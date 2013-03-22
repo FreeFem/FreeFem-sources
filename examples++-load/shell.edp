@@ -8,3 +8,8 @@ while(1)
 	  cout << n << " " << isdir(n) << endl; 
 	else break; 
 }
+
+cout << " login " << getenv("LOGIN") << endl;
+setenv("FF_TOTO","toto");
+setenv("FF_TOTO","toto");
+cout << " FF_TOTO  " << getenv("FF_TOTO") << endl;

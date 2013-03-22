@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h> 
+#include <strings.h> 
 //#include <tr1/regex> 
 using namespace Fem2D;
 long ff_chdir(string * c) { return chdir(c->c_str());}
@@ -52,6 +53,26 @@ string * ReadDir(Stack s,DIR ** const &dirpp){
   return  Nothing;
 }
 
+string * ffgetenv(Stack s,string * const & k)
+{
+    const char *env = getenv(k->c_str());
+    if(!env) env ="";
+    return Add2StackOfPtr2Free(s,new string(env));
+}
+
+long  ffsetenv(string * const & k,string * const & v)
+{
+    char * vv = strcpy((char*)malloc(v->size()+2),v->c_str());
+    char * kk = strcpy((char*)malloc(k->size()+2),k->c_str());
+    long r= setenv(vv,kk,1);
+    return r ;
+}
+long  ffunsetenv(string * const & k)
+{
+    long r= unsetenv(k->c_str());
+    return r ;
+}
+
 
 extern  mylex *zzzfff;
 
@@ -86,6 +107,9 @@ void init(){
   Global.Add("mkdir","(",new OneOperator1<long,string*>(ff_mkdir));
   Global.Add("stat","(",new OneOperator1<long,string*>(ff_stat));
   Global.Add("isdir","(",new OneOperator1<long,string*>(ff_isdir));
+  Global.Add("getenv","(",new OneOperator1s_<string*,string*>(ffgetenv));
+  Global.Add("setenv","(",new OneOperator2_<long,string*,string*>(ffsetenv));
+  Global.Add("unsetenv","(",new OneOperator1_<long,string*>(ffunsetenv));
 }
 
 LOADFUNC(init);
