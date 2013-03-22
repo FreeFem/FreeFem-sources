@@ -89,14 +89,15 @@ tag-tar-$(SIZEPKG): $(PACKAGE)
 	touch tag-tar-$(SIZEPKG)
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
-
-
-clean: 
-	-rm ff-flags
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d*.a  ../lib/libmmg3d-v4.a
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/mmg3d-v4
+clean-local:
+	-rm ff-flags ../lib/WHERE.mmg3d
+	-rm -rf ../lib/libmmg3d*.a  ../lib/libmmg3d-v4.a
+	-rm -rf ../include/mmg3d-v4
 	-rm -r $(SRCDIR)
 	-rm FAIT* mmg* flags-* build-4 tag-tar*
+
+clean:clean-local 
+
 
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags

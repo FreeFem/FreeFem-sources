@@ -17,8 +17,14 @@ $(TARGZ):
 	cd ../pkg;$(WGET) $(URL)
 ../pkg:
 	mkdir $@
-clean:
+
+clean-local:
 	rm -rf $(SRCDIR) Make.defs 
+	rm -f ../lib/libnlopt_cxx*  ../lib/WHERE.nlopt 
+	rm -f ../include/nlopt*
+
+clean:clean-local:
+
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	echo nlopt LD -L@DIR@/lib -lnlopt_cxx  >../lib/WHERE.nlopt ;\

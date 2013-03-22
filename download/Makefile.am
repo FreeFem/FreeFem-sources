@@ -117,9 +117,12 @@ tag-compile-pkg: bin lib include pkg FORCE
 	touch tag-compile-pkg
 FORCE:
 
-re-install: 
+re-install:
+	-rm -rf	 include lib bin 
+	mkdir   include lib bin 	 
 	$(MAKE) compile-pkg DIRTARGET=install
 WHERE:
+	-rm -rf  lib/WHERE.*
 	$(MAKE) compile-pkg DIRTARGET=WHERE
 
 clean-local:

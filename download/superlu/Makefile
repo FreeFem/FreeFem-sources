@@ -93,10 +93,10 @@ FAIRE:$(SRCDIR)
 install: FAIRE WHERE
 	cd $(SRCDIR)/SRC; $(AR) $(ARFLAGS) $(SUPERLULIB)  $(OBJ_SUPERLU)
 	cd $(SRCDIR)/SRC; $(RANLIB) $(SUPERLULIB) 
-	cp $(SRCDIR)/SRC/s*h  $(SRCDIR)/$(INSTALL)/include
+	cp $(SRCDIR)/SRC/s*h  ../include
 WHERE:
-	echo superlu LD -L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
-	echo superlu INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+	echo superlu LD -L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)  >../lib/WHERE.superlu
+	echo superlu INCLUDE -I@DIR@/include >> ../lib/WHERE.superlu
 
 
 
@@ -114,13 +114,16 @@ $(PACKAGE_PATH):
 	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE)
 
 clean-local:
+	-rm ../lib/WHERE.superlu
+	-rm ../lib/libsuperlu_$(SUPERLU_VERSION).*
 	-rm -rf superlu*
-clean:
 	-rm $(SRCDIR)/SRC/$(SUPERLULIB)
-	-rm $(SRCDIR)/$(INSTALL)/include/slu*h 
-	-rm $(SRCDIR)/$(INSTALL)/include/supermatrix.h
+	-rm ../include/slu*h 
+	-rm ../include/supermatrix.h
 	-rm -r $(SRCDIR) ff-FLAGS
 	-rm -rf FAIT FAIRE
+clean:clean-local
+
 
 
 ff-FLAGS: ../Makefile  Makefile 

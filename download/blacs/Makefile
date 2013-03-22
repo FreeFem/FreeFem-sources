@@ -73,10 +73,11 @@ $(PACKAGE3):
 
 clean-local:
 	-cd $(SRCDIR)/SRC/MPI &&  $(MAKE) clean -C $(SRCDIR)/SRC/MPI
-
-clean: clean-local
 	-rm Bmake.inc FAIRE
 	-rm $(SRCDIR)/$(INSTALL)/lib/blacs/*.a
 	-rm -rf $(SRCDIR)
+
+clean: clean-local
+
 
 .PHONY:$(SRCDIR)/$(INSTALL)  compile install

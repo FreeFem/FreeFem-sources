@@ -31,11 +31,11 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tags  cxxflags
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch $(SRCDIR)/FAIT
 WHERE: $(SRCDIR)/FAIT
-	echo tetgen LD -L@DIR@/lib -ltet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
-	echo tetgen  INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+	echo tetgen LD -L@DIR@/lib -ltet  >../lib/WHERE.tetgen
+	echo tetgen  INCLUDE -I@DIR@/include >> ../lib/WHERE.tetgen
 install:$(SRCDIR)/FAIT WHERE
 	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
-	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
+	cp $(SRCDIR)/tetgen.h ../include 
 
 
 
@@ -51,11 +51,13 @@ $(PACKAGE):
 
 clean-local:
 	-rm -rf tetgen1.4.?  FAIT FAIRE 
-clean:
-	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
-	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
+	-rm ../lib/libtet.a ../lib/WHERE.tetgen 
+	-rm ../include/tetgen.h 
 	-rm FAIT
 	-rm -rf tetgen1.4.?
+
+clean: clean-local
+
 cxxflags: ../Makefile  Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags

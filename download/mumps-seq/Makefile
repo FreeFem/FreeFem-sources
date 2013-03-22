@@ -21,20 +21,20 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cd $(SRCDIR);make d z
 	touch $(SRCDIR)/FAIT	
 install: $(SRCDIR)/FAIT
-	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
-	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
+	-mkdir -p ../include/libseq
+	cp $(SRCDIR)/include/*.h ../include/libseq
+	cp $(SRCDIR)/libseq/*.h  ../include/libseq
+	-mkdir -p ../lib
+	cp $(SRCDIR)/lib/*.a ../lib/
+	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/
 
 WHERE: 
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
-	echo mumps-seq LD -L@DIR@/lib   -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ  -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lpthread    >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
-	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
-	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
-	echo libseq INCLUDE -I@DIR@/include/libseq>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;\
+	echo mumps-seq LD -L@DIR@/lib   -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ  -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lpthread    >../lib/WHERE.mumpsseq ;\
+	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> ../lib/WHERE.mumpsseq ;\
+	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>../lib/WHERE.mumpsseq ;\
+	echo libseq INCLUDE -I@DIR@/include/libseq>> ../lib/WHERE.mumpsseq ;\
 	fi
 
 
@@ -56,11 +56,12 @@ $(PACKAGE1):
 	cd `dirname $@`; $(WGET)   http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
+	rm Makefile.inc FAIRE* *~ ../lib/WHERE.mumpsseq
+	-rm -rf ../include/*mumps*
+	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
+	-rm -rf $(SRCDIR)
 
 clean: clean-local
-	rm Makefile.inc FAIRE* *~ 
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/*mumps*
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/lib*mumps* $(SRCDIR)/$(INSTALL)/lib/libpord*.a $(SRCDIR)/$(INSTALL)/lib/libmpiseq*.a
-	-rm -rf $(SRCDIR)
+
 
 .PHONY:$(SRCDIR)/$(INSTALL)
