@@ -1,0 +1,9 @@
+for i in examples++*/.; do 
+echo  ----  $i  ---
+cd $i;
+case $i in 
+*mpi/.)  ../CheckAllEdp "../src/mpi/ff-mpirun -np 4" *.edp ;;
+*)       ../CheckAllEdp "../src/nw/FreeFem++-nw -nw" *.edp ;;
+esac;
+cd ..;
+done
