@@ -3466,16 +3466,16 @@ which makes fool to be true.  Similar examples can be built with $==,<=,>=,<,>,!
 \index{bool}\index{true}\index{false}
 \index{int}
 \item[int]
-  declares an integer.
+  declares an integer (i.e. \texttt{long} in \texttt{C++})..
 \item[string] declare the variable to store
 a text enclosed within double quotes, such as:
 \bFF
 "This is a string in double quotes."
 \eFF
 \index{string}
-\item[real] declares the variable to store a number such as ``12.345''. \index{real}
+\item[real] declares the variable to store a number such as ``12.345''. \index{real} (i.e. \texttt{double} in \texttt{C++}).
 \item[complex]  Complex numbers, such as\index{Complex}
-$1+2i$, \freefempp understand that $i=\sqrt{-1}$.
+$1+2i$, \freefempp understand that $i=\sqrt{-1}$ (i.e. \texttt{complex<double>} in \texttt{C++}).
 \bFF
 @complex a =  1@i, b = 2 + 3@i;
 @cout << "a + b = " << a + b << @endl;
