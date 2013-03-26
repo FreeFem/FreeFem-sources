@@ -26,7 +26,7 @@ int[int] ll=[3,2,5,1];
 //       4   step 
 //       5   up wall 
 func zoom=[[2.5,0],[10,H]];
-mesh Th=square(6,22,[x*22,y*H],label=ll);
+mesh Th=square(22,6,[x*22,y*H],label=ll);
 Th=trunc(Th, (x>l) | (y >0.5),label=4); 
 func meshsize= 2*max(0.05,max(max(x-l,0.0)/19./5.,max(l-x,0.0)/3./8. ));
 func uin=(H-y)*(y-0.5)/square((H-0.5)/2.);
