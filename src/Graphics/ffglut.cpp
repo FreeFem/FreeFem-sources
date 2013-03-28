@@ -66,12 +66,17 @@ THREADFUNC(ThreadRead,fd);
 
 int kread=-1;
 
+
+map<int,OneWindow *> AllWindows;
+map<int,int>  Num2Windows;
+
+
 int Fin(int code)
 {
   WaitNextRead();
   if(!NoMorePlot && debug>2)
     cout << " exit before end  " << endl;
-  exit(NoMorePlot ? 0  : 1);
+  if(NoMorePlot) exit(NoMorePlot ? 0  : 1);
 }
 
 int   ReadOnePlot(FILE *fp)
@@ -175,30 +180,9 @@ int SendForNextPlot()
   
   return 1;
 }
+static  bool TryNewPlot( void );
 
-static  bool TryNewPlot( void )
-{
-  // the routine to try to see if the next plot is read or not. 
-  // -----------------------------------------------------------
-  bool ret=false;
-  if(debug>2)
-    cout << "  TryNewPlot   plot : " << currentPlot << " next = " << nextPlot << endl;;
-  if (nextPlot!=0)
-    {
-      WaitNextRead();
-      if(debug>1) cout << " change current plot to: " << nextPlot << " et  Lock Plot . " << endl;;
 
-      AllWindows[glutGetWindow()]->add(nextPlot);
-      //if(currentPlot) delete currentPlot; //  a change fait dans add 
-      // MutexNextPlot.WAIT();      
-      currentPlot=nextPlot;
-      nextPlot=0;
-      // MutexNextPlot.Free();
-      LauchNextRead();  
-      ret=true;
-    }
-  return ret;    
-}
 
 
 
@@ -316,7 +300,7 @@ int dichotomie(const KN_<double>  &viso,R v)
 }
 
 
-map<int,OneWindow *> AllWindows;
+
 int  ShowGlerror(const char *s)
 {
     GLint error = glGetError();
@@ -407,6 +391,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
     
     kk++;	
     if(cc[kk])
+    {
       if(lok[kk])   glCallList(gllists+kk);
       else 
 	{ 
@@ -429,9 +414,10 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 	  glEnd();
 	  glEndList();  //
 	}
-    
+    }
     kk++;
     if(cc[kk])
+    {
       if(lok[kk])   glCallList(gllists+kk);
       else 
 	{ 
@@ -453,7 +439,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 	  glEnd();
 	glEndList();  // fin de la list
       }
-
+    }
     ShowGlerror("end Mesh plot");
 
 }
@@ -481,6 +467,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
   double saturation =plotmesh ? 1 :  0.25;
   int kk=0;
   if(cc[kk])
+  {
     if(lok[kk])   glCallList(gllists+kk);
     else 
       { 
@@ -513,8 +500,10 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
 	glEndList();  // fin de la list	  
       }
+  }
     kk=2;
     if(cc[kk])
+    {
 	if(lok[kk])   glCallList(gllists+kk);
 	else 
 	  { 
@@ -541,7 +530,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 	      
 	      glEndList();  // fin de la list	  
 	  }
-    
+    }
   kk++;
   ShowGlerror("end Mesh plot");
   
@@ -786,7 +775,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   int nK=v.N()/ Th.nt;
   if(debug>4)
   cout << "\t\t\tOnePlotMesh::Draw  " <<v.N() << " ,nt " << Th.nt << " " << nK << " " 
-       << Psub.N() << " " << what << " ,nv " << Th.nv <<  endl;
+       << Psub.N() << " " << what << " ,nv " << Th.nv << " cas=" << cas << endl;
   ffassert(v.N()== Th.nt*nK);
   ffassert(nK == nsubV*(what%10));
   int o=0;
@@ -1067,7 +1056,7 @@ OneWindow::OneWindow(int h,int w,ThePlot *p)
   height(h),width(w),theplot(0),hpixel(1),
   Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
   windowdump(false),help(false), rapz0(-1.),rapz(1),withlight(false),
-  changearrow(true),changeiso(true) 
+  changearrow(true),changeiso(true), keepPV(false),init(false)
 {
   
   add(p);
@@ -1084,11 +1073,13 @@ void OneWindow::set(ThePlot *p)
       {
 	plotdim=p->plotdim;
       }
+    if(!init)
+    {
     rapz0 =-1; // to recompute the defalut rapz
     //    p->win=this;
     //    if(first)
-    DefaultView() ;
-    
+    DefaultView(2) ;
+    }
     
 }
 
@@ -1117,10 +1108,18 @@ void OneWindow::add(ThePlot *p)
     set(p);
 }
 
-void OneWindow::DefaultView() 
+void OneWindow::DefaultView(int state)
 {
+  if(debug>1)  cout << "DefaultView " << state << " " <<keepPV << endl;
+  if(keepPV)
+   {
+      if(state==0 && init) return;
+  }
+  else if(state==2) rapz=-1;
+    
   if(theplot)
     {
+      init =1;
       plotdim=theplot->plotdim;
       R3 A(theplot->Pmin),B(theplot->Pmax);
       R3 D(A,B);
@@ -1139,10 +1138,11 @@ void OneWindow::DefaultView()
 	      cout << " dz = " << zmax-zmin  << " dxy =" << dxy << endl;
 	    }
 	}
+        
       rapz=rapz0;
       coef_dist=theplot->dcoef;
       focal=theplot->focal;      
-
+    
       if(theplot->datadim==3)
 	{
 	  Bmin3=A;
@@ -1320,7 +1320,7 @@ void  OneWindow::resize(int w,int h)
 {  double ww=width,hh=height;
     width=w;
     height=h;
-    if (theplot->aspectratio)
+    if (theplot && theplot->aspectratio)
       {	
 	  cadreortho(oBmin,oBmax);
       }
@@ -1403,6 +1403,7 @@ void OneWindow::getcadre(double &xmin,double &xmax,double &ymin,double &ymax)
 }
 void OneWindow::Display()
 {
+  if(!theplot) return;
   ffassert(this && theplot);
   SetScreenView() ;
   glColor3d(0.,0.,0.);
@@ -1567,6 +1568,9 @@ void ThePlot::DrawHelp(OneWindow *win)
   win->Show("v)  switch between show or not the numerical value of colors ",i++);
   win->Show("m)  switch between show or not  meshes  ",i++);
   win->Show("w)  window dump in file ffglutXXXX.ppm ",i++);
+  win->Show("*)  keep/unkeep viewpoint for next plot",i++);
+  win->Show("k)  complex data / change view type ",i++);
+    
   win->Show("any other key : nothing ",++i);
 }
 
@@ -1606,7 +1610,7 @@ void ThePlot::Draw(OneWindow *win)
       }
     if(state==0) {
       state=1;
-      win->DefaultView();
+      win->DefaultView(0);
     }
 
     win->SetView();
@@ -1656,7 +1660,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
      changeViso(true),changeVarrow(true),changeColor(true),
      changeBorder(true),changeFill(true), withiso(false),witharrow(false),
      plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
-     datadim(1)
+     datadim(1), winnum(0)
      
 {
   
@@ -1695,9 +1699,12 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   coefr=1;
   long dimpp=0;
   long cas;
+#define READ_VTK_PARAM(index,type)					\
+case 20+index: {type dummy; fin >= dummy;} break;
   
   while(1)
     {
+
 	fin >> cas;
 	if((debug > 4)) cout << " read cas: " << cas << "  " << PlotStream::dt_endarg << endl;
 	if(cas==PlotStream::dt_endarg) break;
@@ -1724,7 +1731,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	  case 18: fin >> add; break;
 	  case 19: fin >> keepPV; break;
 	  case 20: fin >> echelle;break;
-	  default: 
+ 	  default: 
 	    cout << "Fatal error: Unknow  case  : " << cas <<endl;
 	    ffassert(0);
 	    break;
@@ -1751,7 +1758,29 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 	  case 17: fin >= dimpp; break;// ajout fevr 2008  v3.0.6
 	  case 18: fin >= add; break;
 	  case 19: fin >= keepPV; break;
-	  case 20: fin >> echelle;break;
+	  case 20: fin >= echelle;break;
+                  // unsed parameter ...
+                  READ_VTK_PARAM(1,double); // ZScale
+                  READ_VTK_PARAM(2,bool); // WhiteBackground
+                  READ_VTK_PARAM(3,bool); // OpaqueBorders
+                  READ_VTK_PARAM(4,bool); // BorderAsMesh
+                  READ_VTK_PARAM(5,bool); // ShowMeshes
+                  READ_VTK_PARAM(6,long); // ColorScheme
+                  READ_VTK_PARAM(7,long); // ArrowShape
+                  READ_VTK_PARAM(8,double); // ArrowSize
+                  READ_VTK_PARAM(9,long); // ComplexDisplay
+                  READ_VTK_PARAM(10,bool); // LabelColors
+                  READ_VTK_PARAM(11,bool); // ShowAxes
+                  READ_VTK_PARAM(12,bool); // CutPlane
+                  READ_VTK_PARAM(13,KN<double>); // CameraPosition
+                  READ_VTK_PARAM(14,KN<double>); // CameraFocalPoint
+                  READ_VTK_PARAM(15,KN<double>); // CameraViewUp
+                  READ_VTK_PARAM(16,double); // CameraViewAngle
+                  READ_VTK_PARAM(17,KN<double>); // CameraClippingRange
+                  READ_VTK_PARAM(18,KN<double>); // CutPlaneOrigin
+                  READ_VTK_PARAM(19,KN<double>); // CutPlaneNormal
+                  //  SEND_VTK_PARAM(20,long); // WindowIndex
+              case 40: fin >= winnum; break;
 	    
 	  default: 
 	    static int nccc=0;
@@ -1768,6 +1797,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   ffassert(cas==PlotStream::dt_endarg);
   if((debug > 2))
     {
+      cout << " Window num " << winnum << ", ";
       cout << " coeff " << coeff <<", ";
       if(cm)
 	cout << " cm " << *cm <<", ";
@@ -2438,7 +2468,7 @@ void Display(void)
 	  
       }
 
-    if(!win->theplot->wait)
+    if(!win->theplot || !win->theplot->wait)
       SendForNextPlot();
     if(!NoMorePlotTilte  &&NoMorePlot)
       {
@@ -2523,167 +2553,172 @@ static void MotionMouse(int x,int y )
 static void Key( unsigned char key, int x, int y )
 {
     OneWindow * win=CurrentWin();
+    if(!win->theplot)return;
+    if(debug>1) cout << "Key winnum:  " <<win->theplot->winnum << endl;
     int ni=win->theplot->Viso.N();
     int na=win->theplot->Varrow.N();
-
-    switch (key) 
-      {
-      case 27: // esc char
-	Fin(0);
-	break;
-      case 'w':
-	if(win)
+    
+    switch (key)
+    {
+        case 27: // esc char
+            Fin(0);
+            break;
+        case 'w':
+            if(win)
 		win->windowdump=true;
-	break;
-      case 'l':
-	win->withlight = !win->withlight;
-	break;
-      case '?' :
-	if(win)
-	  win->help=true;
-	
-      case '+':
-	win->zoom(x,y,0.7);
-	win->coef_dist /= 1.2;
-	break;
-      case '-':	    
-	win->zoom(x,y,1./0.7);
-	win->coef_dist *= 1.2;
-	break;
-      case '3':
-	
-	win->plotdim=win->plotdim==2?3:2;
-	break;
-	/*
-	  case '2':	    
-	  win->plotdim=2;
-	  break; */
-      case '=':
-	win->DefaultView();
-	break;
-      case 'f':
-	win->theplot->fill = ! win->theplot->fill  ;
-	break;
-      case '@':
-	win->dtheta = win->dtheta ? 0 : pi/1800.;
-      break;
-      case 'k':
-	if(win->theplot->NextCase())
-	  {
-	    R fmn,fmx,vmn,vmx;	  
-	    win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
-	    win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;	    
-	    win->changeiso=true;
-	    win->changearrow=true;
-	  }
-	break;
-
-      case 'b':
-	win->theplot->grey = ! win->theplot->grey   ;
-	win->changeiso=true;
-	win->changearrow=true;
-
-	break;
-      case 'g':
-	win->theplot->grey = !  win->theplot->grey   ;
-	win->changeiso=true;
-	win->changearrow=true;
-
-	break;
-	
-      case 'v':
-	win->theplot->value = ! win->theplot->value  ;
-	break;
-      case 'm':
-	win->theplot->drawmeshes = ! win->theplot->drawmeshes  ;
-	break;
-      case 'B':
-	win->theplot->drawborder = ! win->theplot->drawborder  ;
-	break;
-      case 'H':
-	win->rapz *= 1.2;
-	break;
-      case 'h':
-	win->rapz /= 1.2;
-	break;
-      case 'p':
-	if(win->icurrentPlot != win->lplots.begin())
-	  win->set(*--win->icurrentPlot);
-	break;
-      case 'a':
-	win->theplot->coeff/= 1.2;
-	win->changearrow=true;
-	break;
-      case 'A':
-	win->theplot->coeff*= 1.2;
-	win->changearrow=true;
-	break;
-	
-      case 'n':
-	{	
-	  na  -=  na < 10  ? 2 : 5;
-	  ni  -=  ni <10 ? 2 : 5;	
-	  na = max(na,2);
-	  ni = max(ni,2); 
-	  R fmn,fmx,vmn,vmx;	  
-	  win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
-	  win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
-	  
-	  win->changeiso=true;
-	  win->changearrow=true;
-	}
-	break ;
-      case 'N':
+            break;
+        case 'l':
+            win->withlight = !win->withlight;
+            break;
+        case '?' :
+            if(win)
+                win->help=true;
+            
+        case '+':
+            win->zoom(x,y,0.7);
+            win->coef_dist /= 1.2;
+            break;
+        case '-':
+            win->zoom(x,y,1./0.7);
+            win->coef_dist *= 1.2;
+            break;
+        case '3':
+            
+            win->plotdim=win->plotdim==2?3:2;
+            break;
+            /*
+             case '2':
+             win->plotdim=2;
+             break; */
+        case '=':
+            win->DefaultView(1);
+            break;
+        case 'f':
+            win->theplot->fill = ! win->theplot->fill  ;
+            break;
+        case '@':
+            win->dtheta = win->dtheta ? 0 : pi/1800.;
+            break;
+        case '*': // add FH  mars 2013 ..
+            win->keepPV = ! win->keepPV;
+            break;
+        case 'k':
+            if(win->theplot->NextCase())
+            {
+                R fmn,fmx,vmn,vmx;
+                win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+                win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
+                win->changeiso=true;
+                win->changearrow=true;
+            }
+            break;
+            
+        case 'b':
+            win->theplot->grey = ! win->theplot->grey   ;
+            win->changeiso=true;
+            win->changearrow=true;
+            
+            break;
+        case 'g':
+            win->theplot->grey = !  win->theplot->grey   ;
+            win->changeiso=true;
+            win->changearrow=true;
+            
+            break;
+            
+        case 'v':
+            win->theplot->value = ! win->theplot->value  ;
+            break;
+        case 'm':
+            win->theplot->drawmeshes = ! win->theplot->drawmeshes  ;
+            break;
+        case 'B':
+            win->theplot->drawborder = ! win->theplot->drawborder  ;
+            break;
+        case 'H':
+            win->rapz *= 1.2;
+            break;
+        case 'h':
+            win->rapz /= 1.2;
+            break;
+        case 'p':
+            if(win->icurrentPlot != win->lplots.begin())
+                win->set(*--win->icurrentPlot);
+            break;
+        case 'a':
+            win->theplot->coeff/= 1.2;
+            win->changearrow=true;
+            break;
+        case 'A':
+            win->theplot->coeff*= 1.2;
+            win->changearrow=true;
+            break;
+            
+        case 'n':
 	{
-	  na  += na < 10  ? 2 : 5;
-	  ni  += ni < 10  ? 2 : 5;
+            na  -=  na < 10  ? 2 : 5;
+            ni  -=  ni <10 ? 2 : 5;
+            na = max(na,2);
+            ni = max(ni,2);
+            R fmn,fmx,vmn,vmx;
+            win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+            win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
+            
+            win->changeiso=true;
+            win->changearrow=true;
 	}
-      case 'i':
+            break ;
+        case 'N':
 	{
-	  R fmn,fmx,vmn,vmx;	  
-	  win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
-	  win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
-	  
-	  win->changeiso=true;
-	  win->changearrow=true;
+            na  += na < 10  ? 2 : 5;
+            ni  += ni < 10  ? 2 : 5;
 	}
-	break;
-      case 'I':
+        case 'i':
 	{
-	  R fmn,fmx,vmn,vmx;	  
-	  win->theplot->SetDefIsoV(ni,na) ;	  
-	  win->changeiso=true;
-	  win->changearrow=true;
+            R fmn,fmx,vmn,vmx;
+            win->theplot->dyn_bfv(win,fmn,fmx,vmn,vmx) ;
+            win->theplot->SetDefIsoV(ni,na,fmn,fmx,vmn,vmx) ;
+            
+            win->changeiso=true;
+            win->changearrow=true;
 	}
-	break;
-      case 'z':
-	if(win->focal < M_PI/1.2 ) 
-	  {
-	    win->coef_dist*=sin(win->focal*1.2/2)/sin(win->focal/2);
-	    win->focal *=1.2;
-	  }
-	break;
-      case 'Z':
-	if(win->focal > 1e-5)
-	  {
-	    win->coef_dist*=sin(win->focal/1.2/2)/sin(win->focal/2);
-	    win->focal /=1.2;
-	  }
-	break;
-      case '\r':
-      case '\n':
+            break;
+        case 'I':
 	{
-	  list<ThePlot*>::iterator ic = win->icurrentPlot;
-	  if(++ic == win->lplots.end()) // last plot ->  try new one
-	    SendForNextPlot();
-	  else
-	    win->set(*++win->icurrentPlot);
-	  break;
+            R fmn,fmx,vmn,vmx;	  
+            win->theplot->SetDefIsoV(ni,na) ;	  
+            win->changeiso=true;
+            win->changearrow=true;
 	}
-      default:
-	if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;  
-	
-      }
+            break;
+        case 'z':
+            if(win->focal < M_PI/1.2 ) 
+            {
+                win->coef_dist*=sin(win->focal*1.2/2)/sin(win->focal/2);
+                win->focal *=1.2;
+            }
+            break;
+        case 'Z':
+            if(win->focal > 1e-5)
+            {
+                win->coef_dist*=sin(win->focal/1.2/2)/sin(win->focal/2);
+                win->focal /=1.2;
+            }
+            break;
+        case '\r':
+        case '\n':
+	{
+            list<ThePlot*>::iterator ic = win->icurrentPlot;
+            if(++ic == win->lplots.end()) // last plot ->  try new one
+                SendForNextPlot();
+            else
+                win->set(*++win->icurrentPlot);
+            break;
+	}
+        default:
+            if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;  
+            
+    }
     glutPostRedisplay();
 }
 
@@ -2744,6 +2779,57 @@ THREADFUNC(ThreadRead,fd)
 }
 
 
+static  bool TryNewPlot( void )
+{
+    // the routine to try to see if the next plot is read or not.
+    // -----------------------------------------------------------
+    bool ret=false;
+    if(debug>2)
+        cout << "  TryNewPlot   plot : " << currentPlot << " next = " << nextPlot << endl;;
+    if (nextPlot!=0)
+    {
+        
+        WaitNextRead();
+        int iwnp= nextPlot-> winnum;
+        if(debug>1) cout << " change current plot to: " << nextPlot << " et  Lock Plot . winnum  " << iwnp << endl;;
+        //cout << " winnum: " << iwnp << endl;
+        if(Num2Windows[iwnp]==0)
+          {
+            ostringstream titre;
+            titre <<  "W "<< iwnp << " /FreeFem++: type return key to proceed (or ? for help on other)";
+            int Height = 512;
+            int Width = 512*3/2;
+            
+            glutInitWindowSize(Width , Height);
+            glutInitWindowPosition(100+iwnp*50, 100+iwnp*50);
+            int iw0=glutCreateWindow(titre.str().c_str());
+            if(debug>1)  cout << " ** glutCreateWindow  " << iw0 << endl;
+            glDisable(GL_DEPTH_TEST);
+            glutReshapeFunc( Reshape ); // pour changement de fenetre
+            glutKeyboardFunc( Key );    // pour les evenements clavier
+            glutSpecialFunc(SpecialKey);
+            glutMouseFunc(Mouse);       // pour les evenements sourie
+            glutMotionFunc(MotionMouse); // les mouvements  de la sourie
+            glutDisplayFunc( Display ); // l'affichage
+            glutPushWindow();
+            glutShowWindow();
+            AllWindows[iw0]= new OneWindow(Width , Height,nextPlot);
+            Num2Windows[iwnp]=iw0;
+        }
+        else
+            AllWindows[Num2Windows[iwnp]]->add(nextPlot);
+        glutSetWindow(Num2Windows[iwnp]);
+        //if(currentPlot) delete currentPlot; //  a change fait dans add
+        // MutexNextPlot.WAIT();
+        currentPlot=nextPlot;
+        nextPlot=0;
+        // MutexNextPlot.Free();
+        LauchNextRead();
+        ret=true;
+    }
+    return ret;    
+}
+
 int main(int argc,  char** argv)
 {
     glutInit(&argc, argv);
@@ -2797,22 +2883,25 @@ int main(int argc,  char** argv)
     glutInitWindowSize(Width , Height);
     glutInitWindowPosition(100, 100);
 
-    string titre = "FreeFem++: type return key to proceed (or ? for help on other)";
-    glutCreateWindow(titre.c_str());
-    glutPushWindow();
-    if (fullscreen)
-	glutFullScreen();
-    
-    AllWindows[glutGetWindow()]=new OneWindow(Width , Height,currentPlot); 
-    TryNewPlot();
-    
-    glDisable(GL_DEPTH_TEST); 
-    glutReshapeFunc( Reshape ); // pour changement de fenetre 
+    string titre = "W0/FreeFem++: type return key to proceed (or ? for help on other)";
+    int iw0=glutCreateWindow(titre.c_str());
+    //glutPushWindow();
+   // if (fullscreen)
+//	glutFullScreen();
+    Num2Windows[0]=iw0;
+    glDisable(GL_DEPTH_TEST);
+    glutReshapeFunc( Reshape ); // pour changement de fenetre
     glutKeyboardFunc( Key );    // pour les evenements clavier
     glutSpecialFunc(SpecialKey);
     glutMouseFunc(Mouse);       // pour les evenements sourie
-    glutMotionFunc(MotionMouse); // les mouvements  de la sourie 
+    glutMotionFunc(MotionMouse); // les mouvements  de la sourie
     glutDisplayFunc( Display ); // l'affichage
+    glutSetWindow(iw0);
+    AllWindows[iw0]=new OneWindow(Width , Height,currentPlot);
+    TryNewPlot();
+    
+ 
+    //cout << " Window  " << iw0 << endl;
     glutMainLoop(); 
 
   return 0;
