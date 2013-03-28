@@ -1,3 +1,6 @@
+ - add multi windows graphics ; WindowIndex=0 in plot function
+   add new event in graphic windows 
+     * to set/unset  default graphics stat to previoux plot 
  - add getenv, setenv , unsetenv function in shell plugins for gestion of environnemnt variable for 
    openmp. 
  - correct pb un trunc for 3d mesh with too flat element (sliver) , and cleanning code .

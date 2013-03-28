@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.20-3}
+\def\VERSION{3.22}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -10023,22 +10023,39 @@ The parameters are
     \item[wait=] boolean expression to wait or not (by default no wait). If true we wait for
     a keyboard event or mouse event,  they respond to an event by the following characters
     \begin{description}
-        \item[\texttt{+}]  to zoom in around the mouse cursor,
-        \item[\texttt{-}]  to zoom out around the mouse cursor,
-        \item[\texttt{=}]  to restore de initial graphics state,
-        \item[\texttt{c}]  to decrease the vector arrows size,
-        \item[\texttt{C}]  to increase the vector arrows size,
-        \item[\texttt{r}]  to refresh the graphic window,
-        \item[\texttt{f}]  to toggle between color fills and isovalues,
-        \item[\texttt{b}]  to toggle into  black and white,
-        \item[\texttt{g}]  to toggle to  grey or color ,
-        \item[\texttt{v}]  to toggle  the display of isovalue scale,
-      %  \item[\texttt{p}]  to save to a postscript file,
-        \item[\texttt{?}]  to show all active keyboard char,
-        \item[\texttt{enter}]  go to the next plot,
-        \item[\texttt{ESC}]  close the graphics process.
-       \item [otherwise] do nothing.
-    \end{description}
+\item[\texttt{enter}] wait next plot
+ \item[\texttt{p}]    previous plot (10 plots saved) 
+ \item[\texttt{ESC}]  exit from ffglut
+ \item[\texttt{?}] show this help window
+ \item[\texttt{+,-}]  zoom in/out  around the cursor 3/2 times 
+ \item[\texttt{=}]  reset vue 
+ \item[\texttt{r}]  refresh plot 
+ \item[{up, down, left, right}] special keys  to  tanslate   
+ \item[\texttt{3}]  switch 3d/2d plot  keys : 
+ \item[\texttt{z,Z)}]  focal zoom unzoom
+ \item[\texttt{H,h}]  switch increase or decrease the Z scale of the plot 
+ \item[{mouse motion}]  
+ \begin{description} 
+ \item[{- left button}] rotate    
+ \item[{- right button}]      zoom        (ctrl+button on mac) 
+ \item[{- right button +alt}] tanslate    (alt+ctrl+button on mac)
+\end{description}
+ \item[\texttt{a,A}]  increase or decrease the arrow size
+ \item[\texttt{B}] switch between show  border meshes or not
+ \item[\texttt{i,I}]  update or not: the min/max bound of the functions to the window
+ \item[\texttt{n,N}] decrease or increase the number of iso value array 
+ \item[\texttt{b}] switch between black and white or color plotting 
+ \item[\texttt{g}] switch between grey or color plotting 
+ \item[\texttt{f}] switch between filling iso or iso line  
+ \item[\texttt{l}] switch between lighting or not  
+ \item[\texttt{v}] switch between show or not the numerical value of colors 
+ \item[\texttt{m}] switch between show or not  meshes  
+ \item[\texttt{w}] window dump in file ffglutXXXX.ppm 
+ \item[\texttt{*}] keep/unkeep viewpoint for next plot
+ \item[\texttt{k}] complex data / change view type 
+ \item[\texttt{ESC}]  close the graphics process before version 3.22, after  no way to close.
+ \item [otherwise] do nothing.
+ \end{description}
 
 
     \itemtt[ps=]  \index{plot!ps=}  string expression for the name of the file to save the plot in postscript
@@ -10064,7 +10081,29 @@ The parameters are
      where \texttt{hi,si,vi} is the ith color to defined the color table.
     \itemtt[boundary=] \index{plot!boundary=} (bool) to plot or not the boundary of the domain (true by default).
     \itemtt[dim=] \index{plot!dim=} (int)  sets dim of the plot 2d or 3d (2 by default)
-
+	\itemtt[add=]  \texttt{<b>}
+	\itemtt[prev=]   \texttt{<b>} set the default graphic state to the previous state
+	\itemtt[ech=]   \texttt{<d>}
+	\itemtt[ZScale=]   \texttt{<d>}
+	\itemtt[WhiteBackground=]   \texttt{<b>}
+	\itemtt[OpaqueBorders=]   \texttt{<b>}
+	\itemtt[BorderAsMesh=]   \texttt{<b>}
+	\itemtt[ShowMeshes=]   \texttt{<b>}
+	\itemtt[ColorScheme=]   \texttt{<l>}
+	\itemtt[ArrowShape=]   \texttt{<l>}
+	\itemtt[ArrowSize=]   \texttt{<d>}
+	\itemtt[ComplexDisplay=]   \texttt{<l>}
+	\itemtt[LabelColors=]   \texttt{<b>}
+	\itemtt[ShowAxes=]   \texttt{<b>}
+	\itemtt[CutPlane=]   \texttt{<b>}
+	\itemtt[CameraPosition=]   
+	\itemtt[CameraFocalPoint=]   
+	\itemtt[CameraViewUp=]   
+	\itemtt[CameraViewAngle=]   \texttt{<d>}
+	\itemtt[CameraClippingRange=]  
+	\itemtt[CutPlaneOrigin=]   
+	\itemtt[CutPlaneNormal=]   
+	\itemtt[WindowIndex=]  set glut window for display for multi windows graphics.   
 \end{description}
 For example: \index{plot!cut}
 \bFF
