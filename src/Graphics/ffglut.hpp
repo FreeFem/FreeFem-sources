@@ -241,7 +241,7 @@ public:
   R theta, phi, dcoef, focal;
   int datadim;
   // 2D
-  
+  long winnum;
   bool NextCase();
   
   bool Change() const  { return changeViso||changeVarrow||changeColor||changeBorder||changeFill;}
@@ -290,7 +290,7 @@ public:
   
 }; 
 
-class OneWindow { 
+class OneWindow {
 public:
   ThePlot *theplot;
   list<ThePlot*> lplots;//  to store some plot 
@@ -316,10 +316,10 @@ public:
   R3 cam;
   bool withlight;
   bool changearrow,changeiso;// to rebuild de graphic list if neccessary
-
+  bool keepPV,init;
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
-  void DefaultView() ;
+  void DefaultView(int state) ;
   bool  NextCase() ;
   void  SetView() ;
   void MoveXView(R dx,R dy) ;

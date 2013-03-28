@@ -97,7 +97,7 @@ func  real[int]   Precon(real[int] & p)
      assert(res==1) ; 
      eps = -abs(eps); 
      w = -dy(u1)+dx(u2);
-     plot(w,fill=1,wait=0, nbiso=40);
+     plot(w,fill=1,wait=0, nbiso=40,WindowIndex=1);
     
      dt = min(dt,T-t);
      t += dt; 
