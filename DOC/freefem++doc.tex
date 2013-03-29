@@ -10023,19 +10023,18 @@ The parameters are
     \item[wait=] boolean expression to wait or not (by default no wait). If true we wait for
     a keyboard event or mouse event,  they respond to an event by the following characters
     \begin{description}
-\item[\texttt{enter}] wait next plot
+\item[\texttt{enter}] try to show  plot
  \item[\texttt{p}]    previous plot (10 plots saved) 
- \item[\texttt{ESC}]  exit from ffglut
- \item[\texttt{?}] show this help window
+ \item[\texttt{?}] show this help 
  \item[\texttt{+,-}]  zoom in/out  around the cursor 3/2 times 
  \item[\texttt{=}]  reset vue 
  \item[\texttt{r}]  refresh plot 
  \item[{up, down, left, right}] special keys  to  tanslate   
  \item[\texttt{3}]  switch 3d/2d plot  keys : 
+  \begin{description} 
  \item[\texttt{z,Z)}]  focal zoom unzoom
  \item[\texttt{H,h}]  switch increase or decrease the Z scale of the plot 
  \item[{mouse motion}]  
- \begin{description} 
  \item[{- left button}] rotate    
  \item[{- right button}]      zoom        (ctrl+button on mac) 
  \item[{- right button +alt}] tanslate    (alt+ctrl+button on mac)
@@ -10059,8 +10058,9 @@ The parameters are
 
 
     \itemtt[ps=]  \index{plot!ps=}  string expression for the name of the file to save the plot in postscript
+    (sorry no save of 3d plot)
     \itemtt[coef=]  \index{plot!coef=} the vector arrow size between arrow unit and domain unit.
-    \itemtt[fill=]  \index{plot!coef=} do a color fill between isovalues.
+    \itemtt[fill=]  \index{plot!coef=} fill  color between iso-values (mandatory of P0 finite element).
      \itemtt[cmm=]  \index{plot!cmm=}string expression to write the graphic window into
      \itemtt[value=]  \index{plot!value=}to plot the value of isolines and the value of vector arrows.
     \itemtt[aspectratio=] \index{plot!aspectratio=}boolean to be sure that the aspect ratio of plot
@@ -10081,28 +10081,28 @@ The parameters are
      where \texttt{hi,si,vi} is the ith color to defined the color table.
     \itemtt[boundary=] \index{plot!boundary=} (bool) to plot or not the boundary of the domain (true by default).
     \itemtt[dim=] \index{plot!dim=} (int)  sets dim of the plot 2d or 3d (2 by default)
-	\itemtt[add=]  \texttt{<b>}
+	\itemtt[add=]  \texttt{<b>} Not used 
 	\itemtt[prev=]   \texttt{<b>} set the default graphic state to the previous state
-	\itemtt[ech=]   \texttt{<d>}
-	\itemtt[ZScale=]   \texttt{<d>}
-	\itemtt[WhiteBackground=]   \texttt{<b>}
-	\itemtt[OpaqueBorders=]   \texttt{<b>}
-	\itemtt[BorderAsMesh=]   \texttt{<b>}
-	\itemtt[ShowMeshes=]   \texttt{<b>}
-	\itemtt[ColorScheme=]   \texttt{<l>}
-	\itemtt[ArrowShape=]   \texttt{<l>}
-	\itemtt[ArrowSize=]   \texttt{<d>}
-	\itemtt[ComplexDisplay=]   \texttt{<l>}
-	\itemtt[LabelColors=]   \texttt{<b>}
-	\itemtt[ShowAxes=]   \texttt{<b>}
-	\itemtt[CutPlane=]   \texttt{<b>}
-	\itemtt[CameraPosition=]   
-	\itemtt[CameraFocalPoint=]   
-	\itemtt[CameraViewUp=]   
-	\itemtt[CameraViewAngle=]   \texttt{<d>}
-	\itemtt[CameraClippingRange=]  
-	\itemtt[CutPlaneOrigin=]   
-	\itemtt[CutPlaneNormal=]   
+	\itemtt[ech=]   \texttt{<d>} Not used 
+	\itemtt[ZScale=]   \texttt{<d>} Not used 
+	\itemtt[WhiteBackground=]   \texttt{<b>} Not used 
+	\itemtt[OpaqueBorders=]   \texttt{<b>} Not used 
+	\itemtt[BorderAsMesh=]   \texttt{<b>} Not used 
+	\itemtt[ShowMeshes=]   \texttt{<b>} Not used 
+	\itemtt[ColorScheme=]   \texttt{<l>} Not used 
+	\itemtt[ArrowShape=]   \texttt{<l>} Not used 
+	\itemtt[ArrowSize=]   \texttt{<d>} Not used 
+	\itemtt[ComplexDisplay=]   \texttt{<l>} Not used 
+	\itemtt[LabelColors=]   \texttt{<b>} Not used 
+	\itemtt[ShowAxes=]   \texttt{<b>} Not used 
+	\itemtt[CutPlane=]   \texttt{<b>} Not used 
+	\itemtt[CameraPosition=]    Not used 
+	\itemtt[CameraFocalPoint=]   Not used 
+	\itemtt[CameraViewUp=]   Not used 
+	\itemtt[CameraViewAngle=]   \texttt{<d>} Not used 
+	\itemtt[CameraClippingRange=]   Not used 
+	\itemtt[CutPlaneOrigin=]   Not used 
+	\itemtt[CutPlaneNormal=]   Not used 
 	\itemtt[WindowIndex=]  set glut window for display for multi windows graphics.   
 \end{description}
 For example: \index{plot!cut}
