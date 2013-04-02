@@ -95,7 +95,7 @@ template<class A,class B>  A Build(B b) {  return A(b);}
   
 
 
-long Exit(long i) {throw(ErrorExec("Exit",i));return 0;}
+long Exit(long i) {throw(ErrorExit("Exit",i));return 0;}
 bool Assert(bool b) {if (!b) throw(ErrorExec("exec assert",1));return true;}
   
 inline void MyAssert(int i,char * ex,char * file,long line)
