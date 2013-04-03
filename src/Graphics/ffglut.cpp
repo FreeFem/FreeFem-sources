@@ -77,7 +77,7 @@ int Fin(int code)
   if(!NoMorePlot && debug>2)
     cout << " exit before end  " << endl;
   if(NoMorePlot && code) exit(NoMorePlot ? 0  : 1);
-   exit(NoMorePlot ? 0  : 1);  
+  if(code) exit(NoMorePlot ? 0  : 1);
 }
 
 int   ReadOnePlot(FILE *fp)
@@ -1544,7 +1544,8 @@ void ThePlot::DrawHelp(OneWindow *win)
   i+=1;
   win->Show("enter) wait next plot",i++);
   win->Show("p)     previous plot (10 plots saved) ",i++);
-  win->Show("ESC)   exit from ffglut",i++);
+  win->Show("ESC)   exit from ffglut (if termined) ",i++);
+  win->Show("^c)    non-ignorable exit from ffglut  ",i++);
   win->Show("?)  show this help window",i++);
   win->Show("+) -)   zoom in/out  around the cursor 3/2 times ",i++);
   win->Show("=)   reset vue ",i++);
@@ -2564,6 +2565,9 @@ static void Key( unsigned char key, int x, int y )
         case 27: // esc char
             Fin(0);
             break;
+        case 3: // esc char
+            Fin(9);
+            break;
         case 'w':
             if(win)
 		win->windowdump=true;
@@ -2865,13 +2869,13 @@ int main(int argc,  char** argv)
 	Fin(1);
      }
     int err=ReadOnePlot(datafile);
-    if(err) {cout << "Err ReadOnePlot " << err << endl;
+    if(err) { //cout << "Err ReadOnePlot " << err << endl;
       Fin(1);}
    
 
 
     if(kread==0) {
-      cout << " Error: no graphic data " << endl; 
+      //cout << " Error: no graphic data " << endl;
       Fin(1);
     }
     if(debug>1) 
