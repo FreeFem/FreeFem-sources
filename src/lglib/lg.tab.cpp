@@ -3336,6 +3336,7 @@ int mainff (int  argc, char **argv)
   if ( ! (getprog(cc,argc,argv) >0)  ) 
     {
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
+      if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
       return 1; 
     }
    
@@ -3397,8 +3398,8 @@ int mainff (int  argc, char **argv)
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     
-  retvalue= Compile(); 
-      
+  retvalue= Compile();
+   // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
 
   if(end_parallele) end_parallele();
 
