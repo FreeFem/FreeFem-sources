@@ -77,6 +77,7 @@ int Fin(int code)
   if(!NoMorePlot && debug>2)
     cout << " exit before end  " << endl;
   if(NoMorePlot && code) exit(NoMorePlot ? 0  : 1);
+   exit(NoMorePlot ? 0  : 1);  
 }
 
 int   ReadOnePlot(FILE *fp)
