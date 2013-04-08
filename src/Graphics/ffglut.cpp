@@ -76,7 +76,7 @@ int Fin(int code)
   WaitNextRead();
   if(!NoMorePlot && debug>2)
     cout << " exit before end  " << endl;
-  if(NoMorePlot && code) exit(NoMorePlot ? 0  : 1);
+  if(NoMorePlot && !code) exit(NoMorePlot ? 0  : 1);
   if(code) exit(NoMorePlot ? 0  : 1);
 }
 

@@ -190,10 +190,13 @@ class SetMesh_Op : public E_F0mps
 public:
   Expression a; 
    
-  static const int n_name_param =2+2+2+2; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2+2+2+2+2; //  add nbiter FH 30/01/2007 11 -> 12
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
+    
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  bool   arg(int i,Stack stack, bool   a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 
   
 public:
@@ -217,7 +220,10 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "renumv",&typeid(KN_<long>)},
   {  "renumt",&typeid(KN_<long>)},
   {  "flabel", &typeid(long)},
-  {  "fregion", &typeid(long)}
+  {  "fregion", &typeid(long)},
+  {  "rmledges", &typeid(long)},
+  {  "rmInternalEdges", &typeid(bool)}
+
         
     
 };
@@ -246,14 +252,17 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   KN<long> rt (arg(5,stack,zz));  
   Expression flab = nargs[6] ;
   Expression freg = nargs[7] ;
-    
+  bool  rm_edge = nargs[8];
+  long  rmlabedges (arg(8,stack,0L));
+  bool  rm_i_edges = (arg(9,stack,false));
+
   bool rV =  (rv.size()== nbv);
   bool rT =  (rt.size()== nbt);
     if(verbosity>1)
 	cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "
-	     << neb << "renum V " << rV << " , renum T "<< rT << endl;  
+	     << neb << "renum V " << rV << " , renum T "<< rT << " rm internal edges " << rm_i_edges<< endl;
     
-  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT  && ! flab && ! freg ) return m;
+  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT  && ! flab && ! freg && !rm_i_edges &&   !rm_edge ) return m;
   ffassert( nre.N() %2 ==0);
   ffassert( nrt.N() %2 ==0);
   map<int,int> mape,mapt;
@@ -310,12 +319,14 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 	}
 	
     }  
-  
+  int  nrmedge=0;
   // les arete frontieres qui n'ont pas change
   BoundaryEdge * bb=b;
   for (int i=0;i<neb;i++)
     {
       int ke,k =Th.BoundaryElement(i,ke);
+      int kke,kk= Th.ElementAdj(k,kke=ke);
+      int intern = ! (( kk == k )|| ( kk < 0)) ;
       const   Triangle &K(Th[k]);
       int i1=Th(Th.bedges[i][0]);
       int i2=Th(Th.bedges[i][1]);
@@ -339,8 +350,12 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
           MeshPointStack(stack)->set(Th,K(Pt),Pt,K,l1,R2(E.y,-E.x)/le,ke);
 	  l1 =GetAny<long>( (*flab)(stack)) ;
       }
-      *bb++ = BoundaryEdge(v,i1,i2,l1);   
+     if( !( intern && ( rm_i_edges || (rmlabedges && (l1 == rmlabedges)) )   ))
+      *bb++ = BoundaryEdge(v,i1,i2,l1);
+     else ++nrmedge;
     }
+    nebn -= nrmedge;
+    if(nrmedge && verbosity > 2) cout << "   change  mesh2 : number of removed  internal edges " << nrmedge << endl;
   assert(nebn==bb-b);
   m =  new Mesh(nbv,nbt,nebn,v,t,b);
 
