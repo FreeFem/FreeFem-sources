@@ -1039,21 +1039,22 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   FESpace & Vh = *pVh ;
   double tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
-
+  long NbOfDF =  &Vh ? Vh.NbOfDF: 0;
   KN<R> *px=0;
   if(isptr)
     {
      px = GetAny<KN<R> * >((*x)(stack) );
      if(init ) 
-       px->init(Vh.NbOfDF); 
-     if(px->N() != Vh.NbOfDF) //add Dec 2009
-	 px->resize(Vh.NbOfDF);
-     ffassert(px->N() == Vh.NbOfDF); 
+       px->init(NbOfDF); 
+     if(px->N() != NbOfDF) //add Dec 2009
+	 px->resize(NbOfDF);
+     ffassert(px->N() == NbOfDF);
    }
   KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
-  if(zero)
-  xx=R(); 
-  if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+  if(zero && NbOfDF )
+   xx=R();
+    
+  if ( & Vh && AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }
@@ -1144,7 +1145,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
   const FESpace & Uh =  *(FESpace*) **pUh ;
   const FESpace & Vh =  *(FESpace*) **pVh ;
-  bool A_is_square= Uh.NbOfDF == Vh.NbOfDF ;
+  bool A_is_square= & Uh == & Vh || Uh.NbOfDF == Vh.NbOfDF ;
 
   // MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
@@ -1218,7 +1219,8 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
-  if(init) A.init(); //  
+  if(init) A.init(); //
+  if( !& Uh || !& Vh) return SetAny<Matrice_Creuse<R>  *>(&A);
   /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat->t != typemat->t) )
     { 
       A.Uh.destroy();
