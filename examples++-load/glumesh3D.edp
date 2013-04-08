@@ -42,8 +42,11 @@ mesh3 Tht=Th31+Th32;
 savemesh( Tht, "glu3D.mesh");
 
 cout << "Vertex, Tet, Triangle " << Tht.nv << " "<< Tht.nt << " " << Tht.nbe << endl; 
-
-
+cout << "area  border = " << int2d(Tht)(1.) << endl; 
+verbosity =3;
+Tht = change(Tht,rmInternalFaces=1);
+cout << "area  border = " << int2d(Tht)(1.) <<endl;
+verbosity =1;
 func mv1x = 1+x;
 func mv1y = y;
 func mv1z = z;

@@ -1677,10 +1677,11 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
   const list<Mesh3 *> lth(*lst.lth);
   Mesh3 * th0=0;
-  
+  int kk=0; 
   for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
     {
-
+      if( ! *i) continue ;
+      kk++;
       Mesh3 &Th3(**i);  // definis ???
       th0=&Th3;
       if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
@@ -1707,7 +1708,8 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
 	Px=Maxc(P,Px);     
       }
     } 
-  
+  if(kk==0) return 0; // no mesh ....
+
   if(verbosity > 1) cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
   
   // probleme memoire
@@ -1731,6 +1733,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   //int nbv0=0;
   for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
     {
+      if( ! *i) continue ;
       const Mesh3 &Th3(**i);
       if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
       if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
@@ -1777,8 +1780,10 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   double hseuil_border = hseuil/3.;
   //nbv0=0;
-  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++){
-    const Mesh3 &Th3(**i);
+  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
+    {
+      if( ! *i) continue ;
+      const Mesh3 &Th3(**i);
       
     for (int k=0;k<Th3.nbe;k++)
       {
@@ -2192,13 +2197,15 @@ class SetMesh3D_Op : public E_F0mps
 public:
   Expression a; 
   
-  static const int n_name_param =2+2+2; // 
+  static const int n_name_param =2+2+2+2; //
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
     { ffassert( !(nargs[i] && nargs[i+2]));
       i = nargs[i] ? i : i+2;
       return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+    long  arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+    bool   arg(int i,Stack stack, bool   a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 
   
 public:
@@ -2219,9 +2226,11 @@ basicAC_F0::name_and_type SetMesh3D_Op::name_param[]= {
   {  "refface", &typeid(KN_<long> )},
   {  "region", &typeid(KN_<long> )},
   {  "label", &typeid(KN_<long> )},
-    {  "fregion", &typeid(long)},
-    {  "flabel", &typeid(long )}
-   
+  {  "fregion", &typeid(long)},
+  {  "flabel", &typeid(long )},
+  {  "rmlfaces", &typeid(long)},
+  {  "rmInternalFaces", &typeid(bool)}
+
 };
 //  besoin en cas de fichier 2D / fichier 3D 
 
@@ -2238,6 +2247,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   Mesh3 * pTh= GetAny<Mesh3 *>((*a)(stack));
   Mesh3 & Th=*pTh;
+  if(!pTh) return pTh;
   Mesh3 *m= pTh;
   int nbv=Th.nv; // nombre de sommet 
   int nbt=Th.nt; // nombre de triangles
@@ -2248,8 +2258,12 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   KN<long> nrface (arg(1,stack,zz));  
   Expression freg = nargs[4];
   Expression flab = nargs[5];
+    bool  rm_faces = nargs[6];
+    long  rmlabfaces (arg(6,stack,0L));
+    bool  rm_i_faces (arg(7,stack,false));
+
  // cout << " Chnage " << freg << " " << flab << endl;   
-  if(nrface.N() <=0 && nrtet.N() <=0 && (!freg) && (!flab)  ) return m; // modf J.M. oct 2010 
+  if(nrface.N() <=0 && nrtet.N() <=0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces ) return m; // modf J.M. oct 2010
   ffassert( nrtet.N() %2 ==0);
   ffassert( nrface.N() %2 ==0);
   
@@ -2330,31 +2344,42 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
   
   Triangle3 * bb=b;
      R2 PtHat2(1./3.,1./3.);
+    int nrmf=0; 
   for (int i=0;i<nbe;i++)
     { 
       const Triangle3 &K( Th.be(i) );
       int fk,ke = Th.BoundaryElement(i,fk); // element co
+      int fkk,kke = Th.ElementAdj(ke,fkk=fk); // element co
+      bool onborder = (kke==ke) || (kke <0) ;
       const Tet & KE(Th[ke]);
       R3 B= KE.PBord(fk,PtHat2);
       int iv[3];       
-    
+      bool  rmf = rm_i_faces && ! onborder; 
       iv[0] = Th.operator()(K[0]);
       iv[1] = Th.operator()(K[1]);
       iv[2] = Th.operator()(K[2]);
       
       int l0,l1=ChangeLab3D(mapface,l0=K.lab) ;
-      (*bb).set( v, iv, l1);   
-	if(flab)
+      if(flab)
 	  {//      R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
 	      mp->set(Th,KE(B),B,KE,K.lab);
-	      bb->lab =GetAny<long>( (* flab)(stack)) ;  
+	      l1 =GetAny<long>( (* flab)(stack)) ;
 	      lmn= min (lmn,bb->lab);
 	      lmx= max (lmx,bb->lab);
 	  }
+        if( !rmf && rm_faces)
+          rmf =  !onborder &&  ( l1 == rmlabfaces  );
+        if(rmf)
+            nrmf++;
+        else
+         (*bb++).set( v, iv, l1);
+
 	
-	bb++;
     }
+    if(nrmf && verbosity > 2) cout << "   change  mesh3 : number of removed  internal faces " << nrmf << " == " << nbe - (bb-b) << endl;
     
+  nben -= nrmf;
+  nbe -= nrmf;
   assert(nben==bb-b);
   *mp=mps; 
   if(nbt != 0)
