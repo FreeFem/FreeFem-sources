@@ -56,8 +56,11 @@ Mesh * GluMesh(listMesh const & lst)
   R2 Pn(1e100,1e100),Px(-1e100,-1e100);
   const list<Mesh *> lth(*lst.lth);
    Mesh * th0=0;
+    int kk=0;
   for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
+       if(! *i ) continue; //
+        ++kk;
        Mesh &Th(**i);
       th0=&Th;
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
@@ -74,7 +77,8 @@ Mesh * GluMesh(listMesh const & lst)
 	  Pn=Minc(P,Pn);
 	  Px=Maxc(P,Px);     
 	}
-    } 
+    }
+    if(kk==0) return 0; //  no mesh ...
   if(verbosity>2)
     cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn 
 	 << " "<< Px << endl;
@@ -94,6 +98,7 @@ Mesh * GluMesh(listMesh const & lst)
     map<pair<int,int>,int> bbe;
     for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
       {
+          if(! *i ) continue; //
 	const Mesh &Th(**i);
 	if(!*i) continue;
 	if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
@@ -139,50 +144,9 @@ Mesh * GluMesh(listMesh const & lst)
 	
       } 
   }
-  /*
-  Mesh::Vertex *becog = new Vertex[nebx];
-  cout << "creation quadtree" << endl;
-  FQuadTree *quadtree_be=new Fem2D::FQuadTree(becog,Pn,Px,-nebx);
-  cout << "fin creation quadtree" << endl;
-  double hseuil_border = hseuil/2.;
-  // to remove common egde wrong code .... FH
-  if(0) 
-    for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
-      {
-      const Mesh &Th(**i);
-      if(!*i) continue;
-      
-      if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
-      for (int k=0;k<Th.neb;k++)
-	{
-	  
-	  const BoundaryEdge & be(Th.bedges[k]);
-	  int i0 = Th.operator()(be[0]); //quadtree->NearestVertex(be[0])-v;
-	  int i1 = Th.operator()(be[1]); //quadtree->NearestVertex(be[1])-v;
-	  
-	  R2 r2vi= ((R2) be[0] + be[1])/2.;
-	  
-	  //const R2 r2vi( cdgx, cdgy);
-	  const Mesh::Vertex & vi(r2vi);
-	  
-	  Vertex * pvi=quadtree_be->ToClose(vi,hseuil_border);
-	  if(!pvi){
-	    becog[neb].x = vi.x;
-	    becog[neb].y = vi.y;
-	    becog[neb].lab = vi.lab;
-	    quadtree_be->Add( becog[neb++] );
-	    
-	    int iglu0=quadtree->ToClose(be[0],hseuil)-v;
-	    int iglu1=quadtree->ToClose(be[1],hseuil)-v;
-	    
-	    (bb++)->set(v,iglu0,iglu1,vi.lab);
-	  }
-	}
-    
-    } //  
-  */
+
   delete quadtree;
-  //delete quadtree_be;
+
    
   if(verbosity>1)
     {
