@@ -3179,7 +3179,7 @@ void Check(const Opera &Op,int N,int  M)
            { 
             const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
             pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));
-            AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
+            if(Thbf)AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
            }
           }
         else if (r==tvf->tMat)
@@ -3192,7 +3192,7 @@ void Check(const Opera &Op,int N,int  M)
             if (B) {
               const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
               pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));            
-              AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf) ;
+              if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf) ;
 	    }
           }
         else if (r==tvf->tTab)
@@ -4589,7 +4589,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
                  break;
                }
            if(!same)
-             InternalError("Methode de Galerkine (ˆ faire)");
+             InternalError("Methode de Galerkine (a faire)");
            else
              {
                
