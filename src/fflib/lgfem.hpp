@@ -235,8 +235,8 @@ class pfes_tef : public v_fes { public:
   pfes_tef(const pmesh* t,const TypeOfFE * tt,Stack s=NullStack, int n=0,Expression *p=0 ) 
     : v_fes(tt->N,t,s,n,p),tef(tt) { operator FESpace * ();} 
   FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
-  { return  new FESpace(**ppTh,*tef,nbdfv,(int *) ndfv,nbdfe,(int*)ndfe);}
-  FESpace * buildupdate()   {  return  new FESpace(**ppTh,*tef);}
+    { return  *ppTh ? new FESpace(**ppTh,*tef,nbdfv,(int *) ndfv,nbdfe,(int*)ndfe): 0;}
+    FESpace * buildupdate()   {  return *ppTh ? new FESpace(**ppTh,*tef):0 ;}
   
 };
 
@@ -251,12 +251,12 @@ class pfes_tefk : public v_fes { public:
   FESpace * buildupdate() { 
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl; 
     assert(tef);
-    return  new FESpace(**ppTh,tef,k);}
+      return  *ppTh? new FESpace(**ppTh,tef,k):0;}
   virtual ~pfes_tefk() { delete [] tef;}
   FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
   {
     assert(tef);
-    return  new FESpace(**ppTh,tef,k,nbdfv,ndfv,nbdfe,ndfe);}
+    return  *ppTh? new FESpace(**ppTh,tef,k,nbdfv,ndfv,nbdfe,ndfe):0 ;}
   
   
 }; 
@@ -266,8 +266,8 @@ class pfes3_tef : public v_fes3 { public:
     const TypeOfFE3 * tef ;  
   pfes3_tef(const pmesh3* t,const TypeOfFE3 * tt,Stack s=NullStack, int n=0,Expression *p=0 ) 
     : v_fes3(tt->N,t,s,n,p),tef(tt) { operator FESpace3 * ();} 
-  FESpace3 * buildupdate( KN<int> & ndfe)   { return  new FESpace3(**ppTh,*tef,ndfe.size()/2,ndfe);   }
-  FESpace3 * buildupdate()   {  return  new FESpace3(**ppTh,*tef);}
+    FESpace3 * buildupdate( KN<int> & ndfe)   { return  *ppTh ? new FESpace3(**ppTh,*tef,ndfe.size()/2,ndfe):0;   }
+    FESpace3 * buildupdate()   {  return  *ppTh? new FESpace3(**ppTh,*tef):0;}
   
 };
 
@@ -300,11 +300,11 @@ public:
   FESpace3 * buildupdate() { 
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl; 
     //assert(tef);
-    return  new FESpace3(**ppTh,tefs);}
+      return  *ppTh? new FESpace3(**ppTh,tefs):0;}
   virtual ~pfes3_tefk() { delete [] tef;}
   FESpace3 * buildupdate(KN<int> & ndfe) 
   {
-    return  new FESpace3(**ppTh,tefs,ndfe.size()/2,ndfe);
+      return  *ppTh? new FESpace3(**ppTh,tefs,ndfe.size()/2,ndfe):0;
   }
     
 }; 
@@ -584,6 +584,7 @@ typedef pair<pferbasearray,int> pferarray ;
 
 inline FESpace * v_fes::update() {     
     assert(d==2);
+    if(!*ppTh) return 0; 
     if (nbcperiodic ) {
        assert(periodic);
        const Mesh &Th(**ppTh);
@@ -600,6 +601,7 @@ inline FESpace * v_fes::update() {
 
 inline FESpace3 * v_fes3::update() {     
   assert(d==3);
+  if(!*ppTh) return 0;
   if (nbcperiodic ) {
     assert(periodic);
     //const Mesh3 &Th(**ppTh);
