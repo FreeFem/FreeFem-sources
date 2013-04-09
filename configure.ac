@@ -70,6 +70,7 @@ AM_MAINTAINER_MODE
 echo >config_LIB_INFO
 
 # Necessary compilers
+
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG(C++)
@@ -102,7 +103,7 @@ if test "$ff_size_ptr" -eq 4  ;then
 elif test  "$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
 else
-  AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr ! ] ); 
+  AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX] ); 
   AC_MSG_ERROR([ Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 ])
 fi
 
