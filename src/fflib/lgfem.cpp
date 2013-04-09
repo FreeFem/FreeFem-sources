@@ -1698,7 +1698,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ppfe)(s));
     FEbase<R,v_fes> & fe(*pp.first);
     const  FESpace & Vh(*fe.newVh());
-    if(!&Vh ) ExecError("Unset FEspace (Null mesh ???) on  uh= ");
+    if(!&Vh ) ExecError("Unset FEspace (Null mesh ? ) on  uh= ");
  
     KN<R> gg(Vh.MaximalNbOfDF());
     const  Mesh & Th(Vh.Th);

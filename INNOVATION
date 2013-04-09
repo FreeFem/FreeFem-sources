@@ -1,7 +1,7 @@
  - add flags to remove internal boundary in 2d,3d in function change 
      rmInternalEdges=1
  - correct glumesh in case of no mesh in 2d
-version 3.21-2
+version 3.22
  - add multi windows graphics ; WindowIndex=0 in plot function
    add new event in graphic windows 
      * to set/unset  default graphics stat to previoux plot 

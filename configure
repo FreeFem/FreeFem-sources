@@ -3555,6 +3555,7 @@ fi
 echo >config_LIB_INFO
 
 # Necessary compilers
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -5082,8 +5083,8 @@ elif test  "$ff_size_ptr" -eq 8  ;then
  SIZEOF_PTRINBIT=64
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}:  fatal error : sizeof pointer $ff_size_ptr !  " >&5
-$as_echo "$as_me:  fatal error : sizeof pointer $ff_size_ptr !  " >&6;};
+  { $as_echo "$as_me:${as_lineno-$LINENO}:  fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX " >&5
+$as_echo "$as_me:  fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX " >&6;};
   as_fn_error $? " Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 " "$LINENO" 5
 fi
 
