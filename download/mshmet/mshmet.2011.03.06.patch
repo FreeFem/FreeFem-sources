@@ -39,3 +39,25 @@
 +extern int   (*lissag)(pMesh ,pSol , int ,int );
  
  #endif
+--- mshmet.2012.04.25/sources/lplib3.c	2013-04-10 11:53:17.000000000 +0200
++++ mshmet.2012.04.25/sourceslib/lplib3.c	2013-04-10 11:54:49.000000000 +0200
+@@ -30,7 +30,10 @@
+ #include <assert.h>
+ #include <errno.h>
+ #include "lplib3.h"
+-
++#ifdef __FreeBSD__
++#include <sys/types.h>
++#include <pmc.h>
++#endif
+ 
+ /*----------------------------------------------------------*/
+ /* Defines													*/
+@@ -1250,6 +1253,7 @@
+ 		 * NPROC environment variable (BSD/OS, CrayOS)
+ 		 * sysctl hw.ncpu or kern.smp.cpus
+ 		 */
++	        int ncpu; 
+ 		if (pmc_init() == 0 && (ncpu = pmc_ncpu()) != -1)
+ 			maxthreads = ncpu;
+ 		else
