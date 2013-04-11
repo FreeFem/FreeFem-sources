@@ -1,11 +1,12 @@
 ff=../src/nw/FreeFem++-nw
 if [ -x ../src/bin/FreeFem++-nw.exe ] ; then ff=../src/bin/FreeFem++-nw.exe; fi
+rm CheckAll-out
 for i in examples++*/.; do 
 echo  ----  $i  ---
 cd $i;
 case $i in 
-*mpi/.)  ../CheckAllEdp "../src/mpi/ff-mpirun -np 4" *.edp ;;
-*)       ../CheckAllEdp "$ff -nw" *.edp ;;
+*mpi/.)  ../CheckAllEdp "../src/mpi/ff-mpirun -np 4" *.edp | tee -a CheckAll-out ;;
+*)       ../CheckAllEdp "$ff -nw" *.edp | tee -a CheckAll-out ;;
 esac;
 cd ..;
 done
