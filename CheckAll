@@ -1,6 +1,6 @@
 ff=../src/nw/FreeFem++-nw
-if [ -x ../src/bin/FreeFem++-nw.exe ] ; then ff=../src/bin/FreeFem++-nw.exe; fi
-if [ -x ../src/bin-win32/FreeFem++-nw.exe ] ; then ff=../src/bin-win32/FreeFem++-nw.exe; fi
+if [ -x ./src/bin/FreeFem++-nw.exe ] ; then ff=../src/bin/FreeFem++-nw.exe; fi
+if [ -x ./src/bin-win32/FreeFem++-nw.exe ] ; then ff=../src/bin-win32/FreeFem++-nw.exe; fi
 rm CheckAll-out
 for i in examples++*/.; do 
 echo  ----  $i  ---
