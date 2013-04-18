@@ -200,17 +200,19 @@ int LineBorder(R2 *P,double *f,long close,R2 *Q,int *i1,int *i2,double eps)
             i1[np]=i2[np]=0,np++;
             
 	}
-        if(f[1]>-eps)
-	{
-            Q[np]=P[1];
-            i1[np]=i2[np]=1,np++;
-	}
         
         if (f[0]*f[1] <= - eps*eps)
 	{
             Q[np]= (P[0]*(f[1]) -  P[1]*(f[0]) ) /(f[1]-f[0]);
             i1[np]=0,i2[np]=1,np++;
 	}
+        
+        if(f[1]>-eps)
+	{
+            Q[np]=P[1];
+            i1[np]=i2[np]=1,np++;
+	}
+        
     }
     else
     {
@@ -337,7 +339,8 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     string * file = arg(6,stack,(string*) 0);
     vector< R2_I2 >  P;
     multimap<int,int> L;
-    
+    if(verbosity>= 1000) debug =verbosity/1000;
+    else debug = 0; 
     map<pair<int,int>, int> FP;
     const   double unset = -1e-100;
     KN<double> tff(nbv, unset);
