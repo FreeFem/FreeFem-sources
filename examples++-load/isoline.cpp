@@ -189,6 +189,9 @@ int IsoLineK(R2 *P,double *f,R2 *Q,int *i0,int *i1,double eps)
     // remark, the left of the line is upper .
     return 0;
 }
+
+
+
 int LineBorder(R2 *P,double *f,long close,R2 *Q,int *i1,int *i2,double eps)
 {
     int np=0;
@@ -787,6 +790,27 @@ R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1
     //mp.P.y=Q.y; // get the current y value
     return pQ; 
 }
+double mesure(Stack stack,const KNM_<double> &b,const KN_<long> &be)
+{
+    double mes =0;
+    int nbc2 = be.N();
+    for (int k=0; k <nbc2 ;)
+    {
+        int i0= be[k++];
+        int i1= be[k++];
+         R2 A(b(0,i0),b(1,i0));
+        double mk=0;
+        for(int i=i0+1; i< i1; ++i)
+        {
+          R2 B(b(0,i-1),b(1,i-1));
+          R2 C(b(0,i),b(1,i));
+            mk += det(A,B,C);
+        }
+        if( verbosity>9) cout << " mesure: composante " << k/2 << "  mesure  " << mk/2. << endl;
+        mes += mes;
+    }
+    return mes/2.;
+}
 
 R3   * Curve(Stack stack,const KNM_<double> &b,const double & ss)
 {
@@ -802,8 +826,12 @@ void finit()
     
     Global.Add("isoline","(",new ISOLINE_P1);
     Global.Add("isoline","(",new ISOLINE_P1(1));
+    
     Global.Add("Curve","(",new OneOperator2s_<R3*,KNM_<double>,double>(Curve));
     Global.Add("Curve","(",new OneOperator4s_<R3*,KNM_<double>,long,long,double>(Curve));
+    
+    Global.Add("area","(",new OneOperator2s_<double ,KNM_<double>,KN_<long> >(mesure));
+    
 }
 
 LOADFUNC(finit);  //  une variable globale qui serat construite  au chargement dynamique    
