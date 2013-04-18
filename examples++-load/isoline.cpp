@@ -830,7 +830,7 @@ void finit()
     Global.Add("Curve","(",new OneOperator2s_<R3*,KNM_<double>,double>(Curve));
     Global.Add("Curve","(",new OneOperator4s_<R3*,KNM_<double>,long,long,double>(Curve));
     
-    Global.Add("area","(",new OneOperator2s_<double ,KNM_<double>,KN_<long> >(mesure));
+    Global.Add("Area","(",new OneOperator2s_<double ,KNM_<double>,KN_<long> >(mesure));
     
 }
 
