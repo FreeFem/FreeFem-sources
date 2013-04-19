@@ -807,7 +807,7 @@ double mesure(Stack stack,const KNM_<double> &b,const KN_<long> &be)
             mk += det(A,B,C);
         }
         if( verbosity>9) cout << " mesure: composante " << k/2 << "  mesure  " << mk/2. << endl;
-        mes += mes;
+        mes += mk;
     }
     return mes/2.;
 }
