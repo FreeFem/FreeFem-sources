@@ -1440,7 +1440,8 @@ void Init_map_type()
      //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
      //     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
-     Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow));
+     //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
+     Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
      Global.Add("conj","(",new OneOperator1_<double>(conj,1));
