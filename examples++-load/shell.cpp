@@ -128,6 +128,7 @@ void init(){
   Global.Add("unlink","(",new OneOperator1<long,string*>(ff_unlink));
   Global.Add("rmdir","(",new OneOperator1<long,string*>(ff_rmdir));
   Global.Add("cddir","(",new OneOperator1<long,string*>(ff_chdir));
+  Global.Add("chdir","(",new OneOperator1<long,string*>(ff_chdir));
   #ifndef WIN32
   Global.Add("mkdir","(",new OneOperator2<long,string*,long>(ff_mkdir));
   #endif

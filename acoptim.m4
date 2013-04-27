@@ -118,6 +118,8 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	AC_MSG_CHECKING(GCC version)
 
         ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'` 
+	ff_clang=`$CC  --version |awk  '/clang/  {print $4}'`
+	if test -n "$ff_clang" ; then ff_gcc4="llvm"; fi
 	AC_MSG_RESULT($ff_gcc4)
 
 	# At the moment, we do not know how to produce correct
@@ -125,7 +127,9 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	AC_MSG_CHECKING(PowerPC architecture)
 	ff_machine=`/usr/bin/machine`
         ff_fast="-O3"
-	if test `uname` = Darwin 
+	if test	-n "$ff_clang" ; then
+          ff_fast='-O3 -fPIC'
+	elif test `uname` = Darwin 
 	    then
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
