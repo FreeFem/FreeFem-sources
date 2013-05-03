@@ -2011,7 +2011,7 @@ AC_OUTPUT(Makefile
     src/Algo/Makefile
     src/lglib/Makefile
     src/fflib/Makefile
-    src/std/Makefile
+dnl    src/std/Makefile
     src/nw/Makefile
     src/mpi/Makefile
     src/bamg/Makefile
