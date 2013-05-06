@@ -20,7 +20,7 @@ COLAMDLIB=../lib/libcolamd.a
 SUITESPARSECONFIGLIB=../lib/libsuitesparseconfig.a
 
 
-all: umfpack cholmod
+#  all: umfpack cholmod
 
 umfpack:$(AMDLIB)  $(UMFPACKLIB) $(SUITESPARSECONFIGLIB)
 cholmod:$(CAMDLIB) $(COLAMDLIB)  $(AMDLIB)  $(CHOLMODLIB) $(SUITESPARSECONFIGLIB) 
