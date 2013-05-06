@@ -13106,7 +13106,7 @@ if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
    then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: using downloaded UMFPACK" >&5
 $as_echo "$as_me: using downloaded UMFPACK" >&6;}
-	DOWNLOAD_UMFPACK=umfpack cholmod
+	DOWNLOAD_UMFPACK="umfpack cholmod"
 
 	ff_umfpack_download=yes
 	# Do not update $LIBS, but create an extra LIB variable,
