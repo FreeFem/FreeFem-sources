@@ -6,8 +6,8 @@ for i in examples++*/.; do
 echo  ----  $i  ---
 cd $i;
 case $i in 
-*mpi/.)  ../CheckAllEdp "../src/mpi/ff-mpirun -np 4" *.edp | tee -a CheckAll-out ;;
-*)       ../CheckAllEdp "$ff -nw" *.edp | tee -a CheckAll-out ;;
+*mpi/.)  ../CheckAllEdp "../src/mpi/ff-mpirun -np 4" *.edp | tee -a ../CheckAll-out ;;
+*)       ../CheckAllEdp "$ff -nw" *.edp | tee -a ../CheckAll-out ;;
 esac;
 cd ..;
 done
