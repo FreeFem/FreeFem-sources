@@ -15,7 +15,7 @@ cd ..;
 done
 if [ -n "$ffmpi" ] ; then 
 cd examples++-mpi/
-./CheckAllEdp "$ffmpi -np 4" *.edp | tee -a ../CheckAll-out 
+../CheckAllEdp "$ffmpi -np 4" *.edp | tee -a ../CheckAll-out 
 else
   echo " **no mpi " | tee -a CheckAll-out 
 fi
