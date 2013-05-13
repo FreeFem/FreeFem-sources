@@ -1,6 +1,6 @@
 # $Id$
 
-all-local: all.edp regtests.edp
+all-local: all.edp regtests.edp  freefem++.pref
 TESTS=../regtests.sh
 TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
 	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
@@ -19,7 +19,7 @@ all.edp:
 	done) > $@
 
 # To create a new set of reference values in "ref.edp"
-Ref: makeref.edp
+Ref: makeref.edp freefem++.pref
 	../src/nw/FreeFem++-nw makeref.edp
 install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
@@ -28,6 +28,9 @@ install-exec-local::
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
+freefem++.pref:
+	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo loadpath += \"./\" >>freefem++.pref
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

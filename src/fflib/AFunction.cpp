@@ -858,6 +858,8 @@ istream *Getline(istream * f, string ** s)
 {
     if( *s==0) *s=new string;
     getline(*f,**s);
+    size_t l = (**s).length();
+    if( l > 0 && ((**s)[l-1]=='\r')) (**s).resize(l-1); //
        return f;    
 }
 // Fin Add ne marche pas ....
