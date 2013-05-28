@@ -1,3 +1,8 @@
+
+ - correct typo on the doc with .*= ./=  operator
+ - correct bug in RT0 3d , code in the construction of the DOF.
+   the bug is all dof on border  face of same elemnt have same dof number.
+   thank to Laurent Bernard <laurent.bernard@lgep.supelec.fr> 
 version 3.23
  - do cleanning in version remove x11, glx, std : freefem++
    clean compile option for clang and clang++ compiler 

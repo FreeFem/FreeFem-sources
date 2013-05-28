@@ -531,8 +531,11 @@ public:
   
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
-    j=p%nea;
-    return p>=0 ? p/nea: -1;}
+    if(p>=0) j=p%nea;
+    return p>=0 ? p/nea: -1-j;}// modif FH. to change the code of copule k,kadj on border element..
+    //  correct bug of 23/05/2013 : 1  dof on RT0 3d... 
+    
+
 
   int ElementAdj(int k,int &j,Rd& PHat) const  
     {
@@ -1205,7 +1208,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
       Key keys[nkeys*2];
       int keysdim[nkeys*2];
       
-      int of = Th.nv+1;
+      int of = Th.nv+10;// Modif FH 28/05/2013 
       int ndim[NbTypeItemElement]={0,0,0,0};
       NbOfDF=0;
       {
