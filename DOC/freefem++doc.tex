@@ -4082,7 +4082,7 @@ The output is :
 \eFF
 
 the all integer array operators are  : % modif v2.0-3
-\index{array!\texttt{=  +  -  *  /  .*  ./ += -= /= *=}  }
+\index{array!\texttt{=  +  -  *  /  .*  ./ += -= /= *= .*= ./=}  }
 
 \index{l1}
 \index{l2}
@@ -4104,10 +4104,10 @@ b += 2*a;
 @cout <<" b += 2*a : " << b << endl;
 b /= 2;
 @cout <<" b /= 2 : " << b << endl;
-b *= a; // same b = b .* a
-@cout << "b*=a; b =" << b << endl;
-b /= a; // same b = b ./ a
-@cout << "b/=a; b =" << b << endl;
+b .*= a; // same b = b .* a
+@cout << "b.*=a; b =" << b << endl;
+b ./= a; // same b = b ./ a
+@cout << "b./=a; b =" << b << endl;
 c = a+b;
 @cout << " c =a+b : c=" << c << endl;
 c = 2*a+4*b;
@@ -4167,10 +4167,10 @@ produce the output
  b /= 2 : 5
           5     2.5       5      10      10
 
-b*=a; b =5
+b.*=a; b =5
          10     2.5      10      40      40
 
-b/=a; b =5
+b./=a; b =5
           5     2.5       5      10      10
 
  c =a+b : c=5
@@ -18955,7 +18955,9 @@ no_comma_expr:
 	| no_set_expr '+=' no_comma_expr
 	| no_set_expr '-=' no_comma_expr
 	| no_set_expr '*=' no_comma_expr
-	| no_set_expr '/=' no_comma_expr ;
+	| no_set_expr '/=' no_comma_expr 
+	| no_set_expr '.*=' no_comma_expr
+	| no_set_expr './=' no_comma_expr ;
 
 
 no_set_expr:
