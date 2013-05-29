@@ -34,6 +34,7 @@ Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
 ifelse(len(MPIPROG),0,; ,)Source: "src\bin-win32\FreeFem++-mpi.exe"; DestDir: "{app}"
+ifelse(len(MPIPROG),0,; ,)Source: "src\mpi\ff-mpirun"; DestDir: "{app}"
 Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
