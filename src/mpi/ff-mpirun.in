@@ -9,7 +9,7 @@ if [ -n "@MPIRUN@"  ] ;then mpirun="@MPIRUN@"  ; fi
 ffmpi=FreeFem++-mpi
 if [ -x "$0" -a -x "$dir/$ffmpi" ]; then  ffmpi="$dir/$ffmpi"; fi    
 if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
-a[0]="$mpirun"
+a[0]="'$mpirun'"
 j=1;
 #echo $1 ---
 while test -n "$1" ; do
