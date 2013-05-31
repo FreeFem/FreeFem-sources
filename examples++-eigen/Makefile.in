@@ -269,12 +269,7 @@ RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
 TEST_EXTENSIONS = @EXEEXT@ .test
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.test.log=.log)
-TEST_LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver
-TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
-	$(TEST_LOG_FLAGS)
+LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
 am__set_b = \
   case '$@' in \
     */*) \
@@ -285,6 +280,12 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.test.log=.log)
+TEST_LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver
+TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
+	$(TEST_LOG_FLAGS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PACKAGE_NAME = @ADD_PACKAGE_NAME@
@@ -419,6 +420,7 @@ STD_LDFLAGS = @STD_LDFLAGS@
 STD_LIBS = @STD_LIBS@
 STRIP = @STRIP@
 TESTIDEPROG = @TESTIDEPROG@
+TEST_FFPP = @TEST_FFPP@
 UMFPACKLIBS = @UMFPACKLIBS@
 VERSION = @VERSION@
 WGET = @WGET@
@@ -496,12 +498,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TESTS = @EIGENTEST@
-TESTS_ENVIRONMENT = PROGLOC=$(top_srcdir)/src REGEDP=testeigen.edp		\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
-	VISUALCHECK=$(VISUALCHECK)
-
+LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS = BeamEigenValue.edp BeamEigenValueperio.edp Lap3dEigenValue.edp  LapEigenValue.edp LapnosymEigenValue.edp Stokes-eigen.edp VP-Steklov-Poincare.edp neuman.edp testeigen.edp
+#  LapComplexEigenValue.edp  (buggus)
 EXTRA_DIST = *.edp all.edp
 all: all-am
 
@@ -685,6 +685,69 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
+BeamEigenValue.edp.log: BeamEigenValue.edp
+	@p='BeamEigenValue.edp'; \
+	b='BeamEigenValue.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+BeamEigenValueperio.edp.log: BeamEigenValueperio.edp
+	@p='BeamEigenValueperio.edp'; \
+	b='BeamEigenValueperio.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+Lap3dEigenValue.edp.log: Lap3dEigenValue.edp
+	@p='Lap3dEigenValue.edp'; \
+	b='Lap3dEigenValue.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+LapEigenValue.edp.log: LapEigenValue.edp
+	@p='LapEigenValue.edp'; \
+	b='LapEigenValue.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+LapnosymEigenValue.edp.log: LapnosymEigenValue.edp
+	@p='LapnosymEigenValue.edp'; \
+	b='LapnosymEigenValue.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+Stokes-eigen.edp.log: Stokes-eigen.edp
+	@p='Stokes-eigen.edp'; \
+	b='Stokes-eigen.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+VP-Steklov-Poincare.edp.log: VP-Steklov-Poincare.edp
+	@p='VP-Steklov-Poincare.edp'; \
+	b='VP-Steklov-Poincare.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+neuman.edp.log: neuman.edp
+	@p='neuman.edp'; \
+	b='neuman.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testeigen.edp.log: testeigen.edp
+	@p='testeigen.edp'; \
+	b='testeigen.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .test.log:
 	@p='$<'; \
 	$(am__set_b); \

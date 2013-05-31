@@ -1,11 +1,10 @@
 # $Id$
 
 all-local: @LOAD_COMPILE@
-TESTS=@LOAD_TESTS@
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
-	VISUALCHECK=$(VISUALCHECK)
+TESTS=load.edp testFE.edp testFEMorley.edp funcTemplate.edp LapDG3.edp LapDG4.edp LaplaceP3.edp LaplaceP4.edp bilapMorley.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp splitmesh3.edp splitmesh6.edp testFE-PkEdge.edp testFE.edp testFEMorley.edp
+LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+
 EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \

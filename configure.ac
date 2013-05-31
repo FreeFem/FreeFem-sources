@@ -24,7 +24,7 @@ AM_INIT_AUTOMAKE(1.6.3 dist-zip)
 
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_MAKE_SET
-
+dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
 
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
@@ -1960,6 +1960,7 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_ideprog  $ff_mpiprog $ff_med
 #    fi
 #    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
 #fi
+AC_SUBST(TEST_FFPP,"../src/nw/FreeFem++")  
 
 ff_with_mpi=-openmpi; 
 
