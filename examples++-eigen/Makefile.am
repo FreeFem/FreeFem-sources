@@ -1,11 +1,10 @@
 # $Id$
 
 all-local: all.edp
-TESTS=@EIGENTEST@
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=testeigen.edp		\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
-	VISUALCHECK=$(VISUALCHECK)
+LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS=BeamEigenValue.edp BeamEigenValueperio.edp Lap3dEigenValue.edp  LapEigenValue.edp LapnosymEigenValue.edp Stokes-eigen.edp VP-Steklov-Poincare.edp neuman.edp testeigen.edp
+#  LapComplexEigenValue.edp  (buggus)
 EXTRA_DIST=*.edp all.edp
 
 all.edp:

@@ -625,6 +625,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+TEST_FFPP
 IDE_TESTS
 TESTIDEPROG
 IDEPROG
@@ -3452,7 +3453,6 @@ else
 $as_echo "no" >&6; }
   SET_MAKE="MAKE=${MAKE-make}"
 fi
-
 
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}ranlib", so it can be a program name with args.
@@ -14618,6 +14618,8 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_ideprog  $ff_mpiprog $ff_med
 #    fi
 #    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib)
 #fi
+TEST_FFPP="../src/nw/FreeFem++"
+
 
 ff_with_mpi=-openmpi;
 

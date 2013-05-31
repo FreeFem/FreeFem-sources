@@ -84,6 +84,8 @@ tag-tar-$(SIZEPKG): $(PACKAGE)
 	 then  rm $(PACKAGE);   $(MAKe) $(PACKAGE); fi	
 	tar xvzf $(PACKAGE)
 	touch mmg3d4/build/sources/dataff.h 	
+	cp mmg3d4/build/sources/swapar.c mmg3d4/build/sources/swapar.c.origne
+	tr -d '\r' <mmg3d4/build/sources/swapar.c.origne >mmg3d4/build/sources/swapar.c
 	cd mmg3d4;patch -p1 <../patch-mmg3dv4.diff
 	cat </dev/null >mmg3d4/build/sources/mmg3dConfig.h
 	touch tag-tar-$(SIZEPKG)

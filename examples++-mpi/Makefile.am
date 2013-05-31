@@ -1,7 +1,9 @@
 # $Id$
+TESTS=DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp Laplace3d-hips.edp LaplaceRT-3d-matrix-mumps.edp LaplaceRT-3d-matrix-superludist.edp MUMPS.edp NSI3d-carac-mumps.edp NSI3d-carac-superludist.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp Stokes-v2-matrix-mumps.edp Stokes-v2-matrix-superludist.edp Stokes-v3-matrix-mumps.edp Stokes-v3-matrix-superludist.edp VG.edp beam-3d-matrix-superludist.edp cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp essai-com.edp essai.edp mortar-DN-4-mpi.edp schwarz-3.edp schwarz-b.edp schwarz-c.edp schwarz.edp
 
-TESTS=regtests.sh
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src EXEEXT=$(EXEEXT) MPIPROG=$(MPIPROG)
+LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+
 LIST_IDP= AddLayer2d.idp		DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
 AddLayer3d.idp		DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp
 
