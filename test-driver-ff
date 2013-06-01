@@ -86,7 +86,7 @@ else
   red= grn= lgn= blu= mgn= std=
 fi
 
-if test "$SKIP" = yes; then
+if test "${SKIP:-no}" = yes; then
 echo SKIP ${TEST_FFPP} ${FLAGS_FFPP}  "$@" >$log_file 2>&1
 estatus=77
 else
