@@ -11,7 +11,7 @@ SUBDIRS=download src  examples++-tutorial examples++	\
 	examples++-bug examples++-chapt3 examples++-other \
 	examples++-3d DOC 
 
-EXTRA_DIST=regtests.sh config-wrapper.h  \
+EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS README_MAC \
