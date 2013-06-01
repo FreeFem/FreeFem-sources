@@ -924,6 +924,7 @@ else
 	  AC_SUBST(MPI_LIB,"")
 	  AC_SUBST(MPI_LIBC,"")
 	  AC_SUBST(MPI_LIBFC,"")
+          AC_SUBST(SKIP_TESTS_MPI,yes)
 	  ff_mpi=no
 
 fi
@@ -1441,7 +1442,9 @@ then
 	AC_DEFINE(HAVE_LIBARPACK,1,Arpack is used for eigenvalue computation)
 
 	# Determines whether to run the eigenvalue tests
-	AC_SUBST([EIGENTEST],../regtests.sh)
+else 
+# all eigen test fails 
+	AC_SUBST([SKIP_TESTS_EIGEN],[yes])
 fi
 AC_SUBST([EIGENOBJ])
 
@@ -1871,7 +1874,7 @@ AC_SUBST(IDEPROG,$ff_ideprog)
 AC_SUBST(TESTIDEPROG,$ff_testideprog)
 # The final test program
 AC_SUBST(IDE_TESTS,$ff_idetest)
-ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_ideprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
+ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
 
 #echo xxxxxxxxxxx
@@ -1960,7 +1963,9 @@ ff_progs="$ff_stdprog FreeFem++-nw $ff_bamgprog $ff_ideprog  $ff_mpiprog $ff_med
 #    fi
 #    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
 #fi
+
 AC_SUBST(TEST_FFPP,"../src/nw/FreeFem++")  
+AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")  
 
 ff_with_mpi=-openmpi; 
 

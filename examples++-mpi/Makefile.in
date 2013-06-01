@@ -327,7 +327,6 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EIGENOBJ = @EIGENOBJ@
-EIGENTEST = @EIGENTEST@
 EPSTOPDF = @EPSTOPDF@
 EXEEXT = @EXEEXT@
 F77 = @F77@
@@ -411,6 +410,8 @@ SIZEOF_INT = @SIZEOF_INT@
 SIZEOF_LONG = @SIZEOF_LONG@
 SIZEOF_PTR = @SIZEOF_PTR@
 SIZEOF_PTRINBIT = @SIZEOF_PTRINBIT@
+SKIP_TESTS_EIGEN = @SKIP_TESTS_EIGEN@
+SKIP_TESTS_MPI = @SKIP_TESTS_MPI@
 STATICTOOL = @STATICTOOL@
 STDPROG = @STDPROG@
 STD_GRAPH_OBJ = @STD_GRAPH_OBJ@
@@ -419,6 +420,7 @@ STD_LIBS = @STD_LIBS@
 STRIP = @STRIP@
 TESTIDEPROG = @TESTIDEPROG@
 TEST_FFPP = @TEST_FFPP@
+TEST_FFPPMPI = @TEST_FFPPMPI@
 UMFPACKLIBS = @UMFPACKLIBS@
 VERSION = @VERSION@
 WGET = @WGET@
@@ -498,9 +500,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # $Id$
-TESTS = DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp Laplace3d-hips.edp LaplaceRT-3d-matrix-mumps.edp LaplaceRT-3d-matrix-superludist.edp MUMPS.edp NSI3d-carac-mumps.edp NSI3d-carac-superludist.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp Stokes-v2-matrix-mumps.edp Stokes-v2-matrix-superludist.edp Stokes-v3-matrix-mumps.edp Stokes-v3-matrix-superludist.edp VG.edp beam-3d-matrix-superludist.edp cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp essai-com.edp essai.edp mortar-DN-4-mpi.edp schwarz-3.edp schwarz-b.edp schwarz-c.edp schwarz.edp
+TESTS = DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp DDM-Schwarz-Stokes-2d.edp LaplaceRT-3d-matrix-mumps.edp MPICGLap.edp MPIGMRES2D.edp MPIGMRES3D.edp MUMPS.edp NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp beam-3d-matrix-superludist.edp cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp essai.edp  mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp testsolver_pastix.edp
 LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4" SKIP=$(SKIP_TESTS_MPI)
 LIST_IDP = AddLayer2d.idp		DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
 AddLayer3d.idp		DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp
 
@@ -740,9 +742,9 @@ DDM-Schwarz-Lap-3d.edp.log: DDM-Schwarz-Lap-3d.edp
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-Laplace3d-hips.edp.log: Laplace3d-hips.edp
-	@p='Laplace3d-hips.edp'; \
-	b='Laplace3d-hips.edp'; \
+DDM-Schwarz-Stokes-2d.edp.log: DDM-Schwarz-Stokes-2d.edp
+	@p='DDM-Schwarz-Stokes-2d.edp'; \
+	b='DDM-Schwarz-Stokes-2d.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -754,9 +756,23 @@ LaplaceRT-3d-matrix-mumps.edp.log: LaplaceRT-3d-matrix-mumps.edp
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-LaplaceRT-3d-matrix-superludist.edp.log: LaplaceRT-3d-matrix-superludist.edp
-	@p='LaplaceRT-3d-matrix-superludist.edp'; \
-	b='LaplaceRT-3d-matrix-superludist.edp'; \
+MPICGLap.edp.log: MPICGLap.edp
+	@p='MPICGLap.edp'; \
+	b='MPICGLap.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+MPIGMRES2D.edp.log: MPIGMRES2D.edp
+	@p='MPIGMRES2D.edp'; \
+	b='MPIGMRES2D.edp'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+MPIGMRES3D.edp.log: MPIGMRES3D.edp
+	@p='MPIGMRES3D.edp'; \
+	b='MPIGMRES3D.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -771,13 +787,6 @@ MUMPS.edp.log: MUMPS.edp
 NSI3d-carac-mumps.edp.log: NSI3d-carac-mumps.edp
 	@p='NSI3d-carac-mumps.edp'; \
 	b='NSI3d-carac-mumps.edp'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-NSI3d-carac-superludist.edp.log: NSI3d-carac-superludist.edp
-	@p='NSI3d-carac-superludist.edp'; \
-	b='NSI3d-carac-superludist.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -810,23 +819,9 @@ Stokes-v2-matrix-mumps.edp.log: Stokes-v2-matrix-mumps.edp
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-Stokes-v2-matrix-superludist.edp.log: Stokes-v2-matrix-superludist.edp
-	@p='Stokes-v2-matrix-superludist.edp'; \
-	b='Stokes-v2-matrix-superludist.edp'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 Stokes-v3-matrix-mumps.edp.log: Stokes-v3-matrix-mumps.edp
 	@p='Stokes-v3-matrix-mumps.edp'; \
 	b='Stokes-v3-matrix-mumps.edp'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-Stokes-v3-matrix-superludist.edp.log: Stokes-v3-matrix-superludist.edp
-	@p='Stokes-v3-matrix-superludist.edp'; \
-	b='Stokes-v3-matrix-superludist.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -880,16 +875,16 @@ cmaes-mpi-VarIneq.edp.log: cmaes-mpi-VarIneq.edp
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-essai-com.edp.log: essai-com.edp
-	@p='essai-com.edp'; \
-	b='essai-com.edp'; \
+essai.edp.log: essai.edp
+	@p='essai.edp'; \
+	b='essai.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-essai.edp.log: essai.edp
-	@p='essai.edp'; \
-	b='essai.edp'; \
+essai2.edp.log: essai2.edp
+	@p='essai2.edp'; \
+	b='essai2.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -901,30 +896,23 @@ mortar-DN-4-mpi.edp.log: mortar-DN-4-mpi.edp
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-schwarz-3.edp.log: schwarz-3.edp
-	@p='schwarz-3.edp'; \
-	b='schwarz-3.edp'; \
+testsolver_MUMPS.edp.log: testsolver_MUMPS.edp
+	@p='testsolver_MUMPS.edp'; \
+	b='testsolver_MUMPS.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-schwarz-b.edp.log: schwarz-b.edp
-	@p='schwarz-b.edp'; \
-	b='schwarz-b.edp'; \
+testsolver_SuperLU_DIST.edp.log: testsolver_SuperLU_DIST.edp
+	@p='testsolver_SuperLU_DIST.edp'; \
+	b='testsolver_SuperLU_DIST.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-schwarz-c.edp.log: schwarz-c.edp
-	@p='schwarz-c.edp'; \
-	b='schwarz-c.edp'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-schwarz.edp.log: schwarz.edp
-	@p='schwarz.edp'; \
-	b='schwarz.edp'; \
+testsolver_pastix.edp.log: testsolver_pastix.edp
+	@p='testsolver_pastix.edp'; \
+	b='testsolver_pastix.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
