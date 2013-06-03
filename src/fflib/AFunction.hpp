@@ -1360,21 +1360,26 @@ class ListOfInst : public  E_F0mps {
   if(list) delete [] list;list=0;if(linenumber)  delete[] linenumber; linenumber=0;}
 };
 
-class CListOfInst  {  private:
+class CListOfInst{
+private:
   ListOfInst * f;
   const basicForEachType *r;
-  public:
-   void operator=(const CC_F0 &a){
-     f=new ListOfInst();     
-       if( !a.Empty() ) {
-         f->Add(a);
-         r=a.left(); }}
-   CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
-    operator C_F0 () const  { return C_F0(f,r);}
-   void eval(Stack s) {(*f)(s);}
-   int size() const {return f->size();}
-   Expression * ptr() const {return f->ptr();}
-   int * nlines() const { return f->nlines();}
+
+public:
+  void operator=(const CC_F0 &a){
+    f=new ListOfInst();     
+    if( !a.Empty() ) {
+      f->Add(a);
+      r=a.left(); }}
+  CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
+  operator C_F0 () const  { return C_F0(f,r);}
+
+  /// Called by yyparse() to evaluate the complete expression tree when reaching the end of its "start" symbol.
+  void eval(Stack s) {(*f)(s);}
+
+  int size() const {return f->size();}
+  Expression * ptr() const {return f->ptr();}
+  int * nlines() const { return f->nlines();}
 };
 
 
