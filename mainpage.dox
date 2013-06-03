@@ -31,13 +31,11 @@
 
   \section broadview Broad View
 
-  - The FreeFem++ language grammar is defined in lg.ypp
+  A FreeFem++ script is first translated into a tree of expressions of type CListOfInst (the language grammar is defined
+  in lg.ypp) and then evaluated by calling CListOfInst::eval(). Any resulting graphical data is converted into a stream
+  of bytes by the PlotStream class before being sent to the ffglut program (see ffglut.cpp) via a pipe.
 
-  - The grammar output is a tree of expressions of type CListOfInst, evaluated by CListOfInst::eval()
-
-  - PlotStream converts graphical data into a stream sent via a pipe to the ffglut program (see ffglut.cpp)
-
-  \section details Detailed Start Sequence
+  \section details Detailed Program Start Sequence
 
   - The C++ main() function is part of platform-dependent treatments. It calls mymain() (in lg.ypp) from:
 
