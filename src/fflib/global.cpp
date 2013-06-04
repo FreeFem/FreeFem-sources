@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -67,7 +69,11 @@ Map_type_of_map map_pair_of_type ; //  to store te type
  Polymorphic * TheOperators=0, //=new Polymorphic(), 
              * TheRightOperators=0; //=new Polymorphic();
 
- TableOfIdentifier Global;
+// <<Global>> Declaration in [[file:AFunction.hpp::Global]]
+
+/// Contains all FreeFem++ language keywords
+
+TableOfIdentifier Global;
 
  long E_Border::Count =0;
 
