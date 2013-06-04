@@ -48,8 +48,8 @@
     - mymain() calls mainff(), which calls Compile(), which calls the standard yyparse() function.
 
     - yyparse() scans the EDP script thanks to the lexer #mylex. When the "start" symbol is successfully scanned, yylval
-    (of type YYSTYPE) contains an expression tree of type CListOfInst. CListOfInst::eval() is called with one #Stack
-    argument built by #newStack().
+    (of type YYSTYPE) contains the whole tree of expressions as an object of type CListOfInst. CListOfInst::eval() is
+    called (with one #Stack argument built by #newStack()) to run the script.
 
   <em>(this is file mainpage.dox)</em>
 
