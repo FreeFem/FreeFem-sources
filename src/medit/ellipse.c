@@ -280,7 +280,7 @@ GLuint drawAllEllipse(pScene sc,pMesh mesh) {
       m[0] = ps->m[0];
       m[1] = ps->m[1];
       m[2] = ps->m[2];
-      if ( !eigen2(m,lambda,vp) ) return;
+      if ( !eigen2(m,lambda,vp) ) return (0) ;
 
       /* consider eigenvalues as sizes */
       dd1 = 1.0 / sqrt(fabs(lambda[0]));
@@ -308,7 +308,7 @@ GLuint drawAllEllipse(pScene sc,pMesh mesh) {
       m[0] = ps->m[0];
       m[1] = ps->m[1];
       m[2] = ps->m[2];
-      if ( !eigen2(m,lambda,vp) ) return;
+      if ( !eigen2(m,lambda,vp) ) return (0) ;
 
       /* consider eigenvalues as sizes */
       dd1 = 1.0 / sqrt(fabs(lambda[0]));

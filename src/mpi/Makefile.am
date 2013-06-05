@@ -20,7 +20,8 @@ FreeFem___mpi_DEPENDENCIES=../fflib/libff.a
 LDADD=../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
 
 AM_CXXFLAGS=-DPARALLELE
-INCLUDES=-I../fflib -I../Graphics -I../femlib @MPI_INCLUDE@
+AM_CPPFLAGS=-I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@
 ff-mpirun:ff-mpirun.in Makefile
-	../../config.status  --file=$@:$@.in
+	../../config.status  --file=ff-mpirun:ff-mpirun.in
+	chmod a+x  ff-mpirun
 

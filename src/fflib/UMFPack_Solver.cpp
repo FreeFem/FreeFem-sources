@@ -301,20 +301,15 @@ BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(Complex,A))
 
 
 //  the 2 default sparse solver double and complex
-DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
-DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+//DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
+//DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
-TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+extern TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue;//=TypeSolveMat::defaultvalue;
 
-static bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-    return 1;
-}
+template <>
+DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
+template <>
+DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
 
 static bool SetUMFPACK()
 {
@@ -330,26 +325,16 @@ void init_UMFPack_solver()
 {
   if(verbosity>2) 
   cout << " UMFPACK ";
-  SparseMatSolver_R= DefSparseSolver<double>::solver;
-  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   
   DefSparseSolver<double>::solver =BuildSolverIUMFPack;
   DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
-  if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver" << endl;
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  }
   Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
   Global.New("HaveUMFPACK",CConstant<bool>(true)); 
 
 }
 
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
 
 #ifdef LOAD_LINK_
 class Init { public:

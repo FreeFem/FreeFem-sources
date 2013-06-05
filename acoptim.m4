@@ -51,16 +51,15 @@ AC_ARG_ENABLE(optim,[  --enable-optim	Turn on compiler optimization])
 
 if test "$enable_debug" = yes;
 then
+
+	AC_MSG_RESULT(yes)
 	CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
 	FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
-	FCFLAGS="`echo $FCFLAGS | sed 's/-O2//g'`"
 	CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
-
         CHECK_COMPILE_FLAG(C,-g,CFLAGS)
 	CHECK_COMPILE_FLAG(C++,-g,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,-g,FFLAGS)	
 
-	AC_MSG_RESULT(yes)
 else
 	AC_MSG_RESULT(no)
 
@@ -119,6 +118,8 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	AC_MSG_CHECKING(GCC version)
 
         ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'` 
+	ff_clang=`$CC  --version |awk  '/clang/  {print $4}'`
+	if test -n "$ff_clang" ; then ff_gcc4="llvm"; fi
 	AC_MSG_RESULT($ff_gcc4)
 
 	# At the moment, we do not know how to produce correct
@@ -126,7 +127,9 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	AC_MSG_CHECKING(PowerPC architecture)
 	ff_machine=`/usr/bin/machine`
         ff_fast="-O3"
-	if test `uname` = Darwin 
+	if test	-n "$ff_clang" ; then
+          ff_fast='-O3 -fPIC'
+	elif test `uname` = Darwin 
 	    then
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
@@ -151,7 +154,7 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
           ppc*) # G3 ????
 	       ff_fast="-O3";;
 	  i486)
-	    ff_fast="-O3 -march=pentium4";;
+	    ff_fast="-O3 $ff_fast";;
 	  *)
 	    AC_MSG_ERROR(cannot determine apple cpu type )
 	    ff_fast="-O3";;

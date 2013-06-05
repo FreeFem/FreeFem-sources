@@ -1,5 +1,5 @@
 // g++ `../examples++-load/ff-get-dep -ff example-mumps.cpp` -o example-mumps
-//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blacs  mpifc  fc   mpi blas 
+//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack   mpifc  fc   mpi blas 
 /*
  *
  *  This file is part of MUMPS 4.9.2, built on Thu Nov  5 07:05:08 UTC 2009

@@ -58,15 +58,9 @@ int iter=0;
     plot (u,wait=0,cmm="solution with Newton Raphson");
 
    }
-   savemesh(Th,"N",[x,y,u*1.5]);
-	{ ofstream file("N.bb");
-	file << "2 1 1 "<< u[].n << " 2 \n";
-	int j;
-	for (j=0;j<u[].n ; j++)  
-	  file << u[][j] << endl; 
-    }  	
-    exec("ffmedit N");
-    exec("rm N.*");
-    
 
+load "medit" load "msh3"  
+    mesh3 Th3= movemesh23(Th,transfo=[x,y,u*1.5]);
+    medit("N",Th3);
 }
+

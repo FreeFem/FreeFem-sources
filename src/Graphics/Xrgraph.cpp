@@ -29,6 +29,7 @@
 /******************************************************************/
 const char * edpfilenamearg=0;	 	
 bool  waitatend=true;
+bool  consoleatend=true;
 
 #define FF_GRAPH_SET_PTR
 #include <math.h>

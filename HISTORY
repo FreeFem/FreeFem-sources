@@ -1,5 +1,1810 @@
-changeset:   2197:e983b6801336
+changeset:   2554:43560825cafe
 tag:         tip
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 10 15:21:51 2012 +0200
+summary:     correct pipe.edp example to run under windows.
+
+changeset:   2553:395f577c1a69
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Oct 08 11:53:33 2012 +0900
+summary:     add pipe plugin to link with other soft
+
+changeset:   2552:db4af2db147e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Oct 07 14:11:44 2012 +0900
+summary:     do small coorection of windows
+
+changeset:   2551:d32ffb11bec9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Oct 07 11:18:26 2012 +0900
+summary:     coorect pb to set C io under winder
+
+changeset:   2550:f3986a910f80
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Oct 06 22:34:10 2012 +0900
+summary:     type
+
+changeset:   2549:f6229d0989bb
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Oct 06 22:30:02 2012 +0900
+summary:     correct mumps compilation
+
+changeset:   2548:a1910dbcf7f9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Oct 06 11:50:54 2012 +0900
+summary:     correct pb of segflaut on window atexit when creating the log file
+
+changeset:   2547:1626cbdfe5d6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Oct 06 10:51:50 2012 +0900
+summary:     coorect typo
+
+changeset:   2546:7a7fba157b77
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Oct 06 10:50:08 2012 +0900
+summary:     add option to remove console output on windows
+
+changeset:   2545:b192e8d7cbd3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Oct 06 10:29:16 2012 +0900
+summary:     correct thing of windows porting
+
+changeset:   2544:1b485471f601
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 04 16:13:47 2012 +0200
+summary:     coorect pb compile windows
+
+changeset:   2543:b0e5ed55fcb8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 03 18:34:29 2012 +0200
+summary:     correct mmg3d with new version
+
+changeset:   2542:a2661dc3cf87
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 03 15:01:12 2012 +0200
+summary:     correct pb with drawbdmesh ( not compile now),
+
+changeset:   2541:5540ca108c29
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 03 14:38:28 2012 +0200
+summary:     add find root of real poly in  gsl plugin
+
+changeset:   2540:7fcb20950af8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 26 15:31:46 2012 +0200
+summary:     remove drawbdmesh on windows
+
+changeset:   2539:3646196ba7b4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 25 13:16:23 2012 +0200
+summary:     A left scalar mul with formal arry.
+
+changeset:   2538:004c3ce519db
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Sep 21 14:52:11 2012 +0200
+summary:     try a build 3.20 version
+
+changeset:   2537:4ea423174745
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Sep 21 11:37:23 2012 +0200
+summary:     add levelset integral in 2d..
+
+changeset:   2536:3df0231f5788
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 19 15:55:46 2012 +0200
+summary:     coorect cout
+
+changeset:   2535:1813e516c73c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 19 15:49:51 2012 +0200
+summary:     correct isoline.cpp  hard ...
+
+changeset:   2534:d63f9b0d6a90
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 18 21:17:21 2012 +0200
+summary:     correct  isoline.cpp bug some time ....
+
+changeset:   2533:9a0f4ba5bc83
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 05 22:33:04 2012 +0200
+summary:     do coorect off clang++ compiler
+
+changeset:   2532:7268da0a32dd
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 05 21:59:44 2012 +0200
+summary:     correct big problem with clang++ compiler ...
+
+changeset:   2531:bf616e104e58
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 05 21:56:56 2012 +0200
+summary:     coorect pb with clang compile, verif strange..
+
+changeset:   2530:10fbabb7ca26
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 05 14:55:29 2012 +0200
+summary:     add formal tools Cofact, det 3x3,  : on formal array.
+
+changeset:   2529:4603f7ce0737
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 04 16:41:21 2012 +0200
+summary:     clang next step.
+
+changeset:   2528:18d5c72b3f8b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 04 10:32:46 2012 +0200
+summary:     do correct for clang compiler
+
+changeset:   2527:061c058bf92d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Sep 03 16:18:48 2012 +0200
+summary:     correct for c++11
+
+changeset:   2526:47944725e009
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Aug 28 14:21:56 2012 +0200
+summary:     update README macos
+
+changeset:   2525:d54e7f17997b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Aug 28 12:53:41 2012 +0200
+summary:     add CheckMPIMacLib.sh and CheckMacLib.sh taget in makefile for mac pkg install
+
+changeset:   2524:8fde78f05ac0
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 27 16:03:36 2012 +0200
+summary:     remove print  in sparse solver
+
+changeset:   2523:d6c07fd2ec36
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Aug 26 21:27:19 2012 +0200
+summary:     add missing operator ?: of bool
+
+changeset:   2522:e5a90f5a7283
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Aug 16 09:47:15 2012 +0200
+summary:     revome print ...
+
+changeset:   2521:91006696c311
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Aug 14 21:17:02 2012 +0200
+summary:     correct mistake find by P. Jolivet.
+
+changeset:   2520:ef81308ec4f1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Aug 12 22:07:52 2012 +0200
+summary:     cooorect automatic seach in configire (P Jolivet).
+
+changeset:   2519:4422559d360a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 06 23:12:27 2012 +0200
+summary:     add comment of my installation
+
+changeset:   2518:27d04b01bb9d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 06 00:14:04 2012 +0200
+summary:     correct Superludist with g++ v 4.8
+
+changeset:   2517:08658feae475
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Aug 05 23:37:08 2012 +0200
+summary:     forget files
+
+changeset:   2516:c2d91d216c32
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Aug 05 23:31:52 2012 +0200
+summary:     coerect Superlu.cpp of g++ v 4.8 add missong this->
+
+changeset:   2515:68577323c46d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Aug 05 15:17:51 2012 +0200
+summary:     change mac compiler gcc version 4.8.0
+
+changeset:   2514:ce08661de7d5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jul 12 14:27:34 2012 +0200
+summary:     add example
+
+changeset:   2513:efd3db094bcf
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jul 12 14:00:47 2012 +0200
+summary:     add imax, imam, correct sctoch interface not //
+
+changeset:   2512:cd465304bca9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jun 13 20:04:15 2012 +0200
+summary:     add compile of shell
+
+changeset:   2511:250772fdd061
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jun 13 20:00:36 2012 +0200
+summary:     add shell/unix interface
+
+changeset:   2510:bfac9dec081e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jun 13 10:38:55 2012 +0200
+summary:     correct PB of cleanning memory of array real[int][int] ...
+
+changeset:   2509:4628b688eeaf
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 07 15:12:35 2012 +0200
+summary:     add missing include in some computer unistd.h
+
+changeset:   2508:031e9c676174
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 07 08:16:38 2012 +0200
+summary:     correct mshmet makefile to force the recompilation
+
+changeset:   2507:1839c38ea7dc
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 07 08:06:55 2012 +0200
+summary:     chnge version to 3.19-2
+
+changeset:   2506:80ae2baf5a8d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 07 07:50:29 2012 +0200
+summary:     correct mshmet problem in case of 2 eigen value in Hessian.
+
+changeset:   2505:95e33e458008
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed May 30 14:13:26 2012 +0200
+summary:     correct typo in font size in postcript interface
+
+changeset:   2504:f2cdbadf6faf
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue May 22 21:15:30 2012 +0200
+summary:     correct clean part of mshmet makefile + add
+
+changeset:   2503:bee48e40935e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue May 15 11:48:05 2012 +0200
+summary:     correct missing const in qf11to25.cpp
+
+changeset:   2502:0232fb9d45b7
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue May 15 11:39:15 2012 +0200
+summary:     add build of Quadratur formular in qf11to25.cpp plugins
+
+changeset:   2501:f20a2f3c7bd6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon May 14 21:04:26 2012 +0200
+summary:     set fftw to version 3.3.2
+
+changeset:   2500:f5c0851c058c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed May 09 22:26:21 2012 +0200
+summary:     update modif of Ernesto Aranda <Ernesto.Aranda@uclm.es> for new version of mmg3d
+
+changeset:   2499:de4c315dad33
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed May 09 21:11:04 2012 +0200
+summary:     pass to version 3.19-1
+
+changeset:   2498:7ecf46eb253d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed May 09 21:06:07 2012 +0200
+summary:     add Ernesto Aranda <Ernesto.Aranda@uclm.es>  change ...
+
+changeset:   2497:49f99f157b3c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon May 07 10:27:41 2012 +0200
+summary:     coorect typo = -> != in configure (mkl sgi)
+
+changeset:   2496:f5814395a638
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon May 07 10:14:08 2012 +0200
+summary:     remove of use of MKL scalapack and blacs with sgi MPI
+
+changeset:   2495:c3b18fa8f700
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 03 19:07:10 2012 +0200
+summary:     remove MKLROOT form configure  ( disaper in new mkl configure)
+
+changeset:   2494:d7658c0f681b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 03 18:28:44 2012 +0200
+summary:     add correct in MUMPS mpi solver
+
+changeset:   2493:c5124bde5bc5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 03 11:01:00 2012 +0200
+summary:     remove cmake de configure
+
+changeset:   2492:83094b26702f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 03 11:00:01 2012 +0200
+summary:     add count pour ptr in CheckPtr.cpp
+
+changeset:   2491:463c4c448187
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Apr 24 13:25:56 2012 +0200
+summary:     try to count memery pointeur
+
+changeset:   2490:66be2ba0ba65
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Apr 23 23:08:13 2012 +0200
+summary:     change version of superlu.
+
+changeset:   2489:d2bee8f1b140
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 17:09:00 2012 +0200
+summary:     update mmg3d  swapar.o is also compile without optim.
+
+changeset:   2488:76e28b509475
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 16:51:03 2012 +0200
+summary:     correct atexit problem in mmg3 v4 ..
+
+changeset:   2487:cb2752aee207
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 15:40:23 2012 +0200
+summary:     correct Interface of Ipopt (ff-Ipopt)
+
+changeset:   2486:04bbadc57f58
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 14:16:51 2012 +0200
+summary:     carrect un set varable in mmage3d-v4
+
+changeset:   2485:e83aa5d378f9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 12:03:38 2012 +0200
+summary:     coorect ff-Ipopt version
+
+changeset:   2484:90cf49c9fbb5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 11:33:36 2012 +0200
+summary:     coorect typo in innovation file
+
+changeset:   2483:baebf141d983
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 09:27:57 2012 +0200
+summary:     update INNOVATION file
+
+changeset:   2482:5ede79cd270b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 09:21:18 2012 +0200
+summary:     correct typo
+
+changeset:   2481:0c075c537334
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 20 08:48:58 2012 +0200
+summary:     add isNaN,IsInf,IsNormal FP fonction and
+
+changeset:   2480:290972213b56
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 22:58:51 2012 +0200
+summary:     add a true scotch example
+
+changeset:   2479:c0c3c75dd20a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 18:46:00 2012 +0200
+summary:     add sort of integer array
+
+changeset:   2478:08b71cf34320
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 17:17:10 2012 +0200
+summary:     add missing file
+
+changeset:   2477:551aa5767d7f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 17:12:43 2012 +0200
+summary:     coorect header of plugin
+
+changeset:   2476:a6258a786803
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 16:46:43 2012 +0200
+summary:     add scotch interface thanks to P. Jolivet
+
+changeset:   2475:b7f9353707c0
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 16:34:39 2012 +0200
+summary:     Pour P. Jolivet,
+
+changeset:   2474:e507d135fbf4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 19 16:28:28 2012 +0200
+summary:     correct bug in macro with operator .*= and ./=
+
+changeset:   2473:28d82b742e4e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Apr 16 13:54:02 2012 +0200
+summary:     comment in stable script examples++-3d/Laplace-Adapt-aniso-3d.edp
+
+changeset:   2472:f7c9fbfee29e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Apr 15 22:27:49 2012 +0200
+summary:     correct mmg3d new interface.
+
+changeset:   2471:67ac6a176e89
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Apr 15 10:36:30 2012 +0200
+summary:     correct build fo missing file during test in ttestio
+
+changeset:   2470:be230cbc9bb1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 11 22:46:11 2012 +0200
+summary:     update doc with  isoline example
+
+changeset:   2469:7b55a13f44bf
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 11 18:15:57 2012 +0200
+summary:     correct type in edp files
+
+changeset:   2468:cb455028d3bc
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 05 17:59:05 2012 +0200
+summary:     correct  pb plot in 3d-lemen;edp example
+
+changeset:   2467:a4495a14cc6f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 05 17:41:19 2012 +0200
+summary:     correct Makefile for dist
+
+changeset:   2466:c1c7515b599d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 05 17:38:21 2012 +0200
+summary:     remove assert of generate surface mesh ???
+
+changeset:   2465:adf7a32dec37
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 05 17:36:08 2012 +0200
+summary:     add new Ipopt example
+
+changeset:   2464:420d59368939
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 05 17:17:53 2012 +0200
+summary:     pass to version 3.19 , and add Ipopt documentation
+
+changeset:   2463:684b603bce0f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Apr 03 15:35:04 2012 +0200
+summary:     change the return value of inv in lapack , reture info value
+
+changeset:   2462:43d891de7b5c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Mar 30 13:52:21 2012 +0200
+summary:     update IPOPT interface
+
+changeset:   2461:ff9197c7215e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 19:02:18 2012 +0100
+summary:     forget all.edp (automatical rebuild)
+
+changeset:   2460:5f0193ae54c8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 18:59:23 2012 +0100
+summary:     coorect install plugin
+
+changeset:   2459:33407ff589c1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 18:52:47 2012 +0100
+summary:     add missing file
+
+changeset:   2458:da832a4533ec
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 18:51:32 2012 +0100
+summary:     romve use file
+
+changeset:   2457:a70d6470d341
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 18:18:18 2012 +0100
+summary:     correct typo
+
+changeset:   2456:660e36d76368
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 18:14:56 2012 +0100
+summary:     add missing file
+
+changeset:   2455:d1c7eb0f6226
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 17:48:02 2012 +0100
+summary:     coorect FFLAGS in ippot
+
+changeset:   2454:c7e70cac0ced
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 17:45:23 2012 +0100
+summary:     correct ipopt fortran flags
+
+changeset:   2453:fa1d39ecf8c5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 17:00:18 2012 +0100
+summary:     correct chanhe of ff-IpOpt in ff-Ipopt
+
+changeset:   2452:603891d1341f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 16:58:37 2012 +0100
+summary:     correcrt Ipot name
+
+changeset:   2451:abcfed2f161a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 15:24:19 2012 +0100
+summary:     remove build file
+
+changeset:   2450:fd47a9cb93e6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 22 14:01:53 2012 +0100
+summary:     correct missing CFLAGS compile flige in ipopt
+
+changeset:   2449:9c4f3a731d8f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 15 17:03:46 2012 +0100
+summary:     update freeyams versio
+
+changeset:   2448:57268fd78d95
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 15 16:22:26 2012 +0100
+summary:     correct ipopt
+
+changeset:   2447:648085c768e2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 15 15:41:31 2012 +0100
+summary:     carrection iptop interface
+
+changeset:   2446:db7e1719d41d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 14 10:03:06 2012 +0100
+summary:     coorect typo the WHERE file building
+
+changeset:   2445:9652b407c4d4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 14 09:40:38 2012 +0100
+summary:     correct msh3.cpp see INNOVATION
+
+changeset:   2444:0912ecf5b7b6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 13 19:22:46 2012 +0100
+summary:     correct type error
+
+changeset:   2443:f73f7abb9628
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Mar 12 20:42:20 2012 +0100
+summary:     add Ipopt interface, seems workinging
+
+changeset:   2442:18c51dd3fae0
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Mar 09 22:15:39 2012 +0100
+summary:     add nex example
+
+changeset:   2441:d857f8111e76
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Mar 09 22:12:33 2012 +0100
+summary:     add IpOpt interface
+
+changeset:   2440:9811138f1bc7
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Mar 09 22:02:20 2012 +0100
+summary:     add Ipopt interface
+
+changeset:   2439:939ad2584480
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 07 21:58:28 2012 +0100
+summary:     correct pb of name in lapack in arpack configire variable
+
+changeset:   2438:cc334b6ba942
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 07 20:31:44 2012 +0100
+summary:     add -mkl flgs in configure in test ..
+
+changeset:   2437:8f1418723ac1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 07 12:53:22 2012 +0100
+summary:     add missing operator A(1:3,3:4) on full matrix
+
+changeset:   2436:d8c7a95bab01
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 06 23:13:13 2012 +0100
+summary:     add new example
+
+changeset:   2435:e9f77853f86a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 06 22:57:22 2012 +0100
+summary:     add subarrey of full matrix.
+
+changeset:   2434:44e45a467771
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 06 22:06:47 2012 +0100
+summary:     add new type of array , array of array.
+
+changeset:   2433:ff330cc9ed2a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Feb 24 17:43:14 2012 +0100
+summary:     add ipopt download
+
+changeset:   2432:6dd56733d650
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Feb 23 13:07:28 2012 +0100
+summary:     add install of libphread-2.dd or win32
+
+changeset:   2431:2fbea8d0c565
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Feb 23 12:07:08 2012 +0100
+summary:     add pthread in mpi mumps
+
+changeset:   2430:96c02671ec5c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Feb 23 12:05:52 2012 +0100
+summary:     add pthread in WHERE-LIBARY-config for mumps-seq
+
+changeset:   2429:b83672d4b4f9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 22 23:18:22 2012 +0100
+summary:     correct typo in libseq path for mumps-seq compile
+
+changeset:   2428:9c218b0575fc
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 22 22:16:57 2012 +0100
+summary:     add MUMPS seq pluging
+
+changeset:   2427:e714f05e8c68
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Feb 20 10:02:23 2012 +0100
+summary:     add tag + correct missing file in windows distributiuon
+
+changeset:   2426:16116189f9fc
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Feb 20 10:01:42 2012 +0100
+summary:     Added tag 3.18-1 for changeset 7a11ffa1f26e
+
+changeset:   2425:7a11ffa1f26e
+tag:         3.18-1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Feb 17 16:14:54 2012 +0100
+summary:     correct edp ..
+
+changeset:   2424:ff06d18097d3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Feb 17 15:21:24 2012 +0100
+summary:     coorect install windows
+
+changeset:   2423:5dc5d4a44a0f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Feb 17 15:16:38 2012 +0100
+summary:     correct missing file in makefiles
+
+changeset:   2422:297b8d9f6034
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 15 22:00:56 2012 +0100
+summary:     update doc
+
+changeset:   2421:fc00fdf10fc8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 15 21:32:56 2012 +0100
+summary:     continuing update
+
+changeset:   2420:6cf5db8c5b72
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 15 21:29:17 2012 +0100
+summary:     add .im, .re of array..compile test
+
+changeset:   2419:56dc83bd98f5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 15 21:01:22 2012 +0100
+summary:     add re , operator in complex  sparce matrix
+
+changeset:   2418:04e97610e592
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Feb 14 21:46:23 2012 +0100
+summary:     add convert of im and re parl of complex sparse matrix
+
+changeset:   2417:c9503b6ad05c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Feb 14 15:30:45 2012 +0100
+summary:     correct norme lp in RNM thank yo a student.
+
+changeset:   2416:17002f8ac1e6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Feb 13 17:12:46 2012 +0100
+summary:     add comment in INNOVATION file
+
+changeset:   2415:99a84a69a476
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Feb 13 16:49:40 2012 +0100
+summary:     add error  in case of probleme ith periodic
+
+changeset:   2414:7e01a75cf0a2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 18:02:06 2012 +0100
+summary:     add missing file
+
+changeset:   2413:7e1ce5867819
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 18:01:07 2012 +0100
+summary:     add missing files
+
+changeset:   2412:1a9d248b0abe
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 17:57:12 2012 +0100
+summary:     add missing file
+
+changeset:   2411:313f2537e2f6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 17:52:21 2012 +0100
+summary:     add missing file
+
+changeset:   2410:f809aa7e43f9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 17:42:51 2012 +0100
+summary:     add missing files
+
+changeset:   2409:124a413008ed
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 16:34:17 2012 +0100
+summary:     correct Makefiles
+
+changeset:   2408:cbb20473adea
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 16:33:04 2012 +0100
+summary:     remove example without new adaptation schema
+
+changeset:   2407:9c7b8c0c8096
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 08 16:24:20 2012 +0100
+summary:     add adpt tool for PK aniso adation in 2d
+
+changeset:   2406:40df8192a994
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Jan 20 15:36:57 2012 +0100
+summary:     coorect scriot
+
+changeset:   2405:9f521b6ad9e9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 19 13:37:05 2012 +0100
+summary:     correct DOC
+
+changeset:   2404:5c0462ce1574
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 19 09:54:05 2012 +0100
+summary:     add New example in Chap 3.
+
+changeset:   2403:4bee3958de18
+parent:      2401:64149fc11869
+parent:      2402:6d506087c6af
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jan 18 21:57:45 2012 +0100
+summary:     merging with 3.18 (error FH)
+
+changeset:   2402:6d506087c6af
+parent:      2400:9506aca1ea28
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jan 18 21:36:47 2012 +0100
+summary:     Added tag v3.18 for changeset 9506aca1ea28
+
+changeset:   2401:64149fc11869
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jan 18 21:34:52 2012 +0100
+summary:     correct file to compile with xcode 4.2
+
+changeset:   2400:9506aca1ea28
+tag:         v3.18
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jan 16 13:08:11 2012 +0100
+summary:     add line ininnovation
+
+changeset:   2399:153d0a5015bb
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jan 16 13:04:13 2012 +0100
+summary:     Correct NSprojection example
+
+changeset:   2398:2d9a79b70d5b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jan 16 11:27:49 2012 +0100
+summary:     add redownload off mmg34 tar gz
+
+changeset:   2397:1fd0801dc393
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jan 16 11:10:33 2012 +0100
+summary:     correct compile of mmg3d v4
+
+changeset:   2396:f03a6f977499
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jan 11 21:35:51 2012 +0100
+summary:     add missing file on windows
+
+changeset:   2395:5fcad65c5ece
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jan 11 21:04:00 2012 +0100
+summary:     passe to version 3.18
+
+changeset:   2394:a8118bf9d0a5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jan 11 12:11:19 2012 +0100
+summary:     update isoline dll.
+
+changeset:   2393:d925ce8d8dd6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jan 10 21:08:06 2012 +0100
+summary:     correct mpigather
+
+changeset:   2392:03d927f3dda3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jan 10 20:50:00 2012 +0100
+summary:     correct parallelempi.cpp mpigather assert
+
+changeset:   2391:8898fcd7acce
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jan 10 18:40:58 2012 +0100
+summary:     change the isolineP1 load file by a isoline file
+
+changeset:   2390:b778cdbf73c1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Dec 15 16:05:51 2011 +0100
+summary:     correct pb of offset in readmesh in ffglut
+
+changeset:   2389:cf6f4a7feea8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Dec 15 11:41:53 2011 +0100
+summary:     coorect PB de shift  of  1 in  read .msh in 3d
+
+changeset:   2388:8cab02860a3c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 30 15:02:31 2011 +0100
+summary:     correct mistake in mpi interface (wrong assert and correct essai.edp)
+
+changeset:   2387:d3f7e78540eb
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 30 14:42:47 2011 +0100
+summary:     corret MPI problem
+
+changeset:   2386:1a638fa49fbe
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Nov 17 15:12:11 2011 +0100
+summary:     correct BLACS interface ( mkl and debain case)
+
+changeset:   2385:111b11d41665
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Nov 17 13:39:47 2011 +0100
+summary:     coorect pb in blacs lib order in WHERE_LIB
+
+changeset:   2384:02fd8c5643f3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 16 22:10:38 2011 +0100
+summary:     correct mshmet
+
+changeset:   2383:c7dc28fb1321
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 16 18:30:17 2011 +0100
+summary:     correct configure.ac (remove trick on odl mmg3 version (not use at all)
+
+changeset:   2382:f661f9f8e47b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 16 17:56:03 2011 +0100
+summary:     remove double symbloe in freeyam with meshlib
+
+changeset:   2381:5732efc58a03
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 16 16:02:42 2011 +0100
+summary:     remove compress tools in scotch by default
+
+changeset:   2380:1f7181ed77e3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 16 11:39:39 2011 +0100
+summary:     correct mistake in ymas interface
+
+changeset:   2379:f671d72ac333
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 16 11:09:26 2011 +0100
+summary:     uodate to last freeymas version
+
+changeset:   2378:b5cf0e99fbc4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 15 17:42:08 2011 +0100
+summary:     correct aprmetis and mmg3d  opt version
+
+changeset:   2377:c9f68542a064
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 15 16:19:23 2011 +0100
+summary:     add small correct of fratran stuff in ff-c++ et find mpirun in configure
+
+changeset:   2376:e475dc98bc5b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 08 22:30:16 2011 +0100
+summary:     add new ffapi.o  in src/bin-win32/Makefile
+
+changeset:   2375:0f35b35f0203
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 08 22:26:08 2011 +0100
+summary:     add missing file
+
+changeset:   2374:00b37e15d8b8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 08 22:12:36 2011 +0100
+summary:     make hack for true random number on window (use of mersen randow)
+
+changeset:   2373:81725e52c648
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 08 21:33:42 2011 +0100
+summary:     correct typo error  and pdate the doc.
+
+changeset:   2372:729356646c52
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Nov 08 21:02:28 2011 +0100
+summary:     correct the new auto laod interface ...
+
+changeset:   2371:97802e3f5d5e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Nov 06 20:59:48 2011 +0100
+summary:     passe to versio 3.17
+
+changeset:   2370:07ee613471d9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Nov 06 15:46:21 2011 +0100
+summary:     coorect PB off pluging  ( ok may be)
+
+changeset:   2369:3a017668777d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Nov 04 18:45:51 2011 +0100
+summary:     correct Typo error in multiple include defence ..
+
+changeset:   2368:72f8424630ee
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Nov 04 16:54:48 2011 +0100
+summary:     up innovation
+
+changeset:   2367:e0d1eed7452a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Nov 04 16:28:33 2011 +0100
+summary:     update plugin to by compatible with new load schema
+
+changeset:   2366:045f330b4eba
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Nov 02 21:43:35 2011 +0100
+summary:     build a work version of mpi on window base of sdk windows hpc
+
+changeset:   2365:896119ddcba9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 26 21:50:31 2011 +0200
+summary:     correct missing
+
+changeset:   2364:6162056c2706
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 26 13:27:13 2011 +0200
+summary:     pass to v 3.16-1
+
+changeset:   2363:bf3e6531f554
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 26 13:12:33 2011 +0200
+summary:     add missing file
+
+changeset:   2362:f38424524a39
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 26 13:10:05 2011 +0200
+summary:     add patch of Marco Atzeri <marco.atzeri@gmail.com> for cygwin
+
+changeset:   2361:392218d17485
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 21 14:47:43 2011 +0200
+summary:     doc is 3.16-1
+
+changeset:   2360:174539a666e8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 21 14:44:44 2011 +0200
+summary:     update doc S. Auliac (optim)
+
+changeset:   2359:e2bd8b52269f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 21 14:17:20 2011 +0200
+summary:     MAJ  INNOVATION
+
+changeset:   2358:539aa3bc4a1b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 21 14:13:58 2011 +0200
+summary:     add mpi_cmaes  lib and examples
+
+changeset:   2357:38c7f4d3ea7b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 20 19:53:57 2011 +0200
+summary:     add NLopt interface and cmaes interce (thank to S. Auliac)
+
+changeset:   2356:2edd97964eeb
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 14 14:35:20 2011 +0200
+summary:     add truc to remove 2 init
+
+changeset:   2355:408618fc2d14
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 13 23:09:39 2011 +0200
+summary:     correct auto load of mumps
+
+changeset:   2354:233a5a7f55c1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 13 23:07:31 2011 +0200
+summary:     correct pb of autoinitsfunct
+
+changeset:   2353:09b0580dda3a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 12 15:01:36 2011 +0200
+summary:     add tool to automatique load
+
+changeset:   2352:4bf39e36e2aa
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 07 22:10:24 2011 +0200
+summary:     coorect pb of alloaction
+
+changeset:   2351:383e5c0deedb
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 07 21:17:54 2011 +0200
+summary:     change testio.edp ttestio.edp
+
+changeset:   2350:70f9874ad0e4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Oct 07 17:42:22 2011 +0200
+summary:     coorect example
+
+changeset:   2349:b3c7905f858b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 06 17:30:42 2011 +0200
+summary:     coorect type in mmg3v4
+
+changeset:   2348:cade5380b91e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 06 17:24:50 2011 +0200
+summary:     correct CFALGS
+
+changeset:   2347:70b2d6267d97
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 06 16:55:39 2011 +0200
+summary:     correct typo error
+
+changeset:   2346:d48570028111
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 06 13:19:02 2011 +0200
+summary:     correct typo error and warning
+
+changeset:   2345:ccd64b80d57f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 06 12:52:17 2011 +0200
+summary:     try to bluid v 3.15
+
+changeset:   2344:d47b9dda863c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Oct 06 11:41:48 2011 +0200
+summary:     coorect pb in real[int,int] A, B; B=A' , etc..
+
+changeset:   2343:c3dee854061e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 05 18:29:37 2011 +0200
+summary:     come back to metis 4.0 for compatibilite reason
+
+changeset:   2342:55e2323587af
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 05 14:44:47 2011 +0200
+summary:     correct pastix  patch include  (remove .. in patch file)
+
+changeset:   2341:50b762415bd3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Oct 05 14:27:57 2011 +0200
+summary:     correct  A=A' for array real[int,int] or complex[int,int]
+
+changeset:   2340:70404bc0a76f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Sep 29 21:48:05 2011 +0200
+summary:     correct Paul Cazeaux  diff
+
+changeset:   2339:e9d61b12fae9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Sep 29 19:25:21 2011 +0200
+summary:     correct install MacOSX
+
+changeset:   2338:6a620fc389e1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Sep 29 13:55:16 2011 +0200
+summary:     add freefem++ laucher
+
+changeset:   2337:b6eca8cec8e8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 28 20:29:53 2011 +0200
+summary:     correc configure cmaek typo error
+
+changeset:   2336:f98beda3b2a9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Sep 28 20:26:15 2011 +0200
+summary:     try to redo Freefem++.app
+
+changeset:   2335:d03364e04423
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 27 18:23:44 2011 +0200
+summary:     correct metis makefile
+
+changeset:   2334:fe046f72fb0a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 27 18:07:55 2011 +0200
+summary:     Added tag 3.14-1 for changeset 3d5d2f056b09
+
+changeset:   2333:3d5d2f056b09
+tag:         3.14-1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 27 18:07:22 2011 +0200
+summary:     pass to versiuon 3.14-1
+
+changeset:   2332:ee6c761a1250
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 27 17:24:22 2011 +0200
+summary:     correct emtis interface to v. 5.0.1 (  version 4.0 diseaper).
+
+changeset:   2331:37137749da6e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Sep 27 15:24:10 2011 +0200
+summary:     correct metis download  (version 5.0.1)
+
+changeset:   2330:a8aac61cf98b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Sep 22 09:26:49 2011 +0200
+summary:     coorect FreeFem++-CoCoa line 26: [: : integer expression expected
+
+changeset:   2329:43229386f981
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Sep 02 09:05:52 2011 +0200
+summary:     correct Missing WHERE buils
+
+changeset:   2328:9dc607125215
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Sep 02 08:57:54 2011 +0200
+summary:     add missing file
+
+changeset:   2327:6e2de6f927d5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Sep 02 08:53:46 2011 +0200
+summary:     update innovation
+
+changeset:   2326:3ea8a0183313
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Sep 01 22:43:12 2011 +0200
+summary:     coorect interface with mmg3d verson 4
+
+changeset:   2325:878e5c556d1e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Sep 01 22:40:33 2011 +0200
+summary:     coorect inferface with mmg3d version 4
+
+changeset:   2324:6fdc0e5ff2d7
+parent:      2321:e34f8a052707
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 29 15:11:31 2011 +0200
+summary:     Added tag 3.14-0 for changeset e34f8a052707
+
+changeset:   2323:a2284c53ea2c
+branch:      alh-autoconf
+parent:      2005:815102f120b1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 29 11:27:42 2011 +0200
+summary:     close branch incompreansible, plus utiliser
+
+changeset:   2322:234fd78ad3c5
+branch:      graphical-user-interface-branch
+parent:      1970:44a4659127b5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 29 11:26:37 2011 +0200
+summary:     close branch incompreansible, plus utiliser
+
+changeset:   2321:e34f8a052707
+tag:         3.14-0
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Aug 29 10:21:12 2011 +0200
+summary:     correct bug in 3d P1 interpolation
+
+changeset:   2320:8901cfb2463f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 22:00:34 2011 +0200
+summary:     correct mpi exemple
+
+changeset:   2319:117a01a44f20
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 21:38:55 2011 +0200
+summary:     correct allGather check
+
+changeset:   2318:e100f2b57094
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 21:15:48 2011 +0200
+summary:     correct pb of allignement in sub array send/recv with MPI
+
+changeset:   2317:be0d2368a0f4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 21:08:19 2011 +0200
+summary:     correct missing return in WSEND
+
+changeset:   2316:8f502dfff22e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 15:05:09 2011 +0200
+summary:     recorrect tetger clan makeifle
+
+changeset:   2315:cff15f3375e6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 15:01:16 2011 +0200
+summary:     do autoreconf
+
+changeset:   2314:dfe298c27b76
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 14:57:05 2011 +0200
+summary:     restart of 3.14 version (big mistake yesterday)
+
+changeset:   2313:fda9929d138d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 13:53:31 2011 +0200
+summary:     remobe -march=native (bug on allpe)
+
+changeset:   2312:3d541b3d75d1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 11:46:26 2011 +0200
+summary:     correct optim compile flags
+
+changeset:   2311:9a74f723f0ac
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 11:33:30 2011 +0200
+summary:     redo second problem
+
+changeset:   2310:bf083bb860bc
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Aug 26 11:18:55 2011 +0200
+summary:     correct debug config flags
+
+changeset:   2309:11f8b8770f48
+parent:      2275:76e1708404c5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue May 31 14:03:37 2011 +0200
+summary:     coorect msssing lib in freeyam pluging
+
+changeset:   2308:f01c1ce34eb3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Aug 25 17:54:08 2011 +0200
+summary:     coorect defaul compile flags
+
+changeset:   2307:48f6f2dda6f9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Aug 25 16:04:43 2011 +0200
+summary:     coorect intrinc second to secnd2 in arpach (missing function).
+
+changeset:   2306:f1321b98b61b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Aug 25 11:20:20 2011 +0200
+summary:     correct clean taget in  Makefile
+
+changeset:   2305:4b313e53fd00
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Aug 25 09:31:50 2011 +0200
+summary:     Added tag 3.14 for changeset fbc48e130737
+
+changeset:   2304:fbc48e130737
+tag:         3.14
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Aug 25 09:30:45 2011 +0200
+summary:     and add -g in case of --enable-debug
+
+changeset:   2303:572e5649ecf2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Aug 03 15:55:49 2011 +0200
+summary:     correct of lion os.
+
+changeset:   2302:0183fdbeab37
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jul 06 11:36:12 2011 +0200
+summary:     see innovation
+
+changeset:   2301:5aeeb62cc314
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jul 04 21:37:38 2011 +0200
+summary:     correct makefile
+
+changeset:   2300:5c0487b0b207
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 23:12:35 2011 +0200
+summary:     correct typo
+
+changeset:   2299:b1bfdb1c8d4c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 16:48:53 2011 +0200
+summary:     correct INNOVATION
+
+changeset:   2298:e8247822dc8f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 16:21:48 2011 +0200
+summary:     correct hips solver typo arror in destructor
+
+changeset:   2297:8d0d89f8408a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 11:17:09 2011 +0200
+summary:     pass to version 3.13-3
+
+changeset:   2296:4088be2bb5b0
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 11:12:40 2011 +0200
+summary:     add WGET in download/mumps/Makefile-mumps-4.10.0.inc
+
+changeset:   2295:344cbb3584d8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 11:05:02 2011 +0200
+summary:     add missing file
+
+changeset:   2294:21c29dd8cb63
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 11:00:03 2011 +0200
+summary:     coorect innovation file
+
+changeset:   2293:2a0706ac5c1b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 10:57:28 2011 +0200
+summary:     coorect hips solver
+
+changeset:   2292:673e2af79b3b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 30 09:32:00 2011 +0200
+summary:     correct HIPS solver
+
+changeset:   2291:d839c2fd8874
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jun 29 09:30:24 2011 +0200
+summary:     upgrade INNOVATION file
+
+changeset:   2290:2809d03f67ce
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Jun 29 09:21:52 2011 +0200
+summary:     add interface of New MUMPS version 4.10.0
+
+changeset:   2289:3ed2fe0ff5bf
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jun 28 09:18:23 2011 +0200
+summary:     pass to version 3.13-2
+
+changeset:   2288:70da8688792b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 27 23:29:05 2011 +0200
+summary:     correct gibbs may be algo
+
+changeset:   2287:97bf00ff569f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 27 22:54:04 2011 +0200
+summary:     fing a bug un gibbs algo dur dur
+
+changeset:   2286:447235cc1f35
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 27 21:17:36 2011 +0200
+summary:     correct interpolation problem with periodic BC.
+
+changeset:   2285:fab78e8b1f74
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 27 19:20:06 2011 +0200
+summary:     correct typo
+
+changeset:   2284:0f2ff71f4833
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 27 19:14:22 2011 +0200
+summary:     add mem usage in UMFPACK solver output
+
+changeset:   2283:540832a7ce66
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 27 10:31:44 2011 +0200
+summary:     add exemples examples++-tutorial/Laplace-RHS-Dirac.edp
+
+changeset:   2282:49c1c93356a0
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 09 17:48:18 2011 +0200
+summary:     correct ambiguity in square func.
+
+changeset:   2281:a92f428fff7f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jun 09 12:26:16 2011 +0200
+summary:     correct choix of mpimkl
+
+changeset:   2280:5aa51837cdb7
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jun 07 20:32:50 2011 +0200
+summary:     correct install yams
+
+changeset:   2279:214e7ba93af3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 06 21:51:56 2011 +0200
+summary:     correct freeyams
+
+changeset:   2278:41c904b8660c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 06 20:42:03 2011 +0200
+summary:     correct spuriou print
+
+changeset:   2277:fcaee41a91cb
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Jun 06 19:07:24 2011 +0200
+summary:     correct freeyams.cpp LD process.
+
+changeset:   2276:1a6949ae0965
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon May 30 15:16:17 2011 +0200
+summary:     add new example
+
+changeset:   2275:76e1708404c5
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri May 27 14:40:04 2011 +0200
+summary:     correct typo in int blas type
+
+changeset:   2274:beae57ef5319
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri May 27 14:36:03 2011 +0200
+summary:     correct int for blas variable ..
+
+changeset:   2273:3f2e931fffc3
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 26 15:42:47 2011 +0200
+summary:     correct typo in doc.
+
+changeset:   2272:6ba83092a50b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 26 15:15:01 2011 +0200
+summary:     go v 3.13
+
+changeset:   2271:27fb12aa07ae
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 26 15:13:55 2011 +0200
+summary:     autoreconf
+
+changeset:   2270:93499395509f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 26 15:11:13 2011 +0200
+summary:     update doc
+
+changeset:   2269:55460f8c273e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed May 25 21:07:04 2011 +0200
+summary:     add final comment on Element_miaxte.cpp file
+
+changeset:   2268:ab20518693c9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue May 24 18:21:42 2011 +0200
+summary:     add RT1, RT1Ortho, DBM1, DBM1Ortho Finite element in Element_Mixte.cpp dynamics libs
+
+changeset:   2267:b1efdda0703b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue May 24 17:16:27 2011 +0200
+summary:     add BDM1 and BDM1Ortho Finite element
+
+changeset:   2266:b73e6b532325
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri May 20 16:47:08 2011 +0200
+summary:     in progress TD-NND 1 element
+
+changeset:   2265:696e7299da62
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri May 20 09:46:32 2011 +0200
+summary:     end of validation for RT1
+
+changeset:   2264:0512b6bb56db
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri May 20 09:09:16 2011 +0200
+summary:     correct RT1 and add RT1Ortho F.E.
+
+changeset:   2263:b5d879cb17c2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 19 15:12:24 2011 +0200
+summary:     correct Elm_TD-NNS.cpp for RT1 F.E.
+
+changeset:   2262:13906a499616
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon May 09 08:53:30 2011 +0200
+summary:     correct lapack
+
+changeset:   2261:3d579277e4ce
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon May 09 08:02:42 2011 +0200
+summary:     coorect lapack.cpp add full matrice  multiplication
+
+changeset:   2260:39fb84c4949b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri May 06 14:56:04 2011 +0200
+summary:     coorct lapack and New FE element
+
+changeset:   2259:a02b7f1a9c02
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu May 05 15:47:08 2011 +0200
+summary:     add New finite in construction
+
+changeset:   2258:bcfcf356bb8c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 28 18:30:09 2011 +0200
+summary:     add splitedges tools  of Mghazli Zoubida <mghazli_zoubida@yahoo.com>
+
+changeset:   2257:294a37023d46
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Apr 18 11:57:40 2011 +0200
+summary:     coorect load load under win32
+
+changeset:   2256:4d0308f12e72
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Apr 18 09:57:50 2011 +0200
+summary:     correct load link pk of " and ' in var
+
+changeset:   2255:da55768a880d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 15 22:31:24 2011 +0200
+summary:     correct configure.Ac
+
+changeset:   2254:83972e23732a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 15 21:04:34 2011 +0200
+summary:     correct configure.ac for mpi under win32
+
+changeset:   2253:2aca6f1b5497
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 15 20:35:45 2011 +0200
+summary:     MPI for win32
+
+changeset:   2252:e145e24f6aa0
+parent:      2251:3d2ff16fa1e5
+parent:      2250:88c8347babf4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 15 18:28:28 2011 +0200
+summary:     coorect Makefile
+
+changeset:   2251:3d2ff16fa1e5
+parent:      2247:246a6ffbd1f1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 15 18:13:05 2011 +0200
+summary:     coorect mpi configure for win32
+
+changeset:   2250:88c8347babf4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 13 14:14:51 2011 +0200
+summary:     updaet Heat3d.idp
+
+changeset:   2249:3c31e2572e2f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 13 14:10:00 2011 +0200
+summary:     correct typ in Heat3d.idp filename
+
+changeset:   2248:6bcbc93c5bca
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 13 14:07:57 2011 +0200
+summary:     change Heat3D.idp
+
+changeset:   2247:246a6ffbd1f1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Apr 12 22:18:31 2011 +0200
+summary:     coorect Problem in WHERE quote
+
+changeset:   2246:bfcbef551c2e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 08 21:47:10 2011 +0200
+summary:     correct Chaleur
+
+changeset:   2245:32829734574c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 08 17:37:22 2011 +0200
+summary:     correct INNOVATION file
+
+changeset:   2244:726002c6f090
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Fri Apr 08 17:33:38 2011 +0200
+summary:     remove suprious dump in superlu dist.
+
+changeset:   2243:48f3b1e4a098
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Apr 07 12:05:18 2011 +0200
+summary:     correct change for // computing
+
+changeset:   2242:a48b9b504aba
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 06 14:50:49 2011 +0200
+summary:     correct configure to build file
+
+changeset:   2241:18630017f8c9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Apr 06 14:49:07 2011 +0200
+summary:     Added tag 3.12-1 for changeset cd142ee7324d
+
+changeset:   2240:cd142ee7324d
+tag:         3.12-1
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Apr 05 10:21:23 2011 +0200
+summary:     correct 3d period BC.
+
+changeset:   2239:a43c08688b7e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 30 13:14:22 2011 +0200
+summary:     procon gmres remove tgv ????
+
+changeset:   2238:fff6c5feb7b6
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 29 21:54:33 2011 +0200
+summary:     gmres precon same
+
+changeset:   2237:e04f738a5db2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 29 21:39:31 2011 +0200
+summary:     change precon gmres
+
+changeset:   2236:c3258922889e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 29 21:13:11 2011 +0200
+summary:     correct precon gmres
+
+changeset:   2235:6e138ea49c63
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Mar 24 16:56:02 2011 +0100
+summary:     correct  PB compiel for hypre with blas.
+
+changeset:   2234:bfe9184061ce
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 23 17:30:48 2011 +0100
+summary:     cooret typo
+
+changeset:   2233:ed0bb81df53d
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 23 17:24:34 2011 +0100
+summary:     add missing MPI_LIB
+
+changeset:   2232:d23847ce53f2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 23 15:14:33 2011 +0100
+summary:     add cast of TypeSparseSlve on int for stokes type of solver .
+
+changeset:   2231:f31959eb8d1f
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 22 00:59:18 2011 +0100
+summary:     correcd DDM examples; tyop error
+
+changeset:   2230:2c44e0a52112
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Mar 21 21:22:49 2011 +0100
+summary:     coorect missing lin in mkl  whith _rf.so ..
+
+changeset:   2229:6fc339f2ceff
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 16 14:55:23 2011 +0100
+summary:     coorect ref test in tutorial
+
+changeset:   2228:7c7128939c45
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 16 14:21:49 2011 +0100
+summary:     corect configure for mpi
+
+changeset:   2227:977b3193fe08
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 16 12:59:13 2011 +0100
+summary:     correct bug in intersection of metric in adaptmesh in case of given metrix
+
+changeset:   2226:49d4be4bdab9
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 15 14:55:54 2011 +0100
+summary:     coorect pb on configure of mpi (hard jos)
+
+changeset:   2225:b9875e93b847
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 15 14:40:24 2011 +0100
+summary:     add test for m4 and bison command in configure
+
+changeset:   2224:7e9e01c6e550
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 15 14:23:06 2011 +0100
+summary:     update mshmet to version 3.0
+
+changeset:   2223:417a4450e6f8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 22:22:41 2011 +0100
+summary:     correct mpi correct of sgi
+
+changeset:   2222:85735d18b198
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 21:51:21 2011 +0100
+summary:     compile with sgi MPI
+
+changeset:   2221:7d3bf33d6031
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 21:35:02 2011 +0100
+summary:     add check MPI_DOUBLE_COMPLEX in configure
+
+changeset:   2220:1d2cb842acb2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 11:56:22 2011 +0100
+summary:     cooret mpi / cpp DOUBLE_COMPLEX
+
+changeset:   2219:d0223be2ab7b
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 10:06:50 2011 +0100
+summary:     correct missing cflags in generic blas compilation
+
+changeset:   2218:ed71122c4649
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 08:54:14 2011 +0100
+summary:     corrrect loop in makefile when cleanning
+
+changeset:   2217:f3f99d1f9f92
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 08:39:35 2011 +0100
+summary:     correct loop in clean target makefiles
+
+changeset:   2216:8b03d97bb490
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Mar 09 08:36:34 2011 +0100
+summary:     correct clean in freeyam makefile
+
+changeset:   2215:5d1babde36d7
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Mar 08 17:57:47 2011 +0100
+summary:     correct mpi compile flags for sgi computer.
+
+changeset:   2214:b04fdc8dbf99
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 09 21:03:19 2011 +0100
+summary:     correct missing in install  examples++-load/fig.pgm	examples++-load/lg.pgm
+
+changeset:   2213:0a53c3f15e2e
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 09 19:27:59 2011 +0100
+summary:     add missing file in Makefile dist tag.
+
+changeset:   2212:bdae2c1318cc
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 09 19:23:36 2011 +0100
+summary:     coorect MPI_DOUBLE_COMPLEX problem in mpi ...
+
+changeset:   2211:a16c149daeb4
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Feb 09 18:11:31 2011 +0100
+summary:     correct mpiReduce complex case ..
+
+changeset:   2210:94365074e706
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Mon Feb 07 20:58:18 2011 +0100
+summary:     correct some mistake.
+
+changeset:   2209:a076fd1237b7
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jan 25 22:11:03 2011 +0100
+summary:     reomve spuriou dump
+
+changeset:   2208:f3ce89f615f8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jan 25 21:48:48 2011 +0100
+summary:     add mpiAllReduce(umax,dmaxg,comm,mpiMAX);  where for real umax,dmaxg;
+
+changeset:   2207:3a8495a5387a
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Tue Jan 25 11:40:33 2011 +0100
+summary:     add mpiAllReduce on real , long , complex data type
+
+changeset:   2206:08fcb4d98a99
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Jan 23 14:34:11 2011 +0100
+summary:     Added tag 3.12-win32 for changeset bea855340647
+
+changeset:   2205:bea855340647
+tag:         3.12-win32
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sun Jan 23 14:33:52 2011 +0100
+summary:     update  INNOVATION
+
+changeset:   2204:f6a959c7600c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Sat Jan 22 21:44:24 2011 +0100
+summary:     correct configure for win32
+
+changeset:   2203:e84ba8234183
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 20 13:59:58 2011 +0100
+summary:     correct typo
+
+changeset:   2202:09ee2c12edb8
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 20 13:57:40 2011 +0100
+summary:     correct typo
+
+changeset:   2201:fb724f3e09a2
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 20 13:55:11 2011 +0100
+summary:     correct install idp file in mpi examples
+
+changeset:   2200:dd0ca033a004
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 20 13:34:00 2011 +0100
+summary:     add tag for version 3.12
+
+changeset:   2199:672e0042f083
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 20 13:29:52 2011 +0100
+summary:     Added tag 3.12 for changeset 270198a4a293
+
+changeset:   2198:270198a4a293
+tag:         3.12
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Thu Jan 20 13:23:35 2011 +0100
+summary:     correct HISTORY
+
+changeset:   2197:e983b6801336
 user:        Frederic Hecht <frederic.hecht@upmc.fr>
 date:        Thu Jan 20 08:32:41 2011 +0100
 summary:     coorect type in top Makefile
@@ -275,22 +2080,22 @@ date:        Thu Dec 02 23:17:52 2010 +0100
 summary:     see INNOVATION correct MPIGMREs[23]d.edp example
 
 changeset:   2142:c01832c2d91e
-parent:      2140:1ca02db51865
-parent:      2141:bae26bfb0b8c
+parent:      2141:1ca02db51865
+parent:      2140:bae26bfb0b8c
 user:        Frederic Hecht <frederic.hecht@upmc.fr>
 date:        Wed Dec 01 16:24:20 2010 +0100
 summary:     merge ???
 
-changeset:   2141:bae26bfb0b8c
+changeset:   2141:1ca02db51865
 parent:      2139:d87b27635075
-user:        Frederic Hecht <frederic.hecht@upmc.fr>
-date:        Wed Dec 01 10:44:59 2010 +0100
-summary:     correct typo
-
-changeset:   2140:1ca02db51865
 user:        Frederic Hecht <frederic.hecht@upmc.fr>
 date:        Wed Dec 01 15:06:40 2010 +0100
 summary:     remove file
+
+changeset:   2140:bae26bfb0b8c
+user:        Frederic Hecht <frederic.hecht@upmc.fr>
+date:        Wed Dec 01 10:44:59 2010 +0100
+summary:     correct typo
 
 changeset:   2139:d87b27635075
 user:        Frederic Hecht <frederic.hecht@upmc.fr>

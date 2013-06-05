@@ -6,18 +6,20 @@ verbosity=2;
 load "msh3"
 load "hips_FreeFem"
 
-int[int] iparm(14);
+int[int] iparm(16);
 real[int] dparm(6);
-for(int iii=0;iii<14;iii++)iparm[iii]=-1;
-for(int iii=0;iii<6;iii++) dparm[iii]=-1;
-iparm[0]=0; // use iterative solver
-iparm[1]=1; // PCG as Krylov method
-iparm[4]=0; // Matrix are symmetric
+iparm=-1;
+dparm=-1;
+iparm[0]=1; // use iterative solver   0 => trap why ???? FH ..... 
+iparm[1]=0; // PCG as Krylov method
+iparm[4]=1; // Matrix are symmetric
 iparm[5]=1; // Pattern are also symmetric
 iparm[9]=0; // Scale matrix
 dparm[0]=1e-13; // Tolerance to convergence
 dparm[1]=5e-4; // Threshold in ILUT
 dparm[2]=5e-4; // Threshold for Schur preconditionner
+dparm[4]=1e-2; // drop tol
+dparm[5]=1e-2; // drop tol 
 
 int nn=10;
 mesh Th2=square(nn,nn,region=0);
@@ -67,7 +69,7 @@ Lapl3d;
 
 matrix A = Lapl3d(Vh,Vh,tgv=-1);//  to remove line this BC. 
 cout << A.n  << " " << A.m << " " << A.nbcoef << endl;
-
+verbosity=4; 
 set(A,solver=sparsesolver,dparams=dparm, lparams=iparm);
 cout <<A.n  <<" " << A.m << " " << A.nbcoef << endl;
 

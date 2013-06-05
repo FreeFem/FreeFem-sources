@@ -40,7 +40,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo blacs LD -L@DIR@/lib/blacs -lblacsCinit_MPI-FREEFEM-0	-lblacsF77init_MPI-FREEFEM-0	-lblacs_MPI-FREEFEM-0  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
+	echo blacs LD -L@DIR@/lib/blacs -lblacs_MPI-FREEFEM-0 	-lblacsF77init_MPI-FREEFEM-0	-lblacsCinit_MPI-FREEFEM-0  -lblacs_MPI-FREEFEM-0  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
 	fi
 
 install: $(SRCDIR)/FAIT
@@ -54,7 +54,7 @@ $(SRCDIR): $(PACKAGE1) $(PACKAGE2) $(PACKAGE3)
 	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
 	cp Bmake.inc $(SRCDIR)
 	mv $(SRCDIR)/SRC/MPI/Makefile $(SRCDIR)/SRC/MPI/Makefile.tmp
-	sed -e 's;\.C;\.oo;g'\
+	sed -e 's;\.C;\.oo;g'  -e 's@: $$(MPIINCdir)/mpif.h@:@' \
 	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
 	> $(SRCDIR)/SRC/MPI/Makefile
 	touch $(SRCDIR)
@@ -73,10 +73,11 @@ $(PACKAGE3):
 
 clean-local:
 	-cd $(SRCDIR)/SRC/MPI &&  $(MAKE) clean -C $(SRCDIR)/SRC/MPI
-
-clean: clean-local
 	-rm Bmake.inc FAIRE
 	-rm $(SRCDIR)/$(INSTALL)/lib/blacs/*.a
 	-rm -rf $(SRCDIR)
+
+clean: clean-local
+
 
 .PHONY:$(SRCDIR)/$(INSTALL)  compile install

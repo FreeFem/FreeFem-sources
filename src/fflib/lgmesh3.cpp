@@ -203,8 +203,8 @@ bool BuildPeriodic(
 		    double y0 = Pmin.y;
 		    if (verbosity > 2)
 			cout << "  --Update: periodic " << Pmin << " " << Pmax << " " << " h=" << hmn 
-			<< " ,  coef = "<< coef << endl;
-		    ffassert(coef>1e-10 && (Pmax-Pmin).norme2()*coef < 1.e7 );
+			<< " ,  coef = "<< coef << " / " << (Pmax-Pmin).norme2()*coef*coef << endl;
+		    ffassert(coef>1e-10 && (Pmax-Pmin).norme2()*coef*coef < 1.e14 ); // correct  FH mars 2013 
 		    
 		    //  map construction ----
 		    for (int i1=0;i1<n1;i1++)
@@ -1018,13 +1018,10 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   KNM<K>   Vp(npPh,dim);
   KN<K>  Vdf(Vh.MaxNbDFPerElement);
   
-  
   if (Vh.isFEMesh() )
     {
-      RdHat KHat[Element::nv];
-      for (int i=1 ; i< Element::nv;++i)
-	KHat[i+1][i] = 1;
-      
+      // crrect bug 29/08/2011 (thanks to rychet@fzu.cz)
+      // remove wrong bulid of KHat (memory out of bound)
       ffassert(Vh.NbOfDF == Th.nv && dim == 1 );
       for (int iv=0;iv<Th.nv;iv++)
 	{
@@ -1036,7 +1033,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
           for(int k=0;k<Element::nv;++k)
             if  ( &Kv[k] == &v) il=k;
           assert(il>=0);
-          mps->set(Th,v,KHat[il],Kv,v.lab);
+          mps->set(Th,v,RdHat::KHat[il],Kv,v.lab);
 	  if (copt) {
 	    if (optiexpK) (*optiexpK)(s); 
 	    yy[iv] =  *(copt[0]);
@@ -1045,7 +1042,6 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 	    yy[iv] = GetAny<K>( ff(s) );
 	  sptr->clean(); // modif FH mars 2006  clean Ptr
        }
-      
     }
   else
     {
@@ -1229,13 +1225,15 @@ AnyType pf3r2R(Stack s,const AnyType &a)
   RdHat PHat;
   bool outside=false;
   bool qnu=true;
-  if ( mp.Th3 == &Th && mp.T) 
+  if ( mp.Th3 && mp.Th3->elements == Th.elements && mp.T)
    {
      qnu=false;
      K=mp.T3;
      PHat=mp.PHat;
    }
-  else if ( mp.other.Th3 == & Th && mp.other.P.x == mp.P.x && mp.other.P.y == mp.P.y && mp.other.P.z == mp.P.z   )
+  else if ( mp.other.Th3 
+            && (mp.other.Th3->elements ==  Th.elements)
+            && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
     {
       K=mp.other.T3;
       PHat=mp.other.PHat;
@@ -1254,9 +1252,11 @@ AnyType pf3r2R(Stack s,const AnyType &a)
 	cout << "  ---  " << qnu << " P=  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K(PHat) == P =  " <<  (*K)(PHat) << " PHat = " << PHat << endl;
     }
   const FElement KK(Vh[Th(K)]);
-  if (outside && KK.tfe->discontinue) 
-    return   SetAny<R>(0.0); 
-#ifndef NDEBUG 
+  if (outside && KK.tfe->discontinue)
+  {   if(verbosity>=10000) cout << " outside f() = 0. " << KK.tfe->discontinue << "\n";
+    return   SetAny<R>(0.0);
+  }
+#ifndef NDEBUG
   if (!outside) 
     {
       if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
@@ -1629,6 +1629,6 @@ init_mesh3_array();
  
 }
 //#include "InitFunct.hpp"
-//static addingInitFunct TheaddingInitFunct(-10,init_lgmesh);
+//static addingInitFunct TheaddingInitFunct(-10,init_lgmesh3);
 template E_set_fev3<double,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;
 template E_set_fev3<Complex,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;

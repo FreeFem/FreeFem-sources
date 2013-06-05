@@ -13,7 +13,9 @@ all-local: tetgen
 DIRPKG=../pkg
 SRCDIR=tetgen$(tetgen_VERSION)
 PACKAGE=$(DIRPKG)/tetgen$(tetgen_VERSION).tar.gz
-SERVER=http://tetgen.berlios.de/files
+SERVER=http://wias-berlin.de/software/tetgen/files
+#http://tetgen.org/files
+#http://tetgen.berlios.de/files
 INSTALL=../..
 tetgen_VERSION=1.4.3
 
@@ -24,21 +26,22 @@ FAIRE:install $(SRCDIR)/FAIT cxxflags
 	touch FAIRE
 
 
-$(SRCDIR)/FAIT: $(SRCDIR) cxxflags 
+$(SRCDIR)/FAIT: $(SRCDIR)/tags  cxxflags 
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch $(SRCDIR)/FAIT
 WHERE: $(SRCDIR)/FAIT
-	echo tetgen LD -L@DIR@/lib -ltet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
-	echo tetgen  INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
+	echo tetgen LD -L@DIR@/lib -ltet  >../lib/WHERE.tetgen
+	echo tetgen  INCLUDE -I@DIR@/include >> ../lib/WHERE.tetgen
 install:$(SRCDIR)/FAIT WHERE
 	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
-	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
+	cp $(SRCDIR)/tetgen.h ../include 
 
 
 
-$(SRCDIR): $(PACKAGE)
+$(SRCDIR)/tags: $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	touch $(SRCDIR)/tags
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
@@ -48,11 +51,13 @@ $(PACKAGE):
 
 clean-local:
 	-rm -rf tetgen1.4.?  FAIT FAIRE 
-clean:
-	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
-	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
-	-rm FAIT FAIRE
-	-rm -rf tetgen*
+	-rm ../lib/libtet.a ../lib/WHERE.tetgen 
+	-rm ../include/tetgen.h 
+	-rm FAIT
+	-rm -rf tetgen1.4.?
+
+clean: clean-local
+
 cxxflags: ../Makefile  Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags

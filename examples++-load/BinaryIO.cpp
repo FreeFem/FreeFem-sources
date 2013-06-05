@@ -76,7 +76,7 @@ outfile.close();
 class Init { public:
   Init();
 };	
-Init init;
+LOADINIT(Init);
 Init::Init(){	
 		
   Global.Add("LoadVec","(",new OneOperator2_<double,  KN<double>*, string* >(LoadVec)); 

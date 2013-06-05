@@ -1714,5 +1714,6 @@ void init_lgmesh() {
   init_glumesh2D();
    
 }
-#include "InitFunct.hpp"
-static addingInitFunct TheaddingInitFunct(-10,init_lgmesh);
+// not work pb this ld (bug ????) 
+//#include "InitFunct.hpp"
+// addingInitFunct TheaddingInitFunctlgmesh(-11,init_lgmesh);

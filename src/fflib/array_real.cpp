@@ -73,7 +73,9 @@ void initArrayOperatordouble()
 												  
 						  );
     Global.Add("toRarray","(",new OneOperator_2KN_<double>);
-    
+    Add<KN<K> *>("imin",".",new OneOperator1<long,KN<K> *>(get_imin));
+    Add<KN<K> *>("imax",".",new OneOperator1<long,KN<K> *>(get_imax));
+
     
 //     ArrayDCL<long>();
 }

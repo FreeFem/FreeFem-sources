@@ -99,7 +99,7 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
   this->iterNum = 0; this->iterNum++;				// iteration counter
   alpha = 1.;					// updating step
 
-  new_solution = update(current_solution,1,alpha,p);	// updating
+  new_solution = this->update(current_solution,1,alpha,p);	// updating
   new_m = this->nrj->getVal(new_solution);     	// Evaluation at the 
 							// new solution
   this->iterNum++;
@@ -108,7 +108,7 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
   while (new_m < old_m + (1. - lambda)*alpha*slope && this->iterNum< this->iterMax)
 	{
 	  alpha *= 3;
-	  new_solution = update(current_solution,1, alpha, p);
+	  new_solution = this->update(current_solution,1, alpha, p);
 	  new_m = this->nrj->getVal(new_solution);
 	  this->iterNum++;
 	}
@@ -160,7 +160,7 @@ typename CubicLineSearch<LS>::Param CubicLineSearch<LS>::search(const Param& cur
 	  else
 		alpha = alpha_tmp;
 	  
-	  new_solution = update(current_solution,1, alpha, p);
+	  new_solution = this->update(current_solution,1, alpha, p);
 	  new_m = this->nrj->getVal(new_solution);
 	  this->iterNum++;
 	}

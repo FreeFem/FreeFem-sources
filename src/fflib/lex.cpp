@@ -210,7 +210,7 @@ int mylex::basescan()
       if (close() )  goto debut; 
       buf[0]=0;
       return ENDOFFILE;}
-  else if (isdigit(c) || c=='.' && isdigit(nc)) {
+  else if (isdigit(c) || (c=='.' && isdigit(nc))) {
     //  a number
     int i=1;
     buf[0]=c;
@@ -265,7 +265,10 @@ int mylex::basescan()
 	      ccc= source().peek(); 
               switch (cc) {
               case 'n': buf[i]='\n';break;
+              case 'r': buf[i]='\r';break;
               case 'f': buf[i]='\f';break;
+              case 't': buf[i]='\t';break;
+              case 'a': buf[i]='\a';break;
               case 10:
               case 13:
 		cc='\n';
@@ -356,8 +359,19 @@ int mylex::basescan()
         cerr << "'" << (char) c << (char) nc << "' <=> " << (int) c << " is " ;
         erreur (" Unexpected character");
       }
-      
-      if (ret!=c) source().get() ;
+      if( (ret == DOTSTAR) || (ret==DOTSLASH))
+      {
+          source().get();
+          nc = source().peek();
+          if(nc == '=' )
+          {
+              buf[2]='=';// ad FH 19 april 2012 (bug in macro ) 
+              buf[3]=0; 
+              source().get();
+              ret = (ret == DOTSTAR) ?DOTMULEQ : DOTDIVEQ;
+          }
+      }
+      else if (ret!=c) source().get();
       else buf[1] = 0;
       strcpy(plglval->oper,buf);
       if(lexdebug)  cout << "Special '" <<  plglval->oper << "' " << ret << " ";
@@ -691,9 +705,10 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 
     lgerror("lex: Error input openning file ");};
 }
-void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name)//,int nbparam,int bstackparam) 
+void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int macroargs)//,int nbparam,int bstackparam)
 {
   filename=name;
+  macroarg=macroargs;
   l=0;
   nf=f= new istringstream(s.c_str()); 
   
@@ -705,7 +720,7 @@ void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name)//,int 
 void mylex::xxxx::close() 
 { 
   if( nf)  delete nf;
-  if (filename) delete filename;
+  if (filename && (macroarg==0) ) delete filename;
   
 }
 void mylex::input(const char *  filename) 

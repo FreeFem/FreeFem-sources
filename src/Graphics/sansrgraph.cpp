@@ -146,6 +146,7 @@ void myexit(int err) {
 
 const char * edpfilenamearg=0;	 	
 bool  waitatend=false;
+bool  consoleatend=false;
 
 #ifdef FREEFEM
 #include <fstream.h>
@@ -177,7 +178,7 @@ void doatexitff()
 {
 #ifdef WIN32
   bool err=true;
-  if(edpfilenamearg)
+  if(edpfilenamearg && consoleatend)
 	{
 	cout << " try getConsole " << edpfilenamearg << endl; 
 	string fn = edpfilenamearg;
@@ -367,8 +368,8 @@ void initgraphique()
   fcolor=1;  /* des couleurs */
   SetColorTable(8);
   INITGRAPH = 1;
-  width = 1500;
-  height =  1060; // aspect ratio  \sqrt(2)
+  width = 10000;// change FH mai 2012 to have more precis graphic for F.  Ortegon 
+  height =  7071; // aspect ratio  \sqrt(2)
 }
 
 void closegraphique()
@@ -500,7 +501,7 @@ void x11draw3(int * ptype)
 
 void penthickness(int pepais)
 {
-  if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais);
+  if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais*2);
 }
 
 void x11linsrn(int * ,int * ,int * ,int * );
@@ -614,12 +615,12 @@ void openPS(const char *filename )
     fprintf(psfile," /rec {newpath 4 copy 8 1 roll moveto 3 -1 roll lineto 4 2 roll exch lineto lineto closepath} def\n");
     fprintf(psfile," %f %f  scale \n",s,s);
     fprintf(psfile," 0 %d 0 %d rec clip\n",int(width),int(height));
-    fprintf(psfile," /Helvetica findfont 24 scalefont setfont\n");
+    fprintf(psfile," /Helvetica findfont %d scalefont setfont\n",int(9/s));
     fprintf(psfile," /S {moveto show} def\n");
     fprintf(psfile," /bF  { mark} def \n");
     fprintf(psfile," /eF {newpath moveto counttomark 2 idiv {lineto} repeat closepath fill cleartomark} def\n");
     fprintf(psfile," /P { /yy exch def /xx exch def   xx xx 1 add yy yy 1 add  rec  fill } def\n");
-    fprintf(psfile," 0.5 setlinewidth\n");
+    fprintf(psfile," 2 setlinewidth\n");
   }
   else 
     cerr << " Err openning postscript file " << fps << endl;
@@ -637,7 +638,9 @@ void closePS(void)
 // bof bof --- 
  float  GetHeigthFont()
 { 
-  return 15./echy;
+     double  widthA4PS=596;
+    float s=widthA4PS/width; 
+  return 5.5/s/echy;
 }
   void Commentaire(const char * c)  
   {

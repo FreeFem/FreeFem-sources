@@ -1,37 +1,16 @@
-% OP -> FH Avril 27, 2010
-
-% CHEZ MOI LES FIGS S'AFFICHENT EN TOUT PETIT: VERIFIE QUE C'eST OK CHEZ TOI
-% CHANGER LA FIGURE 5.12
-% RAJOUTER LES REF D'ARTICLE DANS MPI (les ? ça fait pas chic)
-% REGROUPER LES § sur les cond periodique dans un seul § ou chapitre séparé du reste
-% IL Y A DES SECTIONS QUI MELANGENT des trucs simples et nécessaires avec des trucs pointus pour spécialiste: SEPARER
-% C'est le cas de MPI qui devrait etre séparé en un truc simple et une annexe technique, 
-% C'est le cas aussi des solveurs
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %!TEX encoding =  IsoLatin9
 %  pour imprimer 2 pages par pages en A5
 % pstops  ``0L@.7(21cm,0)+0L@.7(21cm,14.85cm)''
-%  ----
-% 2.24-2  correction convect function definition FH . 27 mars 2008
-% 2.24-2-1 correction bobgus@rcn.com  1 april 2008 (doc-patch1.patch)
-% 2.24-2-2 correction bobgus@rcn.com  17 april 2008 (doc-patch2.patch)
-% ---
 \documentclass[a4paper,twoside,12pt]{book}
 \usepackage{pdfsync}
 
 \usepackage{styles}
-
-%%%ALH- ff, fi, fl ligatures are avoided when not using txfonts with htlatex
-%%%\usepackage{txfonts}
-
 \usepackage{multirow}
 \usepackage{bm}
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.13}
+\def\VERSION{3.22}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -76,12 +55,9 @@
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
  \\~  \\
-% \Blue{{ \sc {\Huge F. Hecht,  O. Pironneau}
-% \\ ~ \\
-%{\Huge A. Le Hyaric, K. Ohtsuka } }}
 \includegraphics[width=6cm]{ffauteur}
 \vglue 1cm
-\includegraphics[width=15cm]{csSnap}
+\includegraphics[width=15cm]{chesapeake-2}
 \\ \vglue0.5cm
 Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \vglue-2cm
@@ -90,11 +66,11 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \thispagestyle{empty}
 
 \begin{center}
- {\Blue{ \TitreFont FreeFem++}} \\ \vglue 1cm  ~ \\
+ {\Blue{ \TitreFont FreeFem++}} \\ \vglue 0.0cm  ~ \\
    Third Edition, Version \VERSION
  \\ \vglue 0.7cm
  {\Large \url{http://www.freefem.org/ff++}} \\
-\vglue 1cm
+\vglue 0.5cm
 
  \
 {\Large Fr\'{e}d\'{e}ric Hecht${}^{1,4}$ }
@@ -108,76 +84,27 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 
 In collaboration with:
 \begin{itemize}
-\item {\Large Olivier Pironneau}, \url{mailto:olivier.pironneau@upmc.fr},~\url{http://www.ann.jussieu.fr/pironneau}
+\item {\large Sylvian Auliac}, \url{mailto:auliac@ann.jussieu.fr},~\url{http://www.ann.jussieu.fr/auliac}
+{is PHD student , he do all the new optimization interface with nlopt, ipopt, cmaes, ...}
+
+\item {\large Olivier Pironneau}, \url{mailto:olivier.pironneau@upmc.fr},~\url{http://www.ann.jussieu.fr/pironneau}
 {Olivier Pironneau is a professor of numerical analysis at the university of Paris VI and at LJLL.  His scientific contributions are in numerical methods for fluids.  He is a member of the Institut Universitaire de France and of the French  Academy of Sciences}
 
-\item {\Large Jacques Morice}, \url{mailto:morice@ann.jussieu.fr}.
+\item {\large Jacques Morice}, \url{mailto:morice@ann.jussieu.fr}.
 Jacaues Morice is a Post-Doct at LJLL. His doing is Thesis in University of Bordeaux I on fast multipole method (FMM).
 In this version, he do all three dimensions mesh generation and coupling with medit software.
 
-\item {\Large Antoine Le Hyaric}, \url{mailto:lehyaric@ann.jussieu.fr},~\url{http://www.ann.jussieu.fr/~lehyaric/}
+\item {\large Antoine Le Hyaric}, \url{mailto:lehyaric@ann.jussieu.fr},~\url{http://www.ann.jussieu.fr/~lehyaric/}
 {Antoine Le Hyaric}{ is a research engineer  from the "Centre National de la
 Recherche Scientifique" (CNRS) at LJLL . He is an expert in software engineering
 for scientific applications. He has applied his skills mainly to
 electromagnetics simulation, parallel computing and three-dimensional
 visualization.}
 
-\item {\Large Kohji Ohtsuka},\url{mailto:ohtsuka@hkg.ac.jp},~ \url{http://www.comfos.org/}
+\item {\large Kohji Ohtsuka},\url{mailto:ohtsuka@hkg.ac.jp},~ \url{http://www.comfos.org/}
 {Kohji Ohtsuka}{ is a professor at the Hiroshima Kokusai Gakuin University, Japan and chairman of the World Scientific and Engineering academy and Society, Japan chapter.  His research is in fracture dynamics, modeling and computing.}
 \end{itemize}
-
-
-
-
-%\medskip
-
-%{\Large Olivier Pironneau${}^{1,3}$}
-
-%  \url{mailto:olivier.pironneau@upmc.fr}
-
-%\url{http://www.ann.jussieu.fr/pironneau}
-
-%
-%\bigskip
-
-%
-
-%{\Large Antoine Le Hyaric${}^{1,2}$ }
-
-% \url{mailto:lehyaric@ann.jussieu.fr}
-
-%\url{http://www.ann.jussieu.fr/~lehyaric/}
-
-%
-%\bigskip
-
-%
-%{\Large Kohji Ohtsuka${}^{5}$ }
-
-%  \url{mailto:ohtsuka@hkg.ac.jp}
-
-%\url{http://http://www.comfos.org/}
 \end{center}
-
-%%\bigskip
-
-%
-%\begin{enumerate}
-%\item  Laboratoire Jacques-Louis Lions,
-%175 rue du Chevaleret , 75013 Paris, France
-
-% Universit\'{e} Pierre et Marie Curie,
-%4 Place  Jussieu,  75252  PARIS cedex 05, France.
-
-%\item CNRS, UMR 7598,  Laboratoire Jacques-Louis Lions,
-%175 rue du Chevaleret , 75013 Paris, France.
-%\item Institut de France, Acad\'{e}mie des sciences, 23, quai de Conti,  75006 Paris,  France.
-%\item INRIA, Projet Gamma, Domaine de Voluceau, Rocquencourt, B.P. 105, 78153 Le Chesnay Cedex, France.
-%\item Hiroshima Kokusai Gakuin University, Hiroshima, Japan.
-
-%\end{enumerate}
-
-
 \vfill
 \hbox to \hsize
 {\hss
@@ -205,7 +132,7 @@ and to l'Agence Nationale de la Recherche (Paris, France)
 
 \hbox to \hsize{\hss\includegraphics[width=7cm]{sanskrit}}
 
-Fruit of a long maturing process, freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
+Fruit of a long maturing process, freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE) in dimension 2 and 3.  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
 
 
 \medskip
@@ -225,8 +152,7 @@ are modeled by one or several partial differential equations.
 its name implies, it is a free software (see the copyrights for full detail)
 based  on the Finite Element Method; it is not a package, it is an integrated product with its own
 high level programming language. This software runs on all UNIX
-OS (with g++ 3.3 or later, and X11R6) , on Window 2000,
-NT, XP, Vista and 7 and on
+OS (with g++ 3.3 or later, and OpenGL) , on Window  XP, Vista and 7 and on
 MacOS 10 (powerpc, intel) \\\\
 Moreover \freefempp is highly adaptive.  Many phenomena involve
 several  coupled systems, for example: fluid-structure interactions,
@@ -277,8 +203,8 @@ storage of the interpolation matrices.
 \ttCC{P0},\ttCC{P1dc},\ttCC{P2dc} and keywords: \ttCC{jump}, \ttCC{mean}, \ttCC{intalledges}.
 %
 \item A large variety of linear direct and iterative solvers
-(LU, Cholesky, Crout, CG, GMRES, UMFPACK) and eigenvalue and
-eigenvector solvers.
+(LU, Cholesky, Crout, CG, GMRES, UMFPACK, MUMPS, SuperLU, ...) and eigenvalue and
+eigenvector solvers (ARPARK) .
 %
 \item Near optimal execution speed (compared with compiled C++
 implementations programmed directly).
@@ -309,7 +235,8 @@ or go to the end of the page to get the full list of downloads.
 Mac OS X and some Linux systems.
 %"\texttt{FreeFem++}" at \url{http://www.freefem.org}.
 \end{remark}
-Install by double click on the appropriate file.
+Install by double click on the appropriate file, under linux and MacOS the
+install file are respectively in directory  \texttt{/usr/local/bin},  \texttt{/usr/local/share/freefem++},  \texttt{/usr/local/lib/ff++}
 
 
 \paragraph{Windows binaries install}
@@ -374,9 +301,9 @@ The syntax for the command-line tools are the same as those of FreeFem.exe.
 
 This section is for those who for some reason do not wish to use the binaries and hence need to recompile \freefempp or install it from the source code:
 
-\paragraph{The documentation archive}: The documentation is also open source; to regenerate it you need a \LaTeX{} environment capable of compiling a CVS archive; under MS-Windows you will have to use  \texttt{cygwin}
+\paragraph{The documentation archive}: The documentation is also open source; to regenerate it you need a \LaTeX{} environment capable of compiling a CVS archive; under MS-Windows you will have to use  \texttt{mingw/msys}
 \begin{center}
-   \url{http://www.cygwin.com}
+   \url{http://www.mingw.org}
 \end{center}
  and under MacOS X we have used Apple's Developer Tools "Xcode" and  \LaTeX{ } from \url{http://www.ctan.org/system/mac/texmac}.
 
@@ -405,7 +332,7 @@ depending on the system you are running :
 based on GLUT/OpenGL (use ffglut visualization tool) or not just add \texttt{ -nw } parameter.
 \item \texttt{ffglut} the visualization tools  through a pipe of freefem++ (remark: {\it if ffglut is not in the system path,
 you will have no plot})
-\item \texttt{FreeFem++-nw}, postscript plot output only (batch version, no graphics windows via \texttt{ffglut} )
+\item \texttt{FreeFem++-nw}, postscript plot output only and  ffmedit (batch version, no graphics windows via \texttt{ffglut} )
 \item \texttt{FreeFem++-mpi}, parallel version, postscript output only 
 %\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
 %\item \texttt{FreeFem++-cs}, integrated development environment
@@ -423,23 +350,47 @@ Application
 \item \texttt{ffmedit} the freefem++ version of medit software (thanks to P. Frey)
 \end{enumerate}
 
-The FreeFem++ parameter command:
-{\small \begin{verbatim}
-Brochet-2:~ hecht$ FreeFem++
- Syntaxe:
-   FreeFem++ [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  
-        -v      verbosity : 0 -- 1000000 level of freefem output 
-        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) 
-        -glut    command  : change the command  ffglut 
-        -gff     command  : change the command  ffglut   with  space quotting
-        -nowait           : nowait at the end on window   
-        -wait             : wait at the end on window   
-        -nw               : no ffglut (=> no graphics windows) 
-        -ne               : no edp script output
-        -cd               : Change directory  to script dir 
- with        default ffglut : ffglut
-\end{verbatim}
-}
+The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw},\texttt{FreeFem++-mpi}, on the command-line  are
+{ \small
+\begin{itemize}
+\item  \verb!FreeFem++ [-?] [-v nn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
+\item or \verb!FreeFem++-nw -? [-v nn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
+ \begin{description}
+ \item \verb!-?!  show the usage.
+\item \verb!-fglut filename!  to store all the data for graphic in file \verb! filename!, and to replay do
+\verb!ffglut filename!.
+\item \verb!-glut  ffglutprogam!  to change the visualisator program's.
+\item \verb!-nw! no call to ffglut and medit 
+\item \verb!-v nn!  set the level of verbosity to \texttt{nn} before execution of the  script.
+\item \verb!-ne! no edp script output
+\item \verb!-wait! wait an return in text window before  closing \texttt{FreeFem++}
+\item \verb!-nowait! wait an return in text window before  closing \texttt{FreeFem++}
+\item \verb!-ne! no edp script output
+\item \verb!-cd! Change directory  to script dir (the script path must by global)
+\item  if no file path then you get a dialog box to choose the edp file on windows systeme.
+\end{description}
+\end{itemize}}
+\medskip
+The notation \texttt{[]} means "optional".
+
+
+%The FreeFem++ parameter command:
+%{\small \begin{verbatim}
+%Brochet-2:~ hecht$ FreeFem++
+% Syntaxe:
+%   FreeFem++ [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  
+%        -v      verbosity : 0 -- 1000000 level of freefem output 
+%        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) 
+%        -glut    command  : change the command  ffglut 
+%        -gff     command  : change the command  ffglut   with  space quotting
+%        -nowait           : nowait at the end on text window  ( 
+%        -wait             : wait at the end on text window   
+%        -nw               : no ffglut and no medit  (=> no graphics windows) 
+%        -ne               : no edp script output
+%        -cd               : Change directory  to script dir 
+% with        default ffglut : ffglut
+%\end{verbatim}
+%}
 \begin{remark} In most cases you can set the level of output (verbosity\index{verbosity}) to value \texttt{nn} by adding the parameters
 \texttt{-v nn} on the command line.
 
@@ -457,24 +408,6 @@ If you are using \texttt{nedit} as your text editor,
 do one time \verb!nedit -import edp.nedit! to have coloring syntax for your \ttCC{.edp}
 files.
 
-The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw} on the command-line  are
-{ \small
-\begin{itemize}
-\item  \verb!FreeFem++ [-?] [-vnn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
-\item or \verb!FreeFem++-nw -? [-vnn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
- \begin{description}
- \item \verb!-?!  show the usage.
-\item \verb!-fglut filename!  to store all the data for graphic in file \verb! filename!, and to replay do
-\verb!ffglut filename!.
-\item \verb!-glut  ffglutprogam!  to change the visualisator program's.
-\item \verb!-nw! no call to ffglut
-\item \verb!-v nn!  set the level of verbosity to \texttt{nn} before execution of the  script.
-\item  if no file path then you get a dialog box to choose the edp file on windows systeme.
-\end{description}
-\end{itemize}}
-\medskip
-The notation \texttt{[]} means "optional".
-
 
 \paragraph{Link with other text editors}
 \begin{description}
@@ -485,7 +418,7 @@ The notation \texttt{[]} means "optional".
 
 \item  Open Notepad++ and Enter  F5
 \item   In the new window  enter  the command
-\verb!FreeFem++ "$(FULL_CURRENT_PATH)"!
+\verb!launchff++ "$(FULL_CURRENT_PATH)"!
 \item Click on  Save,  and enter  \texttt{FreeFem++} in the box  "Name", now  choose
 the  short cut key  to launch directly FreeFem++  (for example \texttt{alt+shift+R})
  \item To add    Color Syntax Compatible with FreeFem++ In Notepad++,
@@ -609,7 +542,7 @@ One of the best ways however on the Mac is to use a text editor like \texttt{Smu
    \centering
    \includegraphics[width=10cm]{mi.jpg}
    \caption{The 3 panels of the integrated environment built with the
-\texttt{Smultron Editor} with \freefempp in action. The Tools menu
+\texttt{fraise Editor} with \freefempp in action. The Tools menu
 has an item to launch \freefempp by a Ctrl+1 command.}
 \end{figure}
 
@@ -645,6 +578,7 @@ are searched from  \texttt{loadpath} list.
      #  comment
      load += "funcTemplate"
      load += "myfunction"
+     load += "MUMPS_seq" 
 \end{verbatim}
 
  The possible paths for this file  are
@@ -2162,108 +2096,6 @@ which is programmed as
 It must be inserted into a larger .cpp file, shown in Appendix A,
  which is the load module linked to \freefempp.
 
-\subsection{A Projection Algorithm for the Navier-Stokes equations }
-\paragraph{Summary}\emph{Fluid flows require good algorithms and good triangultions. We show
-here an example of a complex algorithm and or first example of \x{mesh adaptation}}.
-\\\\
-An incompressible viscous fluid satisfies:
-$$ \p _t u + u\cdot\nabla u + \nabla p - \nu\Delta u = 0,\quad  \nabla\cdot u=0
-\quad  \hbox{ in } \Omega\times ]0,T[,
-$$
-$$ u|_{t=0} = u^0,\quad  u|_\Gamma = u_\Gamma.
-$$
-A possible algorithm, proposed by Chorin, is
-$$ {1\over \delta t}[u^{m+1} - u^moX^m] + \nabla p^m -\nu\Delta u^m= 0,\quad  u|_\Gamma
- = u_\Gamma,
- $$
-$$ -\Delta p^{m+1} = -\nabla\cdot  u^moX^m, \quad  \p _n p^{m+1} = 0,
-$$
-where $uoX(x) = u(x-u(x)\delta t)$ since $\p _t u + u\cdot\nabla
-u $ is approximated by the method of characteristics, as in the previous section.
-\\\\
-An improvement over Chorin's algorithm, given by Rannacher, is to compute a correction, q,
-to the pressure (the overline denotes the mean over $\Omega$)
-\[
-    -\Delta q= \n\cdot\vec u - \overline{\n\cdot\vec u}
-\]
-and define
-\[
-    u^{m+1}=\tilde u + \n q\delta t,~~~p^{m+1}=p^m-q-\overline{p^m-q}
-\]
-where $\tilde u$ is the $(u^{m+1},v^{m+1})$ of Chorin's algorithm.
-
-\paragraph{The backward facing step}
-
-The geometry is that of a channel with a backward facing step so that
-the inflow section is smaller than the outflow section. This geometry
-produces a fluid recirculation zone that must be captured correctly.
-
-This can only be done if the triangulation is sufficiently fine, or
-well adapted to the flow.
-
-\begin{example}[NSprojection.edp]\index{adaptmesh}\index{mesh!adaptation}
-\bFF
-// file NSprojection.edp
-
-@border a0(t=1,0){ x=0;      y=t;           @label=1;}
-@border a1(t=0,1){ x=2*t;    y=0;           @label=2;}
-@border a2(t=0,1){ x=2;      y=-t/2;        @label=2;}
-@border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;   @label=2;}
-@border a4(t=0,1){ x=20;     y=-0.5+1.5*t;  @label=3;}
-@border a5(t=1,0){ x=20*t;   y=1;           @label=4;}
-@int n=1;
-mesh Th= @buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
-@plot(Th);
-@fespace Vh(Th,P1);
-@real nu = 0.0025, dt = 0.2; // Reynolds=400
-Vh w,u = 4*y*(1-y)*(y>0)*(x<2), v =0, p = 0, q=0;
-@real area= int2d(Th)(1.);
-
-@for(@int n=0;n<100;n++){
-  Vh uold = u,  vold = v, pold=p;
-  Vh f=@convect([u,v],-dt,uold),  g=@convect([u,v],-dt,vold);
-
-  @solve pb4u(u,w,init=n,solver=LU)
-        =@int2d(Th)(u*w/dt +nu*(@dx(u)*@dx(w)+@dy(u)*@dy(w)))
-        -@int2d(Th)((f/dt-@dx(p))*w)
-        + @on(1,u = 4*y*(1-y)) + @on(2,4,u = 0)+ @on(3,u=f);
-  @plot(u);
-
-  @solve pb4v(v,w,init=n,solver=LU)
-        = @int2d(Th)(v*w/dt +nu*(@dx(v)*@dx(w)+@dy(v)*@dy(w)))
-        -@int2d(Th)((g/dt-@dy(p))*w)
-        +@on(1,2,3,4,v = 0);
-
- @real meandiv = @int2d(Th)(dx(u)+dy(v))/area;
-
- @solve pb4p(q,w,init=n,solver=LU)= @int2d(Th)(@dx(q)*@dx(w)+@dy(q)*@dy(w))
-    - @int2d(Th)((@dx(u)+ @dy(v)-meandiv)*w/dt)+ on(3,q=0);
-
- @real meanpq = @int2d(Th)(pold - q)/area;
- @if(n==50){
-    Th = @adaptmesh(Th,u,v,q); @plot(Th, wait=true);
- }
- p = pold-q-meanpq;
- u = u + @dx(q)*dt;
- v = v + @dy(q)*dt;
-}
-\eFF
-\end{example}
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[width=15cm]{NSprojTh}\\
-\includegraphics[width=15cm]{NSprojP}\\
-\includegraphics[width=15cm]{NSprojU}
-
-\caption{\label{figNSproj} Rannacher's projection algorithm: result on an adapted mesh (top) showing
-the pressure (middle) and the horizontal velocity $u$ at Reynolds 400.}
-\end{center}
-\end{figure}
-
-We show in figure \ref{figNSproj} the numerical results obtained for a Reynolds
-number of 400 where mesh adaptation is done after 50 iterations on the first mesh.
-
 
  \subsection{The System of elasticity}
 
@@ -2594,6 +2426,326 @@ Results are shown on figure \ref{figstokes}
 %}
 %@cout << "CPU " <<@clock()-s0 << "s " << endl;
 %\eFF
+
+\subsection{A Projection Algorithm for the Navier-Stokes equations }
+\paragraph{Summary}\emph{Fluid flows require good algorithms and good triangultions. We show
+here an example of a complex algorithm and or first example of \x{mesh adaptation}}.
+\\\\
+An incompressible viscous fluid satisfies:
+$$ \p _t u + u\cdot\nabla u + \nabla p - \nu\Delta u = 0,\quad  \nabla\cdot u=0
+\quad  \hbox{ in } \Omega\times ]0,T[,
+$$
+$$ u|_{t=0} = u^0,\quad  u|_\Gamma = u_\Gamma.
+$$
+A possible algorithm, proposed by Chorin, is
+$$ {1\over \delta t}[u^{m+1} - u^moX^m] + \nabla p^m -\nu\Delta u^m= 0,\quad  u|_\Gamma
+ = u_\Gamma,
+ $$
+$$ -\Delta p^{m+1} = -\nabla\cdot  u^moX^m, \quad  \p _n p^{m+1} = 0,
+$$
+where $uoX(x) = u(x-u(x)\delta t)$ since $\p _t u + u\cdot\nabla
+u $ is approximated by the method of characteristics, as in the previous section.
+\\\\
+An improvement over Chorin's algorithm, given by Rannacher, is to compute a correction, q,
+to the pressure (the overline denotes the mean over $\Omega$)
+\[
+    -\Delta q= \n\cdot\vec u - \overline{\n\cdot\vec u}
+\]
+and define
+\[
+    u^{m+1}=\tilde u + \n q\delta t,~~~p^{m+1}=p^m-q-\overline{p^m-q}
+\]
+where $\tilde u$ is the $(u^{m+1},v^{m+1})$ of Chorin's algorithm.
+
+\paragraph{The backward facing step}
+
+The geometry is that of a channel with a backward facing step so that
+the inflow section is smaller than the outflow section. This geometry
+produces a fluid recirculation zone that must be captured correctly.
+
+This can only be done if the triangulation is sufficiently fine, or
+well adapted to the flow.
+
+Remark (FH), The are a technical difficulty is the example, the discret flow flux must be 
+$0$ and in the previous version this is not the case, the correction is not so simple. 
+
+\begin{example}[NSprojection.edp]\index{adaptmesh}\index{mesh!adaptation}
+\bFF
+// file NSprojection.edp
+
+@border a0(t=1,0){ x=0;      y=t;      label=1;}
+@border a1(t=0,1){ x=2*t;    y=0;        label=2;}
+@border a2(t=0,1){ x=2;      y=-t/2;       label=2;}
+@border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;       label=2;}
+@border a4(t=0,1){ x=20;     y=-0.5+1.5*t;   label=3;}
+@border a5(t=1,0){ x=20*t; y=1;        label=4;}
+@int n=1;
+@mesh Th= buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
+plot(Th);
+@fespace Vh(Th,P1);
+@real nu = 0.0025, dt = 0.2; // Reynolds=200
+@func uBCin =  4*y*(1-y)*(y>0)*(x<2) ; 
+@func uBCout =  4./1.5*(y+0.5)*(1-y) *(x>19);
+Vh w,u = uBCin, v =0, p = 0, q=0;
+@real area= int2d(Th)(1.);
+Vh ubc  = uBCin + uBCout; 
+@real influx0  = int1d(Th,1) (ubc*N.x), // FH add
+      outflux0 = int1d(Th,3) (ubc*N.x); // FH add
+verbosity=1;
+@for(@int n=0;n<300;n++){
+	
+  Vh uold = u,  vold = v, pold=p;
+  Vh f=convect([uold,vold],-dt,uold); 
+  @real outflux = int1d(Th,3) (f*N.x); // FH add
+  f = f - (influx0+outflux)/outflux0 * uBCout; // FH add
+  outflux = int1d(Th,3) (f*N.x); // FH add
+  assert( abs(influx0+outflux) < 1e-10); // WARNING the flux must be 0 ..
+  
+  @solve pb4u(u,w,init=n,solver=LU)
+        =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
+        -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
+        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
+  plot(u);
+
+  @solve pb4v(v,w,init=n,solver=LU)
+        = int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
+        -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
+        +on(1,2,3,4,v = 0);
+
+ @real meandiv = int2d(Th)(dx(u)+dy(v))/area;
+
+ @solve pb4p(q,w,init=n,solver=LU)= int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
+    - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
+
+ @real meanpq = int2d(Th)(pold - q)/area;
+ if(n%50==49){
+    Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
+    plot(Th, wait=true);
+    ubc = uBCin + uBCout; // reinterpolate B.C. 
+    influx0 = int1d(Th,1) (ubc*N.x); // FH add
+    outflux0 = int1d(Th,3) (ubc*N.x); // FH add
+ }
+ p = pold-q-meanpq;
+ u = u + dx(q)*dt;
+ v = v + dy(q)*dt;
+ real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
+ cout << " iter " << n << " Err L2 = " << err << endl;
+ if(err < 1e-3) break;
+}
+plot(p,wait=1,ps="NSprojP.eps");
+plot(u,wait=1,ps="NSprojU.eps");\eFF
+\end{example}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=15cm]{NSprojTh}\\
+\includegraphics[width=15cm]{NSprojP}\\
+\includegraphics[width=15cm]{NSprojU}
+
+\caption{\label{figNSproj} Rannacher's projection algorithm: result on an adapted mesh (top) showing
+the pressure (middle) and the horizontal velocity $u$ at Reynolds 400.}
+\end{center}
+\end{figure}
+
+We show in figure \ref{figNSproj} the numerical results obtained for a Reynolds
+number of 400 where mesh adaptation is done after 50 iterations on the first mesh.
+
+\subsection{Newton Method for the Steady Navier-Stokes equations}
+
+The problem is find the velocity field $\bm{u}=(u_i)_{i=1}^d$ and the pressure $p$ of a Flow 
+satisfying in the domain $\Omega \subset  \mathbb{R}^d (d=2,3)$:
+\Blue{\begin{eqnarray*}
+ (\bm{u}\cdot\nabla) \bm{u}-\nu \Delta \bm{u}+\nabla p&=&0,\\ \nabla\cdot \bm{u}&=&0
+\end{eqnarray*}}
+where $\nu$ is the viscosity of the fluid, $\nabla = (\p_i )_{i=1}^d $, the dot product is $\cdot$, and  $\Delta = \nabla\cdot\nabla$
+with the some boundary conditions ( $\bm{u}$ is  given on $\Gamma$)
+
+\bigskip
+
+The weak form is 
+find $\bm{u}, p $ such than for $\forall \bm{v}$ (zero on $\Gamma$), and $\forall  q$ 
+\Blue{\begin{equation}
+  \int_\Omega  ((\bm{u}\cdot\nabla) \bm{u} ). \bm v + \nu \nabla \bm{u}:\nabla \bm{v} 
+  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = 0 
+\end{equation}}
+
+
+The Newton Algorithm to solve nonlinear Problem is
+
+Find  $u\in  V$ such that $F(u)=0$ where 
+$ F : V \mapsto V $. 
+
+\begin{enumerate} \index{Newton Algorithm
+}
+\item choose $u_0\in \R^n $ , ;
+\item for ( $i =0$; $i$ < niter; $i = i+1$) 
+
+\begin{enumerate}
+\item solve $DF(u_i) w_i =  F(u_i)$;
+\item $u_{i+1} = u_i - w_i$;  
+\end{enumerate}
+ break  $|| w_i|| < \varepsilon$.
+\end{enumerate}
+
+Where $DF(u)$ is the differential of $F$ at point  $u$, this is a linear application such that:
+{$
+  F(u+\delta) = F(u) + DF(u) \delta + o(\delta) 
+$}
+
+
+For Navier Stokes, $F$ and $DF$ are  :
+\Blue{\small
+\begin{eqnarray*}F(\bm{u},p) =  \int_\Omega  &&((\bm{u}\cdot\nabla) \bm{u} ). \bm v + \nu \nabla \bm{u}:\nabla \bm{v} 
+  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u}\\
+DF(\bm{u},p)(\bm{\delta u} ,\delta p)  =  \int_\Omega  &&((\bm{\delta u}\cdot\nabla) \bm{u} ). \bm v + ((\bm{u}\cdot\nabla) \bm{\delta u} ). \bm v \\
+ &+& \nu \nabla \bm{\delta u}:\nabla \bm{v}  - \delta p \nabla\cdot \bm{v} - q \nabla\cdot \bm{\delta u}
+\end{eqnarray*}}
+
+
+
+So the Newton algorithm become   
+\begin{example}[NSNewton.edp] 
+\bFF
+...   
+	@for( n=0;n< 15;n++)
+	{ @solve Oseen([du1,du2,dp],[v1,v2,q]) =
+          @int2d(Th) (  nu*(Grad(du1,du2)'*Grad(v1,v2) )
+                      + UgradV(du1,du2, u1, u2)'*[v1,v2]
+                      + UgradV( u1, u2,du1,du2)'*[v1,v2]
+                      - div(du1,du2)*q - div(v1,v2)*dp 
+                      - 1e-8*dp*q // stabilization term 
+                     )
+        - @int2d(Th) (  nu*(Grad(u1,u2)'*Grad(v1,v2) )
+                      + UgradV(u1,u2, u1, u2)'*[v1,v2]
+                      - div(u1,u2)*q - div(v1,v2)*p 
+                     )
+        + @on(1,du1=0,du2=0) ;
+      u1[] -= du1[];  u2[] -= du2[]; p[]  -= dp[];
+      err= du1[].linfty + du2[].linfty + dp[].linfty;        
+      @if(err < eps) @break;    
+      @if( n>3 && err > 10.) @break; //  blowup ???? 
+    }
+\eFF
+
+
+With the  operator: 
+\bFF
+@macro Grad(u1,u2) [ dx(u1),dy(u1) , dx(u2),dy(u2) ]// 
+@macro UgradV(u1,u2,v1,v2) [ [u1,u2]'*[dx(v1),dy(v1)] ,
+                            [u1,u2]'*[dx(v2),dy(v2)] ]// 
+@macro div(u1,u2)  (dx(u1)+dy(u2))//
+\eFF
+
+We build a computation mesh the exterior of a 2d cylinder. 
+
+\bFF
+@real R = 5,L=15;
+@border cc(t=0,2*pi){ x=cos(t)/2;y=sin(t)/2;label=1;}
+@border ce(t=pi/2,3*pi/2) { x=cos(t)*R;y=sin(t)*R;label=1;}
+@border beb(tt=0,1) { real t=tt^1.2; x= t*L; y= -R; label = 1;}
+@border beu(tt=1,0) { real t=tt^1.2; x= t*L; y= R; label = 1;}
+@border beo(t=-R,R) {  x= L; y= t; label = 0;}
+@border bei(t=-R/4,R/4) {  x= L/2; y= t; label = 0;}
+@mesh Th=buildmesh(cc(-50)+ce(30)+beb(20)+beu(20)+beo(10)+bei(10));
+@plot(Th);
+
+// bounding box for the plot
+@func bb=[[-1,-2],[4,2]];
+
+/  FE Space Taylor Hood
+@fespace Xh(Th,P2);// for volicity 
+@fespace Mh(Th,P1);// for pressure 
+Xh u1,u2,v1,v2,du1,du2,u1p,u2p;
+Mh p,q,dp,pp;
+
+// intial guess with B.C. 
+u1 = ( x^2+y^2) > 2;
+u2=0;
+\eFF
+
+Finally we use  trick to make continuation on the viscosity $\nu$, because the Newton method blowup 
+owe start with the final viscosity $\nu$
+\bFF
+//  Physical parameter
+real nu= 1./50, nufinal=1/200. ,cnu=0.5;
+
+// stop test for Newton
+real eps=1e-6;
+
+verbosity=0;
+while(1)  //  Loop on viscosity
+{   int n;
+    real err=0; // err on Newton algo ... 
+    
+      ... put the new the Newton  algo here
+        
+	if(err < eps)                                                               
+	 { // converge decrease $\nu$ (more difficult)                                                                                                                           
+	   plot([u1,u2],p,wait=1,cmm=" rey = " + 1./nu , coef=0.3,bb=bb);                                                           
+	   @if( nu == nufinal) break;                                                                                                
+	   @if( n < 4) cnu=cnu^1.5; // fast converge => change faster                                                                
+	   nu = max(nufinal, nu* cnu); // new vicosity                                                                              
+	   u1p=u1;  u2p=u2;  pp=p; //  save correct solution ...                                                                    
+	 }                                                                                                                          
+	 @else 
+	 {   //  blowup increase $\nu$  (more simple)                                                                         
+	   @assert(cnu< 0.95); //  the method  finally  blowup                                                                                               
+	   nu = nu/cnu; //  get previous value of viscosity                                                                         
+	   cnu= cnu^(1./1.5); // no conv. => change lower                                                                           
+	   nu = nu* cnu;  // new viscosity                                                                                           
+	   cout << " restart nu = " << nu << " Rey= "<< 1./nu << "  (cnu = " << cnu << " ) \n";                                     
+	   // restore a correct solution ..                                                                                           
+	   u1=u1p;                                                                                                                  
+	   u2=u2p;                                                                                                                  
+	   p=pp;                                                                                                                    
+	 }     
+}        
+\eFF
+\end{example}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=8cm]{NSNewtonTh}
+\includegraphics[width=8cm]{NSNewtonUP}
+\caption{\label{NSNewton} Mesh and the velocity and pressure at Reynolds  $ 200$ }
+\end{center}
+\end{figure}
+
+
+%\paragraph{Gag's or Bug with Stokes Equation, with Boundary condition}
+%
+%
+%Denote: \Blue{$\Gamma$} the boundary, \Blue{$\bm{n}$} the unit exterior normal,  
+%\Blue{$\varepsilon(\bm{u}) =  ( ^t \nabla \bm{u}+ \nabla \bm{u})/2 $}, \Blue{$I_d$} the Identity matrix.
+%
+%\begin{enumerate}
+%\item With BC, the incompressibility imply
+%\Red{$ \int_\Gamma \bm{u}.\bm{n} =0 $} at discrete level. 
+%\item 
+% The force in the fluid on surface $\Sigma$ is \Blue{$ \int_\Sigma (\nu\; \varepsilon(\bm{u})  -  p I_d) \bm{n}  $}. The Weak form is  
+%$\forall \bm{v}, q$ :
+%\[  \int_\Omega  \nu \nabla \bm{u}:\nabla \bm{v} 
+%  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = {\int_\Gamma \;{}^t\bm{n}(\nu \nabla \bm{u} -  p I_d )   \bm{v} }
+%  \]
+%    Or with a more physical formulation (with the true strain $\varepsilon$):
+%\[  \int_\Omega  \nu\; \varepsilon( \bm{u}):\varepsilon( \bm{v}) 
+%  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = {\int_\Gamma \;{}^t\bm{n}(\nu \varepsilon (\bm{u}) -  p I_d )   \bm{v} }
+%  \]  
+%\end{enumerate}
+%
+%\begin{figure}[htbp]
+%\begin{center}
+%\includegraphics[width=8cm]{NSnewtonU}
+%\includegraphics[width=8cm]{NSnewtonE}
+%
+%\caption{\label{figconvect} The rotated hill after one revolution, left with Characteristics-Galerkin,
+%on the right with Discontinuous $P_1$ Galerkin FEM.}
+%\end{center}
+%\end{figure}
+%
+
+
+
 \subsection{A Large Fluid Problem}
 A friend of one of us in Auroville-India was building a ramp to access an air conditioned room. As I was visiting the construction site he told me that he expected to cool air escaping by the door to the room to slide down the ramp and refrigerate the feet of the coming visitors.  I told him "no way" and decided to check numerically.  The results are on the front page of this book.
 \\
@@ -3265,16 +3417,16 @@ which makes fool to be true.  Similar examples can be built with $==,<=,>=,<,>,!
 \index{bool}\index{true}\index{false}
 \index{int}
 \item[int]
-  declares an integer.
+  declares an integer (i.e. \texttt{long} in \texttt{C++})..
 \item[string] declare the variable to store
 a text enclosed within double quotes, such as:
 \bFF
 "This is a string in double quotes."
 \eFF
 \index{string}
-\item[real] declares the variable to store a number such as ``12.345''. \index{real}
+\item[real] declares the variable to store a number such as ``12.345''. \index{real} (i.e. \texttt{double} in \texttt{C++}).
 \item[complex]  Complex numbers, such as\index{Complex}
-$1+2i$, \freefempp understand that $i=\sqrt{-1}$.
+$1+2i$, \freefempp understand that $i=\sqrt{-1}$ (i.e. \texttt{complex<double>} in \texttt{C++}).
 \bFF
 @complex a =  1@i, b = 2 + 3@i;
 @cout << "a + b = " << a + b << @endl;
@@ -3930,7 +4082,7 @@ The output is :
 \eFF
 
 the all integer array operators are  : % modif v2.0-3
-\index{array!\texttt{=  +  -  *  /  .*  ./ += -= /= *=}  }
+\index{array!\texttt{=  +  -  *  /  .*  ./ += -= /= *= .*= ./=}  }
 
 \index{l1}
 \index{l2}
@@ -3952,10 +4104,10 @@ b += 2*a;
 @cout <<" b += 2*a : " << b << endl;
 b /= 2;
 @cout <<" b /= 2 : " << b << endl;
-b *= a; // same b = b .* a
-@cout << "b*=a; b =" << b << endl;
-b /= a; // same b = b ./ a
-@cout << "b/=a; b =" << b << endl;
+b .*= a; // same b = b .* a
+@cout << "b.*=a; b =" << b << endl;
+b ./= a; // same b = b ./ a
+@cout << "b./=a; b =" << b << endl;
 c = a+b;
 @cout << " c =a+b : c=" << c << endl;
 c = 2*a+4*b;
@@ -4015,10 +4167,10 @@ produce the output
  b /= 2 : 5
           5     2.5       5      10      10
 
-b*=a; b =5
+b.*=a; b =5
          10     2.5      10      40      40
 
-b/=a; b =5
+b./=a; b =5
           5     2.5       5      10      10
 
  c =a+b : c=5
@@ -4235,6 +4387,14 @@ one has:  $ M_{ab}$  a basic matrix with the only  non zero term $m_{ab}=1$.
   B.resize(10,20); //  resize the sparse matrix \index{matrix!resize} and  remove out of bound terms
 \eFF
 where $A$ is a given matrix.
+\item complex versu real sparse matrix: \index{re}\index{matrix!re}\index{im}\index{matrix!im} \index{matrix!real to complex}
+\bFF
+  @matrix<@complex> C=vv(Xh,Xh);
+  @matrix  R=vr(Xh,Xh);
+  @matrix<complex> CR=R; C=R; // create or copy real matrix tp complex matrix 
+  R=C.im; R=C.re; // get real or imagery part of complex sparse matrix 
+  @matrix CI=C.im,  CR=C.re; // get real or imagery part of complex  sparse matrix 
+\eFF
 \end{itemize}
 
 \subsubsection{\setS{Matrix Operations}}
@@ -4304,6 +4464,17 @@ A=[I,J,C]; // set a new matrix
 matrix D=[diagofA] ; // set a diagonal matrix D from the array diagofA. \index{diagonal matrix}
 cout << " D = " << D << endl;
 \eFF
+ For the second case, it is just
+ a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
+ so no  operations on vector are allowed,   except the
+ selection of an item  . \index{dot product}\index{transpose}
+
+The transpose or Hermitian conjugation operator is \texttt{\string'} as in  Matlab or Scilab, so the way
+to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
+\index{dot}\index{array!dot}
+
+
+
 The resizing of a sparse matrix $A$ \index{resize}\index{matrix!resize} is also allowed:
 \bFF
 A.resize(10,100);
@@ -4481,7 +4652,15 @@ the library lapack on you system and try in directory \texttt{examples++-load}
 
 It is also possible to make an array of FE functions, with the same syntax,
 and we can treat them as \emph{vector valued function} if we need them.
-\index{array}\index{array!FE function}
+\index{array}\index{array!FE function}, the syntax for space or vector finite function is
+\bFF
+@int n = 100; // size of the array. 
+Vh[@int] wh(n);// real scalar case 
+Wh[@int] [uh,vh](n); // real vectorial case 
+Vh<@complex>[@int] cwh(n);// complex scalar  case
+Wh<@complex>[@int] [cuh,cvh](n); // complex vectorial case 
+[cuh[2],cvh[2]]= [x,y]; // set interpolation of index 2.  
+\eFF
 \begin{example}
 In the following example, Poisson's equation is solved for 3 different given
 functions $f=1,\, \sin(\pi x)\cos(\pi y),\, |x-1||y-1|$, whose solutions are
@@ -4493,38 +4672,26 @@ Vh u, v, f;
 @problem @Poisson(u,v) =
     @int2d(Th)( @dx(u)*@dx(v) + @dy(u)*@dy(v))
      + @int2d(Th)( -f*v ) + @on(1,2,3,4,u=0) ;
-Vh[int] uu(3); // an array of FE function
+Vh[@int] uu(3); // an array of FE function
 f=1;   // problem1
 Poisson; uu[0] = u;
 f=sin(pi*x)*cos(pi*y);  // problem2
 Poisson; uu[1] = u;
 f=abs(x-1)*abs(y-1);    // problem3
 Poisson; uu[2] = u;
-@for (int i=0; i<3; i++)  // plots all solutions
+@for (@int i=0; i<3; i++)  // plots all solutions
   @plot(uu[i], @wait=true);
 \eFF
 \end{example}
 
+\subsection{Map arrays}
  For the second case, it is just
  a map of the STL\footnote{Standard template Library, now part of standard \Cpp}\cite{cpp}
  so no  operations on vector are allowed,   except the
  selection of an item  . \index{dot product}\index{transpose}
-
-The transpose or Hermitian conjugation operator is \texttt{\string'} as in  Matlab or Scilab, so the way
-to compute the dot product of two array \ttCC{a,b} is  \ttCC{@real\ ab=\ a'*b}\index{product!dot}.
 \index{min}\index{array!min}
 \bFF
-@int i;
-@real [int] tab(10), tab1(10); // 2 array of 10 real
-  \it  real [int] tab2;    //  Error: array with no size
-tab = 1;                //  set all the array to 1
-tab[1]=2;
-@cout << tab[1] << " " << tab[9] << " size of tab = "
-     << tab.n << " " << tab.min << " " << tab.max << " " <<  @endl;
-tab1=tab; tab=tab+tab1; tab=2*tab+tab1*5; tab1=2*tab-tab1*5;
-tab+=tab; @cout << " dot product " << tab'*tab << @endl; //${}^{t}{tab}\,{tab} $
-@cout << tab << @endl; @cout << tab[1] << " "
-<< tab[9] <<  @endl; @real[string] map;        //  a dynamic array
+@real[string] map;        //  a dynamic array
 @for (i=0;i<10;i=i+1)
   {
     tab[i] = i*i;
@@ -4536,6 +4703,7 @@ map[2]=3.0;             //  2 is automatically cast to the string "2"
 
 @cout << " map[\"1\"] = " << map["1"] << "; "<< @endl;
 @cout << " map[2] = " << map[2] << "; "<< @endl;
+
 \eFF
 
 
@@ -5432,7 +5600,7 @@ Vhxy fxy; // the function
    file >> xx >>yy >> fxy[][i];  // to read third row only.
    // xx and yy are just skipped
 }
-@plot(fxu,ps="xyf.eps"); // plot the function (see figure  \ref{xyf})
+@plot(fxy,ps="xyf.eps"); // plot the function (see figure  \ref{xyf})
 \eFF
 
 One  new way to build a mesh is to have two arrays one  the $x$ values and the other for the $y$ values (version 2.23-2):
@@ -6170,6 +6338,8 @@ command line are for a two dimensional and dimensional case:
 \begin{description}
 \item [\texttt{label =}] is a vector of integer that contains successive pair of the old label number to  the new label number .
 \item [\texttt{region =}] is a vector of integer that contains successive pair of the old region number to new region number.
+\item [\texttt{flabel =}]  is a integer function with given the new value of the label (version 3.21).
+\item [\texttt{fregion =}] is a integer function with given the new value of the region .
 \end{description}
 %and for a three dimensional case:
 %\begin{description}
@@ -6183,13 +6353,13 @@ For example, we have
 \begin{eqnarray}
 \label{eq.org.vector.change.label}
 \mathtt{label} &= &[ O_{1}, N_{1},  ..., O_{n_{l}},N_{n_{l}} ] \\
-\mathtt{region} & =& [ O_{1}, N_{1},  ..., O_{n_{l}},N_{n_{l}} ]
+\mathtt{region} & =& [ O_{1}, N_{1},  ..., O_{n_{l}},N_{n_{l}} ] 
 \end{eqnarray}
 
 %%%ALH-25/2/10-compilation error
 %%%where $O_{i}$ is the $i^\mathrm{nd}$ old number (label or region) to change in new number $N_{i}$.
 
-An example of using this function is given in "glumesh2D.edp":  \index{mesh!change}\index{change}
+An example of using this function is given in "glumesh2D.edp":  \index{mesh!change}\index{change}\index{label!change}\index{region!change}\index{flabel!change}\index{fregion!change}
 \begin{example}[glumesh2D.edp]
 \label{changelabel}~
 \bFF
@@ -6200,9 +6370,9 @@ An example of using this function is given in "glumesh2D.edp":  \index{mesh!chan
  4: verbosity=3;
  5: @int[int] r1=[2,0],  r2=[4,0];
  6: @plot(Th1,wait=1);
- 7: Th1=@change(Th1,label=r1);//Change the label of Edges of Th1 with label 2 in 0.
+ 7: Th1=@change(Th1,label=r1);//Change the label of Edges  2 in 0.
  8: @plot(Th1,wait=1);
- 9: Th2=@change(Th2,label=r2);//Change the label of Edges of Th2 with label 4 in 0.
+ 9: Th2=@change(Th2,label=r2);//Change the label of Edges  4 in 0.
 10: @mesh Th=Th1+Th2;         //  ``gluing together'' of meshes Th1 and Th2
 11: @cout << " nb lab = " << int1d(Th1,1,3,4)(1./lenEdge)+int1d(Th2,1,2,3)(1./lenEdge)
 12:          << " == " << int1d(Th,1,2,3,4)(1./lenEdge) <<" == " << ((10+20)+10)*2 << endl;
@@ -6218,7 +6388,7 @@ An example of using this function is given in "glumesh2D.edp":  \index{mesh!chan
 
 \paragraph{``gluing'' different mesh}
 In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in FreeFem++ is using.
-This function is just called using the symbol addition "+" between meshes. \index{mesh!+}
+This function is the operator "+" between meshes. \index{mesh!+}
 The method implemented need that the point in adjacent mesh are the same.
 %%The method implemented need that the result's mesh of ``gluing'' meshes is conformal.
 
@@ -7752,11 +7922,150 @@ Vh u,v,usol,h;
   plot(u,wait=1);
   errm*= 0.8;// change the level of error
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
-  Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);// rebuidl mesh
+  Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);//rebuild mesh
   medit("U-adap-iso-"+ii,Th3,u,wait=1);}
 \eFF
 \end{example}
+
+\subsection{Build a 2d mesh from a isoline}
+\index{isoline}
+
+ The idea is get the discretization of a isoline to fluid meshes, this tool  can be useful to
+ construct meshes from image. First, we give an example of the isovalue meshes $0.2$  of analytical function $ \sqrt{(x-1/2)^2 +(y-1/2)^2}$,
+ on unit square. 
+\begin{example}[isoline.edp]
+\label{ex:isoline.edp}~\hfill\break
+\bFF
+load "isoline" // load the plugin "isoline"
+
+@real[@int,@int] xy(3,1); // to store the isoline points 
+@int[@int] be(1);// to store the begin , end couple of lines
+{// a block for memory management 
+  @mesh Th=square(10,10);//,[x*.5,y*0.5]);
+  @fespace Vh(Th,P1);
+  Vh u= @sqrt(square(x-0.5)+square(y-0.5));
+  @real iso= 0.2 ;
+  @real[int] viso=[iso];
+  @plot(u,viso=viso,Th);// to see the iso line 
+
+  @int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1);
+\eFF
+
+The isoline parameters are \texttt{Th} the mesh, the expression $u$ , the  bidimentionnal array \texttt{xy}
+to store the list coordinate of the points. The list of named parameter are:
+\begin{description}
+\item[iso=]  value of the isoline  to compute ($\bm{0}$ is the default value)
+\item[close=] close the iso line with the border (def. true), we add the part of the mesh border such the value
+ is less than the iso value 
+\item[smoothing=] nb of smoothing process  is  the ${l} ^{r} {s} $ where
+$l$ is the length of the current  line component, $r$ the ratio, $s$ is smoothing  value. The smoothing default value is $\bm{0}$.
+\item[ratio=] the ratio ( $1$ by default). 
+\item[eps=] relative $\varepsilon$  (see code ??)  (def 1e-10 )
+\item[beginend=]  array to get begin, end couple of each of sub line  (resize automatically)
+\item[file=] to save the data  curve in data file for gnu plot
+\end{description}
+
+In the array \texttt{xy} you get the list of vertices of the isoline,
+each connex line go from $i= i_0^c ,\dots, i_1^c-1$ with $i_0^c =be(2*c)$  $i_1^c =be(2*c+1)$, and
+  where $x_i= xy(0,i), y_i=yx( 1,i), l_i=xy(2,i) $. 
+Here  $l_i$ is the length of the line (the origin of the line is point  $i_0^c$).
+
+The  sense  of the  isoline is such that the upper part is at the left  size of the  isoline.
+So here : the minimum is a point $0.5,05$ so  the curve 1 turn in the clockwise  sense, 
+the order of each component are sort such the the number of point by component is decreasing .
+
+\bFF   
+  @cout << " nb of the line  component   = " << nbc << endl; 
+  @cout << " n = " << xy.m << endl; // number  of points 
+  @cout << "be = " << be << endl; //  begin end of the each componant
+
+  // show the lines component 
+  @for( @int c=0;c<nbc; ++c) 
+  {
+    @int i0 = be[2*c], i1 = be[2*c+1]-1;//begin,end of the line component
+    @cout << " Curve " << c << endl; 
+    @for(int i=i0; i<= i1; ++i)
+       @cout << " x= " << xy(0,i) <<" y= " << xy(1,i) << " s= " 
+             << xy(2,i) << endl; 
+    plot([xy(0,i0:i1),xy(1,i0:i1)],wait=1,viso=viso,cmm = " curve "+c);
+  }
+}// end of block for  memory management 
+
+@cout << " len of  last  curve = " << xy(2,xy.m-1) << endl;; 
+\eFF
+
+We also have a  new function to parametrize easly  a
+discret \texttt{Curve} defined by couple $be, xy$. \index{Curve}
+
+\bFF
+@border Curve0(t=0,1) // the extern boundary 
+{ @int c =0; // component 0
+  @int i0 = be[2*c], i1 = be[2*c+1]-1;   
+  P=@Curve(xy,i0,i1,t); // Curve 0
+  label=1; 
+} 
+
+@border Curve1(t=0,1) 
+{ @int c =1; // component 1
+  @int i0 = be[2*c], i1 = be[2*c+1]-1;   
+  P=Curve(xy,i0,i1,t);  // Curve 1
+  label=1; 
+} 
+
+@plot(Curve1(100)); // show curve. 
+@mesh Th= buildmesh(Curve1(-100));// because 
+@plot(Th,wait=1);// 
+\eFF
+\end{example}
+
+Secondly, we use this idea to build meshes from image, we use the plugins
+\texttt{ppm2rnm} to read \texttt{pgm} gray scale image, and we extract the 
+gray contour at level $0.25$.  
+
+\begin{example}[Leman-mesh.edp]
+\label{ex:Leman-mesh.edp}~\hfill\break
+\bFF
+@load "ppm2rnm" @load "isoline"
+@string leman="lg.pgm"; //see figure \ref{fig:lg}
+@real AreaLac =  580.03; // in $Km^2$
+@real hsize= 5; // mesh sir in pixel ..
+@real[int,int] Curves(3,1);
+@int[int] be(1);
+@int nc;// nb of curve 
+{  
+  @real[int,int] ff1(leman); // read  image (figure \ref{fig:lg}) 
+  // and set to an rect.  array \index{ppm2rnm}
+  @int nx = ff1.n, ny=ff1.m; // grey value between 0 to 1 (dark)
+  // build a Cartesian mesh such that the origin is qt the right place.
+  @mesh Th=square(nx-1,ny-1,[(nx-1)*(x),(ny-1)*(1-y)]);   
+   // warning  the numbering is of the vertices (x,y) is 
+   // given by $  i = x/nx + nx* y/ny $
+  @fespace Vh(Th,P1);
+   Vh f1; f1[]=ff1; //  transforme array in finite element function.
+  nc=@isoline(Th,f1,iso=0.25,close=1,Curves,beginend=be,smoothing=.1,ratio=0.5); 
+}
+// the longest isoline : the lac .. 
+@int ic0=be(0), ic1=be(1)-1;		
+plot([Curves(0,ic0:ic1),Curves(1,ic0:ic1)], wait=1);
+@int NC= Curves(2,ic1)/hsize;
+@border G(t=0,1) {  @P=@Curve(Curves,ic0,ic1,t);  @label= 1 + (x>xl)*2 + (y<yl);} 	
+
+plot(G(-NC),wait=1); 
+@mesh Th=buildmesh(G(-NC));
+plot(Th,wait=1);
+@real scale = sqrt(AreaLac/Th.area);
+Th=@movemesh(Th,[x*scale,y*scale]);//resize the mesh  
+@cout << " Th.area = " << Th.area << " Km^2 " << " == " << AreaLac <<  "   Km^2 " << endl ;
+plot(Th,wait=1,ps="leman.eps");//  see figure \ref{fig:leman}
+\eFF
+\end{example}
+
+\twoplot[width=8cm]{lg}{leman}{\label{fig:lg}The image of the leman lac meshes}{\label{fig:leman} the mesh of lac}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{\setS{Finite Elements}} \index{finite element space}\label{finite elements}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 As stated in Section \ref{sec:example}.
 FEM approximates all functions $w$ as
@@ -8160,8 +8469,8 @@ and $U_{h},V_{h} \in R_{h}$
 The functions $U_{h},V_{h}$ have three components so we have
 $$U_{h}=\vectthree{Uxh}{Uyh}{Uzh}  \quad \mbox{and}\quad V_{h}=\vectthree{Vxh}{Vyh}{Vzh}$$
 
-\begin{note}\label{note-p3d} ONe problem of the periodic boundary condition is the mesh mus be the same
-au equivalence face, the BuildLayer mesh generatio split  quadralateral  faces with the diagonal
+\begin{note}\label{note-p3d} One hard  problem of the periodic boundary condition is the mesh must be the same
+au equivalence face, the BuildLayer mesh generator split each  quadrilateral  faces with the diagonal
 passing through vertex with maximal number, so to be sure to have the same mesh one both face periodic
 the 2d numbering in corresponding edges must be compatible (for example the same variation).
 By Default, the numbering of square vertex are correct. 
@@ -8172,7 +8481,7 @@ To change the mesh numbering you can used the \texttt{change} function like:
 { // for cleanning  memory..
 @int[@int] old2new(0:Th.nv-1);// array set on 0, 1, .., nv-1
 @fespace Vh2(Th,P1);
-@Vh2 sorder=x+y; // choose ordering  increasing on 4 square borders with x or y\index{sort}
+@Vh2 sorder=x+y; // choose an ordering  increasing on 4 square borders with x or y\index{sort}
 @sort(sorder[],old2new); // build the inverse permutation 
 @int[@int]  new2old=old2new^-1;   // inverse the permutation 
 Th= @change(Th,renumv=new2old);\index{change}
@@ -9110,8 +9419,67 @@ where * stands for the name of quadrature formula or the order of the Gauss form
  By default,  we use the formula which is exact for polynomials of degree $5$ on triangles or edges (in bold in three tables)\index{quadrature:default}.
 \end{note}
 
-%\newpage
+This possible to add an own quadrature formulae with using plugin \texttt{"qf11to25"} on segment  , triangle or Tetrahedron.
+The quadrature formulae  in $D$ dimension is a bidimentional  array of size $N_q\times (D+1)$ 
+such that the $D+1$ value of on row $i=0,...,N_p-1$  are $w^i,\hat{x}^i_1,...,\hat{x}^i_D$ where
 
+$w^i$ is the weight of the quadrature point, and $1-\sum_{k=1}^D \hat{x}^i_k ,\hat{x}^i_1,...,\hat{x}^i_D$
+is the barycentric coordinate the quadrature point.
+  
+\bFF
+// just for test ... (version 3.19-1) 
+load "qf11to25" // load plugin                   
+     
+  // Quadrature on segment \hfilll
+    @real[int,int] qq1=[ 
+                      [0.5,0],
+                      [0.5,1]];
+
+  @QF1 qf1(1,qq1);// def of quadrature formulae qf1 on segment 
+  // remark:\hfilll
+  //  1 is the order of the quadrature  exact for polynome of degree < 1) 
+ 
+  // Quadrature on triangle \hfilll
+  @real[int,int] qq2=[
+                     [1./3,0,0],
+                     [1./3.,1,0],
+                     [1./3.,0,1]];
+                     
+  @QF2 qf2(1,qq2);// def of quadrature formulae qf2 on triangle 
+  // remark:\hfilll
+  //  1 is the order of the quadrature  exact for polynome of degree < 1) 
+  // so must have $ \Longrightarrow \sum w^i  = 1 $\hfilll
+  
+   // Quadrature on Tetrahedron   \hfilll
+  @real[int,int] qq3=[
+     [1./4,0,0,0],
+     [1./4.,1,0,0],
+     [1./4.,0,1,0],
+     [1./4.,0,0,1]];
+     
+  @QF3 qf3(1,qq3);// def of quadrature formulae qf3 on get. 
+  // remark:\hfilll
+  //  1 is the order of the quadrature  exact for polynome of degree < 1) 
+
+
+  // verification in 1d end 2d.. 
+  @real I1 = int1d(Th,qfe=qf1)(x^2) ;
+  @real I1l = int1d(Th,qfe=qf1pElump)(x^2) ;
+
+  @real I2 = int2d(Th,qft=qf2)(x^2) ;
+  @real I2l = int2d(Th,qft=qf1pTlump)(x^2) ;
+
+  @cout << I1 << " == " << I1l << endl; 
+  @cout << I2 << " == " << I2l << endl; 
+  @assert( abs(I1-I1l) < 1e-10);
+  @assert( abs(I2-I2l) < 1e-10);
+\eFF
+%\newpage
+the output is
+\bFF
+1.67 == 1.67
+0.335 == 0.335
+\eFF
 
 \subsection{Variational Form, Sparse Matrix, PDE Data Vector}
   \index{varf}\index{array}
@@ -9606,27 +9974,44 @@ The parameters are
     \item[wait=] boolean expression to wait or not (by default no wait). If true we wait for
     a keyboard event or mouse event,  they respond to an event by the following characters
     \begin{description}
-        \item[\texttt{+}]  to zoom in around the mouse cursor,
-        \item[\texttt{-}]  to zoom out around the mouse cursor,
-        \item[\texttt{=}]  to restore de initial graphics state,
-        \item[\texttt{c}]  to decrease the vector arrows size,
-        \item[\texttt{C}]  to increase the vector arrows size,
-        \item[\texttt{r}]  to refresh the graphic window,
-        \item[\texttt{f}]  to toggle between color fills and isovalues,
-        \item[\texttt{b}]  to toggle into  black and white,
-        \item[\texttt{g}]  to toggle to  grey or color ,
-        \item[\texttt{v}]  to toggle  the display of isovalue scale,
-      %  \item[\texttt{p}]  to save to a postscript file,
-        \item[\texttt{?}]  to show all active keyboard char,
-        \item[\texttt{enter}]  go to the next plot,
-        \item[\texttt{ESC}]  close the graphics process.
-       \item [otherwise] do nothing.
-    \end{description}
+\item[\texttt{enter}] try to show  plot
+ \item[\texttt{p}]    previous plot (10 plots saved) 
+ \item[\texttt{?}] show this help 
+ \item[\texttt{+,-}]  zoom in/out  around the cursor 3/2 times 
+ \item[\texttt{=}]  reset vue 
+ \item[\texttt{r}]  refresh plot 
+ \item[{up, down, left, right}] special keys  to  tanslate   
+ \item[\texttt{3}]  switch 3d/2d plot  keys : 
+  \begin{description} 
+ \item[\texttt{z,Z)}]  focal zoom unzoom
+ \item[\texttt{H,h}]  switch increase or decrease the Z scale of the plot 
+ \item[{mouse motion}]  
+ \item[{- left button}] rotate    
+ \item[{- right button}]      zoom        (ctrl+button on mac) 
+ \item[{- right button +alt}] tanslate    (alt+ctrl+button on mac)
+\end{description}
+ \item[\texttt{a,A}]  increase or decrease the arrow size
+ \item[\texttt{B}] switch between show  border meshes or not
+ \item[\texttt{i,I}]  update or not: the min/max bound of the functions to the window
+ \item[\texttt{n,N}] decrease or increase the number of iso value array 
+ \item[\texttt{b}] switch between black and white or color plotting 
+ \item[\texttt{g}] switch between grey or color plotting 
+ \item[\texttt{f}] switch between filling iso or iso line  
+ \item[\texttt{l}] switch between lighting or not  
+ \item[\texttt{v}] switch between show or not the numerical value of colors 
+ \item[\texttt{m}] switch between show or not  meshes  
+ \item[\texttt{w}] window dump in file ffglutXXXX.ppm 
+ \item[\texttt{*}] keep/unkeep viewpoint for next plot
+ \item[\texttt{k}] complex data / change view type 
+ \item[\texttt{ESC}]  close the graphics process before version 3.22, after  no way to close.
+ \item [otherwise] do nothing.
+ \end{description}
 
 
     \itemtt[ps=]  \index{plot!ps=}  string expression for the name of the file to save the plot in postscript
+    (sorry no save of 3d plot)
     \itemtt[coef=]  \index{plot!coef=} the vector arrow size between arrow unit and domain unit.
-    \itemtt[fill=]  \index{plot!coef=} do a color fill between isovalues.
+    \itemtt[fill=]  \index{plot!coef=} fill  color between iso-values (mandatory of P0 finite element).
      \itemtt[cmm=]  \index{plot!cmm=}string expression to write the graphic window into
      \itemtt[value=]  \index{plot!value=}to plot the value of isolines and the value of vector arrows.
     \itemtt[aspectratio=] \index{plot!aspectratio=}boolean to be sure that the aspect ratio of plot
@@ -9647,7 +10032,29 @@ The parameters are
      where \texttt{hi,si,vi} is the ith color to defined the color table.
     \itemtt[boundary=] \index{plot!boundary=} (bool) to plot or not the boundary of the domain (true by default).
     \itemtt[dim=] \index{plot!dim=} (int)  sets dim of the plot 2d or 3d (2 by default)
-
+	\itemtt[add=]  \texttt{<b>} Not used 
+	\itemtt[prev=]   \texttt{<b>} set the default graphic state to the previous state
+	\itemtt[ech=]   \texttt{<d>} Not used 
+	\itemtt[ZScale=]   \texttt{<d>} Not used 
+	\itemtt[WhiteBackground=]   \texttt{<b>} Not used 
+	\itemtt[OpaqueBorders=]   \texttt{<b>} Not used 
+	\itemtt[BorderAsMesh=]   \texttt{<b>} Not used 
+	\itemtt[ShowMeshes=]   \texttt{<b>} Not used 
+	\itemtt[ColorScheme=]   \texttt{<l>} Not used 
+	\itemtt[ArrowShape=]   \texttt{<l>} Not used 
+	\itemtt[ArrowSize=]   \texttt{<d>} Not used 
+	\itemtt[ComplexDisplay=]   \texttt{<l>} Not used 
+	\itemtt[LabelColors=]   \texttt{<b>} Not used 
+	\itemtt[ShowAxes=]   \texttt{<b>} Not used 
+	\itemtt[CutPlane=]   \texttt{<b>} Not used 
+	\itemtt[CameraPosition=]    Not used 
+	\itemtt[CameraFocalPoint=]   Not used 
+	\itemtt[CameraViewUp=]   Not used 
+	\itemtt[CameraViewAngle=]   \texttt{<d>} Not used 
+	\itemtt[CameraClippingRange=]   Not used 
+	\itemtt[CutPlaneOrigin=]   Not used 
+	\itemtt[CutPlaneNormal=]   Not used 
+	\itemtt[WindowIndex=]  set glut window for display for multi windows graphics.   
 \end{description}
 For example: \index{plot!cut}
 \bFF
@@ -9754,7 +10161,7 @@ Now with version 3.2 or better
 @mesh Th=square(10,10,[2*x-1,2*y-1]);
 @fespace Vh(Th,P1);
 Vh u=2-x*x-y*y;
-@medit("mm",u);
+@medit("mm",Th,u);
 \eFF
 
 \index{medit}\index{exec}
@@ -9780,7 +10187,17 @@ Vh u=2-x*x-y*y;
 
 
 
-\section{Algorithms}
+%\section{Algorithms}
+
+% The complete example is in \texttt{algo.edp} file.
+
+\section{Algorithms and Optimization}
+
+\newcommand{\MyInt}[2]{\displaystyle{\int_{#1} #2 } }
+\newcommand{\rhotp}{\rho(\theta,\phi)}
+\newcommand{\tp}{(\theta,\phi)}
+\newcommand{\dtheta}{\partial_{\theta}}
+\newcommand{\dphi}{\partial_{\phi}}
 
  The complete example is in \texttt{algo.edp} file.
 
@@ -9955,19 +10372,26 @@ LinearGMRES($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsil
 \end{quote}
 For detail of these algorithms, refer to \cite{Lucquin}[Chapter IV, 1.3].
 
-\subsection{Optimization}
+\subsection{Algorithms for Unconstrained Optimization}
 Two algorithms of
 COOOL  a package \cite{coool} are interfaced with
 the Newton Raphson method  (call \texttt{Newton}) and
 the  \texttt{BFGS} method. \index{Newton}\index{BFGS}
-Be careful of these algorithms, because their
-implementation use full matrices.
+These two ones are directly available in FreeFem (no dynamical link to load).
+Be careful with these algorithms, because their
+implementation uses full matrices. We also provide several
+optimization algorithms from the NLopt library  \cite{nlopt} as well 
+as an interface for Hansen's  implementation of CMAES 
+(a MPI version of this one is also available). These last algorithms can
+be found as dynamical links in the \texttt{example++-load} folder
+as the \texttt{ff-NLopt} and \texttt{CMA\_ES} files (\texttt{CMA\_ES\_MPI}
+from the \texttt{example++-mpi} folder for the mpi version).
 
-Example of utilization
+\subsubsection{Example of utilization for BFGS or CMAES}
 %\begin{example}[{algo.edp}
 \bFF
-  real[int] b(10),u(10);
-  func @real J(@real[int] & u)
+  @real[int] b(10),u(10);
+  @func @real J(@real[int] & u)
     {
       @real s=0;
       @for (@int i=0;i<u.n;i++)
@@ -9991,7 +10415,1534 @@ Example of utilization
 \eFF
 %\end{example}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Using the CMA evolution strategy is almost the same, except that, as it is
+a derivative free optimizer, the \texttt{dJ} argument is omitted and there are
+some other named parameters to control the behaviour of the algorithm. With the same 
+objective function as above, an example of utilization would be (see \texttt{cmaes-VarIneq.edp} for a complete example):
+\bFF
+  @load "ff-cmaes"
+  ... //define J, u and all here
+  @real min = cmaes(J,u,stopTolFun=1e-6,stopMaxIter=3000);
+  @cout << "minimal value is " << min << " for u = " << u << @endl;
+\eFF
+This algorithm works with a normal multivariate distribution in the parameters
+space and try to adapt its covariance matrix using the information provides by
+the successive function evaluations (see \cite{hansen} for more details). Thus, some specific parameters can be passed
+to control the starting distribution, size of the sample generations etc... Named parameters
+for this are the following :
+\index{CMAES}
+\begin{description}
+
+    \item[\texttt{seed=}] Seed for random number generator  \index{CMAES!seed=}
+    ({\tt val} is an integer). No specified value will lead to a clock based seed initialization.
+    
+    \item[\texttt{initialStdDev=}] Value for the standard deviations of the initial covariance matrix \index{CMAES!initialStdDev=}
+    ({\tt val} is a real). If the value $\sigma$ is passed, the initial covariance matrix will be set to $\sigma I$. The 
+            expected initial distance between initial $X$ and the $argmin$
+            should be roughly initialStdDev. Default is $0.3$.
+    
+    \item[\texttt{initialStdDevs=}] Same as above except that the argument is an array allowing to set a value of the initial standard deviation
+    for each parameter. Entries differing by several orders of magnitude should be avoided (if it can't be, try rescaling the problem).
+    
+    \item[\texttt{stopTolFun=}]  Stops the algorithm if function values differences are smaller than the passed one, default is $10^{-12}$.
+    
+    \item[\texttt{stopTolFunHist=}]  Stops the algorithm if function value differences of the best values are smaller than the passed one, default is $0$ (unused).
+    
+    \item[\texttt{stopTolX=}]  Stopping criteria triggered if step sizes in the parameters space are 
+                 smaller than this real value, default is $0$.
+                 
+    \item[\texttt{stopTolXFactor=}]  Stopping criteria triggered when the standard deviation increases more than this value. The default value is $10^{3}$.
+       
+    \item[\texttt{stopMaxFunEval=}]  Stops the algorithm when {\tt stopMaxFunEval} function evaluations have been done. Set to $900(n+3)^{2}$ by default, where $n$ is the parameters space dimension .
+                 
+    \item[\texttt{stopMaxIter=}]  Integer stopping the search when {\tt stopMaxIter} generations has been sampled. Unused by default.
+    
+    \item[\texttt{popsize=}]  Integer value used to change the sample size. The default value is $4+ \lfloor 3\ln (n) \rfloor$, see \cite{hansen}
+    for more details. Increasing the population size usually improves the global search capabilities at the cost of an at most linear reduction of the convergence speed with respect to {\tt popsize}.
+    
+    \item[\texttt{paramFile=}] This {\tt string} type parameter allows the user to pass all the parameters using an extern file as in Hansen's original code. More parameters related to the CMA-ES algorithm 
+    can be changed with this file. A sample of it can be found in the {\tt examples++-load/ffCMAES/} folder under the name {\tt initials.par}. Note that the parameters passed to the CMAES function in the 
+    FreeFem script will be ignored if an input parameters file is given.
+                 
+\end{description}
+
+
+
+
+
+\subsection{IPOPT}
+The {\tt ff-Ipopt} package is an interface for the IPOPT \cite{ipopt} optimizer. IPOPT is a software library for large scale, non-linear, constrained optimization. Detailed informations about it are in \cite{ipopt} and \url{https://projects.coin-or.org/Ipopt}. It implements a primal-dual interior point method along with filter method based line searchs. 
+IPOPT need a direct sparse symmetric linear solver. If your version of FreeFem has been compiled with the {\tt --enable-downlad} tag, it will automatically be linked with a sequential version of MUMPS. An alternative to MUMPS would be to download the HSL subroutines (see \url{http://www.coin-or.org/Ipopt/documentation/node16.html}) and place them in the {\tt /ipopt/Ipopt-3.10.2/ThirdParty/HSL} directory of the FreeFem++ downloads folder before compiling.
+
+\subsubsection{Short description of the algorithm}
+ In this section, we give a very brief glimpse at the underlying mathematics of IPOPT. For a deeper introduction on interior methods for nonlinear smooth optimization, one can consult \cite{ipintro}, or \cite{ipopt} for more IPOPT specific elements. For convenience, let us assume that the minimization problem is the following, given a function $f:\mathbb{R}^{n}\mapsto\mathbb{R}$, find :
+ \begin{equation}\label{minimproblem}
+ \begin{array} {c}
+ x_{0} = \underset{x\in V}{\operatorname{argmin}} f(x) \\
+ \mathrm{with}\ V = \left\lbrace x\in\R^{n} \vert \forall i, 1\leq i \leq m, c_{i}(x) \geq 0 \right\rbrace 
+ \end{array}
+ \end{equation}
+Generalization to mixed equality/inequality constraints can be found in \cite{ipintro} or \cite{ipopt}. The $f$ function as well as the constraints $c$ should be twice-continuously differentiable.
+
+
+%For this optimization problem, the first order Karush-Kuhn-Tucker (KKT) conditions, hold at the point $x^{*}$ if $\exists \lambda^{*}\in\R^{m}$ such that :
+%\begin{equation}\label{KKT}
+%\begin{array}{r c l}
+%	\forall i,\  c_{i}(x^{*})& \geq &0 \\
+%	\nabla f(x^{*}) & = & J_{c}(x^{*})^{T}\lambda^{*}\\
+%	\forall i,\ \lambda_{i}^{*} & \geq & 0 \\
+%	c(x^{*})\cdot\lambda^{*} &=&0
+%\end{array}
+%\end{equation}
+%When certain assumptions upon the constraints are met (see \cite{ipintro}), these are necessary conditions for a point to be a solution of \ref{minimproblem}.
+As a barrier method, interior point algorithms try to find a Karush-Kuhn-Tucker point for \ref{minimproblem} by solving a sequence of unconstrained problems of the form :
+\begin{equation}\label{barrier}
+\mathrm{for\ a\ given\ }\mu > 0,\ \mathrm{find}\ x_{\mu} = \underset{x\in\R^{n}}{\operatorname{argmin}}\  f(x) - \displaystyle{\mu\sum_{i=1}^{m} \ln c_{i}(x)}
+\end{equation}
+If the sequence of barrier parameters $\mu$ converge to 0, intuition suggests that the sequence of minimizers of \ref{barrier} converge to a local constrained minimizer of \ref{minimproblem}. For a given $\mu$, \ref{barrier} is solved by finding $x_{\mu}\in\R^{n}$ such that :
+\begin{equation}\label{muproblem}
+ \nabla f(x_{\mu}) - \displaystyle{\sum_{i=1}^{m}\frac{\mu}{c_{i}(x_{\mu})}\nabla c_{i}(x_{\mu})}
+ = \nabla f(x_{\mu}) - J_{c}(x_{\mu})^{T}
+ \left(\begin{array}{c} \mu / c_{1}(x_{\mu}) \\ \vdots \\ \mu / c_{m}(x_{\mu}) \end{array}\right) = 0
+\end{equation}
+If we call $\lambda_{\mu}\in\R^{m}$ the vector of components $\lambda_{\mu,i} = \mu / c_{i}(x_{\mu})$, the upper condition can then be written as :
+\begin{equation}\label{muproblemlambda}
+ \nabla f(x_{\mu}) - J_{c}(x_{\mu})^{T}\lambda_{\mu}= 0
+\end{equation}
+It should remind something of the Lagrange multipliers, and indeed, when certain assumptions are met, when $\mu\rightarrow 0$, the $\lambda_{\mu, i}$ converge toward some suitable Lagrange multipliers for the KKT conditions. 
+
+
+Equation \ref{muproblemlambda} is solved by performing a Newton method  in order to find a solution of \ref{muproblem} for each of the decreasing values of $\mu$. Some order 2 conditions are also taken into account to avoid convergence to local maximizer, see \cite{ipintro} for precision about them. In a classical IP algorithm, the Newton method is directly applied to \ref{muproblem}. This is in most case inefficient due to frequent computation of infeasible points. These difficulties are avoided in Primal-Dual interior point methods where \ref{muproblem} is transformed into an extended system where $\lambda_{\mu}$ is treated as an unknown (here again, details can be found in \cite{ipintro}).
+
+
+More IPOPT specific features or implementation details can be found in \cite{ipopt}. We will just retain that IPOPT is a smart Newton method for solving constrained optimization problem. Thus, the optimization process requires expressions of all derivatives up to the order 2 of the fitness function as well as those of the constraints. For problems whose hessian are difficult to compute or leads to high dimension dense matrices, it is possible to use a BFGS approximation of these objects at the cost of a much slower convergence rate.
+
+
+\subsubsection{IPOPT in FreeFem++}
+Calling the IPOPT optimizer in a FreeFem++ script is done with the {\tt IPOPT} function included in the {\tt ff-Ipopt} dynamic library. IPOPT is designed to solve constrained minimization problem in the form :
+
+ \begin{equation}\label{ipoptproblem}
+ \begin{array} {r l}
+ 	\mathrm{find}& x_{0} = \underset{x\in\R^{n}}{\operatorname{argmin}} f(x) \\
+ 	\mathrm{s.t.}&\left\lbrace \begin{array}{l r}  \forall i\leq n,\ x_{i}^{\mathrm{lb}}\leq x_{i}\leq x_{i}^{\mathrm{ub}} & \mathrm{\  (simple\ bounds)} \\
+	   \forall i\leq m,\ c_{i}^{\mathrm{lb}}\leq c_{i}(x)\leq c_{i}^{\mathrm{ub}} & \mathrm{(constraints\ functions)}
+ \end{array}\right. \\
+ 
+ \end{array}
+ \end{equation}
+Where $\mathrm{ub}$ and $\mathrm{lb}$ stand for "upper bound" and "lower bound". If for some $i, 1\leq i\leq m$ we have $c_{i}^{\mathrm{lb}} = c_{i}^{\mathrm{ub}}$, it means that $c_{i}$ is an equality constraint, and an inequality one if $c_{i}^{\mathrm{lb}} < c_{i}^{\mathrm{ub}}$.
+
+
+There are different ways to pass the fitness function and constraints. The more general one is to define the functions using the keyword {\tt func}. Any returned matrix must be a sparse one (type {\tt matrix}, not a {\tt real[int,int]}) :
+\bFF
+  @func @real J(@real[@int] &X) {...} //Fitness Function, returns a scalar
+  @func @real[@int] gradJ(@real[@int] &X) {...} //Gradient is a vector
+  
+  @func @real[int] C(@real[@int] &X) {...} //Constraints
+  @func @matrix jacC(@real[@int] &X) {...} //Constraints jacobian
+\eFF
+\textbf{Warning 1} : in the current version of FreeFem++, returning a {\tt matrix} object local to a function block leads to undefined results. For each sparse matrix returning function you define, an extern matrix object has to be declared, whose associated function will overwrite and return on each call. Here is an example for {\tt jacC} :
+\bFF
+  @matrix jacCBuffer; //just declare, no need to define yet
+  @func @matrix jacC(@real[@int] &X)
+  {
+    ...//fill jacCBuffer
+    @return jacCBuffer;
+  }
+\eFF
+\textbf{Warning 2}: IPOPT requires the structure of each matrix at the initialization of the algorithm. Some errors may occur if the matrices are not constant and are built with the {\tt matrix A = [I,J,C]} syntax, or with an intermediary full matrix ({\tt real[int,int]}), because any null coefficient is discarded during the construction of the sparse matrix. It is also the case when making matrices linear combinations, for which any zero coefficient will result in the suppression of the matrix from the combination. Some controls are available to avoid such problems. Check the named parameters descriptions ({\tt checkindex}, {\tt structhess} and {\tt structjac} can help). We strongly advice to use {\tt varf} as much as possible for the matrix forging.
+\newline
+
+The hessian returning function is somewhat different because it has to be the hessian of the lagrangian function : $(x,\sigma_{f},\lambda)\mapsto \sigma_{f}\nabla^{2}f(x) + \displaystyle{\sum_{i=1}^{m}\lambda_{i}\nabla^{2}c_{i}(x)}$ where $\lambda\in\R^{m}$ and $\sigma\in\R$. Your hessian function should then have the following prototype :
+\bFF
+  @matrix hessianLBuffer; //just to keep it in mind
+  @func @matrix hessianL(@real[@int] &X,@real sigma,@real[@int] &lambda) {...}
+\eFF
+If the constraints functions are all affine, or if there are only simple bounds constraints or no constraint at all, the lagrangian hessian is equal to the fitness function hessian, one can then omit the {\tt sigma} and {\tt lambda} parameters :
+\bFF
+  @matrix hessianJBuffer;
+  @func @matrix hessianJ(@real[@int] &X) {...} //Hessian prototype when constraints are affine
+\eFF
+When these functions are defined, IPOPT is called this way :
+\bFF
+  @real[@int] Xi = ... ; //starting point
+  @IPOPT(J,gradJ,hessianL,C,jacC,Xi, /*some named parameters*/ );
+\eFF
+If the hessian is omitted, the interface will tell IPOPT to use the (L)BFGS approximation (it can also be enabled with a named parameter, see further). Simple bounds or unconstrained problems do not require the constraints part, so the following expressions are valid :
+\bFF
+  @IPOPT(J,gradJ,C,jacC,Xi, ... ); //IPOPT with BFGS  
+  @IPOPT(J,gradJ,hessianJ,Xi, ... );//Newton IPOPT without constraints
+  @IPOPT(J,gradJ,Xi, ... );//BFGS, no constraints
+\eFF
+
+Simple bounds are passed using the {\tt lb} and {\tt ub} named parameters, while constraints bounds are passed with the {\tt clb} and {\tt cub} ones. Unboundedness in some directions can be achieved by using the $1e^{19}$ and $-1e^{19}$ values that IPOPT recognizes as $+\infty$ and $-\infty$ :
+\bFF
+  @real[@int] xlb(n),xub(n),clb(m),cub(m);
+  ... //fill the arrays...
+  @IPOPT(J,gradJ,hessianL,C,jacC,Xi,@lb=xlb,@ub=xub,@clb=clb,@cub=cub,  /*some other named parameters*/ );
+\eFF
+
+\textbf{P2 fitness function and affine constraints function :} In the case where the fitness function or constraints function can be expressed respectively in the following forms :
+$$
+\begin{array}{c c}
+	\forall x\in\R^{n},\  f(x) = \frac{1}{2}\left\langle Ax,x \right\rangle + \left\langle b,x\right\rangle & (A,b)\in\mathcal{M}_{n,n}(\R)\times\R^{n} \\
+	\mathrm{or} ,\ C(x) = Ax + b & (A,b)\in\mathcal{M}_{n,m}(\R)\times\R^{m} 
+\end{array}
+$$
+where $A$ and $b$ are constant, it is possible to directly pass the $(A,b)$ pair instead of defining 3 (or 2) functions. It also indicates to IPOPT that some objects are constant and that they have to be evaluated only once, thus avoiding multiple copies of the same matrix. The syntax is :
+\bFF
+  //Affine constraints with "standard" fitness function
+  @matrix A= ... ;//Linear part of the constraints
+  @real[@int] b = ... ; //Constant part of constraints
+  @IPOPT(J,gradJ,hessianJ, [A,b] ,Xi, /*bounds and named params*/); 
+  //[b,A] would work as well... Scatterbrains pampering...
+\eFF
+Note that if you define the constraints in this way, they doesn't contribute to the hessian, so the hessian should only take one {\tt real[int]} as argument. 
+\bFF
+  //Affine constraints and P2 fitness func:
+  @matrix A= ... ;//Bilinear form matrix
+  @real[@int] b = ... ;//Linear contribution to f
+  @matrix Ac= ... ;//Linear part of the constraints
+  @real[@int] bc= ... ;//Constant part of constraints
+  @IPOPT([A,b], [Ac,bc] ,Xi, /*bounds and named params*/);
+\eFF
+If both objective and constraints functions are given this way, it automatically activates the IPOPT {\tt mehrotra\_algorithm} option (better for linear and quadratric programming according to the documentation). Otherwise, this option can only be set through the option file (see the named parameters section). 
+
+A spurious case is the one of defining $f$ in this manner while using standard functions for the constraints :
+\bFF
+  @matrix A= ... ;//Bilinear form matrix
+  @real[@int] b = ... ;//Linear contribution to f
+  @func @real[int] C(@real[@int] &X) {...} //Constraints
+  @func @matrix jacC(@real[@int] &X) {...} //Constraints jacobian
+  @IPOPT([A,b],C,jacC,Xi, /*bounds and named params*/);
+\eFF
+Indeed, when passing {\tt [A,b]} in order to define $f$, the lagrangian hessian is automatically build has the constant $x \mapsto A$ function, with no way to add possible constraints contributions, leading to incorrect second order derivatives. So, a problem should be defined like that in only two cases : 1) constraints are nonlinear but you want to use the BFGS mode (then add {\tt bfgs=1} to the named parameter), 2) constraints are affine, but in this case, why not passing them in the same way?
+
+Here are some other valid definitions of the problem (cases when $f$ is a pure quadratic or linear form, or $C$ a pure linear function, etc...) :
+\bFF
+  //Pure quadratic f - A is a matrix:
+  @IPOPT(A, /*constraints args*/, Xi, /*bounds and named params*/);
+  //Pure linear f - b i a real[int] :
+  @IPOPT(b, /*constraints args*/, Xi, /*bounds and named params*/);
+  //linear constraints - Ac is a matrix
+  @IPOPT(/*fitness func args*/, Ac, Xi, /*bounds and named params*/);
+\eFF
+
+\textbf{Returned Value :} The {\tt IPOPT} function returns an error code of type {\tt int}. A zero value is obtained when the algorithm succeeds and positive values reflects the fact that IPOPT encounters minor troubles. Negative values reveals more problematic cases. The associated IPOPT return tags are listed in the table below. The \href{https://projects.coin-or.org/Ipopt/browser/stable/3.10/Ipopt/doc/documentation.pdf?format=raw}{IPOPT pdf documentation} provides more accurate description of these return status :\newline
+
+\begin{tabular}{|cl|cl|}
+   \hline
+   \multicolumn{2}{|c|}{Success}  & \multicolumn{2}{c|}{Failures} \\
+   \hline
+   0 & {\tt Solve\_Succeeded} & -1 & {\tt Maximum\_Iterations\_Exceeded}  \\
+   1 & {\tt Solved\_To\_Acceptable\_Level} & -2 &{\tt Restoration\_Failed} \\
+   2 & {\tt Infeasible\_Problem\_Detected} & -3 & {\tt Error\_In\_Step\_Computation} \\
+   3 & {\tt Search\_Direction\_Becomes\_Too\_Small} & -4 & {\tt Maximum\_CpuTime\_Exceeded} \\
+   4 & {\tt Diverging\_Iterates} & & \\
+   5 & {\tt User\_Requested\_Stop} & & \\
+   6 & {\tt Feasible\_Point\_Found} & & \\
+   \hline
+   \multicolumn{2}{|c|}{Problem definition issues} & \multicolumn{2}{c|}{Critical errors} \\
+   \hline
+   -10 & {\tt Not\_Enough\_Degrees\_Of\_Freedom} & -100 & {\tt Unrecoverable\_Exception} \\
+   -11 & {\tt Invalid\_Problem\_Definition} & -101 & {\tt NonIpopt\_Exception\_Thrown} \\
+   -12 & {\tt Invalid\_Option} & -102 & {\tt Insufficient\_Memory}\\
+   -13 & {\tt Invalid\_Number\_Detected} & -199 & {\tt Internal\_Error} \\
+   \hline
+\end{tabular}
+\newline
+
+
+\textbf{Named Parameters :} The available named parameters in this interface are those we thought to be the most subject to variations from one optimization to another, plus a few ones that are interface specific. Though, as one could see at \url{http://www.coin-or.org/Ipopt/documentation/node59.html}, there are many parameters that can be changed within IPOPT, affecting the algorithm behaviour. These parameters can still be controlled by placing an option file in the execution directory. Note that IPOPT's \href{https://projects.coin-or.org/Ipopt/browser/stable/3.10/Ipopt/doc/documentation.pdf?format=raw}{pdf documentation} may provides more informations than the previously mentioned online version for certain parameters. The in-script available parameters are :
+
+\begin{description}
+  \item[\texttt{lb}, \texttt{ub} :] {\tt real[int]} for lower and upper simple bounds upon the search variables, must be of size $n$ (search space dimension). If two components of same index in these arrays are equal then the corresponding search variable is fixed. By default IPOPT will remove any fixed variable from the optimization process and always use the fixed value when calling functions. It can be changed using the {\tt fixedvar} parameter.
+  \item[\texttt{clb}, \texttt{cub} :] {\tt real[int]} of size $m$ (number of constraints) for lower and upper constraints bounds. Equality between two components of same index $i$ in {\tt clb} and {\tt cub} reflect an equality constraint.
+  \item[\texttt{structjacc} :] To pass the greatest possible structure (indexes of non null coefficients) of the constraints jacobian under the form {\tt [I,J]} where {\tt I} and {\tt J} are two integer arrays. If not defined, the structure of the constraints jacobian, evaluated in {\tt Xi}, is used (no issue if the jacobian is constant or always defined with the same {\tt varf}, hazardous if it is with triplet array or if a full matrix is involved).
+  \item[\texttt{structhess} :] Same as above but for the hessian function (unused if $f$ is P2 or less and constraints are affine). Here again, keep in mind that it is the hessian of the lagrangian function (which is equal to the hessian of $f$ only if constraints are affine). If no structure is given with this parameter, the lagrangian hessian is evaluated on the starting point, with $\sigma=1$ and $\lambda = (1,1,\dots,1)$ (it is safe if all the constraints and fitness function hessians are constant or build with {\tt varf}, and here again less reliable if built with triplet array or full matrix).
+  \item[\texttt{checkindex} :] A {\tt bool} that triggers an index dichotomic search when matrices are copied from FreeFem functions to IPOPT arrays.  It is used to avoid wrong index matching when some null coefficients are removed from the matrices by FreeFem. It will not solve the problems arising when a too small structure has been given at the initialization of the algorithm. Enabled by default (except in cases where all matrices are obviously constant).
+  \item[\texttt{warmstart} :] If set to {\tt true}, the constraints dual variables $\lambda$, and simple bounds dual variables are initialized with the values of the arrays passed to {\tt lm}, {\tt lz} and {\tt uz} named parameters (see below).
+  \item[\texttt{lm} :]  {\tt real[int]} of size $m$, which is used  to get the final values of the constraints dual variables $\lambda$ and/or initialize them in case of a warm start (the passed array is also updated to the last dual variables values at the end of the algorithm).
+  \item[\texttt{lz}, \texttt{uz} :] {\tt real[int]} of size $n$ to get the final values and/or initialize (in case of warm start) the dual variables associated to simple bounds.
+  \item[\texttt{tol} :] {\tt real}, convergence tolerance for the algorithm, the default value is $10^{-8}$.
+  \item[\texttt{maxiter} :] {\tt int}, maximum number of iterations with 3000 as default value.
+  \item[\texttt{maxcputime} :] {\tt real} value, maximum runtime duration. Default is $10^{6}$ (almost 11 days and a half).
+  \item[\texttt{bfgs} :] {\tt bool} enabling or not the (low-storage) BFGS approximation of the lagrangian hessian. It is set to false by default, unless there is no way to compute the hessian with the functions that have been passed to IPOPT.
+  \item[\texttt{derivativetest} :] Used to perform a comparison of the derivatives given to IPOPT with finite differences computation. The possible {\tt string} values are : {\tt "none"} (default), {\tt "first-order"}, {\tt "second-order"} and {\tt "only-second-order"}. The associated derivative error tolerance can be changed via the option file. One should not care about any error given by it before having tried, and failed, to perform a first optimization.
+  \item[\texttt{dth} : ] Perturbation parameter for the derivative test computations with finite differences. Set by default to $10^{-8}$.
+  \item[\texttt{dttol} :] Tolerance value for the derivative test error detection (default value unknown yet, maybe $10^{-5}$).
+  \item[\texttt{optfile} :] {\tt string} parameter to specify the IPOPT option file name. IPOPT will look for a {\tt ipopt.opt} file by default. Options set in the file will overwrite those defined in the FreeFem script.
+  \item[\texttt{printlevel} :] An {\tt int} to control IPOPT output print level, set to 5 by default, the possible values are from 0 to 12. A description of the output informations is available in the \href{https://projects.coin-or.org/Ipopt/browser/stable/3.10/Ipopt/doc/documentation.pdf?format=raw}{pdf documentation} of IPOPT.
+  \item[\texttt{fixedvar} :] {\tt string} for the definition of simple bounds equality constraints treatment : use {\tt "make\_parameter"} (default value) to simply remove them from the optimization process (the functions will always be evaluated with the fixed value for those variables), {\tt "make\_constraint"} to treat them as any other constraint or {\tt "relax\_bounds"} to relax fixing bound constraints.
+  \item[\texttt{mustrategy} :] a {\tt string} to choose the update strategy for the barrier parameter $\mu$. The two possible tags are {\tt "monotone"}, to use the monotone (Fiacco-McCormick) strategy, or {\tt "adaptive"} (default setting).
+  \item[\texttt{muinit} :] {\tt real} positive value for the barrier parameter initialization. It is only relevant when {\tt mustrategy} has been set to {\tt monotone}.
+  \item[\texttt{pivtol} :] {\tt real} value to set the pivot tolerance for the linear solver. A smaller number pivots for sparsity, a larger number pivots for stability. The value has to be in the $[0,1]$ interval and is set to $10^{-6}$  by default.
+  \item[\texttt{brf} :] Bounds relax factor : before starting the optimization, the bounds given by the user are relaxed. This option sets the factor for this relaxation. If it is set to zero, then the bounds relaxation is disabled. This {\tt real} has to be positive and its default value is $10^{-8}$.
+  \item[\texttt{objvalue} :] An identifier to a {\tt real} type variable to get the last value of the objective function (best value in case of succes).
+  
+\end{description}
+
+\subsection{Some short examples using IPOPT}
+\begin{example}[IpoptVI.edp]
+A very simple example consisting in, given two functions $f $ and $g$ (defined on $\Omega\subset\R^{2}$),  minimizing $J(u) = \displaystyle{\frac{1}{2}\int_{\Omega} \vert\nabla u\vert^{2}  - \int_{\Omega}fu}\ $, with $u\leq g$ almost everywhere :
+\bFF
+  @load "ff-Ipopt"; //load the interface
+  @int nn=20; //mesh quality
+  @mesh Th=@square(nn,nn); //build a square mesh
+ @ fespace Vh(Th,P1); //finite element space
+
+  @func f = 1.; //rhs function
+  @real r=0.03,s=0.1; //some parameters for g
+ @ func g = r - r/2*exp(-0.5*(@square(@x-0.5)+square(@y-0.5))/ @square(s));
+//g is constant minus a gaussian
+
+  @macro Grad(u) [@dx(u),@dy(u)]//the gradient operator
+  @varf vP(u,v) = @int2d(Th)(Grad(u)'*Grad(v)) - @int2d(Th)(f*v);
+\eFF
+Here we build the matrix and second member associated to the functional to minimize once and for all. The {\tt [A,b]} syntax for the fitness function is then used to pass it to IPOPT.
+\bFF
+  @matrix A = vP(Vh,Vh,solver=CG);
+  @real[@int] b = vP(0,Vh);
+\eFF
+
+We use simple bounds to impose the boundary condition $u=0$ on $\partial\Omega$, as well as the $u\leq g$ condition.
+\bFF
+  Vh lb=-1.e19; //lower-unbounded in the interior
+  Vh ub=g;//upper-bounded by g in the interior
+  @varf vGamma(u,v) = @on(1,2,3,4,u=1); 
+  @real[@int] onGamma=vGamma(0,Vh);
+  ub[] = onGamma ? 0. : ub[]; //enforcing the boundary condition
+  lb[] = onGamma ? 0. : lb[]; 
+
+  Vh u=0; //starting point
+  @IPOPT([A,b],u[],@lb=lb[],@ub=ub[]);//solve the problem
+  @plot(u,@wait=1);
+\eFF
+\end{example}
+
+\begin{example}[IpoptVI2.edp]
+Let $\Omega$ be a domain of $\mathbb{R}^{2}$, $f_{1}, f_{2}\in L^{2}(\Omega)$ and $g_{1}, g_{2} \in L^{2}(\partial\Omega)$ four given functions with $g_{1}\leq g_{2}$ almost everywhere.
+We define the space : 
+$$V = \left\lbrace (v_{1},v_{2})\in H^{1}(\Omega)^{2} ; v_{1}\vert_{\partial\Omega}=g_{1}, v_{2}\vert_{\partial\Omega}=g_{2}, v_{1}\leq v_{2}\ \mathrm{a.e.}\ \right\rbrace$$
+as well as the functional $J:H^{1}(\Omega)^{2}\longrightarrow \mathbb{R}$:
+$$J(v_{1},v_{2}) = \displaystyle{\frac{1}{2}\int_{\Omega}\vert\nabla v_{1}\vert^{2} - \int_{\Omega} f_{1}v_{1} +  \frac{1}{2}\int_{\Omega}\vert\nabla v_{2}\vert^{2} - \int_{\Omega} f_{2}v_{2}}$$
+The problem consists in finding (numerically) two functions $(u_{1},u_{2}) = \underset{(v_{1},v_{2})\in V}{\operatorname{argmin}} J(v_{1},v_{2}) $. 
+\bFF
+@load "ff-IpOpt";
+
+@mesh Th=@square(10,10);
+@fespace Vh(Th,[P1,P1] );
+@fespace Wh(Th,[P1] );
+@int iter=0;
+
+@func f1 =  10;//right hand sides
+@func f2 = -15;
+@func g1 = -0.1;//Boundary conditions functions
+@func g2 =  0.1;
+
+@while(++iter)//mesh adaptation loop
+{
+@macro Grad(u) [@dx(u),@dy(u)]//gradient macro
+@varf vP([u1,u2],[v1,v2]) = @int2d(Th)(Grad(u1)'*Grad(v1)+ Grad(u2)'*Grad(v2)) 
+- @int2d(Th)(f1*v1+f2*v2);
+
+@matrix A = vP(Vh,Vh);//Fitness function matrix...
+@real[@int] b = vP(0,Vh);//and linear form
+
+@int[@int] II1=[0],II2=[1];//Constraints matrix
+@matrix C1 =  @interpolate (Wh,Vh, @U2Vc=II1);
+@matrix C2 =  @interpolate (Wh,Vh, @U2Vc=II2);
+@matrix CC = -1*C1 + C2; // u2 - u1 >0
+Wh cl=0;//constraints lower bounds (no upper bounds)
+
+//Boundary conditions
+@varf vGamma([u1,u2],[v1,v2]) = @on(1,2,3,4,u1=1,u2=1);
+@real[@int] onGamma=vGamma(0,Vh);
+Vh [ub1,ub2]=[g1,g2];
+Vh [lb1,lb2]=[g1,g2];
+ub1[] = onGamma ? ub1[] : 1e19  ; //Unbounded in interior
+lb1[] = onGamma ? lb1[] : -1e19  ;
+
+Vh [u1,u2]=[0,0];//starting point
+
+@IPOPT([b,A],CC,u1[],@lb=lb1[],@ub=ub1[],@clb=cl[]);
+
+@plot(u1,u2,@wait=1,@nbiso=60,@dim=3);
+@if(iter > 1) @break;
+Th= @adaptmesh(Th,[u1,u2],@err=0.004,@nbvx=100000);
+}
+\eFF
+\begin{figure}
+\includegraphics[width=8cm] {VarIneqFill}
+\includegraphics[width=8cm] {VarIneqIso}
+\caption{Numerical Approximation of the Variational Inequality \label{VarIneqF}}
+\end{figure}
+
+\end{example}
+
+\subsection{3D constrained minimal surface with IPOPT}
+
+\subsubsection{Area and volume expressions}
+This example aimed at numerically solving some constrained minimal surface problems with the IPOPT algorithm. We restrain to $C^{k}$ ($k\geq 1$), closed, spherically parametrizable surfaces, i.e. surfaces $S$ such that :
+$$ \exists \rho \in C^{k}([0,2\pi ]\times[0,\pi] ) \vert 
+S = \left\lbrace 
+X = \left(
+\begin{array} {c}
+ \rhotp \\
+ 0 \\
+ 0
+\end{array}
+\right)
+, (\theta,\phi) \in [0,2\pi ]\times[0,\pi]
+  \right\rbrace$$
+Where the components are expressed in the spherical coordinate system. Let's call $\Omega$ the  $[0,2\pi ]\times[0,\pi]$ angular parameters set. In order to exclude self crossing and opened shapes, the following assumptions upon $\rho$ are made :
+$$ \rho \geq 0\ \ \mathrm{and}\ \ \forall \phi, \rho(0,\phi) = \rho(2\pi,\phi)$$
+For a given function $\rho$ the first fundamental form (the metric) of the defined surface has the following matrix representation :
+\begin{equation}\label{msfff}
+G = 
+\left(
+\begin{array}{c c}
+	\rho^{2}\sin^{2}(\phi) + (\dtheta\rho)^{2} &\dtheta\rho\dphi\rho \\
+	\dtheta\rho\dphi\rho & \rho^{2} + (\dphi\rho)^{2} \\
+\end{array}
+\right)
+\end{equation}
+This metric is used to express the area of the surface. Let $g=\det(G)$, then we have :
+\begin{equation}\label{msarea}
+	\mathcal{A}(\rho) 
+	= \MyInt{\Omega}{\left\| \dtheta X \wedge \dphi X \right\|}
+	=\MyInt{\Omega}{\sqrt{g}}
+	=\MyInt{\Omega}{\sqrt{ \rho^{2}(\dtheta\rho)^{2}  + \rho^{4}\sin^{2}(\phi) + \rho^{2}(\dphi\rho)^{2}\sin^{2}(\phi)}d\theta d\phi}
+\end{equation}
+The volume of the space enclosed within the shape is easier to express :
+\begin{equation}\label{msvolume}
+	\mathcal{V}(\rho)
+	= \MyInt{\Omega}{\int_{0}^{\rhotp} r^{2}\sin(\phi)  dr d\theta d\phi}
+	= \frac{1}{3}\MyInt{\Omega}{\rho^{3} \sin(\phi) d\theta d\phi}
+\end{equation}
+
+
+\subsubsection{Derivatives}
+In order to use a newton based interior point optimization algorithm, one must be able to evaluate the derivatives of $\mathcal{A}$ and $\mathcal{V}$ with respect to $rho$. Concerning the area we have the following result :
+$$
+	\forall v\in C^{1}(\Omega) \ , \ \langle d\mathcal{A}(\rho),v\rangle
+	= \MyInt{\Omega}{\frac{1}{2} \frac{ d\bar{g}(\rho)(v)}{\sqrt{g}}d\theta d\phi   }
+$$
+Where $\bar{g}$ is the application mapping the $\tp \mapsto g(\theta,\phi)$ scalar field to $\rho$. This leads to the following expression, easy to transpose in a freefem script using :
+\begin{equation}\label{msdarea}
+	\begin{array}{r c l}
+		\forall v\in C^{1}(\Omega) \ , \ \langle d\mathcal{A}(\rho),v\rangle &
+		=  & \MyInt{\Omega}{  \left(2\rho^{3}\sin^{2}(\phi) + \rho(\dtheta\rho)^{2} + \rho(\dphi\rho)^{2}\sin^{2}(\phi) \right) v} \\
+		& &  +\MyInt{\Omega}{\ \rho^{2}\dtheta\rho\dtheta v\ + \ \rho^{2}\dphi\rho\sin^{2}(\phi)\dphi v   }
+	\end{array}
+\end{equation}
+
+With a similar approach, one can derive an expression for second order derivatives. Though comporting no specific difficulties, the detailed calculus are tedious, the result is that 
+these derivatives can be write using a $3\times 3$ matrix $\bm{B}$ whose coefficients are expressed in term of $\rho$ and its derivatives with respect to $\theta$ and $\phi$, such that :
+\begin{equation}\label{msd2area}
+	\forall (w,v)\in C^{1}(\Omega)\ ,\  d^{2}\mathcal{A}(\rho)(w,v) = \MyInt{\Omega}
+	{
+		\left(\begin{array}{c c c} w & \dtheta w &  \dphi w \end{array}\right)
+		\bm{B}
+	}	\left( \begin{array}{c} v \\ \dtheta v \\ \dphi v \end{array} \right) d\theta d\phi
+\end{equation}
+
+Deriving the volume function derivatives is again an easier task. We immediately get the following expressions :
+\begin{equation}\label{msdvolume}
+	\begin{array}{r c l}
+		\forall v\ ,\ \langle d\mathcal{V}(\rho),v\rangle & = & \MyInt{\Omega}{\rho^{2}\sin(\phi)v\ d\theta d\phi} \\
+		\forall w,v\ , d^{2}\mathcal{V}(\rho)(w,v) & = & \MyInt{\Omega}{2\rho\sin(\phi)wv\ d\theta d\phi}
+	\end{array}
+\end{equation}
+
+\subsubsection{The problem and its script :}
+The whole code is available in {\tt IpoptMinSurfVol.edp}. We propose to solve the following problem : 
+
+\begin{example} 
+Given a positive function $\rho_{\mathrm{object}}$ piecewise continuous, and a scalar $\mathcal{V}_{\mathrm{max}} > \mathcal{V}(\rho_{\mathrm{object}})$,
+find $\rho_{0}$ such that :
+$$
+\rho_{0} = \underset{\rho\in C^{1}(\Omega)}{\operatorname{argmin}}\ \mathcal{A}(\rho)\ ,\ \mathrm{s.t.}\  \rho_{0}\geq\rho_{\mathrm{object}} \ \mathrm{and\ } \mathcal{V}(\rho_{0})\leq \mathcal{V}_{\mathrm{max}}
+$$
+\end{example}
+If $\rho_{\mathrm{object}}$ is the spherical parametrization of the surface of a 3-dimensional object (domain) $\mathcal{O}$, it can be interpreted as finding the surface with minimal area enclosing the object with a given maximal volume.
+If $\mathcal{V}_{\mathrm{max}}$ is close to $ \mathcal{V}(\rho_{\mathrm{object}})$, so should be $\rho_{0}$ and $\rho_{\mathrm{object}}$. With higher values of $\mathcal{V}_{\mathrm{max}}$, $\rho$ should 
+be closer to the unconstrained minimal surface surrounding $\mathcal{O}$ which is obtained as soon as $\mathcal{V}_{\mathrm{max}} \geq \frac{4}{3}\pi \|\rho_{\mathrm{object}}\|_{\infty}^{3} $ (sufficient but not necessary).
+\newline
+
+It also could be interesting to solve the same problem with the constraint $\mathcal{V}(\rho_{0})\geq \mathcal{V}_{\mathrm{min}}$ which lead to a sphere when 
+$\mathcal{V}_{\mathrm{min}} \geq \frac{1}{6}\pi \mathrm{diam}(\mathcal{O})^{3} $ and move toward the solution of the unconstrained problem as $\mathcal{V}_{\mathrm{min}}$ decreases.
+\newline
+
+We start by meshing the domain $[0,2\pi ]\times\ [0,\pi ]$, then a periodic P1 finite elements space is defined.
+\bFF
+@load "msh3";
+@load "medit";
+@load "ff-Ipopt";
+
+@int np=40; //initial mesh quality parameter
+@mesh Th = @square(2*np,np,[2*@pi*x,@pi*y]);
+
+@fespace Vh(Th,@P1,@periodic=[[2,y],[4,y]]);
+Vh startshape=5; //initial shape
+\eFF
+We create some finite element functions whose underlying arrays will be used to store the values of dual variables associated to all the constraints in order to reinitialize the algorithm with
+it in the case where we use mesh adaptation. Doing so, the algorithm will almost restart at the accuracy level it reached before mesh adaptation, thus saving many iterations.
+\bFF
+Vh uz=1.,lz=1.; //Simple bounds dual variable
+@real@[int] lm=[1]; //dual variable for volume constraint
+\eFF
+Then, follows the mesh adaptation loop, and a rendering function, {\tt Plot3D},  using 3D mesh to display the shape it is passed with {\tt medit} (the {\tt movemesh23} procedure often crashes
+when called with ragged shapes).
+\bFF 
+@int nadapt=1;
+@for(@int kkk=0;kkk<nadapt;++kkk) //Mesh adaptation loop
+{
+
+@int iter=0;//iterations count
+@func sin2 = @square(@sin(y)); //a function that will be often used
+
+@func @int Plot3D(@real[@int] &rho,@string cmm,@bool ffplot) {...} //see the .edp file
+\eFF
+Here are the functions related to the area computation and its shape derivative, according to equations \ref{msarea} and \ref{msdarea} :
+\bFF
+@func @real Area(@real[@int] &X) 
+{
+  Vh rho;
+  rho[] = X;
+  Vh rho2 = @square(rho);
+  Vh rho4 = @square(rho2);
+  @real res = @int2d(Th)(  @sqrt( rho4*sin2 
+                              + rho2*@square(@dx(rho)) 
+                              + rho2*sin2*@square(@dy(rho)) )  
+                       );
+  ++iter;
+  @plot(rho,  ... /*some parameters*/ ... );
+  @return res;
+}
+
+@func @real[@int] GradArea(@real[@int] &X) //The gradient
+{
+  Vh rho,rho2;
+  rho[] = X;
+  rho2[] = @square(X);
+  Vh sqrtPsi,alpha; //Psi is actually det(G)
+  {//some optimizations
+    Vh  dxrho2 = @dx(rho)*@dx(rho), dyrho2 = @dy(rho)*@dy(rho);
+    sqrtPsi = @sqrt( rho2*rho2*sin2 + rho2*dxrho2 + rho2*dyrho2*sin2 );
+    alpha = 2.*rho2*rho*sin2 + rho*dxrho2 + rho*dyrho2*sin2;
+  }
+  @varf dSurface(u,v) = 
+    @int2d(Th)(1./sqrtPsi*(alpha*v+rho2*@dx(rho)*@dx(v)+rho2*@dy(rho)*sin2*@dy(v)));
+  @real[@int] grad = dSurface(0,Vh);
+  @return grad;
+}
+\eFF
+The function returning the hessian of the area for a given shape is a bit blurry, thus we won't show here all of equation \ref{msd2area} coefficients definition, they can be found in the {\tt edp} file. 
+\bFF
+@matrix hessianA; //The global matrix buffer
+
+@func @matrix HessianArea(@real[@int] &X)
+{
+  Vh rho,rho2;
+  rho[] = X;
+  rho2 = @square(rho);
+  Vh sqrtPsi,sqrtPsi3,C00,C01,C02,C11,C12,C22,A;
+  {
+    ... //definition of the above functions
+  }
+  @varf d2Area(w,v) =
+    @int2d(Th)(
+      1./sqrtPsi * (A*w*v + 2*rho*@dx(rho)*@dx(w)*v + 2*rho*@dx(rho)*w*@dx(v) 
+                    + 2*rho*@dy(rho)*sin2*@dy(w)*v + 2*rho*@dy(rho)*sin2*w*@dy(v)
+                    + rho2*@dx(w)*@dx(v) + rho2*sin2*@dy(w)*@dy(v)) 
+    + 1./sqrtPsi3 * (C00*w*v + C01*@dx(w)*v + C01*w*@dx(v) + C02*@dy(w)*v 
+                    + C02*w*@dy(v) + C11*@dx(w)*@dx(v)
+                    + C12*@dx(w)*@dy(v) + C12*@dy(w)*@dx(v) + C22*@dy(w)*@dy(v)) 
+     );//end of int2d and varf
+  hessianA = d2Area(Vh,Vh);
+  @return hessianA;
+}
+\eFF
+And the volume related functions :
+\bFF
+@func @real Volume(@real[@int] &X)
+{
+  Vh rho;
+  rho[]=X;
+  Vh rho3=rho*rho*rho;
+  @real res = 1./3.*@int2d(Th)(rho3*@sin(y));
+  @return res;
+}
+
+@func @real[@int] GradVolume(@real@[int] &X)
+{
+  Vh rho;
+  rho[]=X;
+  @varf dVolume(u,v) = @int2d(Th)(rho*rho*@sin(y)*v);
+  @real[@int] grad = dVolume(0,Vh);
+  @return grad;
+}
+
+@matrix hessianV;//buffer
+@func @matrix HessianVolume(@real[@int] &X)
+{
+  Vh rho;
+  rho[]=X;
+  @varf d2Volume(w,v) = @int2d(Th)(2*rho*@sin(y)*v*w);
+  hessianV = d2Volume(Vh,Vh);
+  @return hessianV;
+}
+\eFF
+If we want to use the volume as a constraint function
+we must wrap it and its derivatives in some FreeFem++ functions returning the appropriate types.
+It is not done in the above functions in case where one wants to use it as fitness function.
+The lagrangian hessian also have to be wrapped since the Volume is not linear with 
+respect to $\rho$, it has some non-null second order derivatives.
+\bFF
+@func @real[@int] ipVolume(@real[@int] &X) {@real[@int] vol = [Volume(X)]; @return vol;}
+
+@matrix mdV;//buffer
+@func @matrix ipGradVolume(@real[@int] &X) 
+{//transforms a vector into a sparse matrix
+  @real[@int,@int] dvol(1,Vh.ndof);
+  dvol(0,:)=GradVolume(X); 
+  mdV=dvol; 
+  @return mdV;
+}
+
+@matrix HLagrangian; //buffer
+@func @matrix ipHessianLag(@real[@int] &X,@real objfact,@real[@int] &lambda)
+{
+  HLagrangian = objfact*HessianArea(X) + lambda[0]*HessianVolume(X);
+  @return HLagrangian;
+}
+\eFF
+The {\tt ipGradVolume} function could bring some troubles during the optimization process because the gradient vector is transformed in a sparse matrix, so any null coefficient
+will be discarded. We are here obliged to give IPOPT the structure by hand and use the {\tt checkindex} named-parameter to avoid bad indexing during copies. 
+This gradient is actually dense, there is no reason for some components to be constantly zero :
+\bFF
+//sparse structure of a dense vector
+@int[@int] gvi(Vh.ndof),gvj=0:Vh.ndof-1;
+gvi=0; //only one line
+\eFF
+These two arrays will be passed to IPOPT with {\tt structjacc=[gvi,gvj]}. The last remaining things are the bounds definition. The simple lower bounds 
+must be equal to the components of the P1 projection of $\rho_{object}$. And we choose $\alpha\in [0,1]$ to set $\mathcal{V}_{\mathrm{max}}$ to 
+$(1-\alpha) \mathcal{V}(\rho_{object}) + \alpha\frac{4}{3}\pi \|\rho_{\mathrm{object}}\|_{\infty}^{3}$ :
+\bFF
+@real e=0.1,r0=0.25,rr=2-r0;
+@real E=1./(e*e),RR=1./(rr*rr);
+//An indented disc
+@func disc1 = @sqrt(1./(RR+(E-RR)*@cos(y)*@cos(y)))*(1+0.1*@cos(9*x));
+//Almost a standard disc
+@func disc2 = @sqrt(1./(RR+(E-RR)*@cos(x)*@cos(x)*sin2))  ;
+Vh lb =  @max(disc1, disc2);//glue the object parts
+@real Vobj = Volume(lb[]); //object volume
+@real Vnvc = 4./3.*@pi*@pow(lb[].linfty,3);//V for no volume constraint
+@real alpha=0.1;
+Plot3D(lb[],"object_inside",0);
+@real[@int] clb=0.,cub=[(1-alpha)*Vobj + alpha*Vnvc];
+\eFF
+Calling IPOPT :
+\bFF
+@IPOPT(Area,GradArea,ipHessianLag,
+      ipVolume,ipGradVolume,rc[], //functions and starting point
+      @ub=ub[],@lb=lb[],@clb=clb,@cub=cub, //simple bounds and volume bounds
+      @checkindex=1,@structjacc=[gvi,gvj],//for safe matrices copies
+      @maxiter=kkk<nadapt-1 ? 40:150,//accurate optim only for last mesh adaptation iteration
+      @warmstart=kkk,@lm=lm,@uz=uz[],@lz=lz[], //warmstart handling
+      @tol=0.00001);
+
+Plot3D(rc[],"Shape_at_"+kkk,0); //displays current solution
+\eFF
+At last, before closing the mesh adaptation loop, we have to perform the said adaptation. The mesh is adaptated with respect to the $X=(\rho,0,0)$ (in spherical coordinates) vector field, not
+directly with respect to $\rho$, otherwise the true curvature of the 3D-shape would not be well taken into account.
+\bFF
+@if(kkk<nadapt-1)
+{
+  @Th = @adaptmesh(Th,
+         rc*@cos(x)*@sin(y),//X
+         rc*@sin(x)*@sin(y),//Y
+         rc*@cos(y),//Z
+         @nbvx=50000,
+         @periodic=[[2,y],[4,y]]); //keeps mesh peridicity
+  @plot(Th);
+  startshape = rc; //shape interpolation on the new mesh
+  uz=uz;//dual variables interpolation
+  lz=lz;
+} //end if
+} //en of mesh adaptation loop
+\eFF
+Here are some pictures of the resulting surfaces obtained for decreasing values of $\alpha$ (and a slightly more complicated object than two orthogonal discs). We get back the enclosed object when $\alpha=0$ :
+
+\begin{center} \includegraphics[width=16.5cm] {minsurf3D} \end{center}
+
+
+\subsection{The nlOpt optimizers}
+The {\tt ff-NLopt}  package provides a FreeFem interface to the free/open-source library for nonlinear optimization, thus easing the use of several different free optimization (constrained or not) routines available
+online along with the PDE solver. All the algorithms are well documented in \cite{nlopt}, thus no exhaustive informations concerning their mathematical specificities will be found here and we will focus on 
+the way they are called in a FreeFem script. One needing detailed informations about these algorithms should visit the said cite where a description of each of them is given, as well as many bibliographical links. 
+Most of the gradient based algorithm of nlOpt uses a full matrix approximation of the hessian, so if you're planing to solve a large scale problem, our advise would be to use the IPOPT optimizer which definitely surpass them. Finally, an examples of use can be found in the {\tt examples++-load/} directory under the name {\tt VarIneq2.edp}
+
+All the nlOpt features are called that way :
+
+\bFF
+  @load "ff-NLopt"
+  ... //define J, u, and maybe grad(J), some constraints etc...
+  @real min = nloptXXXXXX(J,u,   //unavoidable part
+                         grad = <name of grad(J)> , //if needed
+                         lb = //lower bounds array
+                         ub= //upper bounds array
+                         ...//   some optional arguments :
+                            //constraints functions names,
+                            //                 stopping criterions,
+                            //     algo. specific parameters,
+                            //                                           etc...
+                         );
+\eFF
+
+{\tt XXXXXX} refers to the algorithm tag (not necessarily 6 characters long). {\tt u} is the starting position (a {\tt real[int]} type array) which will be overwritten by the algorithm, the value at the end being the found argmin. And as usual, {\tt J} is a function taking a {\tt real[int]} type array as argument and returning a {\tt real}. {\tt grad}, {\tt lb} and {\tt ub} are "half-optionnal" arguments, in the sense that they are obligatory for some routines but not all.
+
+The possible optional named parameters are the following, note that they are not used by all algorithm s (some does not supports constraints, or a type of constraints, some are gradient-based and other are derivative free, etc...). One can refer to the table after the parameters description to check which are the named parameters supported by a specific algorithm. Using an unsupported parameter will not stop 
+the compiler work and seldom breaks runtime, it will just be ignored. That said, when it is obvious you are missusing a routine, you will get a warning message at runtime (for exemple if you pass a gradient 
+to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
+
+
+
+\index{ffNLOpt}
+\begin{description}
+
+\item[\textbf{Half-optional parameters :}]
+\begin{description}
+    \item[ ]
+    \item[\texttt{grad=}]  The name of the function which computes the gradient of the cost function (prototype should be {\tt real[int]} $\rightarrow$ {\tt real[int]}, both argument and result should have the size $n$). 
+    This is needed as soon s a gradient-based method is involved, ignored if defined in a derivative free context. 
+    \item[\texttt{lb}/\texttt{ub} =] Lower and upper bounds arrays ({\tt real[int]} type) of size $n$. Used to define the bounds within which the search variable is allowed to move. 
+    Needed for some algorithms, optional or unsupported for others.
+    \item[\texttt{subOpt} :] Only enabled for the Augmented Lagrangian and MLSL method who need a sub-optimizer in order to work. Just pass the tag of the desired local algorithm with a {\tt string}.
+\end{description}
+
+\item[\textbf{Constraints related parameters (optional - unused if not specified):}]
+\begin{description}
+  \item[ ]
+  \item[\texttt{IConst}/\texttt{EConst} :] Allows to pass the name of a function implementing some inequality (resp. equality) constraints on the search space. The function type must be 
+  {\tt real[int]} $\rightarrow$ {\tt real[int]} where the size of the returned array is equal to the number of constraints (of the same type - it means that all the constraints are computed in one vectorial function).
+  In order to mix inequality and equality constraints in a same minimization attempt, two vectorial functions have to be defined and passed. See example \ref{varineqex} for more details about how these
+  constraints have to be implemented.
+  \item[\texttt{gradIConst}/\texttt{gradEConst} :] Use to provide the inequality (resp. equality) constraints gradient. These are {\tt real[int]} $\rightarrow$ {\tt real[int,int]} type functions. Assuming we have defined
+  a constraint function (either inequality or equality) with $p$ constraints, the size of the matrix returned by its associated gradient must be $p\times n$ (the $i$-th line of the matrix is the gradient of the $i$-th
+  constraint). It is needed in a gradient-based context as soon as an inequality or equality constraint function is passed to the optimizer and ignored in all other cases.
+  \item[\texttt{tolIConst}/\texttt{tolEConst} :] Tolerance values for each constraint. This is an array of size equal to the number of inequality (resp. equality) constraints. Default value os set to $10^{-12}$
+  for each constraint of any type.  
+\end{description}
+
+\item[\textbf{Stopping criteria :}]
+\begin{description}
+  \item[ ]
+  \item[\texttt{stopFuncValue} :] Makes the algorithm end when the objective function reaches this {\tt real} value.
+  \item[\texttt{stopRelXTol} :] Stops the algorithm when the relative moves in each direction of the search space is smaller than this {\tt real} value.
+  \item[\texttt{stopAbsXTol} :] Stops the algorithm when the moves in each direction of the search space is smaller than the corresponding value in this {\tt real[int]} array.
+  \item[\texttt{stopRelFTol} :] Stops the algorithm when the relative variation of the objective function is smaller than this {\tt real} value.
+  \item[\texttt{stopAbsFTol} :] Stops the algorithm when the variation of the objective function is smaller than this {\tt real} value.
+  \item[\texttt{stopMaxFEval} :] Stops the algorithm when the number of fitness evaluations reaches this {\tt integer} value.
+  \item[\texttt{stopTime} :] Stops the algorithm when the otpimization time in second exceeds this {\tt real} value. This is not a strict maximum: the time may exceed it slightly, 
+  depending upon the algorithm and on how slow your function evaluation is.
+ \end{description}
+ Note that when an AUGLAG or MLSL method is used, the meta-algorithm and the sub-algorithm may have different termination criteria. Thus, for algorithms of this kind, the following
+ named parameters has been defined (just adding the SO prefix - for Sub-Optimizer) to set the ending condition of the sub-algorithm (the meta one uses the ones above) : {\tt SOStopFuncValue}, 
+ {\tt SOStopRelXTol}, and so on... If these ones are not used, the sub-optimizer will use those of the master routine.
+ 
+ \item[\textbf{Other named parameters :}]
+ \begin{description}
+   \item[ ]
+   \item[\texttt{popSize} :] {\tt integer} used to change the size of the sample for stochastic search methods. Default value is a peculiar heuristic to the chosen algorithm.
+   \item[\texttt{SOPopSize} :] Same as above, but when the stochastic search is passed to a meta-algorithm.
+   \item[\texttt{nGradStored} :] The number ({\tt interger} type) of gradients to "remember" from previous optimization steps: increasing this increases the memory requirements but may speed convergence.
+   It is set to a heuristic value by default. If used with AUGLAG or MLSL, it will only affect the given subsidiary algorithm.
+ \end{description}
+
+\end{description}
+
+The following table sums up the main characteristics of each algorithm, providing the more important information about which features are supported by which algorithm and what are the unavoidable arguments 
+they need. More details can be found in \cite{nlopt}.
+\begin{center}
+\includegraphics [height=\textheight]{nlopttab}   
+\end{center}
+
+
+%\begin{example}[VarIneq.edp]
+%\label{varineqex}
+%Let $\Omega$ be a domain of $\mathbb{R}^{2}$, $f_{1}, f_{2}\in L^{2}(\Omega)$ and $g_{1}, g_{2} \in L^{2}(\partial\Omega)$ four given functions with $g_{1}\leq g_{2}$ almost everywhere.
+%We define the space : 
+%$$V = \left\lbrace (v_{1},v_{2})\in H^{1}(\Omega)^{2} ; v_{1}\vert_{\partial\Omega}=g_{1}, v_{2}\vert_{\partial\Omega}=g_{2}, v_{1}\leq v_{2}\ \mathrm{a.e.}\ \right\rbrace$$
+%as well as the functional $J:H^{1}(\Omega)^{2}\longrightarrow \mathbb{R}$:
+%$$J(v_{1},v_{2}) = \displaystyle{\frac{1}{2}\int_{\Omega}\vert\nabla v_{1}\vert^{2} - \int_{\Omega} f_{1}v_{1} +  \frac{1}{2}\int_{\Omega}\vert\nabla v_{2}\vert^{2} - \int_{\Omega} f_{2}v_{2}}$$
+%The problem consists in finding (numerically) two functions $(u_{1},u_{2}) = \underset{(v_{1},v_{2})\in V}{\operatorname{argmin}} J(v_{1},v_{2}) $.
+%
+%This can be interpreted as finding $u_{1}, u_{2}$ as close as possible (in a certain sense) to the solutions of Laplace equation with respectively $f_{1}, f_{2}$ second members
+% and $g_{1}, g_{2}$ Dirichlet boundary conditions with the $u_{1}\leq u_{2}$ almost everywhere constraint.
+%\end{example}
+%
+%Here is the corresponding script to treat this variational inequality problem with one of the NLOpt algorithms. The whole script is in the \texttt{VarIneq2.edp}.
+%\bFF
+%  @load "ff-NLopt" //Loading nlopt
+%  @int NN = 10;
+%  @mesh Th = @square(NN,NN);
+%  @func f1=1.; //Datas
+%  @func f2=-1.; 
+%  @func g1=0.;
+%  @func g2=0.1;
+%  @int nadapt=3,iter=0;
+%  @real starttol=1e-12,bctol=6.e-12;
+%  @fespace Vh(Th,P1);
+%\eFF
+%
+%Instead of defining the $J$ functional with explicit integral on the domain, we will write it in quadratic/linear form, since the corresponding matrix and vector will not change
+%along with the iterations and the FreeFem matrix-vector product is optimized, this method will significantly speed up the approximation of the solution.
+%
+%\bFF
+%  @varf BVF(v,w) = @int2d(Th)(0.5*@dx(v)*@dx(w) + 0.5*@dy(v)*@dy(w)); //bilinear
+%  @varf LVF1(v,w) = @int2d(Th)(f1*w);//and linear parts
+%  @varf LVF2(v,w) = @int2d(Th)(f2*w);
+%  @matrix A =  BVF(Vh,Vh);//corresponding matrix
+%  @real[@int] b1 = LVF1(0,Vh) , b2 = LVF2(0,Vh); //and vectors
+%\eFF
+%Then follows a trick that we will use later to pass the boundary conditions as non-linear equality constraints (although these are of course linear ones, but this approach
+%demonstrate how to use all the features of NLOpt in one shot).
+%\bFF
+%  @varf Vbord(v,w) = @on(1,2,3,4,v=1);
+%  Vh In,Bord;
+%  Bord[] = Vbord(0,Vh,@tgv=1); //Bord=1 on the border
+%  In[] = Bord[] ? 0:1; //and 0 inside
+%  Vh gh1=Bord*g1,gh2=Bord*g2; //gh1=g1 on the border and 0 inside
+%  
+%  //The functional :
+%  @func @real J(@real[@int] &X)
+%  {
+%    Vh u1,u2;
+%    u1[] = X(0:Vh.ndof-1); //splitting the vector
+%    u2[] = X(Vh.ndof:2*Vh.ndof-1); 
+%    iter++;
+%	    @real[@int] Au1 = A*u1[], Au2 = A*u2[]; 
+%	    Au1 -= b1;
+%	    Au2 -= b2;
+%	    @real val = u1[]'*Au1 + u2[]'*Au2;
+%	    @plot(u1,u2,...); //parameters omitted
+%	    @return val;
+%  }
+%\eFF
+%To be able to play with gradient-based algorithm, we must have a gradient ready :
+%\bFF
+%  @varf dBFV(v,w) = @int2d(Th)(@dx(v)*@dx(w)+@dy(v)*@dy(w)); 
+%  @matrix dA = dBFV(Vh,Vh);
+%  @func @real[@int] dJ(@real[@int] &X)
+%  {
+%	    Vh u1,u2;
+%	    u1[] = X(0:Vh.ndof-1);
+%	    u2[] = X(Vh.ndof:2*Vh.ndof-1);
+%	    @real[@int] grad1 = dA*u1[], grad2 = dA*u2[];
+%	    grad1 -= b1;
+%	    grad2 -= b2;
+%	    @real[@int] Grad(X.n);
+%	    Grad(0:Vh.ndof-1) = grad1;
+%	    Grad(Vh.ndof:2*Vh.ndof-1) = grad2; 
+%	    @return Grad;
+%  }
+%\eFF
+%As we use P1 Lagrange finite elements, the $u_{1}\leq u_{2} $ constraint can be expressed directly upon the degree of freedom. In NLOpt, one constraint must have the form $f(X)\leq 0$.
+%The function is vectorial in order to handle multiple constraints :
+%\bFF
+%  @func @real[@int] IneqC(@real[@int] &X)
+%  {
+%	    @real[@int] constraints(Vh.ndof);
+%	    @for(@int i=0;i<Vh.ndof;++i) constraints[i] = X[i] - X[i+Vh.ndof];
+%	    @return constraints; //u1i - u2i <= 0
+%  }
+%\eFF
+%One also has to define a gradient for each constraint if a gradient search is to be used. Constraint gradient must be a function which returns a matrix. The $i$-th line of this matrix is the gradient of
+%the $i$-th constraint with respect to the variables of the search space.
+%\bFF
+%  @func @real[@int,@int] dIneqC(@real[@int] &X)
+%  {
+%	    @real[@int,@int] dconst(Vh.ndof,2*Vh.ndof);//so sparse... shame!
+%	    dconst=0;
+%	    @for(@int i=0;i<Vh.ndof;++i)
+%	    {
+%		      dconst(i,i) = 1.;
+%		      dconst(i,i+Vh.ndof) = -1.;
+%	    }
+%	    @return dconst;
+%  }
+%\eFF
+%As mentioned earlier, we also define a set of equality constraints and their derivatives in order to handle the boundary conditions. One could also use the {\tt lb} and {\tt ub} parameters to impose them, this also would avoid the use of large sparse matrix returned by the gradient function (it can be found in the script file, where we set {\tt lb} to $g-\epsilon$ and {\tt ub} to $g+\epsilon$).
+%Here again, we can work directly on the degree of freedom because of the P1 finite element. The script could not work with other finite elements without modifications.
+%\bFF
+%  @real[@int] BordIndex(Th.nbe); //Indexes of border d.f.
+%  
+%  {
+%	    @int k=0; //filling the index array
+%	    @for(@int i=0;i<Bord.n;++i) if(Bord[][i]) {BordIndex[k]=i; ++k;}
+%  }
+%  
+%  @func @real[@int] BC(@real[@int] &X)
+%  {
+%	    @real[@int] bc(2*Th.nbe);
+%	    @for(@int i=0;i<Th.nbe;++i)
+%	    {
+%		      @int I = BordIndex[i];
+%		      bc[i] = X[I] - gh1[][I];
+%		      bc[i+Th.nbe] = X[I+Th.nv] - gh2[][I];
+%	    }
+%	    @return bc;
+%  }
+%  @func @real[@int,@int] dBC(@real[@int] &X) //Gradient of boundary conditions
+%  {
+%	    @real[@int,@int] dbc(2*Th.nbe,2*Th.nv);//even sparser...:(
+%	    dbc=0.;
+%	    @for(@int i=0;i<Th.nbe;++i)
+%	    {
+%		      @int I=BordIndex[i];
+%		      dbc(i,I) = 1.;
+%		      dbc(i+Th.nbe,I+Th.nv) = 1.;
+%	    }
+%	    @return dbc;
+%  }
+%\eFF
+%Now we fill an initial vector and start the algorithm :
+%\bFF
+%  @real[@int] start(2*Vh.ndof);
+%  start(0:Vh.ndof-1) = 0.; //starting with u1=u2=0 is bad
+%  start(Vh.ndof:2*Vh.ndof-1) = 0.01; //a small difference is needed
+%  
+%  @real mini = @nloptAUGLAG(J, start, @grad=dJ,
+%                          @IConst=IneqC, @gradIConst=dIneqC,
+%                          @EConst=BC, @gradEConst=dBC,
+%                          @subOpt="LBFGS", 
+%                          @stopMaxFEval=10000, @stopAbsFTol=starttol
+%                         );
+%\eFF
+%Here we wrap a BFGS algorithm (which only works with unconstraint problems) in the augmented lagrangian method for both equality and inequality constraints. Another legit choice would be to use
+%SLSQP, the only gradient-based search of the package supporting these two kinds of constraints (note that the {\tt subOpt} parameter is gone ) :
+%\bFF
+%  @real mini = @nloptSLSQP(J, start, @grad=dJ,
+%                          @IConst=IneqC, @gradIConst=dIneqC,
+%                          @EConst=BC, @gradEConst=dBC,
+%                          @stopMaxFEval=10000, @stopAbsFTol=starttol
+%                         );
+%\eFF
+%One can also try to pass derivative free algorithms to AUGLAG and discard the gradients to see what happens, or directly one which handles the two kinds of constraints. Just check 
+%the tag in the table. The true script also has a loop in which the algorithm is restarted after mesh adaptation, nothing was said about that to avoid complicating an already relatively long
+%script comment.
+
+
+
+
+
+
+
+
+\subsection{Optimization with MPI}
+The only quick way to use the previously presented algorithms on a parallel architecture lies in parallelizing the used cost function (which is in most real life case, the expensive part of the algorithm).
+ Somehow, we provide a parallel version of the CMA-ES algorithm. The parallelization principle is the trivial one of evolving/genetic algorithms : at each iteration the cost function has to be evaluated $N$ 
+ times without any dependence at all, these $N$ calculus are then equally distributed to each processes. Calling the MPI version of CMA-ES is nearly the same as calling its sequential version (a 
+ complete example of use can be found in the \texttt{cmaes-mpi-VarIneq.edp} file).:
+
+\bFF
+  @load "mpi-cmaes"
+  ... //define J, u and all here
+  @real min = cmaesMPI(J,u,stopTolFun=1e-6,stopMaxIter=3000);
+  @cout << "minimal value is " << min << " for u = " << u << @endl;
+\eFF
+
+If the population size is not changed using the {\tt popsize} parameter, it will use the heuristic value slightly changed to be equal to the closest greater multiple of the size of the communicator used by 
+the optimizer. 
+The FreeFem {\tt mpicommworld} is used by default. The user can specify his own MPI communicator with the named parameter "{ \tt comm=}", see the MPI section of this manual for more informations about 
+communicators in \texttt{FreeFem++}.
+
+
+
+%%%%%%%%%  old -----
+%%% \subsection{conjugate Gradient/GMRES}
+%%%
+%%%Suppose we want to solve  the Euler problem (here $x$ has nothing to do with the reserved variable for the first coordinate in \freefempp): find $ x\in \R^n $  such that
+%%%\begin{equation}
+%%%\label{eqn:dJ=0}
+%%%\nabla J(x) = \left(\frac{\p J}{\p x_i} (\vec{x})\right) = 0
+%%%\end{equation}
+%%%where $ J$ is a functional (to minimize  for example) from  $ \R^n$ to $ \R$.
+%%%
+%%%If the function is convex we can use the conjugate gradient to solve the problem,
+%%%and we just need the function (named \texttt{dJ} for example)
+%%%which compute $\nabla J$, so the parameters
+%%%are the name of that function with prototype
+%%%
+%%% \ttCC{@func\ @real[@int]\  dJ(@real[@int] \& xx);}
+%%% 
+%%% which compute $\nabla J$, and
+%%%a vector \ttCC{x} of type ( of course the number 20 can be changed)
+%%%
+%%% \ttCC{@real[@int] x(20);} 
+%%% 
+%%% to initialize the process and get the result.
+%%%\\\\
+%%%Given an initial value $\vec{x}^{(0)}$, a maximum number $i_{\max}$
+%%%of iterations, and an error tolerance $0<\epsilon<1$:
+%%%Put $\vec{x}=\vec{x}^{(0)}$ and write
+%%%\begin{quote}\texttt{
+%%%NLCG($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\epsilon$);
+%%%}
+%%%\end{quote}
+%%%will give the solution of $\vec{x}$ of $\nabla J(\vec{x})=0$.
+%%%We can omit parameters \texttt{precon, nbiter, eps}.
+%%%Here $M$ is the preconditioner whose default is the identity matrix.
+%%%The stopping test is
+%%%\[
+%%%\| \nabla J(\vec{x})\|_P\le \epsilon\| \nabla J(\vec{x}^{(0)})\|_P
+%%%\]
+%%%Writing the minus value in \texttt{eps=}, i.e.,
+%%%\begin{quote}\texttt{
+%%%NLCG($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=-\epsilon$);
+%%%}
+%%%\end{quote}
+%%%we can use the stopping test
+%%%\[
+%%%\| \nabla J(\vec{x})\|_P^2\le \epsilon
+%%%\]
+%%%The  parameters of these three functions are:
+%%%% FFCS(8/10/9)need to move index for htindex not to interfere
+%%%% with \begin{description}
+%%%\index{LinearCG}
+%%%\index{LinearCG!nbiter=} \index{LinearCG!precon=} \index{LinearCG!eps=}\index{LinearCG!veps=}
+%%%\index{NLCG!nbiter=}  \index{NLCG!eps=}\index{NLCG!veps=}
+%%%\index{LinearGMRES}
+%%%\index{LinearGMRES!nbiter=} \index{LinearGMRES!precon=} \index{LinearGMRES!eps=}\index{LinearGMRES!veps=}
+%%%\begin{description}
+%%%
+%%%\itemtt[nbiter=] set the number of iteration (by default $100$)
+%%%\itemtt[precon=] set the preconditioner function (\texttt{P} for example)   by default it is the identity, remark the prototype
+%%%is \ttCC{@func\ @real[\@int]\ P(@real[@int] \&x)}.
+%%%\itemtt[eps=] set the value of the stop test $\varepsilon$ ($=10^{-6}$ by default) if positive then relative test
+%%%$||\nabla J(x)||_P\leq \varepsilon||\nabla J(x_0)||_P$, otherwise the  absolute test is  $||\nabla J(x)||_P^2\leq |\varepsilon|$.
+%%%\itemtt[veps=] set and return the value of the stop test,  if positive then relative test
+%%%$||\nabla J(x)||_P\leq \varepsilon||\nabla J(x_0)||_P$, otherwise the  absolute test is  $||\nabla J(x)||_P^2\leq |\varepsilon|$.
+%%%The return value is  minus  the real stop test (remark: it is useful in loop).
+%%%
+%%%\end{description}
+%%%
+%%%\begin{example}[algo.edp]
+%%%For a given function $b$, let us find the minimizer $u$ of the functional
+%%%\begin{eqnarray*}
+%%% J(u) &=& \frac{1}{2}\int_{\Omega} f(|\nabla u|^2) - \int_{\Omega}  u b \\
+%%% f(x) &=& ax + x-\ln(1+x), \quad f'(x) = a+\frac{x}{1+x}, \quad f''(x) =  \frac{1}{(1+x)^2}
+%%%\end{eqnarray*}
+%%%under the boundary condition $u=0$ on $\p\Omega$.
+%%%\bFF
+%%%@func @real J(real[int] & u)
+%%%  {
+%%%    Vh w;w[]=u; // copy array u in the finite element function w
+%%%    @real r=@int2d(Th)(0.5*f( dx(w)*dx(w) + dy(w)*dy(w) ) - b*w) ;
+%%%    cout << "J(u) =" << r << " " << u.min <<  " " << u.max << endl;
+%%%    @return r;
+%%%  }
+%%%// -----------------------
+%%%
+%%%Vh u=0; //  the current value of the solution
+%%%Ph alpha; // of store  $df(|\nabla u|^2)$
+%%%@int iter=0;
+%%%alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization
+%%%
+%%%@func @real[int] dJ(@real[@int] & u)
+%%%  {
+%%%    @int verb=verbosity; verbosity=0;
+%%%    Vh w;w[]=u;  // copy array u in the finite element function w
+%%%    alpha=df( dx(w)*dx(w) + dy(w)*dy(w) ); // optimization
+%%%    @varf au(uh,vh) = @int2d(Th)( alpha*( dx(w)*dx(vh) + dy(w)*dy(vh) ) - b*vh)
+%%%                      + @on(1,2,3,4,uh=0);
+%%%    u= au(0,Vh);
+%%%    verbosity=verb;
+%%%    @return u; // warning no return of local array
+%%%  }
+%%%
+%%%\eFF
+%%%
+%%%We want to construct also a preconditioner $C$
+%%%with solving the problem:  find $u_h \in V_{0h}$ such that
+%%%\[
+%%%\forall v_h \in V_{0h}, \quad  \int_\Omega \alpha \nabla u_h . \nabla v_h = \int_\Omega b v_h
+%%%\]
+%%%where $ \alpha=f'(|\nabla u|^2)$.
+%%%*/
+%%%\bFF
+%%%@varf alap(uh,vh)=  @int2d(Th)( alpha *( dx(uh)*dx(vh) + dy(uh)*dy(vh) ))
+%%%                   + @on(1,2,3,4,uh=0);
+%%%
+%%%@varf amass(uh)= @int2d(Th)( uh*vh)  + @on(1,2,3,4,uh=0);
+%%%
+%%%@matrix Amass = alap(Vh,Vh,solver=CG); // \index{matrix}
+%%%@matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   // \index{Cholesky}\index{factorize=}\index{solver=}
+%%%
+%%%// the preconditionner function
+%%%@func @real[@int] C(@real[@int] & u)
+%%%{
+%%%   @real[@int] w = Amass*u;
+%%%   u = Alap^-1*w;
+%%%   @return u; // no return of local array  variable
+%%%}
+%%%\eFF
+%%%/*
+%%%To solve the problem, we make 10 iteration of the conjugate gradient,
+%%%recompute the preconditioner and restart the conjugate gradient:
+%%%*/
+%%%\bFF
+%%%   verbosity=5;
+%%%   @int conv=0;
+%%%   @real eps=1e-6;
+%%%   @for(@int i=0;i<20;i++)
+%%%   {
+%%%     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps); // \index{veps=}\index{NLCG}
+%%%     @if (conv) @break;  // if converge break loop
+%%%     alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // recompute alpha optimization
+%%%     Alap = alap(Vh,Vh,solver=Cholesky,factorize=1);
+%%%     @cout << " restart with new preconditionner " << conv
+%%%           << " eps =" << eps << endl;
+%%%    }
+%%%
+%%%   @plot (u,wait=1,cmm="solution with NLCG");
+%%%\eFF
+%%%\end{example}
+%%%For a given symmetric positive matrix $A$, consider the quadratic form
+%%%\[
+%%%J(\vec{x})=\frac{1}{2}\vec{x}^TA\vec{x}-\vec{b}^T\vec{x}
+%%%\]
+%%%then $J(\vec{x})$ is minimized by the solution $\vec{x}$ of $A\vec{x}=\vec{b}$.
+%%%In this case, we can use the function \texttt{LinearCG}
+%%%\begin{quote}\texttt{
+%%%LinearCG($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+%%%}
+%%%\end{quote}
+%%%If $A$ is not symmetric, we can use GMRES(Generalized Minimum Residual) algorithm by
+%%%\begin{quote}\texttt{
+%%%LinearGMRES($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+%%%}
+%%%\end{quote}
+%%%Also, we can use the non-linear version of GMRES algorithm
+%%%(the functional $J$ is just convex)
+%%%\begin{quote}\texttt{
+%%%LinearGMRES($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+%%%}
+%%%\end{quote}
+%%%For detail of these algorithms, refer to \cite{Lucquin}[Chapter IV, 1.3].
+%%%
+%%%\subsection{Optimization}
+%%%%Two algorithms of
+%%%%COOOL  a package \cite{coool} are interfaced with
+%%%%the Newton Raphson method  (call \texttt{Newton}) and
+%%%%the  \texttt{BFGS} method. \index{Newton}\index{BFGS}
+%%%%Be careful of these algorithms, because their
+%%%%implementation use full matrices.
+%%%%
+%%%%Example of utilization
+%%%%%\begin{example}[{algo.edp}
+%%%%\bFF
+%%%%  real[int] b(10),u(10);
+%%%%  func @real J(@real[int] & u)
+%%%%    {
+%%%%      @real s=0;
+%%%%      @for (@int i=0;i<u.n;i++)
+%%%%          s +=(i+1)*u[i]*u[i]*0.5 - b[i]*u[i];
+%%%%      @cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
+%%%%      @return s;
+%%%%    }
+%%%%
+%%%%//  the grad of J (this is a affine version (the RHS is in  )
+%%%%  @func @real[int] DJ(@real[int] &u)
+%%%%    {
+%%%%      @for (@int i=0;i<u.n;i++)
+%%%%        u[i]=(i+1)*u[i]-b[i];
+%%%%      @return u;  // return of global variable ok
+%%%%    };
+%%%%
+%%%%  b=1; u=2; // set  right hand side and initial gest
+%%%%  @BFGS(J,dJ,u,eps=1.e-6,nbiter=20,nbiterline=20);
+%%%%  @cout << "BFGS: J(u) = " << J(u) << endl;
+%%%%
+%%%%\eFF
+%%%%%\end{example}
+%%%Two algorithms of
+%%%COOOL  a package \cite{coool} are interfaced with
+%%%the Newton Raphson method  (call \texttt{Newton}) and
+%%%the  \texttt{BFGS} method. \index{Newton}\index{BFGS}
+%%%These two ones are directly available in FreeFem (no dynamical link to load).
+%%%Be careful with these algorithms, because their
+%%%implementation uses full matrices. We also provide several
+%%%optimization algorithms from the NLopt library  \cite{nlopt} as well 
+%%%as an interface for Hansen's  implementation of CMAES 
+%%%(a MPI version of this one is also available). These last algorithms can
+%%%be found as dynamical links in the \texttt{example++-load} folder
+%%%as the \texttt{ff-NLopt} and \texttt{CMA\_ES} files (\texttt{CMA\_ES\_MPI}
+%%%from the \texttt{example++-mpi} folder for the mpi version).
+%%%
+%%%\subsubsection{Example of utilization for BFGS or CMAES}
+%%%%\begin{example}[{algo.edp}
+%%%\bFF
+%%%  @real[int] b(10),u(10);
+%%%  @func @real J(@real[int] & u)
+%%%    {
+%%%      @real s=0;
+%%%      @for (@int i=0;i<u.n;i++)
+%%%          s +=(i+1)*u[i]*u[i]*0.5 - b[i]*u[i];
+%%%      @cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
+%%%      @return s;
+%%%    }
+%%%
+%%%//  the grad of J (this is a affine version (the RHS is in  )
+%%%  @func @real[int] DJ(@real[int] &u)
+%%%    {
+%%%      @for (@int i=0;i<u.n;i++)
+%%%        u[i]=(i+1)*u[i]-b[i];
+%%%      @return u;  // return of global variable ok
+%%%    };
+%%%
+%%%  b=1; u=2; // set  right hand side and initial gest
+%%%  @BFGS(J,dJ,u,eps=1.e-6,nbiter=20,nbiterline=20);
+%%%  @cout << "BFGS: J(u) = " << J(u) << endl;
+%%%
+%%%\eFF
+%%%%\end{example}
+%%%
+%%%Using the CMA evolution strategy is almost the same, except that, as it is
+%%%a derivative free optimizer, the \texttt{dJ} argument is omitted and there are
+%%%some other named parameters to control the behaviour of the algorithm. With the same 
+%%%objective function as above, an example of utilization would be (see \texttt{cmaes-VarIneq.edp} for a complete example):
+%%%\bFF
+%%%  @load "ff-cmaes"
+%%%  ... //define J, u and all here
+%%%  @real min = cmaes(J,u,stopTolFun=1e-6,stopMaxIter=3000);
+%%%  @cout << "minimal value is " << min << " for u = " << u << @endl;
+%%%\eFF
+%%%This algorithm works with a normal multivariate distribution in the parameters
+%%%space and try to adapt its covariance matrix using the information provides by
+%%%the successive function evaluations (see \cite{hansen} for more details). Thus, some specific parameters can be passed
+%%%to control the starting distribution, size of the sample generations etc... Named parameters
+%%%for this are the following :
+%%%\index{CMAES}
+%%%\begin{description}
+%%%
+%%%    \item[\texttt{seed=}] Seed for random number generator  \index{CMAES!seed=}
+%%%    ({\tt val} is an integer). No specified value will lead to a clock based seed initialization.
+%%%    
+%%%    \item[\texttt{initialStdDev=}] Value for the standard deviations of the initial covariance matrix \index{CMAES!initialStdDev=}
+%%%    ({\tt val} is a real). If the value $\sigma$ is passed, the initial covariance matrix will be set to $\sigma I$. The 
+%%%            expected initial distance between initial $X$ and the $argmin$
+%%%            should be roughly initialStdDev. Default is $0.3$.
+%%%    
+%%%    \item[\texttt{initialStdDevs=}] Same as above except that the argument is an array allowing to set a value of the initial standard deviation
+%%%    for each parameter. Entries differing by several orders of magnitude should be avoided (if it can't be, try rescaling the problem).
+%%%    
+%%%    \item[\texttt{stopTolFun=}]  Stops the algorithm if function values differences are smaller than the passed one, default is $10^{-12}$.
+%%%    
+%%%    \item[\texttt{stopTolFunHist=}]  Stops the algorithm if function value differences of the best values are smaller than the passed one, default is $0$ (unused).
+%%%    
+%%%    \item[\texttt{stopTolX=}]  Stopping criteria triggered if step sizes in the parameters space are 
+%%%                 smaller than this real value, default is $0$.
+%%%                 
+%%%    \item[\texttt{stopTolXFactor=}]  Stopping criteria triggered when the standard deviation increases more than this value. The default value is $10^{3}$.
+%%%       
+%%%    \item[\texttt{stopMaxFunEval=}]  Stops the algorithm when {\tt stopMaxFunEval} function evaluations have been done. Set to $900(n+3)^{2}$ by default, where $n$ is the parameters space dimension .
+%%%                 
+%%%    \item[\texttt{stopMaxIter=}]  Integer stopping the search when {\tt stopMaxIter} generations has been sampled. Unused by default.
+%%%    
+%%%    \item[\texttt{popsize=}]  Integer value used to change the sample size. The default value is $4+ \lfloor 3\ln (n) \rfloor$, see \cite{hansen}
+%%%    for more details. Increasing the population size usually improves the global search capabilities at the cost of an at most linear reduction of the convergence speed with respect to {\tt popsize}.
+%%%    
+%%%    \item[\texttt{paramFile=}] This {\tt string} type parameter allows the user to pass all the parameters using an extern file as in Hansen's original code. More parameters related to the CMA-ES algorithm 
+%%%    can be changed with this file. A sample of it can be found in the {\tt examples++-load/ffCMAES/} folder under the name {\tt initials.par}. Note that the parameters passed to the CMAES function in the 
+%%%    FreeFem script will be ignored if an input parameters file is given.
+%%%                 
+%%%\end{description}
+%%%
+%%%
+%%%\subsubsection{The nlOpt optimizers}
+%%%The {\tt ff-NLopt}  package provides a FreeFem interface to the free/open-source library for nonlinear optimization, thus easing the use of several different free optimization (constrained or not) routines available
+%%%online along with the PDE solver. All the algorithms are well documented in \cite{nlopt}, thus no exhaustive informations concerning their mathematical specificities will be found here and we will focus on 
+%%%the way they are called in a FreeFem script. One needing detailed informations about these algorithms should visit the said cite where a description of each of them is given, as well as many bibliographical links.
+%%%
+%%%All the nlOpt features are called that way :
+%%%
+%%%\bFF
+%%%  @load "ff-NLopt"
+%%%  ... //define J, u, and maybe grad(J), some constraints etc...
+%%%  @real min = nloptXXXXXX(J,u,   //unavoidable part
+%%%                         grad = <name of grad(J)> , //if needed
+%%%                         lb = //lower bounds array
+%%%                         ub= //upper bounds array
+%%%                         ...//   some optional arguments :
+%%%                            //constraints functions names,
+%%%                            //                 stopping criterions,
+%%%                            //     algo. specific parameters,
+%%%                            //                                           etc...
+%%%                         );
+%%%\eFF
+%%%
+%%%{\tt XXXXXX} refers to the algorithm tag (not necessarily 6 characters long). {\tt u} is the starting position (a {\tt real[int]} type array) which will be overwritten by the algorithm, the value at the end being the found argmin. And as usual, {\tt J} is a function taking a {\tt real[int]} type array as argument and returning a {\tt real}. {\tt grad}, {\tt lb} and {\tt ub} are "half-optionnal" arguments, in the sense that they are obligatory for some routines but not all.
+%%%
+%%%The possible optional named parameters are the following, note that they are not used by all algorithm s (some does not supports constraints, or a type of constraints, some are gradient-based and other are derivative free, etc...). One can refer to the table after the parameters description to check which are the named parameters supported by a specific algorithm. Using an unsupported parameter will not stop 
+%%%the compiler work and seldom breaks runtime, it will just be ignored. That said, when it is obvious you are missusing a routine, you will get a warning message at runtime (for exemple if you pass a gradient 
+%%%to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
+%%%
+%%%
+%%%\index{ffNLOpt}
+%%%\begin{description}
+%%%
+%%%\item[\textbf{Half-optional parameters :}]
+%%%\begin{description}
+%%%    \item[ ]
+%%%    \item[\texttt{grad=}]  The name of the function which computes the gradient of the cost function (prototype should be {\tt real[int]} $\rightarrow$ {\tt real[int]}, both argument and result should have the size $n$). 
+%%%    This is needed as soon s a gradient-based method is involved, ignored if defined in a derivative free context. 
+%%%    \item[\texttt{lb}/\texttt{ub} =] Lower and upper bounds arrays ({\tt real[int]} type) of size $n$. Used to define the bounds within which the search variable is allowed to move. 
+%%%    Needed for some algorithms, optional or unsupported for others.
+%%%    \item[\texttt{subOpt} :] Only enabled for the Augmented Lagrangian and MLSL method who need a sub-optimizer in order to work. Just pass the tag of the desired local algorithm with a {\tt string}.
+%%%\end{description}
+%%%
+%%%\item[\textbf{Constraints related parameters (optional - unused if not specified):}]
+%%%\begin{description}
+%%%  \item[ ]
+%%%  \item[\texttt{IConst}/\texttt{EConst} :] Allows to pass the name of a function implementing some inequality (resp. equality) constraints on the search space. The function type must be 
+%%%  {\tt real[int]} $\rightarrow$ {\tt real[int]} where the size of the returned array is equal to the number of constraints (of the same type - it means that all the constraints are computed in one vectorial function).
+%%%  In order to mix inequality and equality constraints in a same minimization attempt, two vectorial functions have to be defined and passed. See example \ref{varineqex} for more details about how these
+%%%  constraints have to be implemented.
+%%%  \item[\texttt{gradIConst}/\texttt{gradEConst} :] Use to provide the inequality (resp. equality) constraints gradient. These are {\tt real[int]} $\rightarrow$ {\tt real[int,int]} type functions. Assuming we have defined
+%%%  a constraint function (either inequality or equality) with $p$ constraints, the size of the matrix returned by its associated gradient must be $p\times n$ (the $i$-th line of the matrix is the gradient of the $i$-th
+%%%  constraint). It is needed in a gradient-based context as soon as an inequality or equality constraint function is passed to the optimizer and ignored in all other cases.
+%%%  \item[\texttt{tolIConst}/\texttt{tolEConst} :] Tolerance values for each constraint. This is an array of size equal to the number of inequality (resp. equality) constraints. Default value os set to $10^{-12}$
+%%%  for each constraint of any type.  
+%%%\end{description}
+%%%
+%%%\item[\textbf{Stopping criteria :}]
+%%%\begin{description}
+%%%  \item[ ]
+%%%  \item[\texttt{stopFuncValue} :] Makes the algorithm end when the objective function reaches this {\tt real} value.
+%%%  \item[\texttt{stopRelXTol} :] Stops the algorithm when the relative moves in each direction of the search space is smaller than this {\tt real} value.
+%%%  \item[\texttt{stopAbsXTol} :] Stops the algorithm when the moves in each direction of the search space is smaller than the corresponding value in this {\tt real[int]} array.
+%%%  \item[\texttt{stopRelFTol} :] Stops the algorithm when the relative variation of the objective function is smaller than this {\tt real} value.
+%%%  \item[\texttt{stopAbsFTol} :] Stops the algorithm when the variation of the objective function is smaller than this {\tt real} value.
+%%%  \item[\texttt{stopMaxFEval} :] Stops the algorithm when the number of fitness evaluations reaches this {\tt integer} value.
+%%%  \item[\texttt{stopTime} :] Stops the algorithm when the otpimization time in second exceeds this {\tt real} value. This is not a strict maximum: the time may exceed it slightly, 
+%%%  depending upon the algorithm and on how slow your function evaluation is.
+%%% \end{description}
+%%% Note that when an AUGLAG or MLSL method is used, the meta-algorithm and the sub-algorithm may have different termination criteria. Thus, for algorithms of this kind, the following
+%%% named parameters has been defined (just adding the SO prefix - for Sub-Optimizer) to set the ending condition of the sub-algorithm (the meta one uses the ones above) : {\tt SOStopFuncValue}, 
+%%% {\tt SOStopRelXTol}, and so on... If these ones are not used, the sub-optimizer will use those of the master routine.
+%%% 
+%%% \item[\textbf{Other named parameters :}]
+%%% \begin{description}
+%%%   \item[ ]
+%%%   \item[\texttt{popSize} :] {\tt integer} used to change the size of the sample for stochastic search methods. Default value is a peculiar heuristic to the chosen algorithm.
+%%%   \item[\texttt{SOPopSize} :] Same as above, but when the stochastic search is passed to a meta-algorithm.
+%%%   \item[\texttt{nGradStored} :] The number ({\tt interger} type) of gradients to "remember" from previous optimization steps: increasing this increases the memory requirements but may speed convergence.
+%%%   It is set to a heuristic value by default. If used with AUGLAG or MLSL, it will only affect the given subsidiary algorithm.
+%%% \end{description}
+%%%
+%%%\end{description}
+%%%
+%%%The following table resume the main characteristics of each algorithm, providing the more important information about which features are supported by which algorithm and what are the unavoidable arguments 
+%%%they need. More details can be found in \cite{nlopt}.
+%%%\begin{center}
+%%%\includegraphics [height=\textheight]{nlopttab}   
+%%%\end{center}
+%%%
+%%%
+%%%\begin{example}[VarIneq.edp]
+%%%\label{varineqex}
+%%%Let $\Omega$ be a domain of $\mathbb{R}^{2}$, $f_{1}, f_{2}\in L^{2}(\Omega)$ and $g_{1}, g_{2} \in L^{2}(\partial\Omega)$ four given functions with $g_{1}\leq g_{2}$ almost everywhere.
+%%%We define the space : 
+%%%$$V = \left\lbrace (v_{1},v_{2})\in H^{1}(\Omega)^{2} ; v_{1}\vert_{\partial\Omega}=g_{1}, v_{2}\vert_{\partial\Omega}=g_{2}, v_{1}\leq v_{2}\ \mathrm{a.e.}\ \right\rbrace$$
+%%%as well as the functional $J:H^{1}(\Omega)^{2}\longrightarrow \mathbb{R}$:
+%%%$$J(v_{1},v_{2}) = \displaystyle{\frac{1}{2}\int_{\Omega}\vert\nabla v_{1}\vert^{2} - \int_{\Omega} f_{1}v_{1} +  \frac{1}{2}\int_{\Omega}\vert\nabla v_{2}\vert^{2} - \int_{\Omega} f_{1}v_{2}}$$
+%%%The problem consists in finding (numerically) two functions $(u_{1},u_{2}) = \underset{(v_{1},v_{2})\in V}{\operatorname{argmin}} J(v_{1},v_{2}) $.
+%%%
+%%%This can be interpreted as finding $u_{1}, u_{2}$ as close as possible (in a certain sense) to the solutions of Laplace equation with respectively $f_{1}, f_{2}$ second members
+%%% and $g_{1}, g_{2}$ Dirichlet boundary conditions with the $u_{1}\leq u_{2}$ almost everywhere constraint.
+%%%\end{example}
+%%%
+%%%Here is the corresponding script to treat this variational inequality problem with one of the NLOpt algorithms. The whole script is in the \texttt{VarIneq2.edp}.
+%%%\bFF
+%%%  @load "ff-NLopt" //Loading nlopt
+%%%  @int NN = 10;
+%%%  @mesh Th = @square(NN,NN);
+%%%  @func f1=1.; //Datas
+%%%  @func f2=-1.; 
+%%%  @func g1=0.;
+%%%  @func g2=0.1;
+%%%  @int nadapt=3,iter=0;
+%%%  @real starttol=1e-12,bctol=6.e-12;
+%%%  @fespace Vh(Th,P1);
+%%%\eFF
+%%%
+%%%Instead of defining the $J$ functional with explicit integral on the domain, we will write it in quadratic/linear form, since the corresponding matrix and vector will not change
+%%%along with the iterations and the FreeFem matrix-vector product is optimized, this method will significantly speed up the approximation of the solution.
+%%%
+%%%\bFF
+%%%  @varf BVF(v,w) = @int2d(Th)(0.5*@dx(v)*@dx(w) + 0.5*@dy(v)*@dy(w)); //bilinear
+%%%  @varf LVF1(v,w) = @int2d(Th)(f1*w);//and linear parts
+%%%  @varf LVF2(v,w) = @int2d(Th)(f2*w);
+%%%  @matrix A =  BVF(Vh,Vh);//corresponding matrix
+%%%  @real[@int] b1 = LVF1(0,Vh) , b2 = LVF2(0,Vh); //and vectors
+%%%\eFF
+%%%Then follows a trick that we will use later to pass the boundary conditions as non-linear equality constraints (although these are of course linear ones, but this approach
+%%%demonstrate how to use all the features of NLOpt in one shot).
+%%%\bFF
+%%%  @varf Vbord(v,w) = @on(1,2,3,4,v=1);
+%%%  Vh In,Bord;
+%%%  Bord[] = Vbord(0,Vh,@tgv=1); //Bord=1 on the border
+%%%  In[] = Bord[] ? 0:1; //and 0 inside
+%%%  Vh gh1=Bord*g1,gh2=Bord*g2; //gh1=g1 on the border and 0 inside
+%%%  
+%%%  //The functional :
+%%%  @func @real J(@real[@int] &X)
+%%%  {
+%%%    Vh u1,u2;
+%%%    u1[] = X(0:Vh.ndof-1); //splitting the vector
+%%%    u2[] = X(Vh.ndof:2*Vh.ndof-1); 
+%%%    iter++;
+%%%	    @real[@int] Au1 = A*u1[], Au2 = A*u2[]; 
+%%%	    Au1 -= b1;
+%%%	    Au2 -= b2;
+%%%	    @real val = u1[]'*Au1 + u2[]'*Au2;
+%%%	    @plot(u1,u2,...); //parameters omitted
+%%%	    @return val;
+%%%  }
+%%%\eFF
+%%%To be able to play with gradient-based algorithm, we must have a gradient ready :
+%%%\bFF
+%%%  @varf dBFV(v,w) = @int2d(Th)(@dx(v)*@dx(w)+@dy(v)*@dy(w)); 
+%%%  @matrix dA = dBFV(Vh,Vh);
+%%%  @func @real[@int] dJ(@real[@int] &X)
+%%%  {
+%%%	    Vh u1,u2;
+%%%	    u1[] = X(0:Vh.ndof-1);
+%%%	    u2[] = X(Vh.ndof:2*Vh.ndof-1);
+%%%	    @real[@int] grad1 = dA*u1[], grad2 = dA*u2[];
+%%%	    grad1 -= b1;
+%%%	    grad2 -= b2;
+%%%	    @real[@int] Grad(X.n);
+%%%	    Grad(0:Vh.ndof-1) = grad1;
+%%%	    Grad(Vh.ndof:2*Vh.ndof-1) = grad2; 
+%%%	    @return Grad;
+%%%  }
+%%%\eFF
+%%%As we use P1 Lagrange finite elements, the $u_{1}\leq u_{2} $ constraint can be expressed directly upon the degree of freedom. In NLOpt, one constraint must have the form $f(X)\leq 0$.
+%%%The function is vectorial in order to handle multiple constraints :
+%%%\bFF
+%%%  @func @real[@int] IneqC(@real[@int] &X)
+%%%  {
+%%%	    @real[@int] constraints(Vh.ndof);
+%%%	    @for(@int i=0;i<Vh.ndof;++i) constraints[i] = X[i] - X[i+Vh.ndof];
+%%%	    @return constraints; //u1i - u2i <= 0
+%%%  }
+%%%\eFF
+%%%One also has to define a gradient for each constraint if a gradient search is to be used. Constraint gradient must be a function which returns a matrix. The $i$-th line of this matrix is the gradient of
+%%%the $i$-th constraint with respect to the variables of the search space.
+%%%\bFF
+%%%  @func @real[@int,@int] dIneqC(@real[@int] &X)
+%%%  {
+%%%	    @real[@int,@int] dconst(Vh.ndof,2*Vh.ndof);//so sparse... shame!
+%%%	    dconst=0;
+%%%	    @for(@int i=0;i<Vh.ndof;++i)
+%%%	    {
+%%%		      dconst(i,i) = 1.;
+%%%		      dconst(i,i+Vh.ndof) = -1.;
+%%%	    }
+%%%	    @return dconst;
+%%%  }
+%%%\eFF
+%%%As mentioned earlier, we also define a set of equality constraints and their derivatives in order to handle the boundary conditions. One could also use the {\tt lb} and {\tt ub} parameters to impose them, this also would avoid the use of large sparse matrix returned by the gradient function (it can be found in the script file, where we set {\tt lb} to $g-\epsilon$ and {\tt ub} to $g+\epsilon$).
+%%%Here again, we can work directly on the degree of freedom because of the P1 finite element. The script could not work with other finite elements without modifications.
+%%%\bFF
+%%%  @real[@int] BordIndex(Th.nbe); //Indexes of border d.f.
+%%%  
+%%%  {
+%%%	    @int k=0; //filling the index array
+%%%	    @for(@int i=0;i<Bord.n;++i) if(Bord[][i]) {BordIndex[k]=i; ++k;}
+%%%  }
+%%%  
+%%%  @func @real[@int] BC(@real[@int] &X)
+%%%  {
+%%%	    @real[@int] bc(2*Th.nbe);
+%%%	    @for(@int i=0;i<Th.nbe;++i)
+%%%	    {
+%%%		      @int I = BordIndex[i];
+%%%		      bc[i] = X[I] - gh1[][I];
+%%%		      bc[i+Th.nbe] = X[I+Th.nv] - gh2[][I];
+%%%	    }
+%%%	    @return bc;
+%%%  }
+%%%  @func @real[@int,@int] dBC(@real[@int] &X) //Gradient of boundary conditions
+%%%  {
+%%%	    @real[@int,@int] dbc(2*Th.nbe,2*Th.nv);//even sparser...:(
+%%%	    dbc=0.;
+%%%	    @for(@int i=0;i<Th.nbe;++i)
+%%%	    {
+%%%		      @int I=BordIndex[i];
+%%%		      dbc(i,I) = 1.;
+%%%		      dbc(i+Th.nbe,I+Th.nv) = 1.;
+%%%	    }
+%%%	    @return dbc;
+%%%  }
+%%%\eFF
+%%%Now we fill an initial vector and start the algorithm :
+%%%\bFF
+%%%  @real[@int] start(2*Vh.ndof);
+%%%  start(0:Vh.ndof-1) = 0.; //starting with u1=u2=0 is bad
+%%%  start(Vh.ndof:2*Vh.ndof-1) = 0.01; //a small difference is needed
+%%%  
+%%%  @real mini = @nloptAUGLAG(J, start, @grad=dJ,
+%%%                          @IConst=IneqC, @gradIConst=dIneqC,
+%%%                          @EConst=BC, @gradEConst=dBC,
+%%%                          @subOpt="LBFGS", 
+%%%                          @stopMaxFEval=10000, @stopAbsFTol=starttol
+%%%                         );
+%%%\eFF
+%%%Here we wrap a BFGS algorithm (which only works with unconstraint problems) in the augmented lagrangian method for both equality and inequality constraints. Another legit choice would be to use
+%%%SLSQP, the only gradient-based search of the package supporting these two kinds of constraints (note that the {\tt subOpt} parameter is gone ) :
+%%%\bFF
+%%%  @real mini = @nloptSLSQP(J, start, @grad=dJ,
+%%%                          @IConst=IneqC, @gradIConst=dIneqC,
+%%%                          @EConst=BC, @gradEConst=dBC,
+%%%                          @stopMaxFEval=10000, @stopAbsFTol=starttol
+%%%                         );
+%%%\eFF
+%%%One can also try to pass derivative free algorithms to AUGLAG and discard the gradients to see what happens, or directly one which handles the two kinds of constraints. Just check 
+%%%the tag in the table. The true script also has a loop in which the algorithm is restarted after mesh adaptation, nothing was said about that to avoid complicating an already relatively long
+%%%script comment.
+%%%
+%%%
+%%%\begin{figure}
+%%%\includegraphics[width=8cm] {VarIneqFill}
+%%%\includegraphics[width=8cm] {VarIneqIso}
+%%%\caption{Numerical Approximation of the Variational Inequality \label{VarIneqF}}
+%%%\end{figure}
+%%%
+%%%
+%%%\subsubsection{Optimization with MPI}
+%%%The only quick way to use the previously presented algorithms on a parallel architecture lies in parallelizing the used cost function (which is in most real life case, the expensive part of the algorithm).
+%%% Somehow, we provide a parallel version of the CMA-ES algorithm. The parallelization principle is the trivial one of evolving/genetic algorithms : at each iteration the cost function has to be evaluated $N$ 
+%%% times without any dependence at all, these $N$ calculus are then equally distributed to each processes. Calling the MPI version of CMA-ES is nearly the same as calling its sequential version (a 
+%%% complete example of use can be found in the \texttt{cmaes-mpi-VarIneq.edp} file).:
+%%%
+%%%\bFF
+%%%  @load "mpi-cmaes"
+%%%  ... //define J, u and all here
+%%%  @real min = cmaesMPI(J,u,stopTolFun=1e-6,stopMaxIter=3000);
+%%%  @cout << "minimal value is " << min << " for u = " << u << @endl;
+%%%\eFF
+%%%
+%%%If the population size is not changed using the {\tt popsize} parameter, it will use the heuristic value slightly changed to be equal to the closest greater multiple of the size of the communicator used by 
+%%%the optimizer. 
+%%%The FreeFem {\tt mpicommworld} is used by default. The user can specify his own MPI communicator with the named parameter "{ \tt comm=}", see the MPI section of this manual for more informations about 
+%%%communicators in \texttt{FreeFem++}.
+%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Mathematical Models}
 \label{sec:MathModels}
 \paragraph{Summary}\emph{This chapter goes deeper into a number of problems that \freefempp can solve.  It is a complement to
@@ -12568,61 +14519,107 @@ divup(p[]); // compute the final solution
 
 \subsubsection{NSUzawaCahouetChabart.edp}
 
- In this example we solve the Navier-Stokes \index{Navier-Stokes} equation,
- in the driven-cavity,
+ In this example we solve the Navier-Stokes \index{Navier-Stokes} equation past a cylinder
  with the Uzawa  algorithm preconditioned by the Cahouet-Chabart method (see \cite{RG03} for all the details).
 
  The idea of the preconditioner is that in a periodic domain, all
  differential operators commute and  the  Uzawa algorithm comes to solving the
  linear operator  $ \nabla. ( (\alpha Id + \nu \Delta)^{-1} \nabla$,
  where $ Id $ is the identity operator.
- So  the preconditioer suggested is $ \alpha \Delta^{-1} + \nu Id$.
+ So  the preconditioner suggested is $ \alpha \Delta^{-1} + \nu Id$.
 \\\\
-To implement this, we reuse the previous example, by including \index{include} a file.
-Then we define the time step $ \Delta t$, viscosity, and new variational form and matrix.
+To implement this, we do 
 
 \begin{example}[NSUzawaCahouetChabart.edp]~
 \index{tutorial!NSUzawaCahouetChabart.edp}
 \bFF
-@include "StokesUzawa.edp" // include the Stokes part
-@real dt=0.05, alpha=1/dt;  // $ \Delta t$
+@real D=0.1, H=0.41;
+@real cx0 = 0.2, cy0 = 0.2; // center of cyl. 
+@real xa = 0.15, ya=0.2, xe = 0.25,ye =0.2;
+@border fr1(t=0,2.2){x=t; y=0; label=1;}
+@border fr2(t=0,H){x=2.2; y=t; label=2;}
+@border fr3(t=2.2,0){x=t; y=H; label=1;}
+@border fr4(t=H,0){x=0; y=t; label=1;}
+@border fr5(t=2*pi,0){x=cx0+D*sin(t)/2; y=cy0+D*cos(t)/2; label=3;}
+@int nn=15;
+ 
+@mesh Th=@buildmesh(fr1(5*nn)+fr2(nn)+fr3(5*nn)+fr4(nn)+fr5(-nn*3));
+@real Um= 1.5;// max velocity (Rey 100) 
+@func Ub = Um*2./3.; 
+@real nu = 1e-3; 
+@real Rey = Ub*D/nu;
+// Boundary condition 
+@func U1 = 4.*Um*y*(H-y)/(H*H)  ;
+@func U2 = 0. ;
 
-@cout << " alpha = " << alpha;
-@real xnu=1./400; // viscosity $ \nu = {\hbox{Reynolds number}}^{-1} $
+@real T=2,t=0; 
+@real dt = D/nn/Um;// CFL = 1 
+ cout << " dt = " << dt <<endl;
+@real alpha=1/dt,epspq=1e-10;
 
-//  the new variational form with mass term \index{varf}
-@varf at(u1,u2)= @int2d(Th)( xnu*dx(u1)*dx(u2)
-                        + xnu*dy(u1)*dy(u2) + u1*u2*alpha  )
-                        +  @on(1,2,4,u1=0)  + @on(3,u1=1) ;
 
-A = at(Xh,Xh,solver=CG);  //  change the matrix \index{matrix!=}\index{matrix!solver=}
+@fespace Mh(Th,[P1]);
+@fespace Xh(Th,[P2]);
+@fespace Wh(Th,[P1dc]);
+@macro grad(u) [dx(u),dy(u)] //
+@macro div(u1,u2) (dx(u1)+dy(u2)) //
 
-//  set the 2 convect variational form \index{qforder=} \index{convect}
-@varf  vfconv1(uu,vv)  = @int2d(Th,qforder=5) (@convect([u1,u2],-dt,u1)*vv*alpha);
-@varf  vfconv2(v2,v1)  = @int2d(Th,qforder=5) (@convect([u1,u2],-dt,u2)*v1*alpha);
+ 
+ @varf von1([u1,u2,p],[v1,v2,q]) =  on(3,u1=0,u2=0) + on(1,u1=U1,u2=U2);
 
-@int idt;       // index of time set
-@real temps=0;  // current time
+  
+//remark : the value 100 in next line is manualy fitted, because free outlet. 
+ @varf vA(p,q) =@int2d(Th)((grad( p ) '*grad(q)) ) + @int1d(Th,2)(100*p*q) ;
 
-Mh pprec,prhs;
-@varf vfMass(p,q) = int2d(Th)(p*q);
-@matrix MassMh=vfMass(Mh,Mh,solver=CG);
+ @varf vM(p,q) =@int2d(Th,qft=qf2pT)(  p*q )+ on(2,p=0);
 
-@varf vfLap(p,q)  = int2d(Th)(dx(pprec)*dx(q)+dy(pprec)*dy(q) + pprec*q*1e-10);
-@matrix LapMh= vfLap(Mh,Mh,solver=Cholesky);
+ @varf vu([u1],[v1]) = @int2d(Th)(alpha*(u1*v1)+nu*(grad(u1)'*grad(v1) )) 
+                       + @on(1,3,u1=0) ;
+ @varf vu1([p],[v1]) = @int2d(Th)(p*dx(v1)) ;
+ @varf vu2([p],[v1]) = @int2d(Th)(p*dy(v1)) ;
+   
+
+ @matrix pAM=vM(Mh,Mh,solver=UMFPACK); 
+ @matrix pAA=vA(Mh,Mh,solver=UMFPACK); 
+ @matrix AU=vu(Xh,Xh,solver=UMFPACK); 
+ @matrix B1=vu1(Mh,Xh);
+ @matrix B2=vu2(Mh,Xh);
+ Xh u1,u2;
+ Mh p;
+@varf vonu1([u1],[v1]) =  on(1,u1=U1) + on(3,u1=0);
+@varf vonu2([u1],[v1]) =  on(1,u1=U2) + on(3,u1=0);
+
+
+@real[@int] brhs1 = vonu1(0,Xh);
+@real[@int] brhs2 = vonu2(0,Xh);
+ 
+@varf  vrhs1(uu,vv)  = @int2d(Th) (@convect([u1,u2],-dt,u1)*vv*alpha)+vonu1 ;
+@varf  vrhs2(v2,v1)  = @int2d(Th) (@convect([u1,u2],-dt,u2)*v1*alpha)+vonu2;
 \eFF
 
- The function to define the preconditioner
+The functions to define  Uzawa and the preconditioner part.  
 
 \bFF
-@func real[int]  CahouetChabart(real[int] & xx)
-{  //  xx = $ \int (div u) w_i$
-   //   $ \alpha LapMh ^{-1}  + \nu MassMh^{-1} $
-   pprec[]= LapMh^-1* xx;
-   prhs[] =  MassMh^-1*xx;
-   pprec[] = alpha*pprec[]+xnu* prhs[];
-   @return pprec[];
-};
+@func  @real[@int]   JUzawa(@real[@int] & pp) 
+{
+	@real[@int] b1=brhs1; b1 += B1*pp;
+	@real[@int] b2=brhs2; b2 += B2*pp;
+	u1[] = AU^-1 * b1;
+	u2[] = AU^-1 * b2;
+	pp  = B1'*u1[];
+	pp += B2'*u2[];
+	pp = -pp; 
+	@return pp; 
+}
+
+@func  @real[int]   Precon(@real[@int] & p)
+ {  
+    @real[@int] pa= pAA^-1*p;
+    @real[@int] pm= pAM^-1*p;
+    @real[@int] pp= alpha*pa+nu*pm; 
+  	@return pp;
+ }
+
 \eFF
 
 The loop in time.
@@ -12632,28 +14629,40 @@ is close to the final solution, don't take a relative  stop test to
 the first residual, take an absolute stop test ( negative here)
 \index{stop test!absolue}
 \bFF
-for (idt = 1; idt < 50; idt++)
+ verbosity = 0; 
+ p=0;
+ 
+   
+ Wh w; // to store vorticity ..
+  
+ @real eps=1e-6;
+ @int ndt = T/dt;
+ @for(@int i=0;i<ndt;++i)
  {
-   temps += dt;
-   cout << " --------- temps " << temps << " \n ";
-   b1[] =  vfconv1(0,Xh);
-   b2[] =  vfconv2(0,Xh);
-   cout << "  min b1 b2  " << b1[].min << " " << b2[].min << endl;
-   cout << "  max b1 b2  " << b1[].max << " " << b2[].max << endl;
-   // call Conjugate Gradient with preconditioner '
-   //  warning eps < 0 => absolue stop test \index{precon=}
-   LinearCG(divup,p[],eps=-1.e-6,nbiter=50,precon=CahouetChabart);
-   divup(p[]);   //  computed the velocity
-
-   plot([u1,u2],p,wait=!(idt%10),value= 1,coef=0.1);
+     brhs1 = vrhs1(0,Xh);
+     brhs2 = vrhs2(0,Xh);
+     @int res=@LinearCG(JUzawa,p[],precon=Precon,nbiter=100,verbosity=10,veps=eps); 
+     @assert(res==1) ; 
+     eps = -abs(eps); 
+     w = -dy(u1)+dx(u2);
+     @plot(w,fill=1,wait=0, nbiso=40);
+    
+     dt = min(dt,T-t);
+     t += dt; 
+     if( dt < 1e-10*T) break;    
  }
+ @plot(w,fill=1,wait=0, nbiso=40,ps="NScahouetChabart"); // see fig. \ref{Fig NScahouetChabart}
+ 
+ @cout << " u1 max " << u1[].linfty 
+      << " u2 max " << u2[].linfty 
+      << " p max = " << p[].max << endl; 
 \eFF
 \end{example}
 \begin{figure}[http]
 \label{cahouetchabart}\begin{center}
-\includegraphics[width=8cm]{NScahouetChabart}
-\caption{Solution of the cavity driven problem at Reynolds number 400 with the
-Cahouet-Chabart algorithm.}
+\includegraphics[width=16cm]{NScahouetChabart}
+\caption{\label{Fig NScahouetChabart}The vorticity at Reynolds number 100 a time 2s with the
+Cahouet-Chabart method.}
 \end{center}
 \end{figure}
 
@@ -13545,7 +15554,7 @@ The nonlinear elasticity  problem is: find  the displacement $(u_{1},u_{2})$  mi
 $$ \min J(u_{1},u_{2}) = \int_{\Omega} f(F2) -  \int_{\Gamma_{p}} P_{a} \,  u_{2} $$
 where  $F2(u_{1},u_{2}) =  A(E[u_{1},u_{2}],E[u_{1},u_{2}])$ and $A(X,Y)$ is bilinear sym. positive form with respect two matrix $X,Y$.
 where $f$ is a given $\mathcal{C}^2$  function, and $E[u_{1},u_{2}] = (E_{ij})_{i=1,2,\,j=1,2}$ is the Green-Saint Venant deformation tensor defined  with:
-$$  E_{ij} = 0.5 ( \p_i u_j + \p_j u_i ) + \sum_k \p_i u_k {\times} \p_j u_k  $$
+$$  E_{ij} = 0.5 \big( ( \p_i u_j + \p_j u_i ) + \sum_k \p_i u_k {\times} \p_j u_k \big) $$
 
 Denote $\mathbf{u}=(u_{1},u_{2})$, $\mathbf{v}=(v_{1},v_{2})$, $\mathbf{w}=(w_{1},w_{2})$.
 
@@ -16946,7 +18955,9 @@ no_comma_expr:
 	| no_set_expr '+=' no_comma_expr
 	| no_set_expr '-=' no_comma_expr
 	| no_set_expr '*=' no_comma_expr
-	| no_set_expr '/=' no_comma_expr ;
+	| no_set_expr '/=' no_comma_expr 
+	| no_set_expr '.*=' no_comma_expr
+	| no_set_expr './=' no_comma_expr ;
 
 
 no_set_expr:
@@ -17613,15 +19624,14 @@ and for more details see \cite{FHcpp}.
 
  To finish we must add this new function in \texttt{FreeFem++} table ,
  to do that include :
+ 
 \bFF
-@class Init { @public:  Init();  };
-
-Init init;
-
-Init::Init(){
+@void init(){
   Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
 }
+@LOADFUNC(init);
 \eFF
+
 It will be called automatically at load module time.
 
 \medskip
@@ -17939,16 +19949,14 @@ AnyType MatrixUpWind0::operator()(Stack stack) @const
  @return sparse_mat;
 }
 
-
-@class Init { @public:
-  Init();
-};
- Init init;
- Init::Init()
+@void init()
    {
      @cout << " lood: init Mat Chacon " << endl;
      Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind0 >( ));
    }
+ 
+@LOADFUNC(init);
+  
 \eFF
 \subsection{More on Adding a new finite element}
 
@@ -18274,8 +20282,7 @@ To add new function/name \texttt{defaultsolver,defaulttoSuperLU}in \texttt{freef
 and set the default  solver to the new solver., just do:
 
 \bFF
-Init init;
-Init::Init()
+void init()
 {
 
   SparseMatSolver_R= DefSparseSolver<@double>::solver;
@@ -18291,6 +20298,8 @@ Init::Init()
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
+
+LOADFUNC(init);
 
 \eFF
 
@@ -18981,6 +20990,13 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 
 \bibitem{sinwel}{\sc Astrid Sabine Sinwel},  {\it A New Family of Mixed Finite Elements for Elasticity}
 \url{http://www.numa.uni-linz.ac.at/Teaching/PhD/Finished/sinwel-diss.pdf}, Thesis,  2009,  Johannes Kepler Universität, Austria
+
+\bibitem{nlopt}{\sc Steven G. Johnson}, The NLopt nonlinear-optimization package,
+\url{http://ab-initio.mit.edu/nlopt}
+\bibitem{hansen}{\sc N. Hansen}, The CMA Evolution Strategy,
+\url{http://www.lri.fr/~hansen/cmaesintro.html}
+\bibitem{ipopt} {\sc A. Wächter and L. T. Biegler}, On the Implementation of a Primal-Dual Interior Point Filter Line Search Algorithm for Large-Scale Nonlinear Programming, Mathematical Programming 106(1), pp. 25-57, 2006
+\bibitem{ipintro}{\sc A. Forsgren, P. E. Gill and M. H. Wright}, Interior Methods for Nonlinear Optimization, SIAM Review, Vol. 44, No 4. pp. 525-597, 2002
 
 
 \end{thebibliography}

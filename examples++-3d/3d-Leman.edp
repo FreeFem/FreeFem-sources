@@ -27,7 +27,7 @@ mesh3 Th=buildlayers(Th2,nn,
   labelmid=rmid, 
   reffaceup = rup,
   reffacelow = rdown);
-medit("Leman",Th);
+if(!NoUseOfWait)medit("Leman",Th);
 fespace Vh(Th,P13d);
 Vh p,q;
 //  (-deep[].min)*c = 0.5 Km

@@ -392,7 +392,7 @@ AnyType mmg3d_Op::operator()(Stack stack)  const
 
   int memory(arg(4,stack,-1L));
   
-  cout << "memory =" << memory << endl;
+  cout << "memory =" << memory << "Mb " << endl;
   if( memory < 0 ){
     nvmax   = max( (int) 1.5*nv,defaultnvmax);
     ntrimax = max( (int) 1.5*nbe,defaultntrimax);
@@ -545,7 +545,7 @@ class Init1 { public:
   Init1();
 };
 
-static Init1 init1;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   

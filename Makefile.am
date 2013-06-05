@@ -6,12 +6,12 @@
 
 # $Id$
 
-SUBDIRS=download src DOC examples++-tutorial examples++	\
+SUBDIRS=download src  examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d
+	examples++-3d DOC 
 
-EXTRA_DIST=regtests.sh config-wrapper.h  \
+EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
 WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS README_MAC \
@@ -21,7 +21,7 @@ freefem++.spec crimson-freefem++.zip \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
-examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp  \
+examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
 WHERE_LIBRARY-mkl FreeFem++-CoCoa
 
 
@@ -143,7 +143,13 @@ deb:
 
 nativeX: $(FF_MAC_PREFIX)_MacOsX.tgz 
 	echo "done"
-
+MacOsX: 
+	-rm -rf  OsXxx
+	mkdir -p  OsXxx/Applications/
+	make install DESTDIR="`pwd`/OsXxx"
+	tar zxvf FreeFem++.app.tgz -C OsXxx/Applications/
+	cd OsXxx;tar cvfz  ../$(FF_MAC_PREFIX)_MacOsX.tgz .
+	rm -rf OsXxx
 clean-local::
 	-rm freefem++-$(VERSION).tar.gz
 	-rm -rf FreeFem++v*_MacOS
@@ -164,6 +170,12 @@ ListFiles-natives: .FORCE
 	find .   -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 List-agl-dylib: src/nw/FreeFem++
 	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
+CheckMacLib.sh: src/nw/FreeFem++
+	echo "for i in `otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	chmod a+x $@
+CheckMPIMacLib.sh: src/mpi/FreeFem++-mpi
+	echo "for i in `otool -L src/mpi/FreeFem++-mpi|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	chmod a+x $@
 .FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives

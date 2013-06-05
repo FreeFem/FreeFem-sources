@@ -5,6 +5,7 @@
 
 SUBDIRS=blas arpack umfpack  
 EXTRA_DIST= \
+./nlopt/Make.inc ./nlopt/Makefile \
 ./blacs/BLACS.patch \
 ./blacs/Bmake-blacs.inc \
 ./blacs/Makefile \
@@ -30,17 +31,18 @@ EXTRA_DIST= \
 ./metis/Makefile-metis.in \
 ./metis/patch-metis \
 ./mmg3d/Makefile \
-./mmg3d/makefile-mmg3d.inc \
+./mmg3d/patch-mmg3dv4.diff \
 ./mshmet/Makefile \
 ./mshmet/Makefile-mshmet.inc \
-./mshmet/mshmet.2009.09.16.patch \
+./mshmet/mshmet.2011.03.06.patch \
 ./mshmet/mshmetlib-internal.h \
 ./mshmet/mshmetlib.c \
 ./mshmet/mshmetlib.h \
-./mumps/MUMPS_4.9.2.patch \
 ./mumps/Makefile \
-./mumps/Makefile-mumps-4.9.2.inc \
+./mumps-seq/Makefile-mumps-4.10.0.inc \
+./mumps-seq/Makefile \
 ./mumps/Makefile-mumps-4.10.0.inc \
+./mumps/MUMPS_4.10.0.patch \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/ParMetis-3.1.1-ok/stdheaders.h \
 ./parmetis/makefile \
@@ -57,6 +59,7 @@ EXTRA_DIST= \
 ./scalapack/SLmake-scalapack.inc \
 ./scotch/Makefile \
 ./scotch/Makefile-scotch.inc \
+./scotch/Makefile.patch \
 ./scotch/scotch_5.1_esmumps.patch \
 ./superlu/Makefile \
 ./superlu/make.inc \
@@ -66,17 +69,18 @@ EXTRA_DIST= \
 ./tetgen/Makefile \
 ./tetgen/tetgen1.4.2.patch \
 ./yams/Makefile \
-./yams/freeyams.2010.05.20.patch \
+./yams/freeyams.2012.02.05.patch \
 ./yams/makefile-yams.inc \
 ./yams/yamslib.c \
 ./yams/yamslib.h \
-./yams/yamslib_internal.h 
+./yams/yamslib_internal.h \
+ipopt/Makefile	\
+ipopt/Makefile.inc.in \
+ipopt/patch-IpBlas 
 
-
-
-
-MPI_SOFT=blacs parmetis  scalapack scotch superludist mumps pastix hypre hips parms 
-LIST_SOFT=tetgen superlu fftw metis yams mshmet mmg3d gmm 
+# blacs is include in  scalapack 2.0.2 
+MPI_SOFT= parmetis  scalapack scotch superludist mumps pastix  hips parms 
+LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt mumps-seq ipopt 
 all-recursive: bin lib include pkg
 
 lib: 
@@ -113,9 +117,12 @@ tag-compile-pkg: bin lib include pkg FORCE
 	touch tag-compile-pkg
 FORCE:
 
-re-install: 
+re-install:
+	-rm -rf	 include lib bin 
+	mkdir   include lib bin 	 
 	$(MAKE) compile-pkg DIRTARGET=install
 WHERE:
+	-rm -rf  lib/WHERE.*
 	$(MAKE) compile-pkg DIRTARGET=WHERE
 
 clean-local:

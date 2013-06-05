@@ -520,6 +520,8 @@ public:
    void operator=(const MatriceProfile & A);
 };
 
+
+                                          
 template <class R> 
 class MatriceMorse:public MatriceCreuse<R> {
 //  numebering  is no-symmetric
@@ -541,6 +543,7 @@ public:
   int * cl;  
 public:
 
+    
  class VirtualSolver :public RefCounter { 
    friend class MatriceMorse;
    virtual void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
@@ -568,7 +571,7 @@ public:
     :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
   {build(this,Uh,Vh,data);           
   }
-
+ 
 MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=false, const VirtualSolver * s=0,bool transpose=false )
     :MatriceCreuse<R>(nn,mm,dd && !transpose),
      nbcoef(nbc),
@@ -628,7 +631,10 @@ template<class K>
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
   bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.);
   
-
+  template<typename RR,typename K> static  RR CastTo(K  b){return b;}
+                                                  
+  template<class K>
+    MatriceMorse(const MatriceMorse<K> & , R (*f)(K) );
   template<class K>
     MatriceMorse(const MatriceMorse<K> & );
 
@@ -764,7 +770,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
-     if (nbitermax <= nbitermax )
+     //if (nbitermax <= nbitermax )
       cout << "CG does'nt converge: " << nbitermax <<   " ||g||^2 = " << g2 << " reps2= " << reps2 << endl; 
    return 0; 
 }
@@ -816,13 +822,13 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };
 
 struct TypeSolveMat {
-    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
+    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6, SparseSolverSym=7 };
     TSolveMat t;
     bool sym;
     bool profile;
     TypeSolveMat(TSolveMat tt=LU) :t(tt),
-    sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
-    profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
+    sym(t == CROUT || t ==CHOLESKY  ||  t==GC || t==SparseSolverSym ),
+    profile(t == CROUT || t ==CHOLESKY  || t ==LU ) {}
     bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
     bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
     static TSolveMat defaultvalue;
@@ -831,8 +837,10 @@ struct TypeSolveMat {
 // add FH , JM  avril 2009 
 template<class K,class V> class MyMap;
 class String; 
-typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi 
-
+typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi
+//  to build 
+#define VDATASPARSESOLVER  1
+int Data_Sparse_Solver_version() ; //{ return VDATASPARSESOLVER;}
 struct Data_Sparse_Solver {
   bool initmat;
   TypeSolveMat* typemat;
@@ -857,6 +865,7 @@ struct Data_Sparse_Solver {
   KN<double> scale_c; 
   string sparams;  
   pcommworld commworld;  // pointeur sur le commworld
+    int master; //  master rank in comm add FH 02/2013 for MUMPS ... => VDATASPARSESOLVER exist 
  /*   
   int *param_int;
   double *param_double;
@@ -903,8 +912,10 @@ struct Data_Sparse_Solver {
     file_param_perm_c(0),
      */
     //sparams, 
-    commworld(0)
+    commworld(0),
+    master(0)
     {}
+    
 private:
     Data_Sparse_Solver(const Data_Sparse_Solver& ); // pas de copie 
 };
@@ -937,6 +948,25 @@ template<class R> struct DefSparseSolver {
       ret =(solver)(ARG_SPARSE_SOLVER(A));
     return ret;	
   }
+};
+
+// add Dec 2012 F.H. for optimisation .. 
+template<class R> struct DefSparseSolverSym {
+    typedef typename MatriceMorse<R>::VirtualSolver *
+    (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
+    
+    static SparseMatSolver solver;
+    
+    static  typename MatriceMorse<R>::VirtualSolver *
+    
+    Build( DCL_ARG_SPARSE_SOLVER(R,A) )
+    
+    {
+        typename MatriceMorse<R>::VirtualSolver *ret=0;
+        if(solver)
+            ret =(solver)(ARG_SPARSE_SOLVER(A));
+        return ret;	
+    }
 };
 
 // End Sep 2007 for generic Space solver

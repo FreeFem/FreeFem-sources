@@ -737,7 +737,7 @@ void TTriangle<R2>::Fill(int color) const
 {
   const TTriangle<R2> & K(*this);
   R2 A(K[0]),B(K[1]),C(K[2]);
-  float p[]={A.x,A.y,B.x,B.y,C.x,C.y};
+  float p[]={(float)A.x,(float)A.y,(float)B.x,(float)B.y,(float)C.x,(float)C.y};
   int c=LaCouleur(); 
   couleur(color); 
   fillpoly(3,p);

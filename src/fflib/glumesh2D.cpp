@@ -56,8 +56,11 @@ Mesh * GluMesh(listMesh const & lst)
   R2 Pn(1e100,1e100),Px(-1e100,-1e100);
   const list<Mesh *> lth(*lst.lth);
    Mesh * th0=0;
+    int kk=0;
   for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
+       if(! *i ) continue; //
+        ++kk;
        Mesh &Th(**i);
       th0=&Th;
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
@@ -74,7 +77,8 @@ Mesh * GluMesh(listMesh const & lst)
 	  Pn=Minc(P,Pn);
 	  Px=Maxc(P,Px);     
 	}
-    } 
+    }
+    if(kk==0) return 0; //  no mesh ...
   if(verbosity>2)
     cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn 
 	 << " "<< Px << endl;
@@ -94,6 +98,7 @@ Mesh * GluMesh(listMesh const & lst)
     map<pair<int,int>,int> bbe;
     for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
       {
+          if(! *i ) continue; //
 	const Mesh &Th(**i);
 	if(!*i) continue;
 	if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
@@ -139,50 +144,9 @@ Mesh * GluMesh(listMesh const & lst)
 	
       } 
   }
-  /*
-  Mesh::Vertex *becog = new Vertex[nebx];
-  cout << "creation quadtree" << endl;
-  FQuadTree *quadtree_be=new Fem2D::FQuadTree(becog,Pn,Px,-nebx);
-  cout << "fin creation quadtree" << endl;
-  double hseuil_border = hseuil/2.;
-  // to remove common egde wrong code .... FH
-  if(0) 
-    for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
-      {
-      const Mesh &Th(**i);
-      if(!*i) continue;
-      
-      if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
-      for (int k=0;k<Th.neb;k++)
-	{
-	  
-	  const BoundaryEdge & be(Th.bedges[k]);
-	  int i0 = Th.operator()(be[0]); //quadtree->NearestVertex(be[0])-v;
-	  int i1 = Th.operator()(be[1]); //quadtree->NearestVertex(be[1])-v;
-	  
-	  R2 r2vi= ((R2) be[0] + be[1])/2.;
-	  
-	  //const R2 r2vi( cdgx, cdgy);
-	  const Mesh::Vertex & vi(r2vi);
-	  
-	  Vertex * pvi=quadtree_be->ToClose(vi,hseuil_border);
-	  if(!pvi){
-	    becog[neb].x = vi.x;
-	    becog[neb].y = vi.y;
-	    becog[neb].lab = vi.lab;
-	    quadtree_be->Add( becog[neb++] );
-	    
-	    int iglu0=quadtree->ToClose(be[0],hseuil)-v;
-	    int iglu1=quadtree->ToClose(be[1],hseuil)-v;
-	    
-	    (bb++)->set(v,iglu0,iglu1,vi.lab);
-	  }
-	}
-    
-    } //  
-  */
+
   delete quadtree;
-  //delete quadtree_be;
+
    
   if(verbosity>1)
     {
@@ -226,10 +190,13 @@ class SetMesh_Op : public E_F0mps
 public:
   Expression a; 
    
-  static const int n_name_param =2+2+2+2; //  add nbiter FH 30/01/2007 11 -> 12 
+  static const int n_name_param =2+2+2+2+2; //  add nbiter FH 30/01/2007 11 -> 12
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
+    
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  bool   arg(int i,Stack stack, bool   a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 
   
 public:
@@ -253,7 +220,10 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "renumv",&typeid(KN_<long>)},
   {  "renumt",&typeid(KN_<long>)},
   {  "flabel", &typeid(long)},
-  {  "fregion", &typeid(long)}
+  {  "fregion", &typeid(long)},
+  {  "rmledges", &typeid(long)},
+  {  "rmInternalEdges", &typeid(bool)}
+
         
     
 };
@@ -282,14 +252,17 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   KN<long> rt (arg(5,stack,zz));  
   Expression flab = nargs[6] ;
   Expression freg = nargs[7] ;
-    
+  bool  rm_edge = nargs[8];
+  long  rmlabedges (arg(8,stack,0L));
+  bool  rm_i_edges = (arg(9,stack,false));
+
   bool rV =  (rv.size()== nbv);
   bool rT =  (rt.size()== nbt);
     if(verbosity>1)
 	cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "
-	     << neb << "renum V " << rV << " , renum T "<< rT << endl;  
+	     << neb << "renum V " << rV << " , renum T "<< rT << " rm internal edges " << rm_i_edges<< endl;
     
-  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT  && ! flab && ! freg ) return m;
+  if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT  && ! flab && ! freg && !rm_i_edges &&   !rm_edge ) return m;
   ffassert( nre.N() %2 ==0);
   ffassert( nrt.N() %2 ==0);
   map<int,int> mape,mapt;
@@ -327,7 +300,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 
   //  generation des triangles 
   int nberr=0;
-  R2 PtHat(0.5,0.5);
+  R2 PtHat(1./3.,1./3.);
   for (int i=0;i<nbt;i++)
     {
       int ii= rT ? rt(i) : i;
@@ -346,21 +319,43 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 	}
 	
     }  
-  
+  int  nrmedge=0;
   // les arete frontieres qui n'ont pas change
   BoundaryEdge * bb=b;
   for (int i=0;i<neb;i++)
-    {        
+    {
+      int ke,k =Th.BoundaryElement(i,ke);
+      int kke,kk= Th.ElementAdj(k,kke=ke);
+      int intern = ! (( kk == k )|| ( kk < 0)) ;
+      const   Triangle &K(Th[k]);
       int i1=Th(Th.bedges[i][0]);
       int i2=Th(Th.bedges[i][1]);
+ 
 	if(rV) {
 	    i1=rv(i1);
 	    i2=rv(i2);
 	}
 	
       int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
-      *bb++ = BoundaryEdge(v,i1,i2,l1);   
+      mp->set(Th,Th[k](PtHat),PtHat,Th[i],l1);
+      if(flab)
+      {
+          R2 E=K.Edge(ke);
+          double le = sqrt((E,E));
+          double sa=0.5,sb=1-sa;
+          R2 PA(TriangleHat[VerticesOfTriangularEdge[ke][0]]),
+          PB(TriangleHat[VerticesOfTriangularEdge[ke][1]]);
+          R2 Pt(PA*sa+PB*sb ); //
+          //  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
+          MeshPointStack(stack)->set(Th,K(Pt),Pt,K,l1,R2(E.y,-E.x)/le,ke);
+	  l1 =GetAny<long>( (*flab)(stack)) ;
+      }
+     if( !( intern && ( rm_i_edges || (rmlabedges && (l1 == rmlabedges)) )   ))
+      *bb++ = BoundaryEdge(v,i1,i2,l1);
+     else ++nrmedge;
     }
+    nebn -= nrmedge;
+    if(nrmedge && verbosity > 2) cout << "   change  mesh2 : number of removed  internal edges " << nrmedge << endl;
   assert(nebn==bb-b);
   m =  new Mesh(nbv,nbt,nebn,v,t,b);
 

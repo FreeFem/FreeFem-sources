@@ -488,6 +488,11 @@ template<class R>  R * set_copy( R* const & a,const R & b){
  SHOWVERB( cout << " set_copy " << typeid(R).name() << " " << &b << endl);
   memcpy(a,&b,sizeof(R)); return a;}
 
+template<class R>  R ** set_copy_new( R** const & a,const R * & b){ 
+    SHOWVERB( cout << " set_copy_new " << typeid(R).name() << " " << &b << endl);
+    *a= new R(*b);
+   return a;}
+
 template<class R>  R * set_copyp( R* const & a,const R & b){ 
  SHOWVERB( cout << " set_copy " << typeid(R).name() << " " << &b << endl);
   // memcpy(a,&b,sizeof(R));

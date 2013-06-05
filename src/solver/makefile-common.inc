@@ -6,18 +6,14 @@
 
 # frefem++ variables
 
-FREEFEM_DIR     = /home/atenekeng/Documents/soft/FreeFem/newfreefem++/freefem++/
-
-#FREEFEM_DIR     = $(HOME)/work/freefem++/
+FREEFEM_DIR     = /Volumes/Ike/cazeaux/ff++/
 
 FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
 
 # directory of the different package
 
-SOFT_DIR =  /home/atenekeng/Documents/soft/
+SOFT_DIR =  $(FREEFEM_DIR)download/
 
-#SOFT_DIR =  $(HOME)/work/LinearSolver/
-#>>>>>>> 1.2
 
 #==========
 #   BLAS

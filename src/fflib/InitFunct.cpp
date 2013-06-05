@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <deque>
 #include <iostream>
+#include <set> 
+#include "ffapi.hpp"  
 using namespace std;
 typedef void  (* afunc)(); 
 typedef pair<int,afunc> InitFunct;
@@ -39,10 +41,15 @@ deque<InitFunct> * getInitFunctlist()
   return data;
 }
 
-
-void call(const InitFunct & a) { (*a.second)();}
-void show(const InitFunct & a) { cout << a.first << " " <<a.second << endl;}
-
+extern long verbosity;
+set<string> & ff_SetofInitFunct() { static set<string> sset; return sset;}
+void call(const InitFunct & a) { 
+  if(verbosity>5) 
+    cout << "\n addInitFunct : " << a.first << " call : " <<a.second  << " ( " ; 
+  (*a.second)();  
+  if(verbosity>5)
+    cout <<  " ) " ;
+}
 bool comp(const InitFunct a,const InitFunct b)
  { 
    return a.first < b.first;
@@ -52,14 +59,25 @@ bool comp(const InitFunct a,const InitFunct b)
  {
    deque<InitFunct> *  l(getInitFunctlist()); 
    sort(l->begin(),l->end(),comp);
- //  cout << " callInitsFunct : " << l->size() << endl;
-   for_each(l->begin(),l->end(),show);   
+   if(verbosity>5) cout << " callInitsFunct : " << l->size() << endl;
+   //   for_each(l->begin(),l->end(),show);   
    for_each(l->begin(),l->end(),call);
+    l->clear();
  }
  
-void  addInitFunct(int i,void  (* f)()) 
-{ 
-  getInitFunctlist()->push_back(make_pair(i,f));
-//  cout << " addInitFunct: " << i << " " << f << endl; 
+void  addInitFunct(int i,void  (* f)(),const char *name) 
+{
+
+  if(!name || (! *name ) ||  ff_SetofInitFunct().insert(name).second)
+    { 
+    getInitFunctlist()->push_back(make_pair(i,f));
+    if(verbosity>9)   cout << " -- addInitFunct: " << i << " " << f 
+			   << " " <<  (name ? name : "" ) <<endl; 
+    }
+  else 
+    cout << " ********  addInitFunct "<< name << " is always load (skip) !" << endl; 
+
 }
+
+
 
