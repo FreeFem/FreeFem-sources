@@ -98,16 +98,23 @@ plots/overlapTh.eps plots/us-ug.eps plots/vs-vg.eps  \
 plots/square-0.eps      plots/square-1.eps      plots/square-2.eps  \
 plots/cube.eps plots/cone.eps \
 plots/Hex-Sphere.eps plots/Cube-With-Ball.eps \
-plots/multiendborder.eps plots/multiendmesh.eps
+plots/multiendborder.eps plots/multiendmesh.eps \
+plots/leman.eps 
 
 #  Pour la page de garde FH
 FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \
 figures/mi.jpg plots/LogoUPMC.jpg \
 plots/beam-3d.jpg \
-plots/logo-finance-par-anr.jpg 
+plots/logo-finance-par-anr.jpg \
+plots/VarIneqFill.jpg plots/VarIneqIso.jpg \
+plots/NSNewtonTh.jpg  plots/NSNewtonUP.jpg \
+plots/chesapeake-2.jpg \
+plots/minsurf3D.jpg \
+plots/lg.jpg 
 
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
-plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf
+plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf \
+plots/nlopttab.pdf
 
 EXTRA_DIST= addfe.tex docFFGUI.tex manual-full.tex freefem++doc.tex  manual.tex FF.sty FFF.sty dessin.sty pdfsync.sty styles.sty \
 $(FIGS_EPS)    $(FIGS_JPG)    $(FIGS_PDF)  

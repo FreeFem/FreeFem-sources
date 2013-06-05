@@ -8,7 +8,7 @@
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:   freeyams
+//ff-c++-LIBRARY-dep:   freeyams libMesh
 //ff-c++-cpp-dep: 
 //  
 
@@ -34,7 +34,7 @@
  */
 
 /*
-./ff-c++ yams.cpp -I/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -I/Users/morice/Desktop/adaptmesh3d/yams2.2010.02.22/sourcesnew -L/Users/morice/Desktop/adaptmesh3d/yams2.2010.02.22/objects/i386/ -lyams2 -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
+ff-c++ -auto freeyams.cpp 
 */
 
 // ./ff-c++ yams.cpp -I../src/libMesh/ -I../download/include/yams/ -L../download/lib/yams/ -lyams2 -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
@@ -125,7 +125,7 @@ void mesh3_to_yams_pSurfMesh( const Mesh3 &Th3 , int memory, int choix,
   meshyams->np = meshyams->npfixe;
 }
 
-Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc ){
+Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc, int choix){
 
   /*
     Mesh3  :: maillage initiale
@@ -155,7 +155,7 @@ Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc ){
     ppt->tag |= M_UNUSED;
     ppt->flag = ppt->color = 0;
   }
-  printf("sm->connex %d\n",sm->connex);
+  // a enlever pour l'instant  
   if ( sm->connex > 0 ) {
     for (k=1; k<=sm->ne; k++) {
       pt1 = &sm->tria[k];
@@ -180,8 +180,11 @@ Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc ){
       }
     }
   }
-
-  if ( sm->ntet ) {
+  
+  cout << "sm->ntet=" << sm->ntet << endl;
+  // a enlever on ne garde pas les tetrahedres
+  // demander P. Frey
+  if ( choix == 6 && sm->ntet ) {
     for (k=1; k<=sm->ntet; k++) {
       ptt = &sm->tetra[k];
       if ( !ptt->v[0] )  continue;
@@ -237,13 +240,14 @@ Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc ){
   for (k=1; k<=sm->ne; k++) {
     int iv[3],lab;
     pt1  = &sm->tria[k];
+    //    lab = pt1->ref; 
     if ( !pt1->v[0] )  continue;
     else if ( sm->connex > 0 && pt1->cc != sm->connex ) continue;
     iv[0] = sm->point[pt1->v[0]].tmp-1;
     iv[1] = sm->point[pt1->v[1]].tmp-1;
     iv[2] = sm->point[pt1->v[2]].tmp-1;
-    lab = (int)(sm->connex < 0 ? pt1->cc : pt1->ref);
- 
+    lab =  pt1->ref; //  change fh 02/2013
+    //cout << " lab : " << sm->connex  << " " << pt1->cc << " " << pt1->ref<< " " << endl;
     (*ff_bb++).set( ff_v, iv, lab);
     
     for (i=0; i<3; i++) {
@@ -264,11 +268,36 @@ Mesh3 * yams_pSurfMesh_to_mesh3( yams_pSurfMesh sm, int infondang, int infocc ){
     } 
     
   }
+  
+  Tet *ff_t;
+  if ( choix == 6 && sm->ntet ) ff_t  = new Tet[sm->ntet];
+  Tet *ff_tt = ff_t;
+
+  if ( choix == 6 && sm->ntet ) {
+    int iv[4],lab;
+    for (k=1; k<=sm->ntet; k++) {
+      ptt  = &sm->tetra[k];
+      if ( !ptt->v[0] )  continue;
+      for (i=0; i<4; i++)
+        iv[i] = sm->point[ptt->v[i]].tmp-1;
+      lab = ptt->ref;
+      (*ff_tt++).set( ff_v, iv, lab); 
+    }
+  }
+
 
   // les autres avoir par la suite
-  cout << " nv " << ff_nv << " nbe" << ff_nbe << endl;
-  Mesh3 *TH3_T = new Mesh3(ff_nv,ff_nbe,ff_v,ff_b);
-  return TH3_T;
+  if( verbosity>1 ) cout << " nv " << ff_nv << " nbe" << ff_nbe << endl;
+  if( choix == 6 && sm->ntet){
+    int ff_nt = sm->ntet;
+    Mesh3 *TH3_T = new Mesh3(ff_nv,ff_nt,ff_nbe,ff_v,ff_t,ff_b);   
+    TH3_T->BuildGTree();
+    return TH3_T;
+  }
+  else{
+    Mesh3 *TH3_T = new Mesh3(ff_nv,ff_nbe,ff_v,ff_b);   
+    return TH3_T;
+  }
 }
 
 void solyams_pSurfMesh( yams_pSurfMesh sm, const int &type, const KN<double> & tabsol, float hmin, float hmax){
@@ -278,25 +307,28 @@ void solyams_pSurfMesh( yams_pSurfMesh sm, const int &type, const KN<double> & t
   double   sizeh,m[6],lambda[3],vp[2][2],vp3[3][3];
   hmin =  FLT_MAX;
   hmax = -FLT_MAX;
+  float vpmin=FLT_MAX, vpmax=-FLT_MAX, mmin=FLT_MAX,mmax=-FLT_MAX;
   
-
-  if(type == 1){
-    for (k=1; k<=sm->npfixe; k++) {
-      ppt = &sm->point[k];
-      ppt->size = (float) tabsol[k];
-      hmin = min(ppt->size,hmin);
-      hmax = max(ppt->size,hmax);
+  if(type == 1)
+    {
+      for (k=1; k<=sm->npfixe; k++) {
+	ppt = &sm->point[k];
+	ppt->size = (float) tabsol[k-1];// change FH nov 2010: k -> k-1
+	hmin = min(ppt->size,hmin);
+	hmax = max(ppt->size,hmax);
+	
+      }
     }
-  }
   else if( type == 3 ){
-    if( !sm->metric ){
-      cerr << " we give metric solution bug" << endl;
+    if ( !sm->metric && !zaldy3(sm,3) )  {
+      ExecError("Pb alloc metric in freeyam ??? ");
     }
     
     for (k=1; k<=sm->npfixe; k++) {
       ppt = &sm->point[k];    
-      pm  = &sm->metric[k];
+      pm  = &sm->metric[k];// coorrection FH dec 2010..
       memset(pm->m,6*sizeof(float),0.);
+      
       for (i=0; i<6; i++)
 	m[i] = (float) tabsol[(k-1)*6+i];
       
@@ -312,15 +344,32 @@ void solyams_pSurfMesh( yams_pSurfMesh sm, const int &type, const KN<double> & t
 	fprintf(stderr,"  ## ERR 9201, inbbf, Not a metric tensor. Discarded\n");
 	free(sm->metric);
 	sm->metric = 0;
-	exit(1);
+	ExecError("freeyamerr: ## ERR 9201, inbbf, Not a metric tensor. Discarded");
       }
-      sizeh     = max(max(lambda[0],lambda[1]),lambda[2]);
+
+      float vmn = min(min(lambda[0],lambda[1]),lambda[2]);
+      float vmx = max(max(lambda[0],lambda[1]),lambda[2]);
+		      
+      vpmin= min(vpmin, vmn);
+      vpmax= max(vpmax,vmx);
+      sizeh     = vpmax;
       ppt->size = max(1.0 / sqrt(sizeh),EPS);
       hmin = min(ppt->size,hmin);
       hmax = max(ppt->size,hmax);
     }
   }
-     
+  //if(verbosity>4)
+    {
+      cout << " freeyams (metric in) :  hmin " <<  hmin << " , hmax " << hmax << endl;
+      if(type==3)
+      cout << "             min max of eigen val  " << vpmin << " " << vpmax << endl;
+    }
+
+  if(type==3 && vpmin <0 )
+    {
+      cout << "   Error Freeyam :  metric    min max of eigen val  " << vpmin << " " << vpmax << endl;
+      ExecError("Error in metric definition freeyams (negative eigen value");
+    }
 }
 
 
@@ -410,30 +459,29 @@ void yams_inival(int intopt[23],double fopt[14]){
   /* get decimation parameters */
   intopt[20] = 0;
   intopt[3]  = 0;
-  intopt[7]  = 1;
-  intopt[22] = 0;
+  intopt[7]  = 0;//  Split multiple connected points  (no manifold) 
+  intopt[22] = 1;// set optim option
 
   // demander P. Frey
-  intopt[0] = 0;
-  intopt[1] = 0; 
-  intopt[2] = 0;
+  intopt[0] = 0; //  anisotropie  
+  intopt[1] = 0; // 
+  intopt[2] = 0;  
     
   intopt[4] = 0;
   intopt[5] = 0;
   intopt[6] = 0;
 
-  intopt[8] = -1;
-  intopt[9] =  0; // par default   // a verifier
-  intopt[10] = 0;
-  intopt[11] = -99;
-  intopt[12] = 0;   // par default
+  intopt[8] = -1; // memory 
+  intopt[9] =  -1; // par default   connex connected component (tout) 
+  intopt[10] = 0;// vrml 
+  intopt[11] = verbosity;
+  intopt[12] = 0;   //nm
 
-  intopt[16] = 0;
-  intopt[17] = 0;
-  intopt[18] = 0;
-  intopt[19] = 0;
-
-  intopt[21] = 0;
+  intopt[16] = 0; // quad
+  intopt[17] = 0;// noridge
+  intopt[18] = 0;// nosmooth
+  intopt[19] = 1;// 1
+  intopt[21] = 1;
   
 }
 
@@ -448,18 +496,18 @@ public:
   int dim;
   vector<Expression> sol;
 
-  static const int n_name_param = 3; // 
+  static const int n_name_param = 14; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
   { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-  KN_<int>  arg(int i,Stack stack,KN_<int> a ) const
-  { return nargs[i] ? GetAny<KN_<int> >( (*nargs[i])(stack) ): a;}
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  bool  arg(int i,Stack stack, bool a ) const{ return nargs[i] ? GetAny< bool >( (*nargs[i])(stack) ): a;}
   
   
 public:
@@ -538,9 +586,22 @@ public:
 
 
 basicAC_F0::name_and_type  yams_Op::name_param[]= {
-  {  "loptions", &typeid(KN_<long>)},
+
+  {  "loptions", &typeid(KN_<long>)},  //0
   {  "doptions", &typeid(KN_<double>)},
-  {  "metric", &typeid(KN_<double>)}
+  {  "metric", &typeid(KN_<double>)},
+  {  "aniso", &typeid(bool)} ,//3
+  {  "mem", &typeid(long)} ,
+  {  "hmin", &typeid(double)} ,
+  {  "hmax", &typeid(double)} ,//6
+  {  "gradation", &typeid(double)} ,
+  {  "option", &typeid(long)} , // 8
+  {  "ridgeangle", &typeid(double)} ,//9
+  {  "absolute", &typeid(bool)}, //10 
+  {  "verbosity", &typeid(long)}, //11 
+    
+  {  "nr", &typeid(long)}, // 12 no ridge
+  {  "ns", &typeid(long)} // 13 no point smoothing
 };
 
 AnyType yams_Op::operator()(Stack stack)  const 
@@ -559,13 +620,12 @@ AnyType yams_Op::operator()(Stack stack)  const
   defaultintopt = 0;
   defaultfopt   = 0.;
   yams_inival( defaultintopt, defaultfopt);
-  /*  MODIF FH 
-  KN<int> defintopt(23);
+  
+  KN<int> intopt(23);
   for(int ii=0; ii< 23; ii++){
-    defintopt[ii]=defaultintopt[ii];
+    intopt[ii]=defaultintopt[ii];
   }
-  */
-  /*
+ 
   KN<double> fopt(14);
   for(int ii=0; ii< 14; ii++){
     fopt[ii]=defaultfopt[ii];
@@ -588,52 +648,84 @@ AnyType yams_Op::operator()(Stack stack)  const
   if( nargs[1] ){
     KN<double> fopttmp =  GetAny<KN_<double> >( (*nargs[1])(stack) );
     if( fopttmp.N() != 11 ){
-      cerr <<"the size of vector loptions is 12 "  << endl;
-      exit(1);
+      cerr <<"the size of vector loptions is 11 not "  << fopttmp.N()<< endl;
+	ExecError("FreeYams");
     }
     else{
-      for(int ii=0; ii<12; ii++){
+      for(int ii=0; ii<11; ii++){
 	fopt[ wrapper_fopt[ii] ] = fopttmp[ii];
       }
     }
-  } FIN MODIF FH 
-  */
-  KN<int> intopt(arg(0,stack,defaultintopt));
-  assert( intopt.N() == 23 );
-  KN<double> fopt(arg(1,stack,defaultfopt));
-  assert( fopt.N() == 14 );
-  KN<double> metric;
+  }
+ 
+  intopt[0] = arg(3,stack,intopt[0]!=1);
+  intopt[8] = arg(4,stack,intopt[8]);
+  fopt[7] = arg(5,stack,fopt[7]);
+  fopt[8] = arg(6,stack,fopt[7]);
+  fopt[6] = arg(7,stack,fopt[6]);
+  intopt[22] = arg(8,stack, intopt[22] ); // optim option  
+  if(nargs[9]) intopt[17]=1; 
+  fopt[13] = arg(9,stack,fopt[13]); // ridge angle
+  intopt[21] = arg(10,stack, intopt[21] ); // absolue 
+  intopt[11] = arg(11,stack,(int) verbosity); // verbosity 
+  intopt[17] = arg(12,stack,intopt[17]); // no ridge 
+  intopt[18] = arg(13,stack,intopt[18]); // nb smooth 
+  if(verbosity>1)
+     {
+       cout << " fopt = [";
+       for(int i=0;i<11;++i)
+	   cout   << fopt[wrapper_fopt[i]]  <<  (i < 10 ? ",": "];\n") ;       
+       cout << " intopt = [";
+       for(int i=0;i<13;++i)
+	   cout << intopt[wrapper_intopt[i]]  <<  (i < 12 ? ",": "];\n" );         
+     }
 
+    
+ 
+  
+  /*
+    KN<int> intopt(arg(0,stack,defaultintopt));
+    assert( intopt.N() == 23 );
+    KN<double> fopt(arg(1,stack,defaultfopt));
+    assert( fopt.N() == 14 );
+  */
+  KN<double> metric;
+    
   int mtype=type;
-  if( nargs[2]  ){ 
-    metric = GetAny<KN_<double> >( (*nargs[2])(stack) );
-    if(metric.N()==Th3.nv){
-      mtype=1;
-      intopt[1]=0;
+  if( nargs[2]  )
+    { 
+      metric = GetAny<KN_<double> >( (*nargs[2])(stack) );
+      if(metric.N()==Th3.nv){
+	mtype=1;
+	intopt[1]=0;
+      }
+      else if(metric.N()==6*Th3.nv){ 
+	intopt[1]=1; 
+	mtype=3;
+      }
+      else 
+	cerr << "sizeof vector metric is incorrect, size will be Th.nv or 6*Th.nv" << endl;
+    }  
+  else if(nbsol>0)
+    {
+    if( type == 1 )
+      {
+	intopt[1]=0;
+	metric.resize(Th3.nv);
+	metric=0.;
+      }
+    else if( type ==3 )
+      {
+	intopt[1]=1;
+	metric.resize(6*Th3.nv);
+	metric=0.;
+      }
     }
-    else if(metric.N()==6*Th3.nv){ 
-      intopt[1]=1; 
-      mtype=3;
+  else
+    {
+      if( intopt[1]==0 ){ metric.resize(Th3.nv); metric=0.;}
+      else if ( intopt[1]==1 ){ metric.resize(6*Th3.nv); metric=0.;}
     }
-    else 
-      cerr << "sizeof vector metric is incorrect, size will be Th.nv or 6*Th.nv" << endl;
-  }
-  else if(nbsol>0){
-    if( type == 1 ){
-      intopt[1]=0;
-      metric.resize(Th3.nv);
-      metric=0.;
-    }
-    else if( type ==3 ){
-      intopt[1]=1;
-      metric.resize(6*Th3.nv);
-      metric=0.;
-    }
-  }
-  else{
-    if( intopt[1]==0 ){ metric.resize(Th3.nv); metric=0.;}
-    else if ( intopt[1]==1 ){ metric.resize(6*Th3.nv); metric=0.;}
-  }
   // mesh for yams
   yams_pSurfMesh yamsmesh;
   yamsmesh = (yams_pSurfMesh)calloc(1,sizeof(yams_SurfMesh));
@@ -643,56 +735,65 @@ AnyType yams_Op::operator()(Stack stack)  const
   yamsmesh->infile  = NULL;
   yamsmesh->outfile = NULL;
   yamsmesh->type    = M_SMOOTH | M_QUERY | M_DETECT | M_BINARY | M_OUTPUT;
- 
-
+  
+  
   mesh3_to_yams_pSurfMesh( Th3 , intopt[8], intopt[22], yamsmesh);
     
   
-  // solution for yams2
-  if(nbsol){
-    MeshPoint *mp3(MeshPointStack(stack)); 
-    
-    KN<bool> takemesh(nv);
-    takemesh=false;
-    for(int it=0;it<nt;it++){
-      for(int iv=0;iv<4;iv++){
-	int i=Th3(it,iv);
-	
-	if(takemesh[i]==false){
+  // solution for freeyams2
+  if(nbsol)
+    {
+      MeshPoint *mp3(MeshPointStack(stack)); 
+      
+      KN<bool> takemesh(nv);
+      takemesh=false;
+      for(int it=0;it<nt;it++){
+	for(int iv=0;iv<4;iv++){
+	  int i=Th3(it,iv);
+	  
+	  if(takemesh[i]==false){
 	  mp3->setP(&Th3,it,iv);
-
+	  
 	  for(int ii=0;ii<nbsolsize;ii++){
 	    metric[i*nbsolsize+ii] = GetAny< double >( (*sol[ii])(stack) );
 	  }
 	  takemesh[i] = true; 
-	}
+	  }
+      }
       }
     }
-  }
+  if(verbosity>10)    
+  cout << "nbsol  " <<  nargs[2] << endl;
   if( nargs[2] || (nbsol > 0) ){ 
     float hmin,hmax;
     solyams_pSurfMesh( yamsmesh, mtype, metric, hmin, hmax);
     yamsmesh->nmfixe = yamsmesh->npfixe;
-    fopt[7]=hmin;
-    fopt[8]=hmax;
+    if( fopt[7] < 0.0 ) 
+      fopt[7]= max(fopt[7],hmin);
+    if( fopt[8] < 0.0 )
+      fopt[8]=max(fopt[8],hmax);
   }
   else{
     yamsmesh->nmfixe = 0;
   }
   int infondang=0, infocc=0;
-  int res = yams_main(yamsmesh, intopt, fopt, infondang, infocc );
-
-  cout << " yamsmesh->dim " << yamsmesh->dim << endl;
+  int res = yams_main( yamsmesh, intopt, fopt, infondang, infocc);
+  if(verbosity>10)
+   cout << " yamsmesh->dim " << yamsmesh->dim << endl;
   if( res > 0){
     cout << " problem with yams :: error " <<  res << endl; 
-    exit(1);
+      ExecError("Freeyams error");
   }
   
-  Mesh3 *Th3_T = yams_pSurfMesh_to_mesh3( yamsmesh, infondang, infocc );
+  Mesh3 *Th3_T = yams_pSurfMesh_to_mesh3( yamsmesh, infondang, infocc ,intopt[22] );
   
   // recuperer la solution ????
-  cout << &yamsmesh->point << " " << &yamsmesh->tria << " "  <<&yamsmesh->geom << " "  << &yamsmesh->tgte << endl;
-  cout << &yamsmesh << endl;
+  if(verbosity>10)
+    {
+      cout << &yamsmesh->point << " " << &yamsmesh->tria << " "  <<&yamsmesh->geom << " "  << &yamsmesh->tgte << endl;
+      cout << &yamsmesh << endl;
+      
+    }
   free(yamsmesh->point);
   free(yamsmesh->tria);
   free(yamsmesh->geom);
@@ -703,6 +804,7 @@ AnyType yams_Op::operator()(Stack stack)  const
   free(yamsmesh);
 
   *mp=mps;
+  Add2StackOfPtr2FreeRC(stack,Th3_T);
   return SetAny<pmesh3>(Th3_T);
 }
 
@@ -712,11 +814,11 @@ class Init1 { public:
   Init1();
 };
 
-static Init1 init1;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   //typedef Mesh3 *pmesh3;
-  if(verbosity) cout << " load: yams  " << endl;
+  if(verbosity) cout << " load: freeyams  " << endl;
   
   Global.Add("freeyams","(",new OneOperatorCode<yams_Op>);
  

@@ -24,6 +24,34 @@
 //  dot(u,v) => (u,v)
 //  norm(u) => sqrt( (u,u) ) 
 
+#include <math.h> 
+
+
+template<class Real> 
+void GeneratePlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)
+{
+    if (dy == 0.0) {
+        cs = 1.0;
+        sn = 0.0;
+    } else if (abs(dy) > abs(dx)) {
+        Real temp = dx / dy;
+        sn = 1.0 / sqrt( 1.0 + temp*temp );
+        cs = temp * sn;
+    } else {
+        Real temp = dy / dx;
+        cs = 1.0 / sqrt( 1.0 + temp*temp );
+        sn = temp * cs;
+    }
+}
+
+
+template<class Real> 
+void ApplyPlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)
+{
+    Real temp  =  cs * dx + sn * dy;
+    dy = -sn * dx + cs * dy;
+    dx = temp;
+}
 
 template < class Matrix, class Vector >
 void 
@@ -56,7 +84,7 @@ template < class Operator, class Vector, class Preconditioner,
 int 
 GMRES(const Operator &A, Vector &x, const Vector &b,
       const Preconditioner &M, Matrix &H, int &m, int &max_iter,
-      Real &tol)
+      Real &tol,long verbosity)
 {
   Real resid;
   int i, j = 1, k;
@@ -116,7 +144,7 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
         return 0;
       }
     }
-    Update(x, m - 1, H, s, v);
+    Update(x, i - 1, H, s, v);// chanhe FH oct 2010  m -1 -> i -1 (bug max_iter < m)
     Ax = A*x;
     Ax = b-Ax;
     
@@ -133,38 +161,14 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
     }
   }
   
+ if(verbosity)
+    cout << "WARNING: GMRES do not converges: " << j <<"/" << max_iter << ",  resid = " << resid 
+         << ", tol=  " << tol << ", normb "<< normb << endl;
   tol = resid;
   delete [] v;
+    
   return 1;
 }
 
 
-#include <math.h> 
-
-
-template<class Real> 
-void GeneratePlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)
-{
-  if (dy == 0.0) {
-    cs = 1.0;
-    sn = 0.0;
-  } else if (abs(dy) > abs(dx)) {
-    Real temp = dx / dy;
-    sn = 1.0 / sqrt( 1.0 + temp*temp );
-    cs = temp * sn;
-  } else {
-    Real temp = dy / dx;
-    cs = 1.0 / sqrt( 1.0 + temp*temp );
-    sn = temp * cs;
-  }
-}
-
-
-template<class Real> 
-void ApplyPlaneRotation(Real &dx, Real &dy, Real &cs, Real &sn)
-{
-  Real temp  =  cs * dx + sn * dy;
-  dy = -sn * dx + cs * dy;
-  dx = temp;
-}
 

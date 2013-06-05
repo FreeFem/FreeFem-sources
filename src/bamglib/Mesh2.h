@@ -287,15 +287,23 @@ class Edge { public:
 
 /////////////////////////////////////////////////////////////////////////////////////
 class GeometricalVertex :public Vertex {
-  int cas;
-  friend class Geometry;
-  GeometricalVertex * link; //  link all the same GeometricalVertex circular (Crack) 
 public:
+    int cas;
+    friend class Geometry;
+    GeometricalVertex * link; //  link all the same GeometricalVertex circular (Crack)
   int Corner() const {return cas&4;}
   int Required()const {return cas&6;}// a corner is required
   void  SetCorner(){ cas |= 4;}
   void  SetRequired(){ cas |= 2;}
   void  Set(){cas=0;}
+  void  Set(const Vertex & v)
+    { // add for bug in clang++ compile FH very strang and hard  ...
+        i=v.i;
+        r=v.r;
+        m=v.m;
+        t=v.t;
+        vint=v.vint;
+    }
   GeometricalVertex() :cas(0), link(this) {};
   GeometricalVertex * The() { assert(link); return link;}// return a unique vertices
   int IsThe() const { return link == this;}  

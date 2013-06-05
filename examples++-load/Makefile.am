@@ -1,11 +1,13 @@
 # $Id$
 
 all-local: @LOAD_COMPILE@
-TESTS=@LOAD_TESTS@
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
-	VISUALCHECK=$(VISUALCHECK)
+TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NSP2BRP0.edp PARDISO.edp SuperLU.edp VarIneq2.edp all.edp bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp regtests.edp schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE.edp testFEMorley.edp tetgencube.edp tetgenholeregion.edp tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp
+# all test can fail must but clean ????  FH... 
+XFAILS_TEST=$(TESTS)
+
+LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+
 EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
@@ -25,7 +27,7 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   all.edp                 makeref.edp             testFE-P3dc.edp \
   bilapMorley.edp         myType.edp              testFE.edp \
   convect_dervieux.edp    testFEMorley.edp \
-  testFE-PkEdge.edp \
+  testFE-PkEdge.edp metis.edp schwarz-nm.edp \
   splitmesh3.cpp  splitmesh3.edp  splitmesh6.cpp  splitmesh6.edp \
   README_SuperLU \
   tetgen.cpp\
@@ -34,11 +36,31 @@ EXTRA_DIST=ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
   medit.cpp  \
   bmo.cpp lgbmo.cpp bmo.hpp \
  fflapack.cpp	lapack.cpp	clapack.h lapack.edp \
- fig.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
+ fig.pgm lg.pgm ppm2rnm.cpp ppmimg.h  ppm2rnm.edp \
  DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp \
  UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
  ffnewuoa.cpp	ffnewuoa.edp	newuoa.f Element_P1dc1.cpp ilut.cpp ilut.edp \
- freeyams.cpp mmg3d.cpp
+ freeyams.cpp mmg3d-v4.0.cpp  mshmet.cpp \
+ BinaryIO.cpp	gsl.cpp gsl.edp  gsl.awk ff_gsl_awk.hpp isolineP1.cpp isoline.cpp lg.pgm Leman-mesh.edp \
+thresholdings.cpp	thresholdings.edp \
+VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp splitedges.edp \
+Element_Mixte.cpp LaplaceRT1.edp lame-TD-NSS.edp test-ElementMixte.edp \
+myfunction2.cpp myfunction2.edp ttestio.edp \
+cmaes-VarIneq.edp cmaes-oven.edp cmaes.cpp \
+cmaes.h cmaes_interface.h ff-cmaes.cpp \
+VarIneq2.edp ff-NLopt.cpp \
+APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp  APk-MetricPk.edp \
+MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h  TensorK.hpp  Geometry.hpp  \
+ RZ.h SortedList.h ExampleMetrics.h  \
+cube.msh  \
+LapMUMPS_seq.edp MUMPS_seq.cpp \
+ff-Ipopt.cpp \
+IpoptLap.edp IpoptVI.edp IpoptVI2.edp IpoptMinSurfVol.edp  \
+scotch.cpp scotch.edp  shell.edp shell.cpp \
+pipe.cpp pipe.edp \
+symmetrizeCSR.cpp \
+PARDISO.edp    dmatrix.hpp PARDISO.cpp             \
+convexehull3d.edp ch.pts 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -52,18 +74,27 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	ppm2rnm.$(DYLIB_SUFFIX) DxWriter.$(DYLIB_SUFFIX) \
 	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE)  \
 	iovtk.$(DYLIB_SUFFIX) 	 gmsh.$(DYLIB_SUFFIX) MetricKuate.$(DYLIB_SUFFIX) \
-	Element_P1dc1.$(DYLIB_SUFFIX)
+	Element_P1dc1.$(DYLIB_SUFFIX) BinaryIO.$(DYLIB_SUFFIX) \
+        isolineP1.$(DYLIB_SUFFIX) isoline.$(DYLIB_SUFFIX)  thresholdings.$(DYLIB_SUFFIX) \
+        VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
+	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
+	myfunction2.$(DYLIB_SUFFIX) \
+	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
+	pipe.$(DYLIB_SUFFIX)  symmetrizeCSR.$(DYLIB_SUFFIX) 
 
 LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
 	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
 	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) \
-	freeyams.$(DYLIB_SUFFIX) mmg3d.$(DYLIB_SUFFIX)
+	freeyams.$(DYLIB_SUFFIX) mmg3d-v4.0.$(DYLIB_SUFFIX) mshmet.$(DYLIB_SUFFIX) \
+	gsl.$(DYLIB_SUFFIX) MUMPS_seq.$(DYLIB_SUFFIX) 	 ff-Ipopt.$(DYLIB_SUFFIX) \
+	ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) scotch.$(DYLIB_SUFFIX) \
+	PARDISO.$(DYLIB_SUFFIX)
 
 bin_PROGRAMS=
 
 
 
-load_compile:ff-c++ freefem++.pref include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
+load_compile:ff-c++ freefem++.pref WHERE_LIBRARY-download  include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
 	echo " finish build list $(DYLIB_SUFFIX)"
 
 
@@ -75,6 +106,7 @@ include: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
+	touch include 
 #	-cp -rf ../download/include/* include/.
 
 Ref: makeref.edp
@@ -85,8 +117,8 @@ makeref.edp: regtests.m4 ../regtests.m4
 
 all-local: all.edp regtests.edp load_compile
 
-all.edp: 
-	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
+all.edp: Makefile
+	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
@@ -118,16 +150,19 @@ ff-get-dep:ff-get-dep.in Makefile
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
 	-if [ -d ../download/bin ] ;then cp $@ ../download/bin; fi
-WHERE_LIBRARY-download:ff-pkg-download 
-	./ff-pkg-download >$@
-	touch WHERE_LIBRARY
+WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
+	@./ff-pkg-download >$@-new
+	@diff $@-new $@  || (cp $@-new $@ ;touch WHERE_LIBRARY)
+WHERE_LIBRARY:
+	touch $@
+FORCE: ;
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
-	$(INSTALL_DATA)  include/* $(DESTDIR)$(ff_prefix_dir)/include
+	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
 	echo loadpath += \"./\"  >$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref

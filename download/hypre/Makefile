@@ -25,6 +25,7 @@ FAITwin32-dll-target:
 
 FAIT:	
 	$(MAKE) FAIRE WHERE
+	touch FAIT
 
 
 
@@ -39,7 +40,7 @@ FAIT:
 FAIRE: $(SRCDIR)/FAIT
 
 $(SRCDIR)/FAIT:$(SRCDIR)
-	cd $(SRCDIR)/src && ./configure  CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$(CC) -E" CXXFLAGS="$(CXXFLAGS)" F77="$(F77)" FFLAGS="$(FFLAGS)" FLIBS="$(FLIBS)" LDFLAGS="$(LDFLAGS)" --with-MPI-include="$(FFMPIDIR)" --with-MPI-lib-dirs="$(FFMPIDIRLIBS)" --with-MPI-libs="$(FFMPILIB2)" --prefix="${abs_top_builddir}/download"  --includedir="${abs_top_builddir}/download"/include/hypre  --libdir="${abs_top_builddir}/download"/lib/hypre 
+	cd $(SRCDIR)/src && ./configure  CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$(CC) -E" CXXFLAGS="$(CXXFLAGS)" F77="$(F77)" FFLAGS="$(FFLAGS)" FLIBS="$(FLIBS)" LDFLAGS="$(LDFLAGS)" --with-MPI-include="$(FFMPIDIR)" --with-MPI-lib-dirs="$(FFMPIDIRLIBS)" --with-MPI-libs="$(FFMPILIB2)" --prefix="${abs_top_builddir}/download"  --includedir="${abs_top_builddir}/download"/include/hypre  --libdir="${abs_top_builddir}/download"/lib/hypre  --with-lapack-libs="$(LAPACKLIBS)" --with-blas-libs="$(BLASLIBS)"
 # --with-lapack --with-blas  #// to add lapack to test
 	# the following line is to avoid compilation of local blas and local lapack of hypre
 	# begin patch
@@ -59,9 +60,8 @@ install:
 	cd $(SRCDIR)/src && $(MAKE) install
 WHERE:
 	if [ -f $(SRCDIR)/FAIT ] ; then  \
-	make install ; \
-	echo hypre LD '-L@DIR@/lib/hypre  -lHYPRE'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
-	echo hypre INCLUDE '-I@DIR@/include/hypre'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
+	echo hypre LD -L@DIR@/lib/hypre  -lHYPRE  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
+	echo hypre INCLUDE -I@DIR@/include/hypre  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.hypre ;\
 	fi
 
 
@@ -74,21 +74,11 @@ $(PACKAGE):
 	cd $(PKGDIR); $(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean: clean-local
-	-rm ff-flags
+
 clean-local:
 	-rm -rf $(SRCDIR) FAIT 
+	-rm ff-flags FAIT
 
-ff-flags: ../Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
-	grep 'CXX *=' ../Makefile >> ff-flags
-	grep 'CC *=' ../Makefile >> ff-flags
-	grep 'FLIBS *=' ../Makefile >> ff-flags
-	grep 'CXXFLAGS *=' ../Makefile >> ff-flags
-	grep 'CFLAGS *=' ../Makefile >> ff-flags
-	grep 'F77 *=' ../Makefile >> ff-flags
-	grep 'FFLAGS *=' ../Makefile >> ff-flags
-	grep 'LDFLAGS *=' ../Makefile >> ff-flags
-	grep 'FLIBS *=' ../Makefile >> ff-flags
-	grep 'WGET *=' ../Makefile >> ff-flags
-	grep 'WIN32DLLTARGET *=' ../Makefile >>ff-flags
+ff-flags: ../Makefile ff-flags.inc 
+	../../config.status  --file="ff-flags:ff-flags.inc"
 

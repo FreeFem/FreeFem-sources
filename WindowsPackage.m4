@@ -33,6 +33,8 @@ Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
+ifelse(len(MPIPROG),0,; ,)Source: "src\bin-win32\FreeFem++-mpi.exe"; DestDir: "{app}"
+ifelse(len(MPIPROG),0,; ,)Source: "src\mpi\ff-mpirun"; DestDir: "{app}"
 Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
 ;  to day the dll version do not works so we use the static one (FH)
 ;Source: "src\bin-win32\FreeFem++-cs.exe"; DestDir: "{app}"
@@ -42,15 +44,22 @@ Source: "src\medit\ffmedit.exe"; DestDir: "{app}"
 Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
 Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
-Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
+; Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
 Source: "src\bin-win32\*.dll"; DestDir: "{app}"
 Source: "examples++-load\ff-c++"; DestDir: "{app}"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
 
-Source: "C:\Cygwin\bin\mingwm10.dll"; DestDir: "{app}"
-Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
+; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
+Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\libgfortran-3.dll"; DestDir: "{app}"
+Source: "C:\MinGW\bin\libquadmath-0.dll"; DestDir: "{app}"
+
 
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server
 ; Does not include FreeFem++-glx which would need the Cygwin X-Server
@@ -66,12 +75,18 @@ Source: "examples++-chapt3\*.edp"; DestDir: "{app}\examples++-chapt3"
 Source: "examples++-other\*.edp"; DestDir: "{app}\examples++-other"
 Source: "examples++-load\*.edp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.cpp"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\*.pgm"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\cube.msh"; DestDir: "{app}\examples++-load"
+
 Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
 Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\dodecaedre01.mesh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\lac-leman-v4.msh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\*.idp"; DestDir: "{app}\examples++-3d"
+ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\*.idp"; DestDir: "{app}\examples++-mpi"
+ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\ff*.txt"; DestDir: "{app}\examples++-mpi"
+ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\*.edp"; DestDir: "{app}\examples++-mpi"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-load"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-tutorial"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-chapt3"
@@ -103,6 +118,7 @@ Name: "{group}\Examples\load"; Filename: "{app}\examples++-load"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
 Name: "{group}\Examples\3d"; Filename: "{app}\examples++-3d"
+ifelse(len(MPIPROG),0,; ,)Name: "{group}\Examples\mpi"; Filename: "{app}\examples++-mpi"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop

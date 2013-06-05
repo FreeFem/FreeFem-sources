@@ -111,12 +111,13 @@ class C_args: public E_F0mps  {public:
   typedef list<C_F0> ::const_iterator const_iterator ;
   // il faut expendre 
   C_args() :largs(){}
-  C_args(C_F0 c) : largs() { largs.push_back(c);}
+  C_args(C_F0 c) : largs() { if(!c.Zero() )largs.push_back(c);}
   C_args(  const basicAC_F0 & args) :largs(){ 
     int n=args.size();
     for (int i=0;i< n;i++)
       {
-        if (args[i].left() == atype<const C_args *>())
+       if(args[i].Zero()) ; //  skip zero term ...
+       else  if (args[i].left() == atype<const C_args *>())
           {
             const C_args * a = dynamic_cast<const C_args *>(args[i].LeftValue());
             for (list<C_F0>::const_iterator i=a->largs.begin();i!=a->largs.end();i++)
@@ -128,8 +129,9 @@ class C_args: public E_F0mps  {public:
   static ArrayOfaType  typeargs() { return ArrayOfaType(true);}
   AnyType operator()(Stack ) const  { return SetAny<const C_args *>(this);}
   operator aType () const { return atype<const C_args *>();}         
-
-  static  E_F0 * f(const basicAC_F0 & args) { return new C_args(args);}    
+  
+  static  E_F0 * f(const basicAC_F0 & args) { return new C_args(args);}
+  bool Zero() { return !largs.empty();}
   bool IsLinearOperator() const;
   bool IsBilinearOperator() const;
 };
@@ -209,13 +211,21 @@ class BC_set : public E_F0mps { public:
         ffassert(uu);
         const MGauche *ui=uu->simple();
         ffassert(ui && ui->second == op_id);
-        // cout << ii->first << " n¡" << ui->first <<   " = ? " << endl;
+        if(verbosity>9)
+         cout << " on : " << ii->first << " n " << ui->first <<   " = ? " << endl;
         if (complextype)
         bc[kk]= make_pair(ui->first,CastTo<Complex>(ii->second));
         else
         bc[kk]= make_pair(ui->first,CastTo<double>(ii->second));
-        ii->second;
-      }     
+        //ii->second;
+      } 
+    //  sort bc / num de composante
+        
+        std::sort(bc.begin(),bc.end());
+        if(verbosity>9)
+        for (vector<pair<int,Expression> >::iterator i=bc.begin(); i !=bc.end();++i)
+            cout <<"  on " <<  i->first << " " << i->second << endl;
+        
     for (int i=0;i<n;i++)
       if( ! BCastTo<KN_<long> >(args[i]))
          {
@@ -245,7 +255,7 @@ class BC_set : public E_F0mps { public:
 	  k->second=CastTo<Complex>(C_F0(k->second,rr)) ;}
   // fin ajout
 */    
-  static ArrayOfaType  typeargs() { return ArrayOfaType(atype<long>(),true);}
+  static ArrayOfaType  typeargs() { return ArrayOfaType(/*atype<long>(),*/true);} //  change frev 2011 FH...
   AnyType operator()(Stack ) const  { return SetAny<Result>(this);}
   operator aType () const { return atype<Result>();}         
   
@@ -256,18 +266,18 @@ class BC_set : public E_F0mps { public:
 
 class CDomainOfIntegration: public E_F0mps { 
 public:
-  static const int n_name_param =9;
+  static const int n_name_param =10;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5 } ; //3d
+  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
   typeofkind  kind; //  0 
   int d; // 3d
    typedef const CDomainOfIntegration* Result;
-  Expression Th; 
+  Expression Th;
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ??? 
   CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
-    :kind(b),d(ddim), what(args.size()-1),whatis(args.size()-1)
+    :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
      
   {
     args.SetNameParam(n_name_param,name_param,nargs);
@@ -301,8 +311,10 @@ public:
   const Fem2D::GQuadratureFormular<R3> & FIV(Stack) const ;  // 3d
   bool UseOpt(Stack s) const  {  return nargs[5] ? GetAny<bool>( (*(nargs[5]))(s) )  : 1;}
   double  binside(Stack s) const { return nargs[6] ? GetAny<double>( (*(nargs[6]))(s) )  : 0;} // truc pour FH
-  bool intmortar(Stack s) const { return nargs[7] ? GetAny<bool>( (*(nargs[7]))(s) )  : 1;} // truc  pour 
-
+  bool intmortar(Stack s) const { return nargs[7] ? GetAny<bool>( (*(nargs[7])) (s) )  : 1;} // truc  pour 
+  double levelset(Stack s) const { return nargs[9] ? GetAny<double>( (*(nargs[9]))(s) )  : 0;}
+  bool  islevelset() const { return nargs[9] != 0; }
+    
 };  
 
 class CDomainOfIntegrationBorder: public CDomainOfIntegration { 
@@ -1027,21 +1039,22 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   FESpace & Vh = *pVh ;
   double tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
-
+  long NbOfDF =  &Vh ? Vh.NbOfDF: 0;
   KN<R> *px=0;
   if(isptr)
     {
      px = GetAny<KN<R> * >((*x)(stack) );
      if(init ) 
-       px->init(Vh.NbOfDF); 
-     if(px->N() != Vh.NbOfDF) //add Dec 2009
-	 px->resize(Vh.NbOfDF);
-     ffassert(px->N() == Vh.NbOfDF); 
+       px->init(NbOfDF); 
+     if(px->N() != NbOfDF) //add Dec 2009
+	 px->resize(NbOfDF);
+     ffassert(px->N() == NbOfDF);
    }
   KN_<R>  xx( px ? *(KN_<R> *) px : GetAny<KN_<R> >((*x)(stack) ));
-  if(zero)
-  xx=R(); 
-  if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+  if(zero && NbOfDF )
+   xx=R();
+    
+  if ( & Vh && AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }
@@ -1132,7 +1145,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
   const FESpace & Uh =  *(FESpace*) **pUh ;
   const FESpace & Vh =  *(FESpace*) **pVh ;
-  bool A_is_square= Uh.NbOfDF == Vh.NbOfDF ;
+  bool A_is_square= & Uh == & Vh || Uh.NbOfDF == Vh.NbOfDF ;
 
   // MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
@@ -1193,18 +1206,21 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
      ExecError("A solver is set on a none square matrix!");
     ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
    }
+    /*
   const OneOperator *precon = static_cast<const OneOperator *> (ds.precon); //  a changer 
-  if ( precon)
+  if ( ds.precon)
     {
-      const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(precon);
-      ffassert(op);
-      precon = op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
+     // const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(precon);
+      //ffassert(op);
+      precon =  ds.precon op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
     }
+     */ // change mars 2011
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
-  if(init) A.init(); //  
+  if(init) A.init(); //
+  if( !& Uh || !& Vh) return SetAny<Matrice_Creuse<R>  *>(&A);
   /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat->t != typemat->t) )
     { 
       A.Uh.destroy();

@@ -8,7 +8,7 @@
 
 #define WrdSiz 4
 
-
+static int debug =0;
 void getline_bin_float_vertex(int ddim, double *c, int *ref){
   int     i;
   float   ff;
@@ -60,7 +60,7 @@ void getline_bin_float_noref(int ddim, double *v){
   float  ff;
   for(i=0; i<ddim; i++){
     fread( (unsigned char *)&(ff) ,WrdSiz, 1, stdin);
-    printf("value of ff %f\n",ff);
+    if(debug)  printf("value of ff %f\n",ff);
     v[i] = ff;
   }
 }
@@ -164,7 +164,7 @@ int loadMesh_popen_bin(pMesh mesh) {
   if( (mesh->dim != 2) && (mesh->dim != 3) ){
     printf("the dimension is not correct");
   }
-  printf("reading dimension %i \n",mesh->dim); 
+ if(debug) printf("reading dimension %i \n",mesh->dim); 
   while( !feof(stdin) ){
 
     loopdebug=loopdebug+1;
@@ -172,19 +172,19 @@ int loadMesh_popen_bin(pMesh mesh) {
     fread( (unsigned char *)&KwdCod ,WrdSiz, 1, stdin);
 
     /* determination of KwdCod */
-    printf("reading KwdCod %i %i\n",KwdCod,loopdebug);
+    if(debug) printf("reading KwdCod %i %i\n",KwdCod,loopdebug);
 
     switch (KwdCod){
     
     case GmfVertices :
       natureread="Vertices";
-      printf("reading %s",natureread);
+     if(debug)  printf("reading %s",natureread);
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&(mesh->np) ,WrdSiz, 1, stdin);
-      printf(": number of vertices %i\n",mesh->np);
+     if(debug)  printf(": number of vertices %i\n",mesh->np);
    
       if ( !mesh->np ) {
-	fprintf(stdout,"  ## No vertex\n");
+	if(debug) fprintf(stdout,"  ## No vertex\n");
  	retcode=-1;
 	goto Lret; 
       }
@@ -210,10 +210,10 @@ int loadMesh_popen_bin(pMesh mesh) {
       break;
     case GmfTriangles :
       natureread = "Triangles";
-      printf("reading %s",natureread);
+      if(debug) printf("reading %s",natureread);
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&(mesh->nt) ,WrdSiz, 1, stdin);
-      printf(": number of triangles %i\n",mesh->nt);
+      if(debug)  printf(": number of triangles %i\n",mesh->nt);
       if ( ddebug ) printf("allocate %d tria\n",mesh->nt);
       mesh->tria = (pTriangle)M_calloc(mesh->nt+1,sizeof(Triangle),"zaldy1.tria");
       assert(mesh->tria);
@@ -239,10 +239,10 @@ int loadMesh_popen_bin(pMesh mesh) {
       break;
     case GmfQuadrilaterals :
       natureread = "Quadrilateral";
-      printf("reading %s",natureread);
+      if(debug) printf("reading %s",natureread);
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&(mesh->nq) ,WrdSiz, 1, stdin);
-      printf(": number of hexahedrons %i\n",mesh->nq);
+      if(debug) printf(": number of hexahedrons %i\n",mesh->nq);
 
       if ( ddebug ) printf("allocate %d quad\n",mesh->nq);
       if ( mesh->nq ) {
@@ -271,10 +271,10 @@ int loadMesh_popen_bin(pMesh mesh) {
       break;
     case GmfTetrahedra :
       natureread = "Tetrahedra";
-      printf("reading %s",natureread);
+      if(debug)  printf("reading %s",natureread);
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&(mesh->ntet) ,WrdSiz, 1, stdin);
-      printf(": number of tetrahedrons %i\n",mesh->ntet);
+      if(debug)  printf(": number of tetrahedrons %i\n",mesh->ntet);
       if ( mesh->ntet ) {
 	if ( ddebug ) printf("allocate %d tetra\n",mesh->ntet);
 	mesh->tetra = (pTetra)M_calloc(mesh->ntet+1,sizeof(Tetra),"zaldy1.tetra");
@@ -301,10 +301,10 @@ int loadMesh_popen_bin(pMesh mesh) {
       break;
     case GmfHexahedra :
       natureread = "Hexahedra";
-      printf("reading %s",natureread);
+      if(debug)  printf("reading %s",natureread);
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&(mesh->nhex) ,WrdSiz, 1, stdin);
-      printf(": number of hexahedrons %i\n",mesh->nhex);
+     if(debug)  printf(": number of hexahedrons %i\n",mesh->nhex);
 
       if ( ddebug ) printf("allocate %d hexa\n",mesh->nhex);
       mesh->hexa = (pHexa)M_calloc(mesh->nhex+1,sizeof(Hexa),"zaldy1.hexa");
@@ -361,10 +361,10 @@ int loadMesh_popen_bin(pMesh mesh) {
       break;
     case GmfEdges :
       natureread="Edges";
-      printf("reading %s",natureread);
+      if(debug)  printf("reading %s",natureread);
       fread( (unsigned char *)&NulPos, WrdSiz, 1, stdin);
       fread( (unsigned char *)&(mesh->na), WrdSiz, 1, stdin);
-      printf(": number of edges %i\n",mesh->na);
+      if(debug)  printf(": number of edges %i\n",mesh->na);
       if ( ddebug ) printf("allocate %d edges\n",mesh->na);
       mesh->edge = (pEdge)M_calloc(mesh->na+1,sizeof(Edge),"zaldy1.edge");
       assert(mesh->edge);
@@ -850,7 +850,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
       fread( (unsigned char *)&nel ,WrdSiz, 1, stdin);
       natureread = "SolAtVertices";
-      fprintf(stdout,"SolAtVertices : nel %i, mesh->np %i \n",nel,mesh->np);
+      if(debug) fprintf(stdout,"SolAtVertices : nel %i, mesh->np %i \n",nel,mesh->np);
       
       if ( nel != mesh->np ) {
 	fprintf(stderr,"  %%%% Wrong number: %d Solutions discarded\n",nel-mesh->np);
@@ -863,7 +863,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 
       /*  type,size,typetab  */  
       read_TypeSizeTyptab_bin( &type, &size, typtab);
-      printf("sol: %s; type %i; size%i;\n",natureread, type, size); 
+      if(debug) printf("sol: %s; type %i; size%i;\n",natureread, type, size); 
       fflush(stdout);
       /* Reading solutions*/
       loadScaVecTen_bin( mesh, 1, dim, ver, nel, type, size, typtab, key);
@@ -874,7 +874,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	natureread = "SolAtTriangles";
 	fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
 	fread( (unsigned char *)&nel ,WrdSiz, 1, stdin);
-	fprintf(stdout,"SolAtTriangles : nel %i, mesh->nt %i \n",nel,mesh->nt);
+	if(debug) printf(stdout,"SolAtTriangles : nel %d, mesh->nt %d \n",nel,mesh->nt);
 	if ( nel && nel != mesh->nt ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel);
 	  retcode=0;
@@ -901,7 +901,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	natureread = "SolAtQuadrilaterals";
 	fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
 	fread( (unsigned char *)&nel ,WrdSiz, 1, stdin);
-	fprintf(stdout,"SolAtQuadrilaterals : nel %i, mesh->nq %i \n",nel,mesh->nq);
+	if(debug)  fprintf(stdout,"SolAtQuadrilaterals : nel %i, mesh->nq %i \n",nel,mesh->nq);
 	if ( nel && nel != mesh->nq ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel);
 	  retcode=0;
@@ -925,7 +925,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	natureread = "SolAtTetrahedra";
 	fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
 	fread( (unsigned char *)&nel ,WrdSiz, 1, stdin);
-	fprintf(stdout,"SolAtTetrahedra : nel %i, mesh->ntet %i \n",nel,mesh->ntet);
+	if(debug)  fprintf(stdout,"SolAtTetrahedra : nel %i, mesh->ntet %i \n",nel,mesh->ntet);
 	if ( nel && nel != mesh->ntet ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel); 
 	  retcode=0;
@@ -949,7 +949,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
 	natureread = "SolAtHexahedra";
 	fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
 	fread( (unsigned char *)&nel ,WrdSiz, 1, stdin);
-	fprintf(stdout,"SolAtHexahedra : nel %i, mesh->nhex %i  %s\n",nel,mesh->nhex);
+	if(debug)  fprintf(stdout,"SolAtHexahedra : nel %d, mesh->nhex %d \n",nel,mesh->nhex);
 	if ( nel && nel != mesh->nhex ) {
 	  fprintf(stderr,"  %%%% Wrong number %d.\n",nel);
 	  GmfCloseMesh(inm);
@@ -969,7 +969,7 @@ int loadSol_popen_bin(pMesh mesh,char *filename,int numsol) {
     }
     if( KwdCod == GmfEnd ){
       fread( (unsigned char *)&NulPos ,WrdSiz, 1, stdin);
-      printf("End of solution\n");
+      if(debug)  printf("End of solution\n");
       if( ddebug ) printf("Reading of mesh file is finished");
       break;
     }    

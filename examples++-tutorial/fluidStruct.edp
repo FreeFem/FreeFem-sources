@@ -75,7 +75,7 @@ Vh [uu1,vv1];
 
   sigma11([x+uu,y+vv]) = (2*dx(u1)-p);
   sigma22([x+uu,y+vv]) = (2*dy(u2)-p);
-  sigma12([x+uu,y+vv]) = (dx(u1)+dy(u2));
+  sigma12([x+uu,y+vv]) = (dx(u2)+dy(u1));
 
 
 solve  bbst([uu,vv],[w,s],init=i)  = 

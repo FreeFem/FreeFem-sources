@@ -20,10 +20,12 @@ INSTALL=../..
 
 SYSERRORS = 
 
-blacs: FAIRE
+blacs:FAIRE
 
 
-FAIRE: $(SRCDIR)/FAIT WHERE
+FAIRE:$(SRCDIR)/FAIT
+	$(MAKE) WHERE
+	touch FAIRE
 
 Bmake.inc: ../../config.status	Makefile Bmake-blacs.inc
 	../../config.status  --file="Bmake.inc1:Bmake-blacs.inc"
@@ -38,7 +40,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	make install;  \
-	echo blacs LD '-L@DIR@/lib/blacs -lblacsCinit_MPI-FREEFEM-0	-lblacsF77init_MPI-FREEFEM-0	-lblacs_MPI-FREEFEM-0'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
+	echo blacs LD -L@DIR@/lib/blacs -lblacs_MPI-FREEFEM-0 	-lblacsF77init_MPI-FREEFEM-0	-lblacsCinit_MPI-FREEFEM-0  -lblacs_MPI-FREEFEM-0  >$(SRCDIR)/$(INSTALL)/lib/WHERE.blacs ;\
 	fi
 
 install: $(SRCDIR)/FAIT
@@ -52,7 +54,7 @@ $(SRCDIR): $(PACKAGE1) $(PACKAGE2) $(PACKAGE3)
 	cd $(SRCDIR)/SRC/MPI; patch -p1 < ../../../BLACS.patch
 	cp Bmake.inc $(SRCDIR)
 	mv $(SRCDIR)/SRC/MPI/Makefile $(SRCDIR)/SRC/MPI/Makefile.tmp
-	sed -e 's;\.C;\.oo;g'\
+	sed -e 's;\.C;\.oo;g'  -e 's@: $$(MPIINCdir)/mpif.h@:@' \
 	< $(SRCDIR)/SRC/MPI/Makefile.tmp \
 	> $(SRCDIR)/SRC/MPI/Makefile
 	touch $(SRCDIR)
@@ -70,11 +72,12 @@ $(PACKAGE3):
 	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE3)`
 
 clean-local:
-	-cd $(SRCDIR)/SRC/MPI; make clean 
-
-clean: clean-local
-	-rm Bmake.inc
+	-cd $(SRCDIR)/SRC/MPI &&  $(MAKE) clean -C $(SRCDIR)/SRC/MPI
+	-rm Bmake.inc FAIRE
 	-rm $(SRCDIR)/$(INSTALL)/lib/blacs/*.a
 	-rm -rf $(SRCDIR)
+
+clean: clean-local
+
 
 .PHONY:$(SRCDIR)/$(INSTALL)  compile install

@@ -183,7 +183,7 @@ class Init { public:
   Init();
 };
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init()  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
 {

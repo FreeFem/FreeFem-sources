@@ -35,3 +35,4 @@ ffmedit    the medit sofware
 Some external library are in the archive file OtherMacOsLib.tgz;
 you may need to install these
 	
+READ le READ_MAC to buil freefem++ on your mac. 

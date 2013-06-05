@@ -18,14 +18,14 @@ mesh3 Thy1 = movemesh23(TS,transfo=[x,+f,y],orientation=-orientation,label=ref);
 mesh3 Thz0 = movemesh23(TS,transfo=[x,y,-f],orientation=-orientation,label=ref);
 mesh3 Thz1 = movemesh23(TS,transfo=[x,y,+f],orientation=+orientation,label=ref);
 mesh3 Tcube= Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
-savemesh(Tcube,"T.mesh");
-exec("ffmedit T.mesh");
-
+//savemesh(Tcube,"T.mesh");
+//exec("ffmedit T.mesh");
+medit("Tcube",Tcube);
 plot(Tcube,wait=1);
 func R = sqrt(x*x+y*y+z*z);
 mesh3 Th = movemesh3(Tcube,transfo=[x/R,y/R,z/R]);
 plot(Th,wait=1);
-savemesh(Th,"T.mesh");
-exec("ffmedit T.mesh");
-//  medit("Th Sphere ",Th);
+//savemesh(Th,"T.mesh");
+//exec("ffmedit T.mesh");
+medit("Th",Th);
 

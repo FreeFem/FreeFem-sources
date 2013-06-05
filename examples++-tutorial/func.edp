@@ -52,3 +52,12 @@ cout << GG(3) << endl;
 cout << GGG(5) << endl;
 
 verbosity=1;
+
+//  test Nan and inf  version 3.19 
+
+real x=1e1000;
+cout << x << " " << isInf(x) << " " << isNaN(x) << " " << isNormal(x) <<endl;
+x =1;
+cout << x << " " << isInf(x) << " " << isNaN(x) << " " << isNormal(x)<<endl;
+x = NaN();
+cout << x << " " << isInf(x) << " " << isNaN(x) << " " << isNormal(x)<<endl;

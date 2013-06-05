@@ -799,14 +799,15 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       
       
       if  ( (l[0] >= eps) && (l[1] >= eps) && (l[2] >= eps) &&  (l[3] >= eps) )
-	{	
+	{
+          outside=false;
 	  Phat=Rd(l+1);
 	  return &K;	
 	}
     }
   
   const Element & K(Th[closestTet]);
-  
+  outside=true;
   CoorBary(K,P,l);
   
   Phat=Rd(l+1);

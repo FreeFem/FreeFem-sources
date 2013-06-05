@@ -34,26 +34,41 @@ template<class R> inline R blas_sdot(const int n,const R *sx,const int incx,cons
     s += *sx * *sy;   
    return  s;
 }
-template<> inline float blas_sdot(const int n,const  float *sx,const int incx,const float *sy,const int  incy)
+
+template<class R> inline R blas_sdot( int n, R *sx, int incx, R *sy, int  incy)
 {
-  return cblas_sdot(n,sx,incx,sy,incy);
+    R s=R();
+    
+    if(incx == 1 && incy == 1)
+        for (int k = 0; k< n; k++)
+            s += *sx++ * * sy++;
+    else
+        for (int k = 0; k< n; k++, sx += incx, sy += incy)
+            s += *sx * *sy;
+    return  s;
 }
-template<> inline double blas_sdot(const int n,const  double *sx,const int incx,const double *sy,const int  incy)
+// OpenBlas PB with constant  remove const ....
+template<> inline float blas_sdot(const int n,  float *sx, int incx, float *sy, int  incy)
 {
-  return cblas_ddot(n,sx,incx,sy,incy);
+    return cblas_sdot(n,sx,incx,sy,incy);
 }
-template<> inline  complex<double> blas_sdot(const int n,const  complex<double> *sx,const int incx,const complex<double> *sy,const int  incy)
+template<> inline double blas_sdot( int n,  double *sx, int incx, double *sy, int  incy)
 {
-  complex<double> s;
-   cblas_zdotu_sub(n,(const void *)sx,incx,(const void *)sy,incy,( void *)&s);
-  return s;
+    return cblas_ddot(n,sx,incx,sy,incy);
 }
-template<> inline  complex<float> blas_sdot(const int n,const  complex<float> *sx,const int incx,const complex<float> *sy,const int  incy)
+template<> inline  complex<double> blas_sdot( int n,  complex<double> *sx, int incx, complex<double> *sy, int  incy)
 {
-  complex<float> s;
-   cblas_zdotu_sub(n,(const void *)sx,incx,(const void *)sy,incy,( void *)&s);
-  return s;
+    complex<double> s;
+    cblas_zdotu_sub(n,( void *)sx,incx,( void *)sy,incy,( void *)&s);
+    return s;
 }
+template<> inline  complex<float> blas_sdot( int n,  complex<float> *sx, int incx, complex<float> *sy, int  incy)
+{
+    complex<float> s;
+    cblas_zdotu_sub(n,( void *)sx,incx,( void *)sy,incy,( void *)&s);
+    return s;
+}
+
 #endif
 //  end modif FH
 using Fem2D::HeapSort;
@@ -271,9 +286,9 @@ template<class R>
                 :  make_pair<int,int>(i+ii00,j+jj00) ; }
  
 template<class R>
-bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj)
+bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
 {
-   double eps0=numeric_limits<double>::min();
+   double eps0=max(numeric_limits<double>::min(), threshold);
  if( norm(coef)<eps0) return  L == U ;
  int i,j,kf,k;
   if(D)
@@ -792,7 +807,7 @@ lg[this->n]=this->n;
 
 template<class R>
 template<class K>
- MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
+ MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A,R (*f)(K ))
    : MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
      symetrique(A.symetrique),       
      a(new R[nbcoef]),
@@ -806,9 +821,30 @@ template<class K>
   for (int k=0;k<nbcoef;k++)
     {
       cl[k]=A.cl[k];
-      a[k]=A.a[k];
+      a[k]=f(A.a[k]);
     }
   
+}
+
+template<class R>
+template<class K>
+MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
+: MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
+symetrique(A.symetrique),       
+a(new R[nbcoef]),
+lg(new int [this->n+1]),
+cl(new int[nbcoef]),
+solver(0)
+{
+    ffassert(a && lg &&  cl);
+    for (int i=0;i<=this->n;i++)
+        lg[i]=A.lg[i];
+    for (int k=0;k<nbcoef;k++)
+    {
+        cl[k]=A.cl[k];
+        a[k]=A.a[k];
+    }
+    
 }
 
 
@@ -887,9 +923,9 @@ solver(0)
 	  ffassert(f.good() );
 	  i--;j--;
 	  imx=max(imx,i);
-	  imx=max(jmx,j);
+	  jmx=max(jmx,j);
 	  imn=min(imn,i);
-	  imn=min(jmn,j);
+	  jmn=min(jmn,j);
 	  //cout << i << " " << j << " " << aij << endl;
 	  if(i0!=i) {j0=-1;lg[i]=k;}
 	  ffassert(i0<=i && j0<j);
@@ -1175,9 +1211,9 @@ template<class R>
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj)
+bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
 {
-  double eps0=numeric_limits<double>::min();
+  double eps0=max(numeric_limits<double>::min(),threshold);
   int i,j,k;
   if (symetrique)
    {

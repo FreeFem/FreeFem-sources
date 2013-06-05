@@ -1148,7 +1148,7 @@ int ForceEdge(Vertex &a, Vertex & b,TriangleAdjacent & taret)
 	  MeshError(990);
 	}
       Vertex *aa = tc.EdgeVertex(0), *bb = tc.EdgeVertex(1);
-      if (( aa == &a ) && (bb == &b) ||  (bb ==  &a ) && (aa == &b)) {
+      if ((( aa == &a ) && (bb == &b)) ||  ((bb ==  &a ) && (aa == &b))) {
 	tc.SetLock();
 	a.Optim(1,0);
 	b.Optim(1,0);
@@ -1467,7 +1467,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   register int izerodet=-1,iedge; // izerodet = egde contening the vertex s
   Icoor2 detOld = t->det;
   
-  if ( ( infv <0 ) && (detOld <0) ||  ( infv >=0  ) && (detOld >0) ) 
+  if ( (( infv <0 ) && (detOld <0)) ||  (( infv >=0  ) && (detOld >0)) ) 
     {
       cerr << "  infv " << infv << " det = " << detOld << endl;
       cerr << Number(s) << " "<< Number(s0) << " "  
@@ -3201,7 +3201,7 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
   if (inbvx) {
     vertices=new Vertex[nbvx];
     assert(vertices);
-    ordre=new (Vertex* [nbvx]);
+    ordre=new Vertex* [nbvx];
     assert(ordre);
     triangles=new Triangle[nbtx];
     assert(triangles);}
@@ -3977,7 +3977,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 Edge** Triangles::MakeGeometricalEdgeToEdge()
  {
   assert(Gh.nbe);
-  Edge **e= new (Edge* [Gh.nbe]);
+  Edge **e= new Edge* [Gh.nbe];
   
   Int4 i;
   for ( i=0;i<Gh.nbe ; i++)

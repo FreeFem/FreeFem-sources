@@ -64,6 +64,6 @@ for (int i=0;i<nbiter;i++)
 	for (j=0;j<fh[].n ; j++)  {
 	  file << eh[][j] << endl; }
       }	
-      exec("ffmedit `pwd`/Th"+i);
+     if(!NoGraphicWindow) exec("ffmedit `pwd`/Th"+i);
     }
 }

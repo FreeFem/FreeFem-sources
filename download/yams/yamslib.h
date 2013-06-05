@@ -184,6 +184,9 @@ namespace yams{
 #endif
   int yams_main(yams_pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int infocc );
   int zaldy1(int nemax,int npmax,int nvmax,int memory,yams_pSurfMesh sm,int choix);
+  int   zaldy2(int npmax);
+  int   zaldy3(yams_pSurfMesh ,int code);
+
 #ifdef __cplusplus
 }
 #endif

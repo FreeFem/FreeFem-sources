@@ -805,14 +805,17 @@ AnyType Adaptation::operator()(Stack stack) const
     
   Metric Mhmax(hmax);
     double  ch2=2/(hmax*hmax);
+    double  cH2=2/(hmin*hmin);
+    
   for ( iv=0;iv<Th.nbv;iv++) 
     Th[iv].m = Mhmax;
-    
+    int miss=0; 
    if (mtx) 
     for ( iv=0;iv<Th.nbv;iv++) 
-      if ( (m11[iv]+m22[iv]) < ch2) // modif FH (Thank to J-F Remacle 07/2010)
-       Th[iv].m = MetricAnIso(m11[iv],m12[iv],m22[iv]);
-   
+      //if ( (m11[iv]+m22[iv]) > ch2) // modif FH (Thank to J-F Remacle 07/2010), correct 03/2011 FH. 
+       Th[iv].m.IntersectWith(MetricAnIso(m11[iv],m12[iv],m22[iv]));// add inters ..
+      else miss++;
+  //if(miss && verbosity>1) cout << "   -- Warning: Missing metric on vertices (too large) " <<  miss << " " << ch2 << endl;
   if ( givenmetric)
     if (ksol == 1) 
       {
@@ -1679,7 +1682,7 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 
 void init_lgmesh() {
-   if(verbosity)  cout <<"lg_mesh ";
+  if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
     bamg::MeshIstreamErrorHandler = MeshErrorIO;
 //   Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
    Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
@@ -1711,5 +1714,6 @@ void init_lgmesh() {
   init_glumesh2D();
    
 }
-#include "InitFunct.hpp"
-static addingInitFunct TheaddingInitFunct(-10,init_lgmesh);
+// not work pb this ld (bug ????) 
+//#include "InitFunct.hpp"
+// addingInitFunct TheaddingInitFunctlgmesh(-11,init_lgmesh);

@@ -32,6 +32,7 @@
 #include  <set>
 #include "AFunction.hpp"
 #include "environment.hpp"
+#include "InitFunct.hpp"
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
@@ -50,7 +51,10 @@ set<string> SetLoadFile;
 bool load(string ss)
 {
   if(SetLoadFile.find(ss) != SetLoadFile.end())
-    cout << " (already loaded : " <<  ss << " ) " ;
+    { 
+      if( (mpirank==0)&& verbosity)
+	cout << " (already loaded : " <<  ss << " ) " ;
+    }
     else
       {
 	SetLoadFile.insert(ss);
@@ -86,8 +90,9 @@ bool load(string ss)
 	      ret= handle !=0;
 	      if (  ret ) 
 		{
-		  if(verbosity)
+		  if(verbosity && (mpirank ==0))
 		    cout << " (load: dlopen " << s << " " << handle << ") ";
+          callInitsFunct() ;  
 		  return handle;
 		}
 	      
@@ -103,26 +108,33 @@ bool load(string ss)
 		  }
 		else 
 		  {
-		    if(verbosity)
+		    if(verbosity&& (mpirank ==0))
 		      cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
+            callInitsFunct() ; 
 		    return mod;
 	    }
 	      }
 #else
-	cout << "------------------------------------   \n" ;
-	cout << "  load: sorry no dlopen on this system " << s << " \n" ;
-	cout << "------------------------------------   \n" ;
+	      if((mpirank ==0))
+		{
+		  cout << "------------------------------------   \n" ;
+		  cout << "  load: sorry no dlopen on this system " << s << " \n" ;
+		  cout << "------------------------------------   \n" ;
+		}
 	CompileError("Error load");
 	return 0;
 #endif  
 	    }
-	cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
-	cerr << "list  prefix: " ;
-	for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
-	  cerr <<"'"<<*i<<"' ";
-	cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' "; 
-	
-	cerr << endl;
+	if(mpirank ==0)
+	  {
+	    cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
+	    cerr << "list  prefix: " ;
+	    for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
+	      cerr <<"'"<<*i<<"' ";
+	    cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' "; 
+	    
+	    cerr << endl;
+	  }
 	CompileError("Error load");
       }
   return 0 ;

@@ -125,7 +125,7 @@ public:
     
      umfpack_di_defaults (Control) ;
      // change UMFPACK_At to UMFPACK_Aat in complex 
-    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
+     int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a,KN_2Ptr<R> (x), KN_2Ptr<R>(b), Numeric,Control,Info) ;
     if (status != 0)
     {
 	umfpack_di_report_info (Control, Info) ;
@@ -289,6 +289,7 @@ public:
 inline MatriceMorse<double>::VirtualSolver *
 BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(double,A))
 {
+  if( verbosity>9)
     cout << " BuildSolverUMFPack<double>" << endl;
     return new SolveUMFPACK<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
@@ -296,6 +297,7 @@ BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(double,A))
 inline MatriceMorse<Complex>::VirtualSolver *
 BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
+  if( verbosity>9)
     cout << " BuildSolverUMFPack<Complex>" << endl;
     return new SolveUMFPACK<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
@@ -307,14 +309,7 @@ DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-}
+
 
 bool SetUMFPACK()
 {
@@ -323,12 +318,13 @@ bool SetUMFPACK()
     DefSparseSolver<double>::solver  =BuildSolverIUMFPack;
     DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return  true;
 }
 
 class Init { public:
     Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
@@ -338,10 +334,7 @@ Init::Init(){
   
   DefSparseSolver<double>::solver =BuildSolverIUMFPack;
   DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
-  if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver" << endl;
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  }
+
   if(! Global.Find("defaulttoUMFPACK").NotNull() )
     Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
 }

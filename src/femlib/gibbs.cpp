@@ -222,6 +222,8 @@ int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
     static integer pf;
 /*    extern  Subroutine int gibbsb_(), gibbsd_(), gibbst_();*/
     static integer nbpass, niveau, pf1, option, old, new_, opt, new1;
+    long pfn1,pfo1,m1e9;
+    m1e9 = 1000000000;
 
 /* -----------------------------------------------------------------------
  */
@@ -385,6 +387,8 @@ s */
 /*     calcul du profile */
     *pfold = 0;
     *pfnew = 0;
+    pfo1=0;
+    pfn1=0;
     bnew = 0;
     bold = 0;
     i__1 = *n;
@@ -409,7 +413,24 @@ s */
 /* Computing MAX */
 	i__2 = bnew, i__3 = r[i] - new_ + 1;
 	bnew = mmax(i__2,i__3);
+        if(*pfold>m1e9) { pfo1+=*pfold/m1e9; *pfold = *pfold%m1e9;}
+        if(*pfnew>m1e9) { pfn1+=*pfnew/m1e9; *pfnew = *pfnew%m1e9;}
+        
 /* L110: */
+    }
+    if(pfo1 || pfn1)
+    { // change unit of pf
+        if(pfo1==pfn1)
+        {
+            *pfnew= pfn1*10 + (*pfnew >= *pfold) ;
+            *pfold= pfo1*10 + (*pfnew <= *pfold) ;
+        }
+        else
+        {
+           *pfnew= pfn1 ;
+           *pfold= pfo1;
+        }
+
     }
 /*      if(impre.ne.0) then */
 /*        write(nfout,*)'profile  old  = ',pfold,', profile  new = ',pfnew
@@ -580,7 +601,7 @@ n+n) */
 		}
 /* L110: */
 	    }
-	    if (h0 < l0 || h0 == l0 && mxcanx <= mxcany) {
+	    if (h0 < l0 || (h0 == l0 && mxcanx <= mxcany)) {
 /*           if(impre.le.-2) write(nfout,*) */
 /*     +       '         h0 = ',h0,',l0 = ',l0,'  ------- XXXX
  --------' */
@@ -651,6 +672,9 @@ return 0;} /* gibbsb_ */
 	*mxz = mmax(i__2,i__3);
 	i__2 = nv[i + 1];
 	for (j = nv[i] + 1; j <= i__2; ++j) {
+	    if(nv[j] > *n) 
+	     printf(" bug in gibbsc_ ##### %ld %ld %ld %ld \n",j,nv[j],i,*niveau );
+	    if(nv[j] <= *n) 
 	    nz[nv[j]] = i;
 /* L20: */
 	}
@@ -663,7 +687,7 @@ return 0;} /* gibbsc_ */
     integer i__1, i__2;
 
     /* Local variables */
-    static integer i, k, s, sv, stk, stk1, stk2;
+    static integer i, k, s, sv, stk, stk1, stk2, nvni=-1;
 
 /* -----------------------------------------------------------------------
  */
@@ -700,7 +724,7 @@ return 0;} /* gibbsc_ */
 
 /*    initialisation */
 
-    stk = *n - 1;
+    stk = *n ;// correct bug FH june 2011 ....
     nv[0] = stk;
     stk2 = stk;
     *niveau = 0;
@@ -711,6 +735,7 @@ L20:
     if (stk2 < stk) {
 	++(*niveau);
 	stk1 = stk2 + 1;
+	nvni=nv[*niveau];/* save value */
 	nv[*niveau] = stk;
 	stk2 = stk;
 /*        print *,' ------- niveau =',niveau,' stk=',stk1,stk2 */
@@ -737,6 +762,7 @@ L20:
 	}
 	goto L20;
     }
+ // if(nvni>0)  nv[*niveau]=nvni;
     --(*niveau);
 /*      call pnv(' gibbsd ',n,nv,niveau) */
 return 0;} /* gibbsd_ */
@@ -1099,7 +1125,7 @@ int FESpace::renum()
     int nnx= SizeToStoreAllNodeofElement();
   	ptvois = new long[nv+1]; 		
 	nn = 	 new long[nnx]; 		
-	vois = 	 new long[nbvoisin+10];	
+	vois = 	 new long[nbvoisin+100];	
 	r = 	 new long[nv+1];			
 	if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
 	err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;

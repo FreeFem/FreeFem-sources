@@ -11,44 +11,47 @@ all-local: scalapack
 # http://www.netlib.org/scalapack/
 # Hips information
 DIRPKG=../pkg
-SRCDIR=scalapack-1.8.0
-PACKAGE1=$(DIRPKG)/scalapack-1.8.0.tgz
+SRCDIR=scalapack-2.0.2
+PACKAGE1=$(DIRPKG)/scalapack-2.0.2.tgz
 SERVER=http://www.netlib.org/scalapack/
 INSTALL=../..
-DIR1 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/TOOLS/LAPACK/*.o
-DIR2 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/TOOLS/*.o
-DIR3 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PBBLAS/*.o
-DIR4 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PTZBLAS/*.o
-DIR5 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/PTOOLS/*.o
-DIR6 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/PBLAS/SRC/*.o
-DIR7 = $(abs_top_builddir)/download/scalapack/$(SRCDIR)/REDIST/SRC/*.o
-DIR8 =  $(abs_top_builddir)/download/scalapack/$(SRCDIR)/SRC/*.o
+DIR1 = TOOLS/LAPACK/*.o
+DIR2 = TOOLS/*.o
+DIR3 = PBLAS/SRC/PBBLAS/*.o
+DIR4 = PBLAS/SRC/PTZBLAS/*.o
+DIR5 = PBLAS/SRC/PTOOLS/*.o
+DIR6 = PBLAS/SRC/*.o
+DIR7 = REDIST/SRC/*.o
+DIR8 = SRC/*.o
+DIR9 = BLACS/SRC/*.o BLACS/SRC/*.oo
 
 scalapack: FAIRE
 
-$(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
+$(SRCDIR)/FAIT-202:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
 	rm $(SRCDIR)/libscalapack.a
-	$(ARCH) $(ARCHFLAGS) $(SRCDIR)/libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8)
+	cd $(SRCDIR);$(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8) $(DIR9)	
 	$(RANLIB) $(SRCDIR)/libscalapack.a
-	touch $(SRCDIR)/FAIT
+	touch $(SRCDIR)/FAIT-202
 install:
-	mkdir -p $(SRCDIR)/$(INSTALL)/include
-	cp $(SRCDIR)/SRC/*.h $(SRCDIR)/$(INSTALL)/include
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/libscalapack.a $(SRCDIR)/$(INSTALL)/lib
+	mkdir -p ../include
+	cp $(SRCDIR)/SRC/*.h ../include
+	mkdir -p ../lib
+	cp $(SRCDIR)/libscalapack.a ../lib
 
 WHERE:
-	if [ -f $(SRCDIR)/FAIT ] ; then \
+	if [ -f $(SRCDIR)/FAIT-202 ] ; then \
 	make install;  \
-	echo "scalapack LD '-L@DIR@/lib  -lscalapack '"  >$(SRCDIR)/$(INSTALL)/lib/WHERE.scalack ;\
-	echo "scalapack INCLUDE '-I@DIR@/include'">> $(SRCDIR)/$(INSTALL)/lib/WHERE.scalack ;\
+	echo scalapack LD -L@DIR@/lib  -lscalapack   >../lib/WHERE.scalapack ;\
+	echo scalapack INCLUDE -I@DIR@/include  >> ../lib/WHERE.scalapack ;\
 	fi
 
-FAIRE: $(SRCDIR)/FAIT	WHERE
+FAIRE: $(SRCDIR)/FAIT-202
+	$(MAKE) WHERE
+	touch FAIRE 
 
-SLmake.inc: ../../config.status	Makefile
+SLmake.inc: ../../config.status	Makefile SLmake-scalapack.inc
 	../../config.status  --file="SLmake.inc:SLmake-scalapack.inc"
 
 $(SRCDIR)/tag-tar: $(PACKAGE1)
@@ -60,12 +63,13 @@ $(PACKAGE1):
 	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE1)`
 
 clean-local:
-	-cd $(SRCDIR); $(MAKE) cleanlib 
+	-cd $(SRCDIR) && $(MAKE) cleanlib  -C $(SRCDIR)
+	-rm SLmake.inc FAIRE ../lib/WHERE.scalapack
+	-rm -rf ../include/{pblas.h,pxsyevx.h,tools.h}
+	-rm -rf ../lib/libscalapack.a ../lib/WHERE.scalapack 
+	-rm -rf $(SRCDIR)
 
 clean: clean-local
-	rm SLmake.inc
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/{pblas.h,pxsyevx.h,tools.h}
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libscalapack.a
-	-rm -rf $(SRCDIR)
+
 
 .PHONY:$(SRCDIR)/$(INSTALL)

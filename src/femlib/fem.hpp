@@ -291,7 +291,7 @@ public:
       if (i<0) ffassert(i>=0);
       else if  (i<3) return SortedTriplet(vertices[i]-v0);
       else if( (i-=3)<3) return SortedTriplet( &Edge(i,0)-v0, &Edge(i,1)-v0);
-      else if( (i==0) ) return SortedTriplet( vertices[0]-v0, vertices[1]-v0, vertices[2]-v0) ;
+      else if( i==0 ) return SortedTriplet( vertices[0]-v0, vertices[1]-v0, vertices[2]-v0) ;
       else ffassert(0);
   }
   
@@ -359,7 +359,7 @@ public:
   SortedTriplet what(int i,Vertex *v0,TBoundaryEdge * t0) { 
       if (i<0) ffassert(i>=0);
       else if  (i<2) return SortedTriplet(vertices[i]-v0);
-      else if( (i==0) ) return SortedTriplet( vertices[0]-v0, vertices[1]-v0) ;
+      else if( i==0 ) return SortedTriplet( vertices[0]-v0, vertices[1]-v0) ;
       else ffassert(0);
   }
   
@@ -486,12 +486,12 @@ public:
   int BorderElementAdj(int i, int j) const 
       {
 	// be: border index, i and j index of vertex of be, i index of common vertex
-	int p2;
+	int p2=-1;
 	for (int p=BoundaryAdjacencesHead[i];p>=0;p=BoundaryAdjacencesLink[p])
 	  { 
 	    if ( !bedges[p2=p/2].in(vertices+j) )   return p2;
 	  }
-      } // Add J. Morice
+      return -1;} // Add J. Morice
   int nTonEdge(int it,int e) const { int k=3*it+e;return k==TheAdjacencesLink[k] ? 1 : 2;}
       
   void VerticesNumberOfEdge(const Triangle & T,int j,int & j0,int & j1) const 

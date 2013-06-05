@@ -42,7 +42,8 @@ PlotStream.hpp \
 endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp \
-../femlib/splitsimplex.cpp AFunction_ext.hpp
+../femlib/splitsimplex.cpp AFunction_ext.hpp \
+ffapi.hpp ffapi.cpp 
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 
@@ -51,7 +52,7 @@ EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
 libff_a_DEPENDENCIES=@EIGENOBJ@
 
-INCLUDES=-I../lglib -I../bamglib -I../Graphics -I../femlib
+AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib
 # -I$(top_srcdir)/arpack/arpack++/include
 
 # Build date changes at every change

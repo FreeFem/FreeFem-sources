@@ -48,7 +48,7 @@ const char *medit_debug="-d";
 
 static bool TheWait=false;
 bool  NoWait=false;
-
+extern bool  NoGraphicWindow;
 using namespace std;
 using namespace Fem2D;
 
@@ -74,13 +74,13 @@ public:
   /*
   readsol_Op(const basicAC_F0 &  args, Expression ffname) : filename(ffname)
   {
-    if(verbosity)  cout << "readsol"<< endl;
+    if(verbosity>2)  cout << "readsol"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);    
   }
   */
   readsol_Op(const basicAC_F0 &  args) 
   {
-    if(verbosity)  cout << "readsol"<< endl;
+    if(verbosity>2)  cout << "readsol"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);    
     if ( BCastTo<string *>(args[0]) ) 
       filename = CastTo<string *>(args[0]);
@@ -108,7 +108,7 @@ AnyType readsol_Op::operator()(Stack stack)  const
   int         nsol;
   int         key;
 
-  int numsol(arg(0,stack,-1)); 
+  int numsol(arg(0,stack,-1L)); 
   assert(abs(numsol)>=1);
 
   char * charfile= new char[ffname->size()+1];
@@ -127,6 +127,7 @@ AnyType readsol_Op::operator()(Stack stack)  const
       exit(1);
     }
   }
+  if(verbosity>2)
   cout <<"  %%%%" << (char *) data <<  " OPENED\n" << endl;
 
   nv = GmfStatKwd(inm,GmfSolAtVertices,&type,&offset,&typtab);
@@ -372,7 +373,7 @@ AnyType datasolMesh2_Op::operator()(Stack stack)  const
   int solnbfloat;
   int TypTab[l.size()];
  
-  int resultorder= arg(0, stack, 1);
+  int resultorder= arg(0, stack, 1L);
   long longdefault;
 
   int ver = GmfFloat, outm;
@@ -604,8 +605,8 @@ AnyType datasolMesh3_Op<v_fes>::operator()(Stack stack)  const
 
   char * ret= new char[ffname->size()+1];
   strcpy(ret, ffname->c_str());
-
-  cout << ret << endl;
+  if(verbosity>2)
+    cout << ret << endl;
   if ( !(outm = GmfOpenMesh( ret, GmfWrite, ver, 3)) ) {
     cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
     exit(1);
@@ -768,7 +769,7 @@ static char * meditcmd(long filebin, int nbsol, int smedit, const string &meditf
    
   meditcmm += ' ';
 
-  char * ret1= new char[ffnn.size()+1];
+  KN<char>  ret1(ffnn.size()+1);
   strcpy( ret1, ffnn.c_str()); 
   
   int nbstrings=1;
@@ -870,7 +871,7 @@ public:
   static const int n_name_param =5;  
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  long arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
   
 public:
@@ -974,7 +975,7 @@ public:
       for(size_t jj=offset; jj<l.size(); jj++){
 	if( l[jj].what != l[ jj%offset ].what ){
 	  char StringError[256]; 
-	  snprintf(StringError,256,"compile error ::  The solution %d of mesh 1 and mesh %d is not the same type",jj%offset,jj/offset+1);
+	  snprintf(StringError,256,"compile error ::  The solution %ld of mesh 1 and mesh %ld is not the same type",jj%offset,jj/offset+1);
 	  CompileError(StringError);
 	}
       }
@@ -1023,6 +1024,7 @@ basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[]= {
 
 AnyType PopenMeditMesh_Op::operator()(Stack stack)  const 
 {
+  if(NoGraphicWindow) return Nothing;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   long order (arg(0,stack,1));
   //
@@ -1114,7 +1116,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
     jt++;
   }
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
-  if(verbosity) cout << "Popen medit : vertex "<< nv << " triangle "<< nt << " edge " << nbe << endl;  
+  if(verbosity>2) cout << "Popen medit : vertex "<< nv << " triangle "<< nt << " edge " << nbe << endl;  
 
   Mesh *pTh = new Mesh(nv,nt,nbe,v,t,b);
   Mesh &Th = *pTh;
@@ -1550,7 +1552,7 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
       }
 
       if(boolsave){
-	if(verbosity) cout << "writing solution in file"  << endl;
+	if(verbosity>2) cout << "writing solution in file"  << endl;
 	if(typsol==1){
 	  writetabsol( datasize, nboftmp, vxx, solsave);
 	  nboftmp=nboftmp+1;
@@ -1564,9 +1566,12 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
 	  nboftmp=nboftmp+3;
 	}
 	/*cout << "fin writing solution in file nboftmp=" << nboftmp << endl;
-	cout << "datasize=" << datasize << " " << "solnbfloat=" << solnbfloat << " boolsave=" << boolsave << endl;
-	for(int iy=0; iy<datasize; iy++){
+	  if(verbosity>2)
+	  {
+	  cout << "datasize=" << datasize << " " << "solnbfloat=" << solnbfloat << " boolsave=" << boolsave << endl;
+	  for(int iy=0; iy<datasize; iy++){
 	  if(iy==0 || iy==datasize-1) cout << iy <<" " <<solsave(0,iy) << endl;	      
+	  }
 	}
 	*/
       }
@@ -1580,14 +1585,17 @@ AnyType PopenMeditMesh_Op::operator()(Stack stack)  const
   bool plotting = true;   
   //  drawing part  ------------------------------
   
-  if (wait && !NoWait) 
+  //  suppression du no wait car plante sur mac
+  //  il faut faire thread qui lance ca de maniere asyncrone ... 
+  //   a faire .. FH ...
+  //  if (wait && !NoWait) 
     {
       pclose(popenstream);
     }
-  else
-    {
-      fclose(popenstream);
-    }
+    //else
+    // {
+    //  fclose(popenstream);
+    //}
   
   // rajout pout la sauvegarde de la solution
   if(boolsave){
@@ -1660,7 +1668,7 @@ public:
   static const int n_name_param = 5;  
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  long arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
 
 public:
@@ -1754,8 +1762,9 @@ basicAC_F0::name_and_type PopenMeditMesh3_Op<v_fes>::name_param[]= {
 template<class v_fes>
 AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const 
 {
+  if(NoGraphicWindow) return Nothing;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  long order (arg(0,stack,1));
+  long order (arg(0,stack,1L));
   //
   int ver = GmfFloat;
   int dimp =3;
@@ -1774,13 +1783,13 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   string * ffname  = GetAny<string *>( (*filename)(stack) );
   string * meditff(arg(1,stack,&stringffmedit));
 
-  long filebin (arg(4,stack,1));
+  long filebin (arg(4,stack,1L));
   int smedit=max(1,nbsol);     
   char * commandline = meditcmd( filebin, nbsol, smedit, *meditff, *ffname);
   
   printf("version de medit %s\n",commandline);  
-  if(verbosity) cout << "number of solution = " << offset-1 << endl;
-  if(verbosity) cout << "number of mesh     = " << nbTh << endl;
+  if(verbosity>2) cout << "number of solution = " << offset-1 << endl;
+  if(verbosity>2) cout << "number of mesh     = " << nbTh << endl;
 
   // lecture des differents maillages
   int nv=0,nt=0,nbe=0; // sommet, triangles, arretes du maillage unifies
@@ -1847,7 +1856,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
     jt++;
   }
   assert( it==nt ); assert(iv==nv); assert(ibe=nbe);
-  if(verbosity) cout << "meditff :: Value of elements: vertex "<< nv << " Tet "<< nt << " triangle " << nbe << endl;  
+  if(verbosity>2) cout << "meditff :: Value of elements: vertex "<< nv << " Tet "<< nt << " triangle " << nbe << endl;  
 
   Mesh3 *pTh = new Mesh3(nv,nt,nbe,v,t,b);
   Mesh3 &Th = *pTh;
@@ -2311,7 +2320,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
       }
  
       if(boolsave){
-	if(verbosity) cout << "writing solution in file" << endl;
+	if(verbosity>2) cout << "writing solution in file" << endl;
 	if(typsol==1){
 	  writetabsol( datasize, nboftmp, vxx, solsave);
 	  nboftmp=nboftmp+1;
@@ -2338,14 +2347,14 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
   bool plotting = true;   
   //  drawing part  ------------------------------
   
-  if (wait && !NoWait) 
+  //    if (wait && !NoWait) 
     {
       pclose(popenstream);
     }
-  else
+    /*else
     {
       fclose(popenstream);
-    }
+      }*/
   
   if(boolsave){
     int outm;
@@ -2395,14 +2404,13 @@ class Init { public:
   Init();
 };
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
-  
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
   
-  if (verbosity)
+  if (verbosity>2)
     cout << " load:popen.cpp  " << endl;
   
   // 2D

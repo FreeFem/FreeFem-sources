@@ -86,5 +86,6 @@ void initArrayOperatorComplex()
 						  new E_F1_funcT<SetArray<K>,SetArray<double> >(Cast<SetArray<K>,SetArray<double> >)
 	  					      
 					      );
+    Global.Add("toCarray","(",new OneOperator_2KN_<Complex>);
     
 }

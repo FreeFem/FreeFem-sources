@@ -15,9 +15,9 @@ SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
 PKGDIR=../pkg
-FFTW_VERSION=3.2.1
+FFTW_VERSION=3.3.2
 INSTALL=../..
-
+THIS=fftw3
 
 fftw:FAIT
 #   $(WIN32DLLTARGET)  
@@ -27,13 +27,19 @@ FAITwin32-dll-target:
 
 FAIT:	
 	$(MAKE) FAIRE
-	touch FAIT
+	touch FAIT 
 
 FAIRE: $(SRCDIR) 
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
-	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch FAIRE
+install:  WHERE
+	cd $(SRCDIR) && make install
+WHERE: 
+	-if [ FAIT ] ; then \
+	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >../lib/WHERE.$(THIS) ;\
+	echo $(THIS) INCLUDE -I@DIR@/include   >> ../lib/WHERE.$(THIS) ;\
+	fi
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 	gunzip -c   $^ | tar xvf - 
@@ -44,7 +50,7 @@ $(PKGDIR)/$(PACKAGE):
 clean: clean-local
 
 clean-local:
-	-rm -rf fftw-* FAIT FAIRE
+	-rm -rf fftw-* FAIT FAIRE ../lib/WHERE.$(THIS)
 
 cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags

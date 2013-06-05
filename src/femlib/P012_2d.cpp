@@ -92,7 +92,7 @@ R TypeOfFE_P1Lagrange2d::operator()(const FElement & K,const  R2 & PHat,const KN
       R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y; 
       r = u0*l0+u1*l1+l2*u2;
     }
-  else if(op==op_dx || op==op_dx )
+  else if(op==op_dx || op==op_dy )
     { 
       const Element & T=K.T;
       R2 D[3];

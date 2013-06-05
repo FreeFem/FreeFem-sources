@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -64,12 +66,13 @@ class mylex : public CodeAlloc {
   struct xxxx { 
     int l;
     istream * f;
-    const string * filename; 
+    const string * filename;
+    int macroarg;
     istream * nf;
 
-    xxxx() : l(0), f(0) , filename(0),nf(0)   {}   
+    xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0)   {}
     void  open(mylex *lexx,const char * ff) ;
-    void  readin(mylex *lexx,const string & s,const string *name=0);
+    void  readin(mylex *lexx,const string & s,const string *name=0,int macroargg=0);
     void close() ;
   };
   
@@ -84,7 +87,7 @@ class mylex : public CodeAlloc {
   list<MapMacroParam> *listMacroParam;
   public:
   
-  mylex(ostream & out);
+  mylex(ostream & out,bool eecho=true);
   string token() const;
   void print(ostream &f) const; 
   int scan(int lvl=0);
@@ -141,7 +144,7 @@ private:
   
 } ;
 
- mylex * Newlex(  ostream & out);
+mylex * Newlex(  ostream & out,bool =true);
  void Destroylex(mylex * m);
 
 extern mylex *zzzfff;

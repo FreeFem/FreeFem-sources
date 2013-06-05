@@ -114,7 +114,8 @@ int mylex::EatCommentAndSpace(string *data)
  // if data is !0 then add reading char in data
  // return the last read char c
  //  --------------------
-  int c,caux;
+  int c,caux,sep=0;
+    const int space=(int) ' ';
   int incomment =0;
   do {
     incomment = 0;
@@ -122,7 +123,7 @@ int mylex::EatCommentAndSpace(string *data)
     
     // eat spaces 
     while (isspace(c) || c == 10 || c == 13 )
-     {
+      {sep=space;
       c = source().get();
       if(isNLCR(source(),c)) c='\n';
       if (echo) cout << (char) c;
@@ -142,7 +143,7 @@ int mylex::EatCommentAndSpace(string *data)
       
       
     if(incomment==1) 
-      {
+      { sep=space;
         if (echo) cout << "//" ;source().get();
         if(data) *data+="//";
 
@@ -155,7 +156,7 @@ int mylex::EatCommentAndSpace(string *data)
       while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
       }
     else if(incomment==2) 
-      {
+      { sep=space;
         if (echo) cout << "/*" ;
         if(data) *data+="/*";
 
@@ -177,7 +178,7 @@ int mylex::EatCommentAndSpace(string *data)
         else erreur( " Unterminated comment");
       }
   } while (incomment);
-  return c;
+    return (c==EOF) ? c : sep;
 }
 int mylex::basescan()
 {
@@ -209,7 +210,7 @@ int mylex::basescan()
       if (close() )  goto debut; 
       buf[0]=0;
       return ENDOFFILE;}
-  else if (isdigit(c) || c=='.' && isdigit(nc)) {
+  else if (isdigit(c) || (c=='.' && isdigit(nc))) {
     //  a number
     int i=1;
     buf[0]=c;
@@ -264,7 +265,10 @@ int mylex::basescan()
 	      ccc= source().peek(); 
               switch (cc) {
               case 'n': buf[i]='\n';break;
+              case 'r': buf[i]='\r';break;
               case 'f': buf[i]='\f';break;
+              case 't': buf[i]='\t';break;
+              case 'a': buf[i]='\a';break;
               case 10:
               case 13:
 		cc='\n';
@@ -355,8 +359,19 @@ int mylex::basescan()
         cerr << "'" << (char) c << (char) nc << "' <=> " << (int) c << " is " ;
         erreur (" Unexpected character");
       }
-      
-      if (ret!=c) source().get() ;
+      if( (ret == DOTSTAR) || (ret==DOTSLASH))
+      {
+          source().get();
+          nc = source().peek();
+          if(nc == '=' )
+          {
+              buf[2]='=';// ad FH 19 april 2012 (bug in macro ) 
+              buf[3]=0; 
+              source().get();
+              ret = (ret == DOTSTAR) ?DOTMULEQ : DOTDIVEQ;
+          }
+      }
+      else if (ret!=c) source().get();
       else buf[1] = 0;
       strcpy(plglval->oper,buf);
       if(lexdebug)  cout << "Special '" <<  plglval->oper << "' " << ret << " ";
@@ -458,8 +473,12 @@ char * mylex::match(int i)
 
 bool mylex::SetMacro(int &ret)
 { 
+  char endmacro[]="EndMacro";
+  char newmacro[]="NewMacro";
+    
   bool rt=false;
-  if (strcmp(buf,"macro")==0)
+  int oldmacro=1;
+  if (strcmp(buf,"macro")==0 || (oldmacro=strcmp(buf,newmacro))==0 )
     {
       char *macroname=newcopy(match(ID));
       int nbparam =0;
@@ -490,13 +509,41 @@ bool mylex::SetMacro(int &ret)
 	      
 	    } while(1); 
 	}
+      int kmacro=0;
       
+
       do {
+	int lk=0;
+	string item;
 	int i = source().get();
 	if (i == EOF) {  cerr << "in macro " <<macroname <<  endl;
 	ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // ");}
 	int ii = source().peek();
-	if (i == '/' && ii == '/') { source().putback('/'); break;} 
+	if(isspace(i) && isalpha(ii) ) {
+	    def +=char(i);
+	    i = source().get();
+	    item = "";
+	    while(isalpha(i))
+	      {
+		item += char(i);
+		i = source().get();
+	      }
+	    if( item == newmacro)  kmacro++;
+	    if( item == endmacro)  {
+		if (kmacro==0)  
+		    { source().putback(i); break;}
+		kmacro--;
+	    }
+	    def += item;
+	    item ="";
+	    ii = source().peek();
+	}
+	
+	if(oldmacro)
+	  {
+	    if (i == '/' && ii == '/') { source().putback('/'); break;} 
+	  }
+
 	def +=char(i);        
       } while(1);
       macroparm.push_back(def);
@@ -548,30 +595,41 @@ bool mylex::CallMacro(int &ret)
 	MapMacroParam  lp;
 	if (nbparam > 0 ) { 
 	  match('(');
-	  for (int k=0;k<nbparam;k++)
-	    { 
-	      string p;
-	      int kend= ( k+1 == nbparam) ? ')' : ',';
-	      int lvl=0;
-	      while (1) {
-		int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
-		if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
-		else if(lvl && rr==']') lvl--; //   if ( then  we eat next ) 
-		else if (rr=='(') lvl++ ;  //  eat next 		
-		else if (rr=='[') lvl++ ;  //  eat next 		
-		else if (lvl<=0) {
-		  if (rr==kend ) break;
-		  else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
-		  cerr << "Error in macro expantion "<< j->first 
-		       << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
-		  cerr << " number of macro parameter in definition is " << nbparam << endl;
-		  ErrorScan(" Wrong number of parameter in  macro call");
-		}}
-		
-		if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
-		p += token(); // Correction FH 2/06/2004 of string parameter
-	      }
-	      if(debugmacro)
+	    for (int k=0;k<nbparam;k++)
+	      { 
+		  string p;
+		  int kend= ( k+1 == nbparam) ? ')' : ',';
+		  int lvl=0;
+		  int lvll=0;
+		  while (1) {
+		      int sep =  EatCommentAndSpace();
+		      int rr = basescan();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
+		      if ( (rr=='}') && (--lvll==0) ) 
+			   continue; // remove first {
+		      else if ( (rr=='{') && (++lvll==1) )
+			  continue; // remove last }	
+		      else if(lvll==0) //  count the open close () [] 
+			{  
+			if(lvl && rr==')') lvl--; //   if ( then  we eat next ) 
+			else if(lvl && rr==']') lvl--; //   if ( then  we eat next ) 
+			else if (rr=='(') lvl++ ;  //  eat next 
+			else if (rr=='[') lvl++ ;  //  eat next 
+			else if (lvl<=0) 
+			  {
+			    if (rr==kend ) break;
+			    else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
+				cerr << "Error in macro expantion "<< j->first 
+				<< ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
+				cerr << " number of macro parameter in definition is " << nbparam << endl;
+				ErrorScan(" Wrong number of parameter in  macro call");
+			    }}}
+		      
+		      if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
+		      if(sep==' ') p+=' ';
+		      p += token(); // Correction FH 2/06/2004 of string parameter
+		      
+		  }
+		  if(debugmacro)
 		cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
 	      lp.insert(make_pair<string,string>(macroparm[k],p));
 	      //lp[macroparm[k]] = p; 
@@ -647,9 +705,10 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 
     lgerror("lex: Error input openning file ");};
 }
-void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name)//,int nbparam,int bstackparam) 
+void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int macroargs)//,int nbparam,int bstackparam)
 {
   filename=name;
+  macroarg=macroargs;
   l=0;
   nf=f= new istringstream(s.c_str()); 
   
@@ -661,7 +720,7 @@ void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name)//,int 
 void mylex::xxxx::close() 
 { 
   if( nf)  delete nf;
-  if (filename) delete filename;
+  if (filename && (macroarg==0) ) delete filename;
   
 }
 void mylex::input(const char *  filename) 
@@ -714,13 +773,13 @@ bool mylex::close() {
    }
 }
 
- mylex::mylex(ostream & out):
+ mylex::mylex(ostream & out,bool eecho):
     linenumber(1),
     charnumber(0),
     ffincludedir(ffenvironment["includepath"]),
     firsttime(true),
     level(-1),
-    echo(mpirank == 0 && verbosity),
+    echo(eecho && (mpirank == 0) && verbosity),
     cout(out),
     listMacroDef(new list<MapMacroDef>),
     listMacroParam(0)
@@ -728,9 +787,9 @@ bool mylex::close() {
     listMacroDef->push_front(MapMacroDef());
    };
    
- mylex * Newlex(  ostream & out)
+mylex * Newlex(  ostream & out,bool eecho)
   {
-    return new mylex(out);
+    return new mylex(out,eecho);
   }
 void Destroylex(mylex * m)
  {

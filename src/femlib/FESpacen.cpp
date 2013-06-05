@@ -547,7 +547,16 @@ template<class MMesh>
      maxNbcoefforInterpolation(TFE[0]->NbcoefforInterpolation)
      
      {
-	 for(int i=0;i<kk;++i)
+         long snbdf=0;
+         for(int i=0;i<kk;++i)
+             snbdf += pVh[i]->NbOfDF;
+         if( snbdf !=NbOfDF)
+             cerr << " Problem build of GFESpace (3d) (may be : due to periodic Boundary condition missing ) FH " << endl
+             << " The number of DF must be " << snbdf << "  and it is " << NbOfDF <<endl; 
+         ffassert(snbdf == NbOfDF );
+
+         
+	     for(int i=0;i<kk;++i)
 	     ffassert(&Th==&pVh[i]->Th);
      }
    

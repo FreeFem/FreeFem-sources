@@ -1,3 +1,5 @@
+/// \file
+
 %{ 
     // -*- Mode : c++ -*-
     //
@@ -42,7 +44,7 @@
 #include "error.hpp"
 class Iden;
 #include "strversionnumber.hpp"
-
+#include "InitFunct.hpp"
 #ifdef __MWERKS__
 #ifdef __INTEL__
 #include <malloc.h>
@@ -73,11 +75,11 @@ bool load(string s);
  template <class R,int d,int i> class FE_;
 
 extern mylex *zzzfff;
-#ifdef PARALLELE
-  void initparallele(int &, char **&);
-  void init_lgparallele();
-  void end_parallele();
-#endif
+// modif FH for window to have 1 dll  for mpi and none mpi ..
+extern  void (*initparallele)(int &, char **&);
+extern  void (*init_lgparallele)();
+extern  void (*end_parallele)();
+// 
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
 #endif
@@ -114,6 +116,11 @@ inline void fingraphique()
 
 void lgerror (const char* s) ;
 
+
+ // mpi ptr to function ... 
+void (*initparallele)(int &argc, char **& argv)=0 ;
+void (*init_lgparallele)()=0;
+void (*end_parallele)()=0;
 %}
 
 %union{ 
@@ -254,11 +261,11 @@ start:   input ENDOFFILE {
                         if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
-                        if(verbosity) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
+                        if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
 			UnShowAlloc =0;// add FH for parallee
-                        if(verbosity) cout << endl;  
+                        if(verbosity>2  || mpirank==0) cout << endl;  
                         { Stack stack = newStack(sizestack);
                         double CPUcompile= CPUtime();
                         try {                  
@@ -347,7 +354,9 @@ parameters_list:
 
 type_of_dcl:   TYPE 
              | TYPE '[' TYPE ']' {$$=TypeArray($1,$3)}
+             | TYPE '[' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
              | TYPE '[' TYPE ',' TYPE ']' {$$=TypeArray($1,$3,$5)}
+             | TYPE '[' TYPE ',' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3,$5),$8)}
              | TYPE '<' TYPE '>' {$$=TypeTemplate($1,$3)}
 	     | TYPE '<' TYPE '>' '[' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6)}
 	     | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
@@ -638,6 +647,7 @@ void init_algo();
 bool withrgraphique = false;
 //string  StrVersionNumber();
 
+/// Called by mainff() and activates the bison parser by calling yyparse()
 int Compile()
 {
   extern   YYSTYPE *plglval;  // modif FH 
@@ -708,8 +718,13 @@ static void SetcppIo()
 }
 // pour l'environement.
 extern const char *  prognamearg;
+extern  bool echo_edp;
+
+/// Called by mymain() and calls Compile() to run the FF language parser
 int mainff (int  argc, char **argv)
 {
+    
+   ffapi::init(); 
   if(argc)  
     prognamearg=argv[0];
 
@@ -722,9 +737,9 @@ int mainff (int  argc, char **argv)
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
-#ifdef PARALLELE
-   initparallele(argc,argv);
-#endif
+
+   if (initparallele)initparallele(argc,argv);
+
   CPUcompileInit= CPUtime();
   withrgraphique = false;
    atexit(ForDebug);
@@ -738,9 +753,11 @@ int mainff (int  argc, char **argv)
   if ( ! (getprog(cc,argc,argv) >0)  ) 
     {
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
+      if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
       return 1; 
     }
-  if(verbosity) { 
+   
+  if(verbosity && (mpirank==0)) { 
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
   }
@@ -749,8 +766,9 @@ int mainff (int  argc, char **argv)
     for(int i=0;i< argc;++i)
 	karg[i]=argv[i];
     pkarg= &karg;
-  zzzfff = Newlex(cout);
-    
+
+  zzzfff = Newlex(cout,echo_edp);
+  
   
 /*  
   ccin= new ifstream(cc);
@@ -777,9 +795,10 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("try",TRY);
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
-   Init_map_type();
-   if(verbosity) cout << " Load: ";
-   init_lgfem() ;
+//   Init_map_type();
+   if(verbosity>2 || (mpirank==0 ) ) cout << " Load: ";
+   callInitsFunct() ; //  init for dynamique libs ...
+  // init_lgfem() ;
    init_lgmesh() ;
    init_lgmesh3() ;
    init_algo();
@@ -787,23 +806,20 @@ int mainff (int  argc, char **argv)
 #ifdef HAVE_LIBARPACK
    init_eigenvalue();
 #endif   
-#ifdef PARALLELE
-   init_lgparallele(); 
-#endif 
-   //#ifdef HAVE_LIBUMFPACK   
-     //if(verbosity)  cout << " UMFPACK ";  
-   // #endif
- // callInitsFunct(); Pb opimisation 
-  if(verbosity)  cout << endl;
+
+   if(init_lgparallele)  init_lgparallele(); 
+  //  callInitsFunct() ; //  init for dynamique libs ...
+
+   if(verbosity>2 || mpirank==0)  cout << endl;
   zzzfff->input(cc);
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     
-  retvalue= Compile(); 
-      
-#ifdef PARALLELE
-  end_parallele();
-#endif
+  retvalue= Compile();
+   // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
+
+  if(end_parallele) end_parallele();
+
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
   if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
@@ -814,4 +830,4 @@ int mainff (int  argc, char **argv)
 }
 
 
- 
+

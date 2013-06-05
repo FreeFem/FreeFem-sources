@@ -289,6 +289,7 @@ basicAC_F0::name_and_type  OptimAlgo::E_LCG::name_param[]= {
  { "nbiter",&typeid(long) },
    { "nbiterline",&typeid(long)}
 };
+void init_algo();
 
 void init_algo()
 {
@@ -296,3 +297,6 @@ void init_algo()
   Global.Add("Newton","(",new OptimAlgo(2,2,2));  //  j + dJ
   Global.Add("Newtow","(",new OneOperatorCode<PrintErrorCompileNewtow>);  //  error 
 }
+
+//#include "InitFunct.hpp"
+//static addingInitFunct TheaddingInitFunct(-9,init_algo);

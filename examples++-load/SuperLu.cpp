@@ -15,7 +15,7 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 */
 #include "slu_ddefs.h"
-
+#include "superlu_enum_consts.h"
 #define GlobalLU_t GlobalLU_txxxx
 #define countnz countnzxxxx
 #define fixupL fixupLxxxx
@@ -222,7 +222,7 @@ void read_options_freefem(string string_option, superlu_options_t *options){
   static const fact_t  enumfact_t[4] = {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED};
   static const colperm_t  enumcolperm_t[5] = {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD, MY_PERMC};
   static const trans_t  enumtrans_t[3] = {NOTRANS, TRANS, CONJ};
-  static const  IterRefine_t enumIterRefine_t[4] = {NOREFINE, SINGLE, DOUBLE, EXTRA};  
+  static const  IterRefine_t enumIterRefine_t[4] = {NOREFINE, SLU_SINGLE, SLU_DOUBLE, SLU_EXTRA};  
 
   static const char*  compyes_no_t[] = {"NO", "YES",0};
   static const char* compfact_t[] = {"DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0};
@@ -529,7 +529,7 @@ public:
     xarow=AA.lg;
 
     /* FreeFem++ use Morse Format */ 
-    CompRow_to_CompCol(m, n, nnz, arow, asubrow, xarow, 
+    this->CompRow_to_CompCol(m, n, nnz, arow, asubrow, xarow, 
 		       &a, &asub, &xa);
 
     /* Defaults */
@@ -578,10 +578,10 @@ public:
 
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
-    Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
+    this->Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
   
-    Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
-    Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
+    this->Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
+    this->Create_Dense_Matrix(&X, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
       
 
       if ( etree.size() ==0 )   etree.resize(n);   
@@ -659,24 +659,29 @@ public:
     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
-        
-    Create_Dense_Matrix(&B, m, 1, b, m, SLU_DN, R_SLU, SLU_GE);
-    Create_Dense_Matrix(&X, m, 1, x, m, SLU_DN, R_SLU, SLU_GE);
-    
-    B.ncol = nrhs;  /* Set the number of right-hand side */
-
-    /* Initialize the statistics variables. */
-    StatInit(&stat);
-    
-  
-    SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
-           &mem_usage, &stat, &info);
-
-
-
-    if(verbosity>2)
-    printf("Triangular solve: dgssvx() returns info %d\n", info);
+      { 
+	  KN_2Ptr<R> xx(x),bb(b);
+	  // cout << " xx #### " << xx.c.N() << " "<< xx.ca.N() <<  " " << xx.ca.step << endl;
+	  //cout << " bb #### " << bb.c.N() << " "<< bb.ca.N() << " " << bb.ca.step <<endl;
+	  this->Create_Dense_Matrix(&B, m, 1, bb, m, SLU_DN, R_SLU, SLU_GE);
+	  this->Create_Dense_Matrix(&X, m, 1, xx, m, SLU_DN, R_SLU, SLU_GE);
+	  
+	  B.ncol = nrhs;  /* Set the number of right-hand side */
+	  
+	  /* Initialize the statistics variables. */
+	  StatInit(&stat);
+	  
+	  
+	  SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
+				  &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
+				  &mem_usage, &stat, &info);
+	  
+	  
+	  
+	  if(verbosity>2)
+	      printf("Triangular solve: dgssvx() returns info %d\n", info);
+	  
+      }
   
    
 
@@ -754,14 +759,6 @@ DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-}
 
 bool SetSuperLU()
 {
@@ -770,11 +767,12 @@ bool SetSuperLU()
     DefSparseSolver<double>::solver  =BuildSolverSuperLU;
     DefSparseSolver<Complex>::solver =BuildSolverSuperLU;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return  true;
 }
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   
@@ -782,12 +780,10 @@ Init::Init()
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   
   if(verbosity>1)
-    cout << "\n Add: SuperLU,  defaultsolver defaultsolverSuperLU" << endl;
+    cout << "\n Add: SuperLU,  defaultsolverSuperLU" << endl;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   DefSparseSolver<double>::solver =BuildSolverSuperLU;
   DefSparseSolver<Complex>::solver =BuildSolverSuperLU;
-  if(! Global.Find("defaultsolver").NotNull() )
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoSuperLU","(",new OneOperator0<bool>(SetSuperLU));
 }
 

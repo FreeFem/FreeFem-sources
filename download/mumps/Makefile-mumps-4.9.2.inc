@@ -1,4 +1,4 @@
-abs_top_builddir=@abs_top_builddir@
+abs_top_builddir=/Volumes/Ike/cazeaux/ff++/
 include $(abs_top_builddir)/download/headers-sparsesolver.inc
 DOWNLOADFF= $(abs_top_builddir)/download
 ###############################################################################
@@ -90,11 +90,11 @@ PLAT    =  FREEFEM
 # RM : remove files
 RM      = /bin/rm -f
 # CC : C compiler
-CC      = @MPICC@
+CC      = @CC@
 # FC : Fortran 90 compiler
-FC      = @MPIFC@
+FC      = @FC@
 # FL : Fortran linker
-FL      = @MPIFC@
+FL      = @FC@
 # AR : Archive object in a library
 AR      = @AR@ @ARFLAGS@ #ar vr
 # RANLIB : generate index of an archive file
@@ -139,9 +139,9 @@ LIBOTHERS = @LIBSPTHREAD@ @FLIBS@ $(FFLIBOTHERSMUMPS)
 CDEFS = @CFLAGSF77@
 
 #COMPILER OPTIONS
-OPTF    = -O3
-OPTC    = -O3 -I.
-OPTL    = -O3
+OPTF    = -O3 @FFLAGS@ @MPI_INCLUDE@
+OPTC    = -O3 -I. @CFLAGS@  @MPI_INCLUDE@
+OPTL    = -O3 @FFLAGS@ @MPI_LIBFC@ 
 
 # CHOOSE BETWEEN USING THE SEQUENTIAL OR THE PARALLEL VERSION.
 
@@ -153,5 +153,5 @@ OPTL    = -O3
 #Parallel:
 INC = $(INCPAR)
 LIB = $(LIBPAR)
-LIBSEQNEEDED = 
+LIBSEQNEEDED = libseqneeded
 

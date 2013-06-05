@@ -57,7 +57,7 @@ void metrique(int nbpoints, R2 * Point,R &A, R &B,R &C,R epsilon)
   int indiceX0=0;
   
  
-  R2 PPoint[nbpoints];
+  R2 *PPoint = new R2 [nbpoints];
   
   for(int i=0;i<nbpoints;i++)
     {
@@ -153,14 +153,14 @@ void metrique(int nbpoints, R2 * Point,R &A, R &B,R &C,R epsilon)
  R EPS=0.;// pour recuperer la valeur de epsilon0 optimale
   R epsilonmax=r0*(1.-r0/Rmax)/20.;
  
-  R * Tabepsilon;
+  R  Tabepsilon[20];
 
   int neps =4;
  //--------- discertisation de epsilon0----------------------------------
  if(epsilonmax>1e-2)
    {
      neps=10;
-     Tabepsilon=new R[neps];
+
      Tabepsilon[0]=1e-5;
      Tabepsilon[1]=1e-4;
      Tabepsilon[2]=1e-3;
@@ -169,13 +169,13 @@ void metrique(int nbpoints, R2 * Point,R &A, R &B,R &C,R epsilon)
 	 Tabepsilon[i]=(i-3)*(epsilonmax-1e-2)/(neps-4.) +1e-2;
   
        }
+     
    }
 
 
  else
    {
     
-     Tabepsilon=new R[neps];
      Tabepsilon[0]=1e-5;
      Tabepsilon[1]=1e-4;
      Tabepsilon[2]=1e-3;
@@ -447,7 +447,7 @@ void metrique(int nbpoints, R2 * Point,R &A, R &B,R &C,R epsilon)
      A=B=1./(Rmin*Rmin);
      C=0.;
      }
- 
+ delete [] PPoint;  
 }
 
 
@@ -660,7 +660,7 @@ AnyType MetricKuate::operator()(Stack stack) const
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init()
 {
   cout << "\n  -- lood: init MetricKuate\n";

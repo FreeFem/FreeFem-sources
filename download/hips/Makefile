@@ -141,16 +141,18 @@ endif
 hips: FAIRE  
 
 FAIT:  
-	$(MAKE) $(SRCDIR)/$(INSTALL)  
+	$(MAKE) ..  WHERE
 	touch FAIT
 
-FAIRE: FAIT WHERE
+FAIRE: FAIT 
 
 makefile.inc: ../Makefile   ../../config.status makefile-hips.inc Makefile     
 	../../config.status  --file="makefile.inc:makefile-hips.inc"
 
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-ff++
+install:..
+
+..: $(SRCDIR)/tag-ff++
 	cp makefile.inc $(SRCDIR)
 	cd $(SRCDIR); $(MAKE)
 	-rm $(SRCDIR)/LIB/*.a
@@ -164,15 +166,15 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-ff++
 	$(AR) $(ARFLAGS) $(SRCDIR)/LIB/libspkit.a $(OBJLIBSPKIT) ;\
 	$(RANLIB) $(SRCDIR)/LIB/libspkit.a;\
 	fi
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/hips
-	cp $(SRCDIR)/LIB/*.h $(SRCDIR)/$(INSTALL)/include/hips/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/hips
-	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/hips
+	mkdir -p ../include/hips
+	cp $(SRCDIR)/LIB/*.h ../include/hips/
+	mkdir -p ../lib/hips
+	cp $(SRCDIR)/LIB/*.a ../lib/hips
 WHERE:
-	echo hips LD '-L@DIR@/lib/hips -lio -lhips'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
-	echo hips INCLUDE '-I@DIR@/include/hips'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
-	echo hipssequential LD '-L@DIR@/lib/hips -lio -lhipssequential'  >>$(SRCDIR)/$(INSTALL)/lib/WHERE.hips
-	echo hipssequential INCLUDE '-I@DIR@/include/hips'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.hips
+	echo hips LD -L@DIR@/lib/hips -lio -lhips  >../lib/WHERE.hips
+	echo hips INCLUDE -I@DIR@/include/hips>> ../lib/WHERE.hips
+	echo hipssequential LD -L@DIR@/lib/hips -lio -lhipssequential  >>../lib/WHERE.hips
+	echo hipssequential INCLUDE -I@DIR@/include/hips  >> ../lib/WHERE.hips
 
 
 $(SRCDIR)/tag-ff++: $(PACKAGE)
@@ -192,15 +194,16 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean-local:
-	-cd $(SRCDIR); $(MAKE) clean 
-
-clean: clean-local
+	-cd $(SRCDIR) && $(MAKE) clean  -C $(SRCDIR)
 	rm makefile.inc
-	-rm $(SRCDIR)/$(INSTALL)/WHERE/hips
-	-rm $(SRCDIR)/$(INSTALL)/lib/hips/*
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/hips/
-	-rm $(SRCDIR)/$(INSTALL)/include/hips/*
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/hips/
+	-rm ../WHERE/hips
+	-rm ../lib/hips/*
+	-rm -rf ../lib/hips/
+	-rm ../include/hips/*
+	-rm -rf ../include/hips/
 	-rm -rf $(SRCDIR)
 	rm FAIT
-.PHONY:$(SRCDIR)/$(INSTALL)
+
+clean: clean-local
+
+.PHONY:..

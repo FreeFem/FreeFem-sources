@@ -22,7 +22,7 @@ plot(u,Th2,wait=1);
 	  file << u[][j] << endl; 
     }  
     // call ffmedit command 	
-    exec("ffmedit mm");
+   if(!NoGraphicWindow) exec("ffmedit mm");
     // clean files
     exec("rm mm.bb mm.faces mm.points");
     
