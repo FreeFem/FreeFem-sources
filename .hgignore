@@ -4,6 +4,7 @@
 (^|/)\.dll$
 (^|/)\.gdb_history$
 (^|/)\.libs$
+\.orig$
 \.DS_Store$
 \.a$
 \.bak$

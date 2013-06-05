@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -1399,8 +1401,12 @@ AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
+// <<Global>> Definition in [[file:global.cpp::Global]]
+
+/// Contains all FreeFem++ language keywords
 
 extern TableOfIdentifier Global;
+
 void ShowType(ostream & );
 
 template<class T> 

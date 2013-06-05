@@ -32,8 +32,8 @@
   \section broadview Broad View
 
   A FreeFem++ script is first translated into a tree of expressions of type CListOfInst (the language grammar is defined
-  in lg.ypp) and then evaluated by calling CListOfInst::eval(). Any resulting graphical data is converted into a stream
-  of bytes by the PlotStream class before being sent to the ffglut program (see ffglut.cpp) via a pipe.
+  in \ref language) and then evaluated by calling CListOfInst::eval(). Any resulting graphical data is converted into a
+  stream of bytes by the PlotStream class before being sent to the ffglut program (see ffglut.cpp) via a pipe.
 
   \section details Detailed Program Start Sequence
 
@@ -47,9 +47,20 @@
 
     - mymain() calls mainff(), which calls Compile(), which calls the standard yyparse() function.
 
-    - yyparse() scans the EDP script thanks to the lexer #mylex. When the "start" symbol is successfully scanned, yylval
-    (of type YYSTYPE) contains the whole tree of expressions as an object of type CListOfInst. CListOfInst::eval() is
-    called (with one #Stack argument built by #newStack()) to run the script.
+    - yyparse() scans the EDP script thanks to the lexer #mylex and generates objects of type YYSTYPE according to the
+      grammar described in lg.ypp.
+
+    - When the "start" symbol is successfully scanned, yylval (of type YYSTYPE) contains the whole tree of expressions
+    as an object of type CListOfInst. CListOfInst::eval() is called (with one #Stack argument built by #newStack()) to
+    run the script.
+
+  \section language Language Keywords
+
+  - An \b fespace is built by calling UnId::UnId() with 3 arguments: ([[file:src/lglib/lg.ypp::FESPACE id]], [[file:src/lglib/lg.ypp::fespace_def]])
+    - an id reference previously built with new ListOfId()
+    - an expression of type C_F0 describing the type of fespace, obtained with ::Find($1)
+    - #atype< #FE<double,2> **>()
+    - FE
 
   <em>(this is file mainpage.dox)</em>
 

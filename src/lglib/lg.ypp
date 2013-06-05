@@ -396,6 +396,8 @@ spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2}
            |  fespace '[' TYPE ']'  spaceIDa    { $$=0;  $$ = $5}
 ;
 
+/* <<fespace_def>> */
+
 fespace_def:
    ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,typeFESpace($3),$3,dimFESpaceImage($3));
      $3.destroy(); };
@@ -828,6 +830,3 @@ int mainff (int  argc, char **argv)
    // ClearMem();
   return retvalue;
 }
-
-
-
