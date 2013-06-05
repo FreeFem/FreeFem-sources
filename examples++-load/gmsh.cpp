@@ -417,6 +417,11 @@ Mesh * GMSH_Load(const string & filename)
     fclose(fp);
 
     Mesh *pTh = new Mesh(nv,nt,nbe,vff,tff,bff);
+    R2 Pn,Px;
+    pTh->BoundingBox(Pn,Px);
+    if(!pTh->quadtree)
+        pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
+
     return pTh;
 
   }
@@ -428,7 +433,7 @@ AnyType GMSH_LoadMesh_Op::operator()(Stack stack)  const
  
   string * pffname= GetAny<string *>((*filename)(stack));
   int renumsurf = 0; 
-  if( nargs[1] )  renumsurf = GetAny< int >( (*nargs[1])(stack) );
+  if( nargs[1] )  renumsurf = GetAny<long>( (*nargs[1])(stack) );
   assert( renumsurf <=1 && renumsurf >= 0);
 
   Mesh * Th = GMSH_Load( *pffname ); 
@@ -805,7 +810,7 @@ AnyType GMSH_LoadMesh3_Op::operator()(Stack stack)  const
  
   string * pffname= GetAny<string *>((*filename)(stack));
   int renumsurf = 0; 
-  if( nargs[1] )  renumsurf = GetAny< int >( (*nargs[1])(stack) );
+  if( nargs[1] )  renumsurf = GetAny<long>( (*nargs[1])(stack) );
   assert( renumsurf <=1 && renumsurf >= 0);
 
   Mesh3 * Th3_t = GMSH_Load3( *pffname); 
@@ -820,7 +825,7 @@ class Init1 { public:
   Init1();
 };
 
-static Init1 init1;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   

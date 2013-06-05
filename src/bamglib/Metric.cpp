@@ -891,7 +891,7 @@ const  Real8 maxsubdiv2 = maxsubdiv*maxsubdiv;
       for (int j=0;j<3;j++)
 	{
 	  Triangle &tt = *t.TriangleAdj(j);
-	  if ( ! &tt ||  it < Number(tt) && ( tt.link || t.link)) 
+	  if ( ! &tt || (( it < Number(tt) && ( tt.link || t.link)))) 
 	    {
 		Vertex &v0 = t[VerticesOfTriangularEdge[j][0]];
 		Vertex &v1 = t[VerticesOfTriangularEdge[j][1]];

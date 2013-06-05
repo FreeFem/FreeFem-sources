@@ -121,7 +121,7 @@ public:
     
      umfpack_di_defaults (Control) ;
      // change UMFPACK_At to UMFPACK_Aat in complex 
-    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, x, b, Numeric,Control,Info) ;
+    int status = umfpack_di_solve (UMFPACK_Aat, A.lg, A.cl, A.a, KN_2Ptr<R>(x), KN_2Ptr<R>(b), Numeric,Control,Info) ;
     if (status != 0)
     {
 	umfpack_di_report_info (Control, Info) ;
@@ -132,7 +132,7 @@ public:
 	ffassert(0);
     }
      if(verbosity>2)
-    cout << "  -- umfpack_di_solve " << endl;
+    cout << "  -- umfpack_di_solve,  peak Mem: " << long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
     if(verbosity>3)
     cout << "   b min max " << b.min() << " " <<b.max() << endl;
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
@@ -257,7 +257,8 @@ public:
     RR2C(n,xr,xi,x);
     if(verbosity>1)
     {
-     cout << "  -- umfpack_zi_solve " << endl;
+      cout << "  -- umfpack_zi_solve, peak Mem : " <<  long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
+      
      if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
     
       cout << "   b min max " << b.min() << " " <<b.max() << endl;
@@ -300,20 +301,15 @@ BuildSolverIUMFPack(DCL_ARG_SPARSE_SOLVER(Complex,A))
 
 
 //  the 2 default sparse solver double and complex
-DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
-DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+//DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
+//DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
-TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+extern TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue;//=TypeSolveMat::defaultvalue;
 
-static bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-    return 1;
-}
+template <>
+DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
+template <>
+DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
 
 static bool SetUMFPACK()
 {
@@ -327,27 +323,18 @@ static bool SetUMFPACK()
 
 void init_UMFPack_solver()
 {
+  if(verbosity>2) 
   cout << " UMFPACK ";
-  SparseMatSolver_R= DefSparseSolver<double>::solver;
-  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
   
   DefSparseSolver<double>::solver =BuildSolverIUMFPack;
   DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
-  if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver" << endl;
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  }
   Global.Add("defaulttoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));  
   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
   Global.New("HaveUMFPACK",CConstant<bool>(true)); 
 
 }
 
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverIUMFPack;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverIUMFPack;
 
 #ifdef LOAD_LINK_
 class Init { public:
@@ -365,6 +352,7 @@ Init::Init(){
 
 bool SetGMRES();
 void init_UMFPack_solver() {
+  if(verbosity) 
   cout << " no UMFPACK -> replace by LU or GMRES  "; 
   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
   Global.New("HaveUMFPACK",CConstant<bool>(false)); 

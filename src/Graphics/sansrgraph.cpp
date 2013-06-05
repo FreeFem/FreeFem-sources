@@ -132,6 +132,7 @@ static reel echx,echy,rxmin,rxmax,rymin,rymax;
 static int  lacouleur=0, width, height, currx=0, curry=0;
 #define call(i) i
 static int INITGRAPH=0;
+void myend();
 void myend()
 {
  if (INITGRAPH)
@@ -145,6 +146,7 @@ void myexit(int err) {
 
 const char * edpfilenamearg=0;	 	
 bool  waitatend=false;
+bool  consoleatend=false;
 
 #ifdef FREEFEM
 #include <fstream.h>
@@ -171,12 +173,12 @@ int main (int argc, char **argv)
   return 0;
 }
 #else
-
+void doatexitff();
 void doatexitff()
 {
 #ifdef WIN32
   bool err=true;
-  if(edpfilenamearg)
+  if(edpfilenamearg && consoleatend)
 	{
 	cout << " try getConsole " << edpfilenamearg << endl; 
 	string fn = edpfilenamearg;
@@ -201,13 +203,13 @@ int main (int argc, char **argv)
 
 
 #endif
-
+void message(char *s);
 void message(char *s)
 {  printf("%s	\n",s);}
 
 void erreur(char *s)
 { message(s); exit(0);}
-
+void *safecalloc(size_t nb, size_t  size);
 void *safecalloc(size_t nb, size_t  size)
 {
   void* p=NULL;
@@ -215,12 +217,12 @@ void *safecalloc(size_t nb, size_t  size)
   if (p == NULL) printf("Run out of Memory!\n");
   return p;
 }
-
+void safefree(void** f);
 void safefree(void** f)
 {
   if(*f){ free((char*) *f); *f=NULL;}
 }
-
+void rflush();
 void rflush()
 {
 }
@@ -366,8 +368,8 @@ void initgraphique()
   fcolor=1;  /* des couleurs */
   SetColorTable(8);
   INITGRAPH = 1;
-  width = 1500;
-  height =  1060; // aspect ratio  \sqrt(2)
+  width = 10000;// change FH mai 2012 to have more precis graphic for F.  Ortegon 
+  height =  7071; // aspect ratio  \sqrt(2)
 }
 
 void closegraphique()
@@ -412,8 +414,10 @@ int InPtScreen( reel x, reel y)
 }
 
 
-
-
+float scali(int i);
+float scalj(int i);
+float scalx(int i);
+float scaly(int i);
 float scali(int i)
 {
   return i/echx  + rxmin;
@@ -478,6 +482,7 @@ void plotstring (const char *  string)
 void showgraphic()
 {
 }
+void x11draw3(int * ptype);
 
 void x11draw3(int * ptype)
 {
@@ -496,10 +501,10 @@ void x11draw3(int * ptype)
 
 void penthickness(int pepais)
 {
-  if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais);
+  if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais*2);
 }
 
-
+void x11linsrn(int * ,int * ,int * ,int * );
 void x11linsrn(int * ,int * ,int * ,int * )
   //int *x1,*x2,*y1,*y2;
 {   
@@ -511,7 +516,7 @@ void viderbuff()
 }
 
 
-
+void cercle(reel , reel , reel );
 void cercle(reel , reel , reel )
 {
   //int r = (int) (rayon * echx);
@@ -540,6 +545,7 @@ int  execute (const char * str)
  return  system(str);
 }
 
+char Getijc(int *x1,int *y1);
 char Getijc(int *x1,int *y1)
 {
   //char char1;
@@ -577,7 +583,7 @@ void openPS(const char *filename )
   if(psfile_save) closePS();
   time_t t_loc;
   int  widthA4PS=596;
-  int heightA4PS=842;
+  //int heightA4PS=842;
   float s= (double)widthA4PS/width;
   char  username[10];
   /*if (!cuserid(username)) */ strcpy(username,"inconnue");
@@ -609,12 +615,12 @@ void openPS(const char *filename )
     fprintf(psfile," /rec {newpath 4 copy 8 1 roll moveto 3 -1 roll lineto 4 2 roll exch lineto lineto closepath} def\n");
     fprintf(psfile," %f %f  scale \n",s,s);
     fprintf(psfile," 0 %d 0 %d rec clip\n",int(width),int(height));
-    fprintf(psfile," /Helvetica findfont 24 scalefont setfont\n");
+    fprintf(psfile," /Helvetica findfont %d scalefont setfont\n",int(9/s));
     fprintf(psfile," /S {moveto show} def\n");
     fprintf(psfile," /bF  { mark} def \n");
     fprintf(psfile," /eF {newpath moveto counttomark 2 idiv {lineto} repeat closepath fill cleartomark} def\n");
     fprintf(psfile," /P { /yy exch def /xx exch def   xx xx 1 add yy yy 1 add  rec  fill } def\n");
-    fprintf(psfile," 0.5 setlinewidth\n");
+    fprintf(psfile," 2 setlinewidth\n");
   }
   else 
     cerr << " Err openning postscript file " << fps << endl;
@@ -632,7 +638,9 @@ void closePS(void)
 // bof bof --- 
  float  GetHeigthFont()
 { 
-  return 15./echy;
+     double  widthA4PS=596;
+    float s=widthA4PS/width; 
+  return 5.5/s/echy;
 }
   void Commentaire(const char * c)  
   {
@@ -661,7 +669,7 @@ static void     FillRect(float x0,float y0, float x1, float y1)
      r[6]=x0;r[7]=y1;
      fillpoly(4,r);
  }
-
+int PutLevel(int lineno, float xf, int col);
 int PutLevel(int lineno, float xf, int col)
 {
   float xmin,xmax,ymin,ymax;
@@ -700,6 +708,9 @@ int PutLevel(int lineno, float xf, int col)
   int getgrey(){ return grey;}
 
 class Grid;
+void SaveMesh(Grid &);
+void SavePlot(int , Grid& , double *);
+void SavePlot(int , Grid& , float *);
 
 void SaveMesh(Grid &){}
 void SavePlot(int , Grid& , double *){}

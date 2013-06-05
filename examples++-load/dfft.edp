@@ -56,3 +56,12 @@ w[] -= ur[]; // array sub
 real err= abs(w[].max)+abs(w[].min) ;
 cout << " err = " << err << endl;
 assert( err  < 1e-6);
+
+// version 3.22 ... 
+
+fftwplan p1=plandfft(u[],v[],ny,-1);
+fftwplan p2=plandfft(u[],v[],ny,1);
+real ccc = square(2.*pi);
+cout << " ny = " << ny << endl; 
+map(wij[],ny,ccc*(x*x+y*y)); 
+wij[][0] = 1e-5;

@@ -1,28 +1,30 @@
 # $Id$
 
-all-local: all.edp regtests.edp 
-TESTS=../regtests.sh
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
-	VISUALCHECK=$(VISUALCHECK)
+all-local: all.edp regtests.edp  freefem++.pref
+TESTS=3d-Leman.edp ArrayFE-3d.edp EqPoisson.edp Lac.edp Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp Laplace3d.edp LaplaceRT-3d.edp NSI3d-carac.edp NSI3d.edp Period-Poisson-cube-ballon.edp Poisson-cube-ballon.edp Poisson.edp Poisson3d.edp Stokes.edp TruncLac.edp all.edp beam-3d.edp cone.edp convect-3d.edp cube-period.edp cylinder-3d.edp cylinder.edp fallingspheres.edp first.edp meditddm.edp p.edp periodic-3d.edp pyramide.edp  refinesphere.edp  schwarz-nm-3d.edp sphere2.edp sphere6.edp tetgencube.edp tetgenholeregion.edp
+
+LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+
 LIST_IDP=MeshSurface.idp cube.idp
 
 EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
   lac-leman-v4.msh $(LIST_IDP)
 
-all.edp:
-	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
+
+
+all.edp:  Makefile
+	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
-		echo "verbosity=verbosityy;" ; \
+		echo "verbosity=verbosityy;searchMethod=0;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\
 		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
 	done) > $@
 
 # To create a new set of reference values in "ref.edp"
-Ref: makeref.edp
-	../src/nw/FreeFem++-nw makeref.edp
+Ref: makeref.edp freefem++.pref
+	export  FF_LOADPATH=../examples++-load/.;../src/nw/FreeFem++-nw makeref.edp
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp

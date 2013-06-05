@@ -350,11 +350,12 @@ public:
   virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
+  virtual void SetBC(int i,double tgv)=0; 
   virtual R & operator()(int i,int j)=0;
   virtual R * pij(int i,int j) const =0; // Add FH 
   virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
   virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
-  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false)=0;
+  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.)=0;
   // Add FH april 2005
   virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
   virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
@@ -454,6 +455,10 @@ public:
   void crout(double = EPSILON/8.) const ; //
   void LU(double = EPSILON/8.) const ; //
   R & diag(int i) { return D[i];}
+  void SetBC (int i,double tgv) {
+      if( tgv>=0) D[i]=tgv;
+      else  { ffassert(tgv<0); }  // to hard ..
+  }
   R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
   R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
@@ -489,7 +494,7 @@ public:
   }
 
   
-  bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false);
+  bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.);
 
   // Add FH april 2005
   R pscal(const KN_<R> & x,const KN_<R> & y); // produit scalaire  
@@ -515,6 +520,8 @@ public:
    void operator=(const MatriceProfile & A);
 };
 
+
+                                          
 template <class R> 
 class MatriceMorse:public MatriceCreuse<R> {
 //  numebering  is no-symmetric
@@ -536,6 +543,7 @@ public:
   int * cl;  
 public:
 
+    
  class VirtualSolver :public RefCounter { 
    friend class MatriceMorse;
    virtual void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
@@ -563,7 +571,7 @@ public:
     :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
   {build(this,Uh,Vh,data);           
   }
-
+ 
 MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=false, const VirtualSolver * s=0,bool transpose=false )
     :MatriceCreuse<R>(nn,mm,dd && !transpose),
      nbcoef(nbc),
@@ -586,7 +594,17 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
   R  operator()(int i,int j) const {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & operator()(int i,int j)  {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & diag(int i)  {R * p= pij(i,i) ;throwassert(p); return *p;}
-  
+  void SetBC (int i,double tgv) {
+	R * p= pij(i,i) ;
+	ffassert(p);
+	if( tgv>=0) *p=tgv;
+	else  {
+	    ffassert(!symetrique); 
+	    for (int k=lg[i];k<lg[i+1]; ++k) a[k]=0;// put the line to Zero.
+	    *p = 1. ; // and the diag coef to 1.
+	}  
+    }
+    
   void SetSolver(const VirtualSolver & s){solver=&s;}
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}
@@ -611,9 +629,12 @@ template<class K>
  
  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
      return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
-  bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false);
+  bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.);
   
-
+  template<typename RR,typename K> static  RR CastTo(K  b){return b;}
+                                                  
+  template<class K>
+    MatriceMorse(const MatriceMorse<K> & , R (*f)(K) );
   template<class K>
     MatriceMorse(const MatriceMorse<K> & );
 
@@ -704,7 +725,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
    throwassert(&x  && &A && &C);
    typedef KN<R> Rn;
    int n=x.N();
-   if (verbosity>99) kprint=1;
+  // if (verbosity>99) kprint=1;
    R ro=1;
    Rn g(n),h(n),Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
    g = A*x;
@@ -738,10 +759,10 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        Cg = C*g;
        R g2p=g2; 
        g2 = (Cg,g);
-       if ( ( (iter%kprint) == kprint-1)  &&  verbosity >1 )
+       if ( ( (iter%kprint) == kprint-1)  /*&&  verbosity >1*/ )
          cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
        if (g2 < reps2) { 
-         if (verbosity )
+         if (kprint <= nbitermax )
             cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
           return 1;// ok 
           }
@@ -749,7 +770,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
-     if (verbosity )
+     //if (nbitermax <= nbitermax )
       cout << "CG does'nt converge: " << nbitermax <<   " ||g||^2 = " << g2 << " reps2= " << reps2 << endl; 
    return 0; 
 }
@@ -801,13 +822,13 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };
 
 struct TypeSolveMat {
-    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6 };
+    enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6, SparseSolverSym=7 };
     TSolveMat t;
     bool sym;
     bool profile;
     TypeSolveMat(TSolveMat tt=LU) :t(tt),
-    sym(t == CROUT || t ==CHOLESKY  ||  t==GC ),
-    profile(t != GC && t != GMRES && t != NONESQUARE && t != SparseSolver ) {}
+    sym(t == CROUT || t ==CHOLESKY  ||  t==GC || t==SparseSolverSym ),
+    profile(t == CROUT || t ==CHOLESKY  || t ==LU ) {}
     bool operator==(const TypeSolveMat & a) const { return t == a.t;}                               
     bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
     static TSolveMat defaultvalue;
@@ -816,8 +837,10 @@ struct TypeSolveMat {
 // add FH , JM  avril 2009 
 template<class K,class V> class MyMap;
 class String; 
-typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi 
-
+typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi
+//  to build 
+#define VDATASPARSESOLVER  1
+int Data_Sparse_Solver_version() ; //{ return VDATASPARSESOLVER;}
 struct Data_Sparse_Solver {
   bool initmat;
   TypeSolveMat* typemat;
@@ -842,6 +865,7 @@ struct Data_Sparse_Solver {
   KN<double> scale_c; 
   string sparams;  
   pcommworld commworld;  // pointeur sur le commworld
+    int master; //  master rank in comm add FH 02/2013 for MUMPS ... => VDATASPARSESOLVER exist 
  /*   
   int *param_int;
   double *param_double;
@@ -888,8 +912,10 @@ struct Data_Sparse_Solver {
     file_param_perm_c(0),
      */
     //sparams, 
-    commworld(0)
+    commworld(0),
+    master(0)
     {}
+    
 private:
     Data_Sparse_Solver(const Data_Sparse_Solver& ); // pas de copie 
 };
@@ -922,6 +948,25 @@ template<class R> struct DefSparseSolver {
       ret =(solver)(ARG_SPARSE_SOLVER(A));
     return ret;	
   }
+};
+
+// add Dec 2012 F.H. for optimisation .. 
+template<class R> struct DefSparseSolverSym {
+    typedef typename MatriceMorse<R>::VirtualSolver *
+    (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
+    
+    static SparseMatSolver solver;
+    
+    static  typename MatriceMorse<R>::VirtualSolver *
+    
+    Build( DCL_ARG_SPARSE_SOLVER(R,A) )
+    
+    {
+        typename MatriceMorse<R>::VirtualSolver *ret=0;
+        if(solver)
+            ret =(solver)(ARG_SPARSE_SOLVER(A));
+        return ret;	
+    }
 };
 
 // End Sep 2007 for generic Space solver

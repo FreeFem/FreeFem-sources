@@ -50,4 +50,13 @@ b1[]=IV34*a1[];
 cout << "b1 = " << b1(.25,.25) << " == " << 2 << endl;
 cout << "b2 = " << b2(.25,.25) << " == " << 4 <<endl;
 cout << "b3 = " << b3(.25,.25) << " == " << 0 <<endl;
-// exended by zero
+// Build interplation matrix a_ij at points (xx[j],yy[j]) j = 0, 1 :
+//  $a_ij = d_op(w^i_c (xx[j],yy[j]))$ where $w_i$ is the basic function.  
+real[int] xx=[.3,.4],yy=[.1,.4];
+int c=0,dop=0; //  component and d operator 
+matrix Ixx= interpolate(Vh,xx,yy,op=dop,composante=c);
+cout << Ixx << endl;
+Vh ww;
+real[int] dd=[1,2]; 
+ww[]= Ixx*dd;
+plot(ww,wait=1);

@@ -103,8 +103,8 @@ MEX = mex -O
 # The path is relative to where it is used, in CHOLMOD/Lib, CHOLMOD/MATLAB, etc.
 # You may wish to use an absolute path.  METIS is optional.  Compile
 # CHOLMOD with -DNPARTITION if you do not wish to use METIS.
-METIS_PATH = ../../metis-4.0
-METIS = ../../metis-4.0/libmetis.a
+METIS_PATH = # FF_DWL/include
+METIS = # FF_DWL/lib/metis/libmetis.a
 
 # If you use CHOLMOD_CONFIG = -DNPARTITION then you must use the following
 # options:
@@ -165,7 +165,7 @@ UMFPACK_CONFIG = FF_CONFIG
 # -DNSUNPERF	    for Solaris only.  If defined, do not use the Sun
 #			Performance Library
 
-CHOLMOD_CONFIG =
+CHOLMOD_CONFIG = -DNPARTITION
 
 #------------------------------------------------------------------------------
 # Linux

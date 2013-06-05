@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: metis  superlu_dist mpi
+//ff-c++-LIBRARY-dep: metis  superlu_dist parmetis blas mpi fc
 //ff-c++-cpp-dep: 
 /*
   Interface freefem++ et SuperLU_DIST_2.3 
@@ -6,6 +6,7 @@
   /bin/sh ff-mpic++ dSuperLU_DIST.cpp -I/Users/morice/librairie/SuperLU_DIST_2.3/SRC/ -L/Users/morice/librairie/openmpi/lib/ -lmpi -lopal -lorte -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib -L/Users/morice/librairie/ParMetis-3.1/ -lparmetis -lmetis -L/Users/morice/librairie/SuperLU_DIST_2.3/lib/ -lsuperlu_dist_2.3
 
 */
+#include <mpi.h>
 #include  <iostream>
 using namespace std;
 
@@ -15,7 +16,7 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
-#include "mpi.h"
+
 #include "superlu_ddefs.h"
 #include "ffsuperludistoption-1.hpp"
 
@@ -136,7 +137,7 @@ class SolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLUm
 
 public:
   SolveSuperLUmpi(const MatriceMorse<R> &AA,string datafile,
-		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c) : 
+		  string param_char, KN<long> &pperm_r, KN<long> &pperm_c, MPI_Comm  * mpicommw) : 
     string_option(param_char),data_option(datafile)
   { 
     
@@ -182,7 +183,10 @@ public:
 	 INITIALIZE THE SUPERLU PROCESS GRID. 
 	 ------------------------------------------------------------*/
     cout << "superlu_gridinit" <<endl;
-    superlu_gridinit(MPI::COMM_WORLD, nprow, npcol, &grid);
+    if(mpicommw)
+      superlu_gridinit(*mpicommw, nprow, npcol, &grid);
+    else
+      superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, &grid);
     
     /* Bail out if I do not belong in the grid. */
     iam = grid.iam;
@@ -244,7 +248,7 @@ public:
 	  Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	  
 	  cout << "Debut: Create_CompCol_Matrix_dist" <<endl;
-	  Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
+	  this->Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
 	  cout << "Fin: Create_CompCol_Matrix_dist" <<endl;
 	  /* creation of pseudo solution + second member */
 	  
@@ -675,7 +679,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
     if(verbosity>9)
     cout << " BuildSolverSuperLUmpi<double>" << endl;
-    return new SolveSuperLUmpi<double>(*A,ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+    return new SolveSuperLUmpi<double>(*A,ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c,static_cast<MPI_Comm*>(ds.commworld));
 }
 
 
@@ -709,7 +713,7 @@ bool SetSuperLUmpi()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

@@ -120,7 +120,7 @@ public:
   void GetMeshes() { get(dt_meshes);}
   bool GetMeshes3() { long tt; read(tt);
       if(tt== dt_meshes3) return true;
-      else if (tt= dt_plots) return false;
+      else if (tt== dt_plots) return false;
       cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_plots << endl;
       ffassert(0);
      }

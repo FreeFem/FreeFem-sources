@@ -47,17 +47,20 @@
 /* Define to 1 if you have the `erfc' function. */
 #undef HAVE_ERFC
 
+/* Define to 1 if you have the <fftw3.h> header file. */
+#undef HAVE_FFTW3_H
+
 /* Define to 1 if you have the `getenv' function. */
 #undef HAVE_GETENV
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
 
 /* Define to 1 if you have the <GLUT/glut.h> header file. */
 #undef HAVE_GLUT_GLUT_H
 
 /* Define to 1 if you have the <GL/glut.h> header file. */
 #undef HAVE_GL_GLUT_H
-
-/* Define to 1 if you have the <GL/glx.h> header file. */
-#undef HAVE_GL_GLX_H
 
 /* Define to 1 if you have the <GL/gl.h> header file. */
 #undef HAVE_GL_GL_H
@@ -82,6 +85,9 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* mpi_double_complex */
+#undef HAVE_MPI_DOUBLE_COMPLEX
 
 /* Define to 1 if you have the <OpenGL/gl.h> header file. */
 #undef HAVE_OPENGL_GL_H
@@ -143,6 +149,9 @@
 /* Define to 1 if you have the <vecLib/cblas.h> header file. */
 #undef HAVE_VECLIB_CBLAS_H
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
+
 /* Name of package */
 #undef PACKAGE
 
@@ -173,6 +182,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
 /* Version number of package */
 #undef VERSION
 
@@ -181,9 +193,6 @@
 
 /* FreeFem++ version as a float */
 #undef VersionFreeFempp
-
-/* Define to 1 if the X Window System is missing or not being used. */
-#undef X_DISPLAY_MISSING
 
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */

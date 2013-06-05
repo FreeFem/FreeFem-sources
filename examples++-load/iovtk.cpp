@@ -670,7 +670,7 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
   else{
     fprintf(fp," format=\"ascii\">\n");   
     for (long i=0; i<Th.nt; i++){
-      fprintf(fp,"%ld %ld %ld %ld ",ien[i*3+0],ien[i*3+1],ien[i*3+2],ien[i*3+3]); 
+      fprintf(fp,"%ld %ld %ld %ld ",ien[i*4+0],ien[i*4+1],ien[i*4+2],ien[i*4+3]);  // J.Morice 01/11 
     }  
     if(surface){
       for (long i=0; i<Th.nbe; i++){
@@ -713,12 +713,12 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
     fprintf(fp,"format=\"ascii\" >\n");
     long nelem=4;
     for (long i=nelem; i <= nelem*Th.nt; i+=nelem){   
-      fprintf(fp,"%d ",i);
+      fprintf(fp,"%ld ",i);
     }
     if(surface){
       nelem=3;
       for (long i=nelem+4*Th.nt; i <= nelem*Th.nbe+4*Th.nt; i+=nelem){
-	fprintf(fp,"%d ",i);
+	fprintf(fp,"%ld ",i);
       }
     }
   }
@@ -755,12 +755,12 @@ void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
   else{
     fprintf(fp,"format=\"ascii\" >\n");
     for (long i=0; i<Th.nt; i++){   
-      unsigned int types= 5;
+      unsigned int types= 10;
       fprintf(fp,"%d ",types);
     }
     if(surface){
       for (long i=0; i<Th.nbe; i++){   
-	unsigned int types= 3;
+	unsigned int types= 5;
 	fprintf(fp,"%d ",types);
       }
     }
@@ -1253,9 +1253,9 @@ AnyType VTK_LoadMesh_Op::operator()(Stack stack)  const
   bool swap = false;
   int reftri = 1;
   int refedges = 1;
-  if( nargs[0] )  reftri = GetAny< int >((*nargs[0])(stack));
+  if( nargs[0] )  reftri = GetAny<long>((*nargs[0])(stack));
   if( nargs[1] )  swap = GetAny< bool >((*nargs[1])(stack));
-  if( nargs[2] )  refedges = GetAny< int >((*nargs[2])(stack));
+  if( nargs[2] )  refedges = GetAny<long>((*nargs[2])(stack));
 
   string *DataLabel;
   if( nargs[3] ) DataLabel = GetAny<string *>((*nargs[3])(stack));
@@ -2756,9 +2756,9 @@ AnyType VTK_LoadMesh3_Op::operator()(Stack stack)  const
   int reftetra=1; 
   int reftri = 1;
   
-  if( nargs[0] )  reftetra = GetAny<int >((*nargs[0])(stack));
+  if( nargs[0] )  reftetra = GetAny<long>((*nargs[0])(stack));
   if( nargs[1] )  swap = GetAny< bool >((*nargs[1])(stack));
-  if( nargs[2] )  reftri = GetAny<int >((*nargs[2])(stack));
+  if( nargs[2] )  reftri = GetAny<long>((*nargs[2])(stack));
 
   string *DataLabel;
   if( nargs[3] ) DataLabel = GetAny<string *>((*nargs[3])(stack));
@@ -3191,7 +3191,7 @@ public:
 	     valsol[iv*(*this).nbfloat+j] = valsol[ iv*(*this).nbfloat+j ]/takemesh[iv];
 	     float value = valsol[iv*(*this).nbfloat+j];
 	     
-	     fprintf(fp," %.8e\n");
+	     fprintf(fp," %.8e\n",value);
 	   }
 	 }
        }
@@ -3992,7 +3992,7 @@ class Init1 { public:
   Init1();
 };
 
-static Init1 init1;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   

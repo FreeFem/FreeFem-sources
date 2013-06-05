@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep: metis mumps  blas ptscotch blacs scalapack mpifc  fc  
+//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blas  mpifc  fc  pthread 
 //ff-c++-cpp-dep: 
 
 /* 
@@ -32,7 +32,7 @@
  */
 
 
-
+#include <mpi.h>
 #include  <iostream>
 using namespace std;
 
@@ -46,7 +46,7 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mpi.h"
+
 #include "dmumps_c.h"
 #include "zmumps_c.h"
 
@@ -310,11 +310,11 @@ public:
     id.comm_fortran= (MUMPS_INT) MPI_Comm_c2f( comm );
     //id.comm_fortran= (F_INT) comm;
 
-    if(verbosity) cout << "init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
+    if(verbosity>2) cout << " MUMPS_FreeFem init parameter :: PAR & SYM " << PAR << " " << SYM << endl; 
 
     dmumps_c(&id);
 
-    if(verbosity) cout << "fin init parameter" << endl; 
+    if(verbosity>10) cout << "fin init parameter" << endl; 
 
     /* set parameter of mumps */
     if( !(param_int == NULL) || !(param_double == NULL) ){
@@ -348,26 +348,28 @@ public:
       }
       else{
 	// parameter by default
+	if(verbosity>10) 
 	cout << "default parameter" << endl;
 	id.ICNTL(1)=-1; id.ICNTL(2)=-1; id.ICNTL(3)=-1; id.ICNTL(4)=0;
     }
 
     // uniquement donner au host 
-    if(myid==0){
-      if( !(perm_r==NULL) && id.ICNTL(7)==1){
-	for(int ii=0; ii<n; ii++) id.perm_in[ii] = pperm_r[ii];
-      }
-      // a decommenter
-      //if( !(perm_c==NULL) && id.ICNTL(6)==1){
-      //for(int ii=0; ii<m; ii++) id.perm_in[ii] = pperm_c[ii];
+    if(myid==0)
+      {
+	if( !(perm_r==NULL) && id.ICNTL(7)==1){
+	  for(int ii=0; ii<n; ii++) id.perm_in[ii] = pperm_r[ii];
+	}
+	// a decommenter
+	//if( !(perm_c==NULL) && id.ICNTL(6)==1){
+	//for(int ii=0; ii<m; ii++) id.perm_in[ii] = pperm_c[ii];
       //}
-      if( !(scale_r==NULL) && !(scale_c==NULL) && id.ICNTL(8)==-1 ){
-	// param_double[0::n-1] :: row  
-	// param_double[n::n+m-1] :: column 
-	for(int ii=0; ii<n; ii++) id.rowsca[ii] = scale_r[ii]; 
-	for(int ii=0; ii<m; ii++) id.colsca[ii] = scale_c[ii];
+	if( !(scale_r==NULL) && !(scale_c==NULL) && id.ICNTL(8)==-1 ){
+	  // param_double[0::n-1] :: row  
+	  // param_double[n::n+m-1] :: column 
+	  for(int ii=0; ii<n; ii++) id.rowsca[ii] = scale_r[ii]; 
+	  for(int ii=0; ii<m; ii++) id.colsca[ii] = scale_c[ii];
+	}
       }
-    }
 
     irn = NULL;
     jcn = NULL;
@@ -1309,14 +1311,14 @@ public:
 	finishtime = clock();
 	timeused= (finishtime-starttime)/(1000 );
 	printf("=====================================================\n");
-	cout << "MUMPS : time solve step  :: " << timeused << " ms" <<endl;
+	cout << "MUMPS : time solve step  :: " << timeused << " ms,  Mem usage " << id.INFOG(16) << "Mb  \n";
 	printf("=====================================================\n");
       }
     }
   }
 
   ~dSolveMUMPSmpi() { 
-    if(verbosity)
+    if(verbosity>10)
       cout << "~SolveMUMPS S:" << endl;
     
      id.job=JOB_END; 
@@ -2527,10 +2529,10 @@ class Init { public:
 };
 
 //  the 2 default sparse solver double and complex
-DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
-DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
+static DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
+static DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
-TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+static TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
 bool SetDefault()
 {
@@ -2552,7 +2554,7 @@ bool SetMUMPSmpi()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   
@@ -2568,4 +2570,23 @@ Init::Init()
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
 }
+
+
+void ffinit()
+{
+
+  SparseMatSolver_R= DefSparseSolver<double>::solver;
+  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
+
+  if(verbosity>1)
+    cout << "\n Add: MUMPS ,  defaultsolver defaultsolverMUMPS " << endl;
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
+  DefSparseSolver<double>::solver =BuildSolverMUMPSmpi;
+  DefSparseSolver<Complex>::solver =BuildSolverMUMPSmpi;
+  if(! Global.Find("defaultsolver").NotNull() )
+    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+  Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
+}
+#include "InitFunct.hpp"
+addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem");
 

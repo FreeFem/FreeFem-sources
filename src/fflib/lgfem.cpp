@@ -71,12 +71,14 @@ namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
    extern GTypeOfFE<Mesh3> &P1bLagrange3d;
    extern GTypeOfFE<Mesh3> &RT03d;
     extern GTypeOfFE<Mesh3> &Edge03d;
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
 }
 
 #include "BamgFreeFem.hpp"
 
 static bool TheWait=false;
 bool  NoWait=false;
+extern bool  NoGraphicWindow;
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
@@ -91,6 +93,17 @@ const int nTypeSolveMat=10;
 int kTypeSolveMat;
 TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 
+ AnyType Long2TypeSolveMat(Stack, const AnyType &ll) {
+      long l=GetAny<long>(ll);
+    ffassert( l>=0 && l <kTypeSolveMat);
+    return dTypeSolveMat[l];
+}
+ AnyType  TypeSolveMat2Long(Stack,const AnyType  &tt ) {
+     const TypeSolveMat *t = GetAny<TypeSolveMat *>(tt);
+    for(long l=0;  l <kTypeSolveMat; ++l)
+	if( t==dTypeSolveMat[l]) return l;
+    return long (kTypeSolveMat-1); // sparse solver case 
+}
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
@@ -585,7 +598,7 @@ class LinearCG : public OneOperator
 
   class E_LCG: public E_F0mps { public:
    const int cas;// <0 => Nolinear
-   static const int n_name_param=4;
+   static const int n_name_param=5;
 
    static basicAC_F0::name_and_type name_param[] ;
 
@@ -622,18 +635,23 @@ class LinearCG : public OneOperator
       int n=x.N();
       MatF_O AA(n,stack,A);
       double eps = 1.0e-6;
+	  double *veps=0;
       int nbitermax=  100;
+      long verb = verbosity;  
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
-      if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
-     
+      if (nargs[3]) veps=GetAny<double*>((*nargs[3])(stack));
+      if (nargs[4]) verb=Abs(GetAny<long>((*nargs[4])(stack)));
+      long gcverb=51L-Min(Abs(verb),50L);
+      if(verb==0) gcverb = 1000000000;// no print 
+      if(veps) eps= *veps;
       KN<R>  bzero(B?1:n); // const array zero
       bzero=R(); 
       KN<R> *bb=&bzero; 
       if (B) {
         Kn &b = *GetAny<Kn *>((*B)(stack));
         R p = (b,b);
-       if (p) 
+       if (p== R()) 
          {
           // ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
           }
@@ -642,17 +660,17 @@ class LinearCG : public OneOperator
       if (cas<0) {
        if (C) 
          { MatF_O CC(n,stack,C);
-           ret = NLCG(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
+           ret = NLCG(AA,CC,x,nbitermax,eps, gcverb );}
         else 
-           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
+           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb);
         }
       else 
       if (C) 
        { MatF_O CC(n,stack,C);
-         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
+         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
-      if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb);
+      if(veps) *veps = -(eps);
       }
       catch(...)
       {
@@ -685,7 +703,8 @@ basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
   {   "eps", &typeid(double)  },
   {   "nbiter",&typeid(long) },
   {   "precon",&typeid(Polymorphic*)},
-  {   "veps" ,  &typeid(double*) }
+  {   "veps" ,  &typeid(double*) },
+  {   "verbosity" ,  &typeid(long) }    
 };
 
 
@@ -700,12 +719,13 @@ class LinearGMRES : public OneOperator
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
+   Kn *b;
    Expression  mat1,mat;
    typedef  typename VirtualMatrice<R>::plusAx plusAx;
-   MatF_O(int n,Stack stk,const OneOperator * op) 
+   MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb) 
      : VirtualMatrice<R>(n),
        stack(stk),
-       x(n),c_x(CPValue(x)),
+       x(n),c_x(CPValue(x)),b(bb),
        mat1(op->code(basicAC_F0_wa(c_x))), 
        mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))  /*op->code(basicAC_F0_wa(c_x))*/) {
       // ffassert(atype<Kn_ >() ==(aType) *op);
@@ -715,6 +735,7 @@ class LinearGMRES : public OneOperator
       ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += GetAny<Kn_>((*mat)(stack));
+      if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b 
       WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008 
    } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
@@ -727,7 +748,7 @@ class LinearGMRES : public OneOperator
   class E_LGMRES: public E_F0mps { public:
    const int cas;// <0 => Nolinear
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =5;
+   static const int n_name_param =6;
    Expression nargs[n_name_param];
   const OneOperator *A, *C; 
   Expression X,B;
@@ -755,17 +776,20 @@ class LinearGMRES : public OneOperator
       Kn b(x.n);
      
       if (B)   b = *GetAny<Kn *>((*B)(stack));
-      else     b=0.;
+      else     b= R();
       int n=x.N();
       int dKrylov=50;
-      MatF_O AA(n,stack,A);
       double eps = 1.0e-6;
       int nbitermax=  100;
+      long verb = verbosity;
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) dKrylov= GetAny<long>((*nargs[4])(stack));
-      
+      if (nargs[5]) verb=Abs(GetAny<long>((*nargs[5])(stack)));
+	 long gcverb=51L-Min(Abs(verb),50L);
+	 
+     
       int ret;
       if(verbosity>4)
         cout << "  ..GMRES: eps= " << eps << " max iter " << nbitermax 
@@ -774,6 +798,22 @@ class LinearGMRES : public OneOperator
 	int k=dKrylov;//,nn=n;
        double epsr=eps;
       // int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+	 KN<R>  bzero(B?1:n); // const array zero
+	 bzero=R(); 
+	 KN<R> *bb=&bzero; 
+	 if (B) {
+	     Kn &b = *GetAny<Kn *>((*B)(stack));
+	     R p = (b,b);
+	     if (p== R()) 
+	       {
+		 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
+	       }
+	     bb = &b;
+	 }
+	 KN<R> * bbgmres =0;
+	 if ( !B) bbgmres=bb; // none zero if gmres without B 		
+	 MatF_O AA(n,stack,A,bbgmres);
+
       if (cas<0) {
         ErrorExec("NL GMRES:  to do! sorry ",1);
 /*       if (C) 
@@ -786,10 +826,10 @@ class LinearGMRES : public OneOperator
       else 
        {
        if (C)
-        { MatF_O CC(n,stack,C); 
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr);}
+        { MatF_O CC(n,stack,C,bbgmres); 
+         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr,verb);}
        else
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr);       
+         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);       
        }
        /*
       if (C) 
@@ -825,7 +865,8 @@ basicAC_F0::name_and_type  LinearGMRES<R>::E_LGMRES::name_param[]= {
   {   "nbiter",&typeid(long) },
   {   "precon",&typeid(Polymorphic*)},
   {   "veps" ,  &typeid(double*) },
-  {   "dimKrylov", &typeid(long) }
+  {   "dimKrylov", &typeid(long) },
+  {   "verbosity", &typeid(long) }
 };
 
 template<typename int2>
@@ -1657,7 +1698,9 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ppfe)(s));
     FEbase<R,v_fes> & fe(*pp.first);
     const  FESpace & Vh(*fe.newVh());
-    KN<R> gg(Vh.MaximalNbOfDF()); 
+    if(!&Vh ) ExecError("Unset FEspace (Null mesh ? ) on  uh= ");
+ 
+    KN<R> gg(Vh.MaximalNbOfDF());
     const  Mesh & Th(Vh.Th);
  //   R F[100]; // buffer 
     TabFuncArg tabexp(s,Vh.N);
@@ -2250,7 +2293,8 @@ class Plot :  public E_F0mps { public:
 	    	else break;
 	    nn++;
 	    int n = f[0]->N;
-	    cout << "add  N = " << n << " " << nn  << " "<< what << endl;
+	    if(verbosity>50) // add 01/2011 FH ????
+	      cout << "add  N = " << n << " " << nn  << " "<< what << endl;
 	    for(int j=0;j<n;++j)
 	      {
 		
@@ -2347,7 +2391,9 @@ class Plot :  public E_F0mps { public:
     };
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =21 ;
+
+  // FFCS: added new parameters for VTK graphics
+  static const int n_name_param =41 ;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2498,8 +2544,30 @@ class Plot :  public E_F0mps { public:
   {   "dim", &typeid(long)}, // 2 or 3 
   {   "add", &typeid(bool)}, // add to previous plot
   {   "prev", &typeid(bool)}, // keep previou  view point  
-  {   "ech", &typeid(double)} // keep previou  view point 
+  {   "ech", &typeid(double)}, // keep previou  view point 
      
+  // FFCS: more options for VTK graphics (numbers are required for
+  // processing)
+  {"ZScale",&typeid(double)}, // #1
+  {"WhiteBackground",&typeid(bool)}, // #2
+  {"OpaqueBorders",&typeid(bool)}, // #3
+  {"BorderAsMesh",&typeid(bool)}, // #4
+  {"ShowMeshes",&typeid(bool)}, // #5
+  {"ColorScheme",&typeid(long)}, // #6
+  {"ArrowShape",&typeid(long)}, // #7
+  {"ArrowSize",&typeid(double)}, // #8
+  {"ComplexDisplay",&typeid(long)}, // #9
+  {"LabelColors",&typeid(bool)}, // #10
+  {"ShowAxes",&typeid(bool)}, // #11
+  {"CutPlane",&typeid(bool)}, // #12
+  {"CameraPosition",&typeid(KN_<double>)}, // #13
+  {"CameraFocalPoint",&typeid(KN_<double>)}, // #14
+  {"CameraViewUp",&typeid(KN_<double>)}, // #15
+  {"CameraViewAngle",&typeid(double)}, // #16
+  {"CameraClippingRange",&typeid(KN_<double>)}, // #17
+  {"CutPlaneOrigin",&typeid(KN_<double>)}, // #18
+  {"CutPlaneNormal",&typeid(KN_<double>)}, // #19
+  {"WindowIndex",&typeid(long)} // #20
 
    };
 
@@ -2628,6 +2696,9 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
    else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
    else cout << "  -- boundary int  " ;*/
+      
+ Expandsetoflab(stack,*di, setoflab,all); 
+/*
  for (size_t i=0;i<what.size();i++)
    {
      long  lab  = GetAny<long>( (*what[i])(stack));
@@ -2635,7 +2706,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      if ( verbosity>3) cout << lab << " ";
      all=false;
    }
- 
+ */
  if(dim==2)
    {
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
@@ -2921,7 +2992,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     {    
 	int lg,nsb;
 	lli.eval(fe3,cmp);
-	if(what==6)
+	// FFCS is able to display 3d complex data
+	//if(what==6)
 	  {
 	    if (fe3[0]->x()) 
 	      {		 
@@ -2946,7 +3018,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
       {    
 	  int lg,nsb;
 	  lli.eval(fe3,cmp);
-	  if(what==7) // ve
+	  // FFCS is able to display 3d complex data
+	  //if(what==7) // ve
 	    {
 	      if (fe3[0]->x()&& fe3[1]->x() && fe3[2]->x()) 
 		{		 
@@ -2970,7 +3043,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
 		    V123(0,'.')=V1;
 		    V123(1,'.')=V2;
 		    V123(2,'.')=V3;
-		    theplot << (KN_<double>&) V123;
+		    // FFCS: should be able to deal with complex as well
+		    theplot << (KN_<K>&) V123;
 		    
 		}
 	    }
@@ -3080,6 +3154,37 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[18]) theplot<< 18L  <= GetAny<bool>((*nargs[18])(s));	
 	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
 	if (nargs[20]) theplot<< 20L  <= (echelle=GetAny<double>((*nargs[20])(s)));	
+
+	// FFCS: extra plot options for VTK (indexed from 1 to keep
+	// these lines unchanged even if the number of standard FF
+	// parameters above changes)
+
+#define VTK_START 20
+#define SEND_VTK_PARAM(index,type)					\
+	  if(nargs[VTK_START+index])					\
+	    theplot<<(long)(VTK_START+index)				\
+	      <=GetAny<type>((*nargs[VTK_START+index])(s));
+
+	SEND_VTK_PARAM(1,double); // ZScale
+	SEND_VTK_PARAM(2,bool); // WhiteBackground
+	SEND_VTK_PARAM(3,bool); // OpaqueBorders
+	SEND_VTK_PARAM(4,bool); // BorderAsMesh
+	SEND_VTK_PARAM(5,bool); // ShowMeshes
+	SEND_VTK_PARAM(6,long); // ColorScheme
+	SEND_VTK_PARAM(7,long); // ArrowShape
+	SEND_VTK_PARAM(8,double); // ArrowSize
+	SEND_VTK_PARAM(9,long); // ComplexDisplay
+	SEND_VTK_PARAM(10,bool); // LabelColors
+	SEND_VTK_PARAM(11,bool); // ShowAxes
+	SEND_VTK_PARAM(12,bool); // CutPlane
+	SEND_VTK_PARAM(13,KN_<double>); // CameraPosition
+	SEND_VTK_PARAM(14,KN_<double>); // CameraFocalPoint
+	SEND_VTK_PARAM(15,KN_<double>); // CameraViewUp
+	SEND_VTK_PARAM(16,double); // CameraViewAngle
+	SEND_VTK_PARAM(17,KN_<double>); // CameraClippingRange
+	SEND_VTK_PARAM(18,KN_<double>); // CutPlaneOrigin
+	SEND_VTK_PARAM(19,KN_<double>); // CutPlaneNormal
+	SEND_VTK_PARAM(20,long); // WindowIndex
 
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;
@@ -3625,7 +3730,7 @@ AnyType Plot::operator()(Stack s) const  {
 			 tab x=l[i].evalt(0,s);
 			 tab y=l[i].evalt(1,s);
 			 long k= Min(x.N(),y.N());
-			 // cout << " ˆ faire " << endl;
+			 // cout << " a faire " << endl;
 			 // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
 			 rmoveto(x[0],y[0]);
 			 couleur(2+i);
@@ -3873,7 +3978,11 @@ AnyType Convect::eval2(Stack s) const
 	      l[(j+1)%3] = b;
 	      l[(j+2)%3] = a;
 	      mpc.change(R2(l[1],l[2]),Th[it],0);             
-	      ffassert(k++<1000);
+	      if(k++>1000)
+		{
+		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity to hight ???? or NaN F. Hecht  " << endl;
+		  ffassert(0);
+		}
 	    }
 
 	  mpc.change(R2(l[1],l[2]),Th[it],0);
@@ -4047,6 +4156,34 @@ class MeanOp : public E_F0mps  { public:
         }
        MeanOp(Expression aa) : a(aa) {} 
     };
+
+long get_size(pferarray const & a)
+{
+  return a.first->N;
+}
+long get_size(pfecarray const & a)
+{
+    return a.first->N;
+}
+long get_size(pferbasearray *const & a)
+{
+    return (**a).N;
+}
+long get_size(pfecbasearray *const & a)
+{
+    return (**a).N;
+}
+long resize(pferbasearray *const & a, long const & n)
+{
+    (**a).resize(n);
+    return n; 
+}
+
+long resize(pfecbasearray *const & a, long const & n)
+{
+    (**a).resize(n);
+    return n;
+}
 
 pferbase* get_element(pferbasearray *const & a, long const & n)
 {
@@ -4274,35 +4411,42 @@ AnyType AddIncrement(Stack stack, const AnyType & a)
     cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
     return a;
 }
-
+/* 
 class EConstantTypeOfFE3 :public E_F0
     { public:
 	//  using namespace   Fem2D;
 	typedef Fem2D::TypeOfFE3 * T;
 	T  v;
     public:
-	AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
-	EConstantTypeOfFE3( T o):v(o) { /*cout << "New constant " << o << endl;*/}
+	AnyType operator()(Stack ) const { ;return SetAny<T>(v);}
+	EConstantTypeOfFE3( T o):v(o) {}
 	size_t nbitem() const { assert(v);
 	cout << " nb item = " << v->N << endl;
 	return v->N ;} 
 	operator aType () const { return atype<T>();} 
     };
 
-
+*/ 
 Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
 {
     throwassert(map_type[typeid( EConstantTypeOfFE3::T).name()]);
     return make_pair(map_type[typeid( EConstantTypeOfFE3::T).name()],new EConstantTypeOfFE3(v));
 }
 
-//  end --- call meth be .. 
+//  end --- call meth be ..
+// 2013 resize of array of fe function..
+template<typename  T> T fepresize(const Resize1<T> & rt,const long &n) {
+    (**(rt.v)).resize(n);
+    return rt.v;}
+template<typename  T> T feresize(const Resize1<T> & rt,const long &n) {
+    rt.v.first->resize(n);
+    return rt.v;}
 
-
+R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
-  if(verbosity) cout <<"lg_fem ";
+  if(verbosity&& (mpirank==0)) cout <<"lg_fem ";
 #ifdef HAVE_CADNA
   cout << "cadna ";
   cadna_init(-1); // pas de fichier 
@@ -4432,6 +4576,8 @@ void  init_lgfem()
  
  Global.New("wait",CConstant<bool*>(&TheWait));
  Global.New("NoUseOfWait",CConstant<bool*>(&NoWait));
+ Global.New("NoGraphicWindow",CConstant<bool*>(&NoGraphicWindow));
+
  Dcl_Type<MeshPoint *>();
  Dcl_Type<finconnue *>();
  Dcl_Type<ftest *>();
@@ -4486,6 +4632,7 @@ void  init_lgfem()
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
+ Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
     
@@ -4524,8 +4671,12 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
  Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
 
- ffassert(kTypeSolveMat<nTypeSolveMat);
+ Global.New("sparsesolverSym",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolverSym)));
 
+ ffassert(kTypeSolveMat<nTypeSolveMat);
+ map_type[typeid(TypeSolveMat*).name()]->AddCast(new E_F1_funcT<TypeSolveMat*,long>(Long2TypeSolveMat) );    
+ map_type[typeid(long).name()]->AddCast(  new E_F1_funcT<long,TypeSolveMat*>(TypeSolveMat2Long) );                                     
+    
 //  init pmesh  
 /*
 
@@ -4556,7 +4707,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OpMake_pfes<pfes,Mesh,TypeOfFE,pfes_tefk>,
 		   new OpMake_pfes<pfes3,Mesh3,TypeOfFE3,pfes3_tefk>
         );
-      
+    TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
  
  Add<MeshPoint*>("P",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::P));
  Add<MeshPoint*>("N",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::N));
@@ -4591,6 +4742,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgElement>("label",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("region",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("area",".",new OneOperator1_<double,lgElement>(getarea));
+ Add<lgElement>("mesure",".",new OneOperator1_<double,lgElement>(getarea));
  Add<lgBoundaryEdge>("length",".",new OneOperator1_<double,lgBoundaryEdge>(getlength));
  Add<lgBoundaryEdge>("label",".",new OneOperator1_<long,lgBoundaryEdge>(getlab));
  Add<lgBoundaryEdge>("Element",".",new OneOperator1_<lgElement,lgBoundaryEdge>(getElement));
@@ -4611,9 +4763,17 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
  Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
-// Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  with rhs (must be zer
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs 
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
+
+ //   Global.Add("LinearCG","(",new LinearCG<Complex>()); // old form  with rhs (must be zer
+ //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>()); // old form  with rhs (must be zer
+ //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>(1)); // old form  without rhs 
+//    Global.Add("LinearCG","(",new LinearCG<Complex>(1)); //  without right handsize
+//    Global.Add("NLCG","(",new LinearCG<Complex>(-1)); //  without right handsize
+   
+    
  zzzfff->AddF("varf",t_form);    //  var. form ~
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);
@@ -4799,7 +4959,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAxeqb > >  ,  
 		   
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >    
 		   
@@ -4963,8 +5123,31 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  
  // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
-  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use ???? FH sep. 2009 
-  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009 
+  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use FH sep. 2009 
+  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009
+    // bof bof ..
+    // resize of array of Finite element ..  a little hard 2013 FH
+    Dcl_Type< Resize1<pfecbasearray* > > ();
+    Dcl_Type< Resize1<pferbasearray* > > ();
+    Dcl_Type< Resize1<pfecarray > > ();
+    Dcl_Type< Resize1<pferarray > > ();
+    Add<pfecbasearray*>("resize",".",new OneOperator1<Resize1<pfecbasearray* >,pfecbasearray*>(to_Resize1));  //  FH fev 2013
+    Add<pferbasearray*>("resize",".",new OneOperator1<Resize1<pferbasearray* >,pferbasearray*>(to_Resize1));  //   FH fev. 2013
+    Add<pferarray>("resize",".",new OneOperator1<Resize1<pferarray >,pferarray>(to_Resize1));  //  FH fev 2013
+    Add<pfecarray>("resize",".",new OneOperator1<Resize1<pfecarray >,pfecarray>(to_Resize1));  //   FH fev. 2013
+    new OneOperator2_<pferbasearray*,Resize1<pferbasearray* > , long  >(fepresize<pferbasearray*>);
+    Add<Resize1<pferbasearray* > >("(","",new  OneOperator2_<pferbasearray*,Resize1<pferbasearray* > , long  >(fepresize));
+    Add<Resize1<pfecbasearray* > >("(","",new OneOperator2_<pfecbasearray*,Resize1<pfecbasearray* > , long  >(fepresize));
+    Add<Resize1<pferarray > >("(","",new OneOperator2_<pferarray,Resize1<pferarray > , long  >(feresize));
+    Add<Resize1<pfecarray > >("(","",new OneOperator2_<pfecarray,Resize1<pfecarray > , long  >(feresize));
+// end of resize ...
+   
+  Add<pfecbasearray*>("n",".",new OneOperator1_<long,pfecbasearray*>(get_size));  //  FH fev 2013
+  Add<pferbasearray*>("n",".",new OneOperator1_<long,pferbasearray*>(get_size));  //   FH fev. 2013
+  Add<pferarray>("n",".",new OneOperator1_<long,pferarray>(get_size));  //  FH fev 2013
+  Add<pfecarray>("n",".",new OneOperator1_<long,pfecarray>(get_size));  //   FH fev. 2013
+    
+    
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
    
@@ -5010,9 +5193,26 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   TEF2dto3d[FindFE2("P0")]=&DataFE<Mesh3>::P0;
   TEF2dto3d[FindFE2("P1b")]=&P1bLagrange3d;
   TEF2dto3d[FindFE2("RT0")]=&RT03d;
-    
-}   
+ /*
+// add may 2011 F. HEcHt   
+  //    in progress ?????  to set varaible to store FinitELEMEnt type.  
+    zzzfff->Add("FiniteElement",atype<TypeOfFE*>());
+    zzzfff->Add("FiniteElement3",atype<TypeOfFE3*>());
 
+    TheOperators->Add("=",new OneOperator2<TypeOfFE*,TypeOfFE*,TypeOfFE*>(&setFE<1>) );    
+    TheOperators->Add("<-",new OneOperator2_<pfes*,pfes*,pfes>(&setFE<0>));
+  
+  */
+}
+
+/*   in progress ?????  to set varaible to store FinitELEMEnt type.  
+template<int init>
+TypeOfFE* setFE(TypeOfFE* a,TypeOfFE* b) 
+{
+    if(init) 
+    return a;    
+}
+*/
 void clean_lgfem()
 {
   for (int i=0;i<kTypeSolveMat;++i)
@@ -5377,6 +5577,55 @@ C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
   lid->push_back(UnId(id));
   return NewFEarray(lid,currentblock,fespacetype,sizeofarray,cplx,dim);
 }
+
+namespace Fem2D {
+void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab)
+{
+    for (size_t i=0;i<bc.on.size();i++)
+        if(bc.onis[i] ==0)
+	    {
+            long  lab  = GetAny<long>( (*bc.on[i])(stack));
+            setoflab.insert(lab);
+            if ( verbosity>99) cout << lab << " ";
+            
+	    }
+        else 
+	    {
+            KN<long>  labs( GetAny<KN_<long> >( (*bc.on[i])(stack)));
+            for (long j=0; j<labs.N(); ++j) {	      
+                setoflab.insert(labs[j]);
+                if ( verbosity>99) cout << labs[j] << " ";
+            }	  
+            
+	    }
+    if(verbosity>99) 
+        cout << endl;
+    
+}
+
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all)
+{
+    for (size_t i=0;i<di.what.size();i++)
+        if(di.whatis[i] ==0)
+	    {
+            long  lab  = GetAny<long>( (*di.what[i])(stack));
+            setoflab.insert(lab);
+            if ( verbosity>3) cout << lab << " ";
+            all=false;
+	    }
+        else 
+	    {
+            KN<long>  labs( GetAny<KN_<long> >( (*di.what[i])(stack)));
+            for (long j=0; j<labs.N(); ++j) {	      
+                setoflab.insert(labs[j]);
+                if ( verbosity>3) cout << labs[j] << " ";
+            }	  
+            all=false;	  
+	    }
+    
+}
+}
+
 
 #include "InitFunct.hpp"
 

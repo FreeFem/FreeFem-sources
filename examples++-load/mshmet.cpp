@@ -8,8 +8,8 @@
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:  mshmet
-//ff-c++-cpp-dep: 
+//ff-c++-LIBRARY-dep:  mshmet libMesh
+//ff-c++-cpp-dep:
 //  
 
 /* 
@@ -103,21 +103,21 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
       ux = p2->c[0] - p1->c[0];
       uy = p2->c[1] - p1->c[1];
       h3 = sqrt(ux*ux + uy*uy);
-
+      /*
       pe        = 0.5 * (h1 + h2 + h3);
-      ptriangle->aire = pe * (pe-h1) * (pe-h2) * (pe-h3);
-      ptriangle->aire = sqrt(ptriangle->aire);
-      rins      = 2.0 * ptriangle->aire / pe;
+      double aire = pe * (pe-h1) * (pe-h2) * (pe-h3);
+      //aire = sqrt(ptriangle->aire);
+      //rins      = 2.0 * aire / pe;
 
-      p0->aire += ptriangle->aire;
-      p0->rins += rins;
+      //p0->aire += ptriangle->aire;
+      //p0->rins += rins;
 
-      p1->aire += ptriangle->aire;
-      p1->rins += rins;
+      //p1->aire += ptriangle->aire;
+      //p1->rins += rins;
 
-      p2->aire += ptriangle->aire;
-      p2->rins += rins;
-
+      //p2->aire += ptriangle->aire;
+      //p2->rins += rins;
+      */
   }
   
   return meshMSHMET;
@@ -175,7 +175,7 @@ MSHMET_pMesh mesh3_to_MSHMET_pMesh( const Mesh3 &Th3 ){
 
 
 MSHMET_pSol sol_mshmet(const int &dim, const int & np, const int &type, const int &size, int *typtab, const KN<double> &solutions){
-  static const int wrapperMetric[6]={0,1,2,3,4,5};
+  static const int wrapperMetric[6]={0,1,3,2,4,5};
   MSHMET_pSol sol;
   int k,ia,i;
 
@@ -202,7 +202,7 @@ MSHMET_pSol sol_mshmet(const int &dim, const int & np, const int &type, const in
 }
 
 void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric){
-  static const int wrapperMetric[6]={0,1,2,3,4,5};
+  static const int wrapperMetric[6]={0,1,3,2,4,5};
   int k,ia,i;
   
   cout << " info->iso " << info->iso << endl;
@@ -232,14 +232,14 @@ void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric
 
 
 void metric_mshmet_to_ff_metric(MSHMET_pSol sol, MSHMET_Info *info, KN<double> &metric){
-  static const int invwrapperMetric[6]={0,1,2,3,4,5};
+  static const int invwrapperMetric[6]={0,1,3,2,4,5};
   int k,ia,i;
   if( info->iso == 1 ){
     cout << " info->iso " << " metric "<< metric.N() <<" " << sol->np << endl;
     // isotrope
     for (k=1; k<=sol->np; k++) {
       metric[ k-1 ] = sol->met[k]; 
-      cout << "k " << k << " " << sol->met[k] << endl;
+      //cout << "k " << k << " " << sol->met[k] << endl;
     }
   }
   else{
@@ -263,7 +263,7 @@ public:
   int dim;
   vector<Expression> sol;
 
-  static const int n_name_param = 3; // 
+  static const int n_name_param = 12; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -272,14 +272,15 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< long  >( (*nargs[i])(stack) ): a;}
+  int  arg(int i,Stack stack, bool a ) const{ return nargs[i] ? GetAny< bool  >( (*nargs[i])(stack) ): a;}
   
   
 public:
   mshmet3d_Op(const basicAC_F0 &  args) : sol( args.size()-1 )
   {
     
-    cout << "mshmet3d"<< endl;
+    //cout << "mshmet3d"<< endl;
     args.SetNameParam(n_name_param,name_param,nargs);
     eTh=to<pmesh3>(args[0]); 
     dim=3;
@@ -342,10 +343,28 @@ public:
 
 
 basicAC_F0::name_and_type  mshmet3d_Op::name_param[]= {
-  {  "loptions", &typeid(KN_<long>)},
+  {  "loptions", &typeid(KN_<long>)}, //0
   {  "doptions", &typeid(KN_<double>)},
-  {  "metric", &typeid(KN_<double>)}
+  {  "metric", &typeid(KN_<double>)},
+  {  "normalization", &typeid(bool)},
+  {  "aniso", &typeid(bool)},
+  {  "levelset", &typeid(bool)},// 5
+  {  "verbosity", &typeid(long)},
+  {  "nbregul", &typeid(long)},
+  {  "hmin", &typeid(double)},
+  {  "hmax", &typeid(double)},//9
+  {  "err", &typeid(double)},//10
+  {  "width", &typeid(double)}//11
+
 };
+
+template<class T>
+ostream & dumpp(const T * p,int n,ostream & f)
+{
+  for(int i=0;i<n;++i)
+    f << p[i] << " ";
+  return f; 
+}
 
 AnyType mshmet3d_Op::operator()(Stack stack)  const 
 {
@@ -369,7 +388,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   defaultfopt(0)= 0.01;
   defaultfopt(1)= 1.0;
   defaultfopt(2)= 0.01;
-  defaultfopt(3)= 0.05;
+  defaultfopt(3)= 0.00;
   KN<long> defaultintopt(7);
   /*
     info->nnu    = intopt[0]; //  0;
@@ -380,19 +399,43 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
     info->nlis   = intopt[5]; //  0;
     info->metric =  intopt[6]; // 0; // metric given besoin ???
   */  
-  defaultintopt(0)= 0;
+  defaultintopt(0)= 1;
   defaultintopt(1)= 1;
   defaultintopt(2)= 0;
-  defaultintopt(3)= 1;
-  defaultintopt(4)= 10;
+  defaultintopt(3)= 0; 
+  defaultintopt(4)= verbosity;
   defaultintopt(5)= 0;
   defaultintopt(6)= 0;
-
+  if(nargs[11]) {defaultintopt[2]=1;defaultfopt[3]=0;}//  level set ...  
   KN<int> intopt(arg(0,stack,defaultintopt));
   KN<double> fopt(arg(1,stack,defaultfopt));
   KN<double> *pmetric=new KN<double>(Th3.nv);
   KN<double> &metric=*pmetric;
+
+
+  intopt[0]=arg(3,stack, intopt[0]!=0);// normaliz
+  intopt[1]=!arg(4,stack,intopt[1]==0);//  aniso
+  intopt[2]=arg(5,stack,intopt[2]!=0);// levelset 
+  intopt[4]=arg(6,stack,intopt[4]); // verbo
+  intopt[5]=arg(7,stack,intopt[5]); // nbregul
+  fopt[0]=arg(8,stack,fopt[0]); //hmin
+  fopt[1]=arg(9,stack,fopt[1]); //hmax
+  fopt[2]=arg(10,stack,fopt[2]);// err
+  fopt[3]=arg(11,stack,fopt[3]);// width
+
+
+  if(verbosity>2) 
+    {
+      cout<< "    -- mshmet : lopt " ;  dumpp((int*) intopt,intopt.N(),cout)  <<endl;
+      cout<< "              : dopt " ; dumpp((double*)fopt,fopt.N(),cout)  <<endl;
+    }
+
   metric=0.;
+  if(intopt.N() != 7 )
+    ExecError(" Size of array of loption are wrong != 7");
+  if(fopt.N() != 4 )
+    ExecError(" Size of array of doption are wrong != 4");
+
 
   if( intopt[1]==0){ 
     metric.resize(6*Th3.nv);
@@ -413,6 +456,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   int TypTab[nbsol];
   for(int ii=0; ii<nbsol;ii++)
     TypTab[ii] = typesol[ii];
+
 
   KN<double> tabsol(nbsolsize*nv);
   tabsol=0.;
@@ -436,6 +480,8 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
       }
     }
   }
+  if(verbosity>5)
+    cout << "    min/max tabsol:  " << tabsol.min() << " " <<tabsol.max() << endl;
   MSHMET_pSol mshmetsol = sol_mshmet(dim, nv, nbsol, nbsolsize, TypTab, tabsol);
   if( intopt[1] == 1) 
     mshmetmesh->info.iso = 1;
@@ -474,7 +520,7 @@ public:
   int dim;
   vector<Expression> sol;
 
-  static const int n_name_param = 3; // 
+  static const int n_name_param = 12; // 
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   
@@ -483,7 +529,7 @@ public:
   KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
   { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
   double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
-  int  arg(int i,Stack stack, int a ) const{ return nargs[i] ? GetAny< int >( (*nargs[i])(stack) ): a;}
+  long  arg(int i,Stack stack, long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
   
   
 public:
@@ -654,7 +700,7 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
   if( nargs[2]  ) metric_mshmet( mshmetsol, &mshmetmesh->info, metric);
 
   int res = MSHMET_mshmet(intopt, fopt, mshmetmesh, mshmetsol);
-  cout << " problem with mshmet :: error " <<  res << endl; 
+  
   if( res > 0){
     cout << " problem with mshmet :: error " <<  res << endl; 
     exit(1);
@@ -676,7 +722,7 @@ class Init1 { public:
   Init1();
 };
 
-static Init1 init1;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   

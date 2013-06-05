@@ -4,38 +4,83 @@
 # $Id: Makefile.am,v 1.16 2010/05/06 21:20:38 hecht Exp $
 
 SUBDIRS=blas arpack umfpack  
-EXTRA_DIST=f2c/Makefile f2c/f2c.h-int   f2c/fort77.sed	f2c/Makefile-MacOs tetgen/Makefile \
-tetgen/tetgen1.4.2.patch superlu/Makefile \
-fftw/Makefile metis/Makefile metis/Makefile-metis.in metis/patch-metis \
-mmg3d/Makefile			mshmet/mshmetlib.h \
-mmg3d/makefile-mmg3d.inc	yams/Makefile \
-yams/freeyams.2010.02.22.patch \
-mshmet/Makefile			yams/makefile-yams.inc \
-mshmet/Makefile-mshmet.inc	yams/yamslib.c \
-mshmet/mshmet.2009.09.16.patch	yams/yamslib.h \
-mshmet/mshmetlib-internal.h	yams/yamslib_internal.h \
-mshmet/mshmetlib.c \
-mumps/MUMPS_4.9.2.patch			parmetis/makefile \
-mumps/Makefile				parmetis/parmetis-3.1.1.patch \
-mumps/Makefile-mumps-4.9.2.inc		pastix/Makefile \
-blacs/BLACS.patch			pastix/config-pastix-complex.in \
-blacs/Bmake-blacs.inc			pastix/config-pastix-real.in \
-blacs/Makefile				pastix/pastix_release_2200-blend.patch \
-pastix/pastix_long_complex.h		pastix/patch-pastix_long_complex.h \
-hips/Makefile				pastix/pastix_release_2200-gen.patch \
-hips/SRC_SPKIT_makefile			scalapack/Makefile \
-hips/hips-1.2b-rc4.patch		scalapack/SLmake-scalapack.inc \
-scotch/Makefile \
-hips/makefile-hips.inc			scotch/Makefile-scotch.inc \
-hypre/Makefile				scotch/scotch_5.1_esmumps.patch \
-superludist/Makefile \
-parmetis/Makefile-parmetis.in		superludist/make-superlu.inc \
-superludist/superludist_2.3.patch  \
-headers-sparsesolver.inc
+EXTRA_DIST= \
+./nlopt/Make.inc ./nlopt/Makefile \
+./blacs/BLACS.patch \
+./blacs/Bmake-blacs.inc \
+./blacs/Makefile \
+./f2c/Makefile \
+./f2c/Makefile-MacOs \
+./f2c/f2c.h-int \
+./f2c/fort77.sed \
+./f2c/tt.f \
+./fftw/Makefile \
+./fftw/Makefile.am \
+./fltk/Makefile.am \
+./fltk/Makefile.in \
+./gmm/Makefile \
+./gmm/cxxflags \
+./headers-sparsesolver.inc \
+./hips/Makefile \
+./hips/SRC_SPKIT_makefile \
+./hips/hips-1.2b-rc4.patch \
+./hips/makefile-hips.inc \
+./hypre/Makefile \
+./hypre/ff-flags.inc \
+./metis/Makefile \
+./metis/Makefile-metis.in \
+./metis/patch-metis \
+./mmg3d/Makefile \
+./mmg3d/patch-mmg3dv4.diff \
+./mshmet/Makefile \
+./mshmet/Makefile-mshmet.inc \
+./mshmet/mshmet.2011.03.06.patch \
+./mshmet/mshmetlib-internal.h \
+./mshmet/mshmetlib.c \
+./mshmet/mshmetlib.h \
+./mumps/Makefile \
+./mumps-seq/Makefile-mumps-4.10.0.inc \
+./mumps-seq/Makefile \
+./mumps/Makefile-mumps-4.10.0.inc \
+./mumps/MUMPS_4.10.0.patch \
+./parmetis/Makefile-parmetis.in \
+./parmetis/ParMetis-3.1.1-ok/stdheaders.h \
+./parmetis/makefile \
+./parmetis/parmetis-3.1.1.patch \
+./parms/Makefile \
+./parms/makefile-parms.in \
+./pastix/Makefile \
+./pastix/config-pastix-complex.in \
+./pastix/config-pastix-real.in \
+./pastix/pastix_release_2200-blend.patch \
+./pastix/pastix_release_2200-gen.patch \
+./pastix/patch-pastix_long_complex.h \
+./scalapack/Makefile \
+./scalapack/SLmake-scalapack.inc \
+./scotch/Makefile \
+./scotch/Makefile-scotch.inc \
+./scotch/Makefile.patch \
+./scotch/scotch_5.1_esmumps.patch \
+./superlu/Makefile \
+./superlu/make.inc \
+./superludist/Makefile \
+./superludist/make-superlu.inc \
+./superludist/superludist_2.3.patch \
+./tetgen/Makefile \
+./tetgen/tetgen1.4.2.patch \
+./yams/Makefile \
+./yams/freeyams.2012.02.05.patch \
+./yams/makefile-yams.inc \
+./yams/yamslib.c \
+./yams/yamslib.h \
+./yams/yamslib_internal.h \
+ipopt/Makefile	\
+ipopt/Makefile.inc.in \
+ipopt/patch-IpBlas 
 
-
-MPI_SOFT=blacs parmetis  scalapack scotch superludist MUMPS pastix hypre hips	
-
+# blacs is include in  scalapack 2.0.2 
+MPI_SOFT= parmetis  scalapack scotch superludist mumps pastix  hips parms 
+LIST_SOFT=tetgen superlu fftw metis mshmet yams mmg3d gmm  nlopt mumps-seq ipopt 
 all-recursive: bin lib include pkg
 
 lib: 
@@ -47,22 +92,50 @@ include:
 pkg:
 	mkdir pkg
 
-clean-local:
-	-rm -rf  lib include 
-	-rm */FAIT 
-	for d in tetgen superlu fftw; do \
-	  ( cd "$$d";$(MAKE) clean ) ; \
-	done 
-all-local: $(DOWNLOADCOMPILE) 
 
-compile-pkg:
+
+all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
+
+WHERE-LD: tag-compile-pkg
+	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
+	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
+
+compile-dir: 
+	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
+	-@if [ 0 -eq `egrep ':$(COMPILEDIR)' WHERE-LD | wc -l` ] ;then \
+	  cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET) ; \
+	else \
+	 echo $(COMPILEDIR) is in WHERE- files ;\
+	fi 
+compile-pkg: tag-compile-pkg WHERE-LD
+tag-compile-pkg: bin lib include pkg FORCE
+	-@if [ -n "$(WGET)" ] ; then \
+	for d in $(LIST_SOFT) ; do $(MAKE) compile-dir COMPILEDIR=$$d ;done ;\
+	if [ -n "$(MPICC)" ] ; then \
+	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d ; done;\
+	fi;fi
+	touch tag-compile-pkg
+FORCE:
+
+re-install:
+	-rm -rf	 include lib bin 
+	mkdir   include lib bin 	 
+	$(MAKE) compile-pkg DIRTARGET=install
+WHERE:
+	-rm -rf  lib/WHERE.*
+	$(MAKE) compile-pkg DIRTARGET=WHERE
+
+clean-local:
+	-rm -rf	 tag-* include lib bin 
+	mkdir   include lib bin 	
+	-rm */FAIT */FAIRE 
 	-if [ -n "$(WGET)" ] ; then \
-	for d in tetgen superlu fftw metis yams mshmet mmg3d ; do \
-	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ; fi; \
+	for d in  $(LIST_SOFT)  ; do \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) clean -C $$d  " ;   $(MAKE) clean -C $$d  ; else echo ** missing "$$d" directory ; fi; \
 	done ;\
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do \
-	if [ -d "$$d" ] ; then  echo "(cd $$d;$(MAKE) ) " ;   ( cd "$$d";$(MAKE) ) ; else echo ** missing "$$d" directory ;  fi; \
+	if [ -d "$$d" ] ; then  echo "$(MAKE) clean  -C $$d  " ;   $(MAKE) clean  -C $$d  ; else echo ** missing "$$d" directory ;  fi; \
 	done ;\
 	fi; \
 	fi 

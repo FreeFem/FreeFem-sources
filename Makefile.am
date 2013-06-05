@@ -6,31 +6,34 @@
 
 # $Id$
 
-SUBDIRS=download src DOC examples++-tutorial examples++	\
+SUBDIRS=download src  examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d
+	examples++-3d DOC 
 
-EXTRA_DIST=regtests.sh config-wrapper.h  \
+EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
-WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS \
-logo.ico copysharedlibs.sh COPYRIGHT edp.nedit INNOVATION reconfigure \
+INSTALL INSTALL-MacOSX INNOVATION \
+WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS README_MAC \
+logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4    \
 freefem++.spec crimson-freefem++.zip \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
-examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp
+examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
+WHERE_LIBRARY-mkl FreeFem++-CoCoa
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 
-FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
+FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README README_WINDOWS README_MAC BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
 mode-mi-edp.zip \
 examples++-tutorial/aile.msh examples++-tutorial/xyf \
 examples++-3d/dodecaedre01.mesh  \
 examples++-3d/lac-leman-v4.msh \
 examples++-load/load.link \
+examples++-load/fig.pgm	examples++-load/lg.pgm \
 ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
 examples++*/*.[ie]dp  CheckAllEdp
@@ -50,7 +53,7 @@ all-local:: @HISTORY@
 # uses fakeroot.
 history:
 	if test "$$FAKED_MODE" = ""; then\
-		cvs2cl --hide-filenames -l "-d>01/01/2005" --file HISTORY;\
+		hg log >HISTORY ;\
 		fi
 
 documentation:
@@ -122,10 +125,10 @@ speedtest: all
 # information from the Debian Changelog to get the package release
 # number as well.
 win32:WindowsPackage.iss
-	cd examples++-load;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr include/* include-tmp
+	cd examples++-load;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr *.h include/* include-tmp
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
-	m4 -DVERSION=$(VERSION)$(ADD_PACKAGE_NAME) \
-		WindowsPackage.m4 > WindowsPackage.iss
+	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
+	-DMPIPROG='$MPIPROG' WindowsPackage.m4 > WindowsPackage.iss
 
 # Debian package
 # --------------
@@ -140,7 +143,13 @@ deb:
 
 nativeX: $(FF_MAC_PREFIX)_MacOsX.tgz 
 	echo "done"
-
+MacOsX: 
+	-rm -rf  OsXxx
+	mkdir -p  OsXxx/Applications/
+	make install DESTDIR="`pwd`/OsXxx"
+	tar zxvf FreeFem++.app.tgz -C OsXxx/Applications/
+	cd OsXxx;tar cvfz  ../$(FF_MAC_PREFIX)_MacOsX.tgz .
+	rm -rf OsXxx
 clean-local::
 	-rm freefem++-$(VERSION).tar.gz
 	-rm -rf FreeFem++v*_MacOS
@@ -150,20 +159,23 @@ clean-local::
 install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
+	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
+	-test `uname` = Darwin && $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
+
 
 ListFiles-natives: .FORCE 
-#	echo COPYRIGHT HISTORY HISTORY_BEFORE_2005 README BUGS TODO INSTALL INSTALL-MacOSX INNOVATION >$@	
-#	echo mode-mi-edp.zip >> $@
 	echo $(FF_EXAMPLES_FILES) >$@
-#	echo examples++-tutorial/aile.msh examples++-tutorial/xyf >> $@
-#	echo examples++-3d/dodecaedre01.mesh  >> $@
-#	echo examples++-load/load.link >> $@
-#	echo ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh >> $@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
-	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
+	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o -name '*.pgm'  |egrep  '[.]/examples++' >>$@
 	find .   -name '*.h*' -o -name '*.cpp'  |egrep  '[.]/examples++' >>$@
 List-agl-dylib: src/nw/FreeFem++
 	otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {print $$1}' >$@
+CheckMacLib.sh: src/nw/FreeFem++
+	echo "for i in `otool -L src/nw/FreeFem++|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	chmod a+x $@
+CheckMPIMacLib.sh: src/mpi/FreeFem++-mpi
+	echo "for i in `otool -L src/mpi/FreeFem++-mpi|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
+	chmod a+x $@
 .FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives

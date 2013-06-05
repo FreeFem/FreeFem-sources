@@ -1,6 +1,8 @@
 #include "mode_open.hpp"
 #if WIN32
 #include  "ff-win32.cpp"
+#else
+#include <unistd.h>
 #endif
 extern long mpirank;
 extern long verbosity;
@@ -9,6 +11,12 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
+extern bool  consoleatend;
+extern bool echo_edp;
+extern bool 	  NoGraphicWindow;
+
+char * Shell_Space(const char * s);
+
 char * Shell_Space(const char * s)
 {
     const char *c=s;
@@ -23,7 +31,7 @@ char * Shell_Space(const char * s)
 	exit(1);
       }
 
-#if WIN32
+#ifdef WIN32
     char * p= new char[i+1+nbspace];
     char * q=p;
     for( i=0;i<100000;++i) 
@@ -45,9 +53,10 @@ char * Shell_Space(const char * s)
 int getprog(char* fn,int argc, char **argv)
 {
   waitatend=true;  // attent 
+  consoleatend=false;  // bug with redirection FH 
   int ret=0;
   *fn='\0';
-#if WIN32
+#ifdef WIN32
  const  int lsuffix= 4;
 #else 
  const  int lsuffix= 0;
@@ -69,21 +78,23 @@ int getprog(char* fn,int argc, char **argv)
       if( pm )
         noffglut = ((strlen(prog)- (pm-prog)) < lsuffix+5);
       else   noffglut==  false;
+      if(noffglut) { consoleatend=false;  waitatend=false;} 
       //      cout << " noffglut= " << noffglut << endl;
       //  suffix ++-glx.exe -> no ffglut
-      // pm = 0= > pas de moin -> freefem++ -> ffglut
+      // pm = 0= > pas de moins -> freefem++ -> ffglut
     }
 #endif
-    
+  bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
-
+   echo_edp=true;
   if(argc)
     for (int i=1; i<argc;i++)
       if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
 	{
 	  strcpy(fn,argv[i+1]);
 	  i++;	
+	  edpfilenamearg=argv[i];
 	  ret=1;
 	}
       else if  (strcmp(argv[i],"-v")==0 && i+1 < argc) 
@@ -93,9 +104,24 @@ int getprog(char* fn,int argc, char **argv)
 	  if(verbosity>10) printf(" verbosity : %ld\n",verbosity);
 	}
       else if  (strcmp(argv[i],"-nw")==0 ) 
-	noffglut=true;
+	{
+	  consoleatend=false;
+	  noffglut=true;
+	  NoGraphicWindow=true; 
+	}
+      else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
+	  echo_edp=false;
+      else if  (strcmp(argv[i],"-cd")==0 ) // 
+	  ch2edpdir=true;
+   
+      else if  (strcmp(argv[i],"-ns")==0 ) // no script  
+	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
 	waitatend=false;
+      else if  (strcmp(argv[i],"-nc")==0 ) 
+	consoleatend=false;
+      else if  (strcmp(argv[i],"-log")==0 ) 
+	consoleatend=true;
       else if  (strcmp(argv[i],"-wait")==0 ) 
 	  waitatend=true;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
@@ -107,11 +133,13 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  progffglut=argv[++i];
 	  noffglut=true;
+	  NoGraphicWindow=false;
 	}
       else if(strcmp(argv[i],"-gff")==0 && i+1 < argc)
 	{
 	  progffglut=Shell_Space(argv[++i]);
 	  noffglut=true;
+	  NoGraphicWindow=false;
 	}    
       else if(strcmp(argv[i],"-?")==0 )
 	ret=2;
@@ -127,7 +155,42 @@ int getprog(char* fn,int argc, char **argv)
 	  edpfilenamearg=argv[i];	 
 	  ret=1;
 	}
-
+if( ch2edpdir && edpfilenamearg)
+  {
+    int i=0;
+    int l= strlen(edpfilenamearg);
+#ifdef WIN32	
+    const char sepdir='\\';
+#else
+   const char sepdir='/';
+#endif    
+    
+    for(i=l-1;i>=0;i--)
+	if(edpfilenamearg[i]==sepdir) break;
+ 	
+    if(i>0) {
+	char *dir= new char [l+1];
+	strcpy(dir,edpfilenamearg);
+	dir[i]=0;
+	int err=0;
+	if(verbosity>1) 
+	    cout << " chdir '" << dir <<"'"<< endl;
+#if WIN32	
+	err=_chdir(dir);
+#else
+	err=chdir(dir);
+#endif
+	//cout << err << endl;
+         if(err) {
+	     cerr << " error : chdir  " << dir << endl;
+	     exit(1);
+	 }
+	delete [] dir;
+	
+    }
+      
+    
+  }
   if( ! progffglut && !noffglut)
     progffglut=ffglut;
   
@@ -163,13 +226,19 @@ int getprog(char* fn,int argc, char **argv)
   if(ret !=1) 
     {
       const char * ff = argc ? argv[0] : "FreeFem++" ;
-      cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  \n"
-	   << "        -v      verbosity :  0 -- 1000000 level of freefem output \n"
-	   << "        -fglut  filepath  :  the file name of save all plots (replot with ffglut command ) \n"
-	   << "        -glut    command  :  the command name of ffglut  \n"
+      cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  [SCRIPT-arguments]\n"
+	   << "        -v      verbosity : 0 -- 1000000 level of freefem output \n"
+	   << "        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) \n"
+	   << "        -glut    command  : change  command  compatible with ffglut  \n"
+           << "        -gff     command  : change  command  compatible with ffglut (with space quoting)\n"
 	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -wait             : wait at the end on window   \n"
-	   << "        -nw               :  no ffglut (=> no graphics windows) \n";
+	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
+	   << "        -ne               : no edp script output\n"
+           << "        -cd               : Change dir to script dir\n"
+
+	;
+
       if(noffglut)  cout << " without     default ffglut : " << ffglut << endl;
       else          cout << " with        default ffglut : " << ffglut << endl;
       cout   << endl;

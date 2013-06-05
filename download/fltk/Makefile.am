@@ -51,3 +51,4 @@ $(PACKAGE):
 
 clean-local:
 	-rm -r fltk-*
+	-rm ../lib/libfftw3.a	../lib/libfftw3.la ../include/fftw3.f	../include/fftw3.f03	../include/fftw3.h	../include/fftw3l.f03	../include/fftw3q.f03

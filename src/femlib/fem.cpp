@@ -27,6 +27,8 @@
  */
 
 extern long verbosity ;
+extern long searchMethod; //pichon
+
 #include <cmath>
 #include  <cfloat>
 #include <cstdlib>
@@ -100,7 +102,8 @@ public:
 	    //    reffecran();
 	    //    cadreortho(0.22,0.22,.1);
 	    if (neb) BuildBoundaryAdjacences();
-	    
+            area=0;  // FH add nov 2010
+            lenbord=0; // FH add nov 2010
 	    if(TheAdjacencesLink) return; //
 	    TheAdjacencesLink = new int[3*nt];
 	    const int NbCode = 2*nv;
@@ -116,6 +119,7 @@ public:
 		for (i=0;i<nt;i++)
 		{ 
 		    Triangle & T=triangles[i];
+		    area += T.area; // add FH nov 2010 
 		    for( j=0; j<3; j++,n++ )
 		    { 
 			VerticesNumberOfEdge(T,j,j0,j1);
@@ -163,6 +167,7 @@ public:
 		for (i=0;i<neb;i++)
 		{  
 		    BoundaryEdge & be(bedges[i]);
+		    lenbord +=   be.length() ; // add Now 2010 FH 
 		    int n;
 		    int i0=number(be.vertices[0]);
 		    int i1=number(be.vertices[1]);
@@ -977,10 +982,10 @@ int Walk(const Mesh & Th,int& it, R *l,
     }
     return it;
 }
-
 const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * tstart) const
 {
     int it,j;
+    const Triangle *  rett=0;
     if ( tstart )
 	it =  (*this)(tstart);
     else  
@@ -1077,7 +1082,9 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		l[j]=0;
 		l[3-nl[0]+nl[1]]=1;
 		Phat=R2(l[1],l[2]);
-		return triangles +it;
+	        rett=triangles +it;
+	        if(searchMethod && outside) goto PICHON;
+	      return rett;
 	    }
 	    //   on the border 
 	    //   projection Ortho
@@ -1104,8 +1111,9 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		R dd = (Pjj,Pjj);
 		if (dd >= dP ) {
 		    Phat=PPhat;
-		    // if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl; 
-		    
+		    // if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl;
+		    rett=tt;
+		    if(searchMethod && outside) goto PICHON;
 		    return tt;
 		}
 		else
@@ -1132,7 +1140,9 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		l[j1]= 1-l[j0];
 		Phat=R2(l[1],l[2]);
 		//if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl; 
-		return triangles +it;
+		rett=triangles +it;
+		if(searchMethod && outside) goto PICHON;
+		return rett;
 	    }
 	    bool ok=false;
 	    // next edge on true boundary 
@@ -1150,8 +1160,41 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	    }
 	    ffassert(ok); 
 	}
-	
-	
+PICHON:	// Add dec 2010 ... 
+	// Brute force .... bof bof ...
+    double ddp=1e100;
+    int pk=-1;
+    
+    for(int k=0;k<nt;++k)
+      {
+	int n=0,nl[3];
+	Triangle & K=triangles[k];
+	R2 & A(K[0]), & B(K[1]), & C(K[2]), G((A+B+C)/3.);
+	R l[3]={0,0,0};
+	R area2= K.area*2;
+	R eps =  -area2*1e-6;
+	l[0] = Area2(P,B,C);
+	l[1] = Area2(A,P,C);
+	l[2] = area2-l[0]-l[1];
+	if (l[0] < eps) nl[n++]=0;
+	if (l[1] < eps) nl[n++]=1;
+	if (l[2] < eps) nl[n++]=2;
+	if (n==0)
+	  {  // interior => return
+	      outside=false; 
+	      Phat=R2(l[1]/area2,l[2]/area2);
+	      return &K;
+	  }
+	R2 GP(G,P);
+	double lgp2=(GP,GP);
+	if(ddp > lgp2) {
+	    ddp=lgp2;
+	    pk=k;
+	    
+	}
+      }
+    
+    return rett; 
 }
 
 
@@ -1416,7 +1459,8 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
 Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 { //  routine complique 
   //  count the number of elements
-    area=Th.area;
+    area=0; //Th.area;
+    lenbord=0;
     volume=0;
     BoundaryAdjacencesHead=0;
     BoundaryAdjacencesLink=0;
@@ -1446,6 +1490,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    splitmin=Min(splitmin, split[i]);
 	    splitmax=Max(splitmax, split[i]);	    
 	    nt += NbOfSubTriangle(split[i]);
+	    area+= Th[i].area; // error Nov 2010 FH ..
 	}
     
     bool constsplit=splitmin==splitmax;
@@ -1897,6 +1942,7 @@ Mesh::Mesh(const  Serialize &serialized)
     vertices=0;
     bedges=0;
     area=0;
+    lenbord=0;
     bnormalv=0;
     //  ---  assert(serialized.samewhat(magicmesh));
     size_t  pp=0;;
@@ -1935,11 +1981,12 @@ Mesh::Mesh(const  Serialize &serialized)
         serialized.get(pp,i0);
         serialized.get(pp,i1);
         serialized.get(pp,ir);
-        bedges[i] = BoundaryEdge(vertices,i0,i1,ir); }
+        bedges[i] = BoundaryEdge(vertices,i0,i1,ir);
+	lenbord += bedges[i].length(); }
     assert( pp ==  serialized.size() );   
     if(verbosity>2) 
 	cout << "   End of un serialize: area on mesh = " << area <<endl;  
-    ConsAdjacence();
+    ConsAdjacence();	
     
 }
 

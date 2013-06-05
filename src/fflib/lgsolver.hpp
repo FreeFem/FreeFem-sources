@@ -131,7 +131,7 @@ class MatC2R : public VirtualMatrice<double> { public:
 
   plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
   virtual bool ChecknbLine(int n) const { return !N ||n==N;}  
-  virtual bool ChecknbColumn(int m) const { return !M ||m==M;} 
+  virtual bool ChecknbColumn(int m) const { return !M ||m==M;}
 
 
 };
@@ -241,10 +241,14 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       precon =  to<KN_<R> >(C_F0(code_del,*C));// 2 undelete pointer
       
       throwassert(precon);
+    
       R aii;
       A.getdiag(D1);
+      double tgv = D1.linfty(); 
+      if( tgv < 1e5) tgv = 1e100; // if no tgv remove .. 
+     // if(verbosity>10 ) cout << "        in Precon GMRES, find tgv = " << tgv << endl;
       for (int i=0;i<n;i++)
-        D1[i] = (norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);
+        D1[i] = (std::abs(D1[i]) <  tgv ) ? R(1.)  : R() ; // remove the tgv ...
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -255,7 +259,7 @@ class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public Virtua
       int k=dKrylov,nn=nbitermax;
 
       //int res=
-      GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
+      GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
 
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
@@ -267,13 +271,14 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
       
     xx=x;
    // cout << x[0] << "  ";
-    xx=GetAny<KN_<R> >((*precon)(stack));
+    xx=GetAny<KN_<R> >((*precon)(stack)); // xx value of the preoco 
     WhereStackOfPtr2Free(stack)->clean(); 
 
 //    cout << (xx)[0] << "  " << endl;
-    R dii;
-    for (int i=0;i<n;i++) 
-       Ax[i] += ((dii=D1[i])==1.0) ? (xx)[i] : x[i]*dii;
+ //   R dii;
+  //   for (int i=0;i<n;i++) // take on value 
+  //     Ax[i] += (D1[i]) ? xx[i] : x[i];//  remove dii ... mars 2011
+    Ax += xx; 
   }
 
     
@@ -315,7 +320,7 @@ class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualM
          KNM<R> H(dKrilov+1,dKrilov+1);
       int k=dKrilov,nn=nbitermax;
       //int res=
-      GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr);
+      GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
 
  }
 
@@ -366,7 +371,7 @@ class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , 
       VA AR(a);
       VC CR(*this);
       //int res=
-      GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+      GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
 
  }
 
@@ -437,7 +442,7 @@ class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver 
       VA AR(a);
       VC CR(*this);
       //int res=
-	GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr);
+	GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
       
       // assert(0); // a faire 
       //int res=GMRES(a,(KN<double> &)x, (const KN<double> &)b,*this,H,k,nn,epsr);
@@ -469,8 +474,8 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
   
   // cout << "~SolveGMRESPrecon; " << endl;
  }
-   virtual bool ChecknbLine(int n) const { return true;}  
-  virtual bool ChecknbColumn(int m) const { return true;} 
+   virtual bool ChecknbLine(int ) const { return true;}  
+  virtual bool ChecknbColumn(int ) const { return true;} 
 
  
 };     
@@ -501,7 +506,7 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     return ret;
 }
 
-    
+
 #define LIST_NAME_PARM_MAT \
     {  "init", &typeid(bool)}, \
     {  "solver", &typeid(TypeSolveMat*)}, \
@@ -523,10 +528,12 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "scaler", &typeid(KN_<double>)}, \
     { "scalec", &typeid(KN_<double>)}, \
     { "sparams", &typeid(string*)}, \
-    { "commworld", &typeid(pcommworld)} \
+    { "commworld", &typeid(pcommworld)}, \
+    { "master", &typeid(long)} \
 
 
-const int NB_NAME_PARM_MAT =  21  ;
+
+const int NB_NAME_PARM_MAT =  22  ;
     
 /*
  {  "init", &typeid(bool)},
@@ -584,6 +591,9 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	if (nargs[++kk]) ds.scale_c = GetAny<KN_<double> >((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.sparams = *GetAny<string*>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.commworld = GetAny<pcommworld>((*nargs[kk])(stack));
+#ifdef VDATASPARSESOLVER
+        if (nargs[++kk]) ds.master = GetAny<long>((*nargs[kk])(stack));
+#endif
   /* de datafilename a scalec */
 /*	
 	if (nargs[++kk]) ds.param_int= GetAny< KN<int> >((*nargs[kk+12])(stack));  // Add J. Morice 02/09 

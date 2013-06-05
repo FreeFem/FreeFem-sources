@@ -25,12 +25,56 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef INITSFUNCT
+#ifndef INITSFUNCT_HPP_
 #define INITSFUNCT_HPP_
-
-void  addInitFunct(int i,void  (* f)()) ;
+#include "ffapi.hpp"
+ 
+void  addInitFunct(int i,void  (* f)(),const char *name) ;
 void  callInitsFunct() ;
-struct  addingInitFunct { 
-  addingInitFunct(int i,void  (* f)()) { addInitFunct(i,f);}
+
+class  addingInitFunct {  public:
+  addingInitFunct(int i,void  (* f)(),const char *name="") { addInitFunct(i,f,name);}
 } ;
+
+//
+#if WIN32
+#define LOADINITIO {					\
+    streambuf * so =ffapi::cout()->rdbuf() ;		\
+    streambuf * si =ffapi::cin()->rdbuf() ;		\
+    streambuf * se =ffapi::cerr()->rdbuf() ;		\
+    if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);	\
+    if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
+    if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
+} 
+#else
+#define LOADINITIO {					\
+    streambuf * so =ffapi::cout()->rdbuf() ;		\
+    streambuf * si =ffapi::cin()->rdbuf() ;		\
+    streambuf * se =ffapi::cerr()->rdbuf() ;		\
+    if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);	\
+    if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
+    if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
+    stdout = ffapi::ffstdout();\
+    stderr = ffapi::ffstderr();\
+    stdin = ffapi::ffstdin();\
+} 
+#endif
+
+  
+#define LOADINITNM(EXEC,NM)						\
+  static  void  AutoLoadInit() { LOADINITIO ;				\
+    if(verbosity>9) cout << "\n loadfile " NM  "\n" ;			\
+    EXEC; }								\
+  int DoLoadInit() {							\
+    if(verbosity>9)							\
+      cout << " ****  " << NM  <<  " ****\n" ;				\
+    addInitFunct(10000,&AutoLoadInit,NM);				\
+    return 2;}								\
+									\
+  static int callDoLoadInit=DoLoadInit();				
+
+#define LOADINIT(TI) LOADINITNM(TI init,__FILE__)			     
+#define LOADFUNC(FC) LOADINITNM(FC() ,__FILE__)			     
+
+
 #endif

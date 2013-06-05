@@ -101,7 +101,7 @@ int medit0() {
   clock_t  ct;
 
   /* default */
-  fprintf(stdout," \n medit0() \n");
+  //  fprintf(stdout," \n medit0() \n");
   fprintf(stdout," Loading data file(s)\n");
   ct = clock();
 
@@ -193,7 +193,7 @@ int medit0_popen() {
   clock_t  ct;
 
   /* default */
-  fprintf(stdout," \n medit0() \n");
+  /*fprintf(stdout," \n medit0() \n");*/
   fprintf(stdout," Loading data file(s)\n");
   ct = clock();
 
@@ -209,7 +209,7 @@ int medit0_popen() {
   /* read mesh(es) */
   k = 0;
   do {
-    printf("mesh number %i\n",k+1);
+    // printf("mesh number %i\n",k+1);
     if ( !cv.mesh[k] ) {
       cv.mesh[k] = M_calloc(1,sizeof(Mesh),"medit0.mesh");
       if ( !cv.mesh[k] )  return(0);
@@ -336,7 +336,7 @@ int main(int argc,char *argv[]) {
   animdep    = 0;
   animfin    = 0;
   ddebug     = FALSE;
-  quiet      = FALSE;
+  quiet      = TRUE;//FALSE;
   stereoMode = 0;
   cv.nbm = cv.nbs = 0;
 

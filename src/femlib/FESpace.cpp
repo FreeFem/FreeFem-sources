@@ -1046,6 +1046,14 @@ FESpace::FESpace(const FESpace ** Vh,int k )
 {
      if(cdef) renum();
     Show();
+    // verification 
+    long snbdf=0;
+    for(int i=0;i<k;++i)
+        snbdf += Vh[i]->NbOfDF;
+    if( snbdf !=NbOfDF)
+        cerr << " Problem build of FEspace (2d) (may be : due to periodic Boundary condition missing ) FH " << endl
+             << " The number of DF must be " << snbdf << "  and it is " << NbOfDF <<endl; 
+    ffassert(snbdf == NbOfDF );
 }
      
 FESpace::FESpace(const Mesh & TTh,const TypeOfFE ** tef,int k,int nbdfv,const int *ndfv,int nbdfe,const int *ndfe )
@@ -1783,7 +1791,9 @@ void TypeOfMortarCas1::ConstructionOfNode(const Mesh &Th,int im,int * NodesOfEle
      int ldata = 6*nbsm;// 3 gauche+ 3 droite 
      sm.sm = new aSubFMortar[nbsm];
      sm.datai = new int [ldata];
-     sm.dataf = new (R (*[ldata])(const FESpace *,const aSubFMortar *,R))  ;
+     typedef  R (* Fdataf)(const FESpace *,const aSubFMortar *,R);
+     sm.dataf =new Fdataf[ldata]; //  new (R (*[ldata])(const FESpace *,const aSubFMortar *,R))  ;
+     ffassert( sm.dataf ); //  remove previous line FH, PB comp
      int *dataDfNumberOFmul=sm.datai;
      
      R (**dataf)(const FESpace *,const aSubFMortar *,R) ;

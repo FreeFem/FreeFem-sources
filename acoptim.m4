@@ -12,11 +12,12 @@ if test "$enable_m64" = yes -a "$enable_m32"
 then
   	    AC_MSG_ERROR([ Choose  32 or 64 architecture not the both ],1);  
 fi
-AC_ARG_ENABLE(profiling,[  --enable-m64	Turn on 64 bits architecture])
+AC_ARG_ENABLE(m64,[  --enable-m64	Turn on 64 bits architecture])
 if test "$enable_m64" = yes
 then
 	ff_m64=-m64	
         CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS)
+        CHECK_COMPILE_FLAG(C,$ff_m64,CNOFLAGS)
 	CHECK_COMPILE_FLAG(C++,$ff_m64,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m64,FFLAGS)	
 #  add -fPIC on on 64 architecture 
@@ -25,11 +26,12 @@ then
 	CHECK_COMPILE_FLAG(Fortran 77,-fPIC,FFLAGS)	
 
 fi
-AC_ARG_ENABLE(profiling,[  --enable-m32	Turn on 32 bits architecture])
+AC_ARG_ENABLE(m32,[  --enable-m32	Turn on 32 bits architecture])
 if test "$enable_m32" = yes 
 then
 	ff_m32=-m32	
         CHECK_COMPILE_FLAG(C,$ff_m32,CFLAGS)
+        CHECK_COMPILE_FLAG(C,$ff_m32,CNOFLAGS)
 	CHECK_COMPILE_FLAG(C++,$ff_m32,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m32,FFLAGS)	
 #  add -fPIC on on 64 architecture 
@@ -47,25 +49,25 @@ AC_MSG_CHECKING(whether to generate debugging information)
 AC_ARG_ENABLE(debug,[  --enable-debug	Turn on debug versions of FreeFem++])
 AC_ARG_ENABLE(optim,[  --enable-optim	Turn on compiler optimization])
 
-# Autoconf always chooses -O2. -O2 in gcc makes some functions
-# disappear. This is not ideal for debugging. And when we optimize, we
-# do not use -O2 anyway.
-
-CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
-FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
-CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
-
 if test "$enable_debug" = yes;
 then
+
 	AC_MSG_RESULT(yes)
+	CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
+	FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
+	CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
+        CHECK_COMPILE_FLAG(C,-g,CFLAGS)
+	CHECK_COMPILE_FLAG(C++,-g,CXXFLAGS)
+	CHECK_COMPILE_FLAG(Fortran 77,-g,FFLAGS)	
+
 else
 	AC_MSG_RESULT(no)
 
 	# No debugging information in optimized code
 
-	CFLAGS="`echo $CFLAGS | sed 's/-g//g'` -DNDEBUG"
-	FFLAGS="`echo $FFLAGS | sed 's/-g//g'` -DNDEBUG"
-	CXXFLAGS="`echo $CXXFLAGS | sed 's/-g//g'` -DNDEBUG"
+	CFLAGS="$CFLAGS -DNDEBUG"
+	FFLAGS="$FFLAGS -DNDEBUG"
+	CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi
 
 # Hardware-independant optimization
@@ -99,6 +101,14 @@ if test "$enable_debug" != yes \
     -a "$enable_generic" != yes
 then
 
+# Autoconf always chooses -O2. -O2 in gcc makes some functions
+# disappear. This is not ideal for debugging. And when we optimize, we
+# do not use -O2 anyway.
+
+CFLAGS="`echo $CFLAGS | sed 's/-O2//g'`"
+FFLAGS="`echo $FFLAGS | sed 's/-O2//g'`"
+CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
+
     # MacOS X Darwin
     if test -x /usr/bin/hostinfo
 	then
@@ -108,6 +118,8 @@ then
 	AC_MSG_CHECKING(GCC version)
 
         ff_gcc4=`$CC  --version |awk  ' NR==1 {print $3}'|sed -e 's/\..*$//'` 
+	ff_clang=`$CC  --version |awk  '/clang/  {print $4}'`
+	if test -n "$ff_clang" ; then ff_gcc4="llvm"; fi
 	AC_MSG_RESULT($ff_gcc4)
 
 	# At the moment, we do not know how to produce correct
@@ -115,7 +127,9 @@ then
 	AC_MSG_CHECKING(PowerPC architecture)
 	ff_machine=`/usr/bin/machine`
         ff_fast="-O3"
-	if test `uname` = Darwin 
+	if test	-n "$ff_clang" ; then
+          ff_fast='-O3 -fPIC'
+	elif test `uname` = Darwin 
 	    then
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
@@ -140,7 +154,7 @@ then
           ppc*) # G3 ????
 	       ff_fast="-O3";;
 	  i486)
-	    ff_fast="-O3 -march=pentium4";;
+	    ff_fast="-O3 $ff_fast";;
 	  *)
 	    AC_MSG_ERROR(cannot determine apple cpu type )
 	    ff_fast="-O3";;

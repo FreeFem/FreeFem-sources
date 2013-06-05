@@ -11,7 +11,7 @@ do
 	all.edp|regtests.edp) 
 	    echo  pass   $i;; 
 	*)
-	    "$cmm" "$i" 2>&1 1>$i-out;
+	    ( $cmm "$i" )2>&1 1>$i-out;
 	    if [ $? -eq 0 ] 
 	    then 
 		echo  OK $cmm $i;

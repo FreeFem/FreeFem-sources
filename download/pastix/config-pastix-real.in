@@ -8,7 +8,7 @@ LIBEXT      = .a
 WGET        = @WGET@
 CCPROG      = @CC@ -Wall -DX_ARCH$(HOSTARCH)
 CFPROG      = @F77@ 
-CF90PROG    = @F77@ -ffree-form
+CF90PROG    = @FC@ 
 MCFPROG     = @MPIFC@ 
 CF90CCPOPT  = -ffree-form -x f95-cpp-input #avant
 # Compilation options for optimization (make expor)

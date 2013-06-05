@@ -17,10 +17,21 @@ chrono.h	extern.h	image.h		mesh.h \
 eigenv.h	grafic.h	medit.h		sproto.h 
 
 
-LDADD= ../libMesh/libMesh.a $(LIBSGLUT)
-INCLUDES=-I../libMesh
+LDADD= ../libMesh/libMesh.a $(LIBSGLUT) -lm
+AM_CPPFLAGS=-I$(srcdir)/../libMesh
 BUILT_SOURCES=compil.date
 compil.date: $(ffmedit_SOURCES)
 	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
 #.PHONY: compil.date
+all-local: pinking.no-opt$(MEDITPROG)
+
+pinking.no-optffmedit$(EXEEXT):picking.c
+	rm picking.$(OBJEXT)
+	$(MAKE) picking.o $(MEDITPROG) CFLAGS="$(CNOFLAGS)"
+	touch pinking.no-optffmedit$(EXEEXT)
+pinking.no-opt:picking.c
+	touch pinking.no-opt
+clean-local:
+	-rm pinking.no-opt pinking.no-optffmedit$(EXEEXT)
+
 

@@ -111,7 +111,7 @@ void read_options_freefem(string *string_option, superlu_options_t *options, Dia
   static const rowperm_t  enumrowperm_t[3] = {NOROWPERM, LargeDiag, MY_PERMR};
   static const DiagScale_t enumDiagScale_t[4] = {NOEQUIL, ROW, COL, BOTH};
   static const trans_t  enumtrans_t[3] = {NOTRANS, TRANS, CONJ};
-  static const IterRefine_t enumIterRefine_t[4] = {NOREFINE, SINGLE, DOUBLE, EXTRA};  
+  static const IterRefine_t enumIterRefine_t[4] = {NOREFINE, SLU_SINGLE, SLU_DOUBLE, SLU_EXTRA};  
   //static const MemType enumMemType_t[4] = {LUSUP, UCOL, LSUB, USUB};  
   //static const stack_end_t enumstack_end_t[2] = {HEAD, TAIL};
   //static const LU_space_t enumLU_space_t[2] = {SYSTEM, USER};
@@ -329,7 +329,7 @@ void read_options_superlu_datafile(string *data_option, superlu_options_t *optio
   static const rowperm_t  enumrowperm_t[3] = {NOROWPERM, LargeDiag, MY_PERMR};
   static const DiagScale_t enumDiagScale_t[4] = {NOEQUIL, ROW, COL, BOTH};
   static const trans_t  enumtrans_t[3] = {NOTRANS, TRANS, CONJ};
-  static const IterRefine_t enumIterRefine_t[4] = {NOREFINE, SINGLE, DOUBLE, EXTRA};  
+  static const IterRefine_t enumIterRefine_t[4] = {NOREFINE, SLU_SINGLE, SLU_DOUBLE, SLU_EXTRA};  
   //static const MemType enumMemType_t[4] = {LUSUP, UCOL, LSUB, USUB};  
   //static const stack_end_t enumstack_end_t[2] = {HEAD, TAIL};
   //static const LU_space_t enumLU_space_t[2] = {SYSTEM, USER};

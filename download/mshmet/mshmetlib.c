@@ -10,8 +10,20 @@
 #include "mshmet.h"
 #include "compil.date"
 
-/*char     idir[5]     = {0,1,2,0,1};*/
+char     idir[5]     = {0,1,2,0,1};
 mytime   mshmet_ctim[TIMEMAX];
+int   (*boulep)(pMesh ,int ,int ,int *);
+int   (*hashel)(pMesh );
+int   (*gradLS)(pMesh ,pSol ,int ,int );
+int   (*hessLS)(pMesh ,pSol ,int ,int );
+int   (*avgval)(pMesh ,pSol ,int );
+int   (*clsval)(pMesh ,pSol ,int );
+int   (*nrmhes)(pMesh ,pSol ,int );
+int   (*redsim)(double *,double *,double *);
+int   (*defmet)(pMesh ,pSol ,int );
+double (*getSol)(pSol ,int ,int );
+int   (*metrLS)(pMesh mesh,pSol );
+int   (*lissag)(pMesh ,pSol , int ,int );
 
 
 static void mshmet_excfun(int sigid) {
@@ -159,8 +171,9 @@ static void mshmet_endcod() {
 
 
 /* set function pointers */
-void mshmet_setfunc(int dim) {
-  if ( dim == 2 ) {
+/* set function pointers */
+void MSHMET_setfunc(pMesh mesh) {
+  if ( mesh->dim == 2 ) {
     boulep = boulep_2d;
     hashel = hashel_2d;
     gradLS = gradLS_2d;
@@ -169,28 +182,44 @@ void mshmet_setfunc(int dim) {
     avgval = avgval_2d;
     clsval = clsval_2d;
     nrmhes = nrmhes_2d;
-    laplac = laplac_2d;
     defmet = defmet_2d;
     redsim = redsim_2d;
     metrLS = metrLS_2d;
     lissag = lissag_2d;
   }
   else {
-    boulep = boulep_3d;
-    hashel = hashel_3d;
-    gradLS = gradLS_3d;
-    hessLS = hessLS_3d;
-    getSol = getSol_3d;
-    avgval = avgval_3d;
-    clsval = clsval_3d;
-    nrmhes = nrmhes_3d;
-    laplac = laplac_3d;
-    defmet = defmet_3d;
-    redsim = redsim_3d;
-    metrLS = metrLS_3d;
-    lissag = lissag_3d;
+    if ( mesh->ne > 0 ) { /* 3d */
+      boulep = boulep_3d;
+      hashel = hashel_3d;
+      gradLS = gradLS_3d;
+      hessLS = hessLS_3d;
+      getSol = getSol_3d;
+      avgval = avgval_3d;
+      clsval = clsval_3d;
+      nrmhes = nrmhes_3d;
+      defmet = defmet_3d;
+      redsim = redsim_3d;
+      metrLS = metrLS_3d;
+			lissag = lissag_3d;
+    }
+    else { /* surface mesh */
+      boulep = boulep_2d;
+      hashel = hashel_2d;
+      lissag = lissag_2d;
+      avgval = avgval_3d;
+      clsval = clsval_3d;
+      nrmhes = nrmhes_3d;
+      getSol = getSol_3d;
+      redsim = redsim_3d;
+      gradLS = gradLS_s;
+      hessLS = hessLS_s;
+      defmet = defmet_s;
+
+      metrLS = metrLS_3d;
+    }
   }
 }
+
 
 
 int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
@@ -206,7 +235,7 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
   signal(SIGSEGV,mshmet_excfun);
   signal(SIGTERM,mshmet_excfun);
   signal(SIGINT,mshmet_excfun);
-  atexit(mshmet_endcod);
+  //atexit(mshmet_endcod);
 
   tminit(mshmet_ctim,TIMEMAX);
   chrono(ON,&mshmet_ctim[0]);
@@ -229,7 +258,7 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
   info->nsol   =  -1; //-1;    // pas besoin ==> on peut prendre plusieurs solutions en meme temps ???
   info->metric =  intopt[6];        // 0; // metric given besoin ???
  
-  mshmet_setfunc(mesh->dim);
+  MSHMET_setfunc(mesh);
   chrono(OFF,&mshmet_ctim[1]);
   if ( mesh->info.imprim )  mshmet_stats(mesh,sol);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %.2f sec.\n",gttime(mshmet_ctim[1]));
@@ -260,10 +289,15 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %.2f sec.\n",gttime(mshmet_ctim[3]));
   
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
-
+  /*
   sol->outn="zzzz";
   if ( !saveMet(sol,&mesh->info,sol->outn) )  exit(1);
+  */
+  if ( mesh->info.imprim )
+    mshmet_endcod();
+
   fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
   if ( mesh->info.imprim < -4 || mesh->info.ddebug )  M_memDump();
+
   return(0);
 }

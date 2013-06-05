@@ -40,25 +40,28 @@ real umax=0;
    }
 
   func real[int] matId(real[int] &u) { return u;};
-  
+  int verb=5; // verbosity of algo ..
   b=0.; u=0.; // set  right hand side and initial gest
-  LinearCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId);
-  cout << "LinearCG (Affin)  : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  LinearCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
+  cout << "LinearCG (Affine)  : J(u) = " << J(u) << " err=" << error(u,b) << endl;
   assert(error(u,b) < 1e-5);
 
   b=1; u=0; // set  right hand side and initial gest
-  LinearCG(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId);
+  LinearCG(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
   cout << "LinearCG (Linear) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
   assert(error(u,b) < 1e-5);
 
+  b=0; u=0; // set  right hand side and initial gest
+  LinearGMRES(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb); // correct in version 3.11 
+  cout << "LinearGMRES (Affine) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  assert(error(u,b) < 1e-5);
   b=1; u=0; // set  right hand side and initial gest
- //   LinearGMRES(DJ,u,eps=1.e-6,nbiter=20,precon=matId); // bug don't work compile error v1.44
-  LinearGMRES(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId);
+  LinearGMRES(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
   cout << "LinearGMRES: J(u) = " << J(u) << " err=" << error(u,b) << endl;
   assert(error(u,b) < 1e-5);
 
   b=1; u=0; // set  right hand side and initial gest
-  NLCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId);
+  NLCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
   cout << "NLCG: J(u) = " << J(u) << " err=" << error(u,b) << endl;
   assert(error(u,b) < 1e-5);
 
@@ -101,13 +104,11 @@ alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization
 
 func real[int] dJ(real[int] & u)
   {
-    int verb=verbosity; verbosity=0; 
     Vh w;w[]=u; 
     alpha=df( dx(w)*dx(w) + dy(w)*dy(w) ); // optimization 
     varf au(uh,vh) = int2d(Th)( alpha*( dx(w)*dx(vh) + dy(w)*dy(vh) ) - b*vh)
     + on(1,2,3,4,uh=0);
     u= au(0,Vh);  
-    verbosity=verb;
     return u; // warning no return of local array  
   }
 
@@ -126,12 +127,11 @@ func real[int] C(real[int] & u)
    u = Alap^-1*w;
    return u; // no return of local array  variable 
 }
-   verbosity=5;
    int conv=0;
    real eps=1e-6; 
    for(int i=0;i<20;i++)
    {
-     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps); 
+     conv=NLCG(dJ,u[],nbiter=10,precon=C,veps=eps,verbosity=5); 
 
      if (conv) break; 
      alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 

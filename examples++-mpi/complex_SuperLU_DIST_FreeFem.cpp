@@ -38,6 +38,7 @@
   /bin/sh ff-mpic++ zSuperLU_DIST.cpp -I/Users/morice/librairie/SuperLU_DIST_2.3/SRC/ -L/Users/morice/librairie/openmpi/lib/ -lmpi -lopen-pal -lopen-rte -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib -L/Users/morice/librairie/ParMetis-3.1/ -lparmetis -lmetis -L/Users/morice/librairie/SuperLU_DIST_2.3/lib/ -lsuperlu_dist_2.3
 
 */
+#include <mpi.h>
 #include  <iostream>
 using namespace std;
 
@@ -47,7 +48,6 @@ using namespace std;
 
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
-#include "mpi.h"
 #include "superlu_zdefs.h"
 #include "ffsuperludistoption.hpp"
 
@@ -190,7 +190,7 @@ class ZSolveSuperLUmpi :   public MatriceMorse<R>::VirtualSolver, public SuperLU
 public:
   ZSolveSuperLUmpi(const MatriceMorse<R> &AA,int strategy,double ttgv, double epsilon,
 		  double pivot,double pivot_sym, string datafile,
-		   string param_char, KN<long> &pperm_r, KN<long> &pperm_c, void * ccommworld=0 ) : 
+		   string param_char, KN<long> &pperm_r, KN<long> &pperm_c, void * ccommworld ) : 
     eps(epsilon),epsr(0),
     tgv(ttgv),string_option(param_char),data_option(datafile),
     tol_pivot_sym(pivot_sym),tol_pivot(pivot)
@@ -224,7 +224,8 @@ public:
     /* lecture de nprow and npcol */
     // Cas max deux procs
     nprow = 1;
-    npcol = 1;
+    MPI_Comm_size(commworld,&npcol);
+
     matrixdist=0;
     /* set the default options */
     set_default_options_dist(&options);
@@ -273,7 +274,7 @@ public:
 	    // dallocateA_dist(n, nnz, &a, &asub, &xa);
 	    // dCompRow_to_CompCol_dist(m,n,nnz,arow,asubrow,xarow,&a,&asub,&xa);
 	    
-	    CompRow_to_CompCol_dist(m,n,nnz,AA.a,AA.cl,AA.lg,&a,&asub,&xa);
+	    this->CompRow_to_CompCol_dist(m,n,nnz,AA.a,AA.cl,AA.lg,&a,&asub,&xa);
 	  
 	    /* Broadcast matrix A to the other PEs. */
 	    MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
@@ -294,7 +295,7 @@ public:
 	    MPI_Bcast( &nnz, 1,   mpi_int_t,  0, grid.comm );
 	    
 	    /* Allocate storage for compressed column representation. */
-	    zallocateA_dist(n, nnz, dc(&a), &asub, &xa);
+	    zallocateA_dist(n, nnz, this->dc(&a), &asub, &xa);
 	    
 	    MPI_Bcast( a, nnz, SuperLU_MPI_DOUBLE_COMPLEX, 0, grid.comm );
 	    MPI_Bcast( asub, nnz, mpi_int_t,  0, grid.comm );
@@ -305,7 +306,7 @@ public:
 	  Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	  
 	  cout << "Debut: Create_CompCol_Matrix_dist" <<endl;
-	  Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
+	  this->Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
 	  cout << "Fin: Create_CompCol_Matrix_dist" <<endl;
 	  /* creation of pseudo solution + second member */
 	  
@@ -410,7 +411,7 @@ public:
 	     MPI_Bcast( &nnz, 1,   mpi_int_t,  0, grid.comm );
 	     
 	     /* Allocate storage for compressed column representation. */
-	     zallocateA_dist(n, nnz, dc(&a), &asub, &xa);
+	     zallocateA_dist(n, nnz, this->dc(&a), &asub, &xa);
 	     
 	     MPI_Bcast( a, nnz, SuperLU_MPI_DOUBLE_COMPLEX, 0, grid.comm );
 	     MPI_Bcast( asub, nnz, mpi_int_t,  0, grid.comm );
@@ -432,7 +433,7 @@ public:
 	   fst_row = iam * m_loc_fst;
 	   
 	   nnz_loc = xa[fst_row+m_loc]-xa[fst_row];
-	   zallocateA_dist(m_loc, nnz_loc, dc(&aloc), &asubloc, &xaloc);
+	   zallocateA_dist(m_loc, nnz_loc, this->dc(&aloc), &asubloc, &xaloc);
 	   
 	   //xaloc = (int_t*) intMalloc_dist(m_loc+1);
 	   for(int ii=0; ii < m_loc; ii++){
@@ -460,7 +461,7 @@ public:
 	   Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	   
 	   if(verbosity) cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
-	   if(verbosity) Create_CompRowLoc_Matrix_dist(&A, m, n, nnz_loc, m_loc, fst_row, aloc, asubloc, xaloc, SLU_NR_loc, R_SLU, SLU_GE);
+	   if(verbosity) this->Create_CompRowLoc_Matrix_dist(&A, m, n, nnz_loc, m_loc, fst_row, aloc, asubloc, xaloc, SLU_NR_loc, R_SLU, SLU_GE);
 	   
 	   cout << "Fin: Create_CompRowCol_Matrix_dist" <<endl;
 	   /* creation of pseudo solution + second member */
@@ -772,7 +773,7 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
   if(verbosity>9)
       cout << " BuildSolverSuperLUmpi<double>" << endl;
   return new ZSolveSuperLUmpi<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,
-				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c);
+				       ds.data_filename, ds.sparams, ds.perm_r, ds.perm_c, ds.commworld);
 }
 
 
@@ -806,7 +807,7 @@ bool SetSuperLUmpi()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

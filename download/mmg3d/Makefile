@@ -10,68 +10,106 @@ include ff-flags
 # -------------------------------
 # 
 DIRPKG= ../pkg
-SRCDIR= ./mmg3dlib#-$(mmg3d_VERSION)
-PACKAGE=$(DIRPKG)/mmg3dlib.tar.gz #-$(mmg3d_VERSION).tar.gz
-INSTALL=../..
+SRCDIR= ./mmg3d4# lib#-$(mmg3d_VERSION)
+PACKAGE=$(DIRPKG)/mmg3d4.0.tgz #mmg3dlib.tar.gz #-$(mmg3d_VERSION).tar.gz
+INSTALL=..
 mmg3d_VERSION=
 # mmg3d pas sur internet
-SERVER=
-WGET=
-LIBMMG3D=$(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
+LIBMMG3D=$(INSTALL)/lib/libmmg3d-v4.a
+OPT=4
+# size of the PKG file ( this file change See Cecile.)
+SIZEPKG=158547
+
+OBJS= analar.o	chkmsh.o	hash.o		memory.o	optcte.o	outqua.o	simu44.o	swap44.o	zaldy.o \
+analarcutting.o	chrono.o	heap.o		mmg3d1.o	optlap.o	pattern.o	simu56.o	swap56.o \
+baryct.o	colpoi.o	inout.o		mmg3d4.o	optlen.o	quality.o	simu68.o	swap68.o \
+boulep.o	coquil.o	length.o	mmg3d9.o	optlentet.o	queue.o		simu710.o	swap710.o \
+bucket.o	cutelt.o	librnbg.o	movevertex.o	optra4.o	ratio.o		solmap.o	swapar.o \
+		delaunay.o	locate.o	optbdry.o	opttet.o	scalem.o	spledg.o	swaptet.o \
+cenrad.o	eigenv.o	matrix.o	optcoq.o	opttyp.o	simu23.o	swap23.o	typelt.o 
+
+OBJSNOP =  cendel.o swapar.o
 
 
-mmg3d: 	
-	-if [ -f $(PACKAGE) ] ;then \
-	   $(MAKE) FAIRE; \
-	else \
-	   echo " file $(PACKAGE)  not found => no mmg3d tar file (download by hand) "; \
-	fi
+mmg3d: mmg3d4/build-$(SIZEPKG)
 
-$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
-	$(MAKE) -C $(SRCDIR) lib
-	touch $(SRCDIR)/FAIT
-install: $(SRCDIR)/FAIT
-	-mkdir $(SRCDIR)/$(INSTALL)/include
-	cp $(SRCDIR)/sources/libmmg3d.h  $(SRCDIR)/$(INSTALL)/include/libmmg3d.h
-	-mkdir $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/objects/libmmg3d.a  $(LIBMMG3D)
+
+mmg3d4/build-$(SIZEPKG):
+	pkgs=`stat -f "%z" $(PACKAGE)`; \
+	if  test $(SIZEPKG) -ne "$$pkgs" ; then \
+	echo "++++++ PB version mmg3d version  $(SIZEPKG) != $$pkgs  +++++"  ;\
+	rm $(PACKAGE); \
+	$(MAKE) clean ; \
+	else $(MAKE) tag-tar-$(SIZEPKG); fi 
+	if [ -d mmg3d4  ] ; then  $(MAKE)  $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
+$(LIBMMG3D):
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS)'  $(OBJSNOP) 
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS)'  $(OBJS) 
+	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CNOFLAGS)   mmg3d.c -I..
+	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o mmg3d4/build/sources/mmg3dmain/mmg3d.o
+	-$(CC) $(CNOFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
+	touch mmg3d4/build-4 mmg3d4/FAIT-4
+install-4:
+	-mkdir ../include/mmg3d-v4/		
+	cp mmg3d4/build/sources/*.h ../include/mmg3d-v4/
+	touch mmg3d4/FAIT-4
+
+mmg3d-4:$(PACKAGE)
+
+$(PACKAGE):
+	-mkdir $(DIRPKG);
+#http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz
+#http://www.math.u-bordeaux1.fr/~dobj/logiciels/mmg3d.php
+	cd $(DIRPKG);$(WGET) 'http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz'
+# http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz -O mmg3d4.0.tgz
+#http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
+
+
+install:install-4 WHERE
 
 WHERE: 
-	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	make install;  \
-	echo mmg3d  LD '-L@DIR@/lib -lmmg3d'  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
-	echo mmg3d INCLUDE '-I@DIR@/include'>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mmg3d ;\
+	@-if [ -f mmg3d4/FAIT-4 ] ; then \
+	make install-4;  \
+	echo mmg3d-v4  LD -L@DIR@/lib -lmmg3d-v4  >../lib/WHERE.mmg3d ;\
+	echo mmg3d-v4 INCLUDE -I@DIR@/include/mmg3d-v4>> ../lib/WHERE.mmg3d ;\
+	echo build WHERE ./lib/WHERE.mmg3d ;\
 	fi
 
 
-FAIRE: $(SRCDIR)/FAIT install
+FAIRE: mmg3d4/FAIT-4 install-4
 
-$(SRCDIR)/tag-tar: $(PACKAGE)
+tag-tar-$(SIZEPKG): $(PACKAGE)
+	-rm -rf mmg3d4
+	if tar tfz $(PACKAGE)  mmg3d4/build/sources/mmg3d.c 2>/dev/null  1>/dev/null  ;\
+	 then  rm $(PACKAGE);   $(MAKe) $(PACKAGE); fi	
 	tar xvzf $(PACKAGE)
-	touch $(SRCDIR)/tag-tar
-	cp makefile-mmg3d.inc $(SRCDIR)/makefile
+	touch mmg3d4/build/sources/dataff.h 	
+	cp mmg3d4/build/sources/swapar.c mmg3d4/build/sources/swapar.c.origne
+	tr -d '\r' <mmg3d4/build/sources/swapar.c.origne >mmg3d4/build/sources/swapar.c
+	cd mmg3d4;patch -p1 <../patch-mmg3dv4.diff
+	cat </dev/null >mmg3d4/build/sources/mmg3dConfig.h
+	touch tag-tar-$(SIZEPKG)
+#	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
-
-$(PACKAGE): 
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG); $(WGET)   $(SERVER)/`basename $(PACKAGE)`
-
-
-clean: 
-	-rm ff-flags
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/libmmg3d.a
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/libmmg3d.a
+clean-local:
+	-rm ff-flags ../lib/WHERE.mmg3d
+	-rm -rf ../lib/libmmg3d*.a  ../lib/libmmg3d-v4.a
+	-rm -rf ../include/mmg3d-v4
 	-rm -r $(SRCDIR)
-	-rm FAIT
+	-rm FAIT* mmg* flags-* build-4 tag-tar*
 
-ff-flags: ../Makefile
-	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
+clean:clean-local 
+
+
+ff-flags: ../Makefile Makefile
+	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
 	grep 'LDFLAGS *=' ../Makefile >> ff-flags
 	grep 'AR *=' ../Makefile >> ff-flags
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
 	grep 'RANLIB *=' ../Makefile >> ff-flags
-
-
+	grep 'WGET *=' ../Makefile >> ff-flags
+	grep 'STD_LIBS *=' ../Makefile >> ff-flags
+	grep 'CNOFLAGS *=' ../Makefile >> ff-flags
 .PHONY:$(SRCDIR)/$(INSTALL)

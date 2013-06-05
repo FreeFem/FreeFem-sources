@@ -1,3 +1,4 @@
+cout << " "<< endl;
 /*  Ne compile pas FH ?? 
 for (idt = 1; idt < 50; idt++)
  {
