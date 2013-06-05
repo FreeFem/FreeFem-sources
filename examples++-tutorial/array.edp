@@ -121,9 +121,9 @@ b += 2*a;
 cout <<" b += 2*a : " << b << endl;
 b /= 2;
 cout <<" b /= 2 : " << b << endl;
-b *= a; // same b = b .* a 
+b .*= a; // same b = b .* a 
 cout << "b*=a; b =" << b << endl;
-b /= a; // same b = b ./ a 
+b ./= a; // same b = b ./ a 
 cout << "b/=a; b =" << b << endl;
 c = a+b;
 cout << " c =a+b : c=" << c << endl;
@@ -158,8 +158,8 @@ cout << " ||a||_1     = " <<  a.l1     << endl;
 cout << " ||a||_2     = " <<  a.l2     << endl;
 cout << " ||a||_infty = " <<  a.linfty << endl;
 cout << " sum a_i     = " <<  a.sum    << endl;
-cout << " max a_i     = " <<  a.max    << endl;
-cout << " min a_i     = " <<  a.min    << endl;
+cout << " max a_i     = " <<  a.max  << " a[  " << a.imax << " ] = " << a[a.imax]     << endl;
+cout << " min a_i     = " <<  a.min  << " a[  " << a.imin << " ] = " << a[a.imin]    << endl;
 cout << " a'*a        = " <<  (a'*a)   << endl;
 cout << " a quantile 0.2 =  " <<  a.quantile(0.2) << endl;
 
@@ -248,6 +248,13 @@ b(0:5:2).sort;
 cout << b << endl; 
 cout << b(0:5:2)  << endl; 
 cout << " quantile(0.2)  = " <<  b.quantile(0.2) << endl; 
+p[0] = 1000;
+p[1] = 888;
+cout << "before    p(1:3).sort  " << p  << endl; 
+p(1:3).sort;
+cout << "after   p(1:3).sort " << p  << endl; 
+p.sort; // version 3.19 ##
+cout << "after   p.sort " << p  << endl; 
 
 macro AA [ [1,2],[3,4]] //
 macro BB [ [1,2],[5,10]] //
@@ -324,3 +331,18 @@ for(int i=0;i<ARGV.n;++i)
   {
     cout << ARGV[i] << endl;
   }
+// Array of FE.
+{
+mesh Th=square(2,2);
+fespace Vh(Th,P1);// scalar 
+fespace Wh(Th,[P1,P1]);// vector
+Vh[int] vh(10);
+Wh[int] [uh,wh](10); 
+vh[2]=x;
+[uh[2],wh[2]]=[y,x];
+[uh[2],wh[2]]=[y,x]; // set 3rd value 
+cout << wh.n << endl;
+cout << vh.n <<endl;
+vh.resize(20);
+cout << vh.n <<endl;
+}

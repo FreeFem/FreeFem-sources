@@ -32,6 +32,7 @@
 #include  <set>
 #include "AFunction.hpp"
 #include "environment.hpp"
+#include "InitFunct.hpp"
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
@@ -91,6 +92,7 @@ bool load(string ss)
 		{
 		  if(verbosity && (mpirank ==0))
 		    cout << " (load: dlopen " << s << " " << handle << ") ";
+          callInitsFunct() ;  
 		  return handle;
 		}
 	      
@@ -108,6 +110,7 @@ bool load(string ss)
 		  {
 		    if(verbosity&& (mpirank ==0))
 		      cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
+            callInitsFunct() ; 
 		    return mod;
 	    }
 	      }
@@ -122,7 +125,7 @@ bool load(string ss)
 	return 0;
 #endif  
 	    }
-	if((mpirank ==0))
+	if(mpirank ==0)
 	  {
 	    cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
 	    cerr << "list  prefix: " ;

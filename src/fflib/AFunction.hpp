@@ -29,7 +29,7 @@
 #ifndef __AFONCTION__
 #define __AFONCTION__
 #include "showverb.hpp" 
-
+#include "InitFunct.hpp"
 
 #include <typeinfo>
 #include <cstddef>
@@ -94,7 +94,10 @@ class C_F0;  //  une instruction  complie time
 class ListOfInst;
 class Polymorphic;
 class OneOperator;
-typedef  E_F0  *  Expression; // 
+
+/// Expression is used as the type of the local list contained in ListOfInst
+typedef  E_F0  *  Expression;
+
 class AC_F0;
 class basicAC_F0;
 typedef complex<double> Complex;
@@ -249,7 +252,7 @@ class basicForEachType : public CodeAlloc {
      const char * name() const  { return this  ?  ktype->name() :"NULL" ;}
      virtual bool CastingFrom(const basicForEachType * t) const ;
      //  modif FH -----  A TESTER  // 
-     virtual bool SametypeRight(const basicForEachType * t) const {return  this == t || t == un_ptr_type;}
+     virtual bool SametypeRight(const basicForEachType * t) const {return  (this == t) || (t == un_ptr_type) || (t == type_C_F0);}
 //     virtual Type_Expr init(const Type_Expr & te) const { return Type_Expr(0,0);}
      virtual int TYPEOFID() const  {return 0;}
 //     bool SametypeLeft(const basicForEachType * t) const {return  t == this;}
@@ -274,7 +277,9 @@ class basicForEachType : public CodeAlloc {
                             const E_F1_funcT_Type * p=0,basicForEachType *rr=0,
                             Function1 iv=0,Function1 id=0) ;*/
 
-public:    
+public:
+    static  const  basicForEachType * type_C_F0; //  for any type un formal operation .... FH add 09/2012
+    
     const basicForEachType * un_ptr_type;  // type of right exp
    private:
  //   map<aType,CastFunc> mapofcast;
@@ -331,6 +336,11 @@ class C_LF2;
 class C_LF1;
 
 //  3 types of function/expression  0,1,2 args  
+
+/// E_F0 is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++ language
+/// (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in ListOfInst, and evaluated when
+/// CListOfInst::eval() is called (see \ref index).
+
 class E_F0 :public CodeAlloc 
    {
    public:
@@ -350,6 +360,7 @@ class E_F0 :public CodeAlloc
     virtual size_t nbitem() const {return 1;}
     virtual bool EvaluableWithOutStack() const {return false;} // 
     virtual bool MeshIndependent() const {return true;} // 
+    virtual bool Zero() const {return false;} //
     virtual E_F0 * right_E_F0() const { return 0;}
     virtual bool ReadOnly() const { return true;} // the expression do not change the memory     
     virtual ~E_F0() {}
@@ -632,6 +643,7 @@ class basicAC_F0;
 	  int  TYPEOFID() const { return r ? r->TYPEOFID(): 0;}
 	  int  nbitem() const { return f ? f->nbitem() : 0;}
 	  bool EvaluableWithOutStack() const { return f && f->EvaluableWithOutStack();}
+          bool Zero() const { return !f || f->Zero();}
 	  Expression Destroy() {  return r->Destroy(*this);}
 	  operator const Polymorphic * () const {return  dynamic_cast<const Polymorphic *>(f);}
 	  bool operator==(const C_F0 & a) const {return f==a.f && r == a.r;}
@@ -917,7 +929,7 @@ class E_F_F0_Opt: public E_F_F0<R,TA0,RO>  { public :
   {
     // A0 x =  *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
     // cout << " opt f (" << x << " ) = "   << ": " << ia << endl; 
-    return SetAny<R>( f( *static_cast<typename E_F_F0<R,TA0>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia))  ) );}  
+    return SetAny<R>( this->f( *static_cast<typename E_F_F0<R,TA0>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia))  ) );}  
   
 };   
 
@@ -991,7 +1003,7 @@ class E_F_F0F0_Opt: public E_F_F0F0<R,TA0,TA1>  { public :
     //A0 aa =*static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
     //A1 bb=*static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ;
     //cout << ia << " " << ib <<  "f( " << aa << "," << bb  << " )   = "<< f(aa,bb) << endl;
-    return SetAny<R>( f( *static_cast<typename E_F_F0F0<R,TA0,TA1>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
+    return SetAny<R>( this->f( *static_cast<typename E_F_F0F0<R,TA0,TA1>::A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
 			 *static_cast<typename E_F_F0F0<R,TA0,TA1>::A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ) );}  
   
 };     
@@ -1232,7 +1244,8 @@ template<class R> class EConstant:public E_F0
   AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<R>(v);}
   EConstant(const R & o):v(o) { /*cout << "New constant " << o << endl;*/}
   bool EvaluableWithOutStack() const {return true;} //   
-  operator aType () const { return atype<R>();} 
+  operator aType () const { return atype<R>();}
+     bool Zero()const  { return v == R();}
   int compare (const E_F0 *t) const { 
         int rr;
         const  EConstant * tt=dynamic_cast<const EConstant *>(t);
@@ -1355,21 +1368,28 @@ class ListOfInst : public  E_F0mps {
   if(list) delete [] list;list=0;if(linenumber)  delete[] linenumber; linenumber=0;}
 };
 
-class CListOfInst  {  private:
+class CListOfInst{
+private:
   ListOfInst * f;
   const basicForEachType *r;
-  public:
-   void operator=(const CC_F0 &a){
-     f=new ListOfInst();     
-       if( !a.Empty() ) {
-         f->Add(a);
-         r=a.left(); }}
-   CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
-    operator C_F0 () const  { return C_F0(f,r);}
-   void eval(Stack s) {(*f)(s);}
-   int size() const {return f->size();}
-   Expression * ptr() const {return f->ptr();}
-   int * nlines() const { return f->nlines();}
+
+public:
+  void operator=(const CC_F0 &a){
+    f=new ListOfInst();     
+    if( !a.Empty() ) {
+      f->Add(a);
+      r=a.left(); }}
+  CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
+  operator C_F0 () const  { return C_F0(f,r);}
+
+  /// Called by yyparse() to evaluate the complete expression tree when reaching the end of its "start" symbol. It calls
+  /// ListOfInst::operator()() for its private ListOfInst pointer #f.
+
+  void eval(Stack s) {(*f)(s);}
+
+  int size() const {return f->size();}
+  Expression * ptr() const {return f->ptr();}
+  int * nlines() const { return f->nlines();}
 };
 
 
@@ -2605,6 +2625,30 @@ template<>  struct binary_trait<long,complex<double> > { typedef  complex<double
 template<>  struct binary_trait<double,complex<double> > { typedef  complex<double> R ;}; 
 template<class A>  struct binary_trait<A,string* > { typedef  string*  R ;}; 
 
+//  1 variable pour les operation de cast 
+class E_F1_funcT_Type: public OneOperator{ public:
+    //  const basicForEachType *r,*a;
+    Function1 f;
+    E_F0 * code(const basicAC_F0 & args) const   { 
+        if ( args.named_parameter && !args.named_parameter->empty()  ) 
+            CompileError( " They are used Named parameter ");
+        
+        return  new  E_F0_Func1(f,args[0]);} 
+    
+    E_F1_funcT_Type(const basicForEachType *rr,const basicForEachType *aa,Function1 ff)
+    : OneOperator(rr,aa), f(ff) {}
+    
+    //: r(rr),a(aa),f(ff) {}
+    //  friend ostream & operator<<(ostream & f,const E_F1_funcT_Type & e) { f << *e.a << " -> " << *e.r ;return f;}
+};
+
+template<class R,class A>
+class E_F1_funcT :public  E_F1_funcT_Type{ public:   
+    E_F1_funcT(Function1 ff) : E_F1_funcT_Type(map_type[typeid(R).name()],map_type[typeid(A).name()],ff){}
+    E_F1_funcT(aType rr,aType a,Function1 ff) : E_F1_funcT_Type(rr,a,ff){}
+};
+
+
 template<class T,class PT> 
  ForEachTypePtr<T,PT>::ForEachTypePtr(): 
          basicForEachType(typeid(PT),sizeof(PT),
@@ -2739,6 +2783,8 @@ template<class T>
 inline C_F0 operator *(const C_F0 &a,const C_F0 &b)
 {    
   return a==*pOne ? b : ( b ==*pOne ? a : C_F0(TheOperators,"*",a,b)) ;}
+inline C_F0 operator+(const C_F0 &a,const C_F0 &b){ return C_F0(TheOperators,"+",a,b);}
+inline C_F0 operator-(const C_F0 &a,const C_F0 &b){ return C_F0(TheOperators,"-",a,b);}
   
 inline C_F0 &operator +=(C_F0 &a,const C_F0 &b)
 {  
@@ -2773,7 +2819,8 @@ class  OneOpCast: public OneOperator {
 // 
 inline  bool  basicForEachType::CastingFrom(aType t) const  {
      throwassert(this && t);
-     if ( t == this) return true; 
+     if ( t == this) return true;
+     else if( t ==  type_C_F0 ) return true; // FH do work .... 09 / 2012 (use of ellispe ...)
      return casting->FindSameR(ArrayOfaType(t,false));
   }
 
@@ -2807,29 +2854,6 @@ inline 	 C_F0 basicForEachType::CastTo(const C_F0 & e) const
            CompileError();} 
  return C_F0();
 }
-//  1 variable pour les operation de cast 
-class E_F1_funcT_Type: public OneOperator{ public:
-//  const basicForEachType *r,*a;
-  Function1 f;
-    E_F0 * code(const basicAC_F0 & args) const   { 
-	if ( args.named_parameter && !args.named_parameter->empty()  ) 
-	    CompileError( " They are used Named parameter ");
-
-	return  new  E_F0_Func1(f,args[0]);} 
-  
-  E_F1_funcT_Type(const basicForEachType *rr,const basicForEachType *aa,Function1 ff)
-    : OneOperator(rr,aa), f(ff) {}
-  
-//: r(rr),a(aa),f(ff) {}
-//  friend ostream & operator<<(ostream & f,const E_F1_funcT_Type & e) { f << *e.a << " -> " << *e.r ;return f;}
-};
-
-template<class R,class A>
-class E_F1_funcT :public  E_F1_funcT_Type{ public:   
-   E_F1_funcT(Function1 ff) : E_F1_funcT_Type(map_type[typeid(R).name()],map_type[typeid(A).name()],ff){}
-   E_F1_funcT(aType rr,aType a,Function1 ff) : E_F1_funcT_Type(rr,a,ff){}
-};
-
 inline Expression  basicForEachType::RightValueExpr(Expression f) const 
 {
   if (un_ptr) return new  E_F0_Func1(un_ptr->f,f);
@@ -3035,7 +3059,7 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
      if( (verbosity / 100)% 10 == 1) 
        cout << "  --  insert opt " << n << " " << *this << endl;     
        n += sizeof(AnyType);         
-       l.push_back(make_pair<Expression,int>(opt,rr)); 
+       l.push_back(make_pair<Expression,int>((Expression)opt,(int)rr)); 
        m.insert(p); 
        return rr;
      }

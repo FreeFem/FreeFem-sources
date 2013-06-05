@@ -115,10 +115,25 @@ plot(xxr, wait=1);
 {// version 3.8    
   mesh Th=square(2,2);
   fespace Xh(Th,P1);
-  varf vv(u,v)= int2d(Th)( ((2+1i)*u*v)');//');
+  varf vv(u,v)= int2d(Th)( ((2+1i)*u*v)')+int2d(Th)((3+2i)*v);//');
+  varf vr(u,v)= int2d(Th)( u*v);//');
+
   matrix<complex> A=vv(Xh,Xh);
-  cout << A(0,0)  << endl;
+  matrix  Ar=vr(Xh,Xh);
+  complex[int] vc=vv(0,Xh);
+  real[int] vrr=vc.re,vii=vc.im;
+  vrr=vc.re;
+  vii=vc.im;
+  cout << "vc[0] = " <<vc[0] << " = " << vc.re[0] << " +i " << vc.im[0] <<endl;
   cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
+  // real part un complex par of matrix . 
+  Ar = A.re;
+  cout <<" A(0,0) = " << A(0,0)  << "   ";
+  cout << " A.re(0.0) = " << Ar(0,0) << "   " ;
+  Ar = A.im; 
+  cout << " A.im(0.0) = " << Ar(0,0) << endl  ;
+
+  
   macro Grada(u) [  phia*dx(u) + phiax*u ,dy(u) ]// ...
     func phia = exp(-2i*pi*x);
   func phiax = -2i*pi*exp(-2i*pi*x);
@@ -129,7 +144,10 @@ plot(xxr, wait=1);
   cout << A(1,2)' << " ==  " << At(2,1) << endl;
   A = A+ (-1)*At;
   cout << A << endl;
- 
+  // copy and initialisation of complex matric with real matrix. 
+ A = Ar; 
+ matrix<complex> Ac=Ar; 
+
 
 
 }

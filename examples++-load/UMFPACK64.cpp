@@ -326,6 +326,7 @@ public:
 inline MatriceMorse<double>::VirtualSolver *
 BuildSolverIUMFPack64(DCL_ARG_SPARSE_SOLVER(double,A))
 {
+  if( verbosity>9)
     cout << " BuildSolverUMFPack64<double>" << endl;
     return new SolveUMFPACK64<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
@@ -333,6 +334,7 @@ BuildSolverIUMFPack64(DCL_ARG_SPARSE_SOLVER(double,A))
 inline MatriceMorse<Complex>::VirtualSolver *
 BuildSolverIUMFPack64(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
+  if( verbosity>9)
     cout << " BuildSolverUMFPack64<Complex>" << endl;
     return new SolveUMFPACK64<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
 }
@@ -344,14 +346,6 @@ DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-}
 
 bool SetUMFPACK64()
 {
@@ -360,27 +354,23 @@ bool SetUMFPACK64()
     DefSparseSolver<double>::solver  =BuildSolverIUMFPack64;
     DefSparseSolver<Complex>::solver =BuildSolverIUMFPack64;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    return  true;
 }
 
-class Init { public:
-    Init();
-};
-Init init;
-Init::Init(){    
+
+void init22()
+{    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   if(verbosity>1)
     cout << "\n Add: UMFPACK64:  defaultsolver defaultsolverUMFPACK64" << endl;
-  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
-  
+  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver; 
   DefSparseSolver<double>::solver =BuildSolverIUMFPack64;
   DefSparseSolver<Complex>::solver =BuildSolverIUMFPack64;
-  if(! Global.Find("defaultsolver").NotNull() )
-    {    cout << "\n add defaultsolver (64)" << endl;
-    Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  }
+
   if(! Global.Find("defaulttoUMFPACK64").NotNull() )
     Global.Add("defaulttoUMFPACK64","(",new OneOperator0<bool>(SetUMFPACK64));  
 }
 
 
+LOADFUNC(init22);

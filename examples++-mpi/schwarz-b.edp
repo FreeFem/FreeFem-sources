@@ -5,6 +5,8 @@
 //  to test the broadcast instruction 
 //  add add the stop test 
 //  ---------------------------------
+// NBPROC 2
+
 if ( mpisize != 2 ) {
 cout << " sorry number of processeur !=2 " << endl;
 exit(1);}

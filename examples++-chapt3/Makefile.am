@@ -1,12 +1,10 @@
 # $Id$
 
 all-local: all.edp regtests.edp
-TESTS=../regtests.sh
-TESTS_ENVIRONMENT=PROGLOC=$(top_srcdir)/src REGEDP=regtests.edp		\
-	EXEEXT=$(EXEEXT) X11PROG=$(X11PROG) GLXPROG=$(GLXPROG)		\
-	AGLPROG=$(AGLPROG) MPIPROG=$(MPIPROG) IDEPROG="$(IDEPROG)"	\
-	VISUALCHECK=$(VISUALCHECK)
+TESTS=BlackScholes2D.edp NSNewton.edp NSprojection.edp condensor.edp convects.edp heatex.edp lame.edp membrane.edp membranerror.edp muwave.edp optimcontrol.edp potential.edp schwarz.edp sound.edp stokes.edp test1.edp testbed.edp thermal.edp thermic.edp
 EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp
+LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \

@@ -10,14 +10,15 @@ all-local: superludist
 
 # SUPERLU information
 #http://crd.lbl.gov/~xiaoye/SuperLU/superlu_3.1.tar.gz
+#http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_3.0.tar.gz
 DIRPKG=../pkg
-SRCDIR=SuperLU_DIST_2.3
-PACKAGE=superlu_dist_2.3.tar.gz
+SRCDIR=SuperLU_DIST_3.0
+PACKAGE=superlu_dist_3.0.tar.gz
 PACKAGE_PATH=$(DIRPKG)/$(PACKAGE)
-SERVER=http://crd.lbl.gov/~xiaoye/SuperLU/
+SERVER=http://crd-legacy.lbl.gov/~xiaoye/SuperLU/
 INSTALL=../..
-SUPERLU_DIST_VERSION=2.3
-DISTSUPERLULIB=../$(INSTALL)/lib/libsuperlu_dist_2.3.a
+SUPERLU_DIST_VERSION=3.0
+DISTSUPERLULIB=../$(INSTALL)/lib/libsuperlu_dist_3.0.a
 WGET=wget
 
 include make.inc
@@ -44,11 +45,11 @@ $(SRCDIR)/SRC/$(DSUPERLULIB): $(SRCDIR)
 	cp make.inc $(SRCDIR)/make.inc
 	cd $(SRCDIR)/SRC; $(MAKE)
 install:
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/superludist
-	cp $(SRCDIR)/SRC/*.h  $(SRCDIR)/$(INSTALL)/include/superludist
+	mkdir -p ../include/superludist
+	cp $(SRCDIR)/SRC/*.h  ../include/superludist
 WHERE:
-	echo superlu_dist LD -L@DIR@/lib -lsuperlu_dist_2.3  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
-	echo superlu_dist INCLUDE -I@DIR@/include/superludist  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
+	echo superlu_dist LD -L@DIR@/lib -lsuperlu_dist_3.0  >../lib/WHERE.superlu_dist
+	echo superlu_dist INCLUDE -I@DIR@/include/superludist  >> ../lib/WHERE.superlu_dist
 
 
 $(SRCDIR): $(PACKAGE_PATH)
@@ -62,11 +63,12 @@ $(PACKAGE_PATH):
 
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR)
+	-rm -rf $(SRCDIR)
+	-rm  ../include/superludist/*.h ../lib/WHERE.superlu_dist
+	-rm -r ../include/superludist/
+	-rm -r ../lib/libsuperlu_dist*.a
+	-rm -r make.inc
+	-rm -rf FAIT FAIRE
 
 clean: clean-local
-	-rm -rf $(SRCDIR)
-	-rm  $(SRCDIR)/$(INSTALL)/include/superludist/*.h
-	-rm -r $(SRCDIR)/$(INSTALL)/include/superludist/
-	-rm -r $(SRCDIR)/$(INSTALL)/lib/libsuperlu_dist*.a
-	-rm -r make.inc
-	-rm -rf FAIT
+

@@ -15,7 +15,7 @@ SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
 PKGDIR=../pkg
-FFTW_VERSION=3.2.1
+FFTW_VERSION=3.3.2
 INSTALL=../..
 THIS=fftw3
 
@@ -37,8 +37,8 @@ install:  WHERE
 	cd $(SRCDIR) && make install
 WHERE: 
 	-if [ FAIT ] ; then \
-	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >$(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
-	echo $(THIS) INCLUDE -I@DIR@/include   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.$(THIS) ;\
+	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >../lib/WHERE.$(THIS) ;\
+	echo $(THIS) INCLUDE -I@DIR@/include   >> ../lib/WHERE.$(THIS) ;\
 	fi
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
@@ -50,7 +50,7 @@ $(PKGDIR)/$(PACKAGE):
 clean: clean-local
 
 clean-local:
-	-rm -rf fftw-* FAIT FAIRE
+	-rm -rf fftw-* FAIT FAIRE ../lib/WHERE.$(THIS)
 
 cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags

@@ -35,69 +35,42 @@
 #include <gsl/gsl_sf_transport.h>
 #include <gsl/gsl_sf_trig.h>
 #include <gsl/gsl_sf_zeta.h>
+#include <gsl/gsl_poly.h>
 
-/*
-// wrapper gsl (all int in feefem++ are long)
-double gsl_sf_bessel_Jn (long n, double x) {return gsl_sf_bessel_Jn((int) n,x); }
-double gsl_sf_bessel_jn (long n, double x) {return gsl_sf_bessel_jn((int) n,x); }
-double gsl_sf_bessel_yl (long n, double x) {return gsl_sf_bessel_yl((int) n,x); }
-double gsl_sf_bessel_kl_scaled (long n, double x) {return gsl_sf_bessel_kl_scaled((int) n,x); }
-double gsl_sf_bessel_Yn (long n, double x) {return gsl_sf_bessel_Yn((int) n,x); }
-double gsl_sf_bessel_Kn (long n, double x) {return gsl_sf_bessel_Kn((int) n,x); }
-double gsl_sf_bessel_In (long n, double x) {return gsl_sf_bessel_In((int) n,x); }
-double gsl_sf_bessel_zero_J0 (long s) {return gsl_sf_bessel_zero_J0( (unsigned int) s); }
-double gsl_sf_bessel_zero_J1 (long s) {return gsl_sf_bessel_zero_J1( (unsigned int) s); }
-double gsl_sf_bessel_zero_Jnu (double nu,long s) {return gsl_sf_bessel_zero_Jnu(nu, (unsigned int) s); }
-*/
 #include "ff_gsl_awk.hpp"
 
+long gslpolysolvequadratic( KN_<double> a,  KN_<double> x)
+{
+  ffassert(a.N()>2 && x.N()>1);
+  return gsl_poly_solve_quadratic (a[2],a[1],a[0],&(x[0]),&(x[1]));
+  }
+long gslpolysolvecubic( KN_<double> a,  KN_<double> x)
+{
+  ffassert(a.N()>2 && x.N()>2);
+  return gsl_poly_solve_cubic (a[2],a[1],a[0],&(x[0]),&(x[1]),&(x[2]));
+  }
+
+long gslpolycomplexsolve( KN_<double> a,  KN_<Complex> x)
+{
+  int n = a.N();
+  ffassert( n-1 <=  x.N()); 
+  KN<double> z(n*2); 
+  gsl_poly_complex_workspace * w= gsl_poly_complex_workspace_alloc (n);
+  int ok=gsl_poly_complex_solve (&a[0], n, w, &z[0]);
+  gsl_poly_complex_workspace_free (w);
+  for (long i = 0; i < n-1; i++)
+    x[i] = Complex(z[2*i], z[2*i+1]);
+  return ok; 
+  }
 
 class Init { public:
   Init();
 };
-Init init;
+LOADINIT(Init);
 Init::Init(){
-  init_gsl_sf() ; 
-  /*
-  Global.Add("gslSfBesselJ0","(",new OneOperator1<double>(gsl_sf_bessel_J0));
-  Global.Add("gslSfBesselJ1","(",new OneOperator1<double>(gsl_sf_bessel_J1));
-  Global.Add("gslSfBesselJn","(",new OneOperator2<double,long,double>(gsl_sf_bessel_Jn));
-  Global.Add("gslSfBesselJnu","(",new OneOperator2<double,double,double>(gsl_sf_bessel_Jnu));
+  init_gsl_sf() ;
+  Global.Add("gslpolysolvequadratic","(",new OneOperator2<long,KN_<double>,KN_<double> >( gslpolysolvequadratic));
+  Global.Add("gslpolysolvecubic","(",new OneOperator2<long,KN_<double>,KN_<double> >(gslpolysolvecubic));
+  Global.Add("gslpolycomplexsolve","(",new OneOperator2<long,KN_<double>,KN_<Complex> >( gslpolycomplexsolve));
 
-  Global.Add("gslSfBesselj0","(",new OneOperator1<double>(gsl_sf_bessel_j0));
-  Global.Add("gslSfBesselj1","(",new OneOperator1<double>(gsl_sf_bessel_j1));
-  Global.Add("gslSfBesselj2","(",new OneOperator1<double>(gsl_sf_bessel_j2));
-  Global.Add("gslSfBesseljn","(",new OneOperator2<double,long,double>(gsl_sf_bessel_jn));
-
-
-  Global.Add("gslSfBessely0","(",new OneOperator1<double>(gsl_sf_bessel_y0));
-  Global.Add("gslSfBessely1","(",new OneOperator1<double>(gsl_sf_bessel_y1));
-  Global.Add("gslSfBessely2","(",new OneOperator1<double>(gsl_sf_bessel_y2));
-  Global.Add("gslSfBesselyl","(",new OneOperator2<double,long,double>(gsl_sf_bessel_yl));
-
-
-  Global.Add("gslSfBesselk0Scaled","(",new OneOperator1<double>(gsl_sf_bessel_k0_scaled));
-  Global.Add("gslSfBesselk1Scaled","(",new OneOperator1<double>(gsl_sf_bessel_k1_scaled));
-  Global.Add("gslSfBesselk2Scaled","(",new OneOperator1<double>(gsl_sf_bessel_k2_scaled));
-  Global.Add("gslSfBesselklScaled","(",new OneOperator2<double,long,double>(gsl_sf_bessel_kl_scaled));
-
-  Global.Add("gslSfBesselY0","(",new OneOperator1<double>(gsl_sf_bessel_Y0));
-  Global.Add("gslSfBesselY1","(",new OneOperator1<double>(gsl_sf_bessel_Y1));
-  Global.Add("gslSfBesselYn","(",new OneOperator2<double,long,double>(gsl_sf_bessel_Yn));
-  Global.Add("gslSfBesselYnu","(",new OneOperator2<double,double,double>(gsl_sf_bessel_Ynu));
-
-  Global.Add("gslSfBesselK0","(",new OneOperator1<double>(gsl_sf_bessel_K0));
-  Global.Add("gslSfBesselK1","(",new OneOperator1<double>(gsl_sf_bessel_K1));
-  Global.Add("gslSfBesselKn","(",new OneOperator2<double,long,double>(gsl_sf_bessel_Kn));
-  Global.Add("gslSfBesselKnu","(",new OneOperator2<double,double,double>(gsl_sf_bessel_Knu));
-
-  Global.Add("gslSfBesselI0","(",new OneOperator1<double>(gsl_sf_bessel_I0));
-  Global.Add("gslSfBesselI1","(",new OneOperator1<double>(gsl_sf_bessel_I1));
-  Global.Add("gslSfBesselIn","(",new OneOperator2<double,long,double>(gsl_sf_bessel_In));
-  Global.Add("gslSfBesselInu","(",new OneOperator2<double,double,double>(gsl_sf_bessel_Inu));
-
-  Global.Add("gslSfBesselZeroJ0","(",new OneOperator1<double,long>(gsl_sf_bessel_zero_J0));
-  Global.Add("gslSfBesselZeroJ1","(",new OneOperator1<double,long>(gsl_sf_bessel_zero_J1));
-  Global.Add("gslSfBesselZeroJnu","(",new OneOperator2<double,double,long>(gsl_sf_bessel_zero_Jnu));
-  */
 }

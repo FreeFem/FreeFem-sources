@@ -19,7 +19,7 @@ pHashtable  hash;
 mytime      ctim[TIMEMAX];
 
 long      nhmax,hnext,hsize;
-int       out; //,yams_idir[5] = {0,1,2,0,1},yams_idirq[7] = {0,1,2,3,0,1,2};
+int       out,idir[5] = {0,1,2,0,1},idirq[7] = {0,1,2,3,0,1,2};
 short     imprim;
 ubyte     ddebug;
 ubyte     ecp;

@@ -1169,7 +1169,7 @@ L10:
          - (LONG8) (c[(s2 << 1) + 2] - c[(s1 << 1) + 2]) 
          * (LONG8) (c[(s3 << 1) + 1] - c[(s1 << 1) + 1]);
          
-  if (!(direct) && det > 0 || direct && det < 0)
+  if ((!(direct) && det > 0) || (direct && det < 0))
      {
 /*       on ajoute un triangle t et on detruit une arete */
 /*       ----------------------------------------------- */

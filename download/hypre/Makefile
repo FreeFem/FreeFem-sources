@@ -74,9 +74,10 @@ $(PACKAGE):
 	cd $(PKGDIR); $(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean: clean-local
-	-rm ff-flags FAIT
+
 clean-local:
 	-rm -rf $(SRCDIR) FAIT 
+	-rm ff-flags FAIT
 
 ff-flags: ../Makefile ff-flags.inc 
 	../../config.status  --file="ff-flags:ff-flags.inc"

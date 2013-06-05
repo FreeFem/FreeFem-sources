@@ -33,9 +33,9 @@ Makefile.in: ../../config.status	Makefile makefile-parms.in
 $(SRCDIR)/$(INSTALL): $(SRCDIR)
 	cp Makefile.in $(SRCDIR)/makefile.in
 	cd $(SRCDIR); $(MAKE) ./LIB/libparms$(DBG).a
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/parms
-	cp $(SRCDIR)/INCLUDE/*.h $(SRCDIR)/$(INSTALL)/include/parms/
-	cp $(SRCDIR)/LIB/*.a $(SRCDIR)/$(INSTALL)/lib/
+	mkdir -p ../include/parms
+	cp $(SRCDIR)/INCLUDE/*.h ../include/parms/
+	cp $(SRCDIR)/LIB/*.a ../lib/
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
@@ -47,14 +47,16 @@ $(PACKAGE):
 
 clean-local:
 	-make cleanall -C $(SRCDIR)/src
-
-clean: 
-	-rm Makefile.in
+	-rm Makefile.in ../lib/WHERE.parms
+	-rm ../lib/libparms.*
+	-rm -rf ../include/parms
 	-rm -rf $(SRCDIR)
+clean: 
+
 
 WHERE:
-	echo parms LD -L@DIR@/lib -lparms$(DBG)  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parms
-	echo parms INCLUDE -I@DIR@/include/parms >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parms
+	echo parms LD -L@DIR@/lib -lparms$(DBG)  >../lib/WHERE.parms
+	echo parms INCLUDE -I@DIR@/include/parms >> ../lib/WHERE.parms
 
 .PHONY:$(SRCDIR)/$(INSTALL)
 

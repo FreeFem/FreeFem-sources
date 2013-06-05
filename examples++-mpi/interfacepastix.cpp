@@ -529,7 +529,7 @@ bool Setpastixmpi()
 
 
 
-Init init;
+LOADINIT(Init);
 Init::Init()
 { 
   

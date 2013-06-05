@@ -58,7 +58,7 @@ extern long mpisize,mpirank;
 double  VersionNumber(); 
 double Imag(const  complex<double> & z){ return imag(z);}
 double Real(const  complex<double> & z){ return real(z);}
-
+const  basicForEachType * basicForEachType::type_C_F0 =0; //  for any type un formal operation .... FH add 09/2012
 
 // FH
 
@@ -95,7 +95,7 @@ template<class A,class B>  A Build(B b) {  return A(b);}
   
 
 
-long Exit(long i) {throw(ErrorExec("Exit",i));return 0;}
+long Exit(long i) {throw(ErrorExit("Exit",i));return 0;}
 bool Assert(bool b) {if (!b) throw(ErrorExec("exec assert",1));return true;}
   
 inline void MyAssert(int i,char * ex,char * file,long line)
@@ -222,6 +222,7 @@ AnyType FWhile(Stack s ,Expression test,Expression ins)
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
+       else throw e;
        }
   return a;
 }
@@ -243,6 +244,7 @@ AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
+       else throw e;
        }
    }
   return a;
@@ -486,7 +488,7 @@ struct  MIMul {
       {
         if (mia && a->EvaluableWithOutStack() )
           {
-            A va = GetAny<A>((*a)(0));
+            A va = GetAny<A>((*a)(NullStack));
            // cout << " va = " << va << endl;
             if ( va == A() )
              { 
@@ -496,7 +498,7 @@ struct  MIMul {
           }
         if (mib && b->EvaluableWithOutStack() )
           {
-            B vb = GetAny<B>((*b)(0));
+            B vb = GetAny<B>((*b)(NullStack));
             // cout << " vb = " << vb << endl;
             if ( vb == B() ) 
             { //cout << " vb = " << vb << endl;
@@ -550,6 +552,22 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
 };
+
+
+class opColumn : public OneOperator{
+public:
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+    bool MeshIndependent() const { return false;}
+    
+    opColumn(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {if( A== basicForEachType::type_C_F0)pref=-100;}
+    opColumn(aType A): OneOperator(atype<C_F0>(),ArrayOfaType(A,true)) {pref=-100;}
+    
+  //  opColumn(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
+    
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const;
+};
+
 class opSum : public OneOperator{
 public:
     const char * op;
@@ -561,6 +579,8 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;       
 };
+
+
 /*
 class opArray : public OneOperator{
 public:
@@ -611,7 +631,89 @@ C_F0 TryConj(const C_F0 & c) {
 	
     return c; }
 // fin add 2010 feb.	  
-// avril 2007	  
+// avril 2007
+
+C_F0  formalMatCofactor(const basicAC_F0 &args)
+{
+    bool ta =args[0].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const E_Array * ea=0;
+    if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    assert( ea || tea );
+    const E_Array & a=  ta ? *tea->v : *ea;
+    int ma =1;
+    int na=a.size();
+    if(na <1 ) CompileError(" Cofactor  ([ ...])  ");
+    bool maa= a[0].left()==atype<E_Array>();
+    if(maa) {
+	ma= a[0].LeftValue()->nbitem();
+	for (int i=1;i<na;i++)
+	    if( ma != (int) a[i].LeftValue()->nbitem())
+		CompileError(" a matrix with variable number of columm");
+        
+    }
+    
+    int na1=na,ma1=ma;
+    if(ta) RNM::Exchange(na1,ma1);
+    if(na1 != ma1) CompileError(" CoFactor:  no square matrix ");
+    if(na1 > 3 || ( na1 <1) ) CompileError(" CoFactor:   square matrix size is more then 3   ");
+    KNM<CC_F0> A(na1,na1);
+    KNM<CC_F0> C(na1,na1);
+    if(maa)
+	for (int i=0;i<na;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<ma;++j)
+		if(!ta)  A(i,j) = (*li)[j];
+		else     A(j,i) = TryConj((*li)[j]);
+	}
+    else
+        for (int i=0;i<na;++i)
+            if(!ta)  A(i,0) = a[i];
+            else     A(0,i) = TryConj(a[i]);
+    
+    
+    AC_F0  v,cc;
+    if(na1==2)
+    {
+      for(int i=0;i<na1;++i)
+        for(int j=0;j<na1;++j)
+          if( (i+j) %2 == 0)
+            C(i,j) = A(1-i,1-j);
+          else
+            C(i,j) = C_F0(TheOperators,"-",A(1-i,1-j));
+    }
+    else if( na1 ==3)
+    {
+        int i1,i2,j1,j2;
+        for(int i=0;i<3;++i)
+          for(int j=0;j<3;++j)
+          {
+              i1 = (i+1)%3;
+              i2 = (i+2)%3;
+              j1 = (j+1)%3;
+              j2 = (j+2)%3;
+              
+            C(i,j) = A(i1,j1)*A(i2,i2)-A(i1,j2)*A(i2,j1);
+          }
+    }
+    v=C(0,0);
+    
+    for (int i=0;i<na1;++i)
+    {  cc = C(i,0);
+        for (int j=1;j<ma1;++j)
+            cc+= C(i,j);
+        C_F0  vi(TheOperators,"[]",cc);
+        if(i==0) v=vi;
+        else v+= vi;
+    }
+    return C_F0(TheOperators,"[]",v);
+
+    
+}
+
 C_F0  formalMatTrace(const basicAC_F0 &args)       
 {
     bool ta =args[0].left()==atype<TransE_Array>();
@@ -661,7 +763,8 @@ C_F0  formalMatTrace(const basicAC_F0 &args)
      
 }
 
-C_F0  formalMatDet(const basicAC_F0 &args)       
+
+C_F0  formalMatDet(const basicAC_F0 &args)
 {
     bool ta =args[0].left()==atype<TransE_Array>();
     const TransE_Array * tea=0;
@@ -710,6 +813,17 @@ C_F0  formalMatDet(const basicAC_F0 &args)
 	C_F0 s2(TheOperators,"*",A(0,1),A(1,0));
 	return C_F0(TheOperators,"-",s1,s2);
     }
+    else if( na1==3 )
+    {
+        int i=0,ii=(i+1)%3,iii=(i+2)%3;
+        A(i,0)*A(i,0);
+        C_F0 det = A(i,0)*A(ii,1)*A(iii,2) - A(i,0)*A(ii,2)*A(iii,1);
+        i++;ii=(i+1)%3,iii=(i+2)%3;
+        det +=  A(i,0)*A(ii,1)*A(iii,2) - A(i,0)*A(ii,2)*A(iii,1);
+        i++;ii=(i+1)%3,iii=(i+2)%3;
+        det +=  A(i,0)*A(ii,1)*A(iii,2) - A(i,0)*A(ii,2)*A(iii,1);
+        return det;
+    }
     else
     {
 	CompileError("FH: sorry only det of 1x1 and 2x2 matrix ");
@@ -744,6 +858,8 @@ istream *Getline(istream * f, string ** s)
 {
     if( *s==0) *s=new string;
     getline(*f,**s);
+    size_t l = (**s).length();
+    if( l > 0 && ((**s)[l-1]=='\r')) (**s).resize(l-1); //
        return f;    
 }
 // Fin Add ne marche pas ....
@@ -781,7 +897,16 @@ inline double walltime(){
 
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
+double NaN(string* p) {return nan(p->c_str());}// add march 2012
+double NaN() {return nan("");}// add march 2012
 
+long isNaN(double x){return isnan(x);}
+long isInf(double x){return isinf(x);}
+long isNormal(double x){return isnormal(x);}
+//int  ShowAlloc(const char *s, size_t lg);
+int ShowAlloc(const char *s,size_t & lg); 
+long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
+long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -811,7 +936,7 @@ void Init_map_type()
     Dcl_Type<Polymorphic*>();
     
 //    Dcl_Type<C_F0>();
-    map_type[typeid(C_F0).name()] =  new TypeLineFunction; 
+    basicForEachType::type_C_F0 = map_type[typeid(C_F0).name()] =  new TypeLineFunction;
     Dcl_Type<E_Array>();
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
@@ -1042,6 +1167,7 @@ void Init_map_type()
        ); 
 
      TheOperators->Add("?:",
+       new Operator_Aritm_If<bool >,
        new Operator_Aritm_If<long >,
        new Operator_Aritm_If<double >,
        new Operator_Aritm_If<Complex >,
@@ -1098,10 +1224,16 @@ void Init_map_type()
       
      // TheOperators->Add("\'", new opTTrans); 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("*",new opColumn(atype<E_Array >() )   );  //  [ ]* C_F0 (all)
+      TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<E_Array >() )   );  //  [ ]* C_F0 (all)
+      TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<TransE_Array >() )   );  //  [ ]* C_F0 (all)
+//    type_C_F0
+      TheOperators->Add("::",new opColumn(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-     // car le type de retour depent des objets du tableau 
+ 
+     // car le type de retour depent des objets du tableau
       atype<E_Array >()->Add("[","",new opVI(atype<E_Array >())   );  
       atype<TransE_Array >()->Add("[","",new opVI(atype<TransE_Array >())   );  
       TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
@@ -1158,8 +1290,8 @@ void Init_map_type()
        new OneOperator2_<long*,long*,long>(&set_copyp),
        new OneOperator2_<bool*,bool*,bool>(&set_copyp), //  mars 2006
        new OneOperator2_<Complex*,Complex*,Complex>(&set_copy),
-       new OneOperator2_<istream**,istream**,istream*>(&set_copy),
-       new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy),
+  //     new OneOperator2_<istream**,istream**,istream*>(&set_copy_new<istream>),
+   //    new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy_new<ostream>),
 //       new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >,
 //       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
        new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006 
@@ -1229,8 +1361,10 @@ void Init_map_type()
 // add 2.16
      Global.Add("trace","(",new opFormal(atype<E_Array>(),formalMatTrace ));
      Global.Add("det","(",new opFormal(atype<E_Array>(),formalMatDet ));
-// end add     
+// end add
                                 
+    // add 3.20
+    Global.Add("Cofactor","(",new opFormal(atype<E_Array>(),formalMatCofactor ));
       
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
@@ -1308,7 +1442,8 @@ void Init_map_type()
      //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
      //     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
-     Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow));
+     //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
+     Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
      Global.Add("conj","(",new OneOperator1_<double>(conj,1));
@@ -1356,7 +1491,16 @@ void Init_map_type()
   Global.Add("randres53","(",new OneOperator_0<double>(genrand_res53));
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
   
-       
+   //  NaN and Inf 
+  Global.Add("ShowAlloc","(",new OneOperator1<long,string*>(ShowAlloc1));// debuging 
+  Global.Add("ShowAlloc","(",new OneOperator2<long,string*,long*>(ShowAlloc1));// debuging 
+  Global.Add("NaN","(",new OneOperator0<double>(NaN));
+  Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
+    Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
+    Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
+    Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
+ 
+  
 
 typedef MyMap<String,String> MyMapSS;
     
@@ -1373,7 +1517,7 @@ typedef MyMap<String,String> MyMapSS;
   
 
 }
-int ShowAlloc(const char *s,size_t & lg); 
+//int ShowAlloc(const char *s,size_t & lg); 
 
 
 
@@ -1413,7 +1557,7 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
 	bool bb=p->EvaluableWithOutStack();
 	//cout << bb << " " <<  * p <<  endl;
 	CompileError(" [...][p], The p must be a constant , sorry");}
-        long pv = GetAny<long>((*p)(0));
+        long pv = GetAny<long>((*p)(NullStack));
     bool ta =args[0].left()==atype<TransE_Array>();
     const TransE_Array * tea=0;
     const E_Array * ea=0;
@@ -1422,7 +1566,13 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     assert( ea || tea );
     const E_Array & a=  ta ? *tea->v : *ea;
    // cout << " pv =" << pv << " size = "<< a.size() << endl;
-    ffassert(pv >=0 && pv <a.size());
+    if(!(pv >=0 && pv <a.size()))
+    {
+      cerr << "\n\nerror [ ... ][" << pv <<" ] " << " the  size of [ ...]  is "<< a.size() << endl;
+      lgerror(" bound of  [ .., .. , ..][ . ] operation  ");
+    }
+    
+    //ffassert(pv >=0 && pv <a.size());
     return (* a.v)[pv];
 }
 
@@ -1514,9 +1664,10 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 		s = C_F0(TheOperators,"+",s,abi);}
 	    C(i,j)=s;
 	};
+   // cout << "\n ***na1 nb1 == = "<< na1 << " " << nb1 << endl;
     if( na1==1 && mb1 ==1)
 	return C(0,0);
-    else if (( mb1 ==1) ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
+    else if ( mb1 ==1 ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
     {
 	AC_F0  v;
 	v=C(0,0);
@@ -1573,8 +1724,7 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
     return C_F0();
 
 }
-
-C_F0  opSum::code2(const basicAC_F0 &args) const      
+C_F0  opColumn::code2(const basicAC_F0 &args) const
 {
     bool ta =args[0].left()==atype<TransE_Array>();
     bool tb = args[1].left()==atype<TransE_Array>();
@@ -1582,7 +1732,139 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     const TransE_Array * teb=0;
     const E_Array * ea=0;
     const E_Array * eb=0;// E_F0
-	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
+    if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
+    else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
+    
+   // ffassert( ea || tea );
+
+    if( (eb || teb) && ( ea || tea ) )
+    {
+    const E_Array & a=  ta ? *tea->v : *ea;
+    const E_Array & b=  tb ? *teb->v : *eb;
+    int ma =1;
+    int mb =1;
+    int na=a.size();
+    int nb=b.size();
+    if(na <1 && nb < 1) CompileError(" empty array  [ ...]':[ ...  ]  ");
+    bool mab= b[0].left()==atype<E_Array>();
+    bool maa= a[0].left()==atype<E_Array>();
+    if(maa) {
+	ma= a[0].LeftValue()->nbitem();
+	for (int i=1;i<na;i++)
+	    if( ma != (int) a[i].LeftValue()->nbitem())
+		CompileError(" first matrix with variable number of columm");
+        
+    }
+    if(mab) {
+	mb= b[1].LeftValue()->nbitem();
+	for (int i=1;i<nb;i++)
+	    if( mb != (int) b[i].LeftValue()->nbitem())
+		CompileError(" second matrix with variable number of columm");
+    }
+    int na1=na,ma1=ma,nb1=nb,mb1=mb;
+    if(ta) RNM::Exchange(na1,ma1);
+    if(tb) RNM::Exchange(nb1,mb1);
+    
+    KNM<CC_F0> A(na1,ma1), B(nb1,mb1);
+    if ( (na1!=nb1 ) || (ma1 != mb1) || (na1 * ma1 ==0)  )
+    {
+	cout << "\n   formal  array or matrix : [ .. ] : [ .. ]   " << endl;
+	cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
+	cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
+	CompileError(" no same size  [ ...] : [ ...  ] sorry ");
+    }
+    
+    if(maa)
+	for (int i=0;i<na;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<ma;++j)
+		if(!ta)  A(i,j) = (*li)[j];
+		else     A(j,i) = TryConj((*li)[j]);
+	}
+    else
+	for (int i=0;i<na;++i)
+	    if(!ta)  A(i,0) = a[i];
+	    else     A(0,i) = TryConj(a[i]);
+    
+    if(mab)
+	for (int i=0;i<nb;++i)
+	{
+	    const E_Array * li=  dynamic_cast<const E_Array *>(b[i].LeftValue());
+	    ffassert(li);
+	    for (int j=0; j<mb;++j)
+		if(!tb)  B(i,j) = (*li)[j];
+		else     B(j,i) = TryConj((*li)[j]);
+	}
+    else
+	for (int i=0;i<nb;++i)
+	    if(!tb)  B(i,0) = b[i];
+	    else     B(0,i) = TryConj(b[i]);
+    
+    //KNM<CC_F0> C(na1,mb1);
+    CC_F0 s,aibi;
+    
+    for (int i=0;i<na1;++i)
+      for (int j=0;j<ma1;++j)
+	{
+		aibi = C_F0(TheOperators,"*",A(i,j),B(i,j));
+            if( (i==0) && (j==0))
+                s = aibi; 
+            else 
+            s = C_F0(TheOperators,"+",s,aibi);
+	};
+ //   if( na1==1 && mb1 ==1)
+	return s;
+    }
+    else if ( ea || tea )
+    {
+        
+        const E_Array & a=  ta ? *tea->v : *ea;
+        int na=a.size();
+        AC_F0  v;
+        v = 0; // empty
+	for (int i=0;i<na;++i)
+	    v += C_F0(TheOperators,"*",ta ? TryConj(a[i]) : a[i],args[1]) ;
+	return ta ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
+    
+    }
+    else if(eb || teb)
+     {
+         const E_Array & b=  tb ? *teb->v : *eb;
+         int nb=b.size();
+         AC_F0  v;
+         v = 0; // empty
+         for (int i=0;i<nb;++i)
+             v += C_F0(TheOperators,"*",args[0],tb ? TryConj(b[i]) : b[i]) ;
+         return tb ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
+
+     }
+    else ffassert(0); 
+/*
+    cout << "   formal : array or matrix : [ .. ] : [ .. ]   " << na << "x" << nb << endl;
+    cout << "   formal : array or matrix : [ .. ] : [ .. ]   " <<  endl;
+    cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
+    cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
+    CompileError("  not implemented sorry ..... (FH) to do ???? ");
+   
+ */
+     return C_F0();
+}
+
+
+C_F0  opSum::code2(const basicAC_F0 &args) const
+{
+    
+    bool ta =args[0].left()==atype<TransE_Array>();
+    bool tb = args[1].left()==atype<TransE_Array>();
+    const TransE_Array * tea=0;
+    const TransE_Array * teb=0;
+    const E_Array * ea=0;
+    const E_Array * eb=0;// E_F0
+    if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
     else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
@@ -1592,7 +1874,7 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     const E_Array & b=  tb ? *teb->v : *eb;
     int na=a.size();
     int nb=b.size();
-    if(na != nb) CompileError(" formal sum  [ ...] + [ ...  ]  ");
+    if(na != nb) CompileError(" formal   [ [...] [] ] : [ [..], [..] , ... ]  ");
     
 
     AC_F0  v;
@@ -1602,6 +1884,8 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
 	return C_F0(TheOperators,"[]",v);
     
 }
+
+
 
 
 

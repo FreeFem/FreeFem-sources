@@ -235,8 +235,8 @@ class pfes_tef : public v_fes { public:
   pfes_tef(const pmesh* t,const TypeOfFE * tt,Stack s=NullStack, int n=0,Expression *p=0 ) 
     : v_fes(tt->N,t,s,n,p),tef(tt) { operator FESpace * ();} 
   FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
-  { return  new FESpace(**ppTh,*tef,nbdfv,(int *) ndfv,nbdfe,(int*)ndfe);}
-  FESpace * buildupdate()   {  return  new FESpace(**ppTh,*tef);}
+    { return  *ppTh ? new FESpace(**ppTh,*tef,nbdfv,(int *) ndfv,nbdfe,(int*)ndfe): 0;}
+    FESpace * buildupdate()   {  return *ppTh ? new FESpace(**ppTh,*tef):0 ;}
   
 };
 
@@ -251,12 +251,12 @@ class pfes_tefk : public v_fes { public:
   FESpace * buildupdate() { 
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl; 
     assert(tef);
-    return  new FESpace(**ppTh,tef,k);}
+      return  *ppTh? new FESpace(**ppTh,tef,k):0;}
   virtual ~pfes_tefk() { delete [] tef;}
   FESpace * buildupdate(int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) 
   {
     assert(tef);
-    return  new FESpace(**ppTh,tef,k,nbdfv,ndfv,nbdfe,ndfe);}
+    return  *ppTh? new FESpace(**ppTh,tef,k,nbdfv,ndfv,nbdfe,ndfe):0 ;}
   
   
 }; 
@@ -266,11 +266,12 @@ class pfes3_tef : public v_fes3 { public:
     const TypeOfFE3 * tef ;  
   pfes3_tef(const pmesh3* t,const TypeOfFE3 * tt,Stack s=NullStack, int n=0,Expression *p=0 ) 
     : v_fes3(tt->N,t,s,n,p),tef(tt) { operator FESpace3 * ();} 
-  FESpace3 * buildupdate( KN<int> & ndfe)   { return  new FESpace3(**ppTh,*tef,ndfe.size()/2,ndfe);   }
-  FESpace3 * buildupdate()   {  return  new FESpace3(**ppTh,*tef);}
+    FESpace3 * buildupdate( KN<int> & ndfe)   { return  *ppTh ? new FESpace3(**ppTh,*tef,ndfe.size()/2,ndfe):0;   }
+    FESpace3 * buildupdate()   {  return  *ppTh? new FESpace3(**ppTh,*tef):0;}
   
 };
- 
+
+
 class pfes3_tefk : public v_fes3 { 
 public:
   
@@ -278,8 +279,17 @@ public:
   const int k;  
   KN< GTypeOfFE<Mesh3> const *> atef;
   GTypeOfFESum<Mesh3> tefs;
+  
+   static int sum(const Fem2D::TypeOfFE3 ** l,int const Fem2D::TypeOfFE3::*p,int n)
+    {
+        int r=0;
+        for (int i=0;i<n;i++)
+            r += l[i]->*p;
+        return r;
+    }
+    
   pfes3_tefk(const pmesh3* t,const Fem2D::TypeOfFE3 ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 ) 
-    : v_fes3(sum((const dataTypeOfFE **)tt,&Fem2D::TypeOfFE3::N,kk),t,s,n,p),
+    : v_fes3(sum((const Fem2D::TypeOfFE3 **)tt,&Fem2D::TypeOfFE3::N,kk),t,s,n,p),
       tef(tt),k(kk),
       atef(kk,tt),tefs(atef)
       
@@ -290,11 +300,11 @@ public:
   FESpace3 * buildupdate() { 
     // cout << "pfes_tefk upd:" << tef << " " << this <<  endl; 
     //assert(tef);
-    return  new FESpace3(**ppTh,tefs);}
+      return  *ppTh? new FESpace3(**ppTh,tefs):0;}
   virtual ~pfes3_tefk() { delete [] tef;}
   FESpace3 * buildupdate(KN<int> & ndfe) 
   {
-    return  new FESpace3(**ppTh,tefs,ndfe.size()/2,ndfe);
+      return  *ppTh? new FESpace3(**ppTh,tefs,ndfe.size()/2,ndfe):0;
   }
     
 }; 
@@ -389,7 +399,8 @@ class FEbaseArrayKn { public:// for eigen value
     int N;
     FEbaseArrayKn(int NN):N(NN){}
   virtual  void  set(int i,KN_<K> ) =0;
-
+virtual KN<K>* get (int i) const = 0; // for P. Jolivet 
+virtual void resize(int i) = 0; // for P. Jolivet 
 };
 
 template<class K,class v_fes>
@@ -412,12 +423,37 @@ public:
     delete [] xx;} 
   void destroy() { //cout << " destroy ~FEbaseArray " << endl; 
     delete this;}         
-  FEbase<K,v_fes>** operator[](int i)  {
+  FEbase<K,v_fes>** operator[](int i) const  {
     if(xx==0 || i <0 || i>=this->N) 
       ExecError("Out of bound in FEbaseArray");
     return xx+i;}  
     
+    void resize(int i) {
+        if(xx != 0 && i > 0 && i != this->N) {
+            FEbase<K,v_fes>** yy = new FEbase<K,v_fes>*[i];
+            if(i > this->N) {
+                for(unsigned int j = 0; j < this->N; ++j)
+                    yy[j] = xx[j];
+                for(unsigned int j = this->N; j < i; ++j)
+                    yy[j] = new FEbase<K,v_fes>(xx[0]->pVh);
+            }
+            else {
+                for(unsigned int j = 0; j < i; ++j)
+                    yy[j] = xx[j];
+                for(unsigned int j = i; j < this->N; ++j)
+                    xx[j]->destroy();
+            }
+             FEbase<K,v_fes>  **oldXx = this->xx;
+             this->xx = yy;
+             delete [] oldXx;
+             this->N = i;
+        }
+    }
+
     void  set(int i,KN_<K>  v){  **(operator[](i))=v;} 
+    
+    KN<K>* get(int i)const { return (**(operator[](i))).xx; }
+    
 private: // rule of programming 
   FEbaseArray(const FEbaseArray &);
   void operator= (const FEbaseArray &); 
@@ -427,8 +463,9 @@ void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Express
 int GetPeriodic(Expression  bb, Expression & b,Expression & f);
 int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2);
 
+
 /*
-template<class K>
+template<class K,int dim>
 class FE  { public:
 
   const pfes  *pVh; // pointeur sur la variable stockant FESpace;
@@ -452,7 +489,7 @@ class FE  { public:
      void operator= (const FE &); 
 };
 // bof bof pour test 
-
+/*
 template<class K,int comp>
 class FE_ : public FE<K>{public:
 
@@ -547,6 +584,7 @@ typedef pair<pferbasearray,int> pferarray ;
 
 inline FESpace * v_fes::update() {     
     assert(d==2);
+    if(!*ppTh) return 0; 
     if (nbcperiodic ) {
        assert(periodic);
        const Mesh &Th(**ppTh);
@@ -563,6 +601,7 @@ inline FESpace * v_fes::update() {
 
 inline FESpace3 * v_fes3::update() {     
   assert(d==3);
+  if(!*ppTh) return 0;
   if (nbcperiodic ) {
     assert(periodic);
     //const Mesh3 &Th(**ppTh);

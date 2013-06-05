@@ -36,6 +36,7 @@
 
 const char * edpfilenamearg=0;	 	
 bool  waitatend=true;
+bool  consoleatend=true;
 
 #ifdef AGL
 #define TARGET_API_MAC_CARBON 1

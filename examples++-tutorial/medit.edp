@@ -4,7 +4,9 @@ real[int] xx(nn),yy(nn);
 mesh Th=square(10,10,[2*x-1,2*y-1]); 
 fespace Vh(Th,P1);
 Vh u=2-x*x-y*y;
-
+// old code ::
+if(1)
+{
    savemesh(Th,"mm",[x,y,u*.5]); //  save mm.points and mm.faces file for medit
    // build a mm.bb file 
 	{ ofstream file("mm.bb"); 
@@ -14,9 +16,16 @@ Vh u=2-x*x-y*y;
 	  file << u[][j] << endl; 
     }  
     // call ffmedit command 	
-    exec("ffmedit mm");
+    if(!NoGraphicWindow) exec("ffmedit mm");
     // clean files
     exec("rm mm.bb mm.faces mm.points");
-    
+}
+else 
+{
+// new code 
+load "medit" load "msh3"  
+    mesh3 Th3= movemesh23(Th,transfo=[x,y,u*0.5]);
+    medit("mm",Th3);// bug un color of u ... FH 
+}
 
 

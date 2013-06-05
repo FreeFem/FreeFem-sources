@@ -1,6 +1,8 @@
 #include "mode_open.hpp"
 #if WIN32
 #include  "ff-win32.cpp"
+#else
+#include <unistd.h>
 #endif
 extern long mpirank;
 extern long verbosity;
@@ -9,7 +11,10 @@ extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
 extern const char *  prognamearg;
 extern const char *  edpfilenamearg;
 extern bool  waitatend;
+extern bool  consoleatend;
 extern bool echo_edp;
+extern bool 	  NoGraphicWindow;
+
 char * Shell_Space(const char * s);
 
 char * Shell_Space(const char * s)
@@ -48,6 +53,7 @@ char * Shell_Space(const char * s)
 int getprog(char* fn,int argc, char **argv)
 {
   waitatend=true;  // attent 
+  consoleatend=false;  // bug with redirection FH 
   int ret=0;
   *fn='\0';
 #ifdef WIN32
@@ -72,6 +78,7 @@ int getprog(char* fn,int argc, char **argv)
       if( pm )
         noffglut = ((strlen(prog)- (pm-prog)) < lsuffix+5);
       else   noffglut==  false;
+      if(noffglut) { consoleatend=false;  waitatend=false;} 
       //      cout << " noffglut= " << noffglut << endl;
       //  suffix ++-glx.exe -> no ffglut
       // pm = 0= > pas de moins -> freefem++ -> ffglut
@@ -97,7 +104,11 @@ int getprog(char* fn,int argc, char **argv)
 	  if(verbosity>10) printf(" verbosity : %ld\n",verbosity);
 	}
       else if  (strcmp(argv[i],"-nw")==0 ) 
-	noffglut=true;
+	{
+	  consoleatend=false;
+	  noffglut=true;
+	  NoGraphicWindow=true; 
+	}
       else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-cd")==0 ) // 
@@ -107,6 +118,10 @@ int getprog(char* fn,int argc, char **argv)
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
 	waitatend=false;
+      else if  (strcmp(argv[i],"-nc")==0 ) 
+	consoleatend=false;
+      else if  (strcmp(argv[i],"-log")==0 ) 
+	consoleatend=true;
       else if  (strcmp(argv[i],"-wait")==0 ) 
 	  waitatend=true;
       else if(strcmp(argv[i],"-fglut")==0 && i+1 < argc)
@@ -118,11 +133,13 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  progffglut=argv[++i];
 	  noffglut=true;
+	  NoGraphicWindow=false;
 	}
       else if(strcmp(argv[i],"-gff")==0 && i+1 < argc)
 	{
 	  progffglut=Shell_Space(argv[++i]);
 	  noffglut=true;
+	  NoGraphicWindow=false;
 	}    
       else if(strcmp(argv[i],"-?")==0 )
 	ret=2;
@@ -216,7 +233,7 @@ if( ch2edpdir && edpfilenamearg)
            << "        -gff     command  : change  command  compatible with ffglut (with space quoting)\n"
 	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -wait             : wait at the end on window   \n"
-	   << "        -nw               : no ffglut (=> no graphics windows) \n"
+	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
            << "        -cd               : Change dir to script dir\n"
 

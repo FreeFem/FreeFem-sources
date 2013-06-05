@@ -46,7 +46,7 @@ ONETEST(LaplaceRT,u1[]'*u1[],1e-2)
 ONETEST(mesh)
 ONETEST(movemesh,u[]'*u[],1e-2)
 ONETEST(nolinear-elas,un[]'*un[],1e-2)
-ONETEST(NSUzawaCahouetChabart,u1[]'*u1[],1e-2)
+ONETEST(NSUzawaCahouetChabart,u1[].linfty,1e-2)
 ONETEST(onde,u[]'*u[],1e-2)
 
 dnl The following two tests have suspicious results (1e20 and bigger)

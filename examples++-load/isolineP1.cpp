@@ -45,7 +45,7 @@ using namespace std;
 
 #include <set>
 #include <vector>
-#include "msh3.hpp"
+//#include "msh3.hpp"
 
 using namespace  Fem2D;
 
@@ -71,11 +71,11 @@ public:
       {	 
 	ff=to<double>( args[2] );  
       }
-    else {
-      CompileError("no function to isolines \n");
+    else {ffassert(0);
+      // ErrorCompile("no function to isolines \n");
     }    
-    if( !nargs[0]) 
-      CompileError("no isolines selected \n");
+    if( !nargs[0]) ffassert(0); 
+      //   ErrorCompile("no isolines selected \n");
   } 
     
   AnyType operator()(Stack stack)  const ;
@@ -124,8 +124,8 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 
   
   // calcul des isolines dans les triangles
-  double EdgeIter[3*Th.nt];
-  int taketriangle[2*Th.nt];
+  KN<double> EdgeIter(3*Th.nt);
+  KN<int> taketriangle(2*Th.nt);
   
   for(int ii=0; ii< 3*Th.nt; ii++){
     EdgeIter[ii] = -1;
@@ -321,7 +321,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   
   //#################################  
   int NbInterBord=0;
-  int ElementLink[Th.nt+Th.neb];
+  KN<int> ElementLink(Th.nt+Th.neb);
   for(int it=0; it< Th.nt+Th.neb; it++)
     ElementLink[it]=-1;
 
@@ -599,7 +599,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
   
   Vertex *VertexIsoP = new Vertex[NbVertex];
   
-  int TriangleVu[Th.nt];
+  KN<int> TriangleVu(Th.nt);
   for(int iii=0; iii< Th.nt; iii++)
     TriangleVu[iii]= -1;
 
@@ -879,13 +879,16 @@ class Init { public:
   Init();
 };
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
  
   typedef Mesh *pmesh;
-  
-  Global.Add("isolineP1","(",new ISOLINE_P1);
+  cerr << " Warning obsolete load file version now use isolineP1 -> isoline " << endl;  
+  cerr << " see example for the syntaxe " << endl; 
+  cerr << " F . Hecht " << endl;   
+  CompileError("obsolet load filee (sorry) use: load \"isoline\" "); 
+  //Global.Add("isolineP1","(",new ISOLINE_P1);
 
 }
    

@@ -38,6 +38,7 @@
 #include "Meshio.h"
 #include "Mesh2.h"
 #include "QuadTree.h"
+
 using namespace std;
 using namespace bamg;
 //long verbosity=2;
@@ -46,6 +47,9 @@ bool withrgraphique=  initgraphique;
 #else
 bool withrgraphique=false; 
 #endif
+#ifdef HAVE_UNISTD_H 
+#include <unistd.h>
+#else
 #ifdef __MWERKS__
 #define R_OK 0
 #define F_OK 0
@@ -64,7 +68,7 @@ inline int access( char *fileName, int notUsed )
 #define W_OK 0
 #define access(i,j) 1
 #endif
-
+#endif
 int initgraph=0;
 void NewHandler();
 void NewHandler()

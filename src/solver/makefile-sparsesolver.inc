@@ -38,23 +38,23 @@
 ###################
 # C compiler
 CC    = gcc 
-MPICC = mpicc
+MPICC = /usr/local/bin/mpicc
 
 # C++ compiler
 CXX    = g++
-MPICXX = mpicxx 
+MPICXX = /usr/local/bin/mpicxx 
 
 # Fortran compiler
 FC     = fort77
-MPIFC  = mpicc #mpifort77 #/Users/morice/librairie/openmpi/bin/mpif90 --prefix /Users/morice/librairie/openmpi/
-FC_LIB = 
+MPIFC  = /usr/local/bin/mpif77 #mpifort77 #/Users/morice/librairie/openmpi/bin/mpif90 --prefix /Users/morice/librairie/openmpi/
+FC_LIB = -L/usr/local/lib -lmpi_f77
 
 # Linker
 MPILD = 
 
 # directory of include file for mpi
-MPI_INCLUDE = #-I/Users/morice/librairie/openmpi/include/
-MPI_LIB     = -L/usr/local/lib -lf2c # -lmpi -lmpi_cxx -lmpi_f77 -lmpi_f90 -lopen-rte -lopen-pal
+MPI_INCLUDE = /I/usr/local/include #-I/Users/morice/librairie/openmpi/include/
+MPI_LIB     = -L/usr/local/lib -lmpi -lmpi_cxx -lmpi_f77 -lmpi_f90 -lopen-rte -lopen-pal
 
 ###############
 #   FLAGS
@@ -84,47 +84,41 @@ SUF      =  dylib
 #########################################################
 
 # frefem++ variables
-#FREEFEM_DIR     = /Users/morice/work/postdoc/freefem++debug/
-#FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
+FREEFEM_DIR     = /Volumes/Ike/cazeaux/ff++/
+FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
 
-FREEFEM_DIR     = $(HOME)/work/freefem++/
 FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
 
 # directory of the different package
 #SOFT_DIR =  /Users/morice/librairie/
-SOFT_DIR =  $(HOME)/work/LinearSolver/
+SOFT_DIR =  $(FREEFEM_DIR)/download/
 
 #==========
 #   BLAS
 #==========
 BLAS_INCLUDE = 
-BLAS_LIB     = -L$(SOFT_DIR)PATCHVECLIB/ wrapper_dotblas.o  -framework veclib
+BLAS_LIB     = -L$(FREEFEM_DIR)ff++/src/solver/PATCHVECLIB/libwrapperdostblas.a  -framework veclib
 
 #============
 #  BLACS : this library is need by MUMPS 
 #============
-BLACS_DIR     =  $(SOFT_DIR)/BLACS/
+BLACS_DIR     =  $(SOFT_DIR)
 BLACS_INCLUDE = 
-BLACS_LIB     =  -L$(BLACS_DIR)LIB/ -lblacsCinit_MPI-BROCHET-0 -lblacs_MPI-BROCHET-0 -lblacsF77init_MPI-BROCHET-0
+BLACS_LIB     =  -L$(BLACS_DIR)lib/ -lblacsCinit_MPI-FREEFEM-0 -lblacs_MPI-FREEFEM-0 -lblacsF77init_MPI-FREEFEM-0
 
 #=============
 #  SCALAPACK : this library is need by MUMPS
 #=============
-SCALAPACK_DIR     = $(SOFT_DIR)/scalapack-1.8.0/
-SCALAPACK_INCLUDE = -I$(SCALAPACK_DIR)SRC/ 
-SCALAPACK_LIB     = -L$(SCALAPACK_DIR) -lscalapack
+SCALAPACK_DIR     = $(SOFT_DIR)
+SCALAPACK_INCLUDE = -I$(SCALAPACK_DIR)include/ 
+SCALAPACK_LIB     = -L$(SCALAPACK_DIR)lib/ -lscalapack
 
 #==============================================
 #   ordering : metis, parmetis, scotch 
 #===============================================
-#  pord : this ordering is given in the mumps package 
-#         and it is only need by MUMPS
-#PORD_DIR     =  $(SOFT_DIR)MUMPS_4.8.3/PORD/
-#PORD_INCLUDE = -I$(PORD_DIR)include
-#PORD_LIB     = -L$(PORD_DIR)lib/ -lpord
 
 # scotch
-SCOTCH_DIR = $(SOFT_DIR)/scotch_5.1_esmumps/
+SCOTCH_DIR = $(SOFT_DIR)
 SCOTCH_INCLUDE = -I$(SCOTCH_DIR)include/
 SCOTCH_LIB     = -L$(SCOTCH_DIR)lib/  -lesmumps  -lscotch -lscotcherr -lscotcherrexit -lm
 
@@ -133,14 +127,14 @@ PTSCOTCH_INCLUDE = -I$(SCOTCH_DIR)include/
 PTSCOTCH_LIB     = -L$(SCOTCH_DIR)lib/ -lptscotch -lptscotcherrexit -lm
 
 # metis
-METIS_DIR      = $(SOFT_DIR)ParMetis-3.1.1/
-METIS_INCLUDE  = -I$(METIS_DIR)METISLib/
-METIS_LIB      = -L$(METIS_DIR) -lmetis
+METIS_DIR      = $(SOFT_DIR)
+METIS_INCLUDE  = -I$(METIS_DIR)include/metis/
+METIS_LIB      = -L$(METIS_DIR)lib -lmetis
 
 # parmetis
-PARMETIS_DIR      = $(SOFT_DIR)ParMetis-3.1.1/
-PARMETIS_INCLUDE  = -I$(PARMETIS_DIR)
-PARMETIS_LIB      = -L$(PARMETIS_DIR) -lparmetis -lmetis
+PARMETIS_DIR      = $(SOFT_DIR)
+PARMETIS_INCLUDE  = -I$(PARMETIS_DIR)include/
+PARMETIS_LIB      = -L$(PARMETIS_DIR)lib/ -lparmetis -lmetis
 
 ###########################################
 #  SECTION 3: 
@@ -158,16 +152,16 @@ PARMETIS_LIB      = -L$(PARMETIS_DIR) -lparmetis -lmetis
 #  Variables needs by HIPS
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #     directory of HIPS
-HIPS_DIR           = /Users/morice/librairie/iterativesolver/hips-1.2beta-rc3/
+HIPS_DIR           = $(SOFT_DIR)
 #    include file of HIPS
-HIPS_INCLUDE       = -I$(HIPS_DIR)SRC/INCLUDE
+HIPS_INCLUDE       = -I$(HIPS_DIR)include/hips/
 #   library of package hips
-HIPS_ALL_LIBS      = -L$(HIPS_DIR)LIB -lio -lhipssequential -lhips -lspkit 
+HIPS_ALL_LIBS      = -L$(HIPS_DIR)lib/hips -lio -lhipssequential -lhips #-lspkit 
 
-IO_LIB             = $(HIPS_DIR)LIB/libio.a
-HIPSSEQUENTIAL_LIB = $(HIPS_DIR)LIB/libhipssequential.a
-HIPS_LIB           = $(HIPS_DIR)LIB/libhips.a
-SPKIT_LIB	   = $(HIPS_DIR)LIB/libspkit.a
+IO_LIB             = $(HIPS_DIR)lib/hips/libio.a
+HIPSSEQUENTIAL_LIB = $(HIPS_DIR)lib/hips/libhipssequential.a
+HIPS_LIB           = $(HIPS_DIR)lib/hips/libhips.a
+#SPKIT_LIB	   = $(HIPS_DIR)LIB/libspkit.a
 
 
 # other compiler option for HIPS (see value of CFLAGS in SECTION 1)
@@ -188,11 +182,11 @@ HIPS_OTHER_LIB     =
 #    Variables needs by HYPRE
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # directory of HYPRE
-HYPRE_DIR     = /Users/morice/librairie/iterativesolver/hypre-2.4.0b/
+HYPRE_DIR     = $(SOFT_DIR)
 # include file of HYPRE
-HYPRE_INCLUDE = -I$(HYPRE_DIR)src/hypre/include/
+HYPRE_INCLUDE = -I$(HYPRE_DIR)include/hypre
 # library of HYPRE
-HYPRE_LIB     = -L$(HYPRE_DIR)src/lib/ -lHYPRE
+HYPRE_LIB     = -L$(HYPRE_DIR)lib/hypre/ -lHYPRE
 
 # other compiler option for HYPRE (see value of CFLAGS in SECTION 1)
 CFLAGS_HYPRE        = -Wall -DHAVE_CONFIG_H -DHYPRE_TIMING -Wno-deprecated -DLINUX -DSPKIT_F  -DMPICH_SKIP_MPICXX
@@ -212,11 +206,11 @@ HYPRE_OTHER_LIB     = -lm -lstdc++
 #   variable needs by pARMS
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # directory of pARMS
-PARMS_DIR    = /Users/morice/librairie/iterativesolver/pARMS_2.2/
+PARMS_DIR    = $(SOFT_DIR)
 # include file of pARMS
-PARMS_INCLUDE =  -I$(PARMS_DIR)INCLUDE/
+PARMS_INCLUDE =  -I$(PARMS_DIR)include/parms
 # library of HYPRE
-PARMS_LIB     =  -L$(PARMS_DIR)LIB/ -lparms-O3
+PARMS_LIB     =  -L$(PARMS_DIR)lib/ -lparms-O3
 
 # other compiler option for HIPS (see value of CFLAGS in )
 # PARMS NEED THE ARCHITECTURE (see generaldefs.h). For Mac Osx defined the architecture as -DLINUX
@@ -243,7 +237,7 @@ PARMS_OTHER_LIB     =
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 MUMPS_HOST  = BROCHET
 #  directory of MUMPS
-MUMPS_DIR     =  /Users/morice/librairie/MUMPS_4.8.3/
+MUMPS_DIR     =  $(SOFT_DIR)mumps/MUMPS_4.9.2/
 # directory of Header File for MUMPS
 MUMPS_INCLUDE = -I$(MUMPS_DIR)include/
 # library of MUMPS
@@ -272,12 +266,12 @@ MUMPS_OTHER_LIB     = -L/usr/lib/gcc/i686-apple-darwin9/4.2.1/ -lgfortran
 #    Variables needs by SuperLU_DIST
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # directory of superlu_dist
-SLUDIST_DIR = $(SOFT_DIR)/SuperLU_DIST_2.3/
-#/Users/morice/librairie/SuperLU_DIST_2.3/
+SLUDIST_DIR = $(SOFT_DIR)
+
 # include file of superlu_dist
-SLUDIST_INCLUDE = -I$(SLUDIST_DIR)SRC/ 
+SLUDIST_INCLUDE = -I$(SLUDIST_DIR)include 
 # librairie of superlu_dist
-SLUDIST_LIB = -L$(SLUDIST_DIR)../lib/ -lsuperlu_dist_2.3
+SLUDIST_LIB = -L$(SLUDIST_DIR)lib/ -lsuperlu_dist_2.3
 
 # other compiler option for SuperLU (see value of CFLAGS in SECTION 1)
 SLUDIST_CFLAGS        = 
@@ -301,19 +295,19 @@ SLUDIST_OTHER_LIB     =
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 #  real pastix
 #  directory of pastix
-REAL_PASTIX_DIR     = /Users/morice/librairie/pastix_release_2259/
+REAL_PASTIX_DIR     = $(SOFT_DIR)/
 # include directory of pastix
-REAL_PASTIX_INCLUDE = -I$(REAL_PASTIX_DIR)install-double-nondist/ 
+REAL_PASTIX_INCLUDE = -I$(REAL_PASTIX_DIR)include/pastix/double/ 
 # library
-REAL_PASTIX_LIB     = -L$(REAL_PASTIX_DIR)install-double-nondist/ -lpastix #-lmatrix_driver 
+REAL_PASTIX_LIB     = -L$(REAL_PASTIX_DIR)lib/pastix/double -lpastix #-lmatrix_driver 
 
 # complex pastix
 #  directory of pstix
-COMPLEX_PASTIX_DIR     = /Users/morice/librairie/pastix_release_2259/
+COMPLEX_PASTIX_DIR     = $(SOFT_DIR)
 # include directory of pastix
-COMPLEX_PASTIX_INCLUDE = -I$(COMPLEX_PASTIX_DIR)install-complex-nondist/
+COMPLEX_PASTIX_INCLUDE = -I$(COMPLEX_PASTIX_DIR)include/pastix/complex/
 # library
-COMPLEX_PASTIX_LIB     = -L$(COMPLEX_PASTIX_DIR)install-complex-nondist/ -lpastix #-lmatrix_driver 
+COMPLEX_PASTIX_LIB     = -L$(COMPLEX_PASTIX_DIR)lib/pastix/complex/ -lpastix #-lmatrix_driver 
 
 
 # other compiler option for PASTIX (see value of CFLAGS in SECTION 1)

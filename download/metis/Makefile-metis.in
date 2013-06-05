@@ -1,4 +1,3 @@
-
 # Which compiler to use
 CC = @CC@
 
@@ -21,3 +20,5 @@ RANLIB = @RANLIB@
 WGET = @WGET@
 
 
+EXEEXT = @EXEEXT@
+VERNUM = @EXEEXT@

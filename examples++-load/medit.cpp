@@ -48,7 +48,7 @@ const char *medit_debug="-d";
 
 static bool TheWait=false;
 bool  NoWait=false;
-
+extern bool  NoGraphicWindow;
 using namespace std;
 using namespace Fem2D;
 
@@ -769,7 +769,7 @@ static char * meditcmd(long filebin, int nbsol, int smedit, const string &meditf
    
   meditcmm += ' ';
 
-  char * ret1= new char[ffnn.size()+1];
+  KN<char>  ret1(ffnn.size()+1);
   strcpy( ret1, ffnn.c_str()); 
   
   int nbstrings=1;
@@ -1024,6 +1024,7 @@ basicAC_F0::name_and_type PopenMeditMesh_Op::name_param[]= {
 
 AnyType PopenMeditMesh_Op::operator()(Stack stack)  const 
 {
+  if(NoGraphicWindow) return Nothing;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   long order (arg(0,stack,1));
   //
@@ -1761,6 +1762,7 @@ basicAC_F0::name_and_type PopenMeditMesh3_Op<v_fes>::name_param[]= {
 template<class v_fes>
 AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const 
 {
+  if(NoGraphicWindow) return Nothing;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   long order (arg(0,stack,1L));
   //
@@ -2402,10 +2404,9 @@ class Init { public:
   Init();
 };
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
-  
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
   

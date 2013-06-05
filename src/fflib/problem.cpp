@@ -54,6 +54,7 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
     { "binside",&typeid(double)},
     { "mortar",&typeid(bool)},
     { "qfV", &typeid(const Fem2D::GQuadratureFormular<R3> *)},
+    { "levelset",&typeid(double)}
 
 };
 
@@ -90,7 +91,13 @@ LIST_NAME_PARM_MAT
  */
 };
 
+struct pair_stack_double
+{
+    Stack first;
+    double *second;
+    pair_stack_double(Stack ss,double* bb) : first(ss),second(bb) {};
 
+};
 
 namespace Fem2D {
 
@@ -176,8 +183,8 @@ void Check(const Opera &Op,int N,int  M)
 			double * p,int ie,int iie, int label,void *bstack)
   {
     
-    pair<void *,double *> * bs=static_cast<pair<void *,double *> *>(bstack);   
-    void * stack= bs->first;
+    pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
+    Stack stack= bs->first;
     double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
     assert(mat.onFace); //   Finite Volume or discontinous Galerkine 
     assert(ie>=0 && ie < 3); //  int on edge 
@@ -430,9 +437,9 @@ void Check(const Opera &Op,int N,int  M)
       }
     Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
     void *paramate=stack;
-    pair<void *,double *> parammatElement_OpVF;  
-    parammatElement_OpVF.first = stack;
-    parammatElement_OpVF.second= & binside;
+    pair_stack_double parammatElement_OpVF(stack,& binside);
+   // parammatElement_OpVF.first = stack;
+   // parammatElement_OpVF.second= & binside;
     
     if (verbosity >3) 
       if (all) cout << " all " << endl ;
@@ -613,7 +620,7 @@ void Check(const Opera &Op,int N,int  M)
       }
     Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
     void *paramate=stack;
-    pair<void *,double *> parammatElement_OpVF;  
+    pair_stack_double parammatElement_OpVF(stack, & binside);
     parammatElement_OpVF.first = stack;
     parammatElement_OpVF.second= & binside;
     
@@ -659,7 +666,7 @@ void Check(const Opera &Op,int N,int  M)
               }
           }
       }
-    else if (di.kind == CDomainOfIntegration::intalledges)
+    else if (di.kind == CDomainOfIntegration::intallfaces  )
       {
         for (int i=0;i< Th.nt; i++) 
           {
@@ -675,7 +682,7 @@ void Check(const Opera &Op,int N,int  M)
       {
 	cerr << " a faire intallVFedges " << endl;
 	ffassert(0);
-        for (int i=0;i< Th.nt; i++) 
+        for (int i=0;i< Th.nt; i++)
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
              for (int ie=0;ie<3;ie++)   
@@ -696,8 +703,11 @@ void Check(const Opera &Op,int N,int  M)
             // AA += mate;
           }
       } 
-    else 
+    else
+    {
+        cerr << " kind of CDomainOfIntegration unkown ?? " << di.kind << endl;
       InternalError(" kind of CDomainOfIntegration unkown");
+    }
     
     if (where_in_stack) delete [] where_in_stack;
     delete &mate;
@@ -712,8 +722,9 @@ void Check(const Opera &Op,int N,int  M)
 		     const FESpace & Uh,const FESpace & Vh,
 		     const QuadratureFormular & FI,
 		     const QuadratureFormular1d & FIb,
-		     double *p,   void *stack, bool intmortar=false)
+		     double *p,   void *vstack, bool intmortar=false)
     {
+        Stack stack=pvoid2Stack(vstack);
 	MeshPoint mp= *MeshPointStack(stack);
 	R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 	const Mesh & Thu(Uh.Th);
@@ -927,6 +938,235 @@ void Check(const Opera &Op,int N,int  M)
 			*MeshPointStack(stack) = mp;
     }  
 			
+    
+    template<class R> 
+    void  AddMatElem(map<pair<int,int>, R > & A,const Mesh3 & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
+                     const FESpace3 & Uh,const FESpace3 & Vh,
+                     const Fem2D::GQuadratureFormular<R3>  & FI,
+                     const  QuadratureFormular & FIb,
+                     double *p,   void *vstack, bool intmortar=false)
+    {
+         Stack stack=pvoid2Stack(vstack);
+        MeshPoint mp= *MeshPointStack(stack);
+        static int count =0; // non test FH .........................
+        if(count++ < 1) {
+            cout << " Warning : Assemble Matrix with incompatible 3d meshes in test (FH)  " << endl;
+            cout << " ------------------------------------------------------------- " << endl;
+        }
+        R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+        const Mesh3 & Thu(Uh.Th);
+        const Mesh3 & Thv(Vh.Th);
+        
+        bool same = &Uh == & Vh;
+        const Tet & T  = Th[it];
+        long npi;
+        long i,j;
+        bool classoptm = copt && Op.optiexpK;
+        assert(Op.MaxOp() <last_operatortype);
+        //
+        int lastop=0;
+        lastop = 0;
+        What_d Dop = Op.DiffOp(lastop);
+
+       
+        //assert(lastop<=3);
+        
+        if (ie<0)    
+            for (npi=0;npi<FI.n;npi++) // loop on the integration point
+            {
+                GQuadraturePoint<R3> pi(FI[npi]);
+                double coef = T.mesure()*pi.a;
+                R3 Pt(pi),Ptu,Ptv;
+                R3 P(T(Pt));
+                bool outsideu,outsidev;
+                // ici trouve le T
+                int iut=0,ivt=0;
+                const Tet * tu,*tv;
+                if(&Th == & Thu )
+                {
+                    tu =&T;
+                    Ptu=Pt;
+                }
+                else
+                {
+                    tu= Thu.Find(P,Ptu,outsideu);
+                    if( !tu ||  outsideu) { 
+                        if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl; 
+                        continue;}}
+                if(same)
+                {
+                    tv=tu;
+                    outsidev=outsideu;
+                    Ptv=Ptu;
+                }
+                else
+                {
+                    if(&Th == & Thv )
+                    {
+                        tv =&T;
+                        Ptv=Pt;
+                    }
+                    else
+                    {
+                        tv= Thv.Find(P,Ptv,outsidev);
+                        if( !tv || outsidev) {
+                            if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                            continue;
+                        }}
+                } 
+                iut = Thu(tu);
+                ivt = Thv(tv);
+                if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ; 
+                FElement3 Ku(Uh[iut]);
+                FElement3 Kv(Vh[ivt]);
+                long n= Kv.NbDoF() ,m=Ku.NbDoF();
+                long N= Kv.N;
+                long M= Ku.N;
+                RNMK_ fv(p,n,N,(long) lastop); //  the value for basic fonction
+                RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,(long) lastop); //  the value for basic fonction
+                
+                
+                Ku.BF(Dop,Ptu,fu);
+                MeshPointStack(stack)->set(Th,P,Pt,T,label);
+                if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+                if (!same) Kv.BF(Dop,Ptv,fv);      
+                for ( i=0;  i<n;   i++ )  
+                { 
+                    
+                    // attention la fonction test donne la ligne 
+                    //  et la fonction test est en second      
+                    int ig = Kv(i);
+                    RNM_ wi(fv(i,'.','.'));         
+                    for ( j=0;  j<m;   j++ ) 
+                    { 
+                        RNM_ wj(fu(j,'.','.'));
+                        int il=0;
+                        int jg(Ku(j));
+                        if ( !sym ||  ig <= jg ) 
+                            for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                            {  // attention la fonction test donne la ligne 
+                                //  et la fonction test est en second      
+                                BilinearOperator::K ll(*l);
+                                pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                                double w_i =  wi(ii.first,ii.second); 
+                                double w_j =  wj(jj.first,jj.second);
+                                R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack))   ;  
+                                if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " on T \n"   ;                                        
+                                double wij =  w_i*w_j;
+                                if (abs(wij)>= 1e-10)                                          
+                                    A[make_pair(ig,jg)] += coef * ccc * wij;
+                            }
+                    }
+                }
+            }
+		else // int on edge ie 
+		    for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+		    {
+              
+                GQuadraturePoint<R2> pi( FIb[npi]);
+                R3 NN= T.N(ie);
+                double mes=NN.norme();
+                NN/=mes;
+                double coef = 0.5*mes*pi.a; // correction 0.5 050109 FH
+                R3 Pt(T.PBord(ie,pi));
+                //Ku.BF(Dop,Pt,fu);
+
+               
+                
+                R3 Ptu,Ptv;
+                R3 P(T(Pt));
+                bool outsideu,outsidev;
+                // ici trouve le T
+                int iut=0,ivt=0;
+                const Tet * tu, *tv;
+                if(&Th == & Thu )
+                {
+                    tu =&T;
+                    Ptu=Pt;
+                }
+                else
+                {	
+                    tu= Thu.Find(P,Ptu,outsideu);
+                    if( !tu ||  (outsideu && !intmortar) )  { 
+                        //R dd=-1;
+                        //if(tu) { R2 PP((*tu)(Ptu)),PPP(P,PP) ; cout << PP << " " << sqrt( (PPP,PPP) ) <<"    "; } 
+                        if(verbosity>100) cout << " On a pas trouver (u) " << P << " " <<Ptu << " " << tu <<   endl; 
+                        continue;}}
+                iut = Thu(tu);
+                if(same)
+                {
+                    tv=tu;
+                    outsidev=outsideu;
+                    Ptv=Ptu;
+                    ivt=iut;
+                }
+                else
+                {
+                    if(&Th == & Thv )
+                    {
+                        tv =&T;
+                        Ptv=Pt;
+                    }
+                    else {
+                        tv= Thv.Find(P,Ptv,outsidev);
+                        if( !tv || (outsidev&& !intmortar))  { 
+                            if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl; 
+                            continue;}} 
+                    ivt = Thv(tv);
+                } 
+                FElement3 Ku(Uh[iut]);
+                FElement3 Kv(Vh[ivt]);
+                long n= Kv.NbDoF() ,m=Ku.NbDoF();
+                long N= Kv.N;
+                long M= Ku.N;
+                //  cout << P << " " <<  Pt << " " <<  iut << " " << ivt  << "  Ptu : " << Ptu << " Ptv: " << Ptv << " n:" << n << " m:" << m << endl;
+                RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+                RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
+                
+                Ku.BF(Dop,Ptu,fu);
+                if( !same)
+                    Kv.BF(Dop,Ptv,fv);
+                
+                
+                // int label=-999999; // a passer en argument 
+                MeshPointStack(stack)->set(Th,P,Pt,T,label,NN,ie);
+                if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+                
+                
+                for ( i=0;  i<n;   i++ )  
+                    // if (onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // juste the df on edge bofbof generaly wrong FH dec 2003
+                { 
+                    RNM_ wi(fv(i,'.','.'));       
+                    int ig=Kv(i);
+                    for ( j=0;  j<m;   j++ ) 
+                    { 
+                        RNM_ wj(fu(j,'.','.'));
+                        int il=0;
+                        int jg=Ku(j);
+                        if( ! sym || ig <= jg )
+                            for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                            {       
+                                BilinearOperator::K ll(*l);
+                                pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                                double w_i =  wi(ii.first,ii.second); 
+                                double w_j =  wj(jj.first,jj.second);
+                                // R ccc = GetAny<R>(ll.second.eval(stack));
+                                
+                                R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                                double wij =  w_i*w_j;
+                                if (abs(wij)>= 1e-10&& (verbosity>1000))  
+                                    cout << " \t\t\t" << ig << " " << jg << " "  <<  ccc <<  " " <<  coef * ccc * w_i*w_j << " on edge \n" ;  
+                                if (abs(wij)>= 1e-10)                                          
+                                    A[make_pair(ig,jg)] += wij*coef*ccc ;
+                            }
+                    }
+                } 
+		    }
+        
+        
+        *MeshPointStack(stack) = mp;
+    }  
+   
  template<class R>
   void AssembleBilinearForm(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                            map<pair<int,int>, R >  & A, const  FormBilinear * b  )
@@ -1089,14 +1329,162 @@ void Check(const Opera &Op,int N,int  M)
                            map<pair<int,int>, R >  & A, const  FormBilinear * b  )
     
   {
-    ffassert(0); // a faire 
+      
+      
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+      bool sptrclean=true;
+      //     sptr->clean(); // modif FH mars 2006  clean Ptr
+      
+      const CDomainOfIntegration & di= *b->di;
+      const Mesh3 * pThdi = GetAny<pmesh3>( (* di.Th)(stack));
+      SHOWVERB(cout << " FormBilinear () " << endl);
+      //MatriceElementaireSymetrique<R> *mates =0;
+      // MatriceElementairePleine<R> *matep =0;
+      const bool useopt=di.UseOpt(stack);    
+      //double binside=di.binside(stack);
+      const bool intmortar=di.intmortar(stack);
+      if ( verbosity >1)
+      {
+          cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
+          cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+          cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+          cout << "        suppose in mortar " << intmortar << endl;
+      }
+      assert(pThdi == & Th);
+      //const vector<Expression>  & what(di.what);             
+      CDomainOfIntegration::typeofkind  kind = di.kind;
+      set<int> setoflab;
+      bool all=true; 
+      const QuadratureFormular & FIT = di.FIT(stack);
+      const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
+      bool VF=b->VF();  // finite Volume or discontinous Galerkin
+      if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+      if (verbosity>3) 
+          if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
+          else  if (CDomainOfIntegration::intallfaces==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
+          //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
+          else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+   
+      Expandsetoflab(stack,di, setoflab,all);
+      /*
+       for (size_t i=0;i<what.size();i++)
+       {long  lab  = GetAny<long>( (*what[i])(stack));
+       setoflab.insert(lab);
+       if ( verbosity>3) cout << lab << " ";
+       all=false;
+       }*/
+      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+      const E_F0 & optiexp0=*b->b->optiexp0;
+      // const E_F0 & optiexpK=*b->b->optiexpK;
+      int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+      R** where_in_stack =0;
+      if (n_where_in_stack_opt && useopt)
+          where_in_stack = new R * [n_where_in_stack_opt];
+      if (where_in_stack)
+      {
+          assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
+          for (int i=0;i<n_where_in_stack_opt;i++)
+          {
+              int offset=b->b->where_in_stack_opt[i];
+              assert(offset>10);
+              where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+              *(where_in_stack[i])=0;
+          }
+          
+          
+          if(&optiexp0) 
+              optiexp0(stack); 
+          KN<bool> ok(b->b->v.size());
+          {  //   remove the zero coef in the liste 
+              // R zero=R();  
+              int il=0;
+              for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+                  ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
+          }
+          BilinearOperator b_nozer(*b->b,ok); 
+          if (verbosity % 10 > 3 ) 
+              cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size() 
+              << "  total " << n_where_in_stack_opt << endl;
+          
+          if ( (verbosity/100) % 10 >= 2)   
+          { 
+              int il=0;
+              
+              for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+                  cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) 
+                  << " offset=" << b->b->where_in_stack_opt[il] 
+                  << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
+          }
+      }
+      Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+      
+      KN<double>  p(Vh.esize()+ Uh.esize() );
+      
+      
+      if (verbosity >3) 
+          if (all) cout << " all " << endl ;
+          else cout << endl;
+      
+      
+      if (di.kind == CDomainOfIntegration::int2d )
+      { 
+          for( int e=0;e<Th.nbe;e++)
+          {
+              if (all || setoflab.find(Th.be(e).lab) != setoflab.end())   
+              {                  
+                  int ie,i =Th.BoundaryElement(e,ie);
+                  AddMatElem(A,Th,*b->b,sym,i,ie,Th.be(e).lab,Uh,Vh,FIV,FIT,p,stack,intmortar);  
+                  if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+              }
+          }
+      }
+      else if (di.kind == CDomainOfIntegration::intallfaces)
+      {
+          ffassert(0); // a faire 
+          
+          for (int i=0;i< Th.nt; i++) 
+          {
+              if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                  for (int ie=0;ie<3;ie++)   
+                      AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIV,FIT,p,stack,intmortar);  
+           
+              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
+              
+              
+          } 
+          
+      }      
+     /* else if (di.kind == CDomainOfIntegration::intallVFedges)
+      {
+          
+          cerr << " a faire intallVFedges " << endl;
+          ffassert(0);
+          
+      }  */    
+      else if (di.kind == CDomainOfIntegration::int3d )
+      {
+          // cerr << " a faire CDomainOfIntegration::int3d  " << endl;
+          for (int i=0;i< Th.nt; i++) 
+          {
+              if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
+                  AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIV,FIT,p,stack); 
+              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr    
+          }
+          
+      } 
+      else 
+          InternalError(" kind of CDomainOfIntegration unkown");
+      
+      if (where_in_stack) delete [] where_in_stack;      
+   
   }
 // --------- FH 170605
  
  
   template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *stack)
+  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *vstack)
   {
+   Stack stack=pvoid2Stack(vstack);    
     //    ffassert(0);
     typedef  FElement3::Element Element;
     MeshPoint mp= *MeshPointStack(stack);
@@ -1256,8 +1644,9 @@ void Check(const Opera &Op,int N,int  M)
   } 
   // xxxxxxxxxxxxxxxxx  modif a faire 
   template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *stack)
+  void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *vstack)
   {
+       Stack stack=pvoid2Stack(vstack);
     typedef  FElement::Element Element;
     MeshPoint mp= *MeshPointStack(stack);
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -1500,8 +1889,9 @@ void Check(const Opera &Op,int N,int  M)
   
   
  template<class R>
- void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * stack)
+ void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * vstack)
   {
+      Stack stack=pvoid2Stack(vstack);
    typedef FESpace3 FESpace;
    typedef typename FESpace3::Mesh Mesh;
    typedef Mesh *pmesh ;
@@ -1680,8 +2070,9 @@ void Check(const Opera &Op,int N,int  M)
 
   // xxxxxxxxxxxxxxxxx  modif a faire   
  template<class R>
- void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * stack)
+ void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * vstack)
   {
+    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp= *MeshPointStack(stack);
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Ku.T;
@@ -1928,9 +2319,10 @@ void Check(const Opera &Op,int N,int  M)
   
   // #pragma optimization_level 0
  template<class R>
-  void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI = QuadratureFormular_T_2)
   {
+    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Kv.T;
@@ -2002,9 +2394,10 @@ void Check(const Opera &Op,int N,int  M)
 
   // 3D
  template<class R>
-  void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const GQuadratureFormular<R3> & FI = QuadratureFormular_Tet_2)
   {
+    Stack stack=pvoid2Stack(vstack);
     typedef  FElement3::Element Element;
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -2074,17 +2467,94 @@ void Check(const Opera &Op,int N,int  M)
   // 3d
  template<class R>
  void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI,
-                    const FESpace3 & Vh,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+                    const FESpace3 & Vh,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
 		   const GQuadratureFormular<R3> & FI)
  {
-    AFAIRE("Element_rhs 3d diff meshes");
+     Stack stack=pvoid2Stack(vstack);
+   // AFAIRE("Element_rhs 3d diff meshes");
+     static int count=0;
+     if(count++<1)
+     {
+         cout << "Warning:  Element_rhs 3 3d diff meshes in test (FH) " << endl;
+         cout << "--------------------------------------------------- " << endl;
+     }
+     MeshPoint mp=*MeshPointStack(stack) ;
+     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+     //    int maxd = Op.MaxOp();
+     //    assert(maxd<last_operatortype);
+     const Tet * Kp=0;
+     
+     bool classoptm = copt && Op.optiexpK;
+     // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+     if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
+         
+         cout << "Element_rhs 3d  3: copt = " << copt << " " << classoptm << endl;
+     
+     assert(Op.MaxOp() <last_operatortype);
+     //
+     int lastop=0;
+     lastop = 0;
+     What_d Dop = Op.DiffOp(lastop);
+     assert(Op.MaxOp() <last_operatortype);
+     
+     // assert(lastop<=3);
+     
+     for (long npi=0;npi<FI.n;npi++) // loop on the integration point
+     {
+         GQuadraturePoint<R3> pi(FI[npi]);
+         R3 PI(KI(pi));      
+         double coef = KI.mesure()*pi.a;
+         MeshPointStack(stack)->set(ThI,PI,pi,KI,KI.lab);
+         if (classoptm) (*Op.optiexpK)(stack); // call optim version 
+         bool outside;
+         R3 Pt;
+         const Tet & K  = *Vh.Th.Find(PI,Pt,outside,Kp);
+         if ( ! outside) 
+         {
+             const  FElement3  Kv= Vh[K];
+             long i,n=Kv.NbDoF(),N=Kv.N;
+             RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+             Kv.BF(Dop,Pt,fu);
+             
+             for ( i=0;  i<n;   i++ )  
+             { 
+                 RNM_ wi(fu(i,'.','.'));
+                 int il=0;
+                 for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                 {       
+                     LOperaD::K ll(*l);
+                     pair<int,int> ii(ll.first);
+                     
+                     double w_i =  wi(ii.first,ii.second);
+                     
+                     R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));;//GetAny<double>(ll.second.eval(stack));
+                     if ( copt && ThI(KI) <1)
+                     {
+                         R cc  =  GetAny<R>(ll.second.eval(stack));
+                         if ( c != cc) { 
+                             cerr << c << " != " << cc << " => ";
+                             cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                             ExecError("In Optimized version "); }
+                     }
+                     
+                     R a = coef * c * w_i;
+                     B[Kv(i)] += a;
+                 }
+             }
+         }
+         Kp = & K; 
+     }  
+     *MeshPointStack(stack) = mp;
+     
+    
 }
   //
  template<class R>
   void  Element_rhs(const  Mesh & ThI,const Triangle & KI,
-                    const FESpace & Vh,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+                    const FESpace & Vh,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI = QuadratureFormular_T_2)
   {
+   Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 //    int maxd = Op.MaxOp();
@@ -2155,11 +2625,11 @@ void Check(const Opera &Op,int N,int  M)
   }  
   // 3d 
   template<class R>
-  void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI ,bool alledges=false)
   {
     //   AFAIRE("Element_rhs on border");
-
+    Stack stack=pvoid2Stack(vstack);
     typedef  FElement3::Element Element;
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -2225,10 +2695,13 @@ void Check(const Opera &Op,int N,int  M)
     
   }  
   // find 3d
+    
+    
  template<class R>
-  void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+  void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false)
   {
+    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     const Triangle & T  = Kv.T;
@@ -2298,15 +2771,93 @@ void Check(const Opera &Op,int N,int  M)
       }  
     *MeshPointStack(stack) = mp;
     
-  } 
+  }
+    
+    template<class R>
+    void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
+                      const QuadratureFormular1d & FI ,const R2 & PPA,const R2 &PPB)
+    {
+        Stack stack=pvoid2Stack(vstack);
+        MeshPoint mp=*MeshPointStack(stack) ;
+        R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+        const Triangle & T  = Kv.T;
+        R2 PA=T(PPA),PB=T(PPB);
+        // const QuadratureFormular1d & FI = QF_GaussLegendre2;
+        long npi;
+        long i,n=Kv.NbDoF(),N=Kv.N;
+        
+        //  bool show = Kv.Vh.Th(T)==0;
+        // char * xxx[] ={" u"," v,"," p"," q"," r"};
+        // char * xxxx[] ={" u'"," v',"," p'"," q'"," r'"};
+        // char * yyy[] ={" ","_x ","_y "};
+        
+        bool classoptm = copt && Op.optiexpK;
+        // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+        if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2)
+            cout << "Element_rhs(levelset) S: copt = " << copt << " " << classoptm << endl;
+        KN<bool> Dop(last_operatortype);
+        Op.DiffOp(Dop);
+        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        assert(Op.MaxOp() <last_operatortype);
+        // assert(lastop<=3);
+        
+        RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+        
+        for (npi=0;npi<FI.n;npi++) // loop on the integration point
+        {
+            QuadratureFormular1dPoint pi( FI[npi]);
+            R2 E(PA,PB);
+            double le = sqrt((E,E));
+            double coef = le*pi.a;
+            double sa=pi.x,sb=1-sa;
+           
+            R2 Pt(PA*sa+PB*sb ); //
+            Kv.BF(Dop,Pt,fu);
+            MeshPointStack(stack)->set(T(Pt),Pt,Kv,0,R2(E.y,-E.x)/le,0);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+            
+            for ( i=0;  i<n;   i++ )
+                // if (alledges || onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
+            {
+                RNM_ wi(fu(i,'.','.'));
+                int il=0;
+                for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                {
+                    LOperaD::K ll(*l);
+                    pair<int,int> ii(ll.first);
+                    double w_i =  wi(ii.first,ii.second);
+                    R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                    if ( copt && Kv.number<1 <1)
+                    {
+                        R cc  =  GetAny<R>(ll.second.eval(stack));
+                        if ( c != cc) {
+                            cerr << c << " =! " << cc << endl;
+                            cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                            ExecError("In Optimized version "); }
+                    }
+                    
+                    
+                    //= GetAny<double>(ll.second.eval(stack));
+                    
+                    B[Kv(i)] += coef * c * w_i;
+                }
+            }
+            
+            
+        }  
+        *MeshPointStack(stack) = mp;
+        
+    } 
+   
+    
  
     template<class R>
     void  Element_rhsVF(const FElement & Kv,const FElement & KKv,int ie,int iie,int label,const LOperaD &Op,double * p,int *ip,void  * bstack,KN_<R> & B,
 		      const QuadratureFormular1d & FI = QF_GaussLegendre2)
     // sier of ip
     {
-	pair<void *,double *> * bs=static_cast<pair<void *,double *> *>(bstack);   
-	void * stack= bs->first;
+	pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
+	Stack stack= bs->first;
 	double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
 	
 	MeshPoint mp=*MeshPointStack(stack) ;
@@ -2425,20 +2976,106 @@ void Check(const Opera &Op,int N,int  M)
   // 3d  
  template<class R>
  void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 & Vh,
- int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+ int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular & FI,bool alledges=false)
-  {
-    AFAIRE("Element_rhs 3d on surface  2 diff mesh ");
+    {
+      Stack stack=pvoid2Stack(vstack);
+      int intmortar=0;
+  //  AFAIRE("Element_rhs 3d on surface  2 diff mesh ");
+      static int count =0;
+      if(count++<1) 
+      {
+          cout << " Element_rhs 3d on surface  2 diff mesh int test (FH)" << endl;
+          cout << " -----------------------------------------------------" << endl;
+      }
+      // integration 1d on 2 diff mesh 
+      
+      
+      MeshPoint mp=*MeshPointStack(stack) ;
+      R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+      
+      
+      bool classoptm = copt && Op.optiexpK;
+      //assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+      if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2) 
+          cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
+      assert(Op.MaxOp() <last_operatortype);
+      //
+      int lastop=0;
+      lastop = 0;
+      What_d Dop = Op.DiffOp(lastop);
+      // assert(lastop<=3);
+      const Tet & T  = KI;
+      long npi;
+      
+      const Tet * Kp=0;
+      
+      for (npi=0;npi<FI.n;npi++) // loop on the integration point
+      {
+          
+          GQuadraturePoint<R2> pi(FI[npi]);
+          R3 NN= T.N(ie);
+          double mes=NN.norme();
+          NN/=mes;
+          double coef = 0.5*mes*pi.a; // 
+          R3 Pt(T.PBord(ie,pi)),PI(T(Pt));
+          
+          
+          
+          MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,NN,ie);
+          if (classoptm) (*Op.optiexpK)(stack); // call optim version         
+          bool outside;
+          R3 PIt;
+          const Tet & K  = *Vh.Th.Find(PI,PIt,outside,Kp);
+          if ( ! outside || intmortar) //  FH march 2009 ???
+          {
+              const  FElement3  Kv= Vh[K];
+              long i,n=Kv.NbDoF(),N=Kv.N;
+              RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+              Kv.BF(Dop,PIt,fu);
+              
+              for ( i=0;  i<n;   i++ )  
+             //   if (alledges || onWhatIsFace[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
+              { 
+                  RNM_ wi(fu(i,'.','.'));
+                  int il=0;
+                  for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                  {       
+                      LOperaD::K ll(*l);
+                      pair<int,int> ii(ll.first);
+                      double w_i =  wi(ii.first,ii.second);
+                      R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                      if ( copt && Kv.number<1 <1)
+                      {
+                          R cc  =  GetAny<R>(ll.second.eval(stack));
+                          if ( c != cc) { 
+                              cerr << c << " =! " << cc << endl;
+                              cerr << "Sorry error in Optimization add:  int1d(Th,optimize=0)(...)" << endl;
+                              ExecError("In Optimized version "); }
+                      }
+                      
+                      
+                      //= GetAny<double>(ll.second.eval(stack));
+                      
+                      B[Kv(i)] += coef * c * w_i;
+                  }
+              }
+              
+          }
+      }  
+      *MeshPointStack(stack) = mp;
+     
+      
   } 
   // 3d
  template<class R>
  void  Element_rhs(const  Mesh & ThI,const Triangle & KI, const FESpace & Vh,
- int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+ int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,bool intmortar=false)
   {
      // integration 1d on 2 diff mesh 
     
-    
+     Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
     
@@ -2542,7 +3179,7 @@ void Check(const Opera &Op,int N,int  M)
            { 
             const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
             pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));
-            AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
+            if(Thbf)AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
            }
           }
         else if (r==tvf->tMat)
@@ -2555,7 +3192,7 @@ void Check(const Opera &Op,int N,int  M)
             if (B) {
               const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
               pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));            
-              AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf) ;
+              if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf) ;
 	    }
           }
         else if (r==tvf->tTab)
@@ -2713,7 +3350,7 @@ void Check(const Opera &Op,int N,int  M)
             for (int j=0;j<dim;j++)
              if (tabexp[j]) 
 	       {  
-		  if(bc->complextype) // FH may 2007  
+		  if(bc->complextype) // FH may 2007  MatriceCreuse
                    Vpp[j]=GetAny<R>( (*tabexp[j])(stack) );
 		  else 
 		   Vpp[j]=GetAny<double>( (*tabexp[j])(stack) );
@@ -2895,52 +3532,10 @@ template<class R>
       }
     *mps =mp;            
   }
-void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab)
-    {
-      for (size_t i=0;i<bc.on.size();i++)
-	  if(bc.onis[i] ==0)
-	    {
-	      long  lab  = GetAny<long>( (*bc.on[i])(stack));
-	      setoflab.insert(lab);
-	      if ( verbosity>99) cout << lab << " ";
-	     
-	    }
-	  else 
-	    {
-	      KN<long>  labs( GetAny<KN_<long> >( (*bc.on[i])(stack)));
-	      for (long j=0; j<labs.N(); ++j) {	      
-		  setoflab.insert(labs[j]);
-		  if ( verbosity>99) cout << labs[j] << " ";
-	      }	  
-	      	  
-	    }
-      if(verbosity>99) 
-	  cout << endl;
-
-    }
-  
-void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all)
-    {
-      for (size_t i=0;i<di.what.size();i++)
-	  if(di.whatis[i] ==0)
-	    {
-	      long  lab  = GetAny<long>( (*di.what[i])(stack));
-	      setoflab.insert(lab);
-	      if ( verbosity>3) cout << lab << " ";
-	      all=false;
-	    }
-	  else 
-	    {
-	      KN<long>  labs( GetAny<KN_<long> >( (*di.what[i])(stack)));
-	      for (long j=0; j<labs.N(); ++j) {	      
-		  setoflab.insert(labs[j]);
-		  if ( verbosity>3) cout << labs[j] << " ";
-	      }	  
-	      all=false;	  
-	    }
-      
-    }
+void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab);
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
     
+
 template<class R>
  void AssembleLinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l )
 {
@@ -2984,6 +3579,7 @@ template<class R>
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+    if(di.islevelset()) InternalError("So no levelset intgeration type on the case");
     /*
     if ( verbosity>3) 
       if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
@@ -3071,7 +3667,7 @@ template<class R>
        /*
        if(VF)
 	 {
-	   pair<void *,double *> bstack; 
+	   pair_stack_double bstack; 
 	   
 	   bstack.first = stack;
 	   bstack.second= & binside;
@@ -3138,7 +3734,25 @@ template<class R>
             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 	  }
     }  
-    else {
+    else  if(kind==CDomainOfIntegration::intallfaces    ) {
+        
+	if(VF) InternalError(" no jump or average in intallfaces of RHS");
+        
+        for(int i=0;i<ThI.nt; i++)
+            for(int ie=0;ie<Mesh3::nea; ie++)
+        {
+            int lab=0;
+            // if face on bord get the lab ??? 
+                if ( sameMesh)
+                    Element_rhs<R>(Vh[i],ie,lab,*l->l,buf,stack,*B,FIT,false);
+                else
+                    Element_rhs<R>(ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false);
+                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+            
+        }
+    }
+    else 
+    {
       cout << " Strange (unknows) kind = " << kind << endl; 
       ffassert(0);
     }
@@ -3146,6 +3760,101 @@ template<class R>
              
   }
 
+static int IsoLineK(double *f,R2 *Q,double eps)
+    {
+        int debug=0;
+        R2 P[3]={ R2(0.,0.),R2(1.,0.),R2(0.,1.)};
+        int kv=0,ke=0,e=3;
+        int tv[3],te[3],vk[3],i0[3],i1[3];
+        for(int i=0;i<3;++i)
+        {
+            if( abs(f[i]) <= eps) {
+                e -= tv[kv++]=i;
+                vk[i]=1;
+            }
+            else
+                vk[i]=0;
+        }
+        if(debug) cout << " ** " <<     kv << endl;
+        if(kv>1) //  on 2  vertex on the isoline ....
+        {
+            if(kv==2)
+            {
+                if(f[e] > 0.)
+                {
+                    int j0=(e+1)%3;
+                    int j1=(e+2)%3;
+                    te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
+                    te[ke]=e,i0[ke]=j1,i1[ke]=j1,++ke;
+                    // pb d'unicity, need to see the adj triangle ...
+                    //return 10+e ; // edge number + 10
+                }
+                else return 0; // skip edge ...
+                
+            }
+            else return 0; //  const funct...
+        }
+        else // see internal edge ..
+            for(int e=0;e<3;++e)
+            {
+                int j0=(e+1)%3;
+                int j1=(e+2)%3;
+                if( vk[j0]) //  the intial  point on iso line
+                {
+                    if(0. < f[j1])
+                        te[ke]=e,i0[ke]=j0,i1[ke]=j0,++ke;
+                    else
+                        te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
+                }
+                else if (vk[j1]); // skip the final point on iso line
+                else if( f[j0] < 0. && 0. < f[j1])  // good  sens
+                    te[ke]=e,i0[ke]=j0,i1[ke]=j1,++ke;
+                else if ( f[j0] > 0. && 0. > f[j1]) // inverse  sens
+                    te[ke]=e+3,i0[ke]=j1,i1[ke]=j0,++ke;
+            }
+        if( ke==2)
+        {
+            // the  K[i1[0]] , Q[0], Q[1] must be direct ...
+            // the  K[i0[1]] , Q[0], Q[1] must be direct ...
+            // Warning   no trivail case ..  make a plot to see
+            //  with is good
+            // the first edge must be
+            
+            if(te[0]<3)  // oriente the line
+            {
+                assert(te[1] >=3);
+                std::swap(te[0],te[1]);
+                std::swap(i0[0],i0[1]);
+                std::swap(i1[0],i1[1]);
+                if(debug) cout << " swap " << endl;
+            }
+            for(int i=0;i<2;++i)
+            {
+                int j0=i0[i],j1=i1[i];
+                if( j0== j1)
+                    Q[i] = P[j0];
+                else
+                    Q[i] = (P[j0]*(f[j1]) -  P[j1]*(f[j0]) ) /(f[j1]-f[j0]);
+                if(debug) cout << i << " " << j0 << " " << j1 << " : "
+                    << Q[i] << "***" << endl;
+            }
+            if(debug)
+            {
+                cout << "i0 " << i0[0] << " " << i0[1] << " " << det(P[i1[0]],Q[0],Q[1]) <<endl;
+                cout << "i1 " << i1[0] << " " << i1[1] << " " << det(P[i0[1]],Q[1],Q[0]) <<endl;
+                cout << "f " << f[0] << " " << f[1] << " " << f[2] << endl;
+                cout << "P " << P[0] << ", " << P[1] << ", " << P[2] << endl;
+                cout << "Q " << Q[0] << ", " << Q[1]  << endl;
+            }
+            if(!vk[i1[0]])
+                assert( det(P[i1[0]],Q[0],Q[1]) > 0);
+            if(!vk[i0[1]])
+                assert( det(P[i0[1]],Q[1],Q[0]) > 0);
+            return 2;
+        }
+        // remark, the left of the line is upper .
+        return 0;
+    }
 
 template<class R>
  void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
@@ -3176,7 +3885,8 @@ template<class R>
     set<int> setoflab;
     bool all=true; 
     bool VF=l->VF();  // finite Volume or discontinous Galerkin
-    if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
+    if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside
+          << " levelset integration " <<di.islevelset()<<  "\n";
 
     if (verbosity>3) 
       if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") , samemesh :"<< sameMesh<< " int mortar: " << intmortar ;
@@ -3190,7 +3900,8 @@ template<class R>
       else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all edges " ;
       else cout << "  -- boundary int  " ;
     */
-      
+    if(di.islevelset() && ((CDomainOfIntegration::int1d!=kind) ) )
+        InternalError("So no levelset integration  on the case");
     Expandsetoflab(stack,di, setoflab,all);
     /*
     for (size_t i=0;i<what.size();i++)
@@ -3236,13 +3947,63 @@ template<class R>
     if (verbosity >3) 
       if (all) cout << " all " << endl ;
       else cout << endl;
-    
+      if(di.islevelset() && (kind !=CDomainOfIntegration::int1d))
+       InternalError(" Sorry No levelSet integral for is case ..");
+         
+
     if (kind==CDomainOfIntegration::int1d)
       {
-	if(VF) InternalError(" no jump or average in int1d of RHS");
-        for( int e=0;e<ThI.neb;e++)
+          
+          
+          if(VF) InternalError(" no jump or average in int1d of RHS");
+          if(di.islevelset())
           {
-            if (all || setoflab.find(ThI.bedges[e].lab) != setoflab.end())   
+              double uset = HUGE_VAL;
+              R2 Q[3];
+              KN<double> phi(ThI.nv);phi=uset;
+              double f[3];
+              for(int t=0; t< ThI.nt;++t)
+              {
+                  double umx=-HUGE_VAL,umn=HUGE_VAL;
+                  for(int i=0;i<3;++i)
+                  {
+                      int j= ThI(t,i);
+                      if( phi[j]==uset)
+                      {
+                          MeshPointStack(stack)->setP(&ThI,t,i);
+                          phi[j]= di.levelset(stack);//zzzz
+                      }
+                      f[i]=phi[j];
+                      umx = std::max(umx,phi[j]);
+                      umn = std::min(umn,phi[j]);
+                      
+                  }
+                  if( umn <=0 && umx >= 0)
+                  {
+                      
+                      int np= IsoLineK(f,Q,1e-10);
+                      if(np==2)
+                      {
+                          if ( sameMesh)
+                          {/*
+                            void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
+                            const QuadratureFormular1d & FI ,const R2 & PA,const R2 &PB)
+                            
+                            */
+                              Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1]);
+                          }
+                          else
+                              InternalError(" No levelSet on Diff mesh :    to day  int1d of RHS");
+                      }
+                      if(sptrclean) sptrclean=sptr->clean();
+                  }
+              }
+              
+        }
+       else
+           for( int e=0;e<ThI.neb;e++)
+          {
+            if (all || setoflab.find(ThI.bedges[e].lab) != setoflab.end())
               {                  
                 int ie,i =ThI.BoundaryElement(e,ie);
                 if ( sameMesh) 
@@ -3257,10 +4018,10 @@ template<class R>
      {	
       if(VF)
         {
-	    pair<void *,double *> bstack; 
+	    pair_stack_double bstack(stack,& binside);
 	    
-	    bstack.first = stack;
-	    bstack.second= & binside;
+	    //bstack.first = stack;
+	    //bstack.second= & binside;
 	    
 	    //InternalError(" Today no jump or average in intalledges of RHS ");
 	    for (int i=0;i< ThI.nt; i++) 
@@ -3346,7 +4107,8 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
         {
           const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
           bool vvf  = bb->VF();
-          if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  ))
+          if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  )
+             &&  (bb->di->kind != CDomainOfIntegration::intallfaces ))
             CompileError("Sorry, no  jump or moy in bilinear form no of type intalledges or intallVFedges ");
            VVF = vvf || VVF;
           }
@@ -3504,7 +4266,11 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
 	  AA.SetSolverMaster(DefSparseSolver<R>::Build(stack,&AA,ds));
 //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
          break;
-           
+        case TypeSolveMat::SparseSolverSym :
+                AA.SetSolverMaster(DefSparseSolverSym<R>::Build(stack,&AA,ds));
+                //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
+                break;
+          
 //#endif         
         default:
           cerr << " type resolution " << ds.typemat->t << endl;
@@ -3563,6 +4329,10 @@ bool SetUMFPACK()
 
 #endif
 #endif
+template <>
+DefSparseSolverSym<double>::SparseMatSolver  DefSparseSolverSym<double>::solver =BuildSolverGMRES;
+template <>
+DefSparseSolverSym<Complex>::SparseMatSolver  DefSparseSolverSym<Complex>::solver =BuildSolverGMRES;
 
  
 template<class R>
@@ -3819,7 +4589,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
                  break;
                }
            if(!same)
-             InternalError("Methode de Galerkine (ˆ faire)");
+             InternalError("Methode de Galerkine (a faire)");
            else
              {
                
@@ -4391,7 +5161,7 @@ const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) co
   if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   */
-  cerr << "Warning :  Order of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
+  cerr << "Warning :  Order of the Integration Formular order " << exact+1 << " exact = " << exact << endl;
   //  ExecError(" We find  no Integration Formular on Tet for this  order to hight");
   return QuadratureFormular_Tet_5;
 }

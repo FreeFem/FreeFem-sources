@@ -71,12 +71,14 @@ namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
    extern GTypeOfFE<Mesh3> &P1bLagrange3d;
    extern GTypeOfFE<Mesh3> &RT03d;
     extern GTypeOfFE<Mesh3> &Edge03d;
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
 }
 
 #include "BamgFreeFem.hpp"
 
 static bool TheWait=false;
 bool  NoWait=false;
+extern bool  NoGraphicWindow;
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
@@ -649,7 +651,7 @@ class LinearCG : public OneOperator
       if (B) {
         Kn &b = *GetAny<Kn *>((*B)(stack));
         R p = (b,b);
-       if (p) 
+       if (p== R()) 
          {
           // ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
           }
@@ -774,7 +776,7 @@ class LinearGMRES : public OneOperator
       Kn b(x.n);
      
       if (B)   b = *GetAny<Kn *>((*B)(stack));
-      else     b=0.;
+      else     b= R();
       int n=x.N();
       int dKrylov=50;
       double eps = 1.0e-6;
@@ -802,7 +804,7 @@ class LinearGMRES : public OneOperator
 	 if (B) {
 	     Kn &b = *GetAny<Kn *>((*B)(stack));
 	     R p = (b,b);
-	     if (p) 
+	     if (p== R()) 
 	       {
 		 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
 	       }
@@ -1696,7 +1698,9 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ppfe)(s));
     FEbase<R,v_fes> & fe(*pp.first);
     const  FESpace & Vh(*fe.newVh());
-    KN<R> gg(Vh.MaximalNbOfDF()); 
+    if(!&Vh ) ExecError("Unset FEspace (Null mesh ? ) on  uh= ");
+ 
+    KN<R> gg(Vh.MaximalNbOfDF());
     const  Mesh & Th(Vh.Th);
  //   R F[100]; // buffer 
     TabFuncArg tabexp(s,Vh.N);
@@ -2692,6 +2696,9 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
    else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
    else cout << "  -- boundary int  " ;*/
+      
+ Expandsetoflab(stack,*di, setoflab,all); 
+/*
  for (size_t i=0;i<what.size();i++)
    {
      long  lab  = GetAny<long>( (*what[i])(stack));
@@ -2699,7 +2706,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      if ( verbosity>3) cout << lab << " ";
      all=false;
    }
- 
+ */
  if(dim==2)
    {
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
@@ -4150,6 +4157,34 @@ class MeanOp : public E_F0mps  { public:
        MeanOp(Expression aa) : a(aa) {} 
     };
 
+long get_size(pferarray const & a)
+{
+  return a.first->N;
+}
+long get_size(pfecarray const & a)
+{
+    return a.first->N;
+}
+long get_size(pferbasearray *const & a)
+{
+    return (**a).N;
+}
+long get_size(pfecbasearray *const & a)
+{
+    return (**a).N;
+}
+long resize(pferbasearray *const & a, long const & n)
+{
+    (**a).resize(n);
+    return n; 
+}
+
+long resize(pfecbasearray *const & a, long const & n)
+{
+    (**a).resize(n);
+    return n;
+}
+
 pferbase* get_element(pferbasearray *const & a, long const & n)
 {
   return (**a)[n];
@@ -4398,9 +4433,16 @@ Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
     return make_pair(map_type[typeid( EConstantTypeOfFE3::T).name()],new EConstantTypeOfFE3(v));
 }
 
-//  end --- call meth be .. 
+//  end --- call meth be ..
+// 2013 resize of array of fe function..
+template<typename  T> T fepresize(const Resize1<T> & rt,const long &n) {
+    (**(rt.v)).resize(n);
+    return rt.v;}
+template<typename  T> T feresize(const Resize1<T> & rt,const long &n) {
+    rt.v.first->resize(n);
+    return rt.v;}
 
-
+R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
@@ -4534,6 +4576,8 @@ void  init_lgfem()
  
  Global.New("wait",CConstant<bool*>(&TheWait));
  Global.New("NoUseOfWait",CConstant<bool*>(&NoWait));
+ Global.New("NoGraphicWindow",CConstant<bool*>(&NoGraphicWindow));
+
  Dcl_Type<MeshPoint *>();
  Dcl_Type<finconnue *>();
  Dcl_Type<ftest *>();
@@ -4627,6 +4671,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
  Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
 
+ Global.New("sparsesolverSym",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolverSym)));
+
  ffassert(kTypeSolveMat<nTypeSolveMat);
  map_type[typeid(TypeSolveMat*).name()]->AddCast(new E_F1_funcT<TypeSolveMat*,long>(Long2TypeSolveMat) );    
  map_type[typeid(long).name()]->AddCast(  new E_F1_funcT<long,TypeSolveMat*>(TypeSolveMat2Long) );                                     
@@ -4661,7 +4707,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OpMake_pfes<pfes,Mesh,TypeOfFE,pfes_tefk>,
 		   new OpMake_pfes<pfes3,Mesh3,TypeOfFE3,pfes3_tefk>
         );
-      
+    TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
  
  Add<MeshPoint*>("P",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::P));
  Add<MeshPoint*>("N",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::N));
@@ -4720,6 +4766,14 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs 
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
+
+ //   Global.Add("LinearCG","(",new LinearCG<Complex>()); // old form  with rhs (must be zer
+ //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>()); // old form  with rhs (must be zer
+ //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>(1)); // old form  without rhs 
+//    Global.Add("LinearCG","(",new LinearCG<Complex>(1)); //  without right handsize
+//    Global.Add("NLCG","(",new LinearCG<Complex>(-1)); //  without right handsize
+   
+    
  zzzfff->AddF("varf",t_form);    //  var. form ~
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);
@@ -4905,7 +4959,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAxeqb > >  ,  
 		   
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >    
 		   
@@ -5069,8 +5123,31 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  
  // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
-  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use ???? FH sep. 2009 
-  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009 
+  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use FH sep. 2009 
+  Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009
+    // bof bof ..
+    // resize of array of Finite element ..  a little hard 2013 FH
+    Dcl_Type< Resize1<pfecbasearray* > > ();
+    Dcl_Type< Resize1<pferbasearray* > > ();
+    Dcl_Type< Resize1<pfecarray > > ();
+    Dcl_Type< Resize1<pferarray > > ();
+    Add<pfecbasearray*>("resize",".",new OneOperator1<Resize1<pfecbasearray* >,pfecbasearray*>(to_Resize1));  //  FH fev 2013
+    Add<pferbasearray*>("resize",".",new OneOperator1<Resize1<pferbasearray* >,pferbasearray*>(to_Resize1));  //   FH fev. 2013
+    Add<pferarray>("resize",".",new OneOperator1<Resize1<pferarray >,pferarray>(to_Resize1));  //  FH fev 2013
+    Add<pfecarray>("resize",".",new OneOperator1<Resize1<pfecarray >,pfecarray>(to_Resize1));  //   FH fev. 2013
+    new OneOperator2_<pferbasearray*,Resize1<pferbasearray* > , long  >(fepresize<pferbasearray*>);
+    Add<Resize1<pferbasearray* > >("(","",new  OneOperator2_<pferbasearray*,Resize1<pferbasearray* > , long  >(fepresize));
+    Add<Resize1<pfecbasearray* > >("(","",new OneOperator2_<pfecbasearray*,Resize1<pfecbasearray* > , long  >(fepresize));
+    Add<Resize1<pferarray > >("(","",new OneOperator2_<pferarray,Resize1<pferarray > , long  >(feresize));
+    Add<Resize1<pfecarray > >("(","",new OneOperator2_<pfecarray,Resize1<pfecarray > , long  >(feresize));
+// end of resize ...
+   
+  Add<pfecbasearray*>("n",".",new OneOperator1_<long,pfecbasearray*>(get_size));  //  FH fev 2013
+  Add<pferbasearray*>("n",".",new OneOperator1_<long,pferbasearray*>(get_size));  //   FH fev. 2013
+  Add<pferarray>("n",".",new OneOperator1_<long,pferarray>(get_size));  //  FH fev 2013
+  Add<pfecarray>("n",".",new OneOperator1_<long,pfecarray>(get_size));  //   FH fev. 2013
+    
+    
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
    
@@ -5500,6 +5577,55 @@ C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
   lid->push_back(UnId(id));
   return NewFEarray(lid,currentblock,fespacetype,sizeofarray,cplx,dim);
 }
+
+namespace Fem2D {
+void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab)
+{
+    for (size_t i=0;i<bc.on.size();i++)
+        if(bc.onis[i] ==0)
+	    {
+            long  lab  = GetAny<long>( (*bc.on[i])(stack));
+            setoflab.insert(lab);
+            if ( verbosity>99) cout << lab << " ";
+            
+	    }
+        else 
+	    {
+            KN<long>  labs( GetAny<KN_<long> >( (*bc.on[i])(stack)));
+            for (long j=0; j<labs.N(); ++j) {	      
+                setoflab.insert(labs[j]);
+                if ( verbosity>99) cout << labs[j] << " ";
+            }	  
+            
+	    }
+    if(verbosity>99) 
+        cout << endl;
+    
+}
+
+void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all)
+{
+    for (size_t i=0;i<di.what.size();i++)
+        if(di.whatis[i] ==0)
+	    {
+            long  lab  = GetAny<long>( (*di.what[i])(stack));
+            setoflab.insert(lab);
+            if ( verbosity>3) cout << lab << " ";
+            all=false;
+	    }
+        else 
+	    {
+            KN<long>  labs( GetAny<KN_<long> >( (*di.what[i])(stack)));
+            for (long j=0; j<labs.N(); ++j) {	      
+                setoflab.insert(labs[j]);
+                if ( verbosity>3) cout << labs[j] << " ";
+            }	  
+            all=false;	  
+	    }
+    
+}
+}
+
 
 #include "InitFunct.hpp"
 

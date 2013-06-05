@@ -1,3 +1,5 @@
+/// \file
+
 %{ 
     // -*- Mode : c++ -*-
     //
@@ -42,7 +44,7 @@
 #include "error.hpp"
 class Iden;
 #include "strversionnumber.hpp"
-
+#include "InitFunct.hpp"
 #ifdef __MWERKS__
 #ifdef __INTEL__
 #include <malloc.h>
@@ -352,7 +354,9 @@ parameters_list:
 
 type_of_dcl:   TYPE 
              | TYPE '[' TYPE ']' {$$=TypeArray($1,$3)}
+             | TYPE '[' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
              | TYPE '[' TYPE ',' TYPE ']' {$$=TypeArray($1,$3,$5)}
+             | TYPE '[' TYPE ',' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3,$5),$8)}
              | TYPE '<' TYPE '>' {$$=TypeTemplate($1,$3)}
 	     | TYPE '<' TYPE '>' '[' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6)}
 	     | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
@@ -643,6 +647,7 @@ void init_algo();
 bool withrgraphique = false;
 //string  StrVersionNumber();
 
+/// Called by mainff() and activates the bison parser by calling yyparse()
 int Compile()
 {
   extern   YYSTYPE *plglval;  // modif FH 
@@ -714,10 +719,12 @@ static void SetcppIo()
 // pour l'environement.
 extern const char *  prognamearg;
 extern  bool echo_edp;
+
+/// Called by mymain() and calls Compile() to run the FF language parser
 int mainff (int  argc, char **argv)
 {
     
-
+   ffapi::init(); 
   if(argc)  
     prognamearg=argv[0];
 
@@ -746,6 +753,7 @@ int mainff (int  argc, char **argv)
   if ( ! (getprog(cc,argc,argv) >0)  ) 
     {
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
+      if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
       return 1; 
     }
    
@@ -787,9 +795,10 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("try",TRY);
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
-   Init_map_type();
+//   Init_map_type();
    if(verbosity>2 || (mpirank==0 ) ) cout << " Load: ";
-   init_lgfem() ;
+   callInitsFunct() ; //  init for dynamique libs ...
+  // init_lgfem() ;
    init_lgmesh() ;
    init_lgmesh3() ;
    init_algo();
@@ -799,14 +808,15 @@ int mainff (int  argc, char **argv)
 #endif   
 
    if(init_lgparallele)  init_lgparallele(); 
+  //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || mpirank==0)  cout << endl;
   zzzfff->input(cc);
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     
-  retvalue= Compile(); 
-      
+  retvalue= Compile();
+   // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
 
   if(end_parallele) end_parallele();
 

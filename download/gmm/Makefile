@@ -14,7 +14,7 @@ SRCDIR=$(PKG)-$(PKG_VERSION)
 PACKAGE=$(PKG)-$(PKG_VERSION).tar.gz
 SERVER=http://download.gna.org/getfem/stable
 PKGDIR=../pkg
-PKG_VERSION=4.1
+PKG_VERSION=4.2
 INSTALL=../..
 
 
@@ -45,7 +45,8 @@ $(PKGDIR)/$(PACKAGE):
 clean: clean-local
 
 clean-local:
-	-rm -rf $(PKG)-* FAIT FAIRE
+	-rm -rf $(PKG)-* FAIT FAIRE $(SRCDIR) 
+	-rm ../lib/WHERE.gmm
 
 cxxflags: ../Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
@@ -57,7 +58,7 @@ cxxflags: ../Makefile
 
 WHERE: 
 	-@if [ -f FAIT ] ; then \
-	echo build $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
-	echo gmm INCLUDE -I@DIR@/include  > $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
-	echo gmm LD -L@DIR@/lib   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.gmm ;\
+	echo build ../lib/WHERE.gmm ;\
+	echo gmm INCLUDE -I@DIR@/include  > ../lib/WHERE.gmm ;\
+	echo gmm LD -L@DIR@/lib   >> ../lib/WHERE.gmm ;\
 	fi

@@ -98,8 +98,10 @@ $(DIRINSTALL)/bin/mpifort77: fort77.sed Makefile
 	mkdir ../lib
 ../include:	
 	mkdir ../include
-clean:
+clean-local:
 	-rm -rf  f2c *~  a.out
+clean:clean-local
+
 veryclean: clean 
 	-rm $(LISTINST) $(F2C_TAR)
 

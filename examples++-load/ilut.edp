@@ -30,7 +30,7 @@ func real[int] ilutMp(real[int] & xx) {
 	ilutOUT=[uuout,ppin];
 	return ilutOUT;
 }
-
+//dumptable(cout);
 // Uses ILUT for the velocity and I for the pressure
 func real[int] ilut(real[int] & xx) {
 	ilutOUT=applyIlutPrecond(xx);

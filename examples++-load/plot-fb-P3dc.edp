@@ -28,10 +28,15 @@ if(!NoUseOfWait)
     vi[][i]=1;
     vi;
     plot(vi,wait=0,cmm=" v"+i);
-    if(0)
-      { savemesh(th,"mm",[x,y,vi*0.5]);   //save *.points and *.faces file for medit
-      exec("ffmedit mm");
-      exec(" rm mm.faces mm.points");
+    if(!NoGraphicWindow && 0 )
+      {
+      load "medit" load "msh3"
+      mesh3 Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
+      medit("mm",Th3); 
+ 
+//      savemesh(th,"mm",[x,y,vi*0.5]);   //save *.points and *.faces file for medit
+//      exec("ffmedit mm");
+//      exec(" rm mm.faces mm.points");
       }	
     vi=vi;	
     cout << i << " vi = "<< vi[]<<endl;

@@ -38,6 +38,7 @@ namespace Fem2D {
 }
 
 #include "GenericMesh.hpp" 
+#include <cstdio>
 #include <cstdlib>
 using namespace std;
 

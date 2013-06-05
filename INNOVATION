@@ -1,6 +1,155 @@
-  - correct problem on lion missing function second in arpack 
-    change Makefile.am to change second in secnd2 in all instrinc 
-    in arpack source. 
+ - coorect automake TESTING part (in progress) 
+ - correct typo on the doc with .*= ./=  operator
+ - correct bug in RT0 3d , code in the construction of the DOF.
+   the bug is all dof on border  face of same elemnt have same dof number.
+   thank to Laurent Bernard <laurent.bernard@lgep.supelec.fr> 
+version 3.23
+ - do cleanning in version remove x11, glx, std : freefem++
+   clean compile option for clang and clang++ compiler 
+
+ - add flags to remove internal boundary in 2d,3d in function change 
+     rmInternalEdges=1
+ - correct glumesh in case of no mesh in 2d
+version 3.22
+ - add multi windows graphics ; WindowIndex=0 in plot function
+   add new event in graphic windows 
+     * to set/unset  default graphics stat to previoux plot 
+ - add getenv, setenv , unsetenv function in shell plugins for gestion of environnemnt variable for 
+   openmp. 
+ - correct pb un trunc for 3d mesh with too flat element (sliver) , and cleanning code .
+ - correct bug in gestion off outsite flag is 3d in case of bute force (searchMethod>0) 
+version 3.21-1 
+ - correct bug  a=b' ; of full matrix 
+ - bug in assert on 3d mesh of huge dimension with periodic condition.
+ - correct build Delaunay 3d mesh of set of point. 
+   see examples++-load/convexehull3d.edp
+version 3.21 frev 2013
+ - n, resize in array of finite element function ... 
+     see edp  array.edp file 
+ - correct pb of compilation of Ipopt with clang++ -std=c++11
+ - correct une NSCahouetChabart.epd examples , and correct un doc. 
+    this is a complete rewritting. FH. 12/02/2013.
+ - correct in change function the "flabel=" parameter in 2d and 3d 
+version 3.20-3
+  - add master= in solver of MUMPS interface to set the master mpirank 
+        <0 => distributed matrix. 
+  - correct problem in label generation in freeyams (18/01/2013)
+     all label border was set on 1  before. 
+version 3.20-2
+  - add MUMPS parallel version (in test)
+  - add paradiso seq solver ..
+version 3.20
+ - correct isoline plug in case of sadlle point
+ - change the compilation tools under windows gcc 4/7 + freeglut / ...)
+ - change the compile tools on mac pass to clang++
+ - compile ok of c++11  compiler
+ - add formal tools on array [] or matrix [[],[],]  for elasitic problem. 
+   let A a formal array 
+   if A is matrix 2x2 or 3x3 : trace(A) , det(A) ,    Cofactor(A) ; 
+    A:A  = sum_ij A_ij * A_ij 
+    2*A,   A*2 // muliplication by a scalar 
+
+ -add integration on levelset line (in test) 
+ 
+version 3.19-2
+ - correct pb of C in/output in pluging (in test) 
+ - correct bugs  mshmet pluging in case of double eigen value in eigen
+ - correct typo poblem (string size) when a change the default
+    window size in postscrip in version 3.19-1 to have more 
+    precise postscript plot
+version 3.19-1
+ - add tool to create Quadrature formlar 1d,2d,3d with 
+   plugind: load "qf11to25"
+   real[int,int] tab1(np,2),tab2(np,3),tab3(np,4);
+   QF1 qfe1(norder,tab1);// 1d
+   QF2 qfe1(norder,tab2);// 2D
+   QF3 qfe1(norder,tab3);// 3D
+   where tab(0,i) = weigth , tab(j,i) =  j coord, norder  order of the
+     quadrature 
+   see examples++-load/LaplaceP4.edp for example 
+ - correct download auto compile of
+    mmg3d, mshmet, scotch, ...
+version 3.19 (20 april 2012) 
+ - scotch partionner interface see scotch.edp in examples++-load
+ - add isNaN(x),  isInf(x), IsNormal(x)  function to check floating point
+      of real value x, see ISO C99. 
+ - add function : NaN() and  NaN("") to build NaN real number (double in C) . 
+ - correct error in macro with operator ./=  and .*= 
+ - add Ipopt doc (thanks to Sylvain  Auliac)
+ - add Ipopt interface (thanks to Sylvain  Auliac)
+ - correct 3d trunc bug in case of internal boundary
+      thank to Yoshihiro Tomita <tomita.yoshihiro@gmail.com>. 
+  - add new type of array , array of array
+    see taboftab:edp in  examples++-tuturial
+    real[int] a;  
+    real[int,int][int] m(10);
+    real[int][int] v(10);
+   not well tested.
+version 3.18-2
+ - add plugins with sequentiel  mumps without mpi 
+ - add conversion of re and im part of complex sparse matrix
+   A = C.im; 
+   A = C.re; 
+version 3.18-1
+ - correct Typo error in example 
+ - add generation of error in case of periodic boundary condition 
+   non scalar problem. 
+ - add tools for adaptation of P2 and P3 finite elements with metrics
+   see APk-AdaptEpsDeltaPk.edp APk-FreeFemQA.edp	 APk-MetricPk.edp
+    APk-ExplicitPkTest.edp	       APk-LaplaceDirac.edp
+
+ - New example in in Chapter 3 Navier Stokes Newton NSNewton.edp
+ - add cod to build matrix and vector form varf in 3d in case of
+      different meshes (in test )
+ - correct NSprojection.edp chap3 example (PB in out flow BC.) 
+ - correct compile of mmg3d v4 plugins (small change un distrib archive) 
+v 3.18 (11/01/2012)
+ - rewrite the isoline-P1 plugins (new name isoline.{dll,so,dylib} )
+     see example Leman-mesh.edp and isoline.edp in 
+     examples++-load directory 
+ - correct bug in cas of resize of array with 2 index (full matrix)
+ - correct assert in MPI  in gather and scatter
+ - correct bug in case of return  in loop for or while. 
+ - correct a=int2d(Th,l)(1) in case simple expression  when l is a  array.
+ - build a pkg under macos for distribution .
+v 3.17  (17/11/2011) 
+ - correct PB of pugins: MUMPS, parmetis, metis, mmg34, mshmet 
+ - the new load interface  (for more safe IO)
+ - build mpi for windows with msmpi ( begin) 
+    memory error after end .. 
+ - remove add by default $LIB_MPI in ff-c++ 
+ - change the way add thing in freefem++ in case of  dynamics load 
+   to be  compatible   plugin with freefem++cs  ( solve pb with
+     cin,cout, cerr in  dll may be..).
+   LOADINIT(Init); // where init is a class 
+or do 
+   addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem"); // where ffinit the init function ...
+v 3.16-1
+ - cmaes interface in scalar and MPI case  (thank to S. Auliac)
+    see doc and examples : cmaes-mpi-VarIneq.edp , cmaes--VarIneq.edp
+ - add NLopt interface (thank to S. Auliac)
+v 3.16 
+  technical stuff: 
+  - correct auto load of mumps
+  - add tool to do automatic load or static load (for testing)
+    see MUMPS_*cpp example 
+v 3.15 
+  - correct all examples++  load and 3d rebuilde the all.edp 
+    and test this examples. 
+  - correct version old bug when full matrix (arry)
+    A=A;' is now correct (set and  initialization )
+    and add  A+=A';    A-=A';
+
+  - reput metis 4.0 form netlib ... (pb of compatibilite with other // soft hips)
+v 3.14-1
+  -   change interface with metis 5.0.1 
+  -   Complete writing of mmg3d interface with version 4 of mmg3d
+      le plugin is "mmg3d-v4.0", the parametre are the same have 
+      command line mmg3d , execpt the file name are not given. 
+  -   remove old bug 3D in interpolation P1 operator 
+      correct bug 29/08/2011 (thanks to rychet@fzu.cz)
+      remove wrong bulid of KHat (memory out of bound)
+
 v 3.14 
   - correct in configure remove the default -O2 -g autoconf value 
     and add -g in case of --enable-debug 
@@ -58,7 +207,7 @@ v 3.12-1 10 10 fevr 2011
     - add tag verson 3.12-win32 
     - add inferface for mpi in win32 architecture (form 32 version)
 v 3.12    17 jan 2011
-    - coorect probleme of comm world on SuperLuDist (complex version)
+    - correct probleme of comm world on SuperLuDist (complex version)
     - correct medit Makefile.am in case of no compilation of medit ..
     - correct a lot of MPI parallel solver example 
         a bug pastix interface ???
@@ -163,7 +312,7 @@ v 3.9-1  August 2009   (For FreeFem++ days )
     add:  gatherv, allgatherv, scatterv, alltoallv   
         and complex data type in:  allgather, gather, scatter, alltoall, ..
     correction bug : gather,  scatter
-    coorect essai.edp mpi example 
+    correct essai.edp mpi example 
   - correct problem of compatibility of dynamic lib  with and without MPI 
      change ff-cc++ to add all MPI libs if MPI version exist. 
   - correct default  region number in square build mesh function  now 0 , (2 beetween  v3.8 -- 3.9)  

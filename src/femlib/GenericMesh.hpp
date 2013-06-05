@@ -41,7 +41,7 @@ extern long searchMethod; //pichon
 #include "assertion.hpp" 
 #include <cstdlib>
 #include <utility>
-
+#include <limits>
 //#include <algorithm>
 //#include <Functional>
 
@@ -116,8 +116,8 @@ const int TypeVolume =3;
 	return (k%2)+ ((j[0]+3)%3)*2; // signe + depart*2
     }    
     // build de permutation     
-    template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0);return 0; }// a error}    
-    template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0);return 0; }// a error}    
+    template<int d> inline void SetNumPerm(int n,int *p) { ffassert(0); }// a error}    
+    template<int d> inline void SetNumPerm1(int n,int *p) { ffassert(0); }// a error}    
     
     template<> inline void SetNumPerm<1>(int ,int *p) { p[0]=0;} // a error}    
     template<> inline void SetNumPerm<2>(int n,int *p) { p[0]=n;p[1]=1-n;} // a error}    
@@ -531,8 +531,11 @@ public:
   
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
-    j=p%nea;
-    return p>=0 ? p/nea: -1;}
+    if(p>=0) j=p%nea;
+    return p>=0 ? p/nea: -1-j;}// modif FH. to change the code of copule k,kadj on border element..
+    //  correct bug of 23/05/2013 : 1  dof on RT0 3d... 
+    
+
 
   int ElementAdj(int k,int &j,Rd& PHat) const  
     {
@@ -1157,7 +1160,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
   const GenericMesh & Th(*this);
   int nnodeK = T::NbNodes(ndfon);
   int *p = 0, *pp=0; 
-  unsigned int tinfty=-1;
+    unsigned int tinfty=std::numeric_limits<unsigned int>::max()   ; 
     
   const int nkv= T::nv;
   const int nkf= T::nf;
@@ -1205,7 +1208,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
       Key keys[nkeys*2];
       int keysdim[nkeys*2];
       
-      int of = Th.nv+1;
+      int of = Th.nv+10;// Modif FH 28/05/2013 
       int ndim[NbTypeItemElement]={0,0,0,0};
       NbOfDF=0;
       {
@@ -1311,11 +1314,13 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	      for(int i=0;i<nke;++i)
 		keysdim[m]=1,keys[m++]=Key(Th(K[T::nvedge[i][0]]),Th(K[T::nvedge[i][1]]));
 	    if(  ndfon[2])//  node on Face
+	      {
 	      if (nkf==1) 
 		keysdim[m]=2,keys[m++]=Key(k+of,tinfty);
 	      else
 		for(int ii,i=0;i<nkf;++i)
 		  keysdim[m]=2,keys[m++]=Key(k+of,ElementAdj(k,ii=i) +of);
+	      }
 	    if(  ndfon[3] )//  node on Tet
 	      if(nkt==1)
 		keysdim[m]=3,keys[m++]=Key(k+of,tinfty);

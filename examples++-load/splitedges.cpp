@@ -102,7 +102,7 @@ Mesh * Split_Edges(Fem2D::Mesh * const & pTh, long  *dK)
 	  if( dK[k] & (1<<e)) {
 	    Triangle *tn=tt++; 
 	    int iee=  NGP(e,k);
-	    int id[]={ &(Kd[0])-v,&(Kd[1])-v,&(Kd[2])-v};
+	    int id[]={  int(&(Kd[0])-v),int(&(Kd[1])-v), int(&(Kd[2])-v)};
 	    int in[]={ id[0],id[1],id[2]};
 	    id[e1]=iee;
 	    in[e2]=iee;
@@ -229,7 +229,7 @@ AnyType SplitEdges::operator()(Stack stack) const
     return SetAny<pmesh>( Split_Edges(pTh,(long *) dK));      
   }
  
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   if (verbosity)

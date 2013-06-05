@@ -222,6 +222,8 @@ int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
     static integer pf;
 /*    extern  Subroutine int gibbsb_(), gibbsd_(), gibbst_();*/
     static integer nbpass, niveau, pf1, option, old, new_, opt, new1;
+    long pfn1,pfo1,m1e9;
+    m1e9 = 1000000000;
 
 /* -----------------------------------------------------------------------
  */
@@ -385,6 +387,8 @@ s */
 /*     calcul du profile */
     *pfold = 0;
     *pfnew = 0;
+    pfo1=0;
+    pfn1=0;
     bnew = 0;
     bold = 0;
     i__1 = *n;
@@ -409,7 +413,24 @@ s */
 /* Computing MAX */
 	i__2 = bnew, i__3 = r[i] - new_ + 1;
 	bnew = mmax(i__2,i__3);
+        if(*pfold>m1e9) { pfo1+=*pfold/m1e9; *pfold = *pfold%m1e9;}
+        if(*pfnew>m1e9) { pfn1+=*pfnew/m1e9; *pfnew = *pfnew%m1e9;}
+        
 /* L110: */
+    }
+    if(pfo1 || pfn1)
+    { // change unit of pf
+        if(pfo1==pfn1)
+        {
+            *pfnew= pfn1*10 + (*pfnew >= *pfold) ;
+            *pfold= pfo1*10 + (*pfnew <= *pfold) ;
+        }
+        else
+        {
+           *pfnew= pfn1 ;
+           *pfold= pfo1;
+        }
+
     }
 /*      if(impre.ne.0) then */
 /*        write(nfout,*)'profile  old  = ',pfold,', profile  new = ',pfnew
@@ -580,7 +601,7 @@ n+n) */
 		}
 /* L110: */
 	    }
-	    if (h0 < l0 || h0 == l0 && mxcanx <= mxcany) {
+	    if (h0 < l0 || (h0 == l0 && mxcanx <= mxcany)) {
 /*           if(impre.le.-2) write(nfout,*) */
 /*     +       '         h0 = ',h0,',l0 = ',l0,'  ------- XXXX
  --------' */

@@ -275,7 +275,7 @@ double  KN_<R>::lp(double p) const {
   {
   double s = 0.;
     for (long i=0;i<n;i++)
-      s = pow(std::max( (double) std::abs(v[index(i)]),s),p);
+      s += pow(std::max( (double) std::abs(v[index(i)]),s),p);
     return pow(s,1./p);
    }
   }
