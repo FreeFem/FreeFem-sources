@@ -1,8 +1,3 @@
-/*! \file
-     language The FreeFem++ Language
-    \note This language description is extracted from file lg.ypp
-*/
-
 %{ 
     // -*- Mode : c++ -*-
     //
@@ -258,11 +253,6 @@ void (*end_parallele)()=0;
 %token SOLVE
 
 %% 
-
-/*! start start:
-
-    doxygen doc
-*/
 
 start:   input ENDOFFILE {
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
