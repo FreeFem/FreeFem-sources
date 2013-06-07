@@ -2679,7 +2679,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
  bool all=true; 
  if(dim==2)
  if (verbosity>3) 
-   if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+   if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
    else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
    else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
    else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
@@ -2707,19 +2707,73 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      all=false;
    }
  */
+  if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (10)");
+      
  if(dim==2)
    {
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
      ffassert(&Th);
      
      if (verbosity >3) 
+     {
        if (all) cout << " all " << endl ;
        else cout << endl;
-     
+     }
      if (kind==CDomainOfIntegration::int1d)
        {
 	 const QuadratureFormular1d & FI = FIE;
-         
+           if(di->islevelset())
+           {
+               double llevelset = 0;
+               double uset = HUGE_VAL;
+               R2 Q[3];
+               KN<double> phi(Th.nv);phi=uset;
+               double f[3];
+               for(int t=0; t< Th.nt;++t)
+               {
+                   double umx=-HUGE_VAL,umn=HUGE_VAL;
+                   for(int i=0;i<3;++i)
+                   {
+                       int j= Th(t,i);
+                       if( phi[j]==uset)
+                       {
+                           MeshPointStack(stack)->setP(&Th,t,i);
+                           phi[j]= di->levelset(stack);//zzzz
+                       }
+                       f[i]=phi[j];
+                       umx = std::max(umx,phi[j]);
+                       umn = std::min(umn,phi[j]);
+                       
+                   }
+                   if( umn <=0 && umx >= 0)
+                   {
+                      
+                       int np= IsoLineK(f,Q,1e-10);
+                       if(np==2)
+                       {
+                           const Triangle & K(Th[t]);
+                           R2 PA(K(Q[0])),PB(K(Q[1]));
+                           R2 NAB(PA,PB);
+                           double  lAB=sqrt((NAB,NAB));
+                           NAB = NAB.perp()/lAB;
+                           llevelset += lAB;
+                           for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                           {
+                               QuadratureFormular1dPoint pi( FI[npi]);
+                               double sa=pi.x,sb=1.-sa;
+                               R2 Pt(Q[0]*sa+Q[1]*sb ); //
+                               MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NAB,-1);
+                               r += lAB*pi.a*GetAny<R>( (*fonc)(stack));
+                           }
+                       }
+                       
+                   }
+               }
+               if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+               
+           }
+
+        else
 	 for( int e=0;e<Th.neb;e++)
 	   {
 	     if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
