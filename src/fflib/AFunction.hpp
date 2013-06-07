@@ -2339,7 +2339,11 @@ class  Operator_Aritm_If : public OneOperator{
   public:
     AnyType operator()(Stack s)  const 
          {
-          return  SetAny<R>(static_cast<R>( GetAny<bool>((*a)(s)) ? GetAny<B>((*b)(s))  : GetAny<C>((*c)(s))  ));
+             bool ok = GetAny<bool>((*a)(s)) ;
+             R r ;
+             if( ok) r=GetAny<B>((*b)(s)) ;
+             else r =GetAny<C>((*c)(s)) ;
+             return  SetAny<R>(r);// static_cast<R>( ? GetAny<B>((*b)(s))  : GetAny<C>((*c)(s))  ));
           }
     Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc){} 
     bool MeshIndependent() const { return a->MeshIndependent() && b->MeshIndependent() &&b->MeshIndependent() ;}

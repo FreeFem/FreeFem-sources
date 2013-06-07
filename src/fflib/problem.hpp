@@ -34,8 +34,11 @@ template<class K> class MatriceCreuse;
 namespace  Fem2D {
   template<class K> class SolveGCPrecon;
   template<class K> class SolveGMRESPrecon;
-  template<class K> class SolveGMRESDiag;  
+  template<class K> class SolveGMRESDiag;
+  int IsoLineK(double *f,R2 *Q,double eps);
+  
 }
+
 
 template<class K> class SolveGCDiag; 
 class Plot;
@@ -1333,6 +1336,6 @@ TypeVarForm() :
 
  static TypeVarForm *Global;
 }; 
-
+   
 }
 #endif

@@ -1,4 +1,4 @@
- - coorect automake TESTING part (in progress) 
+ - correct automake TESTING part (in progress) 
  - correct typo on the doc with .*= ./=  operator
  - correct bug in RT0 3d , code in the construction of the DOF.
    the bug is all dof on border  face of same elemnt have same dof number.
