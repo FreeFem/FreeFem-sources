@@ -1116,12 +1116,12 @@ void OneWindow::add(ThePlot *p)
 
 void OneWindow::DefaultView(int state)
 {
-  if(debug>1)  cout << "DefaultView " << state << " " <<keepPV << endl;
+  if(debug>1)  cout << "DefaultView " << state << " " <<keepPV << " theplot " << theplot << endl;
   if(keepPV)
    {
       if(state==0 && init) return;
   }
-  else if(state==2) rapz=-1;
+  else /*if(state==2)*/ rapz0=-1;
     
   if(theplot)
     {
