@@ -1,3 +1,6 @@
+9/06/2013
+ - correct extract function of mesh Lo Sala <salalo80@gmail.com>
+ - correct int2d on levelset  see example intlevelset.edp 
  - correct automake TESTING part (in progress) 
  - correct typo on the doc with .*= ./=  operator
  - correct bug in RT0 3d , code in the construction of the DOF.
