@@ -19,6 +19,7 @@ using namespace std;
 #include <list>
 #include <map>
 #include <utility>
+#include <unistd.h>
 
 #include "rgraph.hpp"
 #include "fem.hpp"
@@ -42,6 +43,7 @@ using namespace std;
 
 int debug=1;
 int casemouse=0,keyact=0;
+double gwait=0;//  no wait in second
 #include "ffglut.hpp"
 
 #include "ffthreads.hpp"
@@ -136,7 +138,7 @@ int   ReadOnePlot(FILE *fp)
       assert(nextPlot==0);
       nextPlot = new ThePlot(f,currentPlot,++kread);
 	if(debug>1)	
-      cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  endl;
+      cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  " gwait = " << gwait << endl;
       assert(nextPlot);
       err=0;
     }
@@ -172,6 +174,9 @@ int SendForNextPlot()
   // every 25/ second..  = 1000/25 = 40 ms
   if(NoMorePlot)
     {
+    if(gwait )
+        {usleep((useconds_t)(1e6*gwait)); Fin(0); }
+
     if((debug > 1)) cout << " send signal For Next plot, skip: No More Plot !  " << endl;
     return 0;
     }
@@ -2470,12 +2475,14 @@ void Display(void)
 	  
       }
 
-    if(!win->theplot || !win->theplot->wait)
+    if(!win->theplot || !win->theplot->wait || gwait )
       SendForNextPlot();
+
     if(!NoMorePlotTilte  &&NoMorePlot)
       {
 	NoMorePlotTilte=true;
 	glutSetWindowTitle("FreeFem++ / Program ended; enter ESC to exit)");
+//          if(gwait) {usleep((useconds_t)(1e6*gwait)); Fin(0); }
       }
 }
 
@@ -2773,13 +2780,17 @@ THREADFUNC(ThreadRead,fd)
 {   
   int err=0;
   assert(nextPlot==0);
-  //  MutexNextPlot.WAIT(); 
+  //  MutexNextPlot.WAIT();
+  if(gwait) usleep((useconds_t) (gwait*1.e6) );
   err=ReadOnePlot((FILE*)fd);
   // MutexNextPlot.Free(); 
   if(debug>1)
     cout << " We Read a plot  : " << kread << " " << nextPlot << " " << err << endl;
   if(err<0)
-    NoMorePlot=true; 
+  {
+    NoMorePlot=true;
+
+   }
   Thread::Exit();
 }
 
@@ -2832,6 +2843,9 @@ static  bool TryNewPlot( void )
         LauchNextRead();
         ret=true;
     }
+    if(gwait &&  NoMorePlot )
+    {usleep((useconds_t)(1e6*gwait)); Fin(0); }
+    
     return ret;    
 }
 
@@ -2845,17 +2859,19 @@ int main(int argc,  char** argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STEREO);
     else  
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
-
+    int i1=1;
     if(argc>2) {
-      if( strcmp(argv[1],"-nv")==0) debug=0;
-      if( strcmp(argv[1],"-v")==0) debug=2,verbosity=2;
-      if( strcmp(argv[1],"-vv")==0) debug=5,verbosity=2;
-      if( strcmp(argv[1],"-vvv")==0) debug=10, verbosity=1000;
+      if( strcmp(argv[1],"-nv")==0) i1++,debug=0;
+      else if( strcmp(argv[1],"-v")==0) i1++,debug=2,verbosity=2;
+      else if( strcmp(argv[1],"-vv")==0) i1++,debug=5,verbosity=2;
+      else if( strcmp(argv[1],"-vvv")==0) i1++,debug=10, verbosity=1000;
+      if( (i1+1 < argc) && (strcmp(argv[i1],"-wait")==0)) { i1++; gwait=atof(argv[i1++]); }
+        
     }
     if(debug>1)		
     cout <<  " mode read = " << MODE_READ_BINARY << endl;
     datafile =0;;
-    if(argc>1 && *argv[argc-1] != '-' ) 
+    if(argc>i1)// && *argv[argc-1] != '-' )
      {	
 	datafile=fopen(argv[argc-1], "r");
 	if(debug >1)
