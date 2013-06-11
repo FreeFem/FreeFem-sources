@@ -54,10 +54,20 @@
     as an object of type CListOfInst. CListOfInst::eval() is called (with one #Stack argument built by #newStack()) to
     run the script.
 
-  \section language Language Keywords
+  \section language FreeFem++-specific Language Elements
 
-  - An \b fespace is built by calling UnId::UnId() with 3 arguments:
-  <!-- [[file:src/lglib/lg.ypp::FESPACE id]] [[file:src/lglib/lg.ypp::fespace_def]] -->
+  - <b>Types</b> <!-- [[file:src/lglib/lg.ypp::type_of_dcl]] --> can be:
+    - a lexical element of reference yytokentype #TYPE defined by calling mylex::Add(Key,aType)
+    - a TypeArray
+    - a TypeTemplate
+
+  - <b>Variables</b> <!-- [[file:src/lglib/lg.ypp::declaration]] --> are created with Block::NewVar<#LocalVariable >()
+  or Block::NewVar<#LocalVariableFES>() which calls TableOfIdentifier::NewVar() and returns a variable reference of type
+  C_F0
+
+  - An \b fespace <!-- [[file:src/lglib/lg.ypp::fespace_def]] -->
+
+  currentblock->NewVar<LocalVariableFES,size_t>($1,typeFESpace($3),$3,dimFESpaceImage($3));
 
     - an id reference previously built with new ListOfId()
     - an expression of type C_F0 describing the type of fespace, obtained with ::Find($1)
