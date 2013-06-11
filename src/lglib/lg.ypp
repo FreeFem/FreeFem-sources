@@ -1,3 +1,5 @@
+/// \file
+
 %{ 
     // -*- Mode : c++ -*-
     //
@@ -645,6 +647,7 @@ void init_algo();
 bool withrgraphique = false;
 //string  StrVersionNumber();
 
+/// Called by mainff() and activates the bison parser by calling yyparse()
 int Compile()
 {
   extern   YYSTYPE *plglval;  // modif FH 
@@ -716,6 +719,8 @@ static void SetcppIo()
 // pour l'environement.
 extern const char *  prognamearg;
 extern  bool echo_edp;
+
+/// Called by mymain() and calls Compile() to run the FF language parser
 int mainff (int  argc, char **argv)
 {
     

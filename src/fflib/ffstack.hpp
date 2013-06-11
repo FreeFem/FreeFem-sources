@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -95,6 +97,7 @@ struct StackType;
 
 //typedef void *Stack;
 
+/// Stack used by CListOfInst::eval()
 typedef StackType & Stack;
 
 struct StackType {
@@ -353,6 +356,8 @@ inline void deleteStack(Stack s)
  }
 #else
 //  a faire ....
+
+/// Called to create a new #Stack used to evaluate a FreeFem++ script in CListOfInst::eval()
 inline Stack newStack(size_t l)
  {
 /*  Stack thestack = new char[l];
