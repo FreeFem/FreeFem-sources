@@ -5446,6 +5446,13 @@ AnyType ExtractMesh2D_Op::operator()(Stack stack)  const
 		
 		
 		Mesh *pThnew = new Mesh(nv,nt,ns,v,t,b);  // attention aux composantes connexes.
+		//Lorenzo
+		R2 Pn,Px;
+		pThnew->BoundingBox(Pn,Px);
+		if(!pThnew->quadtree)
+			pThnew->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
+		//Lorenzo
+				
 		return pThnew;
 		
 	}
@@ -5696,7 +5703,7 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
     
     Mesh3 *pThnew = new Mesh3(nv,nt,ns,v,t,b);  // peut etre a définir ???
     // attention aux composantes connexes.
-		
+	pThnew->BuildGTree();  //Lorenzo
     
     return pThnew;
     
@@ -5757,7 +5764,7 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
     
     cout <<" nv" << nv << " ns " << endl;  
     Mesh3 *pThnew = new Mesh3(nv,ns,v,b);  
-		
+	pThnew->BuildGTree();  //Lorenzo	
     return pThnew;    
   }
 

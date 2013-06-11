@@ -7,7 +7,7 @@ macro laplacien(u,v) (dx(u)*dx(v)+dy(u)*dy(v)) // fin macro
 real f=1;
 Vh u,uu,v,vv;
 
-solve bilap([u,uu],[v,vv],solver=LU,eps=1.0e-6) =
+solve bilap([u,uu],[v,vv],solver=sparsesolver,eps=1.0e-6) =
     int2d(Th)(  laplacien(u,vv)+uu*vv //  - Delta u + uu =0 (vv)
     	         + laplacien(uu,v)  )     //  - Delta uu = 1 (v)
     	        

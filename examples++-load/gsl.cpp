@@ -37,13 +37,16 @@
 #include <gsl/gsl_sf_zeta.h>
 #include <gsl/gsl_poly.h>
 
+#include <gsl/gsl_bspline.h>
+#include <gsl/gsl_multifit.h>
+
 #include "ff_gsl_awk.hpp"
 
 long gslpolysolvequadratic( KN_<double> a,  KN_<double> x)
 {
   ffassert(a.N()>2 && x.N()>1);
   return gsl_poly_solve_quadratic (a[2],a[1],a[0],&(x[0]),&(x[1]));
-  }
+}
 long gslpolysolvecubic( KN_<double> a,  KN_<double> x)
 {
   ffassert(a.N()>2 && x.N()>2);
@@ -61,7 +64,7 @@ long gslpolycomplexsolve( KN_<double> a,  KN_<Complex> x)
   for (long i = 0; i < n-1; i++)
     x[i] = Complex(z[2*i], z[2*i+1]);
   return ok; 
-  }
+}
 
 class Init { public:
   Init();
@@ -72,5 +75,11 @@ Init::Init(){
   Global.Add("gslpolysolvequadratic","(",new OneOperator2<long,KN_<double>,KN_<double> >( gslpolysolvequadratic));
   Global.Add("gslpolysolvecubic","(",new OneOperator2<long,KN_<double>,KN_<double> >(gslpolysolvecubic));
   Global.Add("gslpolycomplexsolve","(",new OneOperator2<long,KN_<double>,KN_<Complex> >( gslpolycomplexsolve));
-
+/* spline gsl and June 2013 */
+    /*
+    Dcl_Type<gsl_bspline_workspace**>(::InitializePtr<gsl_bspline_workspace **>,::DeletePtr<gsl_bspline_workspace **>);
+    zzzfff->Add("gslbspline",atype<gsl_bspline_workspace ** >());
+    TheOperators->Add("<-",
+                      new OneOperator3_<gsl_bspline_workspace **,gsl_bspline_workspace **,KNM_<double>  >(pBuilQFd<R1>),
+*/
 }
