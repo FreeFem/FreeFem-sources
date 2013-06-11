@@ -1,0 +1,151 @@
+load "fflapack"
+// load "fflapack" obsolete (F. Hecht version 3.8)
+{
+int n=5;
+real[int,int] A(n,n),A1(n,n),B(n,n);
+for(int i=0;i<n;++i)
+for(int j=0;j<n;++j)
+  A(i,j)= (i==j) ? n+1 : 1;
+ A(0,n-1)=-100;
+cout << A << endl;
+A1=A^-1;
+cout << A1 << endl;
+
+ complex[int] vp(n);
+ complex[int,int] VP(n,n),KK(n,n);
+
+ int nn= dgeev(A,vp,VP);
+ cout << "  vp = " <<vp << endl;
+ cout << " VP = " << VP << endl;
+ KK =0.;
+ for(int i=0;i<n;++i)
+   for(int j=0;j<n;++j)
+     for(int k=0;k<n;++k)
+       KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
+ cout <<" KK " <<  KK << endl; 
+B=0;
+for(int i=0;i<n;++i)
+  for(int j=0;j<n;++j)
+    for(int k=0;k<n;++k)
+      B(i,j) +=A(i,k)*A1(k,j);
+cout << B << endl;
+ B = A*A1; // version 3.13
+cout << B << " ++++++  "<<  endl;
+// A1+A^-1;  attention ne marche pas
+
+inv(A1);
+cout << A1 << endl;
+}
+{
+  cout << " *****************  complex VP \n";
+int n=5;
+complex[int,int] A(n,n),A1(n,n),B(n,n);
+for(int i=0;i<n;++i)
+for(int j=0;j<n;++j)
+  A(i,j)= (i==j) ? n+1 : 1;
+A(0,n-1)=-100i;
+cout << A << endl;
+A1=A^-1;
+cout << A1 << endl;
+
+ complex[int] vp(n);
+ complex[int,int] VP(n,n),KK(n,n);
+
+ int nn= zgeev(A,vp,VP);
+ cout << "  vp = " <<vp << endl;
+ cout << " VP = " << VP << endl;
+ KK =0.;
+ for(int i=0;i<n;++i)
+   for(int j=0;j<n;++j)
+     for(int k=0;k<n;++k)
+       KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
+ cout <<" KK " <<  KK << endl; 
+ assert( KK.linfty < 1e-10);
+B=0;
+for(int i=0;i<n;++i)
+  for(int j=0;j<n;++j)
+    for(int k=0;k<n;++k)
+      B(i,j) +=A(i,k)*A1(k,j);
+cout << B << endl;
+// A1+A^-1;  attention ne marche pas
+
+//inv(A1);
+//cout << A1 << endl;
+  cout << " *****************  fin --complex VP \n";
+}
+
+{
+  int n=5;
+  complex[int,int] A(n,n),A1(n,n),B(n,n);
+  for(int i=0;i<n;++i)
+    for(int j=0;j<n;++j)
+      A(i,j)= (i==j) ? (n+1)*1i : 1+0i;
+  cout << A << endl;
+  A1=A^-1;
+  cout << A1 << endl;
+
+  B=0;
+  for(int i=0;i<n;++i)
+    for(int j=0;j<n;++j)
+      for(int k=0;k<n;++k)
+	B(i,j) +=A(i,k)*A1(k,j);
+  cout << B << endl;
+  // A1+A^-1;  attention ne marche pas 
+}
+
+{
+
+int n=5;
+real [int,int] A(n,n),  B(n,n),  C(n,n);
+macro SETM(A,i,j,fij) { for(int i=0;i<A.n;++i) for(int j=0;j<A.m;++j) A(i,j)= (fij) ;}// 
+SETM(C,i,j,1./(1+i+j)) ; 
+SETM(B,i,j,i==j?2.:1./n) ;
+ 
+A = B*C;
+cout << A << " " << endl;
+A = B + C;
+real[int]  b(n),c(n);
+real[int,int] AA=A;
+AA=A;
+real [int,int] At=A';
+
+b = A*c;
+
+At =A';
+{
+
+real [int,int] A=[[0,-1,2],[4,11,2],[0,-1,2],[4,11,2]];
+real [int,int] B=[[3,-1],[1,2],[6,1]];
+real [int,int] E=[[11,0],[35,20],[11,0],[35,20]];
+real [int,int]  At=A';
+real [int,int] C(A.n,B.m);
+C=A*B;
+cout << " C = " <<  C << endl;
+cout << " E = " <<  E << endl;
+
+C -= E;
+assert( C.linfty < 1e-10);
+C = A*B;
+C -=E; 
+assert( C.linfty < 1e-10);
+}
+{
+
+complex [int,int] A=[[0,-1,2],[4,11,2],[0,-1,2],[4,11,2]];
+complex [int,int] B=[[3,-1],[1,2],[6,1]];
+complex [int,int] E=[[11,0],[35,20],[11,0],[35,20]];
+
+complex [int,int] C(A.n,B.m);
+complex [int,int]  At=A';
+cout << "At = " << At << endl;
+C=A*B;
+cout << " C = " <<  C << endl;
+cout << " E = " <<  E << endl;
+
+C -= E;
+assert( C.linfty < 1e-10);
+C = A*B;
+C -=E; 
+assert( C.linfty < 1e-10);
+}
+}
