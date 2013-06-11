@@ -105,6 +105,101 @@ namespace Fem2D {
     void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab);
 // 
 
+int IsoLineK(double *f,R2 *Q,double eps)
+    {
+        int debug=0;
+        R2 P[3]={ R2(0.,0.),R2(1.,0.),R2(0.,1.)};
+        int kv=0,ke=0,e=3;
+        int tv[3],te[3],vk[3],i0[3],i1[3];
+        for(int i=0;i<3;++i)
+        {
+            if( abs(f[i]) <= eps) {
+                e -= tv[kv++]=i;
+                vk[i]=1;
+            }
+            else
+                vk[i]=0;
+        }
+        if(debug) cout << " ** " <<     kv << endl;
+        if(kv>1) //  on 2  vertex on the isoline ....
+        {
+            if(kv==2)
+            {
+                if(f[e] > 0.)
+                {
+                    int j0=(e+1)%3;
+                    int j1=(e+2)%3;
+                    te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
+                    te[ke]=e,i0[ke]=j1,i1[ke]=j1,++ke;
+                    // pb d'unicity, need to see the adj triangle ...
+                    //return 10+e ; // edge number + 10
+                }
+                else return 0; // skip edge ...
+                
+            }
+            else return 0; //  const funct...
+        }
+        else // see internal edge ..
+            for(int e=0;e<3;++e)
+            {
+                int j0=(e+1)%3;
+                int j1=(e+2)%3;
+                if( vk[j0]) //  the intial  point on iso line
+                {
+                    if(0. < f[j1])
+                        te[ke]=e,i0[ke]=j0,i1[ke]=j0,++ke;
+                    else
+                        te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
+                }
+                else if (vk[j1]); // skip the final point on iso line
+                else if( f[j0] < 0. && 0. < f[j1])  // good  sens
+                    te[ke]=e,i0[ke]=j0,i1[ke]=j1,++ke;
+                else if ( f[j0] > 0. && 0. > f[j1]) // inverse  sens
+                    te[ke]=e+3,i0[ke]=j1,i1[ke]=j0,++ke;
+            }
+        if( ke==2)
+        {
+            // the  K[i1[0]] , Q[0], Q[1] must be direct ...
+            // the  K[i0[1]] , Q[0], Q[1] must be direct ...
+            // Warning   no trivail case ..  make a plot to see
+            //  with is good
+            // the first edge must be
+            
+            if(te[0]<3)  // oriente the line
+            {
+                assert(te[1] >=3);
+                std::swap(te[0],te[1]);
+                std::swap(i0[0],i0[1]);
+                std::swap(i1[0],i1[1]);
+                if(debug) cout << " swap " << endl;
+            }
+            for(int i=0;i<2;++i)
+            {
+                int j0=i0[i],j1=i1[i];
+                if( j0== j1)
+                    Q[i] = P[j0];
+                else
+                    Q[i] = (P[j0]*(f[j1]) -  P[j1]*(f[j0]) ) /(f[j1]-f[j0]);
+                if(debug) cout << i << " " << j0 << " " << j1 << " : "
+                    << Q[i] << "***" << endl;
+            }
+            if(debug)
+            {
+                cout << "i0 " << i0[0] << " " << i0[1] << " " << det(P[i1[0]],Q[0],Q[1]) <<endl;
+                cout << "i1 " << i1[0] << " " << i1[1] << " " << det(P[i0[1]],Q[1],Q[0]) <<endl;
+                cout << "f " << f[0] << " " << f[1] << " " << f[2] << endl;
+                cout << "P " << P[0] << ", " << P[1] << ", " << P[2] << endl;
+                cout << "Q " << Q[0] << ", " << Q[1]  << endl;
+            }
+            if(!vk[i1[0]])
+                assert( det(P[i1[0]],Q[0],Q[1]) > 0);
+            if(!vk[i0[1]])
+                assert( det(P[i0[1]],Q[1],Q[0]) > 0);
+            return 2;
+        }
+        // remark, the left of the line is upper .
+        return 0;
+    }
 
 void Check(const Opera &Op,int N,int  M)
  {
@@ -373,7 +468,11 @@ void Check(const Opera &Op,int N,int  M)
     //const vector<Expression>  & what(di.what);             
     CDomainOfIntegration::typeofkind  kind = di.kind;
     set<int> setoflab;
-    bool all=true; 
+    bool all=true;
+     
+    const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+    bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
+    
     const QuadratureFormular1d & FIE = di.FIE(stack);
     const QuadratureFormular & FIT = di.FIT(stack);
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
@@ -383,6 +482,9 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+     //if(di.islevelset()) InternalError("So no levelset integration type on this case (6)");
+     if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (6)");
+     
     Expandsetoflab(stack,di, setoflab,all);
    /*
     for (size_t i=0;i<what.size();i++)
@@ -472,7 +574,48 @@ void Check(const Opera &Op,int N,int  M)
     
     if (di.kind == CDomainOfIntegration::int1d )
       {
-        for( int e=0;e<Th.neb;e++)
+          if(di.islevelset())
+          {
+              double uset = HUGE_VAL;
+              R2 Q[3];
+              KN<double> phi(ThI.nv);phi=uset;
+              double f[3];
+              for(int t=0; t< ThI.nt;++t)
+              {
+                  double umx=-HUGE_VAL,umn=HUGE_VAL;
+                  for(int i=0;i<3;++i)
+                  {
+                      int j= ThI(t,i);
+                      if( phi[j]==uset)
+                      {
+                          MeshPointStack(stack)->setP(&ThI,t,i);
+                          phi[j]= di.levelset(stack);//zzzz
+                      }
+                      f[i]=phi[j];
+                      umx = std::max(umx,phi[j]);
+                      umn = std::min(umn,phi[j]);
+                      
+                  }
+                  if( umn <=0 && umx >= 0)
+                  {
+                      
+                      int np= IsoLineK(f,Q,1e-10);
+                      if(np==2)
+                      {
+                         /* if ( sameMesh)
+                          {
+                           
+                              Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1]);
+                          }
+                          else*/ 
+                              InternalError(" No levelSet on Diff mesh :    to day  int1d of Matrix");
+                      }
+                      if(sptrclean) sptrclean=sptr->clean();
+                  }
+              }
+              
+          }
+        else for( int e=0;e<Th.neb;e++)
           {
             if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
               {                  
@@ -566,6 +709,9 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int3d   (nQP: "<< FIV.n << " ) in "  ;
+     if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (7) ");
+     if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
+     
    Expandsetoflab(stack,di, setoflab,all);
    /*
     for (size_t i=0;i<what.size();i++)
@@ -1206,6 +1352,9 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+      if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
+      if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("Sorry no levelset integration type on no int1d case");
+      
     /*
     if (verbosity>3) 
       if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
@@ -1364,6 +1513,8 @@ void Check(const Opera &Op,int N,int  M)
           else  if (CDomainOfIntegration::intallfaces==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
           //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
           else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+      if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (2)");
+      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
    
       Expandsetoflab(stack,di, setoflab,all);
       /*
@@ -3579,7 +3730,8 @@ template<class R>
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
-    if(di.islevelset()) InternalError("So no levelset intgeration type on the case");
+    if(di.islevelset()) InternalError("So no levelset integration type on this case (3)");
+    if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset intgeration type on no int1d case");
     /*
     if ( verbosity>3) 
       if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
@@ -3760,101 +3912,6 @@ template<class R>
              
   }
 
-static int IsoLineK(double *f,R2 *Q,double eps)
-    {
-        int debug=0;
-        R2 P[3]={ R2(0.,0.),R2(1.,0.),R2(0.,1.)};
-        int kv=0,ke=0,e=3;
-        int tv[3],te[3],vk[3],i0[3],i1[3];
-        for(int i=0;i<3;++i)
-        {
-            if( abs(f[i]) <= eps) {
-                e -= tv[kv++]=i;
-                vk[i]=1;
-            }
-            else
-                vk[i]=0;
-        }
-        if(debug) cout << " ** " <<     kv << endl;
-        if(kv>1) //  on 2  vertex on the isoline ....
-        {
-            if(kv==2)
-            {
-                if(f[e] > 0.)
-                {
-                    int j0=(e+1)%3;
-                    int j1=(e+2)%3;
-                    te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
-                    te[ke]=e,i0[ke]=j1,i1[ke]=j1,++ke;
-                    // pb d'unicity, need to see the adj triangle ...
-                    //return 10+e ; // edge number + 10
-                }
-                else return 0; // skip edge ...
-                
-            }
-            else return 0; //  const funct...
-        }
-        else // see internal edge ..
-            for(int e=0;e<3;++e)
-            {
-                int j0=(e+1)%3;
-                int j1=(e+2)%3;
-                if( vk[j0]) //  the intial  point on iso line
-                {
-                    if(0. < f[j1])
-                        te[ke]=e,i0[ke]=j0,i1[ke]=j0,++ke;
-                    else
-                        te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
-                }
-                else if (vk[j1]); // skip the final point on iso line
-                else if( f[j0] < 0. && 0. < f[j1])  // good  sens
-                    te[ke]=e,i0[ke]=j0,i1[ke]=j1,++ke;
-                else if ( f[j0] > 0. && 0. > f[j1]) // inverse  sens
-                    te[ke]=e+3,i0[ke]=j1,i1[ke]=j0,++ke;
-            }
-        if( ke==2)
-        {
-            // the  K[i1[0]] , Q[0], Q[1] must be direct ...
-            // the  K[i0[1]] , Q[0], Q[1] must be direct ...
-            // Warning   no trivail case ..  make a plot to see
-            //  with is good
-            // the first edge must be
-            
-            if(te[0]<3)  // oriente the line
-            {
-                assert(te[1] >=3);
-                std::swap(te[0],te[1]);
-                std::swap(i0[0],i0[1]);
-                std::swap(i1[0],i1[1]);
-                if(debug) cout << " swap " << endl;
-            }
-            for(int i=0;i<2;++i)
-            {
-                int j0=i0[i],j1=i1[i];
-                if( j0== j1)
-                    Q[i] = P[j0];
-                else
-                    Q[i] = (P[j0]*(f[j1]) -  P[j1]*(f[j0]) ) /(f[j1]-f[j0]);
-                if(debug) cout << i << " " << j0 << " " << j1 << " : "
-                    << Q[i] << "***" << endl;
-            }
-            if(debug)
-            {
-                cout << "i0 " << i0[0] << " " << i0[1] << " " << det(P[i1[0]],Q[0],Q[1]) <<endl;
-                cout << "i1 " << i1[0] << " " << i1[1] << " " << det(P[i0[1]],Q[1],Q[0]) <<endl;
-                cout << "f " << f[0] << " " << f[1] << " " << f[2] << endl;
-                cout << "P " << P[0] << ", " << P[1] << ", " << P[2] << endl;
-                cout << "Q " << Q[0] << ", " << Q[1]  << endl;
-            }
-            if(!vk[i1[0]])
-                assert( det(P[i1[0]],Q[0],Q[1]) > 0);
-            if(!vk[i0[1]])
-                assert( det(P[i0[1]],Q[1],Q[0]) > 0);
-            return 2;
-        }
-        // remark, the left of the line is upper .
-        return 0;
-    }
 
 template<class R>
  void AssembleLinearForm(Stack stack,const Mesh & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
@@ -3901,7 +3958,7 @@ template<class R>
       else cout << "  -- boundary int  " ;
     */
     if(di.islevelset() && ((CDomainOfIntegration::int1d!=kind) ) )
-        InternalError("So no levelset integration  on the case");
+        InternalError("So no levelset integration 1d on the case (4)");
     Expandsetoflab(stack,di, setoflab,all);
     /*
     for (size_t i=0;i<what.size();i++)
@@ -3948,7 +4005,7 @@ template<class R>
       if (all) cout << " all " << endl ;
       else cout << endl;
       if(di.islevelset() && (kind !=CDomainOfIntegration::int1d))
-       InternalError(" Sorry No levelSet integral for is case ..");
+       InternalError(" Sorry No levelSet integral for is case ..(5)");
          
 
     if (kind==CDomainOfIntegration::int1d)
