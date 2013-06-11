@@ -2848,7 +2848,32 @@ static  bool TryNewPlot( void )
     
     return ret;    
 }
+void 	SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
+{
+  // syntax 
+  //   1024x1024+100+100
+  // or
+  //  1024x1024 
+  const char  *bx = p;
+  const char *by = index(p,'x');
+  const char *ox = index(p,'+');
+  const char *oy = rindex(p,'+');
+  if(by ==0) return;
+  Width= atoi(bx);
+  Height= atoi(by+1);
+  if(ox && (ox != oy))
+    {
+      iii0= atoi(ox+1);
+      jjj0=atoi(oy+1);
+    }
+  if(debug>1)
+    cout << "  position = "<< Width << "x" << Height << "+"<< iii0 << "+" << jjj0 << endl;
+  assert(Width >0 &&  Width < 3000);
+  assert(Height >0 &&  Height < 3000);
+  assert(iii0 >0 &&  iii0 < 3000);
+  assert(jjj0 >0 &&  jjj0 < 3000);
 
+}
 int main(int argc,  char** argv)
 {
     glutInit(&argc, argv);
@@ -2859,25 +2884,56 @@ int main(int argc,  char** argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STEREO);
     else  
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
-    int i1=1;
-    if(argc>2) {
-      if( strcmp(argv[1],"-nv")==0) i1++,debug=0;
-      else if( strcmp(argv[1],"-v")==0) i1++,debug=2,verbosity=2;
-      else if( strcmp(argv[1],"-vv")==0) i1++,debug=5,verbosity=2;
-      else if( strcmp(argv[1],"-vvv")==0) i1++,debug=10, verbosity=1000;
-      if( (i1+1 < argc) && (strcmp(argv[i1],"-wait")==0)) { i1++; gwait=atof(argv[i1++]); }
-        
-    }
-    if(debug>1)		
-    cout <<  " mode read = " << MODE_READ_BINARY << endl;
-    datafile =0;;
-    if(argc>i1)// && *argv[argc-1] != '-' )
-     {	
+     int i1=1;
+     int Height = 512,Width = 512*3/2, iii0=100,jjj0=100;
+     string titre = "W0/FreeFem++: type return key to proceed (or ? for help on other)";
+     int eerr=0; 
+    if(argc>1) 
+      {
+	if( (i1 < argc) &&strcmp(argv[i1],"-?")==0) i1++,eerr=-1; 
+	if (i1 < argc)
+	  {
+	    if( strcmp(argv[i1],"-nv")==0) i1++,debug=0;
+	    else if( strcmp(argv[i1],"-v")==0) i1++,debug=2,verbosity=2;
+	    else if( strcmp(argv[i1],"-vv")==0) i1++,debug=5,verbosity=2;
+	    else if( strcmp(argv[i1],"-vvv")==0) i1++,debug=10, verbosity=1000;
+	  }
+	  if( (i1+1 < argc) && (strcmp(argv[i1],"-wait")==0)) { i1++; gwait=atof(argv[i1++]); }
+	  if( (i1+1 < argc) && (strcmp(argv[i1],"-g")==0)) { 
+	    i1++; 
+	    SetDefWin(argv[i1++], iii0,jjj0,Width,Height);
+	  }
+	  if( (i1+1 < argc) && (strcmp(argv[i1],"-t")==0)) { 
+	    i1++; 
+	    titre = argv[i1++];
+	  }
+	  if( (i1 -  argc > 1) )
+	    { 
+	      eerr = 1;
+	      cout << " error ming args " << i1 -  argc  << endl; 
+	    }
+      }
+    datafile =0;
+    cout << (argc>i1) << eerr << endl; 
+    if(argc>i1 && (eerr==0))// && *argv[argc-1] != '-' )
+      {	
 	datafile=fopen(argv[argc-1], "r");
 	if(debug >1)
-	cout << " fopen :" << argv[argc-1] << " " <<datafile << endl;
-     }
-
+		cout << " fopen :" << argv[argc-1] << " " <<datafile << endl;
+	if(datafile==0)
+	  eerr=100;
+	
+      }
+    if(eerr)
+      {
+	cerr << " Erreur ffglut  [-nv|-v|-vv|-vvv] [-wait 0.5] [-g 512x300+10+10] [-t title] [file]" << endl; 
+	cerr << " err number " << eerr << endl; 
+	abort();
+      }
+    
+    
+    if(debug>1)		
+    cout <<  " mode read = " << MODE_READ_BINARY << endl;
     if(datafile==0)
 	datafile=stdin;
     if ( !datafile){
@@ -2898,13 +2954,10 @@ int main(int argc,  char** argv)
     cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
 
-    int Height = 512;
-    int Width = 512*3/2; 
     
     glutInitWindowSize(Width , Height);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowPosition(iii0,jjj0);
 
-    string titre = "W0/FreeFem++: type return key to proceed (or ? for help on other)";
     int iw0=glutCreateWindow(titre.c_str());
     //glutPushWindow();
    // if (fullscreen)
