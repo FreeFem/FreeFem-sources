@@ -1285,6 +1285,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_
 
 }
 
+/// Creates a square mesh by calling Carre() at script evaluation time
 class MeshCarre2 :   public E_F0mps { public:
     typedef pmesh  Result;
      Expression nx,ny;
@@ -1323,7 +1324,7 @@ class MeshCarre2 :   public E_F0mps { public:
 
 
 
-
+/// Creates a square mesh by calling Carre() at script evaluation time
 class MeshCarre2f :   public E_F0mps { public:
     typedef pmesh  Result;
      Expression nx,ny;

@@ -69,9 +69,7 @@ Map_type_of_map map_pair_of_type ; //  to store te type
  Polymorphic * TheOperators=0, //=new Polymorphic(), 
              * TheRightOperators=0; //=new Polymorphic();
 
-// <<Global>> Declaration in [[file:AFunction.hpp::Global]]
-
-/// Contains all FreeFem++ language keywords
+/// <<Global>> Contains all FreeFem++ language keywords. Declaration in [[file:AFunction.hpp::Global]]
 
 TableOfIdentifier Global;
 
