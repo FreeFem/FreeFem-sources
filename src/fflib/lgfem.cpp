@@ -1,3 +1,4 @@
+/// \file
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -4656,6 +4657,8 @@ void  init_lgfem()
  basicForEachType * t_fbilin=atype<const  FormBilinear *>();
  basicForEachType * t_flin=atype<const  FormLinear *>();
  basicForEachType * t_BC=atype<const BC_set *>();
+
+ /// Doxygen doc
  basicForEachType * t_form=atype<const C_args*>();
 
   Dcl_Type<const CDomainOfIntegration *>();
@@ -4805,7 +4808,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  
 //  new type  
  zzzfff->Add("R3",atype<R3*>());
- zzzfff->Add("mesh",atype<pmesh*>());
+ zzzfff->Add("mesh",atype<pmesh*>()); // <<mesh_keyword>>
  zzzfff->Add("mesh3",atype<pmesh3*>());
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());
@@ -4827,8 +4830,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 //    Global.Add("LinearCG","(",new LinearCG<Complex>(1)); //  without right handsize
 //    Global.Add("NLCG","(",new LinearCG<Complex>(-1)); //  without right handsize
    
-    
- zzzfff->AddF("varf",t_form);    //  var. form ~
+ zzzfff->AddF("varf",t_form);    //  var. form ~  <<varf>>
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);
  

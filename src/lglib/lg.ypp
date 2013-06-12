@@ -368,6 +368,7 @@ type_of_dcl:   TYPE
              
 ;
 
+/* <<ID_space>> */
 
 ID_space:
 ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
@@ -382,6 +383,8 @@ ID_array_space:
   |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
 
 ;
+
+/* <<fespace>> */
 
 fespace123: FESPACE { fespacedim=2} |FESPACE1 { fespacedim=1} | FESPACE3 { fespacedim=3};
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
@@ -456,6 +459,8 @@ declaration_for:
 
 try: TRY { Block::open(currentblock) };
 
+/* <<instruction>> */
+
 instruction:   ';' {$$=0;} 
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
@@ -472,7 +477,7 @@ instruction:   ';' {$$=0;}
          |  IF '(' Expr ')'   instruction  ELSE instruction {$$=FIf($3,$5,$7)}
          |  begin  instructions end { 
                       $$=C_F0(new E_block($2,$3),atype<void>()) }
-         |  BORDER  ID   border_expr {
+         |  BORDER  ID   border_expr { /* <<BORDER_ID>> */
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$3))} 
          |  BORDER  ID   '['  array ']' ';' {
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$4))} 
@@ -501,6 +506,9 @@ bornes: '(' ID '=' Expr ',' Expr ')' {
    $$+= $4;
    $$+= $6 }
 ;
+
+/* <<border_expr>> */
+
 border_expr:   bornes instruction {   
    $$ = ($1 += $2);
    currentblock->close(currentblock)} 

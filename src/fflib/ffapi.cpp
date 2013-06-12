@@ -1,31 +1,32 @@
-/// \file
-/// ======================================================================
-/// Written by Antoine Le Hyaric
-/// Laboratoire Jacques-Louis Lions
-/// Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
-/// http://www.ljll.math.upmc.fr/lehyaric
-/// ======================================================================
-/// This file is part of Freefem++
-/// 
-/// Freefem++ is free software; you can redistribute it and/or modify
-/// it under the terms of the GNU Lesser General Public License as
-/// published by the Free Software Foundation; either version 2.1 of
-/// the License, or (at your option) any later version.
-/// 
-/// Freefem++  is distributed in the hope that it will be useful,
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-/// GNU Lesser General Public License for more details.
-/// 
-/// You should have received a copy of the GNU Lesser General Public
-/// License along with Freefem++; if not, write to the Free Software
-/// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-/// 02110-1301 USA
-/// ======================================================================
-/// headeralh cpp freefem start=21/01/10 upmc
-
-// Proposed FreeFem++ Application Programming Interface
-// ----------------------------------------------------
+/*!
+ * \file 
+ * 
+ * \brief FreeFem++ API implementation
+ * 
+ * 
+ * \author Written by Antoine Le Hyaric
+ * \author Laboratoire Jacques-Louis Lions
+ * \author Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+ * \author http://www.ljll.math.upmc.fr/lehyaric
+ * 
+ * \copyright This file is part of Freefem++
+ * 
+ * \copyright Freefem++ is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ * 
+ * \copyright Freefem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * \copyright You should have received a copy of the GNU Lesser General Public
+ * License along with Freefem++; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * 
+ * headeralh brief="FreeFem++ API implementation" cpp default=0 dox freefem start=21/01/10 upmc written
+ */
 
 // headerfilter
 #include "ffapi.hpp"
@@ -81,6 +82,40 @@ Buffer buffer(NULL,bufferwrite);
 #endif
 
 namespace ffapi{
+
+  // FreeFem++ Objects
+  // -----------------
+
+  /// Replacement for the FF script stack
+  Stack stack;
+
+  /// Initiates everything necessary to simulate the FF script evaluation environment
+  void init(){
+
+    // creates a stack for local evaluations as in [[file:../lglib/lg.ypp::newStack]]
+    Stack s=newStack(sizestack);
+
+    currentblock;xxx;
+  }
+
+  /// in the FF language, square() is an operator of type OneOperatorCode and uses MeshCarre2 and/or MeshCarre2f. The
+  /// square keyword is described in the FF doc at [[file:../../DOC/freefem++doc.tex::square]]
+
+  mesh square(int nx,int ny,Expression fx,Expression fy,int flags,KN_<long> lab,long reg=0){
+
+    build_and_eval strategy;xxx;
+
+    /// Build a lexical object as FF would do it and activate it
+
+    /// calls [[file:lgmesh.cpp::Carre]] like MeshCarre2::operator()() and copies the resulting object to get rid of the
+    /// local stack.
+
+    mesh m=Carre(nx,ny,fx,fy,flags,lab,reg);
+    return m;
+  }
+
+  // FreeFem++ input/output
+  // ----------------------
 
   // Get a pointer to the local cin/cout (which is distinct from
   // ffcs's stdin/stdout under Windows because each DLL owns separate
@@ -255,8 +290,10 @@ void init()
 }
 }
 
-/// Local Variables:
-/// mode:c++
-/// ispell-local-dictionary:"british"
-/// coding:utf-8
-/// End:
+/*!
+ * Local Variables:
+ * mode:c++
+ * ispell-local-dictionary:"british"
+ * coding:utf-8
+ * End:
+ */

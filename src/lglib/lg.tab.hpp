@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
+/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
 /* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,15 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+#ifndef YY_LG_LG_TAB_HPP_INCLUDED
+# define YY_LG_LG_TAB_HPP_INCLUDED
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 1
+#endif
+#if YYDEBUG
+extern int lgdebug;
+#endif
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -91,12 +100,10 @@
 #endif
 
 
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
-
-/* Line 2068 of yacc.c  */
+/* Line 2053 of yacc.c  */
 #line 124 "lg.ypp"
  
  double dnum;
@@ -113,9 +120,8 @@ typedef union YYSTYPE
 /* ListCatch * clist_Catchs;*/
 
 
-
-/* Line 2068 of yacc.c  */
-#line 119 "lg.tab.hpp"
+/* Line 2053 of yacc.c  */
+#line 125 "lg.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -124,4 +130,18 @@ typedef union YYSTYPE
 
 extern YYSTYPE lglval;
 
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int lgparse (void *YYPARSE_PARAM);
+#else
+int lgparse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
+int lgparse (void);
+#else
+int lgparse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
+#endif /* !YY_LG_LG_TAB_HPP_INCLUDED  */
