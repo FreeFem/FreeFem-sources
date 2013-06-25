@@ -47,6 +47,8 @@ for(int i=1;i<4;i++)
   }
    Th=square(5,5,[(x-0.5)*2,(y-0.5)*2]);
 
+// FFCS - regression tests
+real regtest;
 
  real cerr= 0.005*(0.000961606/0.000582183)^0.66; 
   for(int i=1;i<4;i++)
@@ -66,5 +68,6 @@ for(int i=1;i<4;i++)
     plot(leh,fill=1,wait=1,viso=viso,value=1,ps="leh2.eps");
     cout << i << " .... " << eh[].min << " "<< eh[].max << " "<< eh[].sum/eh[].n << " " 
          << int2d(Th)(eh)/Th.area << " " << Th.nt << " " << Th.nv << endl;
+    regtest=eh[]'*eh[];//'
   }
 

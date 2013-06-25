@@ -685,6 +685,7 @@ bool SetDefault()
     DefSparseSolver<double>::solver =SparseMatSolver_R;
     //DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+    return false;
 }
 
 bool Setpastixmpi()
@@ -694,6 +695,7 @@ bool Setpastixmpi()
     DefSparseSolver<double>::solver  =BuildSolverpastix_real_mpi;
     //DefSparseSolver<Complex>::solver =BuildSolverpastix_real_mpi;    
     TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
+    return false;
 }
 
 

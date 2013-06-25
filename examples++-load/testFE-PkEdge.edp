@@ -7,6 +7,8 @@ mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
 real x1=0.7,y1=0.9, h=1e-7;
 int it1=Th(x1,y1).nuTriangle; 
 
+// FFCS: store reference value
+real regtest;
 
  macro Check(PkEdge)
 { 
@@ -50,7 +52,7 @@ int it1=Th(x1,y1).nuTriangle;
       */
       
     } 
-  
+  regtest=a1'*a1;
 }  //EOM
 
 Check(P1edge)

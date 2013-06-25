@@ -32,7 +32,8 @@ try {
 Th3=readmesh3("spherewithtworegion.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
 }
 catch (...) {
-  include "../examples++-3d/tetgenholeregion.edp"
+  // FFCS - path to example scripts are changed, so this needs to be in the local directory to be common to FF and FFCS
+  include "tetgenholeregion.edp"
 }
 fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;

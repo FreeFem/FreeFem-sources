@@ -29,3 +29,5 @@ mesh3 Th=tetg(Thsurf,switch="pqaaAAYYQ",nbofregions=1,regionlist=domaine);
 
 savemesh(Th,"cyl.mesh");
 medit("cyl",Th,wait=1);
+// FFCS: testing 3d plots
+plot(Th,cmm="cyl");

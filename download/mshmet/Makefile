@@ -29,31 +29,22 @@ MSHMET_OBJDIR = $(MSHMET_DIR)/objects
 mshmet: $(FAIRE) 
 
 $(FAIRE):$(SRCDIR)/FAIT
-	$(MAKE) WHERE  
+	$(MAKE) WHERE $(SRCDIR)/$(INSTALL)  
 	touch $(FAIRE)
 
 $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar
 	cd $(MSHMET_DIR); $(MAKE)
 	touch $(SRCDIR)/FAIT
 
-install:$(SRCDIR)/FAIT  ../../src/libMesh/libMesh.a 
-	cp $(MSHMET_SRCDIR)/mshmetlib.h  ../include/mshmetlib.h
-	cp $(MSHMET_OBJDIR)/libmshmet.a  ../lib/libmshmet.a
-	cp ../../src/libMesh/libMesh.a  ../lib/libMesh.a
-	mkdir -p ../include/libMesh
-	cp ../../src/libMesh/*h  ../include/libMesh
+# FFCS - libMesh is also required by yams, so we move all the rules to [[file:../../../Makefile.am]]
+install:$(SRCDIR)/FAIT
+	cp $(MSHMET_SRCDIR)/mshmetlib.h  $(SRCDIR)/$(INSTALL)/include/mshmetlib.h
+	cp $(MSHMET_OBJDIR)/libmshmet.a  $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
 
-../../src/libMesh/libMesh.a:
-	cd ../../src/libMesh && $(MAKE) 
-
-WHERE: 
-	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	make install;  \
-	echo mshmet  LD -L@DIR@/lib -lmshmet  >../lib/WHERE.mshmet ;\
-	echo mshmet INCLUDE -I@DIR@/include>> ../lib/WHERE.mshmet ;\
-	echo libMesh  LD -L@DIR@/lib -lMesh  >../lib/WHERE.libMesh ;\
-	echo libMesh INCLUDE -I@DIR@/include/libMesh >> ../lib/WHERE.libMesh ;\
-	fi
+# FFCS - simplify makefile structure for automatic rebuilds
+WHERE:install
+	echo mshmet  LD -L@DIR@/lib -lmshmet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet
+	echo mshmet INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet
 
 
 $(SRCDIR)/tag-tar: $(PACKAGE)
@@ -69,26 +60,23 @@ $(SRCDIR)/tag-tar: $(PACKAGE)
 	cp ../../src/libMesh/eigenv.c $(MSHMET_SRCDIR)
 	cp Makefile-mshmet.inc $(MSHMET_DIR)/makefile
 	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2011.03.06.patch
+#
+#	Patch for i586 developed by John Hunt (14/2/13)
+#
+	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2012.04.25_i586.patch
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
-clean-local: 
-	-make -C $(MSHMET_DIR) clean;
-	-rm $(MSHMET_OBJDIR)/libmshmet.a
-	-rm ff-flags ../lib/WHERE.mshmet
-	-rm ../lib/WHERE.libMesh ../lib/WHERE.mshmet 
-	-rm ../include/mshmetlib.h
-	-rm ../lib/libmshmet.a
-	-rm -r ../lib/libMesh.a
-	-rm -r ../include/libMesh
-	-rm -rf $(SRCDIR)
+clean:
+	-rm ff-flags
+#	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
+#	compilation dependencies control there (see
+#	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
+	-rm -rf mshmet.????.??.??
 	-rm FAIT $(FAIRE) 
-
-clean: clean-local
-
 
 ff-flags: ../Makefile 
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
@@ -102,4 +90,4 @@ ff-flags: ../Makefile
 	grep 'mshmet_VERSION *=' ./Makefile >> ff-flags
 
 
-.PHONY:
+.PHONY: $(SRCDIR)/$(INSTALL)

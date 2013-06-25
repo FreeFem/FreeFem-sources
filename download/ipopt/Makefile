@@ -24,8 +24,10 @@ INCMUMPS=$(DOWNLOADFF)/include/libseq
 Ipopt: $(SRCDIR)/FAIRE
 #  --enable-static  --disable-shared  
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
+#	FFCS - disable dependency tracking like in FFCS itself for MinGW compilation (problem with backslashes, see
+#	[[file:../../../../configure.ac::enable_dependency_tracking]])
 	cd $(SRCDIR) ; \
-	 ./configure \
+	 ./configure --disable-dependency-tracking \
 		   --disable-shared --enable-static \
                   --with-mumps='$(LIBMUMPS)' \
 	          --without-hsl \
@@ -36,24 +38,29 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' \
 	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	touch $(SRCDIR)/FAIT	
-install: $(SRCDIR)/FAIT
-	$(MAKE)  -C  $(SRCDIR) install	
 
-WHERE: 
-	if [ -f $(SRCDIR)/FAIT  ] ;then \
-	$(MAKE)  -C  $(SRCDIR) install ; \
-	echo Ipopt LD -L@DIR@/lib   -lipopt   >../lib/WHERE.Ipopt;\
-	echo Ipopt INCLUDE -I@DIR@/include/coin  >> ../lib/WHERE.Ipopt ;\
-	fi
+# FFCS - avoid remaking install every time
+install.done: $(SRCDIR)/FAIT
+	$(MAKE)  -C  $(SRCDIR) install	
+	touch $@
+clean-local::
+	-rm *.done
+
+# FFCS - install and WHERE need to be sequential
+WHERE.done: install.done
+	echo Ipopt LD -L@DIR@/lib   -lipopt   >$(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt;
+	echo Ipopt INCLUDE -I@DIR@/include/coin  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt ;
+	touch $@
 
 Makefile.inc:
 	../../config.status  --file="Makefile.inc:Makefile.inc.in"
 
-$(SRCDIR)/FAIRE:
-	$(MAKE) install WHERE 
-	touch $(SRCDIR)/FAIRE
+# FFCS - install and WHERE need to be sequential
+$(SRCDIR)/FAIRE: install.done WHERE.done
+	touch $@
 
 
+$(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
 $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL) 
 	tar xvzf $(PACKAGE)
@@ -63,12 +70,12 @@ $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL)
 
 $(PACKAGE):
 	cd `dirname $@`; $(WGET)   $(URL)/`basename $(PACKAGE)`
-clean-local:
+clean-local::
 	rm -rf  $(SRCDIR)  *~ Makefile.inc
+
+clean: clean-local
 	-rm -rf ../include/coin
 	-rm ../lib/libipopt* ../lib/liblcoinhsl* 
 
-clean: clean-local
 
-
-.PHONY:..
+.PHONY:$(SRCDIR)/$(INSTALL)

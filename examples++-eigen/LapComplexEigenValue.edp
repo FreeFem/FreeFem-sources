@@ -55,5 +55,8 @@ for (int kk=0;kk<k;kk++)
   ui=imag(eV[i]);
 //  plot(ur,cmm="Eigen  Vector (real)  "+i+" valeur =" + v  ,wait=1,value=1);
 //  plot(ui,cmm="Eigen  Vector (imag)  "+i+" valeur =" + v  ,wait=1,value=1);
+
+    // FFCS: add 3d view
+    plot(eV[i],dim=3,fill=1);
 }
 
