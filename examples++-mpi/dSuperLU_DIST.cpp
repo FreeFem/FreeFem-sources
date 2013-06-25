@@ -186,6 +186,7 @@ public:
     if(mpicommw)
       superlu_gridinit(*mpicommw, nprow, npcol, &grid);
     else
+      // FFCS - MPI::COMM_WORLD is not accepted on mingw64+MSMPI?
       superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, &grid);
     
     /* Bail out if I do not belong in the grid. */
@@ -248,6 +249,7 @@ public:
 	  Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	  
 	  cout << "Debut: Create_CompCol_Matrix_dist" <<endl;
+	  // FFCS - "this->" required by g++ 4.7
 	  this->Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
 	  cout << "Fin: Create_CompCol_Matrix_dist" <<endl;
 	  /* creation of pseudo solution + second member */
@@ -700,6 +702,8 @@ bool SetDefault()
     DefSparseSolver<double>::solver =SparseMatSolver_R;
     //DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+
+    return false;
 }
 
 bool SetSuperLUmpi()
@@ -709,6 +713,8 @@ bool SetSuperLUmpi()
     DefSparseSolver<double>::solver  =BuildSolverSuperLUmpi;
     //DefSparseSolver<Complex>::solver =BuildSolverSuperLUmpi;    
     TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
+
+    return false;
 }
 
 

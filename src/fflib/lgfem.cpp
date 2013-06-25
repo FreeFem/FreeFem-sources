@@ -2394,7 +2394,7 @@ class Plot :  public E_F0mps { public:
    static basicAC_F0::name_and_type name_param[] ;
 
   // FFCS: added new parameters for VTK graphics
-  static const int n_name_param =41 ;
+  static const int n_name_param =42 ;
    Expression bb[4];
     vector<Expression2> l;
     Expression nargs[n_name_param];
@@ -2547,8 +2547,8 @@ class Plot :  public E_F0mps { public:
   {   "prev", &typeid(bool)}, // keep previou  view point  
   {   "ech", &typeid(double)}, // keep previou  view point 
      
-  // FFCS: more options for VTK graphics (numbers are required for
-  // processing)
+  // FFCS: more options for VTK graphics (numbers are required for processing)
+
   {"ZScale",&typeid(double)}, // #1
   {"WhiteBackground",&typeid(bool)}, // #2
   {"OpaqueBorders",&typeid(bool)}, // #3
@@ -2568,7 +2568,8 @@ class Plot :  public E_F0mps { public:
   {"CameraClippingRange",&typeid(KN_<double>)}, // #17
   {"CutPlaneOrigin",&typeid(KN_<double>)}, // #18
   {"CutPlaneNormal",&typeid(KN_<double>)}, // #19
-  {"WindowIndex",&typeid(long)} // #20
+  {"WindowIndex",&typeid(long)}, // #20
+  {"NbColorTicks",&typeid(long)}, // #21
 
    };
 
@@ -3210,9 +3211,8 @@ AnyType Plot::operator()(Stack s) const  {
 	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
 	if (nargs[20]) theplot<< 20L  <= (echelle=GetAny<double>((*nargs[20])(s)));	
 
-	// FFCS: extra plot options for VTK (indexed from 1 to keep
-	// these lines unchanged even if the number of standard FF
-	// parameters above changes)
+	// FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
+	// FF parameters above changes) received in [[file:../../../../src/visudata.cpp::receiving_plot_parameters]]
 
 #define VTK_START 20
 #define SEND_VTK_PARAM(index,type)					\
@@ -3240,6 +3240,7 @@ AnyType Plot::operator()(Stack s) const  {
 	SEND_VTK_PARAM(18,KN_<double>); // CutPlaneOrigin
 	SEND_VTK_PARAM(19,KN_<double>); // CutPlaneNormal
 	SEND_VTK_PARAM(20,long); // WindowIndex
+	SEND_VTK_PARAM(21,long); // NbColorTicks
 
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;

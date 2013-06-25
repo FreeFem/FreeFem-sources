@@ -25,6 +25,7 @@ myType * init_MyType(myType * const &a, string * const & s)
 {
   a->nom = new string(* s);
   cout << " build MyType " << *a->nom << endl;
+  return NULL; // return value never used for now (13.1)
 } 
 
 

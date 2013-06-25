@@ -14,6 +14,12 @@ using namespace std;
 #include <fstream>
 #include <ctime>
 
+// FFCS: random() and srandom() do not seem to be available in MinGW
+#ifdef WIN32
+#define random rand
+#define srandom srand
+#endif
+
 unsigned long good_seed()
 {
   unsigned long random_seed,  random_seed_a,random_seed_b;
@@ -57,6 +63,11 @@ public:
   OneOperator_0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 
+// FFCS: rand() wants an int on Win32 and Win64, so we need to have a new function "long ffrandom()" to create the OneOperator
+// object which requires longs (and the MinGW compiler (g++ 4.5) refuses to compile if OneOperator and the underlying function do
+// not have the same type). FFCS patched this source with "long ffrandom(){return random();}" but FF now comes with
+// "genrand_int31()".
+
 #ifdef WIN32
 
 void init_by_array(unsigned long init_key[], int key_length);
@@ -64,13 +75,14 @@ long genrand_int31(void);
 void init_genrand(unsigned long);
 //  hach for window ... F. HEcht 
 long ffsrandom(long  s) { init_genrand( (unsigned int ) s); return 0;}
-long random() { return genrand_int31();}
+long ffrandom() { return genrand_int31();}
 long ffsrandomdev() { 
   init_genrand(good_seed());
   return 0;}
 #else 
 
 long ffsrandom(long  s) { srandom( (unsigned int ) s); return 0;}
+long ffrandom(){return random();}
 long ffsrandomdev() { 
 #ifdef HAVE_SRANDOMDEV
   srandomdev(); 
@@ -85,7 +97,7 @@ return 0;}
 void init(){
   Global.Add("srandomdev","(",new OneOperator_0<long>(ffsrandomdev));
   Global.Add("srandom","(",new OneOperator1<long>(ffsrandom));
-  Global.Add("random","(",new OneOperator_0<long>(random));
+  Global.Add("random","(",new OneOperator_0<long>(ffrandom));
 }
 LOADFUNC(init); 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */

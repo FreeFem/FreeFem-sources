@@ -207,7 +207,8 @@ public:
 	      { 
 		topmemory4tmp=0;// clean the tmp allocation 
 	        if(stackptr.size()>=20 && verbosity>2) 
-	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n ";
+		  //FFCS: nothing on following line for tests/compare
+	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
 		
 		for (iterator i=stackptr.end(); i != stackptr.begin();)
 		{

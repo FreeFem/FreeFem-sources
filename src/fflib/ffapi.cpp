@@ -1,157 +1,126 @@
-/*!
- * \file 
- * 
- * \brief FreeFem++ API implementation
- * 
- * 
- * \author Written by Antoine Le Hyaric
- * \author Laboratoire Jacques-Louis Lions
- * \author Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
- * \author http://www.ljll.math.upmc.fr/lehyaric
- * 
- * \copyright This file is part of Freefem++
- * 
- * \copyright Freefem++ is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- * 
- * \copyright Freefem++ is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * \copyright You should have received a copy of the GNU Lesser General Public
- * License along with Freefem++; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- * 
- * headeralh brief="FreeFem++ API implementation" cpp default=0 dox freefem start=21/01/10 upmc written
- */
+/// \file
+/// ======================================================================
+/// Written by Antoine Le Hyaric
+/// Laboratoire Jacques-Louis Lions
+/// Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+/// http://www.ljll.math.upmc.fr/lehyaric
+/// ======================================================================
+/// This file is part of Freefem++
+/// 
+/// Freefem++ is free software; you can redistribute it and/or modify
+/// it under the terms of the GNU Lesser General Public License as
+/// published by the Free Software Foundation; either version 2.1 of
+/// the License, or (at your option) any later version.
+/// 
+/// Freefem++  is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU Lesser General Public License for more details.
+/// 
+/// You should have received a copy of the GNU Lesser General Public
+/// License along with Freefem++; if not, write to the Free Software
+/// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+/// 02110-1301 USA
+/// ======================================================================
+/// headeralh cpp freefem start=21/01/10 upmc
+
+// Proposed FreeFem++ Application Programming Interface
+// ----------------------------------------------------
 
 // headerfilter
 #include "ffapi.hpp"
-#ifndef FFS
+#ifdef FFLANG
+#include "socket.hpp"
+#include "spawn.hpp"
+#include "buffer.hpp"
+#endif
+#include <iostream>
+#include <cstdio>
+#ifndef FFLANG
 #include <cstdio>
 #endif
-#ifdef FFS
-#include "../src/options.hpp"
+#ifdef FFLANG
+#include "options.hpp"
+#include <stdlib.h>
 #endif
-#ifndef FFS
+#ifndef FFLANG
 #ifdef WIN32
 #include <fcntl.h>
 #endif
 #endif
-#ifndef FFS
+#ifndef FFLANG
 #ifdef PARALLELE
 #include "mpi.h"
 #endif
 #endif
 
-#include <cstdlib>
-
 // FFCS-specific implementations for the FF API
 // --------------------------------------------
 
-/// FFCS defined means that FFCS is being compiled. I am fairly
-/// confident that FFCS will not be defined while compiling the
-/// original FF.
-#ifdef FFS
-#include "../src/socket.hpp"
-#include "../src/buffer.hpp"
-#endif
+/// FFLANG defined means that FFCS is being compiled. I am fairly confident that FFCS will not be defined while
+/// compiling the original FF.
 
-/// Need to choose a non-zero stream number because FF will check it
-/// (as global variable ThePlotStream)
+/// Need to choose a non-zero stream number because FF will check it (as global variable ThePlotStream)
 #define FFAPISTREAM 1
 
-/// if FFCS is around, we need to bufferize all communication to avoid
-/// mixing up CMD_FFG and CMD_STDOUT messages
-#ifdef FFS
+/// if FFCS is around, we need to bufferize all communications to avoid mixing up CMD_FFG and CMD_STDOUT messages
+#ifdef FFLANG
 void bufferwrite(const char *b,const int l){
+  Socket::dialoglock->WAIT(); // need #include "socket.hpp"
 
-  // thank to the buffering, there is only one CMD_FFG tag for multiple
-  // visualization data items.
-  *serversocket<<CMD_FFG;
-  *serversocket<<l;
+  // thank to the buffering, there is only one CMD_FFG tag for multiple visualization data items.
+  onlyffsock()<<CMD_FFG; // need #include "spawn.hpp"
+  onlyffsock()<<l;
 
   // this call contains the socket MAGIC number
-  serversocket->bufferedwrite(static_cast<const char*>(b),l);
+  onlyffsock().bufferedwrite(static_cast<const char*>(b),l);
+
+  Socket::dialoglock->Free();
 }
 
-Buffer buffer(NULL,bufferwrite);
+Buffer buffer(NULL,bufferwrite); // need #include "buffer.hpp"
 #endif
 
 namespace ffapi{
 
-  // FreeFem++ Objects
-  // -----------------
+  // Get a pointer to the local cin/cout (which is distinct from ffcs's stdin/stdout under Windows because each DLL owns
+  // separate cin/cout objects).
 
-  /// Replacement for the FF script stack
-  Stack stack;
-
-  /// Initiates everything necessary to simulate the FF script evaluation environment
-  void init(){
-
-    // creates a stack for local evaluations as in [[file:../lglib/lg.ypp::newStack]]
-    Stack s=newStack(sizestack);
-
-    currentblock;xxx;
-  }
-
-  /// in the FF language, square() is an operator of type OneOperatorCode and uses MeshCarre2 and/or MeshCarre2f. The
-  /// square keyword is described in the FF doc at [[file:../../DOC/freefem++doc.tex::square]]
-
-  mesh square(int nx,int ny,Expression fx,Expression fy,int flags,KN_<long> lab,long reg=0){
-
-    build_and_eval strategy;xxx;
-
-    /// Build a lexical object as FF would do it and activate it
-
-    /// calls [[file:lgmesh.cpp::Carre]] like MeshCarre2::operator()() and copies the resulting object to get rid of the
-    /// local stack.
-
-    mesh m=Carre(nx,ny,fx,fy,flags,lab,reg);
-    return m;
-  }
-
-  // FreeFem++ input/output
-  // ----------------------
-
-  // Get a pointer to the local cin/cout (which is distinct from
-  // ffcs's stdin/stdout under Windows because each DLL owns separate
-  // cin/cout objects).
+  // need #include <iostream>
   std::istream *cin(){return &std::cin;}
   std::ostream *cout(){return &std::cout;}
   std::ostream *cerr(){return &std::cerr;}
-  FILE *ffstdout(){return stdout; };
-  FILE *ffstderr(){return stderr;};
-  FILE *ffstdin(){return stdin;};
 
+  // FFCS - ::stdout not accepted under mingw32
+  // need #include <cstdio>
+  FILE *ffstdout(){return stdout;}
+  FILE *ffstderr(){return stderr;}
+  FILE *ffstdin(){return stdin;}
 
-  void newplot(){
-#ifdef FFS
-    assert(serversocket);
-#endif
-  }
+  void newplot(){}
 
   FILE *ff_popen(const char *command, const char *type){
-#ifdef FFS
+#ifdef FFLANG
+
     // this happens right at the begining of FF, so the socket
     // communication must not be started yet (only when actual
     // visualization data needs to be transfered).
+
+    PROGRESS;
     return (FILE*)FFAPISTREAM;
 #else
+
     // need #include <cstdio>
-    popen(command,type);
+    return popen(command,type);
 #endif
   }
 
   int ff_pclose(FILE *stream){
-#ifdef FFS
+#ifdef FFLANG
     // nothing to close in FFCS
     return 0;
 #else
-    pclose(stream);
+    return pclose(stream);
 #endif
   }
 
@@ -162,29 +131,30 @@ namespace ffapi{
     // in the middle of the lines checked by test/compare. So deactivate
     // it by default.
 #ifdef DEBUG_FFAPI
-#ifdef FFS
+#ifdef FFLANG
     printf("debug: ffapi: using TCP sockets\n");
 #else
     printf("debug: ffapi: using an anonymous pipe\n");
-#endif // FFS
+#endif // FFLANG
 #endif // DEBUG_FFAPI
 
-#ifdef FFS
-    // Ask FFCS to analyze the visualization flux header. I could just
-    // skip this stage, but it will be useful to check the coherency
-    // between FFCS and FF when FF evolves in the future.
-    assert(serversocket);
-    *serversocket<<CMD_FFGINIT;
+#ifdef FFLANG
+
+    // Ask FFCS to analyze the visualization flux header. I could just skip this stage, but it will be useful to check
+    // the coherency between FFCS and FF when FF evolves in the future.
+
+    Socket::dialoglock->WAIT();
+    onlyffsock()<<CMD_FFGINIT;
+    Socket::dialoglock->Free();
 #endif
-    ff_fwrite(ptr,size,nmemb,stream);
+    return ff_fwrite(ptr,size,nmemb,stream);
   }
 
   size_t ff_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream){
-#ifdef FFS
-    // this assert is a way to check that the serversocket pointer
-    // exported from the FFCS shared library is a valid one (which has
-    // not been always true in the case of Windows DLLs).
-    assert(serversocket);
+#ifdef FFLANG
+
+    // if the ffsock pointer is null here, it means that the pointer exported from the FFCS shared library is not a
+    // valid one (this has been the case with Windows DLLs in the past).
 
     // we won't make use of the stream, but make sure that the call from
     // FF is coherent with what we know.
@@ -192,48 +162,57 @@ namespace ffapi{
 
     buffer.write(static_cast<const char*>(ptr),size*nmemb);
 
-    // stops the server flux at one precise point (point value expressed
-    // during a previous crash while reading server data in the client
-    // in visudata.cpp). Use abort() to call the debugger (which can
-    // display the call stack and show where the problematic pipe value
-    // came from).
+    // stops the server flux at one precise point (point value expressed during a previous crash while reading server
+    // data in the client in visudata.cpp). Use abort() to call the debugger (which can display the call stack and show
+    // where the problematic pipe value came from).
 
-    // need #include "../src/options.hpp"
-    if(options->AbortFFGDataAt==buffer.getpoint())abort();
+    // need #include "options.hpp"
+    if(options->AbortFFGraphicsDataAt==buffer.getpoint())abort(); // need #include <stdlib.h>
 
 #else
     fwrite(ptr,size,nmemb,stream);
 #endif
+    return 0;
   }
 
   int ff_fflush(FILE *stream){
-#ifdef FFS
+#ifdef FFLANG
     assert(stream==(FILE*)FFAPISTREAM);
-    assert(serversocket);
 
-    // we need to flush both the buffer and the socket to avoid a
-    // separate callback for flush in the buffer
+    // we need to flush both the buffer and the socket to avoid a separate callback for flush in the buffer
     buffer.flush();
-    serversocket->writeflush();
+
+    // ff_fflush() is used by FF only at the end of a plot, so we can use this location to send a marker for the
+    // sequential java client to deal with one complete plot at a time.
+    Socket::dialoglock->WAIT();
+    onlyffsock()<<CMD_FFGEND;
+    onlyffsock().writeflush();
+    Socket::dialoglock->Free();
+
 #else
     fflush(stream);
 #endif
+    return 0;
   }
 
   int ff_ferror(FILE *stream){
-#ifndef FFS
+#ifndef FFLANG
     return ferror(stream);
+#else
+    return 0;
 #endif
   }
 
   int ff_feof(FILE *stream){
-#ifndef FFS
+#ifndef FFLANG
     return feof(stream);
+#else
+    return 0;
 #endif
   }
 
   void wintextmode(FILE *f){
-#ifndef FFS
+#ifndef FFLANG
 #ifdef WIN32
     // need #include <fcntl.h>
     _setmode(fileno(f),O_TEXT);	
@@ -242,7 +221,7 @@ namespace ffapi{
   }
 
   void winbinmode(FILE *f){
-#ifndef FFS
+#ifndef FFLANG
 #ifdef WIN32
     _setmode(fileno(f),O_BINARY);	
 #endif
@@ -250,9 +229,8 @@ namespace ffapi{
   }
 
   void mpi_init(int &argc, char** &argv){
-    /// only call MPI_Init() if this has not already been done in
-    /// ffcs/src/server.cpp
-#ifndef FFS
+    /// only call MPI_Init() if this has not already been done in ffcs/src/server.cpp
+#ifndef FFLANG
 #ifdef PARALLELE
     // need #include "mpi.h"
     MPI_Init(&argc,&argv);
@@ -261,39 +239,43 @@ namespace ffapi{
   }
 
   void mpi_finalize(){
-#ifndef FFS
+#ifndef FFLANG
 #ifdef PARALLELE
     MPI_Finalize();
 #endif
 #endif
   }
 
-void init()
-{
-  ffapi::fwriteinit ;
-  ffapi::winbinmode ;
-  ffapi::wintextmode ;
-  ffapi::mpi_finalize ;
-  ffapi::cin ;
-  ffapi::cerr ;
-  ffapi::cout ;
-  ffapi::ff_feof ;
-  ffapi::newplot ;
-  ffapi::ff_popen ;
-  ffapi::mpi_init ;
-  ffapi::ff_ferror ;
-  ffapi::ff_fflush ;
-  ffapi::ff_fwrite ;
-  ffapi::ff_pclose ;
-;
+  bool protectedservermode(){
+#ifdef FFLANG
+    return !options->LocalClient;
+#else
+    return false;
+#endif
+  }
 
-}
+  void init(){
+    ffapi::fwriteinit;
+    ffapi::winbinmode;
+    ffapi::wintextmode;
+    ffapi::mpi_finalize;
+    ffapi::cin;
+    ffapi::cerr;
+    ffapi::cout;
+    ffapi::ff_feof;
+    ffapi::newplot;
+    ffapi::ff_popen;
+    ffapi::mpi_init;
+    ffapi::ff_ferror;
+    ffapi::ff_fflush;
+    ffapi::ff_fwrite;
+    ffapi::ff_pclose;
+    ffapi::protectedservermode;
+  }
 }
 
-/*!
- * Local Variables:
- * mode:c++
- * ispell-local-dictionary:"british"
- * coding:utf-8
- * End:
- */
+/// Local Variables:
+/// mode:c++
+/// ispell-local-dictionary:"british"
+/// coding:utf-8
+/// End:

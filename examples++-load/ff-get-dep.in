@@ -20,14 +20,18 @@ case "$1" in
 	for i in $@ ; do
 	#    echo "$1" 
 	#    echo 	awk -v p="$1" -v m=INCLUDE ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," ";}}' $wherelib  $wherelib-download
-         awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) && (!first){ first=1;for (i=3;i<=NF;++i) {print $i," ";}}' "$wherelib"  "$wherelib"-config "$wherelib"-download
+	    
+	    # FFCS: print everything on the same line to avoid splitting paths containing spaces
+         awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) && (!first){ first=1;for (i=3;i<=NF;++i) {printf("%s ",$i);}}' "$wherelib"  "$wherelib"-config "$wherelib"-download
 	done
 	
 	;;
     -l*)
 	shift;
 	for i in $@ ; do   
-	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {print $i," "};} 
+
+	    # FFCS: print everything on the same line to avoid splitting paths containing spaces
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {printf("%s ",$i);}} 
           END  { if(!first) print "ERROR-missing-lib:" p;} ' "$wherelib"  "$wherelib"-config "$wherelib"-download 
 	done
 	;;
@@ -49,7 +53,8 @@ case "$1" in
 	 if [ -n "$ldlibs" -o -z "$libs" ]; then
 	     echo "$cpp" "$inclins" "$ldlibs"
 	 else
-	     echo " erreur find libs of $0 :  $libs " 1>&2
+	     # FFCS - we need errors returns to insure that all compilations run well. ERROR is detected by ff-c++
+	     echo "ERROR: find libs of $0 :  $libs "
 	 fi
 	;;
   *)  

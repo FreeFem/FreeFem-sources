@@ -1,4 +1,5 @@
-include $(abs_top_builddir)/download/headers-sparsesolver.inc
+# FFCS - let "make clean" work even if include file is not found
+-include $(abs_top_builddir)/download/headers-sparsesolver.inc
 #############################################
 #  FLAGS :: FREEFEM TO COMPILE SUPERLU_DIST
 #
@@ -17,9 +18,11 @@ RANLIB       	= @RANLIB@
 
 ############################################################################
 # C compiler setup
-CC           	= @CC@
+CC           	= @MPICC@
 # CFLAGS should be set to be the C flags that include optimization
-CFLAGS          = @CFLAGS@ @MPI_INCLUDE@
+# FFCS - problem with some return statements on MacOS
+# FFCS - -I MPI_INC_DIR required on MacOS 10.8 MacPorts+OpenMPI
+CFLAGS          = -Wreturn-type @CFLAGS@ -I @MPI_INC_DIR@
 # NOOPTS should be set to be the C flags that turn off any optimization
 NOOPTS		=  @CNOFLAGS@ 
 ############################################################################

@@ -123,7 +123,7 @@ while [ $# -ne 0 ]  ; do
 	-I*)    INC="$INC '$1'";;
 	-D*)    INC="$INC '$1'";;
 	-dll)   DLL="$DLL '$2'";shift;;
-	-[Ll]*)    LIBS="$LIBS $1" ;;
+	-[Ll]*)    LIBS="$LIBS '$1'" ;; # FFCS - 27/10/11 - need quotes for MPICH libraries in 'Program Files' under Windows
 	*.a)     LIBS="$LIBS $1" ;;
 	*.so)    LIBS="$LIBS $1" ;;
 	*.dll)   if [ -f "$1" ] ; then  LIBS="$LIBS '$1'"  
@@ -152,11 +152,16 @@ if [ -n "$autodep"  ] ; then
      error=`echo "$argsdep"| grep ERROR`
      if [ -n "$error" ] ; then
 	 echo " ERROR in  auto dependance seach.  sorry : $error "
-	 exit 0;
+
+	 # FFCS - 28/11/11 - we need to stop compiling as soon as there is an error because we want a fixed set of features in
+	 # FFCS
+	 exit 1;
      fi
     echo eval "$thecommand" $args  $argsdep
     eval "$thecommand" $args  $argsdep
-    exit 0;
+
+    # FFCS needs an error exit code to make sure that all libraries are correctly compiled
+    exit $?;
 fi
 
 if [  -n "$onwin32" -a ! -f "$bin/libff.dll"  ] ; then 
@@ -186,9 +191,13 @@ case "$WIN32$uu" in
         echo " Window without cygwin "
 	WMPI_LIB=''
         b="$bin"
-        LIBS=" '$b/libff.dll' $LIBS $DLL"
-        SHARED="-shared  -Wl,--enable-auto-import" #--unresolved-symbols=ignore-all
-        FLAGS= # '  -mno-cygwin '
+        LIBS=" '$b/libff.dll' '$b/FreeFem++-api.dll' $LIBS $DLL"
+
+	# FFCS - 17/10/12 - --unresolved-symbols=ignore-all is not understood by the current mingw64 compilers
+        SHARED="-shared -Wl,--enable-auto-import"
+
+	# FFCS - 17/10/12 - -mno-cygwin is not understood by the current mingw64 compilers
+        ###FLAGS='  -mno-cygwin '
         SUF=dll;;
     win32-cygwin-version)
         echo " cygwin-version "
