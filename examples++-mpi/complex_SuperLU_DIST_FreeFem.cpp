@@ -1,5 +1,6 @@
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep: superlu_dist  blas parmetis metis mpi fc
+// FFCS - 23/5/12 - remove metis dependency because it interfers with identically-named libmetis.a from parmetis
+//ff-c++-LIBRARY-dep: superlu_dist  blas parmetis mpi fc
 //ff-c++-cpp-dep: 
 // ORIG-DATE: 02/2009
 // -*- Mode : c++ -*-
@@ -38,6 +39,10 @@
   /bin/sh ff-mpic++ zSuperLU_DIST.cpp -I/Users/morice/librairie/SuperLU_DIST_2.3/SRC/ -L/Users/morice/librairie/openmpi/lib/ -lmpi -lopen-pal -lopen-rte -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib -L/Users/morice/librairie/ParMetis-3.1/ -lparmetis -lmetis -L/Users/morice/librairie/SuperLU_DIST_2.3/lib/ -lsuperlu_dist_2.3
 
 */
+
+// FFCS - required to define __int64 for MSMPI
+#include <stdint.h>
+
 #include <mpi.h>
 #include  <iostream>
 using namespace std;
@@ -274,6 +279,7 @@ public:
 	    // dallocateA_dist(n, nnz, &a, &asub, &xa);
 	    // dCompRow_to_CompCol_dist(m,n,nnz,arow,asubrow,xarow,&a,&asub,&xa);
 	    
+	    // FFCS - "this->" required by g++ 4.7
 	    this->CompRow_to_CompCol_dist(m,n,nnz,AA.a,AA.cl,AA.lg,&a,&asub,&xa);
 	  
 	    /* Broadcast matrix A to the other PEs. */
@@ -295,6 +301,7 @@ public:
 	    MPI_Bcast( &nnz, 1,   mpi_int_t,  0, grid.comm );
 	    
 	    /* Allocate storage for compressed column representation. */
+	    // FFCS - "this->" required by g++ 4.7
 	    zallocateA_dist(n, nnz, this->dc(&a), &asub, &xa);
 	    
 	    MPI_Bcast( a, nnz, SuperLU_MPI_DOUBLE_COMPLEX, 0, grid.comm );
@@ -306,6 +313,7 @@ public:
 	  Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	  
 	  cout << "Debut: Create_CompCol_Matrix_dist" <<endl;
+	  // FFCS - "this->" required by g++ 4.7
 	  this->Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);      
 	  cout << "Fin: Create_CompCol_Matrix_dist" <<endl;
 	  /* creation of pseudo solution + second member */
@@ -411,6 +419,7 @@ public:
 	     MPI_Bcast( &nnz, 1,   mpi_int_t,  0, grid.comm );
 	     
 	     /* Allocate storage for compressed column representation. */
+	     // FFCS - "this->" required by g++ 4.7
 	     zallocateA_dist(n, nnz, this->dc(&a), &asub, &xa);
 	     
 	     MPI_Bcast( a, nnz, SuperLU_MPI_DOUBLE_COMPLEX, 0, grid.comm );
@@ -433,6 +442,7 @@ public:
 	   fst_row = iam * m_loc_fst;
 	   
 	   nnz_loc = xa[fst_row+m_loc]-xa[fst_row];
+	   // FFCS - "this->" required by g++ 4.7
 	   zallocateA_dist(m_loc, nnz_loc, this->dc(&aloc), &asubloc, &xaloc);
 	   
 	   //xaloc = (int_t*) intMalloc_dist(m_loc+1);
@@ -461,6 +471,7 @@ public:
 	   Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	   
 	   if(verbosity) cout << "Debut: Create_CompRowCol_Matrix_dist" <<endl;
+	   // FFCS - "this->" required by g++ 4.7
 	   if(verbosity) this->Create_CompRowLoc_Matrix_dist(&A, m, n, nnz_loc, m_loc, fst_row, aloc, asubloc, xaloc, SLU_NR_loc, R_SLU, SLU_GE);
 	   
 	   cout << "Fin: Create_CompRowCol_Matrix_dist" <<endl;
@@ -794,6 +805,8 @@ bool SetDefault()
     //DefSparseSolver<double>::solver =SparseMatSolver_R;
     DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+
+    return false;
 }
 
 bool SetSuperLUmpi()
@@ -803,6 +816,8 @@ bool SetSuperLUmpi()
     //DefSparseSolver<double>::solver  =BuildSolverSuperLUmpi;
     DefSparseSolver<Complex>::solver =BuildSolverSuperLUmpi;    
     TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
+
+    return false;
 }
 
 

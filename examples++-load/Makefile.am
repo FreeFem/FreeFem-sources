@@ -69,21 +69,27 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
-	pipe.$(DYLIB_SUFFIX)  symmetrizeCSR.$(DYLIB_SUFFIX) 
+	@FFCS_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX) 
 
-LIST_COMPILE_PKG= 	tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) \
-	metis.$(DYLIB_SUFFIX) UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) \
-	lapack.$(DYLIB_SUFFIX)  fflapack.$(DYLIB_SUFFIX) ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) \
-	freeyams.$(DYLIB_SUFFIX) mmg3d-v4.0.$(DYLIB_SUFFIX) mshmet.$(DYLIB_SUFFIX) \
-	gsl.$(DYLIB_SUFFIX) MUMPS_seq.$(DYLIB_SUFFIX) 	 ff-Ipopt.$(DYLIB_SUFFIX) \
-	ff-NLopt.$(DYLIB_SUFFIX)  ff-cmaes.$(DYLIB_SUFFIX) scotch.$(DYLIB_SUFFIX) \
-	PARDISO.$(DYLIB_SUFFIX)
+# FFCS - some libraries are skipped because the corresponding tool is deactivated.
+
+LIST_COMPILE_PKG=tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) metis.$(DYLIB_SUFFIX)		\
+	UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) @FFCS_DYLIB_lapack@ @FFCS_DYLIB_fflapack@			\
+	ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) @FFCS_DYLIB_yams@ @FFCS_DYLIB_mmg3d@ @FFCS_DYLIB_mshmet@		\
+	@FFCS_DYLIB_gsl@ @FFCS_DYLIB_mumps_seq@ @FFCS_DYLIB_ipopt@ ff-NLopt.$(DYLIB_SUFFIX) ff-cmaes.$(DYLIB_SUFFIX)	\
+	@FFCS_DYLIB_scotch@ @FFCS_DYLIB_pardiso@
 
 bin_PROGRAMS=
 
+# FFCS parallel make: some targets need to be built sequentially
 
+# FFCS - do not set loadpath to be able to run an external version of FF on the examples in this directory with
+# [[../../mkffref]]
 
-load_compile:ff-c++ freefem++.pref WHERE_LIBRARY-download  include  $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
+load_compile:
+	$(MAKE) $(AM_MAKEFLAGS) ff-c++
+	$(MAKE) $(AM_MAKEFLAGS) WHERE_LIBRARY-download  include.done
+	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
 	echo " finish build list $(DYLIB_SUFFIX)"
 
 
@@ -91,12 +97,48 @@ load_compile:ff-c++ freefem++.pref WHERE_LIBRARY-download  include  $(LIST_COMPI
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ./ff-c++ -auto  $< 
 
+# FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with empty files
+# without any access right). So just replace the whole thing with a plain copy.
+
+if ENABLE_FFCS
+allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/AFunction.hpp ../src/fflib/AnyType.hpp	\
+	../src/fflib/array_init.hpp ../src/fflib/array_resize.hpp ../src/fflib/array_tlp.hpp				\
+	../src/femlib/assertion.hpp ../src/femlib/BamgFreeFem.hpp ../src/Algo/BFGS.hpp ../src/Algo/BrentLS.hpp		\
+	../src/Algo/CG.hpp ../src/femlib/CGNL.hpp ../src/fflib/CodeAlloc.hpp ../config.h ../config-wrapper.h		\
+	../src/Algo/CubicLS.hpp ../src/Algo/defs.hpp ../src/femlib/DOperator.hpp ../src/libMesh/eigenv.h		\
+	../src/fflib/endian.hpp ../src/fflib/environment.hpp ../src/fflib/error.hpp ../src/femlib/fem3.hpp		\
+	../src/femlib/fem.hpp ../src/femlib/FESpace.hpp ../src/femlib/FESpacen.hpp ../src/fflib/ff++.hpp		\
+	../src/fflib/ffstack.hpp ../src/femlib/FQuadTree.hpp ../src/femlib/GenericMesh.hpp				\
+	../src/Graphics/getprog-unix.hpp ../src/Graphics/glrgraph.hpp ../src/femlib/gmres.hpp				\
+	../src/femlib/GQuadTree.hpp ../src/femlib/HashTable.hpp ../src/femlib/HeapSort.hpp ../src/fflib/InitFunct.hpp	\
+	../src/fflib/ffapi.hpp ../src/femlib/Label.hpp ../src/fflib/lex.hpp ../src/fflib/lgfem.hpp			\
+	../src/fflib/lgmesh3.hpp ../src/fflib/lgsolver.hpp ../src/lglib/lg.tab.hpp ../src/femlib/libmesh5.h		\
+	../src/Algo/LineSearch.hpp ../src/femlib/MatriceCreuse.hpp ../src/femlib/MatriceCreuse_tpl.hpp			\
+	../src/femlib/Mesh1dn.hpp ../src/femlib/Mesh2dn.hpp ../src/bamglib/Mesh2.h ../src/femlib/Mesh3dn.hpp		\
+	../src/bamglib/Meshio.h ../src/femlib/MeshPoint.hpp ../src/bamglib/meshtype.h ../src/bamglib/Metric.h		\
+	../src/Graphics/mode_open.hpp ../src/Algo/NewtonRaphson.hpp ../src/Algo/NRJ.hpp ../src/fflib/Operator.hpp	\
+	../src/Algo/Optima.hpp ../src/Algo/Param.hpp ../src/femlib/PkLagrange.hpp ../src/fflib/PlotStream.hpp		\
+	../src/fflib/problem.hpp ../src/femlib/QuadratureFormular.hpp ../src/bamglib/QuadTree.h ../src/femlib/R1.hpp	\
+	../src/bamglib/R2.h ../src/femlib/R2.hpp ../src/femlib/R3.hpp ../src/femlib/RefCounter.hpp			\
+	../src/Graphics/rgraph.hpp ../src/femlib/RNM.hpp ../src/femlib/RNM_opc.hpp ../src/femlib/RNM_op.hpp		\
+	../src/femlib/RNM_tpl.hpp ../src/Algo/RosenBrock.hpp ../src/fflib/Serialize.hpp ../src/bamglib/SetOfE4.h	\
+	../src/fflib/showverb.hpp ../src/femlib/splitsimplex.hpp ../src/fflib/String.hpp				\
+	../src/fflib/strversionnumber.hpp ../src/fflib/throwassert.hpp ../src/femlib/ufunction.hpp			\
+	../src/fflib/versionnumber.hpp
+
+include.done: $(allheaders)
+	mkdir -p include
+	cp $^ include
+	touch $@
+
+else
 include: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
 	touch include 
 #	-cp -rf ../download/include/* include/.
+endif
 
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
@@ -106,7 +148,10 @@ makeref.edp: regtests.m4 ../regtests.m4
 
 all-local: all.edp regtests.edp load_compile
 
-all.edp: Makefile
+# FFCS - 27/2/13 - remove dependency on Makefile to avoid recompiling everything everytime something is changed in the
+# configuration step
+
+all.edp:
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
@@ -119,23 +164,26 @@ all.edp: Makefile
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
-$(LIST_COMPILE):ff-c++ include Makefile 
+# FFCS - 27/2/13 - remove dependency on Makefile to avoid recompiling everything everytime something is changed in the
+# configuration step
+
+$(LIST_COMPILE):ff-c++ include.done
 
 clean-local:
-	-rm *.o  load.link WHERE_LIBRARY-download ff-get-dep ff-c++ ff-pkg-download \
+	-rm *.o *.$(DYLIB_SUFFIX) load.link WHERE_LIBRARY-download ff-get-dep ff-c++ ff-pkg-download \
 	  $(LIST_COMPILE) $(LIST_COMPILE_PKG)  regtests.edp makeref.edp
-	-rm -rf include
-ff-c++:load.link.in  Makefile load.link WHERE_LIBRARY-download ff-get-dep
+	-rm -rf include include.done
+ff-c++:load.link.in load.link WHERE_LIBRARY-download ff-get-dep ../config.status
 	../config.status  --file=ff-c++:load.link.in
 	chmod a+x ff-c++
-load.link:load.link.in  Makefile
+load.link:load.link.in ../config.status
 	../config.status  --file=load.link:load.link.in
 	chmod a+x load.link
-ff-pkg-download:ff-pkg-download.in Makefile
+ff-pkg-download:ff-pkg-download.in ../config.status
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
 	cp $@ ../download/bin
-ff-get-dep:ff-get-dep.in Makefile
+ff-get-dep:ff-get-dep.in ../config.status
 	../config.status  --file=$@:$@.in
 	chmod a+x $@
 	-if [ -d ../download/bin ] ;then cp $@ ../download/bin; fi
@@ -165,3 +213,8 @@ install-exec-local:: load_compile
 
 
 
+#FFCS: add tags for files that are not specified to automake by a
+#SOURCE directive (this tags file is automatically taken into account
+#by automake when it sees it).
+TAGS:
+	etags *.?pp

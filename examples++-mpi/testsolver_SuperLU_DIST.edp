@@ -4,6 +4,10 @@ assert(mpisize>=2);
 int[int] procs=[0,1];
 mpiGroup gpr(procs);
 mpiComm comm(gpr);
+
+// FFCS - reference value for regression tests
+real regtest;
+
 if ( bool(comm))
   {
     /////////////////////////////
@@ -106,6 +110,7 @@ if ( bool(comm))
 	cout << "xx= " << xx << endl;	
 	di=(xx-x);
 	cout << "error " << sqrt( abs(di'*di) ) << endl;//'));
+	regtest=di.l2;
       }
 
     

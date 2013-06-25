@@ -93,6 +93,9 @@ cout << B << endl;
   // A1+A^-1;  attention ne marche pas 
 }
 
+// FFCS - value for regression checks
+real regtest=0;
+
 {
 
 int n=5;
@@ -147,5 +150,8 @@ assert( C.linfty < 1e-10);
 C = A*B;
 C -=E; 
 assert( C.linfty < 1e-10);
+
+// FFCS - value for regression checks
+regtest=C.linfty;
 }
 }

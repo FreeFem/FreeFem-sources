@@ -28,4 +28,5 @@ load "medit" load "msh3"
     medit("mm",Th3);// bug un color of u ... FH 
 }
 
-
+// FFCS: testing 3D plots
+plot(u);

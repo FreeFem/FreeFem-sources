@@ -10,6 +10,10 @@
      K.Morgan, J.Périaux and F.Thomasset, Analysis of laminar flow over a backward facing step, Vol9 of Notes on Num. Fluid Mech., Vieweg, 1984. 
     
 */
+
+// FFCS regression test value
+real regtest;
+
 real[int] Reynold=[50,150,300,400,500];
 real[int] HH=[1.5,1]; 
 real[int,int] reattachP=[ [ 2.8, 2 ], [ 5.16, 3.7 ]] ;  // reattachP[irey,cas]  
@@ -159,6 +163,9 @@ for(int krey=0;krey<Reynold.n;++krey)
     plot(coef=0.2,cmm="H="+H+", rey="+re+" [u1,u2] et p  ",p,[uu1,uu2],wait=0,nbiso=20,bb=zoom);//,ps="Upstep-"+H+"-"+re
     plot(coef=0.2,cmm="H="+H+", rey="+re+" [u1,u2] et p  ",p,[uu1,uu2],wait=0,nbiso=20,bb=zoom);//,ps="Upstep-"+H+"-"+re+".ps");  
     plot(coef=0.2,cmm="H="+H+", rey="+re+" [u1,u2] et p  ",psi,bb=zoom,viso=psiviso);//,ps="psi-step-"+H+"-"+re+".ps");  
+
+    // FFCS regression test value
+    regtest=uu1[]'*uu1[];//'
      }
 }
 assert(nerr==0); 

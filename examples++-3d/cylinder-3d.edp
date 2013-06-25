@@ -16,3 +16,5 @@ mesh3 Th=buildlayers(Baseh,nlayer,
   reffaceup = rup,
   reffacelow = rdown);
 medit("Cyl",Th,wait=1);
+// FFCS: testing 3d plots
+plot(Th,cmm="Cyl");

@@ -2824,7 +2824,8 @@ void Check(const Opera &Op,int N,int  M)
                   pair<int,int> ii(ll.first);
                   double w_i =  wi(ii.first,ii.second);
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                if ( copt && Kv.number<1 <1)
+		  // FFCS - removing what is probably a small glitch
+                if ( copt && Kv.number<1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
@@ -2902,7 +2903,8 @@ void Check(const Opera &Op,int N,int  M)
                   pair<int,int> ii(ll.first);
                   double w_i =  wi(ii.first,ii.second);
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                if ( copt && Kv.number<1 <1)
+		  // FFCS - removing what is probably a small glitch
+                if ( copt && Kv.number<1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
@@ -2978,7 +2980,8 @@ void Check(const Opera &Op,int N,int  M)
                     pair<int,int> ii(ll.first);
                     double w_i =  wi(ii.first,ii.second);
                     R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                    if ( copt && Kv.number<1 <1)
+		  // FFCS - removing what is probably a small glitch
+                    if ( copt && Kv.number<1)
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         if ( c != cc) {
@@ -3102,7 +3105,8 @@ void Check(const Opera &Op,int N,int  M)
 			    else  if (iicase==Code_OtherSide) w_i = ww_i;  // valeur de autre cote
 			    }
 			  R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-			  if ( copt && Kv.number<1 <1)
+		  // FFCS - removing what is probably a small glitch
+			  if ( copt && Kv.number<1)
 			    {
 				R cc  =  GetAny<R>(ll.second.eval(stack));
 				if ( c != cc) { 
@@ -3196,7 +3200,8 @@ void Check(const Opera &Op,int N,int  M)
                       pair<int,int> ii(ll.first);
                       double w_i =  wi(ii.first,ii.second);
                       R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                      if ( copt && Kv.number<1 <1)
+		  // FFCS - removing what is probably a small glitch
+                      if ( copt && Kv.number<1)
                       {
                           R cc  =  GetAny<R>(ll.second.eval(stack));
                           if ( c != cc) { 
@@ -3283,7 +3288,8 @@ void Check(const Opera &Op,int N,int  M)
                   pair<int,int> ii(ll.first);
                   double w_i =  wi(ii.first,ii.second);
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                if ( copt && Kv.number<1 <1)
+		  // FFCS - removing what is probably a small glitch
+                if ( copt && Kv.number<1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 

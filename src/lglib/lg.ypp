@@ -256,7 +256,8 @@ void (*end_parallele)()=0;
 
 start:   input ENDOFFILE {
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
-                        if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
+			//FFCS: divert stream to FFCS
+                        if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
@@ -287,7 +288,8 @@ start:   input ENDOFFILE {
                         //debugstack.clear() 
                         } 
                         fingraphique();
-			if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}
+			//FFCS: divert stream to FFCS
+			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
@@ -732,6 +734,7 @@ static void SetcppIo()
 #endif
    ios::sync_with_stdio();
 }
+
 // pour l'environement.
 extern const char *  prognamearg;
 extern  bool echo_edp;
@@ -746,7 +749,12 @@ int mainff (int  argc, char **argv)
 
     int vvold=verbosity; 
     if(mpirank !=0) verbosity=0;
+
+  // ALH - 14/10/8 - This breaks FFCS output redirection
+#ifndef ENABLE_FFCS
   SetcppIo();
+#endif
+
   GetEnvironment();   
     vvold=verbosity; 
     if(mpirank !=0) verbosity=0; 
@@ -838,9 +846,23 @@ int mainff (int  argc, char **argv)
 
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
-  if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
+  // FFCS: divert stream to FFCS
+  if(ThePlotStream){
+    ffapi::ff_pclose(ThePlotStream);
+    ThePlotStream=0;
+  }
   Destroylex( zzzfff);
   
    // ClearMem();
   return retvalue;
 }
+
+/* FFCS: emacs configuration for this file */
+ 
+/*!
+ * Local Variables:
+ * mode:antlr
+ * ispell-local-dictionary:"british"
+ * coding:utf-8
+ * End:
+ */

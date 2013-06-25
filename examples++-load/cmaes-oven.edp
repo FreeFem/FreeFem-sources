@@ -7,7 +7,8 @@ real eps=1e-2,hugeval=1.e30;		//a small value governing collisions and a huge on
 int nbres=6;		//number of resistors (should not be changed) 
 int NPres=NP*(2*pi*R);
 real[int] pr(nbres+2), K(nbres+2); 
-int regi=nbres, rege=nbres+1, lext=1;K=1;	K[regi]=10;
+int regi=nbres, rege=nbres+1, lext=1;
+K=1;	K[regi]=10;
 
 macro Grad(u) [dx(u),dy(u)]//EOM
 macro Resistor(i,cx,cy,lab)
@@ -160,4 +161,6 @@ real[int] start=[pst,L/6,l/6,pst,L/2,l/6,pst,5*L/6,l/6,pst,L/6,5*l/6,pst,L/2,5*l
 cout << cmaes(J,start,initialStdDevs=isd,stopTolFun=1e-1,stopMaxIter=200,stopMaxFunEval=1000);
 //BFGS(J,dJ,start,nbiterline=10,nbiter=3000,eps=1.e-8);
 iter = 1000;
-J(start);
+
+// FFCS - regression test reference value
+real regtest=J(start);

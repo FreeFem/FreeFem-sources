@@ -18,29 +18,31 @@ mumps: FAIRE-$(VERSION)
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
-	cd $(SRCDIR);make d z
+#	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
+	cd $(SRCDIR) && make d
+	cd $(SRCDIR) && make z
 	touch $(SRCDIR)/FAIT	
-install: $(SRCDIR)/FAIT
-	-mkdir -p ../include/libseq
-	cp $(SRCDIR)/include/*.h ../include/libseq
-	cp $(SRCDIR)/libseq/*.h  ../include/libseq
-	-mkdir -p ../lib
-	cp $(SRCDIR)/lib/*.a ../lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/
+install.done: $(SRCDIR)/FAIT
+	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
+	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
+	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
+	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
+	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
+	touch $@
+clean::
+	-rm *.done
 
-WHERE: 
-	if [ -f $(SRCDIR)/FAIT  ] ;then \
-	$(MAKE) install ; \
-	echo mumps-seq LD -L@DIR@/lib   -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ  -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lpthread    >../lib/WHERE.mumpsseq ;\
-	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> ../lib/WHERE.mumpsseq ;\
-	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>../lib/WHERE.mumpsseq ;\
-	echo libseq INCLUDE -I@DIR@/include/libseq>> ../lib/WHERE.mumpsseq ;\
-	fi
+# FFCS - install and WHERE need to be done sequentially, even in parallel builds
+WHERE.done: install.done
+	echo mumps-seq LD -L@DIR@/lib   -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ  -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lpthread >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
+	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
+	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
+	echo libseq INCLUDE -I@DIR@/include/libseq>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
+	touch $@
 
-
-FAIRE-$(VERSION):
-	$(MAKE) install WHERE 
-	touch FAIRE-$(VERSION)
+FAIRE-$(VERSION): install.done WHERE.done
+	touch $@
 
 Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
@@ -56,12 +58,12 @@ $(PACKAGE1):
 	cd `dirname $@`; $(WGET)   http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
-	rm Makefile.inc FAIRE* *~ ../lib/WHERE.mumpsseq
+
+# FFCS - $(SRCDIR)/$(INSTALL) is not valid if $(SRCDIR) is not there
+clean:: clean-local
+	-rm Makefile.inc FAIRE* *~ 
 	-rm -rf ../include/*mumps*
-	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
+	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a ../lib/WHERE.mumpsseq
 	-rm -rf $(SRCDIR)
-
-clean: clean-local
-
 
 .PHONY:$(SRCDIR)/$(INSTALL)

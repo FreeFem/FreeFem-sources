@@ -31,6 +31,7 @@ Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 //plot(Th,wait=1);
 medit("squaremesh",Th,wait=1);
+plot(Th); // FFCS: testing 3d plots
 verbosity=2;
 
 // construction of the surface of spheres
@@ -46,6 +47,7 @@ cout << "=====================" << endl;
 cout << "=====================" << endl;
 savemesh(Th3sph,"sphereR1.mesh");
 medit("sphereR1",wait=1,Th3sph);
+plot(Th3sph); // FFCS: testing 3d plots
 real Rmax  = 2.;
 func f1max = Rmax*f1;
 func f2max = Rmax*f2;
@@ -60,6 +62,7 @@ cout << "addition" << endl;
 mesh3 Th3=Th3sph+Th3sph2;
 savemesh(Th3,"sphereAdd.mesh");
 medit("sphereSurfaceAdd",wait=1,Th3);
+plot(Th3); // FFCS: testing 3d plots
 
 
 real[int] domain2 = [1.5,0.,0.,145,0.001,0.5,0.,0.,18,0.01];
@@ -72,6 +75,7 @@ cout << "finish: tetgen call without hole" << endl;
 cout << "=============================" << endl;
 savemesh(Th3fin,"spherewithtworegion.mesh"); 
 medit("spherewithtworegion",wait=1,Th3fin);
+plot(Th3fin); // FFCS: testing 3d plots
 
 real[int] hole = [0.,0.,0.];
 real[int] domain = [1.5,0.,0.,53,0.001];
@@ -84,6 +88,7 @@ cout << "finish: tetgen call with hole   " << endl;
 cout << "=============================" << endl;
 savemesh(Th3finhole,"spherewithahole.mesh"); 
 medit("spherewithahole",wait=1,Th3finhole);
+plot(Th3finhole); // FFCS: testing 3d plots
 
 
 
