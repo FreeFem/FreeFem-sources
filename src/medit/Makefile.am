@@ -7,7 +7,7 @@ bin_PROGRAMS=$(MEDITPROG)
 EXTRA_PROGRAMS=ffmedit
 ffmedit_SOURCES=  \
 animat.c		cube.c			image.c			listnum.c		mouse.c			persp.c			stream.c		zaldy2.c \
-bbfile.c		dlists.c		inmsh2.c		material.c		normal.c		picking.c		tiles.c \
+bbfile.c		dlists.c		inmsh2.c		material.c		normal.c		tiles.c \
 camera.c		ellipse.c		inout.c			medit.c			param.c			psfile.c		transform.c \
 cenrad.c		geometry.c		inout_morice.c		menus.c			parsar.c		scene.c			util.c \
 clip.c			gisfil.c		inout_popenbinaire.c	mesh.c			parsop.c		scissor.c		vector.c \
@@ -25,13 +25,19 @@ compil.date: $(ffmedit_SOURCES)
 #.PHONY: compil.date
 all-local: pinking.no-opt$(MEDITPROG)
 
-pinking.no-optffmedit$(EXEEXT):picking.c
-	rm picking.$(OBJEXT)
-	$(MAKE) picking.o $(MEDITPROG) CFLAGS="$(CNOFLAGS)"
-	touch pinking.no-optffmedit$(EXEEXT)
-pinking.no-opt:picking.c
-	touch pinking.no-opt
-clean-local:
-	-rm pinking.no-opt pinking.no-optffmedit$(EXEEXT)
+# FFCS: during a parallel make, we should make sure that picking.o is not used before being made by a different
+# thread. If I understand things correctly, picking.c should not be compiled with the regular CFLAGS options.
 
+ffmedit_DEPENDENCIES=picking.$(OBJEXT)
+picking.$(OBJEXT):picking.c
+	${CC} -c $< -o $@
+
+###pinking.no-optffmedit$(EXEEXT):picking.c
+###	rm picking.$(OBJEXT)
+###	$(MAKE) picking.o $(MEDITPROG) CFLAGS="$(CNOFLAGS)"
+###	touch pinking.no-optffmedit$(EXEEXT)
+###pinking.no-opt:picking.c
+###	touch pinking.no-opt
+###clean-local:
+###	-rm pinking.no-opt pinking.no-optffmedit$(EXEEXT)
 

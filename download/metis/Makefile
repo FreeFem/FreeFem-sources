@@ -16,6 +16,8 @@ PACKAGE=$(DIRPKG)/metis-$(metis_VERSION).tar.gz
 SERVER=http://www.netlib.org/linalg/
 #//http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/OLD
 INSTALL=../..
+
+# FFCS - 14/11/11 - version 4.0.3 is not available from netlib anymore
 metis_VERSION=4.0
 
 metis: FAIRE
@@ -56,9 +58,11 @@ WHERE:
 
 
 
+# FFCS: patch is necessary for metis 4.0, but not for 4.0.3
 $(SRCDIR)/tags: $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	patch -p0  <patch-metis
+	patch -p0  <metis-4.0_main_return.patch
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = ..;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libmetis.a;../$(INSTALL)/lib/metis/libmetis.a;' \
@@ -75,10 +79,15 @@ $(PACKAGE):
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
-	-rm -rf metis*
+	-rm -rf metis-4.0 config.log
 	-rm -rf ../lib/metis ../lib/WHERE.metis
 	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm FAIRE FAIT 
 
+# FFCS - 23/5/12 - $(SRCDIR)/$(INSTALL) is meaningless if $(SRCDIR) does not exist
 clean: clean-local
+	-rm ../lib/metis/libmetis.a
+	-rm ../lib/include/metis.h
+	-rm -rf $(SRCDIR)
+	-rm FAIRE FAIT 

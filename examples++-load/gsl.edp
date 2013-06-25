@@ -110,14 +110,16 @@ cout << "gsl_sf_zetam1(0.55) =  " << gslsfzetam1(0.55)  << endl;
 cout << "gsl_sf_zetam1_int(2) =  " << gslsfzetam1int(2)  << endl; 
 cout << "gsl_sf_eta_int(1) =  " << gslsfetaint(1)  << endl; 
 cout << "gsl_sf_eta(0.55) =  " << gslsfeta(0.55)  << endl; 
-real [int] P2=[ 2,-3,1];
-real [int] P3=[ 8,-10,1,1];
+
+// FFCS - avoid using P2 and P3 which already define something very precise
+real [int] p2=[ 2,-3,1];
+real [int] p3=[ 8,-10,1,1];
 real [int] X(3);
 complex[int] Z(4);
 real [int] Q4=[ -1,0,0,0,1];
-gslpolysolvequadratic(P2,X);
+gslpolysolvequadratic(p2,X);
 cout << X[0] << " " << X[1] << endl; 
-gslpolysolvecubic(P3,X);
+gslpolysolvecubic(p3,X);
 cout << X[0] << " " << X[1] << " " << X[2] << endl; 
 gslpolycomplexsolve(Q4,Z); 
 cout << Z[0] << " " << Z[1] << " " << Z[2] << " " << Z[3] <<endl; 

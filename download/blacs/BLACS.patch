@@ -20,3 +20,16 @@ diff -ur BLACS/SRC/MPI/Makefile BLACS-okk/Makefile
  
  Bdef.h : ../Bdef.h
  	rm -f Bdef.h
+@@ -196,9 +196,10 @@
+ bi_f77_mpi_testall.o : mpif.h bi_f77_mpi_testall.f
+ 	$(F77) -c $(F77FLAGS) $*.f
+ 
+-mpif.h : $(MPIINCdir)/mpif.h
++# FFCS: watch out for spaces and links under Windows. Also, make dependencies cannot contain spaces.
++mpif.h :
+ 	rm -f mpif.h
+-	ln -s $(MPIINCdir)/mpif.h mpif.h
++	cp $(MPIINCdir)/mpif.h mpif.h
+ 
+ #  ------------------------------------------------------------------------
+ #  We move C .o files to .C so that we can use the portable suffix rule for

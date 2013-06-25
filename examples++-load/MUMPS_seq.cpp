@@ -280,7 +280,6 @@ DefSparseSolverSym<Complex>::SparseMatSolver SparseMatSolverSym_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
-
 bool SetMUMPS_seq()
 {
     if(verbosity>1)

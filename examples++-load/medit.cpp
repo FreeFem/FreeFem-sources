@@ -28,7 +28,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-#include "mode_open.hpp"
+#include "../src/Graphics/mode_open.hpp" // ALH - there should be a '-I'?
 #include "ff++.hpp"
 #define WrdSiz 4
 

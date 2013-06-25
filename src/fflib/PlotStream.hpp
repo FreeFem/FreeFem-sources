@@ -12,6 +12,9 @@
 #endif
 #include "endian.hpp"
 
+//FFCS visualization stream redirection
+#include "ffapi.hpp"
+
 using  Fem2D::Mesh;
 using  Fem2D::Mesh3;
 namespace Fem2D {
@@ -28,15 +31,19 @@ public:
   PlotStream(FILE *Stream) :TheStream(Stream) { }
   operator bool() const { return TheStream;}
   // datatype mush be < 0 to have no collistion with arg number. 
+  // FFCS: <<PlotStream::datatype>>
     enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_plots3=-11,dt_endarg=99999,dt_newplot=-5  };
   
-  void SendNewPlot() {  write((long )dt_newplot); set_binary_mode(); }
+  //FFCS:need to send control data to FFCS at least once per plot
+  void SendNewPlot() {  ffapi::newplot();write((long )dt_newplot); set_binary_mode(); }
   void SendEndArgPlot() {write((long )dt_endarg); }
-  void SendEndPlot() { write((long )dt_endplot);fflush(TheStream); set_text_mode() ;}
+  //FFCS:redirect visualization stream
+  void SendEndPlot() { write((long )dt_endplot);ffapi::ff_fflush(TheStream); set_text_mode() ;}
   void SendPlots() { write((long )dt_plots); }
   void SendMeshes() { write((long )dt_meshes);}
   void SendMeshes3() { write((long )dt_meshes3);}
-  void write(const void *data,size_t l) {fwrite(data,1,l,TheStream);}
+  //FFCS: divert stream to FFCS
+  void write(const void *data,size_t l) {ffapi::ff_fwrite(data,1,l,TheStream);}
 
   PlotStream& write(const bool& bb) {bool b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(bool));return *this;}
   PlotStream& write(const long long& bb) {long long  b=w_endian(bb);write(reinterpret_cast<const void *> (&b),sizeof(long long));return *this;}
@@ -59,15 +66,13 @@ public:
   
   void set_text_mode() 
   {    
-#ifdef WIN32
-        _setmode(fileno(TheStream),O_TEXT);	
-#endif
+  //FFCS:visualization stream redirection
+    ffapi::wintextmode(TheStream);
   }
   void set_binary_mode()
   {    
-#ifdef WIN32
-    _setmode(fileno(TheStream),O_BINARY);	
-#endif
+  //FFCS:visualization stream redirection
+    ffapi::winbinmode(TheStream);
   }
  
   PlotStream & operator << (const bool& b)    { return write(b); }
@@ -112,7 +117,8 @@ public:
 	//	fread(  p++,1,1,TheStream);
 	//       read(data,l);
 }
-  bool good() const {return ferror(TheStream)==0;}
+  //FFCS:visualization stream redirection
+  bool good() const {return ffapi::ff_ferror(TheStream)==0;}
   void GetNewPlot() { get(dt_newplot) ; set_binary_mode();}
   void GetEndArgPlot() {get(dt_endarg); }
   void GetEndPlot() {get(dt_endplot); set_text_mode();}
@@ -129,7 +135,8 @@ public:
     if( tt !=(long) t) 
       cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
     ffassert(tt==(long) t);}
-    bool eof() {return feof(TheStream);}
+  //FFCS:visualization stream redirection
+    bool eof() {return ffapi::ff_feof(TheStream);}
   PlotStream& read( bool& b) {read(reinterpret_cast< void *> (&b),sizeof(bool));  b=r_endian(b);return *this;}
   PlotStream& read( long long& b) {read(reinterpret_cast< void *> (&b),sizeof(long long)); b=r_endian(b);return *this;}
   PlotStream& read( long& b) { long long l;

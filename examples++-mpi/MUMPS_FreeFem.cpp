@@ -36,6 +36,13 @@
 #include  <iostream>
 using namespace std;
 
+// FFCS - 23/4/13 - instanciate some global symbols which are not found by default in MS MPI Fortran libraries
+#ifdef WIN32
+__declspec(dllexport) int toto;
+MPI_Fint* _imp__MPI_F_STATUS_IGNORE;
+MPI_Fint* _imp__MPI_F_STATUSES_IGNORE;
+#endif
+
 #include "rgraph.hpp"
 #include "error.hpp"
 #include "AFunction.hpp"

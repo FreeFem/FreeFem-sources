@@ -73,5 +73,7 @@ medit("maillagesurf",Thmv2surf,wait=1);
 //savemesh(Thmv2surf,"maillagesurfacecylindre.mesh");
 //medit("maillageplein",Thmv2);
 
+// FFCS: testing 3d plots
+plot(Thmv2surf);
 
 

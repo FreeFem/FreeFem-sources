@@ -19,7 +19,8 @@ parms_VERSION=2.2
 
 parms: FAIRE
 
-$(SRCDIR)/FAIT:
+# FFCS: more dependencies for parallel builds
+$(SRCDIR)/FAIT:$(SRCDIR)
 	$(MAKE) $(SRCDIR)/$(INSTALL)  WHERE
 	touch $(SRCDIR)/FAIT
 install:$(SRCDIR)/$(INSTALL)
@@ -51,7 +52,12 @@ clean-local:
 	-rm ../lib/libparms.*
 	-rm -rf ../include/parms
 	-rm -rf $(SRCDIR)
-clean: 
+clean:clean-local
+#	FFCS - make sure that all directories are cleaned. This is especially important under Windows because there is no
+#	compilation dependencies control there (see
+#	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
+	-rm -rf pARMS_*
+	-rm config.log
 
 
 WHERE:

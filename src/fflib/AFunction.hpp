@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -94,7 +96,10 @@ class C_F0;  //  une instruction  complie time
 class ListOfInst;
 class Polymorphic;
 class OneOperator;
-typedef  E_F0  *  Expression; // 
+
+/// Expression is used as the type of the local list contained in ListOfInst
+typedef  E_F0  *  Expression;
+
 class AC_F0;
 class basicAC_F0;
 typedef complex<double> Complex;
@@ -149,9 +154,7 @@ typedef deque<UnId> ListOfId;
 //#define NEW_TYPE_PtrI(type) map_type[typeid(type*).name()] = new ForEachTypePtr<type*>(Initialize<type>)
 */
 
-
-
-
+/// Doxygen doc
 extern Polymorphic * TheOperators, * TheRightOperators;
 
 //  -------------
@@ -333,6 +336,11 @@ class C_LF2;
 class C_LF1;
 
 //  3 types of function/expression  0,1,2 args  
+
+/// E_F0 is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++ language
+/// (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in ListOfInst, and evaluated when
+/// CListOfInst::eval() is called (see \ref index).
+
 class E_F0 :public CodeAlloc 
    {
    public:
@@ -376,7 +384,8 @@ class E_F0 :public CodeAlloc
  };  
  
 inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
-// a  
+
+/// Specialization of E_F0 where MeshIndependent() always returns false instead of true.  
 class E_F0mps : public E_F0 { public:
   virtual bool MeshIndependent() const {return false;} // 
 };
@@ -1360,21 +1369,28 @@ class ListOfInst : public  E_F0mps {
   if(list) delete [] list;list=0;if(linenumber)  delete[] linenumber; linenumber=0;}
 };
 
-class CListOfInst  {  private:
+class CListOfInst{
+private:
   ListOfInst * f;
   const basicForEachType *r;
-  public:
-   void operator=(const CC_F0 &a){
-     f=new ListOfInst();     
-       if( !a.Empty() ) {
-         f->Add(a);
-         r=a.left(); }}
-   CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
-    operator C_F0 () const  { return C_F0(f,r);}
-   void eval(Stack s) {(*f)(s);}
-   int size() const {return f->size();}
-   Expression * ptr() const {return f->ptr();}
-   int * nlines() const { return f->nlines();}
+
+public:
+  void operator=(const CC_F0 &a){
+    f=new ListOfInst();     
+    if( !a.Empty() ) {
+      f->Add(a);
+      r=a.left(); }}
+  CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
+  operator C_F0 () const  { return C_F0(f,r);}
+
+  /// Called by yyparse() to evaluate the complete expression tree when reaching the end of its "start" symbol. It calls
+  /// ListOfInst::operator()() for its private ListOfInst pointer #f.
+
+  void eval(Stack s) {(*f)(s);}
+
+  int size() const {return f->size();}
+  Expression * ptr() const {return f->ptr();}
+  int * nlines() const { return f->nlines();}
 };
 
 
@@ -1384,8 +1400,10 @@ AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
+/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]]
 
 extern TableOfIdentifier Global;
+
 void ShowType(ostream & );
 
 template<class T> 
@@ -1885,10 +1903,12 @@ inline  E_F0 * C_F0::LeftValue() const {
 }*/
 
 
-      
+/// Declaration of TypeArray
 aType TypeArray(aType,aType);
-aType TypeTemplate(aType,aType);
 aType TypeArray(aType c,aType b,aType a);
+
+/// Declaration of TypeTemplate
+aType TypeTemplate(aType,aType);
 
 void Init_map_type();
 

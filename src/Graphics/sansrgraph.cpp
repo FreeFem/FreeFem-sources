@@ -601,7 +601,7 @@ void openPS(const char *filename )
 
   const char *fps (filename?filename:ffff);
 
-  
+
   psfile=fopen(fps,"w");
   if(psfile) {
     psfile_save=psfile;

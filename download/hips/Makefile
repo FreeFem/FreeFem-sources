@@ -50,7 +50,7 @@ ObjBlockDBMATRIX   = $(SRCDIR)/SRC/BLOCK/DBMATRIX/amalgamate.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMATRIX_SEQ.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_Setup.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_SetupHID.o \
-  	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_solve2.o \
+	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_solve2.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_solve.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBMatrix_TRSM.o \
 	$(SRCDIR)/SRC/BLOCK/DBMATRIX/DBPrec_FACTO_TRSM_GEMM_LL.o \
@@ -140,7 +140,8 @@ endif
 
 hips: FAIRE  
 
-FAIT:  
+# FFCS: more dependencies for parallel builds
+FAIT:$(SRCDIR)/tag-ff++
 	$(MAKE) ..  WHERE
 	touch FAIT
 
@@ -193,6 +194,7 @@ $(PACKAGE):
 	-mkdir $(DIRPKG)
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
+# FFCS: avoid loops when SRCDIR does not exist
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) clean  -C $(SRCDIR)
 	rm makefile.inc

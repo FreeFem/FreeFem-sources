@@ -135,6 +135,9 @@ for(int i=0;i<P3h.ndof;++i)
 
  }
 
+// FFCS - reference value
+real ref;
+
 {
 assert(err==0);
 
@@ -205,6 +208,9 @@ for( int i=0;i<Wh1.ndof;++i)
   V(w)=V(u);
   w1[][i]-=1;
   assert( w1[].linfty < 1e-10);
+
+  // FFCS reference value
+  ref=w1[].linfty;
 }
 
 cout << " End  Check  ***********" << RTname <<  " Ok .... \n"; 

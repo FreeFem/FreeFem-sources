@@ -29,3 +29,5 @@ plot(Th,wait=1);
 //exec("ffmedit T.mesh");
 medit("Th",Th);
 
+// FFCS: testing 3d plots
+plot(Th);
