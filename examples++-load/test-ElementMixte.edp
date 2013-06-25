@@ -1,0 +1,219 @@
+
+load "Element_P4"
+load "Element_Mixte"
+
+macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
+macro dn(f) ( N.x*dx(f)+N.y*dy(f)) //
+macro ccn(f) ( N.x*f#1+N.y*f#2) //
+macro cctau(f) ( -N.y*f#1+N.x*f#2) //
+macro dnn(f) ( N.x*N.x*f#11+2.*N.y*N.x*f#12+ N.y*N.y*f#22) //
+mesh Th=square(1,1,flags=1);//,[10*(x+y/3),10*(y-x/3)]);
+Th=trunc(Th,(x+y)<1.1);plot(Th,wait=1);
+Th=movemesh(Th,[0.1*(x+y/3),0.1*(y-x/3)]);
+Th=movemesh(Th,[0.1*(x),0.1*(y)]);
+real x1=0.7,y1=0.9, h=1e-6;
+int it1=Th(x1,y1).nuTriangle; 
+
+fespace Zh(Th,P1dc); 
+Zh  f11= 1, f12=0, f22=0;
+
+fespace Vh(Th,TDNNS1);
+cout << Vh.ndof << endl;
+cout << Vh.ndofK << endl;
+fespace Eh(Th,P0edge);
+fespace P3h(Th,[P0,P0,P0]);
+
+
+Eh  edges;
+ macro SS(a) [a#11,a#12,a#22] //
+
+P3h SS(pp);
+
+Vh SS(a),SS(b),SS(c);
+
+varf vFlux([ax11,ax12,ax22],[e]) = intalledges(Th,qforder=1)( dnn(a)*e*lenEdge);
+edges=x; 
+cout << " x = " << edges[]<< endl; 
+edges=y; 
+cout << " y = " << edges[]<< endl; 
+
+real gx=1./3., gy(1./3); 
+
+
+for(int j=0; j<Vh.ndofK;++j)
+{int i= Vh(0,j);
+ cout << "****" << j << " "  << i << endl; 
+ a11[]=0;
+ a11[][i]=1;
+/*
+ x=0; y = 0.5;  N.x = -1; N.y = 0; 
+  cout << " ------ dnn (0.,0.5) " << dnn(a) <<  "   " ;
+ x=0.5; y = 0.5;  N.x = 1; N.y = 1; 
+ cout << " dnn (.5,.5) " << dnn(a) << "     " ;
+ x=0.5; y = 0.;  N.x = 0; N.y = -1; 
+  cout << " dnn (0.5,0) " << dnn(a) << endl;
+  cout << " (0,0.5)  = " << a11(0,0.5) << " " << a12(0,0.5) << " " << a22(0,0.5) << endl;
+  cout << " (0.5,0)  = " << a11(0.5,0) << " " << a12(0.5,0) << " " << a22(0.5,0) << endl;
+  cout << " (0.5,0.5)  = " << a11(0.5,0.5) << " " << a12(0.5,0.5) << " " << a22(0.5,0.5) << endl;
+*/
+ // cout << " ...... " << int2d(Th)(a11) << " " << int2d(Th)(a12) << " " <<int2d(Th)(a22) << endl;
+
+// plot(a11,wait=1,cmm="a00 "+i);
+// plot(a22,wait=1,cmm="a22 "+i);
+// plot(a12,wait=1,cmm="a12 "+i);
+edges[]=vFlux(0,Eh);
+// cout << a11(gx,gy) << " " << a12(gx,gy) << " " << a22(gx,gy) << " at G "<< " " <<OA
+  cout << " ...... " << int2d(Th)(a11) << " " << int2d(Th)(a12) << " " <<int2d(Th)(a22)  << "   --- " ; 
+  for(int j=0;j<3;++j)
+   cout << edges[](Eh(0,j)) << " " ;
+ cout << "   *** Edges flux n.n " << j  << endl;  
+
+}
+ 
+SS(a) =SS(f);
+cout << a11[].n << " a = "<< a11[] <<endl; 
+
+ cout << a11(0.6,0.2) << " == " << f11(0.6,0.2) << endl;
+ cout << a12(0.6,0.2) << " == " << f12(0.6,0.2) << endl;
+ cout << a22(0.6,0.2) << " == " << f22(0.6,0.2) << endl;
+ cout << " 00 = " << int2d(Th)(square(a11-f11)) << endl;
+ cout << " 00 = " << int2d(Th)(square(a22-f22)) << endl;
+ cout << " 00 = " << int2d(Th)(square(a12-f12)) << endl;
+//plot(a11,wait=1);
+
+//Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
+//it1=Th(x1,y1).nuTriangle;
+
+
+for (int i=0;i<Vh.ndofK;++i)
+	cout <<  i << " l  -> G " << Vh(0,i) << endl;
+ macro diff(err,dd,c,a,s) { real ddd = int2d(Th) (square( dd(a)-dd(c))) ;
+  cout << " ddd " << s << " : " <<ddd <<endl;
+ if (ddd>1e-10)  err++ ;} //
+int err=0;
+for (int i=0;i<Vh.ndofK;++i)
+{
+  cout << " ***  node " << i << " of Traingle " << it1 << endl;
+  a11[]=0;	
+  int j=Vh(it1,i);
+  a11[][j]=1;
+  SS(b)=SS(a);
+  cout << " b = " << b11[] << endl; 
+  b11[]-=a11[];
+  edges[]=vFlux(0,Eh);
+  cout << "Mean  edges = " << edges[] << "  diff = " << b11[].linfty <<endl; 
+  if (b11[].linfty > 1e-10) err++; 
+  Zh c11=a11,c12=a12,c22=a22;
+ 
+    
+ // plot(a12,wait=1,cmm="a12 "+i );
+ // plot(c12,wait=1,cmm="c12 "+i );
+  diff(err, ,c11,a11," ");
+  diff(err, ,c12,a12," ");
+  diff(err, ,c22,a22," ");
+  diff(err, dx,c11,a11,"dx");
+  diff(err, dx,c12,a12,"dx");
+  diff(err, dx,c22,a22,"dx");
+
+  diff(err, dy,c11,a11,"dy");
+  diff(err, dy,c12,a12,"dy");
+  diff(err, dy,c22,a22,"dy");
+
+
+  
+} 
+assert(err==0);
+for(int i=0;i<P3h.ndof;++i)
+ {
+ 	cout << " i =" << i << endl;
+ 	pp11[]=0;
+ 	pp11[][i]=1;
+ 	SS(a)=SS(pp);
+ 	diff(err, ,pp22,a22," ");
+ 	diff(err, ,pp11,a11," ");
+ 	diff(err, ,pp12,a12," ");
+
+ }
+
+{
+assert(err==0);
+
+NewMacro V(u) [u#1,u#2] EndMacro
+NewMacro CheckRT(RT,RTname,xx,yy,dxxx,V)
+cout << " Check  ***********" << RTname <<  "\n"; 
+
+{
+fespace Wh1 (Th,RT);
+fespace Ph1 (Th,P1);
+fespace Ph2 (Th,P2dc);
+fespace Kh (Th,P2);
+fespace Eh0 (Th,P1nc);
+Wh1 V(u), V(w);
+
+int err1=0;
+for( int j=0;j<Wh1.ndofK;++j)
+{
+  int i=Wh1(0,j); 
+  u1[] =0;
+  u1[][i]=1;
+  Ph2 U1=u1,U2=u2;
+  U1=u1;
+  U2=u2;
+  cout << j << " " << i << " int K = " << int2d(Th,qforder=3)(u1) << " --- " << int2d(Th,qforder=3)(u2) << "   ---  " << int1d(Th,qforder=2)( u1*N.x + u2*N.y) <<  endl;
+  V(w)=V(u);
+  varf veeee(uu,E) = intalledges(Th)( (nTonEdge==2) *E*( jump(dxxx(u))));
+  real ddcc=intalledges(Th)( (nTonEdge==2) *square( jump(dxxx(u))));
+  if(ddcc > 1e-10) {err1++;  cout << j<< " " << i << " err disc " << ddcc << endl;
+  Eh0 eee; eee[]=veeee(0,Eh0);
+  plot(eee,cmm=" jump ",fill=1,wait=1); 
+   mesh Tg=trunc(Th,1,split=5);
+  fespace WWh(Tg,P2dc);
+  WWh  gu1=u1,gu2=u2;
+   plot([gu1,gu2],wait=1,cmm=" dof "+j+" K=0 ");}
+  w1[][i]-=1;
+  if(w1[].linfty > 1e-10) { w1[][i]+=1;cout << j << " " << i << " diff = "   << w1[] << endl;}
+  cout << " ||w - (\delta_ij)_j=  || " << w1[].linfty << endl;
+  assert( w1[].linfty < 1e-10);
+  NewMacro diff2(op) int2d(Th)(square(op(u1)-op(U1))+square(op(u2)-op(U2))) EndMacro 
+  assert( diff2( 0+ )) ;
+  assert( diff2(dx)) ;
+  assert( diff2(dy)) ;
+
+
+}
+assert(err1==0);
+
+Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
+V(u)=[0,0];
+V(w)=[0,0];
+
+  func p1=2+x+y*2;
+  func uu1 =  1+xx*p1;
+  func uu2 =  2+yy*p1;
+
+
+ [u1,u2] = [uu1 ,uu2];
+ cout << int2d(Th)( square(uu1-u1) )/ Th.area << endl;
+ cout << int2d(Th)( square(uu2-u2) )/Th.area << endl;
+ plot([u1,u2],wait=1);
+
+for( int i=0;i<Wh1.ndof;++i)
+{
+
+  u1[] =0;
+  u1[][i]=1;
+  V(w)=V(u);
+  w1[][i]-=1;
+  assert( w1[].linfty < 1e-10);
+}
+
+cout << " End  Check  ***********" << RTname <<  " Ok .... \n"; 
+}
+EndMacro
+
+CheckRT(RT1,"RT11",x,y,ccn,V)
+CheckRT(RT1Ortho,"RT1Ortho",-y,x,cctau,V)
+CheckRT(BDM1,"BDM1",x,y,ccn,V)
+CheckRT(BDM1Ortho,"BDM1Ortho",-y,x,cctau,V)
+
+}

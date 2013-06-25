@@ -1,0 +1,21 @@
+verbosity=2;
+mesh Thxy=triangulate("xyf");
+plot(Thxy,wait=1,ps="Thxy.ps");
+fespace Vhxy(Thxy,P1);
+Vhxy fxy;
+
+{ ifstream file("xyf");
+   real xx,yy;
+   for(int i=0;i<fxy.n;i++)
+   file >> xx >>yy >> fxy[][i]; 
+}
+
+plot(fxy,wait=1,ps="xyf.ps");
+
+// new way to bluid a mesh   version 2.23-2
+Vhxy xx=x,yy=y;
+
+mesh Th=triangulate(xx[],yy[]);
+cout << " region = " <<  triangulate(xx[],yy[])[1].region  <<endl; 
+cout << fxy[]'*fxy[] << endl;
+plot(Th,wait=1); 
