@@ -1,0 +1,186 @@
+# ======================================================================
+# Written by Antoine Le Hyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# http://www.ljll.math.upmc.fr/lehyaric
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh default=0 freefem hash upmc written
+
+# List of automatically generated files in the FreeFem++ tree that should not be transferred to avoid any unnecessary
+# version control conflicts
+
+.hg
+.hgignore
+configure
+DOC/Makefile.in
+Makefile.in
+download/Makefile.in
+download/arpack/Makefile.in
+download/blas/Makefile.in
+download/fftw/fftw-3.3.2/Makefile.in
+download/fftw/fftw-3.3.2/api/Makefile.in
+download/fftw/fftw-3.3.2/dft/Makefile.in
+download/fftw/fftw-3.3.2/dft/scalar/Makefile.in
+download/fftw/fftw-3.3.2/dft/scalar/codelets/Makefile.in
+download/fftw/fftw-3.3.2/dft/simd/Makefile.in
+download/fftw/fftw-3.3.2/dft/simd/altivec/Makefile.in
+download/fftw/fftw-3.3.2/dft/simd/avx/Makefile.in
+download/fftw/fftw-3.3.2/dft/simd/common/Makefile.in
+download/fftw/fftw-3.3.2/dft/simd/neon/Makefile.in
+download/fftw/fftw-3.3.2/dft/simd/sse2/Makefile.in
+download/fftw/fftw-3.3.2/doc/FAQ/Makefile.in
+download/fftw/fftw-3.3.2/doc/Makefile.in
+download/fftw/fftw-3.3.2/genfft/Makefile.in
+download/fftw/fftw-3.3.2/kernel/Makefile.in
+download/fftw/fftw-3.3.2/libbench2/Makefile.in
+download/fftw/fftw-3.3.2/m4/Makefile.in
+download/fftw/fftw-3.3.2/mpi/Makefile.in
+download/fftw/fftw-3.3.2/rdft/Makefile.in
+download/fftw/fftw-3.3.2/rdft/scalar/Makefile.in
+download/fftw/fftw-3.3.2/rdft/scalar/r2cb/Makefile.in
+download/fftw/fftw-3.3.2/rdft/scalar/r2cf/Makefile.in
+download/fftw/fftw-3.3.2/rdft/scalar/r2r/Makefile.in
+download/fftw/fftw-3.3.2/rdft/simd/Makefile.in
+download/fftw/fftw-3.3.2/rdft/simd/altivec/Makefile.in
+download/fftw/fftw-3.3.2/rdft/simd/avx/Makefile.in
+download/fftw/fftw-3.3.2/rdft/simd/common/Makefile.in
+download/fftw/fftw-3.3.2/rdft/simd/neon/Makefile.in
+download/fftw/fftw-3.3.2/rdft/simd/sse2/Makefile.in
+download/fftw/fftw-3.3.2/reodft/Makefile.in
+download/fftw/fftw-3.3.2/simd-support/Makefile.in
+download/fftw/fftw-3.3.2/support/Makefile.in
+download/fftw/fftw-3.3.2/tests/Makefile.in
+download/fftw/fftw-3.3.2/threads/Makefile.in
+download/fftw/fftw-3.3.2/tools/Makefile.in
+download/gmm/gmm-4.2/Makefile.in
+download/gmm/gmm-4.2/include/Makefile.in
+download/gmm/gmm-4.2/tests/Makefile.in
+download/hypre/hypre-2.4.0b/src/FEI_mv/ARPACK/ARPACK/Makefile.in
+download/hypre/hypre-2.4.0b/src/FEI_mv/ARPACK/SUPLU/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/bin/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/config/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/java/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/m4/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/sidl/Makefile.in
+download/hypre/hypre-2.4.0b/src/babel-runtime/sidlx/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/JavaInterface/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/MatlabInterface-Old/src/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/MatlabInterface/src/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/sIPOPT/AmplSolver/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/sIPOPT/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/sIPOPT/examples/parametric_cpp/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/sIPOPT/examples/redhess_cpp/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/contrib/sIPOPT/src/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/examples/Cpp_example/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/examples/ScalableProblems/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/examples/hs071_c/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/examples/hs071_cpp/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/examples/hs071_f/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Algorithm/Inexact/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Algorithm/LinearSolvers/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Algorithm/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Apps/AmplSolver/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Apps/CUTErInterface/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Apps/CompositeInterface/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Apps/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Common/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/Interfaces/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/LinAlg/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/LinAlg/TMatrices/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/contrib/CGPenalty/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/src/contrib/LinearSolverLoader/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/test/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/C/1-skeleton/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/C/2-mistake/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/C/3-solution/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/Cpp/1-skeleton/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/Cpp/2-mistake/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/Cpp/3-solution/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/Fortran/1-skeleton/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/Fortran/2-mistake/Makefile.in
+download/ipopt/Ipopt-3.10.2/Ipopt/tutorial/CodingExercise/Fortran/3-solution/Makefile.in
+download/ipopt/Ipopt-3.10.2/Makefile.in
+download/ipopt/Ipopt-3.10.2/ThirdParty/ASL/Makefile.in
+download/ipopt/Ipopt-3.10.2/ThirdParty/Blas/Makefile.in
+download/ipopt/Ipopt-3.10.2/ThirdParty/HSL/Makefile.in
+download/ipopt/Ipopt-3.10.2/ThirdParty/Lapack/Makefile.in
+download/ipopt/Ipopt-3.10.2/ThirdParty/Metis/Makefile.in
+download/ipopt/Ipopt-3.10.2/ThirdParty/Mumps/Makefile.in
+download/metis/Makefile.in
+download/metis/metis-4.0/Makefile.in
+download/nlopt/nlopt-2.2.4/Makefile.in
+download/nlopt/nlopt-2.2.4/api/Makefile.in
+download/nlopt/nlopt-2.2.4/auglag/Makefile.in
+download/nlopt/nlopt-2.2.4/bobyqa/Makefile.in
+download/nlopt/nlopt-2.2.4/cdirect/Makefile.in
+download/nlopt/nlopt-2.2.4/cobyla/Makefile.in
+download/nlopt/nlopt-2.2.4/crs/Makefile.in
+download/nlopt/nlopt-2.2.4/direct/Makefile.in
+download/nlopt/nlopt-2.2.4/isres/Makefile.in
+download/nlopt/nlopt-2.2.4/lbfgs/Makefile.in
+download/nlopt/nlopt-2.2.4/luksan/Makefile.in
+download/nlopt/nlopt-2.2.4/mlsl/Makefile.in
+download/nlopt/nlopt-2.2.4/mma/Makefile.in
+download/nlopt/nlopt-2.2.4/neldermead/Makefile.in
+download/nlopt/nlopt-2.2.4/newuoa/Makefile.in
+download/nlopt/nlopt-2.2.4/octave/Makefile.in
+download/nlopt/nlopt-2.2.4/praxis/Makefile.in
+download/nlopt/nlopt-2.2.4/slsqp/Makefile.in
+download/nlopt/nlopt-2.2.4/stogo/Makefile.in
+download/nlopt/nlopt-2.2.4/swig/Makefile.in
+download/nlopt/nlopt-2.2.4/test/Makefile.in
+download/nlopt/nlopt-2.2.4/util/Makefile.in
+download/parmetis/Makefile.in
+download/parmetis/ParMetis-3.1.1/Makefile.in
+download/parms/Makefile.in
+download/umfpack/Makefile.in
+examples++-3d/Makefile.in
+examples++-bug/Makefile.in
+examples++-chapt3/Makefile.in
+examples++-eigen/Makefile.in
+examples++-load/Makefile.in
+examples++-mpi/Makefile.in
+examples++-other/Makefile.in
+examples++-tutorial/Makefile.in
+examples++/Makefile.in
+src/Algo/Makefile.in
+src/Graphics/Makefile.in
+src/Makefile.in
+src/agl/Makefile.in
+src/bamg/Makefile.in
+src/bamglib/Makefile.in
+src/bin-win32/Makefile.in
+src/femlib/Makefile.in
+src/fflib/Makefile.in
+src/glx/Makefile.in
+src/iml/Makefile.in
+src/lglib/Makefile.in
+src/libMesh/Makefile.in
+src/medit/Makefile.in
+src/mpi/Makefile.in
+src/nw/Makefile.in
+src/std/Makefile.in
+src/x11/Makefile.in
+
+# Local Variables:
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

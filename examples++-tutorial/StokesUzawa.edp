@@ -1,0 +1,46 @@
+//  signe of pressure is correct 
+assert(version>1.18); 
+real s0=clock();
+mesh Th=square(10,10);
+fespace Xh(Th,P2),Mh(Th,P1);
+Xh u1,u2,v1,v2;
+Mh p,q,ppp;
+
+
+varf bx(u1,q) = int2d(Th)( (dx(u1)*q)); 
+
+varf by(u1,q) = int2d(Th)( (dy(u1)*q));
+
+varf a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                    +  on(1,2,4,u1=0)  +  on(3,u1=1) ;
+
+Xh bc1; bc1[] = a(0,Xh);
+Xh b;
+                   
+matrix A= a(Xh,Xh,solver=CG); 
+matrix Bx= bx(Xh,Mh);
+matrix By= by(Xh,Mh);
+Xh bcx=1,bcy=0;
+
+func real[int] divup(real[int] & pp)
+{ 
+  int verb=verbosity;
+   verbosity=0;
+   b[]  = Bx'*pp; b[] += bc1[] .*bcx[];
+   u1[] = A^-1*b[];
+   b[]  = By'*pp; b[] += bc1[] .*bcy[];
+   u2[] = A^-1*b[];
+   ppp[] =   Bx*u1[];
+   ppp[] +=  By*u2[];
+   verbosity=verb;
+   return ppp[] ;
+};
+p=0;q=0;u1=0;v1=0;
+
+        
+LinearCG(divup,p[],q[],eps=1.e-6,nbiter=50);
+
+divup(p[]);
+
+plot([u1,u2],p,wait=1,value=true,coef=0.1);
+
