@@ -340,7 +340,10 @@ VtkWriter* init_VtkWriter(VtkWriter * const &a, string * const & s)
  return a;
 } 
 
-void* call_addmesh( VtkWriter * const & mt, Mesh3* const & pTh) { mt->addmesh(pTh);}
+void* call_addmesh( VtkWriter * const & mt, Mesh3* const & pTh) {
+  mt->addmesh(pTh);
+  return NULL;
+}
  
 //   Add the function name to the freefem++ table 
 class Init 

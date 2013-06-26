@@ -3974,7 +3974,7 @@ d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 @cout << " d = ( a ? b : c )  is " << d << endl;
 d = ( a ? 1 : c );// for i = 0, n-1: d[i] = a[i] ? 1 : c[i] ,  \hfill (v2.23-1)
 d = ( a ? b : 0 );// for i = 0, n-1: d[i] = a[i] ? b[i] : 0 ,  \hfill (v2.23-1)
-d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill (v2.23-1)
+d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill(v2.23-1)
 tab.sort ; //  sort the array tab  (version 2.18)
 cout << " tab (after sort) "  << tab << endl;
 int[int] ii(0:d.n-1); // set array ii to 0,1, ..., d.n-1 \hfill (v3.2)
@@ -5082,6 +5082,7 @@ Let us begin with the two important keywords \texttt{\bf border} and \texttt{\bf
 All examples in this section come from the files \texttt{mesh.edp}
 and \texttt{tablefunction.edp}.
 
+% <<square>>
 \index{square}
 \subsubsection{\setS{Square}}
 
@@ -10817,7 +10818,7 @@ This metric is used to express the area of the surface. Let $g=\det(G)$, then we
 The volume of the space enclosed within the shape is easier to express :
 \begin{equation}\label{msvolume}
 	\mathcal{V}(\rho)
-	= \MyInt{\Omega}{\int_{0}^{\rhotp} r^{2}\sin(\phi)  dr d\theta d\phi}
+	= \MyInt{\Omega}{\int_{0}^{\rhotp} r^{2}\sin(\phi) dr d\theta d\phi}
 	= \frac{1}{3}\MyInt{\Omega}{\rho^{3} \sin(\phi) d\theta d\phi}
 \end{equation}
 
@@ -11105,7 +11106,7 @@ All the nlOpt features are called that way :
 
 The possible optional named parameters are the following, note that they are not used by all algorithm s (some does not supports constraints, or a type of constraints, some are gradient-based and other are derivative free, etc...). One can refer to the table after the parameters description to check which are the named parameters supported by a specific algorithm. Using an unsupported parameter will not stop 
 the compiler work and seldom breaks runtime, it will just be ignored. That said, when it is obvious you are missusing a routine, you will get a warning message at runtime (for exemple if you pass a gradient 
-to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
+to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
 
 
 
@@ -11688,7 +11689,7 @@ communicators in \texttt{FreeFem++}.
 %%%
 %%%The possible optional named parameters are the following, note that they are not used by all algorithm s (some does not supports constraints, or a type of constraints, some are gradient-based and other are derivative free, etc...). One can refer to the table after the parameters description to check which are the named parameters supported by a specific algorithm. Using an unsupported parameter will not stop 
 %%%the compiler work and seldom breaks runtime, it will just be ignored. That said, when it is obvious you are missusing a routine, you will get a warning message at runtime (for exemple if you pass a gradient 
-%%%to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
+%%%to a derivative free algorithm, or set the population of a non-genetic one, etc...). In the following description, $n$ stands for the dimension of the search space.\\ \\
 %%%
 %%%
 %%%\index{ffNLOpt}

@@ -18,4 +18,12 @@ if(1)
     medit("Thup",Thup,wait=1);
     medit("Thdown",Thdown,wait=1);
     medit("Th",Th,wait=1);
+ 
+   // FFCS: removing medit calls for regression tests will empty the
+   // curly brackets
+   1;
   }
+// FFCS: testing 3d plots
+plot(Thup);
+plot(Thdown);
+plot(Th);

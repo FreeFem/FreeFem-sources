@@ -213,7 +213,8 @@ verbosity=1;
 
 plot(usd,wait=1,cmm="CG");
 
-
+// FFCS: for regression tests
+real regtest;
 {  
 fespace Vha(Tha,P1);
 Vha vah,uah;
@@ -224,5 +225,6 @@ solve vLapMM([uah],[vah]) =
    ;
 verbosity =3;
 plot(uah,usd,cmm="uah",wait=1); 
+regtest=uah[]'*uah[];
 }
 

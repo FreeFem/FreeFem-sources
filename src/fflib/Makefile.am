@@ -4,6 +4,10 @@
 
 noinst_LIBRARIES=libff.a
 
+# FFCS - 28/11/11 - ffapi.cpp cannot be part of libff.a because it
+# needs to be compiled with different options depending on the
+# executable it is included in (eg with/without MPI)
+
 libff_a_SOURCES2=  UMFPack_Solver.cpp \
 AFunction.cpp AFunction2.cpp  \
  array_long.cpp          array_real.cpp        array_complex.cpp \
@@ -42,8 +46,7 @@ PlotStream.hpp \
 endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp \
-../femlib/splitsimplex.cpp AFunction_ext.hpp \
-ffapi.hpp ffapi.cpp 
+../femlib/splitsimplex.cpp AFunction_ext.hpp
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 

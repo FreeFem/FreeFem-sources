@@ -2455,6 +2455,7 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
   }
 
   delete [] pch;
+  return (Mesh *) NULL;
 }
 
 
@@ -3912,6 +3913,7 @@ AnyType VTK_WriteMesh3_Op::operator()(Stack stack)  const
     delete [] nameofuser[iiii];
   }
   delete [] pch;
+  return (Mesh3 *) NULL;
 }
 //==============================================
 // FIN ECRITURE DE FICHIER .vtk (3D)

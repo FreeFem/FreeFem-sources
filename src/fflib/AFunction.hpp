@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -152,9 +154,7 @@ typedef deque<UnId> ListOfId;
 //#define NEW_TYPE_PtrI(type) map_type[typeid(type*).name()] = new ForEachTypePtr<type*>(Initialize<type>)
 */
 
-
-
-
+/// Doxygen doc
 extern Polymorphic * TheOperators, * TheRightOperators;
 
 //  -------------
@@ -384,7 +384,8 @@ class E_F0 :public CodeAlloc
  };  
  
 inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
-// a  
+
+/// Specialization of E_F0 where MeshIndependent() always returns false instead of true.  
 class E_F0mps : public E_F0 { public:
   virtual bool MeshIndependent() const {return false;} // 
 };
@@ -1399,8 +1400,10 @@ AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
+/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]]
 
 extern TableOfIdentifier Global;
+
 void ShowType(ostream & );
 
 template<class T> 
@@ -1900,10 +1903,12 @@ inline  E_F0 * C_F0::LeftValue() const {
 }*/
 
 
-      
+/// Declaration of TypeArray
 aType TypeArray(aType,aType);
-aType TypeTemplate(aType,aType);
 aType TypeArray(aType c,aType b,aType a);
+
+/// Declaration of TypeTemplate
+aType TypeTemplate(aType,aType);
 
 void Init_map_type();
 

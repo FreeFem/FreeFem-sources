@@ -22,5 +22,6 @@ func fz= x;
 int[int] r1T=[0,0], r2T=[0,0,2,2];
 int[int] r4T=[0,2]; 
 mesh3 Th3T=buildlayers(Th2,coef= max(.01,y/max(x,0.4) ), MaxLayersT,zbound=[zminT,zmaxT],transfo=[fx,fy,fz],facemerge=1, region=r1T, labelmid=r2T);
-
 medit("cone",Th3T,wait=1);
+// FFCS: testing 3d plots
+plot(Th3T,cmm="cone");

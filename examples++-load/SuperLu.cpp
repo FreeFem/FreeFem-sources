@@ -529,6 +529,7 @@ public:
     xarow=AA.lg;
 
     /* FreeFem++ use Morse Format */ 
+    // FFCS - "this->" required by g++ 4.7
     this->CompRow_to_CompCol(m, n, nnz, arow, asubrow, xarow, 
 		       &a, &asub, &xa);
 
@@ -578,6 +579,7 @@ public:
 
     Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T(); 
 
+    // FFCS - "this->" required by g++ 4.7
     this->Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
   
     this->Create_Dense_Matrix(&B, m, 0, (R*) 0, m, SLU_DN, R_SLU, SLU_GE);
@@ -663,6 +665,7 @@ public:
 	  KN_2Ptr<R> xx(x),bb(b);
 	  // cout << " xx #### " << xx.c.N() << " "<< xx.ca.N() <<  " " << xx.ca.step << endl;
 	  //cout << " bb #### " << bb.c.N() << " "<< bb.ca.N() << " " << bb.ca.step <<endl;
+	  // FFCS - "this->" required by g++ 4.7
 	  this->Create_Dense_Matrix(&B, m, 1, bb, m, SLU_DN, R_SLU, SLU_GE);
 	  this->Create_Dense_Matrix(&X, m, 1, xx, m, SLU_DN, R_SLU, SLU_GE);
 	  
@@ -758,7 +761,6 @@ DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
 DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
-
 
 bool SetSuperLU()
 {
