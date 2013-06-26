@@ -1,4 +1,6 @@
-include @abs_top_builddir@/download/headers-sparsesolver.inc
+# ALH - avoid blocking when Makefile.inc is not built yet
+-include @abs_top_builddir@/download/headers-sparsesolver.inc
+
 EXE	=
 LIB	= .a
 OBJ	= .o

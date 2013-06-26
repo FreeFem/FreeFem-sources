@@ -80,9 +80,9 @@ tag-tar-$(SIZEPKG): $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	touch mmg3d4/build/sources/dataff.h 	
 #
-#	FFCS - clean-up all CR/LF to make patching more successful
+#	ALH - clean-up all CR/LF to make patching more successful
 #
-	../../../../build/cleancrlf mmg3d4
+	../../build/cleancrlf mmg3d4
 #
 	cd mmg3d4;patch -p1 <../patch-mmg3dv4.diff
 	cat </dev/null >mmg3d4/build/sources/mmg3dConfig.h

@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch  scalapack blas  mpifc  fc  pthread 
+//ff-c++-LIBRARY-dep: mumps parmetis ptscotch scalapack blas mpifc fc mpi pthread 
 //ff-c++-cpp-dep: 
 
 /* 
