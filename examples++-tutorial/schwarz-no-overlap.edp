@@ -33,7 +33,9 @@ for ( i=0 ;i< 20; i++)
    pb;
    lambda = lambda - (u-U)/2;
 //  if (i==0)
-  plot(U,u,wait=true,ps="schwarz-no-u"+i+".eps");
+
+    // FFCS: add 3d view
+  plot(U,u,wait=true,ps="schwarz-no-u"+i+".eps",dim=3,fill=1);
 };
 
 plot(U,u,ps="schwarz-no-u.eps");

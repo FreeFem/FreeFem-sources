@@ -1,3 +1,6 @@
+// FFCS: making a numerical value visible for regression tests
+real regtest;
+
 { // ---  a real non linear test ---
 mesh Th=square(10,10);  // mesh definition of $\Omega$
 Th = adaptmesh(Th,0.05,IsMetric=1,splitpbedge=1);
@@ -48,7 +51,7 @@ int iter=0;
     dfalpha = df( alpha ) ; // optimization
     ddfalpha = 2*ddf(alpha ) ; // optimization
     v[]= vdJ(0,Vh);
-    real res= v[]'*v[];
+    real res= v[]'*v[]; //'
     cout << i <<  " residu^2 = " <<  res  << endl;
     matrix H;
     if( res< 1e-12) break;
@@ -57,10 +60,11 @@ int iter=0;
     u[] -= w[];
     plot (u,wait=0,cmm="solution with Newton Raphson");
 
+    // FFCS: regression tests
+    regtest=u[]'*u[]; //'
    }
 
 load "medit" load "msh3"  
     mesh3 Th3= movemesh23(Th,transfo=[x,y,u*1.5]);
     medit("N",Th3);
 }
-

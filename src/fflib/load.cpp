@@ -46,10 +46,21 @@ using namespace std;
 #include <windows.h>
 #endif
 
+#include "ffapi.hpp"
+
 set<string> SetLoadFile;
 
 bool load(string ss)
 {
+
+  // FFCS - do not allow potentially dangerous commands from remote anonymous clients
+
+  if(ffapi::protectedservermode() && (ss=="pipe" || ss=="shell")){
+    cerr<<"library "<<ss<<" not allowed in server environment"<<endl;
+    CompileError("Error load");
+    return 0;
+  }
+
   if(SetLoadFile.find(ss) != SetLoadFile.end())
     { 
       if( (mpirank==0)&& verbosity)
@@ -87,6 +98,12 @@ bool load(string ss)
 #ifdef LOAD  
 	      handle = dlopen (s.c_str(), RTLD_LAZY ); 
 	      if (verbosity>9) cout << " test dlopen(" << s << ")= " << handle <<  endl;
+
+	      // FFCS - 20/9/11 - print explanation for load errors
+	      if(verbosity>9 && !handle){
+		cout<<"load error was: "<<dlerror()<<endl;
+	      }
+
 	      ret= handle !=0;
 	      if (  ret ) 
 		{

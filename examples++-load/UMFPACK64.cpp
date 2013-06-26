@@ -13,6 +13,7 @@ using namespace std;
 
 #include "MatriceCreuse_tpl.hpp"
 
+#include <wchar.h>
  
 #ifdef HAVE_LIBUMFPACK
 extern "C" {
@@ -85,7 +86,12 @@ public:
       cout << "\n";      
     }
     //  convert   array in long ...
+    // FFCS: Win64 long pb
+#ifdef WIN64
+    KN<long long> Alg(n+1),Acl(A.nbcoef);
+#else
     KN<long> Alg(n+1),Acl(A.nbcoef);
+#endif
     for(int i=0;i<=n;++i)
       Alg[i]=A.lg[i];
 
@@ -133,7 +139,12 @@ public:
     
      umfpack_dl_defaults (Control) ;
     //  convert   array in long ...
+     // FFCS: Win64 long pb
+#ifdef WIN64
+    KN<long long> Alg(n+1),Acl(A.nbcoef);
+#else
     KN<long> Alg(n+1),Acl(A.nbcoef);
+#endif
     for(int i=0;i<=n;++i)
       Alg[i]=A.lg[i];
 
@@ -224,7 +235,13 @@ public:
     }
 
     //  convert   array in long ...
+
+    // FFCS: need a longlong on Win64 because longs are 32 bits
+#ifdef WIN64
+    KN<long long> Alg(n+1),Acl(A.nbcoef);
+#else
     KN<long> Alg(n+1),Acl(A.nbcoef);
+#endif
     for(int i=0;i<=n;++i)
       Alg[i]=A.lg[i];
 
@@ -276,7 +293,13 @@ public:
      // change UMFPACK_At to UMFPACK_Aat in complex  oct 2005
 
     //  convert   array in long ...
+     // FFCS: Win64 long pb
+#ifdef WIN64
+    KN<long long> Alg(n+1),Acl(A.nbcoef);
+#else
     KN<long> Alg(n+1),Acl(A.nbcoef);
+#endif
+
     for(int i=0;i<=n;++i)
       Alg[i]=A.lg[i];
 
@@ -345,7 +368,6 @@ DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
 DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
-
 
 bool SetUMFPACK64()
 {

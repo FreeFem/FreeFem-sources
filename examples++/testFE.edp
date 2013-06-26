@@ -1,4 +1,4 @@
-
+real regtest;// for FFCS regression tests
 // exact solution is [x*x,y]  -Delta [x*x,y] = [-2,0]
 // This exemple is buggus before version 1.26
 { 
@@ -44,4 +44,5 @@ verbosity = 2;
     real err2= sqrt( int2d(Th)(square(uHx-x*x)+square(uHy-y)));
     cout << " Error in L2 norme " << err2 << endl ;
     assert(err2 < 1e-10);
+    regtest=err2;
 }

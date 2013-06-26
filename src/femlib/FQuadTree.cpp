@@ -550,7 +550,7 @@ Vertex *  FQuadTree::NearestVertexWithNormal(const R2 &P)//(long xi,long yj)
 	     NbVerticesSearch++;
 	     I2 i2 =  R2ToI2(v);
 	     // if good sens when try -- 
-	     h0 = h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
+	     h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
 	     if (h0 <h) 
 	      {
 		   h = h0;

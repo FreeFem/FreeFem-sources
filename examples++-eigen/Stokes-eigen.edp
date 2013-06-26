@@ -44,7 +44,9 @@ for (int i=0;i<k;i++)
   u1=eu1[i];
   u2=eu2[i];
   p=ep[i];
-  plot([u1,u2],p,cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="Stokes-eigen"+i+".eps");
+
+  // FFCS: changed to 3D view
+  plot([u1,u2],p,cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,value=1,ArrowSize=-1.6,dim=3,fill=1);
 }
 
 cout << "CPU " << clock()-s0 << "s " << endl;     

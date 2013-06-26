@@ -32,8 +32,8 @@
   \section broadview Broad View
 
   A FreeFem++ script is first translated into a tree of expressions of type CListOfInst (the language grammar is defined
-  in lg.ypp) and then evaluated by calling CListOfInst::eval(). Any resulting graphical data is converted into a stream
-  of bytes by the PlotStream class before being sent to the ffglut program (see ffglut.cpp) via a pipe.
+  in \ref language) and then evaluated by calling CListOfInst::eval(). Any resulting graphical data is converted into a
+  stream of bytes by the PlotStream class before being sent to the ffglut program (see ffglut.cpp) via a pipe.
 
   \section details Detailed Program Start Sequence
 
@@ -47,9 +47,40 @@
 
     - mymain() calls mainff(), which calls Compile(), which calls the standard yyparse() function.
 
-    - yyparse() scans the EDP script thanks to the lexer #mylex. When the "start" symbol is successfully scanned, yylval
-    (of type YYSTYPE) contains the whole tree of expressions as an object of type CListOfInst. CListOfInst::eval() is
-    called (with one #Stack argument built by #newStack()) to run the script.
+    - yyparse() scans the EDP script thanks to the lexer #mylex and generates objects of type YYSTYPE according to the
+      grammar described in lg.ypp.
+
+    - When the "start" symbol is successfully scanned, yylval (of type YYSTYPE) contains the whole tree of expressions
+    as an object of type CListOfInst. CListOfInst::eval() is called (with one #Stack argument built by #newStack()) to
+    run the script.
+
+  \section language FreeFem++-specific Language Elements
+
+  - <b>Types</b> <!-- [[file:src/lglib/lg.ypp::type_of_dcl]] -->
+    - a lexical element of reference #yytokentype #TYPE defined by calling mylex::Add(Key,aType)
+    - a TypeArray() if followed by square brackets
+    - a TypeTemplate() if followed by lower/greater signs
+    - <b>Finite Element Space Types</b> <!-- [[file:src/lglib/lg.ypp::ID_space]] -->
+      - NewFEvariable()
+      - NewFEarray()
+
+  - <b>Variables</b> <!-- [[file:src/lglib/lg.ypp::declaration]] -->
+    - Block::NewVar<#LocalVariable>() <!-- see [[file:src/lglib/lg.ypp::list_of_dcls]] -->
+    - Block::NewVar<#LocalVariableFES>() for \b fespaces <!-- [[file:src/lglib/lg.ypp::fespace_def]] -->
+
+  - \b Instructions <!-- [[file:src/lglib/lg.ypp::instruction]] -->
+    - \b load : load()
+    - \b border :
+      - E_Border <!-- [[file:src/lglib/lg.ypp::BORDER_ID]] -->
+      - local variable and boundaries <!-- [[file:src/lglib/lg.ypp::border_expr]] -->
+      - instruction <!-- [[file:src/lglib/lg.ypp::instruction]] -->
+    - \b varf : #t_form defined in init_lgfem() <!-- [[file:src/fflib/lgfem.cpp::varf]] -->
+    - \b problem : Problem
+    - \b solve : Solve
+
+  \section examples Documented examples
+
+    - Laplace.cpp
 
   <em>(this is file mainpage.dox)</em>
 

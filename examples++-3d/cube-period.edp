@@ -68,7 +68,11 @@ assert(er==0 && nnn == Vh.ndof && nnn1 == Vhh.ndof); // some verification ...
 macro Grad(u) [dx(u),dy(u),dz(u)] //;
   solve P(u,v,solver=CG)= int3d(Th)(Grad(u)'*Grad(v)) - int3d(Th)(f*v); //') ;
 cout << "Err L2 = " << sqrt(int3d(Th)( square(u-uu)) ) << endl;
-Vh2 u0=u(x,y,0);
-Vh2 u1=u(x,y,1);
 
-plot(u0,u1,wait=1);
+// FFCS: add 3D view
+
+///Vh2 u0=u(x,y,0);
+///Vh2 u1=u(x,y,1);
+///plot(u0,u1,wait=1);
+
+plot(u,nbiso=10);

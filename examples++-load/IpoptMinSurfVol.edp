@@ -6,6 +6,9 @@ real alpha=0.9;
 int np=30;
 mesh Th = square(2*np,np,[2*pi*x,pi*y]);
 
+// FFCS regression reference value
+real regtest;
+
 fespace Vh(Th,P1,periodic=[[2,y],[4,y]/*,[1,x],[3,x]*/]);
 
 /*
@@ -241,5 +244,8 @@ if(kkk<nadapt-1)
 	uz=uz;//dual variables interpolation
 	lz=lz;
 }
+
+// FFCS regression reference value
+regtest=rc[]'*rc[];
 }
 

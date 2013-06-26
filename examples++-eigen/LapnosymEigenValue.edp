@@ -65,6 +65,13 @@ for (int kk=0;kk<k;kk++)
   complex xAx = u1[]'*Au1 + u2[]'*Au2 + 1i*(u1[]'*Au2 - u2[]'*Au1);
   complex eigenvalue = xAx/xBx;
   cout << " ---- " <<  i<< " " <<  v <<" eigenvalue= " << eigenvalue << endl;
-  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + er + " , " + ei  ,wait=1,value=1);
+
+  // FFCS: add 3D view
+  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + er + " , " + ei  ,wait=1,value=1,dim=3,fill=1);
 }
 
+// FFCS: order of eigenvalues may change, and biggest eigenvalue
+// (95.xxx) may not be picked up at all.
+
+real regtest=0;
+for(int i=1;i<nev;i++)if(ev[i]<95 && regtest<ev[i])regtest=ev[i];
