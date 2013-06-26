@@ -65,7 +65,6 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL) 
 	tar xvzf $(PACKAGE)
 	patch -p0 <patch-IpBlas
-	#cp $(FHSL) $(SRCDIR)/ThirdParty/HSL/
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):
@@ -76,6 +75,6 @@ clean-local::
 clean: clean-local
 	-rm -rf ../include/coin
 	-rm ../lib/libipopt* ../lib/liblcoinhsl* 
-
+	-rm $(PACKAGE)
 
 .PHONY:$(SRCDIR)/$(INSTALL)

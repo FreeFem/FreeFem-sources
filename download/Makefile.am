@@ -105,9 +105,19 @@ include:
 pkg:
 	mkdir pkg
 
+# ALH - /download/yams and /download/mshmet need /src/libMesh/libmesh.a but /src is compiled after /download, so we
+# need to compile it now
 
+lib/libMesh.a:lib include
+	cd ../src/libMesh && $(MAKE) $(AM_MAKEFLAGS)
+	test -f ../src/libMesh/libMesh.a
+	mkdir -p include/libMesh
+	cp ../src/libMesh/*h  include/libMesh
+	echo libMesh  LD -L@DIR@/lib -lMesh  > lib/WHERE.libMesh
+	echo libMesh INCLUDE -I@DIR@/include/libMesh >> lib/WHERE.libMesh
+	cp ../src/libMesh/libMesh.a lib/libMesh.a
 
-all-local:bin lib include pkg  $(DOWNLOADCOMPILE) 
+all-local:bin lib include lib/libMesh.a pkg  $(DOWNLOADCOMPILE) 
 
 WHERE-LD: tag-compile-pkg
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		

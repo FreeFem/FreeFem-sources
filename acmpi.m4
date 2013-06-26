@@ -1,5 +1,5 @@
-# Checking wether we can produce a parallel version (FF without FFCS)
-# -------------------------------------------------------------------
+# Checking wether we can produce a parallel version
+# -------------------------------------------------
 
 dnl m4_include(ax_mpi.m4)
 ff_save_path="$PATH"

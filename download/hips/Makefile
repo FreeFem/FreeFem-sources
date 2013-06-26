@@ -204,7 +204,7 @@ clean-local:
 	-rm ../include/hips/*
 	-rm -rf ../include/hips/
 	-rm -rf $(SRCDIR)
-	rm FAIT
+	-rm FAIT
 
 clean: clean-local
 

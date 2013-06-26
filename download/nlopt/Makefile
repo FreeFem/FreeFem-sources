@@ -1,7 +1,7 @@
 URL="http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz"
 SRCDIR=nlopt-2.2.4
 TARGZ=../pkg/$(SRCDIR).tar.gz
-include Make.defs
+-include Make.defs
 
 all: FAIRE
 
@@ -13,8 +13,8 @@ $(SRCDIR)/FAIT: $(TARGZ)
 #	FFCS - 30/11/11 - "--disable-dependency-tracking": dependencies pose problem on mixed Cygwin/MinGW setups
 #	because of slashes and backslashes
 #
-# 	FFCS - 22/10/12 - Fred - "--without-octave": patch for one machine that has octave installed on it: building of nlopt
-#	fails because it wants to install the octave components.  Not a bad idea in general but probably not when
+# 	FFCS - 22/10/12 - Fred - "--without-octave": patch for one machine that has octave installed on it: building of
+#	nlopt fails because it wants to install the octave components.  Not a bad idea in general but probably not when
 #	building ffcs.
 #
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking --with-cxx --prefix="$(FFDOWNLOAD)" CXX="$(CXX)"	\
@@ -35,7 +35,7 @@ clean-local:
 	rm -f ../lib/libnlopt_cxx*  ../lib/WHERE.nlopt 
 	rm -f ../include/nlopt*
 
-clean:clean-local:
+clean:clean-local
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \

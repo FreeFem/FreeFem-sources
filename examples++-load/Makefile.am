@@ -1,5 +1,3 @@
-# $Id$
-
 all-local: @LOAD_COMPILE@
 TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NSP2BRP0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE.edp testFEMorley.edp tetgencube.edp tetgenholeregion.edp tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp
 # all test can fail must but clean ????  FH... 
@@ -81,21 +79,16 @@ LIST_COMPILE_PKG=tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUF
 
 bin_PROGRAMS=
 
-# FFCS parallel make: some targets need to be built sequentially
+# FFCS parallel make: some targets need to be built first, sequentially
 
-# FFCS - do not set loadpath to be able to run an external version of FF on the examples in this directory with
-# [[../../mkffref]]
-
-load_compile:
-	$(MAKE) $(AM_MAKEFLAGS) ff-c++
-	$(MAKE) $(AM_MAKEFLAGS) WHERE_LIBRARY-download  include.done
-	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE)  $(LIST_COMPILE_PKG)
+load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
+#
+# max_load 
+	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE)
 	echo " finish build list $(DYLIB_SUFFIX)"
 
-
-
 .cpp.$(DYLIB_SUFFIX): ff-c++
-	 ./ff-c++ -auto  $< 
+	 ./ff-c++ -auto $< 
 
 # FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with empty files
 # without any access right). So just replace the whole thing with a plain copy.
@@ -132,11 +125,11 @@ include.done: $(allheaders)
 	touch $@
 
 else
-include: include.tar.gz
+include.done: include.tar.gz
 	rm -rf include 
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
-	touch include 
+	touch $@
 #	-cp -rf ../download/include/* include/.
 endif
 
@@ -213,8 +206,8 @@ install-exec-local:: load_compile
 
 
 
-#FFCS: add tags for files that are not specified to automake by a
-#SOURCE directive (this tags file is automatically taken into account
-#by automake when it sees it).
+# FFCS: add tags for files that are not specified to automake by a SOURCE directive (this tags file is automatically
+# taken into account by automake when it sees it).
+
 TAGS:
 	etags *.?pp

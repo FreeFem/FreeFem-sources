@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include SLmake.inc
 
 all-local: scalapack
@@ -76,5 +75,6 @@ clean:
 #	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
 	-rm -rf scalapack-*
 	-rm config.log
+	-rm $(PACKAGE1)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
