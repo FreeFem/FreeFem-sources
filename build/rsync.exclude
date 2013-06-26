@@ -26,6 +26,7 @@
 # version control conflicts
 
 .hg
+.hgignore
 configure
 DOC/Makefile.in
 Makefile.in
