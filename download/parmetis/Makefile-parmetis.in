@@ -1,0 +1,24 @@
+
+# Which compiler to use
+CC = @MPICC@
+LD=  @MPICC@
+# What optimization level to use
+OPTFLAGS = @CFLAGS@ 
+
+# What options to be used by the compiler
+COPTIONS =  -DHAVE_CONFIG_H -I. -I../../../.. @FFMETIS_CFLAGS@ #-D_MSC_VER
+
+# What options to be used by the loader
+LDOPTIONS = @LDFLAGS@ 
+XTRALIBS= @MPI_LIBC@
+
+# What archiving to use
+AR =  @AR@ @ARFLAGS@
+
+# What to use for indexing the archive
+RANLIB = @RANLIB@
+#RANLIB = ar -ts
+#RANLIB = 
+WGET = @WGET@
+
+

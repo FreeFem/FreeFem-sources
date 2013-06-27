@@ -1,0 +1,22 @@
+diff -ur BLACS/SRC/MPI/Makefile BLACS-okk/Makefile
+--- BLACS/SRC/MPI/Makefile	2010-02-16 13:29:39.000000000 +0100
++++ BLACS-okk/Makefile	2010-02-16 13:24:56.000000000 +0100
+@@ -86,7 +86,8 @@
+ 	rm -f $(BLACSFINIT) $(BLACSCINIT)
+ 	make $(BLACSFINIT)
+ 	make $(BLACSCINIT)
+-	$(ARCH) $(ARCHFLAGS) $(BLACSLIB) $(Fintobj) $(Cintobj)
++	cp INTERNAL/*.o .
++	$(ARCH) $(ARCHFLAGS) $(BLACSLIB) $(internal) $(Fintobj) $(Cintobj)
+ 	$(RANLIB) $(BLACSLIB)
+ 
+ $(BLACSFINIT) :
+@@ -110,7 +111,7 @@
+ 	( cd INTERNAL ; $(MAKE) -f ../Makefile I_int "dlvl=$(BTOPdir)" )
+ 
+ I_int : Bdef.h Bconfig.h $(internal)
+-	$(ARCH) $(ARCHFLAGS) $(BLACSLIB) $(internal)
++	#$(ARCH) $(ARCHFLAGS) $(BLACSLIB) $(internal)
+ 
+ Bdef.h : ../Bdef.h
+ 	rm -f Bdef.h
