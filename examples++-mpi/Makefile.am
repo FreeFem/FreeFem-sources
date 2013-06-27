@@ -52,4 +52,4 @@ install-exec-local::
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
-DDM-Schwarz-Lame-3d.edp:freefem++.pref:
+DDM-Schwarz-Lame-3d.edp:freefem++.pref
