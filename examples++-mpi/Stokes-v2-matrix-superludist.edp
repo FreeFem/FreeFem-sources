@@ -99,5 +99,5 @@ cout << "                          ------------" << endl;
 cout << " all                     " <<  timeI << endl;
 cout << "============= CPU TIME ============" << endl;
 
-if(mpirank==0) medit("UV2 PV2",Th,[u1,u2,u3],p);
+//if(mpirank==0) medit("UV2 PV2",Th,[u1,u2,u3],p);
 
