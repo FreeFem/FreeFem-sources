@@ -527,7 +527,7 @@ TESTS = APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp \
 	testFEMorley.edp tetgencube.edp tetgenholeregion.edp \
 	tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp
 # all test can fail must but clean ????  FH... 
-XFAILS_TESTS = $(TESTS)
+XFAIL_TESTS = $(TESTS)
 LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 EXTRA_DIST = $(TESTS) all.edp makeref.edp regtests.edp \
