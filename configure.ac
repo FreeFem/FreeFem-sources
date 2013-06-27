@@ -112,7 +112,7 @@ else
 fi
 
 # FFCS - build the code for FreeFem++-cs
-AC_ARG_ENABLE(fortran,[  --enable-ffcs	build FreeFem++ for use by FreeFem++-cs])
+AC_ARG_ENABLE(ffcs,AC_HELP_STRING([--enable-ffcs],[build FreeFem++ for use by FreeFem++-cs]))
 if test "$enable_ffcs" = yes
 then
 	AC_DEFINE_UNQUOTED(ENABLE_FFCS,$enable_ffcs,[build FreeFem++ for use by FreeFem++-cs])
