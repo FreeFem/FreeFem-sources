@@ -49,7 +49,8 @@ install-exec-local::
 	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
 
 
-freefem++.pref:
+freefem++.pref:Makefile
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo includepath = \"../examples++-3d/\" >>freefem++.pref
+	echo includepath += \"../examples++-tutorial/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
-DDM-Schwarz-Lame-3d.edp:freefem++.pref
