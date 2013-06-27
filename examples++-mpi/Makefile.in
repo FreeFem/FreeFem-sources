@@ -1088,10 +1088,11 @@ install-exec-local::
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
 	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
 
-freefem++.pref:
+freefem++.pref:Makefile
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo includepath = \"../examples++-3d/\" >>freefem++.pref
+	echo includepath += \"../examples++-tutorial/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
-DDM-Schwarz-Lame-3d.edp:freefem++.pref
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
