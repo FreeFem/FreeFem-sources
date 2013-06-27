@@ -914,7 +914,7 @@ uninstall-am:
 	uninstall uninstall-am
 
 
-all-local: all.edp
+all-local: all.edp freefem++.pref
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
@@ -924,6 +924,11 @@ all.edp:
 		echo \{ include \"$$i\"\;\}\; ;\
 		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
 	done) > $@
+freefem++.pref:
+        echo loadpath = \"../examples++-load/\" >freefem++.pref
+        echo loadpath += \"./\" >>freefem++.pref
+
+Lap3dEigenValue.edp:freefem++.pref
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

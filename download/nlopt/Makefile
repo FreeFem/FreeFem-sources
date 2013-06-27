@@ -23,7 +23,7 @@ clean-local:
 	rm -f ../lib/libnlopt_cxx*  ../lib/WHERE.nlopt 
 	rm -f ../include/nlopt*
 
-clean:clean-local:
+clean:clean-local
 
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \

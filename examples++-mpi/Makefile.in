@@ -1091,6 +1091,7 @@ install-exec-local::
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
+DDM-Schwarz-Lame-3d.edp:freefem++.pref:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

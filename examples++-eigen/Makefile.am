@@ -1,6 +1,6 @@
 # $Id$
 
-all-local: all.edp
+all-local: all.edp freefem++.pref
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw SKIP=$(SKIP_TESTS_EIGEN)
 
@@ -16,3 +16,8 @@ all.edp:
 		echo \{ include \"$$i\"\;\}\; ;\
 		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
 	done) > $@
+freefem++.pref:
+        echo loadpath = \"../examples++-load/\" >freefem++.pref
+        echo loadpath += \"./\" >>freefem++.pref
+
+Lap3dEigenValue.edp:freefem++.pref

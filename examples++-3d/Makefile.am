@@ -31,7 +31,7 @@ makeref.edp: regtests.m4 ../regtests.m4
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
-
+3d-Leman.edp:freefem++.pref
 install-exec-local:: 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
