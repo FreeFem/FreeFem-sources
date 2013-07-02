@@ -500,7 +500,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TESTS = 3d-Leman.edp ArrayFE-3d.edp EqPoisson.edp Lac.edp Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp Laplace3d.edp LaplaceRT-3d.edp NSI3d-carac.edp NSI3d.edp Period-Poisson-cube-ballon.edp Poisson-cube-ballon.edp Poisson.edp Poisson3d.edp Stokes.edp TruncLac.edp all.edp beam-3d.edp cone.edp convect-3d.edp cube-period.edp cylinder-3d.edp cylinder.edp fallingspheres.edp first.edp meditddm.edp p.edp periodic-3d.edp pyramide.edp  refinesphere.edp  schwarz-nm-3d.edp sphere2.edp sphere6.edp tetgencube.edp tetgenholeregion.edp
+TESTS = 3d-Leman.edp ArrayFE-3d.edp EqPoisson.edp Lac.edp Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp Laplace3d.edp LaplaceRT-3d.edp NSI3d-carac.edp NSI3d.edp Period-Poisson-cube-ballon.edp Poisson-cube-ballon.edp Poisson.edp Poisson3d.edp Stokes.edp TruncLac.edp  beam-3d.edp cone.edp convect-3d.edp cube-period.edp cylinder-3d.edp cylinder.edp fallingspheres.edp first.edp meditddm.edp p.edp periodic-3d.edp pyramide.edp  refinesphere.edp  schwarz-nm-3d.edp sphere2.edp sphere6.edp tetgencube.edp tetgenholeregion.edp
+XFAIL_TESTS = Laplace-Adapt-aniso-3d.edp fallingspheres.edp
 LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 LIST_IDP = MeshSurface.idp cube.idp
@@ -797,13 +798,6 @@ Stokes.edp.log: Stokes.edp
 TruncLac.edp.log: TruncLac.edp
 	@p='TruncLac.edp'; \
 	b='TruncLac.edp'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-all.edp.log: all.edp
-	@p='all.edp'; \
-	b='all.edp'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
