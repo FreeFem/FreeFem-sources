@@ -22,7 +22,32 @@ real xx;
   file << 0.1 ;
   //  file << " " << 0.2 ;
   cout << " where in file " << where << endl;
+  file << " # comment bla bla ...  0.3 \n";
+  file << 0.2 << endl; 
 }
+//  Idea to skip comment in a file ...  start with  # too EOL
+func ifstream skipcomment(ifstream &ff)
+{
+    
+    while(1)
+    {
+    int where = ff.tellg(); // store file position 
+    string comment;
+    ff >> comment; 
+    if ( ! ff.good() ) break; 
+    if( comment(0:0)=="#") {
+         getline(ff,comment);
+         cout << " -- #" << comment << endl;
+    }
+    else {
+        ff.seekg(where); //restore file position 
+        break;        
+    }    
+    }
+    return ff;
+}
+
+
 {
   ifstream file("f.txt");
   cout << " where " << file.seekg << endl; 
@@ -30,6 +55,8 @@ real xx;
   file >> xx;
   cout <<  " xx = " << xx << " good ? " << file.good() << endl;
   assert(xx==0.1);
+  skipcomment(file) >> xx;
+  assert(xx==0.2);
   file.seekg(0);
   cout << " where " << file.tellg() << " " << file.good() << endl; 
   file >> g[] ;

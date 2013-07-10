@@ -66,7 +66,8 @@ $(SRCDIR): $(PACKAGE_PATH)
 
 $(PACKAGE_PATH):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);../../../../build/download $(SERVER)$(PACKAGE) $(PACKAGE_PATH)
+	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE) 
+#$(PACKAGE_PATH)
 
 # FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])

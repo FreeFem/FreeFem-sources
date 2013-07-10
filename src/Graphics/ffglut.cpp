@@ -2848,6 +2848,25 @@ static  bool TryNewPlot( void )
     
     return ret;    
 }
+const char * Index(const char * p, const char c)
+{
+    int k=0;
+    while(k++<1000000)
+        if(!*p) return 0;
+        else if(  *p==c) return p;
+        else ++p;
+    return 0; 
+}
+const char * rIndex(const char * p, const char c)
+{
+    int k=0;
+    const char *pp=0;
+    while(k++<1000000)
+        if(!*p) break;
+        else if(  *p==c) pp= p;
+        else ++p;
+    return pp; 
+}
 void 	SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
 {
   // syntax 
@@ -2855,9 +2874,9 @@ void 	SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
   // or
   //  1024x1024 
   const char  *bx = p;
-  const char *by = index(p,'x');
-  const char *ox = index(p,'+');
-  const char *oy = rindex(p,'+');
+  const char *by = Index(p,'x');
+  const char *ox = Index(p,'+');
+  const char *oy = rIndex(p,'+');
   if(by ==0) return;
   Width= atoi(bx);
   Height= atoi(by+1);
