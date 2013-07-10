@@ -1,0 +1,58 @@
+#!/bin/sh
+
+ff=$0;
+bb=`basename $0`
+DIR=`dirname $ff`
+pp=`pwd`
+if [ $bb = $ff -a  \( '.' = "$DIR" -o -z "$DIR" \) ] ;  then
+  ff=`which $0`
+  DIR=`dirname $ff`
+  if [ '.' = "$DIR" -o -z "$DIR" ] ;  then
+     echo Sorry cant find the Directory  place of $0
+  fi
+fi
+case $DIR in 
+/*) ;;
+[.])  DIR=$pp;;
+*)  DIR="$pp/$DIR"
+esac
+DIRP=`dirname $DIR`
+#echo "WWWWW"  $DIRP 
+if [ -d "$DIRP/download/lib" -a -d "$DIRP/download/include"  ] ; then
+    DIR="$DIRP/download"
+elif [ -d "$DIRP/lib" -a -d "$DIRP/include"  ] ; then
+    DIR="$DIRP"
+else
+  DIR=@ff_prefix_dir@
+fi
+
+if [   -d $DIR/lib -a -d $DIR/include  ] ; then
+    LIB="$DIR/lib"
+    INC="$DIR/include"
+    cd "$LIB"
+#  set -x
+    for i in $LIB/WHERE.* ; do            
+	test -f $i && ( sed "s;@DIR@;$DIR;" <$i  )
+    done
+#    return
+    for la in arpack umfpack amd fftw3 blas lapack   mmg3d; do
+        l=`echo $la |sed -e s/^tet$/tetgen/`
+       if [ ! -f $LIB/WHERE.$l ]; then
+	   if [ -z "$l" ];then l="$la";fi  
+	   if  ( ls  "lib$la"[-._0-9]*a 1>/dev/null 2>/dev/null ) ; then 
+	       ll=`ls  "lib$la"[-._0-9]*a|grep [.]a`
+	       if [ -n "$ll" ]; then 
+		   lib=`expr "$ll" : lib'\(.*\).a'`
+		   echo $l LD "'"-L$LIB"'" "'"-l$lib"'"
+		   if [ -d $INC/$la ] ; then
+		       echo $l INCLUDE "'"-I$INC/$la"'"
+		   else
+		       echo $l INCLUDE "'"-I$INC"'"
+		   fi
+	       fi
+	   fi
+       fi
+    done
+else
+    echo error not directory $DIR/lib and $DIR/include  $DIRP 
+fi
