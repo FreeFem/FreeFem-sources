@@ -290,6 +290,7 @@ public:
 	  Dtype_t R_SLU = SuperLUmpiDISTDriver<R>::R_SLU_T(); 
 	  if(verbosity>6)
 	  cout << "Debut: Create_CompCol_Matrix_dist" <<endl;
+	  // FFCS - "this->" required by g++ 4.7
 	  this->Create_CompCol_Matrix_dist(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE); 
 	  if(verbosity>6)
 	  cout << "Fin: Create_CompCol_Matrix_dist" <<endl;
@@ -775,6 +776,8 @@ bool SetDefault()
     DefSparseSolver<double>::solver =SparseMatSolver_R;
     //DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+
+    return false;
 }
 
 bool SetSuperLUmpi()
@@ -784,6 +787,8 @@ bool SetSuperLUmpi()
     DefSparseSolver<double>::solver  =BuildSolverSuperLUmpi;
     //DefSparseSolver<Complex>::solver =BuildSolverSuperLUmpi;    
     TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
+
+    return false;
 }
 
 

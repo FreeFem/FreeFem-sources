@@ -4,6 +4,14 @@
 #else
 #include <unistd.h>
 #endif
+
+// FFCS: required for chdir() when g++ 4.7 is used
+#include <unistd.h>
+
+// FFCS: redirecting visualization output
+#include "../fflib/ffapi.hpp"
+#include <string>
+
 extern long mpirank;
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
@@ -70,20 +78,13 @@ int getprog(char* fn,int argc, char **argv)
   const char *progffglut=0;
   const char *fileglut=0;
   bool noffglut=false;
-#ifndef NODEFFFGLUT
-  if(argc)
-    {
-      const char *prog =argv[0];
-      const char *pm= strrchr(argv[0],'-');      
-      if( pm )
-        noffglut = ((strlen(prog)- (pm-prog)) < lsuffix+5);
-      else   noffglut==  false;
-      if(noffglut) { consoleatend=false;  waitatend=false;} 
-      //      cout << " noffglut= " << noffglut << endl;
-      //  suffix ++-glx.exe -> no ffglut
-      // pm = 0= > pas de moins -> freefem++ -> ffglut
-    }
-#endif
+
+  // FFCS - remove the test for noffglut to be able to create pictures
+  // in any situation. Even FreeFem++-mpilang needs to send pictures
+  // (eg when called in a FreeFem++-server situation by EJS)
+
+  noffglut=false;
+
   bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
@@ -175,11 +176,9 @@ if( ch2edpdir && edpfilenamearg)
 	int err=0;
 	if(verbosity>1) 
 	    cout << " chdir '" << dir <<"'"<< endl;
-#if WIN32	
-	err=_chdir(dir);
-#else
+	// FFCS: mingw64 API change
 	err=chdir(dir);
-#endif
+
 	//cout << err << endl;
          if(err) {
 	     cerr << " error : chdir  " << dir << endl;
@@ -196,9 +195,15 @@ if( ch2edpdir && edpfilenamearg)
   
   if(progffglut && mpirank==0)
     {
-      ThePlotStream = popen(progffglut,"w");		   
-      if(verbosity)
-	printf(" EXEC of the plot  : %s\n",progffglut);
+      // FFCS: divert stream to FFCS
+      ThePlotStream = ffapi::ff_popen(progffglut,"w");		   
+
+      // FFCS: just forget the following message because it could be understood as an error during FFCS execution
+      // although ffglut is not used there.
+
+      //if(verbosity)
+      //  printf(" EXEC of the plot  : %s\n",progffglut);
+
       if(!ThePlotStream) { cerr << "  Error popen  "<< progffglut << endl;exit(1);}
       
     }

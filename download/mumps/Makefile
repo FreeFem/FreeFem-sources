@@ -1,7 +1,27 @@
-# Downloading and compiling extra libraries
-# -----------------------------------------
+# ======================================================================
+# Modified by Antoine Le Hyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# http://www.ljll.math.upmc.fr/lehyaric
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh default=0 freefem make modified start=19/03/10 upmc
 
-# $Id$
 include Makefile.inc
 
 all-local: mumps
@@ -55,12 +75,15 @@ $(PACKAGE1):
 
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
-	rm Makefile.inc FAIRE* ../lib/WHERE.mumps
+	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
 
 clean: clean-local
 
-
-.PHONY:$(SRCDIR)/$(INSTALL)
+# Local Variables:
+# mode:makefile
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

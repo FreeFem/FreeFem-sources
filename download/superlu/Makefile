@@ -81,7 +81,8 @@ OBJ_SUPERLU = $(ALLAUX) $(LAAUX) \
 
 superlu: FAIT
 
-FAIT:	
+# FFCS - 18/6/12 - depend on SRCDIR to remake all when package version changes
+FAIT:$(SRCDIR)	
 	$(MAKE)  install WHERE
 	touch FAIT
 
@@ -90,13 +91,15 @@ FAIRE:$(SRCDIR)
 	cd $(SRCDIR)/SRC; $(MAKE) -f ../../ff-FLAGS  $(OBJ_SUPERLU)
 	touch FAIRE
 
-install: FAIRE WHERE
+# FFCS - FAIRE and WHERE need to be done sequentially, even in a parallel build (corrected by Cico, 1/3/12)
+install: FAIRE
+	$(MAKE) WHERE
 	cd $(SRCDIR)/SRC; $(AR) $(ARFLAGS) $(SUPERLULIB)  $(OBJ_SUPERLU)
 	cd $(SRCDIR)/SRC; $(RANLIB) $(SUPERLULIB) 
-	cp $(SRCDIR)/SRC/s*h  ../include
+	cp $(SRCDIR)/SRC/s*h  $(SRCDIR)/$(INSTALL)/include
 WHERE:
-	echo superlu LD -L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)  >../lib/WHERE.superlu
-	echo superlu INCLUDE -I@DIR@/include >> ../lib/WHERE.superlu
+	echo superlu LD -L@DIR@/lib -lsuperlu_$(SUPERLU_VERSION)  >$(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
+	echo superlu INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu
 
 
 
@@ -113,23 +116,19 @@ $(PACKAGE_PATH):
 	-mkdir $(DIRPKG);
 	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE)
 
-clean-local:
-	-rm ../lib/WHERE.superlu
-	-rm ../lib/libsuperlu_$(SUPERLU_VERSION).*
-	-rm -rf superlu*
-	-rm $(SRCDIR)/SRC/$(SUPERLULIB)
-	-rm ../include/slu*h 
-	-rm ../include/supermatrix.h
-	-rm -r $(SRCDIR) ff-FLAGS
+# FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
+# compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
+
+clean:
+	-rm -rf SuperLU_* ff-FLAGS
 	-rm -rf FAIT FAIRE
-clean:clean-local
 
 
-
+# ALH - FFCS - 18/5/9 - FHecht says he forgot to add -fPIC for 64 bit platforms, so I add it myself here.
 ff-FLAGS: ../Makefile  Makefile 
 	grep '^CXX *=' ../Makefile >>$@
 	grep '^CC *=' ../Makefile >>$@
-	grep '^CFLAGS *=' ../Makefile >>$@
+	grep '^CFLAGS *=' ../Makefile|sed 's/$$/ -fPIC/' >>$@
 	grep '^BLAS[A-Z ]*='  ../Makefile|grep =  >>$@
 	grep '^AR *='  ../Makefile|grep =  >>$@
 	grep '^ARFLAGS *='  ../Makefile|grep =  >>$@

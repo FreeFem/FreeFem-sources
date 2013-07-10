@@ -7,7 +7,8 @@
 // AUTHOR   : Guy Atenekeng
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
-//ff-c++-LIBRARY-dep: metis parms  blas mpifc fc
+// FFCS - need reference to MPI to have the proper include for mpi.h on MacOS10.8
+//ff-c++-LIBRARY-dep: metis parms  blas mpifc mpi fc
 //ff-c++-cpp-dep: 
 
 /* 
@@ -473,11 +474,12 @@ public:
 	/*Differents preconditionners use*/
 	 meth[0]=(char *)malloc(sizeof(char)*9); strcpy(meth[0],"add_ilu0"); meth[1]=(char *)malloc(sizeof(char)*9); strcpy(meth[1],"add_ilut"); 
 	 meth[2]=(char *)malloc(sizeof(char)*9); strcpy(meth[2],"add_iluk"); meth[3]=(char *)malloc(sizeof(char)*9); strcpy(meth[3],"add_arms");
-	 meth[4]=(char *)malloc(sizeof(char)*9); strcpy(meth[4],"lsch_ilu0"); meth[5]=(char *)malloc(sizeof(char)*9); strcpy(meth[5],"lsch_ilut");  
-	 meth[6]=(char *)malloc(sizeof(char)*9); strcpy(meth[6],"lsch_iluk"); meth[7]=(char *)malloc(sizeof(char)*9); strcpy(meth[7],"lsch_arms"); 	
-	 meth[8]=(char *)malloc(sizeof(char)*9); strcpy(meth[8],"rsch_ilu0"); meth[9]=(char *)malloc(sizeof(char)*9); strcpy(meth[9],"rsch_ilut");
-         meth[10]=(char *)malloc(sizeof(char)*9); strcpy(meth[10],"rsch_iluk"); meth[11]=(char *)malloc(sizeof(char)*9); strcpy(meth[11],"rsch_arms");
-	 meth[12]=(char *)malloc(sizeof(char)*9); strcpy(meth[12],"sch_gilu0"); meth[13]=(char *)malloc(sizeof(char)*9); strcpy(meth[13],"sch_sgs");
+	 // FFCS - fixed "buffer overflow" warning by JHunt
+	 meth[4]=(char *)malloc(sizeof(char)*10); strcpy(meth[4],"lsch_ilu0"); meth[5]=(char *)malloc(sizeof(char)*10); strcpy(meth[5],"lsch_ilut");  
+	 meth[6]=(char *)malloc(sizeof(char)*10); strcpy(meth[6],"lsch_iluk"); meth[7]=(char *)malloc(sizeof(char)*10); strcpy(meth[7],"lsch_arms"); 	
+	 meth[8]=(char *)malloc(sizeof(char)*10); strcpy(meth[8],"rsch_ilu0"); meth[9]=(char *)malloc(sizeof(char)*10); strcpy(meth[9],"rsch_ilut");
+         meth[10]=(char *)malloc(sizeof(char)*10); strcpy(meth[10],"rsch_iluk"); meth[11]=(char *)malloc(sizeof(char)*10); strcpy(meth[11],"rsch_arms");
+	 meth[12]=(char *)malloc(sizeof(char)*10); strcpy(meth[12],"sch_gilu0"); meth[13]=(char *)malloc(sizeof(char)*8); strcpy(meth[13],"sch_sgs");
 	/*storage format of the matrix*/
          char pcrM[4];
 	strcpy(pcrM,"csr");

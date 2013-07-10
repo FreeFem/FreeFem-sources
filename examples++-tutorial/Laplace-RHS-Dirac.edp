@@ -5,6 +5,10 @@
  real[int] cdelta=[1.,2.];//  coef    delta_i
   mesh Th=square(10,10);
   verbosity=0;
+
+// Reference value for FFCS regression tests
+real ref;
+
  for(int iter=0;iter < 13;iter++)
  {
 
@@ -29,4 +33,6 @@
   plot(uh,wait=1,dim=3,fill=1);
   Th=adaptmesh(Th,uh,nbvx=100000,err= 0.01*1.15^-iter);
   
+  // Reference value for FFCS regression tests
+  ref=uh[]'*uh[];//'
   }

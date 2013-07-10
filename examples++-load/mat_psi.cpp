@@ -193,6 +193,7 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
 int   Marco(const Mesh3::Element & K, R3 U,R c[4], double a[4][4] )  //PSI Deconninck
 {
     ExecError("Not Implemented Sorry Marco!");
+    return 0;
 }
 AnyType MatrixUpWind3::operator()(Stack stack) const 
 {

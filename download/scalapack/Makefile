@@ -1,10 +1,12 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include SLmake.inc
 
 all-local: scalapack
+
+# FFCS: parallel compilation crashes on Win32 (same archive updated from 2 different parallel makes)
+MAKEFLAGS=-j 1
 
 # Downloading and compiling scalapack
 # ------------------------------
@@ -15,6 +17,8 @@ SRCDIR=scalapack-2.0.2
 PACKAGE1=$(DIRPKG)/scalapack-2.0.2.tgz
 SERVER=http://www.netlib.org/scalapack/
 INSTALL=../..
+
+# FFCS: shorten argument length to avoid "sh: ../ar: Argument list too long" under Cygwin
 DIR1 = TOOLS/LAPACK/*.o
 DIR2 = TOOLS/*.o
 DIR3 = PBLAS/SRC/PBBLAS/*.o
@@ -27,11 +31,12 @@ DIR9 = BLACS/SRC/*.o BLACS/SRC/*.oo
 
 scalapack: FAIRE
 
+# FFCS: shorten argument length to avoid "sh: ../ar: Argument list too long" under Cygwin
 $(SRCDIR)/FAIT-202:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
 	cd $(SRCDIR);$(MAKE) lib
 	rm $(SRCDIR)/libscalapack.a
-	cd $(SRCDIR);$(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8) $(DIR9)	
+	cd $(SRCDIR) && $(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8) $(DIR9)
 	$(RANLIB) $(SRCDIR)/libscalapack.a
 	touch $(SRCDIR)/FAIT-202
 install:
@@ -62,14 +67,14 @@ $(PACKAGE1):
 	-mkdir $(DIRPKG)
 	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE1)`
 
-clean-local:
-	-cd $(SRCDIR) && $(MAKE) cleanlib  -C $(SRCDIR)
-	-rm SLmake.inc FAIRE ../lib/WHERE.scalapack
-	-rm -rf ../include/{pblas.h,pxsyevx.h,tools.h}
-	-rm -rf ../lib/libscalapack.a ../lib/WHERE.scalapack 
-	-rm -rf $(SRCDIR)
-
-clean: clean-local
-
+clean:
+#	FFCS - need to clean completely even in case of error
+	-rm SLmake.inc FAIRE FAIT
+#	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
+#	compilation dependencies control there (see
+#	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
+	-rm -rf scalapack-*
+	-rm config.log
+	-rm $(PACKAGE1)
 
 .PHONY:$(SRCDIR)/$(INSTALL)

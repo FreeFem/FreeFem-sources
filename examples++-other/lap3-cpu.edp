@@ -53,6 +53,10 @@ uh=0;
 cpu=clock() ;
 laplaceCrout; // solve the problem plot(uh); // to see the result
 cout << "-- lap Crout    " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+
+// FFCS: reference value for regression tests
+real regtest=uh[].max;
+
 uh=0;
 
 if(HaveUMFPACK){

@@ -53,8 +53,9 @@ class SCOTCH_Op : public E_F0mps {
         AnyType operator()(Stack stack) const;
 };
 
+// FFCS - keywords/dumptable is not able to scan class names if they contain spaces, even in template arguments
 template<class T, class V>
-basicAC_F0::name_and_type SCOTCH_Op<T, V>::name_param[] = {
+basicAC_F0::name_and_type SCOTCH_Op<T,V>::name_param[] = {
     {"weight", &typeid(KN<long>*)}
 };
 

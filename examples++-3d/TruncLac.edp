@@ -22,4 +22,6 @@ func u=x^2+y^2;
 
 mesh3 Th3=trunc(Th,(u-0.5)>1.e-10,split=1,label=135);
 medit("Lac",wait=1,Th);
+plot(Th); // FFCS: testing 3d plots
 medit("LacTruncated",Th3,wait=1);
+plot(Th3); // FFCS: testing 3d plots

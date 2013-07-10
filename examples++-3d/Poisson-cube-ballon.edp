@@ -116,7 +116,19 @@ problem P(uh,vh)=
   
   P;
 
-plot(uh,wait=1, nbiso=6);
+// FFCS: with 3D view parameters
+real[int] CameraPositionValue = [3.50634,-2.51489,2.60313];
+real[int] CameraFocalPointValue = [0.0604689,-0.304636,-0.256484];
+real[int] CameraViewUpValue = [0.7198,0.502367,-0.479078];
+real[int] CutPlaneOriginValue = [-0.5,-0.55,0.0335184];
+real[int] CutPlaneNormalValue = [0,0,1];
+plot(uh,wait=1, nbiso=6,
+	BorderAsMesh = 1,
+	CameraPosition=CameraPositionValue,
+	CameraFocalPoint=CameraFocalPointValue,
+	CameraViewUp=CameraViewUpValue,
+	CutPlaneOrigin=CutPlaneOriginValue,
+	CutPlaneNormal = CutPlaneNormalValue);
 medit("   uh ",Th, uh,wait=1); 
 
 
