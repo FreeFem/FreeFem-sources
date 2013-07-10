@@ -34,6 +34,9 @@ mesh3 Th3=tetgtransfo(Th,transfo=[f1,f2,f3],nbofregions=1,regionlist=domaine);
 //savemesh(Th3,"sphere.meshb");
 medit("sphere",Th3);
 
+// FFCS - check 3D plots
+plot(Th3,cmm="sphere");
+
 fespace Vh(Th3,P23d);
 func ue =   2*x*x + 3*y*y + 4*z*z+ 5*x*y+6*x*z+1;
 func f= -18. ;
@@ -64,5 +67,8 @@ cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
 Vh2 u2=u,u2e=ue;
 plot(u2,wait=1);
 plot(u2,u2e,wait=1);
+
+// FFCS - check 3D plots
+plot(u);
 
 assert(err < 1e-9);

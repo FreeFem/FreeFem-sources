@@ -1,4 +1,4 @@
-g# Configuration script using Automake + Autoconf for FreeFem++
+# Configuration script using Automake + Autoconf for FreeFem++
 # ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
@@ -10,7 +10,7 @@ g# Configuration script using Automake + Autoconf for FreeFem++
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.24,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.25,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -26,6 +26,10 @@ AC_CONFIG_HEADERS(config.h)
 AC_PROG_MAKE_SET
 dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
+
+# FFCS - parallel make options (see [[file:../../configure/ac::FFCS_MAKEFLAGS]])
+
+AC_SUBST(FFCS_MAKEFLAGS,$FFCS_MAKEFLAGS)
 
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 dnl search of associad software 
@@ -107,6 +111,15 @@ else
   AC_MSG_ERROR([ Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 ])
 fi
 
+# FFCS - build the code for FreeFem++-cs
+AC_ARG_ENABLE(fortran,[  --enable-ffcs	build FreeFem++ for use by FreeFem++-cs])
+if test "$enable_ffcs" = yes
+then
+	AC_DEFINE_UNQUOTED(ENABLE_FFCS,$enable_ffcs,[build FreeFem++ for use by FreeFem++-cs])
+else
+	enable_ffcs=no
+fi
+AM_CONDITIONAL([ENABLE_FFCS],[test $enable_ffcs = yes])
 
 # dur dur car sous MacOsX le fortran n'est pas standard. 
 ff_AR="ar"
@@ -117,8 +130,11 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPAC
 ff_g2c_lib="";	 
 if test "$enable_fortran" != no
 then
-    AC_PROG_FC(gfortran  f90  xlf90 g95  )
-    AC_PROG_F77( gfortran  f90 xlf xlf90 g95 f77 fort77 "$FC" )
+
+    # ALH-FFCS-2/3/10: add gfortran-mp-4.4 for MacPorts on MacOS 10.6
+    AC_PROG_FC(gfortran  f90  xlf90 g95 gfortran-mp-4.4)
+    AC_PROG_F77(gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" gfortran-mp-4.4)
+
 #	if test -n "$F77" 
 #	then
     ff_flibs=""
@@ -363,7 +379,13 @@ ff_uname=`uname`
 ff_mingw=no
 case $ff_uname in
     CYGWIN*)	
-	ff_nocygwin=-mno-cygwin;
+
+    	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
+	if test $enable_ffcs = no
+	then
+	    ff_nocygwin=-mno-cygwin
+	fi
+
 	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
     MINGW*)
         enable_cygwindll=no;;
@@ -373,36 +395,67 @@ CYGWIN*|MINGW*)
 
 	ff_suffix_dylib="dll";
         ff_win32=yes;
-	AC_SUBST(FFMETIS_CFLAGS,"-D__VC__ -D_MSC_VER")
+
+	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
+	# (which creates thousands of duplicate definitions for sytem calls like time()).
+
+	if test $enable_ffcs = yes
+	then
+	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
+	else
+	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__ -D_MSC_VER")
+	fi
+
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
 # 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
 	        ff_glut_ok=yes
+
+		# FFCS: on Windows, FF crashes when compiling GL/glut.h and the option "--disable-opengl" is not
+		# operational because ff_glut_ok is forced to yes here.
+		if test $enable_ffcs = yes
+		then
+	            ff_glut_ok=no
+		    enable_opengl=no
+		fi
+
                 ff_mingw=yes 
                 enable_cygwindll=no;
-		#ff_pthread="-mthread"
-		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
-		FFLAGS="$FFLAGS $ff_nocygwin"
-		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-                AC_COMPILE_IFELSE([AC_LANG_SOURCE([int a;])],[],
-                    [ff_nocygwin="";
-		     AC_MSG_NOTICE([Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3])
-                    ])
-		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
-		FFLAGS="$FFLAGS $ff_nocygwin"
-		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-		CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
+		ff_pthread="-mthreads"
+
+		# FFCS does not use the Cygwin MinGW compilers any more
+		if test $enable_ffcs = no
+		then
+		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
+		    FFLAGS="$FFLAGS $ff_nocygwin"
+		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
+                    AC_COMPILE_IFELSE([AC_LANG_SOURCE([int a;])],[],
+			[ff_nocygwin="";
+			    AC_MSG_NOTICE([Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3])
+			    ])
+		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
+		    FFLAGS="$FFLAGS $ff_nocygwin"
+		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
+		    CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
+		fi
+
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
 		LIBSNOCONSOLE="-mwindows"
-		test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe` 
-		if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
-		    case "$F77" in
-	 		*gfortran) FLIBS="$ff_nocygwin -lgfortran";;
-	 		*g77) FLIBS="$ff_nocygwin -lg2c";;
-			*)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
-		    esac 
+
+		# FFCS uses a specific compiler, so we specify its libraries explicitely
+		if test $enable_ffcs = no
+		then
+		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe` 
+		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
+			case "$F77" in
+	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran";;
+	 		    *g77) FLIBS="$ff_nocygwin -lg2c";;
+			    *)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
+			esac 
+		    fi
 		fi
+
                 ff_glutname="glut32"
 		#  check abort a existing function just to find in glut32.dll exist in the path 
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
@@ -629,306 +682,68 @@ fi
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
-dnl m4_include(ax_mpi.m4)
-ff_save_path="$PATH"
-# We need to choose between mpich, openmpi  and lam for the Debian package
-AC_ARG_WITH(mpipath,[  --with-mpipath= the path of mpich under windows (no command  mpic++, ... )])
-AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c++,fc, ... (to link with c++ - ex:   -L/usr/local/lib -lmpi_f90  -lmpi_cxx -lmpi -lopen-rte -lopen-pal -lutil) ])
-AC_ARG_WITH(mpilibsc,[  --with-mpilibsc= the libs to add to c  ... (to link with cc (for pastix lib)  ex:   -L/usr/local/lib -lmpi -lopen-rte -lopen-pal -lutil) ])
-AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (no mpicc++, just use the compiler)) ])
-AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|/usr/local/bin/mpic++|... ]	or --without-mpi	Choose MPI implementation (default is mpic++)])
-if test "$with_mpi" != no ; then  
-#if test "$with_mpi" != no ; then
-#AX_MPI(with_mpi=yes, with_mpi=no)
-#fi
 
-# Default is mpic++ 
-ff_mpi_suffix="";
-if test "$with_mpi" = yes -o -z "$with_mpi" 
+if test $enable_ffcs = no
 then
-   ff_mpicxx=mpic++
-else 
-  case "$with_mpi" in
- lam|mpich|openmpi)   ff_mpi_suffix=.$with_mpi;ff_mpicxx=mpic++.$with_mpi;;
- *)  ff_mpicxx="$with_mpi" ;;
- esac
-fi
-
-dnl AC_MSG_NOTICE([ xxxxxxxxxxxxxxxxxxxx --$with_mpilibs--]);
-if test -n "$with_mpiinc"  -a "$with_mpiinc" != no ; then
-  if test  "$with_mpi" = 'no' ; then with_mpi='yes'; fi
-  ff_MPI_INCLUDE="$with_mpiinc"
-fi
-if test -n "$with_mpilibs" -a "$with_mpilibs" != no ; then
-    ff_MPI_LIB="$with_mpilibs"
-    ff_MPI_LIBC="$with_mpilibs"
-    ff_MPI_LIBFC="$with_mpilibs"
-    MPICXX="$CXX $ff_MPI_INCLUDE"
-    MPIF77="$F77 $ff_MPI_INCLUDE"
-    MPIFC="$FC  $ff_MPI_INCLUDE"
-    MPICC="$CC  $ff_MPI_INCLUDE"
-    AC_MSG_NOTICE([   ---  set  all MPI compile to compiler:   $MPICC , $MPIF77, $MPIFC, $MPICC  ])
-fi
-
-if test -n "$with_mpilibsc" -a "$with_mpilibsc" != no ; then
- ff_MPI_LIBC="$with_mpilibsc"
-fi
-
-AC_ARG_VAR(MPIRUN,[MPI run command ])
-AC_MSG_CHECKING(for MPIRUN)
-
-if test -z "$MPIRUN" ; then
-    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)
-    if test "$MPIRUN" = no
-    then
-	ff_mpi=no
-    fi
-fi
-AC_MSG_RESULT($MPIRUN)
-
-AC_MSG_CHECKING(for mpipath )
-	
-if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes -a "$MPIRUN" != no ; then 
-#   if "$MPIRUN" != no ; tehn 
-    with_mpipath=`AS_DIRNAME(["$MPIRUN"])`
-    with_mpipath=`AS_DIRNAME(["$with_mpipath"])`
-#    else 
-#    for i in '/c/Program Files (x86)/MPICH2' '/c/Program Files/MPICH2' 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
-#	test -d "$i" &&  with_mpipath="$i" && break 
-#    done
-#    fi
-fi
-
-dnl if test "$with_mpilibs" != "no" ; then
-dnl fi
-
-    
-if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
-#    sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
- #   chmod a+rx mpic++ 
-  #  for i in mpicc mpif90 mpifc mpif77 ; do cp mpic++ $i; done 
-#    ff_pwd=`pwd`
- #   with_mpi="$ff_pwd"/mpic++
- #   MPICXX="$ff_pwd/mpic++"
- #   MPIF77="$ff_pwd/mpif77"
- #   MPIFC="$ff_pwd/mpif90"
- #   MPICC="$ff_pwd/mpicc" zzzzzzzzzzz   
-    if  with_mpilibs=`which msmpi.dll` 
-    then
-	case "$ff_size_ptr"  in 
-	    4) with_mpipathlib="$with_mpipath/Lib/i386";;
-	    8) with_mpipathlib="$with_mpipath/Lib/amd64";;
-	    *) with_mpipath=no;;
-	esac
-	
-	
-	test -d "$with_mpipath/Inc" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Inc"
-	test -d "$with_mpipath/Include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Include"
-	ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' '-D_MSC_VER' '-D__int64=long long'"
-	with_mpiinc="$ff_MPI_INCLUDE"
-	test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpiexe.exe"
-	ff_MPI_LIBC="$with_mpilibs"
-	ff_MPI_LIB="$with_mpilibs"
-	ff_MPI_LIBFC="$with_mpilibs"
-	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
-	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
-	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
-	test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
-    else
-	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_LOG_FD
-	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_FD
-	with_mpipath=no
-	with_mpi=no
-    fi
-else 
-    with_mpipath=no	   
-fi
-
-
-AC_MSG_RESULT($ff_mpi_path)
-
-
-
-
-dnl  correct ff_mpi_path august 2010 -- FH ...  
-
-
-ff_save_cxx="$CXX"
-ff_save_libs="$LIBS"
-
-
-if test "$with_mpi" != no
-then
-	ff_mpi_path=`AS_DIRNAME(["$MPIRUN"])`
-dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
-	case "$ff_mpi_path" in
-	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
-	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;; 
-dnl if also  add $PATH they  could be missing some different mpi version... 
-	esac	 
-	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
-	if test -z "$MPICXX" ; then
-	    AC_PATH_PROGS(MPICXX,$ff_defmpicxx mpic++$ff_mpi_suffix mpicxx$ff_mpi_suffix mpiCC$ff_mpi_suffix mpCC hcp mpxlC mpxlC_r cmpic++,no,$ff_mpi_path)
-	    AC_MSG_CHECKING(for MPICXX)
-	fi
-	ff_mpicxx="eval $MPICXX"
-	CXX=$ff_mpicxx
-	LIBS="$LIBS $ff_MPI_LIB"
-	
-	AC_LINK_IFELSE(
-[AC_LANG_SOURCE([
-#include <mpi.h>
-#include <stdio.h>
-int main(int argc,char **argv){
-  char name[[BUFSIZ]];
-  int length;
-  
-  MPI_Init(&argc, &argv);
-  MPI_Get_processor_name(name, &length);
-  printf("%s: hello world\n", name);
-  MPI_Finalize();
-  return 0;
-}])],
-ff_mpi=yes,
-ff_mpi=no)
-	AC_MSG_RESULT($ff_mpi)
-
-	# Also check that mpirun is there. If it isn't, then MPI is
-	# not fully installed.
-
-
-	if test "$ff_mpi" = yes;
-	then
-
-AC_MSG_CHECKING( MPI_DOUBLE_COMPLEX)
-
-	AC_COMPILE_IFELSE(
-[AC_LANG_SOURCE([
-#include <mpi.h>
-MPI_Datatype xxxx=MPI_DOUBLE_COMPLEX;
-])],
-ff_mpi_double_complex=yes,
-ff_mpi_double_complex=no)
-	AC_MSG_RESULT($ff_mpi_double_complex)
-if test "$ff_mpi_double_complex" = yes  ; then
-AC_DEFINE(HAVE_MPI_DOUBLE_COMPLEX,1, mpi_double_complex)
-fi
-
-
-	  echo "MPI CC $ff_mpi" >config_LIB_INFO
-
-		# We do not AC_DEFINE any special flag for parallel
-		# computation here, because it must only be set when the
- 		# parallel program is compiled (see src/mpi/Makfile.am)
-		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
-   		  AC_SUBST(MPIPROG,"$ff_mpiprog")
-   		  AC_SUBST(MPISCRIPT,"ff-mpirun")
-   		  AC_SUBST(MPIRUN,$MPIRUN)
-                  AC_SUBST(MPICXX,$MPICXX)
-	else
-	        AC_SUBST(MPICXX,$ff_save_cxx)
-	fi
-
-	if test "$ff_mpi" = yes;
-	then
-	  if test "$enable_fortran" != no
-	  then	
-	      
-	      AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-	      if test -z "$MPIF77" ; then    
-		  AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
-	      fi
-	      AC_SUBST(MPIF77)
-	      AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
-	      if test -z "$MPIFC" ; then
-		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
-	      fi		
-	      AC_SUBST(MPIFC)
-	  fi
-
-
-	ff_MPI_INCLUDE="$with_mpiinc"
-        ff_mpishow=`$MPICXX -show` 2>/dev/null
-        ff_mpicshow=`$MPICC -show` 2>/dev/null
-        ff_mpifcshow=`$MPIFC -show` 2>/dev/null
-	if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then	 
-	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
-	      ff_MPI_LIB_DIRS=""
-	      [ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	      [ff_MPI_LIBC=`echo $ff_mpicshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	      [ff_MPI_LIBFC=`echo $ff_mpifcshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|grep -v 'commons,use_dylibs' |tr '\n' ' '`]
-	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
-	  fi
-	    [ff_mpi_idir=`echo $ff_MPI_INCLUDE|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
-	    [ff_mpi_ldir=`echo $ff_MPI_LIB|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|sed -e 's/^-[Llp]//' -e 's/^-Wl,]//'  |tr '\n' ' '`' /usr/lib']
-	  
-	  if  test -z "$ff_MPI_INCLUDE_DIR" ; then  
-	  for i in $ff_mpi_idir; do
-	      if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
-		  ff_MPI_INCLUDE_DIR=$i
-	      fi
-	  done
-	  fi
-	  for i in $ff_mpi_ldir; do
-	      ff_tmp=`ls $i/libmpi.*|head -1`
-	      if test  -f "$ff_tmp"  -a -z "$ff_MPI_LIB_DIRS"  ;then
-		  ff_MPI_LIB_DIRS=$i
-	      fi
-	      done
-	  
-	  AC_SUBST(MPICXX,$MPICXX)		
-	  AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
-	  if test -z "$MPICC" ; then		
-	      AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
-	  fi
-	  AC_SUBST(MPICC,$MPICC)
-	  AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
-
-	  if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
-	      AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
-	  else
-	      if test -n "$MPIFC" ; then
-	           AC_FF_ADDWHERELIB(mpifc,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
-	           AC_FF_ADDWHERELIB(mpif77,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
-dnl		  [echo mpifc LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
-dnl		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
-dnl		  [echo mpif77 LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
-dnl		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
-	      fi
-  	  fi
-	  if test -n "$MPICXX" ; then 	    
-              AC_FF_ADDWHERELIB(mpi,$ff_MPI_LIB,$ff_MPI_INCLUDE)
-dnl              [echo mpi LD "'$ff_MPI_LIB'"    >>$ff_where_lib_conf ]
-dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
-	  fi
-	  AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
-	  AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
-	  AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
-	  AC_SUBST(MPI_LIB,$ff_MPI_LIB)
-	  AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)
-	  AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
-	fi
-	CXX="$ff_save_cxx"
-	LIBS="$ff_save_libs"
-fi
-
+    # FF case
+    m4_include(acmpi.m4)
 else
-          
-	  AC_SUBST(MPIRUN,"")      		
-	  AC_SUBST(MPICC,"")      		
-	  AC_SUBST(MPICXX,"")      		
-	  AC_SUBST(MPIF77,"")      		
-	  AC_SUBST(MPIFC,"")      		
-	  AC_SUBST(MPI_INCLUDE,"")
-	  AC_SUBST(MPI_LIB_DIRS,"")
-	  AC_SUBST(MPI_LIB,"")
-	  AC_SUBST(MPI_LIBC,"")
-	  AC_SUBST(MPI_LIBFC,"")
-          AC_SUBST(SKIP_TESTS_MPI,yes)
-	  ff_mpi=no
+    # FFCS - use the same MPI configuration choices as FFCS
+    ff_mpi=yes
+    AC_SUBST(MPICXX,$MPICXX)
+    AC_SUBST(MPICC,$MPICC)
+    AC_SUBST(MPIF77,$MPIF77)
+    AC_SUBST(MPIFC,$MPIFC)
+    AC_SUBST(MPIPROG,"FreeFem++-mpi${EXEEXT}")
+    AC_SUBST(MPI_INCLUDE,"-I $MPI_INC_DIR")
+    AC_SUBST(MPI_INC_DIR,$MPI_INC_DIR)
+    AC_SUBST(MPI_LIB_DIRS,"")
+    AC_SUBST(MPI_LIB,$MPI_LIB)
+    AC_SUBST(MPI_LIBC,"")
+    AC_SUBST(MPI_LIBFC,"")
 
+    # Extra MPI-dependant configuration options that are set by FF during MPI configuration. FFCS - 25/2/13 - Fred
+    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
+    # accepted by pastix. So we just use $ac_build_alias which is much more reliable than $ff_HOSTARCH_pastix.
+
+    AC_SUBST(PASTIX_HOSTARCH,$ac_build_alias)
+
+    # these values should not be empty otherwise examples++-load/ff-get-dep will think that they are not defined
+    AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
+
+    # mpifc and mpif77 libraries should always be specified because FF never calls the Fortran MPI compiler. It always
+    # uses mpicxx in [[file:examples++-load/ff-c++]]. The resulting Fortran libraries (eg Mumps) would compile even
+    # without the proper Fortran libs, but they would not load properly.
+
+    # under Win32, libmpi_f77.a is not the right name and ff/mingw/mpicxx adds the right libraries by itself
+
+    if test $ff_win32 != yes
+    then
+        AC_FF_ADDWHERELIB(mpifc,-lmpi_f77,)
+    	AC_FF_ADDWHERELIB(mpif77,-lmpi_f77,)
+    else
+        AC_FF_ADDWHERELIB(mpifc,-DDUMMY,)
+    	AC_FF_ADDWHERELIB(mpif77,-DDUMMY,)
+    fi
+
+    # FFCS - MPI_DOUBLE_COMPLEX kept from original FF configure script
+    AC_MSG_CHECKING( MPI_DOUBLE_COMPLEX)
+    AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([
+#include <mpi.h>
+		MPI_Datatype xxxx=MPI_DOUBLE_COMPLEX;
+		])],
+    ff_mpi_double_complex=yes,
+    ff_mpi_double_complex=no)
+    AC_MSG_RESULT($ff_mpi_double_complex)
+    if test "$ff_mpi_double_complex" = yes  ; then
+	AC_DEFINE(HAVE_MPI_DOUBLE_COMPLEX,1, mpi_double_complex)
+    fi
 fi
-#export PATH="$ff_save_path"
+
+# FFCS needs to change some of the FF makefiles to compile without MPI on MacOS
+AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
+
 # Looking for useful configuration utilities
 # ------------------------------------------
 
@@ -1138,9 +953,11 @@ dnl	echo lapack  LD  \'$ff_mkl_lapack\'  >>$ff_where_lib_conf
 dnl	echo scalapack  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
 dnl	echo blacs  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
 dnl	echo lapack INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
-
     else 
 	ff_mkl_libpath=no
+	
+	# FH - pardiso is there as soon as mkl is
+        enable_pardiso=no
     fi
 fi
 
@@ -1241,6 +1058,10 @@ then
 	    ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
 	    ff_lapack_ok=ok
 	else
+
+            # ALH - FFCS - 23/12/8 - ATLAS compilation does not work anymore on Linux
+	    AC_MSG_ERROR(No BLAS library found - please install one or install Lapack)
+
 	    ff_download_blas=atlas-source
 	    ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
 	    ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
@@ -1273,10 +1094,12 @@ then
 fi
 
 
-if test "$ff_blas_ok" = yes 
+# FFCS: do not specify the default BLAS LDADD if a specific one will be built in the download directory
+
+if test "$ff_blas_ok" = yes && test "$ff_download_blas" = ""
 then
-AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
-dnl    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
+    AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
+    dnl    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
 fi
 
 # end of BLAS -------------------
@@ -1512,16 +1335,23 @@ then
 		AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )			
 	 fi
 fi
-  if test "$ff_umfpack_ok" = yes 
-  then
-      AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
-      AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
 
-dnl      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-dnl      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
-dnl      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
-dnl       echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
-  fi   
+# FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
+# -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
+
+if test $enable_ffcs = yes
+then
+    if test "$ff_umfpack_ok" = yes 
+    then
+	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+
+	dnl      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
+	dnl      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
+	dnl      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
+	dnl       echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
+    fi   
+fi
 
 LIBS="$ff_save_libs"
 
@@ -1543,6 +1373,15 @@ if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 	fi
 	ff_umfpack_ok=yes
 fi
+
+# FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
+# -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
+
+if test $enable_ffcs = yes && test "$ff_umfpack_ok" = yes 
+then
+    AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
+    AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
+fi   
 
 if test "$ff_umfpack_ok" = no
 then
@@ -1624,6 +1463,9 @@ then
 	AC_MSG_RESULT($ff_dynload)
 fi
 
+# FFCS - -lm missing for ffmedit link stage on Debian Testing
+AC_CHECK_LIB(m,sin)
+
 # Checks that we also have the corresponding library
 if test "$ff_dynload" = yes
 then
@@ -1699,7 +1541,7 @@ fi
 # pdfsync.sty. So we need to be able to disable it.
 enable_pdf=yes
 AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
-if test "$enable_pdf" = yes 
+if test "$enable_pdf" != no
 then
    AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
    if test "$ff_pdflatex" = yes -a $EPSTOPDF != false -a $ff_convert = yes;
@@ -1725,9 +1567,22 @@ fi
 
 if test "$ff_mingw" = yes 
 then
+
+    # FFCS does not use FreeFem++-std, and Pcrgraph.cpp does not compile under mingwin64
+    if test $enable_ffcs = no
+    then
 	ff_stdprog="FreeFem++-std${EXEEXT}"
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
+    fi
+
+    # ALH - FFCS - 30/11/8 - I need to get the output from FF for FFCS regression tests
+    if test $enable_ffcs = yes
+    then
+	ff_std_ldflags="-mconsole -mwindows"
+    else
 	ff_std_ldflags=-mwindows
+    fi
+
 	ff_std_libs=
 fi
 AC_SUBST(STD_GRAPH_OBJ,$ff_std_graph_obj)
@@ -1841,6 +1696,51 @@ else
 	AC_MSG_RESULT(yes)
 fi
 
+# Allow some downloaded tools not to be compiled
+# ----------------------------------------------
+
+# $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
+m4_define([FFCS_DISABLE_DOWNLOAD],
+    [AC_ARG_ENABLE($1,[  --disable-$1      Do not download $1])
+    if test "$enable_$1" = "no"
+    then
+        AC_SUBST([FFCS_COMPILE_$1],"")
+        AC_SUBST([FFCS_DYLIB_$1],"")
+    else
+        AC_SUBST([FFCS_COMPILE_$1],ifelse($3,,$1,$3))
+        AC_SUBST([FFCS_DYLIB_$1],$2)
+    fi
+])
+
+FFCS_DISABLE_DOWNLOAD(fflapack,fflapack.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+FFCS_DISABLE_DOWNLOAD(hips,hips_FreeFem.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(hypre,hypre.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(lapack,lapack.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(mshmet,mshmet.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
+FFCS_DISABLE_DOWNLOAD(mumps_seq,MUMPS_seq.$DYLIB_SUFFIX,mumps-seq)
+FFCS_DISABLE_DOWNLOAD(parms,parms_FreeFem.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
+FFCS_DISABLE_DOWNLOAD(scotch,scotch.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
+FFCS_DISABLE_DOWNLOAD(yams,freeyams.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(pardiso,PARDISO.$DYLIB_SUFFIX)
+FFCS_DISABLE_DOWNLOAD(pipe,pipe.$DYLIB_SUFFIX)
+
+# FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
+if test $OS = Windows_NT
+then
+    CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
+
+    # we also need to satisfy ff-c++ that the pthread are not a blocking point
+    if test -n "$ff_pthread"  ; then
+       AC_FF_ADDWHERELIB(pthread,"",)
+    fi
+fi
+
 # Find out kernel and libc versions
 # ---------------------------------
 
@@ -1867,7 +1767,18 @@ AC_SUBST(CNOFLAGS,$CNOFLAGS) dnl for superludist CFLAGS without optim  ...
 AC_SUBST(FNOFLAGS,$FNOFLAGS) dnl for blacs CFLAGS without optim  ...
 # The final list of executable programs
 AC_SUBST(MEDITPROG,$ff_meditprog)
-AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
+
+# ALH - FFCS - 5/1/9 - ffglut cannot be compiled with FFCS under Cygwin because it requires a GLUT versions that works
+# with Mingw, and the standard Cygwin Glut is not enough. But FFCS needs a working ffglut on other platforms for testing
+# purposes.
+
+if test "$ff_win32" = yes
+then
+	AC_SUBST(FFGLUTPROG,'')
+else
+	AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
+fi
+
 AC_SUBST(BAMGPROG,$ff_bamgprog)
 AC_SUBST(STDPROG,$ff_stdprog)
 AC_SUBST(IDEPROG,$ff_ideprog)
@@ -1888,7 +1799,7 @@ ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 #metis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
 # mumps LD '-L/Users/hecht/work/freefem++/download//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'
 # mumps INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetis
+# parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetispar
 # parmetis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
 # scalapack LD '-L/Users/hecht/work/freefem++/download/lib  -lscalapack '
 # scalapack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
@@ -2003,7 +1914,11 @@ m4_map([AC_FF_WHERELIB],[
     ]
     )
 
+# FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
+# Windows)
 
+AM_CONDITIONAL([FFCS_WINDOWS],[test $OS = Windows_NT])
+ 
 # All makefiles
 AC_OUTPUT(Makefile
     download/Makefile
@@ -2083,13 +1998,22 @@ dnl    fi
 fi  # ---  test "$enable_download" = yes  ;then
 
 
-if test "$ff_glut_ok" != yes  ; then
-    AC_MSG_NOTICE([     *********************************************** ])
-    AC_MSG_NOTICE([     WARNING: you do not have the new grachics tools ])
-    AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
-    AC_MSG_NOTICE([         read the README to find missing package  ])
-    AC_MSG_NOTICE([         F. Hecht  ])
-    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])	
-    AC_MSG_NOTICE([     *********************************************** ])
+# FFCS: remove this message because it could make the user think that something is broken
+if test $enable_ffcs = no
+then
+    if test "$ff_glut_ok" != yes  ; then
+	AC_MSG_NOTICE([     *********************************************** ])
+	AC_MSG_NOTICE([     WARNING: you do not have the new grachics tools ])
+	AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
+	AC_MSG_NOTICE([         read the README to find missing package  ])
+	AC_MSG_NOTICE([         F. Hecht  ])
+	AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])	
+	AC_MSG_NOTICE([     *********************************************** ])
+    fi
 fi
 
+# Local Variables:
+# mode:shell-script
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

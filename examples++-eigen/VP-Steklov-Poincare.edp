@@ -18,5 +18,5 @@ int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV);
 k=min(k,nev); //  some time the number of converged eigen value is  greater then nev..
 cout << ev <<endl;
 for(int i=0;i<k;++i)
- 	plot(eV[i],cmm=" vp " + ev[i],wait=1);
+ 	plot(eV[i],cmm=" vp " + ev[i],wait=1,dim=3,fill=1);
  

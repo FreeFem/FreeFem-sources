@@ -60,7 +60,11 @@ WGET = @WGET@
    MPIdir = $(FFMPIDIR) 
    MPIdev =  
    MPIplat = 
-   MPILIBdir = @MPI_LIB_DIRS@
+
+   # FFCS: Windows path to MPICH2 contains spaces, but FF configure --with-mpipath option should not contain quotes
+   # because FF configure adds quotes when defining MPI_LIB
+
+   MPILIBdir = '@MPI_LIB_DIRS@'
    MPIINCdir = '@MPI_INC_DIR@'
    MPILIB = @MPI_LIB@
 

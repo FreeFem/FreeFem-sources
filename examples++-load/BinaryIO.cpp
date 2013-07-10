@@ -68,6 +68,7 @@ long int Flag;
  Flag= *FLAG;   
  outfile.write ((char*) &Flag, sizeof(long int));
 outfile.close();
+ return 0.0;
 }
 
 

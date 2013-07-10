@@ -23,7 +23,8 @@ for(int ii=0; ii<5; ii++)
   Vh h ;
   h[]=mshmet(Th3,u,normalization=1,aniso=0,nbregul=1,hmin=1e-3,hmax=0.3,err=errm);//loptions=MSHloptions,doptions=MSHdoptions);
   cout <<" h min, max = " <<  h[].min << " "<< h[].max << " " << h[].n << " " << Th3.nv << endl;
-  plot(u,wait=1);
+  // FFCS: add 3D view parameters
+  plot(u,wait=1,fill=0,boundary=0,CutPlane=0,ShowMeshes=1,LabelColors=0);
   errm*= 0.8;// change the level of error
   cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
   Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);

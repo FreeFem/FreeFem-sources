@@ -29,7 +29,10 @@ yams: FAIRE
 
 
 
-FAIRE: yamslib_internal.h yamslib.c yamslib.h  ../Makefile
+# FFCS - make sure that PATCH is done sequentially otherwise its error messages are drowned into other meaningless
+# parallel compilation messages
+
+FAIRE: $(SRCDIR)/PATCH yamslib_internal.h yamslib.c yamslib.h  ../Makefile
 	$(MAKE)  install  WHERE
 	touch FAIRE
 
@@ -43,13 +46,13 @@ install: $(SRCDIR)/FAIT
 	cp $(YAMS_SRCDIR)/defines.h  ../include/freeyams_defines.h
 	-mkdir ../lib	
 	cp $(YAMS_OBJDIR)/libyams.a  ../lib/libfreeyams.a
-WHERE: 
-	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	make install;  \
-	echo freeyams  LD -L@DIR@/lib -lfreeyams  >../lib/WHERE.freeyams ;\
-	echo freeyams INCLUDE -I@DIR@/include>> ../lib/WHERE.freeyams ;\
-	fi
 
+# FFCS - WHERE is made to depend on FAIT otherwise it may be built in parallel and not be activated because FAIT is not
+# there yet
+
+WHERE: $(SRCDIR)/FAIT
+	echo freeyams  LD -L@DIR@/lib -lfreeyams  >$(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;
+	echo freeyams INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams ;
 
 $(SRCDIR)/PATCH: $(PACKAGE) 
 	-mkdir -p $(SRCDIR)
@@ -58,7 +61,9 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	cp $(YAMS_SRCDIRNOLIB)/*.c $(YAMS_SRCDIRNOLIB)/*.h $(YAMS_SRCDIR)
 	rm $(YAMS_SRCDIR)/memory.c 
 	cp $(YAMS_SRCDIRNOLIB)/compil.date $(YAMS_SRCDIR)
-	cd $(YAMS_SRCDIR); patch -p2 < ../../freeyams$(yams_VERSION).patch
+	cd $(YAMS_SRCDIR) && \
+	  patch -p2 < ../../freeyams$(yams_VERSION).patch && \
+	  patch -p2 < ../../freeyams$(yams_VERSION)-return-values.patch
 	mv  $(YAMS_SRCDIR)/yams.c $(YAMS_SRCDIR)/..
 	touch $(SRCDIR)/PATCH
 
@@ -66,20 +71,27 @@ $(PACKAGE):
 	-mkdir $(DIRPKG);
 	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
+# FFCS: only run make clean if cd to SRCDIR worked, otherwise this is infinite loop.
+
 clean-local: 
 	-rm FAIRE FAIT  $(SRCDIR)/FAIT
 	-cd $(YAMS_DIR) &&  $(MAKE) -C $(YAMS_DIR)  clean
 	-rm $(YAMS_OBJDIR)/libyams.a
+
+# FFCS -simplifying all paths
+
+ clean: clean-local
 	-rm ff-flags
+	-rm $(SRCDIR)/$(INSTALL)/lib/libfreeyams.a
+	-rm $(SRCDIR)/$(INSTALL)/include/*freeyams*.h
+	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.freeyams
 	-rm ../lib/libfreeyams.a
 	-rm ../include/*freeyams*.h
 	-rm ../lib/WHERE.freeyams
 	-rm -rf $(YAMS_DIR)
 	-rm -rf $(SRCDIR)
+	-rm $(PACKAGE)
 	-rm FAIT FAIRE
-
-clean: clean-local
-
 
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
