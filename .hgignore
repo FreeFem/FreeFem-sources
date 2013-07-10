@@ -1,5 +1,4 @@
 (^|/)ListOfUnAllocPtr\.bin$
-(^|/)Makefile\.in$
 (^|/)TAGS$
 (^|/)\.deps$
 (^|/)\.dll$
@@ -283,7 +282,6 @@
 ^config\.log$
 ^config\.status$
 ^config_LIB_INFO$
-^configure$
 ^configure-stamp$
 ^configure\.lineno$
 ^configure\.param$
@@ -366,7 +364,6 @@
 ^download/ipopt/install\.done$
 ^download/lib/
 ^download/metis/FAIRE
-^download/metis/Makefile\.in$
 ^download/metis/config\.log$
 ^download/metis/metis-
 ^download/mmg3d/WHERE\.done$
@@ -390,7 +387,6 @@
 ^download/nlopt/config\.log$
 ^download/nlopt/nlopt-2\.2\.4/
 ^download/parmetis/FAIRE
-^download/parmetis/Makefile\.in$
 ^download/parmetis/ParMetis-
 ^download/parmetis/WHERE\.done$
 ^download/parmetis/compile\.done$
