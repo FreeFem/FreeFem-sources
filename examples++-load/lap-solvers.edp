@@ -27,4 +27,3 @@ defaulttoSuperLU();
 cpu=clock() ;
 laplace0; // solve the problem plot(uh); // to see the result
 cout << "-- lap SuperLU " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
-uh=0;

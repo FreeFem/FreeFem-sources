@@ -1,3 +1,5 @@
+/// \file
+
 // -*- Mode : c++ -*-
 //
 // SUMMARY  :      
@@ -95,6 +97,7 @@ struct StackType;
 
 //typedef void *Stack;
 
+/// Stack used by CListOfInst::eval()
 typedef StackType & Stack;
 
 struct StackType {
@@ -204,7 +207,8 @@ public:
 	      { 
 		topmemory4tmp=0;// clean the tmp allocation 
 	        if(stackptr.size()>=20 && verbosity>2) 
-	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n ";
+		  //FFCS: nothing on following line for tests/compare
+	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
 		
 		for (iterator i=stackptr.end(); i != stackptr.begin();)
 		{
@@ -353,6 +357,8 @@ inline void deleteStack(Stack s)
  }
 #else
 //  a faire ....
+
+/// Called to create a new #Stack used to evaluate a FreeFem++ script in CListOfInst::eval()
 inline Stack newStack(size_t l)
  {
 /*  Stack thestack = new char[l];

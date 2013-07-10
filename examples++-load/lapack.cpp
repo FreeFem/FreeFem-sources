@@ -834,7 +834,9 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
 	return  mult<R,init,ibeta>(a,*bc.a,bc.b->t()) ;
     else if((bc.ta == 1) && (bc.tb == 1))
 	return  mult<R,init,ibeta>(a,bc.a->t(),bc.b->t()) ;
-
+    else
+        // should never happen
+        return NULL;
 }
 
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 

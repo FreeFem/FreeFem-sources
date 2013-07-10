@@ -17,6 +17,8 @@ PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
 
 arpack: $(ARPACKLIB) 
 
+# FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
+
 $(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
@@ -24,6 +26,7 @@ $(ARPACKLIB): ARPACK/fait
 	cd ARPACK && make lib 
 	if test -n '@FF_LAPACKdir@' ; then \
 	$(AR) $(ARFLAGS) $(LAPACK_arpack_LIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
+	$(RANLIB) $(LAPACK_arpack_LIB) ;\
 	else \
 	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
 	fi

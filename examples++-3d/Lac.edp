@@ -16,3 +16,5 @@ mesh3 Th=buildlayers(Th2,nn,
   reffaceup = rup,
   reffacelow = rdown);
 medit("Lac",Th,wait=1);
+// FFCS: testing 3d plots
+plot(Th,cmm="Lac");

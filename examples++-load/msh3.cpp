@@ -2405,6 +2405,9 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
       
       return mpq;
     }
+
+  Mesh3 *mpq = NULL;
+  return mpq;
 }
 
 
@@ -5767,7 +5770,9 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
 	pThnew->BuildGTree();  //Lorenzo	
     return pThnew;    
   }
-
+   
+  Mesh3 *pThnew = NULL;
+  return pThnew;    
 }
 
 

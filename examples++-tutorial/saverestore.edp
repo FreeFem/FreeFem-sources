@@ -14,6 +14,7 @@ Vh u=f;
 
 f <<u[];
 }
+real regtest;//FFCS regression test value
 {
 mesh Th=readmesh("Th.msh"); // il y a un changement de numerotation des traingle ou??
 // mesh Th("Th.msh"); // oK ..
@@ -26,4 +27,5 @@ e[] = u[] -v[];
 cout << e[].max << " " << e[].min << endl;
 plot(e,wait=1,value=1);
 assert(e[].max-e[].min < 1e-6);
+regtest=e[].max-e[].min;
 }

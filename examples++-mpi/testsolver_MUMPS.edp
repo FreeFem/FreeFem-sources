@@ -53,6 +53,9 @@ broadcast(processor(0),ICNTL);
     }
 }
 
+// FFCS - reference value for regression tests
+real regtest;
+
 // Read parameter of MUMPS solver in file ffmumps_fileparam.txt
 
 {
@@ -79,6 +82,7 @@ matrix A =
     di = xx-x;
     if(mpirank==0){	
     cout << "x-xx="<< endl; cout << "Linf "<< di.linfty << " L2 " << di.l2 << endl;
+    regtest=di.l2;
     }
 }
 

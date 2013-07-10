@@ -30,6 +30,12 @@ cholmod:$(CAMDLIB) $(COLAMDLIB)  $(AMDLIB)  $(CHOLMODLIB) $(SUITESPARSECONFIGLIB
 # the lib depend of the Makefile to force the reconstruction 
 # if the parameter change
 
+# FFCS: SuiteSparse/*/Source are not able to compile in parallel from
+# scratch ("pipe from processes is a directory"?). But specifying
+# "make -j 1" is not enough (another error pops up). Use "$(MAKE)
+# MAKEFLAGS=" instead (using "make MAKEFLAGS=" still produces an error
+# on Cygwin).
+
 $(SUITESPARSECONFIGLIB): SuiteSparse/FF 
 	cd SuiteSparse/SuiteSparse_config && make 
 	-mkdir ../include ../lib
@@ -38,7 +44,7 @@ $(SUITESPARSECONFIGLIB): SuiteSparse/FF
 	$(RANLIB) ../lib/libsuitesparseconfig.a
 
 $(UMFPACKLIB): SuiteSparse/FF 
-	cd SuiteSparse/UMFPACK/Lib && make 
+	cd SuiteSparse/UMFPACK/Lib && $(MAKE) MAKEFLAGS=
 	-mkdir ../include ../lib
 	cp -f  SuiteSparse/UMFPACK/Include/*.h ../include
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
@@ -46,7 +52,7 @@ $(UMFPACKLIB): SuiteSparse/FF
 	$(RANLIB) ../lib/libumfpack.a
 
 $(AMDLIB): SuiteSparse/FF 
-	cd SuiteSparse/AMD/Lib && make 
+	cd SuiteSparse/AMD/Lib && $(MAKE) MAKEFLAGS=
 	-mkdir ../include ../lib
 	cp -f  SuiteSparse/AMD/Include/*.h ../include
 	cp  SuiteSparse/AMD/Lib/libamd.a ../lib/libamd.a
@@ -90,6 +96,7 @@ SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk:SuiteSparse/DATE Makefile S
 	    echo " same flags => no recompilation !  " ; \
 	else \
 	   echo "  recompile umfpack (some flags change) => clean umfpack colmod amd " ;\
+	   mkdir -p SuiteSparse/SuiteSparse_config ;\
 	   cp SuiteSparse_config.mk SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk ; \
 	   (cd SuiteSparse/UMFPACK && make clean); \
 	   (cd SuiteSparse/CHOLMOD && make clean); \
@@ -131,3 +138,5 @@ clean-local:
 	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
 	-rm SuiteSparse*gz 
 	-rm -rf SuiteSparse
+	-rm ../pkg/SuiteSparse-*
+	-rm SuiteSparse_config.mk

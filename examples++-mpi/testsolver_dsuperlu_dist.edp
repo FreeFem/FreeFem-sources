@@ -1,5 +1,8 @@
 load "dSuperLU_DIST"
 
+// FFCS - reference value for regressions tests
+real regtest;
+
 // read parameter for superlu from file
 verbosity=2;
 {
@@ -53,6 +56,7 @@ matrix A =
     di = xx-x;
     if(mpirank==0){	
     cout << "x-xx="<< endl; cout << "Linf "<< di.linfty << " L2 " << di.l2 << endl;
+    regtest=di.l2;
     }
 }
 
