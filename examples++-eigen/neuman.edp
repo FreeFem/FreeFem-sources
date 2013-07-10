@@ -22,5 +22,9 @@ int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,n
 k=min(k,nev); //  some time the number of converged eigen value 
               // can be greater than nev;
 
-for(int i=0;i<k;i++)
+for(int i=0;i<k;i++){
   cout << " Valeur propre " << i << " = " << ev[i] << endl;
+
+  // FFCS: add 3D view
+  plot(eV[i],dim=3,fill=1);
+}

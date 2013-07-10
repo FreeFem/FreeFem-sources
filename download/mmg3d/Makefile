@@ -10,14 +10,16 @@ include ff-flags
 # -------------------------------
 # 
 DIRPKG= ../pkg
-SRCDIR= ./mmg3d4# lib#-$(mmg3d_VERSION)
-PACKAGE=$(DIRPKG)/mmg3d4.0.tgz #mmg3dlib.tar.gz #-$(mmg3d_VERSION).tar.gz
+SRCDIR= ./mmg3d4
+PACKAGE=$(DIRPKG)/mmg3d4.0.tgz
 INSTALL=..
 mmg3d_VERSION=
 # mmg3d pas sur internet
 LIBMMG3D=$(INSTALL)/lib/libmmg3d-v4.a
 OPT=4
-# size of the PKG file ( this file change See Cecile.)
+# size of the PKG file ( this file change See Cecile.) FFCS - 19/2/13 - the test for the file size (`stat -f "%z" file`)
+# is not portable from MacOS, so just leave it out in FFCS (SIZEPKG is still useful to force a remake when the package
+# changes)
 SIZEPKG=158547
 
 OBJS= analar.o	chkmsh.o	hash.o		memory.o	optcte.o	outqua.o	simu44.o	swap44.o	zaldy.o \
@@ -30,76 +32,75 @@ cenrad.o	eigenv.o	matrix.o	optcoq.o	opttyp.o	simu23.o	swap23.o	typelt.o
 
 OBJSNOP =  cendel.o swapar.o
 
+# FFCS - simplify Makefile structure
+mmg3d:WHERE.done
 
-mmg3d: mmg3d4/build-$(SIZEPKG)
-
-
-mmg3d4/build-$(SIZEPKG):
-	pkgs=`stat -f "%z" $(PACKAGE)`; \
-	if  test $(SIZEPKG) -ne "$$pkgs" ; then \
-	echo "++++++ PB version mmg3d version  $(SIZEPKG) != $$pkgs  +++++"  ;\
-	rm $(PACKAGE); \
-	$(MAKE) clean ; \
-	else $(MAKE) tag-tar-$(SIZEPKG); fi 
-	if [ -d mmg3d4  ] ; then  $(MAKE)  $(LIBMMG3D) install-4 WHERE ; else echo "Sorry no source " ; fi
-$(LIBMMG3D):
+mmg3d4/FAIT-4.done:tag-tar-$(SIZEPKG)
 	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS)'  $(OBJSNOP) 
 	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS)'  $(OBJS) 
-	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CNOFLAGS)   mmg3d.c -I..
+	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS)   mmg3d.c -I..
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o mmg3d4/build/sources/mmg3dmain/mmg3d.o
+#
+#	FFCS - ranlib required on Windows 7 64 bits
+#
+	$(RANLIB) $(LIBMMG3D)
 	-$(CC) $(CNOFLAGS) mmg3d4/build/sources/mmg3dmain/mmg3d.o   mmg3d4/build/sources/*.o -o ../bin/mmg3d $(STD_LIBS)
-	touch mmg3d4/build-4 mmg3d4/FAIT-4
-install-4:
+	touch mmg3d4/FAIT-4.done
+
+# FFCS - simplify Makefile structure
+install-4.done:mmg3d4/FAIT-4.done
 	-mkdir ../include/mmg3d-v4/		
 	cp mmg3d4/build/sources/*.h ../include/mmg3d-v4/
-	touch mmg3d4/FAIT-4
+	touch $@
+clean::
+	-rm install-4.done
 
 mmg3d-4:$(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-#http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz
-#http://www.math.u-bordeaux1.fr/~dobj/logiciels/mmg3d.php
-	cd $(DIRPKG);$(WGET) 'http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz'
-# http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download.php?file=mmg3d4.0.tgz -O mmg3d4.0.tgz
-#http://www.math.u-bordeaux1.fr/~dobj/logiciels/download.php?file=`basename $(PACKAGE)`
+# 	FFCS - 6/11/12 - curl/MacOS8 does not like redirections
+	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz
 
+install:install-4.done WHERE.done
 
-install:install-4 WHERE
+# FFCS - keep simplest makefile structure for automatic recompilations
+WHERE.done: install-4.done
+	echo mmg3d-v4  LD -L@DIR@/lib -lmmg3d-v4  >../lib/WHERE.mmg3d ;
+	echo mmg3d-v4 INCLUDE -I@DIR@/include/mmg3d-v4>> ../lib/WHERE.mmg3d ;
+	echo build WHERE ./lib/WHERE.mmg3d ;
+	touch $@
+clean::
+	-rm WHERE.done
 
-WHERE: 
-	@-if [ -f mmg3d4/FAIT-4 ] ; then \
-	make install-4;  \
-	echo mmg3d-v4  LD -L@DIR@/lib -lmmg3d-v4  >../lib/WHERE.mmg3d ;\
-	echo mmg3d-v4 INCLUDE -I@DIR@/include/mmg3d-v4>> ../lib/WHERE.mmg3d ;\
-	echo build WHERE ./lib/WHERE.mmg3d ;\
-	fi
+FAIRE: mmg3d4/FAIT-4.done install-4.done
 
-
-FAIRE: mmg3d4/FAIT-4 install-4
-
+# FFCS - keep it simple
 tag-tar-$(SIZEPKG): $(PACKAGE)
-	-rm -rf mmg3d4
-	if tar tfz $(PACKAGE)  mmg3d4/build/sources/mmg3d.c 2>/dev/null  1>/dev/null  ;\
-	 then  rm $(PACKAGE);   $(MAKe) $(PACKAGE); fi	
 	tar xvzf $(PACKAGE)
 	touch mmg3d4/build/sources/dataff.h 	
-	cp mmg3d4/build/sources/swapar.c mmg3d4/build/sources/swapar.c.origne
-	tr -d '\r' <mmg3d4/build/sources/swapar.c.origne >mmg3d4/build/sources/swapar.c
+#
+#	ALH - clean-up all CR/LF to make patching more successful
+#
+	../../build/cleancrlf mmg3d4
+#
 	cd mmg3d4;patch -p1 <../patch-mmg3dv4.diff
 	cat </dev/null >mmg3d4/build/sources/mmg3dConfig.h
 	touch tag-tar-$(SIZEPKG)
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
-clean-local:
-	-rm ff-flags ../lib/WHERE.mmg3d
-	-rm -rf ../lib/libmmg3d*.a  ../lib/libmmg3d-v4.a
-	-rm -rf ../include/mmg3d-v4
-	-rm -r $(SRCDIR)
-	-rm FAIT* mmg* flags-* build-4 tag-tar*
 
-clean:clean-local 
 
+clean::
+	-rm ff-flags
+#
+#	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
+#	compilation dependencies control there (see
+#	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
+#
+	-rm -r mmg3d4
+	-rm FAIT* mmg* flags-* tag-tar*
+	-rm $(PACKAGE)
 
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags

@@ -411,7 +411,7 @@ basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
 /*
    {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
    {   "paramdouble",&typeid(KN<double>)},
->>>>>>> 1.42
+
    {   "paramstring",&typeid(string*)},
    {   "permrow",&typeid(KN_<long>)},
    {   "permcol",&typeid(KN_<long>)},

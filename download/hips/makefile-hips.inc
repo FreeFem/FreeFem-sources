@@ -1,6 +1,9 @@
 abs_top_builddir=@abs_top_builddir@
 DOWNLOADFF=$(abs_top_builddir)/download/
-include $(DOWNLOADFF)/headers-sparsesolver.inc
+
+# ALH - allow include to fail for make clean
+-include $(DOWNLOADFF)/headers-sparsesolver.inc
+
 ### ADD for freefem++
 ###
 ###  HIPS specific compilation flags

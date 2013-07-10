@@ -60,6 +60,8 @@ for (int i=0;i<k;i++)
   if(abs(err) > 1e-6) nerr++;
   if(abs(ev[i]-eev[i]) > 1e-1) nerr++;
   cout << " ---- " <<  i<< " " << ev[i] << " == " << eev[i] << " err= " << err << " --- "<<endl;
-  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="eigen"+i+".eps");
+
+  // FFCS: add 3D view capabilities
+  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="eigen"+i+".eps",dim=3,fill=1,CutPlane=0,ShowAxes=0);
 }
 assert(nerr==0);

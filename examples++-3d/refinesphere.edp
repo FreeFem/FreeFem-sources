@@ -52,3 +52,8 @@ mesh3 Th3sphrefine2=tetgreconstruction(Th3sph,switch="raAQ",region=newlabel2,siz
  medit("sphere",Th3sph,wait=1);
  medit("sphererefinedomain",wait=1,Th3sphrefine);
   medit("sphererefinelocal",wait=1,Th3sphrefine2);
+
+// FFCS: testing 3d plots
+plot(Th3sph);
+plot(Th3sphrefine);
+plot(Th3sphrefine2);

@@ -145,7 +145,12 @@ LIBOTHERS = @LIBSPTHREAD@ @FLIBS@ $(FFLIBOTHERSMUMPS)
 CDEFS = @CFLAGSF77@
 
 #COMPILER OPTIONS
-OPTF    = -O @FFLAGS@ @MPI_INCLUDE@
+
+# FFCS - 23/4/13 - -fno-range-check required on MinGW to compile with
+# Microsoft MPI. mpif.h contains INTEGER MPI_FLOAT_INT / PARAMETER
+# (MPI_FLOAT_INT=z'8c000000') which requires this.
+
+OPTF    = -O @FFLAGS@ @MPI_INCLUDE@ -fno-range-check
 OPTC    = -O -I. @CFLAGS@  @MPI_INCLUDE@
 OPTL    = -O @FFLAGS@ @MPI_LIBFC@ 
 

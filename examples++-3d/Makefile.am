@@ -29,6 +29,7 @@ Ref: makeref.edp freefem++.pref
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
+
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
