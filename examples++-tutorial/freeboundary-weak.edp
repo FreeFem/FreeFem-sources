@@ -1,5 +1,5 @@
 //  
-//   calcul d'une zone saturation en eau (nappe phréatique)
+//   calcul d'une zone saturation en eau (nappe phreatique)
 //
 verbosity=1;
 real weak=1;
@@ -7,7 +7,7 @@ string com= "  avec du/dn ";
 if(weak) com = " avec du/du = residu  ";
 real L=10;        // longueur du domaine					   	
 real Q=0.02;      // flux entrant
-real K=0.5;	      //permeabilité	
+real K=0.5;	      //permeabilite	
 
 real  erradap=0.001;
 real  coef=1;

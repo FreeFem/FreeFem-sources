@@ -25,6 +25,8 @@ catch(...)
     // Tetrahelize the interior of the cube with tetgen
     medit("tetg",Th,wait=1);
     savemesh(Th,"Th-hex-sph.mesh");
+    // FFCS: testing 3d plots
+    plot(Th);
  }
 
 

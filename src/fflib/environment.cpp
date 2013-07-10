@@ -265,7 +265,16 @@ int  readinitfile(const string & file)
 void GetEnvironment()
  {
  char  * ff_verbosity=0,* ff_loadpath=0,* ff_incpath=0,* home=0;
+
+ // FFCS: we must make sure that FFCS does not reuse the same freefem++.pref as FF because some shared libraries must be
+ // recompiled.
+
+#ifdef ENABLE_FFCS
+ string  ffpref="freefem++-cs.pref";
+#else
   string  ffpref="freefem++.pref";
+#endif
+
 #ifdef HAVE_GETENV
   ff_verbosity = getenv("FF_VERBOSITY");
   ff_loadpath = getenv("FF_LOADPATH");

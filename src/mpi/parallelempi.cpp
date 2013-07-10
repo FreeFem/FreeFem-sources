@@ -40,6 +40,8 @@ using namespace std;
 #include "lgsolver.hpp"
 #include "problem.hpp"
 
+//FFCS redirection
+#include "../fflib/ffapi.hpp"
 
 #undef MPICH_SKIP_MPICXX
 #define  MPICH_SKIP_MPICXX
@@ -2278,7 +2280,8 @@ public:
 // Fin add J. Morice
 void f_initparallele(int &argc, char **& argv)
 {
-  MPI_Init(&argc, &argv);
+  /// FFCS: MPI_Init() needs to be called earlier (in ffcs/src/server.cpp)
+  ffapi::mpi_init(argc,argv);
   
   int mpirank1,mpisize1;
   MPI_Comm_rank(MPI_COMM_WORLD, &mpirank1); /* local */ 
@@ -2289,8 +2292,10 @@ void f_initparallele(int &argc, char **& argv)
   if(verbosity> 2 || (mpirank ==0))
   cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
 }
+
 double ffMPI_Wtime() {return MPI_Wtime();}
 double ffMPI_Wtick() {return MPI_Wtick();}
+
 void f_init_lgparallele()
   {
     if(verbosity && mpirank == 0) cout << "parallelempi ";
@@ -2607,7 +2612,9 @@ void f_init_lgparallele()
   }
 void f_end_parallele()
 {
-    MPI_Finalize();
+  /// FFCS: MPI_Finalize() needs to be called later than this (in
+  /// ffcs/src/server.cpp)
+  ffapi::mpi_finalize();
     if(mpirank==0 || verbosity>2) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
     else if(verbosity>5)  cout << '.' << endl ;
 }

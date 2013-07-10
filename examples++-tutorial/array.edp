@@ -317,7 +317,7 @@ d = ( a ? b : c ); // for i = 0, n-1  : d[i] = a[i] ? b[i] : c[i] ,
 cout << " d = ( a ? b : c )  is " << d << endl;
 d = ( a ? 1 : c );// for i = 0, n-1: d[i] = a[i] ? 1 : c[i] ,   (v2.23-1)
 d = ( a ? b : 0 );// for i = 0, n-1: d[i] = a[i] ? b[i] : 0 ,   (v2.23-1)
-d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill (v2.23-1)
+d = ( a ? 1 : 0 );// for i = 0, n-1: d[i] = a[i] ? 0 : 1 ,     \hfill(v2.23-1)
  tab.sort ; //  sort the array tab  (version 2.18) 
 cout << " tab (after sort) "  << tab << endl;
 int[int] ii(0:d.n-1); // set array ii to 0,1, ..., d.n-1
@@ -326,6 +326,7 @@ sort(d,ii); // sort array d and ii in parallele
 cout << " d " << d << "\n ii = " << ii << endl;
 
 }
+
 //  version 3.8-1
 for(int i=0;i<ARGV.n;++i)
   {
@@ -346,3 +347,4 @@ cout << vh.n <<endl;
 vh.resize(20);
 cout << vh.n <<endl;
 }
+

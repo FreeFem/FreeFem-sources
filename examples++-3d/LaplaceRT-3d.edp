@@ -123,7 +123,20 @@ problem laplaceMixte([u1,u2,u3,p],[v1,v2,v3,q],solver=GMRES,eps=1.0e-10,tgv=1e30
  + on(2,u1=g1n,u2=g2n,u3=g3n);
 
 laplace;
-plot(P,fill=1);
+
+// FFCS: add 3D view parameters
+real[int] CameraPositionValue = [0.0165449,3.23891,-0.991528];
+real[int] CameraFocalPointValue = [0.5,0.5,0.5];
+real[int] CameraViewUpValue = [0.671735,0.442219,0.594318];
+real[int] CutPlaneOriginValue = [0.5,0.5,1.01];
+real[int] CutPlaneNormalValue = [0.689523,0.722423,0.0516115];
+plot(P,fill=0,boundary=0,ShowMeshes=1,CutPlane=1,
+	CameraPosition=CameraPositionValue,
+	CameraFocalPoint=CameraFocalPointValue,
+	CameraViewUp=CameraViewUpValue,
+	CutPlaneOrigin=CutPlaneOriginValue,
+	CutPlaneNormal = CutPlaneNormalValue);
+
 laplaceMixte;
 
 real errL2=sqrt(int3d(Th)(square(P-p))) ;

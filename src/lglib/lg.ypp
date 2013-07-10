@@ -1,3 +1,5 @@
+/// \file
+
 %{ 
     // -*- Mode : c++ -*-
     //
@@ -256,7 +258,8 @@ void (*end_parallele)()=0;
 
 start:   input ENDOFFILE {
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
-                        if(ThePlotStream) fwrite(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
+			//FFCS: divert stream to FFCS
+                        if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
@@ -287,7 +290,8 @@ start:   input ENDOFFILE {
                         //debugstack.clear() 
                         } 
                         fingraphique();
-			if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}
+			//FFCS: divert stream to FFCS
+			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
@@ -302,6 +306,8 @@ input:   instructions
 instructions:  instruction   {$$=$1;;;}
         | instructions  instruction   { $$= ($1+=$2) }         
         ;
+
+/* Function arguments list */
 
 list_of_id_args:   { $$=new ListOfId();}
             | id                      { $$ = new ListOfId(); $$->push_back(UnId($1))}
@@ -330,6 +336,8 @@ list_of_id1:  id                      { $$ = new ListOfId(); $$->push_back(UnId(
          
 id: ID | FESPACE|FESPACE3|FESPACE1; 
 
+/* <<list_of_dcls>> */
+
 list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
               |  ID '='   no_comma_expr     {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
               |  ID  '(' parameters_list ')' {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3);
@@ -350,6 +358,8 @@ parameters_list:
 	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
 ; 
 
+/* <<type_of_dcl>> */
+
 type_of_dcl:   TYPE 
              | TYPE '[' TYPE ']' {$$=TypeArray($1,$3)}
              | TYPE '[' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
@@ -362,6 +372,7 @@ type_of_dcl:   TYPE
              
 ;
 
+/* <<ID_space>> */
 
 ID_space:
 ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
@@ -376,6 +387,8 @@ ID_array_space:
   |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
 
 ;
+
+/* <<fespace>> */
 
 fespace123: FESPACE { fespacedim=2} |FESPACE1 { fespacedim=1} | FESPACE3 { fespacedim=3};
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
@@ -394,6 +407,8 @@ spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2}
            |  fespace '[' TYPE ']'  spaceIDa    { $$=0;  $$ = $5}
 ;
 
+/* <<fespace_def>> */
+
 fespace_def:
    ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,typeFESpace($3),$3,dimFESpaceImage($3));
      $3.destroy(); };
@@ -402,7 +417,9 @@ fespace_def_list:  fespace_def
                  | fespace_def_list ',' fespace_def {$$=C_F0($1,$3)}
 ;
     
-declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3} 
+/* <<declaration>> */
+
+declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3} /* see [[list_of_dcls]] */
              | FESPACEID  fespace_def_list    ';' {$$=$2}  
              | spaceIDs ';'{ $$=$1} 
              | FUNCTION ID '=' Expr ';' {$$=currentblock->NewID($1,$2,$4);} 
@@ -446,6 +463,8 @@ declaration_for:
 
 try: TRY { Block::open(currentblock) };
 
+/* <<instruction>> */
+
 instruction:   ';' {$$=0;} 
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
@@ -462,7 +481,7 @@ instruction:   ';' {$$=0;}
          |  IF '(' Expr ')'   instruction  ELSE instruction {$$=FIf($3,$5,$7)}
          |  begin  instructions end { 
                       $$=C_F0(new E_block($2,$3),atype<void>()) }
-         |  BORDER  ID   border_expr {
+         |  BORDER  ID   border_expr { /* <<BORDER_ID>> */
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$3))} 
          |  BORDER  ID   '['  array ']' ';' {
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$4))} 
@@ -491,6 +510,9 @@ bornes: '(' ID '=' Expr ',' Expr ')' {
    $$+= $4;
    $$+= $6 }
 ;
+
+/* <<border_expr>> */
+
 border_expr:   bornes instruction {   
    $$ = ($1 += $2);
    currentblock->close(currentblock)} 
@@ -645,6 +667,7 @@ void init_algo();
 bool withrgraphique = false;
 //string  StrVersionNumber();
 
+/// Called by mainff() and activates the bison parser by calling yyparse()
 int Compile()
 {
   extern   YYSTYPE *plglval;  // modif FH 
@@ -713,9 +736,12 @@ static void SetcppIo()
 #endif
    ios::sync_with_stdio();
 }
+
 // pour l'environement.
 extern const char *  prognamearg;
 extern  bool echo_edp;
+
+/// Called by mymain() and calls Compile() to run the FF language parser
 int mainff (int  argc, char **argv)
 {
     
@@ -725,7 +751,12 @@ int mainff (int  argc, char **argv)
 
     int vvold=verbosity; 
     if(mpirank !=0) verbosity=0;
+
+  // ALH - 14/10/8 - This breaks FFCS output redirection
+#ifndef ENABLE_FFCS
   SetcppIo();
+#endif
+
   GetEnvironment();   
     vvold=verbosity; 
     if(mpirank !=0) verbosity=0; 
@@ -817,12 +848,23 @@ int mainff (int  argc, char **argv)
 
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
-  if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
+  // FFCS: divert stream to FFCS
+  if(ThePlotStream){
+    ffapi::ff_pclose(ThePlotStream);
+    ThePlotStream=0;
+  }
   Destroylex( zzzfff);
   
    // ClearMem();
   return retvalue;
 }
 
-
-
+/* FFCS: emacs configuration for this file */
+ 
+/*!
+ * Local Variables:
+ * mode:antlr
+ * ispell-local-dictionary:"british"
+ * coding:utf-8
+ * End:
+ */

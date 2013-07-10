@@ -32,6 +32,10 @@
  ref:ANR-07-CIS7-002-01 
  */
 
+// FFCS: add requirement for MPI
+//ff-c++-LIBRARY-dep: hypre mpi
+//ff-c++-cpp-dep: 
+
 // add F.Hecht ...  oct 2010 
 #define HYPRE_TIMING
 // .. end add

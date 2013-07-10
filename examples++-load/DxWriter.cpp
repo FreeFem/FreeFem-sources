@@ -316,10 +316,16 @@ DxWriter* init_DxWriter(DxWriter * const &a, string * const & s)
 } 
 
 void* call_addmesh( DxWriter * const & mt, Fem2D::Mesh* const & pTh)
-{ mt->addmesh(pTh);}
+{ 
+  mt->addmesh(pTh);
+  return NULL;
+}
 
 void* call_addtimeseries( DxWriter * const & mt,string * const & name, Fem2D::Mesh* const & pTh)
-{ mt->addtimeseries(*name, pTh);}
+{ 
+  mt->addtimeseries(*name, pTh);
+  return NULL;
+}
 
 
 //   Add the function name to the freefem++ table 
