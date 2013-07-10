@@ -18,7 +18,7 @@ BUILT_SOURCES=compil.date
 compil.date: $(ffmedit_SOURCES)
 	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
 #.PHONY: compil.date
-all-local: pinking.no-opt$(MEDITPROG)
+###all-local: pinking.no-opt$(MEDITPROG)
 
 # ALH - during a parallel make, we should make sure that picking.o is not used before being made by a different
 # thread. If I understand things correctly, picking.c should not be compiled with the regular CFLAGS options.
