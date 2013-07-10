@@ -1,9 +1,18 @@
-26/6/2013
- - created a build/ subdirectory for build tools (ALH)
- - enabled parallel make ("make -j") (ALH)
- - created a separate file (acmpi.m4) for complex MPI configuration options (ALH)
- - added configuration option --enable-ffcs to make the FF source compatible with FFCS (ALH)
- - backported all patches for FreeFem++-cs into FreeFem++ (ALH)
+10/7/2013  (version 3.25)
+ - merge FFCS (ALH) version and  ff++ version (FH) of freefem++ programs
+ - remove all automake file form the hg data base
+ 
+ - add new parameter to ffglut for demo of freefem++ 
+    ffglut  [-nv|-v|-vv|-vvv] [-wait 0.5] [-g 512x300+10+10] [-t title] [file]
+    all number can be change the wiat is in second 0 is default value nowait bewteew plot
+    -g 512x300+10+10 is the geometry of the  graphic window
+    -t the title of the windows 
+26/6/2013 (ALH)
+ - created a build/ subdirectory for build tools
+ - enabled parallel make ("make -j")
+ - created a separate file (acmpi.m4) for complex MPI configuration options
+ - added configuration option --enable-ffcs to make the FF source compatible with FFCS
+ - backported all current FreeFem++ patches for FreeFem++-cs into the FreeFem++
  - started main doxygen page mainpage.dox
 9/06/2013
  - correct extract function of mesh Lo Sala <salalo80@gmail.com>

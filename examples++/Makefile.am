@@ -1,6 +1,6 @@
 # $Id$
 
-all-local: all.edp regtests.edp
+all-local: all.edp regtests.edp freefem++.pref
 
 TESTS=aadaptation.edp aalapacien.edp aalaplace-nc.edp aamove.edp aaRT.edp arrayoFVh.edp bilap.edp D2.edp demo1.edp demo.edp funct.edp lapacienprecon.edp lap_mat.edp NSP1P1b.edp NSP1P1.edp NSP1P2.edp parareal.edp Richard.edp teste.edp testFE.edp wafer-heating-laser-axi.edp
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
@@ -23,6 +23,9 @@ Ref: makeref.edp
 
 makeref.edp: regtests.m4 ../regtests.m4
 	m4 regtests.m4 > makeref.edp
+freefem++.pref:
+	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo loadpath += \"./\" >>freefem++.pref
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

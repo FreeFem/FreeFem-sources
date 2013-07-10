@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.23,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.25,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -953,9 +953,11 @@ dnl	echo lapack  LD  \'$ff_mkl_lapack\'  >>$ff_where_lib_conf
 dnl	echo scalapack  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
 dnl	echo blacs  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
 dnl	echo lapack INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
-
     else 
 	ff_mkl_libpath=no
+	
+	# FH - pardiso is there as soon as mkl is
+        enable_pardiso=no
     fi
 fi
 
@@ -1700,13 +1702,13 @@ fi
 # $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
 m4_define([FFCS_DISABLE_DOWNLOAD],
     [AC_ARG_ENABLE($1,[  --disable-$1      Do not download $1])
-    if test "$enable_$1" != "no"
+    if test "$enable_$1" = "no"
     then
-        AC_SUBST([FFCS_COMPILE_$1],ifelse($3,,$1,$3))
-        AC_SUBST([FFCS_DYLIB_$1],$2)
-    else
         AC_SUBST([FFCS_COMPILE_$1],"")
         AC_SUBST([FFCS_DYLIB_$1],"")
+    else
+        AC_SUBST([FFCS_COMPILE_$1],ifelse($3,,$1,$3))
+        AC_SUBST([FFCS_DYLIB_$1],$2)
     fi
 ])
 

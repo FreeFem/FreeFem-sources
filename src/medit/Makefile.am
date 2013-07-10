@@ -17,6 +17,14 @@ AM_CPPFLAGS=-I$(srcdir)/../libMesh
 BUILT_SOURCES=compil.date
 compil.date: $(ffmedit_SOURCES)
 	echo "#define COMPIL " '"' `date` '(with ff++ $(VERSION))''"' > compil.date
+<<<<<<< /home/alh/ff/draft/src/medit/Makefile.am
+||||||| /tmp/Makefile.am~base.yzYX12
+#.PHONY: compil.date
+all-local: pinking.no-opt$(MEDITPROG)
+=======
+#.PHONY: compil.date
+###all-local: pinking.no-opt$(MEDITPROG)
+>>>>>>> /tmp/Makefile.am~other.Tl5tp3
 
 # ALH - during a parallel make, we should make sure that picking.o is not used before being made by a different
 # thread. If I understand things correctly, picking.c should not be compiled with the regular CFLAGS options.
