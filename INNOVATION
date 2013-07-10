@@ -1,3 +1,7 @@
+10/7/2013  (version 3.25)
+ - merge FFCS (ALH) version and  ff++ version (FH) of freefem++ programs
+ - remove all automake file form the hg data base
+ 
  - add new parameter to ffglut for demo of freefem++ 
     ffglut  [-nv|-v|-vv|-vvv] [-wait 0.5] [-g 512x300+10+10] [-t title] [file]
     all number can be change the wiat is in second 0 is default value nowait bewteew plot
