@@ -3912,7 +3912,7 @@ Hence FE-functions are not defined only by their formula but also by the mesh an
 
 \bFF
 func f=x^2*(1+y)^3+y^2;
-mesh Th = square(20,20,[-2+2*x,-2+2*y]); // square $]-2,2[^2$
+mesh Th = square(20,20,[-2+4*x,-2+4*y]); // square $]-2,2[^2$
 fespace Vh(Th,P1);
 Vh fh=f;  // fh is the  projection of f to Vh (real value)
 func zf=(x^2*(1+y)^3+y^2)*exp(x+1i*y);
