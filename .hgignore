@@ -347,7 +347,7 @@
 ^download/gmm/FAIRE
 ^download/gmm/FAIT
 ^download/gmm/cxxflags
-^download/gmm/gmm-4\.2/
+^download/gmm/gmm-.*/
 ^download/hips/FAIT
 ^download/hips/config\.log$
 ^download/hips/hips-1\.2b-rc4/
