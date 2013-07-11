@@ -36,8 +36,8 @@ OBJSNOP =  cendel.o swapar.o
 mmg3d:WHERE.done
 
 mmg3d4/FAIT-4.done:tag-tar-$(SIZEPKG)
-	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS)'  $(OBJSNOP) 
-	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS)'  $(OBJS) 
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS) -g'   $(OBJSNOP) 
+	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -g'   $(OBJS) 
 	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS)   mmg3d.c -I..
 	$(AR) $(ARFLAGS) $(LIBMMG3D) mmg3d4/build/sources/*.o mmg3d4/build/sources/mmg3dmain/mmg3d.o
 #

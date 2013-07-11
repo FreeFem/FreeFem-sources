@@ -1,4 +1,7 @@
 10/7/2013  (version 3.25)
+ - remove of Mafile.in configure for the hg distrubion 
+     use :  autoreconf -i  # too build Makefile.in 
+     before to configure 
  - merge FFCS (ALH) version and  ff++ version (FH) of freefem++ programs
  - remove all automake file form the hg data base
  
