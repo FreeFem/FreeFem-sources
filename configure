@@ -625,11 +625,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 FFCS_WINDOWS_FALSE
 FFCS_WINDOWS_TRUE
->>>>>>> /tmp/configure~other.AHgiVg
 TEST_FFPPMPI
 TEST_FFPP
 IDE_TESTS
@@ -643,8 +640,6 @@ FNOFLAGS
 CNOFLAGS
 LIBC_VERSION
 KERNEL_VERSION
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 FFCS_DYLIB_pipe
 FFCS_COMPILE_pipe
 FFCS_DYLIB_pardiso
@@ -679,7 +674,6 @@ FFCS_DYLIB_gsl
 FFCS_COMPILE_gsl
 FFCS_DYLIB_fflapack
 FFCS_COMPILE_fflapack
->>>>>>> /tmp/configure~other.AHgiVg
 FLTK_CONFIG
 FLTK_CONFIG_PARAM
 FLTK_VERSION
@@ -733,11 +727,8 @@ DOWNLOADCOMPILE
 WGET
 ff_curl
 ff_wget
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 FFCS_MPIOK_FALSE
 FFCS_MPIOK_TRUE
->>>>>>> /tmp/configure~other.AHgiVg
 SKIP_TESTS_MPI
 MPI_LIBFC
 MPI_LIBC
@@ -788,11 +779,8 @@ F77
 ac_ct_FC
 FCFLAGS
 FC
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 ENABLE_FFCS_FALSE
 ENABLE_FFCS_TRUE
->>>>>>> /tmp/configure~other.AHgiVg
 SIZEOF_PTRINBIT
 SIZEOF_PTR
 SIZEOF_INT
@@ -826,10 +814,7 @@ CC
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 FFCS_MAKEFLAGS
->>>>>>> /tmp/configure~other.AHgiVg
 RANLIB
 am__untar
 am__tar
@@ -928,8 +913,6 @@ with_amd
 with_umfpack
 enable_static
 enable_pdf
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 enable_fflapack
 enable_gsl
 enable_hips
@@ -947,7 +930,6 @@ enable_superludist
 enable_yams
 enable_pardiso
 enable_pipe
->>>>>>> /tmp/configure~other.AHgiVg
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1590,34 +1572,11 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-<<<<<<< /home/alh/ff/draft/configure
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-ffcs           build FreeFem++ for use by FreeFem++-cs
-||||||| /tmp/configure~base.QJKce1
-  --enable-silent-rules   less verbose build output (undo: "make V=1")
-  --disable-silent-rules  verbose build output (undo: "make V=0")
-  --enable-maintainer-mode
-                          enable make rules and dependencies not useful (and
-                          sometimes confusing) to the casual installer
-  --enable-dependency-tracking
-                          do not reject slow dependency extractors
-  --disable-dependency-tracking
-                          speeds up one-time build
-=======
-  --enable-silent-rules   less verbose build output (undo: "make V=1")
-  --disable-silent-rules  verbose build output (undo: "make V=0")
-  --enable-maintainer-mode
-                          enable make rules and dependencies not useful (and
-                          sometimes confusing) to the casual installer
-  --enable-dependency-tracking
-                          do not reject slow dependency extractors
-  --disable-dependency-tracking
-                          speeds up one-time build
-  --enable-ffcs	build FreeFem++ for use by FreeFem++-cs
->>>>>>> /tmp/configure~other.AHgiVg
   --disable-fortran	No Fortran compiler available ( ARPACK need it)
   --disable-c		No C compiler available (C BLAS need it)
   --disable-default-fltk	Does not use default FLTK
@@ -1633,8 +1592,6 @@ Optional Features:
   --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)
   --enable-static	Build binaries with no shared library dependencies
   --disable-pdf	Disable PDF documentation building
-<<<<<<< /tmp/configure~base.QJKce1
-=======
   --disable-fflapack      Do not download fflapack
   --disable-gsl      Do not download gsl
   --disable-hips      Do not download hips
@@ -1652,7 +1609,6 @@ Optional Features:
   --disable-yams      Do not download yams
   --disable-pardiso      Do not download pardiso
   --disable-pipe      Do not download pipe
->>>>>>> /tmp/configure~other.AHgiVg
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -3606,14 +3562,11 @@ else
 fi
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 # FFCS - parallel make options (see [[file:../../configure/ac::FFCS_MAKEFLAGS]])
 
 FFCS_MAKEFLAGS=$FFCS_MAKEFLAGS
 
 
->>>>>>> /tmp/configure~other.AHgiVg
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 
 
@@ -5182,7 +5135,6 @@ $as_echo "$as_me:  fatal error : sizeof pointer $ff_size_ptr !  or no c++ compil
   as_fn_error $? " Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 " "$LINENO" 5
 fi
 
-<<<<<<< /home/alh/ff/draft/configure
 # FFCS - build the code for FreeFem++-cs
 # Check whether --enable-ffcs was given.
 if test "${enable_ffcs+set}" = set; then :
@@ -5207,33 +5159,6 @@ else
   ENABLE_FFCS_FALSE=
 fi
 
-||||||| /tmp/configure~base.QJKce1
-=======
-# FFCS - build the code for FreeFem++-cs
-# Check whether --enable-fortran was given.
-if test "${enable_fortran+set}" = set; then :
-  enableval=$enable_fortran;
-fi
-
-if test "$enable_ffcs" = yes
-then
-
-cat >>confdefs.h <<_ACEOF
-#define ENABLE_FFCS $enable_ffcs
-_ACEOF
-
-else
-	enable_ffcs=no
-fi
- if test $enable_ffcs = yes; then
-  ENABLE_FFCS_TRUE=
-  ENABLE_FFCS_FALSE='#'
-else
-  ENABLE_FFCS_TRUE='#'
-  ENABLE_FFCS_FALSE=
-fi
-
->>>>>>> /tmp/configure~other.AHgiVg
 
 # dur dur car sous MacOsX le fortran n'est pas standard.
 ff_AR="ar"
@@ -5248,21 +5173,14 @@ fi
 ff_g2c_lib="";
 if test "$enable_fortran" != no
 then
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
     # ALH-FFCS-2/3/10: add gfortran-mp-4.4 for MacPorts on MacOS 10.6
->>>>>>> /tmp/configure~other.AHgiVg
     ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-<<<<<<< /tmp/configure~base.QJKce1
-  for ac_prog in gfortran  f90  xlf90 g95
-=======
   for ac_prog in gfortran  f90  xlf90 g95 gfortran-mp-4.4
->>>>>>> /tmp/configure~other.AHgiVg
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -5306,11 +5224,7 @@ fi
 fi
 if test -z "$FC"; then
   ac_ct_FC=$FC
-<<<<<<< /tmp/configure~base.QJKce1
-  for ac_prog in gfortran  f90  xlf90 g95
-=======
   for ac_prog in gfortran  f90  xlf90 g95 gfortran-mp-4.4
->>>>>>> /tmp/configure~other.AHgiVg
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5477,11 +5391,7 @@ ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-<<<<<<< /tmp/configure~base.QJKce1
-  for ac_prog in gfortran  f90 xlf xlf90 g95 f77 fort77 "$FC"
-=======
   for ac_prog in gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" gfortran-mp-4.4
->>>>>>> /tmp/configure~other.AHgiVg
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -5525,11 +5435,7 @@ fi
 fi
 if test -z "$F77"; then
   ac_ct_F77=$F77
-<<<<<<< /tmp/configure~base.QJKce1
-  for ac_prog in gfortran  f90 xlf xlf90 g95 f77 fort77 "$FC"
-=======
   for ac_prog in gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" gfortran-mp-4.4
->>>>>>> /tmp/configure~other.AHgiVg
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5691,10 +5597,7 @@ ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
->>>>>>> /tmp/configure~other.AHgiVg
 #	if test -n "$F77"
 #	then
     ff_flibs=""
@@ -7897,9 +7800,6 @@ ff_uname=`uname`
 ff_mingw=no
 case $ff_uname in
     CYGWIN*)
-<<<<<<< /tmp/configure~base.QJKce1
-	ff_nocygwin=-mno-cygwin;
-=======
 
     	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
 	if test $enable_ffcs = no
@@ -7907,7 +7807,6 @@ case $ff_uname in
 	    ff_nocygwin=-mno-cygwin
 	fi
 
->>>>>>> /tmp/configure~other.AHgiVg
 	GCCNOCYGWIN=$ff_nocygwin
 ;;
     MINGW*)
@@ -7918,9 +7817,6 @@ CYGWIN*|MINGW*)
 
 	ff_suffix_dylib="dll";
         ff_win32=yes;
-<<<<<<< /tmp/configure~base.QJKce1
-	FFMETIS_CFLAGS="-D__VC__ -D_MSC_VER"
-=======
 
 	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
 	# (which creates thousands of duplicate definitions for sytem calls like time()).
@@ -7933,15 +7829,12 @@ CYGWIN*|MINGW*)
 	    FFMETIS_CFLAGS="-D__VC__ -D_MSC_VER"
 
 	fi
->>>>>>> /tmp/configure~other.AHgiVg
 
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
 	then
 # 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
 	        ff_glut_ok=yes
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
 		# FFCS: on Windows, FF crashes when compiling GL/glut.h and the option "--disable-opengl" is not
 		# operational because ff_glut_ok is forced to yes here.
@@ -7951,16 +7844,8 @@ CYGWIN*|MINGW*)
 		    enable_opengl=no
 		fi
 
->>>>>>> /tmp/configure~other.AHgiVg
                 ff_mingw=yes
                 enable_cygwindll=no;
-<<<<<<< /tmp/configure~base.QJKce1
-		#ff_pthread="-mthread"
-		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
-		FFLAGS="$FFLAGS $ff_nocygwin"
-		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-                cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-=======
 		ff_pthread="-mthreads"
 
 		# FFCS does not use the Cygwin MinGW compilers any more
@@ -7970,7 +7855,6 @@ CYGWIN*|MINGW*)
 		    FFLAGS="$FFLAGS $ff_nocygwin"
 		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
                     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
->>>>>>> /tmp/configure~other.AHgiVg
 /* end confdefs.h.  */
 int a;
 _ACEOF
@@ -7978,39 +7862,19 @@ if ac_fn_cxx_try_compile "$LINENO"; then :
 
 else
   ff_nocygwin="";
-<<<<<<< /tmp/configure~base.QJKce1
-		     { $as_echo "$as_me:${as_lineno-$LINENO}: Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3" >&5
-=======
 			    { $as_echo "$as_me:${as_lineno-$LINENO}: Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3" >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me: Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3" >&6;}
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-<<<<<<< /tmp/configure~base.QJKce1
-		CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
-		FFLAGS="$FFLAGS $ff_nocygwin"
-		CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
-		CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
-=======
 		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
 		    FFLAGS="$FFLAGS $ff_nocygwin"
 		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
 		    CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
 		fi
 
->>>>>>> /tmp/configure~other.AHgiVg
 		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
 		LIBSNOCONSOLE="-mwindows"
-<<<<<<< /tmp/configure~base.QJKce1
-		test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
-		if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
-		    case "$F77" in
-	 		*gfortran) FLIBS="$ff_nocygwin -lgfortran";;
-	 		*g77) FLIBS="$ff_nocygwin -lg2c";;
-			*)   as_fn_error $? " Sorry no known FLIBS with this $F77  !" "$LINENO" 5 ;;
-		    esac
-=======
 
 		# FFCS uses a specific compiler, so we specify its libraries explicitely
 		if test $enable_ffcs = no
@@ -8023,12 +7887,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 			    *)   as_fn_error $? " Sorry no known FLIBS with this $F77  !" "$LINENO" 5 ;;
 			esac
 		    fi
->>>>>>> /tmp/configure~other.AHgiVg
 		fi
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
->>>>>>> /tmp/configure~other.AHgiVg
                 ff_glutname="glut32"
 		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
@@ -9221,25 +9081,15 @@ if test "${enable_generic+set}" = set; then :
 fi
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-# Generic code
-if test "$enable_debug" != yes \
-    -a "$enable_optim" != no \
-    -a "$enable_generic" = yes
-=======
 # FFCS: remove "-mcpu=common" to allow other hardware-dependant values of cpu for PowerPC - thank you Fred (20/02/11)
 
 if test $enable_ffcs = yes
->>>>>>> /tmp/configure~other.AHgiVg
 then
-<<<<<<< /tmp/configure~base.QJKce1
-=======
     # Generic code
     if test "$enable_debug" != yes \
 	-a "$enable_optim" != no \
 	-a "$enable_generic" = yes
     then
->>>>>>> /tmp/configure~other.AHgiVg
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -mcpu=common" >&5
 $as_echo_n "checking whether the C compiler accepts -mcpu=common... " >&6; }
 	check_save_flags="$CFLAGS"
@@ -9395,10 +9245,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
     fi
->>>>>>> /tmp/configure~other.AHgiVg
 fi
 
 # Hardware-dependant optimization
@@ -11124,8 +10971,6 @@ $as_echo "yes" >&6; }
 
 # Checking wether we can produce a parallel version
 # -------------------------------------------------
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
 if test $enable_ffcs = no
 then
@@ -11133,7 +10978,6 @@ then
     # Checking wether we can produce a parallel version
 # -------------------------------------------------
 
->>>>>>> /tmp/configure~other.AHgiVg
 ff_save_path="$PATH"
 # We need to choose between mpich, openmpi  and lam for the Debian package
 
@@ -11816,9 +11660,6 @@ else
 	  ff_mpi=no
 
 fi
-<<<<<<< /tmp/configure~base.QJKce1
-#export PATH="$ff_save_path"
-=======
 
 # Local Variables:
 # mode:shell-script
@@ -11962,7 +11803,6 @@ else
 fi
 
 
->>>>>>> /tmp/configure~other.AHgiVg
 # Looking for useful configuration utilities
 # ------------------------------------------
 
@@ -12763,13 +12603,10 @@ $as_echo_n "checking for BLAS version to download... " >&6; }
 	    ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
 	    ff_lapack_ok=ok
 	else
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
             # ALH - FFCS - 23/12/8 - ATLAS compilation does not work anymore on Linux
 	    as_fn_error $? "No BLAS library found - please install one or install Lapack" "$LINENO" 5
 
->>>>>>> /tmp/configure~other.AHgiVg
 	    ff_download_blas=atlas-source
 	    ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
 	    ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
@@ -12837,19 +12674,11 @@ done
 fi
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-if test "$ff_blas_ok" = yes
-=======
 # FFCS: do not specify the default BLAS LDADD if a specific one will be built in the download directory
 
 if test "$ff_blas_ok" = yes && test "$ff_download_blas" = ""
->>>>>>> /tmp/configure~other.AHgiVg
 then
-<<<<<<< /tmp/configure~base.QJKce1
-	if test -z "$ff_where_lib_conf_blas" ; then
-=======
     	if test -z "$ff_where_lib_conf_blas" ; then
->>>>>>> /tmp/configure~other.AHgiVg
 	    echo "blas LD $ff_blas_libs"  >>$ff_where_lib_conf
 	    test -n "" && echo "blas INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_blas=1
@@ -12860,11 +12689,7 @@ $as_echo "$as_me:     ++ add blas : $ff_blas_libs  in  $ff_where_lib_conf \"" >&
 $as_echo "$as_me:     -- do not add blas : $ff_blas_libs  in  $ff_where_lib_conf \"" >&6;}
         fi
 
-<<<<<<< /tmp/configure~base.QJKce1
-fi
-=======
     fi
->>>>>>> /tmp/configure~other.AHgiVg
 
 # end of BLAS -------------------
 
@@ -13497,11 +13322,6 @@ $as_echo "#define HAVE_LIBUMFPACK 1" >>confdefs.h
 
 	 fi
 fi
-<<<<<<< /tmp/configure~base.QJKce1
-  if test "$ff_umfpack_ok" = yes
-  then
-      	if test -z "$ff_where_lib_conf_amd" ; then
-=======
 
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
@@ -13511,7 +13331,6 @@ then
     if test "$ff_umfpack_ok" = yes
     then
 		if test -z "$ff_where_lib_conf_amd" ; then
->>>>>>> /tmp/configure~other.AHgiVg
 	    echo "amd LD $ff_umfpack_libs"  >>$ff_where_lib_conf
 	    test -n "-I/usr/include/$ff_umfpack_dir" && echo "amd INCLUDE -I/usr/include/$ff_umfpack_dir "  >>$ff_where_lib_conf
             ff_where_lib_conf_amd=1
@@ -13522,11 +13341,7 @@ $as_echo "$as_me:     ++ add amd : $ff_umfpack_libs -I/usr/include/$ff_umfpack_d
 $as_echo "$as_me:     -- do not add amd : $ff_umfpack_libs -I/usr/include/$ff_umfpack_dir in  $ff_where_lib_conf \"" >&6;}
         fi
 
-<<<<<<< /tmp/configure~base.QJKce1
-      	if test -z "$ff_where_lib_conf_umfpack" ; then
-=======
 		if test -z "$ff_where_lib_conf_umfpack" ; then
->>>>>>> /tmp/configure~other.AHgiVg
 	    echo "umfpack LD $ff_umfpack_libs"  >>$ff_where_lib_conf
 	    test -n "-I/usr/include/$ff_umfpack_dir" && echo "umfpack INCLUDE -I/usr/include/$ff_umfpack_dir "  >>$ff_where_lib_conf
             ff_where_lib_conf_umfpack=1
@@ -13538,12 +13353,8 @@ $as_echo "$as_me:     -- do not add umfpack : $ff_umfpack_libs -I/usr/include/$f
         fi
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-  fi
-=======
 				    fi
 fi
->>>>>>> /tmp/configure~other.AHgiVg
 
 LIBS="$ff_save_libs"
 
@@ -13571,8 +13382,6 @@ $as_echo "#define HAVE_LIBUMFPACK 1" >>confdefs.h
 	ff_umfpack_ok=yes
 fi
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
 
@@ -13602,7 +13411,6 @@ $as_echo "$as_me:     -- do not add umfpack : $ff_umfpack_libs  in  $ff_where_li
 
 fi
 
->>>>>>> /tmp/configure~other.AHgiVg
 if test "$ff_umfpack_ok" = no
 then
 	 { $as_echo "$as_me:${as_lineno-$LINENO}: -- NOT  UMFPACK  ff_wget = $ff_wget" >&5
@@ -13886,8 +13694,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 $as_echo "$ff_dynload" >&6; }
 fi
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 # FFCS - -lm missing for ffmedit link stage on Debian Testing
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sin in -lm" >&5
 $as_echo_n "checking for sin in -lm... " >&6; }
@@ -13943,7 +13749,6 @@ _ACEOF
 fi
 
 
->>>>>>> /tmp/configure~other.AHgiVg
 # Checks that we also have the corresponding library
 if test "$ff_dynload" = yes
 then
@@ -14740,11 +14545,7 @@ if test "${enable_pdf+set}" = set; then :
   enableval=$enable_pdf;
 fi
 
-<<<<<<< /tmp/configure~base.QJKce1
-if test "$enable_pdf" = yes
-=======
 if test "$enable_pdf" != no
->>>>>>> /tmp/configure~other.AHgiVg
 then
    # Extract the first word of "pdflatex", so it can be a program name with args.
 set dummy pdflatex; ac_word=$2
@@ -14846,17 +14647,12 @@ fi
 
 if test "$ff_mingw" = yes
 then
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 
     # FFCS does not use FreeFem++-std, and Pcrgraph.cpp does not compile under mingwin64
     if test $enable_ffcs = no
     then
->>>>>>> /tmp/configure~other.AHgiVg
 	ff_stdprog="FreeFem++-std${EXEEXT}"
 	ff_std_graph_obj=Pcrgraph.$OBJEXT
-<<<<<<< /tmp/configure~base.QJKce1
-=======
     fi
 
     # ALH - FFCS - 30/11/8 - I need to get the output from FF for FFCS regression tests
@@ -14864,13 +14660,9 @@ then
     then
 	ff_std_ldflags="-mconsole -mwindows"
     else
->>>>>>> /tmp/configure~other.AHgiVg
 	ff_std_ldflags=-mwindows
-<<<<<<< /tmp/configure~base.QJKce1
-=======
     fi
 
->>>>>>> /tmp/configure~other.AHgiVg
 	ff_std_libs=
 fi
 STD_GRAPH_OBJ=$ff_std_graph_obj
@@ -15046,343 +14838,6 @@ else
 $as_echo "yes" >&6; }
 fi
 
-<<<<<<< /home/alh/ff/draft/configure
-# Allow some downloaded tools not to be compiled
-# ----------------------------------------------
-
-# $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
-
-
-# Check whether --enable-fflapack was given.
-if test "${enable_fflapack+set}" = set; then :
-  enableval=$enable_fflapack;
-fi
-
-    if test "$enable_fflapack" != "no"
-    then
-        FFCS_COMPILE_fflapack=fflapack
-
-        FFCS_DYLIB_fflapack=fflapack.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_fflapack=""
-
-        FFCS_DYLIB_fflapack=""
-
-    fi
-
-# Check whether --enable-gsl was given.
-if test "${enable_gsl+set}" = set; then :
-  enableval=$enable_gsl;
-fi
-
-    if test "$enable_gsl" != "no"
-    then
-        FFCS_COMPILE_gsl=gsl
-
-        FFCS_DYLIB_gsl="gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX"
-
-    else
-        FFCS_COMPILE_gsl=""
-
-        FFCS_DYLIB_gsl=""
-
-    fi
-
-# Check whether --enable-hips was given.
-if test "${enable_hips+set}" = set; then :
-  enableval=$enable_hips;
-fi
-
-    if test "$enable_hips" != "no"
-    then
-        FFCS_COMPILE_hips=hips
-
-        FFCS_DYLIB_hips=hips_FreeFem.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_hips=""
-
-        FFCS_DYLIB_hips=""
-
-    fi
-
-# Check whether --enable-hypre was given.
-if test "${enable_hypre+set}" = set; then :
-  enableval=$enable_hypre;
-fi
-
-    if test "$enable_hypre" != "no"
-    then
-        FFCS_COMPILE_hypre=hypre
-
-        FFCS_DYLIB_hypre=hypre.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_hypre=""
-
-        FFCS_DYLIB_hypre=""
-
-    fi
-
-# Check whether --enable-ipopt was given.
-if test "${enable_ipopt+set}" = set; then :
-  enableval=$enable_ipopt;
-fi
-
-    if test "$enable_ipopt" != "no"
-    then
-        FFCS_COMPILE_ipopt=ipopt
-
-        FFCS_DYLIB_ipopt=ff-Ipopt.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_ipopt=""
-
-        FFCS_DYLIB_ipopt=""
-
-    fi
-
-# Check whether --enable-lapack was given.
-if test "${enable_lapack+set}" = set; then :
-  enableval=$enable_lapack;
-fi
-
-    if test "$enable_lapack" != "no"
-    then
-        FFCS_COMPILE_lapack=lapack
-
-        FFCS_DYLIB_lapack=lapack.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_lapack=""
-
-        FFCS_DYLIB_lapack=""
-
-    fi
-
-# Check whether --enable-mmg3d was given.
-if test "${enable_mmg3d+set}" = set; then :
-  enableval=$enable_mmg3d;
-fi
-
-    if test "$enable_mmg3d" != "no"
-    then
-        FFCS_COMPILE_mmg3d=mmg3d
-
-        FFCS_DYLIB_mmg3d=mmg3d-v4.0.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_mmg3d=""
-
-        FFCS_DYLIB_mmg3d=""
-
-    fi
-
-# Check whether --enable-mshmet was given.
-if test "${enable_mshmet+set}" = set; then :
-  enableval=$enable_mshmet;
-fi
-
-    if test "$enable_mshmet" != "no"
-    then
-        FFCS_COMPILE_mshmet=mshmet
-
-        FFCS_DYLIB_mshmet=mshmet.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_mshmet=""
-
-        FFCS_DYLIB_mshmet=""
-
-    fi
-
-# Check whether --enable-mumps was given.
-if test "${enable_mumps+set}" = set; then :
-  enableval=$enable_mumps;
-fi
-
-    if test "$enable_mumps" != "no"
-    then
-        FFCS_COMPILE_mumps=mumps
-
-        FFCS_DYLIB_mumps="MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX"
-
-    else
-        FFCS_COMPILE_mumps=""
-
-        FFCS_DYLIB_mumps=""
-
-    fi
-
-# Check whether --enable-mumps_seq was given.
-if test "${enable_mumps_seq+set}" = set; then :
-  enableval=$enable_mumps_seq;
-fi
-
-    if test "$enable_mumps_seq" != "no"
-    then
-        FFCS_COMPILE_mumps_seq=mumps-seq
-
-        FFCS_DYLIB_mumps_seq=MUMPS_seq.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_mumps_seq=""
-
-        FFCS_DYLIB_mumps_seq=""
-
-    fi
-
-# Check whether --enable-parms was given.
-if test "${enable_parms+set}" = set; then :
-  enableval=$enable_parms;
-fi
-
-    if test "$enable_parms" != "no"
-    then
-        FFCS_COMPILE_parms=parms
-
-        FFCS_DYLIB_parms=parms_FreeFem.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_parms=""
-
-        FFCS_DYLIB_parms=""
-
-    fi
-
-# Check whether --enable-pastix was given.
-if test "${enable_pastix+set}" = set; then :
-  enableval=$enable_pastix;
-fi
-
-    if test "$enable_pastix" != "no"
-    then
-        FFCS_COMPILE_pastix=pastix
-
-        FFCS_DYLIB_pastix="interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX"
-
-    else
-        FFCS_COMPILE_pastix=""
-
-        FFCS_DYLIB_pastix=""
-
-    fi
-
-# Check whether --enable-scotch was given.
-if test "${enable_scotch+set}" = set; then :
-  enableval=$enable_scotch;
-fi
-
-    if test "$enable_scotch" != "no"
-    then
-        FFCS_COMPILE_scotch=scotch
-
-        FFCS_DYLIB_scotch=scotch.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_scotch=""
-
-        FFCS_DYLIB_scotch=""
-
-    fi
-
-# Check whether --enable-superludist was given.
-if test "${enable_superludist+set}" = set; then :
-  enableval=$enable_superludist;
-fi
-
-    if test "$enable_superludist" != "no"
-    then
-        FFCS_COMPILE_superludist=superludist
-
-        FFCS_DYLIB_superludist="complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX"
-
-    else
-        FFCS_COMPILE_superludist=""
-
-        FFCS_DYLIB_superludist=""
-
-    fi
-
-# Check whether --enable-yams was given.
-if test "${enable_yams+set}" = set; then :
-  enableval=$enable_yams;
-fi
-
-    if test "$enable_yams" != "no"
-    then
-        FFCS_COMPILE_yams=yams
-
-        FFCS_DYLIB_yams=freeyams.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_yams=""
-
-        FFCS_DYLIB_yams=""
-
-    fi
-
-# Check whether --enable-pardiso was given.
-if test "${enable_pardiso+set}" = set; then :
-  enableval=$enable_pardiso;
-fi
-
-    if test "$enable_pardiso" != "no"
-    then
-        FFCS_COMPILE_pardiso=pardiso
-
-        FFCS_DYLIB_pardiso=PARDISO.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_pardiso=""
-
-        FFCS_DYLIB_pardiso=""
-
-    fi
-
-# Check whether --enable-pipe was given.
-if test "${enable_pipe+set}" = set; then :
-  enableval=$enable_pipe;
-fi
-
-    if test "$enable_pipe" != "no"
-    then
-        FFCS_COMPILE_pipe=pipe
-
-        FFCS_DYLIB_pipe=pipe.$DYLIB_SUFFIX
-
-    else
-        FFCS_COMPILE_pipe=""
-
-        FFCS_DYLIB_pipe=""
-
-    fi
-
-
-# FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
-if test $OS = Windows_NT
-then
-    CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
-
-    # we also need to satisfy ff-c++ that the pthread are not a blocking point
-    if test -n "$ff_pthread"  ; then
-       	if test -z "$ff_where_lib_conf_pthread" ; then
-	    echo "pthread LD """  >>$ff_where_lib_conf
-	    test -n "" && echo "pthread INCLUDE  "  >>$ff_where_lib_conf
-            ff_where_lib_conf_pthread=1
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add pthread : \"\"  in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     ++ add pthread : \"\"  in  $ff_where_lib_conf \"" >&6;}
-	else
-	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add pthread : \"\"  in  $ff_where_lib_conf \"" >&5
-$as_echo "$as_me:     -- do not add pthread : \"\"  in  $ff_where_lib_conf \"" >&6;}
-        fi
-
-    fi
-fi
-
-||||||| /tmp/configure~base.QJKce1
-=======
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
 
@@ -15717,7 +15172,6 @@ $as_echo "$as_me:     -- do not add pthread : \"\"  in  $ff_where_lib_conf \"" >
     fi
 fi
 
->>>>>>> /tmp/configure~other.AHgiVg
 # Find out kernel and libc versions
 # ---------------------------------
 
@@ -15751,9 +15205,6 @@ CNOFLAGS=$CNOFLAGS
  # The final list of executable programs
 MEDITPROG=$ff_meditprog
 
-<<<<<<< /tmp/configure~base.QJKce1
-FFGLUTPROG=$ff_ffglutprog
-=======
 
 # ALH - FFCS - 5/1/9 - ffglut cannot be compiled with FFCS under Cygwin because it requires a GLUT versions that works
 # with Mingw, and the standard Cygwin Glut is not enough. But FFCS needs a working ffglut on other platforms for testing
@@ -15767,7 +15218,6 @@ else
 	FFGLUTPROG=$ff_ffglutprog
 
 fi
->>>>>>> /tmp/configure~other.AHgiVg
 
 BAMGPROG=$ff_bamgprog
 
@@ -15794,11 +15244,7 @@ ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 #metis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
 # mumps LD '-L/Users/hecht/work/freefem++/download//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'
 # mumps INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-<<<<<<< /tmp/configure~base.QJKce1
-# parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetis
-=======
 # parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetispar
->>>>>>> /tmp/configure~other.AHgiVg
 # parmetis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
 # scalapack LD '-L/Users/hecht/work/freefem++/download/lib  -lscalapack '
 # scalapack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
@@ -17278,8 +16724,6 @@ $as_echo "$ff_WHERE" >&6; }
 	fi
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
 
@@ -17291,7 +16735,6 @@ else
   FFCS_WINDOWS_FALSE=
 fi
 
->>>>>>> /tmp/configure~other.AHgiVg
 
 # All makefiles
 ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/nw/Makefile src/mpi/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
@@ -17429,19 +16872,14 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 if test -z "${ENABLE_FFCS_TRUE}" && test -z "${ENABLE_FFCS_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_FFCS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
->>>>>>> /tmp/configure~other.AHgiVg
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 if test -z "${FFCS_MPIOK_TRUE}" && test -z "${FFCS_MPIOK_FALSE}"; then
   as_fn_error $? "conditional \"FFCS_MPIOK\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -17450,7 +16888,6 @@ if test -z "${FFCS_WINDOWS_TRUE}" && test -z "${FFCS_WINDOWS_FALSE}"; then
   as_fn_error $? "conditional \"FFCS_WINDOWS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
->>>>>>> /tmp/configure~other.AHgiVg
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0
@@ -18855,64 +18292,29 @@ $as_echo "$as_me:       or try to download/compile the altas blas ." >&6;}
 fi  # ---  test "$enable_download" = yes  ;then
 
 
-<<<<<<< /tmp/configure~base.QJKce1
-if test "$ff_glut_ok" != yes  ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}:      *********************************************** " >&5
-=======
 # FFCS: remove this message because it could make the user think that something is broken
 if test $enable_ffcs = no
 then
     if test "$ff_glut_ok" != yes  ; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:      *********************************************** " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:      *********************************************** " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-    { $as_echo "$as_me:${as_lineno-$LINENO}:      WARNING: you do not have the new grachics tools " >&5
-=======
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:      WARNING: you do not have the new grachics tools " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:      WARNING: you do not have the new grachics tools " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-    { $as_echo "$as_me:${as_lineno-$LINENO}:          because the configure do not find OpenGL, GLUT or pthread  developer stuff " >&5
-=======
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:          because the configure do not find OpenGL, GLUT or pthread  developer stuff " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:          because the configure do not find OpenGL, GLUT or pthread  developer stuff " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-    { $as_echo "$as_me:${as_lineno-$LINENO}:          read the README to find missing package  " >&5
-=======
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:          read the README to find missing package  " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:          read the README to find missing package  " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-    { $as_echo "$as_me:${as_lineno-$LINENO}:          F. Hecht  " >&5
-=======
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:          F. Hecht  " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:          F. Hecht  " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-    { $as_echo "$as_me:${as_lineno-$LINENO}:  to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev " >&5
-=======
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:  to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:  to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-    { $as_echo "$as_me:${as_lineno-$LINENO}:      *********************************************** " >&5
-=======
 	{ $as_echo "$as_me:${as_lineno-$LINENO}:      *********************************************** " >&5
->>>>>>> /tmp/configure~other.AHgiVg
 $as_echo "$as_me:      *********************************************** " >&6;}
-<<<<<<< /tmp/configure~base.QJKce1
-=======
     fi
->>>>>>> /tmp/configure~other.AHgiVg
 fi
 
-<<<<<<< /tmp/configure~base.QJKce1
-=======
 # Local Variables:
 # mode:shell-script
 # ispell-local-dictionary:"british"
 # coding:utf-8
 # End:
->>>>>>> /tmp/configure~other.AHgiVg
