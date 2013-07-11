@@ -1,4 +1,4 @@
-diff -r -u mmg3d4/build/sources/analarcutting.c mmg3d4-new/build/sources/analarcutting.c
+>diff -r -u mmg3d4/build/sources/analarcutting.c mmg3d4-new/build/sources/analarcutting.c
 --- mmg3d4/build/sources/analarcutting.c	2012-12-19 16:05:32.000000000 +0100
 +++ mmg3d4-new/build/sources/analarcutting.c	2013-01-18 16:33:45.000000000 +0100
 @@ -307,7 +307,7 @@
@@ -980,8 +980,9 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +  return(0);
 +}
 +
+diff -u  mmg3d4/build/sources/inout.c mmg3d4-ok/build/sources/inout.c
 --- mmg3d4/build/sources/inout.c	2012-12-19 16:05:32.000000000 +0100
-+++ mmg3d4-ok/build/sources/inout.c	2013-07-10 22:05:10.000000000 +0200
++++ mmg3d4-ok/build/sources/inout.c	2013-07-11 11:43:47.000000000 +0200
 @@ -44,6 +44,7 @@
  along with MMG3D. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
@@ -990,7 +991,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
  
  extern short           MMG_imprim;
-@@ -100,35 +101,452 @@
+@@ -100,35 +101,467 @@
    return(out);
  }
  
@@ -1314,40 +1315,54 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +    int kn[10];
 +    np = 0; 
 +    nc = 0;
-+    /* */
-+    { 
-+      int kk=0;
-+      int *mark= (int*) calloc(mesh->np,sizeof(int)); 
-+      for ( k=1; k<=mesh->ne; k++) 
-+	{
-+	  pt = &mesh->tetra[k];
-+	  if ( !pt->v[0] )  continue;  
-+	  k0++;
-+	  for(j=0;j<4;++j)
-+	    kn[j] = mesh->point[pt->v[j]].tmp;
-+	  for(j=0;j<4;++j)
-+	    mark[kn[j]]++;	  
-+	}
-+      
-+      for (k=1; k<=mesh->np; k++) 
-+	{
-+	  ppt = &mesh->point[k];
-+	  if (mark[k] && ! (ppt->tag & M_UNUSED ))
-+	    {
-+	      kk++;
-+	      ppt->tag  |= M_UNUSED; 
-+	    }
-+	  
-+	}
-+      if(kk) printf(" mmg3d: Strange nb of point %d not in tet is not zero (correct by FH)!\n" , kk);
-+      free(mark); 
-+    }
++    // compress vertex ... fist case ... 
 +    for (k=1; k<=mesh->np; k++) {
 +      ppt = &mesh->point[k];
 +      if ( ppt->tag & M_UNUSED )  continue;  
 +      ppt->tmp = ++np;  
 +      /*      if ( ppt->geom & M_CORNER )  cor[nc++] = ppt->tmp; */
-+    } 
++    }
++   
++    /*   seacrch vertex not in tet ???? */
++    {
++        int kk=0,npp=np;
++       for (k=1; k<=mesh->np; k++)
++       {
++            ppt = &mesh->point[k];
++           if ((ppt->tag & M_UNUSED )) ppt->tmp =-2;
++           else ppt->tmp =-1;
++
++       }
++       for ( k=1; k<=mesh->ne; k++)
++	{
++            pt = &mesh->tetra[k];
++            if ( !pt->v[0] )  continue;
++            k0++;
++            for(j=0;j<4;++j)
++              mesh->point[pt->v[j]].tmp=0;
++	}
++        np=0;
++        for (k=1; k<=mesh->np; k++)
++	{
++            ppt = &mesh->point[k];
++            
++            if ( ppt->tmp ==0) 
++               ppt->tmp = ++np; 
++            else
++            {
++                
++            if (ppt->tmp==-1)
++	    {
++                kk++;
++                ppt->tag  |= M_UNUSED;
++	    }
++                ppt->tmp=0;
++            }
++	}
++        if(kk) printf(" mmg3d: Strange nb of point %d not in tet is not zero (correct by FH)!\n" , kk);
++      
++    }
++    
 +    mesh->nt=0;
 +    if(! MMG_markBdry(mesh)) 
 +      mesh->nt=0;
@@ -1363,6 +1378,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +      }
 +    
 +    data[ff_id_tet]=ne  ;
++    printf(" mmg3d:  nbp = %d, nb tet %d\n",np,ne);
 +    //data[ff_id_hex]=nhex;
 +    //data[ff_id_prism]=npris; 
 +    //data[ff_id_quad]=nq;
@@ -1374,7 +1390,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +    for ( k=1; k<=mesh->np; k++) 
 +      {
 +	ppt = &mesh->point[k];
-+	if ( ppt->tag & M_UNUSED )  continue;  
++	if ( ! ppt->tmp   )  continue;
 +	dataff->set_v(dataff, ppt->tmp,ppt->c,ppt->ref);	    
 +      }
 +    
@@ -1454,7 +1470,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    if ( !ptr ) {
      strcat(data,".meshb");
      if( !(inm = fopen(data,"rb")) ) {
-@@ -136,8 +554,8 @@
+@@ -136,8 +569,8 @@
        *ptr = '\0';
        strcat(data,".mesh");
        if( !(inm = fopen(data,"r")) ) {
@@ -1465,7 +1481,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
        }
      } else {
        bin = 1;
-@@ -147,194 +565,194 @@
+@@ -147,194 +580,194 @@
      ptr = strstr(data,".meshb");
      if( !ptr ) {
        if( !(inm = fopen(data,"r")) ) {
@@ -1815,7 +1831,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    if ( !MMG_zaldy(mesh) )  return(0);
    /* read mesh vertices */
    mesh->npfixe = mesh->np;
-@@ -342,35 +760,35 @@
+@@ -342,35 +775,35 @@
    fseek(inm,posnp,SEEK_SET);
    for (k=1; k<=mesh->np; k++) {
      ppt = &mesh->point[k];
@@ -1875,7 +1891,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    }
  
    /* read mesh triangles */
-@@ -378,227 +796,226 @@
+@@ -378,227 +811,226 @@
    rewind(inm);
    fseek(inm,posnt,SEEK_SET);
    for (k=1; k<=mesh->nt; k++) {
@@ -2104,12 +2120,6 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 -      for(i=0 ; i<6 ; i++)
 -	pt->bdryinfo[i] = 0;
 -    }
--  }
--  if(reorient) {
--    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
--    fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d tetra reoriented\n",reorient);
--    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
--    reorient = 1;
 +      pt->bdryref[i] = -1;  
 +    
 +		if (ned) {
@@ -2124,6 +2134,12 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
 +	      pt->bdryinfo[i] = 0;  			
 +		}
    }
+-  if(reorient) {
+-    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+-    fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d tetra reoriented\n",reorient);
+-    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+-    reorient = 1;
+-  }
 -   if (ned) M_free(hed.item);
 +  if (ned) M_free(hed.item); 
  
@@ -2275,7 +2291,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.option)!=10 ) {
      fprintf(stdout,"     NUMBER OF GIVEN VERTICES   %8d\n",mesh->npfixe);
      if ( mesh->ntfixe )
-@@ -609,24 +1026,26 @@
+@@ -609,24 +1041,26 @@
      if ( ned )
        fprintf(stdout,"     NUMBER OF GIVEN EDGES      %8d\n",ned);
    }
@@ -2310,7 +2326,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
    strcpy(data,filename);
    ptr = strstr(data,".mesh");
-@@ -645,94 +1064,94 @@
+@@ -645,94 +1079,94 @@
    }
    fprintf(stdout,"  %%%% %s OPENED\n",data);
  
@@ -2470,7 +2486,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      return(0);
    }
    sol->npfixe = sol->np;
-@@ -742,31 +1161,31 @@
+@@ -742,31 +1176,31 @@
    /* read mesh solutions */
    sol->npfixe = sol->np;
    rewind(inm);
@@ -2521,7 +2537,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      /* MMG_swap data */
      if ( sol->offset == 6 ) {
        tmp                = sol->met[isol + 2];
-@@ -778,13 +1197,13 @@
+@@ -778,13 +1212,13 @@
    if ( abs(MMG_imprim) > 3 )
      fprintf(stdout,"     NUMBER OF GIVEN DATA       %8d\n",sol->npfixe);
  
@@ -2539,7 +2555,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    pDispl       pd;
    float       fsol;
    int         binch,bdim,iswp;
-@@ -792,10 +1211,13 @@
+@@ -792,10 +1226,13 @@
    long        posnp;
    char        *ptr,data[128],chaine[128];
  
@@ -2556,7 +2572,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    iswp  = 0;
  
    strcpy(data,filename);
-@@ -815,76 +1237,76 @@
+@@ -815,76 +1252,76 @@
    }
    fprintf(stdout,"  %%%% %s OPENED\n",data);
  
@@ -2694,7 +2710,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    if ( !pd->np ) {
      fprintf(stdout,"  ** MISSING DATA\n");
      return(0);
-@@ -895,7 +1317,7 @@
+@@ -895,7 +1332,7 @@
    }
  
    if ( btyp != 2 ) {
@@ -2703,7 +2719,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      return(0);
    }
  
-@@ -907,47 +1329,50 @@
+@@ -907,47 +1344,50 @@
    fseek(inm,posnp,SEEK_SET);
    for (k=1; k<=pd->np; k++) {
      iadr = (k - 1) * 3 + 1;
@@ -2777,7 +2793,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    mesh->ver = 2; //double precision
    bin = 0;
    strcpy(data,filename);
-@@ -959,28 +1384,28 @@
+@@ -959,28 +1399,28 @@
        *ptr = '\0';
        strcat(data,".mesh");
        if( !(inm = fopen(data,"w")) ) {
@@ -2813,7 +2829,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s ",chaine);
    } else {
      binch = 1; //MeshVersionFormatted
-@@ -993,33 +1418,38 @@
+@@ -993,33 +1433,38 @@
      fwrite(&bpos,sw,1,inm);
      binch = 3;
      fwrite(&binch,sw,1,inm);
@@ -2866,7 +2882,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s",chaine);
      fprintf(inm,"%d\n",np);
    } else {
-@@ -1027,27 +1457,27 @@
+@@ -1027,27 +1472,27 @@
      fwrite(&binch,sw,1,inm);
      bpos += 12+(1+3*mesh->ver)*4*np; //NullPos
      fwrite(&bpos,sw,1,inm);
@@ -2903,7 +2919,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
        fprintf(inm,"%s",chaine);
        fprintf(inm,"%d \n",mesh->nt);
      } else {
-@@ -1055,49 +1485,48 @@
+@@ -1055,49 +1500,48 @@
        fwrite(&binch,sw,1,inm);
        bpos += 12+16*mesh->nt; //Pos
        fwrite(&bpos,sw,1,inm);
@@ -2983,7 +2999,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s",chaine);
      fprintf(inm,"%d\n",ne);
    } else {
-@@ -1105,29 +1534,29 @@
+@@ -1105,29 +1549,29 @@
      fwrite(&binch,sw,1,inm);
      bpos += 12 + 20*ne;//Pos
      fwrite(&bpos,sw,1,inm);
@@ -3028,7 +3044,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
        fprintf(inm,"%s",chaine);
        fprintf(inm,"%d\n",ned);
      } else {
-@@ -1135,50 +1564,50 @@
+@@ -1135,50 +1579,50 @@
        fwrite(&binch,sw,1,inm);
        bpos += 12 + 3*4*ned;//Pos
        fwrite(&bpos,sw,1,inm);
@@ -3101,7 +3117,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    if(mesh->ncor) M_free(cor);
    if ( mesh->info.imprim ) {
      fprintf(stdout,"     NUMBER OF GIVEN VERTICES   %8d\n",mesh->npfixe);
-@@ -1193,20 +1622,22 @@
+@@ -1193,20 +1637,22 @@
      if ( mesh->ned )
        fprintf(stdout,"     TOTAL NUMBER OF EDGES      %8d\n",ned);
    }
@@ -3127,7 +3143,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
    if ( !sol->np )  return(1);
    bin = 1;
-@@ -1219,24 +1650,24 @@
+@@ -1219,24 +1665,24 @@
        *ptr = '\0';
        bin  = 0;
      } else {
@@ -3165,7 +3181,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
    sol->ver = 2;
    if( bin && !(inm = fopen(data,"wb")) ) {
      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-@@ -1251,9 +1682,9 @@
+@@ -1251,9 +1697,9 @@
  
    /*entete fichier*/
    if(!bin) {
@@ -3177,7 +3193,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s ",chaine);
    } else {
      binch = 1; //MeshVersionFormatted
-@@ -1266,19 +1697,19 @@
+@@ -1266,19 +1712,19 @@
      fwrite(&bpos,sw,1,inm);
      binch = 3;
      fwrite(&binch,sw,1,inm);
@@ -3202,7 +3218,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      return(0);
    }
  
-@@ -1287,11 +1718,11 @@
+@@ -1287,11 +1733,11 @@
    for (k=1; k<=mesh->np; k++) {
      ppt = &mesh->point[k];
      if ( ppt->tag & M_UNUSED )  continue;
@@ -3217,7 +3233,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s",chaine);
      fprintf(inm,"%d\n",nbl);
      fprintf(inm,"%d %d\n",1,typ);
-@@ -1300,7 +1731,7 @@
+@@ -1300,7 +1746,7 @@
      fwrite(&binch,sw,1,inm);
      bpos += 20+(sol->offset*sol->ver)*4*nbl; //Pos
      fwrite(&bpos,sw,1,inm);
@@ -3226,7 +3242,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      binch = 1; //nb sol
      fwrite(&binch,sw,1,inm);
      binch = typ; //typ sol
-@@ -1317,34 +1748,34 @@
+@@ -1317,34 +1763,34 @@
        sol->met[isol + 3] = tmp;
      }
      if (sol->ver < 2) {
@@ -3280,7 +3296,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s",chaine);
    } else {
      binch = 54; //End
-@@ -1355,14 +1786,16 @@
+@@ -1355,14 +1801,16 @@
  }
  
  /*save the node speed : coornew-coorold/dt*/
@@ -3300,7 +3316,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
  
    pd      = mesh->disp;
    pd->ver = 2;
-@@ -1378,7 +1811,7 @@
+@@ -1378,7 +1826,7 @@
        bin  = 0;
      }
    }
@@ -3309,7 +3325,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      strcat(data,".o.solb");
    else
      strcat(data,".o.sol");
-@@ -1395,9 +1828,9 @@
+@@ -1395,9 +1843,9 @@
  
    /*entete fichier*/
    if(!bin) {
@@ -3321,7 +3337,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s ",chaine);
    } else {
      binch = 1; //MeshVersionFormatted
-@@ -1410,20 +1843,20 @@
+@@ -1410,20 +1858,20 @@
      fwrite(&bpos,sw,1,inm);
      binch = 3;
      fwrite(&binch,sw,1,inm);
@@ -3347,7 +3363,7 @@ diff -r -u mmg3d4/build/sources/swapar.c mmg3d4-new/build/sources/swapar.c
      fprintf(inm,"%s",chaine);
      fprintf(inm,"%d\n",nbl);
      fprintf(inm,"%d %d\n",1,typ);
-@@ -1432,34 +1865,34 @@
+@@ -1432,34 +1880,34 @@
      fwrite(&binch,sw,1,inm);
      bpos += 20+(3*pd->ver)*4*nbl; //Pos
      fwrite(&bpos,sw,1,inm);
