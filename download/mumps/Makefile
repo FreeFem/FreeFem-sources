@@ -39,7 +39,7 @@ mumps: FAIRE-$(VERSION)
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
 	cd $(SRCDIR);make d z
-	touch $(SRCDIR)/FAIT	
+	touch $@
 install: $(SRCDIR)/FAIT
 	-mkdir -p ../include/libseq
 	cp $(SRCDIR)/include/*.h ../include/
@@ -48,17 +48,21 @@ install: $(SRCDIR)/FAIT
 	cp $(SRCDIR)/lib/*.a ../lib/
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM.a ../lib/
 
-WHERE: 
-	if [ -f $(SRCDIR)/FAIT  ] ;then \
-	$(MAKE) install ; \
-	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM  -lpthread  >../lib/WHERE.mumps ;\
-	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps ;\
-	fi
+# ALH - WHERE was not built properly during a full compile from a
+# clean source. This goal has been rewritten to solve this issue.
 
+WHERE: 
+	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM \
+		-lpthread  >../lib/WHERE.mumps
+	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps
 
 FAIRE-$(VERSION):
-	$(MAKE) install WHERE 
-	touch FAIRE-$(VERSION)
+#
+# ALH - the WHERE target must be built sequentially only after 'install'
+#
+	$(MAKE) install
+	$(MAKE) WHERE 
+	touch $@
 
 Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"

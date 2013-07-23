@@ -545,11 +545,13 @@
 ^examples\+\+-load/sphere2region\.mesh$
 ^examples\+\+-load/spherewithahole\.mesh$
 ^examples\+\+-load/spherewithtworegion\.mesh$
+^examples\+\+-load/tetgenholeregion\.edp$
 ^examples\+\+-load/triQA\.msh$
 ^examples\+\+-mpi/.*\.eps$
 ^examples\+\+-mpi/Makefile$
 ^examples\+\+-mpi/beam-deformed-mumps\.mesh$
 ^examples\+\+-mpi/beam-deformed-superlu\.mesh$
+^examples\+\+-mpi/cube\.idp$
 ^examples\+\+-mpi/freefem\+\+\.pref
 ^examples\+\+-mpi/machinefile$
 ^examples\+\+-mpi/regtests-.*\.log$
@@ -615,6 +617,8 @@
 ^src/bamg/drawbdmesh$
 ^src/bamglib/Makefile$
 ^src/bin-win32/Makefile$
+^src/bin-win32/config\.log$
+^src/bin-win32/ff-c\+\+$
 ^src/femlib/Makefile$
 ^src/fflib/Makefile$
 ^src/fflib/strversionnumber\.cpp$
