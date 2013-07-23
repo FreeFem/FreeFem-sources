@@ -1,5 +1,5 @@
 (ALH)
- - Removed all Mercurial-tracked files from .hgignore.
+ - Removed all Mercurial-tracked files from .hgignore
 10/7/2013  (version 3.25)
  - merge FFCS (ALH) version and  ff++ version (FH) of freefem++ programs
  - remove all automake file form the hg data base

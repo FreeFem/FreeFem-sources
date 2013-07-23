@@ -281,6 +281,7 @@
 ^config\.log$
 ^config\.status$
 ^config_LIB_INFO$
+^configure$
 ^configure-stamp$
 ^configure\.lineno$
 ^configure\.param$
