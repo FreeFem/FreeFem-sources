@@ -7,8 +7,8 @@
 // AUTHOR   : Guy Atenekeng
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
-// FFCS - need reference to MPI to have the proper include for mpi.h on MacOS10.8
-//ff-c++-LIBRARY-dep: metis parms  blas mpifc mpi fc
+// ALH - need reference to MPI to have the proper include for mpi.h on MacOS10.8
+//ff-c++-LIBRARY-dep: parms metis blas mpifc fc mpi pthread
 //ff-c++-cpp-dep: 
 
 /* 
@@ -60,8 +60,30 @@ extern "C" {
 #endif
 
 extern "C" {
+
+  // ALH - 24/7/13 - we need to include metis/defs.h explicitely
+  // because pARMS also contains an include file called defs.h and
+  // both include directories are specified on the command line to
+  // compile this file.  Without this only one defs.h would be
+  // included, the one from the first package specified above on the
+  // line [[LIBRARY-dep]]
+
+  #include "../download/include/metis/defs.h"
+
   #include "metis.h"
 }
+
+#ifdef WIN32
+
+// ALH - this activates the Windows DLL default export mechanism
+
+__declspec(dllexport) int not_used;
+
+// ALH - 24/7/13 - instanciate some global symbols which are not found by default in MS MPI Fortran libraries
+
+MPI_Fint* _imp__MPI_F_STATUS_IGNORE;
+MPI_Fint* _imp__MPI_F_STATUSES_IGNORE;
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
