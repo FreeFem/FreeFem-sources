@@ -702,6 +702,12 @@ else
     AC_SUBST(MPI_LIBC,"")
     AC_SUBST(MPI_LIBFC,"")
 
+    # Extra MPI-dependant configuration options that are set by FF during MPI configuration. FFCS - 25/2/13 - Fred
+    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
+    # required by pastix on the corresponding platforms.
+
+    AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
+
     # these values should not be empty otherwise examples++-load/ff-get-dep will think that they are not defined
     AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
 
