@@ -1,9 +1,6 @@
 abs_top_builddir=@abs_top_builddir@
 DOWNLOADFF=$(abs_top_builddir)/download/
-
-# ALH - allow include to fail for make clean
--include $(DOWNLOADFF)/headers-sparsesolver.inc
-
+include $(DOWNLOADFF)/headers-sparsesolver.inc
 ### ADD for freefem++
 ###
 ###  HIPS specific compilation flags
@@ -47,7 +44,12 @@ INTSIZE      =
 ARCH       = -DLINUX
 RANLIB     = @RANLIB@ 
 CC	   = @CC@       # C compiler 
-MPICC      = @MPICC@ 
+
+# FFCS - add MPI_INCLUDE because FF cannot use the defaut openmpi scripts on MacOS (see
+# [[file:../../../../configure.ac::mpicc_on_macos]])
+
+MPICC      = @MPICC@ @MPI_INCLUDE@
+
 CPP	   = cpp
 FC         = 
 MPIFC      = @MPIFC@

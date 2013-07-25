@@ -1741,6 +1741,18 @@ then
     fi
 fi
 
+# ALH - pARMS needs "-fno-range-check" on Windows, but this options fails on MacOS 10.8.  Add no-range-check for Windows
+# for hexadecimal parameter constants like:
+#
+# [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
+#
+# Such constants are rejected without [[file:download/parms/makefile-parms.in::NO_RANGE_CHECK]]
+
+if test $OS = Windows_NT
+then
+    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)
+fi
+
 # Find out kernel and libc versions
 # ---------------------------------
 
