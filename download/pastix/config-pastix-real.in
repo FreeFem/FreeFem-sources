@@ -1,5 +1,5 @@
 abs_top_builddir=@abs_top_builddir@
--include $(abs_top_builddir)/download/headers-sparsesolver.inc
+include $(abs_top_builddir)/download/headers-sparsesolver.inc
 HOSTARCH    = @PASTIX_HOSTARCH@
 VERSIONBIT  = _@SIZEOF_PTRINBIT@bit
 EXEEXT      =
@@ -18,7 +18,12 @@ CCFDEB      = -g3
 
 LKFOPT      =
 MKPROG      = make 
-MPCCPROG    = @MPICC@ -Wall -DX_ARCH$(HOSTARCH)
+
+# FFCS - add MPI_INCLUDE because FF cannot use the defaut openmpi scripts on MacOS (see
+# [[file:../../../../configure.ac::mpicc_on_macos]])
+
+MPCCPROG    = @MPICC@ -Wall -DX_ARCH$(HOSTARCH) @MPI_INCLUDE@
+
 ARFLAGS     = @ARFLAGS@  # ruv
 ARPROG      = @AR@       # ar
 EXTRALIB    = @FLIBS@ -lm -lsupc++
