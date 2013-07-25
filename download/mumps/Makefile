@@ -38,7 +38,11 @@ mumps: FAIRE-$(VERSION)
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
-	cd $(SRCDIR);make d z
+#
+# ALH - 'd' and 'z' versions need to be made sequentially
+#
+	cd $(SRCDIR);make d
+	cd $(SRCDIR);make z
 	touch $@
 install: $(SRCDIR)/FAIT
 	-mkdir -p ../include/libseq
