@@ -90,10 +90,10 @@ ipopt/patch-IpBlas
 
 # <<no_more_blacs>> blacs is include in  scalapack 2.0.2 
 
-MPI_SOFT=parmetis scalapack @FFCS_COMPILE_scotch@ @FFCS_COMPILE_superludist@ @FFCS_COMPILE_mumps@	\
-	@FFCS_COMPILE_pastix@  @FFCS_COMPILE_hips@ @FFCS_COMPILE_parms@
-LIST_SOFT=tetgen superlu fftw metis @FFCS_COMPILE_mshmet@ @FFCS_COMPILE_yams@ @FFCS_COMPILE_mmg3d@ gmm nlopt	\
-	@FFCS_COMPILE_mumps_seq@ @FFCS_COMPILE_ipopt@
+MPI_SOFT=parmetis scalapack @TOOL_COMPILE_scotch@ @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@ @TOOL_COMPILE_pastix@	\
+	@TOOL_COMPILE_hips@ @TOOL_COMPILE_parms@
+LIST_SOFT=tetgen @TOOL_COMPILE_superlu@ fftw metis @TOOL_COMPILE_mshmet@ @TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@ gmm	\
+	nlopt @TOOL_COMPILE_mumps_seq@ @TOOL_COMPILE_ipopt@
 all-recursive: bin lib include pkg
 
 lib: 

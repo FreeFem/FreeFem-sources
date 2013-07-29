@@ -356,22 +356,8 @@ AC_MSG_RESULT($ff_sunos)
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
 
-# Sometimes (under cygwin for instance) the default version of FLTK
-# does not fit our purpose
-
-AC_ARG_ENABLE(default-fltk,
-	[  --disable-default-fltk	Does not use default FLTK])
-
 AC_ARG_ENABLE(cygwindll,
 	[  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)])
-
-# Default FLTK version under Cygwin does not use threads. So we cannot
-# use it.
-
-if test "$enable_cygwindll" = yes
-then
-	enable_default_fltk=no
-fi
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
@@ -750,7 +736,7 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 #getting utility software archives through the internet
 AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Downloadc generic blas (implie --enable-download)])
 
-AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)])
+AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)])
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"
@@ -1590,96 +1576,6 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
 AC_SUBST(STD_LIBS,$ff_std_libs)
 
-# Can we produce an IDE?
-# ----------------------
-
-# For development purposes, we may need to use X libraries instead of
-# native libraries (mainly to run the programs remotely)
-#  AC_ARG_WITH(fltk,[  --without-fltk	(to suppress explicity    --enable-download imply --with-fltk ) ])
-#  AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
-#  remove all fltk stuff
-# to remove of FLTK
-#AC_MSG_NOTICE(without ide/ fltk ..... Please wait the next version.... ) 
-if test 0 != 0 
- then  
-if test "$with_fltk" = no 
-then 
-     ff_fltk=no
-	AC_MSG_NOTICE(without FLTK sorry in next no ide today ) 
-else
-# under mingw use download fltk version
-if test "$ff_mingw" = yes 
-then
-	AC_MSG_NOTICE(under mingw not using default FLTK)
- enable_default_fltk=no 
-fi
-
-# Default FLTK (in the machine's default PATH)
-if test "$enable_default_fltk" = no
-then
-	AC_MSG_NOTICE(not using default FLTK)
-	ff_fltk=no
-else
-
-	# Checks that fltk-config exists
-	ff_fltk_config=fltk-config
-	AC_CHECK_PROG(ff_fltk,fltk-config,yes,no)
-
-	# Checks that FLTK is compiled with threads enabled
-	AC_MSG_CHECKING(that FLTK is compiled with threads)
-	AC_COMPILE_IFELSE(
-[AC_LANG_SOURCE([[#include <FL/Fl.H>
-main(){
-  Fl::lock();
-}
-]])],
-		ff_fltk_threads=yes,
-		ff_fltk_threads=no)
-	AC_MSG_RESULT($ff_fltk_threads)
-	if test "$ff_fltk_threads" = no
-	then
-		ff_fltk=no
-		AC_MSG_NOTICE(not using default FLTK because it does not know threads)
-	fi	
-fi
-
-# Downloading and compiling FLTK
-if test "$ff_fltk" = no -a "$enable_download" = yes
-then
-	AC_MSG_NOTICE(using downloaded FLTK)
-	AC_SUBST(DOWNLOAD_FLTK,fltk)
-	ff_fltk_version=1.1.6
-	AC_SUBST(FLTK_VERSION,$ff_fltk_version)
-	ff_fltk_config="$curdir/download//bin/fltk-config"
-	ff_fltk=yes
-fi
-
-if test "$ff_fltk" = yes
-then
-	# For the moment, FreeFem++-ide${EXEEXT} is not built
-	# because it first needs FreeFEM++ to accept several
-	# successive runs without restart.
-        
-	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
-	ff_idetest="./testhighlight.sh"
-	ff_testideprog="testhighlight${EXEEXT}"
-	if test "$enable_cygwindll" = yes 
-	 then
-           AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --enable-cygwin")
-        elif test "$ff_mingw" = yes 
-	 then
-           AC_SUBST(FLTK_CONFIG_PARAM,"--enable-localzlib --disable-cygwin")
-	else
-           AC_SUBST(FLTK_CONFIG_PARAM,"--disable-cygwin")
-	fi
-
-	AC_SUBST(FLTK_CONFIG,$ff_fltk_config)
-
-
-fi
-fi
-# end of remove fltk
-fi 
 # Flex compatibility with Bison
 # -----------------------------
 
@@ -1699,38 +1595,70 @@ fi
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
 
-# $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
-m4_define([FFCS_DISABLE_DOWNLOAD],
-    [AC_ARG_ENABLE($1,[  --disable-$1      Do not download $1])
-    if test "$enable_$1" = "no"
+# ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
+# may also find interesting to specify a local version of a tool instead of downloading it.
+
+# m4 macro parameters: $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
+
+m4_define([TOOL_DISABLE_DOWNLOAD],
+    [AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
+    AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
+
+    if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
     then
-        AC_SUBST([FFCS_COMPILE_$1],"")
-        AC_SUBST([FFCS_DYLIB_$1],"")
+
+	# some directives have been specified, use them instead of downloading
+
+	AC_FF_ADDWHERELIB($1,$with_$1_ldflags,$with_$1_include)
+        AC_SUBST([TOOL_COMPILE_$1],"")
+	enable_$1_download=no
+
     else
-        AC_SUBST([FFCS_COMPILE_$1],ifelse($3,,$1,$3))
-        AC_SUBST([FFCS_DYLIB_$1],$2)
+
+	# no specific directives for package $1, activate automatic download
+
+        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
+	enable_$1_download=yes
     fi
 ])
 
-FFCS_DISABLE_DOWNLOAD(fflapack,fflapack.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
-FFCS_DISABLE_DOWNLOAD(hips,hips_FreeFem.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(hypre,hypre.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(lapack,lapack.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(mshmet,mshmet.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
-FFCS_DISABLE_DOWNLOAD(mumps_seq,MUMPS_seq.$DYLIB_SUFFIX,mumps-seq)
-FFCS_DISABLE_DOWNLOAD(parms,parms_FreeFem.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
-FFCS_DISABLE_DOWNLOAD(scotch,scotch.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
-FFCS_DISABLE_DOWNLOAD(yams,freeyams.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(pardiso,PARDISO.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(pipe,pipe.$DYLIB_SUFFIX)
+m4_define([TOOL_DISABLE],
+    [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+    if test "$enable_$1" = "no"
+    then
+        AC_SUBST([TOOL_COMPILE_$1],"")
+        AC_SUBST([TOOL_DYLIB_$1],"")
+    else
+        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+    TOOL_DISABLE_DOWNLOAD($1,$2,$3)
+])
+
+TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
+TOOL_DISABLE(hypre,hypre.$DYLIB_SUFFIX)
+TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
+TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
+TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
+TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
+TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
+TOOL_DISABLE(mumps_seq,MUMPS_seq.$DYLIB_SUFFIX,mumps-seq)
+TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
+TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
+TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
+TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
+TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
+TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
+TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
+TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
+
 if test $OS = Windows_NT
 then
     CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
@@ -1968,7 +1896,16 @@ if test "$enable_download" = yes  ;then
     AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
     AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  ])
-    AC_MSG_NOTICE([      use of download superlu, metis])
+    AC_MSG_NOTICE([      use of download metis])
+
+    # ALH - some tools may be activated but not downloaded if a local version is specified (see
+    # [[TOOL_DISABLE_DOWNLOAD]])
+
+    if test "$enable_superlu_download" = yes
+    then
+	AC_MSG_NOTICE([      use of download superlu])
+    fi
+
     if test -n "$MPICC" ; then
    	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
     fi
