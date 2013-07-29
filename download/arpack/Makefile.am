@@ -1,8 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
-
 all-local: $(DOWNLOAD_ARPACK)
 EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz 
 
