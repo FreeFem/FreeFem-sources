@@ -33,6 +33,10 @@ SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 VERSION=4.10.0
 
+# ALH - this is also set in Makefile.inc, but this file may not always exist (eg after a make clean)
+
+WGET = wget --no-check-certificate
+
 mumps:../lib/WHERE.mumps
 
 # ALH - WHERE was not built properly during a full compile from a clean source. This goal has been rewritten to solve
