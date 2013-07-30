@@ -1600,7 +1600,7 @@ fi
 
 # m4 macro parameters: $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
 
-m4_define([TOOL_DISABLE_DOWNLOAD],
+m4_define([TOOL_PARAMETERS],
     [AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
     AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
 
@@ -1635,7 +1635,7 @@ m4_define([TOOL_DISABLE],
 
     # Also allow to disable the download of one tool if it is already locally installed
 
-    TOOL_DISABLE_DOWNLOAD($1,$2,$3)
+    TOOL_PARAMETERS($1,$2,$3)
 ])
 
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
@@ -1644,17 +1644,21 @@ TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(hypre,hypre.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
+TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
 TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,MUMPS_seq.$DYLIB_SUFFIX,mumps-seq)
+TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmetis)
 TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
+TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
@@ -1899,7 +1903,7 @@ if test "$enable_download" = yes  ;then
     AC_MSG_NOTICE([      use of download metis])
 
     # ALH - some tools may be activated but not downloaded if a local version is specified (see
-    # [[TOOL_DISABLE_DOWNLOAD]])
+    # [[TOOL_PARAMETERS]])
 
     if test "$enable_superlu_download" = yes
     then
