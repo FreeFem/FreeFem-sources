@@ -1,5 +1,33 @@
-# $Id$
-TESTS=DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp DDM-Schwarz-Stokes-2d.edp LaplaceRT-3d-matrix-mumps.edp MPICGLap.edp MPIGMRES2D.edp MPIGMRES3D.edp MUMPS.edp NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp beam-3d-matrix-superludist.edp cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp essai.edp  mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp testsolver_pastix.edp
+# ======================================================================
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# http://www.ljll.math.upmc.fr/lehyaric
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
+
+TESTS=DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp			\
+	DDM-Schwarz-Stokes-2d.edp LaplaceRT-3d-matrix-mumps.edp MPICGLap.edp MPIGMRES2D.edp MPIGMRES3D.edp MUMPS.edp	\
+	NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp		\
+	Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp beam-3d-matrix-superludist.edp			\
+	cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp	\
+	essai.edp mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp testsolver_pastix.edp
+
 XFAIL_TESTS=$(TESTS)
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
@@ -31,8 +59,8 @@ MUMPS.edp  dmatrix.hpp
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
 # deactivated).
 
-LIST_COMPILE=@FFCS_DYLIB_mumps@ @FFCS_DYLIB_hips@ @FFCS_DYLIB_superludist@ @FFCS_DYLIB_pastix@ MPICG.$(DYLIB_SUFFIX)	\
-@FFCS_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX)
+LIST_COMPILE=@TOOL_DYLIB_mumps@ @TOOL_DYLIB_hips@ @TOOL_DYLIB_superludist@ @TOOL_DYLIB_pastix@ MPICG.$(DYLIB_SUFFIX)	\
+@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX)
 
 if FFCS_MPIOK
 
@@ -73,3 +101,9 @@ freefem++.pref:Makefile
 clean-local::
 	-rm *.$(DYLIB_SUFFIX)
 	-rm *.$(OBJEXT)
+
+# Local Variables:
+# mode:makefile
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:
