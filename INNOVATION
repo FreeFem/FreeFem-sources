@@ -1,6 +1,7 @@
 (ALH)
  - Removed all Mercurial-tracked files from .hgignore
  - added options --with-[package]-include= and --with-[package]-ldflags= to avoid downloading existing packages
+ - Parallelized MUMPS compilation in download/mumps
 10/7/2013  (version 3.25)
  - merge FFCS (ALH) version and  ff++ version (FH) of freefem++ programs
  - remove all automake file form the hg data base
