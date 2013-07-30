@@ -9,6 +9,7 @@
 \.a$
 \.bak$
 \.dll$
+\.done$
 \.dylib$
 \.exe$
 \.o$
@@ -360,9 +361,7 @@
 ^download/include/
 ^download/ipopt/Ipopt-3\.10\.2/
 ^download/ipopt/Makefile\.inc$
-^download/ipopt/WHERE\.done$
 ^download/ipopt/config\.log
-^download/ipopt/install\.done$
 ^download/lib/
 ^download/lib/WHERE\.Ipopt
 ^download/lib/WHERE\.freeyams
@@ -382,9 +381,7 @@
 ^download/metis/FAIRE
 ^download/metis/config\.log$
 ^download/metis/metis-.*/
-^download/mmg3d/WHERE\.done$
 ^download/mmg3d/ff-flags$
-^download/mmg3d/install-4\.done$
 ^download/mmg3d/mmg3d4/
 ^download/mmg3d/tag-tar-158547
 ^download/mshmet/ff-flags$
@@ -392,9 +389,7 @@
 ^download/mumps-seq/FAIRE-4\.10\.0
 ^download/mumps-seq/MUMPS_4\.10\.0/
 ^download/mumps-seq/Makefile\.inc
-^download/mumps-seq/WHERE\.done$
 ^download/mumps-seq/config\.log
-^download/mumps-seq/install\.done$
 ^download/mumps/FAIRE-4\.10\.0
 ^download/mumps/MUMPS_4\.10\.0/
 ^download/mumps/Makefile\.inc$
@@ -404,10 +399,7 @@
 ^download/nlopt/nlopt-2\.2\.4/
 ^download/parmetis/FAIRE
 ^download/parmetis/ParMetis-
-^download/parmetis/WHERE\.done$
-^download/parmetis/compile\.done$
 ^download/parmetis/config\.log$
-^download/parmetis/install\.done$
 ^download/parms/Makefile\.in
 ^download/parms/config\.log
 ^download/parms/pARMS_2\.2/
@@ -455,9 +447,7 @@
 ^download/superludist/make\.inc$
 ^download/tag-compile-pkg
 ^download/tetgen/FAIRE
-^download/tetgen/WHERE\.done$
 ^download/tetgen/cxxflags$
-^download/tetgen/install\.done$
 ^download/tetgen/tetgen1.4.3/
 ^download/umfpack/Make\.include$
 ^download/umfpack/Makefile$
@@ -534,7 +524,6 @@
 ^examples\+\+-load/glu2D\.mesh\.gmsh$
 ^examples\+\+-load/glu3D\.mesh$
 ^examples\+\+-load/include$
-^examples\+\+-load/include\.done$
 ^examples\+\+-load/ipopt\.out$
 ^examples\+\+-load/lll\.mesh$
 ^examples\+\+-load/load\.link$

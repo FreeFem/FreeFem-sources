@@ -33,28 +33,29 @@ SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 VERSION=4.10.0
 
-mumps:WHERE
+mumps:../lib/WHERE.mumps
 
 # ALH - WHERE was not built properly during a full compile from a clean source. This goal has been rewritten to solve
 # this issue.
 
-WHERE:install
+../lib/WHERE.mumps:install.done
 	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM \
 		-lpthread  >../lib/WHERE.mumps
 	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps
 
-install:$(SRCDIR)/FAIT
+install.done:$(SRCDIR)/FAIT
 	-mkdir -p ../include/libseq
 	cp $(SRCDIR)/include/*.h ../include/
 	cp $(SRCDIR)/libseq/*.h  ../include/libseq
 	-mkdir -p ../lib
 	cp $(SRCDIR)/lib/*.a ../lib/
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM.a ../lib/
+	touch $@
 
 $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar Makefile.inc
 	cp Makefile.inc $(SRCDIR)
-	cd $(SRCDIR) && $(MAKE) $(MAKEFLAGS) d
-	cd $(SRCDIR) && $(MAKE) $(MAKEFLAGS) z
+	cd $(SRCDIR) && $(MAKE) d
+	cd $(SRCDIR) && $(MAKE) z
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-mumps-$(VERSION).inc
@@ -73,7 +74,7 @@ clean:
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
-	-rm config.log
+	-rm config.log *.done
 
 # Local Variables:
 # mode:makefile
