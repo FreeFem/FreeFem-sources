@@ -19,8 +19,8 @@ mumps: FAIRE-$(VERSION)
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
 #	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
-	cd $(SRCDIR) && make d
-	cd $(SRCDIR) && make z
+	cd $(SRCDIR) && $(MAKE) $(MAKEFLAGS) d
+	cd $(SRCDIR) && $(MAKE) $(MAKEFLAGS) z
 	touch $(SRCDIR)/FAIT	
 install.done: $(SRCDIR)/FAIT
 	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
