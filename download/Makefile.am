@@ -88,10 +88,11 @@ ipopt/patch-IpBlas
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
-# <<no_more_blacs>> blacs is include in  scalapack 2.0.2 
+# <<no_more_blacs>> blacs is included in scalapack 2.0.2
 
 MPI_SOFT=@TOOL_COMPILE_parmetis@ scalapack @TOOL_COMPILE_scotch@ @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@	\
-	@TOOL_COMPILE_pastix@ @TOOL_COMPILE_hips@ @TOOL_COMPILE_parms@
+	@TOOL_COMPILE_pastix@ @TOOL_COMPILE_hips@ @TOOL_COMPILE_parms@ @TOOL_COMPILE_hypre@
+
 LIST_SOFT=tetgen @TOOL_COMPILE_superlu@ fftw @TOOL_COMPILE_metis@ @TOOL_COMPILE_mshmet@ @TOOL_COMPILE_yams@	\
 	@TOOL_COMPILE_mmg3d@ gmm @TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@ @TOOL_COMPILE_ipopt@
 all-recursive: bin lib include pkg

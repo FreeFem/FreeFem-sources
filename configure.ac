@@ -1595,6 +1595,14 @@ fi
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
 
+# ALH - 31/7/13 - hypre was deactivated some time ago (around 01/2012 according to Mercurial records), so keep it not
+# compiled by default, but allow it to be compiled on user request (requested on the FF mailing list)
+
+if test -z "$enable_hypre"
+then
+    $enable_hypre=no
+fi
+
 # ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
 # may also find interesting to specify a local version of a tool instead of downloading it.
 
@@ -1641,7 +1649,7 @@ m4_define([TOOL_DISABLE],
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
-TOOL_DISABLE(hypre,hypre.$DYLIB_SUFFIX)
+TOOL_DISABLE(hypre,hypre_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
