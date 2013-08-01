@@ -37,7 +37,12 @@ ARFLAGS	= @ARFLAGS@ #cr
 
 # fortran compiler / linker 
  FC	=	@MPIFC@
- FFLAGS	= $(DBG)  $(DARCH)  @FFLAGS@
+
+# ALH - add no-range-check for Windows (hexadecimal parameter constants like
+# [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
+# are rejected without this
+
+ FFLAGS	= $(DBG)  $(DARCH)  @FFLAGS@ -fno-range-check
 #
 # the directory of MPI library. for example -L/usr/local/mpich/lib
  LFLAGS_MPI 	= $(FFMPIINCLUDE) 

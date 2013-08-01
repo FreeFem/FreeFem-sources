@@ -1,3 +1,9 @@
+(ALH)
+ - Removed all Mercurial-tracked files from .hgignore
+ - added options --with-[package]-include= and --with-[package]-ldflags= to avoid downloading existing packages
+ - Parallelized MUMPS compilation in download/mumps (and mumps-seq)
+ - Applied a patch from Fred for compiling SuiteSparse on Slackware64-14.0
+ - Added configuration option --enable-hypre (disabled by default, contrary to other tools)
 10/7/2013  (version 3.25)
  - remove of Mafile.in configure for the hg distrubion 
      use :  autoreconf -i  # too build Makefile.in 
