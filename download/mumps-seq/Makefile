@@ -1,69 +1,94 @@
+# ======================================================================
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# http://www.ljll.math.upmc.fr/lehyaric
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
+
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.inc
 
 all-local: mumps
 
 # Downloading and compiling mumps
-# ------------------------------
+# -------------------------------
+
 DIRPKG=../pkg
 SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 INSTALL=../..
 VERSION=4.10.0
 
-mumps: FAIRE-$(VERSION)
+# ALH - this is also set in Makefile.inc, but this file may not always exist (eg after a make clean)
 
-$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
-	cp Makefile.inc $(SRCDIR)
-#	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
-	cd $(SRCDIR) && make d
-	cd $(SRCDIR) && make z
-	touch $(SRCDIR)/FAIT	
-install.done: $(SRCDIR)/FAIT
-	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
-	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
-	touch $@
-clean::
-	-rm *.done
+WGET = wget --no-check-certificate
+
+mumps:../lib/WHERE.mumpsseq
 
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
-WHERE.done: install.done
-	echo mumps-seq LD -L@DIR@/lib   -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ  -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lpthread >$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
-	echo mumps-seq INCLUDE -I@DIR@/include/libseq  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
-	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
-	echo libseq INCLUDE -I@DIR@/include/libseq>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mumpsseq ;
+
+../lib/WHERE.mumpsseq: install.done
+	echo mumps-seq LD -L@DIR@/lib -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ	\
+		-lpordFREEFEM-SEQ -lpthread > ../lib/WHERE.mumpsseq
+	echo mumps-seq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
+	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
+	echo libseq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
+
+install.done: $(SRCDIR)/FAIT
+	-mkdir -p ../include/libseq
+	cp $(SRCDIR)/include/*.h ../include/libseq
+	cp $(SRCDIR)/libseq/*.h  ../include/libseq
+	-mkdir -p ../lib
+	cp $(SRCDIR)/lib/*.a ../lib/
+	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/
 	touch $@
 
-FAIRE-$(VERSION): install.done WHERE.done
-	touch $@
+$(SRCDIR)/FAIT:Makefile.inc
+	cp Makefile.inc $(SRCDIR)
+#
+#	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
+#
+	cd $(SRCDIR) && $(MAKE) d
+	cd $(SRCDIR) && $(MAKE) z
+	touch $(SRCDIR)/FAIT	
 
-Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
+Makefile.inc: ../../config.status Makefile Makefile-mumps-$(VERSION).inc $(SRCDIR)/tag-tar
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
-
-$(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
 $(SRCDIR)/tag-tar:$(PACKAGE1)
 	tar xvzf $(PACKAGE1)
-#	patch -d MUMPS_4.9.2   -p 1    <MUMPS_4.9.2.patch
-	touch $(SRCDIR)/tag-tar
+	touch $@
 
 $(PACKAGE1):
-	cd `dirname $@`; $(WGET)   http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
-clean-local:
-	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
+	cd `dirname $@`; $(WGET) http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 
-# FFCS - $(SRCDIR)/$(INSTALL) is not valid if $(SRCDIR) is not there
-clean:: clean-local
+clean:
 	-rm Makefile.inc FAIRE* *~ 
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a ../lib/WHERE.mumpsseq
 	-rm -rf $(SRCDIR)
+	-rm *.done config.log
 
-.PHONY:$(SRCDIR)/$(INSTALL)
+# Local Variables:
+# mode:makefile
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:
