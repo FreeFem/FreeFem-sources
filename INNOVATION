@@ -1,3 +1,5 @@
+ - correct download of scotch un curl 
+ - correct problem in a*[b,c, ... ]' in case of complex value   
 10/7/2013  (version 3.25)
  - remove of Mafile.in configure for the hg distrubion 
      use :  autoreconf -i  # too build Makefile.in 
