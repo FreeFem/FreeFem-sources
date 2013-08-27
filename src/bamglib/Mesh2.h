@@ -1153,11 +1153,12 @@ inline void VertexOnGeom::Set(const VertexOnGeom & rec,const Triangles & Th ,Tri
   *this = rec;  
   mv = ThNew.vertices + Th.Number(mv);
   if (gv)
+  {
     if (abscisse < 0 )
       gv = ThNew.Gh.vertices + Th.Gh.Number(gv);
     else
       ge = ThNew.Gh.edges + Th.Gh.Number(ge);
-  
+  }
 }
 inline Real8 Edge::MetricLength() const
   { 

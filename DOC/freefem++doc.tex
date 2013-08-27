@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.22}
+\def\VERSION{3.25}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -10468,55 +10468,59 @@ for this are the following :
 \end{description}
 
 
-
-
-
+%%  version S. Auliac du 26/08/2013 ...
 \subsection{IPOPT}
 The {\tt ff-Ipopt} package is an interface for the IPOPT \cite{ipopt} optimizer. IPOPT is a software library for large scale, non-linear, constrained optimization. Detailed informations about it are in \cite{ipopt} and \url{https://projects.coin-or.org/Ipopt}. It implements a primal-dual interior point method along with filter method based line searchs. 
 IPOPT need a direct sparse symmetric linear solver. If your version of FreeFem has been compiled with the {\tt --enable-downlad} tag, it will automatically be linked with a sequential version of MUMPS. An alternative to MUMPS would be to download the HSL subroutines (see \url{http://www.coin-or.org/Ipopt/documentation/node16.html}) and place them in the {\tt /ipopt/Ipopt-3.10.2/ThirdParty/HSL} directory of the FreeFem++ downloads folder before compiling.
 
 \subsubsection{Short description of the algorithm}
- In this section, we give a very brief glimpse at the underlying mathematics of IPOPT. For a deeper introduction on interior methods for nonlinear smooth optimization, one can consult \cite{ipintro}, or \cite{ipopt} for more IPOPT specific elements. For convenience, let us assume that the minimization problem is the following, given a function $f:\mathbb{R}^{n}\mapsto\mathbb{R}$, find :
+ In this section, we give a very brief glimpse at the underlying mathematics of IPOPT. For a deeper introduction on interior methods for nonlinear smooth optimization, one may consults \cite{ipintro}, or \cite{ipopt} for more IPOPT specific elements. IPOPT is designed to perform optimization for both equality and inequality constrained problems. Though, nonlinear inequalities are rearranged before the beginning of the optimization process in order to restrict the panel of nonlinear constraints to those of the equality kind. Each nonlinear inequality ones are transformed into a pair of simple bound inequality and nonlinear equality constraint by the introduction of as many slack variables as is needed : $c_{i}(x)\leq 0$ becomes $c_{i}(x) + s_{i} = 0$ and $s_{i}\leq 0$, where $s_{i}$ is added to the initial variables of the problems $x_{i}$.  
+ Thus, for convenience, we will assume that the minimization problem does not contain any nonlinear inequality constraint. It means that, given a function $f:\mathbb{R}^{n}\mapsto\mathbb{R}$, we want to find :
  \begin{equation}\label{minimproblem}
  \begin{array} {c}
  x_{0} = \underset{x\in V}{\operatorname{argmin}} f(x) \\
- \mathrm{with}\ V = \left\lbrace x\in\R^{n} \vert \forall i, 1\leq i \leq m, c_{i}(x) \geq 0 \right\rbrace 
+ \mathrm{with}\ V = \left\lbrace x\in\R^{n}\ \vert\ c(x)= 0 \ \text{and}\ x_{l}\leq x\leq x_{u}\right\rbrace 
  \end{array}
  \end{equation}
-Generalization to mixed equality/inequality constraints can be found in \cite{ipintro} or \cite{ipopt}. The $f$ function as well as the constraints $c$ should be twice-continuously differentiable.
+Where $c:\R^{n}\rightarrow\R^{m}$ and $x_{l},x_{u}\in\R^{n}$ and inequalities hold componentwise.
+The $f$ function as well as the constraints $c$ should be twice-continuously differentiable.
 
-
-%For this optimization problem, the first order Karush-Kuhn-Tucker (KKT) conditions, hold at the point $x^{*}$ if $\exists \lambda^{*}\in\R^{m}$ such that :
-%\begin{equation}\label{KKT}
-%\begin{array}{r c l}
-%	\forall i,\  c_{i}(x^{*})& \geq &0 \\
-%	\nabla f(x^{*}) & = & J_{c}(x^{*})^{T}\lambda^{*}\\
-%	\forall i,\ \lambda_{i}^{*} & \geq & 0 \\
-%	c(x^{*})\cdot\lambda^{*} &=&0
-%\end{array}
-%\end{equation}
-%When certain assumptions upon the constraints are met (see \cite{ipintro}), these are necessary conditions for a point to be a solution of \ref{minimproblem}.
-As a barrier method, interior point algorithms try to find a Karush-Kuhn-Tucker point for \ref{minimproblem} by solving a sequence of unconstrained problems of the form :
+As a barrier method, interior points algorithms try to find a Karush-Kuhn-Tucker point for (\ref{minimproblem}) by solving a sequence of problems, unconstrained with respect to the inequality constraints, of the form :
 \begin{equation}\label{barrier}
-\mathrm{for\ a\ given\ }\mu > 0,\ \mathrm{find}\ x_{\mu} = \underset{x\in\R^{n}}{\operatorname{argmin}}\  f(x) - \displaystyle{\mu\sum_{i=1}^{m} \ln c_{i}(x)}
+\mathrm{for\ a\ given\ }\mu > 0,\ \mathrm{find}\ x_{\mu} = \underset{x\in\R^{n}\ \vert\ c(x)=0}{\operatorname{argmin}}\  B(x,\mu) 
 \end{equation}
-If the sequence of barrier parameters $\mu$ converge to 0, intuition suggests that the sequence of minimizers of \ref{barrier} converge to a local constrained minimizer of \ref{minimproblem}. For a given $\mu$, \ref{barrier} is solved by finding $x_{\mu}\in\R^{n}$ such that :
+Where $\mu$ is a positive real number and $B(x,\mu) = f(x) - \displaystyle{\mu\sum_{i=1}^{n} \ln (x_{u,i}-x_{i})} - \displaystyle{\mu\sum_{i=1}^{m} \ln(x_{i}-x_{l,i})}$.
+The remaining equality constraints are handled with the usual Lagrange multipliers method.
+If the sequence of barrier parameters $\mu$ converge to 0, intuition suggests that the sequence of minimizers of (\ref{barrier}) converge to a local constrained minimizer of (\ref{minimproblem}). For a given $\mu$, (\ref{barrier}) is solved by finding $(x_{\mu},\lambda_{\mu})\in\R^{n}\times\R^{m}$ such that :
 \begin{equation}\label{muproblem}
- \nabla f(x_{\mu}) - \displaystyle{\sum_{i=1}^{m}\frac{\mu}{c_{i}(x_{\mu})}\nabla c_{i}(x_{\mu})}
- = \nabla f(x_{\mu}) - J_{c}(x_{\mu})^{T}
- \left(\begin{array}{c} \mu / c_{1}(x_{\mu}) \\ \vdots \\ \mu / c_{m}(x_{\mu}) \end{array}\right) = 0
+ \nabla B(x_{\mu},\mu) + \displaystyle{\sum_{i=1}^{m}\lambda_{\mu,i}\nabla c_{i}(x_{\mu})}
+ = \nabla B(x_{\mu},\mu) + J_{c}(x_{\mu})^{T}\lambda_{\mu} = 0\quad \text{and}\quad c(x_{\mu}) = 0
 \end{equation}
-If we call $\lambda_{\mu}\in\R^{m}$ the vector of components $\lambda_{\mu,i} = \mu / c_{i}(x_{\mu})$, the upper condition can then be written as :
+The derivations for $\nabla B$ only holds for the $x$ variables, so that :
+\[
+\nabla B(x,\mu) = \nabla f(x) + \left(\begin{matrix}\mu/(x_{u,1}-x_{1}) \\ \vdots \\ \mu/(x_{u,n}-x_{n})\end{matrix}\right) - \left(\begin{matrix}\mu/(x_{1}-x_{l,1}) \\ \vdots \\ \mu/(x_{n}-x_{l,n})\end{matrix}\right)
+\]
+If we respectively call $z_{u}(x,\mu) = \left(\mu/(x_{u,1}-x_{1}),\dots, \mu/(x_{u,n}-x_{n})\right)$ and $z_{l}(x,\mu)$ the other vector appearing in the above equation, then the optimum $(x_{\mu},\lambda_{\mu})$ 
+satisfies :
 \begin{equation}\label{muproblemlambda}
- \nabla f(x_{\mu}) - J_{c}(x_{\mu})^{T}\lambda_{\mu}= 0
+\nabla f(x_{\mu}) + J_{c}(x_{\mu})^{T}\lambda_{\mu}+ z_{u}(x_{\mu},\mu) - z_{l}(x_{\mu},\mu) = 0 \quad \text{and} \quad c(x_{\mu}) = 0
 \end{equation}
-It should remind something of the Lagrange multipliers, and indeed, when certain assumptions are met, when $\mu\rightarrow 0$, the $\lambda_{\mu, i}$ converge toward some suitable Lagrange multipliers for the KKT conditions. 
+In this equation, the $z_l$ and $z_u$ vectors seems to play the role of Lagrange multipliers for the simple bounds inequalities, and indeed, when $\mu\rightarrow 0$, they converge toward some suitable Lagrange multipliers for the KKT conditions, provided some technical assumptions are fulfilled (see \cite{ipintro}). 
 
+Equation \ref{muproblemlambda} is solved by performing a Newton method  in order to find a solution of (\ref{muproblem}) for each of the decreasing values of $\mu$. Some order 2 conditions are also taken into account to avoid convergence to local maximizer, see \cite{ipintro} for precision about them. In the most classical IP algorithms, the Newton method is directly applied to (\ref{muproblem}). This is in most case inefficient due to frequent computation of infeasible points. These difficulties are avoided in Primal-Dual interior points methods where (\ref{muproblem}) is transformed into an extended system where $z_u$ and $z_l$ are treated as unknowns and the barrier problems are finding $(x,\lambda,z_u,z_l)\in\R^n\times\R^m\times\R^n\times\R^n$ such that :
+\begin{equation}\label{PrimalDualIPBarrierProblem}
+\left\lbrace\begin{array}{rcl}
+\nabla f(x) + J_{c}(x)^{T}\lambda+ z_{u} - z_{l} & = & 0 \\
+c(x) & = & 0 \\
+(X_u - X) z_u - \mu e & = & 0 \\
+(X - X_l) z_l - \mu e & = & 0 
+\end{array}\right.
+\end{equation}
+Where if $a$ is a vector of $\R^n$, $A$ denotes the diagonal matrix $A=(a_i \delta_{ij})_{1\leq i,j\leq n}$ and $e\in\R^{n} = (1,1,\dots,1)$. Solving this nonlinear system by the Newton methods is known as being
+the \textit{primal-dual} interior points method. Here again, more details are available in \cite{ipintro}. Most actual implementations introduce features in order to globalize the convergence capability of the method, essentially by 
+adding some line-search steps to the Newton algorithm, or by using trust regions. For the purpose of IPOPT, this is achieved by a \textit{filter line search} methods, the details of which can be found in \cite{iplinesearch}.
 
-Equation \ref{muproblemlambda} is solved by performing a Newton method  in order to find a solution of \ref{muproblem} for each of the decreasing values of $\mu$. Some order 2 conditions are also taken into account to avoid convergence to local maximizer, see \cite{ipintro} for precision about them. In a classical IP algorithm, the Newton method is directly applied to \ref{muproblem}. This is in most case inefficient due to frequent computation of infeasible points. These difficulties are avoided in Primal-Dual interior point methods where \ref{muproblem} is transformed into an extended system where $\lambda_{\mu}$ is treated as an unknown (here again, details can be found in \cite{ipintro}).
-
-
-More IPOPT specific features or implementation details can be found in \cite{ipopt}. We will just retain that IPOPT is a smart Newton method for solving constrained optimization problem. Thus, the optimization process requires expressions of all derivatives up to the order 2 of the fitness function as well as those of the constraints. For problems whose hessian are difficult to compute or leads to high dimension dense matrices, it is possible to use a BFGS approximation of these objects at the cost of a much slower convergence rate.
+More IPOPT specific features or implementation details can be found in \cite{ipopt}. We will just retain that IPOPT is a smart Newton method for solving constrained optimization problem, with global convergence capabilities due to a robust line search method (in the sense that the algorithm will convergence no matter the initializer). Due to the underlying Newton method, the optimization process requires expressions of all derivatives up to the order 2 of the fitness function as well as those of the constraints. For problems whose hessian matrices are difficult to compute or lead to high dimensional dense matrices, it is possible to use a BFGS approximation of these objects at the cost of a much slower convergence rate.
 
 
 \subsubsection{IPOPT in FreeFem++}
@@ -10680,8 +10684,10 @@ Here are some other valid definitions of the problem (cases when $f$ is a pure q
   \item[\texttt{pivtol} :] {\tt real} value to set the pivot tolerance for the linear solver. A smaller number pivots for sparsity, a larger number pivots for stability. The value has to be in the $[0,1]$ interval and is set to $10^{-6}$  by default.
   \item[\texttt{brf} :] Bounds relax factor : before starting the optimization, the bounds given by the user are relaxed. This option sets the factor for this relaxation. If it is set to zero, then the bounds relaxation is disabled. This {\tt real} has to be positive and its default value is $10^{-8}$.
   \item[\texttt{objvalue} :] An identifier to a {\tt real} type variable to get the last value of the objective function (best value in case of succes).
-  
+  \item[\texttt{mumin} :] Minimal value for the barrier parameter $\mu$, a {\tt real} with $10^{-11}$ as default value.
+  \item[\texttt{linesearch} :] A boolean which disables the line search when set to {\tt false}. The line search is activated by default. When disabled, the method becomes a standard Newton algorithm other the primal-dual system. The global convergence is then no longer assured, meaning that many initializers could lead to diverging iterates. But on the other hand, it can be useful when trying to catch a precise local minimum without having some out of control process making the iterate caught by some other near optimum.
 \end{description}
+%% fin de   version S. Auliac du 26/08/2013 ...
 
 \subsection{Some short examples using IPOPT}
 \begin{example}[IpoptVI.edp]
