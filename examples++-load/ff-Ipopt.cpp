@@ -25,7 +25,7 @@
  */
 //ff-c++-LIBRARY-dep:  Ipopt mumps-seq blas  libseq  fc  
 
-using namespace std;
+//using namespace std;
 #include "IpTNLP.hpp"
 #include "IpIpoptApplication.hpp"
 #include "ff++.hpp"
@@ -100,6 +100,7 @@ template<class K> class ffcalfunc
 		ffcalfunc(const ffcalfunc &f) : stack(f.stack) {}
 		ffcalfunc(Stack _stack) : stack(_stack) {}
 		virtual K J(Rn_) const = 0;
+    virtual  ~ffcalfunc() {}
 };
 
 
@@ -219,7 +220,9 @@ template<> class ffcalfunc<Matrice_Creuse<R> *>
 		ffcalfunc(Stack s) : stack(s) {}
 		virtual K J(Rn_) const = 0;
 		virtual K J(Rn_,double,Rn_) const = 0;
-		virtual bool NLCHPEnabled() const = 0; //Non Linear Constraints Hessian Prototype 
+  		virtual bool NLCHPEnabled() const = 0; //Non Linear Constraints Hessian Prototype
+    virtual ~ffcalfunc(){}
+    
 };
 
 /*****************************************************************************************************************************
@@ -472,7 +475,7 @@ ffNLP::ffNLP(Rn &x,const Rn &_xl,const Rn &_xu,const Rn &_gl,const Rn &_gu,Scala
 ffNLP::ffNLP(Rn &x,const Rn &_xl,const Rn &_xu,const Rn &_gl,const Rn &_gu,ScalarFunc * _fitness,VectorFunc * _dfitness,SparseMatFunc * _hessian,
 						 VectorFunc * _constraints,SparseMatFunc * _dconstraints, int _mm,int _nnz_jac,int _nnz_h) : 
 				  xstart(&x), xl(_xl), xu(_xu), gl(_gl), gu(_gu),hessian(_hessian),final_value(299792458.),//sym(0),unsymind(),
-					fitness(_fitness),dfitness(dfitness),constraints(_constraints),dconstraints(_dconstraints),uz_start(),lz_start(),
+					fitness(_fitness),dfitness(_dfitness),constraints(_constraints),dconstraints(_dconstraints),uz_start(),lz_start(),
 					mm(_mm),nnz_jac(_nnz_jac),nnz_h(_nnz_h),HesStruct(true),JacStruct(false),sigma_start(1.),lambda_start(),x_start(x),checkstruct(1) {}
 
 ffNLP::~ffNLP()
@@ -596,19 +599,25 @@ bool ffNLP::get_starting_point(Index n, bool init_x, Number* x,bool init_z, Numb
 	{
 		if(uz_start.N() != n) 
 		{
-			cout << "ff-IPOPT warm start : upper simple bounds start multipliers array doesn't have the expected size (" << uz_start.N() << "!=" << n << ")." << endl;
-			cout << "                   ";
-			if(uz_start.N()==0) cout << "maybe because no upper bounds multiplier has been given. " << endl;
-			cout << " Initializing them to 1..." << endl;
+      if(xu.min() < 1.e19)
+      {
+        cout << "ff-IPOPT warm start : upper simple bounds start multipliers array doesn't have the expected size (" << uz_start.N() << "!=" << n << ")." << endl;
+        cout << "                   ";
+        if(uz_start.N()==0) cout << "maybe because no upper bounds multiplier has been given. " << endl;
+        cout << " Initializing them to 1..." << endl;
+      }
 			uz_start.resize(n);
 			uz_start=1.;
 		}
 		if(lz_start.N() != n) 
 		{
-			cout << "ff-IPOPT warm start : lower simple bounds start multipliers array doesn't have the expected size (" << lz_start.N() << "!=" << n << ")." << endl;
-			cout << "                   ";
-			if(lz_start.N()==0) cout << "maybe because no lower bounds multiplier has been given. " << endl;
-			cout << " Initializing them to 1..." << endl;
+			if(xl.max() > -1e19)
+			{
+        cout << "ff-IPOPT warm start : lower simple bounds start multipliers array doesn't have the expected size (" << lz_start.N() << "!=" << n << ")." << endl;
+        cout << "                   ";
+        if(lz_start.N()==0) cout << "maybe because no lower bounds multiplier has been given. " << endl;
+        cout << " Initializing them to 1..." << endl;
+      }
 			lz_start.resize(n);
 			lz_start=1.;
 		}
@@ -862,6 +871,7 @@ class GenericFitnessFunctionDatas
 		GenericFitnessFunctionDatas() : CompletelyNonLinearConstraints(true),JJ(0),GradJ(0),Hessian(0) {}
 		virtual const AssumptionF A() const {return undeff;}
 		virtual void operator()(Stack,const C_F0&,const C_F0&,const C_F0&,Expression const *,ScalarFunc *&,VectorFunc *&,SparseMatFunc *&,bool) const = 0; //Build the functions
+   virtual ~GenericFitnessFunctionDatas() {}
 };
 template<AssumptionF AF> class FitnessFunctionDatas : public GenericFitnessFunctionDatas  //not really a template, since most of the methods of all cases have to be specialized
 {
@@ -869,6 +879,7 @@ template<AssumptionF AF> class FitnessFunctionDatas : public GenericFitnessFunct
 		FitnessFunctionDatas(const basicAC_F0 &,Expression const *,const C_F0 &,const C_F0 &,const C_F0 &);
 		const AssumptionF A() const {return AF;}
 		void operator()(Stack,const C_F0&,const C_F0&,const C_F0&,Expression const *,ScalarFunc *&,VectorFunc *&,SparseMatFunc *&,bool) const;
+    
 };
 
 class GenericConstraintFunctionDatas
@@ -879,7 +890,9 @@ class GenericConstraintFunctionDatas
 		GenericConstraintFunctionDatas() : Constraints(0),GradConstraints(0) {}
 		virtual const AssumptionG A() const {return undefg;}
 		virtual const bool WC() const =0;//with constraints
-		virtual void operator()(Stack,const C_F0 &,Expression const *,VectorFunc *&,SparseMatFunc *&,bool) const = 0;//build the functions
+		virtual void operator()(Stack,const C_F0 &,Expression const *,VectorFunc *&,SparseMatFunc *&,bool) const = 0;//build the functions`
+   virtual  ~GenericConstraintFunctionDatas() {}
+    
 };
 template<AssumptionG AG> class ConstraintFunctionDatas : public GenericConstraintFunctionDatas
 {
@@ -913,7 +926,7 @@ class OptimIpopt : public OneOperator
 				std::set<unsigned short> unused_name_param; //In some case, some parameter are usless, this is the list of their index in nargs
 				void InitUNP(); //Initialize unusued_name_param at freefem compile time
 				static basicAC_F0::name_and_type name_param[];
-				static const int n_name_param=27;
+				static const int n_name_param=29;
 				Expression nargs[n_name_param];
 				Expression X;
 				mutable Rn lm;
@@ -1151,8 +1164,10 @@ class OptimIpopt : public OneOperator
 					if(nargs[23]) app->Options()->SetNumericValue("mumps_pivtol",GetAny<double>((*nargs[23])(stack)));
 					if(nargs[24]) app->Options()->SetNumericValue("bound_relax_factor",GetAny<double>((*nargs[24])(stack)));
 					if(nargs[25]) app->Options()->SetStringValue("mu_strategy",GetAny<string*>((*nargs[25])(stack))->c_str());
+					if(nargs[27]) app->Options()->SetNumericValue("mu_min",GetAny<double>((*nargs[27])(stack)));
+          if(nargs[28]) if(!GetAny<bool>((*nargs[28])(stack))) app->Options()->SetStringValue("accept_every_trial_step","yes");
 					//if(nargs[26]) app->Options()->SetNumericValue("obj_scaling_factor",GetAny<double>((*nargs[26])(stack)));
-				
+          if(verbosity>1) app->Options()->SetStringValue("print_user_options","yes");
 					app->Options()->SetStringValue("output_file", "ipopt.out");
 					if(AF!=no_assumption_f && AF!=unavailable_hessian && AG!=no_assumption_g) app->Options()->SetStringValue("mehrotra_algorithm", "yes");
 					
@@ -1160,14 +1175,7 @@ class OptimIpopt : public OneOperator
 					app->Initialize();
 			
 					// Ask Ipopt to solve the problem
-					try
-					{
-						status = app->OptimizeTNLP(optim);
-					}
-					catch(...)
-					{
-						cout << "error caught" << endl;
-					}
+          status = app->OptimizeTNLP(optim);
 				
 					if(lag_mul) *lag_mul = _optim->lambda_start;
 					if(l_z) *l_z = _optim->lz_start;
@@ -1179,8 +1187,14 @@ class OptimIpopt : public OneOperator
 						double *pfv = GetAny<double*>((*nargs[26])(stack));
 						*pfv = cost;
 					}
-					if(verbosity) {if(status == Solve_Succeeded) printf("\n\n*** Ipopt succeeded \n"); else printf("\n\n*** Ipopt failure!\n");}
-					
+					if(verbosity)
+					{
+						if(status == Solve_Succeeded) printf("\n\n*** Ipopt succeeded \n");
+						else if(static_cast<int>(status)<0) printf("\n\n*** Ipopt failure!\n");
+						else printf("\n\n*** Ipopt mixed results.\n");
+					}
+          
+          
 					clean(lag_mul);
 					clean(l_z);
 					clean(u_z);
@@ -1192,7 +1206,7 @@ class OptimIpopt : public OneOperator
 					if(lm) lm.destroy(); // clean memory of LM 
 					closetheparam.eval(stack); // clean memory 
 					WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-					return SetAny<long>(static_cast<long>(status)); //SetAny<long>(0);  Modif FH  july 2005       
+					return SetAny<long>(static_cast<long>(static_cast<int>(status))); //SetAny<long>(0);  Modif FH  july 2005
 				}
 				    
 				operator aType () const { return atype<long>();} 
@@ -1204,100 +1218,100 @@ class OptimIpopt : public OneOperator
 		//Constructors - they define the different prototype of the overloaded IPOPT function reachable in freefem scripts
 		
 		OptimIpopt(Case<no_assumption_f,no_assumption_g>) : 
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
 			AF(no_assumption_f),AG(no_assumption_g) {}
 		OptimIpopt(Case<no_assumption_f,without_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
 			AF(no_assumption_f),AG(without_constraints) {}
 		OptimIpopt(Case<no_assumption_f,P1_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
 			AF(no_assumption_f),AG(P1_g) {}
 		OptimIpopt(Case<no_assumption_f,mv_P1_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<E_Array>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<E_Array>(),atype<KN<R> *>()),
 			AF(no_assumption_f),AG(mv_P1_g) {}
 		OptimIpopt(Case<no_assumption_f,linear_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
 			AF(no_assumption_f),AG(linear_g) {}
 
 
 		OptimIpopt(Case<P2_f,P1_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
 			AF(P2_f),AG(P1_g) {}
 		OptimIpopt(Case<P2_f,without_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<KN<R> *>()),
 			AF(P2_f),AG(without_constraints) {}
 		OptimIpopt(Case<P2_f,no_assumption_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Polymorphic *>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R> *>(),atype<Polymorphic*>(),atype<Polymorphic *>(),atype<KN<R> *>()),
 			AF(P2_f),AG(no_assumption_g) {}
 		OptimIpopt(Case<P2_f,mv_P1_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<E_Array>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<E_Array>(),atype<KN<R> *>()),
 			AF(P2_f),AG(mv_P1_g) {}
 		OptimIpopt(Case<P2_f,linear_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
 			AF(P2_f),AG(linear_g) {}
 			
 		OptimIpopt(Case<unavailable_hessian,no_assumption_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),
 			AF(unavailable_hessian),AG(no_assumption_g) {}
 		OptimIpopt(Case<unavailable_hessian,without_constraints>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),AF(unavailable_hessian),AG(without_constraints) {}
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R> *>()),AF(unavailable_hessian),AG(without_constraints) {}
 		OptimIpopt(Case<unavailable_hessian,P1_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R> *>()),
 			AF(unavailable_hessian),AG(P1_g) {}
 		OptimIpopt(Case<unavailable_hessian,mv_P1_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<E_Array>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<E_Array>(),atype<KN<R>*>()),
 			AF(unavailable_hessian),AG(mv_P1_g) {}
 		OptimIpopt(Case<unavailable_hessian,linear_g>) :
-			OneOperator(atype<double>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(unavailable_hessian),AG(linear_g) {}
 			
 		OptimIpopt(Case<mv_P2_f,no_assumption_g>) :
-			OneOperator(atype<double>(),atype<E_Array>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<E_Array>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
 			AF(mv_P2_f),AG(no_assumption_g) {}
 		OptimIpopt(Case<mv_P2_f,without_constraints>) :
-			OneOperator(atype<double>(),atype<E_Array>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<E_Array>(),atype<KN<R>*>()),
 			AF(mv_P2_f),AG(without_constraints) {}
 		OptimIpopt(Case<mv_P2_f,P1_g>) :
-			OneOperator(atype<double>(),atype<E_Array>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<E_Array>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(mv_P2_f),AG(P1_g) {}
 		OptimIpopt(Case<mv_P2_f,mv_P1_g>) :
-			OneOperator(atype<double>(),atype<E_Array>(),atype<E_Array>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<E_Array>(),atype<E_Array>(),atype<KN<R>*>()),
 			AF(mv_P2_f),AG(mv_P1_g) {}
 		OptimIpopt(Case<mv_P2_f,linear_g>) :
-			OneOperator(atype<double>(),atype<E_Array>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<E_Array>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(mv_P2_f),AG(linear_g) {}
 		
 		OptimIpopt(Case<quadratic_f,no_assumption_g>) :
-			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Matrice_Creuse<R>*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
 			AF(quadratic_f),AG(no_assumption_g) {}
 		OptimIpopt(Case<quadratic_f,without_constraints>) :
-			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(quadratic_f),AG(without_constraints) {}
 		OptimIpopt(Case<quadratic_f,P1_g>) :
-			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Matrice_Creuse<R>*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(quadratic_f),AG(P1_g) {}
 		OptimIpopt(Case<quadratic_f,mv_P1_g>) :
-			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<E_Array>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Matrice_Creuse<R>*>(),atype<E_Array>(),atype<KN<R>*>()),
 			AF(quadratic_f),AG(mv_P1_g) {}
 		OptimIpopt(Case<quadratic_f,linear_g>) :
-			OneOperator(atype<double>(),atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(quadratic_f),AG(linear_g) {}
 			
 			
 		OptimIpopt(Case<linear_f,no_assumption_g>) :
-			OneOperator(atype<double>(),atype<KN<R>*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<KN<R>*>(),atype<Polymorphic*>(),atype<Polymorphic*>(),atype<KN<R>*>()),
 			AF(linear_f),AG(no_assumption_g) {}
 		OptimIpopt(Case<linear_f,without_constraints>) :
-			OneOperator(atype<double>(),atype<KN<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<KN<R>*>(),atype<KN<R>*>()),
 			AF(linear_f),AG(without_constraints) {}
 		OptimIpopt(Case<linear_f,P1_g>) :
-			OneOperator(atype<double>(),atype<KN<R>*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<KN<R>*>(),atype<Polymorphic*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(linear_f),AG(P1_g) {}
 		OptimIpopt(Case<linear_f,mv_P1_g>) :
-			OneOperator(atype<double>(),atype<KN<R>*>(),atype<E_Array>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<KN<R>*>(),atype<E_Array>(),atype<KN<R>*>()),
 			AF(linear_f),AG(mv_P1_g) {}
 		OptimIpopt(Case<linear_f,linear_g>) :
-			OneOperator(atype<double>(),atype<KN<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
+			OneOperator(atype<long>(),atype<KN<R>*>(),atype<Matrice_Creuse<R>*>(),atype<KN<R>*>()),
 			AF(linear_f),AG(linear_g) {}
 		
 };
@@ -1377,7 +1391,9 @@ basicAC_F0::name_and_type  OptimIpopt::E_Ipopt::name_param[]=
 	{"pivtol",		&typeid(double) },											//23 -  pivot tolerance for the linear solver
 	{"brf",				&typeid(double) },											//24 -  bounds relax factor
 	{"mustrategy",&typeid(string*) },											//25 -  strategy for barrier parameter update
-	{"objvalue",  &typeid(double*) }											//26 -  to get the last objective function value
+	{"objvalue",  &typeid(double*) },											//26 -  to get the last objective function value
+	{"mumin",			&typeid(double) },											//27 -  minimal value for the barrier parameter
+  {"linesearch",&typeid(bool) }                         //28 -  use the line search or not (if no, the usual Newton step is kept)
 	//{"osf",				&typeid(double) }												//26 -  objective function scalling factor
 };
 
