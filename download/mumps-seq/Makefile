@@ -27,6 +27,7 @@
 include Makefile.inc
 
 all-local: mumps
+mumps:../lib/WHERE.mumpsseq
 
 # Downloading and compiling mumps
 # -------------------------------
@@ -48,9 +49,19 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 #
 	cd $(SRCDIR) && make d
 	cd $(SRCDIR) && make z
-	touch $(SRCDIR)/FAIT	
+	touch $@
 
-mumps:../lib/WHERE.mumpsseq
+install.done: $(SRCDIR)/FAIT
+	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
+	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
+	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
+	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
+	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
+	touch $@
+
+clean::
+	-rm *.done
 
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 
@@ -60,15 +71,6 @@ mumps:../lib/WHERE.mumpsseq
 	echo mumps-seq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
 	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
 	echo libseq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
-
-install.done: $(SRCDIR)/FAIT
-	-mkdir -p ../include/libseq
-	cp $(SRCDIR)/include/*.h ../include/libseq
-	cp $(SRCDIR)/libseq/*.h  ../include/libseq
-	-mkdir -p ../lib
-	cp $(SRCDIR)/lib/*.a ../lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/
-	touch $@
 
 $(SRCDIR)/FAIT:Makefile.inc
 	cp Makefile.inc $(SRCDIR)

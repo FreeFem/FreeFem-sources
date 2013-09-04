@@ -17,7 +17,6 @@ CHOLMODLIB=../lib/libcholmod.a
 COLAMDLIB=../lib/libcolamd.a
 SUITESPARSECONFIGLIB=../lib/libsuitesparseconfig.a
 
-
 #  all: umfpack cholmod
 
 # ALH - 4/9/13 - parallel make crashes ("pipe from processes is a directory"?). make sure that everything is run
@@ -34,18 +33,13 @@ cholmod:
 	$(MAKE) MAKEFLAGS= $(CHOLMODLIB)
 	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB) 
 
-# The 'lib' goal is replaced with 'libb' to avoid problems with the
-# existing 'Lib' subdirectory on case-insensitive file systems
-# the lib depend of the Makefile to force the reconstruction 
-# if the parameter change
-
 # FFCS: SuiteSparse/*/Source are not able to compile in parallel from scratch ("pipe from processes is a
 # directory"?). But specifying "make -j 1" is not enough (another error pops up). Use "$(MAKE) MAKEFLAGS=" instead
 # (using "make MAKEFLAGS=" still produces an error on Cygwin).
 
 $(SUITESPARSECONFIGLIB): SuiteSparse/FF 
 	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS=
-	mkdir -p ../include ../lib
+	mkdir ../include ../lib
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/SuiteSparse_config/libsuitesparseconfig.a ../lib/libsuitesparseconfig.a
 	$(RANLIB) ../lib/libsuitesparseconfig.a
@@ -88,6 +82,10 @@ $(COLAMDLIB): SuiteSparse/FF
 
 UMFPACKv4.4:
 	tar xzf UMFPACKv4.4.tar.gz
+
+# The 'lib' goal is replaced with 'libb' to avoid problems with the existing 'Lib' subdirectory on case-insensitive file
+# systems the lib depend of the Makefile to force the reconstruction if the parameter change
+
 UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4  
 	sed 's/lib:/libb:/' < UMFPACKv4.4/UMFPACK/`basename $@ 2`  >$@
 
@@ -148,3 +146,9 @@ clean-local:
 	-rm -rf SuiteSparse
 	-rm ../pkg/SuiteSparse-*
 	-rm SuiteSparse_config.mk
+
+# Local Variables:
+# mode:makefile
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

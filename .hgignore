@@ -1,6 +1,5 @@
 (^|/)ListOfUnAllocPtr\.bin$
 (^|/)Makefile\.in$
-(^|/)Makefile\.in$
 (^|/)TAGS$
 (^|/)\.deps$
 (^|/)\.dll$
@@ -9,20 +8,18 @@
 \.DS_Store$
 \.a$
 \.bak$
-<<<<<<< /home/alh/ff/pub/.hgignore
-\.dll$
-\.dylib$
-||||||| /tmp/.hgignore~base.qV6EV7
-=======
 \.dll$
 \.done$
 \.dylib$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 \.exe$
 \.o$
 \.orig$
 \.rej$
 \.so$
+^DOC/ffdoc.*\.html$
+^DOC/ffdoc.*\.png$
+^DOC/cmsy.*\.png$
+^DOC/ffdoc\..*
 ^DOC/.*\.aux$
 ^DOC/.*\.dvi$
 ^DOC/.*\.idx$
@@ -285,10 +282,6 @@
 ^config-version\.h$
 ^config\.h$
 ^config\.h\.in$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
-^config\.h\.in$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^config\.log$
 ^config\.status$
 ^config_LIB_INFO$
@@ -317,28 +310,7 @@
 ^download/arpack/arpack\+\+$
 ^download/arpack/arpack\+\+\.tar\.gz$
 ^download/arpack/patch\.tar\.gz$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^download/bin/
->>>>>>> /tmp/.hgignore~other.TdhHG7
-^download/bin/ff-get-dep$
-^download/bin/ff-pkg-download$
-^download/bin/fftw-wisdom$
-^download/bin/fftw-wisdom-to-conf$
-^download/bin/graphchk$
-^download/bin/kmetis$
-^download/bin/mesh2dual$
-^download/bin/mesh2nodal$
-^download/bin/mtest$
-^download/bin/oemetis$
-^download/bin/onmetis$
-^download/bin/parmetis$
-^download/bin/partdmesh$
-^download/bin/partnmesh$
-^download/bin/pmetis$
-^download/bin/pometis$
-^download/bin/ptest$
-^download/bin/yams2
 ^download/blacs/BLACS/
 ^download/blacs/Bmake\.inc$
 ^download/blacs/config\.log$
@@ -473,8 +445,6 @@
 ^download/yams/FAIRE
 ^download/yams/ff-flags$
 ^download/yams/freeyams.*/
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^ex.*\.eps$
 ^ex.*\.log$
 ^ex.*\.out$
@@ -483,25 +453,16 @@
 ^ex.*\.trs$
 ^examples\+\+-3d/A\.txt$
 ^examples\+\+-3d/B\.txt$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-3d/Makefile$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-3d/Th-hex-sph\.mesh$
 ^examples\+\+-3d/Th33\.mesh$
 ^examples\+\+-3d/Th3\.mesh$
 ^examples\+\+-3d/Th\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-3d/all\.edp
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-3d/cyl\.mesh$
 ^examples\+\+-3d/dd\.bb$
 ^examples\+\+-3d/dd\.meshb$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-3d/freefem\+\+\.pref
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-3d/sphereAdd\.mesh$
 ^examples\+\+-3d/sphereR1\.mesh$
 ^examples\+\+-3d/sphereR2\.mesh$
@@ -509,105 +470,64 @@
 ^examples\+\+-3d/sphere\.points$
 ^examples\+\+-3d/spherewithahole\.mesh$
 ^examples\+\+-3d/spherewithtworegion\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-bug/Makefile$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-chapt3/J\.txt$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-chapt3/Makefile$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-chapt3/Th\.msh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-chapt3/all\.edp
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-chapt3/freefem\+\+\.pref$
 ^examples\+\+-chapt3/graph\.txt$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-chapt3/regtests-nw\.log$
 ^examples\+\+-chapt3/regtests\.edp$
 ^examples\+\+-eigen/.*\.eps$
 ^examples\+\+-eigen/.*\.log$
 ^examples\+\+-eigen/Makefile$
 ^examples\+\+-eigen/all\.edp
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-eigen/freefem\+\+\.pref$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-eigen/machinefile$
 ^examples\+\+-load/Makefile$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-load/Th33\.mesh$
 ^examples\+\+-load/ThFF\.txt$
 ^examples\+\+-load/ThFF_Metric\.txt$
 ^examples\+\+-load/TriQA\.txt$
 ^examples\+\+-load/TriQA_Metric\.txt$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-load/WHERE_LIBRARY$
 ^examples\+\+-load/WHERE_LIBRARY-config$
 ^examples\+\+-load/WHERE_LIBRARY-download$
 ^examples\+\+-load/WHERE_LIBRARY-download-new
 ^examples\+\+-load/all\.edp
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-load/bl31\.mesh$
 ^examples\+\+-load/bl32\.mesh$
 ^examples\+\+-load/box2region1hole\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-load/config\.log$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-load/ellipsoide\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-load/ff-c\+\+$
 ^examples\+\+-load/ff-get-dep$
 ^examples\+\+-load/ff-pkg-download$
 ^examples\+\+-load/freefem\+\+\.pref$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-load/glu2D\.mesh$
 ^examples\+\+-load/glu2D\.mesh\.gmsh$
 ^examples\+\+-load/glu3D\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-load/include$
-<<<<<<< /home/alh/ff/pub/.hgignore
 ^examples\+\+-load/include\.done$
 ^examples\+\+-load/ipopt\.out$
 ^examples\+\+-load/lll\.mesh$
-||||||| /tmp/.hgignore~base.qV6EV7
-^examples\+\+-load/include\.done$
-=======
-^examples\+\+-load/ipopt\.out$
-^examples\+\+-load/lll\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-load/load\.link$
 ^examples\+\+-load/machinefile$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-load/movemeshglumesh\.mesh$
 ^examples\+\+-load/pippo\.data$
 ^examples\+\+-load/pippo\.dx$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-load/regtests-.*\.log$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-load/sphere2region\.mesh$
 ^examples\+\+-load/spherewithahole\.mesh$
 ^examples\+\+-load/spherewithtworegion\.mesh$
 ^examples\+\+-load/tetgenholeregion\.edp$
 ^examples\+\+-load/triQA\.msh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-mpi/.*\.eps$
 ^examples\+\+-mpi/Makefile$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-mpi/beam-deformed-mumps\.mesh$
 ^examples\+\+-mpi/beam-deformed-superlu\.mesh$
 ^examples\+\+-mpi/cube\.idp$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-mpi/freefem\+\+\.pref
 ^examples\+\+-mpi/machinefile$
 ^examples\+\+-mpi/regtests-.*\.log$
@@ -618,18 +538,12 @@
 ^examples\+\+-tutorial/.*\.log$
 ^examples\+\+-tutorial/.*\.msh$
 ^examples\+\+-tutorial/.*\.ps$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-tutorial/A\.matrix$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-tutorial/Makefile$
 ^examples\+\+-tutorial/all\.edp
 ^examples\+\+-tutorial/f\.txt$
 ^examples\+\+-tutorial/freefem\+\+\.pref
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+-tutorial/g\.mesh$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+-tutorial/lestables$
 ^examples\+\+-tutorial/machinefile$
 ^examples\+\+-tutorial/makeref\.edp$
@@ -648,10 +562,7 @@
 ^examples\+\+/Makefile$
 ^examples\+\+/all\.edp
 ^examples\+\+/err\.dat$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^examples\+\+/freefem\+\+\.pref$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ^examples\+\+/machinefile$
 ^examples\+\+/toto\.txt$
 ^freefem\+\+-.\..*\.zip$
@@ -724,69 +635,20 @@
 ^src/x11/Makefile$
 ^stamp-h$
 ^stamp-h1$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-=======
 ^test-driver$
->>>>>>> /tmp/.hgignore~other.TdhHG7
 ~$
-<<<<<<< /tmp/.hgignore~base.qV6EV7
-^ex.*\.trs$
-^ex.*\.log$
-^ex.*\.ps$
-^ex.*\.eps$
-^ex.*\.so$
-^ex.*\.out$
-\.dylib$
-\.dll$
-^examples\+\+-3d/A\.txt$
-^examples\+\+-3d/B\.txt$
-^examples\+\+-3d/Th-hex-sph\.mesh$
-^examples\+\+-3d/Th\.mesh$
-^examples\+\+-3d/Th3\.mesh$
-^examples\+\+-3d/Th33\.mesh$
-^examples\+\+-3d/cyl\.mesh$
-^examples\+\+-3d/dd\.bb$
-^examples\+\+-3d/dd\.meshb$
-^examples\+\+-3d/sphere\.faces$
-^examples\+\+-3d/sphere\.points$
-^examples\+\+-3d/sphereAdd\.mesh$
-^examples\+\+-3d/sphereR1\.mesh$
-^examples\+\+-3d/sphereR2\.mesh$
-^examples\+\+-3d/spherewithahole\.mesh$
-^examples\+\+-3d/spherewithtworegion\.mesh$
-^examples\+\+-chapt3/J\.txt$
-^examples\+\+-chapt3/Th\.msh$
-^examples\+\+-chapt3/freefem\+\+\.pref$
-^examples\+\+-chapt3/graph\.txt$
-^examples\+\+-eigen/freefem\+\+\.pref$
-^examples\+\+-load/Th33\.mesh$
-^examples\+\+-load/ThFF\.txt$
-^examples\+\+-load/ThFF_Metric\.txt$
-^examples\+\+-load/TriQA\.txt$
-^examples\+\+-load/TriQA_Metric\.txt$
-^examples\+\+-load/bl31\.mesh$
-^examples\+\+-load/bl32\.mesh$
-^examples\+\+-load/box2region1hole\.mesh$
-^examples\+\+-load/ellipsoide\.mesh$
-^examples\+\+-load/glu2D\.mesh$
-^examples\+\+-load/glu2D\.mesh\.gmsh$
-^examples\+\+-load/glu3D\.mesh$
-^examples\+\+-load/ipopt\.out$
-^examples\+\+-load/lll\.mesh$
-^examples\+\+-load/movemeshglumesh\.mesh$
-^examples\+\+-load/pippo\.data$
-^examples\+\+-load/pippo\.dx$
-^examples\+\+-load/sphere2region\.mesh$
-^examples\+\+-load/spherewithahole\.mesh$
-^examples\+\+-load/spherewithtworegion\.mesh$
-^examples\+\+-load/triQA\.msh$
-^examples\+\+-mpi/beam-deformed-mumps\.mesh$
-^examples\+\+-mpi/beam-deformed-superlu\.mesh$
-^examples\+\+-tutorial/A\.matrix$
-^examples\+\+-tutorial/g\.mesh$
-^examples\+\+/freefem\+\+\.pref$
-^download/bin/
-^test-driver$
-(^|/)Makefile\.in$
-^config\.h\.in$=======
->>>>>>> /tmp/.hgignore~other.TdhHG7
+^DOC/plots/BG-russe\.eps$
+^DOC/plots/LogoLJLL\.eps$
+^DOC/plots/LogoUPMC\.eps$
+^DOC/plots/NSNewtonTh\.eps$
+^DOC/plots/NSNewtonUP\.eps$
+^DOC/plots/VarIneqFill\.eps$
+^DOC/plots/VarIneqIso\.eps$
+^DOC/plots/chesapeake-2\.eps$
+^DOC/plots/ffauteur\.eps$
+^DOC/plots/lg\.eps$
+^DOC/plots/logo-finance-par-anr\.eps$
+^DOC/plots/minsurf3D\.eps$
+^DOC/plots/nlopttab\.eps$
+^DOC/plots/sanskrit\.eps$
+^DOC/plots/titre-ff\.eps$
