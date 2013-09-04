@@ -24,10 +24,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-<<<<<<< /tmp/Makefile~base.tafKgb
-# $Id$
-=======
->>>>>>> /tmp/Makefile~other.plOUGU
 include Makefile.inc
 
 all-local: mumps
@@ -45,7 +41,6 @@ VERSION=4.10.0
 
 WGET = wget --no-check-certificate
 
-<<<<<<< /home/alh/ff/pub/download/mumps-seq/Makefile
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
 #
@@ -54,36 +49,8 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cd $(SRCDIR) && make d
 	cd $(SRCDIR) && make z
 	touch $(SRCDIR)/FAIT	
-install.done: $(SRCDIR)/FAIT
-	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
-	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
-	touch $@
-clean::
-	-rm *.done
-||||||| /tmp/Makefile~base.tafKgb
-$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
-	cp Makefile.inc $(SRCDIR)
-#	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
-	cd $(SRCDIR) && make d
-	cd $(SRCDIR) && make z
-	touch $(SRCDIR)/FAIT	
-install.done: $(SRCDIR)/FAIT
-	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
-	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
-	touch $@
-clean::
-	-rm *.done
-=======
+
 mumps:../lib/WHERE.mumpsseq
->>>>>>> /tmp/Makefile~other.plOUGU
 
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 

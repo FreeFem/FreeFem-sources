@@ -1671,7 +1671,7 @@ TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 
-if test $OS = Windows_NT
+if test "$OS" = Windows_NT
 then
     CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
 

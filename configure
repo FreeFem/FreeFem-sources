@@ -640,45 +640,50 @@ FNOFLAGS
 CNOFLAGS
 LIBC_VERSION
 KERNEL_VERSION
-FFCS_DYLIB_pipe
-FFCS_COMPILE_pipe
-FFCS_DYLIB_pardiso
-FFCS_COMPILE_pardiso
-FFCS_DYLIB_yams
-FFCS_COMPILE_yams
-FFCS_DYLIB_superludist
-FFCS_COMPILE_superludist
-FFCS_DYLIB_scotch
-FFCS_COMPILE_scotch
-FFCS_DYLIB_pastix
-FFCS_COMPILE_pastix
-FFCS_DYLIB_parms
-FFCS_COMPILE_parms
-FFCS_DYLIB_mumps_seq
-FFCS_COMPILE_mumps_seq
-FFCS_DYLIB_mumps
-FFCS_COMPILE_mumps
-FFCS_DYLIB_mshmet
-FFCS_COMPILE_mshmet
-FFCS_DYLIB_mmg3d
-FFCS_COMPILE_mmg3d
-FFCS_DYLIB_lapack
-FFCS_COMPILE_lapack
-FFCS_DYLIB_ipopt
-FFCS_COMPILE_ipopt
-FFCS_DYLIB_hypre
-FFCS_COMPILE_hypre
-FFCS_DYLIB_hips
-FFCS_COMPILE_hips
-FFCS_DYLIB_gsl
-FFCS_COMPILE_gsl
-FFCS_DYLIB_fflapack
-FFCS_COMPILE_fflapack
-FLTK_CONFIG
-FLTK_CONFIG_PARAM
-FLTK_VERSION
-DOWNLOAD_FLTK
-ff_fltk
+TOOL_DYLIB_yams
+TOOL_COMPILE_yams
+TOOL_DYLIB_umfpack
+TOOL_COMPILE_umfpack
+TOOL_DYLIB_superludist
+TOOL_COMPILE_superludist
+TOOL_DYLIB_superlu
+TOOL_COMPILE_superlu
+TOOL_DYLIB_scotch
+TOOL_COMPILE_scotch
+TOOL_DYLIB_pipe
+TOOL_COMPILE_pipe
+TOOL_DYLIB_pastix
+TOOL_COMPILE_pastix
+TOOL_DYLIB_parms
+TOOL_COMPILE_parms
+TOOL_DYLIB_parmetis
+TOOL_COMPILE_parmetis
+TOOL_DYLIB_pardiso
+TOOL_COMPILE_pardiso
+TOOL_DYLIB_nlopt
+TOOL_COMPILE_nlopt
+TOOL_DYLIB_mumps_seq
+TOOL_COMPILE_mumps_seq
+TOOL_DYLIB_mumps
+TOOL_COMPILE_mumps
+TOOL_DYLIB_mshmet
+TOOL_COMPILE_mshmet
+TOOL_DYLIB_mmg3d
+TOOL_COMPILE_mmg3d
+TOOL_DYLIB_metis
+TOOL_COMPILE_metis
+TOOL_DYLIB_lapack
+TOOL_COMPILE_lapack
+TOOL_DYLIB_ipopt
+TOOL_COMPILE_ipopt
+TOOL_DYLIB_hypre
+TOOL_COMPILE_hypre
+TOOL_DYLIB_hips
+TOOL_COMPILE_hips
+TOOL_DYLIB_gsl
+TOOL_COMPILE_gsl
+TOOL_DYLIB_fflapack
+TOOL_COMPILE_fflapack
 STD_LIBS
 STD_LDFLAGS
 STD_GRAPH_OBJ
@@ -887,10 +892,10 @@ enable_option_checking
 enable_silent_rules
 enable_maintainer_mode
 enable_dependency_tracking
+enable_ffcs
 enable_fortran
 with_flib
 enable_c
-enable_default_fltk
 enable_cygwindll
 enable_profiling
 enable_m64
@@ -918,22 +923,71 @@ with_umfpack
 enable_static
 enable_pdf
 enable_fflapack
+with_fflapack_include
+with_fflapack_ldflags
 enable_gsl
+with_gsl_include
+with_gsl_ldflags
 enable_hips
+with_hips_include
+with_hips_ldflags
 enable_hypre
+with_hypre_include
+with_hypre_ldflags
 enable_ipopt
+with_ipopt_include
+with_ipopt_ldflags
 enable_lapack
+with_lapack_include
+with_lapack_ldflags
+enable_metis
+with_metis_include
+with_metis_ldflags
 enable_mmg3d
+with_mmg3d_include
+with_mmg3d_ldflags
 enable_mshmet
+with_mshmet_include
+with_mshmet_ldflags
 enable_mumps
+with_mumps_include
+with_mumps_ldflags
 enable_mumps_seq
-enable_parms
-enable_pastix
-enable_scotch
-enable_superludist
-enable_yams
+with_mumps_seq_include
+with_mumps_seq_ldflags
+enable_nlopt
+with_nlopt_include
+with_nlopt_ldflags
 enable_pardiso
+with_pardiso_include
+with_pardiso_ldflags
+enable_parmetis
+with_parmetis_include
+with_parmetis_ldflags
+enable_parms
+with_parms_include
+with_parms_ldflags
+enable_pastix
+with_pastix_include
+with_pastix_ldflags
 enable_pipe
+with_pipe_include
+with_pipe_ldflags
+enable_scotch
+with_scotch_include
+with_scotch_ldflags
+enable_superlu
+with_superlu_include
+with_superlu_ldflags
+enable_superludist
+with_superludist_include
+with_superludist_ldflags
+enable_umfpack
+with_umfpack_include
+with_umfpack_ldflags
+enable_yams
+with_yams_include
+with_yams_ldflags
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1585,10 +1639,9 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
-  --enable-ffcs	build FreeFem++ for use by FreeFem++-cs
+  --enable-ffcs           build FreeFem++ for use by FreeFem++-cs
   --disable-fortran	No Fortran compiler available ( ARPACK need it)
   --disable-c		No C compiler available (C BLAS need it)
-  --disable-default-fltk	Does not use default FLTK
   --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)
   --enable-profiling	Turn on profiling
   --enable-m64	Turn on 64 bits architecture
@@ -1598,26 +1651,31 @@ Optional Features:
   --enable-generic	Turn off hardware-dependant optimization options
   --enable-opengl         Enable/disable support for OpenGL
   --enable-generic_blas	Downloadc generic blas (implie --enable-download)
-  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK,FLTK)
+  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)
   --enable-static	Build binaries with no shared library dependencies
   --disable-pdf	Disable PDF documentation building
-  --disable-fflapack      Do not download fflapack
-  --disable-gsl      Do not download gsl
-  --disable-hips      Do not download hips
-  --disable-hypre      Do not download hypre
-  --disable-ipopt      Do not download ipopt
-  --disable-lapack      Do not download lapack
-  --disable-mmg3d      Do not download mmg3d
-  --disable-mshmet      Do not download mshmet
-  --disable-mumps      Do not download mumps
-  --disable-mumps_seq      Do not download mumps_seq
-  --disable-parms      Do not download parms
-  --disable-pastix      Do not download pastix
-  --disable-scotch      Do not download scotch
-  --disable-superludist      Do not download superludist
-  --disable-yams      Do not download yams
-  --disable-pardiso      Do not download pardiso
-  --disable-pipe      Do not download pipe
+  --disable-fflapack      Do not use fflapack
+  --disable-gsl           Do not use gsl
+  --disable-hips          Do not use hips
+  --disable-hypre         Do not use hypre
+  --disable-ipopt         Do not use ipopt
+  --disable-lapack        Do not use lapack
+  --disable-metis         Do not use metis
+  --disable-mmg3d         Do not use mmg3d
+  --disable-mshmet        Do not use mshmet
+  --disable-mumps         Do not use mumps
+  --disable-mumps_seq     Do not use mumps_seq
+  --disable-nlopt         Do not use nlopt
+  --disable-pardiso       Do not use pardiso
+  --disable-parmetis      Do not use parmetis
+  --disable-parms         Do not use parms
+  --disable-pastix        Do not use pastix
+  --disable-pipe          Do not use pipe
+  --disable-scotch        Do not use scotch
+  --disable-superlu       Do not use superlu
+  --disable-superludist   Do not use superludist
+  --disable-umfpack       Do not use umfpack
+  --disable-yams          Do not use yams
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1638,6 +1696,102 @@ Optional Packages:
   --with-arpack=library	Use a specific version of Arpack
   --with-amd=library	Use a specific version of AMD
   --with-umfpack=library	Use a specific version of Umfpack
+  --with-fflapack-include=
+                          Include directives for fflapack instead of automatic
+                          download
+  --with-fflapack-ldflags=
+                          Link-time directives for fflapack instead of
+                          automatic download
+  --with-gsl-include=     Include directives for gsl instead of automatic
+                          download
+  --with-gsl-ldflags=     Link-time directives for gsl instead of automatic
+                          download
+  --with-hips-include=    Include directives for hips instead of automatic
+                          download
+  --with-hips-ldflags=    Link-time directives for hips instead of automatic
+                          download
+  --with-hypre-include=   Include directives for hypre instead of automatic
+                          download
+  --with-hypre-ldflags=   Link-time directives for hypre instead of automatic
+                          download
+  --with-ipopt-include=   Include directives for ipopt instead of automatic
+                          download
+  --with-ipopt-ldflags=   Link-time directives for ipopt instead of automatic
+                          download
+  --with-lapack-include=  Include directives for lapack instead of automatic
+                          download
+  --with-lapack-ldflags=  Link-time directives for lapack instead of automatic
+                          download
+  --with-metis-include=   Include directives for metis instead of automatic
+                          download
+  --with-metis-ldflags=   Link-time directives for metis instead of automatic
+                          download
+  --with-mmg3d-include=   Include directives for mmg3d instead of automatic
+                          download
+  --with-mmg3d-ldflags=   Link-time directives for mmg3d instead of automatic
+                          download
+  --with-mshmet-include=  Include directives for mshmet instead of automatic
+                          download
+  --with-mshmet-ldflags=  Link-time directives for mshmet instead of automatic
+                          download
+  --with-mumps-include=   Include directives for mumps instead of automatic
+                          download
+  --with-mumps-ldflags=   Link-time directives for mumps instead of automatic
+                          download
+  --with-mumps_seq-include=
+                          Include directives for mumps_seq instead of
+                          automatic download
+  --with-mumps_seq-ldflags=
+                          Link-time directives for mumps_seq instead of
+                          automatic download
+  --with-nlopt-include=   Include directives for nlopt instead of automatic
+                          download
+  --with-nlopt-ldflags=   Link-time directives for nlopt instead of automatic
+                          download
+  --with-pardiso-include= Include directives for pardiso instead of automatic
+                          download
+  --with-pardiso-ldflags= Link-time directives for pardiso instead of
+                          automatic download
+  --with-parmetis-include=
+                          Include directives for parmetis instead of automatic
+                          download
+  --with-parmetis-ldflags=
+                          Link-time directives for parmetis instead of
+                          automatic download
+  --with-parms-include=   Include directives for parms instead of automatic
+                          download
+  --with-parms-ldflags=   Link-time directives for parms instead of automatic
+                          download
+  --with-pastix-include=  Include directives for pastix instead of automatic
+                          download
+  --with-pastix-ldflags=  Link-time directives for pastix instead of automatic
+                          download
+  --with-pipe-include=    Include directives for pipe instead of automatic
+                          download
+  --with-pipe-ldflags=    Link-time directives for pipe instead of automatic
+                          download
+  --with-scotch-include=  Include directives for scotch instead of automatic
+                          download
+  --with-scotch-ldflags=  Link-time directives for scotch instead of automatic
+                          download
+  --with-superlu-include= Include directives for superlu instead of automatic
+                          download
+  --with-superlu-ldflags= Link-time directives for superlu instead of
+                          automatic download
+  --with-superludist-include=
+                          Include directives for superludist instead of
+                          automatic download
+  --with-superludist-ldflags=
+                          Link-time directives for superludist instead of
+                          automatic download
+  --with-umfpack-include= Include directives for umfpack instead of automatic
+                          download
+  --with-umfpack-ldflags= Link-time directives for umfpack instead of
+                          automatic download
+  --with-yams-include=    Include directives for yams instead of automatic
+                          download
+  --with-yams-ldflags=    Link-time directives for yams instead of automatic
+                          download
 
 Some influential environment variables:
   CC          C compiler command
@@ -5204,9 +5358,9 @@ $as_echo "$as_me:  fatal error : sizeof pointer $ff_size_ptr !  or no c++ compil
 fi
 
 # FFCS - build the code for FreeFem++-cs
-# Check whether --enable-fortran was given.
-if test "${enable_fortran+set}" = set; then :
-  enableval=$enable_fortran;
+# Check whether --enable-ffcs was given.
+if test "${enable_ffcs+set}" = set; then :
+  enableval=$enable_ffcs;
 fi
 
 if test "$enable_ffcs" = yes
@@ -7838,28 +7992,11 @@ $as_echo "$ff_sunos" >&6; }
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
 
-# Sometimes (under cygwin for instance) the default version of FLTK
-# does not fit our purpose
-
-# Check whether --enable-default-fltk was given.
-if test "${enable_default_fltk+set}" = set; then :
-  enableval=$enable_default_fltk;
-fi
-
-
 # Check whether --enable-cygwindll was given.
 if test "${enable_cygwindll+set}" = set; then :
   enableval=$enable_cygwindll;
 fi
 
-
-# Default FLTK version under Cygwin does not use threads. So we cannot
-# use it.
-
-if test "$enable_cygwindll" = yes
-then
-	enable_default_fltk=no
-fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking wether we are on Microsoft Windows" >&5
 $as_echo_n "checking wether we are on Microsoft Windows... " >&6; }
@@ -14741,152 +14878,6 @@ STD_LDFLAGS=$ff_std_ldflags
 STD_LIBS=$ff_std_libs
 
 
-# Can we produce an IDE?
-# ----------------------
-
-# For development purposes, we may need to use X libraries instead of
-# native libraries (mainly to run the programs remotely)
-#  AC_ARG_WITH(fltk,[  --without-fltk	(to suppress explicity    --enable-download imply --with-fltk ) ])
-#  AC_ARG_WITH(xfltk,[  --with-xfltk	When recompiling FLTK, use X libraries instead of native Win32 or MacOS])
-#  remove all fltk stuff
-# to remove of FLTK
-#AC_MSG_NOTICE(without ide/ fltk ..... Please wait the next version.... )
-if test 0 != 0
- then
-if test "$with_fltk" = no
-then
-     ff_fltk=no
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: without FLTK sorry in next no ide today " >&5
-$as_echo "$as_me: without FLTK sorry in next no ide today " >&6;}
-else
-# under mingw use download fltk version
-if test "$ff_mingw" = yes
-then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: under mingw not using default FLTK" >&5
-$as_echo "$as_me: under mingw not using default FLTK" >&6;}
- enable_default_fltk=no
-fi
-
-# Default FLTK (in the machine's default PATH)
-if test "$enable_default_fltk" = no
-then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: not using default FLTK" >&5
-$as_echo "$as_me: not using default FLTK" >&6;}
-	ff_fltk=no
-else
-
-	# Checks that fltk-config exists
-	ff_fltk_config=fltk-config
-	# Extract the first word of "fltk-config", so it can be a program name with args.
-set dummy fltk-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_ff_fltk+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$ff_fltk"; then
-  ac_cv_prog_ff_fltk="$ff_fltk" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_ff_fltk="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_ff_fltk" && ac_cv_prog_ff_fltk="no"
-fi
-fi
-ff_fltk=$ac_cv_prog_ff_fltk
-if test -n "$ff_fltk"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_fltk" >&5
-$as_echo "$ff_fltk" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-
-	# Checks that FLTK is compiled with threads enabled
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking that FLTK is compiled with threads" >&5
-$as_echo_n "checking that FLTK is compiled with threads... " >&6; }
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <FL/Fl.H>
-main(){
-  Fl::lock();
-}
-
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ff_fltk_threads=yes
-else
-  ff_fltk_threads=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ff_fltk_threads" >&5
-$as_echo "$ff_fltk_threads" >&6; }
-	if test "$ff_fltk_threads" = no
-	then
-		ff_fltk=no
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: not using default FLTK because it does not know threads" >&5
-$as_echo "$as_me: not using default FLTK because it does not know threads" >&6;}
-	fi
-fi
-
-# Downloading and compiling FLTK
-if test "$ff_fltk" = no -a "$enable_download" = yes
-then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: using downloaded FLTK" >&5
-$as_echo "$as_me: using downloaded FLTK" >&6;}
-	DOWNLOAD_FLTK=fltk
-
-	ff_fltk_version=1.1.6
-	FLTK_VERSION=$ff_fltk_version
-
-	ff_fltk_config="$curdir/download//bin/fltk-config"
-	ff_fltk=yes
-fi
-
-if test "$ff_fltk" = yes
-then
-	# For the moment, FreeFem++-ide${EXEEXT} is not built
-	# because it first needs FreeFEM++ to accept several
-	# successive runs without restart.
-
-	ff_ideprog="FreeFem++-ide${EXEEXT} FreeFem++-cs${EXEEXT} FreeFem++-client${EXEEXT} FreeFem++-server${EXEEXT}"
-	ff_idetest="./testhighlight.sh"
-	ff_testideprog="testhighlight${EXEEXT}"
-	if test "$enable_cygwindll" = yes
-	 then
-           FLTK_CONFIG_PARAM="--enable-localzlib --enable-cygwin"
-
-        elif test "$ff_mingw" = yes
-	 then
-           FLTK_CONFIG_PARAM="--enable-localzlib --disable-cygwin"
-
-	else
-           FLTK_CONFIG_PARAM="--disable-cygwin"
-
-	fi
-
-	FLTK_CONFIG=$ff_fltk_config
-
-
-
-fi
-fi
-# end of remove fltk
-fi
 # Flex compatibility with Bison
 # -----------------------------
 
@@ -14909,7 +14900,21 @@ fi
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
 
-# $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
+# ALH - 31/7/13 - hypre was deactivated some time ago (around 01/2012 according to Mercurial records), so keep it not
+# compiled by default, but allow it to be compiled on user request (requested on the FF mailing list)
+
+if test -z "$enable_hypre"
+then
+    $enable_hypre=no
+fi
+
+# ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
+# may also find interesting to specify a local version of a tool instead of downloading it.
+
+# m4 macro parameters: $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
+
+
+
 
 
 # Check whether --enable-fflapack was given.
@@ -14919,16 +14924,61 @@ fi
 
     if test "$enable_fflapack" = "no"
     then
-        FFCS_COMPILE_fflapack=""
+        TOOL_COMPILE_fflapack=""
 
-        FFCS_DYLIB_fflapack=""
+        TOOL_DYLIB_fflapack=""
 
     else
-        FFCS_COMPILE_fflapack=fflapack
+        TOOL_COMPILE_fflapack=fflapack
 
-        FFCS_DYLIB_fflapack=fflapack.$DYLIB_SUFFIX
+        TOOL_DYLIB_fflapack=fflapack.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-fflapack_include was given.
+if test "${with_fflapack_include+set}" = set; then :
+  withval=$with_fflapack_include;
+fi
+
+
+# Check whether --with-fflapack_ldflags was given.
+if test "${with_fflapack_ldflags+set}" = set; then :
+  withval=$with_fflapack_ldflags;
+fi
+
+
+    if test "$with_fflapack_include" != "" || test "$with_fflapack_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_fflapack" ; then
+	    echo "fflapack LD $with_fflapack_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_fflapack_include" && echo "fflapack INCLUDE $with_fflapack_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_fflapack=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add fflapack : $with_fflapack_ldflags $with_fflapack_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add fflapack : $with_fflapack_ldflags $with_fflapack_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add fflapack : $with_fflapack_ldflags $with_fflapack_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add fflapack : $with_fflapack_ldflags $with_fflapack_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_fflapack=""
+
+	enable_fflapack_download=no
+
+    else
+
+	# no specific directives for package fflapack, activate automatic download
+
+        TOOL_COMPILE_fflapack=fflapack
+
+	enable_fflapack_download=yes
+    fi
+
 
 # Check whether --enable-gsl was given.
 if test "${enable_gsl+set}" = set; then :
@@ -14937,16 +14987,61 @@ fi
 
     if test "$enable_gsl" = "no"
     then
-        FFCS_COMPILE_gsl=""
+        TOOL_COMPILE_gsl=""
 
-        FFCS_DYLIB_gsl=""
+        TOOL_DYLIB_gsl=""
 
     else
-        FFCS_COMPILE_gsl=gsl
+        TOOL_COMPILE_gsl=gsl
 
-        FFCS_DYLIB_gsl="gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX"
+        TOOL_DYLIB_gsl="gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX"
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-gsl_include was given.
+if test "${with_gsl_include+set}" = set; then :
+  withval=$with_gsl_include;
+fi
+
+
+# Check whether --with-gsl_ldflags was given.
+if test "${with_gsl_ldflags+set}" = set; then :
+  withval=$with_gsl_ldflags;
+fi
+
+
+    if test "$with_gsl_include" != "" || test "$with_gsl_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_gsl" ; then
+	    echo "gsl LD $with_gsl_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_gsl_include" && echo "gsl INCLUDE $with_gsl_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_gsl=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add gsl : $with_gsl_ldflags $with_gsl_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add gsl : $with_gsl_ldflags $with_gsl_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add gsl : $with_gsl_ldflags $with_gsl_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add gsl : $with_gsl_ldflags $with_gsl_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_gsl=""
+
+	enable_gsl_download=no
+
+    else
+
+	# no specific directives for package gsl, activate automatic download
+
+        TOOL_COMPILE_gsl=gsl
+
+	enable_gsl_download=yes
+    fi
+
 
 # Check whether --enable-hips was given.
 if test "${enable_hips+set}" = set; then :
@@ -14955,16 +15050,61 @@ fi
 
     if test "$enable_hips" = "no"
     then
-        FFCS_COMPILE_hips=""
+        TOOL_COMPILE_hips=""
 
-        FFCS_DYLIB_hips=""
+        TOOL_DYLIB_hips=""
 
     else
-        FFCS_COMPILE_hips=hips
+        TOOL_COMPILE_hips=hips
 
-        FFCS_DYLIB_hips=hips_FreeFem.$DYLIB_SUFFIX
+        TOOL_DYLIB_hips=hips_FreeFem.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-hips_include was given.
+if test "${with_hips_include+set}" = set; then :
+  withval=$with_hips_include;
+fi
+
+
+# Check whether --with-hips_ldflags was given.
+if test "${with_hips_ldflags+set}" = set; then :
+  withval=$with_hips_ldflags;
+fi
+
+
+    if test "$with_hips_include" != "" || test "$with_hips_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_hips" ; then
+	    echo "hips LD $with_hips_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_hips_include" && echo "hips INCLUDE $with_hips_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_hips=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add hips : $with_hips_ldflags $with_hips_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add hips : $with_hips_ldflags $with_hips_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add hips : $with_hips_ldflags $with_hips_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add hips : $with_hips_ldflags $with_hips_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_hips=""
+
+	enable_hips_download=no
+
+    else
+
+	# no specific directives for package hips, activate automatic download
+
+        TOOL_COMPILE_hips=hips
+
+	enable_hips_download=yes
+    fi
+
 
 # Check whether --enable-hypre was given.
 if test "${enable_hypre+set}" = set; then :
@@ -14973,16 +15113,61 @@ fi
 
     if test "$enable_hypre" = "no"
     then
-        FFCS_COMPILE_hypre=""
+        TOOL_COMPILE_hypre=""
 
-        FFCS_DYLIB_hypre=""
+        TOOL_DYLIB_hypre=""
 
     else
-        FFCS_COMPILE_hypre=hypre
+        TOOL_COMPILE_hypre=hypre
 
-        FFCS_DYLIB_hypre=hypre.$DYLIB_SUFFIX
+        TOOL_DYLIB_hypre=hypre_FreeFem.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-hypre_include was given.
+if test "${with_hypre_include+set}" = set; then :
+  withval=$with_hypre_include;
+fi
+
+
+# Check whether --with-hypre_ldflags was given.
+if test "${with_hypre_ldflags+set}" = set; then :
+  withval=$with_hypre_ldflags;
+fi
+
+
+    if test "$with_hypre_include" != "" || test "$with_hypre_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_hypre" ; then
+	    echo "hypre LD $with_hypre_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_hypre_include" && echo "hypre INCLUDE $with_hypre_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_hypre=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add hypre : $with_hypre_ldflags $with_hypre_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add hypre : $with_hypre_ldflags $with_hypre_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add hypre : $with_hypre_ldflags $with_hypre_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add hypre : $with_hypre_ldflags $with_hypre_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_hypre=""
+
+	enable_hypre_download=no
+
+    else
+
+	# no specific directives for package hypre, activate automatic download
+
+        TOOL_COMPILE_hypre=hypre
+
+	enable_hypre_download=yes
+    fi
+
 
 # Check whether --enable-ipopt was given.
 if test "${enable_ipopt+set}" = set; then :
@@ -14991,16 +15176,61 @@ fi
 
     if test "$enable_ipopt" = "no"
     then
-        FFCS_COMPILE_ipopt=""
+        TOOL_COMPILE_ipopt=""
 
-        FFCS_DYLIB_ipopt=""
+        TOOL_DYLIB_ipopt=""
 
     else
-        FFCS_COMPILE_ipopt=ipopt
+        TOOL_COMPILE_ipopt=ipopt
 
-        FFCS_DYLIB_ipopt=ff-Ipopt.$DYLIB_SUFFIX
+        TOOL_DYLIB_ipopt=ff-Ipopt.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-ipopt_include was given.
+if test "${with_ipopt_include+set}" = set; then :
+  withval=$with_ipopt_include;
+fi
+
+
+# Check whether --with-ipopt_ldflags was given.
+if test "${with_ipopt_ldflags+set}" = set; then :
+  withval=$with_ipopt_ldflags;
+fi
+
+
+    if test "$with_ipopt_include" != "" || test "$with_ipopt_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_ipopt" ; then
+	    echo "ipopt LD $with_ipopt_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_ipopt_include" && echo "ipopt INCLUDE $with_ipopt_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_ipopt=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add ipopt : $with_ipopt_ldflags $with_ipopt_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add ipopt : $with_ipopt_ldflags $with_ipopt_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add ipopt : $with_ipopt_ldflags $with_ipopt_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add ipopt : $with_ipopt_ldflags $with_ipopt_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_ipopt=""
+
+	enable_ipopt_download=no
+
+    else
+
+	# no specific directives for package ipopt, activate automatic download
+
+        TOOL_COMPILE_ipopt=ipopt
+
+	enable_ipopt_download=yes
+    fi
+
 
 # Check whether --enable-lapack was given.
 if test "${enable_lapack+set}" = set; then :
@@ -15009,16 +15239,124 @@ fi
 
     if test "$enable_lapack" = "no"
     then
-        FFCS_COMPILE_lapack=""
+        TOOL_COMPILE_lapack=""
 
-        FFCS_DYLIB_lapack=""
+        TOOL_DYLIB_lapack=""
 
     else
-        FFCS_COMPILE_lapack=lapack
+        TOOL_COMPILE_lapack=lapack
 
-        FFCS_DYLIB_lapack=lapack.$DYLIB_SUFFIX
+        TOOL_DYLIB_lapack=lapack.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-lapack_include was given.
+if test "${with_lapack_include+set}" = set; then :
+  withval=$with_lapack_include;
+fi
+
+
+# Check whether --with-lapack_ldflags was given.
+if test "${with_lapack_ldflags+set}" = set; then :
+  withval=$with_lapack_ldflags;
+fi
+
+
+    if test "$with_lapack_include" != "" || test "$with_lapack_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_lapack" ; then
+	    echo "lapack LD $with_lapack_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_lapack_include" && echo "lapack INCLUDE $with_lapack_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_lapack=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add lapack : $with_lapack_ldflags $with_lapack_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add lapack : $with_lapack_ldflags $with_lapack_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add lapack : $with_lapack_ldflags $with_lapack_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add lapack : $with_lapack_ldflags $with_lapack_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_lapack=""
+
+	enable_lapack_download=no
+
+    else
+
+	# no specific directives for package lapack, activate automatic download
+
+        TOOL_COMPILE_lapack=lapack
+
+	enable_lapack_download=yes
+    fi
+
+
+# Check whether --enable-metis was given.
+if test "${enable_metis+set}" = set; then :
+  enableval=$enable_metis;
+fi
+
+    if test "$enable_metis" = "no"
+    then
+        TOOL_COMPILE_metis=""
+
+        TOOL_DYLIB_metis=""
+
+    else
+        TOOL_COMPILE_metis=metis
+
+        TOOL_DYLIB_metis=metis.$DYLIB_SUFFIX
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-metis_include was given.
+if test "${with_metis_include+set}" = set; then :
+  withval=$with_metis_include;
+fi
+
+
+# Check whether --with-metis_ldflags was given.
+if test "${with_metis_ldflags+set}" = set; then :
+  withval=$with_metis_ldflags;
+fi
+
+
+    if test "$with_metis_include" != "" || test "$with_metis_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_metis" ; then
+	    echo "metis LD $with_metis_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_metis_include" && echo "metis INCLUDE $with_metis_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_metis=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add metis : $with_metis_ldflags $with_metis_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add metis : $with_metis_ldflags $with_metis_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add metis : $with_metis_ldflags $with_metis_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add metis : $with_metis_ldflags $with_metis_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_metis=""
+
+	enable_metis_download=no
+
+    else
+
+	# no specific directives for package metis, activate automatic download
+
+        TOOL_COMPILE_metis=metis
+
+	enable_metis_download=yes
+    fi
+
 
 # Check whether --enable-mmg3d was given.
 if test "${enable_mmg3d+set}" = set; then :
@@ -15027,16 +15365,61 @@ fi
 
     if test "$enable_mmg3d" = "no"
     then
-        FFCS_COMPILE_mmg3d=""
+        TOOL_COMPILE_mmg3d=""
 
-        FFCS_DYLIB_mmg3d=""
+        TOOL_DYLIB_mmg3d=""
 
     else
-        FFCS_COMPILE_mmg3d=mmg3d
+        TOOL_COMPILE_mmg3d=mmg3d
 
-        FFCS_DYLIB_mmg3d=mmg3d-v4.0.$DYLIB_SUFFIX
+        TOOL_DYLIB_mmg3d=mmg3d-v4.0.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-mmg3d_include was given.
+if test "${with_mmg3d_include+set}" = set; then :
+  withval=$with_mmg3d_include;
+fi
+
+
+# Check whether --with-mmg3d_ldflags was given.
+if test "${with_mmg3d_ldflags+set}" = set; then :
+  withval=$with_mmg3d_ldflags;
+fi
+
+
+    if test "$with_mmg3d_include" != "" || test "$with_mmg3d_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_mmg3d" ; then
+	    echo "mmg3d LD $with_mmg3d_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_mmg3d_include" && echo "mmg3d INCLUDE $with_mmg3d_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_mmg3d=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mmg3d : $with_mmg3d_ldflags $with_mmg3d_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add mmg3d : $with_mmg3d_ldflags $with_mmg3d_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add mmg3d : $with_mmg3d_ldflags $with_mmg3d_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add mmg3d : $with_mmg3d_ldflags $with_mmg3d_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_mmg3d=""
+
+	enable_mmg3d_download=no
+
+    else
+
+	# no specific directives for package mmg3d, activate automatic download
+
+        TOOL_COMPILE_mmg3d=mmg3d
+
+	enable_mmg3d_download=yes
+    fi
+
 
 # Check whether --enable-mshmet was given.
 if test "${enable_mshmet+set}" = set; then :
@@ -15045,16 +15428,61 @@ fi
 
     if test "$enable_mshmet" = "no"
     then
-        FFCS_COMPILE_mshmet=""
+        TOOL_COMPILE_mshmet=""
 
-        FFCS_DYLIB_mshmet=""
+        TOOL_DYLIB_mshmet=""
 
     else
-        FFCS_COMPILE_mshmet=mshmet
+        TOOL_COMPILE_mshmet=mshmet
 
-        FFCS_DYLIB_mshmet=mshmet.$DYLIB_SUFFIX
+        TOOL_DYLIB_mshmet=mshmet.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-mshmet_include was given.
+if test "${with_mshmet_include+set}" = set; then :
+  withval=$with_mshmet_include;
+fi
+
+
+# Check whether --with-mshmet_ldflags was given.
+if test "${with_mshmet_ldflags+set}" = set; then :
+  withval=$with_mshmet_ldflags;
+fi
+
+
+    if test "$with_mshmet_include" != "" || test "$with_mshmet_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_mshmet" ; then
+	    echo "mshmet LD $with_mshmet_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_mshmet_include" && echo "mshmet INCLUDE $with_mshmet_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_mshmet=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mshmet : $with_mshmet_ldflags $with_mshmet_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add mshmet : $with_mshmet_ldflags $with_mshmet_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add mshmet : $with_mshmet_ldflags $with_mshmet_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add mshmet : $with_mshmet_ldflags $with_mshmet_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_mshmet=""
+
+	enable_mshmet_download=no
+
+    else
+
+	# no specific directives for package mshmet, activate automatic download
+
+        TOOL_COMPILE_mshmet=mshmet
+
+	enable_mshmet_download=yes
+    fi
+
 
 # Check whether --enable-mumps was given.
 if test "${enable_mumps+set}" = set; then :
@@ -15063,16 +15491,61 @@ fi
 
     if test "$enable_mumps" = "no"
     then
-        FFCS_COMPILE_mumps=""
+        TOOL_COMPILE_mumps=""
 
-        FFCS_DYLIB_mumps=""
+        TOOL_DYLIB_mumps=""
 
     else
-        FFCS_COMPILE_mumps=mumps
+        TOOL_COMPILE_mumps=mumps
 
-        FFCS_DYLIB_mumps="MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX"
+        TOOL_DYLIB_mumps="MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX"
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-mumps_include was given.
+if test "${with_mumps_include+set}" = set; then :
+  withval=$with_mumps_include;
+fi
+
+
+# Check whether --with-mumps_ldflags was given.
+if test "${with_mumps_ldflags+set}" = set; then :
+  withval=$with_mumps_ldflags;
+fi
+
+
+    if test "$with_mumps_include" != "" || test "$with_mumps_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_mumps" ; then
+	    echo "mumps LD $with_mumps_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_mumps_include" && echo "mumps INCLUDE $with_mumps_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_mumps=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mumps : $with_mumps_ldflags $with_mumps_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add mumps : $with_mumps_ldflags $with_mumps_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add mumps : $with_mumps_ldflags $with_mumps_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add mumps : $with_mumps_ldflags $with_mumps_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_mumps=""
+
+	enable_mumps_download=no
+
+    else
+
+	# no specific directives for package mumps, activate automatic download
+
+        TOOL_COMPILE_mumps=mumps
+
+	enable_mumps_download=yes
+    fi
+
 
 # Check whether --enable-mumps_seq was given.
 if test "${enable_mumps_seq+set}" = set; then :
@@ -15081,106 +15554,124 @@ fi
 
     if test "$enable_mumps_seq" = "no"
     then
-        FFCS_COMPILE_mumps_seq=""
+        TOOL_COMPILE_mumps_seq=""
 
-        FFCS_DYLIB_mumps_seq=""
+        TOOL_DYLIB_mumps_seq=""
 
     else
-        FFCS_COMPILE_mumps_seq=mumps-seq
+        TOOL_COMPILE_mumps_seq=mumps-seq
 
-        FFCS_DYLIB_mumps_seq=MUMPS_seq.$DYLIB_SUFFIX
+        TOOL_DYLIB_mumps_seq=MUMPS_seq.$DYLIB_SUFFIX
 
     fi
 
-# Check whether --enable-parms was given.
-if test "${enable_parms+set}" = set; then :
-  enableval=$enable_parms;
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-mumps_seq_include was given.
+if test "${with_mumps_seq_include+set}" = set; then :
+  withval=$with_mumps_seq_include;
 fi
 
-    if test "$enable_parms" = "no"
-    then
-        FFCS_COMPILE_parms=""
 
-        FFCS_DYLIB_parms=""
-
-    else
-        FFCS_COMPILE_parms=parms
-
-        FFCS_DYLIB_parms=parms_FreeFem.$DYLIB_SUFFIX
-
-    fi
-
-# Check whether --enable-pastix was given.
-if test "${enable_pastix+set}" = set; then :
-  enableval=$enable_pastix;
+# Check whether --with-mumps_seq_ldflags was given.
+if test "${with_mumps_seq_ldflags+set}" = set; then :
+  withval=$with_mumps_seq_ldflags;
 fi
 
-    if test "$enable_pastix" = "no"
-    then
-        FFCS_COMPILE_pastix=""
 
-        FFCS_DYLIB_pastix=""
+    if test "$with_mumps_seq_include" != "" || test "$with_mumps_seq_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_mumps_seq" ; then
+	    echo "mumps_seq LD $with_mumps_seq_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_mumps_seq_include" && echo "mumps_seq INCLUDE $with_mumps_seq_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_mumps_seq=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add mumps_seq : $with_mumps_seq_ldflags $with_mumps_seq_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add mumps_seq : $with_mumps_seq_ldflags $with_mumps_seq_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add mumps_seq : $with_mumps_seq_ldflags $with_mumps_seq_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add mumps_seq : $with_mumps_seq_ldflags $with_mumps_seq_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_mumps_seq=""
+
+	enable_mumps_seq_download=no
 
     else
-        FFCS_COMPILE_pastix=pastix
 
-        FFCS_DYLIB_pastix="interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX"
+	# no specific directives for package mumps_seq, activate automatic download
 
+        TOOL_COMPILE_mumps_seq=mumps-seq
+
+	enable_mumps_seq_download=yes
     fi
 
-# Check whether --enable-scotch was given.
-if test "${enable_scotch+set}" = set; then :
-  enableval=$enable_scotch;
+
+# Check whether --enable-nlopt was given.
+if test "${enable_nlopt+set}" = set; then :
+  enableval=$enable_nlopt;
 fi
 
-    if test "$enable_scotch" = "no"
+    if test "$enable_nlopt" = "no"
     then
-        FFCS_COMPILE_scotch=""
+        TOOL_COMPILE_nlopt=""
 
-        FFCS_DYLIB_scotch=""
+        TOOL_DYLIB_nlopt=""
 
     else
-        FFCS_COMPILE_scotch=scotch
+        TOOL_COMPILE_nlopt=nlopt
 
-        FFCS_DYLIB_scotch=scotch.$DYLIB_SUFFIX
+        TOOL_DYLIB_nlopt=ff-NLopt.$DYLIB_SUFFIX
 
     fi
 
-# Check whether --enable-superludist was given.
-if test "${enable_superludist+set}" = set; then :
-  enableval=$enable_superludist;
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-nlopt_include was given.
+if test "${with_nlopt_include+set}" = set; then :
+  withval=$with_nlopt_include;
 fi
 
-    if test "$enable_superludist" = "no"
-    then
-        FFCS_COMPILE_superludist=""
 
-        FFCS_DYLIB_superludist=""
-
-    else
-        FFCS_COMPILE_superludist=superludist
-
-        FFCS_DYLIB_superludist="complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX"
-
-    fi
-
-# Check whether --enable-yams was given.
-if test "${enable_yams+set}" = set; then :
-  enableval=$enable_yams;
+# Check whether --with-nlopt_ldflags was given.
+if test "${with_nlopt_ldflags+set}" = set; then :
+  withval=$with_nlopt_ldflags;
 fi
 
-    if test "$enable_yams" = "no"
-    then
-        FFCS_COMPILE_yams=""
 
-        FFCS_DYLIB_yams=""
+    if test "$with_nlopt_include" != "" || test "$with_nlopt_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_nlopt" ; then
+	    echo "nlopt LD $with_nlopt_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_nlopt_include" && echo "nlopt INCLUDE $with_nlopt_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_nlopt=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add nlopt : $with_nlopt_ldflags $with_nlopt_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add nlopt : $with_nlopt_ldflags $with_nlopt_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add nlopt : $with_nlopt_ldflags $with_nlopt_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add nlopt : $with_nlopt_ldflags $with_nlopt_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_nlopt=""
+
+	enable_nlopt_download=no
 
     else
-        FFCS_COMPILE_yams=yams
 
-        FFCS_DYLIB_yams=freeyams.$DYLIB_SUFFIX
+	# no specific directives for package nlopt, activate automatic download
 
+        TOOL_COMPILE_nlopt=nlopt
+
+	enable_nlopt_download=yes
     fi
+
 
 # Check whether --enable-pardiso was given.
 if test "${enable_pardiso+set}" = set; then :
@@ -15189,16 +15680,249 @@ fi
 
     if test "$enable_pardiso" = "no"
     then
-        FFCS_COMPILE_pardiso=""
+        TOOL_COMPILE_pardiso=""
 
-        FFCS_DYLIB_pardiso=""
+        TOOL_DYLIB_pardiso=""
 
     else
-        FFCS_COMPILE_pardiso=pardiso
+        TOOL_COMPILE_pardiso=pardiso
 
-        FFCS_DYLIB_pardiso=PARDISO.$DYLIB_SUFFIX
+        TOOL_DYLIB_pardiso=PARDISO.$DYLIB_SUFFIX
 
     fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-pardiso_include was given.
+if test "${with_pardiso_include+set}" = set; then :
+  withval=$with_pardiso_include;
+fi
+
+
+# Check whether --with-pardiso_ldflags was given.
+if test "${with_pardiso_ldflags+set}" = set; then :
+  withval=$with_pardiso_ldflags;
+fi
+
+
+    if test "$with_pardiso_include" != "" || test "$with_pardiso_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_pardiso" ; then
+	    echo "pardiso LD $with_pardiso_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_pardiso_include" && echo "pardiso INCLUDE $with_pardiso_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_pardiso=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add pardiso : $with_pardiso_ldflags $with_pardiso_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add pardiso : $with_pardiso_ldflags $with_pardiso_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add pardiso : $with_pardiso_ldflags $with_pardiso_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add pardiso : $with_pardiso_ldflags $with_pardiso_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_pardiso=""
+
+	enable_pardiso_download=no
+
+    else
+
+	# no specific directives for package pardiso, activate automatic download
+
+        TOOL_COMPILE_pardiso=pardiso
+
+	enable_pardiso_download=yes
+    fi
+
+
+# Check whether --enable-parmetis was given.
+if test "${enable_parmetis+set}" = set; then :
+  enableval=$enable_parmetis;
+fi
+
+    if test "$enable_parmetis" = "no"
+    then
+        TOOL_COMPILE_parmetis=""
+
+        TOOL_DYLIB_parmetis=""
+
+    else
+        TOOL_COMPILE_parmetis=parmetis
+
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-parmetis_include was given.
+if test "${with_parmetis_include+set}" = set; then :
+  withval=$with_parmetis_include;
+fi
+
+
+# Check whether --with-parmetis_ldflags was given.
+if test "${with_parmetis_ldflags+set}" = set; then :
+  withval=$with_parmetis_ldflags;
+fi
+
+
+    if test "$with_parmetis_include" != "" || test "$with_parmetis_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_parmetis" ; then
+	    echo "parmetis LD $with_parmetis_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_parmetis_include" && echo "parmetis INCLUDE $with_parmetis_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_parmetis=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add parmetis : $with_parmetis_ldflags $with_parmetis_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add parmetis : $with_parmetis_ldflags $with_parmetis_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add parmetis : $with_parmetis_ldflags $with_parmetis_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add parmetis : $with_parmetis_ldflags $with_parmetis_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_parmetis=""
+
+	enable_parmetis_download=no
+
+    else
+
+	# no specific directives for package parmetis, activate automatic download
+
+        TOOL_COMPILE_parmetis=parmetis
+
+	enable_parmetis_download=yes
+    fi
+
+
+# Check whether --enable-parms was given.
+if test "${enable_parms+set}" = set; then :
+  enableval=$enable_parms;
+fi
+
+    if test "$enable_parms" = "no"
+    then
+        TOOL_COMPILE_parms=""
+
+        TOOL_DYLIB_parms=""
+
+    else
+        TOOL_COMPILE_parms=parms
+
+        TOOL_DYLIB_parms=parms_FreeFem.$DYLIB_SUFFIX
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-parms_include was given.
+if test "${with_parms_include+set}" = set; then :
+  withval=$with_parms_include;
+fi
+
+
+# Check whether --with-parms_ldflags was given.
+if test "${with_parms_ldflags+set}" = set; then :
+  withval=$with_parms_ldflags;
+fi
+
+
+    if test "$with_parms_include" != "" || test "$with_parms_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_parms" ; then
+	    echo "parms LD $with_parms_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_parms_include" && echo "parms INCLUDE $with_parms_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_parms=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add parms : $with_parms_ldflags $with_parms_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add parms : $with_parms_ldflags $with_parms_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add parms : $with_parms_ldflags $with_parms_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add parms : $with_parms_ldflags $with_parms_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_parms=""
+
+	enable_parms_download=no
+
+    else
+
+	# no specific directives for package parms, activate automatic download
+
+        TOOL_COMPILE_parms=parms
+
+	enable_parms_download=yes
+    fi
+
+
+# Check whether --enable-pastix was given.
+if test "${enable_pastix+set}" = set; then :
+  enableval=$enable_pastix;
+fi
+
+    if test "$enable_pastix" = "no"
+    then
+        TOOL_COMPILE_pastix=""
+
+        TOOL_DYLIB_pastix=""
+
+    else
+        TOOL_COMPILE_pastix=pastix
+
+        TOOL_DYLIB_pastix="interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX"
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-pastix_include was given.
+if test "${with_pastix_include+set}" = set; then :
+  withval=$with_pastix_include;
+fi
+
+
+# Check whether --with-pastix_ldflags was given.
+if test "${with_pastix_ldflags+set}" = set; then :
+  withval=$with_pastix_ldflags;
+fi
+
+
+    if test "$with_pastix_include" != "" || test "$with_pastix_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_pastix" ; then
+	    echo "pastix LD $with_pastix_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_pastix_include" && echo "pastix INCLUDE $with_pastix_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_pastix=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add pastix : $with_pastix_ldflags $with_pastix_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add pastix : $with_pastix_ldflags $with_pastix_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add pastix : $with_pastix_ldflags $with_pastix_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add pastix : $with_pastix_ldflags $with_pastix_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_pastix=""
+
+	enable_pastix_download=no
+
+    else
+
+	# no specific directives for package pastix, activate automatic download
+
+        TOOL_COMPILE_pastix=pastix
+
+	enable_pastix_download=yes
+    fi
+
 
 # Check whether --enable-pipe was given.
 if test "${enable_pipe+set}" = set; then :
@@ -15207,20 +15931,381 @@ fi
 
     if test "$enable_pipe" = "no"
     then
-        FFCS_COMPILE_pipe=""
+        TOOL_COMPILE_pipe=""
 
-        FFCS_DYLIB_pipe=""
+        TOOL_DYLIB_pipe=""
 
     else
-        FFCS_COMPILE_pipe=pipe
+        TOOL_COMPILE_pipe=pipe
 
-        FFCS_DYLIB_pipe=pipe.$DYLIB_SUFFIX
+        TOOL_DYLIB_pipe=pipe.$DYLIB_SUFFIX
 
     fi
 
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-pipe_include was given.
+if test "${with_pipe_include+set}" = set; then :
+  withval=$with_pipe_include;
+fi
+
+
+# Check whether --with-pipe_ldflags was given.
+if test "${with_pipe_ldflags+set}" = set; then :
+  withval=$with_pipe_ldflags;
+fi
+
+
+    if test "$with_pipe_include" != "" || test "$with_pipe_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_pipe" ; then
+	    echo "pipe LD $with_pipe_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_pipe_include" && echo "pipe INCLUDE $with_pipe_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_pipe=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add pipe : $with_pipe_ldflags $with_pipe_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add pipe : $with_pipe_ldflags $with_pipe_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add pipe : $with_pipe_ldflags $with_pipe_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add pipe : $with_pipe_ldflags $with_pipe_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_pipe=""
+
+	enable_pipe_download=no
+
+    else
+
+	# no specific directives for package pipe, activate automatic download
+
+        TOOL_COMPILE_pipe=pipe
+
+	enable_pipe_download=yes
+    fi
+
+
+# Check whether --enable-scotch was given.
+if test "${enable_scotch+set}" = set; then :
+  enableval=$enable_scotch;
+fi
+
+    if test "$enable_scotch" = "no"
+    then
+        TOOL_COMPILE_scotch=""
+
+        TOOL_DYLIB_scotch=""
+
+    else
+        TOOL_COMPILE_scotch=scotch
+
+        TOOL_DYLIB_scotch=scotch.$DYLIB_SUFFIX
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-scotch_include was given.
+if test "${with_scotch_include+set}" = set; then :
+  withval=$with_scotch_include;
+fi
+
+
+# Check whether --with-scotch_ldflags was given.
+if test "${with_scotch_ldflags+set}" = set; then :
+  withval=$with_scotch_ldflags;
+fi
+
+
+    if test "$with_scotch_include" != "" || test "$with_scotch_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_scotch" ; then
+	    echo "scotch LD $with_scotch_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_scotch_include" && echo "scotch INCLUDE $with_scotch_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_scotch=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add scotch : $with_scotch_ldflags $with_scotch_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add scotch : $with_scotch_ldflags $with_scotch_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add scotch : $with_scotch_ldflags $with_scotch_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add scotch : $with_scotch_ldflags $with_scotch_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_scotch=""
+
+	enable_scotch_download=no
+
+    else
+
+	# no specific directives for package scotch, activate automatic download
+
+        TOOL_COMPILE_scotch=scotch
+
+	enable_scotch_download=yes
+    fi
+
+
+# Check whether --enable-superlu was given.
+if test "${enable_superlu+set}" = set; then :
+  enableval=$enable_superlu;
+fi
+
+    if test "$enable_superlu" = "no"
+    then
+        TOOL_COMPILE_superlu=""
+
+        TOOL_DYLIB_superlu=""
+
+    else
+        TOOL_COMPILE_superlu=superlu
+
+        TOOL_DYLIB_superlu=SuperLu.$DYLIB_SUFFIX
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-superlu_include was given.
+if test "${with_superlu_include+set}" = set; then :
+  withval=$with_superlu_include;
+fi
+
+
+# Check whether --with-superlu_ldflags was given.
+if test "${with_superlu_ldflags+set}" = set; then :
+  withval=$with_superlu_ldflags;
+fi
+
+
+    if test "$with_superlu_include" != "" || test "$with_superlu_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_superlu" ; then
+	    echo "superlu LD $with_superlu_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_superlu_include" && echo "superlu INCLUDE $with_superlu_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_superlu=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add superlu : $with_superlu_ldflags $with_superlu_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add superlu : $with_superlu_ldflags $with_superlu_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add superlu : $with_superlu_ldflags $with_superlu_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add superlu : $with_superlu_ldflags $with_superlu_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_superlu=""
+
+	enable_superlu_download=no
+
+    else
+
+	# no specific directives for package superlu, activate automatic download
+
+        TOOL_COMPILE_superlu=superlu
+
+	enable_superlu_download=yes
+    fi
+
+
+# Check whether --enable-superludist was given.
+if test "${enable_superludist+set}" = set; then :
+  enableval=$enable_superludist;
+fi
+
+    if test "$enable_superludist" = "no"
+    then
+        TOOL_COMPILE_superludist=""
+
+        TOOL_DYLIB_superludist=""
+
+    else
+        TOOL_COMPILE_superludist=superludist
+
+        TOOL_DYLIB_superludist="complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX"
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-superludist_include was given.
+if test "${with_superludist_include+set}" = set; then :
+  withval=$with_superludist_include;
+fi
+
+
+# Check whether --with-superludist_ldflags was given.
+if test "${with_superludist_ldflags+set}" = set; then :
+  withval=$with_superludist_ldflags;
+fi
+
+
+    if test "$with_superludist_include" != "" || test "$with_superludist_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_superludist" ; then
+	    echo "superludist LD $with_superludist_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_superludist_include" && echo "superludist INCLUDE $with_superludist_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_superludist=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add superludist : $with_superludist_ldflags $with_superludist_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add superludist : $with_superludist_ldflags $with_superludist_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add superludist : $with_superludist_ldflags $with_superludist_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add superludist : $with_superludist_ldflags $with_superludist_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_superludist=""
+
+	enable_superludist_download=no
+
+    else
+
+	# no specific directives for package superludist, activate automatic download
+
+        TOOL_COMPILE_superludist=superludist
+
+	enable_superludist_download=yes
+    fi
+
+
+# Check whether --enable-umfpack was given.
+if test "${enable_umfpack+set}" = set; then :
+  enableval=$enable_umfpack;
+fi
+
+    if test "$enable_umfpack" = "no"
+    then
+        TOOL_COMPILE_umfpack=""
+
+        TOOL_DYLIB_umfpack=""
+
+    else
+        TOOL_COMPILE_umfpack=umfpack
+
+        TOOL_DYLIB_umfpack=UMFPACK64.$DYLIB_SUFFIX
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-umfpack_include was given.
+if test "${with_umfpack_include+set}" = set; then :
+  withval=$with_umfpack_include;
+fi
+
+
+# Check whether --with-umfpack_ldflags was given.
+if test "${with_umfpack_ldflags+set}" = set; then :
+  withval=$with_umfpack_ldflags;
+fi
+
+
+    if test "$with_umfpack_include" != "" || test "$with_umfpack_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_umfpack" ; then
+	    echo "umfpack LD $with_umfpack_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_umfpack_include" && echo "umfpack INCLUDE $with_umfpack_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_umfpack=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add umfpack : $with_umfpack_ldflags $with_umfpack_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add umfpack : $with_umfpack_ldflags $with_umfpack_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add umfpack : $with_umfpack_ldflags $with_umfpack_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add umfpack : $with_umfpack_ldflags $with_umfpack_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_umfpack=""
+
+	enable_umfpack_download=no
+
+    else
+
+	# no specific directives for package umfpack, activate automatic download
+
+        TOOL_COMPILE_umfpack=umfpack
+
+	enable_umfpack_download=yes
+    fi
+
+
+# Check whether --enable-yams was given.
+if test "${enable_yams+set}" = set; then :
+  enableval=$enable_yams;
+fi
+
+    if test "$enable_yams" = "no"
+    then
+        TOOL_COMPILE_yams=""
+
+        TOOL_DYLIB_yams=""
+
+    else
+        TOOL_COMPILE_yams=yams
+
+        TOOL_DYLIB_yams=freeyams.$DYLIB_SUFFIX
+
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+
+# Check whether --with-yams_include was given.
+if test "${with_yams_include+set}" = set; then :
+  withval=$with_yams_include;
+fi
+
+
+# Check whether --with-yams_ldflags was given.
+if test "${with_yams_ldflags+set}" = set; then :
+  withval=$with_yams_ldflags;
+fi
+
+
+    if test "$with_yams_include" != "" || test "$with_yams_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+		if test -z "$ff_where_lib_conf_yams" ; then
+	    echo "yams LD $with_yams_ldflags"  >>$ff_where_lib_conf
+	    test -n "$with_yams_include" && echo "yams INCLUDE $with_yams_include "  >>$ff_where_lib_conf
+            ff_where_lib_conf_yams=1
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     ++ add yams : $with_yams_ldflags $with_yams_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     ++ add yams : $with_yams_ldflags $with_yams_include in  $ff_where_lib_conf \"" >&6;}
+	else
+	    { $as_echo "$as_me:${as_lineno-$LINENO}:     -- do not add yams : $with_yams_ldflags $with_yams_include in  $ff_where_lib_conf \"" >&5
+$as_echo "$as_me:     -- do not add yams : $with_yams_ldflags $with_yams_include in  $ff_where_lib_conf \"" >&6;}
+        fi
+
+        TOOL_COMPILE_yams=""
+
+	enable_yams_download=no
+
+    else
+
+	# no specific directives for package yams, activate automatic download
+
+        TOOL_COMPILE_yams=yams
+
+	enable_yams_download=yes
+    fi
+
+
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
-if test $OS = Windows_NT
+
+if test "$OS" = Windows_NT
 then
     CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
 
@@ -18344,8 +19429,18 @@ $as_echo "$as_me:       use of download tetgen  see download/tetgen/tetgen1.4.3/
 $as_echo "$as_me:       use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  " >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  " >&5
 $as_echo "$as_me:       use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  " >&6;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download superlu, metis" >&5
-$as_echo "$as_me:       use of download superlu, metis" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}:       use of download metis" >&5
+$as_echo "$as_me:       use of download metis" >&6;}
+
+    # ALH - some tools may be activated but not downloaded if a local version is specified (see
+    # [[TOOL_PARAMETERS]])
+
+    if test "$enable_superlu_download" = yes
+    then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}:       use of download superlu" >&5
+$as_echo "$as_me:       use of download superlu" >&6;}
+    fi
+
     if test -n "$MPICC" ; then
    	{ $as_echo "$as_me:${as_lineno-$LINENO}:       try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library" >&5
 $as_echo "$as_me:       try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library" >&6;}

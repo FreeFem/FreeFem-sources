@@ -1,11 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-<<<<<<< /tmp/Makefile.am~base.ktCvM0
-# $Id$
-
-=======
->>>>>>> /tmp/Makefile.am~other.FXh2wd
 all-local: $(DOWNLOAD_UMFPACK)
 EXTRA_DIST= SuiteSparse_config.mk.in 
 
@@ -44,35 +39,13 @@ cholmod:
 # the lib depend of the Makefile to force the reconstruction 
 # if the parameter change
 
-<<<<<<< /home/alh/ff/pub/download/umfpack/Makefile.am
 # FFCS: SuiteSparse/*/Source are not able to compile in parallel from scratch ("pipe from processes is a
 # directory"?). But specifying "make -j 1" is not enough (another error pops up). Use "$(MAKE) MAKEFLAGS=" instead
 # (using "make MAKEFLAGS=" still produces an error on Cygwin).
-||||||| /tmp/Makefile.am~base.ktCvM0
-# FFCS: SuiteSparse/*/Source are not able to compile in parallel from
-# scratch ("pipe from processes is a directory"?). But specifying
-# "make -j 1" is not enough (another error pops up). Use "$(MAKE)
-# MAKEFLAGS=" instead (using "make MAKEFLAGS=" still produces an error
-# on Cygwin).
-=======
-# FFCS: SuiteSparse/*/Source cannot be compiled in parallel from
-# scratch ("pipe from processes is a directory"?). But specifying
-# "make -j 1" is not enough (another error pops up). Use "$(MAKE)
-# MAKEFLAGS=" instead (using "make MAKEFLAGS=" still produces an error
-# on Cygwin).
->>>>>>> /tmp/Makefile.am~other.FXh2wd
 
 $(SUITESPARSECONFIGLIB): SuiteSparse/FF 
-<<<<<<< /home/alh/ff/pub/download/umfpack/Makefile.am
 	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
-||||||| /tmp/Makefile.am~base.ktCvM0
-	cd SuiteSparse/SuiteSparse_config && make 
-	-mkdir ../include ../lib
-=======
-	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS= 
 	mkdir -p ../include ../lib
->>>>>>> /tmp/Makefile.am~other.FXh2wd
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/SuiteSparse_config/libsuitesparseconfig.a ../lib/libsuitesparseconfig.a
 	$(RANLIB) ../lib/libsuitesparseconfig.a
@@ -93,45 +66,22 @@ $(AMDLIB): SuiteSparse/FF
 	$(RANLIB) ../lib/libamd.a
 
 $(CAMDLIB): SuiteSparse/FF 
-<<<<<<< /home/alh/ff/pub/download/umfpack/Makefile.am
 	cd SuiteSparse/CAMD/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
-||||||| /tmp/Makefile.am~base.ktCvM0
-	cd SuiteSparse/CAMD/Lib && make 
-	-mkdir ../include ../lib
-=======
-	cd SuiteSparse/CAMD/Lib && $(MAKE) MAKEFLAGS= 
 	mkdir -p ../include ../lib
->>>>>>> /tmp/Makefile.am~other.FXh2wd
 	cp -f  SuiteSparse/CAMD/Include/*.h ../include
 	cp  SuiteSparse/CAMD/Lib/libcamd.a ../lib/libcamd.a
 	$(RANLIB) ../lib/libcamd.a
 
 $(CHOLMODLIB): SuiteSparse/FF 
-<<<<<<< /home/alh/ff/pub/download/umfpack/Makefile.am
 	cd SuiteSparse/CHOLMOD/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
-||||||| /tmp/Makefile.am~base.ktCvM0
-	cd SuiteSparse/CHOLMOD/Lib && make 
-	-mkdir ../include ../lib
-=======
-	cd SuiteSparse/CHOLMOD/Lib && $(MAKE) MAKEFLAGS= 
 	mkdir -p ../include ../lib
->>>>>>> /tmp/Makefile.am~other.FXh2wd
 	cp -f  SuiteSparse/CHOLMOD/Include/*.h ../include
 	cp  SuiteSparse/CHOLMOD/Lib/libcholmod.a ../lib/libcholmod.a
 	$(RANLIB) ../lib/libcholmod.a
+
 $(COLAMDLIB): SuiteSparse/FF 
-<<<<<<< /home/alh/ff/pub/download/umfpack/Makefile.am
 	cd SuiteSparse/COLAMD/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
-||||||| /tmp/Makefile.am~base.ktCvM0
-	cd SuiteSparse/COLAMD/Lib && make 
-	-mkdir ../include ../lib
-=======
-	cd SuiteSparse/COLAMD/Lib && $(MAKE) MAKEFLAGS= 
 	mkdir -p ../include ../lib
->>>>>>> /tmp/Makefile.am~other.FXh2wd
 	cp -f  SuiteSparse/COLAMD/Include/*.h ../include
 	cp  SuiteSparse/COLAMD/Lib/libcolamd.a ../lib/libcolamd.a
 	$(RANLIB) ../lib/libcolamd.a
