@@ -113,7 +113,10 @@ EXTRALIB   := $(EXTRALIB) $(FFMPILIB)
 
 # Scotch always needed to compile
 SCOTCH_HOME =
-SCOTCH_INC  = $(abs_top_builddir)/download/include/scotch
+
+# ALH - 4/9/13 - see [[file:../../configure.ac::SCOTCH_INCLUDE]]
+SCOTCH_INC  =  @SCOTCH_INCLUDE@
+
 SCOTCH_LIB  = $(abs_top_builddir)/download/lib/
 # uncomment on of this blocks					     
 #scotch								     

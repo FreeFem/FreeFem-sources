@@ -640,6 +640,7 @@ FNOFLAGS
 CNOFLAGS
 LIBC_VERSION
 KERNEL_VERSION
+SCOTCH_INCLUDE
 TOOL_DYLIB_yams
 TOOL_COMPILE_yams
 TOOL_DYLIB_umfpack
@@ -728,6 +729,7 @@ DOWNLOAD_BLAS
 GENERIC_BLAS_BUILT_SOURCES
 GENERIC_BLAS
 ff_unzip
+FFTW
 DOWNLOADCOMPILE
 WGET
 ff_curl
@@ -12263,6 +12265,11 @@ else
 $as_echo "$as_me:  without cadna ***** " >&6;}
 fi
 
+# Looking for FFTW
+# ----------------
+
+# ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jaraush, 1/8/13)
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw_execute in -lfftw3" >&5
 $as_echo_n "checking for fftw_execute in -lfftw3... " >&6; }
 if ${ac_cv_lib_fftw3_fftw_execute+:} false; then :
@@ -12327,7 +12334,7 @@ done
 
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
-	if test -z "$ff_where_lib_conf_fftw3" ; then
+    	if test -z "$ff_where_lib_conf_fftw3" ; then
 	    echo "fftw3 LD -lfftw3"  >>$ff_where_lib_conf
 	    test -n "" && echo "fftw3 INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_fftw3=1
@@ -12338,7 +12345,16 @@ $as_echo "$as_me:     ++ add fftw3 : -lfftw3  in  $ff_where_lib_conf \"" >&6;}
 $as_echo "$as_me:     -- do not add fftw3 : -lfftw3  in  $ff_where_lib_conf \"" >&6;}
         fi
 
+    fftw_download=
+else
+    fftw_download=fftw
 fi
+
+# see [[file:download/fftw/Makefile::all]]
+
+FFTW=$fftw_download
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for tetrahedralize in -ltet" >&5
 $as_echo_n "checking for tetrahedralize in -ltet... " >&6; }
 if ${ac_cv_lib_tet_tetrahedralize+:} false; then :
@@ -12403,7 +12419,7 @@ done
 
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
-   	if test -z "$ff_where_lib_conf_tetgen" ; then
+    	if test -z "$ff_where_lib_conf_tetgen" ; then
 	    echo "tetgen LD -ltet"  >>$ff_where_lib_conf
 	    test -n "" && echo "tetgen INCLUDE  "  >>$ff_where_lib_conf
             ff_where_lib_conf_tetgen=1
@@ -12418,7 +12434,6 @@ $as_echo "$as_me:     -- do not add tetgen : -ltet  in  $ff_where_lib_conf \"" >
 $as_echo "#define HAVE_TETGEN 1" >>confdefs.h
 
 fi
-
 
 # Looking for the BLAS
 # --------------------
@@ -16325,6 +16340,14 @@ $as_echo "$as_me:     -- do not add pthread : \"\"  in  $ff_where_lib_conf \"" >
     fi
 fi
 
+# ALH - 4/9/13 - request from Helmut Jaraush - allow to change Scotch include path
+if test "$with_scotch_include" = ""
+then
+    with_scotch_include=$ac_pwd/download/include/scotch
+fi
+SCOTCH_INCLUDE=$with_scotch_include
+
+
 # Find out kernel and libc versions
 # ---------------------------------
 
@@ -17880,7 +17903,7 @@ $as_echo "$ff_WHERE" >&6; }
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
 
- if test $OS = Windows_NT; then
+ if test "$OS" = Windows_NT; then
   FFCS_WINDOWS_TRUE=
   FFCS_WINDOWS_FALSE='#'
 else
@@ -17890,7 +17913,7 @@ fi
 
 
 # All makefiles
-ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/nw/Makefile src/mpi/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
+ac_config_files="$ac_config_files Makefile download/Makefile download/blas/Makefile download/arpack/Makefile download/umfpack/Makefile download/fftw/Makefile src/Makefile src/bamglib/Makefile src/Graphics/Makefile src/femlib/Makefile src/Algo/Makefile src/lglib/Makefile src/fflib/Makefile src/nw/Makefile src/mpi/Makefile src/bamg/Makefile src/libMesh/Makefile src/medit/Makefile src/bin-win32/Makefile examples++/Makefile examples++-eigen/Makefile examples++-tutorial/Makefile examples++-mpi/Makefile examples++-load/Makefile examples++-chapt3/Makefile examples++-bug/Makefile examples++-other/Makefile examples++-3d/Makefile DOC/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -18648,6 +18671,7 @@ do
     "download/blas/Makefile") CONFIG_FILES="$CONFIG_FILES download/blas/Makefile" ;;
     "download/arpack/Makefile") CONFIG_FILES="$CONFIG_FILES download/arpack/Makefile" ;;
     "download/umfpack/Makefile") CONFIG_FILES="$CONFIG_FILES download/umfpack/Makefile" ;;
+    "download/fftw/Makefile") CONFIG_FILES="$CONFIG_FILES download/fftw/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/bamglib/Makefile") CONFIG_FILES="$CONFIG_FILES src/bamglib/Makefile" ;;
     "src/Graphics/Makefile") CONFIG_FILES="$CONFIG_FILES src/Graphics/Makefile" ;;
