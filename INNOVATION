@@ -9,6 +9,7 @@
  - Parallelized MUMPS compilation in download/mumps (and mumps-seq)
  - Applied a patch from Fred for compiling SuiteSparse on Slackware64-14.0
  - Added configuration option --enable-hypre (disabled by default, contrary to other tools)
+ - Disable FFTW download when a local version is found (request from Helmut Jaraush)
 10/7/2013  (version 3.25)
  - remove of Mafile.in configure for the hg distrubion 
      use :  autoreconf -i  # too build Makefile.in 

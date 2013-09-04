@@ -827,15 +827,25 @@ else
     AC_MSG_NOTICE([ without cadna ***** ])
 fi
 
-dnl  : Looking for the FFTW3
-dnl --------------------------
+# Looking for FFTW
+# ----------------
+
+# ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jaraush, 1/8/13)
+
 AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
 AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
-AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
-dnl    [echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf]
+    AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
+    fftw_download=
+else
+    fftw_download=fftw
 fi
+
+# see [[file:download/fftw/Makefile::all]]
+
+AC_SUBST(FFTW,$fftw_download)
+
 dnl ---------------------------
 dnl   Looking for the tetgen
 dnl --------------------------
@@ -843,12 +853,9 @@ AC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
 AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
-   AC_FF_ADDWHERELIB(tetgen,-ltet,)
-dnl    [echo tetgen LD  -ltet   >>$ff_where_lib_conf]
+    AC_FF_ADDWHERELIB(tetgen,-ltet,)
     AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
 fi
-dnl ---------------------------
-
 
 # Looking for the BLAS
 # --------------------
@@ -1681,6 +1688,13 @@ then
     fi
 fi
 
+# ALH - 4/9/13 - request from Helmut Jaraush - allow to change Scotch include path
+if test "$with_scotch_include" = ""
+then
+    with_scotch_include=$ac_pwd/download/include/scotch
+fi
+AC_SUBST(SCOTCH_INCLUDE,$with_scotch_include)
+
 # Find out kernel and libc versions
 # ---------------------------------
 
@@ -1857,7 +1871,7 @@ m4_map([AC_FF_WHERELIB],[
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
 
-AM_CONDITIONAL([FFCS_WINDOWS],[test $OS = Windows_NT])
+AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
  
 # All makefiles
 AC_OUTPUT(Makefile
@@ -1865,6 +1879,7 @@ AC_OUTPUT(Makefile
     download/blas/Makefile
     download/arpack/Makefile
     download/umfpack/Makefile
+    download/fftw/Makefile
     src/Makefile
     src/bamglib/Makefile
     src/Graphics/Makefile
@@ -1872,7 +1887,6 @@ AC_OUTPUT(Makefile
     src/Algo/Makefile
     src/lglib/Makefile
     src/fflib/Makefile
-dnl    src/std/Makefile
     src/nw/Makefile
     src/mpi/Makefile
     src/bamg/Makefile
