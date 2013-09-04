@@ -1,9 +1,19 @@
+<<<<<<< /home/alh/ff/pub/INNOVATION
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
 (ALH)
  - force Umfpack build to run sequentially (parallel make crashes with "pipe from processes is a directory"?)
  - pARMS download URL changed to http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php (thanks Fred)
  - corrected download/mumps parallel compilation (WHERE was not built properly)
+||||||| /tmp/INNOVATION~base.RVBRs5
+=======
+(ALH)
+ - Removed all Mercurial-tracked files from .hgignore
+ - added options --with-[package]-include= and --with-[package]-ldflags= to avoid downloading existing packages
+ - Parallelized MUMPS compilation in download/mumps (and mumps-seq)
+ - Applied a patch from Fred for compiling SuiteSparse on Slackware64-14.0
+ - Added configuration option --enable-hypre (disabled by default, contrary to other tools)
+>>>>>>> /tmp/INNOVATION~other.YDQaUR
 10/7/2013  (version 3.25)
  - remove of Mafile.in configure for the hg distrubion 
      use :  autoreconf -i  # too build Makefile.in 
