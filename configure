@@ -2936,7 +2936,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
- # Automake 1.4 is too old
+ # Automake 1.11 is too old for check ...
 am__api_version='1.13'
 
 ac_aux_dir=
@@ -13389,8 +13389,8 @@ fi
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
 
-if test $enable_ffcs = yes
-then
+#if test $enable_ffcs = yes
+#then
     if test "$ff_umfpack_ok" = yes
     then
 		if test -z "$ff_where_lib_conf_amd" ; then
@@ -13417,7 +13417,7 @@ $as_echo "$as_me:     -- do not add umfpack : $ff_umfpack_libs -I/usr/include/$f
 
 
 				    fi
-fi
+#fi
 
 LIBS="$ff_save_libs"
 
@@ -13448,7 +13448,8 @@ fi
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
 
-if test $enable_ffcs = yes && test "$ff_umfpack_ok" = yes
+## if test $enable_ffcs = yes && test "$ff_umfpack_ok" = yes
+if  test "$ff_umfpack_ok" = yes
 then
     	if test -z "$ff_where_lib_conf_amd" ; then
 	    echo "amd LD $ff_umfpack_libs"  >>$ff_where_lib_conf
