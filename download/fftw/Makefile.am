@@ -1,0 +1,60 @@
+# Downloading and compiling extra libraries
+# -----------------------------------------
+
+include cxxflags
+
+all:@FFTW@
+
+# Downloading and compiling FFTW
+# ------------------------------
+
+# FFTW information
+#http://www.fftw.org/fftw-3.2.tar.gz
+SRCDIR=fftw-$(FFTW_VERSION)
+PACKAGE=fftw-$(FFTW_VERSION).tar.gz
+SERVER=http://www.fftw.org
+PKGDIR=../pkg
+FFTW_VERSION=3.3.2
+INSTALL=../..
+THIS=fftw3
+
+fftw:FAIT
+
+FAITwin32-dll-target:
+	echo "On Pure Win32 (to hard to compile) "
+
+FAIT:	
+	$(MAKE) FAIRE
+	touch FAIT 
+
+FAIRE: $(SRCDIR) 
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
+	cd $(SRCDIR) && make install
+	touch FAIRE
+install:
+	cd $(SRCDIR) && make install
+WHERE:install
+	-if [ FAIT ] ; then \
+	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >../lib/WHERE.$(THIS) ;\
+	echo $(THIS) INCLUDE -I@DIR@/include   >> ../lib/WHERE.$(THIS) ;\
+	fi
+
+$(SRCDIR): $(PKGDIR)/$(PACKAGE)
+	gunzip -c   $^ | tar xvf - 
+
+$(PKGDIR)/$(PACKAGE):
+	cd $(PKGDIR);$(WGET) $(SERVER)/$(PACKAGE)
+
+clean: clean-local
+
+clean-local:
+	-rm -rf fftw-* FAIT FAIRE ../lib/WHERE.$(THIS)
+
+cxxflags: ../Makefile
+	grep 'CXX *=' ../Makefile >cxxflags
+	grep 'CC *=' ../Makefile >>cxxflags
+	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
+	grep 'CFLAGS *=' ../Makefile >>cxxflags
+	grep 'WGET *=' ../Makefile >>cxxflags
+	grep 'WIN32DLLTARGET *=' ../Makefile >>cxxflags
+

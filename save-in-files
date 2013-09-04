@@ -1,0 +1,1 @@
+tar cvf missing-in-file.tar `find . -name '*.in' | awk -F / ' NF <= 4'` configure

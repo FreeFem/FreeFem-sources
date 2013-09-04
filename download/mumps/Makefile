@@ -67,6 +67,7 @@ WHERE: install
 FAIRE-$(VERSION):WHERE
 	touch FAIRE-$(VERSION)
 
+# ALH - "make d" and "make z" need to be done sequentially
 $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar Makefile.inc
 	cp Makefile.inc $(SRCDIR)
 	cd $(SRCDIR) && $(MAKE) d
@@ -84,7 +85,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 $(PACKAGE1):
 	cd `dirname $@`; $(WGET) http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 
-clean: clean-local
+clean:clean-local
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
