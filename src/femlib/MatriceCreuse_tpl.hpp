@@ -288,28 +288,31 @@ template<class R>
 template<class R>
 bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
 {
-   double eps0=max(numeric_limits<double>::min(), threshold);
- if( norm(coef)<eps0) return  L == U ;
- int i,j,kf,k;
-  if(D)
-   for( i=0;i<this->n;i++)
-    if( norm(D[i])>eps0)
-     mij[ij_mat(trans,ii00,jj00,i,i)] += coef*(cnj? conj(D[i]) : D[i]);
-   else
-   for(int i=0;i<this->n;i++) // no dia => identity dai
-     mij[ij_mat(trans,ii00,jj00,i,i)] += coef;
-     
- if (L && pL )    
-   for (kf=pL[0],i=0;  i<this->n;   i++  )  
-     for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
-        if(norm(L[k])>eps0)
-        mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? conj(L[k]) : L[k]);
- if (U && pU)     
-   for (kf=pU[0],j=0;  j<this->m;  j++)  
-     for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
-      if(norm(U[k])>eps0)
-        mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? conj(U[k]) : U[k]);
- return L == U ; // symetrique               
+    double eps0=max(numeric_limits<double>::min(), threshold);
+    if( norm(coef)<eps0) return  L == U ;
+    int i,j,kf,k;
+    if(D)
+    {
+        for( i=0;i<this->n;i++)
+            if( norm(D[i])>eps0)
+                mij[ij_mat(trans,ii00,jj00,i,i)] += coef*(cnj? conj(D[i]) : D[i]);
+    }
+    else
+    {
+        for(int i=0;i<this->n;i++) // no dia => identity dai
+            mij[ij_mat(trans,ii00,jj00,i,i)] += coef;
+    }
+    if (L && pL )
+        for (kf=pL[0],i=0;  i<this->n;   i++  )
+            for ( k=kf,kf=pL[i+1], j=i-kf+k;   k<kf; j++,  k++  )
+                if(norm(L[k])>eps0)
+                    mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? conj(L[k]) : L[k]);
+    if (U && pU)
+        for (kf=pU[0],j=0;  j<this->m;  j++)
+            for (k=kf,kf=pU[j+1], i=j-kf+k;   k<kf; i++,  k++  )
+                if(norm(U[k])>eps0)
+                    mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? conj(U[k]) : U[k]);
+    return L == U ; // symetrique
 }
 template<class R>
 MatriceProfile<R>::MatriceProfile(const int nn,const R *a)

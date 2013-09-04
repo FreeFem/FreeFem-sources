@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.in
 
 all-local: parms
@@ -13,7 +12,7 @@ all-local: parms
 DIRPKG=../pkg
 SRCDIR=pARMS_$(parms_VERSION)
 PACKAGE=$(DIRPKG)/pARMS_$(parms_VERSION).tar.gz
-SERVER= http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.tar.gz
+SERVER=http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php
 INSTALL=../..
 parms_VERSION=2.2
 
@@ -44,21 +43,22 @@ $(SRCDIR): $(PACKAGE)
 
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)
+	cd $(DIRPKG);$(WGET) $(SERVER) --output-document=$(PACKAGE)
 
-clean-local:
+clean:
 	-make cleanall -C $(SRCDIR)/src
 	-rm Makefile.in ../lib/WHERE.parms
 	-rm ../lib/libparms.*
 	-rm -rf ../include/parms
 	-rm -rf $(SRCDIR)
-clean:clean-local
+#
 #	FFCS - make sure that all directories are cleaned. This is especially important under Windows because there is no
 #	compilation dependencies control there (see
 #	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
+#
 	-rm -rf pARMS_*
 	-rm config.log
-
+	-rm $(PACKAGE)
 
 WHERE:
 	echo parms LD -L@DIR@/lib -lparms$(DBG)  >../lib/WHERE.parms

@@ -464,51 +464,6 @@ int GetPeriodic(Expression  bb, Expression & b,Expression & f);
 int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2);
 
 
-/*
-template<class K,int dim>
-class FE  { public:
-
-  const pfes  *pVh; // pointeur sur la variable stockant FESpace;
-  CountPointer<FESpace> Vh; // espace courant 
-  virtual KN<K> *x() {return xx;}
-  KN<K> * xx; // value
-  int componante; 
-  FE(const pfes  *ppVh,int comp=0) :pVh(ppVh), xx(0),Vh(0),componante(comp) {}
-  void destroy() { delete this;}
-  virtual ~FE() { delete xx;}
-  virtual  void operator=( KN<K> *y) { Vh=**pVh; 
-       throwassert((bool) Vh);
-       if (xx) delete xx;xx=y;
-       throwassert( y->N() == Vh->NbOfDF);}
- virtual  FESpace * newVh() { throwassert(*pVh);return **pVh;}
- virtual FE<K> * set()  {return this;};
- operator  FESpace &() {set(); throwassert(Vh); return *Vh;}
-   
-   private:
-     FE(const FE &);
-     void operator= (const FE &); 
-};
-// bof bof pour test 
-/*
-template<class K,int comp>
-class FE_ : public FE<K>{public:
-
-  FE<K>  ** pere;
-  FE_(FE<K> ** p) : FE<K>(0,comp),pere(p) {}
-  operator FE<K>  * () { return new FE<K>(*pere,comp);}
-  void destroy() { delete this;}    
-  FE<K> * set() {throwassert(pere && *pere); xx=(**pere).xx;pVh=(**pere).pVh; Vh =(**pere).Vh;return this; }
-  FESpace * newVh() { return **(**pere).pVh;}
-  virtual ~FE_() { xx=0; }// pour ne pas  detruire les valeurs qui seront detruit quant le pere serat detruit
-  virtual KN<K> *x() {return (**pere).x() ;}
-  
-  void operator=( KN<K> *y) { 
-       **pere=y;
-       set();}
-  
-};
-
-*/
 C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim);
 C_F0 NewFEarray(ListOfId * ids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim);
 C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim);

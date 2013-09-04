@@ -24,7 +24,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.inc
 
 all-local: scotch
@@ -40,7 +39,8 @@ SERVER=https://gforge.inria.fr/frs/download.php/23391
 INSTALL=../..
 scotch_VERSION=5.1_esmumps
 scotch_VERSION_LOCAL=5.1.6_esmumps
-
+#  trick to no in MPI on NOT .. 
+TESTMPI= test -n '$(CCP)'
 scotch: FAIRE
 
 $(SRCDIR)/AFAIRE:
@@ -60,8 +60,8 @@ $(SRCDIR)/FAIT: $(SRCDIR) Makefile.inc
 	cd $(SRCDIR)/src && $(MAKE) scotch
 #
 #	FFCS - 16/1/13 - this crashes when run in parallel
-#
-	cd $(SRCDIR)/src && $(MAKE) -j1 ptscotch
+#       FH: compile pt only if mpi is here 
+	if $(TESTMPI) ; then  cd $(SRCDIR)/src && $(MAKE) -j1 ptscotch ; fi
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT
@@ -69,13 +69,14 @@ install:$(SRCDIR)/FAIT
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
 
-# FFCS - 16/1/13 - simplifying make rules
+# ALH - 16/1/13 - simplifying make rules
 WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
-	echo ptscotch LD -L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr   >$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo ptscotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotch LD -L@DIR@/lib   -lscotch -lscotcherr   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib -lptesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch LD -L@DIR@/lib -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
@@ -86,13 +87,15 @@ $(SRCDIR): $(PACKAGE)
 # FFCS: (7/2/11) gforge.inria.fr seems to have switched from http to https
 $(PACKAGE):
 	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET) --no-check-certificate   $(SERVER)/`basename $(PACKAGE)`
+# FH/ 06/08/13 remove -no-check-certificate  in $(WGET)  command , pb this curl...
+	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE)`
+
 
 # FFCS - 28/3/13 - more cleaning
 clean-local:
 	-cd $(SRCDIR)/src && $(MAKE)  realclean  -C $(SRCDIR)/src
 	-rm config.log
-	-rm $(PACKAGE)
+# FH 	-rm $(PACKAGE) 
 
 clean: clean-local
 	-rm Makefile.inc
