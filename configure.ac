@@ -19,8 +19,8 @@ dnl : ${FFLAGS=""}
 
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
-# Automake 1.4 is too old
-AM_INIT_AUTOMAKE(1.6.3 dist-zip)
+# Automake 1.11 is too old for check ... 
+AM_INIT_AUTOMAKE(1.13 dist-zip)
 
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_MAKE_SET
@@ -1339,8 +1339,8 @@ fi
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
 
-if test $enable_ffcs = yes
-then
+#if test $enable_ffcs = yes
+#then
     if test "$ff_umfpack_ok" = yes 
     then
 	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
@@ -1351,7 +1351,7 @@ then
 	dnl      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
 	dnl       echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
     fi   
-fi
+#fi
 
 LIBS="$ff_save_libs"
 
@@ -1377,7 +1377,8 @@ fi
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
 
-if test $enable_ffcs = yes && test "$ff_umfpack_ok" = yes 
+## if test $enable_ffcs = yes && test "$ff_umfpack_ok" = yes 
+if  test "$ff_umfpack_ok" = yes 
 then
     AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
     AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
