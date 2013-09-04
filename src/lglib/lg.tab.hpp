@@ -104,7 +104,7 @@ extern int lgdebug;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 124 "lg.ypp"
+#line 126 "lg.ypp"
  
  double dnum;
  long lnum;
