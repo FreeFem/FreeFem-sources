@@ -123,6 +123,9 @@ include.done: $(allheaders)
 	mkdir -p include
 	cp $^ include
 	touch $@
+clean-local:
+	-rm -r include
+	-rm include.done
 
 else
 include.done: include.tar.gz
