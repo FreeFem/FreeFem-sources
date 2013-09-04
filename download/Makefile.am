@@ -69,12 +69,13 @@ EXTRA_DIST= \
 ./superludist/Makefile \
 ./superludist/make-superlu.inc \
 ./superludist/superludist_2.3.patch \
-./superludist_3.0-printf.patch \
-./superludist_3.0-cast_warning.patch \
-./superludist_3.0-return_values.patch \
-./superludist_3.0-operation_undefined.patch \
+./superludist/superludist_3.0-printf.patch \
+./superludist/superludist_3.0-cast_warning.patch \
+./superludist/superludist_3.0-return_values.patch \
+./superludist/superludist_3.0-operation_undefined.patch \
 ./tetgen/Makefile \
 ./tetgen/tetgen1.4.2.patch \
+./tetgen/patches.win64 \
 ./yams/Makefile \
 ./yams/freeyams.2012.02.05.patch \
 ./yams/freeyams.2012.02.05-return-values.patch \
