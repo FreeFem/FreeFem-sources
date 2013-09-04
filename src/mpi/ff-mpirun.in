@@ -14,10 +14,14 @@ j=1;
 #echo $1 ---
 while test -n "$1" ; do
 ((j=$j+1))
-((j1=$j+1))
+#((j1=$j+1))
 #echo --- $1 --  $j1 $j
 case "$1" in
-*.edp) a[$j]="${ffmpi}";a[$j1]="$1";j=j1;;
+"-nw") nw=1;;
+"-win") w=0;;
+*.edp) a[$j]="${ffmpi}";
+if [ "$nw" -eq 1 ]; then ((j=$j+1));a[$j]="-nw"; fi
+((j=$j+1));a[$j]="$1";;
 #if[ ! -f "$1" ]; then echo error file no found "$1"; dry=2; fi;;
 -dry) dry=1;; 
 *)  a[$j]="$1";;

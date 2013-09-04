@@ -1,4 +1,4 @@
-//load "PARDISO" 
+load "PARDISO" 
 load "symmetrizeCSR"
 load "shell"
 //if(ompgetnumthreads() < 2 & getenv("OMP_NUM_THREAD") =="" ) 
