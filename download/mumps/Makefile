@@ -48,16 +48,15 @@ install: $(SRCDIR)/FAIT
 	cp $(SRCDIR)/lib/*.a ../lib/
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM.a ../lib/
 
-WHERE: 
+# ALH - WHERE needs to be built sequentially after install
+WHERE: install
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
 	$(MAKE) install ; \
 	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM  -lpthread  >../lib/WHERE.mumps ;\
 	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps ;\
 	fi
 
-
-FAIRE-$(VERSION):
-	$(MAKE) install WHERE 
+FAIRE-$(VERSION):WHERE
 	touch FAIRE-$(VERSION)
 
 Makefile.inc: ../../config.status	Makefile Makefile-mumps-$(VERSION).inc
@@ -73,14 +72,14 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 $(PACKAGE1):
 	cd `dirname $@`; $(WGET)   http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 
+clean: clean-local
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
-
-clean: clean-local
+	-rm $(PACKAGE1)
 
 # Local Variables:
 # mode:makefile

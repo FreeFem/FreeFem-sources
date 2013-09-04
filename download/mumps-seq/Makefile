@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.inc
 
 all-local: mumps
@@ -18,7 +17,9 @@ mumps: FAIRE-$(VERSION)
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
-#	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
+#
+#	ALH - 22/5/12 - Mumps has difficulties compiling d & z in parallel
+#
 	cd $(SRCDIR) && make d
 	cd $(SRCDIR) && make z
 	touch $(SRCDIR)/FAIT	

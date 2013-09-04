@@ -1,8 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
-
 all-local: $(DOWNLOAD_UMFPACK)
 EXTRA_DIST= SuiteSparse_config.mk.in 
 
@@ -22,22 +20,31 @@ SUITESPARSECONFIGLIB=../lib/libsuitesparseconfig.a
 
 #  all: umfpack cholmod
 
-umfpack:$(AMDLIB)  $(UMFPACKLIB) $(SUITESPARSECONFIGLIB)
-cholmod:$(CAMDLIB) $(COLAMDLIB)  $(AMDLIB)  $(CHOLMODLIB) $(SUITESPARSECONFIGLIB) 
+# ALH - 4/9/13 - parallel make crashes ("pipe from processes is a directory"?). make sure that everything is run
+# sequentially
+
+umfpack:
+	$(MAKE) MAKEFLAGS= $(AMDLIB)
+	$(MAKE) MAKEFLAGS= $(UMFPACKLIB)
+	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB)
+cholmod:
+	$(MAKE) MAKEFLAGS= $(CAMDLIB)
+	$(MAKE) MAKEFLAGS= $(COLAMDLIB)
+	$(MAKE) MAKEFLAGS= $(AMDLIB)
+	$(MAKE) MAKEFLAGS= $(CHOLMODLIB)
+	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB) 
 
 # The 'lib' goal is replaced with 'libb' to avoid problems with the
 # existing 'Lib' subdirectory on case-insensitive file systems
 # the lib depend of the Makefile to force the reconstruction 
 # if the parameter change
 
-# FFCS: SuiteSparse/*/Source are not able to compile in parallel from
-# scratch ("pipe from processes is a directory"?). But specifying
-# "make -j 1" is not enough (another error pops up). Use "$(MAKE)
-# MAKEFLAGS=" instead (using "make MAKEFLAGS=" still produces an error
-# on Cygwin).
+# FFCS: SuiteSparse/*/Source are not able to compile in parallel from scratch ("pipe from processes is a
+# directory"?). But specifying "make -j 1" is not enough (another error pops up). Use "$(MAKE) MAKEFLAGS=" instead
+# (using "make MAKEFLAGS=" still produces an error on Cygwin).
 
 $(SUITESPARSECONFIGLIB): SuiteSparse/FF 
-	cd SuiteSparse/SuiteSparse_config && make 
+	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS=
 	-mkdir ../include ../lib
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/SuiteSparse_config/libsuitesparseconfig.a ../lib/libsuitesparseconfig.a
@@ -59,20 +66,20 @@ $(AMDLIB): SuiteSparse/FF
 	$(RANLIB) ../lib/libamd.a
 
 $(CAMDLIB): SuiteSparse/FF 
-	cd SuiteSparse/CAMD/Lib && make 
+	cd SuiteSparse/CAMD/Lib && $(MAKE) MAKEFLAGS=
 	-mkdir ../include ../lib
 	cp -f  SuiteSparse/CAMD/Include/*.h ../include
 	cp  SuiteSparse/CAMD/Lib/libcamd.a ../lib/libcamd.a
 	$(RANLIB) ../lib/libcamd.a
 
 $(CHOLMODLIB): SuiteSparse/FF 
-	cd SuiteSparse/CHOLMOD/Lib && make 
+	cd SuiteSparse/CHOLMOD/Lib && $(MAKE) MAKEFLAGS=
 	-mkdir ../include ../lib
 	cp -f  SuiteSparse/CHOLMOD/Include/*.h ../include
 	cp  SuiteSparse/CHOLMOD/Lib/libcholmod.a ../lib/libcholmod.a
 	$(RANLIB) ../lib/libcholmod.a
 $(COLAMDLIB): SuiteSparse/FF 
-	cd SuiteSparse/COLAMD/Lib && make 
+	cd SuiteSparse/COLAMD/Lib && $(MAKE) MAKEFLAGS=
 	-mkdir ../include ../lib
 	cp -f  SuiteSparse/COLAMD/Include/*.h ../include
 	cp  SuiteSparse/COLAMD/Lib/libcolamd.a ../lib/libcolamd.a

@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.inc
 
 all-local: scotch
@@ -47,14 +46,14 @@ install:$(SRCDIR)/FAIT
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
 
-# FFCS - 16/1/13 - simplifying make rules
+# ALH - 16/1/13 - simplifying make rules
 WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib  -lptesmumps -lptscotch -lptscotcherr   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotch LD -L@DIR@/lib   -lscotch -lscotcherr   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotch INCLUDE -I@DIR@/include/scotch  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib -lptesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch LD -L@DIR@/lib -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)

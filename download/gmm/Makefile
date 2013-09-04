@@ -1,10 +1,7 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include cxxflags
-
-
 
 # Downloading and compiling FFTW
 # ------------------------------
