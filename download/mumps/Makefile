@@ -56,7 +56,6 @@ install.done:$(SRCDIR)/FAIT
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM.a ../lib/
 	touch $@
 
-<<<<<<< /home/alh/ff/pub/download/mumps/Makefile
 # ALH - WHERE needs to be built sequentially after install
 WHERE: install
 	if [ -f $(SRCDIR)/FAIT  ] ;then \
@@ -67,25 +66,13 @@ WHERE: install
 
 FAIRE-$(VERSION):WHERE
 	touch FAIRE-$(VERSION)
-||||||| /tmp/Makefile~base.CQxHQL
-WHERE: 
-	if [ -f $(SRCDIR)/FAIT  ] ;then \
-	$(MAKE) install ; \
-	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM  -lpthread  >../lib/WHERE.mumps ;\
-	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps ;\
-	fi
 
-
-FAIRE-$(VERSION):
-	$(MAKE) install WHERE 
-	touch FAIRE-$(VERSION)
-=======
+# ALH - "make d" and "make z" need to be done sequentially
 $(SRCDIR)/FAIT:$(SRCDIR)/tag-tar Makefile.inc
 	cp Makefile.inc $(SRCDIR)
 	cd $(SRCDIR) && $(MAKE) d
 	cd $(SRCDIR) && $(MAKE) z
 	touch $@
->>>>>>> /tmp/Makefile~other.cALS1_
 
 Makefile.inc:../../config.status Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
@@ -98,30 +85,14 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 $(PACKAGE1):
 	cd `dirname $@`; $(WGET) http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 
-<<<<<<< /home/alh/ff/pub/download/mumps/Makefile
-clean: clean-local
+clean:clean-local
 clean-local:
-	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
-||||||| /tmp/Makefile~base.CQxHQL
-clean-local:
-	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
-	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
-=======
-clean:
-	-rm Makefile.inc ../lib/WHERE.mumps
->>>>>>> /tmp/Makefile~other.cALS1_
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
-<<<<<<< /home/alh/ff/pub/download/mumps/Makefile
 	-rm $(PACKAGE1)
-||||||| /tmp/Makefile~base.CQxHQL
-
-clean: clean-local
-=======
 	-rm config.log *.done
->>>>>>> /tmp/Makefile~other.cALS1_
 
 # Local Variables:
 # mode:makefile

@@ -228,9 +228,8 @@ real[int] clb=0.,cub=[(1-alpha)*Vobj + alpha*Vnvc];
 /*
  * Call to IPOPT
  */
- 
-IPOPT(Area,GradArea,ipHessianLag,ipVolume,ipGradVolume,rc[],ub=ub[],lb=lb[],clb=clb,cub=cub,checkindex=1,maxiter=kkk<nadapt-1 ? 40:150,warmstart=kkk,lm=lm,uz=uz[],lz=lz[],tol=0.00001,structjacc=[gvi,gvj]);
-
+int res=IPOPT(Area,GradArea,ipHessianLag,ipVolume,ipGradVolume,rc[],ub=ub[],lb=lb[],clb=clb,cub=cub,checkindex=1,maxiter=kkk<nadapt-1 ? 40:150,warmstart=kkk,lm=lm,uz=uz[],lz=lz[],tol=0.00001,structjacc=[gvi,gvj]);
+cout << " IPOPT: res =" << res << endl ;
 /*
  * Display the final mesh
  */
