@@ -830,7 +830,7 @@ fi
 # Looking for FFTW
 # ----------------
 
-# ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jaraush, 1/8/13)
+# ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
 
 AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
 AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
@@ -1688,7 +1688,7 @@ then
     fi
 fi
 
-# ALH - 4/9/13 - request from Helmut Jaraush - allow to change Scotch include path
+# ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
 if test "$with_scotch_include" = ""
 then
     with_scotch_include=$ac_pwd/download/include/scotch
