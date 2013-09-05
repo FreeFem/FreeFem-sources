@@ -1733,7 +1733,7 @@ FFCS_DISABLE_DOWNLOAD(yams,freeyams.$DYLIB_SUFFIX)
 FFCS_DISABLE_DOWNLOAD(pipe,pipe.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
-if test $OS = Windows_NT
+if test "$OS" = Windows_NT
 then
     CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
 
@@ -1920,8 +1920,8 @@ m4_map([AC_FF_WHERELIB],[
 # Windows)
 #  remove gsl if not find ... FK 
 
-if test  "$ff_where_lib_conf_gsl" -ne 1  -a -z "$enable_gsl" ; then enable_gsl=no; fi;  
-if test  "$ff_where_lib_conf_mkl" -ne 1  -a -z "$enable_mkl" ; then enable_pardiso=no; fi;  
+if test  "$ff_where_lib_conf_gsl" == 1  -a -z "$enable_gsl" ; then enable_gsl=no; fi;  
+if test  "$ff_where_lib_conf_mkl" == 1  -a -z "$enable_mkl" ; then enable_pardiso=no; fi;  
 FFCS_DISABLE_DOWNLOAD(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
 FFCS_DISABLE_DOWNLOAD(pardiso,PARDISO.$DYLIB_SUFFIX)
 
