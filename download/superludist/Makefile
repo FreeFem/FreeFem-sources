@@ -19,7 +19,7 @@ SERVER=http://crd-legacy.lbl.gov/~xiaoye/SuperLU/
 INSTALL=../..
 SUPERLU_DIST_VERSION=3.0
 DISTSUPERLULIB=../$(INSTALL)/lib/libsuperlu_dist_3.0.a
-WGET=wget
+## WGET=wget
 
 include make.inc
 
