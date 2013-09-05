@@ -146,6 +146,11 @@ while [ $# -ne 0 ]  ; do
     esac
     shift
 done
+
+#  remove old file... FH sep 2013..
+SUF=@DYLIB_SUFFIX@
+rm $out.$SUF
+
 if [ -n "$autodep"  ] ; then
 #    echo "$thecommand" $args  `eval "'$dircommand/ff-get-dep'" -ff $files`
     argsdep=`eval "'$dircommand/ff-get-dep'" -ff $files`
@@ -157,6 +162,7 @@ if [ -n "$autodep"  ] ; then
 	 # FFCS - 28/11/11 - we need to stop compiling as soon as there is an error because we want a fixed set of features in
 	 # FFCS
 	 # return a error when FFCS enable .. FH. 
+	 echo " -- $error " >>Missing-plugins-@DYLIB_SUFFIX@.log
 	 exit $ffcs;
      fi
     echo eval "$thecommand" $args  $argsdep
@@ -181,13 +187,12 @@ if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
 test "$withmpi" = "yes" && WMPI_LIB="$MPI_LIB"
 
 INC="$INCFF $INC"  
-SUF=so
 SHARED="-shared"
 case "$WIN32$uu" in
     Darwin*) 
 #        echo "export MACOSX_DEPLOYMENT_TARGET=10.3"
 #	export MACOSX_DEPLOYMENT_TARGET=10.4
-	SUF=dylib
+#	SUF=dylib
 	SHARED="-bundle -undefined dynamic_lookup"  ;;
     win32-CYGWIN*|win32-win32)
         echo " Window without cygwin "
@@ -200,14 +205,16 @@ case "$WIN32$uu" in
 
 	# FFCS - 17/10/12 - -mno-cygwin is not understood by the current mingw64 compilers
         ###FLAGS='  -mno-cygwin '
-        SUF=dll;;
+#        SUF=dll
+	;;
     win32-cygwin-version)
         echo " cygwin-version "
 	WMPI_LIB=''
         b=$bin
         FLAGS=' '
         LIBS="'$b/libff.dll' $LIBS $DLL"
-        SUF=dll;;
+#        SUF=dll
+	;;
     FreeBSD|NetBSD)
 	SHARED="-shared" 
 	FLAGS='-fPIC';;
