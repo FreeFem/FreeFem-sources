@@ -1,3 +1,7 @@
+// this exemple is buggus in some case ...
+// strange ...  FH.  , S Auliac  (will be correct in test ???)
+// remove the test  (no loop)  
+int nadapt=0;//  3 is teh previous value..
 load "msh3";
 load "medit";
 load "ff-Ipopt";
@@ -23,7 +27,7 @@ Vh uz=1.,lz=1.;
 real[int] lm=[1];
 
 
-int nadapt=3;
+
 for(int kkk=0;kkk<nadapt;++kkk) //Mesh adaptation loop
 {
 
