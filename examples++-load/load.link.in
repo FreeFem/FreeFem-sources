@@ -9,6 +9,7 @@ FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
 FFFFLAGS='@FFLAGS@'
 FFFLIBS='@FLIBS@'
 INCFF=
+if [ "@ENABLE_FFCS@" != "yes" ] ;then ffcs=0; else ffcs=1;fi 
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
 if [ -z "$MPICXX" ] ; then MPICXX="@MPICXX@" ; fi
 if [ -z "$MPI_LIB" ] ; then MPI_LIB="@MPI_LIB@" ; fi
@@ -155,7 +156,8 @@ if [ -n "$autodep"  ] ; then
 
 	 # FFCS - 28/11/11 - we need to stop compiling as soon as there is an error because we want a fixed set of features in
 	 # FFCS
-	 exit 1;
+	 # return a error when FFCS enable .. FH. 
+	 exit $ffcs;
      fi
     echo eval "$thecommand" $args  $argsdep
     eval "$thecommand" $args  $argsdep

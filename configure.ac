@@ -119,6 +119,7 @@ then
 else
 	enable_ffcs=no
 fi
+AC_SUBST(ENABLE_FFCS,"$enable_ffcs")
 AM_CONDITIONAL([ENABLE_FFCS],[test $enable_ffcs = yes])
 
 # dur dur car sous MacOsX le fortran n'est pas standard. 
@@ -1713,8 +1714,9 @@ m4_define([FFCS_DISABLE_DOWNLOAD],
     fi
 ])
 
+
 FFCS_DISABLE_DOWNLOAD(fflapack,fflapack.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+#  move FFCS_DISABLE_DOWNLOAD gls  , after find gsl ... 
 FFCS_DISABLE_DOWNLOAD(hips,hips_FreeFem.$DYLIB_SUFFIX)
 FFCS_DISABLE_DOWNLOAD(hypre,hypre.$DYLIB_SUFFIX)
 FFCS_DISABLE_DOWNLOAD(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
@@ -1728,7 +1730,6 @@ FFCS_DISABLE_DOWNLOAD(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeF
 FFCS_DISABLE_DOWNLOAD(scotch,scotch.$DYLIB_SUFFIX)
 FFCS_DISABLE_DOWNLOAD(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 FFCS_DISABLE_DOWNLOAD(yams,freeyams.$DYLIB_SUFFIX)
-FFCS_DISABLE_DOWNLOAD(pardiso,PARDISO.$DYLIB_SUFFIX)
 FFCS_DISABLE_DOWNLOAD(pipe,pipe.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
@@ -1917,6 +1918,13 @@ m4_map([AC_FF_WHERELIB],[
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
+#  remove gsl if not find ... FK 
+
+if test  "$ff_where_lib_conf_gsl" -ne 1  -a -z "$enable_gsl" ; then enable_gsl=no; fi;  
+if test  "$ff_where_lib_conf_mkl" -ne 1  -a -z "$enable_mkl" ; then enable_pardiso=no; fi;  
+FFCS_DISABLE_DOWNLOAD(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+FFCS_DISABLE_DOWNLOAD(pardiso,PARDISO.$DYLIB_SUFFIX)
+
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test $OS = Windows_NT])
  
