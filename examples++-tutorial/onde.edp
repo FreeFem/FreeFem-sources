@@ -1,0 +1,34 @@
+int i, N=20;
+mesh Th=square(N,N);
+fespace RTh(Th,RT0);
+fespace P0h(Th,P0);
+fespace P1h(Th,P1);
+
+RTh [Vx,Vy],[vx,vy];
+P0h up,u,um;
+
+real dt=0.125/N, pi=4*atan(1.0);
+[Vx,Vy]=[0,0];
+um= sin(pi*x)*sin(pi*y);
+u=um;
+
+problem prob(Vx,Vy,vx,vy,solver=Cholesky,init=i)
+    = int2d(Th) (Vx*vx+Vy*vy) + int2d(Th)(up*(dx(vx)+dy(vy)))
+//     + on(1,2,3,4,Vx=pi*cos(pi*x)*sin(pi*y)*cos(i*dt*pi*sqrt(2.))
+//                 ,Vy=pi*sin(pi*x)*cos(pi*y)*cos(i*dt*pi*sqrt(2.)) )
+;
+for (i=0;i<20;i++)
+ {
+     up = 2*u-um+dt*dt*(dx(Vx)+dy(Vy));
+     prob;
+     um=u;
+     u=up;
+     cout<< int2d(Th)((u-sin(pi*x)*sin(pi*y)*cos(i*dt*pi*sqrt(2.)))^2)
+     /int2d(Th)((sin(pi*x)*sin(pi*y)*cos(i*dt*pi*sqrt(2.)))^2)<< endl;
+//     plot([Vx,Vy],wait=0, value=1);
+ }
+P1h w,W = 0;
+problem prob1(W,w,solver=Cholesky,init=0)
+    = int2d(Th) (W*w) + int2d(Th)(up*w);
+    prob1;
+    plot(W,wait=1,value=1);
