@@ -38,3 +38,4 @@ LOADOPTS =
 #  Need follow the convention of how C calls a Fortran routine.
 #
 CDEFS        = @CFLAGSF77@
+WGET =@WGET@ 

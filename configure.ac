@@ -119,6 +119,7 @@ then
 else
 	enable_ffcs=no
 fi
+AC_SUBST(ENABLE_FFCS,"$enable_ffcs")
 AM_CONDITIONAL([ENABLE_FFCS],[test $enable_ffcs = yes])
 
 # dur dur car sous MacOsX le fortran n'est pas standard. 
@@ -1654,7 +1655,6 @@ m4_define([TOOL_DISABLE],
 ])
 
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(hypre,hypre_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
@@ -1665,7 +1665,6 @@ TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
 TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,MUMPS_seq.$DYLIB_SUFFIX,mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
-TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis)
 TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
@@ -1675,10 +1674,11 @@ TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
+TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 
-if test $OS = Windows_NT
+if test "$OS" = Windows_NT
 then
     CFLAGS="$CFLAGS -DWITHOUT_PTHREAD -DAdd_"
 
@@ -1863,6 +1863,13 @@ m4_map([AC_FF_WHERELIB],[
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
+#  remove gsl if not find ... FK 
+
+if test  "$ff_where_lib_conf_gsl" == 1  -a -z "$enable_gsl" ; then enable_gsl=no; fi;  
+if test  "$ff_where_lib_conf_mkl" == 1  -a -z "$enable_mkl" ; then enable_pardiso=no; fi;  
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
+
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test $OS = Windows_NT])
  

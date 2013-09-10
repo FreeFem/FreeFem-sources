@@ -33,7 +33,7 @@ all-local: pastix
 DIRPKG   = ../pkg
 SRCDIR   = pastix_release_$(VERSION)
 PACKAGE1 = $(DIRPKG)/pastix_release_$(VERSION).tar.bz2
-SERVER   = http://gforge.inria.fr/frs/download.php/21873/
+SERVER   = https://gforge.inria.fr/frs/download.php/21873/
 INSTALL  = ../..
 VERSION  = 2200
 
@@ -160,8 +160,8 @@ $(PACKAGE1):
 #
 # FFCS - 23/4/13 - --no-check-certificate always required here, even
 # if [[file:../../configure.ac::no-check-certificate]] decides otherwise.
-#
-	cd $(DIRPKG);$(WGET) --no-check-certificate $(SERVER)/`basename $(PACKAGE1)`
+# FH remove no-check-certificate , in wget command ..
+	cd $(DIRPKG);$(WGET) - $(SERVER)/`basename $(PACKAGE1)`
 
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:

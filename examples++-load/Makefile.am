@@ -83,8 +83,11 @@ bin_PROGRAMS=
 
 load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 #
-# max_load 
+# max_load
+	-rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null
 	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE) $(LIST_COMPILE_PKG)
+	@if test -f Missing-plugins-$(DYLIB_SUFFIX).log ; then cat Missing-plugins-$(DYLIB_SUFFIX).log; fi; exit 0 
+	@echo Warning missing plugin: `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
 	echo " finish build list $(DYLIB_SUFFIX)"
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
@@ -145,7 +148,7 @@ all-local: all.edp regtests.edp load_compile
 # configuration step
 
 all.edp:
-	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
+	@(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \

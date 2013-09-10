@@ -279,12 +279,14 @@ dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	  AC_SUBST(MPI_LIB,$ff_MPI_LIB)
 	  AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)
 	  AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
+          AC_SUBST(SKIP_TESTS_MPI,"no")
 	fi
 	CXX="$ff_save_cxx"
 	LIBS="$ff_save_libs"
 fi
-
-else
+fi
+##  clean on MPI variable if not MPI ...
+if test "$ff_mpi" != yes ; then
           
 	  AC_SUBST(MPIRUN,"")      		
 	  AC_SUBST(MPICC,"")      		
@@ -296,7 +298,7 @@ else
 	  AC_SUBST(MPI_LIB,"")
 	  AC_SUBST(MPI_LIBC,"")
 	  AC_SUBST(MPI_LIBFC,"")
-          AC_SUBST(SKIP_TESTS_MPI,yes)
+          AC_SUBST(SKIP_TESTS_MPI,"yes")
 	  ff_mpi=no
 
 fi
