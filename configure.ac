@@ -20,7 +20,7 @@ dnl : ${FFLAGS=""}
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # Automake 1.11 is too old for check ... 
-AM_INIT_AUTOMAKE(1.13 dist-zip)
+AM_INIT_AUTOMAKE(1.12 dist-zip)
 
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_MAKE_SET
