@@ -689,10 +689,15 @@ else
     AC_SUBST(MPI_LIBFC,"")
 
     # Extra MPI-dependant configuration options that are set by FF during MPI configuration. FFCS - 25/2/13 - Fred
-    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
-    # accepted by pastix. So we just use $ac_build_alias which is much more reliable than $ff_HOSTARCH_pastix.
+    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. i686_pc_linux and i686_mac are accepted by
+    # pastix.
 
-    AC_SUBST(PASTIX_HOSTARCH,$ac_build_alias)
+    if test"$ff_HOSTARCH_pastix" = ""
+    then
+	ff_HOSTARCH_pastix=i686_pc_linux
+    fi
+
+    AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
     # these values should not be empty otherwise examples++-load/ff-get-dep will think that they are not defined
     AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
@@ -1385,6 +1390,7 @@ ff_malloc_h=""
 AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
 AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
+
 AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma gettimeofday)
 AC_CHECK_FUNCS(srandomdev)
 
