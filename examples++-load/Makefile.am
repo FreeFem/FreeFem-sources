@@ -67,15 +67,15 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
-	@FFCS_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX) 
+	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX) 
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
-LIST_COMPILE_PKG=tetgen.$(DYLIB_SUFFIX) SuperLu.$(DYLIB_SUFFIX) dfft.$(DYLIB_SUFFIX) metis.$(DYLIB_SUFFIX)		\
-	UMFPACK64.$(DYLIB_SUFFIX) NewSolver.$(DYLIB_SUFFIX) @FFCS_DYLIB_lapack@ @FFCS_DYLIB_fflapack@			\
-	ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) @FFCS_DYLIB_yams@ @FFCS_DYLIB_mmg3d@ @FFCS_DYLIB_mshmet@		\
-	@FFCS_DYLIB_gsl@ @FFCS_DYLIB_mumps_seq@ @FFCS_DYLIB_ipopt@ ff-NLopt.$(DYLIB_SUFFIX) ff-cmaes.$(DYLIB_SUFFIX)	\
-	@FFCS_DYLIB_scotch@ @FFCS_DYLIB_pardiso@
+LIST_COMPILE_PKG=tetgen.$(DYLIB_SUFFIX) @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) @TOOL_DYLIB_metis@		\
+	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ @TOOL_DYLIB_fflapack@		\
+	ffnewuoa.$(DYLIB_SUFFIX) ilut.$(DYLIB_SUFFIX) @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mshmet@	\
+	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX)	\
+	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_pardiso@
 
 bin_PROGRAMS=
 
@@ -93,8 +93,8 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ./ff-c++ -auto $< 
 
-# FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with empty files
-# without any access right). So just replace the whole thing with a plain copy.
+# FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with
+# empty files without any access right). So just replace the whole thing with a plain copy.
 
 if ENABLE_FFCS
 allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/AFunction.hpp ../src/fflib/AnyType.hpp	\
