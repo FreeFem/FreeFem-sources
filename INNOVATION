@@ -1,6 +1,8 @@
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
-(ALH)
+10/9/2013 (ALH)
+ - Corrected pastix compilation for FFCS on MacOS 10.6
+5/9/2013 (ALH)
  - force Umfpack build to run sequentially (parallel make crashes with "pipe from processes is a directory"?)
  - pARMS download URL changed to http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php (thanks Fred)
  - corrected download/mumps parallel compilation (WHERE was not built properly)
