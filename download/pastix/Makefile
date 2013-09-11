@@ -161,7 +161,7 @@ $(PACKAGE1):
 # FFCS - 23/4/13 - --no-check-certificate always required here, even
 # if [[file:../../configure.ac::no-check-certificate]] decides otherwise.
 # FH remove no-check-certificate , in wget command ..
-	cd $(DIRPKG);$(WGET) - $(SERVER)/`basename $(PACKAGE1)`
+	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE1)`
 
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:
