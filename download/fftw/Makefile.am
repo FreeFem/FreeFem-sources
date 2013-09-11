@@ -1,8 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
-
 all-local: $(DOWNLOAD_FFTW)
 
 # Downloading and compiling FLTK
@@ -29,4 +27,5 @@ $(PACKAGE):
 
 clean-local:
 	-rm -rf fftw-* 
-	-rm ../include/fftw3.f	../include/fftw3.f03	../include/fftw3.h	../include/fftw3l.f03	../include/fftw3q.f03 ../lib/libfftw3.a	../lib/libfftw3.la
+	-rm ../include/fftw3.f ../include/fftw3.f03 ../include/fftw3.h ../include/fftw3l.f03 ../include/fftw3q.f03	\
+		../lib/libfftw3.a ../lib/libfftw3.la

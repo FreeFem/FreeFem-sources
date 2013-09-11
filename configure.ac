@@ -1866,6 +1866,7 @@ AC_OUTPUT(Makefile
     download/blas/Makefile
     download/arpack/Makefile
     download/umfpack/Makefile
+    download/fftw/Makefile
     src/Makefile
     src/bamglib/Makefile
     src/Graphics/Makefile
