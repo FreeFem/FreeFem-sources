@@ -1,0 +1,128 @@
+// simulation of wafer heating by a laser.
+/**************************************************************
+From:  Fabian Dortu
+
+Materials and Components Analysis group (MCA)
+SPDT division
+
+IMEC, Kapeldreef 75, B-3001 Leuven, Belgium
+tel: +32/16 28 8774
+e-mail: Fabian.Dortu@imec.be <mailto:Fabian.Dortu@imec.be> 
+**************************************************************/
+// The poisson equation (here the heat equation) is solved in cylindrical coordinates:
+//   $ \Delta u = 1/r \partial_r(r \partial_r u) + \partial_{zz} u +  1/r^2 \partial_{\theta^2} u $
+// so the variationnal formulation is after integer on the 3d cylinder 
+// rotation invariant given $\partial_{\theta} u =0$
+//  $ - \Delta u = f $
+//  on the 1/2 plan $ \theta =0$ 
+//  $ \int r ( \partial_r u \partial_r v + \partial_z u \partial_z v ) = \int r f v  - \int_{\Gamma} r \partial_n u v $  
+//  the radial coordinate 'r' is called 'x'.
+//  the depth coordinate 'z' is called 'y'.
+// The wafer stuck is a rectangle with upper left corner at (0,0)
+//  and lower right corner at (radius,-thickness)
+// The laser beam it the surface from top to bottom at the center (0,0). 
+// The units assumed for the distance is the micrometer (um)
+
+
+//***********************
+//*** User parameters ***
+//***********************
+
+real radius=1000;   // the wafer radius (um)
+real thick=600;     // the wafer thickness (um)
+real thC=1.5e-4;    // the thermal conductivity (W/K/um)
+real beamr=2;     // the laser beam radius (in the sens of a gaussian)
+real refl=0.55;     // reflection coefficient Air/Silicon
+real Eg=1.12;       // Band gap of Silicon (eV)
+real En=1.49;       // Energy of laser (eV) - must be greater than Eg.
+real I0=1e-2;       // Laser beam intensity (W/um^2)
+real alpha=0.2;     // absorption coefficient (um^-1)
+func f=I0 * (1-refl) * (En-Eg)/En * alpha * exp(alpha*y) * exp(-x*x/beamr/beamr);
+                    // the heat generation function: a laser beam of radius 'beamr'
+                    // lateral shape is gaussian.
+                    // in depth shape is decreasing exponential because of absorption.
+real g=300;          // temperature at right and bottom surfaces (in Kelvin)
+
+//********************************
+//*** Geometry/Mesh definition ***
+//********************************
+
+
+//--- less basic mesh ---
+border bottom1(t=0,radius/5) {x=t; y=-thick; label=1;}
+border bottom2(t=radius/5,radius) {x=t; y=-thick; label=2;}
+border right1(t=-thick,0) {x=radius; y=t; label=3;};  // 'right' actually means external surface
+border top1(t=radius,radius/5*3) {x=t; y=0; label=4;};
+border top2(t=radius/5*3,radius/5) {x=t; y=0; label=5;}
+border top3(t=radius/5,0) {x=t; y=0; label=6;};
+border left1(t=0,-thick/5) {x=0; y=t; label=7;}; // 'left' actually means center of cylinder
+border left2(t=-thick/5,-thick) {x=0; y=t; label=8;}; // 'left' actually means center of cylinder
+mesh Th = buildmesh ( bottom1(20) + bottom2(10) + right1(20) + top1(10) + top2(20) + top3(50) + left1(50) + left2(25) );
+
+plot(Th,wait=1,fill=1,ps="wafer_mesh2.eps");
+//savemesh(Th,"wafer_stuck.msh");
+
+
+//**************************
+//*** Problem definition ***
+//**************************
+
+
+
+fespace Vh(Th,P1);
+Vh u,v,zero;
+
+u=0;     // The temperature variable.
+v=0;     // The weight function.
+zero=0;  // used to set initial condition
+int i=0; // variable used for mesh reconstruction
+real error=0.1, coef=0.1^(1./5.);
+
+
+//--- Variational Form ----
+problem Problem1(u,v,solver=CG,init=i,eps=1.0e-8) =
+int2d(Th) ( x*dx(u)*dx(v) + x*dy(u)*dy(v) )
+  + int2d(Th) ( -v*x*f/thC )    // the source term = laser heating 
+  + on( 1,2,3,u=g ) ;             // fixed temperature at bottom and right surface.
+
+
+
+//*************
+//*** Solve ***
+//*************
+
+
+real cpu=clock();
+
+cout << "***USER*** " << "Begin solve/adapt iterations" << endl;
+
+for (i=0;i<10;i++)
+{
+  cout << "***USER*** " << "Iteration number: " << i << endl;
+  real d = clock();
+  Problem1;
+  plot(u,wait=1);
+  Th=adaptmesh(Th,u,inquire=1,err=error);
+  cout << " CPU = " << clock()-d << endl;
+
+  error = error * coef;
+  
+} ;
+
+plot(Th,wait=1,bb=[[0,0],[-10,-10]],nbiso=20,ps="adaptedmesh.eps"); // plot the last adapted mesh
+plot(u,wait=1,bb=[[0,0],[-10,-10]],nbiso=20,ps="temperature.eps"); // plot the solution
+
+
+//Plot a cut section at r=0
+real[int] xx(10),yy(10);
+for (i=0;i<10;i++)
+{
+  x=0.; y=i/10.; // this line is used by the next one 
+  xx[i]=i;
+  yy[i]=u; // value of u at point (0. , i/10.)
+}
+
+plot([xx,yy],ps="likegnu.eps",wait=true);
+
+
+cout << " CPU = " << clock()-cpu << endl;
