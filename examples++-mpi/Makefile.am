@@ -68,6 +68,7 @@ if FFCS_MPIOK
 # [[../../mkffref]]
 
 all-local:$(LIST_COMPILE)
+	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
 	echo "finish compile load mpi solver !"
 else
 all-local:
