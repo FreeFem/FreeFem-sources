@@ -48,3 +48,4 @@ clean: clean-local
 
 clean-local:
 	-rm -rf fftw-* FAIT FAIRE ../lib/WHERE.$(THIS)
+		../lib/libfftw3.a ../lib/libfftw3.la

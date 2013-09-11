@@ -42,27 +42,6 @@ VERSION=4.10.0
 
 WGET = wget --no-check-certificate
 
-$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
-	cp Makefile.inc $(SRCDIR)
-#
-#	ALH - 22/5/12 - Mumps has difficulties compiling d & z in parallel
-#
-	cd $(SRCDIR) && make d
-	cd $(SRCDIR) && make z
-	touch $@
-
-install.done: $(SRCDIR)/FAIT
-	-mkdir -p $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/libseq
-	cp $(SRCDIR)/libseq/*.h  $(SRCDIR)/$(INSTALL)/include/libseq
-	-mkdir -p $(SRCDIR)/$(INSTALL)/lib
-	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
-	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a $(SRCDIR)/$(INSTALL)/lib/
-	touch $@
-
-clean::
-	-rm *.done
-
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 
 ../lib/WHERE.mumpsseq: install.done
@@ -79,7 +58,7 @@ $(SRCDIR)/FAIT:Makefile.inc
 #
 	cd $(SRCDIR) && $(MAKE) d
 	cd $(SRCDIR) && $(MAKE) z
-	touch $(SRCDIR)/FAIT	
+	touch $@
 
 Makefile.inc: ../../config.status Makefile Makefile-mumps-$(VERSION).inc $(SRCDIR)/tag-tar
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
