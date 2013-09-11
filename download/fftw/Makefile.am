@@ -1,8 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-include cxxflags
-
 all:@FFTW@
 
 # Downloading and compiling FFTW
@@ -28,7 +26,8 @@ FAIT:
 	touch FAIT 
 
 FAIRE: $(SRCDIR) 
-	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/$(INSTALL) CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking --disable-fortran --prefix=`pwd`/$(INSTALL)	\
+	CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make install
 	touch FAIRE
 install:
@@ -49,12 +48,3 @@ clean: clean-local
 
 clean-local:
 	-rm -rf fftw-* FAIT FAIRE ../lib/WHERE.$(THIS)
-
-cxxflags: ../Makefile
-	grep 'CXX *=' ../Makefile >cxxflags
-	grep 'CC *=' ../Makefile >>cxxflags
-	grep 'CXXFLAGS *=' ../Makefile >>cxxflags
-	grep 'CFLAGS *=' ../Makefile >>cxxflags
-	grep 'WGET *=' ../Makefile >>cxxflags
-	grep 'WIN32DLLTARGET *=' ../Makefile >>cxxflags
-
