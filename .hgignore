@@ -270,6 +270,7 @@
 ^Makefile$
 ^Output$
 ^WindowsPackage\.iss$
+^\.htaccess$
 ^aclocal\.m4$
 ^autom4te\.cache$
 ^build-arch-stamp$
