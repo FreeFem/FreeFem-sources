@@ -329,6 +329,7 @@
 ^download/fftw/FAIT$
 ^download/fftw/cxxflags$
 ^download/fftw/fftw-
+^download/fftw/Makefile$
 ^download/fltk/Makefile$
 ^download/fltk/fltk-1\.1\..$
 ^download/fltk/fltk-1\.1\..-source\.tar\.bz2$

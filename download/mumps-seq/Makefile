@@ -51,6 +51,15 @@ WGET = wget --no-check-certificate
 	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
 	echo libseq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
 
+install.done: $(SRCDIR)/FAIT
+	-mkdir -p ../include/libseq
+	cp $(SRCDIR)/include/*.h ../include/libseq
+	cp $(SRCDIR)/libseq/*.h  ../include/libseq
+	-mkdir -p ../lib
+	cp $(SRCDIR)/lib/*.a ../lib/
+	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/
+	touch $@
+
 $(SRCDIR)/FAIT:Makefile.inc
 	cp Makefile.inc $(SRCDIR)
 #
