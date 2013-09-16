@@ -19,8 +19,21 @@ dnl : ${FFLAGS=""}
 
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
+
 # Automake 1.11 is too old for check ... 
-AM_INIT_AUTOMAKE(1.13 dist-zip)
+
+# ALH - 10/9/13 - FFCS needs to skip this automake version requirement when compiling on older platforms (eg cygwin or
+# last Ubuntu LTS). So we fix a low hardcoded requirement and test for higher versions when not in FFCS.
+
+AM_INIT_AUTOMAKE(1.11 dist-zip)
+
+if test "$enable_ffcs" != yes
+then
+    if test `echo $am__api_version|awk '{if($1>1.13)print "ok";}'` != ok
+    then
+	AC_MSG_ERROR([Automake version needs to be 1.13 or later to enable "make check"])
+    fi
+fi
 
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_MAKE_SET

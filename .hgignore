@@ -274,6 +274,7 @@
 ^Makefile$
 ^Output$
 ^WindowsPackage\.iss$
+^\.htaccess$
 ^aclocal\.m4$
 ^autom4te\.cache$
 ^build-arch-stamp$
@@ -328,6 +329,7 @@
 ^download/fftw/FAIT$
 ^download/fftw/cxxflags$
 ^download/fftw/fftw-
+^download/fftw/Makefile$
 ^download/fltk/Makefile$
 ^download/fltk/fltk-1\.1\..$
 ^download/fltk/fltk-1\.1\..-source\.tar\.bz2$
