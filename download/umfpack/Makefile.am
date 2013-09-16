@@ -39,7 +39,7 @@ cholmod:
 
 $(SUITESPARSECONFIGLIB): SuiteSparse/FF 
 	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS=
-	mkdir ../include ../lib
+	mkdir -p ../include ../lib
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/SuiteSparse_config/libsuitesparseconfig.a ../lib/libsuitesparseconfig.a
 	$(RANLIB) ../lib/libsuitesparseconfig.a
