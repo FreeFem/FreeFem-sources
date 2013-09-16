@@ -639,18 +639,21 @@ fi
 fi
 AC_SUBST(LIBSPTHREAD,$ff_pthread)
 
-if test "$ff_glut_ok" = yes
+# ALH - 16/9/13 - at the moment the requirements for medit (glut) are not compatible with FFCS so medit is
+# only compiled with FF.
+
+if test $enable_ffcs = no
 then
-    AC_SUBST(LIBSGLUT,$ff_glut)
-    if test -n  "$ff_pthread" ; then 
-	ff_ffglutprog="ffglut${EXEEXT}"
-	AC_DEFINE_UNQUOTED(PROG_FFGLUT,"$ff_ffglutprog", the ffglut application for the new graphics )
+    if test "$ff_glut_ok" = yes
+    then
+	AC_SUBST(LIBSGLUT,$ff_glut)
+	if test -n  "$ff_pthread" ; then 
+	    ff_ffglutprog="ffglut${EXEEXT}"
+	    AC_DEFINE_UNQUOTED(PROG_FFGLUT,"$ff_ffglutprog", the ffglut application for the new graphics )
+	fi
+	ff_meditprog="ffmedit${EXEEXT}"
     fi
-    ff_meditprog="ffmedit${EXEEXT}"
 fi
-# echo "  .... LIBS = $LIBS .... " 
-
-
 
 AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix package name)])
 if test "$with_suffix" = yes
