@@ -13,7 +13,11 @@
 //  cblas_ddot macos-9 is not 
 #ifdef HAVE_CBLAS_H
 extern "C" {
-#include <cblas.h> 
+#define FF_VERSION VERSION
+#undef VERSION
+#include <cblas.h>
+#undef VERSION   
+#define VERSION VERSION    
 }
 #define WITHBLAS 1
 #elif HAVE_VECLIB_CBLAS_H
@@ -56,18 +60,25 @@ template<> inline double blas_sdot( int n,  double *sx, int incx, double *sy, in
 {
     return cblas_ddot(n,sx,incx,sy,incy);
 }
+
+#ifdef OPENBLAS_CONFIG_H
+typedef  openblas_complex_double *BLAS_ptr_complex16;
+#else
+typedef void *BLAS_ptr_complex16;
+
+#endif
 template<> inline  complex<double> blas_sdot( int n,  complex<double> *sx, int incx, complex<double> *sy, int  incy)
 {
     complex<double> s;
-    cblas_zdotu_sub(n,( void *)sx,incx,( void *)sy,incy,( void *)&s);
+    cblas_zdotu_sub(n,( double *)sx,incx,( double *)sy,incy,(BLAS_ptr_complex16)&s);
     return s;
 }
-template<> inline  complex<float> blas_sdot( int n,  complex<float> *sx, int incx, complex<float> *sy, int  incy)
-{
-    complex<float> s;
-    cblas_zdotu_sub(n,( void *)sx,incx,( void *)sy,incy,( void *)&s);
-    return s;
-}
+//template<> inline  complex<float> blas_sdot( int n,  complex<float> *sx, int incx, complex<float> *sy, int  incy)
+//{
+//    complex<float> s;
+//    cblas_cdotu_sub(n,( void *)sx,incx,( void *)sy,incy,(BLAS_ptr_complex8)&s);
+//    return s;
+//}
 
 #endif
 //  end modif FH
