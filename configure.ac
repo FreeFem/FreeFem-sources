@@ -290,18 +290,12 @@ then
     test -f /mingw/bin/libpthread-2.dll && ff_pthread_dll=/mingw/bin/libpthread-2.dll ; \
     AC_FF_ADDWHERELIB(f77,$FLIBS,$ff_cfagsf77 $ff_pthread_dll)
     AC_FF_ADDWHERELIB(fc,$FLIBS,$ff_cfagsf77 $ff_pthread_dll)
-
-dnl    [echo f77 LD  $FLIBS  >>$ff_where_lib_conf]
-dnl    [echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
-#  bof bof -- FH ...
-dnl    [echo fc LD  $FLIBS  >>$ff_where_lib_conf]
-dnl    [echo fc INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
-
-# AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
+
 #  fin test FORTRAN ..........
-# -----------------------------
-AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
+# ----------------------------
+
+AC_ARG_ENABLE(c,AC_HELP_STRING([--disable-c],[No C compiler available (C BLAS need it)]))
 if test "$enable_c" != no
 then
     AC_PROG_CC
@@ -869,6 +863,7 @@ fi
 
 # Looking for the BLAS
 # --------------------
+
 ff_blas_ok=no
 ff_blas_inc=""
 # User-specified location
@@ -949,13 +944,6 @@ dnl  scalapack, and blacs don not work with mlk and sgi
      fi
      AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
      AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
-
-dnl	echo scalapack  LD  \'$ff_mkl_scalapack\'  >>$ff_where_lib_conf
-dnl	echo blacs  LD  \'$ff_mkl_blacs\'  >>$ff_where_lib_conf
-dnl	echo lapack  LD  \'$ff_mkl_lapack\'  >>$ff_where_lib_conf
-dnl	echo scalapack  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf
-dnl	echo blacs  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf
-dnl	echo lapack INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf
     else
 	ff_mkl_libpath=no
 
@@ -968,11 +956,9 @@ fi
 AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
 
 AC_ARG_WITH(blas,
-    [  --with-blas=library	Use a specific version of the Blas],
-	ff_blas_ok=yes
-	ff_blas_libs="${withval}")
-
-
+    AC_HELP_STRING([--with-blas=library],[Use a specific version of the Blas]),
+    ff_blas_ok=yes
+    ff_blas_libs="${withval}")
 
 # Specific BLAS library location for FreeBSD
 ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
@@ -980,28 +966,22 @@ ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
 # Trying  blas library
 # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
 for iblas in \
-     "-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+    "-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
     $ff_freebsd_blas
 do
-#
-#"-L${curdir}/download/blas -lcblas -lf77blas" \
-#"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \
-#"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
-#
-if test "$ff_blas_ok" = no;
-then
+    if test "$ff_blas_ok" = no;
+    then
         AC_MSG_CHECKING(for daxpy_ in $iblas)
         ff_save_libs="$LIBS"
         LIBS="$LIBS $iblas"
         AC_LINK_IFELSE(
-                [AC_LANG_CALL(,daxpy_)],
-                ff_blas_ok=yes
-		ff_blas_libs="$iblas",)
-                LIBS="$ff_save_libs"
+            [AC_LANG_CALL(,daxpy_)],
+            ff_blas_ok=yes
+	    ff_blas_libs="$iblas",)
+        LIBS="$ff_save_libs"
         AC_MSG_RESULT($ff_blas_ok)
-fi
+    fi
 done
-
 
 #cblas_zdotu_sub
 #echo "LIBS = " $LIBS
@@ -1017,7 +997,7 @@ then
     AC_MSG_RESULT($ff_cblas_libs)
     LIBS="$ff_save_libs"
 fi
-#echo "LIBS = " $LIBS
+
 # If all else fails, download!
 
 if test "$ff_blas_ok" = no -a "$enable_download" = yes \
@@ -1027,58 +1007,28 @@ then
 
     AC_MSG_CHECKING(for BLAS version to download)
 
-	# Do not update $LIBS, but create an extra LIB variable,
-	# because this lib does not exist yet, and this could make the
-	# following tests fail.
+    # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
+    # the following tests fail.
 
-	# When compiling a generic version, we do not need an
-	# optimized version of the BLAS.
+    # When compiling a generic version, we do not need an optimized version of the BLAS.
 
-#   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
-    if true
-    then
-	ff_download_blas=generic
-	ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
-	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+    # supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
 
-	AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
-	AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
-    else
-		# There are precompiled versions for Windows. We cannot
-		# distinguish the different versions easily so we just
-		# download the most generic one. A more specific version can
-		# always be downloaded by hand.
+    ff_download_blas=generic
+    ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
+    ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
-		# BUG: at the moment, some necessary symbols are missing from
-		# the precompiled version (e.g. _dgemm_).
-
-###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
-	if false
-	then
-	    ff_download_blas=atlas-binary
-	    ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
-	    ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
-	    ff_lapack_ok=ok
-	else
-
-            # ALH - FFCS - 23/12/8 - ATLAS compilation does not work anymore on Linux
-	    AC_MSG_ERROR(No BLAS library found - please install one or install Lapack)
-
-	    ff_download_blas=atlas-source
-	    ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
-	    ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
-	    ff_lapack_ok=ok
-	fi
-    fi
+    AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
+    AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
 
     AC_MSG_RESULT($ff_download_blas)
-    AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
     ff_blas_ok=yes
     ff_cblas_h=yes
     ff_cblas_libs=yes
 fi
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
+
 #looking for cblas.h  FH
 
 if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
@@ -1092,7 +1042,6 @@ then
     AC_CHECK_HEADERS(atlas/cblas.h,
 	ff_cblas_h=yes
 	ff_cblas_h=no)
-
 fi
 
 
@@ -1582,14 +1531,6 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
 
-# ALH - 31/7/13 - hypre was deactivated some time ago (around 01/2012 according to Mercurial records), so keep it not
-# compiled by default, but allow it to be compiled on user request (requested on the FF mailing list)
-
-if test -z "$enable_hypre"
-then
-    $enable_hypre=no
-fi
-
 # ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
 # may also find interesting to specify a local version of a tool instead of downloading it.
 
@@ -1635,7 +1576,6 @@ m4_define([TOOL_DISABLE],
 
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
-TOOL_DISABLE(hypre,hypre_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
