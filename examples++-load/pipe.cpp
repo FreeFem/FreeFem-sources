@@ -7,8 +7,16 @@
 //#include "pstream.h"
 
 typedef __gnu_cxx::stdio_filebuf<char> stdiofilebuf;
+#ifdef WIN32
+#include <Windows.h>
+
+
+long ffsleep(long  s) { Sleep(s*1000);return 0;}
+long ffusleep(long  s) {  Sleep(s/1000);return 0;}
+#else
 long ffsleep(long  s) { return sleep(s);}
 long ffusleep(long  s) { return usleep(s);}
+#endif
 struct pstream {
     FILE * f; 
     stdiofilebuf * fb;
