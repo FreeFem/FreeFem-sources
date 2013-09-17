@@ -7,7 +7,10 @@
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
 17/9/2013 ALH
- - configuration option --enable-generic-blas has no effect, removed
+ - umfpack configuration cleanup (request from Fred)
+ - blas configuration cleanup (request from Cico)
+   - configuration option --enable-generic-blas has no effect, removed
+   - Atlas compilation directives have no effect, removed
 10/9/2013 (ALH)
  - Corrected pastix compilation for FFCS on MacOS 10.6
  - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
