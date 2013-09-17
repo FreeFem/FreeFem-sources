@@ -39,7 +39,7 @@ install.done:compile.done
 #
 #	FFCS - 23/5/12 - cannot keep name libmetis.a because it is identical to the library created by
 #	[[file:../metis/Makefile]] and library path mechanisms at link time pick one for the other on MinGW.
-	mv $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a $(SRCDIR)/$(INSTALL)/lib/libmetispar.a
+	mv $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetispar.a
 #
 	-cd $(SRCDIR)/Programs && make 
 	touch $@
