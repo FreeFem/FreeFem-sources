@@ -40,10 +40,6 @@ AC_PROG_MAKE_SET
 dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
 
-# FFCS - parallel make options (see [[file:../../configure/ac::FFCS_MAKEFLAGS]])
-
-AC_SUBST(FFCS_MAKEFLAGS,$FFCS_MAKEFLAGS)
-
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 dnl search of associad software 
 m4_define([AC_FF_ADDWHERELIB],
@@ -755,10 +751,7 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 # Looking for useful configuration utilities
 # ------------------------------------------
 
-#getting utility software archives through the internet
-AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Downloadc generic blas (implie --enable-download)])
-
-AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)])
+AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"
@@ -775,12 +768,6 @@ AC_ARG_WITH(mkl,
 	[  --with-mkl= the  MKL LIBPATH : (ie. /opt/intel/mkl/RR.r.y.xxx/lib/<arch>)],
 	   ff_mkl_libpath="${withval}")
 
-
-if test "$enable_generic_blas" = yes
-then
-	enable_download=yes
-fi
-#  echo " ----------- $enable_download --"
 # if enabling downloads find wget or curl to do download 
 # ------------------------------------------------------
 
@@ -1046,7 +1033,6 @@ then
 	# When compiling a generic version, we do not need an
 	# optimized version of the BLAS.
     
-#	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
 #   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
     if true 
     then
@@ -1114,7 +1100,6 @@ fi
 if test "$ff_blas_ok" = yes && test "$ff_download_blas" = ""
 then
     AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
-    dnl    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
 fi
 
 # end of BLAS -------------------
@@ -1289,84 +1274,81 @@ AC_SUBST([EIGENOBJ])
 # Looking for UMFPACK
 # -------------------
 
+if test "$ff_blas_ok" = yes;
+then
+	LIBS="$ff_blas_libs $LIBS"
+fi
+
 ff_amd_ok=no
 ff_umfpack_ok=no
 ff_save_libs="$LIBS"
 if test "$ff_blas_ok" = yes;
 then
-        # User-specified location
-        AC_ARG_WITH(amd,
-                [  --with-amd=library	Use a specific version of AMD],
-                ff_amd_ok=yes
-		ff_umfpack_libs="${withval}")
 
-        AC_ARG_WITH(umfpack,
-                [  --with-umfpack=library	Use a specific version of Umfpack],
-                ff_umfpack_ok=yes
-                ff_umfpack_libs="${withval} $ff_umfpack_libs"
-               )
-#		AC_DEFINE(HAVE_LIBUMFPACK,1,
-#			Umfpack is used for sparse matrices computations))
+    # User-specified location
 
-	# Trying default locations
+    AC_ARG_WITH(amd,
+	AC_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
+        ff_amd_ok=yes
+	ff_umfpack_libs="${withval}")
 
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
+    AC_ARG_WITH(umfpack,
+        AC_HELP_STRING([--with-umfpack=library],[Use a specific version of Umfpack]),
+        ff_umfpack_ok=yes
+        ff_umfpack_libs="${withval} $ff_umfpack_libs")
+
+    # Trying default locations for the headers
+    
+    AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
+	ff_umfpack_header=yes
+	ff_umfpack_dir=`dirname $ac_header`)
+
+    # Somes systems like FreeBSD hide umfpack.h in a directory called UMFPACK (all capitals). This breaks the
+    # standard #define produced by autoconf in config.h.in.
+
+    if test "$ff_umfpack_header" != yes;
+    then
+	AC_CHECK_HEADER(UMFPACK/umfpack.h,
 	    ff_umfpack_header=yes
-	    ff_umfpack_dir=`dirname $ac_header`)
+	    ff_umfpack_dir=UMFPACK
+	    AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir))
+    fi
 
-	# Somes systems like FreeBSD hide umfpack.h in a directory
-	# called UMFPACK (all capitals). This breaks the standard
-	# #define produced by autoconf in config.h.in.
+    if test "$ff_amd_ok" = no;
+    then
+	AC_CHECK_LIB(amd,amd_info,
+	    ff_umfpack_libs="$ff_umfpack_libs -lamd"
+	    ff_amd_ok=yes)
+    fi
 
-	if test "$ff_umfpack_header" != yes;
-	then
-		AC_CHECK_HEADER(UMFPACK/umfpack.h,
-			ff_umfpack_header=yes
-			ff_umfpack_dir=UMFPACK
-			AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,
-				If umfpack.h is located in UMFPACK subdir))
-	fi
-	LIBS="$ff_blas_libs $LIBS"
-	if test "$ff_amd_ok" = no;
-	then
-		AC_CHECK_LIB(amd,amd_info,
-			ff_umfpack_libs="$ff_umfpack_libs -lamd"
-			ff_amd_ok=yes)
-	fi
+    if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
+    then        
+	AC_CHECK_LIB(umfpack,umf_i_malloc,
+	    ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
+	    ff_umfpack_ok=yes,,$ff_umfpack_libs)
+    fi	
 
-	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
-	then        
-		AC_CHECK_LIB(umfpack,umf_i_malloc,
-			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
-			ff_umfpack_ok=yes,,$ff_umfpack_libs)
-		if test "$ff_umfpack_ok" != yes -o "$ff_umfpack_header" != yes ; then
-			AC_MSG_WARN([		Sorry we find UMFPACK lib but not the include umfpack.h file])
-		fi
-	fi	
-        if  test	 "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no; then
-            ff_umfpack_ok=no
-         fi
-	 if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
-		AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )			
-	 fi
+    if test "$ff_umfpack_header" != yes -o "$ff_umfpack_ok" != yes; then
+        ff_umfpack_ok=no
+	AC_MSG_WARN([Sorry, we could not find the UMFPACK lib or the UMFPACK headers])
+    fi
+
+    if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
+	AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )			
+    fi
 fi
 
 # FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
 # -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
 
-#if test $enable_ffcs = yes
-#then
+if test $enable_ffcs = no
+then
     if test "$ff_umfpack_ok" = yes 
     then
 	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
 	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
-
-	dnl      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-	dnl      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
-	dnl      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
-	dnl       echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
     fi   
-#fi
+fi
 
 LIBS="$ff_save_libs"
 
@@ -1988,10 +1970,10 @@ dnl	AC_MSG_NOTICE([      Use of precompile version : download/pkg/$ff_mmg3dlib  
 dnl    else
 dnl	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
 dnl    fi	
-fi  # ---  test "$enable_download" = yes  ;then
+fi
 
 
-# FFCS: remove this message because it could make the user think that something is broken
+# FFCS does not use glut, so remove this message because it could make the user think that something is broken
 if test $enable_ffcs = no
 then
     if test "$ff_glut_ok" != yes  ; then
