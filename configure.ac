@@ -1077,13 +1077,10 @@ then
 	ff_cblas_h=no)
 fi
 
+# ALH - 18/9/13 - [[file:download/blas/Makefile.am]] does not update the WHERE mechanism so it always needs to be set up
+# here even in the case of a downloaded blas library.
 
-# FFCS: do not specify the default BLAS LDADD if a specific one will be built in the download directory
-
-if test "$ff_blas_ok" = yes && test "$ff_download_blas" = ""
-then
-    AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
-fi
+AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
 
 # end of BLAS -------------------
 
