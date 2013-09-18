@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+# ======================================================================
+# Written by Antoine Le Hyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# http://www.ljll.math.upmc.fr/lehyaric
+# ======================================================================
+# This file is part of Freefem++
+#
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# Freefem++  is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+# 02110-1301 USA
+# ======================================================================
+# headeralh freefem perl start=7/10/10 upmc
+
+use strict;
+
+# if a file is a soft link, just convert it into a real file. I know this is dangerous if the file the link points to
+# changes, but I don't have many choices to make the MinGW compilers work (they do not understand Cygwin softlinks).
+
+traverse(<*>);
+
+sub traverse{
+  foreach my $arg(@_){
+
+    # 4/12/10: under cygwin, "find" seems to have random problems (the file system lags behind when doing many file
+    # moves in quick succession?), so just replace it with a local recursive subroutine.
+
+    if(-d $arg){
+      print "links2files: traversing $arg...\n";
+      traverse(<$arg/*>);
+      next;
+    }
+
+    # do not use readlink -f because it does not exist on Mac. Result is in $org
+    my $org;
+    my $nextorg=$arg;
+    do{
+      $org=$nextorg;
+      $nextorg=`readlink $org`;
+    }while($nextorg ne '');
+
+    if(-l $arg){
+      chomp $org;
+      if(-e $org){
+	print "links2files: $arg -> $org\n";
+	unlink $arg;
+	system "cp $org $arg";
+
+	# sometimes on Cygwin the resulting file is of size zero and not readable by anyone? And then if we try again it
+	# works fine!
+	die "$arg is of size 0" unless -s $arg;
+      }
+    }
+  }
+}
+
+# Local Variables:
+# mode:cperl
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

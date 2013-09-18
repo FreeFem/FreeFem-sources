@@ -25,11 +25,10 @@ DIRPKG=../pkg
 BLAS_TGZ=$(DIRPKG)/blas.tgz
 CBLAS_TGZ=$(DIRPKG)/cblas.tgz
 
-# Downloading and compiling the Blas
-# ----------------------------------
+# Downloading and compiling the Generic Blas
+# ------------------------------------------
 
-# Generic BLAS
-noinst_LIBRARIES=@GENERIC_BLAS@
+noinst_LIBRARIES=@DOWNLOADED_BLAS@
 EXTRA_LIBRARIES=libf77blas.a libcblas.a
 
 # List of files to compile (do not list them in *_SOURCES to prevent them from being included in distributions).
@@ -90,7 +89,7 @@ CBLAS/src/zdotcsub.f CBLAS/src/cblas_dnrm2.c CBLAS/src/cblas_sgbmv.c CBLAS/src/c
 
 nodist_libf77blas_a_SOURCES=$(F77BLAS_SOURCES)
 nodist_libcblas_a_SOURCES=$(CBLAS_SOURCES)
-BUILT_SOURCES=@GENERIC_BLAS_BUILT_SOURCES@
+BUILT_SOURCES=@DOWNLOADED_BLAS_BUILT_SOURCES@
 
 # -ICBLAS/include to find cblas.h
 libcblas_a_CFLAGS=-DADD_ -ICBLAS/include
@@ -126,6 +125,49 @@ $(CBLAS_TGZ):
 
 clean-local::
 	-rm -r BLAS CBLAS blas_xerbla.f
+
+# ALH - 18/9/13 - Downloading and building the OpenBLAS
+# -----------------------------------------------------
+
+all-local::@COMPILE_OPENBLAS@
+generic:
+openblas:links.done
+
+# links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
+if FFCS_WINDOWS
+links.done:openblas.done
+	cd OpenBLAS && ../../build/links2files
+	touch $@
+else
+links.done:openblas.done
+	touch $@
+endif
+
+openblas.done:openpatches.done
+#
+# DYNAMIC_ARCH=1 allows the Openblas to run fast on all the processor architectures that the FFCS users may have
+#
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
+#
+# RANLIB is required on Win64 to avoid "archive has no index" error when linking FreeFem+.exe
+#
+	$(RANLIB) OpenBLAS/libopenblas.lib
+	touch $@
+
+# The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
+# date
+openpatches.done:opendownload.done
+	patch -u -p1 < openblas.patches
+	touch $@
+opendownload.done:
+	git clone https://github.com/xianyi/OpenBLAS.git
+	touch $@
+
+# Since some libraries (VTK, FLTK, Openblas) are quite long to compile and they do not change very often (we don't
+# usually change them in FFCS), they are only cleaned with specific target 'allclean'.
+
+allclean::
+	-rm -r *.done OpenBLAS
 
 # Local Variables:
 # mode:makefile
