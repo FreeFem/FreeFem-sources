@@ -834,10 +834,18 @@ fi
 # Looking for FFTW
 # ----------------
 
-# ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
+# ALH - 18/9/13 - deactivates FFTW detection for testing purposes
 
-AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
-AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
+AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
+if test "$enable_system_fftw" != no
+then
+
+    # ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
+
+    AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
+    AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
+fi
+
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
     AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
@@ -912,13 +920,13 @@ then
 		*ifort*) ff_mkl_cc=intel;;
 		*) ff_mkl_cc=gf;;
             esac
-#   bof bof ....
+            # bof bof ....
 	    case "$MPIRUN" in
 		*/sgi/*)         ff_mkl_mpi=_sgimpt;;
 		*/intel/*)         ff_mkl_mpi=_intelmpi;;
 		*)        ff_mkl_mpi=_openmpi;;
 	    esac
-#	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
+            # echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
 	    if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
 		mkl_blas=rt
 		mkk_lapack=rt
@@ -1009,7 +1017,7 @@ fi
 # ALH - 18/9/13 - option to compile the OpenBLAS moved from the FFCS tree to FF tree
 
 AC_ARG_ENABLE(openblas,AC_HELP_STRING([--disable-openblas],[Disable the automatic download of OpenBLAS]))
-if test "$enable_openblas" != no && test "$enable_download" = yes
+if  test "$ff_blas_ok" = no && test "$enable_openblas" != no && test "$enable_download" = yes
 then
     AC_CHECK_PROG(ff_git,git,yes,no)
     AC_MSG_CHECKING([Activating the OpenBLAS (deactivate with --disable-openblas)])
