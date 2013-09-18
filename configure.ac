@@ -866,142 +866,176 @@ fi
 
 ff_blas_ok=no
 ff_blas_inc=""
-# User-specified location
-# add MKL  seach dec 2010  FH ....
 
-ff_mkl_flags=""
-if test "$ff_mkl_libpath" != "not" ; then
-   ff_CFLAGS="$CFLAGS"
-   CHECK_COMPILE_FLAG(C,-mkl,CFLAGS)
-   if test  "$ff_CFLAGS" != "$CFLAGS" ; then
-     ff_ff_mkl_flags="-mkl"
-   fi
-   CFLAGS="$ff_CFLAGS"
-fi
+# ALH - 18/9/13 - give the option to deactivate system blas for testing purposes
+AC_ARG_ENABLE(system-blas,AC_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
 
-AC_MSG_CHECKING(for MKL )
-ff_mkl_root=""
-if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
-    if test "$ff_mkl_libpath"  = "yes"  ; then
-	ff_IFS="$IFS"
-	IFS=":"
-	for i in $LD_LIBRARY_PATH:$LIBRARY_PATH ; do
-            case $i in
-		*/mkl/*) ff_mkl_libpath=$i;;
-	    esac ;
-	done;
-      IFS="$ff_IFS"
-    else
-	ff_mkl_libpath=no
+if test "$enable_system_blas" != no
+then
+
+    # User-specified location
+    # add MKL  seach dec 2010  FH ....
+
+    ff_mkl_flags=""
+    if test "$ff_mkl_libpath" != "not" ; then
+	ff_CFLAGS="$CFLAGS"
+	CHECK_COMPILE_FLAG(C,-mkl,CFLAGS)
+	if test  "$ff_CFLAGS" != "$CFLAGS" ; then
+	    ff_ff_mkl_flags="-mkl"
+	fi
+	CFLAGS="$ff_CFLAGS"
     fi
-    if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
-	ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
-	ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
-        ff_mkl_lp=
-        case "$ff_mkl_arch" in
-            *64*)  ff_mkl_lp=_lp64
-	esac
-        case $F77 in
-            *ifort*) ff_mkl_cc=intel;;
-            *) ff_mkl_cc=gf;;
-        esac
+
+    AC_MSG_CHECKING(for MKL)
+    ff_mkl_root=""
+    if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
+	if test "$ff_mkl_libpath"  = "yes"  ; then
+	    ff_IFS="$IFS"
+	    IFS=":"
+	    for i in $LD_LIBRARY_PATH:$LIBRARY_PATH ; do
+		case $i in
+		    */mkl/*) ff_mkl_libpath=$i;;
+		esac ;
+	    done;
+	    IFS="$ff_IFS"
+	else
+	    ff_mkl_libpath=no
+	fi
+	if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
+	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
+	    ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
+            ff_mkl_lp=
+            case "$ff_mkl_arch" in
+		*64*)  ff_mkl_lp=_lp64
+	    esac
+            case $F77 in
+		*ifort*) ff_mkl_cc=intel;;
+		*) ff_mkl_cc=gf;;
+            esac
 #   bof bof ....
-	case "$MPIRUN" in
-	*/sgi/*)         ff_mkl_mpi=_sgimpt;;
-	*/intel/*)         ff_mkl_mpi=_intelmpi;;
-	*)        ff_mkl_mpi=_openmpi;;
-	esac
+	    case "$MPIRUN" in
+		*/sgi/*)         ff_mkl_mpi=_sgimpt;;
+		*/intel/*)         ff_mkl_mpi=_intelmpi;;
+		*)        ff_mkl_mpi=_openmpi;;
+	    esac
 #	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
-	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
-	  mkl_blas=rt
-	  mkk_lapack=rt
-          ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
-          ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
-          ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core -liomp5 -lpthread"
+	    if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
+		mkl_blas=rt
+		mkk_lapack=rt
+		ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
+		ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
+		ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core -liomp5 -lpthread"
+	    else
+		if test -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_lapack.a ; then
+		    ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
+		    ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+		    ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+		else
+		    ff_mkl_mlt="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  -Wl,--end-group  -lm -lpthread"
+		    ff_mkl_blas="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,--end-group  -lm -lpthread"
+		    ff_mkl_lapack="$ff_mkl_blas"
+		fi
+	    fi
+            ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
+            ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+	    ff_blas_ok=yes
+	    ff_lapack_ok=yes
+	    ff_blas_libs="$ff_mkl_blas"
+	    ff_blas_inc="-I$ff_mkl_root/include"
+	    dnl  scalapack, and blacs don not work with mlk and sgi
+	    if test "$ff_mkl_mpi" != "_sgimpt" ; then
+		AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
+		AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
+	    else
+		ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  "
+	    fi
+	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
+	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
 	else
-	if test -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_lapack.a ; then
-	  ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
-	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
-	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
-	else
-	  ff_mkl_mlt="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  -Wl,--end-group  -lm -lpthread"
-	  ff_mkl_blas="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,--end-group  -lm -lpthread"
-	  ff_mkl_lapack="$ff_mkl_blas"
-	fi
-	fi
-        ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
-        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
-	ff_blas_ok=yes
-	ff_lapack_ok=yes
-	ff_blas_libs="$ff_mkl_blas"
-	ff_blas_inc="-I$ff_mkl_root/include"
-dnl  scalapack, and blacs don not work with mlk and sgi
-     if test "$ff_mkl_mpi" != "_sgimpt" ; then
-        AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
-        AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
-     else
-       ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  "
-     fi
-     AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
-     AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
-    else
-	ff_mkl_libpath=no
+	    ff_mkl_libpath=no
 
 	# FH - pardiso is there as soon as mkl is
-        enable_pardiso=no
+            enable_pardiso=no
+	fi
     fi
-fi
 
 
-AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
+    AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
 
-AC_ARG_WITH(blas,
-    AC_HELP_STRING([--with-blas=library],[Use a specific version of the Blas]),
-    ff_blas_ok=yes
-    ff_blas_libs="${withval}")
+    AC_ARG_WITH(blas,
+	AC_HELP_STRING([--with-blas=library],[Use a specific version of the Blas]),
+	ff_blas_ok=yes
+	ff_blas_libs="${withval}")
 
-# Specific BLAS library location for FreeBSD
-ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
-#  zmach is in lapack
-# Trying  blas library
-# echo "LIBS =  $LIBS blas --- $ff_blas_ok"
-for iblas in \
-    "-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
-    $ff_freebsd_blas
-do
-    if test "$ff_blas_ok" = no;
+    # Specific BLAS library location for FreeBSD
+    ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
+    #  zmach is in lapack
+    # Trying  blas library
+    # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
+    for iblas in \
+	"-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+	$ff_freebsd_blas
+    do
+	if test "$ff_blas_ok" = no;
+	then
+            AC_MSG_CHECKING(for daxpy_ in $iblas)
+            ff_save_libs="$LIBS"
+            LIBS="$LIBS $iblas"
+            AC_LINK_IFELSE(
+		[AC_LANG_CALL(,daxpy_)],
+		ff_blas_ok=yes
+		ff_blas_libs="$iblas",)
+            LIBS="$ff_save_libs"
+            AC_MSG_RESULT($ff_blas_ok)
+	fi
+    done
+
+    #cblas_zdotu_sub
+    #echo "LIBS = " $LIBS
+    ff_cblas_libs=no
+    if test "$ff_blas_ok" = yes
     then
-        AC_MSG_CHECKING(for daxpy_ in $iblas)
-        ff_save_libs="$LIBS"
-        LIBS="$LIBS $iblas"
-        AC_LINK_IFELSE(
-            [AC_LANG_CALL(,daxpy_)],
-            ff_blas_ok=yes
-	    ff_blas_libs="$iblas",)
-        LIBS="$ff_save_libs"
-        AC_MSG_RESULT($ff_blas_ok)
+	AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
+	ff_save_libs="$LIBS"
+	LIBS="$LIBS $ff_blas_libs $FLIBS"
+	AC_LINK_IFELSE(
+            [AC_LANG_CALL(,cblas_zdotu_sub)],
+            ff_cblas_libs=yes)
+	AC_MSG_RESULT($ff_cblas_libs)
+	LIBS="$ff_save_libs"
     fi
-done
-
-#cblas_zdotu_sub
-#echo "LIBS = " $LIBS
-ff_cblas_libs=no
-if test "$ff_blas_ok" = yes
-then
-    AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
-    ff_save_libs="$LIBS"
-    LIBS="$LIBS $ff_blas_libs $FLIBS"
-    AC_LINK_IFELSE(
-        [AC_LANG_CALL(,cblas_zdotu_sub)],
-        ff_cblas_libs=yes)
-    AC_MSG_RESULT($ff_cblas_libs)
-    LIBS="$ff_save_libs"
 fi
 
-# If all else fails, download!
+# ALH - 18/9/13 - option to compile the OpenBLAS moved from the FFCS tree to FF tree
 
-if test "$ff_blas_ok" = no -a "$enable_download" = yes \
-    -a "$enable_fortran" != no -a "$enable_c" != no
+AC_ARG_ENABLE(openblas,AC_HELP_STRING([--disable-openblas],[Disable the automatic download of OpenBLAS]))
+if test "$enable_openblas" != no && test "$enable_download" = yes
+then
+    AC_CHECK_PROG(ff_git,git,yes,no)
+    AC_MSG_CHECKING([Activating the OpenBLAS (deactivate with --disable-openblas)])
+    if test $ff_git = no
+    then
+	AC_MSG_RESULT([git not found])
+    else
+	ff_download_blas=openblas
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas"
+	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+
+        # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
+	AC_SUBST(DOWNLOADED_BLAS,"")
+	AC_SUBST(COMPILE_OPENBLAS,openblas)
+
+	ff_blas_ok=yes
+	ff_cblas_h=yes
+	ff_cblas_libs=yes
+
+	AC_MSG_RESULT([ok])
+    fi
+fi
+
+# If all else fails, download a generic version
+
+if test "$ff_blas_ok" = no -a "$enable_download" = yes -a "$enable_fortran" != no -a "$enable_c" != no
 then
     AC_CHECK_PROG(ff_unzip,unzip,yes,no)
 
@@ -1012,20 +1046,19 @@ then
 
     # When compiling a generic version, we do not need an optimized version of the BLAS.
 
-    # supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
-
     ff_download_blas=generic
     ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
     ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
-    AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
-    AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
+    AC_SUBST(DOWNLOADED_BLAS,"libf77blas.a libcblas.a")
+    AC_SUBST(DOWNLOADED_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
 
     AC_MSG_RESULT($ff_download_blas)
     ff_blas_ok=yes
     ff_cblas_h=yes
     ff_cblas_libs=yes
 fi
+
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
 
@@ -1053,7 +1086,6 @@ then
 fi
 
 # end of BLAS -------------------
-
 
 # Looking for ARPACK
 # ------------------
