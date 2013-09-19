@@ -40,10 +40,10 @@ ARFLAGS	= @ARFLAGS@ #cr
 
 # ALH - add no-range-check for Windows (hexadecimal parameter constants like
 # [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
-# are rejected without this
+# are rejected without this. See [[file:../../configure.ac::NO_RANGE_CHECK]]
 
- FFLAGS	= $(DBG)  $(DARCH)  @FFLAGS@ -fno-range-check
-#
+ FFLAGS	= $(DBG)  $(DARCH)  @FFLAGS@ @NO_RANGE_CHECK@
+
 # the directory of MPI library. for example -L/usr/local/mpich/lib
  LFLAGS_MPI 	= $(FFMPIINCLUDE) 
 # the mpi library

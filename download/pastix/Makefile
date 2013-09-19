@@ -103,7 +103,9 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/double
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/double/
 	cd $(SRCDIR)/src/ &&  $(MAKE) clean 
-	#complex version
+#
+# complex version
+#
 	cp config-complex.in $(SRCDIR)/src/config.in	
 #
 #	FFCS - 16/1/13 - this crashes in parallel
