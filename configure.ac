@@ -697,27 +697,14 @@ else
     AC_SUBST(MPI_LIBFC,"")
 
     # Extra MPI-dependant configuration options that are set by FF during MPI configuration. FFCS - 25/2/13 - Fred
-<<<<<<< /Users/ljll/ff/draft/configure.ac
     # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
     # required by pastix on the corresponding platforms.
-||||||| /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/configure.ac~base._BcCV8
-    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
-    # accepted by pastix. So we just use $ac_build_alias which is much more reliable than $ff_HOSTARCH_pastix.
-=======
-    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. i686_pc_linux and i686_mac are accepted by
-    # pastix.
 
     if test"$ff_HOSTARCH_pastix" = ""
     then
 	ff_HOSTARCH_pastix=i686_pc_linux
     fi
->>>>>>> /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/configure.ac~other.9HfOS0
-
-<<<<<<< /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/configure.ac~base._BcCV8
-    AC_SUBST(PASTIX_HOSTARCH,$ac_build_alias)
-=======
     AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
->>>>>>> /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/configure.ac~other.9HfOS0
 
     # these values should not be empty otherwise examples++-load/ff-get-dep will think that they are not defined
     AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
@@ -1656,7 +1643,6 @@ then
     fi
 fi
 
-<<<<<<< /Users/ljll/ff/draft/configure.ac
 # ALH - pARMS needs "-fno-range-check" on Windows, but this options fails on MacOS 10.8.  Add no-range-check for Windows
 # for hexadecimal parameter constants like:
 #
@@ -1669,8 +1655,6 @@ then
     AC_SUBST(NO_RANGE_CHECK,-fno-range-check)
 fi
 
-||||||| /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/configure.ac~base._BcCV8
-=======
 # ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
 if test "$with_scotch_include" = ""
 then
@@ -1678,7 +1662,6 @@ then
 fi
 AC_SUBST(SCOTCH_INCLUDE,$with_scotch_include)
 
->>>>>>> /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/configure.ac~other.9HfOS0
 # Find out kernel and libc versions
 # ---------------------------------
 
