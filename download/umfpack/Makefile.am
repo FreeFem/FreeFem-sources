@@ -38,8 +38,6 @@ CHOLMODLIB=../lib/libcholmod.a
 COLAMDLIB=../lib/libcolamd.a
 SUITESPARSECONFIGLIB=../lib/libsuitesparseconfig.a
 
-#  all: umfpack cholmod
-
 # ALH - 4/9/13 - parallel make crashes ("pipe from processes is a directory"?). make sure that everything is run
 # sequentially
 
@@ -47,7 +45,9 @@ umfpack:
 	$(MAKE) MAKEFLAGS= $(AMDLIB)
 	$(MAKE) MAKEFLAGS= $(UMFPACKLIB)
 	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB)
-cholmod:
+#
+# ALH - 19/9/13 - cholmod part built sequentially
+#
 	$(MAKE) MAKEFLAGS= $(CAMDLIB)
 	$(MAKE) MAKEFLAGS= $(COLAMDLIB)
 	$(MAKE) MAKEFLAGS= $(AMDLIB)
