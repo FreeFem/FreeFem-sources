@@ -1026,7 +1026,7 @@ then
     fi
 fi
 
-# ALH - 18/9/13 - option to compile the OpenBLAS moved from the FFCS tree to FF tree
+# <<OpenBLAS>> ALH - 18/9/13 - option to compile the OpenBLAS moved from the FFCS tree to FF tree
 
 AC_ARG_ENABLE(openblas,AC_HELP_STRING([--disable-openblas],[Disable the automatic download of OpenBLAS]))
 if  test "$ff_blas_ok" = no && test "$enable_openblas" != no && test "$enable_download" = yes

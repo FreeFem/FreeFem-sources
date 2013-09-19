@@ -117,10 +117,12 @@ CBLAS/fait: $(CBLAS_TGZ)
 $(CBLAS_SOURCES): CBLAS/fait
 
 $(BLAS_TGZ):
-	cd $(DIRPKG);@WGET@ -N http://www.netlib.org/blas/blas.tgz
+	mkdir -p $(DIRPKG)
+	cd $(DIRPKG) && @WGET@ -N http://www.netlib.org/blas/blas.tgz
 
 $(CBLAS_TGZ):
-	cd $(DIRPKG);@WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
+	mkdir -p $(DIRPKG)
+	cd $(DIRPKG) && @WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
 
 
 clean-local::
@@ -128,6 +130,8 @@ clean-local::
 
 # ALH - 18/9/13 - Downloading and building the OpenBLAS
 # -----------------------------------------------------
+
+# to activate this, see [[file:../../configure.ac::OpenBLAS]]
 
 all-local::@COMPILE_OPENBLAS@
 generic:
