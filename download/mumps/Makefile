@@ -39,6 +39,23 @@ WGET = wget --no-check-certificate
 
 mumps:../lib/WHERE.mumps
 
+<<<<<<< /Users/ljll/ff/draft/download/mumps/Makefile
+$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
+	cp Makefile.inc $(SRCDIR)
+#
+# ALH - 'd' and 'z' versions need to be made sequentially
+#
+	cd $(SRCDIR);make d
+	cd $(SRCDIR);make z
+	touch $@
+install: $(SRCDIR)/FAIT
+||||||| /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/Makefile~base.L82IRe
+$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
+	cp Makefile.inc $(SRCDIR)
+	cd $(SRCDIR);make d z
+	touch $@
+install: $(SRCDIR)/FAIT
+=======
 # ALH - WHERE was not built properly during a full compile from a clean source. This goal has been rewritten to solve
 # this issue.
 
@@ -48,6 +65,7 @@ mumps:../lib/WHERE.mumps
 	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps
 
 install.done:$(SRCDIR)/FAIT
+>>>>>>> /var/folders/fm/vykbv5z12lv_d2px5wdw3xzr0000gn/T/Makefile~other.gSsCy7
 	-mkdir -p ../include/libseq
 	cp $(SRCDIR)/include/*.h ../include/
 	cp $(SRCDIR)/libseq/*.h  ../include/libseq
