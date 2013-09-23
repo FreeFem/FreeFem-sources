@@ -1032,6 +1032,14 @@ then
 	AC_SUBST(DOWNLOADED_BLAS,"")
 	AC_SUBST(COMPILE_OPENBLAS,openblas)
 
+	if test "$OS" = Windows_NT
+	then
+	    ff_static_lib=lib
+	else
+	    ff_static_lib=a
+	fi
+	AC_SUBST(FF_STATIC_LIB,$ff_static_lib)
+
 	ff_blas_ok=yes
 	ff_cblas_h=yes
 	ff_cblas_libs=yes
