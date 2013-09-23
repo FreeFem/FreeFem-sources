@@ -155,7 +155,7 @@ openblas.done:openpatches.done
 #
 # RANLIB is required on Win64 to avoid "archive has no index" error when linking FreeFem+.exe
 #
-	$(RANLIB) OpenBLAS/libopenblas.lib
+	$(RANLIB) OpenBLAS/libopenblas.@FF_STATIC_LIB@
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
