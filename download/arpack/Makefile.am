@@ -53,11 +53,7 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	    -DFF_ARFLAGS="@ARFLAGS@" \
 	    -DFF_RANLIB="@RANLIB@" \
 	    ARmake.m4 >ARPACK/ARmake.inc
-#
-#	cp ARPACK/UTIL/Makefile ARPACK/Makefile_UTIL
-#	sed  -e '1,$$s/second.o/$$(SECOND_O)/' <ARPACK/Makefile_UTIL  >ARPACK/UTIL/Makefile  
 	touch ARPACK/fait
-	cd ARPACK/LAPACK;
 
 $(ARPACK96_TAR_GZ):
 	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz
