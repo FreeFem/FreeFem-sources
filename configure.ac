@@ -1162,27 +1162,29 @@ if test "$ff_lapack_ok" != no ; then
 AC_SUBST(LAPACKLIBS,$ff_lapack_libs)
 fi
 if test "$ff_lapack_ok" = no; then
-AC_ARG_WITH(lapack,
-	[  --with-lapack=library	Use a specific version of the Lapack],
+    AC_ARG_WITH(lapack,
+	AC_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
 	ff_lapack_ok=yes
 	ff_lapack_lib="${withval}"
-	LIBS="$ff_lapack_lib $LIBS"
-)
+	LIBS="$ff_lapack_lib $LIBS")
 fi
+
+# Lapack configuration for Arpack
 
 ff_lapackdir='$$(LAPACKdir)'
-if  test "$ff_lapack_ok" = yes ; then
-  # no compilation of lapack in  arpack
-  ff_lapackdir=
-  if test "$ff_lapack_ok" = yes
-  then
-AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
-dnl      echo lapack LD  \'$ff_lapack_lib\'  >>$ff_where_lib_conf
-  fi
-
+if test "$ff_lapack_ok" = yes
+then
+    # no compilation of lapack in arpack
+    ff_lapackdir=
 else
-  ff_lapack_lib=-llapack
+    ff_lapack_lib=-llapack
 fi
+
+# ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
+# examples++-load require it (eg [[file:examples++-load/Element_Mixte.cpp::lapack]]). Request from Fred.
+
+AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
+
 # Arpack itself
 
 ff_arpack_ok=no
