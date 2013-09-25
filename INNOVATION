@@ -13,6 +13,10 @@
    - Atlas compilation directives have no effect anymore, removed
    - Moved OpenBLAS compilation from FFCS source tree to FF source tree
  - Added configure option --disable-system-fftw to skip any default FFTW library installed on the system
+
+ - Changed location of lapack WHERE-library setup in [[file:configure.ac::WHERE_lapack]] to insure that it is always
+   defined (request from Fred)
+
 10/9/2013 (ALH)
  - Corrected pastix compilation for FFCS on MacOS 10.6
  - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
