@@ -1177,13 +1177,8 @@ then
     # no compilation of lapack in arpack
     ff_lapackdir=
 else
-    ff_lapack_lib=-llapack
+    ff_lapack_lib="-L${curdir}/download/lib -llapack"
 fi
-
-# ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
-# examples++-load require it (eg [[file:examples++-load/Element_Mixte.cpp::lapack]]). Request from Fred.
-
-AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
 # Arpack itself
 
@@ -1266,6 +1261,11 @@ else
 	AC_SUBST([SKIP_TESTS_EIGEN],[yes])
 fi
 AC_SUBST([EIGENOBJ])
+
+# ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
+# examples++-load require it (eg [[file:examples++-load/Element_Mixte.cpp::lapack]]). Request from Fred.
+
+AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
 # Looking for UMFPACK
 # -------------------
