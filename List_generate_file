@@ -3,6 +3,7 @@ download/Makefile.in
 download/blas/Makefile.in
 download/arpack/Makefile.in
 download/umfpack/Makefile.in
+download/fftw/Makefile.in
 src/Makefile.in
 src/bamglib/Makefile.in
 src/Graphics/Makefile.in
