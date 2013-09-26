@@ -179,7 +179,7 @@ if [  -n "$onwin32" -a ! -f "$bin/libff.dll"  ] ; then
 fi
 
 if [ -z "$out" ] ; then  out=$o  ; fi;
-if [ -f  $out.$SUF ] then rm $out.$SUF ; fi 
+if [ -f  "$out.$SUF" ] ; then rm $out.$SUF ; fi 
 
 # Default compiler
 if [ -z "$CXX"  ];then  CXX=g++ ; fi
