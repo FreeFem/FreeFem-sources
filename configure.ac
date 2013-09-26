@@ -854,7 +854,12 @@ if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
 AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
 dnl    [echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf]
+else
+  if test "$enable_download" = yes  ;then
+      ff_DOWNLOAD_FFTW=fftw
+  fi
 fi
+AC_SUBST(DOWNLOAD_FFTW,$ff_DOWNLOAD_FFTW)
 dnl ---------------------------
 dnl   Looking for the tetgen
 dnl --------------------------
