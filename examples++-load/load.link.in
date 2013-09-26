@@ -149,7 +149,6 @@ done
 
 #  remove old file... FH sep 2013..
 SUF=@DYLIB_SUFFIX@
-rm $out.$SUF
 
 if [ -n "$autodep"  ] ; then
 #    echo "$thecommand" $args  `eval "'$dircommand/ff-get-dep'" -ff $files`
@@ -180,6 +179,8 @@ if [  -n "$onwin32" -a ! -f "$bin/libff.dll"  ] ; then
 fi
 
 if [ -z "$out" ] ; then  out=$o  ; fi;
+if [ -f  $out.$SUF ] then rm $out.$SUF ; fi 
+
 # Default compiler
 if [ -z "$CXX"  ];then  CXX=g++ ; fi
 if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
