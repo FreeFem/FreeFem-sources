@@ -349,6 +349,7 @@ top_srcdir = ../..
 FFTW_VERSION = 3.3.2
 SRCDIR = fftw-$(FFTW_VERSION)
 SERVER = http://www.fftw.org
+THIS = fftw3
 all: all-am
 
 .SUFFIXES:
@@ -536,11 +537,11 @@ uninstall-am:
 
 all-local: $(DOWNLOAD_FFTW)
 
-fftw: $(SRCDIR)/FAIT
+fftw: $(SRCDIR)/FAIT WHERE
 	$(MAKE) WHERE
 
 $(SRCDIR)/FAIT:$(SRCDIR)/FAIT-1
-	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/..  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/../..  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch $(SRCDIR)/FAIT

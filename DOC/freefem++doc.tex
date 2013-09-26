@@ -16103,7 +16103,8 @@ while the weak BVP formulation acquires the form
 
 \subsection{Whispering gallery modes}
 
-Written by 
+Written by I. S. Grudinin.
+
 In whispering gallery mode (WGM) resonators, which are typically spheres or disks, electromagnetic field is trapped by total internal reflections from the boundary. Modes of such resonators are distinguished by compact volume and record high quality factors (Q) in a broad range of frequencies. Modern applications of such resonators include microwave and optical cavities for atomic clocks, cavity optomechanics, nonlinear and quantum optics. Analytical solutions for WG modes are only available for a limited number of idealized geometries, such as sphere or ellipsoid. Since  resonator dimensions are typically much larger than optical wavelength, direct application of numerical 3D finite difference time domain (FDTD) or finite element methods (FEM) is not practical. It's possible to solve the vectorial wave equation by reducing it to a two dimensional case by taking axial symmetry into account. Such reduction leads to a system of 3 equations to be solved in a 2D ``$\rho-z$'' section of a resonator. Please refer to \cite{Oxborrow} for a detailed derivation and to \cite{Grudinin} for an example of using FreeFem++ to compute WGMs.
 
 \subsubsection{Wave equation for the WGMs}
@@ -16137,7 +16138,7 @@ We can reduce the order of partial derivatives in this integral by using the Gre
 Thus converting equations (\ref{eq:system}) we obtain a large expression for the weak form (see [1])
 
 \subsubsection{A dielectric sphere example with FreeFem++}
-We now compute the fundamental mode frequency for a fused silica sphere. The sphere is 36 micrometer in diameter, the refractive index is 1.46, the boundary condition is the magnetic wall (which can actually be omitted as it holds automatically). The example can be found in \texttt{examples++-eigenvalue/WGM-sphere.edp} in freefem distribution.
+We now compute the fundamental mode frequency for a fused silica sphere. The sphere is 36 micrometer in diameter, the refractive index is 1.46, the boundary condition is the magnetic wall (which can actually be omitted as it holds automatically). The example can be found in \texttt{examples++-eigenvalue/WGM-sphere.edp} in the distribution.
 
 
 \section{\texttt{MPI} Parallel version }
@@ -21039,12 +21040,12 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 \url{http://ab-initio.mit.edu/nlopt}
 \bibitem{hansen}{\sc N. Hansen}, The CMA Evolution Strategy,
 \url{http://www.lri.fr/~hansen/cmaesintro.html}
-\bibitem{ipopt} {\sc A. W‰chter and L. T. Biegler}, On the Implementation of a Primal-Dual Interior Point Filter Line Search Algorithm for Large-Scale Nonlinear Programming, Mathematical Programming 106(1), pp. 25-57, 2006
+\bibitem{ipopt} {\sc A. W‰chter and L. T. Biegler}, {\it On the Implementation of a Primal-Dual Interior Point Filter Line Search Algorithm for Large-Scale Nonlinear Programming}, Mathematical Programming 106(1), pp. 25-57, 2006
 \bibitem{ipintro}{\sc A. Forsgren, P. E. Gill and M. H. Wright}, Interior Methods for Nonlinear Optimization, SIAM Review, Vol. 44, No 4. pp. 525-597, 2002
 
-\bibitem{Oxborrow} M. Oxborrow, ``Traceable 2-D finite-element simulation of the whispering-gallery modes of axisymmetric electromagnetic resonators,'' IEEE T. Microw. Theory \textbf{55}, 1209--1218 (2007).
+\bibitem{Oxborrow} M. Oxborrow, {\it Traceable 2-D finite-element simulation of the whispering-gallery modes of axisymmetric electromagnetic resonators}, IEEE T. Microw. Theory \textbf{55}, 1209--1218 (2007).
 
-\bibitem{Grudinin} I. S. Grudinin, and N. Yu, ‚ÄúFinite-element modeling of coupled optical microdisk resonators for displacement sensing,‚Äù  J. Opt. Soc. Am. B 29, 3010-3014 (2012). 
+\bibitem{Grudinin} I. S. Grudinin, and N. Yu, {\it  Finite-element modeling of coupled optical microdisk resonators for displacement sensing}, J. Opt. Soc. Am. B 29, 3010-3014 (2012). 
 
 \end{thebibliography}
 \printindex
