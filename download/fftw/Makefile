@@ -50,8 +50,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = i686-apple-darwin12.4.0
-host_triplet = i686-apple-darwin12.4.0
+build_triplet = i686-apple-darwin12.5.0
+host_triplet = i686-apple-darwin12.5.0
 subdir = download/fftw
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/mkinstalldirs
@@ -120,6 +120,7 @@ DOCPSGZ = freefem++doc.ps.gz
 DOWNLOADCOMPILE = compile-pkg
 DOWNLOAD_ARPACK = arpack
 DOWNLOAD_BLAS = 
+DOWNLOAD_FFTW = fftw
 DOWNLOAD_UMFPACK = umfpack cholmod
 DYLIB_SUFFIX = dylib
 ECHO_C = \c
@@ -152,7 +153,7 @@ GREP = /usr/bin/grep
 HISTORY = 
 IDEPROG = 
 IDE_TESTS = 
-INSTALL = install
+INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
@@ -192,7 +193,7 @@ MPI_LIBFC =
 MPI_LIB_DIRS = 
 OBJEXT = o
 OPTIM_TYPE = 
-PACKAGE = fltk-$(FFTW_VERSION).tar.gz
+PACKAGE = fftw-$(FFTW_VERSION).tar.gz
 PACKAGE_BUGREPORT = hecht@ann.jussieu.fr
 PACKAGE_NAME = FreeFem++
 PACKAGE_STRING = FreeFem++ 3.25
@@ -285,10 +286,10 @@ am__quote =
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 bindir = ${exec_prefix}/bin
-build = i686-apple-darwin12.4.0
+build = i686-apple-darwin12.5.0
 build_alias = 
 build_cpu = i686
-build_os = darwin12.4.0
+build_os = darwin12.5.0
 build_vendor = apple
 builddir = .
 datadir = ${datarootdir}
@@ -312,10 +313,10 @@ ff_pdflatex = yes
 ff_prefix_dir = /usr/local/lib/ff++/3.25
 ff_unzip = 
 ff_wget = yes
-host = i686-apple-darwin12.4.0
+host = i686-apple-darwin12.5.0
 host_alias = 
 host_cpu = i686
-host_os = darwin12.4.0
+host_os = darwin12.5.0
 host_vendor = apple
 htmldir = ${docdir}
 includedir = ${prefix}/include
@@ -341,11 +342,12 @@ top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
 
-# Downloading and compiling FLTK
+# Downloading and compiling FFTW
 # ------------------------------
 
 # FFTW information
-SRCDIR = fltk-$(FFTW_VERSION)
+FFTW_VERSION = 3.3.2
+SRCDIR = fftw-$(FFTW_VERSION)
 SERVER = http://www.fftw.org
 all: all-am
 
@@ -534,18 +536,28 @@ uninstall-am:
 
 all-local: $(DOWNLOAD_FFTW)
 
-fltk: $(SRCDIR)/$(INSTALL)
+fftw: $(SRCDIR)/FAIT
+	$(MAKE) WHERE
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cd $(SRCDIR) && ./configure  --prefix=`pwd`/../.. CXX=$(CXX) CC=$(CC)
+$(SRCDIR)/FAIT:$(SRCDIR)/FAIT-1
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`pwd`/..  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
+	touch $(SRCDIR)/FAIT
 
-$(SRCDIR): $(PACKAGE)
-	tar xvzf $(PACKAGE)
+$(SRCDIR)/FAIT-1:../pkg/$(PACKAGE)
+	tar xvzf ../pkg/$(PACKAGE)
+	touch $(SRCDIR)/FAIT-1
 
-$(PACKAGE):
-	wget --no-check-certificate -N $(SERVER)/$(PACKAGE)
+../pkg/$(PACKAGE):
+	-mkdir ../pkg
+	cd ../pkg;wget --no-check-certificate -N $(SERVER)/$(PACKAGE)
+
+WHERE:$(SRCDIR)/FAIT
+	-if [ $(SRCDIR)/FAIT ] ; then \
+	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >../lib/WHERE.$(THIS) ;\
+	echo $(THIS) INCLUDE -I@DIR@/include   >> ../lib/WHERE.$(THIS) ;\
+	fi
 
 clean-local:
 	-rm -rf fftw-* 
