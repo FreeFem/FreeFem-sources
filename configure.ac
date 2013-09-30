@@ -1232,10 +1232,14 @@ then
 		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
 		AC_SUBST(LAPACK_arpack_LIB,${curdir}/download/lib/liblapack.a)
 
-		# Do not update $LIBS, but create an extra LIB variable,
-		# because this lib does not exist yet, and this could make the
-		# following tests fail.
-                ff_arpack_libs="-L${curdir}/download/lib -larpack  $ff_lapack_lib"
+		# Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this
+		# could make the following tests fail.
+
+		# ALH - 30/9/13 - do not use the "-L ${curdir}/download/lib" directive because it would allow other
+		# following -l directives (eg -lumfpack) to pick an old locally compiled library instead of the system
+		# ones.
+
+                ff_arpack_libs="${curdir}/download/lib/libarpack.a $ff_lapack_lib"
 		ff_arpack_ok=yes
 	fi
 fi
@@ -1315,8 +1319,14 @@ then
 
     if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
     then
+
+        # ALH - 30/9/13 - other libraries required by Umfpack
+
+	AC_CHECK_LIB(cholmod,cholmod_add,ff_umfpack_libs="$ff_umfpack_libs -lcholmod")
+	AC_CHECK_LIB(colamd,colamd_set_defaults,ff_umfpack_libs="$ff_umfpack_libs -lcolamd")
+
 	AC_CHECK_LIB(umfpack,umf_i_malloc,
-	    ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
+	    ff_umfpack_libs="-lumfpack $ff_umfpack_libs"
 	    ff_umfpack_ok=yes,,$ff_umfpack_libs)
     fi
 
@@ -1326,7 +1336,7 @@ then
     fi
 
     if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
-	AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )
+	AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
     fi
 fi
 
