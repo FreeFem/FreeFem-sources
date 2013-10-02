@@ -1353,7 +1353,7 @@ then
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
     # the following tests fail.
 
-    ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig -lrt"
+    ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
     AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
     if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
