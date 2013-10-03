@@ -1,3 +1,4 @@
+  - correct error in case of block matrix with block of 0 row or 0 column. 
 05/09/2013 put version .tar.gz on the web 
   - correct makefile wget in pastis and superludist  
   - correct compile of load example :  paradiso, gsl automaticaly 

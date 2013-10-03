@@ -2397,7 +2397,22 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
               err++;}
           }
         }
+
     if (err)    ExecError("Error Block Matrix,  size sub matrix");
+    //  gestion of zero block ????
+    
+    for (int j=0;j<M;++j)
+        if   ( Oj(j+1) ==0) Oj(j+1)=1;
+        else if( Oj(j+1) !=1)  err++;
+    for (int i=0;i<N;++i)
+        if   ( Oi(i+1) ==0) Oi(i+1)=1;
+        else if( Oi(i+1) !=1)  err++;
+    if (err)    ExecError("Error Block Matrix with  0 line or  0 colomn..");
+   
+
+   
+    
+
 //  cout << "Oi = " <<  Oi << endl;
 //  cout << "Oj = " <<  Oj << endl;
 
