@@ -2362,7 +2362,10 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
       int l0,l1=ChangeLab3D(mapface,l0=K.lab) ;
       if(flab)
 	  {//      R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
-	      mp->set(Th,KE(B),B,KE,K.lab);
+              R3 NN= KE.N(fk);
+              double mes=NN.norme();
+              NN/=mes;
+	      mp->set(Th,KE(B),B,KE,K.lab,NN,fk);
 	      l1 =GetAny<long>( (* flab)(stack)) ;
 	      lmn= min (lmn,bb->lab);
 	      lmx= max (lmx,bb->lab);
