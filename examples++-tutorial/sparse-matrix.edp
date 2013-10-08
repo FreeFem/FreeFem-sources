@@ -190,7 +190,7 @@ Vh unVh=0,wVh=0;
 VH unVH=0,wVH=0;
 unVh[]=1;
 unVH[]=1;
-wVh[] = MM' * unVH[] ; 
+wVh[] = MM' * unVH[] ; //'
 wVH[] = MM * unVh[] ; 
 
 //cout << "wWh : " << wVh[] << endl;
