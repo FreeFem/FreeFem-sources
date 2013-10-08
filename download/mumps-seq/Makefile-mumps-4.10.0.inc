@@ -163,3 +163,8 @@ LIBSEQNEEDED = libseqneeded
 #LIBSEQNEEDED = libseqneeded
 
 WGET = @WGET@
+# Local Variables:
+# mode:makefile
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

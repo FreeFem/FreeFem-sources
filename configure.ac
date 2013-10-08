@@ -20,7 +20,7 @@ dnl : ${FFLAGS=""}
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
-# Automake 1.11 is too old for check ... 
+# Automake 1.11 is too old for check ...
 
 # ALH - 10/9/13 - FFCS needs to skip this automake version requirement when compiling on older platforms (eg cygwin or
 # last Ubuntu LTS). So we fix a low hardcoded requirement and test for higher versions when not in FFCS.
@@ -40,40 +40,36 @@ AC_PROG_MAKE_SET
 dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
 
-# FFCS - parallel make options (see [[file:../../configure/ac::FFCS_MAKEFLAGS]])
-
-AC_SUBST(FFCS_MAKEFLAGS,$FFCS_MAKEFLAGS)
-
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
-dnl search of associad software 
+dnl search of associad software
 m4_define([AC_FF_ADDWHERELIB],
   [	if test -z "$ff_where_lib_conf_$1" ; then
-	    echo "$1 LD $2"  >>$ff_where_lib_conf 
+	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    test -n "$3" && echo "$1 INCLUDE $3 "  >>$ff_where_lib_conf
             ff_where_lib_conf_$1=1
 	    AC_MSG_NOTICE([    ++ add $1 : $2 $3 in  $ff_where_lib_conf "])
 	else
 	    AC_MSG_NOTICE([    -- do not add $1 : $2 $3 in  $ff_where_lib_conf "])
         fi
-]) dnl 
+]) dnl
 m4_define([AC_FF_WHERELIB],
     [  	if test -z "$ff_where_lib_conf_$1" ; then
         AC_MSG_CHECKING(check $1)
 	ff_save_libs=$LIBS
 	LIBS="$LIBS $2 $4"
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no]) 
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no])
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
 	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
 		echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
-	    fi 
+	    fi
 	fi
 	AC_MSG_RESULT($ff_WHERE)
 
         ff_where_lib_conf_$1=1
 	LIBS=$ff_save_libs
-	fi	
+	fi
     ])dnl end m4_define AC_FF_WHERELIB
 
 
@@ -96,9 +92,9 @@ AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
 dnl AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch "  in 
+case "$ff_m4 $ff_bison $ff_patch "  in
 *no*)
-    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])	
+    AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])
     AC_MSG_ERROR([ Sorry missing  m4,bison,patch command !]);;
 esac
 
@@ -120,7 +116,7 @@ if test "$ff_size_ptr" -eq 4  ;then
 elif test  "$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
 else
-  AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX] ); 
+  AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX] );
   AC_MSG_ERROR([ Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 ])
 fi
 
@@ -135,13 +131,14 @@ fi
 AC_SUBST(ENABLE_FFCS,"$enable_ffcs")
 AM_CONDITIONAL([ENABLE_FFCS],[test $enable_ffcs = yes])
 
-# dur dur car sous MacOsX le fortran n'est pas standard. 
+# dur dur car sous MacOsX le fortran n'est pas standard.
 ff_AR="ar"
 ff_ARFLAGS="rv"
-ff_RANLIB="ranlib" 
+ff_RANLIB="ranlib"
 
-AC_ARG_ENABLE(fortran,[  --disable-fortran	No Fortran compiler available ( ARPACK need it)])
-ff_g2c_lib="";	 
+AC_ARG_ENABLE(fortran,AC_HELP_STRING([--disable-fortran],[No Fortran compiler available ( ARPACK need it)]))
+
+ff_g2c_lib="";
 if test "$enable_fortran" != no
 then
 
@@ -149,29 +146,29 @@ then
     AC_PROG_FC(gfortran  f90  xlf90 g95 gfortran-mp-4.4)
     AC_PROG_F77(gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" gfortran-mp-4.4)
 
-#	if test -n "$F77" 
+#	if test -n "$F77"
 #	then
     ff_flibs=""
-        # modif FH		
-    AC_F77_LIBRARY_LDFLAGS  
+        # modif FH
+    AC_F77_LIBRARY_LDFLAGS
     dnl	AC_F77_WRAPPERS
-	# correct pb of double def under macos 
+	# correct pb of double def under macos
     case $F77 in
 	 *fort77)
 	    if test -z "$FLIBS" ; then
 #             FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print $(NF-2),$(NF-1)}'`
-#  FH to remove " "  
+#  FH to remove " "
 		FLIBS=`fort77 -v  a.out  2>&1|awk '/a.out/ && /fort77/  { print "echo",$(NF-2),$(NF-1)}'|sh`
-		
-		AC_MSG_WARN([  fort77   FLIBS :  $FLIBS ])	     
+
+		AC_MSG_WARN([  fort77   FLIBS :  $FLIBS ])
 	    fi
 	    ;;
-	*g77)  
+	*g77)
 	    for i in $FLIBS; do
-		case $i in 	  
-# save last directory of the list 
-		    -L*) 
-			d=`expr $i : '-L\(.*\)'`; 
+		case $i in
+# save last directory of the list
+		    -L*)
+			d=`expr $i : '-L\(.*\)'`;
 			echo " try $d "
 			if test -e "$d/libg2c.so" ; then
 			    ff_flibs="$d/libg2c.so"
@@ -179,23 +176,23 @@ then
 			    ff_flibs="$d/libg2c.dylib"
 			elif test -e "$d/libg2c.a" ; then
 			    ff_flibs="$d/libg2c.a"
-			elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then   
-			    ff_flibs="$i" 
+			elif test  -e $d/libg2c.so -o	-e $d/libg2c.a ; then
+			    ff_flibs="$i"
 			fi;;
 		esac
-	    done 
+	    done
 	    if test -e "$ff_flibs"  ;then
 		FLIBS="$ff_flibs"
-	    else 	 
+	    else
 		FLIBS="$ff_flibs -lg2c"
 	    fi
 	    AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
 	    ;;
-# add FH sep 2006 / modif  2009  
+# add FH sep 2006 / modif  2009
         *gfortran)
             for i in $FLIBS; do
 		case $i in
-		    -L*)  
+		    -L*)
 			d=`expr $i : '-L\(.*\)'`;
 			if test -e "$d/libgfortran.so" ; then
 			    ff_flibs="$d/libgfortran.so"
@@ -203,28 +200,28 @@ then
 			    ff_flibs="$d/libgfortran.dylib"
 			elif test -e "$d/libgfortran.a" ; then
 			    ff_flibs="$d/libgfortran.a"
-			elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then   
-			    ff_flibs="$i" 
+			elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then
+			    ff_flibs="$i"
 			fi;;
 		esac
             done
 	    if test -e "$ff_flibs"  ;then
 		FLIBS="$ff_flibs"
-	    else 
+	    else
 		FLIBS="$ff_flibs -lgfortran"
 	    fi
             AC_MSG_WARN([  get dir of -lgfortran  FLIBS :  $FLIBS ])
             ;;
     esac
     AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
-#  correct FH sep 2006 -o -> -a 
+#  correct FH sep 2006 -o -> -a
     if test "$with_flib" != no -a -n  "$with_flib"
-    then 
+    then
 	ff_g2c_lib="$with_flib"
 	FLIBS="$with_flib"
     fi
 # add FH oct 2007 for download f2c
-    if test -z "$F77"  ; then 
+    if test -z "$F77"  ; then
 	ff_f77=`pwd`/download/bin/fort77
 	ff_flibs=`pwd`/download/lib/libf2c.a
 	if test -x $ff_f77  -a -f $ff_flibs ; then
@@ -236,7 +233,7 @@ then
 	    AC_MSG_NOTICE( [add --disable-fortran  ] );
 	    AC_MSG_NOTICE( [or try to compile f2c in directory download/f2c  ] );
 	    AC_MSG_NOTICE( [  just do:  make install ] );
-	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);  
+	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);
 	fi
     fi
 #  check if the FLIBS is correct
@@ -247,10 +244,10 @@ then
     LIBS="$ff_libs"
     echo "F77 LD $ff_libs" >config_LIB_INFO
 
-    AC_MSG_CHECKING([ Size of fortran 77 integer ])	
-    
-    
-    
+    AC_MSG_CHECKING([ Size of fortran 77 integer ])
+
+
+
 ##   AC_LANG(fortran);
     AC_LANG_PUSH([Fortran 77])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -271,7 +268,7 @@ then
     AC_LANG_POP([Fortran 77])
     AC_MSG_RESULT($ff_f77intsize)
     AC_F77_WRAPPERS
-    
+
     ff_cfagsf77=""
     case $ac_cv_f77_mangling in
 #  "lower case, no underscore, no extra underscore")
@@ -288,23 +285,17 @@ then
     AC_SUBST(CFLAGSF77,$ff_cfagsf77)
     if test $ff_f77intsize -ne  4
     then
-	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by not 4 bytes integer ( $ff_f77intsize bytes) ],1);  
+	AC_MSG_ERROR([ Fatal Error: Your fortran 77  compiler have by not 4 bytes integer ( $ff_f77intsize bytes) ],1);
     fi
     test -f /mingw/bin/libpthread-2.dll && ff_pthread_dll=/mingw/bin/libpthread-2.dll ; \
     AC_FF_ADDWHERELIB(f77,$FLIBS,$ff_cfagsf77 $ff_pthread_dll)
     AC_FF_ADDWHERELIB(fc,$FLIBS,$ff_cfagsf77 $ff_pthread_dll)
-
-dnl    [echo f77 LD  $FLIBS  >>$ff_where_lib_conf]
-dnl    [echo f77 INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
-#  bof bof -- FH ... 
-dnl    [echo fc LD  $FLIBS  >>$ff_where_lib_conf]
-dnl    [echo fc INCLUDE $ff_cfagsf77  >>$ff_where_lib_conf]
-
-# AC_DEFINE_UNQUOTED(FF_F77_INTEGER_SIZE,$ff_f77intsize,[ size of F77 integer ])
 fi
+
 #  fin test FORTRAN ..........
-# -----------------------------
-AC_ARG_ENABLE(c,[  --disable-c		No C compiler available (C BLAS need it)])
+# ----------------------------
+
+AC_ARG_ENABLE(c,AC_HELP_STRING([--disable-c],[No C compiler available (C BLAS need it)]))
 if test "$enable_c" != no
 then
     AC_PROG_CC
@@ -314,7 +305,7 @@ else
 	# We need to define this otherwise ./configure crashes with
 	# the message "configure: error: conditional "am__fastdepCC"
 	# was never defined".
-    
+
     am__fastdepCC_TRUE=
     am__fastdepCC_FALSE='#'
 fi
@@ -344,7 +335,7 @@ echo $ac_configure_args > configure.param
 # by default the suffix of the  .so lib file is .so
 #      it is .dll   under windows
 #      it is .dylib under macos X
-ff_suffix_dylib="so";	
+ff_suffix_dylib="so";
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 
@@ -355,7 +346,7 @@ then
 	ff_HOSTARCH_pastix=i686_mac
 	ff_suffix_dylib="dylib"
 	ff_mac=yes
-AC_DEFINE_UNQUOTED(FF_PREFIX_DIR_APPLE,"/Applications/FreeFem++.app/Contents/",FreeFem prefix  dir)	
+AC_DEFINE_UNQUOTED(FF_PREFIX_DIR_APPLE,"/Applications/FreeFem++.app/Contents/",FreeFem prefix  dir)
 fi
 AC_MSG_RESULT($ff_mac)
 
@@ -375,10 +366,10 @@ AC_ARG_ENABLE(cygwindll,
 
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
-#  flag to build window 32   version   ff_mingw = yes 
+#  flag to build window 32   version   ff_mingw = yes
 ff_mingw=no
 case $ff_uname in
-    CYGWIN*)	
+    CYGWIN*)
 
     	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
 	if test $enable_ffcs = no
@@ -420,44 +411,44 @@ CYGWIN*|MINGW*)
 		    enable_opengl=no
 		fi
 
-                ff_mingw=yes 
+                ff_mingw=yes
                 enable_cygwindll=no;
 		ff_pthread="-mthreads"
 
 		# FFCS does not use the Cygwin MinGW compilers any more
 		if test $enable_ffcs = no
 		then
-		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
+		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
 		    FFLAGS="$FFLAGS $ff_nocygwin"
 		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
                     AC_COMPILE_IFELSE([AC_LANG_SOURCE([int a;])],[],
 			[ff_nocygwin="";
 			    AC_MSG_NOTICE([Sorry $ff_nocygwin optio is wrong try whitout , but try with gcc-3.3])
 			    ])
-		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"		
+		    CXXFLAGS="$CXXFLAGS $ff_nocygwin -I/usr/include/mingw"
 		    FFLAGS="$FFLAGS $ff_nocygwin"
 		    CFLAGS="$CFLAGS $ff_nocygwin -I/usr/include/mingw"
 		    CNOFLAGS="$CNOFLAGS $ff_nocygwin -I/usr/include/mingw"
 		fi
 
-		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32" 
+		LIBS="$LIBS $ff_nocygwin -mthreads -lws2_32 -lcomdlg32"
 		LIBSNOCONSOLE="-mwindows"
 
 		# FFCS uses a specific compiler, so we specify its libraries explicitely
 		if test $enable_ffcs = no
 		then
-		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe` 
+		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
 		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 			case "$F77" in
 	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran";;
 	 		    *g77) FLIBS="$ff_nocygwin -lg2c";;
 			    *)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
-			esac 
+			esac
 		    fi
 		fi
 
                 ff_glutname="glut32"
-		#  check abort a existing function just to find in glut32.dll exist in the path 
+		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
 		AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
 		if test -z "$ff_glut" ; then
@@ -495,9 +486,9 @@ AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
 # date is only useful for config-version.h
 
 test "$prefix" = NONE && prefix="$ac_default_prefix"
-ff_prefix_dir="${prefix}/lib/ff++/$VERSION"   
+ff_prefix_dir="${prefix}/lib/ff++/$VERSION"
 AC_MSG_CHECKING(prefix dir freefem++  )
-AC_MSG_RESULT($ff_prefix_dir)	 
+AC_MSG_RESULT($ff_prefix_dir)
 
 FF_DATE=`date`
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
@@ -539,18 +530,18 @@ m4_include(acoptim.m4)
 
 
 # ------------------------------
-# compilation flags of FreeFem++ 
+# compilation flags of FreeFem++
 # ------------------------------
 #  -DDRAWING  bamg active some drawing facility in bamg (inquire mesh)
 #  -DBAMG_LONG_LONG active the use of  long long in bamg
-#  -DDEBUG active the  checking in bamg  
-#  -DNCHECKPTR remove check pointer facility 
-#  -DCHECK_KN active subscripting of some array  
+#  -DDEBUG active the  checking in bamg
+#  -DNCHECKPTR remove check pointer facility
+#  -DCHECK_KN active subscripting of some array
 #  -DWITHCHECK of the dynamic type ckecking of the langague (very slow)
 #  -DEIGENVALUE  to compile the eigen value part
 #  ------------------------------------------------
 
-# FreeFrem++-specific optimizations -fpascal-strings 
+# FreeFrem++-specific optimizations -fpascal-strings
 if test "$enable_debug" = yes;
 then
 	CXXFLAGS="$CXXFLAGS  -DBAMG_LONG_LONG -DCHECK_KN"
@@ -571,7 +562,7 @@ fi
 
 AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix to package name)])
 
-AC_MSG_CHECKING(suffix to add to package name)	
+AC_MSG_CHECKING(suffix to add to package name)
 ff_suffix=
 if test "$with_suffix" = yes -o "$with_suffix" = no -o "$with_suffix" = ""
 then
@@ -596,7 +587,7 @@ AC_ARG_WITH(flib,[  --with-flib= the fortran library ])
 AC_ARG_ENABLE([opengl],AS_HELP_STRING([--enable-opengl],
                                       [Enable/disable support for OpenGL]))
 
-# echo "  .... LIBS = $LIBS .... " 
+# echo "  .... LIBS = $LIBS .... "
 if test x$enable_opengl != xno; then
 # GL libraries seem to depend on some dlopen capabilities
 if test "$enable_static" != yes -a "$ff_glut_ok" != yes
@@ -607,9 +598,9 @@ then
         ,
         ff_gl_ok=no
         )
-    
-    
-    if test "$ff_gl_ok" = no 
+
+
+    if test "$ff_gl_ok" = no
     then
 	AC_CHECK_HEADERS(GL/gl.h,
 	    ff_gl_ok=yes
@@ -621,19 +612,19 @@ then
         ff_glut_ok=yes,
         ff_glut_ok=no)
 
-    if test "$ff_glut_ok" = no 
+    if test "$ff_glut_ok" = no
     then
 	AC_CHECK_HEADERS(GL/glut.h,
 	    ff_glut_ok=yes,
 	    ff_glut_ok=no)
     fi
-    
+
 # GLUT .....
     if test "$ff_glut_ok" =	yes
-    then			
+    then
 	for glut in \
 	    "-framework GLUT -framework OpenGL -framework Cocoa" \
-	    "-lglut -lGLU -lGL" 	
+	    "-lglut -lGLU -lGL"
 	do
 	    ff_glut="$glut"
 	    ff_libs1="$LIBS"
@@ -644,38 +635,41 @@ then
 		break,
 		ff_glut_ok=next);
 	    LIBS="$ff_libs1"
-	done	
+	done
     fi
-    
+
 
 fi
 fi
 AC_SUBST(LIBSPTHREAD,$ff_pthread)
 
-if test "$ff_glut_ok" = yes
+# ALH - 16/9/13 - at the moment the requirements for medit (glut) are not compatible with FFCS so medit is
+# only compiled with FF.
+
+if test $enable_ffcs = no
 then
-    AC_SUBST(LIBSGLUT,$ff_glut)
-    if test -n  "$ff_pthread" ; then 
-	ff_ffglutprog="ffglut${EXEEXT}"
-	AC_DEFINE_UNQUOTED(PROG_FFGLUT,"$ff_ffglutprog", the ffglut application for the new graphics )
+    if test "$ff_glut_ok" = yes
+    then
+	AC_SUBST(LIBSGLUT,$ff_glut)
+	if test -n  "$ff_pthread" ; then
+	    ff_ffglutprog="ffglut${EXEEXT}"
+	    AC_DEFINE_UNQUOTED(PROG_FFGLUT,"$ff_ffglutprog", the ffglut application for the new graphics )
+	fi
+	ff_meditprog="ffmedit${EXEEXT}"
     fi
-    ff_meditprog="ffmedit${EXEEXT}"
 fi
-# echo "  .... LIBS = $LIBS .... " 
-
-
 
 AC_ARG_WITH(suffix,[  --with-suffix=[G3/G4/G4,P4,..] or --without-suffix (default no suffix package name)])
 if test "$with_suffix" = yes
 then
   with_suffix=""
-elif test "$with_suffix" = no -o -z "$with_suffix" 
+elif test "$with_suffix" = no -o -z "$with_suffix"
 then
   with_suffix=""
 else
   with_suffix="-$with_suffix"
 fi
-  AC_MSG_CHECKING(add suffix $with_suffix )	
+  AC_MSG_CHECKING(add suffix $with_suffix )
   AC_SUBST(ADD_PACKAGE_NAME,$with_suffix)
   AC_MSG_RESULT(yes)
 
@@ -703,14 +697,13 @@ else
     AC_SUBST(MPI_LIBFC,"")
 
     # Extra MPI-dependant configuration options that are set by FF during MPI configuration. FFCS - 25/2/13 - Fred
-    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. i686_pc_linux and i686_mac are accepted by
-    # pastix.
+    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
+    # required by pastix on the corresponding platforms.
 
     if test"$ff_HOSTARCH_pastix" = ""
     then
 	ff_HOSTARCH_pastix=i686_pc_linux
     fi
-
     AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
     # these values should not be empty otherwise examples++-load/ff-get-dep will think that they are not defined
@@ -752,10 +745,7 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 # Looking for useful configuration utilities
 # ------------------------------------------
 
-#getting utility software archives through the internet
-AC_ARG_ENABLE(generic_blas,[  --enable-generic_blas	Downloadc generic blas (implie --enable-download)])
-
-AC_ARG_ENABLE(download,[  --enable-download	Download missing libraries (BLAS,ARPACK,UMFPACK)])
+AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"
@@ -772,21 +762,15 @@ AC_ARG_WITH(mkl,
 	[  --with-mkl= the  MKL LIBPATH : (ie. /opt/intel/mkl/RR.r.y.xxx/lib/<arch>)],
 	   ff_mkl_libpath="${withval}")
 
-
-if test "$enable_generic_blas" = yes
-then
-	enable_download=yes
-fi
-#  echo " ----------- $enable_download --"
-# if enabling downloads find wget or curl to do download 
+# if enabling downloads find wget or curl to do download
 # ------------------------------------------------------
 
-if test  "$ff_wget" =  no 
+if test  "$ff_wget" =  no
 then
-	ff_wget=""	
+	ff_wget=""
 	AC_CHECK_PROG(ff_wget,wget --no-check-certificate,yes,no)
-fi	
-if test  "$ff_wget" = no 
+fi
+if test  "$ff_wget" = no
 then
         ff_wget_command="curl --fail -O "
   	ff_curl=""
@@ -794,34 +778,34 @@ then
 	ff_wget="$ff_curl"
 fi
 
-# for automatique compilation of 
-# lib in download 
+# for automatique compilation of
+# lib in download
 if test  "$ff_wget" != yes  -a "$enable_download"  = "yes"  ; then
   enable_download=no
-  AC_MSG_ERROR([   enable-download and no wget or curl. ],1);  
+  AC_MSG_ERROR([   enable-download and no wget or curl. ],1);
 fi
 if test "$enable_download"  = "yes" ; then
 DOWNLOADCOMPILE=compile-pkg
 else
 DOWNLOADCOMPILE=
-fi 
+fi
 
 AC_SUBST(WGET,$ff_wget_command)
 AC_SUBST(DOWNLOADCOMPILE,$DOWNLOADCOMPILE)
 
 #  modif FH -----
-#  -- looking for cadna  
-#  the round-off error propagation 
+#  -- looking for cadna
+#  the round-off error propagation
 # the web site http://www-anp.lip6.fr/cadna/
 #  --------------------
 AC_ARG_WITH(cadna,[  --with-cadna= cadna library --without-cadna  ])
 if test "$with_cadna" != no -o -n  "$with_cadna"
-    then 
+    then
     ff_cadna="$with_cadna"
 fi
 ff_cadna_ok=no
-if test "$with_cadna" != no  
-    then 
+if test "$with_cadna" != no
+    then
     ff_libs_old="$LIBS"
     ff_ldflags_old="$LDFLAGS"
     ff_cadna_dir="${curdir}/download/cadna"
@@ -830,11 +814,11 @@ if test "$with_cadna" != no
 	ff_cadna_ok=yes)
     AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
 	ff_cadna_h=yes, ff_cadna_h=no)
-    
+
     LIBS="$ff_libs_old"
-    LDFLAGS="$ff_ldflags_old"    
-    
-    if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes 
+    LDFLAGS="$ff_ldflags_old"
+
+    if test "$ff_cadna_ok" = yes  -a "$ff_cadna_h" = yes
 	then
 	AC_DEFINE(HAVE_CADNA,1, freecadna is use to evalute the round-off error propagation )
 	CPPFLAGS="$CPPFLAGS -I$ff_cadna_dir"
@@ -846,15 +830,33 @@ else
     AC_MSG_NOTICE([ without cadna ***** ])
 fi
 
-dnl  : Looking for the FFTW3
-dnl --------------------------
-AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
-AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
+# Looking for FFTW
+# ----------------
+
+# ALH - 18/9/13 - deactivates FFTW detection for testing purposes
+
+AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
+if test "$enable_system_fftw" != no
+then
+
+    # ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
+
+    AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
+    AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
+fi
+
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
-AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
-dnl    [echo fftw3 LD  -lfftw3   >>$ff_where_lib_conf]
+    AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
+    fftw_download=
+else
+    fftw_download=fftw
 fi
+
+# see [[file:download/fftw/Makefile::all]]
+
+AC_SUBST(FFTW,$fftw_download)
+
 dnl ---------------------------
 dnl   Looking for the tetgen
 dnl --------------------------
@@ -862,226 +864,219 @@ AC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
 AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
-   AC_FF_ADDWHERELIB(tetgen,-ltet,)
-dnl    [echo tetgen LD  -ltet   >>$ff_where_lib_conf]
+    AC_FF_ADDWHERELIB(tetgen,-ltet,)
     AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
 fi
-dnl ---------------------------
-
 
 # Looking for the BLAS
 # --------------------
+
 ff_blas_ok=no
 ff_blas_inc=""
-# User-specified location
-# add MKL  seach dec 2010  FH ....
 
-ff_mkl_flags=""
-if test "$ff_mkl_libpath" != "not" ; then
-   ff_CFLAGS="$CFLAGS"
-   CHECK_COMPILE_FLAG(C,-mkl,CFLAGS)
-   if test  "$ff_CFLAGS" != "$CFLAGS" ; then
-     ff_ff_mkl_flags="-mkl"
-   fi
-   CFLAGS="$ff_CFLAGS"
-fi
+# ALH - 18/9/13 - give the option to deactivate system blas for testing purposes
+AC_ARG_ENABLE(system-blas,AC_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
 
-AC_MSG_CHECKING(for MKL )
-ff_mkl_root=""
-if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
-    if test "$ff_mkl_libpath"  = "yes"  ; then
-	ff_IFS="$IFS"
-	IFS=":"
-	for i in $LD_LIBRARY_PATH:$LIBRARY_PATH ; do 
-            case $i in 
-		*/mkl/*) ff_mkl_libpath=$i;;
-	    esac ;
-	done;
-      IFS="$ff_IFS"
-    else 
-	ff_mkl_libpath=no
+if test "$enable_system_blas" != no
+then
+
+    # User-specified location
+    # add MKL  seach dec 2010  FH ....
+
+    ff_mkl_flags=""
+    if test "$ff_mkl_libpath" != "not" ; then
+	ff_CFLAGS="$CFLAGS"
+	CHECK_COMPILE_FLAG(C,-mkl,CFLAGS)
+	if test  "$ff_CFLAGS" != "$CFLAGS" ; then
+	    ff_ff_mkl_flags="-mkl"
+	fi
+	CFLAGS="$ff_CFLAGS"
     fi
-    if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
-	ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
-	ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
-        ff_mkl_lp=
-        case "$ff_mkl_arch" in
-            *64*)  ff_mkl_lp=_lp64
-	esac
-        case $F77 in
-            *ifort*) ff_mkl_cc=intel;;
-            *) ff_mkl_cc=gf;;
-        esac
-#   bof bof .... 
-	case "$MPIRUN" in
-	*/sgi/*)         ff_mkl_mpi=_sgimpt;;
-	*/intel/*)         ff_mkl_mpi=_intelmpi;;
-	*)        ff_mkl_mpi=_openmpi;;
-	esac
-#	echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
-	if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
-	  mkl_blas=rt
-	  mkk_lapack=rt 
-          ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
-          ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
-          ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core -liomp5 -lpthread"
-	else 
-	if test -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_lapack.a ; then
-	  ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
-	  ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
-	  ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+
+    AC_MSG_CHECKING(for MKL)
+    ff_mkl_root=""
+    if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
+	if test "$ff_mkl_libpath"  = "yes"  ; then
+	    ff_IFS="$IFS"
+	    IFS=":"
+	    for i in $LD_LIBRARY_PATH:$LIBRARY_PATH ; do
+		case $i in
+		    */mkl/*) ff_mkl_libpath=$i;;
+		esac ;
+	    done;
+	    IFS="$ff_IFS"
 	else
-	  ff_mkl_mlt="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  -Wl,--end-group  -lm -lpthread"
-	  ff_mkl_blas="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,--end-group  -lm -lpthread"
-	  ff_mkl_lapack="$ff_mkl_blas"
+	    ff_mkl_libpath=no
 	fi
-	fi
-        ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
-        ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
-	ff_blas_ok=yes
-	ff_lapack_ok=yes
-	ff_blas_libs="$ff_mkl_blas"
-	ff_blas_inc="-I$ff_mkl_root/include"
-dnl  scalapack, and blacs don not work with mlk and sgi 
-     if test "$ff_mkl_mpi" != "_sgimpt" ; then  
-        AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
-        AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
-     else
-       ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  " 
-     fi
-     AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
-     AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
-        
-dnl	echo scalapack  LD  \'$ff_mkl_scalapack\'  >>$ff_where_lib_conf	
-dnl	echo blacs  LD  \'$ff_mkl_blacs\'  >>$ff_where_lib_conf	
-dnl	echo lapack  LD  \'$ff_mkl_lapack\'  >>$ff_where_lib_conf	
-dnl	echo scalapack  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
-dnl	echo blacs  INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
-dnl	echo lapack INCLUDE  \'$ff_blas_inc\' >>$ff_where_lib_conf	
-    else 
-	ff_mkl_libpath=no
-	
+	if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
+	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
+	    ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
+            ff_mkl_lp=
+            case "$ff_mkl_arch" in
+		*64*)  ff_mkl_lp=_lp64
+	    esac
+            case $F77 in
+		*ifort*) ff_mkl_cc=intel;;
+		*) ff_mkl_cc=gf;;
+            esac
+            # bof bof ....
+	    case "$MPIRUN" in
+		*/sgi/*)         ff_mkl_mpi=_sgimpt;;
+		*/intel/*)         ff_mkl_mpi=_intelmpi;;
+		*)        ff_mkl_mpi=_openmpi;;
+	    esac
+            # echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
+	    if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
+		mkl_blas=rt
+		mkk_lapack=rt
+		ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
+		ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
+		ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core -liomp5 -lpthread"
+	    else
+		if test -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_lapack.a ; then
+		    ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
+		    ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+		    ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+		else
+		    ff_mkl_mlt="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  -Wl,--end-group  -lm -lpthread"
+		    ff_mkl_blas="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,--end-group  -lm -lpthread"
+		    ff_mkl_lapack="$ff_mkl_blas"
+		fi
+	    fi
+            ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
+            ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+	    ff_blas_ok=yes
+	    ff_lapack_ok=yes
+	    ff_blas_libs="$ff_mkl_blas"
+	    ff_blas_inc="-I$ff_mkl_root/include"
+	    dnl  scalapack, and blacs don not work with mlk and sgi
+	    if test "$ff_mkl_mpi" != "_sgimpt" ; then
+		AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
+		AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
+	    else
+		ff_warm=" (We do not use MKL scalapack and blacs with sgi MPI),  "
+	    fi
+	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
+	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
+	else
+	    ff_mkl_libpath=no
+
 	# FH - pardiso is there as soon as mkl is
-        enable_pardiso=no
+            enable_pardiso=no
+	fi
     fi
-fi
 
 
-AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
+    AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
 
-AC_ARG_WITH(blas,
-    [  --with-blas=library	Use a specific version of the Blas],
+    AC_ARG_WITH(blas,
+	AC_HELP_STRING([--with-blas=library],[Use a specific version of the Blas]),
 	ff_blas_ok=yes
 	ff_blas_libs="${withval}")
 
-
-
-# Specific BLAS library location for FreeBSD
-ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
-#  zmach is in lapack 
-# Trying  blas library
-# echo "LIBS =  $LIBS blas --- $ff_blas_ok"
-for iblas in \
-     "-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
-    $ff_freebsd_blas
-do
-#   
-#"-L${curdir}/download/blas -lcblas -lf77blas" \
-#"-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -lf77blas -latlas" \ 
-#"-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -lf77blas -latlas" \
-#
-if test "$ff_blas_ok" = no;
-then
-        AC_MSG_CHECKING(for daxpy_ in $iblas)
-        ff_save_libs="$LIBS"
-        LIBS="$LIBS $iblas"
-        AC_LINK_IFELSE(
-                [AC_LANG_CALL(,daxpy_)],
-                ff_blas_ok=yes
+    # Specific BLAS library location for FreeBSD
+    ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
+    #  zmach is in lapack
+    # Trying  blas library
+    # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
+    for iblas in \
+	"-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+	$ff_freebsd_blas
+    do
+	if test "$ff_blas_ok" = no;
+	then
+            AC_MSG_CHECKING(for daxpy_ in $iblas)
+            ff_save_libs="$LIBS"
+            LIBS="$LIBS $iblas"
+            AC_LINK_IFELSE(
+		[AC_LANG_CALL(,daxpy_)],
+		ff_blas_ok=yes
 		ff_blas_libs="$iblas",)
-                LIBS="$ff_save_libs"
-        AC_MSG_RESULT($ff_blas_ok)
+            LIBS="$ff_save_libs"
+            AC_MSG_RESULT($ff_blas_ok)
+	fi
+    done
+
+    #cblas_zdotu_sub
+    #echo "LIBS = " $LIBS
+    ff_cblas_libs=no
+    if test "$ff_blas_ok" = yes
+    then
+	AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
+	ff_save_libs="$LIBS"
+	LIBS="$LIBS $ff_blas_libs $FLIBS"
+	AC_LINK_IFELSE(
+            [AC_LANG_CALL(,cblas_zdotu_sub)],
+            ff_cblas_libs=yes)
+	AC_MSG_RESULT($ff_cblas_libs)
+	LIBS="$ff_save_libs"
+    fi
 fi
-done
 
+# <<OpenBLAS>> ALH - 18/9/13 - option to compile the OpenBLAS moved from the FFCS tree to FF tree
 
-#cblas_zdotu_sub
-#echo "LIBS = " $LIBS
-ff_cblas_libs=no
-if test "$ff_blas_ok" = yes 
+AC_ARG_ENABLE(openblas,AC_HELP_STRING([--disable-openblas],[Disable the automatic download of OpenBLAS]))
+if  test "$ff_blas_ok" = no && test "$enable_openblas" != no && test "$enable_download" = yes
 then
-    AC_MSG_CHECKING(for blas_zdotu_sub in $ff_blas_libs)
-    ff_save_libs="$LIBS"
-    LIBS="$LIBS $ff_blas_libs $FLIBS"
-    AC_LINK_IFELSE(
-        [AC_LANG_CALL(,cblas_zdotu_sub)],
-        ff_cblas_libs=yes)
-    AC_MSG_RESULT($ff_cblas_libs)
-    LIBS="$ff_save_libs"	
-fi
-#echo "LIBS = " $LIBS
-# If all else fails, download!
+    AC_CHECK_PROG(ff_git,git,yes,no)
+    AC_MSG_CHECKING([Activating the OpenBLAS (deactivate with --disable-openblas)])
+    if test $ff_git = no
+    then
+	AC_MSG_RESULT([git not found])
+    else
+	ff_download_blas=openblas
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas"
+	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
-if test "$ff_blas_ok" = no -a "$enable_download" = yes \
-    -a "$enable_fortran" != no -a "$enable_c" != no
+        # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
+	AC_SUBST(DOWNLOADED_BLAS,"")
+	AC_SUBST(COMPILE_OPENBLAS,openblas)
+
+	if test "$OS" = Windows_NT
+	then
+	    ff_static_lib=lib
+	else
+	    ff_static_lib=a
+	fi
+	AC_SUBST(FF_STATIC_LIB,$ff_static_lib)
+
+	ff_blas_ok=yes
+	ff_cblas_h=yes
+	ff_cblas_libs=yes
+
+	AC_MSG_RESULT([ok])
+    fi
+fi
+
+# If all else fails, download a generic version
+
+if test "$ff_blas_ok" = no -a "$enable_download" = yes -a "$enable_fortran" != no -a "$enable_c" != no
 then
     AC_CHECK_PROG(ff_unzip,unzip,yes,no)
-    
+
     AC_MSG_CHECKING(for BLAS version to download)
-    
-	# Do not update $LIBS, but create an extra LIB variable,
-	# because this lib does not exist yet, and this could make the
-	# following tests fail.
-    
-	# When compiling a generic version, we do not need an
-	# optimized version of the BLAS.
-    
-#	if test "$enable_generic" = yes -o "$enable_generic_blas" = yes 
-#   supress the automatic compilation of atlas, to expencive  (FH version 3.0-5)
-    if true 
-    then
-	ff_download_blas=generic
-	ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
-	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
-	
-	AC_SUBST(GENERIC_BLAS,"libf77blas.a libcblas.a")
-	AC_SUBST(GENERIC_BLAS_BUILT_SOURCES,'BLAS CBLAS  $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
-    else
-		# There are precompiled versions for Windows. We cannot
-		# distinguish the different versions easily so we just
-		# download the most generic one. A more specific version can
-		# always be downloaded by hand.
-	
-		# BUG: at the moment, some necessary symbols are missing from
-		# the precompiled version (e.g. _dgemm_).
-	
-###	if test "$ff_win32" = yes -a "$enable_generic" = yes -a "$ff_unzip" = yes
-	if false
-	then
-	    ff_download_blas=atlas-binary
-	    ff_blas_libs="-L${curdir}/download/blas/WinNT_PPRO256 -lcblas -llapack -lf77blas -latlas"
-	    ff_blas_inc="-I${curdir}/download/blas/WinNT_PPRO256"
-	    ff_lapack_ok=ok
-	else
 
-            # ALH - FFCS - 23/12/8 - ATLAS compilation does not work anymore on Linux
-	    AC_MSG_ERROR(No BLAS library found - please install one or install Lapack)
+    # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
+    # the following tests fail.
 
-	    ff_download_blas=atlas-source
-	    ff_blas_libs="-L${curdir}/download/blas/ATLAS/lib/ff++ -lcblas -llapack -lf77blas -latlas"
-	    ff_blas_inc="-I${curdir}/download/blas/ATLAS/include"
-	    ff_lapack_ok=ok
-	fi
-    fi
+    # When compiling a generic version, we do not need an optimized version of the BLAS.
+
+    ff_download_blas=generic
+    ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
+    ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+
+    AC_SUBST(DOWNLOADED_BLAS,"libf77blas.a libcblas.a")
+    AC_SUBST(DOWNLOADED_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
 
     AC_MSG_RESULT($ff_download_blas)
-    AC_SUBST(DOWNLOAD_BLAS,$ff_download_blas)
     ff_blas_ok=yes
     ff_cblas_h=yes
     ff_cblas_libs=yes
 fi
+
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
+
 #looking for cblas.h  FH
 
 if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
@@ -1095,20 +1090,14 @@ then
     AC_CHECK_HEADERS(atlas/cblas.h,
 	ff_cblas_h=yes
 	ff_cblas_h=no)
-    
 fi
 
+# ALH - 18/9/13 - [[file:download/blas/Makefile.am]] does not update the WHERE mechanism so it always needs to be set up
+# here even in the case of a downloaded blas library.
 
-# FFCS: do not specify the default BLAS LDADD if a specific one will be built in the download directory
-
-if test "$ff_blas_ok" = yes && test "$ff_download_blas" = ""
-then
-    AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
-    dnl    echo blas LD  \'$ff_blas_libs\'  >>$ff_where_lib_conf
-fi
+AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
 
 # end of BLAS -------------------
-
 
 # Looking for ARPACK
 # ------------------
@@ -1121,8 +1110,8 @@ then
   ff_g2c_lib="$FLIBS"
        if test  -n "$ff_g2c_lib"
        then
-           LIBS="$LIBS $ff_g2c_lib"       
-       else 
+           LIBS="$LIBS $ff_g2c_lib"
+       else
 	  ff_g2c_ok=no
 	  AC_CHECK_LIB(g2c,G77_second_0,
 		LIBS="$LIBS -lg2c"
@@ -1148,23 +1137,23 @@ fi
 # because BLAS compilation will need it.
 
 AC_SUBST(G2CLIB,$ff_g2c_lib)
-#looking of  lapack if no compile the arpack lapack 
-# warning $$ because the make eat one 
+#looking of  lapack if no compile the arpack lapack
+# warning $$ because the make eat one
 ff_lapack_ok=no;
 ff_lapack_lib=
 AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
     if test "$ff_blas_ok" = yes ; then
         AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], ff_lapack_ok=yes)
 	if test "$ff_lapack_ok" = no ; then
-	    ff_save_libs=$LIBS	  
+	    ff_save_libs=$LIBS
 	    LIBS="$ff_save_libs $ff_blas_libs"
-            AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], ff_lapack_ok=yes)	
+            AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], ff_lapack_ok=yes)
 	    if test "$ff_lapack_ok" = no ; then
 	    LIBS="$ff_save_libs -llapack $ff_blas_libs"
             AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], [ff_lapack_ok=yes
-	    ff_lapack_lib="-llapack"] )	
-	    fi		    
-	    LIBS="$ff_save_libs"	   
+	    ff_lapack_lib="-llapack"] )
+	    fi
+	    LIBS="$ff_save_libs"
 	fi
     fi
 
@@ -1173,30 +1162,27 @@ if test "$ff_lapack_ok" != no ; then
 AC_SUBST(LAPACKLIBS,$ff_lapack_libs)
 fi
 if test "$ff_lapack_ok" = no; then
-AC_ARG_WITH(lapack,
-	[  --with-lapack=library	Use a specific version of the Lapack],
+    AC_ARG_WITH(lapack,
+	AC_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
 	ff_lapack_ok=yes
 	ff_lapack_lib="${withval}"
-	LIBS="$ff_lapack_lib $LIBS"
-)
+	LIBS="$ff_lapack_lib $LIBS")
 fi
+
+# Lapack configuration for Arpack
 
 ff_lapackdir='$$(LAPACKdir)'
-if  test "$ff_lapack_ok" = yes ; then
-  # no compilation of lapack in  arpack 
-  ff_lapackdir=
-  if test "$ff_lapack_ok" = yes   
-  then
-AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
-dnl      echo lapack LD  \'$ff_lapack_lib\'  >>$ff_where_lib_conf
-  fi   
-
+if test "$ff_lapack_ok" = yes
+then
+    # no compilation of lapack in arpack
+    ff_lapackdir=
 else
-  ff_lapack_lib=-llapack
+    ff_lapack_lib="-L${curdir}/download/lib -llapack"
 fi
+
 # Arpack itself
 
-ff_arpack_ok=no   
+ff_arpack_ok=no
 ff_save_libs="$LIBS"
 ff_arpack_libs=
 if test "$ff_blas_ok" = yes;
@@ -1229,12 +1215,12 @@ then
                 ff_arpack_libs="$ff_lib_arpack")
         AC_MSG_RESULT($ff_arpack_ok)
     fi
-  if test "$ff_arpack_ok" = yes 
+  if test "$ff_arpack_ok" = yes
   then
       AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
       echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
-  fi   
-  
+  fi
+
 	# If all else fails, download!
 	if test "$ff_arpack_ok" = no -a "$enable_download" = yes \
 	   -a "$enable_fortran" != no
@@ -1246,14 +1232,18 @@ then
 		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
 		AC_SUBST(LAPACK_arpack_LIB,${curdir}/download/lib/liblapack.a)
 
-		# Do not update $LIBS, but create an extra LIB variable,
-		# because this lib does not exist yet, and this could make the
-		# following tests fail.
-                ff_arpack_libs="-L${curdir}/download/lib -larpack  $ff_lapack_lib"
+		# Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this
+		# could make the following tests fail.
+
+		# ALH - 30/9/13 - do not use the "-L ${curdir}/download/lib" directive because it would allow other
+		# following -l directives (eg -lumfpack) to pick an old locally compiled library instead of the system
+		# ones.
+
+                ff_arpack_libs="${curdir}/download/lib/libarpack.a $ff_lapack_lib"
 		ff_arpack_ok=yes
 	fi
 fi
-if test  "$ff_arpack_ok" != yes 
+if test  "$ff_arpack_ok" != yes
  then
 	    AC_MSG_NOTICE([-- NO ARPACK --  enable_download : $enable_download , wget: $ff_wget ])
 fi
@@ -1270,11 +1260,16 @@ then
 	AC_DEFINE(HAVE_LIBARPACK,1,Arpack is used for eigenvalue computation)
 
 	# Determines whether to run the eigenvalue tests
-else 
-# all eigen test fails 
+else
+# all eigen test fails
 	AC_SUBST([SKIP_TESTS_EIGEN],[yes])
 fi
 AC_SUBST([EIGENOBJ])
+
+# ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
+# examples++-load require it (eg [[file:examples++-load/Element_Mixte.cpp::lapack]]). Request from Fred.
+
+AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
 # Looking for UMFPACK
 # -------------------
@@ -1284,117 +1279,121 @@ ff_umfpack_ok=no
 ff_save_libs="$LIBS"
 if test "$ff_blas_ok" = yes;
 then
-        # User-specified location
-        AC_ARG_WITH(amd,
-                [  --with-amd=library	Use a specific version of AMD],
-                ff_amd_ok=yes
-		ff_umfpack_libs="${withval}")
 
-        AC_ARG_WITH(umfpack,
-                [  --with-umfpack=library	Use a specific version of Umfpack],
-                ff_umfpack_ok=yes
-                ff_umfpack_libs="${withval} $ff_umfpack_libs"
-               )
-#		AC_DEFINE(HAVE_LIBUMFPACK,1,
-#			Umfpack is used for sparse matrices computations))
+    # User-specified location
 
-	# Trying default locations
+    AC_ARG_WITH(amd,
+	AC_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
+        ff_amd_ok=yes
+	ff_umfpack_libs="${withval}")
 
-	AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
-	    ff_umfpack_header=yes
-	    ff_umfpack_dir=`dirname $ac_header`)
+    AC_ARG_WITH(umfpack,
+        AC_HELP_STRING([--with-umfpack=library],[Use a specific version of Umfpack]),
+        ff_umfpack_ok=yes
+        ff_umfpack_libs="${withval} $ff_umfpack_libs")
 
-	# Somes systems like FreeBSD hide umfpack.h in a directory
-	# called UMFPACK (all capitals). This breaks the standard
-	# #define produced by autoconf in config.h.in.
+    # Trying default locations for the headers
 
-	if test "$ff_umfpack_header" != yes;
-	then
-		AC_CHECK_HEADER(UMFPACK/umfpack.h,
-			ff_umfpack_header=yes
-			ff_umfpack_dir=UMFPACK
-			AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,
-				If umfpack.h is located in UMFPACK subdir))
-	fi
-	LIBS="$ff_blas_libs $LIBS"
-	if test "$ff_amd_ok" = no;
-	then
-		AC_CHECK_LIB(amd,amd_info,
-			ff_umfpack_libs="$ff_umfpack_libs -lamd"
-			ff_amd_ok=yes)
-	fi
+    AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
+	ff_umfpack_header=yes
+	ff_umfpack_dir=`dirname $ac_header`)
 
-	if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
-	then        
-		AC_CHECK_LIB(umfpack,umf_i_malloc,
-			ff_umfpack_libs=" -lumfpack $ff_umfpack_libs"
-			ff_umfpack_ok=yes,,$ff_umfpack_libs)
-		if test "$ff_umfpack_ok" != yes -o "$ff_umfpack_header" != yes ; then
-			AC_MSG_WARN([		Sorry we find UMFPACK lib but not the include umfpack.h file])
-		fi
-	fi	
-        if  test	 "$ff_umfpack_header" != yes -a "$ff_umfpack_ok" != no; then
-            ff_umfpack_ok=no
-         fi
-	 if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
-		AC_DEFINE(HAVE_LIBUMFPACK,1, Umfpack is used for sparse matrices computations )			
-	 fi
-fi
+    # Somes systems like FreeBSD hide umfpack.h in a directory called UMFPACK (all capitals). This breaks the
+    # standard #define produced by autoconf in config.h.in.
 
-# FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
-# -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
-
-#if test $enable_ffcs = yes
-#then
-    if test "$ff_umfpack_ok" = yes 
+    LIBS="$ff_blas_libs $LIBS"
+    if test "$ff_umfpack_header" != yes;
     then
-	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
-	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+	AC_CHECK_HEADER(UMFPACK/umfpack.h,
+	    ff_umfpack_header=yes
+	    ff_umfpack_dir=UMFPACK
+	    AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir))
+    fi
 
-	dnl      echo  amd LD \'$ff_umfpack_libs\'  >>$ff_where_lib_conf
-	dnl      echo  amd INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
-	dnl      echo  umfpack LD  '$ff_umfpack_libs\'   >>$ff_where_lib_conf     
-	dnl       echo  umfpack  INCLUDE  \'-I/usr/include/$ff_umfpack_dir\'  >>$ff_where_lib_conf
-    fi   
-#fi
+    if test "$ff_amd_ok" = no;
+    then
+	AC_CHECK_LIB(amd,amd_info,
+	    ff_umfpack_libs="$ff_umfpack_libs -lamd"
+	    ff_amd_ok=yes)
+    fi
+
+    if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
+    then
+
+        # ALH - 30/9/13 - other libraries required by Umfpack
+
+	AC_CHECK_LIB(cholmod,cholmod_add,ff_umfpack_libs="$ff_umfpack_libs -lcholmod")
+	AC_CHECK_LIB(colamd,colamd_set_defaults,ff_umfpack_libs="$ff_umfpack_libs -lcolamd")
+
+	AC_CHECK_LIB(umfpack,umf_i_malloc,
+	    ff_umfpack_libs="-lumfpack $ff_umfpack_libs"
+	    ff_umfpack_ok=yes,,$ff_umfpack_libs)
+    fi
+
+    if test "$ff_umfpack_header" != yes -o "$ff_umfpack_ok" != yes; then
+        ff_umfpack_ok=no
+	AC_MSG_WARN([Sorry, we could not find the UMFPACK lib or the UMFPACK headers])
+    fi
+
+    if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
+	AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
+    fi
+fi
 
 LIBS="$ff_save_libs"
 
-
 # If all else fails, download!
-if test "$ff_umfpack_ok" = no -a "$enable_download" = yes 
-   then
-	AC_MSG_NOTICE(using downloaded UMFPACK)
-	AC_SUBST(DOWNLOAD_UMFPACK,"umfpack cholmod")
-	ff_umfpack_download=yes
-	# Do not update $LIBS, but create an extra LIB variable,
-	# because this lib does not exist yet, and this could make the
-	# following tests fail.
 
-	ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
-	AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
-	if test "$ff_win32" = yes; then
+if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
+then
+    AC_MSG_NOTICE(using downloaded UMFPACK)
+    AC_SUBST(DOWNLOAD_UMFPACK,"umfpack")
+    ff_umfpack_download=yes
+
+    # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
+    # the following tests fail.
+
+    ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
+    AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
+    if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
-	fi
-	ff_umfpack_ok=yes
+    fi
+    ff_umfpack_ok=yes
 fi
 
-# FFCS - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version, and removed
-# -I/usr/include/$ff_umfpack_dir from include options because it breaks the MingW64 compilation process.
+# ALH - 17/9/13 - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version because
+# [[file:download/umfpack/Makefile.am]] does not set the WHERE mechanism. Also removed -I/usr/include/$ff_umfpack_dir
+# from include options for FFCS because it breaks the MingW64 compilation process.
 
-## if test $enable_ffcs = yes && test "$ff_umfpack_ok" = yes 
-if  test "$ff_umfpack_ok" = yes 
+if test "$ff_umfpack_ok" = yes
 then
-    AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
-    AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
-fi   
-
-if test "$ff_umfpack_ok" = no
-then
-	 AC_MSG_NOTICE( -- NOT  UMFPACK  ff_wget = $ff_wget)
+    if test $enable_ffcs = no
+    then
+	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+    else
+	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
+	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
+    fi
+else
+    AC_MSG_NOTICE([ -- NO UMFPACK (ff_wget = $ff_wget)])
 fi
 
 AC_SUBST(UMFPACKLIBS,$ff_umfpack_libs)
+
+# If times() and sysconf() are not here, UMFPACK should know
+
+if test "$ff_umfpack_ok" = yes
+then
+    AC_CHECK_FUNCS(times sysconf,
+	ff_umfpack_posix_ok=yes,
+	ff_umfpack_posix_ok=no)
+
+    if test "$ff_umfpack_posix_ok" = no
+    then
+	AC_SUBST(FF_UMFPACK_CONFIG,"-DCBLAS -DNPOSIX")
+    fi
+fi
 
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
@@ -1411,25 +1410,13 @@ AC_CHECK_FUNCS(srandomdev)
 AC_CHECK_FUNCS(second_,ff_second="",ff_second=second.o)
 AC_SUBST(FF_SECOND,"$ff_second")
 
-# If times() and sysconf() are not here, UMFPACK should know
-if test "$ff_umfpack_ok" = yes
-then
-	AC_CHECK_FUNCS(times sysconf,
-			     ff_umfpack_posix_ok=yes,
-			     ff_umfpack_posix_ok=no)
-	if test "$ff_umfpack_posix_ok" = no
-	then
-		AC_SUBST(FF_UMFPACK_CONFIG,"-DCBLAS -DNPOSIX")
-	fi
-fi
-
 # Enable static linking (no shared libraries)
 # -------------------------------------------
-AC_CHECK_PROG(ff_libtool,libtool,yes,no)	
-if test  "$ff_mac" = "yes"  -a "$ff_libtool" = yes ; then  
+AC_CHECK_PROG(ff_libtool,libtool,yes,no)
+if test  "$ff_mac" = "yes"  -a "$ff_libtool" = yes ; then
   ff_AR="libtool"
   ff_ARFLAGS="-static -o"
-  ff_RANLIB="echo" 
+  ff_RANLIB="echo"
 fi
 
 AC_ARG_ENABLE(static,
@@ -1445,7 +1432,7 @@ then
 		AC_MSG_ERROR(libtool not found)
 	fi
 fi
-#  for compiation of  arpack  use libtool to bluid universal library on MacOs. 
+#  for compiation of  arpack  use libtool to bluid universal library on MacOs.
 AC_SUBST(AR,$ff_AR)
 AC_SUBST(ARFLAGS,$ff_ARFLAGS)
 AC_SUBST(RANLIN,$ff_RANLIB)
@@ -1510,12 +1497,12 @@ dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CNOFLAGS)
-	if test "$enable_fortran" != no 
-	 then 
-	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)	
-	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FNOFLAGS)	
-	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCFLAGS)	
-	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCNOFLAGS)	
+	if test "$enable_fortran" != no
+	 then
+	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)
+	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FNOFLAGS)
+	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCFLAGS)
+	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCNOFLAGS)
 dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FNOFLAGS)
 dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
 
@@ -1529,7 +1516,7 @@ AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 AC_CHECK_PROG(ff_latex,latex,yes,no)
 AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
 AC_CHECK_PROG(ff_dvips,dvips,yes,no)
-# to translate the figure 
+# to translate the figure
 AC_CHECK_PROG(ff_pdf2ps,pdf2ps,yes,no)
 AC_CHECK_PROGS(EPSTOPDF,[epstopdf pstopdf],[false])
 AC_CHECK_PROG(ff_convert,convert,yes,no)
@@ -1570,9 +1557,9 @@ fi
 # Choosing compilation options for the standard version (in src/std)
 # ------------------------------------------------------------------
 
-# The "standard" configured version can use win32 (mingw) 
+# The "standard" configured version can use win32 (mingw)
 
-if test "$ff_mingw" = yes 
+if test "$ff_mingw" = yes
 then
 
     # FFCS does not use FreeFem++-std, and Pcrgraph.cpp does not compile under mingwin64
@@ -1597,32 +1584,8 @@ AC_SUBST(STD_LDFLAGS,$ff_std_ldflags)
 
 AC_SUBST(STD_LIBS,$ff_std_libs)
 
-# Flex compatibility with Bison
-# -----------------------------
-
-# If Flex does not know Bison options, it cannot deal with
-# src/ide/hl_lex.l++. So we need to make src/ide/hl_lex.c++ up-to-date
-# by hand (under Cygwin, "cvs update" does not make hl_lex.c++ newer
-# than hl_lex.l++ even if it was when a commit was done).
-AC_MSG_CHECKING(flex compatibility with bison)
-if test `flex --help|fgrep bison|wc -l` = 0
-then
-	AC_MSG_RESULT(no)
-	touch src/ide/hl_lex.c++
-else
-	AC_MSG_RESULT(yes)
-fi
-
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
-
-# ALH - 31/7/13 - hypre was deactivated some time ago (around 01/2012 according to Mercurial records), so keep it not
-# compiled by default, but allow it to be compiled on user request (requested on the FF mailing list)
-
-if test -z "$enable_hypre"
-then
-    $enable_hypre=no
-fi
 
 # ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
 # may also find interesting to specify a local version of a tool instead of downloading it.
@@ -1669,7 +1632,6 @@ m4_define([TOOL_DISABLE],
 
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
-TOOL_DISABLE(hypre,hypre_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
@@ -1701,6 +1663,25 @@ then
     fi
 fi
 
+# ALH - pARMS needs "-fno-range-check" on Windows, but this options fails on MacOS 10.8.  Add no-range-check for Windows
+# for hexadecimal parameter constants like:
+#
+# [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
+#
+# Such constants are rejected without [[file:download/parms/makefile-parms.in::NO_RANGE_CHECK]]
+
+if test $OS = Windows_NT
+then
+    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)
+fi
+
+# ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
+if test "$with_scotch_include" = ""
+then
+    with_scotch_include=$ac_pwd/download/include/scotch
+fi
+AC_SUBST(SCOTCH_INCLUDE,$with_scotch_include)
+
 # Find out kernel and libc versions
 # ---------------------------------
 
@@ -1716,129 +1697,28 @@ then
 	AC_MSG_RESULT($ff_libc_version)
 	AC_SUBST(LIBC_VERSION,$ff_libc_version)
 fi
-#  def variable pour les makefiles 
+#  def variable pour les makefiles
 
 # creating all makefiles
 # ----------------------
-ff_bamgprog="bamg${EXEEXT}  cvmsh2${EXEEXT}"
 
+ff_bamgprog="bamg${EXEEXT} cvmsh2${EXEEXT}"
 
 AC_SUBST(CNOFLAGS,$CNOFLAGS) dnl for superludist CFLAGS without optim  ...
 AC_SUBST(FNOFLAGS,$FNOFLAGS) dnl for blacs CFLAGS without optim  ...
+
 # The final list of executable programs
+
 AC_SUBST(MEDITPROG,$ff_meditprog)
-
-# ALH - FFCS - 5/1/9 - ffglut cannot be compiled with FFCS under Cygwin because it requires a GLUT versions that works
-# with Mingw, and the standard Cygwin Glut is not enough. But FFCS needs a working ffglut on other platforms for testing
-# purposes.
-
-if test "$ff_win32" = yes
-then
-	AC_SUBST(FFGLUTPROG,'')
-else
-	AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
-fi
-
+AC_SUBST(FFGLUTPROG,$ff_ffglutprog)
 AC_SUBST(BAMGPROG,$ff_bamgprog)
 AC_SUBST(STDPROG,$ff_stdprog)
-AC_SUBST(IDEPROG,$ff_ideprog)
-AC_SUBST(TESTIDEPROG,$ff_testideprog)
-# The final test program
-AC_SUBST(IDE_TESTS,$ff_idetest)
 ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
+AC_SUBST(TEST_FFPP,"../src/nw/FreeFem++")
+AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")
 
-#echo xxxxxxxxxxx
-# hips LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhips
-# hips INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
-# hipssequential LD -L/Users/hecht/work/freefem++/download/lib/hips -lio -lhipssequential
-# hipssequential INCLUDE -I/Users/hecht/work/freefem++/download/include/hips
-# hypre LD -L/Users/hecht/work/freefem++/download/lib/hypre  -lHYPRE
-# hypre INCLUDE -I/Users/hecht/work/freefem++/download/include/hypre
-#metis LD -L/Users/hecht/work/freefem++/download/lib -lmetis
-#metis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
-# mumps LD '-L/Users/hecht/work/freefem++/download//lib  -lpord -lmumps_common -ldmumps -lzmumps -lpord'
-# mumps INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# parmetis LD -L/Users/hecht/work/freefem++/download/lib -lparmetis -lmetispar
-# parmetis INCLUDE -I/Users/hecht/work/freefem++/download/include/metis
-# scalapack LD '-L/Users/hecht/work/freefem++/download/lib  -lscalapack '
-# scalapack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# ptscotch LD '-L/Users/hecht/work/freefem++/download/lib  -lptesmumps -lptscotch -lptscotcherr '
-# ptscotch INCLUDE '-I/Users/hecht/work/freefem++/download/include/scotch'
-# scotch LD '-L/Users/hecht/work/freefem++/download/lib   -lscotch -lscotcherr '
-# scotch INCLUDE '-I/Users/hecht/work/freefem++/download/include/scotch'
-# superlu LD -L/Users/hecht/work/freefem++/download/lib -lsuperlu
-# superlu INCLUDE -I/Users/hecht/work/freefem++/download/include
-# superlu_dist LD '-L/Users/hecht/work/freefem++/download/lib -lsuperlu_dist_2.3'
-# superlu_dist INCLUDE '-I/Users/hecht/work/freefem++/download/include/superludist'
-# tetgen LD -L/Users/hecht/work/freefem++/download/lib -ltet
-# tetgen INCLUDE -I/Users/hecht/work/freefem++/download/include/
-# arpack LD '-L/Users/hecht/work/freefem++/download/lib' '-larpack'
-# arpack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# umfpack LD '-L/Users/hecht/work/freefem++/download/lib' '-lumfpack'
-# umfpack INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# amd LD '-L/Users/hecht/work/freefem++/download/lib' '-lamd'
-# amd INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# fftw3 LD '-L/Users/hecht/work/freefem++/download/lib' '-lfftw3'
-# fftw3 INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-# mmg3d LD '-L/Users/hecht/work/freefem++/download/lib' '-lmmg3d'
-# mmg3d INCLUDE '-I/Users/hecht/work/freefem++/download/include'
-
-
-#if test -f download/pkg/mmg3dlib.tar.gz  ;then
-#    AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
-#else
-#    ff_MACOS=`expr "xx $CXXFLAGS" : '.*-mmacosx-version-min=\([0-9.]*\).*'`
-#    
-#    ff_mmg3dlib=""
-#    if test "$ff_mac" = yes ; then
-#        case $ff_MACOS  in
-#	     [0-9.]*) ff_MACOS="$ff_MACOS";;
-#	     *) ff_MACOS=`sw_vers -productVersion| awk -F. '{print $1"."$2}'`
-#    	esac
-#	MACOS=10.4
-#	ff_mmg3dlib="libmmg3d-1001-OSX-$ff_MACOS.tar.gz"
-#    elif test "$ff_win32" = yes ; then
-#        case `uname` in 
-#	 MINGW32*)    	ff_mmg3dlib="libmmg3d-1001-MINGW32.tar.gz";;
-#	 MINGW64*)    	ff_mmg3dlib="libmmg3d-1001-MINGW64.tar.gz";;
-#	 CYWIN*)    	ff_mmg3dlib="libmmg3d-1001-WIN32.tar.gz";;
-#	 esac 
-#    else 
-#	ff_mmg3dlib="libmmg3d-1001-LINUX-$ff_size_ptr.tar.gz"
-#    fi
-    
-#    if test -f  download/pkg/$ff_mmg3dlib ; then 
-#        tar zxf download/pkg/$ff_mmg3dlib -C download
-#    elif test "enable_download" = yes ; then
-#	mkdir download/pkg 
-#	( cd download/pkg
-#	    $ff_wget_command  http://www.freefem.org/ff++/ftp/libmmg3d/$ff_mmg3dlib
-#	    tar zxf $ff_mmg3dlib -C .. 	
-#	    )
-#    fi
-#    if test -f "download/lib/libmmg3d.a" ; then
-#	AC_MSG_CHECKING(for MMG_mmg3dlib in mmg3dlib )
-#	    ff_save_libs="$LIBS"
-#	    LIBS="$LIBS -Ldownload/lib -lmmg3d"
-#	    AC_LINK_IFELSE(
-#		[AC_LANG_CALL(,MMG_mmg3dlib)],
-#		ff_mmg3d_ok=yes 
-#		,
-#		ff_mmg3d_ok=no
-#		rm download/lib/libmmg3d.a download/include/libmmg3d.a
-#                ff_mmg3d_ok=
-#		)
-#	    LIBS="$ff_save_libs"
-#	    AC_MSG_RESULT($ff_mmg3d_ok)
-#    fi
-#    AC_SUBST(MMG3DLIB_TAR,$ff_mmg3dlib) 
-#fi
-
-AC_SUBST(TEST_FFPP,"../src/nw/FreeFem++")  
-AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")  
-
-ff_with_mpi=-openmpi; 
+ff_with_mpi=-openmpi;
 
 ff_blacs="-lblacsCinit$ff_with_mpi     -lblacsF77init$ff_with_mpi      -lblacs$ff_with_mpi"
 ff_scalapack=-lscalapack
@@ -1848,8 +1728,7 @@ test -n "$ff_mkl_blacs" && ff_blacs="$ff_mkl_blacs"
 test -n "$ff_mkl_scalapack" && ff_scalapack="$ff_mkl_scalapack"
 test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
 
-
-m4_map([AC_FF_WHERELIB],[ 
+m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
 	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
@@ -1876,16 +1755,16 @@ m4_map([AC_FF_WHERELIB],[
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
-#  remove gsl if not find ... FK 
+#  remove gsl if not find ... FK
 
-if test  "$ff_where_lib_conf_gsl" == 1  -a -z "$enable_gsl" ; then enable_gsl=no; fi;  
-if test  "$ff_where_lib_conf_mkl" == 1  -a -z "$enable_mkl" ; then enable_pardiso=no; fi;  
+if test  "$ff_where_lib_conf_gsl" == 1  -a -z "$enable_gsl" ; then enable_gsl=no; fi;
+if test  "$ff_where_lib_conf_mkl" == 1  -a -z "$enable_mkl" ; then enable_pardiso=no; fi;
 TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
 
 
-AM_CONDITIONAL([FFCS_WINDOWS],[test $OS = Windows_NT])
- 
+AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
+
 # All makefiles
 AC_OUTPUT(Makefile
     download/Makefile
@@ -1900,7 +1779,6 @@ AC_OUTPUT(Makefile
     src/Algo/Makefile
     src/lglib/Makefile
     src/fflib/Makefile
-dnl    src/std/Makefile
     src/nw/Makefile
     src/mpi/Makefile
     src/bamg/Makefile
@@ -1950,32 +1828,16 @@ if test "$enable_download" = yes  ;then
    	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
     fi
 
-dnl    if test -f download/lib/libmmg3d.a ; then
-dnl        AC_FF_ADDWHERELIB(mmg3d,-L`pwd`/download/lib,-I`pwd`/download/include)
-dnl	echo "mmg3d LD '-L`pwd`/download/lib' '-lmmg3d'" >>$ff_where_lib_conf
-dnl	echo "mmg3d INCLUDE '-I`pwd`/download/include'" >>$ff_where_lib_conf
-dnl    else 
-dnl 	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
-dnl    fi
-    
     if test "$ff_download_blas" = "generic"  ; then
         AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
         AC_MSG_NOTICE([      you can try to use the  Kazushige Goto s BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
         AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
         AC_MSG_NOTICE([      or try to download/compile the altas blas .])
     fi
+fi
 
-dnl    if test -f download/pkg/mmg3dlib.tar.gz  ; then
-dnl	AC_MSG_NOTICE([      Compile : download/pkg/mmg3dlib.tar.gz  (3d mesh adapaton)])
-dnl    elif test 	  "$ff_mmg3d_ok" = yes ; then
-dnl	AC_MSG_NOTICE([      Use of precompile version : download/pkg/$ff_mmg3dlib  (3d mesh adapaton)])
-dnl    else
-dnl	AC_MSG_NOTICE([   sorry no download/pkg/mmg3dlib.tar.gz 3d mesh adapaton see Dobrzynski Cecile <cecile.dobrzynski@math.u-bordeaux1.fr> ])
-dnl    fi	
-fi  # ---  test "$enable_download" = yes  ;then
+# FFCS does not use glut, so remove this message because it could make the user think that something is broken
 
-
-# FFCS: remove this message because it could make the user think that something is broken
 if test $enable_ffcs = no
 then
     if test "$ff_glut_ok" != yes  ; then
@@ -1984,7 +1846,7 @@ then
 	AC_MSG_NOTICE([         because the configure do not find OpenGL, GLUT or pthread  developer stuff ])
 	AC_MSG_NOTICE([         read the README to find missing package  ])
 	AC_MSG_NOTICE([         F. Hecht  ])
-	AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])	
+	AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])
 	AC_MSG_NOTICE([     *********************************************** ])
     fi
 fi
