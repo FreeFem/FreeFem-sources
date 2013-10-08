@@ -850,12 +850,15 @@ then
     AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
     fftw_download=
 else
-    fftw_download=fftw
+    if test "$enable_download" = yes
+    then
+	ff_DOWNLOAD_FFTW=fftw
+    fi
 fi
 
-# see [[file:download/fftw/Makefile::all]]
+# used in [[file:download/fftw/Makefile.am::DOWNLOAD_FFTW]]
 
-AC_SUBST(FFTW,$fftw_download)
+AC_SUBST(DOWNLOAD_FFTW,$ff_DOWNLOAD_FFTW)
 
 dnl ---------------------------
 dnl   Looking for the tetgen
