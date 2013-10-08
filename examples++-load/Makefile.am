@@ -133,8 +133,11 @@ include.done: include.tar.gz
 	gunzip -c include.tar.gz| tar xvf -
 	-rm -f include/._*
 	touch $@
-#	-cp -rf ../download/include/* include/.
 endif
+
+clean-local::
+	-rm -r include
+	-rm include.done
 
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
@@ -165,7 +168,7 @@ regtests.edp: regtests.m4 ../regtests.m4
 
 $(LIST_COMPILE):ff-c++ include.done
 
-clean-local:
+clean-local::
 	-rm *.o *.$(DYLIB_SUFFIX) load.link WHERE_LIBRARY-download ff-get-dep ff-c++ ff-pkg-download \
 	  $(LIST_COMPILE) $(LIST_COMPILE_PKG)  regtests.edp makeref.edp
 	-rm -rf include include.done

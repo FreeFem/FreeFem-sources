@@ -6,6 +6,17 @@
  - add missing file in dist or in mercurial distribution
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
+17/9/2013 (ALH)
+ - umfpack configuration cleanup (request from Fred)
+ - blas configuration cleanup (request from Cico)
+   - configuration option --enable-generic-blas has no effect anymore, removed
+   - Atlas compilation directives have no effect anymore, removed
+   - Moved OpenBLAS compilation from FFCS source tree to FF source tree
+ - Added configure option --disable-system-fftw to skip any default FFTW library installed on the system
+
+ - Changed location of lapack WHERE-library setup in [[file:configure.ac::WHERE_lapack]] to insure that it is always
+   defined (request from Fred)
+
 10/9/2013 (ALH)
  - Corrected pastix compilation for FFCS on MacOS 10.6
  - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
@@ -19,6 +30,7 @@
  - Parallelized MUMPS compilation in download/mumps (and mumps-seq)
  - Applied a patch from Fred for compiling SuiteSparse on Slackware64-14.0
  - Added configuration option --enable-hypre (disabled by default, contrary to other tools)
+ - Deactivate FFTW download when a local version is found (request from Helmut Jarausch)
 10/7/2013  (version 3.25)
  - remove of Mafile.in configure for the hg distrubion 
     use :  autoreconf -i  # too build Makefile.in 

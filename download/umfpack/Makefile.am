@@ -1,8 +1,29 @@
-# Downloading and compiling extra libraries
-# -----------------------------------------
+# Downloading and compiling extra libraries for Umfpack
+# ======================================================================
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh brief="Downloading and compiling extra libraries for Umfpack" default=0 freefem make multipleauthors start=04/06/04 upmc
 
-all-local:$(DOWNLOAD_UMFPACK)
-EXTRA_DIST=SuiteSparse_config.mk.in 
+# see [[file:../../configure.ac::DOWNLOAD_UMFPACK]]
+all-local: $(DOWNLOAD_UMFPACK)
+EXTRA_DIST= SuiteSparse_config.mk.in 
 
 # Downloading and compiling UMFPACK
 # ---------------------------------
@@ -17,9 +38,6 @@ CHOLMODLIB=../lib/libcholmod.a
 COLAMDLIB=../lib/libcolamd.a
 SUITESPARSECONFIGLIB=../lib/libsuitesparseconfig.a
 
-
-#  all: umfpack cholmod
-
 # ALH - 4/9/13 - parallel make crashes ("pipe from processes is a directory"?). make sure that everything is run
 # sequentially
 
@@ -27,7 +45,9 @@ umfpack:
 	$(MAKE) MAKEFLAGS= $(AMDLIB)
 	$(MAKE) MAKEFLAGS= $(UMFPACKLIB)
 	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB)
-cholmod:
+#
+# ALH - 19/9/13 - cholmod part built sequentially
+#
 	$(MAKE) MAKEFLAGS= $(CAMDLIB)
 	$(MAKE) MAKEFLAGS= $(COLAMDLIB)
 	$(MAKE) MAKEFLAGS= $(AMDLIB)
@@ -40,14 +60,14 @@ cholmod:
 
 $(SUITESPARSECONFIGLIB): SuiteSparse/FF 
 	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
+	mkdir -p ../include ../lib
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/SuiteSparse_config/libsuitesparseconfig.a ../lib/libsuitesparseconfig.a
 	$(RANLIB) ../lib/libsuitesparseconfig.a
 
 $(UMFPACKLIB): SuiteSparse/FF 
 	cd SuiteSparse/UMFPACK/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir -p ../include ../lib
+	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/UMFPACK/Include/*.h ../include
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/UMFPACK/Lib/libumfpack.a ../lib/libumfpack.a
@@ -62,21 +82,21 @@ $(AMDLIB): SuiteSparse/FF
 
 $(CAMDLIB): SuiteSparse/FF 
 	cd SuiteSparse/CAMD/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
+	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/CAMD/Include/*.h ../include
 	cp  SuiteSparse/CAMD/Lib/libcamd.a ../lib/libcamd.a
 	$(RANLIB) ../lib/libcamd.a
 
 $(CHOLMODLIB): SuiteSparse/FF 
 	cd SuiteSparse/CHOLMOD/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
+	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/CHOLMOD/Include/*.h ../include
 	cp  SuiteSparse/CHOLMOD/Lib/libcholmod.a ../lib/libcholmod.a
 	$(RANLIB) ../lib/libcholmod.a
 
 $(COLAMDLIB): SuiteSparse/FF 
 	cd SuiteSparse/COLAMD/Lib && $(MAKE) MAKEFLAGS=
-	-mkdir ../include ../lib
+	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/COLAMD/Include/*.h ../include
 	cp  SuiteSparse/COLAMD/Lib/libcolamd.a ../lib/libcolamd.a
 	$(RANLIB) ../lib/libcolamd.a

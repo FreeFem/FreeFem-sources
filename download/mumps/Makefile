@@ -39,13 +39,21 @@ WGET = wget --no-check-certificate
 
 mumps:../lib/WHERE.mumps
 
+$(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
+	cp Makefile.inc $(SRCDIR)
+#
+# ALH - 'd' and 'z' versions need to be made sequentially
+#
+	cd $(SRCDIR);make d
+	cd $(SRCDIR);make z
+	touch $@
+
 # ALH - WHERE was not built properly during a full compile from a clean source. This goal has been rewritten to solve
 # this issue.
 
 ../lib/WHERE.mumps:install.done
-	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM \
-		-lpthread  >../lib/WHERE.mumps
-	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps
+	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM -lpthread  > $@
+	echo mumps INCLUDE -I@DIR@/include  >> $@
 
 install.done:$(SRCDIR)/FAIT
 	-mkdir -p ../include/libseq
@@ -55,14 +63,6 @@ install.done:$(SRCDIR)/FAIT
 	cp $(SRCDIR)/lib/*.a ../lib/
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM.a ../lib/
 	touch $@
-
-# ALH - WHERE needs to be built sequentially after install
-WHERE: install
-	if [ -f $(SRCDIR)/FAIT  ] ;then \
-	$(MAKE) install ; \
-	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM  -lpthread  >../lib/WHERE.mumps ;\
-	echo mumps INCLUDE -I@DIR@/include  >> ../lib/WHERE.mumps ;\
-	fi
 
 FAIRE-$(VERSION):WHERE
 	touch FAIRE-$(VERSION)
@@ -87,6 +87,7 @@ $(PACKAGE1):
 
 clean:clean-local
 clean-local:
+	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a

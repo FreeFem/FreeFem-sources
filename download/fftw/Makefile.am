@@ -1,31 +1,51 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-all-local: $(DOWNLOAD_FFTW)
+all:@FFTW@
 
-# Downloading and compiling FLTK
+# Downloading and compiling FFTW
 # ------------------------------
 
 # FFTW information
-SRCDIR=fltk-$(FFTW_VERSION)
-PACKAGE=fltk-$(FFTW_VERSION).tar.gz
+#http://www.fftw.org/fftw-3.2.tar.gz
+SRCDIR=fftw-$(FFTW_VERSION)
+PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
-INSTALL=install
+PKGDIR=../pkg
+FFTW_VERSION=3.3.2
+INSTALL=../..
+THIS=fftw3
 
-fltk: $(SRCDIR)/$(INSTALL)
+fftw:FAIT
 
-$(SRCDIR)/$(INSTALL): $(SRCDIR)
-	cd $(SRCDIR) && ./configure  --prefix=`pwd`/../.. CXX=$(CXX) CC=$(CC)
-	cd $(SRCDIR) && make
+FAITwin32-dll-target:
+	echo "On Pure Win32 (to hard to compile) "
+
+FAIT:	
+	$(MAKE) FAIRE
+	touch FAIT 
+
+FAIRE: $(SRCDIR) 
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking --disable-fortran --prefix=`pwd`/$(INSTALL)	\
+	CXX="$(CXX)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make install
+	touch FAIRE
+install:
+	cd $(SRCDIR) && make install
+WHERE:install
+	-if [ FAIT ] ; then \
+	echo $(THIS)  LD -L@DIR@/lib -l$(THIS)  >../lib/WHERE.$(THIS) ;\
+	echo $(THIS) INCLUDE -I@DIR@/include   >> ../lib/WHERE.$(THIS) ;\
+	fi
 
-$(SRCDIR): $(PACKAGE)
-	tar xvzf $(PACKAGE)
+$(SRCDIR): $(PKGDIR)/$(PACKAGE)
+	gunzip -c   $^ | tar xvf - 
 
-$(PACKAGE):
-	@WGET@ -N $(SERVER)/$(PACKAGE)
+$(PKGDIR)/$(PACKAGE):
+	cd $(PKGDIR);$(WGET) $(SERVER)/$(PACKAGE)
+
+clean: clean-local
 
 clean-local:
-	-rm -rf fftw-* 
-	-rm ../include/fftw3.f ../include/fftw3.f03 ../include/fftw3.h ../include/fftw3l.f03 ../include/fftw3q.f03	\
+	-rm -rf fftw-* FAIT FAIRE ../lib/WHERE.$(THIS)
 		../lib/libfftw3.a ../lib/libfftw3.la
