@@ -103,6 +103,10 @@ bool fespacecomplex;
 int fespacedim;
 extern int UnShowAlloc;
 int ShowAlloc(const char *s,size_t &);
+
+// <<yylex>> Connection from grammar to lexer object zzzfff [[file:../fflib/lex.hpp::zzzfff]] of class mylex
+// [[file:../fflib/lex.hpp::class mylex]]. Method mylex::scan() is implemented at [[file:../fflib/lex.cpp::mylex::scan]]
+
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 
@@ -255,6 +259,8 @@ void (*end_parallele)()=0;
 %token SOLVE
 
 %% 
+
+/* <<start_symbol>> called from [[int Compile]] */
 
 start:   input ENDOFFILE {
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
@@ -679,17 +685,17 @@ int Compile()
   Block::open(currentblock);  
   try {
     UnShowAlloc =0;
-    retvalue=yyparse (); //  compile
+    retvalue=yyparse (); // compile starting from [[start_symbol]]
    
     if(retvalue==0)  
       if(currentblock) 
-	{retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
+        {retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
       else {
-	  if( verbosity  ) {
+        if( verbosity  ) {
 	      UnShowAlloc =1;
 	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << " mpirank: " <<mpirank << endl;
 	      if(!mpirank) cerr <<  "Bien: On a fini Normalement" << endl; }
-	}
+      }
   }
 
   catch (Error & e) 
@@ -837,11 +843,11 @@ int mainff (int  argc, char **argv)
   //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || mpirank==0)  cout << endl;
-  zzzfff->input(cc);
+  zzzfff->input(cc); // [[file:../fflib/lex.cpp::void mylex input]]
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     
-  retvalue= Compile();
+  retvalue= Compile(); // [[int Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
 
   if(end_parallele) end_parallele();
