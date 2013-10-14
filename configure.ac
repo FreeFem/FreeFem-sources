@@ -713,9 +713,11 @@ else
     # uses mpicxx in [[file:examples++-load/ff-c++]]. The resulting Fortran libraries (eg Mumps) would compile even
     # without the proper Fortran libs, but they would not load properly.
 
-    # under Win32, libmpi_f77.a is not the right name and ff/mingw/mpicxx adds the right libraries by itself
+    # under Win32, libmpi_f77.a is not the right name and FFCS mingw/mpicxx adds the right libraries by itself
 
-    if test $ff_win32 != yes
+    # With mpich2 Debian wheezy 32 bits, libmpi_f77.a is not available (request from Cico, 14/10/13)
+
+    if test -f /usr/lib/openmpi/lib/libmpi_f77.a
     then
         AC_FF_ADDWHERELIB(mpifc,-lmpi_f77,)
     	AC_FF_ADDWHERELIB(mpif77,-lmpi_f77,)
