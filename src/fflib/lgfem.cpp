@@ -4813,10 +4813,13 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  zzzfff->Add("R3",atype<R3*>());
 
- // <<mesh_keyword>> pmesh is a pointer to Mesh defined at [[file:lgfem.hpp::typedef Mesh pmesh]]
+ // <<mesh_keyword>> pmesh is a pointer to Mesh [[file:../femlib/fem.hpp::class Mesh]] defined at
+ // [[file:lgfem.hpp::typedef Mesh pmesh]]
+
  zzzfff->Add("mesh",atype<pmesh*>());
 
  // pmesh3 is a pointer to Mesh3 defined at [[file:lgfem.hpp::typedef Mesh3 pmesh3]]
+
  zzzfff->Add("mesh3",atype<pmesh3*>());
 
  zzzfff->Add("element",atype<lgElement>());
