@@ -773,7 +773,8 @@ void ListOfInst::Add(const C_F0 & ins) {
       list[n++] = ins;
       }}
       
-/// Iteratively calls each item in the local array #list of type #Expression
+/// <<ListOfInst::operator()>> Iteratively calls each item in the local array #list of type #Expression
+
 AnyType ListOfInst::operator()(Stack s) const {     
     AnyType r; 
     double s0=CPUtime(),s1=s0,ss0=s0;
