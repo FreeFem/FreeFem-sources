@@ -1,3 +1,6 @@
+  - correct error in case of block matrix with block of 0 row or 0 column. 
+14/10/2013 (ALH)
+  - changed FFCS Fortran MPI configuration for MPICH2
 05/09/2013 put version .tar.gz on the web 
   - correct makefile wget in pastis and superludist  
   - correct compile of load example :  paradiso, gsl automaticaly 
@@ -41,7 +44,7 @@
  
  - add new parameter to ffglut for demo of freefem++ 
     ffglut  [-nv|-v|-vv|-vvv] [-wait 0.5] [-g 512x300+10+10] [-t title] [file]
-    all number can be change the wiat is in second 0 is default value nowait bewteew plot
+    all number can be change the wait is in second 0 is default value nowait bewteew plot
     -g 512x300+10+10 is the geometry of the  graphic window
     -t the title of the windows 
 26/6/2013 (ALH)
