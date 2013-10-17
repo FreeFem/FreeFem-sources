@@ -1,6 +1,7 @@
   - correct error in case of block matrix with block of 0 row or 0 column. 
 14/10/2013 (ALH)
   - changed FFCS Fortran MPI configuration for MPICH2
+  - split DOC makefiles into Makefile.am and figs.mak to suppress automake warnings about portability
 05/09/2013 put version .tar.gz on the web 
   - correct makefile wget in pastis and superludist  
   - correct compile of load example :  paradiso, gsl automaticaly 
