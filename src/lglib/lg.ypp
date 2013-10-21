@@ -1,4 +1,4 @@
-/// \file
+// \file
 
 %{ 
     // -*- Mode : c++ -*-
@@ -90,7 +90,11 @@ aType rettype[nbembtype];
 Block * routineinblock[nbembtype]; // Add FH july 2005 pb clean on return 
 int kkembtype=-1;
 int inloopcount=0;
+
+/// <<currentblock>> Block class from [[file:~/ff/draft/src/fflib/AFunction.hpp::Block]]
+
 Block *currentblock;
+
 // Add FH july 2005 
 //  problem clean variable after break,continue and return.
 const int sizeStackOfLoop=100; 
@@ -283,6 +287,7 @@ start:input ENDOFFILE {
       // FFCS: divert stream to FFCS
       if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
 
+      // cf [[currentblock]]
       size_t sizestack = currentblock->size()+1024 ; //  before close 
 
       // $1 is of type [[YYSTYPE]]
@@ -295,7 +300,11 @@ start:input ENDOFFILE {
       if(verbosity>2  || mpirank==0) cout << endl;  
 
       {
+
+        // <<create_global_FF_stack>> calls [[file:~/ff/draft/src/fflib/ffstack.hpp::newStack]]
+
         Stack stack = newStack(sizestack);
+
         double CPUcompile= CPUtime();
         try {                  
 
@@ -319,6 +328,9 @@ start:input ENDOFFILE {
 
         if(verbosity) cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
                            <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
+
+        /// <<delete_global_FF_stack>>
+
         deleteStack(stack);
       } 
       fingraphique();

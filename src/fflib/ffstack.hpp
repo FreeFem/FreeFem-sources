@@ -53,6 +53,8 @@ const int BeginOffset = 6;
 
 #ifndef NEWFFSTACK
 typedef void StackType;
+
+/// <<Stack>>
 typedef void *Stack;
 
 
@@ -335,6 +337,7 @@ T * Add2StackOfPtr2FreeA(Stack s,T * p)
 //  ---------------------------------------------------
 #ifndef NEWFFSTACK
 
+/// <<newStack>>
 inline Stack newStack(size_t l)
  {
    char *  mps;
