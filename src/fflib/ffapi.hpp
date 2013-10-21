@@ -105,7 +105,7 @@ namespace ffapi{
   bool protectedservermode();
 }
 
-#endif //FFAPI_HPP
+#endif // FFAPI_HPP
 
 /// Local Variables:
 /// mode:c++

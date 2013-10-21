@@ -30,7 +30,10 @@
 //   are pointer 
 //#define WITHCHECK
 class basicForEachType;
+
+/// <<aType>>
 typedef const  basicForEachType * aType;
+
 ostream & operator<<(ostream & f,const basicForEachType & e);
 
 //typedef  unsigned char  AnyData[24]; 

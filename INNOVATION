@@ -1,6 +1,16 @@
   - correct error in case of block matrix with block of 0 row or 0 column. 
-14/10/2013 (ALH)
-  - changed FFCS Fortran MPI configuration for MPICH2
+21/10/2013 (ALH)
+ - umfpack configuration cleanup (request from Fred)
+ - blas configuration cleanup (request from Cico)
+   - configuration option --enable-generic-blas has no effect anymore, removed
+   - Atlas compilation directives have no effect anymore, removed
+   - Moved OpenBLAS compilation from FFCS source tree to FF source tree
+ - Added configure option --disable-system-fftw to skip any default FFTW library installed on the system
+ - Changed location of lapack WHERE-library setup in [[file:configure.ac::WHERE_lapack]] to insure that it is always
+   defined (request from Fred)
+ - changed FFCS Fortran MPI configuration for MPICH2
+ - split DOC makefiles into Makefile.am and figs.mak to suppress automake warnings about portability
+ - moved build/download script from FFCS to FF before reorganizing FF downloads (request from FH)
 05/09/2013 put version .tar.gz on the web 
   - correct makefile wget in pastis and superludist  
   - correct compile of load example :  paradiso, gsl automaticaly 
@@ -9,17 +19,6 @@
  - add missing file in dist or in mercurial distribution
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
-17/9/2013 (ALH)
- - umfpack configuration cleanup (request from Fred)
- - blas configuration cleanup (request from Cico)
-   - configuration option --enable-generic-blas has no effect anymore, removed
-   - Atlas compilation directives have no effect anymore, removed
-   - Moved OpenBLAS compilation from FFCS source tree to FF source tree
- - Added configure option --disable-system-fftw to skip any default FFTW library installed on the system
-
- - Changed location of lapack WHERE-library setup in [[file:configure.ac::WHERE_lapack]] to insure that it is always
-   defined (request from Fred)
-
 10/9/2013 (ALH)
  - Corrected pastix compilation for FFCS on MacOS 10.6
  - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
