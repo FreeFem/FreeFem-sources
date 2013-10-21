@@ -58,11 +58,15 @@ void  mylex::Add(Key k,int i)
   Check(!i,k,"mot clef");
   Add(k,i,0); 
 }
+
 void  mylex::Add(Key k,aType t)   
 {
   Check(!t,k,"type");
+
+  // TYPE defined at [[file:../lglib/lg.ypp::token type TYPE]]
   Add(k,TYPE,t);
 }
+
 void  mylex::AddF(Key k,aType t)  
 {
   Check(!t,k,"FUNCTION");
@@ -396,17 +400,20 @@ int mylex::scan1()
   return ret;
 }    
 
+// <<mylex::scan>>
 int mylex::scan(int lvl)
 {
  
   int ret= scan1(); 
   
-      
+  // ID defined at [[file:../lglib/lg.ypp::token str ID]]
   if ( ret == ID) {
     if (! InMotClef(plglval->type,ret))  {
       int ft = FindType(buf);
-      //      if( ft) cout << "(  ft == " << ft << " ) "<< endl;
+
+      // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::token str FESPACE]]
       int feid3[4]  ={ ID,FESPACE1,FESPACE,FESPACE3};
+
       assert ( ft >= 0 && ft <= 3)  ;
       ret =  feid3[ft];      
       plglval->str = newcopy(buf);
@@ -421,7 +428,8 @@ int mylex::scan(int lvl)
   
   return ret;
 }
-  string mylex::token() const
+
+string mylex::token() const
   {
    int i=-1;
    string f;

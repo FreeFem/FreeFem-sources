@@ -1122,6 +1122,10 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
       
 }
 }
+
+/// <<Carre>> Builds a square-shaped 2D mesh. An Expression [[file:AFunction.hpp::Expression]] is a pointer to an object
+/// of class E_F0 [[file:AFunction.hpp::E_F0]].
+
 Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0)
 {
   if(verbosity>99)  cout << " region = " << reg << " labels " << lab <<endl;  
@@ -1132,7 +1136,7 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
   using  Fem2D::R;
- // using  Fem2D::R;
+
   using  Fem2D::MeshPointStack;
   int nx1=nx+1,ny1=ny+1;
   int nbv=(nx1)*(ny1);
@@ -1267,103 +1271,104 @@ Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_
       v[i1].lab=v[i2].lab=l4;
     }     
     
- {
-  if(verbosity) cout << "  -- Square mesh : nb vertices  =" << nbv 
-                     << " ,  nb triangles = " << nbt << " ,  nb boundary edges " << neb << endl;  
-  Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
-  R2 Pn,Px;
-  m->BoundingBox(Pn,Px);
-  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-/*  initgraphique();
-  m->Draw();
-  rattente(1);*/
- // m->decrement();
-     Add2StackOfPtr2FreeRC(stack,m);// 07/2008 FH
+  {
+    if(verbosity) cout << "  -- Square mesh : nb vertices  =" << nbv 
+		       << " ,  nb triangles = " << nbt << " ,  nb boundary edges " << neb << endl;  
+    Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
+    R2 Pn,Px;
+    m->BoundingBox(Pn,Px);
+    m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
 
-  return m;
+    Add2StackOfPtr2FreeRC(stack,m);// 07/2008 FH
+
+    return m;
   }
-
 }
 
-/// Creates a square mesh by calling Carre() at script evaluation time
-class MeshCarre2 :   public E_F0mps { public:
-    typedef pmesh  Result;
-     Expression nx,ny;
-   static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =1+2;
-    Expression nargs[n_name_param];
+/// <<MeshCarre2>> Creates a square mesh by calling the [[Carre]] function at script evaluation time. Uses class E_F0mps
+/// [[file:AFunction.hpp::E_F0mps]] to connect to the FF language.
+
+class MeshCarre2 :   public E_F0mps {
+public:
+  typedef pmesh  Result;
+  Expression nx,ny;
+  static basicAC_F0::name_and_type name_param[] ;
+  static const int n_name_param =1+2;
+  Expression nargs[n_name_param];
    
-    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-    KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
-    { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
     
      
-     MeshCarre2(const basicAC_F0 & args) 
-    {     
-      args.SetNameParam(n_name_param,name_param,nargs);
-      nx=to<long>(args[0]); 
-      ny=to<long>(args[1]); 
-     }
+  MeshCarre2(const basicAC_F0 & args) 
+  {     
+    args.SetNameParam(n_name_param,name_param,nargs);
+    nx=to<long>(args[0]); 
+    ny=to<long>(args[1]); 
+  }
     
-    static ArrayOfaType  typeargs() { 
-        return  ArrayOfaType(atype<long>(),atype<long>(),false);}
+  static ArrayOfaType  typeargs() { 
+    return  ArrayOfaType(atype<long>(),atype<long>(),false);}
         
-    static  E_F0 * f(const basicAC_F0 & args){
-        return new MeshCarre2(args);} 
+  static  E_F0 * f(const basicAC_F0 & args){
+    return new MeshCarre2(args);} 
         
-    AnyType operator()(Stack s) const { 
-	long flags=arg(0,s,0);
-	KN<long> zz;
-	KN<long> label=arg(1,s,zz);
-	long region=arg(2,s,0L);// correct aout 2010 FH ... 2-> 0 
-	return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags,label,region ));}
-    operator aType () const { return atype<pmesh>();} 
-      
+  AnyType operator()(Stack s) const { 
+    long flags=arg(0,s,0);
+    KN<long> zz;
+    KN<long> label=arg(1,s,zz);
+    long region=arg(2,s,0L);// correct aout 2010 FH ... 2-> 0 
+    
+    /// calls [[Carre]]
+    
+    return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)),0,0,s,flags,label,region ));
+  }
+
+  operator aType () const { return atype<pmesh>();} 
 };
 
+/// <<MeshCarre2f>> Creates a square mesh by calling the [[Carre]] function at script evaluation time
 
-
-
-/// Creates a square mesh by calling Carre() at script evaluation time
-class MeshCarre2f :   public E_F0mps { public:
-    typedef pmesh  Result;
-     Expression nx,ny;
-     Expression fx,fy;
-   static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =1+2;
-    Expression nargs[n_name_param];
+class MeshCarre2f :   public E_F0mps {
+public:
+  typedef pmesh  Result;
+  Expression nx,ny;
+  Expression fx,fy;
+  static basicAC_F0::name_and_type name_param[] ;
+  static const int n_name_param =1+2;
+  Expression nargs[n_name_param];
    
-    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-    KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
-    { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+  long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+  { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
      
-     MeshCarre2f(const basicAC_F0 & args) 
-    { 
-      args.SetNameParam(n_name_param,name_param,nargs);
-      nx=to<long>(args[0]); 
-      ny=to<long>(args[1]); 
-      const E_Array *  a= dynamic_cast<const E_Array*>(args[2].LeftValue());
-      ffassert(a);fx=0;fy=0;
-      if (a->size()>0) fx=to<double>( (*a)[0]);
-      if (a->size()>1) fy=to<double>( (*a)[1]);
-     }
+  MeshCarre2f(const basicAC_F0 & args) 
+  { 
+    args.SetNameParam(n_name_param,name_param,nargs);
+    nx=to<long>(args[0]); 
+    ny=to<long>(args[1]); 
+    const E_Array *  a= dynamic_cast<const E_Array*>(args[2].LeftValue());
+    ffassert(a);fx=0;fy=0;
+    if (a->size()>0) fx=to<double>( (*a)[0]);
+    if (a->size()>1) fy=to<double>( (*a)[1]);
+  }
     
-    static ArrayOfaType  typeargs() { 
-        return  ArrayOfaType(atype<long>(),atype<long>(),atype<E_Array>(),false);}
+  static ArrayOfaType  typeargs() { 
+    return  ArrayOfaType(atype<long>(),atype<long>(),atype<E_Array>(),false);}
         
-    static  E_F0 * f(const basicAC_F0 & args){
-        return new MeshCarre2f(args);} 
+  static  E_F0 * f(const basicAC_F0 & args){
+    return new MeshCarre2f(args);} 
         
-    AnyType operator()(Stack s) const { 
-      long flags=arg(0,s,0);
-	KN<long> zz;
-	KN<long> label=arg(1,s,zz);
-	long region=arg(2,s,0L);
+  AnyType operator()(Stack s) const { 
+    long flags=arg(0,s,0);
+    KN<long> zz;
+    KN<long> label=arg(1,s,zz);
+    long region=arg(2,s,0L);
 	
-      return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags,label,region));}
+    return SetAny<pmesh>(Carre( GetAny<long>( (*nx)(s)) , GetAny<long>( (*ny)(s)), fx,fy,s , flags,label,region));}
 
-    operator aType () const { return atype<pmesh>();} 
-      
+  operator aType () const { return atype<pmesh>();} 
 };
 
 basicAC_F0::name_and_type  MeshCarre2::name_param[]= {
@@ -1681,40 +1686,34 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 }
 
-
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
-    bamg::MeshIstreamErrorHandler = MeshErrorIO;
-//   Global.Add("buildmesh","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMesh));
-   Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
-    Global.Add("buildmesh","(",new OneOperatorCode<classBuildMeshArray>);
-   Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile>);
-//   Global.Add("buildmesh","(",new OneOperator1_<pmesh,string*>(buildmeshbamg));
+  bamg::MeshIstreamErrorHandler = MeshErrorIO;
+
+  Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
+  Global.Add("buildmesh","(",new OneOperatorCode<classBuildMeshArray>);
+  Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile>);
    
-   Global.Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));    
-   Global.Add("adaptmesh","(",new OneOperatorCode<Adaptation>);
-   Global.Add("movemesh","(",new OneOperatorCode<MoveMesh>);
-   Global.Add("splitmesh","(",new OneOperatorCode<SplitMesh>);
-   Global.Add("checkmovemesh","(",new OneOperatorCode<CheckMoveMesh>);
-   Global.Add("square","(",new OneOperatorCode<MeshCarre2>);
-   Global.Add("square","(",new OneOperatorCode<MeshCarre2f>);
-   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
-   Global.Add("trunc","(", new Op_trunc_mesh);
-   Global.Add("readmesh","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadMeshbamg));
-   Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh, E_F_F0_Add2RC<pmesh,pmesh> >(EmptyTheMesh));
-   Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *, E_F_F0F0_Add2RC<pmesh,pmesh,KN<long>*> >(EmptyTheMesh));
-   Global.Add("triangulate","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadTriangulate));
-   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double>,E_F_F0F0_Add2RC<pmesh,KN_<double>,KN_<double>,E_F0> >(Triangulate));
-   TheOperators->Add("<-",
-       new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
-       
-// use for :   mesh Th = readmesh ( ...);       
+  Global.Add("buildmeshborder","(",new OneOperator1s_<pmesh,const E_BorderN *>(BuildMeshBorder));    
+  Global.Add("adaptmesh","(",new OneOperatorCode<Adaptation>);
+  Global.Add("movemesh","(",new OneOperatorCode<MoveMesh>);
+  Global.Add("splitmesh","(",new OneOperatorCode<SplitMesh>);
+  Global.Add("checkmovemesh","(",new OneOperatorCode<CheckMoveMesh>);
+  Global.Add("square","(",new OneOperatorCode<MeshCarre2>);
+  Global.Add("square","(",new OneOperatorCode<MeshCarre2f>);
+  Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
+  Global.Add("trunc","(", new Op_trunc_mesh);
+  Global.Add("readmesh","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadMeshbamg));
+  Global.Add("emptymesh","(",new OneOperator1_<pmesh,pmesh, E_F_F0_Add2RC<pmesh,pmesh> >(EmptyTheMesh));
+  Global.Add("emptymesh","(",new OneOperator2_<pmesh,pmesh,KN<long> *, E_F_F0F0_Add2RC<pmesh,pmesh,KN<long>*> >(EmptyTheMesh));
+  Global.Add("triangulate","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadTriangulate));
+  Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double>,E_F_F0F0_Add2RC<pmesh,KN_<double>,KN_<double>,E_F0> >(Triangulate));
   TheOperators->Add("<-",
-       new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
+		    new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
+       
+  // use for :   mesh Th = readmesh ( ...);       
+  TheOperators->Add("<-",
+		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
   extern void init_glumesh2D();
   init_glumesh2D();
-   
 }
-// not work pb this ld (bug ????) 
-//#include "InitFunct.hpp"
-// addingInitFunct TheaddingInitFunctlgmesh(-11,init_lgmesh);

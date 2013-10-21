@@ -406,6 +406,8 @@ typedef TMortar<R2> Mortar;
  
 class FQuadTree;
 
+  // <<class Mesh>>
+
 class Mesh: public RefCounter { 
 public:
   

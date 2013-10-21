@@ -78,9 +78,7 @@
     - \b problem : Problem
     - \b solve : Solve
 
-  \section examples Documented examples
-
-    - Laplace.cpp
+  - \b API : ffapi.hpp <!-- [[file:src/fflib/ffapi.hpp]] -->
 
   <em>(this page is written in mainpage.dox and can be viewed on the internet at
   http://www.ljll.math.upmc.fr/lehyaric/freefem/html)</em>

@@ -147,5 +147,8 @@ private:
 mylex * Newlex(  ostream & out,bool =true);
  void Destroylex(mylex * m);
 
+/// <<zzzfff>> This pointer is initialized in [[file:../lglib/lg.ypp::zzzfff Newlex cout echo_edp]]
+
 extern mylex *zzzfff;
+
 #endif

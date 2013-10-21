@@ -103,6 +103,10 @@ bool fespacecomplex;
 int fespacedim;
 extern int UnShowAlloc;
 int ShowAlloc(const char *s,size_t &);
+
+// <<yylex>> Connection from grammar to lexer object zzzfff [[file:../fflib/lex.hpp::zzzfff]] of class mylex
+// [[file:../fflib/lex.hpp::class mylex]]. Method mylex::scan() is implemented at [[file:../fflib/lex.cpp::mylex::scan]]
+
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 
@@ -123,19 +127,34 @@ void (*init_lgparallele)()=0;
 void (*end_parallele)()=0;
 %}
 
+/* <<YYSTYPE>> definition */
+
 %union{ 
- double dnum;
- long lnum;
- char * str;
- char oper[8];
- CC_F0 cexp;
- Routine   *routine;
- AC_F0 args;
- aType type;
- CListOfInst cinst;
- Block * block; 
- ListOfId *clist_id;
-/* ListCatch * clist_Catchs;*/
+  double dnum;
+  long lnum;
+  char * str;
+  char oper[8];
+
+  /* cf [[file:../fflib/AFunction.hpp::CC_F0]] */
+  CC_F0 cexp;
+
+  /* cf [[file:../fflib/AFunction.hpp::Routine]] */
+  Routine *routine;
+
+  /* array of parameters for FF language operators. cf [[file:../fflib/AFunction.hpp::AC_F0]] */
+  AC_F0 args;
+
+  /* cf [[file:../fflib/AnyType.hpp::aType]] */
+  aType type;
+
+  /* cf [[file:../fflib/AFunction.hpp::CListOfInst]] */
+  CListOfInst cinst;
+
+  /* cf [[file:../fflib/AFunction.hpp::Block]] */
+  Block *block; 
+
+  /* cf [[file:../fflib/AFunction.hpp::ListOfId]] */
+  ListOfId *clist_id;
 }
 
 /* BISON Declarations */
@@ -256,48 +275,64 @@ void (*end_parallele)()=0;
 
 %% 
 
-start:   input ENDOFFILE {
-		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
-			//FFCS: divert stream to FFCS
-                        if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
-                        size_t sizestack = currentblock->size()+1024 ; //  before close 
-                        $1+=currentblock->close(currentblock);
-                        if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
-                        size_t lg0,lg1;                       
-                        int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
-			UnShowAlloc =0;// add FH for parallee
-                        if(verbosity>2  || mpirank==0) cout << endl;  
-                        { Stack stack = newStack(sizestack);
-                        double CPUcompile= CPUtime();
-                        try {                  
-                          $1.eval(stack);}
-                        catch ( E_exception & e)  {
-                          cerr << e.what() << " ,  mpirank " << mpirank << endl;
-                          return 1; }
-                        catch( Error & err) {
-                          cerr << err.what() << endl;
-			  cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
-                          return err.errcode();
-                        }
-                         catch( ...) { cerr << "Strange catch exception ???\n"; 
-                          cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
-                          return 1; 
-                         }
+/* <<start_symbol>> called from [[int Compile]] */
 
-                        if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
-			    <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
-                        deleteStack(stack);
-                        //debugstack.clear() 
-                        } 
-                        fingraphique();
-			//FFCS: divert stream to FFCS
-			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
-			UnShowAlloc =1;
-                        NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
+start:input ENDOFFILE {
+      const char *magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
+
+      // FFCS: divert stream to FFCS
+      if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
+
+      size_t sizestack = currentblock->size()+1024 ; //  before close 
+
+      // $1 is of type [[YYSTYPE]]
+      $1+=currentblock->close(currentblock);
+
+      if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
+      size_t lg0,lg1;                       
+      int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
+      UnShowAlloc =0;// add FH for parallee
+      if(verbosity>2  || mpirank==0) cout << endl;  
+
+      {
+        Stack stack = newStack(sizestack);
+        double CPUcompile= CPUtime();
+        try {                  
+
+          // calls [[file:~/ff/draft/src/fflib/AFunction.hpp::CListOfInst::eval]]
+
+          $1.eval(stack);
+        }
+        catch ( E_exception & e)  {
+          cerr << e.what() << " ,  mpirank " << mpirank << endl;
+          return 1; 
+        }
+        catch( Error & err) {
+          cerr << err.what() << endl;
+          cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
+          return err.errcode();
+        }
+        catch( ...) { cerr << "Strange catch exception ???\n"; 
+          cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
+          return 1; 
+        }
+
+        if(verbosity) cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
+                           <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
+        deleteStack(stack);
+      } 
+      fingraphique();
+
+      // FFCS: divert stream to FFCS
+      if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
+
+      UnShowAlloc =1;
+      NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         
-			    if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr 
-			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank <<endl;}
-  return 0;}
+      if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr 
+                        << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank <<endl;}
+      return 0;
+    }
 ;
 
 input:   instructions 
@@ -670,6 +705,8 @@ bool withrgraphique = false;
 /// Called by mainff() and activates the bison parser by calling yyparse()
 int Compile()
 {
+
+  // YYSTYPE defined at [[YYSTYPE]]
   extern   YYSTYPE *plglval;  // modif FH 
   plglval = &lglval;
   int retvalue=0;
@@ -679,17 +716,17 @@ int Compile()
   Block::open(currentblock);  
   try {
     UnShowAlloc =0;
-    retvalue=yyparse (); //  compile
+    retvalue=yyparse (); // compile starting from [[start_symbol]]
    
     if(retvalue==0)  
       if(currentblock) 
-	{retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
+        {retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
       else {
-	  if( verbosity  ) {
+        if( verbosity  ) {
 	      UnShowAlloc =1;
 	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg << " mpirank: " <<mpirank << endl;
 	      if(!mpirank) cerr <<  "Bien: On a fini Normalement" << endl; }
-	}
+      }
   }
 
   catch (Error & e) 
@@ -837,11 +874,11 @@ int mainff (int  argc, char **argv)
   //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || mpirank==0)  cout << endl;
-  zzzfff->input(cc);
+  zzzfff->input(cc); // [[file:../fflib/lex.cpp::void mylex input]]
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     
-  retvalue= Compile();
+  retvalue= Compile(); // [[int Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
 
   if(end_parallele) end_parallele();

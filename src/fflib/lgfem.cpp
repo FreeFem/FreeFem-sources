@@ -4807,10 +4807,21 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgBoundaryEdge>("whoinElement",".",new OneOperator1_<long,lgBoundaryEdge>(EdgeElement));
  
  
-//  new type  
+ // New FF language types. zzzfff is defined at [[file:lex.hpp::zzzfff]] as a pointer to an object of class mylex
+ // [[file:lex.hpp::class mylex]]. zzzfff->Add() is at [[file:lex.cpp::void mylex Add Key k aType t]]. The lexer will
+ // then be called from the parser via [[file:../lglib/lg.ypp::yylex]]
+
  zzzfff->Add("R3",atype<R3*>());
- zzzfff->Add("mesh",atype<pmesh*>()); // <<mesh_keyword>>
+
+ // <<mesh_keyword>> pmesh is a pointer to Mesh [[file:../femlib/fem.hpp::class Mesh]] defined at
+ // [[file:lgfem.hpp::typedef Mesh pmesh]]
+
+ zzzfff->Add("mesh",atype<pmesh*>());
+
+ // pmesh3 is a pointer to Mesh3 defined at [[file:lgfem.hpp::typedef Mesh3 pmesh3]]
+
  zzzfff->Add("mesh3",atype<pmesh3*>());
+
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());
 // zzzfff->Add("fespace",atype<pfes*>());

@@ -97,7 +97,8 @@ class ListOfInst;
 class Polymorphic;
 class OneOperator;
 
-/// Expression is used as the type of the local list contained in ListOfInst
+/// <<Expression>> is used as the type of the local list contained in ListOfInst
+
 typedef  E_F0  *  Expression;
 
 class AC_F0;
@@ -142,7 +143,10 @@ struct UnId {
   
 };
 
+/// <<ListOfId>>
+
 typedef deque<UnId> ListOfId;
+
 //  xxx is a type so xxx can't be a parameter 
 #define ATYPE(xxx) map_type[typeid(xxx).name()]
 /* #define NEW_TYPE(type) map_type[typeid(type).name()] = new ForEachType<type >(0,0)
@@ -337,8 +341,8 @@ class C_LF1;
 
 //  3 types of function/expression  0,1,2 args  
 
-/// E_F0 is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++ language
-/// (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in ListOfInst, and evaluated when
+/// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
+/// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in ListOfInst, and evaluated when
 /// CListOfInst::eval() is called (see \ref index).
 
 class E_F0 :public CodeAlloc 
@@ -385,7 +389,8 @@ class E_F0 :public CodeAlloc
  
 inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
 
-/// Specialization of E_F0 where MeshIndependent() always returns false instead of true.  
+/// <<E_F0mps> Specialization of E_F0 where MeshIndependent() always returns false instead of true.  
+
 class E_F0mps : public E_F0 { public:
   virtual bool MeshIndependent() const {return false;} // 
 };
@@ -593,7 +598,8 @@ class Polymorphic:  public E_F0mps {
 
 
 
-//  compile time expression 
+// <<C_F0>> compile time expressions
+
 class basicAC_F0;
  class C_F0 {
    friend class CC_F0;
@@ -1331,6 +1337,7 @@ Type_Expr CConstant(const R & v)
  }
 
 
+/// <<CC_F0>>
 
 class CC_F0 {
   Expression f;
@@ -1346,28 +1353,40 @@ public:
  // operator const C_F0 &() const {return  *this;}
 };
 
+/// <<ListOfInst>>
 
 class ListOfInst : public  E_F0mps { 
-    int n;
-    Expression   *   list;
-    int   *   linenumber;
-    const int nx;
-    public:
-    ListOfInst():n(0),list(0),linenumber(0),nx(10){}
-    ListOfInst(int nn):n(0),list(0),linenumber(0),nx(nn?nn:10){}
-    void Add(const C_F0 & ins); 
-    AnyType operator()(Stack s) const; 
-    operator aType () const { return n ? (aType) * (list[n-1]) : atype<void>();} 
+  int n;
+  Expression   *   list;
+  int   *   linenumber;
+  const int nx;
+public:
+  ListOfInst():n(0),list(0),linenumber(0),nx(10){}
+  ListOfInst(int nn):n(0),list(0),linenumber(0),nx(nn?nn:10){}
+  void Add(const C_F0 & ins); 
+
+  /// <<ListOfInst::operator()>> implemented at [[file:AFunction2.cpp::ListOfInst::operator()]]
+
+  AnyType operator()(Stack s) const; 
+
+  operator aType () const { return n ? (aType) * (list[n-1]) : atype<void>();} 
    
-   Expression &operator[](int i){return list[i];}
-   bool empty() const {return n==0;}
-   int size() const {return n;}
-   Expression * ptr() const {return list;}
-   int * nlines() const {return linenumber;}
- //  void destroy() { if (list) delete [] list; list=0;}
-  ~ListOfInst(){ cout << " ----- ~ListOfInst " << endl;
-  if(list) delete [] list;list=0;if(linenumber)  delete[] linenumber; linenumber=0;}
+  Expression &operator[](int i){return list[i];}
+  bool empty() const {return n==0;}
+  int size() const {return n;}
+  Expression * ptr() const {return list;}
+  int * nlines() const {return linenumber;}
+
+  ~ListOfInst(){
+    cout << " ----- ~ListOfInst " << endl;
+    if(list) delete [] list;
+    list=0;
+    if(linenumber)  delete[] linenumber;
+    linenumber=0;
+  }
 };
+
+/// <<CListOfInst>>
 
 class CListOfInst{
 private:
@@ -1383,8 +1402,9 @@ public:
   CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
   operator C_F0 () const  { return C_F0(f,r);}
 
-  /// Called by yyparse() to evaluate the complete expression tree when reaching the end of its "start" symbol. It calls
-  /// ListOfInst::operator()() for its private ListOfInst pointer #f.
+  /// <<CListOfInst::eval>> Called by yyparse() at [[file:~/ff/draft/src/lglib/lg.ypp::start_symbol]] to evaluate the
+  /// complete expression tree when reaching the end of its "start" symbol. It calls ListOfInst::operator()() at
+  /// [[ListOfInst::operator()]] for its private [[ListOfInst]] pointer #f.
 
   void eval(Stack s) {(*f)(s);}
 
@@ -1426,7 +1446,7 @@ inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i
 //   if (!(r && r->un_ptr)) { cerr << "PtrValue: Not a Left value " << *r << endl;CompileError();} 
 //   return C_F0(new  E_F0_Func1(r->un_ptr->f,f),r->un_ptr->r);}
 
- 
+/// <<basicAC_F0>>
 
 class basicAC_F0 {
 //  version de base d'un tableau d'un parametres  
@@ -1463,6 +1483,7 @@ class basicAC_F0 {
   void SetNameParam(int n=0,name_and_type *l=0 , Expression * e=0) const ;
 };
 
+/// <<AC_F0>> array of parameters for FF language operators. uses [[basicAC_F0]]
 
 class AC_F0: public basicAC_F0 { //  a Array of C_F0
 //    tableau d'un parametres  max 1024 parametres 
@@ -1911,6 +1932,8 @@ aType TypeArray(aType c,aType b,aType a);
 aType TypeTemplate(aType,aType);
 
 void Init_map_type();
+
+/// <<Block>>
 
 class Block { //
    static size_t Max(size_t a,size_t b){ return a < b ? b :a;}
@@ -2951,6 +2974,9 @@ class E_Routine :  public E_F0mps { public:
   operator aType ()  const{ return rt;}         
 
 };
+
+/// <<Routine>>
+
 class Routine: public OneOperator{  public:
    size_t offset;
    aType tfunc,tret;
