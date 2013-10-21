@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# Downloading third-party packages on request from the user
 # ======================================================================
 # Written by Antoine Le Hyaric
 # http://www.ljll.math.upmc.fr/lehyaric
@@ -21,31 +22,17 @@
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
-# headeralh default=0 freefem perl start=04/06/2012 upmc written
-
-# clean-up all CR/LF line endings (usually before patching to avoid failures after editing the same source files on
-# different systems)
+# headeralh brief="Downloading third-party packages on request from the user" default=0 freefem perl start=21/10/2013 upmc written
 
 use strict;
+use Getopt::Std;
+use threads;
+use threads::shared;
 
-# change files that have been recorded in FF using DOS line endings
-my @files=`find $ARGV[0] -type f`;
-chomp @files;
-foreach my $file(@files){
-  next if $file=~/\.(jpg|eps|mcp|pdf|pgm|o|a|so|png|jpg|gz|tgz)$/;
-  next if $file=~/\.hg\//;
-  my $contents=`cat $file`;
-  my $oldcontents=$contents;
+my %opts;
+getopts('dlmo:p:v',\%opts);
 
-  # changing line-ending conventions. all ffcs patches work from unix-style (ie no CR) files
-
-  $contents=~s/\r$//gm;
-  next if $contents eq $oldcontents;
-  print "cleancrlf: Unix line-ending for $file...\n";
-  open FILE,">$file" or die;
-  print FILE $contents;
-  close FILE;
-}
+die "work in progress";
 
 # Local Variables:
 # mode:cperl
