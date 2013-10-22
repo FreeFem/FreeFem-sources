@@ -30,6 +30,8 @@
 //-----------------------------------  
 //  to manage the freefem stack 
 
+#include "throwassert.hpp"
+
 //   in the stack we save all the variable 
 //   a adresse 0 we have the MeshPointStack to defineP,N, ....
 //   a adresse sizeof(void *) 
@@ -209,7 +211,7 @@ public:
 	      { 
 		topmemory4tmp=0;// clean the tmp allocation 
 	        if(stackptr.size()>=20 && verbosity>2) 
-		  //FFCS: nothing on following line for tests/compare
+		  // FFCS: nothing on following line for tests/compare
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
 		
 		for (iterator i=stackptr.end(); i != stackptr.begin();)

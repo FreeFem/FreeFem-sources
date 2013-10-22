@@ -115,6 +115,8 @@ inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 
 extern bool withrgraphique;
+
+/// <<fingraphique>>
 inline void fingraphique()
  { if(withrgraphique) 
    { withrgraphique=false;
@@ -287,7 +289,7 @@ start:input ENDOFFILE {
       // FFCS: divert stream to FFCS
       if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
 
-      // cf [[currentblock]]
+      // <<sizestack>> cf [[currentblock]]
       size_t sizestack = currentblock->size()+1024 ; //  before close 
 
       // $1 is of type [[YYSTYPE]]

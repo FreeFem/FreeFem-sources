@@ -184,7 +184,7 @@ struct Keyless : binary_function<const char *,const char *, bool>
     bool operator()(const Key& x, const Key& y) const { return strcmp(x,y)<0;} };
     
 
-// un table Iden     
+// <<TableOfIdentifier>>
 class TableOfIdentifier: public CodeAlloc {
   public:
   struct Value;
@@ -342,8 +342,8 @@ class C_LF1;
 //  3 types of function/expression  0,1,2 args  
 
 /// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
-/// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in ListOfInst, and evaluated when
-/// CListOfInst::eval() is called (see \ref index).
+/// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in [[ListOfInst]], and evaluated
+/// when CListOfInst::eval() [[file:~/ff/draft/src/fflib/AFunction.hpp::CListOfInst::eval]] is called (see \ref index).
 
 class E_F0 :public CodeAlloc 
    {
@@ -389,7 +389,7 @@ class E_F0 :public CodeAlloc
  
 inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
 
-/// <<E_F0mps> Specialization of E_F0 where MeshIndependent() always returns false instead of true.  
+/// <<E_F0mps>> Specialization of [[E_F0]] where MeshIndependent() always returns false instead of true.  
 
 class E_F0mps : public E_F0 { public:
   virtual bool MeshIndependent() const {return false;} // 
@@ -1355,7 +1355,9 @@ public:
 
 /// <<ListOfInst>>
 
-class ListOfInst : public  E_F0mps { 
+class ListOfInst :
+  public E_F0mps /// [[E_F0mps]]
+{ 
   int n;
   Expression   *   list;
   int   *   linenumber;
@@ -1386,11 +1388,14 @@ public:
   }
 };
 
-/// <<CListOfInst>>
+/// <<CListOfInst>> used in [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]]
 
 class CListOfInst{
 private:
-  ListOfInst * f;
+
+    /// class [[ListOfInst]]
+    ListOfInst * f;
+
   const basicForEachType *r;
 
 public:
@@ -1420,7 +1425,8 @@ AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
-/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]]
+/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]], uses
+/// [[TableOfIdentifier]]
 
 extern TableOfIdentifier Global;
 
@@ -2627,7 +2633,7 @@ class  OneOperator3_ : public OneOperator {
       f(ff){}
 };
 
-//  la class code doit contenir
+// <<OneOperatorCode>> utilise [[E_F0]]. la class code doit contenir
 /*
   class CODE: public E_F0 {
     typedef  ...  func .. ;
@@ -2636,7 +2642,7 @@ class  OneOperator3_ : public OneOperator {
     typedef  ... R;  // return type 
 }
 */
-//
+
 template<class CODE,int ppref=0>
 class  OneOperatorCode : public OneOperator {
     public: 

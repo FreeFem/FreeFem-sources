@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+# Build an index of all Emacs org-mode hyperlinks
+# ======================================================================
+# Written by Antoine Le Hyaric
+# http://www.ljll.math.upmc.fr/lehyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+#
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh brief="Build an index of all Emacs org-mode hyperlinks" default=0 freefem perl start=22/10/2013 upmc written
+
+use strict;
+
+my %anchors;
+my $dir='';
+my @ignore=`cat .hgignore`;
+foreach my $f(`find . -type f`){
+
+  # files to skip because of .hgignore
+  $f=~s/^\.\///;
+  chomp $f;
+  my $found=0;
+  foreach my $r(@ignore){
+    chomp $r;
+    if($f=~/$r/){
+      $found=1;
+      last;
+    }
+  }
+  next if $found;
+
+  # files to skip for other reasons
+  next if $f=~/\.(bmp|png|jpg|eps|pdf|tar|gz|zip|tgz)$/;
+  next if $f=~/\.hg\//;
+  next if $f=~/examples\+\+-load\/include\//;
+
+  # display progress
+  print $f,"\n";
+
+  # find name anchors in file contents
+  my $c=`cat $f`;
+  while($c=~m/<<([^<> ,{}]+)>>/g){$anchors{$1}.=" [[file:${f}::$1]]"}
+}
+
+# final display
+open OUT,">index.org" or die;
+print OUT "# -*- mode:org;coding:utf-8 -*-\n";
+print OUT "# Hyperlinks into the FreeFem++ source, built with [[file:build/orgindex]]\n";
+foreach(sort {uc($a) cmp uc($b)} keys %anchors){
+  print OUT "$_";
+  my $padding=25;
+  if(length($_)<$padding){print OUT " "x($padding-length($_))}
+  print OUT "$anchors{$_}\n";
+}
+close OUT;
+
+# Local Variables:
+# mode:cperl
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

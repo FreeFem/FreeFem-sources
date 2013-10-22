@@ -400,7 +400,7 @@ int mylex::scan1()
   return ret;
 }    
 
-// <<mylex::scan>>
+// <<mylex_scan>>
 int mylex::scan(int lvl)
 {
  

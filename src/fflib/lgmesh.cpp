@@ -60,6 +60,9 @@ using namespace std;
 */
 #include "ff++.hpp"
 
+
+#include "lgmesh.hpp"
+
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
 
