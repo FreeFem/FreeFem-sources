@@ -1,4 +1,7 @@
   - correct error in case of block matrix with block of 0 row or 0 column. 
+(ALH)
+ - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
+ - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format
 21/10/2013 (ALH)
  - umfpack configuration cleanup (request from Fred)
  - blas configuration cleanup (request from Cico)
@@ -11,6 +14,10 @@
  - changed FFCS Fortran MPI configuration for MPICH2
  - split DOC makefiles into Makefile.am and figs.mak to suppress automake warnings about portability
  - moved build/download script from FFCS to FF before reorganizing FF downloads (request from FH)
+10/9/2013 (ALH)
+ - Corrected pastix compilation for FFCS on MacOS 10.6
+ - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
+   generated conflicts
 05/09/2013 put version .tar.gz on the web 
   - correct makefile wget in pastis and superludist  
   - correct compile of load example :  paradiso, gsl automaticaly 
@@ -19,10 +26,6 @@
  - add missing file in dist or in mercurial distribution
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
-10/9/2013 (ALH)
- - Corrected pastix compilation for FFCS on MacOS 10.6
- - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
-   generated conflicts
 5/9/2013 (ALH)
  - force Umfpack build to run sequentially (parallel make crashes with "pipe from processes is a directory"?)
  - pARMS download URL changed to http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php (thanks Fred)

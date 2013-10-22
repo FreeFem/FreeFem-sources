@@ -372,6 +372,7 @@ class SetArray { public:
     long size() const {return n;}
 };
 
+/// <<KN_>>
 template<class R>
 class KN_: public  ShapeOfArray {
 protected:

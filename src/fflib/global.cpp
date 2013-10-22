@@ -43,7 +43,10 @@
 //#include "PlotStream.hpp"
 
  bool  NoGraphicWindow=false;
- long verbosity = 1;
+
+/// <<verbosity>>
+long verbosity = 1;
+
  long searchMethod = 0; //pichon
  FILE *ThePlotStream=0; //  Add for new plot. FH oct 2008
 

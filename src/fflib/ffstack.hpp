@@ -30,6 +30,8 @@
 //-----------------------------------  
 //  to manage the freefem stack 
 
+#include "throwassert.hpp"
+
 //   in the stack we save all the variable 
 //   a adresse 0 we have the MeshPointStack to defineP,N, ....
 //   a adresse sizeof(void *) 
@@ -53,6 +55,8 @@ const int BeginOffset = 6;
 
 #ifndef NEWFFSTACK
 typedef void StackType;
+
+/// <<Stack>>
 typedef void *Stack;
 
 
@@ -207,7 +211,7 @@ public:
 	      { 
 		topmemory4tmp=0;// clean the tmp allocation 
 	        if(stackptr.size()>=20 && verbosity>2) 
-		  //FFCS: nothing on following line for tests/compare
+		  // FFCS: nothing on following line for tests/compare
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
 		
 		for (iterator i=stackptr.end(); i != stackptr.begin();)
@@ -335,6 +339,7 @@ T * Add2StackOfPtr2FreeA(Stack s,T * p)
 //  ---------------------------------------------------
 #ifndef NEWFFSTACK
 
+/// <<newStack>>
 inline Stack newStack(size_t l)
  {
    char *  mps;

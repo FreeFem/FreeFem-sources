@@ -3,7 +3,7 @@
 #include <string> 
 #include <cstring> 
 #include "RefCounter.hpp"
-#include "Serialize.hpp"
+#include "../fflib/Serialize.hpp"
 // some usefull function 
 
 //typedef double R;
@@ -28,6 +28,12 @@ inline double norm(double x){return x*x;}
 inline float norm(float x){return x*x;}
 #include <utility>
 #include <algorithm>
+
+// ALH - 21/10/13 - R1.hpp needs cmath and it does include it, but since R1.hpp is only included as part of namespace
+// Fem2D, we need to make sure that cmath is called as part of the default namespace, otherwise we will get "error:
+// ‘::acos’ has not been declared" and such.
+
+#include <cmath>
 
 // definition R
 namespace Fem2D 
@@ -558,8 +564,10 @@ private:
   int *BoundaryAdjacencesHead;
   int *BoundaryAdjacencesLink; 
   int *TriangleConteningVertex;       
-  // no copy
+
+  // <<no_mesh_copy>> the copy constructor for Mesh is kept private on purpose
   Mesh(const Mesh &);
+
   void operator=(const Mesh &);       
 };
 
@@ -631,7 +639,7 @@ void  HeapSort(T *c,T1 *c1,T2 *c2,long n)
 }
 
  inline   int numSubTVertex(int N,int i,int j)
-    {  //  i,j  coordonne barycentre * N dans l'ele�ent de reference.
+    {  //  i,j  coordonne barycentre * N dans l'eleùent de reference.
 	i=i+j; // numerotation / diag  
 	// i,j 
 	assert(j<=i && 0<= j); 
