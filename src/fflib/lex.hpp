@@ -92,7 +92,7 @@ class mylex : public CodeAlloc {
   string token() const;
   void print(ostream &f) const; 
 
-  /// This is the main [[file:~/ff/draft/src/lglib/lg.ypp::yylex]] entry point from the grammar. Implemented in
+  /// This is the main [[file:../lglib/lg.ypp::yylex]] entry point from the grammar. Implemented in
   /// [[file:lex.cpp::mylex_scan]]
 
   int scan(int lvl=0);
@@ -154,7 +154,7 @@ mylex * Newlex(  ostream & out,bool =true);
  void Destroylex(mylex * m);
 
 /// <<zzzfff>> This pointer is allocated in [[file:global.cpp::zzzfff]] and initialized in
-/// [[file:~/ff/draft/src/lglib/lg.ypp::zzzfff]]
+/// [[file:../lglib/lg.ypp::zzzfff]]
 
 extern mylex *zzzfff;
 

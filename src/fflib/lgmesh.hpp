@@ -28,7 +28,7 @@
  * headeralh brief="Exposed functions from lgmesh.cpp" cpp default=0 dox freefem start=21/10/2013 upmc written
  */
 
-  // <<Carre>> [[file:~/ff/draft/src/fflib/lgmesh.cpp::Carre]]
+  // <<Carre>> [[file:lgmesh.cpp::Carre]]
   Fem2D::Mesh* Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0);
 
 /*!

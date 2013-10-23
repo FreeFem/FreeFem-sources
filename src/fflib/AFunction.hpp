@@ -344,7 +344,7 @@ class C_LF1;
 
 /// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
 /// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in [[ListOfInst]], and evaluated
-/// when CListOfInst::eval() [[file:~/ff/draft/src/fflib/AFunction.hpp::CListOfInst::eval]] is called (see \ref index).
+/// when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called (see \ref index).
 
 class E_F0 :public CodeAlloc 
    {
@@ -540,6 +540,8 @@ class  OneOperator : public ArrayOfaType {
     void Show(const ArrayOfaType & at,ostream &f=cerr) const;
     void Show(ostream &f=cerr) const;
     operator aType () const { return r;}
+
+    // <<OneOperator_code_decl>>
     virtual E_F0 * code(const basicAC_F0 &) const =0; 
     virtual C_F0  code2(const basicAC_F0 &a) const ; // {return code(code(a),r);}	
     const OneOperator * Simple() const { return next||n?0:this;}
@@ -548,10 +550,13 @@ class  OneOperator : public ArrayOfaType {
 };
 
 /// <<Polymorphic>>
-class Polymorphic:  public E_F0mps {
+
+class Polymorphic:  
+  public E_F0mps // [[E_F0mps]]
+{
    //  a list of type 
    //  simple, array or function
-   private: 
+private: 
    typedef const char * Key;
    typedef OneOperator * Value;
  //  struct Keyless : binary_function<Key,Key, bool>
@@ -567,7 +572,7 @@ class Polymorphic:  public E_F0mps {
    //   we have to add thing to a polymorphisme expression
    mutable maptype m; //  all polymorphisme of the Identifier
    Expression e; // default expression
-  public:    
+public:    
   Polymorphic() : m(),e(0) {}
   
 //  by default Empty and do nothing      
@@ -585,11 +590,9 @@ class Polymorphic:  public E_F0mps {
                            ) const
       {Addp(op,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,pa,pb,pc,pd,pe,0);}
  void Add(const char * op,OneOperator ** pp) const ;      
- private:
- void Addp(const char * op,OneOperator * pp,...) const ;
+private:
+  void Addp(const char * op,OneOperator * pp,...) const ;
   friend ostream & operator<<(ostream & f,const Polymorphic & a);
-  
-  
 };
 
 ///   the type for polymorphisme of id 
@@ -612,14 +615,20 @@ public:
   /// cf [[Type_Expr]]
   C_F0(const Type_Expr & a):f(a.second),r(a.first)   {}
 
+  /// <<C_F0_constructor_pop_char_basicAC_F0_decl>>
+  /// [[file:AFunction2.cpp::C_F0_constructor_pop_char_basicAC_F0_impl]]
   /// cf [[Polymorphic]]
   C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
+
   C_F0(const Polymorphic *,const char *, AC_F0 & );
 
   //  function, array ..  
   C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)  ;
   C_F0(const C_F0 & e,const char *op, AC_F0 & p) ;	  
-  C_F0(const C_F0 & e,const char *op,const C_F0 & ee)  ; 
+
+  // <<C_F0_constructor_char_C_F0_decl>> [[C_F0_constructor_char_C_F0_impl]]
+  C_F0(const C_F0 & e,const char *op,const C_F0 & ee);
+
   C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b) ; 	  
   C_F0(const C_F0 & e,const char *nm) ; 
 
@@ -629,7 +638,7 @@ public:
   // unary operator  
   C_F0(const Polymorphic * pop,const char *op,const C_F0 & a); 
 
-  // binary operator  
+  // <<C_F0_constructor_binary_decl>> binary operator [[file:AFunction2.cpp::C_F0_constructor_binary]]
   C_F0(const Polymorphic * pop,const char *op,const C_F0 & a,const  C_F0  & b); 
 
   // ternary operator  
@@ -1341,7 +1350,7 @@ Type_Expr CConstant(const R & v)
  }
 
 
-/// <<CC_F0>> used in [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]]
+/// <<CC_F0>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class CC_F0 {
   Expression f;
@@ -1392,7 +1401,7 @@ public:
   }
 };
 
-/// <<CListOfInst>> used in [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]]
+/// <<CListOfInst>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class CListOfInst{
 private:
@@ -1411,7 +1420,7 @@ public:
   CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
   operator C_F0 () const  { return C_F0(f,r);}
 
-  /// <<CListOfInst::eval>> Called by yyparse() at [[file:~/ff/draft/src/lglib/lg.ypp::start_symbol]] to evaluate the
+  /// <<CListOfInst::eval>> Called by yyparse() at [[file:../lglib/lg.ypp::start_symbol]] to evaluate the
   /// complete expression tree when reaching the end of its "start" symbol. It calls ListOfInst::operator()() at
   /// [[ListOfInst::operator()]] for its private [[ListOfInst]] pointer #f.
 
@@ -1878,10 +1887,11 @@ inline	  C_F0::C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)
 	         } 
 	       else
 	        {
-	           cerr << " unknow operator " << op << " on type " << *e.r << endl;
+	           cerr << " unknown operator " << op << " on type " << *e.r << endl;
 	           CompileError();
 	        }}	       
 	   }
+
 inline	  C_F0::C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b)  
 {
     C_F0 tab[2]={a,b};
@@ -1890,26 +1900,28 @@ inline	  C_F0::C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b)
     *this= C_F0(e,op,p);
 }
 	   
+/// <<C_F0_constructor_char_C_F0_impl>>
 inline	  C_F0::C_F0(const C_F0 & e,const char *op,const C_F0 & ee)  
 {
-	     const Polymorphic * pop=e;
-	     if (pop) 
-	      {
-	      *this=C_F0(pop,op,e,ee);
-	      }
-	     else { 
-	      // cerr << *e.r << " : table  " << endl;
-	      // e.r->ShowTable(cerr);
-	       C_F0 x=e.r->Find(op);       
-	       pop=x;
-	       if(pop) 	         
-	         *this=C_F0(pop,"",e,ee);  
-	       else
-	        {
-	           cerr << " unknow operator " << op << " on type " << *e.r << " " << *ee.r<<  endl;
-	           CompileError();
-	        }}	       
-  
+  const Polymorphic * pop=e;
+  if (pop) 
+    {
+      // calls [[C_F0_constructor_binary_decl]]
+      *this=C_F0(pop,op,e,ee);
+    }
+  else { 
+    // cerr << *e.r << " : table  " << endl;
+    // e.r->ShowTable(cerr);
+    C_F0 x=e.r->Find(op);       
+    pop=x;
+    if(pop) 	         
+      *this=C_F0(pop,"",e,ee);  
+    else
+      {
+	cerr << " unknown operator " << op << " on type " << *e.r << " " << *ee.r<<  endl;
+	CompileError();
+      }
+  }	       
 }
 	   
 inline	  C_F0::C_F0(const C_F0 & e,const char *nm)  
@@ -1954,7 +1966,7 @@ class Block { //
    size_t  top,topmax;
    TableOfIdentifier table;
    ListOfTOfId::iterator itabl;    
-   public:
+public:
    //  list of variable
    size_t OffSet(size_t ssize) {
       top=align8(top);
@@ -2987,7 +2999,7 @@ class E_Routine :  public E_F0mps { public:
 
 };
 
-/// <<Routine>> used in [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]]
+/// <<Routine>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class Routine: public OneOperator{  public:
    size_t offset;
@@ -3122,8 +3134,9 @@ extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and
 void initArrayOperators();   
 void  initArrayDCL();
 
- void ClearMem(); 
+void ClearMem(); 
 
+// <<OneOperator_code2>>
 inline C_F0  OneOperator::code2(const basicAC_F0 &a) const  {return C_F0(code(a),r);}	
 
 template<class R>

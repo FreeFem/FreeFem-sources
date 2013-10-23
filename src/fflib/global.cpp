@@ -60,7 +60,7 @@ Map_type_of_map map_pair_of_type ; //  to store te type
 mylex *zzzfff;
 bool lexdebug;
 
-/// <<plglval>> see [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]] and [[file:~/ff/draft/src/lglib/lg.ypp::yylval]]
+/// <<plglval>> see [[file:../lglib/lg.ypp::YYSTYPE]] and [[file:../lglib/lg.ypp::yylval]]
 #include "lg.tab.hpp"
 YYSTYPE *plglval;
 
