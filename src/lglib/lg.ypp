@@ -90,7 +90,7 @@ Block * routineinblock[nbembtype]; // Add FH july 2005 pb clean on return
 int kkembtype=-1;
 int inloopcount=0;
 
-/// <<currentblock>> Block class from [[file:~/ff/draft/src/fflib/AFunction.hpp::Block]]
+/// <<currentblock>> Block class from [[file:../fflib/AFunction.hpp::Block]]
 
 Block *currentblock;
 
@@ -305,14 +305,14 @@ start:
 
       {
 
-        // <<create_global_FF_stack>> calls [[file:~/ff/draft/src/fflib/ffstack.hpp::newStack]]
+        // <<create_global_FF_stack>> calls [[file:../fflib/ffstack.hpp::newStack]]
 
         Stack stack = newStack(sizestack);
 
         double CPUcompile= CPUtime();
         try {                  
 
-          // calls [[file:~/ff/draft/src/fflib/AFunction.hpp::CListOfInst::eval]]
+          // calls [[file:../fflib/AFunction.hpp::CListOfInst::eval]]
 
           $1.eval(stack);
         }
@@ -657,7 +657,7 @@ sub_script_expr:
 /*<<parameters>>*/
 
 parameters:  {$$=0} 
-	|   FESPACE {$$=Find($1)} /*[[file:~/ff/draft/src/fflib/AFunction2.cpp::Find]]*/
+	|   FESPACE {$$=Find($1)} /*[[file:../fflib/AFunction2.cpp::Find]]*/
 	|   FESPACE1 {$$=Find($1)} 
 	|   FESPACE3 {$$=Find($1)} 
 
@@ -695,14 +695,20 @@ pow_expr: primary /*[[primary]]*/
 /*<<primary>>*/
 
 primary:  
-           ID           {$$=Find($1);} /* <<primary_ID>> */
+
+  /* <<primary_ID>> calls [[file:~/ff/draft/src/fflib/AFunction2.cpp::Find]]
+     returns [[file:~/ff/draft/src/fflib/AFunction.hpp::C_F0]] */
+
+           ID           {$$=Find($1);}
+
   |        LNUM         {$$= CConstant($1)}
   |        DNUM         {$$= CConstant($1)}
   |        CNUM         {$$= CConstant(complex<double>(0,$1))}
   |        STRING {$$= CConstant<const char *>($1)}
 
-  /* refers to [[parameters]] and creates an object of class [[file:~/ff/draft/src/fflib/AFunction.hpp::C_F0]]
-     as [[YYSTYPE]]. used for <<primary_plot>> */
+  /* <<primary_brackets_parameters>> refers to [[parameters]] and creates an object of class
+     [[file:../fflib/AFunction.hpp::C_F0]] */
+
   |        primary '('  parameters ')'  {$$=C_F0($1,$2,$3);}
 
   |        primary '[' sub_script_expr ']'    {$$=C_F0($1,$2,$3)}
@@ -760,7 +766,7 @@ int Compile()
   // see [[YYSTYPE]] [[yylval]] [[lglval]]
   extern   YYSTYPE *plglval;  // modif FH 
 
-  /// allocated at [[file:~/ff/draft/src/fflib/global.cpp::plglval]]
+  /// plglval is allocated at [[file:../fflib/global.cpp::plglval]]
   plglval = &lglval;
 
   int retvalue=0;

@@ -43,7 +43,7 @@ my $dir='';
 my @ignore=`cat .hgignore`;
 foreach my $f(`find . -type f`){push @q,$f}
 
-# core count inspired from [[file:~/alh/perl/System.ph::nbcores]]
+# core count inspired from [[file:../../../alh/perl/System.ph::nbcores]]
 sub nbcores{
   my $n=1;
   if(-e "/proc/cpuinfo"){$n=`grep 'processor.*:' /proc/cpuinfo|wc -l`} # linux
@@ -60,7 +60,7 @@ foreach(@threads){$_->join()}
 sub scanfiles{
   while(defined(my $f=pop @q)){
 
-    # relative path name
+    # relative path name is required for the index to be operational on any user machine
     $f=~s/^\.\///;
     chomp $f;
     my $frel=file($f)->relative($pwd);
@@ -103,19 +103,21 @@ sub scanfiles{
     }
 
     # update file if some paths were changed
+
     if($c ne $cref){
-      print "Changed hyperlink paths to relative in $f";
+      print "Changed hyperlink paths to relative in $f\n";
       open FILE,">$f" or die;
       print FILE $c;
       close FILE;
     }
 
     # find name anchors in file contents
+
     while($c=~m/<<([^<> ,{}]+)>>/g){$anchors{$1}.=" [[file:${frel}::$1][$frel]]"}
   }
 }
 
-# final display
+# print out all existing hyperlink anchors
 
 print "\n";
 open OUT,">index.org" or die;
@@ -130,6 +132,7 @@ foreach(sort {uc($a) cmp uc($b)} keys %anchors){
   if(length($_)<$padding){print OUT " "x($padding-length($_))}
   print OUT "$anchors{$_}\n";
 }
+
 close OUT;
 
 # Local Variables:
