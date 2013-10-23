@@ -105,6 +105,7 @@ class AC_F0;
 class basicAC_F0;
 typedef complex<double> Complex;
 
+/// <<Type_Expr>> [[file:AnyType.hpp::aType]] [[E_F0]]
 typedef pair<aType,  E_F0  *>  Type_Expr ;// to store the type and the expression  29042005 FH
 
  int  FindType(const char * name) ; 
@@ -235,7 +236,7 @@ template<class T>
 };
 
 
-//  for all the type of the language 
+// <<basicForEachType>> for all the type of the language 
 class basicForEachType : public CodeAlloc {
     const type_info  * ktype;  // the real type_info
   //  const type_info *ktypefunc;// the type of code 
@@ -546,7 +547,7 @@ class  OneOperator : public ArrayOfaType {
     
 };
 
-
+/// <<Polymorphic>>
 class Polymorphic:  public E_F0mps {
    //  a list of type 
    //  simple, array or function
@@ -591,84 +592,87 @@ class Polymorphic:  public E_F0mps {
   
 };
 
+///   the type for polymorphisme of id 
 
-
-
-//   the type for polymorphisme of id 
-
-
-
-// <<C_F0>> compile time expressions
+/// <<C_F0>> compile time expressions
 
 class basicAC_F0;
- class C_F0 {
-   friend class CC_F0;
-  protected: 
-  Expression  f; //  the expression code 
-  aType r;   // the expression type
+class C_F0 {
+  friend class CC_F0; // cf [[CC_F0]]
+protected: 
+  Expression  f; //  the expression code, cf [[Expression]]
+  aType r;   // the expression type, cf  [[file:../fflib/AnyType.hpp::aType]]
   
- public: 
-   //  the constructeur 
-   C_F0() :f(0),r(0) {}
-   C_F0(const C_F0 & c):f(c.f),r(c.r)   {}
-   C_F0(const C_F0 & a,const C_F0 & b); // concatenation 
-   C_F0(const Type_Expr & a):f(a.second),r(a.first)   {}
-   C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
-   C_F0(const Polymorphic *,const char *, AC_F0 & );
-   //  function, array ..  
-   C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)  ;
-   C_F0(const C_F0 & e,const char *op, AC_F0 & p) ;	  
-   C_F0(const C_F0 & e,const char *op,const C_F0 & ee)  ; 
-   C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b) ; 	  
-   C_F0(const C_F0 & e,const char *nm) ; 
-   //  without parameter ex f()   
-   C_F0(const Polymorphic * pop,const char *op); 
-   // unary operator  
-   C_F0(const Polymorphic * pop,const char *op,const C_F0 & a); 
-   // binary operator  
-   C_F0(const Polymorphic * pop,const char *op,const C_F0 & a,const  C_F0  & b); 
-      // ternary operator  
-      C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b,const  C_F0 & c); 
-	  
-	  	  
-	  C_F0( Expression ff,aType rr ): f(ff),r(rr) { 
-	   //   cout << "C_F0: " <<  * rr << endl;//  dec 2007 FH
-	  // if (!rr && ff)  cerr << "Type Null" << endl;
-	    }
-	 // operator Expression() const {return f;}
-	  AnyType eval(Stack s) const {return (*f)(s);}
+public: 
+  //  the constructeur 
+  C_F0() :f(0),r(0) {}
+  C_F0(const C_F0 & c):f(c.f),r(c.r)   {}
+  C_F0(const C_F0 & a,const C_F0 & b); // concatenation 
 
-	  Expression RightValue() const { return r->RightValueExpr(f);}	  
-	  Expression LeftValue() const;
+  /// cf [[Type_Expr]]
+  C_F0(const Type_Expr & a):f(a.second),r(a.first)   {}
+
+  /// cf [[Polymorphic]]
+  C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
+  C_F0(const Polymorphic *,const char *, AC_F0 & );
+
+  //  function, array ..  
+  C_F0(const C_F0 & e,const char *op,const basicAC_F0 & p)  ;
+  C_F0(const C_F0 & e,const char *op, AC_F0 & p) ;	  
+  C_F0(const C_F0 & e,const char *op,const C_F0 & ee)  ; 
+  C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b) ; 	  
+  C_F0(const C_F0 & e,const char *nm) ; 
+
+  //  without parameter ex f(). cf [[Polymorphic]]
+  C_F0(const Polymorphic * pop,const char *op); 
+
+  // unary operator  
+  C_F0(const Polymorphic * pop,const char *op,const C_F0 & a); 
+
+  // binary operator  
+  C_F0(const Polymorphic * pop,const char *op,const C_F0 & a,const  C_F0  & b); 
+
+  // ternary operator  
+  C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b,const  C_F0 & c); 
 	  
-	  aType left() const {return r;}
-	  aType right() const {return r->right();}
+  C_F0( Expression ff,aType rr ): f(ff),r(rr) { 
+    //   cout << "C_F0: " <<  * rr << endl;//  dec 2007 FH
+    // if (!rr && ff)  cerr << "Type Null" << endl;
+  }
+
+  // operator Expression() const {return f;}
+  AnyType eval(Stack s) const {return (*f)(s);}
+  
+  Expression RightValue() const { return r->RightValueExpr(f);}	  
+  Expression LeftValue() const;
+	  
+  aType left() const {return r;}
+  aType right() const {return r->right();}
   C_F0  RightExp() const { return C_F0(RightValue(),right());} // FH add 07/2005
-	  operator    E_F0 *  () const {return f;}
-	  bool Empty() const {return !f || f->Empty();}
-	  bool NotNull() const {return  f;}
-	  int  TYPEOFID() const { return r ? r->TYPEOFID(): 0;}
-	  int  nbitem() const { return f ? f->nbitem() : 0;}
-	  bool EvaluableWithOutStack() const { return f && f->EvaluableWithOutStack();}
-          bool Zero() const { return !f || f->Zero();}
-	  Expression Destroy() {  return r->Destroy(*this);}
-	  operator const Polymorphic * () const {return  dynamic_cast<const Polymorphic *>(f);}
-	  bool operator==(const C_F0 & a) const {return f==a.f && r == a.r;}
-	  bool operator!=(const C_F0 & a) const {return f!=a.f || r != a.r;}
-//          Type_Expr SetParam(const ListOfId * l,size_t & top) const ;
-      bool MeshIndependent() const { return f ==0 ? f->MeshIndependent() : false;}
-     C_F0 OnReturn() {	 f=r->OnReturn(f); return *this;  } // Add mai 2009 (for return statment.
+  operator    E_F0 *  () const {return f;}
+  bool Empty() const {return !f || f->Empty();}
+  bool NotNull() const {return  f;}
+  int  TYPEOFID() const { return r ? r->TYPEOFID(): 0;}
+  int  nbitem() const { return f ? f->nbitem() : 0;}
+  bool EvaluableWithOutStack() const { return f && f->EvaluableWithOutStack();}
+  bool Zero() const { return !f || f->Zero();}
+  Expression Destroy() {  return r->Destroy(*this);}
+  operator const Polymorphic * () const {return  dynamic_cast<const Polymorphic *>(f);}
+  bool operator==(const C_F0 & a) const {return f==a.f && r == a.r;}
+  bool operator!=(const C_F0 & a) const {return f!=a.f || r != a.r;}
+  //          Type_Expr SetParam(const ListOfId * l,size_t & top) const ;
+  bool MeshIndependent() const { return f ==0 ? f->MeshIndependent() : false;}
+  C_F0 OnReturn() {	 f=r->OnReturn(f); return *this;  } // Add mai 2009 (for return statment.
 private:
-friend class Block;	 
-friend class TableOfIdentifier; 
-	  C_F0( Expression ff ): f(ff),r(0) {}
- };
+  friend class Block;	 
+  friend class TableOfIdentifier; 
+  C_F0( Expression ff ): f(ff),r(0) {}
+};
 
 
 
-//  for bison 
+// for bison [[CListOfInst]]
 class CListOfInst;
- 
 
  //  a => b
  //  f => t||f
@@ -1337,7 +1341,7 @@ Type_Expr CConstant(const R & v)
  }
 
 
-/// <<CC_F0>>
+/// <<CC_F0>> used in [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]]
 
 class CC_F0 {
   Expression f;
@@ -1356,7 +1360,7 @@ public:
 /// <<ListOfInst>>
 
 class ListOfInst :
-  public E_F0mps /// [[E_F0mps]]
+  public E_F0mps /*[[E_F0mps]]*/
 { 
   int n;
   Expression   *   list;
@@ -1798,12 +1802,14 @@ inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l
     
 typedef list<TableOfIdentifier *> ListOfTOfId;    
     
- extern  list<TableOfIdentifier *> tables_of_identifier;
+/// <<tables_of_identifier>> allocated at [[file:global.cpp::tableofidentifier]]
+extern list<TableOfIdentifier *> tables_of_identifier;
 
  
 
+/// [[file:AFunction2.cpp::Find]]
 
-  C_F0 Find(const char * name) ;  
+C_F0 Find(const char * name);
   
 inline  C_F0 basicForEachType::Find(const char * k) const
   {  C_F0 r( ti.Find(k));
@@ -2981,7 +2987,7 @@ class E_Routine :  public E_F0mps { public:
 
 };
 
-/// <<Routine>>
+/// <<Routine>> used in [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]]
 
 class Routine: public OneOperator{  public:
    size_t offset;

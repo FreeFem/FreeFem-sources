@@ -370,7 +370,9 @@ void Polymorphic::Add(const char * op,Value *pp) const
      return 0;
    } 
 
-  C_F0 Find(const char * name)   
+/// <<Find>> uses [[file:global.cpp::tables_of_identifier]]
+
+C_F0 Find(const char * name)   
 {
    C_F0 r;
    ListOfTOfId::const_iterator i=tables_of_identifier.begin();
