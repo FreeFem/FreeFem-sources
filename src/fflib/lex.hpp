@@ -36,6 +36,7 @@
 extern bool lexdebug;
 extern long mpisize,mpirank;
 
+/// <<mylex>>
 class mylex : public CodeAlloc { 
   public:
   typedef const char * Key;
@@ -152,7 +153,8 @@ private:
 mylex * Newlex(  ostream & out,bool =true);
  void Destroylex(mylex * m);
 
-/// <<zzzfff>> This pointer is initialized in [[file:../lglib/lg.ypp::zzzfff Newlex cout echo_edp]]
+/// <<zzzfff>> This pointer is allocated in [[file:global.cpp::zzzfff]] and initialized in
+/// [[file:~/ff/draft/src/lglib/lg.ypp::zzzfff]]
 
 extern mylex *zzzfff;
 

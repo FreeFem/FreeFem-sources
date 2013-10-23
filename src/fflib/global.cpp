@@ -56,11 +56,13 @@ Map_type_of_map map_pair_of_type ; //  to store te type
 
  basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
 
+/// <<zzzfff>> see [[file:lex.hpp::mylex]]
+mylex *zzzfff;
+bool lexdebug;
 
- mylex *zzzfff;
-  bool lexdebug;
+/// <<plglval>> see [[file:~/ff/draft/src/lglib/lg.ypp::YYSTYPE]] and [[file:~/ff/draft/src/lglib/lg.ypp::yylval]]
 #include "lg.tab.hpp"
- YYSTYPE *plglval;
+YYSTYPE *plglval;
 
  int TheCurrentLine=-1; // unset: by default
  long mpisize=0,mpirank=0;
@@ -78,11 +80,11 @@ TableOfIdentifier Global;
 
  long E_Border::Count =0;
 
- typedef list<TableOfIdentifier *> ListOfTOfId;
+/// <<tableofidentifier>> declared at [[file:AFunction.hpp::tables_of_identifier]]
+typedef list<TableOfIdentifier *> ListOfTOfId;
+ListOfTOfId tables_of_identifier;
 
-  ListOfTOfId tables_of_identifier;
-
-  const int AC_F0::MaxSize=1024; // maximal number of parameters
+const int AC_F0::MaxSize=1024; // maximal number of parameters
 
 
 

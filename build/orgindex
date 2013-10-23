@@ -25,42 +25,105 @@
 # headeralh brief="Build an index of all Emacs org-mode hyperlinks" default=0 freefem perl start=22/10/2013 upmc written
 
 use strict;
+use warnings;
+use threads;
+use threads::shared;
+use Path::Class; # relative()
+use File::Basename; # dirname()
+use Cwd; # getcwd()
 
+# Scan all files in the FF directory tree
+
+my $pwd=getcwd();
 my %anchors;
+share %anchors;
+my @q;
+share @q;
 my $dir='';
 my @ignore=`cat .hgignore`;
-foreach my $f(`find . -type f`){
+foreach my $f(`find . -type f`){push @q,$f}
 
-  # files to skip because of .hgignore
-  $f=~s/^\.\///;
-  chomp $f;
-  my $found=0;
-  foreach my $r(@ignore){
-    chomp $r;
-    if($f=~/$r/){
-      $found=1;
-      last;
+# core count inspired from [[file:~/alh/perl/System.ph::nbcores]]
+sub nbcores{
+  my $n=1;
+  if(-e "/proc/cpuinfo"){$n=`grep 'processor.*:' /proc/cpuinfo|wc -l`} # linux
+  elsif(-x "/usr/sbin/sysctl"){$n=`sysctl -n hw.ncpu`} # macos
+  elsif(defined $ENV{NUMBER_OF_PROCESSORS}){$n=$ENV{NUMBER_OF_PROCESSORS}} # windows
+  return $n;
+}
+
+# start as many threads as possible
+my @threads;
+for(my $i=0;$i<nbcores();$i++){push @threads,threads->create(\&scanfiles)}
+foreach(@threads){$_->join()}
+
+sub scanfiles{
+  while(defined(my $f=pop @q)){
+
+    # relative path name
+    $f=~s/^\.\///;
+    chomp $f;
+    my $frel=file($f)->relative($pwd);
+
+    # files to skip because of .hgignore
+    my $found=0;
+    foreach my $r(@ignore){
+      chomp $r;
+      if($f=~/$r/){
+	$found=1;
+	last;
+      }
     }
+    next if $found;
+
+    # files to skip for other reasons
+    next if $f=~/\.(bmp|png|jpg|eps|pdf|tar|gz|zip|tgz)$/; # not text
+    next if $f=~/\.hg\//; # not text
+    next if $f=~/examples\+\+-load\/include\//; # duplicated text
+
+    # make sure that we don't leave absolute paths in the hyperlinks because these would not work on other machines
+
+    my $cref=`cat $f`;
+    my $c=$cref;
+    while($cref=~m/\[\[file:([^:\]]+)(.*)\]\]/g){
+
+      # hyperlink potentially containing an absolute path
+      my $labs=$1;
+      if($labs=~/^~\//){
+
+	# set HOME value
+	my $labshome=$labs;
+	$labshome=~s/^~/$ENV{HOME}/;
+
+	# change absolute path to relative in file contents
+	my $lrel=file($labshome)->relative(dirname($f));
+	my $labsqm=quotemeta($labs);
+	$c=~s/\[\[file:$labsqm/\[\[file:$lrel/g;
+      }
+    }
+
+    # update file if some paths were changed
+    if($c ne $cref){
+      print "Changed hyperlink paths to relative in $f";
+      open FILE,">$f" or die;
+      print FILE $c;
+      close FILE;
+    }
+
+    # find name anchors in file contents
+    while($c=~m/<<([^<> ,{}]+)>>/g){$anchors{$1}.=" [[file:${frel}::$1][$frel]]"}
   }
-  next if $found;
-
-  # files to skip for other reasons
-  next if $f=~/\.(bmp|png|jpg|eps|pdf|tar|gz|zip|tgz)$/;
-  next if $f=~/\.hg\//;
-  next if $f=~/examples\+\+-load\/include\//;
-
-  # display progress
-  print $f,"\n";
-
-  # find name anchors in file contents
-  my $c=`cat $f`;
-  while($c=~m/<<([^<> ,{}]+)>>/g){$anchors{$1}.=" [[file:${f}::$1]]"}
 }
 
 # final display
+
+print "\n";
 open OUT,">index.org" or die;
 print OUT "# -*- mode:org;coding:utf-8 -*-\n";
 print OUT "# Hyperlinks into the FreeFem++ source, built with [[file:build/orgindex]]\n";
+print OUT "# (do not modify this file manually: update the source files and run [[file:build/orgindex]] again)\n";
+print OUT "\n";
+
 foreach(sort {uc($a) cmp uc($b)} keys %anchors){
   print OUT "$_";
   my $padding=25;
