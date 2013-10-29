@@ -2536,6 +2536,7 @@ public:
   static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
 
   /// Evaluates the contents of the Plot object during script evaluation. Implemented at [[Plot_operator_brackets]]
+
   AnyType operator()(Stack s) const ;
 }; 
 

@@ -1129,7 +1129,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
 /// <<Carre>> Builds a square-shaped 2D mesh. An Expression [[file:AFunction.hpp::Expression]] is a pointer to an object
 /// of class E_F0 [[file:AFunction.hpp::E_F0]].
 
-Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0)
+Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg)
 {
   if(verbosity>99)  cout << " region = " << reg << " labels " << lab <<endl;  
   const int unionjack=1;
