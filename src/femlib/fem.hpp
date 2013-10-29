@@ -3,7 +3,7 @@
 #include <string> 
 #include <cstring> 
 #include "RefCounter.hpp"
-#include "../fflib/Serialize.hpp"
+#include "Serialize.hpp"
 // some usefull function 
 
 //typedef double R;
