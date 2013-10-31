@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Downloading third-party packages on request from the user
+# Download third-party packages independently of FF configuration (request from FH)
 # ======================================================================
 # Written by Antoine Le Hyaric
 # http://www.ljll.math.upmc.fr/lehyaric
@@ -22,17 +22,105 @@
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
-# headeralh brief="Downloading third-party packages on request from the user" default=0 freefem perl start=21/10/2013 upmc written
+# headeralh brief="Download third-party packages independently of FF configuration (request from FH)" default=0 freefem perl start=21/10/2013 upmc written
 
 use strict;
 use Getopt::Std;
 use threads;
 use threads::shared;
 
-my %opts;
-getopts('dlmo:p:v',\%opts);
+# -a = accept all licences
+# -f = force new downloads
 
-die "work in progress";
+my %opts;
+getopts('af',\%opts);
+
+# can be run from the parent directory
+
+if(-d "download"){chdir "download"}
+
+download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz',
+	 'http://www.caam.rice.edu/software/ARPACK','arpack96.tar.gz');
+download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
+	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz');
+
+download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz');
+download('CBLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz');
+
+download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz');
+
+download('freeYams','http://www.ann.jussieu.fr/~frey/ftp/archives/freeyams.2012.02.05.tgz',
+	 'http://www.ann.jussieu.fr/~frey/software.html','freeyams.2012.02.05.tgz');
+
+download('Gmm++','http://download.gna.org/getfem/stable/gmm-4.2.tar.gz',
+	 'http://download.gna.org/getfem/html/homepage/download.html','gmm-4.2.tar.gz');
+
+download('Hips','http://hips.gforge.inria.fr/release/hips-1.2b-rc4.tar.gz',
+	 'http://hips.gforge.inria.fr/','hips-1.2b-rc4.tar.gz');
+
+download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.10.2.tgz',
+	 'https://projects.coin-or.org/Ipopt','Ipopt-3.10.2.tgz');
+
+download('METIS','http://www.netlib.org/linalg/metis-4.0.tar.gz','http://www.netlib.org/linalg/','metis-4.0.tar.gz');
+
+download('ParMETIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-3.1.1.tar.gz',
+	 'http://glaros.dtc.umn.edu/gkhome/views/metis','ParMetis-3.1.1.tar.gz');
+
+download('MMG3D','http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz',
+	 'http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/mmg3d.php','mmg3d4.0.tgz');
+
+download('mshmet','http://www.ann.jussieu.fr/~frey/ftp/archives/mshmet.2012.04.25.tgz',
+	 'http://www.ann.jussieu.fr/~frey/software.html','mshmet.2012.04.25.tgz');
+
+download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
+	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz');
+
+download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
+	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz');
+
+download(' pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
+	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz');
+
+download('PaStiX','https://gforge.inria.fr/frs/download.php/21873/pastix_release_2200.tar.bz2',
+	 'https://gforge.inria.fr/projects/pastix/','pastix_release_2200.tar.bz2');
+
+download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
+	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz');
+
+download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_esmumps.tar.gz',
+	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz');
+
+download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
+	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz');
+
+download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
+	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz');
+download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_3.0.tar.gz',
+	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_dist_3.0.tar.gz');
+
+download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
+	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz');
+
+sub download{
+  my($title,$url,$lic,$pkg)=@_;
+
+  print "getall: $title: ";
+  if(-f "pkg/$pkg" && !$opts{f}){
+    print "done\n";
+    return;
+  }
+
+  if(!$opts{a}){
+    print "please check the licence for $title at $lic. Do you want to download $title? (yN)\n";
+    my $ans=uc <STDIN>;
+    chomp $ans;
+    return if $ans ne 'Y';
+  }
+
+  # uses [[file:../build/download]]
+  system "mkdir -p pkg";
+  system "../build/download $url pkg/$pkg";
+}
 
 # Local Variables:
 # mode:cperl

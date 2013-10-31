@@ -1,8 +1,6 @@
 # and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
-
 include cxxflags
 all-local: tetgen
 
@@ -58,11 +56,6 @@ $(SRCDIR)/tags: $(PACKAGE)
 	cd tetgen1.4.3 && patch -u -p1 < ../patches.win64
 	touch $(SRCDIR)/tags
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
-
-$(PACKAGE):
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
-
-
 
 clean-local::
 	-rm -rf tetgen1.4.?  FAIT FAIRE 

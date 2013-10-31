@@ -157,14 +157,6 @@ $(SRCDIR): $(PACKAGE1)
 	cd $(SRCDIR)/src/blend/src/; patch -p2 < ../../../../pastix_release_2200-blend.patch
 	touch $(SRCDIR)
 
-$(PACKAGE1):
-	-mkdir $(DIRPKG);
-#
-# FFCS - 23/4/13 - --no-check-certificate always required here, even
-# if [[file:../../configure.ac::no-check-certificate]] decides otherwise.
-# FH remove no-check-certificate , in wget command ..
-	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE1)`
-
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:
 	-cd $(SRCDIR)/src &&  $(MAKE) clean 

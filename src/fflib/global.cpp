@@ -80,7 +80,7 @@ TableOfIdentifier Global;
 
  long E_Border::Count =0;
 
-/// <<tableofidentifier>> declared at [[file:AFunction.hpp::tables_of_identifier]]
+/// <<tables_of_identifier>> declared at [[file:AFunction.hpp::tables_of_identifier]]
 typedef list<TableOfIdentifier *> ListOfTOfId;
 ListOfTOfId tables_of_identifier;
 

@@ -3,6 +3,7 @@
  - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
  - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format
  - Set all hyperlinks to relative paths to make sure that they work from any location
+ - Separate download script for all third-party software [[file:download/getall]], request from FH
 21/10/2013 (ALH)
  - umfpack configuration cleanup (request from Fred)
  - blas configuration cleanup (request from Cico)

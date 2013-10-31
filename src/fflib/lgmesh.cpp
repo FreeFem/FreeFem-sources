@@ -1313,7 +1313,9 @@ public:
     
   static ArrayOfaType  typeargs() { 
     return  ArrayOfaType(atype<long>(),atype<long>(),false);}
-        
+
+  /// <<MeshCarre2_f>>
+
   static  E_F0 * f(const basicAC_F0 & args){
     return new MeshCarre2(args);} 
         
@@ -1702,8 +1704,11 @@ void init_lgmesh() {
   Global.Add("movemesh","(",new OneOperatorCode<MoveMesh>);
   Global.Add("splitmesh","(",new OneOperatorCode<SplitMesh>);
   Global.Add("checkmovemesh","(",new OneOperatorCode<CheckMoveMesh>);
+
+  /// <<square_keyword>> see [[file:AFunction.hpp::OneOperatorCode]]
   Global.Add("square","(",new OneOperatorCode<MeshCarre2>);
   Global.Add("square","(",new OneOperatorCode<MeshCarre2f>);
+
   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
   Global.Add("trunc","(", new Op_trunc_mesh);
   Global.Add("readmesh","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadMeshbamg));

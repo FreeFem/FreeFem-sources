@@ -55,11 +55,5 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	    ARmake.m4 >ARPACK/ARmake.inc
 	touch ARPACK/fait
 
-$(ARPACK96_TAR_GZ):
-	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz
-
-$(PATCH_TAR_GZ):
-	cd $(DIRPKG);@WGET@ -N http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz
-
 clean-local:
 	-rm -r ARPACK ../lib/libarpack.a

@@ -1839,6 +1839,11 @@ if test "$enable_download" = yes  ;then
         AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
         AC_MSG_NOTICE([      or try to download/compile the altas blas .])
     fi
+
+    # ALH - 30/10/13 - (request from FH) all downloads are now part of a separate script ([[file:download/getall]])
+    # which needs to be run before make for the user to specify whether he is ok with each of the package licences.
+
+    AC_MSG_NOTICE([      Please run "download/getall" to download all necessary packages before running make])
 fi
 
 # FFCS does not use glut, so remove this message because it could make the user think that something is broken

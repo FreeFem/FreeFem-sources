@@ -33,10 +33,6 @@ SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 VERSION=4.10.0
 
-# ALH - this is also set in Makefile.inc, but this file may not always exist (eg after a make clean)
-
-WGET = wget --no-check-certificate
-
 mumps:../lib/WHERE.mumps
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
@@ -81,9 +77,6 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 	tar xvzf $(PACKAGE1)
 	patch -d MUMPS_$(VERSION) -p 1 < MUMPS_$(VERSION).patch
 	touch $(SRCDIR)/tag-tar
-
-$(PACKAGE1):
-	cd `dirname $@`; $(WGET) http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
 
 clean:clean-local
 clean-local:

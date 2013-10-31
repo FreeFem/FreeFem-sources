@@ -39,6 +39,7 @@ inline float norm(float x){return x*x;}
 namespace Fem2D 
 {
 
+  // ALH - These include files are located inside the namespace definition on purpose?
 
 #include "R1.hpp"
 #include "R2.hpp"

@@ -25,8 +25,6 @@ $(SRCDIR)/FAIT: $(TARGZ)
 	cd $(SRCDIR) && $(MAKE) install
 	touch $(SRCDIR)/FAIT
 	$(MAKE) WHERE
-$(TARGZ):
-	cd ../pkg;$(WGET) $(URL)
 ../pkg:
 	mkdir $@
 
