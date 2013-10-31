@@ -477,11 +477,13 @@ void Check(const Opera &Op,int N,int  M)
     const QuadratureFormular & FIT = di.FIT(stack);
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-    if (verbosity>3) 
+    if (verbosity>3)
+    {
       if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+    }
      //if(di.islevelset()) InternalError("So no levelset integration type on this case (6)");
      if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (6)");
      
@@ -520,7 +522,7 @@ void Check(const Opera &Op,int N,int  M)
 	  // R zero=R();  
 	  int il=0;
 	  for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-	    ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
+	    ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
 	}
 	BilinearOperator b_nozer(*b->b,ok); 
 	if (verbosity % 10 > 3 ) 
@@ -543,9 +545,11 @@ void Check(const Opera &Op,int N,int  M)
    // parammatElement_OpVF.first = stack;
    // parammatElement_OpVF.second= & binside;
     
-    if (verbosity >3) 
+    if (verbosity >3)
+    {
       if (all) cout << " all " << endl ;
       else cout << endl;
+    }
     if(VF) {
       if(&Uh != &Vh || sym)
 	ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
@@ -704,11 +708,13 @@ void Check(const Opera &Op,int N,int  M)
     const GQuadratureFormular<R3> & FIV = di.FIV(stack);
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-    if (verbosity>3) 
+    if (verbosity>3)
+    {
       if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int3d   (nQP: "<< FIV.n << " ) in "  ;
+    }
      if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (7) ");
      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
      
@@ -747,7 +753,7 @@ void Check(const Opera &Op,int N,int  M)
 	  // R zero=R();  
 	  int il=0;
 	  for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-	    ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
+	    ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
 	}
 	BilinearOperator b_nozer(*b->b,ok); 
 	if (verbosity % 10 > 3 ) 
@@ -770,9 +776,11 @@ void Check(const Opera &Op,int N,int  M)
     parammatElement_OpVF.first = stack;
     parammatElement_OpVF.second= & binside;
     
-    if (verbosity >3) 
+    if (verbosity >3)
+    {
       if (all) cout << " all " << endl ;
       else cout << endl;
+    }
     if(VF) {
       if(&Uh != &Vh || sym)
 	ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
@@ -1347,11 +1355,13 @@ void Check(const Opera &Op,int N,int  M)
     const QuadratureFormular & FIT = di.FIT(stack);
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-    if (verbosity>3) 
+    if (verbosity>3)
+    {
       if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
       else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+    }
       if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
       if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("Sorry no levelset integration type on no int1d case");
       
@@ -1395,7 +1405,7 @@ void Check(const Opera &Op,int N,int  M)
        // R zero=R();  
       int il=0;
       for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-        ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
+        ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
      }
     BilinearOperator b_nozer(*b->b,ok); 
     if (verbosity % 10 > 3 ) 
@@ -1417,10 +1427,11 @@ void Check(const Opera &Op,int N,int  M)
    KN<double>  p(Vh.esize()+ Uh.esize() );
 
     
-    if (verbosity >3) 
+    if (verbosity >3)
+    {
       if (all) cout << " all " << endl ;
       else cout << endl;
-
+    }
     
     if (di.kind == CDomainOfIntegration::int1d )
       {
@@ -1508,11 +1519,13 @@ void Check(const Opera &Op,int N,int  M)
       const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
       bool VF=b->VF();  // finite Volume or discontinous Galerkin
       if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-      if (verbosity>3) 
+      if (verbosity>3)
+      {
           if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
           else  if (CDomainOfIntegration::intallfaces==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
           //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
           else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+      }
       if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (2)");
       if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
    
@@ -1550,7 +1563,7 @@ void Check(const Opera &Op,int N,int  M)
               // R zero=R();  
               int il=0;
               for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                  ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( norm(*(where_in_stack[il])) < 1e-100 ) );
+                  ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
           }
           BilinearOperator b_nozer(*b->b,ok); 
           if (verbosity % 10 > 3 ) 
@@ -1573,9 +1586,10 @@ void Check(const Opera &Op,int N,int  M)
       
       
       if (verbosity >3) 
-          if (all) cout << " all " << endl ;
+	{
+	  if (all) cout << " all " << endl ;
           else cout << endl;
-      
+	}
       
       if (di.kind == CDomainOfIntegration::int2d )
       { 
@@ -3732,10 +3746,12 @@ template<class R>
     if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
 
     if (verbosity>3) 
-      if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") , samemesh: " << sameMesh << " "   ;
-      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
-      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
-      else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+      {
+	if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") , samemesh: " << sameMesh << " "   ;
+	else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
+	else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
+	else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+      }
     if(di.islevelset()) InternalError("So no levelset integration type on this case (3)");
     if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset intgeration type on no int1d case");
     /*
@@ -3801,9 +3817,10 @@ template<class R>
     
       KN<int>   ip(Vh.MaxNbDFPerElement*6);
     if (verbosity >3) 
-      if (all) cout << " all " << endl ;
-      else cout << endl;
-    
+      {
+	if (all) cout << " all " << endl ;
+	else cout << endl;
+      }
     if (kind==CDomainOfIntegration::int2d)
       { //AFAIRE("3D Elment RHS CDomainOfIntegration::int2d");
 	if(VF) InternalError(" no jump or average in int1d of RHS");
@@ -3952,10 +3969,12 @@ template<class R>
           << " levelset integration " <<di.islevelset()<<  "\n";
 
     if (verbosity>3) 
-      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") , samemesh :"<< sameMesh<< " int mortar: " << intmortar ;
-      else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
-      else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
-      else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+      {
+	if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") , samemesh :"<< sameMesh<< " int mortar: " << intmortar ;
+	else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+	else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+	else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+      }
     /*
     if ( verbosity>3) 
       if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
@@ -4008,8 +4027,10 @@ template<class R>
     
       KN<int>   ip(Vh.MaxNbDFPerElement*6);
     if (verbosity >3) 
-      if (all) cout << " all " << endl ;
-      else cout << endl;
+      {
+	if (all) cout << " all " << endl ;
+	else cout << endl;
+      }
       if(di.islevelset() && (kind !=CDomainOfIntegration::int1d))
        InternalError(" Sorry No levelSet integral for is case ..(5)");
          
@@ -4125,13 +4146,15 @@ template<class R>
       ffassert(0);
       for (int i=0;i< ThI.nt; i++) 
         {
-         if (all || setoflab.find(ThI[i].lab) != setoflab.end()) 
-         for (int ie=0;ie<3;ie++)
-            if ( sameMesh) 
-                Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
-             else 
-                InternalError("To Do") ;
-           if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+	  if (all || setoflab.find(ThI[i].lab) != setoflab.end()) 
+	    for (int ie=0;ie<3;ie++)
+	      { 
+		if ( sameMesh) 
+		  Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
+		else 
+		  InternalError("To Do") ;
+	      }
+	  if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
         }
      }
      
@@ -4722,11 +4745,12 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   try {  
   
   if (ds.initmat)
-    if(cadna)
-     ACadna = DefSolverCadna( stack,A, ds);
-    else
-      DefSolver(stack,  A, ds);
-  
+    {
+      if(cadna)
+	ACadna = DefSolverCadna( stack,A, ds);
+      else
+	DefSolver(stack,  A, ds);
+    }
 
 
       

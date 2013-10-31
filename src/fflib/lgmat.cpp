@@ -558,8 +558,8 @@ void BuildCombMat(map< pair<int,int>, R> & mij,const KNM_<R> & A, int ii00=0,int
    for ( j=0;j<m;j++)
           {
            R cij=coef*A(i,j);
-           if (cnj)  cij = conj(cij); 
-           if(norm(cij) >eps0)
+           if (cnj)  cij = RNM::conj(cij); 
+           if(Fem2D::norm(cij) >eps0)
              mij[ij_mat(false,ii00,jj00,i,j)] += cij;
          
    }
@@ -1773,7 +1773,7 @@ map< pair<int,int>, R> *Matrixfull2mapIJ_inv (KNM<R>   * const & pa,const Inv_KN
     for (long j=0;j<M;++j)
      { R aij=a(i,j);
        //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
-       if(ii[i]>=0 && jj[j]>=0 && norm(aij)>1e-40) 
+       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40) 
          A[make_pair(ii[i],jj[j])] += aij;
      }
       
@@ -1806,7 +1806,7 @@ map< pair<int,int>, R> *Matrixfull2mapIJ (KNM<R>   * const & pa,const KN_<long> 
        
           R aij=a(i,j);
        //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
-         if (norm(aij)>1e-40) 
+	  if (Fem2D::norm(aij)>1e-40) 
            A[make_pair(il,jl)] += aij;
        }
      }
@@ -1828,7 +1828,7 @@ AnyType Matrixfull2map (Stack , const AnyType & pp)
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { R aij=a(i,j);
-     if (norm(aij)>1e-40) 
+       if (Fem2D::norm(aij)>1e-40) 
       A[make_pair(i,j)] += aij;
      }
       
@@ -1860,8 +1860,8 @@ map< pair<int,int>, R> *Matrixoutp2mapIJ_inv (outProduct_KN_<R>   * const & pop,
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { 
-       R aij=op.a[i]*conj(op.b[j]);
-       if(ii[i]>=0 && jj[j]>=0 && norm(aij)>1e-40) 
+       R aij=op.a[i]*RNM::conj(op.b[j]);
+       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40) 
 //       if (norm(aij)>1e-40 &) 
           A[make_pair(ii[i],jj[j])] += aij;
      }   
@@ -1983,8 +1983,8 @@ map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,cons
                     cerr << " Out of Bound  in (a*b')(I,J) : " << i << " " << j << " not in " << "[0,"<<N<<"[x[0," << M << "[ \n";
                     ExecError("Out of Bound Error");
                 }
-               R aij=op.a[i]*conj(op.b[j]);
-               if (norm(aij)>1e-40) 
+               R aij=op.a[i]*RNM::conj(op.b[j]);
+               if (Fem2D::norm(aij)>1e-40) 
                   A[make_pair(il,jl)] += aij;
                }
      }   
@@ -2008,8 +2008,8 @@ AnyType Matrixoutp2map (Stack , const AnyType & pp)
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
      { 
-      R aij=op.a[i]*conj(op.b[j]);
-      if (norm(aij)>1e-40) 
+      R aij=op.a[i]*RNM::conj(op.b[j]);
+      if (Fem2D::norm(aij)>1e-40) 
         A[make_pair(i,j)] += aij;
      } 
   delete &op;        

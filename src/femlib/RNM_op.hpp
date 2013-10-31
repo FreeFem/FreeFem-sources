@@ -49,7 +49,7 @@ KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)
         R * mij = li;
         bj = bb;
         for (long j=0;   j<m; j++, bj += stepj, mij += stepij )         
-          *mij oper cc * conj(*bj) ; 
+          *mij oper cc * RNM::conj(*bj) ; 
        }
     return *this;
  }
@@ -59,7 +59,7 @@ KNM_<R> & KNM_<R>::operator oper (const ConjKNM_<R> & u)
     K_throwassert( N() == u.N() && M() == u.M() ); 
   for(int i=0;i<N();++i)
     for(int j=0;j<M();++j)
-        KNM_<R>::operator () (i,j) oper conj( u(i,j));
+        KNM_<R>::operator () (i,j) oper RNM::conj( u(i,j));
     return *this;
 }
 

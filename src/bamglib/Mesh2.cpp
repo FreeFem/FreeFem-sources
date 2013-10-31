@@ -1037,7 +1037,8 @@ int SwapForForcingEdge(Vertex   *  & pva ,Vertex  * &   pvb ,
     detsa=-detsa;
     detsb=-detsb;
 
-    if (ToSwap) 
+    if (ToSwap)
+    {
       if (dets2 < 0) {// haut
         dets1 = (ToSwap ? dets1 : detsa) ;
         detsa = dets2; 
@@ -1050,7 +1051,7 @@ int SwapForForcingEdge(Vertex   *  & pva ,Vertex  * &   pvb ,
       else {// on a fin ???
         tt1 = Next(tt2);
         ret =0;}
-
+    }
   }
   return ret;
 }
@@ -1494,6 +1495,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   if (!det3[2]) izerodet=2,nbd0++;
   
   if  (nbd0 >0 ) // point s on a egde or on a vertex 
+  {
     if (nbd0 == 1) {
       iedge = OppositeEdge[izerodet];
       TriangleAdjacent ta = t->Adj(iedge);
@@ -1523,7 +1525,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
       cerr << " s1 = "<< Number(s1) << " "  << s1 << endl;
       cerr << " s2 = "<< Number(s2) << " "  << s2 << endl;
       MeshError(5,this);}
-
+  }
   // remove de MarkUnSwap edge
   t->SetUnMarkUnSwap(0);     
   t->SetUnMarkUnSwap(1);     
@@ -2270,7 +2272,8 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 	      assert(i0 != i1);
 	      if (d01 == 0) 
 		break; 
-	      if ( d01 < seuil) 
+	      if ( d01 < seuil)
+              {
 		if (i1<nbvold) {
 		  // remove all the points i0;
 		  register Int4 ip,ipp;
@@ -2310,6 +2313,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 		  vertices[ip0].r = C;	      
 		vertices[ip0].r = C;
 	      }
+              }
 	    }
 	} // for (i0= ....
   }// for triangle   
@@ -3748,7 +3752,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 	  if(ei.Required())
 	    {
 	      if (j==0)
-		if(step==0)
+              {if(step==0)
 		  nbe++;
 		else
 		  { 
@@ -3765,7 +3769,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 #ifdef DRAWING1
 		    edges[nbe].Draw();
 #endif
-		    nbe++;}
+                      nbe++;}}
 	    }
           else 
 	    { // on curve ------
@@ -4099,10 +4103,10 @@ void Triangles::SetIntCoor(const char * strfrom)
 	if (triangles[i].det <=0 && Nberr++ <10)
 	  {
 	    if(Nberr==1)
-	      if (strfrom)
+            { if (strfrom)
 		cerr << "+++ Fatal Error " << strfrom << "(SetInCoor)  Error :  area of Triangle < 0 " << endl; 
 	      else 
-		cerr << "+++  Fatal Error Triangle (in SetInCoor) area of Triangle < 0" << endl;
+                  cerr << "+++  Fatal Error Triangle (in SetInCoor) area of Triangle < 0" << endl;}
 	    cerr << " Triangle " << i << "  det  (I2) = " << triangles[i].det ;
 	    cerr << " (R2) " << Det(v1.r-v0.r,v2.r-v0.r);
 	    cerr << "; The 3  vertices " << endl;
@@ -4199,7 +4203,8 @@ void Triangles::FillHoleInMesh()
      Int4 k=0;
      for (i=0;i<edge4->nb();i++)
        if (st[i] >=0) // edge alone 
-	 if (i < nbe) 
+       {
+           if (i < nbe)
 	   {
 	     Int4 i0=edge4->i(i);ordre[i0] = vertices+i0;
 	     Int4 i1=edge4->j(i);ordre[i1] = vertices+i1;
@@ -4213,6 +4218,7 @@ void Triangles::FillHoleInMesh()
 	     cerr << " Lose boundary edges " << i << " : " << i0 << " " << i1 << endl;
 	     }
 	 }
+       }
      	 
       if(k != 0) {
 	if (verbosity>20)

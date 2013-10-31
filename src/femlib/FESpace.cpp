@@ -845,9 +845,10 @@ int nb_dfv,const int *ndfv,int nb_dfe,const int *ndfe)
              int kj=kkk,kjj=-1;
             // assert(kk != k);
              if ( kk >= 0 && jj >=0  &&  !(( kk == k ) && ( jj=j ) ) ) 
-              if (k < kk ) kjj = NbNodeonEdge-kj-1; // 
+             {
+              if (k < kk ) kjj = NbNodeonEdge-kj-1; //
               else   kj = NbNodeonEdge-kj-1, kjj = NbNodeonEdge-kj-1;
-          
+             }
           if (kjj >=0)   
             NodesOfElement[kk*nbne+oe+jj] = nn + ndfe[be]*NbNodeonEdge+ kjj   ; // adj
           NodesOfElement[k*nbne+oe+j]   = nn + ndfe[be]*NbNodeonEdge+ kj   ; // new  

@@ -39,6 +39,7 @@ public:
   EConstantTypeOfFE & operator=(Fem2D::TypeOfFE * vv) {
       ffassert( !isconst  && vv && (vv->N == N)); //  same type 
       v = vv;       
+      return  *this;
   }
    operator aType () const { assert(v);return atype<Fem2D::TypeOfFE*>();} 
 };

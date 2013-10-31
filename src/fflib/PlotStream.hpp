@@ -149,7 +149,8 @@ public:
     return *this;}
   PlotStream& read( int& b) {read(reinterpret_cast< void *> (&b),sizeof(int)); b=r_endian(b);return *this;}
   PlotStream& read( double& b) {read(reinterpret_cast< void *> (&b),sizeof(double)); b=r_endian(b);return *this;}
-  PlotStream &read( complex<double> &C) { return read(C.real()),read(C.imag());}
+  PlotStream &read( complex<double> &C) { double  re,im; read(re); read(im); C=complex<double>(re,im); return 
+ *this;}
   PlotStream &read( Fem2D::R1 & P) { return read(P.x);}
   PlotStream &read( Fem2D::R2 & P) { return read(P.x),read(P.y);}
   PlotStream &read( Fem2D::R3 & P) { return read(P.x),read(P.y),read(P.z);}
