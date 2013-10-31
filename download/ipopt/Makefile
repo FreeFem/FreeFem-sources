@@ -36,7 +36,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	  CC='$(CC)' CFLAGS='$(CFLAGS) -I$(INCMUMPS)' \
 	  F77='$(FC)' FFLAGS='$(FCFLAGS)' \
 	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' \
-	 --with-blas='$(CXXFLAGS) $(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
+	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	touch $(SRCDIR)/FAIT	
 
 # FFCS - avoid remaking install every time
