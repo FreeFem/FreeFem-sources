@@ -316,7 +316,7 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & 
 
 void Polymorphic::Addp(const char * op,Value pp,...) const 
 {
-  pair<iterator,bool>  p=m.insert(make_pair<const Key,Value>(op,pp));
+  pair<iterator,bool>  p=m.insert(pair<const Key,Value>(op,pp));
   Value f= p.first->second;	
   if (!p.second)  // not insert => old 
     *f += *pp;
@@ -338,7 +338,7 @@ void Polymorphic::Add(const char * op,Value *pp) const
 {
   if (*pp)
    {
-    pair<iterator,bool>  p=m.insert(make_pair<const Key,Value>(op,*pp));
+    pair<iterator,bool>  p=m.insert(pair<const Key,Value>(op,*pp));
     Value f= p.first->second;	
     if (!p.second)  // not insert => old 
       *f += **pp;
@@ -511,7 +511,7 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
       if (i==m.end()) // new
 	{
 	    Value poly0=Value(atype<Polymorphic*>(),new Polymorphic(),listofvar);     
-	    i=m.insert(make_pair<const Key,Value>(k,poly0)).first;
+	    i=m.insert(pair<const Key,Value>(k,poly0)).first;
 	    listofvar= &*i;
 	}
       const Polymorphic * p= dynamic_cast<const Polymorphic *>(i->second.second);
@@ -704,7 +704,7 @@ struct CleanE_Routine {
 };
 
 AnyType E_Routine::operator()(Stack s)  const  {
-   debugstack.push(make_pair<const E_Routine*,int>(this,TheCurrentLine));
+   debugstack.push(pair<const E_Routine*,int>(this,TheCurrentLine));
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;

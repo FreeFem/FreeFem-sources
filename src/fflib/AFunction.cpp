@@ -1446,9 +1446,9 @@ void Init_map_type()
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
-     Global.Add("conj","(",new OneOperator1_<double>(conj,1));
+     Global.Add("conj","(",new OneOperator1_<double>(RNM::conj,1));
      TheOperators->Add("\'",new OneOperator1_<Complex>(conj,0));       
-     TheOperators->Add("\'",new OneOperator1_<double>(conj,1));       //  add F.  Feb 2010  of conj of varf.. 
+     TheOperators->Add("\'",new OneOperator1_<double>(RNM::conj,1));       //  add F.  Feb 2010  of conj of varf.. 
      
      
      Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));

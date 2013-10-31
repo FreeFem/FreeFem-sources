@@ -737,8 +737,8 @@ void GeometricalEdge::Draw(Int4  i)
       x= F( Real4(ii)/100.0);
       if(ii==50) x50=x,k50=1;
       if (InPtScreen(x.x,x.y) )
-	if(k) rlineto(x.x,x.y);
-	else k=1,rmoveto(x.x,x.y);
+      {if(k) rlineto(x.x,x.y);
+          else k=1,rmoveto(x.x,x.y);}
     }
       if (InPtScreen(v[1]->r.x,v[1]->r.y))      
 	v[1]->LineTo();  

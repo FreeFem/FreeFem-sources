@@ -5,6 +5,7 @@ template void  SplitSimplex<R1>(int N,int & nv, R1 *& P, int & nk , int *& K);
 template void  SplitSimplex<R2>(int N,int & nv, R2 *& P, int & nk , int *& K);
 template void  SplitSimplex<R3>(int N,int & nv, R3 *& P, int & nk , int *& K);
 $:
+*/
 //
 //   
 // ORIG-DATE:     fev 2009

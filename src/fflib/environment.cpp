@@ -187,7 +187,8 @@ int  readinitfile(const string & file)
 		else 
 		  line+= c;
 		if(c=='#') cmm=true;
-		if(!cmm) 
+		if(!cmm)
+                {
 		  if(invalue) // get value  key [=|+= value ]
 		    { 
 		      if (bv) //  store the value
@@ -251,6 +252,7 @@ int  readinitfile(const string & file)
 		    }
 		  else if(isalpha(c) ) 
 		    { inkey=1; key= c;}
+                }
 	}
 	if( inkey || invalue || bv )
 	  {

@@ -916,7 +916,7 @@ template<class R,class TA0,bool RO=true>
      } // to give a order in instuction 
 
    int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) ;
-   virtual ostream & dump(ostream &ff) const  { ff << typeid(*this).name() <<" f= " << ff << " a= "<< *a << ' '  ;return ff; }
+   virtual ostream & dump(ostream &ff) const  { ff << typeid(*this).name() <<" f= " << f << " a= "<< *a << ' '  ;return ff; }
 
 };
 

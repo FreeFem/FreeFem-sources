@@ -88,7 +88,7 @@ bool mylex::InMotClef  (aType & t, int & r) const {
 void  mylex::Add(Key k,int r,aType t){ 
   iterator ii= MotClef.find(k);
   ffassert(ii==MotClef.end());
-  MotClef.insert(make_pair<const Key,Value>(k,make_pair(r,t))); }
+  MotClef.insert(pair<const Key,Value>(k,Value(r,t))); }
 
 void mylex::dump(ostream & f ) 
 {
@@ -631,7 +631,7 @@ bool mylex::CallMacro(int &ret)
 		  }
 		  if(debugmacro)
 		cout << "macro arg "<< k << " :" << macroparm[k] << " -> " <<  p << endl;
-	      lp.insert(make_pair<string,string>(macroparm[k],p));
+	      lp.insert(pair<string,string>(macroparm[k],p));
 	      //lp[macroparm[k]] = p; 
 	    }
 	}
