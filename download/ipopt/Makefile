@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.inc
 
 all-local: Ipopt
@@ -67,8 +66,6 @@ $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL)
 	patch -p0 <patch-IpBlas
 	touch $(SRCDIR)/tag-tar
 
-$(PACKAGE):
-	cd `dirname $@`; $(WGET)   $(URL)/`basename $(PACKAGE)`
 clean-local::
 	rm -rf  $(SRCDIR)  *~ Makefile.inc
 

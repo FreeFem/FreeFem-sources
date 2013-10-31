@@ -1806,15 +1806,10 @@ inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,const ListOfId & l,size_t & top,bool del) 
    { return r->Initialization(New(k,r->SetParam(c,&l,top),del));}
    
+/// <<tables_of_identifier>> allocated at [[file:global.cpp::tables_of_identifier]]
 
-
-    
 typedef list<TableOfIdentifier *> ListOfTOfId;    
-    
-/// <<tables_of_identifier>> allocated at [[file:global.cpp::tableofidentifier]]
 extern list<TableOfIdentifier *> tables_of_identifier;
-
- 
 
 /// [[file:AFunction2.cpp::Find]]
 
@@ -2842,6 +2837,7 @@ inline C_F0 operator *(const C_F0 &a,const C_F0 &b)
 inline C_F0 operator+(const C_F0 &a,const C_F0 &b){ return C_F0(TheOperators,"+",a,b);}
 inline C_F0 operator-(const C_F0 &a,const C_F0 &b){ return C_F0(TheOperators,"-",a,b);}
   
+/// <<C_F0_operator_plusequals>>
 inline C_F0 &operator +=(C_F0 &a,const C_F0 &b)
 {  
    C_F0 r=C_F0(TheOperators,"+",a,b);

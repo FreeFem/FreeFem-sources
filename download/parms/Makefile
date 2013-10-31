@@ -41,10 +41,6 @@ $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	touch $(SRCDIR)
 
-$(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET) $(SERVER) --output-document=$(PACKAGE)
-
 clean:
 	-make cleanall -C $(SRCDIR)/src
 	-rm Makefile.in ../lib/WHERE.parms

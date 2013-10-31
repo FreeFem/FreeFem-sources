@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 # ======================================================================
 # Written by Antoine Le Hyaric
 # Laboratoire Jacques-Louis Lions

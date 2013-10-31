@@ -116,15 +116,6 @@ CBLAS/fait: $(CBLAS_TGZ)
 	touch CBLAS/fait
 $(CBLAS_SOURCES): CBLAS/fait
 
-$(BLAS_TGZ):
-	mkdir -p $(DIRPKG)
-	cd $(DIRPKG) && @WGET@ -N http://www.netlib.org/blas/blas.tgz
-
-$(CBLAS_TGZ):
-	mkdir -p $(DIRPKG)
-	cd $(DIRPKG) && @WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
-
-
 clean-local::
 	-rm -r BLAS CBLAS blas_xerbla.f
 

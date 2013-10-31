@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.in
 
 all-local: parmetis
@@ -76,9 +75,6 @@ $(SRCDIR)/tags: $(PACKAGE)
           <$(SRCDIR)/METISLib/Makefile-orig \
           >$(SRCDIR)/METISLib/Makefile
 	touch $(SRCDIR)/tags
-
-$(PACKAGE):
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 # FFCS - 23/5/12 - corrected bug in removing .a from ../lib
 clean:

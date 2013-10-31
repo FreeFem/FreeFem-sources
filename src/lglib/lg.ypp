@@ -482,7 +482,7 @@ fespace_def_list:  fespace_def
     
 /* <<declaration>> */
 
-declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3} /* see [[list_of_dcls]] */
+declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3} /* see [[type_of_dcl]] [[list_of_dcls]] */
              | FESPACEID  fespace_def_list    ';' {$$=$2}  
              | spaceIDs ';'{ $$=$1} 
              | FUNCTION ID '=' Expr ';' {$$=currentblock->NewID($1,$2,$4);} 
@@ -533,7 +533,7 @@ instruction:   ';' {$$=0;}
          | LOAD  STRING  {load($2);$$= 0; }
          |  try  '{' instructions '}' catchs {$$=Try($3,$5,currentblock->close(currentblock));}
          |  Expr ';' {$$=$1} /*[[Expr]]*/
-         |  declaration  {$$=$1} 
+         |  declaration  {$$=$1} /*[[declaration]]*/
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)} 
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
                 {inloopcount--; 
@@ -646,6 +646,8 @@ no_ternary_expr:
 	
 ;
 
+/*<<sub_script_expr>>*/
+
 sub_script_expr:  
 	    no_ternary_expr {$$=$1} 
     |   ':' {$$=C_F0(TheOperators,":")}			    
@@ -664,11 +666,11 @@ parameters:  {$$=0}
     /* cf [[id]] [[no_set_expr]] */
 	|  id '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)}
 
-	|   sub_script_expr {$$=$1} 
+	|   sub_script_expr {$$=$1} /*[[sub_script_expr]]*/
 	| parameters ',' FESPACE { $$ = ($1 += Find($3)) }
 	| parameters ',' FESPACE1 { $$ = ($1 += Find($3)) }
 	| parameters ',' FESPACE3 { $$ = ($1 += Find($3)) }
-	| parameters ',' sub_script_expr { $$ = ($1 += $3) }
+	| parameters ',' sub_script_expr { $$ = ($1 += $3) } /*[[sub_script_expr]]*/
 
     /* cf [[id]] [[no_set_expr]] */
 	| parameters ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5)) }
