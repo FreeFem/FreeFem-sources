@@ -681,19 +681,19 @@ int Compile()
     UnShowAlloc =0;
     retvalue=yyparse (); //  compile
     
-    if(retvalue==0)  
+    if    (retvalue==0)  
       {
 	if(currentblock) 
 	  {
 	    retvalue=1;
 	    if(!mpirank) cerr <<  "Error:a block is not close" << endl; 
-	  }  
+	  }     
 	else {
 	  if( verbosity  ) 
-	    {
+	    { 
 	      UnShowAlloc =1;
 	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg 
-		   << " mpirank: " <<mpirank << endl;
+		   << " mpirank: " <<mpirank << endl    ;
 	      if(!mpirank) cerr <<  "Bien: On a fini Normalement" << endl; 
 	    }
 	}

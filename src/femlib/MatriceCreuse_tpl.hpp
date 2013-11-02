@@ -300,12 +300,12 @@ template<class R>
 bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
 {
     double eps0=max(numeric_limits<double>::min(), threshold);
-    if( norm(coef)<eps0) return  L == U ;
+    if( RNM::norm2(coef)<eps0) return  L == U ;
     int i,j,kf,k;
     if(D)
     {
         for( i=0;i<this->n;i++)
-            if( norm(D[i])>eps0)
+            if( RNM::norm2(D[i])>eps0)
                 mij[ij_mat(trans,ii00,jj00,i,i)] += coef*(cnj? RNM::conj(D[i]) : D[i]);
     }
     else
@@ -319,7 +319,7 @@ bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tr
 	    k=kf;
 	    kf=pL[i+1];
 	    for ( j=i-kf+k;   k<kf; j++,  k++  )
-                if(norm(L[k])>eps0)
+                if(RNM::norm2(L[k])>eps0)
 		  mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? RNM::conj(L[k]) : L[k]);
 	  }
     if (U && pU)
@@ -328,7 +328,7 @@ bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tr
 	    k=kf;
 	    kf=pU[j+1];
 	    for ( i=j-kf+k;   k<kf; i++,  k++  )
-	      if(norm(U[k])>eps0)
+	      if(RNM::norm2(U[k])>eps0)
 		mij[ij_mat(trans,ii00,jj00,i,j)]= coef*(cnj? RNM::conj(U[k]) : U[k]);
 	  }
     return L == U ; // symetrique
@@ -576,7 +576,7 @@ void MatriceProfile<R>::cholesky(double eps) const {
   if (L != U) ERREUR(factorise,"Skyline matrix non symmetric");
   U = 0; // 
   typefac = FactorizationCholeski;
-  if ( norm(D[0]) <= 1.0e-60)
+  if ( RNM::norm2(D[0]) <= 1.0e-60)
       ERREUR(cholesky,"pivot (" << 0 << ")= " << D[0] )
   
   D[0] = sqrt(D[0]); 
@@ -599,8 +599,8 @@ void MatriceProfile<R>::cholesky(double eps) const {
       *ij =  -s/D[j] ;
       xii -= *ij * *ij ;
       }
-    // cout << norm(xii) << " " << Max(eps2*norm(D[i]),1.0e-60) << " " << sqrt(xii) <<endl;
-    if ( Fem2D::norm(xii) <= Max(eps2*Fem2D::norm(D[i]),1.0e-60)) 
+    // cout << RNM::norm2(xii) << " " << Max(eps2*RNM::norm2(D[i]),1.0e-60) << " " << sqrt(xii) <<endl;
+    if ( RNM::norm2(xii) <= Max(eps2*RNM::norm2(D[i]),1.0e-60)) 
       ERREUR(cholesky,"pivot (" << i << ")= " << xii << " < " << eps*abs(D[i]))
     D[i] = sqrt(xii);
     }
@@ -631,7 +631,7 @@ void MatriceProfile<R>::crout(double eps) const  {
 
       xii -= *ij * *ij * *dkk;
       }
-    if (norm(xii) <= Max(eps2*norm(D[i]),1.0e-60))
+    if (RNM::norm2(xii) <= Max(eps2*RNM::norm2(D[i]),1.0e-60))
       ERREUR(crout,"pivot (" << i << " )= " << abs(xii)<< " <= " << eps*abs(D[i]) << " eps = " << eps)
 	D[i] = xii;
     }
@@ -697,7 +697,7 @@ void MatriceProfile<R>::LU(double eps) const  {
       // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;
       uii = D[i] -s;
       
-      if (norm(uii) <= Max(eps2*norm(D[i]),1.0e-30))
+      if (RNM::norm2(uii) <= Max(eps2*RNM::norm2(D[i]),1.0e-30))
 	ERREUR(LU,"pivot (" << i << " )= " << abs(uii) << " <= " << eps*abs(D[i]) << " eps = " << eps);     
       
       D[i] = uii;
@@ -791,7 +791,7 @@ template <class R>
   int nbcoeff=0;
   for(int i=0;i<this->n;i++)
     for(int j=0;j<this->m;j++)
-      if(norm(A(i,j))>tol2) nbcoeff++;
+      if(RNM::norm2(A(i,j))>tol2) nbcoeff++;
 
   nbcoef=nbcoeff;
   nbcoeff=Max(nbcoeff,1); // pour toujours alloue quelque chose FH Bug dans CheckPtr
@@ -805,7 +805,7 @@ template <class R>
     lg[i]=nbcoeff;
     for(int j=0;j<this->m;j++)
      
-      if(norm(aij=A(i,j))>tol2)
+      if(RNM::norm2(aij=A(i,j))>tol2)
        {
          cl[nbcoeff]=j;
          a[nbcoeff]=aij;
@@ -987,7 +987,7 @@ ostream& MatriceMorse<R>::dump(ostream & f) const
     int ke=lg[i+1];
     for (;k<ke;k++)
       f << setw(9) << i+1 << ' ' << setw(9) << cl[k]+1 << ' ' << setprecision( 20) << a[k]<< '\n' ;
-     // if (norm(a[k])) f  << cl[k] << " " << a[k]<< ", ";
+     // if (RNM::norm2(a[k])) f  << cl[k] << " " << a[k]<< ", ";
      // else f  << cl[k] << " 0., " ;
    // f << endl;    
    }
@@ -1253,7 +1253,7 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tran
          {
            j=cl[k];
            R cij =  coef* ( cnj ? RNM::conj(a[k]) : a[k]);
-           if(norm(cij)>eps0)
+           if(RNM::norm2(cij)>eps0)
            {
             mij[ij_mat(trans,ii00,jj00,i,j)] += cij ;
            if (i!=j)
@@ -1270,7 +1270,7 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tran
            j=cl[k];
            R cij =  coef* ( cnj ? RNM::conj(a[k]) : a[k]);
 
-           if(norm(cij)>eps0)
+           if(RNM::norm2(cij)>eps0)
            mij[ij_mat(trans,ii00,jj00,i,j)] += cij;
          }
    }
@@ -1328,7 +1328,7 @@ template<class R>
 	    {
 	      for (int k=lg[i];k<lg[i+1];k++)
 		{   int j=cl[k];
-		    if( j<this->m && norm(a[k]))		    
+		    if( j<this->m && RNM::norm2(a[k]))		    
 			++nc;		   
 		}
 		nlg[i+1]=nc;
@@ -1342,7 +1342,7 @@ template<class R>
 	      for (int k=lg[i];k<lg[i+1];k++)
 		{
 		    int j=cl[k];
-		    if(i<this->n && j<this->m && norm(a[k]))
+		    if(i<this->n && j<this->m && RNM::norm2(a[k]))
 			++nc ;
 		}
 		nlg[i+1]=nc;
@@ -1359,7 +1359,7 @@ template<class R>
 	  for (int i=0;i<nm;i++)
 	      for (int k=lg[i];k<lg[i+1];k++)
 		{   int j=cl[k];
-		    if( j<this->m && norm(a[k]))		    
+		    if( j<this->m && RNM::norm2(a[k]))		    
 		      {na[nc]=a[k];
 		       ncl[nc++]=j;}
 		}
@@ -1371,7 +1371,7 @@ template<class R>
 	      for (int k=lg[i];k<lg[i+1];k++)
 		{
 		    int j=cl[k];
-		    if( j<this->m && norm(a[k]))
+		    if( j<this->m && RNM::norm2(a[k]))
 		      {na[nc]=a[k];
 		       ncl[nc++]=j;}
 		}
@@ -1439,7 +1439,7 @@ template<class RA>
        for (int k=lg[i];k<lg[i+1];k++)
          {    
            int j=cl[k];
-           if(norm(a[k])<eps0) continue;
+           if(RNM::norm2(a[k])<eps0) continue;
            int ii[2],jj[2];
            ii[0]=i;ii[1]=j;
            jj[0]=j;jj[1]=i;
@@ -1458,7 +1458,7 @@ template<class RA>
                      bjk=B(kz,j);
                    else
                       bjk=B(j,kz);
-                   if( norm(bjk)>eps0 && (!sym || kz<=i))
+                   if( RNM::norm2(bjk)>eps0 && (!sym || kz<=i))
                      sij.insert(make_pair(i,kz));
                   }
             }
@@ -1508,7 +1508,7 @@ template<class RA>
          {    
            int j=cl[k];
            RAB aij = a[k];
-           if(norm(aij) <eps0 ) continue;
+           if(RNM::norm2(aij) <eps0 ) continue;
            int ii[2],jj[2];
            ii[0]=i;ii[1]=j;
            jj[0]=j;jj[1]=i;
@@ -1528,7 +1528,7 @@ template<class RA>
                    else
                       bjk=B(j,k);
                 //   cout << i << "," << "," << j << "," << k << " " << aij << " " << bjk << endl;
-                   if( norm( bjk)> eps0  && (!sym || k<=i))
+                   if( RNM::norm2( bjk)> eps0  && (!sym || k<=i))
                        AB(i,k) += aij*bjk;
                   }
             }
@@ -1701,7 +1701,7 @@ double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gma
         R dx  = (xnew - x[i])*omega ;
         R xi = RNM::Min(RNM::Max(x[i]+dx,gmin[i]),gmax[i]);
         dx = x[i]- xi;
-        err = Max(err, norm(dx));
+        err = Max(err, RNM::norm2(dx));
         x[i] = xi;
         }
    }  return sqrt(err);
@@ -1741,7 +1741,7 @@ void MatriceMorse<R>::setdiag(const KN_<R> & x)
     {
       R * p= pij(i,i);
       if(p)     *p = x[i];
-      else ffassert( norm(x[i]) < 1e-30);}
+      else ffassert( RNM::norm2(x[i]) < 1e-30);}
 }
 template<class R>
 void MatriceMorse<R>::getdiag(KN_<R> & x) const 
