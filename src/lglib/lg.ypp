@@ -116,6 +116,7 @@ inline int lineno() {return zzzfff->lineno();}
 extern bool withrgraphique;
 
 /// <<fingraphique>>
+
 inline void fingraphique()
  { if(withrgraphique) 
    { withrgraphique=false;

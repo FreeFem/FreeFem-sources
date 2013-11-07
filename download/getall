@@ -27,17 +27,32 @@
 use strict;
 use Getopt::Std;
 use threads;
-use threads::shared;
 
 # -a = accept all licences
 # -f = force new downloads
+# -o name,name,... = only packages with the given names
 
 my %opts;
-getopts('af',\%opts);
+getopts('afo:',\%opts);
+
+# list required packages
+my $only=0;
+my %packs;
+if(defined $opts{o}){
+  $only=1;
+  foreach(split(/,/,$opts{o})){$packs{$_}=1}
+}
 
 # can be run from the parent directory
 
-if(-d "download"){chdir "download"}
+if(-x "download/getall"){chdir "download"}
+
+# can be run from any of the child directories
+
+if(-x "../getall"){chdir ".."}
+
+system "mkdir -p pkg";
+my @downloads;
 
 download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz',
 	 'http://www.caam.rice.edu/software/ARPACK','arpack96.tar.gz');
@@ -45,7 +60,9 @@ download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
 	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz');
 
 download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz');
-download('CBLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz');
+download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz');
+
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.8','http://www.openblas.net/','OpenBLAS.tar.gz');
 
 download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz');
 
@@ -101,25 +118,45 @@ download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_
 download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
 	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz');
 
+# run all downloads concurrently
+
+my @threads;
+foreach(@downloads){push @threads,threads->create(\&downloadone,$_)}
+foreach(@threads){$_->join()}
+
 sub download{
   my($title,$url,$lic,$pkg)=@_;
 
-  print "getall: $title: ";
+  # skip packages that have not been requested explicitely
+  return if($only && !defined $packs{$title});
+
+  # skip packages that are already present
   if(-f "pkg/$pkg" && !$opts{f}){
-    print "done\n";
+    print "$title $pkg done\n";
     return;
   }
 
+  # we do not store the answers to these questions. To repeat the same downloads without manual input, options "-a" and
+  # "-o names" are provided.
+
   if(!$opts{a}){
-    print "please check the licence for $title at $lic. Do you want to download $title? (yN)\n";
+    print "$title: please check the licence at $lic. Do you want to download $url? (yN)\n";
     my $ans=uc <STDIN>;
     chomp $ans;
     return if $ans ne 'Y';
   }
 
   # uses [[file:../build/download]]
-  system "mkdir -p pkg";
-  system "../build/download $url pkg/$pkg";
+  push @downloads,"../build/download $url pkg/$pkg";
+}
+
+sub downloadone{
+  my($cmd)=@_;
+  print "$cmd\n";
+  system $cmd;
+  if($?){
+    print "$cmd FAILED\n";
+  }
 }
 
 # Local Variables:

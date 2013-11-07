@@ -1,8 +1,34 @@
-# Downloading and compiling extra libraries
-# -----------------------------------------
+# ======================================================================
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh default=0 freefem make multipleauthors start=04/06/04 upmc brief="Makefile for downloaded ARPACK"
 
-all-local: $(DOWNLOAD_ARPACK)
+all-local:$(DOWNLOAD_ARPACK)
 EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz 
+
+COMMON_PACKTITLE=ARPACK
+include ../common.mak
+
+# nothing specific to do for [[file:../common.mak::reinstall]]
+
+reinstall::install
 
 # Downloading and compiling ARPACK
 # --------------------------------
@@ -13,10 +39,11 @@ DIRPKG=../pkg
 ARPACK96_TAR_GZ=$(DIRPKG)/arpack96.tar.gz
 PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
 
-arpack: $(ARPACKLIB) 
+COMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
 
 # FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
 
+compile::$(ARPACKLIB)
 $(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
@@ -28,8 +55,6 @@ $(ARPACKLIB): ARPACK/fait
 	else \
 	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
 	fi
-
-
 
 ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	-rm -rf ARPACK
@@ -55,5 +80,11 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	    ARmake.m4 >ARPACK/ARmake.inc
 	touch ARPACK/fait
 
-clean-local:
+clean-local::
 	-rm -r ARPACK ../lib/libarpack.a
+
+# Local Variables:
+# mode:makefile
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:
