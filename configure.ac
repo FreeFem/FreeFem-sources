@@ -952,7 +952,20 @@ then
             ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes
-	    ff_blas_libs="$ff_mkl_blas"
+
+	    # <<enable_mkl_mlt>> ALH - 6/11/13 - request from Atsushi Suzuki - the default MKL library must be able to
+	    # handle threads when FF is connected to AS' solver. So we need an option to configure FF with the
+	    # multithreaded MKL by default.
+
+	    AC_ARG_ENABLE(mkl_mlt,AC_HELP_STRING([--enable-mkl-mlt],[Link with the multithreaded instead of the monothreaded version of the MKL]))
+
+	    if test "$enable_mkl_mlt" = yes
+	    then
+		ff_blas_libs="$ff_mkl_mlt"
+	    else
+		ff_blas_libs="$ff_mkl_blas"
+	    fi
+
 	    ff_blas_inc="-I$ff_mkl_root/include"
 	    dnl  scalapack, and blacs don not work with mlk and sgi
 	    if test "$ff_mkl_mpi" != "_sgimpt" ; then
@@ -1232,7 +1245,12 @@ then
 	then
                 ff_arpack_download=yes
 		AC_MSG_NOTICE(using downloaded Arpack)
-		AC_SUBST(DOWNLOAD_ARPACK,arpack)
+
+		# ALH - 6/11/13 - this install goal is the standard goal for all downloaded packages in
+		# [[file:download/common.mak::install]]
+
+		AC_SUBST(DOWNLOAD_ARPACK,install)
+
 		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
 		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
 		AC_SUBST(LAPACK_arpack_LIB,${curdir}/download/lib/liblapack.a)
