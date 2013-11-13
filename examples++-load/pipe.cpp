@@ -1,12 +1,10 @@
 // to compile ff-c++ pipe.cpp
 //  warning do not compile under windows...
 #include "ff++.hpp"
-#include <ext/stdio_filebuf.h>
-#include <cstdio> 
+#include <cstdio>
 #include <unistd.h>
-//#include "pstream.h"
 
-typedef __gnu_cxx::stdio_filebuf<char> stdiofilebuf;
+
 #ifdef WIN32
 #include <Windows.h>
 
@@ -17,6 +15,82 @@ long ffusleep(long  s) {  Sleep(s/1000);return 0;}
 long ffsleep(long  s) { return sleep(s);}
 long ffusleep(long  s) { return usleep(s);}
 #endif
+
+#if __clang_major__ > 4
+
+#include "pstream.h"
+
+struct pstream {
+    redi::basic_pstream<char>  * fb;
+    //stdiofilebuf * fb;
+    ostream *os;
+    istream *is;
+    pstream(redi::basic_pstream<char>  *ff,std::ios_base::openmode mode)
+    : fb(ff) ,os(0),is(0)
+    {  if(verbosity>10) cout << " mode " << mode << endl;
+        basic_iostream<char> *   bs = fb;//->rdbuf();
+        ffassert(bs);
+        if(mode & ios_base::in )  {is = dynamic_cast<istream *>(bs);  assert(is);}//new istream(fb);
+        if(mode & ios_base::out ) {os = dynamic_cast<ostream *>(bs);assert(os);} //new ostream(fb);
+        if(verbosity>10)  cout << is << " " << os << " ******* " << endl;
+    }
+    ~pstream() {
+       // if(f)  delete f;;
+     //   if(os) delete os;
+      //  if(is) delete is;
+        if(fb) delete(fb);
+       // f=0;
+        os=0;
+        is=0;
+        fb=0;
+    }
+    void flush()
+    {
+        if( os ) os->flush();
+        //if( is ) is->flush();
+    }
+    
+};
+
+static pstream **  pstream_init(pstream **const & p,string * const & a,string * const & b)
+{
+    string mode= b ? *b: "w";
+    if (mode.length() ==0) mode = "wr";
+   /* redi::pstreams::pmode omp = redi::pstreams::pstdin|redi::pstreams::pstdout;
+    if (mode == "r+" )      omp = redi::pstreams::pstdin|redi::pstreams::pstdout;
+    else if( mode == "w"  ) omp = redi::pstreams::pstdout;
+    else if(  mode == "r" ) omp = redi::pstreams::pstdin;
+*/
+    std::ios_base::openmode  om = ios_base::in| ios_base::out;
+    if (mode == "r+" )      om =ios_base::in| ios_base::out;
+    else if( mode == "w"  ) om = ios_base::out;
+    else if(  mode == "r" ) om =  ios_base::in;
+    else  ExecError("Invalide mode pstream r,r+,w ");
+    if(verbosity>10)  *ffapi::cout()  << "pstream_init: om " << om << "(" <<ios_base::in << ios_base::out << ") mode:"
+        << mode << " '" << *a <<"'"<<  endl;
+
+    redi::basic_pstream<char>  *pp = new redi::pstream(a->c_str(),om);
+    ffassert(pp);
+    *p =  new pstream(pp,om);
+    
+    if ( !*p || !pp) {
+        cerr << " Error openning pipe  " << *a << endl;
+        ExecError("Error openning pipe");}
+    
+    return p;
+};
+
+static pstream **  pstream_init(pstream **const & p,string * const & a)
+{
+    return pstream_init(p,a,0);
+};
+
+#else
+// VERSION GNU
+#include <ext/stdio_filebuf.h>
+
+
+typedef __gnu_cxx::stdio_filebuf<char> stdiofilebuf;
 struct pstream {
     FILE * f; 
     stdiofilebuf * fb;
@@ -31,7 +105,7 @@ struct pstream {
     }
     ~pstream() {
         if(f) pclose(f);
-        if(os) delete os;
+       s if(os) delete os;
         if(is) delete is;
         if(fb) delete(fb);
         f=0;
@@ -39,8 +113,12 @@ struct pstream {
         is=0;
         fb=0;
 }
+   void flush()
+    {
+        if( os ) os->flush();
+        if( f) fflush(f);
+    }
 };
-
 //typedef redi::pstream pstream;
 // typedef std::string string;
 
@@ -53,26 +131,28 @@ static pstream **  pstream_init(pstream **const & p,string * const & a,string * 
     else if( mode == "w"  ) om = ios_base::out;
     else if(  mode == "r" ) om =  ios_base::in;
     else  ExecError("Invalide mode pstream r,r+,w ");
-   if(verbosity>10)  *ffapi::cout()  << "pstream_init: om " << om << "(" <<ios_base::in << ios_base::out << ") mode:"
-                    << mode << " '" << *a <<"'"<<  endl;
+    if(verbosity>10)  *ffapi::cout()  << "pstream_init: om " << om << "(" <<ios_base::in << ios_base::out << ") mode:"
+        << mode << " '" << *a <<"'"<<  endl;
 #ifdef WIN32
     FILE * pp =_popen(a->c_str(),mode.c_str());
-#else    
+#else
     FILE * pp =popen(a->c_str(),mode.c_str());
 #endif
     *p =  new pstream(pp,om);
-
+    
     if ( !*p || !pp) {
         cerr << " Error openning pipe  " << *a << endl;
         ExecError("Error openning pipe");}
-   
+    
     return p;
 };
 
-static pstream **  pstream_init(pstream **const & p,string * const & a) 
+static pstream **  pstream_init(pstream **const & p,string * const & a)
 {
     return pstream_init(p,a,0);
-}; 
+};
+#endif
+
 
 
 AnyType pstream2o(Stack,const AnyType &a) {
@@ -93,8 +173,9 @@ class istream_good { public:
 long cflush(pstream ** ppf) 
 {
   pstream & f = **ppf;
-  if( f.os ) f.os->flush();
-  if( f.f) fflush(f.f);
+    f.flush();
+ // if( f.os ) f.os->flush();
+ // if( f.f) fflush(f.f);
   return  0; 
 }; 
 inline istream_good to_istream_good(pstream **f){ ffassert((**f).is) ; return istream_good((**f).is);}

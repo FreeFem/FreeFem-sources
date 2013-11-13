@@ -1,27 +1,28 @@
 To compile a full version of FreeFem++ under MacOS 
 ---------------------------------------------------
 
-Under Lion August 2012 ( xcode 4.4 form scratch)
+Under Mavrisk (10.9)  2012 ( xcode 5.0.1 form scratch)
 -------------------------------------------------
  remark: All line beginning by # are  shell command in terminal. 
  
 
- 1) install xcode 4.4 , and the xcode command line tools  
+ 1) install xcode 5.0.1 , and the xcode command line tools  
     xcode 
-      menu preferences -> Downloads -> Components -> Command Line Tools 
-        install
     install Auxiliary Tools for Xcode (for PackageMaker)
- 2) install  gcc-4.8 form http://hpc.sourceforge.net
-  # curl -O http://prdownloads.sourceforge.net/hpc/gcc-lion.tar.gz?download
-  # sudo tar zxvf gcc-lion.tar.gz -C /
+ 2) install xcode command line  (xcode 5.0.2  bug ???? ) 
+  # xcode-select --install  
+ 2) install  gcc-4.9 form http://hpc.sourceforge.net
+  # curl -O http://prdownloads.sourceforge.net/hpc/gfortran-4.9-bin.tar.gz?download
+  # sudo tar zxvf gfortran-4.9-bin.tar.gz -C /
  3) autoconf and automake now not in xcode
    I use the macport distribution form http://www.macports.org
   # sudo port install  autoconfo
   # sudo port install  automake
+  Or with  brew tool ... 
  4) install tex  from  ctan 
    http://mirrors.ctan.org/systems/mac/mactex/MacTeX.pkg
  5) install openmpi form the source 
-   http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.tar.bz2
+ http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.5.tar.bz2
   #  ./configure CC=/usr/local/bin/gcc CXX=/usr/local/bin/g++ F77=/usr/local/bin/gfortran FC=/usr/local/bin/gfortran
   # make 
   # sudo make install

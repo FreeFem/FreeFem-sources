@@ -1,3 +1,8 @@
+  - correct pb of ambiguity with new complex lib 
+31/10/2013  compilation on MacOS 10.9 with compile of xcode 5.0.1 
+  - correct the pipe.cpp to compile with clang-500.2.79 
+  - remove of warning message genrate by clang++ -std=c++11 (version clang-500.2.79)
+  - correct also compilation problem 
   - correct error in case of block matrix with block of 0 row or 0 column. 
 21/10/2013 (ALH)
  - umfpack configuration cleanup (request from Fred)

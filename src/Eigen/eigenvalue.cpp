@@ -295,11 +295,12 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	serr[err++]="Sorry the colum's number of the secand matrix in EigneValue is wrong.";
 	
    if(verbosity)
+   {
     if(sym)
       cout << "Real symmetric eigenvalue problem: A*x - B*x*lambda" << endl;
     else
       cout << "Real non symmetric eigenvalue problem: A*x - B*x*lambda" << endl;
-  
+   }
         
     if(verbosity>9 || err)
 	cout << "    n " << n << ", nev "<< nbev << ", tol =" << tol << ", maxit =" << maxit 

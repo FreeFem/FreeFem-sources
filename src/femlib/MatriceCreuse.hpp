@@ -655,6 +655,7 @@ template<class K>
 template<class R,class M,class P> 
 int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
 {
+   
 //  ConjuguedGradient lineare   A*x est appele avec des conditions au limites 
 //  non-homogene puis homogene  pour calculer le gradient  
    if (verbosity>50) 
@@ -666,12 +667,12 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    throwassert(n==x.N());
    Rn g(n), h(n), Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg  
    g = A*x;  
-   double xx= real((x,conj(x)));
+   double xx= RNM::real((x,conj(x)));
    double epsold=eps;
    g -= b;// g = Ax-b
    Cg = C*g; // gradient preconditionne 
    h =-Cg; 
-   double g2 = real((Cg,conj(g)));
+   double g2 = RNM::real((Cg,conj(g)));
    if (g2 < 1e-30) 
     { if(verbosity>1)
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
@@ -681,14 +682,14 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    for (int iter=0;iter<=nbitermax;iter++)
      {      
        Ah = A*h;
-       double hAh =real((h,conj(Ah)));
+       double hAh =RNM::real((h,conj(Ah)));
       // if (Abs(hAh)<1e-30) ExecError("CG2: Matrix non defined, sorry ");
-       R ro =  - real((g,conj(h)))/ hAh; // ro optimal (produit scalaire usuel)
+       R ro =  - RNM::real((g,conj(h)))/ hAh; // ro optimal (produit scalaire usuel)
        x += ro *h;
        g += ro *Ah; // plus besoin de Ah, on utilise avec Cg optimisation
        Cg = C*g;
        double g2p=g2; 
-       g2 = real((Cg,conj(g)));
+       g2 = RNM::real((Cg,conj(g)));
        if ( !(iter%kprint) && iter && (verbosity>3) )
          cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
        if (g2 < reps2) { 
@@ -752,7 +753,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        Ah -= b;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop  
        R hAh =(h,Ah);
-       if (norm(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
+         if (RNM::norm2(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
        ro =  - (g,h)*rop/hAh ; // ro optimal (produit scalaire usuel)
        x += (ro-rop) *h;
        g += (ro/rop) *Ah; // plus besoin de Ah, on utilise avec Cg optimisation

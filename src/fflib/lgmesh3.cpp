@@ -226,7 +226,7 @@ bool BuildPeriodic(
 				  {
 				      if (verbosity >50)
 					  cout << kv << " " << xx << " " << yy << " ->   " << ij << " :: " << ie << endl;
-				      im=m.insert(make_pair<pair<int,int>,int>(ij,kv)).first;
+				      im=m.insert(pair<pair<int,int>,int>(ij,kv)).first;
 				  }
 				else {
 				    if(im->second != kv)

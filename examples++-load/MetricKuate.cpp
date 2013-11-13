@@ -39,7 +39,8 @@ bool from_string( const string & Str, T & Dest )
   // créer un flux à partir de la chaine donnée
   istringstream iss( Str );
   // tenter la conversion vers Dest
-  return iss >> Dest != 0;
+  iss >> Dest;
+  return !Dest;
 };
 
 
