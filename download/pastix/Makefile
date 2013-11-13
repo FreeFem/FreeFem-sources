@@ -182,7 +182,7 @@ clean: clean-local
 #
 	-rm config.in config-complex.in config.log
 	-rm config.log
-	-rm $(PACKAGE1)
+#	-rm $(PACKAGE1)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
 

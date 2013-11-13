@@ -92,7 +92,7 @@ clean-local:
 	-rm -rf ../include/*mumps*
 	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
 	-rm -rf $(SRCDIR)
-	-rm $(PACKAGE1)
+#	-rm $(PACKAGE1)
 	-rm config.log *.done
 
 # Local Variables:
