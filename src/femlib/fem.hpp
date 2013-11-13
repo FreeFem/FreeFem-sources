@@ -24,15 +24,17 @@ template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(M
 
 //#include "ufunction.hpp" 
 #include "ufunction.hpp" 
-inline double norm(double x){return x*x;} 
-inline float norm(float x){return x*x;}
+
 #include <utility>
 #include <algorithm>
+#include <complex>
 
 // definition R
 namespace Fem2D 
 {
-
+inline double norm(double x){return x*x;} 
+inline float norm(float x){return x*x;}
+template<class T> T  norm(const complex<T> &x){return std::norm(x);}
 
 #include "R1.hpp"
 #include "R2.hpp"

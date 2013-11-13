@@ -80,6 +80,7 @@ int Fin(int code)
     cout << " exit before end  " << endl;
   if(NoMorePlot && !code) exit(NoMorePlot ? 0  : 1);
   if(code) exit(NoMorePlot ? 0  : 1);
+  return 0;
 }
 
 int   ReadOnePlot(FILE *fp)
@@ -1464,8 +1465,7 @@ void OneWindow::setLighting()
 	}
       else
 	{
-	  
-	  GLfloat position[] = {(float) Pvue3.x,(float) Pvue3.y,(float) (Pvue3.z+(Bmax3.z-Bmin3.z)*3,1.f)} ;
+	  GLfloat position[] = {(float) Pvue3.x,(float) Pvue3.y,(float) (Pvue3.z+(Bmax3.z-Bmin3.z)*3),1.f} ;
 	  glLightfv(GL_LIGHT0, GL_POSITION, position);
 	  
 	}
@@ -1857,11 +1857,12 @@ case 20+index: {type dummy; fin >= dummy;} break;
 	    }
 	  
 	  if((debug > 3))
+	    {
 	    if(version==2)
 	      cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
 	    else
 	      cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
-	  
+	    }
 	  ffassert(fin.good());
 	}
       else // Add FH optimisation FH 11/12/2008 (not use to day)
@@ -2229,7 +2230,7 @@ void  plot(double xx,double yy,const char *cmm,int font)
 void plot(double x,double y,double i,int font)
 {
     char buf[24];
-    snprintf(buf,24,"%g",i,font);
+    snprintf(buf,24,"%g",i);
     plot(x,y,buf);
 }
 
@@ -2792,6 +2793,7 @@ THREADFUNC(ThreadRead,fd)
 
    }
   Thread::Exit();
+  return  0; 
 }
 
 

@@ -189,7 +189,7 @@ template<class R>
     R * l(u);
     R  *r(vc.a);
     int stepl= u.step, stepr=vc.a.step;    
-    for (long i=0;i<n;i++,l += stepl, r += stepr) s += *l * conj(*r);
+    for (long i=0;i<n;i++,l += stepl, r += stepr) s += *l * RNM::conj(*r);
     return s;
   }
 
@@ -201,7 +201,7 @@ template<class R>
     R * l(u.a);
     R  *r(vc);
     int stepl= u.a.step, stepr=vc.step;    
-    for (long i=0;i<n;i++,l += stepl, r += stepr) s += conj(*l) * (*r);
+    for (long i=0;i<n;i++,l += stepl, r += stepr) s += RNM::conj(*l) * (*r);
     return s;
   }
 

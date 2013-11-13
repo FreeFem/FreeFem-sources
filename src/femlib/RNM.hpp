@@ -149,13 +149,19 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //  add size of the matrix in VirtualMatrix class.
 //   mars 2010 add  unset KNM case ...
 // ----------------
+
+namespace RNM {
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
 inline long  conj(const long &x){return x;}
 inline double  real(const double &x){return x;}
 inline float  real(const float &x){return x;}
-
-namespace RNM {
+    template<class T> T  real(const complex<T>& v){ return std::real(v);}
+inline double  norm2(const double x){return x*x;}
+inline float  norm2(const float x){return x*x;}
+template<class T> T  norm2(const complex<T>& v){ return norm(v);}
+    
+template<class T> inline complex<T>  conj(const complex<T>& v){ return std::conj<T>(v);}
 template<class T> inline T Min (const T &a,const T &b){return a < b ? a : b;}
 template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
 template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
@@ -959,13 +965,13 @@ class KN :public KN_<R> { public:
    KN& operator  =(const SetArray<R> & u)  
      { if(this->unset()) this->set(new R[u.size()],u.size(),0,0); KN_<R>::operator= (u);return *this;}
    KN& operator +=(const SetArray<R> & u)  
-     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator+= (u);return *this;}
+     { if(this->unset()) this->set(new R[u.size()],u.size(),0,0); KN_<R>::operator+= (u);return *this;}
    KN& operator -=(const SetArray<R> & u)    
-     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator-= (u);return *this;}
+     { if(this->unset()) this->set(new R[u.size()],u.size(),0,0); KN_<R>::operator-= (u);return *this;}
    KN& operator *=(const SetArray<R> & u)  
-     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator*= (u);return *this;}
+     { if(this->unset()) this->set(new R[u.size()],u.size(),0,0); KN_<R>::operator*= (u);return *this;}
    KN& operator /=(const SetArray<R> & u)  
-     { if(this->unset()) set(new R[u.size()],u.size(),0,0); KN_<R>::operator/= (u);return *this;}
+     { if(this->unset()) this->set(new R[u.size()],u.size(),0,0); KN_<R>::operator/= (u);return *this;}
 
    KN& operator =(const_R a)  
         { if(this->unset()) this->set(new R[1],1,0,0); KN_<R>::operator= (a);return *this;}
@@ -978,9 +984,9 @@ class KN :public KN_<R> { public:
    KN& operator =(const DotStar_KN_<R> & u)  
         { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const if_KN_<R> & u)  
-        { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+        { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const ifnot_KN_<R> & u)  
-        { if(this->unset()) set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+        { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const DotSlash_KN_<R> & u)  
         { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const Sub_KN_<R> & u)  
@@ -1008,7 +1014,7 @@ class KN :public KN_<R> { public:
         { if(this->unset()) this->set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
    KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)  
   { if(this->unset()  && Ax.A->N) {
-        set(new R[Ax.A->N],Ax.A->N);
+        this->set(new R[Ax.A->N],Ax.A->N);
         KN_<R>::operator=(R());}
     KN_<R>::operator+=(Ax);
     return *this;}
@@ -1016,7 +1022,7 @@ class KN :public KN_<R> { public:
         { if(this->unset()&&Ax.A->M) this->set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
    KN& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
   { if(this->unset()&&Ax.A->M) {
-       set(new R[Ax.A->M],Ax.A->M);
+       this->set(new R[Ax.A->M],Ax.A->M);
       KN_<R>::operator=(R());}
       KN_<R>::operator+=(Ax);
      return *this;}

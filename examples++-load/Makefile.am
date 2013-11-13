@@ -44,7 +44,7 @@ ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  MUMPS_seq.cpp \
  ff-Ipopt.cpp \
  scotch.cpp    shell.cpp \
- pipe.cpp  \
+ pipe.cpp pstream.h  \
  symmetrizeCSR.cpp \
  dmatrix.hpp PARDISO.cpp             \
  ch.pts  

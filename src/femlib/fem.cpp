@@ -242,7 +242,8 @@ public:
 			
 			if (NbAdj) NbOfEdges++;
 			if(NbAdj==1)
-			    if (! (TonBoundary[i]& MaskEdge[j])) 
+                        {
+                            if (! (TonBoundary[i]& MaskEdge[j]))
 			    { NbOfMEdges++;
 				if(verbosity>99) 
 				    cout << " Edge (" << j0 << " "<< j1 << ") : "  << j  << " of Triangle " << &T-triangles << " on mortar \n"
@@ -250,6 +251,7 @@ public:
 				TonBoundary[i]+= AddMortar[j];
 			    }
 				else { NbOfBEdges++; }
+                        }
 		    }
 		}
 		    

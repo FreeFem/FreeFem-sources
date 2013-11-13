@@ -56,13 +56,13 @@ struct affectation: binary_function<T, T, T>
 template <class T>
 struct affectation_add: binary_function<T, T, T>
 {
-	T& operator()(T& x, const T& y) const {return (x=+y);}
+	T& operator()(T& x, const T& y) const {return (x+=y);}// correct FH 25/10/2013
 };
 
 template <class T>
 struct affectation_sub: binary_function<T, T, T>
 {
-	T& operator()(T& x, const T& y) const {return (x=-y);}
+	T& operator()(T& x, const T& y) const {return (x-=y);}// correct FH 25/10/2013
 };
 
 

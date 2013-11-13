@@ -214,7 +214,6 @@ int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
     integer i__1, i__2, i__3, i__4;
 
     /* Builtin functions */
-    /* Subroutine */ int s_stop();
 
     /* Local variables */
     static integer nbcc, degi, bold, bnew, i, j, k, p, degre, x, y, p1, p2;

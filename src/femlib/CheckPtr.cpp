@@ -434,26 +434,26 @@ int ShowAlloc(const char *s,size_t & lg)
 #include <new>
 
 long  CheckPtr___nbptr=0; 
-void* operator new( size_t size ) {
+void* operator new( size_t size ) throw(std::bad_alloc) {
     CheckPtr___nbptr++;
     void *p = malloc( size );
     
     return p;
 }
 
-void* operator new[]( size_t size ) {  
+void* operator new[]( size_t size ) throw(std::bad_alloc) {  
     void *p = malloc(size);
      CheckPtr___nbptr++;
     return p;
 }
 
-void operator delete( void *p ) {  
+void operator delete( void *p ) throw() {  
     free(p);
     CheckPtr___nbptr--;
 
 }
 
-void operator delete[]( void *p ) {
+void operator delete[]( void *p ) throw() {
     free(p);
     CheckPtr___nbptr--;
 

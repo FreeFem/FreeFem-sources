@@ -228,7 +228,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 		   VertexIso[ jj1 ]++;
 		   
 		   if( VertexIso[ jj0 ] > 2 || VertexIso[ jj1 ] > 2 )
-		     cerr << " erreur: Le sommet au passe l'iso valeur est connecter à plus de 2 iso points " << endl;
+		     cerr << " error:the iso value pass  is connected to more then 2 iso vertices " << endl;
 		   else{
 		     VertexIsoTri[ 2*jj0+VertexIso[ jj0 ] -1 ] = it;
 		     VertexIsoTri[ 2*jj1+VertexIso[ jj1 ] -1 ] = it;
@@ -253,7 +253,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 	      EdgeIter[3*it+i] = 0.;
 	      VertexIso[ jj0 ]++;
 	      if( VertexIso[ jj0 ] > 2 )
-		cerr << " erreur: Le sommet au passe l'iso valeur est connecter à plus de 2 iso points " << endl;
+		cerr << " error:the iso value pass  is connected to more then 2 iso vertices " << endl;
 	      else{
 		VertexIsoTri[ 2*jj0+VertexIso[ jj0 ] -1 ] = it;
 	      }
@@ -262,7 +262,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 	      EdgeIter[3*it+(i+1)%3] = 0.;
 	      VertexIso[ jj1 ]++;	
 	      if( VertexIso[ jj1 ] > 2 )
-		cerr << " erreur: Le sommet au passe l'iso valeur est connecter à plus de 2 iso points " << endl;
+		cerr << " error:the iso value pass  is connected to more then 2 iso vertices " << endl;
 		else{
 		  VertexIsoTri[ 2*jj1+VertexIso[ jj1 ] -1 ] = it;
 		}
