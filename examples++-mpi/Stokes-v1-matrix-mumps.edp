@@ -6,7 +6,7 @@ loadpath += "./"
 */
 
 load "msh3"
-load "medit"
+//load "medit"
 load "MUMPS_FreeFem"
 include "getARGV.idp"
 
@@ -77,5 +77,5 @@ cout << " solve                   " <<  time3 << endl;
 cout << "                          ------------" << endl;
 cout << " all                     " <<  timeI << endl;
 cout << "============= CPU TIME ============" << endl;
-if(mpirank==0 && pplot) medit("UV2 PV2",Th,[u1,u2,u3],p);
+//if(mpirank==0 && pplot) medit("UV2 PV2",Th,[u1,u2,u3],p);
 

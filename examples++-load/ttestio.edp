@@ -29,11 +29,11 @@ savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidul
 
 mesh3 Th3;
 try {
-Th3=readmesh3("spherewithtworegion.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
+Th3=readmesh3("spherewithahole.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
 }
 catch (...) {
   // FFCS - path to example scripts are changed, so this needs to be in the local directory to be common to FF and FFCS
-  include "tetgenholeregion.edp"
+  include "tetgenholeregion_rugby.edp"
 }
 fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;
