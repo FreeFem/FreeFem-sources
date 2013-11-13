@@ -17,8 +17,7 @@ EXTRA_DIST= \
 ./f2c/tt.f \
 ./fftw/Makefile \
 ./fftw/Makefile.am \
-./fltk/Makefile.am \
-./fltk/Makefile.in \
+./fftw/Makefile.in \
 ./gmm/Makefile \
 ./gmm/cxxflags \
 ./headers-sparsesolver.inc \
@@ -47,7 +46,6 @@ EXTRA_DIST= \
 ./mumps/Makefile-mumps-4.10.0.inc \
 ./mumps/MUMPS_4.10.0.patch \
 ./parmetis/Makefile-parmetis.in \
-./parmetis/ParMetis-3.1.1-ok/stdheaders.h \
 ./parmetis/makefile \
 ./parmetis/parmetis-3.1.1.patch \
 ./parms/Makefile \
@@ -56,7 +54,6 @@ EXTRA_DIST= \
 ./pastix/config-pastix-complex.in \
 ./pastix/config-pastix-real.in \
 ./pastix/pastix_release_2200-blend.patch \
-./pastix/pastix_release_2200-gen.patch \
 ./pastix/patch-pastix_long_complex.h \
 ./scalapack/Makefile \
 ./scalapack/SLmake-scalapack.inc \
