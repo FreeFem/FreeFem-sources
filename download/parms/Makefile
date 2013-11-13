@@ -58,7 +58,7 @@ clean:
 #
 	-rm -rf pARMS_*
 	-rm config.log
-	-rm $(PACKAGE)
+#	-rm $(PACKAGE)
 
 WHERE:
 	echo parms LD -L@DIR@/lib -lparms$(DBG)  >../lib/WHERE.parms
