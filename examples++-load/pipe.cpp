@@ -105,7 +105,7 @@ struct pstream {
     }
     ~pstream() {
         if(f) pclose(f);
-       s if(os) delete os;
+        if(os) delete os;
         if(is) delete is;
         if(fb) delete(fb);
         f=0;
