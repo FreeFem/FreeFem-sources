@@ -55,6 +55,7 @@ EXTRA_DIST= \
 ./pastix/config-pastix-real.in \
 ./pastix/pastix_release_2200-blend.patch \
 ./pastix/patch-pastix_long_complex.h \
+./pastix//all_macros.diff \
 ./scalapack/Makefile \
 ./scalapack/SLmake-scalapack.inc \
 ./scotch/Makefile \
