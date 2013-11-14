@@ -138,7 +138,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 	 
 	  R hAh =ReduceSum1((h,Ah),commworld);
 	  R gh = ReduceSum1((g,h),commworld);
-	  if (norm(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
+	  if (RNM::norm2(hAh)<1e-100) ExecError("CG2: Matrix is not defined (/0), sorry ");
 	  ro =  -gh*rop/hAh ; // ro optimal (produit scalaire usuel)
 	  x += (ro-rop) *h;
 	  g += (ro/rop) *Ah; // plus besoin de Ah, on utilise avec Cg optimisation
