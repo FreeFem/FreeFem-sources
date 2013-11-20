@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.26,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.26-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1739,20 +1739,20 @@ m4_map([AC_FF_WHERELIB],[
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
 	[[hypre],[-lHYPRE]],
 	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
-	[[superlu_dist],[-lsuperlu-dist],[superlu-dist/superlu_defs.h],[]],
-	[[superlu],[-lsuperlu],[superlu/slu_ddefs.h],[]],
-	[[Superlu4],[-lsuperlu4],[superlu4/slu_ddefs.h],[]],
+	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
+	[[superlu],[-lsuperlu],[/usr/include/superlu/slu_ddefs.h],[]],
+	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/slu_ddefs.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[]],
         [[ptscotch],[-lptscotch -lptscotcherr],[]],
-	[[metis],[-lscotch -lmetis],[metis/metis.h],[]],
+	[[metis],[-lscotch -lmetis],[/usr/include/metis/metis.h],[]],
 	[[metis],[-lscotch -lmetis],[metis.h],[]],
 	[[parmetis],[-lptscotch -lparmetis],[],[]],
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
 	[[mshmet],[-lmshmet],[],[]],
-	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
+	[[gsl],[-lgsl -lgslcblas -lm],[/usr/include/gsl/gsl_sf.h],[]],
 	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
     ]

@@ -3,17 +3,6 @@
 //ff-c++-cpp-dep: 
 //  for Super4.0 library   
 #include "ff++.hpp"
-/*
-#include  <iostream>
-using namespace std;
-
-#include "rgraph.hpp"
-#include "error.hpp"
-#include "AFunction.hpp"
-
-//#include "lex.hpp"
-#include "MatriceCreuse_tpl.hpp"
-*/
 #include "slu_ddefs.h"
 #include "superlu_enum_consts.h"
 #define GlobalLU_t GlobalLU_txxxx

@@ -1,3 +1,4 @@
+    correct of superlu compile problem
 13/11/203  Pass to version 3.26 ...
   - correct pb of ambiguity with new complex lib 
 31/10/2013  compilation on MacOS 10.9 with compile of xcode 5.0.1 
