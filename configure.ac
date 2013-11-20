@@ -61,9 +61,9 @@ m4_define([AC_FF_WHERELIB],
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
-	    if test -n "$ff_WHERE_INC" -a  "$ff_WHERE_INC" != '.'   ; then
-		echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf
-	    fi
+	    case "$ff_WHERE_INC" in 
+		/*)e cho "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
+	    esac
 	fi
 	AC_MSG_RESULT($ff_WHERE)
 
@@ -1740,8 +1740,8 @@ m4_map([AC_FF_WHERELIB],[
 	[[hypre],[-lHYPRE]],
 	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
 	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
-	[[superlu],[-lsuperlu],[/usr/include/superlu/slu_ddefs.h],[]],
-	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/slu_ddefs.h],[]],
+	[[superlu],[-lsuperlu],[/usr/include/superlu/superlu_enum_consts.h],[]],
+	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[]],
@@ -1752,7 +1752,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
 	[[mshmet],[-lmshmet],[],[]],
-	[[gsl],[-lgsl -lgslcblas -lm],[/usr/include/gsl/gsl_sf.h],[]],
+	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
     ]
