@@ -277,6 +277,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
 	  }
 	  for (int eh=0;eh<6;eh++){
 	    cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  Th3[k].lenEdge(eh) << endl;
+	    cout << " Tet vertices : " <<iv[0] << " " << iv[1] << " " << iv[2] << " " << iv[3] << " " << endl;
 	  }
 	  cout << " A tetrahedra with a very small edge was created " << endl;
 	 

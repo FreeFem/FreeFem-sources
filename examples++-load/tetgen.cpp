@@ -2454,6 +2454,7 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
 
   fp >> nbv;
  
+  if(verbosity>1)
   cout << "  -- Nb of Points " << nbv << endl;
   KN<double> cxx(nbv), cyy(nbv), czz(nbv);
 
@@ -2462,7 +2463,11 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
     {
       fp >> cxx[lec] >> cyy[lec] >> czz[lec];
     }
-
+  ffassert(fp.good()); 
+  if(verbosity>1)
+  cout << " bound x " << cxx.min() << " " << cxx.max() 
+       <<  "  y " << cyy.min() << " "<< cyy.max()
+       <<  "  z " << czz.min() << " "<< czz.max() << endl; 
 //  if( lec !=nbv ) {
 //     cerr << "  -- tetgconvexhull : Erreur Reading File " << pointsfile <<endl; 
 //     cerr << " number of points " << nbv << " " <<"number of lecture" << lec << endl;  
