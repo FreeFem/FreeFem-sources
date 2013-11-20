@@ -149,9 +149,9 @@ re-install:
 WHERE:
 	$(MAKE) compile-pkg DIRTARGET=WHERE
 install-exec-local:	
-        $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
-        $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/bin
-        $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/bin
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	cp -rp lib $(DESTDIR)$(ff_prefix_dir)/lib
 	cp -rp include  $(DESTDIR)$(ff_prefix_dir)/include
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)/bin
