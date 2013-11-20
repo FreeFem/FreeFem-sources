@@ -6,8 +6,8 @@ if [   -f "$wherelib-download" ] ; then
     wherelib=WHERE_LIBRARY
 elif [   -f "$dircommand/$wherelib-download" ] ; then
     wherelib=$dircommand/WHERE_LIBRARY
-elif [ -f '@ff_prefix_dir@/WHERE_LIBRARY-download' ] ; then
-    wherelib='@ff_prefix_dir@/WHERE_LIBRARY'
+elif [ -f '@ff_prefix_dir@/lib/WHERE_LIBRARY-download' ] ; then
+    wherelib='@ff_prefix_dir@/lib/WHERE_LIBRARY'
 else
    echo " error no WHERE_LIBRARY  file "
    exit 1;
