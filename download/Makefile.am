@@ -152,9 +152,9 @@ install-exec-local:
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/bin
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
-	cp -rp lib $(DESTDIR)$(ff_prefix_dir)/lib
-	cp -rp include  $(DESTDIR)$(ff_prefix_dir)/include
-	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)/bin
+	cp -rp lib $(DESTDIR)$(ff_prefix_dir)
+	cp -rp include  $(DESTDIR)$(ff_prefix_dir)
+	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
 
 clean-local:
 	-rm -rf	 tag-* include lib bin 
