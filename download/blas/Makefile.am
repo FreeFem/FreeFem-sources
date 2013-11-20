@@ -25,6 +25,9 @@ DIRPKG=../pkg
 BLAS_TGZ=$(DIRPKG)/blas.tgz
 CBLAS_TGZ=$(DIRPKG)/cblas.tgz
 
+EXTRA_DIST= \
+openblas.patches 
+
 # Downloading and compiling the Generic Blas
 # ------------------------------------------
 

@@ -14,7 +14,7 @@ SUBDIRS=download src  examples++-tutorial examples++	\
 EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
-WindowsPackage.m4 README README_ARPACK  README_CVS README_CW  README_WINDOWS README_MAC \
+WindowsPackage.m4 README README_ARPACK  README_WINDOWS README_MAC \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4    \
 freefem++.spec crimson-freefem++.zip \
