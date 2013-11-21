@@ -1,0 +1,28 @@
+load "FreeFemQA"
+
+mesh Th=square(1,1,[x,y]);
+
+func scal = 1/(x+0.2)^2;
+
+//func scal = 5;
+
+func mxx=100*scal;
+func mxy=0;
+func myy=scal;
+
+Th=adaptmesh(Th,4*scal,0,4*scal,IsMetric=true);
+Th=MeshGenQA(Th,mxx,mxy,myy,exportToMathematica=true,exportMetricToMathematica=true,finalRefine=false);
+plot(Th,wait=true,ps="IsoFFMesh.ps");
+
+//Th=readmesh("triQA.msh");
+plot(Th,ps="QAMesh.ps");
+
+
+//mesh Th=readmesh("/Users/jean-mariemirebeau/Library/Developer/Xcode/DerivedData/DelaunayFlip-deaxqdiomhuvirblsdlxiubujmam/Build/Products/Debug/Th.msh");
+//plot(Th);
+
+//Le sens Geometry->FF a l'air de marcher.
+//Maintenant, il faut le sens inverse.
+
+//mesh Th=square(1,1,[x,y]);
+//savemesh(Th,"ThFF.msh");
