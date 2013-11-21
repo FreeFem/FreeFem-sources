@@ -34,7 +34,8 @@
 %.ps:%.dvi
 	dvips -u +psfonts.map -u +pdftex.map -u +Ttbbold.map -z -K $* -o $@
 
-%.pdf:%.tex  cpfigs $(CPFIGS_PDF) 
+%.pdf:%.tex #  cpfigs $(CPFIGS_PDF) 
+	$(MAKE) -f gnu.mak cpfigs  $(CPFIGS_PDF)  EPSTOPDF="$(EPSTOPDF)"
 	-rm $*.pdf $*.aux $*.log \
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	pdflatex $*
