@@ -15,8 +15,8 @@ fi
 quote="'"
 wherel=""
 test -f "$wherelib"-download && wherel="$wherel $quote$wherelib-download$quote"
-test -f "$wherelib"-config && wherel[2]="$wherel $quote$wherelib-config$quote"
-test -f "$wherelib" && wherel[3]="$wherel $quote$wherelib-$quote"
+test -f "$wherelib"-config && wherel="$wherel $quote$wherelib-config$quote"
+test -f "$wherelib" && wherel="$wherel $quote$wherelib-$quote"
 #echo " WHERE files :  "   "${where}
 # 
 case "$1" in
