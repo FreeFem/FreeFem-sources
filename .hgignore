@@ -5,6 +5,7 @@
 (^|/)\.dll$
 (^|/)\.gdb_history$
 (^|/)\.libs$
+(^|/)autosave\.edp$
 \.DS_Store$
 \.a$
 \.bak$
@@ -654,4 +655,6 @@
 ^stamp-h$
 ^stamp-h1$
 ^test-driver$
+examples\+\+-tutorial/mm\.faces$
+examples\+\+-tutorial/mm\.points$
 ~$
