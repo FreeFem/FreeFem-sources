@@ -1,5 +1,5 @@
 load "ff-Ipopt"
-int bfgs=1,constraint =1; // aglo .. 
+int bfgs=0,constraint =1; // aglo .. 
 real x0=1.5,y0=0.5; 
 mesh Th=square(10,10,[x+1,y]);
 fespace Vh(Th,P2);
