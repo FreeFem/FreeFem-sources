@@ -10,6 +10,7 @@ int[int] iparm(16);
 real[int] dparm(6);
 iparm=-1;
 dparm=-1;
+/*  the sol trap  if we use...
 iparm[0]=1; // use iterative solver   0 => trap why ???? FH ..... 
 iparm[1]=0; // PCG as Krylov method
 iparm[4]=1; // Matrix are symmetric
@@ -20,7 +21,7 @@ dparm[1]=5e-4; // Threshold in ILUT
 dparm[2]=5e-4; // Threshold for Schur preconditionner
 dparm[4]=1e-2; // drop tol
 dparm[5]=1e-2; // drop tol 
-
+*/
 int nn=10;
 mesh Th2=square(nn,nn,region=0);
 fespace Vh2(Th2,P2);
