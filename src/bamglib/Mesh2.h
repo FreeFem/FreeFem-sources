@@ -794,6 +794,7 @@ public:
   Vertex ** ordre;
   SubDomain * subdomains;
   ListofIntersectionTriangles  lIntTria;
+  int warning ;
 // end of variable
   
   Triangles(Int4 i);//:BTh(*this),Gh(*new Geometry()){PreInit(i);}
