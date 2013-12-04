@@ -1696,8 +1696,11 @@ Int4  Triangles::SplitInternalEdgeWithBorderVertices()
       nbv = iv;
     }
   if (NbSplitEdge >  nbv-nbvold)
+  {
     cout << " Warning not enough vertices  to split all internal edges "  << endl
 	 << "    we lost " << NbSplitEdge - ( nbv-nbvold) << " Edges Sorry " << endl;
+      warning = 2;
+  }
   if (verbosity>2)
   cout << "SplitInternalEdgeWithBorderVertices: Number of splited edge " << NbSplitEdge << endl;
   return  NbSplitEdge;
@@ -2885,6 +2888,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 			break;}
 		    Int4 it = Number(t);
 		    if (mark[it] >=0) {
+                        
 			if(verbosity>10)
 			    cerr << "     Warning: the sub domain " << i << " ref = " << subdomains[i].ref 
 				<< " is previouly defined with "  <<mark[it] << " ref = " << subdomains[mark[it]].ref
@@ -3201,7 +3205,7 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
   CrackedEdges  =0;  
   nbe = 0; 
   name = fname ;
-
+  warning=0;
   if (inbvx) {
     vertices=new Vertex[nbvx];
     assert(vertices);

@@ -316,7 +316,7 @@ class Adaptation :   public E_F0mps { public:
   typedef pmesh  Result;
   
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =27;
+  static const int n_name_param =28;
   
   int nbsol;    
   Expression nargs[n_name_param];
@@ -330,6 +330,7 @@ class Adaptation :   public E_F0mps { public:
   
   double arg(int i,Stack stack,double a) const { return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
   long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  long* arg(int i,Stack stack,long* a) const{ return nargs[i] ? GetAny<long*>( (*nargs[i])(stack) ): a;}
   bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
   int arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
   
@@ -433,7 +434,9 @@ class Adaptation :   public E_F0mps { public:
        {  "nomeshgeneration", &typeid(bool) },
        {   "metric"          ,  &typeid(E_Array)},  // 24
        {   "periodic"        ,  &typeid(E_Array) },// 25 
-       { "requirededges",    &typeid(KN_<long> ) } // 26 
+       { "requirededges",    &typeid(KN_<long> ) }, // 26
+       { "warning",    &typeid(long *) } // 27
+     
     };
 
 struct Op_trunc_mesh : public OneOperator {
@@ -696,6 +699,11 @@ AnyType Adaptation::operator()(Stack stack) const
   double cutoffradian          = arg(21,stack,-1.0)* bamg::Pi/180. ;
   bool split                    = arg(22,stack,false) ;
   bool nomeshgeneration         = arg(23,stack,false) ;
+  long lwarning=0;
+
+  long * pwarning                = arg(27,stack,&lwarning) ;
+  long &warning=*pwarning; //  get get warning message ...
+    
   //   the 24th param is metrix  and is store at compilation time
   //  const E_Array * expmetrix = dynamic_cast<const E_Array *>(nargs[24]);
   //   the 25th param is periodic and it store at compilation time
@@ -863,7 +871,6 @@ AnyType Adaptation::operator()(Stack stack) const
   if ( ! nomeshgeneration)
   {
   nTh= new Triangles(nbsx,Th,KeepBackVertices); // Adaption is here
-  
   if (split)
 	    nTh->SplitElement(1); // modif FH mai 2009 (thank J-M Mirebeau) : Th ->nTh
  
@@ -892,6 +899,7 @@ AnyType Adaptation::operator()(Stack stack) const
   Metric M(hmax);
   for (iv=0;iv < Th.nbv;iv++)
     Th[iv].m = M;
+  warning = nTh->warning;
 
   Mesh * g=  bamg2msh(nTh,true);
 
