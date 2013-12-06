@@ -1,97 +1,63 @@
-load "fflapack"
+load "lapack"
+// test of lapack load file ... 
+// .......................
 // load "fflapack" obsolete (F. Hecht version 3.8)
-{
+// use  load "lapack"  
+int nerr=0; // nomber of err .. 
+//  to set a full matrix .. 
+macro SETM(A,i,j,fij) 
+{ 
+    for(int i=0;i<A.n;++i) 
+      for(int j=0;j<A.m;++j) 
+        A(i,j)= (fij) ;
+}//EOM 
+
+// The of Eigen Problem ..
+NewMacro TEST(Type,Typevp,vtype,ComputeEV)
+{     
+cout << "\n\n *****************   VP \n\n\n"; 
 int n=5;
-real[int,int] A(n,n),A1(n,n),B(n,n);
-for(int i=0;i<n;++i)
-for(int j=0;j<n;++j)
-  A(i,j)= (i==j) ? n+1 : 1;
- A(0,n-1)=-100;
+Type[int,int] A(n,n),A1(n,n),B(n,n),Id(n,n);
+SETM(A,i,j,(i==j) ? n+1 : 1); 
+SETM(Id,i,j,real(i==j)); 
+A(0,n-1)=vtype;
+
 cout << A << endl;
 A1=A^-1;
 cout << A1 << endl;
 
- complex[int] vp(n);
- complex[int,int] VP(n,n),KK(n,n);
+Typevp[int] vp(n);
+Typevp[int,int] VP(n,n),KK(n,n);
 
- int nn= dgeev(A,vp,VP);
+int nn= ComputeEV(A,vp,VP);
  cout << "  vp = " <<vp << endl;
  cout << " VP = " << VP << endl;
+ 
+ // verification ... 
  KK =0.;
  for(int i=0;i<n;++i)
    for(int j=0;j<n;++j)
      for(int k=0;k<n;++k)
        KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
- cout <<" KK " <<  KK << endl; 
+ cout <<" ||KK|| " <<  KK.linfty << endl; 
+ nerr += KK.linfty > 1e-9; 
 B=0;
-for(int i=0;i<n;++i)
-  for(int j=0;j<n;++j)
-    for(int k=0;k<n;++k)
-      B(i,j) +=A(i,k)*A1(k,j);
-cout << B << endl;
- B = A*A1; // version 3.13
-cout << B << " ++++++  "<<  endl;
-// A1+A^-1;  attention ne marche pas
-
+B = A*A1; // version 3.13
+B -= Id; 
+cout <<" ||A*A1-Id|| " <<  B.linfty << endl; 
+nerr += B.linfty > 1e-9; 
 inv(A1);
-cout << A1 << endl;
+A1 -= A; 
+cout <<  "|| inv(A1) - A ||" << A1.linfty << endl;
+nerr += A1.linfty > 1e-9; 
 }
-{
-  cout << " *****************  complex VP \n";
-int n=5;
-complex[int,int] A(n,n),A1(n,n),B(n,n);
-for(int i=0;i<n;++i)
-for(int j=0;j<n;++j)
-  A(i,j)= (i==j) ? n+1 : 1;
-A(0,n-1)=-100i;
-cout << A << endl;
-A1=A^-1;
-cout << A1 << endl;
+EndMacro 
 
- complex[int] vp(n);
- complex[int,int] VP(n,n),KK(n,n);
+TEST(real,complex,-100.,dgeev)
+TEST(complex,complex,100i,zgeev)
+TEST(real,real,1,dsyev)
+assert(nerr==0); 
 
- int nn= zgeev(A,vp,VP);
- cout << "  vp = " <<vp << endl;
- cout << " VP = " << VP << endl;
- KK =0.;
- for(int i=0;i<n;++i)
-   for(int j=0;j<n;++j)
-     for(int k=0;k<n;++k)
-       KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
- cout <<" KK " <<  KK << endl; 
- assert( KK.linfty < 1e-10);
-B=0;
-for(int i=0;i<n;++i)
-  for(int j=0;j<n;++j)
-    for(int k=0;k<n;++k)
-      B(i,j) +=A(i,k)*A1(k,j);
-cout << B << endl;
-// A1+A^-1;  attention ne marche pas
-
-//inv(A1);
-//cout << A1 << endl;
-  cout << " *****************  fin --complex VP \n";
-}
-
-{
-  int n=5;
-  complex[int,int] A(n,n),A1(n,n),B(n,n);
-  for(int i=0;i<n;++i)
-    for(int j=0;j<n;++j)
-      A(i,j)= (i==j) ? (n+1)*1i : 1+0i;
-  cout << A << endl;
-  A1=A^-1;
-  cout << A1 << endl;
-
-  B=0;
-  for(int i=0;i<n;++i)
-    for(int j=0;j<n;++j)
-      for(int k=0;k<n;++k)
-	B(i,j) +=A(i,k)*A1(k,j);
-  cout << B << endl;
-  // A1+A^-1;  attention ne marche pas 
-}
 
 // FFCS - value for regression checks
 real regtest=0;
@@ -100,7 +66,6 @@ real regtest=0;
 
 int n=5;
 real [int,int] A(n,n),  B(n,n),  C(n,n);
-macro SETM(A,i,j,fij) { for(int i=0;i<A.n;++i) for(int j=0;j<A.m;++j) A(i,j)= (fij) ;}// 
 SETM(C,i,j,1./(1+i+j)) ; 
 SETM(B,i,j,i==j?2.:1./n) ;
  
