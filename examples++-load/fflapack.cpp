@@ -33,7 +33,7 @@ class Init { public:
   Init();
 };
 
-bool lapack_inv(KNM<double>* A)
+long lapack_inv(KNM<double>* A)
 {
   intblas n=A->N();
   intblas m=A->M();
@@ -48,6 +48,23 @@ bool lapack_inv(KNM<double>* A)
   if(info) return info;
   dgetri_(&n,a,&lda,ipiv,w,&lw,&info);
   return info;
+}
+
+long lapack_inv(KNM<Complex>* A)
+{
+    intblas n=A->N();
+    intblas m=A->M();
+    Complex *a=&(*A)(0,0);
+    intblas info;
+    intblas lda=n;
+    KN<intblas> ipiv(n);
+    intblas  lw=10*n;
+    KN<Complex> w(lw);
+    ffassert(n==m);
+    zgetrf_(&n,&n,a,&lda,ipiv,&info);
+    if(info) return info;
+    zgetri_(&n,a,&lda,ipiv,w,&lw,&info);
+    return info;
 }
 
 // (computation of the eigenvalues and right eigenvectors of a real nonsymmetric matrix)
@@ -836,7 +853,7 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
 	return  mult<R,init,ibeta>(a,bc.a->t(),bc.b->t()) ;
     else
         // should never happen
-        return NULL; 
+        return NULL;
 }
 
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 
@@ -948,9 +965,15 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,true,0> ) );
       TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true,0> ) );
       
-      Global.Add("inv","(",new  OneOperator1<bool,KNM<double>*>(lapack_inv));  
-      Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  
-      Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));  
+      Global.Add("inv","(",new  OneOperator1<long,KNM<double>*>(lapack_inv));  
+      Global.Add("inv","(",new  OneOperator1<long,KNM<Complex>*>(lapack_inv));
+        
+      Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));
+      Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));
+        // add FH
+       Global.Add("geev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));
+       Global.Add("geev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));
+        
       Global.Add("dggev","(",new  OneOperator5_<long,KNM<double>*,KNM<double>*,KN<Complex>*,KN<double>*,KNM<Complex>*>(lapack_dggev));
       Global.Add("dsygvd","(",new  OneOperator4_<long,KNM<double>*,KNM<double>*,KN<double>*,KNM<double>*>(lapack_dsygvd));
       Global.Add("dgesdd","(",new  OneOperator4_<long,KNM<double>*,KNM<double>*,KN<double>*,KNM<double>*>(lapack_dgesdd));

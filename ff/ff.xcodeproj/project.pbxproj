@@ -10,8 +10,6 @@
 		3D103DA015EC148400DAD98A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103D9F15EC148400DAD98A /* libarpack.a */; };
 		3D103DA215EC149B00DAD98A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA115EC149B00DAD98A /* libamd.a */; };
 		3D103DA415EC14AB00DAD98A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA315EC14AB00DAD98A /* libumfpack.a */; };
-		3D103DA615EC15A500DAD98A /* libgfortran.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA515EC15A500DAD98A /* libgfortran.dylib */; };
-		3D103DA815EC16A200DAD98A /* libmpi_cxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA715EC16A200DAD98A /* libmpi_cxx.dylib */; };
 		3D15D46D0BD3A65E00CEB4C6 /* sansrgraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A030972538B00D487F6 /* sansrgraph.cpp */; };
 		3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DC9E0970155D002A1826 /* lg.tab.cpp */; };
 		3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A050972539900D487F6 /* DefColor.cpp */; };
@@ -60,8 +58,6 @@
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
 		3D66F11E1752B077004AE3C8 /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */; };
 		3D66F1201752B083004AE3C8 /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D66F11F1752B083004AE3C8 /* libcholmod.a */; };
-		3D6E37AE15EC18D00023BB54 /* libmpi_cxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA715EC16A200DAD98A /* libmpi_cxx.dylib */; };
-		3D6E37AF15EC18D60023BB54 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA173F815EBCA2C00543A08 /* libmpi.dylib */; };
 		3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
@@ -130,7 +126,6 @@
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
-		3DA173F915EBCA2C00543A08 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA173F815EBCA2C00543A08 /* libmpi.dylib */; };
 		3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D90DDED097050AC002A1826 /* vecLib.framework */; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
@@ -163,8 +158,6 @@
 		3D103D9F15EC148400DAD98A /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = "../../../ff/ff-MacIntel/download/lib/libarpack.a"; sourceTree = "<group>"; };
 		3D103DA115EC149B00DAD98A /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = "../../../ff/ff-MacIntel/download/lib/libamd.a"; sourceTree = "<group>"; };
 		3D103DA315EC14AB00DAD98A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = "../../../ff/ff-MacIntel/download/lib/libumfpack.a"; sourceTree = "<group>"; };
-		3D103DA515EC15A500DAD98A /* libgfortran.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgfortran.dylib; path = ../../../../../usr/local/lib/libgfortran.dylib; sourceTree = "<group>"; };
-		3D103DA715EC16A200DAD98A /* libmpi_cxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.dylib; path = ../../../../../usr/local/lib/libmpi_cxx.dylib; sourceTree = "<group>"; };
 		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
 		3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuitesparseconfig.a; path = ../../../../../usr/local/lib/libsuitesparseconfig.a; sourceTree = "<group>"; };
@@ -257,7 +250,6 @@
 		3D90DD31097015B4002A1826 /* strversionnumber.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = strversionnumber.cpp; sourceTree = "<group>"; };
 		3D90DDED097050AC002A1826 /* vecLib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = vecLib.framework; path = /System/Library/Frameworks/vecLib.framework; sourceTree = "<absolute>"; };
 		3D9B0EB40C8495C0008A8F03 /* RNM.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM.hpp; path = ../src/femlib/RNM.hpp; sourceTree = SOURCE_ROOT; };
-		3DA173F815EBCA2C00543A08 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = ../../../../../usr/local/lib/libmpi.dylib; sourceTree = "<group>"; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
@@ -312,14 +304,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DBBD59D0C356C5B007E5F45 /* vecLib.framework in Frameworks */,
-				3DA173F915EBCA2C00543A08 /* libmpi.dylib in Frameworks */,
 				3D103DA015EC148400DAD98A /* libarpack.a in Frameworks */,
 				3D103DA215EC149B00DAD98A /* libamd.a in Frameworks */,
 				3D66F1201752B083004AE3C8 /* libcholmod.a in Frameworks */,
 				3D66F11E1752B077004AE3C8 /* libsuitesparseconfig.a in Frameworks */,
 				3D103DA415EC14AB00DAD98A /* libumfpack.a in Frameworks */,
-				3D103DA615EC15A500DAD98A /* libgfortran.dylib in Frameworks */,
-				3D103DA815EC16A200DAD98A /* libmpi_cxx.dylib in Frameworks */,
 				3D848A94175504D300E33180 /* libcolamd.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -329,8 +318,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */,
-				3D6E37AE15EC18D00023BB54 /* libmpi_cxx.dylib in Frameworks */,
-				3D6E37AF15EC18D60023BB54 /* libmpi.dylib in Frameworks */,
 				3D848A93175504D300E33180 /* libcolamd.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -344,10 +331,7 @@
 				3D66F11F1752B083004AE3C8 /* libcholmod.a */,
 				3D848A92175504D300E33180 /* libcolamd.a */,
 				3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */,
-				3DA173F815EBCA2C00543A08 /* libmpi.dylib */,
-				3D103DA715EC16A200DAD98A /* libmpi_cxx.dylib */,
 				3D103DA315EC14AB00DAD98A /* libumfpack.a */,
-				3D103DA515EC15A500DAD98A /* libgfortran.dylib */,
 				3D103D9F15EC148400DAD98A /* libarpack.a */,
 				3D103DA115EC149B00DAD98A /* libamd.a */,
 				3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */,
