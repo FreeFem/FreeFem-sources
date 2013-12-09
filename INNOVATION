@@ -1,5 +1,9 @@
+01/12/13
+    install dowload lib 
+    update lapack interface in examples.
     add WHERE_LIBRARY-file in install 
-    change the order of seach lib with   WHERE_LIBRARY-download WHERE_LIBRARY-config        WHERE_LIBRARY
+    change the order of seach lib with   WHERE_LIBRARY-download 
+       WHERE_LIBRARY-config        WHERE_LIBRARY
     remove all relative in WHERE_LIBRARY-config
     correct of superlu compile problem
 13/11/203  Pass to version 3.26 ...
