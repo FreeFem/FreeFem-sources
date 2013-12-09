@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.26-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.26-3,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1030,7 +1030,7 @@ then
 	AC_MSG_RESULT([git not found])
     else
 	ff_download_blas=openblas
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas"
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
