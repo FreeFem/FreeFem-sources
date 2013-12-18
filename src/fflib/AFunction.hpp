@@ -487,7 +487,10 @@ class  ArrayOfaType : public CodeAlloc{
 };
 
 
-    
+/// <<OneOperator>> Base class for all language operators. Daughter classes have the same name with several extensions:
+/// "[1-9]" represent the number of operator arguments, "_" designates operators that take a reference instead of a
+/// copied argument, "s" designates operators that require a stack argument.
+
 class  OneOperator : public ArrayOfaType {
     friend class MakeVectSpaceN;
     friend class basicForEachType;
@@ -2036,6 +2039,10 @@ template<class T>
 
 
 
+/// <<OneOperator1>> To know the meaning of OneOperator name extensions, see [[OneOperator]]. The template arguments to
+/// OneOperator classes are identical to the types of the arguments of the C++ function that is called from the
+/// class. The matrices are of type KNM<double>* or KNM<double>** (for left-side expressions, but this is "more
+/// tricky") which correspond to a real[int,int] in the edp script.
 
 template<class R,class A=R,class CODE=E_F_F0<R,A> >
 class  OneOperator1 : public OneOperator {
