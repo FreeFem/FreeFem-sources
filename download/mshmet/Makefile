@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 all-local: mshmet
 
 include ff-flags
@@ -65,10 +64,6 @@ $(SRCDIR)/tag-tar: $(PACKAGE)
 #
 	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2012.04.25_i586.patch
 	touch $(SRCDIR)/tag-tar
-
-$(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 
 clean:
 	-rm ff-flags

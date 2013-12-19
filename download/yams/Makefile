@@ -67,10 +67,6 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	mv  $(YAMS_SRCDIR)/yams.c $(YAMS_SRCDIR)/..
 	touch $(SRCDIR)/PATCH
 
-$(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
-
 # FFCS: only run make clean if cd to SRCDIR worked, otherwise this is infinite loop.
 
 clean-local: 

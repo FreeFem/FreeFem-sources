@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.in
 
 all-local: metis
@@ -75,8 +74,6 @@ $(SRCDIR)/tags: $(PACKAGE)
           >$(SRCDIR)/Lib/Makefile
 	touch $(SRCDIR)/tags
 
-$(PACKAGE):
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
 	-rm -rf metis-4.0 config.log

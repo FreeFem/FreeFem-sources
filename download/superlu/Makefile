@@ -1,6 +1,5 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
-# $Id$
 
 all-local: superlu
 
@@ -111,10 +110,6 @@ $(SRCDIR)/$(INSTALL):
 $(SRCDIR): $(PACKAGE_PATH)
 	tar xvzf $(PACKAGE_PATH)
 	touch $(SRCDIR)
-
-$(PACKAGE_PATH):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE)
 
 # FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])

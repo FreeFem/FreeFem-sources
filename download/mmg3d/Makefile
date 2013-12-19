@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 all-local: mmg3d
 
 include ff-flags
@@ -56,11 +55,6 @@ clean::
 	-rm install-4.done
 
 mmg3d-4:$(PACKAGE)
-
-$(PACKAGE):
-	-mkdir $(DIRPKG);
-# 	FFCS - 6/11/12 - curl/MacOS8 does not like redirections
-	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz
 
 install:install-4.done WHERE.done
 
