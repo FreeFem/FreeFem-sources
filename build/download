@@ -1,0 +1,63 @@
+#!/bin/bash -e
+# ======================================================================
+# Written by Antoine Le Hyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# http://www.ljll.math.upmc.fr/lehyaric
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++  is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+# 02110-1301 USA
+# ======================================================================
+# headeralh freefem shellxe start=21/10/10 upmc
+
+# Download a file by whatever means available
+# -------------------------------------------
+
+# $1=url
+# $2=local name
+
+if test -x /usr/bin/wget
+then
+
+    # use no-verbose to avoid mixing several wget outputs together when called concurrently in
+    # [[file:../download/getall]]
+
+    wget "$1" --output-document="$2" --no-verbose
+    exit $?
+fi
+
+if test -x /usr/bin/curl
+then
+    curl "$1" --output "$2"
+    exit $?
+fi
+
+if test -x /usr/bin/GET
+then
+    GET "$1" > "$2"
+    exit $?
+fi
+
+echo FF download: No way to download files from the web
+echo FF download: Please install wget or curl or GET
+exit 1
+
+# Local Variables:
+# mode:shell-script
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

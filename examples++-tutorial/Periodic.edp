@@ -1,0 +1,16 @@
+ mesh Th=square(10,10,[2*x*pi,2*y*pi]);
+ fespace Vh(Th,P2,periodic=[[2,y],[4,y],[1,x],[3,x]]);     // the label 2 and 4 are periodic
+ //  [a1,b1,b2,f1],[b,fb] the degree of freedom of of the border a1,b1,c1 and b are equivalent 
+ //  via fonctions f1 and f2 
+ //  here full periodic in x and y direction
+ Vh uh,vh;              // unkown and test function. 
+ func f=sin(x+pi/4.)*cos(y+pi/4.);                 //  right hand side function 
+ func g=0;                 //  boundary condition function
+ 
+ problem laplace(uh,vh) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int2d(Th)( -f*vh )                          //  linear form
+;                
+
+  laplace; // solve the problem plot(uh); // to see the result
+  plot(uh,ps="period.eps",value=true);

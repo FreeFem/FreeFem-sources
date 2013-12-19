@@ -1,0 +1,7 @@
+To obtain the library corresponding to this patch, edit the makefile.
+                     
+For the compiler gfortran, we need to compile without underscore 
+    gfortran -fno-underscoring  -O3 -c wrapper_dotblas.f 
+
+In the file makefile-common.inc, complete the line BLAS_LIB with  
+BLAS_LIB =  -L./PATCHVECLIB/libwrapperdostblas.a -framework veclib

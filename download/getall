@@ -1,0 +1,166 @@
+#!/usr/bin/perl
+# Download third-party packages independently of FF configuration (request from FH)
+# ======================================================================
+# Written by Antoine Le Hyaric
+# http://www.ljll.math.upmc.fr/lehyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+#
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh brief="Download third-party packages independently of FF configuration (request from FH)" default=0 freefem perl start=21/10/2013 upmc written
+
+use strict;
+use Getopt::Std;
+use threads;
+
+# -a = accept all licences
+# -f = force new downloads
+# -o name,name,... = only packages with the given names
+
+my %opts;
+getopts('afo:',\%opts);
+
+# list required packages
+my $only=0;
+my %packs;
+if(defined $opts{o}){
+  $only=1;
+  foreach(split(/,/,$opts{o})){$packs{$_}=1}
+}
+
+# can be run from the parent directory
+
+if(-x "download/getall"){chdir "download"}
+
+# can be run from any of the child directories
+
+if(-x "../getall"){chdir ".."}
+
+system "mkdir -p pkg";
+my @downloads;
+
+download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz',
+	 'http://www.caam.rice.edu/software/ARPACK','arpack96.tar.gz');
+download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
+	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz');
+
+download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz');
+download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz');
+
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.8','http://www.openblas.net/','OpenBLAS.tar.gz');
+
+download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz');
+
+download('freeYams','http://www.ann.jussieu.fr/~frey/ftp/archives/freeyams.2012.02.05.tgz',
+	 'http://www.ann.jussieu.fr/~frey/software.html','freeyams.2012.02.05.tgz');
+
+download('Gmm++','http://download.gna.org/getfem/stable/gmm-4.2.tar.gz',
+	 'http://download.gna.org/getfem/html/homepage/download.html','gmm-4.2.tar.gz');
+
+download('Hips','http://hips.gforge.inria.fr/release/hips-1.2b-rc4.tar.gz',
+	 'http://hips.gforge.inria.fr/','hips-1.2b-rc4.tar.gz');
+
+download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.10.2.tgz',
+	 'https://projects.coin-or.org/Ipopt','Ipopt-3.10.2.tgz');
+
+download('METIS','http://www.netlib.org/linalg/metis-4.0.tar.gz','http://www.netlib.org/linalg/','metis-4.0.tar.gz');
+
+download('ParMETIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-3.1.1.tar.gz',
+	 'http://glaros.dtc.umn.edu/gkhome/views/metis','ParMetis-3.1.1.tar.gz');
+
+download('MMG3D','http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz',
+	 'http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/mmg3d.php','mmg3d4.0.tgz');
+
+download('mshmet','http://www.ann.jussieu.fr/~frey/ftp/archives/mshmet.2012.04.25.tgz',
+	 'http://www.ann.jussieu.fr/~frey/software.html','mshmet.2012.04.25.tgz');
+
+download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
+	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz');
+
+download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
+	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz');
+
+download(' pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
+	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz');
+
+download('PaStiX','https://gforge.inria.fr/frs/download.php/21873/pastix_release_2200.tar.bz2',
+	 'https://gforge.inria.fr/projects/pastix/','pastix_release_2200.tar.bz2');
+
+download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
+	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz');
+
+download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_esmumps.tar.gz',
+	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz');
+
+download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
+	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz');
+
+download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
+	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz');
+download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_3.0.tar.gz',
+	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_dist_3.0.tar.gz');
+
+download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
+	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz');
+
+# run all downloads concurrently
+
+my @threads;
+foreach(@downloads){push @threads,threads->create(\&downloadone,$_)}
+foreach(@threads){$_->join()}
+
+sub download{
+  my($title,$url,$lic,$pkg)=@_;
+
+  # skip packages that have not been requested explicitely
+  return if($only && !defined $packs{$title});
+
+  # skip packages that are already present
+  if(-f "pkg/$pkg" && !$opts{f}){
+    print "$title $pkg done\n";
+    return;
+  }
+
+  # we do not store the answers to these questions. To repeat the same downloads without manual input, options "-a" and
+  # "-o names" are provided.
+
+  if(!$opts{a}){
+    print "$title: please check the licence at $lic. Do you want to download $url? (yN)\n";
+    my $ans=uc <STDIN>;
+    chomp $ans;
+    return if $ans ne 'Y';
+  }
+
+  # uses [[file:../build/download]]
+  push @downloads,"../build/download $url pkg/$pkg";
+}
+
+sub downloadone{
+  my($cmd)=@_;
+  print "$cmd\n";
+  system $cmd;
+  if($?){
+    print "$cmd FAILED\n";
+  }
+}
+
+# Local Variables:
+# mode:cperl
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:
