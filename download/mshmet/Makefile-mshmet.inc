@@ -21,7 +21,7 @@ lib    = $(OBJDIR)/libmshmet.a
 #.SILENT:
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	$(CC) $(OPT64) $(INCDIR) $(CFLAGS) -c $< -o $@
+	$(CC) $(OPT64) $(INCDIR) $(CFLAGS) -DSERIAL -c $< -o $@
 
 $(EXEDIR)/$(prog):$(DIRDIR) $(objs)
 	echo "#define COMPIL " '"' `date` '"' > $(SRCDIR)/compil.date

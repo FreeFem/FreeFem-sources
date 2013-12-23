@@ -136,7 +136,7 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
 } //  BuildMEK_KK
 
 template<class R,class FES>
-void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) {
+void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,void *B) {
   for (int i=0;i<this->lga;i++) 
      this->a[i]=0;
   if(this->onFace)
@@ -154,7 +154,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) 
 	  this->n=this->m=BuildMEK_KK<FElement>(this->lnk,this->ni,this->nik,this->nikk,&Kv,0);
          int n2 =this->m*this->n; 
          for (int i=0;i<n2;i++) this->a[i]=0;
-         faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack);
+         faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
         }
         else
         {
@@ -162,7 +162,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) 
          this->n=this->m=BuildMEK_KK<FElement>(this->lnk,this->ni,this->nik,this->nikk,&Kv,&KKv);
         
          
-         faceelement(*this,Kv,KKv,Kv,KKv,this->data,ie,iie,label,stack);
+         faceelement(*this,Kv,KKv,Kv,KKv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
 
         }
       }
@@ -189,20 +189,20 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack) 
      this->m=nbdf;
      int n2 =this->m*this->n; 
      for (int i=0;i<n2;i++) this->a[i]=0;
-     element(*this,Ku,Kv,this->data,ie,label,stack);
+     element(*this,Ku,Kv,this->data,ie,label,stack,reinterpret_cast<Rd*>(B));
   }
   else 
     {
      int n2 =this->m*this->n;
      for (int i=0;i<n2;i++) this->a[i]=0;
-     element(*this,Kv,Kv,this->data,ie,label,stack);
+     element(*this,Kv,Kv,this->data,ie,label,stack,reinterpret_cast<Rd*>(B));
    // call the elementary mat 
     }  
   }  
 }
 
 template<class R,class FES>
-void MatriceElementaireSymetrique<R,FES>::call(int k,int ie,int label,void * stack) {
+void MatriceElementaireSymetrique<R,FES>::call(int k,int ie,int label,void * stack,void  *B) {
   // mise a zero de la matrice elementaire, plus sur
   for (int i=0;i<this->lga;i++) 
     this->a[i]=0;
@@ -221,7 +221,7 @@ void MatriceElementaireSymetrique<R,FES>::call(int k,int ie,int label,void * sta
 	  this->ni[i] = K(i); // copy the numbering 
 	this->m=this->n = nbdf; 
 	
-	element(*this,K,this->data,ie,label,stack); 
+	element(*this,K,this->data,ie,label,stack,static_cast<Rd*>(B));
       }// call the elementary mat 
     else
       {

@@ -151,11 +151,11 @@ public:
      }
       
   virtual R & operator() (int i,int j) =0;
-  virtual void call(int ,int ie,int label,void * data) =0;  // 
+    virtual void call(int ,int ie,int label,void * data,void *Q=0) =0;  //
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
-  MatriceElementaire & operator()(int k,int ie,int label,void * s=0) {
-    call(k,ie,label,s);
+  MatriceElementaire & operator()(int k,int ie,int label,void * s=0,void *B=0) {
+    call(k,ie,label,s,B);
     return *this;}
 };
 
@@ -227,8 +227,8 @@ public:
   ~MatriceElementaireFES() {}
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
-  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0) {
-    this->call(k,ie,label,s);
+  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0,void *Q=0) {
+    this->call(k,ie,label,s,Q);
     return *this;}
 };
 
@@ -247,16 +247,18 @@ public:
   typedef typename  FESpace::Mesh Mesh;
   typedef typename  FESpace::QFElement QFElement;
   typedef typename  FESpace::QFBorderElement QFBorderElement;
-  typedef typename  FESpace::FElement FElement; 
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  FESpace::Mesh::Rd Rd;
+    
 
   R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
-  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *) ; 
-  void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *) ; 
-  void call(int k,int ie,int label,void *);
+  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *,Rd *) ;
+  void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *,Rd *) ;
+    void call(int k,int ie,int label,void *,void *B);
   
-  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0)
-  {call(k,ie,label,stack);return *this;}
+  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0,Rd *Q=0)
+  {call(k,ie,label,stack,Q);return *this;}
   MatriceElementairePleine(const FESpace & VVh,
                            const QFElement & fit=*QFElement::Default,
                            const QFBorderElement & fie =*QFBorderElement::Default)  
@@ -306,12 +308,12 @@ public:
   typedef typename  FESpace::QFElement QFElement;
   typedef typename  FESpace::QFBorderElement QFBorderElement;
   typedef typename  FESpace::FElement FElement; 
-
+  typedef typename  FESpace::Mesh::Rd Rd;
   R & operator()(int i,int j) 
   {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}
-  void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *) ; 
-  void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ; 
-  void call(int k,int ie,int label,void * stack);
+  void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *,Rd *) ;
+  void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ;
+  void call(int k,int ie,int label,void * stack,void *B);
   MatriceElementaireSymetrique(const FESpace & VVh,
                                const QFElement & fit=*QFElement::Default,
                                const QFBorderElement & fie =*QFBorderElement::Default) 
@@ -321,8 +323,8 @@ public:
 	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
        fit,fie),
        element(0),mortar(0) {}
-  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0) 
-  {this->call(k,ie,label,stack);return *this;};
+  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0,Rd *B=0)
+  {this->call(k,ie,label,stack,B);return *this;};
 };
 
 

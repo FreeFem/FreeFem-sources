@@ -266,7 +266,7 @@ void Check(const Opera &Op,int N,int  M)
   void  Element_OpVF(MatriceElementairePleine<R,FESpace3> & mat,
 		     const FElement3 & Ku,const FElement3 & KKu,
 		     const FElement3 & Kv,const FElement3 & KKv,
-		     double * p,int ie,int iie, int label,void *bstack)
+		     double * p,int ie,int iie, int label,void *bstack,R3 *B)
   {
     ffassert(0); 
   }
@@ -275,9 +275,9 @@ void Check(const Opera &Op,int N,int  M)
   void  Element_OpVF(MatriceElementairePleine<R,FESpace> & mat,
 			const FElement & Ku,const FElement & KKu,
 			const FElement & Kv,const FElement & KKv,
-			double * p,int ie,int iie, int label,void *bstack)
+			double * p,int ie,int iie, int label,void *bstack,R2 *B)
   {
-    
+     ffassert(B==0);
     pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
     Stack stack= bs->first;
     double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
@@ -563,7 +563,7 @@ void Check(const Opera &Op,int N,int  M)
     }
     else if (sym) {
       mates= new MatriceElementaireSymetrique<R,FESpace>(Uh,FIT,FIE);
-      mates->element = Element_Op<R>;               
+      mates->element = Element_Op<R>;
     }
     else {
       matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,FIT,FIE);
@@ -612,7 +612,8 @@ void Check(const Opera &Op,int N,int  M)
                               Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1]);
                           }
                           else*/ 
-                              InternalError(" No levelSet on Diff mesh :    to day  int1d of Matrix");
+                           //   InternalError(" No levelSet on Diff mesh :    to day  int1d of Matrix");
+                         A += mate(0,0,0,stack,Q);
                       }
                       if(sptrclean) sptrclean=sptr->clean();
                   }
@@ -1647,8 +1648,9 @@ void Check(const Opera &Op,int N,int  M)
  
  
   template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *vstack)
+  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *vstack,R3 *B)
   {
+    ffassert(B==0);
    Stack stack=pvoid2Stack(vstack);    
     //    ffassert(0);
     typedef  FElement3::Element Element;
@@ -1809,9 +1811,9 @@ void Check(const Opera &Op,int N,int  M)
   } 
   // xxxxxxxxxxxxxxxxx  modif a faire 
   template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *vstack)
+  void  Element_Op(MatriceElementairePleine<R,FESpace> & mat,const FElement & Ku,const FElement & Kv,double * p,int ie,int label,void *vstack,R2 *B)
   {
-       Stack stack=pvoid2Stack(vstack);
+      Stack stack=pvoid2Stack(vstack);
     typedef  FElement::Element Element;
     MeshPoint mp= *MeshPointStack(stack);
     R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -1852,7 +1854,7 @@ void Check(const Opera &Op,int N,int  M)
 
   for (i=0;i< nx;i++) 
     *pa++ = 0.; 
-  if (ie<0)    
+  if (ie<0 && B==0)
     for (npi=0;npi<FI.n;npi++) // loop on the integration point
       {
         QuadraturePoint pi(FI[npi]);
@@ -1943,7 +1945,67 @@ void Check(const Opera &Op,int N,int  M)
           }
 	*/
       }
-  else // int on edge ie 
+  else if(B)
+  {  // int on isovalue ...
+      R2 PA(B[0]),PB(B[0]);
+      R2 A=T(PA),B=T(PB);
+      R2 E(A,B);
+      double le = sqrt((E,E));
+      if(le > 1e-15) // bofbof ????
+      for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+      {
+          pa =a;
+          QuadratureFormular1dPoint pi( FIb[npi]);
+          double coef = le*pi.a;
+          double sa=pi.x,sb=1-sa;
+          R2 Pt(PA*sa+PB*sb ); //
+          Ku.BF(Dop,Pt,fu);
+          if (!same) Kv.BF(Dop,Pt,fv);
+          // int label=-999999; // a passer en argument
+          MeshPointStack(stack)->set(T(Pt),Pt,Kv,-1,R2(E.y,-E.x)/le,-1);
+          if (classoptm) (*Op.optiexpK)(stack); // call optim version
+          int il=0;
+          for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+	  {  // attention la fonction test donne la ligne
+              //  et la fonction test est en second
+              BilinearOperator::K ll(*l);
+              //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+              long jcomp= ll.first.first.first,jop=ll.first.first.second;
+              long icomp= ll.first.second.first,iop=ll.first.second.second;
+              
+              
+              R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+              if ( copt && Kv.number <1)
+	      {
+                  R cc  =  GetAny<R>(ll.second.eval(stack));
+                  //cout << *(copt[il]) << " == " <<  cc << endl;
+                  if ( ccc != cc) {
+                      cerr << cc << " != " << ccc << " => ";
+                      cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+                      ExecError("In Optimized version "); }
+	      }
+              int fi=Kv.dfcbegin(icomp);
+              int li=Kv.dfcend(icomp);
+              int fj=Ku.dfcbegin(jcomp);
+              int lj=Ku.dfcend(jcomp);
+              ccc *= coef;
+              
+              // attention la fonction test donne la ligne
+              //  et la fonction test est en second      
+              
+              for ( i=fi;  i<li;   i++ )  
+	      { 
+		  for ( j=fj;  j<lj;   j++ ) 
+                  { 		      
+		      R w_i =  fv(i,icomp,iop); 
+		      R w_j =  fu(j,jcomp,jop);		      
+		      mat(i,j) += ccc * w_i*w_j;
+                  }
+	      }
+	  }
+      }
+  }
+  else // int on edge ie
     for (npi=0;npi<FIb.n;npi++) // loop on the integration point
       {
         pa =a;
@@ -2054,8 +2116,9 @@ void Check(const Opera &Op,int N,int  M)
   
   
  template<class R>
- void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * vstack)
+ void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * vstack,R3 *B)
   {
+      ffassert(B==0);
       Stack stack=pvoid2Stack(vstack);
    typedef FESpace3 FESpace;
    typedef typename FESpace3::Mesh Mesh;
@@ -2235,7 +2298,7 @@ void Check(const Opera &Op,int N,int  M)
 
   // xxxxxxxxxxxxxxxxx  modif a faire   
  template<class R>
- void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * vstack)
+ void  Element_Op(MatriceElementaireSymetrique<R,FESpace> & mat,const FElement & Ku,double * p,int ie,int label, void * vstack,R2*B)
   {
     Stack stack=pvoid2Stack(vstack);
     MeshPoint mp= *MeshPointStack(stack);
@@ -2363,7 +2426,69 @@ void Check(const Opera &Op,int N,int  M)
 		      }*/
           
         } 
-    else // int on edge ie 
+    else if(B)
+    {
+        R2 PA(B[0]),PB(B[0]);
+        R2 A=T(PA),B=T(PB);
+        R2 E(A,B);
+        double le = sqrt((E,E));
+         if(le > 1e-15)
+        for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+        {
+            
+            pa =a;
+            QuadratureFormular1dPoint pi( FIb[npi]);
+           
+            double coef = le*pi.a;
+            double sa=pi.x,sb=1-sa;
+            R2 Pt(PA*sa+PB*sb ); //
+            Ku.BF(Dop,Pt,fu);
+            // int label=-999999; // a passer en argument
+            MeshPointStack(stack)->set(T(Pt),Pt,Ku,0,R2(E.y,-E.x)/le,0);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+            
+            int il=0;
+            for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+	    {  // attention la fonction test donne la ligne
+                //  et la fonction test est en second
+                BilinearOperator::K ll(*l);
+                //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                long jcomp= ll.first.first.first,jop=ll.first.first.second;
+                long icomp= ll.first.second.first,iop=ll.first.second.second;
+                
+                R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
+                if ( copt && Ku.number <1)
+		{
+                    R cc  =  GetAny<R>(ll.second.eval(stack));
+                    // cout << *(copt[il]) << " == " <<  cc << endl;
+                    if ( c != cc) {
+                        cerr << c << " != " << cc << " => ";
+                        cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+                        ExecError("In Optimized version "); }
+		}
+                c *= coef ;
+                long fi=Ku.dfcbegin(icomp);
+                long li=Ku.dfcend(icomp);
+                long fj=Ku.dfcbegin(jcomp);
+                long lj=Ku.dfcend(jcomp);
+                
+                for ( i=fi;  i<li;   i++ )
+                    for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) //
+                    {
+                        R w_i =  fu(i,icomp,iop);
+                        R w_j =  fu(j,jcomp,jop);		      
+                        
+                        mat(i,j)  +=  c * w_i*w_j;
+                        /*
+                         if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
+                         cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
+                         */
+                    }
+                
+            }
+        }
+    }
+    else    // int on edge ie
       for (npi=0;npi<FIb.n;npi++) // loop on the integration point
         {
           
