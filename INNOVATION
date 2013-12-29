@@ -1,4 +1,5 @@
-   coorect pb of compilation under window (mingw32/msys) 
+   add interfer with gsl random number generatio in test .. 
+   correct pb of compilation under window (mingw32/msys) 
 version 3.26-3  09/12/2013 
    correct problem with openblas need pthread lib 
 01/12/13
