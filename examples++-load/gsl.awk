@@ -1,116 +1,145 @@
 # egrep "^int|^double" /opt/local/include/gsl/gsl_sf* 
+# egrep "^int|^double|^long" /usr/local/include/gsl/gsl_{cdf,randist,sf_*}.h | egrep -v ',$'  
+
 BEGIN {FS="[(),]";
     LANG="C";
-    edp="gsl1.edp";
+    edp="gsl.idp";
     c="\"";
     pp=c "(" c;
     print " /*  ";
-    print "load",c "gsl" c  > edp
-}
+    print "// file create:  awk -f gsl.awk  gsl_list  > ff_gsl_awk.hpp " >edp
+    print "load",c "gsl1" c  > edp
+    print "gslrng ffrng;" >edp
+    print " gslabortonerror=0; " >edp
+    #  convertion de type gsl .. ff++ 
+    
+    Tff["double"]="double";
+    Tff["const double"]="double";
+    Tff["int"]="long";
+    Tff["const size_t"]="long";
+    Tff["unsigned int"]="long";
+    Tff["const int"]="long";
+    Tff["const unsigned int"]="long";
+    Tff["const double"]="double";
+   # Tff["const gsl_rng *"] = "gsl_rng **";
+    Cff["const gsl_rng *"] = "*"; 
+    V0["double"]= 0.55;
+    V0["const double"]= 0.55; 
+    V0["const gsl_rng *"] = "ffrng";
+ }
 
 function f0(f) { xx=f;gsub("_","",xx) ; return  xx  };
 function ff(f) { return c f0(f) c };
-NF ==3 {
-    split($1,fff,"[ \t]*");
+function VV(t) { if ( V0[t] !=0) return V0[t]; else return 0;}
+function ana1()
+{
+    ok = 0; 
+    xx1=$1;
+    nnn=split($1,xxx,":");
+    if(nnn == 2) xx1= xxx[2]; 
+
+    fonc=0; 
+    split(xx1,fff,"[ \t]*");
     f=fff[2];
-    split($2,fff,"[ \t]*");
-    tt=0;
-    i2=1
-    ok=1
-    nn=0;
-    v0=1;
-	t="";
-	while(ok==1 && nn++<5)
+    R=fff[1]; 
+
+    if( R=="int" || R =="double" ) ok=1;
+    #print " xx: " xx1, R, f, ok ; 
+
+}
+function anatype(kkk)
+{
+    if( ok !=1) return 0; ; 
+    v0=1;  
+    t = "";
+ 
+    nnn=split($(kkk+1),fff,"[ \t]*");
+    i2 =1; 
+    while( i2<nnn)
 	{
-	    # print " ---- " , fff[i2] , i2 
-	    if(fff[i2] == "unsigned" ) { t= t " " fff[i2] ;}
-	    else if(fff[i2] == "int" ) { t= t " " fff[i2] ;tt="long";}
-	    else if(fff[i2] == "double" ) { t= t " " fff[i2];tt="double"; v0=0.55 ;}
-	    else if(fff[i2] == "const" ) { t= t " " fff[i2] ;}
-	    else {i2--;ok=0;}
-	    i2++;
+	   if( t=="")
+	    t = fff[i2];
+	   else
+	    t= t " " fff[i2]; 
+	    i2++; 
 	}
-	p1=fff[i2];
-	#print f, "  " , t , " " , tt, " " , p1;
-	lw="";
-	if(tt!=0){
-	if(tt=="long")
-	{
-	    lw ="double " f "( long x ) { return " f "( (" t ") x );}\n" ;
-	}
-	gg = "\n   Global.Add("ff(f) "," pp",new OneOperator1<double ," tt ">( " f " )); "
+	tmp=match(fff[nnn],/.*\[\]/);
+	if(tmp) t = t "[]"; 
+	T[kkk]=t;
+	if( Tff[t] == "") ok=0; 
+	if( Tff[t] == "" && T00[t]=="") { print "//  -- missing type \"" t  "\" ";T00[t]=1;} 
+    return ok; 
+}
+
+NF ==3 {
+    ana1();
+    #print NF, "******",ok
+    anatype(1);
+    if( ok == 1)
+    {
+      ok==2;
+ 	  lw="";
+	  
+	   lw = Tff[R] " " f "__(" Tff[T[1]] " const & x ) { return " f "( (" T[1] ")" Cff[T[1]] " x );}\n" ;
+	  
+	gg = "\n   Global.Add(" ff(f) "," pp ",new OneOperator1_<" Tff[R] "," Tff[T[1]] ">( " f "__)); "
 	cw = cw  lw;
 	cm = cm  gg;
 	print "cout << " c  f "("v0") =  " c " << " f0(f) "("v0")  << endl; "> edp
 	}
-	else
-	    print " missng "f,t,tt
 }
-NF > 4 { print " minssing " $0 ; }
-NF ==4 {
-    split($1,fff,"[ \t]*");
-    f=fff[2];
-    
-    split($2,fff,"[ \t]*");
-    tt=0;
-    i2=1
-    ok=1
-    nn=0;
-    t="";
-    while(ok==1 && nn++<5)
-    {
-	# print " ---- " , fff[i2] , i2 
-	if(fff[i2] == "unsigned" ) { t= t " " fff[i2] ;}
-	else if(fff[i2] == "int" ) { t= t " " fff[i2] ;tt="long";}
-	else if(fff[i2] == "double" ) { t= t " " fff[i2];tt="double" ;}
-	else if(fff[i2] == "const" ) { t= t " " fff[i2] ;}
-	else {i2--;ok=0;}
-	i2++;
-    }
-    
-    p1=fff[i2];
-    tt1=tt;
-    t1=t;
-    
-    split($3,fff,"[ \t]*");
-    tt=0;
-    i2=1
-    ok=1
-    nn=0;
-    t="";
-    if (fff[i2]==" ") i2++;
-    if (fff[i2]=="") i2++;
-    if (fff[i2]=="  ") i2++;
-    while(ok==1 && nn++<5)
-    {
-	# print " ---- " , fff[i2] , i2 
-	if(fff[i2] == "unsigned" ) { t= t " " fff[i2] ;}
-	else if(fff[i2] == "int" ) { t= t " " fff[i2] ;tt="long";}
-	else if(fff[i2] == "gsl_mode_t" ) { t= t " " fff[i2] ;tt="long";}
-	else if(fff[i2] == "double" ) { t= t " " fff[i2];tt="double" ;}
-	else if(fff[i2] == "const" ) { t= t " " fff[i2] ;}
-	else {i2--;ok=0;}
-	i2++;
-    }
-    
-    p2=fff[i2];
 
-#    print f, "  " , t , " " , tt, " " , p1, p3;
-    lw="";
-    if(tt && tt1 ) 
+NF ==4 {
+    ana1();
+    anatype(1);
+    anatype(2);
+    if( ok == 1)
     {
-	if(tt1=="long" || tt="long")  
-	{
-	    lw ="double " f "( " tt1  " x, " tt " y   ) { return " f "( (" t1 ") x, (" t ")  y  );}\n" ;
-	}
-	gg = "\n   Global.Add(" ff(f) "," pp ",new OneOperator2<double," tt1 "," tt " >( " f " )); ";
+      ok==2;
+ 	  lw="";
+	  
+	   lw = Tff[R] " " f "__(" Tff[T[1]] " const & x , " Tff[T[2]] " const & y )" \
+	   "{ return " f "( (" T[1] ")" Cff[T[1]] " x , (" T[2] ")" Cff[T[2]] " y );}\n" ;
+	  
+	gg = "\n   Global.Add(" ff(f) "," pp ",new OneOperator2_<" Tff[R] "," Tff[T[1]] "," Tff[T[2]] ">( " f "__)); "
 	cw = cw  lw;
 	cm = cm  gg;
-    }
-    else
-	print NF, "  ", tt1,",",tt," --" t1," ",t " ::: " " missing -- ", f , " (" , $2 "," $3  ") " fff[1] "," fff[2],",", fff[3] 
+	v0 = VV(T[1]);
+	v1 = VV(T[2]);
+	
+	print "cout << " c  f "(" v0 ", "v1 ") =  " c " << " f0(f) "(" v0 ",",v1 ")  << endl; "> edp
+	}
 }
 
+NF ==5 {
+    ana1();
+    anatype(1);
+    anatype(2);
+    anatype(3);
+    if( ok == 1)
+    {
+      ok==2;
+ 	  lw="";
+	  
+	   lw = Tff[R] " " f "__(" Tff[T[1]] " const & x , "  Tff[T[2]] " const & y , " Tff[T[3]] " const & z )" \
+	   "{ return " f "( (" T[1] ")" Cff[T[1]] " x , (" T[2] ")" Cff[T[2]] " y , (" T[3] ")" Cff[T[3]] " z );}\n" ;
+	  
+	gg = "\n   Global.Add(" ff(f) "," pp ",new OneOperator3_<" Tff[R] "," Tff[T[1]] "," Tff[T[2]] "," Tff[T[3]] \
+	   ">( " f "__)); ";
+	cw = cw  lw;
+	cm = cm  gg;
+	v0 = VV(T[1]);
+	v1 = VV(T[2]);
+	v2 = VV(T[3]);
+	
+	print "cout << " c  f "(" v0 "," v1 "," v2 ") =  " c " << " f0(f) "(" v0 "," v1 "," v2 ")  << endl; "> edp
+	}
+}
+
+
+ok !=1 { 
+   print " missing:",NF," ", f , " -> " $0;
+}
 END {   print " */ "
 	print "/*****************/";
 	print "/*****************/";

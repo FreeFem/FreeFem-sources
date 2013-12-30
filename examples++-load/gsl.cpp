@@ -41,6 +41,8 @@
 #include <gsl/gsl_multifit.h>
 
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_cdf.h>
 
 #include "ff_gsl_awk.hpp"
 
@@ -110,7 +112,8 @@ long gsl_rng_set(gsl_rng ** pr, long s){  gsl_rng_set(*pr,s);return 0; }
 string * gsl_name(Stack s,const gsl_rng_type * const & pr)
   {return Add2StackOfPtr2Free(s,new string((*pr).name));}
 
-long  ngslrng =0; 
+long  ngslrng =0;
+long  gslabort =1;
 static const gsl_rng_type ** gsl_rngpp; 
 
 const gsl_rng_type * gslrngtype(long i)
@@ -119,13 +122,28 @@ const gsl_rng_type * gslrngtype(long i)
   return gsl_rngpp[i]; 
 }
 
+extern "C" {
+    void ffhandler (const char * reason,
+                  const char * file,
+                  int line,
+                    int gsl_errno);
+
+}
+void ffhandler (const char * reason,
+                const char * file,
+                int line,
+                int gsl_errno)
+{
+    cerr << "\n GSL Error = " << reason << " in " <<file << " at " << line << " err= " <<gsl_errno << endl;
+    if(gslabort) ExecError("Gsl errorhandler");
+}
+
 class Init { public:
   Init();
 };
 LOADINIT(Init);
 using  namespace Fem2D ;
 Init::Init(){
-  init_gsl_sf() ;
     
   Global.Add("gslpolysolvequadratic","(",new OneOperator2<long,KN_<double>,KN_<double> >( gslpolysolvequadratic));
   Global.Add("gslpolysolvecubic","(",new OneOperator2<long,KN_<double>,KN_<double> >(gslpolysolvecubic));
@@ -229,5 +247,9 @@ Global.Add("gslrngmin","(",new OneOperator1<long   ,gsl_rng **>( gsl_rng_min));
 Global.Add("gslrngmax","(",new OneOperator1<long   ,gsl_rng **>( gsl_rng_max));
 Global.Add("gslrngset","(",new OneOperator2<long   ,gsl_rng **, long>(gsl_rng_set));
  Global.Add("gslrngtype","(",new OneOperator1<const gsl_rng_type * ,long>(gslrngtype));     
-    
+  init_gsl_sf() ;
+ gslabort=1;
+ Global.New("gslabortonerror",CConstant<long*>(&gslabort));
+   
+ gsl_set_error_handler(ffhandler);
 }
