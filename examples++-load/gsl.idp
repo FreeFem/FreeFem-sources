@@ -1,5 +1,5 @@
 // file create:  awk -f gsl.awk  gsl_list  > ff_gsl_awk.hpp 
-load "gsl1"
+load "gsl"
 gslrng ffrng;
  gslabortonerror=0; 
 cout << "gsl_cdf_ugaussian_P(1) =  " << gslcdfugaussianP(1)  << endl; 
