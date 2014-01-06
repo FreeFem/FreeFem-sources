@@ -190,6 +190,9 @@ $(SRCDIR)/tag-ff++: $(PACKAGE)
 #	cp  SRC_SPKIT_makefile $(SRCDIR)/SRC/SPKIT/makefile
 	touch $(SRCDIR)/tag-ff++
 
+$(PACKAGE):
+	../getall -o Hips
+
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) clean  -C $(SRCDIR)

@@ -1627,13 +1627,6 @@ m4_define([TOOL_PARAMETERS],
 	AC_FF_ADDWHERELIB($1,$with_$1_ldflags,$with_$1_include)
         AC_SUBST([TOOL_COMPILE_$1],"")
 	enable_$1_download=no
-
-    else
-
-	# no specific directives for package $1, activate automatic download
-
-        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
-	enable_$1_download=yes
     fi
 ])
 
@@ -1646,6 +1639,7 @@ m4_define([TOOL_DISABLE],
     else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
+	enable_$1_download=yes
     fi
 
     # Also allow to disable the download of one tool if it is already locally installed
