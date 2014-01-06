@@ -98,8 +98,10 @@ download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
 download(' pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
 	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz');
 
+# ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
+
 download('PaStiX','https://gforge.inria.fr/frs/download.php/21873/pastix_release_2200.tar.bz2',
-	 'https://gforge.inria.fr/projects/pastix/','pastix_release_2200.tar.bz2');
+	 'https://gforge.inria.fr/projects/pastix/','pastix_release_2200.tar.bz2','BAD_CERT');
 
 download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
 	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz');
@@ -125,7 +127,7 @@ foreach(@downloads){push @threads,threads->create(\&downloadone,$_)}
 foreach(@threads){$_->join()}
 
 sub download{
-  my($title,$url,$lic,$pkg)=@_;
+  my($title,$url,$lic,$pkg,$opts)=@_;
 
   # skip packages that have not been requested explicitely
   return if($only && !defined $packs{$title});
@@ -147,7 +149,7 @@ sub download{
   }
 
   # uses [[file:../build/download]]
-  push @downloads,"../build/download $url pkg/$pkg";
+  push @downloads,"../build/download $url pkg/$pkg $opts";
 }
 
 sub downloadone{

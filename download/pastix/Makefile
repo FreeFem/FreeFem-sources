@@ -157,6 +157,9 @@ $(SRCDIR): $(PACKAGE1)
 	cd $(SRCDIR)/src/blend/src/; patch -p2 < ../../../../pastix_release_2200-blend.patch
 	touch $(SRCDIR)
 
+$(PACKAGE1):
+	../getall -o PaStiX
+
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:
 	-cd $(SRCDIR)/src &&  $(MAKE) clean 

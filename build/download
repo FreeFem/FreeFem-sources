@@ -29,14 +29,22 @@
 
 # $1=url
 # $2=local name
+# $3=BAD_CERT if the SSL certificate of the web server is wrong
 
 if test -x /usr/bin/wget
 then
 
+    opts=
+    if test "$3" = BAD_CERT
+    then
+	opts=--no-check-certificate
+    fi
+
     # use no-verbose to avoid mixing several wget outputs together when called concurrently in
     # [[file:../download/getall]]
 
-    wget "$1" --output-document="$2" --no-verbose
+    wget "$1" --output-document="$2" --no-verbose $opts
+
     exit $?
 fi
 
