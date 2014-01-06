@@ -569,6 +569,7 @@
 ^examples\+\+-tutorial/makeref\.edp$
 ^examples\+\+-tutorial/plot\.gp$
 ^examples\+\+-tutorial/regtests\.edp$
+^examples\+\+-load/regtests\.edp$
 ^examples\+\+-tutorial/toto\..*$
 ^examples\+\+-tutorial/u\.txt$
 ^examples\+\+/.*\.BB$
