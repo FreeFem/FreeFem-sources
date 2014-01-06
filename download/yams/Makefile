@@ -67,6 +67,9 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	mv  $(YAMS_SRCDIR)/yams.c $(YAMS_SRCDIR)/..
 	touch $(SRCDIR)/PATCH
 
+$(PACKAGE):
+	../getall -o freeYams
+
 # FFCS: only run make clean if cd to SRCDIR worked, otherwise this is infinite loop.
 
 clean-local: 
