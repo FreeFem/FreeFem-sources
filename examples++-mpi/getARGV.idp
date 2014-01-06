@@ -1,0 +1,90 @@
+ // for gestion of FreeFem++ argument and in version 3.10-1 FH
+ // F. Hecht 
+ // Usage:  getARGV(n,defaultvalue) // get the fist used default valeu
+ //  or     getARGV(after,defaultvalue) // get the arg after after 
+ // the type of delfaut value given the return type: int,double, string
+ func int usedARGV(int n)
+{
+  int k=1,ii=1,kk=1,ret=-1;
+  for(int i=1;i<ARGV.n;++i)
+   {
+   // cout <<i<< " "<< ARGV[i] << " " <<(ARGV[i]=="-v") << " " << kk << "==" 
+   //      << n << " " << ARGV[i].rfind("dp") << " " <<ARGV[i].length-2  << endl;
+        
+       if(ARGV[i]=="-v") i++;
+       else if(ARGV[i]=="-fglut") i++;
+       else if(ARGV[i]=="-ffg") i++;
+       else if(ARGV[i]=="-glut") i++;
+       else if(ARGV[i]=="-f") i++;
+       else if(ARGV[i]=="-nw") ii;
+       else if(ARGV[i]=="-wait") ii;
+       else if(ARGV[i]=="-ne") ii;
+       else if(ARGV[i]=="-cd") ii;
+       //else if(ARGV[i].rfind(".edp")==ARGV[i].length-4 ) ii;
+       else if(i==1) ii;
+       else if(kk++==n) {ret=i;}
+      // else cout << " +++ \n";
+     }
+   //  cout << ret << endl;
+    return ret;
+}
+
+func int usedARGV(string after)
+{
+  int ret=-1;
+  for(int i=ARGV.n-1;i>=0;--i)        
+       if(ARGV[i]==after) { ret=++i; break;}
+  if(ARGV.n<ret) ret=-1;
+  return ret;
+}
+
+func int getARGV(int n,int default)
+{
+   int d=default;
+   int k=usedARGV(n);
+   if(k>0) d=atoi(ARGV[k]);
+    return d;
+}
+func real getARGV(int n,real default)
+{
+   real d=default;
+   int k=usedARGV(n);
+   if(k>0) d=atof(ARGV[k]);
+   return d;
+}
+func string getARGV(int n,string default)
+{
+   string d=default;
+   int k=usedARGV(n);
+   if(k>0) d=ARGV[k];
+    return d;
+}
+
+func int getARGV(string after,int default)
+{
+   int d=default;
+   int k=usedARGV(after);
+   if(k>0) d=atoi(ARGV[k]);
+    return d;
+}
+func real getARGV(string after,real default)
+{
+   real d=default;
+   int k=usedARGV(after);
+   if(k>0) d=atof(ARGV[k]);
+   return d;
+}
+func string getARGV(string after,string default)
+{
+   string d=default;
+   int k=usedARGV(after);
+   if(k>0) d=ARGV[k];
+    return d;
+}
+
+/*
+cout << getARGV(1,100) << endl;
+cout << getARGV(2,200.) << endl;
+cout << getARGV(3,"300.000") << endl;
+cout << getARGV("-n"," xxx") << endl;
+*/
