@@ -37,8 +37,12 @@ if [   -d $DESTDIR$DIR/lib -a -d $DESTDIR$DIR/include  ] ; then
     for i in $LIB/WHERE.* ; do            
 	test -f $i && ( sed "s;@DIR@;$DIR;" <$i  )
     done
-#    return
-    for la in arpack umfpack amd fftw3  mmg3d; do
+
+# ALH - 6/1/14 - remove umfpack and amd because some versions of
+# umfpack needs more than just adding -L (they need the colamd and
+# cholmod libraries, which are setup in [[file:configure.ac]]).
+
+    for la in arpack fftw3 mmg3d; do
         l=`echo $la |sed -e s/^tet$/tetgen/`
        if [ ! -f $LIB/WHERE.$l ]; then
 	   if [ -z "$l" ];then l="$la";fi  
