@@ -1043,20 +1043,12 @@ then
 	AC_MSG_RESULT([git not found])
     else
 	ff_download_blas=openblas
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas $ff_pthread"
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
 	AC_SUBST(DOWNLOADED_BLAS,"")
 	AC_SUBST(COMPILE_OPENBLAS,openblas)
-
-	if test "$OS" = Windows_NT
-	then
-	    ff_static_lib=lib
-	else
-	    ff_static_lib=a
-	fi
-	AC_SUBST(FF_STATIC_LIB,$ff_static_lib)
 
 	ff_blas_ok=yes
 	ff_cblas_h=yes
