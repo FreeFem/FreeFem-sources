@@ -155,7 +155,7 @@ $(SUITESPARSE_TGZ):
 	../getall -o SuiteSparse
 
 clean-local:
-	-rm $AMDLIB $CAMDLIB $CHOLMODLIB $COLAMDLIB $SUITESPARSECONFIGLIB
+	-rm $(AMDLIB) $(CAMDLIB) $(CHOLMODLIB) $(COLAMDLIB) $(SUITESPARSECONFIGLIB)
 	-rm ../include/amd*.h 
 	-rm ../include/umfpack*.h 
 	-rm ../include/colmod*.h 
