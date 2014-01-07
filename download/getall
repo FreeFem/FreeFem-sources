@@ -106,8 +106,10 @@ download('PaStiX','https://gforge.inria.fr/frs/download.php/21873/pastix_release
 download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
 	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz');
 
+# ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
+
 download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_esmumps.tar.gz',
-	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz');
+	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz','BAD_CERT');
 
 download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
 	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz');
