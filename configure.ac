@@ -1772,15 +1772,19 @@ m4_map([AC_FF_WHERELIB],[
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
-#  remove gsl if not find ... FH
-# correction FH .. 18/12/2013. 
-if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
-if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
-TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
-
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
+
+#  remove gsl if not find ... FH
+# correction FH .. 18/12/2013. 
+# ALH - 7/1/14 - not able to compile gsl or pardiso with FFCS on Windows
+if test "$enable_ffcs" != yes
+then
+    if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
+    if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
+fi
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
 
 # All makefiles
 AC_OUTPUT(Makefile

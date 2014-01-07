@@ -84,6 +84,9 @@ $(SRCDIR): $(PACKAGE)
 	cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)
 
+$(PACKAGE):
+	../getall -o Scotch
+
 # FFCS - 28/3/13 - more cleaning
 clean-local:
 	-cd $(SRCDIR)/src && $(MAKE)  realclean  -C $(SRCDIR)/src
