@@ -76,6 +76,9 @@ $(SRCDIR)/tags: $(PACKAGE)
           >$(SRCDIR)/METISLib/Makefile
 	touch $(SRCDIR)/tags
 
+$(PACKAGE):
+	../getall -o ParMETIS -a
+
 # FFCS - 23/5/12 - corrected bug in removing .a from ../lib
 clean:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C  $(SRCDIR)
