@@ -58,7 +58,7 @@ $(SRCDIR)/tags: $(PACKAGE)
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
-	../getall -o TetGen
+	../getall -oa TetGen
 
 clean-local::
 	-rm -rf tetgen1.4.?  FAIT FAIRE 

@@ -84,7 +84,7 @@ tag-tar-$(SIZEPKG): $(PACKAGE)
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
 $(PACKAGE):
-	../getall -o MMG3D
+	../getall -oa MMG3D
 
 clean::
 	-rm ff-flags

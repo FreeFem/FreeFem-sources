@@ -191,7 +191,7 @@ $(SRCDIR)/tag-ff++: $(PACKAGE)
 	touch $(SRCDIR)/tag-ff++
 
 $(PACKAGE):
-	../getall -o Hips
+	../getall -oa Hips
 
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:

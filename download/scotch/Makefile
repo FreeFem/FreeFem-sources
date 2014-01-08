@@ -85,7 +85,7 @@ $(SRCDIR): $(PACKAGE)
 	touch $(SRCDIR)
 
 $(PACKAGE):
-	../getall -o Scotch
+	../getall -oa Scotch
 
 # FFCS - 28/3/13 - more cleaning
 clean-local:
