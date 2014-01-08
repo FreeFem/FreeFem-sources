@@ -71,6 +71,9 @@ $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL)
 	patch -p0 <patch-IpBlas
 	touch $(SRCDIR)/tag-tar
 
+$(PACKAGE):
+	../getall -o Ipopt -a
+
 clean-local::
 	rm -rf  $(SRCDIR)  *~ Makefile.inc
 
