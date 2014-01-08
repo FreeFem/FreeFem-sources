@@ -80,6 +80,9 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	    ARmake.m4 >ARPACK/ARmake.inc
 	touch ARPACK/fait
 
+$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):
+	../getall -o ARPACK -a
+
 clean-local::
 	-rm -r ARPACK ../lib/libarpack.a
 
