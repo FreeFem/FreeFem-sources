@@ -96,7 +96,7 @@ download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
 download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
 	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz');
 
-download(' pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
+download('pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
 	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz');
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
