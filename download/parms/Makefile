@@ -41,6 +41,9 @@ $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	touch $(SRCDIR)
 
+$(PACKAGE):
+	../getall -o pARMS -a
+
 clean:
 	-make cleanall -C $(SRCDIR)/src
 	-rm Makefile.in ../lib/WHERE.parms
