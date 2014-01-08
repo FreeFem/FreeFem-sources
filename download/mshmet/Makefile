@@ -65,6 +65,9 @@ $(SRCDIR)/tag-tar: $(PACKAGE)
 	cd $(MSHMET_SRCDIR); patch -p2 < ../../mshmet.2012.04.25_i586.patch
 	touch $(SRCDIR)/tag-tar
 
+$(PACKAGE):
+	../getall -o mshmet -a
+
 clean:
 	-rm ff-flags
 #	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
