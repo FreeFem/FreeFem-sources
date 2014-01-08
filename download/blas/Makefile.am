@@ -169,7 +169,7 @@ openpatches.done:opendownload.done
 
 download::opendownload.done
 opendownload.done:
-	../getall -oa OpenBLAS
+	../getall -o OpenBLAS -a
 	touch $@
 
 # ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part

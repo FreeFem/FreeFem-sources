@@ -68,7 +68,7 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	touch $(SRCDIR)/PATCH
 
 $(PACKAGE):
-	../getall -oa freeYams
+	../getall -o freeYams -a
 
 # FFCS: only run make clean if cd to SRCDIR worked, otherwise this is infinite loop.
 
