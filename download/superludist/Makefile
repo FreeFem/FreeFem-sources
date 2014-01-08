@@ -62,6 +62,9 @@ $(SRCDIR): $(PACKAGE_PATH)
 	cd $(SRCDIR)/SRC/; patch -p2 < ../../superludist_3.0-operation_undefined.patch
 	touch $(SRCDIR)
 
+$(PACKAGE_PATH):
+	../getall -o SuperLU_DIST -a
+
 # FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
 
