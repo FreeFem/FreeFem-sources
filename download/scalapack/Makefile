@@ -63,6 +63,9 @@ $(SRCDIR)/tag-tar: $(PACKAGE1)
 	gunzip -c $(PACKAGE1) | tar xvf -
 	touch $(SRCDIR)/tag-tar
 
+$(PACKAGE1):
+	../getall -o ScaLAPACK -a
+
 clean:
 #	FFCS - need to clean completely even in case of error
 	-rm SLmake.inc FAIRE FAIT
