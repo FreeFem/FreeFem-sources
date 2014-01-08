@@ -1043,6 +1043,11 @@ then
 	AC_MSG_RESULT([git not found])
     else
 	ff_download_blas=openblas
+
+	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples+++-load/ff-c++ will
+	# place -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which
+	# will fail.
+
 	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 

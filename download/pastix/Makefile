@@ -158,7 +158,7 @@ $(SRCDIR): $(PACKAGE1)
 	touch $(SRCDIR)
 
 $(PACKAGE1):
-	../getall -o PaStiX
+	../getall -o PaStiX -a
 
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:

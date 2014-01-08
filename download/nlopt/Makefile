@@ -28,6 +28,9 @@ $(SRCDIR)/FAIT: $(TARGZ)
 ../pkg:
 	mkdir $@
 
+$(TARGZ):
+	../getall -o NLopt -a
+
 clean-local:
 	rm -rf $(SRCDIR) Make.defs 
 	rm -f ../lib/libnlopt_cxx*  ../lib/WHERE.nlopt 
