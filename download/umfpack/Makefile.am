@@ -152,7 +152,7 @@ UMFPACK_Make.m4: Makefile UMFPACKv4.4
 UMFPACKv4.4.tar.gz:
 	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.4/UMFPACKv4.4.tar.gz
 $(SUITESPARSE_TGZ):
-	../getall -o SuiteSparse
+	../getall -o SuiteSparse -a
 
 clean-local:
 	-rm $(AMDLIB) $(CAMDLIB) $(CHOLMODLIB) $(COLAMDLIB) $(SUITESPARSECONFIGLIB)

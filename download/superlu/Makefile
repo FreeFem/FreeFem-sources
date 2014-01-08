@@ -111,6 +111,9 @@ $(SRCDIR): $(PACKAGE_PATH)
 	tar xvzf $(PACKAGE_PATH)
 	touch $(SRCDIR)
 
+$(PACKAGE_PATH):
+	../getall -o SuperLU -a
+
 # FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
 

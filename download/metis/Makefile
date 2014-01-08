@@ -74,6 +74,9 @@ $(SRCDIR)/tags: $(PACKAGE)
           >$(SRCDIR)/Lib/Makefile
 	touch $(SRCDIR)/tags
 
+$(PACKAGE):
+	../getall -o METIS -a
+
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
 	-rm -rf metis-4.0 config.log
