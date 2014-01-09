@@ -62,7 +62,8 @@ download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
 download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz');
 download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz');
 
-download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.8','http://www.openblas.net/','OpenBLAS.tar.gz');
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.8','http://www.openblas.net/','OpenBLAS.tar.gz',
+	 'BAD_CERT');
 
 download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz');
 
@@ -95,7 +96,7 @@ download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
 download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
 	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz');
 
-download(' pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
+download('pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
 	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz');
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
@@ -106,8 +107,10 @@ download('PaStiX','https://gforge.inria.fr/frs/download.php/21873/pastix_release
 download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
 	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz');
 
+# ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
+
 download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_esmumps.tar.gz',
-	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz');
+	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz','BAD_CERT');
 
 download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
 	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz');

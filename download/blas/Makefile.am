@@ -141,7 +141,7 @@ openblas:links.done
 # links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
 if FFCS_WINDOWS
 links.done:openblas.done
-	cd OpenBLAS && ../../build/links2files
+	cd OpenBLAS && ../../../build/links2files
 	touch $@
 else
 links.done:openblas.done
@@ -153,10 +153,6 @@ openblas.done:openpatches.done
 # DYNAMIC_ARCH=1 allows the Openblas to run fast on all the processor architectures that the FFCS users may have
 #
 	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
-#
-# RANLIB is required on Win64 to avoid "archive has no index" error when linking FreeFem+.exe
-#
-	$(RANLIB) OpenBLAS/libopenblas.@FF_STATIC_LIB@
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
@@ -164,19 +160,23 @@ openblas.done:openpatches.done
 
 openpatches.done:opendownload.done
 	tar xvzf ../pkg/OpenBLAS.tar.gz
+#
+# ALH - 7/1/14 - The tar directory has changed names
+#
+	mv xianyi-OpenBLAS-* OpenBLAS
 	patch -u -p1 < openblas.patches
 	touch $@
 
 download::opendownload.done
 opendownload.done:
-	../getall -o OpenBLAS
+	../getall -o OpenBLAS -a
 	touch $@
 
 # ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part
 # of the specific target 'veryclean'.
 
 veryclean::
-	-rm -r *.done OpenBLAS
+	-rm -r *.done OpenBLAS xianyi-OpenBLAS-*
 
 # Local Variables:
 # mode:makefile
