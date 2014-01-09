@@ -158,8 +158,8 @@ openblas.done:openpatches.done
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
 # date
 
-openpatches.done:opendownload.done
-	tar xvzf ../pkg/OpenBLAS.tar.gz
+openpatches.done:../pkg/OpenBLAS.tar.gz
+	tar xvzf $<
 #
 # ALH - 7/1/14 - The tar directory has changed names
 #
@@ -167,8 +167,8 @@ openpatches.done:opendownload.done
 	patch -u -p1 < openblas.patches
 	touch $@
 
-download::opendownload.done
-opendownload.done:
+download::../pkg/OpenBLAS.tar.gz
+../pkg/OpenBLAS.tar.gz:
 	../getall -o OpenBLAS -a
 	touch $@
 
