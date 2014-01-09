@@ -1,40 +1,7 @@
  /*  
-//  -- missing type "const gsl_rng *" 
- missing: 5   gsl_ran_beta  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_beta (const gsl_rng * r, const double a, const double b);
- missing: 4   gsl_ran_exponential  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_exponential (const gsl_rng * r, const double mu);
- missing: 5   gsl_ran_exppow  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_exppow (const gsl_rng * r, const double a, const double b);
- missing: 4   gsl_ran_cauchy  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_cauchy (const gsl_rng * r, const double a);
- missing: 4   gsl_ran_chisq  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_chisq (const gsl_rng * r, const double nu);
 //  -- missing type "const double[]" 
  missing: 5   gsl_ran_dirichlet_pdf  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_dirichlet_pdf (const size_t K, const double alpha[], const double theta[]);
  missing: 5   gsl_ran_dirichlet_lnpdf  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_dirichlet_lnpdf (const size_t K, const double alpha[], const double theta[]);
- missing: 5   gsl_ran_erlang  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_erlang (const gsl_rng * r, const double a, const double n);
- missing: 5   gsl_ran_fdist  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_fdist (const gsl_rng * r, const double nu1, const double nu2);
- missing: 5   gsl_ran_flat  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_flat (const gsl_rng * r, const double a, const double b);
- missing: 5   gsl_ran_gamma  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gamma (const gsl_rng * r, const double a, const double b);
- missing: 4   gsl_ran_gamma_int  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gamma_int (const gsl_rng * r, const unsigned int a);
- missing: 5   gsl_ran_gamma_mt  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gamma_mt (const gsl_rng * r, const double a, const double b);
- missing: 5   gsl_ran_gamma_knuth  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gamma_knuth (const gsl_rng * r, const double a, const double b);
- missing: 4   gsl_ran_gaussian  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gaussian (const gsl_rng * r, const double sigma);
- missing: 4   gsl_ran_gaussian_ratio_method  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gaussian_ratio_method (const gsl_rng * r, const double sigma);
- missing: 4   gsl_ran_gaussian_ziggurat  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gaussian_ziggurat (const gsl_rng * r, const double sigma);
- missing: 3   gsl_ran_ugaussian  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_ugaussian (const gsl_rng * r);
- missing: 3   gsl_ran_ugaussian_ratio_method  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_ugaussian_ratio_method (const gsl_rng * r);
- missing: 5   gsl_ran_gaussian_tail  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gaussian_tail (const gsl_rng * r, const double a, const double sigma);
- missing: 4   gsl_ran_ugaussian_tail  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_ugaussian_tail (const gsl_rng * r, const double a);
- missing: 3   gsl_ran_landau  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_landau (const gsl_rng * r);
- missing: 5   gsl_ran_gumbel1  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gumbel1 (const gsl_rng * r, const double a, const double b);
- missing: 5   gsl_ran_gumbel2  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_gumbel2 (const gsl_rng * r, const double a, const double b);
- missing: 4   gsl_ran_logistic  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_logistic (const gsl_rng * r, const double a);
- missing: 5   gsl_ran_lognormal  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_lognormal (const gsl_rng * r, const double zeta, const double sigma);
- missing: 5   gsl_ran_pareto  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_pareto (const gsl_rng * r, double a, const double b);
- missing: 4   gsl_ran_rayleigh  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_rayleigh (const gsl_rng * r, const double sigma);
- missing: 5   gsl_ran_rayleigh_tail  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_rayleigh_tail (const gsl_rng * r, const double a, const double sigma);
- missing: 4   gsl_ran_tdist  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_tdist (const gsl_rng * r, const double nu);
- missing: 4   gsl_ran_laplace  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_laplace (const gsl_rng * r, const double a);
- missing: 5   gsl_ran_levy  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_levy (const gsl_rng * r, const double c, const double alpha);
- missing: 6   gsl_ran_levy  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_levy_skew (const gsl_rng * r, const double c, const double alpha, const double beta);
- missing: 5   gsl_ran_weibull  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_weibull (const gsl_rng * r, const double a, const double b);
 //  -- missing type "size_t" 
  missing: 4   gsl_ran_discrete_pdf  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_discrete_pdf (size_t k, const gsl_ran_discrete_t *g);
 //  -- missing type "const gsl_mode_t" 
@@ -367,35 +334,66 @@ double gsl_cdf_negative_binomial_Q__(long const & x , double const & y , double 
 double gsl_cdf_pascal_P__(long const & x , double const & y , long const & z ){ return gsl_cdf_pascal_P( (const unsigned int) x , (const double) y , (const unsigned int) z );}
 double gsl_cdf_pascal_Q__(long const & x , double const & y , long const & z ){ return gsl_cdf_pascal_Q( (const unsigned int) x , (const double) y , (const unsigned int) z );}
 double gsl_ran_bernoulli_pdf__(long const & x , double const & y ){ return gsl_ran_bernoulli_pdf( (const unsigned int) x , (double) y );}
+double gsl_ran_beta__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_beta( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_beta_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_beta_pdf( (const double) x , (const double) y , (const double) z );}
 double gsl_ran_binomial_pdf__(long const & x , double const & y , long const & z ){ return gsl_ran_binomial_pdf( (const unsigned int) x , (const double) y , (const unsigned int) z );}
+double gsl_ran_exponential__(gsl_rng ** const & x , double const & y ){ return gsl_ran_exponential( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_exponential_pdf__(double const & x , double const & y ){ return gsl_ran_exponential_pdf( (const double) x , (const double) y );}
+double gsl_ran_exppow__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_exppow( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_exppow_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_exppow_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_cauchy__(gsl_rng ** const & x , double const & y ){ return gsl_ran_cauchy( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_cauchy_pdf__(double const & x , double const & y ){ return gsl_ran_cauchy_pdf( (const double) x , (const double) y );}
+double gsl_ran_chisq__(gsl_rng ** const & x , double const & y ){ return gsl_ran_chisq( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_chisq_pdf__(double const & x , double const & y ){ return gsl_ran_chisq_pdf( (const double) x , (const double) y );}
+double gsl_ran_erlang__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_erlang( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_erlang_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_erlang_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_fdist__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_fdist( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_fdist_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_fdist_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_flat__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_flat( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_flat_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_flat_pdf( (double) x , (const double) y , (const double) z );}
+double gsl_ran_gamma__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_gamma( (const gsl_rng *)* x , (const double) y , (const double) z );}
+double gsl_ran_gamma_int__(gsl_rng ** const & x , long const & y ){ return gsl_ran_gamma_int( (const gsl_rng *)* x , (const unsigned int) y );}
 double gsl_ran_gamma_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_gamma_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_gamma_mt__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_gamma_mt( (const gsl_rng *)* x , (const double) y , (const double) z );}
+double gsl_ran_gamma_knuth__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_gamma_knuth( (const gsl_rng *)* x , (const double) y , (const double) z );}
+double gsl_ran_gaussian__(gsl_rng ** const & x , double const & y ){ return gsl_ran_gaussian( (const gsl_rng *)* x , (const double) y );}
+double gsl_ran_gaussian_ratio_method__(gsl_rng ** const & x , double const & y ){ return gsl_ran_gaussian_ratio_method( (const gsl_rng *)* x , (const double) y );}
+double gsl_ran_gaussian_ziggurat__(gsl_rng ** const & x , double const & y ){ return gsl_ran_gaussian_ziggurat( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_gaussian_pdf__(double const & x , double const & y ){ return gsl_ran_gaussian_pdf( (const double) x , (const double) y );}
+double gsl_ran_ugaussian__(gsl_rng ** const & x ) { return gsl_ran_ugaussian( (const gsl_rng *)* x );}
+double gsl_ran_ugaussian_ratio_method__(gsl_rng ** const & x ) { return gsl_ran_ugaussian_ratio_method( (const gsl_rng *)* x );}
 double gsl_ran_ugaussian_pdf__(double const & x ) { return gsl_ran_ugaussian_pdf( (const double) x );}
+double gsl_ran_gaussian_tail__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_gaussian_tail( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_gaussian_tail_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_gaussian_tail_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_ugaussian_tail__(gsl_rng ** const & x , double const & y ){ return gsl_ran_ugaussian_tail( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_ugaussian_tail_pdf__(double const & x , double const & y ){ return gsl_ran_ugaussian_tail_pdf( (const double) x , (const double) y );}
+double gsl_ran_landau__(gsl_rng ** const & x ) { return gsl_ran_landau( (const gsl_rng *)* x );}
 double gsl_ran_landau_pdf__(double const & x ) { return gsl_ran_landau_pdf( (const double) x );}
 double gsl_ran_geometric_pdf__(long const & x , double const & y ){ return gsl_ran_geometric_pdf( (const unsigned int) x , (const double) y );}
+double gsl_ran_gumbel1__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_gumbel1( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_gumbel1_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_gumbel1_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_gumbel2__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_gumbel2( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_gumbel2_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_gumbel2_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_logistic__(gsl_rng ** const & x , double const & y ){ return gsl_ran_logistic( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_logistic_pdf__(double const & x , double const & y ){ return gsl_ran_logistic_pdf( (const double) x , (const double) y );}
+double gsl_ran_lognormal__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_lognormal( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_lognormal_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_lognormal_pdf( (const double) x , (const double) y , (const double) z );}
 double gsl_ran_logarithmic_pdf__(long const & x , double const & y ){ return gsl_ran_logarithmic_pdf( (const unsigned int) x , (const double) y );}
 double gsl_ran_negative_binomial_pdf__(long const & x , double const & y , double const & z ){ return gsl_ran_negative_binomial_pdf( (const unsigned int) x , (const double) y , (double) z );}
 double gsl_ran_pascal_pdf__(long const & x , double const & y , long const & z ){ return gsl_ran_pascal_pdf( (const unsigned int) x , (const double) y , (unsigned int) z );}
+double gsl_ran_pareto__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_pareto( (const gsl_rng *)* x , (double) y , (const double) z );}
 double gsl_ran_pareto_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_pareto_pdf( (const double) x , (const double) y , (const double) z );}
 double gsl_ran_poisson_pdf__(long const & x , double const & y ){ return gsl_ran_poisson_pdf( (const unsigned int) x , (const double) y );}
+double gsl_ran_rayleigh__(gsl_rng ** const & x , double const & y ){ return gsl_ran_rayleigh( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_rayleigh_pdf__(double const & x , double const & y ){ return gsl_ran_rayleigh_pdf( (const double) x , (const double) y );}
+double gsl_ran_rayleigh_tail__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_rayleigh_tail( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_rayleigh_tail_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_rayleigh_tail_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_ran_tdist__(gsl_rng ** const & x , double const & y ){ return gsl_ran_tdist( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_tdist_pdf__(double const & x , double const & y ){ return gsl_ran_tdist_pdf( (const double) x , (const double) y );}
+double gsl_ran_laplace__(gsl_rng ** const & x , double const & y ){ return gsl_ran_laplace( (const gsl_rng *)* x , (const double) y );}
 double gsl_ran_laplace_pdf__(double const & x , double const & y ){ return gsl_ran_laplace_pdf( (const double) x , (const double) y );}
+double gsl_ran_levy__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_levy( (const gsl_rng *)* x , (const double) y , (const double) z );}
+double gsl_ran_weibull__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_weibull( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_weibull_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_weibull_pdf( (const double) x , (const double) y , (const double) z );}
 double gsl_sf_airy_zero_Ai__(long const & x ) { return gsl_sf_airy_zero_Ai( (unsigned int) x );}
 double gsl_sf_airy_zero_Bi__(long const & x ) { return gsl_sf_airy_zero_Bi( (unsigned int) x );}
@@ -669,35 +667,66 @@ double gsl_sf_eta__(double const & x ) { return gsl_sf_eta( (const double) x );}
    Global.Add("gslcdfpascalP","(",new OneOperator3_<double,long,double,long>( gsl_cdf_pascal_P__)); 
    Global.Add("gslcdfpascalQ","(",new OneOperator3_<double,long,double,long>( gsl_cdf_pascal_Q__)); 
    Global.Add("gslranbernoullipdf","(",new OneOperator2_<double,long,double>( gsl_ran_bernoulli_pdf__)); 
+   Global.Add("gslranbeta","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_beta__)); 
    Global.Add("gslranbetapdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_beta_pdf__)); 
    Global.Add("gslranbinomialpdf","(",new OneOperator3_<double,long,double,long>( gsl_ran_binomial_pdf__)); 
+   Global.Add("gslranexponential","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_exponential__)); 
    Global.Add("gslranexponentialpdf","(",new OneOperator2_<double,double,double>( gsl_ran_exponential_pdf__)); 
+   Global.Add("gslranexppow","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_exppow__)); 
    Global.Add("gslranexppowpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_exppow_pdf__)); 
+   Global.Add("gslrancauchy","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_cauchy__)); 
    Global.Add("gslrancauchypdf","(",new OneOperator2_<double,double,double>( gsl_ran_cauchy_pdf__)); 
+   Global.Add("gslranchisq","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_chisq__)); 
    Global.Add("gslranchisqpdf","(",new OneOperator2_<double,double,double>( gsl_ran_chisq_pdf__)); 
+   Global.Add("gslranerlang","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_erlang__)); 
    Global.Add("gslranerlangpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_erlang_pdf__)); 
+   Global.Add("gslranfdist","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_fdist__)); 
    Global.Add("gslranfdistpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_fdist_pdf__)); 
+   Global.Add("gslranflat","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_flat__)); 
    Global.Add("gslranflatpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_flat_pdf__)); 
+   Global.Add("gslrangamma","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_gamma__)); 
+   Global.Add("gslrangammaint","(",new OneOperator2_<double,gsl_rng **,long>( gsl_ran_gamma_int__)); 
    Global.Add("gslrangammapdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_gamma_pdf__)); 
+   Global.Add("gslrangammamt","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_gamma_mt__)); 
+   Global.Add("gslrangammaknuth","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_gamma_knuth__)); 
+   Global.Add("gslrangaussian","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_gaussian__)); 
+   Global.Add("gslrangaussianratiomethod","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_gaussian_ratio_method__)); 
+   Global.Add("gslrangaussianziggurat","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_gaussian_ziggurat__)); 
    Global.Add("gslrangaussianpdf","(",new OneOperator2_<double,double,double>( gsl_ran_gaussian_pdf__)); 
+   Global.Add("gslranugaussian","(",new OneOperator1_<double,gsl_rng **>( gsl_ran_ugaussian__)); 
+   Global.Add("gslranugaussianratiomethod","(",new OneOperator1_<double,gsl_rng **>( gsl_ran_ugaussian_ratio_method__)); 
    Global.Add("gslranugaussianpdf","(",new OneOperator1_<double,double>( gsl_ran_ugaussian_pdf__)); 
+   Global.Add("gslrangaussiantail","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_gaussian_tail__)); 
    Global.Add("gslrangaussiantailpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_gaussian_tail_pdf__)); 
+   Global.Add("gslranugaussiantail","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_ugaussian_tail__)); 
    Global.Add("gslranugaussiantailpdf","(",new OneOperator2_<double,double,double>( gsl_ran_ugaussian_tail_pdf__)); 
+   Global.Add("gslranlandau","(",new OneOperator1_<double,gsl_rng **>( gsl_ran_landau__)); 
    Global.Add("gslranlandaupdf","(",new OneOperator1_<double,double>( gsl_ran_landau_pdf__)); 
    Global.Add("gslrangeometricpdf","(",new OneOperator2_<double,long,double>( gsl_ran_geometric_pdf__)); 
+   Global.Add("gslrangumbel1","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_gumbel1__)); 
    Global.Add("gslrangumbel1pdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_gumbel1_pdf__)); 
+   Global.Add("gslrangumbel2","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_gumbel2__)); 
    Global.Add("gslrangumbel2pdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_gumbel2_pdf__)); 
+   Global.Add("gslranlogistic","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_logistic__)); 
    Global.Add("gslranlogisticpdf","(",new OneOperator2_<double,double,double>( gsl_ran_logistic_pdf__)); 
+   Global.Add("gslranlognormal","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_lognormal__)); 
    Global.Add("gslranlognormalpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_lognormal_pdf__)); 
    Global.Add("gslranlogarithmicpdf","(",new OneOperator2_<double,long,double>( gsl_ran_logarithmic_pdf__)); 
    Global.Add("gslrannegativebinomialpdf","(",new OneOperator3_<double,long,double,double>( gsl_ran_negative_binomial_pdf__)); 
    Global.Add("gslranpascalpdf","(",new OneOperator3_<double,long,double,long>( gsl_ran_pascal_pdf__)); 
+   Global.Add("gslranpareto","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_pareto__)); 
    Global.Add("gslranparetopdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_pareto_pdf__)); 
    Global.Add("gslranpoissonpdf","(",new OneOperator2_<double,long,double>( gsl_ran_poisson_pdf__)); 
+   Global.Add("gslranrayleigh","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_rayleigh__)); 
    Global.Add("gslranrayleighpdf","(",new OneOperator2_<double,double,double>( gsl_ran_rayleigh_pdf__)); 
+   Global.Add("gslranrayleightail","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_rayleigh_tail__)); 
    Global.Add("gslranrayleightailpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_rayleigh_tail_pdf__)); 
+   Global.Add("gslrantdist","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_tdist__)); 
    Global.Add("gslrantdistpdf","(",new OneOperator2_<double,double,double>( gsl_ran_tdist_pdf__)); 
+   Global.Add("gslranlaplace","(",new OneOperator2_<double,gsl_rng **,double>( gsl_ran_laplace__)); 
    Global.Add("gslranlaplacepdf","(",new OneOperator2_<double,double,double>( gsl_ran_laplace_pdf__)); 
+   Global.Add("gslranlevy","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_levy__)); 
+   Global.Add("gslranweibull","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_weibull__)); 
    Global.Add("gslranweibullpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_weibull_pdf__)); 
    Global.Add("gslsfairyzeroAi","(",new OneOperator1_<double,long>( gsl_sf_airy_zero_Ai__)); 
    Global.Add("gslsfairyzeroBi","(",new OneOperator1_<double,long>( gsl_sf_airy_zero_Bi__)); 
