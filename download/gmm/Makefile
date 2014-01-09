@@ -36,6 +36,9 @@ install: FAIRE
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 	gunzip -c   $^ | tar xvf - 
 
+$(PKGDIR)/$(PACKAGE):
+	../getall -o Gmm++ -a
+
 clean: clean-local
 
 clean-local:

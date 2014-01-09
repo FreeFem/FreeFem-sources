@@ -1043,20 +1043,17 @@ then
 	AC_MSG_RESULT([git not found])
     else
 	ff_download_blas=openblas
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas $ff_pthread"
+
+	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples+++-load/ff-c++ will
+	# place -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which
+	# will fail.
+
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
 	AC_SUBST(DOWNLOADED_BLAS,"")
 	AC_SUBST(COMPILE_OPENBLAS,openblas)
-
-	if test "$OS" = Windows_NT
-	then
-	    ff_static_lib=lib
-	else
-	    ff_static_lib=a
-	fi
-	AC_SUBST(FF_STATIC_LIB,$ff_static_lib)
 
 	ff_blas_ok=yes
 	ff_cblas_h=yes
@@ -1772,15 +1769,19 @@ m4_map([AC_FF_WHERELIB],[
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
-#  remove gsl if not find ... FH
-# correction FH .. 18/12/2013. 
-if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
-if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
-TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
-
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
+
+#  remove gsl if not find ... FH
+# correction FH .. 18/12/2013. 
+# ALH - 7/1/14 - not able to compile gsl or pardiso with FFCS on Windows
+if test "$enable_ffcs" != yes
+then
+    if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
+    if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
+fi
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
 
 # All makefiles
 AC_OUTPUT(Makefile

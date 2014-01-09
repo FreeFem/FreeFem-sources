@@ -72,6 +72,9 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 	tar xvzf $(PACKAGE1)
 	touch $@
 
+$(PACKAGE1):
+	../getall -o MUMPS -a
+
 clean:
 	-rm Makefile.inc FAIRE* *~ 
 	-rm -rf ../include/*mumps*
