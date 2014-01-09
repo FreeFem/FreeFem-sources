@@ -1,4 +1,6 @@
-   add interfer with gsl random number generatio in test .. 
+   correct mistake in gsl interface random number (9/1/14)
+   missing all ramdow distribution ..
+   add interface  with gsl random number generation in test .. 
    correct pb of compilation under window (mingw32/msys) 
 version 3.26-3  09/12/2013 
    correct problem with openblas need pthread lib 
