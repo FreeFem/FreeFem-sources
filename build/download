@@ -31,7 +31,7 @@
 # $2=local name
 # $3=BAD_CERT if the SSL certificate of the web server is wrong
 
-if test -x /usr/bin/wget
+if test -x /usr/bin/wget || test -x /opt/local/bin/wget
 then
 
     opts=
