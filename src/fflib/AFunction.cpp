@@ -1430,7 +1430,7 @@ void Init_map_type()
      Global.Add("max","(",new OneOperator2_<long,long>(Max));
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
      Global.Add("atan2","(",new OneOperator2<double>(atan2));
-     Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014 
+     Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
     
      Global.Add("atan","(",new OneOperator2<double>(atan2));
      Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));
