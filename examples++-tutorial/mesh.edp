@@ -127,6 +127,7 @@ plot(rh,ps="lshape.eps");
 // ------------------------------------------------------------
 {  //  trunc mesh  tools exemples 
   mesh Th=square(3,3);
+  int[int] n2o(1); 
   fespace Vh(Th,P1);
   Vh u;	
   int i,n=u.n;
@@ -135,8 +136,9 @@ plot(rh,ps="lshape.eps");
     {
       u[][i]=1;
       plot(u,wait=1);
-      mesh Shi=trunc(Th,abs(u)>1e-10,split=5,label=2);
+      mesh Shi=trunc(Th,abs(u)>1e-10,split=2,label=2,new2old=n2o);
       plot(Th,Shi,wait=1,ps="trunc"+i+".eps");                    
+      cout << " n2o " << n2o << endl; // where the element come
       u[][i]=0;
     }
 }

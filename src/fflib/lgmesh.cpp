@@ -443,12 +443,14 @@ struct Op_trunc_mesh : public OneOperator {
 
     class Op: public E_F0mps   { public:
       static basicAC_F0::name_and_type name_param[] ;
-      static const int n_name_param =2;
+      static const int n_name_param =4;
       Expression nargs[n_name_param];
     
       Expression getmesh,bbb;
       long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-      Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b) 
+        
+       KN<long> *  arg(int i,Stack stack) const{ return nargs[i] ? GetAny<KN<long> *>( (*nargs[i])(stack) ): 0;}
+      Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b)
         { args.SetNameParam(n_name_param,name_param,nargs); }
       AnyType operator()(Stack s)  const ;
      };
@@ -461,7 +463,9 @@ struct Op_trunc_mesh : public OneOperator {
 basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_name_param] =
  {
    {  "split",             &typeid(long)},
-   {  "label",             &typeid(long)}
+   {  "label",             &typeid(long)},
+   { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jovilet jan 2014
+   { "old2new", &typeid(KN<long>*)}   //  ajout FH pour P. Jovilet jan 2014
  
  };
 
@@ -474,6 +478,7 @@ AnyType classBuildMesh::operator()(Stack stack)  const {
    long  nbvx         = arg(0,stack,0L); 
    bool  requireborder=  arg(1,stack,false);
    ffassert(   nbvx >= 0);
+   
    return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder)));
 
 }
@@ -493,8 +498,11 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
     long kkksplit =arg(0,stack,1L);
     long label =arg(1,stack,2L);
+    KN<long> * pn2o =  arg(2,stack);
+    KN<long> * po2n =  arg(3,stack);
     KN<int> split(Th.nt);
     split=kkksplit;
+    long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
     long kk=0;
     for (int k=0;k<Th.nt;k++)
@@ -505,6 +513,32 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
        if (  GetAny<bool>((*bbb)(stack))  ) kk++;
        else  split[k]=0  ;    
      }
+    
+    if(pn2o)
+        {
+          pn2o->resize(kk*ks);
+          KN<long> &n2o(*pn2o);
+          int l=0;
+          for(int k=0; k< Th.nt; ++k)
+             if( split[k] )
+                 for(int i=0; i< ks; ++i)
+                     n2o[l++] = k;
+        }
+        if(po2n)
+        {
+            po2n->resize(Th.nt);
+            KN<long> &o2n(*po2n);
+            int l=0;
+            for(int k=0; k< Th.nt; ++k)
+                if( split[k] )
+                {
+                        o2n[k] = l;
+                       l+=ks;
+                }
+            else o2n[k]=-1;
+        }
+
+    
      *mp=mps;
      if (verbosity>1) 
      cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
