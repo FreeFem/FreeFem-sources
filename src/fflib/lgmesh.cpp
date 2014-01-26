@@ -58,7 +58,9 @@ using namespace std;
 #include "BamgFreeFem.hpp"
 #include "lgfem.hpp"
 */
+
 #include "ff++.hpp"
+#include "AFunction_ext.hpp"
 
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
@@ -1728,6 +1730,63 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 }
 
+bool SameMesh(Mesh * const & pTh1,Mesh * const & pTh2)
+{
+    typedef Mesh::Element Element;
+    if( !pTh1) return 0;
+    if( !pTh2) return 0;
+    if( pTh1 == pTh2) return 1;
+    if( pTh1->nv != pTh2->nv) return 0;
+    if( pTh1->nt != pTh2->nt) return 0;
+    Mesh & Th1=*pTh1, & Th2 = *pTh2;
+    ffassert(0); // a faire..
+    
+    return 1;
+}
+
+bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+{
+    ffassert(pTh && psupp && pphi);
+    const int nve = Mesh::Element::NbV;
+    Mesh & Th= *pTh;
+    int nt = Th.nt;
+    int nv = Th.nv;
+    
+    KN<double> & supp(*psupp);
+    KN<double> u(nv), s(nt);
+    KN<double> & phi(*pphi);
+    ffassert(supp.N()==nt);//P0
+    ffassert(phi.N()==nv); // P1
+    s = supp;
+    
+    supp = 0.;
+    for(int step=0; step < nlayer; ++ step)
+    {
+        
+        phi=0.;
+        u = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                u[Th(k,i)] += supp[k];
+        
+        for(int v=0; v < nv; ++nv)
+            u[v] = u[v] >0.;
+        
+        supp += u;
+        
+        s = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                s[k] += u[Th(k,i)];
+        
+        for(int v=0; v < nt; ++nv)
+            s[v] = s[v] > 0.;
+    }
+    phi = u*(1./nlayer);
+    supp =s;
+    return true;
+}
+
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
@@ -1752,8 +1811,10 @@ void init_lgmesh() {
   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double>,E_F_F0F0_Add2RC<pmesh,KN_<double>,KN_<double>,E_F0> >(Triangulate));
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
-       
-  // use for :   mesh Th = readmesh ( ...);       
+    // Thg,suppi[],nnn,unssd[]
+  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
+  Global.Add("AddLayers","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
+  // use for :   mesh Th = readmesh ( ...);
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
   extern void init_glumesh2D();
