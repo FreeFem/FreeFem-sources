@@ -1,3 +1,11 @@
+version 3.27 
+   add  AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
+   add  tool to trunc to get element numbering for Thn to Tho 
+     int[int] In2o(1),Io2n(1); 
+     Tho =  trunc(Tho, x<0, new2old=In2o, old2new=Io2n);
+   add restrict function for get dof numbering old to new
+     fespace Vnh(Thn,Pk), Voh(Tho,Pk);
+     int[int] n2o=restrict(Vnh,Voh,n2ok);     
    correct mistake in gsl interface random number (9/1/14)
    missing all ramdow distribution ..
    add interface  with gsl random number generation in test .. 
