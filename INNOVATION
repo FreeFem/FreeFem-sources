@@ -2,6 +2,16 @@
    missing all ramdow distribution ..
    add interface  with gsl random number generation in test .. 
    correct pb of compilation under window (mingw32/msys) 
+6/1/14 (ALH)
+ - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
+ - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format
+ - Set all hyperlinks to relative paths to make sure that they work from any location
+ - Separate download script for all third-party software [[file:download/getall]] (request from FH)
+ - created common makefile goals in [[file:download/common.mak]] for all downloaded packages (request from FH)
+   - changed [[file:download/arpack/Makefile.am]] to make use of [[file:download/common.mak]]
+   - done for [[file:download/blas/Makefile.am]] as well
+ - added option --enable-mkl-mlt in [[file:configure.ac::enable_mkl_mlt]] to allow FF to be linked with the
+   multithreaded MKL when an external library requires it (request from Atsushi Suzuki)
 version 3.26-3  09/12/2013 
    correct problem with openblas need pthread lib 
 01/12/13
@@ -31,6 +41,10 @@ version 3.26-3  09/12/2013
  - changed FFCS Fortran MPI configuration for MPICH2
  - split DOC makefiles into Makefile.am and figs.mak to suppress automake warnings about portability
  - moved build/download script from FFCS to FF before reorganizing FF downloads (request from FH)
+10/9/2013 (ALH)
+ - Corrected pastix compilation for FFCS on MacOS 10.6
+ - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
+   generated conflicts
 05/09/2013 put version .tar.gz on the web 
   - correct makefile wget in pastis and superludist  
   - correct compile of load example :  paradiso, gsl automaticaly 
@@ -39,10 +53,6 @@ version 3.26-3  09/12/2013
  - add missing file in dist or in mercurial distribution
  - correct download of scotch un curl 
  - correct problem in a*[b,c, ... ]' in case of complex value   
-10/9/2013 (ALH)
- - Corrected pastix compilation for FFCS on MacOS 10.6
- - Removed dependency from lg.ypp to lg.tab.?pp in [[file:src/lglib/Makefile.am::lg.tab.?pp]] to avoid automatically
-   generated conflicts
 5/9/2013 (ALH)
  - force Umfpack build to run sequentially (parallel make crashes with "pipe from processes is a directory"?)
  - pARMS download URL changed to http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php (thanks Fred)

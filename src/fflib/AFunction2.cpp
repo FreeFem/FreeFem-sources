@@ -187,6 +187,7 @@ void Polymorphic::Show(const char *op,const ArrayOfaType & at,ostream &f)  const
     else i->second->Show(at,f);
   }
 
+// <<C_F0_constructor_pop_char_basicAC_F0_impl>> cf [[file:AFunction.hpp::C_F0_constructor_pop_char_basicAC_F0_decl]]
 C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 {
     ArrayOfaType at(p); 
@@ -196,7 +197,9 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 	    /* cout << endl;
 	     poly->Show(op,at,cout);
 	     cout << op << ": (in " << at << ") => " << " " << *ff<< "\n\n";*/
-	    *this= ff->code2(p);
+
+	  // [[file:AFunction.hpp::OneOperator_code2]]
+	  *this= ff->code2(p);
 	}
 	else
 	  { if(mpirank==0)
@@ -237,13 +240,16 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const C_F0 & aa)
   p=a;
   *this= C_F0(pop,op,p);
 }
-//  operator binaire
+
+// <<C_F0_constructor_binary_operator>> operator binaire
 C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b) 
 {
   C_F0 tab[2]={a,b};
-  basicAC_F0  p;
+  basicAC_F0 p;
   p=make_pair<int,C_F0*>(2,tab);
-  *this= C_F0(pop,op,p);
+
+  // [[file:AFunction.hpp::C_F0_constructor_pop_char_basicAC_F0_decl]]
+  *this=C_F0(pop,op,p);
 }
 
 //  operator trinaire
@@ -370,7 +376,9 @@ void Polymorphic::Add(const char * op,Value *pp) const
      return 0;
    } 
 
-  C_F0 Find(const char * name)   
+/// <<Find>> uses [[file:global.cpp::tables_of_identifier]]
+
+C_F0 Find(const char * name)   
 {
    C_F0 r;
    ListOfTOfId::const_iterator i=tables_of_identifier.begin();

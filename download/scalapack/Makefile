@@ -64,8 +64,7 @@ $(SRCDIR)/tag-tar: $(PACKAGE1)
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE1):
-	-mkdir $(DIRPKG)
-	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE1)`
+	../getall -o ScaLAPACK -a
 
 clean:
 #	FFCS - need to clean completely even in case of error
