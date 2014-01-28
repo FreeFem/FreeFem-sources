@@ -7,7 +7,7 @@ fespace Vh(Th,P1);
 
 macro Grad(u) [dx(u),dy(u)]//
 real sigma = 1;// 
-varf vA(u,v)=int1d(Th)(-sigma*u*v)+int2d(Th)(Grad(v)'*Grad(u)) ;
+varf vA(u,v)=int1d(Th)(-sigma*u*v)+int2d(Th)(Grad(v)'*Grad(u)) ; //'
 varf vM(u,v)= int1d(Th)(u*v);
 matrix A = vA(Vh,Vh,solver=sparsesolver);
 matrix B = vM(Vh,Vh);

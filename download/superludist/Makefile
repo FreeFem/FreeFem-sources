@@ -1,8 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
-
 all-local: superludist
 
 # Downloading and compiling SuperLU DIST
@@ -65,9 +63,7 @@ $(SRCDIR): $(PACKAGE_PATH)
 	touch $(SRCDIR)
 
 $(PACKAGE_PATH):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)  $(SERVER)$(PACKAGE) 
-#$(PACKAGE_PATH)
+	../getall -o SuperLU_DIST -a
 
 # FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])

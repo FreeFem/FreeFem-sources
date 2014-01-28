@@ -25,6 +25,10 @@ DIRPKG=../pkg
 BLAS_TGZ=$(DIRPKG)/blas.tgz
 CBLAS_TGZ=$(DIRPKG)/cblas.tgz
 
+COMMON_PACKTITLE=BLAS
+COMMON_PACKAGES=$(BLAS_TGZ) $(CBLAS_TGZ) ../pkg/OpenBLAS.tar.gz
+include ../common.mak
+
 EXTRA_DIST= \
 openblas.patches 
 
@@ -32,7 +36,9 @@ openblas.patches
 # ------------------------------------------
 
 noinst_LIBRARIES=@DOWNLOADED_BLAS@
+compile::$(noinst_LIBRARIES)
 EXTRA_LIBRARIES=libf77blas.a libcblas.a
+compile::@DOWNLOADED_BLAS@
 
 # List of files to compile (do not list them in *_SOURCES to prevent them from being included in distributions).
 
@@ -119,31 +125,23 @@ CBLAS/fait: $(CBLAS_TGZ)
 	touch CBLAS/fait
 $(CBLAS_SOURCES): CBLAS/fait
 
-$(BLAS_TGZ):
-	mkdir -p $(DIRPKG)
-	cd $(DIRPKG) && @WGET@ -N http://www.netlib.org/blas/blas.tgz
-
-$(CBLAS_TGZ):
-	mkdir -p $(DIRPKG)
-	cd $(DIRPKG) && @WGET@ -N http://www.netlib.org/blas/blast-forum/cblas.tgz
-
-
 clean-local::
 	-rm -r BLAS CBLAS blas_xerbla.f
 
-# ALH - 18/9/13 - Downloading and building the OpenBLAS
-# -----------------------------------------------------
+# <<OpenBLAS>> ALH - 18/9/13 - Downloading and building the OpenBLAS
+# ------------------------------------------------------------------
 
 # to activate this, see [[file:../../configure.ac::OpenBLAS]]
 
 all-local::@COMPILE_OPENBLAS@
+compile::@COMPILE_OPENBLAS@
 generic:
 openblas:links.done
 
 # links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
 if FFCS_WINDOWS
 links.done:openblas.done
-	cd OpenBLAS && ../../build/links2files
+	cd OpenBLAS && ../../../build/links2files
 	touch $@
 else
 links.done:openblas.done
@@ -155,26 +153,30 @@ openblas.done:openpatches.done
 # DYNAMIC_ARCH=1 allows the Openblas to run fast on all the processor architectures that the FFCS users may have
 #
 	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
-#
-# RANLIB is required on Win64 to avoid "archive has no index" error when linking FreeFem+.exe
-#
-	$(RANLIB) OpenBLAS/libopenblas.@FF_STATIC_LIB@
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
 # date
+
 openpatches.done:opendownload.done
+	tar xvzf ../pkg/OpenBLAS.tar.gz
+#
+# ALH - 7/1/14 - The tar directory has changed names
+#
+	mv xianyi-OpenBLAS-* OpenBLAS
 	patch -u -p1 < openblas.patches
 	touch $@
+
+download::opendownload.done
 opendownload.done:
-	git clone https://github.com/xianyi/OpenBLAS.git
+	../getall -o OpenBLAS -a
 	touch $@
 
-# Since some libraries (VTK, FLTK, Openblas) are quite long to compile and they do not change very often (we don't
-# usually change them in FFCS), they are only cleaned with specific target 'allclean'.
+# ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part
+# of the specific target 'veryclean'.
 
-allclean::
-	-rm -r *.done OpenBLAS
+veryclean::
+	-rm -r *.done OpenBLAS xianyi-OpenBLAS-*
 
 # Local Variables:
 # mode:makefile

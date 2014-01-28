@@ -952,7 +952,20 @@ then
             ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes
-	    ff_blas_libs="$ff_mkl_blas"
+
+	    # <<enable_mkl_mlt>> ALH - 6/11/13 - request from Atsushi Suzuki - the default MKL library must be able to
+	    # handle threads when FF is connected to AS' solver. So we need an option to configure FF with the
+	    # multithreaded MKL by default.
+
+	    AC_ARG_ENABLE(mkl_mlt,AC_HELP_STRING([--enable-mkl-mlt],[Link with the multithreaded instead of the monothreaded version of the MKL]))
+
+	    if test "$enable_mkl_mlt" = yes
+	    then
+		ff_blas_libs="$ff_mkl_mlt"
+	    else
+		ff_blas_libs="$ff_mkl_blas"
+	    fi
+
 	    ff_blas_inc="-I$ff_mkl_root/include"
 	    dnl  scalapack, and blacs don not work with mlk and sgi
 	    if test "$ff_mkl_mpi" != "_sgimpt" ; then
@@ -1030,20 +1043,17 @@ then
 	AC_MSG_RESULT([git not found])
     else
 	ff_download_blas=openblas
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas $ff_pthread"
+
+	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples+++-load/ff-c++ will
+	# place -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which
+	# will fail.
+
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
 	AC_SUBST(DOWNLOADED_BLAS,"")
 	AC_SUBST(COMPILE_OPENBLAS,openblas)
-
-	if test "$OS" = Windows_NT
-	then
-	    ff_static_lib=lib
-	else
-	    ff_static_lib=a
-	fi
-	AC_SUBST(FF_STATIC_LIB,$ff_static_lib)
 
 	ff_blas_ok=yes
 	ff_cblas_h=yes
@@ -1232,7 +1242,12 @@ then
 	then
                 ff_arpack_download=yes
 		AC_MSG_NOTICE(using downloaded Arpack)
-		AC_SUBST(DOWNLOAD_ARPACK,arpack)
+
+		# ALH - 6/11/13 - this install goal is the standard goal for all downloaded packages in
+		# [[file:download/common.mak::install]]
+
+		AC_SUBST(DOWNLOAD_ARPACK,install)
+
 		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
 		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
 		AC_SUBST(LAPACK_arpack_LIB,${curdir}/download/lib/liblapack.a)
@@ -1609,13 +1624,6 @@ m4_define([TOOL_PARAMETERS],
 	AC_FF_ADDWHERELIB($1,$with_$1_ldflags,$with_$1_include)
         AC_SUBST([TOOL_COMPILE_$1],"")
 	enable_$1_download=no
-
-    else
-
-	# no specific directives for package $1, activate automatic download
-
-        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
-	enable_$1_download=yes
     fi
 ])
 
@@ -1628,6 +1636,7 @@ m4_define([TOOL_DISABLE],
     else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
+	enable_$1_download=yes
     fi
 
     # Also allow to disable the download of one tool if it is already locally installed
@@ -1760,15 +1769,19 @@ m4_map([AC_FF_WHERELIB],[
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
-#  remove gsl if not find ... FH
-# correction FH .. 18/12/2013. 
-if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
-if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
-TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
-
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
+
+#  remove gsl if not find ... FH
+# correction FH .. 18/12/2013. 
+# ALH - 7/1/14 - not able to compile gsl or pardiso with FFCS on Windows
+if test "$enable_ffcs" != yes
+then
+    if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
+    if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
+fi
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
 
 # All makefiles
 AC_OUTPUT(Makefile
@@ -1839,6 +1852,11 @@ if test "$enable_download" = yes  ;then
         AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
         AC_MSG_NOTICE([      or try to download/compile the altas blas .])
     fi
+
+    # ALH - 30/10/13 - (request from FH) all downloads are now part of a separate script ([[file:download/getall]])
+    # which needs to be run before make for the user to specify whether he is ok with each of the package licences.
+
+    AC_MSG_NOTICE([      Please run "download/getall" to download all necessary packages before running make])
 fi
 
 # FFCS does not use glut, so remove this message because it could make the user think that something is broken

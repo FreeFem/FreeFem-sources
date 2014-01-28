@@ -25,10 +25,11 @@ $(SRCDIR)/FAIT: $(TARGZ)
 	cd $(SRCDIR) && $(MAKE) install
 	touch $(SRCDIR)/FAIT
 	$(MAKE) WHERE
-$(TARGZ):
-	cd ../pkg;$(WGET) $(URL)
 ../pkg:
 	mkdir $@
+
+$(TARGZ):
+	../getall -o NLopt -a
 
 clean-local:
 	rm -rf $(SRCDIR) Make.defs 

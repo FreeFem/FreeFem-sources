@@ -1,9 +1,9 @@
-#!/bin/bash -e
+# Common make rules for all downloaded packages (request from FH)
 # ======================================================================
 # Written by Antoine Le Hyaric
+# http://www.ljll.math.upmc.fr/lehyaric
 # Laboratoire Jacques-Louis Lions
 # Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
-# http://www.ljll.math.upmc.fr/lehyaric
 # ======================================================================
 # This file is part of Freefem++
 # 
@@ -12,60 +12,44 @@
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
 # 
-# Freefem++  is distributed in the hope that it will be useful,
+# Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 # 
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-# 02110-1301 USA
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
-# headeralh freefem shellxe start=21/10/10 upmc
+# headeralh brief="Common make rules for all downloaded packages (request from FH)" default=0 freefem make start=06/11/2013 upmc written
 
-# Download a file by whatever means available
-# -------------------------------------------
+# Common goals for all packages:
+# download compile install reinstall clean veryclean
 
-# $1=url
-# $2=local name
-# $3=BAD_CERT if the SSL certificate of the web server is wrong
+# <<download>>
 
-if test -x /usr/bin/wget || test -x /opt/local/bin/wget
-then
+# COMMON_PACKTITLE correspond to package names in [[file:getall]]
+download::
+	../getall -o $(COMMON_PACKTITLE)
+$(COMMON_PACKAGES):download
 
-    opts=
-    if test "$3" = BAD_CERT
-    then
-	opts=--no-check-certificate
-    fi
+compile::download
 
-    # use no-verbose to avoid mixing several wget outputs together when called concurrently in
-    # [[file:../download/getall]]
+# <<install>>
 
-    wget "$1" --output-document="$2" --no-verbose $opts
+install::compile
 
-    exit $?
-fi
+# <<reinstall>>
 
-if test -x /usr/bin/curl
-then
-    curl "$1" --output "$2"
-    exit $?
-fi
+reinstall::compile
 
-if test -x /usr/bin/GET
-then
-    GET "$1" > "$2"
-    exit $?
-fi
+clean-local::
 
-echo FF download: No way to download files from the web
-echo FF download: Please install wget or curl or GET
-exit 1
+veryclean::clean
+	-rm $(COMMON_PACKAGES)
 
 # Local Variables:
-# mode:shell-script
+# mode:makefile
 # ispell-local-dictionary:"british"
 # coding:utf-8
 # End:
