@@ -423,7 +423,7 @@ void  SplitSimplex(int N,int & nv, Rd *& P, int & nk , int *& K)
 	{
 	  Rd Khat[d+1];
 	  for (int j=1;j<=d;++j)
-	    Khat[j][j]=1;
+	    Khat[j][j-1]=1;// bug correct jan 2024 FH (thank to OP) 
 	  Khat[i]=G;
 	  SplitSimplex( N, P,K+nk1*i,nv1*i,Khat);
 	}     
