@@ -217,7 +217,7 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 	  }
       
     }
-  if(verbosity>5)
+  if(verbosity>199)
     {
       
       cout <<   "  SplitSimplex   " << endl;
@@ -245,7 +245,7 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
   
   // face i=0
   int l=0;
-  if(verbosity>100)
+  if(verbosity>200)
     cout << "face i=0" << endl;
   for (int i=0;i<N;++i)
     for (int j=0;j<N;++j){
@@ -262,11 +262,11 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  tri[l++]= op+NumSimplex3(0,N-i-1,N-j); 
 	}
       //cout << "i,j " << i << "," << j << endl;
-      if(verbosity>100)
+      if(verbosity>200)
       cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
     }
   // face j=0
-  if(verbosity>100)
+  if(verbosity>200)
   cout << "face j=0" << endl;
   for (int i=0;i<N;++i)
     for (int j=0;j<N;++j){
@@ -283,11 +283,11 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  tri[l++]= op+NumSimplex3(N-i,0,N-j-1);
 	}
       //cout << "i,j " << i << "," << j << endl;
-      if(verbosity>100)    
+      if(verbosity>200)
 	cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
     }
   // face k=0
-  if(verbosity>100)
+  if(verbosity>200)
     cout << "face k=0" << endl;
   for (int i=0;i<N;++i)
     for (int j=0;j<N;++j){
@@ -306,11 +306,11 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  //tri[l++]= op+NumSimplex3(N-i,N-j-1,0);
 	}
       //cout << "i,j " << i << "," << j << endl;
-      if(verbosity>100)
+      if(verbosity>200)
 	cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
     }
   // face i+j+k=1
-  if(verbosity>100)
+  if(verbosity>200)
     cout << "dernier face " << endl;
   for (int k=0;k<N;++k)
     for (int j=0;j<N;++j){
@@ -328,10 +328,10 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  tri[l++]= op+NumSimplex3( i-1, N-j,   N-k); 
 	  tri[l++]= op+NumSimplex3(   i, N-j, N-k-1); 
 	}
-      if(verbosity>100)
+      if(verbosity>200)
 	cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;
     }
-  if(verbosity>100)
+  if(verbosity>200)
     cout << "l= " << l << " ntri=" << ntri << endl;
   assert( l == ntri); 
 }
@@ -399,7 +399,7 @@ void  SplitSimplex(int N,int & nv, R2 *& P, int & nk , int *& K)
 template<class Rd>
 void  SplitSimplex(int N,int & nv, Rd *& P, int & nk , int *& K)
 {
-  const int d = Rd::d;
+  const int d = Rd::d,d1 =d+1;
   int cas = (N>0) ? 1 : d+1;
   assert(N);
   N=abs(N);
@@ -412,22 +412,37 @@ void  SplitSimplex(int N,int & nv, Rd *& P, int & nk , int *& K)
     }
   nv = cas*nv1;
   nk = cas*nk1;
-  P = new Rd[nv];
-  K = new int[nk*(d+1)];
+  P = new Rd[nv]; // no bug correct jan 2024 FH (thank to OP)
+  K = new int[nk*d1]; // no  bug correct jan 2024 FH (thank to OP)
   if( cas ==1) 
     SplitSimplex( N, P,K);
   else 
     { 
-      Rd G=Rd::diag(1./(d+1));
+      Rd G=Rd::diag(1./(d1));
       for(int i=0;i<=d;++i)
 	{
 	  Rd Khat[d+1];
 	  for (int j=1;j<=d;++j)
 	    Khat[j][j-1]=1;// bug correct jan 2024 FH (thank to OP) 
 	  Khat[i]=G;
-	  SplitSimplex( N, P,K+nk1*i,nv1*i,Khat);
+	  SplitSimplex( N, P,K+(nk1*d1)*i,nv1*i,Khat); // FH  no recursion here ...
 	}     
     }
+  if(verbosity>99)
+     {
+         cout << "SplitSimplex : nv ="  << nv << " nk :" << nk << " " << N <<  endl ;
+         for(int i=0; i< nv ; ++i)
+             cout << i << " / " << P[i] <<  endl;
+         
+         for(int k=0,kk=0; k < nk; ++k)
+         {
+            cout << k << " " << kk << " : ";
+             for(int m=0;m<d+1;++m)
+                 cout << K[kk++] << " " ;
+             cout << endl;
+         }
+         
+     }
 }
 
 template void  SplitSimplex<R1>(int N,int & nv, R1 *& P, int & nk , int *& K);
