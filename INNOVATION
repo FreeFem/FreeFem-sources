@@ -1,4 +1,6 @@
 version 3.27 
+   correct bug in dusplay of P1b finite element in 3d 
+     error in SplitMesh<R3>  function  (Thank to O. Pironneau) 
    add  AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
    add  tool to trunc to get element numbering for Thn to Tho 
      int[int] In2o(1),Io2n(1); 
