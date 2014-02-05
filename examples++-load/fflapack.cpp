@@ -720,7 +720,7 @@ class Init { public:
   Init();
 };
 */
-
+template <int INIT>
 KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b) 
 {
   /*
@@ -766,7 +766,10 @@ KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b)
   integer  n= B.N();
   KN<integer> p(n);
   ffassert(B.M()==n);
-  a->resize(n,n);
+  if(INIT)
+      a->init(n,n);
+   else
+    a->resize(n,n);
   *a=0.;
   for(int i=0;i<n;++i)
     (*a)(i,i)=(R) 1;;
@@ -775,6 +778,7 @@ KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b)
   if(info) cerr << " error:  dgesv_ "<< info << endl;
   return a;
 }
+
 
 // Template interface 
 inline int gemm(char *transa, char *transb, integer *m, integer *
@@ -856,6 +860,7 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
         return NULL;
 }
 
+template <int INIT>
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 
 {
   /*
@@ -901,7 +906,10 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
   integer   n= B.N();
   KN<integer> p(n);
   ffassert(B.M()==n);
-  a->resize(n,n);
+  if(INIT)
+     a->init(n,n);
+  else
+     a->resize(n,n);
   *a=0.;
   for(int i=0;i<n;++i)
     (*a)(i,i)=(R) 1;;
@@ -910,26 +918,7 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
   if(info) cerr << " error:  zgesv_ "<< info << endl;
   return a;
 }
-/*
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
-  // avec de matrice plein 
-  //  B = A ^-1 * C;
-  //  A = A ^-1;
-  Dcl_Type< Inverse<KNM<double >* > > ();
-  Dcl_Type< Inverse<KNM<Complex >* > > ();
-  
-  TheOperators->Add("^", new OneBinaryOperatorRNM_inv<double>());
-  TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
-  TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
-  TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
-  
-
- 
-}
-
-*/
 LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 template<class R,class A,class B> R Build2(A a,B b) {
@@ -951,8 +940,11 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("*", new OneOperator2< Mult< KNM<Complex>* >,KNM<Complex>*,KNM<Complex>*>(Build2));
       
       TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
-      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
-      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
+      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve<0>) );
+      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC<0>) );
+      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve<1>) );
+      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC<1>) );
+        
       TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false,0> ) );
       TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false,0> ) );
       
