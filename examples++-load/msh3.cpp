@@ -40,6 +40,8 @@
 #ifndef WITH_NO_INIT
 #include "ff++.hpp"
 #endif
+#include "AFunction_ext.hpp"
+
 
 //  TransfoMesh_v2.cpp
 using namespace std;
@@ -5809,6 +5811,54 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
   return pThnew;    
 }
 
+bool AddLayers(Mesh3 * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+{
+    ffassert(pTh && psupp && pphi);
+    const int nve = Mesh3::Element::nv;
+    Mesh3 & Th= *pTh;
+    const int nt = Th.nt;
+    const int nv = Th.nv;
+    
+    KN<double> & supp(*psupp);
+    KN<double> u(nv), s(nt);
+    KN<double> & phi(*pphi);
+    ffassert(supp.N()==nt);//P0
+    ffassert(phi.N()==nv); // P1
+    s = supp;
+    phi=0.;
+    // supp = 0.;
+    // cout << " s  " << s << endl;
+    
+    for(int step=0; step < nlayer; ++ step)
+    {
+        
+        
+        u = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                u[Th(k,i)] += s[k];
+        
+        for(int v=0; v < nv; ++v)
+            u[v] = u[v] >0.;
+        // cout << " u  " << u << endl;
+        
+        phi += u;
+        
+        s = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                s[k] += u[Th(k,i)];
+        
+        for(int k=0; k < nt; ++k)
+            s[k] = s[k] > 0.;
+        supp += s;
+        // cout << " s  " << s << endl;
+    }
+    // cout << " phi  " << phi << endl;
+    phi *= (1./nlayer);
+    // supp =s;
+    return true;
+}
 
 
 
@@ -5851,6 +5901,9 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 
   Global.Add("extract","(",new ExtractMesh);
   Global.Add("extract","(",new ExtractMesh2D);
+    
+  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
+    
 }
 /*
 class Init { public:
