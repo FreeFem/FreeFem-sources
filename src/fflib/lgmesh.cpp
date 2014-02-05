@@ -1749,8 +1749,8 @@ bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlay
     ffassert(pTh && psupp && pphi);
     const int nve = Mesh::Element::NbV;
     Mesh & Th= *pTh;
-    int nt = Th.nt;
-    int nv = Th.nv;
+    const int nt = Th.nt;
+    const int nv = Th.nv;
     
     KN<double> & supp(*psupp);
     KN<double> u(nv), s(nt);
@@ -1758,32 +1758,38 @@ bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlay
     ffassert(supp.N()==nt);//P0
     ffassert(phi.N()==nv); // P1
     s = supp;
+    phi=0.;
+    // supp = 0.;
+    // cout << " s  " << s << endl;
     
-    supp = 0.;
     for(int step=0; step < nlayer; ++ step)
     {
         
-        phi=0.;
+        
         u = 0.;
         for(int k=0; k<nt; ++k)
             for(int i=0; i<nve; ++i)
-                u[Th(k,i)] += supp[k];
+                u[Th(k,i)] += s[k];
         
-        for(int v=0; v < nv; ++nv)
+        for(int v=0; v < nv; ++v)
             u[v] = u[v] >0.;
+        // cout << " u  " << u << endl;
         
-        supp += u;
+        phi += u;
         
         s = 0.;
         for(int k=0; k<nt; ++k)
             for(int i=0; i<nve; ++i)
                 s[k] += u[Th(k,i)];
         
-        for(int v=0; v < nt; ++nv)
-            s[v] = s[v] > 0.;
+        for(int k=0; k < nt; ++k)
+            s[k] = s[k] > 0.;
+        supp += s;
+        // cout << " s  " << s << endl;
     }
-    phi = u*(1./nlayer);
-    supp =s;
+    // cout << " phi  " << phi << endl;
+    phi *= (1./nlayer);
+    // supp =s;
     return true;
 }
 
