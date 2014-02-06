@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 all-local: mshmet
 
 include ff-flags
@@ -67,8 +66,7 @@ $(SRCDIR)/tag-tar: $(PACKAGE)
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	../getall -o mshmet -a
 
 clean:
 	-rm ff-flags

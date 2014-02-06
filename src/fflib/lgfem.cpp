@@ -2182,7 +2182,10 @@ class Convect : public E_F0mps  { public:
     
 };
 
-class Plot :  public E_F0mps { public:
+/// <<Plot>> used for the [[plot_keyword]]
+
+class Plot :  public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
+public:
     typedef KN_<R>  tab;
     typedef pferbase sol;
     typedef pferbasearray asol;
@@ -2241,6 +2244,8 @@ class Plot :  public E_F0mps { public:
 	}
 
     };
+
+  /// <<Expression2>>
     struct Expression2 
      {
 	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
@@ -2391,12 +2396,17 @@ class Plot :  public E_F0mps { public:
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
     };
 
-   static basicAC_F0::name_and_type name_param[] ;
+  // see [[Plot_name_param]]
+  static basicAC_F0::name_and_type name_param[] ;
 
-  // FFCS: added new parameters for VTK graphics
-  static const int n_name_param =42 ;
-   Expression bb[4];
-    vector<Expression2> l;
+  /// FFCS: added new parameters for VTK graphics. See [[Plot_name_param]] for new parameter names
+  static const int n_name_param=42;
+
+  Expression bb[4];
+
+  /// see [[Expression2]]
+  vector<Expression2> l;
+
     Expression nargs[n_name_param];
     Plot(const basicAC_F0 & args) : l(args.size()) 
     {
@@ -2518,13 +2528,21 @@ class Plot :  public E_F0mps { public:
 	  }
     }
     
-    static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
-    static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
-    AnyType operator()(Stack s) const ;
+  static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
+
+  /// <<Plot_f>> Creates a Plot object with the list of arguments obtained from the script during the grammatical
+  /// analysis of the script (in lg.ypp)
+
+  static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
+
+  /// Evaluates the contents of the Plot object during script evaluation. Implemented at [[Plot_operator_brackets]]
+
+  AnyType operator()(Stack s) const ;
 }; 
 
+/// <<Plot_name_param>>
 
- basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
+basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {   "coef", &typeid(double)},
   {   "cmm", &typeid(string*)},
   {   "ps", &typeid(string*)  },
@@ -2571,7 +2589,7 @@ class Plot :  public E_F0mps { public:
   {"WindowIndex",&typeid(long)}, // #20
   {"NbColorTicks",&typeid(long)}, // #21
 
-   };
+};
 
 
 
@@ -3114,7 +3132,9 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     return err;
 }
    
-AnyType Plot::operator()(Stack s) const  { 
+/// <<Plot_operator_brackets>> from class [[Plot]]
+
+AnyType Plot::operator()(Stack s) const{ 
     
    // remap  case 107 and 108 , 109  for array of FE. 
   vector<ListWhat> ll;
@@ -3994,8 +4014,7 @@ AnyType Plot::operator()(Stack s) const  {
   viderbuff();
      
   return 0L;
-}     
-
+}
  
 AnyType Convect::operator()(Stack s) const 
 {  
@@ -4885,6 +4904,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
  
  Global.Add("on","(",new OneOperatorCode<BC_set > );
+
+ /// <<plot_keyword>> uses [[Plot]] and [[file:AFunction.hpp::OneOperatorCode]] and [[file:AFunction.hpp::Global]]
  Global.Add("plot","(",new OneOperatorCode<Plot> );
  Global.Add("convect","(",new OneOperatorCode<Convect> );
 

@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.in
 
 all-local: parmetis
@@ -78,7 +77,7 @@ $(SRCDIR)/tags: $(PACKAGE)
 	touch $(SRCDIR)/tags
 
 $(PACKAGE):
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	../getall -o ParMETIS -a
 
 # FFCS - 23/5/12 - corrected bug in removing .a from ../lib
 clean:

@@ -1,10 +1,12 @@
+(^|/)#
 (^|/)ListOfUnAllocPtr\.bin$
 (^|/)Makefile\.in$
 (^|/)TAGS$
-(^|/)\.deps$
+(^|/)\.deps/
 (^|/)\.dll$
 (^|/)\.gdb_history$
 (^|/)\.libs$
+(^|/)autosave\.edp$
 \.DS_Store$
 \.a$
 \.bak$
@@ -291,7 +293,7 @@
 ^WindowsPackage\.iss$
 ^\.htaccess$
 ^aclocal\.m4$
-^autom4te\.cache$
+^autom4te\.cache/
 ^build-arch-stamp$
 ^build-indep-stamp$
 ^c-.*$
@@ -320,7 +322,7 @@
 ^debian/tmp$
 ^download/Makefile$
 ^download/WHERE-LD
-^download/arpack/ARPACK$
+^download/arpack/ARPACK/
 ^download/arpack/Makefile$
 ^download/arpack/arpack96\.tar\.gz$
 ^download/arpack/arpack\+\+$
@@ -331,8 +333,8 @@
 ^download/blacs/Bmake\.inc$
 ^download/blacs/config\.log$
 ^download/blas/ATLAS$
-^download/blas/BLAS$
-^download/blas/CBLAS$
+^download/blas/BLAS/
+^download/blas/CBLAS/
 ^download/blas/Makefile$
 ^download/blas/OpenBLAS/
 ^download/blas/WinNT_PPRO256$
@@ -567,6 +569,7 @@
 ^examples\+\+-tutorial/makeref\.edp$
 ^examples\+\+-tutorial/plot\.gp$
 ^examples\+\+-tutorial/regtests\.edp$
+^examples\+\+-load/regtests\.edp$
 ^examples\+\+-tutorial/toto\..*$
 ^examples\+\+-tutorial/u\.txt$
 ^examples\+\+/.*\.BB$
@@ -586,7 +589,7 @@
 ^freefem\+\+-.\..*\.zip$
 ^freefem\+\+-.\...-.$
 ^freefem\+\+-.\...-..$
-^html$
+^html/
 ^speedtest\.out$
 ^src/Algo/Makefile$
 ^src/FreeFem\+\+$
@@ -654,4 +657,6 @@
 ^stamp-h$
 ^stamp-h1$
 ^test-driver$
+examples\+\+-tutorial/mm\.faces$
+examples\+\+-tutorial/mm\.points$
 ~$

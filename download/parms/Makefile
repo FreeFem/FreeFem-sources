@@ -42,8 +42,7 @@ $(SRCDIR): $(PACKAGE)
 	touch $(SRCDIR)
 
 $(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET) $(SERVER) --output-document=$(PACKAGE)
+	../getall -o pARMS -a
 
 clean:
 	-make cleanall -C $(SRCDIR)/src

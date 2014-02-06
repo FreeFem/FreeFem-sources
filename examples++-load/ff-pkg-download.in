@@ -1,4 +1,26 @@
-#!/bin/sh
+#!/bin/bash
+# Building WHERE_LIBRARY-download
+# ======================================================================
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+#
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh brief="Building WHERE_LIBRARY-download" default=0 freefem multipleauthors shell start=21/09/09 upmc
 
 ff=$0;
 bb=`basename $0`
@@ -37,8 +59,11 @@ if [   -d $DESTDIR$DIR/lib -a -d $DESTDIR$DIR/include  ] ; then
     for i in $LIB/WHERE.* ; do            
 	test -f $i && ( sed "s;@DIR@;$DIR;" <$i  )
     done
-#    return
-    for la in arpack umfpack amd fftw3  mmg3d; do
+
+    # ALH - 6/1/14 - remove umfpack and amd because some versions of umfpack needs more than just adding -L (they need
+    # the colamd and cholmod libraries, which are setup in [[file:configure.ac]]).
+
+    for la in arpack fftw3 mmg3d; do
         l=`echo $la |sed -e s/^tet$/tetgen/`
 	nbw=`awk "/^$la /" WHERE_LIBRARY WHERE_LIBRARY-config|wc -l`
        if [ "$nbw" -ne 0 -a ! -f $LIB/WHERE.$l  ]; then
@@ -60,3 +85,9 @@ if [   -d $DESTDIR$DIR/lib -a -d $DESTDIR$DIR/include  ] ; then
 else
     echo error not directory $DIR/lib and $DIR/include  $DIRP 
 fi
+
+# Local Variables:
+# mode:shell-script
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

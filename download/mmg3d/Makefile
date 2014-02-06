@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 all-local: mmg3d
 
 include ff-flags
@@ -57,11 +56,6 @@ clean::
 
 mmg3d-4:$(PACKAGE)
 
-$(PACKAGE):
-	-mkdir $(DIRPKG);
-# 	FFCS - 6/11/12 - curl/MacOS8 does not like redirections
-	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz
-
 install:install-4.done WHERE.done
 
 # FFCS - keep simplest makefile structure for automatic recompilations
@@ -89,7 +83,8 @@ tag-tar-$(SIZEPKG): $(PACKAGE)
 	touch tag-tar-$(SIZEPKG)
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
-
+$(PACKAGE):
+	../getall -o MMG3D -a
 
 clean::
 	-rm ff-flags
