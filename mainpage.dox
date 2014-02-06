@@ -1,0 +1,94 @@
+/*!
+ * \file
+ * 
+ * \brief Main page of Doxygen documentation
+ * 
+ * \author Written by Antoine Le Hyaric
+ * \author Laboratoire Jacques-Louis Lions
+ * \author Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+ * \author http://www.ljll.math.upmc.fr/lehyaric
+ * 
+ * \copyright This file is part of Freefem++
+ * 
+ * \copyright Freefem++ is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ * 
+ * \copyright Freefem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * \copyright You should have received a copy of the GNU Lesser General Public
+ * License along with Freefem++; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * 
+ * headeralh brief="Main page of Doxygen documentation" dox default=0 freefem upmc written
+ */
+
+/*! \mainpage Technical Documentation
+
+  \section broadview Broad View
+
+  A FreeFem++ script is first translated into a tree of expressions of type CListOfInst (the language grammar is defined
+  in \ref language) and then evaluated by calling CListOfInst::eval(). Any resulting graphical data is converted into a
+  stream of bytes by the PlotStream class before being sent to the ffglut program (see ffglut.cpp) via a pipe.
+
+  \section details Detailed Program Start Sequence
+
+  - The C++ main() function is part of platform-dependent treatments. It calls mymain() (in lg.ypp) from:
+
+    - Unix: src/Graphics/sansrgraph.cpp
+    - Windows: src/Graphics/Pcrgraph.cpp
+    - MacOS: src/Graphics/macrgraf.cpp
+
+  - in lg.ypp:
+
+    - mymain() calls mainff(), which calls Compile(), which calls the standard yyparse() function.
+
+    - yyparse() scans the EDP script thanks to the lexer #mylex and generates objects of type YYSTYPE according to the
+      grammar described in lg.ypp.
+
+    - When the "start" symbol is successfully scanned, yylval (of type YYSTYPE) contains the whole tree of expressions
+    as an object of type CListOfInst. CListOfInst::eval() is called (with one #Stack argument built by #newStack()) to
+    run the script.
+
+  \section language FreeFem++-specific Language Elements
+
+  - <b>Types</b> <!-- [[file:src/lglib/lg.ypp::type_of_dcl]] -->
+    - a lexical element of reference #yytokentype #TYPE defined by calling mylex::Add(Key,aType)
+    - a TypeArray() if followed by square brackets
+    - a TypeTemplate() if followed by lower/greater signs
+    - <b>Finite Element Space Types</b> <!-- [[file:src/lglib/lg.ypp::ID_space]] -->
+      - NewFEvariable()
+      - NewFEarray()
+
+  - <b>Variables</b> <!-- [[file:src/lglib/lg.ypp::declaration]] -->
+    - Block::NewVar<#LocalVariable>() <!-- see [[file:src/lglib/lg.ypp::list_of_dcls]] -->
+    - Block::NewVar<#LocalVariableFES>() for \b fespaces <!-- [[file:src/lglib/lg.ypp::fespace_def]] -->
+
+  - \b Instructions <!-- [[file:src/lglib/lg.ypp::instruction]] -->
+    - \b load : load()
+    - \b border :
+      - E_Border <!-- [[file:src/lglib/lg.ypp::BORDER_ID]] -->
+      - local variable and boundaries <!-- [[file:src/lglib/lg.ypp::border_expr]] -->
+      - instruction <!-- [[file:src/lglib/lg.ypp::instruction]] -->
+    - \b varf : #t_form defined in init_lgfem() <!-- [[file:src/fflib/lgfem.cpp::varf]] -->
+    - \b problem : Problem
+    - \b solve : Solve
+
+  - \b API : ffapi.hpp <!-- [[file:src/fflib/ffapi.hpp]] -->
+
+  <em>(this page is written in mainpage.dox and can be viewed on the internet at
+  http://www.ljll.math.upmc.fr/lehyaric/freefem/html)</em>
+
+*/
+
+/*!
+ * Local Variables:
+ * mode:c
+ * ispell-local-dictionary:"british"
+ * coding:utf-8
+ * End:
+ */

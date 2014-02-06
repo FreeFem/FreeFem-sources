@@ -1,0 +1,30 @@
+int err=0;
+mesh Th=square(50,50,[3*x-1.5,3*y-1.5]);
+func r = sqrt(x*x +y*y);
+// wrong ...
+real lc ;
+verbosity=10;
+lc = int1d(Th,levelset=r-1.)(1.) ; 
+cout << " len of the level set = " <<  lc  << " =  2pi " << 2*pi ;
+cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl; 
+if( abs(lc-2*pi) > 1e-1) err++;
+fespace Vh(Th,P1);
+// test linear and bilinear ... 
+varf vl(u,v) = int1d(Th,levelset=r-1.)(v) + int1d(Th,levelset=r-1.)(u*v);
+real[int] vv=vl(0,Vh);
+
+cout << " len of the level set (varf linear ) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi ;
+cout  << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;
+if( abs(lc-2*pi) > 1e-1) err++; 
+real[int]  one(Vh.ndof); 
+one=1.;
+// sorry not implemented to day ... FH..
+//matrix VV=vl(Vh,Vh); // no build of matrix with levelset ... sorry not implemented to day ... FH..
+//vv = VV*one;
+//cout << " len of the level set (varf bilinear ) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi;
+//cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;; 
+//if( abs(lc-2*pi) > 1e-1) err++;
+
+cout << " Nb err " << err << endl;
+assert(err==0);
+
