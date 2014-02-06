@@ -36,6 +36,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+
 typedef double R;
 
 //  R0 R1, R2 , R3 to be uniforme. 

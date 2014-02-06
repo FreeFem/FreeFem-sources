@@ -68,8 +68,7 @@ $(SRCDIR)/PATCH: $(PACKAGE)
 	touch $(SRCDIR)/PATCH
 
 $(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	../getall -o freeYams -a
 
 # FFCS: only run make clean if cd to SRCDIR worked, otherwise this is infinite loop.
 
