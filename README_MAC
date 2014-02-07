@@ -47,8 +47,8 @@ Under Mavericks (10.9)  2012 ( xcode 5.0.2 form scratch)
   # sudo make install 
 
 to bluid the version of 10.8  the version compilation (fev. 2014)
-# export MACOSX_DEPLOYMENT_TARGET=10.8
-# ./configure  '-with-suffix=macos-10.8' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=clang -isysroot /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk' 'CXXFLAGS=' 'CXX=clang++ -std=c++11 -isysroot /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran' 'MPICXX=/usr/local/bin/mpic++' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' 'MPIF77=/usr/local/bin/mpif90' '--enable-maintainer-mode'
+
+./configure '-with-suffix=macos-10.8' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=clang -isysroot /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk' 'CXXFLAGS=-mmacosx-version-min=10.8' 'CXX=clang++ -std=c++11 -isysroot /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk' 'CFLAGS=-mmacosx-version-min=10.8' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran' 'MPICXX=/usr/local/bin/mpic++' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' 'MPIF77=/usr/local/bin/mpif90' '--enable-maintainer-mode'
 
 ------------
 Under Snow Leopard.  Jan 2011
