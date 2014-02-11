@@ -30,7 +30,7 @@
 
 # COMMON_PACKTITLE correspond to package names in [[file:getall]]
 download::
-	../getall -o $(COMMON_PACKTITLE)
+	../getall -o $(COMMON_PACKTITLE) -a
 $(COMMON_PACKAGES):download
 
 compile::download
