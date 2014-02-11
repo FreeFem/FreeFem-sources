@@ -1,14 +1,15 @@
 # egrep "^int|^double" /opt/local/include/gsl/gsl_sf* 
 # egrep "^int|^double|^long" /usr/local/include/gsl/gsl_{cdf,randist,sf_*}.h | egrep -v ',$'  
-
+#  export  LANG=C
 BEGIN {FS="[(),]";
+    FLOAD="gsl"
     LANG="C";
-    edp="gsl.idp";
+    edp=FLOAD ".idp";
     c="\"";
     pp=c "(" c;
     print " /*  ";
     print "// file create:  awk -f gsl.awk  gsl_list  > ff_gsl_awk.hpp " >edp
-    print "load",c "gsl1" c  > edp
+    print "load",c FLOAD c  > edp
     print "gslrng ffrng;" >edp
     print " gslabortonerror=0; " >edp
     #  convertion de type gsl .. ff++ 
@@ -21,7 +22,8 @@ BEGIN {FS="[(),]";
     Tff["const int"]="long";
     Tff["const unsigned int"]="long";
     Tff["const double"]="double";
-   # Tff["const gsl_rng *"] = "gsl_rng **";
+    Tff["const gsl_rng *"] = "gsl_rng **";
+#    Tff["gsl_mode_t"] = ""; 
     Cff["const gsl_rng *"] = "*"; 
     V0["double"]= 0.55;
     V0["const double"]= 0.55; 
@@ -85,6 +87,7 @@ NF ==3 {
 	gg = "\n   Global.Add(" ff(f) "," pp ",new OneOperator1_<" Tff[R] "," Tff[T[1]] ">( " f "__)); "
 	cw = cw  lw;
 	cm = cm  gg;
+	v0 = VV(T[1]);
 	print "cout << " c  f "("v0") =  " c " << " f0(f) "("v0")  << endl; "> edp
 	}
 }

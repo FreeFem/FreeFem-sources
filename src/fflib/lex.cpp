@@ -258,7 +258,7 @@ int mylex::basescan()
       int i;
       char cc,ccc;
       for (     i = 0,cc=source().peek(); 
-                i < 256 &&  (isprint(cc) && cc !='\n'  && cc !='"');
+                i < 256 &&  ( (isprint(cc)|isspace(cc)) && cc !='\n'  && cc !='"');
                 cc=source().peek(),++i
                 ) 
         {       

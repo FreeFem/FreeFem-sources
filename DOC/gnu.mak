@@ -40,6 +40,7 @@
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	pdflatex $*
 	pdflatex $*
+	pdflatex $*
 	makeindex $*
 	pdflatex $*
 cpfigs: 

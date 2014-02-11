@@ -58,7 +58,9 @@ using namespace std;
 #include "BamgFreeFem.hpp"
 #include "lgfem.hpp"
 */
+
 #include "ff++.hpp"
+#include "AFunction_ext.hpp"
 
 
 #include "lgmesh.hpp"
@@ -446,12 +448,14 @@ struct Op_trunc_mesh : public OneOperator {
 
     class Op: public E_F0mps   { public:
       static basicAC_F0::name_and_type name_param[] ;
-      static const int n_name_param =2;
+      static const int n_name_param =4;
       Expression nargs[n_name_param];
     
       Expression getmesh,bbb;
       long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-      Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b) 
+        
+       KN<long> *  arg(int i,Stack stack) const{ return nargs[i] ? GetAny<KN<long> *>( (*nargs[i])(stack) ): 0;}
+      Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b)
         { args.SetNameParam(n_name_param,name_param,nargs); }
       AnyType operator()(Stack s)  const ;
      };
@@ -464,7 +468,9 @@ struct Op_trunc_mesh : public OneOperator {
 basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_name_param] =
  {
    {  "split",             &typeid(long)},
-   {  "label",             &typeid(long)}
+   {  "label",             &typeid(long)},
+   { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jovilet jan 2014
+   { "old2new", &typeid(KN<long>*)}   //  ajout FH pour P. Jovilet jan 2014
  
  };
 
@@ -477,6 +483,7 @@ AnyType classBuildMesh::operator()(Stack stack)  const {
    long  nbvx         = arg(0,stack,0L); 
    bool  requireborder=  arg(1,stack,false);
    ffassert(   nbvx >= 0);
+   
    return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder)));
 
 }
@@ -496,8 +503,11 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
     long kkksplit =arg(0,stack,1L);
     long label =arg(1,stack,2L);
+    KN<long> * pn2o =  arg(2,stack);
+    KN<long> * po2n =  arg(3,stack);
     KN<int> split(Th.nt);
     split=kkksplit;
+    long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
     long kk=0;
     for (int k=0;k<Th.nt;k++)
@@ -508,6 +518,32 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
        if (  GetAny<bool>((*bbb)(stack))  ) kk++;
        else  split[k]=0  ;    
      }
+    
+    if(pn2o)
+        {
+          pn2o->resize(kk*ks);
+          KN<long> &n2o(*pn2o);
+          int l=0;
+          for(int k=0; k< Th.nt; ++k)
+             if( split[k] )
+                 for(int i=0; i< ks; ++i)
+                     n2o[l++] = k;
+        }
+        if(po2n)
+        {
+            po2n->resize(Th.nt);
+            KN<long> &o2n(*po2n);
+            int l=0;
+            for(int k=0; k< Th.nt; ++k)
+                if( split[k] )
+                {
+                        o2n[k] = l;
+                       l+=ks;
+                }
+            else o2n[k]=-1;
+        }
+
+    
      *mp=mps;
      if (verbosity>1) 
      cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
@@ -1699,6 +1735,69 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 }
 
+bool SameMesh(Mesh * const & pTh1,Mesh * const & pTh2)
+{
+    typedef Mesh::Element Element;
+    if( !pTh1) return 0;
+    if( !pTh2) return 0;
+    if( pTh1 == pTh2) return 1;
+    if( pTh1->nv != pTh2->nv) return 0;
+    if( pTh1->nt != pTh2->nt) return 0;
+    Mesh & Th1=*pTh1, & Th2 = *pTh2;
+    ffassert(0); // a faire..
+    
+    return 1;
+}
+
+bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+{
+    ffassert(pTh && psupp && pphi);
+    const int nve = Mesh::Element::NbV;
+    Mesh & Th= *pTh;
+    const int nt = Th.nt;
+    const int nv = Th.nv;
+    
+    KN<double> & supp(*psupp);
+    KN<double> u(nv), s(nt);
+    KN<double> & phi(*pphi);
+    ffassert(supp.N()==nt);//P0
+    ffassert(phi.N()==nv); // P1
+    s = supp;
+    phi=0.;
+    // supp = 0.;
+    // cout << " s  " << s << endl;
+    
+    for(int step=0; step < nlayer; ++ step)
+    {
+        
+        
+        u = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                u[Th(k,i)] += s[k];
+        
+        for(int v=0; v < nv; ++v)
+            u[v] = u[v] >0.;
+        // cout << " u  " << u << endl;
+        
+        phi += u;
+        
+        s = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                s[k] += u[Th(k,i)];
+        
+        for(int k=0; k < nt; ++k)
+            s[k] = s[k] > 0.;
+        supp += s;
+        // cout << " s  " << s << endl;
+    }
+    // cout << " phi  " << phi << endl;
+    phi *= (1./nlayer);
+    // supp =s;
+    return true;
+}
+
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
@@ -1726,8 +1825,10 @@ void init_lgmesh() {
   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double>,E_F_F0F0_Add2RC<pmesh,KN_<double>,KN_<double>,E_F0> >(Triangulate));
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
-       
-  // use for :   mesh Th = readmesh ( ...);       
+    // Thg,suppi[],nnn,unssd[]
+  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
+  Global.Add("AddLayers","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
+  // use for :   mesh Th = readmesh ( ...);
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
   extern void init_glumesh2D();

@@ -1017,6 +1017,7 @@ void Init_map_type()
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
      
      Global.New("cout",CConstant<ostream*>(&cout));
+     Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));
      Global.New("append",CConstant<ios::openmode>(ios::app));
      Global.New("endl",CConstant<const char*>("\n"));
@@ -1430,6 +1431,8 @@ void Init_map_type()
      Global.Add("max","(",new OneOperator2_<long,long>(Max));
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
      Global.Add("atan2","(",new OneOperator2<double>(atan2));
+     Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
+    
      Global.Add("atan","(",new OneOperator2<double>(atan2));
      Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));
      Global.Add("abs","(",new OneOperator1<double>(Abs));

@@ -2856,7 +2856,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     QuadratureFormular1dPoint pi( FI[npi]);
 		     double sa=pi.x,sb=1-sa;
 		     R2 Pt(PA*sa+PB*sb ); //  
-		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie);
+		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,K.lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
