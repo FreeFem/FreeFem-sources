@@ -1,5 +1,5 @@
 version 3.27 
-   correct bug in dusplay of P1b finite element in 3d 
+   correct bug in display of P1b finite element in 3d 
      error in SplitMesh<R3>  function  (Thank to O. Pironneau) 
    add  AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
    add  tool to trunc to get element numbering for Thn to Tho 
@@ -9,7 +9,7 @@ version 3.27
      fespace Vnh(Thn,Pk), Voh(Tho,Pk);
      int[int] n2o=restrict(Vnh,Voh,n2ok);     
    correct mistake in gsl interface random number (9/1/14)
-   missing all ramdow distribution ..
+   missing all random  distribution ..
    add interface  with gsl random number generation in test .. 
    correct pb of compilation under window (mingw32/msys) 
 6/2/14 (ALH)
