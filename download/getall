@@ -30,7 +30,6 @@ use Getopt::Std;
 # This download script needs to be able to work on platforms that do not have threads (eg Mingw).
 
 my $can_use_threads=eval 'use threads;1';
-#if($can_use_threads){use threads}
 
 # -a = accept all licences
 # -f = force new downloads

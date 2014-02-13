@@ -582,9 +582,9 @@ void Check(const Opera &Op,int N,int  M)
           {
               double uset = HUGE_VAL;
               R2 Q[3];
-              KN<double> phi(ThI.nv);phi=uset;
+              KN<double> phi(Th.nv);phi=uset;
               double f[3];
-              for(int t=0; t< ThI.nt;++t)
+              for(int t=0; t< Th.nt;++t)
               {
                   double umx=-HUGE_VAL,umn=HUGE_VAL;
                   for(int i=0;i<3;++i)
@@ -613,7 +613,7 @@ void Check(const Opera &Op,int N,int  M)
                           }
                           else*/ 
                            //   InternalError(" No levelSet on Diff mesh :    to day  int1d of Matrix");
-                         A += mate(0,0,0,stack,Q);
+                         A += mate(t,-1,Th[t].lab,stack,Q);
                       }
                       if(sptrclean) sptrclean=sptr->clean();
                   }
@@ -1947,10 +1947,11 @@ void Check(const Opera &Op,int N,int  M)
       }
   else if(B)
   {  // int on isovalue ...
-      R2 PA(B[0]),PB(B[0]);
+      R2 PA(B[0]),PB(B[1]);
       R2 A=T(PA),B=T(PB);
       R2 E(A,B);
       double le = sqrt((E,E));
+    //  cout << " xxxx "<< le << " "<< A << " " << B << endl;
       if(le > 1e-15) // bofbof ????
       for (npi=0;npi<FIb.n;npi++) // loop on the integration point
       {
