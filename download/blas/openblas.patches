@@ -1,0 +1,30 @@
+# -*- mode:diff;coding:raw-text; -*-
+diff -r -u ref/OpenBLAS/c_check OpenBLAS/c_check
+--- ref/OpenBLAS/c_check	2010-01-28 20:26:25.000000000 +0100
++++ OpenBLAS/c_check	2012-06-05 15:17:47.877934400 +0200
+@@ -22,15 +22,16 @@
+ 
+ $cross_suffix = "";
+ 
+-if ($ARGV[0] =~ /(.*)(-[.\d]+)/) {
+-    if ($1 =~ /(.*-)(.*)/) {
+-	$cross_suffix = $1;
+-    }
+-} else {
+-    if ($ARGV[0] =~ /(.*-)(.*)/) {
+-	$cross_suffix = $1;
+-    }
+-}
++# FFCS - this test is broken when using full paths with dashes for compilers
++#if ($ARGV[0] =~ /(.*)(-[.\d]+)/) {
++#    if ($1 =~ /(.*-)(.*)/) {
++#	$cross_suffix = $1;
++#    }
++#} else {
++#    if ($ARGV[0] =~ /(.*-)(.*)/) {
++#	$cross_suffix = $1;
++#    }
++#}
+ 
+ $compiler = "";
+ $compiler = PGI       if ($data =~ /COMPILER_PGI/);
