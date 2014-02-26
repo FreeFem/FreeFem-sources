@@ -566,11 +566,11 @@ Choose the type of application from \freefempp, \texttt{FreeFem++-nw},  \texttt{
 \begin{remark} The variable \texttt{verbosity} changes the level of internal printing ($0$, nothing (unless there are syntax errors), $1$ few,  $10$  lots, etc. ...),
 the default value is $2$.
 \\
- The include files are searched from the \texttt{includepath} list and the load files
+The include files are searched from the \texttt{includepath} list and the load files
 are searched from  \texttt{loadpath} list.
 \end{remark}
 
- The syntax of the file  is:
+The syntax of the file  is:
 \begin{verbatim}
      verbosity= 5
      loadpath += "/Library/FreeFem++/lib"
@@ -583,7 +583,7 @@ are searched from  \texttt{loadpath} list.
      load += "MUMPS_seq" 
 \end{verbatim}
 
- The possible paths for this file  are
+The possible paths for this file  are
  \begin{itemize}
    \item under unix and MacOs
 \begin{verbatim}
@@ -1033,9 +1033,9 @@ The language of \freefempp is  typed, polymorphic and reentrant with macro gener
 statement each statement separated from the next by a semicolon ";".
 The syntax is that of C++ by default augmented with something that is more akin
 to \TeX.
- For the specialist, one key guideline is that \freefempp rarely generates an internal
- finite element  array;
- this was adopted for speed and
+For the specialist, one key guideline is that \freefempp rarely generates an internal
+finite element  array;
+this was adopted for speed and
 consequently \freefempp could be hard to beat in terms of execution speed, except
 for the time lost in the interpretation of the language (which can be reduced by a systematic usage
 of \texttt{varf} and matrices instead of \texttt{problem}.
@@ -1148,7 +1148,7 @@ For example
 \section{Learning by Examples}
 This chapter is for those, like us, who don't like to read manuals. A number of simple examples
 cover a good deal of the capacity of \freefempp and are self-explanatory.  For the modeling part
-this chapter continues at Chapter 9 where some PDEes of physics, engineering and finance are studied
+this chapter continues at Chapter 9 where some PDEs of physics, engineering and finance are studied
 in greater depth.
 
 \subsection{Membranes}
@@ -1528,7 +1528,7 @@ Pressure variations in air at rest are governed by the wave equation:
      {\p^2 u \over \p t^2} - c^2 \Delta u =0.
 \]
 When the solution wave is monochromatic (and that depend on the boundary and initial conditions),
- $u$ is of the form
+$u$ is of the form
 $u(x,t)=Re(v(x) e^{ik t})$ where $v$ is a solution of Helmholtz's equation:
 %
 \begin{eqnarray}&&
@@ -1540,7 +1540,7 @@ $u(x,t)=Re(v(x) e^{ik t})$ where $v$ is a solution of Helmholtz's equation:
 where $g$ is the source.
 Note the ``+'' sign in front of the Laplace operator and that $k>0$ is real. This sign may make the
 problem ill posed for some values of $\frac c k$, a phenomenon called
- ``resonance''.\\
+``resonance''.\\
 At resonance there are non-zero solutions even when $g=0$. So the following program may or may not work:
 
 \begin{example}[sound.edp]
@@ -1753,20 +1753,20 @@ vold=v+ue; @plot(vold);
 \subsection{Irrotational Fan Blade Flow and Thermal effects}
 
 \paragraph{Summary}\emph{Here we will learn how to deal with a \x{multi-physics system}
-of PDEs on a \x{Complex geometry,} with \x{multiple meshes} within one problem.  We
+of PDEs on a \x{Complex geometry}, with \x{multiple meshes} within one problem.  We
 also learn how to manipulate the \x{region indicator} and see how smooth is the projection
 operator from one mesh to another.}
 
- \paragraph{Incompressible flow}
+\paragraph{Incompressible flow}
 
 Without viscosity and vorticity incompressible flows have a velocity given by:
- $$
+$$
  u=\left(\begin{matrix}{\p \psi \over \p x_{2} }\\ -{\p \psi
  \over \p x_{1}} \end{matrix}\right), \quad
   \hbox{  where $\psi  $ is solution of }\quad  \Delta \psi =0
 $$
 This equation expresses both incompressibility
- ($\nabla\cdot u=0$) and absence of vortex ($\nabla\times u =0$).
+($\nabla\cdot u=0$) and absence of vortex ($\nabla\times u =0$).
 
 As the fluid slips along the walls, normal velocity is zero, which
 means that $\psi$ satisfies:
@@ -1774,7 +1774,7 @@ $$
  \psi \hbox{ constant on the walls}.
 $$
 One can also prescribe the normal velocity at an artificial boundary, and this translates into
- non constant {Dirichlet} data for $\psi$.
+non constant {Dirichlet} data for $\psi$.
 \\\\
 
 \paragraph{Airfoil}
@@ -1787,11 +1787,11 @@ one way to model this problem is to write
  \psi |_{S}=0, \quad
  \psi|_{C}= {u_\infty}y,
 \end{eqnarray}
- where $\partial\Omega=C\cup S $
+where $\partial\Omega=C\cup S $
 
 \paragraph{The NACA0012 Airfoil}
 An equation for the upper surface of a NACA0012 (this is a classical
-  wing profile in aerodynamics) is:
+wing profile in aerodynamics) is:
 $$    y = 0.17735\sqrt{x}-0.075597x- 0.212836x^2+0.17363x^3-0.06254x^4.$$
 %
 \begin{example}[potential.edp]
@@ -2097,10 +2097,10 @@ which is programmed as
 }
 \eFF
 It must be inserted into a larger .cpp file, shown in Appendix A,
- which is the load module linked to \freefempp.
+which is the load module linked to \freefempp.
 
 
- \subsection{The System of elasticity}
+\subsection{The System of elasticity}
 
 \paragraph{Elasticity}
 
@@ -2133,7 +2133,7 @@ axis are governed by \\
 $$
   -\mu \Delta {\bf u} - (\mu+\lambda)  \nabla (\nabla .{\bf u})={\bf f}~~\hbox{in}~~\Omega,
 $$
- where $\lambda ,\mu  $ are the Lam\'{e} coefficients introduced above.
+where $\lambda ,\mu  $ are the Lam\'{e} coefficients introduced above.
 
 Remark, we do not used this equation because the associated  variationnal
 form does not give the right boundary condition, we simply use
@@ -2150,12 +2150,12 @@ So the variationnal form can be written as :
 $$
  \int_{\Omega} \lambda \nabla.u   \nabla.v  + 2 \mu \epsilon(\mathbf{u}):\epsilon(\mathbf{v}) \; dx - \int_{\Omega}  \mathbf{v} f  \;dx  =0;
 $$
- \paragraph{Example}  Consider  elastic plate with the undeformed rectangle shape
+\paragraph{Example}  Consider  elastic plate with the undeformed rectangle shape
 $[0,20]\times [-1,1]$.
 The body force is the gravity force $\vec f$ and the
 boundary force $\vec g$ is zero on lower, upper and right sides.
- The left vertical sides of the beam is fixed.
- The boundary conditions are
+The left vertical sides of the beam is fixed.
+The boundary conditions are
 \begin{eqnarray*}
      \sigma . {\bf n}  &=& g = 0    ~~\hbox{on}~~\Gamma_1, \Gamma_4, \Gamma_3, \\
       {\bf u} &=& \mathbf{0} ~~\hbox{on}~~\Gamma_2
@@ -2395,9 +2395,11 @@ number of 400 where mesh adaptation is done after 50 iterations on the first mes
 
 The problem is find the velocity field $\bm{u}=(u_i)_{i=1}^d$ and the pressure $p$ of a Flow 
 satisfying in the domain $\Omega \subset  \mathbb{R}^d (d=2,3)$:
-\Blue{\begin{eqnarray*}
- (\bm{u}\cdot\nabla) \bm{u}-\nu \Delta \bm{u}+\nabla p&=&0,\\ \nabla\cdot \bm{u}&=&0
-\end{eqnarray*}}
+\Blue{
+  \begin{eqnarray*}
+    (\bm{u}\cdot\nabla) \bm{u}-\nu \Delta \bm{u}+\nabla p&=&0,\\ \nabla\cdot \bm{u}&=&0
+  \end{eqnarray*}
+}
 where $\nu$ is the viscosity of the fluid, $\nabla = (\p_i )_{i=1}^d $, the dot product is $\cdot$, and  $\Delta = \nabla\cdot\nabla$
 with the some boundary conditions ( $\bm{u}$ is  given on $\Gamma$)
 
@@ -2405,10 +2407,12 @@ with the some boundary conditions ( $\bm{u}$ is  given on $\Gamma$)
 
 The weak form is 
 find $\bm{u}, p $ such than for $\forall \bm{v}$ (zero on $\Gamma$), and $\forall  q$ 
-\Blue{\begin{equation}
-  \int_\Omega  ((\bm{u}\cdot\nabla) \bm{u} ). \bm v + \nu \nabla \bm{u}:\nabla \bm{v} 
-  - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = 0 
-\end{equation}}
+\Blue{
+  \begin{equation}
+    \int_\Omega  ((\bm{u}\cdot\nabla) \bm{u} ). \bm v + \nu \nabla \bm{u}:\nabla \bm{v} 
+    - p \nabla\cdot \bm{v} - q \nabla\cdot \bm{u} = 0 
+  \end{equation}
+}
 
 
 The Newton Algorithm to solve nonlinear Problem is
@@ -2416,8 +2420,7 @@ The Newton Algorithm to solve nonlinear Problem is
 Find  $u\in  V$ such that $F(u)=0$ where 
 $ F : V \mapsto V $. 
 
-\begin{enumerate} \index{Newton Algorithm
-}
+\begin{enumerate} \index{Newton Algorithm}
 \item choose $u_0\in \R^n $ , ;
 \item for ( $i =0$; $i$ < niter; $i = i+1$) 
 
@@ -2425,7 +2428,7 @@ $ F : V \mapsto V $.
 \item solve $DF(u_i) w_i =  F(u_i)$;
 \item $u_{i+1} = u_i - w_i$;  
 \end{enumerate}
- break  $|| w_i|| < \varepsilon$.
+break  $|| w_i|| < \varepsilon$.
 \end{enumerate}
 
 Where $DF(u)$ is the differential of $F$ at point  $u$, this is a linear application such that:
@@ -3076,23 +3079,22 @@ If $F$ is linear with respect to its arguments, then the PDE is said
  \\
 The general form of a second order, linear scalar PDE is
 ${\p^2\varphi\over\p x_i\p x_j}$ and $A:B$ means
- $\sum^d_{i,j=1} a_{ij} b_{ij}.$
+$\sum^d_{i,j=1} a_{ij} b_{ij}.$
  $$\alpha\varphi + a\cdot\nabla\varphi + B :\nabla(\nabla\varphi) =
  f{\quad\hbox{ in }\quad}\Omega\subset \Rel^d,
  $$
- where $f(x),\alpha(x)\in \Rel,
- a(x)\in \Rel^d, B(x)\in \Rel^{d\times d}$
+where $f(x),\alpha(x)\in \Rel, a(x)\in \Rel^d, B(x)\in \Rel^{d\times d}$
 are the PDE \emph{coefficients}.
 If the coefficients are independent of $x$, the PDE is said to have
- \emph{constant coefficients}.
+\emph{constant coefficients}.
 
 To a PDE we associate a quadratic form, by replacing
 $\varphi$ by $1$,
- $\p\varphi/\p x_i$ by $z_i$ and
- $\p^2\varphi/\p x_i\p x_j$ by $z_i z_j$, where $z$
- is a vector in $\Rel^d$~:
- $$\alpha + a\cdot z + z^T Bz = f.
- $$
+$\p\varphi/\p x_i$ by $z_i$ and
+$\p^2\varphi/\p x_i\p x_j$ by $z_i z_j$, where $z$
+is a vector in $\Rel^d$~:
+$$\alpha + a\cdot z + z^T Bz = f.
+$$
 If it is the equation of an ellipse (ellipsoid if $d \geq 2$),
 the PDE is said to be {\it elliptic};
 if it is the equation of a parabola or a hyperbola, the PDE is said to
@@ -3113,18 +3115,18 @@ For example, for the non linear equation
  $${\p^2\varphi\over\p t^2} - {\p\varphi\over\p
  x}{\p^2\varphi\over\p x^2} = 1,
  $$
-  we have $d=2, x_1 = t, x_2 = x$ and its linearized form is:
+we have $d=2, x_1 = t, x_2 = x$ and its linearized form is:
  $${\p^2 u\over\p t^2} - {\p u\over\p x}
  {\p^2\varphi\over\p x^2} - {\p\varphi\over\p
  x}{\p^2 u\over\p x^2} = 0,
  $$
 which for the unknown $u$ is locally elliptic if
- ${\p\varphi\over\p x} < 0$  and locally hyperbolic if
- ${\p\varphi\over\p x} > 0$.
+${\p\varphi\over\p x} < 0$  and locally hyperbolic if
+${\p\varphi\over\p x} > 0$.
 
 \paragraph{Examples}
 
- \noindent{Laplace's} equation is elliptic:
+\noindent{Laplace's} equation is elliptic:
  $$\Delta\varphi \equiv {\p^2\varphi\over\p x^2_1} +
  {\p^2\varphi\over\p x^2_2} + \cdots +
  {\p^2\varphi\over\p x^2_d} = f, \ \ \ \forall x
@@ -3140,7 +3142,7 @@ If $\mu >0$,  the \emph{wave} equation is hyperbolic:
  f{\quad\hbox{~in~}\quad}  Q.
  $$
 The \emph{convection diffusion} equation is parabolic if $\mu \neq 0$
- and hyperbolic otherwise:
+and hyperbolic otherwise:
  $${\p\varphi\over\p t} + a\nabla\varphi -
  \mu\Delta\varphi = f.
  $$
@@ -3163,9 +3165,9 @@ The \emph{\x{Neumann}} condition is
  \Gamma \hbox{~~~(or~~} n\cdot B\nabla\varphi,\hbox{given on }\
  \Gamma\hbox{ for a general second order PDE)}
 $$
-  where $n$ is the normal at $x\in\Gamma$
+where $n$ is the normal at $x\in\Gamma$
 directed towards the exterior of $\Omega$ (by definition
- ${\p\varphi\over\p n}=\nabla\varphi\cdot n$).
+${\p\varphi\over\p n}=\nabla\varphi\cdot n$).
 
 Another classical condition, called a \emph{Robin} (or \emph{Fourier})
 condition is written as:
@@ -3174,31 +3176,31 @@ condition is written as:
  \Gamma.
  $$
 Finding a set of boundary conditions  that defines a unique
- $\varphi$ is a difficult art.\\
+$\varphi$ is a difficult art.\\
 In general, an elliptic equation is well posed (\emph{i.e.} $\varphi$
- is unique) with one Dirichlet, Neumann or Robin conditions on the whole boundary.
- \\
+is unique) with one Dirichlet, Neumann or Robin conditions on the whole boundary.
+\\
 Thus, Laplace's equations  is well posed with
- a Dirichlet or Neumann condition but also with
+a Dirichlet or Neumann condition but also with
  $$\varphi \ \hbox{given on}\ \Gamma_1,\quad {\p\varphi\over
  \p n} \
  \hbox{given on}\ \Gamma_2, \quad \Gamma_1\cup\Gamma_2 =
  \Gamma,\quad{\dot{\Gamma_1}\cap\dot{\Gamma_2}} =
  \emptyset.$$
 Parabolic and hyperbolic equations rarely require boundary conditions
- on all of  $\Gamma\times]0,T[$. For instance, the heat equation
- is well posed with
+on all of  $\Gamma\times]0,T[$. For instance, the heat equation
+is well posed with
  $$\varphi \ \hbox{given at}\ t=0 \ \hbox{and Dirichlet or Neumann or mixed conditions on}\
  \p\Omega.$$
 Here $t$ is time so the first condition is called an \x{initial condition}.  The whole set of conditions
 are also called \x{Cauchy} conditions.
 \\
 The wave equation  is well posed with
- $$\varphi \ \hbox{and}\ {\p\varphi\over\p t} \
+$$\varphi \ \hbox{and}\ {\p\varphi\over\p t} \
  \hbox{given at}\ t=0
  \ \hbox{and Dirichlet or Neumann or mixed conditions on}\
  \p\Omega.
- $$
+$$
 
 
 \textBlack
@@ -13667,7 +13669,7 @@ ${\p u\over\p t} +u\cdot\nabla u$, giving a discretization in time
 \end{equation}
 }
 The term $u^n\circ X^n(x)\approx u^n(x-u^n(x)\tau )$ will be
-computed by the operator ``convect" \index{convect} , so we obtain
+computed by the operator ``convect'' \index{convect} , so we obtain
 \bFF
 int i=0;
 @real  nu=1./100.;
