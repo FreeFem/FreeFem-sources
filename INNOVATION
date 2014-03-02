@@ -1,3 +1,4 @@
+   coorect problem of region evalution in jump and mean function 
 version 3.28  ( merge with freefem++-cs tool)
    add download/getall perl script to download all related soft
    add  int1d on isoline for matrix ...

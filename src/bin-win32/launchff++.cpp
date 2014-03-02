@@ -14,6 +14,12 @@ int main(int argc,const char **argv)
   char *dir=0;
   const char *pp=0; 
   string cmd="freefem++.exe ";
+  if(argc <=1)
+  {
+      cerr << " Sorry no file name "<< endl;
+      cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
+      exit(1);
+  }
   for(int i=1;i<argc;++i)
     {	
     cmd += C;
