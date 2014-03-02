@@ -23,7 +23,7 @@ examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
 examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
 WHERE_LIBRARY-mkl FreeFem++-CoCoa \
-./build/cleancrlf
+./build/cleancrlf uninstall-ff++
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
