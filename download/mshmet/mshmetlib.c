@@ -9,7 +9,7 @@
 
 #include "mshmet.h"
 #include "compil.date"
-
+extern long verbosity;
 char     idir[5]     = {0,1,2,0,1};
 mytime   mshmet_ctim[TIMEMAX];
 int   (*boulep)(pMesh ,int ,int ,int *);
@@ -300,4 +300,17 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
   if ( mesh->info.imprim < -4 || mesh->info.ddebug )  M_memDump();
 
   return(0);
+}
+//  Add FH thank to I. Bajc.  (iztok.bajc@fmf.uni-lj.si) 03/14 
+void MSHMET_free( pMesh mesh, pSol sol)
+{
+  /* free mem */
+  M_free(mesh->point);
+  if ( mesh->nt )  M_free(mesh->tria);
+  if ( mesh->ne )  M_free(mesh->tetra);
+  M_free(mesh->adja);
+  M_free(sol->sol);
+  M_free(sol->met);
+  M_free(sol);
+  if(verbosity>10) printf(" mshmesh memory leak %d \n",M_memLeak());
 }

@@ -499,7 +499,9 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
   
   // faire les free
-  
+    
+  MSHMET_free( mshmetmesh, mshmetsol);
+
   Add2StackOfPtr2Free(stack,pmetric);
   *mp=mps;
   return SetAny< KN<double> >(metric);
@@ -709,7 +711,7 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
   metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
   
   // faire les free
-  
+  MSHMET_free( mshmetmesh, mshmetsol);
   *mp=mps;
 
   Add2StackOfPtr2Free(stack,pmetric);
@@ -729,7 +731,7 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   //if (verbosity)
   if(verbosity) cout << " load: mshmet  " << endl;
   
-   Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op>);
+  Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op>);
   Global.Add("mshmet","(",new OneOperatorCode<mshmet3d_Op>);
   //Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op> );
   

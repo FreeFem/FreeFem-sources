@@ -584,4 +584,15 @@ int yams_main(pSurfMesh sm, int intopt[23], double fopt[14], int infondang, int 
   
   return(0);
 }
-
+// add FH 03/14 ...
+void yams_free(pSurfMesh sm)
+{
+  /* release allocated memory */
+  M_free(sm->point);
+  M_free(sm->tria);
+  M_free(sm->geom);
+  M_free(sm->tgte);
+  if ( sm->metric ) M_free(sm->metric);
+  if ( sm->edge )   M_free(sm->edge);
+  M_free(sm);
+}
