@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.28-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.29,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1424,8 +1424,9 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
 AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
 
-AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma gettimeofday)
+AC_CHECK_FUNCS(asinh acosh atanh getenv jn erfc tgamma gettimeofday mallinfo mstats)
 AC_CHECK_FUNCS(srandomdev)
+
 
 AC_CHECK_FUNCS(second_,ff_second="",ff_second=second.o)
 AC_SUBST(FF_SECOND,"$ff_second")

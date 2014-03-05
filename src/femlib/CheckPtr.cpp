@@ -6,14 +6,21 @@
 #include <malloc.h>
 #endif
 
-static size_t StorageUsed()
+static long StorageUsed()
 {
+#if MALLOC_ZONE_SPECIFIC_FLAGS
     struct mstats mem1;
     mem1 = mstats();
     return mem1.bytes_used;
+#elif M_MMAP_THRESHOLD
+    struct mallinfo mem1;
+    mem1=mallinfo(void);
+    return mem1.uordblks;
+#else
+    return 0;
+#endif
     
 }
-
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 // -*- Mode : c++ -*-
