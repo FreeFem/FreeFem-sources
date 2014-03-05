@@ -14,7 +14,7 @@ static long StorageUsed()
     return mem1.bytes_used;
 #elif M_MMAP_THRESHOLD
     struct mallinfo mem1;
-    mem1=mallinfo(void);
+    mem1=mallinfo();
     return mem1.uordblks;
 #else
     return 0;
