@@ -47,6 +47,20 @@ using namespace  Fem2D;
 using namespace  mshmet;
 
 // 2d mesh function
+//  Add FH thank to I. Bajc.  (iztok.bajc@fmf.uni-lj.si) 03/14
+//
+static void myMSHMET_free( MSHMET_pMesh mesh, MSHMET_pSol sol)
+{
+    /* free mem */
+    free(mesh->point);
+    if ( mesh->nt )  free(mesh->tria);
+    if ( mesh->ne )  free(mesh->tetra);
+    free(mesh->adja);
+    free(mesh);
+    free(sol->sol);
+    free(sol->met);
+    free(sol);
+   }
 
 MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
   MSHMET_pMesh meshMSHMET;
@@ -500,7 +514,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   
   // faire les free
     
-  MSHMET_free( mshmetmesh, mshmetsol);
+  myMSHMET_free( mshmetmesh, mshmetsol);
 
   Add2StackOfPtr2Free(stack,pmetric);
   *mp=mps;
@@ -711,7 +725,7 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
   metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
   
   // faire les free
-  MSHMET_free( mshmetmesh, mshmetsol);
+  myMSHMET_free( mshmetmesh, mshmetsol);
   *mp=mps;
 
   Add2StackOfPtr2Free(stack,pmetric);
