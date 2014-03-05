@@ -87,7 +87,6 @@ namespace mshmet{
 extern "C" {
 #endif
   int MSHMET_mshmet(int intopt[7], double fopt[4], MSHMET_pMesh mesh, MSHMET_pSol sol);
-  void MSHMET_free(  MSHMET_pMesh mesh,  MSHMET_pSol sol); 
 #ifdef  __cplusplus
 }}
 #endif

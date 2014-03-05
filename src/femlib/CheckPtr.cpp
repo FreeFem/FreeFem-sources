@@ -493,7 +493,7 @@ int ShowAlloc(const char *s,size_t & lg)
 {
     size_t m =StorageUsed();
     if(CheckPtr___memoryusage!=0 && m != CheckPtr___memoryusage)
-        printf("CheckPtr:  Warning memory leack with malloc = %zu \n ",CheckPtr___memoryusage-m);
+        printf("CheckPtr:  Warning memory leack with malloc = %zu \n ",m-CheckPtr___memoryusage);
     CheckPtr___memoryusage=m;
     lg = 0; return CheckPtr___nbptr;}
 int UnShowAlloc =0;
