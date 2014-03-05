@@ -95,6 +95,7 @@ bool showCPU= false;
 size_t CodeAlloc::nb=0, CodeAlloc::lg=0,CodeAlloc::nbpx=0,CodeAlloc::chunk=2048; 
 size_t CodeAlloc::nbt,CodeAlloc::nbdl=0;
 CodeAlloc ** CodeAlloc::mem=0;
+size_t CodeAlloc::memoryusage=0; 
 bool CodeAlloc::sort=true;
 bool  CodeAlloc::cleanning=false;
 bool echo_edp=true; // add F.H of remove script dump 

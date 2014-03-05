@@ -33,6 +33,7 @@ class CodeAlloc { public:
   static bool cleanning;
   static void * lgmax;
   static bool sort;
+  static size_t memoryusage; // add FH mach 2014 ..
   static bool isdel(int i)
   {
     return  ((char *) (void *)  mem[i] - (char *) 0) % 2 == 1;

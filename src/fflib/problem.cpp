@@ -5374,8 +5374,8 @@ const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) co
   if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   */
-  cerr << "Warning :  Order of the Integration Formular order " << exact+1 << " exact = " << exact << endl;
-  //  ExecError(" We find  no Integration Formular on Tet for this  order to hight");
+  cerr << "Warning :  Order of the Quadrature Formular order " << exact+1 << " exact = " << exact << endl;
+  //  ExecError(" We find  no Quadrature Formular on Tet for this  order: too high");
   return QuadratureFormular_Tet_5;
 }
 
@@ -5395,8 +5395,8 @@ const Fem2D::QuadratureFormular & CDomainOfIntegration::FIT(Stack stack) const
   if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   */
-  cerr << " Ordre of the Integration Formular ordre " << exact+1 << " exact = " << exact << endl;
-  ExecError(" We find  no Integration Formular on Triangle for this  order to hight");
+  cerr << " Order of the Quadature Formular: order = " << exact+1 << " exact = " << exact << endl;
+  ExecError("Sorry,  we find  no Quadrature Formular on Triangle for this  order: too high.");
   return QuadratureFormular_T_1;
 }       
 const Fem2D::QuadratureFormular1d & CDomainOfIntegration::FIE(Stack stack) const 
@@ -5416,7 +5416,7 @@ const Fem2D::QuadratureFormular1d & CDomainOfIntegration::FIE(Stack stack) const
   if( 9 >= exact ) return QF_GaussLegendre5;
   */
   cerr << " Ordre of the Integration Formular on Edge, order = " << exact+1 << " exact = " << exact << endl;
-  ExecError(" We find  no Integration Formular on Edge  for this  order to hight");
+  ExecError(" We find  no Quadrature Formular on Edge  for this  order:  too high.");
   return QF_GaussLegendre1;
 }
 
