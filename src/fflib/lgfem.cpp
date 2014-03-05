@@ -4061,7 +4061,7 @@ AnyType Convect::eval2(Stack s) const
 	      mpc.change(R2(l[1],l[2]),Th[it],0);             
 	      if(k++>1000)
 		{
-		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity to hight ???? or NaN F. Hecht  " << endl;
+		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity too high ???? or NaN F. Hecht  " << endl;
 		  ffassert(0);
 		}
 	    }

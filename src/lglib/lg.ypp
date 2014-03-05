@@ -63,7 +63,7 @@ class Iden;
 #include "lgfem.hpp" 
 #include "lex.hpp"
 #include "environment.hpp"
-
+extern long storageused();
     extern FILE *ThePlotStream;
     extern KN<String> *pkarg;
 
@@ -106,18 +106,9 @@ bool fespacecomplex;
 int fespacedim;
 extern int UnShowAlloc;
 int ShowAlloc(const char *s,size_t &);
-<<<<<<< variant A
-
 // <<yylex>> Connection from grammar to lexer object zzzfff [[file:../fflib/lex.hpp::zzzfff]] of class mylex
 // [[file:../fflib/lex.hpp::class mylex]]. Method mylex::scan() is implemented at [[file:../fflib/lex.cpp::mylex_scan]]
 
->>>>>>> variant B
-####### Ancestor
-
-// <<yylex>> Connection from grammar to lexer object zzzfff [[file:../fflib/lex.hpp::zzzfff]] of class mylex
-// [[file:../fflib/lex.hpp::class mylex]]. Method mylex::scan() is implemented at [[file:../fflib/lex.cpp::mylex::scan]]
-
-======= end
 inline int yylex()  {return zzzfff->scan();}
 inline int lineno() {return zzzfff->lineno();}
 
@@ -141,16 +132,10 @@ void (*init_lgparallele)()=0;
 void (*end_parallele)()=0;
 %}
 
-<<<<<<< variant A
+
 /* <<YYSTYPE>> definition. <<yylval>> is renamed <<lglval>> by bison at [[file:lg.tab.cpp::lglval]]. It is allocated in
  lg.tab.o */
-
->>>>>>> variant B
-####### Ancestor
-/* <<YYSTYPE>> definition */
-
-======= end
-%union{ 
+%union{
  double dnum;
  long lnum;
  char * str;
@@ -283,78 +268,8 @@ void (*end_parallele)()=0;
 
 %% 
 
-<<<<<<< variant A
-/* <<start_symbol>> called from [[Compile]] */
-
-start:
-    input /*[[input]]*/
-    ENDOFFILE {
-      const char *magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
-
-      // FFCS: divert stream to FFCS
-      if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
-
-      // <<sizestack>> cf [[currentblock]]
-      size_t sizestack = currentblock->size()+1024 ; //  before close 
-
-      // $1 is of type [[YYSTYPE]]
-      $1+=currentblock->close(currentblock);
-
-      if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
-      size_t lg0,lg1;                       
-      int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
-      UnShowAlloc =0;// add FH for parallee
-      if(verbosity>2  || mpirank==0) cout << endl;  
-
-      {
-
-        // <<create_global_FF_stack>> calls [[file:../fflib/ffstack.hpp::newStack]]
-
-        Stack stack = newStack(sizestack);
-
-        double CPUcompile= CPUtime();
-        try {                  
-
-          // calls [[file:../fflib/AFunction.hpp::CListOfInst::eval]]
-
-          $1.eval(stack);
-        }
-        catch ( E_exception & e)  {
-          cerr << e.what() << " ,  mpirank " << mpirank << endl;
-          return 1; 
-        }
-        catch( Error & err) {
-          cerr << err.what() << endl;
-          cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
-          return err.errcode();
-        }
-        catch( ...) { cerr << "Strange catch exception ???\n"; 
-          cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
-          return 1; 
-        }
-
-        if(verbosity) cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
-                           <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
-
-        /// <<delete_global_FF_stack>>
-
-        deleteStack(stack);
-      } 
-
-      fingraphique();
-
-      if(ThePlotStream){
-
-        // FFCS: divert stream to FFCS
-        ffapi::ff_pclose(ThePlotStream);
-
-        ThePlotStream=0;
-      }
-
-      UnShowAlloc =1;
-      NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
->>>>>>> variant B
 start:   input ENDOFFILE {
+    // clean FH  mach 2014
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
 			//FFCS: divert stream to FFCS
                         if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
@@ -363,6 +278,7 @@ start:   input ENDOFFILE {
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
+                        size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
                         if(verbosity>2  || mpirank==0) cout << endl;  
                         { Stack stack = newStack(sizestack);
@@ -392,64 +308,11 @@ start:   input ENDOFFILE {
 			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
-####### Ancestor
-/* <<start_symbol>> called from [[int Compile]] */
-
-start:input ENDOFFILE {
-      const char *magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
-
-      // FFCS: divert stream to FFCS
-      if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
-
-      size_t sizestack = currentblock->size()+1024 ; //  before close 
-
-      // $1 is of type [[YYSTYPE]]
-      $1+=currentblock->close(currentblock);
-
-      if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
-      size_t lg0,lg1;                       
-      int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
-      UnShowAlloc =0;// add FH for parallee
-      if(verbosity>2  || mpirank==0) cout << endl;  
-
-      {
-        Stack stack = newStack(sizestack);
-        double CPUcompile= CPUtime();
-        try {                  
-
-          // calls [[file:~/ff/draft/src/fflib/AFunction.hpp::CListOfInst::eval]]
-
-          $1.eval(stack);
-        }
-        catch ( E_exception & e)  {
-          cerr << e.what() << " ,  mpirank " << mpirank << endl;
-          return 1; 
-        }
-        catch( Error & err) {
-          cerr << err.what() << endl;
-          cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
-          return err.errcode();
-        }
-        catch( ...) { cerr << "Strange catch exception ???\n"; 
-          cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
-          return 1; 
-        }
-
-        if(verbosity) cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
-                           <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
-        deleteStack(stack);
-      } 
-      fingraphique();
-
-      // FFCS: divert stream to FFCS
-      if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
-
-      UnShowAlloc =1;
-      NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
-======= end
+                        size_t stu1 =storageused()-stu0    ;
                         
-			    if (NbPtr) { cout << " ######## We forget of deleting   " << NbPtr 
-			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank <<endl;}
+                        
+			    if (NbPtr || (stu1>100000) ) { cout << " ######## We forget of deleting   " << NbPtr
+			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank << ", memory leak ="<< stu1 <<  endl;}
   return 0;}
 ;
 
@@ -883,8 +746,8 @@ int Compile()
         if( verbosity  ) {
 	      UnShowAlloc =1;
 	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg 
-		   << " mpirank: " <<mpirank << endl    ;
-	      if(!mpirank) cerr <<  "Bien: On a fini Normalement" << endl; 
+              << " mpirank: " <<mpirank <<  endl    ;
+	      if(!mpirank) cerr <<  "Ok: Normal End" << endl;
 	    }
 	}
     }

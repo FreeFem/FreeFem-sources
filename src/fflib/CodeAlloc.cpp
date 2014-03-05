@@ -35,7 +35,7 @@ using namespace std;
 
 #include "CodeAlloc.hpp"
 
-/*
+/* now in global.cpp 
 size_t CodeAlloc::nb=0, CodeAlloc::lg=0,CodeAlloc::nbpx=0,CodeAlloc::chunk=2048; 
 size_t CodeAlloc::nbt,CodeAlloc::nbdl=0;
 CodeAlloc ** CodeAlloc::mem=0;
