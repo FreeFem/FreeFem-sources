@@ -1,4 +1,19 @@
-//#define NCHECKPTR // BUg with MPI ??? FH 
+//#define NCHECKPTR // BUg with MPI ??? FH
+
+#if __APPLE__
+#include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
+
+static size_t StorageUsed()
+{
+    struct mstats mem1;
+    mem1 = mstats();
+    return mem1.bytes_used;
+    
+}
+
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 // -*- Mode : c++ -*-
@@ -32,19 +47,6 @@
 #include <cerrno>
 #include <cstdio>
 #include <new>
-#if __APPLE__
-#include <malloc/malloc.h>
-#else
-#include <malloc.h>
-#endif
-
-static size_t StorageUsed()
-{
-    struct mstats mem1;
-    mem1 = mstats();
-    return mem1.bytes_used;
-    
-}
 
 void debugalloc()
 { }
