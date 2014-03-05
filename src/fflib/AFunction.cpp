@@ -62,7 +62,7 @@ long storageused()
     return mem1.bytes_used;
 #elif HAVE_MALLINFO
     struct mallinfo mem1;
-    mem1=mallinfo(void);
+    mem1=mallinfo();
     return mem1.uordblks;
 #else
     return 0;
@@ -77,7 +77,7 @@ long storagetotal()
     return mem1.bytes_total;
 #elif HAVE_MALLINFO
     struct mallinfo mem1;
-    mem1=mallinfo(void);
+    mem1=mallinfo();
     return mem1.keepcost;
 #else
     return 0;
