@@ -48,7 +48,7 @@ mmg3d4/FAIT-4.done:tag-tar-$(SIZEPKG)
 	touch mmg3d4/FAIT-4.done
 
 # FFCS - simplify Makefile structure
-install-4.done:mmg3d4/FAIT-4.done
+install-4.done:mmg3d4/FAIT-4.done 
 	-mkdir ../include/mmg3d-v4/		
 	cp mmg3d4/build/sources/*.h ../include/mmg3d-v4/
 	touch $@
@@ -71,7 +71,8 @@ clean::
 FAIRE: mmg3d4/FAIT-4.done install-4.done
 
 # FFCS - keep it simple
-tag-tar-$(SIZEPKG): $(PACKAGE)
+tag-tar-$(SIZEPKG): $(PACKAGE) patch-mmg3dv4.diff
+	-rm -rf  mmg3d4
 	tar xvzf $(PACKAGE)
 	touch mmg3d4/build/sources/dataff.h 	
 #
