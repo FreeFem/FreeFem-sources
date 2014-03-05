@@ -50,23 +50,38 @@
 // Add FH to get memroy used in test .. march 2014
 #if __APPLE__
 #include <malloc/malloc.h>
-#else
+#elif HAVE_MALLOC_H
 #include <malloc.h> 
 #endif
 
 long storageused()
 {
+#if HAVE_MSTATS
     struct mstats mem1;
     mem1 = mstats();
     return mem1.bytes_used;
+#elif HAVE_MALLINFO
+    struct mallinfo mem1;
+    mem1=mallinfo(void);
+    return mem1.uordblks;
+#else
+    return 0;
+#endif
 
 }
 long storagetotal()
 {
+#if HAVE_MSTATS
     struct mstats mem1;
     mem1 = mstats();
     return mem1.bytes_total;
-   
+#elif HAVE_MALLINFO
+    struct mallinfo mem1;
+    mem1=mallinfo(void);
+    return mem1.keepcost;
+#else
+    return 0;
+#endif
 }
 // end add mach 2014 ...
 extern Map_type_of_map map_type_of_map ; //  to store te type 
