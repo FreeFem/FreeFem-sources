@@ -15,7 +15,6 @@ EXTRA_DIST= \
 ./f2c/f2c.h-int \
 ./f2c/fort77.sed \
 ./f2c/tt.f \
-./fftw/Makefile \
 ./fftw/Makefile.am \
 ./fftw/Makefile.in \
 ./gmm/Makefile \
@@ -83,7 +82,8 @@ EXTRA_DIST= \
 ./yams/yamslib_internal.h \
 ipopt/Makefile	\
 ipopt/Makefile.inc.in \
-ipopt/patch-IpBlas 
+ipopt/patch-IpBlas  \
+getall 
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
