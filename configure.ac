@@ -1644,6 +1644,33 @@ m4_define([TOOL_DISABLE],
 
     TOOL_PARAMETERS($1,$2,$3)
 ])
+##  try to see pakage is hon computer  if the FH ZZZZ 
+
+m4_map([AC_FF_WHERELIB],[
+	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
+	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
+	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
+	[[hypre],[-lHYPRE]],
+	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
+	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
+	[[superlu],[-lsuperlu],[/usr/include/superlu/superlu_enum_consts.h],[]],
+	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/superlu_enum_consts.h],[]],
+        [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
+        [[scalapack],[-lscalapack$ff_with_mpi],[]],
+        [[scotch],[-lscotch -lscotcherr],[scotch.h]],
+        [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h]],
+	[[metis],[-lscotch -lmetis],[/usr/include/metis/metis.h],[]],
+	[[metis],[-lscotch -lmetis],[metis.h],[]],
+	[[parmetis],[-lptscotch -lparmetis],[],[]],
+	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
+	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
+	[[mshmet],[-lmshmet],[],[]],
+	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
+	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
+	[[tetgen],[-ltet],[tetgen.h],[]],
+    ]
+    )
+## before try 
 
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
@@ -1685,13 +1712,13 @@ fi
 #
 # Such constants are rejected without [[file:download/parms/makefile-parms.in::NO_RANGE_CHECK]]
 
-if test $OS = Windows_NT
+if test "$OS" = Windows_NT
 then
     AC_SUBST(NO_RANGE_CHECK,-fno-range-check)
 fi
 
 # ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
-if test "$with_scotch_include" = ""
+if test "$with_scotch_include" = "" 
 then
     with_scotch_include=$ac_pwd/download/include/scotch
 fi
@@ -1742,31 +1769,6 @@ ff_scalapack=-lscalapack
 test -n "$ff_mkl_blacs" && ff_blacs="$ff_mkl_blacs"
 test -n "$ff_mkl_scalapack" && ff_scalapack="$ff_mkl_scalapack"
 test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
-
-m4_map([AC_FF_WHERELIB],[
-	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
-	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
-	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
-	[[hypre],[-lHYPRE]],
-	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
-	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
-	[[superlu],[-lsuperlu],[/usr/include/superlu/superlu_enum_consts.h],[]],
-	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/superlu_enum_consts.h],[]],
-        [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
-        [[scalapack],[-lscalapack$ff_with_mpi],[]],
-        [[scotch],[-lscotch -lscotcherr],[]],
-        [[ptscotch],[-lptscotch -lptscotcherr],[]],
-	[[metis],[-lscotch -lmetis],[/usr/include/metis/metis.h],[]],
-	[[metis],[-lscotch -lmetis],[metis.h],[]],
-	[[parmetis],[-lptscotch -lparmetis],[],[]],
-	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
-	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
-	[[mshmet],[-lmshmet],[],[]],
-	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
-	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
-	[[tetgen],[-ltet],[tetgen.h],[]],
-    ]
-    )
 
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
