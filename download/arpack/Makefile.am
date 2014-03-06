@@ -43,7 +43,7 @@ PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
 
 # FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
 
-pkgcompile::$(ARPACKLIB)
+compilepkg::$(ARPACKLIB)
 $(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
