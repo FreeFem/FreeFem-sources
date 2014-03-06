@@ -15,12 +15,12 @@ EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh \
 
 
 all.edp:  Makefile
-	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
+	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;searchMethod=0;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\
-		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
+		echo ' cout << " mem leak = " <<storageused() - MEM1234 << endl << "------------------------------------------------------------------------------ " << endl;' ;\
 	done) > $@
 
 # To create a new set of reference values in "ref.edp"
