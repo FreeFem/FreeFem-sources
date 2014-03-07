@@ -1,3 +1,4 @@
+  add basic  func mesh3 Cube(int nx,int ny,int nz) in cube.idp file.
 version 3.29  (hg rev 2973)
    add int storagetotal(); and int storageused(); function 
      to get static of malloc ( memory storage usage)
