@@ -12,6 +12,8 @@ version 3.27
    missing all random  distribution ..
    add interface  with gsl random number generation in test .. 
    correct pb of compilation under window (mingw32/msys) 
+(ALH)
+ - [[file:download/getall]] now checks downloaded packages against known MD5 values
 6/2/14 (ALH)
  - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
  - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format
