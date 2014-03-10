@@ -26,10 +26,11 @@
 
 use strict;
 use Getopt::Std;
+use Digest::MD5 qw(md5_hex); # [[http://perldoc.perl.org/Digest/MD5.html]]
 
 # This download script needs to be able to work on platforms that do not have threads (eg Mingw).
 
-my $can_use_threads=eval 'use threads;1';
+my $can_use_threads=eval 'use threads;use threads::shared;1';
 
 # -a = accept all licences
 # -f = force new downloads
@@ -37,6 +38,11 @@ my $can_use_threads=eval 'use threads;1';
 
 my %opts;
 getopts('afo:',\%opts);
+
+# Accumulate errors and print them all at the end of the script
+
+my $errors='';
+if($can_use_threads){share(\$errors)}
 
 # list required packages
 my $only=0;
@@ -58,73 +64,81 @@ system "mkdir -p pkg";
 my @downloads;
 
 download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/arpack96.tar.gz',
-	 'http://www.caam.rice.edu/software/ARPACK','arpack96.tar.gz');
+	 'http://www.caam.rice.edu/software/ARPACK','arpack96.tar.gz','fffaa970198b285676f4156cebc8626e');
 download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
-	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz');
+	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz','14830d758f195f272b8594a493501fa2');
 
-download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz');
-download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz');
+download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz',
+	 '5e99e975f7a1e3ea6abcad7c6e7e42e6');
+download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz',
+	 '1e8830f622d2112239a4a8a83b84209a');
 
 download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.8','http://www.openblas.net/','OpenBLAS.tar.gz',
+	 'b58ad6312e9c9a284fd72de7b6a0a076',
 	 'BAD_CERT');
 
-download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz');
+download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz',
+	 '6977ee770ed68c85698c7168ffa6e178');
 
 download('freeYams','http://www.ann.jussieu.fr/~frey/ftp/archives/freeyams.2012.02.05.tgz',
-	 'http://www.ann.jussieu.fr/~frey/software.html','freeyams.2012.02.05.tgz');
+	 'http://www.ann.jussieu.fr/~frey/software.html','freeyams.2012.02.05.tgz','b7c82a256a3e59beeb2b578de93a4e0b');
 
 download('Gmm++','http://download.gna.org/getfem/stable/gmm-4.2.tar.gz',
-	 'http://download.gna.org/getfem/html/homepage/download.html','gmm-4.2.tar.gz');
+	 'http://download.gna.org/getfem/html/homepage/download.html','gmm-4.2.tar.gz','35fe900f7459c49f4b4337dc691c8cdf');
 
 download('Hips','http://hips.gforge.inria.fr/release/hips-1.2b-rc4.tar.gz',
-	 'http://hips.gforge.inria.fr/','hips-1.2b-rc4.tar.gz');
+	 'http://hips.gforge.inria.fr/','hips-1.2b-rc4.tar.gz','78720bf9bbbce5e174bdbdbaa1e5d7b4');
 
 download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.10.2.tgz',
-	 'https://projects.coin-or.org/Ipopt','Ipopt-3.10.2.tgz');
+	 'https://projects.coin-or.org/Ipopt','Ipopt-3.10.2.tgz','e647a49a80a03f2682db583e00aa520b');
 
-download('METIS','http://www.netlib.org/linalg/metis-4.0.tar.gz','http://www.netlib.org/linalg/','metis-4.0.tar.gz');
+download('METIS','http://www.netlib.org/linalg/metis-4.0.tar.gz','http://www.netlib.org/linalg/','metis-4.0.tar.gz',
+	 '0aa546419ff7ef50bd86ce1ec7f727c7');
 
 download('ParMETIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-3.1.1.tar.gz',
-	 'http://glaros.dtc.umn.edu/gkhome/views/metis','ParMetis-3.1.1.tar.gz');
+	 'http://glaros.dtc.umn.edu/gkhome/views/metis','ParMetis-3.1.1.tar.gz','57318dbaddff2c3d1ef820cff0bf87b0');
 
 download('MMG3D','http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mmg3d4.0.tgz',
-	 'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php','mmg3d4.0.tgz');
+	 'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php','mmg3d4.0.tgz','bfc2b0373bc208e0512415d1aa2e76a1');
 
 download('mshmet','http://www.ann.jussieu.fr/~frey/ftp/archives/mshmet.2012.04.25.tgz',
-	 'http://www.ann.jussieu.fr/~frey/software.html','mshmet.2012.04.25.tgz');
+	 'http://www.ann.jussieu.fr/~frey/software.html','mshmet.2012.04.25.tgz','427f397e0602efc56aa897d38a8e9bfa');
 
 download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
-	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz');
+	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz','959e9981b606cd574f713b8422ef0d9f');
 
 download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
-	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz');
+	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz','9c60c6380a10c6d2a06895f0e8756d4f');
 
 download('pARMS','http://www-users.cs.umn.edu/~saad/software/pARMS/pARMS_2.2.php',
-	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz');
+	 'http://www-users.cs.umn.edu/~saad/software/pARMS','pARMS_2.2.tar.gz','be0b4a539d78b9b2b7faf32ff83de822');
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
 
 download('PaStiX','https://gforge.inria.fr/frs/download.php/21873/pastix_release_2200.tar.bz2',
-	 'https://gforge.inria.fr/projects/pastix/','pastix_release_2200.tar.bz2','BAD_CERT');
+	 'https://gforge.inria.fr/projects/pastix/','pastix_release_2200.tar.bz2','c82b1808084f183dc8dfd07b1deef694',
+	 'BAD_CERT');
 
 download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
-	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz');
+	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz','2f75e600a2ba155ed9ce974a1c4b536f');
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
 
 download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_esmumps.tar.gz',
-	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz','BAD_CERT');
+	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz','961d0ab22914fc6455a62699cf7b5a47',
+	 'BAD_CERT');
 
 download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
-	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz');
+	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz',
+	 'efe53b7ef2b529d54727815231a5a6a9');
 
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
-	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz');
+	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz','b72c6309f25e9660133007b82621ba7c');
 download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_3.0.tar.gz',
-	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_dist_3.0.tar.gz');
+	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_dist_3.0.tar.gz','1d77f10a265f5751d4e4b59317d778f8');
 
 download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
-	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz');
+	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz','d6a4bcdde2ac804f7ec66c29dcb63c18');
 
 # run all downloads concurrently
 
@@ -137,8 +151,13 @@ else{
   foreach(@downloads){downloadone($_)}
 }
 
+if($errors ne ''){
+  print "\n$errors";
+  exit 1;
+}
+
 sub download{
-  my($title,$url,$lic,$pkg,$opts)=@_;
+  my($title,$url,$lic,$pkg,$md5,$opts)=@_;
 
   # skip packages that have not been requested explicitely
   return if($only && !defined $packs{$title});
@@ -160,16 +179,19 @@ sub download{
   }
 
   # uses [[file:../build/download]]
-  push @downloads,"../build/download $url pkg/$pkg $opts";
+  push @downloads,"$url,pkg/$pkg,$md5,$opts";
 }
 
 sub downloadone{
-  my($cmd)=@_;
+  my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);
+  my $cmd="../build/download $url $pkg $opts";
   print "$cmd\n";
   system $cmd;
-  if($?){
-    print "$cmd FAILED\n";
-  }
+  if($?){$errors.="ERROR: $cmd FAILED\n"}
+
+  # check if resulting package contents are valid
+  my $md5check=md5_hex(`cat $pkg`);
+  if($md5check ne $md5){$errors.="ERROR: INVALID MD5 for $pkg\n"}
 }
 
 # Local Variables:
