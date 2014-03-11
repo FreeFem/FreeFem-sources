@@ -308,7 +308,7 @@ start:   input ENDOFFILE {
 			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
-                        size_t stu1 =storageused()-stu0    ;
+                        long stu1 =storageused()-stu0    ;
                         
                         
 			    if (NbPtr || (stu1>100000) ) { cout << " ######## We forget of deleting   " << NbPtr

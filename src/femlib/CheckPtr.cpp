@@ -447,7 +447,7 @@ int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
     size_t m =StorageUsage;
     StorageUsage =StorageUsed();
     if (!NbAllocShow) {NbAllocShow=NbAlloc;}
-  printf ("----------CheckPtr:-----%s------ NbUndelPtr  %ld  Alloc: %ld  NbPtr %ld  Mem Usage: %zu diff: %zu\n",s,NbPtr,AllocSize,NbAlloc,StorageUsage,StorageUsage-m);
+  printf ("----------CheckPtr:-----%s------ NbUndelPtr  %ld  Alloc: %ld  NbPtr %ld  Mem Usage: %zu diff: %ld\n",s,NbPtr,AllocSize,NbAlloc,StorageUsage,(long)(StorageUsage-m));
   lg = AllocSize;
   return NbPtr;
 }

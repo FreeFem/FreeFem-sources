@@ -62,6 +62,7 @@
 		3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
 		3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
+		3D75A17118CA62AE00AEDCE7 /* P1IsoValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */; };
 		3D848A93175504D300E33180 /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D848A92175504D300E33180 /* libcolamd.a */; };
 		3D848A94175504D300E33180 /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D848A92175504D300E33180 /* libcolamd.a */; };
 		3D84ADDF1654DAE200301697 /* ffstack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADC31654DAE200301697 /* ffstack.hpp */; };
@@ -164,6 +165,7 @@
 		3D66F11F1752B083004AE3C8 /* libcholmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcholmod.a; path = ../../../../../usr/local/lib/libcholmod.a; sourceTree = "<group>"; };
 		3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = UMFPack_Solver.cpp; sourceTree = "<group>"; };
 		3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = glumesh2D.cpp; sourceTree = "<group>"; };
+		3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = P1IsoValue.cpp; path = ../src/fflib/P1IsoValue.cpp; sourceTree = "<group>"; };
 		3D848A92175504D300E33180 /* libcolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcolamd.a; path = ../../../../../usr/local/lib/libcolamd.a; sourceTree = "<group>"; };
 		3D84ADC31654DAE200301697 /* ffstack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ffstack.hpp; path = ../src/fflib/ffstack.hpp; sourceTree = "<group>"; };
 		3D84ADC41654DAE200301697 /* lgsolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lgsolver.hpp; path = ../src/fflib/lgsolver.hpp; sourceTree = "<group>"; };
@@ -328,6 +330,7 @@
 		3D90DC7D097012B3002A1826 = {
 			isa = PBXGroup;
 			children = (
+				3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */,
 				3D66F11F1752B083004AE3C8 /* libcholmod.a */,
 				3D848A92175504D300E33180 /* libcolamd.a */,
 				3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */,
@@ -772,6 +775,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D75A17118CA62AE00AEDCE7 /* P1IsoValue.cpp in Sources */,
 				3D15D46D0BD3A65E00CEB4C6 /* sansrgraph.cpp in Sources */,
 				3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */,
 				3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,

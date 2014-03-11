@@ -47,7 +47,7 @@ endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp \
 ../femlib/splitsimplex.cpp AFunction_ext.hpp \
-ffapi.hpp
+ffapi.hpp P1IsoValue.cpp	P1IsoValue.hpp
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 

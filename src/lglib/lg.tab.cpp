@@ -2102,10 +2102,10 @@ yyreduce:
 			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
-                        size_t stu1 =storageused()-stu0    ;
+                        long stu1 =storageused()-stu0    ;
                         
                         
-			    if (NbPtr || (stu1>10000) ) { cout << " ######## We forget of deleting   " << NbPtr
+			    if (NbPtr || (stu1>100000) ) { cout << " ######## We forget of deleting   " << NbPtr
 			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank << ", memory leak ="<< stu1 <<  endl;}
   return 0;;}
     break;
