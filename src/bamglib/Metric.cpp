@@ -976,7 +976,7 @@ void Triangles::SmoothMetric(Real8 raisonmax)
     for (i=Head0;i>=0;i=first_np_or_next_t0[ip=i],first_np_or_next_t0[ip]=-1)
       {  //  pour tous les triangles autour du sommet s
 	// 	cout << kk << " i = " << i << " " << ip << endl;
-	register Triangle * t= vertices[i].t;
+	 Triangle * t= vertices[i].t;
 	assert(t);
 	Vertex & vi = vertices[i];
 	TriangleAdjacent ta(t,EdgesVertexTriangle[vertices[i].vint][0]);
