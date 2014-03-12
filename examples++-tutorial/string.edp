@@ -59,6 +59,10 @@ for (int i=0;i<10;++i)
    cout << i << " : " << s << endl;
   }
 }
+// add  3.29 + Stringification
+macro aa()  "tyty"  //
+cout << aa << endl; 
+cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
 
 
  

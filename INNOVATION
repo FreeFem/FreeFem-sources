@@ -1,3 +1,7 @@
+  add new macro tool  like in C 
+    FILE,LINE,Stringification() to get line number and edp filename, add quote to a parameter after macro generation .. 
+   like in 
+    cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
   add new int2d on levelset  in 3d  (int test)
   add basic  func mesh3 Cube(int nx,int ny,int nz) in cube.idp file.
 version 3.29  (hg rev 2973)
