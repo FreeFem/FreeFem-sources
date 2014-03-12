@@ -1,3 +1,4 @@
+  add ltime() (rev 2981)  function returns the value of time in seconds since 0 hours, 0 minutes, 0 seconds, January 1, 1970, (int) 
   add new macro tool  like in C  (rev 2980)
     FILE,LINE,Stringification() to get line number and edp filename, add quote to a parameter after macro generation .. 
    like in 

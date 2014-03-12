@@ -53,7 +53,9 @@
 #elif HAVE_MALLOC_H
 #include <malloc.h> 
 #endif
-
+#ifdef HAVE_TIMES
+#include <time.h>
+#endif
 long storageused()
 {
 #if HAVE_MSTATS
@@ -932,6 +934,15 @@ inline double walltime(){
 #endif
 }
 
+inline long fftime()
+{
+#ifdef HAVE_GETTIMEOFDAY
+    time_t tloc;
+    return time(&tloc);
+#endif
+    return -1;
+}
+
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
 double NaN(string* p) {return nan(p->c_str());}// add march 2012
@@ -1509,6 +1520,7 @@ void Init_map_type()
      
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
     Global.Add("time","(",new OneOperator0<double>(walltime));// add mars 2010 for Pichon.
+    Global.Add("ltime","(",new OneOperator0<long>(fftime));// add mars 2014 ( the times unix fonction)
     Global.Add("storageused","(",new OneOperator0<long>(storageused));
     Global.Add("storagetotal","(",new OneOperator0<long>(storagetotal));
     
