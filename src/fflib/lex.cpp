@@ -626,13 +626,13 @@ bool mylex::CallMacro(int &ret)
   }
   else if(strcmp(buf,"FILE")==0)
   {
-       plglval->str = newcopy(filename() );
+      plglval->str = newcopy(filename() );
       ret = STRING;
      return false;
   }
   else if(strcmp(buf,"LINE")==0)
   {
-      plglval->lnum = linenumber;
+    plglval->lnum = linenumber;
     ret=LNUM;
     return false;
   }

@@ -1,6 +1,7 @@
 //  bug string macro parameter   version < 1.41
 // bug in string parameter version before <2.5
 // -----------------
+
  macro tyty(uu) uu//  
 cout << tyty("toto") << endl;
 
@@ -59,10 +60,11 @@ for (int i=0;i<10;++i)
    cout << i << " : " << s << endl;
   }
 }
-// add  3.29 + Stringification
+// add  3.29 + Stringification, LINE, FILE, ltime ..
+
 macro aa()  "tyty"  //
 cout << aa << endl; 
 cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
-
+cout << " unix time = " << time() << " " << ltime() << endl;
 
  
