@@ -1,4 +1,4 @@
-  add new macro tool  like in C 
+  add new macro tool  like in C  (rev 2980)
     FILE,LINE,Stringification() to get line number and edp filename, add quote to a parameter after macro generation .. 
    like in 
     cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
