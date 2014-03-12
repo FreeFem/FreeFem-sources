@@ -704,7 +704,7 @@ retry:
     Real8 sg;
     //   cout << "           " << Number(on) << " " <<  Number(eg0) << " " <<  Number(eg1) << " "  ; 
     if (eg0 == eg1) { 
-       register Real8 s0= vg0,s1=vg1;
+        Real8 s0= vg0,s1=vg1;
        sg =  s0 * (1.0-s) +  s * s1;
        //    cout <<"                s0=" << s0 << " s1=" << s1 
        //             << " s = " << s << " sens= " << OppositeSens << "\t\t sg = " << sg << endl ;
@@ -869,14 +869,14 @@ void Geometry::AfterRead()
         exch = 0;
         Int4  *p =  hv + i, *po = p;
 	Int4 n = *p;
-        register float angleold = -1000 ; // angle = - infini 
+         float angleold = -1000 ; // angle = - infini 
         ord = 0;
         while (n >=0) 
         {
           ord++;
-          register Int4 i1= n /2;
-          register Int4  j1 = n % 2;
-          register Int4 *pn = ev + n;
+           Int4 i1= n /2;
+           Int4  j1 = n % 2;
+           Int4 *pn = ev + n;
           float angle = j1 ? OppositeAngle(eangle[i1]):  eangle[i1];
           n = *pn;
           if (angleold > angle) // exch to have : po -> pn -> p 

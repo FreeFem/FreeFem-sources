@@ -2158,7 +2158,7 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
  void  Element_Op(MatriceElementaireSymetrique<R,FESpace3> & mat,const FElement3 & Ku,double * p,int ie,int label, void * vstack,R3 *B)
   {
-      ffassert(B==0);
+  //    ffassert(B==0);
       Stack stack=pvoid2Stack(vstack);
    typedef FESpace3 FESpace;
    typedef typename FESpace3::Mesh Mesh;
@@ -2250,7 +2250,95 @@ void Check(const Opera &Op,int N,int  M)
             }
           
         } 
-    else // int on edge ie 
+    else if(B)
+        {  // int on leveset
+            int np = ie-10; //= (B[0].x == B[3].x ) && (B[0].y == B[3].y ) && (B[0].z == B[3].z ) ? 3 : 4;
+            if(verbosity>999) cout << "    Ass mat pleine /"<< np << endl;
+            assert( np==3 || np==4);
+            // XXXXXXX
+            double epsmes3=T.mesure()*T.mesure()*1e-18;
+            R3 PP[4];
+            double l[3];
+            for(int i=0; i< np; ++i)
+                PP[i]= T(B[i]);
+            
+            for( int i =0; i+1 < np; i+=2)
+            { // 0,1,, a and 2,3,0.
+                int i0=i,i1=i+1,i2=(i+2)%np;
+                R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
+                double mes2 = (NN,NN);
+                double mes = sqrt(mes2);
+                
+                if(mes2*mes <epsmes3) continue; //  too small
+                NN /= mes;
+                mes *= 0.5;
+                if(verbosity>999)
+                    cout << " --int on leveset3d " << np << " " << mes << " " << i0<<i1<<i2 <<endl;
+                double asum=0;
+                for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+                {
+                    GQuadraturePoint<R2>  pi( FIb[npi]);
+                    // cout << " %% " << npi << " " << pi.a << " " << pi.x << " " << pi.y << endl;
+                    asum+= pi.a;
+                    pi.toBary(l);
+                    R3 Pt( l[0]*B[i0]+l[1]*B[i1]+l[2]*B[i2]); //
+                    double coef = mes*pi.a; // correction 0.5 050109 FH
+                    Ku.BF(Dop,Pt,fu);
+                     MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,NN,ie);
+                    if (classoptm) (*Op.optiexpK)(stack); // call optim version
+                    
+                    pa=a;
+                    int il=0;
+                    for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                    {  // attention la fonction test donne la ligne
+                        //  et la fonction test est en second
+                        BilinearOperator::K ll(*l);
+                        //	      pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                        long jcomp= ll.first.first.first,jop=ll.first.first.second;
+                        long icomp= ll.first.second.first,iop=ll.first.second.second;
+                        
+                        R c = copt ? *(copt[il]): GetAny<R>(ll.second.eval(stack));
+                        if ( copt && Ku.number <1)
+                        {
+                            R cc  =  GetAny<R>(ll.second.eval(stack));
+                            // cout << *(copt[il]) << " == " <<  cc << endl;
+                            if ( c != cc) {
+                                cerr << c << " != " << cc << " => ";
+                                cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+                                ExecError("In Optimized version "); }
+                        }
+                        c *= coef ;
+                        long fi=Ku.dfcbegin(icomp);
+                        long li=Ku.dfcend(icomp);
+                        long  fj=Ku.dfcbegin(jcomp);
+                        long  lj=Ku.dfcend(jcomp);
+                        
+                        for (long i=fi;  i<li;   i++ )
+                            for (long j=fj;  j<min(lj,i+1);  j++,pa++ ) //
+                            {
+                                R w_i =  fu(i,icomp,iop); 
+                                R w_j =  fu(j,jcomp,jop);		      
+                                
+                                mat(i,j)  +=  c * w_i*w_j;
+                                
+                                /*
+                                 if (Ku.Vh.Th(T) < 1 && npi < 1 && i < 1 && j < 1 ) 
+                                 cout <<" + " << c << " (" <<coef << " " << w_i << " " << w_j << " " << jj.first << " " << jj.second << ") " ;
+                                 */
+                            }
+                        
+                    }
+                    
+                    
+                    
+                }
+                
+                
+            }
+            
+        }// end int level set ...
+      else
+        // int on edge ie
       for (npi=0;npi<FIb.n;npi++) // loop on the integration point
         {
           
@@ -2291,8 +2379,8 @@ void Check(const Opera &Op,int N,int  M)
 	      long  fj=Ku.dfcbegin(jcomp);
 	      long  lj=Ku.dfcend(jcomp);
 
-	      for ( i=fi;  i<li;   i++ )  
-		for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) // 
+	      for (long i=fi;  i<li;   i++ )
+		for (long j=fj;  j<min(lj,i+1);  j++,pa++ ) //
 		  {
 		    R w_i =  fu(i,icomp,iop); 
 		    R w_j =  fu(j,jcomp,jop);		      

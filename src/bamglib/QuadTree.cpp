@@ -54,8 +54,8 @@ void  QuadTree::Draw()
   QuadTreeBox * pb[ MaxDeep ];
   int  pi[ MaxDeep  ];
   Icoor1 ii[  MaxDeep ], jj [ MaxDeep];
-  register int l=0; // level
-  register QuadTreeBox * b;
+   int l=0; // level
+   QuadTreeBox * b;
   IntQuad hb =  MaxISize;
   if(!root) return;
   //  Int4 kkk =0;
@@ -87,14 +87,14 @@ void  QuadTree::Draw()
 	    }
 	else // Pointer QuadTreeBox 
 	    { 
-	      register int lll = pi[l];
-	      register QuadTreeBox *b0=b;
+	       int lll = pi[l];
+	       QuadTreeBox *b0=b;
 	      
 	      if ((b=b->b[lll])) 
 		{ 
 		  hb >>=1 ; // div by 2
-		  register Icoor1 iii = ii[l]+I_IJ(lll,hb);
-		  register Icoor1 jjj = jj[l]+J_IJ(lll,hb);
+		   Icoor1 iii = ii[l]+I_IJ(lll,hb);
+		   Icoor1 jjj = jj[l]+J_IJ(lll,hb);
 		  
 		  pb[++l]=  b;
 		  pi[l]= 4;
@@ -111,8 +111,8 @@ void  QuadTree::Draw()
 		}
 	      else
 		{
-		  register Icoor1 iii = ii[l]+I_IJ(lll,hb/2);
-		  register Icoor1 jjj = jj[l]+J_IJ(lll,hb/2);
+		   Icoor1 iii = ii[l]+I_IJ(lll,hb/2);
+		   Icoor1 jjj = jj[l]+J_IJ(lll,hb/2);
 		  b=b0;
 
 		  IMoveTo(iii,     jjj);
@@ -135,8 +135,8 @@ Vertex *  QuadTree::NearestVertex(Icoor1 i,Icoor1 j)
   QuadTreeBox * pb[ MaxDeep ];
   int  pi[ MaxDeep  ];
   Icoor1 ii[  MaxDeep ], jj [ MaxDeep];
-  register int l=0; // level
-  register QuadTreeBox * b;
+   int l=0; // level
+   QuadTreeBox * b;
   IntQuad  h=MaxISize,h0;
   IntQuad hb =  MaxISize;
   Icoor1  i0=0,j0=0;
@@ -147,7 +147,7 @@ Vertex *  QuadTree::NearestVertex(Icoor1 i,Icoor1 j)
   
   // init for optimisation ---
   b = root;
-  register Int4  n0;
+   Int4  n0;
   if (!root->n)
     return vn; // empty tree 
   
@@ -155,9 +155,9 @@ Vertex *  QuadTree::NearestVertex(Icoor1 i,Icoor1 j)
     {
       // search the non empty 
       // QuadTreeBox containing  the point (i,j)
-      register Icoor1 hb2 = hb >> 1 ;
-      register  int k = IJ(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
-      register QuadTreeBox * b0= b->b[k];
+       Icoor1 hb2 = hb >> 1 ;
+        int k = IJ(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
+       QuadTreeBox * b0= b->b[k];
       if ( ( b0 == 0) || (b0->n == 0) ) 
 	break; // null box or empty   => break 	    
       NbQuadTreeBoxSearch++;
@@ -170,7 +170,7 @@ Vertex *  QuadTree::NearestVertex(Icoor1 i,Icoor1 j)
   
   if ( n0 > 0) 
     {  
-      for(register int k=0;k<n0;k++)
+      for( int k=0;k<n0;k++)
 	{
 	  I2 i2 =  b->v[k]->i;
 	  h0 = NORM(iplus,i2.x,jplus,i2.y);
@@ -191,7 +191,7 @@ Vertex *  QuadTree::NearestVertex(Icoor1 i,Icoor1 j)
     b= pb[l];
     while (pi[l]--)
       { 	      
-	register int k = pi[l];
+	 int k = pi[l];
 	
 	if (b->n>0) // Vertex QuadTreeBox none empty
 	  { 
@@ -206,13 +206,13 @@ Vertex *  QuadTree::NearestVertex(Icoor1 i,Icoor1 j)
 	  }
 	else // Pointer QuadTreeBox 
 	  { 
-	    register QuadTreeBox *b0=b;
+	     QuadTreeBox *b0=b;
 	    NbQuadTreeBoxSearch++;
 	    if ((b=b->b[k])) 
 	      {
 		hb >>=1 ; // div by 2
-		register Icoor1 iii = ii[l]+I_IJ(k,hb);
-		register Icoor1 jjj = jj[l]+J_IJ(k,hb);
+		 Icoor1 iii = ii[l]+I_IJ(k,hb);
+		 Icoor1 jjj = jj[l]+J_IJ(k,hb);
 		
 		if  (INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
 		  {
@@ -247,8 +247,8 @@ Vertex *   QuadTree::ToClose(Vertex & v,Real8 seuil,Icoor1 hx,Icoor1 hy)
   QuadTreeBox * pb[ MaxDeep ];
   int  pi[ MaxDeep  ];
   Icoor1 ii[  MaxDeep ], jj [ MaxDeep];
-  register int l=0; // level
-  register QuadTreeBox * b;
+   int l=0; // level
+   QuadTreeBox * b;
   Icoor1 h=MaxISize;
   Icoor1 hb =  MaxISize;
   Icoor1 i0=0,j0=0;
@@ -268,7 +268,7 @@ Vertex *   QuadTree::ToClose(Vertex & v,Real8 seuil,Icoor1 hx,Icoor1 hy)
     b= pb[l];
     while (pi[l]--)
       { 	      
-	register int k = pi[l];
+	 int k = pi[l];
 	
 	if (b->n>0) // Vertex QuadTreeBox none empty
 	  { 
@@ -289,13 +289,13 @@ Vertex *   QuadTree::ToClose(Vertex & v,Real8 seuil,Icoor1 hx,Icoor1 hy)
 	  }
 	else // Pointer QuadTreeBox 
 	  { 
-	    register QuadTreeBox *b0=b;
+	     QuadTreeBox *b0=b;
 	    NbQuadTreeBoxSearch++;
 	    if ((b=b->b[k]))
 	      {
 		hb >>=1 ; // div by 2
-		register long iii = ii[l]+I_IJ(k,hb);
-		register long jjj = jj[l]+J_IJ(k,hb);
+		 long iii = ii[l]+I_IJ(k,hb);
+		 long jjj = jj[l]+J_IJ(k,hb);
 		
 		if  (INTER_SEG(iii,iii+hb,i-hx,i+hx) && INTER_SEG(jjj,jjj+hb,j-hy,j+hy)) 
 		  {
@@ -322,7 +322,7 @@ Vertex *   QuadTree::ToClose(Vertex & v,Real8 seuil,Icoor1 hx,Icoor1 hy)
 void  QuadTree::Add( Vertex & w)
 {
   QuadTreeBox ** pb , *b;
-  register long i=w.i.x, j=w.i.y,l=MaxISize;
+   long i=w.i.x, j=w.i.y,l=MaxISize;
   pb = &root;
   //    cout << pb << " " << &root << endl;
   while( (b=*pb) && (b->n<0))
@@ -349,10 +349,10 @@ void  QuadTree::Add( Vertex & w)
       b->n = -b->n; // mark is pointer QuadTreeBox
       b->b[0]=b->b[1]=b->b[2]=b->b[3]=0; // set empty QuadTreeBox ptr
       l >>= 1;    // div the size by 2
-      for (register int k=0;k<4;k++) // for the 4 vertices find the sub QuadTreeBox ij
+      for ( int k=0;k<4;k++) // for the 4 vertices find the sub QuadTreeBox ij
 	{ 
-	  register int ij;
-	  register QuadTreeBox * bb =  b->b[ij=IJ(v4[k]->i.x,v4[k]->i.y,l)];
+	   int ij;
+	   QuadTreeBox * bb =  b->b[ij=IJ(v4[k]->i.x,v4[k]->i.y,l)];
 	  if (!bb) 
 	    bb=b->b[ij]=NewQuadTreeBox(); // alloc the QuadTreeBox 
 	  //    cout << bb << " " << k << " "  << ij <<  endl;
@@ -444,7 +444,7 @@ Vertex *  QuadTree::NearestVertexWithNormal(Icoor1 i,Icoor1 j)
   
   // init for optimisation ---
   b = root;
-  register Int4  n0;
+   Int4  n0;
   if (!root->n)
     return vn; // empty tree 
   
@@ -452,9 +452,9 @@ Vertex *  QuadTree::NearestVertexWithNormal(Icoor1 i,Icoor1 j)
     {
       // search the non empty 
       // QuadTreeBox containing  the point (i,j)
-      register Icoor1 hb2 = hb >> 1 ;
-      register  int k = IJ(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
-      register QuadTreeBox * b0= b->b[k];
+       Icoor1 hb2 = hb >> 1 ;
+        int k = IJ(iplus,jplus,hb2);// QuadTreeBox number of size hb2 contening i;j
+       QuadTreeBox * b0= b->b[k];
       if ( ( b0 == 0) || (b0->n == 0) ) 
 	break; // null box or empty   => break 	    
       NbQuadTreeBoxSearch++;
@@ -467,7 +467,7 @@ Vertex *  QuadTree::NearestVertexWithNormal(Icoor1 i,Icoor1 j)
   
   if ( n0 > 0) 
     {  
-      for(register int k=0;k<n0;k++)
+      for( int k=0;k<n0;k++)
 	{
 	  I2 i2 =  b->v[k]->i;
 	  //   try if is in the right sens -- 
@@ -508,13 +508,13 @@ Vertex *  QuadTree::NearestVertexWithNormal(Icoor1 i,Icoor1 j)
 	  }
 	else // Pointer QuadTreeBox 
 	  { 
-	    register QuadTreeBox *b0=b;
+	     QuadTreeBox *b0=b;
 	    NbQuadTreeBoxSearch++;
 	    if ((b=b->b[k])) 
 	      {
 		hb >>=1 ; // div by 2
-		register Icoor1 iii = ii[l]+I_IJ(k,hb);
-		register Icoor1 jjj = jj[l]+J_IJ(k,hb);
+		 Icoor1 iii = ii[l]+I_IJ(k,hb);
+		 Icoor1 jjj = jj[l]+J_IJ(k,hb);
 		
 		if  (INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h)) 
 		  {
