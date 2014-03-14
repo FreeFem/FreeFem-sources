@@ -191,8 +191,7 @@ $(SRCDIR)/tag-ff++: $(PACKAGE)
 	touch $(SRCDIR)/tag-ff++
 
 $(PACKAGE):
-	-mkdir $(DIRPKG)
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	../getall -o Hips -a
 
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:

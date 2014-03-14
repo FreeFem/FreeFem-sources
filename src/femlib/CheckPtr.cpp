@@ -1,4 +1,26 @@
-#define NCHECKPTR // BUg with MPI ??? FH 
+//#define NCHECKPTR // BUg with MPI ??? FH
+
+#if __APPLE__
+#include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
+
+static long StorageUsed()
+{
+#if MALLOC_ZONE_SPECIFIC_FLAGS
+    struct mstats mem1;
+    mem1 = mstats();
+    return mem1.bytes_used;
+#elif M_MMAP_THRESHOLD
+    struct mallinfo mem1;
+    mem1=mallinfo();
+    return mem1.uordblks;
+#else
+    return 0;
+#endif
+    
+}
 #ifndef NCHECKPTR
 #define DEBUGUNALLOC 1 
 // -*- Mode : c++ -*-
@@ -148,7 +170,9 @@ class OneAlloc {public:
   };
 
 private:
+    
   static const long Maxundelptr = 2048;
+    static size_t StorageUsage;
   static size_t AllocSize ;
   static size_t MaxUsedSize;
   static AllocData * AllocHead ;  
@@ -184,7 +208,7 @@ public:
 };
 
 static AllocExtern AllocExternData;
-
+size_t AllocExtern::StorageUsage=0;
 size_t AllocExtern::AllocSize =0;
 size_t AllocExtern::MaxUsedSize =0;
 AllocExtern::AllocData * AllocExtern::AllocHead =0;  
@@ -303,6 +327,7 @@ void AllocExtern::init()
    if(0== (count++)) 
     {
       sprintf(filename,"ListOfAllocPtr-%d.bin",(int) sizeof(void*));
+      StorageUsage=0;
       AllocSize =0;
       MaxUsedSize =0;
       AllocHead =0;  
@@ -311,6 +336,7 @@ void AllocExtern::init()
       NextFree =0;
       NbuDelPtr =0;
       NbuDelPtr = 0;
+        
       after_end = false;
       
       FILE *file=fopen(filename,"rb");
@@ -418,8 +444,10 @@ void operator delete[](void * pp) throw ()
 {  AllocExternData.MyDeleteOperator(pp,true);}
 
 int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
-  if (!NbAllocShow) NbAllocShow=NbAlloc;
-  printf ("----------CheckPtr:-----%s------ NbUndelPtr  %ld  Alloc: %ld  NbPtr %ld \n",s,NbPtr,AllocSize,NbAlloc);
+    size_t m =StorageUsage;
+    StorageUsage =StorageUsed();
+    if (!NbAllocShow) {NbAllocShow=NbAlloc;}
+  printf ("----------CheckPtr:-----%s------ NbUndelPtr  %ld  Alloc: %ld  NbPtr %ld  Mem Usage: %zu diff: %ld\n",s,NbPtr,AllocSize,NbAlloc,StorageUsage,(long)(StorageUsage-m));
   lg = AllocSize;
   return NbPtr;
 }
@@ -433,7 +461,9 @@ int ShowAlloc(const char *s,size_t & lg)
 #include <cstdio>
 #include <new>
 
-long  CheckPtr___nbptr=0; 
+long  CheckPtr___nbptr=0;
+size_t CheckPtr___memoryusage =0;
+
 void* operator new( size_t size ) throw(std::bad_alloc) {
     CheckPtr___nbptr++;
     void *p = malloc( size );
@@ -460,7 +490,12 @@ void operator delete[]( void *p ) throw() {
 }
 
 int ShowAlloc(const char *s,size_t & lg)
-{ lg = 0; return CheckPtr___nbptr;}
+{
+    size_t m =StorageUsed();
+    if(CheckPtr___memoryusage!=0 && m != CheckPtr___memoryusage)
+        printf("CheckPtr:  Warning memory leack with malloc = %zu \n ",m-CheckPtr___memoryusage);
+    CheckPtr___memoryusage=m;
+    lg = 0; return CheckPtr___nbptr;}
 int UnShowAlloc =0;
 #else
 #include <stdlib.h>

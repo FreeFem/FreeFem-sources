@@ -159,7 +159,7 @@ inline float  real(const float &x){return x;}
     template<class T> T  real(const complex<T>& v){ return std::real(v);}
 inline double  norm2(const double x){return x*x;}
 inline float  norm2(const float x){return x*x;}
-template<class T> T  norm2(const complex<T>& v){ return norm(v);}
+template<class T> T  norm2(const complex<T>& v){ return std::norm(v);}
     
 template<class T> inline complex<T>  conj(const complex<T>& v){ return std::conj<T>(v);}
 template<class T> inline T Min (const T &a,const T &b){return a < b ? a : b;}
@@ -378,6 +378,7 @@ class SetArray { public:
     long size() const {return n;}
 };
 
+/// <<KN_>>
 template<class R>
 class KN_: public  ShapeOfArray {
 protected:

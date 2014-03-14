@@ -37,7 +37,7 @@ $(SRCDIR): $(PKGDIR)/$(PACKAGE)
 	gunzip -c   $^ | tar xvf - 
 
 $(PKGDIR)/$(PACKAGE):
-	cd $(PKGDIR); $(WGET) $(SERVER)/$(PACKAGE)
+	../getall -o Gmm++ -a
 
 clean: clean-local
 

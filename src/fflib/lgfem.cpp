@@ -33,6 +33,8 @@
 
 #include  <cmath>
 #include  <iostream>
+#include <cfloat>
+
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
@@ -105,6 +107,7 @@ TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 	if( t==dTypeSolveMat[l]) return l;
     return long (kTypeSolveMat-1); // sparse solver case 
 }
+
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
@@ -2182,7 +2185,10 @@ class Convect : public E_F0mps  { public:
     
 };
 
-class Plot :  public E_F0mps { public:
+/// <<Plot>> used for the [[plot_keyword]]
+
+class Plot :  public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
+public:
     typedef KN_<R>  tab;
     typedef pferbase sol;
     typedef pferbasearray asol;
@@ -2241,6 +2247,8 @@ class Plot :  public E_F0mps { public:
 	}
 
     };
+
+  /// <<Expression2>>
     struct Expression2 
      {
 	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
@@ -2391,12 +2399,17 @@ class Plot :  public E_F0mps { public:
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
     };
 
-   static basicAC_F0::name_and_type name_param[] ;
+  // see [[Plot_name_param]]
+  static basicAC_F0::name_and_type name_param[] ;
 
-  // FFCS: added new parameters for VTK graphics
-  static const int n_name_param =42 ;
-   Expression bb[4];
-    vector<Expression2> l;
+  /// FFCS: added new parameters for VTK graphics. See [[Plot_name_param]] for new parameter names
+  static const int n_name_param=42;
+
+  Expression bb[4];
+
+  /// see [[Expression2]]
+  vector<Expression2> l;
+
     Expression nargs[n_name_param];
     Plot(const basicAC_F0 & args) : l(args.size()) 
     {
@@ -2518,13 +2531,21 @@ class Plot :  public E_F0mps { public:
 	  }
     }
     
-    static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
-    static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
-    AnyType operator()(Stack s) const ;
+  static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
+
+  /// <<Plot_f>> Creates a Plot object with the list of arguments obtained from the script during the grammatical
+  /// analysis of the script (in lg.ypp)
+
+  static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
+
+  /// Evaluates the contents of the Plot object during script evaluation. Implemented at [[Plot_operator_brackets]]
+
+  AnyType operator()(Stack s) const ;
 }; 
 
+/// <<Plot_name_param>>
 
- basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
+basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {   "coef", &typeid(double)},
   {   "cmm", &typeid(string*)},
   {   "ps", &typeid(string*)  },
@@ -2571,7 +2592,7 @@ class Plot :  public E_F0mps { public:
   {"WindowIndex",&typeid(long)}, // #20
   {"NbColorTicks",&typeid(long)}, // #21
 
-   };
+};
 
 
 
@@ -2714,10 +2735,10 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      all=false;
    }
  */
-  if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (10)");
       
  if(dim==2)
    {
+       if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (10 2d)");
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
      ffassert(&Th);
      
@@ -2837,7 +2858,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     QuadratureFormular1dPoint pi( FI[npi]);
 		     double sa=pi.x,sb=1-sa;
 		     R2 Pt(PA*sa+PB*sb ); //  
-		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie);
+		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,K.lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
@@ -2881,6 +2902,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    }
  else if(dim==3)
    {
+     if(di->islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type on no int2d case (10 3d)");
+      
      const Mesh3  & Th = * GetAny<pmesh3>( (*di->Th)(stack) );
      ffassert(&Th);
      
@@ -2889,7 +2912,81 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	 if (all) cout << " all " << endl ;
 	 else cout << endl;
        }
-     if (kind==CDomainOfIntegration::int2d)
+       if (kind==CDomainOfIntegration::int2d)
+           if(di->islevelset())
+           {
+               const GQuadratureFormular<R2> & FI = FIT;
+               double llevelset = 0;
+               const double uset = std::numeric_limits<double>::max();
+              // cout << " uset ="<<uset << endl;
+               R3 Q[4];
+               KN<double> phi(Th.nv);
+               phi=uset;
+               double f[4];
+               
+               for(int t=0; t< Th.nt;++t)
+               {
+                   double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                   for(int i=0;i<4;++i)
+                   {
+                       int j= Th(t,i);
+                       if( phi[j]==uset)
+                       {
+                           MeshPointStack(stack)->setP(&Th,t,i);
+                           phi[j]= di->levelset(stack);//zzzz
+                       }
+                       f[i]=phi[j];
+                       umx = std::max(umx,f[i]);
+                       umn = std::min(umn,f[i]);
+                       
+                   }
+                   if( umn <=0 && umx >= 0)
+                   {
+                       
+                       int np= IsoLineK(f,Q,1e-10);
+
+                       double l[3];
+                       if(np>2)
+                       {
+                        if(verbosity>999)  cout << t << " int levelset : " << umn << " .. " << umx << " np " << np <<" "
+                         << f[0] << " " << f[1] << " "<< f[2] << " "<< f[3] << " "<<endl;
+                          
+                           const Mesh3::Element & K(Th[t]);
+                           double epsmes3=K.mesure()*K.mesure()*1e-18;
+                           R3 PP[4];
+                           for(int i=0; i< np; ++i)
+                               PP[i]= K(Q[i]);
+                           for( int i =0; i+1 < np; i+=2)
+                           { // 0,1,, a and 2,3,0.
+                               int i0=i,i1=i+1,i2=(i+2)%np;
+                               R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
+                               double mes2 = (NN,NN);
+                               double mes = sqrt(mes2);
+                               if(mes2*mes <epsmes3) continue; //  too small
+                               NN /= mes;
+                               mes *= 0.5; //   warning correct FH 050109
+                             //  cout <<i << " / "  << NN << " / " << mes <<" / "<< i0<< i1<< i2 <<" " << llevelset <<endl;
+                               llevelset += mes;
+                               for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                               {
+                                   GQuadraturePoint<R2>  pi( FI[npi]);
+                                   pi.toBary(l);
+                                   R3 Pt( l[0]*Q[i0]+l[1]*Q[i1]+l[2]*Q[i2]); //
+                                   MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
+                                   r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                               }
+                           }
+                       }
+                       
+                   }
+               }
+               if(verbosity > 5) cout << " Area level set = " << llevelset << endl;
+              // if(verbosity > 50) cout << "phi " << phi << endl;
+               
+           }
+       
+         else
+        
        {
 	 const GQuadratureFormular<R2> & FI = FIT;
          int lab;
@@ -3114,7 +3211,9 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     return err;
 }
    
-AnyType Plot::operator()(Stack s) const  { 
+/// <<Plot_operator_brackets>> from class [[Plot]]
+
+AnyType Plot::operator()(Stack s) const{ 
     
    // remap  case 107 and 108 , 109  for array of FE. 
   vector<ListWhat> ll;
@@ -3994,8 +4093,7 @@ AnyType Plot::operator()(Stack s) const  {
   viderbuff();
      
   return 0L;
-}     
-
+}
  
 AnyType Convect::operator()(Stack s) const 
 {  
@@ -4042,7 +4140,7 @@ AnyType Convect::eval2(Stack s) const
 	      mpc.change(R2(l[1],l[2]),Th[it],0);             
 	      if(k++>1000)
 		{
-		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity to hight ???? or NaN F. Hecht  " << endl;
+		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity too high ???? or NaN F. Hecht  " << endl;
 		  ffassert(0);
 		}
 	    }
@@ -4885,6 +4983,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
  
  Global.Add("on","(",new OneOperatorCode<BC_set > );
+
+ /// <<plot_keyword>> uses [[Plot]] and [[file:AFunction.hpp::OneOperatorCode]] and [[file:AFunction.hpp::Global]]
  Global.Add("plot","(",new OneOperatorCode<Plot> );
  Global.Add("convect","(",new OneOperatorCode<Convect> );
 

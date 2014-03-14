@@ -36,6 +36,7 @@
 extern bool lexdebug;
 extern long mpisize,mpirank;
 
+/// <<mylex>>
 class mylex : public CodeAlloc { 
   public:
   typedef const char * Key;
@@ -90,7 +91,12 @@ class mylex : public CodeAlloc {
   mylex(ostream & out,bool eecho=true);
   string token() const;
   void print(ostream &f) const; 
+
+  /// This is the main [[file:../lglib/lg.ypp::yylex]] entry point from the grammar. Implemented in
+  /// [[file:lex.cpp::mylex_scan]]
+
   int scan(int lvl=0);
+
   int lineno(){return linenumber;}
   char * YYText() { return buf;}
   void dump(ostream & f ) ;
@@ -147,7 +153,8 @@ private:
 mylex * Newlex(  ostream & out,bool =true);
  void Destroylex(mylex * m);
 
-/// <<zzzfff>> This pointer is initialized in [[file:../lglib/lg.ypp::zzzfff Newlex cout echo_edp]]
+/// <<zzzfff>> This pointer is allocated in [[file:global.cpp::zzzfff]] and initialized in
+/// [[file:../lglib/lg.ypp::zzzfff]]
 
 extern mylex *zzzfff;
 
