@@ -2,7 +2,7 @@
 #  awk -f undef.awk -v l MUMPS.dylib -v f=../src/mpi/FreeFem++-mpi
 BEGIN { 
     so=".dylib";
-    if (  f==0) f="../src/nw/FreeFem++"
+    if (  f==0) f="../src/mpi/FreeFem++-mpi"
     if( l==0 ) l="MUMPS.dylib"; 
     FS="[ \t$]+"
     if(ldd==0) ldd="otool -L ";
