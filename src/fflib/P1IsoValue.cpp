@@ -195,14 +195,6 @@ int IsoLineK(double *f,Fem2D::R2 *Q,const double eps)
             if(debug) cout << i << " " << j0 << " " << j1 << " : "
                 << Q[i] << "***" << endl;
         }
-        if(debug)
-        {
-            cout << "i0 " << i0[0] << " " << i0[1] << " " << det(P[i1[0]],Q[0],Q[1]) <<endl;
-            cout << "i1 " << i1[0] << " " << i1[1] << " " << det(P[i0[1]],Q[1],Q[0]) <<endl;
-            cout << "f " << f[0] << " " << f[1] << " " << f[2] << endl;
-            cout << "P " << P[0] << ", " << P[1] << ", " << P[2] << endl;
-            cout << "Q " << Q[0] << ", " << Q[1]  << endl;
-        }
         if(!vk[i1[0]])
             assert( det(P[i1[0]],Q[0],Q[1]) > 0);
         if(!vk[i0[1]])
