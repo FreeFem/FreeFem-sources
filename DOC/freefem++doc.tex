@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.25}
+\def\VERSION{3.26-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -34,7 +34,7 @@
 \setbox0\hbox{\raisebox{\dp0}{\box0}\kern-\dimen1\kern-5pt\raisebox{\dp1}{\ox1}}
 \vcenter{\box0}
 }
-\pagenumbering{roman}
+\pagenumbering{arabic}
 \title{}
 \author{}
 \date{}
@@ -73,11 +73,12 @@ Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris
 \vglue 0.5cm
 
  \
-{\Large Fr\'{e}d\'{e}ric Hecht${}^{1,4}$ }
+{\Large Fr\'{e}d\'{e}ric Hecht\footnote{Laboratoire Jacques-Louis Lions, Universit\'{e} Pierre et Marie Curie, Paris}
+\footnote{Projet Alpines, Inria Rocquencourt.} }
 
 \url{mailto:frederic.hecht@upmc.fr}
 
-\url{http://www.ann.jussieu.fr/~hecht}
+\url{https://www.ljll.math.upmc.fr/~hecht}
 
 
 \bigskip
@@ -112,6 +113,7 @@ visualization.}
 \includegraphics[height=1.7cm]{LogoUPMC} \hss
 %\includegraphics[height=1.7cm]{LogoCNRS} \hss
 \includegraphics[height=1.7cm]{logo-finance-par-anr} \hss
+\includegraphics[height=1.7cm]{INRIA-logo} \hss
 }
 \bigskip
 
@@ -123,26 +125,27 @@ and to l'Agence Nationale de la Recherche (Paris, France)
 \cleardoublepage
 %\end{document}
 %%%%%%%%%%
- \setcounter{page}{1}
+%\setcounter{page}{1}
 \tableofcontents
 \let\subsubsection\subsection
 \let\subsection\section
 \let\section\chapter
+
 \section*{Preface}
 
 \hbox to \hsize{\hss\includegraphics[width=7cm]{sanskrit}}
 
-Fruit of a long maturing process, freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE) in dimension 2 and 3.  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
+Fruit of a long maturing process, freefem, in its last avatar, \freefempp, is a high level integrated development environment (IDE)  for numerically solving partial differential equations (PDE) in dimension 2 and 3.  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
 
 
 \medskip
 
-\texttt{FreeFem++} has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK, SuperLU . Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \texttt{FreeFem++}. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \texttt{FreeFem++} to prepare research quality reports: color display online with zooming and other features and postscript printouts.
+\freefempp has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK, SuperLU . Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \freefempp. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \freefempp to prepare research quality reports: color display online with zooming and other features and postscript printouts.
 \medskip
 
 This manual is meant for students at Master level, for  researchers at any level, and for engineers (including financial engineering) with some understanding of variational methods for partial differential equations.
 
-\section{Introduction}\pagenumbering{arabic} \setcounter{page}{1}
+\section{Introduction}%\pagenumbering{arabic} \setcounter{page}{1}
 A partial differential equation is a relation between a function
 of several variables and its (partial) derivatives.
  Many problems in physics, engineering, mathematics and even banking
@@ -233,7 +236,7 @@ or go to the end of the page to get the full list of downloads.
 
 \begin{remark}: Binaries are available for Microsoft Windows, Apple
 Mac OS X and some Linux systems.
-%"\texttt{FreeFem++}" at \url{http://www.freefem.org}.
+%"\freefempp" at \url{http://www.freefem.org}.
 \end{remark}
 Install by double click on the appropriate file, under linux and MacOS the
 install file are respectively in directory  \texttt{/usr/local/bin},  \texttt{/usr/local/share/freefem++},  \texttt{/usr/local/lib/ff++}
@@ -241,7 +244,7 @@ install file are respectively in directory  \texttt{/usr/local/bin},  \texttt{/u
 
 \paragraph{Windows binaries install}
 
-  First download the windows installation executable, then double click it. to install \texttt{FreeFem++}. In most cases just answer yes (or typr return) to all questions. Otherwise in the Additional Task windows, check the  box "Add application directory to your system path your system path ." This is required otherwise the program  \texttt{ffglut.exe} will not be found.
+  First download the windows installation executable, then double click it. to install \freefempp. In most cases just answer yes (or typr return) to all questions. Otherwise in the Additional Task windows, check the  box "Add application directory to your system path your system path ." This is required otherwise the program  \texttt{ffglut.exe} will not be found.
 
   By now you should have
   two new icons on your desktop:
@@ -285,7 +288,7 @@ The syntax for the command-line tools are the same as those of FreeFem.exe.
   Download the MacOS X binary version file, extract all the files with a double click on the
   icon of the file, go the the directory and put the \texttt{FreeFem+.app} application in the
   \texttt{/Applications} directory.
-  If you want a terminal access to \freefempp just copy the file \texttt{FreeFem++} in a
+  If you want a terminal access to \freefempp just copy the file \freefempp in a
    directory of your \verb!$PATH! shell environment variable.
 
   If you want to automatically launch the \texttt{FreeFem++.app}, double click on a \texttt{.edp} file icon.
@@ -328,7 +331,7 @@ To compile and install \freefempp, just follow the \texttt{INSTALL}
 and \texttt{README} files. The following programs are produced,
 depending on the system you are running :
 \begin{enumerate}
-\item \texttt{FreeFem++}, standard version, with a graphical interface
+\item \freefempp, standard version, with a graphical interface
 based on GLUT/OpenGL (use ffglut visualization tool) or not just add \texttt{ -nw } parameter.
 \item \texttt{ffglut} the visualization tools  through a pipe of freefem++ (remark: {\it if ffglut is not in the system path,
 you will have no plot})
@@ -350,7 +353,7 @@ Application
 \item \texttt{ffmedit} the freefem++ version of medit software (thanks to P. Frey)
 \end{enumerate}
 
-The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw},\texttt{FreeFem++-mpi}, on the command-line  are
+The syntax of tools \freefempp,\texttt{FreeFem++-nw},\texttt{FreeFem++-mpi}, on the command-line  are
 { \small
 \begin{itemize}
 \item  \verb!FreeFem++ [-?] [-v nn] [-fglut file1] [-glut file2] [-f]  edpfilepath ! where the
@@ -363,8 +366,8 @@ The syntax of tools \texttt{FreeFem++},\texttt{FreeFem++-nw},\texttt{FreeFem++-m
 \item \verb!-nw! no call to ffglut and medit 
 \item \verb!-v nn!  set the level of verbosity to \texttt{nn} before execution of the  script.
 \item \verb!-ne! no edp script output
-\item \verb!-wait! wait an return in text window before  closing \texttt{FreeFem++}
-\item \verb!-nowait! wait an return in text window before  closing \texttt{FreeFem++}
+\item \verb!-wait! wait an return in text window before  closing \freefempp
+\item \verb!-nowait! wait an return in text window before  closing \freefempp
 \item \verb!-ne! no edp script output
 \item \verb!-cd! Change directory  to script dir (the script path must by global)
 \item  if no file path then you get a dialog box to choose the edp file on windows systeme.
@@ -419,7 +422,7 @@ files.
 \item  Open Notepad++ and Enter  F5
 \item   In the new window  enter  the command
 \verb!launchff++ "$(FULL_CURRENT_PATH)"!
-\item Click on  Save,  and enter  \texttt{FreeFem++} in the box  "Name", now  choose
+\item Click on  Save,  and enter  \freefempp in the box  "Name", now  choose
 the  short cut key  to launch directly FreeFem++  (for example \texttt{alt+shift+R})
  \item To add    Color Syntax Compatible with FreeFem++ In Notepad++,
  \begin{itemize}
@@ -451,7 +454,7 @@ availble at \url{http://www.crimsoneditor.com/} and adapted as follows:
 \begin{itemize}
 \item Go to the \texttt{Tools/Preferences/File} association menu and add the .edp extension set
 
-\item In the same panel in \texttt{Tools/User} Tools, add a \texttt{FreeFem++} item (1st line) with the path
+\item In the same panel in \texttt{Tools/User} Tools, add a \freefempp item (1st line) with the path
 to \texttt{freefem++.exe} on the second line and \texttt{\$(FilePath)} and \texttt{\$(FileDir)} on third and fourth lines.
 Tick the 8.3 box.
 \item for color syntax, extract file from \texttt{crimson-freefem.zip} and put files in the corresponding sub-folder of
@@ -548,7 +551,7 @@ has an item to launch \freefempp by a Ctrl+1 command.}
 
 \paragraph{In Terminal mode}
 
-Choose the type of application from \texttt{FreeFem++}, \texttt{FreeFem++-nw},  \texttt{FreeFem++-mpi}, \dots  according to your needs.  Add at least the path name; for example
+Choose the type of application from \freefempp, \texttt{FreeFem++-nw},  \texttt{FreeFem++-mpi}, \dots  according to your needs.  Add at least the path name; for example
 \bFF
  FreeFem++ your-edp-file-path
 \eFF
@@ -557,7 +560,7 @@ Choose the type of application from \texttt{FreeFem++}, \texttt{FreeFem++-nw},  
 
 
 \index{verbosity}\index{includepath}\index{loadpath}\index{load}\index{include}
- \texttt{FreeFem++} reads a user's init file named \ttCC{freefem++.pref}
+ \freefempp reads a user's init file named \ttCC{freefem++.pref}
  to initialize global variables:
    \texttt{verbosity}, \texttt{includepath}, \texttt{loadpath}.
 
@@ -606,7 +609,7 @@ the search rule before the init files.
 
  Remark: the separator between directories must be ";" and not ":" because ":" is used under Windows.
 
- Remark, to show the list of init of \texttt{freefem++}, do
+ Remark, to show the list of init of \freefempp, do
 \begin{verbatim}
  export FF_VERBOSITY=100; ./FreeFem++-nw
  --  verbosity is set to 100
@@ -1095,7 +1098,7 @@ For example, if you forget parenthesis as in
 @mesh Th = @square(10,10;
 @plot(Th);
 \eFF
-then you will get the following message from \texttt{FreeFem++},
+then you will get the following message from \freefempp,
 \bFF
     2 : mesh Th = square(10,10;
  Error line number 2, in file bb.edp, before  token ;
@@ -2986,7 +2989,7 @@ Vh vr=@real(v), vi=@imag(v);
 
 \subsection{Optimal Control} Thanks to the function \texttt{BFGS} it
 is possible to solve complex nonlinear optimization problem within
-\texttt{FreeFem++}. For example consider the following inverse
+\freefempp. For example consider the following inverse
 problem
 \[
     \min_{b,c,d\in R}J=\int_E(u-u_d)^2~:~
@@ -3099,7 +3102,7 @@ Then the derivatives are found by setting $\delta b=1, \delta c=\delta d=0$ and 
 unknowns, it is dangerously expensive to use this method when the unknown $x$ is a
 Finite Element Function.  One should use another optimizer such as
 the NonLinear Conjugate Gradient \texttt{NLCG} (also a key word
-of \texttt{FreeFem++}).  See the file algo.edp in the examples folder.
+of \freefempp).  See the file algo.edp in the examples folder.
 
 \subsection{A Flow with Shocks}
 Compressible Euler  equations should be discretized with Finite Volumes or FEM with flux up-winding scheme but these are not implemented in \freefempp.  Nevertheless acceptable results can be obtained with the method of characteristics
@@ -4831,7 +4834,7 @@ Remark, all these methods except the first return the stream \texttt{f}, so they
 \eFF
 
 \subsubsection{\setS{Script arguments}}
-There is a very useful predefined array in Freefem++ \texttt{ARGV} that contains all the arguments of the script used in the command line. The following code prints out the first three of these arguments:\index{ARGV} 
+There is a very useful predefined array in \freefempp \texttt{ARGV} that contains all the arguments of the script used in the command line. The following code prints out the first three of these arguments:\index{ARGV} 
 \bFF
 //  version 3.8-1
 @for(int i=0;i<ARGV.n;++i)
@@ -4863,7 +4866,7 @@ An example of macro without parameter
 @macro xxx() {real i=0;int j=0;cout << i << " " << j << endl;}//
 xxx \it/* replace xxx by the <replacement token list> */
 \eFF
- The freefem++ code associated: 
+ The \freefempp code associated: 
 \begin{verbatim}
     1 : // macro without parameter 
     2 :  macro xxx {real i=0;int j=0;cout << i << " " << j << endl;}//
@@ -4880,7 +4883,7 @@ toto({real i=0;int j=0;cout << i << " " << j << endl;})
 // and only one level of \{\} are remove 
 toto({{real i=0;int j=0;cout << i << " " << j << endl;}})
 \eFF
- The freefem++ code created :
+ The \freefempp code created :
 \begin{verbatim}
     6 :  macro toto(i )   i // 
     8 : // quoting parameter the \{\} are remove
@@ -4906,7 +4909,7 @@ to transforme full matrix in formal array like in :
 	@func E5x2 = VV6(VIL3,EE);
 	@func Eps =  VV3(VIL3,EEps);
 \eFF
-The freefem++ code created :
+The \freefempp code created :
 \begin{verbatim}
    16 : real[int,int] CC(7,7),EE(6,3),EEps(4,4);
    17 : 
@@ -4939,7 +4942,7 @@ The freefem++ code created :
 Vh v1=x,v2=y;
 cout << int2d(Th)(div(v)) << endl;
 \eFF
-The freefem++ code created :
+The \freefempp code created :
 
 \begin{verbatim}
    31 :  macro div(u )   (dx(u#1)+ dy(u#2)) //EOM 
@@ -4968,7 +4971,7 @@ and claose de macro definition (version 3.11, and not well tested).
 
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 
- In the version \texttt{2.3} of \texttt{FreeFem++}, exception handing was added as in \texttt{C++}.
+ In the version \texttt{2.3} of \freefempp, exception handing was added as in \texttt{C++}.
  But today only the \texttt{C++} exceptions are caught. Note that  in \texttt{C++} all the errors attached to
 \texttt{ExecError, assert, exit, ...} call exceptions  too so it may be hard to find the cause of the error.
  The exceptions handle all \texttt{ExecError}:
@@ -6388,7 +6391,7 @@ An example of using this function is given in "glumesh2D.edp":  \index{mesh!chan
 \end{example}
 
 \paragraph{``gluing'' different mesh}
-In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in FreeFem++ is using.
+In line 10 of previous file, the method to ``gluing'' different mesh of the same dimension in \freefempp is using.
 This function is the operator "+" between meshes. \index{mesh!+}
 The method implemented need that the point in adjacent mesh are the same.
 %%The method implemented need that the result's mesh of ``gluing'' meshes is conformal.
@@ -6399,7 +6402,7 @@ The method implemented need that the point in adjacent mesh are the same.
 \subsubsection{Read/Write Statements for a Mesh in 3D}
 \index{readmesh}\index{savemesh}
 
-In three dimensions, the file mesh format supported for input and output files by FreeFem++ are the extension .msh and .mesh.
+In three dimensions, the file mesh format supported for input and output files by \freefempp are the extension .msh and .mesh.
 These formats are described in the chapter on Mesh Files in two dimensions.
 
 \paragraph{extension file .msh}
@@ -6527,7 +6530,7 @@ This switch must be used to ensure conformal mesh between two adjacents mesh.
 \end{itemize}
 
 To obtain a tetrahedral mesh generator with tetgen, we need the surface mesh of three dimensional domain.
-We give now the command line in FreeFem++ to construct these meshes.
+We give now the command line in \freefempp to construct these meshes.
 
 \index{movemesh23}
 \paragraph{keyword: ``movemesh23''}
@@ -7647,7 +7650,7 @@ Problem2;
 \label{sec:freeyams}
 FreeYams is a surface mesh adaptation software which is developed by P. Frey. This software is a new version of yams. The adapted surface mesh is constructed with a geometric metric tensor field. This  field is based on the intrinsic properties of the discrete surface. Also this software allows to construct a simplification of a mesh. This decimation is  based on the Hausdorff distance between the initial and the current triangulation. Compared to the software yams, FreeYams  can be used also to produce anisotropic triangulations adapted to level set simulations. A technical report on FreeYams is not available yet but a documentation on yams exists at  http://www.ann.jussieu.fr/$\sim$frey/software.html \cite{tech.freeyams}.
 
-To call FreeYams in Freefem++, we used the keyword freeyams. The arguments of this function are the initial mesh and/or metric. The metric with freeyams are a function, a FE function, a symmetric tensor function, a symmetric tensor FE function or a vector of double. If the metric is vector of double, this data must be given in \texttt{metric} parameter. Otherwise, the metric is given in the argument.
+To call FreeYams in \freefempp, we used the keyword freeyams. The arguments of this function are the initial mesh and/or metric. The metric with freeyams are a function, a FE function, a symmetric tensor function, a symmetric tensor FE function or a vector of double. If the metric is vector of double, this data must be given in \texttt{metric} parameter. Otherwise, the metric is given in the argument.
 
 For example, the  adapted mesh of $Thinit$ defined by the metric $u$ defined as FE function is obtained in writing.
 \bFF
@@ -8990,7 +8993,7 @@ the real mathemaical probleme like in the \verb!examples++-tutorial/Laplace-lagr
 example.
 \end{note}
 
-In \texttt{FreeFem++},  the bidimensional problem (\ref{eq:v-poisson}) becomes
+In \freefempp,  the bidimensional problem (\ref{eq:v-poisson}) becomes
 \bFF
  @ problem Pw(u,v) =
        @int2d(Th)( kappa*( dx(u)*dx(u) +  dy(u)*dy(u)) )  // $\int_{\Omega} \kappa \nabla{v} . \nabla u  \,d\omega$ \hfilll
@@ -10153,7 +10156,7 @@ quit' | gnuplot");
 As said above, medit \footnote{\url{http://www-rocq.inria.fr/gamma/medit/medit.html}} is a
 freeware display package by Pascal Frey using OpenGL. Then you may run the following example.
 \\\\
-Remark: Now \texttt{medit} software is include in \texttt{FreeFem++} under \texttt{ffmedit} name. \index{medit} \index{ffmedit}
+Remark: Now \texttt{medit} software is include in \freefempp under \texttt{ffmedit} name. \index{medit} \index{ffmedit}
 \plot[width=8cm]{medit2}{medit plot}
 
 Now with version 3.2 or better
@@ -10471,7 +10474,7 @@ for this are the following :
 %%  version S. Auliac du 26/08/2013 ...
 \subsection{IPOPT}
 The {\tt ff-Ipopt} package is an interface for the IPOPT \cite{ipopt} optimizer. IPOPT is a software library for large scale, non-linear, constrained optimization. Detailed informations about it are in \cite{ipopt} and \url{https://projects.coin-or.org/Ipopt}. It implements a primal-dual interior point method along with filter method based line searchs. 
-IPOPT need a direct sparse symmetric linear solver. If your version of FreeFem has been compiled with the {\tt --enable-downlad} tag, it will automatically be linked with a sequential version of MUMPS. An alternative to MUMPS would be to download the HSL subroutines (see \url{http://www.coin-or.org/Ipopt/documentation/node16.html}) and place them in the {\tt /ipopt/Ipopt-3.10.2/ThirdParty/HSL} directory of the FreeFem++ downloads folder before compiling.
+IPOPT need a direct sparse symmetric linear solver. If your version of FreeFem has been compiled with the {\tt --enable-downlad} tag, it will automatically be linked with a sequential version of MUMPS. An alternative to MUMPS would be to download the HSL subroutines (see \url{http://www.coin-or.org/Ipopt/documentation/node16.html}) and place them in the {\tt /ipopt/Ipopt-3.10.2/ThirdParty/HSL} directory of the \freefempp downloads folder before compiling.
 
 \subsubsection{Short description of the algorithm}
  In this section, we give a very brief glimpse at the underlying mathematics of IPOPT. For a deeper introduction on interior methods for nonlinear smooth optimization, one may consults \cite{ipintro}, or \cite{ipopt} for more IPOPT specific elements. IPOPT is designed to perform optimization for both equality and inequality constrained problems. Though, nonlinear inequalities are rearranged before the beginning of the optimization process in order to restrict the panel of nonlinear constraints to those of the equality kind. Each nonlinear inequality ones are transformed into a pair of simple bound inequality and nonlinear equality constraint by the introduction of as many slack variables as is needed : $c_{i}(x)\leq 0$ becomes $c_{i}(x) + s_{i} = 0$ and $s_{i}\leq 0$, where $s_{i}$ is added to the initial variables of the problems $x_{i}$.  
@@ -10523,8 +10526,8 @@ adding some line-search steps to the Newton algorithm, or by using trust regions
 More IPOPT specific features or implementation details can be found in \cite{ipopt}. We will just retain that IPOPT is a smart Newton method for solving constrained optimization problem, with global convergence capabilities due to a robust line search method (in the sense that the algorithm will convergence no matter the initializer). Due to the underlying Newton method, the optimization process requires expressions of all derivatives up to the order 2 of the fitness function as well as those of the constraints. For problems whose hessian matrices are difficult to compute or lead to high dimensional dense matrices, it is possible to use a BFGS approximation of these objects at the cost of a much slower convergence rate.
 
 
-\subsubsection{IPOPT in FreeFem++}
-Calling the IPOPT optimizer in a FreeFem++ script is done with the {\tt IPOPT} function included in the {\tt ff-Ipopt} dynamic library. IPOPT is designed to solve constrained minimization problem in the form :
+\subsubsection{IPOPT in \freefempp}
+Calling the IPOPT optimizer in a \freefempp script is done with the {\tt IPOPT} function included in the {\tt ff-Ipopt} dynamic library. IPOPT is designed to solve constrained minimization problem in the form :
 
  \begin{equation}\label{ipoptproblem}
  \begin{array} {r l}
@@ -10546,7 +10549,7 @@ There are different ways to pass the fitness function and constraints. The more 
   @func @real[int] C(@real[@int] &X) {...} //Constraints
   @func @matrix jacC(@real[@int] &X) {...} //Constraints jacobian
 \eFF
-\textbf{Warning 1} : in the current version of FreeFem++, returning a {\tt matrix} object local to a function block leads to undefined results. For each sparse matrix returning function you define, an extern matrix object has to be declared, whose associated function will overwrite and return on each call. Here is an example for {\tt jacC} :
+\textbf{Warning 1} : in the current version of \freefempp, returning a {\tt matrix} object local to a function block leads to undefined results. For each sparse matrix returning function you define, an extern matrix object has to be declared, whose associated function will overwrite and return on each call. Here is an example for {\tt jacC} :
 \bFF
   @matrix jacCBuffer; //just declare, no need to define yet
   @func @matrix jacC(@real[@int] &X)
@@ -11002,7 +11005,7 @@ And the volume related functions :
 }
 \eFF
 If we want to use the volume as a constraint function
-we must wrap it and its derivatives in some FreeFem++ functions returning the appropriate types.
+we must wrap it and its derivatives in some \freefempp functions returning the appropriate types.
 It is not done in the above functions in case where one wants to use it as fitness function.
 The lagrangian hessian also have to be wrapped since the Volume is not linear with 
 respect to $\rho$, it has some non-null second order derivatives.
@@ -11364,7 +11367,7 @@ The only quick way to use the previously presented algorithms on a parallel arch
 If the population size is not changed using the {\tt popsize} parameter, it will use the heuristic value slightly changed to be equal to the closest greater multiple of the size of the communicator used by 
 the optimizer. 
 The FreeFem {\tt mpicommworld} is used by default. The user can specify his own MPI communicator with the named parameter "{ \tt comm=}", see the MPI section of this manual for more informations about 
-communicators in \texttt{FreeFem++}.
+communicators in \freefempp.
 
 
 
@@ -11947,7 +11950,7 @@ communicators in \texttt{FreeFem++}.
 %%%If the population size is not changed using the {\tt popsize} parameter, it will use the heuristic value slightly changed to be equal to the closest greater multiple of the size of the communicator used by 
 %%%the optimizer. 
 %%%The FreeFem {\tt mpicommworld} is used by default. The user can specify his own MPI communicator with the named parameter "{ \tt comm=}", see the MPI section of this manual for more informations about 
-%%%communicators in \texttt{FreeFem++}.
+%%%communicators in \freefempp.
 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Mathematical Models}
@@ -12628,7 +12631,7 @@ $u^a_h$ is \ttCC{u} in this program.
 \end{example}
 
 
-\subsubsection{Poisson with mixte finite element}
+\subsubsection{Poisson with mixted finite element}
 
 Here we consider the   Poisson equation with mixed boundary value
 problems:
@@ -13454,9 +13457,9 @@ Remark: This  example is in \texttt{Newton.edp} file of \texttt{examples++-tutor
 \newpage
 \subsection{Eigenvalue Problems}
 
-This section depends on your installation of \texttt{FreeFem++}; you need to have compiled (see \texttt{README\_arpack}),
+This section depends on your installation of \freefempp; you need to have compiled (see \texttt{README\_arpack}),
 ARPACK.
-This tools is available in \texttt{FreeFem++}  if the word ``eigenvalue'' appear in line ``Load:'', like:
+This tools is available in \freefempp  if the word ``eigenvalue'' appear in line ``Load:'', like:
 \bFF
 -- FreeFem++ v1.28 (date Thu Dec 26 10:56:34 CET 2002)
  file : LapEigenValue.edp
@@ -14735,7 +14738,7 @@ is  a penalty constant (large enough).
 \end{enumerate}
 You can find all the mathematic  about this algorithm in \cite{ItoKunisch}.
 
-Now how to do that in \texttt{FreeFem++}
+Now how to do that in \freefempp
 
 The full example is:
 \begin{example}[VI.edp]{}{}~
@@ -15373,7 +15376,7 @@ plot(reg,fill=1,wait=1,value=1);
 \eFF
 \twoplot[height=8cm]{region}{region_nu}{the function \texttt{reg}}{the function \texttt{nu} }
 
-\index{region} \texttt{region}  is a keyword of \texttt{FreeFem++} which is in fact a variable depending of
+\index{region} \texttt{region}  is a keyword of \freefempp which is in fact a variable depending of
 the current position (is not a function today, use \texttt{Ph reg=region;} to  set  a function).  This variable value returned is the number of the
 subdomain of the current position.  This number is defined by "buildmesh" which scans while building the mesh all
 its connected component.  So to get the number of a region containing a particular point
@@ -15488,7 +15491,7 @@ $\Omega^{n+1} = \mathcal{F}(\Omega^n)$
 
 \begin{example}[freeboundary.edp]
 \index{tutorial!freeboundary.edp}
-The  \texttt{FreeFem++} :implementation is:
+The  \freefempp :implementation is:
 
 \bFF
 @real q=0.02;      //flux entrant
@@ -15907,7 +15910,7 @@ $$
 $$
 {\em
 For brevity, in the rest of this section we assume $P = 0$.  The provided
-FreeFem++ code, however, does not rely on this assumption and allows
+\freefempp code, however, does not rely on this assumption and allows
 for a general value and direction of $P$.}
 
 Given a Newton approximation $\vec{u}_n$ of the displacement field
@@ -16010,7 +16013,7 @@ here bears no variational context.  By $\delta$ we mean simply an
 increment in the sense of Newton's Method.  The role of a variational virtual displacement here
 is played by $\vec{w}$.
 
-\subsubsection{An Approach to Implementation in {\tt FreeFem++}}
+\subsubsection{An Approach to Implementation in \freefempp}
 
 The associated file is  \texttt{examples++-tutorial/nl-elast-neo-Hookean.edp}.
 
@@ -16105,7 +16108,7 @@ while the weak BVP formulation acquires the form
 
 Written by I. S. Grudinin.
 
-In whispering gallery mode (WGM) resonators, which are typically spheres or disks, electromagnetic field is trapped by total internal reflections from the boundary. Modes of such resonators are distinguished by compact volume and record high quality factors (Q) in a broad range of frequencies. Modern applications of such resonators include microwave and optical cavities for atomic clocks, cavity optomechanics, nonlinear and quantum optics. Analytical solutions for WG modes are only available for a limited number of idealized geometries, such as sphere or ellipsoid. Since  resonator dimensions are typically much larger than optical wavelength, direct application of numerical 3D finite difference time domain (FDTD) or finite element methods (FEM) is not practical. It's possible to solve the vectorial wave equation by reducing it to a two dimensional case by taking axial symmetry into account. Such reduction leads to a system of 3 equations to be solved in a 2D ``$\rho-z$'' section of a resonator. Please refer to \cite{Oxborrow} for a detailed derivation and to \cite{Grudinin} for an example of using FreeFem++ to compute WGMs.
+In whispering gallery mode (WGM) resonators, which are typically spheres or disks, electromagnetic field is trapped by total internal reflections from the boundary. Modes of such resonators are distinguished by compact volume and record high quality factors (Q) in a broad range of frequencies. Modern applications of such resonators include microwave and optical cavities for atomic clocks, cavity optomechanics, nonlinear and quantum optics. Analytical solutions for WG modes are only available for a limited number of idealized geometries, such as sphere or ellipsoid. Since  resonator dimensions are typically much larger than optical wavelength, direct application of numerical 3D finite difference time domain (FDTD) or finite element methods (FEM) is not practical. It's possible to solve the vectorial wave equation by reducing it to a two dimensional case by taking axial symmetry into account. Such reduction leads to a system of 3 equations to be solved in a 2D ``$\rho-z$'' section of a resonator. Please refer to \cite{Oxborrow} for a detailed derivation and to \cite{Grudinin} for an example of using \freefempp to compute WGMs.
 
 \subsubsection{Wave equation for the WGMs}
 Since electric field is discontinuous on the surface of a dielectric and magnetic field is typically not, we derive our equations for the magnetic field. The electric field can be easily derived at a later stage from $\vec{E}=\frac{i}{\omega\epsilon_0}\hat{\epsilon}^{-1}\nabla\times\vec{H}$. Following a standard procedure starting with Maxwell equations we derive a wave equation in a single-axis anisotropic medium such as an optical crystal:
@@ -16124,7 +16127,7 @@ A_1\{{H}_{\rho}^t,{H}_{\phi}^t,{H}_{z}^t\}&=&0\\ \nonumber
 A_2\{{H}_{\rho}^t,{H}_{\phi}^t,{H}_{z}^t\}&=&0\\ \nonumber
 A_3\{{H}_{\rho}^t,{H}_{\phi}^t,{H}_{z}^t\}&=&0
 \end{eqnarray}
- The numerical solutions of these equations and boundary conditions can be found with FreeFem++ if we write the system in the weak, or integral form.
+ The numerical solutions of these equations and boundary conditions can be found with \freefempp if we write the system in the weak, or integral form.
 \subsection{Weak formulation}
 In general, to obtain the integral or ``weak'' statements equivalent to system (\ref{eq:system}) and boundary conditions we form a scalar dot product between an arbitrary magnetic field test function $\vec{H}^t=\{{H}_{\rho}^t,{H}_{\phi}^t,{H}_{z}^t\}$ and the components of our vectorial equation $A_1,A_2,A_3$, and integrate over the resonator's cross section domain $\Omega$ (and its boundary for the boundary conditions):
 \begin{equation}\label{eq:weak-initial}
@@ -16137,12 +16140,12 @@ We can reduce the order of partial derivatives in this integral by using the Gre
 \end{equation}
 Thus converting equations (\ref{eq:system}) we obtain a large expression for the weak form (see [1])
 
-\subsubsection{A dielectric sphere example with FreeFem++}
+\subsubsection{A dielectric sphere example with \freefempp}
 We now compute the fundamental mode frequency for a fused silica sphere. The sphere is 36 micrometer in diameter, the refractive index is 1.46, the boundary condition is the magnetic wall (which can actually be omitted as it holds automatically). The example can be found in \texttt{examples++-eigenvalue/WGM-sphere.edp} in the distribution.
 
 
 \section{\texttt{MPI} Parallel version }
-A first attempt of parallelization of \texttt{FreeFem++} is made here with {\bf\texttt{mpi}}.
+A first attempt of parallelization of \freefempp is made here with {\bf\texttt{mpi}}.
 An extended interface with MPI has been added to \freefempp version 3.5,  (see the MPI documentation for the functionality 
 of the language at \url{http://www.mpi-forum.org/docs/mpi21-report.pdf}).
 
@@ -16435,7 +16438,7 @@ of problem (\ref{eq:lapl}) is find $\uh^{\ell}_{i}\in \Vh_i$ such that:
 %%%\end{equation}
 where $g_i^k$ is the value of $g$ associated to the degree of freedom $k\in \Nhgi_{i} $.
 
-In FreeFem++, it can be written has with \texttt{U} is the vector corresponding to $\uh^{\ell}_{|i}$ and the 
+In \freefempp, it can be written has with \texttt{U} is the vector corresponding to $\uh^{\ell}_{|i}$ and the 
 vector \texttt{U1}  is the vector corresponding to $\uh^\ell_{i}$  is the solution of: 
 
 \bFF
@@ -16458,7 +16461,7 @@ the right of side of the problem, are defined  by
   @real[int] onG = vPbon(0,Whi);
   @real[int] Bi=vPb(0,Whi);  
 \eFF\smallskip
-where  the freefem++  label of $\Gamma$ is 1 and the label of
+where  the \freefempp  label of $\Gamma$ is 1 and the label of
 $\Gamma_i\setminus \Gamma$ is $10$.
 
 
@@ -16473,7 +16476,7 @@ and the matrix $rMj[j]$ to after to  reduce owith  neighborhood $j$ domain.
 
 So the tranfert and update part  compute 
 $v_i= \pi_i u_i + \sum_{j\in J_i} \pi_j  u_j  $ and  can be write  the
-freefem++ function Update:
+\freefempp function Update:
 \bFF
 @func @bool Update(@real[@int] &ui, @real[@int] &vi)
 { @int n= jpart.n;
@@ -16628,7 +16631,7 @@ and build the partition $\pi$  function constant equal to $i$ on each
 sub domain $\mathcal{O}_i, i =1 ,.., N_p$,  of the grid with the \texttt{Metis} graph  partitioner  \cite{metis}
  and on each process $i$ in $1..,N_p$ do 
 \begin{enumerate}
-\item Broadcast from process $1$, the mesh  $\Th^*$ (call \texttt{Thii} in freefem++ script), and $\pi$ function,
+\item Broadcast from process $1$, the mesh  $\Th^*$ (call \texttt{Thii} in \freefempp script), and $\pi$ function,
 \item remark that the characteristic function  $\1_{\mathcal{O}_i}$ of domain $\mathcal{O}_i$,   is defined  by $(\pi=i) ? 1 : 0 $, 
 \item let us call $\Pi^2_P$ (resp. $\Pi^2_V$) the $L^2$ on $P_h^*$ the space of the constant finite element function per element on $\Th^*$ (resp.
 $V_h^*$ the space of the affine continuous finite element per element on $\Th^*$).
@@ -16688,7 +16691,7 @@ and build in parallel the  $\pi_i$ and $\Omega_i$, such that   $ \mathcal{O}_i\ 
 %\eFF
 \item At this step we have  all on  the coarse mesh , so we can 
 build the fine final mesh by splitting all meshes : \verb!Thi, Thij[j],Thij[j]! 
-with freefem++ \texttt{trunc} mesh function which do restriction and slipping. 
+with \freefempp \texttt{trunc} mesh function which do restriction and slipping. 
 \smallskip
 \item The construction of the send/recv  matrices  \verb!sMj! and \verb!rMj! :
 can done with this code:\smallskip
@@ -16961,7 +16964,7 @@ are controlled by INCTL(5) (resp. INCTL(18)).  The different values of ICNTL(5) 
 %They con are respectively matrix format (0: assembled format and 1: elemental format) and matrix pattern and matrix entries.
 In the current release of Freefem$++$, we consider that FE matrix or matrix is storage in assembled format. Therefore, INCTL(5) is treated as 0 value.
 The main option for ICNTL(18):  INCLTL(18)=0  centrally on the host processor, ICNTL(18)=3 distributed the input matrix pattern and the entries
-(recommended option for distributed matrix by developer of MUMPS). For other values of ICNTL(18) see the user's guide of MUMPS. These values can be used also in Freefem++.
+(recommended option for distributed matrix by developer of MUMPS). For other values of ICNTL(18) see the user's guide of MUMPS. These values can be used also in \freefempp.
 
 The default option implemented in \freefempp are ICNTL(5)=0 and ICNTL(18)=0.\\
 
@@ -16981,7 +16984,7 @@ for more details  \cite{mumpsuserguide}).  The parameters permr, scaler, and sca
 %%%%%%%%%%%%%%%%%%
 \end{paragraph}
 
-\paragraph{Calling MUMPS in FreeFem++}
+\paragraph{Calling MUMPS in \freefempp}
 
 To call MUMPS in \freefempp, we need to load the dynamic library MUMPS\_freefem.dylib (MacOSX),  MUMPS\_freefem.so (Unix) or  MUMPS\_freefem.dll (Windows).
 This is  done in typing load "MUMPS\_freefem" in the .edp file. We give now the two methods to give the option of MUMPS solver in \freefempp.
@@ -17082,7 +17085,7 @@ in C and MPI for communications.
 
 \begin{paragraph}
 {\bf{Installation of SuperLU\_DIST:}}
-To use SuperLU\_DIST in \freefempp, you have to install SuperLU\_DIST package. We need MPI and ParMetis library to do this compilation. An installation procedure to obtain this package is given in the file README\_COMPILE in the directory src/solver/  of the freefem++ package.
+To use SuperLU\_DIST in \freefempp, you have to install SuperLU\_DIST package. We need MPI and ParMetis library to do this compilation. An installation procedure to obtain this package is given in the file README\_COMPILE in the directory src/solver/  of the \freefempp package.
 %To used SuperLU distributed, we first need to compile this libraries. The file  *.a  and *.h  must be copied in the tree of freefem$++$ respectively in directory /download/lib/ and directory /download/include/.
 %To compile  SuperLU Distributed during the compilation of freefem$++$, we must used  the option --enable-download at the configure step. %% futur release
 \end{paragraph}
@@ -17121,7 +17124,7 @@ The other parameters for LU factorization are ParSymFact and ReplaceTinyPivot.  
 need the ParMetis ordering \cite{parmetis}. The default option argument of SuperLU\_DIST are given in the file ffsuperlu\_dist\_fileparam.txt.
 \end{paragraph}
 
-\paragraph{Calling SuperLU\_DIST in FreeFem++}
+\paragraph{Calling SuperLU\_DIST in \freefempp}
 
 To call SuperLU\_DIST in \freefempp, we need to load the library dynamic correspond to interface.
 This done by the following line  {\bf{load "real\_superlu \_DIST\_FreeFem"}} (resp.  {\bf{load "complex\_superlu\_DIST\_FreeFem"}}) for real (resp. complex) arithmetics in the file .edp.
@@ -17262,8 +17265,8 @@ incomplete factorization \cite{A:LaBRI::sisc06}
 MultiGrid)
 \cite{A:AMG::sisc00} and parallel approximated inverse \cite{A:PASA::sisc00}.
 \\\\
-To use one of these programs in FreeFem++, you have to install it independently
-of FreeFem++.
+To use one of these programs in \freefempp, you have to install it independently
+of \freefempp.
 It is also necessary to install the MPI communication library which is essential
 for communication
 between the processors and, in some cases, software partitioning graphs like
@@ -17279,7 +17282,7 @@ $m$ which depends on type of Krylov subspace. For example in GMRES,
 $\mathcal{L}_m=AK_m$.
 \\\\
 We realized an interface which is easy to use, so that the call of these
-different softwares in FreeFem++ is done in the same way.
+different softwares in \freefempp is done in the same way.
 You just have to load the solver and then specify the parameters to  apply to
 the specific  solvers. In the rest of this chapter,
 when  we talk about Krylov subspace methods we mean one among  GMRES, CG and
@@ -17314,7 +17317,7 @@ To solve the local problem on $A_i$ there are several preconditioners as
 \textbf{ilut} (Incomplete  LU with threshold),
 \textbf{iluk}(Incomplete  LU with level of fill in) and \textbf{ARMS}( Algebraic
 Recursive Multilevel Solver). But to use pAMRS in
-FreeFem++ you have first to install pAMRS.
+\freefempp you have first to install pAMRS.
 
 \paragraph*{Installation of pARMS}
 To install pARMS, you must first download  the pARMS package at \cite{spARMS}.
@@ -17322,11 +17325,11 @@ Once the download is complete, you must unpack package pARMS and follow the
 installation procedure
 described in file README to create the library \textbf{libparms.a}.
 
-\paragraph*{Using pARMS as interface to FreeFem++}
-Before calling pARMS solver inside FreeFem++, you must
+\paragraph*{Using pARMS as interface to \freefempp}
+Before calling pARMS solver inside \freefempp, you must
 compile file $parms\_FreeFem.cpp$  to create a dynamic library
 $parms\_FreeFem.so$.
-To do this, move to the directory $src/solver$ of  FreeFem++, edit the file
+To do this, move to the directory $src/solver$ of  \freefempp, edit the file
 $makefile\-parms.inc$ to specify the following variables:\\
 
 \begin{tabular}{ll}
@@ -17337,18 +17340,18 @@ $PARMS\_DIR$ : &  Directory of pARMS \\
 \textbf{$METIS\_LIB$} : &    METIS librairy \\
 \textbf{$MPI$} : & MPI directory  \\
 \textbf{$MPI\_INCLUDE$} : & MPI headers \\
-\textbf{$FREEFEM$} : &  FreeFem++ directory \\
-\textbf{$FREEFEM\_INCLUDE$} : &  FreeFem++ header for sparse linear solver\\
+\textbf{$FREEFEM$} : &  \freefempp directory \\
+\textbf{$FREEFEM\_INCLUDE$} : &  \freefempp header for sparse linear solver\\
 \textbf{$LIBBLAS$} : & Blas library\\
 \end{tabular}
 
 After  that, in the command line  type \textbf{make parms} to create
 $parms\_FreeFem.so$.
 \\
-As usual in FreeFem++, we will show by examples how to call pARMS in FreeFem++.
+As usual in \freefempp, we will show by examples how to call pARMS in \freefempp.
 There are three ways of doing this:
 \paragraph*{Example 1: Default parameters }
-This example comes from user guide of FreeFem++ \cite{ufreefem} at page 12.
+This example comes from user guide of \freefempp \cite{ufreefem} at page 12.
 \begin{example}\label{exm:first}~
 \bFF
  1: @load parms_freefem   // Tell FreeFem that you will use pARMS 
@@ -17370,7 +17373,7 @@ This example comes from user guide of FreeFem++ \cite{ufreefem} at page 12.
 \end{example}
 
 In line 1 of example \ref{exm:first} we load in memory the pARMS dynamic library
-with interface FreeFem++.
+with interface \freefempp.
 After this, in line 7 we specify that the bilinear form will be solved by the
 last sparse linear solver
 load in memory which, in this case, is pARMS.
@@ -17595,7 +17598,7 @@ mesh) and increase the number of processors
 used to solve the linear system. We saw that, when the number of processors
 increases, the time for solving the linear equation decreases, even if the
 number of iteration increases. This proves that, using pARMS as solver of linear
-systems coming from discretization of partial differential equation in FreeFem++
+systems coming from discretization of partial differential equation in \freefempp
 can decrease drastically the total time of simulation.
 
 \subsubsection{Interfacing with HIPS}
@@ -17622,10 +17625,10 @@ For example, to install HIPS on a  linux cluster copy the file
 edit \textbf{makefile.inc} to set values of different variables and type
 \textbf{make all}.
 
-\paragraph*{Using HIPS as the interface to FreeFem++}
-Before calling the HIPS solver inside FreeFem++, you must
+\paragraph*{Using HIPS as the interface to \freefempp}
+Before calling the HIPS solver inside \freefempp, you must
 compile file $hips\_FreeFem.cpp$  to create dynamic library $hips\_FreeFem.so$.
-To do this, move to the directory $src/solver$ of  FreeFem++ and edit the file
+To do this, move to the directory $src/solver$ of  \freefempp and edit the file
 $makefile.inc$ to specify the following variables:\\
 
 \begin{tabular}{ll}
@@ -17637,7 +17640,7 @@ headers\\
 \textbf{$LIBHIPSSEQUENTIAL$} : & \$($HIPS\_DIR$)/LIB/libhipssequential.a: HIPS
 utilities library\\
 \textbf{$LIBHIPS$}           : & \$($HIPS\_DIR$)/LIB/libhips.a: HIPS library\\
-\textbf{$FREEFEM$} : &  FreeFem++ directory \\
+\textbf{$FREEFEM$} : &  \freefempp directory \\
 \textbf{$FREEFEM\_INCLUDE$} : &  FreeFem headers for sparse linear solver\\
 \textbf{$METIS$}   : &    METIS directory  \\
 \textbf{$METIS\_LIB$} : &    METIS library \\
@@ -17648,13 +17651,13 @@ utilities library\\
 After  specifies all the variables, in the command line in the directory
 $src/solver$ type \textbf{make hips} to create $hips\_FreeFem.so$.
 \\
-Like with pARMS, the calling of HIPS in FreeFem++ can be done in three different
+Like with pARMS, the calling of HIPS in \freefempp can be done in three different
 manners.
 We will present only one example where the user specifies the parameters through
 keywords \texttt{lparams} and \texttt{dparams}.
 
 \paragraph*{Laplacian 3D solve with HIPS}\label{hipsexample2}
-Let us consider the 3D Laplacian  example inside FreeFem++ package where after
+Let us consider the 3D Laplacian  example inside \freefempp package where after
 discretization we want to solve the linear equation with Hips. Example
 \ref{hips:laplacian} is Laplacian3D using Hips as linear solver. We first load
 Hips solver at  line 2. From line 4 to 15 we specify the parameters for the Hips
@@ -17850,7 +17853,7 @@ To install HYPRE, first download the HYPRE package at \cite{HYPRE}, unpack it
 and go to the HYPRE/src source directory and do
 \textbf{./configure} to configure Hypre. After this just type \textit{make all}
 to create \textbf{libHYPRE.a}.
-\paragraph*{Using HYPRE as interface to FreeFem++}
+\paragraph*{Using HYPRE as interface to \freefempp}
 Before calling HYPRE solver inside \freefempp, you must
 compile the file $hypre\_FreeFem.cpp$  to create dynamic library
 $hypre\_FreeFem.so$.
@@ -19553,7 +19556,7 @@ primary:
 %%%}
 \section{Dynamical link}
 \label{Dynamical link}
-Now, it's possible to add built-in functionnalites in \texttt{FreeFem++} under the three
+Now, it's possible to add built-in functionnalites in \freefempp under the three
 environnents Linux, Windows and MacOS X 10.3 or newer.
 It is agood idea to,
 first try the example \texttt{load.edp} in directory \texttt{example++-load}.
@@ -19570,7 +19573,7 @@ You will need to install a \texttt{c++} compiler  (generally \texttt{g++/gcc} co
 
 Now, assume  that you are in a shell window (a cygwin window under Windows)  in the directory
 \texttt{example++-load}. Remark that  in the sub directory \texttt{include}
-they are all the \texttt{FreeFem++} include file to make the link with \texttt{FreeFem++}.
+they are all the \freefempp include file to make the link with \freefempp.
 
 
 
@@ -19590,7 +19593,7 @@ they are all the \texttt{FreeFem++} include file to make the link with \texttt{F
 
 {\bf The compilation of your module}:
 the script \texttt{ff-c++} compiles and makes
-the link with \texttt{FreeFem++}, but be careful, the script
+the link with \freefempp, but be careful, the script
 has no way to known if you try to compile for a
 pure Windows environment or for a cygwin environment
 so to build the load module under cygwin  you must add
@@ -19617,7 +19620,7 @@ using namespace std;
 @using @namespace Fem2D;
 @double myfunction(Stack stack)
 {
-  //  to get FreeFem++  data
+  //  to get \freefempp  data
   MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
   @double x= mp.P.x; // get the current x value
   @double y= mp.P.y; // get the current y value
@@ -19625,10 +19628,10 @@ using namespace std;
   @return sin(x)*cos(y);
 }
 \eFF
-Now the Problem is to build the link with \texttt{FreeFem++}, to do that
+Now the Problem is to build the link with \freefempp, to do that
 we need two classes, one to call the function \texttt{myfunction}
 
-All \texttt{FreeFem++} evaluable expression must be a struct/class  \texttt{C++}  which
+All \freefempp evaluable expression must be a struct/class  \texttt{C++}  which
 derive from \texttt{E\_F0}. By default this expression does not depend of the mesh position,
 but if they   derive from \texttt{E\_F0mps} the expression depends of the mesh position,
 and for more details see \cite{FHcpp}.
@@ -19636,10 +19639,10 @@ and for more details see \cite{FHcpp}.
 
 
 \bFF
-//  A class build the link with \texttt{FreeFem++}
+//  A class build the link with \freefempp
 // generaly this class are already in AFunction.hpp
 // but unfortunatly, I have no simple function with no parameter
-// in \texttt{FreeFem++} depending of the mesh,
+// in \freefempp depending of the mesh,
 @template<class R>
 @class  OneOperator0s : @public OneOperator {
 
@@ -19650,7 +19653,7 @@ and for more details see \cite{FHcpp}.
     @typedef  R (*func)(Stack stack) ;
     func f; // the pointeur to the fnction myfunction
     E_F0_F(func ff)  : f(ff) {}
-    // the operator evaluation in \texttt{FreeFem++}
+    // the operator evaluation in \freefempp
     AnyType @operator()(Stack stack)  @const {@return SetAny<R>( f(stack)) ;}
 
   };
@@ -19658,7 +19661,7 @@ and for more details see \cite{FHcpp}.
   @typedef  R (*func)(Stack ) ;
   func  f;
 @public:
-  // the function which build the \texttt{FreeFem++} byte code
+  // the function which build the \freefempp byte code
   E_F0 * code(@const basicAC_F0 & ) @const { @return  new E_F0_F(f);}
   // the constructor to say ff is a function without parameter
   // and returning a R
@@ -19667,7 +19670,7 @@ and for more details see \cite{FHcpp}.
 \eFF
 
 
- To finish we must add this new function in \texttt{FreeFem++} table ,
+ To finish we must add this new function in \freefempp table ,
  to do that include :
  
 \bFF
@@ -19719,11 +19722,11 @@ CodeAlloc : nb ptr  1394,  size :71524
 Bien: On a fini Normalement
 \eFF
 
-Under Windows, launch \texttt{FreeFem++} with the mouse (or ctrl O) on the example.
+Under Windows, launch \freefempp with the mouse (or ctrl O) on the example.
 
 \subsection{Example: Discrete Fast Fourier Transform } \index{DFFT}\index{FFT}
 
-This will add FFT to \texttt{FreeFem++}, taken from
+This will add FFT to \freefempp, taken from
  \url{http://www.fftw.org/}. To download and install under \texttt{download/include}
  just go in \texttt{download/fftw} and try\texttt{make}.
 
@@ -20104,7 +20107,7 @@ using namespace std;
 //  ----   cooking to add the finite elemet to freefem table --------
 // a static variable to def the finite element
   static TypeOfFE_P2BRLagrange P2LagrangeP2BR;
-  //  now adding   FE in FreeFEm++  table
+  //  now adding   FE in FreeFem++  table
   static AddNewFE P2BR("P2BR",&P2LagrangeP2BR);
 // --- end cooking
 } // end FEM2d namespace
@@ -20277,7 +20280,7 @@ BuildSolverSuperLU(DCL_ARG_SPARSE_SOLVER(Complex,A))
 
 \eFF
 
-The link to \texttt{FreeFem++}
+The link to \freefempp
 
 
 \bFF
@@ -20323,7 +20326,7 @@ To set the default solver to superLU, call this function:
 
 \index{defaultsolver}
 \index{defaulttoSuperLU}
-To add new function/name \texttt{defaultsolver,defaulttoSuperLU}in \texttt{freefem++},
+To add new function/name \texttt{defaultsolver,defaulttoSuperLU}in \freefempp,
 and set the default  solver to the new solver., just do:
 
 \bFF
@@ -20369,7 +20372,7 @@ tar xvfz ../SuperLU_3.0-include-ff.tar.gz
 I will give a correct one
 to compile with freefm++.
 
-To compile  the freefem++ load file  of SuperLu with freefem do:
+To compile  the \freefempp load file  of SuperLu with freefem do:
 some find like :
 \begin{verbatim}
 ff-c++ SuperLU.cpp  -L$HOME/work/LinearSolver/SuperLU_3.0/ -lsuperlu_3.0
@@ -20429,8 +20432,8 @@ FreeFem++ SuperLu.edp
 
 
 
-\section*{FreeFem++ LGPL License}
-This is The \texttt{FreeFem++} software.
+\section*{\freefempp LGPL License}
+This is The \freefempp software.
 Programs in it were maintained by
 \begin{itemize}
 \item \texttt{Fr\'{e}d\'{e}ric hecht <Frederic.Hecht@upmc.fr>}
@@ -21062,10 +21065,10 @@ Wingate  , L. P. Bos},  Several new quadrature formulas for polynomial integrati
 \textbf{Book Description}
 \medskip
 
-Fruit of a long maturing process freefem, in its last avatar, \texttt{FreeFem++}, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
+Fruit of a long maturing process freefem, in its last avatar, \freefempp, is a high level integrated development environment (IDE)  for partial differential equations (PDE).  It is the ideal tool for teaching the finite element method but it is also perfect for research to quickly test new ideas or multi-physics and complex applications.
 \medskip
 
-\texttt{FreeFem++} has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \texttt{FreeFem++}. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \texttt{FreeFem++} to prepare research quality reports: color display online with zooming and other features and postscript printouts.
+\freefempp has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK. Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \freefempp. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \freefempp to prepare research quality reports: color display online with zooming and other features and postscript printouts.
 
 \medskip
 This book is ideal for students at Master level, for  researchers at any level and for engineers also in financial mathematics.

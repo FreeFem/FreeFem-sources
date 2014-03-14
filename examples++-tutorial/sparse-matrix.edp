@@ -227,3 +227,15 @@ aM[9]= MM;
 cout << MM << endl;
 MM.resize(10,100);
 cout << MM << endl;
+
+{  //  test renumbering of sub mesh ..
+  func Pk=P2;
+  int[int] n2ok(1); 
+  mesh ThC = trunc(Th,x < 0.5,new2old=n2ok);
+  fespace VFh(Th,Pk);
+  fespace VCh(ThC,Pk);
+  verbosity= 100; 
+  int[int] n2o=restrict(VCh,VFh,n2ok);
+  cout << " n2o " << n2o << endl;
+  
+}

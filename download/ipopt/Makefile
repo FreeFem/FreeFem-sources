@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 include Makefile.inc
 
 all-local: Ipopt
@@ -23,6 +22,10 @@ INCMUMPS=$(DOWNLOADFF)/include/libseq
 #/Ipopt-3.10.2.tgz
 Ipopt: $(SRCDIR)/FAIRE
 #  --enable-static  --disable-shared  
+
+# ALH - 6/1/14 - We need to specify FLIBS explicitely because Ipopt
+# fails to guess FLIBS correctly on Windows+Cygwin+Mingw64, see [[file:Makefile.inc.in::FLIBS]]
+
 $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 #	FFCS - disable dependency tracking like in FFCS itself for MinGW compilation (problem with backslashes, see
 #	[[file:../../../../configure.ac::enable_dependency_tracking]])
@@ -35,6 +38,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	  CXX='$(CXX)' CXXFLAGS='$(CXXFLAGS) -I$(INCMUMPS)' \
 	  CC='$(CC)' CFLAGS='$(CFLAGS) -I$(INCMUMPS)' \
 	  F77='$(FC)' FFLAGS='$(FCFLAGS)' \
+	  FLIBS='$(FLIBS)' \
 	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' \
 	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	touch $(SRCDIR)/FAIT	
@@ -68,7 +72,8 @@ $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL)
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):
-	cd `dirname $@`; $(WGET)   $(URL)/`basename $(PACKAGE)`
+	../getall -o Ipopt -a
+
 clean-local::
 	rm -rf  $(SRCDIR)  *~ Makefile.inc
 

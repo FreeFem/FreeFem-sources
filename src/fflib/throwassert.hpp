@@ -43,7 +43,8 @@
 #undef assert
 #define assert(condition) throwassert(condition)
 #endif
-// an unremovable assert : ffassert
+
+// <<ffassert>> an unremovable assert. According to FH, ffassert() is as a more reliable way to trap FF than assert().
 #undef ffassert
 #define ffassert(condition)  ((condition) ? ( (void) 0) : throw(ErrorAssert(#condition,__FILE__, __LINE__)))
 //#define AFAIRE(str) ( (cerr << " TO be Done " << str << endl), throw(ErrorAssert("AFAIRE)/TO DO  (FH????",__FILE__, __LINE__))) 

@@ -568,6 +568,8 @@ char Getxyc(float &x,float &y)
 
   return c;
 }
+
+/// <<rattente>>
 void rattente(int )
 {
 }

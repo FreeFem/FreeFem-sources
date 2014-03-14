@@ -1,8 +1,6 @@
 # and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
-
 include cxxflags
 all-local: tetgen
 
@@ -32,8 +30,8 @@ FAIRE:install.done $(SRCDIR)/FAIT cxxflags WHERE.done
 # FFCS - 30/11/10 - need ranlib on Win64. The PATH is setup so that mingw/ranlib is called
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tags  cxxflags 
-	cd $(SRCDIR);g++  -m64 -fPIC -DNDEBUG  -fPIC -DBAMG_LONG_LONG  -DNCHECKPTR  -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
-	cd $(SRCDIR);g++ -m64 -fPIC -DNDEBUG  -fPIC -DBAMG_LONG_LONG  -DNCHECKPTR  -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
+	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
+	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch $(SRCDIR)/FAIT
 WHERE.done: $(SRCDIR)/FAIT
 	echo tetgen LD -L@DIR@/lib -ltet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
@@ -60,9 +58,7 @@ $(SRCDIR)/tags: $(PACKAGE)
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
-
-
+	../getall -o TetGen -a
 
 clean-local::
 	-rm -rf tetgen1.4.?  FAIT FAIRE 

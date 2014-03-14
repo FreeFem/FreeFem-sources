@@ -283,7 +283,7 @@ TriangleAdjacent Triangle::FindBoundaryEdge(int i) const
 {
   // turn around  the vertex ns[i] also call  s
 #ifdef DEBUG
-  register Vertex * s  =  ns[i];
+   Vertex * s  =  ns[i];
 #endif
   Triangle   *t = (Triangle *) this , *ttc;
   int k=0,j = EdgesVertexTriangle[i][0],jc;
@@ -746,7 +746,7 @@ void ListofIntersectionTriangles::SplitEdge(const Triangles & Bh,
 
 
 int  ListofIntersectionTriangles::NewItem(Triangle * tt,Real8 d0,Real8 d1,Real8 d2) { 
-  register int n;
+   int n;
   R2 x(0,0);
   if ( d0) x =      (*tt)[0].r * d0;
   if ( d1) x = x +  (*tt)[1].r * d1;
@@ -760,7 +760,7 @@ int  ListofIntersectionTriangles::NewItem(Triangle * tt,Real8 d0,Real8 d1,Real8 
     lIntTria[Size].bary[2]=d2;
     lIntTria[Size].x = x;
     Metric m0,m1,m2;
-    register Vertex * v;
+     Vertex * v;
     if ((v=(*tt)(0))) m0    = v->m;
     if ((v=(*tt)(1))) m1    = v->m;
     if ((v=(*tt)(2))) m2    = v->m;
@@ -774,7 +774,7 @@ int  ListofIntersectionTriangles::NewItem(Triangle * tt,Real8 d0,Real8 d1,Real8 
   return n;
 }
 int ListofIntersectionTriangles::NewItem(R2 A,const Metric & mm) {  
-  register int n;
+   int n;
   if(!Size ||  Norme2_2(lIntTria[Size-1].x-A)) {
     if (Size==MaxSize) ReShape();
     lIntTria[Size].t=0;
@@ -1192,8 +1192,8 @@ int Triangle::swap(Int2 a,int koption){
  if(a/4 !=0) return 0;// arete lock or MarkUnSwap
 #endif
 
-  register Triangle *t1=this,*t2=at[a];// les 2 triangles adjacent
-  register Int1 a1=a,a2=aa[a];// les 2 numero de l arete dans les 2 triangles
+   Triangle *t1=this,*t2=at[a];// les 2 triangles adjacent
+   Int1 a1=a,a2=aa[a];// les 2 numero de l arete dans les 2 triangles
 #ifdef DEBUG
   if(a2 & 4) return 0; // arete lock
   int munswap2 = a2/4;
@@ -1202,10 +1202,10 @@ int Triangle::swap(Int2 a,int koption){
   if(a2/4 !=0) return 0; // arete lock or MarkUnSwap
 #endif
   
-  register Vertex  *sa=t1->ns[VerticesOfTriangularEdge[a1][0]];
-  register Vertex  *sb=t1->ns[VerticesOfTriangularEdge[a1][1]];
-  register Vertex  *s1=t1->ns[OppositeVertex[a1]];
-  register Vertex  *s2=t2->ns[OppositeVertex[a2]];
+   Vertex  *sa=t1->ns[VerticesOfTriangularEdge[a1][0]];
+   Vertex  *sb=t1->ns[VerticesOfTriangularEdge[a1][1]];
+   Vertex  *s1=t1->ns[OppositeVertex[a1]];
+   Vertex  *s2=t2->ns[OppositeVertex[a2]];
 
 #ifdef DEBUG
   assert ( a >= 0 && a < 3 );  
@@ -1238,7 +1238,7 @@ int Triangle::swap(Int2 a,int koption){
         while (1)
 	 if(kopt) {
 	 // critere de Delaunay pure isotrope
-	 register Icoor2 xb1 = sb->i.x - s1->i.x,
+	  Icoor2 xb1 = sb->i.x - s1->i.x,
 	   x21 = s2->i.x - s1->i.x,
 	   yb1 = sb->i.y - s1->i.y,
 	   y21 = s2->i.y - s1->i.y,
@@ -1246,7 +1246,7 @@ int Triangle::swap(Int2 a,int koption){
 	   x2a = s2->i.x - sa->i.x,
 	   yba = sb->i.y - sa->i.y,
 	   y2a = s2->i.y - sa->i.y;
-	 register double
+	  double
 	   cosb12 =  double(xb1*x21 + yb1*y21),
 	   cosba2 =  double(xba*x2a + yba*y2a) ,
 	   sinb12 = double(det2),
@@ -1328,15 +1328,15 @@ int Triangle::swap(Int2 a,int koption){
 Real8  Vertex::Smoothing(Triangles & Th,const Triangles & BTh,Triangle  * & tstart ,Real8 omega)
 {
 #ifdef DEBUG  
-  register  Int4 NbSwap =0;
+    Int4 NbSwap =0;
 #endif
-  register Vertex * s  = this;
+   Vertex * s  = this;
   Vertex &vP = *s,vPsave=vP;
   //  if (vP.on) return 0;// Don't move boundary vertex  
   
-  register Triangle * tbegin= t , *tria = t , *ttc;
+   Triangle * tbegin= t , *tria = t , *ttc;
  
-  register int k=0,kk=0,j = EdgesVertexTriangle[vint][0],jc;
+   int k=0,kk=0,j = EdgesVertexTriangle[vint][0],jc;
   R2 P(s->r),PNew(0,0);
   //  cout << BTh.quadtree << " " <<  BTh.quadtree->root << endl;
   // assert(BTh.quadtree && BTh.quadtree->root);
@@ -1464,8 +1464,8 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   Icoor2  det3local[3];
   int infv = &s0 ?  ((  &s1 ? ( &s2  ? -1 : 2) : 1  )) : 0;
   // infv = ordre of the infini vertex (null)
-  register int nbd0 =0; // number of zero det3
-  register int izerodet=-1,iedge; // izerodet = egde contening the vertex s
+   int nbd0 =0; // number of zero det3
+   int izerodet=-1,iedge; // izerodet = egde contening the vertex s
   Icoor2 detOld = t->det;
   
   if ( (( infv <0 ) && (detOld <0)) ||  (( infv >=0  ) && (detOld >0)) ) 
@@ -1696,8 +1696,11 @@ Int4  Triangles::SplitInternalEdgeWithBorderVertices()
       nbv = iv;
     }
   if (NbSplitEdge >  nbv-nbvold)
+  {
     cout << " Warning not enough vertices  to split all internal edges "  << endl
 	 << "    we lost " << NbSplitEdge - ( nbv-nbvold) << " Edges Sorry " << endl;
+      warning = 2;
+  }
   if (verbosity>2)
   cout << "SplitInternalEdgeWithBorderVertices: Number of splited edge " << NbSplitEdge << endl;
   return  NbSplitEdge;
@@ -1721,8 +1724,8 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
   const Int4 PrimeNumber= AGoodNumberPrimeWith(nbv)  ;
   Int4 k3 = rand()%nbvnew ; 
   for (Int4 is3=0; is3<nbvnew; is3++) {
-    register Int4 j = nbvold +(k3 = (k3 + PrimeNumber)% nbvnew);
-    register Int4 i = nbvold+is3; 
+     Int4 j = nbvold +(k3 = (k3 + PrimeNumber)% nbvnew);
+     Int4 i = nbvold+is3; 
     ordre[i]= vertices + j;
     ordre[i]->ReferenceNumber=i;
   }
@@ -2107,12 +2110,12 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 	  
 	  if(first_np_or_next_t[k]>0) { // this edge is done before 
 	    // find the color of the edge and begin , end of newpoint
-	    register int kk = t->NuEdgeTriangleAdj(j);
+	     int kk = t->NuEdgeTriangleAdj(j);
 	    assert ((*t)(VerticesOfTriangularEdge[j][0]) == (*ta)(VerticesOfTriangularEdge[kk][1]));
 	    assert ((*t)(VerticesOfTriangularEdge[j][1]) == (*ta)(VerticesOfTriangularEdge[kk][0]));
-	    register Int4 kolor =3*k + kk;
+	     Int4 kolor =3*k + kk;
 	    ColorEdge[j]=kolor;
-	    register Int4 kkk= 1;
+	     Int4 kkk= 1;
 	    step[j]=-1;// other sens 
 	    BeginNewPoint[j]=0;
 	    EndNewPoint[j]=-1; // empty list          
@@ -2276,21 +2279,21 @@ void  Triangles::NewPointsOld(Triangles & Bh)
               {
 		if (i1<nbvold) {
 		  // remove all the points i0;
-		  register Int4 ip,ipp;
+		   Int4 ip,ipp;
 		  for  (ip=i0;i0 != (ipp = vertices[ip].ReferenceNumber);ip=ipp)
 		    vertices[ip].ReferenceNumber = -1;// mark remove
 		  vertices[ip].ReferenceNumber = -1;// mark remove
 		}
 	      else {
 		// remove on of two points
-		register Int4 ip0, ip1, ipp0,ipp1;
-		register int kk0=1,kk1=1;
+		 Int4 ip0, ip1, ipp0,ipp1;
+		 int kk0=1,kk1=1;
 		// count the number of common points to compute weight w0,w1
 		for  (ip0=i0;i0 != (ipp0 = vertices[ip0].ReferenceNumber);ip0=ipp0) kk0++;
 		for  (ip1=i1;i1 != (ipp1 = vertices[ip1].ReferenceNumber);ip1=ipp1) kk1++;
 		
-		register Real8 w0 = ((Real8) kk0)/(kk0+kk1);
-		register Real8 w1 = ((Real8) kk1)/(kk0+kk1);
+		 Real8 w0 = ((Real8) kk0)/(kk0+kk1);
+		 Real8 w1 = ((Real8) kk1)/(kk0+kk1);
 
 		// make a circular link
 		Exchange(vertices[i0].ReferenceNumber,vertices[i1].ReferenceNumber);
@@ -2885,6 +2888,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 			break;}
 		    Int4 it = Number(t);
 		    if (mark[it] >=0) {
+                        
 			if(verbosity>10)
 			    cerr << "     Warning: the sub domain " << i << " ref = " << subdomains[i].ref 
 				<< " is previouly defined with "  <<mark[it] << " ref = " << subdomains[mark[it]].ref
@@ -3023,8 +3027,8 @@ void Triangles::ReNumberingVertex(Int4 * renu)
 void Triangles::ReNumberingTheTriangleBySubDomain(bool justcompress)
  {
   Int4 *renu= new Int4[nbt];
-  register Triangle *t0,*t,*te=triangles+nbt;
-  register Int4 k=0,it,i,j;
+   Triangle *t0,*t,*te=triangles+nbt;
+   Int4 k=0,it,i,j;
       
   for ( it=0;it<nbt;it++) 
     renu[it]=-1; // outside triangle 
@@ -3089,15 +3093,15 @@ void Triangles::ReNumberingTheTriangleBySubDomain(bool justcompress)
 Int4  Triangles::ConsRefTriangle(Int4 *reft) const
 {
   assert(reft);
-  register Triangle *t0,*t;
-  register Int4 k=0, num;   
+   Triangle *t0,*t;
+   Int4 k=0, num;   
   for (Int4 it=0;it<nbt;it++) 
     reft[it]=-1; // outside triangle 
   for (Int4 i=0;i<NbSubDomains;i++)
    { 
      t=t0=subdomains[i].head;
      assert(t0); // no empty sub domain
-     // register Int4 color=i+1;// because the color 0 is outside triangle
+     //  Int4 color=i+1;// because the color 0 is outside triangle
      do { k++;
        num = Number(t);
        assert(num>=0 &&num < nbt);
@@ -3120,12 +3124,12 @@ void Triangles::ConsLinkTriangle()
 {
   for (Int4 i=0;i<NbSubDomains;i++)
     subdomains[i].head=0;
-  register Triangle * t=triangles,*tend = triangles+nbt,*hst;
+   Triangle * t=triangles,*tend = triangles+nbt,*hst;
   for (;t<tend;t++)
    {  
        if (t->link) 
         {
-          register Int4 color = t->color-1;
+           Int4 color = t->color-1;
           assert(color<NbSubDomains && color>=0);
           if (hst=subdomains[color].head) {
             t->link=hst->link;
@@ -3201,7 +3205,7 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
   CrackedEdges  =0;  
   nbe = 0; 
   name = fname ;
-
+  warning=0;
   if (inbvx) {
     vertices=new Vertex[nbvx];
     assert(vertices);
@@ -3446,7 +3450,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
                   Real8 sNew=Lstep;// abcisse of the new points (phase==1) 
                   L=0;// length of the curve
                   Int4 i=0;// index of new points on the curve
-                  register GeometricalVertex * GA0 = *(*peequi)[k0equi].on;
+                   GeometricalVertex * GA0 = *(*peequi)[k0equi].on;
                   Vertex *A0;
                   A0 = GA0->to;  // the vertex in new mesh
                   Vertex *A1;
@@ -3552,7 +3556,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 		      if(verbosity>98) cout <<  BTh.Number(ee) << " " << " on=" << *ee[k1].on << " "<< ee[k1].on->IsRequiredVertex() <<  endl;
 		      if ( ee[k1].on->IsRequiredVertex()) {
 		         assert(eeequi[k1equi].on->IsRequiredVertex());
-			register GeometricalVertex * GA1 = *eeequi[k1equi].on;
+			 GeometricalVertex * GA1 = *eeequi[k1equi].on;
 			A1=GA1->to;// the vertex in new mesh
 			assert (A1-vertices>=0 && A1-vertices <nbv);
 			break;}
@@ -4552,10 +4556,10 @@ Triangles::Triangles(Triangles & Th,Geometry * pGh,Triangles * pBth,Int4 nbvxx) 
 Int4  Triangle::Optim(Int2 i,int koption)
 {
   // turn in the positif sens around vertex s  
-  register  Int4 NbSwap =0;
-  register Vertex * s  = ns[i];
-  register Triangle * tbegin=0 , *t = this , *ttc;
-  register int k=0,j = EdgesVertexTriangle[i][0],jc;
+    Int4 NbSwap =0;
+   Vertex * s  = ns[i];
+   Triangle * tbegin=0 , *t = this , *ttc;
+   int k=0,j = EdgesVertexTriangle[i][0],jc;
   tbegin=t;
   do {
     k++; 

@@ -38,15 +38,11 @@ PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 INSTALL=../..
 VERSION=4.10.0
 
-# ALH - this is also set in Makefile.inc, but this file may not always exist (eg after a make clean)
-
-WGET = wget --no-check-certificate
-
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 
 ../lib/WHERE.mumpsseq: install.done
 	echo mumps-seq LD -L@DIR@/lib -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ	\
-		-lpordFREEFEM-SEQ -lpthread > ../lib/WHERE.mumpsseq
+		-lpordFREEFEM-SEQ $(LIBSPTHREAD)  > ../lib/WHERE.mumpsseq
 	echo mumps-seq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
 	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
 	echo libseq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
@@ -77,7 +73,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 	touch $@
 
 $(PACKAGE1):
-	cd `dirname $@`; $(WGET) http://graal.ens-lyon.fr/MUMPS/`basename $(PACKAGE1)`
+	../getall -o MUMPS -a
 
 clean:
 	-rm Makefile.inc FAIRE* *~ 

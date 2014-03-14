@@ -43,7 +43,10 @@
 //#include "PlotStream.hpp"
 
  bool  NoGraphicWindow=false;
- long verbosity = 1;
+
+/// <<verbosity>>
+long verbosity = 1;
+
  long searchMethod = 0; //pichon
  FILE *ThePlotStream=0; //  Add for new plot. FH oct 2008
 
@@ -53,11 +56,13 @@ Map_type_of_map map_pair_of_type ; //  to store te type
 
  basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
 
+/// <<zzzfff>> see [[file:lex.hpp::mylex]]
+mylex *zzzfff;
+bool lexdebug;
 
- mylex *zzzfff;
-  bool lexdebug;
+/// <<plglval>> see [[file:../lglib/lg.ypp::YYSTYPE]] and [[file:../lglib/lg.ypp::yylval]]
 #include "lg.tab.hpp"
- YYSTYPE *plglval;
+YYSTYPE *plglval;
 
  int TheCurrentLine=-1; // unset: by default
  long mpisize=0,mpirank=0;
@@ -75,11 +80,11 @@ TableOfIdentifier Global;
 
  long E_Border::Count =0;
 
- typedef list<TableOfIdentifier *> ListOfTOfId;
+/// <<tables_of_identifier>> declared at [[file:AFunction.hpp::tables_of_identifier]]
+typedef list<TableOfIdentifier *> ListOfTOfId;
+ListOfTOfId tables_of_identifier;
 
-  ListOfTOfId tables_of_identifier;
-
-  const int AC_F0::MaxSize=1024; // maximal number of parameters
+const int AC_F0::MaxSize=1024; // maximal number of parameters
 
 
 
@@ -90,6 +95,7 @@ bool showCPU= false;
 size_t CodeAlloc::nb=0, CodeAlloc::lg=0,CodeAlloc::nbpx=0,CodeAlloc::chunk=2048; 
 size_t CodeAlloc::nbt,CodeAlloc::nbdl=0;
 CodeAlloc ** CodeAlloc::mem=0;
+size_t CodeAlloc::memoryusage=0; 
 bool CodeAlloc::sort=true;
 bool  CodeAlloc::cleanning=false;
 bool echo_edp=true; // add F.H of remove script dump 

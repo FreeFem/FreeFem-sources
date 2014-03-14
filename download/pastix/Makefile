@@ -158,12 +158,7 @@ $(SRCDIR): $(PACKAGE1)
 	touch $(SRCDIR)
 
 $(PACKAGE1):
-	-mkdir $(DIRPKG);
-#
-# FFCS - 23/4/13 - --no-check-certificate always required here, even
-# if [[file:../../configure.ac::no-check-certificate]] decides otherwise.
-# FH remove no-check-certificate , in wget command ..
-	cd $(DIRPKG);$(WGET) $(SERVER)/`basename $(PACKAGE1)`
+	../getall -o PaStiX -a
 
 # FFCS: avoid loops when SRCDIR does not exist
 clean-local:

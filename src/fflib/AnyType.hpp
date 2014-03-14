@@ -29,9 +29,13 @@
 //   void *, long, double, complex, all bigger type 
 //   are pointer 
 //#define WITHCHECK
+
+/// cf [[file:AFunction.hpp::basicForEachType]]
+
 class basicForEachType;
 
-/// <<aType>>
+/// <<aType>> uses [[file:AFunction.hpp::basicForEachType]]
+
 typedef const  basicForEachType * aType;
 
 ostream & operator<<(ostream & f,const basicForEachType & e);

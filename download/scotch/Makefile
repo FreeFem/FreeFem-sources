@@ -84,12 +84,8 @@ $(SRCDIR): $(PACKAGE)
 	cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)
 
-# FFCS: (7/2/11) gforge.inria.fr seems to have switched from http to https
 $(PACKAGE):
-	-mkdir $(DIRPKG);
-# FH/ 06/08/13 remove -no-check-certificate  in $(WGET)  command , pb this curl...
-	cd $(DIRPKG);$(WGET)  $(SERVER)/`basename $(PACKAGE)`
-
+	../getall -o Scotch -a
 
 # FFCS - 28/3/13 - more cleaning
 clean-local:

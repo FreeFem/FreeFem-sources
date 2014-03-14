@@ -1,3 +1,7 @@
+add doc:
+  gsl interface 
+  imax of tableau 
+
 Short time:
  build a true aniso 3d adaptation example
   to day bug in interface of mmg3d with metric and in tetgen ...

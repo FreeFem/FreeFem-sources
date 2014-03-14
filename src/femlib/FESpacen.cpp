@@ -565,8 +565,8 @@ template<class MMesh>
 KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U) const  
 {
   const int d =  Rd::d;
-  Rd *Ps;
-  int *Ks;
+  Rd *Ps=0;
+  int *Ks=0;
   int nsb = TFE[0]->nbsubdivision;        
   int nvsub,nksub;
   SplitSimplex<Rd>(nsb, nvsub,  Ps,  nksub ,  Ks);
