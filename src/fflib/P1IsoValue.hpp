@@ -29,7 +29,10 @@
 #ifndef __ff__P1IsoValue__
 #define __ff__P1IsoValue__
 
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
+
 
 #include "ufunction.hpp"
 namespace Fem2D
