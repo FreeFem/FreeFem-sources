@@ -494,6 +494,8 @@ void Check(const Opera &Op,int N,int  M)
               double f[3];
               for(int t=0; t< Th.nt;++t)
               {
+                if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+                  {
                   double umx=-HUGE_VAL,umn=HUGE_VAL;
                   for(int i=0;i<3;++i)
                   {
@@ -526,7 +528,7 @@ void Check(const Opera &Op,int N,int  M)
                       if(sptrclean) sptrclean=sptr->clean();
                   }
               }
-              
+              }
           }
         else for( int e=0;e<Th.neb;e++)
           {
@@ -736,6 +738,8 @@ void Check(const Opera &Op,int N,int  M)
             double f[4];
             for(int t=0; t< Th.nt;++t)
             {
+                if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+                {
                 double umx=-HUGE_VAL,umn=HUGE_VAL;
                 for(int i=0;i<4;++i)
                 {
@@ -762,7 +766,7 @@ void Check(const Opera &Op,int N,int  M)
                     }
                     if(sptrclean) sptrclean=sptr->clean();
                 }
-            }
+                }}
             
         }
         else
