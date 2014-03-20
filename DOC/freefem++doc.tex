@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.26-2}
+\def\VERSION{3.29}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -9080,11 +9080,11 @@ The parameters are:
       Dirichlet boundary conditions,   see page \pageref{imple-tgv} for description.
 
 \index{tolpivot=}
-      \item[tolpivot=] \index{problem!tolpivot =} \index{solve!tolpivot=} set the tolerence of the pivot in UMFPACK ($10^{-1}$)  and, LU, Crout, Cholesky
+      \item[tolpivot=] \index{problem!tolpivot =} \index{solve!tolpivot=} set the tolerance of the pivot in UMFPACK ($10^{-1}$)  and, LU, Crout, Cholesky
       factorisation ($10^{-20}$).
 
 \index{tolpivotsym=}
-      \item[tolpivotsym=] \index{problem!tolpivotsym =} \index{solve!tolpivotsym=} set the tolerence of the pivot sym in UMFPACK
+      \item[tolpivotsym=] \index{problem!tolpivotsym =} \index{solve!tolpivotsym=} set the tolerance of the pivot sym in UMFPACK
 \index{strategy=}
       \item[strategy=] \index{problem!strategy =} \index{solve!strategy=} set the integer UMFPACK strategy  ($0$ by default).
 
@@ -9095,42 +9095,85 @@ The parameters are:
 Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
 
   After the "=" sign, one may find sums of:
-  \index{int1d}\index{int2d}\index{int3d}\index{intalledges}
+  \index{int1d}\index{int2d}\index{int3d}\index{intalledges}\index{levelset}
 
 \begin{itemize}
     \item identifier(s); this is the name given earlier to the
      variational form(s) (type \texttt{varf} \index{varf}) for possible reuse.
 
       Remark, that the
-     name in the "varf" of the unknow of  test function is forgotten, we just used the order in argument
+     name in the "varf" of the unknown of  test function is forgotten, we just used the order in argument
      list to recall name as in a \Cpp function, see  note \ref{varf param},
     \item  the terms of the bilinear form itself: if $K$ is a  given function,
-    \begin{itemize}
-       \item[-]   \texttt{ int3d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $
-       \item[-]   \texttt{ int3d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $
-       \item[-]   \texttt{ int2d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $
-       \item[-]   \texttt{ int2d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $
+    \item  bilinear part for 3d meshes \texttt{Th}
+     \begin{itemize}
+       \item[-]   \texttt{ int3d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $ 
+       \item[-]   \texttt{ int3d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
 
-       \item[-] \texttt{ int1d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
-          } K\,v\,w  $
+        \item[-] \texttt{ int2d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
+          } K\,v\,w  $ 
+       \item[-]  \texttt{ int2d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
+        \item[-] \texttt{ int2d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
+          } K\,v\,w  $ 
 
-       \item[-] \texttt{ intalledges(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } K\,v\,w  $
-       \item[-] \texttt{ intalledges(Th,1)( K*v*w) } $ \displaystyle = \sum_{{T\in\mathtt{Th},T\subset \Omega_{1}}}\int_{\p T } K\,v\,w  $
+       \item[-]  \texttt{ int2d(Th,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi=0} K\,v\,w  $ 
+       \item[-]  \texttt{ int2d(Th,l,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi=0} K\,v\,w  $ 
 
+       \item[-] \texttt{ intallfaces(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } K\,v\,w  $ 
+       \item[-] \texttt{ intallfaces(Th,1)( K*v*w) } $ \displaystyle = \sum_{{T\in\mathtt{Th},T\subset \Omega_{1}}}\int_{\p T } K\,v\,w  $ 
+
+       
        \item[-]  they contribute to the sparse matrix of type \texttt{matrix} which, whether declared explicitly or not is contructed by \freefempp.
        \end{itemize}
-    \item  the right handside of the PDE, volumic terms of the linear form: for given functions $K,\, f$:
+           \item    bilinear part for 2d meshes \texttt{Th}
+
+     \begin{itemize}
+       \item[-]   \texttt{ int2d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $ 
+       \item[-]   \texttt{ int2d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
+
+        \item[-] \texttt{ int1d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
+          } K\,v\,w  $ 
+       \item[-]  \texttt{ int1d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
+        \item[-] \texttt{ int1d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
+          } K\,v\,w  $ 
+
+       \item[-]  \texttt{ int1d(Th,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi=0} K\,v\,w  $ 
+       \item[-]  \texttt{ int1d(Th,l,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi=0} K\,v\,w  $ 
+
+       \item[-] \texttt{ intalledges(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } K\,v\,w  $ 
+       \item[-] \texttt{ intalledges(Th,1)( K*v*w) } $ \displaystyle = \sum_{{T\in\mathtt{Th},T\subset \Omega_{1}}}\int_{\p T } K\,v\,w  $ 
+
+       
+       \item[-]  they contribute to the sparse matrix of type \texttt{matrix} which, whether declared explicitly or not is contructed by \freefempp.
+       \end{itemize}
+
+    \item  the right hand-side of the PDE in 3d,  the terms of the linear form: for given functions $K,\, f$:
          \begin{itemize}
        \item[-]
          \texttt{ int3d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
           } K\,w  $
        \item[-]
+         \texttt{ int3d(Th,l)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\in\Omega_l}\int_{T
+          } K\,w  $
+      \item[-] \texttt{ int2d(Th,2,5)( K*w) }   $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5}) } K \,w  $
+       \item[-] \texttt{ intallfaces(Th)( f*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } f\,w  $
+       \item[-] a vector of type  \texttt{real[int]}
+      \end{itemize}
+   \item  the right hand-side of the PDE in 2d, the   terms of the linear form: for given functions $K,\, f$:
+         \begin{itemize}
+       \item[-]
          \texttt{ int2d(Th)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T
+          } K\,w  $
+       \item[-]
+         \texttt{ int2d(Th,l)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\in\Omega_l}\int_{T
           } K\,w  $
       \item[-] \texttt{ int1d(Th,2,5)( K*w) }   $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5}) } K \,w  $
        \item[-] \texttt{ intalledges(Th)( f*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } f\,w  $
        \item[-] a vector of type  \texttt{real[int]}
       \end{itemize}
+
+    
+    
 
     \item  The boundary condition terms :
     \begin{itemize}
