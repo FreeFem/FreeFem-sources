@@ -11,7 +11,7 @@ using namespace std;
 #include "P1IsoValue.hpp"
 using namespace Fem2D;
 
-typedef double R;
+//typedef double R;
 
 inline R3 bary(const R3 K[4],R f[4],int i0,int i1,R v)
 {
