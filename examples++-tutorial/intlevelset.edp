@@ -18,11 +18,34 @@ cout  << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;
 if( abs(lc-2*pi) > 1e-1) err++; 
 real[int]  one(Vh.ndof); 
 one=1.;
-matrix VV=vl(Vh,Vh); // no build of matrix with levelset
+matrix VV=vl(Vh,Vh); //  matrix with levelset
 vv = VV*one;
 cout << " len of the level set (varf bilinear ) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi;
 cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;; 
 if( abs(lc-2*pi) > 1e-1) err++;
+
+//  just for test a idea approximation of int of negative part of levelset 
+//   to we just change the mesure of the element not the quadrature point 
+{ // test new stuff for level set  ... 
+    macro grad(u) [dx(u),dy(u)] //
+    Vh u,v;
+    solve Pxx(u,v) = int2d(Th) ( u*v*1e-8 ) + int2d(Th, levelset= 1-r) ( grad(u)'*grad(v) ) + on(1,u=0) + int2d(Th, levelset= 1-r) ( 1*v);
+    plot(u,wait=1);   
+    varf vxx(u,v) =  int2d(Th, levelset= 1-r) ( u*v ) + int2d(Th, levelset= 1-r) ( 1*v);
+  matrix XX=vxx(Vh,Vh);
+  real[int] xx=vxx(0,Vh);
+  real area1= int2d(Th, levelset= 1-r)(1.);
+  cout << "  area1 = " << area1 << "  ~= " << Th.area - pi << endl;
+  assert(abs(area1-(Th.area - pi)) < 0.1); 
+  cout << " xx.sum = " << xx.sum << " == " << area1 <<endl;
+  assert(abs(area1-xx.sum) < 1e-8); 
+  
+  real[int] yy(Vh.ndof); yy=1;
+  xx= XX*yy;
+  cout << " XX.sum = " << xx.sum << " == " << area1 << endl;
+  assert(abs(area1-xx.sum) < 1e-8); 
+}
+
 
 if(0) 
 {// test on diff mesh  not wet implemented (FH  frev 2014)
