@@ -393,7 +393,8 @@ void Check(const Opera &Op,int N,int  M)
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
     }
      //if(di.islevelset()) InternalError("So no levelset integration type on this case (6)");
-     if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (6)");
+     if(di.islevelset() && ( (CDomainOfIntegration::int1d!=kind) && (CDomainOfIntegration::int2d!=kind) )  )
+         InternalError("So no levelset integration type on no int1d case (6)");
      
     Expandsetoflab(stack,di, setoflab,all);
    /*
@@ -523,7 +524,7 @@ void Check(const Opera &Op,int N,int  M)
                           }
                           else*/ 
                            //   InternalError(" No levelSet on Diff mesh :    to day  int1d of Matrix");
-                         A += mate(t,-1,Th[t].lab,stack,Q);
+                         A += mate(t,10,Th[t].lab,stack,Q);
                       }
                       if(sptrclean) sptrclean=sptr->clean();
                   }
@@ -569,6 +570,56 @@ void Check(const Opera &Op,int N,int  M)
       }      
     else if (di.kind == CDomainOfIntegration::int2d )
       {
+          
+          if(di.islevelset())
+          {
+              double uset = HUGE_VAL;
+              R2 Q[4];
+              KN<double> phi(Th.nv);phi=uset;
+              double f[3];
+              for(int t=0; t< Th.nt;++t)
+              {
+                  if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+                  {
+                      double umx=-HUGE_VAL,umn=HUGE_VAL;
+                      for(int i=0;i<3;++i)
+                      {
+                          int j= ThI(t,i);
+                          if( phi[j]==uset)
+                          {
+                              MeshPointStack(stack)->setP(&ThI,t,i);
+                              phi[j]= di.levelset(stack);//zzzz
+                          }
+                          f[i]=phi[j];
+                          umx = std::max(umx,phi[j]);
+                          umn = std::min(umn,phi[j]);
+                          
+                      }
+                       if( umx <=0 )
+                         A += mate(t,-1,Th[t].lab,stack);
+                       else if( umn <0 )
+                       { // coupe ..
+                           int i0 = 0, i1 = 1, i2 =2;
+
+                           if( f[i0] > f[i1] ) swap(i0,i1) ;
+                           if( f[i0] > f[i2] ) swap(i0,i2) ;
+                           if( f[i1] > f[i2] ) swap(i1,i2) ;
+                           
+                            double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
+                            if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
+                            else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
+                            assert( c > 0 && c < 1);
+                            double arean = (1-c)*Th[t].area;
+                            Q[0].x =arean;
+                            A += mate(t,-2,Th[t].lab,stack,Q);
+                       }
+                       if(sptrclean) sptrclean=sptr->clean();
+                      }
+                  }
+              }
+        else
+         
+          
         for (int i=0;i< Th.nt; i++) 
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
@@ -1897,11 +1948,12 @@ void Check(const Opera &Op,int N,int  M)
 
   for (i=0;i< nx;i++) 
     *pa++ = 0.; 
-  if (ie<0 && B==0)
+  if (ie<0 )//&& B==0)
     for (npi=0;npi<FI.n;npi++) // loop on the integration point
       {
         QuadraturePoint pi(FI[npi]);
-        R coef = T.area*pi.a;
+          R mes = B ? B->x : T.area;
+        R coef = mes *pi.a;
         R2 Pt(pi);
         pa =a;
         Ku.BF(Dop,Pt,fu);
@@ -1950,43 +2002,6 @@ void Check(const Opera &Op,int N,int  M)
 		    }
 		}
 	    }
-
-	/*
-        for ( i=0;  i<n;   i++ )  
-          { 
-            
-            // attention la fonction test donne la ligne 
-            //  et la fonction test est en second      
-            
-            RNM_ wi(fv(i,'.','.'));         
-            for ( j=0;  j<m;   j++,pa++ ) 
-              { 
-                RNM_ wj(fu(j,'.','.'));
-                int il=0;
-                for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
-                  {  // attention la fonction test donne la ligne 
-                    //  et la fonction test est en second      
-                    BilinearOperator::K ll(*l);
-                    pair<int,int> jj(ll.first.first),ii(ll.first.second);
-                    R w_i =  wi(ii.first,ii.second); 
-                    R w_j =  wj(jj.first,jj.second);
-                    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                if ( copt && Kv.number <1)
-                 {
-                     R cc  =  GetAny<R>(ll.second.eval(stack));
-                     //cout << *(copt[il]) << " == " <<  cc << endl;
-                     if ( ccc != cc) { 
-                        cerr << cc << " != " << ccc << " => ";
-                       cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
-                       ExecError("In Optimized version "); }
-                 }
-                    
-                    
-                    *pa += coef * ccc * w_i*w_j;
-                  }
-              }
-          }
-	*/
       }
   else if(B)
   {  // int on isovalue ...
@@ -2478,7 +2493,8 @@ void Check(const Opera &Op,int N,int  M)
       for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
           QuadraturePoint pi(FI[npi]);
-          double coef = T.area*pi.a;
+          double mes= B ? B->x :T.area;
+          double coef = mes*pi.a;
           R2 Pt(pi);
           pa =a;
           Ku.BF(Dop,Pt,fu);
@@ -2762,7 +2778,7 @@ void Check(const Opera &Op,int N,int  M)
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1  && verbosity/100 && verbosity % 10 == 2) 
      cout << "Element_rhs S0: copt = " << copt << " " << classoptm << endl;
-
+ 
 
     KN<bool> Dop(last_operatortype);
     Op.DiffOp(Dop);  
@@ -4373,9 +4389,9 @@ template<class R>
       else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all edges " ;
       else cout << "  -- boundary int  " ;
     */
-    if(di.islevelset() && ((CDomainOfIntegration::int1d!=kind) ) )
-        InternalError("So no levelset integration 1d on the case (4)");
-    Expandsetoflab(stack,di, setoflab,all);
+      if(di.islevelset() && ( (CDomainOfIntegration::int1d!=kind) && (CDomainOfIntegration::int2d!=kind) )  )
+          InternalError("So no levelset integration type on no int1d/int2d case (4)");
+     Expandsetoflab(stack,di, setoflab,all);
     /*
     for (size_t i=0;i<what.size();i++)
       {long  lab  = GetAny<long>( (*what[i])(stack));
@@ -4422,7 +4438,7 @@ template<class R>
 	if (all) cout << " all " << endl ;
 	else cout << endl;
       }
-      if(di.islevelset() && (kind !=CDomainOfIntegration::int1d))
+      if(di.islevelset() && (kind !=CDomainOfIntegration::int1d)&& (kind !=CDomainOfIntegration::int2d))
        InternalError(" Sorry No levelSet integral for is case ..(5)");
          
 
@@ -4549,23 +4565,71 @@ template<class R>
         }
      }
      
-    else {
+    else if (kind==CDomainOfIntegration::int2d){
+        if(di.islevelset())
+        {
+            QuadratureFormular FITM(FIT);
+            double uset = HUGE_VAL;
+            R2 Q[4];
+            KN<double> phi(Th.nv);phi=uset;
+            double f[3];
+            for(int t=0; t< Th.nt;++t)
+            {
+                if ( all || setoflab.find(ThI[t].lab) != setoflab.end())
+                {
+                    double umx=-HUGE_VAL,umn=HUGE_VAL;
+                    for(int i=0;i<3;++i)
+                    {
+                        int j= ThI(t,i);
+                        if( phi[j]==uset)
+                        {
+                            MeshPointStack(stack)->setP(&ThI,t,i);
+                            phi[j]= di.levelset(stack);//zzzz
+                        }
+                        f[i]=phi[j];
+                        umx = std::max(umx,phi[j]);
+                        umn = std::min(umn,phi[j]);
+                        
+                    }
+                    if( umx <=0 )
+                        Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT);
+                    else if( umn <0 )
+                    { // coupe ..
+                        int i0 = 0, i1 = 1, i2 =2;
+                        
+                        if( f[i0] > f[i1] ) swap(i0,i1) ;
+                        if( f[i0] > f[i2] ) swap(i0,i2) ;
+                        if( f[i1] > f[i2] ) swap(i1,i2) ;
+                        
+                        double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
+                        if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
+                        else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
+                        assert( c > 0 && c < 1);
+                        double arean = (1-c)*Th[t].area;
+                        FITM=FIT;
+                        FITM*=1-c;
+                        Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FITM);
+                    }
+                    if(sptrclean) sptrclean=sptr->clean();
+                }
+            }
+        }
+        else
+            for (int i=0;i< ThI.nt; i++)
+                if (all || setoflab.find(ThI[i].lab) != setoflab.end())
+                {
+                    if ( sameMesh )
+                        Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT);
+                    else
+                        Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT);
+                    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                }
+    }
       
-      for (int i=0;i< ThI.nt; i++) 
-        if (all || setoflab.find(ThI[i].lab) != setoflab.end()) 
-         {
-          if ( sameMesh ) 
-            Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT); 
-          else 
-            Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT);
-            if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-         }
-    }  
-    
-    if (n_where_in_stack_opt) delete [] where_in_stack;
-             
+      if (n_where_in_stack_opt) delete [] where_in_stack;
+      
   }
-  
+    
   
 }// END of NameSpace Fem2D
 
