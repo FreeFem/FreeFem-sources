@@ -29,7 +29,7 @@ if( abs(lc-2*pi) > 1e-1) err++;
 { // test new stuff for level set  ... 
     macro grad(u) [dx(u),dy(u)] //
     Vh u,v;
-    solve Pxx(u,v) = int2d(Th) ( u*v*1e-8 ) + int2d(Th, levelset= 1-r) ( grad(u)'*grad(v) ) + on(1,u=0) + int2d(Th, levelset= 1-r) ( 1*v);
+    solve Pxx(u,v) = int2d(Th) ( grad(u)'*grad(v)*1e-8 ) + int2d(Th, levelset= 1-r) ( grad(u)'*grad(v) ) + on(1,u=0) + int2d(Th, levelset= 1-r) ( 1*v);
     plot(u,wait=1);   
     varf vxx(u,v) =  int2d(Th, levelset= 1-r) ( u*v ) + int2d(Th, levelset= 1-r) ( 1*v);
   matrix XX=vxx(Vh,Vh);
