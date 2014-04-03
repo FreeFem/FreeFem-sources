@@ -1739,7 +1739,7 @@ inline C_F0 TableOfIdentifier::Find(const char * name,const basicAC_F0 & args) c
 
 inline size_t align8(size_t &off) 
 { 
- register size_t o= off %8 ;
+  size_t o= off %8 ;
   off += o ? 8-o : 0;
  return off;
 }

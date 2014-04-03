@@ -28,25 +28,25 @@
 
 # <<download>>
 
-# COMMON_PACKTITLE corresponds to package names in [[file:getall]]
+# PKGCOMMON_PACKTITLE corresponds to package names in [[file:getall]]
 download::
-	../getall -o $(COMMON_PACKTITLE) -a
-$(COMMON_PACKAGES):download
+	../getall -o $(PKGCOMMON_PACKTITLE) -a
+$(PKGCOMMON_PACKAGES):download
 
-compile::download
+compilepkg::download
 
 # <<install>>
 
-install::compile
+install::compilepkg
 
 # <<reinstall>>
 
-reinstall::compile
+reinstall::compilepkg
 
 clean-local::
 
 veryclean::clean
-	-rm $(COMMON_PACKAGES)
+	-rm $(PKGCOMMON_PACKAGES)
 
 # Local Variables:
 # mode:makefile

@@ -1798,6 +1798,100 @@ bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlay
     return true;
 }
 
+
+double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double & phi0,KN<double>  * const & where)
+{
+    Mesh & Th=*pTh;
+    KN<double> & phi=*pphi;
+    ffassert( phi.N() == Th.nv); // P1
+    double arean=0., areap=0.;
+    for (int k=0;k<Th.nt;k++)
+    {
+        if( !where || (*where)[k] )
+        {
+            const Triangle & K(Th[k]);
+            const Vertex & A(K[0]), &B(K[1]),&C(K[2]);
+            int iK[3]={Th(k,0),Th(k,1),Th(k,2)};
+            R  fk[3]={phi[iK[0]]-phi0,phi[iK[1]]-phi0,phi[iK[2]]-phi0 };
+            int i0 = 0, i1 = 1, i2 =2;
+            if( fk[i0] > fk[i1] ) swap(i0,i1) ;
+            if( fk[i0] > fk[i2] ) swap(i0,i2) ;
+            if( fk[i1] > fk[i2] ) swap(i1,i2) ;
+            
+            if ( fk[i2] <=0.) arean+= K.area;
+            else  if ( fk[i0] >=0.) areap+= K.area;
+            else {
+                double c = (fk[i2]-fk[i1])/(fk[i2]-fk[i0]); // coef Up Traing
+                if( fk[i1] < 0 ) { double y=fk[i2]/(fk[i2]-fk[i1]); c *=y*y; }
+                else {double y=fk[i0]/(fk[i0]-fk[i1]) ; c = 1.- (1.-c)*y*y; };
+                assert( c > 0 && c < 1);
+                areap += c*K.area;
+                arean += (1-c)*K.area;
+            }
+        }
+    }
+    // cout << phi0 << endl;
+    return arean; //  negative area ...
+}
+double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double & phi0)
+{
+    return arealevelset(pTh,pphi,phi0,0);
+}
+
+
+double volumelevelset(Mesh3 * const & pTh,KN<double> * const &pphi,const double & phi0,KN<double> * const & where)
+{
+    Mesh3 & Th = *pTh;
+    KN<double> & phi = *pphi;
+    ffassert(phi.N() == Th.nv); //assertion fails if the levelset function is not P1
+    double volumen=0.,volumep=0.;
+    for(int k=0;k<Th.nt;++k)
+    {
+        if(!where || (*where)[k])
+        {
+            const Tet & K(Th[k]);
+            int iK[4] =  {Th(k,0),Th(k,1),Th(k,2),Th(k,3)};
+            R  fk[4]={phi[iK[0]]-phi0,phi[iK[1]]-phi0,phi[iK[2]]-phi0,phi[iK[3]]-phi0};
+            int ij[4] = {0,1,2,3};
+            for(int i=0;i<4;++i) for(int j=i+1;j<4;++j) if(fk[ij[i]] > fk[ij[j]]) swap(ij[i],ij[j]);
+            if(fk[ij[3]]<=0.) volumen += K.mesure();
+            else if(fk[ij[0]]>=0.) volumep += K.mesure();
+            else
+            {
+                //cout << "ij = {" << ij[0] << ',' << ij[1] << ',' << ij[2] << ',' << ij[3] << '}' << endl;
+                const R3 A[4] = {K[ij[0]],K[ij[1]],K[ij[2]],K[ij[3]]};
+                const R f[4] = {fk[ij[0]],fk[ij[1]],fk[ij[2]],fk[ij[3]]};
+                if(f[0]<0. && f[1]>=0.) //the only negative dof is f0
+                {
+                    double c = (f[0]*f[0]*f[0])/((f[0]-f[1])*(f[0]-f[2])*(f[0]-f[3]));
+                    volumen += c*K.mesure();
+                    volumep += (1.-c)*K.mesure();
+                }
+                else if(f[1]<0. && f[2]>=0.) //two negative dof, this is the hard case...
+                {
+                    const R3  A03 = A[3] + f[3]/(f[3]-f[0]) * (A[0]-A[3]) , A13 = A[3] + f[3]/(f[3]-f[1]) * (A[1]-A[3]),
+                    A02 = A[2] + f[2]/(f[2]-f[0]) * (A[0]-A[2]) , A12 = A[2] + f[2]/(f[2]-f[1]) * (A[1]-A[2]);
+                    double V1 = f[3]*f[3]/((f[3]-f[1])*(f[3]-f[0])) * K.mesure();
+                    double V2 = 1./6.*abs(det(A13-A[2],A12-A[2],A02-A[2]));
+                    double V3 = 1./6.*abs(det(A13-A[2],A02-A[2],A03-A[2]));
+                    volumep += V1+V2+V3;
+                    volumen += (K.mesure() - V1-V2-V3);
+                }
+                else
+                {
+                    double c = (f[3]*f[3]*f[3])/((f[3]-f[0])*(f[3]-f[1])*(f[3]-f[2]));
+                    volumen += (1.-c)*K.mesure();
+                    volumep += c*K.mesure();
+                }
+            }
+        }
+    }
+    return volumen;
+}
+double volumelevelset(Mesh3 * const &pTh,KN<double> * const &pphi,const double & phi0) {return volumelevelset(pTh,pphi,phi0,0);}
+
+
+
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
@@ -1829,6 +1923,13 @@ void init_lgmesh() {
   Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
   Global.Add("AddLayers","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
   // use for :   mesh Th = readmesh ( ...);
+    //  Add FH mars 2015 to compute mesure under levelset ...
+    Global.Add("arealevelset","(",new OneOperator3_<double,Mesh *, KN<double>*,double>(arealevelset));
+    Global.Add("arealevelset","(",new OneOperator4_<double,Mesh *, KN<double>*,double,KN<double>*>(arealevelset));
+    //Global.Add("convectlevelset","(", new OneOperatorCode<ConvectLevelSet0 >( ));
+    Global.Add("volumelevelset","(",new OneOperator3_<double,Mesh3 *,KN<double>*,double>(volumelevelset));
+    Global.Add("volumelevelset","(",new OneOperator4_<double,Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
+
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
   extern void init_glumesh2D();

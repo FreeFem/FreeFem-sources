@@ -537,15 +537,15 @@ int Triangle::swapDRAW(Int2 a){
   int NbUnSwap=0;
   if(a/4 !=0)  {cout << a << "arete lock"<< a <<endl;return 0;}// arete lock or MarkUnSwap
 
-  register Triangle *t1=this,*t2=at[a];// les 2 triangles adjacent
-  register Int1 a1=a,a2=aa[a];// les 2 numero de l arete dans les 2 triangles
+   Triangle *t1=this,*t2=at[a];// les 2 triangles adjacent
+   Int1 a1=a,a2=aa[a];// les 2 numero de l arete dans les 2 triangles
   
   if(a2/4 !=0) {cout << a2 << "arete lock adj"<< a2 << endl; return 0;} // arete lock
   
-  register Vertex  *sa=t1->ns[VerticesOfTriangularEdge[a1][0]];
-  register Vertex  *sb=t1->ns[VerticesOfTriangularEdge[a1][1]];
-  register Vertex  *s1=t1->ns[OppositeVertex[a1]];
-  register Vertex  *s2=t2->ns[OppositeVertex[a2]];
+   Vertex  *sa=t1->ns[VerticesOfTriangularEdge[a1][0]];
+   Vertex  *sb=t1->ns[VerticesOfTriangularEdge[a1][1]];
+   Vertex  *s1=t1->ns[OppositeVertex[a1]];
+   Vertex  *s2=t2->ns[OppositeVertex[a2]];
 
 #ifdef DEBUG
   assert ( a >= 0 && a < 3 );  
@@ -577,7 +577,7 @@ int Triangle::swapDRAW(Int2 a){
         while (1)
 	 if(kopt) {
 	 // critere de Delaunay pure 
-	 register Real8 xb1 = sb->i.x - s1->i.x,
+	  Real8 xb1 = sb->i.x - s1->i.x,
 	   x21 = s2->i.x - s1->i.x,
 	   yb1 = sb->i.y - s1->i.y,
 	   y21 = s2->i.y - s1->i.y,

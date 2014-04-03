@@ -9,7 +9,7 @@
 
 #include "mshmet.h"
 #include "compil.date"
-
+extern long verbosity;
 char     idir[5]     = {0,1,2,0,1};
 mytime   mshmet_ctim[TIMEMAX];
 int   (*boulep)(pMesh ,int ,int ,int *);
