@@ -35,9 +35,11 @@ namespace  Fem2D {
   template<class K> class SolveGCPrecon;
   template<class K> class SolveGMRESPrecon;
   template<class K> class SolveGMRESDiag;
-  int IsoLineK(double *f,R2 *Q,double eps);
+//  int IsoLineK(double *f,R2 *Q,double eps);
   
 }
+
+#include "P1IsoValue.hpp"
 
 
 template<class K> class SolveGCDiag; 

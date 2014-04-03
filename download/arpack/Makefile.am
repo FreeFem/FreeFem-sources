@@ -23,7 +23,7 @@
 all-local:$(DOWNLOAD_ARPACK)
 EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz 
 
-COMMON_PACKTITLE=ARPACK
+PKGCOMMON_PACKTITLE=ARPACK
 include ../common.mak
 
 # nothing specific to do for [[file:../common.mak::reinstall]]
@@ -39,11 +39,11 @@ DIRPKG=../pkg
 ARPACK96_TAR_GZ=$(DIRPKG)/arpack96.tar.gz
 PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
 
-COMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
+PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
 
 # FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
 
-compile::$(ARPACKLIB)
+compilepkg::$(ARPACKLIB)
 $(ARPACKLIB): ARPACK/fait
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \

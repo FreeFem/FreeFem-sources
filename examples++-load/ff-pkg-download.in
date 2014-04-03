@@ -45,10 +45,13 @@ DIRP=`dirname $DIR`
 #echo "WWWWW"  $DIRP 
 if [ -d "$DESTDIR$DIRP/download/lib" -a -d "$DESTDIR$DIRP/download/include"  ] ; then
     DIR="$DIRP/download"
+    DIRW="$DIRP/examples++-load"
 elif [ -d "$DESTDIR$DIRP/lib" -a -d "$DESTDIR$DIRP/include"  ] ; then
     DIR="$DIRP"
+    DIRW="$DIR/lib"
 else
   DIR=@ff_prefix_dir@
+  DIRW="$DIRW/lib"
 fi
 
 if [   -d $DESTDIR$DIR/lib -a -d $DESTDIR$DIR/include  ] ; then
@@ -59,10 +62,9 @@ if [   -d $DESTDIR$DIR/lib -a -d $DESTDIR$DIR/include  ] ; then
     for i in $LIB/WHERE.* ; do            
 	test -f $i && ( sed "s;@DIR@;$DIR;" <$i  )
     done
-
     # ALH - 6/1/14 - remove umfpack and amd because some versions of umfpack needs more than just adding -L (they need
     # the colamd and cholmod libraries, which are setup in [[file:configure.ac]]).
-
+    cd "$DIRW"
     for la in arpack fftw3 mmg3d; do
         l=`echo $la |sed -e s/^tet$/tetgen/`
 	nbw=`awk "/^$la /" WHERE_LIBRARY WHERE_LIBRARY-config|wc -l`

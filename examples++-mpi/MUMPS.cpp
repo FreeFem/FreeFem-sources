@@ -63,6 +63,7 @@ template<> struct MPI_TYPE<char>    {static const MPI_Datatype TYPE(){return MPI
 
 
 static std::string analysis[] = {"AMD", "", "AMF", "SCOTCH", "PORD", "METIS", "QAMD", "automatic sequential", "automatic parallel", "PT-SCOTCH", "ParMetis"};
+
 template<class R>
 class SolverMumps : public MatriceMorse<R>::VirtualSolver {
 
@@ -82,12 +83,12 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
       distributed(matrank<0)
   {
     
-      MPI_Comm_rank(comm, &mpirank);
-      
+    MPI_Comm_rank(comm, &mpirank);
+    int master = mpirank==matrank;  
     _id = new typename MUMPS_STRUC_TRAIT<R>::MUMPS ;
     _id->job = JOB_INIT;
     _id->par = 1;
-      
+    
     _id->comm_fortran = MPI_Comm_c2f(comm);
     _id->sym = A.symetrique;
     _strategy = strategy;
@@ -99,64 +100,75 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     if( distributed || (mpirank == matrank) )
         {
             	
-	if(_id->sym == 0) {
-	  nnz = A.nbcoef;
-	  I = new int[A.nbcoef];
-	  CSR2COO<'C', 'U'>(A.n, A.lg, I);
-	  C =  A.a;
-	  J = A.cl;
-	  for(unsigned int i = 0; i < A.nbcoef; ++i)
-	    ++J[i];
-	}
-	else {
-	  if(A.symetrique) {
+	if(_id->sym == 0) 
+	  {
 	    nnz = A.nbcoef;
 	    I = new int[A.nbcoef];
-	    J = new int[A.nbcoef];
-	    C = new R[A.nbcoef];
-	    for(unsigned int i = 0; i < A.n; ++i)
-	      C[i] = A.a[A.lg[i + 1] - 1];
-	    std::generate(I, I + A.n, step(0, 1));
-	    CSR2COO<'C', 'L'>(A.n, A.lg, I + A.n);
-	    std::copy(I, I + A.n, J);
-	    for(unsigned int i = 1; i < A.n; ++i) {
-	      for(unsigned int j = A.lg[i]; j < A.lg[i + 1] - 1; ++j) {
-	      J[A.n + j - i] = A.cl[j] + 1;
-	      C[A.n + j - i] = A.a[j];
+	    CSR2COO<'C', 'U'>(A.n, A.lg, I);
+	    C =  A.a;
+	    J = A.cl;
+	    for(unsigned int i = 0; i < A.nbcoef; ++i)
+	      ++J[i];
+	  }
+	else 
+	  {
+	    if(A.symetrique) 
+	      {
+		nnz = A.nbcoef;
+		I = new int[A.nbcoef];
+		J = new int[A.nbcoef];
+		C = new R[A.nbcoef];
+		for(unsigned int i = 0; i < A.n; ++i)
+		  C[i] = A.a[A.lg[i + 1] - 1];
+		std::generate(I, I + A.n, step(0, 1));
+		CSR2COO<'C', 'L'>(A.n, A.lg, I + A.n);
+		std::copy(I, I + A.n, J);
+		for(unsigned int i = 1; i < A.n; ++i) {
+		  for(unsigned int j = A.lg[i]; j < A.lg[i + 1] - 1; ++j) {
+		    J[A.n + j - i] = A.cl[j] + 1;
+		    C[A.n + j - i] = A.a[j];
+		  }
+		}
 	      }
-	    }
+	    else 
+	      {
+		nnz = A.n + (A.nbcoef - A.n) / 2;
+		I = new int[A.n + (A.nbcoef - A.n) / 2];
+		J = new int[A.n + (A.nbcoef - A.n) / 2];
+		C = new R[A.n + (A.nbcoef - A.n) / 2];
+		trimCSR<false, 'F',R>(A.n, I + A.n, A.lg, J + A.n, A.cl, C + A.n, A.a);
+		for(unsigned int i = 0; i < A.n - 1; ++i)
+		  C[i] = A.a[A.lg[i + 1] - (I[i + 1 + A.n] - I[i + A.n]) - 1];
+		C[A.n - 1] = A.a[A.nbcoef - 1];
+		std::generate(I, I + A.n, step(0, 1));
+		CSR2COO<'F', 'U'>(A.n - 1, I + A.n, I + A.n);
+		std::copy(I, I + A.n, J);
+	      }
 	  }
-	  else {
-	    nnz = A.n + (A.nbcoef - A.n) / 2;
-	    I = new int[A.n + (A.nbcoef - A.n) / 2];
-	    J = new int[A.n + (A.nbcoef - A.n) / 2];
-	    C = new R[A.n + (A.nbcoef - A.n) / 2];
-	    trimCSR<false, 'F',R>(A.n, I + A.n, A.lg, J + A.n, A.cl, C + A.n, A.a);
-	    for(unsigned int i = 0; i < A.n - 1; ++i)
-	      C[i] = A.a[A.lg[i + 1] - (I[i + 1 + A.n] - I[i + A.n]) - 1];
-	    C[A.n - 1] = A.a[A.nbcoef - 1];
-	    std::generate(I, I + A.n, step(0, 1));
-	    CSR2COO<'F', 'U'>(A.n - 1, I + A.n, I + A.n);
-	    std::copy(I, I + A.n, J);
-	  }
-	}
         _id->n = A.n;
         if(!distributed)
-        {
-        _id->nz=nnz;
-	_id->a =reinterpret_cast<MR *>( C);
-	_id->irn = I;
-        _id->jcn = J;
-        }
+	  {
+	    _id->nz=nnz;
+	    _id->a =reinterpret_cast<MR *>( C);
+	    _id->irn = I;
+	    _id->jcn = J;
+	  }
         else
-        {
-            
+	  {
+	    
             _id->nz_loc=nnz;
             _id->a_loc =reinterpret_cast<MR *>( C);
             _id->irn_loc = I;
             _id->jcn_loc = J;
-        }
-            
+	  }
+	
+	}
+    else 
+      { // no matrix ...
+	_id->nz=0;
+	_id->a =0; 
+	_id->irn = 0;;
+	_id->jcn = 0;
       }
     _id->nrhs = 1;
     _id->ICNTL(1) = 0;
@@ -253,13 +265,11 @@ typename MatriceMorse<R>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(R, A)
   if(ds.lparams.N()>1) matrank = ds.lparams[1];// <0 => distri mat ..
   if( ! strategy) strategy=3;
   int mat = mpirank == matrank || matrank < 0; 
-  if(A && mat)
+  if(A)
     return new SolverMumps<R>(*A, ds.lparams, ds.dparams, pcw,strategy,matrank);
   else 
-    {
-      MatriceMorse<R> empty;
-      return new SolverMumps<R>(empty, ds.lparams, ds.dparams, (MPI_Comm*)ds.commworld,strategy,matrank);
-    }
+    ffassert(0); 
+  return new SolverMumps<R>(*A, ds.lparams, ds.dparams, pcw,strategy,matrank);
 }
 
 //  the 2 default sparse solver double and complex
