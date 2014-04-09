@@ -391,12 +391,10 @@ int mylex::scan1()
  // bool echo = mpirank == 0; 
 
   int ret= basescan();
-
-  if ( ret == ID)
-    while ((SetMacro(ret))) ((void) 0);
-
-  if ( ret == ID)
-    while ((CallMacro(ret))) ((void) 0);
+  if(debugmacro)  cout << " scan1 " << ret << " " << token() << " " << ID << endl;
+    while ( ret == ID &&SetMacro(ret)); // correction mars 2014 FH
+    while ( ret == ID && CallMacro(ret)) ; // correction mars 2014 FH
+    
   return ret;
 }    
 
@@ -588,6 +586,57 @@ bool mylex::CallMacro(int &ret)
   // New Version with direct macro expansion
   // FH  jan 2005 
   // -----------------------------------------
+//  add Stringification,FILE, LINE  march 2014 FH..
+  if(strcmp(buf,"Stringification")==0)
+  {
+      if(debugmacro) cout <<"call Stringification : " << buf << endl;
+
+      if(echo) cout << buf << "(" ;
+      string p,cmm;
+      int lvll=0;
+           match('(');
+      
+      int kend=')';
+      while (1) {
+          cmm="";
+          int sep =  EatCommentAndSpace(&cmm);
+          p += cmm;
+          int rr = scan1();// do macro expantion
+          if(lvll && rr==')') lvll--; //   if ( then  we eat next )
+          else if (rr=='(') lvll++ ;  //  eat next
+          else if (lvll<=0)
+              {
+                  if (rr==kend ) break;
+                  else if  (rr==')' || rr==',')  {
+                      cerr << "Error in Stringification  "
+                      << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
+                      ErrorScan(" Wrong number of parameter in  Stringification call");
+                  }}
+          if(debugmacro)cout << " ..." << rr << " " << token()<< " " << level << endl;
+          if (rr==ENDOFFILE) ErrorScan(" Stringification in macro ");
+          if(echo) cout << token();
+          p += token();
+          //if(echo) cout <<buf;
+      }
+      
+      plglval->str = newcopy(p.c_str());
+      ret = STRING;
+
+      return false;
+  }
+  else if(strcmp(buf,"FILE")==0)
+  {
+      plglval->str = newcopy(filename() );
+      ret = STRING;
+     return false;
+  }
+  else if(strcmp(buf,"LINE")==0)
+  {
+    plglval->lnum = linenumber;
+    ret=LNUM;
+    return false;
+  }
+  else
   for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
     {
       MapMacroDef::const_iterator j= i->find(buf);
@@ -626,7 +675,7 @@ bool mylex::CallMacro(int &ret)
 			  {
 			    if (rr==kend ) break;
 			    else if  (rr==')' || rr==',')  {// Correction FH 2/06/2004
-				cerr << "Error in macro expantion "<< j->first 
+				cerr << "Error in macro expansion "<< j->first
 				<< ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
 				cerr << " number of macro parameter in definition is " << nbparam << endl;
 				ErrorScan(" Wrong number of parameter in  macro call");
@@ -644,7 +693,7 @@ bool mylex::CallMacro(int &ret)
 	    }
 	}
 	if(debugmacro)
-	  cout <<   " input in : -> " << macroparm[nbparam]  << " " << nbparam << endl;
+	  cout <<   " input in : -> " << macroparm[nbparam]  << " <-> " << nbparam << endl;
 	input(macroparm[nbparam]);
 	// ici il faut faire la substitution  de parameter 
 	// -----------------------------------------------
@@ -654,6 +703,7 @@ bool mylex::CallMacro(int &ret)
 	  int c= EatCommentAndSpace(&expandtxt); // eat comment to save it;
 	  if (c == EOF) break;
 	  ret = basescan();
+          if(debugmacro)  cout << " ret = " << ret << token() << endl;
 	  if(ret== ENDOFFILE) break; 
 	  if (nbparam && ret == ID) 
 	    {  
@@ -661,7 +711,7 @@ bool mylex::CallMacro(int &ret)
 	      if ( j !=  lp.end()) 
 		expandtxt+=j->second;
 	      else 
-		expandtxt+=buf; 
+		expandtxt+=token();
 	    }
 	  else if (ret!='#')  //  macro concatenation operator 
 	    expandtxt+=token();

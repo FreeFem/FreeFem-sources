@@ -26,7 +26,7 @@ BLAS_TGZ=$(DIRPKG)/blas.tgz
 CBLAS_TGZ=$(DIRPKG)/cblas.tgz
 OPENBLAS_TGZ=../pkg/OpenBLAS.tar.gz
 
-COMMON_PACKTITLE=BLAS
+PKGCOMMON_PACKTITLE=BLAS
 COMMON_PACKAGES=$(BLAS_TGZ) $(CBLAS_TGZ) $(OPENBLAS_TGZ)
 include ../common.mak
 
@@ -37,9 +37,9 @@ openblas.patches
 # ------------------------------------------
 
 noinst_LIBRARIES=@DOWNLOADED_BLAS@
-compile::$(noinst_LIBRARIES)
+##compile::$(noinst_LIBRARIES)
 EXTRA_LIBRARIES=libf77blas.a libcblas.a
-compile::@DOWNLOADED_BLAS@
+pkgcompile::@DOWNLOADED_BLAS@
 
 # List of files to compile (do not list them in *_SOURCES to prevent them from being included in distributions).
 
@@ -135,7 +135,7 @@ clean-local::
 # to activate this, see [[file:../../configure.ac::OpenBLAS]]
 
 all-local::@COMPILE_OPENBLAS@
-compile::@COMPILE_OPENBLAS@
+pkgcompile::@COMPILE_OPENBLAS@
 generic:
 openblas:links.done
 

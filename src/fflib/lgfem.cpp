@@ -33,6 +33,8 @@
 
 #include  <cmath>
 #include  <iostream>
+#include <cfloat>
+
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
@@ -105,6 +107,7 @@ TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 	if( t==dTypeSolveMat[l]) return l;
     return long (kTypeSolveMat-1); // sparse solver case 
 }
+
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
@@ -2733,10 +2736,10 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      all=false;
    }
  */
-  if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (10)");
       
  if(dim==2)
    {
+     if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 2d)");
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
      ffassert(&Th);
      
@@ -2823,10 +2826,66 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	       }
 	   }
        }
-     else if (kind==CDomainOfIntegration::int2d) {
-       
-       const QuadratureFormular & FI =FIT;
-       for (int i=0;i< Th.nt; i++) 
+     else if (kind==CDomainOfIntegration::int2d)
+     {
+         const QuadratureFormular & FI =FIT;
+
+         if(di->islevelset())
+         { // add FH mars 2014 compute int2d  on phi < 0 ..
+             double llevelset = 0;
+             double uset = HUGE_VAL;
+             R2 Q[3];
+             KN<double> phi(Th.nv);phi=uset;
+             double f[3],umx,umn;
+             for(int t=0; t< Th.nt;++t)
+             {
+                if (all || setoflab.find(Th[t].lab) != setoflab.end())
+                {
+                const Triangle & K(Th[t]);
+
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di->levelset(stack);//zzzz
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+                     
+                 }
+                 double area =K.area;
+                 if( umn >=0 ) continue; //  all positif => nothing
+                 if( umx >0 )
+                    { // coupe ..
+                        int i0 = 0, i1 = 1, i2 =2;
+                        
+                        if( f[i0] > f[i1] ) swap(i0,i1) ;
+                        if( f[i0] > f[i2] ) swap(i0,i2) ;
+                        if( f[i1] > f[i2] ) swap(i1,i2) ;
+                        
+                        double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
+                        if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
+                        else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
+                        assert( c > 0 && c < 1);
+                        area *= 1-c;
+                    }
+                 for (int npi=0; npi<FI.n;npi++)
+                    {
+                        QuadraturePoint pi(FI[npi]);
+                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                        r += area*pi.a*GetAny<R>( (*fonc)(stack));
+                    }
+                    
+                }
+             }
+             
+         }
+      else
+       for (int i=0;i< Th.nt; i++)
 	 {
 	   const Triangle & K(Th[i]);
 	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
@@ -2900,6 +2959,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    }
  else if(dim==3)
    {
+     if(di->islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type on no int2d case (10 3d)");
+      
      const Mesh3  & Th = * GetAny<pmesh3>( (*di->Th)(stack) );
      ffassert(&Th);
      
@@ -2908,7 +2969,81 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	 if (all) cout << " all " << endl ;
 	 else cout << endl;
        }
-     if (kind==CDomainOfIntegration::int2d)
+       if (kind==CDomainOfIntegration::int2d)
+           if(di->islevelset())
+           {
+               const GQuadratureFormular<R2> & FI = FIT;
+               double llevelset = 0;
+               const double uset = std::numeric_limits<double>::max();
+              // cout << " uset ="<<uset << endl;
+               R3 Q[4];
+               KN<double> phi(Th.nv);
+               phi=uset;
+               double f[4];
+               
+               for(int t=0; t< Th.nt;++t)
+               {
+                   double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                   for(int i=0;i<4;++i)
+                   {
+                       int j= Th(t,i);
+                       if( phi[j]==uset)
+                       {
+                           MeshPointStack(stack)->setP(&Th,t,i);
+                           phi[j]= di->levelset(stack);//zzzz
+                       }
+                       f[i]=phi[j];
+                       umx = std::max(umx,f[i]);
+                       umn = std::min(umn,f[i]);
+                       
+                   }
+                   if( umn <=0 && umx >= 0)
+                   {
+                       
+                       int np= IsoLineK(f,Q,1e-10);
+
+                       double l[3];
+                       if(np>2)
+                       {
+                        if(verbosity>999)  cout << t << " int levelset : " << umn << " .. " << umx << " np " << np <<" "
+                         << f[0] << " " << f[1] << " "<< f[2] << " "<< f[3] << " "<<endl;
+                          
+                           const Mesh3::Element & K(Th[t]);
+                           double epsmes3=K.mesure()*K.mesure()*1e-18;
+                           R3 PP[4];
+                           for(int i=0; i< np; ++i)
+                               PP[i]= K(Q[i]);
+                           for( int i =0; i+1 < np; i+=2)
+                           { // 0,1,, a and 2,3,0.
+                               int i0=i,i1=i+1,i2=(i+2)%np;
+                               R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
+                               double mes2 = (NN,NN);
+                               double mes = sqrt(mes2);
+                               if(mes2*mes <epsmes3) continue; //  too small
+                               NN /= mes;
+                               mes *= 0.5; //   warning correct FH 050109
+                             //  cout <<i << " / "  << NN << " / " << mes <<" / "<< i0<< i1<< i2 <<" " << llevelset <<endl;
+                               llevelset += mes;
+                               for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                               {
+                                   GQuadraturePoint<R2>  pi( FI[npi]);
+                                   pi.toBary(l);
+                                   R3 Pt( l[0]*Q[i0]+l[1]*Q[i1]+l[2]*Q[i2]); //
+                                   MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
+                                   r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                               }
+                           }
+                       }
+                       
+                   }
+               }
+               if(verbosity > 5) cout << " Area level set = " << llevelset << endl;
+              // if(verbosity > 50) cout << "phi " << phi << endl;
+               
+           }
+       
+         else
+        
        {
 	 const GQuadratureFormular<R2> & FI = FIT;
          int lab;
@@ -3200,43 +3335,43 @@ AnyType Plot::operator()(Stack s) const{
 	double echelle=1;
 	int cmp[3]={-1,-1,-1};
 	theplot.SendNewPlot();
-	if (nargs[0]) theplot<< 0L <=  GetAny<double>((*nargs[0])(s));
-	if (nargs[1]) theplot<< 1L <=  GetAny<string *>((*nargs[1])(s));
-	if (nargs[2]) theplot<< 2L <=  GetAny<string*>((*nargs[2])(s));
-	if (nargs[3]) theplot<< 3L  <= (bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
-	else theplot<< 3L  <=  (bool)  (TheWait&& !NoWait);
-	if (nargs[4]) theplot<< 4L  <= GetAny<bool>((*nargs[4])(s));
-	if (nargs[5]) theplot<< 5L <=  GetAny<bool>((*nargs[5])(s));
-	if (nargs[6]) theplot<< 6L <=  GetAny<bool>((*nargs[6])(s));
-	if (nargs[7]) theplot<< 7L  <= GetAny<bool>((*nargs[7])(s));
+	if (nargs[0]) (theplot<< 0L) <=  GetAny<double>((*nargs[0])(s));
+	if (nargs[1]) (theplot<< 1L) <=  GetAny<string *>((*nargs[1])(s));
+	if (nargs[2]) (theplot<< 2L) <=  GetAny<string*>((*nargs[2])(s));
+	if (nargs[3]) (theplot<< 3L)  <= (bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
+	else (theplot<< 3L)  <=  (bool)  (TheWait&& !NoWait);
+	if (nargs[4]) (theplot<< 4L)  <= GetAny<bool>((*nargs[4])(s));
+	if (nargs[5]) (theplot<< 5L) <=  GetAny<bool>((*nargs[5])(s));
+	if (nargs[6]) (theplot<< 6L) <=  GetAny<bool>((*nargs[6])(s));
+	if (nargs[7]) (theplot<< 7L)  <= GetAny<bool>((*nargs[7])(s));
 	if (nargs[8])  
 	  {  KN<double> bbox(4);
 	      for (int i=0;i<4;i++)
 		  bbox[i]= GetAny<double>((*bb[i])(s));
 	      
-	      theplot<< 8L <= bbox ;
+	      (theplot<< 8L) <= bbox ;
 	  }
-	if (nargs[9])  theplot<< 9L   <=  GetAny<long>((*nargs[9])(s));
-	if (nargs[10])  theplot<< 10L <= GetAny<long>((*nargs[10])(s));
+	if (nargs[9])  (theplot<< 9L)   <=  GetAny<long>((*nargs[9])(s));
+	if (nargs[10])  (theplot<< 10L) <= GetAny<long>((*nargs[10])(s));
 	if (nargs[11]) { 
 	    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-	theplot<< 11L  <= v   ;}
+	(theplot<< 11L)  <= v   ;}
 	
 	if (nargs[12]) 
-	    theplot<< 12L <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
+	    (theplot<< 12L) <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
 	
 	
 	
-	if (nargs[13]) theplot<< 13L  <= GetAny<bool>((*nargs[13])(s));
-	if (nargs[14]) theplot<< 14L <= GetAny<bool>((*nargs[14])(s));
+	if (nargs[13]) (theplot<< 13L)  <= GetAny<bool>((*nargs[13])(s));
+	if (nargs[14]) (theplot<< 14L) <= GetAny<bool>((*nargs[14])(s));
 	if (nargs[15]) 
-	    theplot<< 15L  <= GetAny<KN_<double> >((*nargs[15])(s));
-	if (nargs[16]) theplot<< 16L  <= GetAny<bool>((*nargs[16])(s));	
+	    (theplot<< 15L)  <= GetAny<KN_<double> >((*nargs[15])(s));
+	if (nargs[16]) (theplot<< 16L)  <= GetAny<bool>((*nargs[16])(s));
 	// add frev 2008 FH for 3d plot ...
-	if (nargs[17]) theplot<< 17L  <= GetAny<long>((*nargs[17])(s));	
-	if (nargs[18]) theplot<< 18L  <= GetAny<bool>((*nargs[18])(s));	
-	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
-	if (nargs[20]) theplot<< 20L  <= (echelle=GetAny<double>((*nargs[20])(s)));	
+	if (nargs[17]) (theplot<< 17L)  <= GetAny<long>((*nargs[17])(s));
+	if (nargs[18]) (theplot<< 18L)  <= GetAny<bool>((*nargs[18])(s));
+	if (nargs[19]) (theplot<< 19L)  <= GetAny<bool>((*nargs[19])(s));
+	if (nargs[20]) (theplot<< 20L)  <= (echelle=GetAny<double>((*nargs[20])(s)));
 
 	// FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
 	// FF parameters above changes) received in
@@ -3249,7 +3384,7 @@ AnyType Plot::operator()(Stack s) const{
 #define VTK_START 20
 #define SEND_VTK_PARAM(index,type)					\
 	  if(nargs[VTK_START+index])					\
-	    theplot<<(long)(VTK_START+index)				\
+	    (theplot<<(long)(VTK_START+index))				\
 	      <=GetAny<type>((*nargs[VTK_START+index])(s));
 
 	SEND_VTK_PARAM(1,double); // ZScale
@@ -4068,7 +4203,7 @@ AnyType Convect::eval2(Stack s) const
 	      mpc.change(R2(l[1],l[2]),Th[it],0);             
 	      if(k++>1000)
 		{
-		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity to hight ???? or NaN F. Hecht  " << endl;
+		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity too high ???? or NaN F. Hecht  " << endl;
 		  ffassert(0);
 		}
 	    }

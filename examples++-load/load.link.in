@@ -156,7 +156,7 @@ if [ -n "$autodep"  ] ; then
     
      error=`echo "$argsdep"| grep ERROR`
      if [ -n "$error" ] ; then
-	 echo " ERROR in  auto dependance seach.  sorry : $error "
+	 echo " WARNING in  auto dependance seach ( missing plugin $2) .  sorry : $error "
 
 	 # FFCS - 28/11/11 - we need to stop compiling as soon as there is an error because we want a fixed set of features in
 	 # FFCS

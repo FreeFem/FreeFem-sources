@@ -161,10 +161,10 @@ long lapack_dgeev(KNM<double> *const &A,KN<Complex> *const &vp,KNM<Complex> *con
   dgeev_(&JOBVL,&JOBVR,&n,mat,&n,wr,wi,vl,&n,vr,&n,w,&lw,&info);
   lw=w[0];
   w.resize(lw);
-  cout << mat << endl;
+  //cout << mat << endl;
   dgeev_(&JOBVL,&JOBVR,&n,mat,&n,wr,wi,vl,&n,vr,&n,w,&lw,&info);
-  cout << wr << endl;
-  cout << wi << endl;
+  //cout << wr << endl;
+  //cout << wi << endl;
   if (info<0)
      {
      cout << "   dgeev: the " << info << "-th argument had an illegal value." << endl;
@@ -703,7 +703,7 @@ class OneBinaryOperatorRNM_inv : public OneOperator { public:
     if ( ! p->EvaluableWithOutStack() ) 
       { 
 	bool bb=p->EvaluableWithOutStack();
-	cout << bb << " " <<  * p <<  endl;
+	cout << "  Error exposant ??? " <<  bb << " " <<  * p <<  endl;
 	CompileError(" A^p, The p must be a constant == -1, sorry");}
     long pv = GetAny<long>((*p)(0));
     if (pv !=-1)   

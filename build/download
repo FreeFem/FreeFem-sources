@@ -44,25 +44,32 @@ then
     # [[file:../download/getall]]
 
     wget "$1" --output-document="$2" --no-verbose $opts
-
-    exit $?
-fi
-
-if test -x /usr/bin/curl
+    ret=$?
+elif test -x /usr/bin/curl
 then
     curl "$1" --output "$2"
-    exit $?
-fi
+    ret=$?
 
-if test -x /usr/bin/GET
+elif test -x /usr/bin/GET
 then
     GET "$1" > "$2"
-    exit $?
-fi
-
-echo FF download: No way to download files from the web
-echo FF download: Please install wget or curl or GET
+    ret=$?
+else
+    echo FF download: No way to download files from the web
+    echo FF download: Please install wget or curl or GET
 exit 1
+fi
+if test "$ret" -eq 0 
+then
+  case `file $2` in
+  *zip*) exit 0 ;;
+  *) echo " incorrect file type => remove " $3;
+     rm $3; 
+    exit  1 ;;
+  esac    
+fi
+echo "Error download $3" ;
+exit $ret
 
 # Local Variables:
 # mode:shell-script

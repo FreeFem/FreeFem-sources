@@ -716,7 +716,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
-   memcpy(save,s,lgsave); // save register 
+   memcpy(save,s,lgsave); // save  
     AnyType *listparam;
  //  Add2StackOfPtr2Free(s,new CleanE_Routine(this,s,listparam=new AnyType[nbparam]));
     Add2StackOfPtr2FreeA(s,listparam=new AnyType[nbparam]);
@@ -743,7 +743,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
       //::delete [] listparam; 
        (*clean)(s); 
       WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
-      memcpy(s,save,lgsave);  // restore register
+      memcpy(s,save,lgsave);  // restore 
       TheCurrentLine=debugstack.front().second;
       debugstack.pop();
       throw ;             
@@ -751,7 +751,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
   
     (*clean)(s); //  the clean is done in CleanE_Routine delete .         
    //  delete [] listparam; after return 
-    memcpy(s,save,lgsave);  // restore register
+    memcpy(s,save,lgsave);  // restore 
     TheCurrentLine=debugstack.front().second;
     debugstack.pop();
    // il faudrait que les variable locale soit detruire apres le return 

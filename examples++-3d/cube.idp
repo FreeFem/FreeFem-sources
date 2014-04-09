@@ -27,7 +27,13 @@ func mesh3 Cube(int[int] & NN,real[int,int] &BB ,int[int,int] & L)
   
   return Th;
 }
- 
+func mesh3 Cube(int Nx,int Ny,int Nz)
+{
+  int[int] NN=[Nx,Ny,Nz];
+  real [int,int]  BB=[[0,1],[0,1],[0,1]];	
+  int[int,int] LL=[[1,2],[3,4],[5,6]]; 
+  return Cube(NN,BB,LL);
+} 
  
 
   
