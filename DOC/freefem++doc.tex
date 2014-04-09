@@ -8201,7 +8201,7 @@ types of finite element are: \index{type of finite element}
     Warning, due to interpolation problem, the degree of freedom is not the six  P2 nodes  but six  nodes  move
      inside with $T(X)= G + .99  (X-G) $ where $G$ is the barycenter, (version 2.24-4).
 
-      \item[P3] piecewise $P_{3}$  continuous finite element (2d)  (need \ttCC{@load "Element_P3"}, 
+      \item[P3] piecewise $P_{3}$  continuous finite element (2d)  (need \ttCC{@load "Element_P3"})
      \index{P3|textbf}\index{fespace!P3}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8210,7 +8210,7 @@ types of finite element are: \index{type of finite element}
      where
      $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
      
-      \item[P3dc] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P3dc"}, 
+      \item[P3dc] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P3dc"})
      \index{P3dc|textbf}\index{fespace!P3dc}
      \begin{equation}
      P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8219,7 +8219,7 @@ types of finite element are: \index{type of finite element}
      where
      $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
 
-      \item[P4] piecewise $P_{4}$  continuous finite element (2d)  (need \ttCC{@load "Element_P4"}, 
+      \item[P4] piecewise $P_{4}$  continuous finite element (2d)  (need \ttCC{@load "Element_P4"})
      \index{P4|textbf}\index{fespace!P4}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8228,7 +8228,7 @@ types of finite element are: \index{type of finite element}
      where
      $P_{4}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 4$.
      
-      \item[P4dc] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P4dc"}, 
+      \item[P4dc] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P4dc"})
      \index{P4dc|textbf}\index{fespace!P4dc}
      \begin{equation}
      P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8237,6 +8237,19 @@ types of finite element are: \index{type of finite element}
      where
      $P_{4}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
 
+     \item[P0Edge] piecewise $P_{0}$  discontinuous finite element (2d)  contant on each edge  of the mesh.
+     \index{P0Edge|textbf}\index{fespace!P0Edge}
+
+     \item[P1Edge] piecewise $P_{1}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_1$ on each edge of the mesh.
+     \index{P1Edge|textbf}\index{fespace!P1Edge}
+     \item[P2Edge] piecewise $P_{2}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_2$ on each edge of the mesh.
+     \index{P2Edge|textbf}\index{fespace!P2Edge}
+     \item[P3Edge] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_3$ on each edge of the mesh.
+     \index{P1Edge|textbf}\index{fespace!P3Edge}
+     \item[P4Edge] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_4$ on each edge of the mesh.
+     \index{P4Edge|textbf}\index{fespace!P4Edge}
+    \item[P5Edge] piecewise $P_{5}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_5$ on each edge of the mesh.
+     \index{P5Edge|textbf}\index{fespace!P4Edge}
 
 
      \item[Morley] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
@@ -8275,7 +8288,7 @@ types of finite element are: \index{type of finite element}
       \item[P2BR]  \index{P2BR|textbf}\index{fespace!P2BR}(need \ttCC{@load "BernadiRaugel"})  the Bernadi Raugel Finite Elemen is a Vectorial   element (2d)  with 2 components,
  See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).
  It is  a 2d coupled FE, with 
- the Polynomial space is $ P1^2$ + 3 normals bubbles edges function $(P_2)$
+ the Polynomial space is $ P_1^2$ + 3 normals bubbles edges function $(P_2)$
 and  the degre of freedom is 6 values at of the $2$ components at the  $3$ vertices
 and the $3$ flux on the $3$ edges  
 So the number  degrees of freedom is 9.      
