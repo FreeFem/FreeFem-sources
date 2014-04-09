@@ -26,7 +26,10 @@
 
 use strict;
 use Getopt::Std;
-use threads;
+
+# This download script needs to be able to work on platforms that do not have threads (eg Mingw).
+
+my $can_use_threads=eval 'use threads;1';
 
 # -a = accept all licences
 # -f = force new downloads
@@ -125,9 +128,14 @@ download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.g
 
 # run all downloads concurrently
 
-my @threads;
-foreach(@downloads){push @threads,threads->create(\&downloadone,$_)}
-foreach(@threads){$_->join()}
+if($can_use_threads){
+  my @threads;
+  foreach(@downloads){push @threads,threads->create(\&downloadone,$_)}
+  foreach(@threads){$_->join()}
+}
+else{
+  foreach(@downloads){downloadone($_)}
+}
 
 sub download{
   my($title,$url,$lic,$pkg,$opts)=@_;

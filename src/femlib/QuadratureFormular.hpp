@@ -97,13 +97,26 @@ public:
   const QP & operator [](int i) const  {return p[i];} 
   const QP  & operator ()(int i) const {return p[i];}
   ~GQuadratureFormular() {if(clean) delete [] p;}
+    
+  GQuadratureFormular(const GQuadratureFormular & QF)
+    :exact(QF.exact),n(QF.n),p(new QP[n]),clean(true){ operator=(QF);}
+    void operator=(const GQuadratureFormular &QF)
+    {
+      assert(n==QF.n);
+        for(int i=0;i<n;++i) p[i]=QF.p[i];
+    }
+    void operator*=( double c)
+    {
+      for(int i=0;i<n;++i) p[i].a *=c;
+    }
+
 private:
-  GQuadratureFormular(const GQuadratureFormular &)
+ /* GQuadratureFormular(const GQuadratureFormular &)
     :exact(0),n(0),p(0){assert(0);}
   void operator=(const GQuadratureFormular &)
   {assert(0);}
   GQuadratureFormular()
-    :exact(0),n(0),p(0){assert(0);}
+    :exact(0),n(0),p(0){assert(0);}*/
   static const GQuadratureFormular * Default;
 };
 

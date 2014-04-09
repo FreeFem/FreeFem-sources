@@ -186,6 +186,7 @@ namespace yams{
   int zaldy1(int nemax,int npmax,int nvmax,int memory,yams_pSurfMesh sm,int choix);
   int   zaldy2(int npmax);
   int   zaldy3(yams_pSurfMesh ,int code);
+  void yams_free(yams_pSurfMesh sm); // Add FH 03/14 
 
 #ifdef __cplusplus
 }

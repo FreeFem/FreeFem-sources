@@ -591,7 +591,9 @@ template<class R>
 AnyType SetMatrix_Op<R>::operator()(Stack stack)  const 
 {
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
-   assert(A && A->A);
+   
+    ffassert(A);
+    if( !A->A) A->A.master(new MatriceMorse<R>());//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
     bool VF=false;
    // bool factorize=false;

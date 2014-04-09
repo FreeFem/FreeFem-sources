@@ -47,6 +47,20 @@ using namespace  Fem2D;
 using namespace  mshmet;
 
 // 2d mesh function
+//  Add FH thank to I. Bajc.  (iztok.bajc@fmf.uni-lj.si) 03/14
+//
+static void myMSHMET_free( MSHMET_pMesh mesh, MSHMET_pSol sol)
+{
+    /* free mem */
+    free(mesh->point);
+    if ( mesh->nt )  free(mesh->tria);
+    if ( mesh->ne )  free(mesh->tetra);
+    free(mesh->adja);
+    free(mesh);
+    free(sol->sol);
+    free(sol->met);
+    free(sol);
+   }
 
 MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
   MSHMET_pMesh meshMSHMET;
@@ -499,7 +513,9 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
   
   // faire les free
-  
+    
+  myMSHMET_free( mshmetmesh, mshmetsol);
+
   Add2StackOfPtr2Free(stack,pmetric);
   *mp=mps;
   return SetAny< KN<double> >(metric);
@@ -709,7 +725,7 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
   metric_mshmet_to_ff_metric( mshmetsol, &mshmetmesh->info, metric);
   
   // faire les free
-  
+  myMSHMET_free( mshmetmesh, mshmetsol);
   *mp=mps;
 
   Add2StackOfPtr2Free(stack,pmetric);
@@ -729,7 +745,7 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   //if (verbosity)
   if(verbosity) cout << " load: mshmet  " << endl;
   
-   Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op>);
+  Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op>);
   Global.Add("mshmet","(",new OneOperatorCode<mshmet3d_Op>);
   //Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op> );
   

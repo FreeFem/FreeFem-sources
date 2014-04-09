@@ -430,6 +430,7 @@ class MeshPoint : public MeshPointBase { public:
      int i0=VerticesOfTriangularEdge[e][0];
      int i1=VerticesOfTriangularEdge[e][1];
      T= &(*Th)[t];
+     region = T->lab;    
      R l[3];
      l[1]=PHat.x;
      l[2]=PHat.y;
