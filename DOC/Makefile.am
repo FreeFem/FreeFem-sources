@@ -20,6 +20,7 @@
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=13/05/04 upmc
 
+all-local:documentation
 dist_pkgdata_DATA=$(DOCPDF)
 documentation: $(DOCPDF) 
 docps:  $(DOCPS) $(DOCPSGZ) 
