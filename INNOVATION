@@ -30,6 +30,8 @@ version 3.27
    correct pb of compilation under window (mingw32/msys) 
 - (ALH)
  - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
+ - Corrected --disable-pdf configuration option (useful for FFCS build)
+ - Removed obsolete cvs history directives
 6/1/14 (ALH)
  - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
  - New script build/orgindex and file index.org to list all hyperlinks in the FF source in Emacs org-mode format
