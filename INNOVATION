@@ -1,8 +1,11 @@
-  add ltime() (rev 2982)  function returns the value of time in seconds since 0 hours, 0 minutes, 0 seconds, January 1, 1970, (int) 
+  add ltime() (rev 2982)  function returns the value of time in seconds 
+       since 0 hours, 0 minutes, 0 seconds, January 1, 1970, (int) 
   add new macro tool  like in C  (rev 2980)
-    FILE,LINE,Stringification() to get line number and edp filename, add quote to a parameter after macro generation .. 
-   like in 
-    cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
+    FILE,LINE,Stringification() to get line number and edp filename,
+    add quote to a parameter after macro generation … 
+    Like in 
+    cout << "in " << FILE << " line " << LINE << "    -- '" 
+         << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
   add new int2d on levelset  in 3d  (int test)
   add basic  func mesh3 Cube(int nx,int ny,int nz) in cube.idp file.
 version 3.29  (hg rev 2973)
