@@ -215,6 +215,11 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
 
 
+clean-local::
+	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh ListOfAllocPtr-8.bin ffglut*.ppm Th.o.meshb	Th3.d.meshb	dep.sol.meshbgh \
+ipopt.out	mmg.out xxxx ThFF.txt		TriQA.txt		cavidadTT.txt		mass.txt		xy.txt \
+ThFF_Metric.txt		TriQA_Metric.txt	datanc.txt		u100m8.txt \
+TTh.sol		Th.o.sol	Th3.sol		dep.o.sol	dep.sol		gradient.sol	hessien.sol pippo.data pippo.dx testsavemedit.solb med.gp bidule.vtk	disque.vtk g-iso 
 
 
 # FFCS: add tags for files that are not specified to automake by a SOURCE directive (this tags file is automatically
