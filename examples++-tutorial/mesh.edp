@@ -306,3 +306,15 @@ if(err==0)
   plot(Th,wait=1,cmm="mesh ok");
 }
 }
+{ // multy border syntaxe version 3.30 avril 2015 ... 
+  real[int] xx=[0,1,1,0],yy=[0,0,1,1];
+  border bb(t=0,1;i) 
+  {
+    int ii = (i+1)%4; real t1 = 1-t;
+    x = xx[i]*t1 + xx[ii];
+    y =  yy[i]*t1 + yy[ii];
+    label = i +1; 
+  }
+  int[int] nn=[4,4,5,7];
+  plot(bb(nn), wait=1);
+}

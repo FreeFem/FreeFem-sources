@@ -526,11 +526,19 @@ catchs:
   CATCH '(' '.' '.' '.'  ')' instruction {$$ =  $7; }
 ;
 
-bornes: '(' ID '=' Expr ',' Expr ')' { 
+bornes: '(' ID '=' Expr ',' Expr ')' {
    Block::open(currentblock);
    $$ = currentblock->NewVar<LocalVariable>($2,atype<double*>());
    $$+= $4;
-   $$+= $6 }
+   $$+= $6;
+   $$+= currentblock->NewVar<LocalVariable>("IndexBorder",atype<long*>());}
+;
+bornes: '(' ID '=' Expr ',' Expr ';' ID ')' {
+    Block::open(currentblock);
+    $$ = currentblock->NewVar<LocalVariable>($2,atype<double*>());
+    $$+= $4;
+    $$+= $6;
+    $$+= currentblock->NewVar<LocalVariable>($8,atype<long*>());}
 ;
 
 /* <<border_expr>> */
