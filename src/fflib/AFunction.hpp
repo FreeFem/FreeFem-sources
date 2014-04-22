@@ -49,7 +49,7 @@
 #include <cstdlib>
 #include <algorithm>
 extern bool showCPU;
-
+#include "RNM.hpp" 
 
 #ifdef TIME_WITH_SYS_TIME 
 # include <sys/time.h> 
@@ -1676,6 +1676,10 @@ class  OneOperator_borderN : public OneOperator {public:
     OneOperator_borderN(const  E_Border * b)
       : OneOperator(atype<const E_BorderN *>(),atype<long>()),
       theborder(b){}
+    OneOperator_borderN(const  E_Border * b,int )
+    : OneOperator(atype<const E_BorderN *>(),atype<KN_<long> >()),
+    theborder(b){}
+    
 };
 
 class E_Border  :public Polymorphic  {  public: 
@@ -1690,6 +1694,7 @@ class E_Border  :public Polymorphic  {  public:
   {
     assert(tab); 
     Add("(",new OneOperator_borderN(this));
+      /* A FAIRE pour multy border ****/
   }
   
   E_Border(const basicAC_F0 & aa) :    
