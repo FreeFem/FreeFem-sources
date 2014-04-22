@@ -1682,11 +1682,11 @@ class E_Border  :public Polymorphic  {  public:
   static basicAC_F0::name_and_type name_param[] ;
   static const int n_name_param =0;
   static long Count;
-  Expression xvar,xfrom,xto,xcode;
+  Expression xvar,xfrom,xto,xcode,xindex;
   basicAC_F0_wa * tab;
   long label;
   E_Border(const E_Array * a) : 
-    xvar(0),xfrom(0),xto(0),xcode(0), tab(a? a->v:0) ,label(++Count) 
+    xvar(0),xfrom(0),xto(0),xcode(0),xindex(0), tab(a? a->v:0) ,label(++Count)
   {
     assert(tab); 
     Add("(",new OneOperator_borderN(this));
@@ -1696,7 +1696,9 @@ class E_Border  :public Polymorphic  {  public:
     xvar(to<double*>(aa[0])),
     xfrom(to<double>(aa[1])),
     xto(to<double>(aa[2])),
-    xcode(aa[3].LeftValue()),
+    xcode(aa[aa.size()-1].LeftValue()),
+ //   xindex( (aa.size() > 4) ? to<long>(aa[3]) : 0 ),
+    xindex( to<long>(aa[3])  ),
     tab(0),
     label(++Count)
   {    Add("(",new OneOperator_borderN(this));}
