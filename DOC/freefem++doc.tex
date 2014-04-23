@@ -5246,6 +5246,54 @@ the global variable are defined  at this time andhere since $r$ is changed betwe
 \eFF
 \end{note}
 
+\subsubsection{\setS{Multy Border}}\index{border!multy}\index{label}
+(Version 3.30)
+
+Some time it can be useful to to make array of border, but unfortunately it is incompatible with the \freefempp syntax. 
+So to bypass this , thes dea is small, if the number of segment of the discretization $n$ is a array, we make  a loop on all the value of the array, and
+the index variable $i$ of the loop  is defined after  parameter definition,  like in \verb!border a(t=0,2*pi;i) ...!.
+
+\medskip A first very small example: 
+
+\bFF
+1: @border a(t=0,2*pi;i){ x=(i+1)*cos(t); y=(i+1)*sin(t);label=1;} 
+2: @int[int] nn=[10,20,30]; 
+3: @plot(a(nn)); //  plot 3 circle with 10,20,30 points ..
+\eFF 
+
+And  more complex exemple (take from \texttt{mesh.edp} example )  to defined a square with small circies: 
+\bFF
+// multy border syntax version 3.30 avril 2014 ... 
+  @real[int] xx=[0,1,1,0],
+            yy=[0,0,1,1];
+  // radius, centre of the 4 circles .. 
+  @real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
+            XC= [0.2,0.8,0.2,0.8],
+            YC= [0.2,0.8,0.8,0.2];
+  @int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
+  // of the 4 circles borders  
+
+  @border bb(t=0,1;i) 
+  {
+  // i is the the index variable of the multi border loop 
+    @int ii = (i+1)%4; @real t1 = 1-t;
+    x =  xx[i]*t1 + xx[ii]*t;
+    y =  yy[i]*t1 + yy[ii]*t;
+    label = 0; ; 
+  }
+  
+  @border cc(t=0,2*pi;i) 
+ {
+    x = RC[i]*cos(t)+XC[i];
+    y = RC[i]*sin(t)+YC[i];
+    label = i+1; 
+  }
+  int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively . 
+  @plot(bb(nn),cc(NC),wait=1);
+  @mesh th= buildmesh(bb(nn)+cc(NC)) ; 
+  @plot(th,wait=1); 
+\eFF
+
 
 \subsubsection{Data Structures and Read/Write Statements for a Mesh}
 
