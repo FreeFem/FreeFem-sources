@@ -1,5 +1,5 @@
 version 3.30.
- --   add multy border  syntaxe example:  april 23 2014 , (hg rev : 2999)
+ --   add multy border  syntaxe example:  april 23 2014 , (hg rev : 3000)
   // i is the index of the the multy index 
   // the number of sub border is given by teh size if the array to set the number of seg on the border ..
   // so for multy border the  number of seg of the border , must be  in int[int] array 
