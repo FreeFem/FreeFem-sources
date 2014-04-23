@@ -3882,7 +3882,8 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 #endif
 			  PreviousNewEdge = edges + nbe;
 			  nbe++;
-#ifdef DEBUG1                 
+        if(verbosity>100)
+                            {
 			  cout << " new points " << nbv-1 << " " << vb->r ;
 			  cout << " new edge " << nbe-1 << " " ;
 			  cout << va << vb <<  " kk0 = " << kk0 
@@ -3893,7 +3894,8 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 			  cout << "      s " << s << " lstep= " << lstep 
 			       << " ledge= " << ledge 
 			       << " lcurve= " << lcurve << endl;
-#endif
+                            }
+
 			  va = vb;
 			}
 		      lcurve = lcurveb;
