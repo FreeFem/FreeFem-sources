@@ -3720,6 +3720,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
     //  cout << "--------- "  <<Number(Gh[i].to) << " " << Gh[i].to << " " << i << endl;
       nbv++;
     }
+    if(verbosity>10) cout << " GeomToTriangles0: init nbv : " << nbv << endl;
 //  assert( Gh.nbv < nbvx);
   
   // Method in 2 step:  0 and 1 
