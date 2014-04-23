@@ -3890,7 +3890,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 			       << " " << kk1 << " ss=" << ss ;
 			  cout << " " << sbb << endl;
 			  cout << "      " << aa << va->r << bb << vb->r 
-			       <<" length=" << Norme(va->r-vb->r) << endl;
+			       <<" length=" << Norme2(va->r-vb->r) << endl;
 			  cout << "      s " << s << " lstep= " << lstep 
 			       << " ledge= " << ledge 
 			       << " lcurve= " << lcurve << endl;
