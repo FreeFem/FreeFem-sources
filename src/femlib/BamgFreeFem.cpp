@@ -679,7 +679,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   {
       Gh->AfterRead();  
       int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
-      
+      if(verbosity> 99) cout << " Gh = " << Gh << endl;
       Triangles *Th = 0;
       try { 
 	  Th =new Triangles( nbtx ,*Gh);
