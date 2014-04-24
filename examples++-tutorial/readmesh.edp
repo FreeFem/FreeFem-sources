@@ -15,7 +15,7 @@ int where;
 real xx;
 {
   
-  ofstream file("f.txt");
+  ofstream file("f.txt",binary);// for windows add binary version 3.30 
   file.precision(16);
   file << f[] << endl;
   where=file.tellp();
@@ -49,7 +49,7 @@ func ifstream skipcomment(ifstream &ff)
 
 
 {
-  ifstream file("f.txt");
+  ifstream file("f.txt",binary); // for windows (pb CRNL EOL  translation ) 
   cout << " where " << file.seekg << endl; 
   file.seekg(where);
   file >> xx;
