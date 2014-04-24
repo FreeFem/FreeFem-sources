@@ -3882,7 +3882,13 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 #endif
 			  PreviousNewEdge = edges + nbe;
 			  nbe++;
-        if(verbosity>100)
+                            //  remove DEBUG print to find a bug in examples++-tutorial/periodic4.edp
+                            // under windows
+                            //  after this the bug  disappear (version 3.30 on freefem++  23/04/2014  FH
+                            //  problem optimisation, bug in compiler, bug in freefem++
+                            
+ 
+                         if(verbosity>999)
                             {
 			  cout << " new points " << nbv-1 << " " << vb->r ;
 			  cout << " new edge " << nbe-1 << " " ;
@@ -3895,6 +3901,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 			       << " ledge= " << ledge 
 			       << " lcurve= " << lcurve << endl;
                             }
+                            //  end of modification ... DF. Hecht 23/04/2014  FH
 
 			  va = vb;
 			}
