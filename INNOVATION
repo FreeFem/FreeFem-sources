@@ -1,4 +1,4 @@
-version 3.30.
+version 3.30. ( for windows hg  rev : 3012) 
  --   add multy border  syntaxe example:  april 23 2014 , (hg rev : 3004)
   // i is the index of the the multy index 
   // the number of sub border is given by teh size if the array to set the number of seg on the border ..
