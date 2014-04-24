@@ -65,6 +65,10 @@ struct Op2_div: public binary_function<A,B,R> {
              << " " << typeid(R).name() << endl;ExecError(" Div by 0");}
      return ((R)a / (R)b);} }; 
 
+template<class R>
+struct Op2_pipe: public binary_function<R,R,R> {
+    static R f(const R & a,const R & b)  {   return (a | b);} };
+
 template<class R,class A=R,class B=A> 
 struct Op2_mod: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return ((R)a % (R)b);} }; 
@@ -104,7 +108,8 @@ struct Op2_and: public binary_function<bool,bool,bool> {
   
 struct Op2_or: public binary_function<bool,bool,bool> { 
   static bool f(const bool & a,const bool & b)  { return a  || b;} }; 
-  
+
+
 template<class R,class A,class B> 
 struct Op2_padd: public binary_function<A,B,R*> { 
   static R * f(Stack s,const A & a,const B & b)  { 
