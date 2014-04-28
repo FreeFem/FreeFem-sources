@@ -2935,7 +2935,8 @@ int main(int argc,  char** argv)
 	    }
       }
     datafile =0;
-    cout << (argc>i1) << eerr << endl; 
+     if(debug>1)
+    cout << "ffglut : " << (argc>i1) << eerr << endl;
     if(argc>i1 && (eerr==0))// && *argv[argc-1] != '-' )
       {	
 	datafile=fopen(argv[argc-1], "r");

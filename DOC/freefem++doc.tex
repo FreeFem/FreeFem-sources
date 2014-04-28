@@ -4774,13 +4774,13 @@ The \ttCC{@continue} statement will pass the part from
 The syntax of input/output statements is similar  to \Cpp syntax. It
 uses \ttCC{@cout}, \ttCC{@cin}, \ttCC{@endl}, \ttCC{<<,>>}.
 
-To write  to (resp. read from)  a file, \index{$<<$} \index{$>>$}\index{append}\index{ofstream!append}
+To write  to (resp. read from)  a file, \index{$<<$} \index{$>>$}\index{append}\index{ofstream!append}\index{binary}\index{ofstream!binary}\index{ifstream!binary}
 declare a new variable \texttt{ofstream ofile("filename");} or \texttt{ofstream ofile("filename",append);} (resp.
 \texttt{ifstream ifile("filename");} ) and use \texttt{ofile}  (resp. \texttt{ifile})
 as \texttt{cout} (resp. \texttt{cin}).
 
-The word \texttt{append} in  \texttt{ofstream ofile("filename",append);}
- means openning a file in append mode.
+The word \texttt{append} in  \texttt{ofstream ofile("filename",append|binary);}
+ means openning a file in append and binary mode.
 
 \begin{note} The file is closed
 at the exit of the enclosing block,
