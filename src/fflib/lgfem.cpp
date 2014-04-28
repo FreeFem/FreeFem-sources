@@ -4341,7 +4341,7 @@ class JumpOp : public E_F0mps  { public:
            A rd,rg;       
            MeshPoint *mp=MeshPointStack(stack),smp=*mp;              
            rg = GetAny<A>((*a)(stack));
-           rd = rg;
+           rd = 0. ;// to be compatible with varf def... FH april 2014 ... v 3.31. 
            if ( mp->SetAdj() )
              rd = GetAny<A>((*a)(stack));  
            *mp=smp;         
