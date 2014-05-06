@@ -40,16 +40,6 @@ examples++-load/fig.pgm	examples++-load/lg.pgm \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
 examples++*/*.[ie]dp  CheckAllEdp
 
-
-# Creates a file named "ChangeLog" containing the chronology of all
-# modifications to the source files. Needs "cvs2cl" to be installed.
-
-changelog:
-	cvs2cl
-
-# History before 2005 is stored in the file "HISTORY_BEFORE_2005"
-all-local:: @HISTORY@
-
 # try and avoid running this under fakeroot (otherwise we may face
 # problems trying to connect to CVS as pseudo-root). Debian packaging
 # uses fakeroot.

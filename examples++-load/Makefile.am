@@ -120,7 +120,7 @@ allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/A
 	../src/femlib/RNM_tpl.hpp ../src/Algo/RosenBrock.hpp ../src/fflib/Serialize.hpp ../src/bamglib/SetOfE4.h	\
 	../src/fflib/showverb.hpp ../src/femlib/splitsimplex.hpp ../src/fflib/String.hpp				\
 	../src/fflib/strversionnumber.hpp ../src/fflib/throwassert.hpp ../src/femlib/ufunction.hpp			\
-	../src/fflib/versionnumber.hpp
+	../src/fflib/versionnumber.hpp ../src/fflib/P1IsoValue.hpp
 
 include.done: $(allheaders)
 	mkdir -p include

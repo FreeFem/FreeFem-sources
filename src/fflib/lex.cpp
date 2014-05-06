@@ -624,12 +624,16 @@ bool mylex::CallMacro(int &ret)
 
       return false;
   }
+
+  // <<FILE_macro>>
   else if(strcmp(buf,"FILE")==0)
   {
       plglval->str = newcopy(filename() );
       ret = STRING;
      return false;
   }
+
+  // <<LINE_macro>>
   else if(strcmp(buf,"LINE")==0)
   {
     plglval->lnum = linenumber;
