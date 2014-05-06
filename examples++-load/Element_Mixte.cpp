@@ -681,8 +681,8 @@ namespace  Fem2D {
       R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y; 
       R L[3]={l0,l1,l2};
       
-      static int count=10;
-      
+      static long  count=10;
+      /*      
       if( count < 0)
 	{
 	  cout << "TypeOfFE_RT1_2d "<< " " << A[0]+A[1]+A[2] << " " <<  B[0]+B[1]+B[2] << endl;
@@ -691,7 +691,7 @@ namespace  Fem2D {
 	  cout<< "A="  << A[0]<< "," << A[1] << " , " << A[2] << endl; 
 	  cout<< "B="  << B[0]<< "," << B[1] << " , " << B[2] <<endl; 
 	}
-      /*
+      
        THE 2 DOF k=0,1  are: on edge e   f -> \int_e f \lambda_{e+k} . n_e 
        THE 2 internal dof are : f -> \int_K f e_i  where e_i is the canonical basis of R^2 
        

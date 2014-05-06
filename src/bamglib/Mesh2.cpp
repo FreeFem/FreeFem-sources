@@ -3720,6 +3720,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
     //  cout << "--------- "  <<Number(Gh[i].to) << " " << Gh[i].to << " " << i << endl;
       nbv++;
     }
+    if(verbosity>10) cout << " GeomToTriangles0: init nbv : " << nbv << endl;
 //  assert( Gh.nbv < nbvx);
   
   // Method in 2 step:  0 and 1 
@@ -3881,18 +3882,27 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 #endif
 			  PreviousNewEdge = edges + nbe;
 			  nbe++;
-#ifdef DEBUG1                 
+                            //  remove DEBUG print to find a bug in examples++-tutorial/periodic4.edp
+                            // under windows
+                            //  after this the bug  disappear (version 3.30 on freefem++  23/04/2014  FH
+                            //  problem optimisation, bug in compiler, bug in freefem++
+                            
+ 
+                         if(verbosity>999)
+                            {
 			  cout << " new points " << nbv-1 << " " << vb->r ;
 			  cout << " new edge " << nbe-1 << " " ;
 			  cout << va << vb <<  " kk0 = " << kk0 
 			       << " " << kk1 << " ss=" << ss ;
 			  cout << " " << sbb << endl;
 			  cout << "      " << aa << va->r << bb << vb->r 
-			       <<" length=" << Norme(va->r-vb->r) << endl;
+			       <<" length=" << Norme2(va->r-vb->r) << endl;
 			  cout << "      s " << s << " lstep= " << lstep 
 			       << " ledge= " << ledge 
 			       << " lcurve= " << lcurve << endl;
-#endif
+                            }
+                            //  end of modification ... DF. Hecht 23/04/2014  FH
+
 			  va = vb;
 			}
 		      lcurve = lcurveb;

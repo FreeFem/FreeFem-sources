@@ -3263,9 +3263,20 @@ diff -u  mmg3d4/build/sources/inout.c mmg3d4-ok/build/sources/inout.c
      fprintf(inm,"%s",chaine);
    } else {
      binch = 54; //End
-diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3dmain/mmg3d.c
+--- mmg3d4/build/sources/mmg3d9.c	2012-12-19 16:05:33.000000000 +0100
++++ mmg3d4-nnew/build/sources/mmg3d9.c	2014-03-05 18:37:03.000000000 +0100
+@@ -382,7 +382,7 @@
+     fprintf(stdout,"  ** MOVING MESH\n");
+ 
+   /*alloc et init metold*/
+-  sol->metold = (double*)M_calloc(sol->npmax+1,sol->offset*sizeof(double),"MMG_mmg3d9");
++  if(!sol->metold) sol->metold = (double*)M_calloc(sol->npmax+1,sol->offset*sizeof(double),"MMG_mmg3d9");
+   assert(sol->metold);
+   mesh->disp->cold = (double*)M_calloc(3*(mesh->npmax + 1),sizeof(double),"MMG_mmg3d9");
+   assert(mesh->disp->cold);
+
 --- mmg3d4/build/sources/mmg3dmain/mmg3d.c	2012-12-19 16:05:53.000000000 +0100
-+++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2014-03-05 17:40:33.000000000 +0100
++++ mmg3d4-new/build/sources/mmg3dmain/mmg3d.c	2014-04-22 16:37:41.000000000 +0200
 @@ -46,7 +46,7 @@
  #include "compil.date"
  #include "mesh.h"
@@ -3275,7 +3286,17 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
  TIM_mytime         MMG_ctim[TIMEMAX];
  short	             MMG_imprim;
  
-@@ -397,6 +397,7 @@
+@@ -310,7 +310,8 @@
+     strcpy(sol->name,mesh->name);
+   }
+   if ( mesh->outf == NULL ) {
+-    mesh->outf = (char *)calloc(128,sizeof(char));
++    static char stbub [256]; 
++    mesh->outf =  stbub; /*(char *)calloc(128,sizeof(char)); */ 
+     assert(mesh->outf);
+     strcpy(mesh->outf,mesh->name);
+     ptr = strstr(mesh->outf,".mesh");
+@@ -397,6 +398,7 @@
  	    100.*ttot/ttim[0],call[0],ttot/(float)call[0]);
    }
    fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot);
@@ -3283,7 +3304,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
  }
  
  
-@@ -433,8 +434,7 @@
+@@ -433,8 +435,7 @@
    return(1);
  }
  
@@ -3293,7 +3314,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
    pMesh      	mesh;
    pSol       	sol;
    Info     	*info;
-@@ -442,7 +442,7 @@
+@@ -442,7 +443,7 @@
    int k,iadr,i,jj,kk,ii;
    double	lambda[3],v[3][3],*mold,*m,declic,maxLES,calLES;
    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",M_VER,M_REL);
@@ -3302,7 +3323,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
    fprintf(stdout,"    %s\n",COMPIL);
  
    signal(SIGABRT,excfun);
-@@ -451,7 +451,7 @@
+@@ -451,7 +452,7 @@
    signal(SIGSEGV,excfun);
    signal(SIGTERM,excfun);
    signal(SIGINT,excfun);
@@ -3311,7 +3332,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
  
    TIM_tminit(MMG_ctim,TIMEMAX);
    TIM_chrono(ON,&MMG_ctim[0]);
-@@ -479,15 +479,27 @@
+@@ -479,15 +480,27 @@
    info->dt       = 1.;
    info->bdry     = 0;
    info->optles   = 0;
@@ -3342,7 +3363,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
    if ( sol->np && sol->np != mesh->np ) {
      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
      sol->np = 0;
-@@ -495,7 +507,7 @@
+@@ -495,7 +508,7 @@
  
    if ( !parsop(mesh) )  return(1);
  
@@ -3351,7 +3372,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
  
    if ( !MMG_setfunc(sol->offset) ) return(1);
    if ( !MMG_scaleMesh(mesh,sol) )  return(1);   
-@@ -527,7 +539,7 @@
+@@ -527,7 +540,7 @@
    if ( !MMG_hashTetra(mesh) )    return(1);
    if ( !MMG_markBdry(mesh) )     return(1);
    if (abs(mesh->info.option)==10) {
@@ -3360,7 +3381,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
      return(0);
    }           
  
-@@ -571,8 +583,8 @@
+@@ -571,8 +584,8 @@
      if ( abs(info->option) == 9 ) {
        if(!MMG_mmg3d9(mesh,sol,&alert)) {
          if ( !MMG_unscaleMesh(mesh,sol) )  return(1);
@@ -3371,7 +3392,7 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
  	return(1);
        }
        /*puts("appel 1");
-@@ -678,18 +690,18 @@
+@@ -678,18 +691,18 @@
      fprintf(stdout,"\n  ## WARNING: INCOMPLETE MESH  %d , %d\n",
              mesh->np,mesh->ne);
  
@@ -3396,12 +3417,12 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
  
    /* free mem */
    M_free(mesh->point);
-@@ -697,14 +709,42 @@
+@@ -697,14 +710,42 @@
    M_free(mesh->tetra);
    /*la desallocation de ce pointeur plante dans certains cas...*/
    M_free(mesh->adja);
 +  /* free FH thank to Iztok Bajc */
-+    if( mesh->outf ) free( mesh->outf );
++  /*    if( mesh->outf ) free( mesh->outf ); */
 +    if(sol->metold  ) M_free(sol->metold );
 +    if(mesh->disp->cold ) M_free(mesh->disp->cold);
 +   /* ---- */
@@ -3440,15 +3461,3 @@ diff -r -u mmg3d4/build/sources/mmg3dmain/mmg3d.c mmg3d4-new/build/sources/mmg3d
 + int    (*MMG_interp)(double *,double *,double *,double );
 + int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
 + int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
---- mmg3d4/build/sources/mmg3d9.c	2012-12-19 16:05:33.000000000 +0100
-+++ mmg3d4-nnew/build/sources/mmg3d9.c	2014-03-05 18:37:03.000000000 +0100
-@@ -382,7 +382,7 @@
-     fprintf(stdout,"  ** MOVING MESH\n");
- 
-   /*alloc et init metold*/
--  sol->metold = (double*)M_calloc(sol->npmax+1,sol->offset*sizeof(double),"MMG_mmg3d9");
-+  if(!sol->metold) sol->metold = (double*)M_calloc(sol->npmax+1,sol->offset*sizeof(double),"MMG_mmg3d9");
-   assert(sol->metold);
-   mesh->disp->cold = (double*)M_calloc(3*(mesh->npmax + 1),sizeof(double),"MMG_mmg3d9");
-   assert(mesh->disp->cold);
-
