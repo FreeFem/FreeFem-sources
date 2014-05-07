@@ -6823,12 +6823,12 @@ Meshes in three dimensions can be translated rotated and deformed using the comm
 is a displacement vector then $\Phi(T_{h})$ is obtained by
 
 \bFF
-@mesh3 Th = @movemesh( Th, transfo=[$\Phi$1, $\Phi$2, $\Phi$3], ... );
+@mesh3 Th = @movemesh( Th, [$\Phi$1, $\Phi$2, $\Phi$3], ... );
 \eFF
 
 The parameters of movemesh in three dimensions are
 \begin{description}
-\item [\texttt{transfo =}] \texttt{[$\Phi$1,$\Phi$2, $\Phi$3]} set the displacement vector of 3D transformation $[\Phi1(x,y,z), \Phi2(x,y,z), \Phi3(x,y,z) ]$.
+%\item [\texttt{transfo =}] \texttt{[$\Phi$1,$\Phi$2, $\Phi$3]} set the displacement vector of 3D transformation $[\Phi1(x,y,z), \Phi2(x,y,z), \Phi3(x,y,z) ]$.
 \item [\texttt{region  =}] set integer label of tetrahedra. 0 by default.
 \item [\texttt{label =}] set the label of faces of border. This parameters is initialized as label for the keyword change (\ref{eq.org.vector.change.label}).
 \item [\texttt{facemerge =}] An integer expression. When you transform a mesh, some faces can be merged. This parameters equals to one if merge's faces is considered.
@@ -6839,6 +6839,7 @@ $$
 ptmerge \: = \: 1e-7 \: \:Vol( B ),
 $$
 where $B$ is the smallest axis parallel boxes containing the discretion domain of $\Omega$ and $Vol(B)$ is the volume of this box.
+\item[\texttt{orientation=}]An integer expression ( 1 by by default) , to reverse or not the orientation of tet if not positive.  
 \end{description}
 
 

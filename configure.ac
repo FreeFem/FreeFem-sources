@@ -1174,7 +1174,7 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 
 AC_MSG_RESULT($ff_lapack_ok)
 if test "$ff_lapack_ok" != no ; then
-AC_SUBST(LAPACKLIBS,$ff_lapack_libs)
+AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
 fi
 if test "$ff_lapack_ok" = no; then
     AC_ARG_WITH(lapack,
