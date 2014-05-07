@@ -49,7 +49,7 @@
 #include <cstdlib>
 #include <algorithm>
 extern bool showCPU;
-
+#include "RNM.hpp" 
 
 #ifdef TIME_WITH_SYS_TIME 
 # include <sys/time.h> 
@@ -1606,11 +1606,28 @@ class PlotStream;
 class E_Border ;
 class E_BorderN :public E_F0mps { public: 
    const E_Border * b;
+   int cas;// 0 long , 1, KN_ , 2 : Array // FH april 14 ..
    Expression  n;
    const E_BorderN * next;
-   E_BorderN(const E_Border *  bb, C_F0  nn,const E_BorderN * nx=0) ; 
+    
+    static   int Cas(C_F0  nn)
+    {
+        if( atype<long>()->CastingFrom(nn.left())) return 0;
+        else if(atype<KN_<long> >()->CastingFrom(nn.left())) return 1;
+        else if( atype< const E_Array * >()->CastingFrom(nn.left())  )
+        {
+            E_Array & a =  *dynamic_cast< E_Array *>((Expression) nn);
+            ffassert(a);
+            a.map(::to<long>);
+            //   a[i]=CastTo<long>(a[i]);
+            return 2;
+        }
+        else CompileError(" Number of element of a border ( longn , int array, [ ] array ");
+        return -1; // bug
+    }
+    E_BorderN(const E_Border *  bb, C_F0  nn,const E_BorderN * nx=0) ;
     E_BorderN(const E_BorderN & bb,const E_BorderN * nx)
-    : b(bb.b),n(bb.n),next(nx)
+    : b(bb.b),n(bb.n),cas(bb.cas),next(nx)
     {
       int kk=1;
 	if(bb.next) {// modif FH. 13/02/2008
@@ -1640,9 +1657,30 @@ class E_BorderN :public E_F0mps { public:
    E_BorderN * operator+( const E_BorderN & bb)  const 
    { throwassert(bb.next==0);
      return new E_BorderN(bb,this);}
-  long Nbseg(Stack stack) const { return GetAny<long>((*n)(stack));}
+
+static C_F0 to(int cas, C_F0 nn)
+    {
+        if(cas==0) return ::to<long>(nn);
+        else if(cas ==1) return ::to<KN_<long> >(nn);
+        else if(cas == 2) return ::to<E_Array> (nn);
+        else ffassert(0); // Big bug .. FH ..
+    }
+  long Nbseg(Stack stack,int index) const {
+      if(cas==0) {assert(index==0);  return GetAny<long>((*n)(stack));}
+      else if (cas==1 ) return  (GetAny<KN_<long> >((*n)(stack)))(index);
+      else if (cas==2)  {E_Array & a =  *dynamic_cast< E_Array *>((Expression) n);assert(a); Expression nn= a[index]; return  GetAny<long>((*nn)(stack));}
+      else return 0;
+  }
+  long NbBorder(Stack stack) const {
+       if(cas==0) return 1;
+      else if (cas==1 ) return  GetAny<KN_<long> >((*n)(stack)).N();
+      else if (cas==2)  return dynamic_cast<const E_Array *>(n)->size();
+      else return 0;
+  } //GetAny<long>((*n)(stack));}
+    
   double from(Stack stack) const ;//{ return GetAny<double>((*n)(stack));}
   double to(Stack stack) const ;//{ return GetAny<double>((*b)(stack));}
+  long * index(Stack stack) const ;//{ return GetAny<double>((*b)(stack));}
   double * var(Stack stack) const ;//{ return GetAny<double*>((*n)(stack));}
   void code(Stack stack) const ;
   long label()const  ;
@@ -1670,48 +1708,65 @@ class AddBorderOperator: public  OneOperator{
 
 
 class  OneOperator_borderN : public OneOperator {public:
-  const  E_Border * theborder;
+    const  E_Border * theborder;int cas;
     E_F0 * code(const basicAC_F0 & a) const 
      { return  new E_BorderN(theborder,a[0]);} 
     OneOperator_borderN(const  E_Border * b)
       : OneOperator(atype<const E_BorderN *>(),atype<long>()),
-      theborder(b){}
+      theborder(b),cas(0){}
+    OneOperator_borderN(const  E_Border * b,int )
+    : OneOperator(atype<const E_BorderN *>(),atype<KN_<long> >()),
+    theborder(b),cas(1){}
+    OneOperator_borderN(const  E_Border * b,int,int )
+    : OneOperator(atype<const E_BorderN *>(),atype<E_Array >()),
+    theborder(b),cas(2){}
+    
 };
 
 class E_Border  :public Polymorphic  {  public: 
   static basicAC_F0::name_and_type name_param[] ;
   static const int n_name_param =0;
   static long Count;
-  Expression xvar,xfrom,xto,xcode;
+  Expression xvar,xfrom,xto,xcode,xindex;
   basicAC_F0_wa * tab;
   long label;
   E_Border(const E_Array * a) : 
-    xvar(0),xfrom(0),xto(0),xcode(0), tab(a? a->v:0) ,label(++Count) 
+    xvar(0),xfrom(0),xto(0),xcode(0),xindex(0), tab(a? a->v:0) ,label(++Count)
   {
     assert(tab); 
     Add("(",new OneOperator_borderN(this));
+    Add("(",new OneOperator_borderN(this,1));
+    Add("(",new OneOperator_borderN(this,1,1));
+      /* A FAIRE pour multy border ****/
   }
   
   E_Border(const basicAC_F0 & aa) :    
     xvar(to<double*>(aa[0])),
     xfrom(to<double>(aa[1])),
     xto(to<double>(aa[2])),
-    xcode(aa[3].LeftValue()),
+    xcode(aa[aa.size()-1].LeftValue()),
+    xindex( (aa.size() > 4) ? (Expression) to<long*>(aa[3]) : 0 ),
+    //xindex( to<long*>(aa[3])  ),
     tab(0),
     label(++Count)
-  {    Add("(",new OneOperator_borderN(this));}
+  {
+    Add("(",new OneOperator_borderN(this));
+    Add("(",new OneOperator_borderN(this,1));
+    Add("(",new OneOperator_borderN(this,1,1));
+  }
 
   AnyType operator()(Stack)  const {
     return  SetAny<const  E_Border *>(this);}
   double length(Stack ) const { ffassert(0);return 0.0; /* a faire */ }
 };
   
-inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)  
-     :b(bb),n(::to<long>(nn)),next(nx) { throwassert(b);}
+inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)
+:b(bb),cas(Cas(nn)),n(to(cas,nn) ),next(nx) { /* cout << "  -- E_BorderN  : cas " << cas << endl; */ throwassert(b);}
 
 inline  double E_BorderN::from(Stack stack) const { return b->xfrom ? GetAny<double>((*b->xfrom)(stack)): double(0.0);}
 inline  double  E_BorderN::to(Stack stack) const { return b->xto? GetAny<double>((*b->xto)(stack)): b->length(stack) ;}
 inline  double *  E_BorderN::var(Stack stack) const { return b->xvar ? GetAny<double*>((*b->xvar)(stack)): (double*) 0 ;}
+inline  long *  E_BorderN::index(Stack stack) const { return b->xindex ? GetAny<long*>((*b->xindex)(stack)): (long*) 0 ;}
 inline  void  E_BorderN::code(Stack stack)const { (*b->xcode)(stack);}
 inline  long  E_BorderN::label()const { return b->label;}
 

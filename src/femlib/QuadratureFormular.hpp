@@ -45,7 +45,7 @@ namespace Fem2D {
 
   //class QuadratureFormular;
 struct  QuadratureWeight {
-   R a;
+  R a;
   QuadratureWeight(R aa): a(aa){}
 };
 
@@ -60,6 +60,7 @@ class GQuadraturePoint: public QuadratureWeight,public Rd {
   GQuadraturePoint(R aa,R xx):QuadratureWeight(aa),Rd(xx) {}
   GQuadraturePoint(R aa,R x,R y):QuadratureWeight(aa),Rd(x,y) {}
   GQuadraturePoint(R aa,R x,R y,R z):QuadratureWeight(aa),Rd(x,y,z) {}
+  GQuadraturePoint Bary(Rd * K, double mes) { return GQuadraturePoint(this->Rd::Bary(K),a*mes);}
 };
 
 template<class Rdd>
@@ -71,6 +72,7 @@ public:
   typedef  GQuadraturePoint<Rd> QP;
   const int exact;            // exact
   const int n;                // nombre de point d'integration
+  const int size;             //  size of the array
 private:
   QP *p;  // les point d'integration 
   const bool clean;
@@ -78,38 +80,50 @@ public:
 // -- les fonctions ------------------
   void Verification(); // for verification 
   GQuadratureFormular (int e,int NbOfNodes,QuadraturePoint *pp,bool c=false)
- :exact(e), n(NbOfNodes),p(pp),clean(c)  {Verification();}
+ :exact(e), n(NbOfNodes),size(n),p(pp),clean(c)  {Verification();}
   GQuadratureFormular (int e,int NbOfNodes,const QuadraturePoint *pp,bool c=false)
  :exact(e),n(NbOfNodes),p(pp),clean(c)   {Verification();}
   
   GQuadratureFormular(int ex,QP p0,QP p1,QP p2,QP p3,QP p4) 
-    : exact(ex),n(5),p(new QP[5]),clean(true) { p[0]=p0;p[1]=p1;p[2]=p2;p[3]=p3;p[4]=p4;Verification();}
+    : exact(ex),n(5),size(n),p(new QP[5]),clean(true) { p[0]=p0;p[1]=p1;p[2]=p2;p[3]=p3;p[4]=p4;Verification();}
   GQuadratureFormular(int ex,QP p0,QP p1,QP p2,QP p3) 
-    : exact(ex),n(4),p(new QP[4]) ,clean(true){ p[0]=p0,p[1]=p1,p[2]=p2;p[3]=p3;Verification();}
+    : exact(ex),n(4),size(n),p(new QP[4]) ,clean(true){ p[0]=p0,p[1]=p1,p[2]=p2;p[3]=p3;Verification();}
   GQuadratureFormular(int ex,QP p0,QP p1,QP p2) 
-    : exact(ex),n(3),p(new QP[3]),clean(true) { p[0]=p0,p[1]=p1,p[2]=p2;Verification();}
+    : exact(ex),n(3),size(n),p(new QP[3]),clean(true) { p[0]=p0,p[1]=p1,p[2]=p2;Verification();}
   GQuadratureFormular(int ex,QP p0,QP p1) 
-    : exact(ex),n(2),p(new QP[2]),clean(true) { p[0]=p0,p[1]=p1;Verification();}
+    : exact(ex),n(2),size(n),p(new QP[2]),clean(true) { p[0]=p0,p[1]=p1;Verification();}
   GQuadratureFormular(int ex,QP p0) 
-    : exact(ex),n(1),p(new QP[1]),clean(true) { p[0]=p0;Verification();}
-
+    : exact(ex),n(1),size(n),p(new QP[1]),clean(true) { p[0]=p0;Verification();}
+  // bluid a empty GQuadratureFormular
+  GQuadratureFormular(int ssize):exact(0),n(0),size(ssize),p(new QP[size]),clean(true) {}
 
   const QP & operator [](int i) const  {return p[i];} 
   const QP  & operator ()(int i) const {return p[i];}
   ~GQuadratureFormular() {if(clean) delete [] p;}
     
   GQuadratureFormular(const GQuadratureFormular & QF)
-    :exact(QF.exact),n(QF.n),p(new QP[n]),clean(true){ operator=(QF);}
-    void operator=(const GQuadratureFormular &QF)
+    :exact(QF.exact),n(QF.n),size(QF.size),p(new QP[n]),clean(true){ operator=(QF);}
+  void operator=(const GQuadratureFormular &QF)
     {
       assert(n==QF.n);
         for(int i=0;i<n;++i) p[i]=QF.p[i];
     }
-    void operator*=( double c)
+  void operator*=( double c)
     {
       for(int i=0;i<n;++i) p[i].a *=c;
     }
-
+  //  Add new GQuadratureFormular on element K to the current Quadarture formular ..
+    // FH   april 2014 ..
+    // to compute int under levelset ..
+  void AddQFK(const GQuadratureFormular &QF,Rd *K,double mes,int n0=0)
+    {
+        
+        assert( size >=  n0  + QF.n );
+        n = n0 + QF+n;
+        for(int i=0;i<QF.n;++i)
+          p[i+n0]=QF.p[i].Bary(K,mes);
+        
+    }
 private:
  /* GQuadratureFormular(const GQuadratureFormular &)
     :exact(0),n(0),p(0){assert(0);}

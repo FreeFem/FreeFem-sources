@@ -1068,6 +1068,8 @@ void Init_map_type()
      Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));
      Global.New("append",CConstant<ios::openmode>(ios::app));
+     Global.New("binary",CConstant<ios::openmode>(ios::binary)); // add FH april 2014
+     TheOperators->Add("|",new OneBinaryOperator<Op2_pipe<ios::openmode> >); // add FH april 2014
      Global.New("endl",CConstant<const char*>("\n"));
      Global.New("true",CConstant<bool>(true));
      Global.New("false",CConstant<bool>(false));
@@ -1345,8 +1347,9 @@ void Init_map_type()
 //       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
        new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006 
        new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,  //  FH string * mars 2006 
-       new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >      //  FH string * mars 2006   
-       );  
+       new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >  ,    //  FH string * mars 2006
+       new OneTernaryOperator3<Op2_set_pstringiomode<istream**,ifstream> >   //  FH string * april  2014
+       );
        
      atype<istream* >()->AddCast( new E_F1_funcT<istream*,istream**>(UnRef<istream* >)); 
      atype<ostream* >()->AddCast( new E_F1_funcT<ostream*,ostream**>(UnRef<ostream* >)); 

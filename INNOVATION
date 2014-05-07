@@ -1,8 +1,42 @@
-  add ltime() (rev 2982)  function returns the value of time in seconds since 0 hours, 0 minutes, 0 seconds, January 1, 1970, (int) 
+version 3.30. ( for windows hg  rev : 3013)
+ -- add binary ios:mode constant, to open file in binary mode under window
+    to solve pb of seekg under windows  
+ --   add multy border  syntaxe example:  april 23 2014 , (hg rev : 3004)
+  // i is the index of the the multy index 
+  // the number of sub border is given by teh size if the array to set the number of seg on the border ..
+  // so for multy border the  number of seg of the border , must be  in int[int] array 
+  real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
+            XC= [0.2,0.8,0.2,0.8],
+            YC= [0.2,0.8,0.8,0.2];
+  int[int]  NC=[-10,-11,-12,13]; 
+
+  border bb(t=0,1;i) 
+  {
+  //  cout << " i = " << i << endl; 
+    int ii = (i+1)%4; real t1 = 1-t;
+    x = xx[i]*t1 + xx[ii]*t;
+    y =  yy[i]*t1 + yy[ii]*t;
+    label = 0; ; 
+  }
+  border cc(t=0,2*pi;i) 
+{
+	x = RC[i]*cos(t)+XC[i];
+	y = RC[i]*sin(t)+YC[i];
+	label = i+1; 
+}
+  int[int] nn=[4,4,5,7];
+  plot(bb(nn),cc(NC),wait=1);
+  mesh th= buildmesh(bb(nn)+cc(NC)) ; 
+  plot(th,wait=1); 
+  
+  add ltime() (rev 2982)  function returns the value of time in seconds 
+       since 0 hours, 0 minutes, 0 seconds, January 1, 1970, (int) 
   add new macro tool  like in C  (rev 2980)
-    FILE,LINE,Stringification() to get line number and edp filename, add quote to a parameter after macro generation .. 
-   like in 
-    cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
+    FILE,LINE,Stringification() to get line number and edp filename,
+    add quote to a parameter after macro generation … 
+    Like in 
+    cout << "in " << FILE << " line " << LINE << "    -- '" 
+         << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
   add new int2d on levelset  in 3d  (int test)
   add basic  func mesh3 Cube(int nx,int ny,int nz) in cube.idp file.
 version 3.29  (hg rev 2973)

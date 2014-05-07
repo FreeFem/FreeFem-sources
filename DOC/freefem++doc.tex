@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.29}
+\def\VERSION{3.30}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -1987,7 +1987,7 @@ Notice the new keywords, \texttt{intalledges} to integrate on all edges of all t
 \end{equation}
 
 (so all internal edges are see two times ), \x{nTonEdge} which is one
-if the triangle has a boundary edge and zero otherwise, {\tt jump} to implement $[c]$.
+if the triangle has a boundary edge and two otherwise, {\tt jump} to implement $[c]$.
 Results of both methods are shown on Figure \ref{figconvect} with identical levels for the \x{level line};
 this is done with the plot-modifier \x{viso}.
 \index{plot!viso=}
@@ -5246,6 +5246,54 @@ the global variable are defined  at this time andhere since $r$ is changed betwe
 \eFF
 \end{note}
 
+\subsubsection{\setS{Multy Border}}\index{border!multy}\index{label}
+(Version 3.30)
+
+Some time it can be useful to to make array of border, but unfortunately it is incompatible with the \freefempp syntax. 
+So to bypass this , thes dea is small, if the number of segment of the discretization $n$ is a array, we make  a loop on all the value of the array, and
+the index variable $i$ of the loop  is defined after  parameter definition,  like in \verb!border a(t=0,2*pi;i) ...!.
+
+\medskip A first very small example: 
+
+\bFF
+1: @border a(t=0,2*pi;i){ x=(i+1)*cos(t); y=(i+1)*sin(t);label=1;} 
+2: @int[int] nn=[10,20,30]; 
+3: @plot(a(nn)); //  plot 3 circle with 10,20,30 points ..
+\eFF 
+
+And  more complex exemple (take from \texttt{mesh.edp} example )  to defined a square with small circies: 
+\bFF
+// multy border syntax version 3.30 avril 2014 ... 
+  @real[int] xx=[0,1,1,0],
+            yy=[0,0,1,1];
+  // radius, centre of the 4 circles .. 
+  @real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
+            XC= [0.2,0.8,0.2,0.8],
+            YC= [0.2,0.8,0.8,0.2];
+  @int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
+  // of the 4 circles borders  
+
+  @border bb(t=0,1;i) 
+  {
+  // i is the the index variable of the multi border loop 
+    @int ii = (i+1)%4; @real t1 = 1-t;
+    x =  xx[i]*t1 + xx[ii]*t;
+    y =  yy[i]*t1 + yy[ii]*t;
+    label = 0; ; 
+  }
+  
+  @border cc(t=0,2*pi;i) 
+ {
+    x = RC[i]*cos(t)+XC[i];
+    y = RC[i]*sin(t)+YC[i];
+    label = i+1; 
+  }
+  int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively . 
+  @plot(bb(nn),cc(NC),wait=1);
+  @mesh th= buildmesh(bb(nn)+cc(NC)) ; 
+  @plot(th,wait=1); 
+\eFF
+
 
 \subsubsection{Data Structures and Read/Write Statements for a Mesh}
 
@@ -8201,7 +8249,7 @@ types of finite element are: \index{type of finite element}
     Warning, due to interpolation problem, the degree of freedom is not the six  P2 nodes  but six  nodes  move
      inside with $T(X)= G + .99  (X-G) $ where $G$ is the barycenter, (version 2.24-4).
 
-      \item[P3] piecewise $P_{3}$  continuous finite element (2d)  (need \ttCC{@load "Element_P3"}, 
+      \item[P3] piecewise $P_{3}$  continuous finite element (2d)  (need \ttCC{@load "Element_P3"})
      \index{P3|textbf}\index{fespace!P3}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8210,7 +8258,7 @@ types of finite element are: \index{type of finite element}
      where
      $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
      
-      \item[P3dc] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P3dc"}, 
+      \item[P3dc] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P3dc"})
      \index{P3dc|textbf}\index{fespace!P3dc}
      \begin{equation}
      P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8219,7 +8267,7 @@ types of finite element are: \index{type of finite element}
      where
      $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
 
-      \item[P4] piecewise $P_{4}$  continuous finite element (2d)  (need \ttCC{@load "Element_P4"}, 
+      \item[P4] piecewise $P_{4}$  continuous finite element (2d)  (need \ttCC{@load "Element_P4"})
      \index{P4|textbf}\index{fespace!P4}
      \begin{equation}
      P2_{h} = \left\{ v \in H^{1}(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8228,7 +8276,7 @@ types of finite element are: \index{type of finite element}
      where
      $P_{4}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 4$.
      
-      \item[P4dc] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P4dc"}, 
+      \item[P4dc] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_P4dc"})
      \index{P4dc|textbf}\index{fespace!P4dc}
      \begin{equation}
      P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
@@ -8237,6 +8285,19 @@ types of finite element are: \index{type of finite element}
      where
      $P_{4}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
 
+     \item[P0Edge] piecewise $P_{0}$  discontinuous finite element (2d)  contant on each edge  of the mesh.
+     \index{P0Edge|textbf}\index{fespace!P0Edge}
+
+     \item[P1Edge] piecewise $P_{1}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_1$ on each edge of the mesh.
+     \index{P1Edge|textbf}\index{fespace!P1Edge}
+     \item[P2Edge] piecewise $P_{2}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_2$ on each edge of the mesh.
+     \index{P2Edge|textbf}\index{fespace!P2Edge}
+     \item[P3Edge] piecewise $P_{3}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_3$ on each edge of the mesh.
+     \index{P1Edge|textbf}\index{fespace!P3Edge}
+     \item[P4Edge] piecewise $P_{4}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_4$ on each edge of the mesh.
+     \index{P4Edge|textbf}\index{fespace!P4Edge}
+    \item[P5Edge] piecewise $P_{5}$  discontinuous finite element (2d)  (need \ttCC{@load "Element_PkEdge"})  $P_5$ on each edge of the mesh.
+     \index{P5Edge|textbf}\index{fespace!P4Edge}
 
 
      \item[Morley] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
@@ -8275,7 +8336,7 @@ types of finite element are: \index{type of finite element}
       \item[P2BR]  \index{P2BR|textbf}\index{fespace!P2BR}(need \ttCC{@load "BernadiRaugel"})  the Bernadi Raugel Finite Elemen is a Vectorial   element (2d)  with 2 components,
  See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).
  It is  a 2d coupled FE, with 
- the Polynomial space is $ P1^2$ + 3 normals bubbles edges function $(P_2)$
+ the Polynomial space is $ P_1^2$ + 3 normals bubbles edges function $(P_2)$
 and  the degre of freedom is 6 values at of the $2$ components at the  $3$ vertices
 and the $3$ flux on the $3$ edges  
 So the number  degrees of freedom is 9.      
