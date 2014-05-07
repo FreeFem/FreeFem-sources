@@ -1,3 +1,5 @@
+ --  correct problem with Ipopt / lapack configure ...
+ -- add BEC plugin of Bose Enstient Optimisation
  -- standardisation movemesh3 -> movemesh ( same parameter of 2d version )	
  -- correct jump in basic integrale to be compatible with varf definition
     jump is not zero on boundary, it is - boundary value ..
