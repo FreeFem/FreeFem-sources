@@ -1,4 +1,4 @@
-version 3.30-1 
+version 3.30-1  ( hg rev: 3017)
  -- add levelset integral on 3d case ( on levelset and under level set) 
  -- correct problem with Ipopt / lapack configure ...
  -- add BEC plugin of Bose Enstient Optimisation

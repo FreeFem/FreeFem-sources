@@ -1,5 +1,10 @@
-@  changeset:   3016:07b402a63c90
+@  changeset:   3017:2952e5f96558
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri May 16 12:46:05 2014 +0200
+|  summary:     add levelset integral and pass to version 3.30-1  in 3d
+|
+o  changeset:   3016:07b402a63c90
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed May 07 21:21:05 2014 +0200
 |  summary:     correct pb in BEC plugin ( function denpendint of x,y,z point ..
@@ -5335,7 +5340,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Thu Jun 03 16:02:58 2004 +0200
-| | |  summary:     Les bibliothèques BLAS, ARPACK et UMFPACK sont automatiquement téléchargées
+| | |  summary:     Les biblioth?ques BLAS, ARPACK et UMFPACK sont automatiquement t?l?charg?es
 | | |
 | o |  changeset:   2002:edf4f99d7e54
 | | |  branch:      alh-autoconf
@@ -5371,7 +5376,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Thu May 27 17:00:47 2004 +0200
-| | |  summary:     Toute première version de FreeFem++ compilable sur Windows avec Cygwin,
+| | |  summary:     Toute premi?re version de FreeFem++ compilable sur Windows avec Cygwin,
 | | |
 | o |  changeset:   1996:931a8adc93ae
 | | |  branch:      alh-autoconf
@@ -5383,13 +5388,13 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Tue May 25 16:14:21 2004 +0200
-| | |  summary:     Trois options de configuration manuelle ajoutées:
+| | |  summary:     Trois options de configuration manuelle ajout?es:
 | | |
 | o |  changeset:   1994:f40848886dac
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Tue May 25 15:05:32 2004 +0200
-| | |  summary:     - Modification de la procédure de test pour exécuter les scripts all.edp
+| | |  summary:     - Modification de la proc?dure de test pour ex?cuter les scripts all.edp
 | | |
 | o |  changeset:   1993:70dc0e4a4a0a
 | | |  branch:      alh-autoconf
@@ -5401,7 +5406,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Mon May 24 19:12:19 2004 +0200
-| | |  summary:     Ajoute l'extension "-g" à la version debug des programmes en vue
+| | |  summary:     Ajoute l'extension "-g" ? la version debug des programmes en vue
 | | |
 | o |  changeset:   1991:eed90ccfb2f9
 | | |  branch:      alh-autoconf
@@ -5419,37 +5424,37 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Mon May 24 14:57:10 2004 +0200
-| | |  summary:     Début de configuration de FreeFem++ sur Windows/Cygwin.
+| | |  summary:     D?but de configuration de FreeFem++ sur Windows/Cygwin.
 | | |
 | o |  changeset:   1988:9e62c7a49ce5
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Mon May 24 11:19:18 2004 +0200
-| | |  summary:     Intégration de la bibliothèque Umfpack dans la configuration et
+| | |  summary:     Int?gration de la biblioth?que Umfpack dans la configuration et
 | | |
 | o |  changeset:   1987:e413f1a2441f
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Wed May 19 15:46:55 2004 +0200
-| | |  summary:     Ajoute src/Eigen/eigenvalue.cpp dans la bibliothèque src/fflib/libff.a
+| | |  summary:     Ajoute src/Eigen/eigenvalue.cpp dans la biblioth?que src/fflib/libff.a
 | | |
 | o |  changeset:   1986:7c581dff37a2
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Wed May 19 15:06:18 2004 +0200
-| | |  summary:     Première version de la procédure de test de non-regression.
+| | |  summary:     Premi?re version de la proc?dure de test de non-regression.
 | | |
 | o |  changeset:   1985:dadd01f5b506
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Wed May 19 13:52:55 2004 +0200
-| | |  summary:     Amélioration de la gestion des numéros de version.
+| | |  summary:     Am?lioration de la gestion des num?ros de version.
 | | |
 | o |  changeset:   1984:aa87846f7d99
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Wed May 19 11:05:24 2004 +0200
-| | |  summary:     Automake configuré sur macserv2
+| | |  summary:     Automake configur? sur macserv2
 | | |
 | o |  changeset:   1983:2f557c31cc18
 | | |  branch:      alh-autoconf
@@ -5461,7 +5466,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Tue May 18 18:00:00 2004 +0200
-| | |  summary:     Configuration de la procédure de compilation sur MacOSX en cours.
+| | |  summary:     Configuration de la proc?dure de compilation sur MacOSX en cours.
 | | |
 | o |  changeset:   1981:82ad80a2167a
 | | |  branch:      alh-autoconf
@@ -5473,7 +5478,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Tue May 18 17:08:36 2004 +0200
-| | |  summary:     Modification de l'arborescence des répertoires dans src/ afin de placer
+| | |  summary:     Modification de l'arborescence des r?pertoires dans src/ afin de placer
 | | |
 | o |  changeset:   1979:775f666ab880
 | | |  branch:      alh-autoconf
@@ -5485,7 +5490,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Mon May 17 11:46:26 2004 +0200
-| | |  summary:     Intégration de Arpack et Umfpack en cours sur plusieurs architectures
+| | |  summary:     Int?gration de Arpack et Umfpack en cours sur plusieurs architectures
 | | |
 | o |  changeset:   1977:c78650dfe24a
 | | |  branch:      alh-autoconf
@@ -5497,25 +5502,25 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Fri May 14 11:48:00 2004 +0200
-| | |  summary:     Test de la présence de mpiCC ajouté (s'il est absent, la version
+| | |  summary:     Test de la pr?sence de mpiCC ajout? (s'il est absent, la version
 | | |
 | o |  changeset:   1975:a25dd9092df7
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Fri May 14 10:08:22 2004 +0200
-| | |  summary:     Extension de la recherche de la bibliothèque BLAS.
+| | |  summary:     Extension de la recherche de la biblioth?que BLAS.
 | | |
 | o |  changeset:   1974:74d24eef730c
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Thu May 13 14:54:09 2004 +0200
-| | |  summary:     Quelques nouveaux fichiers installés par la procédure standard Autoreconf -i.
+| | |  summary:     Quelques nouveaux fichiers install?s par la proc?dure standard Autoreconf -i.
 | | |
 | o |  changeset:   1973:dfa4239b5f28
 | | |  branch:      alh-autoconf
 | | |  user:        lehyaric
 | | |  date:        Thu May 13 14:45:32 2004 +0200
-| | |  summary:     La procédure Automake + Autoconf a été testée sur Hydre (Debian Testing).
+| | |  summary:     La proc?dure Automake + Autoconf a ?t? test?e sur Hydre (Debian Testing).
 | | |
 | o |  changeset:   1972:a00adb8d7dee
 | | |  branch:      alh-autoconf
@@ -5528,7 +5533,7 @@ o | |  changeset:   2006:3bb8e4bb93b7
 | | |  parent:      0:6d28b8993874
 | | |  user:        lehyaric
 | | |  date:        Thu May 13 14:00:37 2004 +0200
-| | |  summary:     Intégration de Autoconf et Automake dans la procédure de build en cours.
+| | |  summary:     Int?gration de Autoconf et Automake dans la proc?dure de build en cours.
 | | |
 | | o  changeset:   1970:44a4659127b5
 | | |  branch:      graphical-user-interface-branch
@@ -6203,7 +6208,7 @@ o |  changeset:   1839:3b36b0cdd71f
 o |  changeset:   1838:6453b34c9217
 | |  user:        hecht
 | |  date:        Sun Dec 27 19:17:04 2009 +0100
-| |  summary:     correct fortran link edition in case of incompatible g7è/gfortran and g++
+| |  summary:     correct fortran link edition in case of incompatible g7?/gfortran and g++
 | |
 o |  changeset:   1837:5110dfd736f3
 | |  user:        hecht
@@ -6963,7 +6968,7 @@ o |  changeset:   1687:5505e8ebf028
 o |  changeset:   1686:ae67b591599d
 | |  user:        hecht
 | |  date:        Fri Jul 10 10:53:56 2009 +0200
-| |  summary:     coorect ff-c++ on win3é
+| |  summary:     coorect ff-c++ on win3?
 | |
 o |  changeset:   1685:f384c5351ff5
 | |  user:        hecht
@@ -11928,7 +11933,7 @@ o |  changeset:   695:ef360bad2ed9
 o |  changeset:   694:3b58d5c49afb
 | |  user:        lehyaric
 | |  date:        Fri Feb 04 16:24:44 2005 +0100
-| |  summary:     Patchs de configuration proposés par Thierry Thomas pour FreeBSD intégrés.
+| |  summary:     Patchs de configuration propos?s par Thierry Thomas pour FreeBSD int?gr?s.
 | |
 o |  changeset:   693:9af00658c499
 | |  user:        hecht
@@ -13565,7 +13570,7 @@ o |  changeset:   368:fe3f3906e950
 o |  changeset:   367:c4a119ca5c9a
 | |  user:        lehyaric
 | |  date:        Mon Sep 13 16:05:19 2004 +0200
-| |  summary:     Modification proposée par Thierry Thomas pour FreeBSD
+| |  summary:     Modification propos?e par Thierry Thomas pour FreeBSD
 | |
 o |  changeset:   366:8493ed2b0f1e
 | |  user:        hecht
@@ -13870,7 +13875,7 @@ o |  changeset:   307:db4e0b9fb8e6
 o |  changeset:   306:fcea44571ff4
 | |  user:        darrasse
 | |  date:        Fri Jul 09 16:52:17 2004 +0200
-| |  summary:     Mise à jour de la liste des auteurs
+| |  summary:     Mise ? jour de la liste des auteurs
 | |
 o |  changeset:   305:a518d55630cf
 | |  user:        lehyaric
@@ -14511,7 +14516,7 @@ o |  changeset:   179:b4d6436c35bf
 o |  changeset:   178:089de7eb3548
 | |  user:        darrasse
 | |  date:        Thu Jun 24 14:44:46 2004 +0200
-| |  summary:     Changement de priorité des alternatives. x11 est prioritaire à glx.
+| |  summary:     Changement de priorit? des alternatives. x11 est prioritaire ? glx.
 | |
 o |  changeset:   177:6b4f77f9d655
 | |  user:        lehyaric
@@ -14576,57 +14581,57 @@ o |  changeset:   166:91dcaa97dd82
 o |  changeset:   165:f80016364270
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:16:48 2004 +0200
-| |  summary:     Ajout d'une page man générique, obligatoire pour Debian.
+| |  summary:     Ajout d'une page man g?n?rique, obligatoire pour Debian.
 | |
 o |  changeset:   164:8861a5960357
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   163:c6f04faebb32
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   162:2eae0e0f0869
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   161:34d7f2a2a9f1
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   160:a94d47551f62
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   159:704f142ac8a6
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   158:462a19c6fd35
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   157:14490711226c
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   156:ecd8d9f031c5
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   155:39009c82f388
 | |  user:        darrasse
 | |  date:        Thu Jun 24 02:12:43 2004 +0200
-| |  summary:     Insertion du dossier debian contenant les fichiers nécessaires pour la
+| |  summary:     Insertion du dossier debian contenant les fichiers n?cessaires pour la
 | |
 o |  changeset:   154:4c9e9eaee438
 | |  user:        lehyaric
@@ -14656,7 +14661,7 @@ o |  changeset:   150:d74e4f965d34
 o |  changeset:   149:ef13ddf7a19d
 | |  user:        lehyaric
 | |  date:        Wed Jun 23 11:36:17 2004 +0200
-| |  summary:     Mise à jour de la configuration de UMFPACK
+| |  summary:     Mise ? jour de la configuration de UMFPACK
 | |
 o |  changeset:   148:8c35b9bd5a21
 | |  user:        lehyaric
@@ -14691,7 +14696,7 @@ o |  changeset:   143:3228d62729ed
 o |  changeset:   142:5a7bc526e492
 | |  user:        darrasse
 | |  date:        Tue Jun 22 15:32:22 2004 +0200
-| |  summary:     correction de la détection de UMFPACK
+| |  summary:     correction de la d?tection de UMFPACK
 | |
 o |  changeset:   141:668587ef4273
 | |  user:        lehyaric
@@ -14771,12 +14776,12 @@ o |  changeset:   127:27909cc2efe4
 o |  changeset:   126:eb38cdcad258
 | |  user:        lehyaric
 | |  date:        Fri Jun 18 10:31:16 2004 +0200
-| |  summary:     Documentation proofreading ok up to §3.6 included
+| |  summary:     Documentation proofreading ok up to ?3.6 included
 | |
 o |  changeset:   125:eebea7c8bada
 | |  user:        lehyaric
 | |  date:        Thu Jun 17 14:34:49 2004 +0200
-| |  summary:     - Documentation proofreading ok up to §3.6 included
+| |  summary:     - Documentation proofreading ok up to ?3.6 included
 | |
 o |  changeset:   124:de5ab079f924
 | |  user:        lehyaric
@@ -14831,7 +14836,7 @@ o |  changeset:   115:8830c3e6a420
 o |  changeset:   114:15154662ef97
 | |  user:        lehyaric
 | |  date:        Tue Jun 15 12:08:37 2004 +0200
-| |  summary:     Proofreading ok up to §2.3 included.
+| |  summary:     Proofreading ok up to ?2.3 included.
 | |
 o |  changeset:   113:f3859d20ff80
 | |  user:        lehyaric
@@ -14856,327 +14861,327 @@ o |  changeset:   110:85d80f2e6265
 o |  changeset:   109:66de63c37bce
 | |  user:        lehyaric
 | |  date:        Tue Jun 08 16:10:19 2004 +0200
-| |  summary:     Relecture anglais doc arrivé au § 1.3
+| |  summary:     Relecture anglais doc arriv? au ? 1.3
 | |
 o |  changeset:   108:93fa37e6dc7e
 | |  user:        lehyaric
 | |  date:        Mon Jun 07 16:34:17 2004 +0200
-| |  summary:     Première relecture des fichiers README et associés.
+| |  summary:     Premi?re relecture des fichiers README et associ?s.
 | |
 o |  changeset:   107:828ba65d9130
 | |  user:        lehyaric
 | |  date:        Mon Jun 07 16:34:17 2004 +0200
-| |  summary:     Première relecture des fichiers README et associés.
+| |  summary:     Premi?re relecture des fichiers README et associ?s.
 | |
 o |  changeset:   106:d76a5467a2c6
 | |  user:        lehyaric
 | |  date:        Mon Jun 07 16:34:17 2004 +0200
-| |  summary:     Première relecture des fichiers README et associés.
+| |  summary:     Premi?re relecture des fichiers README et associ?s.
 | |
 o |  changeset:   105:b58a786980f6
 | |  user:        lehyaric
 | |  date:        Mon Jun 07 16:34:17 2004 +0200
-| |  summary:     Première relecture des fichiers README et associés.
+| |  summary:     Premi?re relecture des fichiers README et associ?s.
 | |
 o |  changeset:   104:83b96ae3f863
 | |  user:        lehyaric
 | |  date:        Mon Jun 07 16:34:17 2004 +0200
-| |  summary:     Première relecture des fichiers README et associés.
+| |  summary:     Premi?re relecture des fichiers README et associ?s.
 | |
 o |  changeset:   103:23de4ddd9d39
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   102:99d43ca61439
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   101:ab16a232f526
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   100:c59fb66f9425
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   99:0bfd80be1c8c
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   98:a12e2d2e0631
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   97:3874c0fba853
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   96:502d1784ed2e
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   95:4dcb9aa0c74e
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   94:37cfd09bf134
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   93:e648a1bfdd58
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   92:dae695622eac
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   91:27cd79875601
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   90:c8bda48c4105
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   89:eb18bcf09a34
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   88:a820a6c27662
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   87:2658627dd95d
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   86:2eb5adcc8f3b
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   85:5c4c5a9817fa
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   84:d7c50a038a79
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   83:e0934bf79429
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   82:60ee4abf02ca
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   81:2bfb83f8a44d
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   80:1b42fd3b13ff
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   79:dfbcaf6116ec
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   78:c990f2f011b2
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   77:2522953f44a9
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   76:d6250e981cf3
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   75:b1d17073cf16
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   74:d524e9ab1f96
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   73:c34a8b43dbb8
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   72:266eeb6a5ad6
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   71:3039d27ef299
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   70:425fc26308ae
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   69:958cf52ec0ae
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   68:7f82309eca0d
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   67:5056a0adbdc9
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   66:db1bcf6b5777
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   65:bb600795df63
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   64:f81592709735
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:25 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   63:2a6417d3e573
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   62:f25428415d3c
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   61:49f2a29fb46e
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   60:c69b6f268006
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   59:9e03261e3434
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   58:1ec7cc14da21
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   57:19c0a9c331c9
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   56:13019879f42e
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   55:c9fab124321e
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   54:a0ae934447f2
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   53:2c37fdc607e9
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   52:fbd4411abda7
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   51:0f97c8037b88
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   50:104bb1f450ad
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   49:23d20c1baebb
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   48:62334abc40ee
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   47:d8836d2bd9f6
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   46:c42f18e39eb4
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   45:5343bcf3d526
 | |  user:        lehyaric
 | |  date:        Fri Jun 04 16:06:24 2004 +0200
-| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont réintégrées
+| |  summary:     Les modifications faites dans la branche "alh-autoconf" sont r?int?gr?es
 | |
 o |  changeset:   44:3572cd801d80
 | |  user:        hecht
@@ -15206,7 +15211,7 @@ o |  changeset:   40:399fdf624955
 o |  changeset:   39:00b51a05f198
 | |  user:        lehyaric
 | |  date:        Wed May 26 11:10:01 2004 +0200
-| |  summary:     manual.tex est réinitialisé à sa version 1.6, car les modifications
+| |  summary:     manual.tex est r?initialis? ? sa version 1.6, car les modifications
 | |
 o |  changeset:   38:4f307cbfc41a
 | |  user:        hecht
@@ -15241,7 +15246,7 @@ o |  changeset:   33:6e952764275e
 o |  changeset:   32:7d38e62303a8
 | |  user:        lehyaric
 | |  date:        Fri May 14 15:46:33 2004 +0200
-| |  summary:     Début de la relecture de l'anglais de la doc.
+| |  summary:     D?but de la relecture de l'anglais de la doc.
 | |
 o |  changeset:   31:25279b0696ab
 | |  user:        lehyaric
@@ -15251,22 +15256,22 @@ o |  changeset:   31:25279b0696ab
 o |  changeset:   30:86ccde355d34
 | |  user:        lehyaric
 | |  date:        Fri May 14 10:43:34 2004 +0200
-| |  summary:     Récupération des Makefiles (depuis l'archive de la version 1.40) qui
+| |  summary:     R?cup?ration des Makefiles (depuis l'archive de la version 1.40) qui
 | |
 o |  changeset:   29:63564e1a54d8
 | |  user:        lehyaric
 | |  date:        Thu May 13 14:07:13 2004 +0200
-| |  summary:     Séparation d'une branche spéciale pour les essais de autoconf.
+| |  summary:     S?paration d'une branche sp?ciale pour les essais de autoconf.
 | |
 o |  changeset:   28:0e192a3be805
 | |  user:        lehyaric
 | |  date:        Thu May 13 14:00:37 2004 +0200
-| |  summary:     Intégration de Autoconf et Automake dans la procédure de build en cours.
+| |  summary:     Int?gration de Autoconf et Automake dans la proc?dure de build en cours.
 | |
 o |  changeset:   27:33eb5379f1b1
 | |  user:        lehyaric
 | |  date:        Thu May 13 09:54:49 2004 +0200
-| |  summary:     Ajout progressif de tous les fichiers à ignorer.
+| |  summary:     Ajout progressif de tous les fichiers ? ignorer.
 | |
 o |  changeset:   26:c5f6979dfddd
 | |  user:        hecht
@@ -15276,7 +15281,7 @@ o |  changeset:   26:c5f6979dfddd
 o |  changeset:   25:4bf5a81958af
 | |  user:        lehyaric
 | |  date:        Wed May 12 14:34:39 2004 +0200
-| |  summary:     Fichier regénéré à la compilation
+| |  summary:     Fichier reg?n?r? ? la compilation
 | |
 o |  changeset:   24:343d50721685
 | |  user:        ly
@@ -15391,12 +15396,12 @@ o |  changeset:   3:f22e3359ec26
 o |  changeset:   2:fa41e8fddceb
 | |  user:        lehyaric
 | |  date:        Mon Apr 26 12:08:47 2004 +0200
-| |  summary:     Mise à jour de la documentation enregistrée dans CVS à partir de la
+| |  summary:     Mise ? jour de la documentation enregistr?e dans CVS ? partir de la
 | |
 o |  changeset:   1:1fcb4737d85b
 |/   user:        lehyaric
 |    date:        Mon Apr 26 12:08:46 2004 +0200
-|    summary:     Mise à jour de la documentation enregistrée dans CVS à partir de la
+|    summary:     Mise ? jour de la documentation enregistr?e dans CVS ? partir de la
 |
 o  changeset:   0:6d28b8993874
    tag:         FREEFEM_1_38
