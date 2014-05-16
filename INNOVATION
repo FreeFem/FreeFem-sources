@@ -1,4 +1,6 @@
- --  correct problem with Ipopt / lapack configure ...
+version 3.30-1 
+ -- add levelset integral on 3d case ( on levelset and under level set) 
+ -- correct problem with Ipopt / lapack configure ...
  -- add BEC plugin of Bose Enstient Optimisation
  -- standardisation movemesh3 -> movemesh ( same parameter of 2d version )	
  -- correct jump in basic integrale to be compatible with varf definition

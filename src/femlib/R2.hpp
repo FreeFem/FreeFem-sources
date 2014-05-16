@@ -43,6 +43,7 @@
 // #include <cstdlib> 
 
 // The class R2
+class R3;
 class R2 {
 public:  
   typedef double R;
@@ -99,7 +100,11 @@ public:
   R norme() const { return std::sqrt(x*x+y*y);}
   R norme2() const { return (x*x+y*y);}
   R2 Bary(R2 P[d+1]) const { return (1-x-y)*P[0]+x*P[1]+y*P[2];}  // add FH 
-  R2 Bary(const R2 *const *const P ) const { return (1-x-y)*(*P[0])+x*(*P[1])+y*(*P[2]);}  // add FH 
+  R2 Bary(const R2 *const *const P ) const { return (1-x-y)*(*P[0])+x*(*P[1])+y*(*P[2]);}  // add FH
+  R3 Bary(R3 P[d+1]) const ; //{ return (1-x-y)*P[0]+x*P[1]+y*P[2];}  // add FH
+  R3 Bary(const R3 *const *const P ) const; // { return (1-x-y)*(*P[0])+x*(*P[1])+y*(*P[2]);}  // add FH
+   
+    
 friend  R2 operator*(R c,const R2 & P) {return P*c;} 
 friend  R2 perp(const R2 & P) { return R2(-P.y,P.x) ; }
 //inline R2 Perp(const R2 & P) { return P.perp(); }  // autre ecriture  de la fonction perp
