@@ -51,10 +51,11 @@ class Iden;
 #include <alloca.h>
 #endif
 #endif
+#include "RNM.hpp"
+
 #include "AFunction.hpp"
 //  to reserve space to graphical pointer function
 #include "rgraph.hpp"
-#include "RNM.hpp"
 #include "fem.hpp"
 #include "FESpacen.hpp" 
 #include "FESpace.hpp" 
