@@ -1,5 +1,20 @@
-@  changeset:   3013:bdf2b6da5050
+@  changeset:   3016:07b402a63c90
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed May 07 21:21:05 2014 +0200
+|  summary:     correct pb in BEC plugin ( function denpendint of x,y,z point ..
+|
+o  changeset:   3015:1aea517bacce
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed May 07 16:14:10 2014 +0200
+|  summary:     add new plugins for BEC
+|
+o  changeset:   3014:ba2508484995
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Apr 28 14:50:11 2014 +0200
+|  summary:     remove spurioux cout in ffglut (00)
+|
+o  changeset:   3013:bdf2b6da5050
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Apr 24 10:29:07 2014 +0200
 |  summary:     add binary mode file type

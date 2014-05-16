@@ -41,6 +41,9 @@ namespace Fem2D
 }
 int IsoLineK(double *f,Fem2D::R3 *Q,const double eps);
 int IsoLineK(double *f,Fem2D::R2 *Q,const double eps);
+int UnderIso(double *f,Fem2D::R3 Q[3][4] ,double vol[3], const double eps);
+int UnderIso(double *f,Fem2D::R2 Q[2][3] ,double area[2], const double eps);
+
 
 
 #endif /* defined(__ff__P1IsoValue__) */

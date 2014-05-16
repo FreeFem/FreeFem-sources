@@ -2872,6 +2872,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                         assert( c > 0 && c < 1);
                         area *= 1-c;
                     }
+                 //  warning  quadrature  wrong just ok for constante FH, we must also change the quadaturer points ..
+                 // just order 1  here ???
                  for (int npi=0; npi<FI.n;npi++)
                     {
                         QuadraturePoint pi(FI[npi]);
@@ -2958,7 +2960,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    }
  else if(dim==3)
    {
-     if(di->islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type on no int2d case (10 3d)");
+     if(di->islevelset() &&  (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
+         InternalError("So no levelset integration type on no int2d / int3d case (10 3d)");
       
      const Mesh3  & Th = * GetAny<pmesh3>( (*di->Th)(stack) );
      ffassert(&Th);
@@ -3067,8 +3070,53 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	       }
 	   }
        }
-     else if (kind==CDomainOfIntegration::int3d) {
+     else if (kind==CDomainOfIntegration::int3d)
+     {
        
+         if(di->islevelset())
+         {   // int3d levelset < 0
+             GQuadratureFormular<R3> FI(FIV.n*3);
+             double llevelset = 0;
+             const double uset = std::numeric_limits<double>::max();
+             // cout << " uset ="<<uset << endl;
+             R3 Q[3][4];
+             double vol6[3];
+             KN<double> phi(Th.nv);
+             phi=uset;
+             double f[4];
+             
+             for (int t=0;t< Th.nt; t++)
+             {
+                 
+		 const Mesh3::Element & K(Th[t]);
+		 if (all || setoflab.find(K.lab) != setoflab.end())
+                 {
+                     double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                     for(int i=0;i<4;++i)
+                     {
+                         int j= Th(t,i);
+                         if( phi[j]==uset)
+                         {
+                             MeshPointStack(stack)->setP(&Th,t,i);
+                             phi[j]= di->levelset(stack);//zzzz
+                         }
+                         f[i]=phi[j];
+                     }
+                     int ntets= UnderIso(f,Q, vol6,1e-14);
+                     setQF<R3>(FI,FIV,QuadratureFormular_Tet_1, Q,vol6,ntets);
+                     for (int npi=0; npi<FI.n;npi++)
+                     {
+                         GQuadraturePoint<R3> pi(FI[npi]);
+                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                         r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 }
+             }
+
+            
+         }
+        else
+         {
        const GQuadratureFormular<R3> & FI =FIV;
              for (int i=0;i< Th.nt; i++) 
 	       {
@@ -3081,6 +3129,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack)); 
                      }
                }
+         }
      }
      else   if (kind==CDomainOfIntegration::intalledges)
        {
