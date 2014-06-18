@@ -1,5 +1,15 @@
-@  changeset:   3019:ff55bb4a608f
+@  changeset:   3021:796a520a31f6
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 18 21:09:55 2014 +0200
+|  summary:     correct INNOVATION.
+|
+o  changeset:   3020:09dd923712b9
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 18 21:07:28 2014 +0200
+|  summary:     add new plugin to make some binary io, will be
+|
+o  changeset:   3019:ff55bb4a608f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri May 16 13:53:06 2014 +0200
 |  summary:     try correct comile pb on UV100
