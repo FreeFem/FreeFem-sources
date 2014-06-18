@@ -133,7 +133,7 @@ version 3.26-3  09/12/2013
  - Added configuration option --enable-hypre (disabled by default, contrary to other tools)
  - Deactivate FFTW download when a local version is found (request from Helmut Jarausch)
 10/7/2013  (version 3.25)
- - remove of Mafile.in configure for the hg distrubion 
+ - remove of Makefile.in configure for the hg distrubion 
     use :  autoreconf -i  # too build Makefile.in 
          before to configure 
          need automake version 1.13 ... 
