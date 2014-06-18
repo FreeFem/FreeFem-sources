@@ -17,7 +17,7 @@ cout << "\n\n gsl random :\n\n";
  for(int i=0; i <ngslrng ; ++i)
    cout << i << " name  " <<  gslname(gslrngtype(i)) << endl; 
 gslrng r=gslrngtype(1);// chose a generator 
-cout << r << endl; 
+// cout << r << endl;  no print .. 
 for (int i = 0; i < 10; i++) 
    cout << gslrnguniform(r) << endl;;  
  
