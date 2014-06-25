@@ -56,6 +56,7 @@
 		3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
+		3D6406B8195B2DD200F33E4F /* getprog-unix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */; };
 		3D66F11E1752B077004AE3C8 /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */; };
 		3D66F1201752B083004AE3C8 /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D66F11F1752B083004AE3C8 /* libcholmod.a */; };
 		3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
@@ -161,6 +162,7 @@
 		3D103DA315EC14AB00DAD98A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = "../../../ff/ff-MacIntel/download/lib/libumfpack.a"; sourceTree = "<group>"; };
 		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
+		3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "getprog-unix.hpp"; path = "../src/Graphics/getprog-unix.hpp"; sourceTree = "<group>"; };
 		3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuitesparseconfig.a; path = ../../../../../usr/local/lib/libsuitesparseconfig.a; sourceTree = "<group>"; };
 		3D66F11F1752B083004AE3C8 /* libcholmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcholmod.a; path = ../../../../../usr/local/lib/libcholmod.a; sourceTree = "<group>"; };
 		3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = UMFPack_Solver.cpp; sourceTree = "<group>"; };
@@ -551,6 +553,7 @@
 			children = (
 				3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */,
 				3DC62A030972538B00D487F6 /* sansrgraph.cpp */,
+				3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */,
 				3DC62A050972539900D487F6 /* DefColor.cpp */,
 				3DC62AE80972994000D487F6 /* macglrgraf.cpp */,
 			);
@@ -595,6 +598,7 @@
 				3D84ADF21654DAE200301697 /* endian.hpp in Headers */,
 				3D84ADF31654DAE200301697 /* environment.hpp in Headers */,
 				3D84ADF41654DAE200301697 /* error.hpp in Headers */,
+				3D6406B8195B2DD200F33E4F /* getprog-unix.hpp in Headers */,
 				3D84ADF51654DAE200301697 /* lgmesh3.hpp in Headers */,
 				3D84ADF61654DAE200301697 /* showverb.hpp in Headers */,
 				3D84ADF71654DAE200301697 /* String.hpp in Headers */,
