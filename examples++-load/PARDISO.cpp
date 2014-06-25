@@ -194,9 +194,9 @@ Init::Init() {
 }
 */
 
-extern int    __KAI_KMPC_CONVENTION  omp_get_max_threads  (void);
-extern int    __KAI_KMPC_CONVENTION  omp_get_num_threads  (void);
-extern void   __KAI_KMPC_CONVENTION  omp_set_num_threads (int);
+extern int    omp_get_max_threads  (void);
+extern int     omp_get_num_threads  (void);
+extern void    omp_set_num_threads (int);
 
 static long ffompgetnumthreads(){return omp_get_num_threads();}
 static long ffompgetmaxthreads(){return omp_get_max_threads();}
