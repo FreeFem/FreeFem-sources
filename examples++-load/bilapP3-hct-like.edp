@@ -12,7 +12,7 @@ int n=100,nn=n+10;
 real[int] xx(nn),yy(nn);
 
 mesh Th=square(20,20);  // mesh definition of $\Omega$
-Th=splitmesh3(Th); 
+//Th=splitmesh3(Th);
 fespace Vh(Th,P3);      // finite element space
 
 macro bilaplacien(u,v) ( dxx(u)*dxx(v)+dyy(u)*dyy(v)+2.*dxy(u)*dxy(v)) // fin macro 
