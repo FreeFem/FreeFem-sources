@@ -109,17 +109,18 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
          
          for (int ii=0;ii<nbdf;ii++)
           {
-           p[ndf] = FEK(ii); // copy the numbering 
+           p[ndf] = 2*FEK(ii)+k; // copy the numbering
            qk[ndf] = ii;
            qkk[ndf++] = -1;
           } // end for ii
          } 
       ffassert(ndf <=l);
    // compression suppression des doublons
+    // attention un df peu aparaitre 2 fois (CL period) dans un element ..
        Fem2D::HeapSort(p,pk,pkk,ndf);
        int k=0;  
         for(int ii=1;ii<ndf;++ii)
-          if (p[k]==p[ii]) // doublons 
+          if (p[k]+1==p[ii]) // doublons k,kk
             { 
               if (pkk[ii]>=0) pkk[k]=pkk[ii];
               if (pk[ii]>=0) pk[k]=pk[ii];
@@ -131,7 +132,8 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
               pkk[k]=pkk[ii];
              }
         ndf=k+1; 
-         
+  for(int ii=0;ii<ndf;++ii)
+      p[ii]= p[ii]/2;// clean pp to revome bug(CL period)
    return ndf;
 } //  BuildMEK_KK
 
