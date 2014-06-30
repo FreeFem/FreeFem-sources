@@ -89,13 +89,20 @@ using std::numeric_limits;
 template<class FElement>
 inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE,const FElement*pKKE)
 {
+  // routine which find common  dof on to adjacent element pKE and pKKE and make the link ..
+  // if pKKE== 0   then no  adj element
+  // the idea is find common dof, but this work only if all dot a different
+  // in on elemnt, so we can have a bug
+  //  in case of periodic boundary condition ..
+  // not correct ... F.Hecht ...
+
+  // -----
   // routine  build  les array p, pk,pkk 
   // which return number of df int 2 element pKE an pKKE
   // max l size of array p, pk, pkk
   // p[i] is the global number of freedom
   // pk[i] is is the local number in pKE ( -1 if not in pKE element)
   // pkk[i] is is the local number in pKKE ( -1 if not in pKKE element)
-  //  remark, if pKKE = 0 => 
      const FElement (*pK[2])={pKE,pKKE};
 
      int ndf=0; // number of dl
@@ -115,6 +122,7 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
           } // end for ii
          } 
       ffassert(ndf <=l);
+    int bug=0;
    // compression suppression des doublons
     // attention un df peu aparaitre 2 fois (CL period) dans un element ..
        Fem2D::HeapSort(p,pk,pkk,ndf);
@@ -126,7 +134,8 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
               if (pk[ii]>=0) pk[k]=pk[ii];
               assert(pk[k] >=0 && pkk[k]>=0);
             }
-           else { // copy 
+           else { // copy
+              if(p[k]==p[ii]) bug++;
               p[++k] =p[ii];
               pk[k]=pk[ii];
               pkk[k]=pkk[ii];
@@ -134,6 +143,16 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
         ndf=k+1; 
   for(int ii=0;ii<ndf;++ii)
       p[ii]= p[ii]/2;// clean pp to revome bug(CL period)
+    if( bug && pKKE) {
+        static int count =0;
+        if( count++ < 2 && verbosity )
+        {
+        cerr << "  May be a Bug in BuildMEK_KK , the code is not safe , periodic boundary condition  on 1 element . " << bug <<  endl;
+        cerr << "  They is a problem   in this case (I am not sure) F.H.  ????" << endl;
+            cerr << "   exempt if the associed  matrix voefficient is 0. "<< endl;
+        }
+        //ffassert(0); // bof bof ... remove of case of jump in internal edge ...
+    }
    return ndf;
 } //  BuildMEK_KK
 
