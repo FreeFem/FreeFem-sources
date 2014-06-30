@@ -227,6 +227,7 @@ class HipsSolver :   public MatriceMorse<double>::VirtualSolver   {
     double tgv;	
     double tol_pivot_sym,tol_pivot; //Add 31 oct 2005
     string data_option;
+    mutable INTS master;//
     MPI_Comm  comm;
     mutable INTS id,  i, j;
     mutable INTS *unknownlist;
@@ -313,10 +314,11 @@ public:
 public:
   
   
-  HipsSolver(const MatriceMorse<double> &AA,double eeps,string datafile, const KN<long> &param_int1, const KN<double> &param_double1,  MPI_Comm  * mpicommw  ) 
+  HipsSolver(const MatriceMorse<double> &AA,double eeps,string datafile, const KN<long> &param_int1,
+             const KN<double> &param_double1,int mmaster,  MPI_Comm  * mpicommw  )
     : eps(eeps),data_option(datafile) ,param_int(17), param_double(6),id(GetId())
   {
-    
+    master=mmaster;
     if(mpicommw==0)
 	comm=MPI_COMM_WORLD;
     else 
@@ -511,6 +513,12 @@ public:
       
       ierr = HIPS_GraphEnd(id);
       HIPS_ExitOnError(ierr);
+      if(master==-1)
+      {
+          
+          // HERE distributed matrix ????
+          ffassert(0); // to be done in future ...
+      }
       if(proc_id==0)
 	{
 	  ierr = HIPS_SetPartition(id, nproc, mapptr, maptmp);
@@ -560,6 +568,12 @@ public:
     nloc=0; 
     int nnsize;
     MPI_Comm_size(comm,&nnsize);
+    if(master==-1)
+      {
+          
+          // HERE distributed rhs ????
+          ffassert(0); // to be done in future ...
+      }
     
     
     COEF * rhsloc = new COEF[iwork1[proc_id]] ;//(COEF *)malloc(sizeof(COEF)*iwork1[proc_id]);
@@ -683,7 +697,7 @@ BuildSolverHipsSolvermpi(DCL_ARG_SPARSE_SOLVER(double,A))
 {
   if(verbosity>9)
     cout << " BuildSolverSuperLU<double>" << endl;
-  return new HipsSolver(*A,ds.epsilon,ds.data_filename, ds.lparams, ds.dparams,(MPI_Comm *)ds.commworld);
+  return new HipsSolver(*A,ds.epsilon,ds.data_filename, ds.lparams, ds.dparams,ds.master,(MPI_Comm *)ds.commworld);
 		    }
 class Init { public:
     Init();

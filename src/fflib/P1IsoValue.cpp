@@ -10,10 +10,20 @@
 using namespace std;
 #include "P1IsoValue.hpp"
 using namespace Fem2D;
-
+extern long verbosity;
 //typedef double R;
 
 inline R3 bary(const R3 K[4],R f[4],int i0,int i1,R v)
+{
+    R d=f[i0]-f[i1];
+    assert(fabs(d)>1e-20);
+    R l1= (f[i0] - v)/ d;  //  == 1 si v = f[i1]
+    R l0 = 1. -l1;
+    assert(l0 >=-1e-10 && l1 >= -1e-10);
+    return K[i0]*l0 + K[i1]*l1; // == K[i1] si l1 ==1 => v = f[i1]
+}
+
+inline R2 bary(const R2 K[3],R f[3],int i0,int i1,R v)
 {
     R d=f[i0]-f[i1];
     assert(fabs(d)>1e-20);
@@ -33,6 +43,224 @@ static inline int  signep4(int i0,int i1,int i2,int i3)
     if(i1>i2) s=-s,Exchange(i1,i2); // i2 max < i
     if(i0>i1) s=-s,Exchange(i0,i1);
     return s;
+}
+inline int  signe_permutation(int i0,int i1,int i2,int i3)
+{
+    int p=1;
+    if(i0>i1) Exchange(i0,i1), p = -p;
+    if(i0>i2) Exchange(i0,i2), p = -p;
+    if(i0>i3) Exchange(i0,i3), p = -p;
+    if(i1>i2) Exchange(i1,i2), p = -p;
+    if(i1>i3) Exchange(i1,i3), p = -p;
+    if(i2>i3) Exchange(i2,i3), p = -p;
+    return p;
+}
+inline void pen23tet(R3 P[6],R3 Q[3][4])
+{
+  //int d1[3][4]= { {1,6,2,3},    {1,5,2,6},    {1,6,4,5}};
+    int d0[3][4]= { {0,5,1,2},    {0,4,1,5},    {0,5,3,4}};
+   /* the 6 way to spilt  a pent en tet ...
+     DATA PDD /1,0,2,3,4,5,0,6/
+     DATA (MU(I, 1),I=1,12) /1,6,2,3,    1,5,2,6,    1,6,4,5/
+     DATA (MU(I, 2),I=1,12) /1,6,2,3,    1,4,2,6,    2,6,4,5/
+     DATA (MU(I, 3),I=1,12) /1,4,2,3,    2,6,3,4,    2,6,4,5/
+     DATA (MU(I, 4),I=1,12) /1,5,2,3,    1,5,3,6,    1,6,4,5/
+     DATA (MU(I, 5),I=1,12) /1,5,2,3,    1,5,3,4,    3,6,4,5/
+     DATA (MU(I, 6),I=1,12) /1,4,2,3,    2,5,3,4,    3,6,4,5/
+     */
+    for(int k=0; k<3; ++k)
+     for(int i=0; i<4;++i)
+        Q[k][i]=P[d0[k][i]];
+}
+int UnderIso(double *f,R2 Q[2][3] ,double area2[2], const double eps)
+{
+ 
+    const R2 *K = R2::KHat;
+    const  int p1[]= {1,2,0};
+    const  int p2[]= {2,0,1};
+    R v=0;
+    //  build  the negative tetra under zero iso value of f ..
+    double fmx=f[0], fmn=f[0];
+    fmx = std::max(fmx,f[1]);
+    fmn = std::min(fmn,f[1]);
+    fmx = std::max(fmx,f[2]);
+    fmn = std::min(fmn,f[2]);
+    if( fmn >= v - eps)
+    {
+        area2[0]=1;
+        return 0; // no intersection ..
+    }
+    if( fmx <= v+ eps)
+    {
+        area2[0]=1;
+        return 1;
+    }; //  full triz ..
+
+    int np[4],nm[4];
+    int km=0,kp=0;
+    
+    int ntria=0;
+    for (int i=0;i<3;++i)
+    {
+        if(f[i]<=v+eps) nm[km++]=i;
+        else np[kp++] = i;
+    }
+    if(km == 0)
+    {
+        area2[0]=0;
+        return 0;
+    }
+    else if( km == 1)
+    { //  1 tet  j, j+1, j+2, j+3
+        int j0=nm[0];
+        int j1=p1[j0], j2=p2[j0];
+        Q[0][0]=K[j0];
+        Q[0][1]=bary(K,f,j0,j1,v);
+        Q[0][2]=bary(K,f,j0,j2,v);
+        ntria=1;
+    }
+    else if( km == 2)
+    {// 1 prisme
+        ntria=2;
+        int j0 = np[0];
+        int j1=p1[j0], j2=p2[j0];
+        R2 Q1=bary(K,f,j0,j1,v);
+        R2 Q2=bary(K,f,j0,j2,v);
+        Q[0][0]=K[j1];
+        Q[0][1]=K[j2];
+        Q[0][2]=Q2;
+        Q[1][0]=K[j1];
+        Q[1][1]=Q2;
+        Q[1][2]=Q1;
+    }
+    else if( km == 3)
+    {
+        area2[0]=1;
+        return 1;
+    }
+    // vol computation
+    for(int k=0; k< ntria; ++k)
+    {
+        area2[k]=det(Q[k][0],Q[k][1],Q[k][2]);
+        //cout <<area2[k] << endl;
+        assert(area2[k] >= - eps);
+    }
+    
+    return ntria;
+   
+}
+int UnderIso(double *f,R3 Q[3][4] ,double vol6[3], const double eps)
+{
+    const R3 *K = R3::KHat;
+    const  int p1[]= {1,2,3,0};
+    const  int p2[]= {2,0,0,2};
+    const  int p3[]= {3,3,1,1};
+    R v=0;
+  //  build  the negative tetra under zero iso value of f ..
+    double fmx=f[0], fmn=f[0];
+    fmx = std::max(fmx,f[1]);
+    fmn = std::min(fmn,f[1]);
+    fmx = std::max(fmx,f[2]);
+    fmn = std::min(fmn,f[2]);
+    fmx = std::max(fmx,f[3]);
+    fmn = std::min(fmn,f[3]);
+    if( fmn >= v - eps)
+    {
+        vol6[0]=1;
+        return 0; // no intersection ..
+    }
+    if( fmx <= v+ eps)
+    {
+        vol6[0]=1;
+        return 1;
+    }; //  full tet ..
+    
+  // hard case ..
+// count number
+    vol6[0]=1;
+   
+    int np[4],nm[4];
+    int km=0,kp=0;
+    
+    int ntet=0;
+    for (int i=0;i<4;++i)
+    {
+        if(f[i]<=v+eps) nm[km++]=i;
+        else np[kp++] = i;
+    }
+    if(km == 0)
+    {
+        vol6[0]=0;
+        return 0;
+    }
+    else if( km == 1)
+    { //  1 tet  j, j+1, j+2, j+3
+        int j0=nm[0];
+        int j1=p1[j0], j2=p2[j0], j3=p3[j0];
+        Q[0][0]=K[j0];
+        Q[0][1]=bary(K,f,j0,j1,v);
+        Q[0][2]=bary(K,f,j0,j2,v);
+        Q[0][3]=bary(K,f,j0,j3,v);
+        ntet=1;
+    }
+    else if( km == 2)
+    {// 1 prisme i0,i1, j0,j1, k0, k0
+        ntet=3;
+        int i0=nm[0];
+        int i1=nm[1];
+        int k0=np[0];
+        int k1=np[1];
+        if(signe_permutation(i0,i1,k0,k1)<0)
+            std::swap(k0,k1);
+            
+        R3 P[6];
+        P[0]=K[i0];
+        P[1]=bary(K,f,i0,k0,v);
+        P[2]=bary(K,f,i0,k1,v);
+        P[3]=K[i1];
+        P[4]=bary(K,f,i1,k0,v);
+        P[5]=bary(K,f,i1,k1,v);
+        pen23tet(P,Q);
+        
+    }
+    else if( km == 3)
+    { // prisme
+        ntet=3;
+        int k0=np[0];
+        int i1=p1[k0];
+        int i2=p2[k0];
+        int i3=p3[k0];
+        assert(signe_permutation(k0,i1,i2,i3)>0);
+        R3 P[6];
+        P[3]=K[i1];
+        P[4]=K[i2];
+        P[5]=K[i3];
+        P[0]=bary(K,f,i1,k0,v);
+        P[1]=bary(K,f,i2,k0,v);
+        P[2]=bary(K,f,i3,k0,v);
+        pen23tet(P,Q);
+        
+
+    }
+    else if( km == 4)
+    {
+      vol6[0]=1;
+      return 1;
+    }
+// vol computation
+    for(int k=0; k< ntet; ++k)
+    {
+        vol6[k]=det(Q[k][0],Q[k][1],Q[k][2],Q[k][3]);
+        assert(vol6[k] >= - eps);
+        if( vol6[k]  <eps && verbosity> 99 )
+            cout <<k << " bizarre " << km << " "
+                 << Q[k][0]<< " "
+                << Q[k][1]<< " "
+                <<Q[k][2]<< " "
+                << Q[k][3]<< endl;
+    }
+
+    return ntet;
 }
 
 int IsoLineK(double *f,Fem2D::R3 *Q,const double eps)

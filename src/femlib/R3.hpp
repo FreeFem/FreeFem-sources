@@ -112,6 +112,12 @@ inline R Norme_infty(const R3 & A){return Max(std::fabs(A.x),std::fabs(A.y),std:
 inline R Norme2_2(const R3 & A){ return (A,A);}
 inline R Norme2(const R3 & A){ return sqrt((A,A));}
 
+inline R3 R2::Bary(R3 P[d+1]) const { return (1-x-y)*P[0]+x*P[1]+y*P[2];}  // add FH
+inline R3 R2::Bary(const R3 *const *const P ) const { return (1-x-y)*(*P[0])+x*(*P[1])+y*(*P[2]);}  // add FH
+inline R3 R1::Bary(R3 P[d+1]) const { return (1-x)*P[0]+x*P[1];}  // add FH
+inline R3 R1::Bary(const R3 *const *const P ) const { return (1-x)*(*P[0])+x*(*P[1]);}  // add FH
+inline R2 R1::Bary(R2 P[d+1]) const { return (1-x)*P[0]+x*P[1];}  // add FH
+inline R2 R1::Bary(const R2 *const *const P ) const { return (1-x)*(*P[0])+x*(*P[1]);}  // add FH
 
 
 struct lessRd

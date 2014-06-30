@@ -492,8 +492,9 @@ void operator delete[]( void *p ) throw() {
 int ShowAlloc(const char *s,size_t & lg)
 {
     size_t m =StorageUsed();
+    long diff = m-CheckPtr___memoryusage
     if(CheckPtr___memoryusage!=0 && m != CheckPtr___memoryusage)
-        printf("CheckPtr:  Warning memory leack with malloc = %zu \n ",m-CheckPtr___memoryusage);
+        printf("CheckPtr:  Warning memory leak with malloc = %ld \n ",diff);
     CheckPtr___memoryusage=m;
     lg = 0; return CheckPtr___nbptr;}
 int UnShowAlloc =0;

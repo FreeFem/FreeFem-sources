@@ -15,7 +15,7 @@ mesh3 ThH = SurfaceHex(N,B,L,1);
 mesh3 ThSg =Sphere(1,hs,300,-1); // "gluing" surface meshs to tolat boundary meshes
 mesh3 ThSd =Sphere(1,hs,310,-1); 
 
-ThSd=movemesh3(ThSd,transfo=[x,4+y,z]);
+ThSd=movemesh(ThSd,[x,4+y,z]);
 
 mesh3 ThHS=ThH+ThSg+ThSd;
 medit("ThHS", ThHS);

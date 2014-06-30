@@ -1075,16 +1075,15 @@ class E_F_F0_Add2RC :public  E_F0 { public:
     
 };
 // end add. 
-template<class R,class A0>
- class E_F_F0s_ :public  E_F0mps { public:
+template<class R,class A0,class E=E_F0>
+ class E_F_F0s_ :public  E { public:
   typedef  R (*func)(Stack stack,const   A0& ) ; 
   func f;
   Expression a;
   E_F_F0s_(func ff,Expression aa) : f(ff),a(aa) {}
   AnyType operator()(Stack s)  const 
     {return SetAny<R>(f(s,GetAny<A0>( (*a)(s) )));}  
-  bool MeshIndependent() const 
-      {return true;} // 
+//  bool MeshIndependent() const {return true;} // def in E
 
     operator aType () const { return atype<R>();}         
     
@@ -2620,7 +2619,7 @@ class  OneUnaryOperator : public OneOperator{
       {}
 };
 
-template<class R,class A=R>
+template<class R,class A=R,class E=E_F0>
 class  OneOperator1s_ : public OneOperator {
     aType r; //  return type
     typedef  R (*func)(Stack stack, const A &) ; 
@@ -2629,7 +2628,7 @@ class  OneOperator1s_ : public OneOperator {
     E_F0 * code(const basicAC_F0 & args) const 
     {     if ( args.named_parameter && !args.named_parameter->empty()  ) 
 	CompileError( " They are used Named parameter ");
-	 return  new E_F_F0s_<R,A>(f,t[0]->CastTo(args[0]));} 
+	 return  new E_F_F0s_<R,A,E>(f,t[0]->CastTo(args[0]));}
     OneOperator1s_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
 };
