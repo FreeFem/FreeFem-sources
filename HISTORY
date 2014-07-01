@@ -1,5 +1,10 @@
-@  changeset:   3029:ff74fea8d8e7
+@  changeset:   3030:dbde96404949
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jul 01 15:23:05 2014 +0200
+|  summary:     add '=' in medit for picking on mac..
+|
+o  changeset:   3029:ff74fea8d8e7
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jun 30 10:03:47 2014 +0200
 |  summary:     correct bug in jump in case 1d problem
