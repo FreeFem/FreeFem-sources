@@ -18,6 +18,8 @@ all.edp:
 	done) > $@
 
 # To create a new set of reference values in "ref.edp"
+clean-local:
+	-rm *.fg *.eps *~ *.ps  Th?.faces  Th?.points Th?.BB Th?.mesh.gmsh   ListOf?llocPtr*.bin ffglut*.ppm 	toto.txt
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
 

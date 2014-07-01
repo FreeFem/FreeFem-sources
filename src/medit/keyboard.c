@@ -439,6 +439,7 @@ void keyScene(unsigned char key,int x,int y) {
       else
         keyMetric('p',0,0);
       break;
+           
     case 'r':
       if ( refmat<0 || ipilmat == sc->par.nbmat ) return;
       pilmat[++ipilmat] = refmat;
@@ -803,6 +804,11 @@ void keyScene(unsigned char key,int x,int y) {
     sc->picklist = pickItem(mesh,sc,numit);
       post = TRUE;
       break;
+    case '=':
+            if ( sc->picklist ) glDeleteLists(sc->picklist,1);
+            sc->picklist = pickingScene(sc,x,y,LPoint);
+            break;
+
     case '!':  /* clip plane */
     return;
       if ( !(clip->active & C_ON) )  return;
