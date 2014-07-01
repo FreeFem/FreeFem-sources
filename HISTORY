@@ -1,5 +1,10 @@
-@  changeset:   3030:dbde96404949
+@  changeset:   3031:aadbdf882d72
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jul 01 18:30:28 2014 +0200
+|  summary:     correct getall add -h parameter ...
+|
+o  changeset:   3030:dbde96404949
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jul 01 15:23:05 2014 +0200
 |  summary:     add '=' in medit for picking on mac..
