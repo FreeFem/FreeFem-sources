@@ -1,5 +1,45 @@
-@  changeset:   3021:796a520a31f6
+@  changeset:   3029:ff74fea8d8e7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 30 10:03:47 2014 +0200
+|  summary:     correct bug in jump in case 1d problem
+|
+o  changeset:   3028:96d648cf5661
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Jun 29 22:39:20 2014 +0200
+|  summary:     coorect bug in change in DG matrice construction in case periodic
+|
+o  changeset:   3027:28131940d86b
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jun 26 11:48:52 2014 +0200
+|  summary:     add new example of C1 approximation witn HCT ...
+|
+o  changeset:   3026:b468fda53b82
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 25 18:42:56 2014 +0200
+|  summary:     correct pb with freefem++-nw know no graphic).
+|
+o  changeset:   3025:c9f9ed1fd403
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 18 22:01:26 2014 +0200
+|  summary:     correct PARDISO.cpp to compile on Mac.
+|
+o  changeset:   3024:c9ebcf863ae0
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 18 21:48:29 2014 +0200
+|  summary:     correct error in gsl.edp
+|
+o  changeset:   3023:fe129f0a04a7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 18 21:19:06 2014 +0200
+|  summary:     correct Makefine.am
+|
+o  changeset:   3022:fe328b42b0bf
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 18 21:13:42 2014 +0200
+|  summary:     correct typo (missing ; )
+|
+o  changeset:   3021:796a520a31f6
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jun 18 21:09:55 2014 +0200
 |  summary:     correct INNOVATION.
