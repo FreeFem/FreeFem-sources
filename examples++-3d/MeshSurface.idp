@@ -44,21 +44,19 @@ func mesh3 SurfaceHex(int[int] & N,real[int,int] &B ,int[int,int] & L,int orient
     mesh3 Th= Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
     return Th;
 }
- 
- 
-func mesh3 Sphere(real R,real h,int L,int orientation)
+func mesh3 Ellipsoide (real RX,real RY, real RZ,real h,int L,int orientation)
 {
   mesh  Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
   //  a parametrization of a sphere 
-  func f1 =cos(x)*cos(y);
-  func f2 =cos(x)*sin(y);
-  func f3 = sin(x);
+  func f1 =RX*cos(x)*cos(y);
+  func f2 =RY*cos(x)*sin(y);
+  func f3 =RZ*sin(x);
   //    partiel derivative 
-  func f1x=sin(x)*cos(y);   
-  func f1y=-cos(x)*sin(y);
-  func f2x=-sin(x)*sin(y);
-  func f2y=cos(x)*cos(y);
-  func f3x=cos(x);
+  func f1x= -RX*sin(x)*cos(y);   
+  func f1y= -RX*cos(x)*sin(y);
+  func f2x= -RY*sin(x)*sin(y);
+  func f2y= +RY*cos(x)*cos(y);
+  func f3x=-RZ*cos(x);
   func f3y=0;
   // the metric on the sphere  $  M = DF^t DF $
   func m11=f1x^2+f2x^2+f3x^2;
@@ -67,7 +65,7 @@ func mesh3 Sphere(real R,real h,int L,int orientation)
   
   func perio=[[4,y],[2,y],[1,x],[3,x]];  // to store the periodic condition 
   
-  real hh=h/R;// hh  mesh size on unite sphere
+  real hh=h;// hh  mesh size on unite sphere
   real vv= 1/square(hh);
   Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
   Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
@@ -75,8 +73,16 @@ func mesh3 Sphere(real R,real h,int L,int orientation)
   Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
   int[int] ref=[0,L];  
   
-  mesh3  ThS= movemesh23(Th,transfo=[f1*R,f2*R,f3*R],orientation=orientation,refface=ref);
+  mesh3  ThS= movemesh23(Th,transfo=[f1,f2,f3],orientation=orientation,refface=ref);
+  ThS=freeyams(ThS,hmin=h,hmax=h,gradation=2.,verbosity=-10,mem=100,option=0);
   return ThS;
+}
+ 
+ 
+func mesh3 Sphere(real R,real h,int L,int orientation)
+{
+
+  return Ellipsoide(R,R,R,h,L,orientation);
 }
 /*  test: 
  load "tetgen" 

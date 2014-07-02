@@ -1,5 +1,10 @@
-@  changeset:   3031:aadbdf882d72
+@  changeset:   3032:1e34d36052ec
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jul 01 19:19:48 2014 +0200
+|  summary:     add '=' for pickinhg on macos on medit..
+|
+o  changeset:   3031:aadbdf882d72
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jul 01 18:30:28 2014 +0200
 |  summary:     correct getall add -h parameter ...
