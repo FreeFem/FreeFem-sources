@@ -1,5 +1,10 @@
-@  changeset:   3033:bb189e3f0ea3
+@  changeset:   3034:0888dfd0dc61
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jul 02 10:31:04 2014 +0200
+|  summary:     correct typo
+|
+o  changeset:   3033:bb189e3f0ea3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jul 02 10:29:53 2014 +0200
 |  summary:     correct misstake  in examples++-3d/MeshSurface.idp

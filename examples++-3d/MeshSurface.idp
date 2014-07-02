@@ -1,5 +1,6 @@
 load "msh3"
 load "medit"
+load "freeyams"
 // 2 basic functions to build surface mesh 
 /*  Usage:
   mesh3   SurfaceHex(N,B,L,orient);
