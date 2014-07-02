@@ -1,5 +1,10 @@
-@  changeset:   3032:1e34d36052ec
+@  changeset:   3033:bb189e3f0ea3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jul 02 10:29:53 2014 +0200
+|  summary:     correct misstake  in examples++-3d/MeshSurface.idp
+|
+o  changeset:   3032:1e34d36052ec
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jul 01 19:19:48 2014 +0200
 |  summary:     add '=' for pickinhg on macos on medit..
