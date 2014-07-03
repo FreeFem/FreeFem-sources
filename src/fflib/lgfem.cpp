@@ -739,8 +739,8 @@ class LinearGMRES : public OneOperator
       ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += GetAny<Kn_>((*mat)(stack));
-      if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b 
-      WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008 
+      if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
+      WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008
    } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
   virtual bool ChecknbLine(int n) const { return true;}  
@@ -824,7 +824,7 @@ class LinearGMRES : public OneOperator
          }
 
 
-
+      //cout << " ** GMRES  bb max=" << bb->max() << " " << bb->min()<<endl;
       if (cas<0) {
         ErrorExec("NL GMRES:  to do! sorry ",1);
 /*       if (C) 
@@ -837,7 +837,7 @@ class LinearGMRES : public OneOperator
       else 
        {
        if (C)
-        { MatF_O CC(n,stack,C,bbgmres); 
+        { MatF_O CC(n,stack,C,0);
          ret=GMRES(AA,(KN<R> &)x, *bb,CC,H,k,nbitermax,epsr,verb);}
        else
          ret=GMRES(AA,(KN<R> &)x, *bb,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);
@@ -851,6 +851,7 @@ class LinearGMRES : public OneOperator
          ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));*/
          
      // if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
+     if(verbosity>99)    cout << " Sol GMRES :" << x << endl;
       return SetAny<long>(ret);
        
      }  
@@ -5049,8 +5050,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
  Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form
  Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs
- Global.Add("AffineGMRES","(",new LinearGMRES<R>(1)); // New new better 
+ Global.Add("AffineGMRES","(",new LinearGMRES<R>(1)); // New  better
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
+ Global.Add("AffineCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
 
  //   Global.Add("LinearCG","(",new LinearCG<Complex>()); // old form  with rhs (must be zer
