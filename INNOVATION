@@ -1,4 +1,7 @@
 
+version 3.31  (rev 3036, 1 july 2014)
+ - correct a big mistake in LinearGMRES , the resulat are complity wrong,
+ -  add sqr functon of O. Pironneau
  - correct update of mercuria depot (rev 3034, 1 july 2014)
  - correct misstake  in examples++-3d/MeshSurface.idp 
    about   computation metric in function build surface  Sphere mesh

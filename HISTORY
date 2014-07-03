@@ -1,5 +1,10 @@
-@  changeset:   3034:0888dfd0dc61
+@  changeset:   3035:b412d75b60bd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jul 02 10:39:35 2014 +0200
+|  summary:     add missing plugin in MeshSurface.idp
+|
+o  changeset:   3034:0888dfd0dc61
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jul 02 10:31:04 2014 +0200
 |  summary:     correct typo

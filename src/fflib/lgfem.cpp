@@ -801,22 +801,29 @@ class LinearGMRES : public OneOperator
         KNM<R> H(dKrylov+1,dKrylov+1);
 	int k=dKrylov;//,nn=n;
        double epsr=eps;
-      // int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
-	 KN<R>  bzero(B?1:n); // const array zero
-	 bzero=R(); 
-	 KN<R> *bb=&bzero; 
-	 if (B) {
-	     Kn &b = *GetAny<Kn *>((*B)(stack));
-	     R p = (b,b);
-	     if (p== R()) 
-	       {
-		 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
-	       }
-	     bb = &b;
-	 }
-	 KN<R> * bbgmres =0;
-	 if ( !B) bbgmres=bb; // none zero if gmres without B 		
-	 MatF_O AA(n,stack,A,bbgmres);
+ 
+         KN<R>  bzero(B?1:n); // const array zero
+         bzero=R();
+         KN<R> *bb=&bzero;
+         if (B) {
+             Kn &b = *GetAny<Kn *>((*B)(stack));
+             R p = (b,b);
+             if (p)
+             {
+                 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
+             }
+             bb = &b;
+         }
+         KN<R> * bbgmres =0;
+         if ( !B ) bbgmres=bb; // none zero if gmres without B
+         MatF_O AA(n,stack,A,bbgmres);
+         if(bbgmres ){
+             *bbgmres= AA* *bbgmres; // Ok Ax == b -> not translation of b .
+             *bbgmres = - *bbgmres;
+             if(verbosity>1) cout << "  ** GMRES set b =  -A(0);  : max=" << bbgmres->max() << " " << bbgmres->min()<<endl;
+         }
+
+
 
       if (cas<0) {
         ErrorExec("NL GMRES:  to do! sorry ",1);
@@ -831,9 +838,9 @@ class LinearGMRES : public OneOperator
        {
        if (C)
         { MatF_O CC(n,stack,C,bbgmres); 
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr,verb);}
+         ret=GMRES(AA,(KN<R> &)x, *bb,CC,H,k,nbitermax,epsr,verb);}
        else
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);       
+         ret=GMRES(AA,(KN<R> &)x, *bb,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);
        }
        /*
       if (C) 
@@ -5040,8 +5047,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  
 
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
- Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
- Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs 
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs
+ Global.Add("AffineGMRES","(",new LinearGMRES<R>(1)); // New new better 
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
 
