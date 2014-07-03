@@ -1499,7 +1499,7 @@ void Init_map_type()
      Global.Add("cosh","(",new OneOperator1_<Complex>(cosh));
      Global.Add("log","(",new OneOperator1_<Complex>(log));
      //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
-     //     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
+     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));

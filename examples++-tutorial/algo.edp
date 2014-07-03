@@ -1,4 +1,7 @@
 //  cleanning version 07/2008  FH in Sevilla.
+int nerr =0; 
+int debugJ =0; 
+int debugdJ =0; 
 real umax=0;
 {
   // minimisation of $J(u) = \frac12\sum (i+1) u_i^2 - b_i $	
@@ -10,7 +13,7 @@ real umax=0;
       real s=0;
       for (int i=0;i<u.n;i++)
 	s +=(i+1)*u[i]*u[i]*0.5 - b[i]*u[i];
-      cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
+      if(debugJ) cout << "J ="<< s << " u =" <<  u[0] << " " << u[1] << "...\n" ;
       return s;
     }
 
@@ -18,7 +21,10 @@ real umax=0;
   func real[int] DJ(real[int] &u)
     { 
       for (int i=0;i<u.n;i++)
-	u[i]=(i+1)*u[i]-b[i];
+	u[i]=(i+1)*u[i];
+      if(debugdJ) cout << "dJ0  ="<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;	
+      u -= b; 
+      if(debugdJ) cout << "dJ-b ="<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;	
       return u;  // return of global variable ok 
     };
 
@@ -27,6 +33,7 @@ real umax=0;
     { 
       for (int i=0;i<u.n;i++)
 	u[i]=(i+1)*u[i];
+      if(debugdJ) cout << "dJ0 ="<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;	
       return u;  // return of global variable ok 
     };
 
@@ -38,40 +45,50 @@ real umax=0;
 	s += abs((i+1)*u[i] - b[i]);
    return s;    
    }
-
   func real[int] matId(real[int] &u) { return u;};
   int verb=5; // verbosity of algo ..
-  b=0.; u=0.; // set  right hand side and initial gest
+  b=1. ; u=0.; // set  right hand side and initial gest
   LinearCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
-  cout << "LinearCG (Affine)  : J(u) = " << J(u) << " err=" << error(u,b) << endl;
-  assert(error(u,b) < 1e-5);
+  cout << "LinearGC (Affine) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
 
   b=1; u=0; // set  right hand side and initial gest
   LinearCG(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
-  cout << "LinearCG (Linear) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
-  assert(error(u,b) < 1e-5);
+  cout << "LinearGC (Linear) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
 
-  b=0; u=0; // set  right hand side and initial gest
-  LinearGMRES(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb); // correct in version 3.11 
+
+  b=1; u=0; // set  right hand side and initial gest
+  AffineGMRES(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb); // correct in version 3.11 
   cout << "LinearGMRES (Affine) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
-  assert(error(u,b) < 1e-5);
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+
   b=1; u=0; // set  right hand side and initial gest
   LinearGMRES(DJ0,u,b,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
-  cout << "LinearGMRES: J(u) = " << J(u) << " err=" << error(u,b) << endl;
-  assert(error(u,b) < 1e-5);
+  cout << "LinearGMRES (Linear) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+
 
   b=1; u=0; // set  right hand side and initial gest
   NLCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
   cout << "NLCG: J(u) = " << J(u) << " err=" << error(u,b) << endl;
-  assert(error(u,b) < 1e-5);
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+
 
   // warning BFGS use a full matrix of size nxn (where n=u.n) 
   b=1; u=2; // set  right hand side and initial gest
   BFGS(J,DJ,u,eps=1.e-6,nbiter=20,nbiterline=20);
    cout << "BFGS: J(u) = " << J(u) << " err=" << error(u,b) << endl;
   assert(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+ 
 
-  
+  assert(nerr==0);
 };
 { // ---  a real non linear test ---
 mesh Th=square(10,10);  // mesh definition of $\Omega$
@@ -148,3 +165,4 @@ func real[int] C(real[int] & u)
 //  see Newton.edp example
 
 }
+assert(nerr==0); 
