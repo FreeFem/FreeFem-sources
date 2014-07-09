@@ -1,5 +1,5 @@
 version 3.31  (rev 3037, 1 july 2014)
-  - readd tan function for complex number  
+ - re-add tan function for complex number  
  - correct a big mistake in LinearGMRES , the resulat are complity wrong,
    correct also the algo.edp
  -  add sqr functon of O. Pironneau

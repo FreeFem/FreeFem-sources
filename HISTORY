@@ -1,5 +1,15 @@
-@  changeset:   3035:b412d75b60bd
+@  changeset:   3037:794839c2a7cd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 03 18:57:21 2014 +0200
+|  summary:     end of corecttion of LinearGMRES and AffineGMREs
+|
+o  changeset:   3036:371512bac93d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 03 13:00:34 2014 +0200
+|  summary:     correct a big big in LinearGMRES (thank to franco@us.es)
+|
+o  changeset:   3035:b412d75b60bd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jul 02 10:39:35 2014 +0200
 |  summary:     add missing plugin in MeshSurface.idp
