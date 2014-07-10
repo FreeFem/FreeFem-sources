@@ -1,5 +1,15 @@
-@  changeset:   3046:5705d48950bd
+@  changeset:   3048:402527913245
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 22:23:35 2014 +0200
+|  summary:     add missing file
+|
+o  changeset:   3047:4b5c501566f6
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 22:00:44 2014 +0200
+|  summary:     update INNOVATION
+|
+o  changeset:   3046:5705d48950bd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 21:45:46 2014 +0200
 |  summary:     correct pb ConjuguedGradient introduct this afternoon (kprint==0)
