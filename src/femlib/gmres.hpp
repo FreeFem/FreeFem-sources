@@ -80,11 +80,11 @@ abs(Real x)
 
 
 template < class Operator, class Vector, class Preconditioner,
-           class Matrix, class Real, class CStop=StopGC<Real>  >
+           class Matrix, class Real, class CStop  >
 int 
 GMRES(const Operator &A, Vector &x, const Vector &b,
       const Preconditioner &M, Matrix &H, int &m, int &max_iter,
-      Real &tol,long verbosity, CStop * Stop =0 )
+      Real &tol,long verbosity, CStop * Stop )
 {
   Real resid;
   int i, j = 1, k;
@@ -170,5 +170,14 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
   return 1;
 }
 
+template < class Operator, class Vector, class Preconditioner,
+class Matrix, class Real >
+int
+GMRES(const Operator &A, Vector &x, const Vector &b,
+      const Preconditioner &M, Matrix &H, int &m, int &max_iter,
+      Real &tol,long verbosity)
+{  
+    return
+    GMRES(A,x,b,M,H,m,max_iter,tol,verbosity,(StopGC<Real> *)0); }
 
 

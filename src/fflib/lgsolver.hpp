@@ -177,7 +177,7 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
-     ConjuguedGradient<R,MatriceMorse<R>,SolveGCPrecon<R> >(a,*this,b,x,nbitermax,epsr);
+     ConjuguedGradient<R,MatriceMorse<R>,SolveGCPrecon<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr,0);
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
