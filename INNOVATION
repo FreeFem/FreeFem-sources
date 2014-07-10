@@ -1,4 +1,12 @@
- - add functionnal  interface  to lacpach (engienvaleu) 
+
+ - function to put your stop test in LinearGC and NLGC
+   the prototype is 
+    func  bool stop(int iter,real[int] u,real[int] g)	;
+    	  {    return g.linfty < 1e-5 || iter > 15;}
+    LinearCG(DJ,u,eps=1.e-15,nbiter=20,precon=matId,verbosity=50,stop=stop);
+    
+
+ - add functionnal  interface  to arpack (Eingen Value) 
 
     func real[int] FA(real[int] & u) { real[int] Au=A^-1*u;return Au;}
     func real[int] FB(real[int] & u) { real[int] Au=B*u;return Au;}

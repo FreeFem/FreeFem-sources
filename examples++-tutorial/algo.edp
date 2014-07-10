@@ -4,6 +4,11 @@ int debugJ =0;
 int debugdJ =0; 
 real umax=0;
 {
+ func  bool stop(int iter,real[int] u,real[int] g)	
+{
+  cout << " stop = " << iter << " " << u.linfty << " " << g.linfty << endl;
+  return g.linfty < 1e-5 || iter > 15;;
+}
   // minimisation of $J(u) = \frac12\sum (i+1) u_i^2 - b_i $	
   // work array 
   real[int] b(10),u(10); 
@@ -50,6 +55,12 @@ real umax=0;
   b=1. ; u=0.; // set  right hand side and initial gest
   LinearCG(DJ,u,eps=1.e-6,nbiter=20,precon=matId,verbosity=verb);
   cout << "LinearGC (Affine) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
+  nerr += !(error(u,b) < 1e-5);
+  if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
+
+  b=1; u=0; 
+  LinearCG(DJ,u,eps=1.e-15,nbiter=20,precon=matId,verbosity=50,stop=stop);
+  cout << "LinearGC (Affine with stop) : J(u) = " << J(u) << " err=" << error(u,b) << endl;
   nerr += !(error(u,b) < 1e-5);
   if(nerr) cout << "    sol: "<< " u =" <<  u[0] << " " << u[1] << " " << u[2]  << "...\n" ;		
 

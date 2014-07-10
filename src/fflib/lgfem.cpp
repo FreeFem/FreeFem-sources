@@ -551,9 +551,49 @@ class E_pfes : public E_F0 {
     E_F0 * code(const basicAC_F0 & args) const ; 
   
 };*/
+template<class R>
+class  E_StopGC: public StopGC<R> {
+public:
+    typedef KN<R> Kn;
+    typedef KN_<R> Kn_;
+
+    Stack s;
+    long n;
+    long iter;
+    Kn_ xx,gg;
+    C_F0 citer,cxx,cgg;
+    C_F0 stop;
+    
+    E_StopGC(Stack ss,long nn,const  Polymorphic * op): s(ss),n(nn),iter(-1),
+    xx(0,0),gg(0,0),
+    citer(CConstant<long>(iter)),
+    cxx(dCPValue(&xx)),
+    cgg(dCPValue(&gg)),
+    stop(op,"(",citer,cxx,cgg)
+    {
+        
+    }
+    ~E_StopGC()
+    {//  a verifier ???? FH....
+        delete (E_F0 *) cxx; // ???
+        delete (E_F0 *) cgg; // ???
+        delete (E_F0 *) citer; // ???
+        delete (E_F0 *) stop; // ???
+    }
+    // template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){return false;} };
+    bool Stop(int iterr, R *x, R * g)
+    {
+        // cout << " Stop " << iterr << endl;
+        iter=iterr;
+        xx.set(x,n);
+        gg.set(g,n);
+        return GetAny<bool>(stop.eval(s));
+    }
+};
+
 
 template<class R>
-class LinearCG : public OneOperator 
+class LinearCG : public OneOperator
 { public:
   typedef KN<R> Kn;
   typedef KN_<R> Kn_;
@@ -598,11 +638,12 @@ class LinearCG : public OneOperator
   virtual bool ChecknbColumn(int m) const { return true;} 
     
 };  
- 
 
   class E_LCG: public E_F0mps { public:
+      
+      
    const int cas;// <0 => Nolinear
-   static const int n_name_param=5;
+   static const int n_name_param=6;
 
    static basicAC_F0::name_and_type name_param[] ;
 
@@ -612,6 +653,7 @@ class LinearCG : public OneOperator
   const OneOperator *A, *C; 
   Expression X,B;
 
+      
   E_LCG(const basicAC_F0 & args,int cc) :cas(cc)
    {
       args.SetNameParam(n_name_param,name_param,nargs);
@@ -632,7 +674,7 @@ class LinearCG : public OneOperator
      
      virtual AnyType operator()(Stack stack)  const {
        int ret=-1;
-
+       E_StopGC<R> *stop=0;
       // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
       try {
       Kn &x = *GetAny<Kn *>((*X)(stack));
@@ -641,11 +683,14 @@ class LinearCG : public OneOperator
       double eps = 1.0e-6;
 	  double *veps=0;
       int nbitermax=  100;
-      long verb = verbosity;  
+      long verb = verbosity;
+      
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) veps=GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) verb=Abs(GetAny<long>((*nargs[4])(stack)));
+      if (nargs[5]) stop= new E_StopGC<R>(stack,n,dynamic_cast<const  Polymorphic *>(nargs[5]));
+//          cout << " E_LCG: Stop = " << stop << " " << verb << endl;
       long gcverb=51L-Min(Abs(verb),50L);
       if(verb==0) gcverb = 1000000000;// no print 
       if(veps) eps= *veps;
@@ -664,25 +709,27 @@ class LinearCG : public OneOperator
       if (cas<0) {
        if (C) 
          { MatF_O CC(n,stack,C);
-           ret = NLCG(AA,CC,x,nbitermax,eps, gcverb );}
+           ret = NLCG(AA,CC,x,nbitermax,eps, gcverb,stop );}
         else 
-           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb);
+           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb,stop);
         }
       else 
       if (C) 
        { MatF_O CC(n,stack,C);
-         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb );}
+         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb, stop );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb);
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb, stop );
       if(veps) *veps = -(eps);
       }
       catch(...)
       {
+       if( stop) delete stop;
        // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
         throw;
       }
      // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-      
+     if( stop) delete stop;
+         
       return SetAny<long>(ret);
        
      }  
@@ -708,7 +755,8 @@ basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
   {   "nbiter",&typeid(long) },
   {   "precon",&typeid(Polymorphic*)},
   {   "veps" ,  &typeid(double*) },
-  {   "verbosity" ,  &typeid(long) }    
+  {   "verbosity" ,  &typeid(long)},
+  {   "stop" ,  &typeid(Polymorphic*)}
 };
 
 
@@ -752,7 +800,7 @@ class LinearGMRES : public OneOperator
   class E_LGMRES: public E_F0mps { public:
    const int cas;// <0 => Nolinear
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =6;
+   static const int n_name_param =7;
    Expression nargs[n_name_param];
   const OneOperator *A, *C; 
   Expression X,B;
@@ -778,7 +826,7 @@ class LinearGMRES : public OneOperator
      virtual AnyType operator()(Stack stack)  const {
       Kn &x = *GetAny<Kn *>((*X)(stack));
       Kn b(x.n);
-     
+       E_StopGC<R> *stop=0;
       if (B)   b = *GetAny<Kn *>((*B)(stack));
       else     b= R();
       int n=x.N();
@@ -791,6 +839,8 @@ class LinearGMRES : public OneOperator
       if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) dKrylov= GetAny<long>((*nargs[4])(stack));
       if (nargs[5]) verb=Abs(GetAny<long>((*nargs[5])(stack)));
+      if (nargs[6]) stop= new E_StopGC<R>(stack,n,dynamic_cast<const  Polymorphic *>(nargs[6]));
+
 	 long gcverb=51L-Min(Abs(verb),50L);
 	 
      
@@ -838,20 +888,12 @@ class LinearGMRES : public OneOperator
        {
        if (C)
         { MatF_O CC(n,stack,C,0);
-         ret=GMRES(AA,(KN<R> &)x, *bb,CC,H,k,nbitermax,epsr,verb);}
+         ret=GMRES(AA,(KN<R> &)x, *bb,CC,H,k,nbitermax,epsr,verb,stop);}
        else
-         ret=GMRES(AA,(KN<R> &)x, *bb,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);
+         ret=GMRES(AA,(KN<R> &)x, *bb,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb,stop);
        }
-       /*
-      if (C) 
-       { MatF_O CC(n,stack,C);
-         
-         ret = ConjuguedGradient2(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
-      else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));*/
-         
-     // if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
-     if(verbosity>99)    cout << " Sol GMRES :" << x << endl;
+      if(verbosity>99)    cout << " Sol GMRES :" << x << endl;
+         if(stop) delete stop;
       return SetAny<long>(ret);
        
      }  
@@ -878,7 +920,8 @@ basicAC_F0::name_and_type  LinearGMRES<R>::E_LGMRES::name_param[]= {
   {   "precon",&typeid(Polymorphic*)},
   {   "veps" ,  &typeid(double*) },
   {   "dimKrylov", &typeid(long) },
-  {   "verbosity", &typeid(long) }
+  {   "verbosity", &typeid(long) },
+  {   "stop" ,  &typeid(Polymorphic*)}
 };
 
 template<typename int2>
