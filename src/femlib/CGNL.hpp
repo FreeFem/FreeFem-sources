@@ -67,7 +67,7 @@ R argmin(R  rho,const DJ & dJ, KN_<R> &x,KN_<R> &h,KN_<R> &g,KN_<R> &w)
   return 0;
 }
 
-template<class R,class DJ,class P,class S=StopGC<R> >
+template<class R,class DJ,class P,class S >
 int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
   //  -------------

@@ -653,7 +653,7 @@ template<class K>
 
 
 template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){cout << " Stop !!!!!\n"; return false;} };
-template<class R,class M,class P,class S=StopGC<R> >
+template<class R,class M,class P,class S >// S=StopGC<Real>
 int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
    
@@ -723,7 +723,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    return 0; 
 }
 
-template<class R,class M,class P,class S=StopGC<R> >
+template<class R,class M,class P,class S>// S=StopGC<Real>
 int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
 //  ConjuguedGradient2 affine A*x = 0 est toujours appele avec les condition aux limites 
@@ -815,7 +815,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
-     ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R> >(a,*this,b,x,nbitermax,epsr);
+     ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr,0);
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
