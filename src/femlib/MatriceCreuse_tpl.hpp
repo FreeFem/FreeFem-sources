@@ -128,7 +128,7 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
        Fem2D::HeapSort(p,pk,pkk,ndf);
        int k=0;  
         for(int ii=1;ii<ndf;++ii)
-          if (p[k]+1==p[ii]) // doublons k,kk
+          if (p[k]/2==p[ii]/2) // doublons k,kk
             { 
               if (pkk[ii]>=0) pkk[k]=pkk[ii];
               if (pk[ii]>=0) pk[k]=pk[ii];

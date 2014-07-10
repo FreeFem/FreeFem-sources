@@ -331,7 +331,7 @@ void Check(const Opera &Op,int N,int  M)
   
   
      pa=a;
-     if (verbosity > 55 && (Ku.number <=0 || KKu.number <=0 )) { 
+     if ( (verbosity > 9999) ||( (verbosity > 55) && (Ku.number <=0 || KKu.number <=0 )))  {
        cout <<endl  << " edge between " << Ku.number << " , " <<  KKu.number   << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
        cout << " K u, uu =  " << Ku.number << " " << KKu.number << " " <<  " K v, vv =  " << Kv.number << " " << KKv.number << " " <<endl; 
        for (int i=0;i<n;i++)
@@ -1575,6 +1575,8 @@ void Check(const Opera &Op,int N,int  M)
           }}
     else if (di.kind == CDomainOfIntegration::intalledges)
       {
+        cerr << " Sorry no implement to hard  "<< endl;
+        ExecError("FH: no intalledges on diff mesh ???");
         ffassert(0); // a faire 
         for (int i=0;i< Th.nt; i++) 
           {

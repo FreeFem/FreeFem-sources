@@ -1,3 +1,5 @@
+- correct bug put in DG formulation (rev 3044)
+   jump, mean , was wrong from Sun Jun 29 22:39:20 2014 +0200 rev 3028
 version  3.31-1 (rev 3042, 10 juky 2014) 
  - function to put your stop test in LinearGC and NLGC
    the prototype is 

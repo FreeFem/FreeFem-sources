@@ -1,5 +1,10 @@
-@  changeset:   3043:27a77d0f60c9
+@  changeset:   3044:010dd06d2876
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 16:59:09 2014 +0200
+|  summary:     remove template initialisation of stopgc ..
+|
+o  changeset:   3043:27a77d0f60c9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 10:45:24 2014 +0200
 |  summary:     pass to version 3.31-1
