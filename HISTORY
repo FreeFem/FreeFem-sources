@@ -1,5 +1,10 @@
-@  changeset:   3048:402527913245
+@  changeset:   3049:3a79062ffe5c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 22:25:07 2014 +0200
+|  summary:     coorect typo
+|
+o  changeset:   3048:402527913245
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 22:23:35 2014 +0200
 |  summary:     add missing file
