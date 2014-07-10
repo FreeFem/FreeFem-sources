@@ -1,5 +1,10 @@
-@  changeset:   3044:010dd06d2876
+@  changeset:   3045:d3f01b55f65d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 21:23:36 2014 +0200
+|  summary:     correct bug put in DG formulation (rev 3044)
+|
+o  changeset:   3044:010dd06d2876
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 16:59:09 2014 +0200
 |  summary:     remove template initialisation of stopgc ..
