@@ -1,5 +1,10 @@
-@  changeset:   3045:d3f01b55f65d
+@  changeset:   3046:5705d48950bd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 21:45:46 2014 +0200
+|  summary:     correct pb ConjuguedGradient introduct this afternoon (kprint==0)
+|
+o  changeset:   3045:d3f01b55f65d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 21:23:36 2014 +0200
 |  summary:     correct bug put in DG formulation (rev 3044)
