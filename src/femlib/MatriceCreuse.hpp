@@ -652,10 +652,9 @@ template<class K>
 };
 
 
-
-
-template<class R,class M,class P> 
-int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
+template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){cout << " Stop !!!!!\n"; return false;} };
+template<class R,class M,class P,class S=StopGC<R> >
+int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
    
 //  ConjuguedGradient lineare   A*x est appele avec des conditions au limites 
@@ -676,7 +675,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    h =-Cg; 
    double g2 = RNM::real((Cg,conj(g)));
    if (g2 < 1e-30) 
-    { if(verbosity>1)
+    { if(verbosity>1 || (kprint<100000))
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
      return 2;  }
    double reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
@@ -692,21 +691,24 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
        Cg = C*g;
        double g2p=g2; 
        g2 = RNM::real((Cg,conj(g)));
+       bool stop = Stop && Stop->Stop(iter,x,g);
+    
        if ( !(iter%kprint) && iter && (verbosity>3) )
-         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
-       if (g2 < reps2) { 
+         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << " " << stop << endl;
+         
+       if (g2 < reps2 || stop) {
          if ( !iter && !xx && g2 && epsold >0 ) {  
              // change fo eps converge to fast due to the 
              // penalization of boundary condition.
              eps =  epsold*epsold*g2; 
-             if (verbosity>3 )
+             if (verbosity>3 || (kprint<3))
              cout << "CG converge to fast (pb of BC)  restart: " << iter <<  "  ro = " 
                   << ro << " ||g||^2 = " << g2 << " <= " << reps2 << "  new eps2 =" <<  eps <<endl; 
               reps2=eps;
            } 
          else 
           { 
-           if (verbosity>1 )
+           if (verbosity>1 || (kprint<100000) )
             cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
            return 1;// ok 
           }
@@ -715,16 +717,18 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
+   if(verbosity)
    cout << " GC: method doesn't converge in " << nbitermax 
         <<  " iteration , xx= "  << xx<< endl;
    return 0; 
 }
 
-template<class R,class M,class P> 
-int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const int nbitermax, double &eps,long kprint=1000000000)
+template<class R,class M,class P,class S=StopGC<R> >
+int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
 //  ConjuguedGradient2 affine A*x = 0 est toujours appele avec les condition aux limites 
 //  -------------
+    
    throwassert(&x  && &A && &C);
    typedef KN<R> Rn;
    int n=x.N();
@@ -737,10 +741,10 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
    h =-Cg; 
    R g2 = (Cg,g);
    if (g2 < 1e-30) 
-    { if(verbosity>1)
+    { if(verbosity>1 || kprint< 1000000)
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
      return 2;  }
-   if (verbosity>5 ) 
+   if (verbosity>5 || (kprint<2))
      cout << " 0 GC  g^2 =" << g2 << endl;
    R reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
    eps = reps2;
@@ -762,11 +766,13 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        Cg = C*g;
        R g2p=g2; 
        g2 = (Cg,g);
+         bool stop = Stop && Stop->Stop(iter,x,g);
        if ( ( (iter%kprint) == kprint-1)  /*&&  verbosity >1*/ )
-         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
-       if (g2 < reps2) { 
+         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << " " << stop <<  endl;
+       if (stop || g2 < reps2 ) {
          if (kprint <= nbitermax )
-            cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
+            cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2
+                 << " stop=" << stop << " /Stop= " << Stop <<  endl;
           return 1;// ok 
           }
        R gamma = g2/g2p;       

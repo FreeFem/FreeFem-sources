@@ -80,11 +80,11 @@ abs(Real x)
 
 
 template < class Operator, class Vector, class Preconditioner,
-           class Matrix, class Real >
+           class Matrix, class Real, class CStop=StopGC<Real>  >
 int 
 GMRES(const Operator &A, Vector &x, const Vector &b,
       const Preconditioner &M, Matrix &H, int &m, int &max_iter,
-      Real &tol,long verbosity)
+      Real &tol,long verbosity, CStop * Stop =0 )
 {
   Real resid;
   int i, j = 1, k;
@@ -131,8 +131,8 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
       if(verbosity>5 || (verbosity>2 && j%100==0) )
        cout << "GMRES: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
            <<  abs(s(i+1)) / normb << " < " << tol << endl;
-    
-      if ((resid = abs(s(i+1)) / normb) < tol) {
+      bool stop = Stop && Stop->Stop(i,x,r);// bof ???? 
+      if (((resid = abs(s(i+1)) / normb) < tol )|| stop ) {
 	if(verbosity)
 	  cout << "GMRES converges: " << j << " " << abs(s(i+1)) << " " <<  normb << " " 
            <<  abs(s(i+1)) / normb << " < " << tol << endl;

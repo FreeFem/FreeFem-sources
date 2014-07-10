@@ -67,8 +67,8 @@ R argmin(R  rho,const DJ & dJ, KN_<R> &x,KN_<R> &h,KN_<R> &g,KN_<R> &w)
   return 0;
 }
 
-template<class R,class DJ,class P> 
-int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
+template<class R,class DJ,class P,class S=StopGC<R> >
+int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
   //  -------------
   assert(&x && &dJ && &C);
@@ -96,9 +96,10 @@ int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,lo
       Cg = C*g;
       R g2p=g2; 
       g2 = (Cg,g);
+      bool stop = Stop && Stop->Stop(iter,x,g);
       if (  kprint >1 )
         cout << "CGNL:" <<iter <<  ",  ro = " << ro << " ||g||^2 = " << g2 << endl; 
-      if (g2 < reps2) { 
+      if (g2 < reps2 || stop) {
         if (kprint )
           cout << "CGNL converge: " << iter <<",  ro = " << ro << " ||g||^2 = " << g2 << endl; 
         return 1;// ok 
