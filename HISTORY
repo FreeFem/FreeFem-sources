@@ -1,5 +1,10 @@
-@  changeset:   3050:e63d8e10315a
+@  changeset:   3051:d267356f183c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 11 14:57:05 2014 +0200
+|  summary:     add script for installation
+|
+o  changeset:   3050:e63d8e10315a
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 22:32:46 2014 +0200
 |  summary:     chech !!
