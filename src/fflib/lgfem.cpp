@@ -566,7 +566,7 @@ public:
     
     E_StopGC(Stack ss,long nn,const  Polymorphic * op): s(ss),n(nn),iter(-1),
     xx(0,0),gg(0,0),
-    citer(CConstant<long>(iter)),
+    citer(CConstant<long*>(&iter)),
     cxx(dCPValue(&xx)),
     cgg(dCPValue(&gg)),
     stop(op,"(",citer,cxx,cgg)
