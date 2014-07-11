@@ -1,5 +1,10 @@
-@  changeset:   3049:3a79062ffe5c
+@  changeset:   3050:e63d8e10315a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 10 22:32:46 2014 +0200
+|  summary:     chech !!
+|
+o  changeset:   3049:3a79062ffe5c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 10 22:25:07 2014 +0200
 |  summary:     coorect typo
