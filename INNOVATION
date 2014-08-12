@@ -1,8 +1,10 @@
+  version  3.31-2 (rev 3052, 11 july 2014) 
+ - correct stop test function in LinearGC (for zuqi.tang@inria.fr)
   build tar.gz distribution (rev 3050) 
   build version MacOs 3.31-1
-- correct bug put in DG formulation (rev 3044)
+ - correct bug put in DG formulation (rev 3044)
    jump, mean , was wrong from Sun Jun 29 22:39:20 2014 +0200 rev 3028
-version  3.31-1 (rev 3042, 10 juky 2014) 
+  version  3.31-1 (rev 3042, 10 july 2014) 
  - function to put your stop test in LinearGC and NLGC
    the prototype is 
     func  bool stop(int iter,real[int] u,real[int] g)	;
