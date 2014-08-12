@@ -1,31 +1,30 @@
 // file NSprojection.edp
-
-border a0(t=1,0){ x=0;      y=t;      label=1;}
-border a1(t=0,1){ x=2*t;    y=0;        label=2;}
-border a2(t=0,1){ x=2;      y=-t/2;       label=2;}
-border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;       label=2;}
-border a4(t=0,1){ x=20;     y=-0.5+1.5*t;   label=3;}
-border a5(t=1,0){ x=20*t; y=1;        label=4;}
+// Version july 2014, 
+// FH. Change B.C on u on outpout , more simple .. 
+// ............
+verbosity=0;
+border a0(t=1,0){ x=-2;      y=t;      label=1;}// inlet ..
+border a1(t=-2,0){ x=t;    y=0;        label=2;}
+border a2(t=0,-0.5){ x=0;      y=t;       label=2;}
+border a3(t=0,1){ x=18*t^1.2;  y=-0.5;       label=2;}
+border a4(t=-0.5,1){ x=18;     y=t;   label=3;}// outlet 
+border a5(t=1,0){ x=-2+20*t; y=1;        label=4;}
 int n=1;
 mesh Th= buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
+
 plot(Th);
 fespace Vh(Th,P1);
+
 real nu = 0.0025, dt = 0.2; // Reynolds=200
-func uBCin =  4*y*(1-y)*(y>0)*(x<2) ; 
-func uBCout =  4./1.5*(y+0.5)*(1-y) *(x>19);
-Vh w,u = uBCin, v =0, p = 0, q=0;
-real area= int2d(Th)(1.);
-Vh ubc  = uBCin + uBCout; 
-real influx0  = int1d(Th,1) (ubc*N.x),
-     outflux0 = int1d(Th,3) (ubc*N.x);
- if(verbosity>2) cout <<  " flux in " << influx0 << " out : " << outflux0 << endl;
- verbosity=1;
- real epsv = 1e-6;
- real epsu = 1e-6;
- real epsp = 1e-6;
+
+Vh w,u = 0, v =0, p = 0, q=0;
+
+ real epsv = 1e-6, epsu = 1e-6, epsp = 1e-6;// Eps CG ..
  // def of Matrix dtMx and dtMy
- matrix dtM1x,dtM1y; 
- { // for memory managenemt ...
+ matrix dtM1x,dtM1y;
+ 
+macro  BuildMat()
+ { /* for memory managenemt */
    varf vM(unused,v) = int2d(Th)(v) ;
    varf vdx(u,v) = int2d(Th)(v*dx(u)*dt) ;
    varf vdy(u,v) = int2d(Th)(v*dy(u)*dt) ;
@@ -38,24 +37,20 @@ real influx0  = int1d(Th,1) (ubc*N.x),
    matrix Mdy = vdy(Vh,Vh);
    dtM1x = dM1*Mdx;
    dtM1y = dM1*Mdy; 
- }
-for(int n=0;n<300;n++){
-	
-  Vh uold = u,  vold = v, pold=p;
-  Vh f=convect([uold,vold],-dt,uold); //  not used ,  g=convect([u,v],-dt,vold);
-  real outflux = int1d(Th,3) (f*N.x);
-  if(verbosity>2)  cout <<  " flux  =  "<< influx0+outflux << "  -- " ;
+ }// 
+ 
+BuildMat
 
-  f = f - (influx0+outflux)/outflux0 * uBCout; 
-  outflux = int1d(Th,3) (f*N.x);
-   if(verbosity>2) cout << "  out flux " << influx0+outflux << endl;
-  assert( abs(influx0+outflux) < 1e-10);
-  // WARNING the the output flux must be 0 ..
+real err=1, outflux=1;
+for(int n=0;n<300;n++)
+ {	
+  Vh uold = u,  vold = v, pold=p;
   
   solve pb4u(u,w,init=n,solver=CG,eps=epsu)
         =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
         -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
-        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
+        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) 
+        ;
   plot(u);
 
   solve pb4v(v,w,init=n,solver=CG,eps=epsv)
@@ -63,52 +58,30 @@ for(int n=0;n<300;n++){
         -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
         +on(1,2,3,4,v = 0);
 
- real meandiv = int2d(Th)(dx(u)+dy(v))/area;
-
  solve pb4p(q,w,solver=CG,init=n,eps=epsp) = int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
-    - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
-
- real meanpq = int2d(Th)(pold - q)/area;
+    - int2d(Th)((dx(u)+ dy(v))*w/dt)+ on(3,q=0);
 
  // to have absolute epsilon in CG algorithm. 
- cout << epsv << endl; 
   epsv = -abs(epsv);
   epsu = -abs(epsu);
   epsp = -abs(epsp);
 
- p = pold-q-meanpq;
- pold[] = dtM1x*q[];
- u[] += pold[];
- pold[] = dtM1y*q[];
- v[] += pold[];
- /*
- u = u + dx(q)*dt;
- v = v + dy(q)*dt;
- */
+  p = pold-q;
+  u[] += dtM1x*q[];
+  v[] += dtM1y*q[];
+ 
+  
   if(n%50==49){
     Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
     plot(Th, wait=true);
-    ubc = uBCin + uBCout; // reinterpolate B.C. 
-    influx0 = int1d(Th,1) (ubc*N.x);
-    outflux0 = int1d(Th,3) (ubc*N.x);
-   varf vM(unused,v) = int2d(Th)(v) ;
-   varf vdx(u,v) = int2d(Th)(v*dx(u)*dt) ;
-   varf vdy(u,v) = int2d(Th)(v*dy(u)*dt) ;
-
-   real[int] Mlump = vM(0,Vh); 
-   real[int] one(Vh.ndof); one = 1;  
-   real[int] M1 =  one ./ Mlump; 
-   matrix dM1 = M1;
-   matrix Mdx = vdx(Vh,Vh);
-   matrix Mdy = vdy(Vh,Vh);
-   dtM1x = dM1*Mdx;
-   dtM1y = dM1*Mdy; 
-   pold = pold;
+    BuildMat // rebuild mat.   
  }
  
- real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
- cout << " iter " << n << " Err L2 = " << err << endl;
- if(err < 1e-3) break;
+  err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
+  outflux = int1d(Th)( [u,v]'*[N.x,N.y]) ;
+  cout << " iter " << n << " Err L2 = " << err << " "<< " flux sortant = "<< outflux << endl; 
+  if(err < 1e-3) break;
 }
+assert(abs(outflux)< 2e-3); // verifaction ... 
 plot(p,wait=1,ps="NSprojP.eps");
 plot(u,wait=1,ps="NSprojU.eps");

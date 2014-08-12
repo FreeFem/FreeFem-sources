@@ -1,5 +1,10 @@
-@  changeset:   3051:d267356f183c
+@  changeset:   3052:a7eb0c2116df
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 11 21:17:26 2014 +0200
+|  summary:     correct iter in stop function in CG
+|
+o  changeset:   3051:d267356f183c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jul 11 14:57:05 2014 +0200
 |  summary:     add script for installation
