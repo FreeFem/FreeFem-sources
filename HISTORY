@@ -1,5 +1,10 @@
-@  changeset:   3052:a7eb0c2116df
+@  changeset:   3053:4e164226411d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Aug 12 23:19:52 2014 +0200
+|  summary:     coorect of array size in plot
+|
+o  changeset:   3052:a7eb0c2116df
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jul 11 21:17:26 2014 +0200
 |  summary:     correct iter in stop function in CG
