@@ -4295,6 +4295,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   clayer=-1;
   zmin=0.;
   zmax=1.;
+    double maxdz = 0;   
   for (int it=0;it<nbt;++it){
     for(int iv=0;iv<3;++iv)      
     {
@@ -4305,12 +4306,13 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	  //cout << "mp: fait " << endl;
 	  if(ezmin){ zmin[i]=GetAny<double>((*ezmin)(stack));}
 	  if(ezmax){ zmax[i]=GetAny<double>((*ezmax)(stack));}
-
+	  maxdz = max(maxdz, abs(zmin[i]-zmax[i]));
 	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
 	
 	}	     
     }
   }
+  
   ffassert(clayer.min() >=0);
 
   if(verbosity >1) cout << "lecture valeur des references " << endl;
@@ -4372,11 +4374,14 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
     
   int nebn =0;
   KN<int> ni(nbv);
+    double epsz = maxdz *1e-6;
+ if(verbosity>9999)    cout << "BuildLayeMesh_Op:: epsz " << epsz <<endl; 
   for(int i=0;i<nbv;i++)
     {
       ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
+      if(abs(zmin[i]-zmax[i]) < epsz) ni[i]=0; // Corr FH aug. 2014...
     }
- 
+  if(verbosity>9999)    cout << " BuildLayeMesh_Op: ni = " << ni << endl; 
   // triangle 
   for (int it=0;it<nbt;++it){
     const Mesh::Element &K(Th.t(it));
