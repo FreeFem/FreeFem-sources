@@ -11,7 +11,7 @@ func zmin= 2-sqrt(4-(x*x+y*y));
 func zmax= 2-sqrt(3.);
 
 mesh3 Th=buildlayers(Th2,nn,
-  coef= max( (zmax-zmin)/zmax, 1./(nn*2) ),
+  coef=  (zmax-zmin)/zmax,
   zbound=[zmin,zmax],
   labelmid=rmid, 
   reffaceup = rup,
