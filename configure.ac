@@ -16,6 +16,8 @@ dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
 dnl : ${FFLAGS=""}
 
+# progg test  expact under windows 
+ff_TEST_FFPP="../src/nw/FreeFem++"
 
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
@@ -135,7 +137,6 @@ AM_CONDITIONAL([ENABLE_FFCS],[test $enable_ffcs = yes])
 ff_AR="ar"
 ff_ARFLAGS="rv"
 ff_RANLIB="ranlib"
-
 AC_ARG_ENABLE(fortran,AC_HELP_STRING([--disable-fortran],[No Fortran compiler available ( ARPACK need it)]))
 
 ff_g2c_lib="";
@@ -460,6 +461,7 @@ CYGWIN*|MINGW*)
 	        AC_SUBST(WINDRESOBJ,windres.o)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
+		ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
                 AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
 	fi
@@ -1757,7 +1759,7 @@ AC_SUBST(BAMGPROG,$ff_bamgprog)
 AC_SUBST(STDPROG,$ff_stdprog)
 ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
-AC_SUBST(TEST_FFPP,"../src/nw/FreeFem++")
+AC_SUBST(TEST_FFPP,$ff_TEST_FFPP)
 AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")
 
 ff_with_mpi=-openmpi;

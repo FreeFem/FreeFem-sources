@@ -1,5 +1,10 @@
-@  changeset:   3054:d23ac6140622
+@  changeset:   3055:f302c03c8ae7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Aug 25 16:36:06 2014 +0200
+|  summary:     coorect a bug in buildlayer in case of 0  edge on border...
+|
+o  changeset:   3054:d23ac6140622
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sat Aug 23 08:08:30 2014 +0200
 |  summary:     pass to ersion 3.31-3
