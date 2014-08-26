@@ -1,5 +1,10 @@
-@  changeset:   3055:f302c03c8ae7
+@  changeset:   3056:d9e53bbab3af
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Aug 25 17:23:15 2014 +0200
+|  summary:     crrect pb in chech un window
+|
+o  changeset:   3055:f302c03c8ae7
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Aug 25 16:36:06 2014 +0200
 |  summary:     coorect a bug in buildlayer in case of 0  edge on border...

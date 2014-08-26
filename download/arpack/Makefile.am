@@ -21,7 +21,7 @@
 # headeralh default=0 freefem make multipleauthors start=04/06/04 upmc brief="Makefile for downloaded ARPACK"
 
 all-local:$(DOWNLOAD_ARPACK)
-EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz 
+EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz  veclib_zdotc.f
 
 PKGCOMMON_PACKTITLE=ARPACK
 include ../common.mak
