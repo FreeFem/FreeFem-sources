@@ -1,5 +1,10 @@
-@  changeset:   3056:d9e53bbab3af
+@  changeset:   3057:e471d8a2ae32
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Aug 26 11:45:47 2014 +0200
+|  summary:     missing file in distribution.
+|
+o  changeset:   3056:d9e53bbab3af
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Aug 25 17:23:15 2014 +0200
 |  summary:     crrect pb in chech un window

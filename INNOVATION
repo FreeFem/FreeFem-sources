@@ -1,3 +1,4 @@
+ - add vectorial operator a/v  and v/a where a est scalar and v vector like real[int], ...   
  version 3.31-3 (rev 3053:4e164226411d 12 Aug 2014) 
  - correct the problem of size of arrow in 2d plot 
   version  3.31-2 (rev 3052, 11 july 2014) 

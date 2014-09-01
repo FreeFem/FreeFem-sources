@@ -140,7 +140,16 @@ template<class R>
       *l oper *aa * bb;
     return *this;
   }
-  
+template<class R>
+KN_<R>&  KN_<R>::operator oper (const Divc_KN_<R> & u) {
+    K_throwassert(u.a.N() == N()  );
+    long stepa(u.a.step);
+    R * l(v); const_R  *aa(u.a),bb(u.b)  ;
+    for (long i=0;i<n;i++,l += step, aa +=stepa)
+        *l oper bb / *aa ;
+    return *this;
+}
+
 template<class R>
  KN_<R>&  KN_<R>::operator oper (const Add_Mulc_KN_<R> & u) {
     K_throwassert(u.a.N() == N()  );

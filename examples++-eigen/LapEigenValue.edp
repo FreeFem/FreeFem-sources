@@ -19,7 +19,7 @@ varf  a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 )
                    
 varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
 
-matrix A= a(Vh,Vh,solver=Crout,factorize=1); 
+matrix A= a(Vh,Vh,solver=sparsesolver); 
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
 
 // important remark:
