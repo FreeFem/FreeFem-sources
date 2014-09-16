@@ -1,0 +1,34 @@
+// version 3.18-2 ...
+real[int] a,b(10);
+a.resize(b.n); // `
+a=b;  
+a=[1,2];
+a.resize(5); //  Pas init a voir ??? 
+cout << "a="<<a << endl;
+real[int,int][int] m(10);
+real[int][int] v(10);
+for(int i=0;i<v.n;++i)
+{
+  v[i].resize(i+1);
+  for(int j=0;j<v[i].n;++j)
+    v[i][j] = 100*i + j;   
+}
+
+cout << " v = " << v << endl;
+v.resize(4);
+cout << " v = " << v << endl;
+v.resize(10);
+cout << " v = " << v << endl;
+
+// test sub array of full matrix ... 
+real[int,int] A(10,5);
+for(int i=0;i<A.n;++i)
+for(int j=0;j<A.m;++j)
+  A(i,j)=i*100+j;
+
+cout << " A( 2:4,1:2) =" << A( 2:4,1:2) << endl;
+cout << " A( 2,1:2) =" << A( 2,1:2) << endl;
+cout << " A( 1:3,1) =" << A( 1:3,1) << endl;
+cout << " A( :,1) =" << A( :,1) << endl;
+cout << " A( :,1).sum =" << A( :,1).sum << endl;
+cout << " A( :,1).min =" << A( :,1).min << endl;
