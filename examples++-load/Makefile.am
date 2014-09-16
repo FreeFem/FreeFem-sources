@@ -42,6 +42,7 @@ ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  RZ.h SortedList.h ExampleMetrics.h  \
  cube.msh  \
  MUMPS_seq.cpp \
+ MUMPS.cpp \
  ff-Ipopt.cpp \
  scotch.cpp    shell.cpp \
  pipe.cpp pstream.h  \
