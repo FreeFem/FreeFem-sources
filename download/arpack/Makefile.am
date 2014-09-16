@@ -46,6 +46,7 @@ PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
 compilepkg::$(ARPACKLIB)
 $(ARPACKLIB): ARPACK/fait
 	case '$(BLASLIBS)' in *vecLib*|*Accelerate*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
+	mkdir -p ../include ../lib
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
