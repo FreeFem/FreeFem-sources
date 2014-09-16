@@ -140,7 +140,7 @@ download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_e
 	 'BAD_CERT');
 
 download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
-	 'http://faculty.cse.tamu.edu/davis/SuiteSparse/','SuiteSparse-4.0.2.tar.gz',
+	 'http://faculty.cse.tamu.edu/davis/suitesparse.html','SuiteSparse-4.0.2.tar.gz',
 	 'efe53b7ef2b529d54727815231a5a6a9');
 
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
