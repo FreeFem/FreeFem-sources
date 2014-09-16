@@ -21,7 +21,7 @@
 # headeralh default=0 freefem make multipleauthors start=04/06/04 upmc brief="Makefile for downloaded ARPACK"
 
 all-local:$(DOWNLOAD_ARPACK)
-EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz 
+EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz  veclib_zdotc.f
 
 PKGCOMMON_PACKTITLE=ARPACK
 include ../common.mak
@@ -45,6 +45,7 @@ PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
 
 compilepkg::$(ARPACKLIB)
 $(ARPACKLIB): ARPACK/fait
+	case '$(BLASLIBS)' in *vecLib*|*Accelerate*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
 	fi; \
@@ -61,6 +62,12 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	gunzip -c $(ARPACK96_TAR_GZ) | tar xf -
 	gunzip -c $(PATCH_TAR_GZ) | tar xf -
 	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
+	case '$(BLASLIBS)' in *vecLib*|*Accelerate*) \
+         for i in  ARPACK/LAPACK/zlatrs.f ARPACK/LAPACK/ztrsyl.f ARPACK/SRC/zgetv0.f ARPACK/SRC/znaitr.f ARPACK/SRC/znaup2.f ARPACK/SRC/zneupd.f;\
+	   do  mv  $$i $$i.cpy; sed -e 's/ZDOTC/ZZDOTC/' -e 's/zdotc/zzdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
+	    done;; \
+	 esac 
+
 	for i in ARPACK/SRC/*.f ; do \
 	    mv  $$i $$i.cpy; sed -e 's/, second/, secnd2/' -e 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
 	for i in  ARPACK/UTIL/second.f;  do  \

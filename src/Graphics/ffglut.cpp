@@ -863,7 +863,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
 		plot.color(2+col);
 		uv = coef*uv;
 		l *= coef;
-		R2 dd = uv*(-0.01/l);
+		R2 dd = uv*(-kk/l);
 		R2 dn = dd.perp()*0.5;
 		if (l*10000.< kk) continue;
 		if (l < kk) 
