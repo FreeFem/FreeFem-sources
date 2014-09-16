@@ -1,5 +1,10 @@
-@  changeset:   3057:e471d8a2ae32
+@  changeset:   3058:2d9d48374ec8
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 01 14:48:27 2014 +0200
+|  summary:     add vectoral operator line v/a (resp.  a/v-  == v_i/a (resp. a/v_i)
+|
+o  changeset:   3057:e471d8a2ae32
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Aug 26 11:45:47 2014 +0200
 |  summary:     missing file in distribution.

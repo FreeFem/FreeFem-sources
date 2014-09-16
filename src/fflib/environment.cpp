@@ -35,7 +35,7 @@
 
 // set in getprog-unix.hpp in Graphic dir..
 const char *  prognamearg=0;
-
+extern long mpisize; //  to known if you use mpi 
 #ifdef PURE_WIN32
 #include <windows.h>
 #endif
@@ -130,7 +130,7 @@ bool EnvironmentInsert(string key,string item,string before)
   return ret;  
 }
 
-int GetEnvironment(const string & key, string items)
+int GetEnvironment(const string & key, string items,string suf="")
 {
   if(verbosity>=100)  cout << key << " -> " << items << endl;
   bool path=key.find("path")!= string::npos;
@@ -142,6 +142,8 @@ int GetEnvironment(const string & key, string items)
     { 
 
       string item =items.substr(d,i-d);
+      if( ! suf.empty() )
+	if((item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="") item  += suf;
       if(path) item=TransDir(item);
       if(verbosity>=100) cout << " + " << item << endl;
       if(!EnvironmentFind(key,item)) 
@@ -349,7 +351,7 @@ void GetEnvironment()
     verbosity = atoi(ff_verbosity);
   }
   if(ff_loadpath)
-    GetEnvironment("loadpath",ff_loadpath);
+    GetEnvironment("loadpath",ff_loadpath,mpisize ? "/mpi" : "" );
   if(ff_incpath)
     GetEnvironment("includepath",ff_incpath);
 

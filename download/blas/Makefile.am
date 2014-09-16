@@ -108,6 +108,7 @@ libcblas_a_CFLAGS=-DADD_ -ICBLAS/include
 BLAS:BLAS/fait
 
 BLAS/fait:$(BLAS_TGZ)
+	mkdir -p ../include ../lib
 	-if tar xvzf $(BLAS_TGZ) BLAS/xerbla.f 2>&1 1>/dev/null ; then \
 	tar xvzf $(BLAS_TGZ) ; \
 	else \
@@ -152,6 +153,8 @@ openblas.done:openpatches.done
 #
 # DYNAMIC_ARCH=1 allows the Openblas to run fast on all the processor architectures that the FFCS users may have
 #
+
+	test  -d ../lib ||  mkdir  ../lib 
 	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
 	touch $@
 
