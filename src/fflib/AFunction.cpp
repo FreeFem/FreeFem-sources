@@ -1425,8 +1425,12 @@ void Init_map_type()
      Global.Add("cos","(",new OneOperator1<double>(cos));
 //     Global.Add("square","(",new OneOperator1_<double>(Square));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
-     Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
+    Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
     Global.Add("square","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
+ //add for Olivier FH July 2017
+    Global.Add("sqr","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
+    Global.Add("sqr","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
+    Global.Add("sqr","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
 
      Global.Add("round","(",new OneOperator1<double>(round)); // add june 2007
      Global.Add("lround","(",new OneOperator1<long,double>(lround)); // add june 2007
@@ -1495,7 +1499,7 @@ void Init_map_type()
      Global.Add("cosh","(",new OneOperator1_<Complex>(cosh));
      Global.Add("log","(",new OneOperator1_<Complex>(log));
      //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
-     //     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
+     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));

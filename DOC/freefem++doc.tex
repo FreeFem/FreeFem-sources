@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.30}
+\def\VERSION{3.31-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -2441,24 +2441,24 @@ $$
 $$ u|_{t=0} = u^0,\quad  u|_\Gamma = u_\Gamma.
 $$
 A possible algorithm, proposed by Chorin, is
-$$ {1\over \delta t}[u^{m+1} - u^moX^m] + \nabla p^m -\nu\Delta u^m= 0,\quad  u|_\Gamma
- = u_\Gamma,
- $$
-$$ -\Delta p^{m+1} = -\nabla\cdot  u^moX^m, \quad  \p _n p^{m+1} = 0,
+$$ {1\over \delta t}[u^{m+1} - u^moX^m] + \nabla p^m -\nu\Delta u^m= 0,\quad  u|_\Gamma = u_\Gamma, \nu \p_n u|_{\Gamma_{out}}=0 
+  $$
+$$ -\Delta p^{m+1} = -\nabla\cdot  u^moX^m, \quad  \p _n p^{m+1} = 0 \mbox{ on } \Gamma , p^{m+1} = 0 \mbox{ on } \Gamma_{out}
 $$
 where $uoX(x) = u(x-u(x)\delta t)$ since $\p _t u + u\cdot\nabla
 u $ is approximated by the method of characteristics, as in the previous section.
 \\\\
-An improvement over Chorin's algorithm, given by Rannacher, is to compute a correction, q,
-to the pressure (the overline denotes the mean over $\Omega$)
+We use the s Chorin's algorithm with free boundary condition  at outlet (i.e.  $p=0,\nu \p_n u = 0$),  to compute a correction, q,
+to the pressure. 
 \[
-    -\Delta q= \n\cdot\vec u - \overline{\n\cdot\vec u}
+    -\Delta q= \n\cdot\vec u ,  \quad q=0 \mbox{ on } \Gamma_{out}
 \]
 and define
 \[
-    u^{m+1}=\tilde u + \n q\delta t,~~~p^{m+1}=p^m-q-\overline{p^m-q}
+    u^{m+1}=\tilde u + P \n q\delta t,~~~p^{m+1}=p^m-q
 \]
-where $\tilde u$ is the $(u^{m+1},v^{m+1})$ of Chorin's algorithm.
+where $\tilde u$ is the $(u^{m+1},v^{m+1})$ of Chorin's algorithm,
+and  where $P$ is the  $L^2$ projection with mass lumping ( a sparse matrix). 
 
 \paragraph{The backward facing step}
 
@@ -2469,74 +2469,100 @@ produces a fluid recirculation zone that must be captured correctly.
 This can only be done if the triangulation is sufficiently fine, or
 well adapted to the flow.
 
-Remark (FH), The are a technical difficulty is the example, the discret flow flux must be 
-$0$ and in the previous version this is not the case, the correction is not so simple. 
+Remark (FH), The are a technical difficulty is the example, is the output B.C., here 
+we put $p=0$ and $ \nu \p_n u = 0$.  
 
 \begin{example}[NSprojection.edp]\index{adaptmesh}\index{mesh!adaptation}
 \bFF
 // file NSprojection.edp
-
-@border a0(t=1,0){ x=0;      y=t;      label=1;}
-@border a1(t=0,1){ x=2*t;    y=0;        label=2;}
-@border a2(t=0,1){ x=2;      y=-t/2;       label=2;}
-@border a3(t=0,1){ x=2+18*t^1.2;  y=-0.5;       label=2;}
-@border a4(t=0,1){ x=20;     y=-0.5+1.5*t;   label=3;}
-@border a5(t=1,0){ x=20*t; y=1;        label=4;}
+// Version july 2014, 
+// FH. Change B.C on u on outpout , more simple .. 
+// ............
+verbosity=0;
+@border a0(t=1,0){ x=-2;      y=t;      label=1;}
+@border a1(t=-2,0){ x=t;    y=0;        label=2;}
+@border a2(t=0,-0.5){ x=0;      y=t;       label=2;}
+@border a3(t=0,1){ x=18*t^1.2;  y=-0.5;       label=2;}
+@border a4(t=-0.5,1){ x=18;     y=t;   label=3;}
+@border a5(t=1,0){ x=-2+20*t; y=1;        label=4;}
 @int n=1;
 @mesh Th= buildmesh(a0(3*n)+a1(20*n)+a2(10*n)+a3(150*n)+a4(5*n)+a5(100*n));
-plot(Th);
+
+@plot(Th);
 @fespace Vh(Th,P1);
 @real nu = 0.0025, dt = 0.2; // Reynolds=200
-@func uBCin =  4*y*(1-y)*(y>0)*(x<2) ; 
-@func uBCout =  4./1.5*(y+0.5)*(1-y) *(x>19);
-Vh w,u = uBCin, v =0, p = 0, q=0;
-@real area= int2d(Th)(1.);
-Vh ubc  = uBCin + uBCout; 
-@real influx0  = int1d(Th,1) (ubc*N.x), // FH add
-      outflux0 = int1d(Th,3) (ubc*N.x); // FH add
-verbosity=1;
-@for(@int n=0;n<300;n++){
-	
+
+Vh w,u = 0, v =0, p = 0, q=0;
+
+@real epsv = 1e-6, epsu = 1e-6, epsp = 1e-6;// Eps CG ..
+
+ // def of Matrix dtMx and dtMy
+@matrix dtM1x,dtM1y;
+ 
+@macro  BuildMat()
+ { /* for memory managenemt */
+   @varf vM(unused,v) = @int2d(Th)(v) ;
+   @varf vdx(u,v) = @int2d(Th)(v*dx(u)*dt) ;
+   @varf vdy(u,v) = @int2d(Th)(v*dy(u)*dt) ;
+
+   @real[@int] Mlump = vM(0,Vh); 
+   @real[@int] one(Vh.ndof); one = 1;  
+   @real[@int] M1 =  one ./ Mlump; 
+   @matrix dM1 = M1;
+   @matrix Mdx = vdx(Vh,Vh);
+   @matrix Mdy = vdy(Vh,Vh);
+   dtM1x = dM1*Mdx;
+   dtM1y = dM1*Mdy; 
+ }// EOF \hfilll
+ 
+BuildMat
+
+@real err=1, outflux=1;
+@for(@int n=0;n<300;n++)
+ {	
   Vh uold = u,  vold = v, pold=p;
-  Vh f=convect([uold,vold],-dt,uold); 
-  @real outflux = int1d(Th,3) (f*N.x); // FH add
-  f = f - (influx0+outflux)/outflux0 * uBCout; // FH add
-  outflux = int1d(Th,3) (f*N.x); // FH add
-  assert( abs(influx0+outflux) < 1e-10); // WARNING the flux must be 0 ..
   
-  @solve pb4u(u,w,init=n,solver=LU)
-        =int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
-        -int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
-        + on(1,u = 4*y*(1-y)) + on(2,4,u = 0) + on(3,u=f);
-  plot(u);
+  @solve pb4u(u,w,init=n,solver=CG,eps=epsu)
+        =@int2d(Th)(u*w/dt +nu*(dx(u)*dx(w)+dy(u)*dy(w)))
+        -@int2d(Th)((convect([uold,vold],-dt,uold)/dt-dx(p))*w)
+        + @on(1,u = 4*y*(1-y)) + @on(2,4,u = 0) ;// Neuman on $Gamma_3$
+       
+  @plot(u);
 
-  @solve pb4v(v,w,init=n,solver=LU)
-        = int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
-        -int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
-        +on(1,2,3,4,v = 0);
+  @solve @pb4v(v,w,init=n,solver=CG,eps=epsv)
+        = @int2d(Th)(v*w/dt +nu*(dx(v)*dx(w)+dy(v)*dy(w)))
+        -@int2d(Th)((convect([uold,vold],-dt,vold)/dt-dy(p))*w)
+        +@on(1,2,3,4,v = 0);
 
- @real meandiv = int2d(Th)(dx(u)+dy(v))/area;
+ @solve pb4p(q,w,solver=CG,init=n,eps=epsp) = @int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
+    - @int2d(Th)((dx(u)+ dy(v))*w/dt)+ @on(3,q=0);
 
- @solve pb4p(q,w,init=n,solver=LU)= int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
-    - int2d(Th)((dx(u)+ dy(v)-meandiv)*w/dt)+ on(3,q=0);
+ // to have absolute epsilon in CG algorithm. 
+  epsv = -abs(epsv);
+  epsu = -abs(epsu);
+  epsp = -abs(epsp);
 
- @real meanpq = int2d(Th)(pold - q)/area;
- if(n%50==49){
-    Th = adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
-    plot(Th, wait=true);
-    ubc = uBCin + uBCout; // reinterpolate B.C. 
-    influx0 = int1d(Th,1) (ubc*N.x); // FH add
-    outflux0 = int1d(Th,3) (ubc*N.x); // FH add
+  p = pold-q;
+  u[] += dtM1x*q[];
+  v[] += dtM1y*q[];
+ 
+  
+  @if(n%50==49){
+    Th = @adaptmesh(Th,[u,v],q,err=0.04,nbvx=100000);
+    @plot(Th, wait=true);
+    BuildMat // rebuild mat.   
  }
- p = pold-q-meanpq;
- u = u + dx(q)*dt;
- v = v + dy(q)*dt;
- real err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
- cout << " iter " << n << " Err L2 = " << err << endl;
- if(err < 1e-3) break;
+ 
+  err = sqrt(int2d(Th)(square(u-uold)+square(v-vold))/Th.area) ;
+  outflux = int1d(Th)( [u,v]'*[N.x,N.y]) ;
+  cout << " iter " << n << " Err L2 = " << err 
+       <<  " flux sortant = "<< outflux << endl; 
+  @if(err < 1e-3) break;
 }
-plot(p,wait=1,ps="NSprojP.eps");
-plot(u,wait=1,ps="NSprojU.eps");\eFF
+@assert(abs(outflux)< 2e-3); // verifaction ... 
+@plot(p,wait=1,ps="NSprojP.eps");
+@plot(u,wait=1,ps="NSprojU.eps");
+\eFF
 \end{example}
 
 \begin{figure}[htbp]
@@ -10337,11 +10363,11 @@ Given an initial value $\vec{x}^{(0)}$, a maximum number $i_{\max}$
 of iterations, and an error tolerance $0<\epsilon<1$:
 Put $\vec{x}=\vec{x}^{(0)}$ and write
 \begin{quote}\texttt{
-NLCG($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\epsilon$);
+NLCG($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\epsilon$, stop$=stopfunc$);
 }
 \end{quote}
 will give the solution of $\vec{x}$ of $\nabla J(\vec{x})=0$.
-We can omit parameters \texttt{precon, nbiter, eps}.
+We can omit parameters \texttt{precon, nbiter, eps, stop}.
 Here $M$ is the preconditioner whose default is the identity matrix.
 The stopping test is
 \[
@@ -10359,10 +10385,10 @@ we can use the stopping test
 The  parameters of these three functions are:
 % FFCS(8/10/9)need to move index for htindex not to interfere
 % with \begin{description}
-\index{LinearCG}
+\index{LinearCG}\index{AffineCG}
 \index{LinearCG!nbiter=} \index{LinearCG!precon=} \index{LinearCG!eps=}\index{LinearCG!veps=}
 \index{NLCG!nbiter=}  \index{NLCG!eps=}\index{NLCG!veps=}
-\index{LinearGMRES}
+\index{LinearGMRES}\index{AffineGMRES}
 \index{LinearGMRES!nbiter=} \index{LinearGMRES!precon=} \index{LinearGMRES!eps=}\index{LinearGMRES!veps=}
 \begin{description}
 
@@ -10374,7 +10400,11 @@ $||\nabla J(x)||_P\leq \varepsilon||\nabla J(x_0)||_P$, otherwise the  absolute 
 \itemtt[veps=] set and return the value of the stop test,  if positive then relative test
 $||\nabla J(x)||_P\leq \varepsilon||\nabla J(x_0)||_P$, otherwise the  absolute test is  $||\nabla J(x)||_P^2\leq |\varepsilon|$.
 The return value is  minus  the real stop test (remark: it is useful in loop).
-
+\itemtt[stop=]$stopfunc$ add your test function to stop before (after version 3.31). The prototype for the function  $stopfunc$ is
+\bFF
+          @func  @bool stopfunc(@int iter,@real[@int] u,@real[@int] g)
+\eFF
+where $u$ is the current solution, and $g$ the current gradient not preconditioned.
 \end{description}
 
 \begin{example}[algo.edp]
@@ -10465,18 +10495,18 @@ J(\vec{x})=\frac{1}{2}\vec{x}^TA\vec{x}-\vec{b}^T\vec{x}
 then $J(\vec{x})$ is minimized by the solution $\vec{x}$ of $A\vec{x}=\vec{b}$.
 In this case, we can use the function \texttt{LinearCG}
 \begin{quote}\texttt{
-LinearCG($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+AffineCG($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$, stop$=stp$);
 }
 \end{quote}
 If $A$ is not symmetric, we can use GMRES(Generalized Minimum Residual) algorithm by
 \begin{quote}\texttt{
-LinearGMRES($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+AffineGMRES($A$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
 }
 \end{quote}
 Also, we can use the non-linear version of GMRES algorithm
 (the functional $J$ is just convex)
 \begin{quote}\texttt{
-LinearGMRES($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
+AffineGMRES($\nabla J$, $\vec{x}$, precon$=M$, nbiter$=i_{\max}$, eps$=\pm\epsilon$);
 }
 \end{quote}
 For detail of these algorithms, refer to \cite{Lucquin}[Chapter IV, 1.3].
@@ -13584,6 +13614,17 @@ The return value is the number of converged eigenvalue (can be greater than the 
 where the matrix $OP=  A - \sigma B $ with a solver and boundary condition,
 and the matrix $B$.
 
+From version 3.31 you have also a functional interface like
+\bFF
+@int k=@EigenValue(n,FOP1,FB,nev= , sigma= );
+\eFF
+where $n$ is the size of the matrix and  the now the matrix defined throught function 
+which defined the respectively the matrix product of $OP^{-1}$ and $B$, like in 
+\bFF
+int n = OP1.n; 
+func real[int] FOP1(real[int] & u) { real[int] Au=OP^-1*u;return Au;}
+func real[int] FB(real[int] & u) { real[int] Au=B*u;return Au;}
+\eFF
 
 \begin{note}{Boundary condition and Eigenvalue Problems\label{note BC EV}}\label{pp BC EV}
 

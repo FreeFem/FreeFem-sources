@@ -32,8 +32,8 @@ macro div(u1,u2) (dx(u1)+dy(u2)) //
  
  varf von1([u1,u2,p],[v1,v2,q]) =  on(3,u1=0,u2=0) + on(1,u1=U1,u2=U2);
 
-//remark : the value 100 in next line is manualy fitted, because free outlet. 
- varf vA(p,q) =int2d(Th)((grad( p ) '*grad(q)) ) + int1d(Th,2)(100*p*q) ;
+//remark : the value 1000 in next line is manualy fitted, because free outlet. 
+ varf vA(p,q) =int2d(Th)((grad( p ) '*grad(q)) ) + int1d(Th,2)(1000*p*q) ;
  varf vM(p,q) =int2d(Th,qft=qf2pT)(  p*q );
 
  varf vu([u1],[v1]) = int2d(Th)(alpha*(u1*v1)+nu*(grad(u1)'*grad(v1) )) 
@@ -87,7 +87,7 @@ func  real[int]   Precon(real[int] & p)
    
  Wh w; // to store voticity ..
   
- real eps=1e-4;
+ real eps=1e-6;
  int ndt = T/dt;
  for(int i=0;i<ndt;++i)
  {
@@ -97,7 +97,7 @@ func  real[int]   Precon(real[int] & p)
      assert(res==1) ; 
      eps = -abs(eps); 
      w = -dy(u1)+dx(u2);
-     plot(w,fill=1,wait=0, nbiso=40,WindowIndex=1);
+     plot(w,fill=1,wait=0, nbiso=40,WindowIndex=0);
     
      dt = min(dt,T-t);
      t += dt; 

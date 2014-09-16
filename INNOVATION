@@ -1,11 +1,49 @@
- -- pluging "bfstream" to write and read in binary file
+ - add vectorial operator a/v  and v/a where a est scalar and v vector like real[int], ...   
+ version 3.31-3 (rev 3053:4e164226411d 12 Aug 2014) 
+ - correct the problem of size of arrow in 2d plot 
+  version  3.31-2 (rev 3052, 11 july 2014) 
+ - correct stop test function in LinearGC (for zuqi.tang@inria.fr)
+  build tar.gz distribution (rev 3050) 
+  build version MacOs 3.31-1
+ - correct bug put in DG formulation (rev 3044)
+   jump, mean , was wrong from Sun Jun 29 22:39:20 2014 +0200 rev 3028
+  version  3.31-1 (rev 3042, 10 july 2014) 
+ - function to put your stop test in LinearGC and NLGC
+   the prototype is 
+    func  bool stop(int iter,real[int] u,real[int] g)	;
+    	  {    return g.linfty < 1e-5 || iter > 15;}
+    LinearCG(DJ,u,eps=1.e-15,nbiter=20,precon=matId,verbosity=50,stop=stop);
+    
+
+ - add functionnal  interface  to arpack (Eingen Value) 
+
+    func real[int] FA(real[int] & u) { real[int] Au=A^-1*u;return Au;}
+    func real[int] FB(real[int] & u) { real[int] Au=B*u;return Au;}
+    int k=EigenValue(n,FA,FB,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
+
+  see examples++-eigen/LapEigenValueFunc.edp for a true example
+
+
+version 3.31  (rev 3037, 1 july 2014)
+ - re-add tan function for complex number  
+ - correct a big mistake in LinearGMRES , the resulat are complity wrong,
+   correct also the algo.edp
+ -  add sqr functon of O. Pironneau
+ - correct update of mercurial depot (rev 3034, 1 july 2014)
+ - correct misstake  in examples++-3d/MeshSurface.idp 
+   about   computation metric in function build surface  Sphere mesh
+   and add a function to build Ellipsoide surface mesh 
+  func mesh3 Ellipsoide (real RX,real RY, real RZ,real h,int L,int orientation)
+ - correct a bug the DG with periodic boundary condition with only one 
+   layer of element.  
+ - add pluging "bfstream" to write and read in binary file (long, double, complex<double> and array)
    see bfstream.edp for an example. 
-version 3.30-1  ( hg rev: 3017)
- -- add levelset integral on 3d case ( on levelset and under level set) 
- -- correct problem with Ipopt / lapack configure ...
- -- add BEC plugin of Bose Enstient Optimisation
- -- standardisation movemesh3 -> movemesh ( same parameter of 2d version )	
- -- correct jump in basic integrale to be compatible with varf definition
+version 3.30-1 may/2014 ( hg rev: 3017)
+ - add levelset integral on 3d case ( on levelset and under level set) 
+ - correct problem with Ipopt / lapack configure ...
+ - add BEC plugin of Bose-Enstein Optimisation
+ - standardisation movemesh3 -> movemesh ( same parameter of 2d version )	
+ - correct jump in basic integrale to be compatible with varf definition
     jump is not zero on boundary, it is - boundary value ..
     fespace Ph(Th,P0);u= 1;int1d(Th)( jump(u) ) = - length border . 
  
@@ -15,9 +53,10 @@ version 3.30-1  ( hg rev: 3017)
    - new -h inline help option
 
 version 3.30. ( for windows hg  rev : 3013)
- -- add binary ios:mode constant, to open file in binary mode under window
+ - add binary ios:mode constant, to open file in binary mode under window
     to solve pb of seekg under windows  
- --   add multy border  syntaxe example:  april 23 2014 , (hg rev : 3004)
+ - add multy border april 23 2014 , (hg rev : 3004)
+    syntaxe example:  
   // i is the index of the the multy index 
   // the number of sub border is given by teh size if the array to set the number of seg on the border ..
   // so for multy border the  number of seg of the border , must be  in int[int] array 
@@ -45,9 +84,9 @@ version 3.30. ( for windows hg  rev : 3013)
   mesh th= buildmesh(bb(nn)+cc(NC)) ; 
   plot(th,wait=1); 
   
-  add ltime() (rev 2982)  function returns the value of time in seconds 
+ - add ltime() (rev 2982)  function returns the value of time in seconds 
        since 0 hours, 0 minutes, 0 seconds, January 1, 1970, (int) 
-  add new macro tool  like in C  (rev 2980)
+ - add new macro tool  like in C  (rev 2980)
     FILE,LINE,Stringification() to get line number and edp filename,
     add quote to a parameter after macro generation … 
     Like in 
@@ -56,28 +95,28 @@ version 3.30. ( for windows hg  rev : 3013)
   add new int2d on levelset  in 3d  (int test)
   add basic  func mesh3 Cube(int nx,int ny,int nz) in cube.idp file.
 version 3.29  (hg rev 2973)
-   add int storagetotal(); and int storageused(); function 
+  - add int storagetotal(); and int storageused(); function 
      to get static of malloc ( memory storage usage)
    
-   correct problem of region evalution in jump and mean function 
+  - correct problem of region evalution in jump and mean function 
 version 3.28  ( merge with freefem++-cs tool)
-   add download/getall perl script to download all related soft
-   add  int1d on isoline for matrix ...
+  - add download/getall perl script to download all related soft
+  - add  int1d on isoline for matrix ...
   
 version 3.27 
-   correct bug in display of P1b finite element in 3d 
-     error in SplitMesh<R3>  function  (Thank to O. Pironneau) 
-   add  AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
-   add  tool to trunc to get element numbering for Thn to Tho 
-     int[int] In2o(1),Io2n(1); 
-     Tho =  trunc(Tho, x<0, new2old=In2o, old2new=Io2n);
-   add restrict function for get dof numbering old to new
-     fespace Vnh(Thn,Pk), Voh(Tho,Pk);
-     int[int] n2o=restrict(Vnh,Voh,n2ok);     
-   correct mistake in gsl interface random number (9/1/14)
-   missing all random  distribution ..
-   add interface  with gsl random number generation in test .. 
-   correct pb of compilation under window (mingw32/msys) 
+ - correct bug in display of P1b finite element in 3d 
+   error in SplitMesh<R3>  function  (Thank to O. Pironneau) 
+ - add  AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
+ - add  tool to trunc to get element numbering for Thn to Tho 
+    int[int] In2o(1),Io2n(1); 
+    Tho =  trunc(Tho, x<0, new2old=In2o, old2new=Io2n);
+ - add restrict function for get dof numbering old to new
+    fespace Vnh(Thn,Pk), Voh(Tho,Pk);
+    int[int] n2o=restrict(Vnh,Voh,n2ok);     
+ - correct mistake in gsl interface random number (9/1/14)
+     missing all random  distribution ..
+ - add interface  with gsl random number generation in test .. 
+ - correct pb of compilation under window (mingw32/msys) 
 6/2/14 (ALH)
  - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
  - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format

@@ -1322,6 +1322,18 @@ template<class T> class PValue:public E_F0
   AnyType operator()(Stack  ) const { return p;}
   PValue(T * pp):p(pp) {}
 };
+
+
+//  global variable bof bof
+//  value througth  a pointeur   add F.H  july 2014
+template<class T> class dPValue:public E_F0
+{
+    T * p;
+public:
+    AnyType operator()(Stack  ) const { return SetAny<T>(*p);}
+    dPValue(T * pp):p(pp) {}
+};
+
 template<class R> class PPValue:public E_F0
  { 
   R ** p;
@@ -1337,6 +1349,13 @@ Type_Expr CPValue(R & v)
    throwassert(map_type[typeid(R*).name()]);
   return make_pair(map_type[typeid(R*).name()],new PValue<R>(&v));
  }
+
+template<class R>
+Type_Expr dCPValue(R * v)
+{
+    throwassert(map_type[typeid(R).name()]);
+    return make_pair(map_type[typeid(R).name()],new dPValue<R>(v));
+}
 template<class R>
 Type_Expr CPPValue(R *& v)
  {

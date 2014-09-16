@@ -99,7 +99,10 @@ d = (a ? b : -1);
 cout << " (a ? b : -1 ) "<< d << endl;
 d = (a ? -2 : c);
 cout << " (a ? -2 : c) " <<  d << endl;
-
+d =   1./d; 
+cout << " 1/ d == (a ? -2 : c) " <<  d << endl;
+d =   a/3.; 
+cout << "a/3 ==  " <<  d << endl;
 
 // Liste all array operator and method 
 // ok in version 2.0-3 
