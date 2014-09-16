@@ -14,3 +14,4 @@ rm usr/local/bin/FreeFem++		usr/local/bin/FreeFem++-nw	usr/local/bin/ff-c++		usr
 rm usr/local/bin/FreeFem++-CoCoa		usr/local/bin/bamg	usr/local/bin/ff-get-dep
 rm  usr/local/bin/ffglut usr/local/bin/FreeFem++-mpi		usr/local/bin/cvmsh2	
 rm usr/local/bin/ff-mpirun  usr/local/bin/ffmedit
+exit 0 
