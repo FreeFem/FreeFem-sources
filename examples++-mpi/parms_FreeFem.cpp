@@ -215,7 +215,7 @@ public:
 		if(param_int.N()>12){if(param_int[12]>0) prepar->lfil[4]=param_int[12]; else prepar->lfil[4]=20;}
 		else prepar->lfil[4]=20; /* lfil for Schur complement const.   */
 
-		if(param_int.N()>13){if(param_int[13]>0) prepar->lfil[5]=param_int[13]; else prepar->lfil[13]=20;}
+		if(param_int.N()>13){if(param_int[13]>0) prepar->lfil[5]=param_int[13]; else prepar->lfil[5]=20;}
 		else prepar->lfil[5]=20; /* lfil for Schur complement const.   */		
 
 		if(param_int.N()>14){if(param_int[14]>0) prepar->mc=param_int[14]; else prepar->mc=1; }
