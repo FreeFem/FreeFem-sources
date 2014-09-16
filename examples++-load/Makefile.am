@@ -197,7 +197,7 @@ freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
-	test -n "$MPIPROG" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
+	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
@@ -215,10 +215,13 @@ install-exec-local:: load_compile WHERE_LIBRARY
 ##	$(DESTDIR)${bindir}/ff-pkg-download $(DESTDIR) >$(DESTDIR)$(ff_prefix_dir)/lib/WHERE_LIBRARY-download
 	-for i in $(LIST_COMPILE_PKG); do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
-	- if [ -n "$MPIPROG" ] ; then \
-		for i in $(LIST_COMPILE_PKG); do \
-		 if [ -f ../example++-mpi/$$i ] ; then \
-	    	    $(INSTALL)  -m 555 ../example++-mpi/$$i $(DESTDIR)$(ff_prefix_dir)/lib/mpi; fi; done ; \
+	- if [ -n "$(MPIPROG)" ] ; then \
+		for i in $(LIST_COMPILE_PKG) $(LIST_COMPILE); do \
+		 if [ -f ../examples++-mpi/$$i ] ; then \
+	    	    $(INSTALL)  -m 555 ../examples++-mpi/$$i $(DESTDIR)$(ff_prefix_dir)/lib/mpi; \
+	        else echo missing install mpi version ???  ../examples++-mpi/$$i ;\
+	         fi;  \
+	        done ; \
 	fi
 
 clean-local::
