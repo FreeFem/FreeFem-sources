@@ -35,7 +35,8 @@
 
 // set in getprog-unix.hpp in Graphic dir..
 const char *  prognamearg=0;
-extern long mpisize; //  to known if you use mpi 
+extern  void (*initparallele)(int &, char **&); // to know if mpiversion ... 
+
 #ifdef PURE_WIN32
 #include <windows.h>
 #endif
@@ -130,9 +131,10 @@ bool EnvironmentInsert(string key,string item,string before)
   return ret;  
 }
 
-int GetEnvironment(const string & key, string items,string suf="")
+int GetEnvironment(const string & key, string items)
 {
-  if(verbosity>=100)  cout << key << " -> " << items << endl;
+  string suf= ((key== "loadpath") && initparallele ) ? "/mpi" : ""; 
+  if(verbosity>=100)  cout << key << " -> " << items << "(+" <<suf << initparallele <<")"<<  endl;
   bool path=key.find("path")!= string::npos;
   int d=0, k=0;
   if(path)
@@ -143,7 +145,11 @@ int GetEnvironment(const string & key, string items,string suf="")
 
       string item =items.substr(d,i-d);
       if( ! suf.empty() )
-	if((item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="") item  += suf;
+	if((item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="") 
+	  {
+	    if(verbosity>=100)  cout << " Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl; 
+	    item  += suf;
+	  }
       if(path) item=TransDir(item);
       if(verbosity>=100) cout << " + " << item << endl;
       if(!EnvironmentFind(key,item)) 
@@ -351,7 +357,7 @@ void GetEnvironment()
     verbosity = atoi(ff_verbosity);
   }
   if(ff_loadpath)
-    GetEnvironment("loadpath",ff_loadpath,mpisize ? "/mpi" : "" );
+    GetEnvironment("loadpath",ff_loadpath);
   if(ff_incpath)
     GetEnvironment("includepath",ff_incpath);
 
