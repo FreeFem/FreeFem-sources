@@ -1,0 +1,76 @@
+#!/bin/sh
+# ff-c++ `./ff-get-dep -ff metis.cpp`
+
+case "$1" in
+    -dlib)
+	shift
+	awk -F:  '/ff-c[+][+]-LIBRARY-dep/  { print $2}' $@
+	exit 0; 
+	;;
+    -dcpp)
+	shift
+	awk -F:  '/ff-c[+][+]-cpp-dep/  { print $2}' $@
+	echo $@
+	exit 0; 
+	;;
+    -ff)
+	shift;
+	libs=`$0 -dlib $@`
+	cpp=`$0 -dcpp $@`
+	inclins=`$0 -i $libs` 
+	ldlibs=`$0 -l $libs`
+	if [ -n "$ldlibs" -o -z "$libs" ]; then
+	    echo "$cpp" "$inclins" "$ldlibs"
+	else
+	     # FFCS - we need errors returns to insure that all compilations run well. ERROR is detected by ff-c++
+	    echo "ERROR: find libs of $0 :  $libs "
+	fi
+	exit 0;
+	;;
+esac 
+dircommand=`dirname $0`
+if [   -f "WHERE_LIBRARY-download" ] ; then
+    dirwhere=.
+elif [   -f "$dircommand/WHERE_LIBRARY-download" ] ; then
+    dirwhere=$dircommand
+elif [ -f '@ff_prefix_dir@/lib/WHERE_LIBRARY-download' ] ; then
+    dirwhere='@ff_prefix_dir@/lib'
+else
+   echo " error no WHERE_LIBRARY  file "
+   exit 1;
+fi
+cd "$dirwhere"
+wherel=WHERE_LIBRARY-download
+test -f WHERE_LIBRARY-config && wherel="$wherel  WHERE_LIBRARY-config"
+test -f WHERE_LIBRARY && wherel="$wherel WHERE_LIBRARY"
+
+
+case "$1" in
+    -i*)
+	shift;
+	for i in $@ ; do
+	#    echo "$1" 
+	#    echo 	awk -v p="$1" -v m=INCLUDE ' ($1 == p) && ($2 == m) { for (i=3;i<=NF;++i) {print $i," ";}}' WHERE_LIBRARY  WHERE_LIBRARY-download
+	    
+	    # FFCS: print everything on the same line to avoid splitting paths containing spaces
+         awk -v p="$i" -v m=INCLUDE ' ($1 == p) && ($2 == m) && (!first){ first=1;for (i=3;i<=NF;++i) {printf("%s ",$i);}}' $wherel
+	done
+	
+	;;
+    -l*)
+	shift;
+	for i in $@ ; do   
+
+	    # FFCS: print everything on the same line to avoid splitting paths containing spaces
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {printf("%s ",$i);}} 
+          END  { if(!first) print "ERROR-missing-lib:" p;} ' $wherel
+	done
+	;;
+  *)  
+	for i in $@ ; do   
+	    awk -v p="$i" ' ($1 == p) { k=0;  for (i=3;i<=NF;++i) {k=1;} print k}' $wherel
+	done
+	
+shift;;
+esac
+
