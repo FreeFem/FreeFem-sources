@@ -24,10 +24,9 @@
 DIRPKG=../pkg
 BLAS_TGZ=$(DIRPKG)/blas.tgz
 CBLAS_TGZ=$(DIRPKG)/cblas.tgz
-OPENBLAS_TGZ=../pkg/OpenBLAS.tar.gz
 
 PKGCOMMON_PACKTITLE=BLAS
-COMMON_PACKAGES=$(BLAS_TGZ) $(CBLAS_TGZ) $(OPENBLAS_TGZ)
+PKGCOMMON_PACKAGES=$(BLAS_TGZ) $(CBLAS_TGZ) ../pkg/OpenBLAS.tar.gz
 include ../common.mak
 
 EXTRA_DIST= \
@@ -159,13 +158,18 @@ openblas.done:openpatches.done
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
 # date
 
-openpatches.done:$(OPENBLAS_TGZ)
-	tar xvzf $<
+openpatches.done:opendownload.done
+	tar xvzf ../pkg/OpenBLAS.tar.gz
 #
 # ALH - 7/1/14 - The tar directory has changed names
 #
 	mv xianyi-OpenBLAS-* OpenBLAS
 	patch -u -p1 < openblas.patches
+	touch $@
+
+download::opendownload.done
+opendownload.done:
+	../getall -o OpenBLAS -a
 	touch $@
 
 # ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part

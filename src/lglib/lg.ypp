@@ -665,8 +665,8 @@ pow_expr: primary /*[[primary]]*/
 
 primary:  
 
-  /* <<primary_ID>> calls [[file:~/ff/draft/src/fflib/AFunction2.cpp::Find]]
-     returns [[file:~/ff/draft/src/fflib/AFunction.hpp::C_F0]] */
+  /* <<primary_ID>> calls [[file:../fflib/AFunction2.cpp::Find]]
+     returns [[file:../fflib/AFunction.hpp::C_F0]] */
 
            ID           {$$=Find($1);}
 
