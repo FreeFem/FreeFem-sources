@@ -32,12 +32,28 @@ use Digest::MD5 qw(md5_hex); # [[http://perldoc.perl.org/Digest/MD5.html]]
 
 my $can_use_threads=eval 'use threads;use threads::shared;1';
 
-# -a = accept all licences
-# -f = force new downloads
-# -o name,name,... = only packages with the given names
-
 my %opts;
-getopts('afo:',\%opts);
+getopts('afho:',\%opts);
+
+if($opts{h}){
+  print <<EOF;
+getall [options]: Download third-party packages independently of the FreeFem++ configuration procedure
+
+Available options:
+
+-a = accept all licences without further user interaction
+-f = force downloads even if packages are already present locally
+-h = this help
+-o name,name,... = only download packages with the given names
+
+EOF
+  exit 0;
+}
+
+# Accumulate errors and print them all at the end of the script
+
+my $errors='';
+if($can_use_threads){share(\$errors)}
 
 # Accumulate errors and print them all at the end of the script
 
@@ -128,8 +144,8 @@ download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_e
 	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz','961d0ab22914fc6455a62699cf7b5a47',
 	 'BAD_CERT');
 
-download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
-	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.0.2.tar.gz',
+download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
+	 'http://faculty.cse.tamu.edu/davis/suitesparse.html','SuiteSparse-4.0.2.tar.gz',
 	 'efe53b7ef2b529d54727815231a5a6a9');
 
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',

@@ -48,8 +48,10 @@ func ZZ3 = y;
 
 int[int] ref33h = [0,15];
 int[int] ref33b = [0,16];
-
+cout << "tyty\n";
+verbosity = 4; 
 mesh3 Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],label=ref33h,orientation=1);  
+cout << "tyty\n";
 mesh3 Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],label=ref33b,orientation=-1); 
 
 ////////////////////////////////
@@ -62,7 +64,7 @@ func mv2x = x;
 func mv2y = y;
 func mv2z = -1.5+z;
 cout << "movemesh ::new mesh" <<endl;
-mesh3 Th33mv = movemesh3(Th33, transfo=[mv2x,mv2y,mv2z]);
+mesh3 Th33mv = movemesh(Th33, [mv2x,mv2y,mv2z]);
 int[int] r1=[12,11,11,21,13,23,14,24,15,25,16,26];
 cout << "change ::new mesh" <<endl;
 //medit("Th33mv",Th33mv);

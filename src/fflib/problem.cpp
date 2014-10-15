@@ -331,7 +331,7 @@ void Check(const Opera &Op,int N,int  M)
   
   
      pa=a;
-     if (verbosity > 55 && (Ku.number <=0 || KKu.number <=0 )) { 
+     if ( (verbosity > 9999) ||( (verbosity > 55) && (Ku.number <=0 || KKu.number <=0 )))  {
        cout <<endl  << " edge between " << Ku.number << " , " <<  KKu.number   << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
        cout << " K u, uu =  " << Ku.number << " " << KKu.number << " " <<  " K v, vv =  " << Kv.number << " " << KKv.number << " " <<endl; 
        for (int i=0;i<n;i++)
@@ -381,8 +381,16 @@ void Check(const Opera &Op,int N,int  M)
     const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
     bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
     
-    const QuadratureFormular1d & FIE = di.FIE(stack);
-    const QuadratureFormular & FIT = di.FIT(stack);
+//    const QuadratureFormular1d & FIE = di.FIE(stack);
+//    const QuadratureFormular & FIT = di.FIT(stack);
+     const QuadratureFormular1d & FIEo = di.FIE(stack);
+     const QuadratureFormular & FITo = di.FIT(stack);
+     // const GQuadratureFormular<R3> & FIVo = di.FIV(stack);
+     //  to change the quadrature on element ... may 2014 FH ..
+     QuadratureFormular1d  FIE(FIEo,3);
+     QuadratureFormular FIT(FITo,3);
+    // GQuadratureFormular<R3>  FIV(FIVo,3);
+
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
     if (verbosity>3)
@@ -574,7 +582,8 @@ void Check(const Opera &Op,int N,int  M)
           if(di.islevelset())
           {
               double uset = HUGE_VAL;
-              R2 Q[4];
+              R2 Q[2][3];
+              double vol6[2];
               KN<double> phi(Th.nv);phi=uset;
               double f[3];
               for(int t=0; t< Th.nt;++t)
@@ -595,27 +604,14 @@ void Check(const Opera &Op,int N,int  M)
                           umn = std::min(umn,phi[j]);
                           
                       }
-                       if( umx <=0 )
-                         A += mate(t,-1,Th[t].lab,stack);
-                       else if( umn <0 )
-                       { // coupe ..
-                           int i0 = 0, i1 = 1, i2 =2;
-
-                           if( f[i0] > f[i1] ) swap(i0,i1) ;
-                           if( f[i0] > f[i2] ) swap(i0,i2) ;
-                           if( f[i1] > f[i2] ) swap(i1,i2) ;
-                           
-                            double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
-                            if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
-                            else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
-                            assert( c > 0 && c < 1);
-                            double arean = (1-c)*Th[t].area;
-                            Q[0].x =arean;
-                            A += mate(t,-2,Th[t].lab,stack,Q);
-                       }
-                       if(sptrclean) sptrclean=sptr->clean();
+                      int nt= UnderIso(f,Q, vol6,1e-14);
+                      setQF<R2>(FIT,FITo,QuadratureFormular_T_1, Q,vol6,nt);
+                      if(FIT.n)
+                       A += mate(t,-1,Th[t].lab,stack);
+                      if(sptrclean) sptrclean=sptr->clean();
                       }
                   }
+                FIT =FITo;
               }
         else
          
@@ -672,9 +668,14 @@ void Check(const Opera &Op,int N,int  M)
     CDomainOfIntegration::typeofkind  kind = di.kind;
     set<int> setoflab;
     bool all=true; 
-    const QuadratureFormular1d & FIE = di.FIE(stack);
-    const QuadratureFormular & FIT = di.FIT(stack);
-    const GQuadratureFormular<R3> & FIV = di.FIV(stack);
+    const QuadratureFormular1d & FIEo = di.FIE(stack);
+    const QuadratureFormular & FITo = di.FIT(stack);
+    const GQuadratureFormular<R3> & FIVo = di.FIV(stack);
+     //  to change the quadrature on element ... may 2014 FH ..
+     QuadratureFormular1d  FIE(FIEo,3);
+    QuadratureFormular FIT(FITo,3);
+    GQuadratureFormular<R3>  FIV(FIVo,3);
+     
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
     if (verbosity>3)
@@ -686,7 +687,8 @@ void Check(const Opera &Op,int N,int  M)
       if(di.islevelset()) cout << " ( int on Levelset) " << endl;
   
     }
-      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
+      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind))
+          InternalError("Sorry no levelset integration type on no int[2|3]d case");
      
    Expandsetoflab(stack,di, setoflab,all);
    /*
@@ -859,16 +861,59 @@ void Check(const Opera &Op,int N,int  M)
 	
       }      
     else if (di.kind == CDomainOfIntegration::int3d )
-      {
-        for (int i=0;i< Th.nt; i++) 
-          {
-            if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
-              A += mate(i,-1,Th[i].lab,stack);   
-            if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-	    
-            // AA += mate;
-          }
-      } 
+    {
+        if(di.islevelset())  //  may 2014 FH ...
+        {   // int3d levelset < 0
+            double llevelset = 0;
+            const double uset = std::numeric_limits<double>::max();
+            // cout << " uset ="<<uset << endl;
+            R3 Q[3][4];
+            double vol6[3];
+            KN<double> phi(Th.nv);
+            phi=uset;
+            double f[4];
+            
+            for (int t=0;t< Th.nt; t++)
+            {
+                
+                const Mesh3::Element & K(Th[t]);
+                if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+                    
+                {
+                    double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                    for(int i=0;i<4;++i)
+                    {
+                        int j= Th(t,i);
+                        if( phi[j]==uset)
+                        {
+                            MeshPointStack(stack)->setP(&Th,t,i);
+                            phi[j]= di.levelset(stack);//zzzz
+                        }
+                        f[i]=phi[j];
+                    }
+                    int ntets= UnderIso(f,Q, vol6,1e-14);
+                    setQF<R3>(FIV,FIVo,QuadratureFormular_Tet_1, Q,vol6,ntets);
+                    if(FIV.n)
+                    {
+                        A += mate(t,-1,Th[t].lab,stack);
+                        if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                        
+                    }
+                }
+            }
+            FIV=FIVo;
+        }
+        else
+            for (int i=0;i< Th.nt; i++)
+            {
+                if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                    A += mate(i,-1,Th[i].lab,stack);
+                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                
+                // AA += mate;
+            }
+        
+    }
     else
     {
         cerr << " kind of CDomainOfIntegration unkown ?? " << di.kind << endl;
@@ -888,8 +933,9 @@ void Check(const Opera &Op,int N,int  M)
 		     const FESpace & Uh,const FESpace & Vh,
 		     const QuadratureFormular & FI,
 		     const QuadratureFormular1d & FIb,
-		     double *p,   void *vstack, bool intmortar=false)
+		     double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
     {
+        //cout << "AddMatElem" << Q << " "  << ie << endl;
         Stack stack=pvoid2Stack(vstack);
 	MeshPoint mp= *MeshPointStack(stack);
 	R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -910,7 +956,8 @@ void Check(const Opera &Op,int N,int  M)
 	int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
 	//assert(lastop<=3);
 	
-	if (ie<0)    
+	if (ie<0)
+        {
 	    for (npi=0;npi<FI.n;npi++) // loop on the integration point
 	    {
 		QuadraturePoint pi(FI[npi]);
@@ -998,17 +1045,32 @@ void Check(const Opera &Op,int N,int  M)
 		    }
 		}
 	    }
-		else // int on edge ie 
-		    for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+        }
+      else // int on edge ie
+            {
+                R2 PA,PB,E;
+                if(Q)
+                {
+                    PA=Q[0];
+                    PB=Q[1];
+                    E=T(PB)-T(PA);
+                    // cout << " AddMAtElem " <<  PA <<  " " << PB << " "<< sqrt((E,E))<< endl;
+                }
+                else
+                {
+                  PA=TriangleHat[VerticesOfTriangularEdge[ie][0]];
+                  PB=TriangleHat[VerticesOfTriangularEdge[ie][1]];
+                  E=T.Edge(ie);
+                }
+                double le = sqrt((E,E));
+               
+              for (npi=0;npi<FIb.n;npi++) // loop on the integration point
 		    {
 			QuadratureFormular1dPoint pi( FIb[npi]);
-			R2 E=T.Edge(ie);
-			double le = sqrt((E,E));
-			double coef = le*pi.a;
-			double sa=pi.x,sb=1-sa;
-			R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
-			    PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-			R2 Pt(PA*sa+PB*sb ); // 
+                        double sa=pi.x,sb=1-sa;
+                        double coef = le*pi.a;
+
+			R2 Pt(PA*sa+PB*sb ); //
 			
 			R2 Ptu,Ptv;
 			R2 P(T(Pt));
@@ -1099,9 +1161,9 @@ void Check(const Opera &Op,int N,int  M)
 			    }
 			} 
 		    }
+            }
 			
-			
-			*MeshPointStack(stack) = mp;
+        *MeshPointStack(stack) = mp;
     }  
 			
     
@@ -1359,7 +1421,7 @@ void Check(const Opera &Op,int N,int  M)
       cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
       cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
       cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
-      cout << "        suppose in mortar " << intmortar << endl;
+      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << endl;
      }
     assert(pThdi == & Th);
     //const vector<Expression>  & what(di.what);             
@@ -1367,7 +1429,8 @@ void Check(const Opera &Op,int N,int  M)
     set<int> setoflab;
     bool all=true; 
     const QuadratureFormular1d & FIE = di.FIE(stack);
-    const QuadratureFormular & FIT = di.FIT(stack);
+    const QuadratureFormular & FITo = di.FIT(stack);
+    QuadratureFormular FIT(FITo,3);
     bool VF=b->VF();  // finite Volume or discontinous Galerkin
     if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
     if (verbosity>3)
@@ -1377,8 +1440,9 @@ void Check(const Opera &Op,int N,int  M)
       else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
       else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
     }
-      if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
-      if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("Sorry no levelset integration type on no int1d case");
+     // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
+      if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) )
+          InternalError("Sorry no levelset integration type on no int1d case");
       
     /*
     if (verbosity>3) 
@@ -1448,20 +1512,71 @@ void Check(const Opera &Op,int N,int  M)
       else cout << endl;
     }
     
-    if (di.kind == CDomainOfIntegration::int1d )
+      if (di.kind == CDomainOfIntegration::int1d )
       {
-        for( int e=0;e<Th.neb;e++)
+         
+          if(di.islevelset())
           {
-            if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
-              {                  
-                int ie,i =Th.BoundaryElement(e,ie);
-		  AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);  
-                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+              double uset = HUGE_VAL;
+              R2 Q[2];
+              double vol6[2];
+              KN<double> phi(Th.nv);phi=uset;
+              double f[3], ll=0;
+              for(int t=0; t< Th.nt;++t)
+              {
+                  if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+                  {
+                      double umx=-HUGE_VAL,umn=HUGE_VAL;
+                      for(int i=0;i<3;++i)
+                      {
+                          int j= Th(t,i);
+                          if( phi[j]==uset)
+                          {
+                              MeshPointStack(stack)->setP(&Th,t,i);
+                              phi[j]= di.levelset(stack);//zzzz
+                          }
+                          f[i]=phi[j];
+                          umx = std::max(umx,phi[j]);
+                          umn = std::min(umn,phi[j]);
+                          
+                      }
+                      int ntp= IsoLineK(f,Q,1e-10);
+                      if(verbosity>999 && ntp==2)
+                      {
+                          const Triangle &T = Th[t];
+                          R2 E(T(Q[0]),T(Q[1]));
+                          double le=sqrt((E,E));
+                          ll += le;
+                        cout << "\t\t" << ntp <<" :  " << Q[0] << " " << Q[1] << " ;  "
+                             << f[0] << " " << f[1] << " " << f[2] << "  " << le << " / " << ll<<endl;
+                      }
+                      if( ntp==2)
+                      {
+                          AddMatElem(A,Th,*b->b,sym,t,10,Th[t].lab,Uh,Vh,FIT,FIE,p,stack,intmortar,Q);
+                          if(sptrclean) sptrclean=sptr->clean();
+                      }
+                  }
               }
+              FIT =FITo;
           }
-      }
+          
+          
+          else
+          {
+              for( int e=0;e<Th.neb;e++)
+              {
+                  if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())
+                  {
+                      int ie,i =Th.BoundaryElement(e,ie);
+                      AddMatElem(A,Th,*b->b,sym,i,ie,Th.bedges[e].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                      if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                  }
+              }
+          }}
     else if (di.kind == CDomainOfIntegration::intalledges)
       {
+        cerr << " Sorry no implement to hard  "<< endl;
+        ExecError("FH: no intalledges on diff mesh ???");
         ffassert(0); // a faire 
         for (int i=0;i< Th.nt; i++) 
           {
@@ -1484,14 +1599,51 @@ void Check(const Opera &Op,int N,int  M)
     else if (di.kind == CDomainOfIntegration::int2d )
       {
        // cerr << " a faire CDomainOfIntegration::int2d  " << endl;
-        for (int i=0;i< Th.nt; i++) 
+          if(di.islevelset())
+          {
+              double uset = HUGE_VAL;
+              R2 Q[2][3];
+              double vol6[2];
+              KN<double> phi(Th.nv);phi=uset;
+              double f[3];
+              for(int t=0; t< Th.nt;++t)
+              {
+                  if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+                  {
+                      double umx=-HUGE_VAL,umn=HUGE_VAL;
+                      for(int i=0;i<3;++i)
+                      {
+                          int j= Th(t,i);
+                          if( phi[j]==uset)
+                          {
+                              MeshPointStack(stack)->setP(&Th,t,i);
+                              phi[j]= di.levelset(stack);//zzzz
+                          }
+                          f[i]=phi[j];
+                          umx = std::max(umx,phi[j]);
+                          umn = std::min(umn,phi[j]);
+                          
+                      }
+                      int nt= UnderIso(f,Q, vol6,1e-14);
+                      setQF<R2>(FIT,FITo,QuadratureFormular_T_1, Q,vol6,nt);
+                      if(FIT.n)
+                        AddMatElem(A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIT,FIE,p,stack);
+                      if(sptrclean) sptrclean=sptr->clean();
+                  }
+              }
+              FIT =FITo;
+          }
+          else
+  
+        {
+        for (int i=0;i< Th.nt; i++)
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
                AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack); 
             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr    
           }
 
-      } 
+      }}
     else 
       InternalError(" kind of CDomainOfIntegration unkown");
       
@@ -1533,9 +1685,19 @@ void Check(const Opera &Op,int N,int  M)
       //const vector<Expression>  & what(di.what);             
       CDomainOfIntegration::typeofkind  kind = di.kind;
       set<int> setoflab;
-      bool all=true; 
-      const QuadratureFormular & FIT = di.FIT(stack);
-      const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
+      bool all=true;
+      // const QuadratureFormular1d & FIEo = di.FIE(stack);
+      const QuadratureFormular & FITo = di.FIT(stack);
+      const GQuadratureFormular<R3> & FIVo = di.FIV(stack);
+      //  to change the quadrature on element ... may 2014 FH ..
+      // QuadratureFormular1d  FIE(FIEo,3);
+      QuadratureFormular FIT(FITo,3);
+      GQuadratureFormular<R3>  FIV(FIVo,3);
+      
+      
+      
+  //    const QuadratureFormular & FIT = di.FIT(stack);
+  //    const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
       bool VF=b->VF();  // finite Volume or discontinous Galerkin
       if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
       if (verbosity>3)
@@ -1546,7 +1708,7 @@ void Check(const Opera &Op,int N,int  M)
           else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
       }
       if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (2)");
-      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
+      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
    
       Expandsetoflab(stack,di, setoflab,all);
       /*
@@ -1647,6 +1809,52 @@ void Check(const Opera &Op,int N,int  M)
       }  */    
       else if (di.kind == CDomainOfIntegration::int3d )
       {
+          if(di.islevelset())  //  may 2014 FH ...
+          {   // int3d levelset < 0
+              double llevelset = 0;
+              const double uset = std::numeric_limits<double>::max();
+              // cout << " uset ="<<uset << endl;
+              R3 Q[3][4];
+              double vol6[3];
+              KN<double> phi(Th.nv);
+              phi=uset;
+              double f[4];
+              
+              for (int t=0;t< Th.nt; t++)
+              {
+                  
+                  const Mesh3::Element & K(Th[t]);
+                  if (all || setoflab.find(Th[t].lab) != setoflab.end())
+                      
+                  {
+                      double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                      for(int i=0;i<4;++i)
+                      {
+                          int j= Th(t,i);
+                          if( phi[j]==uset)
+                          {
+                              MeshPointStack(stack)->setP(&Th,t,i);
+                              phi[j]= di.levelset(stack);//zzzz
+                          }
+                          f[i]=phi[j];
+                      }
+                      int ntets= UnderIso(f,Q, vol6,1e-14);
+                      setQF<R3>(FIV,FIVo,QuadratureFormular_Tet_1, Q,vol6,ntets);
+                      if(FIV.n)
+                      {
+                          AddMatElem(A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIV,FIT,p,stack);
+                          if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                          
+                      }
+                      
+                  }
+              }
+              FIV = FIVo;
+              
+          }
+          else
+
+      {
           // cerr << " a faire CDomainOfIntegration::int3d  " << endl;
           for (int i=0;i< Th.nt; i++) 
           {
@@ -1655,7 +1863,7 @@ void Check(const Opera &Op,int N,int  M)
               if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr    
           }
           
-      } 
+      } }
       else 
           InternalError(" kind of CDomainOfIntegration unkown");
       
@@ -3148,7 +3356,7 @@ void Check(const Opera &Op,int N,int  M)
         const Mesh3 & Th= Kv.Vh.Th;
         double epsmes3=K.mesure()*K.mesure()*1e-18;
         long npi;
-        long i,n=Kv.NbDoF(),N=Kv.N;
+        long n=Kv.NbDoF(),N=Kv.N;
         double l[3];
         
         bool classoptm = copt && Op.optiexpK;
@@ -3166,15 +3374,17 @@ void Check(const Opera &Op,int N,int  M)
         for(int i=0; i< np; ++i)
             PP[i]= K(Q[i]);
 
-        for( int i =0; i+1 < np; i+=2)
+        for( int iii =0; iii+1 < np; iii+=2)
         { // 0,1,, a and 2,3,0.
-            int i0=i,i1=i+1,i2=(i+2)%np;
+            int i0=iii,i1=iii+1,i2=(iii+2)%np;
             R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
             double mes2 = (NN,NN);
             double mes = sqrt(mes2);
             if(mes2*mes <epsmes3) continue; //  too small
             NN /= mes;
             mes *= 0.5;
+           // cout << " Element_rhs::mes " << mes << " " << iii << endl;
+
         for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
             GQuadraturePoint<R2>  pi( FI[npi]);
@@ -3186,7 +3396,7 @@ void Check(const Opera &Op,int N,int  M)
     //        MeshPointStack(stack)->set(K(Pt),Pt,Kv,label,NN,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
             double coef = mes*pi.a;
-            for ( i=0;  i<n;   i++ )
+            for (int  i=0;  i<n;   i++ )
                 // if (alledges || onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
             {
                 RNM_ wi(fu(i,'.','.'));
@@ -3604,7 +3814,8 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
  void  Element_rhs(const  Mesh & ThI,const Triangle & KI, const FESpace & Vh,
  int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,bool intmortar=false)
+                    const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,bool intmortar=false,
+                   R2 *Q=0)
   {
      // integration 1d on 2 diff mesh 
     
@@ -3626,20 +3837,29 @@ void Check(const Opera &Op,int N,int  M)
     long npi;
     
     const Triangle * Kp=0;
-    
+    R2 PA,PB,E;
+    if( Q==0)
+      {
+       PA=TriangleHat[VerticesOfTriangularEdge[ie][0]];
+       PB=TriangleHat[VerticesOfTriangularEdge[ie][1]];
+       E=T.Edge(ie);
+      }
+      else
+      {
+          PA=Q[0];
+          PB=Q[1];
+          E=T(PB)-T(PA);
+      }
+    double le = sqrt((E,E));
+   
     for (npi=0;npi<FI.n;npi++) // loop on the integration point
       {
         QuadratureFormular1dPoint pi( FI[npi]);
 
         
-        
-        R2 E=T.Edge(ie);
-        double le = sqrt((E,E));
         double coef = le*pi.a;
         double sa=pi.x,sb=1-sa;
-        R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
-           PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-        R2 Pt(PA*sa+PB*sb ); //  
+        R2 Pt(PA*sa+PB*sb ); //
         R2 PI(KI(Pt));  
      //   Kv.BF(Dop,Pt,fu);
         MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,R2(E.y,-E.x)/le,ie);
@@ -4098,15 +4318,24 @@ template<class R>
     
     CDomainOfIntegration::typeofkind  kind = di.kind;
     //const QuadratureFormular1d & FIE = di.FIE(stack);
-    const QuadratureFormular & FIT = di.FIT(stack);
-    const GQuadratureFormular<R3> & FIV = di.FIV(stack);
+  //  const QuadratureFormular & FIT = di.FIT(stack);
+   // const GQuadratureFormular<R3> & FIV = di.FIV(stack);
+    
+   // const QuadratureFormular1d & FIEo = di.FIE(stack);
+    const QuadratureFormular & FITo = di.FIT(stack);
+    const GQuadratureFormular<R3> & FIVo = di.FIV(stack);
+    //  to change the quadrature on element ... may 2014 FH ..
+   // QuadratureFormular1d  FIE(FIEo,3);
+    QuadratureFormular FIT(FITo,3);
+    GQuadratureFormular<R3>  FIV(FIVo,3);
+    
     const bool useopt=di.UseOpt(stack);    
     double binside=di.binside(stack);  // truc FH pour fluide de grad2 (decentrage bizard)  
   //  cout << "AssembleLinearForm " << l->l->v.size() << endl; 
     set<int> setoflab;
     bool all=true; 
     bool VF=l->VF();  // finite Volume or discontinous Galerkin
-    if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
+    if (verbosity>2) cout << "  -- AssembleLinearForm 1,  discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
 
     if (verbosity>3) 
       {
@@ -4116,7 +4345,8 @@ template<class R>
 	else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
       }
   //  if(di.islevelset()) InternalError("So no levelset integration type on this case (3)");
-    if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset intgeration type on no int1d case");
+    if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
+        InternalError("So no levelset intgeration type on no int2d/3d case");
     /*
     if ( verbosity>3) 
       if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
@@ -4186,6 +4416,7 @@ template<class R>
       }
     if (kind==CDomainOfIntegration::int2d)
       { //AFAIRE("3D Elment RHS CDomainOfIntegration::int2d");
+        double  ss =0;
 	if(VF) InternalError(" no jump or average in int1d of RHS");
           if(di.islevelset()) // init on level set (of RHS)
           {
@@ -4212,22 +4443,40 @@ template<class R>
                   }
                   if( umn <=0 && umx >= 0)
                   {
-                     
+                      
                       int np= IsoLineK(f,Q,1e-10);// ca code ...
-                      if(np==3 && np==4)
+                      if(np==3 || np==4)
                       {  //  if(np==3) Q[3]=Q[0]; // same 0 == 3 bofbof ??? FH
-                         
-                      }
+                          //   cout << " Q[0]" << Q[0] << endl;
+                          if( verbosity> 99)
+                          {
+                          R3 PP[4];
+                          const Tet  &K(ThI[t]);
+                          for(int i=0; i< np; ++i)
+                              PP[i]= K(Q[i]);
+                          for( int i =0; i+1 < np; i+=2)
+                          {
+                              int i0=i,i1=i+1,i2=(i+2)%np;
+                              R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
+                              double mes2 = (NN,NN);
+                              double mes = sqrt(mes2)/2;
+                              ss+= mes;
+                              //cout << "mes " << mes << " " << i << " , ";
+                          }
+                          }
+
                       if ( sameMesh)
                           Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT,np,Q);
                       else
                       //    else
-                              InternalError(" No levelSet on Diff mesh :    to day  int1d of RHS");
+                            InternalError(" No levelSet on Diff mesh3 :    to day  int2d of RHS");
                       //    Element_rhs<R>(ThI,ThI[t],Vh,-1,lab,*l->l,buf,stack,*B,FIT,false);
-
+                      }
                       if(sptrclean) sptrclean=sptr->clean();
                   }
               }
+              if( verbosity> 99)
+              cout << "          surf levelset = " << ss << endl;
               
           }
         else
@@ -4305,6 +4554,52 @@ template<class R>
       }
     
     else if(kind==CDomainOfIntegration::int3d) {
+        if(di.islevelset())  //  may 2014 FH ...
+        {   // int3d levelset < 0
+            double llevelset = 0;
+            const double uset = std::numeric_limits<double>::max();
+            // cout << " uset ="<<uset << endl;
+            R3 Q[3][4];
+            double vol6[3];
+            KN<double> phi(Th.nv);
+            phi=uset;
+            double f[4];
+            
+            for (int t=0;t< Th.nt; t++)
+            {
+                
+                const Mesh3::Element & K(ThI[t]);
+                if (all || setoflab.find(ThI[t].lab) != setoflab.end())
+
+                {
+                    double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                    for(int i=0;i<4;++i)
+                    {
+                        int j= ThI(t,i);
+                        if( phi[j]==uset)
+                        {
+                            MeshPointStack(stack)->setP(&ThI,t,i);
+                            phi[j]= di.levelset(stack);//zzzz
+                        }
+                        f[i]=phi[j];
+                    }
+                    int ntets= UnderIso(f,Q, vol6,1e-14);
+                    setQF<R3>(FIV,FIVo,QuadratureFormular_Tet_1, Q,vol6,ntets);
+                    if(FIV.n)
+                    {
+                    if ( sameMesh )
+                       Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIV);
+                    else
+                        Element_rhs<R>(ThI,ThI[t],Vh,*l->l,buf,stack,*B,FIV);
+                    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                    
+                    }
+                 }
+            }
+          FIV=FIVo;
+        }
+        else
+        {
       
       for (int i=0;i< ThI.nt; i++) 
         if (all || setoflab.find(ThI[i].lab) != setoflab.end()) 
@@ -4314,7 +4609,7 @@ template<class R>
 	    else 
 	      Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIV);
             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-	  }
+	  }}
     }  
     else  if(kind==CDomainOfIntegration::intallfaces    ) {
         
@@ -4372,7 +4667,7 @@ template<class R>
     set<int> setoflab;
     bool all=true; 
     bool VF=l->VF();  // finite Volume or discontinous Galerkin
-    if (verbosity>2) cout << "  -- AssembleLinearForm discontinous Galerkin  =" << VF << " binside = "<< binside
+    if (verbosity>2) cout << "  -- AssembleLinearForm 2, discontinous Galerkin  =" << VF << " binside = "<< binside
           << " levelset integration " <<di.islevelset()<<  "\n";
 
     if (verbosity>3) 
@@ -4484,7 +4779,9 @@ template<class R>
                               Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1]);
                           }
                           else
-                              InternalError(" No levelSet on Diff mesh :    to day  int1d of RHS");
+                              Element_rhs<R>(ThI,ThI[t],Vh,0,ThI[t].lab,*l->l,buf,stack,*B,FIE,false,intmortar,Q);
+                              
+                              //InternalError(" No levelSet on Diff mesh :    to day  int1d of RHS");
                       }
                       if(sptrclean) sptrclean=sptr->clean();
                   }

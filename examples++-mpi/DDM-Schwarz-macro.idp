@@ -299,7 +299,7 @@ for(int j=0;j<n;++j)
 
 
 /******************************************************************/ 
-macro BuildTransferMat(ipart,mesh,Pk,N,U2V,Thi,Whi,Whij,Thij,aThij,Usend,Vrecv,jpart,vdebug)
+macro BuildTransferMat2(ipart,mesh,Pk,N,U2V,Thi,Whi,Whij,Thij,aThij,Usend,Vrecv,jpart,Pii,vdebug)
 /******************************************************************/ 
 /* construction of transfert  matrix  
 mesh: mesh or mesh3
@@ -313,13 +313,14 @@ aThij: the array of intersect mesh with Thi
 jpart[j]: the j th Sub Domain intersecting Thi
 */
 
-matrix Pii;  
+
 matrix[int] sMj(jpart.n), rMj(jpart.n); /* M of send to j  */
 fespace Whi(Thi,Pk);
 mesh Thij=Thi;
 fespace Whij(Thij,Pk);/*  */
-
+ matrix Pii; 
 {
+ 
  int njpart= jpart.n; /* njpart:  number of intersection which */
   Whi defPk#N(wpii,)=Times#N(pii);
   Pii = wpii[];
@@ -346,6 +347,11 @@ InitUdef(jpart.n,Whij,Thij,aThij,Usend,N)  /* initU(n,Vh,Th,aTh,U) */
 InitUdef(jpart.n,Whij,Thij,aThij,Vrecv,N) /* ... */
 if(ipart==0) cout << " *** end init  data for send/revc  " << endl;
 // 
+/******************************************************************/ 
+macro BuildTransferMat(ipart,mesh,Pk,N,U2V,Thi,Whi,Whij,Thij,aThij,Usend,Vrecv,jpart,vdebug)
+ BuildTransferMat2(ipart,mesh,Pk,N,U2V,Thi,Whi,Whij,Thij,aThij,Usend,Vrecv,jpart,Pii,vdebug)
+ //
+/******************************************************************/ 
 
 
 /******************************************************************/ 

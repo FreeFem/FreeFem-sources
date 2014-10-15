@@ -1,5 +1,6 @@
 //  Computation of the eigen value and eigen vector of the 
 // Dirichlet problem  on square $]0,\pi[^2$
+// Functionnal interface 
 // ----------------------------------------
 // we use the inverse shift mode 
 // the shift is given with sigma real
@@ -10,7 +11,7 @@ verbosity=1;
 mesh Th=square(20,20,[pi*y,pi*x]);
 fespace Vh(Th,P2);
 Vh u1,u2;
-
+int n=Vh.ndof; 
 
 real sigma = 00;  // value of the shift 
 
@@ -22,6 +23,8 @@ varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
 matrix A= a(Vh,Vh,solver=sparsesolver); 
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
 
+func real[int] FA(real[int] & u) { real[int] Au=A^-1*u;return Au;}
+func real[int] FB(real[int] & u) { real[int] Au=B*u;return Au;}
 // important remark:
 // the boundary condition is make with exact penalisation:
 //     we put 1e30=tgv  on the diagonal term of the lock degre of freedom.
@@ -36,7 +39,7 @@ real[int] ev(nev); // to store nev eigein value
 Vh[int] eV(nev);   // to store nev eigen vector
 
 
-int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
+int k=EigenValue(n,FA,FB,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
 //   tol= the tolerace
 //   maxit= the maximal iteration see arpack doc.
 //   ncv   see arpack doc.

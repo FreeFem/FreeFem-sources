@@ -1,4 +1,8 @@
-bug in clean variable (delete) after a break , continue or return.
+-- bug in  examples++-3d/TruncLac.edp   april 2014 
+assertion under windows system versiuon 3.30 ()
+
+
+-- bug in clean variable (delete) after a break , continue or return.
 example :
   while(1) 
 {
@@ -10,7 +14,7 @@ but the variable M  is un set, so some time freefem trap
 when  we free unset pointer.
 
 
-bug une fonction with string parameter
+-- bug une fonction with string parameter
 hard to correct  
   func bool  write(string  fn,real[int] & u)
     {
@@ -23,7 +27,7 @@ Now, problem: (correct in version 1.14)
    adpation and periodic boundary condition are incompatible.
    no way to inforce periodic adpated  mesh  today.
 
-before version 1.28:
+-- before version 1.28:
   bug when 
   passing a parameter of funct to a  parameter
   parameter
@@ -42,13 +46,13 @@ before version 1.28:
 
 
 
-before version 1.21, bug in interpolation on non connexe 
+-- before version 1.21, bug in interpolation on non connexe 
    domain, (some pieces of code are lose)
 
     on(1,u=N.x); the normal is not set  (correct in version 1.20)
 
 
-bug in version 1.18 and before
+-- bug in version 1.18 and before
   The no symetric matrix set form a variationnal form
   is make with 2 transpositions one on the space and one 
   at the level of the bilineair form
