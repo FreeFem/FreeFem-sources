@@ -131,6 +131,7 @@ void   menuFeature(int );
 void   menuImage(int );
 void   keyMetric(unsigned char key,int x,int y);
 int    createMenus(pScene ,pMesh );
+GLuint pickingScene(pScene sc,int x,int y,int ident);
  
 /* mesh.c */
 void   meshInfo(pMesh );

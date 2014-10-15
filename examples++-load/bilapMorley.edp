@@ -4,6 +4,7 @@ int n=100,nn=n+10;
 real[int] xx(nn),yy(nn);
 
 mesh Th=square(40,40);  // mesh definition of $\Omega$
+fespace Wh(Th,P2);
 fespace Vh(Th,P2Morley);      // finite element space
 // correct june 21 2007 (Thank to  Hui Zhang hzhang@mailst.xjtu.edu.cn who find the error)
 macro bilaplacien(u,v) ( dxx(u)*dxx(v)+dyy(u)*dyy(v)+2.*dxy(u)*dxy(v)) // fin macro 
@@ -19,6 +20,11 @@ solve bilap([u,ux,uy],[v,vx,vy]) =
 plot(u,cmm="u", wait=1,fill=1);
 plot(ux,wait=1,cmm="u_x");
 plot(uy,wait=1,cmm="u_y");
+Wh uu=u;
+real umax = uu[].max; 
+int err =  (abs(umax-0.0012782) > 1e-4); 
+cout << " uu max " << umax << " ~ 0.0012782,  err = " << err << endl; 
+
 
 
 for (int i=0;i<=n;i++)
@@ -27,3 +33,4 @@ for (int i=0;i<=n;i++)
    yy[i]=u(0.5,real(i)/n); // value of uh at point (0.5, i/10.) 
  }
  plot([xx(0:n),yy(0:n)],wait=1);
+ assert(err==0); 

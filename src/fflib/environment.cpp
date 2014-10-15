@@ -35,6 +35,7 @@
 
 // set in getprog-unix.hpp in Graphic dir..
 const char *  prognamearg=0;
+extern  void (*initparallele)(int &, char **&); // to know if mpiversion ... 
 
 #ifdef PURE_WIN32
 #include <windows.h>
@@ -116,6 +117,14 @@ bool EnvironmentInsert(string key,string item,string before)
 {
    bool ret=true;
    OneEnvironmentData  & l = ffenvironment[key];
+   char  sufmpi[] = {'m','p','i',dirsep,'\0'};
+   string suf= ((key== "loadpath") && initparallele ) ? sufmpi  : ""; 
+   if( ! suf.empty() )
+     if((item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="") 
+       {
+	 if(verbosity>=100)  cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl; 
+	 item  += suf;
+       }
    
    OneEnvironmentData::iterator i=find(l.begin(),l.end(),item);
    
@@ -132,7 +141,7 @@ bool EnvironmentInsert(string key,string item,string before)
 
 int GetEnvironment(const string & key, string items)
 {
-  if(verbosity>=100)  cout << key << " -> " << items << endl;
+  if(verbosity>=100)  cout << key << " -> " << items <<  endl;
   bool path=key.find("path")!= string::npos;
   int d=0, k=0;
   if(path)

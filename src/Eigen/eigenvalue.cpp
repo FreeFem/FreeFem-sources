@@ -32,6 +32,7 @@
 #include <complex>
 
 
+
 using namespace std;
 #include "error.hpp"
 #include "arpackff.hpp"
@@ -45,6 +46,7 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
+//#include "ffstack.hpp"
 extern Block *currentblock;
 
 typedef double R;
@@ -55,6 +57,56 @@ void Show(int ido,KN_<K> w,const char *cmm)
   cout << cmm << ido << " max " << w.max() << " min  " << w.min() << " sum  =" 
        << w.sum()  << endl;
 }
+
+
+ template<class R>
+ class FuncMat: public VirtualMatrice<R> { public:
+ //    typedef double K;
+typedef KN<R> Kn;
+     typedef KN_<R> Kn_;
+     
+ Stack stack;
+     int cas;
+ mutable  Kn x;
+ C_F0 c_x;
+ Kn *b;
+ Expression  mat1,mat;
+ typedef  typename VirtualMatrice<R>::plusAx plusAx;
+ FuncMat(int kas,int n,Stack stk,const OneOperator * op,Kn *bb=0)
+ : VirtualMatrice<R>(n),
+ stack(stk),cas(kas),
+ x(n),c_x(CPValue(x)),b(bb),
+ mat1(op->code(basicAC_F0_wa(c_x))),
+ mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))  ) {
+
+ }
+ FuncMat() { if(mat1!=mat) delete mat; delete mat1; delete c_x.LeftValue();}
+ void addMatMul(const  Kn_  & xx, Kn_ & Ax) const {
+  //   cout <<" addMatMul " <<xx.N()<< " " << Ax.N() << " " << cas << endl;
+ ffassert(xx.N()==Ax.N() && cas == 1);
+ x =xx;
+ Ax  += GetAny<Kn_>((*mat)(stack));
+ if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
+ WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008
+ }
+     
+ void Solve( KN_<R> & Ax  ,const KN_<R> & xx) const
+     {
+         ffassert(xx.N()==Ax.N() && cas == -1);
+         x =xx;
+         Ax  = GetAny<Kn_>((*mat)(stack));
+         if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
+         WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008
+         
+     }
+ plusAx operator*(const Kn &  x) const {return plusAx(this,x);}
+ virtual bool ChecknbLine(int n) const { return true;}
+ virtual bool ChecknbColumn(int m) const { return true;}
+ 
+ };
+ 
+
+
 
 template<class K,class Mat>
 void  DoIdoAction(int ido,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work,Mat &OP1,Mat &B)
@@ -108,18 +160,40 @@ class EigenValue : public OneOperator
     static basicAC_F0::name_and_type name_param[] ;
     static const int n_name_param =12;
     Expression nargs[n_name_param];
-    Expression expOP1,expB;
+    Expression expOP1,expB,expn;
+    const OneOperator * codeOP1, *codeB;
     template<class T>
     T arg(int i,Stack stack,const T & a) const{ return nargs[i] ? GetAny<T>( (*nargs[i])(stack) ): a;}
     E_EV(const basicAC_F0 & args,int cc) :
-      cas(cc)
+    cas(cc)
     {
       // OP1 = (A-sigma*B)        
       //                int nbj= args.size()-1;
       args.SetNameParam(n_name_param,name_param,nargs);
+      if( cas==1 || cas ==2)
+      {
+          expn=to< long>(args[0]);
+          expOP1=0;
+          expB=0;
+          const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[1].LeftValue());
+          ffassert(op);
+          codeOP1 = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+          if( cas== 2)
+          {
+              const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[2].LeftValue());
+              ffassert(op);
+              codeB = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+              
+          }
+      }
+      else
+      {
       expOP1=to< Matrice_Creuse<K> *>(args[0]);
       expB=to< Matrice_Creuse<K> *>(args[1]);
-      
+      codeOP1=0;
+      codeB=0;
+      expn=0;
+      }
     }
     
     AnyType operator()(Stack stack)  const;
@@ -130,14 +204,101 @@ class EigenValue : public OneOperator
   E_F0 * code(const basicAC_F0 & args) const {
     return new E_EV(args,cas);}
   
-  EigenValue(int c) :   
+  EigenValue() :
     OneOperator(atype<long>(),
 		atype<Matrice_Creuse<K> *>(),
 		atype<Matrice_Creuse<K> *>()),
-    cas(c){}
+    cas(0){}
+    
+  EigenValue(int ,int ) :
+    OneOperator(atype<long>(),atype<long>(),
+		atype<Polymorphic *>(),
+		atype<Polymorphic *>()),
+    cas(2){}
+    EigenValue(int  ) :
+    OneOperator(atype<long>(),atype<long>(),
+		atype<Polymorphic *>()),
+    cas(1){}
     
 };
 
+class EigenValueC : public OneOperator
+{ public:
+    typedef Complex K;
+    typedef double R;
+    typedef KN<K> Kn;
+    typedef KN_<K> Kn_;
+    const int cas;
+    class E_EV: public E_F0mps { public:
+        const int cas;
+        
+        static basicAC_F0::name_and_type name_param[] ;
+        static const int n_name_param =10;
+        Expression nargs[n_name_param];
+        Expression expOP1,expB,expn;
+        const OneOperator * codeOP1, *codeB;
+        template<class T>
+        T arg(int i,Stack stack,const T & a) const{ return nargs[i] ? GetAny<T>( (*nargs[i])(stack) ): a;}
+        E_EV(const basicAC_F0 & args,int cc) :
+        cas(cc)
+        {
+            // OP1 = (A-sigma*B)
+            //                int nbj= args.size()-1;
+            args.SetNameParam(n_name_param,name_param,nargs);
+            if( cas==1 || cas ==2)
+            {
+                expn=to< long>(args[0]);
+                expOP1=0;
+                expB=0;
+                const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[1].LeftValue());
+                ffassert(op);
+                codeOP1 = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+                if( cas== 2)
+                {
+                    const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[2].LeftValue());
+                    ffassert(op);
+                    codeB = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+                }
+            }
+            else
+            {
+                expOP1=to< Matrice_Creuse<K> *>(args[0]);
+                expB=to< Matrice_Creuse<K> *>(args[1]);
+                codeOP1=0;
+                codeB=0;
+                expn=0;
+            }
+        }
+        
+        AnyType operator()(Stack stack)  const;
+        operator aType () const { return atype<long>();}
+        
+    };
+    
+    E_F0 * code(const basicAC_F0 & args) const {
+        return new E_EV(args,cas);}
+    
+    EigenValueC() :
+    OneOperator(atype<long>(),
+		atype<Matrice_Creuse<K> *>(),
+		atype<Matrice_Creuse<K> *>()),
+    cas(0){}
+    
+    EigenValueC(int ,int ) :
+    OneOperator(atype<long>(),atype<long>(),
+		atype<Polymorphic *>(),
+		atype<Polymorphic *>()),
+    cas(2){}
+    EigenValueC(int  ) :
+    OneOperator(atype<long>(),atype<long>(),
+		atype<Polymorphic *>()),
+    cas(1){}
+    
+};
+
+
+
+/*
 class EigenValueC : public OneOperator
 { public:
   typedef Complex K;
@@ -180,7 +341,7 @@ class EigenValueC : public OneOperator
     cas(c){}
   
 };
-
+*/
 basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
   {   "tol", &typeid(double)  },
   {   "nev",&typeid(long) },
@@ -243,19 +404,42 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
   rawvector=arg<KNM<double> *>(9,stack,0);
   resid=arg<KN<double> *>(10,stack,0);
   mode = arg<long>(11,stack,3);
-    
+
+ 
  // evector=evector2.first;
-  Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
-  Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
+    
+    Matrice_Creuse<K> *pOP1=0, *pB=0;
+   if(expOP1)
+   pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
+   if(expB)
+   pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
   double * residptr=resid? (double*) *resid : 0;
-  //cout << " residptr = " << residptr <<endl;
+  cout << " residptr = " << residptr <<endl;
+  long  n=0;
+  if( pOP1)
+      n =pOP1->A->n;
+  else {
+      ffassert(expn);
+     n = GetAny<long>((*expn)(stack));
+  }
   
   if(evalue) nbev=Max( (long)evalue->N(),nbev);
   
-  const MatriceCreuse<K> & OP1 = pOP1->A;
-  const MatriceCreuse<K> & B = pB->A;
-  
-  long  n=OP1.n;
+  const VirtualMatrice<K> * ptOP1, *ptB;
+   if(pOP1)
+     ptOP1= & (const VirtualMatrice<K>&)(pOP1->A);
+   if(pB)
+     ptB = &  (const VirtualMatrice<K>&)(pB->A);
+ 
+  FuncMat<R> *pcOP1=0,  *pcB=0;
+  if(codeOP1)
+   ptOP1=pcOP1= new FuncMat<K>(-1,n,stack,codeOP1);
+  if(codeB)
+   ptB=pcB= new FuncMat<K>(1,n,stack,codeB);
+  MatriceIdentite<K>  Id(n);
+    
+  if(!ptB) ptB = &Id;
+  const VirtualMatrice<K> &OP1= *ptOP1, &B=*ptB;
   if(sym)
     {
       nbev=min(n-1,nbev);
@@ -287,11 +471,11 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     if( ! ( (   ncv <= n) && 2 <= (ncv-nbev ) ) && !sym )
 	serr[err++]="   ( ncv <= n)  2 <= (ncv-nev ) ( no-symetric  case) ";
     
-    if (n != OP1.m) 
+    if (n != OP1.M)
 	serr[err++]=" the first matrix in EigneValue is not square.";
-    if (n != B.n ) 
+    if (n != B.N )
 	serr[err++]="Sorry the row's number of the secand matrix in EigneValue is wrong.";
-    if (n != B.m ) 
+    if (n != B.M )
 	serr[err++]="Sorry the colum's number of the secand matrix in EigneValue is wrong.";
 	
    if(verbosity)
@@ -577,7 +761,9 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	    
 	  }
 	} 
-  
+    if(pcOP1) delete pcOP1;
+    if(pcB) delete pcB;
+    
 	return (long) nconv;
 }
   
@@ -612,16 +798,53 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   K * residptr= resid ? (K*) *resid : 0;
   //evector=evector2.first;
   ffassert(mode>0 && mode <4) ; 
-  Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
-  Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
+ // Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
+//  Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
   
   if(evalue) nbev=Max( (long)evalue->N(),nbev);
   if(!maxit)  maxit = 100*nbev;    
   
-  const MatriceCreuse<K> & OP1 = pOP1->A;
-  const MatriceCreuse<K> & B = pB->A;
+  //const MatriceCreuse<K> & OP1 = pOP1->A;
+  //const MatriceCreuse<K> & B = pB->A;
   
-  long  n=OP1.n;
+  //long  n=OP1.n;
+    
+    
+    Matrice_Creuse<K> *pOP1=0, *pB=0;
+    if(expOP1)
+        pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
+    if(expB)
+        pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
+   // double * residptr=resid? (double*) *resid : 0;
+   // cout << " residptr = " << residptr <<endl;
+    long  n=0;
+    if( pOP1)
+        n =pOP1->A->n;
+    else {
+        ffassert(expn);
+        n = GetAny<long>((*expn)(stack));
+    }
+    
+    if(evalue) nbev=Max( (long)evalue->N(),nbev);
+    
+    const VirtualMatrice<K> * ptOP1, *ptB;
+    if(pOP1)
+        ptOP1= & (const VirtualMatrice<K>&)(pOP1->A);
+    if(pB)
+        ptB = &  (const VirtualMatrice<K>&)(pB->A);
+    
+    FuncMat<K> *pcOP1=0,  *pcB=0;
+    if(codeOP1)
+        ptOP1=pcOP1= new FuncMat<K>(-1,n,stack,codeOP1);
+    if(codeB)
+        ptB=pcB= new FuncMat<K>(1,n,stack,codeB);
+    MatriceIdentite<K>  Id(n);
+    
+    if(!ptB) ptB = &Id;
+    const VirtualMatrice<K> &OP1= *ptOP1, &B=*ptB;
+    
+    
+    
   nbev=min(nbev,n-2);
   if(!ncv)     ncv = nbev*2+1;  
   ncv = max(nbev+2,ncv);
@@ -635,11 +858,11 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   // 2 <= NCV-NEV and NCV <= N
    if( ! ( 2 <= nbev && ncv <= n)) 
        serr[err++]="   ( 2 <= nbve && nvc <= n) ";
-  if (n != OP1.m) 
+  if (n != OP1.N)
    serr[err++]=" the first matrix in EigneValue is not Hermitien.";
-  if (n != B.n ) 
+  if (n != B.N )
     serr[err++]="Sorry the row's number of the secand matrix in EigneValue is wrong.";
-  if (n != B.m ) 
+  if (n != B.M )
     serr[err++]="Sorry the colum's number of the secand matrix in EigneValue is wrong.";
     if(verbosity)
 	cout << "Real complex eigenvalue problem: A*x - B*x*lambda" << endl;
@@ -809,9 +1032,12 @@ return (long) nconv;
 void init_eigenvalue()
 {
   if(verbosity&& (mpirank==0) ) cout << "eigenvalue ";
+    Global.Add("EigenValue","(",new EigenValue());  //  j + dJ
+    Global.Add("EigenValue","(",new EigenValueC());  //  j + dJ
     Global.Add("EigenValue","(",new EigenValue(1));  //  j + dJ
-    Global.Add("EigenValue","(",new EigenValueC(1));  //  j + dJ
-    
+    Global.Add("EigenValue","(",new EigenValue(1,1));  //  j + dJ
+   // Global.Add("EigenValue","(",new EigenValueC(1));  //  j + dJ
+   
 }
 #else
 class Init {
@@ -819,7 +1045,7 @@ public:
   Init()
   {
     if(verbosity&&(mpirank==0) ) cout << "eigenvalue ";
-    Global.Add("EigenValue2","(",new EigenValue(1));  //  j + dJ
+    Global.Add("EigenValue2","(",new EigenValue());  //  j + dJ
     Global.Add("EigenValue2","(",new EigenValueC(1));  //  j + dJ
   }
 };

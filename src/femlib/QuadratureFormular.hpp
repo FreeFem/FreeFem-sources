@@ -60,7 +60,9 @@ class GQuadraturePoint: public QuadratureWeight,public Rd {
   GQuadraturePoint(R aa,R xx):QuadratureWeight(aa),Rd(xx) {}
   GQuadraturePoint(R aa,R x,R y):QuadratureWeight(aa),Rd(x,y) {}
   GQuadraturePoint(R aa,R x,R y,R z):QuadratureWeight(aa),Rd(x,y,z) {}
-  GQuadraturePoint Bary(Rd * K, double mes) { return GQuadraturePoint(this->Rd::Bary(K),a*mes);}
+  template<class RD >
+  GQuadraturePoint<RD>
+    Bary(RD * K, double mes) { return GQuadraturePoint<RD>(this->Rd::Bary(K),a*mes);}
 };
 
 template<class Rdd>
@@ -70,8 +72,8 @@ public:
   typedef Rdd Rd;
   typedef  GQuadraturePoint<Rd> QuadraturePoint;
   typedef  GQuadraturePoint<Rd> QP;
-  const int exact;            // exact
-  const int n;                // nombre de point d'integration
+  int exact;            // exact
+  int n;                // nombre de point d'integration
   const int size;             //  size of the array
 private:
   QP *p;  // les point d'integration 
@@ -101,25 +103,31 @@ public:
   const QP  & operator ()(int i) const {return p[i];}
   ~GQuadratureFormular() {if(clean) delete [] p;}
     
-  GQuadratureFormular(const GQuadratureFormular & QF)
-    :exact(QF.exact),n(QF.n),size(QF.size),p(new QP[n]),clean(true){ operator=(QF);}
+    GQuadratureFormular(const GQuadratureFormular & QF, int mul=1)
+    :exact(QF.exact),n(QF.n),size(QF.size*mul),p(new QP[size]),clean(true){ operator=(QF);}
   void operator=(const GQuadratureFormular &QF)
     {
-      assert(n==QF.n);
-        for(int i=0;i<n;++i) p[i]=QF.p[i];
+      assert(size>=QF.n);
+      n = QF.n;
+      for(int i=0;i<n;++i)
+           p[i]=QF.p[i];
     }
   void operator*=( double c)
     {
-      for(int i=0;i<n;++i) p[i].a *=c;
+      for(int i=0;i<n;++i)
+          p[i].a *=c;
     }
   //  Add new GQuadratureFormular on element K to the current Quadarture formular ..
     // FH   april 2014 ..
     // to compute int under levelset ..
-  void AddQFK(const GQuadratureFormular &QF,Rd *K,double mes,int n0=0)
+    void reset() { n =0;exact=0;}
+  template<class RD >
+  void AddQFK(const GQuadratureFormular<RD> &QF ,Rd *K,double mes,int n0=0)
     {
         
         assert( size >=  n0  + QF.n );
-        n = n0 + QF+n;
+        n0 += n;
+        n = n0 + QF.n;
         for(int i=0;i<QF.n;++i)
           p[i+n0]=QF.p[i].Bary(K,mes);
         
@@ -171,9 +179,27 @@ template<class Rd>
 GQuadratureFormular<Rd> * QF_Simplex(int exact);
 //  { return  QF_exact<GQuadratureFormular<Rd>,Rd::d+1>(exact);}
 
+template<class Rd>
+void  setQF( GQuadratureFormular<Rd> &FI,
+             const GQuadratureFormular<Rd> & FI1 ,
+             const GQuadratureFormular<Rd> & FI0 ,
+             Rd Q[Rd::d][Rd::d+1],
+             double *cmes,
+             int n)
+    {
+        FI.reset();
+        for(int i=0; i< n; ++i)
+            if(cmes[i]==1)
+                FI=FI1;
+            else if(cmes[i] > 1e-4)
+              FI.AddQFK(FI1,Q[i],cmes[i]);
+            else if ( cmes[i]> 1e-8 )
+              FI.AddQFK(FI0,Q[i],cmes[i]);
+
+    }
 
 
-      
+    
 }
 
 namespace Fem2D {

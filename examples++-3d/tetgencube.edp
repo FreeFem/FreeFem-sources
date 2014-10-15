@@ -68,7 +68,7 @@ func mv2z = z;
 //mesh3 Thmv2 = movemesh3(Thfinal, transfo=[mv2x,mv2y,mv2z]);
 //savemesh(Thmv2,"halfcylindricalshell.mesh");
 //verbosity=2;
-mesh3 Thmv2surf = movemesh3(Th33, transfo=[mv2x,mv2y,mv2z], facemerge=0);
+mesh3 Thmv2surf = movemesh(Th33,[mv2x,mv2y,mv2z], facemerge=0);
 medit("maillagesurf",Thmv2surf,wait=1);
 //savemesh(Thmv2surf,"maillagesurfacecylindre.mesh");
 //medit("maillageplein",Thmv2);

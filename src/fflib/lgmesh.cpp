@@ -1824,7 +1824,7 @@ double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double &
                 double c = (fk[i2]-fk[i1])/(fk[i2]-fk[i0]); // coef Up Traing
                 if( fk[i1] < 0 ) { double y=fk[i2]/(fk[i2]-fk[i1]); c *=y*y; }
                 else {double y=fk[i0]/(fk[i0]-fk[i1]) ; c = 1.- (1.-c)*y*y; };
-                assert( c > 0 && c < 1);
+                assert( c > -1e-10 && c-1. < 1e-10);
                 areap += c*K.area;
                 arean += (1-c)*K.area;
             }

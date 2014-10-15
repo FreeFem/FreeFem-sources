@@ -1906,7 +1906,7 @@ public:
   double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
   long  arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 public:
-  Movemesh3D_Op(const basicAC_F0 &  args,Expression tth) 
+/*  Movemesh3D_Op(const basicAC_F0 &  args,Expression tth)
     : eTh(tth), xx(0) , yy(0) , zz(0)
   {
     args.SetNameParam(n_name_param,name_param,nargs);
@@ -1925,7 +1925,28 @@ public:
       yy=to<double>( (*a1)[1]);
       zz=to<double>( (*a1)[2]);
     }    
-  } 
+  }*/
+    Movemesh3D_Op(const basicAC_F0 &  args,Expression tth,Expression xxx=0,Expression yyy=0,Expression zzz=0  )
+    : eTh(tth), xx(xxx) , yy(yyy) , zz(zzz)
+    {
+        args.SetNameParam(n_name_param,name_param,nargs);
+        const E_Array * a1=0 ;
+        if(nargs[0])  a1  = dynamic_cast<const E_Array *>(nargs[0]);
+        int err =0;
+        if( nargs[1] && nargs[7] )
+            CompileError("uncompatible movemesh3 (Th, region= , reftet=  ");
+        if( nargs[2] && nargs[8] )
+            CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
+        
+        if(a1) {
+            if(a1->size() !=3 ||  xx || yy || zz)
+                CompileError("movemesh3 (Th,transfo=[X,Y,Z],) ");
+            xx=to<double>( (*a1)[0]);
+            yy=to<double>( (*a1)[1]);
+            zz=to<double>( (*a1)[2]);
+        }    
+    } 
+    
   
   AnyType operator()(Stack stack)  const ;
 };
@@ -1965,6 +1986,8 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   double precis_mesh( arg(3,stack,1e-7));
   long  mergefacemesh( arg(4,stack,1L) );
   long  flagsurfaceall( arg(5,stack,0L) );
+    long orientationelement( arg(6,stack,1L) );
+
 
   //if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
   ffassert( nrtet.N() %2 ==0);
@@ -2007,9 +2030,9 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
       
       if(takemesh[i]==0){
 	mp3->setP(&Th,it,iv);
-	if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
-	if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
-	if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+          if(xx){ txx[i]=GetAny<double>((*xx)(stack));} else txx[i]=mp3->P.x;
+	if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}else tyy[i]=mp3->P.y;
+	if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}else tzz[i]=mp3->P.z;
 	takemesh[i] = takemesh[i]+1;
       }
     }
@@ -2069,118 +2092,60 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
     }
   
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
-			      recollement_elem, recollement_border, point_confondus_ok);
+			      recollement_elem, recollement_border, point_confondus_ok,orientationelement);
   
-  if( nrtet.N() >0){ 
+  if( nrtet.N() >0)
+   {
     for (int i=0;i<nbt;i++)
       {
 	const Tet &K( T_Th3->elements[i] );	
-	int iv[4];
-	iv[0]= T_Th3->operator()(K[0]);
-	iv[1]= T_Th3->operator()(K[1]);
-	iv[2]= T_Th3->operator()(K[2]);
-	iv[3]= T_Th3->operator()(K[3]);
-
-	// les 3 triangles par triangles origines 
 	int lab=K.lab;
-	T_Th3->elements[i].set( T_Th3->vertices, iv, ChangeLab3D(maptet,lab));
+	T_Th3->elements[i].lab = ChangeLab3D(maptet,lab);
       }  
   }
   // les arete frontieres qui n'ont pas change
     
-  if( nrf.N()>0){
+  if( nrf.N()>0)
+    {
     for (int i=0;i<nbe;i++)
       { 
 	const Triangle3 &K( T_Th3->be(i) );
-	int iv[3];       
-	iv[0] = T_Th3->operator()(K[0]);
-	iv[1] = T_Th3->operator()(K[1]);
-	iv[2] = T_Th3->operator()(K[2]);
-	
 	int l0,l1=ChangeLab3D(mapface,l0=K.lab) ;
-	T_Th3->be(i).set( T_Th3->vertices, iv, l1 );
+	T_Th3->be(i).lab = l1;
       }
-  }
+   }
   
 
-  if(nbt != 0)
-    {    
-      long orientationelement( arg(6,stack,1L) );
-      if( orientationelement == -1){
-	// change all orientation of borderelements and elements
-	for (int i=0;i<T_Th3->nt;i++)
-	  { 
-	    const Tet &K( T_Th3->elements[i] );
-	    int iv[4];       
-	    
-	    iv[0] = T_Th3->operator()(K[0]);
-	    iv[1] = T_Th3->operator()(K[1]);
-	    iv[2] = T_Th3->operator()(K[2]);
-	    iv[3] = T_Th3->operator()(K[3]);
-	    
-	    int iv_temp=iv[1];
-	    iv[1]=iv[2];
-	    iv[2]=iv_temp;
-	    T_Th3->elements[i].set( T_Th3->vertices, iv, K.lab );
-	  }
+   if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
 
-
-	for (int i=0;i<T_Th3->nbe;i++)
-	  { 
-	    const Triangle3 &K( T_Th3->be(i) );
-	    int iv[3];       
-	    
-	    iv[0] = T_Th3->operator()(K[0]);
-	    iv[1] = T_Th3->operator()(K[1]);
-	    iv[2] = T_Th3->operator()(K[2]);
-	    
-	    int iv_temp=iv[1];
-	    iv[1]=iv[2];
-	    iv[2]=iv_temp;
-	    T_Th3->be(i).set( T_Th3->vertices, iv, K.lab );
-	  }
-      }
-
-      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
-
-      T_Th3->BuildGTree();
-    }
-  else
-    {
-      // parameter orientation for a 3D surface mesh
-      long orientationsurf( arg(6,stack,1L) );
-      if( orientationsurf == -1){
-	// change all orientation of borderelements
-	for (int i=0;i<T_Th3->nbe;i++)
-	  { 
-	    const Triangle3 &K( T_Th3->be(i) );
-	    int iv[3];       
-	    
-	    iv[0] = T_Th3->operator()(K[0]);
-	    iv[1] = T_Th3->operator()(K[1]);
-	    iv[2] = T_Th3->operator()(K[2]);
-	    
-	    int iv_temp=iv[1];
-	    iv[1]=iv[2];
-	    iv[2]=iv_temp;
-	    T_Th3->be(i).set( T_Th3->vertices, iv, K.lab );
-	  }
-      }
-      
-      if(flagsurfaceall==1) T_Th3->BuildBoundaryElementAdj();
-    }
-  Add2StackOfPtr2FreeRC(stack,T_Th3);
+   T_Th3->BuildGTree();
+   Add2StackOfPtr2FreeRC(stack,T_Th3);
  
   *mp=mps;
   return T_Th3;
 }
 
-class  Movemesh3D : public OneOperator { public:  
-    Movemesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>()) {}
+class  Movemesh3D : public OneOperator { public:
+    int cas;
+    Movemesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>()), cas(0) {}
+    Movemesh3D(int ) : OneOperator(atype<pmesh3>(),atype<pmesh3>(),atype<E_Array>()), cas(1) {}
   
   E_F0 * code(const basicAC_F0 & args) const 
   {
-	return  new Movemesh3D_Op(args,t[0]->CastTo(args[0])); 
+	if(cas==0)
+            return  new Movemesh3D_Op(args,t[0]->CastTo(args[0]));
+        else if (cas == 1)
+        {
+            const E_Array * a = dynamic_cast<const E_Array *>(args[1].LeftValue());
+            
+            ffassert(a);
+            if (a->size() !=3) CompileError("movemesh(Th,[X,Y,Z],...) need 3 componates in array ",atype<pmesh>());
+            Expression X=to<double>( (*a)[0]);
+            Expression Y=to<double>( (*a)[1]);
+            Expression Z=to<double>( (*a)[2]);
+            return   new Movemesh3D_Op(args,t[0]->CastTo(args[0]),X,Y,Z);
+        }
+      else return 0;
   }
 };
 
@@ -2688,160 +2653,158 @@ typedef Mesh3 *pmesh3;
 };
 
 
-/* ancien fichier de TransfoMesh */ 
+/* ancien fichier de TransfoMesh */
 
-Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, 
-		      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok){
-  // cas besoin memoire important
- 
-//Mesh3 *T_Th3=new Mesh3;	
- int nv_t,nt_t,nbe_t;
-   
- int* Numero_Som;
-     
-  int* ind_nv_t;
-  int* ind_nt_t;
-  int* ind_nbe_t;
-  
-  int* label_nt_t;
-  int* label_nbe_t;
-  
-  int i_som, i_elem, i_border;
-  
-  Numero_Som = new int[Th3.nv];
-  
-  ind_nv_t   = new int[Th3.nv];
-  ind_nt_t   = new int[Th3.nt];
-  ind_nbe_t  = new int[Th3.nbe];
-  
-  label_nt_t   = new int[Th3.nt];
-  label_nbe_t  = new int[Th3.nbe];
-  
-  
-  //cout << "Vertex, Tetrahedra, Border : "<<Th3.nv << ", "<<Th3.nt<< ", " << Th3.nbe<< endl;
-  
-  for(int ii=0; ii<Th3.nv; ii++){
-    Numero_Som[ii]=ii;
-  }
-  
-  if(verbosity > 1) cout <<" debut: SamePointElement " <<endl;
-  
-  SamePointElement( precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, recollement_element, recollement_border, point_confondus_ok, 
-		    Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
-  
-  if(verbosity > 1) cout <<" fin: SamePointElement " <<endl;
-		      
-
-
-  // set size of Mesh T_Th3 
-  //T_Th3->set(nv_t,nt_t,nbe_t);
-  Vertex3 *v = new Vertex3[nv_t];
-  Tet     *t = new Tet[nt_t];
-  Tet     *tt=t;
-  Triangle3 *b= new Triangle3[nbe_t];
-  Triangle3 *bb=b;
-  
-  cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
-  
-  // determination of vertex		
-  i_som = 0;
-  for(int i=0; i<nv_t; i++){
+Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
+		      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok,int orientation)
+{
+    // cas besoin memoire important
     
-    int & ii = ind_nv_t[i];
-    assert( Numero_Som[ii] == i_som );
+    //Mesh3 *T_Th3=new Mesh3;
+    int nv_t,nt_t,nbe_t;
     
-    const Vertex3 & K(Th3.vertices[ii]);
+    int* Numero_Som;
     
-    /*
-      T_Th3->vertices[i_som].x = tab_XX[ii];
-      T_Th3->vertices[i_som].y = tab_YY[ii];
-      T_Th3->vertices[i_som].z = tab_ZZ[ii];
-      T_Th3->vertices[i_som].lab = K.lab; 
-    */
-    v[i_som].x = tab_XX[ii];
-    v[i_som].y = tab_YY[ii];
-    v[i_som].z = tab_ZZ[ii];
-    v[i_som].lab = K.lab; 
+    int* ind_nv_t;
+    int* ind_nt_t;
+    int* ind_nbe_t;
+    
+    int* label_nt_t;
+    int* label_nbe_t;
+    
+    int i_som, i_elem, i_border;
+    
+    Numero_Som = new int[Th3.nv];
+    
+    ind_nv_t   = new int[Th3.nv];
+    ind_nt_t   = new int[Th3.nt];
+    ind_nbe_t  = new int[Th3.nbe];
+    
+    label_nt_t   = new int[Th3.nt];
+    label_nbe_t  = new int[Th3.nbe];
     
     
-    i_som = i_som + 1;		
-  }	
-  //cout << "i_som, nv_t=" <<i_som << " "<<nv_t << endl;
-  assert( i_som == nv_t);
-  
-	
-  //cout << " Transfo volume elements " << endl;
-  // determination of volume elements
-    i_elem = 0;
-    for( int i=0; i< nt_t; i++){
-      int & ii=ind_nt_t[i];
-      
-      // creation of elements
-      
-      const Tet & K(Th3.elements[ii]);
-      int iv[4];
-      int lab;
-      //lab = K.lab;
-      lab = label_nt_t[i];
-      for(int jj=0; jj <4; jj++){
-	iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ]; 
-	assert( iv[jj] >= 0 && iv[jj] < nv_t); 
-	//cout <<"i_elem=" << i_elem << "i=" <<  ii <<" " << jj << " " <<  Th3.operator()(K[jj]) << " "  << iv[jj] << endl;
-      }
-      
+    //cout << "Vertex, Tetrahedra, Border : "<<Th3.nv << ", "<<Th3.nt<< ", " << Th3.nbe<< endl;
     
-      //T_Th3->elements[i_elem].set(T_Th3->vertices, iv, lab);
-      (tt++)->set(v, iv, lab);
-      i_elem=i_elem+1;
-    } 
-  
-  assert( i_elem == nt_t);
-  
-  //cout << " Transfo border elements " << endl;
-  // determination of border elements
-  i_border= 0;
-  for( int i=0; i< nbe_t; i++){
-    int & ii=ind_nbe_t[i];
-    
-    // creation of elements
-    const Triangle3 & K(Th3.be(ii));
-    int iv[3];
-    int lab;
-    
-    //lab = K.lab; 
-    lab = label_nbe_t[i];
-    
-    for(int jj=0; jj <3; jj++){
-      iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
-      assert( iv[jj] >= 0 && iv[jj] < nv_t);
+    for(int ii=0; ii<Th3.nv; ii++){
+        Numero_Som[ii]=ii;
     }
     
-    //T_Th3->be(i_border).set(T_Th3->vertices, iv, lab);
-    (bb++)->set(v, iv, lab);
-    i_border=i_border+1;
-	} 
-  assert( i_border == nbe_t);
-  
-  delete [] Numero_Som; 
-  delete [] ind_nv_t;   
-  delete [] ind_nt_t;  
-  delete [] ind_nbe_t;
-  delete [] label_nt_t;
-  delete [] label_nbe_t;
-  
-  if( nt_t !=0){
-    Mesh3 *T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b);
+    if(verbosity > 1) cout <<" debut: SamePointElement " <<endl;
     
-    return T_Th3;
-  }
-  else{
-    Mesh3 *T_Th3 = new Mesh3(nv_t,nbe_t,v,b);
-
-    delete t;
-    return T_Th3;
-  }
+    SamePointElement( precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, recollement_element, recollement_border, point_confondus_ok,
+                     Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
     
-
+    if(verbosity > 1) cout <<" fin: SamePointElement " <<endl;
+    
+    
+    
+    // set size of Mesh T_Th3
+    //T_Th3->set(nv_t,nt_t,nbe_t);
+    Vertex3 *v = new Vertex3[nv_t];
+    Tet     *t = new Tet[nt_t];
+    Tet     *tt=t;
+    Triangle3 *b= new Triangle3[nbe_t];
+    Triangle3 *bb=b;
+    double mes=0,mesb=0;
+    cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
+    
+    // determination of vertex
+    i_som = 0;
+    for(int i=0; i<nv_t; i++){
+        
+        int & ii = ind_nv_t[i];
+        assert( Numero_Som[ii] == i_som );
+        
+        const Vertex3 & K(Th3.vertices[ii]);
+        
+        v[i_som].x = tab_XX[ii];
+        v[i_som].y = tab_YY[ii];
+        v[i_som].z = tab_ZZ[ii];
+        v[i_som].lab = K.lab;
+        
+        
+        i_som = i_som + 1;
+    }
+    assert( i_som == nv_t);
+    
+    
+    //cout << " Transfo volume elements " << endl;
+    // determination of volume elements
+    i_elem = 0;
+    for( int i=0; i< nt_t; i++){
+        int & ii=ind_nt_t[i];
+        
+        // creation of elements
+        
+        const Tet & K(Th3.elements[ii]);
+        int iv[4];
+        int lab;
+        lab = label_nt_t[i];
+        
+        for(int jj=0; jj <4; jj++){
+            iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+            assert( iv[jj] >= 0 && iv[jj] < nv_t);
+        }
+        if(orientation<0) swap(iv[1],iv[2]) ;
+        (tt)->set(v, iv, lab);
+        mes += tt++->mesure();
+        i_elem++;
+    }
+    
+    assert( i_elem == nt_t);
+    
+    //cout << " Transfo border elements " << endl;
+    // determination of border elements
+    i_border= 0;
+    for( int i=0; i< nbe_t; i++){
+        int & ii=ind_nbe_t[i];
+        // creation of elements
+        const Triangle3 & K(Th3.be(ii));
+        int iv[3];
+        int lab;
+        lab = label_nbe_t[i];
+        
+        for(int jj=0; jj <3; jj++)
+        {
+            iv[jj] = Numero_Som[ Th3.operator()(K[jj]) ];
+            assert( iv[jj] >= 0 && iv[jj] < nv_t);
+        }
+        if(orientation<0) swap(iv[1],iv[2]) ;
+        
+        bb->set(v, iv, lab);
+        mesb += bb++->mesure();
+        i_border=i_border+1;
+    }
+    assert( i_border == nbe_t);
+    if  ( mes  < 0 )
+    {
+        cerr << " E rror of mesh orientation , current orientation = "<< orientation << endl;
+        cerr << " volume mesh = " << mes << endl;
+        cerr << " surface border mesh = " << mesb << endl;
+        ErrorExec(" movemesh 3d ",1);
+    }
+    
+    delete [] Numero_Som;
+    delete [] ind_nv_t;   
+    delete [] ind_nt_t;  
+    delete [] ind_nbe_t;
+    delete [] label_nt_t;
+    delete [] label_nbe_t;
+    
+    if( nt_t !=0){
+        Mesh3 *T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b);
+        
+        return T_Th3;
+    }
+    else{
+        Mesh3 *T_Th3 = new Mesh3(nv_t,nbe_t,v,b);
+        
+        delete [] t;
+        return T_Th3;
+    }
+    
+    
 }
 void SamePointElement( const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 & Th3, 
 	int &recollement_element, int &recollement_border, int &point_confondus_ok,
@@ -2853,9 +2816,9 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
   R3 bmin,bmax;
   //int recollement_element=1,recollement_border=1;
   
-  if(verbosity > 1) cout << "  BuilBound " <<endl;
+  if(verbosity > 2) cout << "    BuilBound " <<endl;
   BuildBoundMinDist_th3( precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, bmin, bmax, hmin);
-  if(verbosity > 1) cout << " =============================== " << endl;
+  if(verbosity > 2) cout << "   =============================== " << endl;
 		
   double bmin3[3], bmax3[3];
   bmin3[0] = bmin.x;
@@ -2868,10 +2831,10 @@ void SamePointElement( const double &precis_mesh, const double *tab_XX, const do
  
 
 
-  if(verbosity > 1) cout << "  OrderVertexTransfo_hcode gtree " << endl;
+  if(verbosity > 2) cout << "    OrderVertexTransfo_hcode gtree " << endl;
   OrderVertexTransfo_hcode_nv_gtree( Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t );
-  if(verbosity > 1) cout << "fin order vertex gtree: nv_t=" << nv_t << endl;
-  if(verbosity > 1) cout << " =============================== " << endl;
+  if(verbosity > 2) cout << "    fin order vertex gtree: nv_t=" << nv_t << endl;
+  if(verbosity > 2) cout << "   =============================== " << endl;
 		
   /* determination de nt_t et de nbe_t*/ 
   int i_elem, i_border;
@@ -3568,9 +3531,9 @@ void BuildBoundMinDist_th2( const double &precis_mesh, const double *tab_XX, con
       }
     }
   }
-  if(verbosity >1) cout << "longmin_box=" << longmini_box << endl;
-  if(verbosity >1) cout << "hmin =" << hmin << endl;
-  if(verbosity >1) cout << "Norme2(bmin-bmax)=" <<  Norme2(bmin-bmax) << endl;
+  if(verbosity >5) cout << "    longmin_box=" << longmini_box << endl;
+  if(verbosity >5) cout << "    hmin =" << hmin << endl;
+  if(verbosity >5) cout << "    Norme2(bmin-bmax)=" <<  Norme2(bmin-bmax) << endl;
   assert( hmin < longmini_box);
 
   // assertion pour la taille de l octree
@@ -3682,7 +3645,7 @@ void BuildBoundMinDist_th3(  const double &precis_mesh,  const double *tab_XX, c
 
   if( Th3.nt == 0){
     for( int ii=0; ii< Th3.nbe; ii++){
-      if(verbosity >1) cout << "border" << ii <<" hmin =" << hmin << endl;
+      if(verbosity >10) cout << "border " << ii <<" hmin =" << hmin << endl;
       const Triangle3 & K(Th3.be(ii));
       double longedge;
       int iv[3];
@@ -3704,10 +3667,10 @@ void BuildBoundMinDist_th3(  const double &precis_mesh,  const double *tab_XX, c
     }
   }
 
-  if(verbosity >1) cout << "longmini_box" << longmini_box << endl; 
-  if(verbosity >1) cout << "hmin =" << hmin << endl;
+  if(verbosity >5) cout << "    longmini_box" << longmini_box << endl;
+  if(verbosity >5) cout << "    hmin =" << hmin << endl;
   assert( hmin < longmini_box);
-  if(verbosity >1) cout << "Norme2(bmin-bmax)=" <<  Norme2(bmin-bmax) << endl;
+  if(verbosity >5) cout << "    Norme2(bmin-bmax)=" <<  Norme2(bmin-bmax) << endl;
   // assertion pour la taille de l octree
   assert(hmin>Norme2(bmin-bmax)/1e9);
 }
@@ -3771,9 +3734,9 @@ void OrderVertexTransfo_hcode_nv( const int &tab_nv, const double *tab_XX, const
     if( numberofpointsdiff==0) numberofpoints=numberofpoints+1;
   }
 	
-  if(verbosity >1) cout << "numberofpoints " << numberofpoints << endl;
-  if(verbosity >1) cout << "taille boite englobante =" << endl;
-  if(verbosity >1)
+  if(verbosity >4) cout << "   -- numberofpoints " << numberofpoints << endl;
+  if(verbosity >4) cout << "   -- taille boite englobante =" << endl;
+  if(verbosity >4)
     {
       for(int ii=0; ii<3; ii++){
 	cout << "ii=" << ii << " " << bmin[ii] << " " << bmax[ii] <<endl;
@@ -3842,7 +3805,7 @@ void OrderVertexTransfo_hcode_nv( const int &tab_nv, const double *tab_XX, const
       nv_t++; //nv_t = nvt+1;
     }
   }
-  if(verbosity >1) cout << "nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;   
+  if(verbosity >1) cout << "      nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;
   assert( nv_t == numberofpoints);
 
   delete [] posv;
@@ -4045,10 +4008,10 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
   
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin,bmax,0);
 	
-  if(verbosity >1){
-    cout << "taille de la boite " << endl;
-    cout << bmin.x << " " << bmin.y << " " << bmin.z <<  endl;
-    cout << bmax.x << " " << bmax.y << " " << bmax.z <<  endl;
+  if(verbosity >2){
+    cout << "  -- taille de la boite " << endl;
+    cout << "\t" <<  bmin.x << " " << bmin.y << " " << bmin.z <<  endl;
+    cout << "\t"  << bmax.x << " " << bmax.y << " " << bmax.z <<  endl;
   }
 	
   // creation of octree
@@ -4084,8 +4047,8 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
   delete gtree;
   delete [] v;
 	
-  if(verbosity >1) cout << "hseuil=" << hseuil <<endl;
-  if(verbosity >1) cout << "nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;   
+  if(verbosity >3) cout << "    hseuil=" << hseuil <<endl;
+  if(verbosity >3) cout << "    nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv <<endl;
   
   if(verifnumberofpoints ==1){
     int numberofpoints=0;
@@ -4095,16 +4058,15 @@ void OrderVertexTransfo_hcode_nv_gtree( const int & tab_nv, const R3 &bmin, cons
       numberofpointsdiff=0;
       for(int jj=ii+1; jj<tab_nv; jj++){
 	double dist = 0.;
-	dist = pow(tab_XX[jj]-tab_XX[ii],2)+pow(tab_YY[jj]-tab_YY[ii],2)+pow(tab_ZZ[jj]-tab_ZZ[ii],2); //pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
+	dist = pow(tab_XX[jj]-tab_XX[ii],2)+pow(tab_YY[jj]-tab_YY[ii],2)+pow(tab_ZZ[jj]-tab_ZZ[ii],2);
 	if( sqrt(dist) < hseuil){
-	  //cout << "point_commun:"<< ii << "<--> " << jj << " coord ii " << tab_XX[ii] << " " << tab_YY[ii] << " " << tab_ZZ[ii] << " jj " << tab_XX[jj] << " " << tab_YY[jj] << " " << tab_ZZ[jj] << endl;
 	  numberofpointsdiff=1;
 	} 
       }
       if( numberofpointsdiff==0) numberofpoints=numberofpoints+1;
     }
-    if(verbosity >1) cout << "numberofpoints " << numberofpoints << endl;
-    if(verbosity >1) cout << "taille boite englobante =" << endl;
+    if(verbosity >2) cout << "  -- numberofpoints " << numberofpoints << endl;
+//    if(verbosity >2) cout << "  -- taille boite englobante =" << endl;
     //    assert(nv_t==numberofpoints);
   }
 }
@@ -4118,7 +4080,7 @@ void PointCommun_hcode_gtree( const int &dim, const int &NbPoints, const int &po
   //Vertex3 v[NbPoints];
   EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin,bmax,0);
 	
-  if(verbosity >1) cout<< "verif hmin vertex3 GTree switch" << point_confondus_ok << endl;
+  if(verbosity >1) cout<< "verif hmin vertex3 GTree switch: " << point_confondus_ok << endl;
 	
   int int_point_confondus_ok = point_confondus_ok;
 	
@@ -4333,6 +4295,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
   clayer=-1;
   zmin=0.;
   zmax=1.;
+    double maxdz = 0;   
   for (int it=0;it<nbt;++it){
     for(int iv=0;iv<3;++iv)      
     {
@@ -4343,12 +4306,13 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	  //cout << "mp: fait " << endl;
 	  if(ezmin){ zmin[i]=GetAny<double>((*ezmin)(stack));}
 	  if(ezmax){ zmax[i]=GetAny<double>((*ezmax)(stack));}
-
+	  maxdz = max(maxdz, abs(zmin[i]-zmax[i]));
 	  clayer[i]=Max( 0. , Min( 1. , arg(2,stack,1.) ) ); 
 	
 	}	     
     }
   }
+  
   ffassert(clayer.min() >=0);
 
   if(verbosity >1) cout << "lecture valeur des references " << endl;
@@ -4410,11 +4374,14 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
     
   int nebn =0;
   KN<int> ni(nbv);
+    double epsz = maxdz *1e-6;
+ if(verbosity>9999)    cout << "BuildLayeMesh_Op:: epsz " << epsz <<endl; 
   for(int i=0;i<nbv;i++)
     {
       ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
+      if(abs(zmin[i]-zmax[i]) < epsz) ni[i]=0; // Corr FH aug. 2014...
     }
- 
+  if(verbosity>9999)    cout << " BuildLayeMesh_Op: ni = " << ni << endl; 
   // triangle 
   for (int it=0;it<nbt;++it){
     const Mesh::Element &K(Th.t(it));
@@ -4491,7 +4458,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	point_confondus_ok = 1;
       }
 
-      Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok);
+        Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok,1);
 		  
       
       // T_Th3->BuildBound();
@@ -4666,7 +4633,7 @@ AnyType DeplacementTab_Op::operator()(Stack stack)  const
     }
 
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,Th, txx, tyy, tzz, border_only, 
-			      recollement_elem, recollement_border, point_confondus_ok);
+			      recollement_elem, recollement_border, point_confondus_ok,1);
   
   if(nbt != 0)
     {
@@ -5893,6 +5860,7 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("movemesh23","(",new Movemesh2D_3D_surf);
   Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf_cout);// 
   Global.Add("movemesh3","(",new Movemesh3D);
+  Global.Add("movemesh","(",new Movemesh3D(1));
   Global.Add("movemesh3D","(", new Movemesh3D_cout);
   Global.Add("deplacement","(",new DeplacementTab);
   Global.Add("checkbemesh","(",new CheckManifoldMesh);  
