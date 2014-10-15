@@ -4,12 +4,10 @@
 # Adaptation to Automake: Antoine Le Hyaric - LJLL Paris 6 -
 # lehyaric@ann.jussieu.fr - 13/5/04
 
-# $Id$
-
 SUBDIRS=download src  examples++-tutorial examples++	\
 	examples++-eigen examples++-load examples++-mpi	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d DOC 
+	examples++-3d DOC
 
 EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
@@ -39,6 +37,16 @@ examples++-load/fig.pgm	examples++-load/lg.pgm \
 ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
 examples++*/*.[ie]dp  CheckAllEdp
+
+
+# Creates a file named "ChangeLog" containing the chronology of all
+# modifications to the source files. Needs "cvs2cl" to be installed.
+
+changelog:
+	cvs2cl
+
+# History before 2005 is stored in the file "HISTORY_BEFORE_2005"
+all-local:: @HISTORY@
 
 # try and avoid running this under fakeroot (otherwise we may face
 # problems trying to connect to CVS as pseudo-root). Debian packaging
