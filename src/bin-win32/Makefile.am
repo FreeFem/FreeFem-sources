@@ -35,18 +35,41 @@ LIBS_FF = libff.dll FreeFem++-api.dll
 all-local: $(WIN32DLLTARGET) 
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
+
+# FFCS does not need most Windows executables since it compiles
+# executables in ffcs/src and ffcs/pack. But still keep one executable
+# to make sure that the whole process works and that libff.dll is
+# correctly built.
+
+if ENABLE_FFCS
+win32-dll-target: FreeFem++.exe ff-c++
+	echo "on a fini"
+else
 win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  launchff++.exe ff-c++ $(MPIPROG)
 	echo "on a fini"
+endif
 
+# ALH - 28/7/14 - the new automake default is to place the objects in
+# the same directory as the corresponding source file
+
+if ENABLE_FFCS
+libff.dll: ../Algo/*.o ../fflib/*.o ../femlib/*.o ../bamglib/*.o ../lglib/lg.tab.o ../Eigen/*.o FreeFem++-api.dll
+	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
+else
 libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o	\
 		FreeFem++-api.dll
 	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
-
+endif
 
 FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
-FreeFem++.exe: ../nw/sansrgraph.o    ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+
+# ALH - 28/7/14 - the new automake default is to place the objects in
+# the same directory as the corresponding source file
+
+FreeFem++.exe: ../Graphics/*.o    ../mpi/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
+
 FreeFem++-mpi.exe:	../nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FF)
 	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 $(MPI_LIB)
 bamg.exe:  libff.dll $(LIBS_FF)
@@ -70,7 +93,7 @@ install-exec-local--::
 
 
 # FFCS: create a separate DLL for ffapi so that it can be changed when running FreeFem++ or FFCS
-FreeFem++-api.dll:../nw/ffapi.o
+FreeFem++-api.dll:../fflib/ffapi.o
 	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@
 
 # FFCS: automake does not clean the exes automatically because they are not built automatically.
