@@ -39,7 +39,7 @@ varf b([uu,vv],[w,s])=
 
 
 
-matrix A= a(Vh,Vh,solver=Crout,factorize=1); 
+matrix A= a(Vh,Vh,solver=UMFPACK); 
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
 
 // important remark:

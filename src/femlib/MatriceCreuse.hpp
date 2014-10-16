@@ -151,11 +151,11 @@ public:
      }
       
   virtual R & operator() (int i,int j) =0;
-  virtual void call(int ,int ie,int label,void * data) =0;  // 
+    virtual void call(int ,int ie,int label,void * data,void *Q=0) =0;  //
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
-  MatriceElementaire & operator()(int k,int ie,int label,void * s=0) {
-    call(k,ie,label,s);
+  MatriceElementaire & operator()(int k,int ie,int label,void * s=0,void *B=0) {
+    call(k,ie,label,s,B);
     return *this;}
 };
 
@@ -227,8 +227,8 @@ public:
   ~MatriceElementaireFES() {}
   const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
   
-  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0) {
-    this->call(k,ie,label,s);
+  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0,void *Q=0) {
+    this->call(k,ie,label,s,Q);
     return *this;}
 };
 
@@ -247,16 +247,18 @@ public:
   typedef typename  FESpace::Mesh Mesh;
   typedef typename  FESpace::QFElement QFElement;
   typedef typename  FESpace::QFBorderElement QFBorderElement;
-  typedef typename  FESpace::FElement FElement; 
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  FESpace::Mesh::Rd Rd;
+    
 
   R & operator() (int i,int j) {return this->a[i*this->m+j];}
   // MatPleineElementFunc element;
-  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *) ; 
-  void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *) ; 
-  void call(int k,int ie,int label,void *);
+  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *,Rd *) ;
+  void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *,Rd *) ;
+    void call(int k,int ie,int label,void *,void *B);
   
-  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0)
-  {call(k,ie,label,stack);return *this;}
+  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0,Rd *Q=0)
+  {call(k,ie,label,stack,Q);return *this;}
   MatriceElementairePleine(const FESpace & VVh,
                            const QFElement & fit=*QFElement::Default,
                            const QFBorderElement & fie =*QFBorderElement::Default)  
@@ -306,12 +308,12 @@ public:
   typedef typename  FESpace::QFElement QFElement;
   typedef typename  FESpace::QFBorderElement QFBorderElement;
   typedef typename  FESpace::FElement FElement; 
-
+  typedef typename  FESpace::Mesh::Rd Rd;
   R & operator()(int i,int j) 
   {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}
-  void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *) ; 
-  void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ; 
-  void call(int k,int ie,int label,void * stack);
+  void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *,Rd *) ;
+  void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ;
+  void call(int k,int ie,int label,void * stack,void *B);
   MatriceElementaireSymetrique(const FESpace & VVh,
                                const QFElement & fit=*QFElement::Default,
                                const QFBorderElement & fie =*QFBorderElement::Default) 
@@ -321,8 +323,8 @@ public:
 	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
        fit,fie),
        element(0),mortar(0) {}
-  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0) 
-  {this->call(k,ie,label,stack);return *this;};
+  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0,Rd *B=0)
+  {this->call(k,ie,label,stack,B);return *this;};
 };
 
 
@@ -650,10 +652,9 @@ template<class K>
 };
 
 
-
-
-template<class R,class M,class P> 
-int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000)
+template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){cout << " Stop !!!!!\n"; return false;} };
+template<class R,class M,class P,class S >// S=StopGC<Real>
+int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
    
 //  ConjuguedGradient lineare   A*x est appele avec des conditions au limites 
@@ -674,7 +675,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    h =-Cg; 
    double g2 = RNM::real((Cg,conj(g)));
    if (g2 < 1e-30) 
-    { if(verbosity>1)
+    { if(verbosity>1 || (kprint<100000))
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
      return 2;  }
    double reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
@@ -690,21 +691,24 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
        Cg = C*g;
        double g2p=g2; 
        g2 = RNM::real((Cg,conj(g)));
+       bool stop = Stop && Stop->Stop(iter,x,g);
+    
        if ( !(iter%kprint) && iter && (verbosity>3) )
-         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
-       if (g2 < reps2) { 
+         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << " " << stop << endl;
+         
+       if (g2 < reps2 || stop) {
          if ( !iter && !xx && g2 && epsold >0 ) {  
              // change fo eps converge to fast due to the 
              // penalization of boundary condition.
              eps =  epsold*epsold*g2; 
-             if (verbosity>3 )
+             if (verbosity>3 || (kprint<3))
              cout << "CG converge to fast (pb of BC)  restart: " << iter <<  "  ro = " 
                   << ro << " ||g||^2 = " << g2 << " <= " << reps2 << "  new eps2 =" <<  eps <<endl; 
               reps2=eps;
            } 
          else 
           { 
-           if (verbosity>1 )
+           if (verbosity>1 || (kprint<100000) )
             cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
            return 1;// ok 
           }
@@ -713,16 +717,18 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
        h *= gamma;
        h -= Cg;  //  h = -Cg * gamma* h       
      }
+   if(verbosity)
    cout << " GC: method doesn't converge in " << nbitermax 
         <<  " iteration , xx= "  << xx<< endl;
    return 0; 
 }
 
-template<class R,class M,class P> 
-int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const int nbitermax, double &eps,long kprint=1000000000)
+template<class R,class M,class P,class S>// S=StopGC<Real>
+int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
 //  ConjuguedGradient2 affine A*x = 0 est toujours appele avec les condition aux limites 
 //  -------------
+    
    throwassert(&x  && &A && &C);
    typedef KN<R> Rn;
    int n=x.N();
@@ -735,10 +741,10 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
    h =-Cg; 
    R g2 = (Cg,g);
    if (g2 < 1e-30) 
-    { if(verbosity>1)
+    { if(verbosity>1 || kprint< 1000000)
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
      return 2;  }
-   if (verbosity>5 ) 
+   if (verbosity>5 || (kprint<2))
      cout << " 0 GC  g^2 =" << g2 << endl;
    R reps2 =eps >0 ?  eps*eps*g2 : -eps; // epsilon relatif 
    eps = reps2;
@@ -760,11 +766,13 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        Cg = C*g;
        R g2p=g2; 
        g2 = (Cg,g);
+         bool stop = Stop && Stop->Stop(iter,x,g);
        if ( ( (iter%kprint) == kprint-1)  /*&&  verbosity >1*/ )
-         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
-       if (g2 < reps2) { 
+         cout << "CG:" <<iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << " " << stop <<  endl;
+       if (stop || g2 < reps2 ) {
          if (kprint <= nbitermax )
-            cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
+            cout << "CG converges " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2
+                 << " stop=" << stop << " /Stop= " << Stop <<  endl;
           return 1;// ok 
           }
        R gamma = g2/g2p;       
@@ -777,7 +785,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 }
 
 template <class R> 
-class MatriceIdentite: VirtualMatrice<R> { public:
+class MatriceIdentite:public  VirtualMatrice<R> { public:
  typedef typename VirtualMatrice<R>::plusAx plusAx;
     MatriceIdentite(int n) :VirtualMatrice<R>(n) {}; 
  void addMatMul(const  KN_<R>  & x, KN_<R> & Ax) const { 
@@ -807,7 +815,7 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
-     ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R> >(a,*this,b,x,nbitermax,epsr);
+     ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr  );
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 

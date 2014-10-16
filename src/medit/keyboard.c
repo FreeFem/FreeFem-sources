@@ -11,7 +11,7 @@ GLfloat  delev = 1.0;
 
 extern void mouseCamera(int button,int state,int x,int y);
 extern void motionCamera(int x,int y);
-
+extern GLboolean picking ;
 
 static void usage() {
   fprintf(stdout,"\n");
@@ -439,6 +439,7 @@ void keyScene(unsigned char key,int x,int y) {
       else
         keyMetric('p',0,0);
       break;
+           
     case 'r':
       if ( refmat<0 || ipilmat == sc->par.nbmat ) return;
       pilmat[++ipilmat] = refmat;
@@ -803,6 +804,12 @@ void keyScene(unsigned char key,int x,int y) {
     sc->picklist = pickItem(mesh,sc,numit);
       post = TRUE;
       break;
+    case '=':
+             picking = GL_TRUE;
+            if ( sc->picklist ) glDeleteLists(sc->picklist,1);
+            sc->picklist = pickingScene(sc,x,y,0);
+            break;
+
     case '!':  /* clip plane */
     return;
       if ( !(clip->active & C_ON) )  return;

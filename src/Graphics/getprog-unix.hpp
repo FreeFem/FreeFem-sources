@@ -10,6 +10,7 @@
 
 // FFCS: redirecting visualization output
 #include "../fflib/ffapi.hpp"
+#include "../fflib/strversionnumber.hpp"
 #include <string>
 
 extern long mpirank;
@@ -78,16 +79,29 @@ int getprog(char* fn,int argc, char **argv)
   const char *progffglut=0;
   const char *fileglut=0;
   bool noffglut=false;
-
+ 
   // FFCS - remove the test for noffglut to be able to create pictures
   // in any situation. Even FreeFem++-mpilang needs to send pictures
   // (eg when called in a FreeFem++-server situation by EJS)
-
+  // is the name -nw or -nw.exe  -> no graphics 
   noffglut=false;
 
   bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
+
+   
+   if(prognamearg )      // FH add to remove ffglut in case of -nw or -nw.exe program. FH juin 2014..
+    {int l = strlen(prognamearg);
+        if( (( l>4 ) && (strcmp("-nw",prognamearg+l-3) ==0))
+           || (( l>8) &&(strcmp("-nw.exe",prognamearg+l-7) ==0)))
+        {
+            consoleatend=false;
+            noffglut=true;
+            NoGraphicWindow=true;
+            waitatend=false;
+        }
+    }
    echo_edp=true;
   if(argc)
     for (int i=1; i<argc;i++)
@@ -108,7 +122,8 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  consoleatend=false;
 	  noffglut=true;
-	  NoGraphicWindow=true; 
+	  NoGraphicWindow=true;
+          waitatend=false; // add modif FH. juin 2014 ..
 	}
       else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
 	  echo_edp=false;
@@ -231,7 +246,8 @@ if( ch2edpdir && edpfilenamearg)
   if(ret !=1) 
     {
       const char * ff = argc ? argv[0] : "FreeFem++" ;
-      cout << " Syntaxe = " << ff  << " [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  [SCRIPT-arguments]\n"
+      cout << " Error parameter: "<< ff << " , version : " << StrVersionNumber() << endl;
+      cout << " Syntaxe = " << ff  << "   [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  [SCRIPT-arguments]\n"
 	   << "        -v      verbosity : 0 -- 1000000 level of freefem output \n"
 	   << "        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) \n"
 	   << "        -glut    command  : change  command  compatible with ffglut  \n"
@@ -241,6 +257,7 @@ if( ch2edpdir && edpfilenamearg)
 	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
            << "        -cd               : Change dir to script dir\n"
+           << endl ;
 
 	;
 

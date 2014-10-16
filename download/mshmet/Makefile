@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 all-local: mshmet
 
 include ff-flags
@@ -47,7 +46,7 @@ WHERE:install
 	echo mshmet INCLUDE -I@DIR@/include>> $(SRCDIR)/$(INSTALL)/lib/WHERE.mshmet
 
 
-$(SRCDIR)/tag-tar: $(PACKAGE)
+$(SRCDIR)/tag-tar: $(PACKAGE) mshmetlib-internal.h mshmetlib.c mshmetlib.h 
 	-mkdir mshmet$(mshmet_VERSION)
 	cd mshmet$(mshmet_VERSION); tar xvzf ../$(PACKAGE)
 	-mkdir $(MSHMET_SRCDIR)
@@ -67,8 +66,7 @@ $(SRCDIR)/tag-tar: $(PACKAGE)
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):
-	-mkdir $(DIRPKG);
-	cd $(DIRPKG);$(WGET)   $(SERVER)/`basename $(PACKAGE)`
+	../getall -o mshmet -a
 
 clean:
 	-rm ff-flags

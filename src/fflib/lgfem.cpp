@@ -33,6 +33,8 @@
 
 #include  <cmath>
 #include  <iostream>
+#include <cfloat>
+
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
@@ -105,6 +107,7 @@ TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 	if( t==dTypeSolveMat[l]) return l;
     return long (kTypeSolveMat-1); // sparse solver case 
 }
+
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
@@ -548,9 +551,49 @@ class E_pfes : public E_F0 {
     E_F0 * code(const basicAC_F0 & args) const ; 
   
 };*/
+template<class R>
+class  E_StopGC: public StopGC<R> {
+public:
+    typedef KN<R> Kn;
+    typedef KN_<R> Kn_;
+
+    Stack s;
+    long n;
+    long iter;
+    Kn_ xx,gg;
+    C_F0 citer,cxx,cgg;
+    C_F0 stop;
+    
+    E_StopGC(Stack ss,long nn,const  Polymorphic * op): s(ss),n(nn),iter(-1),
+    xx(0,0),gg(0,0),
+    citer(CConstant<long*>(&iter)),
+    cxx(dCPValue(&xx)),
+    cgg(dCPValue(&gg)),
+    stop(op,"(",citer,cxx,cgg)
+    {
+        
+    }
+    ~E_StopGC()
+    {//  a verifier ???? FH....
+        delete (E_F0 *) cxx; // ???
+        delete (E_F0 *) cgg; // ???
+        delete (E_F0 *) citer; // ???
+        delete (E_F0 *) stop; // ???
+    }
+    // template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){return false;} };
+    bool Stop(int iterr, R *x, R * g)
+    {
+        // cout << " Stop " << iterr << endl;
+        iter=iterr;
+        xx.set(x,n);
+        gg.set(g,n);
+        return GetAny<bool>(stop.eval(s));
+    }
+};
+
 
 template<class R>
-class LinearCG : public OneOperator 
+class LinearCG : public OneOperator
 { public:
   typedef KN<R> Kn;
   typedef KN_<R> Kn_;
@@ -595,11 +638,12 @@ class LinearCG : public OneOperator
   virtual bool ChecknbColumn(int m) const { return true;} 
     
 };  
- 
 
   class E_LCG: public E_F0mps { public:
+      
+      
    const int cas;// <0 => Nolinear
-   static const int n_name_param=5;
+   static const int n_name_param=6;
 
    static basicAC_F0::name_and_type name_param[] ;
 
@@ -609,6 +653,7 @@ class LinearCG : public OneOperator
   const OneOperator *A, *C; 
   Expression X,B;
 
+      
   E_LCG(const basicAC_F0 & args,int cc) :cas(cc)
    {
       args.SetNameParam(n_name_param,name_param,nargs);
@@ -629,7 +674,7 @@ class LinearCG : public OneOperator
      
      virtual AnyType operator()(Stack stack)  const {
        int ret=-1;
-
+       E_StopGC<R> *stop=0;
       // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
       try {
       Kn &x = *GetAny<Kn *>((*X)(stack));
@@ -638,11 +683,14 @@ class LinearCG : public OneOperator
       double eps = 1.0e-6;
 	  double *veps=0;
       int nbitermax=  100;
-      long verb = verbosity;  
+      long verb = verbosity;
+      
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) veps=GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) verb=Abs(GetAny<long>((*nargs[4])(stack)));
+      if (nargs[5]) stop= new E_StopGC<R>(stack,n,dynamic_cast<const  Polymorphic *>(nargs[5]));
+//          cout << " E_LCG: Stop = " << stop << " " << verb << endl;
       long gcverb=51L-Min(Abs(verb),50L);
       if(verb==0) gcverb = 1000000000;// no print 
       if(veps) eps= *veps;
@@ -661,25 +709,27 @@ class LinearCG : public OneOperator
       if (cas<0) {
        if (C) 
          { MatF_O CC(n,stack,C);
-           ret = NLCG(AA,CC,x,nbitermax,eps, gcverb );}
+           ret = NLCG(AA,CC,x,nbitermax,eps, gcverb,stop );}
         else 
-           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb);
+           ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb,stop);
         }
       else 
       if (C) 
        { MatF_O CC(n,stack,C);
-         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb );}
+         ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb, stop );}
       else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb);
+         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb, stop );
       if(veps) *veps = -(eps);
       }
       catch(...)
       {
+       if( stop) delete stop;
        // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
         throw;
       }
      // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-      
+     if( stop) delete stop;
+         
       return SetAny<long>(ret);
        
      }  
@@ -705,7 +755,8 @@ basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
   {   "nbiter",&typeid(long) },
   {   "precon",&typeid(Polymorphic*)},
   {   "veps" ,  &typeid(double*) },
-  {   "verbosity" ,  &typeid(long) }    
+  {   "verbosity" ,  &typeid(long)},
+  {   "stop" ,  &typeid(Polymorphic*)}
 };
 
 
@@ -736,8 +787,8 @@ class LinearGMRES : public OneOperator
       ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += GetAny<Kn_>((*mat)(stack));
-      if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b 
-      WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008 
+      if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
+      WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008
    } 
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
   virtual bool ChecknbLine(int n) const { return true;}  
@@ -749,7 +800,7 @@ class LinearGMRES : public OneOperator
   class E_LGMRES: public E_F0mps { public:
    const int cas;// <0 => Nolinear
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =6;
+   static const int n_name_param =7;
    Expression nargs[n_name_param];
   const OneOperator *A, *C; 
   Expression X,B;
@@ -775,7 +826,7 @@ class LinearGMRES : public OneOperator
      virtual AnyType operator()(Stack stack)  const {
       Kn &x = *GetAny<Kn *>((*X)(stack));
       Kn b(x.n);
-     
+       E_StopGC<R> *stop=0;
       if (B)   b = *GetAny<Kn *>((*B)(stack));
       else     b= R();
       int n=x.N();
@@ -788,6 +839,8 @@ class LinearGMRES : public OneOperator
       if (nargs[3]) eps= *GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) dKrylov= GetAny<long>((*nargs[4])(stack));
       if (nargs[5]) verb=Abs(GetAny<long>((*nargs[5])(stack)));
+      if (nargs[6]) stop= new E_StopGC<R>(stack,n,dynamic_cast<const  Polymorphic *>(nargs[6]));
+
 	 long gcverb=51L-Min(Abs(verb),50L);
 	 
      
@@ -798,23 +851,30 @@ class LinearGMRES : public OneOperator
         KNM<R> H(dKrylov+1,dKrylov+1);
 	int k=dKrylov;//,nn=n;
        double epsr=eps;
-      // int res=GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr);
-	 KN<R>  bzero(B?1:n); // const array zero
-	 bzero=R(); 
-	 KN<R> *bb=&bzero; 
-	 if (B) {
-	     Kn &b = *GetAny<Kn *>((*B)(stack));
-	     R p = (b,b);
-	     if (p== R()) 
-	       {
-		 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
-	       }
-	     bb = &b;
-	 }
-	 KN<R> * bbgmres =0;
-	 if ( !B) bbgmres=bb; // none zero if gmres without B 		
-	 MatF_O AA(n,stack,A,bbgmres);
+ 
+         KN<R>  bzero(B?1:n); // const array zero
+         bzero=R();
+         KN<R> *bb=&bzero;
+         if (B) {
+             Kn &b = *GetAny<Kn *>((*B)(stack));
+             R p = (b,b);
+             if (p)
+             {
+                 // ExecError("Sorry MPILinearCG work only with nul right hand side, so put the right hand in the function");
+             }
+             bb = &b;
+         }
+         KN<R> * bbgmres =0;
+         if ( !B ) bbgmres=bb; // none zero if gmres without B
+         MatF_O AA(n,stack,A,bbgmres);
+         if(bbgmres ){
+             *bbgmres= AA* *bbgmres; // Ok Ax == b -> not translation of b .
+             *bbgmres = - *bbgmres;
+             if(verbosity>1) cout << "  ** GMRES set b =  -A(0);  : max=" << bbgmres->max() << " " << bbgmres->min()<<endl;
+         }
 
+
+      //cout << " ** GMRES  bb max=" << bb->max() << " " << bb->min()<<endl;
       if (cas<0) {
         ErrorExec("NL GMRES:  to do! sorry ",1);
 /*       if (C) 
@@ -827,20 +887,13 @@ class LinearGMRES : public OneOperator
       else 
        {
        if (C)
-        { MatF_O CC(n,stack,C,bbgmres); 
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,CC,H,k,nbitermax,epsr,verb);}
+        { MatF_O CC(n,stack,C,0);
+         ret=GMRES(AA,(KN<R> &)x, *bb,CC,H,k,nbitermax,epsr,verb,stop);}
        else
-         ret=GMRES(AA,(KN<R> &)x, (const KN<R> &)b,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb);       
+         ret=GMRES(AA,(KN<R> &)x, *bb,MatriceIdentite<R>(n),H,k,nbitermax,epsr,verb,stop);
        }
-       /*
-      if (C) 
-       { MatF_O CC(n,stack,C);
-         
-         ret = ConjuguedGradient2(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
-      else 
-         ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));*/
-         
-     // if( nargs[3]) *GetAny<double*>((*nargs[3])(stack)) = -(eps);
+      if(verbosity>99)    cout << " Sol GMRES :" << x << endl;
+         if(stop) delete stop;
       return SetAny<long>(ret);
        
      }  
@@ -867,7 +920,8 @@ basicAC_F0::name_and_type  LinearGMRES<R>::E_LGMRES::name_param[]= {
   {   "precon",&typeid(Polymorphic*)},
   {   "veps" ,  &typeid(double*) },
   {   "dimKrylov", &typeid(long) },
-  {   "verbosity", &typeid(long) }
+  {   "verbosity", &typeid(long) },
+  {   "stop" ,  &typeid(Polymorphic*)}
 };
 
 template<typename int2>
@@ -2182,7 +2236,10 @@ class Convect : public E_F0mps  { public:
     
 };
 
-class Plot :  public E_F0mps { public:
+/// <<Plot>> used for the [[plot_keyword]]
+
+class Plot :  public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
+public:
     typedef KN_<R>  tab;
     typedef pferbase sol;
     typedef pferbasearray asol;
@@ -2241,6 +2298,8 @@ class Plot :  public E_F0mps { public:
 	}
 
     };
+
+  /// <<Expression2>>
     struct Expression2 
      {
 	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
@@ -2391,12 +2450,17 @@ class Plot :  public E_F0mps { public:
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
     };
 
-   static basicAC_F0::name_and_type name_param[] ;
+  // see [[Plot_name_param]]
+  static basicAC_F0::name_and_type name_param[] ;
 
-  // FFCS: added new parameters for VTK graphics
-  static const int n_name_param =42 ;
-   Expression bb[4];
-    vector<Expression2> l;
+  /// FFCS: added new parameters for VTK graphics. See [[Plot_name_param]] for new parameter names
+  static const int n_name_param=42;
+
+  Expression bb[4];
+
+  /// see [[Expression2]]
+  vector<Expression2> l;
+
     Expression nargs[n_name_param];
     Plot(const basicAC_F0 & args) : l(args.size()) 
     {
@@ -2518,13 +2582,21 @@ class Plot :  public E_F0mps { public:
 	  }
     }
     
-    static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
-    static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
-    AnyType operator()(Stack s) const ;
+  static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
+
+  /// <<Plot_f>> Creates a Plot object with the list of arguments obtained from the script during the grammatical
+  /// analysis of the script (in lg.ypp)
+
+  static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
+
+  /// Evaluates the contents of the Plot object during script evaluation. Implemented at [[Plot_operator_brackets]]
+
+  AnyType operator()(Stack s) const ;
 }; 
 
+/// <<Plot_name_param>>
 
- basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
+basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {   "coef", &typeid(double)},
   {   "cmm", &typeid(string*)},
   {   "ps", &typeid(string*)  },
@@ -2571,7 +2643,7 @@ class Plot :  public E_F0mps { public:
   {"WindowIndex",&typeid(long)}, // #20
   {"NbColorTicks",&typeid(long)}, // #21
 
-   };
+};
 
 
 
@@ -2714,10 +2786,10 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      all=false;
    }
  */
-  if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) ) InternalError("So no levelset integration type on no int1d case (10)");
       
  if(dim==2)
    {
+     if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 2d)");
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
      ffassert(&Th);
      
@@ -2804,10 +2876,68 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	       }
 	   }
        }
-     else if (kind==CDomainOfIntegration::int2d) {
-       
-       const QuadratureFormular & FI =FIT;
-       for (int i=0;i< Th.nt; i++) 
+     else if (kind==CDomainOfIntegration::int2d)
+     {
+         const QuadratureFormular & FI =FIT;
+
+         if(di->islevelset())
+         { // add FH mars 2014 compute int2d  on phi < 0 ..
+             double llevelset = 0;
+             double uset = HUGE_VAL;
+             R2 Q[3];
+             KN<double> phi(Th.nv);phi=uset;
+             double f[3],umx,umn;
+             for(int t=0; t< Th.nt;++t)
+             {
+                if (all || setoflab.find(Th[t].lab) != setoflab.end())
+                {
+                const Triangle & K(Th[t]);
+
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di->levelset(stack);//zzzz
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+                     
+                 }
+                 double area =K.area;
+                 if( umn >=0 ) continue; //  all positif => nothing
+                 if( umx >0 )
+                    { // coupe ..
+                        int i0 = 0, i1 = 1, i2 =2;
+                        
+                        if( f[i0] > f[i1] ) swap(i0,i1) ;
+                        if( f[i0] > f[i2] ) swap(i0,i2) ;
+                        if( f[i1] > f[i2] ) swap(i1,i2) ;
+                        
+                        double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
+                        if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
+                        else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
+                        assert( c > 0 && c < 1);
+                        area *= 1-c;
+                    }
+                 //  warning  quadrature  wrong just ok for constante FH, we must also change the quadaturer points ..
+                 // just order 1  here ???
+                 for (int npi=0; npi<FI.n;npi++)
+                    {
+                        QuadraturePoint pi(FI[npi]);
+                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                        r += area*pi.a*GetAny<R>( (*fonc)(stack));
+                    }
+                    
+                }
+             }
+             
+         }
+      else
+       for (int i=0;i< Th.nt; i++)
 	 {
 	   const Triangle & K(Th[i]);
 	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
@@ -2837,7 +2967,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     QuadratureFormular1dPoint pi( FI[npi]);
 		     double sa=pi.x,sb=1-sa;
 		     R2 Pt(PA*sa+PB*sb ); //  
-		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie);
+		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,K.lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
@@ -2881,6 +3011,9 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    }
  else if(dim==3)
    {
+     if(di->islevelset() &&  (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
+         InternalError("So no levelset integration type on no int2d / int3d case (10 3d)");
+      
      const Mesh3  & Th = * GetAny<pmesh3>( (*di->Th)(stack) );
      ffassert(&Th);
      
@@ -2889,7 +3022,81 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	 if (all) cout << " all " << endl ;
 	 else cout << endl;
        }
-     if (kind==CDomainOfIntegration::int2d)
+       if (kind==CDomainOfIntegration::int2d)
+           if(di->islevelset())
+           {
+               const GQuadratureFormular<R2> & FI = FIT;
+               double llevelset = 0;
+               const double uset = std::numeric_limits<double>::max();
+              // cout << " uset ="<<uset << endl;
+               R3 Q[4];
+               KN<double> phi(Th.nv);
+               phi=uset;
+               double f[4];
+               
+               for(int t=0; t< Th.nt;++t)
+               {
+                   double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                   for(int i=0;i<4;++i)
+                   {
+                       int j= Th(t,i);
+                       if( phi[j]==uset)
+                       {
+                           MeshPointStack(stack)->setP(&Th,t,i);
+                           phi[j]= di->levelset(stack);//zzzz
+                       }
+                       f[i]=phi[j];
+                       umx = std::max(umx,f[i]);
+                       umn = std::min(umn,f[i]);
+                       
+                   }
+                   if( umn <=0 && umx >= 0)
+                   {
+                       
+                       int np= IsoLineK(f,Q,1e-10);
+
+                       double l[3];
+                       if(np>2)
+                       {
+                        if(verbosity>999)  cout << t << " int levelset : " << umn << " .. " << umx << " np " << np <<" "
+                         << f[0] << " " << f[1] << " "<< f[2] << " "<< f[3] << " "<<endl;
+                          
+                           const Mesh3::Element & K(Th[t]);
+                           double epsmes3=K.mesure()*K.mesure()*1e-18;
+                           R3 PP[4];
+                           for(int i=0; i< np; ++i)
+                               PP[i]= K(Q[i]);
+                           for( int i =0; i+1 < np; i+=2)
+                           { // 0,1,, a and 2,3,0.
+                               int i0=i,i1=i+1,i2=(i+2)%np;
+                               R3 NN= R3(PP[i0],PP[i1])^R3(PP[i0],PP[i2]);
+                               double mes2 = (NN,NN);
+                               double mes = sqrt(mes2);
+                               if(mes2*mes <epsmes3) continue; //  too small
+                               NN /= mes;
+                               mes *= 0.5; //   warning correct FH 050109
+                             //  cout <<i << " / "  << NN << " / " << mes <<" / "<< i0<< i1<< i2 <<" " << llevelset <<endl;
+                               llevelset += mes;
+                               for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                               {
+                                   GQuadraturePoint<R2>  pi( FI[npi]);
+                                   pi.toBary(l);
+                                   R3 Pt( l[0]*Q[i0]+l[1]*Q[i1]+l[2]*Q[i2]); //
+                                   MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
+                                   r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                               }
+                           }
+                       }
+                       
+                   }
+               }
+               if(verbosity > 5) cout << " Area level set = " << llevelset << endl;
+              // if(verbosity > 50) cout << "phi " << phi << endl;
+               
+           }
+       
+         else
+        
        {
 	 const GQuadratureFormular<R2> & FI = FIT;
          int lab;
@@ -2914,8 +3121,53 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	       }
 	   }
        }
-     else if (kind==CDomainOfIntegration::int3d) {
+     else if (kind==CDomainOfIntegration::int3d)
+     {
        
+         if(di->islevelset())
+         {   // int3d levelset < 0
+             GQuadratureFormular<R3> FI(FIV.n*3);
+             double llevelset = 0;
+             const double uset = std::numeric_limits<double>::max();
+             // cout << " uset ="<<uset << endl;
+             R3 Q[3][4];
+             double vol6[3];
+             KN<double> phi(Th.nv);
+             phi=uset;
+             double f[4];
+             
+             for (int t=0;t< Th.nt; t++)
+             {
+                 
+		 const Mesh3::Element & K(Th[t]);
+		 if (all || setoflab.find(K.lab) != setoflab.end())
+                 {
+                     double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                     for(int i=0;i<4;++i)
+                     {
+                         int j= Th(t,i);
+                         if( phi[j]==uset)
+                         {
+                             MeshPointStack(stack)->setP(&Th,t,i);
+                             phi[j]= di->levelset(stack);//zzzz
+                         }
+                         f[i]=phi[j];
+                     }
+                     int ntets= UnderIso(f,Q, vol6,1e-14);
+                     setQF<R3>(FI,FIV,QuadratureFormular_Tet_1, Q,vol6,ntets);
+                     for (int npi=0; npi<FI.n;npi++)
+                     {
+                         GQuadraturePoint<R3> pi(FI[npi]);
+                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                         r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 }
+             }
+
+            
+         }
+        else
+         {
        const GQuadratureFormular<R3> & FI =FIV;
              for (int i=0;i< Th.nt; i++) 
 	       {
@@ -2928,6 +3180,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack)); 
                      }
                }
+         }
      }
      else   if (kind==CDomainOfIntegration::intalledges)
        {
@@ -3114,7 +3367,9 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     return err;
 }
    
-AnyType Plot::operator()(Stack s) const  { 
+/// <<Plot_operator_brackets>> from class [[Plot]]
+
+AnyType Plot::operator()(Stack s) const{ 
     
    // remap  case 107 and 108 , 109  for array of FE. 
   vector<ListWhat> ll;
@@ -3179,43 +3434,43 @@ AnyType Plot::operator()(Stack s) const  {
 	double echelle=1;
 	int cmp[3]={-1,-1,-1};
 	theplot.SendNewPlot();
-	if (nargs[0]) theplot<< 0L <=  GetAny<double>((*nargs[0])(s));
-	if (nargs[1]) theplot<< 1L <=  GetAny<string *>((*nargs[1])(s));
-	if (nargs[2]) theplot<< 2L <=  GetAny<string*>((*nargs[2])(s));
-	if (nargs[3]) theplot<< 3L  <= (bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
-	else theplot<< 3L  <=  (bool)  (TheWait&& !NoWait);
-	if (nargs[4]) theplot<< 4L  <= GetAny<bool>((*nargs[4])(s));
-	if (nargs[5]) theplot<< 5L <=  GetAny<bool>((*nargs[5])(s));
-	if (nargs[6]) theplot<< 6L <=  GetAny<bool>((*nargs[6])(s));
-	if (nargs[7]) theplot<< 7L  <= GetAny<bool>((*nargs[7])(s));
+	if (nargs[0]) (theplot<< 0L) <=  GetAny<double>((*nargs[0])(s));
+	if (nargs[1]) (theplot<< 1L) <=  GetAny<string *>((*nargs[1])(s));
+	if (nargs[2]) (theplot<< 2L) <=  GetAny<string*>((*nargs[2])(s));
+	if (nargs[3]) (theplot<< 3L)  <= (bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
+	else (theplot<< 3L)  <=  (bool)  (TheWait&& !NoWait);
+	if (nargs[4]) (theplot<< 4L)  <= GetAny<bool>((*nargs[4])(s));
+	if (nargs[5]) (theplot<< 5L) <=  GetAny<bool>((*nargs[5])(s));
+	if (nargs[6]) (theplot<< 6L) <=  GetAny<bool>((*nargs[6])(s));
+	if (nargs[7]) (theplot<< 7L)  <= GetAny<bool>((*nargs[7])(s));
 	if (nargs[8])  
 	  {  KN<double> bbox(4);
 	      for (int i=0;i<4;i++)
 		  bbox[i]= GetAny<double>((*bb[i])(s));
 	      
-	      theplot<< 8L <= bbox ;
+	      (theplot<< 8L) <= bbox ;
 	  }
-	if (nargs[9])  theplot<< 9L   <=  GetAny<long>((*nargs[9])(s));
-	if (nargs[10])  theplot<< 10L <= GetAny<long>((*nargs[10])(s));
+	if (nargs[9])  (theplot<< 9L)   <=  GetAny<long>((*nargs[9])(s));
+	if (nargs[10])  (theplot<< 10L) <= GetAny<long>((*nargs[10])(s));
 	if (nargs[11]) { 
 	    KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-	theplot<< 11L  <= v   ;}
+	(theplot<< 11L)  <= v   ;}
 	
 	if (nargs[12]) 
-	    theplot<< 12L <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
+	    (theplot<< 12L) <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
 	
 	
 	
-	if (nargs[13]) theplot<< 13L  <= GetAny<bool>((*nargs[13])(s));
-	if (nargs[14]) theplot<< 14L <= GetAny<bool>((*nargs[14])(s));
+	if (nargs[13]) (theplot<< 13L)  <= GetAny<bool>((*nargs[13])(s));
+	if (nargs[14]) (theplot<< 14L) <= GetAny<bool>((*nargs[14])(s));
 	if (nargs[15]) 
-	    theplot<< 15L  <= GetAny<KN_<double> >((*nargs[15])(s));
-	if (nargs[16]) theplot<< 16L  <= GetAny<bool>((*nargs[16])(s));	
+	    (theplot<< 15L)  <= GetAny<KN_<double> >((*nargs[15])(s));
+	if (nargs[16]) (theplot<< 16L)  <= GetAny<bool>((*nargs[16])(s));
 	// add frev 2008 FH for 3d plot ...
-	if (nargs[17]) theplot<< 17L  <= GetAny<long>((*nargs[17])(s));	
-	if (nargs[18]) theplot<< 18L  <= GetAny<bool>((*nargs[18])(s));	
-	if (nargs[19]) theplot<< 19L  <= GetAny<bool>((*nargs[19])(s));	
-	if (nargs[20]) theplot<< 20L  <= (echelle=GetAny<double>((*nargs[20])(s)));	
+	if (nargs[17]) (theplot<< 17L)  <= GetAny<long>((*nargs[17])(s));
+	if (nargs[18]) (theplot<< 18L)  <= GetAny<bool>((*nargs[18])(s));
+	if (nargs[19]) (theplot<< 19L)  <= GetAny<bool>((*nargs[19])(s));
+	if (nargs[20]) (theplot<< 20L)  <= (echelle=GetAny<double>((*nargs[20])(s)));
 
 	// FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
 	// FF parameters above changes) received in [[file:../../../../src/visudata.cpp::receiving_plot_parameters]]
@@ -3223,7 +3478,7 @@ AnyType Plot::operator()(Stack s) const  {
 #define VTK_START 20
 #define SEND_VTK_PARAM(index,type)					\
 	  if(nargs[VTK_START+index])					\
-	    theplot<<(long)(VTK_START+index)				\
+	    (theplot<<(long)(VTK_START+index))				\
 	      <=GetAny<type>((*nargs[VTK_START+index])(s));
 
 	SEND_VTK_PARAM(1,double); // ZScale
@@ -3994,8 +4249,7 @@ AnyType Plot::operator()(Stack s) const  {
   viderbuff();
      
   return 0L;
-}     
-
+}
  
 AnyType Convect::operator()(Stack s) const 
 {  
@@ -4042,7 +4296,7 @@ AnyType Convect::eval2(Stack s) const
 	      mpc.change(R2(l[1],l[2]),Th[it],0);             
 	      if(k++>1000)
 		{
-		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity to hight ???? or NaN F. Hecht  " << endl;
+		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity too high ???? or NaN F. Hecht  " << endl;
 		  ffassert(0);
 		}
 	    }
@@ -4187,7 +4441,7 @@ class JumpOp : public E_F0mps  { public:
            A rd,rg;       
            MeshPoint *mp=MeshPointStack(stack),smp=*mp;              
            rg = GetAny<A>((*a)(stack));
-           rd = rg;
+           rd = 0. ;// to be compatible with varf def... FH april 2014 ... v 3.31. 
            if ( mp->SetAdj() )
              rd = GetAny<A>((*a)(stack));  
            *mp=smp;         
@@ -4420,12 +4674,26 @@ template<class T> T *resizeandclean2(const Resize<T> & t,const long &n)
   return  t.v;
  }
 
+template<class PMat>
+AnyType ClearReturn(Stack stack, const AnyType & a)
+{
+    // a ne faire que pour les variables local au return...
+    //  pour l'instant on copie pour fqire mqrche
+    // a repense  FH  mqi 20014....
+    PMat * m = GetAny<PMat * >(a);
+    //   KN<K> *cm=new KN<K>(true, *m); bug quant KN est une variable global
+    // KN<K> *cm=new KN<K>( *m); // on duplique le tableau comme en C++  (dur dur ?????? FH)
+    m->increment();
+    Add2StackOfPtr2FreeRC(stack,m);
+    return m;
+}
+
 
 template <class R>
 void DclTypeMatrix()
 {
  
-  Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
+  Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >, ClearReturn<Matrice_Creuse<R> >);
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
   Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
@@ -4837,9 +5105,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  
 
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
- Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form  with rhs (must be zer
- Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs 
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form
+ Global.Add("LinearGMRES","(",new LinearGMRES<R>(1)); // old form  without rhs
+ Global.Add("AffineGMRES","(",new LinearGMRES<R>(1)); // New  better
  Global.Add("LinearCG","(",new LinearCG<R>(1)); //  without right handsize
+ Global.Add("AffineCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
 
  //   Global.Add("LinearCG","(",new LinearCG<Complex>()); // old form  with rhs (must be zer
@@ -4885,6 +5155,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
  
  Global.Add("on","(",new OneOperatorCode<BC_set > );
+
+ /// <<plot_keyword>> uses [[Plot]] and [[file:AFunction.hpp::OneOperatorCode]] and [[file:AFunction.hpp::Global]]
  Global.Add("plot","(",new OneOperatorCode<Plot> );
  Global.Add("convect","(",new OneOperatorCode<Convect> );
 

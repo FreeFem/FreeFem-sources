@@ -863,7 +863,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
 		plot.color(2+col);
 		uv = coef*uv;
 		l *= coef;
-		R2 dd = uv*(-0.01/l);
+		R2 dd = uv*(-kk/l);
 		R2 dn = dd.perp()*0.5;
 		if (l*10000.< kk) continue;
 		if (l < kk) 
@@ -2935,7 +2935,8 @@ int main(int argc,  char** argv)
 	    }
       }
     datafile =0;
-    cout << (argc>i1) << eerr << endl; 
+     if(debug>1)
+    cout << "ffglut : " << (argc>i1) << eerr << endl;
     if(argc>i1 && (eerr==0))// && *argv[argc-1] != '-' )
       {	
 	datafile=fopen(argv[argc-1], "r");

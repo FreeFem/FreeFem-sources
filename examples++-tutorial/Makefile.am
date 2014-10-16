@@ -9,6 +9,7 @@ TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 LIST_IDP=*.idp
 EXTRA_DIST=*.edp *.idp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 
+
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
@@ -18,6 +19,8 @@ all.edp:
 		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
 	done) > $@
 
+clean-local:
+	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh f.txt	u.txt A.matrix	mm.matrix mm.b sphere-a.faces	sphere-a.points	sphere.faces	sphere.points toto.Th		toto.am_fmt	toto.dbg.gmsh toto.Th.gmsh	toto.dbg	toto.msh plot.gp ListOfAllocPtr-8.bin ffglut*.ppm th.msh Th1.msh		Th12.msh	th.msh 	emptymesh-2.msh	 thermic.dat
 # To create a new set of reference values in "ref.edp"
 Ref: makeref.edp freefem++.pref
 	../src/nw/FreeFem++-nw makeref.edp

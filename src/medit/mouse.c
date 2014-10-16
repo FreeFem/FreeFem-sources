@@ -158,7 +158,7 @@ void mouse(int button,int state,int x,int y) {
     lasttime = glutGet(GLUT_ELAPSED_TIME);
 
     if ( button == GLUT_LEFT_BUTTON ) {
-      if ( keyact & GLUT_ACTIVE_SHIFT ) {
+      if ( keyact == GLUT_ACTIVE_SHIFT ) {
         /* entity designation */
         picking = GL_TRUE;
 	if ( sc->picklist ) glDeleteLists(sc->picklist,1);
@@ -166,14 +166,14 @@ void mouse(int button,int state,int x,int y) {
 	return;
       }
 
-      else if ( keyact & GLUT_ACTIVE_ALT ) {
+      else if ( keyact == GLUT_ACTIVE_ALT ) {
 	    /* zoom */
 	    starty = y;
 	    glutMotionFunc(zoomMotion);
 	    return;
       }
 
-      else if ( keyact & GLUT_ACTIVE_CTRL ) {
+      else if ( keyact == GLUT_ACTIVE_CTRL ) {
         /* rubberband selection */
         glutSetCursor(GLUT_CURSOR_CROSSHAIR);
         p->rubix  = p->rubfx = x;
@@ -206,7 +206,7 @@ void mouse(int button,int state,int x,int y) {
 
     if ( button == GLUT_LEFT_BUTTON ) {
       
-      if ( keyact & GLUT_ACTIVE_CTRL ) {
+      if ( keyact == GLUT_ACTIVE_CTRL ) {
         /* rubberband selection */
         p->rubfx  = x;
         p->rubfy  = sc->par.ys-y;
@@ -217,7 +217,7 @@ void mouse(int button,int state,int x,int y) {
         return;
       }
       
-      else if ( keyact & GLUT_ACTIVE_ALT ) {
+      else if ( keyact == GLUT_ACTIVE_ALT ) {
         glutMotionFunc(motion);
 	    return;
       }

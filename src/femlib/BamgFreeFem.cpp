@@ -411,12 +411,15 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   
   int nbvx=0,nbe=0,nbsd=0;
   for (E_BorderN const * k=b;k;k=k->next)
-    {long n=  Max(1L,Abs(k->Nbseg(stack))); ;
+  {
+      int nbd = k->NbBorder(stack);
+      for(int index=0; index<nbd; ++index )
+    {long n=  Max(1L,Abs(k->Nbseg(stack,index))); ;
     nbvx += n+1;
     nbe += n;
     nbsd++;
     }
-  
+  }
   Geometry * Gh =  new Geometry;
   
   if(verbosity>2)
@@ -441,10 +444,16 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   i=0;
   for (E_BorderN const * k=b;k;k=k->next)
     {
-      assert(k->b->xfrom); // a faire 
+    int nbd = k->NbBorder(stack);
+    for(int index=0; index<nbd; ++index )
+    {
+      assert(k->b->xfrom); // a faire
       double & t = *  k->var(stack);
       double a(k->from(stack)),b(k->to(stack));
-      n=Max(Abs(k->Nbseg(stack)),1L);     
+      long * indx = k->index(stack);
+      if(indx) *indx = index;
+      else ffassert(index==0);
+      n=Max(Abs(k->Nbseg(stack,index)),1L);
       t=a;
       double delta = (b-a)/n;
       for ( nn=0;nn<=n;nn++,i++, t += delta)
@@ -462,6 +471,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
           }     
         }
     }
+}
   lmin = sqrt(lmin);
   double eps = (lmin)/16.; 
   int nbvprev = i;
@@ -575,10 +585,17 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   int nnn=0;
   i=0;
   for (E_BorderN const * k=b;k;k=k->next)
-    {
+      
+  {    int nbd = k->NbBorder(stack);
+      for(int index=0; index<nbd; ++index )
+      {
       double & t = *  k->var(stack);
       double a(k->from(stack)),b(k->to(stack));
-      n=Max(Abs(k->Nbseg(stack)),1L);     
+      n=Max(Abs(k->Nbseg(stack,index)),1L);
+      long * indx = (k->index(stack));
+      if(indx) *indx = index;
+      else ffassert(index==0);
+
       double delta = (b-a)/n;
       t=a+delta/2; 
       for ( nn=0;nn<n;nn++,i++, t += delta)
@@ -614,7 +631,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
           Hmin = Min(Hmin,l12);
         }
       nnn++; 
-    }
+      }}
   
   delete [] vertices; vertices=0;
   
@@ -635,19 +652,23 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
     }
   
   Gh->NbSubDomains=nbsd;
-  if (Gh->NbSubDomains>0) 
+  if (Gh->NbSubDomains>0)
     {
-      Gh->subdomains = new GeometricalSubDomain[  Gh->NbSubDomains];
-      Int4 i1=0;
-      i=0;
-      for (E_BorderN const * k=b;k;k=k->next,i++)
-        { long Nbseg =k->Nbseg(stack);
-        long n=  Max(1L,Abs(Nbseg)); 
-        Gh->subdomains[i].sens = Nbseg >0 ? 1 : -1;
-        Gh->subdomains[i].edge=Gh->edges + i1;
-        Gh->subdomains[i].ref = i;
-        i1 += n;
-        }
+        Gh->subdomains = new GeometricalSubDomain[  Gh->NbSubDomains];
+        Int4 i1=0;
+        i=0;
+        for (E_BorderN const * k=b;k;k=k->next)
+        {
+            int nbd = k->NbBorder(stack);
+            for(int index=0; index<nbd; ++index,i++)
+            {
+                long Nbseg =k->Nbseg(stack,index);
+                long n=  Max(1L,Abs(Nbseg));
+                Gh->subdomains[i].sens = Nbseg >0 ? 1 : -1;
+                Gh->subdomains[i].edge=Gh->edges + i1;
+                Gh->subdomains[i].ref = i;
+                i1 += n;
+            }}
     }
   Gh->NbEquiEdges=0;
   Gh->NbCrackedEdges=0;
@@ -658,7 +679,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   {
       Gh->AfterRead();  
       int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
-      
+      if(verbosity> 99) cout << " ** Gh = " << endl << *Gh << endl << " *** " <<endl; ;
       Triangles *Th = 0;
       try { 
 	  Th =new Triangles( nbtx ,*Gh);
@@ -722,10 +743,17 @@ void E_BorderN::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ym
   Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
   for (E_BorderN const * k=this;k;k=k->next)
     {
+        int nbd = k->NbBorder(stack);
+        for(int index=0; index<nbd; ++index )
+        {
       assert(k->b->xfrom); // a faire 
       double & t = *  k->var(stack);
       double a(k->from(stack)),b(k->to(stack));
-      long n=Max(Abs(k->Nbseg(stack)),1L);     
+      long * indx = (k->index(stack));
+      if(indx) *indx = index;
+      else ffassert(index==0);
+
+      long n=Max(Abs(k->Nbseg(stack,index)),1L);
       t=a;
       double delta = (b-a)/n;
       for (int  nn=0;nn<=n;nn++, t += delta)
@@ -738,7 +766,7 @@ void E_BorderN::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ym
           ymin=Min(ymin,mp.P.y);
           ymax=Max(ymax,mp.P.y);
         }
-    }
+        }}
   mp=mps; 
 }  
 void E_BorderN::Plot(Stack stack) const
@@ -752,11 +780,18 @@ void E_BorderN::Plot(Stack stack) const
   int nbd=0;
   for (E_BorderN const * k=this;k;k=k->next)
     {
+      int nbdr = k->NbBorder(stack);
+      for(int index=0; index<nbdr; ++index )
+     {
       nbd++;
       assert(k->b->xfrom); // a faire 
       double & t = *  k->var(stack);
       double a(k->from(stack)),b(k->to(stack));
-      long n=Max(Abs(k->Nbseg(stack)),1L);     
+      long n=Max(Abs(k->Nbseg(stack,index)),1L);
+      long * indx = (k->index(stack));
+      if(indx) *indx = index;
+      else ffassert(index==0);
+
       t=a;
       double delta = (b-a)/n;
       R2 P,Po;
@@ -791,6 +826,7 @@ void E_BorderN::Plot(Stack stack) const
       DrawMark(mp.P.p2(),0.01);
       MoveTo(mp.P.p2());
     }
+}
   if(verbosity>9) cout << "  -- Plot size : " << nbd << " Border \n";
   mp=mps; 
 }
@@ -803,18 +839,29 @@ void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
     //getcadre(x0,x1,y0,y1);
     //float h= (x1-x0)*0.01;
     
-    long nbd1=0;
+    long nbd1=0;// nb of sub border
     for (E_BorderN const * k=this;k;k=k->next)
+    {
+     int nbdr = k->NbBorder(stack);
+     for(int index=0; index<nbdr; ++index )
 	nbd1++;
+    }
    plot << nbd1;
    int nbd=0;
     for (E_BorderN const * k=this;k;k=k->next)
       {
+          int nbdr = k->NbBorder(stack);
+          for(int index=0; index<nbdr; ++index )
+          {
 	  nbd++;
 	  assert(k->b->xfrom); // a faire 
 	  double & t = *  k->var(stack);
 	  double a(k->from(stack)),b(k->to(stack));
-	  long n=Max(Abs(k->Nbseg(stack)),1L);     
+	  long n=Max(Abs(k->Nbseg(stack,index)),1L);
+          long * indx = (k->index(stack));
+          if(indx) *indx = index;
+          else ffassert(index==0);
+
 	  t=a;
 	  double delta = (b-a)/n;
 	  R2 P,Po;
@@ -829,7 +876,7 @@ void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
 		plot << (long) mp.label <<P.x << P.y;
 	    }
 	 
-      }
+          }}
     assert(nbd==nbd1);
     if(verbosity>9) cout << "  -- Plot size : " << nbd << " Border \n";
     mp=mps; 

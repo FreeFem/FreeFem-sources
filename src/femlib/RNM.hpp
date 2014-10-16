@@ -148,6 +148,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //  re-correct += sep 2007
 //  add size of the matrix in VirtualMatrix class.
 //   mars 2010 add  unset KNM case ...
+//  sept 2014  add 1/v operator  ... 
 // ----------------
 
 namespace RNM {
@@ -159,7 +160,7 @@ inline float  real(const float &x){return x;}
     template<class T> T  real(const complex<T>& v){ return std::real(v);}
 inline double  norm2(const double x){return x*x;}
 inline float  norm2(const float x){return x*x;}
-template<class T> T  norm2(const complex<T>& v){ return norm(v);}
+template<class T> T  norm2(const complex<T>& v){ return std::norm(v);}
     
 template<class T> inline complex<T>  conj(const complex<T>& v){ return std::conj<T>(v);}
 template<class T> inline T Min (const T &a,const T &b){return a < b ? a : b;}
@@ -199,7 +200,8 @@ template<class R> class KN ;
 template<class R> class conj_KN_ ;
 template<class R> class Add_KN_;
 template<class R> class Sub_KN_;
-template<class R> class Mulc_KN_;
+template<class R> class Mulc_KN_; // vector b*a_i
+template<class R> class Divc_KN_;// vector b/a_i
 template<class R> class Add_Mulc_KN_;
 template<class R> class Mul_KNM_KN_; 
 template<class R> class DotStar_KN_;
@@ -378,6 +380,7 @@ class SetArray { public:
     long size() const {return n;}
 };
 
+/// <<KN_>>
 template<class R>
 class KN_: public  ShapeOfArray {
 protected:
@@ -504,7 +507,13 @@ public:
    KN_& operator-=(const Mulc_KN_<R> & u) ;
    KN_& operator*=(const Mulc_KN_<R> & u) ;
    KN_& operator/=(const Mulc_KN_<R> & u) ;
-  
+ 
+    KN_& operator =(const Divc_KN_<R> & u) ;
+    KN_& operator+=(const Divc_KN_<R> & u) ;
+    KN_& operator-=(const Divc_KN_<R> & u) ;
+    KN_& operator*=(const Divc_KN_<R> & u) ;
+    KN_& operator/=(const Divc_KN_<R> & u) ;
+    
    KN_& operator =(const Add_Mulc_KN_<R> & u) ;
    KN_& operator+=(const Add_Mulc_KN_<R> & u) ;
    KN_& operator-=(const Add_Mulc_KN_<R> & u) ;
@@ -993,7 +1002,9 @@ class KN :public KN_<R> { public:
         { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const Mulc_KN_<R> & u)  
         { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
-   KN& operator =(const Add_Mulc_KN_<R> & u)  
+   KN& operator =(const Divc_KN_<R> & u)
+    { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
+   KN& operator =(const Add_Mulc_KN_<R> & u)
         { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
    KN& operator =(const if_arth_KN_<R> & u)  
         { if(this->unset()) this->set(new R[u.a.N()],u.a.N());KN_<R>::operator=(u);return *this;}
@@ -1048,7 +1059,9 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator-=(u);return *this;}
    KN& operator -=(const Mulc_KN_<R> & u)  
         { KN_<R>::operator-=(u);return *this;}
-   KN& operator -=(const Add_Mulc_KN_<R> & u)  
+   KN& operator -=(const Divc_KN_<R> & u)
+    { KN_<R>::operator-=(u);return *this;}
+   KN& operator -=(const Add_Mulc_KN_<R> & u)
         { KN_<R>::operator-=(u);return *this;}
    KN& operator -=(const if_arth_KN_<R> & u)  
         { KN_<R>::operator-=(u);return *this;}
@@ -1069,7 +1082,9 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator+=(u);return *this;}
    KN& operator +=(const Mulc_KN_<R> & u)  
         { KN_<R>::operator+=(u);return *this;}
-   KN& operator +=(const Add_Mulc_KN_<R> & u)  
+   KN& operator +=(const Divc_KN_<R> & u)
+    { KN_<R>::operator+=(u);return *this;}
+   KN& operator +=(const Add_Mulc_KN_<R> & u)
         { KN_<R>::operator+=(u);return *this;}
    KN& operator +=(const if_arth_KN_<R> & u)  
         { KN_<R>::operator+=(u);return *this;}
@@ -1087,6 +1102,9 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator/=(u);return *this;}
    KN& operator /=(const Mulc_KN_<R> & u)  
         { KN_<R>::operator/=(u);return *this;}
+   KN& operator /=(const Divc_KN_<R> & u)
+    { KN_<R>::operator/=(u);return *this;}
+    
    KN& operator /=(const Add_Mulc_KN_<R> & u)  
         { KN_<R>::operator/=(u);return *this;}
    KN& operator /=(const if_arth_KN_<R> & u)  
@@ -1105,7 +1123,9 @@ class KN :public KN_<R> { public:
         { KN_<R>::operator*=(u);return *this;}
    KN& operator *=(const Mulc_KN_<R> & u)  
         { KN_<R>::operator*=(u);return *this;}
-   KN& operator *=(const Add_Mulc_KN_<R> & u)  
+   KN& operator *=(const Divc_KN_<R> & u)
+    { KN_<R>::operator*=(u);return *this;}
+   KN& operator *=(const Add_Mulc_KN_<R> & u)
         { KN_<R>::operator*=(u);return *this;}
    KN& operator *=(const if_arth_KN_<R> & u)  
         { KN_<R>::operator*=(u);return *this;}
@@ -1372,6 +1392,15 @@ class Mulc_KN_ { public:
 {  return outProduct_KN_<R>(a,bb,b);} 
 
  };  
+template<class R>
+class Divc_KN_ {
+    // // vector b/a_i ..
+public:
+    const KN_<const_R>  a;  const_R  b;
+    Divc_KN_(const_R  bb,const KN_<const_R> & aa) : a(aa),b(bb) {}
+  //  Divc_KN_(const Divc_KN_<R> & aa,const_R  bb) : a(aa.a),b(aa.b*bb) {}
+    Divc_KN_ operator-() const {return Divc_KN_(a,-b);}
+};  
 
 template<class R> 
 class Add_Mulc_KN_ { public:
@@ -1423,11 +1452,13 @@ template<class R> inline Sub_KN_<R> operator-(const KN_<const_R> &a,const KN_<co
 template<class R> inline Mulc_KN_<R> operator*(const KN_<const_R> &a,const R &b) 
     { return Mulc_KN_<R>(a,b);}
 template<class R> inline Mulc_KN_<R> operator/(const KN_<const_R> &a,const R &b) 
-    { return Mulc_KN_<R>(a,1/b);}
+    { return Mulc_KN_<R>(a,R(1)/b);}
 template<class R> inline Mulc_KN_<R> operator*(const R &b,const KN_<const_R> &a) 
     { return Mulc_KN_<R>(a,b);}
-template<class R> inline Mulc_KN_<R> operator-(const KN_<const_R> &a) 
-    { return Mulc_KN_<R>(a,-1);}
+template<class R> inline Divc_KN_<R> operator/(const R &b,const KN_<const_R> &a)
+{ return Divc_KN_<R>(b,a);}
+template<class R> inline Mulc_KN_<R> operator-(const KN_<const_R> &a)
+    { return Mulc_KN_<R>(a,R(-1));}
 
 
 
@@ -1461,8 +1492,11 @@ template<class R> inline bool  SameShape(const ShapeOfArray & a,const Add_KN_<R>
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const Sub_KN_<R> & b) 
            { return SameShape(a,b.a) ;} 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const Mulc_KN_<R> & b) 
-           { return SameShape(a,b.a) ;} 
-template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotStar_KN_<R> & b) 
+           { return SameShape(a,b.a) ;}
+template<class R> inline bool  SameShape(const ShapeOfArray & a,const Divc_KN_<R> & b)
+{ return SameShape(a,b.a) ;}
+
+template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotStar_KN_<R> & b)
            { return SameShape(a,b.a) ;} 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotSlash_KN_<R> & b) 
            { return SameShape(a,b.a) ;} 

@@ -50,6 +50,23 @@ long lapack_inv(KNM<double>* A)
   return info;
 }
 
+long lapack_inv(KNM<Complex>* A)
+{
+    intblas n=A->N();
+    intblas m=A->M();
+    Complex *a=&(*A)(0,0);
+    intblas info;
+    intblas lda=n;
+    KN<intblas> ipiv(n);
+    intblas  lw=10*n;
+    KN<Complex> w(lw);
+    ffassert(n==m);
+    zgetrf_(&n,&n,a,&lda,ipiv,&info);
+    if(info) return info;
+    zgetri_(&n,a,&lda,ipiv,w,&lw,&info);
+    return info;
+}
+
 // (computation of the eigenvalues and right eigenvectors of a real nonsymmetric matrix)
 long lapack_dgeev(KNM<double> *const &A,KN<Complex> *const &vp,KNM<Complex> *const &vectp)
 {
@@ -144,10 +161,10 @@ long lapack_dgeev(KNM<double> *const &A,KN<Complex> *const &vp,KNM<Complex> *con
   dgeev_(&JOBVL,&JOBVR,&n,mat,&n,wr,wi,vl,&n,vr,&n,w,&lw,&info);
   lw=w[0];
   w.resize(lw);
-  cout << mat << endl;
+  //cout << mat << endl;
   dgeev_(&JOBVL,&JOBVR,&n,mat,&n,wr,wi,vl,&n,vr,&n,w,&lw,&info);
-  cout << wr << endl;
-  cout << wi << endl;
+  //cout << wr << endl;
+  //cout << wi << endl;
   if (info<0)
      {
      cout << "   dgeev: the " << info << "-th argument had an illegal value." << endl;
@@ -686,7 +703,7 @@ class OneBinaryOperatorRNM_inv : public OneOperator { public:
     if ( ! p->EvaluableWithOutStack() ) 
       { 
 	bool bb=p->EvaluableWithOutStack();
-	cout << bb << " " <<  * p <<  endl;
+	cout << "  Error exposant ??? " <<  bb << " " <<  * p <<  endl;
 	CompileError(" A^p, The p must be a constant == -1, sorry");}
     long pv = GetAny<long>((*p)(0));
     if (pv !=-1)   
@@ -703,7 +720,7 @@ class Init { public:
   Init();
 };
 */
-
+template <int INIT>
 KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b) 
 {
   /*
@@ -749,7 +766,10 @@ KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b)
   integer  n= B.N();
   KN<integer> p(n);
   ffassert(B.M()==n);
-  a->resize(n,n);
+  if(INIT)
+      a->init(n,n);
+   else
+    a->resize(n,n);
   *a=0.;
   for(int i=0;i<n;++i)
     (*a)(i,i)=(R) 1;;
@@ -758,6 +778,7 @@ KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b)
   if(info) cerr << " error:  dgesv_ "<< info << endl;
   return a;
 }
+
 
 // Template interface 
 inline int gemm(char *transa, char *transb, integer *m, integer *
@@ -839,6 +860,7 @@ KNM<R>* mult(KNM<R >* a,Mult<KNM<R >*> bc)
         return NULL;
 }
 
+template <int INIT>
 KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b) 
 {
   /*
@@ -884,7 +906,10 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
   integer   n= B.N();
   KN<integer> p(n);
   ffassert(B.M()==n);
-  a->resize(n,n);
+  if(INIT)
+     a->init(n,n);
+  else
+     a->resize(n,n);
   *a=0.;
   for(int i=0;i<n;++i)
     (*a)(i,i)=(R) 1;;
@@ -893,26 +918,7 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
   if(info) cerr << " error:  zgesv_ "<< info << endl;
   return a;
 }
-/*
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
-  // avec de matrice plein 
-  //  B = A ^-1 * C;
-  //  A = A ^-1;
-  Dcl_Type< Inverse<KNM<double >* > > ();
-  Dcl_Type< Inverse<KNM<Complex >* > > ();
-  
-  TheOperators->Add("^", new OneBinaryOperatorRNM_inv<double>());
-  TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
-  TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
-  TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
-  
-
- 
-}
-
-*/
 LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 template<class R,class A,class B> R Build2(A a,B b) {
@@ -934,8 +940,11 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("*", new OneOperator2< Mult< KNM<Complex>* >,KNM<Complex>*,KNM<Complex>*>(Build2));
       
       TheOperators->Add("^", new OneBinaryOperatorRNM_inv<Complex>());
-      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve) );
-      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC) );
+      TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve<0>) );
+      TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC<0>) );
+      TheOperators->Add("<-", new OneOperator2<KNM<double>*,KNM<double>*,Inverse<KNM<double >*> >( Solve<1>) );
+      TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Inverse<KNM<Complex >*> >( SolveC<1>) );
+        
       TheOperators->Add("=", new OneOperator2<KNM<double>*,KNM<double>*,Mult<KNM<double >*> >( mult<double,false,0> ) );
       TheOperators->Add("=", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,false,0> ) );
       
@@ -949,8 +958,14 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       TheOperators->Add("<-", new OneOperator2<KNM<Complex>*,KNM<Complex>*,Mult<KNM<Complex >*> >( mult<Complex,true,0> ) );
       
       Global.Add("inv","(",new  OneOperator1<long,KNM<double>*>(lapack_inv));  
-      Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));  
-      Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));  
+      Global.Add("inv","(",new  OneOperator1<long,KNM<Complex>*>(lapack_inv));
+        
+      Global.Add("dgeev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));
+      Global.Add("zgeev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));
+        // add FH
+       Global.Add("geev","(",new  OneOperator3_<long,KNM<double>*,KN<Complex>*,KNM<Complex>*>(lapack_dgeev));
+       Global.Add("geev","(",new  OneOperator3_<long,KNM<Complex>*,KN<Complex>*,KNM<Complex>*>(lapack_zgeev));
+        
       Global.Add("dggev","(",new  OneOperator5_<long,KNM<double>*,KNM<double>*,KN<Complex>*,KN<double>*,KNM<Complex>*>(lapack_dggev));
       Global.Add("dsygvd","(",new  OneOperator4_<long,KNM<double>*,KNM<double>*,KN<double>*,KNM<double>*>(lapack_dsygvd));
       Global.Add("dgesdd","(",new  OneOperator4_<long,KNM<double>*,KNM<double>*,KN<double>*,KNM<double>*>(lapack_dgesdd));

@@ -84,11 +84,11 @@ endif
 	../examples++-load/ff-c++ -auto -mpi $<
 
 install-exec-local:: 
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
+	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	-for i in $(LIST_COMPILE); do \
-	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
+	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib/mpi; fi; done
 	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
 
 

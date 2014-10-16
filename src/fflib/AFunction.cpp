@@ -47,6 +47,45 @@
 
 #include "array_init.hpp"
 
+// Add FH to get memroy used in test .. march 2014
+#if __APPLE__
+#include <malloc/malloc.h>
+#elif HAVE_MALLOC_H
+#include <malloc.h> 
+#endif
+#ifdef HAVE_TIMES
+#include <time.h>
+#endif
+long storageused()
+{
+#if HAVE_MSTATS
+    struct mstats mem1;
+    mem1 = mstats();
+    return mem1.bytes_used;
+#elif HAVE_MALLINFO
+    struct mallinfo mem1;
+    mem1=mallinfo();
+    return mem1.uordblks;
+#else
+    return 0;
+#endif
+
+}
+long storagetotal()
+{
+#if HAVE_MSTATS
+    struct mstats mem1;
+    mem1 = mstats();
+    return mem1.bytes_total;
+#elif HAVE_MALLINFO
+    struct mallinfo mem1;
+    mem1=mallinfo();
+    return mem1.keepcost;
+#else
+    return 0;
+#endif
+}
+// end add mach 2014 ...
 extern Map_type_of_map map_type_of_map ; //  to store te type 
 extern Map_type_of_map map_pair_of_type ; //  to store te type 
 
@@ -895,6 +934,15 @@ inline double walltime(){
 #endif
 }
 
+inline long fftime()
+{
+#ifdef HAVE_GETTIMEOFDAY
+    time_t tloc;
+    return time(&tloc);
+#endif
+    return -1;
+}
+
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
 double NaN(string* p) {return nan(p->c_str());}// add march 2012
@@ -1017,8 +1065,11 @@ void Init_map_type()
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
      
      Global.New("cout",CConstant<ostream*>(&cout));
+     Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));
      Global.New("append",CConstant<ios::openmode>(ios::app));
+     Global.New("binary",CConstant<ios::openmode>(ios::binary)); // add FH april 2014
+     TheOperators->Add("|",new OneBinaryOperator<Op2_pipe<ios::openmode> >); // add FH april 2014
      Global.New("endl",CConstant<const char*>("\n"));
      Global.New("true",CConstant<bool>(true));
      Global.New("false",CConstant<bool>(false));
@@ -1296,8 +1347,9 @@ void Init_map_type()
 //       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
        new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006 
        new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,  //  FH string * mars 2006 
-       new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >      //  FH string * mars 2006   
-       );  
+       new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >  ,    //  FH string * mars 2006
+       new OneTernaryOperator3<Op2_set_pstringiomode<istream**,ifstream> >   //  FH string * april  2014
+       );
        
      atype<istream* >()->AddCast( new E_F1_funcT<istream*,istream**>(UnRef<istream* >)); 
      atype<ostream* >()->AddCast( new E_F1_funcT<ostream*,ostream**>(UnRef<ostream* >)); 
@@ -1373,15 +1425,20 @@ void Init_map_type()
      Global.Add("cos","(",new OneOperator1<double>(cos));
 //     Global.Add("square","(",new OneOperator1_<double>(Square));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
-     Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
+    Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
     Global.Add("square","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
+ //add for Olivier FH July 2017
+    Global.Add("sqr","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
+    Global.Add("sqr","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
+    Global.Add("sqr","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
 
      Global.Add("round","(",new OneOperator1<double>(round)); // add june 2007
      Global.Add("lround","(",new OneOperator1<long,double>(lround)); // add june 2007
      Global.Add("floor","(",new OneOperator1<double>(floor)); // add march 2006
      Global.Add("ceil","(",new OneOperator1<double>(ceil));  // add march 2006
      Global.Add("rint","(",new OneOperator1<double>(rint));  // add june 2006
-     
+     Global.Add("lrint","(",new OneOperator1<long,double>(lrint));  // add mars  2014
+    
      Global.Add("sin","(",new OneOperator1<double>(sin));
      Global.Add("tan","(",new OneOperator1<double>(tan));
      Global.Add("atan","(",new OneOperator1<double>(atan));
@@ -1430,6 +1487,8 @@ void Init_map_type()
      Global.Add("max","(",new OneOperator2_<long,long>(Max));
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
      Global.Add("atan2","(",new OneOperator2<double>(atan2));
+     Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
+    
      Global.Add("atan","(",new OneOperator2<double>(atan2));
      Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));
      Global.Add("abs","(",new OneOperator1<double>(Abs));
@@ -1440,7 +1499,7 @@ void Init_map_type()
      Global.Add("cosh","(",new OneOperator1_<Complex>(cosh));
      Global.Add("log","(",new OneOperator1_<Complex>(log));
      //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
-     //     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
+     Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
      Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));
@@ -1467,7 +1526,10 @@ void Init_map_type()
      Global.Add("assert","(",new OneOperator1<bool>(Assert));     
      
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
-    Global.Add("time","(",new OneOperator0<double>(walltime));// add mars 2010 for Pichon. 
+    Global.Add("time","(",new OneOperator0<double>(walltime));// add mars 2010 for Pichon.
+    Global.Add("ltime","(",new OneOperator0<long>(fftime));// add mars 2014 ( the times unix fonction)
+    Global.Add("storageused","(",new OneOperator0<long>(storageused));
+    Global.Add("storagetotal","(",new OneOperator0<long>(storagetotal));
     
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
      Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006 

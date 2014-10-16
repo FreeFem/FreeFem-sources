@@ -276,16 +276,180 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
     
     
 };
+// Fin Add FH Houston --------
+
+// for Jolivet  to build restriction  jan 2014
+// t[int] I= restrict(VCh,VGh,IPG); //  ou
+template<class pfes>
+class RestrictArray : public OneOperator { public:
+    template< typename T > struct Base { typedef  T B; };
+    template< typename T > struct Base< T* >{ typedef T B;};
+
+    typedef  typename Base<pfes>::B::FESpace FESpace;
+    typedef typename FESpace::FElement FElement;
+  //  typedef  FESpace FESpace;
+    
+    class Op : public E_F0info { public:  // passe de l'info ..
+        typedef pfes * A;
+        Expression a,b,c,d;
+        // if c = 0 => a,b FESpace
+        // if c != a FESpace et b,c KN_<double>
+        static const int n_name_param =0;
+     //   static basicAC_F0::name_and_type name_param[] ;
+        Expression nargs[n_name_param];
+        bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+        long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+        KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+        
+    public:
+        Op(const basicAC_F0 &  args,Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc),d(0) {
+          args.SetNameParam(n_name_param,0,nargs);
+          
+        }
+        /*
+        AnyType operator()(Stack stack)  const
+          {
+              if( verbosity>9) cout << " -- RestrictArray  "<< endl;
+              pfes * pCUh = GetAny< pfes * >((* a)(stack));
+              pfes * pFVh = GetAny<  pfes * >((* b)(stack));
+              // verif same  FE.
+              KN_<long> ncf=  GetAny<  KN_<long>  >((* c)(stack));
+              FESpace * pVCh = **pCUh;
+              FESpace * pVFh = **pFVh;
+              FESpace  VCh = *pVCh;
+              FESpace  VFh = *pVFh;
+              long neC = VCh.NbOfElements   ;
+              long neF = VFh.NbOfElements   ;
+              long ndfC = VCh.NbOfDF   ;
+              long ndfF = VFh.NbOfDF   ;
+              
+              KN_<long> nc2f= ncf;
+              
+              KN<long> *pnum=new KN<long>(ndfC);
+              KN<long> inj=*pnum;
+              inj = -1; // un set ..
+              if( verbosity>9) cout<< " ne =" << neC << " " << neF << endl;
+              
+              for(int kc=0; kc <VCh.NbOfElements; kc++)
+              {
+                  
+                  int kf = nc2f(kc);
+                  FElement KC(pVCh,kc);
+                  FElement KF(pVFh,kf);
+                  
+                  int ndofKC = KC.NbDoF() ;
+                  int ndofKF =  KF.NbDoF() ;
+                  if( verbosity>99) cout << kc << " " << kf << " : " <<ndofKC << " " << ndofKF << endl;
+                  ffassert(ndofKC== ndofKF );
+                  ffassert( kf >= 0 && kf < neF);
+                  ffassert( kc >= 0 && kc< neC);
+ 
+                  for(int df=0; df<ndofKC; df++)
+                  {
+                      int dfC =KC(df), dfF=KF(df);
+                      if( verbosity>99) cout << dfC <<" ->  "<< dfF << endl;
+                      assert(dfC >= 0 && dfC < ndfC);
+                      inj[dfC] = dfF;
+                  }
+                 
+              }
+              
+              if( verbosity>9) cout << " restrict:  Inject= " << inj << endl;
+               ffassert(inj.min() != -1);
+            //Add2StackOfPtr2FreeRC(stack,pnum);
+              
+            return pnum;
+          }
+	*/
+    };
+    RestrictArray() : OneOperator(  atype<const typename RestrictArray<pfes>::Op *>(),//atype<KN<long>* >(),
+                                        atype<pfes *>(),
+                                        atype<pfes *>(),
+                                        atype<KN_<long> >()) {}
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        if(args.size()!=3)CompileError("Bug in RestrictArray code nb of args !=  3 ????? bizarre" );
+      return  new Op(args,t[0]->CastTo(args[0]),
+                           t[1]->CastTo(args[1]),
+                           t[2]->CastTo(args[2]));
+    }
+};
+// end restrict ...
+template< typename T > struct Base { typedef  T B; };
+template< typename T > struct Base< T* >{ typedef T B;};
+
+template<class pfes, int INIT>
+AnyType SetRestrict(Stack stack,Expression einj,Expression erest)
+{
+    
+    typedef  typename Base<pfes>::B::FESpace FESpace;
+    typedef typename FESpace::FElement FElement;
+
+   KN<long>  * pinj =GetAny<KN<long>*>((*einj)(stack));
+   const typename RestrictArray<pfes>::Op * ar(dynamic_cast<const typename RestrictArray<pfes>::Op *>(erest));
+    ffassert(ar);
+    if( verbosity>9) cout << " -- RestrictArray  "<< endl;
+    pfes * pCUh = GetAny< pfes * >((* ar->a)(stack));
+    pfes * pFVh = GetAny<  pfes * >((* ar->b)(stack));
+    // verif same  FE.
+    KN_<long> ncf=  GetAny<  KN_<long>  >((* ar->c)(stack));
+    FESpace * pVCh = **pCUh;
+    FESpace * pVFh = **pFVh;
+    FESpace & VCh = *pVCh;
+    FESpace & VFh = *pVFh;
+    long neC = VCh.NbOfElements   ;
+    long neF = VFh.NbOfElements   ;
+    long ndfC = VCh.NbOfDF   ;
+    long ndfF = VFh.NbOfDF   ;
+    
+    KN_<long> nc2f= ncf;
+    if(INIT==0)
+        pinj->init(ndfC);
+    else pinj->resize(ndfC);
+  //  KN<long> *pnum= INIT ==0 ? new KN<long>(ndfC): pnum;
+    KN<long> & inj=*pinj;
+    inj = -1; // un set ..
+    if( verbosity>9) cout<< " ne =" << neC << " " << neF << endl;
+    
+    for(int kc=0; kc <VCh.NbOfElements; kc++)
+    {
+        
+        int kf = nc2f(kc);
+        FElement KC(pVCh,kc);
+        FElement KF(pVFh,kf);
+        
+        int ndofKC = KC.NbDoF() ;
+        int ndofKF =  KF.NbDoF() ;
+        if( verbosity>99) cout << kc << " " << kf << " : " <<ndofKC << " " << ndofKF << endl;
+        ffassert(ndofKC== ndofKF );
+        ffassert( kf >= 0 && kf < neF);
+        ffassert( kc >= 0 && kc< neC);
+        
+        for(int df=0; df<ndofKC; df++)
+        {
+            int dfC =KC(df), dfF=KF(df);
+            if( verbosity>99) cout << dfC <<" ->  "<< dfF << endl;
+            assert(dfC >= 0 && dfC < ndfC);
+            inj[dfC] = dfF;
+        }
+        
+    }
+    if( verbosity>9) cout << " restrict:  Inject= " << inj << endl;
+    ffassert(inj.min() != -1);
+   
+  return pinj;
+}
 
 // Fin Add FH Houston --------
 template<class pfes>
-class MatrixInterpolation : public OneOperator { public:  
+class MatrixInterpolation : public OneOperator { public:
 
     class Op : public E_F0info { public:
        typedef pfes * A;
-       Expression a,b,c,d; 
+       Expression a,b,c,d;
        // if c = 0 => a,b FESpace
-       // if c != a FESpace et b,c KN_<double> 
+       // if c != a FESpace et b,c KN_<double>
        static const int n_name_param =5;
        static basicAC_F0::name_and_type name_param[] ;
         Expression nargs[n_name_param];
@@ -427,7 +591,9 @@ template<class R>
 AnyType SetMatrix_Op<R>::operator()(Stack stack)  const 
 {
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
-   assert(A && A->A);
+   
+    ffassert(A);
+    if( !A->A) A->A.master(new MatriceMorse<R>());//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
     bool VF=false;
    // bool factorize=false;
@@ -2747,6 +2913,25 @@ void  init_lgmat()
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes>(1));
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>);
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>(1,1));
+    
+    Dcl_Type<const  RestrictArray<pfes>::Op *>();
+    Dcl_Type<const  RestrictArray<pfes3>::Op *>();
+  //  Add<const RestrictArray<pfes>::Op *>("<-","(", new RestrictArray<pfes>);
+  //  Add<const RestrictArray<pfes3>::Op *>("<-","(", new RestrictArray<pfes3>);
+  
+  Global.Add("restrict","(",new RestrictArray<pfes>);// FH Jan 2014
+  Global.Add("restrict","(",new RestrictArray<pfes3>);// FH Jan 2014
+    
+  TheOperators->Add("=",
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,1>),
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,1>)
+                      );
+    TheOperators->Add("<-",
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,0>),
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,0>)
+                      );
+  
+
   Global.Add("interpolate","(",new MatrixInterpolation<pfes>);
   Global.Add("interpolate","(",new MatrixInterpolation<pfes>(1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfes3>);
@@ -2778,7 +2963,8 @@ void  init_lgmat()
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolation3)
 		   );
- 
+
+    
  TheOperators->Add("<-",
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolation3)

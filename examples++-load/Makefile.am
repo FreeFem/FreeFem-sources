@@ -1,5 +1,5 @@
 all-local: @LOAD_COMPILE@
-TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NSP2BRP0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE.edp testFEMorley.edp tetgencube.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp
+TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NSP2BRP0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp  ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE.edp testFEMorley.edp tetgencube.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp bfstream.edp bilapP3-hct-like.edp
 # all test can fail must but clean ????  FH... 
 XFAIL_TESTS=$(TESTS)
 
@@ -30,7 +30,7 @@ ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
  ffnewuoa.cpp		newuoa.f Element_P1dc1.cpp ilut.cpp  \
  freeyams.cpp mmg3d-v4.0.cpp  mshmet.cpp \
- BinaryIO.cpp	gsl.cpp   gsl.awk ff_gsl_awk.hpp isolineP1.cpp isoline.cpp lg.pgm  \
+ BinaryIO.cpp	gsl.cpp   gsl.awk ff_gsl_awk.hpp gsl.idp isolineP1.cpp isoline.cpp lg.pgm  \
  thresholdings.cpp	 \
  VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp  \
  Element_Mixte.cpp    \
@@ -42,12 +42,13 @@ ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  RZ.h SortedList.h ExampleMetrics.h  \
  cube.msh  \
  MUMPS_seq.cpp \
+ MUMPS.cpp \
  ff-Ipopt.cpp \
  scotch.cpp    shell.cpp \
  pipe.cpp pstream.h  \
  symmetrizeCSR.cpp \
  dmatrix.hpp PARDISO.cpp             \
- ch.pts  
+ ch.pts   BEC.cpp bfstream.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -67,7 +68,8 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
-	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX) 
+	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX)  BEC.$(DYLIB_SUFFIX) \
+	bfstream.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
@@ -196,6 +198,7 @@ freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
+	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
@@ -213,8 +216,20 @@ install-exec-local:: load_compile WHERE_LIBRARY
 ##	$(DESTDIR)${bindir}/ff-pkg-download $(DESTDIR) >$(DESTDIR)$(ff_prefix_dir)/lib/WHERE_LIBRARY-download
 	-for i in $(LIST_COMPILE_PKG); do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
+	- if [ -n "$(MPIPROG)" ] ; then \
+		for i in $(LIST_COMPILE_PKG) $(LIST_COMPILE); do \
+		 if [ -f ../examples++-mpi/$$i ] ; then \
+	    	    $(INSTALL)  -m 555 ../examples++-mpi/$$i $(DESTDIR)$(ff_prefix_dir)/lib/mpi; \
+	        else echo missing install mpi version ???  ../examples++-mpi/$$i ;\
+	         fi;  \
+	        done ; \
+	fi
 
-
+clean-local::
+	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh ListOfAllocPtr-8.bin ffglut*.ppm Th.o.meshb	Th3.d.meshb	dep.sol.meshbgh \
+ipopt.out	mmg.out xxxx ThFF.txt		TriQA.txt		cavidadTT.txt		mass.txt		xy.txt \
+ThFF_Metric.txt		TriQA_Metric.txt	datanc.txt		u100m8.txt \
+TTh.sol		Th.o.sol	Th3.sol		dep.o.sol	dep.sol		gradient.sol	hessien.sol pippo.data pippo.dx testsavemedit.solb med.gp bidule.vtk	disque.vtk g-iso 
 
 
 # FFCS: add tags for files that are not specified to automake by a SOURCE directive (this tags file is automatically

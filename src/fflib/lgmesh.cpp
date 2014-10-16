@@ -58,7 +58,12 @@ using namespace std;
 #include "BamgFreeFem.hpp"
 #include "lgfem.hpp"
 */
+
 #include "ff++.hpp"
+#include "AFunction_ext.hpp"
+
+
+#include "lgmesh.hpp"
 
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
@@ -316,7 +321,7 @@ class Adaptation :   public E_F0mps { public:
   typedef pmesh  Result;
   
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =27;
+  static const int n_name_param =28;
   
   int nbsol;    
   Expression nargs[n_name_param];
@@ -330,6 +335,7 @@ class Adaptation :   public E_F0mps { public:
   
   double arg(int i,Stack stack,double a) const { return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
   long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+  long* arg(int i,Stack stack,long* a) const{ return nargs[i] ? GetAny<long*>( (*nargs[i])(stack) ): a;}
   bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
   int arg(int i,Stack stack,int a) const{ return nargs[i] ? GetAny<int>( (*nargs[i])(stack) ): a;}
   
@@ -433,19 +439,23 @@ class Adaptation :   public E_F0mps { public:
        {  "nomeshgeneration", &typeid(bool) },
        {   "metric"          ,  &typeid(E_Array)},  // 24
        {   "periodic"        ,  &typeid(E_Array) },// 25 
-       { "requirededges",    &typeid(KN_<long> ) } // 26 
+       { "requirededges",    &typeid(KN_<long> ) }, // 26
+       { "warning",    &typeid(long *) } // 27
+     
     };
 
 struct Op_trunc_mesh : public OneOperator {
 
     class Op: public E_F0mps   { public:
       static basicAC_F0::name_and_type name_param[] ;
-      static const int n_name_param =2;
+      static const int n_name_param =4;
       Expression nargs[n_name_param];
     
       Expression getmesh,bbb;
       long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-      Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b) 
+        
+       KN<long> *  arg(int i,Stack stack) const{ return nargs[i] ? GetAny<KN<long> *>( (*nargs[i])(stack) ): 0;}
+      Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b)
         { args.SetNameParam(n_name_param,name_param,nargs); }
       AnyType operator()(Stack s)  const ;
      };
@@ -458,7 +468,9 @@ struct Op_trunc_mesh : public OneOperator {
 basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_name_param] =
  {
    {  "split",             &typeid(long)},
-   {  "label",             &typeid(long)}
+   {  "label",             &typeid(long)},
+   { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jovilet jan 2014
+   { "old2new", &typeid(KN<long>*)}   //  ajout FH pour P. Jovilet jan 2014
  
  };
 
@@ -471,6 +483,7 @@ AnyType classBuildMesh::operator()(Stack stack)  const {
    long  nbvx         = arg(0,stack,0L); 
    bool  requireborder=  arg(1,stack,false);
    ffassert(   nbvx >= 0);
+   
    return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder)));
 
 }
@@ -490,8 +503,11 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
     long kkksplit =arg(0,stack,1L);
     long label =arg(1,stack,2L);
+    KN<long> * pn2o =  arg(2,stack);
+    KN<long> * po2n =  arg(3,stack);
     KN<int> split(Th.nt);
     split=kkksplit;
+    long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
     long kk=0;
     for (int k=0;k<Th.nt;k++)
@@ -502,6 +518,32 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
        if (  GetAny<bool>((*bbb)(stack))  ) kk++;
        else  split[k]=0  ;    
      }
+    
+    if(pn2o)
+        {
+          pn2o->resize(kk*ks);
+          KN<long> &n2o(*pn2o);
+          int l=0;
+          for(int k=0; k< Th.nt; ++k)
+             if( split[k] )
+                 for(int i=0; i< ks; ++i)
+                     n2o[l++] = k;
+        }
+        if(po2n)
+        {
+            po2n->resize(Th.nt);
+            KN<long> &o2n(*po2n);
+            int l=0;
+            for(int k=0; k< Th.nt; ++k)
+                if( split[k] )
+                {
+                        o2n[k] = l;
+                       l+=ks;
+                }
+            else o2n[k]=-1;
+        }
+
+    
      *mp=mps;
      if (verbosity>1) 
      cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
@@ -696,6 +738,11 @@ AnyType Adaptation::operator()(Stack stack) const
   double cutoffradian          = arg(21,stack,-1.0)* bamg::Pi/180. ;
   bool split                    = arg(22,stack,false) ;
   bool nomeshgeneration         = arg(23,stack,false) ;
+  long lwarning=0;
+
+  long * pwarning                = arg(27,stack,&lwarning) ;
+  long &warning=*pwarning; //  get get warning message ...
+    
   //   the 24th param is metrix  and is store at compilation time
   //  const E_Array * expmetrix = dynamic_cast<const E_Array *>(nargs[24]);
   //   the 25th param is periodic and it store at compilation time
@@ -863,7 +910,6 @@ AnyType Adaptation::operator()(Stack stack) const
   if ( ! nomeshgeneration)
   {
   nTh= new Triangles(nbsx,Th,KeepBackVertices); // Adaption is here
-  
   if (split)
 	    nTh->SplitElement(1); // modif FH mai 2009 (thank J-M Mirebeau) : Th ->nTh
  
@@ -892,6 +938,7 @@ AnyType Adaptation::operator()(Stack stack) const
   Metric M(hmax);
   for (iv=0;iv < Th.nbv;iv++)
     Th[iv].m = M;
+  warning = nTh->warning;
 
   Mesh * g=  bamg2msh(nTh,true);
 
@@ -1126,7 +1173,7 @@ Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double>
 /// <<Carre>> Builds a square-shaped 2D mesh. An Expression [[file:AFunction.hpp::Expression]] is a pointer to an object
 /// of class E_F0 [[file:AFunction.hpp::E_F0]].
 
-Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg=0)
+Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg)
 {
   if(verbosity>99)  cout << " region = " << reg << " labels " << lab <<endl;  
   const int unionjack=1;
@@ -1310,7 +1357,9 @@ public:
     
   static ArrayOfaType  typeargs() { 
     return  ArrayOfaType(atype<long>(),atype<long>(),false);}
-        
+
+  /// <<MeshCarre2_f>>
+
   static  E_F0 * f(const basicAC_F0 & args){
     return new MeshCarre2(args);} 
         
@@ -1686,6 +1735,163 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 }
 
+bool SameMesh(Mesh * const & pTh1,Mesh * const & pTh2)
+{
+    typedef Mesh::Element Element;
+    if( !pTh1) return 0;
+    if( !pTh2) return 0;
+    if( pTh1 == pTh2) return 1;
+    if( pTh1->nv != pTh2->nv) return 0;
+    if( pTh1->nt != pTh2->nt) return 0;
+    Mesh & Th1=*pTh1, & Th2 = *pTh2;
+    ffassert(0); // a faire..
+    
+    return 1;
+}
+
+bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+{
+    ffassert(pTh && psupp && pphi);
+    const int nve = Mesh::Element::NbV;
+    Mesh & Th= *pTh;
+    const int nt = Th.nt;
+    const int nv = Th.nv;
+    
+    KN<double> & supp(*psupp);
+    KN<double> u(nv), s(nt);
+    KN<double> & phi(*pphi);
+    ffassert(supp.N()==nt);//P0
+    ffassert(phi.N()==nv); // P1
+    s = supp;
+    phi=0.;
+    // supp = 0.;
+    // cout << " s  " << s << endl;
+    
+    for(int step=0; step < nlayer; ++ step)
+    {
+        
+        
+        u = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                u[Th(k,i)] += s[k];
+        
+        for(int v=0; v < nv; ++v)
+            u[v] = u[v] >0.;
+        // cout << " u  " << u << endl;
+        
+        phi += u;
+        
+        s = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                s[k] += u[Th(k,i)];
+        
+        for(int k=0; k < nt; ++k)
+            s[k] = s[k] > 0.;
+        supp += s;
+        // cout << " s  " << s << endl;
+    }
+    // cout << " phi  " << phi << endl;
+    phi *= (1./nlayer);
+    // supp =s;
+    return true;
+}
+
+
+double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double & phi0,KN<double>  * const & where)
+{
+    Mesh & Th=*pTh;
+    KN<double> & phi=*pphi;
+    ffassert( phi.N() == Th.nv); // P1
+    double arean=0., areap=0.;
+    for (int k=0;k<Th.nt;k++)
+    {
+        if( !where || (*where)[k] )
+        {
+            const Triangle & K(Th[k]);
+            const Vertex & A(K[0]), &B(K[1]),&C(K[2]);
+            int iK[3]={Th(k,0),Th(k,1),Th(k,2)};
+            R  fk[3]={phi[iK[0]]-phi0,phi[iK[1]]-phi0,phi[iK[2]]-phi0 };
+            int i0 = 0, i1 = 1, i2 =2;
+            if( fk[i0] > fk[i1] ) swap(i0,i1) ;
+            if( fk[i0] > fk[i2] ) swap(i0,i2) ;
+            if( fk[i1] > fk[i2] ) swap(i1,i2) ;
+            
+            if ( fk[i2] <=0.) arean+= K.area;
+            else  if ( fk[i0] >=0.) areap+= K.area;
+            else {
+                double c = (fk[i2]-fk[i1])/(fk[i2]-fk[i0]); // coef Up Traing
+                if( fk[i1] < 0 ) { double y=fk[i2]/(fk[i2]-fk[i1]); c *=y*y; }
+                else {double y=fk[i0]/(fk[i0]-fk[i1]) ; c = 1.- (1.-c)*y*y; };
+                assert( c > -1e-10 && c-1. < 1e-10);
+                areap += c*K.area;
+                arean += (1-c)*K.area;
+            }
+        }
+    }
+    // cout << phi0 << endl;
+    return arean; //  negative area ...
+}
+double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double & phi0)
+{
+    return arealevelset(pTh,pphi,phi0,0);
+}
+
+
+double volumelevelset(Mesh3 * const & pTh,KN<double> * const &pphi,const double & phi0,KN<double> * const & where)
+{
+    Mesh3 & Th = *pTh;
+    KN<double> & phi = *pphi;
+    ffassert(phi.N() == Th.nv); //assertion fails if the levelset function is not P1
+    double volumen=0.,volumep=0.;
+    for(int k=0;k<Th.nt;++k)
+    {
+        if(!where || (*where)[k])
+        {
+            const Tet & K(Th[k]);
+            int iK[4] =  {Th(k,0),Th(k,1),Th(k,2),Th(k,3)};
+            R  fk[4]={phi[iK[0]]-phi0,phi[iK[1]]-phi0,phi[iK[2]]-phi0,phi[iK[3]]-phi0};
+            int ij[4] = {0,1,2,3};
+            for(int i=0;i<4;++i) for(int j=i+1;j<4;++j) if(fk[ij[i]] > fk[ij[j]]) swap(ij[i],ij[j]);
+            if(fk[ij[3]]<=0.) volumen += K.mesure();
+            else if(fk[ij[0]]>=0.) volumep += K.mesure();
+            else
+            {
+                //cout << "ij = {" << ij[0] << ',' << ij[1] << ',' << ij[2] << ',' << ij[3] << '}' << endl;
+                const R3 A[4] = {K[ij[0]],K[ij[1]],K[ij[2]],K[ij[3]]};
+                const R f[4] = {fk[ij[0]],fk[ij[1]],fk[ij[2]],fk[ij[3]]};
+                if(f[0]<0. && f[1]>=0.) //the only negative dof is f0
+                {
+                    double c = (f[0]*f[0]*f[0])/((f[0]-f[1])*(f[0]-f[2])*(f[0]-f[3]));
+                    volumen += c*K.mesure();
+                    volumep += (1.-c)*K.mesure();
+                }
+                else if(f[1]<0. && f[2]>=0.) //two negative dof, this is the hard case...
+                {
+                    const R3  A03 = A[3] + f[3]/(f[3]-f[0]) * (A[0]-A[3]) , A13 = A[3] + f[3]/(f[3]-f[1]) * (A[1]-A[3]),
+                    A02 = A[2] + f[2]/(f[2]-f[0]) * (A[0]-A[2]) , A12 = A[2] + f[2]/(f[2]-f[1]) * (A[1]-A[2]);
+                    double V1 = f[3]*f[3]/((f[3]-f[1])*(f[3]-f[0])) * K.mesure();
+                    double V2 = 1./6.*abs(det(A13-A[2],A12-A[2],A02-A[2]));
+                    double V3 = 1./6.*abs(det(A13-A[2],A02-A[2],A03-A[2]));
+                    volumep += V1+V2+V3;
+                    volumen += (K.mesure() - V1-V2-V3);
+                }
+                else
+                {
+                    double c = (f[3]*f[3]*f[3])/((f[3]-f[0])*(f[3]-f[1])*(f[3]-f[2]));
+                    volumen += (1.-c)*K.mesure();
+                    volumep += c*K.mesure();
+                }
+            }
+        }
+    }
+    return volumen;
+}
+double volumelevelset(Mesh3 * const &pTh,KN<double> * const &pphi,const double & phi0) {return volumelevelset(pTh,pphi,phi0,0);}
+
+
+
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
@@ -1699,8 +1905,11 @@ void init_lgmesh() {
   Global.Add("movemesh","(",new OneOperatorCode<MoveMesh>);
   Global.Add("splitmesh","(",new OneOperatorCode<SplitMesh>);
   Global.Add("checkmovemesh","(",new OneOperatorCode<CheckMoveMesh>);
+
+  /// <<square_keyword>> see [[file:AFunction.hpp::OneOperatorCode]]
   Global.Add("square","(",new OneOperatorCode<MeshCarre2>);
   Global.Add("square","(",new OneOperatorCode<MeshCarre2f>);
+
   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh>);
   Global.Add("trunc","(", new Op_trunc_mesh);
   Global.Add("readmesh","(",new OneOperator1_<pmesh,string*, E_F_F0_Add2RC<pmesh,string*> >(ReadMeshbamg));
@@ -1710,8 +1919,17 @@ void init_lgmesh() {
   Global.Add("triangulate","(",new OneOperator2_<pmesh,KN_<double>,KN_<double>,E_F_F0F0_Add2RC<pmesh,KN_<double>,KN_<double>,E_F0> >(Triangulate));
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
-       
-  // use for :   mesh Th = readmesh ( ...);       
+    // Thg,suppi[],nnn,unssd[]
+  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
+  Global.Add("AddLayers","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
+  // use for :   mesh Th = readmesh ( ...);
+    //  Add FH mars 2015 to compute mesure under levelset ...
+    Global.Add("arealevelset","(",new OneOperator3_<double,Mesh *, KN<double>*,double>(arealevelset));
+    Global.Add("arealevelset","(",new OneOperator4_<double,Mesh *, KN<double>*,double,KN<double>*>(arealevelset));
+    //Global.Add("convectlevelset","(", new OneOperatorCode<ConvectLevelSet0 >( ));
+    Global.Add("volumelevelset","(",new OneOperator3_<double,Mesh3 *,KN<double>*,double>(volumelevelset));
+    Global.Add("volumelevelset","(",new OneOperator4_<double,Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
+
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
   extern void init_glumesh2D();

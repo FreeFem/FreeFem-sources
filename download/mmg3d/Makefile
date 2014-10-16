@@ -1,7 +1,6 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-# $Id$
 all-local: mmg3d
 
 include ff-flags
@@ -36,6 +35,7 @@ OBJSNOP =  cendel.o swapar.o
 mmg3d:WHERE.done
 
 mmg3d4/FAIT-4.done:tag-tar-$(SIZEPKG)
+	echo "#define COMPIL " '"' `date` '"' > ./mmg3d4/build/sources/compil.date
 	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CNOFLAGS) -g'   $(OBJSNOP) 
 	cd mmg3d4/build/sources/; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -g'   $(OBJS) 
 	cd mmg3d4/build/sources/mmg3dmain; $(CC) -c $(CFLAGS)   mmg3d.c -I..
@@ -48,7 +48,7 @@ mmg3d4/FAIT-4.done:tag-tar-$(SIZEPKG)
 	touch mmg3d4/FAIT-4.done
 
 # FFCS - simplify Makefile structure
-install-4.done:mmg3d4/FAIT-4.done
+install-4.done:mmg3d4/FAIT-4.done 
 	-mkdir ../include/mmg3d-v4/		
 	cp mmg3d4/build/sources/*.h ../include/mmg3d-v4/
 	touch $@
@@ -56,11 +56,6 @@ clean::
 	-rm install-4.done
 
 mmg3d-4:$(PACKAGE)
-
-$(PACKAGE):
-	-mkdir $(DIRPKG);
-# 	FFCS - 6/11/12 - curl/MacOS8 does not like redirections
-	cd $(DIRPKG);$(WGET) http://www.math.u-bordeaux1.fr/~cdobrzyn/logiciels/download/mmg3d4.0.tgz
 
 install:install-4.done WHERE.done
 
@@ -76,7 +71,8 @@ clean::
 FAIRE: mmg3d4/FAIT-4.done install-4.done
 
 # FFCS - keep it simple
-tag-tar-$(SIZEPKG): $(PACKAGE)
+tag-tar-$(SIZEPKG): $(PACKAGE) patch-mmg3dv4.diff
+	-rm -rf  mmg3d4
 	tar xvzf $(PACKAGE)
 	touch mmg3d4/build/sources/dataff.h 	
 #
@@ -89,7 +85,8 @@ tag-tar-$(SIZEPKG): $(PACKAGE)
 	touch tag-tar-$(SIZEPKG)
 #	cp makefile-mmg3d.inc $(SRCDIR)/makefile
 
-
+$(PACKAGE):
+	../getall -o MMG3D -a
 
 clean::
 	-rm ff-flags

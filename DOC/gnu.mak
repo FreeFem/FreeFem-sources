@@ -40,6 +40,7 @@
                 $*.toc $*.ind $*.glo $*.out $*.blg $*ilg $*.idx $*.bbl $*.tmp	
 	pdflatex $*
 	pdflatex $*
+	pdflatex $*
 	makeindex $*
 	pdflatex $*
 cpfigs: 
@@ -133,7 +134,7 @@ plots/VarIneqFill.jpg plots/VarIneqIso.jpg \
 plots/NSNewtonTh.jpg  plots/NSNewtonUP.jpg \
 plots/chesapeake-2.jpg \
 plots/minsurf3D.jpg \
-plots/lg.jpg 
+plots/lg.jpg plots/INRIA-logo.jpg 
 
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf \

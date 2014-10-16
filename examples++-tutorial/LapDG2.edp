@@ -32,7 +32,7 @@ varf Ans(u,v)=
             ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
           + pena*jump(u)*jump(v) ) / nTonEdge 
 )
- + int1d(Th,3)(pena*x*v)
+ + int1d(Th,3)(pena*0.*v)
 ;
 func f=1;
 func g=0;

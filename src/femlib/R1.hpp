@@ -36,6 +36,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+
 typedef double R;
 
 //  R0 R1, R2 , R3 to be uniforme. 
@@ -46,6 +47,8 @@ public:
   static const int d=0;
   R0(){}
 };
+class R2;
+class R3;
 
 class R1 {
 public:  
@@ -91,7 +94,11 @@ public:
   R norme2() const { return (x*x);}
   R1 Bary(R1 P[d+1]) const { return (1-x)*P[0]+x*P[1];}  // add FH 
   R1 Bary(const R1 *const *const P ) const { return (1-x)*(*P[0])+x*(*P[1]);}  // add FH 
-friend  R1 operator*(R c,const R1 & P) {return P*c;} 
+  R2 Bary(R2 P[d+1]) const;// { return (1-x)*P[0]+x*P[1];}  // add FH
+  R2 Bary(const R2 *const *const P ) const ;//{ return (1-x)*(*P[0])+x*(*P[1]);}  // add FH
+    R3 Bary(R3 P[d+1]) const ;//{ return (1-x)*P[0]+x*P[1];}  // add FH
+    R3 Bary(const R3 *const *const P ) const ;//{ return (1-x)*(*P[0])+x*(*P[1]);}  // add FH
+friend  R1 operator*(R c,const R1 & P) {return P*c;}
 
 friend  std::ostream& operator <<(std::ostream& f, const R1 & P )
        { f << P.x   ; return f; }
