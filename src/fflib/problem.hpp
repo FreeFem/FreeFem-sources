@@ -875,7 +875,7 @@ public:
 
 
 
-template<class K> class Matrice_Creuse  { 
+template<class K> class Matrice_Creuse  {
   //  CountPointer<FESpace> Uh,Vh;
   //pfes  *pUh,*pVh; // pointeur sur la variable stockant FESpace;  
 public:
@@ -883,12 +883,16 @@ public:
   //  const void * pUh,pVh; //  pointeur pour la reconstruction 
   CountPointer<MatriceCreuse<K> > A;  
   TypeSolveMat typemat;
+    size_t count;
   void init() {
+      count=0;
     A.init();Uh.init();Vh.init();
     typemat=TypeSolveMat(TypeSolveMat::NONESQUARE);}
   Matrice_Creuse() { init();}
   void destroy() {
+    if(count)
     A.destroy();
+    else count++;
     //    Uh.destroy();
     //Vh.destroy();
   }   
@@ -899,7 +903,7 @@ public:
   long N() const {return  A ? A->n : 0;}
   long M() const { return A ? A->m : 0;}
   void resize(int n,int m) { if(A) A->resize(n,m);}
-  
+  void increment(){ count++;}
 };
 
 template<class K> class Matrice_Creuse_Transpose;

@@ -669,6 +669,7 @@ public:
   bool EvaluableWithOutStack() const { return f && f->EvaluableWithOutStack();}
   bool Zero() const { return !f || f->Zero();}
   Expression Destroy() {  return r->Destroy(*this);}
+    
   operator const Polymorphic * () const {return  dynamic_cast<const Polymorphic *>(f);}
   bool operator==(const C_F0 & a) const {return f==a.f && r == a.r;}
   bool operator!=(const C_F0 & a) const {return f!=a.f || r != a.r;}
