@@ -93,13 +93,13 @@ varf   vNS ([u1,u2,p],[v1,v2,q]) =
 for(real re=100;re<=reymax;re *=2)
   { 
     
-    real lerr=0.04;
+    real lerr=0.1;
     
-    if(re>8000) lerr=0.01;
-    if(re>10000) lerr=0.005; 
+    if(re>8000) lerr=0.05;
+    if(re>10000) lerr=0.01; 
     for(int step=0;step<2;step++)
       {
-	Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000);
+	Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000,abserror=0, cutoff=0.01);
 	//plot(Th,wait=0);
 	[u1,u2,p]=[u1,u2,p];
 	[up1,up2,pp]=[up1,up2,pp];
