@@ -1,3 +1,8 @@
+15/10/2014 (ALH)
+ - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
+ - Corrected --disable-pdf configuration option (useful for FFCS build)
+ - Removed obsolete cvs history directives
+ - [[file:download/getall]] now checks downloaded packages against known MD5 values
  version 3.32 
  - correct of problem of plugin and mpi,
     build all dynamics lib with and without mpi, 
@@ -52,6 +57,11 @@ version 3.30-1 may/2014 ( hg rev: 3017)
     jump is not zero on boundary, it is - boundary value ..
     fespace Ph(Th,P0);u= 1;int1d(Th)( jump(u) ) = - length border . 
  
+30/6/14 (ALH)
+ - [[file:download/getall]]
+   - now checks downloaded packages against known MD5 values
+   - new -h inline help option
+
 version 3.30. ( for windows hg  rev : 3013)
  - add binary ios:mode constant, to open file in binary mode under window
     to solve pb of seekg under windows  
@@ -117,11 +127,6 @@ version 3.27
      missing all random  distribution ..
  - add interface  with gsl random number generation in test .. 
  - correct pb of compilation under window (mingw32/msys) 
-15/10/2014 (ALH)
- - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
- - Corrected --disable-pdf configuration option (useful for FFCS build)
- - Removed obsolete cvs history directives
- - [[file:download/getall]] now checks downloaded packages against known MD5 values
 6/2/14 (ALH)
  - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
  - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format
