@@ -36,10 +36,10 @@ matrix H;
 	int[int] hi=[0,1,1,2,2,2,3,3,3,3],hj=[0,0,1,0,1,2,0,1,2,3];
 	real[int] hc(hi.n);
 	hc=0.;
-
+	H = [hi,hj,hc];
 func matrix HJ(real[int] &X,real jfactor,real[int] &lambda)
 {
-	H = [hi,hj,hc];
+
 	H(0,0) = jfactor * 2*X[3];
 	H(1,0) = jfactor * X[3];
 	H(2,0) = jfactor * X[3];
@@ -56,7 +56,7 @@ func matrix HJ(real[int] &X,real jfactor,real[int] &lambda)
 	H(1,1) += lambda[1] * 2.;
 	H(2,2) += lambda[1] * 2.;
 	H(3,3) += lambda[1] * 2.;
-	//cout << H << endl;
+	cout << H << endl;
 	return H;
 }
  
@@ -84,7 +84,7 @@ func matrix HJ(real[int] &X,real jfactor,real[int] &lambda)
     GG(1,1) = 2.*X[1];
     GG(1,2) = 2.*X[2];
     GG(1,3) = 2.*X[3];
- 	return GG;
+    return GG;
  }
  
  real[int] start=[1, 5, 5, 1];

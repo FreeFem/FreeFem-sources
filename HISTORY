@@ -1,5 +1,10 @@
-@  changeset:   3069:828f65161d32
+@  changeset:   3070:50157156eec4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Oct 01 16:14:50 2014 +0200
+|  summary:     correct PARDISO / omp interface un uv100
+|
+o  changeset:   3069:828f65161d32
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Sep 16 17:23:35 2014 +0200
 |  summary:     coorect type in parms interface
