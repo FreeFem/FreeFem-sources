@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.31-2}
+\def\VERSION{3.32}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -4169,10 +4169,20 @@ cout << " ||a||_1     = " <<  a.l1     << endl;//\index{array!.l1}
 cout << " ||a||_2     = " <<  a.l2     << endl;//\index{array!.l2}
 cout << " ||a||_infty = " <<  a.linfty << endl;//\index{array!.linfty}
 cout << " sum a_i     = " <<  a.sum    << endl;//\index{array!.sum}
-cout << " max a_i     = " <<  a.max    << endl;//\index{array!.max}
-cout << " min a_i     = " <<  a.min    << endl;//\index{array!.min}
+cout << " max a_i     = " <<  a.max  << " a[  " << a.imax << " ] = " << a[a.imax]     << endl;//\index{array!.max}\index{array!.imax}
+cout << " min a_i     = " <<  a.min  << " a[  " << a.imin << " ] = " << a[a.imin]    << endl;//\index{array!.min}\index{array!.imin}
+
 cout << " a'*a        = " <<  (a'*a)   << endl;//\index{array!dot product}
 cout << " a quantile 0.2 = " <<  a.quantile(0.2) << endl; //\index{array!quantile}
+// array mapping \index{array!mapping}
+int[int] I=[2,3,4,-1,3];
+b=c=-3; 
+b= a(I); // for( i=0;i<b.n;i++) if(I[i] >=0)  b[i]=a[I[i]];
+c(I)= a; // for( i=0;i<I.n;i++) if(I[i] >=0)  C(I[i])=a[i];
+cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
+c(I) += a;// for( i=0;i<I.n;i++) if(I[i] >=0)  C(I[i])+=a[i];
+cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;   
+
 }
 \eFF
 produce the output
@@ -4236,11 +4246,21 @@ b./=a; b =5
  ||a||_2     = 6.403124237
  ||a||_infty = 4
  sum a_i     = 13
- max a_i     = 4
- min a_i     = 1
+ max a_i     = 4 a[  3 ] = 4
+ min a_i     = 1 a[  1 ] = 1
  a'*a        = 41
  a quantile 0.2 = 2
-
+ b = a(I) : 5	
+	  2	  4	  4	 -3	  4
+	
+  c(I) = a 5	
+	 -3	 -3	  2	  4	  2
+	
+ b = a(I) : 5	
+	  2	  4	  4	 -3	  4
+	
+  c(I) = a 5	
+	 -3	 -3	  4	  9	  4
 \eFF
 
 \begin{note}
