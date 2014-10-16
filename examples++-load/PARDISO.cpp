@@ -28,8 +28,16 @@
 #include <mkl_pardiso.h>
 #include <mkl_spblas.h>
 #include <mkl_types.h>
-//#include <omp.h>
+#if 0
+#include <omp.h>
+#else
 
+extern "C" {
+extern int    omp_get_max_threads  (void);
+extern int     omp_get_num_threads  (void);
+extern void    omp_set_num_threads (int);
+}
+#endif
 #include "rgraph.hpp"
 #include "AFunction.hpp"
 
@@ -194,9 +202,6 @@ Init::Init() {
 }
 */
 
-extern int    omp_get_max_threads  (void);
-extern int     omp_get_num_threads  (void);
-extern void    omp_set_num_threads (int);
 
 static long ffompgetnumthreads(){return omp_get_num_threads();}
 static long ffompgetmaxthreads(){return omp_get_max_threads();}

@@ -60,6 +60,7 @@ template<> struct MPI_TYPE<long>      {static const MPI_Datatype  TYPE(){return 
 template<> struct MPI_TYPE<int>      {static const MPI_Datatype TYPE(){return MPI_INT;}};
 template<> struct MPI_TYPE<double>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE;}};
 template<> struct MPI_TYPE<char>    {static const MPI_Datatype TYPE(){return MPI_BYTE;}};
+template<> struct MPI_TYPE<Complex>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
 
 
 static std::string analysis[] = {"AMD", "", "AMF", "SCOTCH", "PORD", "METIS", "QAMD", "automatic sequential", "automatic parallel", "PT-SCOTCH", "ParMetis"};

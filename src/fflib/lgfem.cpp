@@ -4674,12 +4674,26 @@ template<class T> T *resizeandclean2(const Resize<T> & t,const long &n)
   return  t.v;
  }
 
+template<class PMat>
+AnyType ClearReturn(Stack stack, const AnyType & a)
+{
+    // a ne faire que pour les variables local au return...
+    //  pour l'instant on copie pour fqire mqrche
+    // a repense  FH  mqi 20014....
+    PMat * m = GetAny<PMat * >(a);
+    //   KN<K> *cm=new KN<K>(true, *m); bug quant KN est une variable global
+    // KN<K> *cm=new KN<K>( *m); // on duplique le tableau comme en C++  (dur dur ?????? FH)
+    m->increment();
+    Add2StackOfPtr2FreeRC(stack,m);
+    return m;
+}
+
 
 template <class R>
 void DclTypeMatrix()
 {
  
-  Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >);
+  Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >, ClearReturn<Matrice_Creuse<R> >);
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
   Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)

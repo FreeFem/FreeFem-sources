@@ -181,11 +181,20 @@ fi
 if [ -z "$out" ] ; then  out=$o  ; fi;
 if [ -f  "$out.$SUF" ] ; then rm $out.$SUF ; fi 
 
+
 # Default compiler
 if [ -z "$CXX"  ];then  CXX=g++ ; fi
 if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
 
 test "$withmpi" = "yes" && WMPI_LIB="$MPI_LIB"
+
+# build a mpi version of the plugin if the plugin do exist un mpi dir
+# and if the mpi version exist and if 
+OWMPI=""
+test  -d ../examples++-mpi -a -n "$MPI_LIB" -a "$withmpi" != "yes" -a ! -f  "../examples++-mpi/$out.cpp"  &&  OWMPI="../examples++-mpi/$out.$SUF"
+test -f "$OWMPI" -a -n "$OWMPI" && rm "$OWMPI"
+
+
 
 INC="$INCFF $INC"  
 SHARED="-shared"
@@ -271,6 +280,13 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	if [ -n "$DLL" ] ; then
 	    echo cp $DLL $bin
 	    test $do = yes &&   cp $DLL "$bin"
+	fi 
+	if [ -n "$OWMPI" ] ; then
+	    echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
+	    if [  $do = yes ] ; then 
+		eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
+		ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
+	    fi
 	fi
     fi
 fi

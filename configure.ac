@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.31-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.32,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1682,7 +1682,7 @@ TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
 TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
-TOOL_DISABLE(mumps_seq,MUMPS_seq.$DYLIB_SUFFIX,mumps-seq)
+TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis)
 TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
