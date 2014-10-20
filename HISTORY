@@ -1,5 +1,40 @@
-@  changeset:   3070:50157156eec4
+@  changeset:   3077:df774c8536bf
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Oct 17 10:54:18 2014 +0200
+|  summary:     update INNOVATION
+|
+o  changeset:   3076:9ad9343d75d5
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Oct 17 10:53:01 2014 +0200
+|  summary:     correct big big in memory manageemnt of sparse matrix Matrice_Creuse
+|
+o  changeset:   3075:7e28b3a59725
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Oct 16 22:42:59 2014 +0200
+|  summary:     correct pb of factorisation
+|
+o  changeset:   3074:a216bad8d511
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Oct 16 22:39:31 2014 +0200
+|  summary:     correct type add remove file
+|
+o  changeset:   3073:89d2902eadca
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Oct 16 22:36:24 2014 +0200
+|  summary:     correct typo and remove test ..
+|
+o  changeset:   3072:d4af5fcecb25
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Oct 16 18:30:25 2014 +0200
+|  summary:     add check \ escape on string  "\z" -> z "\\" -> \ "\"" -> "
+|
+o  changeset:   3071:d324bac28890
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Oct 16 16:33:01 2014 +0200
+|  summary:     coorect size on arrow  in plot ..
+|
+o  changeset:   3070:50157156eec4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Oct 01 16:14:50 2014 +0200
 |  summary:     correct PARDISO / omp interface un uv100

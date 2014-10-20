@@ -11,6 +11,7 @@ const char C='"';
 
 int main(int argc,const char **argv)
 {
+  int debug=0; 
   char *dir=0;
   const char *pp=0; 
   string cmd="freefem++.exe ";
@@ -20,8 +21,12 @@ int main(int argc,const char **argv)
       cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
       exit(1);
   }
+  
   for(int i=1;i<argc;++i)
     {	
+	if(strcmp("++d",argv[i])==0) 
+	  debug=1;
+	else {
     cmd += C;
     cmd += argv[i];
     if(!pp &&strlen(argv[i])>2) 
@@ -29,9 +34,11 @@ int main(int argc,const char **argv)
           pp= argv[i];
     cmd += C;
     cmd += " ";
-    }
+	if( debug) cout << "  ffl: arg " << i << argv[i] << endl;
+    }}
   if(pp)
    {
+   	if( debug ) cout << "  ffl: file:" << pp << endl;  
     int i=0;
     int l= strlen(pp);
      for(i=l-1;i>=0;i--)
@@ -39,12 +46,14 @@ int main(int argc,const char **argv)
      dir= new char [l+1];
      strcpy(dir,pp);
      dir[i]=0;
-     //cout << " chdir to " << dir << endl;
+	 if(debug) 
+     cout << "  ffl:  chdir to " << dir << endl;
      _chdir(dir);
      delete [] dir;
    }
    cmd += " -wait -log";
-   //cout << "exec " << cmd << endl;
+   if(debug) 
+   cout << "exec " << cmd << endl;
    int ret= system(cmd.c_str());
    return ret;
 }
