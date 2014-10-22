@@ -1,3 +1,7 @@
+#ifdef WITH_PETSC
+#include <petsc.h>
+#endif
+
 /// \file
 /// ======================================================================
 /// Written by Antoine Le Hyaric
@@ -233,7 +237,17 @@ namespace ffapi{
 #ifndef FFLANG
 #ifdef PARALLELE
     // need #include "mpi.h"
-    MPI_Init(&argc,&argv);
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if(provided < MPI_THREAD_SERIALIZED) {
+        MPI_Comm_rank(MPI_COMM_WORLD, &provided);
+        if(provided == 0)
+            std::cout << "MPI_THREAD_SERIALIZED not supported !" << std::endl;
+    }
+#ifdef WITH_PETSC
+    PetscInitialize(&argc, &argv, 0, "");
+#endif
+
 #endif
 #endif
   }
@@ -241,6 +255,9 @@ namespace ffapi{
   void mpi_finalize(){
 #ifndef FFLANG
 #ifdef PARALLELE
+#ifdef WITH_PETSC
+    PetscFinalize();
+#endif
     MPI_Finalize();
 #endif
 #endif

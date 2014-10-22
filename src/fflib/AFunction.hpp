@@ -1968,7 +1968,7 @@ inline	  C_F0::C_F0(const C_F0 & e,const char *op,const C_F0 & a,const C_F0 & b)
 {
     C_F0 tab[2]={a,b};
     basicAC_F0  p;
-    p=make_pair<int,C_F0*>(2,tab);
+    p=make_pair(2,tab);
     *this= C_F0(e,op,p);
 }
 	   
