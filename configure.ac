@@ -1335,7 +1335,7 @@ then
     if test "$ff_amd_ok" = no;
     then
 	AC_CHECK_LIB(amd,amd_info,
-	    ff_umfpack_libs="$ff_umfpack_libs -lamd"
+	    ff_umfpack_libs="-lamd"
 	    ff_amd_ok=yes)
     fi
 
