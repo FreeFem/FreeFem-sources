@@ -85,7 +85,7 @@ download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.n
 	 '1e8830f622d2112239a4a8a83b84209a');
 
 download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.12','http://www.openblas.net/','OpenBLAS.tar.gz',
-	 '5df7f175b2db6a2b02ca4ff932e39bc7',
+	 'dfc868e0c134855639f036d2723bf4be',
 	 'BAD_CERT');
 
 download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz',
