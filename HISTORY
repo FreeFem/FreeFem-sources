@@ -1,5 +1,10 @@
-@  changeset:   3090:5da39542e29b
+@  changeset:   3091:0a4c31444a80
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Nov 04 10:58:24 2014 +0100
+|  summary:     correct    md5 code of OpenBlas.tar.gz
+|
+o  changeset:   3090:5da39542e29b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Nov 03 21:46:43 2014 +0100
 |  summary:     Added tag 3.28 for changeset af4fbbef4ecd
