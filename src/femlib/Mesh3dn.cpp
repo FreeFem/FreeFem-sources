@@ -238,6 +238,7 @@ namespace Fem2D
   // 2) delete points which is not in element or in border element
   Mesh3::Mesh3(const string  filename, const long change)
   {
+   
     int ok=load(filename);
     cout << "read mesh ok " << ok  << endl;
     cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
@@ -549,7 +550,7 @@ namespace Fem2D
     int i;
     //	f >> nv >> nt >> neb ;
     string str;
-    
+    int err=0;
     while(!f.eof())
       {
 	f >> str;
@@ -578,8 +579,10 @@ namespace Fem2D
 	      cout <<   "  -- Nb of Elements " << nt << endl;
 	    for (int i=0;i<nt;i++) 
 	      { 
-		this->t(i).Read1(f,this->vertices,this->nv); 
-		mes += this->t(i).mesure();}
+		this->t(i).Read1(f,this->vertices,this->nv);
+                if(this->t(i).mesure()<=0) err++; // Modif FH nov 2014
+		mes += this->t(i).mesure();
+                }
 	  }
 	else if (str=="Triangles")
 	  {
@@ -620,6 +623,12 @@ namespace Fem2D
 	 BuildjElementConteningVertex();  
 	 }
     */
+    if(err!=0)
+    {
+        cerr << " Mesh3::read: sorry bad mesh. Number of negative Tet " << err << endl;
+        this->~Mesh3();
+        ffassert(0);
+    }
   }
   
   int Mesh3::load(const string & filename)
@@ -882,7 +891,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
   }
     void Mesh3::readmsh(ifstream & f,int offset)
     {  
-
+        int err=0;
 	f >> nv >> nt >> nbe;
 	if(verbosity>2)
 	    cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
@@ -903,9 +912,10 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 		  int i[4],lab;
 		  Element & K(this->elements[k]);
 		  f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
-          Add(i,4,offset);
+                  Add(i,4,offset);
 		  K.set(this->vertices,i,lab);
-		  mes += K.mesure();	    
+		  mes += K.mesure();
+                  err += K.mesure() <0;
 		  
 	      }
 	  }
@@ -915,11 +925,17 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 	    int i[4],lab;
 	    BorderElement & K(this->borderelements[k]);
 	    f >> i[0] >> i[1] >> i[2]  >> lab;
-        Add(i,3,offset);
+            Add(i,3,offset);
 	    K.set(this->vertices,i,lab);
 	    mesb += K.mesure();	    
 	    
 	}
+        if(err!=0)
+        {
+            cerr << " Mesh3::readmsh : sorry bad mesh. Number of negative Tet " << err << endl;
+            this->~Mesh3();
+            ffassert(0);
+        }
 
     }
     

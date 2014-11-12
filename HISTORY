@@ -1,5 +1,10 @@
-@  changeset:   3091:0a4c31444a80
+@  changeset:   3092:fa4384bf86b4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 07 14:30:36 2014 +0100
+|  summary:     correct pb under window  in load.cpp (no dlerror)
+|
+o  changeset:   3091:0a4c31444a80
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Nov 04 10:58:24 2014 +0100
 |  summary:     correct    md5 code of OpenBlas.tar.gz
