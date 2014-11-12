@@ -686,7 +686,19 @@ public:
     delete [] vertices;
     delete [] bnormalv;
     if(gtree) delete gtree;
-    
+      ElementConteningVertex=0;
+      TheAdjacencesLink=0;
+      BoundaryElementHeadLink=0;
+      borderelements=0;
+      elements=0;
+      vertices=0;
+      bnormalv=0;
+      gtree=0;
+      nt=(0);
+      nv=(0);
+      nbe=(0);
+      mes=(0.);
+      mesb=(0.);
   }
 
   Serialize serialize() const;
