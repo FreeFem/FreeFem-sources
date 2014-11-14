@@ -345,8 +345,8 @@ public:
     
     AnyType operator()(Stack stack)  const 
     {
-	extern void xxxx();
-	xxxx();
+	//extern void xxxx();
+	//xxxx();
       A  a=GetAny<A>((*a0)(stack));
       KN<AnyType> v(N);
       KN<int>  nn(N+1);
