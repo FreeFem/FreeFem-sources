@@ -1280,8 +1280,9 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 		  {
 		      int i0=j++,i1=j++; 
 		      if(keys[i1]<keys[i0]) swap( keys[i0],keys[i1]);
-		      //typename HashTable<Key,Key>::iterator pe = 
-		     equi.add(keys[i0],keys[i1]);
+		      //typename HashTable<Key,Key>::iterator pe =
+                      if(keys[i0]< keys[i1] ) // not equal ... Add nov. 2014 
+		        equi.add(keys[i0],keys[i1]);
 		     // if(pe) assert(pe->k == keys[i0]);
 		  }
 		
@@ -1292,15 +1293,18 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	  for (int it=0,change=1;change;it++)
 	    { 
 	    change=0;
-	    assert(it<10);
+	    ffassert(it++<100);
 	    for (typename HashTable<Key,Key>::iterator qe,pe=equi.begin() ; pe != equi.end(); ++pe)
 	      { 
-		  
-		  assert( pe->k < pe->v); 
+                  if( verbosity>9999) cout << pe->k << " " << pe->v << endl;
+		  ffassert( pe->k < pe->v);
 		  qe=equi.find(pe->v);
 		  if(qe) 
-		    { change++;
-		     assert( qe->k < qe->v);
+                  {
+                      if( verbosity>9999) cout << pe->k << " " << pe->v << " <=> " << qe->k <<endl;
+
+                     change++;
+		     ffassert( qe->k < qe->v);
 		      pe->v = qe->v;
 		  }
 	    
