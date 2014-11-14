@@ -340,7 +340,7 @@ public:
 	    what[i]=1;
 	  }      
 	else 
-	  CompileError(" we are waiting for scalar or vector of scalar");
+	  CompileError(" InitArrayfromArray: we are waiting for scalar or vector of scalar");
     }
     
     AnyType operator()(Stack stack)  const 
@@ -370,7 +370,8 @@ public:
         if (what[i]==0)
           (*a)[j]= GetAny<RR>(v[i]);
         else if (what[i]==1) 
-          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >(v[i]);
+          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >((*(tab[i]))(stack));// correct bug nov 2014
+        //  (due to resize=> pointer  change Fh
       return SetAny<R>(a);
     } 
     bool MeshIndependent() const     {return  mi;} // 
