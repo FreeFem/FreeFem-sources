@@ -1,5 +1,20 @@
-@  changeset:   3092:fa4384bf86b4
+@  changeset:   3095:3ed7375fbf91
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 14 09:12:19 2014 +0100
+|  summary:     remove debug call xxxx()
+|
+o  changeset:   3094:82be1c76fe42
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 14 09:11:12 2014 +0100
+|  summary:     correct bug array growing behaves differently on Linux and Mac
+|
+o  changeset:   3093:eecf0e60f9f5
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Nov 12 16:28:08 2014 +0100
+|  summary:     add check on vol tet in readmesh3
+|
+o  changeset:   3092:fa4384bf86b4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 07 14:30:36 2014 +0100
 |  summary:     correct pb under window  in load.cpp (no dlerror)
