@@ -1,3 +1,5 @@
+ - correct bug in periodic condition in case common dof with periodic.  
+ - correct big bug in memory gestion of sparse matrix
  version 3.32 
  - correct of problem of plugin and mpi,
     build all dynamics lib with and without mpi, 

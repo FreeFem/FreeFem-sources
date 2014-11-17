@@ -51,4 +51,6 @@ cout << " i   = " << i << "\n";
  real a =  x == 0 ? x : -1;
  real b =  x != 0 ? x : -1;
  cout << " a = " << a << " b = " << b << endl; 
+ string ss="\z\a\b\f\\--\\";
+ cout << "\""<< ss << "\"" <<  endl; 
  }

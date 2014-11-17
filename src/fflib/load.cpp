@@ -145,6 +145,12 @@ bool load(string ss)
 	if(mpirank ==0)
 	  {
 	    cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
+        char *error;
+#ifndef WIN32
+        if ((error = dlerror()) != NULL) {
+            fprintf(stderr, "%s\n", error);
+        }
+#endif
 	    cerr << "list  prefix: " ;
 	    for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
 	      cerr <<"'"<<*i<<"' ";

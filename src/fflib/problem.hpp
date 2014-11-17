@@ -889,10 +889,10 @@ public:
     A.init();Uh.init();Vh.init();
     typemat=TypeSolveMat(TypeSolveMat::NONESQUARE);}
   Matrice_Creuse() { init();}
-  void destroy() {
-    if(count)
-    A.destroy();
-    else count++;
+  void destroy() {// Correct Oct 2015 FH (avant test a 'envert) !!!!
+    if(count--==0)
+      A.destroy();
+//else count--;
     //    Uh.destroy();
     //Vh.destroy();
   }   

@@ -272,7 +272,12 @@ RR get_element_si(const A &  a,const B & b,const C & c){
 template<class RR,class A,class B,class C>  
 RR get_element_lineorcol(const A &  a,const B & b,const C & c){ 
  //  cout << b << " .... " << ((*a)(SubArray(1,b),c)) << endl;;
-    return  ((*a)(b,c));}
+    if(c == ':' && (b<0 || a->N() <= b))
+            ExecError("Out of bound");
+    if(b == ':' && (c<0 || a->M() <= c))
+            ExecError("Out of bound");
+    return  ((*a)(b,c));
+    }
 
 template<class RR,class A,class B,class C>  
 RR get_element_is_(const A &  a,const B & b,const C & c){ 
@@ -335,13 +340,13 @@ public:
 	    what[i]=1;
 	  }      
 	else 
-	  CompileError(" we are waiting for scalar or vector of scalar");
+	  CompileError(" InitArrayfromArray: we are waiting for scalar or vector of scalar");
     }
     
     AnyType operator()(Stack stack)  const 
     {
-	extern void xxxx();
-	xxxx();
+	//extern void xxxx();
+	//xxxx();
       A  a=GetAny<A>((*a0)(stack));
       KN<AnyType> v(N);
       KN<int>  nn(N+1);
@@ -365,7 +370,8 @@ public:
         if (what[i]==0)
           (*a)[j]= GetAny<RR>(v[i]);
         else if (what[i]==1) 
-          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >(v[i]);
+          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >((*(tab[i]))(stack));// correct bug nov 2014
+        //  (due to resize=> pointer  change Fh
       return SetAny<R>(a);
     } 
     bool MeshIndependent() const     {return  mi;} // 

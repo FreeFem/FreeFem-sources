@@ -2106,10 +2106,9 @@ yyreduce:
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         long stu1 =storageused()-stu0    ;
                         
-                        
-			    if (NbPtr || (stu1>100000) ) { cout << " ######## We forget of deleting   " << NbPtr
+			    if (NbPtr && verbosity) { cout << " ######## We forget of deleting   " << NbPtr 
 			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank << ", memory leak ="<< stu1 <<  endl;}
-  return 0;;}
+  return 0;}
     break;
 
   case 4:
