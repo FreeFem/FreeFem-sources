@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.32-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.33,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -64,7 +64,7 @@ m4_define([AC_FF_WHERELIB],
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
 	    case "$ff_WHERE_INC" in 
-		/*)e cho "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
+		/*) echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
 	    esac
 	fi
 	AC_MSG_RESULT($ff_WHERE)
