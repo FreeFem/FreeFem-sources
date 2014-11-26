@@ -1,5 +1,10 @@
-@  changeset:   3095:3ed7375fbf91
+@  changeset:   3096:e5f2eccb8503
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 14 23:03:05 2014 +0100
+|  summary:     correct bug in periodic B.C ( some time loop)
+|
+o  changeset:   3095:3ed7375fbf91
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 14 09:12:19 2014 +0100
 |  summary:     remove debug call xxxx()
