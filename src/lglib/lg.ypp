@@ -78,7 +78,7 @@ extern mylex *zzzfff;
 // modif FH for window to have 1 dll  for mpi and none mpi ..
 extern  void (*initparallele)(int &, char **&);
 extern  void (*init_lgparallele)();
-extern  void (*end_parallele)();
+// extern  void (*end_parallele)();
 // 
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
@@ -130,7 +130,7 @@ void lgerror (const char* s) ;
  // mpi ptr to function ... 
 void (*initparallele)(int &argc, char **& argv)=0 ;
 void (*init_lgparallele)()=0;
-void (*end_parallele)()=0;
+//void (*end_parallele)()=0;
 %}
 
 
@@ -914,9 +914,9 @@ int mainff (int  argc, char **argv)
     
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
-
-  if(end_parallele) end_parallele();
-
+  
+  //if(end_parallele) end_parallele();
+  ff_finalize(); 
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
   // FFCS: divert stream to FFCS

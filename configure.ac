@@ -1000,7 +1000,7 @@ then
     # Trying  blas library
     # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
     for iblas in \
-	"-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+	"-framework Accelerate" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
 	$ff_freebsd_blas
     do
 	if test "$ff_blas_ok" = no;
@@ -1101,7 +1101,7 @@ then
     AC_CHECK_HEADERS(cblas.h,
 	ff_cblas_h=yes,
 	ff_cblas_h=no)
-    AC_CHECK_HEADERS(vecLib/cblas.h,
+    AC_CHECK_HEADERS(Accelerate/cblas.h,
 	ff_cblas_h=yes
 	ff_cblas_h=no)
     AC_CHECK_HEADERS(atlas/cblas.h,
