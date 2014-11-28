@@ -52,9 +52,9 @@ set<string> SetLoadFile;
 
 bool load(string ss)
 {
-
+  
   // FFCS - do not allow potentially dangerous commands from remote anonymous clients
-
+  
   if(ffapi::protectedservermode() && (ss=="pipe" || ss=="shell")){
     cerr<<"library "<<ss<<" not allowed in server environment"<<endl;
     CompileError("Error load");
@@ -66,100 +66,103 @@ bool load(string ss)
       if( (mpirank==0)&& verbosity)
 	cout << " (already loaded : " <<  ss << " ) " ;
     }
-    else
-      {
-	SetLoadFile.insert(ss);
-	bool ret=false;
-	void * handle = 0;
-	const int /*nbprefix=2,*/nbsuffix=2;
-	list<string> prefix(ffenvironment["loadpath"]);
-	if(prefix.empty())
-	  {
-	    prefix.push_back("");
-	    prefix.push_back("./");
-	  }
-
-	string suffix[nbsuffix] ;
+  else
+    {
+      SetLoadFile.insert(ss);
+      bool ret=false;
+      void * handle = 0;
+      const int /*nbprefix=2,*/nbsuffix=2;
+      list<string> prefix(ffenvironment["loadpath"]);
+      if(prefix.empty())
+	{
+	  prefix.push_back("");
+	  prefix.push_back("./");
+	}
+      
+      string suffix[nbsuffix] ;
 	
-	suffix[0]="";
-	suffix[1]=".so";
+      suffix[0]="";
+      suffix[1]=".so";
 #ifdef  __APPLE__
-	suffix[1]=".dylib";
+      suffix[1]=".dylib";
 #endif  
 #ifdef WIN32  
-	suffix[1]=".dll";
+      suffix[1]=".dll";
 #endif 
-	int j; 
-	for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
-	  for ( j= 0;j< nbsuffix;++j)
-	    {
-	      string s= *i+ss+suffix[j];
-	      
+      int j; 
+      for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
+	for ( j= 0;j< nbsuffix;++j)
+	  {
+	    string s= *i+ss+suffix[j];
+	    
 #ifdef LOAD  
-	      handle = dlopen (s.c_str(), RTLD_LAZY ); 
-	      if (verbosity>9) cout << " test dlopen(" << s << ")= " << handle <<  endl;
-
-	      // FFCS - 20/9/11 - print explanation for load errors
-	      if(verbosity>9 && !handle){
-		cout<<"load error was: "<<dlerror()<<endl;
-	      }
-
-	      ret= handle !=0;
-	      if (  ret ) 
-		{
-		  if(verbosity && (mpirank ==0))
-		    cout << " (load: dlopen " << s << " " << handle << ") ";
-          callInitsFunct() ;  
-		  return handle;
-		}
-	      
-#elif WIN32
-	      {
-		HINSTANCE mod=  LoadLibrary(s.c_str());
-		if (verbosity>9) cout << " test LoadLibrary(" << s << ")= " << mod <<  endl;
-		if(mod==0) 
-		  {
-		    DWORD merr = GetLastError();
-		    if(verbosity>19)
-		      cerr  <<   "\n try loadLibary : " <<s << "\n \t fail : " << merr << endl;
-		  }
-		else 
-		  {
-		    if(verbosity&& (mpirank ==0))
-		      cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
-            callInitsFunct() ; 
-		    return mod;
+	    handle = dlopen (s.c_str(), RTLD_LAZY ); 
+	    if (verbosity>9) cout << " test dlopen(" << s << ")= " << handle <<  endl;
+	    
+	    // FFCS - 20/9/11 - print explanation for load errors
+	    if(verbosity>9 && !handle){
+	      cout<<"load error was: "<<dlerror()<<endl;
 	    }
+	    
+	    ret= handle !=0;
+	    if (  ret ) 
+	      {
+		if(verbosity && (mpirank ==0))
+		  cout << " (load: dlopen " << s << " " << handle << ") ";
+		callInitsFunct() ;  
+		return handle;
 	      }
+	    
+#elif WIN32
+	    {
+	      HINSTANCE mod=  LoadLibrary(s.c_str());
+	      if (verbosity>9) cout << " test LoadLibrary(" << s << ")= " << mod <<  endl;
+	      if(mod==0) 
+		{
+		  DWORD merr = GetLastError();
+		  if(verbosity>19)
+		    cerr  <<   "\n try loadLibary : " <<s << "\n \t fail : " << merr << endl;
+		}
+	      else 
+		{
+		  if(verbosity&& (mpirank ==0))
+		    cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
+		  callInitsFunct() ; 
+		  return mod;
+		}
+	    }
 #else
-	      if((mpirank ==0))
+	    if(mpirank ==0)
 		{
 		  cout << "------------------------------------   \n" ;
 		  cout << "  load: sorry no dlopen on this system " << s << " \n" ;
 		  cout << "------------------------------------   \n" ;
 		}
-	CompileError("Error load");
-	return 0;
+	    CompileError("Error load");
+	    return 0;
 #endif  
-	    }
-	if(mpirank ==0)
-	  {
-	    cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
-        char *error;
-#ifndef WIN32
-        if ((error = dlerror()) != NULL) {
-            fprintf(stderr, "%s\n", error);
-        }
-#endif
-	    cerr << "list  prefix: " ;
-	    for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
-	      cerr <<"'"<<*i<<"' ";
-	    cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' "; 
-	    
-	    cerr << endl;
 	  }
-	CompileError("Error load");
-      }
+      if(mpirank ==0)
+	{
+	  cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
+	  char *error=0;
+#ifndef WIN32
+#ifdef LOAD
+	  error= dlerror();
+	  if ( error  != NULL) {
+	    cerr << " dlerror : " << error << endl;
+	  }
+#endif
+#endif
+	  cerr << "list  prefix: " ;
+	  for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
+	    cerr <<"'"<<*i<<"' ";
+	  cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' "; 
+	  
+	  cerr << endl;
+	}
+      CompileError("Error load");
+    }
   return 0 ;
 }
 

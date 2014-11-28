@@ -1,8 +1,9 @@
 abs_top_builddir=@abs_top_builddir@
-CC      = @CC@
+CC=@CC@
 # FC : Fortran 90 compiler
-FC      = @FC@
-LIBBLAS =  @BLASLIBS@
+FC=@FC@
+BLASLIBS = @BLASLIBS@
+LAPACKLIBS=@LAPACKLIBS@
 #  Use:
 #    -DAdd_ if your Fortran compiler adds an underscore at the end
 #              of symbols,
@@ -14,7 +15,18 @@ LIBBLAS =  @BLASLIBS@
 #
 CFLAGS=@CFLAGS@
 FCFLAGS=@FCFLAGS@
+CFLAGSF77=@CFLAGSF77@
 MPI_INCLUDE=@MPI_INCLUDE@
+MPI_INC_DIR=@MPI_INC_DIR@
 MPI_LIB=@MPI_LIB@
-
+MPI_LIBC=@MPI_LIBC@
+MPI_LIBFC=@MPI_LIBFC@
+MPI_LIB_DIRS=@MPI_LIB_DIRS@
+MPICC=@MPICC@
+MPICXX=@MPICXX@
+MPIF77=@MPIF77@
+MPIFC=@MPIFC@
+MPIPROG=@MPIPROG@
+MPIRUN=@MPIRUN@
+MPISCRIPT=@MPISCRIPT@
 

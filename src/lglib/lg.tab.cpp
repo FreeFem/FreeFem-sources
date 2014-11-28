@@ -261,7 +261,7 @@ extern mylex *zzzfff;
 // modif FH for window to have 1 dll  for mpi and none mpi ..
 extern  void (*initparallele)(int &, char **&);
 extern  void (*init_lgparallele)();
-extern  void (*end_parallele)();
+// extern  void (*end_parallele)();
 // 
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
@@ -313,7 +313,7 @@ void lgerror (const char* s) ;
  // mpi ptr to function ... 
 void (*initparallele)(int &argc, char **& argv)=0 ;
 void (*init_lgparallele)()=0;
-void (*end_parallele)()=0;
+//void (*end_parallele)()=0;
 
 
 /* Enabling traces.  */
@@ -2106,9 +2106,10 @@ yyreduce:
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         long stu1 =storageused()-stu0    ;
                         
-			    if (NbPtr && verbosity) { cout << " ######## We forget of deleting   " << NbPtr 
+                        
+			    if (NbPtr || (stu1>100000) ) { cout << " ######## We forget of deleting   " << NbPtr
 			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank << ", memory leak ="<< stu1 <<  endl;}
-  return 0;}
+  return 0;;}
     break;
 
   case 4:
@@ -3444,9 +3445,9 @@ int mainff (int  argc, char **argv)
     
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
-
-  if(end_parallele) end_parallele();
-
+  
+  //if(end_parallele) end_parallele();
+  ff_finalize(); 
   //  currentblock->close(currentblock).eval(thestack);
   fingraphique();
   // FFCS: divert stream to FFCS
