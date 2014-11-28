@@ -65,6 +65,7 @@ void ff_finalize()
 {
     for (vector<AtEnd>::const_reverse_iterator i=AtFFEnd.rbegin(); i !=AtFFEnd.rend(); ++ i)
         (**i)();
+    AtFFEnd.clear(); 
 }
 void ff_atend(AtEnd f)
 {
