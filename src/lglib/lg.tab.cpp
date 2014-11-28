@@ -3364,7 +3364,7 @@ int mainff (int  argc, char **argv)
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
-
+   ff_atend(fingraphique);
    if (initparallele)initparallele(argc,argv);
 
   CPUcompileInit= CPUtime();
@@ -3396,7 +3396,7 @@ int mainff (int  argc, char **argv)
 
     /// <<zzzfff>>
     zzzfff = Newlex(cout,echo_edp);
-  
+    
   
 /*  
   ccin= new ifstream(cc);
@@ -3449,7 +3449,7 @@ int mainff (int  argc, char **argv)
   //if(end_parallele) end_parallele();
   ff_finalize(); 
   //  currentblock->close(currentblock).eval(thestack);
-  fingraphique();
+ // fingraphique();
   // FFCS: divert stream to FFCS
   if(ThePlotStream){
     ffapi::ff_pclose(ThePlotStream);
