@@ -10,7 +10,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.32-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.33,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -64,7 +64,7 @@ m4_define([AC_FF_WHERELIB],
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
 	    case "$ff_WHERE_INC" in 
-		/*)e cho "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
+		/*) echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
 	    esac
 	fi
 	AC_MSG_RESULT($ff_WHERE)
@@ -1000,7 +1000,7 @@ then
     # Trying  blas library
     # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
     for iblas in \
-	"-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+	"-framework Accelerate" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
 	$ff_freebsd_blas
     do
 	if test "$ff_blas_ok" = no;
@@ -1101,7 +1101,7 @@ then
     AC_CHECK_HEADERS(cblas.h,
 	ff_cblas_h=yes,
 	ff_cblas_h=no)
-    AC_CHECK_HEADERS(vecLib/cblas.h,
+    AC_CHECK_HEADERS(Accelerate/cblas.h,
 	ff_cblas_h=yes
 	ff_cblas_h=no)
     AC_CHECK_HEADERS(atlas/cblas.h,

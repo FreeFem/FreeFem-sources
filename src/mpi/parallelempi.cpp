@@ -2278,6 +2278,15 @@ public:
 
 
 // Fin add J. Morice
+
+void f_end_parallele()
+{
+    /// FFCS: MPI_Finalize() needs to be called later than this (in
+    /// ffcs/src/server.cpp)
+    ffapi::mpi_finalize();
+    if(mpirank==0 || verbosity>2) cout << "FreeFem++-mpi finalize correctly .\n" << flush ;
+    else if(verbosity>5)  cout << '.' << endl ;
+}
 void f_initparallele(int &argc, char **& argv)
 {
   /// FFCS: MPI_Init() needs to be called earlier (in ffcs/src/server.cpp)
@@ -2291,6 +2300,7 @@ void f_initparallele(int &argc, char **& argv)
   mpisize =mpisize1;// MPI::COMM_WORLD.Get_size();
   if(verbosity> 2 || (mpirank ==0))
   cout << "initparallele rank " <<  mpirank << " on " << mpisize << endl;
+  ff_atend(f_end_parallele); // set end MPI // 
 }
 
 double ffMPI_Wtime() {return MPI_Wtime();}
@@ -2610,24 +2620,17 @@ void f_init_lgparallele()
       atype<KN<MPI_Request>* >()->Add("[","",new OneOperator2_<fMPI_Request*,KN<MPI_Request>*,long >(get_elementp_));    
       
   }
-void f_end_parallele()
-{
-  /// FFCS: MPI_Finalize() needs to be called later than this (in
-  /// ffcs/src/server.cpp)
-  ffapi::mpi_finalize();
-    if(mpirank==0 || verbosity>2) cout << "FreeFem++-mpi finalize correctly .\n" << flush ; 
-    else if(verbosity>5)  cout << '.' << endl ;
-}
+
 
 // set the 3 ptr 
 extern void (*initparallele)(int &argc, char **& argv) ;
 extern void (*init_lgparallele)();
-extern void (*end_parallele)();
+//extern void (*end_parallele)();
 
 
 void init_ptr_parallelepmi();
 void init_ptr_parallelepmi(){
 initparallele=&f_initparallele ;
 init_lgparallele=&f_init_lgparallele;
-end_parallele=&f_end_parallele;
+//end_parallele=&f_end_parallele;
 };
