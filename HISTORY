@@ -1,5 +1,30 @@
-@  changeset:   3096:e5f2eccb8503
+@  changeset:   3101:fb9b853f36b3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 28 13:43:55 2014 +0100
+|  summary:     correct ff_finalmize
+|
+o  changeset:   3100:b47f510056e4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 28 12:06:48 2014 +0100
+|  summary:     add function ff_finalize
+|
+o  changeset:   3099:913a0e471dca
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Nov 26 08:18:43 2014 +0100
+|  summary:     add missing files
+|
+o  changeset:   3098:78b5f9947030
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Nov 26 08:13:09 2014 +0100
+|  summary:     pass to version 3.33
+|
+o  changeset:   3097:492928d72946
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Nov 26 08:10:21 2014 +0100
+|  summary:     begin of PETSc integration
+|
+o  changeset:   3096:e5f2eccb8503
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 14 23:03:05 2014 +0100
 |  summary:     correct bug in periodic B.C ( some time loop)

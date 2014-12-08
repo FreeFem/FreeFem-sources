@@ -1,68 +1,62 @@
-if ( mpisize != 2 ) {
-cout << " sorry number of processeur !=2 " << endl;
-exit(1);}
-verbosity=3;
-real pi=4*atan(1);
-int inside = 2;
-int outside = 1;
-border a(t=1,2){x=t;y=0;label=outside;};
-border b(t=0,1){x=2;y=t;label=outside;};
-border c(t=2,0){x=t ;y=1;label=outside;};
-border d(t=1,0){x = 1-t; y = t;label=inside;};
-border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
-border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
-int n=4;
-mesh th,TH;
+load "schwarz"
+load "metis"
+load "utility"
+load "removeDOF"
+include "getARGV.idp"
 
-if (mpirank == 0) 
- {
- th = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
- cout << " end th  " << endl;
-// processor(1) << th ;
-// processor(1) >> TH;
+searchMethod = 1;
+
+macro minimalMesh()square(1, 1)// EOM
+macro generateTh(name)name = square(global, global, [x, y], label = l);// EOM
+macro grad(u)[dx(u), dy(u)]// EOM
+macro bbN(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(4);
+            bb2d(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+macro meshN()mesh// EOM
+macro intN()int2d// EOM
+macro measureN()area// EOM
+macro def(u)u// EOM
+macro init(u)u// EOM
+include "additional.idp"
+
+int overlap = getARGV("-overlap", 1);
+func Pk = P1;
+
+verbosity = getARGV("-v", 0);
+int s = getARGV("-split", 1);
+int global = getARGV("-global", 200);
+int solver = getARGV("-solver", 3); // 1: Additive Schwarz + CG, 2: RAS + GMRES, 3: GENEO + GMRES
+int i, j;
+int[int] l = [1, 2, 2, 2];
+
+mesh Th = minimalMesh;
+fespace Wh(Th, Pk);
+build(generateTh, Th, ThBorder, ThOverlap, s, D, numberIntersection, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld)
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + intN(meshName)(v) + on(1, u = 0.0);// EOM
+assemble(Mat, rhs, Wh, Th, ThBorder, Varf)
+
+dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+
+if(mpisize > 1 && solver == 3) {
+    int[int] parm(1);
+    parm(0) = getARGV("-nu", 20);
+    macro EVproblem(varfName, meshName, PhName)
+        varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + on(1, u = 0.0);// EOM
+    EVproblem(vPbNoPen, Th, Ph)
+    matrix<real> noPen = vPbNoPen(Wh, Wh, solver = CG);
+    if(solver == 3) // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
+        attachCoarseOperator(mpiCommWorld, A, A = noPen, parameters = parm);
 }
-else
- {
- TH = buildmesh ( e(5*n) + e1(25*n) );
- cout << " end TH  " << endl;
-// processor(0) << TH ;
-// processor(0) >> th;
- }
-broadcast(processor(0),th);
-broadcast(processor(1),TH);
 
+Wh<real> def(u); // this will be the solution
 
-
-fespace vh(th,P1);
-fespace VH(TH,P1);
-vh u=0,v; VH U,V;
-int i=0;
-
-problem PB(U,V,init=i,solver=Cholesky) = 
-    int2d(TH)( dx(U)*dx(V)+dy(U)*dy(V) )
-  + int2d(TH)( -V) + on(inside,U = u)  +    on(outside,U= 0 ) ;
-problem pb(u,v,init=i,solver=Cholesky) = 
-    int2d(th)( dx(u)*dx(v)+dy(u)*dy(v) )
-  + int2d(th)( -v) + on(inside ,u = U) +    on(outside,u = 0 ) ;
-
-
-for ( i=0 ;i< 10; i++) 
-{ 
-  cout << mpirank << " looP " << i << endl;
-  if (mpirank == 0)
-  {   
-   PB;
-   processor(1) << U[];
-   processor(1) >> u[];
-  }
-  else 
-  {
-   pb;
-   processor(0) >> U[];
-   processor(0) << u[];
-  }
-  //  if (mpirank==0)  
-  // plot(U,u,wait=true,ps="Uu"+i+".eps");
-};
- if (mpirank==0)  
-    plot(U,u,ps="Uu.eps");
+DDM(A, u[], rhs, dim = getARGV("-gmres_restart", 60), iter = getARGV("-iter", 60), eps = getARGV("-eps", 1e-8), solver = solver);
+plotMPI(Th, u[], "Global solution", Pk, def, 3, 1)

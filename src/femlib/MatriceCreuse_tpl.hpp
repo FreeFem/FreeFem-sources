@@ -172,7 +172,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,v
        FElement Kv(this->Vh[k]);
        if(kk<0)
         { // return ; // on saute ????  bof bof 
-	  this->n=this->m=BuildMEK_KK<FElement>(this->lnk,this->ni,this->nik,this->nikk,&Kv,0);
+	  this->n=this->m=BuildMEK_KK<FElement>(this->lnki,this->ni,this->nik,this->nikk,&Kv,0);
          int n2 =this->m*this->n; 
          for (int i=0;i<n2;i++) this->a[i]=0;
          faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
@@ -180,7 +180,7 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,v
         else
         {
          FElement KKv(this->Vh[kk]);
-         this->n=this->m=BuildMEK_KK<FElement>(this->lnk,this->ni,this->nik,this->nikk,&Kv,&KKv);
+         this->n=this->m=BuildMEK_KK<FElement>(this->lnki,this->ni,this->nik,this->nikk,&Kv,&KKv);
         
          
          faceelement(*this,Kv,KKv,Kv,KKv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
@@ -189,8 +189,36 @@ void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,v
       }
      else 
       {
-        ERREUR("A FAIRE/ TO DO  (see F. hecht) ", 0); 
-        ffassert(0); // a faire F. Hecht desole 
+          throwassert(faceelement);
+          const Mesh &Th(this->Vh.Th);
+          
+          int iie=ie,kk=Th.ElementAdj(k,iie);
+          if(kk==k|| kk<0) kk=-1;
+          if ( &this->Vh == &this->Uh)
+          {
+              FElement Kv(this->Vh[k]);
+              FElement Ku(this->Uh[k]);
+              if(kk<0)
+              { // return ; // on saute ????  bof bof
+                  this->n=BuildMEK_KK<FElement>(this->lnki,this->ni,this->nik,this->nikk,&Kv,0);
+                  this->m=BuildMEK_KK<FElement>(this->lnkj,this->nj,this->njk,this->njkk,&Ku,0);
+                  int n2 =this->m*this->n;
+                  for (int i=0;i<n2;i++) this->a[i]=0;
+                  faceelement(*this,Kv,Kv,Kv,Kv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
+              }
+              else
+              {
+                  FElement KKv(this->Vh[kk]);
+                  FElement KKu(this->Uh[kk]);
+                  this->n=BuildMEK_KK<FElement>(this->lnki,this->ni,this->nik,this->nikk,&Kv,&KKv);
+                  this->m=BuildMEK_KK<FElement>(this->lnkj,this->nj,this->njk,this->njkk,&Ku,&KKu);
+                  
+                  faceelement(*this,Ku,KKu,Kv,KKv,this->data,ie,iie,label,stack,reinterpret_cast<Rd*>(B));
+                  
+              }
+          }
+          ERREUR("BUG ???? A FAIRE/ TO DO  (see F. hecht) ", 0);
+        ffassert(0); // a faire F. Hecht desole
        
       }
    }
@@ -1159,17 +1187,26 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
     if (step==0) { // do allocation 
       nbcoef=ilg;
       if (verbosity >3)
-        cout << "  -- MorseMatrix: Nb coef !=0 " << nbcoef << endl;
+        cout << "  -- MorseMatrix: Nb coef !=0 " << nbcoef << "  n =" << this->n << " m = " << this->m << endl;
       a = new R[nbcoef];
       cl = new int [nbcoef];}
     ffassert( a && cl);
     for (int i=0;i<nbcoef;i++) 
       a[i]=0;
-    
    }
-  
+    if( verbosity > 999)
+    {
+        cout << "  -- MorseMatrix: " << endl;
+        for(int i=0; i< this->n; ++i)
+        { cout << i << " : " ;
+            for(int k=lg[i];k<lg[i+1]; ++k)
+                cout << cl[k] << ' ';
+            cout << endl;
+        }
+    }
+    
 }
-template<class R> inline void ConjArray( R  *v, int n) 
+template<class R> inline void ConjArray( R  *v, int n)
 {
   for (int i=0;i<n;++i)
     v[i] = RNM::conj(v[i]);
@@ -1630,6 +1667,7 @@ template<class R>
 
 template<class R>
 MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
+  //  R zero=R();
   int il,jl,i,j;
   int * mi=me.ni, *mj=me.nj;
   if ((this->n==0) && (this->m==0))
@@ -1661,8 +1699,10 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
     for (il=0; il<me.n; ++il)  { i=mi[il]; 
       for ( jl=0; jl< me.m ; ++jl,++al)  {j=mj[jl];
         aij = pij(i,j);
+      //  if( *al!=zero )
+        {
         throwassert(aij);
-	*aij += *al;}}
+            *aij += *al;}}}
     break;
      
   case MatriceElementaire<R>::Symmetric : ffassert(symetrique);   

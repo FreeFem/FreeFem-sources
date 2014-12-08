@@ -1,0 +1,55 @@
+load "schwarz"
+load "metis"
+load "utility"
+include "getARGV.idp"
+
+searchMethod = 1;
+
+macro minimalMesh()square(1, 1)// EOM
+macro grad(u)[dx(u), dy(u)]// EOM
+macro bbN(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(4);
+            bb2d(bb, boundingMesh);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+macro meshN()mesh// EOM
+macro intN()int2d// EOM
+macro measureN()area// EOM
+macro def(u)[u, u#B, u#C]// EOM
+macro init(u)[u, u, u]// EOM
+include "additional.idp"
+
+int overlap = getARGV("-overlap", 1);
+func Pk = [P2, P2, P0];
+
+verbosity = getARGV("-v", 0);
+int s = getARGV("-split", 1);
+int global = getARGV("-global", 200);
+int solver = getARGV("-solver", 3); // 1: Additive Schwarz + CG, 2: RAS + GMRES, 3: GENEO + GMRES
+int i, j;
+
+real Sqrt = sqrt(2.);
+macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]// EOM
+macro div(u)(dx(u) + dy(u#B))// EOM
+
+mesh ThGlobal = square(getARGV("-global", 20), getARGV("-global", 20), [x, y]);
+
+ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
+mesh Th = movemesh(ThGlobal, [-x, y]);
+ThGlobal = ThGlobal + Th;
+macro generateTh(name)name = ThGlobal;// EOM
+fespace Wh(Th, Pk);
+build(generateTh, Th, ThBorder, ThOverlap, s, D, numberIntersection, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld)
+
+varf vPb([u, uB, p], [v, vB, q]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
+matrix K = vPb(Wh, Wh);
+real[int] rhs = vPb(0, Wh);
+
+dmatrix Mat(K, arrayIntersection, restrictionIntersection, D, bs = 1);
+Wh def(b);
+b[] = Mat^-1 * rhs;
+plotMPI(Th, b[], "Global solution PETSc", Pk, def, 3, 1);
