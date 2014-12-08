@@ -915,10 +915,11 @@ then
 	else
 	    ff_mkl_libpath=no
 	fi
+	
 	if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
-	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
+	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib.*'`
 	    ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
-            ff_mkl_lp=
+            ff_mkl_lp=_lp64
             case "$ff_mkl_arch" in
 		*64*)  ff_mkl_lp=_lp64
 	    esac
@@ -932,7 +933,7 @@ then
 		*/intel/*)         ff_mkl_mpi=_intelmpi;;
 		*)        ff_mkl_mpi=_openmpi;;
 	    esac
-            # echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
+             echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
 	    if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
 		mkl_blas=rt
 		mkk_lapack=rt
@@ -950,8 +951,10 @@ then
 		    ff_mkl_lapack="$ff_mkl_blas"
 		fi
 	    fi
+	    if test -f $ff_mkl_root/lib/$ff_mkl_arch/lib/mkl_scalapack${ff_mkl_lp} ; then 
             ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
             ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+	    fi
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes
 

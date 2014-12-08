@@ -469,12 +469,18 @@ void Check(const Opera &Op,int N,int  M)
     }
     if(VF) {
       if(&Uh != &Vh || sym)
-	ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
+	cout << ("To Day in bilinear form with discontinous Galerkin (2d):   \n"
 		  "  test or unkown function must be  defined on the same FEspace, \n"
 		  "  and the matrix is not symmetric. \n" 
 		  " To do other case in a future (F. Hecht) dec. 2003 ");
-      
-      matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIT,FIE);
+        if(&Uh == &Vh)
+            matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIT,FIE);
+        else
+            matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIT,FIE);
+
+        
+     
+  //      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIT,FIE);
       matep->faceelement = Element_OpVF;   
       paramate= &parammatElement_OpVF;            
     }
@@ -755,12 +761,14 @@ void Check(const Opera &Op,int N,int  M)
     }
     if(VF) {
       if(&Uh != &Vh || sym)
-	ExecError("To Day in bilinear form with discontinous Galerkin:   \n"
+	cout <<  ("To Day in bilinear form with discontinous Galerkin (3d):   \n"
 		  "  test or unkown function must be  defined on the same FEspace, \n"
 		  "  and the matrix is not symmetric. \n" 
-		  " To do other case in a future (F. Hecht) dec. 2003 ");
-      
+		  " To do other case in a future (F. Hecht) dec. 2014 ");
+      if(&Uh == &Vh)
       matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIV,FIT);
+      else
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIV,FIT);
       matep->faceelement = Element_OpVF;   
       paramate= &parammatElement_OpVF;            
     }
