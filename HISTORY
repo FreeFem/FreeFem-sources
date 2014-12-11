@@ -1,5 +1,10 @@
-@  changeset:   3101:fb9b853f36b3
+@  changeset:   3102:768c07a126f7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Dec 08 09:37:21 2014 +0100
+|  summary:     add file fore hpddm interface
+|
+o  changeset:   3101:fb9b853f36b3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 28 13:43:55 2014 +0100
 |  summary:     correct ff_finalmize
