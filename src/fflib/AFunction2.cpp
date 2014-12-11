@@ -44,7 +44,7 @@
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 
-queue<pair<const E_Routine*,int> > debugstack;
+queue<pair<const E_Routine*,int> > *debugstack=0;
 
 
 class vectorOfInst : public  E_F0mps { public:
@@ -712,7 +712,7 @@ struct CleanE_Routine {
 };
 
 AnyType E_Routine::operator()(Stack s)  const  {
-   debugstack.push(pair<const E_Routine*,int>(this,TheCurrentLine));
+   debugstack->push(pair<const E_Routine*,int>(this,TheCurrentLine));
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
@@ -734,7 +734,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
       ret=(*code)(s);  }
    catch( E_exception & e) { 
           // cout << " catch " << e.what() << " clean & throw " << endl;
-           if (e.type() == E_exception::e_return)  
+            if (e.type() == E_exception::e_return)
               ret = e.r;
            else 
               ErrorExec("E_exception: break or contine not in loop ",1);
@@ -744,16 +744,16 @@ AnyType E_Routine::operator()(Stack s)  const  {
        (*clean)(s); 
       WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
       memcpy(s,save,lgsave);  // restore 
-      TheCurrentLine=debugstack.front().second;
-      debugstack.pop();
+      TheCurrentLine=debugstack->front().second;
+      debugstack->pop();
       throw ;             
      }
   
     (*clean)(s); //  the clean is done in CleanE_Routine delete .         
    //  delete [] listparam; after return 
     memcpy(s,save,lgsave);  // restore 
-    TheCurrentLine=debugstack.front().second;
-    debugstack.pop();
+    TheCurrentLine=debugstack->front().second;
+    debugstack->pop();
    // il faudrait que les variable locale soit detruire apres le return 
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
    // plus safe ?????  FH.  (fait 2008)
@@ -858,13 +858,14 @@ void ShowDebugStack()
    cerr << "  current line = " << TheCurrentLine  
         << " mpirank " << mpirank << " / " << mpisize <<endl; 
    else
-   cerr << "  current line = " << TheCurrentLine  << endl; 
-   while ( debugstack.size() )
+   cerr << "  current line = " << TheCurrentLine  << endl;
+  if(debugstack)
+   while ( debugstack->size() )
      {
         
-        cerr << " call " << debugstack.front().first->name<< "  at  line " 
-             <<debugstack.front().second << endl; 
-        debugstack.pop();     
+        cerr << " call " << debugstack->front().first->name<< "  at  line "
+             <<debugstack->front().second << endl;
+        debugstack->pop();
      }
  }
  
