@@ -1,5 +1,10 @@
-@  changeset:   3102:768c07a126f7
+@  changeset:   3103:e7c44e31bf18
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Dec 11 20:48:28 2014 +0100
+|  summary:     correct memory leack
+|
+o  changeset:   3102:768c07a126f7
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Dec 08 09:37:21 2014 +0100
 |  summary:     add file fore hpddm interface
