@@ -3458,7 +3458,7 @@ int mainff (int  argc, char **argv)
     ThePlotStream=0;
   }
   Destroylex( zzzfff);
-  
+  delete [] cc;
    // ClearMem();
   return retvalue;
 }

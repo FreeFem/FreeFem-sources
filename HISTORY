@@ -1,5 +1,10 @@
-@  changeset:   3103:e7c44e31bf18
+@  changeset:   3104:5d5d0f7cbcfc
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Dec 12 10:40:06 2014 +0100
+|  summary:     correct lot of memory leak in case of
+|
+o  changeset:   3103:e7c44e31bf18
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Dec 11 20:48:28 2014 +0100
 |  summary:     correct memory leack

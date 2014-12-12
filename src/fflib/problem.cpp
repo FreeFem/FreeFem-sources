@@ -5802,7 +5802,7 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
 	BC_set * bc= new BC_set(*dynamic_cast<const  BC_set *>(e));
 	if (complextype && !bc->complextype) {
 	    bc->CastToK<Complex>() ;
-	    cout << " Bc to complex " << endl;
+	    if(verbosity > 10) cout << " Bc to complex " << endl;
 	} 
 	//else bc->mapping(&CCastToR) ; 
           //cout << l <<   " ll->l " <<  ll->l << " " << ll->l->isoptimize <<endl;    
