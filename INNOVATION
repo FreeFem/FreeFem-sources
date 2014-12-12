@@ -1,3 +1,6 @@
+ - correct pb of memory leak in case 
+   matrix A = ...; in loop ( this occur in lot of case, tanks to P. Jolivet )
+   correct small memory leak in use of routine due to debugstack. 
  - correct bug in periodic condition in case common dof with periodic.  
  - correct big bug in memory gestion of sparse matrix
  version 3.32 
