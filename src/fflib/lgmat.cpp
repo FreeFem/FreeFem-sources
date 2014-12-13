@@ -2756,7 +2756,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        );
        
  TheOperators->Add("<-",
-       new OneOperatorCode<BlockMatrix<R>>(),
+       new OneOperatorCode<BlockMatrix<R> >(),
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R,0>)  ,
