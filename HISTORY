@@ -1,5 +1,10 @@
-@  changeset:   3106:e18aa16a8edf
+@  changeset:   3107:77a71b1b2901
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sat Dec 13 21:14:08 2014 +0100
+|  summary:     correct memory leak
+|
+o  changeset:   3106:e18aa16a8edf
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sat Dec 13 14:53:47 2014 +0100
 |  summary:     correct typo for  c++11 >>

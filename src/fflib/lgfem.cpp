@@ -2549,16 +2549,26 @@ public:
 	      l[i].composant=false;
 	      l[i].what=16; //  iso value 3d
 	      l[i][0]=CastTo<pf3c>(args[i]);}
-	  else if (BCastTo<pferarray>(args[i])) {
-	      // cout << "BCastTo<pfer>(args[i])" << endl;
-	      l[i].composant=false;
-	      l[i].what=101; //  iso value array iso value 2d 
-	      l[i][0]=CastTo<pferarray>(args[i]);}
-	  else if (BCastTo<pf3rarray>(args[i])) {
-	      // cout << "BCastTo<pfer>(args[i])" << endl;
-	      l[i].composant=false;
-	      l[i].what=106; //arry iso value array iso value 3d 
-	      l[i][0]=CastTo<pf3rarray>(args[i]);}	
+          else if (BCastTo<pferarray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=101; //  iso value array iso value 2d
+              l[i][0]=CastTo<pferarray>(args[i]);}
+          else if (BCastTo<pfecarray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=111; //  iso value array iso value 2d
+              l[i][0]=CastTo<pfecarray>(args[i]);}
+          else if (BCastTo<pf3rarray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=106; //arry iso value array iso value 3d
+              l[i][0]=CastTo<pf3rarray>(args[i]);}
+          else if (BCastTo<pf3carray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=116; //arry iso value array iso value 3d
+              l[i][0]=CastTo<pf3carray>(args[i]);}
 	  else if (BCastTo<pmesh>(args[i])){
 	      l[i].composant=true;
 	      l[i].what=0; // mesh ... 
