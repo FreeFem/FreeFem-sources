@@ -1,5 +1,10 @@
-@  changeset:   3107:77a71b1b2901
+@  changeset:   3108:1f630ba53655
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Dec 15 14:17:33 2014 +0100
+|  summary:     add missing option in plot
+|
+o  changeset:   3107:77a71b1b2901
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sat Dec 13 21:14:08 2014 +0100
 |  summary:     correct memory leak
