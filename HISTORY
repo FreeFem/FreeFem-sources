@@ -1,5 +1,10 @@
-@  changeset:   3109:be503a9f1ff3
+@  changeset:   3110:cf15bbc40e87
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jan 13 21:08:20 2015 +0100
+|  summary:     add hd5 and xml stuff.
+|
+o  changeset:   3109:be503a9f1ff3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Dec 15 14:52:58 2014 +0100
 |  summary:     put modif un lg.ypp not in lg.tab.cpp
