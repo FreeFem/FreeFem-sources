@@ -136,7 +136,7 @@ else
 include.done: $(allheaders)
 	-rm -rf include
 	mkdir -p  include
-	cd include && ln -s $(allheaders) .
+	for i in $(allheaders); do  ln -s ../$$i include/. ; done 
 	touch $@
 endif
 
