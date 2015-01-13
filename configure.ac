@@ -1,4 +1,3 @@
-# Configuration script using Automake + Autoconf for FreeFem++
 # ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
@@ -529,7 +528,8 @@ EOF
 # Generic or hardware-dependant optimization
 m4_include(acmacros.m4)
 m4_include(acoptim.m4)
-
+m4_include(ax_lib_hdf5.m4)
+m4_include(ax_lib_gsl.m4)
 
 # ------------------------------
 # compilation flags of FreeFem++
@@ -1654,6 +1654,14 @@ m4_define([TOOL_DISABLE],
     TOOL_PARAMETERS($1,$2,$3)
 ])
 ##  try to see pakage is hon computer  if the FH ZZZZ 
+## FH to find gsl ... 
+AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
+if test "$ff_with_gsl" = "yes"; then  
+  AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
+fi
+
+##
+
 
 m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
@@ -1674,7 +1682,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
 	[[mshmet],[-lmshmet],[],[]],
-	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
+dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
     ]
@@ -1782,6 +1790,17 @@ test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
 
+##  search of HDF5 ....
+AX_LIB_HDF5()
+if test "$with_hdf5" = "yes"; then  
+  AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
+  LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
+else
+  enable_iohdf5=no  
+fi
+TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX)
+
+
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
 
 #  remove gsl if not find ... FH
@@ -1792,8 +1811,11 @@ then
     if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
     if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
 fi
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
-TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
+TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
+
+
 
 # All makefiles
 AC_OUTPUT(Makefile

@@ -72,7 +72,7 @@ inline void pen23tet(R3 P[6],R3 Q[3][4])
      for(int i=0; i<4;++i)
         Q[k][i]=P[d0[k][i]];
 }
-int UnderIso(double *f,R2 Q[2][3] ,double area2[2], const double eps)
+int UnderIso(double *f,R2 Q[2][3] ,double area2[2],  double eps)
 {
  
     const R2 *K = R2::KHat;
@@ -149,7 +149,7 @@ int UnderIso(double *f,R2 Q[2][3] ,double area2[2], const double eps)
     return ntria;
    
 }
-int UnderIso(double *f,R3 Q[3][4] ,double vol6[3], const double eps)
+int UnderIso(double *f,R3 Q[3][4] ,double vol6[3],  double eps)
 {
     const R3 *K = R3::KHat;
     const  int p1[]= {1,2,3,0};
@@ -263,7 +263,7 @@ int UnderIso(double *f,R3 Q[3][4] ,double vol6[3], const double eps)
     return ntet;
 }
 
-int IsoLineK(double *f,Fem2D::R3 *Q,const double eps)
+int IsoLineK(double *f,Fem2D::R3 *Q, double eps)
 {
     
     static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;
@@ -345,7 +345,7 @@ int IsoLineK(double *f,Fem2D::R3 *Q,const double eps)
     return nP;
 }
 
-int IsoLineK(double *f,Fem2D::R2 *Q,const double eps)
+int IsoLineK(double *f,Fem2D::R2 *Q, double eps)
 {
     int debug=0;
     R2 P[3]={ R2(0.,0.),R2(1.,0.),R2(0.,1.)};
@@ -380,22 +380,22 @@ int IsoLineK(double *f,Fem2D::R2 *Q,const double eps)
         else return 0; //  const funct...
     }
     else // see internal edge ..
-        for(int e=0;e<3;++e)
+        for(int ee=0;ee<3;++ee)
         {
-            int j0=(e+1)%3;
-            int j1=(e+2)%3;
+            int j0=(ee+1)%3;
+            int j1=(ee+2)%3;
             if( vk[j0]) //  the intial  point on iso line
             {
                 if(0. < f[j1])
-                    te[ke]=e,i0[ke]=j0,i1[ke]=j0,++ke;
+                    te[ke]=ee,i0[ke]=j0,i1[ke]=j0,++ke;
                 else
-                    te[ke]=e+3,i0[ke]=j0,i1[ke]=j0,++ke;
+                    te[ke]=ee+3,i0[ke]=j0,i1[ke]=j0,++ke;
             }
             else if (vk[j1]); // skip the final point on iso line
             else if( f[j0] < 0. && 0. < f[j1])  // good  sens
-                te[ke]=e,i0[ke]=j0,i1[ke]=j1,++ke;
+                te[ke]=ee,i0[ke]=j0,i1[ke]=j1,++ke;
             else if ( f[j0] > 0. && 0. > f[j1]) // inverse  sens
-                te[ke]=e+3,i0[ke]=j1,i1[ke]=j0,++ke;
+                te[ke]=ee+3,i0[ke]=j1,i1[ke]=j0,++ke;
         }
     if( ke==2)
     {

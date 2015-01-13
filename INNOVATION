@@ -1,3 +1,7 @@
+ - add hd5 interface  (13/01/2015) 
+    Thank to Mathieu Cloirec CINES - http://www.cines.fr
+   voir example iohd5-beam-2d.edp	    iohd5-beam-3d.edp
+ - add find of libgsl  in configure script 
  - correct pb of memory leak in case 
    matrix A = ...; in loop ( this occur in lot of case, tanks to P. Jolivet )
    correct small memory leak in use of routine due to debugstack. 

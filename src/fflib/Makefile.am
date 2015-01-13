@@ -21,6 +21,7 @@ CodeAlloc.cpp lgmat.cpp global.cpp 					\
 ../bamglib/Mesh2.cpp ../bamglib/Metric.cpp ../femlib/BamgFreeFem.cpp	\
 ../bamglib/MeshDraw.cpp ../bamglib/MeshGeom.cpp				\
 ../bamglib/MeshQuad.cpp ../bamglib/SetOfE4.cpp ../bamglib/MeshRead.cpp	\
+../bamglib/write_hdf5.cpp ..//bamglib//write_xdmf.cpp \
 ../bamglib/MeshWrite.cpp problem.cpp mt19937ar.cpp \
 ../Graphics/DefColor.cpp \
  InitFunct.cpp ../Algo/lgalgo.cpp			\
@@ -56,7 +57,7 @@ EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
 libff_a_DEPENDENCIES=@EIGENOBJ@
 
-AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib
+AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS)
 # -I$(top_srcdir)/arpack/arpack++/include
 
 # Build date changes at every change

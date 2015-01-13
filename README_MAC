@@ -99,3 +99,5 @@ sudo port install missing-tool
 like for exemple:
 
 sudo port install gnuplot
+
+sudo  install_name_tool -change /Users/hecht/ff/ff-MacOS-10.9/download/PETSc/petsc-3.5.2/arch-darwin-c-debug/lib/libparmetis.dylib /usr/local/petsc/lib/libparmetis.dylib libpetsc.3.5.dylib
