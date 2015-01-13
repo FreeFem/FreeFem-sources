@@ -1,5 +1,10 @@
-@  changeset:   3108:1f630ba53655
+@  changeset:   3109:be503a9f1ff3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Dec 15 14:52:58 2014 +0100
+|  summary:     put modif un lg.ypp not in lg.tab.cpp
+|
+o  changeset:   3108:1f630ba53655
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Dec 15 14:17:33 2014 +0100
 |  summary:     add missing option in plot
