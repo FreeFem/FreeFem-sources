@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.33,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.34,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -88,6 +88,7 @@ echo >config_LIB_INFO
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG(C++)
+
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
@@ -544,6 +545,10 @@ m4_include(ax_lib_gsl.m4)
 #  ------------------------------------------------
 
 # FreeFrem++-specific optimizations -fpascal-strings
+
+CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS)
+
+
 if test "$enable_debug" = yes;
 then
 	CXXFLAGS="$CXXFLAGS  -DBAMG_LONG_LONG -DCHECK_KN"
