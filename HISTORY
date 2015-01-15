@@ -1,5 +1,10 @@
-@  changeset:   3117:1356c66b9164
+@  changeset:   3118:89604c8d20bb
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 15 11:04:51 2015 +0100
+|  summary:     correct build/download to follow link in case of curl usage..
+|
+o  changeset:   3117:1356c66b9164
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 15 08:22:32 2015 +0100
 |  summary:     correct pb on depot
