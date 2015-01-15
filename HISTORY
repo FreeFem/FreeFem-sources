@@ -1,5 +1,10 @@
-@  changeset:   3116:ed9ccb5032ff
+@  changeset:   3117:1356c66b9164
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 15 08:22:32 2015 +0100
+|  summary:     correct pb on depot
+|
+o  changeset:   3116:ed9ccb5032ff
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jan 13 22:49:44 2015 +0100
 |  summary:     coorect examples++-load/include dir construction
