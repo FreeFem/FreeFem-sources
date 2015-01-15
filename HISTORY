@@ -1,5 +1,15 @@
-@  changeset:   3114:c180b6d013fd
+@  changeset:   3116:ed9ccb5032ff
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jan 13 22:49:44 2015 +0100
+|  summary:     coorect examples++-load/include dir construction
+|
+o  changeset:   3115:034691a4deff
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jan 13 22:34:43 2015 +0100
+|  summary:     correct reconstrion for examples++-load/include
+|
+o  changeset:   3114:c180b6d013fd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jan 13 22:01:23 2015 +0100
 |  summary:     add missing file
