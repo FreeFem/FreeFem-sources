@@ -1823,7 +1823,7 @@ TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
-test $ff_cxx11!=yes &&  enable_schwarz=no
+test $ff_cxx11!=yes -a $ff_mpi==no &&  enable_schwarz=no
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
 
