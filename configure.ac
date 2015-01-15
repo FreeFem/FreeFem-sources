@@ -546,8 +546,11 @@ m4_include(ax_lib_gsl.m4)
 
 # FreeFrem++-specific optimizations -fpascal-strings
 
-CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS)
-
+CHECK_COMPILE_FLAG(C++,[-std=c++11],CXX11FLAGS)
+CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
+ff_cxx_11="no"
+if test -z "$CXX11FLAGS" ; then ff_cxx_11="yes" ; fi
+AC_SUBST(WITH_CXX11,$ff_cxx_11)
 
 if test "$enable_debug" = yes;
 then
@@ -1820,6 +1823,8 @@ TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
+test $ff_cxx11!=yes &&  enable_schwarz=no
+TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
 
 # All makefiles
