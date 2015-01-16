@@ -1,5 +1,15 @@
-@  changeset:   3123:84eadda9ec1e
+@  changeset:   3125:397a0e0b089f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 16 17:16:29 2015 +0100
+|  summary:     add petsc in configure (first test)
+|
+o  changeset:   3124:695d108081da
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 15 16:54:43 2015 +0100
+|  summary:     correct pb compile e new schwarz pluging
+|
+o  changeset:   3123:84eadda9ec1e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 15 15:55:21 2015 +0100
 |  summary:     add schwarz interface

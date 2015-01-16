@@ -567,7 +567,13 @@ m4_include(acmacros.m4)
 m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
-
+# Checking c++11 for schwarz interface of P. Jolivet ...
+CHECK_COMPILE_FLAG(C++,[-std=c++11],CXX11FLAGS)
+CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
+ff_cxx11="no"
+if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+AC_SUBST(WITH_CXX11,$ff_cxx11)
+#end Checking  c++11
 # ------------------------------
 # compilation flags of FreeFem++
 # ------------------------------
@@ -582,11 +588,6 @@ m4_include(ax_lib_gsl.m4)
 
 # FreeFrem++-specific optimizations -fpascal-strings
 
-CHECK_COMPILE_FLAG(C++,[-std=c++11],CXX11FLAGS)
-CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
-ff_cxx_11="no"
-if test -z "$CXX11FLAGS" ; then ff_cxx_11="yes" ; fi
-AC_SUBST(WITH_CXX11,$ff_cxx_11)
 
 if test "$enable_debug" = yes;
 then
@@ -1859,7 +1860,10 @@ TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
-test $ff_cxx11!=yes -o  $ff_mpi==no -o  ff_petsc_ok==no &&  enable_schwarz=no
+# echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$ff_petsc_ok" != yes &&  enable_schwarz=no
+
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
 
