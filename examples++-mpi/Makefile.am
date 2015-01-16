@@ -61,7 +61,7 @@ PETSc.hpp additional.idp removeDOF.cpp schwarz.cpp schwarz.edp stokes-2d.edp uti
 # deactivated).
 
 LIST_COMPILE=@TOOL_DYLIB_mumps@ @TOOL_DYLIB_hips@ @TOOL_DYLIB_superludist@ @TOOL_DYLIB_pastix@ MPICG.$(DYLIB_SUFFIX)	\
-@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_schwarz@@
+@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_schwarz@
 
 if FFCS_MPIOK
 

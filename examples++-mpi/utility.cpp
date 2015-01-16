@@ -1,3 +1,5 @@
+//ff-c++-LIBRARY-dep:  hpddm  scalapack blas  mpifc  fc mpi  pthread 
+//ff-c++-cpp-dep: 
 #ifndef _ALL_IN_ONE_
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"
