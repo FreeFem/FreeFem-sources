@@ -1,5 +1,10 @@
-@  changeset:   3125:397a0e0b089f
+@  changeset:   3126:40891f8e170d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 16 20:39:09 2015 +0100
+|  summary:     correct configure.ac to compile plugin schwarz with PETSc
+|
+o  changeset:   3125:397a0e0b089f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 16 17:16:29 2015 +0100
 |  summary:     add petsc in configure (first test)
