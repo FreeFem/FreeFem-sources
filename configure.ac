@@ -88,6 +88,42 @@ echo >config_LIB_INFO
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG(C++)
+AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
+# /usr/local/petsc/conf/petscvariables 
+ff_petsc_ok=no
+## echo --$with_petsc--
+if test "$with_petsc" != no ; then
+    ff_petsc=""
+    if test -n "$with_pets" -a -f "$with_petsc/conf/petscvariables" ; then 
+	ff_petsc="$with_petsc/conf/petscvariables"
+    elif test -n "$with_pets" -a -f "$with_petsc" ; then 
+	ff_petsc="$with_petsc"
+    elif test -z "$with_petsc" ; then
+	for d in /usr /usr/local /opt/usr  /opt/local ; do
+	  ##  echo  "$d/petsc/conf/petscvariables" 
+	    if test -f "$d/petsc/conf/petscvariables" ; then 
+		ff_petsc="$d/petsc/conf/petscvariables"
+	    fi
+	done
+	if test -n "$ff_petsc" ; then
+	    echo "ff_petsc=$ff_petsc" 
+	    PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ff_petsc`
+	    PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ff_petsc`
+	    if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
+		ff_petsc_ok=yes;
+		AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
+	    fi
+	fi
+    fi
+fi
+
+if test "$ff_petsc_ok" != no ;   then
+    AC_MSG_NOTICE([ with petsc  PETSC_WITH_EXTERNAL_LIB=$PETSC_WITH_EXTERNAL_LIB ])
+else
+    AC_MSG_NOTICE([ without petsc ***** ])
+fi
+
+
 
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
@@ -1823,7 +1859,7 @@ TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
-test $ff_cxx11!=yes -a $ff_mpi==no &&  enable_schwarz=no
+test $ff_cxx11!=yes -o  $ff_mpi==no -o  ff_petsc_ok==no &&  enable_schwarz=no
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
 

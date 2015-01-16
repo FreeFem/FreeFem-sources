@@ -1,3 +1,7 @@
+#define WITH_PETSC
+//ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas  mpifc  fc mpi  pthread  PETSc
+//ff-c++-cpp-dep: -framework Accelerate
+
 #include <math.h>
 #include <mpi.h>
 #include <ff++.hpp>
