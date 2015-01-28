@@ -66,6 +66,6 @@ typedef long   Int4;
  const  Icoor2 MaxICoor22 = Icoor2(2)*Icoor2(MaxICoor) * Icoor2(MaxICoor) ;
 #endif
  class Triangles;
-extern void MeshError(int Err,Triangles *Th=0) ;
+extern void MeshError(int Err,const Triangles *Th=0) ;
 }
 #endif

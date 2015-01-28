@@ -1584,7 +1584,11 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
    a= new C_F0[nb];
    a[0]=e;
    for (int i=1;i<nb;i++) a[i]=b[i-1];}
- ~basicAC_F0_wa(){delete [] a;} 
+    ~basicAC_F0_wa(){delete [] a;
+        a=0;
+        delete named_parameter;
+        named_parameter=0;}
+ 
 
  basicAC_F0_wa(const basicAC_F0 & b) { 
    named_parameter=0;
@@ -3200,7 +3204,7 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
        return rr;
      }
 
-extern queue<pair<const E_Routine*,int> > debugstack;
+extern queue<pair<const E_Routine*,int> > * debugstack;
 
 struct NothingType {  // a type to do nothing 
  NothingType() {};
