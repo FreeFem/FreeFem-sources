@@ -408,7 +408,7 @@ void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int
           couleur(2+dichotomie(Viso,l));
           uv = coef*uv;
           l *= coef;
-          R2 dd = uv*(-0.005/l);
+          R2 dd = uv*(-kk/l);// modif F.H size of arraow 08/14 FH.l
           R2 dn = dd.perp()*0.5;
           if (l*10000.< kk) continue;
           if (l < kk) 

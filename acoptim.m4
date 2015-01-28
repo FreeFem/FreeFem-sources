@@ -160,6 +160,8 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	       ff_fast="-O3";;
 	  i486)
 	    ff_fast="-O3 $ff_fast";;
+	  x86_64*)
+	  ff_fast="-O3 $ff_fast";;
 	  *)
 	    AC_MSG_ERROR(cannot determine apple cpu type )
 	    ff_fast="-O3";;

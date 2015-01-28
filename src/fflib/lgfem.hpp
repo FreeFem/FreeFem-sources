@@ -411,14 +411,14 @@ public:
   
  // int N;
   FEbase<K,v_fes>  **xx;
-  FEbaseArray(const pfes  *ppVh,int NN) :FEbaseArrayKn<K>(NN),xx(new FEbase<K,v_fes> * [NN])
+  FEbaseArray(const pfes  *ppVh,int NN) :FEbaseArrayKn<K>(NN),xx(new FEbase<K,v_fes> * [std::max(NN, 1)])
   {
-    for (int i=0;i<this->N;i++)
+    for (int i=0;i<std::max(this->N, 1);i++)
       xx[i]=new FEbase<K,v_fes>(ppVh);
   }
   ~FEbaseArray() { 
     //  cout << " ~FEbaseArray " << endl;
-    for (int i=0;i<this->N;i++)
+    for (int i=0;i<std::max(this->N, 1);i++)
       xx[i]->destroy();
     delete [] xx;} 
   void destroy() { //cout << " destroy ~FEbaseArray " << endl; 
@@ -432,9 +432,9 @@ public:
         if(xx != 0 && i > 0 && i != this->N) {
             FEbase<K,v_fes>** yy = new FEbase<K,v_fes>*[i];
             if(i > this->N) {
-                for(unsigned int j = 0; j < this->N; ++j)
+                for(unsigned int j = 0; j < std::max(this->N, 1); ++j)
                     yy[j] = xx[j];
-                for(unsigned int j = this->N; j < i; ++j)
+                for(unsigned int j = std::max(this->N, 1); j < i; ++j)
                     yy[j] = new FEbase<K,v_fes>(xx[0]->pVh);
             }
             else {

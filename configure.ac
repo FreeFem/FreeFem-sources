@@ -1,4 +1,3 @@
-# Configuration script using Automake + Autoconf for FreeFem++
 # ------------------------------------------------------------
 
 # Antoine Le Hyaric - LJLL Paris 6 - lehyaric@ann.jussieu.fr - 13/5/04
@@ -10,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.32,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.34,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -64,7 +63,7 @@ m4_define([AC_FF_WHERELIB],
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
 	    case "$ff_WHERE_INC" in 
-		/*)e cho "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
+		/*) echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
 	    esac
 	fi
 	AC_MSG_RESULT($ff_WHERE)
@@ -89,6 +88,43 @@ echo >config_LIB_INFO
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG(C++)
+AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
+# /usr/local/petsc/conf/petscvariables 
+ff_petsc_ok=no
+## echo --$with_petsc--
+if test "$with_petsc" != no ; then
+    ff_petsc=""
+    if test -n "$with_pets" -a -f "$with_petsc/conf/petscvariables" ; then 
+	ff_petsc="$with_petsc/conf/petscvariables"
+    elif test -n "$with_pets" -a -f "$with_petsc" ; then 
+	ff_petsc="$with_petsc"
+    elif test -z "$with_petsc" ; then
+	for d in /usr /usr/local /opt/usr  /opt/local ; do
+	  ##  echo  "$d/petsc/conf/petscvariables" 
+	    if test -f "$d/petsc/conf/petscvariables" ; then 
+		ff_petsc="$d/petsc/conf/petscvariables"
+	    fi
+	done
+	if test -n "$ff_petsc" ; then
+	    echo "ff_petsc=$ff_petsc" 
+	    PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ff_petsc`
+	    PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ff_petsc`
+	    if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
+		ff_petsc_ok=yes;
+		AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
+	    fi
+	fi
+    fi
+fi
+
+if test "$ff_petsc_ok" != no ;   then
+    AC_MSG_NOTICE([ with petsc  PETSC_WITH_EXTERNAL_LIB=$PETSC_WITH_EXTERNAL_LIB ])
+else
+    AC_MSG_NOTICE([ without petsc ***** ])
+fi
+
+
+
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
@@ -529,8 +565,15 @@ EOF
 # Generic or hardware-dependant optimization
 m4_include(acmacros.m4)
 m4_include(acoptim.m4)
-
-
+m4_include(ax_lib_hdf5.m4)
+m4_include(ax_lib_gsl.m4)
+# Checking c++11 for schwarz interface of P. Jolivet ...
+CHECK_COMPILE_FLAG(C++,[-std=c++11],CXX11FLAGS)
+CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
+ff_cxx11="no"
+if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+AC_SUBST(WITH_CXX11,$ff_cxx11)
+#end Checking  c++11
 # ------------------------------
 # compilation flags of FreeFem++
 # ------------------------------
@@ -544,6 +587,8 @@ m4_include(acoptim.m4)
 #  ------------------------------------------------
 
 # FreeFrem++-specific optimizations -fpascal-strings
+
+
 if test "$enable_debug" = yes;
 then
 	CXXFLAGS="$CXXFLAGS  -DBAMG_LONG_LONG -DCHECK_KN"
@@ -915,10 +960,11 @@ then
 	else
 	    ff_mkl_libpath=no
 	fi
+	
 	if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
-	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib/.*'`
+	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib.*'`
 	    ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
-            ff_mkl_lp=
+            ff_mkl_lp=_lp64
             case "$ff_mkl_arch" in
 		*64*)  ff_mkl_lp=_lp64
 	    esac
@@ -932,7 +978,7 @@ then
 		*/intel/*)         ff_mkl_mpi=_intelmpi;;
 		*)        ff_mkl_mpi=_openmpi;;
 	    esac
-            # echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
+             echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
 	    if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
 		mkl_blas=rt
 		mkk_lapack=rt
@@ -944,14 +990,20 @@ then
 		    ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
 		    ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
 		    ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+		elif test -f $ff_mkl_root/lib/libmkl_lapack.a ; then
+		    ff_mkl_mlt="-L$ff_mkl_root/lib -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
+		    ff_mkl_blas="-L$ff_mkl_root/lib -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+		    ff_mkl_lapack="-L$ff_mkl_root/lib -lmkl_lapack"
 		else
 		    ff_mkl_mlt="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  -Wl,--end-group  -lm -lpthread"
 		    ff_mkl_blas="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,--end-group  -lm -lpthread"
 		    ff_mkl_lapack="$ff_mkl_blas"
 		fi
 	    fi
+	    if test -f $ff_mkl_root/lib/$ff_mkl_arch/lib/mkl_scalapack${ff_mkl_lp} ; then 
             ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
             ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+	    fi
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes
 
@@ -1000,7 +1052,7 @@ then
     # Trying  blas library
     # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
     for iblas in \
-	"-framework vecLib" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
+	"-framework Accelerate" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
 	$ff_freebsd_blas
     do
 	if test "$ff_blas_ok" = no;
@@ -1101,7 +1153,7 @@ then
     AC_CHECK_HEADERS(cblas.h,
 	ff_cblas_h=yes,
 	ff_cblas_h=no)
-    AC_CHECK_HEADERS(vecLib/cblas.h,
+    AC_CHECK_HEADERS(Accelerate/cblas.h,
 	ff_cblas_h=yes
 	ff_cblas_h=no)
     AC_CHECK_HEADERS(atlas/cblas.h,
@@ -1637,6 +1689,14 @@ m4_define([TOOL_DISABLE],
     TOOL_PARAMETERS($1,$2,$3)
 ])
 ##  try to see pakage is hon computer  if the FH ZZZZ 
+## FH to find gsl ... 
+AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
+if test "$ff_with_gsl" = "yes"; then  
+  AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
+fi
+
+##
+
 
 m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
@@ -1657,7 +1717,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
 	[[mshmet],[-lmshmet],[],[]],
-	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
+dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
     ]
@@ -1765,6 +1825,17 @@ test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
 # FFCS - 27/10/11 - Some extra conditionals for things that do not work on certain systems (eg MPI libraries under
 # Windows)
 
+##  search of HDF5 ....
+AX_LIB_HDF5()
+if test "$with_hdf5" = "yes"; then  
+  AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
+  LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
+else
+  enable_iohdf5=no  
+fi
+TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX)
+
+
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
 
 #  remove gsl if not find ... FH
@@ -1775,8 +1846,16 @@ then
     if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
     if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
 fi
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX NewSolver.$DYLIB_SUFFIX")
-TOOL_DISABLE(pardiso,PARDISO.$DYLIB_SUFFIX)
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
+TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
+TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
+
+# echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$ff_petsc_ok" != yes &&  enable_schwarz=no
+
+TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
+
 
 # All makefiles
 AC_OUTPUT(Makefile

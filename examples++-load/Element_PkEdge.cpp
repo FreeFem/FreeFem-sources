@@ -110,9 +110,10 @@ namespace  Fem2D {
       else ee=2;
       int e3=ee*npe;
       double s=1.-L[ee];
-      R xe = L[VerticesOfTriangularEdge[ee][0]]/s;//  go from 0 to 1 on edge 
+      R xe = L[VerticesOfTriangularEdge[ee][0]]/s;//  go from 0 to 1 on edge
+      R dxe = -1;
       if(K.EdgeOrientation(ee) <0.) 
-	xe = 1-xe;
+          xe = 1-xe, dxe=-1;
       //cout << P << " ee = " << ee << " xe " << xe << " " << L[ee]<< " s=" <<s  << " orient: " << K.EdgeOrientation(ee) <<endl;
       assert(s);
       val=0; 
@@ -121,12 +122,12 @@ namespace  Fem2D {
 	  RN_ f0(val('.',0,op_id)); 
 	  for (int l=0;l<npe;l++)
 	    {
-	      int df= e3+l;
+	      int dof= e3+l;
 	      R f=1.;
 	      for (int i=0;i<npe;++i)
 		if(i != l) 
 		  f *= (xe-X[i])/(X[l]-X[i]);
-	      f0[df] = f;
+	      f0[dof] = f;
 	    }
 	  //cout << " f0 = " << f0 << " X= "<< X << endl;
 	}
@@ -134,9 +135,32 @@ namespace  Fem2D {
       
       if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
 	{
-	  cerr << " TO DO ???  FH " << endl;
-	  ffassert(0);
-	}
+            R2 E =K.Edge(ee);
+            R lE2=(E,E);
+            dxe /=lE2;
+            //cout << " xe = "<< xe << " " << dxe << " " << lE2 << endl;
+            for (int l=0;l<npe;l++)
+            {
+                int dof= e3+l;
+                R f=1. ,df = 0., ddf = 0.;
+                for (int i=0;i<npe;++i)
+                    if(i != l)
+                    {   R xx=(xe-X[i])/(X[l]-X[i]);
+                        R dxx= dxe/(X[l]-X[i]);
+                        ddf = ddf* xx + 2*df*dxx;
+                        df = df* xx + f*dxx;
+                        f *= xx;
+                    }
+               // cout << "   dof: " << dof << " " << f << " " << df << " " << 1./lE2/(X[1]- X[0]) << " " << E << endl;
+                if( whatd[op_id])val(dof,0,op_id)= f;
+                if( whatd[op_dx]) val(dof,0,op_dx)= df*E.x;
+                if( whatd[op_dy]) val(dof,0,op_dy)= df*E.y;
+                if( whatd[op_dxx]) val(dof,0,op_dxx)= ddf*E.x*E.x;
+                if( whatd[op_dyy]) val(dof,0,op_dyy)= ddf*E.y*E.y;
+                if( whatd[op_dxy]) val(dof,0,op_dxy)= ddf*E.x*E.y;
+               
+            }
+    	}
     }
 
   

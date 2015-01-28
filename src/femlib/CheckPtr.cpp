@@ -6,6 +6,8 @@
 #include <malloc.h>
 #endif
 
+static long verbosity;
+
 static long StorageUsed()
 {
 #if MALLOC_ZONE_SPECIFIC_FLAGS
@@ -271,9 +273,11 @@ void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
   MaxUsedSize = AllocSize < MaxUsedSize ? MaxUsedSize :  AllocSize;
   if( !ll &&  !a->p)
     {
+        if(verbosity>2) {
       printf("\t\tCheckPtrMem Full Exit(10) New Alloc %ld %p when %ld\n ", ll, a->p, a->n);
       printf ("\t\tCheckPtr:Max Memory used %10.3f kbytes " ,  MaxUsedSize/1024. );
       printf (" Memory undelete %ld \n" , AllocSize);
+        }
       exitalloc(1);
     }
   return (void*) ((char*)a->p);
@@ -388,6 +392,7 @@ AllocExtern::~AllocExtern()
      k+=kk;
     kk=kk < Maxundelptr ? kk : Maxundelptr;
     HeapSort(list,kk);
+    if(verbosity > 2)
     for (int i= kk-10<0 ? 0 : kk-10 ;i<kk;i++)
       {
         printf ("\t\tCheckPtr:Undelete pointer  %p size %ld  when %ld\n", list[i]->p,list[i]->l,list[i]->n);        
@@ -407,9 +412,11 @@ AllocExtern::~AllocExtern()
       }
       else {}
     
+      if(verbosity>2) {
     if(k)  printf ("\t\tCheckPtr:Nb of undelete pointer is %d last %d\n",k,lln);
     printf ("\t\tCheckPtr:Max Memory used %10.3f kbytes " ,  MaxUsedSize/1024. );
     printf (" Memory undelete %ld \n" , AllocSize);
+      }
     
     //   clean store pointer      
     p=AllocHead;    
@@ -447,6 +454,7 @@ int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
     size_t m =StorageUsage;
     StorageUsage =StorageUsed();
     if (!NbAllocShow) {NbAllocShow=NbAlloc;}
+    if(verbosity > 2)
   printf ("----------CheckPtr:-----%s------ NbUndelPtr  %ld  Alloc: %ld  NbPtr %ld  Mem Usage: %zu diff: %ld\n",s,NbPtr,AllocSize,NbAlloc,StorageUsage,(long)(StorageUsage-m));
   lg = AllocSize;
   return NbPtr;
@@ -493,7 +501,7 @@ int ShowAlloc(const char *s,size_t & lg)
 {
     size_t m =StorageUsed();
     long diff = m-CheckPtr___memoryusage;
-    if(CheckPtr___memoryusage!=0 && m != CheckPtr___memoryusage)
+    if(verbosity > 0 && CheckPtr___memoryusage!=0 && m != CheckPtr___memoryusage)
         printf("CheckPtr:  Warning memory leak with malloc = %ld \n ",diff);
     CheckPtr___memoryusage=m;
     lg = 0; return CheckPtr___nbptr;}

@@ -376,6 +376,11 @@ SparseMatStructure& SparseMatStructure::AddMatrix(Matrice_Creuse<R> const * cons
     n = n > _M->N() ? n : _M->N();
     m = m > _M->M() ? m : _M->M();
     MatriceMorse<R> const * const M = dynamic_cast<MatriceMorse<R> const * const> (&(*_M->A));
+    if( !M ) {
+        cerr << " Err= "<< " Matrix is not morse or CSR "<< &(*_M->A) << endl;
+        ffassert(M);
+    }
+     {
     if(!sym || (sym && M->symetrique))
     {
         for(int i=0;i < M->N;++i)
@@ -389,6 +394,7 @@ SparseMatStructure& SparseMatStructure::AddMatrix(Matrice_Creuse<R> const * cons
         {
             for(int k=M->lg[i]; k < M->lg[i+1]; ++k) if(i >= M->cl[k]) structure.insert(Z2(i,M->cl[k]));
         }
+    }
     }
     return *this;
 }

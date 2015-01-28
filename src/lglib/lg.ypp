@@ -78,7 +78,7 @@ extern mylex *zzzfff;
 // modif FH for window to have 1 dll  for mpi and none mpi ..
 extern  void (*initparallele)(int &, char **&);
 extern  void (*init_lgparallele)();
-extern  void (*end_parallele)();
+// extern  void (*end_parallele)();
 // 
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
@@ -130,7 +130,7 @@ void lgerror (const char* s) ;
  // mpi ptr to function ... 
 void (*initparallele)(int &argc, char **& argv)=0 ;
 void (*init_lgparallele)()=0;
-void (*end_parallele)()=0;
+//void (*end_parallele)()=0;
 %}
 
 
@@ -279,6 +279,7 @@ start:   input ENDOFFILE {
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
+                        debugstack= new queue<pair<const E_Routine*,int> >;
                         size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
                         if(verbosity>2  || mpirank==0) cout << endl;  
@@ -308,6 +309,7 @@ start:   input ENDOFFILE {
 			//FFCS: divert stream to FFCS
 			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
+                        if(debugstack) delete debugstack;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         long stu1 =storageused()-stu0    ;
                         
@@ -833,7 +835,7 @@ int mainff (int  argc, char **argv)
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
-
+   ff_atend(fingraphique);
    if (initparallele)initparallele(argc,argv);
 
   CPUcompileInit= CPUtime();
@@ -865,7 +867,7 @@ int mainff (int  argc, char **argv)
 
     /// <<zzzfff>>
     zzzfff = Newlex(cout,echo_edp);
-  
+    
   
 /*  
   ccin= new ifstream(cc);
@@ -914,18 +916,18 @@ int mainff (int  argc, char **argv)
     
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
-
-  if(end_parallele) end_parallele();
-
+  
+  //if(end_parallele) end_parallele();
+  ff_finalize(); 
   //  currentblock->close(currentblock).eval(thestack);
-  fingraphique();
+ // fingraphique();
   // FFCS: divert stream to FFCS
   if(ThePlotStream){
     ffapi::ff_pclose(ThePlotStream);
     ThePlotStream=0;
   }
   Destroylex( zzzfff);
-  
+  delete [] cc;
    // ClearMem();
   return retvalue;
 }
