@@ -37,6 +37,9 @@
 //       Th3_t->BuildjElementConteningVertex();
 //   is now in the constructor of Mesh3 to be consistante. 
 //   
+//  Vincent HUBER - vincent.huber@cemosis.fr   October 2014
+//  manage verbosity levels
+//
 #include "ff++.hpp"
 
 using namespace Fem2D;
@@ -77,7 +80,7 @@ public:
   GMSH_LoadMesh_Op(const basicAC_F0 &  args,Expression ffname) 
     : filename(ffname)
   {
-    if(verbosity) cout << "Load mesh given by GMSH " << endl;
+    if(verbosity>1) cout << "Load mesh given by GMSH " << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
   } 
   
@@ -123,20 +126,20 @@ Mesh * GMSH_Load(const string & filename)
 	  if(!fgets(str, sizeof(str), fp)) exit(1);
 	  int format, size;
 	  if(sscanf(str, "%lf %d %d", &version, &format, &size) != 3) exit(1);
-	  cout << "Mesh Format is " <<  format << endl;
+	  if(verbosity>1) cout << "Mesh Format is " <<  format << endl;
 	  if(format){
 	    binary = true;
-	    cout << "Mesh is in binary format" << endl;
+	    if(verbosity>2) cout << "Mesh is in binary format" << endl;
 	    int one;
 	    if(fread(&one, sizeof(int), 1, fp) != 1) exit(1);
 	    if(one != 1){
 	      swap = true;
-	      cout << "Swapping bytes from binary file" << endl;
+	      if(verbosity>2) cout << "Swapping bytes from binary file" << endl;
 	    }
 	  }
 	}
 	else if(!strncmp(&str[1], "PhysicalNames", 13)) {	  
-	  cout << " PhysicalNames is not considered in freefem++ " << endl;
+	  if(verbosity>0) cout << " PhysicalNames is not considered in freefem++ " << endl;
 	}
 	
 	else if(!strncmp(&str[1], "NO", 2) || !strncmp(&str[1], "Nodes", 5) ||
@@ -185,7 +188,7 @@ Mesh * GMSH_Load(const string & filename)
 	  int numElements;
 	  sscanf(str, "%d", &numElements);
 	   
-	  if(verbosity) cout << "Loading elements\n" << endl; 
+	  if(verbosity>2) cout << "Loading elements\n" << endl; 
 	  if(!binary){
 	    for(int i = 0; i < numElements; i++) {
 	      int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
@@ -213,8 +216,8 @@ Mesh * GMSH_Load(const string & filename)
 	      if( type == 1 ) nbe++;
 	      if( type == 2 ) nt++;
 	      if( type == 4 ){
-		cout << "We are loading a two dimensionnal mesh " << endl;
-		exit(1);
+					cout << "We are loading a two dimensionnal mesh " << endl;
+					exit(1);
 	      }
 	      
 	      int indices[60];
@@ -323,7 +326,7 @@ Mesh * GMSH_Load(const string & filename)
 		int iv0,iv1;
 		iv0 = mapnumv[ indices[0] ];	
 		iv1 = mapnumv[ indices[1] ];
-		cout << "Elem " << ie+1 << " " << iv0+1 << " " << iv1+1 << endl;
+		if(verbosity>2) cout << "Elem " << ie+1 << " " << iv0+1 << " " << iv1+1 << endl;
 		(bbff++)->set(vff, iv0, iv1, physical);
 		ie++;
 	      }
@@ -332,12 +335,12 @@ Mesh * GMSH_Load(const string & filename)
 		iv0 = mapnumv[ indices[0] ];	
 		iv1 = mapnumv[ indices[1] ];
 		iv2 = mapnumv[ indices[2] ];	
-		cout << "Triangles " << it+1 << " " << iv0+1 << " " << iv1+1 << " " << iv2+1 << endl;
+		if(verbosity>2) cout << "Triangles " << it+1 << " " << iv0+1 << " " << iv1+1 << " " << iv2+1 << endl;
 		
 		(ttff++)->set(vff, iv0, iv1, iv2, physical);
-		cout << "mes=" << tff[it].area << endl;
+		if(verbosity>2) cout << "mes=" << tff[it].area << endl;
 		if( tff[it].area < 1e-8 ){
-		  cout << "bug" << endl;
+		  cout << "bug : mes < 1e-8 !" << endl;
 		  exit(1);
 		}
 		it++;
@@ -405,12 +408,12 @@ Mesh * GMSH_Load(const string & filename)
 	  }
 	}
         else if(!strncmp(&str[1], "NodeData", 8)) {
-	  cout << " NodeData is not considered in freefem++ " << endl;
+	  if(verbosity>1) cout << " NodeData is not considered in freefem++ " << endl;
 	}
 	else if(!strncmp(&str[1], "ElementData", 11) ||
 		!strncmp(&str[1], "ElementNodeData", 15)){
 
-	  cout << " ElementData/ElementNodeData is not considered in freefem++ " << endl;
+	  if(verbosity>1) cout << " ElementData/ElementNodeData is not considered in freefem++ " << endl;
 	}
       }
     }
@@ -456,7 +459,7 @@ public:
   GMSH_LoadMesh3_Op(const basicAC_F0 &  args,Expression ffname) 
     : filename(ffname)
   {
-    if(verbosity) cout << "Load mesh given by GMSH " << endl;
+    if(verbosity>1) cout << "Load mesh given by GMSH " << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
   } 
   
@@ -504,17 +507,17 @@ Mesh3 * GMSH_Load3(const string & filename)
 	  if(sscanf(str, "%lf %d %d", &version, &format, &size) != 3) exit(1);
 	  if(format){
 	    binary = true;
-	    cout << "Mesh is in binary format" << endl;
+	    if(verbosity>1) cout << "Mesh is in binary format" << endl;
 	    int one;
 	    if(fread(&one, sizeof(int), 1, fp) != 1) exit(1);
 	    if(one != 1){
 	      swap = true;
-	      cout << "Swapping bytes from binary file" << endl;
+	      if(verbosity>1) cout << "Swapping bytes from binary file" << endl;
 	    }
 	  }
 	}
 	else if(!strncmp(&str[1], "PhysicalNames", 13)) {
-	  cout << " PhysicalNames is not considered in freefem++ " << endl;
+	  if(verbosity>1) cout << " PhysicalNames is not considered in freefem++ " << endl;
 	}
 	
 	else if(!strncmp(&str[1], "NO", 2) || !strncmp(&str[1], "Nodes", 5) ||
@@ -592,7 +595,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 		
 		if( type == 1 ){
 		  if(i==0)
-		    cout << "edges in 3D mesh are not considered yet in freefem++, skeep data" << endl;	
+		   if(verbosity>0)  cout << "edges in 3D mesh are not considered yet in freefem++, skeep data" << endl;	
 		}
 		if( type == 2 ) nbe++;
 		if( type == 4 ) nt++;
@@ -617,7 +620,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 		if( (numVertices = nvElemGmsh[type-1]) == 0){
 		  cout << "Element of type " << type  << " is not considered in Freefem++" << endl;
 		  exit(1);
-	      }
+	  }
 		unsigned int n = 1 + numTags + numVertices;
 		int *data = new int[n];
 		
@@ -631,7 +634,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 		  int *indices = &data[numTags + 1];
 		  
 		  if( type == 1 && i==0 ){
-		    cout << "edges in 3D mesh are not used in freefem++,skeep data" << endl;
+		   cout << "edges in 3D mesh are not used in freefem++,skeep data" << endl;
 		    //exit(1);
 		  }
 		  if( type == 2 ) nbe++;
@@ -648,7 +651,7 @@ Mesh3 * GMSH_Load3(const string & filename)
     }
     fclose(fp);
     
-    cout << "closing file " << nt << " " << nbe << endl;
+   if(verbosity>1)  cout << "closing file " << nt << " " << nbe << endl;
 
     Tet *tff  = new Tet[nt];
     Tet *ttff = tff;
@@ -780,12 +783,12 @@ Mesh3 * GMSH_Load3(const string & filename)
 	  }
 	}
         else if(!strncmp(&str[1], "NodeData", 8)) {
-	  cout << " NodeData is not considered in freefem++ " << endl;
+	  if(verbosity) cout << " NodeData is not considered in freefem++ " << endl;
 	}
 	else if(!strncmp(&str[1], "ElementData", 11) ||
 		!strncmp(&str[1], "ElementNodeData", 15)){
 
-	  cout << " ElementData/ElementNodeData is not considered in freefem++ " << endl;
+	 if(verbosity)  cout << " ElementData/ElementNodeData is not considered in freefem++ " << endl;
 	}
       }
     }
@@ -830,8 +833,8 @@ LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dy
 Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
-  if(verbosity) cout << " load: gmsh " << endl;
+  if(verbosity>1) cout << " load: gmsh " << endl;
   Global.Add("gmshload3","(",new GMSH_LoadMesh3);
   Global.Add("gmshload","(",new GMSH_LoadMesh);
-  if(verbosity) cout << " load: gmsh  " << endl;
+  if(verbosity>1) cout << " load: gmsh  " << endl;
 }

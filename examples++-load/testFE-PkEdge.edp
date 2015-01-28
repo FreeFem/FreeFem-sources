@@ -1,10 +1,12 @@
 load "Element_PkEdge"
 // a macro the compute numerical derivative
 macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
-mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
-// Th=square(1,1);
+mesh Th=square(1,1,flags=0,[10*(x+y/3),10*(y-x/3)]);
+Th=square(1,1,flags=0   );
+plot(Th,wait=1);
 //savemesh(Th,"Th.msh");
-real x1=0.7,y1=0.9, h=1e-7;
+real x1=0.4,y1=0.4;//10*(x+y/3),y1=10*(y-x/3), 
+real h=1e-5 ;
 int it1=Th(x1,y1).nuTriangle; 
 
 // FFCS: store reference value
@@ -43,13 +45,14 @@ real regtest;
       /*  check the derivative and numerical derivative */
       /* no derivative in this element.  */
       
-      /*
-	cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1) << " == " << DD(a1,h,0) << endl; 
-	assert( abs(dx(a1)(x1,y1)-DD(a1,h,0) ) < 1e-5);
-	assert( abs(dx(a2)(x1,y1)-DD(a2,h,0) ) < 1e-5);
-	assert( abs(dy(a1)(x1,y1)-DD(a1,0,h) ) < 1e-5);
-	assert( abs(dy(a2)(x1,y1)-DD(a2,0,h) ) < 1e-5);
-      */
+      
+	cout << " dx(a1)(x1,y1) =  " << dx(a1)(x1,y1) << "  == " 
+	   << DD(a1,h,0) << " DD " << " /  " 
+	   << (a1(0.001,0.001) -  a1(0.999,0.999))/2 <<endl; 
+	assert( abs(dx(a1)(x1,y1)-DD(a1,h,0) ) < 1e-4);
+	assert( abs(dy(a1)(x1,y1)-DD(a1,0,h) ) < 1e-4);
+	/*sassert( abs(dy(a2)(x1,y1)-DD(a2,0,h) ) < 1e-5);*/
+     
       
     } 
   regtest=a1'*a1;

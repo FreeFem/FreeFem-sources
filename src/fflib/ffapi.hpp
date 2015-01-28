@@ -37,6 +37,8 @@ using namespace std;
 
 #ifndef FFAPI_HPP
 #define FFAPI_HPP
+  void ff_finalize();
+  void ff_atend( void (*atendff)());
 
 namespace ffapi{
 
@@ -45,9 +47,8 @@ namespace ffapi{
 
   // Getting a pointer to FF stdin and stdout enables extra DLLs to use standard IO even when they are redirected (eg
   // through FFCS).
-
+  
   void init(); 
-
   // need #include <iostream>
   // need #include <sstream>
   // need using namespace std;

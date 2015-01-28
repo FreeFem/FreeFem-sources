@@ -14,7 +14,7 @@ FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
 WindowsPackage.m4 README README_ARPACK  README_WINDOWS README_MAC \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
-mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4    \
+mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4 ax_lib_hdf5.m4  \
 freefem++.spec crimson-freefem++.zip \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \

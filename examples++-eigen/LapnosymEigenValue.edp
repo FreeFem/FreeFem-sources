@@ -20,7 +20,7 @@ varf  a(u1,u2)= int2d(Th)(  nu*(dx(u1)*dx(u2) + dy(u1)*dy(u2)) + (dx(u1)+dy(u1))
 varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ;//+  on(1,2,3,4,u1=0);
 
 
-matrix OP= op(Vh,Vh,solver=LU,factorize=1); 
+matrix OP= op(Vh,Vh,solver=UMFPACK,factorize=0); 
 matrix A= a(Vh,Vh,solver=GMRES); 
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
 int nev=10;
