@@ -48,7 +48,8 @@ ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  pipe.cpp pstream.h  \
  symmetrizeCSR.cpp \
  dmatrix.hpp PARDISO.cpp             \
- ch.pts   BEC.cpp bfstream.cpp
+ ch.pts   BEC.cpp bfstream.cpp iohdf5.cpp \
+ iohd5-beam-2d.edp	iohd5-beam-3d.edp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -69,7 +70,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX)  BEC.$(DYLIB_SUFFIX) \
-	bfstream.$(DYLIB_SUFFIX)
+	bfstream.$(DYLIB_SUFFIX) @TOOL_DYLIB_iohdf5@
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
@@ -98,7 +99,6 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 # FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with
 # empty files without any access right). So just replace the whole thing with a plain copy.
 
-if ENABLE_FFCS
 allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/AFunction.hpp ../src/fflib/AnyType.hpp	\
 	../src/fflib/array_init.hpp ../src/fflib/array_resize.hpp ../src/fflib/array_tlp.hpp				\
 	../src/femlib/assertion.hpp ../src/femlib/BamgFreeFem.hpp ../src/Algo/BFGS.hpp ../src/Algo/BrentLS.hpp		\
@@ -122,18 +122,22 @@ allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/A
 	../src/femlib/RNM_tpl.hpp ../src/Algo/RosenBrock.hpp ../src/fflib/Serialize.hpp ../src/bamglib/SetOfE4.h	\
 	../src/fflib/showverb.hpp ../src/femlib/splitsimplex.hpp ../src/fflib/String.hpp				\
 	../src/fflib/strversionnumber.hpp ../src/fflib/throwassert.hpp ../src/femlib/ufunction.hpp			\
-	../src/fflib/versionnumber.hpp
+	../src/fflib/versionnumber.hpp ../src/bamglib/write_hdf5.hpp	../src/bamglib/write_xdmf.hpp                   \
+	../src/fflib/P1IsoValue.hpp
+
+if ENABLE_FFCS
 
 include.done: $(allheaders)
+	-rm -rf include
 	mkdir -p include
 	cp $^ include
 	touch $@
 
 else
-include.done: include.tar.gz
-	rm -rf include 
-	gunzip -c include.tar.gz| tar xvf -
-	-rm -f include/._*
+include.done: $(allheaders)
+	-rm -rf include
+	mkdir -p  include
+	for i in $(allheaders); do  ln -s ../$$i include/. ; done 
 	touch $@
 endif
 

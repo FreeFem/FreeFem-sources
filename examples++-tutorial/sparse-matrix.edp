@@ -1,6 +1,8 @@
 //  sparse matrix test  ---
 // example of the new matrix feature in version 1.40
 // -------------------------------------------------
+for(int step=0; step<2; ++step) // make to time the test to find memoire leak ..
+{ 
 mesh  TH = square(3,4);
 mesh  th = square(2,3);
 mesh  Th = square(4,4);
@@ -238,4 +240,5 @@ cout << MM << endl;
   int[int] n2o=restrict(VCh,VFh,n2ok);
   cout << " n2o " << n2o << endl;
   
+}
 }

@@ -21,7 +21,7 @@
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
 
-TESTS=DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp			\
+TESTS=  schwarz.edp DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp	\
 	DDM-Schwarz-Stokes-2d.edp LaplaceRT-3d-matrix-mumps.edp MPICGLap.edp MPIGMRES2D.edp MPIGMRES3D.edp MUMPS.edp	\
 	NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp		\
 	Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp beam-3d-matrix-superludist.edp			\
@@ -53,14 +53,15 @@ real_SuperLU_DIST_FreeFem.cpp \
 real_pastix_FreeFem.cpp mpi-cmaes.cpp \
 ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt \
 MUMPS.cpp   \
-MUMPS.edp  dmatrix.hpp              
+MUMPS.edp  dmatrix.hpp  \
+PETSc.hpp additional.idp removeDOF.cpp schwarz.cpp schwarz.edp stokes-2d.edp utility.cpp schwarz-2d.edp
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
 # deactivated).
 
 LIST_COMPILE=@TOOL_DYLIB_mumps@ @TOOL_DYLIB_hips@ @TOOL_DYLIB_superludist@ @TOOL_DYLIB_pastix@ MPICG.$(DYLIB_SUFFIX)	\
-@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX)
+@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_schwarz@
 
 if FFCS_MPIOK
 

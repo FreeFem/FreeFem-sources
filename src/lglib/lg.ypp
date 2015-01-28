@@ -279,6 +279,7 @@ start:   input ENDOFFILE {
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
+                        debugstack= new queue<pair<const E_Routine*,int> >;
                         size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
                         if(verbosity>2  || mpirank==0) cout << endl;  
@@ -308,6 +309,7 @@ start:   input ENDOFFILE {
 			//FFCS: divert stream to FFCS
 			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
 			UnShowAlloc =1;
+                        if(debugstack) delete debugstack;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         long stu1 =storageused()-stu0    ;
                         
@@ -925,7 +927,7 @@ int mainff (int  argc, char **argv)
     ThePlotStream=0;
   }
   Destroylex( zzzfff);
-  
+  delete [] cc;
    // ClearMem();
   return retvalue;
 }
