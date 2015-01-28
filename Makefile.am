@@ -45,9 +45,6 @@ examples++*/*.[ie]dp  CheckAllEdp
 changelog:
 	cvs2cl
 
-# History before 2005 is stored in the file "HISTORY_BEFORE_2005"
-all-local:: @HISTORY@
-
 # try and avoid running this under fakeroot (otherwise we may face
 # problems trying to connect to CVS as pseudo-root). Debian packaging
 # uses fakeroot.
