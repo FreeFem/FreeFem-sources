@@ -3382,7 +3382,7 @@ int mainff (int  argc, char **argv)
   if ( ! (getprog(cc,argc,argv) >0)  ) 
     {
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
-      if(ThePlotStream) {pclose(ThePlotStream); ThePlotStream=0;}  
+      if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
       return 1; 
     }
    
