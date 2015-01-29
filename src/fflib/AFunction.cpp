@@ -945,12 +945,13 @@ inline long fftime()
 
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
-double NaN(string* p) {return nan(p->c_str());}// add march 2012
+double NaN(string* p) {
+return nan(p->c_str());}// add march 2012
 double NaN() {return nan("");}// add march 2012
-
-long isNaN(double x){return isnan(x);}
-long isInf(double x){return isinf(x);}
-long isNormal(double x){return isnormal(x);}
+// to correct bug in g++ v 4.8.1 add std
+long isNaN(double x){using namespace std;return isnan(x);}
+long isInf(double x){   using namespace std;return isinf(x);}
+long isNormal(double x){   using namespace std;return isnormal(x);}
 //int  ShowAlloc(const char *s, size_t lg);
 int ShowAlloc(const char *s,size_t & lg); 
 long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
@@ -1502,7 +1503,9 @@ void Init_map_type()
      Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
-     Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));
+    
+    Global.Add("pow","(",new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >); 
+                //new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
      Global.Add("conj","(",new OneOperator1_<double>(RNM::conj,1));
