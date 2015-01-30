@@ -4038,7 +4038,7 @@ Edge** Triangles::MakeGeometricalEdgeToEdge()
   return e;
  }
 
-Triangles::clear()
+void Triangles::clear()
 {
   assert(NbRef<=0);
   if (CurrentTh == this) CurrentTh=0;
