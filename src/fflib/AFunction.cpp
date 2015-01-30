@@ -30,7 +30,21 @@
 
 #include "config-wrapper.h"
 
+#include <cmath>
 #include <complex>
+//  put here some def dur to c++11 
+// problem with mixed with using namespace std; 
+// to correct bug in g++ v 4.8.1 add std
+long isNaN(double x){return isnan(x);}
+long isInf(double x){return isinf(x);}
+long isNormal(double x){return std::isnormal(x);}
+#ifdef HAVE_JN
+double myyn(long n, double x){ return yn((int)n,x);}
+double myjn(long n, double x){ return jn((int) n,x);}
+#endif
+//int  ShowAlloc(const char *s, size_t lg);
+
+// F. Hecht fev. 2015 ...
 #include "AFunction.hpp"
 #include <cstdarg>
 #include <cstring>
@@ -871,10 +885,6 @@ C_F0  formalMatDet(const basicAC_F0 &args)
     
 }
 
-#ifdef HAVE_JN
-double myyn(long n, double x){using namespace std;  return yn((int)n,x);}
-double myjn(long n, double x){using namespace std;  return jn((int) n,x);}
-#endif
 //  Add juin  2007 
 template<class A,class B=A,class R=A>
 struct evalE_mul {
@@ -948,11 +958,6 @@ double atof(string* p) {return atof(p->c_str());}// add march 2010
 double NaN(string* p) {
 return nan(p->c_str());}// add march 2012
 double NaN() {return nan("");}// add march 2012
-// to correct bug in g++ v 4.8.1 add std
-long isNaN(double x){using namespace std;return isnan(x);}
-long isInf(double x){   using namespace std;return isinf(x);}
-long isNormal(double x){   using namespace std;return isnormal(x);}
-//int  ShowAlloc(const char *s, size_t lg);
 int ShowAlloc(const char *s,size_t & lg); 
 long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
 long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}

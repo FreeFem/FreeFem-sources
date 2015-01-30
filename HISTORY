@@ -1,5 +1,10 @@
-@  changeset:   3131:c1663877ad52
+@  changeset:   3132:d7e83d234408
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 30 09:59:26 2015 +0100
+|  summary:     correct jn call for c++11
+|
+o  changeset:   3131:c1663877ad52
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 30 09:57:04 2015 +0100
 |  summary:     coorect pow of c++-11 compiler
