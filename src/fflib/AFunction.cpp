@@ -1504,7 +1504,7 @@ void Init_map_type()
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
     
-    Global.Add("pow","(",new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >); 
+    Global.Add("pow","(",new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >);
                 //new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));

@@ -1,5 +1,10 @@
-@  changeset:   3129:1af654663cff
+@  changeset:   3130:e1174bba7a16
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 29 10:31:52 2015 +0100
+|  summary:     coorect pb with pclose call
+|
+o  changeset:   3129:1af654663cff
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 29 10:01:11 2015 +0100
 |  summary:     add correct of pb compilation undec g++ 4.8.1 c++-11
