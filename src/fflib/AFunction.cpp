@@ -872,8 +872,8 @@ C_F0  formalMatDet(const basicAC_F0 &args)
 }
 
 #ifdef HAVE_JN
-double myyn(long n, double x){ return yn((int)n,x);}
-double myjn(long n, double x){ return jn((int) n,x);}
+double myyn(long n, double x){using namespace std;  return yn((int)n,x);}
+double myjn(long n, double x){using namespace std;  return jn((int) n,x);}
 #endif
 //  Add juin  2007 
 template<class A,class B=A,class R=A>

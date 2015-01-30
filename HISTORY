@@ -1,5 +1,10 @@
-@  changeset:   3130:e1174bba7a16
+@  changeset:   3131:c1663877ad52
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 30 09:57:04 2015 +0100
+|  summary:     coorect pow of c++-11 compiler
+|
+o  changeset:   3130:e1174bba7a16
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 29 10:31:52 2015 +0100
 |  summary:     coorect pb with pclose call
