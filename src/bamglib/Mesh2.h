@@ -802,7 +802,7 @@ public:
   
   Triangles(Int4 i);//:BTh(*this),Gh(*new Geometry()){PreInit(i);}
   void clear();
-  ~Triangles() {clear();}
+    ~Triangles() {if(NbRef==0) {clear();NbRef=1;}}
   Triangles(const char * ,Real8=-1) ;
   
  
