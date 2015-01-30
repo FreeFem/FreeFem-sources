@@ -1,5 +1,10 @@
-@  changeset:   3133:dfe9ee56d630
+@  changeset:   3134:e59974780d33
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 30 14:45:46 2015 +0100
+|  summary:     remove of pb of 2 free un bamg in case of crossing boundary
+|
+o  changeset:   3133:dfe9ee56d630
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 30 14:12:53 2015 +0100
 |  summary:     change for c++-11 and hdf5 with g++-4.9.1
