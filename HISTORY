@@ -1,5 +1,10 @@
-@  changeset:   3132:d7e83d234408
+@  changeset:   3133:dfe9ee56d630
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 30 14:12:53 2015 +0100
+|  summary:     change for c++-11 and hdf5 with g++-4.9.1
+|
+o  changeset:   3132:d7e83d234408
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 30 09:59:26 2015 +0100
 |  summary:     correct jn call for c++11

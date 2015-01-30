@@ -801,10 +801,11 @@ public:
 // end of variable
   
   Triangles(Int4 i);//:BTh(*this),Gh(*new Geometry()){PreInit(i);}
-  
-  ~Triangles(); 
+  void clear();
+  ~Triangles() {clear();}
   Triangles(const char * ,Real8=-1) ;
   
+ 
   Triangles(Int4 nbvx,Triangles & BT,int keepBackVertices=1)
          :Gh(BT.Gh),BTh(BT) {
 	     try {GeomToTriangles1(nbvx,keepBackVertices);}
