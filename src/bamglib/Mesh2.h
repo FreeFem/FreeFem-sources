@@ -802,19 +802,19 @@ public:
   
   Triangles(Int4 i);//:BTh(*this),Gh(*new Geometry()){PreInit(i);}
   void clear();
-    ~Triangles() {if(NbRef==0) {clear();NbRef=1;}}
+    ~Triangles() {if(NbRef==0) {clear();NbRef=-1;}}
   Triangles(const char * ,Real8=-1) ;
   
  
   Triangles(Int4 nbvx,Triangles & BT,int keepBackVertices=1)
          :Gh(BT.Gh),BTh(BT) {
 	     try {GeomToTriangles1(nbvx,keepBackVertices);}
-	      catch(...) { this->~Triangles(); throw; } }
+	      catch(...) { this->clear(); throw; } }
   
   Triangles(Int4 nbvx,Geometry & G)
          :Gh(G),BTh(*this){
 	     try { GeomToTriangles0(nbvx);}
-	     catch(...) { this->~Triangles(); throw; } }
+	     catch(...) { this->clear(); throw; } }
   Triangles(Triangles &,Geometry * pGh=0,Triangles* pBTh=0,Int4 nbvxx=0 ); // COPY OPERATEUR
   //  Triangles(Triangles &){ cerr << " BUG call copy opretor of Triangles" << endl;MeshError(111);}
   Triangles(const Triangles &,const int *flag,const int *bb); // truncature

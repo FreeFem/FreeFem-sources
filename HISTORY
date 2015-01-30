@@ -1,5 +1,10 @@
-@  changeset:   3135:e2d7867ffd31
+@  changeset:   3136:d52565e53a04
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 30 15:01:45 2015 +0100
+|  summary:     correct pb 2 free in bamg
+|
+o  changeset:   3135:e2d7867ffd31
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 30 14:51:08 2015 +0100
 |  summary:     correct typo
