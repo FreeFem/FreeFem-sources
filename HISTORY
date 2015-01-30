@@ -1,5 +1,10 @@
-@  changeset:   3134:e59974780d33
+@  changeset:   3135:e2d7867ffd31
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 30 14:51:08 2015 +0100
+|  summary:     correct typo
+|
+o  changeset:   3134:e59974780d33
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 30 14:45:46 2015 +0100
 |  summary:     remove of pb of 2 free un bamg in case of crossing boundary
