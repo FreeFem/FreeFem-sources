@@ -73,7 +73,24 @@ fi
 
 dnl if test "$with_mpilibs" != "no" ; then
 dnl fi
-
+case "$with_mpipath" in
+ */sgi/mpt/*) 
+        test -d "$with_mpipath/include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/include"
+        test -d "$with_mpipath/lib" &&  ff_MPI_LIB_DIR="$with_mpipath/include"
+        ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' "
+        with_mpiinc="$ff_MPI_INCLUDE"
+        ff_MPI_LIBC="-L'$ff_MPI_LIB_DIR' -lmpi"
+        ff_MPI_LIB="-L'$ff_MPI_LIB_DIR' -lmpi++ -lmpi"
+        ff_MPI_LIBFC="-L'$ff_MPI_LIB_DIR'  -lmpi"
+        test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
+        test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
+        test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
+        test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
+	if test -f "$ff_MPI_LIB_DIR/libmpi.so" ; then 
+	   ffmpi=sgi 
+	fi 
+;;
+esac
     
 if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
 #    sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
@@ -220,66 +237,67 @@ fi
 
 
 	ff_MPI_INCLUDE="$with_mpiinc"
-        ff_mpishow=`$MPICXX -show` 2>/dev/null
-        ff_mpicshow=`$MPICC -show` 2>/dev/null
-        ff_mpifcshow=`$MPIFC -show` 2>/dev/null
-	if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then	 
-	      [ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
-	      ff_MPI_LIB_DIRS=""
-	      [ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	      [ff_MPI_LIBC=`echo $ff_mpicshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
-	      [ff_MPI_LIBFC=`echo $ff_mpifcshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|grep -v 'commons,use_dylibs' |tr '\n' ' '`]
-	      [ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
-	  fi
+	if test "$ff_mpi" !=  sgi; then 
+            ff_mpishow=`$MPICXX -show` 2>/dev/null
+            ff_mpicshow=`$MPICC -show` 2>/dev/null
+            ff_mpifcshow=`$MPIFC -show` 2>/dev/null
+	    if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then	 
+		[ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[^WLlOgp]|^-Wp,'|tr '\n' ' '`]
+		ff_MPI_LIB_DIRS=""
+		[ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+		[ff_MPI_LIBC=`echo $ff_mpicshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
+		[ff_MPI_LIBFC=`echo $ff_mpifcshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|grep -v 'commons,use_dylibs' |tr '\n' ' '`]
+		[ff_mpi_idir=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
+	    fi
 	    [ff_mpi_idir=`echo $ff_MPI_INCLUDE|tr ' ' '\n'| grep -E '^-I'|sed s/^-I//|tr '\n' ' '`' /usr/include']
 	    [ff_mpi_ldir=`echo $ff_MPI_LIB|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|sed -e 's/^-[Llp]//' -e 's/^-Wl,]//'  |tr '\n' ' '`' /usr/lib']
-	  
-	  if  test -z "$ff_MPI_INCLUDE_DIR" ; then  
-	  for i in $ff_mpi_idir; do
-	      if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
-		  ff_MPI_INCLUDE_DIR=$i
-	      fi
-	  done
-	  fi
-	  for i in $ff_mpi_ldir; do
-	      ff_tmp=`ls $i/libmpi.*|head -1`
-	      if test  -f "$ff_tmp"  -a -z "$ff_MPI_LIB_DIRS"  ;then
-		  ff_MPI_LIB_DIRS=$i
-	      fi
-	      done
-	  
-	  AC_SUBST(MPICXX,$MPICXX)		
-	  AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
-	  if test -z "$MPICC" ; then		
-	      AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
-	  fi
-	  AC_SUBST(MPICC,$MPICC)
-	  AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
+	    
+	    if  test -z "$ff_MPI_INCLUDE_DIR" ; then  
+		for i in $ff_mpi_idir; do
+		    if test -f "$i/mpi.h" -a -z "$ff_MPI_INCLUDE_DIR"  ;then
+			ff_MPI_INCLUDE_DIR=$i
+		    fi
+		done
+	    fi
+	    for i in $ff_mpi_ldir; do
+		ff_tmp=`ls $i/libmpi.*|head -1`
+		if test  -f "$ff_tmp"  -a -z "$ff_MPI_LIB_DIRS"  ;then
+		    ff_MPI_LIB_DIRS=$i
+		fi
+	    done
+	fi
+	AC_SUBST(MPICXX,$MPICXX)		
+	AC_ARG_VAR(MPICC,[MPI C compiler command in $ff_mpi_path])
+	if test -z "$MPICC" ; then		
+	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
+	fi
+	AC_SUBST(MPICC,$MPICC)
+	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
-	  if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
-	      AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
-	  else
-	      if test -n "$MPIFC" ; then
-	           AC_FF_ADDWHERELIB(mpifc,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
-	           AC_FF_ADDWHERELIB(mpif77,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
+	if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
+	    AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
+	else
+	    if test -n "$MPIFC" ; then
+	        AC_FF_ADDWHERELIB(mpifc,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
+	        AC_FF_ADDWHERELIB(mpif77,$ff_MPI_LIBFC,$ff_MPI_INCLUDE)
 dnl		  [echo mpifc LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
 dnl		  [echo mpifc INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 dnl		  [echo mpif77 LD "'$ff_MPI_LIBFC'"   >>$ff_where_lib_conf ]
 dnl		  [echo mpif77 INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
-	      fi
-  	  fi
-	  if test -n "$MPICXX" ; then 	    
-              AC_FF_ADDWHERELIB(mpi,$ff_MPI_LIB,$ff_MPI_INCLUDE)
+	    fi
+  	fi
+	if test -n "$MPICXX" ; then 	    
+            AC_FF_ADDWHERELIB(mpi,$ff_MPI_LIB,$ff_MPI_INCLUDE)
 dnl              [echo mpi LD "'$ff_MPI_LIB'"    >>$ff_where_lib_conf ]
 dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
-	  fi
-	  AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
-	  AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
-	  AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
-	  AC_SUBST(MPI_LIB,$ff_MPI_LIB)
-	  AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)
-	  AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
-          AC_SUBST(SKIP_TESTS_MPI,"no")
+	fi
+	AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		
+	AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)
+	AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)
+	AC_SUBST(MPI_LIB,$ff_MPI_LIB)
+	AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)
+	AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
+        AC_SUBST(SKIP_TESTS_MPI,"no")
 	fi
 	CXX="$ff_save_cxx"
 	LIBS="$ff_save_libs"
