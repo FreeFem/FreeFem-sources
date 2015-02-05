@@ -568,10 +568,11 @@ m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
 # Checking c++11 for schwarz interface of P. Jolivet ...
-CHECK_COMPILE_FLAG(C++,[-std=c++11],CXX11FLAGS)
-CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
-ff_cxx11="no"
-if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+
+CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
+dnl ff_cxx11="no"
+dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
 AC_SUBST(WITH_CXX11,$ff_cxx11)
 #end Checking  c++11
 # ------------------------------

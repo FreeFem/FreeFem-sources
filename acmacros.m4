@@ -4,7 +4,7 @@
 # $1 = compiler name
 # $2 = flag
 # $3 = make macro containing flags for that compiler
-
+# $4 =  exec is true ..
 # Note: changes AC_LANG()
 
 AC_DEFUN([CHECK_COMPILE_FLAG],
@@ -29,6 +29,10 @@ AC_DEFUN([CHECK_COMPILE_FLAG],
 	if test "$check_flag_ok" = no;
 	then
 		$3="$check_save_flags"
+	fi
+	if test -n "$4" ;
+         then 
+	        $4="$check_flag_ok"
 	fi
 
 	AC_LANG_POP($1)

@@ -50,7 +50,7 @@ Matrice_Creuse<R> *thresholding2(const Thresholding<R> & t,const double &thresho
 	   {
 	     int nrt = sparse_mat->A->NbCoef();
 	     sparse_mat->A->addMatTo(R(1.),M,false,0,0,false,threshold);	    
-	     (M)[make_pair(n-1,m-1)]+=R();
+	 //    (M)[make_pair(n-1,m-1)]+=R();
 	     bool sym=false; // bof bof  
 	     sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
 	     sparse_mat->A.master(new MatriceMorse<R>(n,m,M,sym));
