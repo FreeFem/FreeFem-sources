@@ -1,5 +1,10 @@
-@  changeset:   3138:d777e1cc38d4
+@  changeset:   3139:d2144a73ee94
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 05 09:47:20 2015 +0100
+|  summary:     correct problem when find c++11 version in configure
+|
+o  changeset:   3138:d777e1cc38d4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 30 16:02:54 2015 +0100
 |  summary:     remove a madatory 3d test
