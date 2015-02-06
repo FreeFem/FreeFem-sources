@@ -8,4 +8,4 @@
 EXTRA_DIST=Mesh2.cpp Mesh2.h MeshDraw.cpp MeshGeom.cpp Meshgibbs.cpp	\
 Meshio.cpp Meshio.h MeshQuad.cpp MeshRead.cpp meshtype.h MeshWrite.cpp	\
 Metric.cpp Metric.h QuadTree.cpp QuadTree.h R2.cpp R2.h SetOfE4.cpp	\
-SetOfE4.h
+SetOfE4.h write_hdf5.cpp write_hdf5.hpp write_xdmf.cpp write_xdmf.hpp
