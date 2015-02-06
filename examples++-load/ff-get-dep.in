@@ -7,6 +7,11 @@ case "$1" in
 	awk -F:  '/ff-c[+][+]-LIBRARY-dep/  { print $2}' $@
 	exit 0; 
 	;;
+    -dclib)
+	shift
+	awk -F:  '/ff-c[+][+]-LIBRARY-dep-check/  { print $2}' $@
+	exit 0; 
+	;;
     -dcpp)
 	shift
 	awk -F:  '/ff-c[+][+]-cpp-dep/  { print $2}' $@
@@ -15,12 +20,18 @@ case "$1" in
 	;;
     -ff)
 	shift;
+#  ajout  de lib  with check
+	clibs=`$0 -dclib $@`
+	if test -n "$clibs" ; then 
+	    dincins=`$0 -DEF $clibs`; 
+	    ldlibs=`$0 -cl $clibs`; 
+	fi
 	libs=`$0 -dlib $@`
 	cpp=`$0 -dcpp $@`
 	inclins=`$0 -i $libs` 
 	ldlibs=`$0 -l $libs`
 	if [ -n "$ldlibs" -o -z "$libs" ]; then
-	    echo "$cpp" "$inclins" "$ldlibs"
+	    echo "$cpp" "$inclins" "$ldlibs" "$dincins" "$ldlibs"
 	else
 	     # FFCS - we need errors returns to insure that all compilations run well. ERROR is detected by ff-c++
 	    echo "ERROR: find libs of $0 :  $libs "
@@ -64,6 +75,20 @@ case "$1" in
 	    # FFCS: print everything on the same line to avoid splitting paths containing spaces
 	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {printf("%s ",$i);}} 
           END  { if(!first) print "ERROR-missing-lib:" p;} ' $wherel
+	done
+	;;
+   -cl*)
+	shift;
+	for i in $@ ; do   
+
+	    # FFCS: print everything on the same line to avoid splitting paths containing spaces
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; for (i=3;i<=NF;++i) {printf("%s ",$i);}}' $wherel
+	done
+	;;
+    -DEF)
+	shift;
+	for i in $@ ; do   
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first); prinft("-DWITH_%s",$p) }}  ' $wherel
 	done
 	;;
   *)  
