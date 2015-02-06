@@ -1,5 +1,15 @@
-@  changeset:   3140:ad567d1f75ac
+@  changeset:   3142:1faabfce37d3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 06 14:07:59 2015 +0100
+|  summary:     add no mandatoring lib in automatic lib search (WHERE-LIb search)
+|
+o  changeset:   3141:d7420bb1718d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 06 11:50:52 2015 +0100
+|  summary:     do lot of correction for new install version 3.24
+|
+o  changeset:   3140:ad567d1f75ac
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 05 21:40:31 2015 +0100
 |  summary:     correct acmpi for pb sgi mpicc
