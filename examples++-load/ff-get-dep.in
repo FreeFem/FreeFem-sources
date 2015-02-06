@@ -4,17 +4,17 @@
 case "$1" in
     -dlib)
 	shift
-	awk -F:  '/ff-c[+][+]-LIBRARY-dep/  { print $2}' $@
+	awk -F:  '/ff-c[+][+]-LIBRARY-dep:/  { print $2}' $@
 	exit 0; 
 	;;
     -dclib)
 	shift
-	awk -F:  '/ff-c[+][+]-LIBRARY-dep-check/  { print $2}' $@
+	awk -F:  '/ff-c[+][+]-LIBRARY-dep-check:/  { print $2}' $@
 	exit 0; 
 	;;
     -dcpp)
 	shift
-	awk -F:  '/ff-c[+][+]-cpp-dep/  { print $2}' $@
+	awk -F:  '/ff-c[+][+]-cpp-dep:/  { print $2}' $@
 	echo $@
 	exit 0; 
 	;;
@@ -88,7 +88,7 @@ case "$1" in
     -DEF)
 	shift;
 	for i in $@ ; do   
-	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first); prinft("-DWITH_%s",$p) }}  ' $wherel
+	    awk -v p="$i" -v  m=LD ' ($1 == p) && ($2 == m) && (!first) {first=1; printf("-DWITH_%s",p);}' $wherel
 	done
 	;;
   *)  

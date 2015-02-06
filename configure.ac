@@ -835,7 +835,7 @@ if test  "$ff_wget" != yes  -a "$enable_download"  = "yes"  ; then
   AC_MSG_ERROR([   enable-download and no wget or curl. ],1);
 fi
 if test "$enable_download"  = "yes" ; then
-DOWNLOADCOMPILE=compile-pkg
+DOWNLOADCOMPILE=compile-pkg install-other
 else
 DOWNLOADCOMPILE=
 fi
