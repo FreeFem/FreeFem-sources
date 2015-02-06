@@ -1,5 +1,10 @@
-@  changeset:   3139:d2144a73ee94
+@  changeset:   3140:ad567d1f75ac
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 05 21:40:31 2015 +0100
+|  summary:     correct acmpi for pb sgi mpicc
+|
+o  changeset:   3139:d2144a73ee94
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 05 09:47:20 2015 +0100
 |  summary:     correct problem when find c++11 version in configure

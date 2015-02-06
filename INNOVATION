@@ -1,3 +1,9 @@
+ version 3.24
+ - configure : 6/02/ 2015
+    correct mpi for  sgi uv computer
+    find gsl lib 
+    add find petsc (in progress) 
+    add missing file in distrubuteion
  -  correct for compilation with g++-4.9.1 -std=c++11 ( without downlaod)
  - add hd5 interface  (13/01/2015) 
     Thank to Mathieu Cloirec CINES - http://www.cines.fr

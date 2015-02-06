@@ -60,36 +60,41 @@ AC_MSG_RESULT($MPIRUN)
 
 AC_MSG_CHECKING(for mpipath )
 	
-if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$ff_win32" = yes -a "$MPIRUN" != no ; then 
+if test "$with_mpi" != no -a ! -d  "$with_mpipath" -a "$MPIRUN" != no ; then 
 #   if "$MPIRUN" != no ; tehn 
     with_mpipath=`AS_DIRNAME(["$MPIRUN"])`
     with_mpipath=`AS_DIRNAME(["$with_mpipath"])`
+#    echo " ***** with_mpipath $with_mpipath \n"
+
 #    else 
 #    for i in '/c/Program Files (x86)/MPICH2' '/c/Program Files/MPICH2' 'c:\Program Files (x86)\MPICH2' 'c:\Program Files\MPICH2' ; do
 #	test -d "$i" &&  with_mpipath="$i" && break 
 #    done
 #    fi
 fi
-
+#echo "****  with_mpipath  '$with_mpipath' $MPIRUN *****"
 dnl if test "$with_mpilibs" != "no" ; then
 dnl fi
-case "$with_mpipath" in
+case "$MPIRUN" in
  */sgi/mpt/*) 
-        test -d "$with_mpipath/include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/include"
-        test -d "$with_mpipath/lib" &&  ff_MPI_LIB_DIR="$with_mpipath/include"
-        ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' "
-        with_mpiinc="$ff_MPI_INCLUDE"
-        ff_MPI_LIBC="-L'$ff_MPI_LIB_DIR' -lmpi"
-        ff_MPI_LIB="-L'$ff_MPI_LIB_DIR' -lmpi++ -lmpi"
-        ff_MPI_LIBFC="-L'$ff_MPI_LIB_DIR'  -lmpi"
-        test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
-        test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
-        test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
-        test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
-	if test -f "$ff_MPI_LIB_DIR/libmpi.so" ; then 
-	   ffmpi=sgi 
-	fi 
-;;
+	ff_MPI_INCLUDE_DIR=
+	ff_MPI_LIB_DIR=
+        test -f "$with_mpipath/include/mpif.h" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/include"
+        test -f "$with_mpipath/lib/libmpi.so" &&  ff_MPI_LIB_DIR="$with_mpipath/lib"
+        if test -n "$ff_MPI_INCLUDE_DIR" -a -n "$ff_MPI_LIB_DIR" ; then 
+            ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' "
+            with_mpiinc="$ff_MPI_INCLUDE"
+            ff_MPI_LIBC="-L'$ff_MPI_LIB_DIR' -lmpi"
+            ff_MPI_LIB="-L'$ff_MPI_LIB_DIR' -lmpi++ -lmpi"
+            ff_MPI_LIBFC="-L'$ff_MPI_LIB_DIR'  -lmpi"
+	    ff_mpitype=sgi 
+            test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
+            test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
+            test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
+            test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
+#	    echo " *** MPI sgi ..... "
+        fi
+	;;
 esac
     
 if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
@@ -149,11 +154,11 @@ ff_save_libs="$LIBS"
 if test "$with_mpi" != no
 then
 	ff_mpi_path=`AS_DIRNAME(["$MPIRUN"])`
-dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
+	dnl	echo "ff_mpi_path '$ff_mpi_path' .............."
 	case "$ff_mpi_path" in
 	    .|"") ff_mpi_path="$PATH";ff_defmpicxx="$ff_mpicxx";;
 	    *) ff_mpi_path="$ff_mpi_path";ff_defmpicxx=`expr "//$ff_mpicxx" : '.*/\(.*\)'`;; 
-dnl if also  add $PATH they  could be missing some different mpi version... 
+	    dnl if also  add $PATH they  could be missing some different mpi version... 
 	esac	 
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
 	if test -z "$MPICXX" ; then
@@ -163,9 +168,9 @@ dnl if also  add $PATH they  could be missing some different mpi version...
 	ff_mpicxx="eval $MPICXX"
 	CXX=$ff_mpicxx
 	LIBS="$LIBS $ff_MPI_LIB"
-	
+	test -z "$ff_mpi" && ff_mpi=yes
 	AC_LINK_IFELSE(
-[AC_LANG_SOURCE([
+	    [AC_LANG_SOURCE([
 #include <mpi.h>
 #include <stdio.h>
 int main(int argc,char **argv){
@@ -177,9 +182,7 @@ int main(int argc,char **argv){
   printf("%s: hello world\n", name);
   MPI_Finalize();
   return 0;
-}])],
-ff_mpi=yes,
-ff_mpi=no)
+}])],ff_mpi=yes,ff_mpi=no)
 	AC_MSG_RESULT($ff_mpi)
 
 	# Also check that mpirun is there. If it isn't, then MPI is
@@ -235,9 +238,9 @@ fi
 	      AC_SUBST(MPIFC)
 	  fi
 
-
+	echo " ********************ffmpi= '$ff_mpi' *************   "
 	ff_MPI_INCLUDE="$with_mpiinc"
-	if test "$ff_mpi" !=  sgi; then 
+	if test -z "$ff_mpitype" ; then 
             ff_mpishow=`$MPICXX -show` 2>/dev/null
             ff_mpicshow=`$MPICC -show` 2>/dev/null
             ff_mpifcshow=`$MPIFC -show` 2>/dev/null
