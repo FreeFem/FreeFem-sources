@@ -1,6 +1,9 @@
+//ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas  mpifc  fc mpi  pthread  
+//ff-c++-LIBRARY-dep-check: petsc  
+//ff-c++-cpp-dep: 
+#ifdef  WITH_petsc
 #define WITH_PETSC
-//ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas  mpifc  fc mpi  pthread  PETSc
-//ff-c++-cpp-dep: -framework Accelerate
+#endif
 
 #include <math.h>
 #include <mpi.h>
