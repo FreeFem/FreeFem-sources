@@ -97,7 +97,7 @@ LIST_SOFT=tetgen @TOOL_COMPILE_superlu@ fftw @TOOL_COMPILE_metis@	\
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@ gmm			\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
-	@TOOL_COMPILE_ipopt@
+	@TOOL_COMPILE_ipopt@ 
 
 all-recursive: bin lib include pkg
 
@@ -122,11 +122,28 @@ lib/libMesh.a:lib include
 	echo libMesh INCLUDE -I@DIR@/include/libMesh >> lib/WHERE.libMesh
 	cp ../src/libMesh/libMesh.a lib/libMesh.a
 
-all-local:bin lib include lib/libMesh.a pkg  $(DOWNLOADCOMPILE) 
+all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE) 
 
-WHERE-LD: tag-compile-pkg
+install-other: tag-install-other
+
+tag-install-other:
+	make install-hpddm
+	touch tag-install-other
+
+WHERE-OTHER: lib/WHERE.hpddm
+WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
+install-hpddm:
+	 test -n "$(MPIRUN)" && ./getall hpddm -a  && make include/hpddm-master  lib/WHERE.hpddm
+include/hpddm-master:
+	cd include; unzip ../pkg/hpddm.zip 
+
+lib/WHERE.hpddm: 
+	if test -d include/hpddm-master ; then \
+	echo hpddm LD -L@DIR@/lib > $@ ;\
+	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/src >> $@ ;\
+	fi
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir: 
@@ -151,7 +168,7 @@ FORCE:
 re-install: 
 	$(MAKE) compile-pkg DIRTARGET=install
 WHERE:
-	$(MAKE) compile-pkg DIRTARGET=WHERE
+	$(MAKE) compile-pkg DIRTARGET=WHERE 
 install-exec-local:	
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/bin
