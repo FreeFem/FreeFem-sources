@@ -23,7 +23,7 @@ case "$1" in
 #  ajout  de lib  with check
 	clibs=`$0 -dclib $@`
 	if test -n "$clibs" ; then 
-	    dincins=`$0 -DEF $clibs`; 
+	    dincins=`$0 -DEF $clibs`' '`$0 -i $clibs`; 
 	    ldlibs=`$0 -cl $clibs`; 
 	fi
 	libs=`$0 -dlib $@`

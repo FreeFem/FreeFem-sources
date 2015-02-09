@@ -1,5 +1,10 @@
-@  changeset:   3144:b6ce652f34d1
+@  changeset:   3145:3516b5ecac75
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 06 18:18:00 2015 +0100
+|  summary:     update download/Makefile.am
+|
+o  changeset:   3144:b6ce652f34d1
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 06 18:10:17 2015 +0100
 |  summary:     add install de hpddm ...
