@@ -360,6 +360,7 @@ AC_LANG(C++)
 # Some useful libraries
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
+AC_CHECK_LIB(iomp5,omp_get_wtime,ff_iomp5="-liomp5",ff_iomp5="")
 
 if test -n "$ff_pthread"  ; then
     AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
@@ -840,7 +841,7 @@ if test  "$ff_wget" != yes  -a "$enable_download"  = "yes"  ; then
   AC_MSG_ERROR([   enable-download and no wget or curl. ],1);
 fi
 if test "$enable_download"  = "yes" ; then
-DOWNLOADCOMPILE=compile-pkg install-other
+DOWNLOADCOMPILE="compile-pkg install-other"
 else
 DOWNLOADCOMPILE=
 fi
@@ -993,16 +994,16 @@ then
 	    if test  -f "$ff_mkl_libpath/libmkl_rt.$ff_suffix_dylib" ; then
 		mkl_blas=rt
 		mkl_lapack=rt
-		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
-		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
+		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
+		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
 		ff_mkl_lapack="$ff_mkl_blas"
 	    elif test -f "$ff_mkl_libpath/libmkl_lapack.$ff_suffix_dylib" ; then
 		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
 		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
 		ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
 	    else
-		ff_mkl_mlt="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  $ff_ldeg  -lm -lpthread"
-		ff_mkl_blas="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm -lpthread"
+		ff_mkl_mlt="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread $ff_iomp5  $ff_ldeg  -lm $ff_pthread"
+		ff_mkl_blas="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
 		ff_mkl_lapack="$ff_mkl_blas"
 	    fi
 	    if test -f "-L$ff_mkl_libpathmkl_scalapack${ff_mkl_lp}" ; then 
