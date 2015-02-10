@@ -1,12 +1,28 @@
 //ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas [mkl]   mpifc  fc mpi  pthread   [petsc]
 //ff-c++-cpp-dep: 
 
-#ifdef  xxWITH_petsc
+#ifdef  WITH_petsc
+#ifndef __APPLE__
 #define WITH_PETSC
 #endif
+#endif
+
 #ifdef WITH_mkl
-// #define HPDDM_MKL            1
+#ifdef __APPLE__
+//#include "mkl.h"
+// INTEL_MKL_VERSION 
+//#if INTEL_MKL_VERSION <= 110103
+//#undef INTEL_MKL_VERSION
+// MKL to old ..... 
+#define HPDDM_MKL            0
 #define HAVE_cblas_axpby
+#pragma message("schwarz plugin without MKL because MKL is too old " )
+#else
+#define HPDDM_MKL            1
+#endif
+#endif
+#ifndef WITH_PETSC 
+#pragma message("schwarz plugin compile without PETSc")
 #endif
 
 #include <math.h>
