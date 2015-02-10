@@ -1,5 +1,30 @@
-@  changeset:   3146:d23e38b06cd6
+@  changeset:   3151:e6be9d714829
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 10 15:33:31 2015 +0100
+|  summary:     remove libiomp5 if non openmp
+|
+o  changeset:   3150:fdef3857f8bf
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 10 14:45:06 2015 +0100
+|  summary:     updet missing file for hpddm
+|
+o  changeset:   3149:7a351cbaa77d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 10 14:43:09 2015 +0100
+|  summary:     coorect pb of compilation of schwarz.cpp plugins in progress.
+|
+o  changeset:   3148:f85a44d0ab6d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 10 10:28:55 2015 +0100
+|  summary:     correct ff-get-dep.in ff-get-dep.awk (pb of new line  in awk )
+|
+o  changeset:   3147:bb139ebb5e41
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 10 09:28:35 2015 +0100
+|  summary:     rewrite all automatic search of library in awk ad add no mandatory lib like PETSc
+|
+o  changeset:   3146:d23e38b06cd6
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Feb 09 18:06:20 2015 +0100
 |  summary:     correct missing include seach in ff-get-dep.in for no mandatori libs
