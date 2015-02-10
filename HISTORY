@@ -1,5 +1,10 @@
-@  changeset:   3145:3516b5ecac75
+@  changeset:   3146:d23e38b06cd6
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 09 18:06:20 2015 +0100
+|  summary:     correct missing include seach in ff-get-dep.in for no mandatori libs
+|
+o  changeset:   3145:3516b5ecac75
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 06 18:18:00 2015 +0100
 |  summary:     update download/Makefile.am
