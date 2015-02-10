@@ -122,7 +122,7 @@ lib/libMesh.a:lib include
 	echo libMesh INCLUDE -I@DIR@/include/libMesh >> lib/WHERE.libMesh
 	cp ../src/libMesh/libMesh.a lib/libMesh.a
 
-all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE) 
+all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE)  install-other
 
 install-other: tag-install-other
 
