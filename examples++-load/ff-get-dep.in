@@ -4,20 +4,19 @@
 case "$1" in
     -dlib)
 	shift
-	awk -F:  '/^[\/]+ff-c[+][+]-LIBRARY-dep:/  { print $2; exit 0;}' $@
+	awk -F:  '/^[\/]+ff-c[+][+]-LIBRARY-dep:/  { printf("%s",$2); exit 0;}' $@
 	exit 0; 
 	;;
     -dcpp)
 	shift
-	awk -F:  '/^[\/]+ff-c[+][+]-cpp-dep:/  { print $2; exit 0;}' $@
-	echo $@
+	awk -F:  '/^[\/]+ff-c[+][+]-cpp-dep:/  { printf("%s",$2); exit 0;}' $@
 	exit 0; 
 	;;
     -ff)
 	shift;
 #  ajout  de lib  with check
 	libs=`$0 -dlib $@`
-	cpp=`$0 -dcpp $@`
+	cpp=`$0 -dcpp $@`" $@"
 	;;
 esac 
 dircommand=`dirname $0`
