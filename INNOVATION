@@ -1,3 +1,5 @@
+ - add no mandatory lib for petsc 
+      write the WHERE-LIBRARY search lib in awk (more simple ) 
  version 3.24
  - configure : 6/02/ 2015
     correct mpi for  sgi uv computer

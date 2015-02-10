@@ -7,7 +7,7 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 EXTRA_DIST= $(TESTS) all.edp makeref.edp regtests.edp \
-ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
+ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
  mat_dervieux.cpp  funcTemplate.cpp \
@@ -216,7 +216,8 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	echo includepath += \"$(ff_prefix_dir)/idp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
 	$(INSTALL_SCRIPT) ff-pkg-download  $(DESTDIR)${bindir}
-	$(INSTALL_SCRIPT) ff-get-dep  $(DESTDIR)${bindir}
+	$(INSTALL_SCRIPT) ff-get-dep   $(DESTDIR)${bindir}
+	$(INSTALL_SCRIPT) ff-get-dep.awk  $(DESTDIR)${bindir}
 ##	$(DESTDIR)${bindir}/ff-pkg-download $(DESTDIR) >$(DESTDIR)$(ff_prefix_dir)/lib/WHERE_LIBRARY-download
 	-for i in $(LIST_COMPILE_PKG); do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done
