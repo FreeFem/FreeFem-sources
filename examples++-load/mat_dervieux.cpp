@@ -147,12 +147,13 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
 }
 
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init()
+$1 */
+static void Load_Init()
 {
   cout << " lood: init Mat Chacon " << endl;
   Global.Add("MatUpWind1","(", new OneOperatorCode<MatrixUpWind0 >( ));
 }
+LOADFUNC(Load_Init)

@@ -321,11 +321,11 @@ bool SetUMFPACK()
     return  true;
 }
 
-class Init { public:
+/*  class Init { public:
     Init();
 };
-LOADINIT(Init);
-Init::Init(){    
+$1 */
+static void Load_Init(){    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   if(verbosity>1)
@@ -340,3 +340,4 @@ Init::Init(){
 }
 
 
+LOADFUNC(Load_Init)

@@ -1,4 +1,4 @@
-// to compile ff-c++ pipe.cpp
+// to compile ff-c++ bstream.cpp
 //  warning do not compile under windows...
 #include "ff++.hpp"
 #include <cstdio>

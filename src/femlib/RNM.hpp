@@ -1170,8 +1170,8 @@ class KN :public KN_<R> { public:
          for(long i=0,j=0;j<no;i++,j+=so) 
            this->v[i]=vo[j]; 
         delete [] vo;} }//  mars 2010
-    void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}//  mars 2010
-    void increment() {assert(this->next<0);  this->next--;}
+  void destroy(){/*assert(this->next<0);*/  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}//  mars 2010
+  void increment() {/*assert(this->next<0);*/  this->next--;}
 };
 
 //  Array with 2 indices

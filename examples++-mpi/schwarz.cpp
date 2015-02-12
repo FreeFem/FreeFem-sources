@@ -1,16 +1,68 @@
+//ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas [mkl]   mpifc  fc mpi  pthread   [petsc]
+//ff-c++-cpp-dep: 
+
+#ifdef  WITH_petsc
+#ifndef xx__APPLE__
 #define WITH_PETSC
-//ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas  mpifc  fc mpi  pthread  PETSc
-//ff-c++-cpp-dep: -framework Accelerate
+#endif
+#endif
+
+#ifdef WITH_mkl
+#include <complex>
+#ifndef MKL_Complex16
+#define MKL_Complex16 std::complex<double>
+#endif
+#ifndef MKL_Complex8
+#define MKL_Complex8 std::complex<float>
+#endif
+#ifndef MKL_INT
+#define MKL_INT int
+#endif
+
+#include <mkl_spblas.h>
+//#include <mkl.h>
+
+#ifdef xxx__APPLE__
+
+
+//#include "mkl.h"
+// INTEL_MKL_VERSION 
+//#if INTEL_MKL_VERSION <= 110103
+//#undef INTEL_MKL_VERSION
+// MKL to old .....
+#define HPDDM_MKL            0
+#define HAVE_cblas_axpby
+#pragma message("schwarz plugin without MKL because MKL is too old " )
+#else
+#define HPDDM_MKL            1
+#endif
+#endif
+#ifndef WITH_PETSC 
+#pragma message("schwarz plugin compile without PETSc")
+#endif
 
 #include <math.h>
 #include <mpi.h>
 #include <ff++.hpp>
 #include "AFunction_ext.hpp"
 #include <HPDDM.hpp>
-#ifdef WITH_PETSC
-#include "PETSc.hpp"
-#endif
 
+template<class T>
+class STL {
+    T* const _it;
+    const int _size;
+    public:
+        STL(const KN<T>& v) : _it(v), _size(v.size()) { };
+        int size() const {
+            return _size;
+        }
+        T* begin() const {
+            return _it;
+        }
+        T* end() const {
+            return _it + _size;
+        }
+};
 template<class K>
 class Pair {
     public:
@@ -21,6 +73,10 @@ class Pair {
         void destroy() {
         }
 };
+
+#ifdef WITH_PETSC
+#include "PETSc.hpp"
+#endif
 
 namespace Schwarz {
 template<class Type, class K>
@@ -60,13 +116,10 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
-    std::vector<KN<long>*> vecR(ptR->n);
-    for(unsigned short i = 0; i < ptR->n; ++i)
-        vecR[i] = &(*ptR)[i];
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
     if(ptO && mA) {
         HPDDM::MatrixCSR<K>* dA = new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->HPDDM::template Subdomain<K>::initialize(dA, static_cast<long*>(*ptO), static_cast<long*>(*ptO) + ptO->N(), vecR, comm);
+        ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>(*ptO), *ptR, comm);
     }
     FEbaseArrayKn<K>* deflation = nargs[2] ? GetAny<FEbaseArrayKn<K>*>((*nargs[2])(stack)) : 0;
     K** const& v = ptA->getVectors();
@@ -265,6 +318,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     }
     else
         ptA->callNumfact(nullptr);
+    ptA->setType(solver == 1 || solver == 6 || solver == 11);
     if(timing) (*timing)[1] = MPI_Wtime() - timer;
     long pipelined = nargs[5] ? GetAny<long>((*nargs[5])(stack)) : 0;
     bool excluded = nargs[6] ? GetAny<bool>((*nargs[6])(stack)) : false;
@@ -279,7 +333,6 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             delete pair->p;
         }
     timer = MPI_Wtime();
-    ptA->setType(solver == 1 || solver == 6 || solver == 11);
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
     if(!excluded) {
@@ -372,14 +425,9 @@ void add() {
 }
 }
 
-class Init {
-    public:
-        Init();
-};
 
-LOADINIT(Init);
 
-Init::Init() {
+static void  Load_Init() {
     const char ds = 'S';
     const char zs = 'G';
     Schwarz::add<HpSchwarz, double, ds>();
@@ -416,3 +464,5 @@ Init::Init() {
     Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
     zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
 }
+
+LOADFUNC(Load_Init);

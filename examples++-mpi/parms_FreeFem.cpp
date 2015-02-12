@@ -1021,9 +1021,9 @@ BuilddSolvePARMS(DCL_ARG_SPARSE_SOLVER(double,A))
     return new dSolvePARMS(*A,ds.data_filename, ds.lparams, ds.dparams,(MPI_Comm *)ds.commworld);
 }
 
-class Init { public:
+/* --FH:   class Init { public:
     Init();
-};
+    };*/
 
 //  the 2 default sparse solver double and complex
 DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
@@ -1048,8 +1048,8 @@ bool SetdSolvePARMS()
      TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
      return TRUE;
 }
-LOADINIT(Init);
-Init::Init()
+
+static void Load_Init()
 { 
   
   SparseMatSolver_R= DefSparseSolver<double>::solver;
@@ -1066,3 +1066,4 @@ Init::Init()
 }
 
 
+ LOADFUNC(Load_Init)

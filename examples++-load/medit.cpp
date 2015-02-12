@@ -2395,18 +2395,18 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 }
 
 //  truc pour que la fonction 
-// Init::Init() soit appele a moment du chargement dynamique
+// static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier 
 //
   
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
   
@@ -2424,3 +2424,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 
   Global.Add("readsol","(",new OneOperatorCode< readsol_Op >);
 }
+LOADFUNC(Load_Init)

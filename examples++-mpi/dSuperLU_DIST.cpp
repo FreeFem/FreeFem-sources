@@ -232,7 +232,7 @@ public:
 	  else{
 	    /*
 	      printf("\tProcess grid\t%d X %d\n", grid.nprow, grid.npcol);
-	      /* Receive matrix A from PE 0. */
+	       Receive matrix A from PE 0. */
 	    MPI_Bcast( &m,   1,   mpi_int_t,  0, grid.comm );
 	    MPI_Bcast( &n,   1,   mpi_int_t,  0, grid.comm );
 	    MPI_Bcast( &nnz, 1,   mpi_int_t,  0, grid.comm );
@@ -685,9 +685,9 @@ BuildSolverSuperLUmpi(DCL_ARG_SPARSE_SOLVER(double,A))
 }
 
 
-class Init { public:
+/* --FH:   class Init { public:
     Init();
-};
+    };*/
 
 //  the 2 default sparse solver double and complex
 DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
@@ -719,8 +719,8 @@ bool SetSuperLUmpi()
 
 
 
-LOADINIT(Init);
-Init::Init()
+
+static void Load_Init()
 { 
   
   SparseMatSolver_R= DefSparseSolver<double>::solver;
@@ -736,3 +736,5 @@ Init::Init()
   Global.Add("defaulttoSuperLUmpi","(",new OneOperator0<bool>(SetSuperLUmpi));
 }
 
+
+ LOADFUNC(Load_Init)

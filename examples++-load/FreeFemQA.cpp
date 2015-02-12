@@ -173,15 +173,16 @@ AnyType MeshGenQA:: operator()(Stack stack) const
 
 };
 
-class Init { public:
+/*  class Init { public:
     Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
 // Init init;
-Init::Init()
+static void Load_Init()
 {
     cout << "\n  -- lood: init MeshGenQA\n";
     Global.Add("MeshGenQA","(", new OneOperatorCode<MeshGenQA >( ));
 }
+LOADFUNC(Load_Init)

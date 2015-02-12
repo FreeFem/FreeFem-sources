@@ -69,32 +69,32 @@ void WriteHdf5::WriteHdf5MeshFile2D(float coordinates[][2], int connec[][3])
     }
    
   //ecriture des coordonnees 2D X et Y des noeuds
-  group_id_coord = H5Gcreate(file_id, "/Coordinates", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  group_id_coord = H5Gcreate2(file_id, "/Coordinates", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   dataspace_id_coord = H5Screate_simple(2, dims_coord, NULL);
-  dataset_id_coord = H5Dcreate(file_id, "/Coordinates/XY", H5T_IEEE_F32LE, dataspace_id_coord, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  dataset_id_coord = H5Dcreate2(file_id, "/Coordinates/XY", H5T_IEEE_F32LE, dataspace_id_coord, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_coord, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, coordinates);
    
   //ecriture des valeurs max des coordonnees
   aid_max_x =  H5Screate_simple(1, dims_x_max, NULL);
-  attr_max_x = H5Acreate(dataset_id_coord, "X_MAX",  H5T_IEEE_F32LE, aid_max_x, H5P_DEFAULT, H5P_DEFAULT);
+  attr_max_x = H5Acreate2(dataset_id_coord, "X_MAX",  H5T_IEEE_F32LE, aid_max_x, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_max_x, H5T_NATIVE_FLOAT, &x_max);
   status = H5Aclose(attr_max_x);
   status = H5Sclose(aid_max_x); 
    
   aid_min_x =  H5Screate_simple(1, dims_x_min, NULL);
-  attr_min_x = H5Acreate(dataset_id_coord, "X_MIN",  H5T_IEEE_F32LE, aid_min_x, H5P_DEFAULT, H5P_DEFAULT);
+  attr_min_x = H5Acreate2(dataset_id_coord, "X_MIN",  H5T_IEEE_F32LE, aid_min_x, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_min_x, H5T_NATIVE_FLOAT, &x_min);
   status = H5Aclose(attr_min_x);
   status = H5Sclose(aid_min_x); 
    
   aid_max_y =  H5Screate_simple(1, dims_y_max, NULL);
-  attr_max_y = H5Acreate(dataset_id_coord, "Y_MAX",  H5T_IEEE_F32LE, aid_max_y, H5P_DEFAULT, H5P_DEFAULT);
+  attr_max_y = H5Acreate2(dataset_id_coord, "Y_MAX",  H5T_IEEE_F32LE, aid_max_y, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_max_y, H5T_NATIVE_FLOAT, &y_max);
   status = H5Aclose(attr_max_y);
   status = H5Sclose(aid_max_y); 
    
   aid_min_y =  H5Screate_simple(1, dims_y_min, NULL);
-  attr_min_y = H5Acreate(dataset_id_coord, "Y_MIN",  H5T_IEEE_F32LE, aid_min_y, H5P_DEFAULT, H5P_DEFAULT);
+  attr_min_y = H5Acreate2(dataset_id_coord, "Y_MIN",  H5T_IEEE_F32LE, aid_min_y, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_min_y, H5T_NATIVE_FLOAT, &y_min);
   status = H5Aclose(attr_min_y);
   status = H5Sclose(aid_min_y); 
@@ -104,10 +104,10 @@ void WriteHdf5::WriteHdf5MeshFile2D(float coordinates[][2], int connec[][3])
   status = H5Gclose(group_id_coord);
    
   //ecriture du tableau de connectivite (3 numeros de noeud definissent 1 triangle)
-  group_id_connec = H5Gcreate(file_id, "/Connectivity", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  group_id_connec = H5Gcreate2(file_id, "/Connectivity", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   dataspace_id_elem2node = H5Screate_simple(2, dims_elem2node, NULL);
-  dataset_id_elem2node = H5Dcreate(file_id, "/Connectivity/ELEM2NODE", H5T_STD_I32LE, 
+  dataset_id_elem2node = H5Dcreate2(file_id, "/Connectivity/ELEM2NODE", H5T_STD_I32LE, 
 				   dataspace_id_elem2node, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_elem2node, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, connec);
   status = H5Dclose(dataset_id_elem2node);
@@ -118,22 +118,22 @@ void WriteHdf5::WriteHdf5MeshFile2D(float coordinates[][2], int connec[][3])
   strcpy(elemtype,"Triangle");
   type_id = H5Tcopy(H5T_C_S1);
   status  = H5Tset_size(type_id, 8);
-  dataspace_id_elemtype = H5Screate(H5S_SCALAR);
-  dataset_id_elemtype=H5Dcreate(file_id, "/Connectivity/ELEMTYPE", type_id, 
+  dataspace_id_elemtype = H5Screate(H5S_SCALAR); 
+  dataset_id_elemtype=H5Dcreate2(file_id, "/Connectivity/ELEMTYPE", type_id, 
 				dataspace_id_elemtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_elemtype, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, elemtype);
   status = H5Dclose(dataset_id_elemtype);
   status = H5Sclose(dataspace_id_elemtype);
    
   dataspace_id_nelem = H5Screate_simple(1, dims_nelem, NULL);
-  dataset_id_nelem = H5Dcreate(file_id, "/Connectivity/NELEM", H5T_STD_I32LE, 
+  dataset_id_nelem = H5Dcreate2(file_id, "/Connectivity/NELEM", H5T_STD_I32LE, 
 			       dataspace_id_nelem, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_nelem, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &nbofelem);
   status = H5Dclose(dataset_id_nelem);
   status = H5Sclose(dataspace_id_nelem);
    
   dataspace_id_nnode = H5Screate_simple(1, dims_nnode, NULL);
-  dataset_id_nnode = H5Dcreate(file_id, "/Connectivity/NNODE", H5T_STD_I32LE, 
+  dataset_id_nnode = H5Dcreate2(file_id, "/Connectivity/NNODE", H5T_STD_I32LE, 
 			       dataspace_id_nnode, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_nnode, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &nbofvertex);
   status = H5Dclose(dataset_id_nnode);
@@ -145,7 +145,7 @@ void WriteHdf5::WriteHdf5MeshFile2D(float coordinates[][2], int connec[][3])
   type_mesh_id = H5Tcopy(H5T_C_S1);
   status  = H5Tset_size(type_mesh_id, 7);
   dataspace_id_meshtype = H5Screate(H5S_SCALAR);
-  dataset_id_meshtype=H5Dcreate(file_id, "/Connectivity/TYPE", type_mesh_id, 
+  dataset_id_meshtype=H5Dcreate2(file_id, "/Connectivity/TYPE", type_mesh_id, 
 				dataspace_id_meshtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_meshtype, type_mesh_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, meshtype);
   status = H5Dclose(dataset_id_meshtype);
@@ -217,52 +217,52 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
     }
 
   //ecriture des coordonnees 3D X,Y,Z des noeuds
-  group_id_coord = H5Gcreate(file_id, "/Coordinates", H5P_DEFAULT, H5P_DEFAULT, 
+  group_id_coord = H5Gcreate2(file_id, "/Coordinates", H5P_DEFAULT, H5P_DEFAULT, 
 			     H5P_DEFAULT);
   dataspace_id_coord = H5Screate_simple(2, dims_coord, NULL);
-  dataset_id_coord = H5Dcreate(file_id, "/Coordinates/XYZ", H5T_IEEE_F32LE, 
+  dataset_id_coord = H5Dcreate2(file_id, "/Coordinates/XYZ", H5T_IEEE_F32LE, 
 			       dataspace_id_coord, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_coord, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, 
 		    H5P_DEFAULT, coordinates);
 
   //ecriture des valeurs max des coordonnees
   aid_max_x =  H5Screate_simple(1, dims_x_max, NULL);
-  attr_max_x = H5Acreate(dataset_id_coord, "X_MAX",  H5T_IEEE_F32LE, aid_max_x, 
+  attr_max_x = H5Acreate2(dataset_id_coord, "X_MAX",  H5T_IEEE_F32LE, aid_max_x, 
 			 H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_max_x, H5T_NATIVE_FLOAT, &x_max);
   status = H5Aclose(attr_max_x);
   status = H5Sclose(aid_max_x); 
   
   aid_min_x =  H5Screate_simple(1, dims_x_min, NULL);
-  attr_min_x = H5Acreate(dataset_id_coord, "X_MIN",  H5T_IEEE_F32LE, aid_min_x, 
+  attr_min_x = H5Acreate2(dataset_id_coord, "X_MIN",  H5T_IEEE_F32LE, aid_min_x, 
 			 H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_min_x, H5T_NATIVE_FLOAT, &x_min);
   status = H5Aclose(attr_min_x);
   status = H5Sclose(aid_min_x); 
   
   aid_max_y =  H5Screate_simple(1, dims_y_max, NULL);
-  attr_max_y = H5Acreate(dataset_id_coord, "Y_MAX",  H5T_IEEE_F32LE, aid_max_y, 
+  attr_max_y = H5Acreate2(dataset_id_coord, "Y_MAX",  H5T_IEEE_F32LE, aid_max_y, 
 			 H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_max_y, H5T_NATIVE_FLOAT, &y_max);
   status = H5Aclose(attr_max_y);
   status = H5Sclose(aid_max_y); 
   
   aid_min_y =  H5Screate_simple(1, dims_y_min, NULL);
-  attr_min_y = H5Acreate(dataset_id_coord, "Y_MIN",  H5T_IEEE_F32LE, aid_min_y, 
+  attr_min_y = H5Acreate2(dataset_id_coord, "Y_MIN",  H5T_IEEE_F32LE, aid_min_y, 
 			 H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_min_y, H5T_NATIVE_FLOAT, &y_min);
   status = H5Aclose(attr_min_y);
   status = H5Sclose(aid_min_y); 
   
   aid_max_z =  H5Screate_simple(1, dims_z_max, NULL);
-  attr_max_z = H5Acreate(dataset_id_coord, "Z_MAX",  H5T_IEEE_F32LE, aid_max_z, 
+  attr_max_z = H5Acreate2(dataset_id_coord, "Z_MAX",  H5T_IEEE_F32LE, aid_max_z, 
 			 H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_max_z, H5T_NATIVE_FLOAT, &z_max);
   status = H5Aclose(attr_max_z);
   status = H5Sclose(aid_max_z); 
   
   aid_min_z =  H5Screate_simple(1, dims_z_min, NULL);
-  attr_min_z = H5Acreate(dataset_id_coord, "Z_MIN",  H5T_IEEE_F32LE, aid_min_z, 
+  attr_min_z = H5Acreate2(dataset_id_coord, "Z_MIN",  H5T_IEEE_F32LE, aid_min_z, 
 			 H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_min_z, H5T_NATIVE_FLOAT, &z_min);
   status = H5Aclose(attr_min_z);
@@ -273,11 +273,11 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
   status = H5Gclose(group_id_coord);
 
   //ecriture du tableau de connectivite (4 numeros de noeud definissent 1 tetraedre)
-  group_id_connec = H5Gcreate(file_id, "/Connectivity", H5P_DEFAULT, H5P_DEFAULT, 
+  group_id_connec = H5Gcreate2(file_id, "/Connectivity", H5P_DEFAULT, H5P_DEFAULT, 
 			      H5P_DEFAULT);
 
   dataspace_id_elem2node = H5Screate_simple(2, dims_elem2node, NULL);
-  dataset_id_elem2node = H5Dcreate(file_id, "/Connectivity/ELEM2NODE", H5T_STD_I32LE, 
+  dataset_id_elem2node = H5Dcreate2(file_id, "/Connectivity/ELEM2NODE", H5T_STD_I32LE, 
 				   dataspace_id_elem2node, H5P_DEFAULT, H5P_DEFAULT, 
 				   H5P_DEFAULT);
   status = H5Dwrite(dataset_id_elem2node, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
@@ -291,7 +291,7 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
   type_id = H5Tcopy(H5T_C_S1);
   status  = H5Tset_size(type_id, 11);
   dataspace_id_elemtype = H5Screate(H5S_SCALAR);
-  dataset_id_elemtype=H5Dcreate(file_id, "/Connectivity/ELEMTYPE", type_id, 
+  dataset_id_elemtype=H5Dcreate2(file_id, "/Connectivity/ELEMTYPE", type_id, 
 				dataspace_id_elemtype, H5P_DEFAULT, H5P_DEFAULT, 
 				H5P_DEFAULT);
   status = H5Dwrite(dataset_id_elemtype, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
@@ -300,7 +300,7 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
   status = H5Sclose(dataspace_id_elemtype);
   
   dataspace_id_nelem = H5Screate_simple(1, dims_nelem, NULL);
-  dataset_id_nelem = H5Dcreate(file_id, "/Connectivity/NELEM", H5T_STD_I32LE, 
+  dataset_id_nelem = H5Dcreate2(file_id, "/Connectivity/NELEM", H5T_STD_I32LE, 
 			       dataspace_id_nelem, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_nelem, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
 		    &nbofelem);
@@ -308,7 +308,7 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
   status = H5Sclose(dataspace_id_nelem);
   
   dataspace_id_nnode = H5Screate_simple(1, dims_nnode, NULL);
-  dataset_id_nnode = H5Dcreate(file_id, "/Connectivity/NNODE", H5T_STD_I32LE, 
+  dataset_id_nnode = H5Dcreate2(file_id, "/Connectivity/NNODE", H5T_STD_I32LE, 
 			       dataspace_id_nnode, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_nnode, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
 		    &nbofvertex);
@@ -321,7 +321,7 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
   type_mesh_id = H5Tcopy(H5T_C_S1);
   status  = H5Tset_size(type_mesh_id, 7);
   dataspace_id_meshtype = H5Screate(H5S_SCALAR);
-  dataset_id_meshtype=H5Dcreate(file_id, "/Connectivity/TYPE", type_mesh_id, 
+  dataset_id_meshtype=H5Dcreate2(file_id, "/Connectivity/TYPE", type_mesh_id, 
 				dataspace_id_meshtype, H5P_DEFAULT, H5P_DEFAULT, 
 				H5P_DEFAULT);
   status = H5Dwrite(dataset_id_meshtype, type_mesh_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
@@ -341,7 +341,7 @@ void WriteHdf5::WriteHdf5MeshFile3D(float coordinates[][3], int connec[][4])
 void WriteHdf5::WriteHdf5SolFile2DInit() 
 {  
   //creation du groupe /Data contenant toutes les donnees solution
-  group_id_data = H5Gcreate(file_id, "/Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  group_id_data = H5Gcreate2(file_id, "/Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 }
 
 void WriteHdf5::WriteHdf5SolFile2DAddField(string * fieldname, int result_order, int trans_dim, int what_type, float *field)
@@ -396,13 +396,13 @@ void WriteHdf5::WriteHdf5SolFile2DAddField(string * fieldname, int result_order,
   	  size_str_float + (res_char[result_order].size()+1) 
   	  + size_str_underscore + (type_char[what_type].size() + 1));
   dataspace_id_data = H5Screate_simple(2, dims_data, NULL);
-  dataset_id_data = H5Dcreate(file_id, char_datafieldname_tot, H5T_IEEE_F32LE, 
+  dataset_id_data = H5Dcreate2(file_id, char_datafieldname_tot, H5T_IEEE_F32LE, 
   			      dataspace_id_data, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_data, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
   type_id = H5Tcopy(H5T_C_S1);
   status  = H5Tset_size(type_id, 17);
   aid_type =  H5Screate(H5S_SCALAR);
-  attr_type = H5Acreate(dataset_id_data, "TYPE",  type_id, aid_type, H5P_DEFAULT, H5P_DEFAULT);
+  attr_type = H5Acreate2(dataset_id_data, "TYPE",  type_id, aid_type, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_type, type_id, data_type);
   status = H5Aclose(attr_type);
   status = H5Sclose(aid_type);
@@ -424,7 +424,7 @@ void WriteHdf5::WriteHdf5SolFile2DFinalize()
 void WriteHdf5::WriteHdf5SolFile3DInit()
 {
   //creation du groupe /Data contenant toutes les donnees solution
-  group_id_data = H5Gcreate(file_id, "/Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  group_id_data = H5Gcreate2(file_id, "/Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 }
 
 void WriteHdf5::WriteHdf5SolFile3DAddField(string * fieldname, int result_order, int trans_dim, int what_type, float *field)
@@ -479,13 +479,13 @@ void WriteHdf5::WriteHdf5SolFile3DAddField(string * fieldname, int result_order,
   	  size_str_float + (res_char[result_order].size()+1) 
   	  + size_str_underscore + (type_char[what_type].size() + 1));
   dataspace_id_data = H5Screate_simple(2, dims_data, NULL);
-  dataset_id_data = H5Dcreate(file_id, char_datafieldname_tot, H5T_IEEE_F32LE, 
+  dataset_id_data = H5Dcreate2(file_id, char_datafieldname_tot, H5T_IEEE_F32LE, 
   			      dataspace_id_data, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id_data, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, field);
   type_id = H5Tcopy(H5T_C_S1);
   status  = H5Tset_size(type_id, 18);
   aid_type =  H5Screate(H5S_SCALAR);
-  attr_type = H5Acreate(dataset_id_data, "TYPE",  type_id, aid_type, H5P_DEFAULT, H5P_DEFAULT);
+  attr_type = H5Acreate2(dataset_id_data, "TYPE",  type_id, aid_type, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Awrite(attr_type, type_id, data_type);
   status = H5Aclose(attr_type);
   status = H5Sclose(aid_type);

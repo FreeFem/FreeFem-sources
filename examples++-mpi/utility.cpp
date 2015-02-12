@@ -409,16 +409,18 @@ long findDiff(KN<double>* const& array, KN<long>* const& val) {
 }
 
 #ifndef _ALL_IN_ONE_
-class Init {
+/* --FH:   class Init {
     public:
         Init();
 };
 
-Init init;
-Init::Init() {
+Init ...; */
+static void Load_Init() {
     Global.Add("bb2d", "(", new Boundingbox2D);
     Global.Add("bb3d", "(", new Boundingbox3D);
     Global.Add("fast", "(", new OneOperator2_<long, KN<double>*, KN<long>*>(long_to_double));
     Global.Add("findDiff", "(", new OneOperator2_<long, KN<double>*, KN<long>*>(findDiff));
 }
+ LOADFUNC(Load_Init)
 #endif
+
