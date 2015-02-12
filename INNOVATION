@@ -1,3 +1,6 @@
+version 3.34-1 
+ - correct lot of mistake for simple compilation of 
+    hpddm interface ..
  - add no mandatory lib for petsc 
       write the WHERE-LIBRARY search lib in awk (more simple ) 
  version 3.24
