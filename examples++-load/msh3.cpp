@@ -5868,7 +5868,7 @@ static void Load_Init()
     
   Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
   typedef Mesh3 *pmesh3;
-  Global.Add("trunc","(", new Op_trunc_mesh3);    
+ // Global.Add("trunc","(", new Op_trunc_mesh3);
 }
 LOADFUNC(Load_Init)
 #endif
