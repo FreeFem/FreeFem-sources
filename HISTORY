@@ -1,5 +1,10 @@
-@  changeset:   3156:651407885920
+@  changeset:   3157:83f4a2ab0c5f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 11:20:52 2015 +0100
+|  summary:     coorect problem on version in PETSc interface and  MKL for schawtz.cpp
+|
+o  changeset:   3156:651407885920
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 12 10:11:33 2015 +0100
 |  summary:     correct typo after big change in plugin (now all test works)
