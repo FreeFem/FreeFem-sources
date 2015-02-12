@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.34,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.34-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -93,40 +93,6 @@ if test `uname` != Darwin; then
  ff_ldbg="-Wl,--start-group"
 fi
 
-AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
-# /usr/local/petsc/conf/petscvariables 
-ff_petsc_ok=no
-## echo --$with_petsc--
-if test "$with_petsc" != no ; then
-    ff_petsc=""
-    if test -n "$with_pets" -a -f "$with_petsc/conf/petscvariables" ; then 
-	ff_petsc="$with_petsc/conf/petscvariables"
-    elif test -n "$with_pets" -a -f "$with_petsc" ; then 
-	ff_petsc="$with_petsc"
-    elif test -z "$with_petsc" ; then
-	for d in /usr /usr/local /opt/usr  /opt/local ; do
-	  ##  echo  "$d/petsc/conf/petscvariables" 
-	    if test -f "$d/petsc/conf/petscvariables" ; then 
-		ff_petsc="$d/petsc/conf/petscvariables"
-	    fi
-	done
-	if test -n "$ff_petsc" ; then
-	    echo "ff_petsc=$ff_petsc" 
-	    PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ff_petsc`
-	    PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ff_petsc`
-	    if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
-		ff_petsc_ok=yes;
-		AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
-	    fi
-	fi
-    fi
-fi
-
-if test "$ff_petsc_ok" != no ;   then
-    AC_MSG_NOTICE([ with petsc  PETSC_WITH_EXTERNAL_LIB=$PETSC_WITH_EXTERNAL_LIB ])
-else
-    AC_MSG_NOTICE([ without petsc ***** ])
-fi
 
 
 
@@ -802,6 +768,39 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 # ------------------------------------------
 
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
+## PETSc
+AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
+# /usr/local/petsc/conf/petscvariables 
+ff_petsc_ok=no
+## echo --$with_petsc--
+if test "$with_petsc" != no -a  $ff_mpi = yes; then
+    ff_petsc=""
+    for d in "$with_petsc" /usr /usr/local /opt/usr  /opt/local ; do
+	if test -f "$d/petsc/conf/petscvariables" ; then 
+	    if test  "$ff_petsc_ok" = no ; then
+		ff_petsc="$d/petsc/conf/petscvariables"
+		PETSC_MPIRUN=`awk -F'=' '"MPIEXEC "==$1 {print $2}' $ff_petsc`
+		cmp -s  ${PETSC_MPIRUN} `${MPIRUN}`
+		if test $?  -eq 0 ; then 
+		    PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ff_petsc`
+		    PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ff_petsc`
+		    if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
+			ff_petsc_ok=yes;
+			AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
+		    fi
+		fi
+	    fi
+	fi
+    done
+fi
+
+if test "$ff_petsc_ok" != no ;   then
+    AC_MSG_NOTICE([ with petsc  PETSC_WITH_EXTERNAL_LIB=$PETSC_WITH_EXTERNAL_LIB ])
+else
+    AC_MSG_NOTICE([ without petsc ***** ])
+fi
+
+
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"
@@ -1869,7 +1868,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$ff_petsc_ok" != yes &&  enable_schwarz=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes &&  enable_schwarz=no
 
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
