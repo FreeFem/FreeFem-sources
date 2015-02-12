@@ -66,8 +66,8 @@ $(SRCDIR)/tag-conf:$(SRCDIR)/tag-tar
 	--download-mumps --download-ml --download-hypre --download-parmetis \
 	--download-superlu --download-pastix --download-suitesparse --download-fftw \
 	 'CFLAGS=$(CFLAGS)' 'CC=$(CC)' 'FC=$(FC)' 'FCFLAGS=$(FCFLAGS)' \
-        --with-mpi-include=$(MPI_INCLUDE) --with-mpi-lib=$(MPI_LIB) \
-	 --with-blas-lapack-lib=$(BLASLIBS) 
+        '--with-mpi-include=$(MPI_INC_DIR)' '--with-mpi-lib=$(MPI_LIB)' \
+	 '--with-blas-lapack-lib=$(BLASLIBS) $(LAPACKLIBS)' 
 	touch $@
 
 $(SRCDIR)/tag-tar:$(PACKAGE)
