@@ -4,6 +4,9 @@
 extern KN<String>* pkarg;
 
 #include "petsc.h"
+#if PETSC_VERSION_LT(3,6,0)
+#define MatCreateVecs MatGetVecs
+#endif
 
 class DistributedCSR {
     public:

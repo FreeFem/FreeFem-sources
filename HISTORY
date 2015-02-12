@@ -1,5 +1,15 @@
-@  changeset:   3154:e8aa9ceccd60
+@  changeset:   3156:651407885920
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 10:11:33 2015 +0100
+|  summary:     correct typo after big change in plugin (now all test works)
+|
+o  changeset:   3155:bff13b38aba2
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 09:43:26 2015 +0100
+|  summary:     Change all int of plugins due to bug on somme allpe version
+|
+o  changeset:   3154:e8aa9ceccd60
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 10 21:34:10 2015 +0100
 |  summary:     try of compile schwarz.cpp on all case
