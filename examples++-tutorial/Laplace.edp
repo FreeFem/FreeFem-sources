@@ -1,0 +1,13 @@
+ mesh Th=square(10,10);
+ fespace Vh(Th,P1);     // P1 FE space
+ Vh uh,vh;              // unkown and test function. 
+ func f=1;                 //  right hand side function 
+ func g=0;                 //  boundary condition function
+ 
+ problem laplace(uh,vh,solver=GMRES,tgv=1e5) =                    //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  - int2d(Th)( f*vh )                          //  linear form
+  + on(1,2,3,4,uh=g) ;                      //  boundary condition form
+
+  laplace; // solve the problem plot(uh); // to see the result
+  plot(uh,ps="Laplace.eps",value=true);

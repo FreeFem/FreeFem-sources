@@ -1,0 +1,116 @@
+Source: freefem++
+Section: non-free/math
+Priority: optional
+Maintainer: Antoine Le Hyaric <lehyaric@ann.jussieu.fr>
+Build-Depends: debhelper (>= 4.0.0), blas-dev | refblas3-dev, libarpack++2-dev (>= 2.1), libumfpack4-dev (>= 4.1), libfltk1.1-dev (>= 1.1.5-1), mpich-bin
+Standards-Version: 3.6.1.0
+
+Package: freefem++
+Architecture: all
+Depends: freefem++-x11 (= ${Source-Version}) | freefem++-cs (= ${Source-Version}) | freefem++-glx (= ${Source-Version}) | freefem++-nw (= ${Source-Version})
+Suggests: freefem++-doc
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the common files for the different flavors of FreeFem++.
+ .
+ Homepage: http://www.freefem.org/
+
+Package: freefem++-nw
+Architecture: any
+Depends: freefem++ (= ${Source-Version}), ${shlibs:Depends}
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the text-based version of FreeFem++
+ .
+ Homepage: http://www.freefem.org/
+
+Package: freefem++-cs
+Architecture: any
+Depends: freefem++ (= ${Source-Version}), ${shlibs:Depends}, libfltk1.1
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the GUI version of FreeFem++
+ .
+ Homepage: http://www.freefem.org/
+
+Package: freefem++-x11
+Architecture: any
+Depends: freefem++ (= ${Source-Version}), ${shlibs:Depends}
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the X11-based version of FreeFem++
+ .
+ Homepage: http://www.freefem.org/
+
+Package: freefem++-glx
+Architecture: any
+Depends: freefem++ (= ${Source-Version}), ${shlibs:Depends}
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the OpenGL-based version of FreeFem++
+ .
+ Homepage: http://www.freefem.org/
+
+Package: freefem++-doc
+Architecture: all
+Suggests: freefem++
+Description: A PDE oriented language using Finite Element Method
+ FreeFem++ is an implementation of a language dedicated to the finite element
+ method. It provides you a way to solve Partial Differential Equations (PDE)
+ simply.
+ .
+ Problems involving partial differential equations (pde) of  several branches
+ of physics such as fluid-structure interactions require interpolations of data
+ on several meshes and their manipulation within one program.
+ .
+ FreeFem++ is an extension of freefem, freefem+ written in C++.
+ .
+ This package contains the documentation for FreeFem++.
+ .
+ Homepage: http://www.freefem.org/
+
