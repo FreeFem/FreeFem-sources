@@ -179,14 +179,15 @@ void   calfun( integer * n, double * x, double *f, void * t)
   if(verbosity>20)  cout << " F= " << * f << endl;
 }
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init::Init()  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init()  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
 {
   Global.Add("newuoa","(",new OptimNewoa(1));  //  j + dJ
 
 }
+LOADFUNC(Load_Init)

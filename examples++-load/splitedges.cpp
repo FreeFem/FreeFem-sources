@@ -1,4 +1,3 @@
-// $Id$
 
 #include "ff++.hpp" 
 
@@ -152,13 +151,13 @@ Mesh * Split_Edges(Fem2D::Mesh * const & pTh, long  *dK)
 }
 
 //  truc pour que la fonction 
-// Init::Init() soit appele a moment du chargement dynamique
+// static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier 
 //  
-class Init { public:
+/*  class Init { public:
   Init();
 };
-
+*/
 class SplitEdges :  public E_F0mps 
 {
 public:
@@ -229,9 +228,8 @@ AnyType SplitEdges::operator()(Stack stack) const
     return SetAny<pmesh>( Split_Edges(pTh,(long *) dK));      
   }
  
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   if (verbosity)
     cout << " lood: Split3  " << endl;
   Global.Add("SplitEdgeMesh","(", new OneOperatorCode<SplitEdges >( ));
@@ -247,3 +245,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   */
 
 }
+LOADFUNC(Load_Init)

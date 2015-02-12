@@ -257,13 +257,15 @@ AnyType MatrixUpWind3::operator()(Stack stack) const
 
 
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
  Init init;
- Init::Init()
+*/
+ static void Load_Init()
    {
      cout << " lood: init Mat Chacon " << endl;
      Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind0 >( ));
      Global.Add("MatUpWind0","(", new OneOperatorCode<MatrixUpWind3 >( ));
-   }
+ }
+LOADFUNC(Load_Init)

@@ -875,13 +875,13 @@ typedef Mesh *pmesh;
   }
 };
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
  
   typedef Mesh *pmesh;
   cerr << " Warning obsolete load file version now use isolineP1 -> isoline " << endl;  
@@ -892,3 +892,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 
 }
    
+LOADFUNC(Load_Init)

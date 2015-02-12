@@ -271,13 +271,13 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
     }
 }
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
 
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
 
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
@@ -290,3 +290,4 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
 }
 
+LOADFUNC(Load_Init)

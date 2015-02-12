@@ -257,17 +257,18 @@ long symmetrizeCSR(Matrice_Creuse<T>* const& A) {
 }
 
 #ifndef _ALL_IN_ONE_
-class Init {
+/* --FH:   class Init {
     public:
         Init();
-};
-
-Init init;
-Init::Init() {
+	};
+Init ...; */
+static void Load_Initrm() {
     Global.Add("removeDOF", "(", new removeDOF<double>);
     Global.Add("removeDOF", "(", new removeDOF<std::complex<double>>);
     Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<double>* >(symmetrizeCSR<double>));
 }
+ LOADFUNC(Load_Initrm)
 #endif
 
 // std::sort(tmp.begin() + lg[i], tmp.end(), [](const std::pair<int, T>& lhs, const std::pair<int, T>& rhs) { return lhs.first < rhs.first; } );
+

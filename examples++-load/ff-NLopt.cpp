@@ -828,13 +828,13 @@ template<nlopt::algorithm ALGO> basicAC_F0::name_and_type  OptimNLopt<ALGO,true>
 
 
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init::Init()  
+static void Load_Init()  
 {
   Global.Add("nloptDIRECT",								"(",new OptimNLopt<nlopt::GN_DIRECT>(1)); 
   Global.Add("nloptDIRECTL",							"(",new OptimNLopt<nlopt::GN_DIRECT_L>(1));
@@ -875,3 +875,4 @@ Init::Init()
 
 
 
+LOADFUNC(Load_Init)

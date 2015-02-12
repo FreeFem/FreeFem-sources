@@ -317,14 +317,14 @@ void* call_addmesh( VtkWriter * const & mt, Fem2D::Mesh* const & pTh) {
 }
  
 //   Add the function name to the freefem++ table 
-class Init 
+/*  class Init 
 { 
 public:
  Init();
 };
 
-LOADINIT(Init);
-Init::Init()
+$1 */
+static void Load_Init()
 {
  
  Dcl_Type<VtkWriter*>(InitP<VtkWriter>,Destroy<VtkWriter>); 
@@ -337,3 +337,4 @@ Init::Init()
  Global.Add("Vtkaddscalar","(",new OneOperatorCode< Vtkwritesol_Op> );
  
 }
+LOADFUNC(Load_Init)

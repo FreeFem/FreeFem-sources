@@ -74,11 +74,11 @@ outfile.close();
 
 
 //   add the function name to the freefem++ table 
-class Init { public:
+/*  class Init { public:
   Init();
 };	
-LOADINIT(Init);
-Init::Init(){	
+$1 */
+static void Load_Init(){	
 		
   Global.Add("LoadVec","(",new OneOperator2_<double,  KN<double>*, string* >(LoadVec)); 
 Global.Add("LoadFlag","(",new OneOperator2_<double,long int*, string* >(LoadFlag));
@@ -86,3 +86,4 @@ Global.Add("LoadFlag","(",new OneOperator2_<double,long int*, string* >(LoadFlag
  Global.Add("flag","(",new OneOperator2_<double,long int*,string* >(flag));  
 }
 
+LOADFUNC(Load_Init)

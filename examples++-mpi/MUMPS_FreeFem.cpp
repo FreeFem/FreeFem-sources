@@ -2536,9 +2536,9 @@ BuildSolverMUMPSmpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
 }
 
 
-class Init { public:
+/*  class Init { public:
     Init();
-};
+    };*/
 
 //  the 2 default sparse solver double and complex
 static DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
@@ -2566,8 +2566,8 @@ bool SetMUMPSmpi()
 
 
 
-LOADINIT(Init);
-Init::Init()
+//LOADINIT(Init);
+static void Load_Init()
 { 
   
   SparseMatSolver_R= DefSparseSolver<double>::solver;
@@ -2602,3 +2602,4 @@ void ffinit()
 #include "InitFunct.hpp"
 addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem");
 
+LOADFUNC(Load_Init);

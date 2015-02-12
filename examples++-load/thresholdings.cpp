@@ -66,13 +66,13 @@ template<class T>
 Thresholding<T> to_Thresholding( Matrice_Creuse<T> *v){ return Thresholding<T>(v);}
 
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
  
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1()
+static void Load_Init()
 {  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
     typedef Thresholding<double>  TMR ;
     typedef Thresholding<Complex>  TMC ;
@@ -88,3 +88,4 @@ Init1::Init1()
     Add<TMC >("(","",new OneOperator2_<MC *, TMC, double >(thresholding2)); 
     
 }
+LOADFUNC(Load_Init)

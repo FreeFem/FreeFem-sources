@@ -1,5 +1,10 @@
-@  changeset:   3153:f693d6250f91
+@  changeset:   3154:e8aa9ceccd60
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 10 21:34:10 2015 +0100
+|  summary:     try of compile schwarz.cpp on all case
+|
+o  changeset:   3153:f693d6250f91
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 10 17:23:21 2015 +0100
 |  summary:     remove plot in MPI

@@ -409,14 +409,9 @@ void add() {
 }
 }
 
-class Init {
-    public:
-        Init();
-};
 
-LOADINIT(Init);
 
-Init::Init() {
+static Load_Init() {
     const char ds = 'S';
     const char zs = 'G';
     Schwarz::add<HpSchwarz, double, ds>();
@@ -453,3 +448,4 @@ Init::Init() {
     Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
     zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
 }
+ LOADFUNC(Load_Init);
