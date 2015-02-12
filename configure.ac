@@ -795,7 +795,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 fi
 
 if test "$ff_petsc_ok" != no ;   then
-    AC_MSG_NOTICE([ with petsc  PETSC_WITH_EXTERNAL_LIB=$PETSC_WITH_EXTERNAL_LIB ])
+    AC_MSG_NOTICE([ with petsc  $ff_petsc])
 else
     AC_MSG_NOTICE([ without petsc ***** ])
 fi
@@ -1909,6 +1909,7 @@ AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
 AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
+AC_MSG_NOTICE([          --  with PETSC $ff_petsc ]);
 AC_MSG_NOTICE([    progs: $ff_progs ])
 if test  "$ff_umfpack_download" = yes  ;then
     AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
