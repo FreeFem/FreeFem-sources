@@ -16,7 +16,7 @@ string ssparams="nprow=1, npcol="+mpisize;
 
 
 
-int nn=getARGV("-n",20);
+int nn=getARGV("-n",15);
 int pplot=getARGV("-plot",0);
 
 
