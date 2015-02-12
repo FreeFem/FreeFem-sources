@@ -5832,13 +5832,9 @@ bool AddLayers(Mesh3 * const & pTh, KN<double> * const & psupp, long const & nla
 
 // because i include this file in tetgen.cpp (very bad)
 #ifndef WITH_NO_INIT
-class Init { public:
-  Init();
-};
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
-
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init()
+{  
   
   Dcl_Type<listMesh3>();
   typedef Mesh *pmesh;
@@ -5871,20 +5867,9 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("extract","(",new ExtractMesh2D);
     
   Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
-    
-}
-/*
-class Init { public:
-  Init();
-};
-
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
-
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
-  
   typedef Mesh3 *pmesh3;
-  Global.Add("trunc","(", new Op_trunc_mesh3);
-
+  Global.Add("trunc","(", new Op_trunc_mesh3);    
 }
-*/
+LOADFUNC(Load_Init)
 #endif
+

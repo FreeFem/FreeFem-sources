@@ -699,9 +699,9 @@ BuildSolverHipsSolvermpi(DCL_ARG_SPARSE_SOLVER(double,A))
     cout << " BuildSolverSuperLU<double>" << endl;
   return new HipsSolver(*A,ds.epsilon,ds.data_filename, ds.lparams, ds.dparams,ds.master,(MPI_Comm *)ds.commworld);
 		    }
-class Init { public:
+/* --FH:   class Init { public:
     Init();
-};
+    }; */
 
 //  the 2 default sparse solver double and complex
 DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
@@ -742,8 +742,8 @@ bool SetHipsSolver()
   TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
   return 1;
 }
-LOADINIT(Init);
-Init::Init()
+
+static void Load_Init()
 {   
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   //SparseMatSolver_C= DefSparseSolver<Complex>::solver;
@@ -764,3 +764,4 @@ Init::Init()
 		      
 		      
 		      
+ LOADFUNC(Load_Init)

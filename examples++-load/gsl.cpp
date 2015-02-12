@@ -138,12 +138,12 @@ void ffhandler (const char * reason,
     if(gslabort) ExecError("Gsl errorhandler");
 }
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
+$1 */
 using  namespace Fem2D ;
-Init::Init(){
+static void Load_Init(){
     
   Global.Add("gslpolysolvequadratic","(",new OneOperator2<long,KN_<double>,KN_<double> >( gslpolysolvequadratic));
   Global.Add("gslpolysolvecubic","(",new OneOperator2<long,KN_<double>,KN_<double> >(gslpolysolvecubic));
@@ -253,3 +253,4 @@ Global.Add("gslrngset","(",new OneOperator2<long   ,gsl_rng **, long>(gsl_rng_se
    
  gsl_set_error_handler(ffhandler);
 }
+LOADFUNC(Load_Init)

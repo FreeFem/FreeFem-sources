@@ -87,7 +87,7 @@ bin_PROGRAMS=
 load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 #
 # max_load
-	-rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null
+	-@rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null || true
 	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE) $(LIST_COMPILE_PKG)
 	@if test -f Missing-plugins-$(DYLIB_SUFFIX).log ; then cat Missing-plugins-$(DYLIB_SUFFIX).log; fi; exit 0 
 	@echo Warning missing plugin: `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
@@ -207,7 +207,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
-	$(INSTALL)  -m 555 WHERE_LIBRARY-config WHERE_LIBRARY  $(DESTDIR)$(ff_prefix_dir)/lib
+	$(INSTALL)  -m 555 ff-get-dep.awk  WHERE_LIBRARY-config WHERE_LIBRARY  $(DESTDIR)$(ff_prefix_dir)/lib
 	for i in  WHERE_LIBRARY-config WHERE_LIBRARY WHERE_LIBRARY-download; do \
 	  sed <$$i >$(DESTDIR)$(ff_prefix_dir)/lib/$$i 's#$(abs_top_builddir)/download#$(ff_prefix_dir)#' ;\
 	 done
@@ -217,7 +217,6 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
 	$(INSTALL_SCRIPT) ff-pkg-download  $(DESTDIR)${bindir}
 	$(INSTALL_SCRIPT) ff-get-dep   $(DESTDIR)${bindir}
-	$(INSTALL_SCRIPT) ff-get-dep.awk  $(DESTDIR)${bindir}
 ##	$(DESTDIR)${bindir}/ff-pkg-download $(DESTDIR) >$(DESTDIR)$(ff_prefix_dir)/lib/WHERE_LIBRARY-download
 	-for i in $(LIST_COMPILE_PKG); do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done

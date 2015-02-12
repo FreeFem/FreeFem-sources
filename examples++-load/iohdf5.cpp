@@ -708,13 +708,13 @@ AnyType datasolHDF5Mesh3_Op<v_fes>::operator()(Stack stack)  const
 }
 
 
-class Init { public:
+/*  class Init { public:
     Init();
 };
 
-LOADINIT(Init); 
+$1 */
 
-Init::Init(){  
+static void Load_Init(){  
 
   cout << " " << endl;
   cout << " ---------------------- " << endl;  
@@ -731,3 +731,4 @@ Init::Init(){
   Global.Add("savehdf5sol","(",new OneOperatorCode< datasolHDF5Mesh3_Op<v_fes3> >);
 }
 
+LOADFUNC(Load_Init)

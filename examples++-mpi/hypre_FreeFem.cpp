@@ -1712,9 +1712,9 @@ BuildHypreSolver(DCL_ARG_SPARSE_SOLVER(double,A))
 }
 
 
-class Init { public:
+/* --FH:   class Init { public:
     Init();
-};
+    };*/
 
 //  the 2 default sparse solver double and complex
 DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; 
@@ -1745,8 +1745,7 @@ bool SetHypreSolver()
 
 
 }
-LOADINIT(Init);
-Init::Init()
+static void Load_Init()
 { 
   
   SparseMatSolver_R= DefSparseSolver<double>::solver;
@@ -1759,7 +1758,4 @@ Init::Init()
   Global.Add("defaulttoHyprempi","(",new OneOperator0<bool>(SetHypreSolver));
 }
 
-  
-
-
-
+LOADFUNC(Load_Init)
