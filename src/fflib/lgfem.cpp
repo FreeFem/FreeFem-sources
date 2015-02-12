@@ -2549,16 +2549,26 @@ public:
 	      l[i].composant=false;
 	      l[i].what=16; //  iso value 3d
 	      l[i][0]=CastTo<pf3c>(args[i]);}
-	  else if (BCastTo<pferarray>(args[i])) {
-	      // cout << "BCastTo<pfer>(args[i])" << endl;
-	      l[i].composant=false;
-	      l[i].what=101; //  iso value array iso value 2d 
-	      l[i][0]=CastTo<pferarray>(args[i]);}
-	  else if (BCastTo<pf3rarray>(args[i])) {
-	      // cout << "BCastTo<pfer>(args[i])" << endl;
-	      l[i].composant=false;
-	      l[i].what=106; //arry iso value array iso value 3d 
-	      l[i][0]=CastTo<pf3rarray>(args[i]);}	
+          else if (BCastTo<pferarray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=101; //  iso value array iso value 2d
+              l[i][0]=CastTo<pferarray>(args[i]);}
+          else if (BCastTo<pfecarray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=111; //  iso value array iso value 2d
+              l[i][0]=CastTo<pfecarray>(args[i]);}
+          else if (BCastTo<pf3rarray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=106; //arry iso value array iso value 3d
+              l[i][0]=CastTo<pf3rarray>(args[i]);}
+          else if (BCastTo<pf3carray>(args[i])) {
+              // cout << "BCastTo<pfer>(args[i])" << endl;
+              l[i].composant=false;
+              l[i].what=116; //arry iso value array iso value 3d
+              l[i][0]=CastTo<pf3carray>(args[i]);}
 	  else if (BCastTo<pmesh>(args[i])){
 	      l[i].composant=true;
 	      l[i].what=0; // mesh ... 
@@ -4489,6 +4499,14 @@ long get_size(pfecbasearray *const & a)
 {
     return (**a).N;
 }
+long get_size(pf3rarray const & a)
+{
+  return a.first->N;
+}
+long get_size(pf3rbasearray *const & a)
+{
+    return (**a).N;
+}
 long resize(pferbasearray *const & a, long const & n)
 {
     (**a).resize(n);
@@ -5486,17 +5504,31 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     Add<Resize1<pfecbasearray* > >("(","",new OneOperator2_<pfecbasearray*,Resize1<pfecbasearray* > , long  >(fepresize));
     Add<Resize1<pferarray > >("(","",new OneOperator2_<pferarray,Resize1<pferarray > , long  >(feresize));
     Add<Resize1<pfecarray > >("(","",new OneOperator2_<pfecarray,Resize1<pfecarray > , long  >(feresize));
+
+    Dcl_Type< Resize1<pf3rbasearray* > > ();
+    Dcl_Type< Resize1<pf3rarray > > ();
+    Add<pf3rbasearray*>("resize",".",new OneOperator1<Resize1<pf3rbasearray* >,pf3rbasearray*>(to_Resize1));  //   FH fev. 2013
+    Add<pf3rarray>("resize",".",new OneOperator1<Resize1<pf3rarray >,pf3rarray>(to_Resize1));  //  FH fev 2013
+    new OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize<pf3rbasearray*>);
+    Add<Resize1<pf3rbasearray* > >("(","",new  OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize));
+    Add<Resize1<pf3rarray > >("(","",new OneOperator2_<pf3rarray,Resize1<pf3rarray > , long  >(feresize));
+
 // end of resize ...
    
   Add<pfecbasearray*>("n",".",new OneOperator1_<long,pfecbasearray*>(get_size));  //  FH fev 2013
   Add<pferbasearray*>("n",".",new OneOperator1_<long,pferbasearray*>(get_size));  //   FH fev. 2013
   Add<pferarray>("n",".",new OneOperator1_<long,pferarray>(get_size));  //  FH fev 2013
   Add<pfecarray>("n",".",new OneOperator1_<long,pfecarray>(get_size));  //   FH fev. 2013
+
+  Add<pf3rbasearray*>("n",".",new OneOperator1_<long,pf3rbasearray*>(get_size));  //   FH fev. 2013
+  Add<pf3rarray>("n",".",new OneOperator1_<long,pf3rarray>(get_size));  //  FH fev 2013
     
     
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
    
+  Add<pf3rarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
+
 //    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
 //    Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
   

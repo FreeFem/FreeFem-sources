@@ -97,7 +97,7 @@ Int4 AGoodNumberPrimeWith(Int4 n)
 }
 
 class Triangles;
-void MeshError(int Err,Triangles *Th){ 
+void MeshError(int Err,const Triangles *Th){
  cerr << " Fatal error in the meshgenerator " << Err << endl ;
 #ifdef  NOTFREEFEM
     exit(1); 
@@ -4038,7 +4038,7 @@ Edge** Triangles::MakeGeometricalEdgeToEdge()
   return e;
  }
 
-Triangles::~Triangles() 
+void Triangles::clear()
 {
   assert(NbRef<=0);
   if (CurrentTh == this) CurrentTh=0;

@@ -400,12 +400,13 @@ AnyType MetricPk:: operator()(Stack stack) const
     }
      */   
 }
-class Init { public:
+/*  class Init { public:
   Init();
 };
-Init init;
-Init::Init()
+Init init;*/
+static void Load_Init()
 {
   cout << "\n  -- lood: init MetricPk\n";
   Global.Add("MetricPk","(", new OneOperatorCode<MetricPk >( ));
 }
+LOADFUNC(Load_Init)

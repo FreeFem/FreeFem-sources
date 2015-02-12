@@ -147,7 +147,7 @@ mesh Thin;
 } /* build ...  */
 
 
-if(vdebug>10&& mpirank==0)
+if(vdebug>10&& mpirank==0 && !NoGraphicWindow)
   plot(part,fill=1,cmm="dual",wait=1);
 
 /* overlapping partition  */
@@ -359,6 +359,8 @@ macro BuildTransferMat(ipart,mesh,Pk,N,U2V,Thi,Whi,Whij,Thij,aThij,Usend,Vrecv,j
 macro PLOTMPIALLU(mesh,Pk,defPk, Th, u, uplot, plotparm)
 { int ver=verbosity;
   verbosity=0;
+  if(NoGraphicWindow==0)
+  {
   if(mpirank==0)
     {
       mesh Thi=Th;
@@ -385,6 +387,7 @@ macro PLOTMPIALLU(mesh,Pk,defPk, Th, u, uplot, plotparm)
       processor(0)<<u;
     }
   mpiBarrier(mpiCommWorld);
+  }
   verbosity=ver;
   return true;
 }

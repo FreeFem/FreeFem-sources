@@ -46,8 +46,8 @@ real_t libmetis__ComputeElementBalance(idx_t ne, idx_t nparts, idx_t *where);
 #else 
 typedef idxtype idx_t ;
 #endif
-template<class Mesh,int NO>
-KN<long> * partmetis(Stack s,KN<long> * const & part,Mesh * const & pTh,long const & lparts)
+template<class Mesh,int NO,typename R>
+KN<R> * partmetis(Stack s,KN<R> * const & part,Mesh * const & pTh,long const & lparts)
 {
     ffassert(pTh);
     const Mesh & Th(*pTh);
@@ -110,13 +110,13 @@ KN<long> * partmetisd(Stack s,KN<long> * const & part,Mesh * const & pTh,long co
     *part=epart;
     return part;
 }
-class Init { public:
+/*  class Init { public:
     Init();
 };
 // E_F_StackF0F0
 
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
   if(verbosity && mpirank == 0) 
   cout << " lood: init metis  " << endl;
   Global.Add("metisnodal","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh *,long> >(&partmetis<Mesh,0>));
@@ -124,4 +124,10 @@ Init::Init(){
     Global.Add("metisnodal","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh3 *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh3 *,long> >(&partmetis<Mesh3,0>));
     Global.Add("metisdual","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh3 *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh3 *,long> >(&partmetis<Mesh3,1>));
     
+    Global.Add("metisnodal","(",new OneOperator3_<KN<double> *,KN<double> *,Mesh *,long , E_F_stackF0F0F0_<KN<double> *,KN<double> *,Mesh *,long> >(&partmetis<Mesh,0>));
+    Global.Add("metisdual","(",new OneOperator3_<KN<double> *,KN<double> *,Mesh *,long , E_F_stackF0F0F0_<KN<double> *,KN<double> *,Mesh *,long> >(&partmetis<Mesh,1>));
+    Global.Add("metisnodal","(",new OneOperator3_<KN<double> *,KN<double> *,Mesh3 *,long , E_F_stackF0F0F0_<KN<double> *,KN<double> *,Mesh3 *,long> >(&partmetis<Mesh3,0>));
+    Global.Add("metisdual","(",new OneOperator3_<KN<double> *,KN<double> *,Mesh3 *,long , E_F_stackF0F0F0_<KN<double> *,KN<double> *,Mesh3 *,long> >(&partmetis<Mesh3,1>));
+    
 }
+LOADFUNC(Load_Init)

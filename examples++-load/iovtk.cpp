@@ -1013,6 +1013,8 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
 {
   // variable freefem++
   int nv, nt=0, nbe=0;
+  int nerr=0;
+
   Mesh::Vertex   *vff;
   map<int,int> mapnumv;
 
@@ -1181,7 +1183,8 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
     TypeCells[i] = type;
     switch(type){
     case 1:  // Vertex
-      cout << "this type of cell is not taking account in Freefem++ " << endl;
+      if(nerr++<10 && verbosity )
+           cout << "this type of cell (vertex) is not taking account in Freefem++ " << type <<  endl;
       break;
     case 3:  // Edge/line
       nbe++; // 2D	
@@ -1194,7 +1197,7 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
       ExecError("error in reading vtk file");
       break;  
     default: 
-      cout << "Error :: This type of cell is not considered in Freefem++"<< endl;
+      cout << "Error :: This type of cell is not considered in Freefem++ "<< type << endl;
       ExecError("error in reading vtk file");
       break;
       }
@@ -1210,14 +1213,14 @@ Mesh * VTK_Load(const string & filename, bool bigEndian)
     Mesh::BorderElement *bff;
     if(nbe>0) bff= new Mesh::BorderElement[nbe];
     Mesh::BorderElement *bbff = bff;
-
     for(unsigned int i = 0; i < numElements; i++){
       int type=TypeCells[i];
       int iv[3];
       int label=1;
       switch(type){
       case 1:  // Vertex
-	cout << "this type of cell is not taking account in Freefem++ " << endl;
+              
+	if(nerr++<10 && verbosity ) cout << "this type of cell (vertex) is not taking account in Freefem++ " <<  type << " " << endl;
 	break;
       case 3:  // Edge/line
 	assert( (firstCell[i+1]-firstCell[i]) == 2 );
@@ -2266,7 +2269,7 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
   int lll = strlen(pch);
   if      (!strcmp(pch+ lll - (ls=4),".vtk"))  VTK_FILE = 1;
   else if (!strcmp(pch + lll - (ls=4),".vtu")) VTK_FILE = 2;
-  cout << pffname << " VTK_FILE "<< VTK_FILE << endl;
+  if(verbosity) cout << " " << pffname << " VTK_FILE "<< VTK_FILE << endl;
   if( VTK_FILE == 1 ){  
     // CAS VTK
     VTK_WRITE_MESH( *pffname, fp, Th, binary, datasize, surface, swap);    		
@@ -2441,9 +2444,10 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
     fprintf(fp,"</UnstructuredGrid>\n");
     fprintf(fp,"</VTKFile>\n");
   }
-  else{
-    cout << "extension file is not correct " << endl;
-    exit(1);
+  else
+  {
+    cout << " iovtk extension file is not correct (" << VTK_FILE << " != 1 or 2 ) " <<  endl;
+    ExecError(" iovtk : extension file");
   }
   
   // close file fp
@@ -2509,7 +2513,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
 {
   // variable freefem++
   int nv, nt=0, nbe=0;
- 
+    int nerr=0;
   // Reading Mesh in vtk formats 
   FILE *fp = fopen(filename.c_str(), "rb");
   if(!fp){
@@ -2526,14 +2530,18 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
   bool binary = false;
   if( !strcmp(buffer, "BINARY") ) binary = true;
     
-  if(fscanf(fp, "%s %s", buffer, buffer2) != 2){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
+  if(fscanf(fp, "%s %s", buffer, buffer2) != 2){
+      cout << "error in reading vtk files" << endl;
+      ExecError("error in reading vtk file"); }
   if(strcmp(buffer, "DATASET") || strcmp(buffer2, "UNSTRUCTURED_GRID")){
     cout << "VTK reader can only read unstructured datasets" << endl;
     ExecError("error in reading vtk file");
   }
     
   // read mesh vertices
-  if(fscanf(fp, "%s %d %s\n", buffer, &nv, buffer2) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); } 
+  if(fscanf(fp, "%s %d %s\n", buffer, &nv, buffer2) != 3){
+      cout << "error in reading vtk files" << endl;
+      ExecError("error in reading vtk file"); }
   if(strcmp(buffer, "POINTS") || !nv){
     cerr << "No points in dataset" << endl;
     ExecError("error in reading vtk file");
@@ -2547,51 +2555,65 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     cout << "VTK reader only accepts float or double datasets" << endl;
     ExecError("error in reading vtk file");
   }
-    
-  cout << "Reading %d points" << nv << " buffer2" <<  buffer2 << "binary" << binary << " " << datasize << " "<< sizeof(float) << endl;
+  if(verbosity>3)
+   cout << "Reading %d points" << nv << " buffer2" <<  buffer2 << "binary"
+        << binary << " " << datasize << " "<< sizeof(float) << endl;
   Vertex3   *vff = new Vertex3[nv];
     
   for(int i = 0 ; i < nv; i++){
-    cout << " i=" << i << endl;
+     if(verbosity>9)
+      cout << " i=" << i << endl;
     double xyz[3];
     if(binary){
       if(datasize == sizeof(float)){
 	float f[3];
-	if(fread(f, sizeof(float), 3, fp) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
+	if(fread(f, sizeof(float), 3, fp) != 3){
+                cout << "error in reading vtk files" << endl;
+                ExecError("error in reading vtk file"); }
 	if(!bigEndian) SwapBytes((char*)f, sizeof(float), 3);
 	for(int j = 0; j < 3; j++) xyz[j] = f[j];
       }
       else{
-	if(fread(xyz, sizeof(double), 3, fp) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
+	if(fread(xyz, sizeof(double), 3, fp) != 3){
+               cout << "error in reading vtk files" << endl;
+               ExecError("error in reading vtk file"); }
 	if(!bigEndian) SwapBytes((char*)xyz, sizeof(double), 3);
       }
     }
     else{
       cout << datasize << " "<< sizeof(float) << endl;
       if(datasize == sizeof(float)){ 
-	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files (float)" << endl; ExecError("error in reading vtk file"); }
+	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){
+               cout << "error in reading vtk files (float)" << endl;
+              ExecError("error in reading vtk file"); }
       }
       else{
-	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){ cout << "error in reading vtk files (double)" << endl; ExecError("error in reading vtk file"); } 
+	if(fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3){
+               cout << "error in reading vtk files (double)" << endl;
+               ExecError("error in reading vtk file"); }
       }
     }
     vff[i].x = xyz[0];
     vff[i].y = xyz[1];
     vff[i].z = xyz[2];
     vff[i].lab = 1;
-    
-    printf( "xyz = %f %f %f\n", xyz[0],xyz[1], xyz[2]);
+    if(verbosity>9)
+      printf( "xyz = %f %f %f\n", xyz[0],xyz[1], xyz[2]);
   }    
 
   // read mesh elements
   int numElements, numElements2, totalNumInt;
-  if(fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3){ cout << "error in reading vtk files" << endl; ExecError("error in reading vtk file"); }
-  printf("reading parameter %s %d %d\n", buffer, numElements, totalNumInt);
-  if(strncmp(buffer, "CELLS",5) || !numElements){
-    cout << "No cells in dataset" << endl;
-    ExecError("error in reading vtk file");
+  if(fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3){
+      cout << "error in reading vtk files" << endl;
+      ExecError("error in reading vtk file"); }
+   if(verbosity>3)
+    printf("reading parameter %s %d %d\n", buffer, numElements, totalNumInt);
+   if(strncmp(buffer, "CELLS",5) || !numElements){
+     cout << "No cells in dataset" << endl;
+     ExecError("error in reading vtk file");
   }
-  cout << "Reading cells" << numElements << endl;
+   if(verbosity>3)
+    cout << "Reading cells" << numElements << endl;
   
   int *IntCells   = new int[totalNumInt-numElements];
   int *firstCell  = new int[numElements+1];
@@ -2600,6 +2622,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
   
   for(unsigned int i = 0; i < numElements; i++){
     int numVerts, n[100];
+     if(verbosity>9)
     cout << "i=" << i << " " << numElements << endl;
     for(int ii = 0; ii < 100; ii++) n[ii]=-1;
     if(binary){
@@ -2625,7 +2648,8 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
 	  cout << "error in reading VTK files " << endl;
 	  ExecError("error in reading vtk file");
 	}
-	cout << "n[j]" << n[j] << endl;
+        if(verbosity>9)
+	cout << "  n[j]" << n[j] << endl;
       }
     }
     firstCell[i] = numIntCells;
@@ -2650,7 +2674,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     cout <<"No or invalid number of cells types" << endl;
     ExecError("error in reading vtk file");
   }
-  
+   if(verbosity>3)
   printf( "reading parameter %s %d\n", buffer, numElements2);
   
   // 3D 
@@ -2673,7 +2697,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
     TypeCells[i] = type;
       switch(type){
       case 1:  // Vertex
-	cout << "this type of cell is not taking account in Freefem++ " << endl;
+	 if(nerr++< 3 && verbosity)  cout << "this type of cell (vertex) is not taking account in Freefem++ " << endl;
 	break;
       case 3:  // Edge/line
 	cout << "this type of cell is not taking account in Freefem++ for a two dimensional mesh" << endl; // 3D
@@ -2710,7 +2734,7 @@ Mesh3 * VTK_Load3(const string & filename, bool bigEndian)
       int label=1;
       switch(type){
       case 1:  // Vertex
-	cout << "this type of cell is not taking account in Freefem++ " << endl;
+	 if(nerr++<3 && verbosity) cout << "this type of cell is not taking account in Freefem++ " << endl;
 	break;
       case 3:  // Edge/line
 	break;
@@ -3990,13 +4014,13 @@ void saveTecplot(const string &file, const Mesh &Th)
 
 
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
 
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   typedef Mesh *pmesh;
   //typedef Mesh2 *pmesh2;
@@ -4009,3 +4033,4 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   Global.Add("vtkload","(",new VTK_LoadMesh);
   
 }
+LOADFUNC(Load_Init)

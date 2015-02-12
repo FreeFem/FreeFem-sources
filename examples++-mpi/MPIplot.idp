@@ -1,6 +1,8 @@
 macro PLOTMPIALL(mesh,Pk, Th, u, plotparm)
 { int ver=verbosity;
   verbosity=0;
+  if(NoGraphicWindow==0)
+  { 
   if(mpirank==0)
     {
       mesh Thi=Th;
@@ -27,6 +29,7 @@ macro PLOTMPIALL(mesh,Pk, Th, u, plotparm)
       processor(0)<<u;
     }
   mpiBarrier(mpiCommWorld);
+  }
   verbosity=ver;
   return true;
 }

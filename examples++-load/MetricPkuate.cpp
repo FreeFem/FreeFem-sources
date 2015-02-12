@@ -82,12 +82,13 @@ AnyType MetricPk:: operator()(Stack s) const
 
 
 }
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init()
+$1 */
+static void Load_Init()
 {
   cout << "\n  -- lood: init MetricPk\n";
   Global.Add("MetricPk","(", new OneOperatorCode<MetricKuate >( ));
 }
+LOADFUNC(Load_Init)
