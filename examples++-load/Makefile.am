@@ -7,7 +7,7 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 EXTRA_DIST= $(TESTS) all.edp makeref.edp regtests.edp \
-ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
+ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  BernadiRaugel.cpp Morley.cpp dfft.cpp  \
  funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
  mat_dervieux.cpp  funcTemplate.cpp \
@@ -48,7 +48,8 @@ ff-get-dep.in ff-pkg-download.in load.link.in  include.tar.gz \
  pipe.cpp pstream.h  \
  symmetrizeCSR.cpp \
  dmatrix.hpp PARDISO.cpp             \
- ch.pts   BEC.cpp bfstream.cpp
+ ch.pts   BEC.cpp bfstream.cpp iohdf5.cpp \
+ iohd5-beam-2d.edp	iohd5-beam-3d.edp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -69,7 +70,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX)  BEC.$(DYLIB_SUFFIX) \
-	bfstream.$(DYLIB_SUFFIX)
+	bfstream.$(DYLIB_SUFFIX) @TOOL_DYLIB_iohdf5@
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
@@ -86,7 +87,7 @@ bin_PROGRAMS=
 load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 #
 # max_load
-	-rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null
+	-@rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null || true
 	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE) $(LIST_COMPILE_PKG)
 	@if test -f Missing-plugins-$(DYLIB_SUFFIX).log ; then cat Missing-plugins-$(DYLIB_SUFFIX).log; fi; exit 0 
 	@echo Warning missing plugin: `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
@@ -98,7 +99,6 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 # FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with
 # empty files without any access right). So just replace the whole thing with a plain copy.
 
-if ENABLE_FFCS
 allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/AFunction.hpp ../src/fflib/AnyType.hpp	\
 	../src/fflib/array_init.hpp ../src/fflib/array_resize.hpp ../src/fflib/array_tlp.hpp				\
 	../src/femlib/assertion.hpp ../src/femlib/BamgFreeFem.hpp ../src/Algo/BFGS.hpp ../src/Algo/BrentLS.hpp		\
@@ -122,18 +122,22 @@ allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/A
 	../src/femlib/RNM_tpl.hpp ../src/Algo/RosenBrock.hpp ../src/fflib/Serialize.hpp ../src/bamglib/SetOfE4.h	\
 	../src/fflib/showverb.hpp ../src/femlib/splitsimplex.hpp ../src/fflib/String.hpp				\
 	../src/fflib/strversionnumber.hpp ../src/fflib/throwassert.hpp ../src/femlib/ufunction.hpp			\
-	../src/fflib/versionnumber.hpp
+	../src/fflib/versionnumber.hpp ../src/bamglib/write_hdf5.hpp	../src/bamglib/write_xdmf.hpp                   \
+	../src/fflib/P1IsoValue.hpp
+
+if ENABLE_FFCS
 
 include.done: $(allheaders)
+	-rm -rf include
 	mkdir -p include
 	cp $^ include
 	touch $@
 
 else
-include.done: include.tar.gz
-	rm -rf include 
-	gunzip -c include.tar.gz| tar xvf -
-	-rm -f include/._*
+include.done: $(allheaders)
+	-rm -rf include
+	mkdir -p  include
+	for i in $(allheaders); do  ln -s ../$$i include/. ; done 
 	touch $@
 endif
 
@@ -203,7 +207,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
-	$(INSTALL)  -m 555 WHERE_LIBRARY-config WHERE_LIBRARY  $(DESTDIR)$(ff_prefix_dir)/lib
+	$(INSTALL)  -m 555 ff-get-dep.awk  WHERE_LIBRARY-config WHERE_LIBRARY  $(DESTDIR)$(ff_prefix_dir)/lib
 	for i in  WHERE_LIBRARY-config WHERE_LIBRARY WHERE_LIBRARY-download; do \
 	  sed <$$i >$(DESTDIR)$(ff_prefix_dir)/lib/$$i 's#$(abs_top_builddir)/download#$(ff_prefix_dir)#' ;\
 	 done
@@ -212,7 +216,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	echo includepath += \"$(ff_prefix_dir)/idp\"  >>$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref
 	$(INSTALL_SCRIPT) ff-c++  $(DESTDIR)${bindir}
 	$(INSTALL_SCRIPT) ff-pkg-download  $(DESTDIR)${bindir}
-	$(INSTALL_SCRIPT) ff-get-dep  $(DESTDIR)${bindir}
+	$(INSTALL_SCRIPT) ff-get-dep   $(DESTDIR)${bindir}
 ##	$(DESTDIR)${bindir}/ff-pkg-download $(DESTDIR) >$(DESTDIR)$(ff_prefix_dir)/lib/WHERE_LIBRARY-download
 	-for i in $(LIST_COMPILE_PKG); do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib; fi; done

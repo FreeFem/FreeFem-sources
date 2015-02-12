@@ -73,7 +73,7 @@ class  addingInitFunct {  public:
 									\
   static int callDoLoadInit=DoLoadInit();				
 
-#define LOADINIT(TI) LOADINITNM(TI init,__FILE__)			     
+#define LOADINIT(TI) LOADINITNM(TI init obsolete,__FILE__)			     
 #define LOADFUNC(FC) LOADINITNM(FC() ,__FILE__)			     
 
 

@@ -329,11 +329,11 @@ void* call_addtimeseries( DxWriter * const & mt,string * const & name, Fem2D::Me
 
 
 //   Add the function name to the freefem++ table 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
 
   Dcl_Type<DxWriter*>(InitP<DxWriter>,Destroy<DxWriter>); // declare deux nouveau type pour freefem++  un pointeur et 
   
@@ -348,3 +348,4 @@ Init::Init(){
   
   //atype< myType * >()->Add("(","",new OneOperator3_<myType_uv,myType *,double,double  >(set_myType_uv));
 }
+LOADFUNC(Load_Init)

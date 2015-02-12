@@ -300,12 +300,12 @@ pRn  seta( pRn  const & a,const pRnm & b)
   //  cout << aa[0] << " "<< aa[250] << "" << aa[500] << endl;
   return a;
 }
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
   cout << " lood: init ppm2rmn  " << endl;
 
 
@@ -323,3 +323,4 @@ Init::Init(){
 					       
 						*/
 }
+LOADFUNC(Load_Init)

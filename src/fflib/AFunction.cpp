@@ -30,7 +30,21 @@
 
 #include "config-wrapper.h"
 
+#include <cmath>
 #include <complex>
+//  put here some def dur to c++11 
+// problem with mixed with using namespace std; 
+// to correct bug in g++ v 4.8.1 add std
+long isNaN(double x){return isnan(x);}
+long isInf(double x){return isinf(x);}
+long isNormal(double x){return std::isnormal(x);}
+#ifdef HAVE_JN
+double myyn(long n, double x){ return yn((int)n,x);}
+double myjn(long n, double x){ return jn((int) n,x);}
+#endif
+//int  ShowAlloc(const char *s, size_t lg);
+
+// F. Hecht fev. 2015 ...
 #include "AFunction.hpp"
 #include <cstdarg>
 #include <cstring>
@@ -871,10 +885,6 @@ C_F0  formalMatDet(const basicAC_F0 &args)
     
 }
 
-#ifdef HAVE_JN
-double myyn(long n, double x){ return yn((int)n,x);}
-double myjn(long n, double x){ return jn((int) n,x);}
-#endif
 //  Add juin  2007 
 template<class A,class B=A,class R=A>
 struct evalE_mul {
@@ -945,13 +955,9 @@ inline long fftime()
 
 long atoi(string* p) {return atoi(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
-double NaN(string* p) {return nan(p->c_str());}// add march 2012
+double NaN(string* p) {
+return nan(p->c_str());}// add march 2012
 double NaN() {return nan("");}// add march 2012
-
-long isNaN(double x){return isnan(x);}
-long isInf(double x){return isinf(x);}
-long isNormal(double x){return isnormal(x);}
-//int  ShowAlloc(const char *s, size_t lg);
 int ShowAlloc(const char *s,size_t & lg); 
 long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
 long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}
@@ -1427,10 +1433,10 @@ void Init_map_type()
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
     Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
     Global.Add("square","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
- //add for Olivier FH July 2017
-    Global.Add("sqr","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
+ //add for Olivier FH July 2014
+    Global.Add("sqr","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));//
     Global.Add("sqr","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
-    Global.Add("sqr","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
+    Global.Add("sqr","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));//
 
      Global.Add("round","(",new OneOperator1<double>(round)); // add june 2007
      Global.Add("lround","(",new OneOperator1<long,double>(lround)); // add june 2007
@@ -1502,7 +1508,9 @@ void Init_map_type()
      Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
-     Global.Add("pow","(",new OneOperator2_<Complex,Complex>(pow ));
+    
+    Global.Add("pow","(",new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >);
+                //new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
      Global.Add("conj","(",new OneOperator1_<double>(RNM::conj,1));

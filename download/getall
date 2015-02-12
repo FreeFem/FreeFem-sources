@@ -84,8 +84,8 @@ download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/bla
 download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz',
 	 '1e8830f622d2112239a4a8a83b84209a');
 
-download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.8','http://www.openblas.net/','OpenBLAS.tar.gz',
-	 'b58ad6312e9c9a284fd72de7b6a0a076',
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.12','http://www.openblas.net/','OpenBLAS.tar.gz',
+	 'dfc868e0c134855639f036d2723bf4be',
 	 'BAD_CERT');
 
 download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz',
@@ -139,9 +139,9 @@ download('Scotch','https://gforge.inria.fr/frs/download.php/23391/scotch_5.1.6_e
 	 'https://gforge.inria.fr/projects/scotch/','scotch_5.1.6_esmumps.tar.gz','961d0ab22914fc6455a62699cf7b5a47',
 	 'BAD_CERT');
 
-download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.0.2.tar.gz',
-	 'http://faculty.cse.tamu.edu/davis/suitesparse.html','SuiteSparse-4.0.2.tar.gz',
-	 'efe53b7ef2b529d54727815231a5a6a9');
+download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.3.1.tar.gz',
+	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.3.1.tar.gz',
+	 'f8f26a3b1c7f82444c0db0b375215287');
 
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
 	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz','b72c6309f25e9660133007b82621ba7c');
@@ -150,6 +150,11 @@ download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_
 
 download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
 	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz','d6a4bcdde2ac804f7ec66c29dcb63c18');
+
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.5.2.tar.gz',
+	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.5.2.tar.gz','d707336a98d7cb31d843804d020edc94');
+download('hpddm','https://github.com/hpddm/hpddm/archive/master.zip',
+	 'https://github.com/hpddm','hpddm.zip','none');
 
 # run all downloads concurrently
 
@@ -202,7 +207,7 @@ sub downloadone{
 
   # check if resulting package contents are valid
   my $md5check=md5_hex(`cat $pkg`);
-  if($md5check ne $md5){$errors.="ERROR: INVALID MD5 for $pkg\n"}
+  if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg\n"}
 }
 
 # Local Variables:

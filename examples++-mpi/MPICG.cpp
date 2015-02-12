@@ -481,12 +481,13 @@ basicAC_F0::name_and_type  MPILinearCG<R>::E_LCG::name_param[]= {
 
 
 
-class Init { public:
+/* --FH:   class Init { public:
     Init();
 };
 
 LOADINIT(Init);
-Init::Init()
+*/ 
+static void Load_Init()
 { 
 
     Global.Add("MPILinearCG","(",new MPILinearCG<R>()); // old form  with rhs (must be zer
@@ -497,3 +498,4 @@ Init::Init()
     
 }
 
+ LOADFUNC(Load_Init)

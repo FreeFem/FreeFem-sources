@@ -134,16 +134,16 @@ Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
 }
 
 //  truc pour que la fonction 
-// Init::Init() soit appele a moment du chargement dynamique
+// static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier 
 //  
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   if (verbosity)
     cout << " lood: Split6  " << endl;
   Global.Add("splitmesh6","(",new OneOperator1_<Mesh *,Mesh *>(SplitMesh6));
@@ -159,3 +159,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   */
 
 }
+LOADFUNC(Load_Init)

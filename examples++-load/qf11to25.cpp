@@ -776,11 +776,6 @@ QuadraturePoint(0.0371924811018/2,0.3361523347440,0.2778500044356),
 };
 const QuadratureFormular QuadratureFormular_T_25(25 ,120,P_QuadratureFormular_T_25);
 
-//  Hack to do something at initialisation time
-//   to add the name myfunction to the freefem++ table 
-class Init { public:
-  Init();
-};
 
 template<class Rd>
 const GQuadratureFormular<Rd> * BuilQFd(const long & nex,const KNM_<double> & qf) {
@@ -814,14 +809,13 @@ const GQuadratureFormular<Rd> ** pBuilQFd(const GQuadratureFormular<Rd> ** const
 }
 
  
-LOADINIT(Init);
 
 // to add new FreeFem++ type ... 
 
 #include "lex.hpp"
 extern  mylex *zzzfff;
 
-Init::Init(){
+static void Load_Init(){
   /*
 grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf" $3 "pT@,CConstant<const QuadratureFormular *>(&QuadratureFormular_T_"$3"));"}'|sed -e 's/@/"/g'
    */
@@ -867,3 +861,4 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
 }
 
  
+LOADFUNC(Load_Init)

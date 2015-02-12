@@ -139,13 +139,14 @@ AnyType SCOTCH_Op<T, V>::operator()(Stack stack)  const {
     return 1L;
 }
 
-class Init {
+/*  class Init {
     public:
         Init();
 };
 
-Init init;
-Init::Init( ){
+Init init;*/
+static void Load_Init( ){
     Global.Add("scotch", "(", new SCOTCH<Mesh, pmesh>);
     Global.Add("scotch", "(", new SCOTCH<Mesh3, pmesh3>);
 }
+LOADFUNC(Load_Init)

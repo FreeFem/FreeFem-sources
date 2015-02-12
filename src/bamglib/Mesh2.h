@@ -134,8 +134,8 @@ const int IsVertexOnEdge = 32;
 class ErrorMesh : public Error
 {  
 public:
-    Triangles *Th;
-    ErrorMesh(const char * Text,int l,Triangles * TTh=0, const char *t2="") :
+    const Triangles *Th;
+    ErrorMesh(const char * Text,int l,const Triangles * TTh=0, const char *t2="") :
 	Error(MESH_ERROR,"Meshing error: ",Text,"\n number : ",l,", ",t2),Th(TTh)  {}
 };
 #endif
@@ -743,7 +743,10 @@ public:
 
   enum TypeFileMesh {
     AutoMesh=0,BDMesh=1,NOPOMesh=2,amMesh=3,am_fmtMesh=4,amdbaMesh=5,
-    ftqMesh=6,mshMesh=7};
+//-----------------------------ajout format hdf5-----------------------------//
+    //    ftqMesh=6,mshMesh=7};
+    ftqMesh=6,mshMesh=7,hdf5Mesh=8};
+//-----------------------------ajout format hdf5-----------------------------//
 
   int static counter; // to kown the number of mesh in memory 
   int OnDisk;       // true if on disk 
@@ -798,19 +801,20 @@ public:
 // end of variable
   
   Triangles(Int4 i);//:BTh(*this),Gh(*new Geometry()){PreInit(i);}
-  
-  ~Triangles(); 
+  void clear();
+    ~Triangles() {if(NbRef==0) {clear();NbRef=-1;}}
   Triangles(const char * ,Real8=-1) ;
   
+ 
   Triangles(Int4 nbvx,Triangles & BT,int keepBackVertices=1)
          :Gh(BT.Gh),BTh(BT) {
 	     try {GeomToTriangles1(nbvx,keepBackVertices);}
-	      catch(...) { this->~Triangles(); throw; } }
+	      catch(...) { this->clear(); throw; } }
   
   Triangles(Int4 nbvx,Geometry & G)
          :Gh(G),BTh(*this){
 	     try { GeomToTriangles0(nbvx);}
-	     catch(...) { this->~Triangles(); throw; } }
+	     catch(...) { this->clear(); throw; } }
   Triangles(Triangles &,Geometry * pGh=0,Triangles* pBTh=0,Int4 nbvxx=0 ); // COPY OPERATEUR
   //  Triangles(Triangles &){ cerr << " BUG call copy opretor of Triangles" << endl;MeshError(111);}
   Triangles(const Triangles &,const int *flag,const int *bb); // truncature
@@ -891,6 +895,9 @@ public:
   void Write_ftq(ostream &) const ;
   void Write_nopo(ostream &) const ;
   void Write_msh(ostream &) const ;
+//-----------------------------ajout format hdf5-----------------------------//
+  void Write_hdf5(const char * filename) const ;
+//-----------------------------ajout format hdf5-----------------------------//
   void Write_amdba(ostream &) const ;
 
   void Read(MeshIstream &,int version,Real8 cutoffradian);

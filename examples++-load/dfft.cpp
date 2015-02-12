@@ -97,9 +97,9 @@ KN<double> * dfft_eq(  KN<double> * const   &x,const DFFT_1d2dor3d<double>  & d)
   return  x;
 }
 
-class Init { public:
+/*  class Init { public:
   Init();
-};
+  };*/
 // bofbof .. 
 struct  fftw_plan_s {};
 // ...
@@ -224,8 +224,8 @@ AnyType Mapkk::operator()(Stack s) const
     return 0L;
 }
 
-LOADINIT(Init);
-Init::Init(){
+
+static void Load_Init(){
   typedef DFFT_1d2dor3d<Complex>  DFFT_C;
   typedef DFFT_1d2dor3d<double>  DFFT_R;
 
@@ -267,3 +267,4 @@ Init::Init(){
   // TheOperators->Add("=", new OneOperator2_<KNM<Complex>*,KNM<Complex>*,DFFT_1d2dor3d>(dfft_eq));
 
 }
+LOADFUNC(Load_Init)

@@ -635,10 +635,9 @@ BuildSolverpastix_complex_mpi(DCL_ARG_SPARSE_SOLVER(Complex,A))
 			       ds.lparams, ds.dparams, ds.perm_r, ds.perm_c,ds.commworld);
 }
 
-
-class Init { public:
+ /*  class Init { public:
     Init();
-};
+    };*/
 
 //  the 2 default sparse solver double and complex
 //DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
@@ -668,8 +667,7 @@ bool Setpastixmpi()
 
 
 
-LOADINIT(Init);
-Init::Init()
+static void Load_Init()
 { 
   
   //SparseMatSolver_R= DefSparseSolver<d>::solver;
@@ -684,3 +682,5 @@ Init::Init()
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   Global.Add("complexdefaulttopastix","(",new OneOperator0<bool>(Setpastixmpi));
 }
+
+ LOADFUNC(Load_Init)

@@ -826,7 +826,7 @@ bool mylex::close() {
   delete listMacroDef;
   while( ! strdata.empty()) 
    {  //  commente july 2005 FH ???. a test plus finement. 
-      // delete [] strdata.top(); // bug  ????? FH  25032005 
+      delete [] strdata.top(); // bug  ????? FH  25032005 
       strdata.pop();
    }
 }

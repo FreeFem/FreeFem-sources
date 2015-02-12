@@ -44,11 +44,11 @@ R3 * get_myType_uv_N(const myType_uv & muv)
   return &r;
 }
 //   Add the function name to the freefem++ table 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
 
   Dcl_Type<myType*>(InitP<myType >,Destroy<myType>); // declare deux nouveau type pour freefem++  un pointeur et 
   Dcl_Type<myType_uv>();
@@ -78,3 +78,4 @@ Init::Init(){
 
 
 
+LOADFUNC(Load_Init)

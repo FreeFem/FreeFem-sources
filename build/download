@@ -47,7 +47,7 @@ then
     ret=$?
 elif test -x /usr/bin/curl
 then
-    curl "$1" --output "$2"
+    curl -L "$1" --output "$2"
     ret=$?
 
 elif test -x /usr/bin/GET

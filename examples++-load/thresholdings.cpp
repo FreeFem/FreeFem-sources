@@ -50,7 +50,7 @@ Matrice_Creuse<R> *thresholding2(const Thresholding<R> & t,const double &thresho
 	   {
 	     int nrt = sparse_mat->A->NbCoef();
 	     sparse_mat->A->addMatTo(R(1.),M,false,0,0,false,threshold);	    
-	     (M)[make_pair(n-1,m-1)]+=R();
+	 //    (M)[make_pair(n-1,m-1)]+=R();
 	     bool sym=false; // bof bof  
 	     sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
 	     sparse_mat->A.master(new MatriceMorse<R>(n,m,M,sym));
@@ -66,13 +66,13 @@ template<class T>
 Thresholding<T> to_Thresholding( Matrice_Creuse<T> *v){ return Thresholding<T>(v);}
 
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
  
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1()
+static void Load_Init()
 {  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
     typedef Thresholding<double>  TMR ;
     typedef Thresholding<Complex>  TMC ;
@@ -88,3 +88,4 @@ Init1::Init1()
     Add<TMC >("(","",new OneOperator2_<MC *, TMC, double >(thresholding2)); 
     
 }
+LOADFUNC(Load_Init)

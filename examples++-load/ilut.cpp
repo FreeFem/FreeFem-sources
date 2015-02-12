@@ -139,18 +139,14 @@ ILUT_Vector apply_ilut_precond(KN<double> * const & v) {
 	return ILUT_Vector(v);
 }
 
-class IluInit {
-	public:
-		IluInit() {
-		  if(verbosity) cout << " -- load ilut init : " << endl;
-			Dcl_Type<ILUT_Matrix>();
-			Dcl_Type<ILUT_Vector>();
-			Global.Add("applyIlutPrecond","(",new OneOperator1_<ILUT_Vector,KN<double>* >(apply_ilut_precond));
-			Global.Add("makeIlutPrecond","(", new OneOperator3_<ILUT_Matrix,KN<long> *,KN<long> *,KN<double> *>(make_ilut_precond));
-			TheOperators->Add("=", new OneOperator2_<long *,long *,ILUT_Matrix>(make_ilut_precond_eq));
-			TheOperators->Add("=", new OneOperator2_<KN<double> *, KN<double> *,ILUT_Vector>(apply_ilut_precond_eq));
-		}
-};
+static void Load_Init() {
+  if(verbosity) cout << " -- load ilut init : " << endl;
+  Dcl_Type<ILUT_Matrix>();
+  Dcl_Type<ILUT_Vector>();
+  Global.Add("applyIlutPrecond","(",new OneOperator1_<ILUT_Vector,KN<double>* >(apply_ilut_precond));
+  Global.Add("makeIlutPrecond","(", new OneOperator3_<ILUT_Matrix,KN<long> *,KN<long> *,KN<double> *>(make_ilut_precond));
+  TheOperators->Add("=", new OneOperator2_<long *,long *,ILUT_Matrix>(make_ilut_precond_eq));
+  TheOperators->Add("=", new OneOperator2_<KN<double> *, KN<double> *,ILUT_Vector>(apply_ilut_precond_eq));
+}
 
-//static IluInit init;
-LOADINIT(IluInit) 
+LOADFUNC(Load_Init)
