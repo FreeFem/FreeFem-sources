@@ -4014,13 +4014,13 @@ void saveTecplot(const string &file, const Mesh &Th)
 
 
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
 
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   typedef Mesh *pmesh;
   //typedef Mesh2 *pmesh2;
@@ -4033,3 +4033,4 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   Global.Add("vtkload","(",new VTK_LoadMesh);
   
 }
+LOADFUNC(Load_Init)

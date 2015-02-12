@@ -734,13 +734,13 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
 
 
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
 
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
   if(verbosity) cout << " load: mshmet  " << endl;
@@ -754,3 +754,4 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
 
 #define  WITH_NO_INIT
 #include "msh3.hpp" 
+LOADFUNC(Load_Init)

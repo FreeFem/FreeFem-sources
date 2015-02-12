@@ -27,7 +27,7 @@ if [ -z "$INCFF" ] ; then
     elif [ -f "${dircommand}/include/ff++.hpp" ]; then
 	INCFF="-I${dircommand}/include"
     elif [ -f ../examples++-load/include/ff++.hpp ]; then
-	INCFF="-Iinclude"
+	INCFF="-I../examples++-load/include"
     elif [ -f "FFAPPLI_INC/ff++.hpp" ] ; then 
 	INCFF="-IFFAPPLI_INC" 
     elif [ -f '@ff_prefix_dir@/include/ff++.hpp' ] ; then 

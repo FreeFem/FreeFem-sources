@@ -185,22 +185,16 @@ bool SetPARDISO()
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
     return 0;
 }
-/*
-class Init {
+/*  class Init {
     public:
         Init();
 };
 
 
 
-LOADINIT(Init);
+$1 */
 
-Init::Init() {
-    TypeSolveMat::defaultvalue = TypeSolveMat::SparseSolver;
-    DefSparseSolver<double>::solver = buildSolver<double>;
-    DefSparseSolver<Complex>::solver = buildSolver<Complex>;
-}
-*/
+
 
 
 static long ffompgetnumthreads(){return omp_get_num_threads();}
@@ -208,11 +202,16 @@ static long ffompgetmaxthreads(){return omp_get_max_threads();}
 
 static long ffompsetnumthreads(long n){omp_set_num_threads(n); return n;}
 
-void initPARDISO()
-{
+static void Load_Init() {
+  //}static void initPARDISO()
+  //{
     
     if(verbosity>1)
         cout << "\n Add: PARDISO:  defaultsolver defaultsolverPARDISO" << endl;
+    TypeSolveMat::defaultvalue = TypeSolveMat::SparseSolver;
+    DefSparseSolver<double>::solver = buildSolver<double>;
+    DefSparseSolver<Complex>::solver = buildSolver<Complex>;
+
     DefSparseSolver<double>::solver  = buildSolver;
     DefSparseSolver<Complex>::solver = buildSolver;
     DefSparseSolverSym<double>::solver  = buildSolver;
@@ -230,4 +229,5 @@ void initPARDISO()
 }
 
 
-LOADFUNC(initPARDISO);
+//LOADFUNC(initPARDISO);
+LOADFUNC(Load_Init)

@@ -109,11 +109,11 @@ double funcs2(Stack s,const double &a,const  double &b){  return a+b;}
 double funcs1(Stack s,const double &a){  return a;}
 
 //   add the function name to the freefem++ table 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
   // Add function with 3 arguments
   Global.Add("funcs1","(",new OneOperator1s_<double, double>(funcs1)); 
   Global.Add("funcs2","(",new OneOperator2s_<double, double, double >(funcs2)); 
@@ -128,3 +128,4 @@ Init::Init(){
 
 
 
+LOADFUNC(Load_Init)

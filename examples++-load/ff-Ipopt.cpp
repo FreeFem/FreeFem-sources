@@ -1407,13 +1407,13 @@ basicAC_F0::name_and_type  OptimIpopt::E_Ipopt::name_param[]=
 
 
 
-class Init { public:
+/*  class Init { public:
     Init();
 };
 
 static Init init;
-
-Init::Init()
+*/
+static void Load_Init()
 {
     Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,no_assumption_g>()));
     Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,without_constraints>()));
@@ -1743,4 +1743,5 @@ GenericConstraintFunctionDatas* GenericConstraintFunctionDatas::New(AssumptionG 
  enum AssumptionF {undeff,no_assumption_f, P2_f, unavailable_hessian, mv_P2_f, quadratic_f, linear_f};
  enum AssumptionG {undefg,without_constraints, no_assumption_g, P1_g, mv_P1_g, linear_g};
  */
+LOADFUNC(Load_Init)
 

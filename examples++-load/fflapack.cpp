@@ -29,9 +29,6 @@ typedef void VOID;
 #include "clapack.h"
 #undef real
 #undef complex 
-class Init { public:
-  Init();
-};
 
 long lapack_inv(KNM<double>* A)
 {
@@ -715,11 +712,6 @@ class OneBinaryOperatorRNM_inv : public OneOperator { public:
 };
 
 
-/* 
-class Init { public:
-  Init();
-};
-*/
 template <int INIT>
 KNM<R>* Solve(KNM<R>* a,Inverse<KNM<R >*> b) 
 {
@@ -919,12 +911,11 @@ KNM<Complex>* SolveC(KNM<Complex>* a,Inverse<KNM<Complex >*> b)
   return a;
 }
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
 
 template<class R,class A,class B> R Build2(A a,B b) {
     return R(a,b);
 }
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
 
   if( map_type.find(typeid(Inverse<KNM<double >* >).name() ) == map_type.end() )
     {
@@ -976,3 +967,4 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
       cout << "( load: lapack <=> fflapack , skeep ) ";
 }
 
+LOADFUNC(Load_Init)
