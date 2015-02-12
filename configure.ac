@@ -780,7 +780,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 	    if test  "$ff_petsc_ok" = no ; then
 		ff_petsc="$d/petsc/conf/petscvariables"
 		PETSC_MPIRUN=`awk -F'=' '"MPIEXEC "==$1 {print $2}' $ff_petsc`
-		cmp -s  ${PETSC_MPIRUN} `${MPIRUN}`
+		cmp -s  $PETSC_MPIRUN $MPIRUN
 		if test $?  -eq 0 ; then 
 		    PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ff_petsc`
 		    PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ff_petsc`
@@ -1909,7 +1909,7 @@ AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
 AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
-AC_MSG_NOTICE([          --  with PETSC $ff_petsc ]);
+AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
 AC_MSG_NOTICE([    progs: $ff_progs ])
 if test  "$ff_umfpack_download" = yes  ;then
     AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
