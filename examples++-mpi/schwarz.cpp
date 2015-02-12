@@ -2,18 +2,34 @@
 //ff-c++-cpp-dep: 
 
 #ifdef  WITH_petsc
-#ifndef __APPLE__
+#ifndef xx__APPLE__
 #define WITH_PETSC
 #endif
 #endif
 
 #ifdef WITH_mkl
-#ifdef __APPLE__
+#include <complex>
+#ifndef MKL_Complex16
+#define MKL_Complex16 std::complex<double>
+#endif
+#ifndef MKL_Complex8
+#define MKL_Complex8 std::complex<float>
+#endif
+#ifndef MKL_INT
+#define MKL_INT int
+#endif
+
+#include <mkl_spblas.h>
+//#include <mkl.h>
+
+#ifdef xxx__APPLE__
+
+
 //#include "mkl.h"
 // INTEL_MKL_VERSION 
 //#if INTEL_MKL_VERSION <= 110103
 //#undef INTEL_MKL_VERSION
-// MKL to old ..... 
+// MKL to old .....
 #define HPDDM_MKL            0
 #define HAVE_cblas_axpby
 #pragma message("schwarz plugin without MKL because MKL is too old " )
