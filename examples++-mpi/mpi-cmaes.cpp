@@ -373,13 +373,12 @@ basicAC_F0::name_and_type  OptimCMA_ES::E_CMA_ES::name_param[]=
 	//{"mu",							&typeid(long) }
 };
 
-class Init { public:
+/* --FH:   class Init { public:
   Init();
-};
+  };*/
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
 
-Init::Init()  
+static void Load_Init()  
 {
   Global.Add("cmaesMPI","(",new OptimCMA_ES(1)); 
 
@@ -390,3 +389,4 @@ Init::Init()
 
 
 
+ LOADFUNC(Load_Init)

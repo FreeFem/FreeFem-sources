@@ -32,7 +32,7 @@
 //#pragma global_optimizer off
 //#pragma inline_depth(0)
 
-#undef NDEBUG
+//#undef NDEBUG
 extern long verbosity ;
 //#define strcasecmp strcmp
 #include <cstdio>
@@ -41,6 +41,7 @@ extern long verbosity ;
 #include <ctime>
 #include <iomanip>
 #include <fstream>
+#include "RNM.hpp"
 
 using namespace std;
 
@@ -53,7 +54,6 @@ using namespace std;
 #include "fem.hpp"
 #include "AFunction.hpp"
 #include "BamgFreeFem.hpp"
-#include "RNM.hpp"
 #include "FESpace.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"

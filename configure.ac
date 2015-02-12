@@ -88,6 +88,11 @@ echo >config_LIB_INFO
 AC_PROG_CC
 AC_PROG_CXX
 AC_LANG(C++)
+if test `uname` != Darwin; then
+ ff_ldeg="-Wl,--end-group"
+ ff_ldbg="-Wl,--start-group"
+fi
+
 AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
 # /usr/local/petsc/conf/petscvariables 
 ff_petsc_ok=no
@@ -355,6 +360,7 @@ AC_LANG(C++)
 # Some useful libraries
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
+AC_CHECK_LIB(iomp5,omp_get_wtime,ff_iomp5="-liomp5",ff_iomp5="")
 
 if test -n "$ff_pthread"  ; then
     AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
@@ -568,10 +574,11 @@ m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
 # Checking c++11 for schwarz interface of P. Jolivet ...
-CHECK_COMPILE_FLAG(C++,[-std=c++11],CXX11FLAGS)
-CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
-ff_cxx11="no"
-if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+
+CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
+dnl ff_cxx11="no"
+dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
 AC_SUBST(WITH_CXX11,$ff_cxx11)
 #end Checking  c++11
 # ------------------------------
@@ -834,7 +841,7 @@ if test  "$ff_wget" != yes  -a "$enable_download"  = "yes"  ; then
   AC_MSG_ERROR([   enable-download and no wget or curl. ],1);
 fi
 if test "$enable_download"  = "yes" ; then
-DOWNLOADCOMPILE=compile-pkg
+DOWNLOADCOMPILE="compile-pkg install-other"
 else
 DOWNLOADCOMPILE=
 fi
@@ -948,6 +955,7 @@ then
     AC_MSG_CHECKING(for MKL)
     ff_mkl_root=""
     if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
+	
 	if test "$ff_mkl_libpath"  = "yes"  ; then
 	    ff_IFS="$IFS"
 	    IFS=":"
@@ -957,10 +965,10 @@ then
 		esac ;
 	    done;
 	    IFS="$ff_IFS"
-	else
-	    ff_mkl_libpath=no
+#	else
+#	    ff_mkl_libpath=no
 	fi
-	
+
 	if test "$ff_mkl_libpath" != "no" -a -d "$ff_mkl_libpath" ; then
 	    ff_mkl_root=`expr "//$ff_mkl_libpath" : '//\(.*\)/lib.*'`
 	    ff_mkl_arch=`expr "//$ff_mkl_libpath" : '//.*/lib/\(.*\)'`
@@ -978,31 +986,29 @@ then
 		*/intel/*)         ff_mkl_mpi=_intelmpi;;
 		*)        ff_mkl_mpi=_openmpi;;
 	    esac
-             echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
-	    if test  -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_rt.a ; then
-		mkl_blas=rt
-		mkk_lapack=rt
-		ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_intel_thread -lmkl_core  -liomp5 -lpthread"
-		ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core  -liomp5 -lpthread"
-		ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_rt -lmkl_sequential -lmkl_core -liomp5 -lpthread"
-	    else
-		if test -f $ff_mkl_root/lib/$ff_mkl_arch/libmkl_lapack.a ; then
-		    ff_mkl_mlt="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
-		    ff_mkl_blas="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
-		    ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
-		elif test -f $ff_mkl_root/lib/libmkl_lapack.a ; then
-		    ff_mkl_mlt="-L$ff_mkl_root/lib -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
-		    ff_mkl_blas="-L$ff_mkl_root/lib -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
-		    ff_mkl_lapack="-L$ff_mkl_root/lib -lmkl_lapack"
-		else
-		    ff_mkl_mlt="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread -liomp5  -Wl,--end-group  -lm -lpthread"
-		    ff_mkl_blas="-Wl,--start-group  -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential -Wl,--end-group  -lm -lpthread"
-		    ff_mkl_lapack="$ff_mkl_blas"
-		fi
+#            echo ................  ff_mkl_root = $ff_mkl_root  .. $ff_mkl_arch
+	    if test ! -d "$ff_mkl_libpath" ; then
+		ff_mkl_libpath="$ff_mkl_root/lib/$ff_mkl_arch"
 	    fi
-	    if test -f $ff_mkl_root/lib/$ff_mkl_arch/lib/mkl_scalapack${ff_mkl_lp} ; then 
-            ff_mkl_scalapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
-            ff_mkl_blacs="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+	    
+	    if test  -f "$ff_mkl_libpath/libmkl_rt.$ff_suffix_dylib" ; then
+		mkl_blas=rt
+		mkl_lapack=rt
+		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
+		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
+		ff_mkl_lapack="$ff_mkl_blas"
+	    elif test -f "$ff_mkl_libpath/libmkl_lapack.$ff_suffix_dylib" ; then
+		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
+		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+		ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+	    else
+		ff_mkl_mlt="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread $ff_iomp5  $ff_ldeg  -lm $ff_pthread"
+		ff_mkl_blas="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
+		ff_mkl_lapack="$ff_mkl_blas"
+	    fi
+	    if test -f "-L$ff_mkl_libpathmkl_scalapack${ff_mkl_lp}" ; then 
+            ff_mkl_scalapack="-L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
+            ff_mkl_blacs="-L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	    fi
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes
@@ -1030,6 +1036,7 @@ then
 	    fi
 	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
+            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
 	else
 	    ff_mkl_libpath=no
 

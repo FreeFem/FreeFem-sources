@@ -1422,13 +1422,13 @@ AnyType Netgen_LoadMesh_Op::operator()(Stack stack)  const
 
 
 
-class Init1 { public:
+/*  class Init1 { public:
   Init1();
 };
 
-LOADINIT(Init1)  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
   if(verbosity) cout << " load: netgen  " << endl;
@@ -1438,3 +1438,4 @@ Init1::Init1(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freef
   Global.Add("netgload","(",new Netgen_LoadMesh);
   if(verbosity) cout << " load: netgload  " << endl;
 }
+LOADFUNC(Load_Init)

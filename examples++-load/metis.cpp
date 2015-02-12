@@ -110,13 +110,13 @@ KN<long> * partmetisd(Stack s,KN<long> * const & part,Mesh * const & pTh,long co
     *part=epart;
     return part;
 }
-class Init { public:
+/*  class Init { public:
     Init();
 };
 // E_F_StackF0F0
 
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
   if(verbosity && mpirank == 0) 
   cout << " lood: init metis  " << endl;
   Global.Add("metisnodal","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh *,long> >(&partmetis<Mesh,0>));
@@ -130,3 +130,4 @@ Init::Init(){
     Global.Add("metisdual","(",new OneOperator3_<KN<double> *,KN<double> *,Mesh3 *,long , E_F_stackF0F0F0_<KN<double> *,KN<double> *,Mesh3 *,long> >(&partmetis<Mesh3,1>));
     
 }
+LOADFUNC(Load_Init)

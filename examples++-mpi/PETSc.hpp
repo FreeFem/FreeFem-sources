@@ -1,7 +1,12 @@
 #include <mpi.h>
 #include <iostream>
 
+extern KN<String>* pkarg;
+
 #include "petsc.h"
+#if PETSC_VERSION_LT(3,6,0)
+#define MatCreateVecs MatGetVecs
+#endif
 
 class DistributedCSR {
     public:
@@ -16,7 +21,7 @@ class DistributedCSR {
         unsigned int             _last;
         unsigned int           _global;
         bool                     _free;
-        DistributedCSR() : _A(), _num(), _ia(), _ja(), _c(), _first(), _last() {} ;
+        DistributedCSR() : _A(), _num(), _ia(), _ja(), _c(), _first(), _last() { };
         ~DistributedCSR() {
             VecDestroy(&_x);
             MatDestroy(&_petsc);
@@ -30,7 +35,11 @@ class DistributedCSR {
         }
 };
 
-long initEmptyCSR(DistributedCSR* const& A) {
+void finalizePETSc() {
+    PetscFinalize();
+}
+
+long initEmptyCSR(DistributedCSR* const&) {
     return 0;
 }
 
@@ -70,20 +79,15 @@ class initCSR : public OneOperator {
 template<class Type>
 AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     DistributedCSR* ptA = GetAny<DistributedCSR*>((*A)(stack));
-    Matrice_Creuse<double>* ptK = GetAny<Matrice_Creuse<double>*>((*K)(stack));
-    MatriceMorse<double> *mK = static_cast<MatriceMorse<double>*>(&(*ptK->A));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     KN<long>* ptO = GetAny<KN<long>*>((*O)(stack));
     KN<double>* ptD = GetAny<KN<double>*>((*D)(stack));
     long bs = nargs[0] ? GetAny<long>((*nargs[0])(stack)) : 1;
     ptA->_A = new HpSchwarz<>;
-    std::vector<KN<long>*> vec(ptR->n);
-    for(unsigned short i = 0; i < ptR->n; ++i)
-        vec[i] = &(ptR->operator[](i));
+    MatriceMorse<double> *mA = static_cast<MatriceMorse<double>*>(&(*GetAny<Matrice_Creuse<double>*>((*K)(stack))->A));
     if(ptO && ptA) {
-        MatriceMorse<double>* mA = static_cast<MatriceMorse<double>*>(&(*ptK->A));
         HPDDM::MatrixCSR<double>* dA = new HPDDM::MatrixCSR<double>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->_A->Subdomain<double>::initialize(dA, static_cast<long*>(*ptO), static_cast<long*>(*ptO) + ptO->N(), vec);
+        ptA->_A->Subdomain<double>::initialize(dA, STL<long>(*ptO), *ptR);
     }
     ptA->_A->HpSchwarz<>::initialize(*ptD);
     if(!ptA->_num)
@@ -106,7 +110,7 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
         MatSetType(ptA->_petsc, MATSEQAIJ);
         MatSeqAIJSetPreallocationCSR(ptA->_petsc, ptA->_ia, ptA->_ja, ptA->_c);
     }
-    if(mK->symetrique)
+    if(mA->symetrique)
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, PETSC_TRUE);
     if(mpirank == 0)
         cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
@@ -159,7 +163,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         data[1] = data[0] + 1;
         for(int i = 0; i < argc - 1; ++i) {
             if(i > 0)
-                data[i + 1] = data[i] + elems[i - 1].size()+1;
+                data[i + 1] = data[i] + elems[i - 1].size() + 1;
             strcpy(data[i + 1], elems[i].c_str());
         }
         PetscOptionsInsert(&argc, &data, NULL);
@@ -178,7 +182,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         for(unsigned short i = 0; i < dim; ++i) {
             double* x;
             VecGetArray(ns[i], &x);
-            ptA->_A->distributedRHS<0>(ptA->_num, ptA->_first, ptA->_last, *(ptNS->get(i)), x, ptA->_A->getDof());
+            ptA->_A->distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, *(ptNS->get(i)), x, ptA->_A->getDof());
             VecRestoreArray(ns[i], &x);
         }
         MatNullSpace sp;
@@ -224,7 +228,7 @@ long renumberCSR(DistributedCSR* const& A, FEbaseArrayKn<double>* const& nullspa
         for(unsigned short i = 0; i < dim; ++i) {
             double* x;
             VecGetArray(ns[i], &x);
-            A->_A->distributedRHS<0>(A->_num, A->_first, A->_last, *(nullspace->get(i)), x, A->_A->getDof());
+            A->_A->distributedVec<0>(A->_num, A->_first, A->_last, *(nullspace->get(i)), x, A->_A->getDof());
             VecRestoreArray(ns[i], &x);
         }
         MatNullSpace sp;
@@ -269,7 +273,7 @@ long solvePETSc(DistributedCSR* const& A, KN<double>* const& in) {
     MatCreateVecs(A->_petsc, &(A->_x), &y);
     double* x;
     VecGetArray(A->_x, &x);
-    A->_A->distributedRHS<0>(A->_num, A->_first, A->_last, *in, x, A->_A->getDof());
+    A->_A->distributedVec<0>(A->_num, A->_first, A->_last, *in, x, A->_A->getDof());
     VecRestoreArray(A->_x, &x);
     std::fill(static_cast<double*>(*in), static_cast<double*>(*in) + in->n, 0);
     timing = MPI_Wtime();
@@ -277,7 +281,7 @@ long solvePETSc(DistributedCSR* const& A, KN<double>* const& in) {
     if(mpirank == 0)
         cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
     VecGetArray(y, &x);
-    A->_A->distributedRHS<1>(A->_num, A->_first, A->_last, *in, x, A->_A->getDof());
+    A->_A->distributedVec<1>(A->_num, A->_first, A->_last, *in, x, A->_A->getDof());
 #if 0
     Vec z;
     MatCreateVecs(A->_petsc, &z, NULL);
@@ -345,7 +349,7 @@ class Inv {
             MatCreateVecs((*t)._petsc, &((*t)._x), &y);
             double* x;
             VecGetArray((*t)._x, &x);
-            (*t)._A->template distributedRHS<0>((*t)._num, (*t)._first, (*t)._last, static_cast<double*>(*u), x, (*t)._A->getDof());
+            (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<double*>(*u), x, (*t)._A->getDof());
             VecRestoreArray((*t)._x, &x);
             std::fill(static_cast<double*>(*out), static_cast<double*>(*out) + out->n, 0);
             timing = MPI_Wtime();
@@ -353,7 +357,7 @@ class Inv {
             if(mpirank == 0)
                 cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
             VecGetArray(y, &x);
-            (*t)._A->template distributedRHS<1>((*t)._num, (*t)._first, (*t)._last, *out, x, (*t)._A->getDof());
+            (*t)._A->template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, *out, x, (*t)._A->getDof());
             VecRestoreArray(y, &x);
             VecDestroy(&y);
             KSPDestroy(&ksp);
@@ -406,11 +410,11 @@ class GMV<DistributedCSR*, U> {
             MatCreateVecs(t->_petsc, &z, &y);
             double* w;
             VecGetArray(z, &w);
-            t->_A->distributedRHS<0>(t->_num, t->_first, t->_last, *u, w, t->_A->getDof());
+            t->_A->distributedVec<0>(t->_num, t->_first, t->_last, *u, w, t->_A->getDof());
             VecRestoreArray(z, &w);
             MatMult(t->_petsc, z, y);
             VecGetArray(y, &w);
-            t->_A->template distributedRHS<1>(t->_num, t->_first, t->_last, *x, w, t->_A->getDof());
+            t->_A->template distributedVec<1>(t->_num, t->_first, t->_last, *x, w, t->_A->getDof());
             VecRestoreArray(y, &w);
             VecDestroy(&y);
             VecDestroy(&z);

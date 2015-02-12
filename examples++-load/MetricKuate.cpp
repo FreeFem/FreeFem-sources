@@ -658,12 +658,13 @@ AnyType MetricKuate::operator()(Stack stack) const
 }
 
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init()
+$1 */
+static void Load_Init()
 {
   cout << "\n  -- lood: init MetricKuate\n";
   Global.Add("MetricKuate","(", new OneOperatorCode<MetricKuate >( ));
 }
+LOADFUNC(Load_Init)

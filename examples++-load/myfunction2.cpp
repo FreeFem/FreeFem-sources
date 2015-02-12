@@ -10,11 +10,12 @@ double myf(string * s) {
 double f(const double& x) { return x*x+1;} 
 //  Hack to do something at initialisation time
 //   to add the name myfunction to the freefem++ table 
-class Init { public:
+/*  class Init { public:
   Init();
 };
-LOADINIT(Init);
-Init::Init(){
+$1 */
+static void Load_Init(){
   Global.Add("Why","(",new OneOperator1<double,string*>(myf));
   Global.Add("f","(",new OneOperator1_<double,double>(f));
 }
+LOADFUNC(Load_Init)

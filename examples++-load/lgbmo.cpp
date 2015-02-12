@@ -312,15 +312,16 @@ basicAC_F0::name_and_type  OptimBMO::E_BMO::name_param[]= {
 { "algo", & typeid(long)} // 15
 };
 
-class Init { public:
+/*  class Init { public:
   Init();
 };
 
-LOADINIT(Init);  //  une variable globale qui serat construite  au chargement dynamique 
+$1 */
 
-Init::Init()  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+static void Load_Init()  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
 {
   Global.Add("bmo","(",new OptimBMO(1));  //  j + dJ
   Global.Add("bmo","(",new OptimBMO(1,1));  //  j + dJ
 
 }
+LOADFUNC(Load_Init)
