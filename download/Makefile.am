@@ -127,7 +127,7 @@ all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE)  install-other
 install-other: tag-install-other
 
 tag-install-other:
-	make install-hpddm
+	$(MAKE) install-hpddm
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm
@@ -135,9 +135,13 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 test -n "$(MPIRUN)" && ./getall hpddm -a  && make include/hpddm-master  lib/WHERE.hpddm
+	 test -n "$(MPIRUN)" && ./getall hpddm -a  && $(MAKE) include/hpddm-master  lib/WHERE.hpddm
+reinstall-hpddm:
+	-rm ../pkg/hpddm.zip 
+	-rm -rf include/hpddm-master
+	$(MAKE) install-hpddm
 include/hpddm-master:
-	cd include; unzip ../pkg/hpddm.zip 
+	-if test -f ../pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; fi
 
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \
