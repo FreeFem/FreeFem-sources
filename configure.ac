@@ -1910,7 +1910,7 @@ AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
-AC_MSG_NOTICE([          --  with schwarz (HPDDM) $ff_cxx11 (need c++11 :  $ff_cxx11) ]);
+AC_MSG_NOTICE([          --  with schwarz (HPDDM) $enable_schwarz (need MPI & c++11 :  $ff_cxx11 ) ]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
