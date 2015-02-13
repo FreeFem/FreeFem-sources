@@ -1910,6 +1910,9 @@ AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
+AC_MSG_NOTICE([          --  with schwarz (HPDDM) $ff_cxx11 (need c++11 :  $ff_cxx11) ]);
+
+
 AC_MSG_NOTICE([    progs: $ff_progs ])
 if test  "$ff_umfpack_download" = yes  ;then
     AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])

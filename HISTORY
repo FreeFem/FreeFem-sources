@@ -1,5 +1,10 @@
-@  changeset:   3162:cd09add72c31
+@  changeset:   3163:6510f36c0063
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 10:14:01 2015 +0100
+|  summary:     add reinstall-hpddm targed in downlaod/Makefile
+|
+o  changeset:   3162:cd09add72c31
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 12 18:03:19 2015 +0100
 |  summary:     correct typo in find petsc
