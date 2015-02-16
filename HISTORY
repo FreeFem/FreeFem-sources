@@ -1,5 +1,10 @@
-@  changeset:   3168:841250c6ecc4
+@  changeset:   3169:dead21419baf
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 15:59:37 2015 +0100
+|  summary:     correct typo in configure of petsc ...
+|
+o  changeset:   3168:841250c6ecc4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Feb 16 12:51:05 2015 +0100
 |  summary:     correct find petsc
