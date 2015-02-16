@@ -775,10 +775,19 @@ ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
     ff_petsc=""
-    for d in "$with_petsc" /usr /usr/local /opt/usr  /opt/local ; do
-	if test -f "$d/petsc/conf/petscvariables" ; then 
+    for d in "$with_petsc" /usr /usr/local /opt/usr  /opt/local 
+    do
+	if test -f ; then
+	    ffconfpetsc="$d"		
+        elif test -f "$d/petsc/petscvariables"  ; then 
+  	    ffconfpetsc="$d/petsc/petscvariables"
+	elif test -f  "$d/petsc-conf/petscvariables"   ; then
+  	    ffconfpetsc="$d/petsc-conf/petscvariables" 
+	else
+	    ffconfpetsc=""
+	fi
+	if test -f "$ffconfpetsc" ; then 
 	    if test  "$ff_petsc_ok" = no ; then
-		ff_petsc="$d/petsc/conf/petscvariables"
 		PETSC_MPIRUN=`awk -F'=' '"MPIEXEC "==$1 {print $2}' $ff_petsc`
 		cmp -s  $PETSC_MPIRUN $MPIRUN
 		if test $?  -eq 0 ; then 
