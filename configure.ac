@@ -779,21 +779,21 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 	    ffconfpetsc="$d$dd"		
 	    if test -f "$ffconfpetsc" ; then 
 		if test  "$ff_petsc_ok" = no ; then
-		    PETSC_MPIRUN=`awk -F'=' '"MPIEXEC "==$1 {print $2}' "$ffconfpetsc"`
+		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 		    cmp -s  "$PETSC_MPIRUN" "$MPIRUN"
-		    if test $?  -eq 0 ; then 
+		    if test "$?"  -eq 0 ; then 
 			PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
 			PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
 			if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
 			    ff_petsc_ok=yes;
 			    AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
 			fi
+		    else
+			AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN." ]);			
 		    fi
-		else
-		    AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN." ]);
 		fi
 	    else
-		echo "  *** try $ffconfpetsc"
+		test  "$ff_petsc_ok" = no && echo "  *** try $ffconfpetsc"
 		ffconfpetsc="";
 
 	    fi
