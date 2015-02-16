@@ -1,5 +1,15 @@
-@  changeset:   3166:2ace2a1eda0b
+@  changeset:   3168:841250c6ecc4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 12:51:05 2015 +0100
+|  summary:     correct find petsc
+|
+o  changeset:   3167:cd84708881af
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 19:04:29 2015 +0100
+|  summary:     correction  in caes of no compilion of hpddm
+|
+o  changeset:   3166:2ace2a1eda0b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 13 15:53:04 2015 +0100
 |  summary:     correct typo in configure output
