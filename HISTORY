@@ -1,5 +1,15 @@
-@  changeset:   3174:794d0cf537dd
+@  changeset:   3176:540554a177a1
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 14:58:27 2015 +0100
+|  summary:     add comment in INNOVATION
+|
+o  changeset:   3175:774b294aa38c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 14:56:23 2015 +0100
+|  summary:     coorect pb in case of no hpddm
+|
+o  changeset:   3174:794d0cf537dd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 17 09:14:52 2015 +0100
 |  summary:     add airy function of gsl
