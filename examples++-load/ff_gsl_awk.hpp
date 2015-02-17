@@ -6,23 +6,14 @@
  missing: 4   gsl_ran_discrete_pdf  -> /usr/local/include/gsl/gsl_randist.h:double gsl_ran_discrete_pdf (size_t k, const gsl_ran_discrete_t *g);
 //  -- missing type "const gsl_mode_t" 
  missing: 5   gsl_sf_airy_Ai_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_e(const double x, const gsl_mode_t mode, gsl_sf_result * result);
-//  -- missing type "gsl_mode_t" 
- missing: 4   gsl_sf_airy_Ai  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Ai(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Bi_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Bi  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Bi(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Ai_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Ai_scaled  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Ai_scaled(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Bi_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Bi_scaled  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Bi_scaled(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Ai_deriv_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_deriv_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Ai_deriv  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Ai_deriv(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Bi_deriv_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_deriv_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Bi_deriv  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Bi_deriv(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Ai_deriv_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_deriv_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Ai_deriv_scaled  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Ai_deriv_scaled(const double x, gsl_mode_t mode);
- missing: 5   gsl_sf_airy_Bi_deriv_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_deriv_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_airy_Bi_deriv_scaled  -> /usr/local/include/gsl/gsl_sf_airy.h:double gsl_sf_airy_Bi_deriv_scaled(const double x, gsl_mode_t mode);
 //  -- missing type "gsl_sf_result *" 
+ missing: 5   gsl_sf_airy_Bi_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
+ missing: 5   gsl_sf_airy_Ai_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
+ missing: 5   gsl_sf_airy_Bi_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
+ missing: 5   gsl_sf_airy_Ai_deriv_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_deriv_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
+ missing: 5   gsl_sf_airy_Bi_deriv_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_deriv_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
+ missing: 5   gsl_sf_airy_Ai_deriv_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Ai_deriv_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
+ missing: 5   gsl_sf_airy_Bi_deriv_scaled_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_Bi_deriv_scaled_e(const double x, gsl_mode_t mode, gsl_sf_result * result);
  missing: 4   gsl_sf_airy_zero_Ai_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_zero_Ai_e(unsigned int s, gsl_sf_result * result);
  missing: 4   gsl_sf_airy_zero_Bi_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_zero_Bi_e(unsigned int s, gsl_sf_result * result);
  missing: 4   gsl_sf_airy_zero_Ai_deriv_e  -> /usr/local/include/gsl/gsl_sf_airy.h:int gsl_sf_airy_zero_Ai_deriv_e(unsigned int s, gsl_sf_result * result);
@@ -93,30 +84,8 @@
  missing: 4   gsl_sf_dilog_e  -> /usr/local/include/gsl/gsl_sf_dilog.h:int     gsl_sf_dilog_e(const double x, gsl_sf_result * result);
  missing: 5   gsl_sf_multiply_e  -> /usr/local/include/gsl/gsl_sf_elementary.h:int gsl_sf_multiply_e(const double x, const double y, gsl_sf_result * result);
  missing: 5   gsl_sf_ellint_Kcomp_e  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_Kcomp_e(double k, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_ellint_Kcomp  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_Kcomp(double k, gsl_mode_t mode);
  missing: 5   gsl_sf_ellint_Ecomp_e  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_Ecomp_e(double k, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_ellint_Ecomp  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_Ecomp(double k, gsl_mode_t mode);
- missing: 6   gsl_sf_ellint_Ecomp  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_Pcomp_e(double k, double n, gsl_mode_t mode, gsl_sf_result * result);
- missing: 5   gsl_sf_ellint_Pcomp  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_Pcomp(double k, double n, gsl_mode_t mode);
  missing: 5   gsl_sf_ellint_Dcomp_e  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_Dcomp_e(double k, gsl_mode_t mode, gsl_sf_result * result);
- missing: 4   gsl_sf_ellint_Dcomp  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_Dcomp(double k, gsl_mode_t mode);
- missing: 6   gsl_sf_ellint_Dcomp  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_F_e(double phi, double k, gsl_mode_t mode, gsl_sf_result * result);
- missing: 5   gsl_sf_ellint_F  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_F(double phi, double k, gsl_mode_t mode);
- missing: 6   gsl_sf_ellint_F  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_E_e(double phi, double k, gsl_mode_t mode, gsl_sf_result * result);
- missing: 5   gsl_sf_ellint_E  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_E(double phi, double k, gsl_mode_t mode);
- missing: 7   gsl_sf_ellint_E  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_P_e(double phi, double k, double n, gsl_mode_t mode, gsl_sf_result * result);
- missing: 6   gsl_sf_ellint_E  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_P(double phi, double k, double n, gsl_mode_t mode);
- missing: 7   gsl_sf_ellint_E  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_D_e(double phi, double k, double n, gsl_mode_t mode, gsl_sf_result * result);
- missing: 6   gsl_sf_ellint_E  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_D(double phi, double k, double n, gsl_mode_t mode);
- missing: 6   gsl_sf_ellint_E  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_RC_e(double x, double y, gsl_mode_t mode, gsl_sf_result * result);
- missing: 5   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_RC(double x, double y, gsl_mode_t mode);
- missing: 7   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_RD_e(double x, double y, double z, gsl_mode_t mode, gsl_sf_result * result);
- missing: 6   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_RD(double x, double y, double z, gsl_mode_t mode);
- missing: 7   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_RF_e(double x, double y, double z, gsl_mode_t mode, gsl_sf_result * result);
- missing: 6   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_RF(double x, double y, double z, gsl_mode_t mode);
- missing: 8   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:int gsl_sf_ellint_RJ_e(double x, double y, double z, double p, gsl_mode_t mode, gsl_sf_result * result);
- missing: 7   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_ellint.h:double gsl_sf_ellint_RJ(double x, double y, double z, double p, gsl_mode_t mode);
- missing: 7   gsl_sf_ellint_RC  -> /usr/local/include/gsl/gsl_sf_elljac.h:int gsl_sf_elljac_e(double u, double m, double * sn, double * cn, double * dn);
  missing: 4   gsl_sf_erfc_e  -> /usr/local/include/gsl/gsl_sf_erf.h:int gsl_sf_erfc_e(double x, gsl_sf_result * result);
  missing: 4   gsl_sf_log_erfc_e  -> /usr/local/include/gsl/gsl_sf_erf.h:int gsl_sf_log_erfc_e(double x, gsl_sf_result * result);
  missing: 4   gsl_sf_erf_e  -> /usr/local/include/gsl/gsl_sf_erf.h:int gsl_sf_erf_e(double x, gsl_sf_result * result);
@@ -395,6 +364,14 @@ double gsl_ran_laplace_pdf__(double const & x , double const & y ){ return gsl_r
 double gsl_ran_levy__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_levy( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_weibull__(gsl_rng ** const & x , double const & y , double const & z ){ return gsl_ran_weibull( (const gsl_rng *)* x , (const double) y , (const double) z );}
 double gsl_ran_weibull_pdf__(double const & x , double const & y , double const & z ){ return gsl_ran_weibull_pdf( (const double) x , (const double) y , (const double) z );}
+double gsl_sf_airy_Ai__(double const & x , long const & y ){ return gsl_sf_airy_Ai( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Bi__(double const & x , long const & y ){ return gsl_sf_airy_Bi( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Ai_scaled__(double const & x , long const & y ){ return gsl_sf_airy_Ai_scaled( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Bi_scaled__(double const & x , long const & y ){ return gsl_sf_airy_Bi_scaled( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Ai_deriv__(double const & x , long const & y ){ return gsl_sf_airy_Ai_deriv( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Bi_deriv__(double const & x , long const & y ){ return gsl_sf_airy_Bi_deriv( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Ai_deriv_scaled__(double const & x , long const & y ){ return gsl_sf_airy_Ai_deriv_scaled( (const double) x , (gsl_mode_t) y );}
+double gsl_sf_airy_Bi_deriv_scaled__(double const & x , long const & y ){ return gsl_sf_airy_Bi_deriv_scaled( (const double) x , (gsl_mode_t) y );}
 double gsl_sf_airy_zero_Ai__(long const & x ) { return gsl_sf_airy_zero_Ai( (unsigned int) x );}
 double gsl_sf_airy_zero_Bi__(long const & x ) { return gsl_sf_airy_zero_Bi( (unsigned int) x );}
 double gsl_sf_airy_zero_Ai_deriv__(long const & x ) { return gsl_sf_airy_zero_Ai_deriv( (unsigned int) x );}
@@ -454,6 +431,13 @@ double gsl_sf_debye_5__(double const & x ) { return gsl_sf_debye_5( (const doubl
 double gsl_sf_debye_6__(double const & x ) { return gsl_sf_debye_6( (const double) x );}
 double gsl_sf_dilog__(double const & x ) { return gsl_sf_dilog( (const double) x );}
 double gsl_sf_multiply__(double const & x , double const & y ){ return gsl_sf_multiply( (const double) x , (const double) y );}
+double gsl_sf_ellint_Kcomp__(double const & x , long const & y ){ return gsl_sf_ellint_Kcomp( (double) x , (gsl_mode_t) y );}
+double gsl_sf_ellint_Ecomp__(double const & x , long const & y ){ return gsl_sf_ellint_Ecomp( (double) x , (gsl_mode_t) y );}
+double gsl_sf_ellint_Pcomp__(double const & x , double const & y , long const & z ){ return gsl_sf_ellint_Pcomp( (double) x , (double) y , (gsl_mode_t) z );}
+double gsl_sf_ellint_Dcomp__(double const & x , long const & y ){ return gsl_sf_ellint_Dcomp( (double) x , (gsl_mode_t) y );}
+double gsl_sf_ellint_F__(double const & x , double const & y , long const & z ){ return gsl_sf_ellint_F( (double) x , (double) y , (gsl_mode_t) z );}
+double gsl_sf_ellint_E__(double const & x , double const & y , long const & z ){ return gsl_sf_ellint_E( (double) x , (double) y , (gsl_mode_t) z );}
+double gsl_sf_ellint_RC__(double const & x , double const & y , long const & z ){ return gsl_sf_ellint_RC( (double) x , (double) y , (gsl_mode_t) z );}
 double gsl_sf_erfc__(double const & x ) { return gsl_sf_erfc( (double) x );}
 double gsl_sf_log_erfc__(double const & x ) { return gsl_sf_log_erfc( (double) x );}
 double gsl_sf_erf__(double const & x ) { return gsl_sf_erf( (double) x );}
@@ -728,6 +712,14 @@ double gsl_sf_eta__(double const & x ) { return gsl_sf_eta( (const double) x );}
    Global.Add("gslranlevy","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_levy__)); 
    Global.Add("gslranweibull","(",new OneOperator3_<double,gsl_rng **,double,double>( gsl_ran_weibull__)); 
    Global.Add("gslranweibullpdf","(",new OneOperator3_<double,double,double,double>( gsl_ran_weibull_pdf__)); 
+   Global.Add("gslsfairyAi","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Ai__)); 
+   Global.Add("gslsfairyBi","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Bi__)); 
+   Global.Add("gslsfairyAiscaled","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Ai_scaled__)); 
+   Global.Add("gslsfairyBiscaled","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Bi_scaled__)); 
+   Global.Add("gslsfairyAideriv","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Ai_deriv__)); 
+   Global.Add("gslsfairyBideriv","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Bi_deriv__)); 
+   Global.Add("gslsfairyAiderivscaled","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Ai_deriv_scaled__)); 
+   Global.Add("gslsfairyBiderivscaled","(",new OneOperator2_<double,double,long>( gsl_sf_airy_Bi_deriv_scaled__)); 
    Global.Add("gslsfairyzeroAi","(",new OneOperator1_<double,long>( gsl_sf_airy_zero_Ai__)); 
    Global.Add("gslsfairyzeroBi","(",new OneOperator1_<double,long>( gsl_sf_airy_zero_Bi__)); 
    Global.Add("gslsfairyzeroAideriv","(",new OneOperator1_<double,long>( gsl_sf_airy_zero_Ai_deriv__)); 
@@ -787,6 +779,13 @@ double gsl_sf_eta__(double const & x ) { return gsl_sf_eta( (const double) x );}
    Global.Add("gslsfdebye6","(",new OneOperator1_<double,double>( gsl_sf_debye_6__)); 
    Global.Add("gslsfdilog","(",new OneOperator1_<double,double>( gsl_sf_dilog__)); 
    Global.Add("gslsfmultiply","(",new OneOperator2_<double,double,double>( gsl_sf_multiply__)); 
+   Global.Add("gslsfellintKcomp","(",new OneOperator2_<double,double,long>( gsl_sf_ellint_Kcomp__)); 
+   Global.Add("gslsfellintEcomp","(",new OneOperator2_<double,double,long>( gsl_sf_ellint_Ecomp__)); 
+   Global.Add("gslsfellintPcomp","(",new OneOperator3_<double,double,double,long>( gsl_sf_ellint_Pcomp__)); 
+   Global.Add("gslsfellintDcomp","(",new OneOperator2_<double,double,long>( gsl_sf_ellint_Dcomp__)); 
+   Global.Add("gslsfellintF","(",new OneOperator3_<double,double,double,long>( gsl_sf_ellint_F__)); 
+   Global.Add("gslsfellintE","(",new OneOperator3_<double,double,double,long>( gsl_sf_ellint_E__)); 
+   Global.Add("gslsfellintRC","(",new OneOperator3_<double,double,double,long>( gsl_sf_ellint_RC__)); 
    Global.Add("gslsferfc","(",new OneOperator1_<double,double>( gsl_sf_erfc__)); 
    Global.Add("gslsflogerfc","(",new OneOperator1_<double,double>( gsl_sf_log_erfc__)); 
    Global.Add("gslsferf","(",new OneOperator1_<double,double>( gsl_sf_erf__)); 
