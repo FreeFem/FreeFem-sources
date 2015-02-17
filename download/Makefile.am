@@ -137,11 +137,11 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 install-hpddm:
 	 if test -n "$(TOOL_COMPILE_schwarz)" then   ./getall hpddm -a ;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
-	-rm ../pkg/hpddm.zip 
+	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
 	-test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm
 include/hpddm-master:
-	-if test -f ../pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
+	-if test -f ./pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
 
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \
