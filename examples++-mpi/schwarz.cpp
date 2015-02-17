@@ -10,7 +10,7 @@
 #endif
 
 
-#ifndef WITH_PETSC 
+#ifndef WITH_petsc 
 #pragma message("schwarz plugin compile without PETSc")
 #endif
 
@@ -51,7 +51,7 @@ class Pair {
         }
 };
 
-#ifdef WITH_PETSC
+#ifdef WITH_petsc
 #include "PETSc.hpp"
 #endif
 
@@ -411,7 +411,7 @@ static void  Load_Init() {
     zzzfff->Add("dschwarz", atype<HpSchwarz<double, ds>*>());
     Schwarz::add<HpSchwarz, std::complex<double>, zs>();
     zzzfff->Add("zschwarz", atype<HpSchwarz<std::complex<double>, zs>*>());
-#ifdef WITH_PETSC
+#ifdef WITH_petsc
     int argc = pkarg->n;
     char** argv = new char*[argc];
     for(int i = 0; i < argc; ++i)
