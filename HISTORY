@@ -1,5 +1,10 @@
-@  changeset:   3176:540554a177a1
+@  changeset:   3177:9d22f6cd1e8f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 15:34:26 2015 +0100
+|  summary:     correct typo  WITH_PETSC -> WITH_petsc
+|
+o  changeset:   3176:540554a177a1
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 17 14:58:27 2015 +0100
 |  summary:     add comment in INNOVATION
