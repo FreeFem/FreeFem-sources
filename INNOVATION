@@ -1,3 +1,4 @@
+ - add some function to then  gsl iinterface  (airy,  biry, ...)
 version 3.34-1 
  - correct lot of mistake for simple compilation of 
     hpddm interface ..
