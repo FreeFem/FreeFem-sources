@@ -135,7 +135,7 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 if test -n "$(TOOL_COMPILE_schwarz)" then   ./getall hpddm -a ;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
+	 if test -n "$(TOOL_COMPILE_schwarz)"; then   ./getall hpddm -a ;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
