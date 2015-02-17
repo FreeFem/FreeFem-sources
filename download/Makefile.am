@@ -127,7 +127,7 @@ all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE)  install-other
 install-other: tag-install-other
 
 tag-install-other:
-	test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm
+	if test -n "$(TOOL_COMPILE_schwarz)" ; then  $(MAKE) install-hpddm; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm
@@ -135,19 +135,19 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 test -n "$(TOOL_COMPILE_schwarz)" && ./getall hpddm -a  && $(MAKE) include/hpddm-master  lib/WHERE.hpddm
+	 if test -n "$(TOOL_COMPILE_schwarz)" then   ./getall hpddm -a ;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
 	-rm ../pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
-	test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm
+	-test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm
 include/hpddm-master:
-	-if test -f ../pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; fi
+	-if test -f ../pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
 
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \
 	echo hpddm LD -L@DIR@/lib > $@ ;\
 	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/src >> $@ ;\
-	fi
+	else true; 	fi
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir: 
