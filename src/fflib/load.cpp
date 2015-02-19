@@ -42,7 +42,7 @@ using namespace std;
 
 #ifdef LOAD
 #include <dlfcn.h>
-#elif WIN32
+#elif _WIN32
 #include <windows.h>
 #endif
 
@@ -86,7 +86,7 @@ bool load(string ss)
 #ifdef  __APPLE__
       suffix[1]=".dylib";
 #endif  
-#ifdef WIN32  
+#ifdef _WIN32  
       suffix[1]=".dll";
 #endif 
       int j; 
@@ -113,7 +113,7 @@ bool load(string ss)
 		return handle;
 	      }
 	    
-#elif WIN32
+#elif _WIN32
 	    {
 	      HINSTANCE mod=  LoadLibrary(s.c_str());
 	      if (verbosity>9) cout << " test LoadLibrary(" << s << ")= " << mod <<  endl;
@@ -146,7 +146,7 @@ bool load(string ss)
 	{
 	  cerr  <<   "\nload error : " << ss << "\n \t fail : "  << endl;
 	  char *error=0;
-#ifndef WIN32
+#ifndef _WIN32
 #ifdef LOAD
 	  error= dlerror();
 	  if ( error  != NULL) {

@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <dirent.h> 
 #include <strings.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -15,12 +15,12 @@ using namespace Fem2D;
 long ff_chdir(string * c) { return chdir(c->c_str());}
 long ff_rmdir(string * c) { return rmdir(c->c_str());}
 long ff_unlink(string * c) { return unlink(c->c_str());}
-#ifndef WIN32
+#ifndef _WIN32
 long ff_mkdir(string * c,long mm) {mode_t m=mm;cout << " mkdir " << *c << "mode =" << m << endl;  return mkdir(c->c_str(),m);}
 #endif
 long ff_chmod(string * c,long mm) {mode_t m=mm;cout << " mkdir " << *c << "mode =" << m << endl;  return chmod(c->c_str(),m);}
 long ff_mkdir(string * c) {mode_t m=07777;
-#ifdef WIN32
+#ifdef _WIN32
   return mkdir(c->c_str());
 #else
   return mkdir(c->c_str(),m);
@@ -56,7 +56,7 @@ string * ReadDir(Stack s,DIR ** const &dirpp){
   *dirpp=0;
   return  Nothing;
 }
-#ifdef WIN32 
+#ifdef _WIN32 
 string * ffgetenv(Stack s,string * const & k)
 {
     const int LEN = 4096;
@@ -129,7 +129,7 @@ void init(){
   Global.Add("rmdir","(",new OneOperator1<long,string*>(ff_rmdir));
   Global.Add("cddir","(",new OneOperator1<long,string*>(ff_chdir));
   Global.Add("chdir","(",new OneOperator1<long,string*>(ff_chdir));
-  #ifndef WIN32
+  #ifndef _WIN32
   Global.Add("mkdir","(",new OneOperator2<long,string*,long>(ff_mkdir));
   #endif
   Global.Add("chmod","(",new OneOperator2<long,string*,long>(ff_chmod));
