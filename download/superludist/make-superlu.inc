@@ -22,7 +22,7 @@ CC           	= @MPICC@
 # CFLAGS should be set to be the C flags that include optimization
 # FFCS - problem with some return statements on MacOS
 # FFCS - -I MPI_INC_DIR required on MacOS 10.8 MacPorts+OpenMPI
-CFLAGS          = -Wreturn-type @CFLAGS@ -I @MPI_INC_DIR@
+CFLAGS          = -Wreturn-type @CFLAGS@ -I'@MPI_INC_DIR@'
 # NOOPTS should be set to be the C flags that turn off any optimization
 NOOPTS		=  @CNOFLAGS@ 
 ############################################################################

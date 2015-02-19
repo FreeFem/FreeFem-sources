@@ -1,5 +1,10 @@
-//ff-c++-LIBRARY-dep:   hpddm  umfpack amd mumps scalapack blas [mkl]   mpifc  fc mpi  pthread   [petsc]
+//ff-c++-LIBRARY-dep:   hpddm  umfpack amd [mumps] scalapack blas [mkl]   mpifc  fc mpi  pthread   [petsc] 
 //ff-c++-cpp-dep: 
+
+#ifdef WITH_mumps
+#define MUMPSSUB
+#define DMUMPS
+#endif
 
 #ifdef WITH_mkl
 #include <complex>

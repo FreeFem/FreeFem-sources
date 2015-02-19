@@ -1364,9 +1364,9 @@ AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 ff_amd_ok=no
 ff_umfpack_ok=no
 ff_save_libs="$LIBS"
-if test "$ff_blas_ok" = yes;
+AC_ARG_ENABLE(system_umfpack,AC_HELP_STRING([--disable-system-umfpack],[Disable the automatic detection of umfpack, colmod, amd, ....]))
+if test "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
 then
-
     # User-specified location
 
     AC_ARG_WITH(amd,
