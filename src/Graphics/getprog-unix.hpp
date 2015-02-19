@@ -1,5 +1,5 @@
 #include "mode_open.hpp"
-#if WIN32
+#if _WIN32
 #include  "ff-win32.cpp"
 #else
 #include <unistd.h>
@@ -40,7 +40,7 @@ char * Shell_Space(const char * s)
 	exit(1);
       }
 
-#ifdef WIN32
+#ifdef _WIN32
     char * p= new char[i+1+nbspace];
     char * q=p;
     for( i=0;i<100000;++i) 
@@ -65,7 +65,7 @@ int getprog(char* fn,int argc, char **argv)
   consoleatend=false;  // bug with redirection FH 
   int ret=0;
   *fn='\0';
-#ifdef WIN32
+#ifdef _WIN32
  const  int lsuffix= 4;
 #else 
  const  int lsuffix= 0;
@@ -175,7 +175,7 @@ if( ch2edpdir && edpfilenamearg)
   {
     int i=0;
     int l= strlen(edpfilenamearg);
-#ifdef WIN32	
+#ifdef _WIN32	
     const char sepdir='\\';
 #else
    const char sepdir='/';
@@ -235,7 +235,7 @@ if( ch2edpdir && edpfilenamearg)
 	}
     }
 
-#ifdef WIN32
+#ifdef _WIN32
   if(ret==0)
     {
       if ( ShowOpenDialogBox1(fn) )

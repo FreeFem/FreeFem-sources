@@ -176,7 +176,7 @@ int main (int argc, char **argv)
 void doatexitff();
 void doatexitff()
 {
-#ifdef WIN32
+#ifdef _WIN32
   bool err=true;
   if(edpfilenamearg && consoleatend)
 	{

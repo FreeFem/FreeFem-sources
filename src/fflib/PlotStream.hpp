@@ -7,7 +7,7 @@
  */
 
 #include <cstdio>
-#ifdef WIN32
+#ifdef _WIN32
 #include <fcntl.h>
 #endif
 #include "endian.hpp"

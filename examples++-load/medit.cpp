@@ -32,7 +32,7 @@
 #include "ff++.hpp"
 #define WrdSiz 4
 
-#ifdef WIN32
+#ifdef _WIN32
 string stringffmedit= "ffmedit.exe";
 //string stringemptymedit= "ffmedit.exe";
 #else

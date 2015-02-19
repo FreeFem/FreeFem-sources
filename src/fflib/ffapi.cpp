@@ -48,7 +48,7 @@
 #include <stdlib.h>
 #endif
 #ifndef FFLANG
-#ifdef WIN32
+#ifdef _WIN32
 #include <fcntl.h>
 #endif
 #endif
@@ -231,7 +231,7 @@ namespace ffapi{
 
   void wintextmode(FILE *f){
 #ifndef FFLANG
-#ifdef WIN32
+#ifdef _WIN32
     // need #include <fcntl.h>
     _setmode(fileno(f),O_TEXT);	
 #endif
@@ -240,7 +240,7 @@ namespace ffapi{
 
   void winbinmode(FILE *f){
 #ifndef FFLANG
-#ifdef WIN32
+#ifdef _WIN32
     _setmode(fileno(f),O_BINARY);	
 #endif
 #endif
