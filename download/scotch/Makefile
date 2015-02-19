@@ -40,7 +40,7 @@ INSTALL=../..
 scotch_VERSION=5.1_esmumps
 scotch_VERSION_LOCAL=5.1.6_esmumps
 #  trick to no in MPI on NOT .. 
-TESTMPI= test -n '$(CCP)'
+TESTMPI= test -n "$(CCP)"
 scotch: FAIRE
 
 $(SRCDIR)/AFAIRE:

@@ -1,5 +1,10 @@
-@  changeset:   3181:e256198220af
+@  changeset:   3182:92b599abe5a0
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 09:47:10 2015 +0100
+|  summary:     correct pb of MPI_Include dir with white space
+|
+o  changeset:   3181:e256198220af
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 17 18:36:27 2015 +0100
 |  summary:     coorect pb of -m64 on m32 machine in CNOFLAGS variable
