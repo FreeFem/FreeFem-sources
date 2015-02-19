@@ -1,5 +1,15 @@
-@  changeset:   3179:5d6eb0d3199c
+@  changeset:   3181:e256198220af
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 18:36:27 2015 +0100
+|  summary:     coorect pb of -m64 on m32 machine in CNOFLAGS variable
+|
+o  changeset:   3180:f6cdea4cee29
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 17:32:51 2015 +0100
+|  summary:     coorect pb of libpath in freeyam under windows
+|
+o  changeset:   3179:5d6eb0d3199c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 17 16:01:22 2015 +0100
 |  summary:     coorect missing ; the reisntall hpddm
