@@ -77,11 +77,11 @@ version 3.30-1 may/2014 ( hg rev: 3017)
 version 3.30. ( for windows hg  rev : 3013)
  - add binary ios:mode constant, to open file in binary mode under window
     to solve pb of seekg under windows  
- - add multy border april 23 2014 , (hg rev : 3004)
+ - add multi border april 23 2014 , (hg rev : 3004)
     syntaxe example:  
-  // i is the index of the the multy index 
+  // i is the index of the the multi index 
   // the number of sub border is given by teh size if the array to set the number of seg on the border ..
-  // so for multy border the  number of seg of the border , must be  in int[int] array 
+  // so for multi border the  number of seg of the border , must be  in int[int] array 
   real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
             XC= [0.2,0.8,0.2,0.8],
             YC= [0.2,0.8,0.8,0.2];
@@ -412,7 +412,7 @@ v 3.12-3
    - new finite element in 2d for elasticity in test. TD-NSS0 (see these of Astrid Sabine Sinwel)
       A New Family of Mixed Finite Elements for Elasticity
    
-   - add matrice matric multy in lapck interface 
+   - add matrice matric multiply in lapack interface 
    - add tool to change the region and label number 
        change(Th,fregion= integer function to set the region number )
    - nuTriangle now given the tet number in 3D.  
