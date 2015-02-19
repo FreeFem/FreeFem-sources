@@ -1,5 +1,10 @@
-@  changeset:   3182:92b599abe5a0
+@  changeset:   3183:e699cda4d954
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 11:27:28 2015 +0100
+|  summary:     correct compile pb of compile under mingw
+|
+o  changeset:   3182:92b599abe5a0
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 19 09:47:10 2015 +0100
 |  summary:     correct pb of MPI_Include dir with white space
