@@ -1,5 +1,15 @@
-@  changeset:   3183:e699cda4d954
+@  changeset:   3185:829ba25b59a7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 23:54:43 2015 +0100
+|  summary:     change WIN32 in _WIN32 (better ??)
+|
+o  changeset:   3184:f4a756b0dfd9
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 23:47:35 2015 +0100
+|  summary:     do correction for wondows
+|
+o  changeset:   3183:e699cda4d954
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 19 11:27:28 2015 +0100
 |  summary:     correct compile pb of compile under mingw

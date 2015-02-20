@@ -540,12 +540,21 @@ m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
 # Checking c++11 for schwarz interface of P. Jolivet ...
-
+# F.Hecht:
+# do not compile all with c++11 version to much 
+# probleme to day (frev 2015) with g++ 4.8.1
+ff_cxx_save=$CXXFLAGS
 CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
 dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
 dnl ff_cxx11="no"
 dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+if test "$ff_cxx11" = yes ; then
+    CXX11FLAGS="-sdt=c++11";
+    AC_FF_ADDWHERELIB(c++11,$CXX11FLAGS,$CXX11FLAGS)
+fi
+CXXFLAGS="$ff_cxx_flags"
 AC_SUBST(WITH_CXX11,$ff_cxx11)
+AC_SUBST(CXX11FLAGS,$CXX11FLAGS)
 #end Checking  c++11
 # ------------------------------
 # compilation flags of FreeFem++
