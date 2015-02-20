@@ -1,5 +1,10 @@
-@  changeset:   3197:874cf273aa63
+@  changeset:   3198:9a29fdbc00b7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:49:27 2015 +0100
+|  summary:     add comment in innovation
+|
+o  changeset:   3197:874cf273aa63
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 20 21:42:03 2015 +0100
 |  summary:     finist coorect of compilation under windows
