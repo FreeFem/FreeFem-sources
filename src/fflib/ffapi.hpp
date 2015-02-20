@@ -38,8 +38,8 @@ using namespace std;
 #ifndef FFAPI_HPP
 #define FFAPI_HPP
 
-  void ff_finalize();
-  void ff_atend( void (*atendff)());
+ // void ff_finalize();
+ // void ff_atend( void (*atendff)());
 // big change F. Hecht Frev 2015
 // passe all function by pointer
 

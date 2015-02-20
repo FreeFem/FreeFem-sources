@@ -57,21 +57,6 @@
 #include "mpi.h"
 #endif
 #endif
-// Add dec 2014
-#include <vector>
-typedef void (*AtEnd)();
-vector<AtEnd> AtFFEnd;
-void ff_finalize()
-{
-    for (vector<AtEnd>::const_reverse_iterator i=AtFFEnd.rbegin(); i !=AtFFEnd.rend(); ++ i)
-        (**i)();
-    AtFFEnd.clear(); 
-}
-void ff_atend(AtEnd f)
-{
-    AtFFEnd.push_back(f);
-}
-
 // FFCS-specific implementations for the FF API
 // --------------------------------------------
 
