@@ -59,9 +59,12 @@ char * Shell_Space(const char * s)
     assert( q-p <= i+nbspace);
     return p;
 }
+
+extern void (*init_lgparallele)();
+
 int getprog(char* fn,int argc, char **argv)
 {
-  waitatend=true;  // attent 
+  waitatend=init_lgparallele==0;  // attent if no parallele
   consoleatend=false;  // bug with redirection FH 
   int ret=0;
   *fn='\0';
