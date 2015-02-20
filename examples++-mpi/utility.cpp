@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: c++11   hpddm  scalapack blas  mpifc  fc mpi  pthread 
+//ff-c++-LIBRARY-dep: cxx11   hpddm  scalapack blas  mpifc  fc mpi  pthread 
 //ff-c++-cpp-dep: 
 #ifndef _ALL_IN_ONE_
 #include "ff++.hpp"

@@ -550,7 +550,7 @@ dnl ff_cxx11="no"
 dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
 if test "$ff_cxx11" = yes ; then
     CXX11FLAGS="-sdt=c++11";
-    AC_FF_ADDWHERELIB(c++11,$CXX11FLAGS,$CXX11FLAGS)
+    AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
 fi
 CXXFLAGS="$ff_cxx_flags"
 AC_SUBST(WITH_CXX11,$ff_cxx11)
