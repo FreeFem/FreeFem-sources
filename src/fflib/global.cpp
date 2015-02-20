@@ -27,6 +27,70 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include <iostream>
+#include <cstdio>
+
+namespace ffapi {
+    
+    //  void init) ();
+    // need #include <iostream>
+    // need #include <sstream>
+    // need using namespace std;
+    std::istream * (*cin)();
+    std::ostream *(*cout)();
+    std::ostream *(*cerr)();
+    
+    // <<mingw32_stdout>> Cannot name these functions identically to the original file pointers under MingW32 (compile
+    // error). Impacts [[file:InitFunct.hpp::LOADINITIO]]. Changed from stdxxx_ptr() to ffstdxxx() according to the way FF
+    // itself was changed.
+    
+    FILE *(*ffstdout)();
+    FILE *(*ffstderr)();
+    FILE *(*ffstdin)();
+    
+    /// Initiate graphical pipe output. I need a separate function for this to warn ffcs to check the corresponding ffglut
+    /// magic number
+    
+    size_t (*fwriteinit)(const void *ptr, size_t size, size_t nmemb,FILE *stream);
+    
+    /// Indicates the begining of a new plot to avoid sending socket control data with each plot item.
+    
+    void (*newplot)();
+    
+    /// Redefinition of standard system calls
+    
+    FILE *(*ff_popen)(const char *command, const char *type);
+    int (*ff_pclose)(FILE *stream);
+    size_t (*ff_fwrite)(const void *ptr, size_t size, size_t nmemb,FILE *stream);
+    int (*ff_fflush)(FILE *stream);
+    int (*ff_ferror)(FILE *stream);
+    int (*ff_feof)(FILE *stream);
+    
+    // Windows file mode
+    // -----------------
+    
+    /// Changing file mode needs to be disabled when the file is a TCP socket to FFCS. Since the treatment is different in
+    /// FF and in FFLANG executables, they have to be stored in a DLL that changes between these two programs.
+    
+    void (*wintextmode)(FILE *f);
+    void (*winbinmode)(FILE *f);
+    
+    // Transfer basic MPI control
+    // --------------------------
+    
+    void (*mpi_init)(int &argc, char **& argv);
+    void (*mpi_finalize)();
+    
+    // Permanent server control
+    // ------------------------
+    
+    /// if true, FF is considered to be accessible from remote anonymous connections and some commands (like shell
+    /// commands) are not allowed.
+    
+    bool (*protectedservermode)();
+    
+}
+
 
 #include "config-wrapper.h"
 
@@ -37,6 +101,9 @@
 #include "RNM.hpp"
 #include <queue>
 #include "environment.hpp"
+
+
+
 
 #define  FF_GRAPH_PTR_DCL
 #include "rgraph.hpp"
@@ -102,5 +169,6 @@ bool echo_edp=true; // add F.H of remove script dump
 
 //  add F. Hecht 
 EnvironmentData  ffenvironment;
+
 
 
