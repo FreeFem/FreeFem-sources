@@ -27,8 +27,8 @@ FFD_OBJ2 = $(patsubst %.o,../fflib/%.o,$(FF_OBJ2))
 FFD_OBJIDE = $(patsubst %.o,../ide/%.o,$(FF_OBJIDE))
 FFD_OBJLMSH = $(patsubst %.o,../ide/%.o,$(FF_OBJLMSH))
 
-LIBS_FF = libff.dll FreeFem++-api.dll
-LIBS_FFmpi = libff.dll 
+LIBS_FF = ../nw/ffapi.o  libff.dll 
+LIBS_FFmpi = ../mpi/ffapi.o libff.dll 
 
 
 
@@ -48,8 +48,10 @@ FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.
 FreeFem++.exe: ../nw/sansrgraph.o    ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
-## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll 
-FreeFem++-mpi.exe:	../nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o ../mpi/ffapi.o $(LIBS_FFmpi)
+## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll  ( J'ai compris)
+## dur dur ... 
+##  on mais init ffpt dans mymain.cpp 
+FreeFem++-mpi.exe:	../nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FFmpi)
 	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 $(MPI_LIB)
 bamg.exe:  libff.dll $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
@@ -72,11 +74,13 @@ install-exec-local--::
 
 
 # FFCS: create a separate DLL for ffapi so that it can be changed when running FreeFem++ or FFCS
-FreeFem++-api.dll:../nw/ffapi.o
-	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@
+# NO dll not all function of ffapi are callback def in ffapi::init()
+# and alloctae in gggg.cpp and Global.cpp 
+#FreeFem++-api.dll:../nw/ffapi.o
+#	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@
 # FF mpi : create a separate DLL for ffapi so that it can be changed when running FreeFem++ or FreeFem++-mpi
-FreeFem++-mpi-api.dll:../mpi/ffapi.o
-	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@ $(MPI_LIB)
+#FreeFem++-mpi-api.dll:../mpi/ffapi.o
+#	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@ $(MPI_LIB)
 
 # FFCS: automake does not clean the exes automatically because they are not built automatically.
 clean-local::
