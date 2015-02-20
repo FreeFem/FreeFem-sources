@@ -1,5 +1,65 @@
-@  changeset:   3185:829ba25b59a7
+@  changeset:   3197:874cf273aa63
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:42:03 2015 +0100
+|  summary:     finist coorect of compilation under windows
+|
+o  changeset:   3196:4dc276d269c1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:32:06 2015 +0100
+|  summary:     correct the WHERE-mumps LIBSPTHREAD
+|
+o  changeset:   3195:2e4300ca79e4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:28:33 2015 +0100
+|  summary:     correct phtread lib in WHERE file for mumps
+|
+o  changeset:   3194:5762e43f1bc1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 19:45:34 2015 +0100
+|  summary:     put ffapt::init in mymain
+|
+o  changeset:   3193:5db386d2de17
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 19:17:39 2015 +0100
+|  summary:     correct ffapi interface
+|
+o  changeset:   3192:3171c844e904
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 19:01:50 2015 +0100
+|  summary:     put the def of ffapi in Global.cpp and gggg.cpp
+|
+o  changeset:   3191:44a966c66463
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 17:43:45 2015 +0100
+|  summary:     change all ffapi interface for window en mpi to have one ff++ dll with and without mpi ..
+|
+o  changeset:   3190:00bb92561961
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 16:08:38 2015 +0100
+|  summary:     add namescape under _WIN32 for isnan isinf function
+|
+o  changeset:   3189:b79b84a0b907
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 16:01:55 2015 +0100
+|  summary:     add -std= flags in ff-c++
+|
+o  changeset:   3188:13a97db817b9
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 15:11:31 2015 +0100
+|  summary:     correct typo sdt -> std
+|
+o  changeset:   3187:34f72766e54c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 14:53:21 2015 +0100
+|  summary:     remplace c++11 by cxx11 for pattern porblem in shell
+|
+o  changeset:   3186:2d6cd9537846
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 14:39:50 2015 +0100
+|  summary:     remove default  c++11 compile if possible too much probleme under windows with g++ 4.9.1
+|
+o  changeset:   3185:829ba25b59a7
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 19 23:54:43 2015 +0100
 |  summary:     change WIN32 in _WIN32 (better ??)
