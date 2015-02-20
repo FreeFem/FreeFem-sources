@@ -160,6 +160,7 @@ void compile(char *fname);
 int main (int argc, char **argv)
 {
   atexit(myend);
+
   int OPTION = 0;
   if (argc == 2)
     {
