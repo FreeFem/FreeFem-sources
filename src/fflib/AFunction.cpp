@@ -37,6 +37,8 @@
 // to correct bug in g++ v 4.8.1 add std
 #ifdef _WIN32
 #define NM_STD std::
+#else
+#define NM_STD 
 #endif
 long isNaN(double x){return NM_STD isnan(x);}
 long isInf(double x){return NM_STD isinf(x);}
