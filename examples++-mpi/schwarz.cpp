@@ -1,6 +1,7 @@
-//ff-c++-LIBRARY-dep: cxx11   hpddm  umfpack amd [mumps] scalapack blas [mkl]   mpifc  fc mpi  pthread   [petsc] 
+//ff-c++-LIBRARY-dep: cxx11   hpddm  umfpack amd  scalapack blas [mkl]   mpifc  fc mpi  pthread   [petsc] 
 //ff-c++-cpp-dep: 
 
+// mumps est avec petsc ..
 #ifdef WITH_mumps
 #define MUMPSSUB
 #define DMUMPS
@@ -17,6 +18,9 @@
 
 #ifndef WITH_petsc 
 #pragma message("schwarz plugin compile without PETSc")
+#else
+#define MUMPSSUB
+#define DMUMPS
 #endif
 
 #define HPDDM_BDD  0
