@@ -40,6 +40,8 @@ using namespace std;
 
  // void ff_finalize();
  // void ff_atend( void (*atendff)());
+typedef void (*AtEnd)();
+void ff_atend(AtEnd f);
 // big change F. Hecht Frev 2015
 // passe all function by pointer
 
