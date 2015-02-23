@@ -1,5 +1,20 @@
-@  changeset:   3198:9a29fdbc00b7
+@  changeset:   3201:e7823efd942c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 22:44:15 2015 +0100
+|  summary:     add Airy and Biry specail function
+|
+o  changeset:   3200:c2364f723231
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 22:38:11 2015 +0100
+|  summary:     no waint at end if parallele cas
+|
+o  changeset:   3199:65548c9cdab0
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 22:21:14 2015 +0100
+|  summary:     coorect init pointer for ffglut
+|
+o  changeset:   3198:9a29fdbc00b7
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 20 21:49:27 2015 +0100
 |  summary:     add comment in innovation
