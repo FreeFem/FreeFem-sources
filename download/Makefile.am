@@ -135,7 +135,8 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 test -n "$(MPIRUN)" && ./getall hpddm -a  && make include/hpddm-master  lib/WHERE.hpddm
+#	ALH - should not generate an error if MPIRUN is not configured
+	test -z "$(MPIRUN)" || ( ./getall hpddm -a  && make include/hpddm-master  lib/WHERE.hpddm )
 include/hpddm-master:
 	cd include; unzip ../pkg/hpddm.zip 
 
