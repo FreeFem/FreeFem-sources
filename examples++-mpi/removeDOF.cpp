@@ -1,3 +1,4 @@
+//ff-c++-LIBRARY-dep: cxx11 
 #ifndef _ALL_IN_ONE_
 #include "ff++.hpp"
 #include <algorithm>

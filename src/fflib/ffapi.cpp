@@ -48,7 +48,7 @@
 #include <stdlib.h>
 #endif
 #ifndef FFLANG
-#ifdef WIN32
+#ifdef _WIN32
 #include <fcntl.h>
 #endif
 #endif
@@ -57,21 +57,6 @@
 #include "mpi.h"
 #endif
 #endif
-// Add dec 2014
-#include <vector>
-typedef void (*AtEnd)();
-vector<AtEnd> AtFFEnd;
-void ff_finalize()
-{
-    for (vector<AtEnd>::const_reverse_iterator i=AtFFEnd.rbegin(); i !=AtFFEnd.rend(); ++ i)
-        (**i)();
-    AtFFEnd.clear(); 
-}
-void ff_atend(AtEnd f)
-{
-    AtFFEnd.push_back(f);
-}
-
 // FFCS-specific implementations for the FF API
 // --------------------------------------------
 
@@ -98,26 +83,28 @@ void bufferwrite(const char *b,const int l){
 
 Buffer buffer(NULL,bufferwrite); // need #include "buffer.hpp"
 #endif
+//  allocation/definition of all ffapi in Global.cpp
 
 namespace ffapi{
+    
 
   // Get a pointer to the local cin/cout (which is distinct from ffcs's stdin/stdout under Windows because each DLL owns
   // separate cin/cout objects).
 
   // need #include <iostream>
-  std::istream *cin(){return &std::cin;}
-  std::ostream *cout(){return &std::cout;}
-  std::ostream *cerr(){return &std::cerr;}
+ static  std::istream *ffapi_cin(){return &std::cin;}
+ static std::ostream *ffapi_cout(){return &std::cout;}
+ static  std::ostream *ffapi_cerr(){return &std::cerr;}
 
   // FFCS - ::stdout not accepted under mingw32
   // need #include <cstdio>
-  FILE *ffstdout(){return stdout;}
-  FILE *ffstderr(){return stderr;}
-  FILE *ffstdin(){return stdin;}
+static  FILE *ffapi_ffstdout(){return stdout;}
+static  FILE *ffapi_ffstderr(){return stderr;}
+static  FILE *ffapi_ffstdin(){return stdin;}
 
-  void newplot(){}
+static  void ffapi_newplot(){}
 
-  FILE *ff_popen(const char *command, const char *type){
+  FILE *ffapi_ff_popen(const char *command, const char *type){
 #ifdef FFLANG
 
     // this happens right at the begining of FF, so the socket
@@ -133,7 +120,7 @@ namespace ffapi{
 #endif
   }
 
-  int ff_pclose(FILE *stream){
+static  int ffapi_ff_pclose(FILE *stream){
 #ifdef FFLANG
     // nothing to close in FFCS
     return 0;
@@ -142,7 +129,7 @@ namespace ffapi{
 #endif
   }
 
-  size_t fwriteinit(const void *ptr, size_t size, size_t nmemb,FILE *stream){
+static  size_t ffapi_fwriteinit(const void *ptr, size_t size, size_t nmemb,FILE *stream){
 
     // printf() is useful for debug because it is not redirected through
     // the FFCS socket. But it is asynchronous with cout so it may end up
@@ -168,7 +155,7 @@ namespace ffapi{
     return ff_fwrite(ptr,size,nmemb,stream);
   }
 
-  size_t ff_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream){
+static  size_t ffapi_ff_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream){
 #ifdef FFLANG
 
     // if the ffsock pointer is null here, it means that the pointer exported from the FFCS shared library is not a
@@ -193,7 +180,7 @@ namespace ffapi{
     return 0;
   }
 
-  int ff_fflush(FILE *stream){
+static  int ffapi_ff_fflush(FILE *stream){
 #ifdef FFLANG
     assert(stream==(FILE*)FFAPISTREAM);
 
@@ -213,7 +200,7 @@ namespace ffapi{
     return 0;
   }
 
-  int ff_ferror(FILE *stream){
+static  int ffapi_ff_ferror(FILE *stream){
 #ifndef FFLANG
     return ferror(stream);
 #else
@@ -221,7 +208,7 @@ namespace ffapi{
 #endif
   }
 
-  int ff_feof(FILE *stream){
+static  int ffapi_ff_feof(FILE *stream){
 #ifndef FFLANG
     return feof(stream);
 #else
@@ -229,24 +216,24 @@ namespace ffapi{
 #endif
   }
 
-  void wintextmode(FILE *f){
+static  void ffapi_wintextmode(FILE *f){
 #ifndef FFLANG
-#ifdef WIN32
+#ifdef _WIN32
     // need #include <fcntl.h>
     _setmode(fileno(f),O_TEXT);	
 #endif
 #endif
   }
 
-  void winbinmode(FILE *f){
+static  void ffapi_winbinmode(FILE *f){
 #ifndef FFLANG
-#ifdef WIN32
+#ifdef _WIN32
     _setmode(fileno(f),O_BINARY);	
 #endif
 #endif
   }
 
-  void mpi_init(int &argc, char** &argv){
+static  void ffapi_mpi_init(int &argc, char** &argv){
     /// only call MPI_Init() if this has not already been done in ffcs/src/server.cpp
 #ifndef FFLANG
 #ifdef PARALLELE
@@ -266,7 +253,7 @@ namespace ffapi{
 #endif
   }
 
-  void mpi_finalize(){
+ static void ffapi_mpi_finalize(){
 #ifndef FFLANG
 #ifdef PARALLELE
 #ifdef WITH_PETSCxxxxxxxx
@@ -277,7 +264,7 @@ namespace ffapi{
 #endif
   }
 
-  bool protectedservermode(){
+static  bool ffapi_protectedservermode(){
 #ifdef FFLANG
     return !options->LocalClient;
 #else
@@ -285,25 +272,29 @@ namespace ffapi{
 #endif
   }
 
-  void init(){
-    ffapi::fwriteinit;
-    ffapi::winbinmode;
-    ffapi::wintextmode;
-    ffapi::mpi_finalize;
-    ffapi::cin;
-    ffapi::cerr;
-    ffapi::cout;
-    ffapi::ff_feof;
-    ffapi::newplot;
-    ffapi::ff_popen;
-    ffapi::mpi_init;
-    ffapi::ff_ferror;
-    ffapi::ff_fflush;
-    ffapi::ff_fwrite;
-    ffapi::ff_pclose;
-    ffapi::protectedservermode;
+void init(){
+    ffapi::cin = ffapi::ffapi_cin;
+    ffapi::cout = ffapi::ffapi_cout;
+    ffapi::cerr = ffapi::ffapi_cerr;
+    ffapi::ffstdout = ffapi::ffapi_ffstdout;
+    ffapi::ffstderr = ffapi::ffapi_ffstderr;
+    ffapi::ffstdin = ffapi::ffapi_ffstdin;
+    ffapi::newplot = ffapi::ffapi_newplot;
+    ffapi::ff_popen = ffapi::ffapi_ff_popen;
+    ffapi::ff_pclose = ffapi::ffapi_ff_pclose;
+    ffapi::fwriteinit = ffapi::ffapi_fwriteinit;
+    ffapi::ff_fwrite = ffapi::ffapi_ff_fwrite;
+    ffapi::ff_fflush = ffapi::ffapi_ff_fflush;
+    ffapi::ff_ferror = ffapi::ffapi_ff_ferror;
+    ffapi::ff_feof = ffapi::ffapi_ff_feof;
+    ffapi::wintextmode = ffapi::ffapi_wintextmode;
+    ffapi::winbinmode = ffapi::ffapi_winbinmode;
+    ffapi::mpi_init = ffapi::ffapi_mpi_init;
+    ffapi::mpi_finalize = ffapi::ffapi_mpi_finalize;
+    ffapi::protectedservermode = ffapi::ffapi_protectedservermode;
   }
 }
+
 
 /// Local Variables:
 /// mode:c++

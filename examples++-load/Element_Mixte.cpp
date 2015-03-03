@@ -25,8 +25,8 @@
  
  */
 
-//ff-c++-LIBRARY-dep:   lapack
-//ff-c++-LIBRARY-dep:   blas
+//ff-c++-LIBRARY-dep:   lapack blas 
+
 
 #include "ff++.hpp"
 #include "AddNewFE.h"

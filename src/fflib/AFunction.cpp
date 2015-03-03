@@ -35,8 +35,13 @@
 //  put here some def dur to c++11 
 // problem with mixed with using namespace std; 
 // to correct bug in g++ v 4.8.1 add std
-long isNaN(double x){return isnan(x);}
-long isInf(double x){return isinf(x);}
+#ifdef _WIN32
+#define NM_STD std::
+#else
+#define NM_STD 
+#endif
+long isNaN(double x){return NM_STD isnan(x);}
+long isInf(double x){return NM_STD isinf(x);}
 long isNormal(double x){return std::isnormal(x);}
 #ifdef HAVE_JN
 double myyn(long n, double x){ return yn((int)n,x);}

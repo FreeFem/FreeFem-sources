@@ -48,7 +48,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 # this issue.
 
 ../lib/WHERE.mumps:install.done
-	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM -lpthread  > $@
+	echo mumps LD -L@DIR@/lib   -ldmumpsFREEFEM -lzmumpsFREEFEM  -lmumps_commonFREEFEM -lpordFREEFEM $(LIBSPTHREAD)  > $@
 	echo mumps INCLUDE -I@DIR@/include  >> $@
 
 install.done:$(SRCDIR)/FAIT

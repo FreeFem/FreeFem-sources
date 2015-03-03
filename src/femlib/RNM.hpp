@@ -1283,8 +1283,8 @@ class KNM: public KNM_<R>{ public:
      }
     
   }
-  void destroy(){assert(this->next<0);  if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}} 
-  void increment() {assert(this->next<0);  this->next--;}
+  void destroy(){/*assert((bool)(this->next<0)); */ if(this->next++ ==-1) {delete [] this->v; this->v=0;this->n=0;}}
+  void increment() {/*assert((bool)(this->next<0)); */ this->next--;}
     
 //  void destroy(){delete [] this->v;this->n=0 ;}
 

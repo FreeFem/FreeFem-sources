@@ -131,6 +131,23 @@ void lgerror (const char* s) ;
 void (*initparallele)(int &argc, char **& argv)=0 ;
 void (*init_lgparallele)()=0;
 //void (*end_parallele)()=0;
+
+// Add dec 2014
+#include <vector>
+typedef void (*AtEnd)();
+vector<AtEnd> AtFFEnd;
+void ff_finalize()
+{
+    for (vector<AtEnd>::const_reverse_iterator i=AtFFEnd.rbegin(); i !=AtFFEnd.rend(); ++ i)
+    (**i)();
+    AtFFEnd.clear();
+}
+void ff_atend(AtEnd f)
+{
+    AtFFEnd.push_back(f);
+}
+
+
 %}
 
 
@@ -817,7 +834,6 @@ extern  bool echo_edp;
 int mainff (int  argc, char **argv)
 {
     
-   ffapi::init(); 
   if(argc)  
     prognamearg=argv[0];
 

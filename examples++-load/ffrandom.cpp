@@ -15,7 +15,7 @@ using namespace std;
 #include <ctime>
 
 // FFCS: random() and srandom() do not seem to be available in MinGW
-#ifdef WIN32
+#ifdef _WIN32
 #define random rand
 #define srandom srand
 #endif
@@ -68,7 +68,7 @@ public:
 // not have the same type). FFCS patched this source with "long ffrandom(){return random();}" but FF now comes with
 // "genrand_int31()".
 
-#ifdef WIN32
+#ifdef _WIN32
 
 void init_by_array(unsigned long init_key[], int key_length);
 long genrand_int31(void);

@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.34,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.34-2,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -93,40 +93,6 @@ if test `uname` != Darwin; then
  ff_ldbg="-Wl,--start-group"
 fi
 
-AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
-# /usr/local/petsc/conf/petscvariables 
-ff_petsc_ok=no
-## echo --$with_petsc--
-if test "$with_petsc" != no ; then
-    ff_petsc=""
-    if test -n "$with_pets" -a -f "$with_petsc/conf/petscvariables" ; then 
-	ff_petsc="$with_petsc/conf/petscvariables"
-    elif test -n "$with_pets" -a -f "$with_petsc" ; then 
-	ff_petsc="$with_petsc"
-    elif test -z "$with_petsc" ; then
-	for d in /usr /usr/local /opt/usr  /opt/local ; do
-	  ##  echo  "$d/petsc/conf/petscvariables" 
-	    if test -f "$d/petsc/conf/petscvariables" ; then 
-		ff_petsc="$d/petsc/conf/petscvariables"
-	    fi
-	done
-	if test -n "$ff_petsc" ; then
-	    echo "ff_petsc=$ff_petsc" 
-	    PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ff_petsc`
-	    PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ff_petsc`
-	    if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
-		ff_petsc_ok=yes;
-		AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
-	    fi
-	fi
-    fi
-fi
-
-if test "$ff_petsc_ok" != no ;   then
-    AC_MSG_NOTICE([ with petsc  PETSC_WITH_EXTERNAL_LIB=$PETSC_WITH_EXTERNAL_LIB ])
-else
-    AC_MSG_NOTICE([ without petsc ***** ])
-fi
 
 
 
@@ -574,12 +540,21 @@ m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
 # Checking c++11 for schwarz interface of P. Jolivet ...
-
+# F.Hecht:
+# do not compile all with c++11 version to much 
+# probleme to day (frev 2015) with g++ 4.8.1
+ff_cxx_save=$CXXFLAGS
 CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
 dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
 dnl ff_cxx11="no"
 dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+if test "$ff_cxx11" = yes ; then
+    CXX11FLAGS="-std=c++11";
+    AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+fi
+CXXFLAGS="$ff_cxx_flags"
 AC_SUBST(WITH_CXX11,$ff_cxx11)
+AC_SUBST(CXX11FLAGS,$CXX11FLAGS)
 #end Checking  c++11
 # ------------------------------
 # compilation flags of FreeFem++
@@ -802,6 +777,46 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 # ------------------------------------------
 
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
+## PETSc
+AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
+# /usr/local/petsc/conf/petscvariables 
+ff_petsc_ok=no
+## echo --$with_petsc--
+if test "$with_petsc" != no -a  $ff_mpi = yes; then
+    for d in "$with_petsc" /usr /usr/local /opt/usr  /opt/local ;do
+	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
+	    ffconfpetsc="$d$dd"		
+	    if test -f "$ffconfpetsc" ; then 
+		if test  "$ff_petsc_ok" = no ; then
+		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
+		    cmp -s  "$PETSC_MPIRUN" "$MPIRUN"
+		    if test "$?"  -eq 0 ; then 
+			PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
+			PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
+			if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
+			    ff_petsc_ok=yes;
+			    AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
+			fi
+		    else
+			AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN." ]);			
+		    fi
+		fi
+	    else
+		test  "$ff_petsc_ok" = no && echo "  *** try $ffconfpetsc"
+		ffconfpetsc="";
+
+	    fi
+	done
+    done
+fi
+
+if test "$ff_petsc_ok" != no ;   then
+    AC_MSG_NOTICE([ with petsc  $ff_petsc_ok])
+else
+    AC_MSG_NOTICE([ without petsc ***** ])
+fi
+
+
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"
@@ -1358,9 +1373,9 @@ AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 ff_amd_ok=no
 ff_umfpack_ok=no
 ff_save_libs="$LIBS"
-if test "$ff_blas_ok" = yes;
+AC_ARG_ENABLE(system_umfpack,AC_HELP_STRING([--disable-system-umfpack],[Disable the automatic detection of umfpack, colmod, amd, ....]))
+if test "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
 then
-
     # User-specified location
 
     AC_ARG_WITH(amd,
@@ -1869,7 +1884,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$ff_petsc_ok" != yes &&  enable_schwarz=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes &&  enable_schwarz=no
 
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
@@ -1910,6 +1925,10 @@ AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
 AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
+AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
+AC_MSG_NOTICE([          --  with schwarz (HPDDM) $enable_schwarz (need MPI & c++11 :  $ff_cxx11 ) ]);
+
+
 AC_MSG_NOTICE([    progs: $ff_progs ])
 if test  "$ff_umfpack_download" = yes  ;then
     AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])

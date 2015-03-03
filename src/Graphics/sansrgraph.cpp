@@ -160,6 +160,7 @@ void compile(char *fname);
 int main (int argc, char **argv)
 {
   atexit(myend);
+
   int OPTION = 0;
   if (argc == 2)
     {
@@ -176,7 +177,7 @@ int main (int argc, char **argv)
 void doatexitff();
 void doatexitff()
 {
-#ifdef WIN32
+#ifdef _WIN32
   bool err=true;
   if(edpfilenamearg && consoleatend)
 	{

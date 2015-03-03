@@ -1,5 +1,230 @@
-@  changeset:   3156:651407885920
+@  changeset:   3201:e7823efd942c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 22:44:15 2015 +0100
+|  summary:     add Airy and Biry specail function
+|
+o  changeset:   3200:c2364f723231
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 22:38:11 2015 +0100
+|  summary:     no waint at end if parallele cas
+|
+o  changeset:   3199:65548c9cdab0
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 22:21:14 2015 +0100
+|  summary:     coorect init pointer for ffglut
+|
+o  changeset:   3198:9a29fdbc00b7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:49:27 2015 +0100
+|  summary:     add comment in innovation
+|
+o  changeset:   3197:874cf273aa63
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:42:03 2015 +0100
+|  summary:     finist coorect of compilation under windows
+|
+o  changeset:   3196:4dc276d269c1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:32:06 2015 +0100
+|  summary:     correct the WHERE-mumps LIBSPTHREAD
+|
+o  changeset:   3195:2e4300ca79e4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 21:28:33 2015 +0100
+|  summary:     correct phtread lib in WHERE file for mumps
+|
+o  changeset:   3194:5762e43f1bc1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 19:45:34 2015 +0100
+|  summary:     put ffapt::init in mymain
+|
+o  changeset:   3193:5db386d2de17
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 19:17:39 2015 +0100
+|  summary:     correct ffapi interface
+|
+o  changeset:   3192:3171c844e904
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 19:01:50 2015 +0100
+|  summary:     put the def of ffapi in Global.cpp and gggg.cpp
+|
+o  changeset:   3191:44a966c66463
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 17:43:45 2015 +0100
+|  summary:     change all ffapi interface for window en mpi to have one ff++ dll with and without mpi ..
+|
+o  changeset:   3190:00bb92561961
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 16:08:38 2015 +0100
+|  summary:     add namescape under _WIN32 for isnan isinf function
+|
+o  changeset:   3189:b79b84a0b907
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 16:01:55 2015 +0100
+|  summary:     add -std= flags in ff-c++
+|
+o  changeset:   3188:13a97db817b9
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 15:11:31 2015 +0100
+|  summary:     correct typo sdt -> std
+|
+o  changeset:   3187:34f72766e54c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 14:53:21 2015 +0100
+|  summary:     remplace c++11 by cxx11 for pattern porblem in shell
+|
+o  changeset:   3186:2d6cd9537846
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 20 14:39:50 2015 +0100
+|  summary:     remove default  c++11 compile if possible too much probleme under windows with g++ 4.9.1
+|
+o  changeset:   3185:829ba25b59a7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 23:54:43 2015 +0100
+|  summary:     change WIN32 in _WIN32 (better ??)
+|
+o  changeset:   3184:f4a756b0dfd9
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 23:47:35 2015 +0100
+|  summary:     do correction for wondows
+|
+o  changeset:   3183:e699cda4d954
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 11:27:28 2015 +0100
+|  summary:     correct compile pb of compile under mingw
+|
+o  changeset:   3182:92b599abe5a0
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 19 09:47:10 2015 +0100
+|  summary:     correct pb of MPI_Include dir with white space
+|
+o  changeset:   3181:e256198220af
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 18:36:27 2015 +0100
+|  summary:     coorect pb of -m64 on m32 machine in CNOFLAGS variable
+|
+o  changeset:   3180:f6cdea4cee29
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 17:32:51 2015 +0100
+|  summary:     coorect pb of libpath in freeyam under windows
+|
+o  changeset:   3179:5d6eb0d3199c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 16:01:22 2015 +0100
+|  summary:     coorect missing ; the reisntall hpddm
+|
+o  changeset:   3178:51c21225d5d5
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 15:53:52 2015 +0100
+|  summary:     coorect  pb in reinstall hpddm
+|
+o  changeset:   3177:9d22f6cd1e8f
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 15:34:26 2015 +0100
+|  summary:     correct typo  WITH_PETSC -> WITH_petsc
+|
+o  changeset:   3176:540554a177a1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 14:58:27 2015 +0100
+|  summary:     add comment in INNOVATION
+|
+o  changeset:   3175:774b294aa38c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 14:56:23 2015 +0100
+|  summary:     coorect pb in case of no hpddm
+|
+o  changeset:   3174:794d0cf537dd
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 17 09:14:52 2015 +0100
+|  summary:     add airy function of gsl
+|
+o  changeset:   3173:3b5e870dffc3
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 17:05:10 2015 +0100
+|  summary:     rebuild AutoGeneratedFile.tar.gz
+|
+o  changeset:   3172:c899a1b95884
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 16:49:52 2015 +0100
+|  summary:     coorect pb of space in mpiexec petc varaible ...
+|
+o  changeset:   3171:6db8bdd3997c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 16:20:19 2015 +0100
+|  summary:     rebuid AutoGeneratedFile.tar.gz
+|
+o  changeset:   3170:5351790608b3
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 16:19:53 2015 +0100
+|  summary:     correct configure remoev ff_petsc variable
+|
+o  changeset:   3169:dead21419baf
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 15:59:37 2015 +0100
+|  summary:     correct typo in configure of petsc ...
+|
+o  changeset:   3168:841250c6ecc4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 16 12:51:05 2015 +0100
+|  summary:     correct find petsc
+|
+o  changeset:   3167:cd84708881af
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 19:04:29 2015 +0100
+|  summary:     correction  in caes of no compilion of hpddm
+|
+o  changeset:   3166:2ace2a1eda0b
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 15:53:04 2015 +0100
+|  summary:     correct typo in configure output
+|
+o  changeset:   3165:45280aa09820
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 15:43:25 2015 +0100
+|  summary:     rebuild  AutoGeneratedFile.tar.gz
+|
+o  changeset:   3164:0d87a638d273
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 15:41:24 2015 +0100
+|  summary:     put  change for hpdmm mlk old. Thank P. Jolivet.
+|
+o  changeset:   3163:6510f36c0063
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 13 10:14:01 2015 +0100
+|  summary:     add reinstall-hpddm targed in downlaod/Makefile
+|
+o  changeset:   3162:cd09add72c31
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 18:03:19 2015 +0100
+|  summary:     correct typo in find petsc
+|
+o  changeset:   3161:2d75c3267da7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 15:41:22 2015 +0100
+|  summary:     rebuild AutoGeneratedFile.tar.gz
+|
+o  changeset:   3160:07a30279fade
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 15:11:48 2015 +0100
+|  summary:     add notify of petsc
+|
+o  changeset:   3159:d71a3cc91c39
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 15:04:19 2015 +0100
+|  summary:     update INNOVATION file
+|
+o  changeset:   3158:7ffe24b7a08d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 15:02:49 2015 +0100
+|  summary:     pass to version 3.34-1 for PETSc interface ans schwarz plugins
+|
+o  changeset:   3157:83f4a2ab0c5f
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 12 11:20:52 2015 +0100
+|  summary:     coorect problem on version in PETSc interface and  MKL for schawtz.cpp
+|
+o  changeset:   3156:651407885920
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 12 10:11:33 2015 +0100
 |  summary:     correct typo after big change in plugin (now all test works)

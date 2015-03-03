@@ -1,5 +1,4 @@
-//ff-c++-LIBRARY-dep:   lapack
-//ff-c++-LIBRARY-dep:   blas
+//ff-c++-LIBRARY-dep:   lapack   blas
 #include "ff++.hpp"
 #include "RNM.hpp"
 #include "AFunction_ext.hpp" // Extension of "AFunction.hpp" to deal with more than 3 parameters function

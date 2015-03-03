@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <Windows.h>
 
 
@@ -133,7 +133,7 @@ static pstream **  pstream_init(pstream **const & p,string * const & a,string * 
     else  ExecError("Invalide mode pstream r,r+,w ");
     if(verbosity>10)  *ffapi::cout()  << "pstream_init: om " << om << "(" <<ios_base::in << ios_base::out << ") mode:"
         << mode << " '" << *a <<"'"<<  endl;
-#ifdef WIN32
+#ifdef _WIN32
     FILE * pp =_popen(a->c_str(),mode.c_str());
 #else
     FILE * pp =popen(a->c_str(),mode.c_str());
@@ -193,7 +193,7 @@ void inittt()
   Global.Add("flush","(",new OneOperator1<long,pstream **> ( cflush)) ; 
   Global.Add("sleep","(",new OneOperator1<long,long> ( ffsleep)) ; 
   Global.Add("usleep","(",new OneOperator1<long,long> ( ffusleep)) ; 
-#ifdef WIN32
+#ifdef _WIN32
    Global.New("onWIN32",CConstant<bool>(true));
 #else    
   Global.New("onWIN32",CConstant<bool>(false));

@@ -37,7 +37,7 @@ class  addingInitFunct {  public:
 } ;
 
 //
-#if WIN32
+#if _WIN32
 #define LOADINITIO {					\
     streambuf * so =ffapi::cout()->rdbuf() ;		\
     streambuf * si =ffapi::cin()->rdbuf() ;		\

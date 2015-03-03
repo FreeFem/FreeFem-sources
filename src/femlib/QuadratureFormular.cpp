@@ -259,7 +259,7 @@ QP1 *  GaussLegendre(int nn)
     int n=nn;
     double r, r1, p1, p2, p3, dp3;
     double eps=1e-16;
-    const double pi=M_PI;
+      const double pi=3.141592653589793238463;//M_PI;
     
     for(int i = 0,ii=n; i <= (n+1)/2-1; i++)
       { 
