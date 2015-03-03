@@ -785,6 +785,9 @@ void mylex::xxxx::close()
   if (filename && (macroarg==0) ) delete filename;
   
 }
+
+// <<mylex_input_filename>>
+
 void mylex::input(const char *  filename) 
 {
   ffassert(level<99 && level >= -1);
@@ -797,6 +800,8 @@ void mylex::input(const char *  filename)
   linenumber = 1;     
   level++;      
 }
+
+// <<mylex_input_string>>
 
 void mylex::input(const string & str,const string * name) 
 {
