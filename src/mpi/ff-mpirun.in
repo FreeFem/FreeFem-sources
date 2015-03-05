@@ -14,6 +14,7 @@ if [ -x "$0" -a -x "$dir/$ffmpi" ]; then
  else 
    ffmpi="$dir/$ffmpi";
  fi    
+fi
 if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
 a[0]="'$mpirun'"
 j=1;
