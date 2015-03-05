@@ -55,6 +55,11 @@ EOF
 my $errors='';
 if($can_use_threads){share(\$errors)}
 
+# Accumulate errors and print them all at the end of the script
+
+my $errors='';
+if($can_use_threads){share(\$errors)}
+
 # list required packages
 my $only=0;
 my %packs;

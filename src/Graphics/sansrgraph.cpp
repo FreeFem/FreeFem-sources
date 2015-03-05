@@ -194,6 +194,10 @@ void doatexitff()
 #endif
 
 }
+
+// ALH - 24/2/15 - the javascript main entry point is on the HTML page
+
+#ifndef EMSCRIPTEN
 extern int mymain(int argc,char **argv);
 int main (int argc, char **argv)
 {
@@ -201,7 +205,7 @@ int main (int argc, char **argv)
   int ret=mymain(argc,argv);
   return ret;
 }
-
+#endif // EMSCRIPTEN
 
 #endif
 void message(char *s);

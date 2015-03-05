@@ -28,7 +28,7 @@
  * headeralh brief="C++ version of Laplace.edp test script" cpp default=0 dox freefem upmc written
  */
 
-// [[file:~/ff/loc/src/fflib/ffapi.hpp::API]]
+// [[file:../src/fflib/ffapi.hpp::API]]
 #include "../src/fflib/ffapi.hpp"
 
 int main(int argc,char *argv[]){

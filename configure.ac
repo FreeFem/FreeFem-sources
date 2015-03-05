@@ -1628,9 +1628,9 @@ then
 	fi
 fi
 
-# PDF documentation building sometimes poses problems because of
-# pdfsync.sty. So we need to be able to disable it.
-enable_pdf=yes
+# PDF documentation building sometimes poses problems because of pdfsync.sty. So we need to be able to disable it.
+# FFCS - 9/4/14 - need to disable PDF also during FFCS build (which does not use the resulting PDF).
+
 AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
 if test "$enable_pdf" != no
 then
@@ -1639,16 +1639,6 @@ then
    then
 	AC_SUBST(DOCPDF,"freefem++doc.pdf")
    fi
-fi
-
-# HISTORY logging through CVS, but only if we are in a CVS working area
-if test -d CVS
-then
-	AC_CHECK_PROG(ff_history,cvs2cl,yes,no)
-	if test "$ff_history" = yes
-	then
-	   AC_SUBST(HISTORY,history)
-	fi
 fi
 
 # Choosing compilation options for the standard version (in src/std)

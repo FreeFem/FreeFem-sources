@@ -624,12 +624,16 @@ bool mylex::CallMacro(int &ret)
 
       return false;
   }
+
+  // <<FILE_macro>>
   else if(strcmp(buf,"FILE")==0)
   {
       plglval->str = newcopy(filename() );
       ret = STRING;
      return false;
   }
+
+  // <<LINE_macro>>
   else if(strcmp(buf,"LINE")==0)
   {
     plglval->lnum = linenumber;
@@ -781,6 +785,9 @@ void mylex::xxxx::close()
   if (filename && (macroarg==0) ) delete filename;
   
 }
+
+// <<mylex_input_filename>>
+
 void mylex::input(const char *  filename) 
 {
   ffassert(level<99 && level >= -1);
@@ -793,6 +800,8 @@ void mylex::input(const char *  filename)
   linenumber = 1;     
   level++;      
 }
+
+// <<mylex_input_string>>
 
 void mylex::input(const string & str,const string * name) 
 {

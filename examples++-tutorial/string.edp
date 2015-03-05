@@ -64,7 +64,11 @@ for (int i=0;i<10;++i)
 
 macro aa()  "tyty"  //
 cout << aa << endl; 
+
+// <<Stringification>> reference example
+
 cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
+
 cout << " unix time = " << time() << " " << ltime() << endl;
 
  
