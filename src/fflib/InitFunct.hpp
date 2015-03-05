@@ -65,7 +65,7 @@ class  addingInitFunct {  public:
   static  void  AutoLoadInit() { LOADINITIO ;				\
     if(verbosity>9) cout << "\n loadfile " NM  "\n" ;			\
     EXEC; }								\
-  int DoLoadInit() {							\
+ static int DoLoadInit() {							\
     if(verbosity>9)							\
       cout << " ****  " << NM  <<  " ****\n" ;				\
     addInitFunct(10000,&AutoLoadInit,NM);				\

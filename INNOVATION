@@ -1,3 +1,4 @@
+ - correction init plugin missing static in int DoLoadInit() ; 
 version 3.34-2 ( 20/2/2015) 
  - do correction do compilation for mpi version under window
      big change in ffapi.cpp rules ( use now call back) end init in mymain. 
