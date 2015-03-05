@@ -1,5 +1,9 @@
+version 3.35 (04/3/15)
+ - remark: .dll , .so, .dylib are incompatible with previous version.
+ - ff-run.in under windows (use src/bin-win32/FreeFem++-mpi 
+   and not src/mpi/FreeFem++-mpi for dll problem). 
  - correction init plugin missing static in int DoLoadInit() ; 
-version 3.34-2 ( 20/2/2015) 
+version 3.34-2 (20/2/2015) 
  - do correction do compilation for mpi version under window
      big change in ffapi.cpp rules ( use now call back) end init in mymain. 
      schwarz plugin run under windows without petsc  lob. 

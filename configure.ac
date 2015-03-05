@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.34-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.35,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -17,6 +17,7 @@ dnl : ${FFLAGS=""}
 
 # progg test  expact under windows 
 ff_TEST_FFPP="../src/nw/FreeFem++"
+ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
 
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
@@ -470,6 +471,8 @@ CYGWIN*|MINGW*)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
 		ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
+		ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
+
                 AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
 	fi
@@ -1842,6 +1845,7 @@ AC_SUBST(STDPROG,$ff_stdprog)
 ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
 AC_SUBST(TEST_FFPP,$ff_TEST_FFPP)
+AC_SUBST(TEST_FFPP_MPI,$ff_TEST_FFPP_MPI)
 AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")
 
 ff_with_mpi=-openmpi;

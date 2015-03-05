@@ -1,5 +1,15 @@
-@  changeset:   3202:f8b54b5a5eb0
+@  changeset:   3204:24487fc19570
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Mar 03 16:30:03 2015 +0100
+|  summary:     correct of non static function in LOADINIT plugin function.
+|
+o  changeset:   3203:113b5d72a002
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 24 22:29:53 2015 +0100
+|  summary:     correct pb of install under windows use of launchff++.exe
+|
+o  changeset:   3202:f8b54b5a5eb0
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Feb 23 18:28:47 2015 +0100
 |  summary:     add dcl of
