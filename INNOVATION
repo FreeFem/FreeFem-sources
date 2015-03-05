@@ -16,6 +16,8 @@
    correct small memory leak in use of routine due to debugstack. 
  - correct bug in periodic condition in case common dof with periodic.  
  - correct big bug in memory gestion of sparse matrix
+4/3/2014 (ALH)
+ - Edited for compatibility with Emscripten
 15/10/2014 (ALH)
  - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
  - Corrected --disable-pdf configuration option (useful for FFCS build)
