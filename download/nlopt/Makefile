@@ -17,8 +17,10 @@ $(SRCDIR)/FAIT: $(TARGZ)
 #	nlopt fails because it wants to install the octave components.  Not a bad idea in general but probably not when
 #	building ffcs.
 #
+	#remove c++11 flags for windfows  FH ..
+	cxxflags=`echo $(CXXFLAGS) |sed -e 's/[-]std=c[+][+]11//g'` ; \
 	cd $(SRCDIR) && ./configure --disable-dependency-tracking --with-cxx --prefix="$(FFDOWNLOAD)" CXX="$(CXX)"	\
-	CXXFLAGS="$(CXXFLAGS)" CC="$(CC)" CFLAGS="$(CFLAGS)" CP="$(CXXCPP)" "--without-threadlocal" "--without-octave"
+	CXXFLAGS="$(CXXFLAGS)" CC="$(CC)" CFLAGS="$(CFLAGS)" CPP="$$cxxflag" "--without-threadlocal" "--without-octave"
 #
 #	FFCS - 30/11/11 - we need to know when the building process breaks
 #

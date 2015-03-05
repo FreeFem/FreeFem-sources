@@ -16,21 +16,26 @@ AC_ARG_ENABLE(m64,[  --enable-m64	Turn on 64 bits architecture])
 if test "$enable_m64" = yes
 then
 	ff_m64=-m64	
-        CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS)
-        CHECK_COMPILE_FLAG(C,$ff_m64,CNOFLAGS)
+	ff_ok=no
+        CHECK_COMPILE_FLAG(C,$ff_m64,CFLAGS,ff_ok)
+        if test "$ff_ok" = yes ;then  CNOFLAGS="$CFLAGS $ff_m64";fi
 	CHECK_COMPILE_FLAG(C++,$ff_m64,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m64,FFLAGS)	
 #  add -fPIC on on 64 architecture 
-        CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
+   if test "$ff_ok" = yes ;then    
+        CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS,ff_ok)
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,-fPIC,FFLAGS)	
+  fi
 
 fi
 AC_ARG_ENABLE(m32,[  --enable-m32	Turn on 32 bits architecture])
 if test "$enable_m32" = yes 
 then
 	ff_m32=-m32	
-        CHECK_COMPILE_FLAG(C,$ff_m32,CFLAGS)
+	ff_ok=no
+        CHECK_COMPILE_FLAG(C,$ff_m32,CFLAGS,ff_ok)
+        if test "$ff_ok" = yes ;then  CNOFLAGS="$CFLAGS $ff_m32";fi
         CHECK_COMPILE_FLAG(C,$ff_m32,CNOFLAGS)
 	CHECK_COMPILE_FLAG(C++,$ff_m32,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m32,FFLAGS)	

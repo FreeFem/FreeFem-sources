@@ -27,7 +27,8 @@ FFD_OBJ2 = $(patsubst %.o,../fflib/%.o,$(FF_OBJ2))
 FFD_OBJIDE = $(patsubst %.o,../ide/%.o,$(FF_OBJIDE))
 FFD_OBJLMSH = $(patsubst %.o,../ide/%.o,$(FF_OBJLMSH))
 
-LIBS_FF = libff.dll FreeFem++-api.dll
+LIBS_FF = ../nw/ffapi.o  libff.dll 
+LIBS_FFmpi = ../mpi/ffapi.o libff.dll 
 
 
 
@@ -49,17 +50,8 @@ win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  launchff+
 	echo "on a fini"
 endif
 
-# ALH - 28/7/14 - the new automake default is to place the objects in
-# the same directory as the corresponding source file
-
-if ENABLE_FFCS
-libff.dll: ../Algo/*.o ../fflib/*.o ../femlib/*.o ../bamglib/*.o ../lglib/lg.tab.o ../Eigen/*.o FreeFem++-api.dll
+libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o	
 	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
-else
-libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o	\
-		FreeFem++-api.dll
-	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
-endif
 
 FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
@@ -70,7 +62,10 @@ FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.
 FreeFem++.exe: ../Graphics/*.o    ../mpi/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
-FreeFem++-mpi.exe:	../nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FF)
+## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll  ( J'ai compris)
+## dur dur ... 
+##  on mais init ffpt dans mymain.cpp 
+FreeFem++-mpi.exe:	../nw/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FFmpi)
 	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 $(MPI_LIB)
 bamg.exe:  libff.dll $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@ 
@@ -90,11 +85,6 @@ install-exec-local--win32-dll-target::
 	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  ff-c++ $(MPIPROG) $(DESTDIR)${bindir} 
 	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir} 
 install-exec-local--::
-
-
-# FFCS: create a separate DLL for ffapi so that it can be changed when running FreeFem++ or FFCS
-FreeFem++-api.dll:../fflib/ffapi.o
-	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@
 
 # FFCS: automake does not clean the exes automatically because they are not built automatically.
 clean-local::

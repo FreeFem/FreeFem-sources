@@ -42,6 +42,8 @@ using namespace std;
 
 //FFCS redirection
 #include "../fflib/ffapi.hpp"
+void ff_atend( void (*atendff)());
+
 
 #undef MPICH_SKIP_MPICXX
 #define  MPICH_SKIP_MPICXX

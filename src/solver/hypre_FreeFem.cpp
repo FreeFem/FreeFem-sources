@@ -114,7 +114,7 @@ double dwalltime() {
 				 double dwalltime()
 		 {
 #ifdef NO_TIMER
-			 /* no sys/times.h on WIN32 */
+			 /* no sys/times.h on _WIN32 */
 			 double tmp;
 			 tmp = 0.0;
 #else

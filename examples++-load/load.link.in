@@ -8,6 +8,7 @@ FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@'
 FFFFLAGS='@FFLAGS@'
 FFFLIBS='@FLIBS@'
+FFCXX11FLAGS='@CXX11FLAGS@'
 INCFF=
 if [ "@ENABLE_FFCS@" != "yes" ] ;then ffcs=0; else ffcs=1;fi 
 if [ -z "$CXX" ] ; then CXX='@CXX@' ; fi
@@ -111,6 +112,7 @@ while [ $# -ne 0 ]  ; do
 	CXXFLAGS=*) CXXFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	FFLAGS=*) FFLAGS=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	MPI_LIB=*) MPI_LIB=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
+	-std=*)	 CXXFLAGS="$1 $CXXFLAGS" ;;
 	-auto) autodep=yes;args=$argsp;;
 	-mpi) withmpi=yes;;
 	-nompi) MPI_LIB='';withmpi='';;
@@ -258,6 +260,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	    eval $CXX -c $INC $FLAGS $CXXFLAGS $FFCXXFLAGS  $PIC  $files
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
+	echo 
     fi
     if [ "$ffiles" ] ;then 
 	echo $F77 -c $FLAGS $FFLAGS $FFFFLAGS $INC $PIC $ffiles
@@ -266,6 +269,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	    eval $F77 -c $INC $FFLAGS $FLAGS $FFFFLAGS $PIC  $ffiles
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
+	echo 
     fi
     if [ "$CONLY" != yes ]; then
 	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
@@ -273,6 +277,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
+	echo 
 	if [  "$bin" != "." ]; then
 	    echo cp $out.$SUF  $bin
 	    test $do = yes &&   cp $out.$SUF  "$bin"
@@ -287,6 +292,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
 		eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $OWMPI $LIBS $DLL $OTHER $MPI_LIB
 		ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	    fi
+	    echo
 	fi
     fi
 fi

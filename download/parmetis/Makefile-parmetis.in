@@ -7,7 +7,7 @@ OPTFLAGS = @CFLAGS@
 
 # What options to be used by the compiler
 # FFCS - add path to mpi.h (required for MacOS 10.8 + MacPorts OpenMPI)
-COPTIONS =  -DHAVE_CONFIG_H -I. -I../../../.. -I @MPI_INC_DIR@ @FFMETIS_CFLAGS@ #-D_MSC_VER
+COPTIONS =  -DHAVE_CONFIG_H -I. -I../../../.. -I'@MPI_INC_DIR@'  @FFMETIS_CFLAGS@ #-D_MSC_VER
 
 # What options to be used by the loader
 LDOPTIONS = @LDFLAGS@ 

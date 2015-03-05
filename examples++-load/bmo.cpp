@@ -11,7 +11,7 @@ using namespace std;
 
 int irand_(int  i)
 {
-#ifdef WIN32
+#ifdef _WIN32
   srand(i);
   return rand();
 #else
@@ -23,7 +23,7 @@ int irand_(int  i)
 static /* Subroutine */ double  xrandme(integer ii)
 {
 
-#ifdef  WIN32
+#ifdef  _WIN32
     static double xrd2, xrd3, xrd4, xrd5, xrd6;
     /* System generated locals */
     int i__1, i__2, i__3, i__4;

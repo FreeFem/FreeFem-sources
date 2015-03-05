@@ -2897,6 +2897,7 @@ void 	SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
 }
 int main(int argc,  char** argv)
 {
+    ffapi::init(); 
     glutInit(&argc, argv);
     bool stereo=false;
     bool fullscreen = false;
