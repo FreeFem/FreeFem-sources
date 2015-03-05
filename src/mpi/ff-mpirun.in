@@ -8,7 +8,12 @@ bindir="@bindir@"
 nw=1
 if [ -n "@MPIRUN@"  ] ;then mpirun="@MPIRUN@"  ; fi
 ffmpi=FreeFem++-mpi
-if [ -x "$0" -a -x "$dir/$ffmpi" ]; then  ffmpi="$dir/$ffmpi"; fi    
+if [ -x "$0" -a -x "$dir/$ffmpi" ]; then 
+ if [ -n "@WIN32DLLTARGET@" -a -x "$dir/../bin-win32/$ffmpi.exe" ] ; then 
+   ffmpi="$dir/../bin-win32/$ffmpi.exe";
+ else 
+   ffmpi="$dir/$ffmpi";
+ fi    
 if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
 a[0]="'$mpirun'"
 j=1;
