@@ -1,5 +1,10 @@
-@  changeset:   3201:e7823efd942c
+@  changeset:   3202:f8b54b5a5eb0
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 23 18:28:47 2015 +0100
+|  summary:     add dcl of
+|
+o  changeset:   3201:e7823efd942c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 20 22:44:15 2015 +0100
 |  summary:     add Airy and Biry specail function
