@@ -1,5 +1,10 @@
-@  changeset:   3207:e2a1dfd6c657
+@  changeset:   3208:3fdbcdbcec08
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 06 11:53:16 2015 +0100
+|  summary:     take un coorect PETSC makefile (i progress under ubunutu)
+|
+o  changeset:   3207:e2a1dfd6c657
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 05 14:46:08 2015 +0100
 |  summary:     add forget fi in src/mpi/ff-mpirun.in

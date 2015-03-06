@@ -19,7 +19,7 @@ dnl : ${FFLAGS=""}
 ff_TEST_FFPP="../src/nw/FreeFem++"
 ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
 
-AC_PREREQ(2.50) dnl for AC_LANG_CASE
+AC_PREREQ(2.69) dnl for AC_LANG_CASE and check stuff 
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
