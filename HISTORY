@@ -1,5 +1,20 @@
-@  changeset:   3204:24487fc19570
+@  changeset:   3207:e2a1dfd6c657
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 05 14:46:08 2015 +0100
+|  summary:     add forget fi in src/mpi/ff-mpirun.in
+|
+o  changeset:   3206:f147b4c7e640
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 05 14:19:55 2015 +0100
+|  summary:     just put rev in INNOVATION
+|
+o  changeset:   3205:255fe77c041d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 05 14:18:12 2015 +0100
+|  summary:     pass to version 3.35
+|
+o  changeset:   3204:24487fc19570
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Mar 03 16:30:03 2015 +0100
 |  summary:     correct of non static function in LOADINIT plugin function.
