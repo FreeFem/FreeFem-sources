@@ -1012,7 +1012,7 @@ void Init_map_type()
         
     Dcl_Type<ios::openmode>();
     
-//  les types des variables 
+    // <<known_variable_types>> les types des variables 
     
   zzzfff->Add("real",typevarreal=atype<double*>());
   zzzfff->Add("int",atype<long*>());
