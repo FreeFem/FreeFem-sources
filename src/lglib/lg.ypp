@@ -232,6 +232,8 @@ void ff_atend(AtEnd f)
 %token <lnum> LNUM
 %token <dnum> DNUM
 %token <dnum> CNUM
+
+/* <<ID>> used by [[file:~/ff/src/fflib/lex.cpp::mylex_scan]] */
 %token <str> ID
 %token <str> FESPACEID
 %token <str> IDPARAM
@@ -255,6 +257,8 @@ void ff_atend(AtEnd f)
 
 %token <type> TYPE
 %token <type> FUNCTION
+
+/* <<FESPACE>> used by [[file:~/ff/src/fflib/lex.cpp::mylex_scan]] */
 %token <str> FESPACE
 %token <str> FESPACE1
 %token <str> FESPACE3
@@ -291,8 +295,11 @@ start:   input ENDOFFILE {
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
 			//FFCS: divert stream to FFCS
                         if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
-                        size_t sizestack = currentblock->size()+1024 ; //  before close 
+                        size_t sizestack = currentblock->size()+1024 ; //  before close
+
+                        // <<close_final_block>>
                         $1+=currentblock->close(currentblock);
+                        
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
@@ -300,7 +307,12 @@ start:   input ENDOFFILE {
                         size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
                         if(verbosity>2  || mpirank==0) cout << endl;  
-                        { Stack stack = newStack(sizestack);
+                        {
+
+                            // <<create_global_FF_stack>> calls [[file:../fflib/ffstack.hpp::newStack]]
+
+                            Stack stack = newStack(sizestack);
+                            
                         double CPUcompile= CPUtime();
                         try {                  
                           $1.eval(stack);}
@@ -319,7 +331,12 @@ start:   input ENDOFFILE {
 
                         if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
 			    <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
+
+
+                        // <<delete_global_FF_stack>>
+
                         deleteStack(stack);
+                        
                         //debugstack.clear() 
                         } 
                         fingraphique();
@@ -760,6 +777,8 @@ int Compile()
 
   int retvalue=0;
 
+  // <<initialize_currentblock>>
+  
   currentblock=0;
   Block::open(currentblock);  
   try {
