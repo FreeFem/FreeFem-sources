@@ -158,7 +158,10 @@ void ff_atend(AtEnd f)
  long lnum;
  char * str;
  char oper[8];
+
+ /* [[file:~/ff/src/fflib/AFunction.hpp::CC_F0]] */
  CC_F0 cexp;
+ 
  Routine   *routine;
  AC_F0 args;
  aType type;
