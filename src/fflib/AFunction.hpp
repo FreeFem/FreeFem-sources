@@ -1373,7 +1373,7 @@ Type_Expr CConstant(const R & v)
   return make_pair(map_type[typeid(R).name()],new  EConstant<R>(v));
  }
 
-/// <<CC_F0>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
+/// <<CC_F0>>, same as [[C_F0]] but without constructor/destructor to be used in union [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class CC_F0 {
   Expression f; // [[Expression]]
