@@ -30,15 +30,18 @@ all-local: scotch
 
 # Downloading and compiling scotch
 # -------------------------------
+# https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
 # http://gforge.inria.fr/frs/download.php/23391/scotch_5.1.7_esmumps.tar.gz
 # Scotch information
 DIRPKG=../pkg
 SRCDIR=scotch_$(scotch_VERSION)
 PACKAGE=$(DIRPKG)/scotch_$(scotch_VERSION_LOCAL).tar.gz
-SERVER=https://gforge.inria.fr/frs/download.php/23391
+SERVER=https://gforge.inria.fr/frs/download.php/file/34099
+#https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
+#https://gforge.inria.fr/frs/download.php/23391
 INSTALL=../..
-scotch_VERSION=5.1_esmumps
-scotch_VERSION_LOCAL=5.1.6_esmumps
+scotch_VERSION=6.0.3
+scotch_VERSION_LOCAL=6.0.3
 #  trick to no in MPI on NOT .. 
 TESTMPI= test -n "$(CCP)"
 scotch: FAIRE
@@ -73,15 +76,15 @@ install:$(SRCDIR)/FAIT
 WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib -lptesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch LD -L@DIR@/lib -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
-	cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
+	#cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
+	#cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)
 
 $(PACKAGE):

@@ -36,7 +36,7 @@ DIRPKG=../pkg
 SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 INSTALL=../..
-VERSION=4.10.0
+VERSION=5.0.0
 
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 
