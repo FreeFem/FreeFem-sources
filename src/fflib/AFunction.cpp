@@ -1074,7 +1074,8 @@ void Init_map_type()
       
      Global.New("verbosity",CPValue<long>(verbosity));
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
-     
+
+     // <<cout>>
      Global.New("cout",CConstant<ostream*>(&cout));
      Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));

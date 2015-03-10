@@ -97,9 +97,9 @@ class ListOfInst;
 class Polymorphic;
 class OneOperator;
 
-/// <<Expression>> is used as the type of the local list contained in ListOfInst
+/// <<Expression>> is used as the type of the local list contained in ListOfInst 
 
-typedef  E_F0  *  Expression;
+typedef  E_F0  *  Expression; // [[E_F0]]
 
 class AC_F0;
 class basicAC_F0;
@@ -343,8 +343,9 @@ class C_LF1;
 //  3 types of function/expression  0,1,2 args  
 
 /// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
-/// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in [[ListOfInst]], and evaluated
-/// when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called (see \ref index).
+/// language (see lg.ypp). E_F0 pointers are typed as [[Expression]], stored as a list in [[ListOfInst]], and evaluated
+/// when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called at
+/// [[file:~/ff/src/lglib/lg.ypp::evaluate_parsed_FF_script]] (see \ref index).
 
 class E_F0 :public CodeAlloc 
    {
@@ -1371,11 +1372,10 @@ Type_Expr CConstant(const R & v)
   return make_pair(map_type[typeid(R).name()],new  EConstant<R>(v));
  }
 
-
 /// <<CC_F0>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class CC_F0 {
-  Expression f;
+  Expression f; // [[Expression]]
   aType r;
 public:
   void operator=(const C_F0& c) { f=c.f;r=c.r;;} 
@@ -1391,7 +1391,7 @@ public:
 /// <<ListOfInst>>
 
 class ListOfInst :
-  public E_F0mps /*[[E_F0mps]]*/
+  public E_F0mps // [[E_F0mps]]
 { 
   int n;
   Expression   *   list;
