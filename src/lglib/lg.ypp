@@ -159,7 +159,7 @@ void ff_atend(AtEnd f)
  char * str;
  char oper[8];
 
- /* [[file:~/ff/src/fflib/AFunction.hpp::CC_F0]] */
+ /* [[file:../fflib/AFunction.hpp::CC_F0]] */
  CC_F0 cexp;
  
  Routine   *routine;
@@ -236,7 +236,7 @@ void ff_atend(AtEnd f)
 %token <dnum> DNUM
 %token <dnum> CNUM
 
-/* <<ID>> used by [[file:~/ff/src/fflib/lex.cpp::mylex_scan]] */
+/* <<ID>> used by [[file:../fflib/lex.cpp::mylex_scan]] */
 %token <str> ID
 %token <str> FESPACEID
 %token <str> IDPARAM
@@ -261,7 +261,7 @@ void ff_atend(AtEnd f)
 %token <type> TYPE
 %token <type> FUNCTION
 
-/* <<FESPACE>> used by [[file:~/ff/src/fflib/lex.cpp::mylex_scan]] */
+/* <<FESPACE>> used by [[file:../fflib/lex.cpp::mylex_scan]] */
 %token <str> FESPACE
 %token <str> FESPACE1
 %token <str> FESPACE3
