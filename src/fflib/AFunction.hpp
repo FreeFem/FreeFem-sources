@@ -1364,7 +1364,8 @@ Type_Expr CPPValue(R *& v)
    throwassert(map_type[typeid(R*).name()]);
   return make_pair(map_type[typeid(R*).name()],new PPValue<R>(&v));
  }
- 
+
+// <<CConstant>>
 template<class R >
 Type_Expr CConstant(const R & v)
  {
