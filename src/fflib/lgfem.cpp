@@ -3484,12 +3484,11 @@ AnyType Plot::operator()(Stack s) const{
 	if (nargs[20]) (theplot<< 20L)  <= (echelle=GetAny<double>((*nargs[20])(s)));
 
 	// FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
-	// FF parameters above changes) received in
-	// [[file:~/ffcs/draft/src/visudata.cpp::receiving_plot_parameters]]. When adding a parameter here, do _NOT_
-	// forget to change the size of the array at [[number_of_distinct_named_parameters_for_plot]] and to name the
-	// new parameters at [[Plot_name_param]]. Also update the list of displayed values at
-	// [[file:~/ffcs/draft/src/plot.cpp::Plotparam_listvalues]] and read the parameter value from the pipe at
-	// [[file:~/ffcs/draft/src/visudata.cpp::receiving_plot_parameters]].
+	// FF parameters above changes) received in [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]]. When
+	// adding a parameter here, do _NOT_ forget to change the size of the array at
+	// [[number_of_distinct_named_parameters_for_plot]] and to name the new parameters at [[Plot_name_param]]. Also
+	// update the list of displayed values at [[file:../ffcs/src/plot.cpp::Plotparam_listvalues]] and read the
+	// parameter value from the pipe at [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]].
 
 #define VTK_START 20
 #define SEND_VTK_PARAM(index,type)					\
