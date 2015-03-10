@@ -12,14 +12,78 @@ all-local: parmetis
 DIRPKG=../pkg
 SRCDIR=ParMetis-$(parmetis_VERSION)
 PACKAGE=$(DIRPKG)/ParMetis-$(parmetis_VERSION).tar.gz
-SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD
+SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis
 
 INSTALL=../..
-parmetis_VERSION=3.1.1
+parmetis_VERSION=4.0.3
 
-parmetis: WHERE.done
+parmetis: FAIRE
 
-compile.done:$(SRCDIR)/tags Makefile.in
+$(SRCDIR)/FAIT:
+	$(MAKE) install.done
+	touch $(SRCDIR)/FAIT
+
+install.done:$(SRCDIR)/tag-compile
+	-mkdir -p ../include/parmetis
+	-mkdir -p ../lib/parmetis
+	test -z "$(MPIRUN)" || cp $(SRCDIR)/libparmetis.a ../lib/parmetis
+	cp $(SRCDIR)/libmetis.a ../lib/parmetis
+	cp $(SRCDIR)/include/*.h ../include/parmetis
+	cp $(SRCDIR)/metis/include/*.h ../include/parmetis
+	touch $@
+
+FAIRE: $(SRCDIR)/FAIT 
+	$(MAKE) WHERE
+	touch FAIRE
+
+
+$(SRCDIR)/tag-compile: $(SRCDIR)/tags
+	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I.'
+	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS'
+	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS) -I../metis/include  -I../include  -I.'
+	mkdir $(SRCDIR)/lib
+	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
+	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
+	touch $(SRCDIR)/tag-compile
+
+
+
+WHERE: install.done
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+		test -z "$(MPIRUN)" ||echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+		test -z "$(MPIRUN)" ||echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+	touch $@ ;\
+	fi
+
+
+OBJS_METIS=auxapi.o	coarsen.o	fm.o		graph.o	kwayrefine.o	minconn.o	options.o	separator.o	timing.o \
+balance.o	compress.o	fortran.o	initpart.o	mcutil.o	mincover.o	parmetis.o	sfm.o		util.o \
+bucketsort.o	contig.o	frename.o	kmetis.o	mesh.o	mmd.o		pmetis.o	srefine.o	wspace.o \
+checkgraph.o	debug.o	gklib.o	kwayfm.o	meshpart.o	ometis.o	refine.o	stat.o
+
+OBJS_GK=b64.o		error.o	fs.o		graph.o	itemsets.o	omp.o		random.o	sort.o	tokenizer.o \
+blas.o	evaluate.o	getopt.o	htable.o	mcore.o	pdb.o		rw.o		string.o	util.o \
+csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o 
+
+OBJS_PARMETIS=akwayfm.c.o		diffutil.c.o		initpart.c.o		move.c.o		renumber.c.o		wave.c.o \
+ametis.c.o		frename.c.o		kmetis.c.o		msetup.c.o		rmetis.c.o		weird.c.o  \
+balancemylink.c.o	gkmetis.c.o		kwayrefine.c.o		node_refine.c.o		selectq.c.o		wspace.c.o \
+comm.c.o		gkmpi.c.o		match.c.o		ometis.c.o		serial.c.o		xyzpart.c.o \
+csrmatch.c.o		graph.c.o		mdiffusion.c.o		pspases.c.o		stat.c.o \
+ctrl.c.o		initbalance.c.o		mesh.c.o		redomylink.c.o		timer.c.o \
+debug.c.o		initmsection.c.o	mmetis.c.o		remap.c.o		util.c.o 
+
+
+
+# FFCS: patch is necessary for metis 4.0, but not for 4.0.3
+$(SRCDIR)/tags: $(PACKAGE)
+	tar xvzf $(PACKAGE)
+	touch $(SRCDIR)/tags
+
+
+
+
+compile.done-old:$(SRCDIR)/tags Makefile.in
 	-mkdir -p "../lib/parmetis"
 	-mkdir -p "../include/parmetis"
 	cp Makefile.in $(SRCDIR)
@@ -29,7 +93,7 @@ compile.done:$(SRCDIR)/tags Makefile.in
 	touch $@
 
 # FFCS - simpler makefile
-install.done:compile.done
+install.done-old:compile.done
 #	cp $(SRCDIR)/libparmetis.a $(SRCDIR)/$(INSTALL)/lib
 #	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/parmetis.h ../include/parmetis
@@ -54,9 +118,9 @@ Makefile.in: ../../config.status Makefile-parmetis.in
 
 
 
-$(SRCDIR)/tags: $(PACKAGE)
+$(SRCDIR)/tags-old: $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	patch -p0  <parmetis-3.1.1.patch
+	#patch -p0  <parmetis-3.1.1.patch
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = .*$$;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
@@ -85,6 +149,6 @@ clean:
 	-rm Makefile.in $(SRCDIR)/tags
 	-rm -rf ../lib/parmetis
 	-rm -rf ../include/parmetis
-	-rm -rf ../include/metis
+#	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm *.done

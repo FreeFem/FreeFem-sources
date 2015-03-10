@@ -917,6 +917,388 @@ namespace  Fem2D {
       count++;
     }
     
+    class TypeOfFE_RT2_2d :public InitTypeOfRTk_2d, public  TypeOfFE {
+    public:
+        static double Pi_h_coef[];
+        bool Ortho;
+        
+        TypeOfFE_RT2_2d(bool ortho)
+        :  InitTypeOfRTk_2d(2),
+        TypeOfFE(ndf,2,Data,2,1,
+                 2*2*3*QFE.n+QFK.n*2,// nb coef mat interpole
+                 3*QFE.n+QFK.n, // nb P interpolation
+                 0),
+        Ortho(ortho)
+        {
+            //      cout << " Pk = " << k << endl;
+            int dofE=this->k+1;// == 3
+            int dofKs=(dofE-1)*(dofE)/2;//== 3 ..
+            int kkk=0,i=0;
+            for (int e=0;e<3;++e)
+                for (int p=0;p<QFE.n;++p)
+                {
+                    R2 A(TriangleHat[VerticesOfTriangularEdge[e][0]]);
+                    R2 B(TriangleHat[VerticesOfTriangularEdge[e][1]]);
+                    for( int l =0; l<dofE ;++l )
+                    {
+                    pij_alpha[kkk++]= IPJ(dofE*e+l,i,0);
+                    pij_alpha[kkk++]= IPJ(dofE*e+l,i,1);
+                    }
+                    
+                    
+                    P_Pi_h[i++]= B*(QFE[p].x)+ A*(1.-QFE[p].x);// X=0 => A  X=1 => B;
+                }
+  
+            
+            
+                for (int p=0;p<QFK.n;++p)
+                {
+                int i6=3*k,i7=i6+1;
+                if(Ortho) Exchange(i6,i7); // x,y -> -y, x
+                 for(int l= 0; l< dofKs; ++l )
+                  {
+                    pij_alpha[kkk++]= IPJ(i6,i,0);
+                    pij_alpha[kkk++]= IPJ(i7,i++,1);
+                    i6 +=2;
+                    i7 +=2;
+                  }
+                  P_Pi_h[i++]= QFK[p];
+                }
+              
+            
+            //cout << kkk << " kkk == " << this->pij_alpha.N() << endl;
+            //cout << i << "  ii == " << this->P_Pi_h.N() << endl;
+            ffassert(kkk==this->pij_alpha.N());
+            ffassert(i==this->P_Pi_h.N() );
+        }
+        
+        void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
+        { // compute the coef of interpolation ...
+            const Triangle & T(K.T);
+            int k=0;
+            // magic fom:
+            //
+            // inv of [[4!,3!,2!2!],[3!,2!2!,2!],[2!2!,3!,4!]]/5! =
+            const double a11=9,a12=-18,a22=3,b11=-18, b12=84;// thank maple ..
+            // inv [[2, 1, 1], [1, 2, 1], [1, 1, 2]]/12 = diag [9, hors diag -3]
+            for (int i=0;i<3;i++)
+            {
+                R2 E(Ortho? T.Edge(i) : -T.Edge(i).perp());
+                
+                R s = T.EdgeOrientation(i) ;
+                for (int p=0;p<QFE.n;++p)
+                {
+                    R l1 = QFE[p].x, l2 = 1-QFE[p].x;
+                    R l11=l1*l1;
+                    R l22=l2*l2;
+                    R l21=l2*l1;
+                    /*
+                      l1^2, l1*l2 l2^2 
+                       int l1^n l2^(4-n) = (n!)(4-n)!/5!
+                      (l1^4,l1l2 l1^2,
+                     */
+                    
+                    R p0= a11*l11+a12*l21+a22*l22;// poly othogonaux to l11,l21, l22
+                    R p1= b11*l11+b12*l21+b11*l22;//
+                    R p2= a22*l11+a12*l21+a11*l22;//
+                    R sa=s*QFE[p].a;
+                    R cc2 = sa*p0; //
+                    R cc1 = sa*p1; //
+                    R cc0 = sa*p2; //
+                    if(s<0) Exchange(cc2,cc0); // exch l11,l22
+                    v[k++]= cc0*E.x;
+                    v[k++]= cc0*E.y;
+                    v[k++]= cc1*E.x;
+                    v[k++]= cc1*E.y;
+                    v[k++]= cc2*E.x;
+                    v[k++]= cc2*E.y;
+                }
+            }
+            R sy= Ortho ? -1 : 1;
+            R dd=9, hd=-3;
+            R ll[3],lo[3];
+            for (int p=0;p<QFK.n;++p)
+            {
+                QFK[p].toBary(ll);
+                // poly orto ..
+                lo[0]=ll[0]*dd+ll[1]*hd+ll[2]*hd;
+                lo[1]=ll[0]*hd+ll[1]*dd+ll[2]*hd;
+                lo[2]=ll[0]*hd+ll[1]*hd+ll[2]*dd;
+                
+                for( int l=0; l<3;++l)
+                {
+                  v[k++]=sy*QFK[p].a * T.area*lo[l];
+                  v[k++]=QFK[p].a * T.area*lo[l];
+                }
+            }
+            // cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
+            assert(k==this->pij_alpha.N());
+        }
+        void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+    } ;
+    // ENDOFCLASS TypeOfFE_PkEdge
+    
+    void TypeOfFE_RT2_2d::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & Phat,RNMK_ & val) const
+    {
+        R2 X=K(Phat);
+        R2 Q[]={ R2(K[0]), R2(K[1]),R2(K[2])};
+        R2 A[]={ R2(Q[1],Q[2]), R2(Q[2],Q[0]), R2(Q[0],Q[1])};
+        R2 B[]={ R2(A[1],A[2]), R2(A[2],A[0]), R2(A[0],A[1])};
+        R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y;
+        R L[3]={l0,l1,l2};
+        assert(0); // in progress F. Hecht ...
+        static long  count=10;
+        /*
+         if( count < 0)
+         {
+         cout << "TypeOfFE_RT2_2d "<< " " << A[0]+A[1]+A[2] << " " <<  B[0]+B[1]+B[2] << endl;
+         cout << det(Q[0],Q[1],Q[2]) << " X = " << X << " Phat ="  << Phat << endl;
+         cout<< "Q="  << Q[0]<< "," << Q[1] << " , " << Q[2] <<endl;
+         cout<< "A="  << A[0]<< "," << A[1] << " , " << A[2] << endl;
+         cout<< "B="  << B[0]<< "," << B[1] << " , " << B[2] <<endl;
+         }
+         
+         THE 2 DOF k=0,1  are: on edge e   f -> \int_e f \lambda_{e+k} . n_e
+         THE 2 internal dof are : f -> \int_K f e_i  where e_i is the canonical basis of R^2
+         
+         
+         so the basis function are
+         
+         let call \phi_i the basic fonction of RT0 (without orientation) so the normal is exterior.
+         \phi_i (X) = ( X- Q_i ) / (2 |K|) =  \lambda_{i+1} Curl( \lambda_{i+2}) - \lambda_{i+2} Curl( \lambda_{i+1})
+         
+         remarque les bulles sont du type
+         \phi_i l_i l_k soit 9 bulles qui ne sont pas independent ..
+         car \sum \phi_i l_i = 0  => 6 bulles independents
+         
+         The Edges function j=0,1,2 , for ll_j = l1^2, l1l2 l2^2 on  edge i+1,i+2 with k=1,2 : lk = \lambda_{i+k}
+         \phi_i ll_j + c_jk \phi_i l_i l_k to remove the 3 internal node
+         
+         2 term int  \phi_i ll_j l_k =
+             Curl( \lambda_{i+2}) * 
+           - Curl( \lambda_{i+1}) *
+         // c'est le bordel a calculer ..
+         i1= i+j+1, i2= i+2-j  remark : {i,i1,i2} <=> {i,i+1,i+2}
+         \phi_i ( \lambda_{i1} - 4/3 \lambda_i) + 1/3 \phi_{i1}\lambda_{i1}
+         
+         internal function are ???
+         \sum   bx_i \phi_{i}\lambda_{i}
+         \sum   by_i \phi_{i}\lambda_{i}
+         \sum bx_i = 1/c0
+         \sum by_i = 1/c0
+         we have
+         \phi_{i} = A_{i+2}  \lambda_{i+1} - A_{i+1}  \lambda_{i+2}
+         with
+         A_i = Th.edge(i)/ ( 2 |K])
+         B_i = A_{i+2} - A_{i+1}
+         det( B_i ) = 9 *2 area
+         to be homogene
+         cc0= |K]  sqrt(area)*sqrt(18)
+         ccK= 9 *2 area *c0;
+         bx_0 = det(R2(cc0,0),B1,B2)/ ( cck)
+         
+         
+         so all basic d function are the sum of 4 functions
+         Qu'il faut calculer ...
+         
+         sum_{k=0}^4  c_k  phi_{p_k} lambda_{l_k} lambda{ll_k}
+         
+         */
+        
+        
+        assert( val.N()>=ndf);
+        assert(val.M()==2);
+        int ee=0;
+        
+        val=0;
+        
+        R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2
+        //3*3 + 2*3 = 15
+        int pI[15][4];// store p_k
+        int lI[15][4];// store l_k
+        int llI[15][4];// store ll_k
+        R   cI[15][4];// store c_k
+        
+        int df=0;
+        R CKK = 2* K.area;
+        for(int e=0;e<3;++e)
+        {
+            int i=e;
+            int ii[2]={(e+1)%3,(e+2)%3};
+            int i2=(e+2)%3;
+            R s = K.EdgeOrientation(e)/CKK;
+            if(s<0) Exchange(ii[0],ii[1]); //
+            for(int k=0;k<3;++k,df++)
+            {
+                pI[df][0]= i;
+                lI[df][0]= ii[k];
+                llI[df][0]= ii[k];
+                cI[df][0]= s;
+                
+                pI[df][1]= i;
+                lI[df][1]= i;
+                cI[df][1]= -s*4./3.;
+                
+                pI[df][2]= ii[k];
+                lI[df][2]= ii[k];
+                cI[df][2]= s/3.;
+                
+                
+            }
+        }
+        /*
+         if(count<0)
+         {
+         // verif.
+         R2 PP[] ={ R2(0.5,0),R2(0.5,0.5),R2(0,0.5)};
+         int err=0;
+         for(int df = 0;df < 6;++df)
+         {
+         cout << " df = " << df << " : \t";
+         for(int k=0;k<3;++k)
+         cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << "  \t  ";
+         cout << endl;
+         
+         R2 fd;
+         for(int p=0;p<3;++p)
+         {
+         R L[3]; PP[p].toBary(L);
+         R2 X=K(PP[p]);
+         cout << X << " ,\t " << L[0] << " " << L[1] << " " <<L[2] ;
+         R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2
+         
+         R2 ff = (cI[df][0] * L[lI[df][0]]) * phi[pI[df][0]]
+         + (cI[df][1] * L[lI[df][1]]) * phi[pI[df][1]]
+         + (cI[df][2] * L[lI[df][2]]) * phi[pI[df][2]]
+         ;
+         fd += ff;
+         cout << " :::: " << 3*ff
+         << " :  " <<  3*(cI[df][0] * L[lI[df][0]]) * phi[pI[df][0]]
+         << " ; " <<  3*(cI[df][1] * L[lI[df][1]]) * phi[pI[df][1]]
+         << " ; " <<  3*(cI[df][2] * L[lI[df][2]]) * phi[pI[df][2]]
+         << " :  " <<  3*(cI[df][0] * L[lI[df][0]])  <<"(" <<  phi[pI[df][0]] <<")"
+         << " ; " <<  3*(cI[df][1] * L[lI[df][1]]) <<"(" << phi[pI[df][1]]<<")"
+         << " ; " <<  3*(cI[df][2] * L[lI[df][2]]) <<"(" << phi[pI[df][2]]<<")"
+         <<endl;
+         
+         }
+         if( fd.norme() > 1e-5) err++;
+         cout << " Verif " << df << " [ " << 3*fd << " ] " << fd.norme()  <<endl;
+         }
+         ffassert(err==0);
+         
+         }
+         */
+        R cK = 18.* K.area;
+        R c0 = sqrt(cK);
+        R cb = 12/c0;
+        R ccK = K.area*cK/c0;
+        for(int k=0;k<2;++k,df++)
+        {
+            
+            R2 PB(0,0);
+            PB[k]=cb;
+            // if( count <5) cout << " PB = " << PB << " df = " << df << " " << cK << " ==" << det(B[0] ,B[1],B[2]) <<endl;
+            R b0 = det(PB   ,B[1],B[2])/ ccK;
+            R b1 = det(B[0],PB   ,B[2])/ ccK;
+            R b2 = det(B[0],B[1],PB   )/ ccK;
+            
+            // if( count <5) cout << " S= "<< b0*B[0]+b1*B[1]+b2*B[2] << " s= " << (b0+b1+b2) << " b=" << b0 << " " << b1 << " " << b2 <<  endl;
+            pI[df][0]= 0;
+            lI[df][0]= 0;
+            cI[df][0]= b0;
+            
+            pI[df][1]= 1;
+            lI[df][1]= 1;
+            cI[df][1]= b1;
+            
+            pI[df][2]= 2;
+            lI[df][2]= 2;
+            cI[df][2]= b2;
+            
+        }
+        /*
+         if( count< 5)
+         {
+         cout << Phat << " " << X << endl;
+         for( int e=0;e<3;++e)
+         {  int e1= (e+1)%3, e2=(e+2)%3 ;
+         cout << " phi e " << phi[e] << " == " << L[e1]*A[e2] -  L[e2]*A[e1] << endl;
+         }
+         for(int df=0;df< 8;++df)
+         {
+         cout << " df = " << df << " : \t";
+         for(int k=0;k<3;++k)
+         cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << "  \t  ";
+         cout << endl;    
+         }
+         
+         }
+         */      
+        int ortho0=0,ortho1=1; R s1ortho=1;
+        if(Ortho) { ortho0=1; ortho1=0; s1ortho=-1;}
+        
+        if (whatd[op_id])
+        {
+            
+            for(int df=0;df< 15;++df)
+            {
+                R2 fd(0.,0.) ;
+                for(int k=0;k<3;++k) {
+                    fd += (cI[df][k] * L[lI[df][k]]* L[llI[df][k]]) * phi[pI[df][k]] ;
+                }
+                
+                val(df,ortho0,op_id)= fd.x;
+                val(df,ortho1,op_id)= s1ortho*fd.y;
+            }
+        }
+        
+        
+        if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
+        {
+            R2 DL[3]={K.H(0),K.H(1),K.H(2)};
+            R2 Dphix(1,0);
+            R2 Dphiy(0,1);
+            
+            if (whatd[op_dx])
+            {
+                
+                for(int df=0;df< 15;++df)
+                {
+                    R2 fd(0.,0.);
+                    for(int k=0;k<3;++k)
+                        fd += cI[df][k] * (  L[llI[df][k]]* (DL[lI[df][k]].x * phi[pI[df][k]] + L[lI[df][k]]* Dphix)
+                                           + DL[llI[df][k]].x* L[lI[df][k]]* phi[pI[df][k]]);
+                    val(df,ortho0,op_dx)= fd.x;
+                    val(df,ortho1,op_dx)= s1ortho*fd.y;	      
+                }
+                
+            }
+            if (whatd[op_dy])
+            {
+                
+                for(int df=0;df< 15;++df)
+                {
+                    R2 fd(0.,0.);
+                    for(int k=0;k<3;++k)
+                        fd += cI[df][k] * (  L[llI[df][k]]* (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy)
+                                           + DL[llI[df][k]].y* L[lI[df][k]]* phi[pI[df][k]]);
+                   //     fd += cI[df][k] * (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy);
+                    val(df,ortho0,op_dy)= fd.x;
+                    val(df,ortho1,op_dy)= s1ortho*fd.y;	      
+                }
+                
+            }
+            if(whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
+            {
+                cout << " to do FH RT1 dxx, dyy dxy " << endl; 
+                ffassert(0); 
+            }
+            
+        }
+        count++;
+    }
+
     
     class TypeOfFE_BDM1_2d : public  TypeOfFE { 
     public:  
@@ -1093,16 +1475,23 @@ namespace  Fem2D {
     
     // a static variable to add the finite element to freefem++
     static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2d(false);// RT1    
-    static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2dOrtho(true);// RT1ortho  
-    static TypeOfFE_BDM1_2d Elm_TypeOfFE_BDM1_2d(false);// BDM1    
+    static TypeOfFE_RT1_2d Elm_TypeOfFE_RT1_2dOrtho(true);// RT1ortho
+    static TypeOfFE_RT2_2d Elm_TypeOfFE_RT2_2d(false);// RT1
+    static TypeOfFE_RT2_2d Elm_TypeOfFE_RT2_2dOrtho(true);// RT1ortho
+
+    static TypeOfFE_BDM1_2d Elm_TypeOfFE_BDM1_2d(false);// BDM1
     static TypeOfFE_BDM1_2d Elm_TypeOfFE_BDM1_2dOrtho(true);// BDM1ortho  
     static TypeOfFE_TD_NNS0 Elm_TD_NNS;
     static TypeOfFE_TD_NNS1 Elm_TD_NNS1;
     static AddNewFE FE__TD_NNS("TDNNS0",&Elm_TD_NNS); 
     static AddNewFE FE__TD_NNS1("TDNNS1",&Elm_TD_NNS1);     
     static AddNewFE Elm__TypeOfFE_RT1_2d("RT1",&Elm_TypeOfFE_RT1_2d); 
-    static AddNewFE Elm__TypeOfFE_RT1_2dOrtho("RT1Ortho",&Elm_TypeOfFE_RT1_2dOrtho); 
-    static AddNewFE Elm__TypeOfFE_BDM1_2d("BDM1",&Elm_TypeOfFE_BDM1_2d); 
+    static AddNewFE Elm__TypeOfFE_RT1_2dOrtho("RT1Ortho",&Elm_TypeOfFE_RT1_2dOrtho);
+    
+    static AddNewFE Elm__TypeOfFE_RT2_2d("RT2",&Elm_TypeOfFE_RT1_2d);
+    static AddNewFE Elm__TypeOfFE_RT2_2dOrtho("RT2Ortho",&Elm_TypeOfFE_RT1_2dOrtho);
+
+    static AddNewFE Elm__TypeOfFE_BDM1_2d("BDM1",&Elm_TypeOfFE_BDM1_2d);
     static AddNewFE Elm__TypeOfFE_BDM1_2dOrtho("BDM1Ortho",&Elm_TypeOfFE_BDM1_2dOrtho); 
     
 } // FEM2d namespace 
