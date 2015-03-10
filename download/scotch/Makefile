@@ -60,11 +60,11 @@ Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 # FFCS - 16/1/13 - what was "$(CCP)" used for?
 $(SRCDIR)/FAIT: $(SRCDIR) Makefile.inc
 	cp Makefile.inc $(SRCDIR)/src
-	cd $(SRCDIR)/src && $(MAKE) scotch
+	cd $(SRCDIR)/src && $(MAKE) scotch esmumps
 #
 #	FFCS - 16/1/13 - this crashes when run in parallel
 #       FH: compile pt only if mpi is here 
-	if $(TESTMPI) ; then  cd $(SRCDIR)/src && $(MAKE) -j1 ptscotch ; fi
+	if $(TESTMPI) ; then  cd $(SRCDIR)/src && $(MAKE) -j1 ptscotch ptesmumps ; fi
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/FAIT
@@ -76,9 +76,9 @@ install:$(SRCDIR)/FAIT
 WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib  -lesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotch LD -L@DIR@/lib -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch LD -L@DIR@/lib  -lesmumps -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 
 $(SRCDIR): $(PACKAGE)

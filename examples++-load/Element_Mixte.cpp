@@ -925,7 +925,7 @@ namespace  Fem2D {
         TypeOfFE_RT2_2d(bool ortho)
         :  InitTypeOfRTk_2d(2),
         TypeOfFE(ndf,2,Data,2,1,
-                 2*2*3*QFE.n+QFK.n*2,// nb coef mat interpole
+                 2*3*3*QFE.n+QFK.n*2*3,// nb coef mat interpole
                  3*QFE.n+QFK.n, // nb P interpolation
                  0),
         Ortho(ortho)
@@ -958,7 +958,7 @@ namespace  Fem2D {
                  for(int l= 0; l< dofKs; ++l )
                   {
                     pij_alpha[kkk++]= IPJ(i6,i,0);
-                    pij_alpha[kkk++]= IPJ(i7,i++,1);
+                    pij_alpha[kkk++]= IPJ(i7,i,1);
                     i6 +=2;
                     i7 +=2;
                   }
@@ -966,8 +966,8 @@ namespace  Fem2D {
                 }
               
             
-            //cout << kkk << " kkk == " << this->pij_alpha.N() << endl;
-            //cout << i << "  ii == " << this->P_Pi_h.N() << endl;
+		//cout << kkk << " kkk == " << this->pij_alpha.N() << endl;
+		//cout << i << "  ii == " << this->P_Pi_h.N() << endl;
             ffassert(kkk==this->pij_alpha.N());
             ffassert(i==this->P_Pi_h.N() );
         }

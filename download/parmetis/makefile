@@ -40,7 +40,7 @@ FAIRE: $(SRCDIR)/FAIT
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I.'
 	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS'
-	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS) -I../metis/include  -I../include  -I.'
+	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS)  -I../metis/GKlib   -I. -I../metis/include  -I../include  -I.'
 	mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
 	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
@@ -65,13 +65,13 @@ OBJS_GK=b64.o		error.o	fs.o		graph.o	itemsets.o	omp.o		random.o	sort.o	tokenizer
 blas.o	evaluate.o	getopt.o	htable.o	mcore.o	pdb.o		rw.o		string.o	util.o \
 csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o 
 
-OBJS_PARMETIS=akwayfm.c.o		diffutil.c.o		initpart.c.o		move.c.o		renumber.c.o		wave.c.o \
-ametis.c.o		frename.c.o		kmetis.c.o		msetup.c.o		rmetis.c.o		weird.c.o  \
-balancemylink.c.o	gkmetis.c.o		kwayrefine.c.o		node_refine.c.o		selectq.c.o		wspace.c.o \
-comm.c.o		gkmpi.c.o		match.c.o		ometis.c.o		serial.c.o		xyzpart.c.o \
-csrmatch.c.o		graph.c.o		mdiffusion.c.o		pspases.c.o		stat.c.o \
-ctrl.c.o		initbalance.c.o		mesh.c.o		redomylink.c.o		timer.c.o \
-debug.c.o		initmsection.c.o	mmetis.c.o		remap.c.o		util.c.o 
+OBJS_PARMETIS=akwayfm.o		diffutil.o		initpart.o		move.o		renumber.o		wave.o \
+ametis.o		frename.o		kmetis.o		msetup.o		rmetis.o		weird.o  \
+balancemylink.o	gkmetis.o		kwayrefine.o		node_refine.o		selectq.o		wspace.o \
+comm.o		gkmpi.o		match.o		ometis.o		serial.o		xyzpart.o \
+csrmatch.o		graph.o		mdiffusion.o		pspases.o		stat.o \
+ctrl.o		initbalance.o		mesh.o		redomylink.o		timer.o \
+debug.o		initmsection.o	mmetis.o		remap.o		util.o 
 
 
 
@@ -102,14 +102,14 @@ install.done-old:compile.done
 #
 #	FFCS - 23/5/12 - cannot keep name libmetis.a because it is identical to the library created by
 #	[[file:../metis/Makefile]] and library path mechanisms at link time pick one for the other on MinGW.
-	mv $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetispar.a
+	mv $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a
 #
 	-cd $(SRCDIR)/Programs && make 
 	touch $@
 
 # FFCS - simpler makefile
 WHERE.done:install.done
-	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetispar  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
+	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
 	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
 	touch $@
 
