@@ -275,7 +275,10 @@ void ff_atend(AtEnd f)
 %token PLUSPLUS
 %token MOINSMOINS
 %token SET
+
+/* <<LTLT>> */
 %token LTLT
+
 %token PLUSEQ
 %token MOINSEQ
 %token MULEQ
@@ -314,8 +317,12 @@ start:   input ENDOFFILE {
                             Stack stack = newStack(sizestack);
                             
                         double CPUcompile= CPUtime();
-                        try {                  
-                          $1.eval(stack);}
+                        try {
+
+                          // <<evaluate_parsed_FF_script>>
+                          $1.eval(stack);
+
+                        }
                         catch ( E_exception & e)  {
                           cerr << e.what() << " ,  mpirank " << mpirank << endl;
                           return 1; }
