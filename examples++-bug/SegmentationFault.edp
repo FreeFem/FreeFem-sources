@@ -1,0 +1,89 @@
+
+////////////////////////////////////
+// Optimisation d'une 'grue'         //
+// à volume constant              //
+// avec un maillage sous-jacent   //
+// qu'on adpate a x^2 et y ^2 mais avec une
+// erreur constante //
+// plante de temps a autre (depend de niter !!!)
+////////////////////////////////////
+// Nom du fichier de sauvegarde
+string sauve="grue";
+
+// nombre d'itérations
+int niter=1;
+
+//nombre de sauvegardes du maillage (<niter)
+int nsave=20;
+
+//coefficient d'exagération de la déformation
+real exa=1;
+
+//pas
+real pas=0.01;
+
+//précision du calcul
+real errcalc=0.001;//
+
+//finesse du maillage de structure
+real errground=0.01;
+
+//initialisation du compteur des sauvergardes
+int nsaved=0;
+
+//compliance
+real compliance;
+
+//fonction définissant la zone à optimiser (=1 sur la frontière optimisable, =0 sinon)
+func cutx =(y>1)*(x<4);
+func cuty =(y>1)*(x<4);
+
+//définition des bords de la forme
+//label =
+// 1:Condition de Dirichlet
+// 2:Condition Libre
+// 3:Condition de Neuman non nulles
+
+border a1(t=8,9) {x=5; y=t;label=3;}; // logement de la charge
+border b(t=5,0)  {x=t; y=9;label=2;}; // haut de la grue
+border c1(t=1.5,5) {x=t; y=8;label=2;}; //bras de la grue
+border d2(t=9,0) {x=-0.5+0.5/9*t; y=t;label=2;}; //cote gauche de la grue
+border d1(t=0,8) {x=0.5+t/8; y=t;label=2;} //cote droit de la grue
+border e(t=-0.5,0.5) {x=t; y=0;label=1;}; //base de la grue
+
+// forces appliquées 
+func g1=0; 
+func g2=-1;
+
+// coefficients de Young et de Lamé
+real lambda=12;
+real mu=6;
+
+
+// coefficients de Lamé du matériau
+cout <<"lambda,mu ="<<lambda<<","<<mu <<endl; 
+
+// construction du maillage de structure de la forme
+mesh Shground= buildmesh(e(5)+d1(20)+c1(10)+a1(5)+b(25)+d2(20));
+mesh Sh=Shground;
+
+fespace Vh(Sh,[P1,P1]);
+Vh [uu,vv],[w,s];
+
+// Calcul du déplacement de la structure
+problem elasticite([uu,vv],[w,s],solver=CG,eps=1.0e-6) =
+    int2d(Sh)(
+               2*mu*(dx(uu)*dx(w)+dy(vv)*dy(s)+((dx(vv)+dy(uu))*(dx(s)+dy(w)))/2)
+              +lambda*(dx(uu)+dy(vv))*(dx(w)+dy(s))
+	)
+    + int1d(Sh,3) (g1*w+g2*s)	
+    +on(1,uu=0,vv=0)
+;
+
+elasticite;
+
+cout << "adaptation"<<endl;
+Sh = adaptmesh  (Sh,[uu,vv],err=errcalc);
+plot(Sh,wait=1);
+
+elasticite;//Segmentation Fault !!!

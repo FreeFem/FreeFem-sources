@@ -1,0 +1,24 @@
+load "bfstream"
+real[int] b(10),bb(1);
+for(int i=0; i< b.n; ++i)
+  b[i] = i+pi;
+cout << " " << b << endl; 
+{
+ofstream f("toto.dt");
+f.write(134);
+f.write(1.346888);
+f.write(b);
+}
+b=0;
+
+{
+real r;
+int i;
+ifstream f("toto.dt");
+f.read(i);
+f.read(r);
+f.read(bb);
+cout << i << " " << r << endl; 
+cout << bb << endl; 
+//cout << b << endl; 
+}

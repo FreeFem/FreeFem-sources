@@ -1,0 +1,28 @@
+ mesh Th=square(10,10);
+ fespace Vh(Th,P1);     // P1 FE space
+ Vh uh,vh;              // unkown and test function. 
+ func f=1;                 //  right hand side function 
+ func g=0;                 //  boundary condition function
+ 
+ problem laplace(uh,vh,solver=CG) =          //  definion of  the problem 
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+  + int1d(Th,1)( uh*vh) 
+  - int1d(Th,1)( vh)
+  - int2d(Th)( f*vh )                          //  linear form
+  + on(2,3,4,uh=g) ;                      //  boundary condition form
+
+  laplace; // solve the problem plot(uh); // to see the result
+  plot(uh,ps="LaplaceP1P2h.eps",value=true);
+//  if error on macos version codeworrior 
+//  remove in panal  PPC linker FreeFEm++ Setting Dead-strip Static Initializition Code Flag
+  fespace V2h(Th,P2);
+ V2h u2h,v2h;              // unkown and test function. 
+
+ problem errorh (u2h,v2h,solver=CG) =           //  definion of  the problem 
+    int2d(Th)( dx(u2h)*dx(v2h) + dy(u2h)*dy(v2h) ) //  bilinear form
+  + int1d(Th,1)( u2h*v2h) 
+  - int1d(Th,1)( v2h)
+  - int2d(Th)( f*v2h )                          //  linear form
+  + on(2,3,4,u2h=g) ;                      //  boundary condition form
+ errorh;
+plot(u2h,ps="ErrorHerachical.ps",value=true,wait=1);
