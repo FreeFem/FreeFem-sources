@@ -1,6 +1,6 @@
 //   for automatic  compilation with ff-c++
 // FFCS - 23/5/12 - remove metis dependency because it interfers with identically-named libmetis.a from parmetis
-//ff-c++-LIBRARY-dep: superlu_dist   ptscotchparmetis  ptscotch  scotch  mpi blas fc
+//ff-c++-LIBRARY-dep: superlu_dist   ptscotchparmetis  ptscotch  scotchmetis scotch  mpi blas fc
 //ff-c++-cpp-dep: 
 // ORIG-DATE: 02/2009
 // -*- Mode : c++ -*-
