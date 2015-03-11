@@ -1,5 +1,10 @@
-@  changeset:   3221:e9b533a7e3d6
+@  changeset:   3222:47a97a9ee26d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 11 15:42:54 2015 +0100
+|  summary:     continuation of new mpi version
+|
+o  changeset:   3221:e9b533a7e3d6
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 11 14:03:52 2015 +0100
 |  summary:     add test lib in schwarz.cpp
