@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11   hpddm [petsc] umfpack amd  scalapack blas [mkl]   mpifc  fc mpi  pthread   
+//ff-c++-LIBRARY-dep: cxx11   hpddm [petsc|mumps] umfpack amd  scalapack blas [mkl]   mpifc  fc mpi  pthread   
 //ff-c++-cpp-dep: 
 
 // mumps est avec petsc ..
