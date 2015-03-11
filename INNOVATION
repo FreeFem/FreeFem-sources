@@ -1,5 +1,6 @@
- change the metis to scotch metsi interfe in hips and parms .. 
- change the current version of scotch metis mumps parmetis 
+ - optionnal lib seach  [toto|tyty] in WHERE-LIBRARY seach lib 
+ -  change the metis to scotch metsi interfe in hips and parms .. 
+ - change the current version of scotch metis mumps parmetis 
 version 3.35 (04/3/15) (rev 3205:255fe77c041d)
  - remark: .dll , .so, .dylib are incompatible with previous version.
  - ff-run.in under windows (use src/bin-win32/FreeFem++-mpi 

@@ -8,7 +8,7 @@
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
 // ALH - need reference to MPI to have the proper include for mpi.h on MacOS10.8
-//ff-c++-LIBRARY-dep: parms scotch  blas mpifc fc mpi pthread
+//ff-c++-LIBRARY-dep: parms scotchmetis scotch  blas mpifc fc mpi pthread
 //ff-c++-cpp-dep: 
 
 /* 

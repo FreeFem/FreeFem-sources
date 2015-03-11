@@ -1,5 +1,10 @@
-@  changeset:   3218:56eb3226e613
+@  changeset:   3219:bc1579e193df
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 11 11:18:14 2015 +0100
+|  summary:     coorect tupe in makefile parmetis
+|
+o  changeset:   3218:56eb3226e613
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 11 11:14:47 2015 +0100
 |  summary:     coorect missing CFLAGS in metis and parmetis Makefile
