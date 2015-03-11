@@ -1,5 +1,10 @@
-@  changeset:   3222:47a97a9ee26d
+@  changeset:   3223:43045f950575
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 11 17:15:54 2015 +0100
+|  summary:     coorect lib in superludist
+|
+o  changeset:   3222:47a97a9ee26d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 11 15:42:54 2015 +0100
 |  summary:     continuation of new mpi version
