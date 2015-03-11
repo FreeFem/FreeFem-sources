@@ -41,11 +41,11 @@ VERSIONORD  = _scotch
 ###################################################################
 # uncomment the following lines for integer type support (Only 1)
 
-VERSIONINT  = $(FFVERSIONINT)#_long
-CCTYPES     = $(FFCTYPESINT)#-DFORCE_LONG -DLONG
+#VERSIONINT  = $(FFVERSIONINT)#_long
+#CCTYPES     = $(FFCTYPESINT)#-DFORCE_LONG -DLONG
 #---------------------------
-#VERSIONINT  = _int32
-#CCTYPES     = -DFORCE_INT32 -DINTSIZE32
+VERSIONINT  = _int
+CCTYPES     = -DFORCE_INT -DINT
 #---------------------------
 #VERSIONINT  = _int64
 #CCTYPES     = -DFORCE_INT64 -DINTSSIZE64
