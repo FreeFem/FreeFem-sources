@@ -195,9 +195,9 @@ void doatexitff()
 
 }
 
-// ALH - 24/2/15 - the javascript main entry point is on the HTML page
+// ALH - 24/2/15 - the javascript main entry point is on the HTML page so it should not be redefined here
 
-#ifndef EMSCRIPTEN
+#ifndef NOMAIN
 extern int mymain(int argc,char **argv);
 int main (int argc, char **argv)
 {
@@ -205,7 +205,7 @@ int main (int argc, char **argv)
   int ret=mymain(argc,argv);
   return ret;
 }
-#endif // EMSCRIPTEN
+#endif // NOMAIN
 
 #endif
 void message(char *s);

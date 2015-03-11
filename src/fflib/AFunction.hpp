@@ -2057,7 +2057,9 @@ public:
    size_t size() const { return Max(topmax,top);}
   void Add(Key k,Key op,OneOperator *p0)  
     { table.Add(k,op,p0);}
-   
+
+  // <<Block_NewVar>>
+  
 template<class T>   
    C_F0 NewVar(Key k,aType t,const C_F0 &i) 
      {return table.NewVar<T>(k, t,top,i);}
