@@ -68,8 +68,7 @@ $(SRCDIR)/tag-conf:$(SRCDIR)/tag-tar
 	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
 	--download-scalapack --download-metis --download-ptscotch \
 	--download-mumps --download-ml --download-hypre --download-parmetis \
-	--download-superlu --download-pastix --download-suitesparse --download-fftw 
-
+	--download-superlu --download-pastix --download-suitesparse --download-fftw \
 	touch $@
 
 $(SRCDIR)/tag-tar:$(PACKAGE)
