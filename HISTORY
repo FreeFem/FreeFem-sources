@@ -1,5 +1,10 @@
-@  changeset:   3214:041b6609580b
+@  changeset:   3215:a2d249fd9802
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 11 09:02:54 2015 +0100
+|  summary:     coorect hips with new version repalce metis by scoth
+|
+o  changeset:   3214:041b6609580b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Mar 10 17:41:09 2015 +0100
 |  summary:     change version of download solftware  metis, partis, scotch mumps mumps-seq
