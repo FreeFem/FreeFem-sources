@@ -12,7 +12,7 @@ CAT	= cat
 CCS     = @CC@ 
 CCP	= @MPICC@ 
 CCD     = @CC@ -I'@MPI_INC_DIR@'
-
+FFINTSCOTCH = -DINTSIZE32 -DIDXSIZE32 -g
 # FFCS - 16/4/13 - some plain C files seem to need access to mpi.h too
 
 # FFCS - 23/4/13 - remove thread and fork dependency on Windows with
