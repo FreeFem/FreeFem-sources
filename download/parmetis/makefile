@@ -41,7 +41,7 @@ $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I.'
 	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS'
 	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS)  -I../metis/GKlib   -I. -I../metis/include  -I../include  -I.'
-	mkdir $(SRCDIR)/lib
+	-mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
 	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
 	touch $(SRCDIR)/tag-compile
