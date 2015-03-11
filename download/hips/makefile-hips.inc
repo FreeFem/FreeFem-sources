@@ -25,7 +25,7 @@ COEFTYPE    = -DTYPE_REAL
 ##    - use -DSCOTCH_PART to use SCOTCH
 
 PARTITIONER  = 
-#PARTITIONER = -DSCOTCH_PART
+PARTITIONER = -DSCOTCH_PART
 
 ##   Integer size
 ##    - default int type is    : INTS = INTL = int (C type length)
