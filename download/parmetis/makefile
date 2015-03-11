@@ -10,7 +10,7 @@ all-local: parmetis
 # http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.tar.gz
 # Parmetis information
 DIRPKG=../pkg
-SRCDIR=ParMetis-$(parmetis_VERSION)
+SRCDIR=parmetis-$(parmetis_VERSION)
 PACKAGE=$(DIRPKG)/ParMetis-$(parmetis_VERSION).tar.gz
 SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis
 
