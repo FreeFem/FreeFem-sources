@@ -1623,7 +1623,9 @@ typedef MyMap<String,String> MyMapSS;
      CodeAlloc::clear();
      ShowAlloc("ClearMem: end" , lg); 
 
- } 
+ }
+
+// <<addingInitFunct>>
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
 
 C_F0  opVI::code2(const basicAC_F0 &args) const      
