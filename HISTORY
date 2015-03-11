@@ -1,5 +1,10 @@
-@  changeset:   3217:5abfb17115f4
+@  changeset:   3218:56eb3226e613
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 11 11:14:47 2015 +0100
+|  summary:     coorect missing CFLAGS in metis and parmetis Makefile
+|
+o  changeset:   3217:5abfb17115f4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 11 10:56:17 2015 +0100
 |  summary:     change metis to scocth  metis  interface  in parms
