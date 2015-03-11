@@ -77,6 +77,7 @@ WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib  -lesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	-$(TESTMPI) &&echo ptscotchparmetis  LD -L@DIR@/lib  -lesmumps -lptscotchparmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch LD -L@DIR@/lib  -lesmumps -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
