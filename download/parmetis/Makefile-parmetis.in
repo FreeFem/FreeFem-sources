@@ -4,6 +4,7 @@ CC = @CC@
 LD=  @CC@
 # What optimization level to use
 OPTFLAGS = @CFLAGS@ 
+CFLAGS = @CFLAGS@ 
 MPI_INCLUDE=@MPI_INCLUDE@
 MPI_LIBC=@MPI_LIBC@
 MPIRUN=@MPIRUN@

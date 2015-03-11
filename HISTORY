@@ -1,5 +1,10 @@
-@  changeset:   3216:8d26188ebf7e
+@  changeset:   3217:5abfb17115f4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 11 10:56:17 2015 +0100
+|  summary:     change metis to scocth  metis  interface  in parms
+|
+o  changeset:   3216:8d26188ebf7e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 11 09:05:14 2015 +0100
 |  summary:     remove metis of hips make file
