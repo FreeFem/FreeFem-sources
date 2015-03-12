@@ -80,10 +80,10 @@ $(SRCDIR)/tag-tar:$(PACKAGE1)
 
 clean:clean-local
 clean-local:
-	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
+#FH	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
 	-rm -rf ../include/*mumps*
-	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
+	-rm -rf ../lib/lib*mumpsFREEFEM* ../lib/libpordFREEFEM.a ../lib/libmpiseqFREEFEM.a 
 	-rm -rf $(SRCDIR)
 #	-rm $(PACKAGE1)
 	-rm config.log *.done

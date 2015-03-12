@@ -42,9 +42,10 @@ END {
     }
     
     if(err) {
+	printf  "\t\t  MISSING lib "> "/dev/stderr" 
 	for(i=0; i < err;++i)
-	    print " MISSING lib " , lerr[i] 
-	print " Check the WHERE-LIBRARY... files ";
+	    printf "%s, ", lerr[i]> "/dev/stderr"; 
+	print "         Check the WHERE-LIBRARYfiles " > "/dev/stderr";
 	exit 1; 
     }
     else printf("%s\n",msg); 
