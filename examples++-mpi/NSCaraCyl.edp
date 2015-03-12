@@ -8,7 +8,8 @@
    -n nbseg           nb of seg on input edge ..  
    -ndt  ndt         nb time step par period 
    -nNewton nNx      number of of iteration in Newtow loop.    
-   -ngp     no gnuplot ..
+   -gp      gnuplot ..
+   -T final time 
  */
 // Author: F. Hecht  .. 
 // jan 2012 Stationnary imcompressible Navier Stokes Equation with Newton method.
@@ -28,11 +29,11 @@ load "scotch"
 load "pipe"
 
 int cas = getARGV("-cas",2);; // 1, 2 or 3 ..
-int n=getARGV("-n",20); //  mesh size ...
-int ndt=getARGV("-ndt",50); 
+int n=getARGV("-n",15); //  mesh size ...
+int ndt=getARGV("-ndt",25); 
 int schema = 2; //  order 1  
-bool  gplt = usedARGV("-ngp")<=0 && (mpirank==0) && (cas!=1) ; // 
-real Tend = 8.;  
+bool gplt = usedARGV("-gp")>=0  && (mpirank==0) && (cas!=1) ; // 
+real Tend = getARGV("-T",2);;  
 bool save=0; 
 real cpu0=mpiWtime() ; 
 string data="./dd";//"2D-"+cas+"-"+n;
