@@ -26,7 +26,7 @@ TESTS=  schwarz.edp DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-
 	NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp		\
 	Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp beam-3d-matrix-superludist.edp			\
 	cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp	\
-	essai.edp mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp testsolver_pastix.edp  NSCaraCyl.edp
+	essai.edp mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp testsolver_pastix.edp  \NSCaraCyl.edp diffusion-3d.edp	elasticity-3d.edp
 
 XFAIL_TESTS=$(TESTS)
 
@@ -34,7 +34,8 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP= AddLayer2d.idp		DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
-AddLayer3d.idp		DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp func-max.idp 
+AddLayer3d.idp		DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp func-max.idp \
+	schwarz-add-macro.idp	schwarz-macro.idp
 
 EXTRA_DIST=*.edp *.idp  regtests.sh  \
 MPICG.cpp \
