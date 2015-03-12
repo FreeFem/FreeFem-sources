@@ -97,7 +97,7 @@ clean::
 #
 	-rm -r mmg3d4
 	-rm FAIT* mmg* flags-* tag-tar*
-	-rm $(PACKAGE)
+#FH 	-rm $(PACKAGE)
 
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
