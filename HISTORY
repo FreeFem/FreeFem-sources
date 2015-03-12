@@ -1,5 +1,26 @@
-@  changeset:   3246:664a6473d705
+@  changeset:   3250:563707de24cc
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 10:45:32 2015 +0100
+|  summary:     add new example
+|
+o  changeset:   3249:68f0ba17d291
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 10:37:05 2015 +0100
+|  summary:     add new exemple
+|
+o  changeset:   3248:856b7093507b
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 10:06:30 2015 +0100
+|  summary:     Added tag 3.35-dist for changeset c863693513fc
+|
+o  changeset:   3247:c863693513fc
+|  tag:         3.35-dist
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 10:06:11 2015 +0100
+|  summary:     up INNOVATIOn
+|
+o  changeset:   3246:664a6473d705
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 12 10:00:56 2015 +0100
 |  summary:     correct optiann  NO_RANGE_CHECK

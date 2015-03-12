@@ -94,7 +94,7 @@ MPI_SOFT=@TOOL_COMPILE_parmetis@ scalapack @TOOL_COMPILE_superludist@	\
 
 LIST_SOFT=tetgen @TOOL_COMPILE_superlu@ fftw @TOOL_COMPILE_metis@	\
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
-	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@ gmm			\
+	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@  @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
 	@TOOL_COMPILE_ipopt@ 
 
@@ -134,7 +134,7 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 if test -n "$(TOOL_COMPILE_schwarz)"; then   ./getall hpddm ;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
+	 if test -n "$(TOOL_COMPILE_schwarz)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master

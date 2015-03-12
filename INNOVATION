@@ -1,3 +1,4 @@
+ - add disable-gmm configure flags 
 version 3.35 dist (12/3/15) (rev 3246:664a6473d705)
  - optionnal lib seach  [toto|tyty] in WHERE-LIBRARY seach lib 
  - change the metis to scotch-metis interfe in hips and parms .. 
