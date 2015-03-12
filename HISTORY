@@ -1,5 +1,10 @@
-@  changeset:   3250:563707de24cc
+@  changeset:   3251:ca607de2351f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 10:59:11 2015 +0100
+|  summary:     add disabel gmm flag
+|
+o  changeset:   3250:563707de24cc
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 12 10:45:32 2015 +0100
 |  summary:     add new example
