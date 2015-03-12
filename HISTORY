@@ -1,5 +1,15 @@
-@  changeset:   3244:42053542982c
+@  changeset:   3246:664a6473d705
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 10:00:56 2015 +0100
+|  summary:     correct optiann  NO_RANGE_CHECK
+|
+o  changeset:   3245:b28c0548e00b
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 09:48:43 2015 +0100
+|  summary:     coorect pb on install form dist version
+|
+o  changeset:   3244:42053542982c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 12 08:50:07 2015 +0100
 |  summary:     remove delete of download file
