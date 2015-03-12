@@ -78,7 +78,7 @@ $(PACKAGE1):
 clean:
 	-rm Makefile.inc FAIRE* *~ 
 	-rm -rf ../include/*mumps*
-	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a ../lib/WHERE.mumpsseq
+	-rm -rf ../lib/lib*mumps*SEQ* ../lib/libpord*SEQ.a ../lib/libmpiseq*SEQ.a ../lib/WHERE.mumpsseq
 	-rm -rf $(SRCDIR)
 	-rm *.done config.log
 

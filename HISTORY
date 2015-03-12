@@ -1,6 +1,11 @@
-@    changeset:   3243:8e76ed03c608
-|\   tag:         tip
-| |  parent:      3241:6c1e633f852c
+@  changeset:   3244:42053542982c
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 08:50:07 2015 +0100
+|  summary:     remove delete of download file
+|
+o    changeset:   3243:8e76ed03c608
+|\   parent:      3241:6c1e633f852c
 | |  parent:      3242:31d3d0d12ff2
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Mar 11 23:14:27 2015 +0100

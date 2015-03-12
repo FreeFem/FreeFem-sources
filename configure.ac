@@ -152,8 +152,9 @@ if test "$enable_fortran" != no
 then
 
     # ALH-FFCS-2/3/10: add gfortran-mp-4.4 for MacPorts on MacOS 10.6
-    AC_PROG_FC(gfortran  f90  xlf90 g95 gfortran-mp-4.4)
-    AC_PROG_F77(gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" gfortran-mp-4.4)
+    # FH add iforr
+    AC_PROG_FC(gfortran  f90  xlf90 g95 ifort gfortran-mp-4.4)
+    AC_PROG_F77(gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" ifort gfortran-mp-4.4)
 
 #	if test -n "$F77"
 #	then
@@ -1888,7 +1889,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes &&  enable_schwarz=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_schwarz=no
 
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 
