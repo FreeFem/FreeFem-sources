@@ -1,5 +1,10 @@
-@  changeset:   3251:ca607de2351f
+@  changeset:   3252:aed9af812d45
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 11:08:21 2015 +0100
+|  summary:     remove compile of iluyt if no gmm
+|
+o  changeset:   3251:ca607de2351f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 12 10:59:11 2015 +0100
 |  summary:     add disabel gmm flag
