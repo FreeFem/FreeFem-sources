@@ -1,5 +1,15 @@
-@  changeset:   3252:aed9af812d45
+@  changeset:   3254:3a9e87cabd2f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 11:49:28 2015 +0100
+|  summary:     add P. Jolivet as Author of Freefem++
+|
+o  changeset:   3253:42d52f6b1dfa
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 12 11:32:44 2015 +0100
+|  summary:     add new geno example
+|
+o  changeset:   3252:aed9af812d45
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 12 11:08:21 2015 +0100
 |  summary:     remove compile of iluyt if no gmm
