@@ -405,7 +405,8 @@ CYGWIN*|MINGW*)
 	then
 	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
 	else
-	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__ -D_MSC_VER")
+	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__"); 
+# -D_MSC_VER")
 	fi
 
 	# We need Mingw to avoid Cygwin's extra DLLs
@@ -1764,14 +1765,14 @@ TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
-TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX)
 TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
-TOOL_DISABLE(parmetis)
+dnl TOOL_DISABLE(parmetis)
 TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)

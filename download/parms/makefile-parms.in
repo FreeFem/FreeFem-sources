@@ -30,7 +30,7 @@ ARFLAGS	= @ARFLAGS@ #cr
  CC	=	@MPICC@
 
  # FFCS - "-I MPI_INC_DIR" required on MacOS 10.8 MacPorts+OpenMPI
- CFLAGS	= $(DBG) $(DARCH) $(DCHNAME)  @CFLAGS@ -I @MPI_INC_DIR@
+ CFLAGS	= $(DBG) $(DARCH) $(DCHNAME)  @CFLAGS@ -I "@MPI_INC_DIR@"
 
  INCLUDE_METIS =     #-I
  METIS_HOME  =       #-L/Users/morice/work/ParMetis-3.1.1/ -lparmetis -lmetis 
