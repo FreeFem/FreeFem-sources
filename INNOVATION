@@ -27,6 +27,7 @@ version 3.34-1
  - correct big bug in memory gestion of sparse matrix
 4/3/2014 (ALH)
  - Edited for compatibility with Emscripten
+ - Added calls for Javascript graphical output along with postscript output
 15/10/2014 (ALH)
  - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
  - Corrected --disable-pdf configuration option (useful for FFCS build)
