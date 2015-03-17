@@ -548,7 +548,7 @@ void cercle(reel , reel , reel )
 void reffecran(){
 #ifdef FFJS
   // ALH - <<ffjs_graphstart>> javascript graph [[file:~/ffjs/main.js::ffjs_graphstart]]
-  EM_ASM_INT({ffjs_graphstart($0,$1)},width,height);
+  EM_ASM(ffjs_graphstart());
 #endif
 }
 
@@ -565,8 +565,8 @@ void fillpoly(int n, float *poly)
    
 #ifdef FFJS
   // ALH - <<ffjs_fillpoly>> javascript graph [[file:~/ffjs/main.js::ffjs_fillpoly]]
-  EM_ASM({ffjs_fillpoly_begin($0,$1)},scalx(poly[0]),height-scaly(poly[1]));
-  for(i=1;i<n;i++)EM_ASM_INT({ffjs_fillpoly_next($0,$1)},scalx(poly[2*i]),height-scaly(poly[2*i+1]));
+  EM_ASM_INT({ffjs_fillpoly_begin($0,$1)},scalx(poly[0]),scaly(poly[1]));
+  for(i=1;i<n;i++)EM_ASM_INT({ffjs_fillpoly_next($0,$1)},scalx(poly[2*i]),scaly(poly[2*i+1]));
   EM_ASM(ffjs_fillpoly_close());
 #endif
 }
