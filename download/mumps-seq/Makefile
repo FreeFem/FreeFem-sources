@@ -36,7 +36,7 @@ DIRPKG=../pkg
 SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
 INSTALL=../..
-VERSION=4.10.0
+VERSION=5.0.0
 
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 
@@ -78,7 +78,7 @@ $(PACKAGE1):
 clean:
 	-rm Makefile.inc FAIRE* *~ 
 	-rm -rf ../include/*mumps*
-	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a ../lib/WHERE.mumpsseq
+	-rm -rf ../lib/lib*mumps*SEQ* ../lib/libpord*SEQ.a ../lib/libmpiseq*SEQ.a ../lib/WHERE.mumpsseq
 	-rm -rf $(SRCDIR)
 	-rm *.done config.log
 

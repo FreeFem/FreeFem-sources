@@ -62,12 +62,13 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 $(SRCDIR)/tag-conf:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) &&  ./configure \
 	--prefix=abs_top_builddir/download \
+	 'CFLAGS=$(CFLAGS)' 'CC=$(CC)' 'FC=$(FC)' 'FCFLAGS=$(FCFLAGS)' \
+        --with-mpi-include='$(MPI_INC_DIR)' --with-mpi-lib='$(MPI_LIB) $(MPI_LIBFC)' \
+        --with-mpiexec='$(MPIRUN)' \
+	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
 	--download-scalapack --download-metis --download-ptscotch \
 	--download-mumps --download-ml --download-hypre --download-parmetis \
 	--download-superlu --download-pastix --download-suitesparse --download-fftw \
-	 'CFLAGS=$(CFLAGS)' 'CC=$(CC)' 'FC=$(FC)' 'FCFLAGS=$(FCFLAGS)' \
-        --with-mpi-include=$(MPI_INCLUDE) --with-mpi-lib=$(MPI_LIB) \
-	 --with-blas-lapack-lib=$(BLASLIBS) 
 	touch $@
 
 $(SRCDIR)/tag-tar:$(PACKAGE)

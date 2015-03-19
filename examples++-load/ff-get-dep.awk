@@ -1,4 +1,4 @@
-BEGIN { nl=split(libs,l,"[ ]*"); err= 0;sp=" ";db=0;}
+BEGIN { nl=split(libs,l," *"); err= 0;sp=" ";db=0;}
 $2=="LD" { 
     if( ld[$1]=="" )  {
 	a=$1;
@@ -15,21 +15,37 @@ END {
     msg=cpp sp;
     for(i=1; i<=nl;++i)
     {
-	libb=l[i];
-	if (match(libb,/^[ ]*$/)) continue; 
-	lib=libb;
-	nn=sub(/\[/,"",lib);
-	nn+=sub(/\]/,"",lib);
-	if (ld[lib]=="" && nn ==0) { lerr[err++]=lib ;}
-        if(ld[lib]!="" && nn==2) msg=msg "-DWITH_" lib sp;
-	if(db) print lib, err;
-	msg = msg ld[lib] sp inc[lib] sp; 
+	libbb=l[i];
+        m=split(libbb,ll,"[]|[]");
+        first = 0;
+	for(j=1; j<=m; ++j)
+	{
+	    msg1="";
+	    lib = ll[j];
+	    nn=1;
+	    if(libbb==lib) nn=0;
+	    if (ld[lib]=="" && nn ==0) { lerr[err++]=lib ;}            
+	    if(ld[lib]!="" && nn!=0)
+	    {
+		if( first==0) {
+		    msg1="-DWITH_" lib sp ld[lib] sp inc[lib] sp;
+		}
+		first ++;
+	    }
+	    if(ld[lib]!="" && nn==0)
+		msg1 =  ld[lib] sp inc[lib] sp;
+	    msg =msg msg1; 
+	    if(db) print " ###" libbb,  lib, err, first ,j, m, msg1;
+	}
+
+ 
     }
     
     if(err) {
+	printf  "\t\t  MISSING lib "> "/dev/stderr" 
 	for(i=0; i < err;++i)
-	    print " MISSING lib " , lerr[i] 
-	print " Check the WHERE-LIBRARY... files ";
+	    printf "%s, ", lerr[i]> "/dev/stderr"; 
+	print "         Check the WHERE-LIBRARYfiles " > "/dev/stderr";
 	exit 1; 
     }
     else printf("%s\n",msg); 
