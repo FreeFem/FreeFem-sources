@@ -31,7 +31,7 @@ all-local: mumps
 DIRPKG=../pkg
 SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
-VERSION=4.10.0
+VERSION=5.0.0
 
 mumps:../lib/WHERE.mumps
 
@@ -75,15 +75,15 @@ Makefile.inc:../../config.status Makefile Makefile-mumps-$(VERSION).inc
 
 $(SRCDIR)/tag-tar:$(PACKAGE1)
 	tar xvzf $(PACKAGE1)
-	patch -d MUMPS_$(VERSION) -p 1 < MUMPS_$(VERSION).patch
+	#patch -d MUMPS_$(VERSION) -p 1 < MUMPS_$(VERSION).patch
 	touch $(SRCDIR)/tag-tar
 
 clean:clean-local
 clean-local:
-	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
+#FH	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.mumps
 	-rm -rf ../include/*mumps*
-	-rm -rf ../lib/lib*mumps* ../lib/libpord*.a ../lib/libmpiseq*.a
+	-rm -rf ../lib/lib*mumpsFREEFEM* ../lib/libpordFREEFEM.a ../lib/libmpiseqFREEFEM.a 
 	-rm -rf $(SRCDIR)
 #	-rm $(PACKAGE1)
 	-rm config.log *.done

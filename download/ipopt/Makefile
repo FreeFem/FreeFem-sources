@@ -80,6 +80,6 @@ clean-local::
 clean: clean-local
 	-rm -rf ../include/coin
 	-rm ../lib/libipopt* ../lib/liblcoinhsl* 
-	-rm $(PACKAGE)
+#FH	-rm $(PACKAGE)
 
 .PHONY:$(SRCDIR)/$(INSTALL)

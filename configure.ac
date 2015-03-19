@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.34-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.35,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -17,8 +17,9 @@ dnl : ${FFLAGS=""}
 
 # progg test  expact under windows 
 ff_TEST_FFPP="../src/nw/FreeFem++"
+ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
 
-AC_PREREQ(2.50) dnl for AC_LANG_CASE
+AC_PREREQ(2.69) dnl for AC_LANG_CASE and check stuff 
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
@@ -151,8 +152,9 @@ if test "$enable_fortran" != no
 then
 
     # ALH-FFCS-2/3/10: add gfortran-mp-4.4 for MacPorts on MacOS 10.6
-    AC_PROG_FC(gfortran  f90  xlf90 g95 gfortran-mp-4.4)
-    AC_PROG_F77(gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" gfortran-mp-4.4)
+    # FH add iforr
+    AC_PROG_FC(gfortran  f90  xlf90 g95 ifort gfortran-mp-4.4)
+    AC_PROG_F77(gfortran f90 xlf xlf90 g95 f77 fort77 "$FC" ifort gfortran-mp-4.4)
 
 #	if test -n "$F77"
 #	then
@@ -403,7 +405,8 @@ CYGWIN*|MINGW*)
 	then
 	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
 	else
-	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__ -D_MSC_VER")
+	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__"); 
+# -D_MSC_VER")
 	fi
 
 	# We need Mingw to avoid Cygwin's extra DLLs
@@ -470,6 +473,8 @@ CYGWIN*|MINGW*)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
                 AC_SUBST(WIN32DLLTARGET,win32-dll-target)
 		ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
+		ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
+
                 AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
 	fi
@@ -1750,13 +1755,14 @@ TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
-TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
+TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX)
 TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
-TOOL_DISABLE(parmetis)
+dnl TOOL_DISABLE(parmetis)
 TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
@@ -1832,6 +1838,7 @@ AC_SUBST(STDPROG,$ff_stdprog)
 ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
 AC_SUBST(TEST_FFPP,$ff_TEST_FFPP)
+AC_SUBST(TEST_FFPP_MPI,$ff_TEST_FFPP_MPI)
 AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")
 
 ff_with_mpi=-openmpi;
@@ -1874,7 +1881,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes &&  enable_schwarz=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_schwarz=no
 
 TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
 

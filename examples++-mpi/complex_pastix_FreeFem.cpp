@@ -55,7 +55,7 @@ using namespace std;
 #include <sys/time.h>
 
 
-#include "pastix_long_complex.h"
+#include "pastix_int_complex.h"
 
 #undef memFree_null
 #define memFree_null(x) {if (x ==NULL) {fprintf(stdout,"%s:%d freeing NULL\n",__FILE__,__LINE__);} free(x); x=NULL;}

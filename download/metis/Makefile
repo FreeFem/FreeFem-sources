@@ -12,12 +12,12 @@ all-local: metis
 DIRPKG=../pkg
 SRCDIR=metis-$(metis_VERSION)
 PACKAGE=$(DIRPKG)/metis-$(metis_VERSION).tar.gz
-SERVER=http://www.netlib.org/linalg/
+SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
 #//http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/OLD
 INSTALL=../..
 
 # FFCS - 14/11/11 - version 4.0.3 is not available from netlib anymore
-metis_VERSION=4.0
+metis_VERSION=5.1.0
 
 metis: FAIRE
 
@@ -28,9 +28,12 @@ $(SRCDIR)/FAIT:
 
 install:$(SRCDIR)/tag-compile
 #	cd $(SRCDIR)/Programs ;$(MAKE) 
+#	cd $(SRCDIR) ;  $(MAKE)  -C  install
 	-mkdir -p ../include/metis
-	cp $(SRCDIR)/Lib/*.h ../include/metis
-
+	-mkdir -p ../lib/metis
+	cp $(SRCDIR)/libmetis.a ../lib/metis
+	cp $(SRCDIR)/include/*.h ../include/metis
+	
 
 FAIRE: $(SRCDIR)/FAIT 
 	$(MAKE) WHERE
@@ -40,10 +43,11 @@ Makefile.in: ../../config.status Makefile-metis.in
 	../../config.status  --file="Makefile.in:Makefile-metis.in"
 
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
-	cp Makefile.in $(SRCDIR)
-	-mkdir -p ../lib/metis
-	cd $(SRCDIR)/Lib;make
-	-cd $(SRCDIR)/Programs;make 
+	#cd $(SRCDIR)/libmetis ;
+	make -C $(SRCDIR)/libmetis $(OBJS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I.'
+	make -C $(SRCDIR)/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS'
+	mkdir $(SRCDIR)/lib
+	cd $(SRCDIR); $(AR)  libmetis.a  libmetis/*.o GKlib/*.o
 	touch $(SRCDIR)/tag-compile
 
 
@@ -51,14 +55,27 @@ $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 WHERE: 
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	echo metis LD -L@DIR@/lib/metis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo metis INCLUDE -I@DIR@/include/metis>> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis INCLUDE -I@DIR@/include/metis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	fi
 
+
+OBJS=auxapi.o	coarsen.o	fm.o		graph.o	kwayrefine.o	minconn.o	options.o	separator.o	timing.o \
+balance.o	compress.o	fortran.o	initpart.o	mcutil.o	mincover.o	parmetis.o	sfm.o		util.o \
+bucketsort.o	contig.o	frename.o	kmetis.o	mesh.o	mmd.o		pmetis.o	srefine.o	wspace.o \
+checkgraph.o	debug.o	gklib.o	kwayfm.o	meshpart.o	ometis.o	refine.o	stat.o
+
+OBJS_GK=b64.o		error.o	fs.o		graph.o	itemsets.o	omp.o		random.o	sort.o	tokenizer.o \
+blas.o	evaluate.o	getopt.o	htable.o	mcore.o	pdb.o		rw.o		string.o	util.o \
+csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o 
 
 
 
 # FFCS: patch is necessary for metis 4.0, but not for 4.0.3
 $(SRCDIR)/tags: $(PACKAGE)
+	tar xvzf $(PACKAGE)
+	touch $(SRCDIR)/tags
+
+$(SRCDIR)/tags-4.0: $(PACKAGE)
 	tar xvzf $(PACKAGE)
 	patch -p0  <patch-metis
 	patch -p0  <metis-4.0_main_return.patch

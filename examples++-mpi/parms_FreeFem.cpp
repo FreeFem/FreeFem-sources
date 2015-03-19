@@ -8,7 +8,7 @@
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
 // ALH - need reference to MPI to have the proper include for mpi.h on MacOS10.8
-//ff-c++-LIBRARY-dep: parms metis blas mpifc fc mpi pthread
+//ff-c++-LIBRARY-dep: parms scotchmetis scotch  blas mpifc fc mpi pthread
 //ff-c++-cpp-dep: 
 
 /* 
@@ -68,9 +68,12 @@ extern "C" {
   // included, the one from the first package specified above on the
   // line [[LIBRARY-dep]]
 
-  #include "../download/include/metis/defs.h"
+typedef int SCOTCH_Num ;
 
-  #include "metis.h"
+
+  //  #include "../download/include/metis/defs.h"
+
+ #include "metis.h"
 }
 
 #ifdef _WIN32

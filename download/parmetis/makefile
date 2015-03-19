@@ -10,16 +10,82 @@ all-local: parmetis
 # http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.tar.gz
 # Parmetis information
 DIRPKG=../pkg
-SRCDIR=ParMetis-$(parmetis_VERSION)
+SRCDIR=parmetis-$(parmetis_VERSION)
 PACKAGE=$(DIRPKG)/ParMetis-$(parmetis_VERSION).tar.gz
-SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD
+SERVER=http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis
 
 INSTALL=../..
-parmetis_VERSION=3.1.1
+parmetis_VERSION=4.0.3
 
-parmetis: WHERE.done
+parmetis: FAIRE
 
-compile.done:$(SRCDIR)/tags Makefile.in
+$(SRCDIR)/FAIT:
+	$(MAKE) install.done
+	touch $(SRCDIR)/FAIT
+
+install.done:$(SRCDIR)/tag-compile
+	-mkdir -p ../include/parmetis
+	-mkdir -p ../lib/parmetis
+	test -z "$(MPIRUN)" || cp $(SRCDIR)/libparmetis.a ../lib/parmetis
+	cp $(SRCDIR)/libmetis.a ../lib/parmetis
+	cp $(SRCDIR)/include/*.h ../include/parmetis
+	cp $(SRCDIR)/metis/include/*.h ../include/parmetis
+	touch $@
+
+FAIRE: $(SRCDIR)/FAIT 
+	$(MAKE) WHERE
+	touch FAIRE
+
+
+$(SRCDIR)/tag-compile: $(SRCDIR)/tags
+	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -D__thread'
+	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS -D__thread'
+	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS)  -I../metis/GKlib   -I. -I../metis/include  -I../include  -I. -D__thread'
+	-mkdir $(SRCDIR)/lib
+	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
+	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
+	touch $(SRCDIR)/tag-compile
+
+
+
+WHERE: install.done
+	-if [ -f $(SRCDIR)/FAIT ] ; then \
+		test -z "$(MPIRUN)" ||echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+		test -z "$(MPIRUN)" ||echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+		echo metis LD -L@DIR@/lib/parmetis  -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+		echo metis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	touch $@ ;\
+	fi
+
+
+OBJS_METIS=auxapi.o	coarsen.o	fm.o		graph.o	kwayrefine.o	minconn.o	options.o	separator.o	timing.o \
+balance.o	compress.o	fortran.o	initpart.o	mcutil.o	mincover.o	parmetis.o	sfm.o		util.o \
+bucketsort.o	contig.o	frename.o	kmetis.o	mesh.o	mmd.o		pmetis.o	srefine.o	wspace.o \
+checkgraph.o	debug.o	gklib.o	kwayfm.o	meshpart.o	ometis.o	refine.o	stat.o
+
+OBJS_GK=b64.o		error.o	fs.o		graph.o	itemsets.o	omp.o		random.o	sort.o	tokenizer.o \
+blas.o	evaluate.o	getopt.o	htable.o	mcore.o	pdb.o		rw.o		string.o	util.o \
+csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o 
+
+OBJS_PARMETIS=akwayfm.o		diffutil.o		initpart.o		move.o		renumber.o		wave.o \
+ametis.o		frename.o		kmetis.o		msetup.o		rmetis.o		weird.o  \
+balancemylink.o	gkmetis.o		kwayrefine.o		node_refine.o		selectq.o		wspace.o \
+comm.o		gkmpi.o		match.o		ometis.o		serial.o		xyzpart.o \
+csrmatch.o		graph.o		mdiffusion.o		pspases.o		stat.o \
+ctrl.o		initbalance.o		mesh.o		redomylink.o		timer.o \
+debug.o		initmsection.o	mmetis.o		remap.o		util.o 
+
+
+
+# FFCS: patch is necessary for metis 4.0, but not for 4.0.3
+$(SRCDIR)/tags: $(PACKAGE)
+	tar xvzf $(PACKAGE)
+	touch $(SRCDIR)/tags
+
+
+
+
+compile.done-old:$(SRCDIR)/tags Makefile.in
 	-mkdir -p "../lib/parmetis"
 	-mkdir -p "../include/parmetis"
 	cp Makefile.in $(SRCDIR)
@@ -29,7 +95,7 @@ compile.done:$(SRCDIR)/tags Makefile.in
 	touch $@
 
 # FFCS - simpler makefile
-install.done:compile.done
+install.done-old:compile.done
 #	cp $(SRCDIR)/libparmetis.a $(SRCDIR)/$(INSTALL)/lib
 #	cp $(SRCDIR)/libmetis.a $(SRCDIR)/$(INSTALL)/lib
 	cp $(SRCDIR)/parmetis.h ../include/parmetis
@@ -38,14 +104,14 @@ install.done:compile.done
 #
 #	FFCS - 23/5/12 - cannot keep name libmetis.a because it is identical to the library created by
 #	[[file:../metis/Makefile]] and library path mechanisms at link time pick one for the other on MinGW.
-	mv $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetispar.a
+	mv $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a $(SRCDIR)/$(INSTALL)/lib/parmetis/libmetis.a
 #
 	-cd $(SRCDIR)/Programs && make 
 	touch $@
 
 # FFCS - simpler makefile
 WHERE.done:install.done
-	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetispar  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
+	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
 	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
 	touch $@
 
@@ -54,9 +120,9 @@ Makefile.in: ../../config.status Makefile-parmetis.in
 
 
 
-$(SRCDIR)/tags: $(PACKAGE)
+$(SRCDIR)/tags-old: $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	patch -p0  <parmetis-3.1.1.patch
+	patch -p1  <parmetis-4.0.3.patch
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = .*$$;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
@@ -85,6 +151,6 @@ clean:
 	-rm Makefile.in $(SRCDIR)/tags
 	-rm -rf ../lib/parmetis
 	-rm -rf ../include/parmetis
-	-rm -rf ../include/metis
+#	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm *.done
