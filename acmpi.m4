@@ -118,7 +118,9 @@ if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
 	
 	test -d "$with_mpipath/Inc" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Inc"
 	test -d "$with_mpipath/Include" &&  ff_MPI_INCLUDE_DIR="$with_mpipath/Include"
-	ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' '-D_MSC_VER' '-D__int64=long long'"
+#  Remove for scotch and parmetis 
+#	ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR' '-D_MSC_VER' '-D__int64=long long'"
+	ff_MPI_INCLUDE="-I'$ff_MPI_INCLUDE_DIR'  '-D__int64=long long'"
 	with_mpiinc="$ff_MPI_INCLUDE"
 	test -z "$MPIRUN" && MPIRUN="$with_mpipath/bin/mpiexe.exe"
 	ff_MPI_LIBC="$with_mpilibs"

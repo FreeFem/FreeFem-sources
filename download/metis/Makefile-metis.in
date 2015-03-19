@@ -3,6 +3,7 @@ CC = @CC@
 
 # What optimization level to use
 OPTFLAGS = @CFLAGS@ 
+CFLAGS = @CFLAGS@ 
 
 # What options to be used by the compiler
 COPTIONS = @FFMETIS_CFLAGS@

@@ -89,7 +89,7 @@ clean-local:
 	-rm ../lib/WHERE.freeyams
 	-rm -rf $(YAMS_DIR)
 	-rm -rf $(SRCDIR)
-	-rm $(PACKAGE)
+#FH 	-rm $(PACKAGE)
 	-rm FAIT FAIRE
 
 ff-flags: ../Makefile Makefile

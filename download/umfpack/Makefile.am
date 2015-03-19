@@ -165,7 +165,7 @@ clean-local:
 	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
 	-rm SuiteSparse*gz 
 	-rm -rf SuiteSparse
-	-rm ../pkg/SuiteSparse-*
+#	-rm ../pkg/SuiteSparse-*
 	-rm SuiteSparse_config.mk
 
 # Local Variables:

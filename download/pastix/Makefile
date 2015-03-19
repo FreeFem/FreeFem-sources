@@ -68,7 +68,12 @@ config.in: ../Makefile ../../config.status	Makefile
 
 install:$(SRCDIR)/FAIT
 
-$(SRCDIR)/FAIT: $(SRCDIR) 
+$(SRCDIR)/FAIT: $(SRCDIR)/FAITR2 $(SRCDIR)/FAITC2
+	touch $(SRCDIR)/FAIT
+
+
+
+$(SRCDIR)/FAITR1: $(SRCDIR)/tag-tar
 	cp config.in $(SRCDIR)/src/
 #
 #	FFCS - 16/1/13 - this crashes in parallel
@@ -98,11 +103,16 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 	#else
 	#cd $(SRCDIR)/src; $(MAKE) install
 	#endif 
+	touch $(SRCDIR)/FAITR1
+$(SRCDIR)/FAITR2: $(SRCDIR)/FAITR1
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/double
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/double/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/double
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/double/
 	cd $(SRCDIR)/src/ &&  $(MAKE) clean 
+	touch $(SRCDIR)/FAITR2;
+
+$(SRCDIR)/FAITC1:$(SRCDIR)/tag-tar
 #
 # complex version
 #
@@ -135,17 +145,20 @@ $(SRCDIR)/FAIT: $(SRCDIR)
 #else
 	#cd $(SRCDIR)/src/ && $(MAKE) install -C $(SRCDIR)/src
 #endif
+	touch $(SRCDIR)/FAITC1
+
+$(SRCDIR)/FAITC2:$(SRCDIR)/FAITC1
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/complex
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex
 	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/complex/
-	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix_long_complex.h)   <patch-pastix_long_complex.h
+	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix_int_complex.h)   <patch-pastix_long_complex.h
 	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix.h) <patch-pastix_long_complex.h
-	touch $(SRCDIR)/FAIT
+	touch $(SRCDIR)/FAITC2
 
 
 
-$(SRCDIR): $(PACKAGE1)
+$(SRCDIR) $(SRCDIR)/tag-tar: $(PACKAGE1)
 	tar xvfj $(PACKAGE1)
 #
 # 31/7/13 - ALH - patch from Fred to avoid picking up a locally installed version of Umfpack when FF compiles its own on
@@ -155,7 +168,7 @@ $(SRCDIR): $(PACKAGE1)
 	patch -p0 < all_macros.diff
 #
 	cd $(SRCDIR)/src/blend/src/; patch -p2 < ../../../../pastix_release_2200-blend.patch
-	touch $(SRCDIR)
+	touch $(SRCDIR) touch $(SRCDIR)/tag-tar 
 
 $(PACKAGE1):
 	../getall -o PaStiX -a
