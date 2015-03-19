@@ -25,7 +25,7 @@ COEFTYPE    = -DTYPE_REAL
 ##    - use -DSCOTCH_PART to use SCOTCH
 
 PARTITIONER  = 
-#PARTITIONER = -DSCOTCH_PART
+PARTITIONER = -DSCOTCH_PART
 
 ##   Integer size
 ##    - default int type is    : INTS = INTL = int (C type length)
@@ -78,8 +78,10 @@ LMPI       =  $(FFMPILIB)  -lsupc++ @FLIBS@  # Additional MPI linker flags
 
 ##   METIS_DIR : path to METIS
 METIS_DIR  =  $(DOWNLOADFF)#
-IMETIS     = -I$(METIS_DIR)include/metis/
-LMETIS     = -L$(METIS_DIR)lib/ -lmetis
+IMETIS     = 
+#-I$(METIS_DIR)include/metis/
+LMETIS     = 
+#-L$(METIS_DIR)lib/ -lmetis
 
 ##   SCOTCH_DIR : path to SCOTCH
 SCOTCH_DIR = $(DOWNLOADFF)

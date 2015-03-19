@@ -8,7 +8,7 @@
 //         Modif by F. Hecht 2011
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
-//ff-c++-LIBRARY-dep:  hips metis  blas  mpi
+//ff-c++-LIBRARY-dep:  hips scotchmetis scotch   blas  mpi
 //ff-c++-cpp-dep: 
 
 /* 
@@ -45,8 +45,12 @@ using namespace std;
 #endif
 
 extern "C" {
+typedef int SCOTCH_Num ;
+
+void   METIS_PartGraphKway(const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, const SCOTCH_Num * const, SCOTCH_Num * const, SCOTCH_Num * const);
+
 #include "hips.h"  
-#include "metis.h"
+//#include "metis.h"
 }
 #include <stdio.h>
 #include <stdlib.h>
@@ -446,6 +450,7 @@ public:
     }
     int option[5];	option[0]=0;
     if(nproc>1){
+        
       METIS_PartGraphKway(&n, AA.lg, AA.cl, NULL, NULL, &wgtflag, &numflag,&nproc, option, &volume, riord);
     }
     else if(nproc==1){
