@@ -1,11 +1,11 @@
 # ALH - avoid blocking when Makefile.inc is not built yet
--include @abs_top_builddir@/download/headers-sparsesolver.inc
+#include @abs_top_builddir@/download/headers-sparsesolver.inc
 
 EXE	=
 LIB	= .a
 OBJ	= .o
-DIRMPI  = @FFMPIDIR@
-MAKE	= make
+#DIRMPI  = @FFMPIDIR@
+#MAKE	= make
 AR	= @AR@
 ARFLAGS	= @ARFLAGS@
 CAT	= cat
@@ -18,10 +18,15 @@ FFINTSCOTCH = -DINTSIZE32 -DIDXSIZE32 -g
 # FFCS - 23/4/13 - remove thread and fork dependency on Windows with
 # -DCOMMON_STUB_FORK without -DCOMMON_PTHREAD
 # [[file:scotch_5.1_esmumps/INSTALL.TXT::COMMON_STUB_FORK]]
+# s/-DCOMMON_TIMING_OLD/-Du_int32_t='unsigned int'/" -e "s/-DCOMMON_RANDOM_FIXED_SEED/-DCOMMON_RANDOM_RAND  -DCOMMON_RANDOM_FIXED_SEED -D'pipe(pfds)=_pipe(pfds,1024,0x8000)'
+CFLAGSWIN  = -DCOMMON_STUB_FORK -Du_int32_t='unsigned int'  -DSCOTCH_RENAME -DCOMMON_RANDOM_RAND  -DCOMMON_RANDOM_FIXED_SEED -D'pipe(pfds)=_pipe(pfds,1024,0x8000)' 
+CFLAGSSTD = -DCOMMON_STUB_FORK  -DCOMMON_RANDOM_FIXED_SEED -DCOMMON_TIMING_OLD -DSCOTCH_RENAME -DSCOTCH_DETERMINISTIC
 
-CFLAGS	= @CFLAGS@ -I'@MPI_INC_DIR@' $(FFINTSCOTCH) -Drestrict=__restrict -DCOMMON_STUB_FORK  -DCOMMON_RANDOM_FIXED_SEED -DCOMMON_TIMING_OLD -DSCOTCH_RENAME -DSCOTCH_DETERMINISTIC
+CFLAGS	= @CFLAGS@ -I'@MPI_INC_DIR@' $(FFINTSCOTCH) -Drestrict=__restrict $(CFLAGSSTD)
 
-LDFLAGS	= @LDFLAGS@ -lm @MPI_LIBC@  @LIBSPTHREAD@  #-L/usr/local/lib/gcc/
+
+LDFLAGS	= @LDFLAGS@ -lm @MPI_LIBC@  @LIBSPTHREAD@  
+#-L/usr/local/lib/gcc/
 CP	= cp
 LEX	= @LEX@
 LN	= ln

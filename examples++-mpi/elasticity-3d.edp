@@ -79,8 +79,8 @@ ThGlobal2d = square(1, 1);
 Wh def(u);
 
 /*# chooseSolver #*/
-if(mpirank == 0 && solver) {
-    solver=getARGV("-solver",12); 
+solver=getARGV("-solver",12); 
+if(mpirank == 0 && solver==0) {
     cout << "What kind of solver would you like to use ?" << endl;
     cout << "   [1]   PETSc GMRES" << endl;
     cout << "   [2]   GAMG" << endl;

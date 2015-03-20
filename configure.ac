@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.35,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.35-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -401,13 +401,6 @@ CYGWIN*|MINGW*)
 	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
 	# (which creates thousands of duplicate definitions for sytem calls like time()).
 
-	if test $enable_ffcs = yes
-	then
-	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__")
-	else
-	    AC_SUBST(FFMETIS_CFLAGS,"-D__VC__"); 
-# -D_MSC_VER")
-	fi
 
 	# We need Mingw to avoid Cygwin's extra DLLs
 	if test "$enable_cygwindll" != yes
@@ -1765,7 +1758,7 @@ TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
-TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmetis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,mshmet.$DYLIB_SUFFIX)
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX)
