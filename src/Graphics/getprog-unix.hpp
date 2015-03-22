@@ -83,12 +83,6 @@ int getprog(char* fn,int argc, char **argv)
   const char *fileglut=0;
   bool noffglut=false;
  
-  // FFCS - remove the test for noffglut to be able to create pictures
-  // in any situation. Even FreeFem++-mpilang needs to send pictures
-  // (eg when called in a FreeFem++-server situation by EJS)
-  // is the name -nw or -nw.exe  -> no graphics 
-  noffglut=false;
-
   bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
