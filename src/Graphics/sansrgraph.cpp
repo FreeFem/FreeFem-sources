@@ -202,17 +202,21 @@ void doatexitff()
 
 }
 
-// ALH - 24/2/15 - the javascript main entry point is on the HTML page so it should not be redefined here
-
-#ifndef NOMAIN
 extern int mymain(int argc,char **argv);
+
+// <<main>>
+
+// ALH - 24/2/15 - the javascript main entry point is on the HTML page so we need to give it a different name here
+#ifdef FFJS
+int ffjs_main (int argc, char **argv)
+#else
 int main (int argc, char **argv)
+#endif
 {
   atexit(doatexitff);
   int ret=mymain(argc,argv);
   return ret;
 }
-#endif // NOMAIN
 
 #endif
 void message(char *s);

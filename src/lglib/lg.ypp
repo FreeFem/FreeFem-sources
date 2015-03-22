@@ -872,7 +872,7 @@ static void SetcppIo()
 extern const char *  prognamearg;
 extern  bool echo_edp;
 
-/// <<mainff>> Called by mymain() and calls Compile() to run the FF language parser
+/// <<mainff>> Called by [[file:mymain.cpp::mymain]] and calls [[Compile]] to run the FF language parser
 
 int mainff (int  argc, char **argv)
 {
