@@ -194,11 +194,13 @@ if(vdebug>10&& mpirank==0 && !NoGraphicWindow)
    Vhi sumphi=0;
    jpart=0;
    njpart=0;
-   int nlayer=RAS?1:sizeoverlaps;
    if(ipart==0) 
-     cout <<" nlayer=" << nlayer << endl;
-   pii= max(unssd-nnn+nlayer,0.)/nlayer;
-   if(dplot1) plot(pii,wait=1,cmm=" 0000");
+     cout <<" sizeoverlaps=" << sizeoverlaps << " " << " nnn = " << nnn<< endl;
+  if(dplot1) plot(unssd,wait=1,cmm=" bbbb");
+
+   pii= max(unssd-sizeoverlaps,0.)/sizeoverlaps;
+   if(RAS) pii[]=pii[] ? 1. : 0.;  
+   if(dplot1) plot(pii,wait=1,cmm=" 0000 max="+pii[].max);
    sumphi[] +=  pii[];
    if(dplot1) plot(sumphi,wait=1,cmm=" summ 0000");
    Vhii phii=0;
@@ -210,7 +212,12 @@ if(vdebug>10&& mpirank==0 && !NoGraphicWindow)
 	    Phii suppii=abs(i-part)<0.2; 
 	    if(suppii[].max > 0.5) 
 	    {
-	     AddLayers(Thii,suppii[],nlayer,phii[]);
+	     AddLayers(Thii,suppii[],sizeoverlaps,phii[]);
+	     if(RAS)  
+	       { phii[]=phii[] ? 1. : 0.;
+	        if(dplot1) plot(phii,wait=1,cmm=" RAS ij");
+
+	      }
 	 	 assert(phii[].min >= -1e-10);
 	     real interij = int#mesh(Thi)(  phii); 
 	     if(interij>epsmes) 
@@ -259,7 +266,7 @@ if(mpiRank(comm)==0) cout << " *** end build partition " << endl;
 /* Thi ( mesh with overlap ).... */
 /*Thi=splitmesh(Thi,2); */
 if(dplot1 ) 
-  { plot(Thi,wait=1); 
+  { plot(Thi,pii,wait=1); 
     for(int j=0;j<njpart;++j)
       plot(pij[j],cmm=" j="+j ,wait=1); } 
       

@@ -24,7 +24,7 @@ load "MPICG"  load "medit"  load "metis"
 include "getARGV.idp"
 include "MPIplot.idp"
 include "MPIGMRESmacro.idp"
-include "AddLayer3d.idp" 
+//include "AddLayer3d.idp" 
 include  "cube.idp"
 
 
