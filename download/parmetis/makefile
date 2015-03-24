@@ -38,9 +38,9 @@ FAIRE: $(SRCDIR)/FAIT
 
 
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
-	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -D__thread'
-	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS -D__thread'
-	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS)  -I../metis/GKlib   -I. -I../metis/include  -I../include  -I. -D__thread'
+	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -D__thread='
+	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS -D__thread='
+	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS)  -I../metis/GKlib   -I. -I../metis/include  -I../include  -I. -D__thread='
 	-mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
 	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
