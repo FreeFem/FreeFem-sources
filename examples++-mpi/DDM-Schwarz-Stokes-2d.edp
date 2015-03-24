@@ -23,7 +23,7 @@ ff-mpirun [mpi parameter]  DDM-Schwarz-Stokes-2d.edp   [-glut ffglut]  [-n N] [-
 load "MPICG"  load "medit"  load "metis"
 include "getARGV.idp"
 include "DDM-Schwarz-macro.idp"
-include "AddLayer2d.idp"
+//include "AddLayer2d.idp"
 include "DDM-funcs-v2.idp"
 
 

@@ -6008,7 +6008,10 @@ const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) co
   if( QuadratureFormular_T_7.exact >= exact ) return QuadratureFormular_T_7;
   if( QuadratureFormular_T_9.exact >= exact ) return QuadratureFormular_T_9;
   */
-  cerr << "Warning :  Order of the Quadrature Formular order " << exact+1 << " exact = " << exact << endl;
+    static long count = 0;
+  if(verbosity > 1 && count++ < 5)
+   cerr << "Warning :  Max Order of the Quadrature Formular Tet  is 6 and expect: " << exact+1
+      <<  endl;
   //  ExecError(" We find  no Quadrature Formular on Tet for this  order: too high");
   return QuadratureFormular_Tet_5;
 }

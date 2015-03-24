@@ -1277,7 +1277,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 	inside=data[2];
 	icomp = data[3];
 	ffassert(op>=0 && op < 4);
-	
+        if(op==3) op=op_dz;//  correct missing
       }
     if(verbosity>2) 
       {

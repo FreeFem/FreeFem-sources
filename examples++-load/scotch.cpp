@@ -1,11 +1,4 @@
-// SUMMARY  :   add interface with partionning library scotch 
-// USAGE    : LGPL      
-// ORG      : LJLL Universite Pierre et Marie Curie, Paris,  FRANCE 
-// AUTHOR   : P. Jolivet 
-// E-MAIL   : Pierre Jolivet <pierre.jolivet@ljll.math.upmc.fr>
-//
-
-/* 
+/*
  This file is part of Freefem++
  
  Freefem++ is free software; you can redistribute it and/or modify
@@ -21,23 +14,28 @@
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
+ 
  */
 //   for automatic  compilation with ff-c++
 //ff-c++-LIBRARY-dep: scotch
-//ff-c++-cpp-dep: 
+//ff-c++-cpp-dep:
 //
 //
 // P. Jolivet   april 2012
 // ----------------------------
-
-
+#ifndef _ALL_IN_ONE_
 #include "ff++.hpp"
 #include <vector>
 #include <cmath>
+#endif
+#ifdef WITH_PTSCOTCH
+#include <mpi.h>
+#include <ptscotch.h>
+#else
 #include <scotch.h>
+#endif
 
-template<class T, class V>
+template<class T, class V, class K>
 class SCOTCH_Op : public E_F0mps {
     public:
         Expression partition;
@@ -49,35 +47,31 @@ class SCOTCH_Op : public E_F0mps {
         SCOTCH_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3) : partition(param1), Th(param2), lpartition(param3) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
-
         AnyType operator()(Stack stack) const;
 };
 
-// FFCS - keywords/dumptable is not able to scan class names if they contain spaces, even in template arguments
-template<class T, class V>
-basicAC_F0::name_and_type SCOTCH_Op<T,V>::name_param[] = {
+template<class T, class V, class K>
+basicAC_F0::name_and_type SCOTCH_Op<T, V, K>::name_param[] = {
     {"weight", &typeid(KN<long>*)}
 };
 
 
-template<class T, class V>
-class  SCOTCH : public OneOperator {
+template<class T, class V, class K>
+class SCOTCH : public OneOperator {
     public:
-        SCOTCH() : OneOperator(atype<long>(), atype<KN<long>* >(), atype<V>(), atype<long>()) {}
+        SCOTCH() : OneOperator(atype<K>(), atype<KN<K>* >(), atype<V>(), atype<long>()) {}
 
-        E_F0* code(const basicAC_F0& args) const
-        {
-            return new SCOTCH_Op<T, V>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+        E_F0* code(const basicAC_F0& args) const {
+            return new SCOTCH_Op<T, V, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
         }
 };
 
-
-template<class T, class V>
-AnyType SCOTCH_Op<T, V>::operator()(Stack stack)  const {
+template<class T, class V, class K>
+AnyType SCOTCH_Op<T, V, K>::operator()(Stack stack)  const {
     T* pTh = GetAny<T*>((*Th)(stack));
     ffassert(pTh);
     int nt = pTh->nt;
-    KN<long>* part = GetAny<KN<long>* >((*partition)(stack));
+    KN<K>* part = GetAny<KN<K>* >((*partition)(stack));
     ffassert(part);
 
     int nve = T::Rd::d+1;
@@ -89,23 +83,22 @@ AnyType SCOTCH_Op<T, V>::operator()(Stack stack)  const {
     SCOTCH_Graph GraphSCOTCH;
     SCOTCH_Strat StratSCOTCH;
     SCOTCH_graphInit(&GraphSCOTCH);
-    SCOTCH_stratInit(&StratSCOTCH);
     SCOTCH_Num baseval = 0;
     SCOTCH_Num vertnbr = nt;
     SCOTCH_Num edgenbr;
     SCOTCH_Num* verttab = new SCOTCH_Num[vertnbr + 1];
     vector<SCOTCH_Num> edgevec;
-    SCOTCH_Num prev;
+    edgevec.reserve(T::Rd::d * (vertnbr - 1));
     int cptNode = 0;
-    int cptEdge = 0;
     int accum = 0;
     verttab[cptNode++] = baseval;
     for (int it = 0; it < nt; ++it) {
         for (int jt = 0; jt < nve; ++jt) {
             int jtt = jt, itt = pTh->ElementAdj(it, jtt);
-            if( (itt != it) && (itt >= 0) ) {
+            if(itt != it && itt >= 0) {
                 ++accum;
                 edgevec.push_back(baseval + itt);
+                //edgevec.emplace_back(baseval + itt);
             }
         }
         verttab[cptNode++] = accum;
@@ -125,28 +118,30 @@ AnyType SCOTCH_Op<T, V>::operator()(Stack stack)  const {
     SCOTCH_Num* vlbltab = NULL;
     SCOTCH_Num* edlotab = NULL;
     SCOTCH_graphBuild(&GraphSCOTCH, baseval, vertnbr, verttab, vendtab, velotab, vlbltab, edgenbr, edgetab, edlotab);
+#ifdef DEBUG
     SCOTCH_graphCheck(&GraphSCOTCH);
-
+#endif
     KN<SCOTCH_Num> epart(nt);
+    SCOTCH_stratInit(&StratSCOTCH);
+    SCOTCH_stratGraphMapBuild(&StratSCOTCH, SCOTCH_STRATSPEED, lpart, 0.05);
     SCOTCH_graphPart(&GraphSCOTCH, lpart, &StratSCOTCH, epart);
     SCOTCH_graphExit(&GraphSCOTCH);
     SCOTCH_stratExit(&StratSCOTCH);
     *part = epart;
-    delete[] verttab;
+    delete [] verttab;
     if(velotab)
-        delete[] velotab;
+        delete [] velotab;
 
-    return 1L;
+    return 0L;
 }
 
-/*  class Init {
-    public:
-        Init();
-};
-
-Init init;*/
-static void Load_Init( ){
-    Global.Add("scotch", "(", new SCOTCH<Mesh, pmesh>);
-    Global.Add("scotch", "(", new SCOTCH<Mesh3, pmesh3>);
+#ifndef _ALL_IN_ONE_
+static void Init_Scotch() {
+    Global.Add("scotch", "(", new SCOTCH<Mesh, pmesh, long>);
+    Global.Add("scotch", "(", new SCOTCH<Mesh3, pmesh3, long>);
+    Global.Add("scotch", "(", new SCOTCH<Mesh, pmesh, double>);
+    Global.Add("scotch", "(", new SCOTCH<Mesh3, pmesh3, double>);
 }
-LOADFUNC(Load_Init)
+
+LOADFUNC(Init_Scotch)
+#endif
