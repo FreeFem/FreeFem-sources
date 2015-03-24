@@ -25,6 +25,12 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+// ALH - javascript output
+#ifdef FFJS
+#include <emscripten.h>
+#endif
+
 #define FF_GRAPH_SET_PTR
 using namespace std;
 #include <ctime>
@@ -44,6 +50,7 @@ using namespace std;
 #endif
 #ifdef xTARGET_CARBON
 #include <Navigation.h>
+
 int pStrCopy (StringPtr p1, char * p2)
 /* copies a pascal string `p1 into a C string */
 {
@@ -194,14 +201,24 @@ void doatexitff()
 #endif
 
 }
+
 extern int mymain(int argc,char **argv);
+
+// <<main>>
+
+// ALH - 24/2/15 - the main entry point for javascript is on the HTML page so we need to give it a different name here.
+// Built by [[file:~/ffjs/Makefile::FFJS_MAIN]] and called by [[file:~/ffjs/util.cpp::ffjs]].
+
+#ifdef FFJS_MAIN
+extern "C" int ffjs_main(int argc,char **argv)
+#else
 int main (int argc, char **argv)
+#endif
 {
   atexit(doatexitff);
   int ret=mymain(argc,argv);
   return ret;
 }
-
 
 #endif
 void message(char *s);
@@ -251,7 +268,11 @@ void couleur(int c)
       r=g=b=0;
     if(psfile)
     fprintf(psfile,"%.3f %.3f %.3f C\n",r,g,b);
-  
+
+#ifdef FFJS_GRAPH
+    // ALH - <<ffjs_couleur>> javascript graph [[file:~/ffjs/main.js::ffjs_couleur]]
+    EM_ASM_DOUBLE({ffjs_couleur($0,$1,$2)},r,g,b);
+#endif
 }
 
 static XColor DefColorSansG( int k,int nb, bool hsv,bool ggrey,int nbcolors,float *colors)
@@ -370,7 +391,7 @@ void initgraphique()
   SetColorTable(8);
   INITGRAPH = 1;
   width = 10000;// change FH mai 2012 to have more precis graphic for F.  Ortegon 
-  height =  7071; // aspect ratio  \sqrt(2)
+  height =  7071; // <<aspect_ratio>>  \sqrt(2)
 }
 
 void closegraphique()
@@ -444,6 +465,11 @@ void rmoveto(reel x, reel y)
 {
   currx = scalx(x);
   curry = scaly(y);
+
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_rmoveto>> javascript graph [[file:~/ffjs/main.js::ffjs_rmoveto]]
+  EM_ASM_INT({ffjs_rmoveto($0,$1)},currx,curry);
+#endif
 }
 
 void rlineto(reel x, reel y)
@@ -452,6 +478,11 @@ void rlineto(reel x, reel y)
   if (psfile)
     fprintf(psfile,"%d %d %d %d L\n",currx, height-curry, newx, height-newy);
   currx = newx; curry = newy;
+
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_rlineto>> javascript graph [[file:~/ffjs/main.js::ffjs_rlineto]]
+  EM_ASM_INT({ffjs_rlineto($0,$1)},newx,newy);
+#endif
 }
 
 void cadreortho(reel centrex, reel centrey, reel rayon)
@@ -477,32 +508,30 @@ void cadreortho(reel centrex, reel centrey, reel rayon)
 
 void plotstring (const char *  string)
 { //int l = strlen(string);
- if(psfile) fprintf(psfile,"(%s) %d %d  S\n",string,currx,height-curry);
+  if(psfile) fprintf(psfile,"(%s) %d %d  S\n",string,currx,height-curry);
+ 
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_plotstring>> javascript graph - Send the string character by character to
+  // [[file:~/ffjs/main.js::ffjs_plotstring]] because there is no string parameter at the moment
+  // [[http://kripken.github.io/emscripten-site/docs/api_reference/emscripten.h.html#c.EM_ASM_]]
+  
+  for(const char *c=string;*c;c++)EM_ASM_INT({ffjs_plotstring($0)},*c);
+  EM_ASM(ffjs_plotstring(0));
+#endif
 }
 
 void showgraphic()
 {
 }
-void x11draw3(int * ptype);
-
-void x11draw3(int * ptype)
-{
-  int type;
-
-  type=  *ptype;
-
-  if (psfile) 
-    switch (type) {
-    case 0  : {fprintf(psfile,"[] setdash\n");break;}
-    case 1  : {fprintf(psfile,"[3]  setdash\n");break;}
-    default : {fprintf(psfile,"[4 1] setdash\n");break;}
-    }
-
-}  
 
 void penthickness(int pepais)
 {
   if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais*2);
+
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_penthickness>> javascript graph [[file:~/ffjs/main.js::ffjs_penthickness]]
+  EM_ASM_INT({ffjs_penthickness($0)},pepais);
+#endif
 }
 
 void x11linsrn(int * ,int * ,int * ,int * );
@@ -522,21 +551,30 @@ void cercle(reel , reel , reel )
 {
   //int r = (int) (rayon * echx);
 }
-void reffecran()
-{
+void reffecran(){
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_graphstart>> javascript graph [[file:~/ffjs/main.js::ffjs_graphstart]]
+  EM_ASM(ffjs_graphstart());
+#endif
 }
 
 void fillpoly(int n, float *poly)
 {
   int i;
-   if (psfile) 
+  if (psfile) 
     {
-     fprintf(psfile,"bF ");
-     for (i=0;i<n;i++)
-      fprintf(psfile,"%d %d ", scalx(poly[2*i]),height-scaly( poly[2*i+1]));
-     fprintf(psfile,"eF\n");
+      fprintf(psfile,"bF ");
+      for (i=0;i<n;i++)
+	fprintf(psfile,"%d %d ", scalx(poly[2*i]),height-scaly( poly[2*i+1]));
+      fprintf(psfile,"eF\n");
     }
-
+   
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_fillpoly>> javascript graph [[file:~/ffjs/main.js::ffjs_fillpoly]]
+  EM_ASM_INT({ffjs_fillpoly_begin($0,$1)},scalx(poly[0]),scaly(poly[1]));
+  for(i=1;i<n;i++)EM_ASM_INT({ffjs_fillpoly_next($0,$1)},scalx(poly[2*i]),scaly(poly[2*i+1]));
+  EM_ASM(ffjs_fillpoly_close());
+#endif
 }
 
 
@@ -606,6 +644,18 @@ void openPS(const char *filename )
 
 
   psfile=fopen(fps,"w");
+
+#ifdef FFJS_GRAPH
+
+  // <<listgraphs>> ALH - extract the list of graphs generated by FF during a run
+  // [[file:~/ffjs/main.js::ffjs_listgraphs]]. Send the file name character by character to
+  // [[file:~/ffjs/main.js::ffjs_listgraphs]] because there is no string parameter at the moment
+  // [[http://kripken.github.io/emscripten-site/docs/api_reference/emscripten.h.html#c.EM_ASM_]]
+  
+  for(const char *c=fps;*c;c++)EM_ASM_INT({ffjs_listgraphs($0)},*c);
+
+#endif
+
   if(psfile) {
     psfile_save=psfile;
     fprintf(psfile,"%%!PS-Adobe-2.0 EPSF-2.0\n%%%%Creator: %s\n%%%%Title: FreeFem++\n","user");
@@ -636,6 +686,11 @@ void closePS(void)
   }
   psfile_save=0;
   psfile=0;
+
+#ifdef FFJS_GRAPH
+  // ALH - <<ffjs_graphdone>> javascript graph [[file:~/ffjs/main.js::ffjs_graphdone]]
+  EM_ASM({ffjs_graphdone()});
+#endif
 }
  void coutmode(short )  {}
 // bof bof --- 

@@ -10,5 +10,5 @@ int mymain (int  argc, char **argv)
 {
  ffapi::init(); 
  init_ptr_parallelepmi();
- return mainff(argc,argv);
+ return mainff(argc,argv); // [[file:lg.ypp::mainff]]
 }

@@ -36,7 +36,10 @@
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
-#if defined(__INTEL__) || defined(__MWERKS__) || !defined(HAVE_DLFCN_H)
+
+// ALH - 11/3/15 - added NOLOAD macro option because no dynamic load available in javascript
+
+#if defined(__INTEL__) || defined(__MWERKS__) || !defined(HAVE_DLFCN_H) || defined(NOLOAD)
 #undef LOAD
 #endif
 

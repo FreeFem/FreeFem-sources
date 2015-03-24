@@ -155,14 +155,24 @@ void ff_atend(AtEnd f)
  lg.tab.o */
 %union{
  double dnum;
+
+ /* <<YYSTYPE_lnum>> */
  long lnum;
+
+ /* <<YYSTYPE_str>> */
  char * str;
  char oper[8];
+
+ /* <<YYSTYPE_cexp>> [[file:../fflib/AFunction.hpp::CC_F0]] */
  CC_F0 cexp;
+ 
  Routine   *routine;
  AC_F0 args;
  aType type;
+
+ /* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
  CListOfInst cinst;
+ 
  Block * block; 
  ListOfId *clist_id;
 /* ListCatch * clist_Catchs;*/
@@ -228,11 +238,15 @@ void ff_atend(AtEnd f)
 %left  <oper>  '(' '[' '.'
 
 %token <oper> ')'  ']' 
- 
+
+/* <<LNUM>> */
 %token <lnum> LNUM
 %token <dnum> DNUM
 %token <dnum> CNUM
+
+/* <<ID>> used by [[file:../fflib/lex.cpp::mylex_scan]] */
 %token <str> ID
+
 %token <str> FESPACEID
 %token <str> IDPARAM
 %token <str> STRING
@@ -255,6 +269,8 @@ void ff_atend(AtEnd f)
 
 %token <type> TYPE
 %token <type> FUNCTION
+
+/* <<FESPACE>> used by [[file:../fflib/lex.cpp::mylex_scan]] */
 %token <str> FESPACE
 %token <str> FESPACE1
 %token <str> FESPACE3
@@ -271,7 +287,10 @@ void ff_atend(AtEnd f)
 %token PLUSPLUS
 %token MOINSMOINS
 %token SET
+
+/* <<LTLT>> */
 %token LTLT
+
 %token PLUSEQ
 %token MOINSEQ
 %token MULEQ
@@ -291,8 +310,13 @@ start:   input ENDOFFILE {
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
 			//FFCS: divert stream to FFCS
                         if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
-                        size_t sizestack = currentblock->size()+1024 ; //  before close 
+
+                        // <<sizestack_set>>
+                        size_t sizestack = currentblock->size()+1024 ; //  before close
+
+                        // <<close_final_block>>
                         $1+=currentblock->close(currentblock);
+                        
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
@@ -300,10 +324,19 @@ start:   input ENDOFFILE {
                         size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
                         if(verbosity>2  || mpirank==0) cout << endl;  
-                        { Stack stack = newStack(sizestack);
+                        {
+
+                            // <<create_global_FF_stack>> calls [[file:../fflib/ffstack.hpp::newStack]]
+
+                            Stack stack = newStack(sizestack);
+                            
                         double CPUcompile= CPUtime();
-                        try {                  
-                          $1.eval(stack);}
+                        try {
+
+                          // <<evaluate_parsed_FF_script>>
+                          $1.eval(stack);
+
+                        }
                         catch ( E_exception & e)  {
                           cerr << e.what() << " ,  mpirank " << mpirank << endl;
                           return 1; }
@@ -319,7 +352,12 @@ start:   input ENDOFFILE {
 
                         if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
 			    <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
+
+
+                        // <<delete_global_FF_stack>>
+
                         deleteStack(stack);
+                        
                         //debugstack.clear() 
                         } 
                         fingraphique();
@@ -341,9 +379,9 @@ start:   input ENDOFFILE {
 input:   instructions /*[[instructions]]*/
 ;
          
-/*<<instructions>>*/
+/* <<instructions>> returns a [[YYSTYPE_cinst]] */
 
-instructions:  instruction /*[[instruction]]*/   {$$=$1;;;}
+instructions:  instruction /* [[instruction]] gives a [[YYSTYPE_cexp]] */   {$$=$1;;;}
         | instructions  instruction   { $$= ($1+=$2) }         
         ;
 
@@ -505,7 +543,7 @@ declaration_for:
 
 try: TRY { Block::open(currentblock) };
 
-/*<<instruction>>*/
+/* <<instruction>> returns a [[YYSTYPE_cexp]] */
 
 instruction:   ';' {$$=0;} 
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
@@ -607,7 +645,7 @@ no_set_expr:
 	| no_ternary_expr ':' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"::",$1,$3,$5)} 	
 ;
 
-/*<<no_ternary_expr>>*/
+/*<<no_ternary_expr>> gives a [[YYSTYPE_cexp]] */
 
 no_ternary_expr:
 	  unary_expr /*[[unary_expr]]*/
@@ -666,14 +704,14 @@ parameters:  {$$=0}
 array:   no_comma_expr {$$=$1} 
        | array ',' no_comma_expr {$$ = ($1 += $3) };
      
-/*<<unary_expr>>*/
+/* <<unary_expr>> returns a [[YYSTYPE_cexp]] */
     
 unary_expr:
     pow_expr /*[[pow_expr]]*/
   | unop  pow_expr %prec UNARY {$$=C_F0(TheOperators,$1,$2)} /*[[unop]] [[pow_expr]]*/
 ;   
 
-/*<<pow_expr>>*/
+/* <<pow_expr>> returns a [[YYSTYPE_cexp]] */
 
 pow_expr: primary /*[[primary]]*/
   |      primary  '^' unary_expr   {$$=C_F0(TheOperators,$2,$1,$3)} 
@@ -681,22 +719,24 @@ pow_expr: primary /*[[primary]]*/
   |      primary '\''              {$$=C_F0(TheOperators,$2,$1)} 
 ;
 
-/*<<primary>>*/
+/* <<primary>> returns a [[YYSTYPE_cexp]] */
 
 primary:  
 
-  /* <<primary_ID>> calls [[file:~/ff/draft/src/fflib/AFunction2.cpp::Find]]
-     returns [[file:~/ff/draft/src/fflib/AFunction.hpp::C_F0]] */
+            /* <<primary_ID>> calls [[file:../fflib/AFunction2.cpp::Find]]
+               returns [[file:../fflib/AFunction.hpp::C_F0]] */
 
            ID           {$$=Find($1);}
+
+           /* <<primary_constant>> uses [[file:~/ff/src/fflib/AFunction.hpp::CConstant]] */
 
   |        LNUM         {$$= CConstant($1)}
   |        DNUM         {$$= CConstant($1)}
   |        CNUM         {$$= CConstant(complex<double>(0,$1))}
   |        STRING {$$= CConstant<const char *>($1)}
 
-  /* <<primary_brackets_parameters>> refers to [[parameters]] and creates an object of class
-     [[file:../fflib/AFunction.hpp::C_F0]] */
+           /* <<primary_brackets_parameters>> refers to [[parameters]] and creates an object of class
+              [[file:../fflib/AFunction.hpp::C_F0]] */
 
   |        primary '('  parameters ')'  {$$=C_F0($1,$2,$3);}
 
@@ -760,6 +800,8 @@ int Compile()
 
   int retvalue=0;
 
+  // <<initialize_currentblock>>
+  
   currentblock=0;
   Block::open(currentblock);  
   try {
@@ -830,7 +872,8 @@ static void SetcppIo()
 extern const char *  prognamearg;
 extern  bool echo_edp;
 
-/// Called by mymain() and calls Compile() to run the FF language parser
+/// <<mainff>> Called by [[file:mymain.cpp::mymain]] and calls [[Compile]] to run the FF language parser
+
 int mainff (int  argc, char **argv)
 {
     

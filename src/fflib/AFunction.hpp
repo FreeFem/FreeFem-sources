@@ -97,9 +97,9 @@ class ListOfInst;
 class Polymorphic;
 class OneOperator;
 
-/// <<Expression>> is used as the type of the local list contained in ListOfInst
+/// <<Expression>> is used as the type of the local list contained in ListOfInst 
 
-typedef  E_F0  *  Expression;
+typedef  E_F0  *  Expression; // [[E_F0]]
 
 class AC_F0;
 class basicAC_F0;
@@ -343,8 +343,9 @@ class C_LF1;
 //  3 types of function/expression  0,1,2 args  
 
 /// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
-/// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in [[ListOfInst]], and evaluated
-/// when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called (see \ref index).
+/// language (see [[file:../lglib/lg.ypp]]). E_F0 pointers are typed as [[Expression]], stored as a list in
+/// [[ListOfInst]], and evaluated when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called at
+/// [[file:../lglib/lg.ypp::evaluate_parsed_FF_script]] (see \ref index).
 
 class E_F0 :public CodeAlloc 
    {
@@ -1363,7 +1364,8 @@ Type_Expr CPPValue(R *& v)
    throwassert(map_type[typeid(R*).name()]);
   return make_pair(map_type[typeid(R*).name()],new PPValue<R>(&v));
  }
- 
+
+// <<CConstant>>
 template<class R >
 Type_Expr CConstant(const R & v)
  {
@@ -1371,11 +1373,10 @@ Type_Expr CConstant(const R & v)
   return make_pair(map_type[typeid(R).name()],new  EConstant<R>(v));
  }
 
-
-/// <<CC_F0>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
+/// <<CC_F0>>, same as [[C_F0]] but without constructor/destructor to be used in union [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class CC_F0 {
-  Expression f;
+  Expression f; // [[Expression]]
   aType r;
 public:
   void operator=(const C_F0& c) { f=c.f;r=c.r;;} 
@@ -1391,7 +1392,7 @@ public:
 /// <<ListOfInst>>
 
 class ListOfInst :
-  public E_F0mps /*[[E_F0mps]]*/
+  public E_F0mps // [[E_F0mps]]
 { 
   int n;
   Expression   *   list;
@@ -2056,7 +2057,9 @@ public:
    size_t size() const { return Max(topmax,top);}
   void Add(Key k,Key op,OneOperator *p0)  
     { table.Add(k,op,p0);}
-   
+
+  // <<Block_NewVar>>
+  
 template<class T>   
    C_F0 NewVar(Key k,aType t,const C_F0 &i) 
      {return table.NewVar<T>(k, t,top,i);}
