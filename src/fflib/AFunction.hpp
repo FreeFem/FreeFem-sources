@@ -599,9 +599,8 @@ private:
   friend ostream & operator<<(ostream & f,const Polymorphic & a);
 };
 
-///   the type for polymorphisme of id 
-
-/// <<C_F0>> compile time expressions
+/// <<C_F0>> The type for polymorphisme of id. Contains one [[Expression]] and the type that the expression will return
+/// [[file:../fflib/AnyType.hpp::aType]] (useful to select the right operator when using that type).
 
 class basicAC_F0;
 class C_F0 {
