@@ -23,7 +23,7 @@ ff-mpirun [mpi parameter] MPIGMRES2d.edp  [-glut ffglut]  [-n N] [-k K]  [-d D] 
 load "MPICG"  load "medit"  load "metis"
 include "getARGV.idp"
 include "DDM-Schwarz-macro.idp"
-include "AddLayer3d.idp"
+//include "AddLayer3d.idp"
 include "DDM-funcs-v2.idp"
 include "cube.idp" 
 

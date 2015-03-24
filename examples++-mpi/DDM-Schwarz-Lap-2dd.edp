@@ -23,7 +23,7 @@ load "MPICG"  load "medit"  load "metis"
 include "getARGV.idp"
 include "MPIplot.idp"
 include "DDM-Schwarz-macro.idp"
-include "AddLayer2d.idp"
+//include "AddLayer2d.idp"
 include "DDM-funcs-v2.idp"
 
 
@@ -42,8 +42,8 @@ int nloc = getARGV("-n",10);
 string sff=getARGV("-p","");
 int gmres=getARGV("-gmres",3); 
 int nC = getARGV("-N" ,max(nloc/10,5)); 
-int sizeoverlaps=1; // size of overlap
-bool RAS=1;  // Global Variable ..
+int sizeoverlaps=getARGV("-overlap" ,1); ; // size of overlap
+bool RAS=getARGV("-RAS",1);  // Global Variable ..
 
 
 
@@ -88,8 +88,8 @@ Whi ui,vi;
 
 
 /* the definition of the Problem .... */
-func G=1.; /* ok  */
-func F=1.; /* ok  */
+func G=1; /* ok  */
+func F=2.; /* ok  */
 macro grad(u) [dx(u),dy(u)] //
 // warning for Dir. BC. the last win 
 varf vPb(U,V)= int2d(Thi)(grad(U)'*grad(V)) + int2d(Thi)(F*V) + on(10,U=0)+on(1,U=G) ; //');// for emacs

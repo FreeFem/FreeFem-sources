@@ -1,5 +1,5 @@
-//ff-c++-LIBRARY-dep: cxx11   hpddm  scalapack blas  mpifc  fc mpi  pthread 
-//ff-c++-cpp-dep: 
+//ff-c++-LIBRARY-dep: cxx11   hpddm  scalapack blas  mpifc  fc mpi  pthread
+//ff-c++-cpp-dep:
 #ifndef _ALL_IN_ONE_
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"
@@ -8,30 +8,7 @@
 #include <mpi.h>
 #endif
 
-class Boundingbox2D_Op : public E_F0mps {
-    public:
-        Expression arrayBB;
-        Expression Th;
-        static const int n_name_param = 0;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        Boundingbox2D_Op(const basicAC_F0& args, Expression param1, Expression param2) : arrayBB(param1), Th(param2) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
-        AnyType operator()(Stack stack) const;
-};
-
-class Boundingbox2D : public OneOperator {
-    public:
-        Boundingbox2D() : OneOperator(atype<long>(), atype<KN<double>* >(), atype<pmesh>()) {}
-        E_F0* code(const basicAC_F0& args) const
-        {
-            return new Boundingbox2D_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        }
-};
-
-AnyType Boundingbox2D_Op::operator()(Stack stack) const {
-    Mesh* pTh = GetAny<Mesh*>((*Th)(stack));
+long Boundingbox2D(KN<double>* const& bb, pmesh const& pTh) {
     KN<double> minmax(4); // x.min, x.max, y.min, y.max
     R2 p1(pTh->bedges[0][0]);
     R2 p2(pTh->bedges[0][1]);
@@ -83,38 +60,11 @@ AnyType Boundingbox2D_Op::operator()(Stack stack) const {
                 minmax[2] = p1.y;
         }
     }
-    KN<double>* bb = GetAny<KN<double>* >((*arrayBB)(stack));
     *bb = minmax;
     return 0L;
 }
 
-class Boundingbox3D_Op : public E_F0mps {
-    public:
-        Expression arrayBB;
-        Expression Th;
-        static const int n_name_param = 0;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        Boundingbox3D_Op(const basicAC_F0& args, Expression param1, Expression param2) : arrayBB(param1), Th(param2) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
-        AnyType operator()(Stack stack) const;
-};
-
-basicAC_F0::name_and_type Boundingbox3D_Op::name_param[] = { };
-basicAC_F0::name_and_type Boundingbox2D_Op::name_param[] = { };
-
-class Boundingbox3D : public OneOperator {
-    public:
-        Boundingbox3D() : OneOperator(atype<long>(), atype<KN<double>* >(), atype<pmesh3>()) {}
-        E_F0* code(const basicAC_F0& args) const
-        {
-            return new Boundingbox3D_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        }
-};
-
-AnyType Boundingbox3D_Op::operator()(Stack stack) const {
-    Mesh3* pTh = GetAny<Mesh3*>((*Th)(stack));
+long Boundingbox3D(KN<double>* const& bb, pmesh3 const& pTh) {
     KN<double> minmax(6); // x.min, x.max, y.min, y.max, z.min, z.max
     const Triangle3& K1(pTh->be(0));
     const Triangle3& K2(pTh->be(1));
@@ -218,7 +168,7 @@ AnyType Boundingbox3D_Op::operator()(Stack stack) const {
     }
 
     int i = 3;
-    while(i < (pTh->nbe)-1) {
+    while(i < pTh->nbe - 1) {
         const Triangle3& Ka(pTh->be(i));
         const Triangle3& Kb(pTh->be(i+1));
         if(Ka[0].x > Ka[1].x) {
@@ -333,7 +283,7 @@ AnyType Boundingbox3D_Op::operator()(Stack stack) const {
         }
         i += 2;
     }
-    if((pTh->nbe)%2 == 1) {
+    if(pTh->nbe % 2 == 1 && i < pTh->nbe) {
         const Triangle3& Ka(pTh->be(i));
         if(Ka[0].x > Ka[1].x) {
             if(Ka[0].x > minmax[1])
@@ -385,42 +335,28 @@ AnyType Boundingbox3D_Op::operator()(Stack stack) const {
         else if(Ka[2].z > minmax[5])
             minmax[5] = Ka[2].z;
     }
-    KN<double>* bb = GetAny<KN<double>* >((*arrayBB)(stack));
     *bb = minmax;
 
     return 0L;
 }
 
-long long_to_double(KN<double>* const& A, KN<long>* const& B) {
-    for(int i = 0; i < B->n; ++i)
-        A->operator[](i) = B->operator[](i);
-    return 0L;
-}
-
 long findDiff(KN<double>* const& array, KN<long>* const& val) {
     std::set<double> vals;
-    for(unsigned int i = 0; i < array->n; ++i)
-        vals.insert(array->operator[]((int)i));
+    for(int i = 0; i < array->n; ++i)
+        vals.insert((*array)[i]);
     val->resize(vals.size());
-    unsigned short i = 0;
-    for(std::set<double>::iterator it = vals.begin(); it != vals.end(); ++it, ++i)
-        val->operator[]((int)i) = *it;
+    int i = 0;
+    for(std::set<double>::iterator it = vals.begin(); it != vals.end(); ++it)
+        (*val)[i++] = *it;
     return 0L;
 }
 
 #ifndef _ALL_IN_ONE_
-/* --FH:   class Init {
-    public:
-        Init();
-};
-
-Init ...; */
-static void Load_Init() {
-    Global.Add("bb2d", "(", new Boundingbox2D);
-    Global.Add("bb3d", "(", new Boundingbox3D);
-    Global.Add("fast", "(", new OneOperator2_<long, KN<double>*, KN<long>*>(long_to_double));
+static void Init_Utility() {
+    Global.Add("bb2d", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox2D));
+    Global.Add("bb3d", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox3D));
     Global.Add("findDiff", "(", new OneOperator2_<long, KN<double>*, KN<long>*>(findDiff));
 }
- LOADFUNC(Load_Init)
-#endif
 
+LOADFUNC(Init_Utility)
+#endif

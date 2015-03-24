@@ -159,6 +159,7 @@ func bool  prefix#CheckUpdate()
   prefix#Update(u[],v[]);
   u[]-=v[];
   if(mpirank==0) cout << "CheckUpdate  " << u[].linfty << endl;
+  if(u[].linfty>1e-6) plot(u,cmm="bug ????");
   assert( u[].linfty<1e-6); 
   
   return 1; }

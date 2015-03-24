@@ -1,6 +1,22 @@
 To compile a full version of FreeFem++ under MacOS 
 ---------------------------------------------------
+Under Yosemite  (10.10.2)  2015 ( xcode 6.2 form scratch)
+1) install xcode 
+  do clang to install command line
+2) with brew install
+  499  brew install wget
+  500  brew install  autoconf
+  501  brew install  automake
+  504  brew install  cmake
+  505  brew install  gfortran
+  506  brew install  gcc
+  540  brew install m4
+  585  brew install pkg-config
+  588  brew install gobject-introspection
 
+
+3) 
+install brew
 Under Mavericks (10.9)  2012 ( xcode 5.0.2 form scratch)
 -------------------------------------------------
  remark: All line beginning by # are  shell command in terminal. 
