@@ -1,5 +1,5 @@
 #include "config-wrapper.h"
-#include "strversionnumber.hpp"
+#include "strversionnumber.hpp" // [[file:strversionnumber.hpp]]
 #include <cstdlib>
 using namespace std;
 #define TOSTRING1(i) #i
