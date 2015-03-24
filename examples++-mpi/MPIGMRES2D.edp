@@ -24,7 +24,7 @@ load "MPICG"  load "medit"  load "metis"
 include "getARGV.idp"
 include "MPIplot.idp"
 include "MPIGMRESmacro.idp"
-include "AddLayer2d.idp" 
+//include "AddLayer2d.idp" 
 
 searchMethod=1; // more safe seach algo (warning can be very expensive in case lot of ouside point) 
 assert(version >=3.11);
