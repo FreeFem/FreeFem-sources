@@ -156,18 +156,15 @@ real timing;
         globalTh(ThOverlap);
         fespace PhGlobal(ThOverlap, P0);
         PhGlobal part;
-        int[int] balancing(ThOverlap.nt);
-        balancing = 0;
         if(mpiRank(comm) == 0) {
             cout.scientific << " --- global mesh of " << ThOverlap.nt << " elements (prior to refinement) generated (in " << mpiWtime() - timing << ") and partitioned with ";
             timing = mpiWtime();
-            metisdual(balancing, ThOverlap, mpiSize(comm));
+            metisdual(part[], ThOverlap, mpiSize(comm));
             cout << "Metis";
             cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
         }
         timing = mpiWtime();
-        broadcast(processor(0, comm), balancing);
-        fast(part[], balancing);
+        broadcast(processor(0, comm), part[]);
         partition(Th, ThBorder, ThOverlap, s, D, Vh, P, comm)
     }
     else if(mpisize == 1) {

@@ -97,7 +97,8 @@ AnyType SCOTCH_Op<T, V, K>::operator()(Stack stack)  const {
             int jtt = jt, itt = pTh->ElementAdj(it, jtt);
             if(itt != it && itt >= 0) {
                 ++accum;
-                edgevec.emplace_back(baseval + itt);
+                edgevec.push_back(baseval + itt);
+                //edgevec.emplace_back(baseval + itt);
             }
         }
         verttab[cptNode++] = accum;
