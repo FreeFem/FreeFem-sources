@@ -24,7 +24,7 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-include config.in
+-include config.in
 
 all-local: pastix
 
