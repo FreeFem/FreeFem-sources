@@ -1,0 +1,183 @@
+ load"medit"
+int debug =0; 
+macro plotMPI(Th, u, legend, Pk, def, d, w)
+    if(mpirank == 0) {
+        meshN ThCurrent = Th;
+        meshN[int] meshTab(mpisize);
+        fespace Xh(ThCurrent, Pk);
+        Xh<real>[int] def(uTab)(mpisize);
+        uTab[0][] = u;
+        meshTab[0] = Th;
+        mpiRequest[int] rq(mpisize - 1);
+        for(i = 1; i < mpisize; ++i)
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
+        for(i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        for(i = 1; i < mpisize; ++i) {
+            ThCurrent = meshTab[i];
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
+        }
+        for(i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        plot(uTab, wait = w, nbiso = 40, fill = 1, value = 1, dim = d, cmm = legend);
+    }
+    else {
+        mpiRequest[int] rq(2);
+        Isend(processor(0, rq[0]), Th);
+        Isend(processor(0, rq[1]), u);
+        mpiWait(rq[0]);
+        mpiWait(rq[1]);
+    }// EOM
+
+macro partition(meshName, borderName, overlapName, s, D, Vh, P, comm)
+        meshName = trunc(overlapName, abs(part - mpiRank(comm)) < 0.1, label = 10);
+        mpiBarrier(comm);
+        real timerPartition = mpiWtime();
+        {
+            fespace PhLocal(meshName, P0);
+            PhLocal overshoot = hTriangle;
+            real max = 2. * overlap * overshoot[].max;
+            bbN(meshName, max, overlapName)
+        }
+        fespace VhGlobal(overlapName, P1);
+        PhGlobal supp = abs(part - mpiRank(comm)) < 0.1;
+        VhGlobal suppSmooth;
+        AddLayers(overlapName, supp[], overlap * 2, suppSmooth[]);
+        {   meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
+            fespace Oh(neighbors, P0);
+            Oh partOverlap = part;
+            findDiff(partOverlap[], arrayIntersection);
+        }
+        fespace Vh(meshName, P1);
+        Vh[int] partitionIntersection(arrayIntersection.n);
+        if(s > 1) {
+            overlapName = trunc(overlapName, suppSmooth > 0.001, split = s);
+            supp = abs(part - mpiRank(comm)) < 0.1;
+            suppSmooth = 0;
+            AddLayers(overlapName, supp[], overlap * 2, suppSmooth[]);
+        }
+        overlapName = trunc(overlapName, suppSmooth > (overlap - 0.999)/2/overlap);
+        supp = supp;
+        suppSmooth = suppSmooth;
+        meshName = trunc(overlapName, suppSmooth> 0.5001, label = 10);
+        real oooo = 0.5001-0.5/overlap;
+        borderName = trunc(overlapName, (suppSmooth > oooo) && (suppSmooth < 0.5001), label = 20);
+        Vh khi = max(suppSmooth*overlap*2 - overlap, 0.) / overlap;
+        Vh sum = khi;
+        VhGlobal phi = 0;
+        
+        for(i = 0; i < arrayIntersection.n; ++i) {
+            PhGlobal suppPartition = abs(arrayIntersection[i] - part) < 0.1;
+            AddLayers(overlapName, suppPartition[], overlap, phi[]);
+            bool inter = intN(overlapName)(phi/measureN)>1e-6;
+            if( inter )
+            {
+                
+            partitionIntersection[numberIntersection] = phi;
+            sum[] += partitionIntersection[numberIntersection][];
+            arrayIntersection[numberIntersection++] = arrayIntersection[i];
+            }
+            else if(debug)          medit("phi",overlapName,phi); 
+              
+        }
+ 
+        khi[] = khi[] ./= sum[];
+        if(solver != 3 && solver != 5)
+            overlapName = minimalMesh;
+        else
+            overlapName = trunc(meshName, khi < 0.99);
+        if(numberIntersection != arrayIntersection.n)
+            arrayIntersection.resize(numberIntersection);
+        {
+        if(verbosity>2) {cout << " **** "<< mpirank << " / ";
+        for(int i=0;  i<arrayIntersection.n ; ++i)
+          cout <<  arrayIntersection[i] << " ";
+        cout << endl; }
+        }
+        Wh def(func2vec) = init(khi);
+        D.resize(Wh.ndof);
+        D = func2vec[];
+        restrictionIntersection.resize(numberIntersection);
+        if( debug) savemesh(meshName,"Th/Th-"+mpirank+".mesh");
+        if( debug)  medit("Th/TTh-"+mpirank,meshName,order=0,part);
+        for(i = 0; i < numberIntersection; ++i) {
+           if( debug)  cout << mpirank << "  trunc  " << i<< endl; 
+           
+            meshN meshIntersection ;
+
+            meshIntersection = trunc(meshName, partitionIntersection[i] > 1e-6);
+            if( debug)  cout << mpirank << " xx nb somm " << meshIntersection.nv << endl; 
+            fespace WhIntersection(meshIntersection, P);
+            matrix R = interpolate(WhIntersection, Wh);
+            real[int] C;
+            int[int] I;
+            [I, restrictionIntersection[i], C] = R;
+            restrictionIntersection[i].resize(R.nbcoef);
+            if( debug)  {savemesh(meshIntersection,"Th/Th-"+mpirank+"-"+arrayIntersection[i]+".mesh");
+            medit("Th/TTh-"+mpirank+"-"+arrayIntersection[i],meshIntersection,order=0,partitionIntersection[i]);
+            cout <<mpirank <<" / " << i << " " << "#####" << " " << C[R.nbcoef-1]<< " " << endl; }
+        }
+// EOM
+
+macro build(globalTh, Th, ThBorder, ThOverlap, s, D, numberIntersection, arrayIntersection, restrictionIntersection, Wh, P, comm)
+meshN ThOverlap, ThBorder;
+
+/*# partition #*/
+int[int] arrayIntersection;
+int[int][int] restrictionIntersection(0);
+real[int] D;
+
+int numberIntersection = 0;
+real timing;
+{
+    timing = mpiWtime();
+    if(mpisize > 1) {
+        globalTh(ThOverlap);
+        fespace PhGlobal(ThOverlap, P0);
+        PhGlobal part; part[]=0;
+        if(mpiRank(comm) == 0) {
+            cout.scientific << " --- global mesh of " << ThOverlap.nt << " elements (prior to refinement) generated (in " << mpiWtime() - timing << ") and partitioned with ";
+            timing = mpiWtime();
+            metisdual(part[], ThOverlap, mpiSize(comm));
+            cout << "Metis";
+            cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
+        }
+        timing = mpiWtime();
+        broadcast(processor(0, comm), part[]);
+                if(debug) medit("part",ThOverlap,part,order=0);
+        partition(Th, ThBorder, ThOverlap, s, D, Vh, P, comm)
+    }
+    else if(mpisize == 1) {
+        globalTh(Th);
+        D.resize(Wh.ndof);
+        D = 1.;
+    }
+    mpiBarrier(mpiCommWorld);
+    if(mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
+}
+/*# partitionEnd #*/
+// EOM
+
+macro assemble(mat, rhs, Wh, Th, ThBorder, Varf)
+real[int] rhs;
+matrix<real> mat;
+{ /* all memory of objects defined between this set of curly brackets
+     will be freed when the closing bracket is reached */
+    meshN ThAugmented = Th + ThBorder; /* ⠶$\Omega^{\delta + 1}_k = \Omega^\delta_k \cup \left(\Omega^{\delta + 1}_k \setminus \Omega^{\delta}_k\right)$⠶ */
+    ThBorder = minimalMesh;
+    Varf(vPb, ThAugmented, PhAugmented)
+    fespace WhAugmented(ThAugmented, Pk);
+    mat = vPb(WhAugmented, WhAugmented/*, solver = CG*/);
+    real[int] rhsFull = vPb(0, WhAugmented);
+    matrix R = interpolate(Wh, WhAugmented);
+
+    removeDOF(mat, R, rhsFull, rhs);
+}
+// EOM
+
+macro assembleUnsym(mat, rhs, Wh, Th, ThBorder, Varf)
+{
+    Varf(vPb, Th, Ph)
+    mat = vPb(Wh, Wh);
+}
+// EOM

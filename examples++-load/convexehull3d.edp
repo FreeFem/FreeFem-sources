@@ -1,0 +1,4 @@
+load "tetgen" 
+
+mesh3 Th=tetgconvexhull("ch.pts",region=1,label=3);//,reftet=1, refface=1);
+plot(Th);
