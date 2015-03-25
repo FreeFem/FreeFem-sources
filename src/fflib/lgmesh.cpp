@@ -1967,12 +1967,12 @@ void init_lgmesh() {
     Global.Add("volumelevelset","(",new OneOperator3_<double,Mesh3 *,KN<double>*,double>(volumelevelset));
     Global.Add("volumelevelset","(",new OneOperator4_<double,Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
     // add FH to get bounding box ...
-    Global.Add("Boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
-    Global.Add("Boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
-    Global.Add("Boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
-    Global.Add("Boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
-    Global.Add("Boundingbox", "(", new OneOperator2_<long, pmesh,KN<double>*>(Boundingbox));
-    Global.Add("Boundingbox", "(", new OneOperator2_<long, pmesh3,KN<double>*>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh,KN<double>*>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh3,KN<double>*>(Boundingbox));
 
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
