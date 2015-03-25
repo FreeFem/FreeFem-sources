@@ -1,8 +1,59 @@
-@  changeset:   3263:77a50d63e43a
-|  tag:         tip
+@    changeset:   3272:820477f35cd3
+|\   tag:         tip
+| |  parent:      3271:a53f2ef3fd89
+| |  parent:      3269:26eb6fa44041
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 15:26:58 2015 +0100
+| |  summary:     remerge version
+| |
+| o  changeset:   3271:a53f2ef3fd89
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 15:23:55 2015 +0100
+| |  summary:     past to version 3.36
+| |
+| o  changeset:   3270:b71bf2084a83
+| |  parent:      3268:08df56079406
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 15:11:13 2015 +0100
+| |  summary:     coorect metsi
+| |
+o |  changeset:   3269:26eb6fa44041
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Wed Mar 25 15:07:24 2015 +0100
+|    summary:     clean a little schwartz.edp
+|
+o  changeset:   3268:08df56079406
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Mar 25 12:04:27 2015 +0100
-|  summary:     correct typo
+|  date:        Wed Mar 25 14:40:27 2015 +0100
+|  summary:     coorect lround and f(aarry) function
+|
+o  changeset:   3267:4de61f34d228
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 25 14:04:16 2015 +0100
+|  summary:     add   lround off arral double to long
+|
+o    changeset:   3266:35e78b977f8a
+|\   parent:      3264:1f4d1bebde82
+| |  parent:      3265:3f85ec5c3666
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 13:51:24 2015 +0100
+| |  summary:     correct update pb.
+| |
+| o  changeset:   3265:3f85ec5c3666
+| |  parent:      3262:0c9c60f5f386
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 13:20:01 2015 +0100
+| |  summary:     correct type
+| |
+o |  changeset:   3264:1f4d1bebde82
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 13:22:04 2015 +0100
+| |  summary:     update schwarz.edp
+| |
+o |  changeset:   3263:77a50d63e43a
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Wed Mar 25 12:04:27 2015 +0100
+|    summary:     correct typo
 |
 o  changeset:   3262:0c9c60f5f386
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
