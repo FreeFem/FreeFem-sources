@@ -550,7 +550,7 @@ if test "$ff_cxx11" = yes ; then
     CXX11FLAGS="-std=c++11";
     AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
 fi
-CXXFLAGS="$ff_cxx_flags"
+CXXFLAGS="$ff_cxx_save"
 AC_SUBST(WITH_CXX11,$ff_cxx11)
 AC_SUBST(CXX11FLAGS,$CXX11FLAGS)
 #end Checking  c++11
