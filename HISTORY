@@ -1,23 +1,41 @@
-@    changeset:   3272:820477f35cd3
-|\   tag:         tip
-| |  parent:      3271:a53f2ef3fd89
+@  changeset:   3275:5feb67cd7a68
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 25 23:03:39 2015 +0100
+|  summary:     update HISTORY
+|
+o    changeset:   3274:d4e74adfc0d7
+|\   parent:      3273:6459276e1200
+| |  parent:      3272:820477f35cd3
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 16:36:57 2015 +0100
+| |  summary:     merge and correct pastix
+| |
+| o  changeset:   3273:6459276e1200
+| |  parent:      3269:26eb6fa44041
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 25 16:33:34 2015 +0100
+| |  summary:     coreect pastix compile
+| |
+o |  changeset:   3272:820477f35cd3
+|\|  parent:      3271:a53f2ef3fd89
 | |  parent:      3269:26eb6fa44041
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Mar 25 15:26:58 2015 +0100
 | |  summary:     remerge version
 | |
-| o  changeset:   3271:a53f2ef3fd89
+o |  changeset:   3271:a53f2ef3fd89
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Mar 25 15:23:55 2015 +0100
 | |  summary:     past to version 3.36
 | |
-| o  changeset:   3270:b71bf2084a83
+o |  changeset:   3270:b71bf2084a83
 | |  parent:      3268:08df56079406
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Mar 25 15:11:13 2015 +0100
 | |  summary:     coorect metsi
 | |
-o |  changeset:   3269:26eb6fa44041
+| o  changeset:   3269:26eb6fa44041
 |/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |    date:        Wed Mar 25 15:07:24 2015 +0100
 |    summary:     clean a little schwartz.edp
