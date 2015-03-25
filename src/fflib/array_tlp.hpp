@@ -29,7 +29,7 @@
 //#pragma inline_depth(1)
 
 #include "config-wrapper.h"
-
+#include <set>
 #include <complex>
 #include "AFunction.hpp"
 #include <cstdarg>
@@ -906,7 +906,18 @@ class  OneOperator_2KN_ : public OneOperator {public:
         return new Op(*b);} 
     OneOperator_2KN_<K>(): OneOperator(atype<KN_<K> >(),atype<E_Array>()) { pref=-1;}
 };
-
+template<class K>
+long Unique(KN<K>* const& array, KN<K>* const& val)
+{
+    std::set<K> vals;
+    for(int i = 0; i < array->n; ++i)
+        vals.insert((*array)[i]);
+    val->resize(vals.size());
+    int i = 0;
+    for(typename std::set<K>::iterator it = vals.begin(); it != vals.end(); ++it)
+        (*val)[i++] = *it;
+    return vals.size();
+}
 extern aType aaaa_knlp;
 template<class K,class Z>
 void ArrayOperator()
@@ -1394,7 +1405,6 @@ void ArrayOperator()
 		      new OneOperator2_<KN_<K> ,KN_<K> ,SetArray<K> >(-1,&set_array_) // missing aug 2009 a(:)=1:3 less prioritaire
     );
     
-
 }
 
 template<class R,class A,class B=A,class BB=B>

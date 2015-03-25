@@ -1,5 +1,10 @@
-@  changeset:   3260:0c94785a41f3
+@  changeset:   3261:abc1e0fd147e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Mar 24 16:58:08 2015 +0100
+|  summary:     correct pb compile new aprmetsi and metes in hpc2
+|
+o  changeset:   3260:0c94785a41f3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Mar 24 16:49:26 2015 +0100
 |  summary:     coorect for new hppdm interface
