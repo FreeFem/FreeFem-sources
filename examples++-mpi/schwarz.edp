@@ -1,7 +1,11 @@
 load "schwarz"
 load "metis"
+load "utility"
+load "removeDOF"
 include "getARGV.idp"
-
+{int tyty;
+if(mpirank==-1) 
+cin >> tyty;}
 searchMethod = 1;
 
 macro minimalMesh()square(1, 1)// EOM
@@ -9,7 +13,7 @@ macro generateTh(name)name = square(global, global, [x, y], label = l);// EOM
 macro grad(u)[dx(u), dy(u)]// EOM
 macro bbN(boundingMesh, overshoot, ThGlobal)
             real[int] bb(4);
-            boundingbox(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
+            bb2d(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
             bb(0) -= overshoot;
             bb(1) += overshoot;
             bb(2) -= overshoot;
@@ -36,6 +40,7 @@ int[int] l = [1, 2, 2, 2];
 mesh Th = minimalMesh;
 fespace Wh(Th, Pk);
 build(generateTh, Th, ThBorder, ThOverlap, s, D, numberIntersection, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld)
+// verif ..
 
 macro Varf(varfName, meshName, PhName)
     varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + intN(meshName)(v) + on(1, u = 0.0);// EOM
