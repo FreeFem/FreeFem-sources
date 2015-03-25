@@ -11,7 +11,7 @@ macro generateTh(name)name = square(global, global, [x, y], label = l);// EOM
 macro grad(u)[dx(u), dy(u)]// EOM
 macro bbN(boundingMesh, overshoot, ThGlobal)
             real[int] bb(4);
-            BoundingBox(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
+            boundingbox(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
             bb(0) -= overshoot;
             bb(1) += overshoot;
             bb(2) -= overshoot;

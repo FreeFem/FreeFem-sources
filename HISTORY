@@ -1,5 +1,10 @@
-@  changeset:   3262:0c9c60f5f386
+@  changeset:   3263:77a50d63e43a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 25 12:04:27 2015 +0100
+|  summary:     correct typo
+|
+o  changeset:   3262:0c9c60f5f386
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 25 11:54:37 2015 +0100
 |  summary:     correct pb of optimisation FLAGS in c++
