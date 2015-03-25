@@ -1,5 +1,3 @@
- load"medit"
-int debug =0; 
 macro plotMPI(Th, u, legend, Pk, def, d, w)
     if(mpirank == 0) {
         meshN ThCurrent = Th;
@@ -77,8 +75,6 @@ macro partition(meshName, borderName, overlapName, s, D, Vh, P, comm)
             sum[] += partitionIntersection[numberIntersection][];
             arrayIntersection[numberIntersection++] = arrayIntersection[i];
             }
-            else if(debug)          medit("phi",overlapName,phi); 
-              
         }
  
         khi[] = khi[] ./= sum[];
@@ -89,33 +85,26 @@ macro partition(meshName, borderName, overlapName, s, D, Vh, P, comm)
         if(numberIntersection != arrayIntersection.n)
             arrayIntersection.resize(numberIntersection);
         {
-        if(verbosity>2) {cout << " **** "<< mpirank << " / ";
+        cout << " **** "<< mpirank << " / ";
         for(int i=0;  i<arrayIntersection.n ; ++i)
           cout <<  arrayIntersection[i] << " ";
-        cout << endl; }
+        cout << endl; 
         }
         Wh def(func2vec) = init(khi);
         D.resize(Wh.ndof);
         D = func2vec[];
         restrictionIntersection.resize(numberIntersection);
-        if( debug) savemesh(meshName,"Th/Th-"+mpirank+".mesh");
-        if( debug)  medit("Th/TTh-"+mpirank,meshName,order=0,part);
         for(i = 0; i < numberIntersection; ++i) {
-           if( debug)  cout << mpirank << "  trunc  " << i<< endl; 
            
             meshN meshIntersection ;
 
             meshIntersection = trunc(meshName, partitionIntersection[i] > 1e-6);
-            if( debug)  cout << mpirank << " xx nb somm " << meshIntersection.nv << endl; 
             fespace WhIntersection(meshIntersection, P);
             matrix R = interpolate(WhIntersection, Wh);
             real[int] C;
             int[int] I;
             [I, restrictionIntersection[i], C] = R;
             restrictionIntersection[i].resize(R.nbcoef);
-            if( debug)  {savemesh(meshIntersection,"Th/Th-"+mpirank+"-"+arrayIntersection[i]+".mesh");
-            medit("Th/TTh-"+mpirank+"-"+arrayIntersection[i],meshIntersection,order=0,partitionIntersection[i]);
-            cout <<mpirank <<" / " << i << " " << "#####" << " " << C[R.nbcoef-1]<< " " << endl; }
         }
 // EOM
 
@@ -134,7 +123,7 @@ real timing;
     if(mpisize > 1) {
         globalTh(ThOverlap);
         fespace PhGlobal(ThOverlap, P0);
-        PhGlobal part; part[]=0;
+        PhGlobal part;
         if(mpiRank(comm) == 0) {
             cout.scientific << " --- global mesh of " << ThOverlap.nt << " elements (prior to refinement) generated (in " << mpiWtime() - timing << ") and partitioned with ";
             timing = mpiWtime();
@@ -144,7 +133,7 @@ real timing;
         }
         timing = mpiWtime();
         broadcast(processor(0, comm), part[]);
-                if(debug) medit("part",ThOverlap,part,order=0);
+       /* medit("part",ThOverlap,part,order=0);*/
         partition(Th, ThBorder, ThOverlap, s, D, Vh, P, comm)
     }
     else if(mpisize == 1) {
