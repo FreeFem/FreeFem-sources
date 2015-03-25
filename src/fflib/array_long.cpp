@@ -165,7 +165,7 @@ void initArrayOperatorlong()
     Global.Add("Unique", "(", new OneOperator2_<long, KN<K>*, KN<K>*>(Unique));
     // convertion double -> long (via lround)
     Dcl_Type<F_KN_<K,K,double> >();
-    Global.Add("lround","(",new OneOperator1F_KN_<F_KN_<K,K,double>,K,double,KN_<K> >(lround));
+    Global.Add("lround","(",new OneOperator1F_KN_<F_KN_<K,K,double>,K,double,KN_<double> >(lround));
     TheOperators->Add("=",new OneBinaryOperator<set_eq_array<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
     TheOperators->Add("+=",new OneBinaryOperator<set_eq_array_add<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
     TheOperators->Add("-=",new OneBinaryOperator<set_eq_array_sub<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005

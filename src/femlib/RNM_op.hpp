@@ -65,8 +65,8 @@ KNM_<R> & KNM_<R>::operator oper (const ConjKNM_<R> & u)
 
 
 template<class R>
-template<class  A,class B,class C>
- KN_<R>& KN_<R>::operator oper (const F_KN_<A,B,C> & u)  {
+template<class  A,class B,class C,class D>
+ KN_<R>& KN_<R>::operator oper (const F_KN_<A,B,C,D> & u)  {
     K_throwassert ( u.check(this->N()) );
     R * l(v);  //  first line   
     for (long i=0;i<n;i++,l += step)  

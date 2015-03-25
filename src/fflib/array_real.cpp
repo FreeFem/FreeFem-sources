@@ -46,14 +46,14 @@ void initArrayOperatordouble()
     typedef double K;
     typedef double KK;
      Dcl_Type< QuantileKN<K> > (); 
-     Global.Add("abs","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(fabs));
-     Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(acos));
-     Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(asin));
-     Global.Add("atan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(atan));
-     Global.Add("floor","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(floor));
-     Global.Add("ceil","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(ceil));
+     Global.Add("abs","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(fabs));
+     Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(acos));
+     Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(asin));
+     Global.Add("atan","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(atan));
+     Global.Add("floor","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(floor));
+     Global.Add("ceil","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(ceil));
 
-    Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
+    Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(square));
     Add<KN_<double> >("sort",".",new OneOperator1_<KN_<K>,KN_<K> >(SortKn<K, KN_<K> >));
    // Add<KN<double> >("sort",".",new OneOperator1_<KN<K>,KN<K> >(SortKn<K, KN<K> >));
     Add<KN<double> *>("sort",".",new OneOperator1_<KN<K>*,KN<K>* >(SortpKn<K>));

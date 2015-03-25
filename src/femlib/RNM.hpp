@@ -213,7 +213,7 @@ template<class R> class if_arth_KN_;
 template<class R> class ifnot_KN_;
 template<class R,class I> class KN_ITAB; 
 
-template<class R,typename A,typename B> class F_KN_;
+template<class R,typename A,typename B,typename BB> class F_KN_;
 
 
 #ifndef ffassert
@@ -546,11 +546,11 @@ public:
    KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
     {*this=R(); Ab.A->Solve(*this,Ab.b);return *this;}
     
-  template<class  A,class B,class C> KN_&  operator =  (const F_KN_<A,B,C>  & u) ;
-  template<class  A,class B,class C> KN_&  operator +=  (const F_KN_<A,B,C>  & u) ;
-  template<class  A,class B,class C> KN_&  operator -=  (const F_KN_<A,B,C>  & u) ;
-  template<class  A,class B,class C> KN_&  operator /=  (const F_KN_<A,B,C>  & u) ;
-  template<class  A,class B,class C> KN_&  operator *=  (const F_KN_<A,B,C>  & u) ;
+  template<class  A,class B,class C,class D> KN_&  operator =  (const F_KN_<A,B,C,D>  & u) ;
+  template<class  A,class B,class C,class D> KN_&  operator +=  (const F_KN_<A,B,C,D>  & u) ;
+  template<class  A,class B,class C,class D> KN_&  operator -=  (const F_KN_<A,B,C,D>  & u) ;
+  template<class  A,class B,class C,class D> KN_&  operator /=  (const F_KN_<A,B,C,D>  & u) ;
+  template<class  A,class B,class C,class D> KN_&  operator *=  (const F_KN_<A,B,C,D>  & u) ;
     
    
 //   KN_& operator =(const MatriceCreuseDivKN_<R> &)  ;
@@ -1577,21 +1577,22 @@ class KN_2Ptr { public:
     operator const R *() const  { return c.unset() ? (R *) ca:(R *) c ;}
     ~KN_2Ptr() { if(!a.unset() && !c.unset() ) {a=c; } } // recopy 	
 }; 
-
-template<class R,typename A,typename B=R> class  F_KN_ 
+// correct march 2015 FH ...
+// add BB type ...
+template<class R,typename A,typename B=R,typename BB=B> class  F_KN_
 { 
   public: 
-  A (*f)(B);
-  KN_<R> a;
-  long N() const {return a.N();}
-  F_KN_( A (*ff)(B),const KN_<R> & aa): f(ff),a(aa) {}
-  A operator[](long i) const { return f(a[i]);}
-  bool check(long n)  const { return  n <= a.N() || a.constant(); }
-  bool constant() const {return a.constant();}
+  A (*f)(BB);
+  KN_<B> b;
+  long N() const {return b.N();}
+  F_KN_( A (*ff)(BB),const KN_<B> & aa): f(ff),b(aa) {}
+  A operator[](long i) const { return f(b[i]);}
+  bool check(long n)  const { return  n <= b.N() || b.constant(); }
+  bool constant() const {return b.constant();}
 }; 
 
-template<class R,typename A,typename B>
-inline bool  SameShape(const ShapeOfArray & a,const F_KN_<R,A,B>  & b) 
+template<class R,typename A,typename B,typename BB>
+inline bool  SameShape(const ShapeOfArray & a,const F_KN_<R,A,B,BB>  & b)
            { return  !a.step || b.constant()  || a.n == b.N() ;} 
            
 #include "RNM_tpl.hpp"
