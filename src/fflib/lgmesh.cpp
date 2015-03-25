@@ -1969,8 +1969,6 @@ void init_lgmesh() {
     // add FH to get bounding box ...
     Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
-    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
-    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh,KN<double>*>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh3,KN<double>*>(Boundingbox));
 
