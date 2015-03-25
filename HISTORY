@@ -1,5 +1,10 @@
-@  changeset:   3261:abc1e0fd147e
+@  changeset:   3262:0c9c60f5f386
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 25 11:54:37 2015 +0100
+|  summary:     correct pb of optimisation FLAGS in c++
+|
+o  changeset:   3261:abc1e0fd147e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Mar 24 16:58:08 2015 +0100
 |  summary:     correct pb compile new aprmetsi and metes in hpc2
