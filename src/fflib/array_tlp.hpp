@@ -29,7 +29,7 @@
 //#pragma inline_depth(1)
 
 #include "config-wrapper.h"
-
+#include <set>
 #include <complex>
 #include "AFunction.hpp"
 #include <cstdarg>
@@ -906,7 +906,18 @@ class  OneOperator_2KN_ : public OneOperator {public:
         return new Op(*b);} 
     OneOperator_2KN_<K>(): OneOperator(atype<KN_<K> >(),atype<E_Array>()) { pref=-1;}
 };
-
+template<class K>
+long Unique(KN<K>* const& array, KN<K>* const& val)
+{
+    std::set<K> vals;
+    for(int i = 0; i < array->n; ++i)
+        vals.insert((*array)[i]);
+    val->resize(vals.size());
+    int i = 0;
+    for(typename std::set<K>::iterator it = vals.begin(); it != vals.end(); ++it)
+        (*val)[i++] = *it;
+    return vals.size();
+}
 extern aType aaaa_knlp;
 template<class K,class Z>
 void ArrayOperator()
@@ -1394,7 +1405,6 @@ void ArrayOperator()
 		      new OneOperator2_<KN_<K> ,KN_<K> ,SetArray<K> >(-1,&set_array_) // missing aug 2009 a(:)=1:3 less prioritaire
     );
     
-
 }
 
 template<class R,class A,class B=A,class BB=B>
@@ -1425,27 +1435,27 @@ class  OneOperator1F_KN_ : public OneOperator {
 template<class K,class KK>
 void ArrayOperatorF()
 {
-     Dcl_Type<F_KN_<K,K,KK> >();
+     Dcl_Type<F_KN_<K,K,K,KK> >();
 
 
-     Global.Add("exp","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(exp));
-     Global.Add("log","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(log));
-     Global.Add("log10","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(log10));
-     Global.Add("sqrt","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sqrt));
-     Global.Add("sin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sin));
-     Global.Add("cos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(cos));
-     Global.Add("tan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(tan));
-     Global.Add("cosh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(cosh));
-     Global.Add("sinh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(sinh));
-     Global.Add("tanh","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(tanh));
-    // Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(acos));
-    // Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(asin));
-    // Global.Add("atan","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(atan));
+     Global.Add("exp","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(exp));
+     Global.Add("log","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(log));
+     Global.Add("log10","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(log10));
+     Global.Add("sqrt","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(sqrt));
+     Global.Add("sin","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(sin));
+     Global.Add("cos","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(cos));
+     Global.Add("tan","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(tan));
+     Global.Add("cosh","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(cosh));
+     Global.Add("sinh","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(sinh));
+     Global.Add("tanh","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(tanh));
+    // Global.Add("acos","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(acos));
+    // Global.Add("asin","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(asin));
+    // Global.Add("atan","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(atan));
 
-     TheOperators->Add("=",new OneBinaryOperator<set_eq_array<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
-     TheOperators->Add("+=",new OneBinaryOperator<set_eq_array_add<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
-     TheOperators->Add("-=",new OneBinaryOperator<set_eq_array_sub<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
-     TheOperators->Add("/=",new OneBinaryOperator<set_eq_array_div<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
-     TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("=",new OneBinaryOperator<set_eq_array<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("+=",new OneBinaryOperator<set_eq_array_add<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("-=",new OneBinaryOperator<set_eq_array_sub<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("/=",new OneBinaryOperator<set_eq_array_div<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
+     TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
   
 }
