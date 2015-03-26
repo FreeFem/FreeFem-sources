@@ -1,5 +1,10 @@
-@  changeset:   3277:a76f9483f95d
+@  changeset:   3278:4224cd4c21ce
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 26 19:09:26 2015 +0100
+|  summary:     correct makefile for windows compile process
+|
+o  changeset:   3277:a76f9483f95d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 26 09:51:08 2015 +0100
 |  summary:     coorect type in innovation file
