@@ -5,11 +5,15 @@ version 3.36
    fast -> ltab=lround(dtab)
    Unique to get all unique value of a array (findDiff)   
    
- - after version 3.33 the some compilation flags a lose, correct confiure.ac
+ - after version 3.33 the some compilation flags a lose, correct configure.ac
+    Please do not use version from [3.33 .. 3.35] included. 
+
+
+
  - add disable-gmm configure flags 
 version 3.35 dist (12/3/15) (rev 3246:664a6473d705) (warning slow version)
- - optionnal lib seach  [toto|tyty] in WHERE-LIBRARY seach lib 
- - change the metis to scotch-metis interfe in hips and parms .. 
+ - optional lib seach  [toto|tyty] in WHERE-LIBRARY seach lib 
+ - change the metis to scotch-metis interface in hips and parms .. 
  - change the current version of scotch metis mumps parmetis 
  - remark: .dll , .so, .dylib are incompatible with previous version.
  - ff-run.in under windows (use src/bin-win32/FreeFem++-mpi 
@@ -19,7 +23,7 @@ version 3.34-2 (20/2/2015) (warning slow version)
  - do correction do compilation for mpi version under window
      big change in ffapi.cpp rules ( use now call back) end init in mymain. 
      schwarz plugin run under windows without petsc  lob. 
- - add some function to then  gsl iinterface  (airy,  biry, ...)
+ - add some function to then  gsl interface  (airy,  biry, ...)
 version 3.34-1 
  - correct lot of mistake for simple compilation of 
     hpddm interface ..
@@ -30,10 +34,15 @@ version 3.34-1
     correct mpi for  sgi uv computer
     find gsl lib 
     add find petsc (in progress) 
-    add missing file in distrubuteion
+    add missing file in distribution
  -  correct for compilation with g++-4.9.1 -std=c++11 ( without downlaod) 
 
 BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (dur Dur)
+
+
+
+
+
   no optimisation flags in compilation
 
  - add hd5 interface  (13/01/2015) 
@@ -44,16 +53,18 @@ BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (d
    matrix A = ...; in loop ( this occur in lot of case, tanks to P. Jolivet )
    correct small memory leak in use of routine due to debugstack. 
  - correct bug in periodic condition in case common dof with periodic.  
- - correct big bug in memory gestion of sparse matrix
+ - correct big bug in memory management of sparse matrix
+
  version 3.32 
  - correct of problem of plugin and mpi,
     build all dynamics lib with and without mpi, 
     the mpi version is install  dir lib/mpi 
  - correct of plugin MUMPS.cpp for complex value. 
- - add vectorial operator a/v  and v/a where a est scalar and v vector like real[int], ...   
+ - add vectorial operator a/v  and v/a where a is scalar and v vector like real[int], ...   
+
  version 3.31-3 (rev 3053:4e164226411d 12 Aug 2014) 
  - correct the problem of size of arrow in 2d plot 
-  version  3.31-2 (rev 3052, 11 july 2014) 
+  version  3.31-2 (rev 3052, 11 July 2014) 
  - correct stop test function in LinearGC (for zuqi.tang@inria.fr)
   build tar.gz distribution (rev 3050) 
   build version MacOs 3.31-1
@@ -67,7 +78,7 @@ BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (d
     LinearCG(DJ,u,eps=1.e-15,nbiter=20,precon=matId,verbosity=50,stop=stop);
     
 
- - add functionnal  interface  to arpack (Eingen Value) 
+ - add functionnal  interface  to arpack (Eigen Value) 
 
     func real[int] FA(real[int] & u) { real[int] Au=A^-1*u;return Au;}
     func real[int] FB(real[int] & u) { real[int] Au=B*u;return Au;}
@@ -78,7 +89,7 @@ BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (d
 
 version 3.31  (rev 3037, 1 july 2014)
  - re-add tan function for complex number  
- - correct a big mistake in LinearGMRES , the resulat are complity wrong,
+ - correct a big mistake in LinearGMRES , the result are completely wrong,
    correct also the algo.edp
  -  add sqr functon of O. Pironneau
  - correct update of mercurial depot (rev 3034, 1 july 2014)
@@ -90,6 +101,7 @@ version 3.31  (rev 3037, 1 july 2014)
    layer of element.  
  - add pluging "bfstream" to write and read in binary file (long, double, complex<double> and array)
    see bfstream.edp for an example. 
+
 version 3.30-1 may/2014 ( hg rev: 3017)
  - add levelset integral on 3d case ( on levelset and under level set) 
  - correct problem with Ipopt / lapack configure ...
@@ -251,7 +263,7 @@ version 3.26-3  09/12/2013
  - correct automake TESTING part (in progress) 
  - correct typo on the doc with .*= ./=  operator
  - correct bug in RT0 3d , code in the construction of the DOF.
-   the bug is all dof on border  face of same elemnt have same dof number.
+   the bug is all dof on border  face of same element have same dof number.
    thank to Laurent Bernard <laurent.bernard@lgep.supelec.fr> 
 version 3.23
  - do cleanning in version remove x11, glx, std : freefem++
@@ -263,11 +275,11 @@ version 3.23
 version 3.22
  - add multi windows graphics ; WindowIndex=0 in plot function
    add new event in graphic windows 
-     * to set/unset  default graphics stat to previoux plot 
+     * to set/unset  default graphics stat to previous plot 
  - add getenv, setenv , unsetenv function in shell plugins for gestion of environnemnt variable for 
    openmp. 
- - correct pb un trunc for 3d mesh with too flat element (sliver) , and cleanning code .
- - correct bug in gestion off outsite flag is 3d in case of bute force (searchMethod>0) 
+ - correct pb un trunc for 3d mesh with too flat element (sliver) , and cleaning code .
+ - correct bug in gestion off outsite flag is 3d in case of brute force (searchMethod>0) 
 version 3.21-1 
  - correct bug  a=b' ; of full matrix 
  - bug in assert on 3d mesh of huge dimension with periodic condition.
@@ -293,7 +305,7 @@ version 3.20
  - change the compilation tools under windows gcc 4/7 + freeglut / ...)
  - change the compile tools on mac pass to clang++
  - compile ok of c++11  compiler
- - add formal tools on array [] or matrix [[],[],]  for elasitic problem. 
+ - add formal tools on array [] or matrix [[],[],]  for elastic problem. 
    let A a formal array 
    if A is matrix 2x2 or 3x3 : trace(A) , det(A) ,    Cofactor(A) ; 
     A:A  = sum_ij A_ij * A_ij 
@@ -303,12 +315,12 @@ version 3.20
  
 version 3.19-2
  - correct pb of C in/output in pluging (in test) 
- - correct bugs  mshmet pluging in case of double eigen value in eigen
- - correct typo poblem (string size) when a change the default
-    window size in postscrip in version 3.19-1 to have more 
+ - correct bugs  mshmet pluging in case of double Eigen value 
+ - correct typo problem (string size) when a change the default
+    window size in postscript in version 3.19-1 to have more 
     precise postscript plot
 version 3.19-1
- - add tool to create Quadrature formlar 1d,2d,3d with 
+ - add tool to create Quadrature formular 1d,2d,3d with 
    plugind: load "qf11to25"
    real[int,int] tab1(np,2),tab2(np,3),tab3(np,4);
    QF1 qfe1(norder,tab1);// 1d
@@ -320,7 +332,7 @@ version 3.19-1
  - correct download auto compile of
     mmg3d, mshmet, scotch, ...
 version 3.19 (20 april 2012) 
- - scotch partionner interface see scotch.edp in examples++-load
+ - scotch partitionner interface see scotch.edp in examples++-load
  - add isNaN(x),  isInf(x), IsNormal(x)  function to check floating point
       of real value x, see ISO C99. 
  - add function : NaN() and  NaN("") to build NaN real number (double in C) . 
@@ -428,24 +440,24 @@ v 3.13-3 ( 30 june 2011 Seville)
 v 3.13-1
    - correct compilation problem on fedora 13 WITH MPI
 v 3.13 (25 may 2011)   
-   - update the finite element list in  documention 
+   - update the finite element list in  documentation 
    - add (load "Element-Mixte")  NEW FINITE ELEMENT 2D
          TDNSS1    sym matrix 2x2 conforme in $\{H(div div) / div(div s)) \in H^{-1} \}$
          RT1 and BDM1  conforme in H(div) Raviert Thomas of Degre 1 and Bezzi, Douglas, Marini 
-         RT1 and BDM1ortho   conforme in H(curl) 2 Nedelec Finite Elemeny
+         RT1 and BDM1ortho   conforme in H(curl) 2 Nedelec Finite Element
 v 3.12-3 
    - new finite element in 2d for elasticity in test. TD-NSS0 (see these of Astrid Sabine Sinwel)
       A New Family of Mixed Finite Elements for Elasticity
    
-   - add matrice matric multiply in lapack interface 
+   - add matrice matrix multiply in lapack interface 
    - add tool to change the region and label number 
        change(Th,fregion= integer function to set the region number )
    - nuTriangle now given the tet number in 3D.  
-   - add mpireduce of matrix to build parallele matrix
+   - add mpireduce of matrix to build parallel matrix
 v 3.12-1 april/2011 
       see remove examples++-mpi/chaleur3D-superludist.edp
    - correct the precond of gmres algo in A^-1 : (29 mars 2011) to build a correct Navier-Stokes 
-   - add cast TypeOfSolver  on int to parametrize the choise of linear solver.
+   - add cast TypeOfSolver  on int to parametrize the choice of linear solver.
    - correct intersection of given metrix in adaptmesh (bug introduc in 07/10 verion 3.9 
      in case of convect-apt  example  
 v 3.12-1 10 10 fevr 2011 
@@ -462,7 +474,7 @@ v 3.12    17 jan 2011
     - correct a lot of MPI parallel solver example 
         a bug pastix interface ???
 	MUMPS, superludist, hypre , hips works 
-    - correct link proble in hips and hypre under linux
+    - correct link problem in hips and hypre under linux
     - Add thresholdings.cpp	thresholdings.edp in examples++-load to remove to small coef
        in a matrix . 
     - Add lots of DDM Schwarz GMRES precondionned with a coarse grid solver por overlapping : 
@@ -477,7 +489,7 @@ v 3.12    17 jan 2011
         NewMacro a(i) 
         EndMacro 
        with // comment and macro definition, first trik
-     - Add interface with special function  og gls  http://www.gnu.org/software/gsl/
+     - Add interface with special function  of gls  http://www.gnu.org/software/gsl/
         the full list is in the example examples++-loal/gsl.edp  
      
 v 3.11-1     25 dec 2010
@@ -486,8 +498,8 @@ v 3.11-1     25 dec 2010
      - Show ff++ line number in case of  assertion  in RNM class. 
      - add Coarse Preconditionner for  MPIGMRES[23]d.edp (Good)
      - solve bug For MPIGMRES2D.edp  due to interpolation bug in rare case
-       by Add brute force for seach of point in 2d like in 3d in the seach in find ouside 
-       set global variable :  searchMethod=1;  // more safe seach algo (can be expensive in case of lot of ouside point) 
+       by Add brute force for seach of point in 2d like in 3d in the search in find ouside 
+       set global variable :  searchMethod=1;  // more safe search algo (can be expensive in case of lot of outside point) 
       -   add hack of ILU precond, if tgv is < 0 then
         we remove all the line and put 1 on the diag term ..
 v 3.11 9 dec 2010 
@@ -500,12 +512,12 @@ v 3.10-2
    - correct MPIGMRES[23]d.edp example 
      add doc on this example.  
 v 3.10-2
- - add operator to inverse permuation to set or initial int[int] array
+ - add operator to inverse permutation to set or initial int[int] array
    I=J^-1; 
    if J is a permuation of 0:n-1  then we have :   I[j[i]]=i 
- - correct comment problem of periodic bounary condition in 3D
+ - correct comment problem of periodic boundary condition in 3D
     see examples++-3d/periodic-3d.edp
- - correct configure to scotch compilation on gnone (phtread) 
+ - correct configure to scotch compilation  (phtread) 
 v 3.10-1
   - at convection function form formal array to int,real,complex array
    (resp.     toZarray, toRarray, toCarray)
@@ -519,7 +531,7 @@ v 3.10-1
 v 3.10 
   - add true Domain Decomposition example in 2d and 3d. 
       see    MPIGMRES2D.edp	  MPIGMRES3D.edp in MPI  examples 
-  - add mpi Isend/Irevd for complex struct like matix, meshes 
+  - add mpi Isend/Irevd for complex struct like matrix, meshes 
      for send/recv Huge objet 
   - add named parameter verbosity= in add GMRES and GC function 
      for show algo evolution .
@@ -543,19 +555,19 @@ v 3.10 ( 5 oct 2010)
 v 3.9-3
   - correct compilation of gmm, mumps on linux
   - add parameter -ne in FreeFem++ commands  to remove edp script print
-  - correct mistake in --enable-m64 or --enable-m32 (suppress the confugure warning)
+  - correct mistake in --enable-m64 or --enable-m32 (suppress the configure warning)
   - correct of ff-c++ script if whith space in path (for windows)
   - add compilation  of gmm library 
 v 3.9-2
   - correct compilation of mshmet dynamic library
-  - correct pb of compile of superludist ( add CNOFLAGS no optimze CFLAGS)
+  - correct pb of compile of superludist ( add CNOFLAGS no optimize CFLAGS)
   - correction of lib on win32 for freeyams and mmg3d
   - correction download/Makefile.am to be sure than bin is a directory.
   - add fftw of win32 
 
 v 3.9-1
   - correction  mmg3d interface (J Morice) 
-  - correct of mmg3d and freeyams under wind32 (ld problom)
+  - correct of mmg3d and freeyams under wind32 (ld problem)
 v 3.9-1  August 2009   (For FreeFem++ days )
   - correct configure (find lapack lib change $ll_lapack_libs in $ll_lapack_lib)
   - correct mistake in mpi 
@@ -565,10 +577,10 @@ v 3.9-1  August 2009   (For FreeFem++ days )
     correct essai.edp mpi example 
   - correct problem of compatibility of dynamic lib  with and without MPI 
      change ff-cc++ to add all MPI libs if MPI version exist. 
-  - correct default  region number in square build mesh function  now 0 , (2 beetween  v3.8 -- 3.9)  
+  - correct default  region number in square build mesh function  now 0 , (2 between  v3.8 -- 3.9)  
   - change in all example  reffacexx= in labelxx= ..., etc to be correct with v 3.8 change.
   - correct a mistake of type  region= parameter in tetgen all functions.  
-  - correct the mpi configure seach tool
+  - correct the mpi configure search tool
       miss when no full path are given  ( only change in configure.ac) 
 v 3.9  July 2009.
   - add lots of automatic  compilation of download soffware,
@@ -588,10 +600,10 @@ v 3.8-2
 v 3.8
   - add in change mesh2 tool to make a renumbering of vertex for periodic 3d mesh. 
      Th= change(Th,renumv=old2new);
-  - correct ' operator do alway in complex case the conj and trans (Hermissian stuff)
+  - correct ' operator do alway in complex case the conj and trans (Hermitian stuff)
      in  formal array with [ ]' 
      in  linear comb of complex matrix  
-        now  A + (-1)*A' is zero  is A is hermisian .
+        now  A + (-1)*A' is zero  is A is hermitian .
      in varf term  (a*dx(u)*dy(v) )'  <=>  a' dx(u)*dy(v)
     now you can  [a*dx(v),dy(v)] ' *[a*dx(u),dy(u)] in complex case.. 
   - plot of complex field  and 3d vector .. 
@@ -617,14 +629,14 @@ v 3.8
         seekg, teeg   method on istream type
         see examples++-tutorial/readmesh.edp examples 
 v 3.7-1 13 jan 2010.. 
-  - EqPoisson.edp (SOlve Poison equation in 3d fish)
+  - EqPoisson.edp (Solve Poison equation in 3d fish)
   - add possibility to put array  (int[int] )  to set a set of label/region in
     in integral (int1d,int2d,int3d)   or  "on" key word 
     example : int[int] l=[1,2,3]  ,  ...  on(l,u=1);
   - add tool to compile under mingw/msys under windows 32 (freefem++-nw works, 
   -  add bug (random trap) in bamg in sub domain computation in case of 
     internal edge in    same region (fist time in 15 years). 
-  -  add bug in varf interpertation in  complex case (miss some convertion)
+  -  add bug in varf interpretation in  complex case (miss some convertion)
   - add build  interpolation matrix in 3d (see examples++-3d/mat_interpole.edp)
   - correct CFLAGS (add -fFIP) in superlu , umfpack under 64 architecture. 
 v  3.7   8 december 2009 
@@ -638,16 +650,16 @@ v  3.7   8 december 2009
    add .im, .real method on complex [int,int] matrix array 
    add  missing  matrix<complex>[int]  type in grammar.
 
-   correct mistake in genertion of file WHERE_LIBRARY-config
+   correct mistake in generation of file WHERE_LIBRARY-config
    add  initialization of	scalar variable at zero 
    add  warning in case of use of	variable with hide freefem++ name
    add missing file in download version
 
 v 3.6.1 
-    correct  font problem in documetation
+    correct  font problem in documentation
              lot of mistake in examples++-load 
     add tool to compile all examples 
-    add PICHON stuff for brute force seach point
+    add PICHON stuff for brute force search point
     add umpack long interface to by pass the 32bit limits 
       see UMFPACK64.cpp and LapUmfpack64.edp in examples++-load.
     add some interface with lapack (inverse of full matrix, 
@@ -664,33 +676,33 @@ v 3.6 (4 nov 2009)
        examples++-load/funcTemplate.edp
     add tools to read .pcm files for optic-flow computation (pcm2rnm.cpp) 
   	 see http://www.cs.otago.ac.nz/research/vision/Research/OpticalFlow/pcm.html
-     correct bug in GMRES without preconditionner asset error. 
+     correct bug in GMRES without preconditionner assert error. 
      correct a rare and ramdomly bug in the interpolation 2d process when the
       the element 0 touch the boundary
      correct on versy old bug in bamg in case of internal boundary edge with
-     two extremity  in true boundary (symptome FillHoleInMesh trap).
+     two extremity  in true boundary (symptoms FillHoleInMesh trap).
    correct operator  subsript a:b:c  operator (in some case the last value was miss) 
    correct the  ?: operator in case of constant array  
-  - add -enable-m32 floag to build 32bits freefem++ on 64 architecture computer
+  - add -enable-m32 flag to build 32bits freefem++ on 64 architecture computer
   - correct eigenvalue.cpp in case of complex finite element
 v 3.5-2  (28 sept. 2009)
   - correct install problem under windows (metis.dll do not compile)
   - correct MacOS install missing /usr/local/lib/ff++/3.xx-yy link 
 v 3.5-1  (24 sept. 2009) not to bad ...
 
-   - add interface to mestis 
-   - correct  display of 3d mesh (with light doday)
+   - add interface to metis 
+   - correct  display of 3d mesh (with light today)
    - add trap in case of mesh with negative volume 
    - correct bug  in case  3d finite element with constant number of df / node
      example fespace Vh(Th2,[P1,P1]); or fespace  Wh(Th3,[P0,P0,P0 ])
 
    - correct problem with tetgen under windows and ubuntu 
-       (remove optimisation during compilation of the library)
+       (remove optimization during compilation of the library)
 
    - correct setting array of vectorial finite element Wh 
      Wh[int] [u,v](10); // array of 10 value
      u[1] or v[1] 2 componante function for indice  1.
-     [u[2],v[2]] = [1,2]; //  set the function for indice  2. 
+     [u[2],v[2]] = [1,2]; //  set the function for indices  2. 
    - correct in matrix size of  matrix B=A(I,J) to I.n x I.m 
      where I, J are array of int 
      
@@ -706,12 +718,12 @@ v 3.5 (27 aug. 2009)
       string[string] s; 
       s[i]; // before trap (two delete) 
 v 3.4-2
-  add boundary mesh inqure in 2d and 3d
+  add boundary mesh inquire in 2d and 3d
   Th.nbe ; // return the number of boundary element 
   Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ 
   Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary elmt k 
-  Th.be(k).Element ;   // return the triangle contening the  boundary elmt k 
-  Th.be(k).whoinElement ;   // return the edge/face number of element contening the  boundary elmt k 
+  Th.be(k).Element ;   // return the triangle containing the  boundary elmt k 
+  Th.be(k).whoinElement ;   // return the edge/face number of element containing the  boundary elmt k 
   Th[k].adj(e) ; // return adjacent element to k by edge/face e, and change 
   // the value of e to the corresponding edge in the adjacent element
   Th[k] == Th[k].adj(e) // non adjacent element  
@@ -720,15 +732,15 @@ v 3.4-2
   do small change in msh3.cpp  file 
  
 v 3.4-1
-   rewrite of the mpi interface in vue of use group and comunicator
+   rewrite of the mpi interface in vue of use group and communicator
      now we only use mpi.h and not mpi++.h
    add plot of array of mesh and array of finite element functions
    add new command in ffglut graphic interface
-     n,N,i,I  to change the number of isovalue and to set the min,max value to the
+     n,N,i,I  to change the number of iso-value and to set the min,max value to the
            graphic
    add left button motion to zoom , and + alt to translate
 V 3.4
-    add in parallel version mpi send, receive and broadcasr of  3d mesh and matrix ( sparse matrix).
+    add in parallel version mpi send, receive and broadcast of  3d mesh and matrix ( sparse matrix).
     build a 3d mpi schwarz example (see example++-mpi/schwarz-3.edp)
     make a wrapper (launchff++.exe)  to launch freefem++ under windows/OS in the edp file directory. 
     correct in interpolation matrix ( unset variable in case of same mesh 
@@ -736,14 +748,15 @@ V 3.4
 
 V 3.3-3 
   add missing file in distribution examples++-load/DxWriter.cpp
-V 3.3-2  8 june 2009
+V 3.3-2  8 June 2009
   add   2 new finite element:
    Edge03d : the Nedelec 3d  Edge finite elements.
    RT03d : the Raviart-Thomas 3d  finite elements
    correct the size of anytype for 64 bits architecture.
    install the new .idp file (include of edp file) in
    directory idp    
-V 3.3-1 1 june 2009
+
+V 3.3-1 1 June 2009
   to correct the problem of the destruction of parameter in case: 
       func real[int]   a2(real[int] a) {a[0]=2; return a;}
    so now the parameter cast to KN_<double> so  the array is not
@@ -753,6 +766,7 @@ V 3.3-1 1 june 2009
     KN<> * of variable (left expression)
     and  KN_<> of   right expression 
   - correct UnRef<A,B> where B ~ A*
+
 v 3.3  29 may 2009
   -  correct some problem in return in function :
    the following function prototype now work without memory fault. 
@@ -766,12 +780,13 @@ v 3.3  29 may 2009
   warning : 
   -  in int3d flag qfV=  a 3d quadrature formula
         the 3d quadrature formula are
-         qfV1 , qfV1lump, qfV2 , qfV5  (where the number is the ordre of the quadrature)
+         qfV1 , qfV1lump, qfV2 , qfV5  (where the number is the order of the quadrature)
   -  correct sign of the normal in 3d (now the normal is exterior)
       -------------------------------------------------------------
   -  correct in adapted mesh the flag splitin2=  (no tested)
   -  correct the convect operator in 3d 
   -  add EigenValue tool  for 3d case  May 15, 2009. 
+
 v 3.2
   - add tools to set array like in matlab/scilab
     real[int] a(1:2:10),  def  a to 1,3,.. 10.
@@ -802,12 +817,14 @@ v 3.2
   - add --enable-m64 for 64 bit compilation flags 
   - correct f2c of  take the -m64 flags 
   -  build the universal f2c library with 4 architecture ppc i386 ppc64 x86_64
+
 v 3.1-1
   - add resize of sparse matrix ( only  morse matrix)
   - add  new 3d finite element P1b3d   (P1 bulle 3d) 
   - add  new option in int1d function in case for  build matrix with different meshes
         mortar=1 ( do not remove integration point if the point is outside of the domain)
     to make no to bad integration on same curve with different meshes. 
+
 v 3.1
   -correct compile  order missing libMesh
   - add lighting in ffglut (key l) for 3d isovalue 
@@ -834,11 +851,11 @@ v 3.0-4 (05 jan 2009)
 v 3.0-3 (27 dec 2008)
   - build a not to bad version 
   - remove so crazy print 
-  - change the ffglut  io with  freefem++  ( to be more universal independant of the architecture an more universal)
+  - change the ffglut  io with  freefem++  ( to be more universal independent of the architecture an more universal)
     - correct ffglut in case of plot of array and when the plot is empty.
       remark ffglut is not compatible with previous version (sorry)
     the filename create with option w is ffglut_xxxx.ppm (window dump)
-    correct int2d on 3d mesh3d for Neuman Boundary condition
+    correct int2d on 3d mesh3d for Neumann Boundary condition
 v 3.0-2 ( 9 dec 2008)
   - ff-c++ to dynamic load program (add ff++.hpp file  with all include, may be)
   - correct the Makefiles et load-link, 
@@ -878,7 +895,7 @@ v 3.0-1 (4 dec 2008)
 	  examples++-load/tetgenholeregion.edp
 
 	    
-  - add interface with tetgen  3d mesher (tetgen.{so,dll,dylib})
+  - add interface with tetgen  3d mesh generator (tetgen.{so,dll,dylib})
         add freefem++ function: 
 	  tetgconvexhull tetgtransfo tetg tetgreconstruction
 	see:
@@ -892,7 +909,7 @@ v 3.0-1 (4 dec 2008)
        add freefem++ function medit savesol (2d , 3d  medit plot)
 
   - correct ?: operator with array and real. 
-  - correct memory erreur with  valgrind tool (19 oct 2008)
+  - correct memory error with  valgrind tool (19 oct 2008)
        In ~ConstructDataFElement() change counter after free
        nosym eigen call to neupp missing +1 in size of array 
   - correct gestion of the counter of ConstructDataFElement class (09/2008)
@@ -930,16 +947,16 @@ v 2.24
      whare : a,c,b,c,d,e,d are  border. 
 
   - correct bug in periodic Boundary Condition( find by Alexandre Masserey <masserey at ycoorsystems.com>)
-       mistake in abscisse choose.
+       mistake in abscise choose.
        sometime assert fail (loop).
      add option to the buildmesh that the boundary is fixe (fixeborder=true)
      see : examples++-tutorial/periodic4bis.edp   
   -  and  R1.hpp, R2.hpp, R3.hpp files for the 3d version.  
 v 2.23-2
   - correct trap in adapdmesh (in mortar-DN-4.edp) in very rare case 
-    du to  intialized   adj  of edges on geometry (very old bug) 
+    du to  initialized   adj  of edges on geometry (very old bug) 
     in case of multi points.
-  with vebosity=10; you get this message: 
+  with verbosity=10; you get this message: 
  -- Begin of insertion process 
  bug  2
  Bug double points in 
@@ -956,11 +973,11 @@ v 2.23
     see examples++-mpi/mortar-DN-4-mpi.edp examples++-tutorial/mortar-DN-4.edp
   - add vectorial  operator  d=  a ? b : c  where d,a is a array, and b,c can be array or scalar 
     usefull for boundary condition
-  - correct probleme in mpi recive message
+  - correct problem in mpi recieve message
   - correct load dynamic on MacOs (bug in fortran find library) in configure.ac
 v 2.22-2
-  - small change in configure.ac of find libumfpack on debain systeme
-  - correct checking code in probleme to same the mesh must be unique in problem of solve definition.
+  - small change in configure.ac of find libumfpack on debian system
+  - correct checking code in problem to same the mesh must be unique in problem of solve definition.
 v 2.22-1
   - make change in Makefile to build universal binary on MacOS
   - change the README file for compilation on ubuntu Linux.
@@ -973,7 +990,7 @@ v 2.21   (november, 18, 2007)
   -  correct configure for no X11 and UMFPACK in sparsesuite
 v 2.20-1 (october, 24, 2007)
   -  correct compilation problem without umfpack
-  -  add  formal operator  for vectorial operator in variationnal form
+  -  add  formal operator  for vectorial operator in variational form
         +, -  on  [  ]  array
         trace operator  matrix like [ [ ... ], .., [... ] ] 
         take element of an array [ ...][2] 
@@ -983,10 +1000,10 @@ v 2.20  (october, 2, 2007)
 	(download/f2d;make install)
   -  add automatic find of libf2c in case of F77=fort77 (driver of f2c) in configure 
   -  add tools to change the sparse linear solver with load dynamic, see doc and SuperLu example
-     in examles++-load
+     in examples++-load
 v 2.19   (august, 19  2007)
   - correct buildmesh from geometry file and add nbvx= named parameter
-    to infore the maximal number of verter in a mesh.
+    to infore the maximal number of vertex in a mesh.
   - add  Th[k].area to get the area of the k-th triangle of Th.
   - add  Th[k].region to get the region number (label)  of the k-th triangle of Th.
   - correct string delete in plot of border (mesh.edp)
@@ -994,9 +1011,9 @@ v 2.19   (august, 19  2007)
 v 2.18-1 (august, 2007)
   - correct old bug under Windows: the std input stream  now works (cin) 
 v 2.18  (july, 19, 2007)
-  - add sort of real array or int array, syntaxe: 
+  - add sort of real array or int array, syntax: 
       a.sort, and we have : a[i-1] <= a[i] for i =0 to a.n-1
-  - add  v=a.quantile(p) ;  statisticial function  and commute v such than 
+  - add  v=a.quantile(p) ;  statistical function  and commute v such than 
      #{ i / a[i] < v } = r*a.n   <=>    v = a[r*n]  when the array is sorted.   
   - correct P4nc, P4 finite element
 v 2.17-2 (19 june 2007)
@@ -1006,28 +1023,28 @@ v 2.17-2 (19 june 2007)
     (see "test to catch bogus boundary"  of example++-tutorial/mesh.edp).
 v 2.17-1
   - add the command line parameter [-v nn] in all freefem++ program to set 
-    the level of verbosity to nn  before all, and if nn == 0 then theoriticaly no more
+    the level of verbosity to nn  before all, and if nn == 0 then theoretically no more
     spurious output.
   - correct  automatique choose of  color in plot of arrow. 
 v 2.17
-  - add bessel function   j0, j1, jn, y0, y1, yn -- bessel
+  - add bessel function   j0, j1, jn, y0, y1, yn -- Bessel
         functions of first and second kind
   - add  erf, erfc -- error function operators
   - add   tgamma, lgamma  -- gamma and log of gamma
-  - add   tool set and get   line,colunm and value of a sparse matrix
+  - add   tool set and get   line,column and value of a sparse matrix
              [I,J,C]=A; // resizing  array I,J,C
              A=[I,J,C] ;
             where
              int[int] I(k),J(k); real[int] C(k);
   - add   in tools to get eigen vector of None FE problem
    like:
-     int nev=5;  // number of computed eigen valeu close to sigma
+     int nev=5;  // number of computed eigen value close to sigma
      real[int] ev(nev); // to store nev eigein value
      real[int,int] eV(AA.n,nev);   // to store nev eigen vector
      int k=EigenValue(AA,BB,sym=true,11value=ev,rawvector=eV);
 
-  - correct the quadrature formular automatic choose with the qforder= field
-  by default the order is correct until  order 10 (so exact for P9 polynomals)
+  - correct the quadrature formula automatic choose with the qforder= field
+  by default the order is correct until  order 10 (so exact for P9 polynomials)
   to add new Quadrature formalur up two  order 26 add  dynamic load qf11to25
 v 2.16-2
   correct configure.ac for windows ide compile
@@ -1038,7 +1055,7 @@ v 2.16 april 17 2007
   add Compressible Neo-Hookean Materials exemple
 v 2.15-1
   Correct mistake in cas of splitmesh with internal boundary (assert)
-  Add dump  of the mesh regulary (pesonnal work, FH)
+  Add dump  of the mesh regulary (personal work, FH)
 v 2.15  (27 mars 2007)
   The blas.tgz file change on http://www.netlib.org/blas/blas.tgz
   correct the makefile  (remove BLAS dir) 
@@ -1046,7 +1063,7 @@ v 2.14-3 (24 mars 2007)
   Correct bug in vectorial operation of type  (b - 3.14*d) (Thanks to F. Dortu)
 v 2.14-2 (22 mars 2007)
   correct integration problem on none classical mesh (mesh of curve of mortar technique)
-  the mesh::Find methode is boggus of the kind on meshes, i make an optimisation to remove
+  the mesh::Find methode is boggus of the kind on meshes, i make an optimization to remove
   this call in case build matrix with varf int1d(Th)( u*v) , in case of Th, u or v is def.
   on same meshes.	
 v 2.14-1 (0 mars 2007)
@@ -1054,7 +1071,7 @@ v 2.14-1 (0 mars 2007)
    add computing linear form of 2 meshes  (ex. v on mesh Th1, and  compute int2d(Th1)(v) )
 v 2.14  (7 mars 2007)
    make correction for solaris bluid
-   add P3,P4 and new quadrature formular on triangle up degree 25 
+   add P3,P4 and new quadrature formula on triangle up degree 25 
    with dynamics load. See examples++-load/*P[43]*.edp
    correct mistake when we build matrix from varf with 3  meshes (FH).
 v 2.13
@@ -1071,12 +1088,12 @@ v 2.12-2
   triangle resp in 3 and 4, before we put 2+3 points on the common edge
   now the put 3 points. 
 v 2.12-1 (jan 15,2007)
-  correct early delete of return pointeur in freefem++ function (trap in string.edp under windows )
+  correct early delete of return pointer in freefem++ function (trap in string.edp under windows )
 v 2.12   ( jan 10,2007)
   correct mistake in none square block matrix 
 v 2.11-2 (nov 29,2006)
   correct integration problem on none classical mesh (mesh of curve of mortar technique)
-  the mesh::Find methode is boggus of the kind on meshes, i make an optimisation to remove 
+  the mesh::Find method is bogus of the kind on meshes, i make an optimization to remove 
   this call in case build matrix with varf int..(Th)( u*v) , in case of Th, u or v is def.
   on same meshes.  
 v 2.11-1 (nov 28,2006)
@@ -1087,12 +1104,12 @@ v 2.11 (nov 10,2006)
  In new version of LAPACK second is a real function
  and in ARPACK second is a subroutine  (Thank the fortran).  
  So I change the Makefile to change the name of function second into secnd2. 
- How to find the bug, in this case the stack of the floatting register (info float under gdb) 
+ How to find the bug, in this case the stack of the floating register (info float under gdb) 
  are growing. So after any real function can return a NaN (one time) due to stack float register 
  overflow.  A big Thank to D. Bernardi of the help (Merci au fortran et Merci au i383).
 
 v 2.10 (oct 26,  2006)
-  correct problem with eigen value on window and some linux distrubition (Fedora)
+  correct problem with Eigen value on window and some linux distrubition (Fedora)
   add a patch of two functions in lapack  see  arpack/arpack-patch-lapack.tar.gz
 
 v 2.9 (sept 19, 2006 FH) 
@@ -1119,7 +1136,7 @@ V2.7-1
 V2.7
   * correct mpi Makefile
   * correct bug in construction of recursive composite finite element (see HISTORY)
-    remark: the finite elemnt struct, so all dynamic library must be recompile. 
+    remark: the finite element struct, so all dynamic library must be recompile. 
 V2.6-1
  * add the examples-bamg  directory  in freefem++ and  correct bamg graphic
 V2.6
@@ -1129,7 +1146,7 @@ V2.6
 V2.5.1
  *  change nbve= to nev= in EigenValue function  (to be compatible with the doc)
  *  newtow to newton    (to correct misspelling)
- *  change in AnyType to remove da randow bug on windows.
+ *  change in AnyType to remove da random bug on windows.
  *  vim color syntax from Richard MICHEL (vim_highlighting_for_FF++.tar.gz)
 
 V2.5-0 
@@ -1141,7 +1158,7 @@ V2.5-0
        getline(cin,s); 
   *  Correct bug when passing parameter string in function
   *  add freefem++  mode for mi editor on macos http://www.mimikaki.net/en/
-    store in  mode-mi-edp.zip archive (unzip and put in the Folder  openned with the 
+    store in  mode-mi-edp.zip archive (unzip and put in the Folder  opened with the 
     mi "Option->Open Mode Folder" menu and set "mi" is the Default application 
     for all the .edp file). 
     
@@ -1150,7 +1167,7 @@ V2.4-2
   * if u is a complex array (i.e. complex[int u] ..;) 
      then  u.re (resp u.im) are  the real array of the real (resp. imag ) 
      part of the vector u
-  * in block matrix add utilisation of array to build the block matrix
+  * in block matrix add utilization of array to build the block matrix
     see new Laplace-lagrange-mult.edp file to have an example
 V2.3-3
  * add outer  product to set matrix or full real or complex 2D array
@@ -1189,14 +1206,14 @@ V2.2-1
     export FF_VERBOSITY=50 
     export FF_INCLUDEPATH="dir;;dir2"
     export FF_LOADPATH="dir;;dir3""
-   remark the separtor of directory  is ";" and not ":" because ":" is use under Windows.
+   remark the separator of directory  is ";" and not ":" because ":" is use under Windows.
  * Examples of Add new Finite element with dynamic link/load,  Morley and Bernardi Raugel   
    see examples++-load 
 V2.1-2
  * add more example of dynamic load example (thank to F. Dortu)
- * correct mistake in simple integral computation (not in variationnal 
+ * correct mistake in simple integral computation (not in variational 
    form)  before we alway use a quadrature formula of order 3, 
-   now we can change the quadrature formula and the defaut is of order 5. 
+   now we can change the quadrature formula and the default is of order 5. 
 V2.0-4
  * change in mshptg the size of the small possible edge from
    1/32000 to 1/1 000 000 000, this mesher is use in trunc, 
@@ -1227,14 +1244,14 @@ Major Change previous version
      examples++-tutorial/mat_interpol.edp
    not so well tested, but could be worse. 
    
- * add example to solve vartionnal inequation. VI.edp
+ * add example to solve variational inequation. VI.edp
 
  * add  possibility to build matrix where the 3 meshes 
-   the integrale mesh, unkwon FE mesh, test FE function 
+   the integrale mesh, unknown FE mesh, test FE function 
    can be different.  You must use varf to build the matrix 
-   is not a standard porblem.
+   is not a standard problem.
   
  * Improvement of  dynamic loading facility under the 3 systems
-   add a fast fourier transform with dynamic loading
+   add a fast Fourier transform with dynamic loading
    see examples++-load/dfft.edp
 

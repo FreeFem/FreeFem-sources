@@ -1,5 +1,10 @@
-@  changeset:   3275:5feb67cd7a68
+@  changeset:   3276:a727de1e2428
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Mar 25 23:30:28 2015 +0100
+|  summary:     remove fast for schwarz-add-macro.idp
+|
+o  changeset:   3275:5feb67cd7a68
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 25 23:03:39 2015 +0100
 |  summary:     update HISTORY
