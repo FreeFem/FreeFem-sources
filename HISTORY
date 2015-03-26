@@ -1,5 +1,10 @@
-@  changeset:   3281:c240a3389925
+@  changeset:   3282:ea76e2181c40
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 26 22:40:28 2015 +0100
+|  summary:     correct missing patch
+|
+o  changeset:   3281:c240a3389925
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 26 22:26:36 2015 +0100
 |  summary:     correct scotch makefile for windows
