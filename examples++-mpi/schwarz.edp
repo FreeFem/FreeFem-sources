@@ -3,7 +3,9 @@ load "metis"
 load "utility"
 load "removeDOF"
 include "getARGV.idp"
-
+{int tyty;
+if(mpirank==-1) 
+cin >> tyty;}
 searchMethod = 1;
 
 macro minimalMesh()square(1, 1)// EOM
@@ -38,6 +40,7 @@ int[int] l = [1, 2, 2, 2];
 mesh Th = minimalMesh;
 fespace Wh(Th, Pk);
 build(generateTh, Th, ThBorder, ThOverlap, s, D, numberIntersection, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld)
+// verif ..
 
 macro Varf(varfName, meshName, PhName)
     varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + intN(meshName)(v) + on(1, u = 0.0);// EOM

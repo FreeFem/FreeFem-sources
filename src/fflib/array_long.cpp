@@ -161,7 +161,18 @@ void initArrayOperatorlong()
 
     Add<KN<K> *>("imin",".",new OneOperator1<long,KN<K> *>(get_imin));
     Add<KN<K> *>("imax",".",new OneOperator1<long,KN<K> *>(get_imax));
-  
+    // madd FH. march 2015 ...
+    Global.Add("Unique", "(", new OneOperator2_<long, KN<K>*, KN<K>*>(Unique));
+    // convertion double -> long (via lround)
+    Dcl_Type<F_KN_<K,K,double> >();
+    Global.Add("lround","(",new OneOperator1F_KN_<F_KN_<K,K,double>,K,double,KN_<double> >(lround));
+    TheOperators->Add("=",new OneBinaryOperator<set_eq_array<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
+    TheOperators->Add("+=",new OneBinaryOperator<set_eq_array_add<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
+    TheOperators->Add("-=",new OneBinaryOperator<set_eq_array_sub<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
+    TheOperators->Add("/=",new OneBinaryOperator<set_eq_array_div<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
+    TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
+
+
     
 }
 
