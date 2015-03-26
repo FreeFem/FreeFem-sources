@@ -1,5 +1,10 @@
-@  changeset:   3278:4224cd4c21ce
+@  changeset:   3279:452b5a691a95
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 26 21:35:35 2015 +0100
+|  summary:     coorect makefile for windows
+|
+o  changeset:   3278:4224cd4c21ce
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 26 19:09:26 2015 +0100
 |  summary:     correct makefile for windows compile process
