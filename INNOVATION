@@ -11,11 +11,6 @@ version 3.36
 
 
  - add disable-gmm configure flags 
-
-4/3/2015 (ALH)
- - Edited for compatibility with Emscripten
- - Added calls for Javascript graphical output along with postscript output
-
 version 3.35 dist (12/3/15) (rev 3246:664a6473d705) (warning slow version)
  - optional lib seach  [toto|tyty] in WHERE-LIBRARY seach lib 
  - change the metis to scotch-metis interface in hips and parms .. 
@@ -59,6 +54,10 @@ BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (d
    correct small memory leak in use of routine due to debugstack. 
  - correct bug in periodic condition in case common dof with periodic.  
  - correct big bug in memory management of sparse matrix
+
+4/3/2015 (ALH)
+ - Edited for compatibility with Emscripten
+ - Added calls for Javascript graphical output along with postscript output
 
 15/10/2014 (ALH)
  - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
