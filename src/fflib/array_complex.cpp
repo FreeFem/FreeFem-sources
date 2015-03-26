@@ -78,8 +78,8 @@ void initArrayOperatorComplex()
     Add<KNM<Complex> *>("re",".",new OneOperator1<KNM_<double>,KNM_<Complex> >(Get_C2R_<0>,atype<KNM<Complex> * >()));
     Add<KNM_<Complex> >("re",".",new OneOperator1<KNM_<double>,KNM_<Complex> >(Get_C2R_<0>,atype<KNM_<Complex>  >()));
     
-    Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(square));
-    Global.Add("conj","(",new OneOperator1F_KN_<F_KN_<K,K,KK>,K,KK,KN_<K> >(conj));
+    Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(square));
+    Global.Add("conj","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(conj));
 
     map_type[typeid(SetArray<K>).name()]->AddCast(					     
 						  new E_F1_funcT<SetArray<K>,SetArray<long> >(Cast<SetArray<K>,SetArray<long> >),
