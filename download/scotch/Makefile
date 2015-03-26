@@ -53,12 +53,7 @@ FAIRE: $(SRCDIR)/FAIT
 	$(MAKE)  WHERE
 	touch FAIRE
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
-ifdef WIN32DLLTARGET
-	sed -e s/CFLAGSOK/CFLAGSWIN/ <Makefile-scotch.inc  >Makefile-scotch.incc
-else
-	sed -e s/CFLAGSOK/CFLAGSSTD/ <Makefile-scotch.inc  >Makefile-scotch.incc
-endif
-	../../config.status  --file="Makefile.inc:Makefile-scotch.incc"
+	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 
 # DCOMMON_TIMING_OLD
 # FFCS - 16/1/13 - what was "$(CCP)" used for?
