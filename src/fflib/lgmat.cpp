@@ -2916,6 +2916,216 @@ bool SetDefault()
 }
 
 
+template<class T>
+class removeDOF_Op : public E_F0mps {
+public:
+    Expression A;
+    Expression R;
+    Expression x;
+    Expression out;
+    static const int n_name_param = 3;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), R(param2), x(param3), out(param4) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+    }
+    
+    AnyType operator()(Stack stack) const;
+};
+
+template<class T>
+basicAC_F0::name_and_type removeDOF_Op<T>::name_param[] = {
+    {"symmetrize", &typeid(bool)},
+    {"condensation", &typeid(KN<long>*)},
+    {"interaction", &typeid(Matrice_Creuse<T>*)}
+};
+
+template<class T>
+class removeDOF : public OneOperator {
+  
+public:
+    removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()) {}
+    
+    E_F0* code(const basicAC_F0& args) const {
+        return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
+    }
+};
+template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
+template<class T>
+AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
+      static const double EPS=1e-12;
+    Matrice_Creuse<T>* pA = GetAny<Matrice_Creuse<T>* >((*A)(stack));
+    Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
+    KN<T>* pX = GetAny<KN<T>* >((*x)(stack));
+    KN<T>* pOut = GetAny<KN<T>* >((*out)(stack));
+    ffassert(pA && pR && pX && pOut);
+    pA->Uh = pR->Uh;
+    pA->Vh = pR->Vh;
+    MatriceMorse<T> *mA = static_cast<MatriceMorse<T>*>(&(*pA->A));
+    MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+    bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
+    KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
+    
+    unsigned int n = condensation ? condensation->n : mR->nbcoef;
+    int* lg = new int[n + 1];
+    int* cl;
+    T* val;
+    T* b;
+    if(pOut->n == 0) {
+        b = new T[n];
+        pOut->set(b, n);
+    }
+    
+    std::vector<signed int> tmpVec;
+    if(!condensation) {
+        tmpVec.resize(mA->n);
+        for(unsigned int i = 0; i < n; ++i)
+            tmpVec[mR->cl[i]] = i + 1;
+        if(!mA->symetrique) {
+            std::vector<std::pair<int, T> > tmp;
+            tmp.reserve(mA->nbcoef);
+            
+            lg[0] = 0;
+            for(unsigned int i = 0; i < n; ++i) {
+                for(unsigned int j = mA->lg[mR->cl[i]]; j < mA->lg[mR->cl[i] + 1]; ++j) {
+                    unsigned int col = tmpVec[mA->cl[j]];
+                    if(col != 0 && abs(mA->a[j]) > EPS) {
+                        if(symmetrize) {
+                            if(col - 1 <= i)
+                                tmp.push_back(std::make_pair(col - 1, mA->a[j]));
+                        }
+                        else
+                            tmp.push_back(std::make_pair(col - 1, mA->a[j]));
+                    }
+                }
+                std::sort(tmp.begin() + lg[i], tmp.end(),cmp<T> );
+                // c++11 , [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
+                *(*pOut + i) = *(*pX + mR->cl[i]);
+                lg[i + 1] = tmp.size();
+            }
+            mA->nbcoef = tmp.size();
+            if(symmetrize)
+                mA->symetrique = true;
+            else
+                mA->symetrique = false;
+            
+            cl = new int[tmp.size()];
+            val = new T[tmp.size()];
+            
+            for(unsigned int i = 0; i < tmp.size(); ++i) {
+                cl[i]  = tmp[i].first;
+                val[i] = tmp[i].second;
+            }
+        }
+        else {
+            std::vector<std::vector<std::pair<unsigned int, T> > > tmp(n);
+            for(unsigned int i = 0; i < n; ++i)
+                tmp[i].reserve(mA->lg[mR->cl[i] + 1] - mA->lg[mR->cl[i]]);
+            
+            unsigned int nnz = 0;
+            for(unsigned int i = 0; i < n; ++i) {
+                for(unsigned int j = mA->lg[mR->cl[i]]; j < mA->lg[mR->cl[i] + 1]; ++j) {
+                    unsigned int col = tmpVec[mA->cl[j]];
+                    if(col != 0 && abs(mA->a[j]) > EPS) {
+                        if(i < col - 1)
+                            tmp[col - 1].push_back(make_pair(i, mA->a[j]));
+                        else
+                            tmp[i].push_back(make_pair(col - 1, mA->a[j]));
+                        ++nnz;
+                    }
+                }
+                *(*pOut + i) = *(*pX + mR->cl[i]);
+            }
+            mA->nbcoef = nnz;
+            cl = new int[nnz];
+            val = new T[nnz];
+            nnz = 0;
+            lg[0] = 0;
+            for(unsigned int i = 0; i < n; ++i) {
+                std::sort(tmp[i].begin(), tmp[i].end(),cmp<T>);
+                // c++11, [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
+                for(typename std::vector<std::pair<unsigned int, T> >::const_iterator it = tmp[i].begin(); it != tmp[i].end(); ++it) {
+                    cl[nnz] = it->first;
+                    val[nnz++] = it->second;
+                }
+                lg[i + 1] = nnz;
+            }
+            
+        }
+        delete [] mA->cl;
+        delete [] mA->lg;
+        delete [] mA->a;
+        mA->n = n;
+        mA->m = n;
+        mA->N = n;
+        mA->M = n;
+        mA->lg = lg;
+        mA->cl = cl;
+        mA->a = val;
+    }
+    else {
+        tmpVec.reserve(mA->n);
+        unsigned int i = 0, j = 1;
+        for(unsigned int k = 0; k < mA->n; ++k) {
+            if(k == *(*condensation + i)) {
+                ++i;
+                tmpVec.push_back(i);
+            }
+            else {
+                tmpVec.push_back(-j);
+                ++j;
+            }
+        }
+        
+        
+        //        if(!mA->symetrique) {
+        std::vector<std::pair<int, T> > tmpInterior;
+        std::vector<std::pair<int, T> > tmpBoundary;
+        std::vector<std::pair<int, T> > tmpInteraction;
+        tmpInterior.reserve(mA->nbcoef);
+        tmpBoundary.reserve(mA->nbcoef);
+        tmpInteraction.reserve(mA->nbcoef);
+        
+        lg[0] = 0;
+        for(unsigned int i = 0; i < mA->n; ++i) {
+            int row = tmpVec[i];
+            if(row < 0) {
+                for(unsigned int j = mA->lg[i]; j < mA->lg[i + 1]; ++j) {
+                    int col = tmpVec[mA->cl[j]];
+                    if(col < 0)
+                        tmpInterior.push_back(make_pair(-col - 1, mA->a[j]));
+                    else
+                        tmpInteraction.push_back(make_pair(col - 1, mA->a[j]));
+                }
+                
+            }
+            else {
+                for(unsigned int j = mA->lg[i]; j < mA->lg[i + 1]; ++j) {
+                    int col = tmpVec[mA->cl[j]];
+                    if(col > 0)
+                        tmpBoundary.push_back(make_pair(col - 1, mA->a[j]));
+                }
+                // std::sort(tmp.begin() + lg[i], tmp.end());
+                *(*pOut + i) = *(*pX + *(*condensation + i));
+                lg[i + 1] = tmpBoundary.size();
+            }
+        }
+        cl = new int[tmpBoundary.size()];
+        val = new T[tmpBoundary.size()];
+        for(unsigned int i = 0; i < tmpBoundary.size(); ++i) {
+            cl[i]  = tmpBoundary[i].first;
+            val[i] = tmpBoundary[i].second;
+        }
+        //        }
+        MatriceMorse<T>* m = new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->symetrique, val, lg, cl, true);
+        pR->typemat = TypeSolveMat(TypeSolveMat::GMRES);
+        pR->A.master(m);
+        m->dummy = false;
+    }
+    return 0L;
+}
+
+
 bool SparseDefault()
 {
     return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
@@ -3019,6 +3229,9 @@ void  init_lgmat()
 
  extern  void init_UMFPack_solver();
  init_UMFPack_solver();
+ Global.Add("renumbering", "(", new removeDOF<double>);
+ Global.Add("renumbering", "(", new removeDOF<Complex>);
+
 }
 
 int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}

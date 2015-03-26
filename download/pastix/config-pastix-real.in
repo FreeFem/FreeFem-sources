@@ -45,7 +45,7 @@ VERSIONORD  = _scotch
 #CCTYPES     = $(FFCTYPESINT)#-DFORCE_LONG -DLONG
 #---------------------------
 VERSIONINT  = _int
-CCTYPES     = -DFORCE_INT -DINT
+CCTYPES     = -DFORCE_INT 
 #---------------------------
 #VERSIONINT  = _int64
 #CCTYPES     = -DFORCE_INT64 -DINTSSIZE64

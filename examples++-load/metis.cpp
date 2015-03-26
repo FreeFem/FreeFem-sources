@@ -117,8 +117,12 @@ KN<long> * partmetisd(Stack s,KN<long> * const & part,Mesh * const & pTh,long co
 
 $1 */
 static void Load_Init(){
-  if(verbosity && mpirank == 0) 
-    cout << " lood: init metis (v  " << METIS_VER_MAJOR <<" )\n"; 
+  if(verbosity && mpirank == 0)
+#ifdef METIS_VER_MAJOR
+    cout << " lood: init metis (v  " << METIS_VER_MAJOR <<" )\n";
+#else
+    cout << " lood: init metis (v 4 )\n";
+#endif
   Global.Add("metisnodal","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh *,long> >(&partmetis<Mesh,0>));
   Global.Add("metisdual","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh *,long> >(&partmetis<Mesh,1>));
     Global.Add("metisnodal","(",new OneOperator3_<KN<long> *,KN<long> *,Mesh3 *,long , E_F_stackF0F0F0_<KN<long> *,KN<long> *,Mesh3 *,long> >(&partmetis<Mesh3,0>));

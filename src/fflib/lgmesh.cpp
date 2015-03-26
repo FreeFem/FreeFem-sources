@@ -1890,6 +1890,43 @@ double volumelevelset(Mesh3 * const & pTh,KN<double> * const &pphi,const double 
 }
 double volumelevelset(Mesh3 * const &pTh,KN<double> * const &pphi,const double & phi0) {return volumelevelset(pTh,pphi,phi0,0);}
 
+long Boundingbox(KN<double>* const& pb, pmesh const& pTh)
+{
+     KN<double> & bb =*pb;
+     if(pTh && bb.N()>=4)
+     {
+         R2 Pn,Px;
+         pTh->BoundingBox(Pn,Px);
+         bb[0] = Pn.x;
+         bb[1] = Px.x;
+         bb[2] = Pn.y;
+         bb[3] = Px.y;
+         return 0;
+     }
+    return -1; // error
+}
+long Boundingbox(KN<double>* const& pb, pmesh3 const& pTh)
+{
+    KN<double> & bb =*pb;
+    if(pTh && bb.N()>=6)
+    {
+        R3 Pn=pTh->Pmin,Px=pTh->Pmax  ;
+        bb[0] = Pn.x;
+        bb[1] = Px.x;
+        bb[2] = Pn.y;
+        bb[3] = Px.y;
+        bb[4] = Pn.y;
+        bb[6] = Px.y;
+        return 0;
+     }
+    return -1; // error
+}
+
+long Boundingbox(pmesh3 const& pTh,KN<double>* const& pb )
+{ return  Boundingbox(pb,pTh);}
+long Boundingbox(pmesh const& pTh,KN<double>* const& pb )
+{ return  Boundingbox(pb,pTh);}
+
 
 
 void init_lgmesh() {
@@ -1929,6 +1966,11 @@ void init_lgmesh() {
     //Global.Add("convectlevelset","(", new OneOperatorCode<ConvectLevelSet0 >( ));
     Global.Add("volumelevelset","(",new OneOperator3_<double,Mesh3 *,KN<double>*,double>(volumelevelset));
     Global.Add("volumelevelset","(",new OneOperator4_<double,Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
+    // add FH to get bounding box ...
+    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh,KN<double>*>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh3,KN<double>*>(Boundingbox));
 
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
