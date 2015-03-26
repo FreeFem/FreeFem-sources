@@ -535,8 +535,13 @@ EOF
 # Generic or hardware-dependant optimization
 m4_include(acmacros.m4)
 m4_include(acoptim.m4)
+
+# [[file:ax_lib_hdf5.m4]]
 m4_include(ax_lib_hdf5.m4)
+
+# [[file:ax_lib_gsl.m4]]
 m4_include(ax_lib_gsl.m4)
+
 # Checking c++11 for schwarz interface of P. Jolivet ...
 # F.Hecht:
 # do not compile all with c++11 version to much 
