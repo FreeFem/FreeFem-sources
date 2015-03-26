@@ -39,9 +39,9 @@ FAIRE: $(SRCDIR)/FAIT
 METISCFLAGS=$(FLAGS_REGEX_H) $(CFLAGS)  -I../GKlib -I../include  -I. -D__thread= 
 PMETISCFLAGS=$(MPI_INCLUDE) $(FLAGS_REGEX_H) $(CFLAGS)  -I../metis/GKlib -I../metis/include   -I../include -I. -D__thread= 
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
-	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(METISCFLAGS)'
-	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(METISCFLAGS) -Dmetis_EXPORTS'
-	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(PMETISCFLAGS)'
+	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) "CC=$(CC)" "CFLAGS=$(METISCFLAGS)"
+	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) "CC=$(CC)" CFLAGS="$(METISCFLAGS) -Dmetis_EXPORTS"
+	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) "CC=$(CC)" "CFLAGS=$(PMETISCFLAGS)"
 	-mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
 	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )

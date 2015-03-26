@@ -6,7 +6,7 @@
    #include <sys/types.h>
 -  #include <sys/resource.h>
 +#ifndef __WIN32__
-+  #include <sys/resource.h>*/
++  #include <sys/resource.h>
 +#endif 
    #include <sys/time.h>
  #endif
