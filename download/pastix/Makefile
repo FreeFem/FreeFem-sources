@@ -68,10 +68,12 @@ config.in: ../Makefile ../../config.status	Makefile
 
 install:$(SRCDIR)/FAIT
 
-$(SRCDIR)/FAIT: $(SRCDIR)/FAITR2 $(SRCDIR)/FAITC2
+$(SRCDIR)/FAIT:  $(SRCDIR)/FAITC2
 	touch $(SRCDIR)/FAIT
 
-
+## change F. Hecht
+## WARNING target $(SRCDIR)/FAITR2 $(SRCDIR)/FAITC2  not in //
+#  => $(SRCDIR)/FAITC2 depend on $(SRCDIR)/FAITR2 
 
 $(SRCDIR)/FAITR1: $(SRCDIR)/tag-tar
 	cp config.in $(SRCDIR)/src/
@@ -147,7 +149,7 @@ $(SRCDIR)/FAITC1:$(SRCDIR)/tag-tar
 #endif
 	touch $(SRCDIR)/FAITC1
 
-$(SRCDIR)/FAITC2:$(SRCDIR)/FAITC1
+$(SRCDIR)/FAITC2: $(SRCDIR)/FAITR2 $(SRCDIR)/FAITC1
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/complex
 	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
 	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex

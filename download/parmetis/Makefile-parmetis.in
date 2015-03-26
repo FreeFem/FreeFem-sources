@@ -1,5 +1,6 @@
 
 # Which compiler to use
+
 CC = @CC@
 LD=  @CC@
 # What optimization level to use
@@ -25,4 +26,6 @@ RANLIB = @RANLIB@
 #RANLIB = 
 WGET = @WGET@
 
-
+#  hack to set -DUSE_GKREGEX if no regex.h =>  FF_HAVE_REGEX_H=0
+USE_GKREGEX0=-DUSE_GKREGEX
+FLAGS_REGEX_H=$(USE_GKREGEX@FF_HAVE_REGEX_H@)

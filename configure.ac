@@ -100,12 +100,13 @@ fi
 
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
+AC_CHECK_PROG(ff_flex,flex,yes,no)
 dnl AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch "  in
+case "$ff_m4 $ff_bison $ff_patch $ff_flex"  in
 *no*)
     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install m4 bison patch cmake ])
-    AC_MSG_ERROR([ Sorry missing  m4,bison,patch command !]);;
+    AC_MSG_ERROR([ Sorry missing  m4,bison,flex,patch command !]);;
 esac
 
 
@@ -1491,6 +1492,9 @@ fi
 
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
+AC_CHECK_HEADERS(regex.h,ff_regex_h=1, ff_regex_h=0)
+AC_SUBST(FF_HAVE_REGEX_H,$ff_regex_h)
+
 AC_CHECK_HEADERS([unistd.h])
 # asinh acosh atanh are not in Mingw yet gettimeofday
 ff_malloc_h=""

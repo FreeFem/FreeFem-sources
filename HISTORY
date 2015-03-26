@@ -1,5 +1,10 @@
-@  changeset:   3276:a727de1e2428
+@  changeset:   3277:a76f9483f95d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 26 09:51:08 2015 +0100
+|  summary:     coorect type in innovation file
+|
+o  changeset:   3276:a727de1e2428
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 25 23:30:28 2015 +0100
 |  summary:     remove fast for schwarz-add-macro.idp

@@ -45,7 +45,7 @@ EXTRA_DIST= \
 ./mumps/Makefile-mumps-5.0.0.inc \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/makefile \
-./parmetis/parmetis-3.1.1.patch \
+./parmetis/parmetis-4.0.3.patch \
 ./parms/Makefile \
 ./parms/makefile-parms.in \
 ./pastix/Makefile \
