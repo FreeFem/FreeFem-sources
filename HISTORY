@@ -1,5 +1,25 @@
-@  changeset:   3282:ea76e2181c40
+@  changeset:   3286:36dfcdecc14b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 15:28:51 2015 +0100
+|  summary:     pass patch of P. Jolivet.
+|
+o  changeset:   3285:2f1d340947f0
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 10:17:44 2015 +0100
+|  summary:     coreect INNOVATIOn file
+|
+o  changeset:   3284:fafdd461d2e5
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 10:16:40 2015 +0100
+|  summary:     try to pub messag in makefile if generate file are out of date.
+|
+o  changeset:   3283:40eba7d447e3
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 26 23:03:32 2015 +0100
+|  summary:     coorect pb of space in variable under windows
+|
+o  changeset:   3282:ea76e2181c40
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 26 22:40:28 2015 +0100
 |  summary:     correct missing patch
