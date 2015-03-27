@@ -1,5 +1,10 @@
-@  changeset:   3286:36dfcdecc14b
+@  changeset:   3287:5cfe4ff2e8d4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 15:36:12 2015 +0100
+|  summary:     remove of AddLayer3 same as AddLayer in msh3
+|
+o  changeset:   3286:36dfcdecc14b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Mar 27 15:28:51 2015 +0100
 |  summary:     pass patch of P. Jolivet.
