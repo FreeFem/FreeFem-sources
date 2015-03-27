@@ -1,5 +1,15 @@
-@  changeset:   3287:5cfe4ff2e8d4
+@  changeset:   3289:e6ce11b08c23
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 16:23:00 2015 +0100
+|  summary:     correct header of ps file ????
+|
+o  changeset:   3288:6b8ea09dc209
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 16:06:29 2015 +0100
+|  summary:     correct the remove of FreeFem++-api.dll in load link
+|
+o  changeset:   3287:5cfe4ff2e8d4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Mar 27 15:36:12 2015 +0100
 |  summary:     remove of AddLayer3 same as AddLayer in msh3
