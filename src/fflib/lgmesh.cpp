@@ -1915,8 +1915,8 @@ long Boundingbox(KN<double>* const& pb, pmesh3 const& pTh)
         bb[1] = Px.x;
         bb[2] = Pn.y;
         bb[3] = Px.y;
-        bb[4] = Pn.y;
-        bb[6] = Px.y;
+        bb[4] = Pn.z;
+        bb[5] = Px.z;
         return 0;
      }
     return -1; // error

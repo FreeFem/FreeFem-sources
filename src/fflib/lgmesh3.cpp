@@ -28,6 +28,7 @@
 
 #include "ff++.hpp"
 #include "array_resize.hpp"
+#include "AFunction_ext.hpp"
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
 
@@ -1387,6 +1388,54 @@ class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
     };
 };
 
+bool AddLayers(Mesh3 * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+{
+    ffassert(pTh && psupp && pphi);
+    const int nve = Tetraedre::NbV;
+    Mesh3 & Th= *pTh;
+    const int nt = Th.nt;
+    const int nv = Th.nv;
+    
+    KN<double> & supp(*psupp);
+    KN<double> u(nv), s(nt);
+    KN<double> & phi(*pphi);
+    ffassert(supp.N()==nt);//P0
+    ffassert(phi.N()==nv); // P1
+    s = supp;
+    phi=0.;
+    // supp = 0.;
+    // cout << " s  " << s << endl;
+    
+    for(int step=0; step < nlayer; ++ step)
+    {
+        
+        
+        u = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                u[Th(k,i)] += s[k];
+        
+        for(int v=0; v < nv; ++v)
+            u[v] = u[v] >0.;
+        // cout << " u  " << u << endl;
+        
+        phi += u;
+        
+        s = 0.;
+        for(int k=0; k<nt; ++k)
+            for(int i=0; i<nve; ++i)
+                s[k] += u[Th(k,i)];
+        
+        for(int k=0; k < nt; ++k)
+            s[k] = s[k] > 0.;
+        supp += s;
+        // cout << " s  " << s << endl;
+    }
+    // cout << " phi  " << phi << endl;
+    phi *= (1./nlayer);
+    // supp =s;
+    return true;
+}
 
 // FH
 
@@ -1440,6 +1489,7 @@ void init_lgmesh3() {
  atype<pf3rbase>()->AddCast(  new E_F1_funcT<pf3rbase,pf3rbase>(UnRef<pf3rbase>));
  atype<pf3cbase>()->AddCast(  new E_F1_funcT<pf3cbase,pf3cbase>(UnRef<pf3cbase>));
  
+  Global.Add("AddLayers3","(",new OneOperator4_<bool, Mesh3 * , KN<double> * , long ,KN<double> * >(AddLayers));
  Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
  Add<pf3c>("[]",".",new OneOperator1<KN<Complex> *,pf3c>(pf3r2vect<Complex,v_fes3>));
  Add<pf3r>("(","",new OneQuadOperator<Op4_pf32K<R,v_fes3>,Op4_pf32K<R,v_fes3>::Op> );
