@@ -656,7 +656,7 @@ void openPS(const char *filename )
   // [[http://kripken.github.io/emscripten-site/docs/api_reference/emscripten.h.html#c.EM_ASM_]]
   
   for(const char *c=fps;*c;c++)EM_ASM_INT({ffjs_listgraphs($0)},*c);
-
+  EM_ASM(ffjs_listgraphs(0));
 #endif
 
   if(psfile) {
