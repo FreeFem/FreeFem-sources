@@ -3874,6 +3874,7 @@ AnyType Plot::operator()(Stack s) const{
     // parameter to send the graphical commands to the right canvas.
     
     if (psfile) {
+      // [[file:../Graphics/sansrgraph.cpp::openPS]]
       openPS(psfile->c_str());
     }
 

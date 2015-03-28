@@ -554,7 +554,7 @@ void cercle(reel , reel , reel )
 void reffecran(){
 #ifdef FFJS_GRAPH
   // ALH - <<ffjs_graphstart>> javascript graph [[file:~/ffjs/main.js::ffjs_graphstart]]
-  EM_ASM(ffjs_graphstart(aaa));
+  EM_ASM(ffjs_graphstart());
 #endif
 }
 
