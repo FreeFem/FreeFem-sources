@@ -3869,11 +3869,16 @@ AnyType Plot::operator()(Stack s) const{
   bool ops=psfile;
   bool drawmeshes=false;
   if ( clean ) {
-    reffecran(); 
 
+    // ALH - 28/3/15 - Open PS file before blanking the current picture because Javascript needs to know any "ps="
+    // parameter to send the graphical commands to the right canvas.
+    
     if (psfile) {
       openPS(psfile->c_str());
     }
+
+    reffecran(); 
+
     if (bw) NoirEtBlanc(1);
     R2 Pmin,Pmax;
     R2 uminmax(1e100,-1e100);
