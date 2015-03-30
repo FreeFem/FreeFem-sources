@@ -618,8 +618,7 @@ public:
   /// cf [[Type_Expr]]
   C_F0(const Type_Expr & a):f(a.second),r(a.first)   {}
 
-  /// <<C_F0_constructor_pop_char_basicAC_F0_decl>>
-  /// [[file:AFunction2.cpp::C_F0_constructor_pop_char_basicAC_F0_impl]]
+  /// <<C_F0_constructor_pop_char_basicAC_F0_decl>> [[file:AFunction2.cpp::C_F0_constructor_pop_char_basicAC_F0_impl]]
   /// cf [[Polymorphic]]
   C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
 

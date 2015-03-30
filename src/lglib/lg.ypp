@@ -374,59 +374,52 @@ start:   input ENDOFFILE {
   return 0;}
 ;
 
-/*<<input>>*/
-
-input:   instructions /*[[instructions]]*/
+input:   instructions /*[[instructions:]]*/
 ;
          
-/* <<instructions>> returns a [[YYSTYPE_cinst]] */
-
-instructions:  instruction /* [[instruction]] gives a [[YYSTYPE_cexp]] */   {$$=$1;;;}
-        | instructions  instruction   { $$= ($1+=$2) }         
+instructions: /* returns a [[YYSTYPE_cinst]] */
+          instruction /* [[instruction:]] returns a [[YYSTYPE_cexp]] */   {$$ = $1;}
+        | instructions  instruction                                       {$$ = ($1+=$2) }         
         ;
 
-/* Function arguments list */
+/* List of function arguments */
 
-list_of_id_args:   { $$=new ListOfId();}
-            | id                      { $$ = new ListOfId(); $$->push_back(UnId($1))}
-            | id '=' no_comma_expr    { $$ = new ListOfId(); $$->push_back(UnId($1,$3)) }
-            | FESPACE id              { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,2> **>()))}
-            | FESPACE '&' id              { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,2> **>(),true))}
-            | FESPACE3 id              { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,3> **>()))}
-            | FESPACE3 '&' id              { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,3> **>(),true))}
-            | type_of_dcl id          { $$ = new ListOfId(); $$->push_back(UnId($2,C_F0(),$1->right())) }
-            | type_of_dcl '&' id      { $$ = new ListOfId(); $$->push_back(UnId($3,C_F0(),$1,true)) }
-            | '[' list_of_id_args ']' { $$ = new ListOfId(); $$->push_back(UnId($2)) }
-            | list_of_id_args ',' id                     { $$ = $1; $$->push_back(UnId($3)) }
-            | list_of_id_args ',''[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4)) }
-            | list_of_id_args ',' id '=' no_comma_expr   { $$ = $1; $$->push_back(UnId($3,$5)) }
-            | list_of_id_args ',' FESPACE id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,2> **>())) }
-            | list_of_id_args ',' FESPACE '&' id             { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,2> **>(),true)) }
-            | list_of_id_args ',' FESPACE3 id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,3> **>())) }
-            | list_of_id_args ',' FESPACE3 '&' id             { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,3> **>(),true)) }
-            | list_of_id_args ',' type_of_dcl id         { $$ = $1; $$->push_back(UnId($4,C_F0(),$3->right())) }
-            | list_of_id_args ',' type_of_dcl '&' id     { $$ = $1; $$->push_back(UnId($5,C_F0(),$3,true)) }
-;
+list_of_id_args:
+                                               { $$ = new ListOfId();}
+  | id                                         { $$ = new ListOfId(); $$->push_back(UnId($1))}
+  | id '=' no_comma_expr                       { $$ = new ListOfId(); $$->push_back(UnId($1,$3)) }
+  | FESPACE id                                 { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,2> **>()))}
+  | FESPACE '&' id                             { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,2> **>(),true))}
+  | FESPACE3 id                                { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,3> **>()))}
+  | FESPACE3 '&' id                            { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,3> **>(),true))}
+  | type_of_dcl id                             { $$ = new ListOfId(); $$->push_back(UnId($2,C_F0(),$1->right())) }
+  | type_of_dcl '&' id                         { $$ = new ListOfId(); $$->push_back(UnId($3,C_F0(),$1,true)) }
+  | '[' list_of_id_args ']'                    { $$ = new ListOfId(); $$->push_back(UnId($2)) }
+  | list_of_id_args ',' id                     { $$ = $1; $$->push_back(UnId($3)) }
+  | list_of_id_args ',''[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4)) }
+  | list_of_id_args ',' id '=' no_comma_expr   { $$ = $1; $$->push_back(UnId($3,$5)) }
+  | list_of_id_args ',' FESPACE id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,2> **>())) }
+  | list_of_id_args ',' FESPACE '&' id         { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,2> **>(),true)) }
+  | list_of_id_args ',' FESPACE3 id            { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,3> **>())) }
+  | list_of_id_args ',' FESPACE3 '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,3> **>(),true)) }
+  | list_of_id_args ',' type_of_dcl id         { $$ = $1; $$->push_back(UnId($4,C_F0(),$3->right())) }
+  | list_of_id_args ',' type_of_dcl '&' id     { $$ = $1; $$->push_back(UnId($5,C_F0(),$3,true)) }
+  ;
 
 list_of_id1:  id                      { $$ = new ListOfId(); $$->push_back(UnId($1)); }
             | list_of_id1 ',' id      { $$=$1  ; $$->push_back(UnId($3)); }
 ;
    
-/*<<id>>*/
+/* <<id>> (anchor required because 'id:' is another type of hyperlink) */
       
 id: ID | FESPACE|FESPACE3|FESPACE1; 
 
-/* <<list_of_dcls>> */
-
-list_of_dcls:    ID                         {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
-              |  ID '='   no_comma_expr     {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
-              |  ID  '(' parameters_list ')' {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3);
-                                              $3.destroy()}
-              |  list_of_dcls ',' list_of_dcls  {$$=C_F0($1,$3)}
-                           
-              
+list_of_dcls:    ID                            {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
+              |  ID '='   no_comma_expr        {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
+              |  ID  '(' parameters_list ')'   {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3);
+                                                $3.destroy()}
+              |  list_of_dcls ',' list_of_dcls {$$=C_F0($1,$3)}
 ;
-
 
 parameters_list:
 	   no_set_expr {$$=$1} 
@@ -438,21 +431,17 @@ parameters_list:
 	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
 ; 
 
-/* <<type_of_dcl>> */
-
 type_of_dcl:   TYPE 
-             | TYPE '[' TYPE ']' {$$=TypeArray($1,$3)}
-             | TYPE '[' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
-             | TYPE '[' TYPE ',' TYPE ']' {$$=TypeArray($1,$3,$5)}
+             | TYPE '[' TYPE ']'                       {$$=TypeArray($1,$3)}
+             | TYPE '[' TYPE ']' '[' TYPE ']'          {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
+             | TYPE '[' TYPE ',' TYPE ']'              {$$=TypeArray($1,$3,$5)}
              | TYPE '[' TYPE ',' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3,$5),$8)}
-             | TYPE '<' TYPE '>' {$$=TypeTemplate($1,$3)}
-	     | TYPE '<' TYPE '>' '[' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6)}
-	     | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
+             | TYPE '<' TYPE '>'                       {$$=TypeTemplate($1,$3)}
+             | TYPE '<' TYPE '>' '[' TYPE ']'          {$$=TypeArray(TypeTemplate($1,$3),$6)}
+             | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
 			    
              
 ;
-
-/* <<ID_space>> */
 
 ID_space:
 ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
@@ -467,8 +456,6 @@ ID_array_space:
   |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
 
 ;
-
-/* <<fespace>> */
 
 fespace123: FESPACE { fespacedim=2} |FESPACE1 { fespacedim=1} | FESPACE3 { fespacedim=3};
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
@@ -487,8 +474,6 @@ spaceIDs :    fespace               spaceIDb    { $$=0;  $$ = $2}
            |  fespace '[' TYPE ']'  spaceIDa    { $$=0;  $$ = $5}
 ;
 
-/* <<fespace_def>> */
-
 fespace_def:
    ID '(' parameters_list ')'  {$$=currentblock->NewVar<LocalVariableFES,size_t>($1,typeFESpace($3),$3,dimFESpaceImage($3));
      $3.destroy(); };
@@ -497,8 +482,6 @@ fespace_def_list:  fespace_def
                  | fespace_def_list ',' fespace_def {$$=C_F0($1,$3)}
 ;
     
-/* <<declaration>> */
-
 declaration:   type_of_dcl {dcltype=$1} list_of_dcls ';' {$$=$3} /* see [[type_of_dcl]] [[list_of_dcls]] */
              | FESPACEID  fespace_def_list    ';' {$$=$2}  
              | spaceIDs ';'{ $$=$1} 
@@ -535,7 +518,6 @@ for_loop:  FOR {ffassert(inloopcount<sizeStackOfLoop);  // modif FH july 2005
                 StackOfLoop[inloopcount++]=currentblock;};
 while_loop:  WHILE {ffassert(inloopcount<sizeStackOfLoop);
                 StackOfLoop[inloopcount++]=currentblock;}; // modif FH july 2005
-                
 
 declaration_for: 
     type_of_dcl {dcltype=$1; Block::open(currentblock);  }
@@ -543,13 +525,12 @@ declaration_for:
 
 try: TRY { Block::open(currentblock) };
 
-/* <<instruction>> returns a [[YYSTYPE_cexp]] */
-
-instruction:   ';' {$$=0;} 
+instruction: /* returns a [[YYSTYPE_cexp]] */
+           ';' {$$=0;} 
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
          |  try  '{' instructions '}' catchs {$$=Try($3,$5,currentblock->close(currentblock));}
-         |  Expr ';' {$$=$1} /*[[Expr]]*/
+         |  Expr ';' {$$=$1} /*[[Expr:]]*/
          |  declaration  {$$=$1} /*[[declaration]]*/
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)} 
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
@@ -559,7 +540,7 @@ instruction:   ';' {$$=0;}
          |  while_loop '(' Expr ')' instruction {inloopcount--;$$=While($3,$5)}
          |  IF '(' Expr ')'   instruction  {$$=FIf($3,$5)}
          |  IF '(' Expr ')'   instruction  ELSE instruction {$$=FIf($3,$5,$7)}
-         |  begin  instructions end { 
+         |  begin  instructions end { /* [[begin:]] [[end:]] */
                       $$=C_F0(new E_block($2,$3),atype<void>()) }
          |  BORDER  ID   border_expr { /* <<BORDER_ID>> */
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$3))} 
@@ -578,8 +559,8 @@ instruction:   ';' {$$=0;}
                     if (kkembtype>=0)
                       $$= C_F0(new E_throw(E_exception::e_return,(rettype[kkembtype]->CastTo($2)).OnReturn()) ,atype<void>());
                      else lgerror(" return not in routine ") }
-
 ;
+
 catchs:  
   CATCH '(' '.' '.' '.'  ')' instruction {$$ =  $7; }
 ;
@@ -591,6 +572,7 @@ bornes: '(' ID '=' Expr ',' Expr ')' {
    $$+= $6;
    $$+= currentblock->NewVar<LocalVariable>("IndexBorder",atype<long*>());}
 ;
+
 bornes: '(' ID '=' Expr ',' Expr ';' ID ')' {
     Block::open(currentblock);
     $$ = currentblock->NewVar<LocalVariable>($2,atype<double*>());
@@ -599,129 +581,102 @@ bornes: '(' ID '=' Expr ',' Expr ';' ID ')' {
     $$+= currentblock->NewVar<LocalVariable>($8,atype<long*>());}
 ;
 
-/* <<border_expr>> */
-
 border_expr:   bornes instruction {   
    $$ = ($1 += $2);
    currentblock->close(currentblock)} 
  ;
 
-/*<<Expr>>*/
-
 Expr:	 
-         no_comma_expr /*[[no_comma_expr]]*/
-       | Expr ',' Expr {$$=C_F0(TheOperators,$2,$1,$3);}
-;
+    no_comma_expr /*[[no_comma_expr:]]*/
+  | Expr ',' Expr {$$=C_F0(TheOperators,$2,$1,$3);}
+  ;
 
-/*<<unop>>*/
-	
 unop:
-	  '-' 
-	| '+' 
-	| '!' 
-	| PLUSPLUS 
-	| MOINSMOINS 
-;
-
-/*<<no_comma_expr>>*/
+    '-' 
+  | '+' 
+  | '!' 
+  | PLUSPLUS 
+  | MOINSMOINS 
+  ;
 
 no_comma_expr:
-      no_set_expr /*[[no_set_expr]]*/
-	| no_set_expr '=' no_comma_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_set_expr PLUSEQ no_comma_expr {$$=C_F0(TheOperators,"+=",$1,$3)}
-	| no_set_expr MOINSEQ no_comma_expr {$$=C_F0(TheOperators,"-=",$1,$3)}
-	| no_set_expr MULEQ no_comma_expr {$$=C_F0(TheOperators,"*=",$1,$3)}
-	| no_set_expr DIVEQ no_comma_expr {$$=C_F0(TheOperators,"/=",$1,$3)}
-	| no_set_expr DOTMULEQ no_comma_expr {$$=C_F0(TheOperators,".*=",$1,$3)}
-	| no_set_expr DOTDIVEQ no_comma_expr {$$=C_F0(TheOperators,"./=",$1,$3)}
-;
-
-/*<<no_set_expr>>*/
+    no_set_expr /*[[no_set_expr:]]*/
+  | no_set_expr '=' no_comma_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_set_expr PLUSEQ no_comma_expr   {$$=C_F0(TheOperators,"+=",$1,$3)}
+  | no_set_expr MOINSEQ no_comma_expr  {$$=C_F0(TheOperators,"-=",$1,$3)}
+  | no_set_expr MULEQ no_comma_expr    {$$=C_F0(TheOperators,"*=",$1,$3)}
+  | no_set_expr DIVEQ no_comma_expr    {$$=C_F0(TheOperators,"/=",$1,$3)}
+  | no_set_expr DOTMULEQ no_comma_expr {$$=C_F0(TheOperators,".*=",$1,$3)}
+  | no_set_expr DOTDIVEQ no_comma_expr {$$=C_F0(TheOperators,"./=",$1,$3)}
+  ;
 
 no_set_expr:
-	no_ternary_expr /*[[no_ternary_expr]]*/
-	| no_ternary_expr '?' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
-        | no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"::",$1,$3)}
-	| no_ternary_expr ':' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"::",$1,$3,$5)} 	
-;
+	no_ternary_expr /*[[no_ternary_expr:]]*/
+  | no_ternary_expr '?' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"?:",$1,$3,$5)}
+  | no_ternary_expr ':' no_ternary_expr                     {$$=C_F0(TheOperators,"::",$1,$3)}
+  | no_ternary_expr ':' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,"::",$1,$3,$5)} 	
+  ;
 
-/*<<no_ternary_expr>> gives a [[YYSTYPE_cexp]] */
-
-no_ternary_expr:
-	  unary_expr /*[[unary_expr]]*/
-	| no_ternary_expr '*' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr DOTSTAR no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr DOTSLASH no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '/' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '%' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '+' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '-' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr LTLT no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr GTGT no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '&' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr AND no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '|' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr OR no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '<' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr LE no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr '>' no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr GE no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr EQ no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	| no_ternary_expr NE no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
-	
-;
-
-/*<<sub_script_expr>>*/
+no_ternary_expr: /* returns a [[YYSTYPE_cexp]] */
+    unary_expr /*[[unary_expr:]]*/
+  | no_ternary_expr '*' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr DOTSTAR no_ternary_expr  {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr DOTSLASH no_ternary_expr {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '/' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '%' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '+' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '-' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr LTLT no_ternary_expr     {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr GTGT no_ternary_expr     {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '&' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr AND no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '|' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr OR no_ternary_expr       {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '<' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr LE no_ternary_expr       {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr '>' no_ternary_expr      {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr GE no_ternary_expr       {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr EQ no_ternary_expr       {$$=C_F0(TheOperators,$2,$1,$3)}
+  | no_ternary_expr NE no_ternary_expr       {$$=C_F0(TheOperators,$2,$1,$3)}
+  ;
 
 sub_script_expr:  
-	    no_ternary_expr {$$=$1} 
-    |   ':' {$$=C_F0(TheOperators,":")}			    
-    |   no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,":",$1,$3)}
+	    no_ternary_expr /*[[no_ternary_expr:]]*/                {$$=$1} 
+    |   ':'                                                     {$$=C_F0(TheOperators,":")}			    
+    |   no_ternary_expr ':' no_ternary_expr                     {$$=C_F0(TheOperators,":",$1,$3)}
     |   no_ternary_expr ':' no_ternary_expr ':' no_ternary_expr {$$=C_F0(TheOperators,":",$1,$3,$5)} 
-
 ;
   
-/*<<parameters>>*/
+parameters:                                                           {$$ = 0} 
+  | FESPACE                                                           {$$ = Find($1)} /*[[file:../fflib/AFunction2.cpp::Find]]*/
+  | FESPACE1                                                          {$$ = Find($1)} 
+  | FESPACE3                                                          {$$ = Find($1)} 
+  | id /*[[id]]*/ '=' no_set_expr /*[[no_set_expr:]]*/                {$$ = make_pair<const char *,const C_F0>($1,$3)}
+  | sub_script_expr /*[[sub_script_expr:]]*/                          {$$ = $1}
+  | parameters ',' FESPACE                                            {$$ = ($1 += Find($3)) }
+  | parameters ',' FESPACE1                                           {$$ = ($1 += Find($3)) }
+  | parameters ',' FESPACE3                                           {$$ = ($1 += Find($3)) }
+  | parameters ',' sub_script_expr /*[[sub_script_expr:]]*/           {$$ = ($1 += $3) }
+  | parameters ',' id /*[[id]]*/ '=' no_set_expr /*[[no_set_expr:]]*/ {$$ = ($1+= make_pair<const char *,const C_F0>($3,$5)) }
+  ; 
 
-parameters:  {$$=0} 
-	|   FESPACE {$$=Find($1)} /*[[file:../fflib/AFunction2.cpp::Find]]*/
-	|   FESPACE1 {$$=Find($1)} 
-	|   FESPACE3 {$$=Find($1)} 
-
-    /* cf [[id]] [[no_set_expr]] */
-	|  id '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)}
-
-	|   sub_script_expr {$$=$1} /*[[sub_script_expr]]*/
-	| parameters ',' FESPACE { $$ = ($1 += Find($3)) }
-	| parameters ',' FESPACE1 { $$ = ($1 += Find($3)) }
-	| parameters ',' FESPACE3 { $$ = ($1 += Find($3)) }
-	| parameters ',' sub_script_expr { $$ = ($1 += $3) } /*[[sub_script_expr]]*/
-
-    /* cf [[id]] [[no_set_expr]] */
-	| parameters ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5)) }
-; 
-
-array:   no_comma_expr {$$=$1} 
-       | array ',' no_comma_expr {$$ = ($1 += $3) };
+array:   no_comma_expr           {$$=$1} 
+       | array ',' no_comma_expr {$$ = ($1 += $3) }
+  ;
      
-/* <<unary_expr>> returns a [[YYSTYPE_cexp]] */
-    
-unary_expr:
-    pow_expr /*[[pow_expr]]*/
-  | unop  pow_expr %prec UNARY {$$=C_F0(TheOperators,$1,$2)} /*[[unop]] [[pow_expr]]*/
-;   
+unary_expr: /* returns a [[YYSTYPE_cexp]] */
+    pow_expr /*[[pow_expr:]]*/
+  | unop /*[[unop:]]*/ pow_expr %prec UNARY {$$=C_F0(TheOperators,$1,$2)}
+  ;   
 
-/* <<pow_expr>> returns a [[YYSTYPE_cexp]] */
-
-pow_expr: primary /*[[primary]]*/
-  |      primary  '^' unary_expr   {$$=C_F0(TheOperators,$2,$1,$3)} 
-  |      primary  '_' unary_expr   {$$=C_F0(TheOperators,$2,$1,$3)} 
+pow_expr: /* returns a [[YYSTYPE_cexp]] */
+         primary /*[[primary:]]*/
+  |      primary '^'  unary_expr   {$$=C_F0(TheOperators,$2,$1,$3)} 
+  |      primary '_'  unary_expr   {$$=C_F0(TheOperators,$2,$1,$3)} 
   |      primary '\''              {$$=C_F0(TheOperators,$2,$1)} 
-;
+  ;
 
-/* <<primary>> returns a [[YYSTYPE_cexp]] */
-
-primary:  
+primary: /* returns a [[YYSTYPE_cexp]] */
 
             /* <<primary_ID>> calls [[file:../fflib/AFunction2.cpp::Find]]
                returns [[file:../fflib/AFunction.hpp::C_F0]] */
@@ -735,10 +690,10 @@ primary:
   |        CNUM         {$$= CConstant(complex<double>(0,$1))}
   |        STRING {$$= CConstant<const char *>($1)}
 
-           /* <<primary_brackets_parameters>> refers to [[parameters]] and creates an object of class
+           /* <<primary_brackets_parameters>> refers to [[parameters:]] and creates an object of class
               [[file:../fflib/AFunction.hpp::C_F0]] */
 
-  |        primary '('  parameters ')'  {$$=C_F0($1,$2,$3);}
+  |        primary '('  parameters /*[[parameters:]]*/ ')'  {$$=C_F0($1,$2,$3);}
 
   |        primary '[' sub_script_expr ']'    {$$=C_F0($1,$2,$3)}
   |        primary '[' sub_script_expr ',' sub_script_expr ']'  {$$=C_F0($1,$2,$3,$5)}
