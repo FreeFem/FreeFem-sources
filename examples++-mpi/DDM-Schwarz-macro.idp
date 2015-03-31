@@ -113,15 +113,16 @@ macro BuildPartitioning(sizeoverlaps,mesh,Thg,Thi,aThij,RAS,pii,jpart,comm,vdebu
 
 int[int] jpart(mpiSize(comm)); /*  list of jpart */
 mesh[int] aThij(1); 
-mesh Thi;
+mesh Thi,Thii;
 Thi=Thg;
+Thii=Thg;
 fespace Vhi(Thi,P1); /**/
 Vhi pii;  
 
 {
  int npart = mpiSize(comm);
- fespace Phg(Thg,P0);
- fespace Vhg(Thg,P1);
+ fespace Phg(Thii,P0);
+ fespace Vhg(Thii,P1);
 
   int njpart=0;
   int ipart= mpiRank(comm);
@@ -135,14 +136,11 @@ Phg  part;
 mesh Thin;
 /* build the partitioning ...  */
 {    
- int[int] nupart(Thg.nt);
- nupart=0; 
+ part=0; 
  if(npart>1 && ipart==0)
-   metisdual(nupart,Thg,npart); 
+   metisdual(part[],Thg,npart); 
    
- broadcast(processor(0,comm),nupart);
- for(int i=0;i<nupart.n;++i)
-    part[][i]=nupart[i];
+ broadcast(processor(0,comm),part[]);
   
 } /* build ...  */
 
@@ -151,16 +149,27 @@ if(vdebug>10&& mpirank==0 && !NoGraphicWindow)
   plot(part,fill=1,cmm="dual",wait=1);
 
 /* overlapping partition  */
-
+Vhi unssd; 
+int nnn = sizeoverlaps*2;/* to be sure exact in thii */
+ 
+{
+ int[int] n2o(1);
  Phg suppi= abs(part-ipart)<0.1; 
- Vhg unssd;                       /* boolean function 1 in the subdomain 0 elswhere  */
+                      /* boolean function 1 in the subdomain 0 elswhere  */
  Thin=trunc(Thg,suppi>0,label=10); /* non-overlapping mesh, interfaces have label 10 */
- int nnn = sizeoverlaps*2;/* to be sure  */
  AddLayers(Thg,suppi[],nnn,unssd[]);    /* see above ! suppi and unssd are modified   */
  unssd[] *= nnn;  /*  to put value nnn a 0   */
+ /*   build a local mesh of thii such that all compuation of the unit partition are  */
+ /*   exact in thii  */
+ Thii=trunc(Thg,unssd> 0.001 ,label=10,new2old=n2o); /* overlapping mesh, interfaces have label 10  */
+ unssd= unssd;/* put on Thii*/
+ real[int] p=part[];
+ part=0.; part[]=p(n2o);  
+
  real nnn0 = nnn - sizeoverlaps +  0.001   ;
- Thi=trunc(Thg,unssd>nnn0 ,label=10); /* overlapping mesh, interfaces have label 10 */
- 
+ Thi=trunc(Thii,unssd>nnn0 ,label=10); /* overlapping mesh, interfaces have label 10 */
+
+}
  settt 
 
 
@@ -168,7 +177,7 @@ if(vdebug>10&& mpirank==0 && !NoGraphicWindow)
  Vhi[int] pij(npij);/* local partition of unit + pii  */
  
  
- real nnn1=  + 0.001  ;
+
  { /*
    construction of the partition of the unit,
     let phi_i P1 FE function 1 on Thin and zero ouside of Thi and positive
@@ -179,10 +188,7 @@ if(vdebug>10&& mpirank==0 && !NoGraphicWindow)
     we nned to find all j such that supp(phi_j) \cap supp(phi_j) is not empty
     <=> int phi_j
  */
- /*   build a local mesh of thii such that all compuation of the unit partition are  */
- /*   exact in thii  */
- mesh Thii=trunc(Thg,unssd>nnn1 ,label=10); /* overlapping mesh, interfaces have label 10  */
-
+ 
 
  {  
    /* find all j  mes (supp(p_j) \cap supp(p_i)) >0   */

@@ -21,12 +21,12 @@ catch(...)
     cout << " voltet = " << voltet << endl;
     real[int] domaine = [0,0,0,1,voltet,0,0,0.7,2,voltet];
     
-    mesh3 Th = tetg(ThHS,switch="pqaAYY",nbofregions=2,regionlist=domaine);    
+    Th = tetg(ThHS,switch="pqaAYY",nbofregions=2,regionlist=domaine);    
     // Tetrahelize the interior of the cube with tetgen
     medit("tetg",Th,wait=1);
     savemesh(Th,"Th-hex-sph.mesh");
     // FFCS: testing 3d plots
-    plot(Th);
+    plot(Th,wait=1);
  }
 
 

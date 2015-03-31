@@ -1,5 +1,10 @@
-@  changeset:   3289:e6ce11b08c23
+@  changeset:   3290:80a5375efef5
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 27 23:52:19 2015 +0100
+|  summary:     add tools to bound aniso in metrix
+|
+o  changeset:   3289:e6ce11b08c23
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Mar 27 16:23:00 2015 +0100
 |  summary:     correct header of ps file ????
