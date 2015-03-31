@@ -1,5 +1,10 @@
-@  changeset:   3290:80a5375efef5
+@  changeset:   3291:1a62057e90df
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Mar 31 10:06:14 2015 +0200
+|  summary:     coorect un set mesh in Period-Poisson-cube-ballon.edp
+|
+o  changeset:   3290:80a5375efef5
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Mar 27 23:52:19 2015 +0100
 |  summary:     add tools to bound aniso in metrix
