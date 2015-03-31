@@ -1,3 +1,4 @@
+ - correct configire and makefile for windows compilation process
 version 3.36 
  - add tools to remove  (now build in)
    utility.dylib removeDOF.dylib  symmetrizeCSR.dylib 

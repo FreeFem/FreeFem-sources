@@ -163,6 +163,7 @@ void initArrayOperatorlong()
     Add<KN<K> *>("imax",".",new OneOperator1<long,KN<K> *>(get_imax));
     // madd FH. march 2015 ...
     Global.Add("Unique", "(", new OneOperator2_<long, KN<K>*, KN<K>*>(Unique));
+    Global.Add("Unique", "(", new OneOperator2_<long, KN<K>*, KN<double>*>(Unique));
     // convertion double -> long (via lround)
     Dcl_Type<F_KN_<K,K,double> >();
     Global.Add("lround","(",new OneOperator1F_KN_<F_KN_<K,K,double>,K,double,KN_<double> >(lround));

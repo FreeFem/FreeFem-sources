@@ -54,8 +54,7 @@ FAIRE: $(SRCDIR)/FAIT
 	touch FAIRE
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
-	case `uname` in *CYGWIN*)  cp Makefile.inc Makefile.inn; sed "s/COPTIONS =/COPTIONS = -D__VC__/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
-	case `uname` in *CYGWIN*|*MINGW*)  cp Makefile.inc Makefile.inn; sed -e "s/-DCOMMON_TIMING_OLD/-Du_int32_t='unsigned int'/" -e "s/-DCOMMON_RANDOM_FIXED_SEED/-DCOMMON_RANDOM_RAND  -DCOMMON_RANDOM_FIXED_SEED -D'pipe(pfds)=_pipe(pfds,1024,0x8000)'/" <Makefile.inn > Makefile.inc; rm Makefile.inn ;; esac 
+
 # DCOMMON_TIMING_OLD
 # FFCS - 16/1/13 - what was "$(CCP)" used for?
 $(SRCDIR)/FAIT: $(SRCDIR) Makefile.inc
@@ -85,6 +84,7 @@ WHERE:$(SRCDIR)/FAIT
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	patch -p1 <scotch_6.0.3.patch
 	#cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
 	#cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)

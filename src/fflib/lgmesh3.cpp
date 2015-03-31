@@ -28,6 +28,7 @@
 
 #include "ff++.hpp"
 #include "array_resize.hpp"
+#include "AFunction_ext.hpp"
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
 
@@ -1440,7 +1441,7 @@ void init_lgmesh3() {
  atype<pf3rbase>()->AddCast(  new E_F1_funcT<pf3rbase,pf3rbase>(UnRef<pf3rbase>));
  atype<pf3cbase>()->AddCast(  new E_F1_funcT<pf3cbase,pf3cbase>(UnRef<pf3cbase>));
  
- Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
+  Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
  Add<pf3c>("[]",".",new OneOperator1<KN<Complex> *,pf3c>(pf3r2vect<Complex,v_fes3>));
  Add<pf3r>("(","",new OneQuadOperator<Op4_pf32K<R,v_fes3>,Op4_pf32K<R,v_fes3>::Op> );
  Add<pf3c>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fes3>,Op4_pf32K<Complex,v_fes3>::Op> );
