@@ -36,16 +36,30 @@ LIBS_FFmpi = ../mpi/ffapi.o libff.dll
 all-local: $(WIN32DLLTARGET) 
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
+
+# FFCS does not need most Windows executables since it compiles
+# executables in ffcs/src and ffcs/pack. But still keep one executable
+# to make sure that the whole process works and that libff.dll is
+# correctly built.
+
+if ENABLE_FFCS
+win32-dll-target: FreeFem++.exe ff-c++
+	echo "on a fini"
+else
 win32-dll-target: FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  launchff++.exe ff-c++ $(MPIPROG)
 	echo "on a fini"
+endif
 
 libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o	
 	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
 
-
 FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
-FreeFem++.exe: ../nw/sansrgraph.o    ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+
+# ALH - 28/7/14 - the new automake default is to place the objects in
+# the same directory as the corresponding source file
+
+FreeFem++.exe: ../Graphics/*.o    ../mpi/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
 ## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll  ( J'ai compris)
@@ -71,16 +85,6 @@ install-exec-local--win32-dll-target::
 	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe  bamg.exe cvmsh2.exe  ff-c++ $(MPIPROG) $(DESTDIR)${bindir} 
 	$(INSTALL_SCRIPT) *.dll   $(DESTDIR)${bindir} 
 install-exec-local--::
-
-
-# FFCS: create a separate DLL for ffapi so that it can be changed when running FreeFem++ or FFCS
-# NO dll not all function of ffapi are callback def in ffapi::init()
-# and alloctae in gggg.cpp and Global.cpp 
-#FreeFem++-api.dll:../nw/ffapi.o
-#	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@
-# FF mpi : create a separate DLL for ffapi so that it can be changed when running FreeFem++ or FreeFem++-mpi
-#FreeFem++-mpi-api.dll:../mpi/ffapi.o
-#	$(CXX) $(GCCNOCYGWIN) -shared -Wl,--enable-auto-import $< -o $@ $(MPI_LIB)
 
 # FFCS: automake does not clean the exes automatically because they are not built automatically.
 clean-local::

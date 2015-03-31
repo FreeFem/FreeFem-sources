@@ -2453,8 +2453,9 @@ public:
   // see [[Plot_name_param]]
   static basicAC_F0::name_and_type name_param[] ;
 
-  /// FFCS: added new parameters for VTK graphics. See [[Plot_name_param]] for new parameter names
-  static const int n_name_param=42;
+  /// <<number_of_distinct_named_parameters_for_plot>> FFCS: added new parameters for VTK graphics. See
+  /// [[Plot_name_param]] for new parameter names
+  static const int n_name_param=43;
 
   Expression bb[4];
 
@@ -2652,7 +2653,7 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"CutPlaneNormal",&typeid(KN_<double>)}, // #19
   {"WindowIndex",&typeid(long)}, // #20
   {"NbColorTicks",&typeid(long)}, // #21
-
+  {"NbColors",&typeid(long)} // #22
 };
 
 
@@ -3483,7 +3484,11 @@ AnyType Plot::operator()(Stack s) const{
 	if (nargs[20]) (theplot<< 20L)  <= (echelle=GetAny<double>((*nargs[20])(s)));
 
 	// FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
-	// FF parameters above changes) received in [[file:../../../../src/visudata.cpp::receiving_plot_parameters]]
+	// FF parameters above changes) received in [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]]. When
+	// adding a parameter here, do _NOT_ forget to change the size of the array at
+	// [[number_of_distinct_named_parameters_for_plot]] and to name the new parameters at [[Plot_name_param]]. Also
+	// update the list of displayed values at [[file:../ffcs/src/plot.cpp::Plotparam_listvalues]] and read the
+	// parameter value from the pipe at [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]].
 
 #define VTK_START 20
 #define SEND_VTK_PARAM(index,type)					\
@@ -3512,6 +3517,7 @@ AnyType Plot::operator()(Stack s) const{
 	SEND_VTK_PARAM(19,KN_<double>); // CutPlaneNormal
 	SEND_VTK_PARAM(20,long); // WindowIndex
 	SEND_VTK_PARAM(21,long); // NbColorTicks
+	SEND_VTK_PARAM(22,long); // NbColors
 
 	theplot.SendEndArgPlot();
 	map<const Mesh *,long> mapth;
@@ -3863,11 +3869,17 @@ AnyType Plot::operator()(Stack s) const{
   bool ops=psfile;
   bool drawmeshes=false;
   if ( clean ) {
-    reffecran(); 
 
+    // ALH - 28/3/15 - Open PS file before blanking the current picture because Javascript needs to know any "ps="
+    // parameter to send the graphical commands to the right canvas.
+    
     if (psfile) {
+      // [[file:../Graphics/sansrgraph.cpp::openPS]]
       openPS(psfile->c_str());
     }
+
+    reffecran(); 
+
     if (bw) NoirEtBlanc(1);
     R2 Pmin,Pmax;
     R2 uminmax(1e100,-1e100);
