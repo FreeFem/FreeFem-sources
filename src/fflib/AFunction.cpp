@@ -1624,34 +1624,53 @@ typedef MyMap<String,String> MyMapSS;
  } 
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
 
-C_F0  opVI::code2(const basicAC_F0 &args) const      
+C_F0  opVI::code2(const basicAC_F0 &args) const
 {
     Expression p=args[1];
-    if ( ! p->EvaluableWithOutStack() ) 
-    { 
-	bool bb=p->EvaluableWithOutStack();
-	//cout << bb << " " <<  * p <<  endl;
-	CompileError(" [...][p], The p must be a constant , sorry");}
-        long pv = GetAny<long>((*p)(NullStack));
+    if ( ! p->EvaluableWithOutStack() )
+    {
+        bool bb=p->EvaluableWithOutStack();
+        //cout << bb << " " <<  * p <<  endl;
+        CompileError(" [...][p], The p must be a constant , sorry");
+    }
+    int pv = GetAny<long>((*p)(NullStack));
     bool ta =args[0].left()==atype<TransE_Array>();
     const TransE_Array * tea=0;
     const E_Array * ea=0;
-	if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+    if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     assert( ea || tea );
     const E_Array & a=  ta ? *tea->v : *ea;
-   // cout << " pv =" << pv << " size = "<< a.size() << endl;
-    if(!(pv >=0 && pv <a.size()))
-    {
-      cerr << "\n\nerror [ ... ][" << pv <<" ] " << " the  size of [ ...]  is "<< a.size() << endl;
-      lgerror(" bound of  [ .., .. , ..][ . ] operation  ");
-    }
+    // cout << " pv =" << pv << " size = "<< a.size() << endl;
     
     //ffassert(pv >=0 && pv <a.size());
+    if(tea){
+        AC_F0  v  ;
+        for (int i=0;i<a.size();++i)
+        {
+            const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
+            ffassert(li && (li->size() >pv));
+            
+            const C_F0 vi = TryConj( (*li)[pv]);
+            if(i==0) v=vi;
+            else v+= vi;
+            
+        }
+        
+        return C_F0(TheOperators,"[]",v);
+        
+    }
+    
+    if(!(pv >=0 && pv <a.size()))
+    {
+        cerr << "\n\nerror [ ... ][" << pv <<" ] " << " the  size of [ ...]  is "<< a.size() << endl;
+        lgerror(" bound of  [ .., .. , ..][ . ] operation  ");
+    }
+    
     return (* a.v)[pv];
 }
 
-C_F0  opDot::code2(const basicAC_F0 &args) const      
+C_F0  opDot::code2(const basicAC_F0 &args) const
 {
     bool ta =args[0].left()==atype<TransE_Array>();
     bool tb = args[1].left()==atype<TransE_Array>();
