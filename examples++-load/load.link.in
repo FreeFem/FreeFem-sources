@@ -210,7 +210,7 @@ case "$WIN32$uu" in
         echo " Window without cygwin "
 	WMPI_LIB=''
         b="$bin"
-        LIBS=" '$b/libff.dll' '$b/FreeFem++-api.dll' $LIBS $DLL"
+        LIBS=" '$b/libff.dll'  $LIBS $DLL"
 
 	# FFCS - 17/10/12 - --unresolved-symbols=ignore-all is not understood by the current mingw64 compilers
         SHARED="-shared -Wl,--enable-auto-import"

@@ -45,7 +45,7 @@ EXTRA_DIST= \
 ./mumps/Makefile-mumps-5.0.0.inc \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/makefile \
-./parmetis/parmetis-3.1.1.patch \
+./parmetis/parmetis-4.0.3.patch \
 ./parms/Makefile \
 ./parms/makefile-parms.in \
 ./pastix/Makefile \
@@ -59,7 +59,7 @@ EXTRA_DIST= \
 ./scotch/Makefile \
 ./scotch/Makefile-scotch.inc \
 ./scotch/Makefile.patch \
-./scotch/scotch_5.1_esmumps.patch \
+./scotch/scotch_6.0.3.patch \
 ./superlu/Makefile \
 ./superlu/make.inc \
 ./superludist/Makefile \

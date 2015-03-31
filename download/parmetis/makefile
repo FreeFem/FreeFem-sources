@@ -36,11 +36,12 @@ FAIRE: $(SRCDIR)/FAIT
 	$(MAKE) WHERE
 	touch FAIRE
 
-
+METISCFLAGS=$(FLAGS_REGEX_H) $(CFLAGS)  -I../GKlib -I../include  -I. -D__thread= 
+PMETISCFLAGS=$(MPI_INCLUDE) $(FLAGS_REGEX_H) $(CFLAGS)  -I../metis/GKlib -I../metis/include   -I../include -I. -D__thread= 
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
-	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -D__thread='
-	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS -D__thread='
-	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) 'CC=$(CC)' CFLAGS='$(MPI_INCLUDE) $(CFLAGS)  -I../metis/GKlib   -I. -I../metis/include  -I../include  -I. -D__thread='
+	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) "CC=$(CC)" "CFLAGS=$(METISCFLAGS)"
+	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) "CC=$(CC)" CFLAGS="$(METISCFLAGS) -Dmetis_EXPORTS"
+	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) "CC=$(CC)" "CFLAGS=$(PMETISCFLAGS)"
 	-mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
 	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
@@ -80,6 +81,7 @@ debug.o		initmsection.o	mmetis.o		remap.o		util.o
 # FFCS: patch is necessary for metis 4.0, but not for 4.0.3
 $(SRCDIR)/tags: $(PACKAGE)
 	tar xvzf $(PACKAGE)
+	patch -p1  <parmetis-4.0.3.patch
 	touch $(SRCDIR)/tags
 
 
@@ -122,7 +124,6 @@ Makefile.in: ../../config.status Makefile-parmetis.in
 
 $(SRCDIR)/tags-old: $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	patch -p1  <parmetis-4.0.3.patch
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = .*$$;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \
