@@ -31,7 +31,7 @@
 # $2=local name
 # $3=BAD_CERT if the SSL certificate of the web server is wrong
 
-if test -x /usr/bin/wget || test -x /opt/local/bin/wget
+if test -x /usr/bin/wget || test -x /usr/bin/wget.exe || test -x /opt/local/bin/wget
 then
 
     opts=
@@ -64,12 +64,12 @@ if test "$ret" -eq 0
 then
   case `file $2` in
   *zip*) exit 0 ;;
-  *) echo " incorrect file type => remove " $3;
-     rm $3; 
+  *) echo " incorrect file type => removing " $2;
+     rm $2; 
     exit  1 ;;
   esac    
 fi
-echo "Error download $3" ;
+echo "Error download $2"
 exit $ret
 
 # Local Variables:
