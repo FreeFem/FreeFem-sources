@@ -429,19 +429,17 @@ parameters_list:
 	|  ID '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
 	| parameters_list ',' no_set_expr { $$ = ($1 += $3) }
 	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
-; 
+    ; 
 
 type_of_dcl:   TYPE 
-             | TYPE '[' TYPE ']'                       {$$=TypeArray($1,$3)}
-             | TYPE '[' TYPE ']' '[' TYPE ']'          {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
-             | TYPE '[' TYPE ',' TYPE ']'              {$$=TypeArray($1,$3,$5)}
-             | TYPE '[' TYPE ',' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3,$5),$8)}
-             | TYPE '<' TYPE '>'                       {$$=TypeTemplate($1,$3)}
-             | TYPE '<' TYPE '>' '[' TYPE ']'          {$$=TypeArray(TypeTemplate($1,$3),$6)}
-             | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
-			    
-             
-;
+    | TYPE '[' TYPE ']'                       {$$=TypeArray($1,$3)}
+    | TYPE '[' TYPE ']' '[' TYPE ']'          {$$=TypeArray(TypeArray($1,$3),$6)} // Add FH mars 2012 
+    | TYPE '[' TYPE ',' TYPE ']'              {$$=TypeArray($1,$3,$5)}
+    | TYPE '[' TYPE ',' TYPE ']' '[' TYPE ']' {$$=TypeArray(TypeArray($1,$3,$5),$8)}
+    | TYPE '<' TYPE '>'                       {$$=TypeTemplate($1,$3)}
+    | TYPE '<' TYPE '>' '[' TYPE ']'          {$$=TypeArray(TypeTemplate($1,$3),$6)}
+    | TYPE '<' TYPE '>' '[' TYPE ',' TYPE ']' {$$=TypeArray(TypeTemplate($1,$3),$6,$8)}
+    ;
 
 ID_space:
 ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
