@@ -139,15 +139,11 @@ pkgcompile::@COMPILE_OPENBLAS@
 generic:
 openblas:links.done
 
-# links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
-if FFCS_WINDOWS
+# The library has a complex name with version number, just copy it into a standard location
+
 links.done:openblas.done
-	cd OpenBLAS && ../../../build/links2files
+	cp OpenBLAS/libopenblas*.a ../lib/libopenblas.a
 	touch $@
-else
-links.done:openblas.done
-	touch $@
-endif
 
 openblas.done:openpatches.done
 #
