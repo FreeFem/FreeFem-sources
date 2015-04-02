@@ -1,0 +1,588 @@
+//  See comment on  documentation chapter 9, 
+//   section:  Compressible Neo-Hookean Materials: Computational So- 
+//    lutions
+// -----------  Author  Alex Sadovsky (mail:sashas@gmail.com)
+// ================================================================
+//  non linear elasticity model: a neo-Hookean material of the
+//  Simo-Pister type, with the strain energy density function given
+//  by:
+//
+//  W = (mu / 2) * ( I1 - tr(I1) - 2 ln(J) ), where we have used 
+//  the notation
+//  F = deformation gradient,
+//  J = det(F),
+//  C = F^T F,
+//  I1 = tr(C),
+//  I = the identity tensor of rank 2
+//  For details, see formula (12) in the following paper:
+//  ====================================================================
+//  Horgan, C; Saccomandi, G;
+//  ``Constitutive Models for Compressible Nonlinearly Elastic
+//  Materials with Limiting Chain Extensibility,''
+//   Journal of Elasticity, Volume 77, Number 2, November 2004, pp. 123-138(16)
+//  ====================================================================
+//  For an exposition of nonlinear elasticity, see the book 
+//  "Nonlinear Elastic Deformations" by R. Ogden.  Other good sources 
+//  are A.J.M. Spencer's "Continuum Mechanics" and P. Chadwick's 
+//  book with the same title.  For the FEM formulation, see 
+//  Prof. Alan Bower's course notes, posted at:
+//  http://www.engin.brown.edu/courses/en222/Notes/FEMfinitestrain/FEMfinitestrain.htm
+//  
+//
+//  The domain of the following problem is a circular or 
+//  elliptical disc with a concentric elliptical hole.  Zero
+//  displacements are prescribed on the outer boundary; the 
+//  dead stress load Pa, on the inner boundary.
+
+//  ====================================================================
+
+
+
+//  Macros for the gradient of a vector field (u1, u2)
+macro grad11(u1, u2) (dx(u1)) //
+macro grad21(u1, u2) (dy(u1)) //
+macro grad12(u1, u2) (dx(u2)) //
+macro grad22(u1, u2) (dy(u2)) //
+
+//  Macros for the deformation gradient
+macro F11(u1, u2) (1.0 + grad11(u1,u2)) //
+macro F12(u1, u2) (0.0 + grad12(u1,u2)) //
+macro F21(u1, u2) (0.0 + grad21(u1,u2)) //
+macro F22(u1, u2) (1.0 + grad22(u1,u2)) //
+
+//  Macros for the incremental deformation gradient
+macro dF11(varu1, varu2) (grad11(varu1, varu2)) //
+macro dF12(varu1, varu2) (grad12(varu1, varu2)) //
+macro dF21(varu1, varu2) (grad21(varu1, varu2)) //
+macro dF22(varu1, varu2) (grad22(varu1, varu2)) //
+
+
+//  Macro for the determinant of the deformation gradient
+macro J(u1, u2) (
+F11(u1, u2)*F22(u1, u2) - F12(u1, u2)*F21(u1, u2)
+) //
+
+//  Macros for the inverse of the deformation gradient
+macro Finv11 (u1, u2) (
+F22(u1, u2) / J(u1, u2)
+) //
+macro Finv22 (u1, u2) (
+F11(u1, u2) / J(u1, u2)
+) //
+macro Finv12 (u1, u2) (
+-F12(u1, u2) / J(u1, u2)
+) //
+macro Finv21 (u1, u2) (
+-F21(u1, u2) / J(u1, u2)
+) //
+
+
+//  Macros for the square of the inverse of the deformation gradient
+macro FFinv11 (u1, u2) (
+Finv11(u1, u2)^2 + Finv12(u1, u2)*Finv21(u1, u2)
+) //
+
+macro FFinv12 (u1, u2) (
+Finv12(u1, u2)*(Finv11(u1, u2) + Finv22(u1, u2))
+) //
+
+macro FFinv21 (u1, u2) (
+Finv21(u1, u2)*(Finv11(u1, u2) + Finv22(u1, u2))
+) //
+
+macro FFinv22 (u1, u2) (
+Finv12(u1, u2)*Finv21(u1, u2) + Finv22(u1, u2)^2
+) //
+
+
+//  Macros for the inverse of the transpose of the deformation gradient
+macro FinvT11(u1, u2) (Finv11(u1, u2)) //
+macro FinvT12(u1, u2) (Finv21(u1, u2)) //
+macro FinvT21(u1, u2) (Finv12(u1, u2)) //
+macro FinvT22(u1, u2) (Finv22(u1, u2)) //
+
+
+
+
+//  The left Cauchy-Green strain tensor 
+macro B11(u1, u2)
+(
+F11(u1, u2)^2 + F12(u1, u2)^2
+)//
+
+macro B12(u1, u2)
+(
+F11(u1, u2)*F21(u1, u2) + F12(u1, u2)*F22(u1, u2)
+)//
+
+macro B21(u1, u2)
+(
+F11(u1, u2)*F21(u1, u2) + F12(u1, u2)*F22(u1, u2)
+)//
+
+macro B22(u1, u2)
+(
+F21(u1, u2)^2 + F22(u1, u2)^2
+)//
+
+
+
+//===========================================================================
+//  The macros for the auxiliary tensors (D0, D1, D2, ...): Begin
+
+
+////  The tensor quantity D0 = F_{n} (\delta F_{n+1})^T
+
+
+macro d0Aux11 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * F11(u1, u2) + dF12(varu1, varu2) * F12(u1, u2)
+)//
+
+macro d0Aux12 (u1, u2, varu1, varu2) 
+(
+dF21(varu1, varu2) * F11(u1, u2) + dF22(varu1, varu2) * F12(u1, u2)
+)//
+
+macro d0Aux21 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * F21(u1, u2) + dF12(varu1, varu2) * F22(u1, u2)
+)//
+
+macro d0Aux22 (u1, u2, varu1, varu2) 
+(
+dF21(varu1, varu2) * F21(u1, u2) + dF22(varu1, varu2) * F22(u1, u2)
+)//
+
+
+
+////  The tensor quantity D1 = D0 + D0^T
+macro d1Aux11 (u1, u2, varu1, varu2) 
+(
+2.0 * d0Aux11 (u1, u2, varu1, varu2) 
+)//
+
+macro d1Aux12 (u1, u2, varu1, varu2) 
+(
+d0Aux12 (u1, u2, varu1, varu2) + d0Aux21 (u1, u2, varu1, varu2) 
+)//
+
+macro d1Aux21 (u1, u2, varu1, varu2) 
+(
+d1Aux12 (u1, u2, varu1, varu2) 
+)//
+
+macro d1Aux22 (u1, u2, varu1, varu2) 
+(
+2.0 * d0Aux22 (u1, u2, varu1, varu2) 
+)//
+
+
+////  The tensor quantity D2 = F^{-T}_{n} dF_{n+1}
+macro d2Aux11 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * FinvT11(u1, u2) + dF21(varu1, varu2) * FinvT12(u1, u2)
+)//
+
+macro d2Aux12 (u1, u2, varu1, varu2) 
+(
+dF12(varu1, varu2) * FinvT11(u1, u2) + dF22(varu1, varu2) * FinvT12(u1, u2)
+)//
+
+macro d2Aux21 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * FinvT21(u1, u2) + dF21(varu1, varu2) * FinvT22(u1, u2)
+)//
+
+macro d2Aux22 (u1, u2, varu1, varu2) 
+(
+dF12(varu1, varu2) * FinvT21(u1, u2) + dF22(varu1, varu2) * FinvT22(u1, u2)
+)//
+
+
+
+
+
+
+
+////  The tensor quantity D3 = F^{-2}_{n} dF_{n+1}
+macro d3Aux11 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF11(varu1, varu2) *FFinv11(u1, u2) *grad11(w1, w2) + dF21(varu1, varu2) *FFinv12(u1, u2)
+*grad11(w1, w2) 
++ dF11(varu1, varu2) *FFinv21(u1, u2) *grad12(w1, w2) + dF21(varu1, varu2) *FFinv22(u1, u2) *grad12(w1, w2)
+)//
+
+macro d3Aux12 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF12(varu1, varu2) *FFinv11(u1, u2) *grad11(w1, w2) + dF22(varu1, varu2) *FFinv12(u1, u2)
+*grad11(w1, w2) 
++ dF12(varu1, varu2) *FFinv21(u1, u2) *grad12(w1, w2) + dF22(varu1, varu2) *FFinv22(u1, u2) *grad12(w1, w2)
+)//
+
+macro d3Aux21 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF11(varu1, varu2) *FFinv11(u1, u2) *grad21(w1, w2) + dF21(varu1, varu2) *FFinv12(u1, u2)
+*grad21(w1, w2) 
++ dF11(varu1, varu2) *FFinv21(u1, u2) *grad22(w1, w2) + dF21(varu1, varu2) *FFinv22(u1, u2) *grad22(w1, w2)
+)//
+
+macro d3Aux22 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF12(varu1, varu2) *FFinv11(u1, u2) *grad21(w1, w2) + dF22(varu1, varu2) *FFinv12(u1, u2)
+*grad21(w1, w2) 
++ dF12(varu1, varu2) *FFinv21(u1, u2) *grad22(w1, w2) + dF22(varu1, varu2) *FFinv22(u1, u2) *grad22(w1, w2)
+)//
+
+
+
+
+
+
+
+
+
+////  The tensor quantity D4 = (grad w) * Finv
+macro d4Aux11 (w1, w2, u1, u2) 
+(
+Finv11(u1, u2)*grad11(w1, w2) + Finv21(u1, u2)*grad12(w1, w2)
+)//
+
+macro d4Aux12 (w1, w2, u1, u2) 
+(
+Finv12(u1, u2)*grad11(w1, w2) + Finv22(u1, u2)*grad12(w1, w2)
+)//
+
+macro d4Aux21 (w1, w2, u1, u2) 
+(
+Finv11(u1, u2)*grad21(w1, w2) + Finv21(u1, u2)*grad22(w1, w2)
+)//
+
+macro d4Aux22 (w1, w2, u1, u2) 
+(
+Finv12(u1, u2)*grad21(w1, w2) + Finv22(u1, u2)*grad22(w1, w2)
+)//
+
+
+
+//  The macros for the auxiliary tensors (D0, D1, D2, ...): End
+//----------------------------------------------------------------------------
+
+//===========================================================================
+//  The macros for the various stress measures: BEGIN
+
+//  The Kirchhoff stress tensor
+macro StressK11(u1, u2)
+(
+mu * (B11(u1, u2) - 1.0)
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK12(u1, u2)
+(
+mu * B12(u1, u2) 
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK21(u1, u2)
+(
+mu * B21(u1, u2) 
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK22(u1, u2)
+(
+mu * (B22(u1, u2) - 1.0)
+)//
+
+
+
+//  The tangent Kirchhoff stress tensor
+macro TanK11(u1, u2, varu1, varu2)
+(
+mu * d1Aux11(u1, u2, varu1, varu2) 
+)//
+
+macro TanK12(u1, u2, varu1, varu2)
+(
+mu * d1Aux12(u1, u2, varu1, varu2) 
+)//
+
+macro TanK21(u1, u2, varu1, varu2)
+(
+mu * d1Aux21(u1, u2, varu1, varu2) 
+)//
+
+macro TanK22(u1, u2, varu1, varu2)
+(
+mu * d1Aux22(u1, u2, varu1, varu2) 
+)//
+
+
+
+//  The macros for the stress tensor components: END
+//----------------------------------------------------------------------------
+
+
+
+// END OF MACROS
+// ----------------------------------------------------------------------------
+
+
+
+
+
+// ************************************************
+// THE (BIO)MECHANICAL PARAMETERS: Begin
+
+//  Elastic coefficients
+real mu = 5.e2; //  kg/cm^2
+
+real D = 1.e3; //  (1 / compressibility)
+
+//  Stress loads
+real Pa = -3.e2;
+
+
+// THE (BIO)MECHANICAL PARAMETERS: End
+// ************************************************
+
+
+// ************************************************
+// THE COMPUTATIONAL PARAMETERS: Begin
+
+//  The wound radius
+real InnerRadius = 1.e0;
+
+//  The outer (truncated) radius
+real OuterRadius = 4.e0;
+
+//  Tolerance (L^2)
+real tol = 1.e-4;
+
+//  Extension of the inner ellipse ((major axis) - (minor axis))
+real InnerEllipseExtension = 1.e0;
+
+// THE COMPUTATIONAL PARAMETERS: End
+// ************************************************
+
+
+int m = 40, n = 20;
+
+border InnerEdge(t = 0, 2.0*pi) {x = (1.0 + InnerEllipseExtension) * InnerRadius * cos(t); y = InnerRadius * sin(t); label = 1;}
+
+border OuterEdge(t = 0, 2.0*pi) {x = (1.0 + 0.0 * InnerEllipseExtension) * OuterRadius * cos(t); y = OuterRadius * sin(t); label = 2;}
+
+mesh Th = buildmesh(InnerEdge(-m) + OuterEdge(n));
+
+int bottom=1, right=2,upper=3,left=4;
+
+plot(Th);
+
+fespace Wh(Th,P1dc);
+fespace Vh(Th,[P1,P1]);
+fespace Sh(Th,P1);
+
+
+Vh [w1, w2], [u1n,u2n], [varu1, varu2];
+
+varf vfMass1D(p,q) = int2d(Th)(p*q);
+matrix Mass1D = vfMass1D(Sh,Sh,solver=CG);
+
+Sh p, ppp;
+
+p[] = 1;
+ppp[] = Mass1D * p[];
+
+real DomainMass = ppp[].sum;
+
+cout << "****************************************" << endl;
+cout << "DomainMass = " << DomainMass << endl;
+cout << "****************************************" << endl;
+
+varf vmass([u1,u2],[v1,v2],solver=CG) 
+=  int2d(Th)( (u1*v1 + u2*v2) / DomainMass );
+
+matrix Mass = vmass(Vh,Vh);
+
+matrix Id = vmass(Vh,Vh);
+
+
+//  Define the standard Euclidean basis functions
+Vh [ehat1x, ehat1y], [ehat2x, ehat2y]; 
+[ehat1x, ehat1y] = [1.0, 0.0];
+[ehat2x, ehat2y] = [0.0, 1.0]; 
+
+
+// The individual elements of the total 1st Piola-Kirchoff stress
+Vh [auxVec1, auxVec2];
+
+// Sh Stress1PK11, Stress1PK12, Stress1PK21, Stress1PK22;
+
+Sh StrK11, StrK12, StrK21, StrK22;
+
+Vh [ef1, ef2];
+
+
+real ContParam, dContParam;
+
+
+problem 
+neoHookeanInc
+([varu1, varu2], [w1, w2], solver = LU)=
+
+int2d(Th, qforder=1)
+( // BILINEAR part
+
+-(
+  StressK11 (u1n, u2n) * d3Aux11(u1n, u2n, varu1, varu2, w1, w2) 
++ StressK12 (u1n, u2n) * d3Aux12(u1n, u2n, varu1, varu2, w1, w2) 
++ StressK21 (u1n, u2n) * d3Aux21(u1n, u2n, varu1, varu2, w1, w2) 
++ StressK22 (u1n, u2n) * d3Aux22(u1n, u2n, varu1, varu2, w1, w2) 
+)
+
++ TanK11 (u1n, u2n, varu1, varu2) * d4Aux11(w1, w2, u1n, u2n) 
++ TanK12 (u1n, u2n, varu1, varu2) * d4Aux12(w1, w2, u1n, u2n)
++ TanK21 (u1n, u2n, varu1, varu2) * d4Aux21(w1, w2, u1n, u2n) 
++ TanK22 (u1n, u2n, varu1, varu2) * d4Aux22(w1, w2, u1n, u2n) 
+
+)
+
++
+
+ int2d(Th, qforder=1)
+( // LINEAR part
+
+  StressK11 (u1n, u2n) * d4Aux11(w1, w2, u1n, u2n) 
++ StressK12 (u1n, u2n) * d4Aux12(w1, w2, u1n, u2n) 
++ StressK21 (u1n, u2n) * d4Aux21(w1, w2, u1n, u2n) 
++ StressK22 (u1n, u2n) * d4Aux22(w1, w2, u1n, u2n) 
+
+
+)
+
+//  Choose one of the following two boundary conditions involving Pa:
+
+// Load vectors normal to the boundary:
+ - int1d(Th,1)( Pa * (w1*N.x + w2*N.y) ) 
+
+//  Load vectors tangential to the boundary:
+// - int1d(Th,1)( Pa * (w1*N.y - w2*N.x) ) 
+
+   + on(2, varu1 = 0, varu2 = 0);
+;
+
+
+
+// The Lagrange-Green strain tensor,  E = (1/2)(C - I)
+// Wh E111, E12, E121, E12;
+
+
+//  Auxiliary variables
+matrix auxMat;
+
+
+// Newton's method
+// ---------------
+Sh u1,u2;
+
+
+ContParam = 0.0;
+dContParam = 0.01;
+
+//  Initialization:
+[varu1,varu2] = [0.0, 0.0]; 
+
+[u1n, u2n] = [0.0, 0.0];
+
+real res = 2.0 * tol;
+
+real eforceres;
+
+int loopcount = 0;
+int loopmax = 45;
+
+//  Iteration:
+while (loopcount <= loopmax && res >= tol) 
+{
+  loopcount ++;
+
+  ////////////////////////////////////////////////////////////
+
+  cout << "Loop " << loopcount << endl;
+
+//  plot([u1n,u2n], wait=0, cmm="displacement:" );
+
+/*
+  cout << "TESTING: Begin" << endl;
+  cout << "dFStress2PK11 = " << dFStress2PK11 (u1n, u2n, varu1, varu2) << endl; 
+  cout << "TESTING: End" << endl;
+
+  cout << "B11 = " << B11(u1n, u2n) << endl;
+  cout << "B12 = " << B12(u1n, u2n) << endl;
+  cout << "B21 = " << B21(u1n, u2n) << endl;
+  cout << "B22 = " << B22(u1n, u2n) << endl << endl;
+
+  cout << "J = " << J(u1n, u2n) << endl << endl;
+
+  StrK11 = StressK11(u1n, u2n);
+  StrK12 = StressK12(u1n, u2n);  
+  StrK21 = StressK21(u1n, u2n);
+  StrK22 = StressK22(u1n, u2n);
+
+  cout << "StressK11 = " << StrK11 << endl;
+  cout << "StressK12 = " << StrK12 << endl;
+  cout << "StressK21 = " << StrK21 << endl;
+  cout << "StressK22 = " << StrK22 << endl;
+*/
+
+  neoHookeanInc;  //  compute [varu1,varu2] = (D^2 J(u1n))^{-1}(D  J(u1n))
+
+//  cout << "This marker reached" << endl;
+
+
+  u1 = varu1;
+  u2 = varu2;
+    
+  w1[]   = Mass*varu1[];
+
+  res = sqrt(w1[]' * varu1[]); //  norme  L^2 of [varu1, varu2]
+
+//  cout << " u1 min =" <<u1[].min << ", u1 max= " << u1[].max << endl;
+//  cout << " u2 min =" << u2[].min << ", u2 max= " << u2[].max << endl;
+
+//  plot([varu1, varu2], wait=1, cmm=" varu1, varu2 " );
+
+  u1n[] += varu1[]; 
+
+  cout << " L^2 residual = " << res << endl;
+
+  plot([u1n,u2n], wait=0, cmm="displacement:" );
+
+//  Calculate the elastic force residue
+  
+
+
+/*
+  if (res < tol)
+  {
+	loopcount = 1;
+	res = 1.0 + tol;
+	ContParam += dContParam;
+	cout << "ContParam = " << ContParam << endl;
+  } 
+*/
+
+}
+
+// plot([u1n,u2n], wait=1, cmm="displacement:" );
+
+// plot([u1n,u2n],wait=1);
+
+plot(Th, wait=2, ps="ref-config.eps");
+
+mesh Th1 = movemesh(Th, [x+u1n, y+u2n]);
+
+plot(Th1, wait=2, ps="def-config-neo-Hookean.eps");
+
+plot([u1n,u2n], wait=0, ps="displacement-neo-Hookean.eps" );
