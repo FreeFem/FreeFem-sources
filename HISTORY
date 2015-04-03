@@ -1,5 +1,10 @@
-@  changeset:   3293:9ec6aea79b48
+@  changeset:   3294:528e3ce0b4e2
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 03 15:43:07 2015 +0200
+|  summary:     add Pierre Jolivet patch [Freefempp] Regarding the use of FreeFEM++ with PETSC.
+|
+o  changeset:   3293:9ec6aea79b48
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Apr 03 15:25:47 2015 +0200
 |  summary:     correct old bug in find on triangular mesh

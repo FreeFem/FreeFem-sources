@@ -141,7 +141,7 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
     KSPSetFromOptions(ptA->_ksp);
     KSPSetUp(ptA->_ksp);
-    if(verbosity > 0 && rank == 0)
+    if(verbosity > 0 && mpirank == 0)
         cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
     return ptA;
 }
