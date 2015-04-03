@@ -414,20 +414,21 @@ list_of_id1:  id                      { $$ = new ListOfId(); $$->push_back(UnId(
       
 id: ID | FESPACE|FESPACE3|FESPACE1; 
 
-list_of_dcls:    ID                            {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
-              |  ID '='   no_comma_expr        {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
-              |  ID  '(' parameters_list ')'   {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3);
-                                                $3.destroy()}
-              |  list_of_dcls ',' list_of_dcls {$$=C_F0($1,$3)}
-;
+list_of_dcls:
+      ID                            {$$=currentblock->NewVar<LocalVariable>($1,dcltype)}   
+    | ID '='   no_comma_expr        {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3)}
+    | ID  '(' parameters_list ')'   {$$=currentblock->NewVar<LocalVariable>($1,dcltype,$3);
+                                     $3.destroy()}
+    | list_of_dcls ',' list_of_dcls {$$=C_F0($1,$3)}
+    ;
 
 parameters_list:
-	   no_set_expr {$$=$1} 
-	|  FESPACE  ID  {$$=Find($1)} 
-	|  FESPACE1  ID  {$$=Find($1)} 
-	|  FESPACE3  ID  {$$=Find($1)} 
-	|  ID '=' no_set_expr { $$=make_pair<const char *,const C_F0>($1,$3)} 	
-	| parameters_list ',' no_set_expr { $$ = ($1 += $3) }
+	  no_set_expr                            { $$=$1} 
+	| FESPACE  ID                            { $$=Find($1)} 
+	| FESPACE1  ID                           { $$=Find($1)} 
+	| FESPACE3  ID                           { $$=Find($1)} 
+	| ID '=' no_set_expr                     { $$=make_pair<const char *,const C_F0>($1,$3)} 	
+	| parameters_list ',' no_set_expr        { $$ = ($1 += $3) }
 	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>($3,$5))}
     ; 
 
@@ -442,13 +443,14 @@ type_of_dcl:   TYPE
     ;
 
 ID_space:
-ID                                  { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
-  |  ID '[' no_set_expr ']'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim); }
-  |  ID '=' no_set_expr                  { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim) }
-  |  '[' list_of_id1 ']'                 { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex,fespacedim) }
-  |  '[' list_of_id1 ']' '[' no_set_expr ']'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
-  |  '[' list_of_id1 ']' '=' no_set_expr { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
-; 
+      ID                                      { $$ =  NewFEvariable($1,currentblock,fespacetype,fespacecomplex,fespacedim); }
+    | ID '[' no_set_expr ']'                  { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim); }
+    | ID '=' no_set_expr                      { $$ =  NewFEvariable($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim) }
+    | '[' list_of_id1 ']'                     { $$ =  NewFEvariable($2,currentblock,fespacetype,fespacecomplex,fespacedim) }
+    | '[' list_of_id1 ']' '[' no_set_expr ']' { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
+    | '[' list_of_id1 ']' '=' no_set_expr     { $$ =  NewFEvariable($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
+    ;
+
 ID_array_space:
  ID '(' no_set_expr ')'              { $$ =  NewFEarray($1,currentblock,fespacetype,$3,fespacecomplex,fespacedim); }
   |  '[' list_of_id1 ']' '(' no_set_expr ')'  { $$ =  NewFEarray($2,currentblock,fespacetype,$5,fespacecomplex,fespacedim) }
