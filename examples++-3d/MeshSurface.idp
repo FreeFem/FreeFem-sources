@@ -1,0 +1,112 @@
+load "msh3"
+load "medit"
+load "freeyams"
+// 2 basic functions to build surface mesh 
+/*  Usage:
+  mesh3   SurfaceHex(N,B,L,orient);
+  --   build the surface mesh of a 3d box 
+  where: for example:
+    int[int]  N=[nx,ny,nz]; //  the number of seg in the 3 direction
+    real [int,int]  B=[[xmin,xmax],[ymin,ymax],[zmin,zmax]]; // bounding bax  
+    int [int,int]  L=[[1,2],[3,4],[5,6]]; // the label of the 6 face left,right, front, back, down, right
+    orient the global orientation of the surface 1 extern (-1 intern)
+
+
+  func mesh3 Sphere(real R,real h,int L,int orient);
+  -- build a surface mesh of a sphere with 1 mapping (spheriale coordinate) 
+     where R is  the raduis, 
+     h is the mesh size  of  the shpere
+     L is the label the the sphere
+     orient the global orientation of the surface 1 extern (-1 intern
+
+*/
+func mesh3 SurfaceHex(int[int] & N,real[int,int] &B ,int[int,int] & L,int orientation)
+{
+    real x0=B(0,0),x1=B(0,1);
+    real y0=B(1,0),y1=B(1,1);
+    real z0=B(2,0),z1=B(2,1);
+    
+    int nx=N[0],ny=N[1],nz=N[2];
+    
+    mesh Thx = square(ny,nz,[y0+(y1-y0)*x,z0+(z1-z0)*y]);
+    mesh Thy = square(nx,nz,[x0+(x1-x0)*x,z0+(z1-z0)*y]);
+    mesh Thz = square(nx,ny,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+    
+    int[int] refx=[0,L(0,0)],refX=[0,L(0,1)];   //  Xmin, Ymax faces labels renumbering 
+    int[int] refy=[0,L(1,0)],refY=[0,L(1,1)];   //  Ymin, Ymax faces labesl renumbering 
+    int[int] refz=[0,L(2,0)],refZ=[0,L(2,1)];   //  Zmin, Zmax faces labels renumbering 
+    
+    mesh3 Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-orientation,label=refx);
+    mesh3 Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=+orientation,label=refX);
+    mesh3 Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+orientation,label=refy);
+    mesh3 Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-orientation,label=refY);
+    mesh3 Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-orientation,label=refz);
+    mesh3 Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+orientation,label=refZ);
+    mesh3 Th= Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
+    return Th;
+}
+func mesh3 Ellipsoide (real RX,real RY, real RZ,real h,int L,int orientation)
+{
+  mesh  Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
+  //  a parametrization of a sphere 
+  func f1 =RX*cos(x)*cos(y);
+  func f2 =RY*cos(x)*sin(y);
+  func f3 =RZ*sin(x);
+  //    partiel derivative 
+  func f1x= -RX*sin(x)*cos(y);   
+  func f1y= -RX*cos(x)*sin(y);
+  func f2x= -RY*sin(x)*sin(y);
+  func f2y= +RY*cos(x)*cos(y);
+  func f3x=-RZ*cos(x);
+  func f3y=0;
+  // the metric on the sphere  $  M = DF^t DF $
+  func m11=f1x^2+f2x^2+f3x^2;
+  func m21=f1x*f1y+f2x*f2y+f3x*f3y;
+  func m22=f1y^2+f2y^2+f3y^2;
+  
+  func perio=[[4,y],[2,y],[1,x],[3,x]];  // to store the periodic condition 
+  
+  real hh=h;// hh  mesh size on unite sphere
+  real vv= 1/square(hh);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  int[int] ref=[0,L];  
+  
+  mesh3  ThS= movemesh23(Th,transfo=[f1,f2,f3],orientation=orientation,refface=ref);
+  ThS=freeyams(ThS,hmin=h,hmax=h,gradation=2.,verbosity=-10,mem=100,option=0);
+  return ThS;
+}
+ 
+ 
+func mesh3 Sphere(real R,real h,int L,int orientation)
+{
+
+  return Ellipsoide(R,R,R,h,L,orientation);
+}
+/*  test: 
+ load "tetgen" 
+  {   
+    real hs = 0.1;  // mesh size on sphere 
+    int[int]  N=[20,20,20];
+    real [int,int]  B=[[-1,1],[-1,1],[-1,1]];
+    int [int,int]  L=[[1,2],[3,4],[5,6]];
+    
+    ////////////////////////////////
+    mesh3 ThH = SurfaceHex(N,B,L,1);
+    mesh3 ThS =Sphere(0.5,hs,7,1); // "gluing" surface meshs to tolat boundary meshes
+    cout << " xxxx" << ThH.nv << " " << ThS.nv << endl;
+    
+    mesh3 ThHS=ThH+ThS;
+    savemesh(ThHS,"Hex-Sphere.mesh");
+    exec("ffmedit Hex-Sphere.mesh;rm Hex-Sphere.mesh");
+    
+    real voltet=(hs^3)/6.;
+    cout << " voltet = " << voltet << endl;
+    real[int] domaine = [0,0,0,1,voltet,0,0,0.7,2,voltet];
+  
+    mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=2,regionlist=domaine);    
+    medit("Cube-With-Ball",Th);
+  }
+*/

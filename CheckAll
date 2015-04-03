@@ -1,0 +1,21 @@
+ff=../src/nw/FreeFem++-nw
+ffmpi=""
+if [ -x ./src/bin/FreeFem++-nw.exe ] ; then ff=../src/bin/FreeFem++-nw.exe; fi
+if [ -x ./src/bin-win32/FreeFem++-nw.exe ] ; then ff=../src/bin-win32/FreeFem++-nw.exe; fi
+if [ -x ./src/mpi/ff-mpirun ] ; then ffmpi=../src/mpi/ff-mpirun; fi
+rm CheckAll-out
+for i in examples++*/.; do 
+echo  ----  $i  ---
+cd $i;
+case $i in 
+*mpi/.)  echo " skip $i do test a end " ;;
+*)       ../CheckAllEdp "$ff -nw" *.edp | tee -a ../CheckAll-out ;;
+esac;
+cd ..;
+done
+if [ -n "$ffmpi" ] ; then 
+cd examples++-mpi/
+../CheckAllEdp "$ffmpi -np 4" *.edp | tee -a ../CheckAll-out 
+else
+  echo " **no mpi " | tee -a CheckAll-out 
+fi
