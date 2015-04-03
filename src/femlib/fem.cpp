@@ -1081,8 +1081,8 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		    continue;
 		}
 		//  on a corner of the mesh 
-		l[j]=0;
-		l[3-nl[0]+nl[1]]=1;
+		l[0]=l[1]=l[2]=0.;
+		l[3-nl[0]-nl[1]]=1.; // correction april 2015 FH
 		Phat=R2(l[1],l[2]);
 	        rett=triangles +it;
 	        if(searchMethod && outside) goto PICHON;
@@ -1166,7 +1166,7 @@ PICHON:	// Add dec 2010 ...
 	// Brute force .... bof bof ...
     double ddp=1e100;
     int pk=-1;
-    
+    rett=0; 
     for(int k=0;k<nt;++k)
       {
 	int n=0,nl[3];
@@ -1196,7 +1196,7 @@ PICHON:	// Add dec 2010 ...
 	}
       }
     
-    return rett; 
+    return 0;
 }
 
 

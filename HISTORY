@@ -1,5 +1,10 @@
-@  changeset:   3291:1a62057e90df
+@  changeset:   3292:600ca0b5f8f6
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Mar 31 18:04:15 2015 +0200
+|  summary:     correct but in evaluation of (aaa')[0]
+|
+o  changeset:   3291:1a62057e90df
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Mar 31 10:06:14 2015 +0200
 |  summary:     coorect un set mesh in Period-Poisson-cube-ballon.edp
