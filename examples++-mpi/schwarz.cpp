@@ -605,9 +605,6 @@ static void Init_Schwarz() {
     TheOperators->Add("*", new OneOperator2<GMV<DistributedCSR*, KN<double>*>, DistributedCSR*, KN<double>*>(Build));
     TheOperators->Add("=", new OneOperator2<KN<double>*, KN<double>*, GMV<DistributedCSR*, KN<double>*>>(GlobalMV));
     Global.Add("set", "(", new setOptions<double>());
-    Global.Add("distributedNumbering", "(", new OneOperator2_<long, DistributedCSR*, KN<double>*>(distributedNumbering));
-    Global.Add("renumber", "(", new OneOperator2_<long, DistributedCSR*, FEbaseArrayKn<double>*>(renumberCSR));
-    Global.Add("solvePETSc", "(", new OneOperator2_<long, DistributedCSR*, KN<double>*>(solvePETSc));
     Dcl_Type<DistributedCSR_inv>();
     TheOperators->Add("^", new OneBinaryOperatorPETSc());
     Dcl_Type<Inv<DistributedCSR_inv, KN<double>*>>();

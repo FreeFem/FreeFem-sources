@@ -1,5 +1,10 @@
-@  changeset:   3292:600ca0b5f8f6
+@  changeset:   3293:9ec6aea79b48
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 03 15:25:47 2015 +0200
+|  summary:     correct old bug in find on triangular mesh
+|
+o  changeset:   3292:600ca0b5f8f6
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Mar 31 18:04:15 2015 +0200
 |  summary:     correct but in evaluation of (aaa')[0]
