@@ -206,6 +206,10 @@ extern int mymain(int argc,char **argv);
 
 // <<main>>
 
+// ALH - 4/4/15 - main() is not desired if FF is used as a library
+
+#ifndef WITHOUT_MAIN
+
 // ALH - 24/2/15 - the main entry point for javascript is on the HTML page so we need to give it a different name here.
 // Built by [[file:~/ffjs/Makefile::FFJS_MAIN]] and called by [[file:~/ffjs/util.cpp::ffjs]].
 
@@ -220,7 +224,10 @@ int main (int argc, char **argv)
   return ret;
 }
 
-#endif
+#endif // WITHOUT_MAIN
+
+#endif // FREEFEM
+
 void message(char *s);
 void message(char *s)
 {  printf("%s	\n",s);}

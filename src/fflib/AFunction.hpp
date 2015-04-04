@@ -1486,12 +1486,9 @@ inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i
 //   if (!(r && r->un_ptr)) { cerr << "PtrValue: Not a Left value " << *r << endl;CompileError();} 
 //   return C_F0(new  E_F0_Func1(r->un_ptr->f,f),r->un_ptr->r);}
 
-/// <<basicAC_F0>>
+/// <<basicAC_F0>> version de base d'un tableau d'un parametres pour les operateurs unaire, binaire, pas d'allocation
 
 class basicAC_F0 {
-//  version de base d'un tableau d'un parametres  
-//   pour les operateurs unaire, binaire, , 
-//   pas d'allocation 
   friend class E_Array; // for mapping fonction 
   protected:
   typedef const C_F0 const_C_F0;
