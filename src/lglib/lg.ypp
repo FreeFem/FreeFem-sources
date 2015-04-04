@@ -167,7 +167,10 @@ void ff_atend(AtEnd f)
  CC_F0 cexp;
  
  Routine   *routine;
+
+ /* <<YYSTYPE_args>> [[file:~/ff/src/fflib/AFunction.hpp::AC_F0]] */
  AC_F0 args;
+ 
  aType type;
 
  /* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
@@ -244,7 +247,7 @@ void ff_atend(AtEnd f)
 %token <dnum> DNUM
 %token <dnum> CNUM
 
-/* <<ID>> used by [[file:../fflib/lex.cpp::mylex_scan]] */
+/* <<ID>> produced by [[file:../fflib/lex.cpp::mylex_scan]] */
 %token <str> ID
 
 %token <str> FESPACEID
@@ -774,7 +777,7 @@ int Compile()
               << " mpirank: " <<mpirank <<  endl    ;
 	      if(!mpirank) cerr <<  "Ok: Normal End" << endl;
 	    }
-	}
+      }
     }
   }
 
