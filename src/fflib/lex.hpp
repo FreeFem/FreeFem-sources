@@ -36,6 +36,7 @@
 extern bool lexdebug;
 extern long mpisize,mpirank;
 
+
 /// <<mylex>>
 class mylex : public CodeAlloc { 
   public:
@@ -78,12 +79,14 @@ class mylex : public CodeAlloc {
   };
   
   friend struct mylex::xxxx;
-  
+
   xxxx pilesource[100];
   istream & source() const {return  * pilesource[level].f;} 
   ostream & cout ;
 
+  // <<MotClef>>
   MapMotClef  MotClef;
+  
   list<MapMacroDef> *listMacroDef;
   list<MapMacroParam> *listMacroParam;
   public:
@@ -106,6 +109,10 @@ class mylex : public CodeAlloc {
     throw(ErrorCompile("lex:",linenumber)); }
   
   bool InMotClef  (aType & t, int & r) const ;
+
+  // ALH - 5/4/15 - <<InMotClef_string>>
+  bool InMotClef(const char *b,aType &t,int &r)const;
+
   void  Add(Key k,int r,aType t);
   
   void Check(bool b,Key k,const char * s) {

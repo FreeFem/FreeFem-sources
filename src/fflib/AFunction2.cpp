@@ -362,6 +362,7 @@ void Polymorphic::Add(const char * op,Value *pp) const
 }
 
 
+// <<FindType>>
  int  FindType(const char * name)  
    {
    C_F0 r;
