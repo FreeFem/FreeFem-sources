@@ -1,5 +1,10 @@
-@  changeset:   3294:528e3ce0b4e2
+@  changeset:   3295:40ed8b7c1b43
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 03 15:51:45 2015 +0200
+|  summary:     correct type rank => mpirank
+|
+o  changeset:   3294:528e3ce0b4e2
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Apr 03 15:43:07 2015 +0200
 |  summary:     add Pierre Jolivet patch [Freefempp] Regarding the use of FreeFEM++ with PETSC.

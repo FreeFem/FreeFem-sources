@@ -1166,7 +1166,7 @@ PICHON:	// Add dec 2010 ...
 	// Brute force .... bof bof ...
     double ddp=1e100;
     int pk=-1;
-    rett=0; 
+  
     for(int k=0;k<nt;++k)
       {
 	int n=0,nl[3];
@@ -1196,7 +1196,7 @@ PICHON:	// Add dec 2010 ...
 	}
       }
     
-    return 0;
+    return rett;
 }
 
 
