@@ -2459,7 +2459,7 @@ public:
 
   Expression bb[4];
 
-  /// see [[Expression2]]
+  /// [[Expression2]] is a description of an object to plot
   vector<Expression2> l;
 
     Expression nargs[n_name_param];
@@ -2469,9 +2469,12 @@ public:
       args.SetNameParam(n_name_param,name_param,nargs);
       if ( nargs[8] )
 	  Box2x2( nargs[8] , bb);   
+
+      // scan all the parameters of the plot() call
       
       for (size_t i=0;i<l.size();i++)
-	  
+
+	// argument is an [[file:AFunction.hpp::E_Array]] (= array of E_F0)
 	  if (args[i].left()==atype<E_Array>())
 	    {
 	      //cout << "args[i].left()==atype<E_Array>()" << endl;
@@ -2520,32 +2523,32 @@ public:
 	      
 	      else { CompileError("plot of array with wrong  number of components (!= 2 or 3) ");}
 	    }
-	  else if (BCastTo<pferbase>(args[i])) {
+	  else if (BCastTo<pferbase>(args[i])) { // [[file:problem.hpp::pferbase]] [[file:lgmesh3.hpp::BCastTo]]
 	      l[i].what=1; //  iso value 2d
 	      // cout << "BCastTo<pferbase>(args[i])" << endl;
 	      l[i].composant=true;
 	      l[i][0]=CastTo<pferbase>(args[i]); }
-	  else if (BCastTo<pfer>(args[i])) {
+	  else if (BCastTo<pfer>(args[i])) { // [[file:problem.hpp::pfer]]
 	      // cout << "BCastTo<pfer>(args[i])" << endl;
 	      l[i].composant=false;
 	      l[i].what=1; //  iso value 2d
 	      l[i][0]=CastTo<pfer>(args[i]);}
-	  else if (BCastTo<pfecbase>(args[i])) {
+	  else if (BCastTo<pfecbase>(args[i])) { // [[file:problem.hpp::pfecbase]]
 	      l[i].what=11; //  iso value 2d
 	      // cout << "BCastTo<pferbase>(args[i])" << endl;
 	      l[i].composant=true;
 	      l[i][0]=CastTo<pfecbase>(args[i]); }
-	  else if (BCastTo<pfec>(args[i])) {
+	  else if (BCastTo<pfec>(args[i])) { // [[file:problem.hpp::pfec]]
 	      // cout << "BCastTo<pfer>(args[i])" << endl;
 	      l[i].composant=false;
 	      l[i].what=11; //  iso value 2d
 	      l[i][0]=CastTo<pfec>(args[i]);}
-	  else if (BCastTo<pf3r>(args[i])) {
+	  else if (BCastTo<pf3r>(args[i])) { // [[file:lgmesh3.hpp::pf3r]]
 	      // cout << "BCastTo<pfer>(args[i])" << endl;
 	      l[i].composant=false;
 	      l[i].what=6; //  iso value 3d
 	      l[i][0]=CastTo<pf3r>(args[i]);}
-	  else if (BCastTo<pf3c>(args[i])) {
+	  else if (BCastTo<pf3c>(args[i])) { // [[file:lgmesh3.hpp::pf3c]]
 	      // cout << "BCastTo<pfer>(args[i])" << endl;
 	      l[i].composant=false;
 	      l[i].what=16; //  iso value 3d
@@ -2560,12 +2563,12 @@ public:
               l[i].composant=false;
               l[i].what=111; //  iso value array iso value 2d
               l[i][0]=CastTo<pfecarray>(args[i]);}
-          else if (BCastTo<pf3rarray>(args[i])) {
+          else if (BCastTo<pf3rarray>(args[i])) { // [[file:lgmesh3.hpp::pf3rarray]]
               // cout << "BCastTo<pfer>(args[i])" << endl;
               l[i].composant=false;
               l[i].what=106; //arry iso value array iso value 3d
               l[i][0]=CastTo<pf3rarray>(args[i]);}
-          else if (BCastTo<pf3carray>(args[i])) {
+          else if (BCastTo<pf3carray>(args[i])) { // [[file:lgmesh3.hpp::pf3carray]]
               // cout << "BCastTo<pfer>(args[i])" << endl;
               l[i].composant=false;
               l[i].what=116; //arry iso value array iso value 3d

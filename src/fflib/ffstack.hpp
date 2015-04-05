@@ -69,6 +69,7 @@ T * Stack_offset (Stack stack,size_t offset)
 {  //cout << "Stack_offset" << stack << " " << offset << endl;
     return   (T *) (void *) (((char *) stack)+offset);}
 
+// <<Stack_Ptr>>
 template<class T>
 T * & Stack_Ptr (Stack stack,size_t offset)  
   {return   (T * &)  (((void **) stack)[offset]);}
@@ -175,12 +176,13 @@ struct PtrArrayType: public VOIDPtrType {
   virtual ~BaseNewInStack() {};
 };
 
- struct BaseNewInStack ;
- struct StackOfPtr2Free;
+struct BaseNewInStack;
+struct StackOfPtr2Free;
 
+// <<WhereStackOfPtr2Free>> [[Stack_Ptr]] [[StackOfPtr2Free]] [[ExprPtrs]]
 inline StackOfPtr2Free  * & WhereStackOfPtr2Free(Stack s) { return  Stack_Ptr<StackOfPtr2Free>(s,ExprPtrs) ;} // fait  
 
-
+// <<StackOfPtr2Free>>
 struct StackOfPtr2Free {
 	typedef vector<BaseNewInStack *>::iterator iterator;
 	StackOfPtr2Free  ** where; // where is store the ptr to the stack 
@@ -347,6 +349,8 @@ inline Stack newStack(size_t l)
   for (size_t i = 0;i< l/sizeof(long);i++) ((long*) thestack)[i]=0;
   ((char **) thestack)[MeshPointStackOffset] = mps = new char [1000]; 
   for(int i=0;i<1000;++i) mps[i]=0;
+
+  // [[WhereStackOfPtr2Free]] [[StackOfPtr2Free]]
   WhereStackOfPtr2Free(thestack)=new StackOfPtr2Free(thestack); 
   
   return thestack;
