@@ -110,7 +110,7 @@ class mylex : public CodeAlloc {
   
   bool InMotClef  (aType & t, int & r) const ;
 
-  // ALH - 5/4/15 - <<InMotClef_string>>
+  // ALH - 5/4/15 - <<InMotClef_string>> [[file:lex.cpp::mylex_input_string]]
   bool InMotClef(const char *b,aType &t,int &r)const;
 
   void  Add(Key k,int r,aType t);

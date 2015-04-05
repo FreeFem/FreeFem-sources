@@ -110,6 +110,7 @@ OneOperator::pair_find OneOperator::FindWithOutCast(const ArrayOfaType & at)cons
       return make_pair(w,n);
 }
 
+// <<FindSameR>>
 OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
  { 
      if (!this) return 0;

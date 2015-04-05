@@ -1,15 +1,16 @@
 #ifndef LGMESH3_HPP
 #define LGMESH3_HPP
-// 3d
-typedef FEbase<double,v_fes3> * pf3rbase ;
-typedef FEbaseArray<double,v_fes3> * pf3rbasearray ;
-typedef pair<pf3rbase,int> pf3r ;
-typedef pair<pf3rbasearray,int> pf3rarray ;
+// 3d real (2d equivalent at [[file:problem.hpp::pferbase]])
+typedef FEbase<double,v_fes3> * pf3rbase ;		// <<pf3rbase>>
+typedef FEbaseArray<double,v_fes3> * pf3rbasearray ;	// <<pf3rbasearray>>
+typedef pair<pf3rbase,int> pf3r ;			// <<pf3r>>
+typedef pair<pf3rbasearray,int> pf3rarray ;		// <<pf3rarray>>
 
-typedef FEbase<Complex,v_fes3> * pf3cbase ;
-typedef FEbaseArray<Complex,v_fes3> * pf3cbasearray ;
-typedef pair<pf3cbase,int> pf3c ;
-typedef pair<pf3cbasearray,int> pf3carray ;
+// 3d complex (2d equivalent at [[file:problem.hpp::pfecbase]])
+typedef FEbase<Complex,v_fes3> * pf3cbase ;		// <<pf3cbase>
+typedef FEbaseArray<Complex,v_fes3> * pf3cbasearray ;	// <<pf3cbasearray>>
+typedef pair<pf3cbase,int> pf3c ;			// <<pf3c>>
+typedef pair<pf3cbasearray,int> pf3carray ;		// <<pf3carray>>
 // fin
 bool isSameMesh(const list<C_F0> & largs,const void * Thu,const void * Thv,Stack stack) ; // true => VF type of Matrix   
   //bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack stack)  ;
@@ -26,6 +27,7 @@ inline bool BCastToC(const C_F0 & f){ return atype<Complex>()->CastingFrom(f.lef
 template<class Result>
 inline Expression CastTo(const C_F0 & f) { return atype<Result>()->CastTo(f);}
 
+// <<BCastTo>>
 template<class Result>
 inline bool BCastTo(const C_F0 & f) { return atype<Result>()->CastingFrom(f.left());}
 

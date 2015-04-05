@@ -288,7 +288,7 @@ public:
     const basicForEachType * un_ptr_type;  // type of right exp
    private:
  //   map<aType,CastFunc> mapofcast;
-    OneOperator * casting; // list of operator for casting to this type 
+  OneOperator * casting; // <<casting>> list of operator for casting to this type 
     
     const E_F1_funcT_Type * un_ptr;        //  is ptr -> get value function
     Function1 DoOnReturn;        //  to call some thing on return. 
@@ -604,10 +604,10 @@ private:
 
 class basicAC_F0;
 class C_F0 {
-  friend class CC_F0; // cf [[CC_F0]]
+  friend class CC_F0;	// cf [[CC_F0]]
 protected: 
-  Expression  f; //  the expression code, cf [[Expression]]
-  aType r;   // the expression type, cf  [[file:../fflib/AnyType.hpp::aType]]
+  Expression  f;	// the expression code, cf [[Expression]]
+  aType r;		// the expression type, cf  [[file:../fflib/AnyType.hpp::aType]]
   
 public: 
   //  the constructeur 
@@ -1522,7 +1522,7 @@ class basicAC_F0 {
 
 /// <<AC_F0>> array of parameters for FF language operators. uses [[basicAC_F0]]
 
-class AC_F0: public basicAC_F0 { //  a Array of C_F0
+class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
 //    tableau d'un parametres  max 1024 parametres 
 //    avec allocation  
  const static  int MaxSize;
@@ -1598,7 +1598,7 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
 };
 
 
-
+// <<E_Array>>
 class E_Array  :public E_F0 {  public: 
   basicAC_F0_wa *v;// the value
   E_Array(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
@@ -1620,7 +1620,7 @@ class E_Array  :public E_F0 {  public:
   } // 
   operator aType () const { return atype<void>();} 
  
-  };
+};
 class PlotStream;  
 class E_Border ;
 class E_BorderN :public E_F0mps { public: 
@@ -2956,7 +2956,7 @@ inline  bool  basicForEachType::CastingFrom(aType t) const  {
      throwassert(this && t);
      if ( t == this) return true;
      else if( t ==  type_C_F0 ) return true; // FH do work .... 09 / 2012 (use of ellispe ...)
-     return casting->FindSameR(ArrayOfaType(t,false));
+     return casting->FindSameR(ArrayOfaType(t,false)); // uses [[casting]] [[file:AFunction2.cpp::FindSameR]]
   }
 
 inline  void CerrCast(const pair<const basicForEachType*,const E_F1_funcT_Type *> & i)
