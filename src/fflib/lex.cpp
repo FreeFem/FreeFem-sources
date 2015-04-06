@@ -112,6 +112,7 @@ void  mylex::Add(Key k,int r,aType t){
   ffassert(ii==MotClef.end());
   MotClef.insert(pair<const Key,Value>(k,Value(r,t))); }
 
+// <<dump>>
 void mylex::dump(ostream & f ) 
 {
   const_iterator i=MotClef.begin(),e=MotClef.end();
