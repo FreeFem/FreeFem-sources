@@ -345,7 +345,7 @@ class C_LF1;
 /// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
 /// language (see [[file:../lglib/lg.ypp]]). E_F0 pointers are typed as [[Expression]], stored as a list in
 /// [[ListOfInst]], and evaluated when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called at
-/// [[file:../lglib/lg.ypp::evaluate_parsed_FF_script]] (see \ref index).
+/// [[file:../lglib/lg.ypp::evaluate_parsed_FF_script]] (see \ref index). No internal data member.
 
 class E_F0 :public CodeAlloc 
    {

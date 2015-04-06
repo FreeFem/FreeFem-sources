@@ -649,7 +649,8 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
   return new E_F0_Func2(f,a,b);
  
 }
- 
+
+// <<ShowType>>
  void ShowType(ostream & f)
  {
  
