@@ -59,7 +59,7 @@ FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.
 # ALH - 28/7/14 - the new automake default is to place the objects in
 # the same directory as the corresponding source file
 
-FreeFem++.exe: ../Graphics/*.o    ../mpi/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+FreeFem++.exe: ../nw/sansrgraph.o    ../mpi/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
 ## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll  ( J'ai compris)
