@@ -1,0 +1,32 @@
+verbosity=4;
+
+mesh Th=square(10,10,[10*x,5*y]);
+fespace Vh(Th,P1);
+
+Vh u,v;
+
+u=0;
+func f= 0;
+func g= 5*x+y;
+int i=0;
+real error=0.1, coef= 0.1^(1./5.);
+// exact solution  is g in this exemple : 
+//  remark $dg/dn = -1$ on $Gamma_1$ (lower side)   $n=(0,-1)$ 
+//  remark $dg/dn = 5$ on $Gamma_2$ (left side)   $n=(1,0)$ 
+//  u + du/dn = g - 1 , because du
+// $$ - \Delta u = 0,\quad  u_{|\Gamma_3 \cup \Gamma_4} = g, \frac{\partial u}{\partial n} + u = g-1 \mbox{on}\Gamma_4$$
+problem Probem1(u,v,solver=LU,init=i,eps=-1.0e-6) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int1d(Th,1) ( u*v )        //  $ \frac{\partial u}{\partial n} + u  = \ldots $
+  + int1d(Th,1) ( (+1-g)*v)    //  $ \ldots  = g-1 $ 
+  + int2d(Th) ( v*f )  
+  + int1d(Th,2) (-5*v)  //  $ \frac{\partial u}{\partial n} = 5 $ 
+  + on(3,4,u=g)  ;
+  
+real cpu=clock();
+Probem1; // SOLVE THE PROBLEM 1
+plot(u);
+real err= sqrt( int2d(Th)( (u-g)^2) );
+cout << "err L^2=" << err <<endl;
+assert(err<1e-5); //  check the solution 
+cout << " CPU = " << clock()-cpu << endl;
