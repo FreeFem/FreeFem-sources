@@ -53,13 +53,16 @@ endif
 libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(FFD_OBJ2) ../lglib/lg.tab.o	
 	$(CXX) $(GCCNOCYGWIN)  -shared  -Wl,--enable-auto-import $^  -o $@ $(LDADD2)
 
-FreeFem++-nw.exe: ../nw/sansrgraph.o ../nw/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+parallelempi-empty.o:../mpi/parallelempi-empty.cpp
+	$(CXX) $(CXXFLAGS) $< -c -o $@
+
+FreeFem++-nw.exe: ../nw/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
 # ALH - 28/7/14 - the new automake default is to place the objects in
 # the same directory as the corresponding source file
 
-FreeFem++.exe: ../nw/sansrgraph.o    ../mpi/parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+FreeFem++.exe: ../nw/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
 ## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll  ( J'ai compris)

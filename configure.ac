@@ -1124,11 +1124,28 @@ then
     else
 	ff_download_blas=openblas
 
-	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples+++-load/ff-c++ will
-	# place -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which
-	# will fail.
+	# Find the package correponding to the CPU type
+	if test $(build_cpu) = x86_64
+	then
+	    ff_openblas_get=OpenBLAS-Win64
 
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
+	    # TODO is there a compatibility or a performance issue in using the int32 or int64 version?
+	    ff_openblas_pack=OpenBLAS-v0.2.14-Win64-int64
+	else
+	    ff_openblas_get=OpenBLAS-Win32
+	    ff_openblas_pack=OpenBLAS-v0.2.14-Win32
+	fi
+	AC_SUBST(OPENBLAS_GET,$ff_openblas_get)
+	AC_SUBST(OPENBLAS_PACK,$ff_openblas_pack)
+
+	# it is necessary to split the library path into -L and -l
+	# otherwise ff/upstream/examples+++-load/ff-c++ will place
+	# -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call
+	# the compiler with $LIBS before $OTHER, which will fail. But
+	# libopenblas.a is placed in the standard directory
+	# download/lib so the -L option is not required anymore.
+
+	ff_blas_libs="-lopenblas -lgfortran $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
