@@ -1,5 +1,10 @@
-@  changeset:   3295:40ed8b7c1b43
+@  changeset:   3296:85dbc875ef1a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Apr 05 10:07:11 2015 +0200
+|  summary:     corect pb in Mesh::Find is case of brute forces.
+|
+o  changeset:   3295:40ed8b7c1b43
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Apr 03 15:51:45 2015 +0200
 |  summary:     correct type rank => mpirank
