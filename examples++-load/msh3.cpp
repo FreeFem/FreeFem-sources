@@ -2093,7 +2093,7 @@ AnyType Movemesh3D_Op::operator()(Stack stack)  const
   
   Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh,rTh3, txx, tyy, tzz, border_only, 
 			      recollement_elem, recollement_border, point_confondus_ok,orientationelement);
-  if(T_Th3->mes <= 0)
+  if((T_Th3->mes) <= 0 && (T_Th3->nt > 0))
   {
       cerr << " Erreur bad orientation in movemesh add parmetre orientation=,1 mesure="<<T_Th3->mes<< endl;
       ExecError(" movemesh(3d): mesh with neg vol");
