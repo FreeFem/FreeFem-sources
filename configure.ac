@@ -716,65 +716,78 @@ then
     m4_include(acmpi.m4)
 else
     # FFCS - use the same MPI configuration choices as FFCS
-    ff_mpi=yes
-    AC_SUBST(MPICXX,$MPICXX)
-    AC_SUBST(MPICC,$MPICC)
-    AC_SUBST(MPIF77,$MPIF77)
-    AC_SUBST(MPIFC,$MPIFC)
-    AC_SUBST(MPIPROG,"FreeFem++-mpi${EXEEXT}")
-    AC_SUBST(MPI_INCLUDE,"-I $MPI_INC_DIR")
-    AC_SUBST(MPI_INC_DIR,$MPI_INC_DIR)
-    AC_SUBST(MPI_LIB_DIRS,"")
-    AC_SUBST(MPI_LIB,$MPI_LIB)
-    AC_SUBST(MPI_LIBC,"")
-    AC_SUBST(MPI_LIBFC,"")
-
-    # Extra MPI-dependant configuration options that are set by FF during MPI configuration. FFCS - 25/2/13 - Fred
-    # noticed that if PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least i686_pc_linux and i686_mac are
-    # required by pastix on the corresponding platforms.
-
-    if test"$ff_HOSTARCH_pastix" = ""
+    if test -z "$MPICXX"
     then
-	ff_HOSTARCH_pastix=i686_pc_linux
-    fi
-    AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
-
-    # these values should not be empty otherwise examples++-load/ff-get-dep will think that they are not defined
-    AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
-
-    # mpifc and mpif77 libraries should always be specified because FF never calls the Fortran MPI compiler. It always
-    # uses mpicxx in [[file:examples++-load/ff-c++]]. The resulting Fortran libraries (eg Mumps) would compile even
-    # without the proper Fortran libs, but they would not load properly.
-
-    # under Win32, libmpi_f77.a is not the right name and FFCS mingw/mpicxx adds the right libraries by itself
-
-    # With mpich2 Debian wheezy 32 bits, libmpi_f77.a is not available (request from Cico, 14/10/13)
-
-    if test -f /usr/lib/openmpi/lib/libmpi_f77.a
-    then
-        AC_FF_ADDWHERELIB(mpifc,-lmpi_f77,)
-    	AC_FF_ADDWHERELIB(mpif77,-lmpi_f77,)
+	ff_mpi=no
     else
-        AC_FF_ADDWHERELIB(mpifc,-DDUMMY,)
-    	AC_FF_ADDWHERELIB(mpif77,-DDUMMY,)
-    fi
+	ff_mpi=yes
+	AC_SUBST(MPICXX,$MPICXX)
+	AC_SUBST(MPICC,$MPICC)
+	AC_SUBST(MPIF77,$MPIF77)
+	AC_SUBST(MPIFC,$MPIFC)
+	AC_SUBST(MPIPROG,"FreeFem++-mpi${EXEEXT}")
+	AC_SUBST(MPI_INCLUDE,"-I $MPI_INC_DIR")
+	AC_SUBST(MPI_INC_DIR,$MPI_INC_DIR)
+	AC_SUBST(MPI_LIB_DIRS,"")
+	AC_SUBST(MPI_LIB,$MPI_LIB)
+	AC_SUBST(MPI_LIBC,"")
+	AC_SUBST(MPI_LIBFC,"")
 
-    # FFCS - MPI_DOUBLE_COMPLEX kept from original FF configure script
-    AC_MSG_CHECKING( MPI_DOUBLE_COMPLEX)
-    AC_COMPILE_IFELSE(
-    [AC_LANG_SOURCE([
+        # Extra MPI-dependant configuration options that are set by FF
+        # during MPI configuration. FFCS - 25/2/13 - Fred noticed that if
+        # PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least
+        # i686_pc_linux and i686_mac are required by pastix on the
+        # corresponding platforms.
+
+	if test"$ff_HOSTARCH_pastix" = ""
+	then
+	    ff_HOSTARCH_pastix=i686_pc_linux
+	fi
+	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
+
+        # these values should not be empty otherwise
+        # examples++-load/ff-get-dep will think that they are not
+        # defined
+	AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
+
+        # mpifc and mpif77 libraries should always be specified
+        # because FF never calls the Fortran MPI compiler. It always
+        # uses mpicxx in [[file:examples++-load/ff-c++]]. The
+        # resulting Fortran libraries (eg Mumps) would compile even
+        # without the proper Fortran libs, but they would not load
+        # properly.
+
+        # under Win32, libmpi_f77.a is not the right name and FFCS
+        # mingw/mpicxx adds the right libraries by itself
+
+        # With mpich2 Debian wheezy 32 bits, libmpi_f77.a is not available (request from Cico, 14/10/13)
+
+	if test -f /usr/lib/openmpi/lib/libmpi_f77.a
+	then
+            AC_FF_ADDWHERELIB(mpifc,-lmpi_f77,)
+    	    AC_FF_ADDWHERELIB(mpif77,-lmpi_f77,)
+	else
+            AC_FF_ADDWHERELIB(mpifc,-DDUMMY,)
+    	    AC_FF_ADDWHERELIB(mpif77,-DDUMMY,)
+	fi
+
+        # FFCS - MPI_DOUBLE_COMPLEX kept from original FF configure script
+	AC_MSG_CHECKING( MPI_DOUBLE_COMPLEX)
+	AC_COMPILE_IFELSE(
+	    [AC_LANG_SOURCE([
 #include <mpi.h>
-		MPI_Datatype xxxx=MPI_DOUBLE_COMPLEX;
-		])],
-    ff_mpi_double_complex=yes,
-    ff_mpi_double_complex=no)
-    AC_MSG_RESULT($ff_mpi_double_complex)
-    if test "$ff_mpi_double_complex" = yes  ; then
-	AC_DEFINE(HAVE_MPI_DOUBLE_COMPLEX,1, mpi_double_complex)
+			MPI_Datatype xxxx=MPI_DOUBLE_COMPLEX;
+			])],
+	    ff_mpi_double_complex=yes,
+	    ff_mpi_double_complex=no)
+	AC_MSG_RESULT($ff_mpi_double_complex)
+	if test "$ff_mpi_double_complex" = yes  ; then
+	    AC_DEFINE(HAVE_MPI_DOUBLE_COMPLEX,1, mpi_double_complex)
+	fi
     fi
 fi
 
-# FFCS needs to change some of the FF makefiles to compile without MPI on MacOS
+# FFCS needs to change some of the FF makefiles to compile without MPI
 AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 
 # Looking for useful configuration utilities
@@ -1124,19 +1137,19 @@ then
     else
 	ff_download_blas=openblas
 
-	# Find the package correponding to the CPU type
-	if test $(build_cpu) = x86_64
-	then
-	    ff_openblas_get=OpenBLAS-Win64
-
-	    # TODO is there a compatibility or a performance issue in using the int32 or int64 version?
-	    ff_openblas_pack=OpenBLAS-v0.2.14-Win64-int64
-	else
-	    ff_openblas_get=OpenBLAS-Win32
-	    ff_openblas_pack=OpenBLAS-v0.2.14-Win32
-	fi
-	AC_SUBST(OPENBLAS_GET,$ff_openblas_get)
-	AC_SUBST(OPENBLAS_PACK,$ff_openblas_pack)
+###	# Find the package correponding to the CPU type
+###	if test $(build_cpu) = x86_64
+###	then
+###	    ff_openblas_get=OpenBLAS-Win64
+###
+###	    # TODO is there a compatibility or a performance issue in using the int32 or int64 version?
+###	    ff_openblas_pack=OpenBLAS-v0.2.14-Win64-int64
+###	else
+###	    ff_openblas_get=OpenBLAS-Win32
+###	    ff_openblas_pack=OpenBLAS-v0.2.14-Win32
+###	fi
+###	AC_SUBST(OPENBLAS_GET,$ff_openblas_get)
+###	AC_SUBST(OPENBLAS_PACK,$ff_openblas_pack)
 
 	# it is necessary to split the library path into -L and -l
 	# otherwise ff/upstream/examples+++-load/ff-c++ will place
