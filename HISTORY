@@ -1,5 +1,35 @@
-@  changeset:   3302:5e03e66f18b1
+@  changeset:   3308:4fc51ad7ea1a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 17 18:13:34 2015 +0200
+|  summary:     try to remove null ref.
+|
+o  changeset:   3307:c06b5ae10a38
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 17 17:16:54 2015 +0200
+|  summary:     correct problem due to null ref
+|
+o  changeset:   3306:cb40b21b4fbe
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 17 16:33:39 2015 +0200
+|  summary:     contine remoev ref on null
+|
+o  changeset:   3305:358680b9a4d1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 17 16:03:10 2015 +0200
+|  summary:     replace ref to point in bamg
+|
+o  changeset:   3304:90a668f13fc7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 17 15:06:27 2015 +0200
+|  summary:     correct pb of optimisation of null ref in bamg
+|
+o  changeset:   3303:bdc269a66962
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Apr 17 12:02:40 2015 +0200
+|  summary:     correct pb in small allocation (in test)
+|
+o  changeset:   3302:5e03e66f18b1
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Apr 10 11:14:19 2015 +0200
 |  summary:     coorect type
