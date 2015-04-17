@@ -30,6 +30,7 @@
 #include <iostream>
 #include <cstdio>
 
+
 namespace ffapi {
     
     //  void init) ();
@@ -170,5 +171,10 @@ bool echo_edp=true; // add F.H of remove script dump
 //  add F. Hecht 
 EnvironmentData  ffenvironment;
 
+basicForEachType *basicForEachType::tnull=0;
+E_F0 *E_F0::tnull=0;
+CodeAlloc *CodeAlloc::tnull=0;
 
+#include <RefCounter.hpp>
+RefCounter *RefCounter::tnull=0;
 
