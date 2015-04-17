@@ -5015,9 +5015,9 @@ void InitProblem( int Nb, const FESpace & Uh,
       if (!X || (X =B) )
         X=new KN<R>(B->N());
       const FEbase<R,v_fes> & u_h0 = *(u_h[0]);
-      const FESpace  * u_Vh = &*u_h0.Vh ;
+      const FESpace  * u_Vh = u_h0.Vh ;
       
-      if ( u_Vh==0  || &(*(u_h[0])).Vh->Th != &Th )
+      if ( u_Vh==0  || &((u_h[0])->Vh->Th) != &Th )
         {
           *X=R();
           if(verbosity>1)
