@@ -1462,7 +1462,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   Triangle * tt[3]; // the 3 new Triangles
   Vertex &s0 = (* t)[0], &s1=(* t)[1], &s2=(* t)[2];
   Icoor2  det3local[3];
-  int infv = &s0 ?  ((  &s1 ? ( &s2  ? -1 : 2) : 1  )) : 0;
+  int infv = t->infv(); //&s0 ?  ((  &s1 ? ( &s2  ? -1 : 2) : 1  )) : 0;
   // infv = ordre of the infini vertex (null)
    int nbd0 =0; // number of zero det3
    int izerodet=-1,iedge; // izerodet = egde contening the vertex s

@@ -401,7 +401,7 @@ class Triangle {
   inline void Set(const Triangle &,const Triangles &,Triangles &);
   inline int In(Vertex *v) const { return ns[0]==v || ns[1]==v || ns[2]==v ;}
   TriangleAdjacent FindBoundaryEdge(int ) const;
-
+  int  infv() const {return ns[0] ?  ((  ns[1] ? ( ns[2]  ? -1 : 2) : 1  )) : 0;}
   void ReNumbering(Triangle *tb,Triangle *te, Int4 *renu) 
    {
     if (link  >=tb && link  <te) link  = tb + renu[link -tb];
