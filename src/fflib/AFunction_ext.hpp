@@ -80,7 +80,7 @@ class E_F_F0F0F0s_ :public  E { public:                               // extend
   
 };
 
-template<class R,class A=R,class B=A,class C=B, class D=C ,class CODE=E_F_F0F0F0s_<R,A,B,C,E_F0> >    // extend (3th arg.)
+template<class R,class A=R,class B=A,class C=B, class CODE=E_F_F0F0F0s_<R,A,B,C,E_F0> >    // extend (3th arg.)
 class  OneOperator3s_ : public OneOperator {     // 
   aType r; //  return type 
   typedef typename  CODE::func  func;
@@ -93,8 +93,8 @@ public:
 
       return  new CODE(f,
 		     t[0]->CastTo(args[0]),
-		     t[0]->CastTo(args[1]),
-		     t[1]->CastTo(args[2]));}     // extend
+		     t[1]->CastTo(args[1]),
+		     t[2]->CastTo(args[2]));}     // extend
   OneOperator3s_(func  ff):                        // 2->
     OneOperator(map_type[typeid(R).name()],
 		map_type[typeid(A).name()],
