@@ -1,4 +1,7 @@
- - correct configire and makefile for windows compilation process
+version 3.36-2
+ - correct problem of cleanning tmp memory for small array 
+
+ - correct configure and makefile for windows compilation process
 version 3.36 
  - add tools to remove  (now build in)
    utility.dylib removeDOF.dylib  symmetrizeCSR.dylib 

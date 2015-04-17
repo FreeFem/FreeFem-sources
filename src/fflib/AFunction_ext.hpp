@@ -72,8 +72,8 @@ class E_F_F0F0F0s_ :public  E { public:                               // extend
   AnyType operator()(Stack s)  const 
   {return SetAny<R>( f( s,
 			GetAny<A0>((*a0)(s)),
-			GetAny<A0>((*a1)(s)),
-			GetAny<A1>((*a2)(s))  ) );}   // extend (3th arg.)
+			GetAny<A1>((*a1)(s)),
+			GetAny<A2>((*a2)(s))  ) );}   // extend (3th arg.)
   virtual size_t nbitem() const {return a2->nbitem(); } // modif ??? 
   bool MeshIndependent() const 
   {return a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent() ;} // extend (2th arg.)
