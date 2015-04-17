@@ -1460,7 +1460,8 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   //-------------------------------------------- 
   
   Triangle * tt[3]; // the 3 new Triangles
-  Vertex &s0 = (* t)[0], &s1=(* t)[1], &s2=(* t)[2];
+   Vertex *ps0 = (* t)(0), *ps1=(* t)(1), *ps2=(* t)(2);
+   Vertex &s0 = *ps0, &s1=*ps1, &s2=*ps2 ;
   Icoor2  det3local[3];
   int infv = t->infv(); //&s0 ?  ((  &s1 ? ( &s2  ? -1 : 2) : 1  )) : 0;
   // infv = ordre of the infini vertex (null)
@@ -1485,9 +1486,9 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
       det3[2]=bamg::det(s0,s1,s );}
     else { 
       // one of &s1  &s2  &s0 is NULL so (&si || &sj) <=> !&sk
-      det3[0]=  &s0 ? -1  : bamg::det(s ,s1,s2) ;
-      det3[1]=  &s1 ? -1 : bamg::det(s0,s ,s2) ;
-      det3[2]=  &s2 ? -1 : bamg::det(s0,s1,s ) ;}}
+      det3[0]=  ps0 ? -1  : bamg::det(s ,s1,s2) ;
+      det3[1]=  ps1 ? -1 : bamg::det(s0,s ,s2) ;
+      det3[2]=  ps2 ? -1 : bamg::det(s0,s1,s ) ;}}
 
   
   if (!det3[0]) izerodet=0,nbd0++;
