@@ -112,7 +112,7 @@ OneOperator::pair_find OneOperator::FindWithOutCast(const ArrayOfaType & at)cons
 
 OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
  { 
-     if (!this) return 0;
+     if (this==tnull) return 0;
       OneOperator *oo,*r;
       int n=0;
       for (oo=this;oo;oo=oo->next)
@@ -607,7 +607,7 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
  ostream & operator<<(ostream & f,const Polymorphic & a)
 {
   Polymorphic::const_iterator i;
-  if(!&a) return f << "Null " << endl;
+    if(&a==E_F0::tnull) return f << "Null " << endl;
   for (i=a.m.begin();i!=a.m.end();i++)
    {
     f << "   operator" << i->first << " : " << endl;

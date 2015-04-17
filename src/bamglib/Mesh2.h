@@ -637,8 +637,8 @@ class VertexOnGeom {  public:
     GeometricalEdge * ge;  // if abscisse in [0..1]
   };
   inline void Set(const VertexOnGeom&,const Triangles &,Triangles &);  
-  int OnGeomVertex()const {return this? abscisse <0 :0;}
-  int OnGeomEdge() const {return this? abscisse >=0 :0;}
+  int OnGeomVertex()const {return  abscisse <0 ;}
+  int OnGeomEdge() const {return  abscisse >=0 ;}
   VertexOnGeom(): mv(0),abscisse(0){gv=0;} 
   VertexOnGeom(Vertex & m,GeometricalVertex &g) : mv(&m),abscisse(-1){gv=&g;}
    //  cout << "        mv = " <<mv << " gv = "  << gv << endl;} 

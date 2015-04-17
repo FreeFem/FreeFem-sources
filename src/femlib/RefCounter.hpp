@@ -48,14 +48,14 @@ class baseCountPointer { protected:
 };
 
 class RefCounter {
-
+  static RefCounter *tnull; 
   mutable int count;
   protected:
   virtual ~RefCounter() {}
   RefCounter() : count(0) {}
   public:
   int destroy() const { 
-   if(this) {throwassert(count>=0);
+      if(this!=tnull) {throwassert(count>=0);
         if ( count--==0) {
 	            SHOWVERB( cout << "True  destruction of " << this <<  endl);
              delete this;

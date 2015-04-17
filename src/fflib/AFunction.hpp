@@ -241,6 +241,7 @@ class basicForEachType : public CodeAlloc {
     const type_info  * ktype;  // the real type_info
   //  const type_info *ktypefunc;// the type of code 
     public:
+    static  basicForEachType * tnull;
      const size_t size;
 
     
@@ -254,7 +255,7 @@ class basicForEachType : public CodeAlloc {
     friend ostream & operator<<(ostream & f,const basicForEachType & e) 
       { f << '<' << e.name() << '>' ;return f;}
      void Show(ostream & f) const ;
-     const char * name() const  { return this  ?  ktype->name() :"NULL" ;}
+     const char * name() const  { return this!=tnull  ?  ktype->name() :"NULL" ;}
      virtual bool CastingFrom(const basicForEachType * t) const ;
      //  modif FH -----  A TESTER  // 
      virtual bool SametypeRight(const basicForEachType * t) const {return  (this == t) || (t == un_ptr_type) || (t == type_C_F0);}
@@ -349,7 +350,7 @@ class C_LF1;
 class E_F0 :public CodeAlloc 
    {
    public:
-
+       static E_F0 *tnull;
   struct kless : binary_function<Expression,Expression, bool>
    { bool operator()(const Expression& x, const Expression& y) const{ 
      //cout << x << " " << y << x->compare(y) << " ::: ";
@@ -359,7 +360,7 @@ class E_F0 :public CodeAlloc
    typedef map< E_F0 *,int,kless> MapOfE_F0;
 
     virtual AnyType operator()(Stack)  const =0;
-    virtual bool Empty() const {return !this; }
+    virtual bool Empty() const {return this==tnull; }
    // virtual E_F0 * destroy(Stack ) const {return 0;}
   //  virtual const E_F0 * Parameter(Stack ) const {return this;}
     virtual size_t nbitem() const {return 1;}
@@ -388,7 +389,7 @@ class E_F0 :public CodeAlloc
      
  };  
  
-inline ostream & operator<<(ostream & f,const E_F0 &e) { if(&e) e.dump(f); else f << " --0-- " ;return f;}
+inline ostream & operator<<(ostream & f,const E_F0 &e) { if(!e.Empty()) e.dump(f); else f << " --0-- " ;return f;}
 
 /// <<E_F0mps>> Specialization of [[E_F0]] where MeshIndependent() always returns false instead of true.  
 
@@ -2955,7 +2956,7 @@ class  OneOpCast: public OneOperator {
 
 // 
 inline  bool  basicForEachType::CastingFrom(aType t) const  {
-     throwassert(this && t);
+     throwassert( t);
      if ( t == this) return true;
      else if( t ==  type_C_F0 ) return true; // FH do work .... 09 / 2012 (use of ellispe ...)
      return casting->FindSameR(ArrayOfaType(t,false));
