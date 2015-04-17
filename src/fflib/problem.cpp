@@ -414,7 +414,7 @@ void Check(const Opera &Op,int N,int  M)
 	all=false;
       }*/
     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-    const E_F0 & optiexp0=*b->b->optiexp0;
+    const E_F0 * poptiexp0=b->b->optiexp0;
     
     int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
     R** where_in_stack =0;
@@ -432,8 +432,8 @@ void Check(const Opera &Op,int N,int  M)
 	  }
 	
 	
-	if(&optiexp0) 
-	  optiexp0(stack); 
+	if(poptiexp0)
+	  (*poptiexp0)(stack);
 	KN<bool> ok(b->b->v.size());
 	{  //   remove the zero coef in the liste 
 	  // R zero=R();  
@@ -706,7 +706,7 @@ void Check(const Opera &Op,int N,int  M)
 	all=false;
       }*/
     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-    const E_F0 & optiexp0=*b->b->optiexp0;
+    const E_F0 * poptiexp0=b->b->optiexp0;
     
     int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
     R** where_in_stack =0;
@@ -724,8 +724,8 @@ void Check(const Opera &Op,int N,int  M)
 	  }
 	
 	
-	if(&optiexp0) 
-	  optiexp0(stack); 
+	if(poptiexp0)
+	  (*poptiexp0)(stack);
 	KN<bool> ok(b->b->v.size());
 	{  //   remove the zero coef in the liste 
 	  // R zero=R();  
@@ -1467,7 +1467,7 @@ void Check(const Opera &Op,int N,int  M)
       all=false;
       }*/
      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-  const E_F0 & optiexp0=*b->b->optiexp0;
+  const E_F0 * poptiexp0=b->b->optiexp0;
   // const E_F0 & optiexpK=*b->b->optiexpK;
   int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
   R** where_in_stack =0;
@@ -1485,8 +1485,8 @@ void Check(const Opera &Op,int N,int  M)
      }
     
     
-    if(&optiexp0) 
-      optiexp0(stack); 
+    if(poptiexp0)
+      (*poptiexp0)(stack);
     KN<bool> ok(b->b->v.size());
      {  //   remove the zero coef in the liste 
        // R zero=R();  
@@ -1727,7 +1727,7 @@ void Check(const Opera &Op,int N,int  M)
        all=false;
        }*/
       if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-      const E_F0 & optiexp0=*b->b->optiexp0;
+      const E_F0 *poptiexp0=b->b->optiexp0;
       // const E_F0 & optiexpK=*b->b->optiexpK;
       int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
       R** where_in_stack =0;
@@ -1745,8 +1745,8 @@ void Check(const Opera &Op,int N,int  M)
           }
           
           
-          if(&optiexp0) 
-              optiexp0(stack); 
+          if(poptiexp0)
+              (*poptiexp0)(stack);
           KN<bool> ok(b->b->v.size());
           {  //   remove the zero coef in the liste 
               // R zero=R();  
@@ -4385,7 +4385,7 @@ template<class R>
 
     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
-    const E_F0 & optiexp0=*l->l->optiexp0;
+    const E_F0 * poptiexp0=l->l->optiexp0;
     // const E_F0 & optiexpK=*l->l->optiexpK;
     int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
     R** where_in_stack =   0;
@@ -4401,7 +4401,7 @@ template<class R>
 	    where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
 	    *(where_in_stack[i])=0;
 	  }
-	if(&optiexp0) optiexp0(stack);
+	if(poptiexp0) (*poptiexp0)(stack);
 	
 	if( (verbosity/100) && verbosity % 10 == 2)
 	  {
@@ -4704,7 +4704,7 @@ template<class R>
       } */
     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
-    const E_F0 & optiexp0=*l->l->optiexp0;
+    const E_F0 * poptiexp0=l->l->optiexp0;
     // const E_F0 & optiexpK=*l->l->optiexpK;
     int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
     R** where_in_stack =0;
@@ -4720,7 +4720,7 @@ template<class R>
 	    where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
 	    *(where_in_stack[i])=0;
 	  }
-	if(&optiexp0) optiexp0(stack);
+	if(poptiexp0) (*poptiexp0)(stack);
 	
 	if( (verbosity/100) && verbosity % 10 == 2)
 	  {
