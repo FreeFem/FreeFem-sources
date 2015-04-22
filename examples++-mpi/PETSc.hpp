@@ -143,6 +143,7 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     KSPSetUp(ptA->_ksp);
     if(verbosity > 0 && mpirank == 0)
         cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
+    MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
 
@@ -270,7 +271,7 @@ class Inv {
         void solve(U out) const {
             Vec y;
             double timing = MPI_Wtime();
-            MatCreateVecs((*t)._petsc, &((*t)._x), &y);
+            MatCreateVecs((*t)._petsc, nullptr, &y);
             double* x;
             VecGetArray((*t)._x, &x);
             (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<double*>(*u), x, (*t)._A->getDof());
