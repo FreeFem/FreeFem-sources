@@ -3205,7 +3205,7 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
        return rr;
      }
 
-extern queue<pair<const E_Routine*,int> > * debugstack;
+extern vector<pair<const E_Routine*,int> > * debugstack;
 
 struct NothingType {  // a type to do nothing 
  NothingType() {};

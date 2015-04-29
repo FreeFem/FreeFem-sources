@@ -44,7 +44,7 @@
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 
-queue<pair<const E_Routine*,int> > *debugstack=0;
+vector<pair<const E_Routine*,int> > *debugstack=0;
 
 
 class vectorOfInst : public  E_F0mps { public:
@@ -712,7 +712,8 @@ struct CleanE_Routine {
 };
 
 AnyType E_Routine::operator()(Stack s)  const  {
-   debugstack->push(pair<const E_Routine*,int>(this,TheCurrentLine));
+  cout << " E_Routine:: push "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
+   debugstack->push_back(pair<const E_Routine*,int>(this,TheCurrentLine));
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
@@ -744,17 +745,21 @@ AnyType E_Routine::operator()(Stack s)  const  {
        (*clean)(s); 
       WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
       memcpy(s,save,lgsave);  // restore 
-      TheCurrentLine=debugstack->front().second;
-      debugstack->pop();
-      throw ;             
+      TheCurrentLine=debugstack->back().second;
+      debugstack->pop_back();
+      cout << " E_Routine:: ... pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
+
+      throw ;
      }
   
     (*clean)(s); //  the clean is done in CleanE_Routine delete .         
    //  delete [] listparam; after return 
     memcpy(s,save,lgsave);  // restore 
-    TheCurrentLine=debugstack->front().second;
-    debugstack->pop();
-   // il faudrait que les variable locale soit detruire apres le return 
+    TheCurrentLine=debugstack->back().second;
+    debugstack->pop_back();
+    cout << " E_Routine::  pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
+
+   // il faudrait que les variable locale soit detruire apres le return
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
    // plus safe ?????  FH.  (fait 2008)
    // mais pb si   a = f()+g()   OK les pointeurs des instruction sont detruit
@@ -860,12 +865,11 @@ void ShowDebugStack()
    else
    cerr << "  current line = " << TheCurrentLine  << endl;
   if(debugstack)
-   while ( debugstack->size() )
+      for (int i=0; i<debugstack->size(); ++i)
      {
         
-        cerr << " call " << debugstack->front().first->name<< "  at  line "
-             <<debugstack->front().second << endl;
-        debugstack->pop();
+        cerr << " call " << debugstack->at(i).first->name<< "  at  line "
+             <<debugstack->at(i).second << endl;
      }
  }
  
