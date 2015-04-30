@@ -1,5 +1,15 @@
-@  changeset:   3312:13fbf0663dff
+@  changeset:   3314:7c816b2243e8
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Apr 29 23:35:08 2015 +0200
+|  summary:     correct be mistake in DG formulation with jump/mean on test function
+|
+o  changeset:   3313:dc3c17483f8e
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Apr 29 20:59:54 2015 +0200
+|  summary:     correct bug in debugshack
+|
+o  changeset:   3312:13fbf0663dff
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Apr 22 12:26:20 2015 +0200
 |  summary:     Pierre Jolivet correction.

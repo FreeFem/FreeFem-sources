@@ -3604,6 +3604,9 @@ void Check(const Opera &Op,int N,int  M)
     void  Element_rhsVF(const FElement & Kv,const FElement & KKv,int ie,int iie,int label,const LOperaD &Op,double * p,int *ip,void  * bstack,KN_<R> & B,
 		      const QuadratureFormular1d & FI = QF_GaussLegendre2)
     // sier of ip
+    //  version correct the  29 april 2015 by. FH
+    //  missing before in case of jump, mean , .. in test functions
+    //  Thank to Lucas Franceschini <lucas.franceschini@ensta-paristech.fr>
     {
 	pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
 	Stack stack= bs->first;
@@ -3702,6 +3705,7 @@ void Check(const Opera &Op,int N,int  M)
                                 if       (iicase==Code_Jump)      w_i = -w_i; ///(w_i = ww_i-w_i); // jump
 			    else  if (iicase==Code_Mean)      ww_i=w_i = cmean*  (w_i + ww_i ); // average
                             else  if (iicase==Code_OtherSide) std::swap(w_i,ww_i);  // valeur de autre cote
+                            else ffassert(0);
 			    }
 			  R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
