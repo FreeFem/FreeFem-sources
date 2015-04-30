@@ -14,12 +14,13 @@ int main(int argc,const char **argv)
   int debug=0; 
   char *dir=0;
   const char *pp=0; 
-  string cmd="freefem++.exe ";
+  string cmd="freefem++.exe";
   if(argc <=1)
   {
       cerr << " Sorry no file name "<< endl;
       cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
-      exit(1);
+      int ret= system(cmd.c_str());
+      return 0; 
   }
   
   for(int i=1;i<argc;++i)

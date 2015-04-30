@@ -64,7 +64,7 @@ extern void (*init_lgparallele)();
 
 int getprog(char* fn,int argc, char **argv)
 {
-  waitatend=init_lgparallele==0;  // attent if no parallele
+  waitatend= 0; // init_lgparallele==0;  // attent if no parallele
   consoleatend=false;  // bug with redirection FH 
   int ret=0;
   *fn='\0';
