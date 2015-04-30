@@ -1,3 +1,4 @@
+version 30 april 2015 (3319:8657e0526391)
  - correct freefem++ launch  in windows (remove wait when launch vai freefem++)
    add wait in case of launch throught launchff++.exe 
  - in DG linear form with jump or mean in test fonction was wrong 
