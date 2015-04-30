@@ -17,8 +17,9 @@ int main(int argc,const char **argv)
   string cmd="freefem++.exe";
   if(argc <=1)
   {
-      cerr << " Sorry no file name "<< endl;
-      cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
+    //      cerr << " Sorry no file name "<< endl;
+      //      cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
+      cmd += " -wait -log";
       int ret= system(cmd.c_str());
       return 0; 
   }
