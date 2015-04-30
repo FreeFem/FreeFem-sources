@@ -712,7 +712,7 @@ struct CleanE_Routine {
 };
 
 AnyType E_Routine::operator()(Stack s)  const  {
-  cout << " E_Routine:: push "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
+  //cout << " E_Routine:: push "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
    debugstack->push_back(pair<const E_Routine*,int>(this,TheCurrentLine));
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
@@ -747,7 +747,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
       memcpy(s,save,lgsave);  // restore 
       TheCurrentLine=debugstack->back().second;
       debugstack->pop_back();
-      cout << " E_Routine:: ... pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
+     // cout << " E_Routine:: ... pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
 
       throw ;
      }
@@ -757,7 +757,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
     memcpy(s,save,lgsave);  // restore 
     TheCurrentLine=debugstack->back().second;
     debugstack->pop_back();
-    cout << " E_Routine::  pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
+   // cout << " E_Routine::  pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
 
    // il faudrait que les variable locale soit detruire apres le return
    // cf routine clean, pour le cas ou l'on retourne un tableau local.

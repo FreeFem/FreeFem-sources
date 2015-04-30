@@ -1,5 +1,25 @@
-@  changeset:   3314:7c816b2243e8
+@  changeset:   3318:7113fd6d9cba
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Apr 30 16:27:53 2015 +0200
+|  summary:     add missing plugin aniso
+|
+o  changeset:   3317:09260ac5f6a3
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Apr 30 16:05:14 2015 +0200
+|  summary:     add -wait in case of no parameter in launchff++ under win32
+|
+o  changeset:   3316:a8743bcf97cd
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Apr 30 16:03:11 2015 +0200
+|  summary:     correct wait under windows by default only withvia launchff++
+|
+o  changeset:   3315:faaa3bc0050c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Apr 30 14:44:10 2015 +0200
+|  summary:     pass to version 3.37
+|
+o  changeset:   3314:7c816b2243e8
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Apr 29 23:35:08 2015 +0200
 |  summary:     correct be mistake in DG formulation with jump/mean on test function
