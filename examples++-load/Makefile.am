@@ -51,7 +51,7 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  ch.pts   BEC.cpp bfstream.cpp iohdf5.cpp \
  iohd5-beam-2d.edp	iohd5-beam-3d.edp ff-AiryBiry.cpp \
  exactpartition.cpp	exactpartition.edp \
- ClosePoints.cpp
+ ClosePoints.cpp aniso.cpp 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -73,7 +73,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX)  BEC.$(DYLIB_SUFFIX) \
 	bfstream.$(DYLIB_SUFFIX) @TOOL_DYLIB_iohdf5@ ff-AiryBiry.$(DYLIB_SUFFIX) \
-	exactpartition.$(DYLIB_SUFFIX)  ClosePoints.$(DYLIB_SUFFIX)
+	exactpartition.$(DYLIB_SUFFIX)  ClosePoints.$(DYLIB_SUFFIX) aniso.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
