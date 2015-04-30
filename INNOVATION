@@ -1,3 +1,5 @@
+ - correct freefem++ launch  in windows (remove wait when launch vai freefem++)
+   add wait in case of launch throught launchff++.exe 
  - in DG linear form with jump or mean in test fonction was wrong 
    like varf a(u,v)=intalledges(Th)(jump(v)*u) ;
 
