@@ -1,0 +1,8 @@
+// bug correct in version 1.19
+cout << ( 10. < 2 ) << endl;
+cout << ( 10. < 2. ) << endl;
+mesh Th=square(5,5);
+fespace Xh(Th,P2);
+Xh v;
+v=label;
+plot(v,value=1,wait=1);

@@ -1,0 +1,45 @@
+// file thermal-fast.edp    same problem than thermal.edp
+
+func fu0 =10+90*x/6;
+func k = 1.8*(y<0.5)+0.2;
+real ue = 25. , alpha=0.25, T=5, dt=0.1 ;
+
+mesh Th=square(30,5,[6*x,y]);
+fespace Vh(Th,P1);
+
+Vh u0=fu0,u=u0;
+
+varf vthermic (u,v)= int2d(Th)(u*v/dt + k*(dx(u) * dx(v) + dy(u) * dy(v)))  
+  +  int1d(Th,1,3)(alpha*u*v)
+  + on(2,4,u=1); 
+
+varf vthermic0(u,v) =   int1d(Th,1,3)(alpha*ue*v);
+
+varf vMass (u,v)= int2d(Th)( u*v/dt)  + on(2,4,u=1);
+
+real tgv = 1e30;
+matrix A= vthermic(Vh,Vh,tgv=tgv,solver=CG);
+matrix M= vMass(Vh,Vh);
+
+
+real[int]  b0  = vthermic0(0,Vh); // constant part of the RHS 
+real[int]  bcn = vthermic(0,Vh); //  tgv on Dirichlet boundary  node  ( !=0 )
+// we have for the node $i$ : $i\in \Gamma_{24}  \quad \Leftrightarrow \quad bcn[i] \ne 0 $ 
+real[int]  bcl=tgv*u0[]; //  the Dirichlet boundary condition part 
+
+
+ofstream ff("thermic.dat");
+for(real t=0;t<T;t+=dt){
+    real[int] b = b0 ; // for  the  RHS
+    b += M*u[]; //  add the the time dependant part
+    // to lock boundary 2,4 part:
+    b = bcn ? bcl  : b ; // do $\forall i$:  b[i] =  bcn[i] ? bcl[i] : b[i]  ;      
+    u[] = A^-1*b;    
+    ff<< t << " " << u(3,0.5) <<endl;
+    plot(u);
+}
+for(int i=0;i<20;i++) 
+  cout<<dy(u)(6.0*i/20.0,0.9)<<endl;
+plot(u,fill=true,wait=1,ps="thermic.eps");
+
+

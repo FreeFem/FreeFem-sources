@@ -1,0 +1,65 @@
+load "schwarz"
+load "metis"
+load "utility"
+load "removeDOF"
+include "getARGV.idp"
+{int tyty;
+if(mpirank==-1) 
+cin >> tyty;}
+searchMethod = 1;
+
+macro minimalMesh()square(1, 1)// EOM
+macro generateTh(name)name = square(global, global, [x, y], label = l);// EOM
+macro grad(u)[dx(u), dy(u)]// EOM
+macro bbN(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(4);
+            bb2d(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+macro meshN()mesh// EOM
+macro intN()int2d// EOM
+macro measureN()area// EOM
+macro def(u)u// EOM
+macro init(u)u// EOM
+include "additional.idp"
+
+int overlap = getARGV("-overlap", 1);
+func Pk = P1;
+
+verbosity = getARGV("-v", 0);
+int s = getARGV("-split", 1);
+int global = getARGV("-global", 200);
+int solver = getARGV("-solver", 3); // 1: Additive Schwarz + CG, 2: RAS + GMRES, 3: GENEO + GMRES
+int i, j;
+int[int] l = [1, 2, 2, 2];
+
+mesh Th = minimalMesh;
+fespace Wh(Th, Pk);
+build(generateTh, Th, ThBorder, ThOverlap, s, D, numberIntersection, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld)
+// verif ..
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + intN(meshName)(v) + on(1, u = 0.0);// EOM
+assemble(Mat, rhs, Wh, Th, ThBorder, Varf)
+
+dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+
+if(mpisize > 1 && solver == 3) {
+    int[int] parm(1);
+    parm(0) = getARGV("-nu", 20);
+    macro EVproblem(varfName, meshName, PhName)
+        varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + on(1, u = 0.0);// EOM
+    EVproblem(vPbNoPen, Th, Ph)
+    matrix<real> noPen = vPbNoPen(Wh, Wh, solver = CG);
+    if(solver == 3) // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
+        attachCoarseOperator(mpiCommWorld, A, A = noPen, parameters = parm);
+}
+
+Wh<real> def(u); // this will be the solution
+
+DDM(A, u[], rhs, dim = getARGV("-gmres_restart", 60), iter = getARGV("-iter", 60), eps = getARGV("-eps", 1e-8), solver = solver);
+plotMPI(Th, u[], "Global solution", Pk, def, 3, 1)
