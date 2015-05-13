@@ -697,7 +697,7 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    if (verbosity>50) 
      kprint=2;
    if (verbosity>99)  cout << A << endl;
-   throwassert(&x && &b && &A && &C);
+//   throwassert(&x && &b && &A && &C);
    typedef KN<R> Rn;
    int n=b.N();   
    throwassert(n==x.N());

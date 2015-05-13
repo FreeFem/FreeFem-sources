@@ -13,6 +13,7 @@ class DistributedCSR {
         HpSchwarz<>*                _A;
         Mat                     _petsc;
         Vec                         _x;
+        KSP                       _ksp;
         unsigned int*             _num;
         int*                       _ia;
         int*                       _ja;
@@ -23,19 +24,27 @@ class DistributedCSR {
         bool                     _free;
         DistributedCSR() : _A(), _num(), _ia(), _ja(), _c(), _first(), _last() { };
         ~DistributedCSR() {
-            VecDestroy(&_x);
-            MatDestroy(&_petsc);
-            delete [] _num;
-            if(_free) {
-                delete []  _ia;
-                delete []  _ja;
-                delete []   _c;
+            if(_A) {
+                VecDestroy(&_x);
+                MatDestroy(&_petsc);
+                KSPDestroy(&_ksp);
+                delete [] _num;
+                _num = nullptr;
+                if(_free) {
+                    delete []  _ia;
+                    delete []  _ja;
+                    delete []   _c;
+                    _ia = _ja = nullptr;
+                    _c = nullptr;
+                }
+                delete _A;
+                _A = nullptr;
             }
-            delete _A;
         }
 };
 
 void finalizePETSc() {
+    PETSC_COMM_WORLD = MPI_COMM_WORLD;
     PetscFinalize();
 }
 
@@ -51,7 +60,7 @@ class initCSR_Op : public E_F0mps {
         Expression O;
         Expression R;
         Expression D;
-        static const int n_name_param = 1;
+        static const int n_name_param = 3;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         initCSR_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4, Expression param5) : A(param1), K(param2), O(param3), R(param4), D(param5) {
@@ -63,7 +72,9 @@ class initCSR_Op : public E_F0mps {
 
 template<class Type>
 basicAC_F0::name_and_type initCSR_Op<Type>::name_param[] = {
-    {"bs", &typeid(long)}
+    {"communicator", &typeid(pcommworld)},
+    {"bs", &typeid(long)},
+    {"rhs", &typeid(KN<double>*)}
 };
 
 template<class Type>
@@ -82,19 +93,22 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     KN<long>* ptO = GetAny<KN<long>*>((*O)(stack));
     KN<double>* ptD = GetAny<KN<double>*>((*D)(stack));
-    long bs = nargs[0] ? GetAny<long>((*nargs[0])(stack)) : 1;
+    long bs = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 1;
     ptA->_A = new HpSchwarz<>;
     MatriceMorse<double> *mA = static_cast<MatriceMorse<double>*>(&(*GetAny<Matrice_Creuse<double>*>((*K)(stack))->A));
+    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
     if(ptO && ptA) {
         HPDDM::MatrixCSR<double>* dA = new HPDDM::MatrixCSR<double>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->_A->Subdomain<double>::initialize(dA, STL<long>(*ptO), *ptR);
+        ptA->_A->Subdomain<double>::initialize(dA, STL<long>(*ptO), *ptR, comm);
     }
+    if(comm)
+        PETSC_COMM_WORLD = *comm;
     ptA->_A->HpSchwarz<>::initialize(*ptD);
     if(!ptA->_num)
         ptA->_num = new unsigned int[ptA->_A->getDof()];
     double timing = MPI_Wtime();
     ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, ptA->_global);
-    if(mpirank == 0)
+    if(verbosity > 0 && mpirank == 0)
         cout << " --- global numbering created (in " << MPI_Wtime() - timing << ")" << endl;
     timing = MPI_Wtime();
     ptA->_free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ptA->_ia, ptA->_ja, ptA->_c);
@@ -112,8 +126,24 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     }
     if(mA->symetrique)
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, PETSC_TRUE);
-    if(mpirank == 0)
+    if(verbosity > 0 && mpirank == 0)
         cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
+    KN<double>* rhs = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
+    if(rhs)
+        ptA->_A->HPDDM::template Subdomain<double>::exchange(*rhs);
+    timing = MPI_Wtime();
+    KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
+    KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+    double eps = 1e-8;
+    PetscOptionsGetReal(NULL, "-eps", &eps, NULL);
+    int it = 100;
+    PetscOptionsGetInt(NULL, "-iter", &it, NULL);
+    KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
+    KSPSetFromOptions(ptA->_ksp);
+    KSPSetUp(ptA->_ksp);
+    if(verbosity > 0 && mpirank == 0)
+        cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
+    MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
 
@@ -193,118 +223,25 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             VecDestroyVecs(dim, &ns);
         delete [] ns;
     }
-    return 0L;
-}
-
-long distributedNumbering(DistributedCSR* const& A, KN<double>* const& vec) {
-    if(!A->_num)
-        A->_num = new unsigned int[vec->n];
     double timing = MPI_Wtime();
-    A->_A->distributedNumbering(A->_num, A->_first, A->_last, A->_global);
-    if(mpirank == 0)
-        cout << " --- global numbering created (in " << MPI_Wtime() - timing << ")" << endl;
-    for(int i = 0; i < vec->n; ++i)
-        vec->operator[](i) = A->_num[i];
-    return 0;
-}
-long renumberCSR(DistributedCSR* const& A, FEbaseArrayKn<double>* const& nullspace) {
-    double timing = MPI_Wtime();
-    A->_free = A->_A->distributedCSR(A->_num, A->_first, A->_last, A->_ia, A->_ja, A->_c);
-    MatCreate(PETSC_COMM_WORLD, &(A->_petsc));
-    MatSetSizes(A->_petsc, A->_last - A->_first, A->_last - A->_first, A->_global, A->_global);
-    MatSetBlockSize(A->_petsc, (nullspace->N == 3) ? 2 : ((nullspace->N == 6) ? 3 : 1));
-    MatSetType(A->_petsc, MATMPIAIJ);
-    MatMPIAIJSetPreallocationCSR(A->_petsc, A->_ia, A->_ja, A->_c);
-    MatSetOption(A->_petsc, MAT_SPD, PETSC_TRUE);
-    if(mpirank == 0)
-        cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
-    int dim = nullspace->N;
-    if(dim) {
-        Vec x;
-        MatCreateVecs(A->_petsc, &x, NULL);
-        timing = MPI_Wtime();
-        Vec* ns;
-        VecDuplicateVecs(x, dim, &ns);
-        for(unsigned short i = 0; i < dim; ++i) {
-            double* x;
-            VecGetArray(ns[i], &x);
-            A->_A->distributedVec<0>(A->_num, A->_first, A->_last, *(nullspace->get(i)), x, A->_A->getDof());
-            VecRestoreArray(ns[i], &x);
-        }
-        MatNullSpace sp;
-        MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, dim, ns, &sp);
-        MatSetNearNullSpace(A->_petsc, sp);
-        if(mpirank == 0)
-            cout << " --- near null space set (in " << MPI_Wtime() - timing << ")" << endl;
-        MatNullSpaceDestroy(&sp);
-        if(ns)
-            VecDestroyVecs(dim, &ns);
-        delete [] ns;
-#if 0
-        PetscViewer viewer;
-        const Vec* vecs;
-        PetscViewerBinaryOpen(PETSC_COMM_WORLD, "A", FILE_MODE_WRITE, &viewer);
-        MatView(A->_petsc, viewer);
-        MatNullSpace mnull;
-        MatGetNearNullSpace(A->_petsc, &mnull);
-        MatNullSpaceGetVecs(mnull, NULL, &dim, &vecs);
-        for(unsigned short i = 0; i < dim; ++i)
-            VecView(vecs[i], viewer);
-        PetscViewerDestroy(&viewer);
-#endif
-    }
-    return 0;
-}
-long solvePETSc(DistributedCSR* const& A, KN<double>* const& in) {
-    KSP ksp;
-    Vec y;
-    double timing = MPI_Wtime();
-    KSPCreate(PETSC_COMM_WORLD, &ksp);
-    KSPSetOperators(ksp, A->_petsc, A->_petsc);
+    KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
     double eps = 1e-8;
     PetscOptionsGetReal(NULL, "-eps", &eps, NULL);
     int it = 100;
     PetscOptionsGetInt(NULL, "-iter", &it, NULL);
-    KSPSetTolerances(ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
-    KSPSetFromOptions(ksp);
-    KSPSetUp(ksp);
-    if(mpirank == 0)
+    KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
+    KSPSetFromOptions(ptA->_ksp);
+    KSPSetUp(ptA->_ksp);
+    if(verbosity > 0 && mpirank == 0)
         cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
-    MatCreateVecs(A->_petsc, &(A->_x), &y);
-    double* x;
-    VecGetArray(A->_x, &x);
-    A->_A->distributedVec<0>(A->_num, A->_first, A->_last, *in, x, A->_A->getDof());
-    VecRestoreArray(A->_x, &x);
-    std::fill(static_cast<double*>(*in), static_cast<double*>(*in) + in->n, 0);
-    timing = MPI_Wtime();
-    KSPSolve(ksp, A->_x, y);
-    if(mpirank == 0)
-        cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
-    VecGetArray(y, &x);
-    A->_A->distributedVec<1>(A->_num, A->_first, A->_last, *in, x, A->_A->getDof());
-#if 0
-    Vec z;
-    MatCreateVecs(A->_petsc, &z, NULL);
-    MatMult(A->_petsc, y, z);
-    VecAXPY(z, -1, A->_x);
-    double err[2];
-    VecNorm(z, NORM_2, err);
-    VecNorm(A->_x, NORM_2, err + 1);
-    if(mpirank == 0)
-        std::cout << " --- PETSc error = " << err[0] << " / " << err[1] << std::endl;
-#endif
-    VecRestoreArray(y, &x);
-    VecDestroy(&y);
-    KSPDestroy(&ksp);
-    A->_A->Subdomain<double>::exchange(*in);
-    return 0;
+    return 0L;
 }
 
 class DistributedCSR_inv  { public:
   DistributedCSR* A;
-  DistributedCSR_inv(DistributedCSR* AA) : A(AA) {assert(A);}
-  operator DistributedCSR& () const {return *A;}
-  operator DistributedCSR* () const {return A;}
+  DistributedCSR_inv(DistributedCSR* B) : A(B) { assert(A); }
+  operator DistributedCSR& () const { return *A; }
+  operator DistributedCSR* () const { return A; }
 };
 
 class OneBinaryOperatorPETSc : public OneOperator {
@@ -332,35 +269,22 @@ class Inv {
         const U u;
         Inv(T v, U w) : t(v), u(w) {}
         void solve(U out) const {
-            KSP ksp;
             Vec y;
             double timing = MPI_Wtime();
-            KSPCreate(PETSC_COMM_WORLD, &ksp);
-            KSPSetOperators(ksp, (*t)._petsc, (*t)._petsc);
-            double eps = 1e-8;
-            PetscOptionsGetReal(NULL, "-eps", &eps, NULL);
-            int it = 100;
-            PetscOptionsGetInt(NULL, "-iter", &it, NULL);
-            KSPSetTolerances(ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
-            KSPSetFromOptions(ksp);
-            KSPSetUp(ksp);
-            if(mpirank == 0)
-                cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
-            MatCreateVecs((*t)._petsc, &((*t)._x), &y);
+            MatCreateVecs((*t)._petsc, nullptr, &y);
             double* x;
             VecGetArray((*t)._x, &x);
             (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<double*>(*u), x, (*t)._A->getDof());
             VecRestoreArray((*t)._x, &x);
             std::fill(static_cast<double*>(*out), static_cast<double*>(*out) + out->n, 0);
             timing = MPI_Wtime();
-            KSPSolve(ksp, (*t)._x, y);
-            if(mpirank == 0)
+            KSPSolve((*t)._ksp, (*t)._x, y);
+            if(verbosity > 0 && mpirank == 0)
                 cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
             VecGetArray(y, &x);
             (*t)._A->template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, *out, x, (*t)._A->getDof());
             VecRestoreArray(y, &x);
             VecDestroy(&y);
-            KSPDestroy(&ksp);
             (*t)._A->HPDDM::template Subdomain<double>::exchange(*out);
         };
 };

@@ -19,6 +19,8 @@ for (int i=0;i<kdf;i++)
   cout << Wh(k,i) << " ";
  cout << endl;
 }
+//int[int] IK=[1,2,4];
+//cout << "Wh(IK) = " << Wh(IK) << endl;  
 //*/
 cout << " P1nc " << endl;
 fespace Vnch(Th,P1nc);

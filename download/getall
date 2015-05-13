@@ -161,7 +161,7 @@ download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.g
 download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.5.2.tar.gz',
 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.5.2.tar.gz','d707336a98d7cb31d843804d020edc94');
 download('hpddm','https://github.com/hpddm/hpddm/archive/master.zip',
-	 'https://github.com/hpddm','hpddm.zip','none');
+	 'https://github.com/hpddm','hpddm.zip','none','BAD_CERT');
 
 # run all downloads concurrently
 

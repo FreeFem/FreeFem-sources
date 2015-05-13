@@ -72,15 +72,15 @@ class E_F_F0F0F0s_ :public  E { public:                               // extend
   AnyType operator()(Stack s)  const 
   {return SetAny<R>( f( s,
 			GetAny<A0>((*a0)(s)),
-			GetAny<A0>((*a1)(s)),
-			GetAny<A1>((*a2)(s))  ) );}   // extend (3th arg.)
+			GetAny<A1>((*a1)(s)),
+			GetAny<A2>((*a2)(s))  ) );}   // extend (3th arg.)
   virtual size_t nbitem() const {return a2->nbitem(); } // modif ??? 
   bool MeshIndependent() const 
   {return a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent() ;} // extend (2th arg.)
   
 };
 
-template<class R,class A=R,class B=A,class C=B, class D=C ,class CODE=E_F_F0F0F0s_<R,A,B,C,E_F0> >    // extend (3th arg.)
+template<class R,class A=R,class B=A,class C=B, class CODE=E_F_F0F0F0s_<R,A,B,C,E_F0> >    // extend (3th arg.)
 class  OneOperator3s_ : public OneOperator {     // 
   aType r; //  return type 
   typedef typename  CODE::func  func;
@@ -93,8 +93,8 @@ public:
 
       return  new CODE(f,
 		     t[0]->CastTo(args[0]),
-		     t[0]->CastTo(args[1]),
-		     t[1]->CastTo(args[2]));}     // extend
+		     t[1]->CastTo(args[1]),
+		     t[2]->CastTo(args[2]));}     // extend
   OneOperator3s_(func  ff):                        // 2->
     OneOperator(map_type[typeid(R).name()],
 		map_type[typeid(A).name()],

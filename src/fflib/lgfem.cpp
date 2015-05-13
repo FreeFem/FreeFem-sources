@@ -1634,7 +1634,8 @@ long mp_region(MeshPoint * p)
    return nu ;}
 
 
-class pVh_ndf : public ternary_function<pfes *,long,long,long> { public:
+class pVh_ndf : public ternary_function<pfes *,long,long,long>
+{ public:
 
 
   class Op : public E_F0mps { public:
@@ -1656,6 +1657,19 @@ class pVh_ndf : public ternary_function<pfes *,long,long,long> { public:
    
   };
 };
+/* Essaie : FH march 2015 ...
+class pVh_renumber : public binary_function<pfes *,KN<long> *,KN<long> *>
+{ public:
+    
+    static KN<long> *  f(Stack s,pfes  *p  ,KN<long> *  k)
+        {
+            ffassert(0); // debile ...
+            return  k ;
+        }
+        
+   
+};
+ */
 //plus
 
 class Op_CopyArray : public OneOperator { public:
@@ -4991,6 +5005,11 @@ void  init_lgfem()
  Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
  Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
  Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
+/* FH: ne peux pas marcher, il faut passer aussi le nouveau Vh
+ Add<pfes*>("(","", new OneBinaryOperator_st<pVh_renumber>  );
+ */
+    
+    
  //new OneOperator3<long,pfes*,long,long>(pVh_ndf));
  
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);

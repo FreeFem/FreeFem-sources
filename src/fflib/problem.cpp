@@ -414,7 +414,7 @@ void Check(const Opera &Op,int N,int  M)
 	all=false;
       }*/
     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-    const E_F0 & optiexp0=*b->b->optiexp0;
+    const E_F0 * poptiexp0=b->b->optiexp0;
     
     int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
     R** where_in_stack =0;
@@ -432,8 +432,8 @@ void Check(const Opera &Op,int N,int  M)
 	  }
 	
 	
-	if(&optiexp0) 
-	  optiexp0(stack); 
+	if(poptiexp0)
+	  (*poptiexp0)(stack);
 	KN<bool> ok(b->b->v.size());
 	{  //   remove the zero coef in the liste 
 	  // R zero=R();  
@@ -706,7 +706,7 @@ void Check(const Opera &Op,int N,int  M)
 	all=false;
       }*/
     if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-    const E_F0 & optiexp0=*b->b->optiexp0;
+    const E_F0 * poptiexp0=b->b->optiexp0;
     
     int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
     R** where_in_stack =0;
@@ -724,8 +724,8 @@ void Check(const Opera &Op,int N,int  M)
 	  }
 	
 	
-	if(&optiexp0) 
-	  optiexp0(stack); 
+	if(poptiexp0)
+	  (*poptiexp0)(stack);
 	KN<bool> ok(b->b->v.size());
 	{  //   remove the zero coef in the liste 
 	  // R zero=R();  
@@ -1467,7 +1467,7 @@ void Check(const Opera &Op,int N,int  M)
       all=false;
       }*/
      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-  const E_F0 & optiexp0=*b->b->optiexp0;
+  const E_F0 * poptiexp0=b->b->optiexp0;
   // const E_F0 & optiexpK=*b->b->optiexpK;
   int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
   R** where_in_stack =0;
@@ -1485,8 +1485,8 @@ void Check(const Opera &Op,int N,int  M)
      }
     
     
-    if(&optiexp0) 
-      optiexp0(stack); 
+    if(poptiexp0)
+      (*poptiexp0)(stack);
     KN<bool> ok(b->b->v.size());
      {  //   remove the zero coef in the liste 
        // R zero=R();  
@@ -1727,7 +1727,7 @@ void Check(const Opera &Op,int N,int  M)
        all=false;
        }*/
       if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-      const E_F0 & optiexp0=*b->b->optiexp0;
+      const E_F0 *poptiexp0=b->b->optiexp0;
       // const E_F0 & optiexpK=*b->b->optiexpK;
       int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
       R** where_in_stack =0;
@@ -1745,8 +1745,8 @@ void Check(const Opera &Op,int N,int  M)
           }
           
           
-          if(&optiexp0) 
-              optiexp0(stack); 
+          if(poptiexp0)
+              (*poptiexp0)(stack);
           KN<bool> ok(b->b->v.size());
           {  //   remove the zero coef in the liste 
               // R zero=R();  
@@ -3604,11 +3604,15 @@ void Check(const Opera &Op,int N,int  M)
     void  Element_rhsVF(const FElement & Kv,const FElement & KKv,int ie,int iie,int label,const LOperaD &Op,double * p,int *ip,void  * bstack,KN_<R> & B,
 		      const QuadratureFormular1d & FI = QF_GaussLegendre2)
     // sier of ip
+    //  version correct the  29 april 2015 by. FH
+    //  missing before in case of jump, mean , .. in test functions
+    //  Thank to Lucas Franceschini <lucas.franceschini@ensta-paristech.fr>
     {
 	pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);   
 	Stack stack= bs->first;
 	double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-	
+        bool onborder= &Kv.T == &KKv.T;
+        const FElement *pKKv= !onborder ?  & KKv : 0;
 	MeshPoint mp=*MeshPointStack(stack) ;
 	R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
 	const Triangle & T  = Kv.T;
@@ -3634,7 +3638,7 @@ void Check(const Opera &Op,int N,int  M)
 	int lffv = nv*N*last_operatortype; 
 	int lp =nv*2;
 	KN_<int> pp(ip,lp),pk(ip+lp,lp),pkk(ip+2*lp,lp);	
-	int n = BuildMEK_KK(lp,pp,pk,pkk,&Kv,&KKv); 
+	int n = BuildMEK_KK(lp,pp,pk,pkk,&Kv,pKKv);
 	RNMK_ fu(p,nv,N,lastop); //  the value for basic fonction
 	RNMK_ ffu( (double*) p  + lffv  ,nv,N,lastop); //  the value for basic fonction
 	
@@ -3648,7 +3652,6 @@ void Check(const Opera &Op,int N,int  M)
 	PP_B(TriangleHat[VerticesOfTriangularEdge[iie][0]]),
 	PP_C(TriangleHat[OppositeVertex[ie]]);
 	R2 Normal(E.perp()/-le); 
-	bool onborder= &Kv.T == &KKv.T; 
         double cmean = onborder ? 1. : 0.5;
 	for (npi=0;npi<FI.n;npi++) // loop on the integration point
 	  {
@@ -3677,10 +3680,14 @@ void Check(const Opera &Op,int N,int  M)
 		  // if (alledges || onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
 		{ 
 		    int ik= pk[i];
-		    int ikk=pkk[i]; 
+		    int ikk=pkk[i];
+                    
 		    RNM_ wi(fu(Max(ik,0),'.','.'));
                     RNM_ wwi(ffu(Max(ikk,0),'.','.'));  		    
 		    int il=0;
+                    int dofik=ik>=0? Kv(ik):-1;
+                    int dofikk=ikk>=0? KKv(ikk):-1;
+                    
 		    for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
 		      {       
 			 
@@ -3695,9 +3702,10 @@ void Check(const Opera &Op,int N,int  M)
 			  if( iicase>0 ) 
 			    {
 			    if( ikk>=0) ww_i =  wwi(ii.first,iis );  
-			    if       (iicase==Code_Jump)      w_i = ww_i-w_i; // jump
-			    else  if (iicase==Code_Mean)      w_i = cmean*  (w_i + ww_i ); // average
-			    else  if (iicase==Code_OtherSide) w_i = ww_i;  // valeur de autre cote
+                                if       (iicase==Code_Jump)      w_i = -w_i; ///(w_i = ww_i-w_i); // jump
+			    else  if (iicase==Code_Mean)      ww_i=w_i = cmean*  (w_i + ww_i ); // average
+                            else  if (iicase==Code_OtherSide) std::swap(w_i,ww_i);  // valeur de autre cote
+                            else ffassert(0);
 			    }
 			  R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
@@ -3713,7 +3721,9 @@ void Check(const Opera &Op,int N,int  M)
 			  
 			  //= GetAny<double>(ll.second.eval(stack));
 			  
-			  B[Kv(i)] += coef * c * w_i;
+                          if(dofik>=0) B[dofik] += coef * c * w_i;
+			  if(dofikk>=0) B[dofikk] += coef * c * ww_i;
+                          
 		      }
 		}
 	      
@@ -4385,7 +4395,7 @@ template<class R>
 
     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
-    const E_F0 & optiexp0=*l->l->optiexp0;
+    const E_F0 * poptiexp0=l->l->optiexp0;
     // const E_F0 & optiexpK=*l->l->optiexpK;
     int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
     R** where_in_stack =   0;
@@ -4401,7 +4411,7 @@ template<class R>
 	    where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
 	    *(where_in_stack[i])=0;
 	  }
-	if(&optiexp0) optiexp0(stack);
+	if(poptiexp0) (*poptiexp0)(stack);
 	
 	if( (verbosity/100) && verbosity % 10 == 2)
 	  {
@@ -4704,7 +4714,7 @@ template<class R>
       } */
     if (verbosity>3) cout << " Optimized = "<< useopt << ", ";
     
-    const E_F0 & optiexp0=*l->l->optiexp0;
+    const E_F0 * poptiexp0=l->l->optiexp0;
     // const E_F0 & optiexpK=*l->l->optiexpK;
     int n_where_in_stack_opt=l->l->where_in_stack_opt.size();
     R** where_in_stack =0;
@@ -4720,7 +4730,7 @@ template<class R>
 	    where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
 	    *(where_in_stack[i])=0;
 	  }
-	if(&optiexp0) optiexp0(stack);
+	if(poptiexp0) (*poptiexp0)(stack);
 	
 	if( (verbosity/100) && verbosity % 10 == 2)
 	  {
@@ -5015,9 +5025,9 @@ void InitProblem( int Nb, const FESpace & Uh,
       if (!X || (X =B) )
         X=new KN<R>(B->N());
       const FEbase<R,v_fes> & u_h0 = *(u_h[0]);
-      const FESpace  * u_Vh = &*u_h0.Vh ;
+      const FESpace  * u_Vh = u_h0.Vh ;
       
-      if ( u_Vh==0  || &(*(u_h[0])).Vh->Th != &Th )
+      if ( u_Vh==0  || &((u_h[0])->Vh->Th) != &Th )
         {
           *X=R();
           if(verbosity>1)

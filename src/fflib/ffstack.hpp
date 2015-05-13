@@ -206,10 +206,12 @@ public:
 	       }
 	
 	bool clean() 
-	 { bool ret= !stackptr.empty();
+	 {
+             topmemory4tmp=0;// clean the tmp allocation
+             bool ret= !stackptr.empty();
 	    if(ret)
 	      { 
-		topmemory4tmp=0;// clean the tmp allocation 
+		
 	        if(stackptr.size()>=20 && verbosity>2) 
 		  // FFCS: nothing on following line for tests/compare
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
@@ -229,7 +231,9 @@ public:
        { 
 	int lg8=lg%8; 
 	if(lg8) lg += 8-lg8; 
-	if(topmemory4tmp + lg>= sizeofmemory4tmp) {ffassert(0);}
+	if(topmemory4tmp + lg>= sizeofmemory4tmp) {
+            ErrorExec("   Fatal Error: too much temporary alloction, your expression is too long, or a bug in ff++, FH; april,2015",1);
+            ffassert(0);}
 	void *   p=static_cast<void*> (memory4tmp+topmemory4tmp);// correct FH Oct 2009
 	topmemory4tmp+= lg;
 	return p;

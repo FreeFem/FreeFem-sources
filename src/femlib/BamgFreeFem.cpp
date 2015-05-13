@@ -130,7 +130,10 @@ Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
       throwassert(k);
       if (kc)  nbcrakev++;
     }
+  double badvalue=12345e100;
   Fem2D::Vertex * v = new Fem2D::Vertex[nv];
+    for(int i=0; i<nv; ++i)
+        v[i].x    =  badvalue;
   //  set the vertices --
   for (i=0;i<nt;i++)
     { 
@@ -143,10 +146,22 @@ Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
           Vertex & thv(th(i)[j]);
           v[k].x    =  thv.r.x;
           v[k].y    =  thv.r.y;
-          v[k].lab  =  thv.ref();        
+          v[k].lab  =  thv.ref();
+        //  cout << i<< " " << j << " " << k <<" " <<  v[k].x  << " " <<thv.r.x<< endl;
+            
         }  
     }
-  // warning in cracked edges 
+    int kerr=0;
+    
+    for(int i=0; i<nv; ++i)
+        if(v[i].x    ==  badvalue) kerr++;
+    if(kerr)
+    {
+        cerr << " bamg2msh: Error: missing "<<kerr << " vertices ???? " << endl;
+        cerr << " I  May be: Some giving point are outside the domain ???? " << endl;
+        ExecError("Buildmesh : bamg2msh missing vertices");
+    }
+  // warning in cracked edges
   // construction of the edges --
   
   if (nbcrakev && verbosity>2)
@@ -398,10 +413,19 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
 
 
 
-Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary) 
+Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern)
 {
-  
-
+    int nbvinter=0;
+    if( pintern)
+    {
+        nbvinter=pintern->N();
+        if((pintern->M() != 2 ) && ( pintern->M()!=3))
+        {
+            cout << " point m = " <<pintern->M()<<endl;
+            ExecError("Errror: BuildMesh number of column of internal point (point=)  must be 2 or 3!");
+        }
+    }
+    int brefintp= -2000000000;
   using namespace bamg;
   using bamg::Abs;
   using bamg::Max;
@@ -409,7 +433,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   using bamg::Pi;
   Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
   
-  int nbvx=0,nbe=0,nbsd=0;
+  int nbvx=nbvinter,nbe=0,nbsd=0;
   for (E_BorderN const * k=b;k;k=k->next)
   {
       int nbd = k->NbBorder(stack);
@@ -472,6 +496,19 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
         }
     }
 }
+ // add interna point
+    if(pintern)
+    {
+        for(int k=0; k<nbvinter; ++k)
+        {
+            ffassert(i <= nbvx);
+            vertices[i].r.x=(*pintern)((long) k,0L);
+            vertices[i].r.y=(*pintern)((long) k,1L);
+            vertices[i].ReferenceNumber=  brefintp + k ;// code internal point ..
+            vertices[i].color = i;
+            i++;
+                    }
+    }
   lmin = sqrt(lmin);
   double eps = (lmin)/16.; 
   int nbvprev = i;
@@ -564,8 +601,12 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
           Gh->vertices[i].color =0;
           Gh->vertices[i].Set();
           //  vertices[i].SetCorner();
-	    if(Requiredboundary)
+          if(Requiredboundary)
            Gh->vertices[i].SetRequired();
+            
+          if(Gh->vertices[i].ReferenceNumber < 0)
+            Gh->vertices[i].SetRequired();
+
           i++;
         }
     }
@@ -635,16 +676,26 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
   
   delete [] vertices; vertices=0;
   
-  throwassert(nnn==nbvprev);
+  throwassert(nnn+nbvinter==nbvprev);
   throwassert(i==Gh->nbe);
   // definition  the default of the given mesh size 
   if (!hvertices) 
     {
-      for (i=0;i<Gh->nbv;i++) 
-        if (Gh->vertices[i].color > 0) 
+        bool hvint = pintern ? pintern->M() ==3 : 0;
+      for (i=0;i<Gh->nbv;i++)
+      {
+        if(hvint &&Gh->vertices[i].ReferenceNumber <brefintp +nbvinter)
+        {
+            long k =Gh->vertices[i].ReferenceNumber-brefintp;
+            Gh->vertices[i].m=Metric( (*pintern)(k ,2L));
+            Gh->vertices[i].ReferenceNumber = -1; //++ bof bof FH ..
+            
+        }
+        else if (Gh->vertices[i].color > 0)
           Gh->vertices[i].m=  Metric(len[i] /(Real4) Gh->vertices[i].color);
         else 
           Gh->vertices[i].m=  Metric(Hmin);
+      }
       delete [] len;
       
       if(verbosity>3) 

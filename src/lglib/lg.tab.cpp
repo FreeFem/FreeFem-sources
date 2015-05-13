@@ -2091,7 +2091,7 @@ yyreduce:
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
                         size_t lg0,lg1;                       
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
-                        debugstack= new queue<pair<const E_Routine*,int> >;
+                        debugstack= new vector<pair<const E_Routine*,int> >;
                         size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
                         if(verbosity>2  || mpirank==0) cout << endl;  

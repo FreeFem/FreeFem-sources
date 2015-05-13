@@ -1,4 +1,16 @@
- - correct configire and makefile for windows compilation process
+version 30 april 2015 (3319:8657e0526391)
+ - correct freefem++ launch  in windows (remove wait when launch vai freefem++)
+   add wait in case of launch throught launchff++.exe 
+ - in DG linear form with jump or mean in test fonction was wrong 
+   like varf a(u,v)=intalledges(Th)(jump(v)*u) ;
+
+ - correct problem of try/catch in freefem++ func 
+version 3.36-2
+ - correct problem some  null ref  with compile Apple LLVM version 6.1.0 (clang-602.0.49) (based on LLVM 3.6.0svn)   xcode 6.3 
+   some warning exist but all test pass. 
+ - correct problem of cleanning tmp memory for small array 
+
+ - correct configure and makefile for windows compilation process
 version 3.36 
  - add tools to remove  (now build in)
    utility.dylib removeDOF.dylib  symmetrizeCSR.dylib 
