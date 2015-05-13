@@ -342,7 +342,7 @@ start:   input ENDOFFILE {
                         double CPUcompile= CPUtime();
                         try {
 
-                          // <<evaluate_parsed_FF_script>>
+                          // <<evaluate_parsed_FF_script>> calls [[file:../fflib/AFunction.hpp::CListOfInst::eval]]
                           $1.eval(stack);
 
                         }
