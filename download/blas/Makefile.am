@@ -166,7 +166,7 @@ openblas:links.done
 if FFCS_WINDOWS
 links.done:openblas.done
 	cd OpenBLAS && ../../../build/links2files
-	cp OpenBLAS/libopenblas.a ../lib/libopenblas.a
+	cp OpenBLAS/libopenblas*.a ../lib/libopenblas.a
 	touch $@
 else
 links.done:openblas.done
