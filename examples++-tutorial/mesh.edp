@@ -306,6 +306,7 @@ if(err==0)
   plot(Th,wait=1,cmm="mesh ok");
 }
 }
+// <<multiborder>>
 // in test ... 
 { 
 // multy border syntax version 3.30 avril 2014 ... 

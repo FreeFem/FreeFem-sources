@@ -47,6 +47,7 @@ class baseCountPointer { protected:
  void  destroyPtr(const RefCounter *  c)  const;
 };
 
+// <<RefCounter>>
 class RefCounter {
   static RefCounter *tnull; 
   mutable int count;

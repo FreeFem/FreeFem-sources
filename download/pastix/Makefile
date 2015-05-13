@@ -24,7 +24,7 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-include config.in
+-include config.in
 
 all-local: pastix
 
@@ -34,7 +34,6 @@ DIRPKG   = ../pkg
 SRCDIR   = pastix_release_$(VERSION)
 PACKAGE1 = $(DIRPKG)/pastix_release_$(VERSION).tar.bz2
 SERVER   = https://gforge.inria.fr/frs/download.php/21873/
-INSTALL  = ../..
 VERSION  = 2200
 
 VERSIONTYPE=$(VERSIONINT)$(VERSIONPRC)$(VERSIONFLT)
@@ -53,10 +52,10 @@ pastix: FAIRE
 
 # FFCS - parallel make rules
 WHERE: install
-	echo double_pastix LD -L@DIR@/lib/pastix/double   -lpastix   >$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;
-	echo double_pastix INCLUDE -I@DIR@/include/pastix/double >> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;
-	echo complex_pastix LD -L@DIR@/lib/pastix/complex   -lpastix   >>$(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;
-	echo complex_pastix INCLUDE -I@DIR@/include/pastix/complex >> $(SRCDIR)/$(INSTALL)/lib/WHERE.pastix ;
+	echo double_pastix LD -L@DIR@/lib/pastix/double   -lpastix   >../lib/WHERE.pastix ;
+	echo double_pastix INCLUDE -I@DIR@/include/pastix/double >> ../lib/WHERE.pastix ;
+	echo complex_pastix LD -L@DIR@/lib/pastix/complex   -lpastix   >>../lib/WHERE.pastix ;
+	echo complex_pastix INCLUDE -I@DIR@/include/pastix/complex >> ../lib/WHERE.pastix ;
 
 FAIRE:$(SRCDIR)/FAIT 
 	$(MAKE) WHERE
@@ -107,10 +106,10 @@ $(SRCDIR)/FAITR1: $(SRCDIR)/tag-tar
 	#endif 
 	touch $(SRCDIR)/FAITR1
 $(SRCDIR)/FAITR2: $(SRCDIR)/FAITR1
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/double
-	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/double/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/double
-	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/double/
+	mkdir -p ../include/pastix/double
+	cp $(SRCDIR)/install/*.h ../include/pastix/double/
+	mkdir -p ../lib/pastix/double
+	cp $(SRCDIR)/install/*.a ../lib/pastix/double/
 	cd $(SRCDIR)/src/ &&  $(MAKE) clean 
 	touch $(SRCDIR)/FAITR2;
 
@@ -150,12 +149,12 @@ $(SRCDIR)/FAITC1:$(SRCDIR)/tag-tar
 	touch $(SRCDIR)/FAITC1
 
 $(SRCDIR)/FAITC2: $(SRCDIR)/FAITR2 $(SRCDIR)/FAITC1
-	mkdir -p $(SRCDIR)/$(INSTALL)/include/pastix/complex
-	cp $(SRCDIR)/install/*.h $(SRCDIR)/$(INSTALL)/include/pastix/complex/
-	mkdir -p $(SRCDIR)/$(INSTALL)/lib/pastix/complex
-	cp $(SRCDIR)/install/*.a $(SRCDIR)/$(INSTALL)/lib/pastix/complex/
-	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix_int_complex.h)   <patch-pastix_long_complex.h
-	(cd $(SRCDIR)/$(INSTALL)/include/pastix/complex/; patch pastix.h) <patch-pastix_long_complex.h
+	mkdir -p ../include/pastix/complex
+	cp $(SRCDIR)/install/*.h ../include/pastix/complex/
+	mkdir -p ../lib/pastix/complex
+	cp $(SRCDIR)/install/*.a ../lib/pastix/complex/
+	(cd ../include/pastix/complex/; patch pastix_int_complex.h)   <patch-pastix_long_complex.h
+	(cd ../include/pastix/complex/; patch pastix.h) <patch-pastix_long_complex.h
 	touch $(SRCDIR)/FAITC2
 
 
@@ -182,10 +181,10 @@ clean-local:
 clean: clean-local
 	-rm config.in FAIRE 
 	-rm $(SRCDIR)/FAIT
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/double
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/pastix/double
-	-rm -rf $(SRCDIR)/$(INSTALL)/include/pastix/complex
-	-rm -rf $(SRCDIR)/$(INSTALL)/lib/pastix/complex
+	-rm -rf ../include/pastix/double
+	-rm -rf ../lib/pastix/double
+	-rm -rf ../include/pastix/complex
+	-rm -rf ../lib/pastix/complex
 	-rm -rf $(SRCDIR)
 #
 # FFCS - also force reconfiguration
@@ -193,8 +192,6 @@ clean: clean-local
 	-rm config.in config-complex.in config.log
 	-rm config.log
 #	-rm $(PACKAGE1)
-
-.PHONY:$(SRCDIR)/$(INSTALL)
 
 # Local Variables:
 # mode:makefile

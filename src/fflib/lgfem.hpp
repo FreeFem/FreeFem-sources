@@ -153,7 +153,7 @@ bool BuildPeriodic(
   const Mesh &Th,Stack stack,
   int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe);
 
-  
+// <<v_fes>> uses [[file:~/ff/src/femlib/RefCounter.hpp::RefCounter]]
 class v_fes : public RefCounter { 
 public:
   typedef ::pfes pfes;
@@ -326,7 +326,7 @@ public:
   }
 };
  
-template<class K,class v_fes> class FEbase;
+template<class K,class v_fes> class FEbase; // <<FEbase>>
 template<class K,class v_fes> 
 class FEcomp {
 public:

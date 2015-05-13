@@ -272,7 +272,8 @@ static  bool ffapi_protectedservermode(){
 #endif
   }
 
-void init(){
+  // called by [[file:../lglib/mymain.cpp::ffapi::init]]
+  void init(){
     ffapi::cin = ffapi::ffapi_cin;
     ffapi::cout = ffapi::ffapi_cout;
     ffapi::cerr = ffapi::ffapi_cerr;
@@ -294,7 +295,6 @@ void init(){
     ffapi::protectedservermode = ffapi::ffapi_protectedservermode;
   }
 }
-
 
 /// Local Variables:
 /// mode:c++

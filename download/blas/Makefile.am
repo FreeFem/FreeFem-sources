@@ -137,17 +137,45 @@ clean-local::
 all-local::@COMPILE_OPENBLAS@
 pkgcompile::@COMPILE_OPENBLAS@
 generic:
+
+###if FFCS_WINDOWS
+###openblas:copy.done
+###copy.done:unzip.done
+###	cp @OPENBLAS_PACK@/lib/libopenblas.a ../lib
+###	touch $@
+###clean::
+###	-rm ../pkg/libopenblas.a
+###unzip.done:download.done
+###	unzip ../pkg/@OPENBLAS_PACK@.zip
+###	touch $@
+###clean::
+###	-rm -r @OPENBLAS_PACK@
+###
+#### [[file:../getall::OpenBLAS]]
+###download.done:
+###	../getall -o @OPENBLAS_GET@ -a
+###	touch $@
+###
+###else
+
 openblas:links.done
+
+# The library has a complex name with version number, just copy it into a standard location
 
 # links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
 if FFCS_WINDOWS
 links.done:openblas.done
 	cd OpenBLAS && ../../../build/links2files
+	cp OpenBLAS/libopenblas.a ../lib/libopenblas.a
 	touch $@
 else
 links.done:openblas.done
+	cp OpenBLAS/libopenblas.a ../lib/libopenblas.a
 	touch $@
 endif
+
+clean::
+	-rm ../lib/libopenblas.a
 
 openblas.done:openpatches.done
 #
@@ -170,10 +198,16 @@ openpatches.done:opendownload.done
 	patch -u -p1 < openblas.patches
 	touch $@
 
+clean::
+	-rm *.done
+	-rm -r OpenBLAS
+
 download::opendownload.done
 opendownload.done:
 	../getall -o OpenBLAS -a
 	touch $@
+
+###endif
 
 # ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part
 # of the specific target 'veryclean'.

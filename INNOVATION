@@ -68,6 +68,15 @@ BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (d
  - correct bug in periodic condition in case common dof with periodic.  
  - correct big bug in memory management of sparse matrix
 
+4/3/2015 (ALH)
+ - Edited for compatibility with Emscripten
+ - Added calls for Javascript graphical output along with postscript output
+
+15/10/2014 (ALH)
+ - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
+ - Corrected --disable-pdf configuration option (useful for FFCS build)
+ - Removed obsolete cvs history directives
+ - [[file:download/getall]] now checks downloaded packages against known MD5 values
  version 3.32 
  - correct of problem of plugin and mpi,
     build all dynamics lib with and without mpi, 
@@ -124,6 +133,11 @@ version 3.30-1 may/2014 ( hg rev: 3017)
     jump is not zero on boundary, it is - boundary value ..
     fespace Ph(Th,P0);u= 1;int1d(Th)( jump(u) ) = - length border . 
  
+30/6/14 (ALH)
+ - [[file:download/getall]]
+   - now checks downloaded packages against known MD5 values
+   - new -h inline help option
+
 version 3.30. ( for windows hg  rev : 3013)
  - add binary ios:mode constant, to open file in binary mode under window
     to solve pb of seekg under windows  
@@ -189,7 +203,7 @@ version 3.27
      missing all random  distribution ..
  - add interface  with gsl random number generation in test .. 
  - correct pb of compilation under window (mingw32/msys) 
-6/1/14 (ALH)
+6/2/14 (ALH)
  - Creating documentation hyperlinks (in emacs orgtime and in Doxygen format)
  - New script build/orgindex and file index.org list all hyperlinks in the FF source in Emacs org-mode format
  - Set all hyperlinks to relative paths to make sure that they work from any location
@@ -199,6 +213,9 @@ version 3.27
    - done for [[file:download/blas/Makefile.am]] as well
  - added option --enable-mkl-mlt in [[file:configure.ac::enable_mkl_mlt]] to allow FF to be linked with the
    multithreaded MKL when an external library requires it (request from Atsushi Suzuki)
+ - cleaned up old comments from the documentation to enable automatic convertion into other formats (eg wiki format)
+ - many small corrections for Windows compilation
+ - added "NbColors" in plot() parameters
 version 3.26-3  09/12/2013 
    correct problem with openblas need pthread lib 
 01/12/13

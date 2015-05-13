@@ -1,5 +1,5 @@
 abs_top_builddir=@abs_top_builddir@
-include $(abs_top_builddir)/download/headers-sparsesolver.inc
+-include $(abs_top_builddir)/download/headers-sparsesolver.inc
 HOSTARCH    = @PASTIX_HOSTARCH@#i686_mac
 VERSIONBIT  = _@SIZEOF_PTRINBIT@bit
 EXEEXT      =
