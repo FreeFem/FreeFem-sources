@@ -204,6 +204,30 @@ struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
      return f;
    }
 };
+template<class A>
+struct Op_ReadKNM : public binary_function<istream*,KNM<A>*,istream*> {
+    static istream *  f(istream  * const  & f,KNM<A>* const  &  a)
+    {
+        if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKN)");
+        int n,m;char c;
+        *f >> n >> m;
+        if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
+        
+        if(n !=a->N() || m != a->M()    ) {
+            cerr << " length on the array  N " << a->N() << " != " << n << " n in file " << endl;
+            cerr << "  or                  M " << a->M() << " != " << m << " m in file " << endl;
+            ExecError("Fatal Error: incompatible length in read array (Op_ReadKNM)");
+            assert(n==a->N());
+        }
+        while (f->get(c) &&  (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
+        
+        for (int i=0;i<n;i++)
+            for (int j=0;j<m;j++)
+                *f >> (*a)(i,j) ;
+        if(!f->good())  ExecError("Fatal Error: file  not good in read array after reading )");
+        return f;
+    }
+};
 
 
 
