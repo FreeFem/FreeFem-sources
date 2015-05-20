@@ -1,3 +1,4 @@
+ - add read of real[int,int], int[int,int], complex[int,int] .. 
 version 30 april 2015 (3319:8657e0526391)
  - correct freefem++ launch  in windows (remove wait when launch vai freefem++)
    add wait in case of launch throught launchff++.exe 
