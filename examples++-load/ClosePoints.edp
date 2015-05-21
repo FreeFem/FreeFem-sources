@@ -17,7 +17,7 @@ real regtest;
       Q(i,0)=P(i,0)+i*0.001;
       Q(i,1)=P(i,1);
 
-      P(i,2) = 0.05*0.02*2*pi;// mesh size auron point..
+      P(i,2) = 0.05*0.05*2*pi;// mesh size auron point..
   }
 // multy border syntax version 3.30 avril 2014 ... 
   real[int] xx=[0,1,1,0],
