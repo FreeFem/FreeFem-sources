@@ -257,7 +257,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                     ev[i] = *ev + i * dof;
                 ptA->setVectors(ev);
                 ptA->Type::super::initialize(nu);
-                int lwork = solver.workspace(&(first._m));
+                int lwork = solver.workspace();//&(first._m)); modif FH mai 2015
                 K* a;
                 typename HPDDM::Wrapper<K>::ul_type* values;
                 if(!std::is_same<K, typename HPDDM::Wrapper<K>::ul_type>::value) {
@@ -282,7 +282,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                         for(int j = A->_ia[i]; j < A->_ia[i + 1]; ++j)
                             a[i + A->_ja[j] * dof] = A->_a[j];
                     ptA->Type::super::callSolve(a, A->_m);
-                    solver.svd(&(A->_m), a, s, u, vt, work, &lwork, pos + nu, rwork);
+                    solver.svd("N",&(A->_m), a, s, u, vt, work, &lwork, pos + nu, rwork);
                     for(unsigned int i = 0, j = 0, k = 0; k < nu; ++k) {
                         if(s[i] > values[j])
                             pos[k] = ++i;
@@ -445,12 +445,12 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         else
             switch(pipelined) {
 #if (OMPI_MAJOR_VERSION > 1 || (OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 7)) || MPICH_NUMVERSION >= 30000000
-                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED,'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
 #if defined(DPASTIX) || defined(DMKL_PARDISO)
-                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED,'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
-                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL,'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
             }
     }
     else {
@@ -459,12 +459,12 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         else
             switch(pipelined) {
 #if (OMPI_MAJOR_VERSION > 1 || (OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 7)) || MPICH_NUMVERSION >= 30000000
-                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED, true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED,'L', true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
 #if defined(DPASTIX) || defined(DMKL_PARDISO)
-                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED, true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED,'L', true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
-                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL, true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL,'L', true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
             }
     }
     timer = MPI_Wtime() - timer;
