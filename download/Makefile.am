@@ -82,7 +82,7 @@ EXTRA_DIST= \
 ipopt/Makefile	\
 ipopt/Makefile.inc.in \
 ipopt/patch-IpBlas  \
-getall 
+getall patch-hpddm-1
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
