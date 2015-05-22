@@ -1,5 +1,10 @@
-@  changeset:   3323:d398f3adab01
+@  changeset:   3324:e9c275d64007
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu May 21 14:40:51 2015 +0200
+|  summary:     put less point on ClosePoints.edp
+|
+o  changeset:   3323:d398f3adab01
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu May 21 14:36:35 2015 +0200
 |  summary:     coorect pb with new hpddm version

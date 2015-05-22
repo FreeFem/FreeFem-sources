@@ -26,8 +26,6 @@
 #define DMUMPS
 #endif
 
-#define HPDDM_BDD  0
-#define HPDDM_FETI 0
 
 
 #include <mpi.h>
@@ -40,7 +38,7 @@
 #undef FETI
 #endif
 #include <HPDDM.hpp>
-#include <LAPACK.hpp>
+
 template<class T>
 class STL {
     T* const _it;
@@ -94,7 +92,7 @@ template<class Type, class K>
 basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"scaling", &typeid(KN<typename HPDDM::Wrapper<K>::ul_type>*)},
-    {"deflation", &typeid(FEbaseArrayKn<K>*)},
+    {"deflation", &typeid(FEbaseArrayKn<K>*)}
 };
 template<class Type, class K>
 class initDDM : public OneOperator {
@@ -248,7 +246,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             ptA->callNumfact();
             if(!vecAIJ.empty()) {
                 int dof = ptA->getDof();
-                HPDDM::Lapack<K> solver(dof);
+                HPDDM::Eigensolver<K> solver(dof);
                 const HPDDM::MatrixCSR<K>& first = *vecAIJ.front();
                 nu = std::min(nu, static_cast<unsigned short>(first._m));
                 K** ev = new K*[nu];
@@ -257,7 +255,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                     ev[i] = *ev + i * dof;
                 ptA->setVectors(ev);
                 ptA->Type::super::initialize(nu);
-                int lwork = solver.workspace();//&(first._m)); modif FH mai 2015
+                int lwork = solver.workspace("S", &first._m);
                 K* a;
                 typename HPDDM::Wrapper<K>::ul_type* values;
                 if(!std::is_same<K, typename HPDDM::Wrapper<K>::ul_type>::value) {
@@ -282,7 +280,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                         for(int j = A->_ia[i]; j < A->_ia[i + 1]; ++j)
                             a[i + A->_ja[j] * dof] = A->_a[j];
                     ptA->Type::super::callSolve(a, A->_m);
-                    solver.svd("N",&(A->_m), a, s, u, vt, work, &lwork, pos + nu, rwork);
+                    solver.svd("S", &(A->_m), a, s, u, vt, work, &lwork, pos + nu, rwork);
                     for(unsigned int i = 0, j = 0, k = 0; k < nu; ++k) {
                         if(s[i] > values[j])
                             pos[k] = ++i;
@@ -399,27 +397,31 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     KN<K>* ptX = GetAny<KN<K>*>((*x)(stack));
     KN<K>* ptRHS = GetAny<KN<K>*>((*rhs)(stack));
     Type* ptA = GetAny<Type*>((*A)(stack));
+    if(ptX->n != ptRHS->n || ptRHS->n < ptA->getDof())
+        return 0L;
     typename HPDDM::Wrapper<K>::ul_type eps = nargs[0] ? GetAny<typename HPDDM::Wrapper<K>::ul_type>((*nargs[0])(stack)) : 1e-8;
     unsigned short dim = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 50;
     unsigned short iter = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : 50;
     KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
+    long solver = nargs[4] ? GetAny<long>((*nargs[4])(stack)) : 0;
     Pair<K>* pair = nargs[7] ? GetAny<Pair<K>*>((*nargs[7])(stack)) : 0;
-    if(pair)
+    if(solver >= 0 && pair)
         if(pair->p) {
             int flag;
             MPI_Test(&(pair->p->first), &flag, MPI_STATUS_IGNORE);
         }
     MatriceMorse<K>* mA = nargs[8] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[8])(stack))->A)) : 0;
-    long solver = nargs[4] ? GetAny<long>((*nargs[4])(stack)) : 0;
     double timer = MPI_Wtime();
-    ptA->setType(solver == 1 || solver == 6 || solver == 11);
-    if(mpisize > 1 && (mA && (solver == 6 || solver == 8))) {
-        HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->callNumfact(&dA);
+    if(solver >= 0) {
+        ptA->setType(solver == 1 || solver == 6 || solver == 11 || solver == 36);
+        if(mpisize > 1 && (mA && (solver == 6 || solver == 8 || solver == 36))) {
+            HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+            ptA->callNumfact(&dA);
+        }
+        else if((solver != 100 && solver != 101) || ((solver == 100 || solver == 101) && mpisize == 1))
+            ptA->callNumfact(nullptr);
+        if(timing) (*timing)[1] = MPI_Wtime() - timer;
     }
-    else if((solver != 100 && solver != 101) || ((solver == 100 || solver == 101) && mpisize == 1))
-        ptA->callNumfact(nullptr);
-    if(timing) (*timing)[1] = MPI_Wtime() - timer;
     long pipelined = nargs[5] ? GetAny<long>((*nargs[5])(stack)) : 0;
     bool excluded = nargs[6] ? GetAny<bool>((*nargs[6])(stack)) : false;
     if(pair)
@@ -434,48 +436,91 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             timer = MPI_Wtime();
         }
     MPI_Barrier(MPI_COMM_WORLD);
-    if(!excluded && pair && pair->p && timing && mpisize > 1)
+    if(solver >= 0 && !excluded && pair && pair->p && timing && mpisize > 1)
         (*timing)[timing->n - 1] += MPI_Wtime() - timer;
     timer = MPI_Wtime();
+    unsigned short mu = ptX->n / ptA->getDof();
+    MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, ptA->getCommunicator());
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
     if(!excluded) {
-        if(solver == 1)
+        if(std::abs(solver) == 1)
             HPDDM::IterativeMethod::CG(*ptA, (K*)*ptX, (K*)*ptRHS, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0);
         else
             switch(pipelined) {
 #if (OMPI_MAJOR_VERSION > 1 || (OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 7)) || MPICH_NUMVERSION >= 30000000
-                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED,'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED, 'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
 #if defined(DPASTIX) || defined(DMKL_PARDISO)
-                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED,'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED, 'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
-                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL,'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL, 'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
             }
     }
     else {
-        if(solver == 1)
+        if(std::abs(solver) == 1)
             HPDDM::IterativeMethod::CG(*ptA, (K*)nullptr, (K*)nullptr, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0);
         else
             switch(pipelined) {
 #if (OMPI_MAJOR_VERSION > 1 || (OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 7)) || MPICH_NUMVERSION >= 30000000
-                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED,'L', true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED, 'L', true>(*ptA, (K*)nullptr, (K*)nullptr, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
 #if defined(DPASTIX) || defined(DMKL_PARDISO)
-                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED,'L', true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED, 'L', true>(*ptA, (K*)nullptr, (K*)nullptr, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
 #endif
-                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL,'L', true>(*ptA, (K*)nullptr, (K*)nullptr, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
+                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL, 'L', true>(*ptA, (K*)nullptr, (K*)nullptr, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
             }
     }
     timer = MPI_Wtime() - timer;
     if(!excluded) {
         if(rank == 0)
             std::cout << scientific << " --- system solved (in " << timer << ")" << std::endl;
-        typename HPDDM::Wrapper<K>::ul_type storage[2];
-        ptA->computeError(*ptX, *ptRHS, storage);
-        if(rank == 0)
-            std::cout << scientific << " --- error = " << storage[1] << " / " << storage[0] << std::endl;
+        typename HPDDM::Wrapper<K>::ul_type* storage = new typename HPDDM::Wrapper<K>::ul_type[2 * mu];
+        ptA->computeError(*ptX, *ptRHS, storage, mu);
+        if(rank == 0) {
+            std::cout << scientific << " --- error = " << storage[1] << " / " << storage[0];
+            for(unsigned short nu = 1; nu < mu; ++nu)
+                std::cout << " (rhs #" << nu << ")" << std::endl << scientific << "             " << storage[2 * nu + 1] << " / " << storage[2 * nu];
+            if(mu > 1)
+                std::cout << " (rhs #" << mu << ")";
+            std::cout << std::endl;
+        }
+        delete [] storage;
     }
+    return 0L;
+}
+
+template<class Type, class K>
+class changeOperator_Op : public E_F0mps {
+    public:
+        Expression A;
+        Expression mat;
+        static const int n_name_param = 0;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        changeOperator_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), mat(param2) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+
+        AnyType operator()(Stack stack) const;
+};
+template<class Type, class K>
+basicAC_F0::name_and_type changeOperator_Op<Type, K>::name_param[] = { };
+template<class Type, class K>
+class changeOperator : public OneOperator {
+    public:
+        changeOperator() : OneOperator(atype<long>(), atype<Type*>(), atype<Matrice_Creuse<K>*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new changeOperator_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+        }
+};
+template<class Type, class K>
+AnyType changeOperator_Op<Type, K>::operator()(Stack stack) const {
+    MatriceMorse<K>* mN = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*mat)(stack))->A));
+    HPDDM::MatrixCSR<K>* dN = new HPDDM::MatrixCSR<K>(mN->n, mN->m, mN->nbcoef, mN->a, mN->lg, mN->cl, mN->symetrique);
+    Type* ptA = GetAny<Type*>((*A)(stack));
+    ptA->setMatrix(dN);
     return 0L;
 }
 
@@ -510,7 +555,7 @@ AnyType distributedDot_Op::operator()(Stack stack) const {
     KN<double>* pout = GetAny<KN<double>*>((*out)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
     double* tmp = new double[pin->n];
-    HPDDM::Wrapper<double>::diagv(pin->n, *pA, *pin, tmp);
+    HPDDM::Wrapper<double>::diag(pin->n, *pA, *pin, tmp);
     KN_<double> KN(tmp, pin->n);
     double dot = (KN, *pout);
     MPI_Allreduce(MPI_IN_PLACE, &dot, 1, MPI_DOUBLE, MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
@@ -564,6 +609,7 @@ void add() {
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
+    Global.Add("changeOperator", "(", new changeOperator<Type<K, S>, K>);
     Dcl_Type<GMV<Type<K, S>*, KN<K>*>>();
     TheOperators->Add("*", new OneOperator2<GMV<Type<K, S>*, KN<K>*>, Type<K, S>*, KN<K>*>(Build));
     TheOperators->Add("=", new OneOperator2<KN<K>*, KN<K>*, GMV<Type<K, S>*, KN<K>*>>(GlobalMV));
@@ -578,69 +624,7 @@ void add() {
 
 #ifndef _ALL_IN_ONE_
 static void Init_Schwarz() {
-    const char ds = 'S';
-    const char zs = 'G';
-#ifdef SCHWARZ
-    // Schwarz::add<HpSchwarz, float, ds>();
-    // zzzfff->Add("sschwarz", atype<HpSchwarz<float, ds>*>());
-    Schwarz::add<HpSchwarz, double, ds>();
-    zzzfff->Add("dschwarz", atype<HpSchwarz<double, ds>*>());
-    // Schwarz::add<HpSchwarz, std::complex<float>, zs>();
-    // zzzfff->Add("cschwarz", atype<HpSchwarz<std::complex<float>, zs>*>());
-    Schwarz::add<HpSchwarz, std::complex<double>, zs>();
-    zzzfff->Add("zschwarz", atype<HpSchwarz<std::complex<double>, zs>*>());
-#ifdef WITH_PETSC
-    int argc = pkarg->n;
-    char** argv = new char*[argc];
-    for(int i = 0; i < argc; ++i)
-        argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
-    PetscInitialize(&argc, &argv, 0, "");
-    delete [] argv;
-    ff_atend(finalizePETSc);
-    Dcl_Type<DistributedCSR*>(Initialize<DistributedCSR>, Delete<DistributedCSR>);
-    Dcl_Type<GMV<DistributedCSR*, KN<double>*>>();
-    zzzfff->Add("dmatrix", atype<DistributedCSR*>());
-    TheOperators->Add("<-", new OneOperator1_<long, DistributedCSR*>(initEmptyCSR));
-    TheOperators->Add("<-", new initCSR<double>);
-    TheOperators->Add("*", new OneOperator2<GMV<DistributedCSR*, KN<double>*>, DistributedCSR*, KN<double>*>(Build));
-    TheOperators->Add("=", new OneOperator2<KN<double>*, KN<double>*, GMV<DistributedCSR*, KN<double>*>>(GlobalMV));
-    Global.Add("set", "(", new setOptions<double>());
-    Dcl_Type<DistributedCSR_inv>();
-    TheOperators->Add("^", new OneBinaryOperatorPETSc());
-    Dcl_Type<Inv<DistributedCSR_inv, KN<double>*>>();
-    TheOperators->Add("*", new OneOperator2<Inv<DistributedCSR_inv, KN<double>*>, DistributedCSR_inv, KN<double>*>(Build));
-    TheOperators->Add("=", new OneOperator2<KN<double>*, KN<double>*, Inv<DistributedCSR_inv, KN<double>*>>(InvPETSc));
-#endif
-#endif
-#if defined(BDD)
-    // Substructuring::add<HpBdd, float, ds>();
-    // zzzfff->Add("sbdd", atype<HpBdd<float, ds>*>());
-    Substructuring::add<HpBdd, double, ds>();
-    zzzfff->Add("dbdd", atype<HpBdd<double, ds>*>());
-    // Substructuring::add<HpBdd, std::complex<float>, zs>();
-    // zzzfff->Add("cbdd", atype<HpBdd<std::complex<float>, zs>*>());
-    Substructuring::add<HpBdd, std::complex<double>, zs>();
-    zzzfff->Add("zbdd", atype<HpBdd<std::complex<double>, zs>*>());
-#endif
-#if defined(FETI)
-    // Substructuring::add<HpFetiPrec, float, ds>();
-    // zzzfff->Add("sfeti", atype<HpFetiPrec<float, ds>*>());
-    Substructuring::add<HpFetiPrec, double, ds>();
-    zzzfff->Add("dfeti", atype<HpFetiPrec<double, ds>*>());
-    // Substructuring::add<HpFetiPrec, std::complex<float>, zs>();
-    // zzzfff->Add("cfeti", atype<HpFetiPrec<std::complex<float>, zs>*>());
-    Substructuring::add<HpFetiPrec, std::complex<double>, zs>();
-    zzzfff->Add("zfeti", atype<HpFetiPrec<std::complex<double>, zs>*>());
-#endif
-    // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
-    // zzzfff->Add("spair", atype<Pair<double>*>());
-    Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
-    zzzfff->Add("dpair", atype<Pair<double>*>());
-    // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
-    // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
-    Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
-    zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
-
+#include "init.hpp"
 }
 
 LOADFUNC(Init_Schwarz)
