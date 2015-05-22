@@ -1,3 +1,4 @@
+version 3.37-1 (22 mai 2015)
  - clean examples-mpi, remove of all usage to RemoveDOF,   bb2d bb3d, findDiff   (see version 3.36)
  - update schwarz.cpp for new hpddm versio n 
  - add read of real[int,int], int[int,int], complex[int,int] .. 
