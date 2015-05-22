@@ -104,7 +104,7 @@ freefem++.pref:Makefile
 DDM-Schwarz-Lame-2d.edp:freefem++.pref
 # FFCS - cleaning is useful sometimes
 clean-local::
-	-rm *.$(DYLIB_SUFFIX)
+	-rm $(LIST_COMPILE)
 	-rm *.$(OBJEXT)
 
 # Local Variables:

@@ -1,6 +1,6 @@
 load "schwarz"
 load "metis"
-load "utility"
+//load "utility"
 include "getARGV.idp"
 
 searchMethod = 1;
@@ -9,7 +9,7 @@ macro minimalMesh()square(1, 1)// EOM
 macro grad(u)[dx(u), dy(u)]// EOM
 macro bbN(boundingMesh, overshoot, ThGlobal)
             real[int] bb(4);
-            bb2d(bb, boundingMesh);
+            boundingbox(bb, boundingMesh);
             bb(0) -= overshoot;
             bb(1) += overshoot;
             bb(2) -= overshoot;

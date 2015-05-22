@@ -40,7 +40,8 @@ macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
             meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 2 * overlap - 0.001));
             fespace Oh(neighbors, P0);
             Oh partOverlap = part;
-            findDiff(partOverlap[], arrayIntersection);
+            /*findDiff(partOverlap[], arrayIntersection);*/
+	    Unique(partOverlap[], arrayIntersection);
         }
         /*
         mpiBarrier(comm);
@@ -209,6 +210,6 @@ matrix K;
     real[int] rhsFull = vPb(0, WhAugmented);
     matrix R = interpolate(Wh, WhAugmented);
 
-    removeDOF(K, R, rhsFull, rhs);
+    renumbering(K, R, rhsFull, rhs);
 }
 // EOM
