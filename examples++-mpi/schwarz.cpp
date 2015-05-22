@@ -624,7 +624,7 @@ void add() {
 
 #ifndef _ALL_IN_ONE_
 static void Init_Schwarz() {
-#include "init.hpp"
+#include "schwarz-init.hpp"
 }
 
 LOADFUNC(Init_Schwarz)
