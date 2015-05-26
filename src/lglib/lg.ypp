@@ -344,7 +344,6 @@ start:   input ENDOFFILE {
 
                           // <<evaluate_parsed_FF_script>> calls [[file:../fflib/AFunction.hpp::CListOfInst::eval]]
                           $1.eval(stack);
-
                         }
                         catch ( E_exception & e)  {
                           cerr << e.what() << " ,  mpirank " << mpirank << endl;
