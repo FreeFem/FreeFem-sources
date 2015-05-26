@@ -120,6 +120,7 @@ static  void ffapi_newplot(){}
 #endif
   }
 
+  // <<ffapi_ff_pclose>>
 static  int ffapi_ff_pclose(FILE *stream){
 #ifdef FFLANG
     // nothing to close in FFCS
@@ -282,7 +283,7 @@ static  bool ffapi_protectedservermode(){
     ffapi::ffstdin = ffapi::ffapi_ffstdin;
     ffapi::newplot = ffapi::ffapi_newplot;
     ffapi::ff_popen = ffapi::ffapi_ff_popen;
-    ffapi::ff_pclose = ffapi::ffapi_ff_pclose;
+    ffapi::ff_pclose = ffapi::ffapi_ff_pclose; // <<ff_pclose>>
     ffapi::fwriteinit = ffapi::ffapi_fwriteinit;
     ffapi::ff_fwrite = ffapi::ffapi_ff_fwrite;
     ffapi::ff_fflush = ffapi::ffapi_ff_fflush;
