@@ -1,5 +1,15 @@
-@  changeset:   3326:c67d55808526
+@  changeset:   3328:d1f7963e8e88
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri May 22 14:14:43 2015 +0200
+|  summary:     add missing file for schwartz.cpp
+|
+o  changeset:   3327:b218c242f40c
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri May 22 14:09:17 2015 +0200
+|  summary:     add missing file in dist .
+|
+o  changeset:   3326:c67d55808526
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri May 22 13:54:52 2015 +0200
 |  summary:     version 3.37
