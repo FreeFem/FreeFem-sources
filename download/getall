@@ -141,7 +141,7 @@ download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
 	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz','2f75e600a2ba155ed9ce974a1c4b536f');
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
-
+#https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
 download('Scotch','https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz',
 	 'https://gforge.inria.fr/projects/scotch/','scotch_6.0.3.tar.gz','10b0cc0f184de2de99859eafaca83cfc',
 	 'BAD_CERT');

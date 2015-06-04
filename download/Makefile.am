@@ -138,10 +138,10 @@ install-hpddm:
 reinstall-hpddm:
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
-	-test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm
+	-test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm || true
 include/hpddm-master:patch-hpddm-1
 	-if test -f ./pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
-	if test  `md5 -q  include/hpddm-master/src/wrapper.hpp` = "4c8acce994d0d5ac533ed58e59dcd187" ; then patch -p1 <patch-hpddm-1; fi;true
+	if `../build/ff-md5 include/hpddm-master/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true
 
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \
