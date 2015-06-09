@@ -222,8 +222,13 @@ sub downloadone{
   my $cmd="../build/download $url $pkg $opts";
   print "$cmd\n";
   system $cmd;
-  if($?){$errors.="ERROR: $cmd FAILED\n"}
-
+  if($?){
+   my $cmd="../build/download http://www.freefem.org/ff++/$pkg $pkg $opts";
+   print "try other site: $cmd\n";
+   system $cmd;
+   if($?){
+     $errors.="ERROR: $cmd FAILED\n"}
+  }
   # check if resulting package contents are valid
   my $md5check=md5_hex(`cat $pkg`);
   if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg\n"}

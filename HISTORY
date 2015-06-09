@@ -1,5 +1,10 @@
-@  changeset:   3334:573b49707eea
+@  changeset:   3335:7f0643919ce4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jun 09 09:33:14 2015 +0200
+|  summary:     pass to version 3.28
+|
+o  changeset:   3334:573b49707eea
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jun 09 08:41:45 2015 +0200
 |  summary:     coorect SUPERLU dist witgh gcc 4.9
