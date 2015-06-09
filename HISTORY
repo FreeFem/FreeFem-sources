@@ -1,5 +1,15 @@
-@  changeset:   3332:04dfe36ed186
+@  changeset:   3334:573b49707eea
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jun 09 08:41:45 2015 +0200
+|  summary:     coorect SUPERLU dist witgh gcc 4.9
+|
+o  changeset:   3333:5d6778c2d80d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jun 04 18:59:17 2015 +0200
+|  summary:     coorect makefile in case of not mpi
+|
+o  changeset:   3332:04dfe36ed186
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jun 03 17:46:03 2015 +0200
 |  summary:     rebuold missing file
