@@ -1,5 +1,10 @@
-@  changeset:   3335:7f0643919ce4
+@  changeset:   3336:a7a9fa953a11
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jun 09 10:18:37 2015 +0200
+|  summary:     correct getall in case of pb of downlaod
+|
+o  changeset:   3335:7f0643919ce4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jun 09 09:33:14 2015 +0200
 |  summary:     pass to version 3.28
