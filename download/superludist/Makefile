@@ -17,19 +17,20 @@ SERVER=http://crd-legacy.lbl.gov/~xiaoye/SuperLU/
 INSTALL=../..
 SUPERLU_DIST_VERSION=3.0
 DISTSUPERLULIB=../$(INSTALL)/lib/libsuperlu_dist_3.0.a
+SPLD_PATCHS=superludist_2.3.patch superludist_3.0-printf.patch superludist_3.0-cast_warning.patch superludist_3.0-return_values.patch superludist_3.0-operation_undefined.patch
 ## WGET=wget
 
 include make.inc
 
-superludist: FAIT
+superludist: FAIT 
 
 # FFCS: more dependencies for parallel builds
-FAIT:$(SRCDIR)
+FAIT:$(SRCDIR)/tags-tar 
 	$(MAKE) FAIRE install WHERE
 	touch FAIT
 
 
-FAIRE: $(SRCDIR)/SRC/$(DSUPERLULIB)  
+FAIRE: $(SRCDIR)/SRC/$(DSUPERLULIB)
 	touch FAIRE
 
 make.inc: ../../config.status  Makefile
@@ -41,7 +42,7 @@ make.inc: ../../config.status  Makefile
 	rm make-superlu-tmp.inc
 
 # FFCS: we need an error if make breaks
-$(SRCDIR)/SRC/$(DSUPERLULIB): $(SRCDIR)
+$(SRCDIR)/SRC/$(DSUPERLULIB): $(SRCDIR)/tags-tar
 	cp make.inc $(SRCDIR)/make.inc
 	cd $(SRCDIR)/SRC && $(MAKE)
 # FFCS: we need more dependencies for parallel builds
@@ -53,14 +54,14 @@ WHERE:
 	echo superlu_dist INCLUDE -I@DIR@/include/superludist  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.superlu_dist
 
 
-$(SRCDIR): $(PACKAGE_PATH)
+$(SRCDIR)/tags-tar: $(PACKAGE_PATH) $(SPLD_PATCHS)
 	tar xvzf $(PACKAGE_PATH)
 	cd $(SRCDIR)/SRC/; patch -p1 < ../../superludist_2.3.patch
 	cd $(SRCDIR)/SRC/; patch -p3 < ../../superludist_3.0-printf.patch
 	cd $(SRCDIR)/SRC/; patch -p2 < ../../superludist_3.0-cast_warning.patch
 	cd $(SRCDIR)/SRC/; patch -p2 < ../../superludist_3.0-return_values.patch
 	cd $(SRCDIR)/SRC/; patch -p2 < ../../superludist_3.0-operation_undefined.patch
-	touch $(SRCDIR)
+	touch $(SRCDIR)/tags-tar
 
 $(PACKAGE_PATH):
 	../getall -o SuperLU_DIST -a
