@@ -1,6 +1,6 @@
 #ifndef _ALL_IN_ONE_
 #include <math.h>
-//ff-c++-LIBRARY-dep: cxx11   hpddm [petsc|mumps schwarz ptscotch scotch] umfpack amd  scalapack blas [mkl]   mpifc  fc mpi  pthread
+//ff-c++-LIBRARY-dep: cxx11   hpddm [petsc|mumps parmetis  ptscotch scotch] umfpack amd  scalapack blas [mkl]   mpifc  fc mpi  pthread
 //ff-c++-cpp-dep:
 // mumps est avec petsc ..
 #define SCHWARZ
