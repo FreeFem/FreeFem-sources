@@ -43,7 +43,7 @@ then
     # use no-verbose to avoid mixing several wget outputs together when called concurrently in
     # [[file:../download/getall]]
 
-    wget "$1" --output-document="$2" --no-verbose $opts
+    wget "$1" --timeout=30 --tries=2 --output-document="$2" --no-verbose $opts
     ret=$?
 elif test -x /usr/bin/curl
 then
