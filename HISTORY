@@ -1,5 +1,10 @@
-@  changeset:   3336:a7a9fa953a11
+@  changeset:   3337:86dd8e46a7f9
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jun 09 10:53:28 2015 +0200
+|  summary:     limit number of try in wget
+|
+o  changeset:   3336:a7a9fa953a11
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jun 09 10:18:37 2015 +0200
 |  summary:     correct getall in case of pb of downlaod
