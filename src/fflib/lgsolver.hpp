@@ -170,8 +170,11 @@ class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMa
       throwassert(precon);
       R aii;
       A.getdiag(D1);
+    double tgv=Fem2D::norm(D1.linfty() )  ;
+    if( Fem2D::norm(tgv) < 1e10) tgv=1e100;
+    double tgv1 = 1./tgv; // Corrige fH 11 mai 2015 ...
      for (int i=0;i<n;i++)
-       D1[i] = (Fem2D::norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);
+       D1[i] = Fem2D::norm(D1[i]) < tgv  ? R(1.) : tgv1;
       
 }
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {

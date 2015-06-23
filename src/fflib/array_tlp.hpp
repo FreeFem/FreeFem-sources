@@ -1381,8 +1381,9 @@ void ArrayOperator()
     
        
      TheOperators->Add(">>",
-        new OneBinaryOperator<Op_ReadKN<K> >
-      );            
+        new OneBinaryOperator<Op_ReadKN<K> >,
+        new OneBinaryOperator<Op_ReadKNM<K> >
+      );
 
      map_type[typeid(MyMap<String,K>*).name()] = new ForEachType<MyMap<String,K>*>(Initialize<MyMap<String,K> >,Delete<MyMap<String,K> >) ;
          

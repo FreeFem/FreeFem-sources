@@ -2,7 +2,7 @@ Compilation of FreeFem++ under unix, MacOs X or mingw  (Windows)
 and bamg (mesh generator)
 ----------------------------------------------------------------
 REMARK:    after 4/09/2013, in hg version all 
-construct by autoreconf are not on the directly in distrubution.
+construct by autoreconf are not on the directly in distribution.
 
 -- to rebuild    with automake version >= 1.13 autoconf :
   # autoreconf -i
@@ -11,10 +11,13 @@ construct by autoreconf are not on the directly in distrubution.
 
 --  to build a complete  version do
    # ./configure --enable-download
+-- to get all source  downlaod package 
+   # download/getall -a 
 -- to test
    make check
 -- to install
    sudo make install
+
 
 
 New:  Test version 3.9  F. Hecht & J. Morice July  2010.

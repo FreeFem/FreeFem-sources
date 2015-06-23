@@ -14,7 +14,7 @@ int main(int argc,const char **argv)
   int debug=0; 
   char *dir=0;
   const char *pp=0; 
-  string cmd="freefem++.exe";
+  string cmd="freefem++.exe ";
   if(argc <=1)
   {
     //      cerr << " Sorry no file name "<< endl;
