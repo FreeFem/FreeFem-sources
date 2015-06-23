@@ -474,7 +474,7 @@ void rmoveto(reel x, reel y)
   curry = scaly(y);
 
 #ifdef FFJS_GRAPH
-  // ALH - <<ffjs_rmoveto>> javascript graph [[file:~/ffjs/main.js::ffjs_rmoveto]]
+  // ALH - <<ffjs_rmoveto>> javascript graph [[file:~/ffjs/ffapi.js::ffjs_rmoveto]]
   EM_ASM_INT({ffjs_rmoveto($0,$1)},currx,curry);
 #endif
 }
