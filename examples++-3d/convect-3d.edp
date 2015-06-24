@@ -24,6 +24,7 @@ Vh v,vo;
 Vh2 v2;
 real x0=0.3,y0=0.3,z0=0;
 vo=hill(square(x-x0)+square(y-y0)+square(z-z0));
+
 real t=0;
 v2=vo(x,y,0);
 plot(v2,cmm=" cut y = 0.5, time ="+t,wait=1);
@@ -31,7 +32,28 @@ real dt=0.1;
 func u1=1.;
 func u2=2.;
 func u3=3.;
+verbosity = 1;
 v=convect([u1,u2,u3],-dt,vo);
+verbosity = 1;
 v2=v(x,y,0);
 t += dt;
 plot(v2,cmm=" cut y = 0.5, time ="+t,wait=1);
+// verification ...
+int err=0; 
+macro Verif(w,val)
+{
+   real so= int3d(Th)(vo);
+   real soi= int3d(Th)(vo*w);
+   real sv= int3d(Th)(v);
+   real svi= int3d(Th)(v*w);
+
+   cout  << Stringification(w) << "  old " <<  soi/so << " new " << svi/sv << " delta " << (svi/sv  - soi/so )/dt << " ~ " <<  val << endl; 
+   err += (abs((svi/sv  - soi/so )/dt - val)> 0.2);
+}   
+//EOF
+
+Verif(x,1)
+Verif(y,2)
+Verif(z,3)     
+assert(err==0);
+ 

@@ -1492,7 +1492,7 @@ L10:
 	  }
        nu[i12 + 3 + t1 * 6] = i22 + 3 + (t2 << 3);
        nu[i22 + 3 + t2 * 6] = i12 + 3 + (t1 << 3);
-       if (i + 4 > 1024)
+       if (i + 4 > 2048) /* Modif F. H june 2015 */
 	  {
 	    if(kerr21)
 	      cout << " Bizarre mshptg err 21 pile too small (continue)  "<< endl;
