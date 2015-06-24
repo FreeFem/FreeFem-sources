@@ -1218,7 +1218,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
       const R eps = 1e-8;
 
       // corrected by F.H 23 juin 2015
-    bool ddd=verbosity>200;
+    bool ddd=verbosity>2000;
       bool nomove=true;
     R lambda[4],dl[4],cl[4];
     Phat.toBary(lambda);
