@@ -571,9 +571,9 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   }
   
   
-  inline    int nRand(int n) {
-    return  rand()%n; //avant random()%n;
-  }
+//  inline    int nRand(int n) {
+//    return  rand()%n; //avant random()%n;
+//  }
   
   inline int find5(int i,int *k,int l)
   {
@@ -694,7 +694,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
       
       
       
-      kk=n==1 ? 0 : nRand(n);
+      kk=n==1 ? 0 : randwalk(n);
       j= nl[ kk ];
       int itt =  Th.ElementAdj(it,j);
       if(itt!=it && itt >=0)  
@@ -710,7 +710,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  kbord[nbord++]=it;
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
-      if(verbosity>101)
+      if(verbosity>1001)
 	{
 	  cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
 	  R ss=0; 
@@ -721,7 +721,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  
 	}
       
-      if(verbosity>200)
+      if(verbosity>2000)
 	cout << "GQuadTree::value of n " << n << endl;
       
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre
@@ -732,12 +732,12 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	    //avant :: if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && itt && find5(itt,kbord,nbord) < -1 ) 
 	    if (l[i] < eps && (itt=Th.ElementAdj(it,ii=i)) != it && (itt>=0) && find5(itt,kbord,nbord) < 0 ) 
 	      ni[nn++]=i,nadj[i]=itt;
-	  if(verbosity>100)
+	  if(verbosity>1000)
 	    cout << " nn : "<< nn << endl;
 	  if (nn>0)
 	    {
 	      //j=nadj[nRand(nn)];
-	      j=ni[nRand(nn)];
+	      j=ni[randwalk(nn)];
 	      it=nadj[j];
 	      dP=DBL_MAX;
 	      //cout << "new it= " << it << endl;
@@ -757,7 +757,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	for(int i=0;i<nkv;++i)
 	  l[i]/=s;
 	Phat=Rd(l +1);
-	if(verbosity>100)
+	if(verbosity>1000)
 	  {
 	    cout << P << " " << n << " l: ";
 	    R ss=0; 

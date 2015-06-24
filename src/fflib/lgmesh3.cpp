@@ -1245,7 +1245,7 @@ AnyType pf3r2R(Stack s,const AnyType &a)
     K=Th.Find(mp.P,PHat,outside);
     mp.other.set(Th,mp.P,PHat,*K,0,outside);
   }
-  if(verbosity>100)
+  if(verbosity>1000)
     {
     if(outside)
 	cout << "  ---  " << qnu << "  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K= " << K << " " << PHat << endl;
