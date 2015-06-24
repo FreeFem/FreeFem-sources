@@ -1,3 +1,6 @@
+ -correct new type of optimisation in integral, 
+  optimized=2 => do optimisation without check 
+  can be usefull in case of random problem. 
  -correct convect operator in 3d (remove randow part, 
    to remove problem of optimisation in varf.
    
