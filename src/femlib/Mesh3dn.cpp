@@ -1215,11 +1215,14 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
+      const R eps = 1e-8;
+
+      // corrected by F.H 23 juin 2015
     bool ddd=verbosity>200;
       bool nomove=true;
-    R lambda[4];
+    R lambda[4],dl[4],cl[4];
     Phat.toBary(lambda);
-    if(ddd) cout << "\n\n\n   WT: "  << Phat << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] << " u = "<< U << " dt " << dt <<endl;
+    if(ddd) cout << "\n\t\t\tWT: "  << Phat << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] << " u = "<< U << " dt " << dt <<endl;
 #ifndef NDEBUG      
       for(int i=0;i<4;++i)
       assert(lambda[i]<1.000001 && lambda[i]>-0.0000001);
@@ -1233,6 +1236,7 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     
     //  cout << " " << u << " " << v ;
     Rd PF = P + U*dt;
+    Rd PFK= PF;
     
     //  couleur(15);MoveTo( P); LineTo( PF);
     R l[nve];
@@ -1245,126 +1249,107 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-     if(ddd)  cout << "\t\t\tWT " << it << ", " << Phat << ",  PF=" << PF
+      
+      if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps)
+      { // a fini  .... ouf ...
+          dt =0;
+          Phat=R3(l+1);
+          nomove=false;
+          return -1;
+      }
+      
+    // l(Q) = lambda + dl  *coef  avec Q= P+ U*dt*coef
+    // coef > 0 et segement [PQ] dans K .. et Q \in \partial K
+    // recherche de la face de sortie ..
+      
+     dl[0]= l[0]-lambda[0];
+     dl[1]= l[1]-lambda[1];
+     dl[2]= l[2]-lambda[2];
+     dl[3]= l[3]-lambda[3];
+     // attention a inf et NaN possible ci FH..
+     cl[0]= -lambda[0]/dl[0];
+     cl[1]= -lambda[1]/dl[1];
+     cl[2]= -lambda[2]/dl[2];
+     cl[3]= -lambda[3]/dl[3];
+ 
+      //  min  positif
+      int kf=-1;
+      double cf=1;// 1 min  positif  < 1.
+      if(cl[0]>0. && cl[0] < cf) cf=cl[kf=0]; // OK NaN or Inf test are wrong in any case ..
+      if(cl[1]>0. && cl[1] < cf) cf=cl[kf=1];
+      if(cl[2]>0. && cl[2] < cf) cf=cl[kf=2];
+      if(cl[3]>0. && cl[3] < cf) cf=cl[kf=3];
+      
+      if(kf>=0)
+      {
+          double cf1 = 1-cf;
+         // point de sortie en temps dt*cf .. ??
+          l[0]-= dl[0]*cf1;
+          l[1]-= dl[1]*cf1;
+          l[2]-= dl[2]*cf1;
+          l[3]-= dl[3]*cf1;
+          PFK = P +  U*(dt*cf); // final  point in tet.
+
+      }
+     // on sort en temp  cf*dt
+      
+    
+      
+     if(ddd)  cout << "\t\t\t WT " << it << ", " << Phat << ",  PFK=" << PFK
 		   << " :  "  << l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3] 
 	           << " == " << det(Q[0],Q[1],Q[2],PF)/Det
 		   << " : l (in) "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] 
-		   << " PF= K(l) = " << Th[it](R3(l+1)) 
+		   << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
 		   <<endl ;
 		  
-    const R eps = 1e-8;
     int neg[nve],k=0;
     int kk=-1;
-    if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps) 
-      {
-	dt =0;
-	Phat=R3(l+1);
-	nomove=false;
-	return -1;
-      }
-    else 
+  
+     if(kf>=0)   // sortie positive ..
       {
 	// on regarde de les reelement negatif 
         // on ne veut pas des points sur les faces.
         // car sinon il va y avoir un probleme ans on va projete sur la face
 	//  et remettre le point dans le tetraedre.
+          
 	if (l[0]<=-eps ) neg[k++]=0;
 	if (l[1]<=-eps ) neg[k++]=1;
 	if (l[2]<=-eps ) neg[k++]=2;
 	if (l[3]<=-eps ) neg[k++]=3;
 	
 	//R eps1 = T.mesure()   * 1.e-5;
-	   if(ddd)  cout << " k= " << k << endl;
+        if(ddd)  cout << "\t\t\t k= " << k << endl;
     
-	if (k==3) //  3 face de sortie possible 
+	if (k>1) //  2 .. 3 face de sortie possible
 	  {
-	    // let j be the vertex beetween the 3 faces 
-	    int j = 6-neg[0]-neg[1]-neg[2]; //  sommet intersection des 3 faces.
-	    int i0 = Tet::nvface[j][0];
-	    int i1 = Tet::nvface[j][1];
-	    int i2 = Tet::nvface[j][2];
-	     if(ddd)  cout << "  -------- " << j << " " << i0 << " " << i1 << " " << i2  << endl;
-	    //  le tet i0,i1,i2,j est positif. 
-	    assert(signe_permutation(i0,i1,i2,j)==1);
-	    // 
-	    R v0= det(Q[i0],Q[j],P,PF); 
-	    R v1= det(Q[i1],Q[j],P,PF); 
-	    R v2= det(Q[i2],Q[j],P,PF); 
-	     if(ddd)   cout << "\t\t\t " << j << " v0123 =" << v0 << " "<< v1 << " " << v2 << endl;
-	    if( v0 > eps && v1 < -eps ) 
-	      kk= i1 ;// on sort par la face j i0, j1
-	    else if( v1 > eps && v2 < -eps ) 
-	      kk= i0 ;
-	    else if( v2 > eps && v0 < -eps ) 
-	      kk= i1 ;
-	    else 
-	      {  // on ne sort pas par une face 
-		int nul[3], nn=0, mm=3;
-		  if (Abs(v0) <=eps) nul[nn++]=i0; else nul[--mm]=i0;
-		  if (Abs(v1) <=eps) nul[nn++]=i1; else nul[--mm]=i1;
-		  if (Abs(v2) <=eps) nul[nn++]=i2; else nul[--mm]=i2;
-		assert(nn>0); 
-		if(nn == 1) // on sort par l'arete nul[0] entre le face   nul[1] et nul[2]
-		  kk =  nul[1+(rand()/(RAND_MAX/2))%2];		  
-		else // on sort par le sommet j.  on choisi la face alleatoirement 
-		  kk = nul[(rand()/(RAND_MAX/3))%3];
-		  
-	      }
-	  }
-	else if (k==2)
-	  {
-	    //  numero des l'arete entre les 2 faces
-	    int i0=neg[0],i1=neg[1];
-	    int e = i0 + i1 - (i0==0); 
-	    // on a:
-	    //   e      =     0        1       2      3        4      5
-	    //  (i0,i1) =   (0,1)  , (0,2), (0,3) , (1,2)  , (1,3), (2,3) 
-	    // avec i0,i1 sont les sommets qui ne sont pas dans l'arete
-	    int   jj0[6] = {2,3,1,0,2,0};
-	    int   jj1[6] = {3,1,2,3,0,1};
-	    int j0 = jj0[e];
-	    int j1 = jj1[e];
-	     if(ddd)   cout << " e " << e << " i0 " << i0 << " " << i1 << " j0 =" << j0 << " " << j1 << endl;
-	    // le tet  j0,j1,i0,i1  doit est positif (ie. la pemutation est positive)
-	    // de meme  i0,i1,j0,j1
-	    assert(signe_permutation(j0,j1,i0,i1)==1);
-	    R v0= det(Q[j0],Q[j1],P,PF); 
-            if(ddd) cout << " v0 =" << v0 <<endl;
-	    if( Abs(v0) < eps  ) 
-	      {
-	      // on sort par l'arete  j0,j1
-	      // on choisi aleatoirement la face de sortie 
-	      kk = (rand()/(RAND_MAX/2)) ? i0 : i1; 
-	      if(ddd)
-		  cout << " rand choose  2 :  " << kk << endl;
-	      }
-	    else 
-	      kk= v0 >0 ? i0 : i1; // Attention dyslexie ici durdur FH....
-	    
+              // regarde  sorti interne ..
+              int pos[4];
+              int kp =0;
+              if (l[0]<0 ) pos[kp++]=0;
+              if (l[1]<0 ) pos[kp++]=1;
+              if (l[2]<0 ) pos[kp++]=2;
+              if (l[3]<0 ) pos[kp++]=3;
+              if(kp>0) kk=pos[randwalk(kp)];//
+              else    kk=neg[randwalk(k)];
+             
 	  }
 	else if (k==1) //  une face possible de sortie (cas simple)
 	  kk = neg[0];
 	
 	if(kk>=0)
 	  {
-	    R d=lambda[kk]-l[kk];
-	    if ( l[kk] )
-	     {
-	    throwassert(d);
-	    R coef =  lambda[kk]/d;
-	    R coef1 = 1-coef;
-	    nomove= (coef<1.e-6);
-	    dt        = dt*coef1;
-	    lambda[0] = lambda[0]*coef1 + coef *l[0];
-	    lambda[1] = lambda[1]*coef1 + coef *l[1];
-	    lambda[2] = lambda[2]*coef1 + coef *l[2];
-	    lambda[3] = lambda[3]*coef1 + coef *l[3];
-            if(ddd) cout << "   \t\t -> kk=" << kk << " d=" << d << " , l= "<< lambda[0]  << " " 
-			 <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << endl;
+              if ( l[kk] ) // on bouge et on arete avant la fin ...
+              {
+                R coef1 = 1-cf;
+                nomove= (cf<1e-6);
+                dt        = dt*coef1;// temps restant
+              }
+            if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< lambda[0]  << " "
+			 <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << " PF =" << PF <<  " " << &PF <<endl;
 	    lambda[kk] =0;
-	     }
+	     //}
 	      
-	 
+	   
 	  
 	  }
 	 
@@ -1372,9 +1357,10 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
     if(nomove )
 	// on ne bouge pas on utilse Find ... 
 	  {
+              if(ddd) cout << "\t\t\t PF = " << PF << " dt =  " <<  dt  << " " << it << " " << &PF<<endl;
 	      R dx2= (U,U)*dt*dt;
 	      R ddt=dt, dc=1;
-	      // if Udt < h/2 => recherche un point final  
+	      // if Udt < h/2 => recherche un point final  (environ)
 	      if(dx2*dx2*dx2 > Det*Det/4)
 		  dt=0;       
 	      else 
@@ -1384,10 +1370,11 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
 		    PF= P + U*ddt; // on avance que d'un 1/4
 		    dt -= ddt;
 		}
+              if(ddd) cout << "\t\t\t PF = " << PF << " " <<  dt << " ddt = " << ddt << " " << it << " " << &PF<<endl;
 	      bool outside;
 	      const Mesh3::Element  *K=Th.Find(PF, Phat,outside,&Th[it]);
 	      if(outside) dt=0; // on a fini 
-	      if(ddd) cout << "   \t ***** WT :  Lock -> Find P+U*ddt*c "<< it<< " " << " -> "<< Th(K) 
+	      if(ddd) cout << "\t\t\t ***** WT :  Lock -> Find P+U*ddt*c "<< it<< " " << " -> "<< Th(K)
 		  << " dt = " << dt << " c = " << dc << " outside: "<< outside <<" , PF " << PF << endl;
 	      return 4+Th(K);
      }

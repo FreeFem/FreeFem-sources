@@ -1,5 +1,10 @@
-@  changeset:   3337:86dd8e46a7f9
+@  changeset:   3338:eb61b55cb4f9
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jun 19 16:11:01 2015 +0200
+|  summary:     add P-H Tournier trich in renumbering
+|
+o  changeset:   3337:86dd8e46a7f9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jun 09 10:53:28 2015 +0200
 |  summary:     limit number of try in wget
