@@ -1,5 +1,20 @@
-@  changeset:   3338:eb61b55cb4f9
+@  changeset:   3341:41d392438ca1
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 24 20:52:26 2015 +0200
+|  summary:     add INNOVATION word.
+|
+o  changeset:   3340:346282589d1d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 24 20:50:13 2015 +0200
+|  summary:     add tool to remove test of optimize  in
+|
+o  changeset:   3339:2fcfaef31265
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jun 24 14:35:37 2015 +0200
+|  summary:     coorect convect 3d ,
+|
+o  changeset:   3338:eb61b55cb4f9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jun 19 16:11:01 2015 +0200
 |  summary:     add P-H Tournier trich in renumbering
