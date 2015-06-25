@@ -1,10 +1,11 @@
- -correct new type of optimisation in integral, 
+ -correct new type of optimisation in integral, (version 3.38 25june 2015)
   optimized=2 => do optimisation without check 
   can be usefull in case of random problem. 
  -correct convect operator in 3d (remove randow part, 
    to remove problem of optimisation in varf.
    
 version 3.38
+ - add parameter in renumbering function. 
 version 3.37-1 (22 mai 2015)
  - clean examples-mpi, remove of all usage to RemoveDOF,   bb2d bb3d, findDiff   (see version 3.36)
  - update schwarz.cpp for new hpddm versio n 
