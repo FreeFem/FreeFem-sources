@@ -1,5 +1,10 @@
-@  changeset:   3341:41d392438ca1
+@  changeset:   3342:3b00ac19273e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jun 25 10:15:55 2015 +0200
+|  summary:     update doc
+|
+o  changeset:   3341:41d392438ca1
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jun 24 20:52:26 2015 +0200
 |  summary:     add INNOVATION word.
