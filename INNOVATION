@@ -1,7 +1,11 @@
- -correct new type of optimisation in integral, (version 3.38 25june 2015)
+version 3.38-1 
+ -  add finite element Edge13d (Finite Element of degrees 1) Thanks to marcella@bonazzoli.it
+     and exemples of wave guide in waveguide.edp
+ - correct renumbering function in case of rhs 
+ - correct new type of optimisation in integral, (version 3.38 25june 2015)
   optimized=2 => do optimisation without check 
   can be usefull in case of random problem. 
- -correct convect operator in 3d (remove randow part, 
+ - correct convect operator in 3d (remove randow part, 
    to remove problem of optimisation in varf.
    
 version 3.38
