@@ -1,5 +1,10 @@
-@  changeset:   3342:3b00ac19273e
+@  changeset:   3343:af6b74e90d77
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jun 26 11:52:09 2015 +0200
+|  summary:     coorect removedof
+|
+o  changeset:   3342:3b00ac19273e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jun 25 10:15:55 2015 +0200
 |  summary:     update doc
