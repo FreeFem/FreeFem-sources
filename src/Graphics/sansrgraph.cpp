@@ -28,8 +28,10 @@
 
 // ALH - javascript output
 #ifdef FFJS
+#ifndef NATIVEFFJS // [[file:~/ffjs/Makefile::NATIVEFFJS]]
 #include <emscripten.h>
-#endif
+#endif // NATIVEFFJS
+#endif // FFJS
 
 #define FF_GRAPH_SET_PTR
 using namespace std;
