@@ -792,7 +792,7 @@ R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1
     return pQ; 
 }
 R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1,const double & ss)
-{ return Curve(stack,b,-1,-1,ss,0);}
+{ return Curve(stack,b,li0,li1,ss,0);}
 double mesure(Stack stack,const KNM_<double> &b,const KN_<long> &be)
 {
     double mes =0;
