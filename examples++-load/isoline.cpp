@@ -751,7 +751,7 @@ class  ISOLINE_P1: public OneOperator { public:
 
 
 
-R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1,const double & ss)
+R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1,const double & ss, long *const&   pi)
 {
     assert(b.N() >=3);
     int i0=li0,i1=li1,im;
@@ -784,12 +784,15 @@ R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1
         double l0=s-b(2,i0);
         Q= (l1*A + l0*B)/(l1+l0);
     }
+    if(pi) *pi=i0;
     R3 *pQ = Add2StackOfPtr2Free(stack,new R3(Q));
     // MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value 
     //mp.P.x=Q.x; // get the current x value
     //mp.P.y=Q.y; // get the current y value
     return pQ; 
 }
+R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1,const double & ss)
+{ return Curve(stack,b,-1,-1,ss,0);}
 double mesure(Stack stack,const KNM_<double> &b,const KN_<long> &be)
 {
     double mes =0;
@@ -817,6 +820,56 @@ R3   * Curve(Stack stack,const KNM_<double> &b,const double & ss)
     return Curve(stack,b,-1,-1,ss);
 }
 
+template<class R,class A0,class A1,class A2, class A3, class A4, class E=E_F0>   // extend (4th arg.)
+class E_F_F0F0F0F0F0s_ :public  E { public:                               // extend
+    typedef  R (*func)(Stack, const  A0 &,const  A1 & , const A2 &, const A3 &, const A4 &  ) ; // extend (4th arg.)
+    func f;
+    Expression a0,a1,a2,a3,a4;          // extend
+    E_F_F0F0F0F0F0s_(func ff,
+                   Expression aa0,
+                   Expression aa1,
+                   Expression aa2,
+                   Expression aa3,
+                    Expression aa4)   // extend
+    : f(ff), a0(aa0), a1(aa1), a2(aa2), a3(aa3),a4(aa4) {}  // extend (4th arg.)
+    AnyType operator()(Stack s)  const
+    {return SetAny<R>( f( s, GetAny<A0>((*a0)(s)),
+                         GetAny<A1>((*a1)(s)),
+                         GetAny<A2>((*a2)(s)),
+                         GetAny<A3>((*a3)(s)),
+                         GetAny<A4>((*a4)(s))) );}   // extend (4th arg.)
+    virtual size_t nbitem() const {return a4->nbitem(); } // modif
+    bool MeshIndependent() const
+    {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()&& a3->MeshIndependent()&& a4->MeshIndependent();} // extend (4th arg.)
+    
+};
+
+template<class R,class A=R,class B=A,class C=B, class D=C ,class E=D,class CODE=E_F_F0F0F0F0F0s_<R,A,B,C,D,E,E_F0> >    // extend (4th arg.)
+class  OneOperator5s_ : public OneOperator {
+    aType r; //  return type
+    typedef typename  CODE::func  func;
+    func f;
+public:
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        if ( args.named_parameter && !args.named_parameter->empty()  )
+            CompileError( " They are used Named parameter ");
+        
+        return  new CODE(f,
+                         t[0]->CastTo(args[0]),
+                         t[1]->CastTo(args[1]),
+                         t[2]->CastTo(args[2]),
+                         t[3]->CastTo(args[3]),
+                         t[4]->CastTo(args[4]));}     // extend
+    OneOperator5s_(func  ff):                        // 3->4
+    OneOperator(map_type[typeid(R).name()],
+                map_type[typeid(A).name()],
+                map_type[typeid(B).name()],
+                map_type[typeid(C).name()],
+                map_type[typeid(D).name()],
+                map_type[typeid(E).name()]),// extens
+    f(ff){}
+};
 
 
 void finit()
@@ -829,6 +882,7 @@ void finit()
     
     Global.Add("Curve","(",new OneOperator2s_<R3*,KNM_<double>,double>(Curve));
     Global.Add("Curve","(",new OneOperator4s_<R3*,KNM_<double>,long,long,double>(Curve));
+    Global.Add("Curve","(",new OneOperator5s_<R3*,KNM_<double>,long,long,double,long *>(Curve));
     
     Global.Add("Area","(",new OneOperator2s_<double ,KNM_<double>,KN_<long> >(mesure));
     

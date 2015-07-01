@@ -1075,11 +1075,11 @@ namespace  Fem2D {
          \phi_i ll_j + c_jk \phi_i l_i l_k to remove the 3 internal node
          
          2 term int  \phi_i ll_j l_k =
-             Curl( \lambda_{i+2}) * 
-           - Curl( \lambda_{i+1}) *
+             Curl( \lambda_{i+2}) * cc(j,k)  - Curl( \lambda_{i+1}) * cc(j,k)
+          =  Curl( \lambda_{i}) cc(j,k)      + Curl( \lambda_{i+2}) 2 cc(j,k)
          // c'est le bordel a calculer ..
          i1= i+j+1, i2= i+2-j  remark : {i,i1,i2} <=> {i,i+1,i+2}
-         \phi_i ( \lambda_{i1} - 4/3 \lambda_i) + 1/3 \phi_{i1}\lambda_{i1}
+        
          
          internal function are ???
          \sum   bx_i \phi_{i}\lambda_{i}
@@ -1291,7 +1291,7 @@ namespace  Fem2D {
             }
             if(whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
             {
-                cout << " to do FH RT1 dxx, dyy dxy " << endl; 
+                cout << " to do FH RT2 dxx, dyy dxy " << endl;
                 ffassert(0); 
             }
             
@@ -1488,8 +1488,8 @@ namespace  Fem2D {
     static AddNewFE Elm__TypeOfFE_RT1_2d("RT1",&Elm_TypeOfFE_RT1_2d); 
     static AddNewFE Elm__TypeOfFE_RT1_2dOrtho("RT1Ortho",&Elm_TypeOfFE_RT1_2dOrtho);
     
-    static AddNewFE Elm__TypeOfFE_RT2_2d("RT2",&Elm_TypeOfFE_RT1_2d);
-    static AddNewFE Elm__TypeOfFE_RT2_2dOrtho("RT2Ortho",&Elm_TypeOfFE_RT1_2dOrtho);
+    static AddNewFE Elm__TypeOfFE_RT2_2d("RT2",&Elm_TypeOfFE_RT2_2d);
+    static AddNewFE Elm__TypeOfFE_RT2_2dOrtho("RT2Ortho",&Elm_TypeOfFE_RT2_2dOrtho);
 
     static AddNewFE Elm__TypeOfFE_BDM1_2d("BDM1",&Elm_TypeOfFE_BDM1_2d);
     static AddNewFE Elm__TypeOfFE_BDM1_2dOrtho("BDM1Ortho",&Elm_TypeOfFE_BDM1_2dOrtho); 
