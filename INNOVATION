@@ -1,3 +1,4 @@
+ - add splitComm for hpddm
 version 3.38-1 
  -  add finite element Edge13d (Finite Element of degrees 1) Thanks to marcella@bonazzoli.it
      and exemples of wave guide in waveguide.edp

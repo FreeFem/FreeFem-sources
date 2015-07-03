@@ -1,5 +1,30 @@
-@  changeset:   3343:af6b74e90d77
+@  changeset:   3348:99d35b68409b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 02 10:03:14 2015 +0200
+|  summary:     correct Navier Stokes examples
+|
+o  changeset:   3347:9c234233943b
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jul 01 15:15:51 2015 +0200
+|  summary:     coorect type in Curve parameter
+|
+o  changeset:   3346:1d5e6dcaa9a0
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jul 01 14:11:27 2015 +0200
+|  summary:     add one argument un curve (isoline)
+|
+o  changeset:   3345:47ef76ab28dd
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 29 15:38:10 2015 +0200
+|  summary:     add missing file (Element_Mixte3d.cpop)
+|
+o  changeset:   3344:1751d0466e33
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 29 14:19:08 2015 +0200
+|  summary:     add new Edge13d Finite element  and examples
+|
+o  changeset:   3343:af6b74e90d77
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jun 26 11:52:09 2015 +0200
 |  summary:     coorect removedof
