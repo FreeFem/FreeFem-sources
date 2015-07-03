@@ -1,5 +1,10 @@
-@  changeset:   3348:99d35b68409b
+@  changeset:   3349:b965a28de4a4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 03 11:36:33 2015 +0200
+|  summary:     add splitComm for hpddm tools
+|
+o  changeset:   3348:99d35b68409b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 02 10:03:14 2015 +0200
 |  summary:     correct Navier Stokes examples
