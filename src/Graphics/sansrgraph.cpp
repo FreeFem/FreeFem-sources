@@ -213,10 +213,10 @@ extern int mymain(int argc,char **argv);
 #ifndef WITHOUT_MAIN
 
 // ALH - 24/2/15 - the main entry point for javascript is on the HTML page so we need to give it a different name here.
-// Built by [[file:~/ffjs/Makefile::FFJS_MAIN]] and called by [[file:~/ffjs/util.cpp::ffjs]].
+// Built by [[file:~/fflib/Makefile::FFLIB_MAIN]] and called by [[file:~/fflib/fflib.cpp::calling_fflib_main]].
 
-#ifdef FFJS_MAIN
-extern "C" int ffjs_main(int argc,char **argv)
+#ifdef FFLIB_MAIN
+extern "C" int fflib_main(int argc,char **argv)
 #else
 int main (int argc, char **argv)
 #endif
