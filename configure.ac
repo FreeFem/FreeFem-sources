@@ -373,22 +373,19 @@ AC_MSG_RESULT($ff_sunos)
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
 
-AC_ARG_ENABLE(cygwindll,
-	[  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)])
-
+AC_ARG_ENABLE(cygwindll,[  --enable-cygwindll	Forces the use of the Cygwin DLL (not recommended)])
+AC_ARG_ENABLE(mingw64,[  --enable-mingw64	Uses mingw64 compilers on Cygwin])
 AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
 #  flag to build window 32   version   ff_mingw = yes
 ff_mingw=no
 case $ff_uname in
     CYGWIN*)
-
-    	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
-	if test $enable_ffcs = no
+	# mingw64 fortran compiler chokes on '-mno-cygwin' option
+	if test "$enable_mingw64" != yes && test "$enable_cygwindll" != yes
 	then
 	    ff_nocygwin=-mno-cygwin
 	fi
-
 	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
     MINGW*)
         enable_cygwindll=no;;

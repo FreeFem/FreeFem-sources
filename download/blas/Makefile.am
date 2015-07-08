@@ -158,19 +158,22 @@ generic:
 ###
 ###else
 
-openblas:links.done
+openblas:install.done
 
-# The library has a complex name with version number, just copy it into a standard location
+# The library may sometimes have a complex name with version number, just copy it into a standard location
+
+if FFCS_WINDOWS
 
 # links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
-if FFCS_WINDOWS
 links.done:openblas.done
 	cd OpenBLAS && ../../../build/links2files
-	cp OpenBLAS/libopenblas*.a ../lib/libopenblas.a
+	touch $@
+install.done:links.done
+	cp OpenBLAS/libopenblas.a ../lib
 	touch $@
 else
-links.done:openblas.done
-	cp OpenBLAS/libopenblas.a ../lib/libopenblas.a
+install.done:openblas.done
+	cp OpenBLAS/libopenblas.a ../lib
 	touch $@
 endif
 

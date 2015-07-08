@@ -61,7 +61,7 @@ namespace ffapi {
     /// Redefinition of standard system calls
     
     FILE *(*ff_popen)(const char *command, const char *type);
-    int (*ff_pclose)(FILE *stream);
+  int (*ff_pclose)(FILE *stream); // [[file:ffapi.cpp::ff_pclose]]
     size_t (*ff_fwrite)(const void *ptr, size_t size, size_t nmemb,FILE *stream);
     int (*ff_fflush)(FILE *stream);
     int (*ff_ferror)(FILE *stream);
