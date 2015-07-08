@@ -2098,7 +2098,8 @@ yyreduce:
                         { Stack stack = newStack(sizestack);
                         double CPUcompile= CPUtime();
                         try {                  
-                          (yyvsp[(1) - (2)].cinst).eval(stack);}
+                          (yyvsp[(1) - (2)].cinst).eval(stack);
+                        }
                         catch ( E_exception & e)  {
                           cerr << e.what() << " ,  mpirank " << mpirank << endl;
                           return 1; }
