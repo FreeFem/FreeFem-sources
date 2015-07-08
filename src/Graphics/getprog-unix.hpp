@@ -9,8 +9,8 @@
 #include <unistd.h>
 
 // FFCS: redirecting visualization output
-#include "../fflib/ffapi.hpp"
-#include "../fflib/strversionnumber.hpp"
+#include "ffapi.hpp"
+#include "strversionnumber.hpp"
 #include <string>
 
 extern long mpirank;
