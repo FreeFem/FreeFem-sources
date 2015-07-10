@@ -1,5 +1,10 @@
-@  changeset:   3349:b965a28de4a4
+@  changeset:   3350:e66cb0d55089
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 03 18:06:08 2015 +0200
+|  summary:     remove bug in renumbering (remove DOC ) missing return in c++
+|
+o  changeset:   3349:b965a28de4a4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jul 03 11:36:33 2015 +0200
 |  summary:     add splitComm for hpddm tools
