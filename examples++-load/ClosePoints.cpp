@@ -309,7 +309,7 @@ KN<long>* CloseTo(Stack stack,double const & eps,pmesh  const &  pTh,KNM<double>
 
 void init(){
     Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo));
-    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, KNM<double>   *  >(CloseTo));
+    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo));
    
    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo));
     Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo));
