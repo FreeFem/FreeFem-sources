@@ -112,6 +112,12 @@ public:
                 if(nc>=0) kk[k++]=nc;
                 
             }
+        if(k>4) {
+            cout << " bizzz" << k << " : " ;
+            for(int i=0; i<k;++i)
+                cout << " " << kk[i];
+            cout << endl;
+        }
         assert(k <=4);
         for(int i=0;i<k;++i)
         {
@@ -127,7 +133,7 @@ public:
     long ncase(double x,double y)
     {
         if(x <x0 || x >=x1 || y <y0 || y >=y1 ) return -1; // dehors
-        else return  long((x-x0)*coef*N)*N +  long((y-y0)*coef*N);// indice de la case contenant (x,y).
+        else return  long((x-x0)/EPSILON) +  long((y-y0)/EPSILON)*N;// indice de la case contenant (x,y).
     }
     ~R2close()
     {
@@ -150,18 +156,18 @@ double dist2(int n,double *p,double *q)
 }
 long Hcode(int n,double eps,double *p,double *p0);
 
-KN<long>* CloseTo(Stack stack,double const & eps,bool t,KNM<double> * const &  p,KNM<double> * const &  q,bool tq)
+KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<double> * const &  q,bool tq)
 {
     
-  long n0=p->N();
-  long m0=p->M();
-  cout << " n0 " << n0 << " m0 " << m0 << " t = " << t << endl;
-  if(t) std::swap(n0,m0);
+  long n0=P.N();
+  long m0=P.M();
+  cout << " n0 " << n0 << " m0 " << m0  << endl;
+ // if(t) std::swap(n0,m0);
   ffassert(n0==2);
  //   bool tq=t; // bofbof ...
-  KNM_<double>  Po =*p;
-  KNM_<double>  Pt =p->t();
-  KNM_<double> P(t ? Pt: Po);
+ // KNM_<double>  Po =*p;
+ // KNM_<double>  Pt =p->t();
+  //KNM_<double> P(t ? Pt: Po);
   KNM<double> & Qo=*q;
    double * p0=&(P(0,0));
    int offset10 =( &(P(1,0)) - p0);
@@ -220,35 +226,49 @@ KN<long>* CloseTo(Stack stack,double const & eps,bool t,KNM<double> * const &  p
 
 KN<long>* CloseTo(Stack stack,double const & eps,KNM<double> * const &  p,KNM<double> * const &  q)
 {
-    return CloseTo(stack,eps,false,p,q,false);
+    KNM_<double> P(*p);
+    return CloseTo(stack,eps,P,q,false);
     
 }
 KN<long>* CloseTo(Stack stack,double const & eps,Transpose<KNM<double>  *>  const &  p,KNM<double> * const &  q)
 {
-    return CloseTo(stack,eps,true,p.t,q,false);
+    KNM_<double> P(p.t->t());
+    return CloseTo(stack,eps,P,q,false);
     
 }
 KN<long>* CloseTo(Stack stack,double const & eps,Transpose<KNM<double>  *>  const &  p,Transpose<KNM<double>  *>  const &  q)
 {
-    return CloseTo(stack,eps,true,p.t,q,true);
+    KNM_<double> P(p.t->t());
+    return CloseTo(stack,eps,P,q,true);
     
 }
 
 KN<long>* CloseTo(Stack stack,double const & eps,KNM<double> * const &  p,Transpose<KNM<double>  *> const &  q)
 {
-    return CloseTo(stack,eps,false,p,q.t,true);
+    KNM_<double> P(*p);
+    return CloseTo(stack,eps,P,q.t,true);
     
 }
 
 KN<long>* CloseTo(Stack stack,double const & eps,KNM<double> * const &  p)
 {
-    return CloseTo(stack,eps,false,p,0,false);
+    KNM_<double> P(*p);
+    return CloseTo(stack,eps,P,0,false);
+    
+}
+KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double>  const &  p)
+{
+    KNM_<double> P(p);
+    cout << " CloseTo KNM_ "<< P.N() << " " << P.M() << endl;
+    return CloseTo(stack,eps,P,0,false);
     
 }
 
+
 KN<long>* CloseTo(Stack stack,double const & eps,Transpose<KNM<double>  *>  const &  p)
 {
-    return CloseTo(stack,eps,true,p.t,0,false);
+     KNM_<double> P(p.t->t());
+    return CloseTo(stack,eps,P,0,false);
 }
 
 
@@ -310,7 +330,8 @@ KN<long>* CloseTo(Stack stack,double const & eps,pmesh  const &  pTh,KNM<double>
 void init(){
     Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo));
     Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo));
-   
+    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo));
+    
    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo));
     Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo));
    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo));
