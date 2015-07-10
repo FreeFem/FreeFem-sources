@@ -35,7 +35,7 @@
 // Modif F Hecht for dll on win32 
 // pass all the graphic function via pointeur
 //  now the real graphic function of a pointeur xxxx is call  xxxx_
-//   We just need to add FF_GRAPH_SET_PTR in all graphic.cpp version
+//   We just need to add <<FF_GRAPH_SET_PTR>> in all graphic.cpp version
 //  the dcl of xxxx pointeur is  done via GRAPH_PTR_DCL macro (set one time ) 
 //  
 // ----- 
