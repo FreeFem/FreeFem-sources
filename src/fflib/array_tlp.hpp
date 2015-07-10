@@ -806,7 +806,7 @@ struct Op3_pacc: public ternary_function<KN_<K>,K,K,if_arth_KN_<K>*> {
 	       kb(new(NewAllocTmp(s,sizeof(b))) K(b),1,0);    
     return new if_arth_KN_<K>(a,kb,kc);}
 };   
-
+template<class K> KNM_<K> Transp(KNM_<K>  M){ return M.t();} // Add FH July 2015
 template<class K>
 struct SetArray2: public binary_function<K,K,SetArray<K> > { 
   static SetArray<K> f(const K & a,const K & b)  { 
@@ -1350,7 +1350,8 @@ void ArrayOperator()
   TheOperators->Add("\'",       
       // new OneOperator1<Transpose<KN_<K> >,KN<K> *>(&Build<Transpose<KN_<K> >,KN<K> *>),
        new OneOperator1<Transpose<KN_<K> >,KN_<K> >(&Build<Transpose<KN_<K> >,KN_<K> >),
-       new OneOperator1<Transpose<KNM<K> * >, KNM<K> * >(&Build<Transpose<KNM<K> * >,KNM<K> * >)            
+       new OneOperator1<Transpose<KNM<K> * >, KNM<K> * >(&Build<Transpose<KNM<K> * >,KNM<K> * >)  ,
+       new OneOperator1<KNM_<K> , KNM_<K> >(Transp<K> )
   );
        
      TheOperators->Add(".*",
