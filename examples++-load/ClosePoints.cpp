@@ -42,7 +42,8 @@ public:
         }
         
         coef  = 1./max(x1-x0,y1-y1);
-        cout << " bb  [" << x0 << ", "<< y0 << "], [ " << x1 << " " << y1 << "], " << coef << endl;
+        if(verbosity>10)
+        cout << "     bounding box ClosePoints  [" << x0 << ", "<< y0 << "], [ " << x1 << " " << y1 << "] " << endl;
         
         N=max(sqrt(nx),10.);
         m=max(nx/10,10);
@@ -113,7 +114,7 @@ public:
                 
             }
         if(k>4) {
-            cout << " bizzz" << k << " : " ;
+            cout << "   ClosePoints: Bug ??? : " << k << " : " ;
             for(int i=0; i<k;++i)
                 cout << " " << kk[i];
             cout << endl;
@@ -161,7 +162,8 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<dou
     
   long n0=P.N();
   long m0=P.M();
-  cout << " n0 " << n0 << " m0 " << m0  << endl;
+  if(verbosity>2 )
+    cout << " -ClosePoints Size array;   n0 " << n0 << " m0 " << m0  << endl;
  // if(t) std::swap(n0,m0);
   ffassert(n0==2);
  //   bool tq=t; // bofbof ...
@@ -172,8 +174,11 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<dou
    double * p0=&(P(0,0));
    int offset10 =( &(P(1,0)) - p0);
    int offset01 =( &(P(0,1)) - p0);
-    cout << " offset of 0 1 :  "<< offset01  << endl;
-    cout << " offset of 1 0 :  "<< offset10 << endl;
+    if(verbosity>10 )
+    {
+    cout << "     offset of 0 1 :  "<< offset01  << endl;
+    cout << "     offset of 1 0 :  "<< offset10 << endl;
+    }
   MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
     
     double x0= P(0,':').min();
@@ -189,6 +194,7 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<dou
   R2close S(data,m0,eps,offset10);
   for (int i=0; i<m0;++i)
     {
+        if(verbosity>19 )
         cout << i << " :: " << P(0,i) << " " << P(1,i) << endl;
         S.AddOpt(&P(0,i));
     }
@@ -217,7 +223,7 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<dou
             (*pr)[i]= (pi-p0)/offset01;
         }
     }
-    
+    if(verbosity>2 ) cout << "  - ClosePoint: nb of common points " << m0-pr->N();
  //   double *p0=&(*p)(0,0);
     
     
@@ -259,6 +265,7 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM<double> * const &  p)
 KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double>  const &  p)
 {
     KNM_<double> P(p);
+    if(verbosity>5)
     cout << " CloseTo KNM_ "<< P.N() << " " << P.M() << endl;
     return CloseTo(stack,eps,P,0,false);
     
