@@ -1350,8 +1350,8 @@ void ArrayOperator()
   TheOperators->Add("\'",       
       // new OneOperator1<Transpose<KN_<K> >,KN<K> *>(&Build<Transpose<KN_<K> >,KN<K> *>),
        new OneOperator1<Transpose<KN_<K> >,KN_<K> >(&Build<Transpose<KN_<K> >,KN_<K> >),
-       new OneOperator1<Transpose<KNM<K> * >, KNM<K> * >(&Build<Transpose<KNM<K> * >,KNM<K> * >)  ,
-       new OneOperator1<KNM_<K> , KNM_<K> >(Transp<K> )
+       new OneOperator1<Transpose<KNM<K> * >, KNM<K> * >(&Build<Transpose<KNM<K> * >,KNM<K> * >,10)  ,
+       new OneOperator1<KNM_<K> , KNM_<K> >(Transp<K>, 1)
   );
        
      TheOperators->Add(".*",
