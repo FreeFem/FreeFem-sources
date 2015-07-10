@@ -60,7 +60,7 @@
 // FFCS-specific implementations for the FF API
 // --------------------------------------------
 
-/// FFLANG defined means that FFCS is being compiled. I am fairly confident that FFCS will not be defined while
+/// <<FFLANG>> defined means that FFCS is being compiled. I am fairly confident that FFCS will not be defined while
 /// compiling the original FF.
 
 /// Need to choose a non-zero stream number because FF will check it (as global variable ThePlotStream)
@@ -273,7 +273,7 @@ static  bool ffapi_protectedservermode(){
 #endif
   }
 
-  // called by [[file:../lglib/mymain.cpp::ffapi::init]]
+  // <<init>> [[file:ffapi.hpp::init]] called by [[file:../lglib/mymain.cpp::ffapi::init]]
   void init(){
     ffapi::cin = ffapi::ffapi_cin;
     ffapi::cout = ffapi::ffapi_cout;

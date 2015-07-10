@@ -222,7 +222,7 @@ int main (int argc, char **argv)
 #endif
 {
   atexit(doatexitff);
-  int ret=mymain(argc,argv);
+  int ret=mymain(argc,argv); // <<calling_mymain>>
   return ret;
 }
 
