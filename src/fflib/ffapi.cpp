@@ -1,7 +1,3 @@
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
-
 /// \file
 /// ======================================================================
 /// Written by Antoine Le Hyaric
@@ -31,8 +27,12 @@
 // Proposed FreeFem++ Application Programming Interface
 // ----------------------------------------------------
 
-// headerfilter
-#include "ffapi.hpp"
+#ifdef WITH_PETSC
+#include <petsc.h>
+#endif
+
+// headerfilter [[shell:headerfilter ffapi.cpp]]
+#include "ffapi.hpp" // [[file:ffapi.hpp]] found by [[file:~/alh/bin/headerfilter]]
 #ifdef FFLANG
 #include "socket.hpp"
 #include "spawn.hpp"
@@ -57,6 +57,7 @@
 #include "mpi.h"
 #endif
 #endif
+
 // FFCS-specific implementations for the FF API
 // --------------------------------------------
 
@@ -235,7 +236,7 @@ static  void ffapi_winbinmode(FILE *f){
   }
 
 static  void ffapi_mpi_init(int &argc, char** &argv){
-    /// only call MPI_Init() if this has not already been done in ffcs/src/server.cpp
+    /// only call MPI_Init() if this has not already been done in [[file:~/ffcs/src/server.cpp]]
 #ifndef FFLANG
 #ifdef PARALLELE
     // need #include "mpi.h"
