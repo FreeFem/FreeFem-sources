@@ -216,7 +216,7 @@ extern int mymain(int argc,char **argv);
 // Built by [[file:~/fflib/Makefile::FFLIB_MAIN]] and called by [[file:~/fflib/fflib.cpp::calling_fflib_main]].
 
 #ifdef FFLIB_MAIN
-extern "C" int fflib_main(int argc,char **argv)
+int fflib_main(int argc,char **argv)
 #else
 int main (int argc, char **argv)
 #endif
