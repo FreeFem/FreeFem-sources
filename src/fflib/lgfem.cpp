@@ -5305,6 +5305,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false)  ,
 		   new OpMatrixtoBilinearForm<double,v_fes >);
  
+ 
  TheOperators->Add("=",
 		 //-  new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,false)  ,// 3d
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false)  ,//3d

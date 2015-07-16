@@ -1,3 +1,7 @@
+ - add function ClosePoint in ClosePoint plugin
+ - add += example of varf   
+ - correct mortar example repalce P0Egde in P0 => better result  
+ - correct map funct if dfft plugin 
  - add splitComm for hpddm
 version 3.38-1 
  -  add finite element Edge13d (Finite Element of degrees 1) Thanks to marcella@bonazzoli.it
