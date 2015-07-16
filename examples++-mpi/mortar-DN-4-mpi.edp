@@ -1,3 +1,4 @@
+// NBPROC 4
 assert(version>=2.23);
 if ( mpisize != 4 ) 
   {
@@ -72,7 +73,7 @@ Nmx[]= vNN(0,RTh);
 Lh  lh=0,rhsl=0;
 
 fespace Vhi(Thi,P1);
-fespace Ehi(Thi,P0edge);
+fespace Ehi(Thi,P0);
 matrix Asd,Csd,PAsd,PIsd,PJsd;
 Vhi usd,vsd,rhssd, pusd,bcsd;
 Ehi epssd;

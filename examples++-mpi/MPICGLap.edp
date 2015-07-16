@@ -1,3 +1,4 @@
+// NBPROC 4
 load "MPICG"
 
 // the grad of the bilinear part of J (the RHS in remove)
