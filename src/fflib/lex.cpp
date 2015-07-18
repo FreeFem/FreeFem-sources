@@ -222,7 +222,7 @@ int mylex::basescan()
       firsttime=false;
     if(echo) cout << setw(5) <<linenumber << " : " ; 
   }
-  EatCommentAndSpace(); 
+  EatCommentAndSpace(); // [[mylex::EatCommentAndSpace]]
   c =source().get(); // the current char 
   char nc = source().peek(); // next char
   buf[0]=c;
@@ -419,7 +419,7 @@ int mylex::scan1()
   // extern long mpirank;
  // bool echo = mpirank == 0; 
 
-  int ret= basescan();
+  int ret= basescan(); // [[mylex_basescan]]
   if(debugmacro)  cout << " scan1 " << ret << " " << token() << " " << ID << endl;
     while ( ret == ID &&SetMacro(ret)); // correction mars 2014 FH
     while ( ret == ID && CallMacro(ret)) ; // correction mars 2014 FH
@@ -763,42 +763,54 @@ bool mylex::CallMacro(int &ret)
 
 void  mylex::xxxx::open(mylex *lex,const char * ff) 
 {
-  //filename=ff;
   l=0;
   nf=f=0;
+
+  // Try to open the given file name without any extra path from [[file:lex.hpp::ffincludedir]]
   if(lex->ffincludedir.empty()) // if no liste 
-      nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
+    nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
+
+  // If it worked, set [[file:lex.hpp::filename]] to ff, otherwise try to add path elements from
+  // [[file:lex.hpp::ffincludedir]]
   if (!f || !*f)
-   {
-   if ( f)  { delete f; f=0; }
-   for (ICffincludedir k=lex->ffincludedir.begin();
-        k!=lex->ffincludedir.end();
-        ++k)
-   {
-    string dif_ff(*k+ff);
-    if (verbosity>=50) lex->cout  << "  --lex open :" << dif_ff << endl;
-    nf=f= new ifstream(dif_ff.c_str(),ios_base::binary); 
-    if ( f)  {
-      if ( f->good()) {  
-        filename = new string(dif_ff);
-        break;
-      }
-      delete f; f=0;
-     }     
-   } 
-   } 
-   else
-      filename=new  string(ff);
-  if (!f || !*f) {
-    lex->cout << " Error openning file " <<ff<< " in: " <<endl;
+    {
+      if ( f)  { delete f; f=0; }
+
+      // for every potential path element
       for (ICffincludedir k=lex->ffincludedir.begin();
 	   k!=lex->ffincludedir.end();
 	   ++k)
-	  lex->cout  << "  -- try  :\"" << *k+ff  << "\"\n";
+	{
+	  string dif_ff(*k+ff);
+	  if (verbosity>=50) lex->cout  << "  --lex open :" << dif_ff << endl;
+	  nf=f= new ifstream(dif_ff.c_str(),ios_base::binary); 
+	  if ( f)  {
 
-    lgerror("lex: Error input openning file ");};
+	    // If path works, set [[file:lex.hpp::filename]] and close test stream
+	    if ( f->good()) {  
+	      filename = new string(dif_ff);
+	      break;
+	    }
+	    delete f; f=0;
+	  }     
+	} 
+    } 
+  else
+    filename=new string(ff);
+
+  // Error message if no path was right
+  if (!f || !*f) {
+    lex->cout << " Error openning file " <<ff<< " in: " <<endl;
+    for (ICffincludedir k=lex->ffincludedir.begin();
+	 k!=lex->ffincludedir.end();
+	 ++k)
+      lex->cout  << "  -- try  :\"" << *k+ff  << "\"\n";
+
+    lgerror("lex: Error input openning file ");
+  }
 }
-void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int macroargs)//,int nbparam,int bstackparam)
+
+void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int macroargs)
 {
   filename=name;
   macroarg=macroargs;
@@ -807,14 +819,15 @@ void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int ma
   
   if (!f || !*f) {
     lex->cout << " Error readin string  :" <<s<< endl;
-    lgerror("lex: Error readin macro ");};
+    lgerror("lex: Error readin macro ");
+  }
 }
 
 void mylex::xxxx::close() 
 { 
-  if( nf)  delete nf;
-  if (filename && (macroarg==0) ) delete filename;
-  
+  // ALH_BUG Why does this segfaults under Windows? Probably needs valgrind.
+  //if(nf) delete nf;
+  if(filename && (macroarg==0)) delete filename; // [[file:lex.hpp::filename]]
 }
 
 // <<mylex_input_filename>>
@@ -853,7 +866,7 @@ bool mylex::close() {
     cout << "\n close " << level ;
   ffassert(level >=0 && level < 100);
   // cout << "\n-- close " << level << endl;
-  pilesource[level].close(); 
+  pilesource[level].close(); // [[mylex::xxxx::close]]
   // cout << "\n ++   " << level << endl;
   if (--level<0)
     return false;
