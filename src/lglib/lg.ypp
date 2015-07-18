@@ -939,7 +939,7 @@ int mainff (int  argc, char **argv)
   //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || mpirank==0)  cout << endl;
-  zzzfff->input(cc); // [[file:../fflib/lex.cpp::void mylex input]]
+  zzzfff->input(cc); // [[file:../fflib/lex.cpp::mylex_input_filename]]
   EnvironmentLoad(); // just before compile
   verbosity=vvold; 
     

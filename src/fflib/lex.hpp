@@ -52,7 +52,7 @@ class mylex : public CodeAlloc {
 
   public: 
   int linenumber,charnumber;
-  list<string> ffincludedir;
+  list<string> ffincludedir; // <<ffincludedir>>
   typedef  list<string>::iterator Iffincludedir;
   typedef  list<string>::const_iterator ICffincludedir;
   
@@ -68,7 +68,7 @@ class mylex : public CodeAlloc {
   struct xxxx { 
     int l;
     istream * f;
-    const string * filename;
+    const string * filename; // <<filename>>
     int macroarg;
     istream * nf;
 
@@ -134,14 +134,14 @@ class mylex : public CodeAlloc {
   bool close() ;
 
   char * newcopy(const char * s)
-   {
+  {
     char *r(new char  [strlen(s)+1]);
     strcpy(r, s);
     strdata.push(r);
     return r;
   }
- ostream & ShowStack(ostream & f); 
-~mylex();
+  ostream & ShowStack(ostream & f); 
+  ~mylex();
 private: 
   int basescan();  
   int EatCommentAndSpace(string *data=0);
