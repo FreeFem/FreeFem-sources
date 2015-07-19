@@ -825,8 +825,10 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
 
 void mylex::xxxx::close() 
 { 
-  // ALH_BUG Why does this segfaults under Windows? Probably needs valgrind.
-  //if(nf) delete nf;
+  // ALH_BUG Why does this segfaults under Windows? Probably needs valgrind to find out.
+#if !defined(FFCS) || !defined(WIN32)
+  if(nf) delete nf;
+#endif
   if(filename && (macroarg==0)) delete filename; // [[file:lex.hpp::filename]]
 }
 
