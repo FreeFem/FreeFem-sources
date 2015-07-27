@@ -1,0 +1,42 @@
+# ======================================================================
+# Written by Antoine Le Hyaric
+# http://www.ljll.math.upmc.fr/lehyaric
+# Antoine Le Hyaric (1,2)
+# 1- CNRS, UMR 7598, Laboratoire Jacques-Louis Lions, F-75005, Paris, France
+# 2- Sorbonne Universités, UPMC Univ Paris 06, UMR 7598, Laboratoire Jacques-Louis Lions, F-75005, Paris, France
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+#+STARTUP: showeverything
+# ======================================================================
+# [[shell:header\alh 'postit.org']] (cf [[file:~/alh/bin/headeralh]])
+# headeralh default=0 freefem org start=27/07/2015 upmc written brief="Development pointers and tools"
+
+* TODO [2015-07-19 dim. 07:38] [[elisp:(startup-persistent-process "remote.pl -X")]] :bookmark:
+* TODO [2015-07-19 dim. 07:38] [[elisp:(startup-persistent-process "rox-filer")]] :bookmark:
+* TODO [#Z] [2015-06-25 jeu. 09:09] [[elisp:(grep "emacsfind")]] (memo: 8m) (wait [2016-01-09 sam. 01:58]) :sorted:bookmark:
+* <<File_info>>
+
+# Local Variables:
+# mode:org
+# mode:visual-line
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# eval:(flyspell-prog-mode)
+# eval:(outline-minor-mode)
+# End:
+# LocalWords: headeralh

@@ -62,6 +62,7 @@ char * Shell_Space(const char * s)
 
 extern void (*init_lgparallele)();
 
+// <<getprog>> called by [[file:../lglib/lg.ypp::getprog]]
 int getprog(char* fn,int argc, char **argv)
 {
   waitatend= 0; // init_lgparallele==0;  // attent if no parallele

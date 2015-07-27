@@ -557,6 +557,7 @@
 ^examples\+\+-load/pippo\.data$
 ^examples\+\+-load/pippo\.dx$
 ^examples\+\+-load/regtests-.*\.log$
+^examples\+\+-load/regtests\.edp$
 ^examples\+\+-load/sphere2region\.mesh$
 ^examples\+\+-load/spherewithahole\.mesh$
 ^examples\+\+-load/spherewithtworegion\.mesh$
@@ -586,9 +587,10 @@
 ^examples\+\+-tutorial/lestables$
 ^examples\+\+-tutorial/machinefile$
 ^examples\+\+-tutorial/makeref\.edp$
+^examples\+\+-tutorial/mm\.faces$
+^examples\+\+-tutorial/mm\.points$
 ^examples\+\+-tutorial/plot\.gp$
 ^examples\+\+-tutorial/regtests\.edp$
-^examples\+\+-load/regtests\.edp$
 ^examples\+\+-tutorial/toto\..*$
 ^examples\+\+-tutorial/u\.txt$
 ^examples\+\+/.*\.BB$
@@ -676,8 +678,6 @@
 ^stamp-h$
 ^stamp-h1$
 ^test-driver$
-examples\+\+-tutorial/mm\.faces$
-examples\+\+-tutorial/mm\.points$
 ~$
 
 # Local Variables:

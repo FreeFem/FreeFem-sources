@@ -28,7 +28,7 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-#include "../src/Graphics/mode_open.hpp" // ALH - there should be a '-I'?
+#include "mode_open.hpp"
 #include "ff++.hpp"
 #define WrdSiz 4
 
@@ -2406,6 +2406,8 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator()(Stack stack)  const
 
 $1 */
 
+// <<dynamic_loading>>
+
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
@@ -2424,4 +2426,6 @@ static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"
 
   Global.Add("readsol","(",new OneOperatorCode< readsol_Op >);
 }
+
+// [[file:include/InitFunct.hpp::LOADFUNC]]
 LOADFUNC(Load_Init)
