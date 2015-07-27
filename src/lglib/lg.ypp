@@ -850,17 +850,17 @@ int mainff (int  argc, char **argv)
   if(argc)  
     prognamearg=argv[0];
 
-    int vvold=verbosity; 
-    if(mpirank !=0) verbosity=0;
+  int vvold=verbosity; 
+  if(mpirank !=0) verbosity=0;
 
   // ALH - 14/10/8 - This breaks FFCS output redirection
 #ifndef ENABLE_FFCS
   SetcppIo();
 #endif
 
-  GetEnvironment();   
-    vvold=verbosity; 
-    if(mpirank !=0) verbosity=0; 
+  GetEnvironment(); // [[file:~/ff/src/fflib/environment.cpp::GetEnvironment]]
+  vvold=verbosity; 
+  if(mpirank !=0) verbosity=0; 
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
@@ -877,7 +877,7 @@ int mainff (int  argc, char **argv)
 
   char *  cc= new char [1024];
   //  istream * ccin=0;
-  if ( ! (getprog(cc,argc,argv) >0)  ) 
+  if ( ! (getprog(cc,argc,argv) >0)  ) // [[file:~/ff/src/Graphics/getprog-unix.hpp::getprog]]
     {
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
       if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
@@ -940,8 +940,10 @@ int mainff (int  argc, char **argv)
 
    if(verbosity>2 || mpirank==0)  cout << endl;
   zzzfff->input(cc); // [[file:../fflib/lex.cpp::mylex_input_filename]]
-  EnvironmentLoad(); // just before compile
-  verbosity=vvold; 
+  EnvironmentLoad(); // just before compile [[file:~/ff/src/fflib/environment.cpp::EnvironmentLoad]]
+
+  // Only reset verbosity for parallel processes where it was forcefully set to zero - ALH
+  if(mpirank!=0)verbosity=vvold; 
     
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;

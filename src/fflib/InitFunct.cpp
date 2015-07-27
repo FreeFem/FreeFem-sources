@@ -43,6 +43,8 @@ deque<InitFunct> * getInitFunctlist()
 
 extern long verbosity;
 set<string> & ff_SetofInitFunct() { static set<string> sset; return sset;}
+
+// <<call>>
 void call(const InitFunct & a) { 
   if(verbosity>5) 
     cout << "\n addInitFunct : " << a.first << " call : " <<a.second  << " ( " ; 
@@ -54,30 +56,31 @@ bool comp(const InitFunct a,const InitFunct b)
  { 
    return a.first < b.first;
  }
- 
- void  callInitsFunct() 
- {
-   deque<InitFunct> *  l(getInitFunctlist()); 
-   sort(l->begin(),l->end(),comp);
-   if(verbosity>5) cout << " callInitsFunct : " << l->size() << endl;
-   //   for_each(l->begin(),l->end(),show);   
-   for_each(l->begin(),l->end(),call);
-    l->clear();
- }
- 
+
+// <<callInitsFunct>> called by [[file:load.cpp::callInitsFunct]]
+void  callInitsFunct() 
+{
+  deque<InitFunct> *  l(getInitFunctlist()); // [[getInitFunctlist]]
+  sort(l->begin(),l->end(),comp);
+  cout << "callInitsFunct verbosity=" << &verbosity << " " << verbosity <<endl;//AAA-ALH-TODO
+  if(verbosity>5) cout << " callInitsFunct : " << l->size() << endl;
+  //   for_each(l->begin(),l->end(),show);   
+  for_each(l->begin(),l->end(),call); // [[call]]
+  l->clear();
+}
+
+// <<addInitFunct>>
 void  addInitFunct(int i,void  (* f)(),const char *name) 
 {
+  if(!name || (! *name )
 
-  if(!name || (! *name ) ||  ff_SetofInitFunct().insert(name).second)
-    { 
+     // [[ff_SetofInitFunct]]
+     ||  ff_SetofInitFunct().insert(name).second
+     ){ 
     getInitFunctlist()->push_back(make_pair(i,f));
     if(verbosity>9)   cout << " -- addInitFunct: " << i << " " << f 
 			   << " " <<  (name ? name : "" ) <<endl; 
-    }
+  }
   else 
     cout << " ********  addInitFunct "<< name << " is always load (skip) !" << endl; 
-
 }
-
-
-

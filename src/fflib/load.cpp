@@ -134,13 +134,31 @@ bool load(string ss)
 		  return mod;
 		}
 	    }
-#else
+#elif STATIC_LINKING
+	    
+	    // <<STATIC_LINKING>> Enable statically linked libraries for [[file:~/fflib/Makefile::STATIC_LINKING]] - ALH
+	    
+	    if(
+	       // [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]] AAA-ALH-HERE
+	       ss=="msh3"
+
+	       // [[file:~/ff/examples++-load/medit.cpp::dynamic_loading]]
+	       || ss=="medit"){
+
+	      cout << "load verbosity=" << &verbosity << " " << verbosity <<endl;//AAA-ALH-TODO
+	      if(verbosity && (mpirank ==0)) cout << " (static load: " << ss << " " << ") ";
+	      callInitsFunct(); // [[file:InitFunct.cpp::callInitsFunct]]
+	      
+	      return true;
+	    }
+	    else return false;
+#else	    
 	    if(mpirank ==0)
-		{
-		  cout << "------------------------------------   \n" ;
-		  cout << "  load: sorry no dlopen on this system " << s << " \n" ;
-		  cout << "------------------------------------   \n" ;
-		}
+	      {
+		cout << "------------------------------------   \n" ;
+		cout << "  load: sorry no dlopen on this system " << s << " \n" ;
+		cout << "------------------------------------   \n" ;
+	      }
 	    CompileError("Error load");
 	    return 0;
 #endif  
