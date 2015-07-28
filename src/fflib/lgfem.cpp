@@ -4342,10 +4342,11 @@ AnyType Convect::eval3(Stack s) const
 MeshPoint* mp(MeshPointStack(s));
 static MeshPoint mpp,mps;
 static R ddts;
+    randwalk(-1); // init randwalk
 R ddt = GetAny<double>((*dt)(s));
 if (ddt) 
 {
-    bool ddd=verbosity>100;
+    bool ddd=verbosity>1000;
     MeshPoint mpc(*mp);
     MeshPointStack(s,&mpc);
     if(*mp==mpp && ddt == ddts) 
@@ -4803,7 +4804,7 @@ template<typename  T> T fepresize(const Resize1<T> & rt,const long &n) {
 template<typename  T> T feresize(const Resize1<T> & rt,const long &n) {
     rt.v.first->resize(n);
     return rt.v;}
-
+double get_R3(R3 *p,long i){return (*p)[i];}
 R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 void  init_lgfem() 
 {
@@ -5086,8 +5087,9 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<R2*>("x",".", new OneOperator_Ptr_o_R<R,R2>(  & R2::x));
  Add<R2*>("y",".", new OneOperator_Ptr_o_R<R,R2>(  & R2::y));
  
- Add<pmesh>("[","",new OneOperator2_<lgElement,pmesh,long>(get_element));
+ Add<R3*>("[","",new OneOperator2<double,R3*,long>(get_R3));
     
+ Add<pmesh>("[","",new OneOperator2_<lgElement,pmesh,long>(get_element));
  Add<pmesh*>("be",".",new OneOperator1_<lgBoundaryEdge::BE,pmesh*>(Build));
  Add<lgElement>("adj",".",new OneOperator1_<lgElement::Adj,lgElement>(Build));
  Add<lgBoundaryEdge::BE>("(","",new OneOperator2_<lgBoundaryEdge,lgBoundaryEdge::BE,long>(get_belement));
@@ -5302,6 +5304,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		//-   new OpArraytoLinearForm<double,v_fes>(atype< KN<double>* >(),true,false)  ,
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false)  ,
 		   new OpMatrixtoBilinearForm<double,v_fes >);
+ 
  
  TheOperators->Add("=",
 		 //-  new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,false)  ,// 3d

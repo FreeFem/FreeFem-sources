@@ -6,6 +6,7 @@
     Mesh adaptation 
 */
 real  reymax = 1600; // ok < 125000 
+func BCu1=4*x*(1-x);
 mesh Th=square(8,8);
 fespace Xh(Th,P2);
 fespace Mh(Th,P1);
@@ -13,6 +14,7 @@ fespace XXMh(Th,[P2,P2,P1]);
 XXMh [u1,u2,p];
 XXMh [v1,v2,q]; 
 
+real epsr=1e-6;
 macro div(u1,u2) (dx(u1)+dy(u2))//
 macro grad(u1,u2) [dx(u1),dy(u2)]//
 macro ugrad(u1,u2,v) (u1*dx(v)+u2*dy(v)) //
@@ -21,10 +23,10 @@ macro Ugrad(u1,u2,v1,v2) [ugrad(u1,u2,v1),ugrad(u1,u2,v2)]//
 solve Stokes ([u1,u2,p],[v1,v2,q],solver=UMFPACK) =
     int2d(Th)( ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
-            + p*q*(0.000001) 
+            - p*q*epsr
             - p*div(v1,v2)-q*div(u1,u2)
            )
-  + on(3,u1=4*x*(1-x),u2=0) 
+  + on(3,u1=BCu1,u2=0) 
   + on(1,2,4,u1=0,u2=0);
 
  Xh uu1=u1,uu2=u2;  
@@ -52,13 +54,14 @@ real alpha=1/dt;
              alpha*( u1*v1 + u2*v2) 
             + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
-            + p*q*(0.000001) 
-            + p*dx(v1)+ p*dy(v2)
-            + dx(u1)*q+ dy(u2)*q
+            - p*q*eprs
+            - p*div(v1,v2)-q*div(u1,u2)
             + Ugrad(u1,u2,u1,u2)'*[v1,v2]
            )   
   + on(3,u1=1,u2=0) 
   + on(1,2,4,u1=0,u2=0) 
+  
+  Newtow   DF(u) u1 = DF(u)u - F(u)
 */
 
 XXMh [up1,up2,pp];
@@ -67,27 +70,22 @@ varf   vDNS ([u1,u2,p],[v1,v2,q]) =
             
             + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
-            + p*q*(0.000001) 
-            + p*dx(v1)+ p*dy(v2)
-            + dx(u1)*q+ dy(u2)*q
+            - p*q*epsr
+            - p*div(v1,v2)-q*div(u1,u2)
             + Ugrad(u1,u2,up1,up2)'*[v1,v2]
             + Ugrad(up1,up2,u1,u2)'*[v1,v2]
            )
-  + on(1,2,3,4,u1=0,u2=0) 
+  + on(3,u1=BCu1,u2=0) 
+  + on(1,2,4,u1=0,u2=0);
 ;
 
 
-varf   vNS ([u1,u2,p],[v1,v2,q]) =
+varf   vNS ([u1,u2,p],[v1,v2,q]) = // DF(u)u - F(u) 
     int2d(Th)(
-          
-            + nu * ( dx(up1)*dx(v1) + dy(up1)*dy(v1)
-            +  dx(up2)*dx(v2) + dy(up2)*dy(v2) )
-            + pp*q*(0.000001) 
-            + pp*dx(v1)+ pp*dy(v2)
-            + dx(up1)*q+ dy(up2)*q
-            + Ugrad(up1,up2,up1,up2)'*[v1,v2]//'
+          Ugrad(up1,up2,up1,up2)'*[v1,v2]//'
 	      )
-  + on(1,2,3,4,u1=0,u2=0) 
+   + on(3,u1=BCu1,u2=0) 
+   + on(1,2,4,u1=0,u2=0);
   ;
 
 for(real re=100;re<=reymax;re *=2)
@@ -111,10 +109,10 @@ for(real re=100;re<=reymax;re *=2)
 	    real[int] b = vNS(0,XXMh);
 	    matrix Ans=vDNS(XXMh,XXMh);
 	    set(Ans,solver=UMFPACK);
-	    real[int] w = Ans^-1*b;
-	    u1[] -= w;
-	    cout << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
-	    if(w.l2<1e-6) break; 
+	     u1[] = Ans^-1*b;
+	     b=u1[]-up1[];
+	    cout << " iter = "<< i << "  " << b.l2 <<  " rey = " << re << endl;
+	    if(b.l2<1e-6) break; 
 	    // uu1=u1;uu2=u2;
 	    //plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2]);  
 	    

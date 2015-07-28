@@ -2,7 +2,7 @@
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS=aadaptation.edp aalapacien.edp aalaplace-nc.edp aamove.edp aaRT.edp arrayoFVh.edp bilap.edp D2.edp demo1.edp demo.edp funct.edp lapacienprecon.edp lap_mat.edp NSP1P1b.edp NSP1P1.edp NSP1P2.edp parareal.edp Richard.edp teste.edp testFE.edp wafer-heating-laser-axi.edp
+TESTS=aadaptation.edp aalapacien.edp aalaplace-nc.edp aamove.edp aaRT.edp arrayoFVh.edp bilap.edp D2.edp demo1.edp demo.edp funct.edp lapacienprecon.edp lap_mat.edp NSP1P1b.edp NSP1P1.edp NSP1P2.edp parareal.edp Richard.edp teste.edp testFE.edp wafer-heating-laser-axi.edp renumbering.edp
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 

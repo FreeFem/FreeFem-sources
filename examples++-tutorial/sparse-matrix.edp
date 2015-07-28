@@ -24,6 +24,13 @@ varf vML(u,v) = int2d(th)(1*v);
 ml[]=vML(0,Vh); // build the P1 mass lump of P1
 cout << ml[] << endl;
 matrix ML(ml[]); // matrix diagonal
+// check +=  version 3.xx
+real sml=ml[].sum;
+ml[]+=vML(0,Vh);
+real sml2=ml[].sum;
+cout << " ### " << sml2 << " " << sml*2 << endl;    
+assert((sml*2-sml2) < 1e-10);
+ml[]/=2.; 
 cout << "ML="<<ML << endl;
 cout << "B="<<B << endl;
 matrix BML=B*ML;

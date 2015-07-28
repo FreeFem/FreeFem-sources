@@ -10,7 +10,7 @@
 
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.35}
+\def\VERSION{3.38}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -9940,12 +9940,13 @@ normal.
 
 
 We add automatic \x{expression optimization} by default, if this optimization creates problems,
-it can be removed with the keyword \texttt{{optimize}} as in the following example : \index{optimize=}
+it can be removed with the keyword \texttt{{optimize}} as in the following example : \index{optimize=},
 \index{varf!optimize=}
 \bFF
-@varf a(u1,u2)= @int2d(Th,optimize=false)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+@varf a(u1,u2)= @int2d(Th,optimize=0)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
                     +  @on(1,2,4,u1=0)  +  @on(3,u1=1) ;
 \eFF
+or you can also  do optimisation and remove the check by setting  \verb!optimize=2! (version 3.38).
 
 Remark, it is all possible to build interpolation matrix, like in
 \index{interpolate}\index{matrix!interpolate}

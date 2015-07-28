@@ -2919,15 +2919,18 @@ bool SetDefault()
 template<class T>
 class removeDOF_Op : public E_F0mps {
 public:
-    Expression A;// A =0
+    Expression A;
     Expression R;
     Expression x;
     Expression out;
-
+    int nbarg;
     static const int n_name_param = 4;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
-    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), R(param2), x(param3), out(param4) {
+    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), R(param2), x(param3), out(param4),nbarg(4) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+    }
+    removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4) : A(0), R(param2), x(param3), out(param4) ,nbarg(3){
         args.SetNameParam(n_name_param, name_param, nargs);
     }
     
@@ -2952,7 +2955,8 @@ public:
     E_F0* code(const basicAC_F0& args) const {
         if(withA)
         return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
-        else new removeDOF_Op<T>(args, 0, t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
+        else
+        return new removeDOF_Op<T>(args,  t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
     }
 };
 template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
