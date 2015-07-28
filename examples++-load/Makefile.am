@@ -34,6 +34,7 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  thresholdings.cpp	 \
  VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp  \
  Element_Mixte.cpp    \
+ Element_Mixte3d.cpp    \
  myfunction2.cpp   \
  cmaes.cpp \
  cmaes.h cmaes_interface.h ff-cmaes.cpp \
@@ -68,7 +69,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	Element_P1dc1.$(DYLIB_SUFFIX) BinaryIO.$(DYLIB_SUFFIX) \
         isolineP1.$(DYLIB_SUFFIX) isoline.$(DYLIB_SUFFIX)  thresholdings.$(DYLIB_SUFFIX) \
         VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
-	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) \
+	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) Element_Mixte3d.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX)  BEC.$(DYLIB_SUFFIX) \
@@ -205,7 +206,7 @@ freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
-	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
+	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi || true
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include

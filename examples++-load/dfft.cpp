@@ -196,30 +196,32 @@ basicAC_F0::name_and_type Mapkk::name_param[]={};
 
 AnyType Mapkk::operator()(Stack s) const
 {
+    // correct July 2015 ... not tested before..
     MeshPoint *mp(MeshPointStack(s)) , mps=*mp;
     KN<R> * pv=GetAny<KN<R> *>((*expv)(s));
     KN<R> v(*pv);
  
     long nn = v.N();
     long m = GetAny<long>((*expm)(s));
-    cout << " expm " << expm << " m = " << m << endl; 
+    if(verbosity>10) cout << "  map: expm " << expm << " m = " << m << endl;
     long n = nn/m;
     double ki = 1./n ;
     double kj = 1./m ;
     double ki0=0., kj0=0;
-    cout <<  n << " " << m << " " << nn << " == " << n*m << endl;
+    if(verbosity>10) cout << << " map: " <<  n << " " << m << " " << nn << " == " << n*m << endl;
     ffassert( m* n  == nn );
     long n2= (n+1)/2, m2=(m+1)/2;
-    for(long k=0,i=0;i < n; ++i)
-         for(long j=0;j < m; ++j,++k)
-         {//
+    for(long j=0,kk=0;j < m; ++j)
+        for(long k=0,i=0;i < n; ++i)
+    {//
              int ii=i, jj=j;
              if( ii > n2) ii=i-n;
              if( jj > m2) jj=j-n;            
              R2 P(i*ki+ki0 ,j*kj+kj0);
              mp->set(P.x,P.y);
-             v[k] = GetAny< R>((*exp)(s));
+             v[kk++] = GetAny< R>((*exp)(s));
          }
+    
     *mp = mps;
     return 0L;
 }

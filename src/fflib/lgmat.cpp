@@ -2923,10 +2923,14 @@ public:
     Expression R;
     Expression x;
     Expression out;
-    static const int n_name_param = 3;
+    int nbarg;
+    static const int n_name_param = 4;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
-    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), R(param2), x(param3), out(param4) {
+    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), R(param2), x(param3), out(param4),nbarg(4) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+    }
+    removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4) : A(0), R(param2), x(param3), out(param4) ,nbarg(3){
         args.SetNameParam(n_name_param, name_param, nargs);
     }
     
@@ -2937,33 +2941,42 @@ template<class T>
 basicAC_F0::name_and_type removeDOF_Op<T>::name_param[] = {
     {"symmetrize", &typeid(bool)},
     {"condensation", &typeid(KN<long>*)},
-    {"interaction", &typeid(Matrice_Creuse<T>*)}
+    {"interaction", &typeid(Matrice_Creuse<T>*)},
+    {"eps",&typeid(double)}
 };
 
 template<class T>
 class removeDOF : public OneOperator {
-  
+   const  bool withA;
 public:
-    removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()) {}
-    
+    removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(true) {}
+    removeDOF(int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(false) {}
+   
     E_F0* code(const basicAC_F0& args) const {
+        if(withA)
         return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
+        else
+        return new removeDOF_Op<T>(args,  t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
     }
 };
 template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
 template<class T>
 AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
-      static const double EPS=1e-12;
-    Matrice_Creuse<T>* pA = GetAny<Matrice_Creuse<T>* >((*A)(stack));
+      static const double defEPS=1e-12;
+    
+    Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
+    if(pA)
+    {
     Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
     KN<T>* pX = GetAny<KN<T>* >((*x)(stack));
     KN<T>* pOut = GetAny<KN<T>* >((*out)(stack));
-    ffassert(pA && pR && pX && pOut);
+    ffassert( pR && pX && pOut);
     pA->Uh = pR->Uh;
     pA->Vh = pR->Vh;
     MatriceMorse<T> *mA = static_cast<MatriceMorse<T>*>(&(*pA->A));
     MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
     bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
+    double EPS=nargs[3] ? GetAny<double>((*nargs[3])(stack)) :defEPS ;
     KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
     
     unsigned int n = condensation ? condensation->n : mR->nbcoef;
@@ -2971,10 +2984,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     int* cl;
     T* val;
     T* b;
-    if(pOut->n == 0) {
-        b = new T[n];
-        pOut->set(b, n);
-    }
+     if(pOut->n != n) pOut->resize(n);
     
     std::vector<signed int> tmpVec;
     if(!condensation) {
@@ -3122,6 +3132,26 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         pR->A.master(m);
         m->dummy = false;
     }
+    }
+    else
+     {
+         Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
+         KN<T>* pX = GetAny<KN<T>* >((*x)(stack));
+         KN<T>* pOut = GetAny<KN<T>* >((*out)(stack));
+         ffassert(pR && pX && pOut);
+         MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+        
+         unsigned int n = mR->nbcoef;
+         
+         if(pOut->n != n) pOut->resize(n);
+         
+         
+     
+                 for(unsigned int i = 0; i < n; ++i) {
+                     *(*pOut + i) = *(*pX + mR->cl[i]);
+                 }
+         
+    }
     return 0L;
 }
 
@@ -3231,6 +3261,8 @@ void  init_lgmat()
  init_UMFPack_solver();
  Global.Add("renumbering", "(", new removeDOF<double>);
  Global.Add("renumbering", "(", new removeDOF<Complex>);
+    Global.Add("renumbering", "(", new removeDOF<double>(1));
+    Global.Add("renumbering", "(", new removeDOF<Complex>(1));
 
 }
 

@@ -714,7 +714,8 @@ public:
 
   E_Array  aa;
   Expression   ppfe;
-  bool optimize;
+    bool optimize, optimizecheck;
+    
   vector<size_t>  where_in_stack_opt;
   Expression optiexp0,optiexpK;
 
@@ -730,7 +731,7 @@ class E_set_fev: public E_F0mps {public:
     const int dim;
   E_Array  aa;
   Expression   ppfe;
-  bool optimize;
+  bool optimize,optimizecheck;
   vector<size_t>  where_in_stack_opt;
   Expression optiexp0,optiexpK;
   
