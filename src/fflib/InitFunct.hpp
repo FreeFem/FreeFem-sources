@@ -80,6 +80,7 @@ class  addingInitFunct {  public:
   static int DoLoadInit() {					\
     if(verbosity>9) cout << " ****  " << NM  <<  " ****\n" ;	\
 								\
+    /* <<calling_addInitFunct>> */				\
     /* [[file:~/ff/src/fflib/InitFunct.cpp::addInitFunct]] */	\
     addInitFunct(10000,&AutoLoadInit,NM);			\
     return 2;							\
