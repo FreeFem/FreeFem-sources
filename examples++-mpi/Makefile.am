@@ -56,7 +56,7 @@ real_pastix_FreeFem.cpp mpi-cmaes.cpp \
 ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt \
 MUMPS.cpp   \
 MUMPS.edp  dmatrix.hpp  \
-PETSc.hpp additional.idp removeDOF.cpp schwarz.cpp schwarz.edp stokes-2d.edp utility.cpp schwarz-2d.edp
+PETSc.hpp additional.idp removeDOF.cpp schwarz.cpp schwarz.edp stokes-2d.edp utility.cpp schwarz-2d.edp schwarz-init.hpp 
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
@@ -104,7 +104,7 @@ freefem++.pref:Makefile
 DDM-Schwarz-Lame-2d.edp:freefem++.pref
 # FFCS - cleaning is useful sometimes
 clean-local::
-	-rm *.$(DYLIB_SUFFIX)
+	-rm $(LIST_COMPILE)
 	-rm *.$(OBJEXT)
 
 # Local Variables:

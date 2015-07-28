@@ -114,21 +114,21 @@ public:
   const int lnki,lnkj; // size of the 4 next array
   int *nik,*nikk;  //  number of df in element   k,kk for VF and GD methode 
   int *njk,*njkk;  //  number of df in element   k,kk  for VF and GD methode
-
+  const int optim;
 
   MatriceElementaire(int datasize,int llga
-                     ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full)
+                     ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,int ooptim=1)
     
     :   lga(llga),a(new R[lga]),
         ni(nni),nj(nnj),n(0),m(0),mtype(t),data(datasize),
-        onFace(false),lnki(0),lnkj(0),nik(0),nikk(0),njk(0),njkk(0)
+        onFace(false),lnki(0),lnkj(0),nik(0),nikk(0),njk(0),njkk(0),optim(ooptim)
         {}
        
 
  //  for discontinous Galerkine method
   MatriceElementaire(int datasize,int llga,int *nni,
                      int lk,
-                     TypeOfMatriceElementaire t=Symmetric
+                     TypeOfMatriceElementaire t=Symmetric, int ooptim=1
                      ) 
     :
     lga(llga),a(new R[lga]),
@@ -138,12 +138,13 @@ public:
        nik(lk? new int[lk*2]:0),
        nikk(nik+lk),
        njk(nik),
-       njkk(nik+lk)
+       njkk(nik+lk),
+        optim(ooptim)
        { ffassert(lk>=0);}
 
     //  for discontinous Galerkine method
     MatriceElementaire(int datasize,int llga,int *nni,int lki,int *nnj,int lkj,
-                       TypeOfMatriceElementaire t=Full
+                       TypeOfMatriceElementaire t=Full,int ooptim=1
                        )
     :
     lga(llga),a(new R[lga]),
@@ -153,7 +154,8 @@ public:
     nik(lki? new int[lki*2]:0),
     nikk(nik+lki),
     njk(lkj? new int[lkj*2]:0),
-    njkk(njk+lkj)
+    njkk(njk+lkj),
+    optim(ooptim)
     {  ffassert(lki>=0);}// non teste ??? .... F. hecht ...
 
   virtual ~MatriceElementaire() {
@@ -213,20 +215,20 @@ public:
   MatriceElementaireFES(const FESpace & UUh,const FESpace & VVh,int llga
 			,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,
 			const QFElement & fit=*QFElement::Default,
-			const QFBorderElement & fie =*QFBorderElement::Default) 
+			const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
                      
     :
     MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,nni,t)
+    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,nni,t,optim)
   {}
        
   MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
 			TypeOfMatriceElementaire t=Symmetric,
 			const QFElement & fit=*QFElement::Default,
-			const QFBorderElement & fie =*QFBorderElement::Default)
+			const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     :
     MatDataFES<FES>(UUh,UUh,fit,fie),
-    MatriceElementaire<R>(UUh.esize(),llga,nni,nni,t)
+    MatriceElementaire<R>(UUh.esize(),llga,nni,nni,t,optim)
   {}
 
   //  for discontinous Galerkine method
@@ -234,20 +236,20 @@ public:
 			int lk,
 			TypeOfMatriceElementaire t=Symmetric,
 			const QFElement & fit=*QFElement::Default,
-			const QFBorderElement & fie =*QFBorderElement::Default) 
+			const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     :
     MatDataFES<FES>(UUh,UUh,fit,fie),
-    MatriceElementaire<R>(UUh.esize(),llga,nni,lk,t)
+    MatriceElementaire<R>(UUh.esize(),llga,nni,lk,t,optim)
   {}
     
     MatriceElementaireFES(const FESpace & UUh,const FESpace & VVh,int llga
                           ,int *nnj,int lkj,int * nni,int lki,TypeOfMatriceElementaire t=Full,
                           const QFElement & fit=*QFElement::Default,
-                          const QFBorderElement & fie =*QFBorderElement::Default)
+                          const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     
     :
     MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,lkj,nni,lki,t)
+    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,lkj,nni,lki,t,optim)
     {}
     
   ~MatriceElementaireFES() {}
@@ -287,39 +289,39 @@ public:
   {call(k,ie,label,stack,Q);return *this;}
   MatriceElementairePleine(const FESpace & VVh,
                            const QFElement & fit=*QFElement::Default,
-                           const QFBorderElement & fie =*QFBorderElement::Default)  
+                           const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     :MatriceElementaireFES<R,FES>(VVh,
 			Square(VVh.MaximalNbOfDF()),
-			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
+			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie,optim),
     element(0),faceelement(0) {}
  
    //  matrice for VF or Galerkin Discontinus
    MatriceElementairePleine(const FESpace & VVh,bool VF,
                            const QFElement & fit=*QFElement::Default,
-                           const QFBorderElement & fie =*QFBorderElement::Default)  
+                           const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
      :MatriceElementaireFES<R,FES>(VVh,
 			Square(VVh.MaximalNbOfDF()*2),
 			new int[VVh.MaximalNbOfDF()*2],
 			VF?VVh.MaximalNbOfDF()*2:0,
-			this->Full,fit,fie),			
+                                   this->Full,fit,fie,optim),
     element(0),faceelement(0) {}
 
   MatriceElementairePleine(const FESpace & UUh,const FESpace & VVh,
                                const QFElement & fit=*QFElement::Default,
-                               const QFBorderElement & fie =*QFBorderElement::Default) 
+                               const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     :MatriceElementaireFES<R,FES>(UUh,VVh,
 				  UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF(),
 				  new int[UUh.MaximalNbOfDF()],
-				  new int[VVh.MaximalNbOfDF()],this->Full,fit,fie),
+				  new int[VVh.MaximalNbOfDF()],this->Full,fit,fie,optim),
      element(0),faceelement(0) {}
 
     MatriceElementairePleine(const FESpace & UUh,const FESpace & VVh,bool VF,
                              const QFElement & fit=*QFElement::Default,
-                             const QFBorderElement & fie =*QFBorderElement::Default)
+                             const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     :MatriceElementaireFES<R,FES>(UUh,VVh,
                                   UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF()*4,
                                   new int[UUh.MaximalNbOfDF()*2],VF?UUh.MaximalNbOfDF()*2:0,
-                                  new int[VVh.MaximalNbOfDF()*2],VF?VVh.MaximalNbOfDF()*2:0,this->Full,fit,fie),
+                                  new int[VVh.MaximalNbOfDF()*2],VF?VVh.MaximalNbOfDF()*2:0,this->Full,fit,fie,optim),
     element(0),faceelement(0) {}
 
 }; 
@@ -351,12 +353,12 @@ public:
   void call(int k,int ie,int label,void * stack,void *B);
   MatriceElementaireSymetrique(const FESpace & VVh,
                                const QFElement & fit=*QFElement::Default,
-                               const QFBorderElement & fie =*QFBorderElement::Default) 
+                               const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
     :MatriceElementaireFES<R,FES>(
            VVh,
 	   int(VVh.MaximalNbOfDF()*(VVh.MaximalNbOfDF()+1)/2),
 	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
-       fit,fie),
+       fit,fie,optim),
        element(0),mortar(0) {}
   MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0,Rd *B=0)
   {this->call(k,ie,label,stack,B);return *this;};

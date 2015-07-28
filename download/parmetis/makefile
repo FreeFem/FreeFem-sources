@@ -18,44 +18,64 @@ INSTALL=../..
 parmetis_VERSION=4.0.3
 
 parmetis: FAIRE
-
+	test -z "$(MPIRUN)" ||$(MAKE) FAIRE-mpi
 $(SRCDIR)/FAIT:
 	$(MAKE) install.done
+	test -z "$(MPIRUN)" ||$(MAKE) $(SRCDIR)/FAIT-mpi 
+	-test -z "$(MPIRUN)" &&  rm $(SRCDIR)/FAIT-mpi
 	touch $(SRCDIR)/FAIT
+$(SRCDIR)/FAIT-mpi:
+	make install-mpi.done
+	touch $(SRCDIR)/FAIT-mpi
 
 install.done:$(SRCDIR)/tag-compile
 	-mkdir -p ../include/parmetis
 	-mkdir -p ../lib/parmetis
-	test -z "$(MPIRUN)" || cp $(SRCDIR)/libparmetis.a ../lib/parmetis
+	#test -z "$(MPIRUN)" || cp $(SRCDIR)/libparmetis.a ../lib/parmetis
 	cp $(SRCDIR)/libmetis.a ../lib/parmetis
 	cp $(SRCDIR)/include/*.h ../include/parmetis
 	cp $(SRCDIR)/metis/include/*.h ../include/parmetis
 	touch $@
+install-mpi.done:$(SRCDIR)/tag-compile-mpi
+	cp $(SRCDIR)/libparmetis.a ../lib/parmetis
+	touch $@
 
 FAIRE: $(SRCDIR)/FAIT 
 	$(MAKE) WHERE
+	test -z "$(MPIRUN)" || $(MAKE) WHERE-mpi
 	touch FAIRE
+FAIRE-mpi: $(SRCDIR)/FAIT-mpi 
+	$(MAKE) WHERE-mpi
+	touch FAIRE-mpi
 
 METISCFLAGS=$(FLAGS_REGEX_H) $(CFLAGS)  -I../GKlib -I../include  -I. -D__thread= 
 PMETISCFLAGS=$(MPI_INCLUDE) $(FLAGS_REGEX_H) $(CFLAGS)  -I../metis/GKlib -I../metis/include   -I../include -I. -D__thread= 
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	make -C $(SRCDIR)/metis/libmetis $(OBJS_METIS) "CC=$(CC)" "CFLAGS=$(METISCFLAGS)"
 	make -C $(SRCDIR)/metis/GKlib $(OBJS_GK) "CC=$(CC)" CFLAGS="$(METISCFLAGS) -Dmetis_EXPORTS"
-	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) "CC=$(CC)" "CFLAGS=$(PMETISCFLAGS)"
+#	test -z "$(MPIRUN)" ||  make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) "CC=$(CC)" "CFLAGS=$(PMETISCFLAGS)"
 	-mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
-	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
+#	test -z "$(MPIRUN)" ||(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
 	touch $(SRCDIR)/tag-compile
+$(SRCDIR)/tag-compile-mpi: $(SRCDIR)/tags
+	 make -C $(SRCDIR)/libparmetis $(OBJS_PARMETIS) "CC=$(CC)" "CFLAGS=$(PMETISCFLAGS)"
+	-mkdir $(SRCDIR)/lib
+#	cd $(SRCDIR); $(AR)  libmetis.a  metis/libmetis/*.o metis/GKlib/*.o
+	(cd $(SRCDIR); $(AR)  libparmetis.a  libparmetis/*.o )
+	touch $(SRCDIR)/tag-compile-mpi
 
 
 
 WHERE: install.done
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
-		test -z "$(MPIRUN)" ||echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
-		test -z "$(MPIRUN)" ||echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 		echo metis LD -L@DIR@/lib/parmetis  -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 		echo metis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	touch $@ ;\
+	fi
+WHERE-mpi: install-mpi.done
+	-if [ -f $(SRCDIR)/FAIT-mpi ] ; then \
+		echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+		echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	fi
 
 
@@ -155,3 +175,4 @@ clean:
 #	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm *.done
+	-rm FAIRE* WHERE*

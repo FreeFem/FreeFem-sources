@@ -102,7 +102,7 @@ $(SRCDIR)/FAITR1: $(SRCDIR)/tag-tar
 	cp $(PASTIX_DIR)/../bin/$(HOSTARCH)/libpastix_murge.a $(PASTIX_DIR)/libpastix_murge$(VERSIONNAME).a
 	ln -sf $(PASTIX_DIR)/libpastix_murge$(VERSIONNAME).a $(PASTIX_DIR)/libpastix_murge.a
 	#else
-	#cd $(SRCDIR)/src; $(MAKE) install
+	#cd $(SRCDIR)/src; $(MAKE) -j1 install
 	#endif 
 	touch $(SRCDIR)/FAITR1
 $(SRCDIR)/FAITR2: $(SRCDIR)/FAITR1
@@ -144,7 +144,7 @@ $(SRCDIR)/FAITC1:$(SRCDIR)/tag-tar
 	cp $(PASTIX_DIR)/../bin/$(HOSTARCH)/libpastix_murge.a $(PASTIX_DIR)/libpastix_murge$(VERSIONNAME).a
 	ln -sf $(PASTIX_DIR)/libpastix_murge$(VERSIONNAME).a $(PASTIX_DIR)/libpastix_murge.a
 #else
-	#cd $(SRCDIR)/src/ && $(MAKE) install -C $(SRCDIR)/src
+	#cd $(SRCDIR)/src/ && $(MAKE) install -j1 -C $(SRCDIR)/src
 #endif
 	touch $(SRCDIR)/FAITC1
 

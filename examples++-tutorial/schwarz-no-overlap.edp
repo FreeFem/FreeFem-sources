@@ -9,7 +9,7 @@ border e(t=0, 1){ x= 1-t; y = t;label=inside;};
 border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
 int n=4;
 mesh th = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
-mesh TH = buildmesh ( e(5*n) + e1(25*n) );
+mesh TH = buildmesh ( e(6*n) + e1(25*n) );
 plot(th,TH,wait=1,ps="schwarz-no-th.eps");
 fespace vh(th,P1);
 fespace VH(TH,P1);

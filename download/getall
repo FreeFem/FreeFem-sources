@@ -159,14 +159,18 @@ download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
 	 'http://www.netlib.org/scalapack/','scalapack-2.0.2.tgz','2f75e600a2ba155ed9ce974a1c4b536f');
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
-
+#https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
 download('Scotch','https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz',
 	 'https://gforge.inria.fr/projects/scotch/','scotch_6.0.3.tar.gz','10b0cc0f184de2de99859eafaca83cfc',
 	 'BAD_CERT');
 
-download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.3.1.tar.gz',
-	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.3.1.tar.gz',
-	 'f8f26a3b1c7f82444c0db0b375215287');
+# download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.3.1.tar.gz',
+# 	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.3.1.tar.gz',
+# 	 'f8f26a3b1c7f82444c0db0b375215287');
+
+download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.4.4.tar.gz',
+	 'http://faculty.cse.tamu.edu/davis/SuiteSparse/','SuiteSparse-4.4.4.tar.gz',
+	 'e0af74476935c9ff6d971df8bb6b82fc') ;
 
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
 	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz','b72c6309f25e9660133007b82621ba7c');
@@ -236,8 +240,13 @@ sub downloadone{
   my $cmd="../build/download $url $pkg $opts";
   print "$cmd\n";
   system $cmd;
-  if($?){$errors.="ERROR: $cmd FAILED\n"}
-
+  if($?){
+   my $cmd="../build/download http://www.freefem.org/ff++/$pkg $pkg $opts";
+   print "try other site: $cmd\n";
+   system $cmd;
+   if($?){
+     $errors.="ERROR: $cmd FAILED\n"}
+  }
   # check if resulting package contents are valid
   my $md5check=md5_hex(`cat $pkg`);
   if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg\n"}

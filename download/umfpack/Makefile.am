@@ -29,7 +29,7 @@ EXTRA_DIST= SuiteSparse_config.mk.in
 # ---------------------------------
 
 DIRPKG=../pkg
-SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-4.3.1.tar.gz
+SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-4.4.4.tar.gz
 
 UMFPACKLIB=../lib/libumfpack.a 
 AMDLIB=../lib/libamd.a

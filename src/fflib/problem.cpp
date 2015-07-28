@@ -50,7 +50,7 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
     { "qforder",&typeid(long)},
     { "qfnbpT",&typeid(long)},
     { "qfnbpE",&typeid(long)},
-    { "optimize",&typeid(bool)},
+    { "optimize",&typeid(long)},
     { "binside",&typeid(double)},
     { "mortar",&typeid(bool)},
     { "qfV", &typeid(const Fem2D::GQuadratureFormular<R3> *)},
@@ -219,7 +219,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
     //  if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2) 
     if (Ku.number<1 && ( verbosity > 1 ) )
-      cout << "Element_OpVF P: copt = " << copt << " " << classoptm << " binside (For FH) =" << binside <<endl;
+      cout << "Element_OpVF P: copt = " << copt << " " << classoptm << " binside (For FH) =" << binside << " opt: " << mat.optim << endl;
   
     
     KN<bool> Dop(last_operatortype); //  sinon ca plate bizarre 
@@ -314,12 +314,12 @@ void Check(const Opera &Op,int N,int  M)
                        // R ccc = GetAny<R>(ll.second.eval(stack));
                        
                         R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                       if ( copt && Kv.number <1)
+                       if ( copt && ( mat.optim==1) && Kv.number <1)
                         {
                          R cc  =  GetAny<R>(ll.second.eval(stack));
                          if ( ccc != cc) { 
                           cerr << cc << " != " << ccc << " => ";
-                         cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
+                         cerr << "Sorry error in Optimization Element_OpVF2d  (b) add:  int2d(Th,optimize=0)(...)" << endl;
                          ExecError("In Optimized version "); }
                  }
                          *pa += coef * ccc * w_i*w_j;
@@ -370,7 +370,7 @@ void Check(const Opera &Op,int N,int  M)
    SHOWVERB(cout << " FormBilinear " << endl);
     MatriceElementaireSymetrique<R,FESpace> *mates =0;
     MatriceElementairePleine<R,FESpace> *matep =0;
-    const bool useopt=di.UseOpt(stack);    
+    const int useopt=di.UseOpt(stack);
     double binside=di.binside(stack);
     
     //const vector<Expression>  & what(di.what);             
@@ -474,9 +474,9 @@ void Check(const Opera &Op,int N,int  M)
 		  "  and the matrix is not symmetric. \n" 
 		  " To do other case in a future (F. Hecht) dec. 2003 ");
         if(&Uh == &Vh)
-            matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIT,FIE);
+            matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIT,FIE,useopt);
         else
-            matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIT,FIE);
+            matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIT,FIE,useopt);
 
         
      
@@ -485,11 +485,11 @@ void Check(const Opera &Op,int N,int  M)
       paramate= &parammatElement_OpVF;            
     }
     else if (sym) {
-      mates= new MatriceElementaireSymetrique<R,FESpace>(Uh,FIT,FIE);
+      mates= new MatriceElementaireSymetrique<R,FESpace>(Uh,FIT,FIE,useopt);
       mates->element = Element_Op<R>;
     }
     else {
-      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,FIT,FIE);
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,FIT,FIE,useopt);
       matep->element = Element_Op<R>;               
     }
     MatriceElementaireFES<R,FESpace> & mate(*( sym? (MatriceElementaireFES<R,FESpace> *)mates : (MatriceElementaireFES<R,FESpace> *) matep));
@@ -667,7 +667,7 @@ void Check(const Opera &Op,int N,int  M)
    SHOWVERB(cout << " FormBilinear " << endl);
     MatriceElementaireSymetrique<R,FESpace> *mates =0;
     MatriceElementairePleine<R,FESpace> *matep =0;
-    const bool useopt=di.UseOpt(stack);    
+    const int useopt=di.UseOpt(stack);
     double binside=di.binside(stack);
     
     //const vector<Expression>  & what(di.what);             
@@ -766,18 +766,18 @@ void Check(const Opera &Op,int N,int  M)
 		  "  and the matrix is not symmetric. \n" 
 		  " To do other case in a future (F. Hecht) dec. 2014 ");
       if(&Uh == &Vh)
-      matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIV,FIT);
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,VF,FIV,FIT,useopt);
       else
-      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIV,FIT);
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,VF,FIV,FIT,useopt);
       matep->faceelement = Element_OpVF;   
       paramate= &parammatElement_OpVF;            
     }
     else if (sym) {
-      mates= new MatriceElementaireSymetrique<R,FESpace>(Uh,FIV,FIT);
+      mates= new MatriceElementaireSymetrique<R,FESpace>(Uh,FIV,FIT,useopt);
       mates->element = Element_Op<R>;               
     }
     else {
-      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,FIV,FIT);
+      matep= new MatriceElementairePleine<R,FESpace>(Uh,Vh,FIV,FIT,useopt);
       matep->element = Element_Op<R>;               
     }
     MatriceElementaireFES<R,FESpace> & mate(*( sym? (MatriceElementaireFES<R,FESpace> *)mates : (MatriceElementaireFES<R,FESpace> *) matep));
@@ -1421,7 +1421,7 @@ void Check(const Opera &Op,int N,int  M)
     SHOWVERB(cout << " FormBilinear () " << endl);
     //MatriceElementaireSymetrique<R> *mates =0;
     // MatriceElementairePleine<R> *matep =0;
-    const bool useopt=di.UseOpt(stack);    
+    const int useopt=di.UseOpt(stack);
     //double binside=di.binside(stack);
     const bool intmortar=di.intmortar(stack);
     if ( verbosity >1)
@@ -1679,7 +1679,7 @@ void Check(const Opera &Op,int N,int  M)
       SHOWVERB(cout << " FormBilinear () " << endl);
       //MatriceElementaireSymetrique<R> *mates =0;
       // MatriceElementairePleine<R> *matep =0;
-      const bool useopt=di.UseOpt(stack);    
+      const int useopt=di.UseOpt(stack);
       //double binside=di.binside(stack);
       const bool intmortar=di.intmortar(stack);
       if ( verbosity >1)
@@ -1914,7 +1914,7 @@ void Check(const Opera &Op,int N,int  M)
     int  iloop=0;
     KN<bool> unvarexp(classoptm ? Op.optiexpK->sizevar() : 1);
     if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2) 
-      cout << "Element_Op 3d P: copt = " << copt << " " << classoptm << endl;
+      cout << "Element_Op 3d P: copt = " << copt << " " << classoptm << " opt: " << mat.optim << endl;
     assert(Op.MaxOp() <last_operatortype);
     //
     int lastop;
@@ -1953,13 +1953,13 @@ void Check(const Opera &Op,int N,int  M)
 	      long icomp= ll.first.second.first,iop=ll.first.second.second;
 	      
 	      R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-	      if ( copt && Kv.number <1)
+	      if ( copt && ( mat.optim==1) && Kv.number <1)
 		{
 		  R cc  =  GetAny<R>(ll.second.eval(stack));
 		  //cout << *(copt[il]) << " == " <<  cc << endl;
 		  if ( ccc != cc) { 
 		    cerr << cc << " != " << ccc << " => ";
-		    cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+		    cerr << "Sorry error in Optimization Element_Op plein 3d (a) add:  int2d(Th,optimize=0)(...)" << endl;
 		    ExecError("In Optimized version "); }
 		}
 	      int fi=Kv.dfcbegin(icomp);
@@ -2037,12 +2037,12 @@ void Check(const Opera &Op,int N,int  M)
 			    double w_j =  wj(jj.first,jj.second);
 			    
 			    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-			    if ( copt && Kv.number <1)
+			    if ( copt && ( mat.optim==1) && Kv.number <1)
                             {
                                 R cc  =  GetAny<R>(ll.second.eval(stack));
                                 if ( ccc != cc) {
                                     cerr << cc << " != " << ccc << " => ";
-                                    cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
+                                    cerr << "Sorry error in Optimization  Element_Op plein 3d (b) add:  int2d(Th,optimize=0)(...)" << endl;
                                     ExecError("In Optimized version "); }
                             }
                             if(verbosity>999)
@@ -2091,12 +2091,12 @@ void Check(const Opera &Op,int N,int  M)
 			    double w_j =  wj(jj.first,jj.second);
 			    
 			    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-			    if ( copt && Kv.number <1)
+			    if ( copt && ( mat.optim==1) && Kv.number <1)
 			      {
 				  R cc  =  GetAny<R>(ll.second.eval(stack));
 				  if ( ccc != cc) { 
 				      cerr << cc << " != " << ccc << " => ";
-				      cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
+				      cerr << "Sorry error in Optimization  Element_Op plein 3d (c) add:  int2d(Th,optimize=0)(...)" << endl;
 				  ExecError("In Optimized version "); }
 			      }
 			    *pa += coef * ccc * w_i*w_j;
@@ -2151,7 +2151,7 @@ void Check(const Opera &Op,int N,int  M)
   int  iloop=0;
   KN<bool> unvarexp(classoptm ? Op.optiexpK->sizevar() : 1);
   if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_Op P: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_Op P: copt = " << copt << " " << classoptm << " opt: " << mat.optim << endl;
     assert(Op.MaxOp() <last_operatortype);
   
     
@@ -2189,13 +2189,13 @@ void Check(const Opera &Op,int N,int  M)
 	      long icomp= ll.first.second.first,iop=ll.first.second.second;
 	      
 	      R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-	      if ( copt && Kv.number <1)
+	      if ( copt && ( mat.optim==1) && Kv.number <1)
 		{
 		  R cc  =  GetAny<R>(ll.second.eval(stack));
 		  //cout << *(copt[il]) << " == " <<  cc << endl;
 		  if ( ccc != cc) { 
 		    cerr << cc << " != " << ccc << " => ";
-		    cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+		    cerr << "Sorry error in Optimization (e) add:  int2d(Th,optimize=0)(...)" << endl;
 		    ExecError("In Optimized version "); }
 		}
 	      int fi=Kv.dfcbegin(icomp);
@@ -2250,13 +2250,13 @@ void Check(const Opera &Op,int N,int  M)
               
               
               R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-              if ( copt && Kv.number <1)
+              if ( copt && ( mat.optim==1) && Kv.number <1)
 	      {
                   R cc  =  GetAny<R>(ll.second.eval(stack));
                   //cout << *(copt[il]) << " == " <<  cc << endl;
                   if ( ccc != cc) {
                       cerr << cc << " != " << ccc << " => ";
-                      cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+                      cerr << "Sorry error in Optimization (f) add:  int2d(Th,optimize=0)(...)" << endl;
                       ExecError("In Optimized version "); }
 	      }
               int fi=Kv.dfcbegin(icomp);
@@ -2308,13 +2308,13 @@ void Check(const Opera &Op,int N,int  M)
 
 	    
 	    R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-	    if ( copt && Kv.number <1)
+	    if ( copt && ( mat.optim==1) && Kv.number <1)
 	      {
 		R cc  =  GetAny<R>(ll.second.eval(stack));
 		//cout << *(copt[il]) << " == " <<  cc << endl;
 		if ( ccc != cc) { 
 		  cerr << cc << " != " << ccc << " => ";
-		  cerr << "Sorry error in Optimization (a) add:  int2d(Th,optimize=0)(...)" << endl;
+		  cerr << "Sorry error in Optimization (g) add:  int2d(Th,optimize=0)(...)" << endl;
 		  ExecError("In Optimized version "); }
 	      }
 	    int fi=Kv.dfcbegin(icomp);
@@ -2357,12 +2357,12 @@ void Check(const Opera &Op,int N,int  M)
                        // R ccc = GetAny<R>(ll.second.eval(stack));
                        
                     R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
-                if ( copt && Kv.number <1)
+                if ( copt && ( mat.optim==1) && Kv.number <1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( ccc != cc) { 
                         cerr << cc << " != " << ccc << " => ";
-                       cerr << "Sorry error in Optimization (b) add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (h) add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                          *pa += coef * ccc * w_i*w_j;
@@ -2422,7 +2422,7 @@ void Check(const Opera &Op,int N,int  M)
     What_d Dop = Op.DiffOp(lastop);
 
     if (Ku.number<1  && verbosity/100 && verbosity % 10 == 2 ) 
-      cout << "Element_Op S 3d: copt = " << copt << " " << classoptm << " lastop = "<< lastop << " Dop " << Dop << endl;
+      cout << "Element_Op S 3d: copt = " << copt << " " << classoptm << " lastop = "<< lastop << " Dop " << Dop << " opt: " << mat.optim << endl;
     assert(Op.MaxOp() <last_operatortype);
     
     RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
@@ -2459,7 +2459,7 @@ void Check(const Opera &Op,int N,int  M)
 		  // cout << *(copt[il]) << " == " <<  cc << endl;
 		  if ( c != cc) { 
 		    cerr << c << " != " << cc << " => ";
-			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    cerr << "Sorry error in Optimization (i) add:  int2d(Th,optimize=0)(...)" << endl;
 			    ExecError("In Optimized version "); }
 		}
 	      c *= coef ;
@@ -2539,7 +2539,7 @@ void Check(const Opera &Op,int N,int  M)
                             // cout << *(copt[il]) << " == " <<  cc << endl;
                             if ( c != cc) {
                                 cerr << c << " != " << cc << " => ";
-                                cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+                                cerr << "Sorry error in Optimization (j) add:  int2d(Th,optimize=0)(...)" << endl;
                                 ExecError("In Optimized version "); }
                         }
                         c *= coef ;
@@ -2605,7 +2605,7 @@ void Check(const Opera &Op,int N,int  M)
 		  // cout << *(copt[il]) << " == " <<  cc << endl;
 		  if ( c != cc) { 
 		    cerr << c << " != " << cc << " => ";
-			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    cerr << "Sorry error in Optimization (k) add:  int2d(Th,optimize=0)(...)" << endl;
 			    ExecError("In Optimized version "); }
 		}
 	      c *= coef ;
@@ -2690,7 +2690,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ||  (Op.where_in_stack_opt.size() !=0) );
   if (Ku.number<1  && verbosity/100 && verbosity % 10 == 2 ) 
-     cout << "Element_Op S: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_Op S: copt = " << copt << " " << classoptm << " opt "<< mat.optim << endl;
     assert(Op.MaxOp() <last_operatortype);
 
 
@@ -2732,7 +2732,7 @@ void Check(const Opera &Op,int N,int  M)
 		  // cout << *(copt[il]) << " == " <<  cc << endl;
 		  if ( c != cc) { 
 		    cerr << c << " != " << cc << " => ";
-			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    cerr << "Sorry error in Optimization (l) add:  int2d(Th,optimize=0)(...)" << endl;
 			    ExecError("In Optimized version "); }
 		}
 	      c *= coef ;
@@ -2779,7 +2779,7 @@ void Check(const Opera &Op,int N,int  M)
                     // cout << *(copt[il]) << " == " <<  cc << endl;
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
-                       cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (m) add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                       
@@ -2827,7 +2827,7 @@ void Check(const Opera &Op,int N,int  M)
                     // cout << *(copt[il]) << " == " <<  cc << endl;
                     if ( c != cc) {
                         cerr << c << " != " << cc << " => ";
-                        cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+                        cerr << "Sorry error in Optimization (n) add:  int2d(Th,optimize=0)(...)" << endl;
                         ExecError("In Optimized version "); }
 		}
                 c *= coef ;
@@ -2886,7 +2886,7 @@ void Check(const Opera &Op,int N,int  M)
 		  // cout << *(copt[il]) << " == " <<  cc << endl;
 		  if ( c != cc) { 
 		    cerr << c << " != " << cc << " => ";
-			    cerr << "Sorry error in Optimization (c) add:  int2d(Th,optimize=0)(...)" << endl;
+			    cerr << "Sorry error in Optimization (o) add:  int2d(Th,optimize=0)(...)" << endl;
 			    ExecError("In Optimized version "); }
 		}
 	      c *= coef ;
@@ -2974,7 +2974,7 @@ void Check(const Opera &Op,int N,int  M)
   // #pragma optimization_level 0
  template<class R>
   void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const QuadratureFormular & FI = QuadratureFormular_T_2)
+                    const QuadratureFormular & FI = QuadratureFormular_T_2,int optim=1)
   {
     Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
@@ -2993,7 +2993,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1  && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_rhs S0: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_rhs S0: copt = " << copt << " " << classoptm << " opt " << optim << endl;
  
 
     KN<bool> Dop(last_operatortype);
@@ -3025,12 +3025,12 @@ void Check(const Opera &Op,int N,int  M)
                 double w_i =  wi(ii.first,ii.second);
                 //copt=0;
                 R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack)); //GetAny<double>(ll.second.eval(stack));
-                if ( copt && Kv.number <1)
+                if ( copt && ( optim==1) && Kv.number <1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
-                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization add:  (p) int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                 //if (Kv.number<5) cout << il<< " " << i << "  c== " <<  c << endl;
@@ -3049,7 +3049,7 @@ void Check(const Opera &Op,int N,int  M)
   // 3D
  template<class R>
   void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const GQuadratureFormular<R3> & FI = QuadratureFormular_Tet_2)
+                    const GQuadratureFormular<R3> & FI = QuadratureFormular_Tet_2,int optim=1)
   {
     Stack stack=pvoid2Stack(vstack);
     typedef  FElement3::Element Element;
@@ -3065,7 +3065,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1  && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_rhs S0: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_rhs S0: copt = " << copt << " " << classoptm << " opt: " << optim << endl;
 
 
     int lastop;
@@ -3096,12 +3096,12 @@ void Check(const Opera &Op,int N,int  M)
                 double w_i =  wi(ii.first,ii.second);
                 //copt=0;
                 R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack)); //GetAny<double>(ll.second.eval(stack));
-                if ( copt && Kv.number <1)
+                if ( copt && ( optim==1) && Kv.number <1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
-                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (q) add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                 //if (Kv.number<5) cout << il<< " " << i << "  c== " <<  c << endl;
@@ -3122,7 +3122,7 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
  void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI,
                     const FESpace3 & Vh,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-		   const GQuadratureFormular<R3> & FI)
+		   const GQuadratureFormular<R3> & FI,int optim)
  {
      Stack stack=pvoid2Stack(vstack);
    // AFAIRE("Element_rhs 3d diff meshes");
@@ -3142,7 +3142,7 @@ void Check(const Opera &Op,int N,int  M)
      // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
      if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
          
-         cout << "Element_rhs 3d  3: copt = " << copt << " " << classoptm << endl;
+         cout << "Element_rhs 3d  3: copt = " << copt << " " << classoptm <<" opt " <<optim << endl;
      
      assert(Op.MaxOp() <last_operatortype);
      //
@@ -3182,12 +3182,12 @@ void Check(const Opera &Op,int N,int  M)
                      double w_i =  wi(ii.first,ii.second);
                      
                      R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));;//GetAny<double>(ll.second.eval(stack));
-                     if ( copt && ThI(KI) <1)
+                     if ( copt && ThI(KI) <1 && optim==1)
                      {
                          R cc  =  GetAny<R>(ll.second.eval(stack));
                          if ( c != cc) { 
                              cerr << c << " != " << cc << " => ";
-                             cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                             cerr << "Sorry error in Optimization (r) add:  int2d(Th,optimize=0)(...)" << endl;
                              ExecError("In Optimized version "); }
                      }
                      
@@ -3206,7 +3206,7 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
   void  Element_rhs(const  Mesh & ThI,const Triangle & KI,
                     const FESpace & Vh,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const QuadratureFormular & FI = QuadratureFormular_T_2)
+                    const QuadratureFormular & FI = QuadratureFormular_T_2,int optim=1)
   {
    Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
@@ -3219,7 +3219,7 @@ void Check(const Opera &Op,int N,int  M)
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
 
-     cout << "Element_rhs 3: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_rhs 3: copt = " << copt << " " << classoptm <<" opt " << optim<< endl;
 
     KN<bool> Dop(last_operatortype);
     Op.DiffOp(Dop);  
@@ -3262,7 +3262,7 @@ void Check(const Opera &Op,int N,int  M)
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
                        cerr << c << " != " << cc << " => ";
-                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (s) add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                     
@@ -3280,7 +3280,7 @@ void Check(const Opera &Op,int N,int  M)
   // 3d 
   template<class R>
   void  Element_rhs(const FElement3 & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const QuadratureFormular & FI ,bool alledges=false)
+                    const QuadratureFormular & FI ,bool alledges=false,int optim=1)
   {
     //   AFAIRE("Element_rhs on border");
     Stack stack=pvoid2Stack(vstack);
@@ -3294,7 +3294,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_rhs 3d S: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_rhs 3d S: copt = " << copt << " " << classoptm <<" opt " << optim << endl;
     int lastop;
     What_d Dop = Op.DiffOp(lastop);
 
@@ -3328,12 +3328,12 @@ void Check(const Opera &Op,int N,int  M)
                   double w_i =  wi(ii.first,ii.second);
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
-                if ( copt && Kv.number<1)
+                if ( copt && ( optim==1) && Kv.number<1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
 			 cerr << c << " =! " << cc << endl;
-                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (t) add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                   
@@ -3352,7 +3352,7 @@ void Check(const Opera &Op,int N,int  M)
     // 3d isoline ... levelset ...
     template<class R>
     void  Element_rhs(const FElement3 & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                      const QuadratureFormular & FI ,int np, R3 *Q)
+                      const QuadratureFormular & FI ,int np, R3 *Q,int optim)
     {
         //   AFAIRE("Element_rhs on border");
         Stack stack=pvoid2Stack(vstack);
@@ -3370,7 +3370,7 @@ void Check(const Opera &Op,int N,int  M)
         bool classoptm = copt && Op.optiexpK;
         // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
         if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2)
-            cout << "Element_rhs 3d S(levelset): copt = " << copt << " " << classoptm << endl;
+            cout << "Element_rhs 3d S(levelset): copt = " << copt << " " << classoptm << " opt " << optim << endl;
         int lastop;
         What_d Dop = Op.DiffOp(lastop);
         
@@ -3416,12 +3416,12 @@ void Check(const Opera &Op,int N,int  M)
                     double w_i =  wi(ii.first,ii.second);
                     R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                     // FFCS - removing what is probably a small glitch
-                    if ( copt && Kv.number<1)
+                    if ( copt && ( optim==1) && Kv.number<1)
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         if ( c != cc) {
                             cerr << c << " =! " << cc << endl;
-                            cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                            cerr << "Sorry error in Optimization (u) add:  int2d(Th,optimize=0)(...)" << endl;
                             ExecError("In Optimized version "); }
                     }
                     
@@ -3446,7 +3446,7 @@ void Check(const Opera &Op,int N,int  M)
     
  template<class R>
   void  Element_rhs(const FElement & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false)
+                    const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,int optim=1)
   {
     Stack stack=pvoid2Stack(vstack);
     MeshPoint mp=*MeshPointStack(stack) ;
@@ -3464,7 +3464,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
    // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_rhs S: copt = " << copt << " " << classoptm << "opt " << optim << endl;
     KN<bool> Dop(last_operatortype);
     Op.DiffOp(Dop);  
     int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
@@ -3499,12 +3499,12 @@ void Check(const Opera &Op,int N,int  M)
                   double w_i =  wi(ii.first,ii.second);
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
-                if ( copt && Kv.number<1)
+                if ( copt && ( optim==1) && Kv.number<1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
 			 cerr << c << " =! " << cc << endl;
-                       cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (v) add:  int2d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                   
@@ -3523,7 +3523,7 @@ void Check(const Opera &Op,int N,int  M)
     
     template<class R>
     void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                      const QuadratureFormular1d & FI ,const R2 & PPA,const R2 &PPB)
+                      const QuadratureFormular1d & FI ,const R2 & PPA,const R2 &PPB,int optim)
     {
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp=*MeshPointStack(stack) ;
@@ -3542,7 +3542,7 @@ void Check(const Opera &Op,int N,int  M)
         bool classoptm = copt && Op.optiexpK;
         // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
         if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2)
-            cout << "Element_rhs(levelset) S: copt = " << copt << " " << classoptm << endl;
+            cout << "Element_rhs(levelset) S: copt = " << copt << " " << classoptm <<" opt " << optim << endl;
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
         int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
@@ -3576,12 +3576,12 @@ void Check(const Opera &Op,int N,int  M)
                     double w_i =  wi(ii.first,ii.second);
                     R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
-                    if ( copt && Kv.number<1)
+                    if ( copt && ( optim==1) && Kv.number<1)
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         if ( c != cc) {
                             cerr << c << " =! " << cc << endl;
-                            cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+                            cerr << "Sorry error in Optimization (w)  add:  int2d(Th,optimize=0)(...)" << endl;
                             ExecError("In Optimized version "); }
                     }
                     
@@ -3602,7 +3602,7 @@ void Check(const Opera &Op,int N,int  M)
  
     template<class R>
     void  Element_rhsVF(const FElement & Kv,const FElement & KKv,int ie,int iie,int label,const LOperaD &Op,double * p,int *ip,void  * bstack,KN_<R> & B,
-		      const QuadratureFormular1d & FI = QF_GaussLegendre2)
+		      const QuadratureFormular1d & FI = QF_GaussLegendre2,int optim=1)
     // sier of ip
     //  version correct the  29 april 2015 by. FH
     //  missing before in case of jump, mean , .. in test functions
@@ -3629,7 +3629,7 @@ void Check(const Opera &Op,int N,int  M)
 	bool classoptm = copt && Op.optiexpK;
 	// assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
        	if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2) 
-	    cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
+	    cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt " << optim << endl;
 	KN<bool> Dop(last_operatortype);
 	Op.DiffOp(Dop);  
 	int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
@@ -3709,12 +3709,12 @@ void Check(const Opera &Op,int N,int  M)
 			    }
 			  R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
-			  if ( copt && Kv.number<1)
+			  if ( copt && ( optim==1) && Kv.number<1)
 			    {
 				R cc  =  GetAny<R>(ll.second.eval(stack));
 				if ( c != cc) { 
 				     cerr << c << " =! " << cc << endl;
-				    cerr << "Sorry error in Optimization add:  int2d(Th,optimize=0)(...)" << endl;
+				    cerr << "Sorry error in Optimization (x) add:  int2d(Th,optimize=0)(...)" << endl;
 				ExecError("In Optimized version "); }
 			    }
 			  
@@ -3737,7 +3737,7 @@ void Check(const Opera &Op,int N,int  M)
  template<class R>
  void  Element_rhs(const  Mesh3 & ThI,const Mesh3::Element & KI, const FESpace3 & Vh,
  int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
-                    const QuadratureFormular & FI,bool alledges=false)
+                    const QuadratureFormular & FI,bool alledges=false,int optim=1)
     {
       Stack stack=pvoid2Stack(vstack);
       int intmortar=0;
@@ -3758,7 +3758,7 @@ void Check(const Opera &Op,int N,int  M)
       bool classoptm = copt && Op.optiexpK;
       //assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
       if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2) 
-          cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
+          cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt "<< optim <<endl;
       assert(Op.MaxOp() <last_operatortype);
       //
       int lastop=0;
@@ -3806,12 +3806,12 @@ void Check(const Opera &Op,int N,int  M)
                       double w_i =  wi(ii.first,ii.second);
                       R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
-                      if ( copt && Kv.number<1)
+                      if ( copt && ( optim==1) && Kv.number<1)
                       {
                           R cc  =  GetAny<R>(ll.second.eval(stack));
                           if ( c != cc) { 
                               cerr << c << " =! " << cc << endl;
-                              cerr << "Sorry error in Optimization add:  int1d(Th,optimize=0)(...)" << endl;
+                              cerr << "Sorry error in Optimization (y) add:  int1d(Th,optimize=0)(...)" << endl;
                               ExecError("In Optimized version "); }
                       }
                       
@@ -3833,7 +3833,7 @@ void Check(const Opera &Op,int N,int  M)
  void  Element_rhs(const  Mesh & ThI,const Triangle & KI, const FESpace & Vh,
  int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                     const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,bool intmortar=false,
-                   R2 *Q=0)
+                   R2 *Q=0,int optim=1)
   {
      // integration 1d on 2 diff mesh 
     
@@ -3845,7 +3845,7 @@ void Check(const Opera &Op,int N,int  M)
     bool classoptm = copt && Op.optiexpK;
     //assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
     if (ThI.number(KI)<1 && verbosity/100 && verbosity % 10 == 2) 
-     cout << "Element_rhs S: copt = " << copt << " " << classoptm << endl;
+     cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt " << optim << endl;
     KN<bool> Dop(last_operatortype);
     Op.DiffOp(Dop);  
     int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
@@ -3904,12 +3904,12 @@ void Check(const Opera &Op,int N,int  M)
                   double w_i =  wi(ii.first,ii.second);
                   R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
 		  // FFCS - removing what is probably a small glitch
-                if ( copt && Kv.number<1)
+                if ( copt && ( optim==1) && Kv.number<1)
                  {
                      R cc  =  GetAny<R>(ll.second.eval(stack));
                      if ( c != cc) { 
 			  cerr << c << " =! " << cc << endl;
-                       cerr << "Sorry error in Optimization add:  int1d(Th,optimize=0)(...)" << endl;
+                       cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
                        ExecError("In Optimized version "); }
                  }
                   
@@ -4347,7 +4347,7 @@ template<class R>
     QuadratureFormular FIT(FITo,3);
     GQuadratureFormular<R3>  FIV(FIVo,3);
     
-    const bool useopt=di.UseOpt(stack);    
+    const int useopt=di.UseOpt(stack);
     double binside=di.binside(stack);  // truc FH pour fluide de grad2 (decentrage bizard)  
   //  cout << "AssembleLinearForm " << l->l->v.size() << endl; 
     set<int> setoflab;
@@ -4484,7 +4484,7 @@ template<class R>
                           }
 
                       if ( sameMesh)
-                          Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT,np,Q);
+                          Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT,np,Q,useopt);
                       else
                       //    else
                             InternalError(" No levelSet on Diff mesh3 :    to day  int2d of RHS");
@@ -4504,9 +4504,9 @@ template<class R>
               {                  
                 int ie,i =ThI.BoundaryElement(e,ie);
                 if ( sameMesh) 
-                  Element_rhs<R>(Vh[i],ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false); 
+                  Element_rhs<R>(Vh[i],ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false,useopt);
                 else 
-                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false); 
+                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.be(e).lab,*l->l,buf,stack,*B,FIT,false,useopt);
                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
               }
 	      } 
@@ -4606,9 +4606,9 @@ template<class R>
                     if(FIV.n)
                     {
                     if ( sameMesh )
-                       Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIV);
+                       Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIV,useopt);
                     else
-                        Element_rhs<R>(ThI,ThI[t],Vh,*l->l,buf,stack,*B,FIV);
+                        Element_rhs<R>(ThI,ThI[t],Vh,*l->l,buf,stack,*B,FIV,useopt);
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                     
                     }
@@ -4623,9 +4623,9 @@ template<class R>
         if (all || setoflab.find(ThI[i].lab) != setoflab.end()) 
 	  {
 	    if ( sameMesh ) 
-	      Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIV); 
+	      Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIV,useopt);
 	    else 
-	      Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIV);
+	      Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIV,useopt);
             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 	  }}
     }  
@@ -4639,9 +4639,9 @@ template<class R>
             int lab=0;
             // if face on bord get the lab ??? 
                 if ( sameMesh)
-                    Element_rhs<R>(Vh[i],ie,lab,*l->l,buf,stack,*B,FIT,false);
+                    Element_rhs<R>(Vh[i],ie,lab,*l->l,buf,stack,*B,FIT,false,useopt);
                 else
-                    Element_rhs<R>(ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false);
+                    Element_rhs<R>(ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false,useopt);
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
             
         }
@@ -4679,7 +4679,7 @@ template<class R>
     CDomainOfIntegration::typeofkind  kind = di.kind;
     const QuadratureFormular1d & FIE = di.FIE(stack);
     const QuadratureFormular & FIT = di.FIT(stack);
-    const bool useopt=di.UseOpt(stack);    
+    const int useopt=di.UseOpt(stack);
      double binside=di.binside(stack);  // truc FH pour fluide de grad2 (decentrage bizard)  
   //  cout << "AssembleLinearForm " << l->l->v.size() << endl; 
     set<int> setoflab;
@@ -4794,10 +4794,10 @@ template<class R>
                             const QuadratureFormular1d & FI ,const R2 & PA,const R2 &PB)
                             
                             */
-                              Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1]);
+                              Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1],useopt);
                           }
                           else
-                              Element_rhs<R>(ThI,ThI[t],Vh,0,ThI[t].lab,*l->l,buf,stack,*B,FIE,false,intmortar,Q);
+                              Element_rhs<R>(ThI,ThI[t],Vh,0,ThI[t].lab,*l->l,buf,stack,*B,FIE,false,intmortar,Q,useopt);
                               
                               //InternalError(" No levelSet on Diff mesh :    to day  int1d of RHS");
                       }
@@ -4813,9 +4813,9 @@ template<class R>
               {                  
                 int ie,i =ThI.BoundaryElement(e,ie);
                 if ( sameMesh) 
-                  Element_rhs<R>(Vh[i],ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false); 
+                  Element_rhs<R>(Vh[i],ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false,useopt);
                 else 
-                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false,intmortar); 
+                  Element_rhs<R>(ThI,ThI[i],Vh,ie,Th.bedges[e].lab,*l->l,buf,stack,*B,FIE,false,intmortar,0,useopt);
                if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
               }
           }
@@ -4839,7 +4839,7 @@ template<class R>
 			    {
 			      int iie=ie,ii=Th.ElementAdj(i,iie);	
 			       if(ii<0) ii=i;//  sur le bord	
-			      Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,Th[i].lab,*l->l,buf,ip,&bstack,*B,FIE); 
+			      Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,Th[i].lab,*l->l,buf,ip,&bstack,*B,FIE,useopt);
 			    }
 			  else 
 			      InternalError("To Do") ;
@@ -4853,7 +4853,7 @@ template<class R>
          {
          for (int ie=0;ie<3;ie++)
             if ( sameMesh) 
-                Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
+                Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true,useopt);
              else 
                 InternalError("To Do") ;
           if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -4872,7 +4872,7 @@ template<class R>
 	    for (int ie=0;ie<3;ie++)
 	      { 
 		if ( sameMesh) 
-		  Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true); 
+		  Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true,useopt);
 		else 
 		  InternalError("To Do") ;
 	      }
@@ -4907,7 +4907,7 @@ template<class R>
                         
                     }
                     if( umx <=0 )
-                        Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT);
+                        Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT,useopt);
                     else if( umn <0 )
                     { // coupe ..
                         int i0 = 0, i1 = 1, i2 =2;
@@ -4923,7 +4923,7 @@ template<class R>
                         double arean = (1-c)*Th[t].area;
                         FITM=FIT;
                         FITM*=1-c;
-                        Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FITM);
+                        Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FITM,useopt);
                     }
                     if(sptrclean) sptrclean=sptr->clean();
                 }
@@ -4934,9 +4934,9 @@ template<class R>
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
                     if ( sameMesh )
-                        Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT);
+                        Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT,useopt);
                     else
-                        Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT);
+                        Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT,useopt);
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                 }
     }

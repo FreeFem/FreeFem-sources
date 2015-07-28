@@ -63,8 +63,9 @@ mesh Thi=Thsd[0];
 // remark: operator # is  the concatenation operator in macro 
 
 //   cout << " Domaine " << i<< " --------" << endl;
+// OK P1/P0 ;, PB P1/P1,  P1/P0Edge , FH..
 fespace Vhi(Thi,P1);
-fespace Ehi(Thi,P0edge);
+fespace Ehi(Thi,P0);
 matrix[int] Asd(nbsd),Csd(nbsd),PAsd(nbsd),PIsd(nbsd),PJsd(nbsd);
 Vhi[int] usd(nbsd),vsd(nbsd),rhssd(nbsd), pusd(nbsd),bcsd(nbsd);
 Ehi[int] epssd(nbsd);

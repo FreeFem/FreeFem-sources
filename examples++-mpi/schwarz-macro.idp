@@ -3,8 +3,8 @@ load "metis"
 load "Element_P3"
 load "Element_P4"
 load "scotch"
-load "utility"
-load "removeDOF"
+//load "utility"
+//load "removeDOF"
 load "schwarz"
 
 macro floating(meshName, VhName, vecName)
@@ -34,7 +34,7 @@ macro simple2d(Ph, function, comm, deltaX, deltaY)
 
 macro bb2(boundingMesh, overshoot, ThGlobal)
             real[int] bb(4);
-            bb2d(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
+            boundingbox(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
             diam = sqrt((bb(1) - bb(0))^2 + (bb(3) - bb(2))^2);
             bb(0) -= overshoot;
             bb(1) += overshoot;
@@ -45,7 +45,7 @@ macro bb2(boundingMesh, overshoot, ThGlobal)
 
 macro bb3(boundingMesh, overshoot, ThGlobal)
             real[int] bb(6);
-            bb3d(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
+            boundingbox(bb, boundingMesh/*, intersection = possibleIntersection, offset = 2. * overlap / global*/);
             diam = sqrt((bb(1) - bb(0))^2 + (bb(3) - bb(2))^2 + (bb(5) - bb(4))^2);
             bb(0) -= overshoot;
             bb(1) += overshoot;

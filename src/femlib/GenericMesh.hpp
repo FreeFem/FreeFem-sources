@@ -59,7 +59,18 @@ namespace Fem2D  {
 #include "R3.hpp"
 #include "Label.hpp"
 #include "HashTable.hpp"
-
+    
+inline int  randwalk(int ncas)
+{
+        const long long a = 314125421, b =1, m=  777777;
+        static long xn = 19999999%m;
+        if(ncas <=0) xn=19999999%m;
+        long long xxn = xn;
+        xn = a*xxn%m +1;
+        xn %= m;
+        return  (xn*ncas)/m;
+}
+    
   const double UnSetMesure=-1e+200;
 
 inline int maxdfon(const int *dfon){ return max(max(dfon[0],dfon[1]),max(dfon[2],dfon[3]));}
