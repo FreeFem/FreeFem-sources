@@ -2308,6 +2308,91 @@ void f_initparallele(int &argc, char **& argv)
 double ffMPI_Wtime() {return MPI_Wtime();}
 double ffMPI_Wtick() {return MPI_Wtick();}
 
+class splitComm_Op : public E_F0mps {
+public:
+    Expression comm;
+    Expression p;
+    Expression splitComm;
+    static const int n_name_param = 2;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    splitComm_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : comm(param1), p(param2), splitComm(param3) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+    }
+    AnyType operator()(Stack stack) const;
+};
+
+basicAC_F0::name_and_type splitComm_Op::name_param[] = {
+    {"topology", &typeid(long)},
+    {"exclude", &typeid(bool)}
+};
+
+class splitComm : public OneOperator {
+public:
+    splitComm() : OneOperator(atype<long>(), atype<pcommworld>(), atype<long*>(), atype<pcommworld>()) {}
+    E_F0* code(const basicAC_F0& args) const
+    {
+        return new splitComm_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+    }
+};
+
+static inline bool splitCommunicator(const MPI_Comm& in, MPI_Comm& out, const bool& exclude, unsigned short& p, const unsigned short& T) {
+    int size, rank;
+    MPI_Comm_size(in, &size);
+    MPI_Comm_rank(in, &rank);
+    if(p > size / 2 && size > 1) {
+        p = size / 2;
+        if(rank == 0)
+            std::cout << "WARNING -- the number of master processes was set to a value greater than MPI_Comm_size, the value has been reset to " << p << std::endl;
+    }
+    p = std::max(p, static_cast<unsigned short>(1));
+    if(exclude) {
+        MPI_Group oldGroup, newGroup;
+        MPI_Comm_group(in, &oldGroup);
+        int* pm = new int[p];
+        if(T == 1)
+            for(int i=0;i<p; ++i) pm[i]=i;
+       //     std::iota(pm, pm + p, 0);
+        else if(T == 2) {
+            float area = size * size / (2.0 * p);
+            *pm = 0;
+            for(unsigned short i = 1; i < p; ++i)
+                pm[i] = static_cast<int>(size - std::sqrt(std::max(size * size - 2 * size * pm[i - 1] - 2 * area + pm[i - 1] * pm[i - 1], 1.0f)) + 0.5);
+        }
+        else
+            for(unsigned short i = 0; i < p; ++i)
+                pm[i] = i * (size / p);
+        bool excluded = std::binary_search(pm, pm + p, rank);
+        if(excluded)
+            MPI_Group_incl(oldGroup, p, pm, &newGroup);
+        else
+            MPI_Group_excl(oldGroup, p, pm, &newGroup);
+        MPI_Comm_create(in, newGroup, &out);
+        MPI_Group_free(&oldGroup);
+        MPI_Group_free(&newGroup);
+        delete [] pm;
+        return excluded;
+    }
+    else {
+        MPI_Comm_dup(in, &out);
+        return false;
+    }
+}
+
+
+AnyType splitComm_Op::operator()(Stack stack) const {
+    bool exclude = nargs[1] ? GetAny<bool>((*nargs[1])(stack)) : false;
+    MPI_Comm* orig_comm = (MPI_Comm*)GetAny<pcommworld>((*comm)(stack));
+    MPI_Comm* new_comm = (MPI_Comm*)GetAny<pcommworld>((*splitComm)(stack));
+    long* pp = GetAny<long*>((*p)(stack));
+    unsigned short p = *pp;
+    long topology = nargs[0] ? GetAny<long>((*nargs[0])(stack)) : 0;
+    bool excluded = splitCommunicator(*orig_comm, *new_comm, exclude, p, topology);
+    *pp = p;
+    return static_cast<long>(excluded);
+}
+
+
 void f_init_lgparallele()
   {
     if(verbosity && mpirank == 0) cout << "parallelempi ";
@@ -2619,7 +2704,9 @@ void f_init_lgparallele()
       TheOperators->Add("<-", 
 			new OneOperator2_<KN<MPI_Request> *,KN<MPI_Request> *,long>(&set_init0)
 			);
-      atype<KN<MPI_Request>* >()->Add("[","",new OneOperator2_<fMPI_Request*,KN<MPI_Request>*,long >(get_elementp_));    
+      atype<KN<MPI_Request>* >()->Add("[","",new OneOperator2_<fMPI_Request*,KN<MPI_Request>*,long >(get_elementp_));
+      
+       Global.Add("splitComm", "(", new splitComm);
       
   }
 

@@ -222,4 +222,7 @@ CheckRT(RT1Ortho,"RT1Ortho",-y,x,cctau,V)
 CheckRT(BDM1,"BDM1",x,y,ccn,V)
 CheckRT(BDM1Ortho,"BDM1Ortho",-y,x,cctau,V)
 
+CheckRT(RT1,"RT2",x,y,ccn,V)
+CheckRT(RT1Ortho,"RT2Ortho",-y,x,cctau,V)
+
 }
