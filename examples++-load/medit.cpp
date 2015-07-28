@@ -47,7 +47,6 @@ const char *medit_addsol="-addsol";
 const char *medit_debug="-d";
 
 static bool TheWait=false;
-bool  NoWait=false;
 extern bool  NoGraphicWindow;
 using namespace std;
 using namespace Fem2D;
@@ -2426,6 +2425,11 @@ static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"
 
   Global.Add("readsol","(",new OneOperatorCode< readsol_Op >);
 }
+
+// <<medit_Load_Init>> static loading: calling Load_Init() from a function which is accessible from
+// [[file:~/ff/src/fflib/load.cpp::static_load_medit]]
+
+void medit_Load_Init(){Load_Init();}
 
 // [[file:include/InitFunct.hpp::LOADFUNC]]
 LOADFUNC(Load_Init)

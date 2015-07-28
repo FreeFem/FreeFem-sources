@@ -112,7 +112,7 @@ bool load(string ss)
 	      {
 		if(verbosity && (mpirank ==0))
 		  cout << " (load: dlopen " << s << " " << handle << ") ";
-		callInitsFunct() ;  
+		callInitsFunct() ;   // [[file:InitFunct.cpp::callInitsFunct]]
 		return handle;
 	      }
 	    
@@ -130,28 +130,34 @@ bool load(string ss)
 		{
 		  if(verbosity&& (mpirank ==0))
 		    cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
-		  callInitsFunct() ; 
+		  callInitsFunct() ;  // [[file:InitFunct.cpp::callInitsFunct]]
 		  return mod;
 		}
 	    }
 #elif STATIC_LINKING
 	    
 	    // <<STATIC_LINKING>> Enable statically linked libraries for [[file:~/fflib/Makefile::STATIC_LINKING]] - ALH
-	    
-	    if(
-	       // [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]] AAA-ALH-HERE
-	       ss=="msh3"
+	    bool ok=false;
 
-	       // [[file:~/ff/examples++-load/medit.cpp::dynamic_loading]]
-	       || ss=="medit"){
-
-	      cout << "load verbosity=" << &verbosity << " " << verbosity <<endl;//AAA-ALH-TODO
-	      if(verbosity && (mpirank ==0)) cout << " (static load: " << ss << " " << ") ";
-	      callInitsFunct(); // [[file:InitFunct.cpp::callInitsFunct]]
+	    // <<static_load_msh3>> [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]] AAA-ALH-HERE
+	    if(ss=="msh3"){
 	      
-	      return true;
+	      // [[file:~/ff/examples++-load/msh3.cpp::msh3_Load_Init]]
+	      void msh3_Load_Init();
+	      msh3_Load_Init();
+	      ok=true;
 	    }
-	    else return false;
+	    
+	    // <<static_load_medit>> [[file:~/ff/examples++-load/medit.cpp::dynamic_loading]]
+	    if(ss=="medit"){
+	      // [[file:~/ff/examples++-load/medit.cpp::medit_Load_Init]]
+	      void medit_Load_Init();
+	      medit_Load_Init();
+	      ok=true;
+	    }
+
+	    if(ok && verbosity && (mpirank ==0)) cout << " (static load: " << ss << " " << ") ";
+	    return ok;
 #else	    
 	    if(mpirank ==0)
 	      {

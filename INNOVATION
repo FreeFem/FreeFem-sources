@@ -15,6 +15,7 @@ version 3.38-1
 
 28/7/2015 (ALH)
  - fixed behavior of "verbosity" to use value from command line ("-v" option)
+ - synchronized lg.ypp with lg.tab.cpp
  
 version 3.38
  - add parameter in renumbering function. 

@@ -52,6 +52,7 @@ void call(const InitFunct & a) {
   if(verbosity>5)
     cout <<  " ) " ;
 }
+
 bool comp(const InitFunct a,const InitFunct b)
  { 
    return a.first < b.first;
@@ -60,16 +61,14 @@ bool comp(const InitFunct a,const InitFunct b)
 // <<callInitsFunct>> called by [[file:load.cpp::callInitsFunct]]
 void  callInitsFunct() 
 {
-  deque<InitFunct> *  l(getInitFunctlist()); // [[getInitFunctlist]]
+  deque<InitFunct> *l(getInitFunctlist()); // [[getInitFunctlist]]
   sort(l->begin(),l->end(),comp);
-  cout << "callInitsFunct verbosity=" << &verbosity << " " << verbosity <<endl;//AAA-ALH-TODO
   if(verbosity>5) cout << " callInitsFunct : " << l->size() << endl;
-  //   for_each(l->begin(),l->end(),show);   
   for_each(l->begin(),l->end(),call); // [[call]]
   l->clear();
 }
 
-// <<addInitFunct>>
+// <<addInitFunct>> called by [[file:InitFunct.hpp::calling_addInitFunct]]
 void  addInitFunct(int i,void  (* f)(),const char *name) 
 {
   if(!name || (! *name )

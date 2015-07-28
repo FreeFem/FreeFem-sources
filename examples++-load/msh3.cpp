@@ -5876,6 +5876,12 @@ static void Load_Init()
   // Global.Add("trunc","(", new Op_trunc_mesh3);
 }
 
-// [[file:../src/fflib/InitFunct.hpp::LOADFUNC]] [[Load_Init]]
+// <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
+// [[file:~/ff/src/fflib/load.cpp::static_load_msh3]]
+
+void msh3_Load_Init(){Load_Init();}
+
+// dynamic loading: calling [[file:../src/fflib/InitFunct.hpp::LOADFUNC]] on [[Load_Init]]
 LOADFUNC(Load_Init)
-#endif
+    
+#endif // [[WITH_NO_INIT]]
