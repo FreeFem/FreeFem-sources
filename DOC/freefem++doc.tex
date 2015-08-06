@@ -7,10 +7,10 @@
 \usepackage{styles}
 \usepackage{multirow}
 \usepackage{bm}
-
+\usepackage{macroListing}
 \newtheorem{remark}{Remark}
 
-\def\VERSION{3.38}
+\def\VERSION{3.38-3}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -18632,6 +18632,7 @@ of subdomain and in every subdomain we use parallel sparse solver to solve local
 
 
 
+\input{petschpddm}
 
 
 
@@ -21067,6 +21068,45 @@ SIAM,  ISBN 0-89871-407-9 //
 {\sc I. Babbu\v{s}ka}, Error bounds for finite element method, Numer. Math. 16, 322-333.
 
 \bibitem{achdou} {\sc Y. Achdou and O. Pironneau}, Computational Methods for Option Pricing.  SIAM monograph (2005).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ajout pour PETSC HPDMM 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibitem{petsc-web-page}
+Satish Balay, Shrirang Abhyankar, Mark~F. Adams, Jed Brown, Peter Brune, Kris
+  Buschelman, Victor Eijkhout, William~D. Gropp, Dinesh Kaushik, Matthew~G.
+  Knepley, Lois~Curfman McInnes, Karl Rupp, Barry~F. Smith, and Hong Zhang.
+\newblock {PETS}c {W}eb page.
+\newblock \url{http://www.mcs.anl.gov/petsc}, 2014.
+
+\bibitem{petsc-efficient}
+Satish Balay, William~D. Gropp, Lois~Curfman McInnes, and Barry~F. Smith.
+\newblock Efficient management of parallelism in object oriented numerical
+  software libraries.
+\newblock In E.~Arge, A.~M. Bruaset, and H.~P. Langtangen, editors, {\em Modern
+  Software Tools in Scientific Computing}, pages 163--202. Birkh{\"{a}}user
+  Press, 1997.
+
+
+\bibitem{Jolivet:2014:HPD}
+Pierre Jolivet and Fr\'ed\'eric Nataf.
+\newblock Hpddm: {High-Performance Unified framework for Domain Decomposition
+  methods, MPI-C++ library}.
+\newblock https://github.com/hpddm/hpddm.
+
+
+\bibitem{Dolean:2015:IDD}
+Dolean, Jolivet and Nataf. 
+\newblock {\em An Introduction to Domain Decomposition Methods: algorithms, theory and parallel implementation}, {2015}
+\newblock  \url{https://hal.archives-ouvertes.fr/cel-01100932, Lecture Notes to appear in SIAM collection},
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% fin d ajout pour petsc et hpddm
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bibitem{freefemp} {\sc D. Bernardi, F.Hecht, K. Ohtsuka, O. Pironneau}, {\it
 freefem+ documentation}, on the web at  ftp://www.freefem.org/freefemplus.

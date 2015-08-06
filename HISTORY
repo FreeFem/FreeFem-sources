@@ -1,5 +1,35 @@
-@  changeset:   3350:e66cb0d55089
+@  changeset:   3356:1249f08c0ad3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 16 09:18:55 2015 +0200
+|  summary:     coorect dfft map , alld martor example, add error in cas of += varf
+|
+o  changeset:   3355:dadb070e748d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 10 18:41:30 2015 +0530
+|  summary:     remove extra print in ClosePoints
+|
+o  changeset:   3354:9087c908fb03
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 10 18:12:17 2015 +0530
+|  summary:     coorect ClosePoint and M(1:3,4:5)'
+|
+o  changeset:   3353:62d791e56f0d
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 10 17:48:03 2015 +0530
+|  summary:     add transpose of M(0.1,3:5)'
+|
+o  changeset:   3352:9c6dcf3bca82
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 10 17:07:52 2015 +0530
+|  summary:     correct pb of parameters in ClosePoints
+|
+o  changeset:   3351:40091c46e368
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 10 17:00:12 2015 +0530
+|  summary:     correct renumbering and add test
+|
+o  changeset:   3350:e66cb0d55089
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jul 03 18:06:08 2015 +0200
 |  summary:     remove bug in renumbering (remove DOC ) missing return in c++

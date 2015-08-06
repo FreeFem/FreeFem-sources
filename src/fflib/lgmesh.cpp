@@ -1960,7 +1960,7 @@ void init_lgmesh() {
 		    new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
     // Thg,suppi[],nnn,unssd[]
   Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
-  Global.Add("AddLayers","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
+  Global.Add("SameMesh","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
   // use for :   mesh Th = readmesh ( ...);
     //  Add FH mars 2015 to compute mesure under levelset ...
     Global.Add("arealevelset","(",new OneOperator3_<double,Mesh *, KN<double>*,double>(arealevelset));
