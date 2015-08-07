@@ -1,5 +1,10 @@
-@  changeset:   3356:1249f08c0ad3
+@  changeset:   3357:17955b4e4623
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 06 19:23:02 2015 +0200
+|  summary:     add hpddm doc in the documentation.
+|
+o  changeset:   3356:1249f08c0ad3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 16 09:18:55 2015 +0200
 |  summary:     coorect dfft map , alld martor example, add error in cas of += varf
