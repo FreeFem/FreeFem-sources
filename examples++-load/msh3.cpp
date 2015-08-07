@@ -4280,6 +4280,243 @@ class  BuildLayerMesh : public OneOperator { public:
   }
 };
 
+/* debut buildlayer.cpp */
+class cubeMesh_Op : public E_F0mps
+{
+public:
+    Expression nx,ny,nz;
+    Expression xx,yy,zz;
+    static const int n_name_param =3; //
+    static basicAC_F0::name_and_type name_param[] ;
+    Expression nargs[n_name_param];
+    KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
+    { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+    double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+    long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
+    //int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+public:
+    cubeMesh_Op(const basicAC_F0 &  args,Expression nnx,Expression nny,Expression nnz,Expression transfo=0)
+    : nx(nnx),ny(nny),nz(nnz),xx(0),yy(0),zz(0)
+    {
+        if(verbosity >1) cout << "construction par cubeMesh_Op" << endl;
+        args.SetNameParam(n_name_param,name_param,nargs);
+        const E_Array * a2 = dynamic_cast<const E_Array *>(transfo);
+        int err =0;
+        //cout << nargs[0] << " "<< a1 << endl;
+        //cout << nargs[1] << " "<< a2 << endl;
+         if(a2) {
+            if(a2->size() !=3)
+                CompileError("cube (n1,n2,n3, [X,Y,Z]) ");
+            xx=to<double>( (*a2)[0]);
+            yy=to<double>( (*a2)[1]);
+            zz=to<double>( (*a2)[2]);
+        }
+        
+    } 
+    
+    AnyType operator()(Stack stack)  const ;
+};
+
+basicAC_F0::name_and_type cubeMesh_Op::name_param[]= {
+    {  "region", &typeid(long )}, // 0
+    {  "label", &typeid(KN_<long> )},
+    {  "flags", &typeid(long )}
+    
+};
+
+
+class  cubeMesh : public OneOperator { public:
+    int xyz;
+    cubeMesh() : OneOperator(atype<pmesh3>(),atype<long>(),atype<long>(),atype<long>()), xyz(0) {}
+    cubeMesh(int ) : OneOperator(atype<pmesh3>(),atype<long>(),atype<long>(),atype<long>(),atype<E_Array>()) ,xyz(1) {}
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        //cout << "args: " << args << endl;
+        if(xyz)
+            return  new cubeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]));
+        else
+            return  new cubeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));
+    }
+};
+extern Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg);
+
+AnyType cubeMesh_Op::operator()(Stack stack)  const
+{
+   
+    
+    int n1 = (int) GetAny<long>((*nx)(stack));
+    int n2 = (int) GetAny<long>((*ny)(stack));
+    int nlayer = (int) GetAny<long>((*nz)(stack));
+    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+    long flags=arg(2,stack,0L);;
+    KN<long> label2;
+    long ll3[]={1,2,3,4,5,6};
+    KN_<long>l3_(ll3,6);
+    KN<long> l3=arg(1,stack,l3_);
+    ffassert(l3.N()==6);
+    long region=arg(0,stack,0L);
+ 
+    Mesh * pTh=  Carre( n1 , n2,0,0,stack,flags,label2,0L );
+    ffassert(pTh && nlayer>0);
+    Mesh &Th=*pTh;
+    int nbv=Th.nv; // nombre de sommet
+    int nbt=Th.nt; // nombre de triangles
+    int neb=Th.neb; // nombre d'aretes fontiere
+    if(verbosity>2)
+        cout << "  -- cubeMesh_Op input: nv" << nbv<< "  nt: "<< nbt << " nbe "<< neb << endl;
+    KN<double> zmin(nbv),zmax(nbv);
+    KN<double> clayer(nbv); //  nombre de layer est nlayer*clayer
+    
+    clayer=1.;
+    zmin=0.;
+    zmax=1.;
+    double maxdz = 1.;
+    
+    if(verbosity >3) cout << "lecture valeur des references " << endl;
+    long rup[]={0,l3[6-1]}, rdown[]={0,l3[5-1]}, r0[]={0,region};
+    long rmid[]={1,l3[1-1],2,l3[2-1],3,l3[3-1],4,l3[4-1]};
+  //  KN_<long> zzempty;
+    KN_<long> nrtet(r0,2);
+    KN_<long> nrfmid(rmid,8);
+    KN_<long> nrfup(rup,2);
+    KN_<long> nrfdown(rdown,2);
+    
+    int point_confondus_ok (0L);
+    double precis_mesh (-1L);
+    
+    
+    // realisation de la map par default
+    
+    map< int, int > maptet;
+    map< int, int > maptrimil, maptrizmax, maptrizmin;
+    map< int, int > mapemil, mapezmax, mapezmin;
+    
+    build_layer_map_tetrahedra( Th, maptet );
+    build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
+    build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
+    
+    // Map utilisateur
+    map< int, int > :: iterator imap;
+    for( int ii=0; ii < nrtet.N(); ii+=2){
+        imap = maptet.find(nrtet[ii]);
+        if( imap != maptet.end()){
+            imap -> second = nrtet[ii+1];
+        }
+    }
+    
+    for( int ii=0; ii < nrfmid.N(); ii+=2){
+        imap = maptrimil.find(nrfmid[ii]);
+        if( imap != maptrimil.end()){
+            imap -> second = nrfmid[ii+1];
+        }
+    }
+    
+    for( int ii=0; ii < nrfup.N(); ii+=2){
+        imap = maptrizmax.find(nrfup[ii]);
+        if( imap != maptrizmax.end()){
+            imap -> second = nrfup[ii+1];
+        }
+    }
+    
+    for( int ii=0; ii < nrfdown.N(); ii+=2){
+        imap = maptrizmin.find(nrfdown[ii]);
+        if( imap != maptrizmin.end()){
+            imap -> second = nrfdown[ii+1];
+        }
+    }
+    
+    int nebn =0;
+    KN<int> ni(nbv);
+    double epsz = maxdz *1e-6;
+    if(verbosity>9999)    cout << ":: epsz " << epsz <<endl;
+    for(int i=0;i<nbv;i++)
+    {
+        ni[i]=Max(0,Min(nlayer,(int) lrint(nlayer*clayer[i])));
+        if(abs(zmin[i]-zmax[i]) < epsz) ni[i]=0; // Corr FH aug. 2014...
+    }
+    if(verbosity>9999)    cout << " cubeMesh_Op: ni = " << ni << endl;
+    // triangle
+    for (int it=0;it<nbt;++it){
+        const Mesh::Element &K(Th.t(it));
+        int i0 = Th.operator()(K[0]);
+        int i1 = Th.operator()(K[1]);
+        int i2 = Th.operator()(K[2]);
+        
+        if( ni[i0] == 0 && ni[i1] == 0 && ni[i2] == 0 ){
+            cout << "A tetrahedra with null volume will be created with triangle " << it << " of 2D Mesh " << endl;
+            cout << "stop procedure of buildlayer" << endl;
+            exit(1);
+        }
+        
+    }
+    
+    // cas maillage volumique + surfacique
+    Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
+    // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer à l'intérieure
+    
+    delete pTh;
+    
+   
+    if( !(xx) && !(yy) && !(zz) )
+    {
+        
+        Th3->BuildGTree(); //A decommenter
+        
+        Add2StackOfPtr2FreeRC(stack,Th3);
+        *mp=mps;
+        return Th3;
+    }
+    else
+    {
+        //Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
+        
+        KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
+        KN<int> takemesh(Th3->nv);
+        //MeshPoint *mp3(MeshPointStack(stack));
+        
+        takemesh=0;
+        Mesh3 &rTh3 = *Th3;
+        for (int it=0;it<Th3->nt;++it){
+            for( int iv=0; iv<4; ++iv){
+                int i=(*Th3)(it,iv);
+                if(takemesh[i]==0){
+                    mp->setP(Th3,it,iv);
+                    if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
+                    if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
+                    if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
+                    
+                    takemesh[i] = takemesh[i]+1;
+                }
+            }
+        }
+        
+        int border_only = 0;
+        int recollement_elem=0, recollement_border=1; 
+        if(point_confondus_ok == 2){
+            recollement_border = 0;
+            point_confondus_ok = 1;
+        }
+        
+        Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok,1);
+        
+        
+        // T_Th3->BuildBound();
+        //  T_Th3->BuildAdj();
+        // T_Th3->Buildbnormalv();  
+        // T_Th3->BuildjElementConteningVertex();
+        
+        
+        T_Th3->BuildGTree(); //A decommenter
+        delete Th3;
+        Add2StackOfPtr2FreeRC(stack,T_Th3);
+        *mp=mps;
+        return T_Th3;
+        
+    }
+    
+}
+
 AnyType BuildLayeMesh_Op::operator()(Stack stack)  const 
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
@@ -5865,6 +6102,8 @@ static void Load_Init()
   Global.Add("deplacement","(",new DeplacementTab);
   Global.Add("checkbemesh","(",new CheckManifoldMesh);  
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
+  Global.Add("cube","(",new  cubeMesh);
+  Global.Add("cube","(",new  cubeMesh(1));
   Global.Add("trunc","(", new Op_trunc_mesh3);
 
   Global.Add("extract","(",new ExtractMesh);
