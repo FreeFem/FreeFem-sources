@@ -109,7 +109,8 @@ plots/VarIneqFill.jpg plots/VarIneqIso.jpg \
 plots/NSNewtonTh.jpg  plots/NSNewtonUP.jpg \
 plots/chesapeake-2.jpg \
 plots/minsurf3D.jpg \
-plots/lg.jpg plots/INRIA-logo.jpg 
+plots/lg.jpg plots/INRIA-logo.jpg  \
+figures/func-cube.jpg 
 
 FIGS_PDF= plots/LogoCNRS.pdf    plots/LogoLJLL.pdf  plots/ffauteur.pdf  \
 plots/titre-ff.pdf   plots/BG-russe.pdf plots/sanskrit.pdf \
