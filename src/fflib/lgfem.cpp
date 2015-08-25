@@ -1346,8 +1346,8 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
       for (int i=1;i<atef.size();i++)
 	same &= atef[i].LeftValue() == atef[1].LeftValue();
       *ppfes = new pfes_tefk(ppTh,tef,atef.size(),s    ,nbcperiodic,periodic);
-      (**ppfes).decrement();  //07/2008 FH
-	// Add2StackOfPtr2FreeRC(s,*ppfes);  //  bug????  a verifier 06/07/2008
+      //(**ppfes).decrement();  //07/2008 FH
+      //Add2StackOfPtr2FreeRC(s,*ppfes);  //  bug????  a verifier 06/07/2008
       //  delete [] tef;
       return r;}
   } ;
@@ -1385,12 +1385,12 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a, TypeOfFE * const & tef)
 { *p=new pfes_tef(a,tef) ;
-  (**p).decrement();
+  //(**p).decrement();
   return p;}
 
 inline pfes3* MakePtr3(pfes3 * const &p,pmesh3 * const &  a, TypeOfFE3 * const & tef)
 { *p=new pfes3_tef(a,tef) ;
-  (**p).decrement();
+  //(**p).decrement();
   return p;}
 
 
@@ -1416,7 +1416,7 @@ class OP_MakePtr2 { public:
 	C tef= GetAny<C>( (*c)(s) );   
 	//  cout << "  ----------- " << endl;  
 	*p=new pfes_tef(th,tef,s,nbcperiodic,periodic) ;
-	(**p).decrement();
+	//(**p).decrement();
 	return  SetAny<R>(p);
       } 
     }; // end Op class 
@@ -1452,7 +1452,7 @@ class OP_MakePtr3 { public:
 	C tef= GetAny<C>( (*c)(s) );   
 	//  cout << "  ----------- " << endl;  
 	*p=new pfes3_tef(th,tef,s,nbcperiodic,periodic) ;
-	(**p).decrement();
+	//(**p).decrement();
 	return  SetAny<R>(p);
       } 
     }; // end Op class 
@@ -1551,12 +1551,12 @@ basicAC_F0::name_and_type  OP_MakePtr3::Op::name_param[]= {
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a){ 
       *p=new pfes_tef(a,&P1Lagrange);
-      (**p).decrement();
+      //(**p).decrement();
        return p ;}
        
 inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
        *p= new pfes_fes(a,n);
-      (**p).decrement();
+      //(**p).decrement();
        return p ;}
        
  long FindTxy(Stack s,pmesh * const &  ppTh,const double & x,const double & y)

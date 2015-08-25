@@ -1,3 +1,7 @@
+version 3.39
+ - correct some problem of memory leak, now the decrement methode in RefCount call delete
+    and all decrement are change in   Add2StackOfPtr2FreeRC(stack,m); (more safe). 
+    so the previous plugin become incompatible. 
 version 3.38-2
  - add hppdm explain in the doc. 
  - add function cube to simplity the construction of mesh of cube like square in 2d 

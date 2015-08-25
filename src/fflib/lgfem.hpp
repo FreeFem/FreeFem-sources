@@ -220,7 +220,7 @@ class v_fes3 : public RefCounter { public:
     :  N(NN),ppTh(f->ppTh),pVh(0),stack(s), nbcperiodic(n),periodic(p)
   {}
   
-  void destroy(){ ppTh=0;pVh=0; delete this;}
+ // void destroy(){ ppTh=0;pVh=0; delete this;}
   virtual ~v_fes3() {}
   bool buildperiodic(Stack stack, KN<int> & ndfe)  ;
   virtual  FESpace3 * buildupdate( KN<int> & ndfe) {  return 0;}

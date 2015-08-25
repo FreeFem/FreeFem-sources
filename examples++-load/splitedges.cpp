@@ -3,7 +3,7 @@
 
   using namespace  Fem2D;
 
-Mesh * Split_Edges(Fem2D::Mesh * const & pTh, long  *dK)
+Mesh * Split_Edges(Stack stack,Fem2D::Mesh * const & pTh, long  *dK)
 {
   bool  v10 = verbosity>10;
   bool  vp = verbosity>1;
@@ -145,7 +145,8 @@ Mesh * Split_Edges(Fem2D::Mesh * const & pTh, long  *dK)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    m->decrement();
+   // m->decrement();
+     Add2StackOfPtr2FreeRC(stack,m);
     return m;
   }
 }
@@ -225,7 +226,7 @@ AnyType SplitEdges::operator()(Stack stack) const
     if(verbosity>0)
       cout << "  SplitEdges: nb split edge = " << ne << endl;
     *mp=mps;
-    return SetAny<pmesh>( Split_Edges(pTh,(long *) dK));      
+    return SetAny<pmesh>( Split_Edges(stack,pTh,(long *) dK));
   }
  
 

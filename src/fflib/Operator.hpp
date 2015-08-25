@@ -540,7 +540,7 @@ template<class R>  R ** set_copyp_new( R**  a,R*  b){
 
 template<class R>  R ** set_copy_incr( R** const & a, R * const & b){ 
    *a=b;
-    cout << "set_copy_incr  " << b << " dans  "<< a << endl;
+    SHOWVERB( cout << "set_copy_incr  " << b << " dans  "<< a << endl);
    if(b) b->increment();
    return a;}
 
