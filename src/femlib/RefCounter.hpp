@@ -46,7 +46,7 @@ class baseCountPointer { protected:
  void  add(const  RefCounter * c)  const; 
  void  destroyPtr(const RefCounter *  c)  const;
 };
-#define SHOWVERB1(i) i 
+
 class RefCounter {
   static RefCounter *tnull; 
   mutable int count;
@@ -57,14 +57,14 @@ class RefCounter {
   int destroy() const { 
       if(this!=tnull) {throwassert(count>=0);
         if ( count--==0) {
-	            SHOWVERB1( cout << "True  destruction of " << this <<  endl);
+	            SHOWVERB( cout << "True  destruction of " << this <<  endl);
              delete this;
              return true;} 
-        else{ SHOWVERB1(cout << " no destruction count=" << count+1 << " " << this <<  endl);
+        else{ SHOWVERB(cout << " no destruction count=" << count+1 << " " << this <<  endl);
               return false;}}
    else return false;} 
-   void increment() const {count++;SHOWVERB1( cout << "increment  of " << this << " "<< count <<  endl);}
-    void decrement() const {count--;SHOWVERB1( cout << "decrement  of " << this << " "<< count <<  endl);ffassert(count>=0);}
+   void increment() const {count++;SHOWVERB( cout << "increment  of " << this << " "<< count <<  endl);}
+    void decrement() const {count--;SHOWVERB( cout << "decrement  of " << this << " "<< count <<  endl);ffassert(count>=0);}
  friend   class baseCountPointer;
 // private:
   RefCounter(const RefCounter &) : count(0) {} 

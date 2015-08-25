@@ -11,11 +11,13 @@ load "msh3"
 
 int[int] l6=[13,26,29,24,17,29];
 int r11=0;
-mesh3 Th=cube(4,5,6);//,[x*2-1,y*2-1,z*2-1]);//,label=l6,flags =3,region=r11); 
+mesh3 Th;
+Th=cube(4,5,6);//,[x*2-1,y*2-1,z*2-1]);//,label=l6,flags =3,region=r11); 
+
 // Check label et region numbering 
 cout << " Th " << endl;
 int err =0; 
-for(int i=0; i<-1; ++i)
+for(int i=0; i<100; ++i)
 {
     real s =int2d(Th,i)(1.);
     real sx=int2d(Th,i)(x);

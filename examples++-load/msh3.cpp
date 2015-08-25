@@ -4339,7 +4339,7 @@ class  cubeMesh : public OneOperator { public:
             return  new cubeMesh_Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));
     }
 };
-extern Mesh * Carre(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg);
+extern Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN_<long> lab,long reg);
 
 AnyType cubeMesh_Op::operator()(Stack stack)  const
 {
@@ -4357,7 +4357,7 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
     ffassert(l3.N()==6);
     long region=arg(0,stack,0L);
  
-    Mesh * pTh=  Carre( n1 , n2,0,0,stack,flags,label2,0L );
+    Mesh * pTh=  Carre_( n1 , n2,0,0,stack,flags,label2,0L );// WARNING no clean of teh stack in this case (durdur)
     ffassert(pTh && nlayer>0);
     Mesh &Th=*pTh;
     int nbv=Th.nv; // nombre de sommet
@@ -4493,7 +4493,7 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
         
     }
     Th3->BuildGTree(); //A decommenter
-    cout << " Cube %%% " << Th3 << endl;
+    if(verbosity >10) cout << " Cube %%% " << Th3 << endl;
     Add2StackOfPtr2FreeRC(stack,Th3);
     *mp=mps;
     return Th3;
