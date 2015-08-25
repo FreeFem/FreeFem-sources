@@ -175,7 +175,7 @@ public:
   void read(istream &);
   void readmsh(ifstream & f,int offset);
   void TrueVertex();
-    ~Mesh3() {cout << " %%%% delete Mesh3"<< this << endl ; }
+    ~Mesh3() {SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie
