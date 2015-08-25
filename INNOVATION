@@ -1,4 +1,5 @@
 version 3.39
+ - -fPIC under windows 
  - pas to version MUMPS-5.0.1
  - correct some problem of memory leak, now the decrement methode in RefCount call delete
     and all decrement are change in   Add2StackOfPtr2FreeRC(stack,m); (more safe). 

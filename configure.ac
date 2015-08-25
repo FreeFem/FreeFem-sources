@@ -384,9 +384,10 @@ AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
 #  flag to build window 32   version   ff_mingw = yes
 ff_mingw=no
+ff_fpic=yes
 case $ff_uname in
     CYGWIN*)
-
+	ff_fpic=no
     	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
 	if test $enable_ffcs = no
 	then
@@ -401,7 +402,7 @@ case $ff_uname in
 esac
 case $ff_uname in
 CYGWIN*|MINGW*)
-
+	ff_fpic=no
 	ff_suffix_dylib="dll";
         ff_win32=yes;
 
@@ -1599,15 +1600,18 @@ then
 dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CNOFLAGS)
 dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	fi
+	if test "$ff_fpic" != "no" ; then
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CNOFLAGS)
-	if test "$enable_fortran" != no
-	 then
+	fi 
+	if test "$enable_fortran" != no ;  then
+	if test "$ff_fpic" != "no" ; then
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FNOFLAGS)
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCFLAGS)
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCNOFLAGS)
+	 fi
 dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FNOFLAGS)
 dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
 

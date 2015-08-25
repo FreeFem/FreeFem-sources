@@ -1,5 +1,10 @@
-@  changeset:   3365:732de473289f
+@  changeset:   3366:09a94a2b4f65
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Aug 25 20:17:15 2015 +0200
+|  summary:     pass to mumps version 5.0.1
+|
+o  changeset:   3365:732de473289f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Aug 25 16:32:30 2015 +0200
 |  summary:     correct cube function and some pb of  memory management
