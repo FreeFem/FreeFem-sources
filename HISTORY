@@ -1,5 +1,10 @@
-@  changeset:   3364:aaf467097e79
+@  changeset:   3365:732de473289f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Aug 25 16:32:30 2015 +0200
+|  summary:     correct cube function and some pb of  memory management
+|
+o  changeset:   3364:aaf467097e79
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Aug 25 14:03:22 2015 +0200
 |  summary:     correct the new function cube
