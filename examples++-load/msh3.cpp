@@ -4458,16 +4458,7 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
     delete pTh;
     
    
-    if( !(xx) && !(yy) && !(zz) )
-    {
-        
-        Th3->BuildGTree(); //A decommenter
-        
-        Add2StackOfPtr2FreeRC(stack,Th3);
-        *mp=mps;
-        return Th3;
-    }
-    else
+    if( xx && yy && zz )
     {
         //Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
         
@@ -4476,16 +4467,14 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
         //MeshPoint *mp3(MeshPointStack(stack));
         
         takemesh=0;
-        Mesh3 &rTh3 = *Th3;
         for (int it=0;it<Th3->nt;++it){
             for( int iv=0; iv<4; ++iv){
                 int i=(*Th3)(it,iv);
                 if(takemesh[i]==0){
                     mp->setP(Th3,it,iv);
-                    if(xx){ txx[i]=GetAny<double>((*xx)(stack));}
-                    if(yy){ tyy[i]=GetAny<double>((*yy)(stack));}
-                    if(zz){ tzz[i]=GetAny<double>((*zz)(stack));}
-                    
+                    { txx[i]=GetAny<double>((*xx)(stack));}
+                    { tyy[i]=GetAny<double>((*yy)(stack));}
+                    { tzz[i]=GetAny<double>((*zz)(stack));}
                     takemesh[i] = takemesh[i]+1;
                 }
             }
@@ -4498,26 +4487,20 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
             point_confondus_ok = 1;
         }
         
-        Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok,1);
-        
-        
-        // T_Th3->BuildBound();
-        //  T_Th3->BuildAdj();
-        // T_Th3->Buildbnormalv();  
-        // T_Th3->BuildjElementConteningVertex();
-        
-        
-        T_Th3->BuildGTree(); //A decommenter
+        Mesh3 *T_Th3=Transfo_Mesh3( precis_mesh, *Th3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok,1);
         delete Th3;
-        Add2StackOfPtr2FreeRC(stack,T_Th3);
-        *mp=mps;
-        return T_Th3;
+        Th3 =T_Th3;
         
     }
+    Th3->BuildGTree(); //A decommenter
+    cout << " Cube %%% " << Th3 << endl;
+    Add2StackOfPtr2FreeRC(stack,Th3);
+    *mp=mps;
+    return Th3;
     
 }
 
-AnyType BuildLayeMesh_Op::operator()(Stack stack)  const 
+AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
