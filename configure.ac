@@ -394,8 +394,10 @@ case $ff_uname in
 	fi
 
 	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
-    MINGW*)
+    MINGW*|MSYS_NT*)
         enable_cygwindll=no;;
+
+
 esac
 case $ff_uname in
 CYGWIN*|MINGW*)

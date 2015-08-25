@@ -10,14 +10,14 @@ load "msh3"
 //  z = 1 = label 6
 
 int[int] l6=[13,26,29,24,17,29];
-int r11=11;
-
-mesh3 Th=cube(4,5,6,[x*2-1,y*2-1,z*2-1],label=l6,flags =3,region=r11); 
+int r11=0;
+mesh3 Th=cube(4,5,6);//,[x*2-1,y*2-1,z*2-1]);//,label=l6,flags =3,region=r11); 
 // Check label et region numbering 
+cout << " Th " << endl;
 int err =0; 
-for(int i=0; i<100; ++i)
+for(int i=0; i<-1; ++i)
 {
-    real s=int2d(Th,i)(1.);
+    real s =int2d(Th,i)(1.);
     real sx=int2d(Th,i)(x);
     real sy=int2d(Th,i)(y);
     real sz=int2d(Th,i)(z);
@@ -29,9 +29,9 @@ for(int i=0; i<100; ++i)
       cout <<" label="<< i << " s " << s << " " << ix << iy << iz << " = " << ii << endl; 
       if( i != ii ) err++;
     }
-}
-real volr11 = int3d(Th,r11)(1.) ;
-cout << " vol region " << r11 << ": " << int3d(Th,11)(1.) << endl; 
+}   
+real volr11 = int3d(Th,11)(1.) ;
+cout << " vol region " << 11 << ": " << volr11 << endl; 
 if( (volr11 - Th.mesure )>1e-8) err++;
 plot(Th); 
 assert(err); 
