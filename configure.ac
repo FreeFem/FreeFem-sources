@@ -386,6 +386,8 @@ then
 fi
 AC_MSG_RESULT($ff_sunos)
 
+AC_ARG_WITH(glut,[  --with-glut  glutlib and include  ])
+
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
 
@@ -423,7 +425,7 @@ CYGWIN*|MINGW*)
 	if test "$enable_cygwindll" != yes
 	then
 # 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
-	        ff_glut_ok=yes
+	        test with_glut  != no &&  ff_glut_ok=yes
 
 		# FFCS: on Windows, FF crashes when compiling GL/glut.h and the option "--disable-opengl" is not
 		# operational because ff_glut_ok is forced to yes here.
@@ -470,13 +472,19 @@ CYGWIN*|MINGW*)
 		fi
 
                 ff_glutname="glut32"
+		if test "$with_glut" != no; then 
+		    if test -n "$with_glut" ; then
+			AC_CHECK_LIB(glut32,abort,ff_glut="$with_glut",ff_glut="")
+		    else
 		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
-		AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
-		if test -z "$ff_glut" ; then
-                ff_glutname="freeglut"
-		AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
-                fi
+			AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
+			if test -z "$ff_glut" ; then
+			    ff_glutname="freeglut"
+			    AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
+			fi
+		    fi
+		fi
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(FFGLUTNAME,$ff_glutname)
 	        AC_SUBST(WINDRESOBJ,windres.o)
