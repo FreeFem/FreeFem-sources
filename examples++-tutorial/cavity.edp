@@ -15,7 +15,7 @@ solve Stokes ([u1,u2,p],[v1,v2,q]) =
   + on(3,u1=1,u2=0) 
   + on(1,2,4,u1=0,u2=0);
   
-plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2]);
+plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ArrowSize=0.5,wait=1);
 
 Xh psi,phi;
 

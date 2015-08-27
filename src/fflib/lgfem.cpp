@@ -3803,7 +3803,8 @@ AnyType Plot::operator()(Stack s) const{
   bool uaspectratio=false;
   bool pViso=false,pVarrow=false;
   int Niso=20,Narrow=20;
-    
+    double ArrowSize=-1;
+    // PPPPP
   KN<R> Viso,Varrow;
         
   bool bw=false;
@@ -3860,7 +3861,7 @@ AnyType Plot::operator()(Stack s) const{
   bool addtoplot=false, keepPV=false;
   if (nargs[18]) addtoplot= GetAny<bool>((*nargs[18])(s));
   if (nargs[19]) keepPV= GetAny<bool>((*nargs[19])(s));
-
+  if (nargs[VTK_START+8]) ArrowSize = GetAny<double>((*nargs[VTK_START+8])(s));
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007 
 	
@@ -4043,9 +4044,9 @@ AnyType Plot::operator()(Stack s) const{
 			 if (fe1) 
 			   {
 			       if (fe->Vh == fe1->Vh)           
-				   vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder);
+				   vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder,ArrowSize);
 			       else
-				   cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
+				   cerr << " Draw only vector field on same Finites Element , Sorry. " << endl;
 			       if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 			   }      
 			 else 
