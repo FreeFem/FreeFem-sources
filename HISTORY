@@ -1,5 +1,15 @@
-@  changeset:   3366:09a94a2b4f65
+@  changeset:   3368:c4d8233716ea
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Aug 26 17:33:09 2015 +0200
+|  summary:     add missing files
+|
+o  changeset:   3367:b34314bc49cc
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Aug 25 20:50:29 2015 +0200
+|  summary:     remobv -fPIC option under windows
+|
+o  changeset:   3366:09a94a2b4f65
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Aug 25 20:17:15 2015 +0200
 |  summary:     pass to mumps version 5.0.1
