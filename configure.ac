@@ -1454,7 +1454,12 @@ fi
 LIBS="$ff_save_libs"
 
 # If all else fails, download!
-
+ff_umfpack_incs=""
+#  attention no /usr/include in WHERE 
+if test "$ff_umfpack_ok" = yes -a -z "$ff_umfpack_dir" 
+then
+    ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
+fi
 if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
@@ -1463,8 +1468,9 @@ then
 
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
     # the following tests fail.
-
+    
     ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
+    ff_umfpack_incs="-I${curdir}/download/include"
     AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
     if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
@@ -1480,8 +1486,8 @@ if test "$ff_umfpack_ok" = yes
 then
     if test $enable_ffcs = no
     then
-	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
-	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,$ff_umfpack_incs)
+	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,$ff_umfpack_incs)
     else
 	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
 	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
