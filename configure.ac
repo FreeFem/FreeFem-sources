@@ -209,14 +209,10 @@ then
 		case $i in
 		    -L*)
 			d=`expr $i : '-L\(.*\)'`;
-			if test -e "$d/libgfortran.so" ; then
-			    ff_flibs="$d/libgfortran.so"
-			elif test -e "$d/libgfortran.dylib" ; then
-			    ff_flibs="$d/libgfortran.dylib"
-			elif test -e "$d/libgfortran.a" ; then
-			    ff_flibs="$d/libgfortran.a"
-			elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then
-			    ff_flibs="$i"
+			if test -e "$d/libgfortran.$ff_suffix_dylib_a" -a  -e "$d/libquadmath.$ff_suffix_dylib_a"  ; then
+			   ff_flibs="$d/libgfortran.$ff_suffix_dylib_a $d/libquadmath.$ff_suffix_dylib_a"
+			elif test -e "$d/libgfortran.a"  -a -e "$d/libquadmath.a"; then
+			   ff_flibs="$d/libgfortran.a $d/libquadmath.a"
 			fi;;
 		esac
             done
@@ -351,16 +347,32 @@ echo $ac_configure_args > configure.param
 # by default the suffix of the  .so lib file is .so
 #      it is .dll   under windows
 #      it is .dylib under macos X
-ff_suffix_dylib="so";
+
+# suffix of dynamic lib 
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
-
+ff_uname=`uname`
+#  flag to build window 32   version   ff_mingw = yes
+# bof bof F. Hecht 
+case $ff_uname in
+    CYGWIN*|MINGW*|MSYS_NT*)
+	ff_suffix_dylib="dll"
+	ff_suffix_dylib_a="dll.a";;
+     Darwin)
+	ff_suffix_dylib="dylib"
+	ff_suffix_dylib_a="dylib";;
+    *) 
+       ff_suffix_dylib="so";
+       ff_suffix_dylib_a="so";
+esac 
+# end suffix ...
 AC_MSG_CHECKING(wether we are on a MacIntosh)
 ff_mac=no
 if test `uname` = Darwin;
 then
 	ff_HOSTARCH_pastix=i686_mac
 	ff_suffix_dylib="dylib"
+	ff_suffix_dylib_a="dylib"
 	ff_mac=yes
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR_APPLE,"/Applications/FreeFem++.app/Contents/",FreeFem prefix  dir)
 fi
@@ -389,11 +401,7 @@ case $ff_uname in
     CYGWIN*)
 	ff_fpic=no
     	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
-	if test $enable_ffcs = no
-	then
-	    ff_nocygwin=-mno-cygwin
-	fi
-
+	#    ff_nocygwin=-mno-cygwin
 	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
     MINGW*|MSYS_NT*)
         enable_cygwindll=no;;
@@ -404,6 +412,7 @@ case $ff_uname in
 CYGWIN*|MINGW*)
 	ff_fpic=no
 	ff_suffix_dylib="dll";
+	ff_suffix_dylib_a="dll.a";
         ff_win32=yes;
 
 	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
@@ -453,7 +462,7 @@ CYGWIN*|MINGW*)
 		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
 		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 			case "$F77" in
-	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran";;
+	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran -lquadmath";;
 	 		    *g77) FLIBS="$ff_nocygwin -lg2c";;
 			    *)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
 			esac
@@ -482,7 +491,7 @@ CYGWIN*|MINGW*)
 
 
 	;;
-*)ff_win32=no;;
+*) ff_win32=no;;
 esac
 AC_MSG_RESULT($ff_win32)
 
@@ -1130,7 +1139,7 @@ then
 	# place -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which
 	# will fail.
 
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran -lquadmath $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
