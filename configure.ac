@@ -386,7 +386,20 @@ then
 fi
 AC_MSG_RESULT($ff_sunos)
 
+# glut ------------
+# ----------------
+ff_glut=""
+ff_glut_ok=""
 AC_ARG_WITH(glut,[  --with-glut  glutlib and include  ])
+if test "$with_glut" != no -a  -n "$with_glut" ; then
+    ff_libs_save="$LIBS"
+    $LIBS="$LIBS $with_glut"
+    AC_SEARCH_LIBS(abort,$with_glut,[ff_glut="$with_glut";ff_glut_ok=yes],[ff_glut="";ff_glut_ok="no"])
+    LIBS="$ff_libs_save"
+    AC_MSG_ERROR([ Sorry missing  bad glut --with !])
+elif test "$with_glut" = no ; then
+    ff_glut_ok="no"
+fi
 
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
@@ -425,13 +438,13 @@ CYGWIN*|MINGW*)
 	if test "$enable_cygwindll" != yes
 	then
 # 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
-	        test with_glut  != no &&  ff_glut_ok=yes
 
 		# FFCS: on Windows, FF crashes when compiling GL/glut.h and the option "--disable-opengl" is not
 		# operational because ff_glut_ok is forced to yes here.
 		if test $enable_ffcs = yes
 		then
 	            ff_glut_ok=no
+		    ff_glut=""
 		    enable_opengl=no
 		fi
 
@@ -471,18 +484,14 @@ CYGWIN*|MINGW*)
 		    fi
 		fi
 
-                ff_glutname="glut32"
-		if test "$with_glut" != no; then 
-		    if test -n "$with_glut" ; then
-			AC_CHECK_LIB(glut32,abort,ff_glut="$with_glut",ff_glut="")
-		    else
+		if test -z "$ff_glut" -a  "$ff_glut_ok" != "no" ; then 
+                    ff_glutname="glut32"
 		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
-			AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
-			if test -z "$ff_glut" ; then
-			    ff_glutname="freeglut"
-			    AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
-			fi
+		    AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
+		    if test -z "$ff_glut" ; then
+			ff_glutname="freeglut"
+			AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
 		    fi
 		fi
          	# Resources for FreeFem++-cs in Microsoft Windows format
