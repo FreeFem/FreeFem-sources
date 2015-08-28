@@ -393,10 +393,12 @@ ff_glut_ok=""
 AC_ARG_WITH(glut,[  --with-glut  glutlib and include  ])
 if test "$with_glut" != no -a  -n "$with_glut" ; then
     ff_libs_save="$LIBS"
-    $LIBS="$LIBS $with_glut"
-    AC_SEARCH_LIBS(abort,$with_glut,[ff_glut="$with_glut";ff_glut_ok=yes],[ff_glut="";ff_glut_ok="no"])
+    $LIBS="$LIBS"
+dnl not works .... so no check .... FH 
+      ff_glut="$with_glut";ff_glut_ok=yes
+dnl     AC_SEARCH_LIBS(abort,[$with_glut],[ff_glut="$with_glut";ff_glut_ok=yes],[ff_glut="";ff_glut_ok="no"])
     LIBS="$ff_libs_save"
-    AC_MSG_ERROR([ Sorry missing  bad glut --with !])
+    AC_MSG_ERROR([ Sorry  bad --with-glut :  $with_glut !])
 elif test "$with_glut" = no ; then
     ff_glut_ok="no"
 fi
