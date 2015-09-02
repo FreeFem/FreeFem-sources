@@ -26,11 +26,8 @@
 # [[shell:header\alh 'postit.org']] (cf [[file:~/alh/bin/headeralh]])
 # headeralh default=0 freefem org start=27/07/2015 upmc written brief="Development pointers and tools"
 
-* TODO [2015-07-19 dim. 07:38] [[elisp:(startup-persistent-process "remote.pl -X")]] :bookmark:
-* TODO [2015-07-19 dim. 07:38] [[elisp:(startup-persistent-process "rox-filer")]] :bookmark:
-* TODO [#Z] [2015-06-25 jeu. 09:09] [[elisp:(grep "emacsfind")]] (memo: 8m) (wait [2016-01-09 sam. 01:58]) :sorted:bookmark:
-* TODO [#Z] [2014-05-30 ven. 22:23] http://www.um.es/freefemv3/ff++/pmwiki.php (memo: 8m) (wait [2015-11-18 mer. 21:31]) :bookmark:j:sorted:
-* TODO [2015-07-28 mar. 14:28] [[http://www.freefem.org/ff++]] :bookmark:j:
+* TODO [#Z] [2014-05-30 ven. 22:23] Documentation Wiki http://www.um.es/freefemv3/ff++/pmwiki.php (memo: 8m) (wait [2015-11-18 mer. 21:31]) :bookmark:j:sorted:
+* TODO [#Z] [2015-07-28 mar. 14:28] Website [[http://www.freefem.org/ff++]] (memo: 8m) (wait [2016-04-21 jeu. 04:57]) :bookmark:j:sorted:
 * <<File_info>>
 
 # Local Variables:
