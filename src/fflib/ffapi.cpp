@@ -82,13 +82,12 @@ void bufferwrite(const char *b,const int l){
   Socket::dialoglock->Free();
 }
 
-Buffer buffer(NULL,bufferwrite); // need #include "buffer.hpp"
+Buffer buffer(NULL,bufferwrite); // need #include "buffer.hpp" // [[file:~/ffcs/src/buffer.hpp::Buffer]]
 #endif
 //  allocation/definition of all ffapi in Global.cpp
 
 namespace ffapi{
     
-
   // Get a pointer to the local cin/cout (which is distinct from ffcs's stdin/stdout under Windows because each DLL owns
   // separate cin/cout objects).
 
