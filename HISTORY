@@ -1,5 +1,45 @@
-@  changeset:   3368:c4d8233716ea
+@  changeset:   3376:358816cdd019
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Sep 01 14:31:44 2015 +0200
+|  summary:     coorect for msys2 and windows 64 version
+|
+o  changeset:   3375:d7ec0d1a3ca2
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Aug 28 13:49:51 2015 +0200
+|  summary:     continuing ligglut
+|
+o  changeset:   3374:b512c8862479
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Aug 28 13:44:17 2015 +0200
+|  summary:     continuing if config ligglut
+|
+o  changeset:   3373:ba5536b31566
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Aug 28 11:36:47 2015 +0200
+|  summary:     coorect choose of glut lib
+|
+o  changeset:   3372:3f8352ae0e30
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 27 23:45:47 2015 +0200
+|  summary:     add choose glut for windows
+|
+o  changeset:   3371:4461862f8771
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 27 21:57:04 2015 +0200
+|  summary:     correct  WHERE_LIBRARY-config for UMFPACK , AMD
+|
+o  changeset:   3370:c0b9cb8975df
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 27 20:40:58 2015 +0200
+|  summary:     update configure.ac for mingw-6' cas
+|
+o  changeset:   3369:117bf8442a68
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 27 11:15:48 2015 +0200
+|  summary:     add ArrowSize= to plot command
+|
+o  changeset:   3368:c4d8233716ea
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Aug 26 17:33:09 2015 +0200
 |  summary:     add missing files
