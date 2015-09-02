@@ -88,7 +88,7 @@ int getprog(char* fn,int argc, char **argv)
   // (eg when called in a FreeFem++-server situation by EJS)
   // is the name -nw or -nw.exe  -> no graphics 
   noffglut=false;
-
+    ffapi::ff_ch2edpdtmpir = false;
   bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
@@ -132,7 +132,9 @@ int getprog(char* fn,int argc, char **argv)
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-cd")==0 ) // 
 	  ch2edpdir=true;
-   
+      else if  (strcmp(argv[i],"-cdtmp")==0 ) //
+          ffapi::ff_ch2edpdtmpir=true;
+
       else if  (strcmp(argv[i],"-ns")==0 ) // no script  
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
@@ -249,7 +251,7 @@ if( ch2edpdir && edpfilenamearg)
   if(ret !=1) 
     {
       const char * ff = argc ? argv[0] : "FreeFem++" ;
-      cout << " Error parameter: "<< ff << " , version : " << StrVersionNumber() << endl;
+      cout << " Error parameter: "<< ff << " , version : " << StrVersionNumber() << " " << sizeof(void*)*8 <<"bits "<< endl;
       cout << " Syntaxe = " << ff  << "   [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  [SCRIPT-arguments]\n"
 	   << "        -v      verbosity : 0 -- 1000000 level of freefem output \n"
 	   << "        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) \n"
@@ -260,6 +262,7 @@ if( ch2edpdir && edpfilenamearg)
 	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
            << "        -cd               : Change dir to script dir\n"
+           << "        -cdtmp            : Change dir to tmp dir (for test)\n"
            << endl ;
 
 	;

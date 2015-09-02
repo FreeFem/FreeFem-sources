@@ -10,7 +10,7 @@ TESTS=BeamEigenValue.edp BeamEigenValueperio.edp Lap3dEigenValue.edp  LapEigenVa
 EXTRA_DIST=*.edp all.edp
 
 all.edp:
-	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
+	(echo "chtmpdir;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \

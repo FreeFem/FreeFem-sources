@@ -11,7 +11,7 @@ EXTRA_DIST=*.edp *.idp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 
 
 all.edp:
-	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
+	(echo "chtmpdir;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \

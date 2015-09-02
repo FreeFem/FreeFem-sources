@@ -44,8 +44,8 @@ typedef void (*AtEnd)();
 void ff_atend(AtEnd f);
 // big change F. Hecht Frev 2015
 // passe all function by pointer
-
 namespace ffapi{
+   extern  bool ff_ch2edpdtmpir;
 
   // Redirecting the FF data stream
   // ------------------------------
@@ -109,6 +109,8 @@ namespace ffapi{
   /// commands) are not allowed.
 
   extern bool (*protectedservermode)();
+  extern  void ifchtmpdir();
+  extern  long chtmpdir();
 }
 
 #endif // FFAPI_HPP
