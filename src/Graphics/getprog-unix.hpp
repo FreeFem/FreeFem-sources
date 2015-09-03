@@ -106,6 +106,7 @@ int getprog(char* fn,int argc, char **argv)
         }
     }
    echo_edp=true;
+  ffapi::ff_justcompile=false;
   if(argc)
     for (int i=1; i<argc;i++)
       if  (ret ==0 && strcmp(argv[i],"-f")==0 && i+1 < argc  ) 
@@ -134,8 +135,16 @@ int getprog(char* fn,int argc, char **argv)
 	  ch2edpdir=true;
       else if  (strcmp(argv[i],"-cdtmp")==0 ) //
           ffapi::ff_ch2edpdtmpir=true;
-
-      else if  (strcmp(argv[i],"-ns")==0 ) // no script  
+      else if  (strcmp(argv[i],"-jc")==0 ) //
+      {
+          ffapi::ff_justcompile=true;
+          waitatend=false;
+          consoleatend=false;
+          noffglut=true;
+          NoGraphicWindow=true;
+          waitatend=false; //
+      }
+      else if  (strcmp(argv[i],"-ns")==0 ) // no script
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-nowait")==0 ) 
 	waitatend=false;

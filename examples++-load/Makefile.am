@@ -161,13 +161,16 @@ all-local: all.edp regtests.edp load_compile
 # configuration step
 
 all.edp:
-	@(echo "chtmpdir;NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
+	@(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
+	    if ../src/nw/FreeFem++ -ns -jc -v 0 $$i  1>/dev/null 2>/dev/null ; then \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\
 		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
-	done) > $@
+	    else  \
+	        echo ' cout << "--------- error compile  file : '$$i' ---------------------------------------------" << endl;'; \
+	      fi; done) > $@
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4

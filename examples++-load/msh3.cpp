@@ -6064,8 +6064,8 @@ static void Load_Init()
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
   
-  if (verbosity && mpirank == 0)
-    cout << " load: msh3  " << endl;
+  if (verbosity>1  && mpirank == 0)
+    cout << " load: msh3  "  <<endl;
   
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,pmesh3,pmesh3>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op3_addmesh<listMesh3,listMesh3,pmesh3>  >      );
