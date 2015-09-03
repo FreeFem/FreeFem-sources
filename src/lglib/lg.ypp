@@ -287,6 +287,7 @@ void ff_atend(AtEnd f)
 %% 
 
 start:   input ENDOFFILE {
+                        if(  ffapi::ff_justcompile) exit(0);
     // clean FH  mach 2014
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
 			//FFCS: divert stream to FFCS

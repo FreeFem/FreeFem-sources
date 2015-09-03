@@ -319,6 +319,7 @@ void init(){
         return chdir(tmp);
         
     }
+    bool ff_justcompile=false;
     bool ff_ch2edpdtmpir=0;
     void ifchtmpdir()
     {

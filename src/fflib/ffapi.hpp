@@ -46,7 +46,7 @@ void ff_atend(AtEnd f);
 // passe all function by pointer
 namespace ffapi{
    extern  bool ff_ch2edpdtmpir;
-
+   extern bool ff_justcompile;
   // Redirecting the FF data stream
   // ------------------------------
 

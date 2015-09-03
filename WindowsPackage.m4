@@ -21,6 +21,18 @@ ChangesAssociations=yes
 OutputBaseFilename=FreeFem++-VERSION-win`'SIZEOFPTR
 ChangesEnvironment=yes
 
+[Dirs]
+Name: "{app}"; 
+; set writing permissions for  examples with write and  read files 
+Name: "{app}\examples++"; Permissions: everyone-full
+Name: "{app}\examples++-load"; Permissions: everyone-full
+Name: "{app}\examples++-tutorial"; Permissions: everyone-full
+Name: "{app}\examples++-3d"; Permissions: everyone-full
+Name: "{app}\examples++-chap3"; Permissions: everyone-full
+Name: "{app}\examples++-eigen"; Permissions: everyone-full
+ifelse(len(MPIPROG),0,; ,)Name: "{app}\examples++-mpi"; Permissions: everyone-full
+
+
 [Files]
 ; README 
 Source: "README"; DestDir: "{app}"
