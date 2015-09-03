@@ -1,17 +1,8 @@
-emacs examples++-chapt3/Makefile.am
-emacs examples++-eigen/Makefile.am
-emacs examples++-load/Makefile.am
-emacs examples++-tutorial/Makefile.am
-emacs examples++/Makefile.am
 # $Id$
 
 all-local: all.edp regtests.edp  freefem++.pref
 
-TESTS=3d-Lemaemacs examples++-chapt3/Makefile.am
-emacs examples++-eigen/Makefile.am
-emacs examples++-load/Makefile.am
-emacs examples++-tutorial/Makefile.am
-emacs examples++/Makefile.amn.edp ArrayFE-3d.edp EqPoisson.edp Lac.edp Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp Laplace3d.edp LaplaceRT-3d.edp NSI3d-carac.edp NSI3d.edp Period-Poisson-cube-ballon.edp Poisson-cube-ballon.edp Poisson.edp Poisson3d.edp Stokes.edp TruncLac.edp  beam-3d.edp cone.edp convect-3d.edp cube-period.edp cylinder-3d.edp cylinder.edp fallingspheres.edp first.edp meditddm.edp p.edp periodic-3d.edp pyramide.edp  refinesphere.edp  schwarz-nm-3d.edp sphere2.edp sphere6.edp tetgencube.edp tetgenholeregion.edp intlevelset3d.edp
+TESTS=3d-Leman.edp ArrayFE-3d.edp EqPoisson.edp Lac.edp Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp Laplace3d.edp LaplaceRT-3d.edp NSI3d-carac.edp NSI3d.edp Period-Poisson-cube-ballon.edp Poisson-cube-ballon.edp Poisson.edp Poisson3d.edp Stokes.edp TruncLac.edp  beam-3d.edp cone.edp convect-3d.edp cube-period.edp cylinder-3d.edp cylinder.edp fallingspheres.edp first.edp meditddm.edp p.edp periodic-3d.edp pyramide.edp  refinesphere.edp  schwarz-nm-3d.edp sphere2.edp sphere6.edp tetgencube.edp tetgenholeregion.edp intlevelset3d.edp
 XFAIL_TESTS=Laplace-Adapt-aniso-3d.edp fallingspheres.edp Laplace-Adapt-3d.edp Period-Poisson-cube-ballon.edp Poisson-cube-ballon.edp cylinder.edp refinesphere.edp tetgencube.edp tetgenholeregion.edp Poisson3d.edp  schwarz-nm-3d.edp 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
