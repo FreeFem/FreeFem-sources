@@ -26,6 +26,7 @@ long ff_mkdir(string * c) {mode_t m=07777;
   return mkdir(c->c_str(),m);
 #endif
   }
+
 long ff_stat(string * c) {
 struct stat buff;
 return stat(c->c_str(),&buff);}
