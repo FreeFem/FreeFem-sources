@@ -1,3 +1,4 @@
+ - add new C1 Finite element HCT 
  - change permission in install example++ for read and write under windows 
  - try to build a windows 64 version under msys64 systeme ...
  - Add use ArrowSize= of size
