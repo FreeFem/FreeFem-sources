@@ -94,7 +94,23 @@ if test `uname` != Darwin; then
  ff_ldbg="-Wl,--start-group"
 fi
 
-
+#  suffix of  dynamic lib .. 
+# ---------------------------
+ff_uname=`uname`
+#  flag to build window 32   version   ff_mingw = yes
+# bof bof F. Hecht 
+case $ff_uname in
+    CYGWIN*|MINGW*|MSYS_NT*)
+	ff_suffix_dylib="dll"
+	ff_suffix_dylib_a="dll.a";;
+     Darwin)
+	ff_suffix_dylib="dylib"
+	ff_suffix_dylib_a="dylib";;
+    *) 
+       ff_suffix_dylib="so";
+       ff_suffix_dylib_a="so";
+esac 
+# end suffix ...
 
 
 
@@ -205,18 +221,21 @@ then
 	    ;;
 # add FH sep 2006 / modif  2009
         *gfortran)
+	    ff_okkk=0
             for i in $FLIBS; do
 		case $i in
 		    -L*)
 			d=`expr $i : '-L\(.*\)'`;
 			if test -e "$d/libgfortran.$ff_suffix_dylib_a" -a  -e "$d/libquadmath.$ff_suffix_dylib_a"  ; then
 			   ff_flibs="$d/libgfortran.$ff_suffix_dylib_a $d/libquadmath.$ff_suffix_dylib_a"
+			    ff_okkk=1
 			elif test -e "$d/libgfortran.a"  -a -e "$d/libquadmath.a"; then
 			   ff_flibs="$d/libgfortran.a $d/libquadmath.a"
+			    ff_okkk=1
 			fi;;
 		esac
             done
-	    if test -e "$ff_flibs"  ;then
+	    if test  "$ff_okkk" -eq 1  ;then
 		FLIBS="$ff_flibs"
 	    else
 		FLIBS="$ff_flibs -lgfortran"
@@ -351,21 +370,6 @@ echo $ac_configure_args > configure.param
 # suffix of dynamic lib 
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
-ff_uname=`uname`
-#  flag to build window 32   version   ff_mingw = yes
-# bof bof F. Hecht 
-case $ff_uname in
-    CYGWIN*|MINGW*|MSYS_NT*)
-	ff_suffix_dylib="dll"
-	ff_suffix_dylib_a="dll.a";;
-     Darwin)
-	ff_suffix_dylib="dylib"
-	ff_suffix_dylib_a="dylib";;
-    *) 
-       ff_suffix_dylib="so";
-       ff_suffix_dylib_a="so";
-esac 
-# end suffix ...
 AC_MSG_CHECKING(wether we are on a MacIntosh)
 ff_mac=no
 if test `uname` = Darwin;
