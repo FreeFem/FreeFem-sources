@@ -309,7 +309,7 @@ void init(){
     {
         char tmp[256];
 #ifdef _WIN32
-        strcpy(tmp,"c:\Temp");
+        strcpy(tmp,"c:\\Temp");
         if (GetEnvironmentVariable("TEMP", tmp, 256) > 0);
 #else
         strcpy(tmp,"/tmp/");
