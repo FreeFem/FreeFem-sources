@@ -304,28 +304,6 @@ void init(){
     ffapi::mpi_finalize = ffapi::ffapi_mpi_finalize;
     ffapi::protectedservermode = ffapi::ffapi_protectedservermode;
   }
-// to change to tmp dir for exec ...
-    long chtmpdir()
-    {
-        char tmp[256];
-#ifdef _WIN32
-        strcpy(tmp,"c:\\Temp");
-        if (GetEnvironmentVariable("TEMP", tmp, 256) > 0);
-#else
-        strcpy(tmp,"/tmp/");
-#endif
-        if(verbosity>2)
-            std::cout << " Change to " << endl;
-        return chdir(tmp);
-        
-    }
-    bool ff_justcompile=false;
-    bool ff_ch2edpdtmpir=0;
-    void ifchtmpdir()
-    {
-        if(ff_ch2edpdtmpir) {
-        }
-    }
 }
 
 
