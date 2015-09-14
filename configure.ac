@@ -817,7 +817,7 @@ AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
 ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" /usr/local/ff++ /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" /usr/local/ff++/lib /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"		
 	    if test -f "$ffconfpetsc" ; then 
