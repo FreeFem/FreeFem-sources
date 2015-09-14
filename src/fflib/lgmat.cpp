@@ -1875,9 +1875,9 @@ template<class R>
 bool IsRawMat(const basicAC_F0 & args) 
 {   
     
-    const E_Array & ee= *dynamic_cast<const E_Array*>((Expression) args[1]);
-    if (!&ee) return 0;
-    
+    const E_Array * pee= dynamic_cast<const E_Array*>((Expression) args[1]);
+    if (pee) return 0;
+    const E_Array &ee=*pee;
     int N=ee.size();
     if (N==1)
     {

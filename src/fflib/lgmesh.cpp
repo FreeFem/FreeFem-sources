@@ -836,7 +836,7 @@ AnyType Adaptation::operator()(Stack stack) const
       { 
         bamg::Vertex & v= Th(it)[jt];
 	//   const Fem2D::Vertex & vf = (*Thh)[it][jt];
-        if (&v && v.color)
+        if ( v.color)
           {
             v.color =0; // uncolor
             mp->setP(Thh ,it,jt);
