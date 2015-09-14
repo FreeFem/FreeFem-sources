@@ -4113,7 +4113,7 @@ void Triangles::SetIntCoor(const char * strfrom)
 	Vertex * pv0 = triangles[i](0);
 	Vertex * pv1 = triangles[i](1);
 	Vertex * pv2 = triangles[i](2);
-      if ( pv0 && pv1 &&  &pv2 ) // a good triangles;
+      if ( pv0 && pv1 &&  pv2 ) // a good triangles;
       {
 	triangles[i].det= det(*pv0,*pv1,*pv2);
 	if (triangles[i].det <=0 && Nberr++ <10)
@@ -4790,11 +4790,11 @@ void  Triangles::ShowHistogram() const
 		Triangle *ta = triangles[it].TriangleAdj(j);
 		if ( !ta || !ta->link || Number(ta) >= it) 
 		{ 
-		    Vertex & vP = triangles[it][VerticesOfTriangularEdge[j][0]];
-		    Vertex & vQ = triangles[it][VerticesOfTriangularEdge[j][1]];
-		    if ( !& vP || !&vQ) continue;
-		    R2 PQ = vQ.r - vP.r;
-		    Real8 l = log(LengthInterpole(vP,vQ,PQ));
+		    Vertex * vP = triangles[it](VerticesOfTriangularEdge[j][0]);
+		    Vertex * vQ = triangles[it](VerticesOfTriangularEdge[j][1]);
+		    if ( ! vP || !vQ) continue;
+		    R2 PQ = vQ->r - vP->r;
+		    Real8 l = log(LengthInterpole(*vP,*vQ,PQ));
 #ifdef DRAWING2             
 		    if (l>1.4)  {
 			penthickness(3);

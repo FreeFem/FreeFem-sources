@@ -629,7 +629,7 @@ int  Triangles::SplitElement(int choice)
 	      //  cout << ":" << ke << "," << !!t.link << " " <<  &tt ;
 	      if (ke<0) // new 
 		{
-		  if (&tt) // internal triangles all the boundary 
+		  if (ta.t) // internal triangles all the boundary
 		      { // new internal edges 
 			Int4 ii = Number(tt);
 			int  jj = ta;

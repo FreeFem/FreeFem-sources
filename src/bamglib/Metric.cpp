@@ -890,8 +890,9 @@ const  Real8 maxsubdiv2 = maxsubdiv*maxsubdiv;
       Triangle &t=triangles[it];
       for (int j=0;j<3;j++)
 	{
-	  Triangle &tt = *t.TriangleAdj(j);
-	  if ( ! &tt || (( it < Number(tt) && ( tt.link || t.link)))) 
+          Triangle *ptt=t.TriangleAdj(j);
+	  Triangle &tt = *ptt;
+	  if ( ! ptt || (( it < Number(tt) && ( tt.link || t.link))))
 	    {
 		Vertex &v0 = t[VerticesOfTriangularEdge[j][0]];
 		Vertex &v1 = t[VerticesOfTriangularEdge[j][1]];
@@ -987,8 +988,9 @@ void Triangles::SmoothMetric(Real8 raisonmax)
 	  ta=Previous(Adj(ta));
 	  // cout <<  Number(ta.EdgeVertex(0)) << " " << Number(ta.EdgeVertex(1)) << endl;
 	  assert(vertices+i == ta.EdgeVertex(1));
-	  Vertex & vj = *(ta.EdgeVertex(0));
-	  if ( &vj ) {
+	  Vertex *pvj = (ta.EdgeVertex(0));
+          Vertex & vj = *pvj;
+	  if ( pvj ) {
 	    j= &vj-vertices;
 	    assert(j>=0 && j < nbv);
 	    R2 Aij = (R2) vj - (R2) vi;
