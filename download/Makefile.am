@@ -82,7 +82,7 @@ EXTRA_DIST= \
 ipopt/Makefile	\
 ipopt/Makefile.inc.in \
 ipopt/patch-IpBlas  \
-getall patch-hpddm-1
+getall patch-hpddm-1 patch-hpddm-2
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
@@ -142,6 +142,7 @@ reinstall-hpddm:
 include/hpddm-master:patch-hpddm-1
 	-if test -f ./pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
 	if `../build/ff-md5 include/hpddm-master/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true
+	if `../build/ff-md5 include/hpddm-master/src/ScaLAPACK.hpp dd38a3ff2d0aaa7d93b76ed19d3224ae` ; then patch -p1 <patch-hpddm-2; fi;true
 
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \

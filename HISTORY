@@ -1,5 +1,35 @@
-@  changeset:   3376:358816cdd019
+@  changeset:   3382:2fa2cb1fde04
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Sep 13 23:48:28 2015 +0200
+|  summary:     add new finite elemnt HCT HSIEH-CLOUGH-TOCH
+|
+o  changeset:   3381:de02d5a5d43f
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Sep 09 16:17:12 2015 +0200
+|  summary:     coorect convect in 3d case (bug !!!!)
+|
+o  changeset:   3380:694d902862e4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Sep 04 13:21:51 2015 +0200
+|  summary:     change version of hpddm
+|
+o  changeset:   3379:3e1f0badf0c4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Sep 03 09:59:12 2015 +0200
+|  summary:     correct typo
+|
+o  changeset:   3378:e5a77d3aa624
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Sep 03 09:51:13 2015 +0200
+|  summary:     try to solve problem of writing in dir example of installation
+|
+o  changeset:   3377:fb06bf0edcb7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Sep 02 22:59:07 2015 +0200
+|  summary:     add chtmpdir function for test in other directory
+|
+o  changeset:   3376:358816cdd019
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Sep 01 14:31:44 2015 +0200
 |  summary:     coorect for msys2 and windows 64 version

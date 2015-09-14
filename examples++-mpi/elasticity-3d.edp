@@ -166,7 +166,7 @@ else {
        // parm(0) = getARGV("-nu", 20);
         EVproblem(vPbNoPen, Th, Ph)
         matrix noPen = vPbNoPen(Wh, Wh, solver = CG);
-        attachCoarseOperator(mpiCommWorld, Aglob, A = noPen, /*threshold = 2. * h[].max / diam, parameters = parm*/);
+        attachCoarseOperator(mpiCommWorld, Aglob, A = noPen /*,threshold = 2. * h[].max / diam, parameters = parm*/);
     }
     /*# coarseSpaceEnd #*/
     /*# SolverDDM #*/
