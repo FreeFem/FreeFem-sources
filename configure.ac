@@ -814,10 +814,11 @@ AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libr
 ## PETSc
 AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
 # /usr/local/petsc/conf/petscvariables 
+#/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" /usr/local/ff++/lib /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"		
 	    if test -f "$ffconfpetsc" ; then 
