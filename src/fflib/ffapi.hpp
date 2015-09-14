@@ -32,6 +32,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdio>
+#include <cstring>
 using namespace std;
 #endif //FFAPI_HPP
 
