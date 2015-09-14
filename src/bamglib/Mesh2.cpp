@@ -4059,12 +4059,13 @@ void Triangles::clear()
   if (VertexOnBThVertex) delete [] VertexOnBThVertex;
   if (VertexOnBThEdge) delete [] VertexOnBThEdge;
   
-  if (&Gh) 
+  //if (&Gh)
     {
       if (Gh.NbRef>0) Gh.NbRef--;
       else if (Gh.NbRef==0) delete &Gh;
     }
-  if (&BTh && (&BTh != this))
+  if (//&BTh &&
+      (&BTh != this))
     {
       if (BTh.NbRef>0) BTh.NbRef--;
       else if (BTh.NbRef==0) delete &BTh;
