@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.38-3}
+\def\VERSION{3.40}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -845,7 +845,7 @@ are the vertices.
 \index{fespace!P2dc}
 \index{fespace!P1b}
 \index{fespace!P2b}
-\index{fespace!P3}\index{fespace!P4}\index{fespace!RT1}\index{fespace!BDM1}\index{fespace!Morley}\index{fespace!P3dc}\index{fespace!P4dc}\index{fespace!RT0Ortho}\index{fespace!RT1Ortho}\index{fespace!BDM1Ortho}\index{fespace!P2BR}\index{fespace!P2h}
+\index{fespace!P3}\index{fespace!P4}\index{fespace!RT1}\index{fespace!BDM1}\index{fespace!Morley}\index{fespace!P3dc}\index{fespace!P4dc}\index{fespace!RT0Ortho}\index{fespace!RT1Ortho}\index{fespace!BDM1Ortho}\index{fespace!P2BR}\index{fespace!P2h}\index{fespace!HCT}
 Currently \freefempp implements the following elements \index{elements} in 2d, (see section \ref{finite elements} for the full description)
 {\parskip=0cm
 \par \ttCC{P0} piecewise constant,
@@ -868,6 +868,7 @@ Currently \freefempp implements the following elements \index{elements} in 2d, (
 \par \ttCC{P1b} piecewise linear continuous plus bubble,
 \par \ttCC{P2b} piecewise quadratic continuous plus bubble.
 \par \ttCC{Morley} Morley finite element (need   \ttCC{@load "Morley"})
+\par \ttCC{HCT} Hsieh-Clough-Tocher $C^1$ finite element (need   \ttCC{@load "Element_HCT"}, version 3.40)
 \par \ttCC{P2BR} P2 Bernardi-Raugel finite element  (need   \ttCC{@load "BernadiRaugel.cpp"})
 
 \par \ttCC{P0edge} a finite element constant per edge 
@@ -5557,16 +5558,16 @@ The following example explains methods to obtain mesh information.
   cout << "  point (0.55,0,6) :triangle number " << it00 << " " << it00
        << ", region = " << nr0 << " == " << nr00 << ",  area K " << area00 << endl;
 
-  // new method to get boundary information and mesh adjacent
+  // new method to get boundary information and mesh adjacent \index{mesh!boundary} \index{mesh!adjacent}
 
  @int k=0,l=1,e=1;
-  Th.nbe ; // return the number of boundary element \hfilll
-  Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
+  Th.nbe ; // return the number of boundary element  \index{mesh!nbe}\hfilll
+  Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$   \index{mesh!be}\hfilll
   Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary elmt k \hfilll
-  Th.be(k).Element ;   // return the triangle containing the  boundary elmt k \hfilll
-  Th.be(k).whoinElement ;   // return the edge number of triangle containing \hfilll
+  Th.be(k).Element ;   // return the triangle containing the  boundary elmt k \index{mesh!Element}\hfilll
+  Th.be(k).whoinElement ;   // return the edge number of triangle containing \index{be!whoinElement}\index{be!\index{mesh!be!whoinElement}\hfilll
   //the  boundary elmt k
-  Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change \hfill
+  Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change \index{mesh!adj}\hfill
   // the value of e to the corresponding edge in the adjacent triangle
   Th[k] == Th[k].adj(e) // non adjacent triangle return the same
   Th[k] != Th[k].adj(e) // true adjacent triangle
@@ -8432,7 +8433,7 @@ types of finite element are: \index{type of finite element}
          \right.\right\}
      \end{equation}
      where
-     $P_{2}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$.
+     $P_{2}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 2$.
 
       Warning to build the interplant of a function $u$ (scalar) for this  finite element,
        we need the function and 2 partial derivatives $(u,u_x, u_y)$,
@@ -8452,7 +8453,25 @@ types of finite element are: \index{type of finite element}
            - @int2d(Th)(f*v)
            + @on(1,2,3,4,u=0,ux=0,uy=0)      
 \eFF
- 
+
+      \item[HCT]  $P_3$ $C^1$ conform finite element (2d)  (need \ttCC{@load "Element_HCT"})  one 3 sub triangles (version 3.40). 
+     \index{HCT|textbf}\index{fespace!HCT}
+     
+     Let call $\mathcal{T}^\triangle_{h}$ the sub mesh of $\mathcal{T}_{h}$ where all triangle are split in 3 at the
+     barycenter.
+     \begin{equation}
+       PHCT_{h} = \left\{ v \in C^1(\Omega) \left|\; \forall K \in \mathcal{T}^\triangle_{h}
+        \quad v_{|K} \in P_{3} \right.\right\} 
+     \end{equation}
+     where
+     $P_{3}$ is the set of polynomials of $\R^{2}$ of  degrees $\le 3$. The degree of freedom are 
+     the value and derivative at vertices and normal derivative a middle edge point of initial meshes,and thank to \cite{HCT}.
+     
+         Warning to build the interplant of a function $u$ (scalar) for this  finite element,
+       we need the function and 2 partial derivatives $(u,u_x, u_y)$,
+      so  this vectorial finite element with 3 components  $(u,u_x,u_y)$ like in previous Finite Element.
+        
+
       \item[P2BR]  \index{P2BR|textbf}\index{fespace!P2BR}(need \ttCC{@load "BernadiRaugel"})  the Bernadi Raugel Finite Elemen is a Vectorial   element (2d)  with 2 components,
  See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).
  It is  a 2d coupled FE, with 
@@ -21204,6 +21223,10 @@ TOMS,
 
 \bibitem{modulef}
 {\sc A. Perronnet et. al. } Library Modulef , INRIA, \url{http://www.inria-rocq/modulef}
+
+\bibitem{HCT}
+{\sc M. Bernadou , J-M Boisserie and K. Hassan } Sur l'implémentation des éléments finis de 
+HsieH-Clough-Tocher complet et réduit, RR 4  INRIA, (1980)  <inria- 00076557>
 
 \bibitem{ern} {\sc A. Ern and J.-L. Guermond}, Discontinuous Galerkin methods for Friedrichs' symmetric
 systems and Second-order PDEs, SIAM J. Numer. Anal., (2005). See also: Theory and Practice of Finite Elements, vol. 159 of Applied Mathematical Sciences,

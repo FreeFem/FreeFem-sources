@@ -1,5 +1,35 @@
-@  changeset:   3389:4a80607c82a0
+@  changeset:   3395:c16b507eade5
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 14 21:09:41 2015 +0200
+|  summary:     correct typo in if
+|
+o  changeset:   3394:dd6b7d9d43d6
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 14 21:02:22 2015 +0200
+|  summary:     continue remove clang++ warning
+|
+o  changeset:   3393:396a7811a4aa
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 14 20:51:59 2015 +0200
+|  summary:     contine of remove warning
+|
+o  changeset:   3392:96cbc6b69860
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 14 20:40:01 2015 +0200
+|  summary:     try to remove message like
+|
+o  changeset:   3391:a1da4c3fbec4
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 14 20:10:46 2015 +0200
+|  summary:     missing include
+|
+o  changeset:   3390:c5bc74121665
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 14 17:11:31 2015 +0200
+|  summary:     move function for dll windows form ffapi to environement
+|
+o  changeset:   3389:4a80607c82a0
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Sep 14 16:55:18 2015 +0200
 |  summary:     correct pb with \ under window
