@@ -1,5 +1,10 @@
-@  changeset:   3395:c16b507eade5
+@  changeset:   3396:75309564db35
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Sep 15 20:00:55 2015 +0200
+|  summary:     correct acmpi.m4 in case of -isysroot /blabla compile option
+|
+o  changeset:   3395:c16b507eade5
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Sep 14 21:09:41 2015 +0200
 |  summary:     correct typo in if

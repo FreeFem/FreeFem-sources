@@ -4712,6 +4712,12 @@ Wh[@int] [uh,vh](n); // real vectorial case
 Vh<@complex>[@int] cwh(n);// complex scalar  case
 Wh<@complex>[@int] [cuh,cvh](n); // complex vectorial case 
 [cuh[2],cvh[2]]= [x,y]; // set interpolation of index 2.  
+
+// Array of Array 
+real [int][int] V(10); // \index{array!array}
+matrix[int] B(10);// \index{array!matrix}
+real [int,int][int] A(10); //\index{array!full matrix}
+
 \eFF
 \begin{example}
 In the following example, Poisson's equation is solved for 3 different given
@@ -5565,7 +5571,7 @@ The following example explains methods to obtain mesh information.
   Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$   \index{mesh!be}\hfilll
   Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary elmt k \hfilll
   Th.be(k).Element ;   // return the triangle containing the  boundary elmt k \index{mesh!Element}\hfilll
-  Th.be(k).whoinElement ;   // return the edge number of triangle containing \index{be!whoinElement}\index{be!\index{mesh!be!whoinElement}\hfilll
+  Th.be(k).whoinElement ;   // return the edge number of triangle containing \index{be!whoinElement}\index{mesh!be!whoinElement}\hfilll
   //the  boundary elmt k
   Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change \index{mesh!adj}\hfill
   // the value of e to the corresponding edge in the adjacent triangle
