@@ -1,5 +1,10 @@
-@  changeset:   3396:75309564db35
+@  changeset:   3397:99cef5d97e5e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Sep 16 20:22:48 2015 +0200
+|  summary:     coorect doc (typo) en add comment on array of array , array of full matrix
+|
+o  changeset:   3396:75309564db35
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Sep 15 20:00:55 2015 +0200
 |  summary:     correct acmpi.m4 in case of -isysroot /blabla compile option

@@ -915,7 +915,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
 				PRODUCT_NAME = fflib;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited) \"/usr/local/include\"";
 				ZERO_LINK = YES;
 			};
@@ -953,7 +953,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
 				PRODUCT_NAME = fflib;
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited) \"/usr/local/include\"";
 				ZERO_LINK = NO;
 			};
