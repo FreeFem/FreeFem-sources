@@ -577,7 +577,7 @@ m4_include(acmacros.m4)
 m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
-# Checking c++11 for schwarz interface of P. Jolivet ...
+# Checking c++11 for schwarz/hpddm  interface of P. Jolivet ...
 # F.Hecht:
 # do not compile all with c++11 version to much 
 # probleme to day (frev 2015) with g++ 4.8.1
@@ -1936,10 +1936,10 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+test "$enable_hpddm" != no && enable_hpddm = yes  
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_hpddm=no
 
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_schwarz=no
-
-TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
+TOOL_DISABLE(hpddm,"hpddm.$DYLIB_SUFFIX")
 
 
 # All makefiles
@@ -1966,12 +1966,14 @@ AC_OUTPUT(Makefile
     examples++-eigen/Makefile
     examples++-tutorial/Makefile
     examples++-mpi/Makefile
+    examples++-hpddm/Makefile
     examples++-load/Makefile
     examples++-chapt3/Makefile
     examples++-bug/Makefile
     examples++-other/Makefile
     examples++-3d/Makefile
     DOC/Makefile)
+
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
 AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
 AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
@@ -1979,7 +1981,7 @@ AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
-AC_MSG_NOTICE([          --  with schwarz (HPDDM) $enable_schwarz (need MPI & c++11 :  $ff_cxx11 ) ]);
+AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
