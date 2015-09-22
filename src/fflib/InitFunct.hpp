@@ -43,7 +43,12 @@ class  addingInitFunct {  public:
   }
 } ;
 
-// <<LOADINITIO>>
+// <<LOADINITIO>> In Emscripten manipulating input and output streams is not allowed (cf
+// [[file:~/fflib/Makefile::NO_STREAM_REDIRECT]])
+
+#ifdef NO_STREAM_REDIRECT
+#define LOADINITIO
+#else
 #if _WIN32
 #define LOADINITIO {					\
     streambuf * so =ffapi::cout()->rdbuf() ;		\
@@ -66,6 +71,7 @@ class  addingInitFunct {  public:
     stdin = ffapi::ffstdin();				\
 } 
 #endif // [[_WIN32]]
+#endif // [[NO_STREAM_REDIRECT]]
 
 #define LOADINITNM(EXEC,NM)					\
 								\
