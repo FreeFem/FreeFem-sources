@@ -1081,8 +1081,8 @@ then
 	    fi
 
 	    ff_blas_inc="-I$ff_mkl_root/include"
-	    dnl  scalapack, and blacs don not work with mlk and sgi
-	    if test "$ff_mkl_mpi" != "_sgimpt" ; then
+	    dnl  scalapack, and blacs do not not work with mlk and sgi
+	    if test "$ff_mkl_mpi" = "_intelmpi" ; then
 		AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
 		AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
 	    else
