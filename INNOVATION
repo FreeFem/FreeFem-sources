@@ -1,3 +1,5 @@
+version 3.40-1 
+ -  move of all hpddm code un examples  examples++-hpddm ( Own by  P. Jolivet and F. Hecht)
 version 3.40 (14 sep. 2015)
  - add new C1 Finite element HCT see examples++-load/bilabHCT.edp 
  - change permission in install example++ for read and write under windows 
