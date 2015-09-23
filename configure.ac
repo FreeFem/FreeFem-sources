@@ -1936,7 +1936,7 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
-test "$enable_hpddm" != no && enable_hpddm = yes  
+test "$enable_hpddm" != no && enable_hpddm=yes  
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_hpddm=no
 
 TOOL_DISABLE(hpddm,"hpddm.$DYLIB_SUFFIX")
