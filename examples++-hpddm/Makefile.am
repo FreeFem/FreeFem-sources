@@ -73,7 +73,7 @@ install-exec-local::
 
 freefem++.pref:Makefile
 	echo loadpath = \"../examples++-mpi/\" >freefem++.pref
-	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo loadpath += \"../examples++-load/\" >>freefem++.pref
 	echo includepath = \"../examples++-3d/\" >>freefem++.pref
 	echo includepath += \"../examples++-tutorial/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
