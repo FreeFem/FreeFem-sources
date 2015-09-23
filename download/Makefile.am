@@ -126,7 +126,7 @@ all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE)  install-other
 install-other: tag-install-other
 
 tag-install-other:
-	if test -n "$(TOOL_COMPILE_schwarz)" ; then  $(MAKE) install-hpddm; else true; fi
+	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm
@@ -134,11 +134,11 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 if test -n "$(TOOL_COMPILE_schwarz)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
+	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
-	-test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm || true
+	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
 include/hpddm-master:patch-hpddm-1
 	-if test -f ./pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
 	if `../build/ff-md5 include/hpddm-master/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true

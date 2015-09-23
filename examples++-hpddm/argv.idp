@@ -23,7 +23,7 @@ searchMethod = 1;
 /*# initialization #*/
 verbosity = getARGV("-v", 0); // the higher this value, the more verbose ⠶\tt FreeFem++⠶ is
 int s = getARGV("-split", 1); // refinement factor of each local meshes
-int global = getARGV("-global", 20); // global number of discretization points in one direction
+int global = getARGV("-global", 10); // global number of discretization points in one direction
 int solver = getARGV("-solver", 0); // 1: Additive Schwarz+CG, 2: RAS+GMRES, 3:RGENEO+GMRES, 4: in progress
 int partitioner = getARGV("-partitioner", 1); // usage of a partitioner 0: regular , 1: Metis, 2: Scotch
 int i, j;

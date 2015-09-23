@@ -1,4 +1,4 @@
-if(mpirank==0) { int i; cin >> i;}
+//if(mpirank==0) { int i; cin >> i;}
 macro K()real// EOM
 macro scalar(name)d#name// EOM
 include "macro_3d.idp"
