@@ -13,7 +13,7 @@ using namespace std;
 
   using namespace  Fem2D;
 
-Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
+Mesh * SplitMesh6(Stack stack,Fem2D::Mesh * const & pTh)
 {
   assert(pTh);
   const Mesh & Th(*pTh);  // le maillage d'origne a decoupe
@@ -128,7 +128,8 @@ Mesh * SplitMesh6(Fem2D::Mesh * const & pTh)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    m->decrement();
+   // m->decrement();
+    Add2StackOfPtr2FreeRC(stack,m);
     return m;
   }
 }
@@ -146,7 +147,7 @@ $1 */
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   if (verbosity)
     cout << " lood: Split6  " << endl;
-  Global.Add("splitmesh6","(",new OneOperator1_<Mesh *,Mesh *>(SplitMesh6));
+  Global.Add("splitmesh6","(",new OneOperator1s_<Mesh *,Mesh *>(SplitMesh6));
   // utilisation 
   // mesh Th,Th3;
   //  ... construction du maillage Th ici 

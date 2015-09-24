@@ -22,7 +22,7 @@ then
 	CHECK_COMPILE_FLAG(C++,$ff_m64,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,$ff_m64,FFLAGS)	
 #  add -fPIC on on 64 architecture 
-   if test "$ff_ok" = yes ;then    
+   if test "$ff_ok" = yes -a "$ff_fpic" != "no" ;then    
         CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS,ff_ok)
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(Fortran 77,-fPIC,FFLAGS)	
@@ -138,16 +138,16 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	ff_machine=`/usr/bin/machine`
         ff_fast="-O3"
 	if test	-n "$ff_clang" ; then
-          ff_fast='-O3 -fPIC'
+          ff_fast='-O3'
 	elif test `uname` = Darwin 
 	    then
 	    # Optimization flags: -fast option do not work because the
 	    # -malign-natural flags create wrong IO code
             if test  "$ff_gcc4" -eq 4 
 	    then
-               ff_fast='-fast -fPIC'
+               ff_fast='-fast'
             else
-	      ff_fast='-fPIC -O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math  -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
+	      ff_fast='-O3 -funroll-loops -fstrict-aliasing -fsched-interblock -falign-loops=16 -falign-jumps=16 -falign-functions=16 -falign-jumps-max-skip=15 -falign-loops-max-skip=15 -ffast-math  -mpowerpc-gpopt -force_cpusubtype_ALL -fstrict-aliasing  -mpowerpc64 '
 	    fi
 	fi        
 

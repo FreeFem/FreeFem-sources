@@ -649,7 +649,7 @@ class VertexOnGeom {  public:
   operator GeometricalEdge * () const  {return ge;}
 //  operator Real8 & () {return abscisse;}
   operator const Real8 & () const {return abscisse;}
-  int IsRequiredVertex(){ return this? (( abscisse<0 ? (gv?gv->Required():0):0 )) : 0;}
+  int IsRequiredVertex(){ return  (( abscisse<0 ? (gv?gv->Required():0):0 )) ;}
   void SetOn(){mv->on=this;mv->vint=IsVertexOnGeom;}
   friend ostream& operator <<(ostream& f, const  VertexOnGeom & vog){
     f << vog.abscisse << " " << vog.mv << " " << vog.gv << " ; ";

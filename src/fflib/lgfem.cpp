@@ -1346,8 +1346,8 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
       for (int i=1;i<atef.size();i++)
 	same &= atef[i].LeftValue() == atef[1].LeftValue();
       *ppfes = new pfes_tefk(ppTh,tef,atef.size(),s    ,nbcperiodic,periodic);
-      (**ppfes).decrement();  //07/2008 FH
-	// Add2StackOfPtr2FreeRC(s,*ppfes);  //  bug????  a verifier 06/07/2008
+      //(**ppfes).decrement();  //07/2008 FH
+      //Add2StackOfPtr2FreeRC(s,*ppfes);  //  bug????  a verifier 06/07/2008
       //  delete [] tef;
       return r;}
   } ;
@@ -1385,12 +1385,12 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a, TypeOfFE * const & tef)
 { *p=new pfes_tef(a,tef) ;
-  (**p).decrement();
+  //(**p).decrement();
   return p;}
 
 inline pfes3* MakePtr3(pfes3 * const &p,pmesh3 * const &  a, TypeOfFE3 * const & tef)
 { *p=new pfes3_tef(a,tef) ;
-  (**p).decrement();
+  //(**p).decrement();
   return p;}
 
 
@@ -1416,7 +1416,7 @@ class OP_MakePtr2 { public:
 	C tef= GetAny<C>( (*c)(s) );   
 	//  cout << "  ----------- " << endl;  
 	*p=new pfes_tef(th,tef,s,nbcperiodic,periodic) ;
-	(**p).decrement();
+	//(**p).decrement();
 	return  SetAny<R>(p);
       } 
     }; // end Op class 
@@ -1452,7 +1452,7 @@ class OP_MakePtr3 { public:
 	C tef= GetAny<C>( (*c)(s) );   
 	//  cout << "  ----------- " << endl;  
 	*p=new pfes3_tef(th,tef,s,nbcperiodic,periodic) ;
-	(**p).decrement();
+	//(**p).decrement();
 	return  SetAny<R>(p);
       } 
     }; // end Op class 
@@ -1551,12 +1551,12 @@ basicAC_F0::name_and_type  OP_MakePtr3::Op::name_param[]= {
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a){ 
       *p=new pfes_tef(a,&P1Lagrange);
-      (**p).decrement();
+      //(**p).decrement();
        return p ;}
        
 inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
        *p= new pfes_fes(a,n);
-      (**p).decrement();
+      //(**p).decrement();
        return p ;}
        
  long FindTxy(Stack s,pmesh * const &  ppTh,const double & x,const double & y)
@@ -1766,9 +1766,10 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     MeshPoint *mps=MeshPointStack(s),mp=*mps;  
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ppfe)(s));
     FEbase<R,v_fes> & fe(*pp.first);
-    const  FESpace & Vh(*fe.newVh());
-    if(!&Vh ) ExecError("Unset FEspace (Null mesh ? ) on  uh= ");
- 
+    const  FESpace * pVh(fe.newVh());
+      
+    if(!pVh ) ExecError("Unset FEspace (Null mesh ? ) on  uh= ");
+    const  FESpace & Vh= *pVh;
     KN<R> gg(Vh.MaximalNbOfDF());
     const  Mesh & Th(Vh.Th);
  //   R F[100]; // buffer 
@@ -3803,7 +3804,8 @@ AnyType Plot::operator()(Stack s) const{
   bool uaspectratio=false;
   bool pViso=false,pVarrow=false;
   int Niso=20,Narrow=20;
-    
+    double ArrowSize=-1;
+    // PPPPP
   KN<R> Viso,Varrow;
         
   bool bw=false;
@@ -3860,7 +3862,7 @@ AnyType Plot::operator()(Stack s) const{
   bool addtoplot=false, keepPV=false;
   if (nargs[18]) addtoplot= GetAny<bool>((*nargs[18])(s));
   if (nargs[19]) keepPV= GetAny<bool>((*nargs[19])(s));
-
+  if (nargs[VTK_START+8]) ArrowSize = GetAny<double>((*nargs[VTK_START+8])(s));
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007 
 	
@@ -4043,9 +4045,9 @@ AnyType Plot::operator()(Stack s) const{
 			 if (fe1) 
 			   {
 			       if (fe->Vh == fe1->Vh)           
-				   vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder);
+				   vecvalue=true,fe->Vh->Draw(*fe->x(),*fe1->x(),Varrow,coeff,cmp0,cmp1,colors,nbcolors,hsv,drawborder,ArrowSize);
 			       else
-				   cerr << " On ne sait tracer que de vecteur sur un meme interpolation " << endl;
+				   cerr << " Draw only vector field on same Finites Element , Sorry. " << endl;
 			       if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 			   }      
 			 else 
@@ -4337,71 +4339,73 @@ AnyType Convect::eval2(Stack s) const
   return r;
 }
 
-AnyType Convect::eval3(Stack s) const 
+AnyType Convect::eval3(Stack s) const
 {
-MeshPoint* mp(MeshPointStack(s));
-static MeshPoint mpp,mps;
-static R ddts;
+    MeshPoint* mp(MeshPointStack(s));
+    static MeshPoint mpp,mps;
+    static R ddts;
     randwalk(-1); // init randwalk
-R ddt = GetAny<double>((*dt)(s));
-if (ddt) 
-{
-    bool ddd=verbosity>1000;
-    MeshPoint mpc(*mp);
-    MeshPointStack(s,&mpc);
-    if(*mp==mpp && ddt == ddts) 
-	mpc=mps;
-	else 
-	  {
-	      
-	      const Mesh3 & Th3(*mp->Th3);
-	      ffassert(mp->Th3 && mp->T3);
-	      R3 PHat=mpc.PHat;
-	      	      
-	      int k=0;
-	      int j; 
-	      int it=Th3(mpc.T3);
-	      if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
-	      while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0) 
-		  if(j>3)  { 
-		      it=j-4;
-		  mpc.change(PHat,Th3[it],0);
-	          if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
-		  }
-		else
-                { 
-		  if(ddd) cout << "P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
-#ifdef DEBUG		    
-		    R3  Po=(*mpc.T3)(PHat),Pho=PHat; int ito=it;
+    R ddt = GetAny<double>((*dt)(s));
+    if (ddt)
+    {
+        bool ddd=verbosity>1000;
+        MeshPoint mpc(*mp);
+        MeshPointStack(s,&mpc);
+        if(*mp==mpp && ddt == ddts)
+            mpc=mps;
+        else
+        {
+            
+            const Mesh3 & Th3(*mp->Th3);
+            ffassert(mp->Th3 && mp->T3);
+            R3 PHat=mpc.PHat;
+            
+            int k=0;
+            int j;
+            int it=Th3(mpc.T3);
+            if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
+            while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0)
+                if(j>3)  {
+                    it=j-4;
+                    mpc.change(PHat,Th3[it],0);
+                    if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it << "ddt=" << ddt ;
+                    if(ddt==0) break; // finish ...
+                    
+                }
+                else
+                {
+                    if(ddd) cout << "P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
+#ifdef DEBUG
+                    R3  Po=(*mpc.T3)(PHat),Pho=PHat; int ito=it;
 #endif
                     int itt =  Th3.ElementAdj(it,j,PHat);
-		   if(ddd && itt>=0) cout << "  -> " << itt << " " << j  << "  : Pn " <<  Th3[itt](PHat) << " PHn " << PHat << " , " << ddt << endl;	
-		    if(itt<0) break;
-		    it=itt;
-		    mpc.change(PHat,Th3[it],0);  
-#ifdef DEBUG		    
-		    if(((Po-mpc.P).norme2() > 1e-10))
-		      {   cout << ito << " " << &Th3[ito][0] << " " << &Th3[ito][1] << " " << &Th3[ito][2] << " " << &Th3[ito][3] << " "  << endl;
-			   cout << it << " " <<  &Th3[it][0] << " " <<  &Th3[it][1] << " " <<  &Th3[it][2] << " " <<  &Th3[it][3] << endl;
-			  cout << Pho  << "o Hat " << PHat << endl;
-			  cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
-			  assert(0);
-			  
-		      }
+                    if(ddd && itt>=0) cout << "  -> " << itt << " " << j  << "  : Pn " <<  Th3[itt](PHat) << " PHn " << PHat << " , " << ddt << endl;
+                    if(itt<0) break;
+                    it=itt;
+                    mpc.change(PHat,Th3[it],0);
+#ifdef DEBUG
+                    if(((Po-mpc.P).norme2() > 1e-10))
+                    {   cout << ito << " " << &Th3[ito][0] << " " << &Th3[ito][1] << " " << &Th3[ito][2] << " " << &Th3[ito][3] << " "  << endl;
+                        cout << it << " " <<  &Th3[it][0] << " " <<  &Th3[it][1] << " " <<  &Th3[it][2] << " " <<  &Th3[it][3] << endl;
+                        cout << Pho  << "o Hat " << PHat << endl;
+                        cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
+                        assert(0);
+                        
+                    }
 #endif			  
-		   ffassert(k++<2000);
+                    ffassert(k++<2000);
                 }
-	      	      
-	      mpc.change(PHat,Th3[it],0);
-	      mpp=*mp; 
-	      mps=mpc;         
-	  }
-}
-ddts=ddt;
-AnyType r= (*ff)(s);
-MeshPointStack(s,mp);
-
-return r;
+            
+            mpc.change(PHat,Th3[it],0);
+            mpp=*mp; 
+            mps=mpc;         
+        }
+    }
+    ddts=ddt;
+    AnyType r= (*ff)(s);
+    MeshPointStack(s,mp);
+    
+    return r;
 }
 
 

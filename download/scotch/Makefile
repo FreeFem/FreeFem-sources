@@ -30,28 +30,31 @@ all-local: scotch
 
 # Downloading and compiling scotch
 # -------------------------------
-# https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
+# https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.4.tar.gz
 # http://gforge.inria.fr/frs/download.php/23391/scotch_5.1.7_esmumps.tar.gz
 # Scotch information
 DIRPKG=../pkg
 SRCDIR=scotch_$(scotch_VERSION)
 PACKAGE=$(DIRPKG)/scotch_$(scotch_VERSION_LOCAL).tar.gz
 SERVER=https://gforge.inria.fr/frs/download.php/file/34099
-#https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
+#https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.4.tar.gz
 #https://gforge.inria.fr/frs/download.php/23391
 INSTALL=../..
-scotch_VERSION=6.0.3
-scotch_VERSION_LOCAL=6.0.3
+scotch_VERSION=6.0.4
+scotch_VERSION_LOCAL=6.0.4
 #  trick to no in MPI on NOT .. 
-TESTMPI= test -n "$(CCP)"
+NOTESTMPI= test -z "$(CCP)"
 scotch: FAIRE
 
 $(SRCDIR)/AFAIRE:
 	$(MAKE) install 
+	$(NOTESTMPI) || $(MAKE) install-mpi
 
 FAIRE: $(SRCDIR)/FAIT
 	$(MAKE)  WHERE
+	$(NOTESTMPI) || $(MAKE) WHERE-mpi
 	touch FAIRE
+
 Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 	../../config.status  --file="Makefile.inc:Makefile-scotch.inc"
 
@@ -60,13 +63,17 @@ Makefile.inc: ../../config.status Makefile-scotch.inc Makefile
 $(SRCDIR)/FAIT: $(SRCDIR) Makefile.inc
 	cp Makefile.inc $(SRCDIR)/src
 	cd $(SRCDIR)/src && $(MAKE) scotch esmumps
-#
-#	FFCS - 16/1/13 - this crashes when run in parallel
-#       FH: compile pt only if mpi is here 
-	if $(TESTMPI) ; then  cd $(SRCDIR)/src && $(MAKE) -j1 ptscotch ptesmumps ; fi
 	touch $(SRCDIR)/FAIT
+$(SRCDIR)/FAIT-mpi: $(SRCDIR) Makefile.inc
+	cp Makefile.inc $(SRCDIR)/src
+	cd $(SRCDIR)/src && $(MAKE) -j1 ptscotch ptesmumps 
+	touch $(SRCDIR)/FAIT-mpi
 
 install:$(SRCDIR)/FAIT
+	mkdir -p $(SRCDIR)/$(INSTALL)/include/scotch
+	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
+	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
+install-mpi:$(SRCDIR)/FAIT-mpi
 	mkdir -p $(SRCDIR)/$(INSTALL)/include/scotch
 	cp $(SRCDIR)/include/*.h $(SRCDIR)/$(INSTALL)/include/scotch/
 	cp $(SRCDIR)/lib/*.a $(SRCDIR)/$(INSTALL)/lib/
@@ -75,16 +82,22 @@ install:$(SRCDIR)/FAIT
 WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotch LD -L@DIR@/lib  -lesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotchparmetis  LD -L@DIR@/lib  -lesmumps -lptscotchparmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	-$(TESTMPI) &&echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch LD -L@DIR@/lib  -lesmumps -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+WHERE-mpi:$(SRCDIR)/FAIT-mpi
+	$(MAKE) install-mpi
+	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo ptscotch LD -L@DIR@/lib  -lesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo ptscotchparmetis  LD -L@DIR@/lib  -lesmumps -lptscotchparmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+	echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch LD -L@DIR@/lib  -lesmumps -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
-	patch -p1 <scotch_6.0.3.patch
+#	patch -p1 <scotch_6.0.4.patch
 	#cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
 	#cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)

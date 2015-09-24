@@ -735,7 +735,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
       nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
   if (!f || !*f)
    {
-   if ( f)  { delete f; f=0; }
+   if ( f)  { delete f; nf=f=0; }
    for (ICffincludedir k=lex->ffincludedir.begin();
         k!=lex->ffincludedir.end();
         ++k)
@@ -748,7 +748,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
         filename = new string(dif_ff);
         break;
       }
-      delete f; f=0;
+      delete f; nf=f=0;
      }     
    } 
    } 
@@ -772,6 +772,8 @@ void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int ma
   
   if (!f || !*f) {
     lex->cout << " Error readin string  :" <<s<< endl;
+    if(f) delete f;
+    nf = f =0;
     lgerror("lex: Error readin macro ");};
 }
 
@@ -779,7 +781,7 @@ void mylex::xxxx::close()
 { 
   if( nf)  delete nf;
   if (filename && (macroarg==0) ) delete filename;
-  
+  f=nf=0;
 }
 void mylex::input(const char *  filename) 
 {

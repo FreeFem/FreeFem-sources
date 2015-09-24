@@ -122,8 +122,10 @@ download('mshmet','http://www.ann.jussieu.fr/~frey/ftp/archives/mshmet.2012.04.2
 
 #download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
 #	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz','959e9981b606cd574f713b8422ef0d9f');
-download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.0.tar.gz',
-	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.0.tar.gz','3c6aeab847e9d775ca160194a9db2b75');
+#download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.0.tar.gz',
+#	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.0.tar.gz','3c6aeab847e9d775ca160194a9db2b75');
+download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.1.tar.gz',
+	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.1.tar.gz','b477573fdcc87babe861f62316833db0');
 
 download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
 	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz','9c60c6380a10c6d2a06895f0e8756d4f');
@@ -142,8 +144,11 @@ download('ScaLAPACK','http://www.netlib.org/scalapack/scalapack-2.0.2.tgz',
 
 # ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
 #https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
-download('Scotch','https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz',
-	 'https://gforge.inria.fr/projects/scotch/','scotch_6.0.3.tar.gz','10b0cc0f184de2de99859eafaca83cfc',
+#download('Scotch','https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz',
+#	 'https://gforge.inria.fr/projects/scotch/','scotch_6.0.3.tar.gz','10b0cc0f184de2de99859eafaca83cfc',
+#	 'BAD_CERT');
+download('Scotch','https://gforge.inria.fr/frs/download.php/file/34618/scotch_6.0.4.tar.gz',
+	 'https://gforge.inria.fr/projects/scotch/','scotch_6.0.4.tar.gz','d58b825eb95e1db77efe8c6ff42d329f',
 	 'BAD_CERT');
 
 # download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.3.1.tar.gz',

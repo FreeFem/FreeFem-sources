@@ -49,14 +49,14 @@ assemble(Mat, rhs, Wh, Th, ThBorder, Varf)
 dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
 
 if(mpisize > 1 && solver == 3) {
-    int[int] parm(1);
-    parm(0) = getARGV("-nu", 20);
+   // int[int] parm(1);
+   // parm(0) = getARGV("-nu", 20);
     macro EVproblem(varfName, meshName, PhName)
         varf varfName(u, v) = intN(meshName)((grad(u)' * grad(v))) + on(1, u = 0.0);// EOM
     EVproblem(vPbNoPen, Th, Ph)
     matrix<real> noPen = vPbNoPen(Wh, Wh, solver = CG);
     if(solver == 3) // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
-        attachCoarseOperator(mpiCommWorld, A, A = noPen, parameters = parm);
+        attachCoarseOperator(mpiCommWorld, A, A = noPen/*, parameters = parm*/);
 }
 
 Wh<real> def(u); // this will be the solution

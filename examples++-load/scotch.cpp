@@ -24,6 +24,8 @@
 // P. Jolivet   april 2012
 // ----------------------------
 #ifndef _ALL_IN_ONE_
+// add for missing  def of int32_t 
+#include <stdint.h>
 #include "ff++.hpp"
 #include <vector>
 #include <cmath>
