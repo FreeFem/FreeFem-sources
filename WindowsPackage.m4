@@ -1,6 +1,8 @@
 ; Creating a FreeFem++ package for Microsoft Windows with Inno Setup
 ; $Id$
-
+;;  m4 def
+;; ifelse(SIZEOFPTR,64, define(`SUFF64',`-64' ),define(`SUFF64',`' ))
+;; -- end def m4  
 ; The Inno Setup configuration file WindowsPackage.iss is built from
 ; WindowsPackage.m4 with the command "make WindowsPackage.iss".
 
@@ -8,15 +10,28 @@
 ; suppress -cs version no fltk to day , wait the next version
 ;  FH version 3.0-1
 [Setup]
-AppName=FreeFem++-VERSION
-AppVerName=FreeFem++ version VERSION
-DefaultDirName={pf}\FreeFem++
-DefaultGroupName=FreeFem++
+AppName=FreeFem++-win`'SIZEOFPTR-VERSION
+AppVerName=FreeFem++ version VERSION (win SIZEOFPTR bits)
+DefaultDirName={pf}\FreeFem++`'SUFF64
+DefaultGroupName=FreeFem++`'SUFF64
+
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
-OutputBaseFilename=FreeFem++-VERSION
+OutputBaseFilename=FreeFem++-VERSION-win`'SIZEOFPTR
 ChangesEnvironment=yes
+
+[Dirs]
+Name: "{app}"; 
+; set writing permissions for  examples with write and  read files 
+Name: "{app}\examples++"; Permissions: everyone-full
+Name: "{app}\examples++-load"; Permissions: everyone-full
+Name: "{app}\examples++-tutorial"; Permissions: everyone-full
+Name: "{app}\examples++-3d"; Permissions: everyone-full
+Name: "{app}\examples++-chap3"; Permissions: everyone-full
+Name: "{app}\examples++-eigen"; Permissions: everyone-full
+ifelse(len(MPIPROG),0,; ,)Name: "{app}\examples++-mpi"; Permissions: everyone-full
+
 
 [Files]
 ; README 
@@ -41,7 +56,7 @@ Source: "src\bin-win32\launchff++.exe"; DestDir: "{app}"
 ;Source: "src\ide\FreeFem++-cs.exe"; DestDir: "{app}"
 Source: "src\nw\ffglut.exe"; DestDir: "{app}"
 Source: "src\medit\ffmedit.exe"; DestDir: "{app}"
-Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
+;Source: "src\bin-win32\FreeFem++-nw.exe"; DestDir: "{app}"
 Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
 ; Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
@@ -51,6 +66,7 @@ Source: "examples++-load\ff-c++"; DestDir: "{app}"
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
 
+ifelse(DHOSTOS,mingw32,``
 Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
 ; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
 Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
@@ -59,6 +75,10 @@ Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
 Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
 Source: "C:\MinGW\bin\libgfortran-3.dll"; DestDir: "{app}"
 Source: "C:\MinGW\bin\libquadmath-0.dll"; DestDir: "{app}"
+'')
+ifelse(DHOSTOS,mingw64,``
+; FH. I have put all dll in bin-win32 dir ....
+'')
 
 
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server

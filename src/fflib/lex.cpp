@@ -774,7 +774,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
   // [[file:lex.hpp::ffincludedir]]
   if (!f || !*f)
     {
-      if ( f)  { delete f; f=0; }
+   if ( f)  { delete f; nf=f=0; }
 
       // for every potential path element
       for (ICffincludedir k=lex->ffincludedir.begin();
@@ -791,7 +791,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 	      filename = new string(dif_ff);
 	      break;
 	    }
-	    delete f; f=0;
+      delete f; nf=f=0;
 	  }     
 	} 
     } 
@@ -819,6 +819,8 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
   
   if (!f || !*f) {
     lex->cout << " Error readin string  :" <<s<< endl;
+    if(f) delete f;
+    nf = f =0;
     lgerror("lex: Error readin macro ");
   }
 }
@@ -830,6 +832,7 @@ void mylex::xxxx::close()
   if(nf) delete nf;
 #endif
   if(filename && (macroarg==0)) delete filename; // [[file:lex.hpp::filename]]
+  f=nf=0;
 }
 
 // <<mylex_input_filename>>

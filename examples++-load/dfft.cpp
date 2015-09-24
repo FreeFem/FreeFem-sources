@@ -208,7 +208,7 @@ AnyType Mapkk::operator()(Stack s) const
     double ki = 1./n ;
     double kj = 1./m ;
     double ki0=0., kj0=0;
-    if(verbosity>10) cout << << " map: " <<  n << " " << m << " " << nn << " == " << n*m << endl;
+    if(verbosity>10) cout <<  " map: " <<  n << " " << m << " " << nn << " == " << n*m << endl;
     ffassert( m* n  == nn );
     long n2= (n+1)/2, m2=(m+1)/2;
     for(long j=0,kk=0;j < m; ++j)

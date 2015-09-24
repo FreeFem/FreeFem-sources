@@ -6,7 +6,7 @@
 # SERVICEMENU : FreeFem++     			# Name of Service menu item
 #
 dir=`dirname $0`;
-ff="/usr/local/bin/FreeFem++"
+ff="@prefix@/bin//FreeFem++"
 fa="-glut ffglut  "
 q="'"
 end="exit;"

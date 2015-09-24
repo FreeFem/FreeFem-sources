@@ -57,6 +57,16 @@
 #include "mpi.h"
 #endif
 #endif
+#include <dirent.h>
+#include <strings.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+extern long verbosity ;
+
 
 // FFCS-specific implementations for the FF API
 // --------------------------------------------

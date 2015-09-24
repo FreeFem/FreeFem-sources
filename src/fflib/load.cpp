@@ -110,7 +110,7 @@ bool load(string ss)
 	    ret= handle !=0;
 	    if (  ret ) 
 	      {
-		if(verbosity && (mpirank ==0))
+		if(verbosity > 1 && (mpirank ==0))
 		  cout << " (load: dlopen " << s << " " << handle << ") ";
 		callInitsFunct() ;   // [[file:InitFunct.cpp::callInitsFunct]]
 		return handle;
