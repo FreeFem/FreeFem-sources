@@ -40,10 +40,11 @@ then
 	opts=--no-check-certificate
     fi
 
-    # use no-verbose to avoid mixing several wget outputs together when called concurrently in
-    # [[file:../download/getall]]
+    # [[man:wget]] we could use no-verbose to avoid mixing several wget outputs together when called concurrently in
+    # [[file:../download/getall]], but then nothing moves while the download goes on, and the user may think that it's
+    # stuck.
 
-    wget "$1" --timeout=30 --tries=2 --output-document="$2" --no-verbose $opts
+    wget "$1" --timeout=30 --tries=2 --output-document="$2" $opts
     ret=$?
 elif test -x /usr/bin/curl
 then

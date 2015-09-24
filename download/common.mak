@@ -28,9 +28,9 @@
 
 # <<download>>
 
-# PKGCOMMON_PACKTITLE correspond to package names in [[file:getall]]
+# PKGCOMMON_PACKTITLE corresponds to package names in [[file:getall]]
 download::
-	../getall -o $(PKGCOMMON_PACKTITLE)
+	../getall -o $(PKGCOMMON_PACKTITLE) -a
 $(PKGCOMMON_PACKAGES):download
 
 compilepkg::download
