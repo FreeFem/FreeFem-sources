@@ -29,9 +29,9 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP=  \
-additional.idp			macro.idp			schur-skel.idp \
+additional.idp			macro.idp		 \
 argv.idp			macro_3d.idp			schwarz-additional_macro.idp \
-getARGV.idp			schur-additional_macro.idp	schwarz-skel.idp 
+getARGV.idp			schwarz-skel.idp 
 
 EXTRA_DIST= $(TESTS) $(LIST_IDP) ./skeleton.cpp ./schwarz.hpp ./substructuring.cpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
 
@@ -48,7 +48,7 @@ if FFCS_MPIOK
 
 all-local:$(LIST_COMPILE)
 	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
-	echo "finish compile load mpi solver !"
+	echo "finish compile load hpddm  solver !"
 else
 all-local:
 endif
