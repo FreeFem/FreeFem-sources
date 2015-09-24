@@ -5,7 +5,7 @@
 //ff-c++-cpp-dep:
 // mumps est avec petsc ..
 #define SCHWARZ
-#define BDD
+//#define BDD
 
 #ifdef WITH_mumps
 #define MUMPSSUB
@@ -97,7 +97,7 @@ class Pair {
 #include "schwarz.hpp"
 #endif
 #if defined(BDD) || defined(FETI)
-#include "substructuring.cpp"
+//#include "substructuring.cpp"
 #endif
 //#include "scotch.cpp"
 #include "removeDOF.cpp"
