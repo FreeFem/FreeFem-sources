@@ -287,6 +287,7 @@ void ff_atend(AtEnd f)
 %% 
 
 start:   input ENDOFFILE {
+                        if(  ffapi::ff_justcompile) exit(0);
     // clean FH  mach 2014
 		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
 			//FFCS: divert stream to FFCS
@@ -294,7 +295,8 @@ start:   input ENDOFFILE {
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         $1+=currentblock->close(currentblock);
                         if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
-                        size_t lg0,lg1;                       
+                        size_t lg0,lg1;
+                        ffapi::ifchtmpdir(); // change  to tmp after compile FH sep 2015 ...
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
                         debugstack= new vector<pair<const E_Routine*,int> >;
                         size_t stu0=storageused(); // get Storage usage

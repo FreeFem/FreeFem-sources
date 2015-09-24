@@ -40,9 +40,9 @@ EXTRA_DIST= \
 ./mshmet/mshmetlib.c \
 ./mshmet/mshmetlib.h \
 ./mumps/Makefile \
-./mumps-seq/Makefile-mumps-5.0.0.inc \
+./mumps-seq/Makefile-mumps-5.0.1.inc \
 ./mumps-seq/Makefile \
-./mumps/Makefile-mumps-5.0.0.inc \
+./mumps/Makefile-mumps-5.0.1.inc \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/makefile \
 ./parmetis/parmetis-4.0.3.patch \
@@ -82,7 +82,7 @@ EXTRA_DIST= \
 ipopt/Makefile	\
 ipopt/Makefile.inc.in \
 ipopt/patch-IpBlas  \
-getall patch-hpddm-1
+getall patch-hpddm-1 patch-hpddm-2
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
@@ -126,7 +126,7 @@ all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE)  install-other
 install-other: tag-install-other
 
 tag-install-other:
-	if test -n "$(TOOL_COMPILE_schwarz)" ; then  $(MAKE) install-hpddm; else true; fi
+	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm
@@ -134,14 +134,15 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm:
-	 if test -n "$(TOOL_COMPILE_schwarz)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
+	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
-	-test -n "$(TOOL_COMPILE_schwarz)" && $(MAKE) install-hpddm || true
+	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
 include/hpddm-master:patch-hpddm-1
 	-if test -f ./pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
 	if `../build/ff-md5 include/hpddm-master/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true
+	if `../build/ff-md5 include/hpddm-master/src/ScaLAPACK.hpp dd38a3ff2d0aaa7d93b76ed19d3224ae` ; then patch -p1 <patch-hpddm-2; fi;true
 
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \

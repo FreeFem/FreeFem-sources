@@ -11,7 +11,7 @@
  *         change 32 in 4  for the size of float . 
  */
 
-using namespace std;
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -20,7 +20,7 @@ using namespace std;
 #include <fstream>
 #include "pcm.hpp"
 #include <iostream>
-
+using namespace std;
 #define BINARY_IN  ios::binary | ios::in
 #define BINARY_OUT ios::binary | ios::out
 #define TOKEN_SIZE 100

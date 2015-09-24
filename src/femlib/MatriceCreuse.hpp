@@ -766,7 +766,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 //  ConjuguedGradient2 affine A*x = 0 est toujours appele avec les condition aux limites 
 //  -------------
     
-   throwassert(&x  && &A && &C);
+  // throwassert(&x  && &A && &C);
    typedef KN<R> Rn;
    int n=x.N();
   // if (verbosity>99) kprint=1;

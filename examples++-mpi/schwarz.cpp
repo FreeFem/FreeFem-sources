@@ -1,5 +1,4 @@
 #ifndef _ALL_IN_ONE_
-#include <math.h>
 //ff-c++-LIBRARY-dep: cxx11   hpddm [petsc|mumps parmetis  ptscotch scotch] umfpack amd  scalapack blas [mkl]   mpifc  fc mpi  pthread
 //ff-c++-cpp-dep:
 // mumps est avec petsc ..
@@ -27,7 +26,7 @@
 #endif
 
 
-
+#include <math.h>
 #include <mpi.h>
 #include <ff++.hpp>
 #include "AFunction_ext.hpp"
@@ -71,6 +70,8 @@ class Pair {
 #endif
 #endif
 
+extern KN<String>* pkarg;
+
 namespace Schwarz {
 template<class Type, class K>
 class initDDM_Op : public E_F0mps {
@@ -105,6 +106,11 @@ class initDDM : public OneOperator {
 };
 template<class Type, class K>
 AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
+    const char** argv = new const char*[pkarg->n];
+    for(int i = 0; i < pkarg->n; ++i)
+        argv[i] = (*((*pkarg)[i].getap()))->data();
+    HPDDM::Option::get()->parse(pkarg->n, argv, mpirank == 0);
+    delete [] argv;
     Type* ptA = GetAny<Type*>((*A)(stack));
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
@@ -139,7 +145,7 @@ class attachCoarseOperator_Op : public E_F0mps {
     public:
         Expression comm;
         Expression A;
-        static const int n_name_param = 8;
+        static const int n_name_param = 7;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         attachCoarseOperator_Op(const basicAC_F0& args, Expression param1, Expression param2) : comm(param1), A(param2) {
@@ -154,7 +160,6 @@ basicAC_F0::name_and_type attachCoarseOperator_Op<Type, K>::name_param[] = {
     {"B", &typeid(Matrice_Creuse<K>*)},
     {"pattern", &typeid(Matrice_Creuse<K>*)},
     {"threshold", &typeid(typename HPDDM::Wrapper<K>::ul_type)},
-    {"parameters", &typeid(KN<long>*)},
     {"timing", &typeid(KN<double>*)},
     {"ret", &typeid(Pair<K>*)},
     {"solver", &typeid(long)}
@@ -174,44 +179,16 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     MPI_Comm comm = *(MPI_Comm*)ptComm;
     Type* ptA = GetAny<Type*>((*A)(stack));
     MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
-    KN<long>* ptParm = nargs[4] ? GetAny<KN<long>*>((*nargs[4])(stack)) : 0;
-    if(ptParm && ptParm->n != 5) {
-        if(ptParm->n == 1) {
-            ptParm->resize(5);
-            (*ptParm)[HPDDM::P] = 1;
-        }
-        else if(ptParm->n == 2)
-            ptParm->resize(5);
-        else
-            cout << "Input array must be of size 1, 2, or 5 !" << endl;
-        if(ptParm->n == 5) {
-            (*ptParm)[HPDDM::TOPOLOGY] = 0;
-            (*ptParm)[HPDDM::DISTRIBUTION] = HPDDM::DMatrix::NON_DISTRIBUTED;
-            (*ptParm)[HPDDM::STRATEGY] = 3;
-        }
-    }
-    KN<double>* timing = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
-    Pair<K>* pair = nargs[6] ? GetAny<Pair<K>*>((*nargs[6])(stack)) : 0;
-    typename HPDDM::Wrapper<K>::ul_type threshold = nargs[3] ? GetAny<typename HPDDM::Wrapper<K>::ul_type>((*nargs[3])(stack)) : 0;
-    std::vector<unsigned short> parm(5);
-    if(ptParm) {
-        parm[HPDDM::P]            = (*ptParm)[HPDDM::P];
-        parm[HPDDM::TOPOLOGY]     = (*ptParm)[HPDDM::TOPOLOGY];
-        parm[HPDDM::DISTRIBUTION] = (*ptParm)[HPDDM::DISTRIBUTION];
-        parm[HPDDM::STRATEGY]     = (*ptParm)[HPDDM::STRATEGY];
-    }
-    else {
-        parm[HPDDM::P]            = 1;
-        parm[HPDDM::TOPOLOGY]     = 0;
-        parm[HPDDM::DISTRIBUTION] = HPDDM::DMatrix::NON_DISTRIBUTED;
-        parm[HPDDM::STRATEGY]     = 3;
-    }
-    unsigned short nu = ptParm ? (*ptParm)[HPDDM::NU] : 20;
-    nu = std::max(nu, static_cast<unsigned short>(1));
+    KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
+    Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
+    HPDDM::Option& opt = *HPDDM::Option::get();
+    unsigned short nu = opt["geneo_nu"];
+    typename HPDDM::Wrapper<K>::ul_type threshold = opt.val("geneo_threshold", 0.0);
     std::pair<MPI_Request, const K*>* ret = nullptr;
     double t;
-    if(mA || nargs[7]) {
-        long nbSolver = nargs[7] ? GetAny<long>((*nargs[7])(stack)) : 0;
+    if(mA || nargs[6]) {
+        nu = std::max(nu, static_cast<unsigned short>(1));
+        long nbSolver = nargs[6] ? GetAny<long>((*nargs[6])(stack)) : 0;
         std::vector<const HPDDM::MatrixCSR<K>*> vecAIJ;
         if(mA) {
             HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
@@ -325,31 +302,29 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
         }
         if(timing)
             (*timing)[3] = MPI_Wtime() - t;
-        parm[HPDDM::NU]           = nu;
+        opt["geneo_nu"] = nu;
         MPI_Barrier(MPI_COMM_WORLD);
         if(timing)
             t = MPI_Wtime();
         if(ptA->exclusion(comm)) {
             if(pair)
-                pair->p = ptA->template buildTwo<1>(comm, parm);
+                pair->p = ptA->template buildTwo<1>(comm);
             else
-                ret = ptA->template buildTwo<1>(comm, parm);
+                ret = ptA->template buildTwo<1>(comm);
         }
         else {
             if(pair)
-                pair->p = ptA->template buildTwo<0>(comm, parm);
+                pair->p = ptA->template buildTwo<0>(comm);
             else
-                ret = ptA->template buildTwo<0>(comm, parm);
+                ret = ptA->template buildTwo<0>(comm);
         }
         if(timing)
             (*timing)[4] = MPI_Wtime() - t;
     }
     else {
         MPI_Barrier(MPI_COMM_WORLD);
-        if(!threshold) {
-            parm[HPDDM::NU]       = nu;
-            ret = ptA->template buildTwo<2>(comm, parm);
-        }
+        if(!threshold)
+            ret = ptA->template buildTwo<2>(comm);
     }
     if(ret)
         delete ret;
@@ -362,7 +337,7 @@ class solveDDM_Op : public E_F0mps {
         Expression A;
         Expression x;
         Expression rhs;
-        static const int n_name_param = 9;
+        static const int n_name_param = 8;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         solveDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), x(param2), rhs(param3) {
@@ -378,7 +353,6 @@ basicAC_F0::name_and_type solveDDM_Op<Type, K>::name_param[] = {
     {"iter", &typeid(long)},
     {"timing", &typeid(KN<double>*)},
     {"solver", &typeid(long)},
-    {"pipelined", &typeid(long)},
     {"excluded", &typeid(bool)},
     {"ret", &typeid(Pair<K>*)},
     {"O", &typeid(Matrice_Creuse<K>*)}
@@ -399,22 +373,42 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     if(ptX->n != ptRHS->n || ptRHS->n < ptA->getDof())
         return 0L;
-    typename HPDDM::Wrapper<K>::ul_type eps = nargs[0] ? GetAny<typename HPDDM::Wrapper<K>::ul_type>((*nargs[0])(stack)) : 1e-8;
-    unsigned short dim = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 50;
-    unsigned short iter = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : 50;
+    HPDDM::Option& opt = *HPDDM::Option::get();
+    typename HPDDM::Wrapper<K>::ul_type eps = nargs[0] ? GetAny<typename HPDDM::Wrapper<K>::ul_type>((*nargs[0])(stack)) : -1.0;
+    if(std::abs(eps + 1.0) > 1.0e-6)
+        opt["tol"] = eps;
+    int dim = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : -1;
+    if(dim != -1)
+        opt["gmres_restart"] = dim;
+    int iter = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : -1;
+    if(iter != -1)
+        opt["max_it"] = iter;
     KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
     long solver = nargs[4] ? GetAny<long>((*nargs[4])(stack)) : 0;
-    Pair<K>* pair = nargs[7] ? GetAny<Pair<K>*>((*nargs[7])(stack)) : 0;
+    if(std::abs(solver) == 1)
+        opt["schwarz_method"] = 3;
+    else if(std::abs(solver) == 8) {
+        opt["schwarz_method"] = 2;
+        if(!opt.set("schwarz_coarse_correction"))
+            opt["schwarz_coarse_correction"] = 0;
+    }
+    else if(std::abs(solver) == 6) {
+        opt["schwarz_method"] = 1;
+        if(!opt.set("schwarz_coarse_correction"))
+            opt["schwarz_coarse_correction"] = 0;
+    }
+    else if(std::abs(solver) == 3 && !opt.set("schwarz_coarse_correction"))
+        opt["schwarz_coarse_correction"] = 0;
+    Pair<K>* pair = nargs[6] ? GetAny<Pair<K>*>((*nargs[6])(stack)) : 0;
     if(solver >= 0 && pair)
         if(pair->p) {
             int flag;
             MPI_Test(&(pair->p->first), &flag, MPI_STATUS_IGNORE);
         }
-    MatriceMorse<K>* mA = nargs[8] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[8])(stack))->A)) : 0;
+    MatriceMorse<K>* mA = nargs[7] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[7])(stack))->A)) : 0;
     double timer = MPI_Wtime();
-    if(solver >= 0) {
-        ptA->setType(solver == 1 || solver == 6 || solver == 11 || solver == 36);
-        if(mpisize > 1 && (mA && (solver == 6 || solver == 8 || solver == 36))) {
+    if(solver >= 0 && solver != 36) {
+        if(mpisize > 1 && (mA && (solver == 6 || solver == 8))) {
             HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
             ptA->callNumfact(&dA);
         }
@@ -422,8 +416,15 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             ptA->callNumfact(nullptr);
         if(timing) (*timing)[1] = MPI_Wtime() - timer;
     }
-    long pipelined = nargs[5] ? GetAny<long>((*nargs[5])(stack)) : 0;
-    bool excluded = nargs[6] ? GetAny<bool>((*nargs[6])(stack)) : false;
+    else if(solver == 36) {
+        if(mpisize > 1) {
+            HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+            ptA->callNumfact(&dA);
+        }
+    }
+    bool excluded = nargs[5] ? GetAny<bool>((*nargs[5])(stack)) : false;
+    if(excluded)
+        opt["master_exclude"];
     if(pair)
         if(pair->p) {
             if(timing)
@@ -438,38 +439,24 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     MPI_Barrier(MPI_COMM_WORLD);
     if(solver >= 0 && !excluded && pair && pair->p && timing && mpisize > 1)
         (*timing)[timing->n - 1] += MPI_Wtime() - timer;
-    timer = MPI_Wtime();
     unsigned short mu = ptX->n / ptA->getDof();
     MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, ptA->getCommunicator());
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
+    if(rank != 0 || excluded)
+        opt.remove("verbosity");
+    timer = MPI_Wtime();
     if(!excluded) {
-        if(std::abs(solver) == 1)
-            HPDDM::IterativeMethod::CG(*ptA, (K*)*ptX, (K*)*ptRHS, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0);
+        if(opt["krylov_method"] == 1)
+            HPDDM::IterativeMethod::CG(*ptA, (K*)*ptX, (K*)*ptRHS, MPI_COMM_WORLD);
         else
-            switch(pipelined) {
-#if (OMPI_MAJOR_VERSION > 1 || (OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 7)) || MPICH_NUMVERSION >= 30000000
-                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED, 'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
-#endif
-#if defined(DPASTIX) || defined(DMKL_PARDISO)
-                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED, 'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
-#endif
-                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL, 'L'>(*ptA, (K*)*ptX, (K*)*ptRHS, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
-            }
+            HPDDM::IterativeMethod::GMRES(*ptA, (K*)*ptX, (K*)*ptRHS, mu, MPI_COMM_WORLD);
     }
     else {
-        if(std::abs(solver) == 1)
-            HPDDM::IterativeMethod::CG(*ptA, (K*)nullptr, (K*)nullptr, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0);
+        if(opt["krylov_method"] == 1)
+            HPDDM::IterativeMethod::CG(*ptA, (K*)nullptr, (K*)nullptr, MPI_COMM_WORLD);
         else
-            switch(pipelined) {
-#if (OMPI_MAJOR_VERSION > 1 || (OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION >= 7)) || MPICH_NUMVERSION >= 30000000
-                case 1:  HPDDM::IterativeMethod::GMRES<HPDDM::PIPELINED, 'L', true>(*ptA, (K*)nullptr, (K*)nullptr, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
-#endif
-#if defined(DPASTIX) || defined(DMKL_PARDISO)
-                case 2:  HPDDM::IterativeMethod::GMRES<HPDDM::FUSED, 'L', true>(*ptA, (K*)nullptr, (K*)nullptr, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
-#endif
-                default: HPDDM::IterativeMethod::GMRES<HPDDM::CLASSICAL, 'L', true>(*ptA, (K*)nullptr, (K*)nullptr, mu, dim, iter, eps, MPI_COMM_WORLD, rank == 0 && !excluded ? 1 : 0); break;
-            }
+            HPDDM::IterativeMethod::GMRES<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, MPI_COMM_WORLD);
     }
     timer = MPI_Wtime() - timer;
     if(!excluded) {
@@ -591,13 +578,15 @@ KN<K>* GlobalMV(KN<K>* Ax, GMV<Type*, KN<K>*> A) {
 #ifdef DEBUG_SCHWARZ
 template<class Type>
 long InitDDM(Type* const& A) {
-    A->setType(true);
     A->callNumfact();
     return 0;
 }
 template<class Type, class K>
 long ApplyAS(Type* const& A, KN<K>* const& in, KN<K>* const& out) {
-    A->apply(*in, *out);
+    K* tmp = new K[in->n];
+    std::copy_n((K*)*in, in->n, tmp);
+    A->apply(tmp, *out);
+    delete [] tmp;
     return 0;
 }
 #endif
@@ -624,7 +613,7 @@ void add() {
 
 #ifndef _ALL_IN_ONE_
 static void Init_Schwarz() {
-#include "schwarz-init.hpp"
+#include "init.hpp"
 }
 
 LOADFUNC(Init_Schwarz)

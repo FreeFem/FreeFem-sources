@@ -1,3 +1,20 @@
+version 3.40-1 
+ -  move of all hpddm code un examples  examples++-hpddm ( Own by  P. Jolivet and F. Hecht)
+version 3.40 (14 sep. 2015)
+ - add new C1 Finite element HCT see examples++-load/bilabHCT.edp 
+ - change permission in install example++ for read and write under windows 
+ - try to build a windows 64 version under msys64 systeme ...
+ - Add use ArrowSize= of size
+version 3.39
+ - remove compile flags -fPIC under windows 
+ - pas to version MUMPS-5.0.1
+ - correct some problem of memory leak, now the decrement methode in RefCount call delete
+    and all decrement are change in   Add2StackOfPtr2FreeRC(stack,m); (more safe). 
+    so the previous plugin become incompatible. 
+version 3.38-2
+ - add hppdm explain in the doc. 
+ - add function cube to simplity the construction of mesh of cube like square in 2d 
+      see cube.edp example. 
  - add function ClosePoint in ClosePoint plugin
  - add += example of varf   
  - correct mortar example repalce P0Egde in P0 => better result  

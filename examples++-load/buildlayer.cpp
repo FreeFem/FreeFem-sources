@@ -225,8 +225,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 	  Th3->Buildbnormalv();  
 	  Th3->BuildjElementConteningVertex();
 	  Th3->BuildGTree();
-	  Th3->decrement();  
-  
+	  //Th3->decrement();
+       Add2StackOfPtr2FreeRC(stack,m);
   	*mp=mps;
   	return Th3;
     }
@@ -264,8 +264,8 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
       T_Th3->Buildbnormalv();  
       T_Th3->BuildjElementConteningVertex();
       T_Th3->BuildGTree();
-      T_Th3->decrement();  
-  
+      //T_Th3->decrement();
+      Add2StackOfPtr2FreeRC(stack,T_Th3);
       *mp=mps;
       return T_Th3;
     }

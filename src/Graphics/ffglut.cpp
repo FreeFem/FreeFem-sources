@@ -804,6 +804,7 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
   win->getcadre(xmin,xmax,ymin,ymax);
   double d= Max(ymax-ymin,xmax-xmin);
   R kk = 4*win->hpixel;
+  if(plot.ArrowSize>0) kk=win->hpixel*max(win->width*plot.ArrowSize/100.,1.);
   R cc = win->hpixel*40;
   
   int klist=0;
@@ -1687,6 +1688,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   psfile=0;
   cm=0;
   grey=0;
+  ArrowSize=-1;
   if(old) {
     grey=old->grey;
   }
@@ -1774,7 +1776,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
                   READ_VTK_PARAM(5,bool); // ShowMeshes
                   READ_VTK_PARAM(6,long); // ColorScheme
                   READ_VTK_PARAM(7,long); // ArrowShape
-                  READ_VTK_PARAM(8,double); // ArrowSize
+           //       READ_VTK_PARAM(8,double); // ArrowSize
+         case 28: fin >= ArrowSize; break;
                   READ_VTK_PARAM(9,long); // ComplexDisplay
                   READ_VTK_PARAM(10,bool); // LabelColors
                   READ_VTK_PARAM(11,bool); // ShowAxes

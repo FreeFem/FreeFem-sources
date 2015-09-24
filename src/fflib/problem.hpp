@@ -1048,7 +1048,7 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   FESpace & Vh = *pVh ;
   double tgv= 1e30;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
-  long NbOfDF =  &Vh ? Vh.NbOfDF: 0;
+  long NbOfDF =  pVh ? Vh.NbOfDF: 0;
   KN<R> *px=0;
   if(isptr)
     {
@@ -1067,7 +1067,7 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   if(zero && NbOfDF )
    xx=R();
     
-  if ( & Vh && AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }
@@ -1156,9 +1156,9 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   assert(b && b->nargs);// *GetAny<pfes * >
   pfes  * pUh= GetAny<pfes *>((*b->euh)(stack));
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
-  const FESpace & Uh =  *(FESpace*) **pUh ;
-  const FESpace & Vh =  *(FESpace*) **pVh ;
-  bool A_is_square= & Uh == & Vh || Uh.NbOfDF == Vh.NbOfDF ;
+  const FESpace * PUh =  (FESpace*) **pUh ;
+  const FESpace * PVh =  (FESpace*) **pVh ;
+  bool A_is_square= PUh == PVh || PUh->NbOfDF == PVh->NbOfDF ;
 
   // MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
@@ -1186,7 +1186,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   string* file_param_perm_r;
   string* file_param_perm_c;  
 */
-  TypeSolveMat tmat=  ( & Uh == & Vh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
+  TypeSolveMat tmat=  (  PUh == PVh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
   ds.typemat=&tmat;
   ds.initmat=true;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
@@ -1233,7 +1233,10 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
   if(init) A.init(); //
-  if( !& Uh || !& Vh) return SetAny<Matrice_Creuse<R>  *>(&A);
+  if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
+    const FESpace & Uh =  *PUh ;
+    const FESpace & Vh =  *PVh ;
+
   /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat->t != typemat->t) )
     { 
       A.Uh.destroy();

@@ -63,8 +63,8 @@ class RefCounter {
         else{ SHOWVERB(cout << " no destruction count=" << count+1 << " " << this <<  endl);
               return false;}}
    else return false;} 
-   void increment() const {count++;} 
-   void decrement() const {count--;}
+   void increment() const {count++;SHOWVERB( cout << "increment  of " << this << " "<< count <<  endl);}
+    void decrement() const {destroy();}// count--;SHOWVERB( cout << "decrement  of " << this << " "<< count <<  endl);ffassert(count>=0);}
  friend   class baseCountPointer;
 // private:
   RefCounter(const RefCounter &) : count(0) {} 

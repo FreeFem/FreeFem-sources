@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.38-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.40-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -94,7 +94,23 @@ if test `uname` != Darwin; then
  ff_ldbg="-Wl,--start-group"
 fi
 
-
+#  suffix of  dynamic lib .. 
+# ---------------------------
+ff_uname=`uname`
+#  flag to build window 32   version   ff_mingw = yes
+# bof bof F. Hecht 
+case $ff_uname in
+    CYGWIN*|MINGW*|MSYS_NT*)
+	ff_suffix_dylib="dll"
+	ff_suffix_dylib_a="dll.a";;
+     Darwin)
+	ff_suffix_dylib="dylib"
+	ff_suffix_dylib_a="dylib";;
+    *) 
+       ff_suffix_dylib="so";
+       ff_suffix_dylib_a="so";
+esac 
+# end suffix ...
 
 
 
@@ -205,22 +221,21 @@ then
 	    ;;
 # add FH sep 2006 / modif  2009
         *gfortran)
+	    ff_okkk=0
             for i in $FLIBS; do
 		case $i in
 		    -L*)
 			d=`expr $i : '-L\(.*\)'`;
-			if test -e "$d/libgfortran.so" ; then
-			    ff_flibs="$d/libgfortran.so"
-			elif test -e "$d/libgfortran.dylib" ; then
-			    ff_flibs="$d/libgfortran.dylib"
-			elif test -e "$d/libgfortran.a" ; then
-			    ff_flibs="$d/libgfortran.a"
-			elif test -e $d/libgfortran.so -o -e $d/libgfortran.a -o -e $d/libgfortran.dylib ; then
-			    ff_flibs="$i"
+			if test -e "$d/libgfortran.$ff_suffix_dylib_a" -a  -e "$d/libquadmath.$ff_suffix_dylib_a"  ; then
+			   ff_flibs="$d/libgfortran.$ff_suffix_dylib_a $d/libquadmath.$ff_suffix_dylib_a"
+			    ff_okkk=1
+			elif test -e "$d/libgfortran.a"  -a -e "$d/libquadmath.a"; then
+			   ff_flibs="$d/libgfortran.a $d/libquadmath.a"
+			    ff_okkk=1
 			fi;;
 		esac
             done
-	    if test -e "$ff_flibs"  ;then
+	    if test  "$ff_okkk" -eq 1  ;then
 		FLIBS="$ff_flibs"
 	    else
 		FLIBS="$ff_flibs -lgfortran"
@@ -351,16 +366,17 @@ echo $ac_configure_args > configure.param
 # by default the suffix of the  .so lib file is .so
 #      it is .dll   under windows
 #      it is .dylib under macos X
-ff_suffix_dylib="so";
+
+# suffix of dynamic lib 
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
-
 AC_MSG_CHECKING(wether we are on a MacIntosh)
 ff_mac=no
 if test `uname` = Darwin;
 then
 	ff_HOSTARCH_pastix=i686_mac
 	ff_suffix_dylib="dylib"
+	ff_suffix_dylib_a="dylib"
 	ff_mac=yes
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR_APPLE,"/Applications/FreeFem++.app/Contents/",FreeFem prefix  dir)
 fi
@@ -374,6 +390,23 @@ then
 fi
 AC_MSG_RESULT($ff_sunos)
 
+# glut ------------
+# ----------------
+ff_glut=""
+ff_glut_ok=""
+AC_ARG_WITH(glut,[  --with-glut  glutlib and include  ])
+if test "$with_glut" != no -a  -n "$with_glut" ; then
+    ff_libs_save="$LIBS"
+    LIBS="$LIBS"
+dnl not works .... so no check .... FH 
+      ff_glut="$with_glut";ff_glut_ok=yes
+dnl     AC_SEARCH_LIBS(abort,[$with_glut],[ff_glut="$with_glut";ff_glut_ok=yes],[ff_glut="";ff_glut_ok="no"])
+    LIBS="$ff_libs_save"
+dnl     AC_MSG_ERROR([ Sorry  bad --with-glut :  $with_glut !])
+elif test "$with_glut" = no ; then
+    ff_glut_ok="no"
+fi
+
 # Checking wether we can produce a Microsoft Windows-specific version
 # -------------------------------------------------------------------
 
@@ -384,23 +417,23 @@ AC_MSG_CHECKING(wether we are on Microsoft Windows)
 ff_uname=`uname`
 #  flag to build window 32   version   ff_mingw = yes
 ff_mingw=no
+ff_fpic=yes
 case $ff_uname in
     CYGWIN*)
-
+	ff_fpic=no
     	# FFCS - 17/1/12 - -mno-cygwin is not recognised by the latest version of mingw32
-	if test $enable_ffcs = no
-	then
-	    ff_nocygwin=-mno-cygwin
-	fi
-
+	#    ff_nocygwin=-mno-cygwin
 	AC_SUBST(GCCNOCYGWIN,$ff_nocygwin);;
-    MINGW*)
+    MINGW*|MSYS_NT*)
         enable_cygwindll=no;;
+
+
 esac
 case $ff_uname in
 CYGWIN*|MINGW*)
-
+	ff_fpic=no
 	ff_suffix_dylib="dll";
+	ff_suffix_dylib_a="dll.a";
         ff_win32=yes;
 
 	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
@@ -411,13 +444,13 @@ CYGWIN*|MINGW*)
 	if test "$enable_cygwindll" != yes
 	then
 # 	        CHECK_COMPILE_FLAG(C++,-mwindows,CXXFLAGS)
-	        ff_glut_ok=yes
 
 		# FFCS: on Windows, FF crashes when compiling GL/glut.h and the option "--disable-opengl" is not
 		# operational because ff_glut_ok is forced to yes here.
 		if test $enable_ffcs = yes
 		then
 	            ff_glut_ok=no
+		    ff_glut=""
 		    enable_opengl=no
 		fi
 
@@ -450,21 +483,23 @@ CYGWIN*|MINGW*)
 		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
 		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 			case "$F77" in
-	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran";;
+	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran -lquadmath";;
 	 		    *g77) FLIBS="$ff_nocygwin -lg2c";;
 			    *)   AC_MSG_ERROR([ Sorry no known FLIBS with this $F77  !]) ;;
 			esac
 		    fi
 		fi
 
-                ff_glutname="glut32"
+		if test -z "$ff_glut" -a  "$ff_glut_ok" != "no" ; then 
+                    ff_glutname="glut32"
 		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
-		AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
-		if test -z "$ff_glut" ; then
-                ff_glutname="freeglut"
-		AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
-                fi
+		    AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
+		    if test -z "$ff_glut" ; then
+			ff_glutname="freeglut"
+			AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
+		    fi
+		fi
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(FFGLUTNAME,$ff_glutname)
 	        AC_SUBST(WINDRESOBJ,windres.o)
@@ -479,7 +514,7 @@ CYGWIN*|MINGW*)
 
 
 	;;
-*)ff_win32=no;;
+*) ff_win32=no;;
 esac
 AC_MSG_RESULT($ff_win32)
 
@@ -542,7 +577,7 @@ m4_include(acmacros.m4)
 m4_include(acoptim.m4)
 m4_include(ax_lib_hdf5.m4)
 m4_include(ax_lib_gsl.m4)
-# Checking c++11 for schwarz interface of P. Jolivet ...
+# Checking c++11 for schwarz/hpddm  interface of P. Jolivet ...
 # F.Hecht:
 # do not compile all with c++11 version to much 
 # probleme to day (frev 2015) with g++ 4.8.1
@@ -783,16 +818,17 @@ AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libr
 ## PETSc
 AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
 # /usr/local/petsc/conf/petscvariables 
+#/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"		
 	    if test -f "$ffconfpetsc" ; then 
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-		    cmp -s  "$PETSC_MPIRUN" "$MPIRUN"
+		    test "$PETSC_MPIRUN" == "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then 
 			PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
 			PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
@@ -1045,8 +1081,8 @@ then
 	    fi
 
 	    ff_blas_inc="-I$ff_mkl_root/include"
-	    dnl  scalapack, and blacs don not work with mlk and sgi
-	    if test "$ff_mkl_mpi" != "_sgimpt" ; then
+	    dnl  scalapack, and blacs do not not work with mlk and sgi
+	    if test "$ff_mkl_mpi" = "_intelmpi" ; then
 		AC_FF_ADDWHERELIB(scalapack,$ff_mkl_scalapack,$ff_blas_inc)
 		AC_FF_ADDWHERELIB(blacs,$ff_mkl_blacs,$ff_blas_inc)
 	    else
@@ -1127,7 +1163,7 @@ then
 	# place -lgfortran in LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which
 	# will fail.
 
-	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran $ff_pthread"
+	ff_blas_libs="-L${curdir}/download/blas/OpenBLAS -lopenblas -lgfortran -lquadmath $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
@@ -1442,7 +1478,12 @@ fi
 LIBS="$ff_save_libs"
 
 # If all else fails, download!
-
+ff_umfpack_incs=""
+#  attention no /usr/include in WHERE 
+if test "$ff_umfpack_ok" = yes -a -z "$ff_umfpack_dir" 
+then
+    ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
+fi
 if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
@@ -1451,8 +1492,9 @@ then
 
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
     # the following tests fail.
-
+    
     ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
+    ff_umfpack_incs="-I${curdir}/download/include"
     AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
     if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
@@ -1468,8 +1510,8 @@ if test "$ff_umfpack_ok" = yes
 then
     if test $enable_ffcs = no
     then
-	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
-	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,-I/usr/include/$ff_umfpack_dir)
+	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,$ff_umfpack_incs)
+	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,$ff_umfpack_incs)
     else
 	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
 	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
@@ -1597,15 +1639,18 @@ then
 dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CNOFLAGS)
 dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	fi
+	if test "$ff_fpic" != "no" ; then
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CNOFLAGS)
-	if test "$enable_fortran" != no
-	 then
+	fi 
+	if test "$enable_fortran" != no ;  then
+	if test "$ff_fpic" != "no" ; then
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FNOFLAGS)
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCFLAGS)
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FCNOFLAGS)
+	 fi
 dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FNOFLAGS)
 dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
 
@@ -1891,10 +1936,10 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+test "$enable_hpddm" != no && enable_hpddm=yes  
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_hpddm=no
 
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_schwarz=no
-
-TOOL_DISABLE(schwarz,"schwarz.$DYLIB_SUFFIX removeDOF.$DYLIB_SUFFIX utility.$DYLIB_SUFFIX")
+TOOL_DISABLE(hpddm,"hpddm.$DYLIB_SUFFIX")
 
 
 # All makefiles
@@ -1921,12 +1966,14 @@ AC_OUTPUT(Makefile
     examples++-eigen/Makefile
     examples++-tutorial/Makefile
     examples++-mpi/Makefile
+    examples++-hpddm/Makefile
     examples++-load/Makefile
     examples++-chapt3/Makefile
     examples++-bug/Makefile
     examples++-other/Makefile
     examples++-3d/Makefile
     DOC/Makefile)
+
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
 AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
 AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
@@ -1934,7 +1981,7 @@ AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
-AC_MSG_NOTICE([          --  with schwarz (HPDDM) $enable_schwarz (need MPI & c++11 :  $ff_cxx11 ) ]);
+AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
