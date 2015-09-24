@@ -31,7 +31,7 @@ endif
 
 
 
-
+LDLIBS = @LDFLAGS@ -lm @MPI_LIBC@  @LIBSPTHREAD@  
 LDFLAGS	= @LDFLAGS@ -lm @MPI_LIBC@  @LIBSPTHREAD@  
 #-L/usr/local/lib/gcc/
 CP	= cp

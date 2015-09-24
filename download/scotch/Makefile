@@ -97,7 +97,7 @@ WHERE-mpi:$(SRCDIR)/FAIT-mpi
 
 $(SRCDIR): $(PACKAGE)
 	tar xvzf $(PACKAGE)
-#	patch -p1 <scotch_6.0.4.patch
+	patch -p1 <scotch_6.0.4.patch
 	#cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
 	#cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)
