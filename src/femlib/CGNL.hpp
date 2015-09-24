@@ -71,7 +71,7 @@ template<class R,class DJ,class P,class S >
 int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint=1000000000,S *Stop=0)
 {
   //  -------------
-  assert(&x && &dJ && &C);
+ // assert(&x && &dJ && &C);
   typedef KN<R> Rn;
   int n=x.N();
   

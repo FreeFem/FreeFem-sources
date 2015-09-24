@@ -492,7 +492,7 @@ class FElement : public baseFElement { public:
   void SaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,R* UVsave) const ;  
 
   void Drawfill(const KN_<R> & U, const  KN_<R> & VIso,int j=0,double rapz=1) const ;  
-  void Draw(const RN_& U,const RN_& V, const  KN_<R> & Viso,R coef,int i0,int i1) const;
+  void Draw(const RN_& U,const RN_& V, const  KN_<R> & Viso,R coef,int i0,int i1,double ArrowSize=-1) const;
   R2   MinMax(const RN_& U,const RN_& V,int i0,int i1) const  ;
   R2   MinMax(const RN_& U,int i0) const  ;
   void BF(const R2 & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
@@ -738,8 +738,8 @@ extern TypeOfFE & P1ncLagrange;
   KN<R>  newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const   ; 
   template<class R> 
   KN<R>  newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int IV,int & lg,int & nsb) const   ; 
-  void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const  ; // Arrow
-  void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true) const  ; // Arrow
+    void Draw(const KN_<R>& U,const KN_<R> & Viso, R coef,int j0=0,int j1=1,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true,double ArrowSize=-1) const  ; // Arrow
+  void Draw(const KN_<R>& U,const KN_<R>& V,const KN_<R> & Viso, R coef,int iu=0,int iv=0,float *colors=0,int nbcolors=0,bool hsv=true,bool drawborder=true,double ArrowSize=-1) const  ; // Arrow
   R2 MinMax(const KN_<R>& U,const KN_<R>& V,int j0,int j1,bool bb=true) const ;
   R2 MinMax(const KN_<R>& U,int j0, bool bb=true) const ;
  // void destroy() {RefCounter::destroy();}

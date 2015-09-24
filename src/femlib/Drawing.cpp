@@ -364,7 +364,7 @@ R2 FElement::MinMax(const RN_& U,int i0) const
     }
    return minmax;
 }
-void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int i1) const
+void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int i1,double ArrowSize) const
 {
   bool whatd[last_operatortype];
   initwhatd(whatd,0);
@@ -373,6 +373,7 @@ void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int
   getcadre(xmin,xmax,ymin,ymax);
   float d= Max(ymax-ymin,xmax-xmin);
   R kk = d*0.005;
+  if(ArrowSize>0) kk=ArrowSize/100.;
   R cc = d*0.05;
   int nsb = nbsubdivision();
   int nsb2 = NbOfSubTriangle(nsb);
@@ -409,6 +410,7 @@ void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int
           uv = coef*uv;
           l *= coef;
           R2 dd = uv*(-kk/l);// modif F.H size of arraow 08/14 FH.l
+          
           R2 dn = dd.perp()*0.5;
           if (l*10000.< kk) continue;
           if (l < kk) 
@@ -680,24 +682,24 @@ R2 FESpace::MinMax(const KN_<R>& U,int j0,bool bb) const
       }
    return Pminmax;
 }
-void  FESpace::Draw(const KN_<R>& U,const RN_ & Viso, R coef,int j0,int j1,float *colors,int nbcolors,bool hsv,bool drawborder) const 
+void  FESpace::Draw(const KN_<R>& U,const RN_ & Viso, R coef,int j0,int j1,float *colors,int nbcolors,bool hsv,bool drawborder,double ArrowSize) const
 { 
   showgraphic();
   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
-    (*this)[k].Draw( U,U,Viso,coef,j0,j1);
+    (*this)[k].Draw( U,U,Viso,coef,j0,j1,ArrowSize);
   NewSetColorTable(2+6,colors,nbcolors,hsv);
   if(drawborder) Th.DrawBoundary();
   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
 
 }
 
-void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int iu,int iv,float *colors,int nbcolors,bool hsv,bool drawborder) const 
+void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int iu,int iv,float *colors,int nbcolors,bool hsv,bool drawborder,double ArrowSize) const
 { 
   showgraphic();
   NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
   for (int k=0;k<Th.nt;k++) 
-    (*this)[k].Draw( U,V,Viso,coef,iu,iv);
+    (*this)[k].Draw( U,V,Viso,coef,iu,iv,ArrowSize);
   NewSetColorTable(2+6,colors,nbcolors,hsv);
   if(drawborder) Th.DrawBoundary();
    NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);

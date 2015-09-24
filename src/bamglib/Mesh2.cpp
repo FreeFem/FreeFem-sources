@@ -1621,8 +1621,9 @@ Int4  Triangles::SplitInternalEdgeWithBorderVertices()
       if (t.link)
 	for (int j=0;j<3;j++)
 	  if(!t.Locked(j) && !t.Hidden(j)){
-	    Triangle &tt = *t.TriangleAdj(j);
-	    if ( &tt && tt.link && it < Number(tt)) 
+            Triangle *ptt = t.TriangleAdj(j);
+	    Triangle &tt = *ptt;
+	    if ( ptt && tt.link && it < Number(tt))
 	      { // an internal edge 
 		Vertex &v0 = t[VerticesOfTriangularEdge[j][0]];
 		Vertex &v1 = t[VerticesOfTriangularEdge[j][1]];
@@ -4058,12 +4059,13 @@ void Triangles::clear()
   if (VertexOnBThVertex) delete [] VertexOnBThVertex;
   if (VertexOnBThEdge) delete [] VertexOnBThEdge;
   
-  if (&Gh) 
+  //if (&Gh)
     {
       if (Gh.NbRef>0) Gh.NbRef--;
       else if (Gh.NbRef==0) delete &Gh;
     }
-  if (&BTh && (&BTh != this))
+  if (//&BTh &&
+      (&BTh != this))
     {
       if (BTh.NbRef>0) BTh.NbRef--;
       else if (BTh.NbRef==0) delete &BTh;
@@ -4109,12 +4111,12 @@ void Triangles::SetIntCoor(const char * strfrom)
     int Nberr=0;
     for (i=0;i<nbt;i++)
       {
-	Vertex & v0 = triangles[i][0];
-	Vertex & v1 = triangles[i][1];
-	Vertex & v2 = triangles[i][2];
-      if ( &v0 && &v1 &&  &v2 ) // a good triangles;
+	Vertex * pv0 = triangles[i](0);
+	Vertex * pv1 = triangles[i](1);
+	Vertex * pv2 = triangles[i](2);
+      if ( pv0 && pv1 &&  pv2 ) // a good triangles;
       {
-	triangles[i].det= det(v0,v1,v2);
+	triangles[i].det= det(*pv0,*pv1,*pv2);
 	if (triangles[i].det <=0 && Nberr++ <10)
 	  {
 	    if(Nberr==1)
@@ -4123,12 +4125,12 @@ void Triangles::SetIntCoor(const char * strfrom)
 	      else 
                   cerr << "+++  Fatal Error Triangle (in SetInCoor) area of Triangle < 0" << endl;}
 	    cerr << " Triangle " << i << "  det  (I2) = " << triangles[i].det ;
-	    cerr << " (R2) " << Det(v1.r-v0.r,v2.r-v0.r);
+	    cerr << " (R2) " << Det(pv1->r-pv0->r,pv2->r-pv0->r);
 	    cerr << "; The 3  vertices " << endl;
-	    cerr << Number(v0) << " "  << Number(v1) << " " 
-		 << Number(v2) << " : " ;
-	    cerr << v0.r << v1.r << v2.r << " ; ";
-	    cerr << v0.i << v1.i << v2.i << endl;
+	    cerr << Number(pv0) << " "  << Number(pv1) << " "
+		 << Number(pv2) << " : " ;
+	    cerr << pv0->r << pv1->r << pv2->r << " ; ";
+	    cerr << pv0->i << pv1->i << pv2->i << endl;
 	  }
       }
     else
@@ -4789,11 +4791,11 @@ void  Triangles::ShowHistogram() const
 		Triangle *ta = triangles[it].TriangleAdj(j);
 		if ( !ta || !ta->link || Number(ta) >= it) 
 		{ 
-		    Vertex & vP = triangles[it][VerticesOfTriangularEdge[j][0]];
-		    Vertex & vQ = triangles[it][VerticesOfTriangularEdge[j][1]];
-		    if ( !& vP || !&vQ) continue;
-		    R2 PQ = vQ.r - vP.r;
-		    Real8 l = log(LengthInterpole(vP,vQ,PQ));
+		    Vertex * vP = triangles[it](VerticesOfTriangularEdge[j][0]);
+		    Vertex * vQ = triangles[it](VerticesOfTriangularEdge[j][1]);
+		    if ( ! vP || !vQ) continue;
+		    R2 PQ = vQ->r - vP->r;
+		    Real8 l = log(LengthInterpole(*vP,*vQ,PQ));
 #ifdef DRAWING2             
 		    if (l>1.4)  {
 			penthickness(3);

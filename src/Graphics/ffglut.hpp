@@ -227,6 +227,7 @@ public:
   bool drawmeshes;
   bool add,keepPV;
   double echelle;
+  double ArrowSize;
   vector<Mesh *> Ths;
   vector<Mesh2 *> Ths2;
   vector<Mesh3 *> Ths3;

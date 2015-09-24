@@ -394,7 +394,42 @@ void EnvironmentLoad()
 	    
 }
 
- 
+//  from ffapi to env. F. Hecht ..
+#include "ffapi.hpp"
+#include <dirent.h>
+#include <strings.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+namespace ffapi
+{
+// to change to tmp dir for exec ...
+long chtmpdir()
+{
+    char tmp[256];
+#ifdef _WIN32
+    strcpy(tmp,"c:\\Temp");
+    if (GetEnvironmentVariable("TEMP", tmp, 256) > 0);
+#else
+    strcpy(tmp,"/tmp/");
+#endif
+    if(verbosity>2)
+        std::cout << " Change to " << endl;
+    return chdir(tmp);
+    
+}
+bool ff_justcompile=false;
+bool ff_ch2edpdtmpir=0;
+void ifchtmpdir()
+{
+    if(ff_ch2edpdtmpir) {
+    }
+}
+}
+
 #ifdef TESTMAIN
 long verbosity=50;
  EnvironmentData  environment;
@@ -403,5 +438,5 @@ int main()
   GetEnvironment();
   return 0; 
 }
-
+}
 #endif

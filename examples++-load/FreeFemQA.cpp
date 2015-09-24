@@ -167,7 +167,8 @@ AnyType MeshGenQA:: operator()(Stack stack) const
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    m->decrement();
+  //  m->decrement();
+      Add2StackOfPtr2FreeRC(stack,m);
     return m;
   }
 

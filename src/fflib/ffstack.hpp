@@ -185,6 +185,7 @@ inline StackOfPtr2Free  * & WhereStackOfPtr2Free(Stack s) { return  Stack_Ptr<St
 // <<StackOfPtr2Free>>
 struct StackOfPtr2Free {
 	typedef vector<BaseNewInStack *>::iterator iterator;
+        typedef vector<BaseNewInStack *>::reverse_iterator reverse_iterator;
 	StackOfPtr2Free  ** where; // where is store the ptr to the stack 
 	StackOfPtr2Free *prev; // previous stack 
 
@@ -218,11 +219,11 @@ public:
 		  // FFCS: nothing on following line for tests/compare
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
 		
-		for (iterator i=stackptr.end(); i != stackptr.begin();)
+		for (reverse_iterator i=stackptr.rbegin(); i != stackptr.rend();++i)
 		{
 		   
-			delete  (* (--i) ); 
-		     //cout << "StackOfPtr2Free: clean " << (* (i) ) << endl;
+			delete  (* (i) );
+		       // cout << "StackOfPtr2Free: clean " << (* (i) ) << " " << endl;
 		}
 		stackptr.resize(0);// clean the
 		

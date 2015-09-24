@@ -32,3 +32,4 @@
 #define SHOWVERB(i) ( (void)0)
 #endif
 #endif
+#define SHOWVERB1(i) i

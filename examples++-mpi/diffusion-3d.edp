@@ -151,11 +151,11 @@ else {
     /*# coarseSpace #*/
     matrix N;
     if(mpisize > 1 && solver == 12) {
-        int[int] parm(1);
-        parm(0) = getARGV("-nu", 20);
+       //int[int] parm(1);
+       // parm(0) = getARGV("-nu", 20);
         EVproblem(vPbNoPen, Th, Ph)
         matrix noPen = vPbNoPen(Wh, Wh, solver = CG);
-        attachCoarseOperator(mpiCommWorld, Aglob, A = noPen, /*threshold = 2. * h[].max / diam,*/ parameters = parm);
+        attachCoarseOperator(mpiCommWorld, Aglob, A = noPen /*,threshold = 2. * h[].max / diam, parameters = parm*/);
     }
     /*# coarseSpaceEnd #*/
     /*# SolverDDM #*/
