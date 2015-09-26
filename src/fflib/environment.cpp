@@ -118,9 +118,11 @@ bool EnvironmentInsert(string key,string item,string before)
    bool ret=true;
    OneEnvironmentData  & l = ffenvironment[key];
    char  sufmpi[] = {'m','p','i',dirsep,'\0'};
-   string suf= ((key== "loadpath") && initparallele ) ? sufmpi  : ""; 
+   string suf= ((key== "loadpath") && initparallele ) ? sufmpi  : "";
+    if( verbosity > 1000) cout << " **EnvironmentInsert " <<initparallele<< " suf '"
+        << suf << "'  " << item <<endl;
    if( ! suf.empty() )
-     if((item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="") 
+     if(!(item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="")
        {
 	 if(verbosity>=100)  cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl; 
 	 item  += suf;

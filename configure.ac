@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.40-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.40-2,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -73,7 +73,18 @@ m4_define([AC_FF_WHERELIB],
 	LIBS=$ff_save_libs
 	fi
     ])dnl end m4_define AC_FF_WHERELIB
-
+define([AC_FF_PETSC_AWK],[awk -F'=' '"$1 "==[$]1 {print [$]2}' [$]ffconfpetsc])
+m4_define([AC_FF_PETSC_WHERELIB],
+	  [
+	    ff_$2=`AC_FF_PETSC_AWK($2)`
+	    ff_$3=`AC_FF_PETSC_AWK($3)`
+	   if test -n "[$]ff_$2"; then 
+			    ff_$1_ok=yes;
+			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
+			     AC_SUBST([TOOL_COMPILE_$1],"")
+	  fi	    
+	  ]
+)dnl end m4_defineAC_FF_PETSC_WHERELIB
 
 ff_HOSTARCH_pastix=
 echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
@@ -829,13 +840,22 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 		    test "$PETSC_MPIRUN" == "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
-		    if test "$?"  -eq 0 ; then 
-			PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
-			PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
-			if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
-			    ff_petsc_ok=yes;
-			    AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
-			fi
+		    if test "$?"  -eq 0 ; then
+		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES)
+		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE)
+			
+		#	PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
+		#	PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
+		#	if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
+		#	    ff_petsc_ok=yes;
+		#	    AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
+		#	fi
 		    else
 			AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN." ]);			
 		    fi
