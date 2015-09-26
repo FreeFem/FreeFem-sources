@@ -374,6 +374,8 @@ curdir=`pwd`
 # -----------------
 
 echo $ac_configure_args > configure.param
+(for i in $ac_configure_args; do echo $i; done) > config.param
+
 # by default the suffix of the  .so lib file is .so
 #      it is .dll   under windows
 #      it is .dylib under macos X
