@@ -1,5 +1,15 @@
-@  changeset:   3397:99cef5d97e5e
+@  changeset:   3399:2f5fc0ecaaa0
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Sep 21 16:59:13 2015 +0200
+|  summary:     correct hpddm make new example dir
+|
+o  changeset:   3398:8bd16241624e
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Sep 20 15:43:13 2015 +0200
+|  summary:     pass to scotch version 6.0.4
+|
+o  changeset:   3397:99cef5d97e5e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Sep 16 20:22:48 2015 +0200
 |  summary:     coorect doc (typo) en add comment on array of array , array of full matrix

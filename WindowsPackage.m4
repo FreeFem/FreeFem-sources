@@ -1,7 +1,13 @@
 ; Creating a FreeFem++ package for Microsoft Windows with Inno Setup
 ; $Id$
 ;;  m4 def
+;; `DHOSTOS' = HOSTOS  
 ;; ifelse(SIZEOFPTR,64, define(`SUFF64',`-64' ),define(`SUFF64',`' ))
+;; define(IFMPI,ifelse(len(MPIPROG),0,; ,))
+;; define(IFMGW32,ifelse(HOSTOS,mingw32,,;))
+;; define(IFMGW64,ifelse(HOSTOS,mingw64,,;))
+
+
 ;; -- end def m4  
 ; The Inno Setup configuration file WindowsPackage.iss is built from
 ; WindowsPackage.m4 with the command "make WindowsPackage.iss".
@@ -66,19 +72,21 @@ Source: "examples++-load\ff-c++"; DestDir: "{app}"
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
 
-ifelse(DHOSTOS,mingw32,``
-Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
+
+IFMGW32 ; mingw32  ....    FH. I have put all dll in bin-win32 dir ....
+IFMGW32 Source: "C:\MinGW\bin\mingwm10.dll"; DestDir: "{app}"
 ; Source: "C:\Cygwin\bin\glut32.dll"; DestDir: "{app}"
-Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
-Source: "C:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
-Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
-Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
-Source: "C:\MinGW\bin\libgfortran-3.dll"; DestDir: "{app}"
-Source: "C:\MinGW\bin\libquadmath-0.dll"; DestDir: "{app}"
-'')
-ifelse(DHOSTOS,mingw64,``
-; FH. I have put all dll in bin-win32 dir ....
-'')
+IFMGW32 Source: "C:\MinGW\msys\1.0\bin\freeglut.dll"; DestDir: "{app}"
+IFMGW32 Source: "C:\MinGW\bin\pthreadGC2.dll"; DestDir: "{app}"
+IFMGW32 Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
+IFMGW32 Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
+IFMGW32 Source: "C:\MinGW\bin\libgfortran-3.dll"; DestDir: "{app}"
+IFMGW32 Source: "C:\MinGW\bin\libquadmath-0.dll"; DestDir: "{app}"
+
+
+IFMGW64 ; mingw64 ....   FH. I have put all dll in bin-win32 dir ....
+
+;; end of mingw ------------
 
 
 ; Does not include FreeFem++-x11 which would need the Cygwin X-Server
