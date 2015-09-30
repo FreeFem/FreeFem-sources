@@ -829,7 +829,7 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
-AC_ARG_WITH(petsc,[  --with-petsc= /usr/local/petsc   --without-petsc  ])
+AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --without-petsc  ])
 # /usr/local/petsc/conf/petscvariables 
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no

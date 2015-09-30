@@ -266,7 +266,7 @@ configure			examples++-chapt3/Makefile.in	src/Graphics/Makefile.in	src/libMesh/M
 download/Makefile.in		examples++-eigen/Makefile.in	src/Makefile.in			src/medit/Makefile.in \
 download/arpack/Makefile.in	examples++-load/Makefile.in	src/bamg/Makefile.in		src/mpi/Makefile.in \
 download/blas/Makefile.in	examples++-mpi/Makefile.in	src/bamglib/Makefile.in		src/nw/Makefile.in \
-download/fftw/Makefile.in	examples++-other/Makefile.in	src/bin-win32/Makefile.in
+download/fftw/Makefile.in	examples++-other/Makefile.in	src/bin-win32/Makefile.in     	examples++-hpddm/Makefile.in 
 
 LIST_GENERATE_FILE_AM= \
 DOC/Makefile.am			download/umfpack/Makefile.am	examples++-tutorial/Makefile.am	src/femlib/Makefile.am \
@@ -276,7 +276,7 @@ configure.ac			examples++-chapt3/Makefile.am	src/Graphics/Makefile.am	src/libMes
 download/Makefile.am		examples++-eigen/Makefile.am	src/Makefile.am			src/medit/Makefile.am \
 download/arpack/Makefile.am	examples++-load/Makefile.am	src/bamg/Makefile.am		src/mpi/Makefile.am \
 download/blas/Makefile.am	examples++-mpi/Makefile.am	src/bamglib/Makefile.am		src/nw/Makefile.am \
-download/fftw/Makefile.am	examples++-other/Makefile.am	src/bin-win32/Makefile.am
+download/fftw/Makefile.am	examples++-other/Makefile.am	src/bin-win32/Makefile.am	examples++-hpddm/Makefile.am
 
 #$(LIST_GENERATE_FILE):$(LIST_GENERATE_FILE_AM)
 #	@echo "WARNING the configure file is older than  configure build flies"
