@@ -83,7 +83,7 @@ class FQuadTree {
 
 public:
   QuadTreeBox * root;
-  Mesh *th;
+  const Mesh *th;
 
   long NbQuadTreeBoxSearch,NbVerticesSearch;
   long NbQuadTreeBox,NbVertices;
@@ -139,8 +139,8 @@ void  ILineTo(long i,long j)
     return sb->bc++;
   }
   ~FQuadTree();
-  FQuadTree(Mesh* t,long tnv,R2 Pmin,R2 Pmax,long nbv=-1);
-  FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv=-1);
+  FQuadTree(const Mesh* t,long tnv,R2 Pmin,R2 Pmax,long nbv=-1);
+  FQuadTree(const Mesh * t,R2 Pmin,R2 Pmax,long nbv=-1);
   FQuadTree(Vertex * v,R2 Pmin,R2 Pmax,long nbv);
   FQuadTree();
   friend ostream& operator <<(ostream& f, const  FQuadTree & qt);

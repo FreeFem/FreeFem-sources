@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D103DA015EC148400DAD98A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103D9F15EC148400DAD98A /* libarpack.a */; };
-		3D103DA215EC149B00DAD98A /* libamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA115EC149B00DAD98A /* libamd.a */; };
-		3D103DA415EC14AB00DAD98A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D103DA315EC14AB00DAD98A /* libumfpack.a */; };
 		3D15D46D0BD3A65E00CEB4C6 /* sansrgraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A030972538B00D487F6 /* sansrgraph.cpp */; };
 		3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DC9E0970155D002A1826 /* lg.tab.cpp */; };
 		3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC62A050972539900D487F6 /* DefColor.cpp */; };
@@ -57,24 +54,12 @@
 		3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
 		3D6406B8195B2DD200F33E4F /* getprog-unix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */; };
-		3D66F11E1752B077004AE3C8 /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */; };
-		3D66F1201752B083004AE3C8 /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D66F11F1752B083004AE3C8 /* libcholmod.a */; };
 		3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
 		3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */; };
 		3D75A17118CA62AE00AEDCE7 /* P1IsoValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */; };
-		3D79E05D1A5D20C30045F64D /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E05C1A5D20C30045F64D /* Accelerate.framework */; };
-		3D79E05F1A5D211D0045F64D /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E05E1A5D211D0045F64D /* libmpi.dylib */; };
 		3D79E0601A5D280C0045F64D /* P1IsoValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */; };
-		3D79E0621A5D29130045F64D /* libmpi_cxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E0611A5D29130045F64D /* libmpi_cxx.dylib */; };
-		3D79E0631A5D29130045F64D /* libmpi_cxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E0611A5D29130045F64D /* libmpi_cxx.dylib */; };
-		3D79E0651A5D29C00045F64D /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E0641A5D29C00045F64D /* libifport.dylib */; };
-		3D79E0661A5D29C00045F64D /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E0641A5D29C00045F64D /* libifport.dylib */; };
-		3D79E0681A5D2A2B0045F64D /* libifcore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E0671A5D2A2B0045F64D /* libifcore.dylib */; };
-		3D79E0691A5D2A2B0045F64D /* libifcore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D79E0671A5D2A2B0045F64D /* libifcore.dylib */; };
-		3D848A93175504D300E33180 /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D848A92175504D300E33180 /* libcolamd.a */; };
-		3D848A94175504D300E33180 /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D848A92175504D300E33180 /* libcolamd.a */; };
 		3D84ADDF1654DAE200301697 /* ffstack.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADC31654DAE200301697 /* ffstack.hpp */; };
 		3D84ADE01654DAE200301697 /* lgsolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADC41654DAE200301697 /* lgsolver.hpp */; };
 		3D84ADE11654DAE200301697 /* problem.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADC51654DAE200301697 /* problem.hpp */; };
@@ -137,14 +122,40 @@
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
+		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; settings = {ASSET_TAGS = (); }; };
+		3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA7404B1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740541BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; settings = {ASSET_TAGS = (); }; };
+		3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; settings = {ASSET_TAGS = (); }; };
+		3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; settings = {ASSET_TAGS = (); }; };
+		3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; settings = {ASSET_TAGS = (); }; };
+		3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; settings = {ASSET_TAGS = (); }; };
+		3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; settings = {ASSET_TAGS = (); }; };
+		3DA7405F1BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; settings = {ASSET_TAGS = (); }; };
+		3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; settings = {ASSET_TAGS = (); }; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
 		3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
 		3DBBD5E60C3573DA007E5F45 /* mymain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5E50C3573DA007E5F45 /* mymain.cpp */; };
 		3DBBFE9E1A654E4900E3CF4E /* write_xdmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */; };
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
-		3DBBFEA21A65518500E3CF4E /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBFEA11A65518500E3CF4E /* libhdf5.dylib */; };
-		3DBBFEA41A6551C600E3CF4E /* libhdf5_hl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBBFEA31A6551C600E3CF4E /* libhdf5_hl.dylib */; };
 		3DDEA1830DFFD92F00F54E1C /* GQuadTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */; };
 		3DDEA1870DFFD97F00F54E1C /* lgmesh3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */; };
 		3DDEA18A0DFFF6DA00F54E1C /* FESpacen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */; };
@@ -169,23 +180,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3D103D9F15EC148400DAD98A /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = "../../../ff/ff-MacIntel/download/lib/libarpack.a"; sourceTree = "<group>"; };
-		3D103DA115EC149B00DAD98A /* libamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.a; path = "../../../ff/ff-MacIntel/download/lib/libamd.a"; sourceTree = "<group>"; };
-		3D103DA315EC14AB00DAD98A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = "../../../ff/ff-MacIntel/download/lib/libumfpack.a"; sourceTree = "<group>"; };
 		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
 		3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "getprog-unix.hpp"; path = "../src/Graphics/getprog-unix.hpp"; sourceTree = "<group>"; };
-		3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuitesparseconfig.a; path = /usr/local/lib/libsuitesparseconfig.a; sourceTree = "<absolute>"; };
-		3D66F11F1752B083004AE3C8 /* libcholmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcholmod.a; path = /usr/local/lib/libcholmod.a; sourceTree = "<absolute>"; };
 		3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = UMFPack_Solver.cpp; sourceTree = "<group>"; };
 		3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = glumesh2D.cpp; sourceTree = "<group>"; };
 		3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = P1IsoValue.cpp; sourceTree = "<group>"; };
-		3D79E05C1A5D20C30045F64D /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
-		3D79E05E1A5D211D0045F64D /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = /usr/local/lib/libmpi.dylib; sourceTree = "<absolute>"; };
-		3D79E0611A5D29130045F64D /* libmpi_cxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.dylib; path = ../../../../../usr/local/lib/libmpi_cxx.dylib; sourceTree = "<group>"; };
-		3D79E0641A5D29C00045F64D /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2013_sp1.3.166/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
-		3D79E0671A5D2A2B0045F64D /* libifcore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifcore.dylib; path = ../../../../../opt/intel/composer_xe_2013_sp1.3.166/compiler/lib/libifcore.dylib; sourceTree = "<group>"; };
-		3D848A92175504D300E33180 /* libcolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcolamd.a; path = /usr/local/lib/libcolamd.a; sourceTree = "<absolute>"; };
 		3D84ADC31654DAE200301697 /* ffstack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ffstack.hpp; sourceTree = "<group>"; };
 		3D84ADC41654DAE200301697 /* lgsolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = lgsolver.hpp; sourceTree = "<group>"; };
 		3D84ADC51654DAE200301697 /* problem.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = problem.hpp; sourceTree = "<group>"; };
@@ -270,13 +270,25 @@
 		3D90DD26097015B4002A1826 /* problem.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = problem.cpp; sourceTree = "<group>"; };
 		3D90DD31097015B4002A1826 /* strversionnumber.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = strversionnumber.cpp; sourceTree = "<group>"; };
 		3D9B0EB40C8495C0008A8F03 /* RNM.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM.hpp; path = ../src/femlib/RNM.hpp; sourceTree = SOURCE_ROOT; };
+		3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.2.4.1.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libamd.2.4.1.a"; sourceTree = "<group>"; };
+		3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuitesparseconfig.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libsuitesparseconfig.a"; sourceTree = "<group>"; };
+		3DA740461BBEEA2100C4EB0A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libumfpack.a"; sourceTree = "<group>"; };
+		3DA740491BBEEA4700C4EB0A /* libgsl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgsl.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libgsl.dylib"; sourceTree = "<group>"; };
+		3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libmpi.dylib"; sourceTree = "<group>"; };
+		3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpichcxx.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libmpichcxx.dylib"; sourceTree = "<group>"; };
+		3DA740521BBEEB8C00C4EB0A /* libcholmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcholmod.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libcholmod.a"; sourceTree = "<group>"; };
+		3DA740551BBEEBB900C4EB0A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = ../../../../../System/Library/Frameworks/Accelerate.framework; sourceTree = "<group>"; };
+		3DA740581BBEEBDC00C4EB0A /* libccolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libccolamd.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libccolamd.a"; sourceTree = "<group>"; };
+		3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcolamd.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libcolamd.a"; sourceTree = "<group>"; };
+		3DA7405E1BBEEC6400C4EB0A /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = "../../../ff/ff-OSX10.10/download/lib/libarpack.a"; sourceTree = "<group>"; };
+		3DA740611BBEECD900C4EB0A /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
+		3DA740621BBEECD900C4EB0A /* libifportmt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifportmt.dylib; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libifportmt.dylib; sourceTree = "<group>"; };
+		3DA740671BBEED7C00C4EB0A /* libifcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifcore.a; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libifcore.a; sourceTree = "<group>"; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
 		3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = write_xdmf.cpp; path = ../src/bamglib/write_xdmf.cpp; sourceTree = "<group>"; };
 		3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = write_hdf5.cpp; path = ../src/bamglib/write_hdf5.cpp; sourceTree = "<group>"; };
-		3DBBFEA11A65518500E3CF4E /* libhdf5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libhdf5.dylib; path = ../../../../../usr/local/lib/libhdf5.dylib; sourceTree = "<group>"; };
-		3DBBFEA31A6551C600E3CF4E /* libhdf5_hl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libhdf5_hl.dylib; path = ../../../../../usr/local/lib/libhdf5_hl.dylib; sourceTree = "<group>"; };
 		3DC6296009723F8E00D487F6 /* Mesh2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2.cpp; path = ../src/bamglib/Mesh2.cpp; sourceTree = SOURCE_ROOT; };
 		3DC6296209723F8E00D487F6 /* MeshDraw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MeshDraw.cpp; path = ../src/bamglib/MeshDraw.cpp; sourceTree = SOURCE_ROOT; };
 		3DC6296309723F8E00D487F6 /* MeshGeom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MeshGeom.cpp; path = ../src/bamglib/MeshGeom.cpp; sourceTree = SOURCE_ROOT; };
@@ -327,19 +339,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D79E0691A5D2A2B0045F64D /* libifcore.dylib in Frameworks */,
-				3DBBFEA21A65518500E3CF4E /* libhdf5.dylib in Frameworks */,
-				3D79E0631A5D29130045F64D /* libmpi_cxx.dylib in Frameworks */,
-				3D79E05D1A5D20C30045F64D /* Accelerate.framework in Frameworks */,
-				3D103DA015EC148400DAD98A /* libarpack.a in Frameworks */,
-				3D103DA215EC149B00DAD98A /* libamd.a in Frameworks */,
-				3D79E0661A5D29C00045F64D /* libifport.dylib in Frameworks */,
-				3D66F1201752B083004AE3C8 /* libcholmod.a in Frameworks */,
-				3D66F11E1752B077004AE3C8 /* libsuitesparseconfig.a in Frameworks */,
-				3D103DA415EC14AB00DAD98A /* libumfpack.a in Frameworks */,
-				3D848A94175504D300E33180 /* libcolamd.a in Frameworks */,
-				3DBBFEA41A6551C600E3CF4E /* libhdf5_hl.dylib in Frameworks */,
-				3D79E05F1A5D211D0045F64D /* libmpi.dylib in Frameworks */,
+				3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */,
+				3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */,
+				3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */,
+				3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
+				3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
+				3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
+				3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
+				3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */,
+				3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
+				3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
+				3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
+				3DA740541BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */,
+				3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */,
+				3DA7404B1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,11 +360,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D79E0681A5D2A2B0045F64D /* libifcore.dylib in Frameworks */,
-				3D79E0651A5D29C00045F64D /* libifport.dylib in Frameworks */,
-				3D79E0621A5D29130045F64D /* libmpi_cxx.dylib in Frameworks */,
+				3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */,
+				3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
+				3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
+				3DA7405F1BBEEC6400C4EB0A /* libarpack.a in Frameworks */,
+				3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */,
+				3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */,
+				3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
+				3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
+				3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
+				3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
+				3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */,
+				3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
 				3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */,
-				3D848A93175504D300E33180 /* libcolamd.a in Frameworks */,
+				3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */,
+				3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,19 +487,20 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
-				3D79E0671A5D2A2B0045F64D /* libifcore.dylib */,
-				3D79E0641A5D29C00045F64D /* libifport.dylib */,
-				3D79E0611A5D29130045F64D /* libmpi_cxx.dylib */,
-				3D79E05E1A5D211D0045F64D /* libmpi.dylib */,
-				3DBBFEA11A65518500E3CF4E /* libhdf5.dylib */,
-				3DBBFEA31A6551C600E3CF4E /* libhdf5_hl.dylib */,
-				3D79E05C1A5D20C30045F64D /* Accelerate.framework */,
-				3D66F11F1752B083004AE3C8 /* libcholmod.a */,
-				3D848A92175504D300E33180 /* libcolamd.a */,
-				3D66F11D1752B077004AE3C8 /* libsuitesparseconfig.a */,
-				3D103DA315EC14AB00DAD98A /* libumfpack.a */,
-				3D103D9F15EC148400DAD98A /* libarpack.a */,
-				3D103DA115EC149B00DAD98A /* libamd.a */,
+				3DA740551BBEEBB900C4EB0A /* Accelerate.framework */,
+				3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */,
+				3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */,
+				3DA740491BBEEA4700C4EB0A /* libgsl.dylib */,
+				3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */,
+				3DA7405E1BBEEC6400C4EB0A /* libarpack.a */,
+				3DA740581BBEEBDC00C4EB0A /* libccolamd.a */,
+				3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */,
+				3DA740521BBEEB8C00C4EB0A /* libcholmod.a */,
+				3DA740461BBEEA2100C4EB0A /* libumfpack.a */,
+				3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */,
+				3DA740611BBEECD900C4EB0A /* libifport.dylib */,
+				3DA740621BBEECD900C4EB0A /* libifportmt.dylib */,
+				3DA740671BBEED7C00C4EB0A /* libifcore.a */,
 				3DC62AF6097299F400D487F6 /* OpenGL.framework */,
 				3DC62AF2097299D800D487F6 /* GLUT.framework */,
 				3DC62AED0972999000D487F6 /* Cocoa.framework */,
@@ -901,6 +925,7 @@
 					PARALLELE,
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = "\"/usr/local/ff++/mpich/include\"";
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -910,6 +935,20 @@
 					"\"$(SRCROOT)/../download/lib\"",
 					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					"/usr/local/ff++/mpich/petsc/lib",
+					"/usr/local/ff++/mpich/lib",
+					/opt/intel/composer_xe_2015.2.132/compiler/lib,
+				);
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
+					"\"$(SRCROOT)/../download/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
+					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					"/usr/local/ff++/mpich/petsc/lib",
+					"/usr/local/ff++/mpich/lib",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
@@ -948,6 +987,9 @@
 					"\"$(SRCROOT)/../download/lib\"",
 					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					"/usr/local/ff++/mpich/petsc/lib",
+					"/usr/local/ff++/mpich/lib",
+					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
@@ -996,13 +1038,12 @@
 					"\"$(SRCROOT)/../download/lib\"",
 					/usr/local/lib,
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					"/usr/local/ff++/mpich/petsc/lib",
+					"/usr/local/ff++/mpich/lib",
+					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_4 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				PRODUCT_NAME = "freefem++-nw";
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
 				ZERO_LINK = YES;
 			};
@@ -1021,13 +1062,12 @@
 					"\"$(SRCROOT)/../download/lib\"",
 					/usr/local/lib,
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					"/usr/local/ff++/mpich/petsc/lib",
+					"/usr/local/ff++/mpich/lib",
+					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/arpack/ARPACK\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/UMFPACK/Lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_4 = "\"$(SRCROOT)/../download/umfpack/UMFPACKv4.4/AMD/Lib\"";
 				PRODUCT_NAME = "freefem++-nw";
-				SDKROOT = macosx10.9;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
 				ZERO_LINK = NO;
 			};

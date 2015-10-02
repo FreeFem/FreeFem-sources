@@ -378,7 +378,7 @@ FQuadTree::FQuadTree(Vertex * v,R2 Pmin,R2 Pmax,long nbv)
 #endif
 }
 
-FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) : 
+FQuadTree::FQuadTree(const Mesh * t,R2 Pmin,R2 Pmax,long nbv) :
  lenStorageQuadTreeBox(t->nv/8+100),
   th(t),
   NbQuadTreeBoxSearch(0),
@@ -402,7 +402,7 @@ FQuadTree::FQuadTree(Mesh * t,R2 Pmin,R2 Pmax,long nbv) :
 #endif
 }
 
-FQuadTree::FQuadTree(Mesh* t,long tnv,R2 Pmin,R2 Pmax,long nbv) : 
+FQuadTree::FQuadTree(const Mesh* t,long tnv,R2 Pmin,R2 Pmax,long nbv) :
  lenStorageQuadTreeBox(tnv/8+100),
   th(t),
   NbQuadTreeBoxSearch(0),

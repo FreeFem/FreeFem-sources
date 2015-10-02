@@ -113,7 +113,7 @@ AnyType MetricPk:: operator()(Stack stack) const
     cout << "Triangulation type : " << ttype << "; Graded=0, Quasi_Acute(refined)=1, Quasi_Acute_Unrefined=2, Quasi_Acute_Proved(refined)=3" << endl;
     //cout << "Metric type : " << wmat << "M0_alone=0, M1_alone=1, M0_M1_weighted_sum=2" << endl;
 
-    Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
+    const Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
     ffassert(pTh);
     const Mesh & Th= *pTh; 
 
