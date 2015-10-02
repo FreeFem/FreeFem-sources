@@ -553,7 +553,7 @@ public:
      
     return -1;}// Add J. Morice
 
- void destroy() {RefCounter::destroy();}
+ void destroy() const {RefCounter::destroy();}
  void MakeQuadTree() ;
       
 private:

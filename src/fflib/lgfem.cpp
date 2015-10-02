@@ -1609,6 +1609,10 @@ long pmesh_nv(pmesh * p)
 long pVh_ndof(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p; ;  return fes->NbOfDF ;}
+pmesh pVh_Th(pfes * p)
+{ throwassert(p && *p);
+    FESpace *fes=**p; ;  return &fes->Th ;}
+
 long pVh_nt(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p; ;  return fes->NbOfElements ;}
@@ -2269,10 +2273,13 @@ public:
     struct ListWhat {
 	int what,i;
 	int cmp[3];
-	int n;	
-	void * v[3];//  for 
-	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(v[0]);}
-	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(v[0]);}
+	int n;
+       union {
+	void * v[3];//  for
+        const void * cv[3];//  for
+       };
+	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
+	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
 	
 	void Set(int nn=0,void **vv=0,int *c=0) {
 	    cmp[0]=cmp[1]=cmp[2]=-1;
@@ -2284,13 +2291,30 @@ public:
 		  if(vv) v[i]=vv[i];
 	      }		   
 	}	
+        void Set(int nn,const void **vv,int *c=0) {
+            cmp[0]=cmp[1]=cmp[2]=-1;
+            v[0]=v[1]=v[2]=0;
+            cv[0]=cv[1]=cv[2]=0;
+            n=nn;
+            for(int i=0;i<nn;++i)
+            {
+                if(c) cmp[i]=c[i];
+                if(vv) cv[i]=vv[i];
+            }		   
+        }	
 	
 	ListWhat(int w=-1,int ii=-1 )
 	: what(w),i(ii) {Set();}
 	ListWhat(int what,int ii,int n,void ** f0,int *c)
 	: what(what),i(ii){ Set(n,f0,c);}
+        ListWhat(int what,int ii,int n,const void ** f0,int *c)
+        : what(what),i(ii){ Set(n,f0,c);}
+        
 	ListWhat(int what,int ii,void * f0)
 	: what(what),i(ii){ Set(1,&f0,0);}
+        
+        ListWhat(int what,int ii,const void * f0)
+        : what(what),i(ii){ Set(1,&f0,0);}
 	
 	template<typename S>
 	void eval(S *f,int *c)
@@ -2407,7 +2431,7 @@ public:
 	     {
 	       th= ath->operator[](j);
 	       if(th) 		    
-		ll.push_back(ListWhat(what%100,ii,static_cast<void *>(th)));
+		ll.push_back(ListWhat(what%100,ii,static_cast<const void *>(th)));
        
 	     }
 	   return n;
@@ -2458,7 +2482,7 @@ public:
 	      {pf3carray p= GetAny< pf3carray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
 	
-	Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
+	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
@@ -4339,12 +4363,24 @@ AnyType Convect::eval2(Stack s) const
   return r;
 }
 
+inline int FindandAdd(set<int> *st,vector<int> & lst,int k)
+{
+    if(lst.size() < 10)
+    {
+      
+    }
+}
+
+
 AnyType Convect::eval3(Stack s) const
 {
     MeshPoint* mp(MeshPointStack(s));
     static MeshPoint mpp,mps;
     static R ddts;
     randwalk(-1); // init randwalk
+   //  set<int> *st=0;
+   // vector<int> lst;
+    
     R ddt = GetAny<double>((*dt)(s));
     if (ddt)
     {
@@ -5007,7 +5043,8 @@ void  init_lgfem()
     
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
- Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
+ Add<pfes*>("Th",".",new OneOperator1<pmesh,pfes*>(pVh_Th));
+    Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
  Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
  Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
 /* FH: ne peux pas marcher, il faut passer aussi le nouveau Vh

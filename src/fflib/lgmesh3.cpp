@@ -34,8 +34,8 @@ using Fem2D::MeshPoint;
 
 extern bool NoWait; 
 
-typedef Mesh * pmesh;
-typedef Mesh3 * pmesh3;
+typedef Mesh const * pmesh;
+typedef Mesh3 const * pmesh3;
 
 map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,int> & k)
 {
@@ -390,12 +390,12 @@ public:
   typedef double R;
   typedef typename Mesh::Rd Rd;
   typedef typename Mesh::Vertex Vertex;
-  CountPointer<Mesh> pTh;
+  CountPointer<const Mesh> pTh;
   const Vertex *v;
   void Check() const {   if (!v || !pTh) { ExecError("Too bad! Unset Vertex!"); } }
   void init() { v=0;pTh.init();}
-  GlgVertex(Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
-  GlgVertex(Mesh * Th,const Vertex * kk): pTh(Th),v(kk) {}
+  GlgVertex(const Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
+  GlgVertex(const Mesh * Th,const Vertex * kk): pTh(Th),v(kk) {}
   operator int() const { Check(); return (* pTh)(v);} 
   operator Rd*(){ Check(); return v;} 
   R x() const {Check() ; return v->X();}
@@ -410,7 +410,7 @@ class GlgElement { public:
 typedef typename Mesh::Element Element;
 
     struct Adj {// 
-	Mesh *pTh;
+	const Mesh *pTh;
 	const Element *k;
 	Adj(const GlgElement<Mesh> & pp) : pTh(pp.pTh),k(pp.k) {}
 	GlgElement<Mesh> adj(long & e) const  {
@@ -423,15 +423,15 @@ typedef typename Mesh::Element Element;
 	return  GlgElement<Mesh>(pTh,kk);}
     }; 
     
-    CountPointer<Mesh> pTh;
+    CountPointer<const Mesh> pTh;
   const Element *k;
   
   GlgElement():  k(0) {}
   void  Check() const  {   if (!k || !pTh) { ExecError("Unset Triangle,Sorry!"); } }
   void init() { k=0;pTh.init();}
   void destroy() {pTh.destroy();}
-  GlgElement(Mesh * Th,long kk): pTh(Th),k( &(*pTh)[kk]) {}
-  GlgElement(Mesh * Th,Element * kk): pTh(Th),k(kk) {}
+  GlgElement(const Mesh * Th,long kk): pTh(Th),k( &(*pTh)[kk]) {}
+  GlgElement(const Mesh * Th,Element * kk): pTh(Th),k(kk) {}
   operator int() const { Check(); return (* pTh)(k);} 
   GlgVertex<Mesh> operator [](const long & i) const { Check(); return GlgVertex<Mesh>(pTh,&(*k)[i]);}   
   long lab() const {Check() ; return k ? k->lab : 0;}
@@ -452,21 +452,21 @@ class GlgBoundaryElement { public:
     typedef typename Mesh::BorderElement BorderElement;
     
     struct BE {
-	Mesh * p;
-	BE(Mesh *pp) : p(pp) {}
-	BE(Mesh **pp) : p(*pp) {}
-	operator Mesh * () const {return p;}
+	const Mesh * p;
+	BE(const Mesh *pp) : p(pp) {}
+	BE(const Mesh **pp) : p(*pp) {}
+	operator const Mesh * () const {return p;}
     };
     
-    CountPointer<Mesh> pTh;
-    BorderElement *k;
+    CountPointer<const Mesh> pTh;
+    const BorderElement *k;
     
     GlgBoundaryElement():  k(0) {}
     void  Check() const  {   if (!k || !pTh) { ExecError("Unset BoundaryEdge,Sorry!"); } }
     void init() { k=0;pTh.init();}
     void destroy() {pTh.destroy();}
-    GlgBoundaryElement(Mesh * Th,long kk): pTh(Th),k( &(*pTh).be(kk)) {}
-    GlgBoundaryElement(Mesh * Th,BoundaryEdge * kk): pTh(Th),k(kk) {}
+    GlgBoundaryElement(const Mesh * Th,long kk): pTh(Th),k( &(*pTh).be(kk)) {}
+    GlgBoundaryElement(const Mesh * Th,BoundaryEdge * kk): pTh(Th),k(kk) {}
     GlgBoundaryElement(const BE & be,long kk): pTh(be.p),k( &(*pTh).be(kk)) {}
     GlgBoundaryElement(const BE & be,BoundaryEdge * kk): pTh(be.p),k(kk) {}
     operator int() const { Check(); return (* pTh)(k);} 
@@ -1194,6 +1194,9 @@ long pVh3_nt(pfes3 * p)
 long pVh3_ndofK(pfes3 * p)
  { throwassert(p && *p);
    FESpace3 *fes=**p;   return (*fes)[0].NbDoF() ;}
+pmesh3 pVh3_Th(pfes3 * p)
+{ throwassert(p && *p);
+    FESpace3 *fes=**p; ;  return &fes->Th ;}
 
 template<class R,int dd,class v_fes>
 AnyType pf3r2R(Stack s,const AnyType &a)
@@ -1613,7 +1616,8 @@ void init_lgmesh3() {
  Add<pfes3*>("ndof",".",new OneOperator1<long,pfes3*>(pVh3_ndof));
  Add<pfes3*>("nt",".",new OneOperator1<long,pfes3*>(pVh3_nt));
  Add<pfes3*>("ndofK",".",new OneOperator1<long,pfes3*>(pVh3_ndofK));
-
+    Add<pfes3*>("Th",".",new OneOperator1<pmesh3,pfes3*>(pVh3_Th));
+    
  //Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
  //Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
  //Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));

@@ -825,8 +825,8 @@ public:
  // void  RandomInit();
  // void  CubeInit(int ,int);
   
-  Real8 MinimalHmin() {return 2.0/coefIcoor;}
-  Real8 MaximalHmax() {return Max(pmax.x-pmin.x,pmax.y-pmin.y);}
+  Real8 MinimalHmin() const {return 2.0/coefIcoor;}
+  Real8 MaximalHmax() const {return Max(pmax.x-pmin.x,pmax.y-pmin.y);}
   const Vertex & operator[]  (Int4 i) const { return vertices[i];};
   Vertex & operator[](Int4 i) { return vertices[i];};
   const Triangle & operator()  (Int4 i) const { return triangles[i];};
@@ -889,7 +889,7 @@ public:
   
   Vertex * NearestVertex(Icoor1 i,Icoor1 j) ;
   Triangle * FindTriangleContening(const I2 & ,Icoor2 [3],Triangle *tstart=0) const;
-  void Write(const char * filename,const TypeFileMesh type = AutoMesh);
+  void Write(const char * filename,const TypeFileMesh type = AutoMesh) const;
   void Write_am_fmt(ostream &) const ;
   void Write_am(ostream &) const ;
   void Write_ftq(ostream &) const ;

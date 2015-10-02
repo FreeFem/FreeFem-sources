@@ -54,7 +54,7 @@ using namespace H5;
 
 namespace bamg {
   
-  void Triangles::Write(const char * filename,const TypeFileMesh typein )
+  void Triangles::Write(const char * filename,const TypeFileMesh typein ) const
   {
     TypeFileMesh type = typein;
     const char * gsuffix=".gmsh";

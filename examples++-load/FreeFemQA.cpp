@@ -51,7 +51,7 @@ public:
     
     Expression nargs[n_name_param];// store named args
     
-    typedef Mesh *  Result;
+    typedef const Mesh *  Result;
     Expression expTh;
     Expression expM11;
     Expression expM12;
@@ -114,7 +114,7 @@ AnyType MeshGenQA:: operator()(Stack stack) const
     const bool exportMetricToMathematica = arg(5, stack, false);
     const bool noRef = arg(6, stack, false);
     
-    Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
+    const Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
     ffassert(pTh);
     const Mesh & Th= *pTh;
         

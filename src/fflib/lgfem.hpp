@@ -48,8 +48,8 @@ namespace  Fem2D {
 using Fem2D::Mesh;
 using Fem2D::Mesh3;
 
-typedef Mesh * pmesh;
-typedef Mesh3 * pmesh3;
+typedef const Mesh  *  pmesh;
+typedef const Mesh3  * pmesh3;
 
 using  Fem2D::FESpace;
 using  Fem2D::TypeOfFE;
@@ -62,12 +62,12 @@ namespace {
   class lgVertex {
   public:
     typedef double R;
-    CountPointer<Mesh> pTh;
+    CountPointer<const Mesh> pTh;
     Vertex *v;
     void Check() const {   if (!v || !pTh) { ExecError("Too bad! Unset Vertex!"); } }
     void init() { v=0;pTh.init();}
-    lgVertex(Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
-    lgVertex(Mesh * Th,Vertex * kk): pTh(Th),v(kk) {}
+    lgVertex(const Mesh * Th,long kk): pTh(Th),v( &(*pTh)(kk)) {}
+    lgVertex(const Mesh * Th,Vertex * kk): pTh(Th),v(kk) {}
     operator int() const { Check(); return (* pTh)(v);} 
     operator R2*(){ Check(); return v;} 
     R x() const {Check() ; return v->x;}
@@ -79,7 +79,7 @@ namespace {
   
   class lgElement { public:
    struct Adj {// 
-	  Mesh *pTh;
+	  const Mesh *pTh;
           Triangle *k;
 	  Adj(const lgElement & pp) : pTh(pp.pTh),k(pp.k) {}
        lgElement adj(long & e) const  {
@@ -89,15 +89,15 @@ namespace {
          e=ee;
 	return  lgElement(pTh,kk);}
       }; 
-  CountPointer<Mesh> pTh; 
+  CountPointer<const Mesh> pTh;
   Triangle *k;
 
   lgElement():  k(0) {}
   void  Check() const  {   if (!k || !pTh) { ExecError("Unset Triangle,Sorry!"); } }
   void init() { k=0;pTh.init();}
   void destroy() {pTh.destroy();}
-  lgElement(Mesh * Th,long kk): pTh(Th),k( &(*Th)[kk]) {}
-  lgElement(Mesh * Th,Triangle * kk): pTh(Th),k(kk) {}
+  lgElement(const Mesh * Th,long kk): pTh(Th),k( &(*Th)[kk]) {}
+  lgElement(const Mesh * Th,Triangle * kk): pTh(Th),k(kk) {}
   operator int() const { Check(); return (* pTh)(k);} 
   lgVertex operator [](const long & i) const { Check(); return lgVertex(pTh,&(*k)[i]);}   
   long lab() const {Check() ; return k ? k->lab : 0;}
@@ -114,21 +114,21 @@ namespace {
 
 class lgBoundaryEdge { public:
     struct BE {
-	Mesh * p;
-	BE(Mesh *pp) : p(pp) {}
-	BE(Mesh **pp) : p(*pp) {}
-	 operator Mesh * () const {return p;}
+	const Mesh * p;
+	BE(const Mesh *pp) : p(pp) {}
+	BE(const Mesh **pp) : p(*pp) {}
+	 operator const Mesh * () const {return p;}
     };
     
-	CountPointer<Mesh> pTh;
+	CountPointer<const Mesh> pTh;
 	BoundaryEdge *k;
 	
 	lgBoundaryEdge():  k(0) {}
 	void  Check() const  {   if (!k || !pTh) { ExecError("Unset BoundaryEdge,Sorry!"); } }
 	void init() { k=0;pTh.init();}
 	void destroy() {pTh.destroy();}
-	lgBoundaryEdge(Mesh * Th,long kk): pTh(Th),k( &(*pTh).be(kk)) {}
-	lgBoundaryEdge(Mesh * Th,BoundaryEdge * kk): pTh(Th),k(kk) {}
+	lgBoundaryEdge(const Mesh * Th,long kk): pTh(Th),k( &(*pTh).be(kk)) {}
+	lgBoundaryEdge(const Mesh * Th,BoundaryEdge * kk): pTh(Th),k(kk) {}
         lgBoundaryEdge(const BE & be,long kk): pTh(be.p),k( &(*pTh).be(kk)) {}
         lgBoundaryEdge(const BE & be,BoundaryEdge * kk): pTh(be.p),k(kk) {}
 	operator int() const { Check(); return (* pTh)(k);} 

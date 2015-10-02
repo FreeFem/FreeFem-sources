@@ -1,3 +1,6 @@
+ - add tools to get mesh of fespace Vh in 2d and 3d 
+     mesh th2= Vh2d.Th ;  mesh3 th3= Vh3d.Th ; 
+     not the type of the mesh is a cosnt pointeur   => lot of cosmetic change
 version 3.40-2
  - try to resolve probleme with petsc metis and freefem++ metis
      now freefem++ use petsc lib if petsc is find for

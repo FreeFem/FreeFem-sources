@@ -593,7 +593,7 @@ public:
 AnyType MetricKuate::operator()(Stack stack) const
 {
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
+  const Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
   long np=  GetAny<long>((*expnp)(stack));
   double hmin=  GetAny<double>((*exphmin)(stack));
   double hmax=  GetAny<double>((*exphmax)(stack));
@@ -606,7 +606,7 @@ AnyType MetricKuate::operator()(Stack stack) const
   pyy =  GetAny<double*>((*py)(stack));
   ffassert(pTh);
   KN<R2> Pt(np);
-  Mesh & Th (*pTh);
+  const Mesh & Th (*pTh);
   cout << " MetricKuate " << np << " hmin = "<< hmin << " hmax = " << hmax  << " nv = " << Th.nv <<  endl;
   R hmx2=1./(hmax*hmax);
   R hmn2=1./(hmin*hmin);
