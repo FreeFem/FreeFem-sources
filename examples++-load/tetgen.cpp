@@ -58,6 +58,7 @@ void insidepoint( const Mesh3 &Th3
 
 */
 // subroutine use for tetegen call
+typedef const Mesh3 *pmesh3;
 
 void mesh3_tetgenio_out(const tetgenio &out, Mesh3 & Th3);
 

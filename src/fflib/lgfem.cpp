@@ -1331,7 +1331,7 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     ~Op() { if(periodic) delete []periodic;}
     AnyType operator()(Stack s)  const {  
       const int d = Mesh::Rd::d;
-      Mesh ** ppTh = GetAny<Mesh  **>( (*eppTh)(s) );
+      const Mesh ** ppTh = GetAny<const Mesh  **>( (*eppTh)(s) );
       AnyType r = (*eppfes)(s) ;
       const TypeOfFE ** tef= new  const TypeOfFE * [ atef.size()];
       for (int i=0;i<atef.size();i++)
@@ -1380,7 +1380,7 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     return  new Op(args[0],args[1],*a2,nbcperiodic,periodic,tedim);
   } 
   OpMake_pfes() : 
-    OneOperator(atype<pfes*>(),atype<pfes*>(),atype<Mesh **>(),atype<E_Array>()) {}
+    OneOperator(atype<pfes*>(),atype<pfes*>(),atype<const Mesh **>(),atype<E_Array>()) {}
 };
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a, TypeOfFE * const & tef)
