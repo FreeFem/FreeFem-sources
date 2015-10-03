@@ -348,7 +348,7 @@ struct MPIrank {
         Fem2D::Mesh *pTh= new Fem2D::Mesh(*buf);
 	Fem2D::R2 Pn,Px;
 	pTh->BoundingBox(Pn,Px);
-	pTh->quadtree=new Fem2D::FQuadTree(a,Pn,Px,a->nv);
+	pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,a->nv);
         a=pTh;
       }   
     delete buf;      
