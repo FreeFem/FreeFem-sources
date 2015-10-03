@@ -1184,6 +1184,13 @@ long pf3r_nbdf(pair<FEbase<K,v_fes3> *,int> p)
    throwassert( !!p.first->Vh);
    return p.first->Vh->NbOfDF;
  }
+template<class K>
+pmesh3 pf3r_Th(pair<FEbase<K,v_fes3> *,int> p)
+{
+    if (!p.first->Vh) p.first->Vh= p.first->newVh();
+    throwassert( !!p.first->Vh);
+    return & p.first->Vh->Th;
+}
 
 long pVh3_ndof(pfes3 * p)
  { throwassert(p && *p);
@@ -1613,6 +1620,10 @@ void init_lgmesh3() {
  /*decommente par J. Morice 14/01/09*/ 
  Add<pf3r>("n",".",new OneOperator1<long,pf3r>(pf3r_nbdf<R>));
  Add<pf3c>("n",".",new OneOperator1<long,pf3c>(pf3r_nbdf<Complex>));
+    
+    Add<pf3r>("Th",".",new OneOperator1<pmesh3 ,pf3r>(pf3r_Th<R>));
+    Add<pf3c>("Th",".",new OneOperator1<pmesh3,pf3c>(pf3r_Th<Complex>));
+    
  Add<pfes3*>("ndof",".",new OneOperator1<long,pfes3*>(pVh3_ndof));
  Add<pfes3*>("nt",".",new OneOperator1<long,pfes3*>(pVh3_nt));
  Add<pfes3*>("ndofK",".",new OneOperator1<long,pfes3*>(pVh3_ndofK));
