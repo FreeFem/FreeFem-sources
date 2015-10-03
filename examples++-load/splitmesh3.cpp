@@ -13,7 +13,7 @@ using namespace std;
 
   using namespace  Fem2D;
 
-Mesh * SplitMesh3(Stack stack,Fem2D::Mesh * const & pTh)
+Mesh const * SplitMesh3(Stack stack,Fem2D::Mesh const * const & pTh)
 {
   assert(pTh);
   const Mesh & Th(*pTh);  // le maillage d'origne a decoupe
@@ -100,7 +100,7 @@ $1 */
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   if (verbosity)
     cout << " lood: Split3  " << endl;
-  Global.Add("splitmesh3","(",new OneOperator1s_<Mesh *,Mesh *>(SplitMesh3));
+  Global.Add("splitmesh3","(",new OneOperator1s_<Mesh const *,Mesh const *>(SplitMesh3));
   // utilisation 
   // mesh Th,Th3;
   //  ... construction du maillage Th ici 

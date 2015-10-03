@@ -46,7 +46,7 @@ class DxWriter {
 		std::vector<double> vecistant;
 	};
 private:
-std::vector<Fem2D::Mesh*> _vecmesh;
+std::vector<const Fem2D::Mesh*> _vecmesh;
 std::vector<tsinfo> _vecofts;
 std::string _nameoffile;
 /*! This string contains the name of data file with \\ where there's a \ in the path*/
@@ -88,8 +88,8 @@ public:
 		}
   }
 	
-  void addmesh(Fem2D::Mesh* mesh){
-		Fem2D::Mesh& Th(*mesh);
+  void addmesh(const Fem2D::Mesh* mesh){
+		const Fem2D::Mesh& Th(*mesh);
 		_vecmesh.push_back(mesh);
 		_ofdata.flags(std::ios_base::scientific);
 		_ofdata.precision(15);
@@ -109,9 +109,9 @@ public:
 		_ofdata<<"attribute \"ref\" string \"positions\" "<<std::endl<<std::endl;
   }
   /*!Add a new time series, defined on the mesh*/
-	void addtimeseries(const string& nameofts, Fem2D::Mesh* mesh){
+	void addtimeseries(const string& nameofts,const  Fem2D::Mesh* mesh){
 		tsinfo ts;ts.name=nameofts;
-		std::vector<Fem2D::Mesh*>::const_iterator first=_vecmesh.begin(), last=_vecmesh.end();
+		std::vector<const Fem2D::Mesh*>::const_iterator first=_vecmesh.begin(), last=_vecmesh.end();
 		if(std::find(first, last, mesh)==last){
 			addmesh(mesh);
 			ts.imesh=_vecmesh.size()-1;
@@ -144,8 +144,8 @@ public:
 	}
 	
 	/*!Add a field*/
-	void addfield(const string& nameoffield, Fem2D::Mesh* mesh, const KN<double>&val){
-		std::vector<Fem2D::Mesh*>::const_iterator first=_vecmesh.begin(), last=_vecmesh.end();
+	void addfield(const string& nameoffield,const Fem2D::Mesh* mesh, const KN<double>&val){
+		std::vector<const Fem2D::Mesh*>::const_iterator first=_vecmesh.begin(), last=_vecmesh.end();
 		int im;
 		if(std::find(first, last, mesh)==last){
 			addmesh(mesh);
@@ -168,7 +168,7 @@ public:
 	}
 	
 	/*!Get the mesh associated with the series nameofts*/
-	Fem2D::Mesh* getmeshts(const string& nameofts){
+	const Fem2D::Mesh* getmeshts(const string& nameofts){
 		for(int i=0;i<_vecofts.size();++i){
 			if(_vecofts[i].name==nameofts)return _vecmesh[_vecofts[i].imesh];
 		}
@@ -274,7 +274,7 @@ AnyType Dxwritesol_Op::operator()(Stack stack)  const
 	DxWriter &dx=*(GetAny<DxWriter *>((*edx)(stack)));
   string &name=*(GetAny<string *>((*ename)(stack)));
 	double t=GetAny<double>((*et)(stack));
-	Mesh &Th=*(dx.getmeshts(name));
+	const Mesh &Th=*(dx.getmeshts(name));
 
   int nt = Th.nt;
   int nv = Th.nv;
@@ -315,13 +315,13 @@ DxWriter* init_DxWriter(DxWriter * const &a, string * const & s)
   return a;
 } 
 
-void* call_addmesh( DxWriter * const & mt, Fem2D::Mesh* const & pTh)
+void* call_addmesh( DxWriter * const & mt,const Fem2D::Mesh* const & pTh)
 { 
   mt->addmesh(pTh);
   return NULL;
 }
 
-void* call_addtimeseries( DxWriter * const & mt,string * const & name, Fem2D::Mesh* const & pTh)
+void* call_addtimeseries( DxWriter * const & mt,string * const & name,const Fem2D::Mesh* const & pTh)
 { 
   mt->addtimeseries(*name, pTh);
   return NULL;
@@ -341,8 +341,8 @@ static void Load_Init(){
   // constructeur  d'un type myType  dans freefem 
   TheOperators->Add("<-", new OneOperator2_<DxWriter*, DxWriter* ,string*>(&init_DxWriter));
   
-  Global.Add("Dxaddmesh","(",new OneOperator2_<void *, DxWriter*, Fem2D::Mesh*>(call_addmesh)); 
-	Global.Add("Dxaddtimeseries","(",new OneOperator3_<void *, DxWriter*, std::string*, Fem2D::Mesh*>(call_addtimeseries)); 
+  Global.Add("Dxaddmesh","(",new OneOperator2_<void *, DxWriter*,const Fem2D::Mesh*>(call_addmesh));
+  Global.Add("Dxaddtimeseries","(",new OneOperator3_<void *, DxWriter*, std::string*,const Fem2D::Mesh*>(call_addtimeseries));
 	
 	Global.Add("Dxaddsol2ts","(",new OneOperatorCode< Dxwritesol_Op> );
   

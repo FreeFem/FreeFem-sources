@@ -370,7 +370,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 
 
 class SetMesh : public OneOperator { public:  
-typedef Mesh *pmesh;
+typedef Mesh const *pmesh;
     SetMesh() : OneOperator(atype<pmesh>(),atype<pmesh>() ) {}
   
   E_F0 * code(const basicAC_F0 & args) const 

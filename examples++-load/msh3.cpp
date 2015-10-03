@@ -2449,9 +2449,9 @@ basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
 
 AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const 
 {
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
-  Mesh & Th=*pTh;
-  Mesh *m= pTh;
+  const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
+  const Mesh & Th=*pTh;
+  const Mesh *m= pTh;
   int nbv=Th.nv;  // nombre de sommet 
   int nbt=Th.nt;  // nombre de triangles
   int nbe=Th.neb; // nombre d'aretes fontiere
@@ -2491,7 +2491,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   {
     KN<int> takemesh(nbv);  
     takemesh=0;  
-    Mesh &rTh = Th;
+    const Mesh &rTh = Th;
     for (int it=0; it<nbt; ++it){
       for( int iv=0; iv<3; ++iv){
 	int i=Th(it,iv);
@@ -6002,11 +6002,11 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
   return pThnew;    
 }
 
-bool AddLayers(Mesh3 * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+bool AddLayers(Mesh3 const  * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
 {
     ffassert(pTh && psupp && pphi);
     const int nve = Mesh3::Element::nv;
-    Mesh3 & Th= *pTh;
+    const Mesh3 & Th= *pTh;
     const int nt = Th.nt;
     const int nv = Th.nv;
     
@@ -6092,7 +6092,7 @@ static void Load_Init()
   Global.Add("extract","(",new ExtractMesh);
   Global.Add("extract","(",new ExtractMesh2D);
     
-  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
+  Global.Add("AddLayers","(",new OneOperator4_<bool, const Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
   typedef const Mesh3 *pmesh3;
  // Global.Add("trunc","(", new Op_trunc_mesh3);
 }

@@ -26,7 +26,7 @@ class VtkWriter
  };
  
 private:
- std::vector<Fem2D::Mesh*> _vecmesh;
+ std::vector<const Fem2D::Mesh*> _vecmesh;
  //std::vector<tsinfo> _vecofts;
  std::string _nameoffile;
 
@@ -53,9 +53,9 @@ public:
     }
   }
 
- void addmesh(Fem2D::Mesh* mesh)
+ void addmesh(const Fem2D::Mesh* mesh)
   {
-   Fem2D::Mesh& Th(*mesh);
+   const Fem2D::Mesh& Th(*mesh);
    _vecmesh.push_back(mesh);
    _ofdata.flags(std::ios_base::scientific);
    _ofdata.precision(15);
@@ -102,7 +102,7 @@ public:
   }
 
  /*!Add a field*/
- void addscalar(const string& nameoffield, Fem2D::Mesh* mesh, const KN<double>&val)
+ void addscalar(const string& nameoffield,const Fem2D::Mesh* mesh, const KN<double>&val)
   {
    _ofdata.flags(std::ios_base::scientific);
    _ofdata.precision(15);
@@ -117,7 +117,7 @@ public:
   }
  
   /*!Add a field*/
- void addvector(const string& nameoffield, Fem2D::Mesh* mesh, const KN<double>&val, const KN<double>&val2)
+ void addvector(const string& nameoffield,const Fem2D::Mesh* mesh, const KN<double>&val, const KN<double>&val2)
   {
    _ofdata.flags(std::ios_base::scientific);
    _ofdata.precision(15);
@@ -131,7 +131,7 @@ public:
   }
 
  /*!Get the mesh associated with the series nameofts*/
- Fem2D::Mesh* getmeshts(const string& nameofts)
+ const Fem2D::Mesh* getmeshts(const string& nameofts)
   {
    return _vecmesh[0];
   }
@@ -237,7 +237,7 @@ AnyType Vtkwritesol_Op::operator()(Stack stack)  const
  VtkWriter &dx=*(GetAny<VtkWriter *>((*edx)(stack)));
  string &name=*(GetAny<string *>((*ename)(stack)));
  //double t=GetAny<double>((*et)(stack));
- Mesh &Th=*(dx.getmeshts(name));
+ const Mesh &Th=*(dx.getmeshts(name));
  
  int nt = Th.nt;
  int nv = Th.nv;
@@ -311,7 +311,7 @@ VtkWriter* init_VtkWriter(VtkWriter * const &a, string * const & s)
  return a;
 } 
 
-void* call_addmesh( VtkWriter * const & mt, Fem2D::Mesh* const & pTh) {
+void* call_addmesh( VtkWriter * const & mt,const Fem2D::Mesh* const & pTh) {
   mt->addmesh(pTh);
   return NULL;
 }
@@ -333,7 +333,7 @@ static void Load_Init()
  zzzfff->Add("VtkWriter",atype<VtkWriter*>()); // ajoute le type myType a freefem++ 
  // constructeur  d'un type myType  dans freefem 
  TheOperators->Add("<-", new OneOperator2_<VtkWriter*, VtkWriter* ,string*>(&init_VtkWriter));
- Global.Add("Vtkaddmesh","(",new OneOperator2_<void *, VtkWriter*, Fem2D::Mesh*>(call_addmesh)); 
+ Global.Add("Vtkaddmesh","(",new OneOperator2_<void *, VtkWriter*,const Fem2D::Mesh*>(call_addmesh));
  Global.Add("Vtkaddscalar","(",new OneOperatorCode< Vtkwritesol_Op> );
  
 }
