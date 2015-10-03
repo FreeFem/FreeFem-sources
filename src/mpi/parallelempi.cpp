@@ -124,6 +124,9 @@ template<> struct MPI_TAG<KN<double>* >   {static const int TAG=12;};
 template<> struct MPI_TAG<KN<Complex>* >   {static const int TAG=13;};
 template<> struct MPI_TAG<Mesh *>   {static const int TAG=1000;};
 template<> struct MPI_TAG<Mesh3 *>   {static const int TAG=1010;};
+template<> struct MPI_TAG<const Mesh *>   {static const int TAG=1000;};
+template<> struct MPI_TAG<const Mesh3 *>   {static const int TAG=1010;};
+
 template<> struct MPI_TAG<Matrice_Creuse<double> *>   {static const int TAG=1020;};
 template<> struct MPI_TAG<Matrice_Creuse<Complex> *>   {static const int TAG=1030;};
 
@@ -2500,8 +2503,8 @@ void f_init_lgparallele()
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<double> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<long> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<Complex> *> >);
-     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Mesh *> >);
-     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Mesh3 *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh3 *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<R> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<Complex> *> >);
      
