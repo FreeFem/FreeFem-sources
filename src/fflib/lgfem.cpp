@@ -1590,6 +1590,15 @@ KN<K> * pfer2vect( pair<FEbase<K,v_fes> *,int> p)
     }
     return x;}
 
+
+template<class K>
+pmesh pfer_Th(pair<FEbase<K,v_fes> *,int> p)
+{
+    if (!p.first->Vh) p.first->Vh= p.first->newVh();
+    throwassert( !!p.first->Vh);
+    return &p.first->Vh->Th;
+}
+
 template<class K>        
 long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
  {  
@@ -5022,6 +5031,8 @@ void  init_lgfem()
  
  Add<pfer>("[]",".",new OneOperator1<KN<double> *,pfer>(pfer2vect<R>));
  Add<pfec>("[]",".",new OneOperator1<KN<Complex> *,pfec>(pfer2vect<Complex>));
+    
+    
  Add<pfer>("(","",new OneTernaryOperator<Op3_pfe2K<R>,Op3_pfe2K<R>::Op> );
  Add<pfec>("(","",new OneTernaryOperator<Op3_pfe2K<Complex>,Op3_pfe2K<Complex>::Op> );
  Add<double>("(","",new OneTernaryOperator<Op3_K2R<R>,Op3_K2R<R>::Op> );
@@ -5036,6 +5047,9 @@ void  init_lgfem()
  
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
+ Add<pfer>("Th",".",new OneOperator1<pmesh ,pfer>(pfer_Th<R>));
+ Add<pfec>("Th",".",new OneOperator1<pmesh,pfec>(pfer_Th<Complex>));
+    
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
