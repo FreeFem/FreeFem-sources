@@ -165,6 +165,7 @@ install-exec-local::FreeFem++-CoCoa  script/PostInstall.sh
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/etc/paths.d/
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/usr/local/bin
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
+	$(INSTALL_SCRIPT) CheckAll CheckAllEdp $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
 	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
