@@ -25,7 +25,7 @@ examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
 WHERE_LIBRARY-mkl FreeFem++-CoCoa.in  \
 uninstall-ff++ \
 ./build/cleancrlf		./build/download		./build/links2files \
-./build/orgindex ./build/ff-md5
+./build/orgindex ./build/ff-md5  script/PostInstall.m4
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -160,11 +160,20 @@ clean-local::
 
 # Native MacOS packaging
 # ----------------------
-install-exec-local::FreeFem++-CoCoa 
+install-exec-local::FreeFem++-CoCoa  script/PostInstall.sh
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
+	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/etc/paths.d/
+	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/usr/local/bin
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
 	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
-	-test `uname` = Darwin && $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
+	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
+	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
+	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
+
+script/PostInstall.sh:./Makefile script/PostInstall.m4
+	m4 script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" >script/PostInstall.sh
+	chmod a+x script/PostInstall.sh
+
 
 
 ListFiles-natives: .FORCE  FreeFem++-CoCoa
