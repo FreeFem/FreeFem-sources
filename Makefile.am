@@ -128,6 +128,7 @@ speedtest: all
 # information from the Debian Changelog to get the package release
 # number as well.
 win32:WindowsPackage.iss
+	test ! -d examples++-load/include-tmp  || rm -r examples++-load/include-tmp 
 	cd examples++-load;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr *.h include/* include-tmp
 WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
