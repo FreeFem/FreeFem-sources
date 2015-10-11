@@ -80,7 +80,7 @@ download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
 	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz','14830d758f195f272b8594a493501fa2');
 
 download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz',
-	 '5e99e975f7a1e3ea6abcad7c6e7e42e6');
+	 'ca21ed426f347c6ec6b136a181e587e5');
 download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz',
 	 '1e8830f622d2112239a4a8a83b84209a');
 
