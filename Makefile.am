@@ -39,7 +39,8 @@ examples++-load/load.link \
 examples++-load/fig.pgm	examples++-load/lg.pgm \
 ./examples++-mpi/regtests.sh ./examples++-other/speedtest.sh  \
 ./download/fftw/Makefile ./download/fftw/Makefile.am \
-examples++*/*.[ie]dp  CheckAllEdp
+examples++*/*.[ie]dp  CheckAllEdp \
+examples++-load/ch.pts 
 
 
 # Creates a file named "ChangeLog" containing the chronology of all
