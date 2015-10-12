@@ -3,7 +3,7 @@
 # "-DFF_BINDIR=$(bindir)" 
 # "-DFF__DATADIR=$(pkgdatadir)
 #  "FFBIN="@prefix@"/bin
-ff_desktop="$HOME/Desktop/edp-""FF__FVER"
+ff_desktop="$HOME/Desktop/FreeFem++-""FF__FVER"
 mkdir -p -m 0755 /etc/paths.d
 ln -sf "FF__DATADIR"/"freefem++doc.pdf" "$HOME/Desktop"
 test -e "$ff_desktop" || ln -sf "FF__DATADIR"/"FF__FVER" "$ff_desktop"
