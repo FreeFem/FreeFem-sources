@@ -215,14 +215,14 @@ sub download{
   # skip packages that are already present
   if(-f "pkg/$pkg" && !$opts{f}){
     my $md5check=md5_hex(`cat pkg/$pkg`);
-  if( ( $md5 eq "none") || ($md5check eq $md5))
-   {
-    print "$title $pkg done\n";
-    return;
-   }
+    if( ( $md5 eq "none") || ($md5check eq $md5))
+      {
+	print "$title $pkg done\n";
+	return;
+      }
 
-  else {
-   print "$title $pkg  md5 change => reget \n";
+    else {
+      print "$title $pkg  md5 change => reget \n";
     }
   }
 
