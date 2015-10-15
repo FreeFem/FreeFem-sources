@@ -33,7 +33,8 @@ download::
 	../getall -o $(PKGCOMMON_PACKTITLE) -a
 $(PKGCOMMON_PACKAGES):download
 
-compilepkg::download
+## regle qui force le telecharmeent a l'install je vide F. H 
+compilepkg::
 
 # <<install>>
 

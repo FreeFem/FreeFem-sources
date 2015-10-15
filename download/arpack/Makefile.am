@@ -90,8 +90,8 @@ ARPACK/fait ARPACK/ARmake.incnew: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4
 	    ARmake.m4 >ARPACK/ARmake.incnew
 	touch ARPACK/fait
 
-$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):
-	../getall -o ARPACK -a
+$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):download
+#	../getall -o ARPACK -a
 
 clean-local::
 	-rm -r ARPACK ../lib/libarpack.a
