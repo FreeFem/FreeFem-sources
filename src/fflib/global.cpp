@@ -173,6 +173,9 @@ EnvironmentData  ffenvironment;
 
 basicForEachType *basicForEachType::tnull=0;
 E_F0 *E_F0::tnull=0;
+
+long newconvect3=0;// old convect 3d
+
 CodeAlloc *CodeAlloc::tnull=0;
 
 #include <RefCounter.hpp>
