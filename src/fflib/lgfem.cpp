@@ -2260,7 +2260,8 @@ class Convect : public E_F0mps  { public:
     AnyType operator()(Stack s) const ; 
     AnyType eval2(Stack s) const ; 
     AnyType eval3(Stack s) const ; 
-    operator aType () const { return atype<Result>();}         
+    AnyType eval3n(Stack s) const ;
+    operator aType () const { return atype<Result>();}
     
 };
 
@@ -4313,7 +4314,7 @@ AnyType Plot::operator()(Stack s) const{
 AnyType Convect::operator()(Stack s) const 
 {  
     if(d==2)  return eval2(s);
-    else  return eval3(s);    
+    else  return eval3(s);
 }
 
 AnyType Convect::eval2(Stack s) const
@@ -4381,8 +4382,11 @@ inline int FindandAdd(set<int> *st,vector<int> & lst,int k)
 }
 
 
+
 AnyType Convect::eval3(Stack s) const
 {
+    extern long newconvect3;
+    if(newconvect3) return eval3n(s);//  New Convect in test
     MeshPoint* mp(MeshPointStack(s));
     static MeshPoint mpp,mps;
     static R ddts;
@@ -4453,6 +4457,77 @@ AnyType Convect::eval3(Stack s) const
     return r;
 }
 
+AnyType Convect::eval3n(Stack s) const
+{
+    MeshPoint* mp(MeshPointStack(s));
+    static MeshPoint mpp,mps;
+    static R ddts;
+    randwalk(-1); // init randwalk
+    //  set<int> *st=0;
+    // vector<int> lst;
+    
+    R ddt = GetAny<double>((*dt)(s));
+    if (ddt)
+    {
+        bool ddd=verbosity>1000;
+        MeshPoint mpc(*mp);
+        MeshPointStack(s,&mpc);
+        if(*mp==mpp && ddt == ddts)
+            mpc=mps;
+        else
+        {
+            
+            const Mesh3 & Th3(*mp->Th3);
+            ffassert(mp->Th3 && mp->T3);
+            R3 PHat=mpc.PHat;
+            
+            int k=0;
+            int j;
+            int it=Th3(mpc.T3);
+            if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
+            while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0)
+                if(j>3)  {
+                    it=j-4;
+                    mpc.change(PHat,Th3[it],0);
+                    if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it << "ddt=" << ddt ;
+                    if(ddt==0) break; // finish ...
+                    
+                }
+                else
+                {
+                    if(ddd) cout << "P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
+#ifdef DEBUG
+                    R3  Po=(*mpc.T3)(PHat),Pho=PHat; int ito=it;
+#endif
+                    int itt =  Th3.ElementAdj(it,j,PHat);
+                    if(ddd && itt>=0) cout << "  -> " << itt << " " << j  << "  : Pn " <<  Th3[itt](PHat) << " PHn " << PHat << " , " << ddt << endl;
+                    if(itt<0) break;
+                    it=itt;
+                    mpc.change(PHat,Th3[it],0);
+#ifdef DEBUG
+                    if(((Po-mpc.P).norme2() > 1e-10))
+                    {   cout << ito << " " << &Th3[ito][0] << " " << &Th3[ito][1] << " " << &Th3[ito][2] << " " << &Th3[ito][3] << " "  << endl;
+                        cout << it << " " <<  &Th3[it][0] << " " <<  &Th3[it][1] << " " <<  &Th3[it][2] << " " <<  &Th3[it][3] << endl;
+                        cout << Pho  << "o Hat " << PHat << endl;
+                        cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
+                        assert(0);
+                        
+                    }
+#endif
+                    ffassert(k++<2000);
+                }
+            
+            mpc.change(PHat,Th3[it],0);
+            mpp=*mp;
+            mps=mpc;
+        }
+    }
+    ddts=ddt;
+    AnyType r= (*ff)(s);
+    MeshPointStack(s,mp);
+    
+    return r;
+}
 
 
 

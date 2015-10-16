@@ -1075,7 +1075,9 @@ void Init_map_type()
       
      Global.New("verbosity",CPValue<long>(verbosity));
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
-     
+    extern long newconvect3;// def in global.cpp 
+    Global.New("newconvect",CPValue<long>(newconvect3)); //pichon
+    
      Global.New("cout",CConstant<ostream*>(&cout));
      Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));
