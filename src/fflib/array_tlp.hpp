@@ -189,7 +189,11 @@ inline   K * get_element( MyMap<String,K> *  const  &  a,string*  const   & b)
   //  cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
    // delete b;  modif mars 2006 auto del ptr
     return ret;}
-    
+
+template<class K>
+inline   bool exist_element( MyMap<String,K> *  const  &  a,string*  const   & b)
+{     return  a->exist(*b);}
+
 template<>
 inline   string ** get_element<string*>( MyMap<String,string*> *  const  &  a,string*  const   & b)
  { string** ret=  &((*a)[*b]); // correction FH feb 2004
@@ -1391,6 +1395,7 @@ void ArrayOperator()
      map_type_of_map[make_pair(atype<string*>(),atype<K>())]=atype<MyMap<String,K>*>(); 
      
      atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
+     TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
     
     // Add Mai 2009
     Dcl_Type<SetArray<K> >();

@@ -134,6 +134,7 @@ class MyMap {
   //   cout << " MyMap::= " << m << " = " << M.m << endl;
      delete m;m=new map<K,V>(M);
     }
+    bool exist(const K & k) const { return m&&  (m->find(k)!= m->end());}
   V &operator[](const K & k) {
   throwassert(m);
   typename map<K,V>::iterator i=m->find(k);
