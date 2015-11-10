@@ -139,7 +139,7 @@ bool load(string ss)
 	    // <<STATIC_LINKING>> Enable statically linked libraries for [[file:~/fflib/Makefile::STATIC_LINKING]] - ALH
 	    bool ok=false;
 
-	    // <<static_load_msh3>> [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]] AAA-ALH-HERE
+	    // <<static_load_msh3>> [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]]
 	    if(ss=="msh3"){
 	      
 	      // [[file:~/ff/examples++-load/msh3.cpp::msh3_Load_Init]]
