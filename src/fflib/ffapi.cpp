@@ -31,12 +31,12 @@
 #include <petsc.h>
 #endif
 
-// headerfilter [[shell:headerfilter ffapi.cpp]]
+// headerfilter [[shell:headerfilter '../../ff/src/fflib/ffapi.cpp']] [[file:~/alh/bin/headerfilter]]
 #include "ffapi.hpp" // [[file:ffapi.hpp]] found by [[file:~/alh/bin/headerfilter]]
 #ifdef FFLANG
 #include "socket.hpp"
 #include "spawn.hpp"
-#include "buffer.hpp"
+#include "buffer.hpp" // [[file:~/ffcs/src/buffer.hpp::Buffer]]
 #endif
 #include <iostream>
 #include <cstdio>
@@ -56,13 +56,6 @@
 #ifdef PARALLELE
 #include "mpi.h"
 #endif
-#endif
-#include <dirent.h>
-#include <strings.h>
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
 #endif
 
 extern long verbosity ;
