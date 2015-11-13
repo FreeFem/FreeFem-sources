@@ -279,8 +279,8 @@ $1 */
 
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
 
-  typedef Mesh *pmesh;
-  typedef Mesh3 *pmesh3;
+  typedef const Mesh *pmesh;
+  typedef const Mesh3 *pmesh3;
 
   
   if (verbosity)

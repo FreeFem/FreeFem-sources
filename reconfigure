@@ -1,5 +1,8 @@
 #!/bin/sh
-if [ -f ./configure.param ]; then 
+if [ -f ./config.param ]; then 
+  cat ./config.param | xargs echo "$@"
+  cat ./config.param | xargs  ./configure "$@"
+elif [ -f ./configure.param ]; then 
   echo ./configure `cat ./configure.param` "$@"
   echo ./configure `cat ./configure.param` "$@"|sh
 else

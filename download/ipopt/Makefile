@@ -13,7 +13,7 @@ DIRPKG=../pkg
 SRCDIR=Ipopt-$(VERSION)
 PACKAGE=$(DIRPKG)/Ipopt-$(VERSION).tgz
 INSTALL=../..
-VERSION=3.10.2
+VERSION=3.12.4
 # 3.10.2
 URL=http://www.coin-or.org/download/source/Ipopt
 FHSL=#$(DIRPKG)/ddeps.f $(DIRPKG)/ma27ad.f  $(DIRPKG)/mc19d.f 
@@ -68,7 +68,7 @@ $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
 $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL) 
 	tar xvzf $(PACKAGE)
-	patch -p0 <patch-IpBlas
+#	patch -p0 <patch-IpBlas
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE):

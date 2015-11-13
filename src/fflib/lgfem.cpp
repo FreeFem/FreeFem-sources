@@ -1331,7 +1331,7 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     ~Op() { if(periodic) delete []periodic;}
     AnyType operator()(Stack s)  const {  
       const int d = Mesh::Rd::d;
-      Mesh ** ppTh = GetAny<Mesh  **>( (*eppTh)(s) );
+      const Mesh ** ppTh = GetAny<const Mesh  **>( (*eppTh)(s) );
       AnyType r = (*eppfes)(s) ;
       const TypeOfFE ** tef= new  const TypeOfFE * [ atef.size()];
       for (int i=0;i<atef.size();i++)
@@ -1380,7 +1380,7 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     return  new Op(args[0],args[1],*a2,nbcperiodic,periodic,tedim);
   } 
   OpMake_pfes() : 
-    OneOperator(atype<pfes*>(),atype<pfes*>(),atype<Mesh **>(),atype<E_Array>()) {}
+    OneOperator(atype<pfes*>(),atype<pfes*>(),atype<const Mesh **>(),atype<E_Array>()) {}
 };
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a, TypeOfFE * const & tef)
@@ -1590,6 +1590,15 @@ KN<K> * pfer2vect( pair<FEbase<K,v_fes> *,int> p)
     }
     return x;}
 
+
+template<class K>
+pmesh pfer_Th(pair<FEbase<K,v_fes> *,int> p)
+{
+    if (!p.first->Vh) p.first->Vh= p.first->newVh();
+    throwassert( !!p.first->Vh);
+    return &p.first->Vh->Th;
+}
+
 template<class K>        
 long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
  {  
@@ -1609,6 +1618,10 @@ long pmesh_nv(pmesh * p)
 long pVh_ndof(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p; ;  return fes->NbOfDF ;}
+pmesh pVh_Th(pfes * p)
+{ throwassert(p && *p);
+    FESpace *fes=**p; ;  return &fes->Th ;}
+
 long pVh_nt(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p; ;  return fes->NbOfElements ;}
@@ -2247,7 +2260,8 @@ class Convect : public E_F0mps  { public:
     AnyType operator()(Stack s) const ; 
     AnyType eval2(Stack s) const ; 
     AnyType eval3(Stack s) const ; 
-    operator aType () const { return atype<Result>();}         
+    AnyType eval3n(Stack s) const ;
+    operator aType () const { return atype<Result>();}
     
 };
 
@@ -2269,10 +2283,13 @@ public:
     struct ListWhat {
 	int what,i;
 	int cmp[3];
-	int n;	
-	void * v[3];//  for 
-	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(v[0]);}
-	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(v[0]);}
+	int n;
+       union {
+	void * v[3];//  for
+        const void * cv[3];//  for
+       };
+	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
+	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
 	
 	void Set(int nn=0,void **vv=0,int *c=0) {
 	    cmp[0]=cmp[1]=cmp[2]=-1;
@@ -2284,13 +2301,30 @@ public:
 		  if(vv) v[i]=vv[i];
 	      }		   
 	}	
+        void Set(int nn,const void **vv,int *c=0) {
+            cmp[0]=cmp[1]=cmp[2]=-1;
+            v[0]=v[1]=v[2]=0;
+            cv[0]=cv[1]=cv[2]=0;
+            n=nn;
+            for(int i=0;i<nn;++i)
+            {
+                if(c) cmp[i]=c[i];
+                if(vv) cv[i]=vv[i];
+            }		   
+        }	
 	
 	ListWhat(int w=-1,int ii=-1 )
 	: what(w),i(ii) {Set();}
 	ListWhat(int what,int ii,int n,void ** f0,int *c)
 	: what(what),i(ii){ Set(n,f0,c);}
+        ListWhat(int what,int ii,int n,const void ** f0,int *c)
+        : what(what),i(ii){ Set(n,f0,c);}
+        
 	ListWhat(int what,int ii,void * f0)
 	: what(what),i(ii){ Set(1,&f0,0);}
+        
+        ListWhat(int what,int ii,const void * f0)
+        : what(what),i(ii){ Set(1,&f0,0);}
 	
 	template<typename S>
 	void eval(S *f,int *c)
@@ -2407,7 +2441,7 @@ public:
 	     {
 	       th= ath->operator[](j);
 	       if(th) 		    
-		ll.push_back(ListWhat(what%100,ii,static_cast<void *>(th)));
+		ll.push_back(ListWhat(what%100,ii,static_cast<const void *>(th)));
        
 	     }
 	   return n;
@@ -2458,7 +2492,7 @@ public:
 	      {pf3carray p= GetAny< pf3carray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
 	
-	Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
+	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
@@ -4295,7 +4329,7 @@ AnyType Plot::operator()(Stack s) const{
 AnyType Convect::operator()(Stack s) const 
 {  
     if(d==2)  return eval2(s);
-    else  return eval3(s);    
+    else  return eval3(s);
 }
 
 AnyType Convect::eval2(Stack s) const
@@ -4354,12 +4388,27 @@ AnyType Convect::eval2(Stack s) const
   return r;
 }
 
+inline int FindandAdd(set<int> *st,vector<int> & lst,int k)
+{
+    if(lst.size() < 10)
+    {
+      
+    }
+}
+
+
+
 AnyType Convect::eval3(Stack s) const
 {
+    extern long newconvect3;
+    if(newconvect3) return eval3n(s);//  New Convect in test
     MeshPoint* mp(MeshPointStack(s));
     static MeshPoint mpp,mps;
     static R ddts;
     randwalk(-1); // init randwalk
+   //  set<int> *st=0;
+   // vector<int> lst;
+    
     R ddt = GetAny<double>((*dt)(s));
     if (ddt)
     {
@@ -4423,6 +4472,77 @@ AnyType Convect::eval3(Stack s) const
     return r;
 }
 
+AnyType Convect::eval3n(Stack s) const
+{
+    MeshPoint* mp(MeshPointStack(s));
+    static MeshPoint mpp,mps;
+    static R ddts;
+    randwalk(-1); // init randwalk
+    //  set<int> *st=0;
+    // vector<int> lst;
+    
+    R ddt = GetAny<double>((*dt)(s));
+    if (ddt)
+    {
+        bool ddd=verbosity>1000;
+        MeshPoint mpc(*mp);
+        MeshPointStack(s,&mpc);
+        if(*mp==mpp && ddt == ddts)
+            mpc=mps;
+        else
+        {
+            
+            const Mesh3 & Th3(*mp->Th3);
+            ffassert(mp->Th3 && mp->T3);
+            R3 PHat=mpc.PHat;
+            
+            int k=0;
+            int j;
+            int it=Th3(mpc.T3);
+            if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
+            while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0)
+                if(j>3)  {
+                    it=j-4;
+                    mpc.change(PHat,Th3[it],0);
+                    if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it << "ddt=" << ddt ;
+                    if(ddt==0) break; // finish ...
+                    
+                }
+                else
+                {
+                    if(ddd) cout << "P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it ;
+#ifdef DEBUG
+                    R3  Po=(*mpc.T3)(PHat),Pho=PHat; int ito=it;
+#endif
+                    int itt =  Th3.ElementAdj(it,j,PHat);
+                    if(ddd && itt>=0) cout << "  -> " << itt << " " << j  << "  : Pn " <<  Th3[itt](PHat) << " PHn " << PHat << " , " << ddt << endl;
+                    if(itt<0) break;
+                    it=itt;
+                    mpc.change(PHat,Th3[it],0);
+#ifdef DEBUG
+                    if(((Po-mpc.P).norme2() > 1e-10))
+                    {   cout << ito << " " << &Th3[ito][0] << " " << &Th3[ito][1] << " " << &Th3[ito][2] << " " << &Th3[ito][3] << " "  << endl;
+                        cout << it << " " <<  &Th3[it][0] << " " <<  &Th3[it][1] << " " <<  &Th3[it][2] << " " <<  &Th3[it][3] << endl;
+                        cout << Pho  << "o Hat " << PHat << endl;
+                        cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
+                        assert(0);
+                        
+                    }
+#endif
+                    ffassert(k++<2000);
+                }
+            
+            mpc.change(PHat,Th3[it],0);
+            mpp=*mp;
+            mps=mpc;
+        }
+    }
+    ddts=ddt;
+    AnyType r= (*ff)(s);
+    MeshPointStack(s,mp);
+    
+    return r;
+}
 
 
 
@@ -5001,6 +5121,8 @@ void  init_lgfem()
  
  Add<pfer>("[]",".",new OneOperator1<KN<double> *,pfer>(pfer2vect<R>));
  Add<pfec>("[]",".",new OneOperator1<KN<Complex> *,pfec>(pfer2vect<Complex>));
+    
+    
  Add<pfer>("(","",new OneTernaryOperator<Op3_pfe2K<R>,Op3_pfe2K<R>::Op> );
  Add<pfec>("(","",new OneTernaryOperator<Op3_pfe2K<Complex>,Op3_pfe2K<Complex>::Op> );
  Add<double>("(","",new OneTernaryOperator<Op3_K2R<R>,Op3_K2R<R>::Op> );
@@ -5015,6 +5137,9 @@ void  init_lgfem()
  
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
+ Add<pfer>("Th",".",new OneOperator1<pmesh ,pfer>(pfer_Th<R>));
+ Add<pfec>("Th",".",new OneOperator1<pmesh,pfec>(pfer_Th<Complex>));
+    
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
@@ -5022,7 +5147,8 @@ void  init_lgfem()
     
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
- Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
+ Add<pfes*>("Th",".",new OneOperator1<pmesh,pfes*>(pVh_Th));
+    Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
  Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
  Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
 /* FH: ne peux pas marcher, il faut passer aussi le nouveau Vh

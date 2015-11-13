@@ -10,6 +10,7 @@ LIBBLAS =  @BLASLIBS@
 LIBLAPACK =@LAPACKLIBS@
 WGET=@WGET@
 CXXCPP=@CXXCPP@
+host_os = @host_os@
 
 # <<FLIBS>> ALH - 6/1/14 - Ipopt fails to guess FLIBS correctly on Windows+Cygwin+Mingw64
 

@@ -135,7 +135,7 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	# At the moment, we do not know how to produce correct
 	# optimizated code on G5.
 	AC_MSG_CHECKING(PowerPC architecture)
-	ff_machine=`/usr/bin/machine`
+	ff_machine=`(test -x /usr/bin/machine && /usr/bin/machine) || echo unknow`
         ff_fast="-O3"
 	if test	-n "$ff_clang" ; then
           ff_fast='-O3'

@@ -60,7 +60,7 @@ using namespace std;
 #include "MeshPoint.hpp"
 #include "PlotStream.hpp"
 #include <set>
-Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
+const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
 { 
   using namespace bamg;
   bamg::Triangles & th (*tTh);
@@ -238,7 +238,7 @@ Fem2D::Mesh *bamg2msh(const bamg::Geometry &Gh)
 
 
 
-bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,long * reqedgeslab,int nreqedgeslab)
+ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,long * reqedgeslab,int nreqedgeslab)
   
 {
   using namespace bamg;
@@ -310,7 +310,7 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,long * req
 }
 
 
-bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian, 
+ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
                            int  nbdfv, int * ndfv,int  nbdfe, int * ndfe,
 			   long * reqedgeslab,int nreqedgeslab)
 {
@@ -413,7 +413,7 @@ bamg::Triangles * msh2bamg(const Fem2D::Mesh & Th,double cutoffradian,
 
 
 
-Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern)
+const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern)
 {
     int nbvinter=0;
     if( pintern)
@@ -723,7 +723,7 @@ Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justbound
     }
   Gh->NbEquiEdges=0;
   Gh->NbCrackedEdges=0;
-  Fem2D::Mesh * m=0;
+  const Fem2D::Mesh * m=0;
   if (justboundary)
     m=bamg2msh(*Gh);
   else 
@@ -933,16 +933,16 @@ void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
     mp=mps; 
 }
 
-Fem2D::Mesh *  BuildMeshBorder(Stack stack, E_BorderN const * const & b) 
+const Fem2D::Mesh *  BuildMeshBorder(Stack stack, E_BorderN const * const & b)
 {
   return BuildMesh(stack,b,true,0,true);
 }
-Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool Requiredboundary) 
+const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool Requiredboundary)
 {
   return BuildMesh(stack,b,false,0,Requiredboundary);
 }
 
-Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
+const Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
   using namespace Fem2D;
   KN<R2> xy;
   char c;
@@ -974,7 +974,7 @@ Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
   return m;
   
 }
-Fem2D::Mesh *  Triangulate( const  KN_<double> & xx,const  KN_<double> & yy) 
+const Fem2D::Mesh *  Triangulate( const  KN_<double> & xx,const  KN_<double> & yy)
 {
     using namespace Fem2D;
     ffassert(xx.N()==yy.N());
@@ -989,18 +989,18 @@ Fem2D::Mesh *  Triangulate( const  KN_<double> & xx,const  KN_<double> & yy)
     return m;
     
 }
-Fem2D::Mesh *  ReadMeshbamg( string * const & s) {
+const Fem2D::Mesh *  ReadMeshbamg( string * const & s) {
   using bamg::Triangles;
   Triangles * bTh= new Triangles(s->c_str());
   // bTh->inquire();
-  Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
+ const Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
   // delete s; modif mars 2006 auto del ptr
  //  m->decrement();  07/2008 FH  auto del ptr
   return m;
 }
 
-Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
+const Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
 
   using bamg::Triangles;
   using bamg::Geometry;
@@ -1010,7 +1010,7 @@ Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
   int nbvx = nbvxin ? nbvxin : ((Gh.nbv*Gh.nbv)/9 +1000); 
   Triangles * bTh=  new Triangles(nbvx,Gh);
   // bTh->inquire();
-  Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
+  const Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
  //  delete s; modif mars 2006 auto del ptr
  // m->decrement();

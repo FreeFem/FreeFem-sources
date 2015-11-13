@@ -1,3 +1,15 @@
+ - coorect trouble in configure this /usr/bin/machine 
+ - map&key to know if a key exist in a map int[strint], ....  
+ - add tools to get mesh of fespace Vh in 2d and 3d 
+     mesh th2= Vh2d.Th ;  mesh3 th3= Vh3d.Th ; 
+     not the type of the mesh is a cosnt pointeur   => lot of cosmetic change
+version 3.40-2
+ - try to resolve probleme with petsc metis and freefem++ metis
+     now freefem++ use petsc lib if petsc is find for
+       parmetis, metis,ptscotch,scotch,fftw3_mpi, mumps,scalapack
+ - correct hpddm examples
+ - rename plugin schowarz in hpddm 
+ - correct problem on compilation do scotch 
 version 3.40-1 
  -  move of all hpddm code un examples  examples++-hpddm ( Own by  P. Jolivet and F. Hecht)
 version 3.40 (14 sep. 2015)

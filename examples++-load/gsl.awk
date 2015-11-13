@@ -5,6 +5,8 @@ BEGIN {FS="[(),]";
     FLOAD="gsl"
     LANG="C";
     edp=FLOAD ".idp";
+    tex=FLOAD ".tex";
+    print "\\begin{itemize}\n" > tex
     c="\"";
     pp=c "(" c;
     print " /*  ";
@@ -31,6 +33,8 @@ BEGIN {FS="[(),]";
  }
 
 function f0(f) { xx=f;gsub("_","",xx) ; return  xx  };
+function f0tex(f) { xx=f;gsub("_","",xx) ; return  "\\texttt{" xx "}"  };
+function ftex(f) { xx=f;gsub("_","\\_",xx) ; return  "\\texttt{" xx "}"  };
 function ff(f) { return c f0(f) c };
 function VV(t) { if ( V0[t] !=0) return V0[t]; else return 0;}
 function ana1()
@@ -89,6 +93,8 @@ NF ==3 {
 	cm = cm  gg;
 	v0 = VV(T[1]);
 	print "cout << " c  f "("v0") =  " c " << " f0(f) "("v0")  << endl; "> edp
+	print "\\item " ftex(f) "(a) $\\quad \\mapsto\\quad $ "  f0tex(f) "(a) " > tex; 
+
 	}
 }
 
@@ -111,6 +117,7 @@ NF ==4 {
 	v1 = VV(T[2]);
 	
 	print "cout << " c  f "(" v0 ", "v1 ") =  " c " << " f0(f) "(" v0 ",",v1 ")  << endl; "> edp
+	print "\\item " ftex(f) "(a,b) $\\quad \\mapsto\\quad $ "  f0tex(f) "(a,b) " > tex; 
 	}
 }
 
@@ -136,6 +143,8 @@ NF ==5 {
 	v2 = VV(T[3]);
 	
 	print "cout << " c  f "(" v0 "," v1 "," v2 ") =  " c " << " f0(f) "(" v0 "," v1 "," v2 ")  << endl; "> edp
+	print "\\item " ftex(f) "(a,b,c) $\\quad \\mapsto\\quad $ "  f0tex(f) "(a,b,c) " > tex; 
+
 	}
 }
 
@@ -146,7 +155,7 @@ ok !=1 {
 END {   print " */ "
 	print "/*****************/";
 	print "/*****************/";
-
+    print "\\end{itemize}\n" > tex
 	print cw ;
 
 	print "/*****************/";

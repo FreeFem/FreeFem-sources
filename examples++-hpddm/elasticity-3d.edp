@@ -1,4 +1,5 @@
-if(0) { // not work to day => remove ...  Sorry FH.
+if(1) { // not work to day => remove ...  Sorry FH.
+//if(mpirank==0) { int i; cin >> i;} // wiat for debug 
 // Author : P. Jolivet 
 /*# Script #*/
 macro K()real// EOM

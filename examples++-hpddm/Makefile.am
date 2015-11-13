@@ -33,7 +33,7 @@ additional.idp			macro.idp		 \
 argv.idp			macro_3d.idp			schwarz-additional_macro.idp \
 getARGV.idp			schwarz-skel.idp 
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) ./skeleton.cpp ./schwarz.hpp ./substructuring.cpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
+EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./schwarz.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be

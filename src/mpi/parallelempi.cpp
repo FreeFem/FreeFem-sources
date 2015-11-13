@@ -124,6 +124,9 @@ template<> struct MPI_TAG<KN<double>* >   {static const int TAG=12;};
 template<> struct MPI_TAG<KN<Complex>* >   {static const int TAG=13;};
 template<> struct MPI_TAG<Mesh *>   {static const int TAG=1000;};
 template<> struct MPI_TAG<Mesh3 *>   {static const int TAG=1010;};
+template<> struct MPI_TAG<const Mesh *>   {static const int TAG=1000;};
+template<> struct MPI_TAG<const Mesh3 *>   {static const int TAG=1010;};
+
 template<> struct MPI_TAG<Matrice_Creuse<double> *>   {static const int TAG=1020;};
 template<> struct MPI_TAG<Matrice_Creuse<Complex> *>   {static const int TAG=1030;};
 
@@ -320,7 +323,7 @@ struct MPIrank {
   }
   
   
-  const MPIrank & Bcast(Fem2D::Mesh *&  a) const {
+  const MPIrank & Bcast(Fem2D::Mesh const *&  a) const {
     if(verbosity>1) 
       cout << " MPI Bcast  (mesh *) " << a << endl;
     Serialize  *buf=0;
@@ -342,18 +345,19 @@ struct MPIrank {
     if(who != mpirank)
       {
 	if (a) (*a).decrement();
-	a= new Fem2D::Mesh(*buf);
+        Fem2D::Mesh *pTh= new Fem2D::Mesh(*buf);
 	Fem2D::R2 Pn,Px;
-	a->BoundingBox(Pn,Px);
-	a->quadtree=new Fem2D::FQuadTree(a,Pn,Px,a->nv);
+	pTh->BoundingBox(Pn,Px);
+	pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
+        a=pTh;
       }   
     delete buf;      
     return *this;
    }
   
-  const MPIrank & Bcast(Fem2D::Mesh3 *&  a) const {
+  const MPIrank & Bcast(Fem2D::Mesh3 const *&  a) const {
     if(verbosity>1) 
-      cout << " MPI Bcast  (mesh3 *) " << a << endl;
+      cout << " MPI Bcast  (const mesh3 *) " << a << endl;
     Serialize  *buf=0;
     long  nbsize=0;
     if(  who == mpirank)  
@@ -373,8 +377,9 @@ struct MPIrank {
 	if(who != mpirank)
 	  {
 	    if (a) (*a).decrement();
-	    a= new Fem2D::Mesh3(*buf);
-	    a->BuildGTree();
+	    Fem2D::Mesh3 * aa= new Fem2D::Mesh3(*buf);
+	    aa->BuildGTree();
+            a=aa;
 	  }   
 	delete buf;      
 	return *this;
@@ -424,10 +429,10 @@ struct MPIrank {
   // version asyncrone or syncrone  Now 2010 ...
   template<class R>   long Send(Matrice_Creuse<R> * const &  a) const ;
   template<class R>   long Recv(Matrice_Creuse<R>  &  a) const ;
-  long Send(Fem2D::Mesh *  a) const ;
-  long Send (Fem2D::Mesh3 *  a) const ;
-  long Recv(Fem2D::Mesh *& a)  const;  
-  long Recv(Fem2D::Mesh3 *& a) const; 
+  long Send(Fem2D::Mesh const *  a) const ;
+  long Send (Fem2D::Mesh3 const *  a) const ;
+  long Recv(Fem2D::Mesh const *& a)  const;
+  long Recv(Fem2D::Mesh3 const *& a) const; 
 
   operator int () const { return who;}     
 };
@@ -493,7 +498,7 @@ void DoOnWaitMPIRequest(MPI_Request *rq)
 
 }
 
-void DeSerialize(Serialize * sTh,Fem2D::Mesh ** ppTh)
+void DeSerialize(Serialize * sTh,Fem2D::Mesh const ** ppTh)
 {
       if ( *ppTh ) (**ppTh).decrement();
    // cout << " ####"<< sTh << endl;
@@ -506,7 +511,7 @@ void DeSerialize(Serialize * sTh,Fem2D::Mesh ** ppTh)
       pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
 }
 
-void DeSerialize(Serialize * sTh,Fem2D::Mesh3 ** ppTh)
+void DeSerialize(Serialize * sTh,const Fem2D::Mesh3 ** ppTh)
 {
       if ( *ppTh )  (**ppTh).decrement();
       Fem2D::Mesh3 * pTh= new Fem2D::Mesh3(*sTh);
@@ -630,9 +635,9 @@ template<class Mesh>
 class RevcWMeshd : public DoOnWaitMPI_Request,Serialize  
 {
 public:  
-  Mesh ** ppTh;
+  Mesh const ** ppTh;
   int state;
-  RevcWMeshd(const MPIrank *mpirank,Mesh ** ppThh)
+  RevcWMeshd(const MPIrank *mpirank,Mesh const ** ppThh)
     : DoOnWaitMPI_Request(*mpirank),Serialize(sizempibuf,Fem2D::Mesh::magicmesh),
       ppTh(ppThh),state(0)
   {
@@ -679,9 +684,9 @@ template<class Mesh>
 class SendWMeshd : public DoOnWaitMPI_Request,Serialize  
 {
 public:  
-  Mesh ** ppTh;
+  const Mesh ** ppTh;
   int state;
-  SendWMeshd(const MPIrank *mpirank,Mesh ** ppThh)
+  SendWMeshd(const MPIrank *mpirank,const Mesh ** ppThh)
     : DoOnWaitMPI_Request(*mpirank),Serialize((**ppThh).serialize()),
       ppTh(ppThh),state(0)
   {
@@ -786,7 +791,7 @@ template<class R>
   }
 
 
-long MPIrank::Send(Fem2D::Mesh *  a) const {
+long MPIrank::Send(const Fem2D::Mesh *  a) const {
     if(verbosity>100) 
       cout << " MPI << (mesh *) " << a << endl;
     ffassert(a);
@@ -795,7 +800,7 @@ long MPIrank::Send(Fem2D::Mesh *  a) const {
     if( rwm->DoSR() ) delete rwm;
     return MPI_SUCCESS;
   }
-long MPIrank::Send (Fem2D::Mesh3 *  a) const {
+long MPIrank::Send (const Fem2D::Mesh3 *  a) const {
     if(verbosity>100) 
       cout << " MPI << (mesh3 *) " << a << endl;
     ffassert(a);
@@ -824,7 +829,7 @@ long MPIrank::Send (Fem2D::Mesh3 *  a) const {
 */
 
 // new version asyncrone ...  Now 2010 ... 
-long MPIrank::Recv(Fem2D::Mesh *& a) const  {
+long MPIrank::Recv(const Fem2D::Mesh *& a) const  {
     if(verbosity>100) 
 	cout << " MPI >> (mesh *) &" << a << " " << &a << endl;
     RevcWMeshd<Mesh> *rwm= new RevcWMeshd<Mesh>(this,&a);
@@ -834,7 +839,7 @@ long MPIrank::Recv(Fem2D::Mesh *& a) const  {
     return MPI_SUCCESS;
 }
 
-long MPIrank::Recv(Fem2D::Mesh3 *& a) const  {
+long MPIrank::Recv(const Fem2D::Mesh3 *& a) const  {
     if(verbosity>100) 
       cout << " MPI >> (mesh3 *) &" << a << " " << &a << endl;
     RevcWMeshd<Mesh3> *rwm= new RevcWMeshd<Mesh3>(this,&a);
@@ -2472,8 +2477,8 @@ void f_init_lgparallele()
 		      new OneBinaryOperator<Op_Readmpi<KN<double> > > ,
 		      new OneBinaryOperator<Op_Readmpi<KN<long> > > ,
 		       new OneBinaryOperator<Op_Readmpi<KN<Complex> > > ,
-		      new OneBinaryOperator<Op_Readmpi<Mesh *> > ,
-		      new OneBinaryOperator<Op_Readmpi<Mesh3 *> > ,
+		      new OneBinaryOperator<Op_Readmpi<const Mesh *> > ,
+		      new OneBinaryOperator<Op_Readmpi<const Mesh3 *> > ,
 		      new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<R> > > ,
 		      new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<Complex> > > 
 		      );
@@ -2485,8 +2490,8 @@ void f_init_lgparallele()
 		       new OneBinaryOperator<Op_Writempi<KN<double> * > > ,
 		       new OneBinaryOperator<Op_Writempi<KN<long> * > > ,
 		       new OneBinaryOperator<Op_Writempi<KN<Complex> * > > ,
-		       new OneBinaryOperator<Op_Writempi<Mesh *> > ,
-		       new OneBinaryOperator<Op_Writempi<Mesh3 *> > ,
+		       new OneBinaryOperator<Op_Writempi<const Mesh *> > ,
+		       new OneBinaryOperator<Op_Writempi<const Mesh3 *> > ,
 		       new OneBinaryOperator<Op_Writempi<Matrice_Creuse<R> * > > ,
 		       new OneBinaryOperator<Op_Writempi<Matrice_Creuse<Complex>* > > 
 		       
@@ -2498,8 +2503,8 @@ void f_init_lgparallele()
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<double> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<long> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<Complex> *> >);
-     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Mesh *> >);
-     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Mesh3 *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh3 *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<R> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<Complex> *> >);
      
@@ -2509,8 +2514,8 @@ void f_init_lgparallele()
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<double> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<long> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<Complex> *> >);
-     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Mesh *> >);
-     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Mesh3 *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh3 *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<R> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<Complex> *> >);
      
@@ -2520,8 +2525,8 @@ void f_init_lgparallele()
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<double> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<long> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<Complex> > >);
-      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Mesh *> >);
-      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Mesh3 *> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const Mesh *> >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const Mesh3 *> >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<R> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<Complex> > >);
       
@@ -2531,8 +2536,8 @@ void f_init_lgparallele()
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<double> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<long> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<Complex> > >);
-      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Mesh *> >);
-      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Mesh3 *> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const Mesh *> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const Mesh3 *> >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<R> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<Complex> > >);
       
@@ -2545,8 +2550,8 @@ void f_init_lgparallele()
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<double> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<long> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<Complex> > >);
-      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Mesh *> >);
-      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Mesh3 *> >);
+      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const Mesh *> >);
+      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const Mesh3 *> >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Matrice_Creuse<R> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Matrice_Creuse<Complex> > >);
       

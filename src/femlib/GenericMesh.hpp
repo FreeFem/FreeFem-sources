@@ -485,6 +485,8 @@ public:
   T & t(int i)  {return elements[CheckT(i)];}
   V & v(int i)  {return vertices[CheckV(i)];}
   B & be(int i) {return borderelements[CheckBE(i)];}
+  const  T & t(int i)  const {return elements[CheckT(i)];}
+  const  V & v(int i)  const {return vertices[CheckV(i)];}
     
     
   GenericMesh()

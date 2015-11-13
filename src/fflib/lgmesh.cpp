@@ -70,7 +70,7 @@ using Fem2D::MeshPoint;
 
 extern bool NoWait; 
 
-typedef Mesh * pmesh;
+typedef Mesh const * pmesh;
 
 
 
@@ -502,7 +502,7 @@ AnyType BuildMeshFile::operator()(Stack stack)  const {
 
 AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const { 
     using namespace    Fem2D;
-    Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
+    const Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
     long kkksplit =arg(0,stack,1L);
     long label =arg(1,stack,2L);
     KN<long> * pn2o =  arg(2,stack);
@@ -549,7 +549,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
      *mp=mps;
      if (verbosity>1) 
      cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
-  pmesh pmsh = new Mesh(Th,split,false,label);
+  Mesh  * pmsh = new Mesh(Th,split,false,label);
   pmsh->renum();
    /* deja fait  dans bamg2msh
   Fem2D::R2 Pn,Px;
@@ -571,10 +571,10 @@ AnyType SplitMesh::operator()(Stack stack) const
  // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-   Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
+  const  Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
    ffassert(Thh);
    int label=1;
-   Mesh & Th(*Thh);
+  const  Mesh & Th(*Thh);
    //   long nbv=Thh->nv;
    long nbt=Thh->nt;
    KN<int> split(nbt);
@@ -605,10 +605,10 @@ AnyType SplitMesh::operator()(Stack stack) const
 AnyType SaveMesh::operator()(Stack stack) const 
 {
   using  Fem2D::MeshPointStack;
-   Fem2D::Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
+  const  Fem2D::Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
    string * fn =  GetAny<string*>((*filename)(stack));
    if (!xx && !yy ) {
-     ::bamg::Triangles * bTh= msh2bamg(*Thh);   
+     const ::bamg::Triangles * bTh= msh2bamg(*Thh);
      (*bTh).Write(fn->c_str(),::bamg::Triangles::AutoMesh);
      delete bTh;
      }
@@ -675,7 +675,7 @@ AnyType MoveMesh::operator()(Stack stack) const
  // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-   Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
+   const Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
    ffassert(Thh);
    long nbv=Thh->nv;
    long nbt=Thh->nt;
@@ -693,7 +693,7 @@ AnyType MoveMesh::operator()(Stack stack) const
       }
     }
     
-   Mesh * pth= MoveTheMesh(*Thh,u,v);
+  const  Mesh * pth= MoveTheMesh(*Thh,u,v);
    if (pth)
      for (size_t i=0;i<sol.size();i++)
        { //  ale 
@@ -759,9 +759,9 @@ AnyType Adaptation::operator()(Stack stack) const
 
   using Fem2D::MeshPoint;
   using Fem2D::Mesh;
-   Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
+  const  Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
   ffassert(Thh);
-    Triangles * oTh =0;
+   Triangles * oTh =0;
   if (nbcperiodic) {
     KN<int> ndfv(Thh->nv);
     KN<int> ndfe(Thh->neb);
@@ -774,7 +774,7 @@ AnyType Adaptation::operator()(Stack stack) const
   }
   else
    oTh = msh2bamg(*Thh,cutoffradian,reqedges,reqedges.N());
-  Triangles &Th(*oTh);
+   Triangles &Th(*oTh);
   bool mtx=em11 && em22 && em12;
   if( mtx )
    {
@@ -942,7 +942,7 @@ AnyType Adaptation::operator()(Stack stack) const
     Th[iv].m = M;
   warning = nTh->warning;
 
-  Mesh * g=  bamg2msh(nTh,true);
+  const Mesh * g=  bamg2msh(nTh,true);
 
   delete nTh;
   delete oTh;
@@ -964,7 +964,7 @@ AnyType Adaptation::operator()(Stack stack) const
  
 
 
-Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
+const Fem2D::Mesh  * EmptyTheMesh(const Fem2D::Mesh *  const & pTh,long *ssd=0)
 {
   using namespace Fem2D;
   using  Fem2D::Triangle;
@@ -1069,17 +1069,17 @@ Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,long *ssd=0)
       
 }
 }
-Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh)
+const Fem2D::Mesh  * EmptyTheMesh( const Fem2D::Mesh *  const & pTh)
 {
   return EmptyTheMesh(pTh,0);
 }
-Fem2D::Mesh  * EmptyTheMesh( Fem2D::Mesh *  const & pTh,  KN<long> * const &  k)
+const Fem2D::Mesh  * EmptyTheMesh(const  Fem2D::Mesh *  const & pTh,  KN<long> * const &  k)
 {
   return EmptyTheMesh(pTh,*k);
 }
 
 
-Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double> &V)
+const Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<double> &V)
 {
   using  Fem2D::Triangle;
   using  Fem2D::Vertex;
@@ -1714,8 +1714,8 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
  // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-   Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
-   Mesh & Th(*Thh);
+   const Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
+   const Mesh & Th(*Thh);
    ffassert(Thh);
    long nbv=Thh->nv;
    long nbt=Thh->nt;
@@ -1743,7 +1743,7 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 
 }
 
-bool SameMesh(Mesh * const & pTh1,Mesh * const & pTh2)
+bool SameMesh(const Mesh * const & pTh1,const Mesh * const & pTh2)
 {
     typedef Mesh::Element Element;
     if( !pTh1) return 0;
@@ -1751,17 +1751,17 @@ bool SameMesh(Mesh * const & pTh1,Mesh * const & pTh2)
     if( pTh1 == pTh2) return 1;
     if( pTh1->nv != pTh2->nv) return 0;
     if( pTh1->nt != pTh2->nt) return 0;
-    Mesh & Th1=*pTh1, & Th2 = *pTh2;
+    const Mesh & Th1=*pTh1, & Th2 = *pTh2;
     ffassert(0); // a faire..
     
     return 1;
 }
 
-bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
 {
     ffassert(pTh && psupp && pphi);
     const int nve = Mesh::Element::NbV;
-    Mesh & Th= *pTh;
+    const Mesh & Th= *pTh;
     const int nt = Th.nt;
     const int nv = Th.nv;
     
@@ -1807,9 +1807,9 @@ bool AddLayers(Mesh * const & pTh, KN<double> * const & psupp, long const & nlay
 }
 
 
-double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double & phi0,KN<double>  * const & where)
+double arealevelset(Mesh const * const & pTh,KN<double>  * const & pphi,const double & phi0,KN<double>  * const & where)
 {
-    Mesh & Th=*pTh;
+    const Mesh & Th=*pTh;
     KN<double> & phi=*pphi;
     ffassert( phi.N() == Th.nv); // P1
     double arean=0., areap=0.;
@@ -1841,15 +1841,15 @@ double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double &
     // cout << phi0 << endl;
     return arean; //  negative area ...
 }
-double arealevelset(Mesh * const & pTh,KN<double>  * const & pphi,const double & phi0)
+double arealevelset(Mesh const * const & pTh,KN<double>  * const & pphi,const double & phi0)
 {
     return arealevelset(pTh,pphi,phi0,0);
 }
 
 
-double volumelevelset(Mesh3 * const & pTh,KN<double> * const &pphi,const double & phi0,KN<double> * const & where)
+double volumelevelset(Mesh3 const * const & pTh,KN<double> * const &pphi,const double & phi0,KN<double> * const & where)
 {
-    Mesh3 & Th = *pTh;
+    const Mesh3 & Th = *pTh;
     KN<double> & phi = *pphi;
     ffassert(phi.N() == Th.nv); //assertion fails if the levelset function is not P1
     double volumen=0.,volumep=0.;
@@ -1896,7 +1896,7 @@ double volumelevelset(Mesh3 * const & pTh,KN<double> * const &pphi,const double 
     }
     return volumen;
 }
-double volumelevelset(Mesh3 * const &pTh,KN<double> * const &pphi,const double & phi0) {return volumelevelset(pTh,pphi,phi0,0);}
+double volumelevelset(Mesh3 const * const &pTh,KN<double> * const &pphi,const double & phi0) {return volumelevelset(pTh,pphi,phi0,0);}
 
 long Boundingbox(KN<double>* const& pb, pmesh const& pTh)
 {
@@ -1965,15 +1965,15 @@ void init_lgmesh() {
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,string* >(&initMesh));
     // Thg,suppi[],nnn,unssd[]
-  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
-  Global.Add("SameMesh","(",new OneOperator2_<bool, Mesh * , Mesh * >(SameMesh));
+  Global.Add("AddLayers","(",new OneOperator4_<bool,const Mesh * , KN<double> * , long ,KN<double> * >(AddLayers));
+  Global.Add("SameMesh","(",new OneOperator2_<bool,const Mesh * ,const  Mesh * >(SameMesh));
   // use for :   mesh Th = readmesh ( ...);
     //  Add FH mars 2015 to compute mesure under levelset ...
-    Global.Add("arealevelset","(",new OneOperator3_<double,Mesh *, KN<double>*,double>(arealevelset));
-    Global.Add("arealevelset","(",new OneOperator4_<double,Mesh *, KN<double>*,double,KN<double>*>(arealevelset));
+    Global.Add("arealevelset","(",new OneOperator3_<double,const Mesh *, KN<double>*,double>(arealevelset));
+    Global.Add("arealevelset","(",new OneOperator4_<double,const Mesh *, KN<double>*,double,KN<double>*>(arealevelset));
     //Global.Add("convectlevelset","(", new OneOperatorCode<ConvectLevelSet0 >( ));
-    Global.Add("volumelevelset","(",new OneOperator3_<double,Mesh3 *,KN<double>*,double>(volumelevelset));
-    Global.Add("volumelevelset","(",new OneOperator4_<double,Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
+    Global.Add("volumelevelset","(",new OneOperator3_<double,const Mesh3 *,KN<double>*,double>(volumelevelset));
+    Global.Add("volumelevelset","(",new OneOperator4_<double,const Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
     // add FH to get bounding box ...
     Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, KN<double>*, pmesh3>(Boundingbox));

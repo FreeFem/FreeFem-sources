@@ -47,7 +47,7 @@ on freefem(edpfile)
 	tell application "Terminal"
 		activate
 		try
-			do script "cd \"" & edpdir & "\";/usr/local/ff++/mpich/3.41/bin/FreeFem++  \"" & edppath & "\""
+			do script "cd \"" & edpdir & "\";@prefix@/bin/FreeFem++  \"" & edppath & "\""
 		end try
 	end tell
 end freefem

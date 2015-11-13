@@ -53,3 +53,9 @@ Wh2b vh=f;
 cout << " ?? " << vh(0.1,0.4) << " == " << f(0.1,0.4) <<  " diff = " << vh(0.1,0.4) - f(0.1,0.4) <<endl;
 assert( abs(vh(0.1,0.4) - f(0.1,0.4)) < 1e-12 );
 }
+
+{ // version 3.41 
+mesh TTh=Wdch.Th;
+plot(TTh,wait=1);
+mesh Tw =w.Th; 
+}

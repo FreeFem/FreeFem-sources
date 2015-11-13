@@ -45,7 +45,8 @@
 
 using namespace  Fem2D;
 using namespace  mshmet;
-
+typedef const Mesh * pmesh;
+typedef const Mesh3 * pmesh3;
 // 2d mesh function
 //  Add FH thank to I. Bajc.  (iztok.bajc@fmf.uni-lj.si) 03/14
 //
@@ -623,9 +624,9 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
 {
   // initialisation
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
   ffassert( pTh );
-  Mesh &Th=*pTh;
+  const Mesh &Th=*pTh;
   int nv=Th.nv;
   int nt=Th.nt;
   int nbe=Th.neb;

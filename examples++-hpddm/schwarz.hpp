@@ -537,7 +537,7 @@ class GMV<Type*, U> {
         const Type* t;
         const U u;
         GMV(Type* v, U w) : t(v), u(w) {}
-        void prod(U x) const { t->GMV(*(this->u), *x); };
+    void prod(U x) const { bool alloc = t->setBuffer(1); t->GMV(*(this->u), *x); t->clearBuffer(alloc); };
 };
 template<class R, class A, class B> R Build(A a, B b) {
     return R(a, b);

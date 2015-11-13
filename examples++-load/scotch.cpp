@@ -139,10 +139,10 @@ AnyType SCOTCH_Op<T, V, K>::operator()(Stack stack)  const {
 
 #ifndef _ALL_IN_ONE_
 static void Init_Scotch() {
-    Global.Add("scotch", "(", new SCOTCH<Mesh, pmesh, long>);
-    Global.Add("scotch", "(", new SCOTCH<Mesh3, pmesh3, long>);
-    Global.Add("scotch", "(", new SCOTCH<Mesh, pmesh, double>);
-    Global.Add("scotch", "(", new SCOTCH<Mesh3, pmesh3, double>);
+    Global.Add("scotch", "(", new SCOTCH<const Mesh, pmesh, long>);
+    Global.Add("scotch", "(", new SCOTCH<const Mesh3, pmesh3, long>);
+    Global.Add("scotch", "(", new SCOTCH<const Mesh, pmesh, double>);
+    Global.Add("scotch", "(", new SCOTCH<const Mesh3, pmesh3, double>);
 }
 
 LOADFUNC(Init_Scotch)

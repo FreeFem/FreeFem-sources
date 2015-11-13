@@ -74,7 +74,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX)  BEC.$(DYLIB_SUFFIX) \
 	bfstream.$(DYLIB_SUFFIX) @TOOL_DYLIB_iohdf5@ ff-AiryBiry.$(DYLIB_SUFFIX) \
-	exactpartition.$(DYLIB_SUFFIX)  ClosePoints.$(DYLIB_SUFFIX) aniso.$(DYLIB_SUFFIX) \
+	exactpartition.$(DYLIB_SUFFIX)  ClosePoints.$(DYLIB_SUFFIX)  \
 	Element_HCT.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.

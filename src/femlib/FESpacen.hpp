@@ -365,14 +365,14 @@ private:
   { 
     const int nmax=100;
     int t[nmax];
-    for (int i=0;i<n;i++)
+    for (int i=0;i<nmax;i++)// correct FH 2Oct 2015  nmax
       t[i]=0;
     int k=0,i0=2*n;
     for(int i=0;i<n;i++)
       if ( data[i]==on)
 	{ int node= data[i+i0];
 	  //  cout << " node " << node << endl;
-	  assert(node < nmax);
+	  ffassert(node < nmax);
 	  if( ! t[node] )
 	    t[node] = 1,++k;
 	} 

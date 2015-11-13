@@ -35,12 +35,12 @@ using namespace  Fem2D;
 
 class listMesh { 
 public:
-  list<Mesh *> *lth;
-  void init()  { lth=new list<Mesh *>;}
+  list<Mesh const  *> *lth;
+  void init()  { lth=new list<Mesh const  *>;}
   void destroy() { delete lth;}
-  listMesh(Stack s,Mesh *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>)) { lth->push_back(th);}
-  listMesh(Stack s,Mesh *tha,Mesh *thb) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>)) { lth->push_back(tha);lth->push_back(thb);}
-  listMesh(Stack s,const listMesh &l,Mesh *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh*>(*l.lth))) { lth->push_back(th);}
+  listMesh(Stack s,Mesh const*th) : lth(Add2StackOfPtr2Free(s,new list<Mesh const*>)) { lth->push_back(th);}
+  listMesh(Stack s,Mesh const*const tha,Mesh const* const thb) : lth(Add2StackOfPtr2Free(s,new list<Mesh const*>)) { lth->push_back(tha);lth->push_back(thb);}
+  listMesh(Stack s,const listMesh &l,Mesh const*const th) : lth(Add2StackOfPtr2Free(s,new list<Mesh const*>(*l.lth))) { lth->push_back(th);}
 
 };
 
@@ -54,14 +54,14 @@ Mesh * GluMesh(listMesh const & lst)
   int nbvx=0;
   double hmin=1e100;
   R2 Pn(1e100,1e100),Px(-1e100,-1e100);
-  const list<Mesh *> lth(*lst.lth);
-   Mesh * th0=0;
+  const list<Mesh const *> lth(*lst.lth);
+  const  Mesh * th0=0;
     int kk=0;
-  for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
+  for(list<Mesh const *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
        if(! *i ) continue; //
         ++kk;
-       Mesh &Th(**i);
+       const Mesh &Th(**i);
       th0=&Th;
       if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
       nbt+= Th.nt;
@@ -96,7 +96,7 @@ Mesh * GluMesh(listMesh const & lst)
   FQuadTree *quadtree=new Fem2D::FQuadTree(th0,Pn,Px,0);
   {
     map<pair<int,int>,int> bbe;
-    for(list<Mesh *>::const_iterator i=lth.begin();i != lth.end();++i)
+    for(list<Mesh const  *>::const_iterator i=lth.begin();i != lth.end();++i)
       {
           if(! *i ) continue; //
 	const Mesh &Th(**i);
@@ -174,7 +174,7 @@ struct Op2_addmesh: public binary_function<AA,BB,RR> {
 
 template<bool INIT,class RR,class AA=RR,class BB=AA> 
 struct Op2_setmesh: public binary_function<AA,BB,RR> { 
-  static RR f(Stack stack, const AA & a,const BB & b)  
+  static RR f(Stack stack, const AA & a,const BB & b)
   {    
     ffassert(a );
     pmesh  p=GluMesh(b);
@@ -370,7 +370,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 
 
 class SetMesh : public OneOperator { public:  
-typedef Mesh *pmesh;
+typedef Mesh const *pmesh;
     SetMesh() : OneOperator(atype<pmesh>(),atype<pmesh>() ) {}
   
   E_F0 * code(const basicAC_F0 & args) const 
@@ -388,7 +388,7 @@ typedef Mesh *pmesh;
 void init_glumesh2D()
 {
   Dcl_Type<listMesh>();
-  typedef Mesh *pmesh;
+  typedef Mesh const  *pmesh;
   
   //Dcl_Type<listMesh3>();
   //typedef Mesh3 *pmesh3;

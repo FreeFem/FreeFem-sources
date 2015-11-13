@@ -54,7 +54,7 @@ real_SuperLU_DIST_FreeFem.cpp \
 real_pastix_FreeFem.cpp mpi-cmaes.cpp \
 ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt \
 MUMPS.cpp   \
-MUMPS.edp  dmatrix.hpp  
+MUMPS.edp  dmatrix.hpp  ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be

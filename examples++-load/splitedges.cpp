@@ -3,7 +3,7 @@
 
   using namespace  Fem2D;
 
-Mesh * Split_Edges(Stack stack,Fem2D::Mesh * const & pTh, long  *dK)
+const Mesh * Split_Edges(Stack stack,Fem2D::Mesh const * const & pTh, long  *dK)
 {
   bool  v10 = verbosity>10;
   bool  vp = verbosity>1;
@@ -186,11 +186,11 @@ public:
 
 AnyType SplitEdges::operator()(Stack stack) const 
   {
-    Mesh * pTh =  GetAny<pmesh>((*expTh)(stack));
+    const Mesh * pTh =  GetAny<pmesh>((*expTh)(stack));
     MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
     bool v10= verbosity>10; 
     ffassert(pTh);
-    Mesh & Th(*pTh);
+    const Mesh & Th(*pTh);
     KN<long> dK(Th.nt);
     dK=0L;
     int ne=0;

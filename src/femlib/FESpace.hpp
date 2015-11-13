@@ -405,7 +405,7 @@ static int NbNodebyWhat(const int *data,int n,int on)
   { 
       const int nmax=100;
       int t[nmax];
-      for (int i=0;i<n;i++)
+      for (int i=0;i<nmax;i++)
       	t[i]=0;
        int k=0,i0=2*n;
        for(int i=0;i<n;i++)
