@@ -1,3 +1,41 @@
+The version 3.41 is compile Under Yosemite  (10.10.5)  7/10/2015 
+xcode 7.0.1 + previous install of latex and with other brew install 
+ Oct. 7th 2015 F. Hecht Paris. 
+-------------------------------------------------------
+precompile compile version    version 3.41 
+
+add installer intel ifort  compiler (ifort version 15.0.2 with mkl)
+build mpich, libgsl, hdf5 
+the configure of all sofware are: 
+mpich-3.1.4: ./configure 'FC=ifort' 'F77=ifort' '-prefix=/usr/local/ff++/mpich'
+gsl-1.16 ./configure 'CC=clang' '--prefix=/usr/local/ff++/mpich/'
+hdf5-1.8.14  ./configure '--enable-cxx' 'CC=clang' 'CXX=clang++' '--prefix=/usr/local/ff++/mpich'
+petsc;   ./configure    '--CFLAGS=-O2'    '--COPTFLAGS=-O3'    '--CXXFLAGS=-O2 -std=c++11'   \
+   '--CXXOPTFLAGS=-O3'    '--FFLAGS=-O2'    '--FOPTFLAGS=-O3'    '--download-fftw'  \
+   '--download-hypre'    '--download-metis'    '--download-ml'    '--download-mumps'   \
+   '--download-parmetis'    '--download-pastix'    '--download-ptscotch'    '--download-scalapack'   \
+   '--download-suitesparse'    '--download-superlu'    '--prefix=/usr/local/ff++/mpich/petsc'   \
+   '--with-blas-lapack-lib=-L/opt/intel/mkl/lib -lmkl_intel_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_sequential -lm -lpthread '    '--with-mpi-dir=/usr/local/ff++/mpich'    'PETSC_ARCH=arch-ff++'
+freefem++: ./configure '--prefix=/usr/local/ff++/mpich/3.41' '--enable-download' '--enable-optim' '--enable-m64' \
+    'F77=ifort' 'FC=ifort' '--enable-maintainer-mode' '--with-mkl=/opt/intel/mkl/lib' \
+    '--with-petsc=/usr/local/ff++/mpich/petsc/lib/petsc/conf/petscvariables' '-with-hdf5=/usr/local/ff++/mpich/bin/h5cc' \
+    '--with-gsl-prefix=/usr/local/ff++/mpich/' '--disable-pastix'
+
+Please read  INNOVATION file to see  all modifaction and  news
+
+Plus all previous install 
+0-1) with brew install
+  499  brew install wget
+  500  brew install  autoconf
+  501  brew install  automake
+  504  brew install  cmake
+  505  brew install  gfortran
+  506  brew install  gcc
+  540  brew install m4
+  585  brew install pkg-config
+  588  brew install gobject-introspection
+0-2)  latex is install form https://tug.org/mactex/mactex-download.html
+
 To compile a full version of FreeFem++ under MacOS 
 ---------------------------------------------------
 Under Yosemite  (10.10.2)  2015 ( xcode 6.2 form scratch)

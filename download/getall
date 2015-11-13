@@ -85,7 +85,7 @@ download('ARPACK','http://www.caam.rice.edu/software/ARPACK/SRC/patch.tar.gz',
 	 'http://www.caam.rice.edu/software/ARPACK','patch.tar.gz','14830d758f195f272b8594a493501fa2');
 
 download('BLAS','http://www.netlib.org/blas/blas.tgz','http://www.netlib.org/blas','blas.tgz',
-	 '5e99e975f7a1e3ea6abcad7c6e7e42e6');
+	 'ca21ed426f347c6ec6b136a181e587e5');
 download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.netlib.org/blas','cblas.tgz',
 	 '1e8830f622d2112239a4a8a83b84209a');
 
@@ -118,8 +118,8 @@ download('Gmm++','http://download.gna.org/getfem/stable/gmm-4.2.tar.gz',
 download('Hips','http://hips.gforge.inria.fr/release/hips-1.2b-rc4.tar.gz',
 	 'http://hips.gforge.inria.fr/','hips-1.2b-rc4.tar.gz','78720bf9bbbce5e174bdbdbaa1e5d7b4');
 
-download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.10.2.tgz',
-	 'https://projects.coin-or.org/Ipopt','Ipopt-3.10.2.tgz','e647a49a80a03f2682db583e00aa520b');
+download('Ipopt','http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz',
+	 'https://projects.coin-or.org/Ipopt','Ipopt-3.12.4.tgz','12a8ecaff8dd90025ddea6c65b49cb03');
 
 #download('METIS','http://www.netlib.org/linalg/metis-4.0.tar.gz','http://www.netlib.org/linalg/','metis-4.0.tar.gz',
 #	 '0aa546419ff7ef50bd86ce1ec7f727c7');

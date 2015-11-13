@@ -92,9 +92,9 @@ AnyType MatrixUpWind0::operator()(Stack stack) const
   Matrice_Creuse<R> * sparce_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   MatriceMorse<R> * amorse =0;
   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
-  Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
+  const Mesh * pTh = GetAny<pmesh>((*expTh)(stack));
   ffassert(pTh);
-  Mesh & Th (*pTh);
+  const Mesh & Th (*pTh);
   {
     map< pair<int,int>, R> Aij;
     KN<double> cc(Th.nv);

@@ -44,7 +44,9 @@ PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
 # FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
 
 compilepkg::$(ARPACKLIB)
-$(ARPACKLIB): ARPACK/fait
+ARPACK/ARmake.inc:ARPACK/ARmake.incnew
+	if diff -q ARPACK/ARmake.incnew ARPACK/ARmake.inc ; then echo No Modif skip compile of arpack ; else cp ARPACK/ARmake.incnew ARPACK/ARmake.inc; fi
+$(ARPACKLIB): ARPACK/fait  ARPACK/ARmake.inc
 	case '$(BLASLIBS)' in *vecLib*|*Accelerate*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
 	mkdir -p ../include ../lib
 	if [ -n '@FF_LAPACKdir@' ] ; then \
@@ -58,7 +60,7 @@ $(ARPACKLIB): ARPACK/fait
 	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
 	fi
 
-ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
+ARPACK/fait ARPACK/ARmake.incnew: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4
 	-rm -rf ARPACK
 	gunzip -c $(ARPACK96_TAR_GZ) | tar xf -
 	gunzip -c $(PATCH_TAR_GZ) | tar xf -
@@ -85,11 +87,11 @@ ARPACK/fait: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile
 	    -DFF_AR="@AR@" \
 	    -DFF_ARFLAGS="@ARFLAGS@" \
 	    -DFF_RANLIB="@RANLIB@" \
-	    ARmake.m4 >ARPACK/ARmake.inc
+	    ARmake.m4 >ARPACK/ARmake.incnew
 	touch ARPACK/fait
 
-$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):
-	../getall -o ARPACK -a
+$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):download
+#	../getall -o ARPACK -a
 
 clean-local::
 	-rm -r ARPACK ../lib/libarpack.a

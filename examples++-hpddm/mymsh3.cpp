@@ -11,10 +11,10 @@ using namespace std;
 
 using namespace  Fem2D;
 
-Mesh3 * mytruncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const int newbelabel);
+const Mesh3 * mytruncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const int newbelabel);
 
 struct Op_mytrunc_mesh3 : public OneOperator {
-  typedef Mesh3 *pmesh3;
+  typedef const Mesh3 *pmesh3;
   class Op: public E_F0mps   { 
   public:
     static basicAC_F0::name_and_type name_param[] ;
@@ -37,7 +37,7 @@ struct Op_mytrunc_mesh3 : public OneOperator {
 };
 
 struct Op_GluMesh3tab : public OneOperator {
-  typedef Mesh3 *pmesh3;
+  typedef const Mesh3 *pmesh3;
   class Op: public E_F0mps   {
   public:
     static basicAC_F0::name_and_type name_param[] ;
@@ -73,7 +73,7 @@ basicAC_F0::name_and_type Op_mytrunc_mesh3::Op::name_param[Op_mytrunc_mesh3::Op:
  };
 
 
-Mesh3 * mytruncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const int newbelabel)
+const Mesh3 * mytruncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const int newbelabel)
 {
     
     static const int FaceTriangle[4]={3,0,1,2};  //={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}
@@ -416,8 +416,8 @@ Mesh3 * mytruncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, con
 
 AnyType Op_mytrunc_mesh3::Op::operator()(Stack stack)  const {
     
-  Mesh3 *pTh = GetAny<Mesh3 *>((*getmesh)(stack));
-  Mesh3 &Th = *pTh;
+  const Mesh3 *pTh = GetAny<Mesh3 *>((*getmesh)(stack));
+  const Mesh3 &Th = *pTh;
   long kkksplit =arg(0,stack,1L);
   long label =arg(1,stack,2L);
    KN<long> * pn2o =  arg(2,stack);
@@ -439,7 +439,7 @@ KN<long> * po2n =  arg(3,stack);
   // *mp=mps;
   if (verbosity>1) 
     cout << "  -- Trunc mesh: Nb of Tetrahedrons = " << kk << " label=" <<label <<endl;
-  Mesh3 * Tht = mytruncmesh(Th,kkksplit,split,false,label);
+  const Mesh3 * Tht = mytruncmesh(Th,kkksplit,split,false,label);
   
     if(pn2o)
     {
@@ -470,7 +470,7 @@ KN<long> * po2n =  arg(3,stack);
   return Tht;
  };
 
-Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
+const Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
 { 
   int flagsurfaceall = 0;
 
@@ -482,11 +482,11 @@ Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
   
   double hmin=1e100;
   R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
-  Mesh3 * th0=0;
+  const Mesh3 * th0=0;
 
   for(int i = 0;i<tab->n;i++)
     {
-      Mesh3 &Th3(*tab->operator[](i));
+      const Mesh3 &Th3(*tab->operator[](i));
       th0=&Th3;
       if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
       
@@ -536,7 +536,7 @@ Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
   //int nbv0=0;
     for(int i = 0;i<tab->n;i++)
     {
-      Mesh3 &Th3(*tab->operator[](i));
+      const Mesh3 &Th3(*tab->operator[](i));
 
       if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
       if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
@@ -586,7 +586,7 @@ Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
   //nbv0=0;
   for(int i = 0;i<tab->n;i++)
     {
-      Mesh3 &Th3(*tab->operator[](i));
+     const  Mesh3 &Th3(*tab->operator[](i));
 
     for (int k=0;k<Th3.nbe;k++)
       {
@@ -671,10 +671,10 @@ Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
 
 AnyType Op_GluMesh3tab::Op::operator()(Stack stack)  const {
 
-  KN<Mesh3*> *tab = GetAny<KN<Mesh3*> *>((*getmeshtab)(stack));
+  KN<const Mesh3*> *tab = GetAny<KN<const Mesh3*> *>((*getmeshtab)(stack));
   long labtodel = arg(0,stack,0);
 
-  Mesh3 * Tht = GluMesh3tab(tab,labtodel);
+  const Mesh3 * Tht = GluMesh3tab(tab,labtodel);
 
   Add2StackOfPtr2FreeRC(stack,Tht);
   return Tht;
@@ -684,8 +684,8 @@ AnyType Op_GluMesh3tab::Op::operator()(Stack stack)  const {
 static void Load_Init()
 {
 	
-  typedef Mesh *pmesh;
-  typedef Mesh3 *pmesh3;
+  typedef const Mesh *pmesh;
+  typedef const Mesh3 *pmesh3;
   
   if (verbosity && mpirank == 0)
     cout << " load: mymsh3  " << endl;

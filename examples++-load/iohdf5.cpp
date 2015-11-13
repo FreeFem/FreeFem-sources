@@ -218,11 +218,11 @@ AnyType datasolHDF5Mesh2_Op::operator()(Stack stack)  const
   // mp & mps set but not used 
   //MeshPoint *mp(MeshPointStack(stack)), mps=*mp;
 
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+  const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
   string * ffname= GetAny<string *>( (*filename)(stack) );
   
   ffassert(pTh);
-  Mesh &Th=*pTh;
+  const Mesh &Th=*pTh;
   int nt = Th.nt;
   int nv = Th.nv;
   //  int nbtype=l.size();
@@ -562,10 +562,10 @@ basicAC_F0::name_and_type datasolHDF5Mesh3_Op<v_fes>::name_param[]=
 template<class v_fes>
 AnyType datasolHDF5Mesh3_Op<v_fes>::operator()(Stack stack)  const 
 { 
-  Mesh3 * pTh= GetAny<Mesh3 *>((*eTh)(stack));
+  const  Mesh3 * pTh= GetAny<const Mesh3 *>((*eTh)(stack));
   string * ffname= GetAny<string *>( (*filename)(stack) );
   ffassert(pTh);
-  Mesh3 &Th=*pTh;
+  const  Mesh3 &Th=*pTh;
   int trans=-1;
   int nt = Th.nt;
   int nv = Th.nv;
@@ -719,8 +719,8 @@ static void Load_Init(){
   cout << " " << endl;
   cout << " ---------------------- " << endl;  
 
-  typedef Mesh *pmesh;
-  typedef Mesh3 *pmesh3;
+  typedef const  Mesh *pmesh;
+  typedef const  Mesh3 *pmesh3;
 
   if (verbosity>2) cout << " load:popen.cpp  " << endl;
   

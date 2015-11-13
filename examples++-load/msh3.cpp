@@ -1657,12 +1657,12 @@ void dpent1_mesh(int idl[3],int nu[12],int &nbe,int &option){
 
 class listMesh3 { 
 public:
-  list<Mesh3 *> *lth;
-  void init()  { lth=new list<Mesh3 *>;}
+  list<const Mesh3 *> *lth;
+  void init()  { lth=new list<const Mesh3 *>;}
   void destroy() { delete lth;}
-  listMesh3(Stack s,Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>)) { lth->push_back(th);}
-  listMesh3(Stack s,Mesh3 *tha,Mesh3 *thb) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>)) { lth->push_back(tha);lth->push_back(thb);}
-  listMesh3(Stack s,const listMesh3 &l,Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<Mesh3*>(*l.lth))) { lth->push_back(th);}
+  listMesh3(Stack s,const Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<const Mesh3*>)) { lth->push_back(th);}
+  listMesh3(Stack s,const Mesh3 *tha,const Mesh3 *thb) : lth(Add2StackOfPtr2Free(s,new list<const Mesh3*>)) { lth->push_back(tha);lth->push_back(thb);}
+  listMesh3(Stack s,const listMesh3 &l,const Mesh3 *th) : lth(Add2StackOfPtr2Free(s,new list<const Mesh3*>(*l.lth))) { lth->push_back(th);}
 
 };
 
@@ -1678,14 +1678,14 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   double hmin=1e100;
   R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
-  const list<Mesh3 *> lth(*lst.lth);
-  Mesh3 * th0=0;
+  const list<const Mesh3 *> lth(*lst.lth);
+  const Mesh3 * th0=0;
   int kk=0; 
-  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
+  for(list<const Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
     {
       if( ! *i) continue ;
       kk++;
-      Mesh3 &Th3(**i);  // definis ???
+      const Mesh3 &Th3(**i);  // definis ???
       th0=&Th3;
       if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
       
@@ -1734,7 +1734,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   nbv=0;
   //int nbv0=0;
-  for(list<Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
+  for(list<const Mesh3 *>::const_iterator i=lth.begin(); i!=lth.end();i++)
     {
       if( ! *i) continue ;
       const Mesh3 &Th3(**i);
@@ -1783,7 +1783,7 @@ Mesh3 * GluMesh3(listMesh3 const & lst)
   
   double hseuil_border = hseuil/3.;
   //nbv0=0;
-  for(list<Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
+  for(list<const Mesh3 *>::const_iterator i=lth.begin();i != lth.end();i++)
     {
       if( ! *i) continue ;
       const Mesh3 &Th3(**i);
@@ -1876,7 +1876,7 @@ struct Op3_setmesh: public binary_function<AA,BB,RR> {
   static RR f(Stack stack,const AA & a,const BB & b)  
   {
     ffassert(a );
-    pmesh3  p=GluMesh3(b);
+    const pmesh3  p=GluMesh3(b);
     
     if(!INIT && *a){
       //Add2StackOfPtr2FreeRC(stack,*a);
@@ -2387,7 +2387,7 @@ AnyType SetMesh3D_Op::operator()(Stack stack)  const
 
 
 class SetMesh3D : public OneOperator { public:  
-typedef Mesh3 *pmesh3;
+typedef const Mesh3 *pmesh3;
     SetMesh3D() : OneOperator(atype<pmesh3>(),atype<pmesh3>() ) {}
   
   E_F0 * code(const basicAC_F0 & args) const 
@@ -2449,9 +2449,9 @@ basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param[]= {
 
 AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const 
 {
-  Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
-  Mesh & Th=*pTh;
-  Mesh *m= pTh;
+  const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
+  const Mesh & Th=*pTh;
+  const Mesh *m= pTh;
   int nbv=Th.nv;  // nombre de sommet 
   int nbt=Th.nt;  // nombre de triangles
   int nbe=Th.neb; // nombre d'aretes fontiere
@@ -2491,7 +2491,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
   {
     KN<int> takemesh(nbv);  
     takemesh=0;  
-    Mesh &rTh = Th;
+    const Mesh &rTh = Th;
     for (int it=0; it<nbt; ++it){
       for( int iv=0; iv<3; ++iv){
 	int i=Th(it,iv);
@@ -2646,8 +2646,8 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
 
 
 class Movemesh2D_3D_surf : public OneOperator { public:  
-typedef Mesh *pmesh;
-typedef Mesh3 *pmesh3;
+typedef const Mesh *pmesh;
+typedef const Mesh3 *pmesh3;
     
   Movemesh2D_3D_surf() : OneOperator(atype<pmesh3>(),atype<pmesh>() ) {}
     E_F0 * code(const basicAC_F0 & args) const 
@@ -4453,7 +4453,7 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
     
     // cas maillage volumique + surfacique
     Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-    // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer à l'intérieure
+    // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer ï¿½ l'intï¿½rieure
     
     delete pTh;
     
@@ -4719,8 +4719,8 @@ public:
 
 
 class Movemesh2D_3D_surf_cout : public OneOperator { public:  
-typedef Mesh *pmesh;
-typedef Mesh3 *pmesh3;
+typedef const Mesh *pmesh;
+typedef const Mesh3 *pmesh3;
     
   Movemesh2D_3D_surf_cout() : OneOperator(atype<pmesh3>(),atype<pmesh>() ) {}
     E_F0 * code(const basicAC_F0 & args) const 
@@ -4750,8 +4750,8 @@ public:
 
 
 class Movemesh3D_cout : public OneOperator { public:  
-typedef Mesh *pmesh;
-typedef Mesh3 *pmesh3;
+typedef const Mesh *pmesh;
+typedef const Mesh3 *pmesh3;
     
   Movemesh3D_cout() : OneOperator(atype<pmesh3>(),atype<pmesh>() ) {}
     E_F0 * code(const basicAC_F0 & args) const 
@@ -5088,7 +5088,7 @@ class  CheckManifoldMesh : public OneOperator { public:
 Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const int newbelabel);
 
 struct Op_trunc_mesh3 : public OneOperator {
-  typedef Mesh3 *pmesh3;
+  typedef const Mesh3 *pmesh3;
   class Op: public E_F0mps   { 
   public:
     static basicAC_F0::name_and_type name_param[] ;
@@ -6002,11 +6002,11 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
   return pThnew;    
 }
 
-bool AddLayers(Mesh3 * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
+bool AddLayers(Mesh3 const  * const & pTh, KN<double> * const & psupp, long const & nlayer,KN<double> * const & pphi)
 {
     ffassert(pTh && psupp && pphi);
     const int nve = Mesh3::Element::nv;
-    Mesh3 & Th= *pTh;
+    const Mesh3 & Th= *pTh;
     const int nt = Th.nt;
     const int nv = Th.nv;
     
@@ -6063,8 +6063,8 @@ static void Load_Init()
 {  
   
   Dcl_Type<listMesh3>();
-  typedef Mesh *pmesh;
-  typedef Mesh3 *pmesh3;
+  typedef const Mesh *pmesh;
+  typedef const Mesh3 *pmesh3;
   
   if (verbosity>1  && mpirank == 0)
     cout << " load: msh3  "  <<endl;
@@ -6093,8 +6093,8 @@ static void Load_Init()
   Global.Add("extract","(",new ExtractMesh);
   Global.Add("extract","(",new ExtractMesh2D);
     
-  Global.Add("AddLayers","(",new OneOperator4_<bool, Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
-  typedef Mesh3 *pmesh3;
+  Global.Add("AddLayers","(",new OneOperator4_<bool, const Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
+  typedef const Mesh3 *pmesh3;
   // Global.Add("trunc","(", new Op_trunc_mesh3);
 }
 

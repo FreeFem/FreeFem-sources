@@ -303,7 +303,7 @@ struct SMesh {
   int operator()(int k,int i) const  { return pTh ? (*pTh)(k,i) : Th_Grid(g,k,i);  }
   R2  operator()(int i) const  { return pTh ? (*pTh)(i) : V_Grid(g,i);  }
   int ElementAdj(int k,int &e) { return pTh ? pTh->ElementAdj(k,e) : EA_Grid(g,k,e);  }
-  SMesh(Mesh *PTh) : pTh(PTh),g(0)   , nv(pTh->nv), nt(pTh->nt),neb(pTh->neb) {}
+  SMesh(const Mesh *PTh) : pTh(PTh),g(0)   , nv(pTh->nv), nt(pTh->nt),neb(pTh->neb) {}
   SMesh(KNM_<double> *gg): pTh(0),g(gg)   ,
 			   nv(gg->N()*gg->M()),
 			   nt((gg->N()-1) *(gg->M()-1)*2),
@@ -324,7 +324,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         pyy = GetAny<KN<double>*>((*eyy)(stack));
     //  cout << pxx << " " << pyy << " " << pxy << endl;
     ffassert( (pxx || pyy) ==  !pxy ) ;
-    Mesh * pTh= GetAny<Mesh *>((*eTh)(stack));
+    const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
     ffassert(pTh);
     SMesh Th(pTh);
     int nbv=Th.nv; // nombre de sommet
@@ -721,7 +721,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 }
 
 class  ISOLINE_P1: public OneOperator { public:  
-    typedef Mesh *pmesh;
+    typedef const Mesh *pmesh;
     int cas;
     
     ISOLINE_P1() : OneOperator(atype<long>(),atype<pmesh>(),atype<double>(), atype<KN<double>*>(),atype<KN<double>* >() ) ,cas(4){}
@@ -875,7 +875,7 @@ public:
 void finit()
 {  
     
-    typedef Mesh *pmesh;
+    typedef const Mesh *pmesh;
     
     Global.Add("isoline","(",new ISOLINE_P1);
     Global.Add("isoline","(",new ISOLINE_P1(1));
