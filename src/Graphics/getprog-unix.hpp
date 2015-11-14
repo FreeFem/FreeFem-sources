@@ -88,7 +88,7 @@ int getprog(char* fn,int argc, char **argv)
   // in any situation. Even FreeFem++-mpilang needs to send pictures
   // (eg when called in a FreeFem++-server situation by EJS)
   // is the name -nw or -nw.exe  -> no graphics 
-  noffglut=false;1
+  noffglut=false;
         ffapi::ff_ch2edpdtmpir = false;
   bool ch2edpdir = false;
   if(argc)
