@@ -448,6 +448,7 @@ void GTypeOfFESum<Mesh>::Build()
   // this->pInterpolation.init(nci);
   // this->cInterpolation.init(nci);
   // this->dofInterpolation.iniy(nci);
+  KN<int> opi(this->nb_sub_fem);// offset numumber point intgartion
   {
     map<RdHat,int,lessRd> mpt;
     numPtInterpolation.init(npi);
@@ -455,16 +456,18 @@ void GTypeOfFESum<Mesh>::Build()
     KN<RdHat> Ptt(npi);
     for (int i=0;i<this->nb_sub_fem;i++)
       {
+        opi[i]=kkk;
 	const GTypeOfFE<Mesh> &ti=*this->Sub_ToFE[i];
 	
 	for(int p=0;p<ti.NbPtforInterpolation;++p,++kkk)
 	  {
 	    Ptt[kkk]=ti.PtInterpolation[p];
-	    if(verbosity>5)
-	    cout << "    p= "<< p << " [ " << Ptt[kkk]<< "] ,  "<< kkk<< " "<< npp<<endl;;
 	    if( mpt.find(Ptt[kkk]) == mpt.end())
 	      mpt[Ptt[kkk]]=npp++;
 	    numPtInterpolation[kkk]=mpt[Ptt[kkk]];
+              if(verbosity>100)
+                  cout << "    p= "<< p << " [ " << Ptt[kkk]<< "] ,  "<< kkk<< " "<< npp<< " " << numPtInterpolation[kkk]<< endl;;
+
 	  }
       }
     assert(this->NbPtforInterpolation==0);
@@ -482,7 +485,7 @@ void GTypeOfFESum<Mesh>::Build()
       const GTypeOfFE<Mesh> &ti=*this->Sub_ToFE[i];
       for(int j=0;j<ti.NbcoefforInterpolation; ++j,++k)
 	{
-	  this->pInterpolation[k]   = numPtInterpolation[ti.pInterpolation[j]];
+	  this->pInterpolation[k]   = numPtInterpolation[opi[i]+ti.pInterpolation[j]];
 	  this->cInterpolation[k]   = ti.cInterpolation[j]+oc;
 	  this->dofInterpolation[k] = ti.dofInterpolation[j]+odof;
 	  this->coefInterpolation[k]=ti.coefInterpolation[j];
@@ -490,7 +493,8 @@ void GTypeOfFESum<Mesh>::Build()
       oc += ti.N;
       odof += ti.NbDoF; 
     }
-  
+    if(verbosity>100)
+    cout << " **GTypeOfFESum<Mesh>::Build() " <<this->pInterpolation <<endl;
   assert(c==this->N);
 }
 
@@ -510,7 +514,7 @@ template<class Mesh> void GTypeOfFESum<Mesh>::set(const Mesh & Th,const Element 
 	       op += ti.NbPtforInterpolation;
 	       
 	   }
-	 
+         if( verbosity > 100) cout << " GTypeOfFESum set "<< this->coefInterpolation << endl;
      }
      
 template<class MMesh> 
