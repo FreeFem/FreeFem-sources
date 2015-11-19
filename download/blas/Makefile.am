@@ -138,26 +138,6 @@ all-local::@COMPILE_OPENBLAS@
 pkgcompile::@COMPILE_OPENBLAS@
 generic:
 
-###if FFCS_WINDOWS
-###openblas:copy.done
-###copy.done:unzip.done
-###	cp @OPENBLAS_PACK@/lib/libopenblas.a ../lib
-###	touch $@
-###clean::
-###	-rm ../pkg/libopenblas.a
-###unzip.done:download.done
-###	unzip ../pkg/@OPENBLAS_PACK@.zip
-###	touch $@
-###clean::
-###	-rm -r @OPENBLAS_PACK@
-###
-#### [[file:../getall::OpenBLAS]]
-###download.done:
-###	../getall -o @OPENBLAS_GET@ -a
-###	touch $@
-###
-###else
-
 openblas:install.done
 
 # The library may sometimes have a complex name with version number, just copy it into a standard location
@@ -189,8 +169,7 @@ openblas.done:openpatches.done
 	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
 	touch $@
 
-# The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
-# date
+# The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
 
 openpatches.done:opendownload.done
 	tar xvzf ../pkg/OpenBLAS.tar.gz
@@ -210,10 +189,8 @@ opendownload.done:
 	../getall -o OpenBLAS -a
 	touch $@
 
-###endif
-
-# ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part
-# of the specific target 'veryclean'.
+# ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part of the specific
+# target 'veryclean'.
 
 veryclean::
 	-rm -r *.done OpenBLAS xianyi-OpenBLAS-*
