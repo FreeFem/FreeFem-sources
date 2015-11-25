@@ -65,7 +65,7 @@ class initDDM_Op : public E_F0mps {
 template<class Type, class K>
 basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
-    {"scaling", &typeid(KN<typename HPDDM::Wrapper<K>::ul_type>*)},
+    {"scaling", &typeid(KN<HPDDM::underlying_type<K>>*)},
     {"deflation", &typeid(FEbaseArrayKn<K>*)}
 };
 template<class Type, class K>
@@ -105,7 +105,7 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
         ptA->setVectors(ev);
         ptA->Type::super::initialize(deflation->N);
     }
-    KN<typename HPDDM::Wrapper<K>::ul_type>* ptD = nargs[1] ? GetAny<KN<typename HPDDM::Wrapper<K>::ul_type>*>((*nargs[1])(stack)) : 0;
+    KN<HPDDM::underlying_type<K>>* ptD = nargs[1] ? GetAny<KN<HPDDM::underlying_type<K>>*>((*nargs[1])(stack)) : 0;
     if(ptD)
         ptA->initialize(*ptD);
     else
@@ -156,7 +156,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
     HPDDM::Option& opt = *HPDDM::Option::get();
     unsigned short nu = opt["geneo_nu"];
-    typename HPDDM::Wrapper<K>::ul_type threshold = opt.val("geneo_threshold", 0.0);
+    HPDDM::underlying_type<K> threshold = opt.val("geneo_threshold", 0.0);
     std::pair<MPI_Request, const K*>* ret = nullptr;
     double t;
     if(mA || nargs[6]) {
@@ -196,7 +196,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             ptA->callNumfact();
             if(!vecAIJ.empty()) {
                 int dof = ptA->getDof();
-                HPDDM::Eigensolver<K> solver(dof);
+                HPDDM::Lapack<K> solver(dof);
                 const HPDDM::MatrixCSR<K>& first = *vecAIJ.front();
                 nu = std::min(nu, static_cast<unsigned short>(first._m));
                 K** ev = new K*[nu];
@@ -207,14 +207,14 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                 ptA->Type::super::initialize(nu);
                 int lwork = solver.workspace("S", &first._m);
                 K* a;
-                typename HPDDM::Wrapper<K>::ul_type* values;
-                if(!std::is_same<K, typename HPDDM::Wrapper<K>::ul_type>::value) {
+                HPDDM::underlying_type<K>* values;
+                if(!std::is_same<K, HPDDM::underlying_type<K>>::value) {
                     a = new K[first._m * (2 * dof + first._m) + lwork];
-                    values = new typename HPDDM::Wrapper<K>::ul_type[nu + first._m + std::max(1, first._m * std::max(5 * first._m + 7, 2 * dof + 2 * first._m + 1))];
+                    values = new HPDDM::underlying_type<K>[nu + first._m + std::max(1, first._m * std::max(5 * first._m + 7, 2 * dof + 2 * first._m + 1))];
                 }
                 else {
                     a = new K[first._m * (2 * dof + first._m + 1) + lwork + nu];
-                    values = reinterpret_cast<typename HPDDM::Wrapper<K>::ul_type*>(a + first._m * (2 * dof + first._m) + lwork);
+                    values = reinterpret_cast<HPDDM::underlying_type<K>*>(a + first._m * (2 * dof + first._m) + lwork);
                 }
                 int* pos = new int[nu + 8 * first._m];
                 std::fill(pos, pos + nu, 0);
@@ -223,8 +223,8 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                     K* u = a + dof * A->_m;
                     K* vt = u + dof * A->_m;
                     K* work = vt + A->_m * A->_m;
-                    typename HPDDM::Wrapper<K>::ul_type* s = values + nu;
-                    typename HPDDM::Wrapper<K>::ul_type* rwork = s + A->_m;
+                    HPDDM::underlying_type<K>* s = values + nu;
+                    HPDDM::underlying_type<K>* rwork = s + A->_m;
                     std::fill(a, a + A->_m * dof, K(0.0));
                     for(int i = 0; i < dof; ++i)
                         for(int j = A->_ia[i]; j < A->_ia[i + 1]; ++j)
@@ -263,7 +263,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                     }
                 }
                 delete [] pos;
-                if(!std::is_same<K, typename HPDDM::Wrapper<K>::ul_type>::value)
+                if(!std::is_same<K, HPDDM::underlying_type<K>>::value)
                     delete [] values;
                 delete [] a;
                 ptA->Type::super::initialize(nu);
@@ -321,7 +321,7 @@ class solveDDM_Op : public E_F0mps {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type solveDDM_Op<Type, K>::name_param[] = {
-    {"eps", &typeid(typename HPDDM::Wrapper<K>::ul_type)},
+    {"eps", &typeid(HPDDM::underlying_type<K>)},
     {"dim", &typeid(long)},
     {"iter", &typeid(long)},
     {"timing", &typeid(KN<double>*)},
@@ -347,7 +347,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(ptX->n != ptRHS->n || ptRHS->n < ptA->getDof())
         return 0L;
     HPDDM::Option& opt = *HPDDM::Option::get();
-    typename HPDDM::Wrapper<K>::ul_type eps = nargs[0] ? GetAny<typename HPDDM::Wrapper<K>::ul_type>((*nargs[0])(stack)) : -1.0;
+    HPDDM::underlying_type<K> eps = nargs[0] ? GetAny<HPDDM::underlying_type<K>>((*nargs[0])(stack)) : -1.0;
     if(std::abs(eps + 1.0) > 1.0e-6)
         opt["tol"] = eps;
     int dim = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : -1;
@@ -435,7 +435,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(!excluded) {
         if(rank == 0)
             std::cout << scientific << " --- system solved (in " << timer << ")" << std::endl;
-        typename HPDDM::Wrapper<K>::ul_type* storage = new typename HPDDM::Wrapper<K>::ul_type[2 * mu];
+        HPDDM::underlying_type<K>* storage = new HPDDM::underlying_type<K>[2 * mu];
         ptA->computeError(*ptX, *ptRHS, storage, mu);
         if(rank == 0) {
             std::cout << scientific << " --- error = " << storage[1] << " / " << storage[0];
