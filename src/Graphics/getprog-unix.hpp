@@ -120,7 +120,7 @@ int getprog(char* fn,int argc, char **argv)
 	{
 	  verbosity = atoi(argv[i+1]);
 	  i++;	
-	  if(verbosity>10) printf(" verbosity : %ld\n",verbosity);
+            if(verbosity>10) cout << " verbosity " <<verbosity << endl;
 	}
       else if  (strcmp(argv[i],"-nw")==0 ) 
 	{
@@ -284,6 +284,6 @@ if( ch2edpdir && edpfilenamearg)
     }
   if(verbosity>10) 
     cout << " file : " << fn << endl ; 
-
+  //  cout << " verbosity= "<< verbosity << endl;
     return 1;
 }
