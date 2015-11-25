@@ -148,7 +148,7 @@ include/hpddm-master:patch-hpddm-1
 lib/WHERE.hpddm: 
 	if test -d include/hpddm-master ; then \
 	echo hpddm LD -L@DIR@/lib > $@ ;\
-	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/src >> $@ ;\
+	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/include >> $@ ;\
 	else true; 	fi
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
