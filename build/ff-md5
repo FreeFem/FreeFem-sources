@@ -27,7 +27,9 @@
 
 use Digest::MD5 qw(md5_hex); # [[http://perldoc.perl.org/Digest/MD5.html]]
  ($ff,$mm) =@ARGV;
+if( ! -e "$ff")   {exit 2; }
 $hh=md5_hex(`cat $ff`);
+
 # print "ff=$ff, hh= $hh == $mm,   \n";
 if ( "$hh" == "$mm") {exit 0;}
  else {exit 1;} 
