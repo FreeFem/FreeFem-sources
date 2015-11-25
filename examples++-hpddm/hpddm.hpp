@@ -132,7 +132,7 @@ basicAC_F0::name_and_type attachCoarseOperator_Op<Type, K>::name_param[] = {
     {"A", &typeid(Matrice_Creuse<K>*)},
     {"B", &typeid(Matrice_Creuse<K>*)},
     {"pattern", &typeid(Matrice_Creuse<K>*)},
-    {"threshold", &typeid(typename HPDDM::Wrapper<K>::ul_type)},
+    {"threshold", &typeid(typename HPDDM::underlying_type<K>)},
     {"timing", &typeid(KN<double>*)},
     {"ret", &typeid(Pair<K>*)},
     {"solver", &typeid(long)}
