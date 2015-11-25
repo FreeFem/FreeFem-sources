@@ -94,10 +94,10 @@ install-exec-local::
 
 
 freefem++.pref:Makefile
-	echo loadpath = \"../examples++-load/\" >freefem++.pref
+	echo loadpath = \"./;../examples++-load/\" >freefem++.pref
 	echo includepath = \"../examples++-3d/\" >>freefem++.pref
 	echo includepath += \"../examples++-tutorial/\" >>freefem++.pref
-	echo loadpath += \"./\" >>freefem++.pref
+#	echo loadpath += \"./\" >>freefem++.pref
 # force the build for freefem++.pref  FH.. 
 DDM-Schwarz-Lame-2d.edp:freefem++.pref
 # FFCS - cleaning is useful sometimes
