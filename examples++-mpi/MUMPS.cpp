@@ -45,9 +45,9 @@ MPI_Fint* _imp__MPI_F_STATUSES_IGNORE;
 #define JOB_INIT -1
 #define JOB_END -2
 #define USE_COMM_WORLD -987654
-#define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
-#define INFOG(I) infog[(I)-1] /* macro s.t. indices match documentation */
-#define INFO(I) info[(I)-1]   /* macro s.t. indices match documentation */
+//#define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
+//#define INFOG(I) infog[(I)-1] /* macro s.t. indices match documentation */
+//#define INFO(I) info[(I)-1]   /* macro s.t. indices match documentation */
 
 template<typename RR> struct MUMPS_STRUC_TRAIT {typedef void MUMPS;  typedef void R; };
 template<> struct MUMPS_STRUC_TRAIT<double>  {typedef DMUMPS_STRUC_C MUMPS; typedef double R;};
@@ -77,11 +77,45 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     bool distributed;
     MPI_Comm comm;
     int mpirank;
+    KN<double> * rinfog;
+    KN<long> * infog;
+
     public:
+    
+    int & ICNTL(int i) const  { return _id->icntl[i-1];}
+    double & CNTL(int i) const  { return _id->cntl[i-1];}
+    int & INFO(int i) const { return _id->info[i-1];}
+    double & RINFO(int i) const { return _id->rinfo[i-1];}
+    int & INFOG(int i) const { return _id->infog[i-1];}
+    double & RINFOG(int i) const { return _id->rinfog[i-1];}
+    void SetVerb(int i=verbosity) const {
+        if( verbosity < 5)
+        {
+            ICNTL(1)=6;
+            ICNTL(3)=0;
+            ICNTL(4)=0;
+        }
+        else
+        {
+            ICNTL(1)=6;
+            ICNTL(2)=0;
+            ICNTL(3)=6;
+            ICNTL(4)=0;
+            if(verbosity < 10) ICNTL(4)=1;
+            else if(verbosity < 15) ICNTL(4)=1;
+            else if(verbosity < 20) ICNTL(4)=2;
+            else if(verbosity < 25) ICNTL(4)=3;
+            else ICNTL(4)=4;
+        }
+        //cout << ICNTL(1) << " " << ICNTL(2) << " "<< ICNTL(3) << " "<< ICNTL(4) << endl; 
+    }
+  
+    
         typedef typename  MUMPS_STRUC_TRAIT<R>::R MR; 
-  SolverMumps(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_R, MPI_Comm* pcomm,int strategy=3,int matrank=0)
+  SolverMumps(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_R, MPI_Comm* pcomm,int strategy=3,int matrank=0,KN<double> *rinfogg=0  ,KN<long> *infogg=0)
     : comm( pcomm ? *pcomm :MPI_COMM_WORLD ),
-      distributed(matrank<0)
+      distributed(matrank<0),
+      rinfog(rinfogg),infog(infogg)
   {
     
     MPI_Comm_rank(comm, &mpirank);
@@ -172,15 +206,15 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
 	_id->jcn = 0;
       }
     _id->nrhs = 1;
-    _id->ICNTL(1) = 0;
-    _id->ICNTL(2) = 0;
-    _id->ICNTL(3) = verbosity > 1 ? 6 : 0;
-    _id->ICNTL(4) = 0; // verbose level
-    _id->ICNTL(5) = 0;                                                          // assembled format
+    ICNTL(1) = 0;
+    ICNTL(2) = 0;
+    ICNTL(3) = verbosity > 1 ? 6 : 0;
+    ICNTL(4) = 0; // verbose level
+    ICNTL(5) = 0;                                                          // assembled format
     if(_strategy > 0 && _strategy < 9 && _strategy != 2) 
       {
-	_id->ICNTL(28) = 1;             // 1: sequential analysis
-	_id->ICNTL(7)  = _strategy - 1; //     0: AMD
+	ICNTL(28) = 1;             // 1: sequential analysis
+	ICNTL(7)  = _strategy - 1; //     0: AMD
       }     
     //     1:
     //     2: AMF
@@ -191,24 +225,24 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     //     7: automatic
     else
       {
-	_id->ICNTL(28) = 1;
-	_id->ICNTL(7)  = 7;
+	ICNTL(28) = 1;
+	ICNTL(7)  = 7;
       }
     if(_strategy > 8 && _strategy < 12) 
       {
-	_id->ICNTL(28) = 2;              // 2: parallel analysis
-	_id->ICNTL(29) = _strategy - 9;  //     0: automatic
+	ICNTL(28) = 2;              // 2: parallel analysis
+	ICNTL(29) = _strategy - 9;  //     0: automatic
       }                                   //     1: PT-STOCH
     //     2: ParMetis
-    _id->ICNTL(9)  = 1;
-    _id->ICNTL(11) = 0;                 // verbose level
-    _id->ICNTL(18) = distributed ? 3: 0;        // centralized matrix input if !distributed
-    _id->ICNTL(20) = 0;                 // dense RHS
-    _id->ICNTL(14) = 30;                // percentage increase in the estimated working space
+    ICNTL(9)  = 1;
+    ICNTL(11) = 0;                 // verbose level
+    ICNTL(18) = distributed ? 3: 0;        // centralized matrix input if !distributed
+    ICNTL(20) = 0;                 // dense RHS
+    ICNTL(14) = 30;                // percentage increase in the estimated working space
     _id->job = 4;
     mumps_c(_id);
-    if(_id->INFOG(1) != 0)
-      std::cout << "BUG MUMPS, INFOG(1) = " << _id->INFOG(1) << " distributed: " << distributed << " master " << matrank << std::endl;
+    if(INFOG(1) != 0)
+      std::cout << "BUG MUMPS, INFOG(1) = " << INFOG(1) << " distributed: " << distributed << " master " << matrank << std::endl;
     if(I) {
       if(_id->sym == 0) {
 	for(unsigned int i = 0; i < A.nbcoef; ++i)
@@ -220,18 +254,33 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
       }
       delete [] I;
     }
+      if( rinfog)
+      {
+          // copy rinfog
+          if(rinfog->N() <40) rinfog->resize(40);
+          for(int i=0; i<40;++i)
+              (*rinfog)[i]=RINFOG(i+1);
+      }
+      if( infog)
+      {
+          // copy ginfo
+          if(infog->N() <40) infog->resize(40);
+          for(int i=0; i<40;++i)
+              (*infog)[i]=INFOG(i+1);
+      }
+     
   };
   
   void Solver(const MatriceMorse<R> &A, KN_<R> &x, const KN_<R> &b) const
     {
-     _id->ICNTL(20) = 0; // dense RHS
-     _id->ICNTL(21) = 0; // centralized dense solution 
+     ICNTL(20) = 0; // dense RHS
+     ICNTL(21) = 0; // centralized dense solution 
      if(distributed)
      {
        MPI_Reduce( (void *) (R*) b,(void *) (R*) x  , x.N() , MPI_TYPE<R>::TYPE(),MPI_SUM,0,comm);
      }
      else if(mpirank==0)  x = b;
-    _id->ICNTL(3) = verbosity > 1 ? 6 : 0;
+    ICNTL(3) = verbosity > 1 ? 6 : 0;
     
     _id->rhs = reinterpret_cast<MR*>((R*) x);
     _id->job = 3;
@@ -240,6 +289,21 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
         {
           MPI_Bcast(reinterpret_cast<void*> ( (R*) x), x.N(), MPI_TYPE<R>::TYPE(), 0,comm);
         }
+        if( rinfog)
+        {
+            // copy rinfog
+            if(rinfog->N() <40) rinfog->resize(40);
+            for(int i=0; i<40;++i)
+                (*rinfog)[i]=RINFOG(i+1);
+        }
+        if( infog)
+        {
+            // copy ginfo
+            if(infog->N() <40) infog->resize(40);
+            for(int i=0; i<40;++i)
+                (*infog)[i]=INFOG(i+1);
+        }
+        
     
   };
   
@@ -267,10 +331,10 @@ typename MatriceMorse<R>::VirtualSolver* buildSolver(DCL_ARG_SPARSE_SOLVER(R, A)
   if( ! strategy) strategy=3;
   int mat = mpirank == matrank || matrank < 0; 
   if(A)
-    return new SolverMumps<R>(*A, ds.lparams, ds.dparams, pcw,strategy,matrank);
+    return new SolverMumps<R>(*A, ds.lparams, ds.dparams, pcw,strategy,matrank,ds.rinfo,ds.info);
   else 
     ffassert(0); 
-  return new SolverMumps<R>(*A, ds.lparams, ds.dparams, pcw,strategy,matrank);
+  return new SolverMumps<R>(*A, ds.lparams, ds.dparams, pcw,strategy,matrank,ds.rinfo,ds.info);
 }
 
 //  the 2 default sparse solver double and complex
@@ -286,7 +350,7 @@ TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 bool SetMUMPS()
 {
     if(verbosity>1)
-      cout << " SetDefault sparse solver to MUMPS" << endl;
+      cout << " SetDefault sparse solver to MUMPS (mpi) " << endl;
     DefSparseSolver<double>::solver  = buildSolver<double>;
     DefSparseSolver<Complex>::solver = buildSolver<Complex>;
     DefSparseSolverSym<double>::solver  = buildSolver<double>;
@@ -297,14 +361,15 @@ bool SetMUMPS()
 
 
 void initMUMPS()
-{    
+{
+  if(verbosity && mpirank==0)  cout << "\n MUMPS (mpi) "<< endl;
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   SparseMatSolverSym_R= DefSparseSolverSym<double>::solver;
   SparseMatSolverSym_C= DefSparseSolverSym<Complex>::solver;
   
   if(verbosity>1)
-    cout << "\n Add: MUMPS:  defaultsolver defaultsolverMUMPS_" << endl;
+    cout << "\n Add: MUMPS(mpi):  defaultsolver defaultsolverMUMPS_" << endl;
   DefSparseSolver<double>::solver  = buildSolver;
   DefSparseSolver<Complex>::solver = buildSolver;
   DefSparseSolverSym<double>::solver  = buildSolver;

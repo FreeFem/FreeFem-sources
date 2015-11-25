@@ -6,8 +6,10 @@ int master = 0; //  no choose see MUMPS doc sect 4.3
 if(mpirank != master) // no need to store the matrix on ranks other than 0
     Th = square(1, 1, label = l);
 fespace Vh(Th, P2);
+real[int] rinfo(40);
+ int[int] info(40); 
 
-varf lap(u,v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th)(v) + on(1, u = 1);
+varf lap(u,v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v) - 100*u*v) + int2d(Th)(v) + on(1, u = 1);
 real[int] b = lap(0, Vh);
 matrix A,B;
 //if( mpirank==master) // => trap pb of size  in  A^-1 * b;
@@ -35,7 +37,12 @@ verbosity = 2;
 // int[int] t(2); t(0) = 4; t(1) = 1;
 // set(A, solver = sparsesolver, lparams = t);
 set(A, solver = sparsesolver,master=master);
-set(B, solver = sparsesolver,master=master);
+set(B, solver = sparsesolver,master=master,rinfo=rinfo,info=info);
+if(mpirank==master)
+for(int i=0; i<40;++i)
+   {
+    cout << "mumps: info B" << i+1 << " = " << info[i] << " , / r " << rinfo[i] <<endl;
+   }
 verbosity = 0;
 Vh u;
 u[] = A^-1 * b;

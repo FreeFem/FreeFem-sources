@@ -532,36 +532,15 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "scalec", &typeid(KN_<double>)}, \
     { "sparams", &typeid(string*)}, \
     { "commworld", &typeid(pcommworld)}, \
-    { "master", &typeid(long)} \
+    { "master", &typeid(long)}, \
+    { "rinfo", &typeid(KN<double>*)}, \
+    { "info", &typeid(KN<long>*)} \
 
 
 
-const int NB_NAME_PARM_MAT =  22  ;
+
+const int NB_NAME_PARM_MAT =  24  ;
     
-/*
- {  "init", &typeid(bool)},
- {  "solver", &typeid(TypeSolveMat*)},
- {  "eps", &typeid(double)  },
- {  "precon",&typeid(Polymorphic*)}, 
- {  "dimKrylov",&typeid(long)},
- {  "bmat",&typeid(Matrice_Creuse<R>* )},
- {  "tgv",&typeid(double )},
- {  "factorize",&typeid(bool)},
- {  "strategy",&typeid(long )},
- {  "tolpivot",&typeid(double )},
- {  "tolpivotsym",&typeid(double )},
- {  "nbiter", &typeid(long)}, // 11
- //  avril 2009  FH
- { "datafilename",& &typeid(string*)} 
- { "lparams",& &typeid(KN_<long>)} 
- { "dparams",& &typeid(KN_<double>)} 
- { "smap", &typeid(map<string,string>*)} 
- { "permr", &typeid(KN_<long>)} 
- { "permc", &typeid(KN_<long>)} 
- { "scaler", &typeid(KN_<double>)} 
- { "scalec", &typeid(KN_<double>)} 
- 
-*/  
     
 template<class R>
 inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param)
@@ -596,20 +575,12 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	if (nargs[++kk]) ds.commworld = GetAny<pcommworld>((*nargs[kk])(stack));
 #ifdef VDATASPARSESOLVER
         if (nargs[++kk]) ds.master = GetAny<long>((*nargs[kk])(stack));
+#else
+        ++kk;
 #endif
-  /* de datafilename a scalec */
-/*	
-	if (nargs[++kk]) ds.param_int= GetAny< KN<int> >((*nargs[kk+12])(stack));  // Add J. Morice 02/09 
-	if (nargs[kk+13]) ds.param_double= GetAny< KN<double> >((*nargs[kk+13])(stack));
-	if (nargs[kk+14]) ds.param_char= GetAny< string * >((*nargs[kk+14])(stack));  //
-	if (nargs[kk+15]) ds.perm_r = GetAny< KN<int > >((*nargs[kk+15])(stack));
-	if (nargs[kk+16]) ds.perm_c = GetAny< KN<int> >((*nargs[kk+16])(stack));  //
-	if (nargs[kk+17]) ds.file_param_int= GetAny< string* >((*nargs[kk+17])(stack));  // Add J. Morice 02/09 
-	if (nargs[kk+18]) ds.file_param_double= GetAny< string* >((*nargs[kk+18])(stack));
-	if (nargs[kk+19]) ds.file_param_char= GetAny< string* >((*nargs[kk+19])(stack));  //
-	if (nargs[kk+20]) ds.file_param_perm_r = GetAny< string* >((*nargs[kk+20])(stack));
-	if (nargs[kk+21]) ds.file_param_perm_c = GetAny< string* >((*nargs[kk+21])(stack));  //
-*/	
+        // add FH nov 2015 ..
+        if (nargs[++kk]) ds.rinfo = GetAny<KN<double>* >((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.info = GetAny<KN<long>* >((*nargs[kk])(stack));
 	assert(++kk == n_name_param);
     }
 } // end of namespace Fem2D
