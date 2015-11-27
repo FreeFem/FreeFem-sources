@@ -309,11 +309,13 @@ return  &((a)(b,c));}
 
     
 
-template<class RR,bool isinit>
+template<class KNRR,bool isinit>
 class  InitArrayfromArray : public OneOperator { 
 public:
-    typedef KN<RR> * A;
-    typedef KN<RR> * R;
+    typedef typename  std::remove_pointer<KNRR>::type KNR ;
+    typedef typename KNR::K RR;
+    typedef KNRR  A;
+    typedef KNRR  R;
     typedef E_Array B;
     
     class CODE : public  E_F0 { public:
@@ -322,7 +324,15 @@ public:
        Expression * tab;
     int * what;//  0  RR, 1 KN<RR>, 
        const  bool mi;
-
+        
+    static KN_<RR> &set(KN<RR> * a,KN<RR> *& p,int n){
+                if(isinit) a->init(n);
+                else a->resize(n);
+        p =a;
+        return *a;}
+        
+    static KN_<RR> &set(KN_<RR> & a,KN<RR> *& p,int n){p=0;return a;}
+        
     CODE(Expression a,const E_Array & tt)  
       : a0(a),N(tt.size()),
 	tab(new Expression [N]),
@@ -346,13 +356,14 @@ public:
 	else 
 	  CompileError(" InitArrayfromArray: we are waiting for scalar or vector of scalar");
     }
-    
-    AnyType operator()(Stack stack)  const 
+    AnyType operator()(Stack stack)  const
     {
+        // a verifier ... FH nov 2015.....
 	//extern void xxxx();
 	//xxxx();
-      A  a=GetAny<A>((*a0)(stack));
-      KN<AnyType> v(N);
+      KN<RR> * pa=0;
+      A  aa=GetAny<A>((*a0)(stack));
+       KN<AnyType> v(N);
       KN<int>  nn(N+1);
       for (int i=0;i<N;i++)
         v[i]= (*(tab[i]))(stack);
@@ -364,19 +375,21 @@ public:
 	  else if (what[i]==1) nn[i]=GetAny<KN_<RR> >(v[i]).size();
           n += nn[i];
 	}
-      if (isinit) 
-        a->init(n);
-      else
-	a->resize(n);
-      
+        if(verbosity>10000)cout << " InitArrayfromArray  aa = " <<aa << " n="<< n << endl;
+        KN_<RR> a =set(aa,pa,n);       
+        if(verbosity>10000) cout << " InitArrayfromArray a.N() "<< a.N() << " " << n << " "
+                             << pa << " " << isinit  <<endl;
+        ffassert(a.N()>=n);
       for (int i=0,j=0 ;i<N; j += nn[i++])
-	
+      {
+       // cout << " ### " << i << " " << j << endl;
         if (what[i]==0)
-          (*a)[j]= GetAny<RR>(v[i]);
+          a[j]= GetAny<RR>(v[i]);
         else if (what[i]==1) 
-          (*a)(SubArray(nn[i],j)) = GetAny<KN_<RR> >((*(tab[i]))(stack));// correct bug nov 2014
+          a(SubArray(nn[i],j)) = GetAny<KN_<RR> >((*(tab[i]))(stack));// correct bug nov 2014
+      }
         //  (due to resize=> pointer  change Fh
-      return SetAny<R>(a);
+      return SetAny<R>(aa);
     } 
     bool MeshIndependent() const     {return  mi;} // 
     ~CODE() { delete [] tab; delete[] what;}
@@ -386,8 +399,14 @@ public:
   
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));} 
-    InitArrayfromArray():   OneOperator(atype<R>(),atype<A>(),atype<B>())  {}
+    {   if(verbosity>9999)
+          cout << "\n code InitArrayfromArray:" << *args[0].left() << " " << *args[1].left()
+               << "( "<< *t[0] << " " << *t[1] <<")" <<endl;
+         return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));}
+    InitArrayfromArray(int preff=0):   OneOperator(atype<R>(),atype<A>(),atype<B>())  {
+        pref=preff;
+       // cout << "\n @@@ R " << *atype<R>()<< " A " << *atype<A>() << " B " << * atype<B>() << " " << preff <<endl;
+    }
   
 };
 
@@ -498,7 +517,7 @@ public:
 	    what[i]=1;
 	  }      
 	else 
-	  CompileError(" we are waiting for scalar or vector of scalar");
+	  CompileError("SetArrayofKNfromKN: we are waiting for scalar or vector of scalar");
     }
     
     AnyType operator()(Stack stack)  const 
@@ -1037,7 +1056,7 @@ void ArrayOperator()
     
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
-       new InitArrayfromArray<K,true>
+       new InitArrayfromArray<KN<K>*,true>
     //   new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),
     //   new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)		????       
      //  new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp)
@@ -1068,7 +1087,7 @@ void ArrayOperator()
 
     // Add<KNM<K> *>("=","(",new OneOperator2_<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_tt));
     
-     Add<KN<K> *>("<-","(",new InitArrayfromArray<K,true>);
+     Add<KN<K> *>("<-","(",new InitArrayfromArray<KN<K>*,true>);
      Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
      Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));
      Add<KNM<K> *>("n",".",new OneOperator1<Z,KNM<K> *>(get_n));
@@ -1088,9 +1107,9 @@ void ArrayOperator()
     
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
-     TheOperators->Add("=", new InitArrayfromArray<K,false>
-       );
-     TheOperators->Add("=", new InitMatfromAArray<K,false>
+     TheOperators->Add("=", new InitArrayfromArray<KN<K>*,false>(10));
+     TheOperators->Add("=", new InitArrayfromArray<KN_<K>,false>(1));// ???????? FH nov 2015 ..
+    TheOperators->Add("=", new InitMatfromAArray<K,false>
        );
      TheOperators->Add("=", new SetArrayofKNfromKN<K>
        );
