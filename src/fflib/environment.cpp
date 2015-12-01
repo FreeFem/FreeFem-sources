@@ -316,8 +316,12 @@ void GetEnvironment()
   if (GetEnvironmentVariable("HOMEPATH", envh, LEN) > 0) 
     home=envh;
 #endif 
-  if ( ff_verbosity ) { 
+  if ( ff_verbosity ) {
+    
     verbosity = atoi(ff_verbosity);
+      if(verbosity > 4)
+    cout << " -- GetEnvironmentVariable: verbosity= " <<verbosity   << endl;
+      
   }
 
 #ifdef PURE_WIN32 
@@ -356,9 +360,9 @@ void GetEnvironment()
   
   
   
-  if ( ff_verbosity ) { 
-    verbosity = atoi(ff_verbosity);
-  }
+ // if ( ff_verbosity ) {
+ //   verbosity = atoi(ff_verbosity);
+ // }
   if(ff_loadpath)
     GetEnvironment("loadpath",ff_loadpath);
   if(ff_incpath)
@@ -377,10 +381,10 @@ void GetEnvironment()
 	show("\ninclude path : ",inc->second, "\n \t ");
 	cout <<"(.)"<<endl;}
     }
-  if ( ff_verbosity ) { 
-    verbosity = atoi(ff_verbosity);
-    if(verbosity>2) cout << " --  verbosity is set to " << verbosity << endl;
-  }
+//  if ( ff_verbosity ) {
+//    verbosity = atoi(ff_verbosity);
+    if(verbosity>10) cout << " --  GetEnvironment: verbosity is set to " << verbosity  << endl;
+//  }
   
  }
 void EnvironmentLoad()

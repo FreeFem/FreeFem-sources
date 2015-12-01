@@ -854,7 +854,7 @@ int mainff (int  argc, char **argv)
   if(argc)  
     prognamearg=argv[0];
 
-  int vvold=verbosity; 
+ //   int vvold=verbosity;
   if(mpirank !=0) verbosity=0;
 
   // ALH - 14/10/8 - This breaks FFCS output redirection
@@ -863,7 +863,7 @@ int mainff (int  argc, char **argv)
 #endif
 
   GetEnvironment(); // [[file:~/ff/src/fflib/environment.cpp::GetEnvironment]]
-  vvold=verbosity; 
+//    vvold=verbosity;
   if(mpirank !=0) verbosity=0; 
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
@@ -946,9 +946,6 @@ int mainff (int  argc, char **argv)
   zzzfff->input(cc); // [[file:../fflib/lex.cpp::mylex_input_filename]]
   EnvironmentLoad(); // just before compile [[file:~/ff/src/fflib/environment.cpp::EnvironmentLoad]]
 
-  // Only reset verbosity for parallel processes where it was forcefully set to zero - ALH
-  if(mpirank!=0)verbosity=vvold; 
-    
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
   

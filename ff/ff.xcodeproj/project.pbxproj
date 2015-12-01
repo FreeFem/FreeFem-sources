@@ -122,34 +122,34 @@
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
-		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; settings = {ASSET_TAGS = (); }; };
-		3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA7404B1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740541BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; settings = {ASSET_TAGS = (); }; };
-		3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; settings = {ASSET_TAGS = (); }; };
-		3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; settings = {ASSET_TAGS = (); }; };
-		3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; settings = {ASSET_TAGS = (); }; };
-		3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; settings = {ASSET_TAGS = (); }; };
-		3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; settings = {ASSET_TAGS = (); }; };
-		3DA7405F1BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; settings = {ASSET_TAGS = (); }; };
-		3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; settings = {ASSET_TAGS = (); }; };
-		3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; settings = {ASSET_TAGS = (); }; };
+		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
+		3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
+		3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; };
+		3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; };
+		3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; };
+		3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; };
+		3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; };
+		3DA7404B1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; };
+		3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; };
+		3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; };
+		3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; };
+		3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; };
+		3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; };
+		3DA740541BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; };
+		3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; };
+		3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; };
+		3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; };
+		3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; };
+		3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; };
+		3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; };
+		3DA7405F1BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; };
+		3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; };
+		3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; };
+		3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; };
+		3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; };
+		3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; };
+		3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; };
+		3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
 		3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
@@ -746,7 +746,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0710;
 			};
 			buildConfigurationList = 3D90DC80097012B3002A1826 /* Build configuration list for PBXProject "ff" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -868,6 +868,7 @@
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					CHECK_KN,
 					BAMG_LONG_LONG,
@@ -910,7 +911,6 @@
 		3DAA7DC00BBFF3B20054E435 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				EXECUTABLE_PREFIX = lib;
@@ -963,7 +963,6 @@
 		3DAA7DC10BBFF3B20054E435 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				EXECUTABLE_PREFIX = lib;
@@ -1004,7 +1003,6 @@
 		3DC62AAA09728DA400D487F6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1052,7 +1050,6 @@
 		3DC62AAB09728DA400D487F6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;

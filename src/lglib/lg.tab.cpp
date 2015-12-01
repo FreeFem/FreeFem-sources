@@ -3370,7 +3370,7 @@ int mainff (int  argc, char **argv)
   if(argc)  
     prognamearg=argv[0];
 
-    int vvold=verbosity; 
+ //   int vvold=verbosity;
     if(mpirank !=0) verbosity=0;
 
   // ALH - 14/10/8 - This breaks FFCS output redirection
@@ -3379,7 +3379,7 @@ int mainff (int  argc, char **argv)
 #endif
 
   GetEnvironment();   
-    vvold=verbosity; 
+//    vvold=verbosity;
     if(mpirank !=0) verbosity=0; 
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
@@ -3444,7 +3444,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
 //   Init_map_type();
-   if(verbosity>2 && (mpirank==0 ) ) cout << " Load: ";
+   if(verbosity>2 || (mpirank==0 ) ) cout << " Load: ";
    callInitsFunct() ; //  init for dynamique libs ...
   // init_lgfem() ;
    init_lgmesh() ;
@@ -3461,7 +3461,7 @@ int mainff (int  argc, char **argv)
    if(verbosity>2 || mpirank==0)  cout << endl;
   zzzfff->input(cc); // [[file:../fflib/lex.cpp::void mylex input]]
   EnvironmentLoad(); // just before compile
-  verbosity=vvold; 
+  //verbosity=vvold;
     
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
