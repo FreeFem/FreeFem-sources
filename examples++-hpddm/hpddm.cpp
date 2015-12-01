@@ -92,9 +92,10 @@ class Pair {
         }
 };
 
+typedef unsigned long ul_type; 
 #include "skeleton.cpp"
 #ifdef SCHWARZ
-#include "schwarz.hpp"
+#include "hpddm.hpp"
 #endif
 #if defined(BDD) || defined(FETI)
 //#include "substructuring.cpp"

@@ -911,7 +911,10 @@ struct Data_Sparse_Solver {
   KN<double> scale_c; 
   string sparams;  
   pcommworld commworld;  // pointeur sur le commworld
-    int master; //  master rank in comm add FH 02/2013 for MUMPS ... => VDATASPARSESOLVER exist 
+    int master; //  master rank in comm add FH 02/2013 for MUMPS ... => VDATASPARSESOLVER exist
+    // array for return information for mumps ...
+    KN<double> * rinfo;
+    KN<long> * info;
  /*   
   int *param_int;
   double *param_double;
@@ -959,7 +962,9 @@ struct Data_Sparse_Solver {
      */
     //sparams, 
     commworld(0),
-    master(0)
+    master(0),
+    rinfo(0),
+    info(0)
     {}
     
 private:

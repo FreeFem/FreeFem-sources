@@ -1,8 +1,16 @@
+version 3.42 
+ - add new quadrature formular 3d exact forme degre 6 to 14 in qf11to25.cpp 
+   the name of qfV are  qfVp1 .. qfVp14 
+ - correct optimisation in convect for navier stokes problem..
+  for this kind of expression
+     + int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
+   in this case now only on characteristics is computated 
  - correct trouble in configure this /usr/bin/machine 
- - map&key to know if a key exist in a map int[strint], ....  
+ - map&key to know if a key exist in a map int[string], ....  
+version 3.41
  - add tools to get mesh of fespace Vh in 2d and 3d 
      mesh th2= Vh2d.Th ;  mesh3 th3= Vh3d.Th ; 
-     not the type of the mesh is a cosnt pointeur   => lot of cosmetic change
+     not the type of the mesh is a const pointeur   => lot of cosmetic change
 version 3.40-2
  - try to resolve probleme with petsc metis and freefem++ metis
      now freefem++ use petsc lib if petsc is find for

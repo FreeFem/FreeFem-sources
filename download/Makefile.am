@@ -109,7 +109,6 @@ include:
 	mkdir  include
 pkg:
 	mkdir pkg
-
 # ALH - /download/yams and /download/mshmet need /src/libMesh/libmesh.a but /src is compiled after /download, so we
 # need to compile it now
 
@@ -137,6 +136,7 @@ WHERE-LD: tag-compile-pkg  WHERE-OTHER
 install-hpddm:
 	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:
+	-rm lib/WHERE.hpddm
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm-master
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
@@ -146,7 +146,10 @@ include/hpddm-master:patch-hpddm-1
 	if `../build/ff-md5 include/hpddm-master/src/ScaLAPACK.hpp dd38a3ff2d0aaa7d93b76ed19d3224ae` ; then patch -p1 <patch-hpddm-2; fi;true
 
 lib/WHERE.hpddm: 
-	if test -d include/hpddm-master ; then \
+	if test -d include/hpddm-master/include ; then \
+	echo hpddm LD -L@DIR@/lib > $@ ;\
+	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/include >> $@ ;\
+	elif test -d include/hpddm-master/src ; then \
 	echo hpddm LD -L@DIR@/lib > $@ ;\
 	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/src >> $@ ;\
 	else true; 	fi

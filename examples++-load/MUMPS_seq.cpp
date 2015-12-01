@@ -56,7 +56,7 @@ void mumps_c(ZMUMPS_STRUC_C *id) { zmumps_c(id);}
 
 
 template<typename  R>
-class SolveMUMPS_seq :   public MatriceMorse<R>::VirtualSolver 
+class SolveMUMPS_seq :   public MatriceMorse<R>::VirtualSolver
 {
 public:
   // typedef double R;
@@ -65,13 +65,15 @@ public:
   double tgv;
   typedef typename  MUMPS_STRUC_TRAIT<R>::R MR; 
   mutable typename MUMPS_STRUC_TRAIT<R>::MUMPS id; 
-
+  KN<double> * rinfog;
+  KN<long> * infog;
+    
   int & ICNTL(int i) const  { return id.icntl[i-1];}
-  R & CNTL(int i) const  { return id.cntl[i-1];}
+  double & CNTL(int i) const  { return id.cntl[i-1];}
   int & INFO(int i) const { return id.info[i-1];}
-  R & RINFO(int i) const { return id.rinfo[i-1];}
+  double & RINFO(int i) const { return id.rinfo[i-1];}
   int & INFOG(int i) const { return id.infog[i-1];}
-  R & RINFOG(int i) const { return id.rinfog[i-1];}
+  double & RINFOG(int i) const { return id.rinfog[i-1];}
   void SetVerb(int i=verbosity) const {
     if( verbosity < 5) 
       { 
@@ -107,9 +109,10 @@ public:
       }
   }
   SolveMUMPS_seq(const MatriceMorse<R> &A,int strategy,double ttgv, double epsilon=1e-6,
-	       double pivot=-1.,double pivot_sym=-1.  ) : 
+	       double pivot=-1.,double pivot_sym=-1. ,KN<double> *rinfogg=0  ,KN<long> *infogg=0 ) :
     eps(epsilon),epsr(0),
-    tgv(ttgv)
+    tgv(ttgv),
+    rinfog(rinfogg),infog(infogg)
   { 
     int myid=0;
     int ierr=0;
@@ -160,6 +163,21 @@ public:
     Check("MUMPS-seq analayse and Factorize");
     if(verbosity>3)
       cout << "  -- MUMPS LU   n=  " << n << ", peak Mem: " << INFOG(22) << " Mb" << " sym: " << id.sym <<  endl;
+      if( rinfog)
+      {
+          // copy rinfog
+          if(rinfog->N() <40) rinfog->resize(40);
+          for(int i=0; i<40;++i)
+              (*rinfog)[i]=RINFOG(i+1);
+      }
+      if( infog)
+      {
+          // copy ginfo
+          if(infog->N() <40) infog->resize(40);
+          for(int i=0; i<40;++i)
+              (*infog)[i]=INFOG(i+1);
+      }
+      
 
   }
   void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
@@ -181,6 +199,22 @@ public:
     if(verbosity>3)
       cout << "   b min max " << b.min() << " " <<b.max() << endl;
     if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
+      // add to get info from MUMPS in freefem++ nov 2015 FH.
+    if( rinfog)
+    {
+        // copy rinfog
+        if(rinfog->N() <40) rinfog->resize(40);
+        for(int i=0; i<40;++i)
+            (*rinfog)[i]=RINFOG(i+1);
+    }
+    if( infog)
+             {
+                 // copy ginfo
+                 if(infog->N() <40) infog->resize(40);
+                 for(int i=0; i<40;++i)
+                     (*infog)[i]=INFOG(i+1);
+             }
+
   }
   void Clean() const 
   {
@@ -208,59 +242,13 @@ public:
      
 }; 
 
-/*
-template<>
-class SolveMUMPS_seq<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
-  double eps;
-  mutable double  epsr;
-  double tgv;
-
-
-
-  
-public:
-  SolveMUMPS_seq(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
-     double pivot=-1.,double pivot_sym=-1.
-) : 
-    eps(epsilon),epsr(0),tgv(ttgv),
-    ar(0),ai(0),
-
-   { 
-    int status;
-    throwassert( !A.sym());
-
-  }
-  void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
-        ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
-    if(verbosity>1)
-    {
-      cout << "  -- MUMPS _solve,  peak Mem : " <<  -1 << "Mbytes " << endl;
-      cout << "   b min max " << b.min() << " " <<b.max() << endl;
-      cout << "   x min max " << x.min() << " " <<x.max() << endl;
-    }
-  }
-
-  ~SolveMUMPS_seq() { 
-    if(verbosity>5)
-    cout << "~SolveMUMPS_seq " << endl;
-  }
-  void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
-  {  
-    ffassert(x.N()==Ax.N());
-    Ax +=  (const MatriceMorse<Complex> &) (*this) * x; 
-  }
-     
-
-}; 
-*/
 
 inline MatriceMorse<double>::VirtualSolver *
 BuildSolverIMUMPSseq(DCL_ARG_SPARSE_SOLVER(double,A))
 {
   if(verbosity>3)
     cout << " BuildSolverMUMPSseq<double>" << endl;
-    return new SolveMUMPS_seq<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
+    return new SolveMUMPS_seq<double>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,ds.rinfo,ds.info);
 }
 
 inline MatriceMorse<Complex>::VirtualSolver *
@@ -268,7 +256,7 @@ BuildSolverIMUMPSseq(DCL_ARG_SPARSE_SOLVER(Complex,A))
 {
   if(verbosity>3)
     cout << " BuildSolverMUMPSseq<Complex>" << endl;
-    return new SolveMUMPS_seq<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym);
+    return new SolveMUMPS_seq<Complex>(*A,ds.strategy,ds.tgv,ds.epsilon,ds.tol_pivot,ds.tol_pivot_sym,ds.rinfo,ds.info);
 }
 
 

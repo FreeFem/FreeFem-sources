@@ -2235,6 +2235,9 @@ class fCLD { public:
 class Convect : public E_F0mps  { public:
     typedef double  Result; // return type 
     Expression u,v,w,ff,dt;
+    long state;
+    static Expression ou,ov,ow,odt; // previous def
+    static long  count;
     int d;
     Convect(const basicAC_F0 & args)  : u(0),v(0),w(0),ff(0),dt(0)
     {
@@ -2251,6 +2254,19 @@ class Convect : public E_F0mps  { public:
        
        dt=CastTo<double>(args[1]);
        ff=CastTo<double>(args[2]);
+       // save previous  state
+        if( !(( ou && u->compare(ou)==0)  && (v->compare(ov)==0) && ( (w==0) || (w->compare(ov)==0))
+              && (dt->compare(odt)==0) )) {
+             count++;
+            
+        }
+        state= count;// use of optim of convect
+        if(verbosity>3)
+          cout << "\n  -- Convert number of Convect case:  .... "<< state << endl;
+        ou=u;
+        ov=v;
+        ow=w;
+        odt=dt;
      }
     
     static ArrayOfaType  typeargs() 
@@ -2264,6 +2280,11 @@ class Convect : public E_F0mps  { public:
     operator aType () const { return atype<Result>();}
     
 };
+Expression Convect::ou=0;
+Expression Convect::ov=0;
+Expression Convect::ow=0;
+Expression Convect::odt=0;
+long  Convect::count=0;
 
 /// <<Plot>> used for the [[plot_keyword]]
 
@@ -4336,17 +4357,27 @@ AnyType Convect::eval2(Stack s) const
 {
   MeshPoint* mp(MeshPointStack(s));
   static MeshPoint mpp,mps;
-  static R ddts;
+  static int stateold=0;
+  static int count =0;
+  static R ddtp=0;
   R ddt = GetAny<double>((*dt)(s));
   if (ddt) 
     {
       MeshPoint mpc(*mp);
       MeshPointStack(s,&mpc);
-      if(*mp==mpp && ddt == ddts) 
-	mpc=mps;
-      else 
+      if( (stateold == state) && (ddt==ddtp) && (*mp==mpp  ) )// optim same convect at same point nov/2015
+      {
+          if( verbosity > 3 && count++ < 10)
+              cout <<" -- optim convect " <<stateold << endl;
+	  mpc=mps;
+      }
+      else
 	{
-
+            
+          if( verbosity > 3 && count++ < 10*10) cout <<" -- no optim convect " <<stateold << " " << state
+                    << " P= " << mp->P  << " PP= " << mpp.P <<  endl;
+          stateold=state;// correction FH..
+          ddtp=ddt;
 	  const Mesh & Th(*mp->Th);
 	  ffassert(mp->Th && mp->T);
 	  R l[3];
@@ -4381,7 +4412,7 @@ AnyType Convect::eval2(Stack s) const
 	  mps=mpc;         
 	}
     }
-  ddts=ddt;
+
   AnyType r= (*ff)(s);
   MeshPointStack(s,mp);
   
@@ -4394,6 +4425,7 @@ inline int FindandAdd(set<int> *st,vector<int> & lst,int k)
     {
       
     }
+    return 0;
 }
 
 
@@ -4404,7 +4436,10 @@ AnyType Convect::eval3(Stack s) const
     if(newconvect3) return eval3n(s);//  New Convect in test
     MeshPoint* mp(MeshPointStack(s));
     static MeshPoint mpp,mps;
-    static R ddts;
+    static int stateold=0;
+    static int count =0;
+    static R ddtp=0;
+
     randwalk(-1); // init randwalk
    //  set<int> *st=0;
    // vector<int> lst;
@@ -4415,12 +4450,18 @@ AnyType Convect::eval3(Stack s) const
         bool ddd=verbosity>1000;
         MeshPoint mpc(*mp);
         MeshPointStack(s,&mpc);
-        if(*mp==mpp && ddt == ddts)
+        if( (stateold == state) && (ddt==ddtp) && (*mp==mpp  ) )// optim same convect at same point nov/2015
+        {
+            if( verbosity > 3 && count++ < 10)
+                cout <<" -- optim convect3 " <<stateold << endl;
             mpc=mps;
+        }
         else
         {
             
-            const Mesh3 & Th3(*mp->Th3);
+           if( verbosity > 3 && count++ < 10*10) cout <<" -- no optim3 convect " <<stateold << " " << state
+                << " P= " << mp->P  << " PP= " << mpp.P <<  endl;
+           const Mesh3 & Th3(*mp->Th3);
             ffassert(mp->Th3 && mp->T3);
             R3 PHat=mpc.PHat;
             
@@ -4465,7 +4506,6 @@ AnyType Convect::eval3(Stack s) const
             mps=mpc;         
         }
     }
-    ddts=ddt;
     AnyType r= (*ff)(s);
     MeshPointStack(s,mp);
     
