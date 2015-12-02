@@ -31,6 +31,8 @@
 #include "config-wrapper.h"
 #include <set>
 #include <complex>
+#include <type_traits>
+
 #include "AFunction.hpp"
 #include <cstdarg>
 #include <cstring>

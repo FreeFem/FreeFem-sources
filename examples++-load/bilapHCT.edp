@@ -1,4 +1,5 @@
 load "Element_HCT"
+load "qf11to25" // for tripleQF function... 
 
 int n=100,nn=n+10;
 real[int] xx(nn),yy(nn);
@@ -10,9 +11,11 @@ fespace Vh(Th,HCT);      // finite element space
 macro bilaplacien(u,v) ( dxx(u)*dxx(v)+dyy(u)*dyy(v)+2.*dxy(u)*dxy(v)) // fin macro 
 real f=1;
 Vh [u,ux,uy],[v,vx,vy];
-
+// Warning the quadrature formula must be def un 3 sub triangle 
+// the function tripleQF build this king of formular from classical quadrature. 
+QF2 qfHCT5=tripleQF(qf5pT) ;
 solve bilap([u,ux,uy],[v,vx,vy]) =
-    int2d(Th)(  bilaplacien(u,v) )
+    int2d(Th,qft=qfHCT5)(  bilaplacien(u,v) )
    - int2d(Th)(f*v)
    + on(1,2,3,4,u=0,ux=0,uy=0) 
 ; 

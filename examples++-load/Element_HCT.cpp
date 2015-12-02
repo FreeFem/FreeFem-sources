@@ -175,7 +175,11 @@ P3(li,li1,li2)} \
             E[1].perp() *sgE[1],
             E[2].perp() *sgE[2]
         };
+        val=0;
         
+        throwassert( val.N()>=6);
+        throwassert(val.M()==3);
+
         int i0 = 0;
         if( l[1] <l[i0]) i0=1;
         if( l[2] <l[i0]) i0=2;
@@ -279,13 +283,9 @@ P3(li,li1,li2)} \
             }
         }
         
-        val=0;
-        
-        throwassert( val.N()>=6);
-        throwassert(val.M()==3);
         
         
-        val=0;
+    
         
         
         if (whatd[op_id] || whatd[op_dx] ||  whatd[op_dy])
@@ -299,7 +299,7 @@ P3(li,li1,li2)} \
             RN_ f(val('.',0,op_id));
             RN_ fx(val('.',1,op_id));
             RN_ fy(val('.',2,op_id));
-            f=0.;
+          
             for(int i=0;i<12;++i)
                 for(int j=0;j<10;++j)
                 {
@@ -326,7 +326,7 @@ P3(li,li1,li2)} \
             RN_ f (val('.',0,op_dx));
             RN_ fx(val('.',1,op_dx));
             RN_ fy(val('.',2,op_dx));
-            f=0.;
+         
             for(int i=0;i<12;++i)
                 for(int j=0;j<10;++j)
                 {
@@ -349,7 +349,7 @@ P3(li,li1,li2)} \
             RN_ f (val('.',0,op_dy));
             RN_ fx(val('.',1,op_dy));
             RN_ fy(val('.',2,op_dy));
-            f=0.;
+         
             for(int i=0;i<12;++i)
                 for(int j=0;j<10;++j)
                 {
