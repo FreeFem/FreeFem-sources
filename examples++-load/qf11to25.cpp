@@ -1779,6 +1779,41 @@ PQP3 QF_TET_P14[] = {
 PQF3 const QuadratureFormular_Tet_P14(14,194, QF_TET_P14);
 
 
+const GQuadratureFormular<R2> * tripleQF(Stack stack,const  GQuadratureFormular<R2> * const & pqf)
+{
+    const GQuadratureFormular<R2>  &qf=*pqf;
+    int np = qf.n*3;
+    GQuadraturePoint<R2> *pq= new GQuadraturePoint<R2>[np];
+    for(int i=0; i< np; ++i)
+    {
+        int j= i%3, k=i/3;
+        const GQuadraturePoint<R2> & Pk=qf[k];
+        double x=Pk.x, y= Pk.y, z= 1-x-y;
+        if(j==0) { x/=3; y+=x;}
+        else if (j==1) { y/=3; x+=y;}
+        else { z/=3; x+= z; y+=z;}
+        pq[i].a=Pk.a/3;
+        pq[i].x=x;
+        pq[i].y=y;
+    }
+   GQuadratureFormular<R2> * q =new GQuadratureFormular<R2>(qf.exact,np,pq,true) ;
+     Add2StackOfPtr2Free(stack,q);
+    return q;
+}
+
+template<class Rd>
+const  GQuadratureFormular<Rd> ** cloneQF(const GQuadratureFormular<Rd> ** const & pr, GQuadratureFormular<Rd> const * const & qf)
+{
+    // cout << "pBuilQFd " << pr << " " << *pr << endl;
+    ffassert(pr );
+    int np = qf->n;
+    GQuadraturePoint<Rd> *pq= new GQuadraturePoint<Rd>[np];
+    for(int i=0;i<np;++i)
+        pq[i]=(*qf)[i];
+     *pr = new GQuadratureFormular<Rd>(qf->exact,np,pq,true) ;
+    return pr;
+}
+
 #include "lex.hpp"
 extern  mylex *zzzfff;
 
@@ -1814,7 +1849,10 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
 	     TheOperators->Add("<-",
 			       new OneOperator3_<const GQuadratureFormular<R1> **,const GQuadratureFormular<R1> **,long,KNM_<double>  >(pBuilQFd<R1>),
 			       new OneOperator3_<const GQuadratureFormular<R2> **,const GQuadratureFormular<R2> **,long,KNM_<double>  >(pBuilQFd<R2>),
-			       new OneOperator3_<const GQuadratureFormular<R3> **,const GQuadratureFormular<R3> **,long,KNM_<double>  >(pBuilQFd<R3>)
+			       new OneOperator3_<const GQuadratureFormular<R3> **,const GQuadratureFormular<R3> **,long,KNM_<double>  >(pBuilQFd<R3>),
+                               new OneOperator2_<const GQuadratureFormular<R2> **,const GQuadratureFormular<R2> **, const GQuadratureFormular<R2> * >(cloneQF<R2>),
+                               new OneOperator2_<const GQuadratureFormular<R3> **,const GQuadratureFormular<R3> **, const GQuadratureFormular<R3> * >(cloneQF<R3>),
+                               new OneOperator2_<const GQuadratureFormular<R1> **,const GQuadratureFormular<R1> **, const GQuadratureFormular<R1> * >(cloneQF<R1>)
 			       
 
         
@@ -1851,6 +1889,9 @@ grep QuadratureFormular QF.cpp|grep ^const|awk -F"[_(]" '{print "Global.New(@qf"
     Global.New("qfVp12", CConstant<const GQuadratureFormular<R3> *>(&QuadratureFormular_Tet_P12));
     Global.New("qfVp13", CConstant<const GQuadratureFormular<R3> *>(&QuadratureFormular_Tet_P13));
     Global.New("qfVp14", CConstant<const GQuadratureFormular<R3> *>(&QuadratureFormular_Tet_P14));
+    //
+    Global.Add("tripleQF","(",new OneOperator1s_<const GQuadratureFormular<R2> *,const GQuadratureFormular<R2> *>(tripleQF));
+
 
 }
 
