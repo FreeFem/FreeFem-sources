@@ -1,0 +1,111 @@
+macro floating(meshName, VhName, vecName)
+        varf floatingPb(def(u), def(v)) = on(1, BC(u, 1));
+        vecName = floatingPb(0, VhName);
+// EOM
+
+macro simple3d(Ph, function, comm, deltaX, deltaY, deltaZ)
+        Ph xx = x / deltaX, yy = y / deltaY, zz = z / deltaZ;
+        i = int(mpiSize(comm)^(0.333333333333333));
+        while(mpiSize(comm) % i != 0)
+            --i;
+        real trash = mpiSize(comm) / i;
+        j = int(sqrt(trash));
+        while(trash % j != 0)
+            --j;
+        real k = int(trash / j);
+        function = int(i * zz) * k * j + int(j * yy) * k + int(k * xx);// EOM
+
+macro simple2d(Ph, function, comm, deltaX, deltaY)
+        Ph xx = x / deltaX, yy = y / deltaY;
+        i = int(sqrt(mpiSize(comm)));
+        while(mpiSize(comm) % i != 0)
+            --i;
+        j = mpiSize(comm) / i;
+        function = int(j * xx) + int(i * yy) * j;// EOM
+
+macro bb2(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(4);
+            boundingbox(bb, boundingMesh);
+            diam = sqrt((bb(1) - bb(0))^2 + (bb(3) - bb(2))^2);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+
+macro bb3(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(6);
+            boundingbox(bb, boundingMesh);
+            diam = sqrt((bb(1) - bb(0))^2 + (bb(3) - bb(2))^2 + (bb(5) - bb(4))^2);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+            bb(4) -= overshoot;
+            bb(5) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
+
+/*# visualization #*/
+macro plotMPI(Th, u, legend, Pk, def, d, w)
+    if(mpirank == 0) {
+        meshN ThCurrent = Th;
+        meshN[int] meshTab(mpisize);
+        fespace Xh(ThCurrent, Pk);
+        Xh<K>[int] def(uTab)(mpisize);
+        uTab[0][] = u[];
+        meshTab[0] = Th;
+        mpiRequest[int] rq(mpisize - 1);
+        for(i = 1; i < mpisize; ++i)
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
+        for(i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        for(i = 1; i < mpisize; ++i) {
+            ThCurrent = meshTab[i];
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
+        }
+        for(i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        plot(uTab, wait = w, nbiso = 40, fill = 1, value = 1, dim = d, cmm = legend);
+    }
+    else {
+        mpiRequest[int] rq(2);
+        Isend(processor(0, rq[0]), Th);
+        Isend(processor(0, rq[1]), u[]);
+        mpiWait(rq[0]);
+        mpiWait(rq[1]);
+    }// EOM
+
+macro plotAll(Th, u, legend, Pk, def, d)
+    if(mpirank == 0) {
+        meshN ThCurrent = Th;
+        meshN[int] meshTab(mpisize);
+        fespace Xh(ThCurrent, Pk);
+        Xh<K>[int] def(uTab)(mpisize);
+        uTab[0][] = u[];
+        meshTab[0] = Th;
+        mpiRequest[int] rq(mpisize - 1);
+        for(i = 1; i < mpisize; ++i)
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
+        for(i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        for(i = 1; i < mpisize; ++i) {
+            ThCurrent = meshTab[i];
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
+        }
+        for(i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        for(i = 0; i < mpisize; ++i)
+            plot(meshTab[i], uTab[i], wait = 1, nbiso = 40, fill = 1, value = 1, dim = d, cmm = legend + " (from " + i + ")");
+    }
+    else {
+        mpiRequest[int] rq(2);
+        Isend(processor(0, rq[0]), Th);
+        Isend(processor(0, rq[1]), u[]);
+        mpiWait(rq[0]);
+        mpiWait(rq[1]);
+    }// EOM
+/*# visualizationEnd #*/
+
+include "getARGV.idp"

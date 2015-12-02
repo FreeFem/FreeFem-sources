@@ -1,0 +1,30 @@
+//   example using region keywork
+// construct a mesh with 4 regions (sub-domains)
+border a(t=0,1){x=t;y=0;};
+border b(t=0,0.5){x=1;y=t;};
+border c(t=0,0.5){x=1-t;y=0.5;};
+border d(t=0.5,1){x=0.5;y=t;};
+border e(t=0.5,1){x=1-t;y=1;};
+border f(t=0,1){x=0;y=1-t;};
+//  internal boundary 
+border i1(t=0,0.5){x=t;y=1-t;};
+border i2(t=0,0.5){x=t;y=t;};
+border i3(t=0,0.5){x=1-t;y=t;};
+   
+mesh th = buildmesh (a(6) + b(4) + c(4) +d(4) + e(4) + 
+    f(6)+i1(6)+i2(6)+i3(6));
+fespace Ph(th,P0);
+fespace Vh(th,P1);
+Ph reg=region;
+plot(reg,fill=1,wait=1,value=1,ps="region.eps");
+int nupper=reg(0.4,0.9);
+int nlower=reg(0.9,0.1);
+cout << " nlower " <<  nlower << ", nupper = " << nupper<< endl;
+//  defined the characteristics fonctions of upper and lower region
+Ph nu=1+5*(region==nlower) + 10*(region==nupper);
+if ( nu[].sum < 1) { cout << " Bug in region.edp (bad version try new one)"<< endl; exit(1);}
+plot(nu,fill=1,wait=1,value=1,ps="region_nu.eps");
+Vh u,v;
+solve lap(u,v) =   int2d(th)( nu*(dx(u)*dx(v) +dy(u)*dy(v)))  + int2d(th)(-1*v) + on(a,b,c,d,e,f,u=0);
+plot(u,value=1,ps="region_u.eps");
+
