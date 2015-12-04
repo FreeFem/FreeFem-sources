@@ -299,7 +299,7 @@ P3(li,li1,li2)} \
             RN_ f(val('.',0,op_id));
             RN_ fx(val('.',1,op_id));
             RN_ fy(val('.',2,op_id));
-          
+             
             for(int i=0;i<12;++i)
                 for(int j=0;j<10;++j)
                 {
@@ -326,7 +326,7 @@ P3(li,li1,li2)} \
             RN_ f (val('.',0,op_dx));
             RN_ fx(val('.',1,op_dx));
             RN_ fy(val('.',2,op_dx));
-         
+            f=0.;
             for(int i=0;i<12;++i)
                 for(int j=0;j<10;++j)
                 {
@@ -349,7 +349,7 @@ P3(li,li1,li2)} \
             RN_ f (val('.',0,op_dy));
             RN_ fx(val('.',1,op_dy));
             RN_ fy(val('.',2,op_dy));
-         
+            f=0.;
             for(int i=0;i<12;++i)
                 for(int j=0;j<10;++j)
                 {
