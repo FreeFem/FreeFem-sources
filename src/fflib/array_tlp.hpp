@@ -31,7 +31,7 @@
 #include "config-wrapper.h"
 #include <set>
 #include <complex>
-#include <type_traits>
+//#include <type_traits>
 
 #include "AFunction.hpp"
 #include <cstdarg>
@@ -46,7 +46,6 @@
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 #include <queue>
-#include <type_traits>
 #include "array_resize.hpp"
 #include "HeapSort.hpp"
 
