@@ -46,6 +46,7 @@
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 #include <queue>
+#include <type_traits>
 #include "array_resize.hpp"
 #include "HeapSort.hpp"
 
