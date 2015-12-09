@@ -53,6 +53,7 @@
 		3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
+		3D5AF7D81C1863D30036669F /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
 		3D6406B8195B2DD200F33E4F /* getprog-unix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */; };
 		3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
@@ -182,6 +183,7 @@
 /* Begin PBXFileReference section */
 		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
+		3D5AF7D71C1863D30036669F /* libhdf5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libhdf5.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libhdf5.dylib"; sourceTree = "<group>"; };
 		3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "getprog-unix.hpp"; path = "../src/Graphics/getprog-unix.hpp"; sourceTree = "<group>"; };
 		3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = UMFPack_Solver.cpp; sourceTree = "<group>"; };
 		3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = glumesh2D.cpp; sourceTree = "<group>"; };
@@ -373,6 +375,7 @@
 				3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */,
 				3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
 				3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */,
+				3D5AF7D81C1863D30036669F /* libhdf5.dylib in Frameworks */,
 				3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */,
 				3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */,
 			);
@@ -501,6 +504,7 @@
 				3DA740611BBEECD900C4EB0A /* libifport.dylib */,
 				3DA740621BBEECD900C4EB0A /* libifportmt.dylib */,
 				3DA740671BBEED7C00C4EB0A /* libifcore.a */,
+				3D5AF7D71C1863D30036669F /* libhdf5.dylib */,
 				3DC62AF6097299F400D487F6 /* OpenGL.framework */,
 				3DC62AF2097299D800D487F6 /* GLUT.framework */,
 				3DC62AED0972999000D487F6 /* Cocoa.framework */,
