@@ -4340,7 +4340,9 @@ AnyType Convect::operator()(Stack s) const
 
 AnyType Convect::eval2(Stack s) const
 {
-  MeshPoint* mp(MeshPointStack(s));
+  MeshPoint* mp(MeshPointStack(s)),mpc(*mp);
+  MeshPointStack(s,&mpc);// P  ptr on  variable mpc ...
+   
   static MeshPoint mpp,mps;
   static int stateold=0;
   static int count =0;
@@ -4348,8 +4350,6 @@ AnyType Convect::eval2(Stack s) const
   R ddt = GetAny<double>((*dt)(s));
   if (ddt) 
     {
-      MeshPoint mpc(*mp);
-      MeshPointStack(s,&mpc);
       if( (stateold == state) && (ddt==ddtp) && (*mp==mpp  ) )// optim same convect at same point nov/2015
       {
           if( verbosity > 3 && count++ < 10)
@@ -4394,15 +4394,15 @@ AnyType Convect::eval2(Stack s) const
 	    }
 
 	  mpc.change(R2(l[1],l[2]),Th[it],0);
-	  mpp=*mp; 
-	  mps=mpc;         
+	  mpp=*mp;// previous value
+	  mps=mpc;// convect value
 	}
     }
- 
+  // warning use poit on &mpc .. bug correct in dec 2015 F.H.
   AnyType r= (*ff)(s);
-  if( verbosity > 3 && count++ < 10*10) cout << "  %%%r= "<< GetAny<double>(r) << endl;
-  MeshPointStack(s,mp);
-  
+  if( verbosity > 3 && count++ < 10*10) cout << "  %%%r= "<< GetAny<double>(r) << "  P= " << mp->P  << ", "<< mp->T << endl;
+   MeshPointStack(s,mp);// restor old pointeur ..
+ 
   return r;
 }
 
@@ -4421,8 +4421,10 @@ AnyType Convect::eval3(Stack s) const
 {
     extern long newconvect3;
     if(newconvect3) return eval3n(s);//  New Convect in test
-    MeshPoint* mp(MeshPointStack(s));
-    static MeshPoint mpp,mps;
+    MeshPoint* mp(MeshPointStack(s)),mpc(*mp);
+    MeshPointStack(s,&mpc);// P  ptr on  variable mpc ...
+
+     static MeshPoint mpp,mps;// previous state ..
     static int stateold=0;
     static int count =0;
     static R ddtp=0;
@@ -4435,8 +4437,6 @@ AnyType Convect::eval3(Stack s) const
     if (ddt)
     {
         bool ddd=verbosity>1000;
-        MeshPoint mpc(*mp);
-        MeshPointStack(s,&mpc);
         if( (stateold == state) && (ddt==ddtp) && (*mp==mpp  ) )// optim same convect at same point nov/2015
         {
             if( verbosity > 3 && count++ < 10)
@@ -4494,14 +4494,14 @@ AnyType Convect::eval3(Stack s) const
         }
     }
     AnyType r= (*ff)(s);
-    MeshPointStack(s,mp);
-    
+    MeshPointStack(s,mp);    
     return r;
 }
 
 AnyType Convect::eval3n(Stack s) const
 {
-    MeshPoint* mp(MeshPointStack(s));
+    MeshPoint* mp(MeshPointStack(s)),mpc(*mp);
+    MeshPointStack(s,&mpc);// P  ptr on  variable mpc ...
     static MeshPoint mpp,mps;
     static R ddts;
     randwalk(-1); // init randwalk
@@ -4512,8 +4512,7 @@ AnyType Convect::eval3n(Stack s) const
     if (ddt)
     {
         bool ddd=verbosity>1000;
-        MeshPoint mpc(*mp);
-        MeshPointStack(s,&mpc);
+
         if(*mp==mpp && ddt == ddts)
             mpc=mps;
         else
@@ -4567,7 +4566,6 @@ AnyType Convect::eval3n(Stack s) const
     ddts=ddt;
     AnyType r= (*ff)(s);
     MeshPointStack(s,mp);
-    
     return r;
 }
 
