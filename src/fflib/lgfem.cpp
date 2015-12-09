@@ -4353,7 +4353,8 @@ AnyType Convect::eval2(Stack s) const
       if( (stateold == state) && (ddt==ddtp) && (*mp==mpp  ) )// optim same convect at same point nov/2015
       {
           if( verbosity > 3 && count++ < 10)
-              cout <<" -- optim convect " <<stateold << endl;
+              cout <<" -- optim convect " <<stateold << "  P= " << mp->P  << ", "<< mp->T
+              << " chi(P) = " << mps.P <<  ","<< mps.T <<endl;
 	  mpc=mps;
       }
       else
@@ -4397,8 +4398,9 @@ AnyType Convect::eval2(Stack s) const
 	  mps=mpc;         
 	}
     }
-
+ 
   AnyType r= (*ff)(s);
+  if( verbosity > 3 && count++ < 10*10) cout << "  %%%r= "<< GetAny<double>(r) << endl;
   MeshPointStack(s,mp);
   
   return r;
