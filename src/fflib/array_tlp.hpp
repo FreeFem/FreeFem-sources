@@ -310,12 +310,22 @@ RR * get_elementp2__(const A & a,const B & b,const C & c){
 return  &((a)(b,c));}
 
 
-    
+template<typename T>
+struct myremove_pointer
+{
+    typedef T type;
+};
+
+template<typename T>
+struct myremove_pointer<T*>
+{
+    typedef typename myremove_pointer<T>::type type;
+};
 
 template<class KNRR,bool isinit>
 class  InitArrayfromArray : public OneOperator { 
 public:
-    typedef typename  std::remove_pointer<KNRR>::type KNR ;
+    typedef typename  myremove_pointer<KNRR>::type KNR ;
     typedef typename KNR::K RR;
     typedef KNRR  A;
     typedef KNRR  R;
