@@ -1,4 +1,6 @@
 version 3.42 
+ - correct some Makefile 
+ - correct optimisation of convect in case on windows bug)
  - add new quadrature formular 3d exact forme degre 6 to 14 in qf11to25.cpp 
    the name of qfV are  qfVp1 .. qfVp14 
  - correct optimisation in convect for navier stokes problem..

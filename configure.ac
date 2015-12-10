@@ -49,6 +49,8 @@ m4_define([AC_FF_ADDWHERELIB],
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    test -n "$3" && echo "$1 INCLUDE $3 "  >>$ff_where_lib_conf
             ff_where_lib_conf_$1=1
+	    ff_where_lib_$1="$2"
+	    ff_where_inc_$1="$3"
 	    AC_MSG_NOTICE([    ++ add $1 : $2 $3 in  $ff_where_lib_conf "])
 	else
 	    AC_MSG_NOTICE([    -- do not add $1 : $2 $3 in  $ff_where_lib_conf "])
@@ -852,6 +854,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE)
 			AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE)
+			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE)
 			
 		#	PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
 		#	PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
@@ -872,12 +875,18 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
     done
 fi
 
+
 if test "$ff_petsc_ok" != no ;   then
     AC_MSG_NOTICE([ with petsc  $ff_petsc_ok])
 else
     AC_MSG_NOTICE([ without petsc ***** ])
 fi
 
+if test "$ff_where_lib_conf_fftw3_mpi" -eq 1  ; then
+  ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'` 
+  AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
+  AC_MSG_NOTICE([ fftw3 from  petsc ***** ]) 
+fi
 
 
 #replacing wget with another command
@@ -1012,8 +1021,25 @@ ff_blas_inc=""
 
 # ALH - 18/9/13 - give the option to deactivate system blas for testing purposes
 AC_ARG_ENABLE(system-blas,AC_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
+if test "$ff_where_lib_conf_blaslapack" -eq 1  ; then
+  echo " use BLAS/Lapack of petsc "
+#  echo "  lib: $ff_where_lib_blaslapack inc: $ff_where_inc_blaslapack"
+	    ff_blas_ok=yes
+	    ff_lapack_ok=yes
+	    ff_blas_libs="$ff_where_lib_blaslapack"
+	    ff_lapack_lib=
+	    ff_blas_inc="$ff_where_inc_blaslapack"
+       AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
+	   AC_FF_ADDWHERELIB(blas,$ff_blas_libs,$ff_blas_inc)
+	   AC_MSG_NOTICE([ BLAS and LAPACK  from  petsc ***** ]) 
+	   if  echo  "$ff_where_lib_blaslapack"| grep -q  " -lmkl"  ; then
+	     	AC_MSG_NOTICE([ MKL  from  petsc ***** ]) 
+	        AC_FF_ADDWHERELIB(mkl,$ff_blas_libs,$ff_blas_inc)
+	   fi
 
-if test "$enable_system_blas" != no
+fi
+
+if test "$enable_system_blas" != no -a "$ff_blas_ok" = no
 then
 
     # User-specified location
@@ -1431,12 +1457,24 @@ AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
 # Looking for UMFPACK
 # -------------------
-
+ff_umfpack_incs=""
 ff_amd_ok=no
 ff_umfpack_ok=no
+if test "$ff_where_lib_conf_suitesparse" -eq 1  ; then
+  echo "amd/umfpack/suitesparse  of petsc"
+  echo "    lib: $ff_where_lib_suitesparse inc: $ff_where_inc_suitesparse"
+  ff_amd_ok=yes
+   ff_umfpack_ok=yes
+   ff_umfpack_libs="$ff_where_lib_suitesparse"
+   ff_umfpack_incs="$ff_where_inc_suitesparse"
+   AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
+   AC_SUBST([UMFPACK_CPPFLAGS],[$ff_where_inc_suitesparse])
+   AC_DEFINE(HAVE_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir)
+fi
+
 ff_save_libs="$LIBS"
 AC_ARG_ENABLE(system_umfpack,AC_HELP_STRING([--disable-system-umfpack],[Disable the automatic detection of umfpack, colmod, amd, ....]))
-if test "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
+if test "$ff_umfpack_ok"  = no -a "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
 then
     # User-specified location
 
@@ -1501,11 +1539,10 @@ fi
 LIBS="$ff_save_libs"
 
 # If all else fails, download!
-ff_umfpack_incs=""
 #  attention no /usr/include in WHERE 
-if test "$ff_umfpack_ok" = yes -a -z "$ff_umfpack_dir" 
+if test "$ff_umfpack_ok" = yes -a -n "$ff_umfpack_dir" -a -z "$ff_umfpack_incs"
 then
-    ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
+	ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"	
 fi
 if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 then
