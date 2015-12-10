@@ -29,9 +29,9 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP=  \
-additional.idp			macro.idp		 \
-argv.idp			macro_3d.idp			schwarz-additional_macro.idp \
-getARGV.idp			schwarz-skel.idp 
+getARGV.idp			schwarz-skel.idp \
+additional.idp			getARGV.idp			macro_3d.idp			schwarz-additional_macro.idp	schwarz-skel.idp \
+argv.idp			macro.idp			schwarz-add-macro.idp		schwarz-macro.idp
 
 EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./hpddm.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
 
