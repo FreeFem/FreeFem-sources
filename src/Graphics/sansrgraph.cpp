@@ -470,6 +470,7 @@ void pointe(reel , reel )
 {
 }
 
+// <<rmoveto>>
 void rmoveto(reel x, reel y)
 {
   currx = scalx(x);
