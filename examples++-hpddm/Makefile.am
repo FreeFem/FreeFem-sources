@@ -33,7 +33,7 @@ additional.idp			macro.idp		 \
 argv.idp			macro_3d.idp			schwarz-additional_macro.idp \
 getARGV.idp			schwarz-skel.idp 
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./schwarz.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
+EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./hpddm.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
@@ -53,7 +53,7 @@ else
 all-local:
 endif
 
-.cpp.$(DYLIB_SUFFIX): ../examples++-load/ff-c++ ../examples++-load/WHERE_LIBRARY-download
+.cpp.$(DYLIB_SUFFIX): ../examples++-load/ff-c++ ../examples++-load/WHERE_LIBRARY-download ../examples++-load/WHERE_LIBRARY-config
 #	FFCS needs an error exit code to make sure that all libraries are correctly compiled
 #
 #	FFCS on Windows inserts all MPI options (include, lib, ...) in the $MPICXX compiler script, instead of "$CXX $MPI_xxx",

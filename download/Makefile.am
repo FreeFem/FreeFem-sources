@@ -157,7 +157,7 @@ lib/WHERE.hpddm:
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir: 
 	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
-	@if [ 0 -eq `egrep ':$(COMPILEDIR)' WHERE-LD | wc -l` ] ;then \
+	@if [ 0 -eq `egrep ':$(COMPILEDIR) *LD' WHERE-LD | wc -l` ] ;then \
 	  cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET) ; \
 	else \
 	 echo $(COMPILEDIR) is in WHERE- files ;\

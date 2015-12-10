@@ -57,7 +57,7 @@ EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
 libff_a_DEPENDENCIES=@EIGENOBJ@
 
-AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS)
+AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
 # -I$(top_srcdir)/arpack/arpack++/include
 
 # Build date changes at every change

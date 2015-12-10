@@ -22,8 +22,12 @@ if [ -d  /usr/local/bin ] ; then
 	  rm "$i";
       fi
   done
+
+
+echo ln -s FF_BINDIR/FreeFem++-CoCoa  /usr/local/bin/ 
+ln -s FF_BINDIR/FreeFem++-CoCoa  /usr/local/bin/ 
+
 fi
 # bluid new link to new 
-echo ln -s FF_BINDIR/FreeFem++-CoCoa  /usr/local/bin/ 
-ln -s FF_BINDIR/FreeFem++-CoCoa  /usr/local/bin/
+
 
