@@ -1,8 +1,9 @@
 version 3.42 
  - correct some Makefile 
  - correct optimisation of convect in case on windows bug)
- - add new quadrature formular 3d exact forme degre 6 to 14 in qf11to25.cpp 
-   the name of qfV are  qfVp1 .. qfVp14 
+ - add tool do build quadature formule when we split triangle in 3 triangle for HCT element.
+ - add new quadrature formular 3d exact form degre 6 to 14 in qf11to25.cpp 
+   the name of  qfV quadrature are  qfVp1 .. qfVp14 
  - correct optimisation in convect for navier stokes problem..
   for this kind of expression
      + int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
