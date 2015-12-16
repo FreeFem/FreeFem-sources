@@ -1,0 +1,89 @@
+//{ int i; cin >> i;}
+macro K()real// EOM
+macro scalar(name)d#name// EOM
+include "macro_3d.idp"
+macro def()def1// EOM
+macro init()init1// EOM
+macro BC()BC1// EOM
+macro meshN()mesh3// EOM
+macro intN()int3d// EOM
+macro intN1()int2d// EOM
+macro measureN()volume// EOM
+macro bbN()bb3// EOM
+macro simple(Ph, function, comm)simple3d(Ph, function, comm, 1., 1., 1.)// EOM
+macro MoveAndPlot(Th, u, Pk, def, dim)plotMPI(Th, u, "Global solution", Pk, def, dim, 1)// EOM
+include "argv.idp"
+
+macro minimalMesh()Cube(CC, BB, LL)// EOM
+macro generateTh(name)name = Cube(NN, BB, LL);// EOM
+int[int, int] LL = [[2,2], [1,1], [1,1]];
+real[int, int] BB = [[0,1], [0,1], [0,1]];
+int[int] NN = [global, global, global];
+int[int] CC = [1, 1, 1];
+
+string txt = "diffusion 3D, $\\mathbb{P}_2$ FE";
+func Pk = P2;
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM
+
+macro coefficients()
+func f = 1.0;
+func bool channel(real a, real b, real dx1, real dy1, real dx2, real dy2, real width) {
+    real slope = (dy2 - dy1) / (dx2 - dx1);
+    if(a >= dx1 && a <= dx2) {
+        if(b >= (slope * (x - dx2) + dy2) && b <= (slope * (x - dx2) + dy2 + width))
+            return true;
+    }
+    return false;
+}
+
+func real skyscraper(real a, real b, real c) {
+    real kappa = 1;
+    int da = int(9 * a);
+    int db = int(9 * b);
+    int dc = int(9 * c);
+    if((da + 1) % 2 && (db + 1) % 2) {
+        kappa = 1e+6 * (db + 1);
+        if(dc % 3)
+            kappa *= dc;
+    }
+    else {
+        if(channel(a, b, 0.1, 0.2, 0.5, 0.6, 0.15))
+            kappa = b * 1e+6;
+        else if(channel(a, b, 0.5, 0.15, 0.9, 0.05, 0.2))
+            kappa = a * 1e+5;
+        else
+            kappa = 1;
+    }
+    return kappa;
+}// EOM
+
+func real stripes(real a, real b, real paramA, real paramB) {
+    ;
+}
+// EOM
+
+macro Varf(varfName, meshName, PhName)
+    fespace PhName(meshName, P0);
+    PhName kappa = skyscraper(x, y, z);
+    kappa = 1;
+    varf varfName(u, v) = intN(meshName)(kappa * (grad(u)' * grad(v))) + intN(meshName)(f * v) + on(1, u = 1.0);// EOM
+
+macro EVproblem(varfName, meshName, PhName)
+    fespace PhName(meshName, P0);
+    PhName kappa = skyscraper(x, y, z);
+    varf varfName(u, v) = intN(meshName)(kappa * (grad(u)' * grad(v))) + on(1, u = 0.0);// EOM
+
+macro optimizedMacro(varfName, meshName, PhName)
+    fespace PhName(meshName, P0);
+    PhName kappa = skyscraper(x, y, z);
+    real kZero = getARGV("-kZero", 10);
+    PhName transmission = kZero;
+    varf varfName(u, v) = intN(meshName)(kappa * (grad(u)' * grad(v))) + intN1(meshName, 10)(transmission * (u * v)) + on(1, u = 0.0);// EOM
+
+macro generateRbm(RbName)
+    RbName.resize(1);
+    Rb[0][] = 1;// EOM
+
+include "schwarz-skel.idp"
+// include "Schur/skel.edp"
