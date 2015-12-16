@@ -421,9 +421,9 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     timer = MPI_Wtime();
     if(!excluded) {
         if(opt["krylov_method"] == 1)
-            HPDDM::IterativeMethod::CG(*ptA, (K*)*ptX, (K*)*ptRHS, MPI_COMM_WORLD);
+            HPDDM::IterativeMethod::CG(*ptA, (K*)*ptRHS, (K*)*ptX, MPI_COMM_WORLD);
         else
-            HPDDM::IterativeMethod::GMRES(*ptA, (K*)*ptX, (K*)*ptRHS, mu, MPI_COMM_WORLD);
+            HPDDM::IterativeMethod::GMRES(*ptA, (K*)*ptRHS, (K*)*ptX, mu, MPI_COMM_WORLD);
     }
     else {
         if(opt["krylov_method"] == 1)
