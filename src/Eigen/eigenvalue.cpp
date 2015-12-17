@@ -1036,7 +1036,9 @@ void init_eigenvalue()
     Global.Add("EigenValue","(",new EigenValueC());  //  j + dJ
     Global.Add("EigenValue","(",new EigenValue(1));  //  j + dJ
     Global.Add("EigenValue","(",new EigenValue(1,1));  //  j + dJ
-   // Global.Add("EigenValue","(",new EigenValueC(1));  //  j + dJ
+    //  sorry no to solve ambiguity => change of name 
+    Global.Add("complexEigenValue","(",new EigenValueC(1));  //  j + dJ
+    Global.Add("complexEigenValue","(",new EigenValueC(1,1));  //  j + dJ
    
 }
 #else

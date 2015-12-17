@@ -1,13 +1,13 @@
 version 3.42 
  - correct some Makefile 
  - correct optimisation of convect in case on windows bug)
- - add tool do build quadature formule when we split triangle in 3 triangle for HCT element.
- - add new quadrature formular 3d exact form degre 6 to 14 in qf11to25.cpp 
+ - add tool do build quadrature formule when we split triangle in 3 triangle for HCT element.
+ - add new quadrature formula 3d exact form degre 6 to 14 in qf11to25.cpp 
    the name of  qfV quadrature are  qfVp1 .. qfVp14 
  - correct optimisation in convect for navier stokes problem..
   for this kind of expression
      + int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
-   in this case now only on characteristics is computated 
+   in this case now only on characteristics is computed 
  - correct trouble in configure this /usr/bin/machine 
  - map&key to know if a key exist in a map int[string], ....  
 version 3.41
@@ -15,7 +15,7 @@ version 3.41
      mesh th2= Vh2d.Th ;  mesh3 th3= Vh3d.Th ; 
      not the type of the mesh is a const pointeur   => lot of cosmetic change
 version 3.40-2
- - try to resolve probleme with petsc metis and freefem++ metis
+ - try to resolve problem with petsc metis and freefem++ metis
      now freefem++ use petsc lib if petsc is find for
        parmetis, metis,ptscotch,scotch,fftw3_mpi, mumps,scalapack
  - correct hpddm examples
@@ -26,22 +26,22 @@ version 3.40-1
 version 3.40 (14 sep. 2015)
  - add new C1 Finite element HCT see examples++-load/bilabHCT.edp 
  - change permission in install example++ for read and write under windows 
- - try to build a windows 64 version under msys64 systeme ...
+ - try to build a windows 64 version under msys64 system ...
  - Add use ArrowSize= of size
 version 3.39
  - remove compile flags -fPIC under windows 
  - pas to version MUMPS-5.0.1
- - correct some problem of memory leak, now the decrement methode in RefCount call delete
+ - correct some problem of memory leak, now the decrement method in RefCount call delete
     and all decrement are change in   Add2StackOfPtr2FreeRC(stack,m); (more safe). 
     so the previous plugin become incompatible. 
 version 3.38-2
  - add hppdm explain in the doc. 
- - add function cube to simplity the construction of mesh of cube like square in 2d 
+ - add function cube to simplify the construction of mesh of cube like square in 2d 
       see cube.edp example. 
  - add function ClosePoint in ClosePoint plugin
  - add += example of varf   
- - correct mortar example repalce P0Egde in P0 => better result  
- - correct map funct if dfft plugin 
+ - correct mortar example: replace P0Egde in P0 => better result  
+ - correct map func if dfft plugin 
  - add splitComm for hpddm
 version 3.38-1 
  -  add finite element Edge13d (Finite Element of degrees 1) Thanks to marcella@bonazzoli.it
@@ -49,7 +49,7 @@ version 3.38-1
  - correct renumbering function in case of rhs 
  - correct new type of optimisation in integral, (version 3.38 25june 2015)
   optimized=2 => do optimisation without check 
-  can be usefull in case of random problem. 
+  can be useful in case of random problem. 
  - correct convect operator in 3d (remove randow part, 
    to remove problem of optimisation in varf.
    
@@ -57,11 +57,11 @@ version 3.38
  - add parameter in renumbering function. 
 version 3.37-1 (22 mai 2015)
  - clean examples-mpi, remove of all usage to RemoveDOF,   bb2d bb3d, findDiff   (see version 3.36)
- - update schwarz.cpp for new hpddm versio n 
+ - update schwarz.cpp for new hpddm version 
  - add read of real[int,int], int[int,int], complex[int,int] .. 
 version 30 april 2015 (3319:8657e0526391)
  - correct freefem++ launch  in windows (remove wait when launch vai freefem++)
-   add wait in case of launch throught launchff++.exe 
+   add wait in case of launch through launchff++.exe 
  - in DG linear form with jump or mean in test fonction was wrong 
    like varf a(u,v)=intalledges(Th)(jump(v)*u) ;
 
@@ -69,7 +69,7 @@ version 30 april 2015 (3319:8657e0526391)
 version 3.36-2
  - correct problem some  null ref  with compile Apple LLVM version 6.1.0 (clang-602.0.49) (based on LLVM 3.6.0svn)   xcode 6.3 
    some warning exist but all test pass. 
- - correct problem of cleanning tmp memory for small array 
+ - correct problem of cleaning tmp memory for small array 
 
  - correct configure and makefile for windows compilation process
 version 3.36 
@@ -111,7 +111,7 @@ version 3.34-1
     add missing file in distribution
  -  correct for compilation with g++-4.9.1 -std=c++11 ( without downlaod) 
 
-BUG in configure => slow veriosn after until version 3.36 ,  25 mars 2015 ... (dur Dur)
+BUG in configure => slow version after until version 3.36 ,  25 mars 2015 ... (dur Dur)
 
 
 
