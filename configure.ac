@@ -2022,12 +2022,12 @@ AC_OUTPUT(Makefile
     src/libMesh/Makefile
     src/medit/Makefile
     src/bin-win32/Makefile
-    examples++/Makefile
-    examples++-eigen/Makefile
+    examples++-load/Makefile
     examples++-tutorial/Makefile
+    examples++/Makefile
     examples++-mpi/Makefile
     examples++-hpddm/Makefile
-    examples++-load/Makefile
+    examples++-eigen/Makefile
     examples++-chapt3/Makefile
     examples++-bug/Makefile
     examples++-other/Makefile
