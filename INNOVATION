@@ -103,7 +103,7 @@ version 3.34-1
     hpddm interface ..
  - add no mandatory lib for petsc 
       write the WHERE-LIBRARY search lib in awk (more simple ) 
- version 3.24 (warning slow version)
+ version 3.34 (warning slow version)
  - configure : 6/02/ 2015
     correct mpi for  sgi uv computer
     find gsl lib 
