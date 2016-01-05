@@ -30,7 +30,7 @@ TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_T
 
 LIST_IDP=  \
 getARGV.idp			schwarz-skel.idp \
-additional.idp			getARGV.idp			macro_3d.idp			schwarz-additional_macro.idp	schwarz-skel.idp \
+additional.idp		macro_3d.idp		schwarz-additional_macro.idp	 \
 argv.idp			macro.idp			schwarz-add-macro.idp		schwarz-macro.idp
 
 EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./hpddm.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp

@@ -56,6 +56,20 @@ const char BACKSLACH='\\';
  const  char dirnsep=BACKSLACH, dirsep=SLACH;
 #endif
 
+#include <sys/stat.h>
+
+int dirExists(const string & path)
+{
+    struct stat info;
+    
+    if(stat( path.c_str(), &info ) != 0)
+        return 0;
+    else if(info.st_mode & S_IFDIR)
+        return 1;
+    else
+        return 0;
+}
+
 string DirName(const char * f)
 {
   const char *c= strrchr(f,dirsep);
@@ -121,12 +135,11 @@ bool EnvironmentInsert(string key,string item,string before)
    string suf= ((key== "loadpath") && initparallele ) ? sufmpi  : "";
     if( verbosity > 1000) cout << " **EnvironmentInsert " <<initparallele<< " suf '"
         << suf << "'  " << item <<endl;
-   if( ! suf.empty() )
-     if(!(item.find("mpi") == string::npos ) && (item.find("MPI") == string::npos ) && item != "."  && item != "./" && item !="")
-       {
+   if( ! suf.empty() && dirExists(item+suf) )
+    {
 	 if(verbosity>=100)  cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl; 
 	 item  += suf;
-       }
+    }
    
    OneEnvironmentData::iterator i=find(l.begin(),l.end(),item);
    
