@@ -486,8 +486,8 @@ public:
   ~MatriceProfile();
   //  KN_<R>         operator* (const KN_<R> & ) const ;
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
-  void addMatTransMul(const KN_<R> &x,KN_<R> &ax) const 
-    { this->t().addMatMul(x,ax);}
+  void addMatTransMul(const KN_<R> &x,KN_<R> &ax) const ;
+  //  { this->t().addMatMul(x,ax);}
   MatriceCreuse<R> & operator +=(MatriceElementaire<R> &);
   void operator=(const R & v); // Mise a zero 
   void cholesky(double = EPSILON/8.) const ; //

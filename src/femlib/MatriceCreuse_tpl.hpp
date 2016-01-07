@@ -499,6 +499,40 @@ void MatriceProfile<R>::addMatMul(const KN_<R> &x,KN_<R> &ax) const
  
 }
 
+template<class R>
+void MatriceProfile<R>::addMatTransMul(const KN_<R> &x,KN_<R> &ax) const
+{if (x.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible x (in) ") ;
+    if (ax.n!= this->n ) ERREUR(MatriceProfile MatMut(xa,x) ," longueur incompatible ax (out)") ;
+    int i,j,k,kf;
+    ffassert(this->n == this->m);
+    if (D)
+        for (i=0;i<this->n;i++)
+            ax[i] += RNM::conj(D[i])*x[i];
+    else
+        for (i=0;i<this->n;i++) // no dia => identyty dai
+            ax[i] +=x[i];
+    
+    if (L && pL )
+        for (kf=pL[0],i=0;  i<this->n;   i++  )
+        {
+            k=kf;
+            kf=pL[i+1];
+            for ( j=i-kf+k;   k<kf; j++,  k++  )
+                ax[j] += RNM::conj(L[k])*x[i],throwassert(i>=0 && i <this->n && j >=0 && j < this->m && k>=0 && k < pL[this->n]);
+        }
+    
+    if (U && pU)
+        for (kf=pU[0],j=0;  j<this->m;  j++)
+        {
+            k=kf;
+            kf=pU[j+1];
+            for ( i=j-kf+k;   k<kf; i++,  k++  )
+                ax[j] += RNM::conj(U[k])*x[i],throwassert(i>=0 && i <this->n && j >=0 && j < this->m &&  k>=0 && k < pU[this->n]);
+        }
+    
+    
+}
+
 
 template<class R>
 void MatriceProfile<R>::operator=(const R & v) {
@@ -1647,9 +1681,9 @@ template<class R>
        for (k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           ax[j] += a[k]*x[i];
+             ax[j] += RNM::conj(a[k])*x[i];
            if (i!=j)
-             ax[i] += a[k]*x[j];
+             ax[i] += RNM::conj(a[k])*x[j];
          }
            
    }
@@ -1659,7 +1693,7 @@ template<class R>
        for (k=lg[i];k<lg[i+1];k++)
          {
            j=cl[k];
-           ax[j] += a[k]*x[i];
+           ax[j] += RNM::conj(a[k])*x[i];
          }
    }
 }

@@ -207,6 +207,7 @@ void ff_atend(AtEnd f)
 %type <type>   type_of_dcl;
 %type <str> id;
 %type <str> fespace123;
+%type <clist_id> IDfor
 
 /* Add precedence rules to solve dangling else s/r conflict */
 
@@ -507,15 +508,21 @@ declaration_for:
 
 try: TRY { Block::open(currentblock) };
 
-/*<<instruction>>*/
+IDfor:     id  { $$ = new ListOfId(); $$->push_back(UnId($1));Block::open(currentblock); }
+         | id ',' id   { $$ = new ListOfId(); $$->push_back(UnId($1));$$->push_back(UnId($3));Block::open(currentblock); }
+         | id ',' id ','  id   { $$ = new ListOfId(); $$->push_back(UnId($1));$$->push_back(UnId($3));$$->push_back(UnId($5));Block::open(currentblock); }
 
-instruction:   ';' {$$=0;} 
+/*<<instruction>>*/
+instruction:   ';' {$$=0;}
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
          |  try  '{' instructions '}' catchs {$$=Try($3,$5,currentblock->close(currentblock));}
          |  Expr ';' {$$=$1} /*[[Expr]]*/
          |  declaration  {$$=$1} /*[[declaration]]*/
-         |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)} 
+         |  for_loop  '[' IDfor  ':' primary ']'
+                {$$=ForAll(currentblock,$3,$5);}
+                 instruction {inloopcount--; $$=ForAll($$,$8,currentblock->close(currentblock))}
+         |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)}
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
                 {inloopcount--; 
                 $$=C_F0(For($3,$5,$7,$9),currentblock->close(currentblock))}
@@ -901,6 +908,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("load",LOAD);
    zzzfff->Add("while",WHILE);
    zzzfff->Add("for",FOR);
+ //  zzzfff->Add("forall",FORALL);
    zzzfff->Add("if",IF);
    zzzfff->Add("else",ELSE);
    zzzfff->Add("end",ENDOFFILE);
