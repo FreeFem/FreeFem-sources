@@ -1324,7 +1324,8 @@ void ArrayOperator()
      //-  new OneBinaryOperator<Op2_mulcp<Mulc_KN_<K>,K,KN<K>*> >,
        new OneBinaryOperator<Op2_mulc<Mulc_KN_<K>,KN_<K>,K> >,
        new OneBinaryOperator<Op2_mulc<Mulc_KN_<K>,K,KN_<K> > >,
-       new OneBinaryOperator<Op2_mulpcp<Mul_KNM_KN_<K>,KNM<K>*,KN<K>*> >,
+       new OneBinaryOperator<Op2_mulpcp<Mul_KNM_KN_<K>,KNM<K>*,KN<K>*> >,// A*b zzzzzzz
+                       
       // new OneBinaryOperator<Op2_mulp<Mul_KNM_KN_<K>,KNM_<K>,KN_<K>> >, // - add #1 mqi 2009 
       // new OneBinaryOperator<Op2_dotproduct<K> >,
        new OneBinaryOperator<Op2_dotproduct_<K> > 

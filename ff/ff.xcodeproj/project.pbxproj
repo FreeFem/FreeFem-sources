@@ -121,6 +121,7 @@
 		3D84AE401654DE9800301697 /* RefCounter.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1E1654DE9800301697 /* RefCounter.hpp */; };
 		3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1F1654DE9800301697 /* splitsimplex.hpp */; };
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
+		3D8BD47D1C3C2596000CB82B /* lg.ypp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8BD47C1C3C2596000CB82B /* lg.ypp */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
 		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
@@ -233,7 +234,6 @@
 		3D84AE0B1654DE9800301697 /* PkLagrange.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PkLagrange.hpp; path = ../src/femlib/PkLagrange.hpp; sourceTree = "<group>"; };
 		3D84AE0D1654DE9800301697 /* assertion.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = assertion.hpp; path = ../src/femlib/assertion.hpp; sourceTree = "<group>"; };
 		3D84AE0E1654DE9800301697 /* BamgFreeFem.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BamgFreeFem.hpp; path = ../src/femlib/BamgFreeFem.hpp; sourceTree = "<group>"; };
-		3D84AE0F1654DE9800301697 /* DOperator.hpp.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = DOperator.hpp.orig; path = ../src/femlib/DOperator.hpp.orig; sourceTree = "<group>"; };
 		3D84AE101654DE9800301697 /* Element_P3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Element_P3.hpp; path = ../src/femlib/tools/Element_P3.hpp; sourceTree = "<group>"; };
 		3D84AE111654DE9800301697 /* fem3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fem3.hpp; path = ../src/femlib/fem3.hpp; sourceTree = "<group>"; };
 		3D84AE121654DE9800301697 /* FESpace.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FESpace.hpp; path = ../src/femlib/FESpace.hpp; sourceTree = "<group>"; };
@@ -251,6 +251,7 @@
 		3D84AE1E1654DE9800301697 /* RefCounter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RefCounter.hpp; path = ../src/femlib/RefCounter.hpp; sourceTree = "<group>"; };
 		3D84AE1F1654DE9800301697 /* splitsimplex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = splitsimplex.hpp; path = ../src/femlib/splitsimplex.hpp; sourceTree = "<group>"; };
 		3D84AE421654DEB600301697 /* ufunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ufunction.hpp; path = ../src/femlib/ufunction.hpp; sourceTree = "<group>"; };
+		3D8BD47C1C3C2596000CB82B /* lg.ypp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; path = lg.ypp; sourceTree = "<group>"; };
 		3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = parallelempi.cpp; path = ../src/mpi/parallelempi.cpp; sourceTree = SOURCE_ROOT; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
@@ -420,6 +421,7 @@
 		3D90DC960970155D002A1826 /* lglib */ = {
 			isa = PBXGroup;
 			children = (
+				3D8BD47C1C3C2596000CB82B /* lg.ypp */,
 				3D90DC9E0970155D002A1826 /* lg.tab.cpp */,
 				3DBBD5E50C3573DA007E5F45 /* mymain.cpp */,
 				3D90DCA00970155D002A1826 /* lg.tab.hpp */,
@@ -472,8 +474,8 @@
 				3D90DCEF097015B4002A1826 /* CodeAlloc.cpp */,
 				3D90DCF7097015B4002A1826 /* environment.cpp */,
 				3D90DD03097015B4002A1826 /* InitFunct.cpp */,
-				3D90DD06097015B4002A1826 /* lex.cpp */,
 				3D90DD0A097015B4002A1826 /* lgfem.cpp */,
+				3D90DD06097015B4002A1826 /* lex.cpp */,
 				3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */,
 				3D90DD0D097015B4002A1826 /* lgmat.cpp */,
 				3D90DD0F097015B4002A1826 /* lgmesh.cpp */,
@@ -570,7 +572,6 @@
 				3D84AE0B1654DE9800301697 /* PkLagrange.hpp */,
 				3D84AE0D1654DE9800301697 /* assertion.hpp */,
 				3D84AE0E1654DE9800301697 /* BamgFreeFem.hpp */,
-				3D84AE0F1654DE9800301697 /* DOperator.hpp.orig */,
 				3D84AE101654DE9800301697 /* Element_P3.hpp */,
 				3D84AE111654DE9800301697 /* fem3.hpp */,
 				3D84AE121654DE9800301697 /* FESpace.hpp */,
@@ -853,6 +854,7 @@
 				3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
+				3D8BD47D1C3C2596000CB82B /* lg.ypp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

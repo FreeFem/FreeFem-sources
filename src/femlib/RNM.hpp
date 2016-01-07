@@ -204,6 +204,7 @@ template<class R> class Mulc_KN_; // vector b*a_i
 template<class R> class Divc_KN_;// vector b/a_i
 template<class R> class Add_Mulc_KN_;
 template<class R> class Mul_KNM_KN_; 
+template<class R> class Mul_KNMh_KN_;
 template<class R> class DotStar_KN_;
 template<class R> class DotSlash_KN_;
 
@@ -532,7 +533,13 @@ public:
    KN_& operator-=(const Mul_KNM_KN_<R> & u) ; 
    KN_& operator*=(const Mul_KNM_KN_<R> & u) ; 
    KN_& operator/=(const Mul_KNM_KN_<R> & u) ; 
-  
+
+    KN_& operator =(const Mul_KNMh_KN_<R> & u) ;
+    KN_& operator+=(const Mul_KNMh_KN_<R> & u) ;
+    KN_& operator-=(const Mul_KNMh_KN_<R> & u) ;
+    KN_& operator*=(const Mul_KNMh_KN_<R> & u) ;
+    KN_& operator/=(const Mul_KNMh_KN_<R> & u) ;
+
  //  KN_& operator =(const MatriceCreuseMulKN_<R> & ) ;
  //  KN_& operator +=(const MatriceCreuseMulKN_<R> & ) ;
    KN_& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
@@ -1012,6 +1019,9 @@ class KN :public KN_<R> { public:
         
    KN& operator =(const Mul_KNM_KN_<R> & u) 
         { if(this->unset()) this->set(new R[u.b.N()],u.b.N());KN_<R>::operator=(u);return *this;}
+    KN& operator =(const Mul_KNMh_KN_<R> & u)
+    { if(this->unset()) this->set(new R[u.b.N()],u.b.N());KN_<R>::operator=(u);return *this;}
+   
 //   KN& operator =(const MatriceCreuseMulKN_<R> & Ax) 
 //       {if(this->unset()) set(new R[Ax.v.N()],Ax.v.N()); KN_<R>::operator=(Ax);return *this;}
 //   KN& operator +=(const MatriceCreuseMulKN_<R> & Ax) 
@@ -1429,6 +1439,17 @@ class Mul_KNM_KN_ { public:
   const KN_<const_R> &b;
   Mul_KNM_KN_(const  KNM_<const_R>  &aa,const KN_<const_R>  &bb)  
         : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));} 
+};
+
+template<class R>
+class Mul_KNMh_KN_ { public:
+    const KNM_<const_R> &A;
+    const KN_<const_R> &b;
+    Mul_KNMh_KN_(const  KNM_<const_R>  &aa,const KN_<const_R>  &bb)
+      : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));}
+    Mul_KNMh_KN_(const  KNM<const_R>  &aa,const KN_<const_R>  &bb)
+    : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));}
+    
 };
 
 

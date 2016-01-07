@@ -605,8 +605,13 @@ struct Op2_mulpc: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return (b * *a);} }; 
 
 template<class R,class A=R,class B=A> 
-struct Op2_mulpcp: public binary_function<A,B,R> { 
-  static R f(const A & a,const B & b)  { return (*a * *b);} }; 
+struct Op2_mulpcp: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  { return (*a * *b);} };
+
+template<class R,class A=R,class B=A>
+struct Op2_2p_: public binary_function<A,B,R> {
+    static R f(const A & a,const B & b)  { return R(*a,*b);} };
+
 
 template<class R,class A=R,class B=A> 
 struct Op2_sub__n: public binary_function<A,B,R*> { 

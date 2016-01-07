@@ -57,6 +57,8 @@ KNM_<double> Get_C2R_(KNM_<complex<double> >  vc)
 void initArrayDCLComplex()
 {
      ArrayDCL<Complex>();
+     Dcl_Type<Mul_KNMh_KN_<Complex> >();
+
 }
 
 Complex square(const Complex & x){return x*x;}
@@ -80,8 +82,11 @@ void initArrayOperatorComplex()
     
     Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(square));
     Global.Add("conj","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(conj));
-
-    map_type[typeid(SetArray<K>).name()]->AddCast(					     
+    TheOperators->Add("*",
+                      new OneBinaryOperator<Op2_2p_<Mul_KNMh_KN_<K>,Transpose<KNM<K>*>,KN<K>*> >);// A'*b zzzzzzz
+    TheOperators->Add("=",new OneBinaryOperator<init_eqarray<KN<K> ,Mul_KNMh_KN_<K> > > );
+    TheOperators->Add("<-",new OneBinaryOperator<init_eqarray<KN<K> ,Mul_KNMh_KN_<K> > > );
+    map_type[typeid(SetArray<K>).name()]->AddCast(
 						  new E_F1_funcT<SetArray<K>,SetArray<long> >(Cast<SetArray<K>,SetArray<long> >),
 						  new E_F1_funcT<SetArray<K>,SetArray<double> >(Cast<SetArray<K>,SetArray<double> >)
 	  					      
