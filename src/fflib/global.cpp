@@ -140,7 +140,7 @@ YYSTYPE *plglval;
 // const C_F0 & One(*pOne), &Zero(*pZero);
  
  Polymorphic * TheOperators=0, //=new Polymorphic(), 
-             * TheRightOperators=0; //=new Polymorphic();
+             * TheRightOperators=0;//=new Polymorphic();
 
 /// <<Global>> Contains all FreeFem++ language keywords. Declaration in [[file:AFunction.hpp::Global]]
 

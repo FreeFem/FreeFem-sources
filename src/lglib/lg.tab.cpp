@@ -2606,12 +2606,12 @@ yyreduce:
 
   case 97:
 #line 523 "lg.ypp"
-    {(yyval.cexp)=ForAll(currentblock,(yyvsp[(3) - (6)].clist_id),(yyvsp[(5) - (6)].cexp));;}
+    {(yyvsp[(5) - (6)].cexp)=ForAll(currentblock,(yyvsp[(3) - (6)].clist_id),(yyvsp[(5) - (6)].cexp));;}
     break;
 
   case 98:
 #line 524 "lg.ypp"
-    {inloopcount--; (yyval.cexp)=ForAll((yyval.cexp),(yyvsp[(8) - (8)].cexp),currentblock->close(currentblock));}
+    {inloopcount--; (yyval.cexp)=ForAll((yyvsp[(5) - (8)].cexp),(yyvsp[(8) - (8)].cexp),currentblock->close(currentblock));}
     break;
 
   case 99:

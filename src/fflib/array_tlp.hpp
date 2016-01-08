@@ -754,6 +754,12 @@ void ArrayDCL()
     map_type_of_map[make_pair(atype<long>(),atype<KN_<K> >())]=atype<KN<KN<K> >*>();// tableau de tableau
     map_type_of_map[make_pair(atype<long>(),atype<KNM_<K> >())]=atype<KN<KNM<K> >*>();// tableau de matrix 
 
+    // Add FH for loop 2015
+    atype<KN<K>*>()->SetTypeLoop(atype<K*>(),atype<long*>());
+    atype<KNM<K>*>()->SetTypeLoop(atype<K*>(),atype<long*>(),atype<long*>());
+    atype<KN_<K> >()->SetTypeLoop(atype<K*>(),atype<long*>());
+    atype<KNM_<K> >()->SetTypeLoop(atype<K*>(),atype<long*>(),atype<long*>());
+
 }
 
 

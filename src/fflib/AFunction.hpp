@@ -315,6 +315,12 @@ public:
     
   //  basicForEachType * funct_type;
   virtual ~basicForEachType();
+
+    // Add FH: for implicite loop FH. Jan 2016 
+    // type for i, type for j, type valeur
+    basicForEachType *typei,*typej,*typev;
+    void SetTypeLoop(basicForEachType *v,basicForEachType *i=0,basicForEachType *j=0)
+    { typev=v; typei=i;typej=j;}
     
 };
 
@@ -3251,15 +3257,9 @@ Type_Expr CVariable(R  (*ff)() )
     throwassert(map_type[typeid(R).name()]);
     return make_pair(map_type[typeid(R).name()],new  typename OneOperator0<R>::E_F0_F(ff));
 }
-inline C_F0 ForAll(Block *,ListOfId * lid,C_F0  m)
-{
-    ffassert(0);
-}
-
-inline C_F0 ForAll(C_F0  loop,C_F0  inst,C_F0  close)
-{
-    ffassert(0);
-}
+void InitLoop();
+C_F0 ForAll(Block *,ListOfId * id,C_F0  m);
+C_F0 ForAll(C_F0  loop,C_F0  inst,C_F0  end);
 
 #endif
 

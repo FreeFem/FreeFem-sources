@@ -1594,6 +1594,8 @@ typedef MyMap<String,String> MyMapSS;
     
           
      tables_of_identifier.push_back(&Global);
+    
+     InitLoop();
   
 
 }

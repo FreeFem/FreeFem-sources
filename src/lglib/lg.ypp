@@ -520,8 +520,8 @@ instruction:   ';' {$$=0;}
          |  Expr ';' {$$=$1} /*[[Expr]]*/
          |  declaration  {$$=$1} /*[[declaration]]*/
          |  for_loop  '[' IDfor  ':' primary ']'
-                {$$=ForAll(currentblock,$3,$5);}
-                 instruction {inloopcount--; $$=ForAll($$,$8,currentblock->close(currentblock))}
+                {$5=ForAll(currentblock,$3,$5);}
+                 instruction {inloopcount--; $$=ForAll($5,$8,currentblock->close(currentblock))}
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)}
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
                 {inloopcount--; 
