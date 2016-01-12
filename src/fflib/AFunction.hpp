@@ -28,6 +28,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 //file afonction.h
+
+
 #ifndef __AFONCTION__
 #define __AFONCTION__
 #include "showverb.hpp" 
@@ -1293,7 +1295,8 @@ template<class R> class EConstant:public E_F0
 //  the variable offset / stack (local variable)
 
  class LocalVariable:public E_F0
- { 
+ {
+      public:
   size_t offset;
   aType t; //  type of the variable just for check  
   public:
@@ -3260,6 +3263,68 @@ Type_Expr CVariable(R  (*ff)() )
 void InitLoop();
 C_F0 ForAll(Block *,ListOfId * id,C_F0  m);
 C_F0 ForAll(C_F0  loop,C_F0  inst,C_F0  end);
+
+class PolymorphicLoop:public Polymorphic {
+public:
+    typedef Expression Exp;
+    C_F0 t;
+    Exp v,i,j;
+    PolymorphicLoop(C_F0 tt,AC_F0 &args) : t(tt),v(0),i(0), j(0){
+        if(verbosity>1000)
+        cout << "PolymorphicLoop  args " << args.size()  << endl;
+        if(args.size()>0) v=args[1];
+        if(args.size()>1) i=args[2];
+        if(args.size()>2) j=args[3];
+        if(verbosity>1000) 
+        cout <<" v " << v << " i=" << i << " j=" << j << endl;
+    }
+    AnyType ftab(Stack s) const { return (*(Expression) t)(s);}
+    AnyType fv(Stack s) const { return v ? (*v)(s): Nothing ;}
+    AnyType fi(Stack s) const { return i ? (*i)(s): Nothing ;}
+    AnyType fj(Stack s) const { return j ? (*j)(s): Nothing ;}
+    
+};
+
+
+
+class ForAllLoopOpBase :  public E_F0mps { public:
+    Expression et,ecode,efin;
+    const PolymorphicLoop *epl;
+    ForAllLoopOpBase( basicForEachType * ret,const basicAC_F0 & args)
+    : et(ret->CastTo(args[0])), ecode(args[2]),efin(0),epl(0)
+    {
+        if(args.size() > 3) efin=args[3];
+        epl = dynamic_cast<const PolymorphicLoop *>((Expression) args[1]);
+        assert(epl!=0);
+    }
+    AnyType tab(Stack s) const { return  (*et)(s);}
+    AnyType v(Stack s)   const { return epl->fv(s);}
+    AnyType i(Stack s)   const { return epl->fi(s);}
+    AnyType j(Stack s)   const { return epl->fj(s);}
+    void code(Stack s) const { (*ecode)(s) ;}
+    void end(Stack s) const { if(efin) (*efin)(s);}
+    
+    
+};
+
+template<class F>
+class  ForAllLoop : public OneOperator {public:
+    typedef typename F::Tab T;
+    class ForAllLoopOp :  public ForAllLoopOpBase { public:
+        F f;
+        ForAllLoopOp(const basicAC_F0 & args):ForAllLoopOpBase(atype<T>(),args),f((const ForAllLoopOpBase*)this) {}
+        AnyType operator()(Stack s) const { return this->f.f(s);}
+    };
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        
+        return new ForAllLoopOp(args);
+    }
+    ForAllLoop() :OneOperator(atype<NothingType>(),atype<T>(),atype<PolymorphicLoop*>()){
+        this->ellipse=true;
+    }
+    
+};
 
 #endif
 

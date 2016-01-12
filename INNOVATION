@@ -1,3 +1,12 @@
+version 3.43
+  all implicity loop  for lot of array  : real[ini], real[int,int], real[string] ,matrix , string[string]
+  the syntaxe is 
+  if B is like a  Array : 
+  for [i,bi: A] bi=f(i);
+
+  if A is like a matrix : 
+  for [i,j,aij: A] aij=g(i,j);
+  see forall.edp example file for more exemple 
 version 3.42 
  - correct some Makefile 
  - correct optimisation of convect in case on windows bug)

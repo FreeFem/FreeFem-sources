@@ -2709,6 +2709,51 @@ AnyType mmM2L3c (Stack , const AnyType & pp)
     return mpp.l;
 }
 */
+template<class R>
+class E_ForAllLoopMatrix
+{  public:
+
+    typedef R *VV;
+    typedef long KK;
+    
+    typedef Matrice_Creuse<R> *  Tab;
+    
+    typedef  ForAllLoopOpBase DataL;
+    const DataL *data;
+    E_ForAllLoopMatrix(const DataL *t): data(t){}
+    AnyType f(Stack s) const {
+        Tab t= GetAny<Tab >(data->tab(s));
+        KK * i   =   GetAny<KK*>(data->i(s));
+        KK * j   =   GetAny<KK*>(data->j(s));
+        VV  v   =   GetAny<VV >(data->v(s));
+        //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
+        if(verbosity>1000) {
+        cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
+        cout << " j " << (char*) (void *) j  -  (char*)(void*) s ;
+        cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
+        cout << endl;
+        }
+        
+        ffassert(i && v);
+        MatriceCreuse<R> *m=t->A;
+        MatriceMorse<R> *mm = dynamic_cast<MatriceMorse<R>*>(m);
+        if(!mm) ExecError(" Matrix sparce of bad type ( not morse ) , sorry.. ");
+        if(mm)
+            for (long  ii=0;ii < mm->n;++ii)
+            for (long  k=mm->lg[ii];k < mm->lg[ii+1];++k)
+            {
+                *i=ii;
+                *j= mm->cl[k];
+                *v =  mm->a[k];
+                data->code(s);
+                mm->a[k] = *v;
+            }
+        data->end(s);
+        return Nothing  ;
+    }
+    
+};
+
 template <class R>
 void AddSparseMat()
 {
@@ -2720,6 +2765,9 @@ void AddSparseMat()
  Dcl_Type<  minusMat<R>  >(); // Add FJH mars 2007
  
  basicForEachType * t_MC=atype<  Matrice_Creuse<R>* >();
+    
+ t_MC->SetTypeLoop(atype<  R* >(),atype<  long* >(),atype<  long* >());
+    
 // basicForEachType * t_MCt=atype<  Matrice_Creuse_Transpose<R> >();
 // basicForEachType * t_lM=atype< list<triplet<R,MatriceCreuse<R> *,bool> > * >();
 // basicForEachType * t_nM=atype<  minusMat<R> >();
@@ -2865,6 +2913,7 @@ TheOperators->Add("+",
 */
 
 
+    TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMatrix<R> >);
 
       
 //  --- end  
