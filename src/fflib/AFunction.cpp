@@ -967,6 +967,55 @@ int ShowAlloc(const char *s,size_t & lg);
 long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
 long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}
 
+//template<class K,class V,class KK,class VV>
+class E_ForAllLoopMapSS
+{  public:
+    typedef String K;
+    typedef String V;
+    typedef string *KK;
+    typedef string *VV;
+    
+    typedef MyMap<K,V>  *Tab;
+    typedef   MyMap<K,V>::iterator TabI ;
+
+    typedef  ForAllLoopOpBase DataL;
+    const DataL *data;
+    E_ForAllLoopMapSS(const DataL *t): data(t){}
+    AnyType f(Stack s) const {
+        Tab t= GetAny<Tab >(data->tab(s));
+        
+         KK * i   =   GetAny<KK* >(data->i(s));
+         VV * v   =   GetAny<VV* >(data->v(s));
+        if(verbosity>1000) {
+        //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
+                cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
+        cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
+            cout << endl;}
+        
+        
+        ffassert(i && v);
+        if(t->m)
+        for (TabI ii=t->m->begin();ii != t->m->end();++ii)
+        {
+            String  kk = ii->first;
+            String  vv = ii->second;
+            
+            *i =  kk;
+            *v =  vv;
+          
+
+            data->code(s);
+            
+            ii->second  = **v;
+            *i=0;
+            *v=0;
+        }
+        data->end(s);
+        return Nothing  ;
+    }
+    
+};
+
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -974,7 +1023,7 @@ void Init_map_type()
   //  cout << sizeof(string) << endl;
     map_type[typeid(AnyType).name()] = new ForTypeAnyType();
     map_type[typeid(void).name()] = new ForTypeVoid();
-
+       InitLoop();
     Dcl_Type<Expression>(0);    
     Dcl_TypeandPtr<double>(0,0,::InitializeDef<double>,0);
     Dcl_TypeandPtr<long>(0,0,::InitializeDef<long>,0);
@@ -1591,12 +1640,15 @@ typedef MyMap<String,String> MyMapSS;
      map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();      
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
 
+     atype<MyMapSS*>()->SetTypeLoop(atype<string**>(),atype<string**>());
     
           
      tables_of_identifier.push_back(&Global);
     
-     InitLoop();
-  
+    TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMapSS*> >);
+ 
+    TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSS >);
+
 
 }
 //int ShowAlloc(const char *s,size_t & lg); 

@@ -987,17 +987,6 @@ void lgerror (const char* s)
       throw(ErrorCompile(s,zzzfff->lineno(),zzzfff->YYText() ));
   }
 
-class PolymorphicLoop:public Polymorphic {
-public:
-    typedef Expression Exp;
-    C_F0 t;
-    Exp v,i,j;
-    PolymorphicLoop(C_F0 tt,AC_F0 &args) : t(tt),v(0),i(0), j(0){
-        if(args.size()>0) v=args[0];
-        if(args.size()>1) i=args[1];
-        if(args.size()>2) j=args[2];
-    }
-};
 
 
  C_F0 ForAll(Block *cb,ListOfId * id,C_F0  m)
@@ -1005,38 +994,45 @@ public:
     
 //Block::open(cb); // new block
      //  decl variable
-     size_t off=cb->OffSet(sizeof(AnyType)*4);// 128 to store data loop
-     size_t st[4]={sizeof(AnyType),sizeof(AnyType),sizeof(AnyType),sizeof(AnyType)};
-     
-     
-     cout << "InitAutoLoop ::: " <<  id->size()<< " " << endl;
-     
+    if(verbosity>1000)
+     cout << "InitAutoLoop ::: " <<  id->size()<< " type=" << *(m.left()) << endl;
+    
      ffassert(id->size()<4);
      aType t=m.left() ;
      ffassert(id->size()<=0 || t->typev);
      ffassert(id->size()<=1 || t->typei);
      ffassert(id->size()<=2 || t->typej);
+    // missing this king of code atype<T>->SetTypeLoop(atype<string**>(),atype<K*>())  maybe !!!! FH. 
      ffassert(id->size()<4);
      // find the size do data
      aType tt[4];
      int k=0;
-     if(t->typev) tt[k++]=t->typev;
      if(t->typei) tt[k++]=t->typei;
      if(t->typej) tt[k++]=t->typej;
+     if(t->typev) tt[k++]=t->typev;
+    
      for(int i=0;i<k;++i)
      {
+     if(verbosity>1000)
      cout << "     aType = " << i << " left " << *tt[i] << " right="<< *tt[i]->right() <<endl;
      }
      AC_F0 args;
      args=0; // reset
      args+=m;
-     size_t ot[4];
-     ot[0]=off;
-     for(int i=1;i<k;++i)
-     ot[i]=ot[i-1]+st[i];
-     for(int i=0; i<id->size() ; ++i)
-     args+=cb->NewID(tt[i],(*id)[i].id,C_F0(new LocalVariable(ot[i],tt[i]),tt[i]));
+     for(int j=0,i=id->size(); j<id->size() ; ++j)
+     {
+         --i;
+         C_F0 ci=cb->NewVar<LocalVariable>((*id)[i].id,tt[i]);
+         C_F0 cv=Find((*id)[i].id);
+         args+=cv;
+         const LocalVariable *lv = dynamic_cast<LocalVariable*>((E_F0*) cv);
+         if(verbosity>1000)
+         cout << " new id " << tt[i] << " "<< (*id)[i].id << " "  << " E="
+             <<  (Expression)  args[i] << " "
+         <<  (Expression)  ci << " " <<args.size()-1  << " ov: " << (lv ? lv->offset: -1) << " " << *cv.left() << endl;
+     }
      Expression loop= new PolymorphicLoop(m,args);
+    if(verbosity>1000)
      cout << "a type: " << *atype<PolymorphicLoop*>() << " " << loop << endl;
     
      return C_F0(loop,atype<PolymorphicLoop*>());
@@ -1044,6 +1040,7 @@ public:
 
  C_F0 ForAll(C_F0  cloop,C_F0  inst,C_F0 end)
 {
+    if(verbosity>1000) 
     cout << " type cloop " << *cloop.left() << " " << cloop.LeftValue() << " "  << endl;
     const PolymorphicLoop *loop=  dynamic_cast<const PolymorphicLoop *>(cloop.LeftValue());
     ffassert(loop);
@@ -1051,8 +1048,11 @@ public:
     args=0;
     args+=loop->t;
     args+=cloop;
-    args+=inst;
-    args+=end;
+    C_F0 instt(inst,atype<NothingType>());
+    C_F0 eend(end,atype<NothingType>());
+    args+=instt;
+    if( (Expression) end !=0)
+      args+=end;
     return C_F0(TheOperators,"{}",args);
 }
 

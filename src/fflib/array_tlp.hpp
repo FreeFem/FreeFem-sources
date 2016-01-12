@@ -759,7 +759,7 @@ void ArrayDCL()
     atype<KNM<K>*>()->SetTypeLoop(atype<K*>(),atype<long*>(),atype<long*>());
     atype<KN_<K> >()->SetTypeLoop(atype<K*>(),atype<long*>());
     atype<KNM_<K> >()->SetTypeLoop(atype<K*>(),atype<long*>(),atype<long*>());
-
+    
 }
 
 
@@ -959,6 +959,119 @@ long Unique(KN<K>* const& array, KN<L>* const& val)
         (*val)[i++] = *it;
     return vals.size();
 }
+
+
+
+
+
+template<class K>
+class E_ForAllLoopRNM
+{  public:
+    typedef KNM_<K> Tab;
+    typedef  ForAllLoopOpBase DataL;
+    const DataL *data;
+    E_ForAllLoopRNM(const DataL *t): data(t){}
+    AnyType f(Stack s) const {
+        Tab t= GetAny<KNM_<K> >(data->tab(s));
+        long * i=   GetAny<long * >(data->i(s));
+        long * j=  GetAny<long * >(data->j(s));
+        K * v   =   GetAny<K * >(data->v(s));
+        if(verbosity>1000) {
+        cout << i << " " << j << " " << v << " " << data->epl <<     endl;
+        cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
+        cout << " j " <<  (char*)(void *) j -  (char*)(void*) s ;
+        cout << " vij " <<  (char*) (void *) v -  (char*)(void*) s ;
+        cout << endl;
+        }
+        
+        ffassert(i && j && v);
+        for ( *i=0;*i<t.N();++*i)
+            for ( *j=0;*j<t.M();++*j)
+            {
+                *v = t(*i,*j);
+                data->code(s);
+                t(*i,*j)= *v;
+            }
+        data->end(s);
+        return Nothing  ;
+     }
+    
+};
+
+template<class K>
+class E_ForAllLoopRN
+{  public:
+    typedef KN_<K> Tab;
+    typedef  ForAllLoopOpBase DataL;
+    const DataL *data;
+    E_ForAllLoopRN(const DataL *t): data(t){}
+    AnyType f(Stack s) const {
+        Tab t= GetAny<KN_<K> >(data->tab(s));
+        long * i=   GetAny<long * >(data->i(s));
+        K * v   =   GetAny<K * >(data->v(s));
+  //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
+         if(verbosity>1000) {
+        cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
+        cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
+        cout << endl;
+         }
+        
+        ffassert(i && v);
+        for ( *i=0;*i<t.N();++*i)
+            {
+                *v = t[*i];
+                data->code(s);
+                t[*i]= *v;
+            }
+        data->end(s);
+        return Nothing  ;
+    }
+    
+};
+
+template<class V>
+class E_ForAllLoopMapSI
+{  public:
+    typedef String K;
+    typedef string *KK;
+    typedef V *VV;
+    
+    typedef MyMap<K,V>  *Tab;
+    typedef typename  MyMap<K,V>::iterator TabI ;
+    
+    typedef  ForAllLoopOpBase DataL;
+    const DataL *data;
+    E_ForAllLoopMapSI(const DataL *t): data(t){}
+    AnyType f(Stack s) const {
+        Tab t= GetAny<Tab >(data->tab(s));
+        KK * i   =   GetAny<KK*>(data->i(s));
+        VV  v   =   GetAny<VV >(data->v(s));
+        //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
+        if(verbosity>1000) {
+        cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
+        cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
+        cout << endl;
+        }
+        
+        ffassert(i && v);
+        if(t->m)
+            for (TabI ii=t->m->begin();ii != t->m->end();++ii)
+            {
+                String  kk = ii->first;
+                V  vv = ii->second;
+                
+                *i =  kk;
+                *v =  vv;
+                 data->code(s);
+                
+                ii->second  = *v;
+                *i=0;
+            }
+        data->end(s);
+        return Nothing  ;
+    }
+    
+};
 extern aType aaaa_knlp;
 template<class K,class Z>
 void ArrayOperator()
@@ -1434,7 +1547,8 @@ void ArrayOperator()
      
      atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
      TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
-    
+    TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMap<String,K>*> >);
+   
     // Add Mai 2009
     Dcl_Type<SetArray<K> >();
     TheOperators->Add("::",
@@ -1450,6 +1564,16 @@ void ArrayOperator()
 		      new OneOperator2_<KN_<K> ,KN_<K> ,SetArray<K> >(-1,&set_array_) // missing aug 2009 a(:)=1:3 less prioritaire
     );
     
+    atype<MyMap<String,K>*>()->SetTypeLoop(atype<K*>(),atype<string**>());
+
+    
+    TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSI<K> >);
+
+    TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopRNM<K> >);
+    TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopRN<K> >);
+    
+    
+
 }
 
 template<class R,class A,class B=A,class BB=B>

@@ -117,6 +117,9 @@ void destroy() { delete p;p=0;} // Add FH march 2010
   ~String(){/* cout << "~String" << p << *p << endl;*/ delete p; p=0;}
    operator const string & () const {return *p;}
    operator  string & ()  {return *p;}
+   operator  const string * ()  const {return p;}
+   operator  string *& ()   {return p;}
+    
    string **  getap()  {return &p;}
   friend inline  ostream & operator<<(ostream & f,const String & s) {throwassert(s.p); f << *s.p ; return f;}
   bool operator<(const String &t) const {assert(p && t.p);return *p<*t.p;} // correction FH feb 2004
@@ -127,6 +130,9 @@ void destroy() { delete p;p=0;} // Add FH march 2010
 template<class K,class V>
 class MyMap {
   public:
+    typedef V Value;
+    typedef K Key;
+    typedef typename map<K,V>::iterator iterator;
   map<K,V> *m;
   
   MyMap() : m(new map<K,V>) {/*cout << "new MyMap:: " << m << endl;*/} 
@@ -153,7 +159,15 @@ class MyMap {
   ~MyMap(){delete m;/*cout << "MyMap:: delete "<< m << endl;*/m=0;} 
   private:
     MyMap(const MyMap &M):m(new map<K,V>(*M.m)) {}
- 
+public:
+    friend inline  ostream & operator<<(ostream & f,const MyMap & s)
+    {
+        if(s.m)
+        for(MyMap::iterator i=s.m->begin(); i!= s.m->end(); ++i)
+            f << i->first << " " << i->second << endl;
+        return f;}
+
+    
 };
 template<class A,class B>
 struct pairless : binary_function<pair<A,B>,const char *, bool>
