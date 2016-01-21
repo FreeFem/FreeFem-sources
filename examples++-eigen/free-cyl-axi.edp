@@ -5,7 +5,8 @@
 // the shift is given with sigma real
 // -------------------------------------
 // Linear elastisitic problem in axisym. model. 
-// thank to http://www.me.mtu.edu/~mavable/MEEM4405/Axi.pdf
+// thank to 
+// http://www.colorado.edu/engineering/CAS/courses.d/AFEM.d/AFEM.Ch02.d/AFEM.Ch02.pdf
 //  for the model.
 //  the benchmark  case is
 // thank form comsol and ansys 

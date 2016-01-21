@@ -5456,6 +5456,12 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
                      unique = false;
                      break;
                    }
+                 else if(LL[i]->FirstDfOfNodeData)// Correct jan 2015 not FE product this case
+                 {
+                     unique = false;
+                     break;
+                 }
+                 
                if (unique) 
                  data->Uh.master( new FESpace(*LL[0],Nb));
                else 
