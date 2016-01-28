@@ -318,9 +318,9 @@ FreeFem++.app.tgz:./config.status
 	 osacompile <FreeFem++.scrpt-txt -o FreeFem++.app/Contents/Resources/Scripts/main.scpt
 	tar zcf FreeFem++.app.tgz FreeFem++.app
 ##  trick to check if the configure configure.ac Makefile.in .. are correct in time 
-Makefile: configure  $(LIST_GENERATE_FILE_AM)
+Makefile: @MAINTAINER_MODE_FALSE@ configure  $(LIST_GENERATE_FILE_AM)
 	echo "configure Makefile:$(LIST_GENERATE_FILE_AM)"  >Makefile-for-Checkam
-	echo -e '\tfalse' >> Makefile-for-Checkam
+	echo '\tfalse' >> Makefile-for-Checkam
 	if $(MAKE) -f Makefile-for-Checkam 2>&1 >/dev/null ; \
 	 then ok=1 ; \
 	else \

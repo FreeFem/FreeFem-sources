@@ -3,7 +3,8 @@
 #include <math.h>
 
 /* seeking 1.e-05 accuracy */
-#define  EPSD           1.e-15
+/* Modif F. Hecht because in some case the result a wrong */
+#define  EPSD           1.e-12 
 #define  EPSD2          1.e-10
 #define  EPS6           5.e-06
 #define  EPS            1.e-06
