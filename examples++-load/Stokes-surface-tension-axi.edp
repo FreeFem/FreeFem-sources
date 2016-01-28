@@ -4,17 +4,18 @@ verbosity=0;
 load "isoline"
 load "curvature"
 
-real X0 = 1;
-real Y0 =1,Y1=0; 
-real meshsize=0.1;
-real CFL = 0.5; 
+real X0 = 0.1, Y0 =1*X0,Y1=0, CC0=Y0; 
+real meshsize=X0/10;
+real CFL = 0.1; 
 real dt = 0.005;
 int niter = 100;
 real Kc =10; 
 real rhog = 0; 
 real nu=1;
+real Vin =1; 
 int nlissage=2;
-func Vin=-1+x*x;
+real X02=X0*X0; 
+func u2in=(-1+x*x/X02)*Vin;
 real fluxin;
 border ctop(t=X0,0){x=t; y=Y0;label=1;};
 border cleft(t=Y0,Y1){x=0; y=t;label=3;};
@@ -27,7 +28,7 @@ for(int i=0; i< nsl; ++i)
     SL(0,i) = 0*(1-ll)+X0*ll;
     real l0=ll;
     real RR=1.2*1.2, YY=sqrt(RR-1);
-    SL(1,i) = -sqrt(RR-l0*l0)+YY;
+    SL(1,i) = -CC0*(sqrt(RR-l0*l0)-YY);
     SL(2,i) = ll; 
   }
 real lgc = setcurveabcisse(SL); 
@@ -48,8 +49,12 @@ plot( cfix+ bSL(lgc/meshsize) , wait=1);
 func Bmesh = buildmesh( cfix+ bSL(lgc/meshsize) );
 mesh Th= Bmesh;
 
-plot(Th, wait=1); 
-macro Eps(u,v) [ dx(u),dy(v), (dx(v)+dy(u))*0.5, (dx(v)+dy(u))*0.5 ] // 
+plot(Th, wait=1);
+// Formule (2.9) of  http://www.colorado.edu/engineering/CAS/courses.d/AFEM.d/AFEM.Ch02.d/AFEM.Ch02.pdf 
+//  macro Eps(u,v) [ dx(u),dy(v), (dx(v)+dy(u))*0.5, (dx(v)+dy(u))*0.5 ] // 
+// here r==x, z==y
+macro Eps(u1,u2)  [dx(u1),dy(u2),u1/x, (dx(u2)+dy(u1))*0.5,(dx(u1)+dy(u2))*.5 ] // EOM
+
 macro Grad(u,v) [ dx(u),dy(v), dx(v), dy(u) ] // 
 macro div(u1,u2) (dx(u1)+dy(u2) ) // 
 macro rdiv(ur,uy) (x*dx(ur) + ur + x*dy(uy)) //
@@ -78,11 +83,9 @@ for(int iter=0; iter<niter;++iter)
     u1[]=0;
 solve PMeca2( [u1,u2,p],[v1,v2,q] ) =
 int2d(Th) ( x*2*nu*Eps(u1,u2)'*Eps(v1,v2) - rdiv(v1,v2)*p -rdiv(u1,u2)*q)
- + on(1,u1=0,u2=Vin)
+ + on(1,u1=0,u2=u2in)
  + on(0,u1=0,u2=0)
  + on(3,u1=0)
-// - int1d(Th,1) ( -v2)
- //+ int1d(Th,0) ( bT0* [u1,u2]'*mT*[v1,v2] )
  + int1d(Th,2) ( Kc*rfcourbure*[N.x,N.y]'*[v1,v2]) 
  - int2d(Th)( -x*rhog*v2)
 ;
