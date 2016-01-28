@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.40}
+\def\VERSION{3.43}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -882,6 +882,8 @@ Currently \freefempp implements the following elements \index{elements} in 2d, (
 \index{fespace!P23d}
 \index{fespace!RT03d}
 \index{fespace!Edge03d}
+\index{fespace!Edge13d}
+\index{fespace!Edge23d}
 \index{fespace!P1b3d}
 Currently \freefempp implements the following elements \index{elements} in 3d, (see section \ref{finite elements} for the full description)
 {\parskip=0cm
@@ -889,7 +891,7 @@ Currently \freefempp implements the following elements \index{elements} in 3d, (
 \par \ttCC{P13d} continuous piecewise linear,
 \par \ttCC{P23d} continuous piecewise quadratic,
 \par \ttCC{RT03d} Raviart-Thomas piecewise constant,
-\par \ttCC{Edge03d} The Nedelec Edge element
+\par \ttCC{Edge03d},\ttCC{Edge13d},\ttCC{Edge23d} The Nedelec Edge element 0,1,2 
 \par \ttCC{P1b3d} piecewise linear continuous plus bubble,
 \par {...} \par
 }
@@ -8361,7 +8363,10 @@ types of finite element are: \index{type of finite element}
         \quad v_{|K} \in P_{1} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \lambda^{K}_{3} \} \right.\right\} \label{eq:P1b-3d}
      \end{equation}
     where $\lambda ^{K}_{i}, i=0,..,d$ are the $d+1$ barycentric  coordinate functions of the element  $K$ (triangle or tetrahedron).
-
+    \item[P1bl,P1bl3d]  piecewise linear  continuous finite element plus linear bubble (2d, 3d) \label{warP1dc}
+     \index{P1bl|textbf}\index{fespace!P1bl}\index{fespace!P1bl3d}
+     the bulle is build by spliting the $K$ a barycenter in $d+1$ sub element. (need \ttCC{@load "Element_P1bl"})
+     
      \item[P2,P23d] piecewise $P_{2}$  continuous finite element (2d, 3d),
      \index{P2|textbf}\index{fespace!P2}
      \begin{equation}
@@ -8438,8 +8443,8 @@ types of finite element are: \index{type of finite element}
      \index{P5Edge|textbf}\index{fespace!P4Edge}
 
 
-     \item[Morley] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
-     \index{Morley|textbf}\index{fespace!Morley}
+     \item[P2Morley] piecewise $P_{2}$  non conform finite element (2d)  (need \ttCC{@load "Morley"})
+     \index{P2Morley|textbf}\index{fespace!P2Morley}\index{Morley}
      \begin{equation}
      P2_{h} = \left\{ v \in L^2(\Omega) \left|\; \forall K \in \mathcal{T}_{h}
         \quad v_{|K} \in P_{3}, 
@@ -8489,7 +8494,7 @@ types of finite element are: \index{type of finite element}
       so  this vectorial finite element with 3 components  $(u,u_x,u_y)$ like in previous Finite Element.
         
 
-      \item[P2BR]  \index{P2BR|textbf}\index{fespace!P2BR}(need \ttCC{@load "BernadiRaugel"})  the Bernadi Raugel Finite Elemen is a Vectorial   element (2d)  with 2 components,
+      \item[P2BR]  \index{P2BR|textbf}\index{fespace!P2BR}(need \ttCC{@load "BernadiRaugel"})  the Bernadi Raugel Finite Element is a Vectorial   element (2d)  with 2 components,
  See Bernardi, C., Raugel, G.: Analysis of some finite elements for the Stokes problem. Math. Comp. 44, 71-79 (1985).
  It is  a 2d coupled FE, with 
  the Polynomial space is $ P_1^2$ + 3 normals bubbles edges function $(P_2)$
@@ -8534,7 +8539,7 @@ So the number  degrees of freedom is 9.
          \label{RT0Ortho}
      \end{equation}      
       
-     \item[Edge03d]  Nedelec finite element or Edge  Element of degree $0$.
+     \item[Edge03d]  3d Nedelec finite element or Edge  Element of degree $0$.
      \index{Edge03d|textbf}\index{fespace!Edge03d}
 
      The 3d case:
@@ -8554,6 +8559,11 @@ So the number  degrees of freedom is 9.
       $$
       and
       $\alpha^1_{K},\alpha^2_{K},\alpha^3_{K},\beta^1_{K},\beta^2_{K},\beta^3_{K} $ are real numbers.
+      \item[Edge13d] (need \ttCC{@load "Element_Mixte3d"}, version 3.34) 3d Nedelec finite element or Edge  Element of degree $1$. \index{Edge13d|textbf}\index{fespace!Edge13d}
+
+      \item[Edge23d]  (need \ttCC{@load "Element_Mixte3d"}, version 3.34) 3d Nedelec finite element or Edge  Element of degree $2$. \index{Edge23d|textbf}\index{fespace!Edge23d}
+
+      
      \item[P1nc] \index{P1nc|textbf}\index{fespace!P1nc} piecewise linear   element continuous at
      the middle of edge only in 2D ?????.
     \item[RT1] \index{RT1|textbf}\index{fespace!RT1} (need \ttCC{@load "Element_Mixte"}, version 3.13)
@@ -8636,7 +8646,7 @@ and $U_{h},V_{h} \in R_{h}$
   Xh[@int] Uh(10); //  array of 10 function in Xh
   Rh[@int] [Wxh,Wyh](10); //  array of 10 functions in Rh.\index{array!fespace}
   Wxh[5](0.5,0.5)  // the 6th  function at point $(0.5,0.5)$
-  Wxh[5][] // the array of the degre of freedom of the 6 function.
+  Wxh[5][] // the array of the degree of freedom of the 6 function.
 \eFF
 
 The functions $U_{h},V_{h}$ have two components so we have

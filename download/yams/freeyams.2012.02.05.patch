@@ -351,3 +351,14 @@ diff -u freeyams.2012.02.05/sourceslib/outqua_a.c  freeyams.2011.09.23-orig/sour
   
    fprintf(stdout,"\n     HISTOGRAMM\n");
    imax = min(9,(int)(10.*rapmax));
+--- freeyams.2012.02.05/sourceslib/eigenv.c	2016-01-28 11:47:05.000000000 +0100
++++ freeyams.2012.02.05-orig/sources/eigenv.c	2012-02-04 12:58:11.000000000 +0100
+@@ -3,7 +3,7 @@
+ #include <math.h>
+ 
+ /* seeking 1.e-05 accuracy */
++#define  EPSD           1.e-12
+-#define  EPSD           1.e-15
+ #define  EPSD2          1.e-200
+ #define  EPS6           5.e-06
+ #define  EPS            1.e-06

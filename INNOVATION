@@ -1,5 +1,13 @@
 version 3.43
-  all implicity loop  for lot of array  : real[ini], real[int,int], real[string] ,matrix , string[string]
+  - update a little the documentation (add new finite element)
+  - add new finite elemnt just for interpolate partition of unity in DDM / HPDDM method 
+     Edge23ds0, Edge13ds0,Edge03d in plugin  Element_Mixte3d
+  - add new finite element P1bl, P1bl3d in plugin  Element_P1bl
+  - add new finite element Edge23d, P1bl,in plugin  Element_Mixte3d
+  - change EPSD in eigenv because touble in some very rare case (see G. Vergez)
+  - correct problem for vectoral solution on implicity declaration of product of simple  EF like  P1b
+  - add tools to compute curvature of border in Cuvature plugin  
+  - all implicity loop  for lot of array  : real[ini], real[int,int], real[string] ,matrix , string[string]
   the syntaxe is 
   if B is like a  Array : 
   for [i,bi: A] bi=f(i);
@@ -7,6 +15,7 @@ version 3.43
   if A is like a matrix : 
   for [i,j,aij: A] aij=g(i,j);
   see forall.edp example file for more exemple 
+  - change the chinise documentation (thank to Helin GONG) 
 version 3.42 
  - correct some Makefile 
  - correct optimisation of convect in case on windows bug)

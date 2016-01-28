@@ -1,5 +1,5 @@
 // Stokes Quasi static avec tension superficiel
-
+verbosity=0; 
 // voir https://fr.wikipedia.org/wiki/Pression_de_Laplace
 load "isoline"
 load "curvature"
@@ -9,8 +9,8 @@ real Y0 =1,Y1=0;
 real meshsize=0.1;
 real CFL = 0.5; 
 real dt = 0.005;
-int niter = 5000;
-real Kc =1; 
+int niter = 100;
+real Kc =10; 
 real rhog = 0; 
 real nu=1;
 int nlissage=2;
@@ -133,7 +133,7 @@ for(int i=0; i<nsl-1;++i)
    }
 temps += dt;
 
- cout << iter << " dt = " << dt << " " << Umax << endl; 
+ cout << iter << temps << " " << " dt = " << dt << " " << Umax << endl; 
 lgc = setcurveabcisse(SL); 
 if( iter% 10 ==9) 
 {

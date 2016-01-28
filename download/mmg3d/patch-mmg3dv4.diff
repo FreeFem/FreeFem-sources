@@ -3461,3 +3461,14 @@ diff -u  mmg3d4/build/sources/inout.c mmg3d4-ok/build/sources/inout.c
 + int    (*MMG_interp)(double *,double *,double *,double );
 + int    (*MMG_optlentet)(pMesh ,pSol ,pQueue ,double ,int ,int );
 + int    (*MMG_movevertex)(pMesh ,pSol ,int ,int );
+--- mmg3d4/build/sources/eigenv.c	2012-12-19 16:05:32.000000000 +0100
++++ mmg3d4-new/build/sources/eigenv.c	2016-01-28 12:10:07.000000000 +0100
+@@ -48,7 +48,7 @@
+ #include <math.h>
+ 
+ 				    /* seeking 1.e-05 accuracy */
+-#define  EPSD           1.e-15
++#define  EPSD           1.e-12
+ #define  EPSD2          1.e-10
+ #define  EPS6           5.e-06
+ #define  EPS            1.e-06
