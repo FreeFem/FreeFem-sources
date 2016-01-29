@@ -41,9 +41,9 @@ public:
             y1=1;
         }
         
-        coef  = 1./max(x1-x0,y1-y1);
+        coef  = 1./max(x1-x0,y1-y0);
         if(verbosity>10)
-            cout << "     bounding box ClosePoints  Pmin=[" << x0 << ", "<< y0 << "], Pmax=[ " << x1 << " " << y1 << "] " << endl;
+            cout << "     bounding box ClosePoints  Pmin=[" << x0 << ", "<< y0 << "], Pmax=[ " << x1 << " " << y1 << "] " << "eps= " <<  EPSILON <<endl;
         
         N=max(sqrt(nx),10.);
         m=max(nx/10,100);
@@ -62,7 +62,7 @@ public:
         assert(k>=0);
         next[n]=head[k];
         head[k]=n;
-        if(debug)   cout << n << " <- " << k << " / " << x << " " << y << " / "<< offset << endl;
+        if(debug)   cout << "  AddSimple " << n << " <- " << k << " / " << x << " " << y << " / "<< offset << endl;
         return n++;
     }
 private:
@@ -102,7 +102,7 @@ public:
     {
       if(debug)   cout << " Find " << x << " "<< y  << " " << EPSILON << " " << ncase(x,y) << ": " ;
        // double x = p[0], y=p[offset];
-        double eps=EPSILON;
+        double eps=EPSILON/2;
         Point *q=0;
         int kk[9],k=0,nc;
         for(int i=-1;i<2;++i)
@@ -154,7 +154,7 @@ public:
     long ncase(double x,double y)
     {
         if(x <x0 || x >=x1 || y <y0 || y >=y1 ) return -1; // dehors
-        else return  long((x-x0)/2/EPSILON) +  long((y-y0)/2/EPSILON)*N;// indice de la case contenant (x,y).
+        else return  long((x-x0)/EPSILON/2) +  long((y-y0)/EPSILON/2)*N;// indice de la case contenant (x,y).
     }
     ~R2close()
     {
@@ -213,7 +213,7 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<dou
     KN<long>* pr=0;
     if(inv) pr = new KN<long>(m0);
     
-    R2close S(data,m0,eps,offset01);
+    R2close S(data,m0,eps,offset10);
     for (int i=0; i<m0;++i)
     {
         if(verbosity>19 )

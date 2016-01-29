@@ -1730,6 +1730,18 @@ R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & 
        ExecError("Use of unexisting coef in sparse matrix operator a(i,j) ");}
     return  p;}
 
+template<class R>
+R  get_element2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){
+    MatriceCreuse<R> * a= ac ? ac->A:0 ;
+    R r=R();
+    if(  !a || a->n <= b || c<0 || a->m <= c  )
+    { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
+        << " Matrix type = " << typeid(ac).name() << endl;
+        cerr << ac << " " << a << endl;
+        ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
+    R *  p =a->pij(b,c);
+    if(p) r=*p;
+    return  r;}
 
 template<class RR,class AA=RR,class BB=AA> 
 struct Op2_mulAv: public binary_function<AA,BB,RR> { 
@@ -2864,9 +2876,11 @@ TheOperators->Add("+",
  
  Global.Add("set","(",new SetMatrix<R>);
  //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );
- 
- atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(get_elementp2mc<R>));
- 
+ //   a(i,i)
+ atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(1,get_elementp2mc<R>));
+    
+ atype<Matrice_Creuse<R> * >()->Add("[","",new OneOperator3_<R,Matrice_Creuse<R> *,long,long >(10,get_element2mc<R>));
+    
  atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
  atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
  
