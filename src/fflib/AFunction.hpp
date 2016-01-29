@@ -2739,6 +2739,16 @@ class  OneOperator3_ : public OneOperator {
       tB(map_type[typeid(B).name()]),
       tC(map_type[typeid(C).name()]),
       f(ff){}
+    OneOperator3_(int ppref,func  ff,
+                  aType tt0=map_type[typeid(A).name()],
+                  aType tt1=map_type[typeid(B).name()],
+                  aType tt2=map_type[typeid(C).name()])
+    : OneOperator(map_type[typeid(R).name()],tt0,tt1,tt2),
+    tA(map_type[typeid(A).name()]),
+    tB(map_type[typeid(B).name()]),
+    tC(map_type[typeid(C).name()]),
+    f(ff) {pref=ppref;}
+
 };
 
 // <<OneOperatorCode>> utilise [[E_F0]]. la class code doit contenir
