@@ -1,8 +1,8 @@
 #ifndef _ALL_IN_ONE_
 #define _ALL_IN_ONE_
 #endif
-//ff-c++-LIBRARY-dep: cxx11   hpddm [petsc|mumps parmetis  ptscotch scotch]  scalapack blas [mkl]   mpifc  fc mpi  pthread
-//ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: cxx11  [petsc|mumps parmetis  ptscotch scotch]  scalapack blas [mkl]   mpifc  fc mpi  pthread
+//ff-c++-cpp-dep: -I./include-hpddm
 // mumps est avec petsc ..
 #define SCHWARZ
 //#define BDD
@@ -26,7 +26,8 @@
 #endif
 
 #include <mpi.h>
-#include <HPDDM.hpp>
+#include "ff++.hpp"
+#include "HPDDM.hpp"
 #ifndef __powerpc__
 #if defined(__clang__) && !defined(__INTEL_COMPILER)
     #pragma clang diagnostic push
@@ -95,7 +96,7 @@ class Pair {
 typedef unsigned long ul_type; 
 #include "skeleton.cpp"
 #ifdef SCHWARZ
-#include "hpddm.hpp"
+#include "ff-hpddm.hpp"
 #endif
 #if defined(BDD) || defined(FETI)
 //#include "substructuring.cpp"

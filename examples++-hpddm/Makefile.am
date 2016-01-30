@@ -33,7 +33,15 @@ getARGV.idp			schwarz-skel.idp \
 additional.idp		macro_3d.idp		schwarz-additional_macro.idp	 \
 argv.idp			macro.idp			schwarz-add-macro.idp		schwarz-macro.idp
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./hpddm.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp
+EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./ff-hpddm.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp \
+include-hpddm/ARPACK.hpp		include-hpddm/MKL_PARDISO.hpp		include-hpddm/dmatrix.hpp		include-hpddm/option_impl.hpp \
+include-hpddm/BDD.hpp			include-hpddm/MUMPS.hpp			include-hpddm/eigensolver.hpp		include-hpddm/preconditioner.hpp \
+include-hpddm/BLAS.hpp			include-hpddm/PaStiX.hpp		include-hpddm/enum.hpp			include-hpddm/schur.hpp \
+include-hpddm/FETI.hpp			include-hpddm/ScaLAPACK.hpp		include-hpddm/iterative.hpp		include-hpddm/schwarz.hpp \
+include-hpddm/HPDDM.hpp			include-hpddm/SuiteSparse.hpp		include-hpddm/matrix.hpp		include-hpddm/subdomain.hpp \
+include-hpddm/Hypre.hpp			include-hpddm/coarse_operator.hpp	include-hpddm/operator.hpp		include-hpddm/wrapper.hpp \
+include-hpddm/LAPACK.hpp		include-hpddm/coarse_operator_impl.hpp	include-hpddm/option.hpp
+
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
