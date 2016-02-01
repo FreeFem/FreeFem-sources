@@ -54,7 +54,7 @@ if FFCS_MPIOK
 # FFCS - do not set loadpath to be able to run an external version of FF on the examples in this directory with
 # [[../../mkffref]]
 
-all-local:$(LIST_COMPILE)
+all-local:$(LIST_COMPILE) freefem++.pref
 	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
 	echo "finish compile load hpddm  solver !"
 else
@@ -85,8 +85,9 @@ freefem++.pref:Makefile
 	echo includepath = \"../examples++-3d/\" >>freefem++.pref
 	echo includepath += \"../examples++-tutorial/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
-# force the build for freefem++.pref  FH.. 
-$(TEST) :freefem++.pref
+
+# force the build for freefem++.pref  FH..  (do not works 2016)
+#$(TEST) :freefem++.pref
 # FFCS - cleaning is useful sometimes
 clean-local::
 	-rm $(LIST_COMPILE)
