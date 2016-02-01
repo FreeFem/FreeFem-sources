@@ -1575,7 +1575,34 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	
 	nv =0;
 	quadtree = new FQuadTree(this,Pmin,Pmax,nv); //  put all the old vertices in the quadtree 
-						     //  copy of the old vertices 
+						     //  copy of the old vertices
+        {  // to keep the order of old vertices to have no problem in
+             // interpolation on sub grid of RT finite element for example (Feb. 2016 F. Hecht)
+        KN<bool> setofv(Th.nv,false);
+        for (int i=0;i<Th.nt;++i)
+          if (split[i])
+              for (int j=0;j<3;++j)
+              setofv[Th(i,j)]=true;
+        for (int i=0;i<Th.nv;++i)
+            if(setofv[i])
+            {
+                Vertex * pV=quadtree->ToClose(Th(i),seuil);
+                if (pV ==0)
+                {
+                 vertices[nv] = Th(i);
+                 vertices[nv].normal=0;
+                 quadtree->Add(vertices[nv]);
+                  nv++;
+                }
+
+            }
+            if(verbosity>3)
+            {
+                cout << "  -- number of old vertices use: " << nv << endl;
+                cout << "  -- number of  neb : " << nebmax << endl;
+            }
+        }
+    /*
 	for (int i=0;i<Th.nt;i++)
 	    if (split[i]) 
 		for (int j=0;j<3;j++)
@@ -1595,6 +1622,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			cout << "  -- number of old vertices use: " << nv << endl;      
 			cout << "  -- number of  neb : " << nebmax << endl;
 		    }
+     */
 	bedges = new BoundaryEdge[nebmax];
 	BoundaryEdge * bedgesi= new BoundaryEdge[nebimax];  // jan 2007 FH
 	int * sdd= new int[Th.nt]; 
