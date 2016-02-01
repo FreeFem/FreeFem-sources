@@ -1,5 +1,7 @@
+  - change the trunc function in 2d to keep the ordre of old vertices to remove signe probleme
+    in some restriction operator of RT finite element  for example
 version 3.43
-  - coorect of the formal operator trace (bug was comute  a00 + trace(A), thank to O. Pironneau )
+  - correct of the formal operator trace (bug was comute  a00 + trace(A), thank to O. Pironneau )
   - put hppdm source include in the distrubition to have more safe compile process.
   - update a little the documentation (add new finite element)
   - add new finite elemnt just for interpolate partition of unity in DDM / HPDDM method 
