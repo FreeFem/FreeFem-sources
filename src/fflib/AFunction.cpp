@@ -814,8 +814,8 @@ C_F0  formalMatTrace(const basicAC_F0 &args)
     
     
     CC_F0 s;
-    s= A(0,0);
-    for (int i=0;i<na1;++i)
+    s= A(0,0); // correction feb. 2016 Thank to O. Pironneau 
+    for (int i=1;i<na1;++i)
 	s = C_F0(TheOperators,"+",s,A(i,i));
     return  s;
      
