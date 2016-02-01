@@ -1,6 +1,6 @@
+version 3.43 (3623:882bfbae1bf6, feb 2016 15:30 CET))
   - change the trunc function in 2d to keep the ordre of old vertices to remove signe probleme
     in some restriction operator of RT finite element  for example
-version 3.43
   - correct of the formal operator trace (bug was comute  a00 + trace(A), thank to O. Pironneau )
   - put hppdm source include in the distrubition to have more safe compile process.
   - update a little the documentation (add new finite element)
