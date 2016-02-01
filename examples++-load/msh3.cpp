@@ -5092,12 +5092,13 @@ struct Op_trunc_mesh3 : public OneOperator {
   class Op: public E_F0mps   { 
   public:
     static basicAC_F0::name_and_type name_param[] ;
-    static const int n_name_param =4;
+    static const int n_name_param =5;
     Expression nargs[n_name_param];
     
     Expression getmesh,bbb;
     long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-    KN<long> *  arg(int i,Stack stack) const{ return nargs[i] ? GetAny<KN<long> *>( (*nargs[i])(stack) ): 0;}
+    bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+      KN<long> *  arg(int i,Stack stack) const{ return nargs[i] ? GetAny<KN<long> *>( (*nargs[i])(stack) ): 0;}
       
     Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b) 
     { args.SetNameParam(n_name_param,name_param,nargs); }
@@ -5115,8 +5116,9 @@ basicAC_F0::name_and_type Op_trunc_mesh3::Op::name_param[Op_trunc_mesh3::Op::n_n
    {  "split",             &typeid(long)},
    {  "label",             &typeid(long)},
      { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jovilet jan 2014
-     { "old2new", &typeid(KN<long>*)}   //  ajout FH pour P. Jovilet jan 2014
-
+     { "old2new", &typeid(KN<long>*)},   //  ajout FH pour P. Jovilet jan 2014
+     { "renum",&typeid(bool)}
+     
  };
 
 
@@ -5201,6 +5203,9 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
             
         }
     }
+    //  take same numbering
+    for(int i=0,k=0; i<Th.nv; i++)
+        if(takevertex[i]>=0) takevertex[i]=k++;
     
     if( kksplit > 1 )
     { // compute the number of slip edge ...
@@ -5272,7 +5277,21 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
     R3 hh = (bmax-bmax)/10.;
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,bmin-hh,bmax+hh,0);
     const R3 * pP[4];
-    int np=0; // nb of new points .. 
+    int np=0; // nb of new points ..
+    // first build old point to keep the numbering order for DDM ...
+    for(int i=0,k=0; i<Th.nv; i++)
+        if(takevertex[i]>=0)
+        {
+            Vertex3 * pvi=gtree->ToClose(Th(i),hseuil);
+            if(!pvi)
+            {
+                (R3&) v[np]= Th(i);
+                v[np].lab=Th(i).lab;
+                gtree->Add( v[np] );
+                np++;
+            }
+            else ffassert(0);
+        }
 
     {
         KN<R3>  vertextetsub(nvsub);
@@ -5459,7 +5478,8 @@ AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
   long label =arg(1,stack,2L);
    KN<long> * pn2o =  arg(2,stack);
 KN<long> * po2n =  arg(3,stack);
-
+  bool renum=arg(4,stack,true);// not use to day to by compatible with 2d version ...
+    
   KN<int> split(Th.nt);
   split=kkksplit;
   MeshPoint *mp= MeshPointStack(stack),mps=*mp;
@@ -5501,7 +5521,7 @@ KN<long> * po2n =  arg(3,stack);
             }
             else o2n[k]=-1;
     }
-
+  // if(renum) Tht->renum(); do not  exist ???? FH ....
   Add2StackOfPtr2FreeRC(stack,Tht);//  07/2008 FH
   *mp=mps;
   return Tht;

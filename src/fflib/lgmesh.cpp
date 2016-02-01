@@ -450,11 +450,12 @@ struct Op_trunc_mesh : public OneOperator {
 
     class Op: public E_F0mps   { public:
       static basicAC_F0::name_and_type name_param[] ;
-      static const int n_name_param =4;
+      static const int n_name_param =5;
       Expression nargs[n_name_param];
     
       Expression getmesh,bbb;
       long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+      bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
         
        KN<long> *  arg(int i,Stack stack) const{ return nargs[i] ? GetAny<KN<long> *>( (*nargs[i])(stack) ): 0;}
       Op(const basicAC_F0 &  args,Expression t,Expression b) : getmesh(t),bbb(b)
@@ -471,8 +472,9 @@ basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_nam
  {
    {  "split",             &typeid(long)},
    {  "label",             &typeid(long)},
-   { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jovilet jan 2014
-   { "old2new", &typeid(KN<long>*)}   //  ajout FH pour P. Jovilet jan 2014
+   { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jolivet jan 2014
+   { "old2new", &typeid(KN<long>*)},   //  ajout FH pour P. JoLivet jan 2014
+     { "renum",&typeid(bool)}
  
  };
 
@@ -508,6 +510,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     KN<long> * pn2o =  arg(2,stack);
     KN<long> * po2n =  arg(3,stack);
     KN<int> split(Th.nt);
+    bool renum=arg(4,stack,true);
     split=kkksplit;
     long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
@@ -550,7 +553,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
      if (verbosity>1) 
      cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
   Mesh  * pmsh = new Mesh(Th,split,false,label);
-  pmsh->renum();
+  if(renum) pmsh->renum();
    /* deja fait  dans bamg2msh
   Fem2D::R2 Pn,Px;
   m->BoundingBox(Pn,Px);

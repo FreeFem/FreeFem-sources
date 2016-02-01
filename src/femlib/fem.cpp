@@ -1574,8 +1574,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	assert( vertices );
 	
 	nv =0;
-	quadtree = new FQuadTree(this,Pmin,Pmax,nv); //  put all the old vertices in the quadtree 
-						     //  copy of the old vertices
+	quadtree = new FQuadTree(this,Pmin,Pmax,nv); // build empty the quadtree
         {  // to keep the order of old vertices to have no problem in
              // interpolation on sub grid of RT finite element for example (Feb. 2016 F. Hecht)
         KN<bool> setofv(Th.nv,false);
@@ -1590,6 +1589,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
                 if (pV ==0)
                 {
                  vertices[nv] = Th(i);
+                    if(verbosity>99) cout << " old to new: " << i << " -> " << nv << " / " << Th(i) <<endl;
                  vertices[nv].normal=0;
                  quadtree->Add(vertices[nv]);
                   nv++;
@@ -1598,8 +1598,8 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
             }
             if(verbosity>3)
             {
-                cout << "  -- number of old vertices use: " << nv << endl;
-                cout << "  -- number of  neb : " << nebmax << endl;
+                cout << "  --- number of old vertices use: " << nv << endl;
+                cout << "  --- number of  neb : " << nebmax << endl;
             }
         }
     /*
