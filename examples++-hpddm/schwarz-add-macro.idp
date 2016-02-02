@@ -1,5 +1,5 @@
 macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
-        meshName = trunc(overlapName, abs(part - mpiRank(comm)) < 0.1, label = 10);
+        meshName = trunc(renum=false,overlapName, abs(part - mpiRank(comm)) < 0.1, label = 10);
         /*
         savemesh(meshName, "Th-0-" + mpirank + ".msh");
         coefficients
@@ -37,7 +37,7 @@ macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
         timerPartition = mpiWtime();
         */
         {
-            meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 2 * overlap - 0.001));
+            meshN neighbors = trunc(renum=false,overlapName, suppSmooth > 0.001 && (suppSmooth < 2 * overlap - 0.001));
             fespace Oh(neighbors, P0);
             Oh partOverlap = part;
             /*findDiff(partOverlap[], arrayIntersection);*/
@@ -59,20 +59,20 @@ macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
         timerPartition = mpiWtime();
         */
         if(s > 1) {
-            overlapName = trunc(overlapName, suppSmooth > 0.001, split = s);
+            overlapName = trunc(renum=false,overlapName, suppSmooth > 0.001, split = s);
             supp = abs(part - mpiRank(comm)) < 0.1;
             suppSmooth = 0;
             AddLayers(overlapName, supp[], overlap * 2, suppSmooth[]);
         }
-        overlapName = trunc(overlapName, suppSmooth > overlap - 0.999);
+        overlapName = trunc(renum=false,overlapName, suppSmooth > overlap - 0.999);
         supp = supp;
         suppSmooth = suppSmooth;
-        meshName = trunc(overlapName, suppSmooth > overlap + 0.001, label = 10);
-        borderName = trunc(overlapName, (suppSmooth > overlap - 0.999) && (suppSmooth < overlap + 0.001), label = 20);
+        meshName = trunc(renum=false,overlapName, suppSmooth > overlap + 0.001, label = 10);
+        borderName = trunc(renum=false,overlapName, (suppSmooth > overlap - 0.999) && (suppSmooth < overlap + 0.001), label = 20);
         if(0) {
             supp = abs(part - mpiRank(comm)) > 0.1;
             AddLayers(overlapName, supp[], overlap * 2, suppSmooth[]);
-            overlapName = trunc(overlapName, suppSmooth > 0.001);
+            overlapName = trunc(renum=false,overlapName, suppSmooth > 0.001);
             suppSmooth = suppSmooth;
             part = part;
         }
@@ -99,7 +99,7 @@ macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
         if(solver != 3 && solver != 5)
             overlapName = minimalMesh;
         else
-            overlapName = trunc(meshName, khi < 0.99);
+            overlapName = trunc(renum=false,meshName, khi < 0.99);
         if(numberIntersection != arrayIntersection.n)
             arrayIntersection.resize(numberIntersection);
         Wh def(func2vec) = init(khi);
@@ -119,7 +119,7 @@ macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
         /* savemesh(meshName, "Th-" + overlap + "-" + mpirank + ".msh"); */
         restrictionIntersection.resize(numberIntersection);
         for(i = 0; i < numberIntersection; ++i) {
-            meshN meshIntersection  = trunc(meshName, partitionIntersection[i] > 1e-6);
+            meshN meshIntersection  = trunc(renum=false,meshName, partitionIntersection[i] > 1e-6);
             fespace WhIntersection(meshIntersection, P);
             matrix R = interpolate(WhIntersection, Wh);
             real[int] C;
@@ -128,7 +128,7 @@ macro partition(meshName, borderName, overlapName, D, Vh, P, comm, s)
             restrictionIntersection[i].resize(R.nbcoef);
             /*
             int[int] n2o;
-            meshN meshIntersection  = trunc(meshName, partitionIntersection[i] > 1e-6, new2old = n2o);
+            meshN meshIntersection  = trunc(renum=false, meshName, partitionIntersection[i] > 1e-6, new2old = n2o);
             fespace WhIntersection(meshIntersection, P);
             restrictionIntersection[i] = restrict(WhIntersection, Wh, n2o);
             */

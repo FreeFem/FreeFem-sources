@@ -32,7 +32,7 @@ macro bb2(boundingMesh, overshoot, ThGlobal)
             bb(2) -= overshoot;
             bb(3) += overshoot;
 
-            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+            ThGlobal = trunc(renum=false,ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
 
 macro bb3(boundingMesh, overshoot, ThGlobal)
             real[int] bb(6);
@@ -45,7 +45,7 @@ macro bb3(boundingMesh, overshoot, ThGlobal)
             bb(4) -= overshoot;
             bb(5) += overshoot;
 
-            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
+            ThGlobal = trunc(renum=false,ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
 
 /*# visualization #*/
 macro plotMPI(Th, u, legend, Pk, def, d, w)

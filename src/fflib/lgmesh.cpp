@@ -502,7 +502,10 @@ AnyType BuildMeshFile::operator()(Stack stack)  const {
     
 }
 
-AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const { 
+AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
+    // Remark : F.Hecht feb 2016 ...
+    // WARNING for DDM
+    // trunc(trunc(Th,op1),op2) =trunc(trunc(Th,op2),op1) => no renumbering ....
     using namespace    Fem2D;
     const Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
     long kkksplit =arg(0,stack,1L);
@@ -510,7 +513,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     KN<long> * pn2o =  arg(2,stack);
     KN<long> * po2n =  arg(3,stack);
     KN<int> split(Th.nt);
-    bool renum=arg(4,stack,true);
+    bool renum=arg(4,stack,false);//  change to false too dangerous with ddm the trunc must commute in DDM
     split=kkksplit;
     long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
