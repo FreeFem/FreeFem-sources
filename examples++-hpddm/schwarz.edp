@@ -19,7 +19,7 @@ macro bbN(boundingMesh, overshoot, ThGlobal)
             bb(2) -= overshoot;
             bb(3) += overshoot;
 
-            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+            ThGlobal = trunc(renum=false,ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
 macro meshN()mesh// EOM
 macro intN()int2d// EOM
 macro measureN()area// EOM

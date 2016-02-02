@@ -585,32 +585,35 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
      int TypeOfFE_RT0_3d::dfon[]={0,0,1,0}; 
      
 
-     TypeOfFE_RT0_3d::TypeOfFE_RT0_3d(): GTypeOfFE<Mesh3>(dfon,d,1,3*3*4,6,false,true)
+     TypeOfFE_RT0_3d::TypeOfFE_RT0_3d(): GTypeOfFE<Mesh3>(dfon,d,1,3*4,4,false,true)
      { 	
-       //  integration on middle of edge (light ) on  each face .. 
+       //  integration on middle of faces  (light ) on  each face ..
 	R3 Pt[]= {R3(0.,0.,0.), R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)};
+         /*
 	for (int i=0;i<Element::ne;++i)
           this->PtInterpolation[i]=(Pt[Element::nvedge[i][0]]+Pt[Element::nvedge[i][1]])*0.5;
-	 
-	 
+	 */
+         for (int i=0;i<Element::nf;++i)
+             this->PtInterpolation[i]=(Pt[Element::nvface[i][0]]+Pt[Element::nvface[i][1]]+Pt[Element::nvface[i][2]])/3.;
+
 //	 static const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;//{ {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
 //	    { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
 	 //     0     1     2     3     4     5
-       {
+     /*  {
 	   int i=0;
 	   for (int f=0;f<4;f++)
 	       for (int e=0,i=0;e<6;e++)
 		   if ((Element::nvedge[e][0] !=f)  && (Element::nvedge[e][1]!=f))
 		       edgeface[f][i++]=e; 
-      }
+      }*/
        {
 	 int i=0;
 	 for (int f=0;f<4;f++) 
 	   {
 	     //  cout << " face : " << f << endl;
-	     for (int p=0;p<3;p++) 
+	   //  for (int p=0;p<3;p++)
 	     {
-		 int e= edgeface[f][p] ; 
+                 int e= f; //edgeface[f][p] ;
 		// cout << "  , "  << this->PtInterpolation[e];
 		 for (int c=0;c<3;c++,i++) 
 
@@ -634,10 +637,10 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 for (int f=0;f<4;f++) 
 	   {
 	       R3 N=K.N(f);//  exterior and  ||N|| = 2* area f
-	       N *= K.faceOrient(f)/6.;
-	       for (int p=0;p<3;p++) 
+	       N *= K.faceOrient(f)/2.;
+	     //  for (int p=0;p<3;p++)
 		 {
-		     int e= edgeface[f][p] ; 
+                     int e= f; //dgeface[f][p] ;
 		     for (int c=0;c<3;c++,i++) 
 			 
 		       {
@@ -657,7 +660,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 assert(val.M()==3 );
 	 // wi = signe * (x - qi)/ (volume*d)   
 	 val=0; 
-	 
+        // cout << " TypeOfFE_RT0_3d "<< Th(K) << " " << Th.nt << " / "<<K.faceOrient(0)<< " " << K.faceOrient(1) << " " << K.faceOrient(2) << " " << K.faceOrient(3) <<endl;
 	 R cc =1./(d*K.mesure());
 	 R ci[4]={ cc*K.faceOrient(0),cc*K.faceOrient(1),cc*K.faceOrient(2),cc*K.faceOrient(3)};
 	 

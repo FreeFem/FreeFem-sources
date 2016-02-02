@@ -156,18 +156,18 @@ int nnn = sizeoverlaps*2;/* to be sure exact in thii */
  int[int] n2o(1);
  Phg suppi= abs(part-ipart)<0.1; 
                       /* boolean function 1 in the subdomain 0 elswhere  */
- Thin=trunc(Thg,suppi>0,label=10); /* non-overlapping mesh, interfaces have label 10 */
+ Thin=trunc(Thg,suppi>0,label=10,renum=false); /* non-overlapping mesh, interfaces have label 10 */
  AddLayers(Thg,suppi[],nnn,unssd[]);    /* see above ! suppi and unssd are modified   */
  unssd[] *= nnn;  /*  to put value nnn a 0   */
  /*   build a local mesh of thii such that all compuation of the unit partition are  */
  /*   exact in thii  */
- Thii=trunc(Thg,unssd> 0.001 ,label=10,new2old=n2o); /* overlapping mesh, interfaces have label 10  */
+ Thii=trunc(Thg,unssd> 0.001 ,label=10,new2old=n2o,renum=false); /* overlapping mesh, interfaces have label 10  */
  unssd= unssd;/* put on Thii*/
  real[int] p=part[];
  part=0.; part[]=p(n2o);  
 
  real nnn0 = nnn - sizeoverlaps +  0.001   ;
- Thi=trunc(Thii,unssd>nnn0 ,label=10); /* overlapping mesh, interfaces have label 10 */
+ Thi=trunc(Thii,unssd>nnn0 ,label=10,renum=false); /* overlapping mesh, interfaces have label 10 */
 
 }
  settt 
@@ -287,7 +287,7 @@ settt
  aThij.resize(njpart);
 /* construction of the mesh intersect i,j part  */
 for(int jp=0;jp<njpart;++jp)
-  aThij[jp]  = trunc(Thi,pij[jp]>1e-6,label=10); /* mesh of the supp of pij  */
+  aThij[jp]  = trunc(Thi,pij[jp]>1e-6,label=10,renum=false); /* mesh of the supp of pij  */
 }
 if(mpiRank(comm)==0) cout << " *** end build mesh  intersection  " << endl;
 // EOM 
@@ -341,14 +341,16 @@ fespace Whij(Thij,Pk);/*  */
     {
       int j=jpart[jp];
       Thij = aThij[jp];
+      if(vdegug>99)savemesh(Thij,"Th-"+j+"--"+ipart+".mesh");
       int [int] U2Vdata=[0];
       matrix I = interpolate(Whij,Whi,U2Vc=U2Vdata); /* Whji <- Whi  */
       sMj[jp] = I*Pii;  /* Whi -> s Whij   */
       rMj[jp] = interpolate(Whij,Whi,t=1,U2Vc=U2Vdata);   /* Whji -> Whi  */
       if(vdebug>10) {
-      {Whi defPk#N(uuu,)=Times#N(1),defPk#N(vvv,)=Times#N(-1); 
+      {Whi defPk#N(uuu,)=Times#N(1); Whij defPk#N(vvv,)=Times#N(-1);
+       cout << vvv[].n <<"+=" << I.n << "x" << I.m << "*" << uuu[].n << endl;
        vvv[]+=I*uuu[]; cout << jp << " %%% " << vvv[].linfty << endl; assert(vvv[].linfty < 1e-6);}
-      {Whi  defPk#N(uuu,)=Times#N(1),defPk#N(vvv,)=Times#N(-1) ;
+      {Whi  defPk#N(uuu,)=Times#N(1); Whij defPk#N(vvv,)=Times#N(-1) ;
        vvv[]+=rMj[jp]'*uuu[]; cout << jp << " ### " << vvv[].linfty << endl; assert(vvv[].linfty < 1e-6);}}
     }}
 if(ipart==0) cout << " *** end build transfert matrix " << endl;
