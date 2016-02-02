@@ -1,8 +1,9 @@
+version 3.43 (version 3.43 (3624:, 2 feb 2016 16;00 CET))
   - change  RT03d finite element interpolation (put 1 point integration by face)
   - add renum=false in all trunc fonction of DDM examples 
   - warning change the defaut no renumbering to be sure trunc commute 
        the two mesh must be the same  truc(trunc(Th,I),J) == truc(trunc(Th,J),I) 
-version 3.43 (3623:882bfbae1bf6, feb 2016 15:30 CET))
+remove this version (version 3.43 (3623:882bfbae1bf6, feb 2016 15:30 CET))
   - change the trunc function in 2d to keep the ordre of old vertices to remove signe probleme
     in some restriction operator of RT finite element  for example
   - correct of the formal operator trace (bug was comute  a00 + trace(A), thank to O. Pironneau )

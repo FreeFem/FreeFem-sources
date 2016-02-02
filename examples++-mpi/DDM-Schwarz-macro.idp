@@ -341,7 +341,7 @@ fespace Whij(Thij,Pk);/*  */
     {
       int j=jpart[jp];
       Thij = aThij[jp];
-      if(vdegug>99)savemesh(Thij,"Th-"+j+"--"+ipart+".mesh");
+      if(vdebug>99)savemesh(Thij,"Th-"+j+"--"+ipart+".mesh");
       int [int] U2Vdata=[0];
       matrix I = interpolate(Whij,Whi,U2Vc=U2Vdata); /* Whji <- Whi  */
       sMj[jp] = I*Pii;  /* Whi -> s Whij   */
