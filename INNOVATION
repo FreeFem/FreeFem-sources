@@ -1,3 +1,5 @@
+  - correct PB of FLIBS
+  - pass to evrsion 3.43-1  3 feb 2015 
 version 3.43 (version 3.43 (3626:8e3d8953975d), 2 feb 2016 16;00 CET))
   - change  RT03d finite element interpolation (put 1 point integration by face)
   - add renum=false in all trunc fonction of DDM examples 
