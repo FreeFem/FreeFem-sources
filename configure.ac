@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.43,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.43-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -242,13 +242,19 @@ then
 			if test -e "$d/libgfortran.$ff_suffix_dylib_a" -a  -e "$d/libquadmath.$ff_suffix_dylib_a"  ; then
 			   ff_flibs="$d/libgfortran.$ff_suffix_dylib_a $d/libquadmath.$ff_suffix_dylib_a"
 			    ff_okkk=1
-			elif test -e "$d/libgfortran.a"  -a -e "$d/libquadmath.a"; then
+			elif test -e "$d/libgfortran.a"  -a -e "$d/libquadmath.a" ; then
 			   ff_flibs="$d/libgfortran.a $d/libquadmath.a"
 			    ff_okkk=1
+			elif test -e "$d/libgfortran.$ff_suffix_dylib_a"   ; then
+			   ff_flibs="$d/libgfortran.$ff_suffix_dylib_a"
+			    ff_okkk=2
+			elif test -e "$d/libgfortran.a" ; then
+			   ff_flibs="$d/libgfortran.a"
+			    ff_okkk=2
 			fi;;
 		esac
             done
-	    if test  "$ff_okkk" -eq 1  ;then
+	    if test  "$ff_okkk" -ge  1  ;then
 		FLIBS="$ff_flibs"
 	    else
 		FLIBS="$ff_flibs -lgfortran"
