@@ -144,6 +144,7 @@ class Feti : public Schur<Solver, CoarseOperator<CoarseSolver, S, K>, K> {
         void start(const K* const f, K* const x, K* const* const l, K* const* const r) const {
             Solver<K>* p = static_cast<Solver<K>*>(super::_pinv);
             if(super::_co) {
+                super::start();
                 if(!excluded) {
                     if(super::_ev) {
                         if(super::_schur) {

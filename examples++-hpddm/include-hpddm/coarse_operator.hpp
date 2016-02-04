@@ -80,7 +80,7 @@ class CoarseOperator : public Solver<K> {
          *    D              - <DMatrix::Distribution> of right-hand sides and solution vectors.
          *    excluded       - True if the master processes are excluded from the domain decomposition, false otherwise. */
         template<bool U, typename Solver<K>::Distribution D, bool excluded>
-        void constructionCollective(const unsigned short* = nullptr, unsigned short p = 0, const unsigned short* = nullptr);
+        void constructionCollective(const unsigned short* = nullptr, unsigned short = 0, const unsigned short* = nullptr);
         /* Function: constructionMap
          *
          *  Builds the maps <DMatrix::ldistribution> and <DMatrix::idistribution> necessary for sending and receiving distributed right-hand sides or solution vectors.
@@ -143,6 +143,45 @@ class CoarseOperator : public Solver<K> {
             else if(out)
                 MPI_Comm_dup(in, out);
         }
+        /* Function: transfer
+         *
+         *  Transfers vectors from the fine grid to the coarse grid, and vice versa.
+         *
+         * Template Parameter:
+         *    T              - True if fine to coarse, false otherwise.
+         *
+         * Parameters:
+         *    counts         - Array of integers <DMatrix::gatherSplitCounts> or <DMatrix::gatherCounts> used for MPI collectives.
+         *    n              - Number of vectors or size of the communicator <Coarse operator::gatherComm> for MPI collectives.
+         *    m              - Size of the communicator <Coarse operator::gatherComm> for MPI collectives or number of vectors.
+         *    ab             - Array to transfer. */
+        template<bool T>
+        void transfer(int* const counts, const int n, const int m, K* const ab) const {
+            if(!T) {
+                std::for_each(counts, counts + 2 * n, [&](int& i) { i *= m; });
+                MPI_Gatherv(MPI_IN_PLACE, 0, Wrapper<K>::mpi_type(), ab, counts, counts + n, Wrapper<K>::mpi_type(), 0, _gatherComm);
+            }
+            if(n != 1 && m != 1) {
+                int size = T ? m : n;
+                K* ba = new K[counts[size - 1] + counts[2 * size - 1]];
+                if(!T) {
+                    for(int i = 0; i < size; ++i)
+                        for(int j = 0; j < m; ++j)
+                            std::copy_n(ab + counts[size + i] + j * (counts[i] / m), counts[i] / m, ba + counts[size + i] / m + j * ((counts[size - 1] + counts[2 * size - 1]) / m));
+                }
+                else {
+                    for(int j = 0; j < n; ++j)
+                        for(int i = 0; i < size; ++i)
+                            std::copy_n(ab + counts[size + i] / n + j * ((counts[size - 1] + counts[2 * size - 1]) / n), counts[i] / n, ba + counts[size + i] + j * (counts[i] / n));
+                }
+                std::copy_n(ba, counts[size - 1] + counts[2 * size - 1], ab);
+                delete [] ba;
+            }
+            if(T) {
+                MPI_Scatterv(ab, counts, counts + m, Wrapper<K>::mpi_type(), MPI_IN_PLACE, 0, Wrapper<K>::mpi_type(), 0, _gatherComm);
+                std::for_each(counts, counts + 2 * m, [&](int& i) { i /= n; });
+            }
+        }
     public:
         CoarseOperator() : _gatherComm(MPI_COMM_NULL), _scatterComm(MPI_COMM_NULL), _rankWorld(), _sizeWorld(), _sizeSplit(), _local(), _sizeRHS(), _offset(false) {
             static_assert(S == 'S' || S == 'G', "Unknown symmetry");
@@ -165,10 +204,10 @@ class CoarseOperator : public Solver<K> {
          * Parameter:
          *    rhs            - Input right-hand side, solution vector is stored in-place. */
         template<bool = false>
-        void callSolver(K* const, const int& = 0);
+        void callSolver(K* const, const unsigned short& = 1);
 #if HPDDM_ICOLLECTIVE
         template<bool = false>
-        void IcallSolver(K* const, MPI_Request*, const int& = 0);
+        void IcallSolver(K* const, MPI_Request*);
 #endif
         /* Function: getRank
          *  Simple accessor that returns <Coarse operator::rankWorld>. */
@@ -185,21 +224,6 @@ class CoarseOperator : public Solver<K> {
         /* Function: getSizeRHS
          *  Returns the value of <Coarse operator::sizeRHS>. */
         unsigned int getSizeRHS() const { return _sizeRHS; }
-        /* Function: reallocateRHS
-         *
-         *  Reallocates the array for storing right-hand sides and solution vectors.
-         *
-         * Parameters:
-         *    rhs            - Reference to the pointer to reallocate.
-         *    n              - Additional space needed, see also <Coarse operator::sizeRHS>. */
-        void reallocateRHS(K*& rhs, const unsigned short& n) const {
-            if(rhs)
-                delete [] rhs;
-            if(Solver<K>::_communicator != MPI_COMM_NULL)
-                rhs = new K[_sizeRHS + _sizeSplit * n];
-            else
-                rhs = new K[_sizeRHS + n];
-        }
 };
 } // HPDDM
 #endif // _HPDDM_COARSE_OPERATOR_

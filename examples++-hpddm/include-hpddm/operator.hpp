@@ -332,7 +332,7 @@ class MatrixMultiplication : public OperatorBase<'s', Preconditioner, K> {
             std::fill_n(work, m * super::_n, K());
             for(unsigned short i = 0; i < m; ++i)
                 Wrapper<K>::sctr(super::_map[index].second.size(), in + i * super::_map[index].second.size(), super::_map[index].second.data(), work + i * super::_n);
-            Wrapper<K>::diag(super::_n, m, _D, work, _work);
+            Wrapper<K>::diag(super::_n, _D, work, _work, m);
             Blas<K>::gemm(&(Wrapper<K>::transc), "N", &(super::_local), &m, &(super::_n), &(Wrapper<K>::d__1), *super::_deflation, &(super::_n), _work, &(super::_n), &(Wrapper<K>::d__0), work, &(super::_local));
         }
     public:
@@ -412,7 +412,7 @@ class MatrixMultiplication : public OperatorBase<'s', Preconditioner, K> {
                     MPI_Isend(in[i], super::_map[i].second.size() * super::_local, Wrapper<K>::mpi_type(), super::_map[i].first, 2, super::_p.getCommunicator(), rq++);
                 }
             }
-            Wrapper<K>::diag(super::_n, super::_local, _D, _work, work);
+            Wrapper<K>::diag(super::_n, _D, _work, work, super::_local);
         }
         template<char S, bool U>
         void assembleForMaster(K* C, const K* in, const int& coefficients, unsigned short index, K* arrayC, unsigned short* const& infoNeighbor = nullptr) {

@@ -55,7 +55,7 @@ struct Wrapper {
     static MPI_Datatype mpi_underlying_type() {
         return Wrapper<underlying_type<K>>::mpi_type();
     }
-    static constexpr bool is_complex = !std::is_same<K, underlying_type<K>>::value;
+    static constexpr bool is_complex = !std::is_same<typename std::remove_const<K>::type, underlying_type<K>>::value;
     /* Variable: transc
      *  Transposed real operators or Hermitian transposed complex operators. */
     static constexpr char transc = is_complex ? 'C' : 'T';
@@ -107,23 +107,41 @@ struct Wrapper {
      *  Scatters the elements of a compressed sparse vector into full-storage form. */
     static void sctr(const int&, const K* const, const int* const, K* const);
     /* Function: diag(in-place)
-     *  Computes a vector-vector element-wise multiplication. */
-    static void diag(const int&, const underlying_type<K>* const, K* const);
-    /* Function: diag
-     *  Computes a vector-vector element-wise multiplication. */
-    static void diag(const int&, const underlying_type<K>* const, const K* const, K* const);
-    /* Function: diag(in-place)
      *  Computes a vector-matrix element-wise multiplication. */
-    static void diag(const int&, const int&, const underlying_type<K>* const, K* const);
+    static void diag(const int&, const underlying_type<K>* const, K* const, const int& = 1);
     /* Function: diag
      *  Computes a vector-matrix element-wise multiplication. */
-    static void diag(const int&, const int&, const underlying_type<K>* const, const K* const, K* const);
+    static void diag(const int&, const underlying_type<K>* const, const K* const, K* const, const int& = 1);
     /* Function: conj
      *  Conjugates a real or complex number. */
     template<class T, typename std::enable_if<!Wrapper<T>::is_complex>::type* = nullptr>
-    static T conj(T& x) { return x; }
+    static T conj(const T& x) { return x; }
     template<class T, typename std::enable_if<Wrapper<T>::is_complex>::type* = nullptr>
-    static T conj(T& x) { return std::conj(x); }
+    static T conj(const T& x) { return std::conj(x); }
+    template<char O>
+    static void cycle(const int n, const int m, K* const ab, const int k) {
+        if((O == 'T' || O == 'C') && n != 1 && m != 1) {
+            const int size = n * m - 1;
+            std::vector<char> b((size >> 3) + 1);
+            b[0] |= 1;
+            b[size >> 3] |= 1 << (size & 7);
+            int i = 1;
+            while(i < size) {
+                int it = i;
+                std::vector<K> t(ab + i * k, ab + (i + 1) * k);
+                do {
+                    int next = (i * n) % size;
+                    std::swap_ranges(ab + next * k, ab + (next + 1) * k, t.begin());
+                    b[i >> 3] |= 1 << (i & 7);
+                    i = next;
+                } while(i != it);
+                if(O == 'C' && is_complex)
+                    ab[i] = conj(ab[i]);
+
+                for(i = 1; i < size && (b[i >> 3] & (1 << (i & 7))) != 0; ++i);
+            }
+        }
+    }
     /* Function: imatcopy
      *  Transforms (copy, transpose, conjugate transpose, conjugate) a dense matrix in-place. */
     template<char O>
@@ -154,12 +172,8 @@ template<class K>
 constexpr K Wrapper<K>::d__2;
 
 template<class K>
-inline void Wrapper<K>::diag(const int& n, const underlying_type<K>* const d, K* const in) {
-    diag(n, d, nullptr, in);
-}
-template<class K>
-inline void Wrapper<K>::diag(const int& m, const int& n, const underlying_type<K>* const d, K* const in) {
-    diag(m, n, d, nullptr, in);
+inline void Wrapper<K>::diag(const int& m, const underlying_type<K>* const d, K* const in, const int& n) {
+    diag(m, d, nullptr, in, n);
 }
 
 #if HPDDM_MKL
@@ -265,18 +279,14 @@ inline void Wrapper<T>::omatcopy(const int n, const int m, const T* const a, con
 }
 #define HPDDM_GENERATE_MKL_VML(C, T)                                                                         \
 template<>                                                                                                   \
-inline void Wrapper<T>::diag(const int& m, const int& n, const T* const d,                                   \
-                             const T* const in, T* const out) {                                              \
+inline void Wrapper<T>::diag(const int& m, const T* const d,                                                 \
+                             const T* const in, T* const out, const int& n) {                                \
     if(in)                                                                                                   \
         for(int i = 0; i < n; ++i)                                                                           \
             v ## C ## Mul(m, d, in + i * m, out + i * m);                                                    \
     else                                                                                                     \
         for(int i = 0; i < n; ++i)                                                                           \
             v ## C ## Mul(m, d, out + i * m, out + i * m);                                                   \
-}                                                                                                            \
-template<>                                                                                                   \
-inline void Wrapper<T>::diag(const int& n, const T* const d, const T* const in, T* const out) {              \
-    diag(n, i__1, d, in, out);                                                                               \
 }
 HPDDM_GENERATE_MKL(s, float)
 HPDDM_GENERATE_MKL(d, double)
@@ -485,7 +495,7 @@ inline void Wrapper<K>::omatcopy(const int n, const int m, const K* const a, con
                 else
                     b[j * ldb + i] = conj(a[i * lda + j]);
             }
-    if(O == 'R' && is_complex)
+    else if(O == 'R' && is_complex)
         for(int i = 0; i < n; ++i)
             std::transform(a + i * lda, a + i * lda + m, b + i * ldb, [](const K& z) { return conj(z); });
     else
@@ -497,47 +507,27 @@ template<char O>
 inline void Wrapper<K>::imatcopy(const int n, const int m, K* const ab, const int lda, const int ldb) {
     static_assert(O == 'N' || O == 'R' || O == 'T' || O == 'C', "Unknown operation");
     if(O == 'T' || O == 'C') {
-        if(n != 1 || m != 1) {
-            if(lda == m && ldb == n) {
-                if(n != m) {
-                    const int size = n * m - 1;
-                    std::bitset<1024> b;
-                    b[0] = b[size] = 1;
-                    int i = 1;
-                    while(i < size) {
-                        int it = i;
-                        K t = ab[i];
-                        do {
-                            int next = (i * n) % size;
-                            std::swap(ab[next], t);
-                            b[i] = 1;
-                            i = next;
-                        } while(i != it);
-                        if(O == 'C' && is_complex)
-                            ab[i] = conj(ab[i]);
-
-                        for(i = 1; i < size && b[i]; ++i);
-                    }
-                }
-                else {
-                    for(int i = 0; i < n - 1; ++i)
-                        for(int j = i + 1; j < n; ++j) {
-                            if(O == 'C' && is_complex) {
-                                ab[i * n + j] = conj(ab[i * n + j]);
-                                ab[j * n + i] = conj(ab[j * n + i]);
-                                std::swap(ab[i * n + j], ab[j * n + i]);
-                            }
-                            else
-                                std::swap(ab[i * n + j], ab[j * n + i]);
-                        }
-                }
-            }
+        if(lda == m && ldb == n) {
+            if(n != m)
+                cycle<O>(n, m, ab, 1);
             else {
-                K* tmp = new K[n * m];
-                omatcopy<O>(n, m, ab, lda, tmp, n);
-                Blas<K>::lacpy("A", &n, &m, tmp, &n, ab, &ldb);
-                delete [] tmp;
+                for(int i = 0; i < n - 1; ++i)
+                    for(int j = i + 1; j < n; ++j) {
+                        if(O == 'C' && is_complex) {
+                            ab[i * n + j] = conj(ab[i * n + j]);
+                            ab[j * n + i] = conj(ab[j * n + i]);
+                            std::swap(ab[i * n + j], ab[j * n + i]);
+                        }
+                        else
+                            std::swap(ab[i * n + j], ab[j * n + i]);
+                    }
             }
+        }
+        else {
+            K* tmp = new K[n * m];
+            omatcopy<O>(n, m, ab, lda, tmp, n);
+            Blas<K>::lacpy("A", &n, &m, tmp, &n, ab, &ldb);
+            delete [] tmp;
         }
     }
     else if(O == 'R' && is_complex) {
@@ -568,11 +558,7 @@ inline void Wrapper<K>::imatcopy(const int n, const int m, K* const ab, const in
 #endif // HPDDM_MKL
 
 template<class K>
-inline void Wrapper<K>::diag(const int& n, const underlying_type<K>* const d, const K* const in, K* const out) {
-    diag(n, i__1, d, in, out);
-}
-template<class K>
-inline void Wrapper<K>::diag(const int& m, const int& n, const underlying_type<K>* const d, const K* const in, K* const out) {
+inline void Wrapper<K>::diag(const int& m, const underlying_type<K>* const d, const K* const in, K* const out, const int& n) {
     if(in)
         for(int i = 0; i < n; ++i)
             for(int j = 0; j < m; ++j)
@@ -600,8 +586,8 @@ inline void reorder(const Idx& i, const Idx& j, const First& first, const Rest&.
 /* Function: reorder
  *  Rearranges an arbitrary number of containers based on the permutation defined by the first argument. */
 template<class T, class... Args>
-inline void reorder(std::vector<T>& order, const Args&... args) {
-    static_assert(sizeof...(args) > 0, "Nothing to reorder");
+inline void reorder(std::vector<T>& order, const Args&... arguments) {
+    static_assert(sizeof...(arguments) > 0, "Nothing to reorder");
     for(T i = 0; i < order.size() - 1; ++i) {
         T j = order[i];
         if(j != i) {
@@ -609,7 +595,7 @@ inline void reorder(std::vector<T>& order, const Args&... args) {
             while(order[k] != i)
                 ++k;
             std::swap(order[i], order[k]);
-            reorder(i, j, args...);
+            reorder(i, j, arguments...);
         }
     }
 }

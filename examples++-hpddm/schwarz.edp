@@ -62,4 +62,17 @@ if(mpisize > 1 && solver == 3) {
 Wh<real> def(u); // this will be the solution
 
 DDM(A, u[], rhs, dim = getARGV("-gmres_restart", 60), iter = getARGV("-iter", 60), eps = getARGV("-eps", 1e-8), solver = solver);
+real umin,umax;
+{
+  real[int] lumax=[u[].max],lumin=[u[].min], Umax(1),Umin(1);
+  mpiAllReduce(lumax,Umax,mpiCommWorld,mpiMAX);
+  mpiAllReduce(lumin,Umin,mpiCommWorld,mpiMIN);
+  umin=Umax[0];
+  umax=Umin[0];
+  cout << mpirank << " U: " << lumax[0] << " " << lumin[0] << endl;
+}
+
 plotMPI(Th, u[], "Global solution", Pk, def, 3, 1)
+if(mpirank==0)
+  cout << " umin " << umin << " umax" << umax << endl;
+assert(abs(umax-umin) > 0.4);

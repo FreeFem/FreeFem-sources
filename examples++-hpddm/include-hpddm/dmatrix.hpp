@@ -59,7 +59,7 @@ class DMatrix {
             if(p > size / 2 && size > 1) {
                 p = size / 2;
                 if(rank == 0)
-                    std::cout << "WARNING -- the number of master processes was set to a value greater than MPI_Comm_size, the value has been reset to " << p << std::endl;
+                    std::cout << "WARNING -- the number of master processes was set to a value greater than MPI_Comm_size / 2, the value has been reset to " << p << std::endl;
             }
             else if(p < 1)
                 p = 1;
@@ -290,6 +290,7 @@ class DMatrix {
             delete [] isol_loc_glob;
             delete [] lsol_loc_glob;
             delete [] _ldistribution;
+            _ldistribution = nullptr;
             delete [] _idistribution;
         }
         /* Function: redistribute
@@ -301,10 +302,9 @@ class DMatrix {
          *
          * Parameters:
          *    vec            - Vector following the numbering of the direct solver.
-         *    res            - Vector following the numbering of the user.
-         *    fuse           - Number of fused reductions (optional). */
+         *    res            - Vector following the numbering of the user. */
         template<char P, class K>
-        void redistribute(K* const vec, K* const res, const unsigned short& fuse = 0) {
+        void redistribute(K* const vec, K* const res) {
             map_type<pair_type>* map_recv_index;
             map_type<pair_type>* map_send_index;
             if(P == 0 || P == 1) {
@@ -317,7 +317,6 @@ class DMatrix {
             }
             map_type<K> map_recv;
             map_type<K> map_send;
-            int gatherCount = fuse > 0 ? *_gatherCounts - fuse : 1;
             MPI_Request* rqSend = new MPI_Request[map_send_index->size() + map_recv_index->size()];
             MPI_Request* rqRecv = rqSend + map_send_index->size();
             unsigned short i = 0;
@@ -327,7 +326,7 @@ class DMatrix {
                     if(P == 0)
                         map_send[q.first].emplace_back(vec[p.first]);
                     else if(P == 1)
-                        map_send[q.first].emplace_back(res[p.first + fuse * (p.first / gatherCount)]);
+                        map_send[q.first].emplace_back(res[p.first]);
                     else if(P == 2)
                         map_send[q.first].emplace_back(res[p.first]);
                 }
@@ -341,9 +340,9 @@ class DMatrix {
                 if(P == 0)
                     res[p.first] = vec[p.second];
                 else if(P == 1)
-                    vec[p.first] = res[p.second + fuse * (p.second / gatherCount)];
+                    vec[p.first] = res[p.second];
                 else if(P == 2)
-                    vec[p.second + fuse * (p.second / gatherCount)] = res[p.first];
+                    vec[p.second] = res[p.first];
             }
             for(i = 0; i < map_recv.size(); ++i) {
                 int index;
@@ -356,7 +355,7 @@ class DMatrix {
                     else if(P == 1)
                         vec[p.first] = pt[p.second];
                     else if(P == 2)
-                        vec[p.first + fuse * (p.first / gatherCount)] = *pt++;
+                        vec[p.first] = *pt++;
                 }
             }
             MPI_Waitall(map_send.size(), rqSend, MPI_STATUSES_IGNORE);
@@ -398,10 +397,9 @@ class DMatrix {
         DMatrix() : _mapRecv(), _mapSend(), _mapOwn(), _ldistribution(), _idistribution(), _gatherCounts(), _gatherSplitCounts(), _displs(), _displsSplit(), _communicator(MPI_COMM_NULL), _n(), _rank(), _distribution() { }
         DMatrix(const DMatrix&) = delete;
         ~DMatrix() {
-            if(!_mapRecv) {
-                delete [] _ldistribution;
+            delete [] _ldistribution;
+            if(!_mapRecv)
                 delete [] _idistribution;
-            }
             delete _mapRecv;
             delete _mapSend;
             delete _mapOwn;

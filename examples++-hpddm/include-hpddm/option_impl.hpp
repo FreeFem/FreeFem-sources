@@ -26,7 +26,7 @@
 
 namespace HPDDM {
 template<int N>
-inline Option::Option(construct_key<N>) {
+inline Option::Option(Singleton::construct_key<N>) {
     _app = nullptr;
     _opt = { { "tol",                           1.0e-8 },
              { "max_it",                        100 },
@@ -97,9 +97,10 @@ inline int Option::parse(std::vector<std::string>& args, bool display, const Con
         std::forward_as_tuple("gs=(classical|modified|none)", "Classical (faster) or modified (more robust) Gram-Schmidt process, or no orthogonalization at all.", Arg::argument),
         std::forward_as_tuple("dump_local_matri(ces|x_[[:digit:]]+)=<output_file>", "Save local operators to disk.", Arg::argument),
 #if HPDDM_SCHWARZ
-        std::forward_as_tuple("krylov_method=(gmres|bgmres|cg)", "(Block) Generalized Minimal Residual Method or Conjugate Gradient.", Arg::argument),
+        std::forward_as_tuple("krylov_method=(gmres|bgmres|cg|gcrodr)", "(Block) Generalized Minimal Residual Method, Conjugate Gradient or Generalized Conjugate Residual Method With Inner Orthogonalization and Deflated Restarting.", Arg::argument),
         std::forward_as_tuple("initial_deflation_tol=<val>", "Tolerance for deflating right-hand sides inside Block GMRES.", Arg::numeric),
         std::forward_as_tuple("gmres_restart=<50>", "Maximum size of the Krylov subspace.", Arg::integer),
+        std::forward_as_tuple("gmres_recycle=<val>", "Number of harmonic Ritz vectors to compute.", Arg::integer),
         std::forward_as_tuple("variant=(left|right|flexible)", "Left or right or flexible preconditioning.", Arg::argument),
         std::forward_as_tuple("", "", [](std::string&, const std::string&, bool) { std::cout << "\n Overlapping Schwarz methods options:"; return true; }),
         std::forward_as_tuple("schwarz_method=(ras|oras|soras|asm|osm|none)", "Symmetric or not, Optimized or Additive, Restricted or not.", Arg::argument),

@@ -177,13 +177,11 @@ class Hypre : public DMatrix {
          * Template Parameter:
          *    D              - Distribution of right-hand sides and solution vectors.
          *
-         * Parameter:
-         *    rhs            - Input right-hand side, solution vector is stored in-place. */
+         * Parameters:
+         *    rhs            - Input right-hand sides, solution vectors are stored in-place.
+         *    n              - Number of right-hand sides. */
         template<DMatrix::Distribution D>
-        void solve(K* rhs) {
-            hypre_Vector* loc = hypre_ParVectorLocalVector(reinterpret_cast<hypre_ParVector*>(hypre_IJVectorObject(reinterpret_cast<hypre_IJVector*>(_b))));
-            K* b = loc->data;
-            loc->data = rhs;
+        void solve(K* rhs, const unsigned short& n) {
             HYPRE_ParVector par_b;
             HYPRE_IJVectorGetObject(_b, reinterpret_cast<void**>(&par_b));
             HYPRE_ParVector par_x;
@@ -193,23 +191,27 @@ class Hypre : public DMatrix {
             int num_iterations;
             const Option& opt = *Option::get();
             const int solverId = opt["master_hypre_solver"];
-            if(solverId == 2) {
-                HYPRE_BoomerAMGSolve(_solver, parcsr_A, par_b, par_x);
-                HYPRE_BoomerAMGGetNumIterations(_solver, &num_iterations);
-            }
-            else if(solverId == 1) {
-                HYPRE_ParCSRPCGSolve(_solver, parcsr_A, par_b, par_x);
-                HYPRE_PCGGetNumIterations(_solver, &num_iterations);
-            }
-            else {
-                HYPRE_ParCSRFlexGMRESSolve(_solver, parcsr_A, par_b, par_x);
-                HYPRE_GMRESGetNumIterations(_solver, &num_iterations);
+            hypre_Vector* loc = hypre_ParVectorLocalVector(reinterpret_cast<hypre_ParVector*>(hypre_IJVectorObject(reinterpret_cast<hypre_IJVector*>(_b))));
+            K* b = loc->data;
+            for(unsigned short nu = 0; nu < n; ++nu) {
+                loc->data = rhs + nu * _local;
+                if(solverId == 2) {
+                    HYPRE_BoomerAMGSolve(_solver, parcsr_A, par_b, par_x);
+                    HYPRE_BoomerAMGGetNumIterations(_solver, &num_iterations);
+                }
+                else if(solverId == 1) {
+                    HYPRE_ParCSRPCGSolve(_solver, parcsr_A, par_b, par_x);
+                    HYPRE_PCGGetNumIterations(_solver, &num_iterations);
+                }
+                else {
+                    HYPRE_ParCSRFlexGMRESSolve(_solver, parcsr_A, par_b, par_x);
+                    HYPRE_GMRESGetNumIterations(_solver, &num_iterations);
+                }
+                std::copy_n(hypre_ParVectorLocalVector(reinterpret_cast<hypre_ParVector*>(hypre_IJVectorObject(reinterpret_cast<hypre_IJVector*>(_x))))->data, _local, rhs + nu * _local);
+                if(DMatrix::_rank == 0 && opt.val<int>("verbosity") > 2)
+                    std::cout << " --- BoomerAMG performed " << num_iterations << " iteration" << (num_iterations > 1 ? "s" : "") << std::endl;
             }
             loc->data = b;
-            loc = hypre_ParVectorLocalVector(reinterpret_cast<hypre_ParVector*>(hypre_IJVectorObject(reinterpret_cast<hypre_IJVector*>(_x))));
-            std::copy_n(loc->data, _local, rhs);
-            if(DMatrix::_rank == 0 && opt.val<int>("verbosity") > 2)
-                std::cout << " --- BoomerAMG performed " << num_iterations << " iteration" << (num_iterations > 1 ? "s" : "") << std::endl;
         }
         void initialize() {
             DMatrix::initialize("BoomerAMG", { DISTRIBUTED_SOL_AND_RHS });

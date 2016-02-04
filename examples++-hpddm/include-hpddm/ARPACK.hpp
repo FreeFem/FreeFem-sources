@@ -110,12 +110,12 @@ class Arpack : public Eigensolver<K> {
 #else
             prec->numfact(A, true);
 #endif
-            int info = 0;
+            int info;
             do {
                 const int* const n = &(Eigensolver<K>::_n), *const nu = &(Eigensolver<K>::_nu);
                 const underlying_type<K>* const tol = &(Eigensolver<K>::_tol);
                 auto loop = [&]() {
-                    int ido = 0;
+                    int ido = info = 0;
                     while(ido != 99) {
                         aupd(&ido, "G", n, _which, nu, tol, vresid, &ncv,
                              vp, iparam, ipntr, workd, workl, &lworkl, rwork, &info);
@@ -136,7 +136,7 @@ class Arpack : public Eigensolver<K> {
                     iparam[2] = _it, iparam[6] = 3;
                     ncv = 2 * Eigensolver<K>::_nu + 1;
                 }
-            } while(info == -9999 && Eigensolver<K>::_nu > 1 && (info = 0));
+            } while(info == -9999 && Eigensolver<K>::_nu > 1);
             if(s == nullptr)
                 delete prec;
             Eigensolver<K>::_nu = iparam[4];
