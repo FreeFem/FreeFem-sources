@@ -1,3 +1,5 @@
+version 3.43-1 
+  - correct PB with hpddm (pass to git version d2a99d89ee37777d2423da218b29e2080950da1e Jan 20 22:03:12 2016)
   - correct PB of FLIBS
   - pass to evrsion 3.43-1  3 feb 2015 
 version 3.43 (version 3.43 (3626:8e3d8953975d), 2 feb 2016 16;00 CET))
