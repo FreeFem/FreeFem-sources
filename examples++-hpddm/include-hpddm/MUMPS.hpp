@@ -121,7 +121,7 @@ class Mumps : public DMatrix {
             else
                 _id->sym = 0;
             MUMPS_STRUC_C<K>::mumps_c(_id);
-            _id->n = DMatrix::_n;
+            _id->n = _id->lrhs = DMatrix::_n;
             _id->nz_loc = nz;
             _id->irn_loc = I;
             _id->jcn_loc = J;
@@ -149,25 +149,33 @@ class Mumps : public DMatrix {
          * Template Parameter:
          *    D              - Distribution of right-hand sides and solution vectors.
          *
-         * Parameter:
-         *    rhs            - Input right-hand side, solution vector is stored in-place. */
+         * Parameters:
+         *    rhs            - Input right-hand sides, solution vectors are stored in-place.
+         *    n              - Number of right-hand sides. */
         template<DMatrix::Distribution D>
-        void solve(K* rhs) {
+        void solve(K* rhs, const unsigned short& n) {
+            _id->nrhs = n;
             if(D == DMatrix::DISTRIBUTED_SOL) {
                 _id->icntl[20] = 1;
                 int info = _id->info[22];
                 int* isol_loc = new int[info];
-                K* sol_loc = new K[info];
+                K* sol_loc = new K[n * info];
                 _id->sol_loc = reinterpret_cast<typename MUMPS_STRUC_C<K>::mumps_type*>(sol_loc);
                 _id->lsol_loc = info;
                 _id->isol_loc = isol_loc;
                 _id->rhs = reinterpret_cast<typename MUMPS_STRUC_C<K>::mumps_type*>(rhs);
                 _id->job = 3;
                 MUMPS_STRUC_C<K>::mumps_c(_id);
-                if(!DMatrix::_mapOwn && !DMatrix::_mapRecv)
+                if(!DMatrix::_mapOwn && !DMatrix::_mapRecv) {
+                    int nloc = DMatrix::_ldistribution[DMatrix::_rank];
                     DMatrix::initializeMap<0>(info, _id->isol_loc, sol_loc, rhs);
+                    DMatrix::_ldistribution = new int[1];
+                    *DMatrix::_ldistribution = nloc;
+                }
                 else
                     DMatrix::redistribute<0>(sol_loc, rhs);
+                for(unsigned short nu = 1; nu < n; ++nu)
+                    DMatrix::redistribute<0>(sol_loc + nu * info, rhs + nu * *DMatrix::_ldistribution);
                 delete [] sol_loc;
                 delete [] isol_loc;
             }

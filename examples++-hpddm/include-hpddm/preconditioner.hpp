@@ -68,7 +68,7 @@ class Preconditioner : public Subdomain<K> {
         K**                _ev;
         /* Variable: uc
          *  Workspace array of size <Coarse operator::local>. */
-        K*                 _uc;
+        mutable K*         _uc;
         /* Function: buildTwo
          *
          *  Assembles and factorizes the coarse operator.
@@ -111,11 +111,11 @@ class Preconditioner : public Subdomain<K> {
                 }
                 double construction = MPI_Wtime();
                 if(allUniform[1] == nu && allUniform[2] == static_cast<unsigned short>(~nu))
-                    ret = _co->template construction<1, excluded>(std::move(Operator(*B, allUniform[0])), comm);
+                    ret = _co->template construction<1, excluded>(Operator(*B, allUniform[0]), comm);
                 else if(N == 3 && allUniform[1] == 0 && allUniform[2] == static_cast<unsigned short>(~allUniform[3]))
-                    ret = _co->template construction<2, excluded>(std::move(Operator(*B, allUniform[0])), comm);
+                    ret = _co->template construction<2, excluded>(Operator(*B, allUniform[0]), comm);
                 else
-                    ret = _co->template construction<0, excluded>(std::move(Operator(*B, allUniform[0])), comm);
+                    ret = _co->template construction<0, excluded>(Operator(*B, allUniform[0]), comm);
                 construction = MPI_Wtime() - construction;
                 if(_co->getRank() == 0 && opt.val<int>("verbosity") > 0) {
                     std::stringstream ss;
@@ -123,14 +123,25 @@ class Preconditioner : public Subdomain<K> {
                     std::string line = " --- coarse operator transferred and factorized by " + to_string(static_cast<int>(opt["master_p"])) + " process" + (static_cast<int>(opt["master_p"]) == 1 ? "" : "es") + " (in " + ss.str() + "s)";
                     std::cout << line << std::endl;
                     std::cout << std::right << std::setw(line.size()) << "(criterion = " + to_string(allUniform[1] == nu && allUniform[2] == static_cast<unsigned short>(~nu) ? nu : (N == 3 && allUniform[2] == static_cast<unsigned short>(~allUniform[3]) ? -_co->getLocal() : 0)) + " -- topology = " + to_string(static_cast<int>(opt["master_topology"])) + " -- distribution = " + to_string(static_cast<int>(opt["master_distribution"])) + ")" << std::endl;
+                    std::cout.unsetf(std::ios_base::adjustfield);
                 }
-                _uc = new K[_co->getSizeRHS()];
             }
             else {
                 delete _co;
                 _co = nullptr;
             }
             return ret;
+        }
+        /* Function: start
+         *
+         *  Allocates the array <Preconditioner::uc> depending on the number of right-hand sides to be solved by an <Iterative method>.
+         *
+         * Parameter:
+         *    mu             - Number of right-hand sides. */
+        void start(const unsigned short& mu = 1) const {
+            if(_uc)
+                delete [] _uc;
+            _uc = new K[mu * _co->getSizeRHS()];
         }
     public:
         Preconditioner() : _co(), _ev(), _uc() { }
@@ -171,6 +182,14 @@ class Preconditioner : public Subdomain<K> {
         /* Function: setVectors
          *  Sets the pointer <Preconditioner::ev>. */
         void setVectors(K** const& ev) { _ev = ev; }
+        /* Function: destroyVectors
+         *  Destroys the pointer <Preconditioner::ev> using a custom deallocator. */
+        void destroyVectors(void (*dtor)(void*)) {
+            if(_ev && *_ev)
+                dtor(*_ev);
+            dtor(_ev);
+            _ev = nullptr;
+        }
         /* Function: getLocal
          *  Returns the value of <Coarse operator::local>. */
         unsigned short getLocal() const { return _co ? _co->getLocal() : 0; }

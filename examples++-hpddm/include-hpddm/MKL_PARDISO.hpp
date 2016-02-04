@@ -146,14 +146,15 @@ class MklPardiso : public DMatrix {
          *    D              - Distribution of right-hand sides and solution vectors.
          *
          * Parameters:
-         *    rhs            - Input right-hand side, solution vector is stored in-place.
-         *    fuse           - Number of fused reductions (optional). */
+         *    rhs            - Input right-hand sides, solution vectors are stored in-place.
+         *    n              - Number of right-hand sides. */
         template<DMatrix::Distribution D>
-        void solve(K* rhs, const unsigned short& fuse = 0) {
+        void solve(K* rhs, const unsigned short& n) {
             int error;
             int phase = 33;
+            int nrhs = n;
             K ddum;
-            CLUSTER_SPARSE_SOLVER(_pt, const_cast<int*>(&i__1), const_cast<int*>(&i__1), &_mtype, &phase, &(DMatrix::_n), _C, _I, _J, const_cast<int*>(&i__1), const_cast<int*>(&i__1), _iparm, const_cast<int*>(&i__0), rhs, _w, const_cast<int*>(&_comm), &error);
+            CLUSTER_SPARSE_SOLVER(_pt, const_cast<int*>(&i__1), const_cast<int*>(&i__1), &_mtype, &phase, &(DMatrix::_n), _C, _I, _J, const_cast<int*>(&i__1), &nrhs, _iparm, const_cast<int*>(&i__0), rhs, _w, const_cast<int*>(&_comm), &error);
         }
         void initialize() {
             if(DMatrix::_communicator != MPI_COMM_NULL)

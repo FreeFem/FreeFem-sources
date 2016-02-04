@@ -211,19 +211,21 @@ class SuiteSparse : public DMatrix {
             delete [] I;
         }
         template<DMatrix::Distribution D>
-        void solve(K* rhs) {
-            if(_c) {
-                _b->ncol = 1;
-                _b->nzmax = _x->nrow;
-                _b->x = rhs;
-                _x->ncol = 1;
-                _x->nzmax = _x->nrow;
-                _x->x = _tmp;
-                cholmod_solve2(CHOLMOD_A, _L, _b, NULL, &_x, NULL, &_Y, &_E, _c);
+        void solve(K* rhs, const unsigned short& n = 1) {
+            for(unsigned short nu = 0; nu < n; ++nu) {
+                if(_c) {
+                    _b->ncol = 1;
+                    _b->nzmax = _x->nrow;
+                    _b->x = rhs + nu * DMatrix::_n;
+                    _x->ncol = 1;
+                    _x->nzmax = _x->nrow;
+                    _x->x = _tmp;
+                    cholmod_solve2(CHOLMOD_A, _L, _b, NULL, &_x, NULL, &_Y, &_E, _c);
+                }
+                else
+                    stsprs<K>::umfpack_wsolve(UMFPACK_Aat, NULL, NULL, NULL, _tmp, rhs + nu * DMatrix::_n, _numeric, _control, NULL, _pattern, _W);
+                std::copy_n(_tmp, DMatrix::_n, rhs + nu * DMatrix::_n);
             }
-            else
-                stsprs<K>::umfpack_wsolve(UMFPACK_Aat, NULL, NULL, NULL, _tmp, rhs, _numeric, _control, NULL, _pattern, _W);
-            std::copy_n(_tmp, DMatrix::_n, rhs);
         }
         void initialize() {
             DMatrix::initialize("SuiteSparse", { CENTRALIZED });

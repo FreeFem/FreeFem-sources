@@ -110,6 +110,7 @@ class Bdd : public Schur<Solver, CoarseOperator<CoarseSolver, S, K>, K> {
         template<bool excluded>
         void start(const K* const f, K* const x, K* const b, K* r) const {
             if(super::_co) {
+                super::start();
                 if(!excluded) {
                     super::condensateEffort(f, b);
                     Subdomain<K>::exchange(b ? b : super::_structure + super::_bi->_m);

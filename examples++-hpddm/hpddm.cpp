@@ -3,6 +3,9 @@
 #endif
 //ff-c++-LIBRARY-dep: cxx11  [petsc|mumps parmetis  ptscotch scotch]  scalapack blas [mkl]   mpifc  fc mpi  pthread
 //ff-c++-cpp-dep: -I./include-hpddm
+//##ff-c++-cpp-dep: -I/Users/hecht/work/soft/hpddm/include
+// ok with : git checkout   d2a99d89ee37777d2423da218b29e2080950da1e 
+// Implements GCRODR.
 // mumps est avec petsc ..
 #define SCHWARZ
 //#define BDD

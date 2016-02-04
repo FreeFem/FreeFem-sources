@@ -42,7 +42,7 @@
  *    HPDDM_QR            - If not set to zero, pseudo-inverses of Schur complements are computed using dense QR decompositions (with pivoting if set to one, without pivoting otherwise).
  *    HPDDM_ICOLLECTIVE   - If possible, use nonblocking MPI collective operations.
  *    HPDDM_GMV           - For overlapping Schwarz methods, this can be used to reduce the volume of communication for computing global matrix-vector products. */
-#define HPDDM_VERSION         000200
+#define HPDDM_VERSION         000201
 #define HPDDM_EPS             1.0e-12
 #define HPDDM_PEN             1.0e+30
 #define HPDDM_GRANULARITY     50000
@@ -226,72 +226,75 @@ using pod_type = typename std::conditional<std::is_same<underlying_type<T>, T>::
 #  endif
 # endif
 # include "matrix.hpp"
-# include "dmatrix.hpp"
+# ifndef HPDDM_MINIMAL
+#  include "dmatrix.hpp"
 
-# if !HPDDM_MKL
-#  ifdef MKL_PARDISOSUB
-#   undef MKL_PARDISOSUB
-#   define MUMPSSUB
-#  endif
-#  ifdef DMKL_PARDISO
-#   undef DMKL_PARDISO
-#   define DMUMPS
-#  endif
-# endif // HPDDM_MKL
-# if defined(DMUMPS) || defined(MUMPSSUB)
-#  include "MUMPS.hpp"
-# endif
-# if defined(DMKL_PARDISO) || defined(MKL_PARDISOSUB)
-#  include "MKL_PARDISO.hpp"
-# endif
-# if defined(DPASTIX) || defined(PASTIXSUB)
-#  include "PaStiX.hpp"
-# endif
-# if defined(DHYPRE)
-#  include "Hypre.hpp"
-# endif
-# if defined(SUITESPARSESUB) || defined(DSUITESPARSE)
-#  include "SuiteSparse.hpp"
-# endif
-# if !defined(SUBDOMAIN) || !defined(COARSEOPERATOR)
-#  undef HPDDM_SCHWARZ
-#  undef HPDDM_FETI
-#  undef HPDDM_BDD
-#  define HPDDM_SCHWARZ       0
-#  define HPDDM_FETI          0
-#  define HPDDM_BDD           0
-# endif
-# include "eigensolver.hpp"
-# include "LAPACK.hpp"
-# if HPDDM_SCHWARZ
-#  ifndef EIGENSOLVER
-#   ifdef INTEL_MKL_VERSION
-#    undef HPDDM_F77
-#    define HPDDM_F77(func) func ## _
+#  if !HPDDM_MKL
+#   ifdef MKL_PARDISOSUB
+#    undef MKL_PARDISOSUB
+#    define MUMPSSUB
 #   endif
-#   include "ARPACK.hpp"
+#   ifdef DMKL_PARDISO
+#    undef DMKL_PARDISO
+#    define DMUMPS
+#   endif
+#  endif // HPDDM_MKL
+#  if defined(DMUMPS) || defined(MUMPSSUB)
+#   include "MUMPS.hpp"
 #  endif
-# endif
+#  if defined(DMKL_PARDISO) || defined(MKL_PARDISOSUB)
+#   include "MKL_PARDISO.hpp"
+#  endif
+#  if defined(DPASTIX) || defined(PASTIXSUB)
+#   include "PaStiX.hpp"
+#  endif
+#  if defined(DHYPRE)
+#   include "Hypre.hpp"
+#  endif
+#  if defined(SUITESPARSESUB) || defined(DSUITESPARSE)
+#   include "SuiteSparse.hpp"
+#  endif
+#  if !defined(SUBDOMAIN) || !defined(COARSEOPERATOR)
+#   undef HPDDM_SCHWARZ
+#   undef HPDDM_FETI
+#   undef HPDDM_BDD
+#   define HPDDM_SCHWARZ       0
+#   define HPDDM_FETI          0
+#   define HPDDM_BDD           0
+#  endif
+#  include "eigensolver.hpp"
+#  include "LAPACK.hpp"
+#  if HPDDM_SCHWARZ
+#   ifndef EIGENSOLVER
+#    ifdef INTEL_MKL_VERSION
+#     undef HPDDM_F77
+#     define HPDDM_F77(func) func ## _
+#    endif
+#    include "ARPACK.hpp"
+#   endif
+#  endif
 
-# include "option_impl.hpp"
-
-# if HPDDM_SCHWARZ
-#  include "schwarz.hpp"
+#  if HPDDM_SCHWARZ
+#   include "schwarz.hpp"
 template<class K = double, char S = 'S'>
 using HpSchwarz = HPDDM::Schwarz<SUBDOMAIN, COARSEOPERATOR, S, K>;
-# endif
-# if HPDDM_FETI
-#  include "FETI.hpp"
+#  endif
+#  if HPDDM_FETI
+#   include "FETI.hpp"
 template<HPDDM::FetiPrcndtnr P, class K = double, char S = 'S'>
 using HpFeti = HPDDM::Feti<SUBDOMAIN, COARSEOPERATOR, S, K, P>;
-# endif
-# if HPDDM_BDD
-#  include "BDD.hpp"
+#  endif
+#  if HPDDM_BDD
+#   include "BDD.hpp"
 template<class K = double, char S = 'S'>
 using HpBdd = HPDDM::Bdd<SUBDOMAIN, COARSEOPERATOR, S, K>;
-# endif
+#  endif
 
-# include "iterative.hpp"
+#  include "GMRES.hpp"
+#  include "GCRODR.hpp"
+#  include "CG.hpp"
+# endif // HPDDM_MINIMAL
+# include "option_impl.hpp"
 #else
 # include "BLAS.hpp"
 # include "LAPACK.hpp"

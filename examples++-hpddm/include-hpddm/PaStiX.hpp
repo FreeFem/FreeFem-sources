@@ -122,6 +122,7 @@ class Pastix : public DMatrix {
             free(_rows2);
             free(_values2);
             delete [] _loc2glob2;
+            free(_colptr2);
             if(_iparm) {
                 _iparm[IPARM_START_TASK]          = API_TASK_CLEAN;
                 _iparm[IPARM_END_TASK]            = API_TASK_CLEAN;
@@ -215,15 +216,21 @@ class Pastix : public DMatrix {
          *    D              - Distribution of right-hand sides and solution vectors.
          *
          * Parameters:
-         *    rhs            - Input right-hand side, solution vector is stored in-place.
-         *    fuse           - Number of fused reductions (optional). */
+         *    rhs            - Input right-hand sides, solution vectors are stored in-place.
+         *    n              - Number of right-hand sides. */
         template<DMatrix::Distribution D>
-        void solve(K* rhs, const unsigned short& fuse = 0) {
-            K* rhs2 = new K[_ncol2];
-            if(!DMatrix::_mapOwn && !DMatrix::_mapRecv)
+        void solve(K* rhs, const unsigned short& n) {
+            K* rhs2 = new K[n * _ncol2];
+            if(!DMatrix::_mapOwn && !DMatrix::_mapRecv) {
+                int nloc = DMatrix::_ldistribution[DMatrix::_rank];
                 DMatrix::initializeMap<1>(_ncol2, _loc2glob2, rhs2, rhs);
+                DMatrix::_ldistribution = new int[1];
+                *DMatrix::_ldistribution = nloc;
+            }
             else
-                DMatrix::redistribute<1>(rhs2, rhs, fuse);
+                DMatrix::redistribute<1>(rhs2, rhs);
+            for(unsigned short nu = 1; nu < n; ++nu)
+                DMatrix::redistribute<1>(rhs2 + nu * _ncol2, rhs + nu * *DMatrix::_ldistribution);
 
             _iparm[IPARM_START_TASK] = API_TASK_SOLVE;
             _iparm[IPARM_END_TASK]   = API_TASK_SOLVE;
@@ -231,7 +238,8 @@ class Pastix : public DMatrix {
                           _ncol2, _colptr2, _rows2, _values2, _loc2glob2,
                           NULL, NULL, rhs2, 1, _iparm, _dparm);
 
-            DMatrix::redistribute<2>(rhs, rhs2, fuse);
+            for(unsigned short nu = 0; nu < n; ++nu)
+                DMatrix::redistribute<2>(rhs + nu * *DMatrix::_ldistribution, rhs2 + nu * _ncol2);
             delete [] rhs2;
         }
         void initialize() {

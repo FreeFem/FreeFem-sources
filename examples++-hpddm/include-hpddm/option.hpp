@@ -30,11 +30,12 @@
 #ifndef HPDDM_NO_REGEX
 #include <regex>
 #endif
+#include "singleton.hpp"
 
 namespace HPDDM {
 /* Class: Option
  *  A class to handle internal options of HPDDM or custom options as defined by the user in its application. */
-class Option {
+class Option : private Singleton {
     private:
         /* Variable: opt
          *  Unordered map that stores the internal options of HPDDM. */
@@ -42,15 +43,12 @@ class Option {
         /* Variable: app
          *  Pointer to an unordered map that may store custom options as defined by the user in its application. */
         std::unordered_map<std::string, double>* _app;
-        template<int N>
-        class construct_key { };
     public:
         template<int N>
-        Option(construct_key<N>);
-        Option(const Option&) = delete;
+        Option(Singleton::construct_key<N>);
         ~Option() {
             std::unordered_map<std::string, double>::const_iterator show = _opt.find("verbosity");
-            if(show != _opt.cend() && show->second > 0) {
+            if(show != _opt.cend() && show->second > 1) {
                 std::function<void(const std::unordered_map<std::string, double>&, const std::string&)> output = [](const std::unordered_map<std::string, double>& map, const std::string& header) {
                     std::vector<std::string> output;
                     output.reserve(map.size() + 3);
@@ -99,8 +97,7 @@ class Option {
          *  Returns a shared pointer to <Option::opt>. */
         template<int N = 0>
         static std::shared_ptr<Option> get() {
-            static std::shared_ptr<Option> instance = std::make_shared<Option>(construct_key<N>());
-            return instance;
+            return Singleton::get<Option, N>();
         }
         /* Function: app
          *  Returns a constant reference of <Option::app>. */
@@ -127,7 +124,15 @@ class Option {
             else
                 return static_cast<T>(it->second);
         }
-        const double& operator[](const std::string& key) const { return _opt.at(key); }
+        const double& operator[](const std::string& key) const {
+            try {
+                return _opt.at(key);
+            }
+            catch(const std::out_of_range& oor) {
+                std::cerr << "out_of_range error: " << oor.what() << std::endl;
+                return _opt.cbegin()->second;
+            }
+        }
         double& operator[](const std::string& key) { return _opt[key]; }
         struct Arg {
             static bool integer(const std::string& opt, const std::string& s, bool verbose) {
@@ -310,8 +315,14 @@ class Option {
                         auto target = std::get<2>(*it).template target<bool (*)(const std::string&, const std::string&, bool)>();
                         if(!target || *target != Arg::argument)
                             map[str] = sto<double>(val);
-                        else
+                        else {
+                            for(const auto& x : map)
+                                if(x.first.find(str) == 0) {
+                                    map.erase(x.first);
+                                    break;
+                                }
                             map[str + "_" + val] = -static_cast<int>(str.size()) - 10000000;
+                        }
                     }
                 }
                 else
