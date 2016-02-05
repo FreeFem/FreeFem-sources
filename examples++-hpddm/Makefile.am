@@ -40,7 +40,8 @@ include-hpddm/BLAS.hpp			include-hpddm/PaStiX.hpp		include-hpddm/enum.hpp			incl
 include-hpddm/FETI.hpp			include-hpddm/ScaLAPACK.hpp		include-hpddm/iterative.hpp		include-hpddm/schwarz.hpp \
 include-hpddm/HPDDM.hpp			include-hpddm/SuiteSparse.hpp		include-hpddm/matrix.hpp		include-hpddm/subdomain.hpp \
 include-hpddm/Hypre.hpp			include-hpddm/coarse_operator.hpp	include-hpddm/operator.hpp		include-hpddm/wrapper.hpp \
-include-hpddm/LAPACK.hpp		include-hpddm/coarse_operator_impl.hpp	include-hpddm/option.hpp 		include-hpddm/singleton.hpp 
+include-hpddm/LAPACK.hpp		include-hpddm/coarse_operator_impl.hpp	include-hpddm/option.hpp 		include-hpddm/singleton.hpp \
+include-hpddm/CG.hpp include-hpddm/GCRODR.hpp include-hpddm/GMRES.hpp 
 
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
