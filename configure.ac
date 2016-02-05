@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.43-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.43-2,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -83,10 +83,50 @@ m4_define([AC_FF_PETSC_WHERELIB],
 	   if test -n "[$]ff_$2"; then 
 			    ff_$1_ok=yes;
 			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
-			     AC_SUBST([TOOL_COMPILE_$1],"")
+			    AC_SUBST([TOOL_COMPILE_$1],"")
 	  fi	    
 	  ]
 )dnl end m4_defineAC_FF_PETSC_WHERELIB
+
+# ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
+# may also find interesting to specify a local version of a tool instead of downloading it.
+
+# m4 macro parameters: $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
+
+m4_define([TOOL_PARAMETERS],
+    [AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
+    AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
+
+    if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
+    then
+
+	# some directives have been specified, use them instead of downloading
+
+	AC_FF_ADDWHERELIB($1,$with_$1_ldflags,$with_$1_include)
+        AC_SUBST([TOOL_COMPILE_$1],"")
+	enable_$1_download=no
+    fi
+])
+
+m4_define([TOOL_DISABLE],
+    [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+    if test "$enable_$1" = "no"
+    then
+        AC_SUBST([TOOL_COMPILE_$1],"")
+        AC_SUBST([TOOL_DYLIB_$1],"")
+    elif  test   "$ff_$1_ok" == "yes" ; then
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+        enable_$1_download=no
+    else  
+        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+	    enable_$1_download=yes
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+    TOOL_PARAMETERS($1,$2,$3)
+])
 
 ff_HOSTARCH_pastix=
 echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
@@ -155,9 +195,9 @@ AC_COMPUTE_INT(ff_size_ptr,[sizeof(int*)])
 AC_SUBST(SIZEOF_LONG,$ff_size_long)
 AC_SUBST(SIZEOF_INT,$ff_size_int)
 AC_SUBST(SIZEOF_PTR,$ff_size_ptr)
-if test "$ff_size_ptr" -eq 4  ;then
+if test "0$ff_size_ptr" -eq 4  ;then
  AC_SUBST(SIZEOF_PTRINBIT,32)
-elif test  "$ff_size_ptr" -eq 8  ;then
+elif test  "0$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
 else
   AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX] );
@@ -888,7 +928,7 @@ else
     AC_MSG_NOTICE([ without petsc ***** ])
 fi
 
-if test "$ff_where_lib_conf_fftw3_mpi" -eq 1  ; then
+if test "0$ff_where_lib_conf_fftw3_mpi" -eq 1  ; then
   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'` 
   AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
   AC_MSG_NOTICE([ fftw3 from  petsc ***** ]) 
@@ -1027,7 +1067,7 @@ ff_blas_inc=""
 
 # ALH - 18/9/13 - give the option to deactivate system blas for testing purposes
 AC_ARG_ENABLE(system-blas,AC_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
-if test "$ff_where_lib_conf_blaslapack" -eq 1  ; then
+if test "0$ff_where_lib_conf_blaslapack" -eq 1  ; then
   echo " use BLAS/Lapack of petsc "
 #  echo "  lib: $ff_where_lib_blaslapack inc: $ff_where_inc_blaslapack"
 	    ff_blas_ok=yes
@@ -1466,7 +1506,7 @@ AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 ff_umfpack_incs=""
 ff_amd_ok=no
 ff_umfpack_ok=no
-if test "$ff_where_lib_conf_suitesparse" -eq 1  ; then
+if test "0$ff_where_lib_conf_suitesparse" -eq 1  ; then
   echo "amd/umfpack/suitesparse  of petsc"
   echo "    lib: $ff_where_lib_suitesparse inc: $ff_where_inc_suitesparse"
   ff_amd_ok=yes
@@ -1801,42 +1841,7 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 # Allow some downloaded tools not to be compiled
 # ----------------------------------------------
 
-# ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
-# may also find interesting to specify a local version of a tool instead of downloading it.
 
-# m4 macro parameters: $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
-
-m4_define([TOOL_PARAMETERS],
-    [AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
-    AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
-
-    if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
-    then
-
-	# some directives have been specified, use them instead of downloading
-
-	AC_FF_ADDWHERELIB($1,$with_$1_ldflags,$with_$1_include)
-        AC_SUBST([TOOL_COMPILE_$1],"")
-	enable_$1_download=no
-    fi
-])
-
-m4_define([TOOL_DISABLE],
-    [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
-    if test "$enable_$1" = "no"
-    then
-        AC_SUBST([TOOL_COMPILE_$1],"")
-        AC_SUBST([TOOL_DYLIB_$1],"")
-    else
-        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
-        AC_SUBST([TOOL_DYLIB_$1],$2)
-	enable_$1_download=yes
-    fi
-
-    # Also allow to disable the download of one tool if it is already locally installed
-
-    TOOL_PARAMETERS($1,$2,$3)
-])
 ##  try to see pakage is hon computer  if the FH ZZZZ 
 ## FH to find gsl ... 
 AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
@@ -2003,7 +2008,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_hpddm" != no && enable_hpddm=yes  
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes -o  "$enable_download"  != "yes"  &&  enable_hpddm=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  &&  enable_hpddm=no
 
 TOOL_DISABLE(hpddm,"hpddm.$DYLIB_SUFFIX")
 
