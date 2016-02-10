@@ -1,12 +1,12 @@
 BEGIN { 
   sub(/[ \t]*/,"",libs);
-  gsub(/([]])/," \] ",libs); 
-  gsub(/([[])/," \[ ",libs); 
-  gsub(/([|])/," \| ",libs); 
+  gsub(/([]])/," ] ",libs); 
+  gsub(/([[])/," [ ",libs); 
+  gsub(/([|])/," | ",libs); 
   nl=split(libs,l," *"); 
   err= 0;
   sp=" ";
-  db=0;
+  if( db != "") db=1;
 }
 $2=="LD" { 
     if( ld[$1]=="" )  {
@@ -46,7 +46,7 @@ END {
 	} 
 	else if (lib=="]") 
 	{ 
-	    skip=ok;
+	    skip=ok ||skip;
 	    if(skip==0) k=k0;
 	    lvl--;
 	    if( !skip && ncase) lerr[err++]=lmis  ;
@@ -57,7 +57,7 @@ END {
 	{
 	    ncase++;
 	    if(db) print " |||| ",skip,ok,k,k0;
-	    skip=ok;
+	    skip=ok || skip;
 	    ok=!skip;
 	    if(skip==0) k=k0;
 	}
