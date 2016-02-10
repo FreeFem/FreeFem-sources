@@ -408,6 +408,7 @@ AC_LANG(C++)
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
 AC_CHECK_LIB(iomp5,omp_get_wtime,ff_iomp5="-liomp5",ff_iomp5="")
+AC_CHECK_LIB([rt],[clock_gettime])
 
 if test -n "$ff_pthread"  ; then
     AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
@@ -913,7 +914,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    fi
 		fi
 	    else
-		test  "$ff_petsc_ok" = no && echo "  *** try $ffconfpetsc"
+		# test  "$ff_petsc_ok" = no && echo "  *** try $ffconfpetsc"
 		ffconfpetsc="";
 
 	    fi

@@ -321,6 +321,80 @@ struct myremove_pointer<T*>
     typedef typename myremove_pointer<T>::type type;
 };
 
+template<class Map,class Key, class Value,bool isinit>
+class  InitMapfromArray : public OneOperator {
+public:
+  //  typedef typename  myremove_pointer<KNRR>::type KNR ;
+  //  typedef typename KNR::K RR;
+    typedef Map  A;
+    typedef Map  R;
+    typedef E_Array B;
+    
+    class CODE : public  E_F0 { public:
+        Expression a0;
+        int N;
+        Expression * tab;
+        int * what;//  0  RR, 1 KN<RR>,
+        const  bool mi;
+        /*
+         static KN_<RR> &set(KN<RR> * a,KN<RR> *& p,int n){
+            if(isinit) a->init(n);
+            else a->resize(n);
+            p =a;
+            return *a;}*/
+        
+       /* static KN_<RR> &set(KN_<RR> & a,KN<RR> *& p,int n){p=0;return a;}*/
+        
+        CODE(Expression a,const E_Array & tt)
+        : a0(a),N(tt.size()),
+        tab(new Expression [N]),
+        what(new int[N])  ,
+        mi(tt.MeshIndependent())
+        
+        {
+            assert(&tt);
+            //      int err=0;
+            for (int i=0;i<N;i++)
+                if(i%2==0 && atype<Key>()->CastingFrom(tt[i].right() ) )
+                {
+                    tab[i]=atype<Key>()->CastTo(tt[i]);
+                    what[i]=1;
+                }
+               else if(i%2==1 && atype<Value>()->CastingFrom(tt[i].right() ) )
+            {
+                tab[i]=atype<Value>()->CastTo(tt[i]);
+                what[i]=1;
+            }
+
+                 else
+                    CompileError(" InitMapfromArray: we are waiting for Key or Value  type");
+        }
+        AnyType operator()(Stack stack)  const
+        {
+            Map * pa=0;
+            A  aa=GetAny<A>((*a0)(stack));
+            ffassert(0);
+            return SetAny<R>(aa);
+        }
+        bool MeshIndependent() const     {return  mi;} //
+        ~CODE() { delete [] tab; delete[] what;}
+        operator aType () const { return atype<R>();}
+    }; // end sub class CODE
+    
+    
+public:
+    E_F0 * code(const basicAC_F0 & args) const
+    {   if(verbosity>9999)
+        cout << "\n code InitMapfromArray:" << *args[0].left() << " " << *args[1].left()
+        << "( "<< *t[0] << " " << *t[1] <<")" <<endl;
+        return  new CODE(t[0]->CastTo(args[0]),*dynamic_cast<const E_Array*>( t[1]->CastTo(args[1]).LeftValue()));}
+    InitMapfromArray(int preff=0):   OneOperator(atype<R>(),atype<A>(),atype<B>())  {
+        pref=preff;
+    }
+    
+};
+
+
 template<class KNRR,bool isinit>
 class  InitArrayfromArray : public OneOperator { 
 public:
@@ -1572,7 +1646,7 @@ void ArrayOperator()
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopRNM<K> >);
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopRN<K> >);
     
-    
+    TheOperators->Add("<-",new InitMapfromArray<MyMap<String,K>*,string *,K,true> );
 
 }
 
