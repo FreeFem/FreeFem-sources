@@ -4,6 +4,17 @@
 extern KN<String>* pkarg;
 
 #include "petsc.h"
+
+#if PETSC_VERSION_LT(3,6,3)
+#define FFPetscOptionsGetInt(a,b,c,d) PetscOptionsGetInt(a,b,c,d)
+#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(a,b,c,d) 
+#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(a,b,c) 
+#else
+#define FFPetscOptionsGetInt(a,b,c,d) PetscOptionsGetInt(NULL,a,b,c,d)
+#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(NULL,a,b,c,d) 
+#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(NULL,a,b,c) 
+#endif
+
 #if PETSC_VERSION_LT(3,6,0)
 #define MatCreateVecs MatGetVecs
 #endif
@@ -135,9 +146,9 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
     KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
     double eps = 1e-8;
-    PetscOptionsGetReal(NULL, "-eps", &eps, NULL);
+    FFPetscOptionsGetReal(NULL, "-eps", &eps, NULL);
     int it = 100;
-    PetscOptionsGetInt(NULL, "-iter", &it, NULL);
+    FFPetscOptionsGetInt(NULL, "-iter", &it, NULL);
     KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
     KSPSetFromOptions(ptA->_ksp);
     KSPSetUp(ptA->_ksp);
@@ -196,7 +207,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                 data[i + 1] = data[i] + elems[i - 1].size() + 1;
             strcpy(data[i + 1], elems[i].c_str());
         }
-        PetscOptionsInsert(&argc, &data, NULL);
+        FFPetscOptionsInsert(&argc, &data, NULL);
         delete [] *data;
         delete [] data;
     }
@@ -226,9 +237,9 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     double timing = MPI_Wtime();
     KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
     double eps = 1e-8;
-    PetscOptionsGetReal(NULL, "-eps", &eps, NULL);
+    FFPetscOptionsGetReal(NULL, "-eps", &eps, NULL);
     int it = 100;
-    PetscOptionsGetInt(NULL, "-iter", &it, NULL);
+    FFPetscOptionsGetInt(NULL, "-iter", &it, NULL);
     KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
     KSPSetFromOptions(ptA->_ksp);
     KSPSetUp(ptA->_ksp);
