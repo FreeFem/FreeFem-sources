@@ -106,7 +106,8 @@ void destroy() { delete p;p=0;} // Add FH march 2010
 //  String( string * c) : p(c) {cout << "String" << p <<","<< *p << endl;} 
   String(const String & c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const string & c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 
-  String(const char *  c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 
+  String(const string * c) : p(new string(*c)) {/*cout << "String" << p <<","<< *p << endl;*/}
+  String(const char *  c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/}
   String(const long & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const double & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const bool & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
@@ -132,6 +133,7 @@ class MyMap {
   public:
     typedef V Value;
     typedef K Key;
+    typedef map<K,V> MAP;
     typedef typename map<K,V>::iterator iterator;
   map<K,V> *m;
   
@@ -141,6 +143,17 @@ class MyMap {
      delete m;m=new map<K,V>(M);
     }
     bool exist(const K & k) const { return m&&  (m->find(k)!= m->end());}
+   bool  insert(const K & k,const V & v)
+    {
+        typedef typename map<K,V>::value_type   value_type;
+        return m->insert(value_type(k,v)).second;
+    }
+    bool insert(const K & k, V * const v)
+    {
+        typedef typename map<K,V>::value_type   value_type;
+        return m->insert(value_type(k,*v)).second;
+    }
+    
   V &operator[](const K & k) {
   throwassert(m);
   typename map<K,V>::iterator i=m->find(k);
@@ -156,7 +169,9 @@ class MyMap {
   V &  v= i->second ;  
   return v;
 }
-  ~MyMap(){delete m;/*cout << "MyMap:: delete "<< m << endl;*/m=0;} 
+  ~MyMap(){delete m;/*cout << "MyMap:: delete "<< m << endl;*/m=0;}
+    void destroy(){delete m;m=0;}
+    void init() { m=new MAP; }
   private:
     MyMap(const MyMap &M):m(new map<K,V>(*M.m)) {}
 public:

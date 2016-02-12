@@ -173,6 +173,7 @@ void initArrayOperatorlong()
     TheOperators->Add("/=",new OneBinaryOperator<set_eq_array_div<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
     TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,double> > > ); // add FH juin 2005
 
+    TheOperators->Add("<-",new InitMapfromArray<MyMap<String,String>*,string *,string*,true> );
 
     
 }

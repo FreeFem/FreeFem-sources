@@ -365,3 +365,15 @@ vh.resize(20);
 cout << vh.n <<endl;
 }
 
+
+
+{ // version 3.43-3  init of map ...
+  cout << " new stuff " << endl; 
+  int[string] a=["2",1,"12",4];
+  string[string] b= ["-1",1,"13","qsdqdq"];
+  cout << " a " << a  << endl;
+   cout << " b " << b  << endl; 
+// the new kind of loop: 
+  for [i,v:a] cout << " a: " << i << " " << v << endl;
+
+}

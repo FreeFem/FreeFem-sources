@@ -2103,14 +2103,14 @@ yyreduce:
                         if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
                         size_t sizestack = currentblock->size()+1024 ; //  before close 
                         (yyvsp[(1) - (2)].cinst)+=currentblock->close(currentblock);
-                        if(verbosity>2 || mpirank==0) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;   
+                        if(verbosity>2 || ( (mpirank==0) && verbosity)) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;
                         size_t lg0,lg1;
                         ffapi::ifchtmpdir(); // change  to tmp after compile FH sep 2015 ...
                         int NbPtr = ShowAlloc("init execution ",lg0); // number of un delele ptr
                         debugstack= new vector<pair<const E_Routine*,int> >;
                         size_t stu0=storageused(); // get Storage usage
 			UnShowAlloc =0;// add FH for parallee
-                        if(verbosity>2  || mpirank==0) cout << endl;  
+                        if(verbosity>2  || ( (mpirank==0) && verbosity) ) cout << endl;
                         { Stack stack = newStack(sizestack);
                         double CPUcompile= CPUtime();
                         try {                  
@@ -3484,7 +3484,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("catch",CATCH);
    zzzfff->Add("throw",THROW);
 //   Init_map_type();
-   if(verbosity>2 || (mpirank==0 ) ) cout << " Load: ";
+   if(verbosity>2 || ( (mpirank==0) && verbosity ) ) cout << " Load: ";
    callInitsFunct() ; //  init for dynamique libs ...
   // init_lgfem() ;
    init_lgmesh() ;
@@ -3498,7 +3498,7 @@ int mainff (int  argc, char **argv)
    if(init_lgparallele)  init_lgparallele(); 
   //  callInitsFunct() ; //  init for dynamique libs ...
 
-   if(verbosity>2 || mpirank==0)  cout << endl;
+   if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;
   zzzfff->input(cc); // [[file:../fflib/lex.cpp::void mylex input]]
   EnvironmentLoad(); // just before compile
   //verbosity=vvold;
