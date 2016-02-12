@@ -324,7 +324,7 @@ struct myremove_pointer<T*>
 template<class Map,class Key, class Value,bool isinit>
 class  InitMapfromArray : public OneOperator {
 public:
-  //  typedef typename  myremove_pointer<KNRR>::type KNR ;
+   typedef typename  myremove_pointer<Map>::type MMap ;
   //  typedef typename KNR::K RR;
     typedef Map  A;
     typedef Map  R;
@@ -371,10 +371,19 @@ public:
         }
         AnyType operator()(Stack stack)  const
         {
-            Map * pa=0;
+          
             A  aa=GetAny<A>((*a0)(stack));
-            ffassert(0);
-            return SetAny<R>(aa);
+            if(isinit) aa->init();
+            for(int i=0,j=0; i<N/2; ++i)
+            {
+                Key k= GetAny<Key>((*(tab[j++]))(stack));
+              //  String sk(*k);
+                Value v= GetAny<Value>((*(tab[j++]))(stack));
+    
+                //cout << "InitMapfromArray  "<< *k << " " << (string) sk << " "<<  v << endl;
+                aa->insert(*k,v);
+            }
+          return SetAny<R>(aa);
         }
         bool MeshIndependent() const     {return  mi;} //
         ~CODE() { delete [] tab; delete[] what;}

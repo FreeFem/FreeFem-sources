@@ -18,10 +18,10 @@ for [i,bi : ss]
 cout <<" ss = "<< ss << endl;
 int[string] si;
 si[1]=2;
-si[5]=1;
+si[50]=1;
 for [i,vi : si]
    {
-   cout << " i " << i << " " << vi << endl;
+   cout << " i " << setw(3) << i << " " << setw(10) <<vi << endl;
     vi= atoi(i)*2;
     }
 

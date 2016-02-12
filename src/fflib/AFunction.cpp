@@ -440,6 +440,14 @@ long exec(string *s)
    operator long () const {return f->precision();}
  };
 
+class OP_setw { public:
+    long w;
+    OP_setw(long ww) :w(ww) {}
+    friend   ostream & operator<<(ostream & f,const OP_setw& op) { return f << setw(op.w);}
+};
+ OP_setw defOP_setw(long i) {return OP_setw(i);}
+
+
  ostream_precis ostream_precision(ostream **f){ return ostream_precis(*f);}
   ostream_precis ostream_precision(ostream *f){ return ostream_precis(f);}
  long get_precis( ostream_precis  pf) { return pf.f->precision();}
@@ -1041,7 +1049,7 @@ void Init_map_type()
     Dcl_Type< istream_seekg > ();
     Dcl_Type< istream_good > ();
     Dcl_Type< NothingType > ();
-    
+    Dcl_Type<OP_setw>();
     Dcl_Type<Polymorphic*>();
     
 //    Dcl_Type<C_F0>();
@@ -1050,7 +1058,10 @@ void Init_map_type()
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
     Dcl_Type<const E_BorderN *>();
-
+    // string[string] type
+    typedef MyMap<String,String> MyMapSS;
+    map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;
+    map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();
     
     
     Dcl_Type<SubArray>();
@@ -1631,13 +1642,6 @@ void Init_map_type()
  
   
 
-typedef MyMap<String,String> MyMapSS;
-    
-     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ; 
-//Dcl_TypeandPtr_<KN_<string*> ,KN<string*>*  > (0,0,0,::Destroy<KN<K> >, ::ClearReturnKK_<K,KN<K>,KN_<K> >,::ClearReturnpKK<K,KN<K> >);
-    
-  //  map_type[typeid(KN2String*).name()] = new ForEachType<MyMapIS*>(Initialize<KN2String >,Delete<MyMapIS >) ;         
-     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();      
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
 
      atype<MyMapSS*>()->SetTypeLoop(atype<string**>(),atype<string**>());
@@ -1648,7 +1652,9 @@ typedef MyMap<String,String> MyMapSS;
     TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMapSS*> >);
  
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSS >);
-
+   // add setw freb 2015 FH
+    Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
+    TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
 
 }
 //int ShowAlloc(const char *s,size_t & lg); 
