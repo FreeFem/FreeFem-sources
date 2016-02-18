@@ -1,3 +1,7 @@
+version 3.44
+ - add tools to extract border after movemesh in Curvature  plugin)
+ - restruct the hpddm and petsc plugin ( thanks to P. Jolivet)
+   add lots hpddm and petsc examples in examples++-hpddm
 version 3.34_3 
   - remove some spurious print when verbosity = 0 
   - add initialisation of array which string parameter like in

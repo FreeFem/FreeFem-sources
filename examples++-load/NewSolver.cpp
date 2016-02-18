@@ -12,7 +12,6 @@ using namespace std;
 
 #include "MatriceCreuse_tpl.hpp"
 
- 
 #ifdef HAVE_LIBUMFPACK
 extern "C" {
 #ifdef HAVE_UMFPACK_H
@@ -41,6 +40,65 @@ extern "C" {
 #endif // HAVE_UMFPACK_H
 }
 #endif
+
+#ifdef HAVE_LIBCHOLMOD_inprogress
+#include <cholmod.h>
+
+
+template<class R>
+class SolveLDLCHOL :   public MatriceMorse<R>::VirtualSolver  {
+    double eps;
+    mutable double  epsr;
+    double tgv;
+    cholmod_sparse *cA ;
+    const MatriceMorse<R> *A,*Acf;
+    
+    cholmod_factor *L;
+    cholmod_common c ;
+public:
+    SolveLDLCHOL(const MatriceMorse<R> &AAA,int strategy,double ttgv, double epsilon=1e-6,
+                 double pivot=-1.,double pivot_sym=-1.  ) :
+    eps(epsilon),epsr(0),
+    tgv(ttgv),
+    A(AAA), Acf(0),
+    cA(new cholmod_sparse),L(0)
+    {
+     cholmod_start (&c) ;
+        cA->nrow=0;
+        cA->ncol=0;
+        cA->nzmax==0;
+        cA->p==0;
+        cA->i==0;
+        cA->x==0;
+        cA->z==0;  // double
+        ca->stype = 1;
+        ca->xtype=
+        int dtype =
+        
+     L = cholmod_analyze (cA, &c) ;
+     cholmod_factorize (cA, L, &c) ;
+    }
+    void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
+        
+       R* xx = cholmod_solve (CHOLMOD_A, L, b, &c) ;
+       x=xx;
+       cholmod_free_dense (&xx, cm) ;
+ 
+    }
+    
+    ~SolveUMFPACK() { 
+ 
+    }
+    void addMatMul(const KN_<R> & x, KN_<R> & Ax) const 
+    {  
+        ffassert(x.N()==Ax.N());
+        Ax +=  (const MatriceMorse<R> &) (*this) * x; 
+    }
+    
+}; 
+
+#endif
+
 template<class R>
 class SolveUMFPACK :   public MatriceMorse<R>::VirtualSolver  {
   double eps;

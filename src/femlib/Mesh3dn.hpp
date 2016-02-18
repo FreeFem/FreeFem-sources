@@ -183,6 +183,7 @@ private:
 };
 // for the caracteristic method.
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt);
+  int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt,R3 &offset);
 
 } 
 #endif

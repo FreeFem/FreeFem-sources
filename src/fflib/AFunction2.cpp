@@ -494,7 +494,7 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
     if( this != &Global) {
 	if ( Global.m.find(k) != Global.m.end() )
 	  {
-	    if(mpirank==0) 
+	    if(mpirank==0 && (verbosity>0))
 	      cerr << "\n *** Warning  The identifier " << k << " hide a Global identifier  \n";
 	    
 	  }

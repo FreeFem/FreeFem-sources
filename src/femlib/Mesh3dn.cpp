@@ -1213,6 +1213,190 @@ const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
   }
 
 
+    int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & offset)
+    {
+        int ncas=0 ;
+        const R eps = 1e-8;
+        
+        // corrected by F.H 23 juin 2015
+        bool ddd=verbosity>2000;
+        bool nomove=true;
+        R lambda[4],dl[4],cl[4];
+        Phat.toBary(lambda);
+        if(ddd) cout << "\n\t\t\tWT: "  << Phat << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] << " u = "<< U << " dt " << dt <<endl;
+#ifndef NDEBUG
+        for(int i=0;i<4;++i)
+            assert(lambda[i]<1.000001 && lambda[i]>-0.0000001);
+#endif
+        typedef R3 Rd;
+        const Mesh3::Element & T(Th[it]);
+        const int nve = 4;
+        const Rd  Q[nve]={(const R3) T[0],(const R3) T[1],(const R3) T[2],(const R3) T[3]};
+        
+        Rd P  =T(Phat);
+        
+        //  cout << " " << u << " " << v ;
+        Rd PF = P + U*dt;
+        Rd PFK= PF;
+        
+        //  couleur(15);MoveTo( P); LineTo( PF);
+        R l[nve];
+        double Det=T.mesure()*6;
+        l[0] = det(PF  ,Q[1],Q[2],Q[3]);
+        l[1] = det(Q[0],PF  ,Q[2],Q[3]);
+        l[2] = det(Q[0],Q[1],PF  ,Q[3]);
+        l[3] = Det - l[0]-l[1]-l[2];
+        l[0] /= Det;
+        l[1] /= Det;
+        l[2] /= Det;
+        l[3] /= Det;
+        
+        if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps)
+        { // a fini  .... ouf ...
+            dt =0;
+            Phat=R3(l+1);
+            nomove=false;
+            return -1;
+        }
+        
+        // l(Q) = lambda + dl  *coef  avec Q= P+ U*dt*coef
+        // coef > 0 et segement [PQ] dans K .. et Q \in \partial K
+        // recherche de la face de sortie ..
+        
+        dl[0]= l[0]-lambda[0];
+        dl[1]= l[1]-lambda[1];
+        dl[2]= l[2]-lambda[2];
+        dl[3]= l[3]-lambda[3];
+        // attention a inf et NaN possible ci FH..
+        cl[0]= -lambda[0]/dl[0];
+        cl[1]= -lambda[1]/dl[1];
+        cl[2]= -lambda[2]/dl[2];
+        cl[3]= -lambda[3]/dl[3];
+        
+        //  min  positif
+        int kf=-1;
+        double cf=1;// 1 min  positif  < 1.
+        if(cl[0]>0. && cl[0] < cf) cf=cl[kf=0]; // OK NaN or Inf test are wrong in any case ..
+        if(cl[1]>0. && cl[1] < cf) cf=cl[kf=1];
+        if(cl[2]>0. && cl[2] < cf) cf=cl[kf=2];
+        if(cl[3]>0. && cl[3] < cf) cf=cl[kf=3];
+        
+        if(kf>=0)
+        {
+            double cf1 = 1-cf;
+            // point de sortie en temps dt*cf .. ??
+            l[0]-= dl[0]*cf1;
+            l[1]-= dl[1]*cf1;
+            l[2]-= dl[2]*cf1;
+            l[3]-= dl[3]*cf1;
+            PFK = P +  U*(dt*cf); // final  point in tet.
+            
+        }
+        // on sort en temp  cf*dt
+        
+        
+        
+        if(ddd)  cout << "\t\t\t WT " << it << ", " << Phat << ",  PFK=" << PFK
+            << " :  "  << l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3]
+	           << " == " << det(Q[0],Q[1],Q[2],PF)/Det
+            << " : l (in) "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3]
+            << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
+            <<endl ;
+        
+        int neg[nve],k=0;
+        int kk=-1;
+        
+        if(kf>=0)   // sortie positive ..
+        {
+            // on regarde de les reelement negatif
+            // on ne veut pas des points sur les faces.
+            // car sinon il va y avoir un probleme ans on va projete sur la face
+            //  et remettre le point dans le tetraedre.
+            
+            if (l[0]<=-eps ) neg[k++]=0;
+            if (l[1]<=-eps ) neg[k++]=1;
+            if (l[2]<=-eps ) neg[k++]=2;
+            if (l[3]<=-eps ) neg[k++]=3;
+            
+            //R eps1 = T.mesure()   * 1.e-5;
+            if(ddd)  cout << "\t\t\t k= " << k << endl;
+            
+            if (k>1) //  2 .. 3 face de sortie possible
+            {
+                // on bouge un peu et on recommence ????
+                // regarde  sorti interne ..
+                int pos[4];
+                int kp =0;
+                if (l[0]<0 ) pos[kp++]=0;
+                if (l[1]<0 ) pos[kp++]=1;
+                if (l[2]<0 ) pos[kp++]=2;
+                if (l[3]<0 ) pos[kp++]=3;
+                if(kp>0) kk=pos[randwalk(kp)];//
+                else     kk=neg[randwalk(k)];
+                
+            }
+            else if (k==1) //  une face possible de sortie (cas simple)
+                kk = neg[0];
+            
+            if(kk>=0)
+            {
+                if ( l[kk] ) // on bouge et on arete avant la fin ...
+                {
+                    R coef1 = 1-cf;
+                    nomove= (cf<1e-6);
+                    dt        = dt*coef1;// temps restant
+                }
+                if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< lambda[0]  << " "
+                    <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << " PF =" << PF <<  " " << &PF <<endl;
+                lambda[kk] =0;
+                //}
+                
+                
+                
+            }
+            
+        }
+        if(nomove )
+            // on ne bouge pas on utilse Find ...
+        {
+            if(ddd) cout << "\t\t\t PF = " << PF << " dt =  " <<  dt  << " " << it << " " << &PF<<endl;
+            R dx2= (U,U)*dt*dt;
+            R ddt=dt, dc=1;
+            // if Udt < h/2 => recherche un point final  (environ)
+            if(dx2*dx2*dx2 > Det*Det/4)
+                dt=0;
+            else
+            {
+                dc=0.25;
+                ddt=dt*dc;
+                PF= P + U*ddt; // on avance que d'un 1/4
+                dt -= ddt;
+            }
+            if(ddd) cout << "\t\t\t PF = " << PF << " " <<  dt << " ddt = " << ddt << " " << it << " " << &PF<<endl;
+            bool outside;
+            const Mesh3::Element  *K=Th.Find(PF, Phat,outside,&Th[it]);
+            if(outside) dt=0; // on a fini
+            if(ddd) cout << "\t\t\t ***** WT :  Lock -> Find P+U*ddt*c "<< it<< " " << " -> "<< Th(K)
+                << " dt = " << dt << " c = " << dc << " outside: "<< outside <<" , PF " << PF << endl;
+            return 4+Th(K);
+        }
+        
+        //  on remet le point dans le tet. 
+        int jj=0;
+        R lmx=lambda[0];
+        if (lmx<lambda[1])  jj=1, lmx=lambda[1];
+        if (lmx<lambda[2])  jj=2, lmx=lambda[2];
+        if (lmx<lambda[3])  jj=3, lmx=lambda[3];
+        if(lambda[0]<0) lambda[jj] += lambda[0],lambda[0]=0;
+        if(lambda[1]<0) lambda[jj] += lambda[1],lambda[1]=0;
+        if(lambda[2]<0) lambda[jj] += lambda[2],lambda[2]=0;
+        if(lambda[3]<0) lambda[jj] += lambda[3],lambda[3]=0;
+        Phat=R3(lambda+1);
+        if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << " K(Phat) ="<< Th[it](Phat) <<  ", " << kk << " jj= "<< jj << " "<< lmx << endl; 
+        assert(kk<0 || lambda[kk]==0);
+        return kk;
+    }
+    
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
       const R eps = 1e-8;

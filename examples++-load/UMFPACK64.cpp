@@ -301,7 +301,7 @@ public:
 #endif
 
     for(int i=0;i<=n;++i)
-      Alg[i]=A.lg[i];
+      Alg[i]=A.lg[i];   
 
     for(int i=0;i<A.nbcoef;++i)
       Acl[i]=A.cl[i];

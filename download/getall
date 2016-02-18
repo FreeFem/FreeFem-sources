@@ -167,10 +167,10 @@ download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_
 download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
 	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz','d6a4bcdde2ac804f7ec66c29dcb63c18');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.5.2.tar.gz',
-	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.5.2.tar.gz','d707336a98d7cb31d843804d020edc94');
-download('hpddm','https://github.com/hpddm/hpddm/archive/master.zip',
-	 'https://github.com/hpddm','hpddm.zip','none','BAD_CERT');
+#download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.5.2.tar.gz',
+#	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.5.2.tar.gz','d707336a98d7cb31d843804d020edc94');
+download('hpddm','https://github.com/hpddm/hpddm/archive/ebc89b2fdfd8a9552010af81b2f1b6e830dca447.zip',
+	 'https://github.com/hpddm','hpddm.zip','30f60a92be43cba6721c5f4d7606169e','BAD_CERT');
 
 # run all downloads concurrently
 

@@ -4507,7 +4507,7 @@ AnyType Convect::eval3n(Stack s) const
     randwalk(-1); // init randwalk
     //  set<int> *st=0;
     // vector<int> lst;
-    
+    R3 offset;
     R ddt = GetAny<double>((*dt)(s));
     if (ddt)
     {
@@ -4526,7 +4526,7 @@ AnyType Convect::eval3n(Stack s) const
             int j;
             int it=Th3(mpc.T3);
             if(ddd) cout << " IN: " <<  (*mpc.T3)(PHat) << " ; " << mpc.P <<" : " << ddt << endl;
-            while ( (j=WalkInTet(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt))>=0)
+            while ( (j=WalkInTetn(Th3,it,PHat,R3(GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),GetAny<double>((*w)(s))),ddt,offset))>=0)
                 if(j>3)  {
                     it=j-4;
                     mpc.change(PHat,Th3[it],0);

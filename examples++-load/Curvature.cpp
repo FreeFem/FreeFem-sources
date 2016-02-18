@@ -125,6 +125,31 @@ R3   * courbe(Stack stack,const KNM_<double> &b,const double & ss)
 {
     return courbe(stack,b,-1,-1,ss,0);
 }
+/*
+   Remarque sur la courbure 2d
+   a = angle tangent / ox
+   R rayon de coubure 
+   s abs curviline
+   c courbure = 1/R
+   ds = R d a
+   c = da/ds 
+   => dans le cas d'une ligne brise
+   c = [a] \delta (dirac) en ds 
+   
+   Courbure 3d  c = 1/R1 + 1/R2 = cr+ ca
+ avec :
+  r == x
+  z == y
+  donc en axi  
+   cr = courbure 2d classsique
+   soit N=(Nr,Nz) normal au point (r,z) unitaire
+ 
+   alors Ra = r/Nr; car la composante r de   (r/Nr  N)  =  r; 
+   donc ca = Nr/r ;
+ 
+ 
+ 
+ */
 KN<double>* courbure(Stack stack,pmesh const & pTh,KN<long> *const & lab,bool axi)
 {
     const double pi= M_PI;
@@ -164,15 +189,16 @@ KN<double>* courbure(Stack stack,pmesh const & pTh,KN<long> *const & lab,bool ax
                 double aa = atan2(E.y,E.x);
                 if(j==1) aa = -aa;
                 c[k] += aa;
-                ++cn[k];
+                cn[k]+= 1+(j==1);
                 le[k]+=lE;
                 if( axi) nr[k]+= E.y/lE;
                  // cout << k << " " << lE << " "<< le[k] << endl;
             }
         }
     }
+    double epsTh = sqrt(Th.area/Th.nt)*1e-6;// bofbof
     for(int i=0;i<Th.nv;++i)
-        if( cn[i]==2)
+        if( cn[i]==3)
         {
             
             //  cout << i << " courbure " << c[i] << " " << le[i] << " " << c[i]/le[i]/2. <<endl;
@@ -184,17 +210,34 @@ KN<double>* courbure(Stack stack,pmesh const & pTh,KN<long> *const & lab,bool ax
                 // Bof Bof  moyen des normal:
                 //  c[i] angle entre n1 et n2 :
                 //   ( n1 + n2 )/ || n1+n2|| et on a :|| n1+n2|| = 1+cos(abs(c[i]))
-                double Nr = nr[i]/(1.+cos(abs(c[i])));
+                double Nr = nr[i]/(1.+cos(abs(c[i])));// ok
                 double r=Th(i).x;
-                c[i] = r*c[i]/le[i]/2.+ Nr;
+                if(verbosity>9999)
+                cout << " R1 " << r/Nr << " R2 " << 1/(c[i]/(le[i]/2.)) << " da=" << c[i] << " le " << le[i]/2 << endl;
+
+                c[i] = r*c[i]/(le[i]/2.)+ Nr ;
             }
-            else c[i] /= le[i]/2.;
+            else c[i] /= (le[i]/2.);
+        }
+        else if ((cn[i]>0) && (abs(Th(i).x) < epsTh && axi))
+        {
+            // extermite r=0
+           // cout << "axi 0" << nr[i] <<  endl;
+            double ci=c[i];
+            if(cn[i]==2) ci=pi+ci;
+            ci *=2;
+            double rm=le[i]*sqrt(1-nr[i]*nr[i])/2;
+            if(verbosity>999)
+              cout <<  Th(i).y << " R1 "<< ci/le[i] << " ci " << ci << " le " << le[i] << " cn " << cn[i] << " " << c[i] << " " << nr[i] << " " << asin(nr[i]) <<endl;
+            c[i] = ci*2*rm;//2*nr[i];
         }
         else
             c[i]=0;
     //cout << c << endl;
     return Add2StackOfPtr2FreeRC(stack,pc);
 }
+
+
 KN<double>* courbure(Stack stack,pmesh const & pTh,KN<long> *const & lab)
 {
     return courbure(stack,pTh,lab,0);
@@ -213,6 +256,7 @@ KN<double>* courbureaxi(Stack stack,pmesh const & pTh,const long & lab)
     KN<long> ll(1); ll=lab;
     return courbure(stack,pTh,&ll,1);
 }
+
 double  reparametrage(Stack stack,const KNM_<double> &bb)
 {
     KNM_<double> b=bb;
@@ -256,6 +300,75 @@ KNM<double>  * equiparametre(Stack stack,const KNM_<double> &bb,const long & n)
     }
     return  Add2StackOfPtr2FreeRC(stack,pc);
 }
+
+double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<double> *const &bb)
+{
+    const Mesh &Th=*pTh;
+    map<long,int> mlab;
+    for (int i=0; i< lab.N(); ++i)
+    {
+        long l=lab[i];
+        if(verbosity>9)
+            cout << i << " lab "<< l << endl;
+        mlab[l]=i;
+    }
+    KN<long> nx(Th.nv),nee(Th.neb*2),mark(Th.nv);
+    nx=-1;
+    mark=-1;
+    int nel=0;
+    for(int ee=0,k=0; ee< Th.neb; ++ee)
+    {
+        BoundaryEdge e = Th.be(ee);
+        if( mlab.find(e.lab) != mlab.end() )
+        {
+            int ie,i =Th.BoundaryElement(ee,ie);
+            const Triangle & K(Th[i]);
+            R2 E=K.Edge(ie);
+            int iv[]= {Th(K[VerticesOfTriangularEdge[ie][0]]),
+                Th(K[VerticesOfTriangularEdge[ie][1]])};
+            nx[iv[0]]=nel;
+            mark[iv[1]]=nel;
+            nee[nel++]=iv[1];
+            nee[nel++]=iv[0];
+        }
+    }
+    // recherech depart
+    int bg =-1,nbg=0;
+    if(nel==0) return 0;
+    for( int k=0; k<nel;++k)
+    {
+        int j= nee[k];
+        if( nx[j] >=0 && mark[j]<0)
+        { nbg++;
+            bg = j;
+        }
+        
+        
+    }
+    ffassert( nbg==1); // un depart
+    int np = nel/2+1;
+    bb->resize(3,np);
+    KNM<double> &b(*bb);
+    int i=0,iv=bg;
+    while (iv>=0 && i< np)
+    {
+        
+        b(0,i)=Th(iv).x;
+        b(1,i)=Th(iv).y;
+        b(2,i)=0; // compute after
+        iv =  nee[nx[iv]];
+        i++;
+    }
+   return reparametrage(stack,b);
+}
+double ExtractBorder(Stack stack,pmesh const & pTh,long const & lab, KNM<double> *const &bb)
+{
+    KN<long> tab(1);
+    tab=lab;
+    return ExtractBorder(stack,pTh,tab,bb);
+}
+
+
 #define  EPSD           1.e-15
 #define  EPSD2          1.e-10
 #define  EPS6           5.e-06
@@ -431,9 +544,11 @@ double VonMises(const double &a11,const double &a12,const double &a22,const doub
     return sqrt((s1*s1+s2*s2+s3*s3)/2.);
 }
 
-
 void finit()
 {
+    
+    Global.Add("extractborder","(",new OneOperator3s_<double,pmesh,KN_<long>,KNM<double>*>(ExtractBorder));
+    Global.Add("extractborder","(",new OneOperator3s_<double,pmesh,long,KNM<double>*>(ExtractBorder));
     
     Global.Add("curvature","(",new OneOperator2s_<KN<double>*,pmesh ,KN<long> *>(courbure));
     Global.Add("curvature","(",new OneOperator2s_<KN<double>*,pmesh ,long>(courbure));
