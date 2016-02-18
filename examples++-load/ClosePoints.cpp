@@ -177,6 +177,53 @@ double dist2(int n,double *p,double *q)
 }
 long Hcode(int n,double eps,double *p,double *p0);
 
+KN<long>* CloseTo2(Stack stack,double const & eps,KNM_<double> const &  P,KNM_<double>  const &  Q)
+{
+    long Pn0=P.N();
+    long Pm0=P.M();
+    long Qn0=Q.N();
+    long Qm0=Q.M();
+    double * p0=&(P(0,0));
+    int po10 =( &(P(1,0)) - p0);
+    int po01 =( &(P(0,1)) - p0);
+    double * q0=&(Q(0,0));
+    int qo10 =( &(Q(1,0)) - p0);
+    int qo01 =( &(Q(0,1)) - p0);
+
+    double x0= P(0,':').min();
+    double y0= P(1,':').min();
+    double x1= P(0,':').max();
+    double y1= P(1,':').max();
+    
+    // add cc
+    double dd= max(x1-x0,y1-y0)*0.01;
+    double data[]={x0-dd,y0-dd,x1+dd,y1+dd};
+
+    R2close S(data,Pm0,eps,po10);
+    for (int i=0; i<Pm0;++i)
+    {
+        if(verbosity>19 )
+            cout << i << " :: " << P(0,i) << " " << P(1,i) << endl;
+        int j= S.AddSimple(&P(0,i));
+    }
+    KN<long>* pr= new KN<long>(Qm0);
+    for (int i=0; i<Qm0;++i)
+    {
+        R2close::Point * p= S.Find(Q(0,i),Q(1,i));
+        if(p)
+          (*pr)[i]= p-S.P;
+        else
+            (*pr)[i]=-1;
+    }
+
+    return Add2StackOfPtr2FreeRC(stack,pr);
+
+}
+KN<long>* CloseTo2t(Stack stack,double const & eps,KNM_<double> const &  P,KNM_<double>  const &  Q)
+{
+    return CloseTo2(stack,eps,P.t(),Q.t());
+}
+
 KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<double> * const &  q,bool tq,bool inv=0)
 {
     
@@ -468,24 +515,26 @@ long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &
 void init()
 {
     Global.Add("Voisinage","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(Voisinage));
+    Global.Add("ClosePoints2","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2));
+  //s  Global.Add("ClosePoints2t","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2t));
     
     //   numbering ..
-    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<false>));
-    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<false>));
-    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<false>));
-    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<false>));
-    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<false>));
-    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<false>));
-    Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<false>));
+   // Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<false>));
+   // Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<false>,1));
+    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<false>,0));
+    //Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<false>));
+   // Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<false>));
+   // Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<false>));
+   // Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<false>));
     Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,pmesh,KNM<double> * >(CloseTo<false>));
     // inv  numbering ..
-    Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<true>));
-    Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<true>));
-    Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<true>));
-    Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<true>));
-    Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<true>));
-    Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<true>));
-    Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<true>));
+   // Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<true>));
+   // Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<true>,1));
+    Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<true>,0));
+  //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<true>));
+  //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<true>));
+  //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<true>));
+  //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<true>));
     Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,pmesh,KNM<double> * >(CloseTo<true>));
     
 }

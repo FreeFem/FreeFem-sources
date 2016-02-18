@@ -767,6 +767,11 @@ template<class A> inline AnyType DestroyKN(Stack,const AnyType &x){
     return  Nothing;
 }
 
+template<typename K>
+AnyType TransposeKNM(Stack,const AnyType &a) {
+    Transpose< KNM<K> * > ta(GetAny<Transpose< KNM<K> * > >(a));
+    return  SetAny<KNM_<K> >((*ta.t).t());}
+
 template<class K>
 void ArrayDCL()
 {
@@ -819,7 +824,8 @@ void ArrayDCL()
        
        ); 
     map_type[typeid(KNM_<K> ).name()]->AddCast(
-					      new E_F1_funcT<KNM_<K>,KNM<K>*>(UnRefpKN<KNM<K>,KNM_<K> >  )
+					      new E_F1_funcT<KNM_<K>,KNM<K>*>(UnRefpKN<KNM<K>,KNM_<K> > ) ,
+                                              new E_F1_funcT<KNM_<K>,Transpose< KNM<K> *> >(TransposeKNM<K>)
 					      ); 
     
     //   ,new E_F1_funcT<KN_<K>,K>(ValueToKN_<K>),
