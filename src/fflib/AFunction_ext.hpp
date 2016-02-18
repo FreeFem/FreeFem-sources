@@ -51,6 +51,12 @@ public:
 		map_type[typeid(A).name()],
 		map_type[typeid(B).name()]),      // extens
     f(ff){}
+    OneOperator2s_(func  ff,int preff):                        // 3->4
+    OneOperator(map_type[typeid(R).name()],
+                map_type[typeid(A).name()],
+                map_type[typeid(B).name()]),      // extens
+    f(ff){pref=preff;}
+   
 };
 
 
