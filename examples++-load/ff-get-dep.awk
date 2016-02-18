@@ -63,7 +63,9 @@ END {
 	}
 	else if( (skip==0) && (ok == 1))
 	{
-	    if(  ex[lib]!=1) {ok=0; lmis=lmis " or " lib; }
+	    if(  ex[lib]!=1) {ok=0;
+		if (lvl == 0) lerr[err++] = lib; 
+		lmis=lmis " or " lib; }
 	    else 
 	    { 
 		ln[++k]=lib;

@@ -133,25 +133,25 @@ WHERE-OTHER: lib/WHERE.hpddm
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
-install-hpddm:
-	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm-master  lib/WHERE.hpddm; else true;fi
-reinstall-hpddm:
+install-hpddm:./getall
+	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm  lib/WHERE.hpddm; else true;fi
+reinstall-hpddm:./getall
 	-rm lib/WHERE.hpddm
 	-rm ./pkg/hpddm.zip 
-	-rm -rf include/hpddm-master
+	-rm -rf include/hpddm
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
-include/hpddm-master:patch-hpddm-1
-	-if test -f ./pkg/hpddm.zip ; then cd include; unzip ../pkg/hpddm.zip ; else true;  fi
-	if `../build/ff-md5 include/hpddm-master/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true
-	if `../build/ff-md5 include/hpddm-master/src/ScaLAPACK.hpp dd38a3ff2d0aaa7d93b76ed19d3224ae` ; then patch -p1 <patch-hpddm-2; fi;true
+include/hpddm:patch-hpddm-1
+	-if test -f ./pkg/hpddm.zip ; then cd include;rm -rf hpddm;  unzip ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; else true;  fi
+#	if `../build/ff-md5 include/hpddm/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true
+#	if `../build/ff-md5 include/hpddm/src/ScaLAPACK.hpp dd38a3ff2d0aaa7d93b76ed19d3224ae` ; then patch -p1 <patch-hpddm-2; fi;true
 
 lib/WHERE.hpddm: 
-	if test -d include/hpddm-master/include ; then \
+	if test -d include/hpddm/include ; then \
 	echo hpddm LD -L@DIR@/lib > $@ ;\
-	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/include >> $@ ;\
-	elif test -d include/hpddm-master/src ; then \
+	echo hpddm  INCLUDE -I@DIR@/include/hpddm/include >> $@ ;\
+	elif test -d include/hpddm/src ; then \
 	echo hpddm LD -L@DIR@/lib > $@ ;\
-	echo hpddm  INCLUDE -I@DIR@/include/hpddm-master/src >> $@ ;\
+	echo hpddm  INCLUDE -I@DIR@/include/hpddm/src >> $@ ;\
 	else true; 	fi
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled

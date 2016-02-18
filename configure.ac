@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.43-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.44,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -929,7 +929,7 @@ else
     AC_MSG_NOTICE([ without petsc ***** ])
 fi
 
-if test "0$ff_where_lib_conf_fftw3_mpi" -eq 1  ; then
+if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'` 
   AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
   AC_MSG_NOTICE([ fftw3 from  petsc ***** ]) 
@@ -1068,7 +1068,7 @@ ff_blas_inc=""
 
 # ALH - 18/9/13 - give the option to deactivate system blas for testing purposes
 AC_ARG_ENABLE(system-blas,AC_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
-if test "0$ff_where_lib_conf_blaslapack" -eq 1  ; then
+if test "$ff_where_lib_conf_blaslapack" = 1  ; then
   echo " use BLAS/Lapack of petsc "
 #  echo "  lib: $ff_where_lib_blaslapack inc: $ff_where_inc_blaslapack"
 	    ff_blas_ok=yes
@@ -1507,14 +1507,17 @@ AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 ff_umfpack_incs=""
 ff_amd_ok=no
 ff_umfpack_ok=no
-if test "0$ff_where_lib_conf_suitesparse" -eq 1  ; then
+# echo @@@@@@@@@ ff_where_lib_conf_suitesparse == $ff_where_lib_conf_suitesparse  @@@@
+if test "$ff_where_lib_conf_suitesparse" = "1"  ; then
   echo "amd/umfpack/suitesparse  of petsc"
   echo "    lib: $ff_where_lib_suitesparse inc: $ff_where_inc_suitesparse"
   ff_amd_ok=yes
    ff_umfpack_ok=yes
+   enable_system_umfpack=no
    ff_umfpack_libs="$ff_where_lib_suitesparse"
    ff_umfpack_incs="$ff_where_inc_suitesparse"
    AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
+   AC_DEFINE(HAVE_LIBCHOLMOD,1,Cholmod  is used for sparse matrices computations)
    AC_SUBST([UMFPACK_CPPFLAGS],[$ff_where_inc_suitesparse])
    AC_DEFINE(HAVE_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir)
 fi
@@ -2007,11 +2010,15 @@ TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
-# echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+ echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_hpddm" != no && enable_hpddm=yes  
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  &&  enable_hpddm=no
-
-TOOL_DISABLE(hpddm,"hpddm.$DYLIB_SUFFIX")
+FF_PETCS_DYLIB=""
+if test "$ff_petsc_ok" != no ;   then
+FF_PETCS_DYLIB="PETSc.$DYLIB_SUFFIX"
+fi
+##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB" 
+TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"])
 
 
 # All makefiles

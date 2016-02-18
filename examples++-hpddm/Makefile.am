@@ -21,34 +21,24 @@
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
 
-TESTS=  diffusion-3d.edp	elasticity-3d.edp	schwarz.edp
+TESTS=   diffusion-2d-PETSc.edp	diffusion-3d-PETSc.edp	elasticity-2d-PETSc.edp	elasticity-3d-PETSc.edp	heat-2d-PETSc.edp	heat-3d.edp \
+diffusion-2d.edp	diffusion-3d.edp	elasticity-2d.edp	elasticity-3d.edp	heat-2d.edp		helmholtz-2d.edp
 
 XFAIL_TESTS=$(TESTS)
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
-LIST_IDP=  \
-getARGV.idp			schwarz-skel.idp \
-additional.idp		macro_3d.idp		schwarz-additional_macro.idp	 \
-argv.idp			macro.idp			schwarz-add-macro.idp		schwarz-macro.idp
+LIST_IDP=  macro_ddm.idp
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) ./hpddm.cpp ./skeleton.cpp ./ff-hpddm.hpp ./removeDOF.cpp ./mymsh3.cpp ./PETSc.hpp ./init.hpp \
-include-hpddm/ARPACK.hpp		include-hpddm/MKL_PARDISO.hpp		include-hpddm/dmatrix.hpp		include-hpddm/option_impl.hpp \
-include-hpddm/BDD.hpp			include-hpddm/MUMPS.hpp			include-hpddm/eigensolver.hpp		include-hpddm/preconditioner.hpp \
-include-hpddm/BLAS.hpp			include-hpddm/PaStiX.hpp		include-hpddm/enum.hpp			include-hpddm/schur.hpp \
-include-hpddm/FETI.hpp			include-hpddm/ScaLAPACK.hpp		include-hpddm/iterative.hpp		include-hpddm/schwarz.hpp \
-include-hpddm/HPDDM.hpp			include-hpddm/SuiteSparse.hpp		include-hpddm/matrix.hpp		include-hpddm/subdomain.hpp \
-include-hpddm/Hypre.hpp			include-hpddm/coarse_operator.hpp	include-hpddm/operator.hpp		include-hpddm/wrapper.hpp \
-include-hpddm/LAPACK.hpp		include-hpddm/coarse_operator_impl.hpp	include-hpddm/option.hpp 		include-hpddm/singleton.hpp \
-include-hpddm/CG.hpp include-hpddm/GCRODR.hpp include-hpddm/GMRES.hpp 
+EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp common.hpp hpddm.cpp
 
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
 # deactivated).
 
-LIST_COMPILE=@TOOL_DYLIB_hpddm@ 
+LIST_COMPILE=@TOOL_DYLIB_hpddm@  
 
 if FFCS_MPIOK
 
@@ -83,7 +73,8 @@ install-exec-local::
 freefem++.pref:Makefile
 	echo loadpath = \"../examples++-mpi/\" >freefem++.pref
 	echo loadpath += \"../examples++-load/\" >>freefem++.pref
-	echo includepath = \"../examples++-3d/\" >>freefem++.pref
+	echo includepath = \"../examples++-mpi/\" >>freefem++.pref
+	echo includepath += \"../examples++-3d/\" >>freefem++.pref
 	echo includepath += \"../examples++-tutorial/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 
