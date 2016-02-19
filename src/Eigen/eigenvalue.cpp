@@ -562,9 +562,9 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	      cout << "Number of Arnoldi vectors generated: " << ncv  << endl;
 	      cout << "Number of iterations taken         : " << iparam[3]  << endl;
 	      cout << endl;
-	      
+              nconv = min(nconv,nbev);
 	      //if (prob.EigenvaluesFound()) {
-	      cout << "Eigenvalues:" << endl;
+	      cout << "Eigenvalues:" << endl;// Add FH feb 2016
 	      for (int i=0; i<nconv; i++) {
 		cout << "  lambda[" << (i+1) << "]: " << evr(i) << endl;
 		  KN_<K> vi(Z(':',i)) ;
@@ -681,7 +681,8 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 		cout << "Number of Arnoldi vectors generated: " << ncv  << endl;
 		cout << "Number of iterations taken         : " << iparam[3] << endl;
 		cout << endl;
-		  
+                nconv = min(nconv,nbev);// Add FH feb 2016
+  
 		cout << "Eigenvalues:" << endl;
 		for (int i=0; i<nconv; i++) {
 		  cout << "  lambda[" << (i+1) << "]: " ;
@@ -976,8 +977,8 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
 	  cout << "Number of Arnoldi vectors generated: " << ncv << endl;
 	  cout << "Number of iterations taken         : " << iparam[3]  << endl;
 	  cout << endl;
-	  
-	  cout << "Eigenvalues:" << endl;
+          nconv = min(nconv,nbev);
+	  cout << "Eigenvalues:" << endl;// Add FH feb 2016
 	  for (int i=0; i<nconv; i++) {
 	    cout << "  lambda[" << (i+1) << "]: " << evc(i) << endl;
 	    KN_<K> vi(Z(':',i)) ;

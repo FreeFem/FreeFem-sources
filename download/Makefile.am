@@ -141,7 +141,7 @@ reinstall-hpddm:./getall
 	-rm -rf include/hpddm
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
 include/hpddm:patch-hpddm-1
-	-if test -f ./pkg/hpddm.zip ; then cd include;rm -rf hpddm;  unzip ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; else true;  fi
+	-if test -f ./pkg/hpddm.zip ; then cd include;rm -rf hpddm hpddm-*;  unzip ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; else true;  fi
 #	if `../build/ff-md5 include/hpddm/src/wrapper.hpp 4c8acce994d0d5ac533ed58e59dcd187` ; then patch -p1 <patch-hpddm-1; fi;true
 #	if `../build/ff-md5 include/hpddm/src/ScaLAPACK.hpp dd38a3ff2d0aaa7d93b76ed19d3224ae` ; then patch -p1 <patch-hpddm-2; fi;true
 
