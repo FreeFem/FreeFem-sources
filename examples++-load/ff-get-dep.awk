@@ -1,12 +1,15 @@
 BEGIN { 
-  sub(/[ \t]*/,"",libs);
+  if( db != "") db=1;
+  gsub(/[ \t][ \t]*/," ",libs);
+  sub(/^ /,"",libs);
+  sub(/ $/,"",libs);
   gsub(/([]])/," ] ",libs); 
   gsub(/([[])/," [ ",libs); 
   gsub(/([|])/," | ",libs); 
+  if(db) print " LIBS='" libs "'";
   nl=split(libs,l," *"); 
   err= 0;
   sp=" ";
-  if( db != "") db=1;
 }
 $2=="LD" { 
     if( ld[$1]=="" )  {

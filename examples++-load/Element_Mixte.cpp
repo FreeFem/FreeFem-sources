@@ -25,7 +25,9 @@
  
  */
 
-//ff-c++-LIBRARY-dep:   lapack blas 
+//ff-c++-LIBRARY-dep:   lapack blas
+
+// lapack: dgetrf and dgetri
 
 
 #include "ff++.hpp"

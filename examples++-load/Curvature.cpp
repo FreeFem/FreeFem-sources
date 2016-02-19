@@ -345,8 +345,13 @@ double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<do
         
         
     }
-    ffassert( nbg==1); // un depart
     int np = nel/2+1;
+    if(nbg ==0) {// bord ferme
+        bg= nee[0];
+        nee[0]=-1; // on ouvre 
+    }
+    else
+      ffassert( nbg==1); // un depart pas plus
     bb->resize(3,np);
     KNM<double> &b(*bb);
     int i=0,iv=bg;
@@ -358,7 +363,18 @@ double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<do
         b(2,i)=0; // compute after
         iv =  nee[nx[iv]];
         i++;
+       
     }
+    if(nbg==0 ) {
+        // on ferme
+        ffassert(i+1==np);
+        iv=bg;
+        b(0,i)=Th(iv).x;
+        b(1,i)=Th(iv).y;
+        b(2,i)=0; // compute after
+        i++;
+    }
+    ffassert(i==np); // bonne longueur => sinon bug plus d'une composant connexe ????
    return reparametrage(stack,b);
 }
 double ExtractBorder(Stack stack,pmesh const & pTh,long const & lab, KNM<double> *const &bb)
