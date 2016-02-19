@@ -171,6 +171,7 @@ tag-compile-pkg: bin lib include pkg FORCE
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d || exit 1; done;\
 	fi;fi
+	$(MAKE) install-hpddm
 	touch tag-compile-pkg
 FORCE:
 
