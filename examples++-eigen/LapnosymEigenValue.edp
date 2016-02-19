@@ -23,7 +23,7 @@ varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ;//+  on(1,2,3,4,u1=0);
 matrix OP= op(Vh,Vh,solver=UMFPACK,factorize=0); 
 matrix A= a(Vh,Vh,solver=GMRES); 
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
-int nev=10;
+int nev=11;
 
 real[int] ev(nev); // to store 10 eigein value real part
 real[int] evi(nev); // to store 10 eigein value imag part
