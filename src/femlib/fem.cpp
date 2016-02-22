@@ -42,6 +42,8 @@ extern long searchMethod; //pichon
 #include "Serialize.hpp"
 #include "fem.hpp"
 #include <set>
+extern   long npichon2d, npichon3d;
+
 namespace Fem2D {
     
     
@@ -986,7 +988,8 @@ int Walk(const Mesh & Th,int& it, R *l,
 }
 const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * tstart) const
 {
-    int it,j;
+    int CasePichon=0;
+    int it,j,it00;
     const Triangle *  rett=0;
     if ( tstart )
 	it =  (*this)(tstart);
@@ -1002,10 +1005,10 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	 if (verbosity>100) 
 	 cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl; 
 	 */
-	it=Contening(v);
+	it00=it=Contening(v);
     }
-    
-    //     int itdeb=it;     
+RESTART:
+    //     int itdeb=it;
     //     int count=0;
     //     L1: 
     outside=true; 
@@ -1147,7 +1150,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 		return rett;
 	    }
 	    bool ok=false;
-	    // next edge on true boundary 
+	    // next edge on true boundaryS
 	    for (int p=BoundaryAdjacencesHead[ii];p>=0;p=BoundaryAdjacencesLink[p])
 	    { int e=p/2, ie=p%2;// je=2-ie;
 				// cout << number(bedges[e][0]) << " " << number(bedges[e][1]) << endl;
@@ -1162,7 +1165,27 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	    }
 	    ffassert(ok); 
 	}
-PICHON:	// Add dec 2010 ... 
+PICHON:	// Add dec 2010 ...
+    CasePichon++;
+    if(CasePichon==1) {// hack feb 2016  ..... ???????
+        // change starting triangle  ????
+        R2 PF=(*rett)(Phat);
+        R2 PP=P + (P-PF);
+        const Vertex * v=quadtree->NearestVertexWithNormal(PP);
+        if (!v)
+        {
+            v=quadtree->NearestVertex(P);
+            assert(v);
+        }
+        /*
+         if (verbosity>100)
+         cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl;
+         */
+        it=Contening(v);
+        if( it != it00) goto RESTART;
+    }
+    
+    npichon2d++;
 	// Brute force .... bof bof ...
     double ddp=1e100;
     int pk=-1;

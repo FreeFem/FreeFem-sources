@@ -1217,6 +1217,9 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
    {
         int ncas=0 ;
         const R eps = 1e-12;
+        const R epsb = 1e-10;
+        const R epsedge = 1e-9;
+
         // corrected by F.H 23 juin 2015
         bool ddd=verbosity>2000;
         bool nomove=true;
@@ -1302,7 +1305,7 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
             << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
             <<endl ;
         
-        int neg[nve],k=0;
+        int neg[nve],k=0,nng[4],kn;
         int kk=-1;
         
         if(kf>=0)   // sortie positive ..
@@ -1312,50 +1315,65 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
             // car sinon il va y avoir un probleme quand on va projete sur la face
             //  et remettre le point dans le tetraedre.
             int ko=0,j=0;
-            if (l[0]<=-eps ) neg[k++]=0,ko+=0+j, j+=4;
-            if (l[1]<=-eps ) neg[k++]=1,ko+=1+j, j+=4;
-            if (l[2]<=-eps ) neg[k++]=2,ko+=2+j, j+=4;
-            if (l[3]<=-eps ) neg[k++]=3,ko+=3+j, j+=4;
+            if (l[0]<=-eps ) neg[k++]=0,ko+=0+j, j+=4;else nng[kn++]=0;
+            if (l[1]<=-eps ) neg[k++]=1,ko+=1+j, j+=4;else nng[kn++]=1;
+            if (l[2]<=-eps ) neg[k++]=2,ko+=2+j, j+=4;else nng[kn++]=2;
+            if (l[3]<=-eps ) neg[k++]=3,ko+=3+j, j+=4;else nng[kn++]=3;
             
             //R eps1 = T.mesure()   * 1.e-5;
             if(ddd)  cout << "\t\t\t k= " << k << endl;
             
-            if(kk>=0)
+            if(k>0)
             {
                 {
                     R coef1 = 1-cf;
                     nomove= (cf<1e-10);
                     dt        = dt*coef1;// temps restant
                 }
-                // on meme le points
+                // on met les points
                 for(int i=0; i<k; ++i)
-                    lambda[neg[i]]=0;
-
-                if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< lambda[0]  << " "
-                    <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << " PF =" << PF <<  " " << &PF <<endl;
-
-                //}
+                    l[neg[i]]=0;
+                int p[4]={0,1,2,3};
+                if(l[p[0]] <l[p[2]]) swap(p[0],p[2]);
+                if(l[p[1]] <l[p[3]]) swap(p[1],p[3]);
+                if(l[p[0]] <l[p[1]]) swap(p[0],p[1]);// 0 ok
+                if(l[p[2]] <l[p[3]]) swap(p[2],p[3]);// 3 ok
+                if(l[p[1]] <l[p[2]]) swap(p[2],p[3]);// 1,2 ok
                 
-                
-                kk= ko;
+                ffassert((l[p[0]]  >= l[p[1]]) && (l[p[1]]  >= l[p[2]]) && (l[p[2]]  >= l[p[3]]) );
+                if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< l[0]  << " "
+                    <<l[1] << " " <<l[2] << " " << l[3] << " PF =" << PF <<  " " << &PF <<endl;
+                if( k==1) kk=p[3];
+                else if(k>1) { // on bouge la sortie un sortie a pb un peu...
+                    if( l[p[1]] > epsedge )
+                    { //sort sur un arete .. varaimant ...
+                        // on met le point sur unz face ...
+                        l[p[0]]-=epsb;
+                        l[p[1]]-=epsb;
+                        l[p[2]]+=epsb+epsb;
+                        l[p[3]]=0;
+                        kk  =p[3];
+                        cout << "  *** WalkInTetn: on bouge convect le point d'une arete  sur un face .... \n";
+                    }
+                    else
+                    { // sort sur un sommet
+                        l[p[0]]-=epsb+epsb;
+                        l[p[2]]+=epsb;
+                        l[p[3]]=0;
+                        kk=p[3];
+                        cout << "  *** WalkInTetn: on bouge convect le point d'un sommet sur un face .... \n";
+
+                    }
+                    l[p[0]]=0;
+                    l[p[0]]=1. - l[0] - l[1] - l[2] - l[3];
+                }
+
             }
             
         }
-         //  on remet le point dans le tet.
-        int jj=0;
-        int kout=0;
-        R lmx=lambda[0];
-        if (lmx<lambda[1])  jj=1, lmx=lambda[1];
-        if (lmx<lambda[2])  jj=2, lmx=lambda[2];
-        if (lmx<lambda[3])  jj=3, lmx=lambda[3];
-        if(lambda[0]<0) kout+=1,lambda[jj] += lambda[0],lambda[0]=0;
-        if(lambda[1]<0) kout+=2,lambda[jj] += lambda[1],lambda[1]=0;
-        if(lambda[2]<0) kout+=4,lambda[jj] += lambda[2],lambda[2]=0;
-        if(lambda[3]<0) kout+=8,lambda[jj] += lambda[3],lambda[3]=0;
-        Phat=R3(lambda+1);
+        Phat=R3(l+1);
         if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << " K(Phat) ="<< Th[it](Phat)
-                      <<  ", " << kk << " jj= "<< jj << " "<< lmx << endl;
-        assert(kk<0 || lambda[kk]==0);
+                      <<  ", " << kk << endl;
         return kk;
    }
     

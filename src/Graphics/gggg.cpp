@@ -112,6 +112,7 @@ void ShowDebugStack(){}
  long mpisize=0,mpirank=0;
 
 bool showCPU= false;
+long npichon2d=0, npichon3d=0;
 
 
 //  add F. Hecht 

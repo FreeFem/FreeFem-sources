@@ -3347,6 +3347,8 @@ int Compile()
 	      UnShowAlloc =1;
 	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg 
               << " mpirank: " <<mpirank <<  endl    ;
+              extern   long npichon2d, npichon3d;
+              if( npichon2d || npichon3d ) cout << " WARNING NUMBER bad SearchMethod cas in 2d: " <<npichon2d << " int 3d "<< npichon3d << endl;
 	      if(!mpirank) cerr <<  "Ok: Normal End" << endl;
 	    }
 	}

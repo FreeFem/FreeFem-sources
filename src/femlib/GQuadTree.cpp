@@ -50,6 +50,7 @@ using namespace std;
 
 
 
+extern   long npichon2d, npichon3d;
 
 
 namespace EF23 {
@@ -615,14 +616,14 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   R dP=DBL_MAX;
   Rd PPhat;
   int k=0;    
-
-  int it,j;
+    int nReStart = 0;
+  int it,j,it00;
   const int mxbord=100;
   int kbord[mxbord];
   int nbord=0;
   if(searchMethod>1) goto PICHON;
   if ( tstart )
-    it =  Th(tstart);
+    it00=it =  Th(tstart);
   else  if(quadtree)
     {  
       const Vertex * v=quadtree->NearestVertexWithNormal(P);
@@ -631,13 +632,13 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  v=quadtree->NearestVertex(P);
 	  assert(v);
 	}
-      it=Th.Contening(v);
+      it00=it=Th.Contening(v);
       if(verbosity>200)
 	cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
       
     }
   else ffassert(0);
-  
+RESTART:
   if(verbosity>200)
     cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
   outside=true; 
@@ -767,6 +768,22 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	    cout << " s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
           }
 	outside=true;
+        // on retest with a other stating point??????
+        if(nReStart++ == 0)
+        {
+            Rd PF= Th[it](Phat);
+            Rd PP= P + (P-PF);
+            const Vertex * v=quadtree->NearestVertexWithNormal(PP);
+            if (!v)
+            {
+                v=quadtree->NearestVertex(P);
+                assert(v);
+            }
+            it=Th.Contening(v);
+            if(verbosity>200)
+                cout <<  "  Recose Close : "<<  *v << " " << Th(v) << " ";
+            if(it!=it00) goto RESTART;
+        }
 	if(searchMethod) goto PICHON;
 	return &Th[it] ;
       }		    
@@ -774,6 +791,9 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   
  PICHON:
   {
+      if(Rd::d==2)  npichon2d++;
+      if(Rd::d==3)  npichon3d++;
+
   /*==============================PICHON=================*/
   // Brute force ** */    
   R l[4], eps = -1e-6;  //pichon
