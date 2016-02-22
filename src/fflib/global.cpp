@@ -114,8 +114,9 @@ namespace ffapi {
 
 /// <<verbosity>>
 long verbosity = 1;
-
  long searchMethod = 0; //pichon
+long npichon2d=0, npichon3d=0;
+
  FILE *ThePlotStream=0; //  Add for new plot. FH oct 2008
 
   KN<String> *pkarg;//  for the list of argument  mars 2010 

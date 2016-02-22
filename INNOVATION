@@ -1,3 +1,5 @@
+ - try to add new version do 3d convect ( add newconvect=1;) in test ...
+ 
 version 3.44 (22 feb. 2016) 
  - add tools to extract border after movemesh in Curvature  plugin)
      see curvature.edp, can be useful to remesh after movemesh. 
