@@ -1,8 +1,9 @@
-version 3.44
+version 3.44 (22 feb. 2016) 
  - add tools to extract border after movemesh in Curvature  plugin)
+     see curvature.edp, can be useful to remesh after movemesh. 
  - restruct the hpddm and petsc plugin ( thanks to P. Jolivet)
    add lots hpddm and petsc examples in examples++-hpddm
-version 3.34_3 
+version 3.43-33 
   - remove some spurious print when verbosity = 0 
   - add initialisation of array which string parameter like in
      string[string] b= ["-1",1,"13","qsdqdq"];
@@ -67,7 +68,7 @@ version 3.40-2
      now freefem++ use petsc lib if petsc is find for
        parmetis, metis,ptscotch,scotch,fftw3_mpi, mumps,scalapack
  - correct hpddm examples
- - rename plugin schowarz in hpddm 
+ - rename plugin schwarz in hpddm 
  - correct problem on compilation do scotch 
 version 3.40-1 
  -  move of all hpddm code un examples  examples++-hpddm ( Own by  P. Jolivet and F. Hecht)
