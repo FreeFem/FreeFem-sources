@@ -2,7 +2,7 @@
 verbosity=0; 
 // voir https://fr.wikipedia.org/wiki/Pression_de_Laplace
 load "isoline"
-load "curvature"
+load "Curvature"
 
 real X0 = 0.1, Y0 =1*X0,Y1=0, CC0=Y0; 
 real meshsize=X0/10;
