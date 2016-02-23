@@ -51,6 +51,8 @@ using namespace std;
 
 
 extern   long npichon2d, npichon3d;
+extern   long npichon2d1, npichon3d1;
+
 
 
 namespace EF23 {
@@ -135,8 +137,8 @@ namespace EF23 {
 		
       }
       // n0 number of boxes of in b ("b0")
-    if(verbosity>200)
-    cout << "n0=" << n0 << endl;
+    if(verbosity>2000)
+    cout << "        n0=" << n0 << endl;
     
     if ( n0 > 0) 
     {  
@@ -154,8 +156,8 @@ namespace EF23 {
       return vn;
     }
     
-if(verbosity>200)
-    cout << "general case : NearVertex" << endl; 
+if(verbosity>2000)
+    cout << "        general case : NearVertex" << endl;
     // general case -----
   pb[0]= b;
   pi[0]=b->n>0 ?(int)  b->n : N  ;
@@ -613,10 +615,11 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   typedef  typename Mesh::Rd Rd;
   const int nkv=Element::nv;
   const int d=Rd::d;
-  R dP=DBL_MAX;
-  Rd PPhat;
+  R dP=DBL_MAX, nddd=0;
+  Rd PPhat,Delta;
   int k=0;    
     int nReStart = 0;
+    int itstart[100],kstart=0;
   int it,j,it00;
   const int mxbord=100;
   int kbord[mxbord];
@@ -634,13 +637,14 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	}
       it00=it=Th.Contening(v);
       if(verbosity>200)
-	cout <<  "  Close : "<<  *v << " " << Th(v) << " "; 
+	cout <<  "   Find: Close : "<<  *v << " , " << Th(v) << " ";
       
     }
   else ffassert(0);
 RESTART:
-  if(verbosity>200)
-    cout << "tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl; 
+  itstart[kstart++]=it;
+  if(verbosity>199)
+    cout << "    tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl;
   outside=true; 
   Mesh::kfind++;
   while (1)
@@ -667,11 +671,11 @@ RESTART:
 	  nl[n++]=i;
 	}
       if(verbosity>200){
-	cout << "tet it=" << it ;
+	cout << "       tet it=" << it ;
 	cout << "  K.mesure=" << K.mesure() ;
-	cout << " eps=" << eps << endl;
+	cout << " eps=" << eps << " : " ;
 	for(int i=0;i<nkv;++i)
-	  cout<< " l["<< i <<"]=" <<  l[i] ;
+	  cout<< "  l["<< i <<"]=" <<  l[i] ;
 	cout << " n=" << n << endl;
       }
       
@@ -684,7 +688,7 @@ RESTART:
 	  Rd pp=K(Phat)-P;
 	  if( pp.norme()>1e-5)
 	    {
-	      cout << " Bug find P " << P << " ==" << K(Phat)  << endl;
+	      cout << "     Bug find P " << P << " ==" << K(Phat) ;
 	      cout << "Phat== " << Phat << " diff= " << pp << endl;
 	      assert(0);
 	    }
@@ -713,7 +717,7 @@ RESTART:
 	}
       if(verbosity>1001)
 	{
-	  cout << " bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
+	  cout << "       bord "<< it<< "   nbf < 0 : " <<n << " (inb) " << inkbord << " nfb" << nbord<<endl;
 	  R ss=0; 
 	  for(int i=0;i<nkv;++i)
 	    {  ss += l[i];
@@ -723,7 +727,7 @@ RESTART:
 	}
       
       if(verbosity>2000)
-	cout << "GQuadTree::value of n " << n << endl;
+	cout << "      GQuadTree::value of n " << n << endl;
       
       if ( n!=1 )  // on est sur le bord, mais plusieurs face <0 => on test les autre
 	{  // 1) existe t'il un adj interne
@@ -760,29 +764,51 @@ RESTART:
 	Phat=Rd(l +1);
 	if(verbosity>1000)
 	  {
-	    cout << P << " " << n << " l: ";
+	    cout << "      "<< P << " " << n << " l: ";
 	    R ss=0; 
 	    for(int i=0;i<nkv;++i)
 	      {  ss += l[i];
 		cout << l[i] << " ";}
-	    cout << " s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
+	    cout << "   s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
           }
 	outside=true;
         // on retest with a other stating point??????
-        if(nReStart++ == 0)
+          // Mod.  23/02/2016 F. H 
+       while(nReStart++ < 7)
         {
-            Rd PF= Th[it](Phat);
-            Rd PP= P + (P-PF);
-            const Vertex * v=quadtree->NearestVertexWithNormal(PP);
-            if (!v)
+             if(nReStart==1)
             {
-                v=quadtree->NearestVertex(P);
-                assert(v);
+                Delta =(P-Th[it](Phat));
+                nddd=Norme2(Delta);
             }
+            else
+            {
+                int sgn=(nReStart %2)*2-1;
+                int i = (nReStart-2)/2;
+                Delta = Rd();
+                Delta[i]= nddd*sgn;
+            }
+            if( verbosity>199) {
+                Rd pp=Th[it](Phat)-P;
+                cout << "    restart find P " << P << " !=" <<Th[it](Phat)  << "\t" ;
+                cout << "Phat== " << Phat << " diff= " << pp << " it = " << it << endl;
+            }
+            
+            Rd PP= P + Delta;
+            Vertex* v=quadtree->NearestVertexWithNormal(PP);
+            if(!v) v=quadtree->NearestVertex(PP);
             it=Th.Contening(v);
-            if(verbosity>200)
-                cout <<  "  Recose Close : "<<  *v << " " << Th(v) << " ";
-            if(it!=it00) goto RESTART;
+            bool same=false;
+            if( verbosity>199)
+            cout << "   loop Search "<<nReStart << " " <<  Delta << " it " << it << endl;
+
+            for(int j=0;j<kstart ; ++j)
+                if( it == itstart[j]) {same=true; break;}
+            if(same) continue;
+            if( verbosity>199) cout << " Restart tet: " << it << " " << P << endl;
+            if(Rd::d==2)  npichon2d1++;
+            if(Rd::d==3)  npichon3d1++;
+            goto RESTART;
         }
 	if(searchMethod) goto PICHON;
 	return &Th[it] ;
@@ -820,6 +846,10 @@ RESTART:
       
       if  ( (l[0] >= eps) && (l[1] >= eps) && (l[2] >= eps) &&  (l[3] >= eps) )
 	{
+         if( verbosity>199)
+         {
+             cout << "   #### brute force " << tet << " "<< endl;
+         }
           outside=false;
 	  Phat=Rd(l+1);
 	  return &K;	

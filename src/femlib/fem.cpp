@@ -43,6 +43,7 @@ extern long searchMethod; //pichon
 #include "fem.hpp"
 #include <set>
 extern   long npichon2d, npichon3d;
+extern   long npichon2d1, npichon3d1;
 
 namespace Fem2D {
     

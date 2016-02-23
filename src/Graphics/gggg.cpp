@@ -113,7 +113,7 @@ void ShowDebugStack(){}
 
 bool showCPU= false;
 long npichon2d=0, npichon3d=0;
-
+long npichon2d1=0, npichon3d1=0;
 
 //  add F. Hecht 
 EnvironmentData  ffenvironment;
