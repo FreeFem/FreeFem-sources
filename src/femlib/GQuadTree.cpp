@@ -774,7 +774,7 @@ RESTART:
 	outside=true;
         // on retest with a other stating point??????
           // Mod.  23/02/2016 F. H 
-       while(nReStart++ < 7)
+       while(nReStart++ < 10)
         {
              if(nReStart==1)
             {
@@ -783,10 +783,11 @@ RESTART:
             }
             else
             {
-                int sgn=(nReStart %2)*2-1;
+                int k= nReStart-1;
                 int i = (nReStart-2)/2;
-                Delta = Rd();
-                Delta[i]= nddd*sgn;
+                
+                for(int i=0; i<Rd::d; ++i)
+                    Delta[i]=  ((1<<i) & k) ?  nddd : -nddd;
             }
             if( verbosity>199) {
                 Rd pp=Th[it](Phat)-P;

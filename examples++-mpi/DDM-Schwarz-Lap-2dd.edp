@@ -27,7 +27,7 @@ include "DDM-Schwarz-macro.idp"
 include "DDM-funcs-v2.idp"
 
 
-searchMethod=1; // more safe seach algo (warning can be very expensive in case lot of ouside point) 
+searchMethod=0; // more safe seach algo (warning can be very expensive in case lot of ouside point) 
 // 0 by default
 
 assert(version >=3.11);

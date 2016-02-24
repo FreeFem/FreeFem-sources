@@ -66,7 +66,7 @@ real coef= 0.01/dmax;
 int[int] ref2=[1,0,2,0];
 if(mpirank==0)
 {
-searchMethod=1;		
+searchMethod=0;		
   mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],label=ref2);
   savemesh(Thm,"beam-deformed-mumps.mesh");
 }
