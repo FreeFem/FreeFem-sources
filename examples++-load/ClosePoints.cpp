@@ -184,11 +184,11 @@ KN<long>* CloseTo2(Stack stack,double const & eps,KNM_<double> const &  P,KNM_<d
     long Qn0=Q.N();
     long Qm0=Q.M();
     double * p0=&(P(0,0));
-    int po10 =( &(P(1,0)) - p0);
-    int po01 =( &(P(0,1)) - p0);
+    int po10 = P.step*P.shapei.step;
+    int po01 = P.step*P.shapej.step;
     double * q0=&(Q(0,0));
-    int qo10 =( &(Q(1,0)) - p0);
-    int qo01 =( &(Q(0,1)) - p0);
+    int qo10 =Q.step*Q.shapei.step;
+    int qo01 =Q.step*Q.shapej.step;
 
     double x0= P(0,':').min();
     double y0= P(1,':').min();
@@ -197,6 +197,8 @@ KN<long>* CloseTo2(Stack stack,double const & eps,KNM_<double> const &  P,KNM_<d
     
     // add cc
     double dd= max(x1-x0,y1-y0)*0.01;
+    if (dd==0) dd = max(abs(x0),abs(y0))*1e-8;
+    if (dd==0) dd=1e-8;
     double data[]={x0-dd,y0-dd,x1+dd,y1+dd};
 
     R2close S(data,Pm0,eps,po10);
@@ -240,8 +242,8 @@ KN<long>* CloseTo(Stack stack,double const & eps,KNM_<double> const &  P,KNM<dou
     KNM<double> & Qo=*q;
     double * p0=&(P(0,0));
     
-    int offset10 =( &(P(1,0)) - p0);
-    int offset01 =( &(P(0,1)) - p0);
+    int offset10 = P.step*P.shapei.step;
+    int offset01 = P.step*P.shapej.step;
     if(verbosity>10 )
     {
         cout << "     offset of 0 1 :  "<< offset01  << endl;
@@ -460,11 +462,11 @@ long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &
 
     double *p= &P(0,0);
     double *q= &Q(0,0);
-    int offset01=&P(0,1)-p;
-    int offset10=&P(1,0)-p;
+    int offset01= P.step*P.shapej.step;;
+    int offset10= P.step*P.shapei.step;;
     double * q0=&(Q(0,0));
-    int qoffset01 =( &(Q(0,1)) - q0);
-    int qoffset10 =( &(Q(1,0)) - q0);
+    int qoffset01 = Q.step*Q.shapej.step;;
+    int qoffset10 = Q.step*Q.shapei.step;;
     ffassert( mp ==2);
     ffassert( mq ==2);
     

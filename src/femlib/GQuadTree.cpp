@@ -796,8 +796,8 @@ RESTART:
             }
             
             Rd PP= P + Delta;
-            Vertex* v=quadtree->NearestVertexWithNormal(PP);
-            if(!v) v=quadtree->NearestVertex(PP);
+            Vertex* v=quadtree->NearestVertex(PP);
+           // if(!v) v=quadtree->NearestVertex(PP);
             it=Th.Contening(v);
             bool same=false;
             if( verbosity>199)
