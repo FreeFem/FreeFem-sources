@@ -2276,7 +2276,7 @@ class Convect : public E_F0mps  { public:
     AnyType operator()(Stack s) const ; 
     AnyType eval2(Stack s) const ; 
     AnyType eval3(Stack s) const ; 
-    AnyType eval3n(Stack s) const ;
+    AnyType eval3old(Stack s) const ;  // old version a supprime en  2017
     operator aType () const { return atype<Result>();}
     
 };
@@ -4417,10 +4417,10 @@ inline int FindandAdd(set<int> *st,vector<int> & lst,int k)
 
 
 
-AnyType Convect::eval3(Stack s) const
+AnyType Convect::eval3old(Stack s) const
 {
     extern long newconvect3;
-    if(newconvect3) return eval3n(s);//  New Convect in test
+    if(newconvect3) return eval3(s);//  New Convect in test
     MeshPoint* mp(MeshPointStack(s)),mpc(*mp);
     MeshPointStack(s,&mpc);// P  ptr on  variable mpc ...
 
@@ -4498,8 +4498,8 @@ AnyType Convect::eval3(Stack s) const
     return r;
 }
 
-AnyType Convect::eval3n(Stack s) const
-{
+AnyType Convect::eval3(Stack s) const
+{  // nouvelle version de convect 3d Feb 2015  version 3.44-01
     MeshPoint* mp(MeshPointStack(s)),mpc(*mp);
     MeshPointStack(s,&mpc);// P  ptr on  variable mpc ...
     static MeshPoint mpp,mps;
