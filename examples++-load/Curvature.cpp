@@ -361,8 +361,9 @@ double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<do
         b(0,i)=Th(iv).x;
         b(1,i)=Th(iv).y;
         b(2,i)=0; // compute after
-        iv =  nee[nx[iv]];
         i++;
+	if( nx[iv] < 0) break;
+        iv =  nee[nx[iv]];
        
     }
     if(nbg==0 ) {
