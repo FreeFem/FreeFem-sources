@@ -57,6 +57,7 @@ matrix<real> Mat;                           // local operator
 ThBorder = square(1, 1);
 
 dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+set(A, sparams = "hpddm_mkl_pardiso_iparm_13 1");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 dpair ret;

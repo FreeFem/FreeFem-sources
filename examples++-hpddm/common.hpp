@@ -24,6 +24,7 @@
 #define HPDDM_FETI 0
 #define HPDDM_BDD 0
 #define HPDDM_NUMBERING 'C'
+#undef CBLAS_H
 
 #include <HPDDM.hpp>
 
