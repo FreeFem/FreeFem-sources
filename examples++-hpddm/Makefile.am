@@ -23,8 +23,7 @@
 
 TESTS=   diffusion-2d-PETSc.edp	diffusion-3d-PETSc.edp	elasticity-2d-PETSc.edp	elasticity-3d-PETSc.edp	heat-2d-PETSc.edp	heat-3d.edp \
 diffusion-2d.edp	diffusion-3d.edp	elasticity-2d.edp	elasticity-3d.edp	heat-2d.edp		helmholtz-2d.edp \
-stokes-2d-PETSc.edp 	stokes-3d-PETSc.edp	stokes-3d.edp
-#  stokes-2d.edp	(segfault ???? FH.. ) 	
+stokes-2d-PETSc.edp 	stokes-3d-PETSc.edp	stokes-3d.edp	stokes-2d.edp
 
 XFAIL_TESTS=$(TESTS)
 
