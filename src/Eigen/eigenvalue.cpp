@@ -414,7 +414,6 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
    if(expB)
    pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
   double * residptr=resid? (double*) *resid : 0;
-  cout << " residptr = " << residptr <<endl;
   long  n=0;
   if( pOP1)
       n =pOP1->A->n;
