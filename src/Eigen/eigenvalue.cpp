@@ -477,7 +477,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     if (n != B.M )
 	serr[err++]="Sorry the colum's number of the secand matrix in EigneValue is wrong.";
 	
-   if(verbosity)
+   if(verbosity && mpirank==0)
    {
     if(sym)
       cout << "Real symmetric eigenvalue problem: A*x - B*x*lambda" << endl;
@@ -723,6 +723,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
 	      {
 		//int k=i;
 		KN_<K> vi(Z(':',i)) ;
+                if(verbosity>2 && mpirank ==0 )
 		cout << "   ------ EV--raw " << vi.min() << " " << vi.max() << endl;
 		(*rawvector)(':',i)=vi;
 	      }
@@ -1017,6 +1018,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
 		{
 		  KN_<K> vi(Z(':',i)) ;
 		  (*rawvector)(':',i)=vi;
+                   if(verbosity>2 && mpirank ==0 )
 		    cout << " raw " << vi.l2() << " == " << (*rawvector)(':',i).l2()<< endl;
 		}
 	      
