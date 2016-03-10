@@ -25,7 +25,7 @@
  */
 
 //   for automatic  compilation with ff-c++
-//ff-c++-LIBRARY-dep:  mumps-seq blas  libseq  fc  pthread
+//ff-c++-LIBRARY-dep:  mumps_seq blas  libseq  fc  pthread
 //ff-c++-cpp-dep: 
 //
 // F. Hecht  december 2011
@@ -95,7 +95,7 @@ public:
       }
     //cout << ICNTL(1) << " " << ICNTL(2) << " "<< ICNTL(3) << " "<< ICNTL(4) << endl; 
   }
-  void Check(const char * msg="mumps-seq") const 
+  void Check(const char * msg="mumps_seq") const 
   {
     if( INFO(1) !=0) 
       {
@@ -160,7 +160,7 @@ public:
 
     id.job=JOB_ANA_FAC; // performs the analysis. and performs the factorization. 
     mumps_c(&id);
-    Check("MUMPS-seq analayse and Factorize");
+    Check("MUMPS_seq analayse and Factorize");
     if(verbosity>3)
       cout << "  -- MUMPS LU   n=  " << n << ", peak Mem: " << INFOG(22) << " Mb" << " sym: " << id.sym <<  endl;
       if( rinfog)
@@ -194,7 +194,7 @@ public:
     SetVerb();
     id.job=JOB_SOLVE; // performs the analysis. and performs the factorization. 
     mumps_c(&id);
-    Check("MUMPS-seq Solve");
+    Check("MUMPS_seq Solve");
     
     if(verbosity>3)
       cout << "   b min max " << b.min() << " " <<b.max() << endl;

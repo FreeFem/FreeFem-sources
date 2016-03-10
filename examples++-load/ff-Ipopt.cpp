@@ -23,7 +23,7 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//ff-c++-LIBRARY-dep:  Ipopt mumps-seq blas  libseq  fc
+//ff-c++-LIBRARY-dep:  Ipopt mumps_seq blas  libseq  fc
 
 //using namespace std;
 #include "IpTNLP.hpp"
