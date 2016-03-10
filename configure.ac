@@ -68,10 +68,10 @@ m4_define([AC_FF_WHERELIB],
 	    case "$ff_WHERE_INC" in 
 		/*) echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
 	    esac
+            ff_where_lib_conf_$1=1
 	fi
 	AC_MSG_RESULT($ff_WHERE)
-        ff_$1_ok=yes;
-        ff_where_lib_conf_$1=1
+        ff_$1_ok=$ff_WHERE;
 	LIBS=$ff_save_libs
 	fi
     ])dnl end m4_define AC_FF_WHERELIB
@@ -1904,7 +1904,7 @@ TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
-TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
+TOOL_DISABLE(superlu4,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
