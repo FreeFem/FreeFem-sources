@@ -46,10 +46,10 @@ do
 	    elif [ -n "$errC" ] ; then
 		((NC++))
 		MSG="${lgn} FAIL(Compile)     ${std}"
-	    elif [ -n "$errA" ] ; then
+	    elif [ -n "$errA" -a  $SIG -ne 0 ] ; then
 		((NA++))
 		MSG="${blu} FAIL(Assert)      ${std}"
-	    elif [ -n "$errX" ] ; then
+	    elif [ -n "$errX" -a  $SIG -ne 0 ] ; then
 		((NX++))
 		MSG="${mgn} FAIL(Exec)        ${std}"
 	    elif [ $SIG -eq 0 ] ; then
