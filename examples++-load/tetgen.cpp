@@ -2284,7 +2284,7 @@ AnyType ReconstructionRefine_Op::operator()(Stack stack)  const
 
 
 // ConvexHull3D_tetg_Op
-
+/*
 class ConvexHull3D_tetg_Op : public E_F0mps 
 {
 public:
@@ -2328,7 +2328,7 @@ basicAC_F0::name_and_type  ConvexHull3D_tetg_Op::name_param[]= {
     {  "label", &typeid(long)}
 };
 
-class ConvexHull3D_tetg : public OneOperator { public:  
+class ConvexHull3D_tetg : public OneOperator { public:
      ConvexHull3D_tetg() : OneOperator( atype<pmesh3>(), atype<long>(), 
      atype< KN_<double> >(), atype< KN_<double> >(), atype< KN_<double> >() ) {}
   
@@ -2355,7 +2355,7 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
      
   KN<long> zzempty;
   //int intempty=0;
-  string stringempty= string("YqaAAQC");
+  string stringempty= string("qaAAQC");
   string* switch_tet(arg(0,stack,&stringempty));
   int label_tet(arg(1,stack,arg(3,stack,0L)));  
   int label_face(arg(2,stack,arg(4,stack,1L)));
@@ -2382,13 +2382,15 @@ AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
   cout << "FreeFem++: End check mesh given by tetgen" << endl;  
   return Th3;
 }
-
+*/
 // ConvexHull3D_tetg_file_Op
 
 class ConvexHull3D_tetg_file_Op: public E_F0mps 
 {
 public:
   Expression filename;
+  Expression xx,yy,zz;
+    
   static const int n_name_param =5; //
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
@@ -2403,16 +2405,17 @@ public:
   
 public:
   ConvexHull3D_tetg_file_Op(const basicAC_F0 &  args, Expression zfilename ) 
-    : filename(zfilename)
+    : filename(zfilename),xx(0),yy(0),zz(0)
   {
     if(verbosity) cout << "Convex Hull with TetGen" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
-    if( nargs[1] && nargs[3] )
-	CompileError("uncompatible ... (Th, region= , reftet=  ");
-    if( nargs[2] && nargs[4] )
-	CompileError("uncompatible ... (Th, label= , refface=  ");
-    
   } 
+    ConvexHull3D_tetg_file_Op(const basicAC_F0 &  args, Expression xxx,Expression yyy,Expression zzz )
+    : filename(0),xx(xxx),yy(yyy),zz(zzz)
+    {
+        if(verbosity) cout << "Convex Hull with TetGen" << endl;
+        args.SetNameParam(n_name_param,name_param,nargs);
+    } 
   
   AnyType operator()(Stack stack)  const ;
 };
@@ -2427,17 +2430,28 @@ basicAC_F0::name_and_type  ConvexHull3D_tetg_file_Op::name_param[]= {
     
 };
 
-class ConvexHull3D_tetg_file : public OneOperator { public:  
-     ConvexHull3D_tetg_file() : OneOperator( atype<pmesh3>(), atype<string *>() ) {}
-  
+class ConvexHull3D_tetg_file : public OneOperator { public:
+    int cas;
+     ConvexHull3D_tetg_file() :
+       OneOperator( atype<pmesh3>(), atype<string *>() ) ,cas(0) {}
+    ConvexHull3D_tetg_file(int i) :
+       OneOperator( atype<pmesh3>(),  atype< KN_<double> >(), atype< KN_<double> >(), atype< KN_<double> >() )  ,cas(1){}
+    
   E_F0 * code(const basicAC_F0 & args) const 
-  { 
-	return  new  ConvexHull3D_tetg_file_Op( args,t[0]->CastTo(args[0]) ); 
+  {
+       if(cas==0)
+	return  new  ConvexHull3D_tetg_file_Op( args,t[0]->CastTo(args[0]) );
+       else
+        return  new  ConvexHull3D_tetg_file_Op( args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2])   );
   }
 };
 
 AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const 
 {
+  int nbv=1;
+  KN<double> cxx(nbv), cyy(nbv), czz(nbv);
+  if(filename)
+  {
   string*  pointsfile = GetAny<string*>((*filename)(stack));
 
   // lecture du fichier contenant les points
@@ -2457,14 +2471,33 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
  
   if(verbosity>1)
   cout << "  -- Nb of Points " << nbv << endl;
-  KN<double> cxx(nbv), cyy(nbv), czz(nbv);
-
+  cxx.resize(nbv);
+  cyy.resize(nbv);
+  czz.resize(nbv);
   
   for(int lec=0;lec<nbv;lec++)
     {
       fp >> cxx[lec] >> cyy[lec] >> czz[lec];
     }
-  ffassert(fp.good()); 
+  ffassert(fp.good());
+  fp.close();
+    
+  }
+  else
+  {
+      KN_<double>
+      c_xx = GetAny< KN<double> > ((*xx)(stack)),
+      c_yy = GetAny< KN<double> > ((*yy)(stack)),
+      c_zz = GetAny< KN<double> > ((*zz)(stack));
+      nbv = c_xx.N();
+      ffassert( nbv == c_yy.N() &&nbv == c_zz.N());
+      cxx.resize(nbv);
+      cyy.resize(nbv);
+      czz.resize(nbv);
+      cxx=c_xx;
+      cyy=c_yy;
+      czz=c_zz;
+  }
   if(verbosity>1)
   cout << " bound x " << cxx.min() << " " << cxx.max() 
        <<  "  y " << cyy.min() << " "<< cyy.max()
@@ -2476,11 +2509,10 @@ AnyType  ConvexHull3D_tetg_file_Op::operator()(Stack stack)  const
 //   }
 //   assert(lec==nbv);
 
-  fp.close();    
 
   KN<long> zzempty;
   //int intempty=0;
-  string stringempty= string("YQV");
+  string stringempty= string("fe");
   string* switch_tet(arg(0,stack,&stringempty));
   int label_tet(arg(1,stack,arg(3,stack,0L)));  
   int label_face(arg(2,stack,arg(4,stack,1L)));
@@ -2523,7 +2555,7 @@ static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"
   if(verbosity) cout << " load: tetgen  " << endl;
   
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg_file);
-  Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg);
+  Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg_file(1));
   Global.Add("tetgtransfo","(",new Build2D3D);
   Global.Add("tetg","(",new Remplissage);
   Global.Add("tetg","(",new RemplissageAddPoint);

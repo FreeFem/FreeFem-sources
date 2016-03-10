@@ -1,3 +1,5 @@
+ - try use lot of preinstall software 
+ - pass to tetgen version 1.5.1-beta (the last one) 
  - add Th.hmin and Th.hmax methode to Mesh type 
 version 3.44-1
  - add new hpddm example for Stokes probleme (Thank to P. Jolivet )

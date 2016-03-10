@@ -2071,20 +2071,29 @@ AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
-if test  "$ff_umfpack_download" = yes  ;then
+if test  "$ff_umfpack_download" = yes -a  -n "$TOOL_COMPILE_umfpack" ;then
     AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
 fi
-if test "$ff_arpack_download" = yes  ; then
+if test "$ff_arpack_download" = yes -a  -n "$TOOL_COMPILE_arpack"  ; then
     AC_MSG_NOTICE([      use of download ARPACK see  download/arpack/ARPACK/README  no License ])
 fi
 
 if test "$enable_download" = yes  ;then
+    if test  -n "$TOOL_COMPILE_fftw3"   ; then 
     AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
+    fi 
+    if test  -n "$TOOL_COMPILE_tetgen"   ; then 
     AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
+    fi
+    if test  -n "$TOOL_COMPILE_yams"   ; then 
     AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
+    fi
+    if test  -n "$TOOL_COMPILE_mmg3d"   ; then     
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  ])
-    AC_MSG_NOTICE([      use of download metis])
-
+    fi
+    if test  -n "$TOOL_COMPILE_parmets"   ; then     
+    AC_MSG_NOTICE([      use of download parmetis])
+     fi
     # ALH - some tools may be activated but not downloaded if a local version is specified (see
     # [[TOOL_PARAMETERS]])
 
