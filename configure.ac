@@ -1648,6 +1648,9 @@ fi
 
 # Checking for some functions that may not appear everywhere
 # ----------------------------------------------------------
+AC_CHECK_HEADERS(cstddef)
+AC_CHECK_HEADERS(stddef.h)
+
 AC_CHECK_HEADERS(regex.h,ff_regex_h=1, ff_regex_h=0)
 AC_SUBST(FF_HAVE_REGEX_H,$ff_regex_h)
 
@@ -1884,6 +1887,7 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
     )
 ## before try 
 
+TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
 TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
