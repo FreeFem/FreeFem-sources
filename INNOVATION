@@ -1,4 +1,5 @@
- - try use lot of preinstall software 
+version 3.45 (10 march 2016)
+ - try use lot of preinstall software  (hard job for ubuntu and debian)
  - pass to tetgen version 1.5.1-beta (the last one) 
  - add Th.hmin and Th.hmax methode to Mesh type 
 version 3.44-1
