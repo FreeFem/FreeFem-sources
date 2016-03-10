@@ -1056,7 +1056,7 @@ AC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
 AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
 if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
 then
-    AC_SUBST([TOOL_COMPILE_$1],"")
+    AC_SUBST([TOOL_COMPILE_tetgen],"")
     AC_FF_ADDWHERELIB(tetgen,-ltet,)
     AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
 fi
