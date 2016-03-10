@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.43}
+\def\VERSION{3.44-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -142,7 +142,7 @@ Fruit of a long maturing process, freefem, in its last avatar, \freefempp, is a 
 
 \medskip
 
-\freefempp has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK, SuperLU . Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \freefempp. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \freefempp to prepare research quality reports: color display online with zooming and other features and postscript printouts.
+\freefempp has an advanced automatic mesh generator, capable of a posteriori mesh adaptation; it has a general purpose elliptic solver  interfaced with fast algorithms such as the multi-frontal method UMFPACK, SuperLU, MUMPS . Hyperbolic and parabolic problems are solved by iterative algorithms prescribed by the user with the high level language of \freefempp. It has several triangular  finite elements, including discontinuous elements.  Finally everything is there in \freefempp to prepare research quality reports: color display online with zooming and other features and postscript printouts.
 \medskip
 
 This manual is meant for students at Master level, for  researchers at any level, and for engineers (including financial engineering) with some understanding of variational methods for partial differential equations.
@@ -157,8 +157,8 @@ are modeled by one or several partial differential equations.
 its name implies, it is a free software (see the copyrights for full detail)
 based  on the Finite Element Method; it is not a package, it is an integrated product with its own
 high level programming language. This software runs on all UNIX
-OS (with g++ 3.3 or later, and OpenGL) , on Window  XP, Vista and 7 and on
-MacOS 10 (powerpc, intel) \\\\
+OS (with g++ 3.3 or later, and OpenGL) , on Window  XP, Vista and 7,8,10 and on
+MacOS 10 intel \\\\
 Moreover \freefempp is highly adaptive.  Many phenomena involve
 several  coupled systems, for example: fluid-structure interactions,
 Lorentz forces for aluminium casting and ocean-atmosphere problems are
@@ -432,7 +432,7 @@ the  short cut key  to launch directly FreeFem++  (for example \texttt{alt+shift
 \item In the list \verb!"Language"! select C++
 \item Add "edp" in the  field  \verb!"add ext"!
 \item Select  \verb!"INSTRUCTION WORD"! in the  list \verb!"Description"! and in the field
-\verb!"supple! \verb!mentary key word"!, cut and past the following list:
+\verb!"supplementary key word"!, cut and past the following list:
 
 \Blue{P0 P1 P2 P3 P4 P5 P1dc P2dc P3dc P4dc P5dc RT0 RT1 RT2 RT3 RT4 RT5 macro plot int1d int2d
 solve movemesh adaptmesh trunc checkmovemesh on func buildmesh square Eigenvalue min max
@@ -450,18 +450,18 @@ cut and past the following list
 \end{itemize}
 \end{itemize}
 
-\item[{Crimson}] {\bf Editor}
-availble at \url{http://www.crimsoneditor.com/} and adapted as follows:
-
-\begin{itemize}
-\item Go to the \texttt{Tools/Preferences/File} association menu and add the .edp extension set
-
-\item In the same panel in \texttt{Tools/User} Tools, add a \freefempp item (1st line) with the path
-to \texttt{freefem++.exe} on the second line and \texttt{\$(FilePath)} and \texttt{\$(FileDir)} on third and fourth lines.
-Tick the 8.3 box.
-\item for color syntax, extract file from \texttt{crimson-freefem.zip} and put files in the corresponding sub-folder of
- Crimson folder (\verb.C:\Program Files\Crimson Editor. ).
-\end{itemize}
+%\item[{Crimson}] {\bf Editor}
+%availble at \url{http://www.crimsoneditor.com/} and adapted as follows:
+%
+%\begin{itemize}
+%\item Go to the \texttt{Tools/Preferences/File} association menu and add the .edp extension set
+%
+%\item In the same panel in \texttt{Tools/User} Tools, add a \freefempp item (1st line) with the path
+%to \texttt{freefem++.exe} on the second line and \texttt{\$(FilePath)} and \texttt{\$(FileDir)} on third and fourth lines.
+%Tick the 8.3 box.
+%\item for color syntax, extract file from \texttt{crimson-freefem.zip} and put files in the corresponding sub-folder of
+% Crimson folder (\verb.C:\Program Files\Crimson Editor. ).
+%\end{itemize}
 
 \item[winedt] for Windows : this is the best but it could be tricky to set up.  Download it from
 \begin{center}
@@ -493,7 +493,7 @@ It is also an editor for TeX/LaTeX. It has a "`tool"' menu which can be configur
 
 \verb!nedit -import edp.nedit!
 
- \item[Smultron] on the Mac, available at \url{http://smultron.sourceforge.net}. It comes ready with color syntax for .edp file.  To teach it to launch \freefempp files, do a "command B" (i.e. the menu Tools/Handle Command/new command) and create a command which does
+ \item[Smultron/fraise] on the Mac, available at \url{http://smultron.sourceforge.net}. It comes ready with color syntax for .edp file.  To teach it to launch \freefempp files, do a "command B" (i.e. the menu Tools/Handle Command/new command) and create a command which does
  \begin{verbatim}
  /usr/local/bin/FreeFem++-CoCoa %%p
  \end{verbatim}
@@ -9176,19 +9176,19 @@ where if $d=2$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p
 +\frac{\p u}{\p y}\frac{\p { v}}{\p y})$ ,
 where if $d=3$ the $ \nabla{ v} . \nabla u = (\frac{\p u}{\p x}\frac{\p { v}}{\p x}
 +\frac{\p u}{\p y}\frac{\p { v}}{\p y} + \frac{\p u}{\p z}\frac{\p { v}}{\p z})$ ,
-and where $\bm{n}$ is the unitary outside normal of $\p\Omega$.
+and where $\bm{n}$ is the unitary outside normal of $\Gamma$.
 
-Now we note that $ \kappa \frac{  \p u}{\p n} = - a u + g $  on $\Gamma_r$
-and $  v = 0 $ on $ \Gamma_d $ and $ \p \Omega = \Gamma_d \cup \Gamma_n $
+Now we note that $ \kappa \frac{  \p u}{\p n} = - a u + b $  on $\Gamma_r$
+and $  v = 0 $ on $ \Gamma_d $ and $ \Gamma = \Gamma_d \cup \Gamma_n $
 thus
 $$
-  - \int_{\p \Omega} {v}
+  - \int_{\Gamma} {v}
  \kappa \frac{  \p u}{\p n} = \int_{\Gamma_r} a u v - \int_{\Gamma_r} b v
 $$
 
 The problem becomes:
 
-Find   $u \in V_g = \{v \in H^1(\Omega) / v = g \mbox{ on } \Gamma_d \} $  such that
+Find   $u \in V_g = \{w \in H^1(\Omega) / w = g \mbox{ on } \Gamma_d \} $  such that
 \begin{equation} {\int_{\Omega} \kappa \nabla{ v} . \nabla u  \,d\omega
  + \int_{\Gamma_r} a u v  \,d\gamma = \int_{\Omega} f {v}}  \,d\omega  + \int_{\Gamma_r} b v  \,d\gamma , \quad \forall v \in V_0 \label{eq:v-poisson}
 \end{equation}
@@ -9211,7 +9211,7 @@ and a way to fix the constant is to solve for $u \in H^1(\Omega)$ such that:
  {\int_{\Omega} \varepsilon u v \,\,d\omega\; + \; \kappa \nabla{ v} . \nabla u  \,d\omega
   = \int_{\Omega} f {v}}  \,d\omega  + \int_{\Gamma_r} b v  \,d\gamma , \quad \forall v \in H^1(\Omega) \label{eq:v-poisson-N}
 \end{equation}
-where $\varepsilon$ is a small parameter ( $ \sim 10^{-10}$ ).
+where $\varepsilon$ is a small parameter ( $ \sim \kappa\; 10^{-10} |\Omega|^{\frac2d} $ ) .
 
 Remark that if the solution
 is of order $ \frac{1}{\varepsilon}$ then the compatibility condition is unsatisfied, otherwise
@@ -9223,7 +9223,7 @@ example.
 In \freefempp,  the bidimensional problem (\ref{eq:v-poisson}) becomes
 \bFF
  @ problem Pw(u,v) =
-       @int2d(Th)( kappa*( dx(u)*dx(u) +  dy(u)*dy(u)) )  // $\int_{\Omega} \kappa \nabla{v} . \nabla u  \,d\omega$ \hfilll
+       @int2d(Th)( kappa*( dx(u)*dx(v) +  dy(u)*dy(v)) )  // $\int_{\Omega} \kappa \nabla{v} . \nabla u  \,d\omega$ \hfilll
      + @int1d(Th,gn)( a * u*v )                        // $\int_{\Gamma_r} a u v  \,d\gamma$  \hfilll
      - @int2d(Th)(f*v)                                 // $\int_{\Omega} f v  \,d\omega $ \hfilll
      - @int1d(Th,gn)( b * v )                          // $ \int_{\Gamma_r} b v  \,d\gamma$ \hfilll
@@ -19113,12 +19113,15 @@ $ (keyword \ttCC{@border}, see \refSec{Border})
   \item[$n_t$] the number of triangles in $\mathcal{T}_h$ (get by \texttt{Th.nt}, see ``mesh.edp'')
   \item[$\Omega_h$] denotes the approximated domain $\Omega_h=\cup_{k=1}^{n_t}T_k$ of $\Omega$. If $\Omega$ is polygonal domain, then it will be $\Omega=\Omega_h$
   \item[$\Gamma_h$] the boundary of $\Omega_h$
-\index{nv}
+\index{nv}\index{hmin}\index{hmax}
   \item[$n_v$] the number of vertices in $\mathcal{T}_h$ (get by \texttt{Th.nv})
+  \item[$h_{min}$] the minimal edge size of $\mathcal{T}_h$ (get by \texttt{Th.hmin})
+  \item[$h_{max}$] the maximal edge size of $\mathcal{T}_h$ (get by \texttt{Th.hmax}) 
   \item[[$q^iq^j$]] the segment connecting $q^i$ and $q^j$
   \item[$q^{k_1},q^{k_2},q^{k_3}$] the vertices of a triangle $T_k$ with anti-clock direction (get the coordinate of $q^{k_j}$ by
   (\texttt{Th[k-1][j-1].x, Th[k-1][j-1].y}))
   \item[$I_{\Omega}$] the set $\{i\in \N|\; q^i\not\in \Gamma_h\}$
+  
 \end{description}
 
 \subsection{Finite Element Spaces}

@@ -382,6 +382,9 @@ public:
   R lenEdge(int i) const {ASSERTION(i>=0 && i <3);
     Rd E=Edge(i);return sqrt((E,E));}
 
+  R lenEdge2(int i) const {ASSERTION(i>=0 && i <3);
+        Rd E=Edge(i);return ((E,E));}
+  
   R  mesure() const {return mes;}
 
 

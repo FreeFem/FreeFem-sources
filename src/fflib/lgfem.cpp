@@ -1615,6 +1615,25 @@ long pmesh_nbe(pmesh * p)
 { throwassert(p && *p) ;  return (**p).neb ;}
 long pmesh_nv(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nv ;}
+
+double pmesh_hmax(pmesh * p)
+{ throwassert(p && *p) ;
+    double hmax2 =0;
+    const Mesh & Th = **p;
+    for(int k=0; k< Th.nt; ++k)
+        for(int e=0; e<3; ++e)
+            hmax2=max(hmax2,Th[k].lenEdge2(e));
+    return sqrt(hmax2);}
+
+double pmesh_hmin(pmesh * p)
+{ throwassert(p && *p) ;
+    double hmin2 =1e100;
+    const Mesh & Th = **p;
+    for(int k=0; k< Th.nt; ++k)
+        for(int e=0; e<3; ++e)
+            hmin2=min(hmin2,Th[k].lenEdge2(e));
+    return sqrt(hmin2);}
+
 long pVh_ndof(pfes * p)
  { throwassert(p && *p);
    FESpace *fes=**p; ;  return fes->NbOfDF ;}
@@ -5171,6 +5190,10 @@ void  init_lgfem()
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
     
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
+    
+  Add<pmesh*>("hmax",".",new OneOperator1<double,pmesh*>(pmesh_hmax));
+  Add<pmesh*>("hmin",".",new OneOperator1<double,pmesh*>(pmesh_hmin));
+    
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
  Add<pfes*>("Th",".",new OneOperator1<pmesh,pfes*>(pVh_Th));
     Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
