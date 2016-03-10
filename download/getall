@@ -163,9 +163,11 @@ download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz
 	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz','b72c6309f25e9660133007b82621ba7c');
 download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_3.0.tar.gz',
 	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_dist_3.0.tar.gz','1d77f10a265f5751d4e4b59317d778f8');
-
-download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
-	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz','d6a4bcdde2ac804f7ec66c29dcb63c18');
+# http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz
+#download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
+#	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz','d6a4bcdde2ac804f7ec66c29dcb63c18');
+download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
+	 'http://www.tetgen.org/1.5/src/','tetgen1.5.1-beta1.tar.gz','3d55c197bcbfc611b7ced6f343643756');
 
 #download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.5.2.tar.gz',
 #	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.5.2.tar.gz','d707336a98d7cb31d843804d020edc94');

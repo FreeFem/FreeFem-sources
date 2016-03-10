@@ -9,12 +9,12 @@ all-local: tetgen
 
 # Tetgen information
 DIRPKG=../pkg
-tetgen_VERSION=1.4.3
+tetgen_VERSION=1.5.1-beta1
 SRCDIR=tetgen$(tetgen_VERSION)
 PACKAGE=$(DIRPKG)/tetgen$(tetgen_VERSION).tar.gz
 
 # FFCS - 6/11/12 - curl is not able to follow redirections from http://tetgen.org/files
-SERVER=http://wias-berlin.de/software/tetgen/files
+#SERVER=http://wias-berlin.de/software/tetgen/files
 
 INSTALL=../..
 
@@ -30,8 +30,8 @@ FAIRE:install.done $(SRCDIR)/FAIT cxxflags WHERE.done
 # FFCS - 30/11/10 - need ranlib on Win64. The PATH is setup so that mingw/ranlib is called
 
 $(SRCDIR)/FAIT: $(SRCDIR)/tags  cxxflags 
-	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
-	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
+	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -O3 -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
+	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -O0 -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch $(SRCDIR)/FAIT
 WHERE.done: $(SRCDIR)/FAIT
 	echo tetgen LD -L@DIR@/lib -ltet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
@@ -53,7 +53,7 @@ clean-local::
 $(SRCDIR)/tags: $(PACKAGE)
 	tar xvzf $(PACKAGE)
 #       FFCS: needs to patch tetgen because mingw64 has 4-byte longs
-	cd tetgen1.4.3 && patch -u -p1 < ../patches.win64
+#	cd tetgen1.4.3 && patch -u -p1 < ../patches.win64
 	touch $(SRCDIR)/tags
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
@@ -61,7 +61,7 @@ $(PACKAGE):
 	../getall -o TetGen -a
 
 clean-local::
-	-rm -rf tetgen1.4.?  FAIT FAIRE 
+	-rm -rf tetgen1.?.*  FAIT FAIRE 
 clean:
 	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
 	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
