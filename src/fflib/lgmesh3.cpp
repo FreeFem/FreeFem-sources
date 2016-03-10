@@ -510,6 +510,25 @@ double pmesh_mesb(pmesh3 * p) { ffassert(p && *p) ;  return (**p).mesb;}
 long pmesh_nt(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nt ;}
 long pmesh_nv(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nv ;}
 long pmesh_nbe(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nbe ;}
+double pmesh_hmax(pmesh3 * p)
+{ ffassert(p && *p) ;
+    double hmax2 =0;
+    const Mesh3 & Th = **p;
+    for(int k=0; k< Th.nt; ++k)
+        for(int e=0; e<6; ++e)
+            hmax2=max(hmax2,Th[k].Edge(e).norme2());
+    return sqrt(hmax2);}
+
+double pmesh_hmin(pmesh3 * p)
+{ throwassert(p && *p) ;
+    double hmin2 =1e100;
+    const Mesh3 & Th = **p;
+    for(int k=0; k< Th.nt; ++k)
+        for(int e=0; e<6; ++e)
+            hmin2=min(hmin2,Th[k].Edge(e).norme2());
+    return sqrt(hmin2);}
+
+
 
 pf3rbase* get_element(pf3rbasearray *const & a, long const & n)
 {
@@ -1525,7 +1544,10 @@ void init_lgmesh3() {
    Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
    Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
    Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
+    Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
+    Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
 
+    
  TheOperators->Add("<-",
        new OneOperator2_<pf3rbase*,pf3rbase*,pfes3* >(MakePtrFE3_2),
        new OneOperator3_<pf3rbasearray*,pf3rbasearray*,pfes3*,long >(MakePtrFE3_3),  

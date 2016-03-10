@@ -1,3 +1,5 @@
+ - add Th.hmin and Th.hmax methode to Mesh type 
+version 3.44-1
  - add new hpddm example for Stokes probleme (Thank to P. Jolivet )
  - put the new convect 3d as the default, (newconvect do nothing now). 25/02/16
  - try to add new version do 3d convect ( add newconvect=1;) in test ...

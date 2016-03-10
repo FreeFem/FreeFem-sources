@@ -336,5 +336,8 @@ if(err==0)
   int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively . 
   plot(bb(nn),cc(NC),wait=1);
   mesh th= buildmesh(bb(nn)+cc(NC)) ; 
-  plot(th,wait=1,ps="multy-border.eps"); 
+  plot(th,wait=1,ps="multy-border.eps");
+  // version 3.44-1
+  cout << " th max mesh size = h = " << th.hmax << endl;
+  cout << " th min mesh size     = " << th.hmin<< endl;
 }
