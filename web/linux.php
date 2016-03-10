@@ -90,7 +90,7 @@ i</span><span class="s5">f your version of automake &gt;= 1.13 , autoconf &gt;= 
 <p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>ghostscript  m4 make  patch pkg-config wget python</b></span></p>
 <p class="p3"><span class="s9"> # other lib of a full freefem++ can be change </span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>libopenblas-dev liblapack-dev libhdf5-dev libgsl0-dev</b></span></p>
-<p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>  libscotch-dev  libfftw3-dev  libsuperlu-dev libarpack2-dev libsuitesparse-dev libmumps-dev  libmumps-seq-dev  libnlopt-dev  coinor-libipopt-dev  libgmm++-dev</b></span></p>
+<p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>  libscotch-dev  libfftw3-dev  libsuperlu3-dev libarpack2-dev libsuitesparse-dev libmumps-dev  libmumps-seq-dev  libnlopt-dev  coinor-libipopt-dev  libgmm++-dev</b></span></p>
 <p class="p3"><span class="s9"> # not mandatory package  but usefull for developpenemt </span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install autoconf automake autotools-dev  bison  flex gdb </b></span></p>
 <p class="p3"><span class="s9"> # not mandatory package for downlaod with hg / mercurail tool</span></p>
