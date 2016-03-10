@@ -1883,7 +1883,7 @@ m4_map([AC_FF_WHERELIB],[
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
-	[[Ipopt],[ -lipopt],[/usr/include/coin/IpTNLP.hpp],[]]
+	[[ipopt],[ -lipopt],[/usr/include/coin/IpTNLP.hpp],[]]
     ]
     )
 ## before try 

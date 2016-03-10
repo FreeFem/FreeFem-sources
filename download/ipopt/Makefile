@@ -52,8 +52,8 @@ clean-local::
 
 # FFCS - install and WHERE need to be sequential
 WHERE.done: install.done
-	echo Ipopt LD -L@DIR@/lib   -lipopt   >$(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt;
-	echo Ipopt INCLUDE -I@DIR@/include/coin  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt ;
+	echo ipopt LD -L@DIR@/lib   -lipopt   >$(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt;
+	echo ipopt INCLUDE -I@DIR@/include/coin  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt ;
 	touch $@
 
 Makefile.inc:
