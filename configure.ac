@@ -1869,7 +1869,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
 	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
 	[[superlu],[-lsuperlu],[/usr/include/superlu/superlu_enum_consts.h],[]],
-	[[Superlu4],[-lsuperlu4],[/usr/include/superlu4/superlu_enum_consts.h],[]],
+	[[superlu4],[-lsuperlu4],[/usr/include/superlu4/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[scotch.h]],
