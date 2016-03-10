@@ -1874,9 +1874,9 @@ m4_map([AC_FF_WHERELIB],[
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[scotch.h]],
         [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h]],
-	[[metis],[-lscotch -lmetis],[/usr/include/metis/metis.h],[]],
-	[[metis],[-lscotch -lmetis],[metis.h],[]],
-	[[parmetis],[-lptscotch -lparmetis],[],[]],
+	[[metis],[-lmetis],[/usr/include/metis/metis.h],[]],
+	[[metis],[-lmetis],[metis.h],[]],
+	[[parmetis],[-lparmetis -lmetis],[],[]],
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
 	[[mshmet],[-lmshmet],[],[]],
@@ -1889,10 +1889,9 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try 
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE(fflapack,fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
-TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
+TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
