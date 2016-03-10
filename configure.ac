@@ -1052,14 +1052,14 @@ AC_SUBST(DOWNLOAD_FFTW,$ff_DOWNLOAD_FFTW)
 dnl ---------------------------
 dnl   Looking for the tetgen
 dnl --------------------------
-AC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
-AC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
-if test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
-then
-    AC_SUBST([TOOL_COMPILE_tetgen],"")
-    AC_FF_ADDWHERELIB(tetgen,-ltet,)
-    AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
-fi
+dnlAC_CHECK_LIB(tet,tetrahedralize,ff_fftet_ok=yes)
+dnlAC_CHECK_HEADERS(tetgen.h,ff_tet_h=yes, ff_tet_h=no)
+dnlif test "$ff_tet_ok" = yes -a "$ff_tet_h" = yes
+dnlthen
+dnl    AC_SUBST([TOOL_COMPILE_tetgen],"")
+dnlAC_FF_ADDWHERELIB(tetgen,-ltet,)
+dnl    AC_DEFINE(HAVE_TETGEN,1, tetgen is compute tetrahedralize volume of an enclosed surface)
+dnlfi
 
 # Looking for the BLAS
 # --------------------
