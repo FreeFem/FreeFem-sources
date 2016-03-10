@@ -70,7 +70,7 @@ m4_define([AC_FF_WHERELIB],
 	    esac
 	fi
 	AC_MSG_RESULT($ff_WHERE)
-
+        ff_$1_ok=yes;
         ff_where_lib_conf_$1=1
 	LIBS=$ff_save_libs
 	fi
@@ -2083,7 +2083,7 @@ if test "$enable_download" = yes  ;then
     AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
     fi 
     if test  -n "$TOOL_COMPILE_tetgen"   ; then 
-    AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.4.3/LICENSE ])
+    AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.5.1-beta/LICENSE ])
     fi
     if test  -n "$TOOL_COMPILE_yams"   ; then 
     AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
