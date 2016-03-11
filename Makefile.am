@@ -26,7 +26,9 @@ examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
 WHERE_LIBRARY-mkl FreeFem++-CoCoa.in  \
 uninstall-ff++ \
 ./build/cleancrlf		./build/download		./build/links2files \
-./build/orgindex ./build/ff-md5  script/PostInstall.m4
+./build/orgindex ./build/ff-md5  script/PostInstall.m4 \
+web/download.php	web/index.php		web/macosx.php		web/menu.php		web/phpfiles.php \
+web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php \
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -163,7 +165,8 @@ clean-local::
 
 # Native MacOS packaging
 # ----------------------
-install-exec-local::FreeFem++-CoCoa  script/PostInstall.sh 
+install-exec-local::
+	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa  script/PostInstall.sh 
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/etc/paths.d/
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/usr/local/bin
@@ -181,7 +184,8 @@ script/PostInstall.sh:./Makefile script/PostInstall.m4
 
 
 
-ListFiles-natives: .FORCE  FreeFem++-CoCoa
+ListFiles-natives: .FORCE 
+	test `uname` != Darwin || $(MAKE)  FreeFem++-CoCoa
 	echo $(FF_EXAMPLES_FILES) >$@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
 	find .  -name '*.[ei]dp' -o -name '*.h*' -o -name '*.cpp' -o -name '*.pgm'  |egrep  '[.]/examples++' >>$@
