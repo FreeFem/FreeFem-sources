@@ -2,13 +2,19 @@ Compilation of FreeFem++ under unix, MacOs X or mingw  (Windows)
 and bamg (mesh generator)
 ----------------------------------------------------------------
 read respectively the following  url depending of systeme 
-http://www.freefem.org/ff++/linux.php
-http://www.freefem.org/ff++/windows.php
-http://www.freefem.org/ff++/macosx.php
+to compile le software 
+http://www.freefem.org/ff++/linux.php      or  web/linux.php 
+http://www.freefem.org/ff++/windows.php    or  web/windows.php
+http://www.freefem.org/ff++/macosx.php   or web/macosx.php
 
-Some special configuration file 
+To use Some special configuration file 
 
-# mac version 
+1) create  file config.param an use 
+# ./reconfigure 
+shell script to reconfigure 
+
+
+# mac version precompile version 
 MBP-FH2:ff-OSX10.10 hecht$ cat config.param 
 '--enable-download'
 '--enable-optim'
@@ -23,10 +29,12 @@ MBP-FH2:ff-OSX10.10 hecht$ cat config.param
 '--disable-pastix'
 '--with-mpipath=/usr/local/ff++/mpich/bin/'
 
-# window version 
+# window version precompile version 
 
 
-# ubuntu version 
+# ubuntu version version
+#  without mpi
+# with mpi
 
 cat config.param 
 '--enable-download'
