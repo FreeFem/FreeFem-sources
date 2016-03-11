@@ -41,6 +41,7 @@ using std::numeric_limits;
 const R pi=M_PI;//4*atan(1.); 
 using namespace std;
 
+static int   nbSendForNextPlot=0,nbTimerNextPlot=0;
 int debug=1;
 int casemouse=0,keyact=0;
 double gwait=0;//  no wait in second
@@ -139,7 +140,7 @@ int   ReadOnePlot(FILE *fp)
       assert(nextPlot==0);
       nextPlot = new ThePlot(f,currentPlot,++kread);
 	if(debug>1)	
-      cout << " next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  " gwait = " << gwait << endl;
+            cout << "\n\n\n next is build " << nextPlot<< " wait :" << nextPlot->wait << " -> " << kread <<  " gwait = " << gwait << "\n\n\n"<<endl;
       assert(nextPlot);
       err=0;
     }
@@ -156,20 +157,36 @@ int   ReadOnePlot(FILE *fp)
 
 void TimerNextPlot(int value)
 {
+  
+    nbTimerNextPlot++;
   // the routine to  until the end of nextplot.
   // we use gluttimerfunc functionnaly
   //  remark, if we miss we retry.
   // -----
   //  if(debug) cout << " TimeNextPlot  " << endl;
+  if(nbTimerNextPlot>1 && debug >2 ) cout << "       ######  Warning more than 1 nbTimerNextPlot" << nbTimerNextPlot << endl;
   value=min(1000,(value*3)/2);// try at leat every 1 second (not to heavy computation)
   if(TryNewPlot())
+  {
+    if(debug >9) cout << "    ####  TimerNextPlot TryNewPlot:: glutPostRedisplay "<< nbTimerNextPlot << " " << nbSendForNextPlot <<endl;
+    nbSendForNextPlot--;// do the plot ..
     glutPostRedisplay();
-  else 
+  }
+  else
+  {
+    if(debug >9) cout << "            ####  TimerNextPlot wait "<< nbTimerNextPlot << " " << nbSendForNextPlot<<endl;
     glutTimerFunc(value,TimerNextPlot,value);
+  }
+     nbTimerNextPlot--;
 }
 
 int SendForNextPlot()
 {
+    
+    if(nbSendForNextPlot>0 && debug >2 ) cout << "       ######  Warning more than 1 SendForNextPlot" << nbSendForNextPlot+1 << endl;
+    if(nbSendForNextPlot) return 0; //
+    nbSendForNextPlot++;
+    
   //  to send a event to plot the date sheet.
   // and out a timer to wait to the end of read..
   // every 25/ second..  = 1000/25 = 40 ms
@@ -178,13 +195,13 @@ int SendForNextPlot()
     if(gwait )
         {usleep((useconds_t)(1e6*gwait)); Fin(0); }
 
-    if((debug > 1)) cout << " send signal For Next plot, skip: No More Plot !  " << endl;
+    if((debug > 1)) cout << " send signal For Next plot, skip: No More Plot !  " <<  endl;
+    nbSendForNextPlot--;
     return 0;
     }
   if((debug > 1)) cout << " Try to read read  plot "<< endl;
   //  put a timer for wait to the  end of read
   glutTimerFunc(40,TimerNextPlot,40);
-  
   return 1;
 }
 static  bool TryNewPlot( void );
@@ -1806,7 +1823,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
   //    if( !uaspectratio) aspectratio= true;
   ffassert(cas==PlotStream::dt_endarg);
   if((debug > 2))
-    {
+    {  cout << "    ***** get ::: ";
       cout << " Window num " << winnum << ", ";
       cout << " coeff " << coeff <<", ";
       if(cm)
@@ -2448,6 +2465,10 @@ void Display(void)
     OneWindow * win=CurrentWin();
     if(win) 
       {
+          if(debug>9)
+          {
+              cout << "\n\n     Display "<< win->theplot  << "  true wiat: " << (!win->theplot || !win->theplot->wait || gwait) << endl;
+          }
 	  /*    if (win->stereo)
 	   { ffassert(0); 
 	   
@@ -2480,8 +2501,9 @@ void Display(void)
       }
     if(debug>9)
     {
-        cout << "  Send  SendForNextPlot : win->theplot " << win->theplot << "   " << !win->theplot || !win->theplot->wait || gwait << endl;
-        if(win->theplot) cout << "        wait" << win->theplot->wait << endl;
+        cout << "  Send  SendForNextPlot : win->theplot " << win->theplot << "   " << (!win->theplot || !win->theplot->wait || gwait);;
+        if(win->theplot) cout << "    wait" << win->theplot->wait << endl;
+        cout <<"\n\n\n"<< endl;
     }
     if(!win->theplot || !win->theplot->wait || gwait )
       SendForNextPlot();

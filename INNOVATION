@@ -1,4 +1,6 @@
 version 3.45 (10 march 2016)
+ - correct veru old bug in ffglut, some time we miss wait due to asyncronuos stuff 
+    and we can hav e memory error for the same reason .
  - try use lot of preinstall software  (hard job for ubuntu and debian)
  - pass to tetgen version 1.5.1-beta (the last one) 
  - add Th.hmin and Th.hmax methode to Mesh type 
