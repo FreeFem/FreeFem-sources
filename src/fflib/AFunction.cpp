@@ -1010,14 +1010,15 @@ class E_ForAllLoopMapSS
             
             *i =  kk;
             *v =  vv;
-          
+           // for  Windows otherwise trap ???? FH. march 2016 
+            if(verbosity>99999) cout << " " << i << " "<< v  << " "  << kk << " " <<  vv << endl;
 
             data->code(s);
             
             ii->second  = **v;
             *i=0;
             *v=0;
-            WhereStackOfPtr2Free(s)->clean();
+            
         }
         data->end(s);
         return Nothing  ;
