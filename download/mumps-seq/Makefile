@@ -41,7 +41,7 @@ VERSION=5.0.1
 # FFCS - install and WHERE need to be done sequentially, even in parallel builds
 
 ../lib/WHERE.mumpsseq: install.done
-	echo mumps-seq LD -L@DIR@/lib -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ	\
+	echo mumps_seq LD -L@DIR@/lib -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ	\
 		-lpordFREEFEM-SEQ $(LIBSPTHREAD)  > ../lib/WHERE.mumpsseq
 	echo mumps-seq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
 	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
