@@ -23,7 +23,7 @@ if __name__ == '__main__':
     '--download-suitesparse',
     '--download-superlu',
     '--prefix=/usr/local/ff++/petsc',
-    '--with-blas-lapack-lib='-llapack -lblas',
+    '--with-blas-lapack-lib=-llapack -lblas',
     'PETSC_ARCH=arch-ff++',
   ]
   configure.petsc_configure(configure_options)
