@@ -1017,6 +1017,7 @@ class E_ForAllLoopMapSS
             ii->second  = **v;
             *i=0;
             *v=0;
+            WhereStackOfPtr2Free(s)->clean();
         }
         data->end(s);
         return Nothing  ;
