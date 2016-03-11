@@ -4836,6 +4836,59 @@ The \ttCC{@continue} statement will pass the part from
 \eFF
 \end{example}
 
+From version 3.43, we have new kind of implicit loop to set array, map, sparse matrices.
+\index{loop!implicite}
+Lhe syntaxe is
+
+\begin{itemize}
+\item   \verb! for [i,ai : a]! for array with one indice, so if  \verb! real[int] a(10)!,then \texttt{i= 0} to \texttt{9} and
+\texttt{ai} is a reference to  \texttt{a[i]} , same for  \verb! real[string] a(10)!, ...
+\item \verb! for [i,j,aij : a]! for array with two  indice, so if  \verb! real[int,int] a(10,11)!,then \texttt{i= 0} to \texttt{9},
+\texttt{j= 0} to \texttt{10} and 
+\texttt{aij} is a reference to  \texttt{a(i,j)} , same for  \verb! matrix  a(10)! , ...
+\end{itemize}
+
+ \begin{example}~
+\bFF
+@real [@int,@int] a(10,10);
+@real [@int] b(10);
+@for [i,bi : b] {bi=i+1; @cout << i << " " << bi << endl;}
+@cout << " b="<< b<< @endl;  
+@for [i,j,aij : a] 
+{
+   aij= 1./(2+i+j);
+   if(abs(aij)<0.2) aij=0;
+}
+@cout << " a= "<< a << @endl; 
+@matrix A=a;
+@string[@string] ss; // a map
+ss["1"]= 1;
+ss["2"]= 2;
+ss["3"]= 5;
+@for [i,bi : ss] 
+    bi=i+6+"-dddd"; 
+@cout <<" ss = "<< ss << @endl;
+@int[@string] si;
+si[1]=2;
+si[50]=1;
+@for [i,vi : si]
+   {
+   cout << " i " << setw(3) << i << " " << setw(10) <<vi << endl;
+    vi= atoi(i)*2;
+    }
+
+@cout <<" si = "<< si << endl;
+@for [i,j,aij : A]
+{
+    cout << i<< " " << j <<" " <<  aij << endl; 
+    aij= -aij;
+}
+@cout << A << endl; 
+\eFF
+\end{example}
+
+
+
 \subsection{\setS{Input/Output}}
 \index{cout}\index{cin}\index{ifstream}\index{ofstream}\index{endl}
 
