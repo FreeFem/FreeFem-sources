@@ -2478,7 +2478,11 @@ void Display(void)
 	}
 	  
       }
-
+    if(debug>9)
+    {
+        cout << "  Send  SendForNextPlot : win->theplot " << win->theplot << "   " << !win->theplot || !win->theplot->wait || gwait << endl;
+        if(win->theplot) cout << "        wait" << win->theplot->wait << endl;
+    }
     if(!win->theplot || !win->theplot->wait || gwait )
       SendForNextPlot();
 

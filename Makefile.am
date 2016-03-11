@@ -28,7 +28,7 @@ uninstall-ff++ \
 ./build/cleancrlf		./build/download		./build/links2files \
 ./build/orgindex ./build/ff-md5  script/PostInstall.m4 \
 web/download.php	web/index.php		web/macosx.php		web/menu.php		web/phpfiles.php \
-web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php \
+web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php 
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
