@@ -1862,8 +1862,8 @@ fi
 
 m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],	
-	[[mumps_seq],[-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -llibmpiseq_seq],[dmumps_c.h],[]],
-	[[libseq],[-llibmpiseq_seq]],
+	[[mumps_seq],[-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq],[dmumps_c.h],[]],
+	[[libseq],[-lmpiseq_seq],[/usr/include/mumps_seq/mpi.h]],
 	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
 	[[hypre],[-lHYPRE]],
