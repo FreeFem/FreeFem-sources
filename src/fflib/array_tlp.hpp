@@ -1151,6 +1151,8 @@ class E_ForAllLoopMapSI
                 
                 *i =  kk;
                 *v =  vv;
+                // for  Windows otherwise trap ???? FH. march 2016
+                if(verbosity>99999) cout << " " << i << " "<< v  << " "  << kk << " " <<  vv << endl;
                  data->code(s);
                 
                 ii->second  = *v;

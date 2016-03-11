@@ -32,3 +32,10 @@ for [i,j,aij : A]
     aij= -aij;
 }
 cout << A << endl; 
+real[string] sd;
+sd["1"]= 1;
+sd["2"]= 2;
+sd["3"]= 5;
+for [i,bi : sd] 
+    bi=bi*bi;
+cout << "sd=\n"<< sd <<endl ;
