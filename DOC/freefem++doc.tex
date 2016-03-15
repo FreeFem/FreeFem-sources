@@ -15075,7 +15075,7 @@ is  a penalty constant (large enough).
 \end{enumerate}
 
 \end{enumerate}
-You can find all the mathematic  about this algorithm in \cite{ItoKunisch}.
+You can find all the mathematics  about this algorithm in \cite{ItoKunisch}.
 
 Now how to do that in \freefempp
 
@@ -15340,14 +15340,14 @@ where  $u_i$ is solution of the following Laplace problem:
     u_i|_{\Gamma_e^i} = 0
  }
 
-The version of this example for  Shur componant. The border problem
-is solve with conjugate gradient.
+The version of this example uses the  Shur complement. The  problem on the border 
+is solved by a conjugate gradient method.
 
 First, we construct the two domain
 \begin{example}[Schwarz-gc.edp]~
 \index{tutorial!Schwarz-gc.edp}
 \bFF
-// Schwarz without overlapping (Shur complenement Neumann -> Dirichet)
+// Schwarz without overlapping (Shur complement  for Neumann to Dirichet)
 @real cpu=clock();
 @int inside = 2;
 @int outside = 1;
