@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11  hpddm [petsc|mumps parmetis  ptscotch scotch]  scalapack [mkl|blas]   mpifc  fc mpi  pthread
+//ff-c++-LIBRARY-dep: cxx11  hpddm [petsc umfpack|mumps parmetis  ptscotch scotch]  scalapack [mkl|blas]   mpifc  fc mpi  pthread
 //ff-c++-cpp-dep:
 
 #include "common.hpp"
