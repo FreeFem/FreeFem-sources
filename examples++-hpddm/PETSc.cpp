@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 hpddm petsc mpi
+//ff-c++-LIBRARY-dep: cxx11 hpddm petsc umfpack mpi
 //ff-c++-cpp-dep: 
 
 #include "common.hpp"
