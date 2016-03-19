@@ -149,8 +149,10 @@ namespace Fem2D
   Mesh3::Mesh3(const string  filename)
   {
     int ok=load(filename);
-    cout << "read mesh ok " << ok  << endl;
-    cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
+    if(verbosity) {
+        cout << "read mesh ok " << ok  << endl;
+        cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
+    }
     if(ok)
       {
 	ifstream f(filename.c_str());

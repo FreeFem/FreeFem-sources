@@ -65,8 +65,9 @@ public:
     AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
     EConstantTypeOfFE3( T o):v(o) { /*cout << "New constant " << o << endl;*/}
     size_t nbitem() const { assert(v);
-	cout << " nb item = " << v->N << endl;
-	return v->N ;} 
+    if(verbosity > 2)
+        cout << " nb item = " << v->N << endl;
+    return v->N ;} 
     operator aType () const { return atype<T>();} 
 };
 

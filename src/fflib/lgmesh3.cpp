@@ -610,7 +610,8 @@ AnyType ReadMesh3::operator()(Stack stack) const
   using  Fem2D::MeshPointStack;
  
   string * fn =  GetAny<string*>((*filename)(stack));
-  cout << "ReadMesh3 " << *fn << endl;
+  if(verbosity > 2)
+      cout << "ReadMesh3 " << *fn << endl;
   Mesh3 *Thh = new Mesh3(*fn);
   Thh->BuildGTree();
   Add2StackOfPtr2FreeRC(stack,Thh);
