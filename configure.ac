@@ -1539,7 +1539,9 @@ then
         ff_umfpack_ok=yes
         ff_umfpack_libs="${withval} $ff_umfpack_libs")
 
-    # Trying default locations for the headers
+    if test "${with_umfpack_include+set}" = set; then 
+      	CPPFLAGS="$CPPFLAGS $with_umfpack_include"
+    fi
 
     AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
 	ff_umfpack_header=yes
