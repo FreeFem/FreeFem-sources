@@ -27,7 +27,7 @@ double BECtrap(Stack stack,KN<double> * const &  pd)
 }
 
 
-void init(){
+static void init(){
   Global.Add("BECtrap","(",new OneOperator1s_<double,KN<double> * ,E_F0mps >(BECtrap));
 }
 

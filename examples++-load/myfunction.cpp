@@ -54,7 +54,7 @@ double testio(Stack stack)
   return 0.; 
 }
 
-void init(){
+static void init(){
   Global.Add("myfunction","(",new OneOperator0s<double>(myfunction));
   Global.Add("testio","(",new OneOperator0s<double>(testio));
 }

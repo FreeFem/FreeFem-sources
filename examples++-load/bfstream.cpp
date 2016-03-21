@@ -61,7 +61,7 @@ void initK()
     Add<OB>("(","",new OneOperator2_<ostream *,OB,KN<K> * >(Write));
     
 }
-void inittt()
+static void inittt()
 {
     typedef Stream_b<ostream> OB;
     typedef Stream_b<istream> IB;

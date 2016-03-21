@@ -281,7 +281,7 @@ bool SetMUMPS_seq()
 }
 
 
-void init22()
+static void init22()
 {
     cout << " MUMPS (sep) "<<endl;
   SparseMatSolver_R= DefSparseSolver<double>::solver;

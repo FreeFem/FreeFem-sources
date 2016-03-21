@@ -180,7 +180,7 @@ long cflush(pstream ** ppf)
 }; 
 inline istream_good to_istream_good(pstream **f){ ffassert((**f).is) ; return istream_good((**f).is);}
 inline bool get_eof(pstream ** p){ return (**p).is ? (**p).is->eof(): EOF;}
-void inittt()
+static void inittt()
 {
   Dcl_TypeandPtr<pstream*>(0,0,::InitializePtr<pstream*>,::DeletePtr<pstream*>);
   atype<istream* >()->AddCast( new E_F1_funcT<istream*,pstream**>(pstream2i));
