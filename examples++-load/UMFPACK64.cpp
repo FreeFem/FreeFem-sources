@@ -380,7 +380,7 @@ bool SetUMFPACK64()
 }
 
 
-void init22()
+static void init22()
 {    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
