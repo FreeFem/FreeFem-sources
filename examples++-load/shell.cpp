@@ -105,7 +105,7 @@ long  ffunsetenv(string * const & k)
 
 extern  mylex *zzzfff;
 
-void init(){
+static void init(){
   Dcl_Type< DIR **  > (0,CloseDir,0);
   zzzfff->Add("Directory",atype<DIR ** >());
   TheOperators->Add("<-",   new OneOperator2<DIR **,DIR **,string *  >(OpenDir));

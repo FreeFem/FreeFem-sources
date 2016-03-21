@@ -94,7 +94,7 @@ return 0;}
 
 #endif
 
-void init(){
+static void init(){
   Global.Add("srandomdev","(",new OneOperator_0<long>(ffsrandomdev));
   Global.Add("srandom","(",new OneOperator1<long>(ffsrandom));
   Global.Add("random","(",new OneOperator_0<long>(ffrandom));

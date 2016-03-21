@@ -561,7 +561,7 @@ double VonMises(const double &a11,const double &a12,const double &a22,const doub
     return sqrt((s1*s1+s2*s2+s3*s3)/2.);
 }
 
-void finit()
+static void finit()
 {
     
     Global.Add("extractborder","(",new OneOperator3s_<double,pmesh,KN_<long>,KNM<double>*>(ExtractBorder));

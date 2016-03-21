@@ -514,7 +514,7 @@ long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &
         Clean((*IJ)[j]);
     return 0;
 }
-void init()
+static void init()
 {
     Global.Add("Voisinage","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(Voisinage));
     Global.Add("ClosePoints2","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2));

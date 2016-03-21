@@ -872,7 +872,7 @@ public:
 };
 
 
-void finit()
+static void finit()
 {  
     
     typedef const Mesh *pmesh;
