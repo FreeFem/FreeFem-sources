@@ -1,0 +1,9 @@
+load "aniso"
+//[m11,m12,m22]/
+real[int] M2=[1,0,100];
+// [m11,m21,m22,m31,m32,m33
+real[int] M3=[1,0,10,0,0,100];
+boundaniso(3,M2,3);
+cout << M2 << endl;
+boundaniso(6,M3,2);
+cout << "M3 = "<< M3<<endl;

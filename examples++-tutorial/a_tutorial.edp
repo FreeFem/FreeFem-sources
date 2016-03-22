@@ -1,0 +1,38 @@
+// This test shows some powerful features of freefem++ on a
+// simple example: $-\Delta(u)=1$ in the unit cercle with $u=0$ on the
+// border of the unit cercle. this problem has an analytical solution
+// u = (1-x^2-y^2)/4
+real pi=4*atan(1);
+border a(t=0,2*pi){ x = cos(t); y = sin(t);label=1;};
+
+mesh disk = buildmesh(a(50));
+plot(disk);
+fespace femp1(disk,P1);  
+femp1 u,v; 
+
+problem laplace(u,v) = 
+    int2d(disk)( dx(u)*dx(v) + dy(u)*dy(v) )     //  bilinear form
+  + int2d(disk)( -1*v )                          //  linear form
+  + on(1,u=0) ;                                // boundary condition 
+
+laplace; 
+femp1 err=u-(1-x^2-y^2)/4;
+
+plot (u,value=true,wait=true);
+plot(err,value=true,wait=true);
+
+cout << "error L2=" << sqrt(int2d(disk)( (u-(1-x^2-y^2)/4) ^2) )<< endl;
+cout << "error H10=" << sqrt(   int2d(disk)((dx(u)+x/2)^2) 
+                              + int2d(disk)((dy(u)+y/2)^2))<< endl;
+
+ disk = adaptmesh(disk,u,err=0.01);
+plot(disk,wait=1);
+
+laplace; 
+
+plot (u,value=true,wait=true);
+err =u-(1-x^2-y^2)/4;
+plot(err,value=true,wait=true);
+cout << "error L2=" << sqrt(int2d(disk)( (u-(1-x^2-y^2)/4) ^2) )<< endl;
+cout << "error H10=" << sqrt(  int2d(disk)((dx(u)+x/2)^2) 
+                             + int2d(disk)((dy(u)+y/2)^2))<< endl;
