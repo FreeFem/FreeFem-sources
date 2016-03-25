@@ -52,7 +52,7 @@ matrix<real> Mat;                           // local operator
     Mat = vPb(WhAugmented, WhAugmented);
     real[int] rhsFull = vPb(0, WhAugmented);
     matrix R = interpolate(Wh, WhAugmented);
-    renumbering(Mat, R, rhsFull, rhs);
+    renumbering(Mat, R, rhsFull, rhs, eps = -1);
 }
 ThBorder = square(1, 1);
 
