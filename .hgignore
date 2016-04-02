@@ -416,6 +416,8 @@
 ^download/mumps-seq/config\.log
 ^download/mumps/FAIRE-4\.10\.0
 ^download/mumps/MUMPS_4\.10\.0/
+^download/mumps-seq/MUMPS_5\.0\.0/
+^download/mumps/MUMPS_5\.0\.0/
 ^download/mumps/Makefile\.inc$
 ^download/mumps/config\.log$
 ^download/nlopt/Make\.defs$
