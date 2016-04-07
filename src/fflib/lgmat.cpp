@@ -59,7 +59,7 @@ using namespace std;
 */
 #include "ff++.hpp" 
 #include "array_resize.hpp" 
-
+#include "AFunction_ext.hpp"
 #include "CGNL.hpp"
 
 namespace bamg { class Triangles; }
@@ -2766,6 +2766,83 @@ class E_ForAllLoopMatrix
     
 };
 
+//  Mat real -> mat complex .... ??? FH.   april  2016 ....
+struct  VirtualMatCR :public VirtualMatrice<Complex> { public:
+    VirtualMatrice<double> & VM;
+    typedef Complex R;
+    VirtualMatCR(VirtualMatrice<double> & MM): VirtualMatrice<Complex>(MM.N,MM.M),  VM(MM) {}
+    void addMatMul(const KN_<R> &  cx, KN_<R> & cy) const {
+        double *px = static_cast<double*>(static_cast<void*>(cx));
+        double *py = static_cast<double*>(static_cast<void*>(cy));
+        KN_<double> rx(px+0,cx.N(),cx.step*2);
+        KN_<double> ix(px+1,cx.N(),cx.step*2);
+        KN_<double> ry(py+0,cy.N(),cy.step*2);
+        KN_<double> iy(py+1,cy.N(),cy.step*2);
+        VM.addMatMul(rx,ry);
+        VM.addMatMul(ix,iy);
+    }
+    void addMatTransMul(const KN_<R> &  cx , KN_<R> & cy ) const {
+        double *px = static_cast<double*>(static_cast<void*>(cx));
+        double *py = static_cast<double*>(static_cast<void*>(cy));
+        KN_<double> rx(px+0,cx.N(),cx.step*2);
+        KN_<double> ix(px+1,cx.N(),cx.step*2);
+        KN_<double> ry(py+0,cy.N(),cy.step*2);
+        KN_<double> iy(py+1,cy.N(),cy.step*2);
+        VM.addMatTransMul(rx,ry);
+        VM.addMatTransMul(ix,iy);
+    
+    }
+        bool WithSolver() const {return VM.WithSolver();} // by default no solver
+    virtual void Solve( KN_<R> & cx ,const KN_<R> & cy) const
+    { if( !VM.WithSolver()) InternalError("VirtualMatrice::solve not implemented ");
+        double *px = static_cast<double*>(static_cast<void*>(cx));
+        double *py = static_cast<double*>(static_cast<void*>(cy));
+        KN_<double> rx(px+0,cx.N(),cx.step*2);
+        KN_<double> ix(px+1,cx.N(),cx.step*2);
+        KN_<double> ry(py+0,cy.N(),cy.step*2);
+        KN_<double> iy(py+1,cy.N(),cy.step*2);
+        VM.Solve(rx,ry);
+        VM.Solve(ix,iy);
+    }
+    
+    bool ChecknbLine  (int n) const { return VM.ChecknbLine(n); }
+    bool ChecknbColumn  (int m) const  { return VM.ChecknbColumn(m); }
+};
+
+
+template<class R,class A,class B>    // extend (4th arg.)
+class  Op2_mulvirtAvCR : public OneOperator {     //
+    aType r; //  return type
+
+  
+public:
+    class CODE :public  E_F0 { public:                               // extend
+        Expression a0,a1;          // extend
+        CODE( Expression aa0,Expression aa1) : a0(aa0), a1(aa1) {}  // extend (2th arg.)
+        AnyType operator()(Stack s)  const
+        {
+            VirtualMatrice<Complex>  *pv = new  VirtualMatCR ((*GetAny<A>((*a0)(s))).A);
+            Add2StackOfPtr2Free(s,pv);
+            return SetAny<R>(R(pv,GetAny<B>((*a1)(s))));
+        }
+        virtual size_t nbitem() const {return a1->nbitem(); } // modif ???
+        bool MeshIndependent() const  {return a0->MeshIndependent() && a1->MeshIndependent() ;}
+    };
+
+    E_F0 * code(const basicAC_F0 & args) const
+    {     if ( args.named_parameter && !args.named_parameter->empty()  )
+        CompileError( " They are used Named parameter ");
+        
+        return  new CODE( t[0]->CastTo(args[0]),
+                          t[1]->CastTo(args[1]));}     // extend
+    Op2_mulvirtAvCR(int preff=0):                        // 3->4
+    OneOperator(map_type[typeid(R).name()],
+                map_type[typeid(A).name()],
+                map_type[typeid(B).name()]) {pref=preff;}
+    
+};
+
+
 template <class R>
 void AddSparseMat()
 {
@@ -3327,6 +3404,13 @@ void  init_lgmat()
     Global.Add("renumbering", "(", new removeDOF<double>(1));
     Global.Add("renumbering", "(", new removeDOF<Complex>(1));
 
+    
+    TheOperators->Add("*",
+                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::plusAx,Matrice_Creuse<double>*,KN_<Complex> > ,
+                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::plusAtx,Matrice_Creuse_Transpose<double>,KN_<Complex> > ,
+                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
+                     );
+    
 }
 
 int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}
