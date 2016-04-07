@@ -49,7 +49,7 @@ using namespace std;
 // buildlayer.cpp
 // trunc3d.cpp
 // rajout global
-
+#include <climits>
 #include <set>
 #include <vector>
 #include "msh3.hpp"
@@ -6071,6 +6071,242 @@ bool AddLayers(Mesh3 const  * const & pTh, KN<double> * const & psupp, long cons
     return true;
 }
 
+Mesh3 * GluMesh3tab(KN<pmesh3> * const & tab, long const & lab_delete)
+{
+    int flagsurfaceall = 0;
+    
+    int nbt=0;
+    int nbe=0;
+    int nbex=0;
+    int nbv=0;
+    int nbvx=0;
+    
+    double hmin=1e100;
+    R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
+    const Mesh3 * th0=0;
+    
+    for(int i = 0;i<tab->n;i++)
+    {
+        const Mesh3 &Th3(*tab->operator[](i));
+        th0=&Th3;
+        if(verbosity>1)  cout << " determination of hmin : GluMesh3D + "<< Th3.nv << " " << Th3.nt << " "<< Th3.nbe << endl;
+        
+        nbt  += Th3.nt;
+        nbvx += Th3.nv;
+        nbex += Th3.nbe;
+        
+        for (int k=0;k<Th3.nt;k++){
+            for (int e=0;e<6;e++){
+                hmin=min(hmin,Th3[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+            }
+        }
+        
+        for (int k=0;k<Th3.nbe;k++){
+            for (int e=0;e<3;e++){
+                hmin=min(hmin,Th3.be(k).lenEdge(e));   // calcul de .lenEdge pour un Mesh3
+            }
+        }
+        
+        for (int ii=0;ii<Th3.nv;ii++){
+            R3 P( Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z);
+            Pn=Minc(P,Pn);
+            Px=Maxc(P,Px);
+        }
+    }
+    
+    if(verbosity > 1) cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
+    
+    // probleme memoire
+    Vertex3  *v= new Vertex3[nbvx];
+    Tet      *t;
+    if(nbt!=0) t= new Tet[nbt];
+    Tet      *tt=t;
+    Triangle3 *b= new Triangle3[nbex];
+    Triangle3 *bb= b;
+    
+    ffassert(hmin>Norme2(Pn-Px)/1e9);
+    double hseuil =hmin/10.;
+    
+    //int *NumSom= new int[nbvx];
+    
+    // VERSION morice
+    if(verbosity > 1) cout << " creation of : BuildGTree" << endl;
+    EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v,Pn,Px,0);
+    
+    nbv=0;
+    //int nbv0=0;
+    for(int i = 0;i<tab->n;i++)
+    {
+        const Mesh3 &Th3(*tab->operator[](i));
+        
+        if(verbosity>1)  cout << " loop over mesh for create new mesh "<< endl;
+        if(verbosity>1)  cout << " GluMesh3D + "<< Th3.nv << " " << Th3.nt <<" " << Th3.nbe << endl;
+        //nbv0 =+Th3.nv;
+        
+        for (int ii=0;ii<Th3.nv;ii++){
+            const Vertex3 &vi(Th3.vertices[ii]);
+            Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+            
+            
+            if(!pvi){
+                v[nbv].x = vi.x;
+                v[nbv].y = vi.y;
+                v[nbv].z = vi.z;
+                v[nbv].lab = vi.lab;
+                //NumSom[ii+nbv0] = nbv;
+                gtree->Add( v[nbv] );
+                nbv++;
+            }
+            /*
+             else{
+             NumSom[ii+nbv0] = pvi-v;
+             assert(pvi-v <nbv);
+             }
+             */
+        }
+        
+        for (int k=0;k<Th3.nt;k++){
+            const Tet  &K(Th3.elements[k]);
+            int iv[4];
+            iv[0]=gtree->ToClose(K[0],hseuil)-v;
+            iv[1]=gtree->ToClose(K[1],hseuil)-v;
+            iv[2]=gtree->ToClose(K[2],hseuil)-v;
+            iv[3]=gtree->ToClose(K[3],hseuil)-v;
+            (tt++)->set(v,iv,K.lab);
+        }
+        //nbv0 =+Th3.nv;
+    }
+    
+    
+    if(verbosity > 1) cout << " creation of : BuildGTree for border elements" << endl;
+    Vertex3  *becog= new Vertex3[nbex];
+    //Vertex3  becog[nbex];
+    EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog,Pn,Px,0);
+    
+    double hseuil_border = hseuil/3;
+    //nbv0=0;
+    for(int i = 0;i<tab->n;i++)
+    {
+        const Mesh3 &Th3(*tab->operator[](i));
+        
+        for (int k=0;k<Th3.nbe;k++)
+        {
+            const Triangle3 & K(Th3.be(k));
+            if ((K.lab != lab_delete))//&&(K.lab != 3))
+            {
+                
+                int iv[3];
+                iv[0]=Th3.operator()(K[0]);
+                iv[1]=Th3.operator()(K[1]);
+                iv[2]=Th3.operator()(K[2]);
+                
+                R cdgx,cdgy,cdgz;
+                
+                cdgx = (Th3.vertices[iv[0]].x+ Th3.vertices[iv[1]].x+ Th3.vertices[iv[2]].x)/3.;
+                cdgy = (Th3.vertices[iv[0]].y+ Th3.vertices[iv[1]].y+ Th3.vertices[iv[2]].y)/3.;
+                cdgz = (Th3.vertices[iv[0]].z+ Th3.vertices[iv[1]].z+ Th3.vertices[iv[2]].z)/3.;
+                
+                const R3 r3vi( cdgx, cdgy, cdgz );
+                const Vertex3 &vi( r3vi);
+                
+                Vertex3 * pvi=gtree_be->ToClose(vi,hseuil_border);
+                if(!pvi){
+                    becog[nbe].x = vi.x;
+                    becog[nbe].y = vi.y;
+                    becog[nbe].z = vi.z;
+                    becog[nbe].lab = vi.lab;
+                    gtree_be->Add( becog[nbe++]);
+                    
+                    int igluv[3];
+                    igluv[0]= gtree->ToClose(K[0],hseuil)-v; //NumSom[iv[0]+nbv0];
+                    igluv[1]= gtree->ToClose(K[1],hseuil)-v; //NumSom[iv[1]+nbv0];
+                    igluv[2]= gtree->ToClose(K[2],hseuil)-v; //NumSom[iv[2]+nbv0];
+                    
+                    (bb++)->set(v,igluv,K.lab);
+                }
+            }
+        }
+        
+        //nbv0 =+Th3.nv;
+    }
+    delete gtree;
+    delete gtree_be;
+    delete [] becog;
+    
+    if(verbosity > 2) cout << " nbv="  << nbv  << endl;
+    if(verbosity > 2) cout << " nbvx=" << nbvx << endl;
+    if(verbosity > 2) cout << " nbt="  << nbt  << endl;
+    if(verbosity > 2) cout << " nbe="  << nbe  << endl;
+    if(verbosity > 2) cout << " nbex=" << nbex << endl;
+    if(verbosity>1)
+    {
+        cout << "     Nb of glu3D  point " << nbvx-nbv;
+        cout << "     Nb of glu3D  Boundary faces " << nbex-nbe << endl;
+    }
+    
+    if(nbt==0){
+        Mesh3 *mpq= new Mesh3(nbv,nbe,v,b);  
+        if(flagsurfaceall==1) mpq->BuildBoundaryElementAdj();
+        return mpq;
+    }
+    else{
+        Mesh3 *mpq= new Mesh3(nbv,nbt,nbe,v,t,b); 
+        /* 
+         mpq->BuildBound();
+         if(verbosity > 1) cout << "fin de BuildBound" << endl;
+         mpq->BuildAdj();
+         if(verbosity > 1) cout << "fin de BuildAdj" << endl;
+         mpq->Buildbnormalv();  
+         if(verbosity > 1) cout << "fin de Buildnormalv()" << endl;
+         mpq->BuildjElementConteningVertex();
+         if(verbosity > 1) cout << "fin de ConteningVertex()" << endl;
+         */
+        mpq->BuildGTree();
+        if(verbosity > 2) cout << "fin de BuildGTree()" << endl;
+        
+        //Add2StackOfPtr2FreeRC(stack,mpq);
+        
+        return mpq;
+    }
+}
+
+struct Op_GluMesh3tab : public OneOperator {
+    typedef const Mesh3 *pmesh3;
+    class Op: public E_F0mps   {
+    public:
+        static basicAC_F0::name_and_type name_param[] ;
+        static const int n_name_param =1;
+        Expression nargs[n_name_param];
+        
+        Expression getmeshtab;
+        long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+        
+        Op(const basicAC_F0 &  args,Expression t) : getmeshtab(t)
+        { args.SetNameParam(n_name_param,name_param,nargs); }
+        AnyType operator()(Stack s)  const ;
+    };
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    { return new Op(args,t[0]->CastTo(args[0])); }
+    Op_GluMesh3tab() :
+    OneOperator(atype<const pmesh3>(),atype<KN<pmesh3>*>()) {};
+};
+
+basicAC_F0::name_and_type Op_GluMesh3tab::Op::name_param[Op_GluMesh3tab::Op::n_name_param] =
+{
+    {  "labtodel",             &typeid(long)}
+};
+
+AnyType Op_GluMesh3tab::Op::operator()(Stack stack)  const {
+    
+    KN<const Mesh3*> *tab = GetAny<KN<const Mesh3*> *>((*getmeshtab)(stack));
+    long labtodel = arg(0,stack,LONG_MIN);
+    
+    Mesh3 * Tht = GluMesh3tab(tab,labtodel);
+    
+    Add2StackOfPtr2FreeRC(stack,Tht);
+    return Tht;
+}
 
 
 
@@ -6108,6 +6344,7 @@ static void Load_Init()
   Global.Add("cube","(",new  cubeMesh);
   Global.Add("cube","(",new  cubeMesh(1));
   Global.Add("trunc","(", new Op_trunc_mesh3);
+  Global.Add("gluemesh","(",new Op_GluMesh3tab);
 
   Global.Add("extract","(",new ExtractMesh);
   Global.Add("extract","(",new ExtractMesh2D);

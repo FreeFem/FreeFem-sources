@@ -154,3 +154,17 @@ plot(xxr, wait=1);
 
 }
 }
+{  // version 3.46
+  mesh Th=square(2,2);
+  fespace Xh(Th,P1);
+  varf vr(u,v)= int2d(Th)( u*v);//');
+  matrix A=vr(Xh,Xh); 
+  Xh<complex> u=(1+2i)*x*y;
+  Xh ur=x*y;
+  complex[int]  Au=A*u[];
+  real[int]  Aur=A*ur[];
+  Au.re -= Aur;
+  Au.im -= 2.*Aur;
+  cout << Au.linfty << endl; 
+  assert(Au.linfty < 1e-10); 
+}
