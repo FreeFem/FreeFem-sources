@@ -104,7 +104,7 @@ err = A * u[];      // global matrix-vector product
 err -= rhs;
 
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
-plotMPI(Th, err, "Global error", Pk, def, real, 3, 1)
+plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)
 real alpha = 1.0e+1;
 meshN ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
 u[] = mpirank;

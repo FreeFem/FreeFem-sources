@@ -56,6 +56,7 @@ matrix<real> Mat;                           // local operator
 ThBorder = Cube(CC, BB, LL);
 
 dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+set(A, sparams = "-hpddm_schwarz_method ras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 10");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 dpair ret;
@@ -99,4 +100,4 @@ err = A * u[];      // global matrix-vector product
 err -= rhs;
 
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
-plotMPI(Th, err, "Global error", Pk, def, real, 3, 1)
+plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)

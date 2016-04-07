@@ -62,7 +62,7 @@ for(int i = 0; i < D.n; ++i)
         err[i] = 0.0;
 
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
-plotMPI(Th, err, "Global error", Pk, def, real, 3, 1)
+plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)
 real alpha = 1.0;
 meshN ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
 u[] = mpirank;

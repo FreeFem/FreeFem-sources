@@ -15,7 +15,7 @@ real Sqrt = sqrt(2.);
 macro div(u)(dx(u) + dy(u#B) + dy(u#C))// EOM
 func Pk = [P2, P2, P2, P1];             // finite element space
 
-string deflation = getARGV("-deflation", "geneo");              // coarse space construction
+string deflation = getARGV("-deflation", "geneo-2");            // coarse space construction
 int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
 int fakeInterface = getARGV("-interface", 10);                  // interface between subdomains
 int s = getARGV("-split", 1);                                   // refinement factor
@@ -59,7 +59,7 @@ matrix<real> Mat;                           // local operator
 ThBorder = buildlayers(square(1, 1), 1);
 
 dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
-set(A, sparams = "-hpddm_local_operators_not_spd -hpddm_mkl_pardiso_iparm_13 1");
+set(A, sparams = "-hpddm_local_operators_not_spd -hpddm_mkl_pardiso_iparm_13 1 --hpddm_schwarz_method oras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 5");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 dpair ret;

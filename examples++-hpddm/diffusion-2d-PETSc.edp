@@ -48,7 +48,7 @@ for(int i = 0; i < D.n; ++i)
         err[i] = 0.0;
 
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
-plotMPI(Th, err, "Global error", Pk, def, real, 3, 1)
+plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)
 
 Wh<real> def(Rb)[1];
 Rb[0] = 1;
