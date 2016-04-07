@@ -1,0 +1,41 @@
+#!/bin/bash
+# 	./config.status  --file=ff-mpirun:ff-mpirun.in
+mpirun=mpirun
+dir=`dirname $0`
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+nw=1
+if [ -n "@MPIRUN@"  ] ;then mpirun="@MPIRUN@"  ; fi
+ffmpi=FreeFem++-mpi
+if [ -x "$0" -a -x "$dir/$ffmpi" ]; then 
+ if [ -n "@WIN32DLLTARGET@" -a -x "$dir/../bin-win32/$ffmpi.exe" ] ; then 
+   ffmpi="$dir/../bin-win32/$ffmpi.exe";
+ else 
+   ffmpi="$dir/$ffmpi";
+ fi    
+fi
+if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
+a[0]="'$mpirun'"
+j=1;
+#echo $1 ---
+while test -n "$1" ; do
+((j=$j+1))
+#((j1=$j+1))
+#echo --- $1 --  $j1 $j
+
+case "$1" in
+"-nw") nw=1;;
+"-win") nw=0;;
+*.edp) a[$j]="${ffmpi}";
+if [ "$nw" -eq 1 ]; then ((j=$j+1));a[$j]="-nw"; fi
+((j=$j+1));a[$j]="$1";;
+#if[ ! -f "$1" ]; then echo error file no found "$1"; dry=2; fi;;
+-dry) dry=1;; 
+*)  a[$j]="$1";;
+esac
+shift
+done
+echo "${a[*]}"
+if [ -n "$dry" ]; then echo which $ffmpi : `which  "$ffmpi"`; fi
+if [ -z "$dry" ]; then eval  "${a[*]}"; fi
