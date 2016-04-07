@@ -106,9 +106,9 @@ i</span><span class="s5">f your version of automake &gt;= 1.13 , autoconf &gt;= 
 <p class="p12"><span class="s1">To configure <span class="Apple-converted-space">  </span>with petsc and hpddm (need<span class="Apple-converted-space">  </span>c++ 11 features )</span></p>
 <p class="p13"><span class="s9"></span><br></p>
 <p class="p11"><span class="s9"># compilation de PETSc<span class="Apple-converted-space"> </span></span></p>
-<p class="p14"><span class="s9"><b>get http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.6.3.tar.gz</b></span></p>
+<p class="p14"><span class="s9"><b>wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.6.3.tar.gz</b></span></p>
 <p class="p14"><span class="s9"><b>tar zxvf petsc-lite-3.6.3.tar.gz</b></span></p>
-<p class="p14"><span class="s9"><b>cd petsc-lite-3.6.3</b></span></p>
+<p class="p14"><span class="s9"><b>cd petsc-3.6.3</b></span></p>
 <p class="p11"><span class="s9">#build the python, file ff-conf.py<span class="Apple-converted-space">  </span>python for configuration of PETSc<span class="Apple-converted-space"> </span></span></p>
 <p class="p9"><span class="s9"><b>cat &gt;ff-conf.py &lt;&lt;EOF</b></span></p>
 <p class="p9"><span class="s9"><b>#!/usr/bin/python</b></span></p>
@@ -135,8 +135,8 @@ i</span><span class="s5">f your version of automake &gt;= 1.13 , autoconf &gt;= 
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--download-scalapack',</b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--download-suitesparse',</b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--download-superlu',</b></span></p>
-<p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--prefix=/usr/local/ff++/petsc',</b></span></p>
-<p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--with-blas-lapack-lib='-llapack -lblas',</b></span></p>
+<p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--prefix=(The dir install petsc)',</b></span></p>
+<p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'--with-blas-lapack-lib=-llapack -lblas',</b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">    </span>'PETSC_ARCH=arch-ff++',</b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>]</b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>configure.petsc_configure(configure_options)</b></span></p>
@@ -144,6 +144,8 @@ i</span><span class="s5">f your version of automake &gt;= 1.13 , autoconf &gt;= 
 <p class="p9"><span class="s9"><b>chmod a+x ff-conf.py</b></span></p>
 <p class="p15"><span class="s9"># launch the petsc configure and follow the instruction<span class="Apple-converted-space"> </span></span></p>
 <p class="p14"><span class="s9"><b>./ff-conf.py</b></span></p>
+<p class="p14"><span class="s9"><b>make PETSC_DIR=(The dir install petsc) PETSC_ARCH=arch-ff++ all</b></span></p>
+<p class="p14"><span class="s9"><b>sudo make PETSC_DIR=(The dir install petsc) PETSC_ARCH=arch-ff++ install</b></span></p>
 <p class="p3"><span class="s7"><br>
 </span><span class="s1">Now you can reconfigure freefem++ with petsc (need<span class="Apple-converted-space">  </span>c++ 11 features )</span></p>
 <p class="p3"><span class="s1"><br>
