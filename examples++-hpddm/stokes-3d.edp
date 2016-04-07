@@ -13,7 +13,7 @@ macro init(i)[i, i, i, i]// EOM     // vector field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]//// two-dimensional gradient
 real Sqrt = sqrt(2.);
 macro div(u)(dx(u) + dy(u#B) + dy(u#C))// EOM
-func Pk = [P2, P2, P2, P0];             // finite element space
+func Pk = [P2, P2, P2, P1];             // finite element space
 
 string deflation = getARGV("-deflation", "geneo");              // coarse space construction
 int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
@@ -54,12 +54,12 @@ matrix<real> Mat;                           // local operator
     Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
     real[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
     matrix R = interpolate(Wh, WhAugmented);
-    renumbering(Mat, R, rhsFull, rhs);
+    renumbering(Mat, R, rhsFull, rhs, eps = -1);
 }
 ThBorder = buildlayers(square(1, 1), 1);
 
 dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
-set(A, sparams = "hpddm_mkl_pardiso_iparm_13 1");
+set(A, sparams = "-hpddm_local_operators_not_spd -hpddm_mkl_pardiso_iparm_13 1");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 dpair ret;

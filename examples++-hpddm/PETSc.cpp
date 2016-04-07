@@ -23,14 +23,14 @@
 namespace PETSc {
 class DistributedCSR {
     public:
-        HpSchwarz<>*                _A;
+        HpSchwarz<PetscScalar>*     _A;
         Mat                     _petsc;
         Vec                         _x;
         KSP                       _ksp;
         unsigned int*             _num;
         int*                       _ia;
         int*                       _ja;
-        double*                     _c;
+        PetscScalar*                _c;
         unsigned int            _first;
         unsigned int             _last;
         unsigned int           _global;
@@ -88,13 +88,13 @@ template<class Type>
 basicAC_F0::name_and_type initCSR_Op<Type>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
-    {"rhs", &typeid(KN<double>*)}
+    {"rhs", &typeid(KN<PetscScalar>*)}
 };
 
 template<class Type>
 class initCSR : public OneOperator {
     public:
-        initCSR() : OneOperator(atype<DistributedCSR*>(), atype<DistributedCSR*>(), atype<Matrice_Creuse<double>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<double>*>()) { }
+        initCSR() : OneOperator(atype<DistributedCSR*>(), atype<DistributedCSR*>(), atype<Matrice_Creuse<PetscScalar>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<double>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new initCSR_Op<Type>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]), t[4]->CastTo(args[4]));
@@ -108,16 +108,16 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
     KN<long>* ptO = GetAny<KN<long>*>((*O)(stack));
     KN<double>* ptD = GetAny<KN<double>*>((*D)(stack));
     long bs = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 1;
-    ptA->_A = new HpSchwarz<>;
-    MatriceMorse<double> *mA = static_cast<MatriceMorse<double>*>(&(*GetAny<Matrice_Creuse<double>*>((*K)(stack))->A));
+    ptA->_A = new HpSchwarz<PetscScalar>;
+    MatriceMorse<PetscScalar> *mA = static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->A));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
     if(ptO && ptA) {
-        HPDDM::MatrixCSR<double>* dA = new HPDDM::MatrixCSR<double>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->_A->Subdomain<double>::initialize(dA, STL<long>(*ptO), *ptR, comm);
+        HPDDM::MatrixCSR<PetscScalar>* dA = new HPDDM::MatrixCSR<PetscScalar>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        ptA->_A->Subdomain<PetscScalar>::initialize(dA, STL<long>(*ptO), *ptR, comm);
     }
     if(comm)
         PETSC_COMM_WORLD = *comm;
-    ptA->_A->HpSchwarz<>::initialize(*ptD);
+    ptA->_A->HpSchwarz<PetscScalar>::initialize(*ptD);
     if(!ptA->_num)
         ptA->_num = new unsigned int[ptA->_A->getDof()];
     double timing = MPI_Wtime();
@@ -142,9 +142,9 @@ AnyType initCSR_Op<Type>::operator()(Stack stack) const {
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, PETSC_TRUE);
     if(verbosity > 0 && mpirank == 0)
         cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
-    KN<double>* rhs = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
+    KN<PetscScalar>* rhs = nargs[2] ? GetAny<KN<PetscScalar>*>((*nargs[2])(stack)) : 0;
     if(rhs)
-        ptA->_A->HPDDM::template Subdomain<double>::exchange(*rhs);
+        ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(*rhs);
     timing = MPI_Wtime();
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
     KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
@@ -179,7 +179,7 @@ class setOptions_Op : public E_F0mps {
 template<class Type>
 basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"sparams", &typeid(std::string*)},
-    {"nearnullspace", &typeid(FEbaseArrayKn<double>*)}
+    {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)}
 };
 
 template<class Type>
@@ -215,7 +215,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         delete [] *data;
         delete [] data;
     }
-    FEbaseArrayKn<double>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<double>*>((*nargs[1])(stack)) : 0;
+    FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
     int dim = 0;
     if(ptNS)
         dim = ptNS->N;
@@ -225,12 +225,12 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         Vec* ns;
         VecDuplicateVecs(x, dim, &ns);
         for(unsigned short i = 0; i < dim; ++i) {
-            double* x;
+            PetscScalar* x;
             VecGetArray(ns[i], &x);
             ptA->_A->distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, *(ptNS->get(i)), x, ptA->_A->getDof());
             VecRestoreArray(ns[i], &x);
         }
-        double* dots = new double[dim];
+        PetscScalar* dots = new PetscScalar[dim];
         for(unsigned short i = 0; i < dim; ++i) {
             if(i > 0) {
                 VecMDot(ns[i], i, ns, dots);
@@ -275,9 +275,9 @@ class InvPETSc {
             MatCreateVecs((*t)._petsc, nullptr, &y);
             K* x;
             VecGetArray((*t)._x, &x);
-            (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<double*>(*u), x, (*t)._A->getDof());
+            (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), x, (*t)._A->getDof());
             VecRestoreArray((*t)._x, &x);
-            std::fill(static_cast<double*>(*out), static_cast<double*>(*out) + out->n, 0);
+            std::fill(static_cast<PetscScalar*>(*out), static_cast<PetscScalar*>(*out) + out->n, 0);
             timing = MPI_Wtime();
             KSPSolve((*t)._ksp, (*t)._x, y);
             if(verbosity > 0 && mpirank == 0)
@@ -334,10 +334,10 @@ static void Init_PETSc() {
     Dcl_Type<PETSc::DistributedCSR*>(Initialize<PETSc::DistributedCSR>, Delete<PETSc::DistributedCSR>);
     zzzfff->Add("dmatrix", atype<PETSc::DistributedCSR*>());
     TheOperators->Add("<-", new OneOperator1_<long, PETSc::DistributedCSR*>(PETSc::initEmptyCSR));
-    TheOperators->Add("<-", new PETSc::initCSR<double>);
-    Global.Add("set", "(", new PETSc::setOptions<double>());
-    addProd<PETSc::DistributedCSR, PETSc::ProdPETSc, KN<double>>();
-    addInv<PETSc::DistributedCSR, PETSc::InvPETSc, KN<double>>();
+    TheOperators->Add("<-", new PETSc::initCSR<PetscScalar>);
+    Global.Add("set", "(", new PETSc::setOptions<PetscScalar>());
+    addProd<PETSc::DistributedCSR, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar>();
+    addInv<PETSc::DistributedCSR, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
 }
 
 LOADFUNC(Init_PETSc)
