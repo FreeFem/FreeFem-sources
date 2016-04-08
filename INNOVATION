@@ -1,3 +1,11 @@
+version 3.45-1 
+ - add new finite element to store value a quadradure point.
+   in plugin  Element_QF  (see exemples++load/Element_QF.edp) 
+   in 2d FEQF1,FEQF2,FEQF5,FEQF7,FEQF9  corresponding resp. to  quadrature  
+         qf1pT,qf2pT,qf5pT,qf7pT,qf9pT
+   in 3d FEQF13d,FEQF23d,FEQF53d  corresponding resp. to  quadrature  
+         qfV1   ,qfV2  ,  qfV5
+   and FEQF and FEQF3d for the default quadrature. 
  - ajout gluemesh of 3d mesh 
  - ajout operator   b= A* c; // where is real matrix avec b and c comples vector. 
 version 3.45 (10 march 2016)
