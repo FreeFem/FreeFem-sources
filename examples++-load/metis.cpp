@@ -51,21 +51,21 @@ KN<R> * partmetis(Stack s,KN<R> * const & part,Mesh * const & pTh,long const & l
 {
     ffassert(pTh);
     const Mesh & Th(*pTh);
-    int nt=Th.nt,nv=Th.nv;
-    int nve = Mesh::Rd::d+1;
+    idx_t nt=Th.nt,nv=Th.nv;
+    idx_t nve = Mesh::Rd::d+1;
     
     KN<idx_t> eptr(nt+1),elmnts(nve*nt), epart(nt), npart(nv);
-    for(int k=0,i=0;k<nt;++k)
+    for(idx_t k=0,i=0;k<nt;++k)
       {
 	eptr[k]=i;
-	for(int j=0;j<nve;j++)
+	for(idx_t j=0;j<nve;j++)
 	  elmnts[i++] = Th(k,j);
 	eptr[k+1]=i;
       }
-    int numflag=0;
-    int nparts=lparts;
-    int edgecut;
-    int etype =nve-2; // triangle or tet .  change FH fevr 2010 
+    idx_t numflag=0;
+    idx_t nparts=lparts;
+    idx_t edgecut;
+    idx_t etype =nve-2; // triangle or tet .  change FH fevr 2010 
     idx_t ncommon = 1; 
 #ifdef  METIS_VER_MAJOR 
     if(NO==0)
@@ -90,17 +90,17 @@ KN<long> * partmetisd(Stack s,KN<long> * const & part,Mesh * const & pTh,long co
 {
     ffassert(pTh);
     const Mesh & Th(*pTh);
-    int nt=Th.nt,nv=Th.nv;
-    int nve = Mesh::Element::NbV;
+    idx_t nt=Th.nt,nv=Th.nv;
+    idx_t nve = Mesh::Element::NbV;
     
     KN<idx_t> elmnts(nve*nt), epart(nt), npart(nv);
-    for(int k=0,i=0;k<nt;++k)
-	for(int j=0;j<nve;j++)
+    for(idx_t k=0,i=0;k<nt;++k)
+	for(idx_t j=0;j<nve;j++)
 	    elmnts[i++] = Th(k,j);
-    int numflag=0;
-    int nparts=lparts;
-    int edgecut;
-    int etype =nve-2; // triangle
+    idx_t numflag=0;
+    idx_t nparts=lparts;
+    idx_t edgecut;
+    idx_t etype =nve-2; // triangle
 #ifdef  METIS_VER_MAJOR    
     printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve, libmetis__ComputeElementBalance(nt, nparts, epart));
 #else
