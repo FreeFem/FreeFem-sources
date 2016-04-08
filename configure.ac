@@ -423,6 +423,7 @@ curdir=`pwd`
 # -----------------
 
 echo $ac_configure_args > configure.param
+eval echo $PATH > config.path
 eval for i in $ac_configure_args\; do echo \$i\; done | sed -e "s/$/'/" -e "s/^/'/"   > config.param
 
 # by default the suffix of the  .so lib file is .so

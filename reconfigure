@@ -1,5 +1,7 @@
 #!/bin/sh
 if [ -f ./config.param ]; then 
+   test -f  ./config.path && eval export PATH=`cat ./config.path`:"$PATH"
+  echo PATH=$PATH 
   cat ./config.param | xargs echo "$@"
   cat ./config.param | xargs  ./configure "$@"
 elif [ -f ./configure.param ]; then 
