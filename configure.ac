@@ -114,7 +114,7 @@ m4_define([TOOL_DISABLE],
     then
         AC_SUBST([TOOL_COMPILE_$1],"")
         AC_SUBST([TOOL_DYLIB_$1],"")
-    elif  test   "$ff_$1_ok" == "yes" ; then
+    elif  test   "$ff_$1_ok" = "yes" ; then
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
     else  
@@ -891,7 +891,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 	    if test -f "$ffconfpetsc" ; then 
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-		    test "$PETSC_MPIRUN" == "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
+		    test "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES)
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE)
@@ -2014,8 +2014,8 @@ AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
 # ALH - 7/1/14 - not able to compile gsl or pardiso with FFCS on Windows
 if test "$enable_ffcs" != yes
 then
-    if test  "$ff_where_lib_conf_gsl" == 1  -a  "$enable_gsl"!="no" ; then enable_gsl=yes; fi;
-    if test  "$ff_where_lib_conf_mkl" == 1  -a  "$enable_mkl"!=no ; then enable_pardiso=yes; fi;
+    if test  "$ff_where_lib_conf_gsl" = 1  -a  "$enable_gsl" != "no" ; then enable_gsl=yes; fi;
+    if test  "$ff_where_lib_conf_mkl" = 1  -a  "$enable_mkl" != "no" ; then enable_pardiso=yes; fi;
 fi
 TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
@@ -2023,7 +2023,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_hpddm" != no && enable_hpddm=yes  
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  &&  enable_hpddm=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o "$ff_umfpack_ok" != "yes"  &&  enable_hpddm=no
 FF_PETCS_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
 FF_PETCS_DYLIB="PETSc.$DYLIB_SUFFIX"
