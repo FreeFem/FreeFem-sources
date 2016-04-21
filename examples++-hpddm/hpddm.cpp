@@ -511,18 +511,24 @@ class distributedDot : public OneOperator {
             return new distributedDot_Op<K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
         }
 };
+template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
+inline K prod(K u, double d, K v) {
+    return std::conj(u) * d * v;
+}
+template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
+inline K prod(K u, double d, K v) {
+    return u * d * v;
+}
 template<class K>
 AnyType distributedDot_Op<K>::operator()(Stack stack) const {
     KN<double>* pA = GetAny<KN<double>*>((*A)(stack));
     KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
     KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    K* tmp = new K[pin->n];
-    HPDDM::Wrapper<K>::diag(pin->n, *pA, *pin, tmp);
-    KN_<K> KN(tmp, pin->n);
-    K dot = (KN, *pout);
+    K dot = K();
+    for(int i = 0; i < pin->n; ++i)
+        dot += prod(pin->operator[](i), pA->operator[](i), pout->operator[](i));
     MPI_Allreduce(MPI_IN_PLACE, &dot, 1, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
-    delete [] tmp;
     return SetAny<K>(dot);
 }
 
@@ -564,6 +570,39 @@ AnyType distributedMV_Op<Type, K>::operator()(Stack stack) const {
     bool alloc = pA->setBuffer(mu);
     pA->GMV((K*)*pin, (K*)*pout, mu, &dA);
     pA->clearBuffer(alloc);
+    return 0L;
+}
+
+template<class Type, class K>
+class scaledExchange_Op : public E_F0mps {
+    public:
+        Expression A;
+        Expression in;
+        static const int n_name_param = 0;
+        static basicAC_F0::name_and_type name_param[];
+        scaledExchange_Op<Type, K>(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), in(param2) {
+            args.SetNameParam(n_name_param, name_param, nullptr);
+        }
+
+        AnyType operator()(Stack stack) const;
+};
+template<class Type, class K>
+basicAC_F0::name_and_type scaledExchange_Op<Type, K>::name_param[] = { };
+template<class Type, class K>
+class scaledExchange : public OneOperator {
+    public:
+        scaledExchange() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new scaledExchange_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+        }
+};
+template<class Type, class K>
+AnyType scaledExchange_Op<Type, K>::operator()(Stack stack) const {
+    Type* pA = GetAny<Type*>((*A)(stack));
+    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
+    unsigned short mu = pin->n / pA->getDof();
+    pA->template scaledExchange<true>((K*)*pin, mu);
     return 0L;
 }
 
@@ -632,6 +671,7 @@ void add() {
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
     Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
+    Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
 }
 }
 
