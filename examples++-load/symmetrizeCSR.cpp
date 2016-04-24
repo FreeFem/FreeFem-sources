@@ -67,14 +67,8 @@ long symmetrizeCSR(Matrice_Creuse<T>* const &A) {
     return 1L;
 }
 
-/*  class Init {
-    public:
-        Init();
-};
-
-Init init;
-*/
 static void Load_Init() {
     Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<double>* >(symmetrizeCSR<double>));
+    Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<std::complex<double> >* >(symmetrizeCSR<std::complex<double> >));
 }
 LOADFUNC(Load_Init)
