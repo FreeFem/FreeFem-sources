@@ -602,7 +602,7 @@ AnyType scaledExchange_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
     KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
     unsigned short mu = pin->n / pA->getDof();
-    pA->template scaledExchange<true>((K*)*pin, mu);
+    pA->Type::template scaledExchange<true>((K*)*pin, mu);
     return 0L;
 }
 
