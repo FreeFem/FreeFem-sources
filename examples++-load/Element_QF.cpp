@@ -187,7 +187,7 @@ namespace  Fem2D {
     void  TypeOfFE_QF3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
     {
         assert(val.N() >=4);
-        assert(val.M()==3 );
+        assert(val.M()==1 );
         int kqf=ijP(P);
         // wi = signe * (x - qi)/ (volume*d)
         val=0;

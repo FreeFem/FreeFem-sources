@@ -346,7 +346,7 @@ template<class R>
                 :  make_pair<int,int>(i+ii00,j+jj00) ; }
  
 template<class R>
-bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
+bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold, const bool keepSym)
 {
     double eps0=max(numeric_limits<double>::min(), threshold);
     if( RNM::norm2(coef)<eps0) return  L == U ;
@@ -1300,6 +1300,16 @@ template<class R>
     
     int n=0,m=0;
     bool sym=true;
+    for(i=begin;i!=end&&sym;i++++)
+    {
+        if(i->second) // M == 0 => zero matrix 
+        {
+            MatriceCreuse<R> & M=*i->second;
+            if(!M.sym())
+                sym = false;
+        }
+    }
+  
     for(i=begin;i!=end;i++++)
      {
 	if(i->second) // M == 0 => zero matrix 
@@ -1313,11 +1323,10 @@ template<class R>
 	    //  change to max FH dec 2007 to hard to satisfy
 	   /* if (n==0)*/ { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}// Modif mars 2007 FH
 	   /* else { if(transpose)  ffassert(n== M.m && m==M.n); else ffassert(n== M.n && m==M.m);}*/
-	    sym = M.addMatTo(coef,mij,transpose,ii00,jj00,transpose&&cnj) && sym;  
+	   M.addMatTo(coef,mij,transpose,ii00,jj00,transpose&&cnj,0.0,sym);
 	}
      } 
     int nbcoef=mij.size();
-    if(sym) nbcoef = (nbcoef+n)/2;
 
   // return new   MatriceMorse<R>(n,m,mij,sym);   
     return make_triplet(n,m,sym);
@@ -1334,7 +1343,7 @@ template<class R>
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold)
+bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold, const bool keepSym)
 {
   double eps0=max(numeric_limits<double>::min(),threshold);
   int i,j,k;
@@ -1348,11 +1357,10 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tran
            if(RNM::norm2(cij)>eps0)
            {
             mij[ij_mat(trans,ii00,jj00,i,j)] += cij ;
-           if (i!=j)
+           if (i!=j&&!keepSym)
              mij[ij_mat(trans,ii00,jj00,j,i)] += cij;
            }
          }
-           
    }
   else
    {
@@ -1367,7 +1375,7 @@ bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tran
          }
    }
 
-return symetrique;
+return keepSym;
 }
 
  
