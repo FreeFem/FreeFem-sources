@@ -5186,6 +5186,7 @@ void  init_lgfem()
     
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
+ Add<pmesh*>("measure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
     
@@ -5307,6 +5308,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<lgElement>("region",".",new OneOperator1_<long,lgElement>(getlab));
  Add<lgElement>("area",".",new OneOperator1_<double,lgElement>(getarea));
  Add<lgElement>("mesure",".",new OneOperator1_<double,lgElement>(getarea));
+ Add<lgElement>("measure",".",new OneOperator1_<double,lgElement>(getarea));
  Add<lgBoundaryEdge>("length",".",new OneOperator1_<double,lgBoundaryEdge>(getlength));
  Add<lgBoundaryEdge>("label",".",new OneOperator1_<long,lgBoundaryEdge>(getlab));
  Add<lgBoundaryEdge>("Element",".",new OneOperator1_<lgElement,lgBoundaryEdge>(getElement));

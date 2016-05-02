@@ -34,7 +34,7 @@ namespace  Fem2D {
             int m;
             KN<int> w;
             
-        TypeOfFE_QF2d(const QF *qf): TypeOfFE(0,0,qf->n,1,DataQF2d(qf->n),1,1,qf->n,qf->n,new double[qf->n] ),m(5), w(m*m)
+        TypeOfFE_QF2d(const QF *qf): TypeOfFE(0,0,qf->n,1,DataQF2d(qf->n),1,1,qf->n,qf->n,new double[qf->n] ),m(qf->n <15 ?5:7), w(m*m)
 	{
             int debug=verbosity>99;
 	    for (int i=0;i<NbDoF;i++) {
@@ -67,12 +67,13 @@ namespace  Fem2D {
                         if(k !=l)
                         {
                             err++;
-                            cout << " Erreur search TypeOfFE_QF2d loose point " << l << " m = " << m << endl;
+                            cout << " Erreur search TypeOfFE_QF2d loose point " << l << " / " << NbDoF << " m = " << m << endl;
                         }
                     }
             if(err)
             {
-                ErrorExec("TypeOfFE_QF2d: increase m in TypeOfFE_QF2d ",1);
+                ErrorExec("TypeOfFE_QF2d: increase m in TypeOfFE_QF2d ",0);
+                ffassert(0);
             }
             
 
@@ -174,12 +175,14 @@ namespace  Fem2D {
             if(kk !=l)
             {
                 err++;
-                cout << " Erreur search TypeOfFE_QF2d loose point " << l << " m = " << m << endl;
+                cout << " Erreur search TypeOfFE_QF3d loose point " << l <<" NbDoF=" << NbDoF <<  " m = " << m << endl;
             }
         }
         if(err)
         {
-            ErrorExec("TypeOfFE_QF2d: increase m in TypeOfFE_QF2d ",1);
+            
+            ErrorExec("TypeOfFE_QF2d: increase m in TypeOfFE_QF3d ",0);
+            ffassert(0);
         }
         
         
