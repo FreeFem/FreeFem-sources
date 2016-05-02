@@ -1540,7 +1540,9 @@ void init_lgmesh3() {
    Add<GlgElement<Mesh3> >("label",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
    Add<GlgElement<Mesh3> >("region",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
    Add<GlgElement<Mesh3> >("mesure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
+    Add<GlgElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
    Add<pmesh3*>("mesure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
+    Add<pmesh3*>("measure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
    Add<pmesh3*>("bordermesure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
    Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
    Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
