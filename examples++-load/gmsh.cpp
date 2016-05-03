@@ -39,6 +39,7 @@
 //   
 //  Vincent HUBER - vincent.huber@cemosis.fr   October 2014
 //  manage verbosity levels
+//  Add SaveGMH "d  FH
 //
 #include "ff++.hpp"
 
@@ -830,12 +831,105 @@ AnyType GMSH_LoadMesh3_Op::operator()(Stack stack)  const
 
 $1 */
 
+bool SaveGMSH(pmesh3 pTh,string *filewoext)
+{
+  /*
+   /This function save a
+   func int SaveGmsh(mesh3 & msh, string namewoextension)
+   {
+   string nameoffile=namewoextension+".msh";
+   //mesh3 msh=amsh;//To jump over a "bug"
+   ofstream f1(nameoffile);
+   //f1.scientific;
+   f1.precision(6);
+   int nbvertices=msh.nv;
+   f1<<"$MeshFormat"<<endl;
+   f1<<"2.2 0 8"<<endl;
+   f1<<"$EndMeshFormat"<<endl;
+   f1<<"$Nodes"<<endl;
+   f1<<nbvertices<<endl;
+   for(int i=0;i<nbvertices;++i)
+   {
+   f1<<(i+1)<<" "<<msh(i).x<<" "<<msh(i).y<<" "<<msh(i).z<<endl;
+   }
+   f1<<"$EndNodes"<<endl;
+   f1<<"$Elements"<<endl;
+   f1<<msh.nt+msh.nbe<<endl;
+   for(int i=0;i<msh.nbe;++i)
+   {
+   //2 is a triangle
+   f1<<(i+1)<<" 2 ";
+   //two tags: the label
+   f1<<"2 "<<msh.be(i).label<<" "<<msh.be(i).label<<" ";
+   //list of nodes
+   f1<<msh.be(i)[0]+1<<" "<<msh.be(i)[1]+1<<" "<<msh.be(i)[2]+1<<endl;
+   }
+   
+   for(int i=0;i<msh.nt;++i)
+   {
+   //4 is a tethrahedron
+   f1<<(msh.nbe+i+1)<<" 4 ";
+   //two tags: the label
+   f1<<"2 "<<msh[i].label<<" "<<msh[i].label<<" ";
+   //list of nodes
+   f1<<msh[i][0]+1<<" "<<msh[i][1]+1<<" "<<msh[i][2]+1<<" "<<msh[i][3]+1<<endl;
+   }
+   
+   f1<<"$EndElements"<<endl;
+   
+   return 0;
+   }
+
+   */
+   string file=*filewoext + ".msh";
+   ofstream f1(file.c_str());
+    if( !f1) {  ffassert(f1);  return 1;}
+   f1.precision(15);
+   const  Mesh3 &msh=*pTh;
+    long nbvertices=msh.nv;
+    f1<<"$MeshFormat"<<endl;
+    f1<<"2.2 0 8"<<endl;
+    f1<<"$EndMeshFormat"<<endl;
+    f1<<"$Nodes"<<endl;
+    f1<<nbvertices<<endl;
+    for(int i=0;i<nbvertices;++i)
+    {
+        f1<<(i+1)<<" "<<msh(i).x<<" "<<msh(i).y<<" "<<msh(i).z<<endl;
+    }
+    f1<<"$EndNodes"<<endl;
+    f1<<"$Elements"<<endl;
+    f1<<msh.nt+msh.nbe<<endl;
+    for(int i=0;i<msh.nbe;++i)
+    {
+        //2 is a triangle
+        f1<<(i+1)<<" 2 ";
+        //two tags: the label
+        f1<<"2 "<<msh.be(i).lab<<" "<<msh.be(i).lab<<" ";
+        //list of nodes
+        f1<<msh(msh.be(i)[0])+1<<" "<<msh(msh.be(i)[1])+1<<" "<<msh(msh.be(i)[2])+1<<endl;
+    }
+    
+    for(int i=0;i<msh.nt;++i)
+    {
+        //4 is a tethrahedron
+        f1<<(msh.nbe+i+1)<<" 4 ";
+        //two tags: the label
+        f1<<"2 "<<msh[i].lab<<" "<<msh[i].lab<<" ";
+        //list of nodes
+        f1<<msh(msh[i][0])+1<<" "<<msh(msh[i][1])+1<<" "<<msh(msh[i][2])+1<<" "<<msh(msh[i][3])+1<<endl;
+    }
+    
+    f1<<"$EndElements"<<endl;
+    return 0; // OK ..
+}
+
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
   if(verbosity>1) cout << " load: gmsh " << endl;
   Global.Add("gmshload3","(",new GMSH_LoadMesh3);
   Global.Add("gmshload","(",new GMSH_LoadMesh);
+   Global.Add("savegmsh","(",new OneOperator2<bool,pmesh3,string*>(SaveGMSH));
   if(verbosity>1) cout << " load: gmsh  " << endl;
 }
 LOADFUNC(Load_Init)
