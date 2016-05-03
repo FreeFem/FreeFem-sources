@@ -1,3 +1,6 @@
+ - add savegmsh in gmsh plug in to write file for gmsh (thank to Lo Sala salalo80@gmail.com)
+  see  ttestio.edp for the examples 
+version 3.46  
 version 3.45-1 
  - add new finite element to store value a quadradure point.
    in plugin  Element_QF  (see exemples++load/Element_QF.edp) 
