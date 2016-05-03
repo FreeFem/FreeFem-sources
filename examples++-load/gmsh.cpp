@@ -833,7 +833,8 @@ $1 */
 
 bool SaveGMSH(pmesh3 pTh,string *filewoext)
 {
-  /*
+  /*  Code from Lo Sala <salalo80@gmail.com>
+     May 3th 2016 ... 
    /This function save a
    func int SaveGmsh(mesh3 & msh, string namewoextension)
    {
