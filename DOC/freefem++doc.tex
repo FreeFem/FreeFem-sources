@@ -9389,6 +9389,8 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
      \begin{itemize}
        \item[-]   \texttt{ int3d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $ 
        \item[-]   \texttt{ int3d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
+       \item[-]  \texttt{ int3d(Th,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi<0} K\,v\,w  $ 
+       \item[-]  \texttt{ int3d(Th,l,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi<0} K\,v\,w  $ 
 
         \item[-] \texttt{ int2d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
           } K\,v\,w  $ 
@@ -9410,6 +9412,8 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
      \begin{itemize}
        \item[-]   \texttt{ int2d(Th)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T } K\,v\,w  $ 
        \item[-]   \texttt{ int2d(Th,1)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{1}}\int_{T} K\,v\,w  $ 
+       \item[-]  \texttt{ int2d(Th,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi<0} K\,v\,w  $ 
+       \item[-]  \texttt{ int2d(Th,l,levelset=phi)( K*v*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi<0} K\,v\,w  $ 
 
         \item[-] \texttt{ int1d(Th,2,5)( K*v*w) }  $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5})
           } K\,v\,w  $ 
@@ -9435,7 +9439,13 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
        \item[-]
          \texttt{ int3d(Th,l)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\in\Omega_l}\int_{T
           } K\,w  $
+      \item[-]  \texttt{ int3d(Th,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi<0} K\,w  $ 
+       \item[-]  \texttt{ int3d(Th,l,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi<0} K\,w  $ 
+          
       \item[-] \texttt{ int2d(Th,2,5)( K*w) }   $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5}) } K \,w  $
+      \item[-]  \texttt{ int2d(Th,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi=0} K\,w  $ 
+       \item[-]  \texttt{ int2d(Th,l,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi=0} K\,w  $ 
+      
        \item[-] \texttt{ intallfaces(Th)( f*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } f\,w  $
        \item[-] a vector of type  \texttt{real[int]}
       \end{itemize}
@@ -9447,7 +9457,12 @@ Below  \texttt{v} is the unknown function and \texttt{w} is the test function.
        \item[-]
          \texttt{ int2d(Th,l)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\in\Omega_l}\int_{T
           } K\,w  $
+       \item[-]  \texttt{ int2d(Th,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi<0} K\,w  $ 
+       \item[-]  \texttt{ int2d(Th,l,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi<0} K\,w  $ 
+          
       \item[-] \texttt{ int1d(Th,2,5)( K*w) }   $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{(\p T\cup\Gamma) \cap ( \Gamma_2 \cup \Gamma_{5}) } K \,w  $
+      \item[-]  \texttt{ int1d(Th,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{T,\phi=0} K\,w  $ 
+       \item[-]  \texttt{ int1d(Th,l,levelset=phi)( K*w) } $ \displaystyle = \sum_{T\in\mathtt{Th},T\subset \Omega_{l}}\int_{T,\phi=0} K\,w  $ 
        \item[-] \texttt{ intalledges(Th)( f*w) } $ \displaystyle = \sum_{T\in\mathtt{Th}}\int_{\p T } f\,w  $
        \item[-] a vector of type  \texttt{real[int]}
       \end{itemize}
