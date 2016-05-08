@@ -379,11 +379,12 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             if(timing)
                 (*timing)[timing->n - 1] = MPI_Wtime() - timer;
             delete [] pair->p->second;
-            delete pair->p;
+            pair->destroy();
+            pair = nullptr;
             timer = MPI_Wtime();
         }
     MPI_Barrier(MPI_COMM_WORLD);
-    if(opt["reuse_preconditioner"] <= 1 && !excluded && pair && pair->p && timing && mpisize > 1)
+    if(opt.val<unsigned short>("reuse_preconditioner") <= 1 && !excluded && pair && pair->p && timing && mpisize > 1)
         (*timing)[timing->n - 1] += MPI_Wtime() - timer;
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
@@ -650,7 +651,7 @@ class InvSchwarz {
             }
             if(mpirank != 0)
                 opt.remove("verbosity");
-            HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, 1, MPI_COMM_WORLD);
+            HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, mu, MPI_COMM_WORLD);
         }
         static U init(U Ax, InvSchwarz<T, U, K> A) {
             A.solve(Ax);
@@ -678,7 +679,7 @@ void add() {
 static void Init_Schwarz() {
     Global.Add("getOption", "(", new OneOperator1_<double, string*>(Schwarz::getOpt));
     Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(Schwarz::isSetOpt));
-#ifdef DSUITESPARSE
+#if defined(DSUITESPARSE) || defined(DHYPRE)
     const char ds = 'G';
 #else
     const char ds = 'S';
