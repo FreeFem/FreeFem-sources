@@ -52,6 +52,8 @@ class Pair {
         void init() {
         }
         void destroy() {
+            delete p;
+            p = nullptr;
         }
 };
 template<class R, class A, class B> R Build(A a, B b) {

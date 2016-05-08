@@ -4,16 +4,14 @@
 #include "common.hpp"
 #include "petsc.h"
 
-#if (PETSC_VERSION_RELEASE== 1)
-// Stable version of petsc ...
+#if PETSC_VERSION_LT(3,7,0)
 #define FFPetscOptionsGetInt(a,b,c,d) PetscOptionsGetInt(a,b,c,d)
-#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(a,b,c,d) 
-#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(a,b,c) 
+#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(a,b,c,d)
+#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(a,b,c)
 #else
-//  dev version of petsc development version
 #define FFPetscOptionsGetInt(a,b,c,d) PetscOptionsGetInt(NULL,a,b,c,d)
-#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(NULL,a,b,c,d) 
-#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(NULL,a,b,c) 
+#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(NULL,a,b,c,d)
+#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(NULL,a,b,c)
 #endif
 
 #if PETSC_VERSION_LT(3,6,0)
