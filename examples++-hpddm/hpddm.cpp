@@ -10,6 +10,12 @@ double getOpt(string* const& ss) {
 bool isSetOpt(string* const& ss) {
     return HPDDM::Option::get()->set(*ss);
 }
+template<class Type, class K>
+bool clearRecycling(Type* const& Op, const long& mu) {
+    HPDDM::Recycling<K>::get(mu)->~Recycling();
+    return false;
+}
+
 
 template<class Type, class K>
 class initDDM_Op : public E_F0mps {
@@ -673,6 +679,7 @@ void add() {
     Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
+    Global.Add("clearRecycling", "(", new OneOperator2_<bool, Type<K, S>*, long>(Schwarz::clearRecycling<Type<K, S>, K>));
 }
 }
 
