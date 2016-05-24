@@ -225,8 +225,18 @@ static AddNewFE3  AddNewFE_QF3d2("FEQF23d",&TypeOfFE_QF3d2);
 static AddNewFE3  AddNewFE_QF3d5("FEQF53d",&TypeOfFE_QF3d5);
 static AddNewFE3  AddNewFE_QF3ddef("FEQF3d",&TypeOfFE_QF3d5);
     
+    
 } // FEM2d namespace 
 
+static void finit()
+{  //  equivalent2d  3d EFQF
+    TEF2dto3d[FindFE2("FEQF")]=&TypeOfFE_QF3d5;
+    TEF2dto3d[FindFE2("FEQF1")]=&TypeOfFE_QF3d1;
+    TEF2dto3d[FindFE2("FEQF2")]=&TypeOfFE_QF3d2;
+    TEF2dto3d[FindFE2("FEQF5")]=&TypeOfFE_QF3d5;
+}
+
+LOADFUNC(finit);  //  une variable globale qui serat construite  au chargement dynamique
 
 // --- fin -- 
 

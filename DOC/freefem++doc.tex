@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.44-1}
+\def\VERSION{3.46}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -8651,14 +8651,22 @@ So the number  degrees of freedom is 9.
          \right.\right\}
          \label{eq:BDM1Ortho}
      \end{equation}
-   \item[TDNNS1]  \index{TDNNS1|textbf}\index{fespace!TDNNS1} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2) A new element finite element to approximation symetrique 2x2 matrix in $H(div div)$ (i.e $\sigma_{nn}$ is continuous accross edge).  
-      \begin{equation}
-         TDNNS1{h} = \left\{ \bm{\sigma} \in (L^2)^{2,2}  \left|\; \forall K \in
-         \mathcal{T}_{h} \quad   \bm{\sigma}_{|K} \in P_1^2, \sigma_{12}=\sigma_{21}, \sigma_{nn} \mbox{is continuous}
-         \right.\right\}
-         \label{TDNNS1}
-     \end{equation}
-     where $ \sigma_{nn}= n^t \sigma n$, and $n$ is a normal to the edge (see \cite[section 4.2.2.3]{sinwel} for full detail)
+   \item[FEQF]  \index{FEQF|textbf}\index{fespace!FEQF} (need \ttCC{@load "Element_QF"}, version 3.45, dimension 2 or 3) the finite element to store 
+   function at default quadrature points (so the  quadrature is \texttt{qf5pT} in 2d and is   \texttt{qfV5} in 3d).
+   
+   for over quadrature you have the following correspondance  finite element, quadrature formula. 
+    \begin{itemize}
+      \item \texttt{FEQF1} $\mapsto$ \texttt{qf1pT}  , \index{FEQF1|textbf}\index{fespace!FEQF1}
+      \item \texttt{FEQF2} $\mapsto$ \texttt{qf2pT}  , \index{FEQF2|textbf}\index{fespace!FEQF2}
+      \item \texttt{FEQF5} $\mapsto$ \texttt{qf5pT}  , \index{FEQF5|textbf}\index{fespace!FEQF5}
+      \item \texttt{FEQF7} $\mapsto$ \texttt{qf7pT}  , \index{FEQF7|textbf}\index{fespace!FEQF7}
+      \item \texttt{FEQF9} $\mapsto$ \texttt{qf9pT}  , \index{FEQF9|textbf}\index{fespace!FEQF9}
+      \item \texttt{FEQF13d} $\mapsto$ \texttt{qfV1}  , \index{FEQF13d|textbf}\index{fespace!FEQF13d}
+      \item \texttt{FEQF23d} $\mapsto$ \texttt{qfV2}  , \index{FEQF23d|textbf}\index{fespace!FEQF23d}
+      \item \texttt{FEQF53d} $\mapsto$ \texttt{qfV5}   \index{FEQF53d|textbf}\index{fespace!FEQF53d}
+    \end{itemize}
+   You can use this element element of do optimization to store and reuse  function with long formula in non linear process in integral. 
+    
      \end{description}
 \subsection{Use of ``fespace" in 2d}
 With the 2d finite element spaces

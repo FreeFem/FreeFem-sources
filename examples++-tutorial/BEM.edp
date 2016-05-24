@@ -1,6 +1,7 @@
 //  compute the solution of a Laplace operator in a Semi infini domain.
 //  with coupling of Boundary element with periodicity BC in x . 
 // -------------------------------------------------------------
+include "ExtractDofsonBorder.idp"
 real eps0=1;
 int labup=3, labdown=1;
 int nharm= 10; // Number of  Harmonique
@@ -38,17 +39,17 @@ Vh<complex> u;
 
 {// for cleanning all local varaible at end of block.
  // computation of the matrice BEM
- int kdfBEM=0; // nb of  DoF on border 
- int[int] IdfB2Vh(0:Vh.ndof-1); // for numbering IdfB2Vh[i]==i 
- {
- int lbord = labup; // label of the BEM border
- varf vbord(u1,v1) = on(lbord,u1=x-10);//  negative value ..
- real[int] xb=vbord(0,Vh,tgv=1);
- sort(xb,IdfB2Vh); // sort of  array  xb and IdfB2Vh
- xb = xb ? 1 : 0;//  put 1 if none zero
- kdfBEM = xb.sum +0.5; //  number of DoF on border 
- IdfB2Vh.resize(kdfBEM);  // IdfB2Vh[i] -> number DoF of border 
- }
+  // nb of  DoF on border 
+ int[int] IdfB2Vh(1); // for numbering IdfB2Vh[i]==i 
+ ExtractDofsonBorder(labup,Vh,IdfB2Vh,-1)
+ int kdfBEM=IdfB2Vh.n;
+ // verif
+ if(0)  { Vh X=x;
+     real[int] xx(IdfB2Vh.n);
+     xx=X[](IdfB2Vh);
+     cout << IdfB2Vh << endl; 
+     cout << xx << endl; 
+   }
 //  end of the numbering computation
  // so  IdfB2Vh[ibem] = iVh where ibem is a df of on bem , and iVh is a df in Vh space. 
    real perio=Xmax;
