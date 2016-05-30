@@ -2029,7 +2029,7 @@ if test "$ff_petsc_ok" != no ;   then
 FF_PETCS_DYLIB="PETSc.$DYLIB_SUFFIX"
 fi
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB" 
-TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"])
+TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETCS_DYLIB"])
 
 
 # All makefiles

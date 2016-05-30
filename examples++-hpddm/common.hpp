@@ -21,8 +21,6 @@
 #define DSUITESPARSE
 #endif
 
-#define HPDDM_FETI 0
-#define HPDDM_BDD 0
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
 
@@ -43,6 +41,11 @@ class STL {
         T* end() const {
             return _it + _size;
         }
+        bool empty() const { return _size <= 0; }
+        T& operator[](std::size_t idx) { return _it[idx]; }
+        const T& operator[](std::size_t idx) const { return _it[idx]; }
+        T& back() { return _it[_size - 1]; }
+        const T& back() const { return _it[_size - 1]; }
 };
 template<class K>
 class Pair {
