@@ -23,23 +23,23 @@
 
 TESTS=   diffusion-2d-PETSc.edp	diffusion-3d-PETSc.edp	elasticity-2d-PETSc.edp	elasticity-3d-PETSc.edp	heat-2d-PETSc.edp	heat-3d.edp \
 diffusion-2d.edp	diffusion-3d.edp	elasticity-2d.edp	elasticity-3d.edp	heat-2d.edp		helmholtz-2d.edp \
-stokes-2d-PETSc.edp 	stokes-3d-PETSc.edp	stokes-3d.edp	stokes-2d.edp
+stokes-2d-PETSc.edp 	stokes-3d-PETSc.edp	stokes-3d.edp	stokes-2d.edp	diffusion-2d-substructuring.edp	elasticity-2d-substructuring.edp
 
 XFAIL_TESTS=$(TESTS)
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
-LIST_IDP=  macro_ddm.idp
+LIST_IDP=  macro_ddm.idp macro_ddm_substructuring.idp
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp common.hpp hpddm.cpp
+EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp common.hpp hpddm.cpp hpddm_substructuring.cpp
 
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
 # deactivated).
 
-LIST_COMPILE=@TOOL_DYLIB_hpddm@  
+LIST_COMPILE=@TOOL_DYLIB_hpddm@  @TOOL_DYLIB_hpddm_substructuring@
 
 if FFCS_MPIOK
 

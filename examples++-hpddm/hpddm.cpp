@@ -1,6 +1,9 @@
 //ff-c++-LIBRARY-dep: cxx11 hpddm [umfpack|mumps parmetis ptscotch scotch scalapack] [mkl|blas] mpi pthread mpifc fc
 //ff-c++-cpp-dep:
 
+#define HPDDM_SCHWARZ 1
+#define HPDDM_FETI    0
+#define HPDDM_BDD     0
 #include "common.hpp"
 
 namespace Schwarz {
@@ -105,7 +108,7 @@ basicAC_F0::name_and_type attachCoarseOperator_Op<Type, K>::name_param[] = {
     {"pattern", &typeid(Matrice_Creuse<K>*)},
     {"threshold", &typeid(HPDDM::underlying_type<K>)},
     {"timing", &typeid(KN<double>*)},
-    {"ret", &typeid(Pair<K>*)},
+    {"ret", &typeid(Pair<K>*)}
 };
 template<class Type, class K>
 class attachCoarseOperator : public OneOperator {
@@ -122,11 +125,11 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     MPI_Comm comm = *(MPI_Comm*)ptComm;
     Type* ptA = GetAny<Type*>((*A)(stack));
     MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
-    KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
     Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
     HPDDM::Option& opt = *HPDDM::Option::get();
-    unsigned short nu = opt["geneo_nu"];
+    unsigned short nu = opt.val<unsigned short>("geneo_nu", 20);
     HPDDM::underlying_type<K> threshold = opt.val("geneo_threshold", 0.0);
+    KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
     std::pair<MPI_Request, const K*>* ret = nullptr;
     double t;
     if(mA) {
