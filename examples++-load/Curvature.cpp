@@ -330,8 +330,11 @@ double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<do
             mark[iv[1]]=nel;
             nee[nel++]=iv[1];
             nee[nel++]=iv[0];
+            if(verbosity>99) cout << " "<< nel/2 << " : "<<iv[1] << " " << iv[0] <<endl;
         }
     }
+    if(verbosity>9)
+        cout << " n edge  "<< nel/2   << endl;
     // recherech depart
     int bg =-1,nbg=0;
     if(nel==0) return 0;
@@ -351,7 +354,9 @@ double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<do
         nee[0]=-1; // on ouvre 
     }
     else
+    { cout << " error (no connexe boundary be carefull with internal boundary (pb of sens) ) : nb start = " << nbg << endl; 
       ffassert( nbg==1); // un depart pas plus
+    }
     bb->resize(3,np);
     KNM<double> &b(*bb);
     int i=0,iv=bg;
