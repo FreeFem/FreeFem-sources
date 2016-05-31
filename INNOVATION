@@ -1,3 +1,5 @@
+version 3.47 (31/may/2016) 
+ - add solveurs FETI and  BDD in  HPDDM
  - add savegmsh in gmsh plug in to write file for gmsh (thank to Lo Sala salalo80@gmail.com)
   see  ttestio.edp for the examples 
 version 3.46  

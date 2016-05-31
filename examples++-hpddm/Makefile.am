@@ -39,7 +39,7 @@ EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp common.hpp hpddm.cpp hpddm_substructu
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
 # deactivated).
 
-LIST_COMPILE=@TOOL_DYLIB_hpddm@  @TOOL_DYLIB_hpddm_substructuring@
+LIST_COMPILE=@TOOL_DYLIB_hpddm@ 
 
 if FFCS_MPIOK
 
