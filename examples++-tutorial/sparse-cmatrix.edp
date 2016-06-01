@@ -126,7 +126,14 @@ plot(xxr, wait=1);
   real[int] vrr=vc.re,vii=vc.im;
   vrr=vc.re;
   vii=vc.im;
-  cout << "vc[0] = " <<vc[0] << " = " << vc.re[0] << " +i " << vc.im[0] <<endl;
+ // vrr=real(vc);
+ // vii=imag(vc);
+  cout << "vc[0] = " <<vc[0] 
+    << " = " << vc.re[0]  << " +i " << vc.im[0] 
+    << " :: = " << vrr[0]  << " +i " << vii[0] 
+    
+    <<endl;
+  
   cout << [ 1i, 1i]'*[ 1i, 1i] <<endl;//'; 
   // real part un complex par of matrix . 
   Ar = A.re;
