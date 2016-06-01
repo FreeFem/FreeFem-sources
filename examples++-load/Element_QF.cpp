@@ -34,7 +34,8 @@ namespace  Fem2D {
             int m;
             KN<int> w;
             
-        TypeOfFE_QF2d(const QF *qf): TypeOfFE(0,0,qf->n,1,DataQF2d(qf->n),1,1,qf->n,qf->n,new double[qf->n] ),m(qf->n <15 ?5:7), w(m*m)
+        TypeOfFE_QF2d(const QF *qf):
+        TypeOfFE(0,0,qf->n,1,DataQF2d(qf->n),1,1,qf->n,qf->n,new double[qf->n] ),m(2), w(m*m)
 	{
             int debug=verbosity>99;
 	    for (int i=0;i<NbDoF;i++) {
@@ -42,6 +43,11 @@ namespace  Fem2D {
 		P_Pi_h[i]=(*qf)[i];
                 coef_Pi_h_alpha[i]=1.;
 	    }
+ 
+            int err=0,iter=0;
+            while(1) {
+                if(iter++>100) break;
+         
             double dx = 1./m, dy=1./m;
            if(debug)  cout << " n " << NbDoF << endl;
             for( int i=0; i< m;++i)
@@ -67,15 +73,18 @@ namespace  Fem2D {
                         if(k !=l)
                         {
                             err++;
-                            cout << " Erreur search TypeOfFE_QF2d loose point " << l << " / " << NbDoF << " m = " << m << endl;
+                            //cout << " Erreur search TypeOfFE_QF2d loose point " << l << " / " << NbDoF << " m = " << m << endl;
                         }
                     }
             if(err)
             {
-                ErrorExec("TypeOfFE_QF2d: increase m in TypeOfFE_QF2d ",0);
-                ffassert(0);
+                m++;
+                w.resize(m*m);
+                w=0;
             }
-            
+            else break;
+            }
+            if(verbosity>9) cout << "  search TypeOfFE_QF2d   NbDoF=" << NbDoF <<  " m = " << m << endl;
 
 	}
         int ijP(const R2 &P) const {
@@ -138,7 +147,7 @@ namespace  Fem2D {
     
     TypeOfFE_QF3d::TypeOfFE_QF3d(const TypeOfFE_QF3d::QFk &qf):
       GTypeOfFE<Mesh3>(dfon=pdfon(qf.n),1,1, qf.n , qf.n , true,true),
-      np(qf.n),m(5),w(m*m*m)
+    np(qf.n),m(2),w(m*m*m)
     {
         for (int i=0;i<np;++i) {
             this->PtInterpolation[i]=qf[i];
@@ -150,7 +159,10 @@ namespace  Fem2D {
         //
         int debug = verbosity>99;
         if(debug)  cout << " n " << NbDoF << endl;
-        double dd= 1./m;
+        int err=0,iter=0;
+        while(1) {
+            double dd= 1./m;
+            if(iter++>100) break;
         for( int i=0; i< m;++i)
             for( int j=0; j< m;++j)
                 for( int k=0; k< m;++k)
@@ -167,24 +179,36 @@ namespace  Fem2D {
                 }
                 if(debug) cout << kk << " " << i << " " << j << " " << k << " :  " << w[k] << " ( " << this->PtInterpolation[w[kk]] << " )" << dd << " || " << P <<  endl;
             }
+        
         // verif
-        int err=0;
+         err=0;
         for (int l=0; l<NbDoF;++l)
         {
             int kk = ijP(this->PtInterpolation[l]);
             if(kk !=l)
             {
                 err++;
-                cout << " Erreur search TypeOfFE_QF3d loose point " << l <<" NbDoF=" << NbDoF <<  " m = " << m << endl;
+              //  cout << " Erreur search TypeOfFE_QF3d loose point " << l <<" NbDoF=" << NbDoF <<  " m = " << m << endl;
             }
         }
-        if(err)
-        {
+            if(err)
+            {
+                m++;
+                w.resize(m*m*m);
+                w=0;
+            }
+            else break;
             
-            ErrorExec("TypeOfFE_QF2d: increase m in TypeOfFE_QF3d ",0);
-            ffassert(0);
         }
+     
         
+        if(err)
+            {
+                cout << " big bug : err m=="<< m <<endl;
+                ErrorExec("TypeOfFE_QF3d: increase  in TypeOfFE_QF3d ",0);
+                ffassert(0);
+            }
+          if(verbosity>9) cout << "  search TypeOfFE_QF3d   NbDoF=" << NbDoF <<  " m = " << m << endl;
         
     }
     void  TypeOfFE_QF3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
@@ -202,38 +226,104 @@ namespace  Fem2D {
     
  
 
-// link with FreeFem++ 
-static TypeOfFE_QF2d TypeOfFE_QF2d1(&QuadratureFormular_T_1);
-static TypeOfFE_QF2d TypeOfFE_QF2d2(&QuadratureFormular_T_2);
-static TypeOfFE_QF2d TypeOfFE_QF2d5(&QuadratureFormular_T_5);
-static TypeOfFE_QF2d TypeOfFE_QF2d7(&QuadratureFormular_T_7);
-static TypeOfFE_QF2d TypeOfFE_QF2d9(&QuadratureFormular_T_9);
+    
+    
+} // Fem2D namespace
+ Fem2D::TypeOfFE** EFQF2( Fem2D::TypeOfFE** ppef, const GQuadratureFormular<R2> *qf)
+{
+    Fem2D::TypeOfFE_QF2d *FEqf = new Fem2D::TypeOfFE_QF2d(qf);
+    *ppef=FEqf;
+    return ppef;
+}
+Fem2D::TypeOfFE3** EFQF3( Fem2D::TypeOfFE3** const ppef, const GQuadratureFormular<R3> *qf)
+{
+    
 
+    Fem2D::TypeOfFE_QF3d *FEqf = new Fem2D::TypeOfFE_QF3d(*qf);
+    *ppef=FEqf;
+    return ppef;
+}
+
+extern mylex *zzzfff;
+static void finit()
+{  //  equivalent2d  3d EFQF
+    
+    typedef  Fem2D::TypeOfFE* pEF2d ;
+    typedef  Fem2D::TypeOfFE3* pEF3d ;
+    using namespace Fem2D;
+    // link with FreeFem++
+    static TypeOfFE_QF2d TypeOfFE_QF2d1(&QuadratureFormular_T_1);
+    static TypeOfFE_QF2d TypeOfFE_QF2d2(&QuadratureFormular_T_2);
+    static TypeOfFE_QF2d TypeOfFE_QF2d5(&QuadratureFormular_T_5);
+    static TypeOfFE_QF2d TypeOfFE_QF2d7(&QuadratureFormular_T_7);
+    static TypeOfFE_QF2d TypeOfFE_QF2d9(&QuadratureFormular_T_9);
+    
     static TypeOfFE_QF3d TypeOfFE_QF3d1(QuadratureFormular_Tet_1);
     static TypeOfFE_QF3d TypeOfFE_QF3d2(QuadratureFormular_Tet_2);
     static TypeOfFE_QF3d TypeOfFE_QF3d5(QuadratureFormular_Tet_5);
     
-static AddNewFE  AddNewFE_QF2d1("FEQF1",&TypeOfFE_QF2d1);
-static AddNewFE  AddNewFE_QF2d2("FEQF2",&TypeOfFE_QF2d2);
-static AddNewFE  AddNewFE_QF2d5("FEQF5",&TypeOfFE_QF2d5);
-static AddNewFE  AddNewFE_QF2d7("FEQF7",&TypeOfFE_QF2d7);
-static AddNewFE  AddNewFE_QF2d9("FEQF9",&TypeOfFE_QF2d9);
-static AddNewFE  AddNewFE_QF2ddef("FEQF",&TypeOfFE_QF2d5);
+    static AddNewFE  AddNewFE_QF2d1("FEQF1",&TypeOfFE_QF2d1);
+    static AddNewFE  AddNewFE_QF2d2("FEQF2",&TypeOfFE_QF2d2);
+    static AddNewFE  AddNewFE_QF2d5("FEQF5",&TypeOfFE_QF2d5);
+    static AddNewFE  AddNewFE_QF2d7("FEQF7",&TypeOfFE_QF2d7);
+    static AddNewFE  AddNewFE_QF2d9("FEQF9",&TypeOfFE_QF2d9);
+    static AddNewFE  AddNewFE_QF2ddef("FEQF",&TypeOfFE_QF2d5);
     
-static AddNewFE3  AddNewFE_QF3d1("FEQF13d",&TypeOfFE_QF3d1);
-static AddNewFE3  AddNewFE_QF3d2("FEQF23d",&TypeOfFE_QF3d2);
-static AddNewFE3  AddNewFE_QF3d5("FEQF53d",&TypeOfFE_QF3d5);
-static AddNewFE3  AddNewFE_QF3ddef("FEQF3d",&TypeOfFE_QF3d5);
-    
-    
-} // FEM2d namespace 
-
-static void finit()
-{  //  equivalent2d  3d EFQF
+    static AddNewFE3  AddNewFE_QF3d1("FEQF13d",&TypeOfFE_QF3d1);
+    static AddNewFE3  AddNewFE_QF3d2("FEQF23d",&TypeOfFE_QF3d2);
+    static AddNewFE3  AddNewFE_QF3d5("FEQF53d",&TypeOfFE_QF3d5);
+    static AddNewFE3  AddNewFE_QF3ddef("FEQF3d",&TypeOfFE_QF3d5);
+   
+    if(0)
+    {// ne marche pas ??????
     TEF2dto3d[FindFE2("FEQF")]=&TypeOfFE_QF3d5;
     TEF2dto3d[FindFE2("FEQF1")]=&TypeOfFE_QF3d1;
     TEF2dto3d[FindFE2("FEQF2")]=&TypeOfFE_QF3d2;
     TEF2dto3d[FindFE2("FEQF5")]=&TypeOfFE_QF3d5;
+    }
+    if(0)
+    { // Add tools cree new FiniteElement2d
+    static AddNewFE3 *pAddNewFE3[15];
+    for(int i=1; i<=14; ++i)
+    {
+        if(verbosity>9) cout << "\n";
+        pAddNewFE3[i]=0;
+        char sqfv[100];
+        sprintf(sqfv,"qfVp%d",i);
+        C_F0 cfq=Global.Find(sqfv);
+        if(cfq.NotNull()  )
+        {
+            if(verbosity>99) cout << "  find " <<  i << " " << sqfv << " type  "<< cfq.left() <<endl;
+            const EConstant<const GQuadratureFormular<R3> *> * efq=dynamic_cast<const EConstant<const GQuadratureFormular<R3> *> *>(cfq.LeftValue());
+            if( efq) {
+                char * EFsqfv= new char[16];
+                sprintf(EFsqfv,"FEqfVp%d",i);
+                
+                const GQuadratureFormular<R3> * qf =  GetAny< const GQuadratureFormular<R3> *>((*efq)(0));
+                if(verbosity>9) cout << " \t " << sqfv << " " << qf->n << " " << qf->exact << ",  EF : " << EFsqfv << endl;
+                int m=5;
+                 TypeOfFE_QF3d *FEqf = new TypeOfFE_QF3d(*qf);
+                pAddNewFE3[i]=new AddNewFE3(EFsqfv,FEqf);
+            }
+        }
+        else
+            if(verbosity>9) cout << " try  " << i << " " << sqfv << " not found"<< endl;
+        ;
+    }
+    }
+    Dcl_Type<pEF2d *>(::InitializePtr<pEF2d>,::DeletePtr<pEF2d>);
+    if(verbosity>9) cout << "\n add FE2d\n";
+    zzzfff->Add("FiniteElement2d",atype<pEF2d *>());
+    map_type[typeid(pEF2d).name()]->AddCast(   new E_F1_funcT<pEF2d,pEF2d*>(UnRef<pEF2d>) );
+    TheOperators->Add("<-",new OneOperator2<pEF2d*,pEF2d*,  const GQuadratureFormular<R2> *>(EFQF2));
+  
+    
+    Dcl_Type<pEF3d *>(::InitializePtr<pEF3d>,::DeletePtr<pEF3d>);
+    if(verbosity>9) cout << "\n add FE3d\n";
+    zzzfff->Add("FiniteElement3d",atype<pEF3d *>());
+    map_type[typeid(pEF3d).name()]->AddCast(   new E_F1_funcT<pEF3d,pEF3d*>(UnRef<pEF3d>) );
+    TheOperators->Add("<-",new OneOperator2<pEF3d*,pEF3d*,  const GQuadratureFormular<R3> *>(EFQF3));
+ 
 }
 
 LOADFUNC(finit);  //  une variable globale qui serat construite  au chargement dynamique

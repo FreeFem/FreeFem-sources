@@ -1,4 +1,12 @@
-version 3.47 (31/may/2016) 
+version 3.47 (1/june/2016) 
+ - tools to build new FiniteElement2d and FiniteElement3d from quadrature formula
+    
+     FiniteElement2d EFQF(qf23pT);
+     fespace Zh(Th2d,EFQF);
+
+     FiniteElement3d EFQF3(qfVp14);
+     fespace Zh(Th3d,EFQF3);
+
  - add solveurs FETI and  BDD in  HPDDM
  - add savegmsh in gmsh plug in to write file for gmsh (thank to Lo Sala salalo80@gmail.com)
   see  ttestio.edp for the examples 
