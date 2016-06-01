@@ -86,8 +86,8 @@ void initArrayOperatorComplex()
     
     Global.Add("square","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(square));
     Global.Add("conj","(",new OneOperator1F_KN_<F_KN_<K,K,K,KK>,K,KK,KN_<K> >(conj));
-    Global.Add("imag","(",new OneOperator1F_KN_<F_KN_<R,R,K,KK>,R,KK,KN_<K> >(imagc));
-    Add<KN_<double> >("<--","(",new OneOperator1F_KN_<F_KN_<R,R,K,KK>,R,KK,KN_<K>(realc));
+//    Global.Add("imag","(",new OneOperator1F_KN_<F_KN_<R,R,K,KK>,R,KK,KN_<K> >(imagc));
+//    Add<KN_<double> >("<--","(",new OneOperator1F_KN_<F_KN_<R,R,K,KK>,R,KK,KN_<K> >(realc));
     TheOperators->Add("*",
                       new OneBinaryOperator<Op2_2p_<Mul_KNMh_KN_<K>,Transpose<KNM<K>*>,KN<K>*> >);// A'*b zzzzzzz
     TheOperators->Add("=",new OneBinaryOperator<init_eqarray<KN<K> ,Mul_KNMh_KN_<K> > > );
