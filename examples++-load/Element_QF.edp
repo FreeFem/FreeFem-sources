@@ -1,3 +1,4 @@
+load "qf11to25"
 load "Element_QF"
 {
 mesh Th=square(5,5,flags=2);
@@ -20,7 +21,11 @@ cout << " yh = " << yh[] << endl;
 cout << int2d(Th)(x) << " ==  " << int2d(Th)(xh) << endl; 
 cout << int2d(Th)(y) << " == " << int2d(Th)(yh) << endl; 
 cout << int2d(Th)(ff) << " == " << int2d(Th)(ffh) << endl; 
-
+//dumptable(cout);
+FiniteElement2d EFQF(qf23pT);
+fespace Zh(Th,EFQF);
+Zh zz=x+y;
+plot(zz,fill=1,wait=1,cmm="zz");
 }
 {
  load "msh3"
@@ -47,5 +52,8 @@ cout << int3d(Th)(x) << " ==  " << int3d(Th)(xh) << endl;
 cout << int3d(Th)(y) << " == " << int3d(Th)(yh) << endl; 
 cout << int3d(Th)(z) << " == " << int3d(Th)(zh) << endl; 
 cout << int3d(Th)(ff) << " == " << int3d(Th)(ffh) << endl; 
+FiniteElement3d EFQF3(qfVp14);
+fespace Zh(Th,EFQF3);
 
 }
+;
