@@ -1573,6 +1573,7 @@ void Init_map_type()
      Global.Add("sin","(",new OneOperator1_<Complex>(sin));
      Global.Add("sinh","(",new OneOperator1_<Complex>(sinh));
      Global.Add("cosh","(",new OneOperator1_<Complex>(cosh));
+     Global.Add("tanh","(",new OneOperator1_<Complex>(tanh));// Add June 2016 FH..
      Global.Add("log","(",new OneOperator1_<Complex>(log));
      //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
      Global.Add("tan","(",new OneOperator1_<Complex>(tan));

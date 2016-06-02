@@ -126,6 +126,7 @@ plot(xxr, wait=1);
   real[int] vrr=vc.re,vii=vc.im;
   vrr=vc.re;
   vii=vc.im;
+  // bugus ::s
  // vrr=real(vc);
  // vii=imag(vc);
   cout << "vc[0] = " <<vc[0] 
