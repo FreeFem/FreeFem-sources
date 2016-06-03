@@ -158,6 +158,9 @@
 		3DBBD5E60C3573DA007E5F45 /* mymain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5E50C3573DA007E5F45 /* mymain.cpp */; };
 		3DBBFE9E1A654E4900E3CF4E /* write_xdmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */; };
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
+		3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
+		3DD7CCFF1D0196A9006E5519 /* libirc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DD7CCFE1D0196A9006E5519 /* libirc.dylib */; };
+		3DD7CD001D0196A9006E5519 /* libirc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DD7CCFE1D0196A9006E5519 /* libirc.dylib */; };
 		3DDEA1830DFFD92F00F54E1C /* GQuadTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */; };
 		3DDEA1870DFFD97F00F54E1C /* lgmesh3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */; };
 		3DDEA18A0DFFF6DA00F54E1C /* FESpacen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */; };
@@ -324,6 +327,7 @@
 		3DC62AF2097299D800D487F6 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		3DC62AF6097299F400D487F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ffglut.hpp; path = ../src/Graphics/ffglut.hpp; sourceTree = SOURCE_ROOT; };
+		3DD7CCFE1D0196A9006E5519 /* libirc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libirc.dylib; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libirc.dylib; sourceTree = "<group>"; };
 		3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = GQuadTree.cpp; path = ../src/femlib/GQuadTree.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lgmesh3.cpp; sourceTree = "<group>"; };
 		3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = FESpacen.cpp; path = ../src/femlib/FESpacen.cpp; sourceTree = SOURCE_ROOT; };
@@ -345,10 +349,12 @@
 				3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */,
 				3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */,
 				3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */,
+				3DD7CD001D0196A9006E5519 /* libirc.dylib in Frameworks */,
 				3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
 				3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
 				3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
 				3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
+				3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */,
 				3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */,
 				3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
 				3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
@@ -370,6 +376,7 @@
 				3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */,
 				3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */,
 				3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
+				3DD7CCFF1D0196A9006E5519 /* libirc.dylib in Frameworks */,
 				3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
 				3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
 				3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
@@ -507,6 +514,7 @@
 				3DA740621BBEECD900C4EB0A /* libifportmt.dylib */,
 				3DA740671BBEED7C00C4EB0A /* libifcore.a */,
 				3D5AF7D71C1863D30036669F /* libhdf5.dylib */,
+				3DD7CCFE1D0196A9006E5519 /* libirc.dylib */,
 				3DC62AF6097299F400D487F6 /* OpenGL.framework */,
 				3DC62AF2097299D800D487F6 /* GLUT.framework */,
 				3DC62AED0972999000D487F6 /* Cocoa.framework */,
@@ -887,8 +895,8 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
-				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../dowload/include\"  \"$(SRCROOT)/..\" $(inherited)";
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -909,7 +917,8 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited)";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited)";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;

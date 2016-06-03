@@ -26,25 +26,7 @@ double BECtrap(Stack stack,KN<double> * const &  pd)
   else ffassert(0); // 
   return ret; 
 }
-template<class R,class A0,class A1,class A2, class E=E_F0>   // extend (4th arg.)
-class E_F_F0F0F0s__ :public  E { public:                               // extend
-    typedef  R (*func)(Stack s,const  A0 &,const  A1 &,const A2 & ) ; // extend (statck +2th arg.)
-    func f;
-    Expression a0,a1,a2;          // extend
-    E_F_F0F0F0s__(func ff,
-                 Expression aa0,
-                 Expression aa1,
-                 Expression aa2)
-    : f(ff), a0(aa0), a1(aa1), a2(aa2) {}  // extend (2th arg.)
-    AnyType operator()(Stack s)  const
-    {return SetAny<R>( f( s,
-                         GetAny<A0>((*a0)(s)),
-                         GetAny<A1>((*a1)(s)),
-                         GetAny<A2>((*a2)(s))  ) );}   // extend (3th arg.)
-    virtual size_t nbitem() const {return a2->nbitem(); } // modif ???
-    bool MeshIndependent() const {return false;}
-    
-};
+
 Complex GPvortex(Stack stack,const double & x0,const double &y0,const double &kappa)
 {
     MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
@@ -96,15 +78,39 @@ Complex dyGPvortex(Stack stack,const double & x0,const double &y0,const double &
     
 }
 
+Complex GPvortices(Stack stack,const KNM_<double> & ps)
+{
+    MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
+    // double *d = *pd;
+    double x= mp.P.x; // get the current x value
+    double y= mp.P.y; // get the current y value
+    Complex vs=1.;
+    ffassert(ps.M()>=3);
+    for(int i=0; i<ps.N();i++)
+    {
+    double x0=ps(i,0), y0=ps(i,1),kappa = ps(i,2);
+    Complex p((x-x0)*kappa,(y-y0)*kappa);
+    double r = abs(p);// theta=arg(p);
+    double tanhr=tanh(r);
+    double tr = tanhr/r ;
+    vs*= (r>1e-20) ? tr*p : p ;
+    }
+    return vs;
+}
+
 static void init(){
-  Global.Add("BECtrap","(",new OneOperator1s_<double,KN<double> * ,E_F0mps >(BECtrap));
-  Global.Add("GPvortex","(",new OneOperator3s_<Complex,double,double,double,E_F_F0F0F0s__<Complex,double,double,double> >
-             (GPvortex));
-    Global.Add("dxGPvortex","(",new OneOperator3s_<Complex,double,double,double,E_F_F0F0F0s__<Complex,double,double,double> >
+  Global.Add("BECtrap","(",new OneOperator1s_<double,KN<double> * ,E_F_F0s_<double,KN<double> * ,E_F0mps > >(BECtrap));
+  Global.Add("GPvortex","(",
+              new OneOperator3s_<Complex,double,double,double,
+                                 E_F_F0F0F0s_<Complex,double,double,double,E_F0mps> > (GPvortex));
+     Global.Add("GPvortices","(",
+               new OneOperator1s_<Complex,KNM_<double> ,
+                                  E_F_F0s_<Complex,KNM_<double>,E_F0mps > >(GPvortices));
+    Global.Add("dxGPvortex","(",new OneOperator3s_<Complex,double,double,double,E_F_F0F0F0s_<Complex,double,double,double,E_F0mps> >
                (dxGPvortex));
-    Global.Add("dyGPvortex","(",new OneOperator3s_<Complex,double,double,double,E_F_F0F0F0s__<Complex,double,double,double> >
+    Global.Add("dyGPvortex","(",new OneOperator3s_<Complex,double,double,double,E_F_F0F0F0s_<Complex,double,double,double,E_F0mps> >
                (dyGPvortex));
- // Global.Add("GPvortex","(",new OneOperator2_<Complex,double> *  >(GPvortex));
+
     
 }
 
