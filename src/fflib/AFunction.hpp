@@ -2653,7 +2653,7 @@ class  OneUnaryOperator : public OneOperator{
       {}
 };
 
-template<class R,class A=R,class E=E_F0>
+template<class R,class A=R,class CODE=E_F_F0s_<R,A> >
 class  OneOperator1s_ : public OneOperator {
     aType r; //  return type
     typedef  R (*func)(Stack stack, const A &) ; 
@@ -2662,7 +2662,7 @@ class  OneOperator1s_ : public OneOperator {
     E_F0 * code(const basicAC_F0 & args) const 
     {     if ( args.named_parameter && !args.named_parameter->empty()  ) 
 	CompileError( " They are used Named parameter ");
-	 return  new E_F_F0s_<R,A,E>(f,t[0]->CastTo(args[0]));}
+	 return  new CODE(f,t[0]->CastTo(args[0]));}
     OneOperator1s_(func  ff): 
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
 };
