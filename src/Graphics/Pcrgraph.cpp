@@ -1549,7 +1549,8 @@ int execute(const char* what)
 #else
 int  execute (const char * str)
 { 
- cout << "exec: " << str << endl;
+ if(verbosity)
+     cout << "exec: " << str << endl;
  return  system(str);
 }
 #endif

@@ -542,7 +542,8 @@ void fillpoly(int n, float *poly)
 
 int  execute (const char * str)
 { 
- cout << "exec: " << str << endl;
+ if(verbosity)
+     cout << "exec: " << str << endl;
  return  system(str);
 }
 

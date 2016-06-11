@@ -1,3 +1,4 @@
+load "thresholdings"
 include "getARGV.idp"
 searchMethod = 1;
 
@@ -52,7 +53,7 @@ macro plotMPI(Th, u, legend, Pk, def, K, d, w)
         mpiWait(rq[1]);
     }// EOM
 
-macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface)
+macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
         meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);
         mpiBarrier(comm);
         real timerPartition = mpiWtime();
@@ -97,14 +98,24 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             real intersection = intN(globalName)(phi) / eps;
             if(intersection > 1.0e-6) {
                 partitionIntersection[numberIntersection] = phi;
-                sum[] += partitionIntersection[numberIntersection][];
+                if(usedARGV("-true_restrict") != -1)
+                    sum[] += partitionIntersection[numberIntersection][];
                 arrayIntersection[numberIntersection++] = arrayIntersection[i];
             }
         }
-        khi[] = khi[] ./= sum[];
         if(numberIntersection != arrayIntersection.n)
             arrayIntersection.resize(numberIntersection);
-        Wh def(func2vec) = init(khi);
+        fespace WhPart(meshName, PkPart);
+        WhPart defPart(func2vec);
+        if(usedARGV("-true_restrict") != -1) {
+            khi[] = khi[] ./= sum[];
+            defPart(func2vec) = initPart(khi);
+        }
+        else {
+            fespace PhLocal(meshName, P0);
+            PhLocal loc = abs(part - mpiRank(comm)) < 0.1;
+            defPart(func2vec) = initPart(loc);
+        }
         D.resize(Wh.ndof);
         D = func2vec[];
         restrictionIntersection.resize(numberIntersection);
@@ -112,13 +123,14 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             meshN meshIntersection = trunc(meshName, partitionIntersection[i] > 1.0e-6);
             fespace WhIntersection(meshIntersection, P);
             matrix R = interpolate(WhIntersection, Wh);
+            R.thresholding(1.0e-10);
             real[int] C;
             int[int] I;
             [I, restrictionIntersection[i], C] = R;
             restrictionIntersection[i].resize(R.nbcoef);
         }// EOM
 
-macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded)
+macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart)
 {
     real timing = mpiWtime();
     if(mpisize > 1 && !excluded) {
@@ -143,7 +155,7 @@ macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersect
         }
         timing = mpiWtime();
         broadcast(processor(0, comm), part[]);
-        partition(Th, ThBorder, ThGlobal, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface)
+        partition(Th, ThBorder, ThGlobal, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
     }
     else if(mpisize == 1) {
         Th = ThGlobal;
@@ -153,3 +165,6 @@ macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersect
     mpiBarrier(mpiCommWorld);
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
 }// EOM
+
+macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded)
+buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init)// EOM
