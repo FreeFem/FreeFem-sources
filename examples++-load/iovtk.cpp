@@ -2328,7 +2328,7 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	    else{
 	      nsol = Th.nt;
 	    }
-	    fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,nsol); 
+	    fprintf(fp,"%s %ld %d double\n",nameofuser[ii],l[ii].nbfloat,nsol);
 	    // changement ecriture solution
 	    l[ii].writesolutionP0_double( fp, Th, stack, surface, binary, swap);
 	    
@@ -2341,7 +2341,7 @@ AnyType VTK_WriteMesh_Op::operator()(Stack stack)  const
 	    if(order[ii] == 1){
 	      
 	      
-	      fprintf(fp,"%s %ld %d float\n",nameofuser[ii],l[ii].nbfloat,Th.nv); 
+	      fprintf(fp,"%s %ld %d double\n",nameofuser[ii],l[ii].nbfloat,Th.nv);
 	      if(verbosity>5)
 		cout << "name of data("<< ii <<")=" << nameofuser[ii]  << endl;
 	      // changement ecriture solution

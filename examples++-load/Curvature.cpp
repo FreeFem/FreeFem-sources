@@ -354,7 +354,7 @@ double ExtractBorder(Stack stack,pmesh const & pTh,KN_<long> const & lab, KNM<do
         nee[0]=-1; // on ouvre 
     }
     else
-    { cout << " error (no connexe boundary be carefull with internal boundary (pb of sens) ) : nb start = " << nbg << endl; 
+    { if(( nbg != 1)|| (verbosity > 4)) cout << " error (no connexe boundary be carefull with internal boundary (pb of sens) ) : nb start = " << nbg << endl;
       ffassert( nbg==1); // un depart pas plus
     }
     bb->resize(3,np);
