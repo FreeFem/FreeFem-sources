@@ -74,4 +74,8 @@ cout << " (u[],u[]) = " << (u[]'*u[]) << endl;
 {
 ofstream file("u.txt");
 file << u[] << endl;
+ file.seekp(100);
+ file.flush;
+ file  << "xxx "<< endl;
+ 
 }
