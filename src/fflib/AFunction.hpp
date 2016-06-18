@@ -1460,8 +1460,7 @@ AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
-/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]], uses
-/// [[TableOfIdentifier]]
+/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]], uses [[TableOfIdentifier]]
 
 extern TableOfIdentifier Global;
 
