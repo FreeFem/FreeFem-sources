@@ -35,12 +35,6 @@ freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 
-# FreeFem API tests
-# -----------------
-
-EXTRA_PROGRAMS=Laplace
-Laplace_SOURCES=Laplace.cpp
-
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp

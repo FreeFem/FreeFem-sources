@@ -1,3 +1,22 @@
+# ======================================================================
+# This file is part of Freefem++
+# 
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+# 
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh conf default=0 freefem start=2008 upmc written
+
 (^|/)#
 (^|/)ListOfUnAllocPtr\.bin$
 (^|/)Makefile\.in$
@@ -397,6 +416,8 @@
 ^download/mumps-seq/config\.log
 ^download/mumps/FAIRE-4\.10\.0
 ^download/mumps/MUMPS_4\.10\.0/
+^download/mumps-seq/MUMPS_5\.0\.0/
+^download/mumps/MUMPS_5\.0\.0/
 ^download/mumps/Makefile\.inc$
 ^download/mumps/config\.log$
 ^download/nlopt/Make\.defs$
@@ -538,6 +559,7 @@
 ^examples\+\+-load/pippo\.data$
 ^examples\+\+-load/pippo\.dx$
 ^examples\+\+-load/regtests-.*\.log$
+^examples\+\+-load/regtests\.edp$
 ^examples\+\+-load/sphere2region\.mesh$
 ^examples\+\+-load/spherewithahole\.mesh$
 ^examples\+\+-load/spherewithtworegion\.mesh$
@@ -567,9 +589,10 @@
 ^examples\+\+-tutorial/lestables$
 ^examples\+\+-tutorial/machinefile$
 ^examples\+\+-tutorial/makeref\.edp$
+^examples\+\+-tutorial/mm\.faces$
+^examples\+\+-tutorial/mm\.points$
 ^examples\+\+-tutorial/plot\.gp$
 ^examples\+\+-tutorial/regtests\.edp$
-^examples\+\+-load/regtests\.edp$
 ^examples\+\+-tutorial/toto\..*$
 ^examples\+\+-tutorial/u\.txt$
 ^examples\+\+/.*\.BB$
@@ -657,6 +680,10 @@
 ^stamp-h$
 ^stamp-h1$
 ^test-driver$
-examples\+\+-tutorial/mm\.faces$
-examples\+\+-tutorial/mm\.points$
 ~$
+
+# Local Variables:
+# mode:conf
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

@@ -52,7 +52,7 @@ ffapi.hpp P1IsoValue.cpp	P1IsoValue.hpp
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 
-# eigenvalue.cpp is optional (see configure.ac)
+# eigenvalue.cpp is optional (see [[file:../../configure.ac::EIGENOBJ]])
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=@EIGENOBJ@
 libff_a_DEPENDENCIES=@EIGENOBJ@
