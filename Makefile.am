@@ -4,8 +4,6 @@
 # Adaptation to Automake: Antoine Le Hyaric - LJLL Paris 6 -
 # lehyaric@ann.jussieu.fr - 13/5/04
 
-# $Id$
-
 SUBDIRS=download src  examples++-load  examples++-mpi \
 	 examples++-tutorial examples++	\
 	examples++-eigen	\
@@ -51,9 +49,6 @@ examples++-load/ch.pts
 
 changelog:
 	cvs2cl
-
-# History before 2005 is stored in the file "HISTORY_BEFORE_2005"
-all-local:: @HISTORY@
 
 # try and avoid running this under fakeroot (otherwise we may face
 # problems trying to connect to CVS as pseudo-root). Debian packaging
@@ -321,6 +316,15 @@ FreeFem++.app.tgz:./config.status
 	-rm FreeFem++.app/Contents/Resources/Scripts/main.scpt
 	 osacompile <FreeFem++.scrpt-txt -o FreeFem++.app/Contents/Resources/Scripts/main.scpt
 	tar zcf FreeFem++.app.tgz FreeFem++.app
+
+# ALH - build a robust TAGS file for a whole directory tree (more robust than the automake TAGS directive because of the
+# multiple source trees downloaded within FF)
+
+findtags:
+	find . -type f -name '*.?pp'|grep -v lg.tab|xargs etags
+clean-local::
+	-rm TAGS
+
 ##  trick to check if the configure configure.ac Makefile.in .. are correct in time 
 Makefile: @MAINTAINER_MODE_FALSE@ configure  $(LIST_GENERATE_FILE_AM)
 	echo "configure Makefile:$(LIST_GENERATE_FILE_AM)"  >Makefile-for-Checkam

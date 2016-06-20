@@ -55,6 +55,11 @@ EOF
 my $errors='';
 if($can_use_threads){share(\$errors)}
 
+# Accumulate errors and print them all at the end of the script
+
+my $errors='';
+if($can_use_threads){share(\$errors)}
+
 # list required packages
 my $only=0;
 my %packs;
@@ -87,6 +92,19 @@ download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz','http://www.n
 download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.12','http://www.openblas.net/','OpenBLAS.tar.gz',
 	 'dfc868e0c134855639f036d2723bf4be',
 	 'BAD_CERT');
+
+# downloading the binary package is required for Windows because
+# compiling requires big amounts of RAM (more than 4GB). This is not a
+# big package so we download it in any situation just in case an
+# offline Windows compile follows.
+
+download('OpenBLAS-Win64','http://downloads.sourceforge.net/project/openblas/v0.2.14/OpenBLAS-v0.2.14-Win64-int64.zip',
+	 'http://www.openblas.net/','OpenBLAS-v0.2.14-Win64-int64.zip',
+	 '9f2d41076857a514b921bf0bf03b5d39');
+
+download('OpenBLAS-Win32','http://downloads.sourceforge.net/project/openblas/v0.2.14/OpenBLAS-v0.2.14-Win32.zip',
+	 'http://www.openblas.net/','OpenBLAS-v0.2.14-Win32.zip',
+	 'eefdf170439620d78fabb3139b7aeb2f');
 
 download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz','http://www.fftw.org','fftw-3.3.2.tar.gz',
 	 '6977ee770ed68c85698c7168ffa6e178');
@@ -199,14 +217,14 @@ sub download{
   # skip packages that are already present
   if(-f "pkg/$pkg" && !$opts{f}){
     my $md5check=md5_hex(`cat pkg/$pkg`);
-  if( ( $md5 eq "none") || ($md5check eq $md5))
-   {
-    print "$title $pkg done\n";
-    return;
-   }
+    if( ( $md5 eq "none") || ($md5check eq $md5))
+      {
+	print "$title $pkg done\n";
+	return;
+      }
 
-  else {
-   print "$title $pkg  md5 change => reget \n";
+    else {
+      print "$title $pkg  md5 change => reget \n";
     }
   }
 

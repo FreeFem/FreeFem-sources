@@ -398,6 +398,7 @@ void ShowKeyWord(ostream & f )
  
  }
 
+// <<dumptable>>
 ostream* dumptable(ostream* f)
 {
 
@@ -1075,7 +1076,7 @@ void Init_map_type()
         
     Dcl_Type<ios::openmode>();
     
-//  les types des variables 
+    // <<known_variable_types>> les types des variables 
     
   zzzfff->Add("real",typevarreal=atype<double*>());
   zzzfff->Add("int",atype<long*>());
@@ -1140,7 +1141,9 @@ void Init_map_type()
     extern long newconvect3;// def in global.cpp 
     Global.New("newconvect",CPValue<long>(newconvect3)); //pichon
     
+     // <<cout>> uses [[file:AFunction.hpp::CConstant]]
      Global.New("cout",CConstant<ostream*>(&cout));
+     
      Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));
      Global.New("append",CConstant<ios::openmode>(ios::app));
@@ -1689,7 +1692,9 @@ void Init_map_type()
      CodeAlloc::clear();
      ShowAlloc("ClearMem: end" , lg); 
 
- } 
+ }
+
+// <<addingInitFunct>>
 static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
 
 C_F0  opVI::code2(const basicAC_F0 &args) const

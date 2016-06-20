@@ -110,6 +110,7 @@ OneOperator::pair_find OneOperator::FindWithOutCast(const ArrayOfaType & at)cons
       return make_pair(w,n);
 }
 
+// <<FindSameR>>
 OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
  { 
      if (this==tnull) return 0;
@@ -362,6 +363,7 @@ void Polymorphic::Add(const char * op,Value *pp) const
 }
 
 
+// <<FindType>>
  int  FindType(const char * name)  
    {
    C_F0 r;
@@ -647,7 +649,8 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
   return new E_F0_Func2(f,a,b);
  
 }
- 
+
+// <<ShowType>>
  void ShowType(ostream & f)
  {
  

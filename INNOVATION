@@ -135,7 +135,11 @@ version 3.38-1
   can be useful in case of random problem. 
  - correct convect operator in 3d (remove randow part, 
    to remove problem of optimisation in varf.
-   
+
+28/7/2015 (ALH)
+ - fixed behavior of "verbosity" to use value from command line ("-v" option)
+ - synchronized lg.ypp with lg.tab.cpp
+ 
 version 3.38
  - add parameter in renumbering function. 
 version 3.37-1 (22 mai 2015)
@@ -212,6 +216,15 @@ BUG in configure => slow version after until version 3.36 ,  25 mars 2015 ... (d
  - correct bug in periodic condition in case common dof with periodic.  
  - correct big bug in memory management of sparse matrix
 
+4/3/2015 (ALH)
+ - Edited for compatibility with Emscripten
+ - Added calls for Javascript graphical output along with postscript output
+
+15/10/2014 (ALH)
+ - Enabled monothreaded downloads in download/getall for platforms that do not support threads (eg Mingw)
+ - Corrected --disable-pdf configuration option (useful for FFCS build)
+ - Removed obsolete cvs history directives
+ - [[file:download/getall]] now checks downloaded packages against known MD5 values
  version 3.32 
  - correct of problem of plugin and mpi,
     build all dynamics lib with and without mpi, 
@@ -348,6 +361,9 @@ version 3.27
    - done for [[file:download/blas/Makefile.am]] as well
  - added option --enable-mkl-mlt in [[file:configure.ac::enable_mkl_mlt]] to allow FF to be linked with the
    multithreaded MKL when an external library requires it (request from Atsushi Suzuki)
+ - cleaned up old comments from the documentation to enable automatic convertion into other formats (eg wiki format)
+ - many small corrections for Windows compilation
+ - added "NbColors" in plot() parameters
 version 3.26-3  09/12/2013 
    correct problem with openblas need pthread lib 
 01/12/13

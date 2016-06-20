@@ -137,17 +137,28 @@ clean-local::
 all-local::@COMPILE_OPENBLAS@
 pkgcompile::@COMPILE_OPENBLAS@
 generic:
-openblas:links.done
+
+openblas:install.done
+
+# The library may sometimes have a complex name with version number, just copy it into a standard location
+
+if FFCS_WINDOWS
 
 # links2files is required for the MinGW compiler to understand where to find the library contents under Cygwin
-if FFCS_WINDOWS
 links.done:openblas.done
 	cd OpenBLAS && ../../../build/links2files
 	touch $@
+install.done:links.done
+	cp OpenBLAS/libopenblas.a ../lib
+	touch $@
 else
-links.done:openblas.done
+install.done:openblas.done
+	cp OpenBLAS/libopenblas.a ../lib
 	touch $@
 endif
+
+clean::
+	-rm ../lib/libopenblas.a
 
 openblas.done:openpatches.done
 #
@@ -158,8 +169,7 @@ openblas.done:openpatches.done
 	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
 	touch $@
 
-# The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory
-# date
+# The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
 
 openpatches.done:opendownload.done
 	tar xvzf ../pkg/OpenBLAS.tar.gz
@@ -170,13 +180,17 @@ openpatches.done:opendownload.done
 	patch -u -p1 < openblas.patches
 	touch $@
 
+clean::
+	-rm *.done
+	-rm -r OpenBLAS
+
 download::opendownload.done
 opendownload.done:
 	../getall -o OpenBLAS -a
 	touch $@
 
-# ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part
-# of the specific target 'veryclean'.
+# ALH - 6/11/13 - Since OpenBLAS is quite long to compile and it does not change very often, it's only cleaned as part of the specific
+# target 'veryclean'.
 
 veryclean::
 	-rm -r *.done OpenBLAS xianyi-OpenBLAS-*

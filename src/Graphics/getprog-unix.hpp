@@ -9,8 +9,8 @@
 #include <unistd.h>
 
 // FFCS: redirecting visualization output
-#include "../fflib/ffapi.hpp"
-#include "../fflib/strversionnumber.hpp"
+#include "ffapi.hpp"
+#include "strversionnumber.hpp"
 #include <string>
 
 extern long mpirank;
@@ -62,6 +62,7 @@ char * Shell_Space(const char * s)
 
 extern void (*init_lgparallele)();
 
+// <<getprog>> called by [[file:../lglib/lg.ypp::getprog]]
 int getprog(char* fn,int argc, char **argv)
 {
   waitatend= 0; // init_lgparallele==0;  // attent if no parallele
@@ -88,7 +89,7 @@ int getprog(char* fn,int argc, char **argv)
   // (eg when called in a FreeFem++-server situation by EJS)
   // is the name -nw or -nw.exe  -> no graphics 
   noffglut=false;
-    ffapi::ff_ch2edpdtmpir = false;
+        ffapi::ff_ch2edpdtmpir = false;
   bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];

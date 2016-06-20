@@ -36,7 +36,10 @@
 using namespace std;
 #include "lex.hpp"
 #define LOAD 1
-#if defined(__INTEL__) || defined(__MWERKS__) || !defined(HAVE_DLFCN_H)
+
+// ALH - 11/3/15 - added NOLOAD macro option because no dynamic load available in javascript
+
+#if defined(__INTEL__) || defined(__MWERKS__) || !defined(HAVE_DLFCN_H) || defined(NOLOAD)
 #undef LOAD
 #endif
 
@@ -109,7 +112,7 @@ bool load(string ss)
 	      {
 		if(verbosity > 1 && (mpirank ==0))
 		  cout << " (load: dlopen " << s << " " << handle << ") ";
-		callInitsFunct() ;  
+		callInitsFunct() ;   // [[file:InitFunct.cpp::callInitsFunct]]
 		return handle;
 	      }
 	    
@@ -127,17 +130,41 @@ bool load(string ss)
 		{
 		  if(verbosity&& (mpirank ==0))
 		    cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
-		  callInitsFunct() ; 
+		  callInitsFunct() ;  // [[file:InitFunct.cpp::callInitsFunct]]
 		  return mod;
 		}
 	    }
-#else
+#elif STATIC_LINKING
+	    
+	    // <<STATIC_LINKING>> Enable statically linked libraries for [[file:~/fflib/Makefile::STATIC_LINKING]] - ALH
+	    bool ok=false;
+
+	    // <<static_load_msh3>> [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]]
+	    if(ss=="msh3"){
+	      
+	      // [[file:~/ff/examples++-load/msh3.cpp::msh3_Load_Init]]
+	      void msh3_Load_Init();
+	      msh3_Load_Init();
+	      ok=true;
+	    }
+	    
+	    // <<static_load_medit>> [[file:~/ff/examples++-load/medit.cpp::dynamic_loading]]
+	    if(ss=="medit"){
+	      // [[file:~/ff/examples++-load/medit.cpp::medit_Load_Init]]
+	      void medit_Load_Init();
+	      medit_Load_Init();
+	      ok=true;
+	    }
+
+	    if(ok && verbosity && (mpirank ==0)) cout << " (static load: " << ss << " " << ") ";
+	    return ok;
+#else	    
 	    if(mpirank ==0)
-		{
-		  cout << "------------------------------------   \n" ;
-		  cout << "  load: sorry no dlopen on this system " << s << " \n" ;
-		  cout << "------------------------------------   \n" ;
-		}
+	      {
+		cout << "------------------------------------   \n" ;
+		cout << "  load: sorry no dlopen on this system " << s << " \n" ;
+		cout << "------------------------------------   \n" ;
+	      }
 	    CompileError("Error load");
 	    return 0;
 #endif  

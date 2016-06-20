@@ -36,12 +36,12 @@
 //       Th3_t->Buildbnormalv();  
 //       Th3_t->BuildjElementConteningVertex();
 //   is now in the constructor of Mesh3 to be consistante. 
-//   
-#ifndef WITH_NO_INIT
+//
+
+#ifndef WITH_NO_INIT // cf [[WITH_NO_INIT]]
 #include "ff++.hpp"
 #endif
-#include "AFunction_ext.hpp"
-
+#include "AFunction_ext.hpp" // [[file:../src/fflib/AFunction_ext.hpp]]
 
 //  TransfoMesh_v2.cpp
 using namespace std;
@@ -52,8 +52,8 @@ using namespace std;
 #include <climits>
 #include <set>
 #include <vector>
-#include "msh3.hpp"
-#include "splitsimplex.hpp"
+#include "msh3.hpp" // [[file:msh3.hpp]]
+#include "splitsimplex.hpp" // [[file:../src/femlib/splitsimplex.hpp]]
 
 using namespace  Fem2D;
 
@@ -250,11 +250,11 @@ void TestSameTriangleMesh3( const Mesh3 & Th3, const double & hseuil, const R3 &
 } 
 
 int TestElementMesh3( const Mesh3 & Th3 ) 
-// Test si le maillage à des éléments communs : Sommet, triangle, ...
+// Test si le maillage Ã  des Ã©lÃ©ments communs : Sommet, triangle, ...
 {
 //  FH 31/09/2009:  Change  int* to KN<int> to remove pb of missing free in some case 
-  R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
-  double hmin=1e10;   // longueur minimal des arrêtes
+  R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // ExtremitÃ© de la boÃ®te englobante
+  double hmin=1e10;   // longueur minimal des arrÃªtes
   double hseuil;
   KN<int> Numero_Som(Th3.nv);
   int nv_t,nt_t,nbe_t;
@@ -267,7 +267,7 @@ int TestElementMesh3( const Mesh3 & Th3 )
   }
 
 
-  // calcul de la longueur minimal des arrêtes
+  // calcul de la longueur minimal des arrÃªtes
   for (int k=0;k<Th3.nt;k++){
     for (int e=0;e<6;e++){
       if( Th3[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
@@ -408,10 +408,10 @@ int TestElementMesh3( const Mesh3 & Th3 )
 
 
 Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 ) 
-// Test si le maillage à des éléments communs : Sommet, triangle, ...
+// Test si le maillage Ã  des Ã©lÃ©ments communs : Sommet, triangle, ...
 {
-  R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
-  double hmin=1e10;   // longueur minimal des arrêtes
+  R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // ExtremitÃ© de la boÃ®te englobante
+  double hmin=1e10;   // longueur minimal des arrÃªtes
   double hseuil;
   int *Numero_Som = new int [Th3.nv];
   int nv_t,nt_t,nbe_t;
@@ -423,7 +423,7 @@ Mesh3 *TestElementMesh3_patch( const Mesh3 & Th3 )
     Psup=Maxc(P,Psup);     
   }
 
-  // calcul de la longueur minimal des arrêtes
+  // calcul de la longueur minimal des arrÃªtes
   for (int k=0;k<Th3.nt;k++){
     for (int e=0;e<6;e++){
       if( Th3[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 ) continue;
@@ -923,7 +923,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
     }
     
 
-    tab_NumSommet[ii] = NumSommet; // Numero du premier sommet 3D associé au sommet 2D ii.
+    tab_NumSommet[ii] = NumSommet; // Numero du premier sommet 3D associÃ© au sommet 2D ii.
     //cout << "ii, tab_NumSommet[ii]= "<< ii <<" "<< tab_NumSommet[ii] << endl;
     
     for(int j=0; j <= Ni; j++){ //changer
@@ -970,7 +970,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 	       
 	    Th3.vertices[ tab_NumSommet[ ib[kk] ] + tab_Ni[ib[kk]] ].lab = imap2->second; 
 	       
-	       // label côté
+	       // label cÃ´tÃ©
 	     map<int,int>:: const_iterator imap3;
 	     imap3=mapemil.find ( K.lab );
 	     assert( imap3!=mapemil.end() );
@@ -994,7 +994,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 
   ElemBord = 0;
 
-  // bord définies en zmax
+  // bord dÃ©finies en zmax
   
   for(int ii=0; ii < Th2.nt; ii++){
     int ijj[3];
@@ -1548,7 +1548,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
       }
       
    }
-  // Au final : les sommers des tetraedres et la conectivité des tetraedres finaux
+  // Au final : les sommers des tetraedres et la conectivitÃ© des tetraedres finaux
   assert(NumElement <= Th3.nt);
   }
 
@@ -1557,7 +1557,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab(const int Nmax,
 void dpent1_mesh(int idl[3],int nu[12],int &nbe,int &option){
   // intent(inout)  :: idl
   // intent(out)    :: nu,nbe,option
-  // option ne sert à rien
+  // option ne sert Ã  rien
   //* version simplifie pour le mailleur par couche 2D 3D
   //-----------------------------------------------------------------------
   //      subroutine dpent1 (idl,nu,nbe,option)
@@ -2521,7 +2521,7 @@ AnyType Movemesh2D_3D_surf_Op::operator()(Stack stack)  const
     int border_only = 0;
     int recollement_border=1, point_confondus_ok=0;
 
-    // faire version de Transfo_Mesh2_tetgen pour ce cas précis.
+    // faire version de Transfo_Mesh2_tetgen pour ce cas prÃ©cis.
     Mesh3 *Th3= MoveMesh2_func( precis_mesh, Th, txx, tyy, tzz, 
 			 border_only, recollement_border, point_confondus_ok);
 	
@@ -3902,7 +3902,7 @@ void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_co
     Numero_Som[ii] = -1;
   }
 	
-  /* Resolution probleme dans le cas où le maillage se colle */
+  /* Resolution probleme dans le cas oÃ¹ le maillage se colle */
 	
   /* maintenant determinations des points confondus et numerotation*/
 	
@@ -4453,7 +4453,7 @@ AnyType cubeMesh_Op::operator()(Stack stack)  const
     
     // cas maillage volumique + surfacique
     Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-    // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer à l'intérieure
+    // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer ï¿½ l'intï¿½rieure
     
     delete pTh;
     
@@ -4623,7 +4623,7 @@ AnyType BuildLayeMesh_Op::operator()(Stack stack)  const
 
   // cas maillage volumique + surfacique
   Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-  // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer à l'intérieure
+  // cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer Ã  l'intÃ©rieure
     
   
   if( !(xx) && !(yy) && !(zz) )
@@ -4911,7 +4911,7 @@ void GetManifolds( Expression mani, int & nbcmanifold,  int * &mani_nbe, Express
       if( verbosity>1) 
 	cout << "    the number of manifold " << n << endl;
       
-      nbcmanifold = n;  // nombre de manifold définis
+      nbcmanifold = n;  // nombre de manifold dÃ©finis
       
       //manifold = new Expression[n]; 
       mani_nbe = new int[n];
@@ -5712,7 +5712,7 @@ AnyType ExtractMesh2D_Op::operator()(Stack stack)  const
 	
 	if( boolsurf==1 && boolelement==0 ){
 		// case only surface mesh
-		// demander à F. pour la pertinence
+		// demander Ã  F. pour la pertinence
 		KN<int> takevertex(Th.nv,-1);
 		KN<int> takebe(Th.neb,0);
 		int nbeLab=0;
@@ -5782,7 +5782,7 @@ AnyType ExtractMesh2D_Op::operator()(Stack stack)  const
 //
 //
 ///////////////////////////////////////////////////////////
-//  recuperer une partie du maillage à l'aide des labels
+//  recuperer une partie du maillage Ã  l'aide des labels
 
 class ExtractMesh_Op : public E_F0mps 
 {
@@ -5951,7 +5951,7 @@ AnyType ExtractMesh_Op::operator()(Stack stack)  const
     }
     
     
-    Mesh3 *pThnew = new Mesh3(nv,nt,ns,v,t,b);  // peut etre a dÃ©finir ???
+    Mesh3 *pThnew = new Mesh3(nv,nt,ns,v,t,b);  // peut etre a dÃƒÂ©finir ???
     // attention aux composantes connexes.
 	pThnew->BuildGTree();  //Lorenzo
     
@@ -6310,8 +6310,10 @@ AnyType Op_GluMesh3tab::Op::operator()(Stack stack)  const {
 
 
 
-// because i include this file in tetgen.cpp (very bad)
+// <<WITH_NO_INIT>> because i include this file in tetgen.cpp (very bad) [[file:tetgen.cpp::WITH_NO_INIT]]
 #ifndef WITH_NO_INIT
+
+// <<dynamic_loading>>
 
 static void Load_Init()
 {  
@@ -6331,10 +6333,9 @@ static void Load_Init()
   TheOperators->Add("=",new OneBinaryOperator_st< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
   TheOperators->Add("<-",new OneBinaryOperator_st< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
 
-
   Global.Add("change","(",new SetMesh3D);
   Global.Add("movemesh23","(",new Movemesh2D_3D_surf);
-  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf_cout);// 
+  Global.Add("movemesh2D3Dsurf","(",new Movemesh2D_3D_surf_cout);
   Global.Add("movemesh3","(",new Movemesh3D);
   Global.Add("movemesh","(",new Movemesh3D(1));
   Global.Add("movemesh3D","(", new Movemesh3D_cout);
@@ -6351,8 +6352,15 @@ static void Load_Init()
     
   Global.Add("AddLayers","(",new OneOperator4_<bool, const Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
   typedef const Mesh3 *pmesh3;
- // Global.Add("trunc","(", new Op_trunc_mesh3);
+  // Global.Add("trunc","(", new Op_trunc_mesh3);
 }
-LOADFUNC(Load_Init)
-#endif
 
+// <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
+// [[file:~/ff/src/fflib/load.cpp::static_load_msh3]]
+
+void msh3_Load_Init(){Load_Init();}
+
+// dynamic loading: calling [[file:../src/fflib/InitFunct.hpp::LOADFUNC]] on [[Load_Init]]
+LOADFUNC(Load_Init)
+    
+#endif // [[WITH_NO_INIT]]

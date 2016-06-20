@@ -25,18 +25,30 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef INITSFUNCT_HPP_
 #define INITSFUNCT_HPP_
 #include "ffapi.hpp"
  
+// [[file:~/ff/src/fflib/InitFunct.cpp::addInitFunct]]
 void  addInitFunct(int i,void  (* f)(),const char *name) ;
-void  callInitsFunct() ;
+
+// [[file:InitFunct.cpp::callInitsFunct]]
+void  callInitsFunct();
 
 class  addingInitFunct {  public:
-  addingInitFunct(int i,void  (* f)(),const char *name="") { addInitFunct(i,f,name);}
+  addingInitFunct(int i,void  (* f)(),const char *name="") {
+    // [[file:~/ff/src/fflib/InitFunct.cpp::addInitFunct]]
+    addInitFunct(i,f,name);
+  }
 } ;
 
-//
+// <<LOADINITIO>> In Emscripten manipulating input and output streams is not allowed (cf
+// [[file:~/fflib/Makefile::NO_STREAM_REDIRECT]])
+
+#ifdef NO_STREAM_REDIRECT
+#define LOADINITIO
+#else
 #if _WIN32
 #define LOADINITIO {					\
     streambuf * so =ffapi::cout()->rdbuf() ;		\
@@ -46,7 +58,7 @@ class  addingInitFunct {  public:
     if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
     if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
 } 
-#else
+#else // [[_WIN32]]
 #define LOADINITIO {					\
     streambuf * so =ffapi::cout()->rdbuf() ;		\
     streambuf * si =ffapi::cin()->rdbuf() ;		\
@@ -54,27 +66,35 @@ class  addingInitFunct {  public:
     if( so &&  cout.rdbuf() != so ) cout.rdbuf(so);	\
     if( si &&  cin.rdbuf() != si ) cin.rdbuf(si);	\
     if( se &&  cerr.rdbuf() != se ) cerr.rdbuf(se);	\
-    stdout = ffapi::ffstdout();\
-    stderr = ffapi::ffstderr();\
-    stdin = ffapi::ffstdin();\
+    stdout = ffapi::ffstdout();				\
+    stderr = ffapi::ffstderr();				\
+    stdin = ffapi::ffstdin();				\
 } 
-#endif
+#endif // [[_WIN32]]
+#endif // [[NO_STREAM_REDIRECT]]
 
-  
-#define LOADINITNM(EXEC,NM)						\
-  static  void  AutoLoadInit() { LOADINITIO ;				\
-    if(verbosity>9) cout << "\n loadfile " NM  "\n" ;			\
-    EXEC; }								\
- static int DoLoadInit() {							\
-    if(verbosity>9)							\
-      cout << " ****  " << NM  <<  " ****\n" ;				\
-    addInitFunct(10000,&AutoLoadInit,NM);				\
-    return 2;}								\
-									\
+#define LOADINITNM(EXEC,NM)					\
+								\
+  static  void  AutoLoadInit() {				\
+								\
+    /* [[LOADINITIO]] */					\
+    LOADINITIO;							\
+    if(verbosity>9) cout << "\n loadfile " NM  "\n" ;		\
+    EXEC;							\
+  }								\
+								\
+  static int DoLoadInit() {					\
+    if(verbosity>9) cout << " ****  " << NM  <<  " ****\n" ;	\
+								\
+    /* <<calling_addInitFunct>> */				\
+    /* [[file:~/ff/src/fflib/InitFunct.cpp::addInitFunct]] */	\
+    addInitFunct(10000,&AutoLoadInit,NM);			\
+    return 2;							\
+  }								\
+								\
   static int callDoLoadInit=DoLoadInit();				
 
 #define LOADINIT(TI) LOADINITNM(TI init obsolete,__FILE__)			     
 #define LOADFUNC(FC) LOADINITNM(FC() ,__FILE__)			     
 
-
-#endif
+#endif // [[INITSFUNCT_HPP_]]
