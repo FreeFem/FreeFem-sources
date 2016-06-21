@@ -1,6 +1,9 @@
 BEGIN { 
   if( db != "") db=1;
-  gsub(/[ \t][ \t]*/," ",libs);
+  gsub(/\n/," ",libs);
+  gsub(/\r/,"",libs);
+  gsub(/\n/,"",libs);
+  gsub(/[ ][ ]*/," ",libs);
   sub(/^ /,"",libs);
   sub(/ $/,"",libs);
   gsub(/([]])/," ] ",libs); 
@@ -35,8 +38,13 @@ END {
     for(i=1; i<=nl;++i)
     {
 	lib=l[i];
-	if(db) print "  @@ '",lib,"'", k,ok , skip 
-	if (lib=="[") 
+ 
+	if(db) print " @@ '" lib "'", k,ok , skip , "err=" err, lvl,i,length(lib)
+	if (length(lib)==0)
+	{
+	   if(db) print " empty "
+	} 
+	else if (lib=="[") 
 	{ 
 	    ncase=0;
 	    skip=0;
@@ -45,7 +53,7 @@ END {
 	    k0=k;
 	    lmis="";
 	    if(lvl!=1)
-		lerr[err++]=" [ ... [ ... ";
+		  lerr[err++]=" [ ... [ ... ";
 	} 
 	else if (lib=="]") 
 	{ 
@@ -75,16 +83,17 @@ END {
 		with[lib]=lvl;
 	    }
 	}
+	if(db)  print "err=",err,"i=",i;
     }
     if(lvl !=0) 
-	lerr[err++]="no matching [|] ";
+	 lerr[err++]="no matching [|] ";
 
     if(db) 
     {
-	printf "%s ", " libs ::: " 
+	printf "%s "," libs ::: " 
 	for(j=1; j<=k; ++j)
 	    printf "%s ",ln[j];
-	print " ";
+	print " err=" err,k,lvl;
     };
 #  remove first  item  ..
     for (j=1; j<=k;++j)
