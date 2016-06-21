@@ -1,3 +1,5 @@
+//ff-c++-LIBRARY-dep:  [flann]
+
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 //#include "HashTable.hpp"
@@ -96,6 +98,47 @@ public:
         Point *q=Exist(p);
         if( q) return  q-P; // numero du point
         else return AddSimple(p);
+    }
+ 
+    int  FindAll(double x,double y,int * p)
+    {
+        int nbp=0;
+        if(debug)   cout << " Find " << x << " "<< y  << " " << EPSILON << " " << ncase(x,y) << ": " ;
+        // double x = p[0], y=p[offset];
+        double eps=EPSILON/2;
+        Point *q=0;
+        int kk[9],k=0,nc;
+        for(int i=-1;i<2;++i)
+            for(int j=-1;j<2;++j)
+            {
+                nc = ncase(x+eps*i,y+eps*j);
+                //cout <<x+eps*i << " " << y+eps*j << " " << nc << " . ";
+                if(nc>=0)
+                    for(int i=0;i<k;++i) // remove double cas e..
+                        if(kk[i]==nc)
+                        {
+                            nc=-1;
+                            break;
+                        }
+                if(nc>=0) kk[k++]=nc;
+            }
+        if(k>4) {
+            cout << "   ClosePoints: FindAll Bug ??? : " << k << " : " ;
+            for(int i=0; i<k;++i)
+                cout << " " << kk[i];
+            cout << endl;
+        }
+        assert(k <=4);
+        for(int i=0;i<k;++i)
+        {
+            int k=kk[i];
+            for(int i=head[k%m] ; i!=NotaPoint; i=next[i] )
+            {
+                if(Equivalent(x,y,P[i]))
+                    p[nbp++]=i;
+            }
+         }
+        return nbp;
     }
     
     Point * Find(double x,double y)
@@ -455,6 +498,7 @@ void Clean(KN<long> &I)
 }
 long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &  eps,KN<KN<long> >  * const & IJ)
 {
+    debug = (verbosity>999);
     int np=P.N();
     int nq=Q.N();
     int mp=P.M();
@@ -469,7 +513,7 @@ long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &
     int qoffset10 = Q.step*Q.shapei.step;;
     ffassert( mp ==2);
     ffassert( mq ==2);
-    
+    KN<int> lp(np);
     
     IJ->resize(nq);
     for (int i=0;i<nq ;i++)
@@ -500,22 +544,83 @@ long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &
     R2close SP(data,np,eps,offset01);
     for (int i=0; i<np;++i)
         SP.AddSimple(&P(i,0));
+    
     for (int j=0; j<nq;++j)
     {
-        R2close::Point *pi=SP.Find(Q(j,0),Q(j,1));
-        if( pi)
+        int nlp =SP.FindAll(Q(j,0),Q(j,1),lp);
+        for(int k=0; k<nlp;++k)
         {  //
-            int i = (pi-SP.P);
+            int i = lp[k];
             if(verbosity>99)  cout << " Add to i=" << i << " -> j " << j << endl;
             Add((*IJ)[i],j);
         }
     }
     for (int j=0; j<nq;++j)
         Clean((*IJ)[j]);
+    debug = 0;
     return 0;
 }
+#ifdef WITH_flann
+#include <flann/flann.hpp>
+long ff_flann_search( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &  eps,KN<KN<long> >  * const & pIJ)
+{
+    KN<KN<long> > &IJ=*pIJ;
+    int np=P.M();
+    int nq=Q.M();
+    
+    int mp=P.N();
+    int mq=Q.N();
+    int nn=nq;
+    double *p= &P(0,0);
+    double *q= &Q(0,0);
+    int offset01= P.step*P.shapej.step;;
+    int offset10= P.step*P.shapei.step;;
+    double * q0=&(Q(0,0));
+    int qoffset01 = Q.step*Q.shapej.step;;
+    int qoffset10 = Q.step*Q.shapei.step;;
+    cout << np << " " << nq << " po 01, 10 " << offset01 << " " << offset10 << " " << &P(0,1) - p
+                            << " qo 01 , 01 =: "  << qoffset01 << " "<< qoffset10 << endl;
+    ffassert( mp == mq && offset10==1 && qoffset10==1);
+    //ffassert( mq ==2);
+    
+    
+    IJ.resize(nq);
+    cout << np << " " << mq << endl;
+    cout << nq << " " << mq << endl;
+    flann::Matrix<double> dataset(p,np,nq);
+    flann::Matrix<double> query(q,nq,mq);
+    std::vector< std::vector<int> > indices;
+    std::vector<std::vector<double> > dists;
+    flann::SearchParams params(128);
+    params.eps= eps;
+    flann::Index<flann::L2<double> > index(dataset, flann::KDTreeIndexParams(4));
+    index.buildIndex();
+    index.radiusSearch(query, indices, dists, eps , params);
+    for (int j=0; j<indices.size() ;++j)
+    {
+         IJ[j].resize(indices[j].size());
+        for(int k=0;k<indices[j].size(); ++k)
+           IJ[j][k]=indices[j][k];
+    }
+   for (int j=0; j<indices.size() ;++j)
+    {
+        int k = j*mq;
+        cout << j << " [ " << q[k] << " " << q[k+1] <<"] : ";
+        for(int k=0;k<indices[j].size(); ++k)
+            cout <<  indices[j][k] << " " << dists[j][k] << ", ";
+        cout << endl;
+    }
+    
+    return 0;
+}
+
+
+#endif
 static void init()
 {
+    #ifdef WITH_flann
+    Global.Add("radiusSearch","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(ff_flann_search));
+#endif
     Global.Add("Voisinage","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(Voisinage));
     Global.Add("ClosePoints2","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2));
   //s  Global.Add("ClosePoints2t","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2t));
