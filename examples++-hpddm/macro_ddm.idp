@@ -1,0 +1,170 @@
+load "thresholdings"
+include "getARGV.idp"
+searchMethod = 1;
+
+macro bb2(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(4);
+            boundingbox(bb, boundingMesh);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+
+macro bb3(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(6);
+            boundingbox(bb, boundingMesh);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+            bb(4) -= overshoot;
+            bb(5) += overshoot;
+
+            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
+
+macro plotMPI(Th, u, legend, Pk, def, K, d, w)
+    if(mpirank == 0) {
+        meshN ThCurrent = Th;
+        meshN[int] meshTab(mpisize);
+        fespace Xh(ThCurrent, Pk);
+        Xh<K>[int] def(uTab)(mpisize);
+        uTab[0][] = u;
+        meshTab[0] = Th;
+        mpiRequest[int] rq(mpisize - 1);
+        for(int i = 1; i < mpisize; ++i)
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
+        for(int i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        for(int i = 1; i < mpisize; ++i) {
+            ThCurrent = meshTab[i];
+            Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
+        }
+        for(int i = 1; i < mpisize; ++i)
+            mpiWaitAny(rq);
+        plot(uTab, wait = w, nbiso = 40, fill = 1, value = 1, dim = d, cmm = legend);
+    }
+    else {
+        mpiRequest[int] rq(2);
+        Isend(processor(0, rq[0]), Th);
+        Isend(processor(0, rq[1]), u);
+        mpiWait(rq[0]);
+        mpiWait(rq[1]);
+    }// EOM
+
+macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
+        meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);
+        mpiBarrier(comm);
+        real timerPartition = mpiWtime();
+        {
+            fespace PhLocal(meshName, P0);
+            PhLocal overshoot = hTriangle;
+            real max = 2.0 * overlap * overshoot[].max;
+            bbN(meshName, max, globalName)
+        }
+        fespace VhGlobal(globalName, P1);
+        PhGlobal supp = abs(part - mpiRank(comm)) < 0.1;
+        VhGlobal suppSmooth;
+        AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
+        {
+            meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999);
+            fespace Oh(neighbors, P0);
+            Oh partOverlap = part;
+            Unique(partOverlap[], arrayIntersection);
+        }
+        fespace VhLocal(meshName, P1);
+        VhLocal[int] partitionIntersection(arrayIntersection.n);
+        if(s > 1) {
+            globalName = trunc(globalName, suppSmooth > 0.001, split = s);
+            supp = abs(part - mpiRank(comm)) < 0.1;
+            suppSmooth = 0;
+            AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
+        }
+        globalName = trunc(globalName, suppSmooth > 0.001);
+        supp = supp;
+        suppSmooth = suppSmooth;
+        meshName = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
+        borderName = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
+        VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
+        VhLocal sum = khi;
+        VhGlobal phi = 0;
+        real eps = intN(globalName)(1.0);
+        part = part;
+        int numberIntersection = 0;
+        for(int i = 0; i < arrayIntersection.n; ++i) {
+            PhGlobal suppPartition = abs(arrayIntersection[i] - part) < 0.1;
+            AddLayers(globalName, suppPartition[], overlap, phi[]);
+            real intersection = intN(globalName)(phi) / eps;
+            if(intersection > 1.0e-6) {
+                partitionIntersection[numberIntersection] = phi;
+                if(usedARGV("-true_restrict") != -1)
+                    sum[] += partitionIntersection[numberIntersection][];
+                arrayIntersection[numberIntersection++] = arrayIntersection[i];
+            }
+        }
+        if(numberIntersection != arrayIntersection.n)
+            arrayIntersection.resize(numberIntersection);
+        fespace WhPart(meshName, PkPart);
+        WhPart defPart(func2vec);
+        if(usedARGV("-true_restrict") != -1) {
+            khi[] = khi[] ./= sum[];
+            defPart(func2vec) = initPart(khi);
+        }
+        else {
+            fespace PhLocal(meshName, P0);
+            PhLocal loc = abs(part - mpiRank(comm)) < 0.1;
+            defPart(func2vec) = initPart(loc);
+        }
+        D.resize(Wh.ndof);
+        D = func2vec[];
+        restrictionIntersection.resize(numberIntersection);
+        for(int i = 0; i < numberIntersection; ++i) {
+            meshN meshIntersection = trunc(meshName, partitionIntersection[i] > 1.0e-6);
+            fespace WhIntersection(meshIntersection, P);
+            matrix R = interpolate(WhIntersection, Wh);
+            R.thresholding(1.0e-10);
+            real[int] C;
+            int[int] I;
+            [I, restrictionIntersection[i], C] = R;
+            restrictionIntersection[i].resize(R.nbcoef);
+        }// EOM
+
+macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart)
+{
+    real timing = mpiWtime();
+    if(mpisize > 1 && !excluded) {
+        fespace PhGlobal(ThGlobal, P0);
+        PhGlobal part;
+        if(mpiRank(comm) == 0) {
+            if(verbosity > 0)
+                cout.scientific << " --- global mesh of " << ThGlobal.nt << " elements (prior to refinement) generated (in " << mpiWtime() - timing << ") and partitioned with ";
+            timing = mpiWtime();
+            if(partitioner == 2) {
+                scotch(part[], ThGlobal, mpiSize(comm));
+                if(verbosity > 0)
+                    cout << "SCOTCH";
+            }
+            else {
+                metisdual(part[], ThGlobal, mpiSize(comm));
+                if(verbosity > 0)
+                    cout << "Metis";
+            }
+            if(verbosity > 0)
+                cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
+        }
+        timing = mpiWtime();
+        broadcast(processor(0, comm), part[]);
+        partition(Th, ThBorder, ThGlobal, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
+    }
+    else if(mpisize == 1) {
+        Th = ThGlobal;
+        D.resize(Wh.ndof);
+        D = 1.;
+    }
+    mpiBarrier(mpiCommWorld);
+    if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
+}// EOM
+
+macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded)
+buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init)// EOM

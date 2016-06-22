@@ -1,0 +1,23 @@
+include "gsl.idp"
+// FFCS - avoid using P2 and P3 which already define something very precise
+real [int] p2=[ 2,-3,1];
+real [int] p3=[ 8,-10,1,1];
+real [int] X(3);
+complex[int] Z(4);
+real [int] Q4=[ -1,0,0,0,1];
+gslpolysolvequadratic(p2,X);
+cout << X[0] << " " << X[1] << endl; 
+gslpolysolvecubic(p3,X);
+cout << X[0] << " " << X[1] << " " << X[2] << endl; 
+gslpolycomplexsolve(Q4,Z); 
+cout << Z[0] << " " << Z[1] << " " << Z[2] << " " << Z[3] <<endl;
+
+cout << "\n\n gsl random :\n\n";
+ cout << " list of generator " << ngslrng << endl;
+ for(int i=0; i <ngslrng ; ++i)
+   cout << i << " name  " <<  gslname(gslrngtype(i)) << endl; 
+gslrng r=gslrngtype(1);// chose a generator 
+// cout << r << endl;  no print .. 
+for (int i = 0; i < 10; i++) 
+   cout << gslrnguniform(r) << endl;;  
+ 
