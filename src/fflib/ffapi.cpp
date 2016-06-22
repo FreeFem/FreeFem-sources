@@ -1,7 +1,3 @@
-#ifdef WITH_PETSC
-#include <petsc.h>
-#endif
-
 /// \file
 /// ======================================================================
 /// Written by Antoine Le Hyaric
@@ -31,12 +27,16 @@
 // Proposed FreeFem++ Application Programming Interface
 // ----------------------------------------------------
 
-// headerfilter
-#include "ffapi.hpp"
+#ifdef WITH_PETSC
+#include <petsc.h>
+#endif
+
+// headerfilter [[shell:headerfilter '../../ff/src/fflib/ffapi.cpp']] [[file:~/alh/bin/headerfilter]]
+#include "ffapi.hpp" // [[file:ffapi.hpp]] found by [[file:~/alh/bin/headerfilter]]
 #ifdef FFLANG
 #include "socket.hpp"
 #include "spawn.hpp"
-#include "buffer.hpp"
+#include "buffer.hpp" // [[file:~/ffcs/src/buffer.hpp::Buffer]]
 #endif
 #include <iostream>
 #include <cstdio>
@@ -57,13 +57,6 @@
 #include "mpi.h"
 #endif
 #endif
-#include <dirent.h>
-#include <strings.h>
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
 
 extern long verbosity ;
 
@@ -71,7 +64,7 @@ extern long verbosity ;
 // FFCS-specific implementations for the FF API
 // --------------------------------------------
 
-/// FFLANG defined means that FFCS is being compiled. I am fairly confident that FFCS will not be defined while
+/// <<FFLANG>> defined means that FFCS is being compiled. I am fairly confident that FFCS will not be defined while
 /// compiling the original FF.
 
 /// Need to choose a non-zero stream number because FF will check it (as global variable ThePlotStream)
@@ -92,13 +85,12 @@ void bufferwrite(const char *b,const int l){
   Socket::dialoglock->Free();
 }
 
-Buffer buffer(NULL,bufferwrite); // need #include "buffer.hpp"
+Buffer buffer(NULL,bufferwrite); // need #include "buffer.hpp" // [[file:~/ffcs/src/buffer.hpp::Buffer]]
 #endif
 //  allocation/definition of all ffapi in Global.cpp
 
 namespace ffapi{
     
-
   // Get a pointer to the local cin/cout (which is distinct from ffcs's stdin/stdout under Windows because each DLL owns
   // separate cin/cout objects).
 
@@ -131,6 +123,7 @@ static  void ffapi_newplot(){}
 #endif
   }
 
+  // <<ffapi_ff_pclose>>
 static  int ffapi_ff_pclose(FILE *stream){
 #ifdef FFLANG
     // nothing to close in FFCS
@@ -245,7 +238,7 @@ static  void ffapi_winbinmode(FILE *f){
   }
 
 static  void ffapi_mpi_init(int &argc, char** &argv){
-    /// only call MPI_Init() if this has not already been done in ffcs/src/server.cpp
+    /// only call MPI_Init() if this has not already been done in [[file:~/ffcs/src/server.cpp]]
 #ifndef FFLANG
 #ifdef PARALLELE
     // need #include "mpi.h"
@@ -283,7 +276,8 @@ static  bool ffapi_protectedservermode(){
 #endif
   }
 
-void init(){
+  // <<init>> [[file:ffapi.hpp::init]] called by [[file:../lglib/mymain.cpp::ffapi::init]]
+  void init(){
     ffapi::cin = ffapi::ffapi_cin;
     ffapi::cout = ffapi::ffapi_cout;
     ffapi::cerr = ffapi::ffapi_cerr;
@@ -292,7 +286,7 @@ void init(){
     ffapi::ffstdin = ffapi::ffapi_ffstdin;
     ffapi::newplot = ffapi::ffapi_newplot;
     ffapi::ff_popen = ffapi::ffapi_ff_popen;
-    ffapi::ff_pclose = ffapi::ffapi_ff_pclose;
+    ffapi::ff_pclose = ffapi::ffapi_ff_pclose; // <<ff_pclose>>
     ffapi::fwriteinit = ffapi::ffapi_fwriteinit;
     ffapi::ff_fwrite = ffapi::ffapi_ff_fwrite;
     ffapi::ff_fflush = ffapi::ffapi_ff_fflush;
@@ -305,7 +299,6 @@ void init(){
     ffapi::protectedservermode = ffapi::ffapi_protectedservermode;
   }
 }
-
 
 /// Local Variables:
 /// mode:c++

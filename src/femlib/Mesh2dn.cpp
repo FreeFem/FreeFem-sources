@@ -321,7 +321,7 @@ void GSave2(FILE * ff,const Mesh & Th)
 	    << nv << " n Bord " << nbe << endl;
 	
     }
-    
+
     void Mesh2::GRead(FILE * ff)
     {  
 	PlotStream f(ff);

@@ -99,9 +99,9 @@ class ListOfInst;
 class Polymorphic;
 class OneOperator;
 
-/// <<Expression>> is used as the type of the local list contained in ListOfInst
+/// <<Expression>> is used as the type of the local list contained in ListOfInst 
 
-typedef  E_F0  *  Expression;
+typedef  E_F0  *  Expression; // [[E_F0]]
 
 class AC_F0;
 class basicAC_F0;
@@ -291,7 +291,7 @@ public:
     const basicForEachType * un_ptr_type;  // type of right exp
    private:
  //   map<aType,CastFunc> mapofcast;
-    OneOperator * casting; // list of operator for casting to this type 
+  OneOperator * casting; // <<casting>> list of operator for casting to this type 
     
     const E_F1_funcT_Type * un_ptr;        //  is ptr -> get value function
     Function1 DoOnReturn;        //  to call some thing on return. 
@@ -352,8 +352,9 @@ class C_LF1;
 //  3 types of function/expression  0,1,2 args  
 
 /// <<E_F0>> is the base class for all expressions built by parsing an EDP script in the grammar of the FreeFem++
-/// language (see lg.ypp). E_F0 pointers are typed as #Expression, stored as a list in [[ListOfInst]], and evaluated
-/// when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called (see \ref index).
+/// language (see [[file:../lglib/lg.ypp]]). E_F0 pointers are typed as [[Expression]], stored as a list in
+/// [[ListOfInst]], and evaluated when CListOfInst::eval() [[file:AFunction.hpp::CListOfInst::eval]] is called at
+/// [[file:../lglib/lg.ypp::evaluate_parsed_FF_script]] (see \ref index). No internal data member.
 
 class E_F0 :public CodeAlloc 
    {
@@ -607,16 +608,15 @@ private:
   friend ostream & operator<<(ostream & f,const Polymorphic & a);
 };
 
-///   the type for polymorphisme of id 
-
-/// <<C_F0>> compile time expressions
+/// <<C_F0>> The type for polymorphisme of id. Contains one [[Expression]] and the type that the expression will return
+/// [[file:../fflib/AnyType.hpp::aType]] (useful to select the right operator when using that type).
 
 class basicAC_F0;
 class C_F0 {
-  friend class CC_F0; // cf [[CC_F0]]
+  friend class CC_F0;	// cf [[CC_F0]]
 protected: 
-  Expression  f; //  the expression code, cf [[Expression]]
-  aType r;   // the expression type, cf  [[file:../fflib/AnyType.hpp::aType]]
+  Expression  f;	// the expression code, cf [[Expression]]
+  aType r;		// the expression type, cf  [[file:../fflib/AnyType.hpp::aType]]
   
 public: 
   //  the constructeur 
@@ -627,8 +627,7 @@ public:
   /// cf [[Type_Expr]]
   C_F0(const Type_Expr & a):f(a.second),r(a.first)   {}
 
-  /// <<C_F0_constructor_pop_char_basicAC_F0_decl>>
-  /// [[file:AFunction2.cpp::C_F0_constructor_pop_char_basicAC_F0_impl]]
+  /// <<C_F0_constructor_pop_char_basicAC_F0_decl>> [[file:AFunction2.cpp::C_F0_constructor_pop_char_basicAC_F0_impl]]
   /// cf [[Polymorphic]]
   C_F0(const Polymorphic *,const char *,const basicAC_F0 & );
 
@@ -1373,7 +1372,8 @@ Type_Expr CPPValue(R *& v)
    throwassert(map_type[typeid(R*).name()]);
   return make_pair(map_type[typeid(R*).name()],new PPValue<R>(&v));
  }
- 
+
+// <<CConstant>> returns [[Type_Expr]]
 template<class R >
 Type_Expr CConstant(const R & v)
  {
@@ -1381,11 +1381,10 @@ Type_Expr CConstant(const R & v)
   return make_pair(map_type[typeid(R).name()],new  EConstant<R>(v));
  }
 
-
-/// <<CC_F0>> used in [[file:../lglib/lg.ypp::YYSTYPE]]
+/// <<CC_F0>>, same as [[C_F0]] but without constructor/destructor to be used in union [[file:../lglib/lg.ypp::YYSTYPE]]
 
 class CC_F0 {
-  Expression f;
+  Expression f; // [[Expression]]
   aType r;
 public:
   void operator=(const C_F0& c) { f=c.f;r=c.r;;} 
@@ -1401,7 +1400,7 @@ public:
 /// <<ListOfInst>>
 
 class ListOfInst :
-  public E_F0mps /*[[E_F0mps]]*/
+  public E_F0mps // [[E_F0mps]]
 { 
   int n;
   Expression   *   list;
@@ -1470,8 +1469,7 @@ AnyType FIf(Stack s ,E_F0 * test,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 AnyType TTry(Stack s ,E_F0 * i0,E_F0 * i1,E_F0 * i2,E_F0 * notuse);
 
 
-/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]], uses
-/// [[TableOfIdentifier]]
+/// <<Global>> Contains all FreeFem++ language keywords. Definition in [[file:global.cpp::Global]], uses [[TableOfIdentifier]]
 
 extern TableOfIdentifier Global;
 
@@ -1497,12 +1495,9 @@ inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i
 //   if (!(r && r->un_ptr)) { cerr << "PtrValue: Not a Left value " << *r << endl;CompileError();} 
 //   return C_F0(new  E_F0_Func1(r->un_ptr->f,f),r->un_ptr->r);}
 
-/// <<basicAC_F0>>
+/// <<basicAC_F0>> version de base d'un tableau d'un parametres pour les operateurs unaire, binaire, pas d'allocation
 
 class basicAC_F0 {
-//  version de base d'un tableau d'un parametres  
-//   pour les operateurs unaire, binaire, , 
-//   pas d'allocation 
   friend class E_Array; // for mapping fonction 
   protected:
   typedef const C_F0 const_C_F0;
@@ -1536,7 +1531,7 @@ class basicAC_F0 {
 
 /// <<AC_F0>> array of parameters for FF language operators. uses [[basicAC_F0]]
 
-class AC_F0: public basicAC_F0 { //  a Array of C_F0
+class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
 //    tableau d'un parametres  max 1024 parametres 
 //    avec allocation  
  const static  int MaxSize;
@@ -1612,7 +1607,7 @@ class  basicAC_F0_wa : public basicAC_F0 { public:
 };
 
 
-
+// <<E_Array>>
 class E_Array  :public E_F0 {  public: 
   basicAC_F0_wa *v;// the value
   E_Array(const basicAC_F0 & aa) : v(new basicAC_F0_wa(aa))  {throwassert(v);}
@@ -1634,7 +1629,7 @@ class E_Array  :public E_F0 {  public:
   } // 
   operator aType () const { return atype<void>();} 
  
-  };
+};
 class PlotStream;  
 class E_Border ;
 class E_BorderN :public E_F0mps { public: 
@@ -2066,7 +2061,9 @@ public:
    size_t size() const { return Max(topmax,top);}
   void Add(Key k,Key op,OneOperator *p0)  
     { table.Add(k,op,p0);}
-   
+
+  // <<Block_NewVar>>
+  
 template<class T>   
    C_F0 NewVar(Key k,aType t,const C_F0 &i) 
      {return table.NewVar<T>(k, t,top,i);}
@@ -2978,7 +2975,7 @@ inline  bool  basicForEachType::CastingFrom(aType t) const  {
      throwassert( t);
      if ( t == this) return true;
      else if( t ==  type_C_F0 ) return true; // FH do work .... 09 / 2012 (use of ellispe ...)
-     return casting->FindSameR(ArrayOfaType(t,false));
+     return casting->FindSameR(ArrayOfaType(t,false)); // uses [[casting]] [[file:AFunction2.cpp::FindSameR]]
   }
 
 inline  void CerrCast(const pair<const basicForEachType*,const E_F1_funcT_Type *> & i)
