@@ -24,7 +24,7 @@ macro div(u,v) ( dx(u)+dy(v) ) // EOM
 solve bb([uu,vv],[w,s],solver=CG)=
 	int2d(th)(  
 		  lambda*div(w,s)*div(uu,vv)	
-                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 
+                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) //'
                  )
   - int2d(th) (gravity*s)
   + on(1,uu=0,vv=0)

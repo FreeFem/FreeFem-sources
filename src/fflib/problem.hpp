@@ -44,17 +44,19 @@ namespace  Fem2D {
 
 template<class K> class SolveGCDiag; 
 class Plot;
-class v_fes;
+class v_fes; // [[file:lgfem.hpp::v_fes]]
 
-typedef FEbase<double,v_fes> * pferbase ;
-typedef FEbaseArray<double,v_fes> * pferbasearray ;
-typedef pair<pferbase,int> pfer ;
-typedef pair<pferbasearray,int> pferarray ;
+// real [[file:lgfem.hpp::FEbase]] using [[file:lgfem.hpp::v_fes]]
+typedef FEbase<double,v_fes> * pferbase ;		// <<pferbase>>
+typedef FEbaseArray<double,v_fes> * pferbasearray ;	// <<pferbasearray>>
+typedef pair<pferbase,int> pfer ;			// <<pfer>>
+typedef pair<pferbasearray,int> pferarray ;		// <<pferarray>>
 
-typedef FEbase<Complex,v_fes> * pfecbase ;
-typedef FEbaseArray<Complex,v_fes> * pfecbasearray ;
-typedef pair<pfecbase,int> pfec ;
-typedef pair<pfecbasearray,int> pfecarray ;
+// complex [[file:lgfem.hpp::FEbase]] using [[file:lgfem.hpp::v_fes]]
+typedef FEbase<Complex,v_fes> * pfecbase ;		// <<pfecbase>>
+typedef FEbaseArray<Complex,v_fes> * pfecbasearray ;	// <<pfecbasearray>>
+typedef pair<pfecbase,int> pfec ;			// <<pfec>>
+typedef pair<pfecbasearray,int> pfecarray ;		// <<pfecarray>>
 
 
 //typedef pair<pmesh *,int> pmesharray ;

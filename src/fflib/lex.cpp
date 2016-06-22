@@ -59,6 +59,7 @@ void  mylex::Add(Key k,int i)
   Add(k,i,0); 
 }
 
+// <<mylex_Add_Key_aType>>
 void  mylex::Add(Key k,aType t)   
 {
   Check(!t,k,"type");
@@ -78,6 +79,9 @@ void  mylex::AddSpace(Key k,aType t)
   Add(k,FESPACE,t); 
 }
 
+// <<mylex_InMotClef>> looks in MotClef for the token contained in buf (buf is set by by [[mylex_basescan]]) and returns
+// its type as t and the grammar token id as r (eg [[file:~/ff/src/lglib/lg.ypp::TYPE]]).
+
 bool mylex::InMotClef  (aType & t, int & r) const {
   const_iterator i= MotClef.find(buf);
   if (i== MotClef.end()) {
@@ -89,11 +93,26 @@ bool mylex::InMotClef  (aType & t, int & r) const {
     ffassert(r);
     return true;}}
 
+// alh - 5/4/15 - <<mylex::InMotClef_string>> [[file:lex.hpp::InMotClef_string]] Same as [[mylex_InMotClef]], but checks
+// another buffer than buf
+bool mylex::InMotClef(const char *b,aType &t,int &r)const{
+  const_iterator i=MotClef.find(b);
+  if(i==MotClef.end()){t=0;r=ID;return false;}
+  else {
+    r=i->second.first;
+    t=i->second.second;
+    ffassert(r);
+    return true;
+  }
+}
+
+// <<mylex_Add_Key_int_aType>>
 void  mylex::Add(Key k,int r,aType t){ 
   iterator ii= MotClef.find(k);
   ffassert(ii==MotClef.end());
   MotClef.insert(pair<const Key,Value>(k,Value(r,t))); }
 
+// <<dump>>
 void mylex::dump(ostream & f ) 
 {
   const_iterator i=MotClef.begin(),e=MotClef.end();
@@ -184,6 +203,8 @@ int mylex::EatCommentAndSpace(string *data)
   } while (incomment);
     return (c==EOF) ? c : sep;
 }
+
+// <<mylex_basescan>>
 int mylex::basescan()
 {
   //  extern long mpirank;
@@ -201,7 +222,7 @@ int mylex::basescan()
       firsttime=false;
     if(echo) cout << setw(5) <<linenumber << " : " ; 
   }
-  EatCommentAndSpace(); 
+  EatCommentAndSpace(); // [[mylex::EatCommentAndSpace]]
   c =source().get(); // the current char 
   char nc = source().peek(); // next char
   buf[0]=c;
@@ -213,9 +234,11 @@ int mylex::basescan()
       //if (echo) cout << "ENDOFFILE "<< endl;
       if (close() )  goto debut; 
       buf[0]=0;
-      return ENDOFFILE;}
+      return ENDOFFILE;
+    }
+
+  // <<found_a_number>>
   else if (isdigit(c) || (c=='.' && isdigit(nc))) {
-    //  a number
     int i=1;
     buf[0]=c;
     bool real= (c=='.');
@@ -229,7 +252,7 @@ int mylex::basescan()
     if (nc =='+' || nc =='-' || isdigit(nc))  buf[i++]=source().get(),nc=source().peek();
     while ( isdigit(nc) && i< 50 ) buf[i++]=source().get(),nc=source().peek();
     }
-    if (i>= 50)  erreur("Number to long");
+    if (i>= 50) erreur("Number too long");
     
     buf[i]=0;
     if (nc=='i' ) 
@@ -242,6 +265,8 @@ int mylex::basescan()
     
     if(lexdebug) cout << " NUM : " << buf  << " "<<endl;
   }
+
+  // <<found_an_identifier>>
   else if (isalpha(c) || c=='\\')
     {
       ret =  ID;
@@ -249,11 +274,12 @@ int mylex::basescan()
       for (i = 1; i < 256 && isalnum(source().peek()); i++) 
         buf[i]=source().get();
       if (i == 256) 
-        erreur ("Identifyier too long");
+        erreur ("Identifier too long");
       buf[i] = 0;
-      
     }
-  else  if (c=='"')
+
+  // <<found_a_string>>
+  else if (c=='"')
     {
       int i;
       char cc,ccc;
@@ -293,6 +319,8 @@ int mylex::basescan()
       
       ret= STRING;
     }
+
+  // Anything else (eg brackets and operators)
   else 
     {
       ret = c;
@@ -384,13 +412,14 @@ int mylex::basescan()
   return ret;
 }
 
+// <<mylex_scan1>>
 int mylex::scan1()
 {
 
   // extern long mpirank;
  // bool echo = mpirank == 0; 
 
-  int ret= basescan();
+  int ret= basescan(); // [[mylex_basescan]]
   if(debugmacro)  cout << " scan1 " << ret << " " << token() << " " << ID << endl;
     while ( ret == ID &&SetMacro(ret)); // correction mars 2014 FH
     while ( ret == ID && CallMacro(ret)) ; // correction mars 2014 FH
@@ -404,12 +433,12 @@ int mylex::scan(int lvl)
  
   int ret= scan1(); 
   
-  // ID defined at [[file:../lglib/lg.ypp::token str ID]]
+  // ID defined at [[file:../lglib/lg.ypp::ID]] and detected at [[found_an_identifier]]
   if ( ret == ID) {
     if (! InMotClef(plglval->type,ret))  {
       int ft = FindType(buf);
 
-      // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::token str FESPACE]]
+      // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
       int feid3[4]  ={ ID,FESPACE1,FESPACE,FESPACE3};
 
       assert ( ft >= 0 && ft <= 3)  ;
@@ -429,8 +458,10 @@ int mylex::scan(int lvl)
 
 string mylex::token() const
   {
-   int i=-1;
-   string f;
+    int i=-1;
+    string f;
+
+    // found at [[found_a_string]]
     if (typetoken == STRING) 
       {
         f += '"';
@@ -447,7 +478,7 @@ string mylex::token() const
     return f;
   }
   
-  void mylex::print(ostream &f) const
+void mylex::print(ostream &f) const
   {
    int i=-1;
    int k=0;
@@ -624,12 +655,16 @@ bool mylex::CallMacro(int &ret)
 
       return false;
   }
+
+  // <<FILE_macro>>
   else if(strcmp(buf,"FILE")==0)
   {
       plglval->str = newcopy(filename() );
       ret = STRING;
      return false;
   }
+
+  // <<LINE_macro>>
   else if(strcmp(buf,"LINE")==0)
   {
     plglval->lnum = linenumber;
@@ -728,42 +763,54 @@ bool mylex::CallMacro(int &ret)
 
 void  mylex::xxxx::open(mylex *lex,const char * ff) 
 {
-  //filename=ff;
   l=0;
   nf=f=0;
+
+  // Try to open the given file name without any extra path from [[file:lex.hpp::ffincludedir]]
   if(lex->ffincludedir.empty()) // if no liste 
-      nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
+    nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
+
+  // If it worked, set [[file:lex.hpp::filename]] to ff, otherwise try to add path elements from
+  // [[file:lex.hpp::ffincludedir]]
   if (!f || !*f)
-   {
+    {
    if ( f)  { delete f; nf=f=0; }
-   for (ICffincludedir k=lex->ffincludedir.begin();
-        k!=lex->ffincludedir.end();
-        ++k)
-   {
-    string dif_ff(*k+ff);
-    if (verbosity>=50) lex->cout  << "  --lex open :" << dif_ff << endl;
-    nf=f= new ifstream(dif_ff.c_str(),ios_base::binary); 
-    if ( f)  {
-      if ( f->good()) {  
-        filename = new string(dif_ff);
-        break;
-      }
-      delete f; nf=f=0;
-     }     
-   } 
-   } 
-   else
-      filename=new  string(ff);
-  if (!f || !*f) {
-    lex->cout << " Error openning file " <<ff<< " in: " <<endl;
+
+      // for every potential path element
       for (ICffincludedir k=lex->ffincludedir.begin();
 	   k!=lex->ffincludedir.end();
 	   ++k)
-	  lex->cout  << "  -- try  :\"" << *k+ff  << "\"\n";
+	{
+	  string dif_ff(*k+ff);
+	  if (verbosity>=50) lex->cout  << "  --lex open :" << dif_ff << endl;
+	  nf=f= new ifstream(dif_ff.c_str(),ios_base::binary); 
+	  if ( f)  {
 
-    lgerror("lex: Error input openning file ");};
+	    // If path works, set [[file:lex.hpp::filename]] and close test stream
+	    if ( f->good()) {  
+	      filename = new string(dif_ff);
+	      break;
+	    }
+      delete f; nf=f=0;
+	  }     
+	} 
+    } 
+  else
+    filename=new string(ff);
+
+  // Error message if no path was right
+  if (!f || !*f) {
+    lex->cout << " Error openning file " <<ff<< " in: " <<endl;
+    for (ICffincludedir k=lex->ffincludedir.begin();
+	 k!=lex->ffincludedir.end();
+	 ++k)
+      lex->cout  << "  -- try  :\"" << *k+ff  << "\"\n";
+
+    lgerror("lex: Error input openning file ");
+  }
 }
-void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int macroargs)//,int nbparam,int bstackparam)
+
+void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int macroargs)
 {
   filename=name;
   macroarg=macroargs;
@@ -774,15 +821,22 @@ void  mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int ma
     lex->cout << " Error readin string  :" <<s<< endl;
     if(f) delete f;
     nf = f =0;
-    lgerror("lex: Error readin macro ");};
+    lgerror("lex: Error readin macro ");
+  }
 }
 
 void mylex::xxxx::close() 
 { 
-  if( nf)  delete nf;
-  if (filename && (macroarg==0) ) delete filename;
+  // ALH_BUG Why does this segfault under Windows? Probably needs valgrind to find out.
+#if !defined(ENABLE_FFCS) || !defined(WIN32)
+  if(nf) delete nf;
+#endif
+  if(filename && (macroarg==0)) delete filename; // [[file:lex.hpp::filename]]
   f=nf=0;
 }
+
+// <<mylex_input_filename>>
+
 void mylex::input(const char *  filename) 
 {
   ffassert(level<99 && level >= -1);
@@ -795,6 +849,8 @@ void mylex::input(const char *  filename)
   linenumber = 1;     
   level++;      
 }
+
+// <<mylex_input_string>>
 
 void mylex::input(const string & str,const string * name) 
 {
@@ -815,7 +871,7 @@ bool mylex::close() {
     cout << "\n close " << level ;
   ffassert(level >=0 && level < 100);
   // cout << "\n-- close " << level << endl;
-  pilesource[level].close(); 
+  pilesource[level].close(); // [[mylex::xxxx::close]]
   // cout << "\n ++   " << level << endl;
   if (--level<0)
     return false;

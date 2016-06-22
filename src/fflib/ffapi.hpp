@@ -54,7 +54,7 @@ namespace ffapi{
   // Getting a pointer to FF stdin and stdout enables extra DLLs to use standard IO even when they are redirected (eg
   // through FFCS).
 
-  void init (); // init def all pointeur
+  void init (); // <<init>> def all pointeur [[file:ffapi.cpp::init]]
   // need #include <iostream>
   // need #include <sstream>
   // need using namespace std;

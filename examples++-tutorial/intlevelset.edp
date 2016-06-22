@@ -24,6 +24,9 @@ cout << " len of the level set (varf bilinear same) = " <<  (lc=vv.sum)  << "=  
 cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;; 
 if( abs(lc-2*pi) > 1e-1) err++;
 
+// FFCS regression test
+real ffcsreg;
+
 //  just for test a idea approximation of int of negative part of levelset 
 //   to we just change the mesure of the element not the quadrature point 
 { // test new stuff for level set  ... 
@@ -44,6 +47,9 @@ if( abs(lc-2*pi) > 1e-1) err++;
   xx= XX*yy;
   cout << " XX.sum = " << xx.sum << " == " << area1 << endl;
   assert(abs(area1-xx.sum) < 1e-8); 
+
+  // FFCS regression tests
+  ffcsreg=abs(area1-xx.sum);
 }
 
 

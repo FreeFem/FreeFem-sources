@@ -130,7 +130,7 @@ const   R3 TetHat[4]= { R3(0.,0.,0.),R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.) } ;
 // --------
 #include "Label.hpp"
 
-  
+  // <<TVertex>>
 template<class Rd>
 class TVertex : public Rd,public Label {
  friend class Mesh;
