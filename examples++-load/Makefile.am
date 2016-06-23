@@ -164,9 +164,10 @@ all-local: all.edp regtests.edp load_compile
 # configuration step
 
 all.edp:
-	@(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
+	@test -f ../src/bin-win32/FreeFem++.exe && ffpp=../src/bin-win32/FreeFem++.exe || ffpp=../src/nw/FreeFem++; \
+	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
-	    if ../src/nw/FreeFem++ -ns -jc -v 0 $$i  1>/dev/null 2>/dev/null ; then \
+	    if $$ffpp -ns -jc -v 0 $$i  1>/dev/null 2>/dev/null ; then \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\
@@ -174,6 +175,7 @@ all.edp:
 	    else  \
 	        echo ' cout << "--------- error compile  file : '$$i' ---------------------------------------------" << endl;'; \
 	      fi; done) > $@
+	@awk '/error compile/ {print "Error freefem++ file ," $$6}' $@
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../regtests.m4
