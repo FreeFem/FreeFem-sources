@@ -561,17 +561,25 @@ CYGWIN*|MINGW*)
 		    if test -z "$ff_glut" ; then
 			ff_glutname="freeglut"
 			AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
+			
+			# -L/mingw64/lib -lfreeglut -lopengl32 -lwinmm -lgdi32 -lm
+		     if test -z "$ff_glut" ; then
+			   AC_CHECK_LIB(freeglut,abort,ff_glut="-L/mingw64/lib -lfreeglut -lopengl32 -lwinmm -lgdi32 -lm",ff_glut_ok=no)
+						# -L/mingw64/lib -lfreeglut -lopengl32 -lwinmm -lgdi32 -lm
+			
+		    fi
+			
 		    fi
 		fi
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(FFGLUTNAME,$ff_glutname)
 	        AC_SUBST(WINDRESOBJ,windres.o)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
-                AC_SUBST(WIN32DLLTARGET,win32-dll-target)
-		ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
-		ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
+            AC_SUBST(WIN32DLLTARGET,win32-dll-target)
+		    ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
+		    ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
 
-                AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
+            AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
 	fi
 
