@@ -89,7 +89,7 @@ int2d(Th) ( x*2*nu*Eps(u1,u2)'*Eps(v1,v2) - rdiv(v1,v2)*p -rdiv(u1,u2)*q)
  + int1d(Th,2) ( Kc*rfcourbure*[N.x,N.y]'*[v1,v2]) 
  - int2d(Th)( -x*rhog*v2)
 ;
-plot(rfcourbure,WindowIndex=1);
+//plot(rfcourbure,WindowIndex=1);
 fluxin = int1d(Th,1)(-u2);
 
 real[int,int] UU(2,nsl);
@@ -153,3 +153,4 @@ plot([u1,u2],p,bSL(lgc/meshsize),coef=dt,cmm=" temps " + temps+ " / " + dt + " /
  Y1= SL(1,0);
 Th= Bmesh;
 }
+cout << " End loop \n"; 
