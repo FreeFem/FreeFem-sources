@@ -60,20 +60,25 @@ complex[int] rhs(Wh.ndof);
     meshN ThAugmented = Th + ThBorder;
     ThBorder = Cube(CC, BB, LL);
     fespace WhAugmented(ThAugmented, Pk);
-    complex[int] rhsFull(WhAugmented.ndof);
     varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
         intN(ThAugmented)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
         - intN(ThAugmented)(k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
         - intN1(ThAugmented, Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
         + on(Dirichlet, Ex=0, Ey=0, Ez=0);
     Mat = vPb(WhAugmented, WhAugmented, solver=GMRES);
+    func f = exp(-((x-0.5)^2+(y-0.5)^2+(z-0.5)^2)*60);
     varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
-        - intN(ThAugmented)([vx,vy,vz]'*[0,0,1])
+        - intN(ThAugmented)([vx,vy,vz]'*[0,0,f])
         + on(Dirichlet, Ex=0,Ey=0,Ez=0);
-    rhsFull = vPbRhs(0, WhAugmented);
-    matrix R = interpolate(Wh, WhAugmented);
-    R.thresholding(1.0e-10);
-    renumbering(Mat, R, rhsFull, rhs);
+    if(mpisize > 1) {
+        complex[int] rhsFull(WhAugmented.ndof);
+        rhsFull = vPbRhs(0, WhAugmented);
+        matrix R = interpolate(Wh, WhAugmented);
+        R.thresholding(1.0e-10);
+        renumbering(Mat, R, rhsFull, rhs);
+    }
+    else
+        rhs = vPbRhs(0, WhAugmented);
 }
 
 zschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D, communicator = mpiCommWorld);
@@ -93,3 +98,6 @@ if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
     Opt = vPbOpt(Wh, Wh);
 }
 DDM(A, nEx, rhs, O = Opt);
+Wh<complex> def(sol);
+sol[] = nEx;
+medit("Global solution", Th, [real(sol), real(soly), real(solz)]);

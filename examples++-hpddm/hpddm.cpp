@@ -406,17 +406,19 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, MPI_COMM_WORLD);
     timer = MPI_Wtime() - timer;
     if(!excluded) {
-        if(rank == 0)
-            std::cout << scientific << " --- system solved (in " << timer << ")" << std::endl;
+        if(verbosity > 0 && rank == 0)
+            std::cout << std::scientific << " --- system solved (in " << timer << ")" << std::endl;
         HPDDM::underlying_type<K>* storage = new HPDDM::underlying_type<K>[2 * mu];
         ptA->computeError(*ptX, *ptRHS, storage, mu);
-        if(rank == 0) {
-            std::cout << scientific << " --- error = " << storage[1] << " / " << storage[0];
-            for(unsigned short nu = 1; nu < mu; ++nu)
-                std::cout << " (rhs #" << nu << ")" << std::endl << scientific << "             " << storage[2 * nu + 1] << " / " << storage[2 * nu];
+        char v = opt.val<char>("verbosity", 0);
+        if(v > 0 && rank == 0) {
+            std::cout << std::scientific << " --- error = " << storage[1] << " / " << storage[0];
             if(mu > 1)
-                std::cout << " (rhs #" << mu << ")";
-            std::cout << std::endl;
+                std::cout << " (rhs #1)\n";
+            else
+                std::cout << "\n";
+            for(unsigned short nu = (v > 2 ? 1 : v > 1 ? std::max(2, mu - 1) : mu); nu < mu; ++nu)
+                std::cout << std::scientific << "             " << storage[2 * nu + 1] << " / " << storage[2 * nu] << " (rhs #" << (nu + 1) << ")\n";
         }
         delete [] storage;
     }
