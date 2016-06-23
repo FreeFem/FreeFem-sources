@@ -47,11 +47,27 @@ f
 <p class="p1">Take the file form and download </p> 
 
     <? pfile($wfile,"Windows 32bits") ?>
-    <? pfile($w64file,"Windows 64bits (in test)") ?>
+    <? pfile($w64file,"Windows 64bits") ?>
  <p class="p1"> And  execute<span class="Apple-converted-space">  </span>and<span class="Apple-converted-space">  </span>follow the instruction<span class="s1">.</span></p>
+
 <p class="p2"><br></p>
 <p class="p2"><span class="Apple-converted-space"> </span></p>
-<p class="p3"><span class="s1">-- </span>How to compile FreeFem++ on Microsoft Windows (win32)</p>
+<p class="p3"><span class="s1">-- </span>How to compile FreeFem++ on Microsoft Windows 64 (for   <A HREF="#Version32"> version Windows 32 </A>) </p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span></span>F. Hecht<span class="Apple-converted-space">  </span>(Paris, June the 23th, 2016)<span class="Apple-converted-space"> </span></p>
+<p class="p3">---------------------------------------------</p>
+<p class="p3"><span class="s2">WARNING<span class="Apple-converted-space">  </span>NOW the window 64  version<span class="Apple-converted-space">  </span>is compiled under MSYS2 </span>for version<span class="Apple-converted-space">  </span>before version 3.47 , see <A NAME="version32"></A> </p>
+<p class="p4"><br></p>
+<p class="p3">typo remark: all line in <span class="s3">green</span><span class="Apple-converted-space">  </span>are shell command under mingw32 shell</p>
+<p class="p4"><br></p>
+<p class="p3">1. Download and install msys2 version x86_64 <span class="Apple-converted-space"> </span></p>
+<p class="p5"><span class="s4">form <a href="https://msys2.github.io">
+<span class="s5">https://msys2.github.io</span></a></span></p>
+<p class="p6">Answer question in following  windows : </p>
+
+
+<p class="p2"><br></p>
+<p class="p2"><span class="Apple-converted-space"> </span></p> 
+<p class="p3"><span class="s1">-- </span>How to compile FreeFem++ on Microsoft Windows (win32)</p>  <A NAME="Version32"></A>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span></span>F. Hecht<span class="Apple-converted-space">  </span>(Paris, Sept. the 4th, 2013)<span class="Apple-converted-space"> </span></p>
 <p class="p3">---------------------------------------------</p>
 <p class="p3"><span class="s2">WARNING<span class="Apple-converted-space">  </span>NOW the window version<span class="Apple-converted-space">  </span>is compiled under MINGW </span>for version<span class="Apple-converted-space">  </span>before version 3.20 , oct 7h 2012 , see the end of the file (obsolete now)</p>
