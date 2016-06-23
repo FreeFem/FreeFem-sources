@@ -558,18 +558,23 @@ CYGWIN*|MINGW*)
 		    AC_CHECK_LIB(glut32,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut="")
 		    if test -z "$ff_glut" ; then
 			ff_glutname="freeglut"
-			AC_CHECK_LIB(freeglut,abort,ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32",ff_glut_ok=no)
+			if test -x  /usr/bin/pkg-config.exe ; then
+			ff_glut="-lglu32 "`/usr/bin/pkg-config.exe --libs freeglut`
+			else
+			ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
+			fi
+			AC_CHECK_LIB(freeglut,abort,ff_glut_ok=yes,ff_glut="")
 		    fi
 		fi
          	# Resources for FreeFem++-cs in Microsoft Windows format
 	        AC_SUBST(FFGLUTNAME,$ff_glutname)
 	        AC_SUBST(WINDRESOBJ,windres.o)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
-                AC_SUBST(WIN32DLLTARGET,win32-dll-target)
-		ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
-		ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
+            AC_SUBST(WIN32DLLTARGET,win32-dll-target)
+		    ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
+		    ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
 
-                AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
+            AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
 	fi
 
@@ -1223,14 +1228,16 @@ then
 
     # Specific BLAS library location for FreeBSD
     ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
-    #  zmach is in lapack
+    ff_dll_blas=`which  libopenblas.dll`
+    if [ -z "$ff_dll_blas" ] ; then  ff_dll_blas="no"; fi
+        #  zmach is in lapack
     # Trying  blas library
     # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
-    for iblas in \
+    for iblas in "$ff_dll_blas" \
 	"-framework Accelerate" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
 	$ff_freebsd_blas
     do
-	if test "$ff_blas_ok" = no;
+	if test "$ff_blas_ok" = no -a "$iblas" != "no" 
 	then
             AC_MSG_CHECKING(for daxpy_ in $iblas)
             ff_save_libs="$LIBS"
@@ -1391,7 +1398,7 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 	if test "$ff_lapack_ok" = no ; then
 	    ff_save_libs=$LIBS
 	    LIBS="$ff_save_libs $ff_blas_libs"
-            AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], ff_lapack_ok=yes)
+            AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], [ff_lapack_ok=yes;ff_lapack_lib="$ff_blas_libs"])
 	    if test "$ff_lapack_ok" = no ; then
 	    LIBS="$ff_save_libs -llapack $ff_blas_libs"
             AC_LINK_IFELSE( [AC_LANG_CALL(,dgeqr2_)], [ff_lapack_ok=yes
