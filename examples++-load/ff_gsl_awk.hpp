@@ -518,7 +518,7 @@ double gsl_sf_legendre_Q1__(double const & x ) { return gsl_sf_legendre_Q1( (con
 double gsl_sf_legendre_Ql__(long const & x , double const & y ){ return gsl_sf_legendre_Ql( (const int) x , (const double) y );}
 double gsl_sf_legendre_Plm__(long const & x , long const & y , double const & z ){ return gsl_sf_legendre_Plm( (const int) x , (const int) y , (const double) z );}
 double gsl_sf_legendre_sphPlm__(long const & x , long const & y , double const & z ){ return gsl_sf_legendre_sphPlm( (const int) x , (const int) y , (const double) z );}
-long gsl_sf_legendre_array_size__(long const & x , long const & y ){ return gsl_sf_legendre_array_size( (const int) x , (const int) y );}
+//long gsl_sf_legendre_array_size__(long const & x , long const & y ){ return gsl_sf_legendre_array_size( (const int) x , (const int) y );}
 double gsl_sf_conicalP_half__(double const & x , double const & y ){ return gsl_sf_conicalP_half( (const double) x , (const double) y );}
 double gsl_sf_conicalP_mhalf__(double const & x , double const & y ){ return gsl_sf_conicalP_mhalf( (const double) x , (const double) y );}
 double gsl_sf_conicalP_0__(double const & x , double const & y ){ return gsl_sf_conicalP_0( (const double) x , (const double) y );}
@@ -866,7 +866,7 @@ double gsl_sf_eta__(double const & x ) { return gsl_sf_eta( (const double) x );}
    Global.Add("gslsflegendreQl","(",new OneOperator2_<double,long,double>( gsl_sf_legendre_Ql__)); 
    Global.Add("gslsflegendrePlm","(",new OneOperator3_<double,long,long,double>( gsl_sf_legendre_Plm__)); 
    Global.Add("gslsflegendresphPlm","(",new OneOperator3_<double,long,long,double>( gsl_sf_legendre_sphPlm__)); 
-   Global.Add("gslsflegendrearraysize","(",new OneOperator2_<long,long,long>( gsl_sf_legendre_array_size__)); 
+  // Global.Add("gslsflegendrearraysize","(",new OneOperator2_<long,long,long>( gsl_sf_legendre_array_size__));
    Global.Add("gslsfconicalPhalf","(",new OneOperator2_<double,double,double>( gsl_sf_conicalP_half__)); 
    Global.Add("gslsfconicalPmhalf","(",new OneOperator2_<double,double,double>( gsl_sf_conicalP_mhalf__)); 
    Global.Add("gslsfconicalP0","(",new OneOperator2_<double,double,double>( gsl_sf_conicalP_0__)); 
