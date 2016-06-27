@@ -169,9 +169,9 @@ class MyMap {
   V &  v= i->second ;  
   return v;
 }
-  ~MyMap(){delete m;/*cout << "MyMap:: delete "<< m << endl;*/m=0;}
-    void destroy(){delete m;m=0;}
-    void init() { m=new MAP; }
+    ~MyMap(){if(verbosity>99999)cout << " ~MyMap:: delete "<< m << endl; delete m;m=0;}
+    void destroy(){if(verbosity>99999) cout << " MyMap:: destroy "<< m << endl;delete m;m=0;}
+    void init() {  m=new MAP; if(verbosity>99999) cout << " MyMap:: int  "<< m << endl; }
   private:
     MyMap(const MyMap &M):m(new map<K,V>(*M.m)) {}
 public:
