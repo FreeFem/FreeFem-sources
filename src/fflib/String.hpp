@@ -42,43 +42,47 @@ string * toString(const T& a)
 }
 
 */
-// 
+//  to be sure new and delele be in see dll for windows
+ string  *newstring(const string & c);
+ string  *newstring(const char * c);
+ void freestring(const string * c);
+//fh June 2016 ....  Hard bug 
 inline string * toString(const double& a)
 {
   char buf[30];
   sprintf(buf,"%g",a);
- return new string(buf);
+ return newstring(buf);
 }
 inline string * toString(const long& a)
 {
   char buf[30];
   sprintf(buf,"%ld",a);
-  return new string(buf);
+  return newstring(buf);
 }
 inline string * toString(const bool& a)
 {
-  return new string(a?"T":"F");
+  return newstring(a?"T":"F");
 }
 inline string * toString(const complex<double> & a)
 {
   char buf[60];
   sprintf(buf,"%g%+gi",a.real(),a.imag());
-  return new string(buf);
+  return newstring(buf);
 }
 
 
 inline string * toStringCconst(const char * const &a)
-{ return new string(a);
+{ return newstring(a);
 }
 inline string * toStringC( char * const &a)
-{ return new string(a);
+{ return newstring(a);
 }
 
 template<class T>
 string * PtoString(const  T * a)
 { ostringstream r;
   r << *a ENDS;
-  return new string(r.str());
+  return newstring(r.str());
 }
 
 template<class T>
@@ -96,18 +100,20 @@ AnyType toStringA(void *, const AnyType &a)
   return SetAny<string *>(new string(r.str()));
 }
 
-class String {  
+class String {
+  
   string  * p;
-  public: 
+  public:
+
 //  String( string & pp) : p(&pp) {}
   String() : p(new string()) {/*cout << "String" << p <<","<<  *p << endl;*/}
   void init() { p= new string();} // Add FH march 2010 
 void destroy() { delete p;p=0;} // Add FH march 2010 
 //  String( string * c) : p(c) {cout << "String" << p <<","<< *p << endl;} 
-  String(const String & c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 
-  String(const string & c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/} 
-  String(const string * c) : p(new string(*c)) {/*cout << "String" << p <<","<< *p << endl;*/}
-  String(const char *  c) : p(new string(c)) {/*cout << "String" << p <<","<< *p << endl;*/}
+  String(const String & c) : p(newstring(*c.p)) {/*cout << "String" << p <<","<< *p << endl;*/}
+  String(const string & c) : p(newstring(c)) {/*cout << "String" << p <<","<< *p << endl;*/}
+  String(const string * c) : p(newstring(*c)) {/*cout << "String" << p <<","<< *p << endl;*/}
+  String(const char *  c) : p(newstring(c)) {/*cout << "String" << p <<","<< *p << endl;*/}
   String(const long & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const double & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const bool & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
