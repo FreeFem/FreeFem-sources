@@ -271,15 +271,15 @@ struct set_eq_div: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a /= b; return a;}
 };
 
-template<class A>
-struct set_peq: public binary_function<A**,A*,A**> {
-  static A** f(A** const  & a, A * const & b)  { 
+
+struct set_peqstring: public binary_function<string**,string*,string**> {
+  static string** f(string** const  & a, string * const & b)  {
     if(*a != b )
     { 
 	//cerr << " set_peq " << *a << endl;
-	delete *a;
+	freestring(*a);
 	//cerr << " set_peq " << *a << " " << " = " << b << " " <<  endl;
-	*a = new A(*b); //(stack ptr) FH mars 2006
+	*a = newstring(*b); //(stack ptr) FH mars 2006
 	//cerr << " set_peq " << *a << " " << **a << " = " << *b << " " << b <<  endl;
     }
      return a;}

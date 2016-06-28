@@ -121,11 +121,15 @@ template<typename T>   AnyTypeWithCheck SetAny(const T & x)
 	memcpy(&any,&x,sizeof(x));
 	return any;
   }
-  
+template<typename T>   AnyTypeWithOutCheck inline SetPtrAny( T *  p)
+{
+    throwassert( (any.ktype=map_type[typeid(T*).name()]));
+    return p;
+}
 inline AnyTypeWithCheck PtrtoAny(void * p,aType r)
   {
 	AnyTypeWithCheck any;
-    any=p;
+        any=p;
 	throwassert(any.ktype=r);    
 	return any;
   }
@@ -143,7 +147,10 @@ inline AnyTypeWithCheck PtrtoAny(void * p,aType r)
     //any = *(  (AnyTypeWithOutCheck *) (void *) &x); 
    return any;
   }
-  
+template<typename T>   AnyTypeWithOutCheck inline SetPtrAny( T *  p)
+{
+    return p;
+}
 inline AnyTypeWithOutCheck PtrtoAny(void * p,aType )
   {
     return p;

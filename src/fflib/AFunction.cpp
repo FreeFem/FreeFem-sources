@@ -1293,7 +1293,7 @@ void Init_map_type()
        new OneBinaryOperator<set_eq<long> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq<double> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq<Complex> ,OneBinaryOperatorMIWO>,
-       new OneBinaryOperator<set_peq<string> ,OneBinaryOperatorMIWO>  // FH string * mars 2006 
+       new OneBinaryOperator<set_peqstring ,OneBinaryOperatorMIWO>  // FH string * mars 2006 
        ); 
 
      TheOperators->Add("?:",
@@ -2053,8 +2053,10 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
 	return C_F0(TheOperators,"[]",v);
     
 }
-
-
+//  to be sure new and delele be in see dll for windows
+string  *newstring(const string & c){return new string(c);}
+string  *newstring(const char * c){return new string(c);}
+void   freestring(const string * c){ delete c;}
 
 
 

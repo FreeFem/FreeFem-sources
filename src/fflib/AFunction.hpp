@@ -781,7 +781,7 @@ template<class A>
   AnyType UnRefCopyPtr(Stack s,const AnyType &a) { 
     A ** ppa=PGetAny<A*>(a);
     A * pc = new A(**ppa);
-    return   SetAny<A*>(Add2StackOfPtr2Free(s,pc)) ;} 
+    return   SetPtrAny(Add2StackOfPtr2Free(s,pc)) ;}
        
     
 template<class A> AnyType Initialize(Stack,const AnyType &x){
@@ -789,7 +789,7 @@ template<class A> AnyType Initialize(Stack,const AnyType &x){
   A *b=new A;// 
   memcpy(a,b,sizeof(A));// bitcopy
   ::operator delete(b); // delete with no destruction 
-  return  SetAny<A*>(a);
+  return  SetPtrAny(a);
 }
 
 template<class A> AnyType InitializePtr(Stack stack,const AnyType &x){
@@ -873,7 +873,7 @@ template<class A> AnyType Initialize(Stack,const AnyType &x,const AnyType &y){
  A *b=new A(GetAny<A>(x));// 
   memcpy(a,b,sizeof(A));// bitcopy
   ::operator delete(b); // delete with no destruction 
-  return  SetAny<A*>(a);
+  return  PtrtoAny(a);
 }
  
 
