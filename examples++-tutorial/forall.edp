@@ -14,7 +14,7 @@ ss["1"]= 1;
 ss["2"]= 2;
 ss["3"]= 5;
 for [i,bi : ss] 
-    bi=i+6+"-dddd"; 
+    ss[i]=bi+i+6+"-dddd"; 
 cout <<" ss = "<< ss << endl;
 int[string] si;
 si[1]=2;
