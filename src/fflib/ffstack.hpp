@@ -279,6 +279,30 @@ private:
  friend  TT * Add2StackOfPtr2Free(Stack s,TT * p);
    
 };
+
+extern void freestring(const string *);
+
+template<>
+struct NewInStack<string> : public BaseNewInStack   {
+    typedef string T;
+    T * p;
+    bool array;
+    ~NewInStack() {
+        // cout << "~NewInStack " << typeid(T).name() << " " << p << "  array " << array << " " << this << "\n";
+        if(p)
+            freestring(p);}
+private:
+    NewInStack(T * pp,bool aa=false) : p(pp),array(aa) {
+        //  cout << "NewInStack " << typeid(T).name() << " "  << p << "  array " << aa << " " << this << "\n";
+    }
+    
+    
+    template<class TT>
+    friend  TT * Add2StackOfPtr2FreeA(Stack s,TT * p);
+    template<class TT>
+    friend  TT * Add2StackOfPtr2Free(Stack s,TT * p);
+    
+};
 // ajout of 2 class NewRefCountInStack and NewArrayInStack
 //  for clean of meshes 
 

@@ -50,7 +50,7 @@ string ** get_replace(string ** pp,long i,long j, string *rr)
       string  s=**pp; // copy modif for windows pb free 
       s.replace(i,j,*rr); 
       delete *pp;
-      *pp = new string(s);
+      *pp = newstring(s);
       return pp;
     } 
 // a( : ) = "sqsd";
@@ -113,7 +113,7 @@ template<bool B>
  {  return sf.find(s,i); }
 string *  TOString(SubString const  & a)
 {
-    return new string(a.s->substr(a.i,a.n));
+    return newstring(a.s->substr(a.i,a.n));
 }
 istream* getlinep( istream* f, string ** s)
  {

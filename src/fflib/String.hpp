@@ -43,6 +43,7 @@ string * toString(const T& a)
 
 */
 //  to be sure new and delele be in see dll for windows
+ string  *newstring();
  string  *newstring(const string & c);
  string  *newstring(const char * c);
  void freestring(const string * c);
@@ -90,14 +91,14 @@ AnyType PtoStringA(void *, const AnyType &a)
 { 
   ostringstream r;
   r << *GetAny<T*>(a) ENDS ;
-  return SetAny<string *>(new string(r.str()));
+  return SetAny<string *>(newstring(r.str()));
 }
 template<class T>
 AnyType toStringA(void *, const AnyType &a)
 { 
   ostringstream r;
   r << GetAny<T>(a) ENDS ;
-  return SetAny<string *>(new string(r.str()));
+  return SetAny<string *>(newstring(r.str()));
 }
 
 class String {
@@ -106,9 +107,9 @@ class String {
   public:
 
 //  String( string & pp) : p(&pp) {}
-  String() : p(new string()) {/*cout << "String" << p <<","<<  *p << endl;*/}
-  void init() { p= new string();} // Add FH march 2010 
-void destroy() { delete p;p=0;} // Add FH march 2010 
+  String() : p(newstring()) {/*cout << "String" << p <<","<<  *p << endl;*/}
+  void init() { p= newstring();} // Add FH march 2010
+void destroy() { freestring(p);p=0;} // Add FH march 2010
 //  String( string * c) : p(c) {cout << "String" << p <<","<< *p << endl;} 
   String(const String & c) : p(newstring(*c.p)) {/*cout << "String" << p <<","<< *p << endl;*/}
   String(const string & c) : p(newstring(c)) {/*cout << "String" << p <<","<< *p << endl;*/}
@@ -119,9 +120,9 @@ void destroy() { delete p;p=0;} // Add FH march 2010
   String(const bool & c) : p(toString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const  long * c) : p(PtoString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String(const double * c) : p(PtoString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
-  String & operator=(const String & s){delete p;p=new string(s);return *this;}
-  String  operator+(const String & s)const {return String(new string(*p+*s.p));} 
-  ~String(){/* cout << "~String" << p << *p << endl;*/ delete p; p=0;}
+  String & operator=(const String & s){ freestring(p);p=newstring(s);return *this;}
+  String  operator+(const String & s)const {return String(newstring(*p+*s.p));} 
+  ~String(){/* cout << "~String" << p << *p << endl;*/  freestring(p); p=0;}
    operator const string & () const {return *p;}
    operator  string & ()  {return *p;}
    operator  const string * ()  const {return p;}

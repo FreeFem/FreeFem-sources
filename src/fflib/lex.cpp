@@ -679,7 +679,7 @@ bool mylex::CallMacro(int &ret)
       if (j != i->end()) {
 	// int inmacroold=withmacropara;
 	  if(debugmacro) cout <<"call macro : " << buf << endl;
-	  string * macronn= new string(" macro: ");
+	  string * macronn= newstring(" macro: ");
 	  *macronn+= buf;
 	  
 	const deque<string>  & macroparm= j->second;
@@ -788,7 +788,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 
 	    // If path works, set [[file:lex.hpp::filename]] and close test stream
 	    if ( f->good()) {  
-	      filename = new string(dif_ff);
+	      filename = newstring(dif_ff);
 	      break;
 	    }
       delete f; nf=f=0;
@@ -796,7 +796,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 	} 
     } 
   else
-    filename=new string(ff);
+    filename=newstring(ff);
 
   // Error message if no path was right
   if (!f || !*f) {
