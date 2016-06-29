@@ -226,7 +226,7 @@ template<class RR> RR LDecremantation(RR* a){ return --(*a);}
 template<class RR> RR RDecremantation(RR* a){ return (*a)--;}
 
 template<class RR,class B>
- RR * New_form_string(string * s) {B * r=  new B(s);delete s;return r;}// correct Mars 2011 remove * if delete
+ RR * New_form_string(string * s) {B * r=  new B(s);freestring(s);return r;}// correct Mars 2011 remove * if delete
  
  
 
@@ -919,7 +919,7 @@ struct evalE_mul {
 };
 istream *Getline(istream * f, string ** s)
 {
-    if( *s==0) *s=new string;
+    if( *s==0) *s=newstring();
     getline(*f,**s);
     size_t l = (**s).length();
     if( l > 0 && ((**s)[l-1]=='\r')) (**s).resize(l-1); //
@@ -986,42 +986,70 @@ class E_ForAllLoopMapSS
     
     typedef MyMap<K,V>  *Tab;
     typedef   MyMap<K,V>::iterator TabI ;
-
+    
     typedef  ForAllLoopOpBase DataL;
     const DataL *data;
     E_ForAllLoopMapSS(const DataL *t): data(t){}
     AnyType f(Stack s) const {
+        TabI  ii;
         Tab t= GetAny<Tab >(data->tab(s));
         
-         KK * i   =   GetAny<KK* >(data->i(s));
-         VV * v   =   GetAny<VV* >(data->v(s));
+        KK * i   =   GetAny<KK* >(data->i(s));
+        VV * v   =   GetAny<VV* >(data->v(s));
         if(verbosity>1000) {
-        //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
-                cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
-        cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
+            //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
+            cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
+            cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
             cout << endl;}
         
         
         ffassert(i && v);
         if(t->m)
-        for (TabI ii=t->m->begin();ii != t->m->end();++ii)
+            ii=t->m->begin();
+        bool ok = true;
+        while(ok)
         {
-            String  kk = ii->first;
-            String  vv = ii->second;
+            if(verbosity>99999) cout << " new n";
+            TabI iip=ii++;
+            ok = ii != t->m->end();
+            String  kk = iip->first;
+            String  vv = iip->second;
+            const string * pvo=iip->second;
             
             *i =  kk;
             *v =  vv;
-           // for  Windows otherwise trap ???? FH. march 2016 
-            if(verbosity>99999) cout << " " << i << " "<< v  << " "  << kk << " " <<  vv << endl;
-
-            data->code(s);
+            const string * pv =*v;
+            // for  Windows otherwise trap ???? FH. march 2016
+            if(verbosity>99999) cout << "  b:" << i << " "<< v  << " "  << kk << " " <<  vv << endl;
             
-            ii->second  = **v;
+            data->code(s);
+            if(verbosity>99999) cout << "  a:" << i << " "<< v  << " "  << kk << " " <<  **v << endl;
+            if( pvo  == (const string *) iip->second) // no  change m[i]=
+            {if( *v != pv ) //  v change
+                iip->second  = **v;
+            }
+            else if( *v != pv )
+            {//  v change
+                cerr << " Erreur forall change m[i] and mi (stupide please choosse) \n";
+                ffassert(0);
+            }
+            if(verbosity>99999) cout << " A;" << i << " "<< v  << " "  << kk << " " <<  vv << " ok =" << ok << endl;
+            
             *i=0;
             *v=0;
+            if(verbosity>99999)
+            {
+                cout << " 0:" << i << " "<< v  << " "  << kk << " " <<  vv << endl;
+                for (TabI iii=t->m->begin();iii!= t->m->end();++iii)
+                    cout << " map =" << iii->first << " -> " << iii->second << endl;
+                cout << " end of map " << endl;
+            }           
+            // ii=iinext;//  
             
         }
+        if(verbosity>99999) cout << "befor end \n";
         data->end(s);
+        if(verbosity>99999) cout <<"afert end \n";
         return Nothing  ;
     }
     
@@ -2054,6 +2082,7 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     
 }
 //  to be sure new and delele be in see dll for windows
+string  *newstring(){return new string();}
 string  *newstring(const string & c){return new string(c);}
 string  *newstring(const char * c){return new string(c);}
 void   freestring(const string * c){ delete c;}

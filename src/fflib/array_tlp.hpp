@@ -199,7 +199,7 @@ inline   bool exist_element( MyMap<String,K> *  const  &  a,string*  const   & b
 template<>
 inline   string ** get_element<string*>( MyMap<String,string*> *  const  &  a,string*  const   & b)
  { string** ret=  &((*a)[*b]); // correction FH feb 2004
-    if( *ret ==0) *ret = new string(""); //  string vide ???
+    if( *ret ==0) *ret = newstring(""); //  string vide ???
      // cout << "get_element " << *b << " : " << ret << " = "<< * ret << endl;
     // delete b;  modif mars 2006 auto del ptr
     return ret;}

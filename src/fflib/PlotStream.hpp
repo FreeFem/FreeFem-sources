@@ -172,7 +172,7 @@ public:
   PlotStream & operator >> ( complex<double>& b)    { return read(b); }
   PlotStream & operator >> ( string& s)    { return read(s); }
   PlotStream & operator >> ( string *& s) 
-  { if(!s) s= new string; return read(*s);
+  { if(!s) s= new string(); return read(*s);
     // cout << " fread string " << s <<endl;
   }
   
