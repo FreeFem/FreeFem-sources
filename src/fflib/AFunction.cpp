@@ -2082,10 +2082,17 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     
 }
 //  to be sure new and delele be in see dll for windows
-string  *newstring(){return new string();}
-string  *newstring(const string & c){return new string(c);}
-string  *newstring(const char * c){return new string(c);}
-void   freestring(const string * c){ delete c;}
+string  *newstring(){if(verbosity>999999) cout << "newstring()\n";
+      return new string();}
+string  *newstring(const string & c){
+    if(verbosity>999999) cout << "newstring((string) "<< c <<") \n";
+   return new string(c);}
+string  *newstring(const char * c){
+    if(verbosity>999999) cout << "newstring((char*)  "<< c <<") \n";
+    return new string(c);}
+void   freestring(const string * c){
+    if(verbosity>999999) cout << "freestring(  "<< *c <<") \n";
+    delete c;}
 
 
 

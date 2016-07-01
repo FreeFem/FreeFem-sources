@@ -468,6 +468,7 @@ int ShowAlloc(const char *s,size_t & lg)
 #include <cerrno>
 #include <cstdio>
 #include <new>
+#include <iostream>
 
 long  CheckPtr___nbptr=0;
 size_t CheckPtr___memoryusage =0;
@@ -475,6 +476,9 @@ size_t CheckPtr___memoryusage =0;
 void* operator new( size_t size ) throw(std::bad_alloc) {
     CheckPtr___nbptr++;
     void *p = malloc( size );
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: new " << CheckPtr___nbptr << " " << size
+                  << " p =" << p <<std::endl;
     
     return p;
 }
@@ -482,16 +486,24 @@ void* operator new( size_t size ) throw(std::bad_alloc) {
 void* operator new[]( size_t size ) throw(std::bad_alloc) {  
     void *p = malloc(size);
      CheckPtr___nbptr++;
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: new[] " << CheckPtr___nbptr << " " << size << " p =" << p <<std::endl;
     return p;
 }
 
 void operator delete( void *p ) throw() {  
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: free " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
+
     free(p);
+    
     CheckPtr___nbptr--;
 
 }
 
 void operator delete[]( void *p ) throw() {
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: free " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
     free(p);
     CheckPtr___nbptr--;
 
