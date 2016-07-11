@@ -110,64 +110,65 @@ include 'phpfiles.php';
   <li class="li13"><span class="s11"></span><span class="s12"><span class="Apple-converted-space">    </span></span><span class="s13">pacman -Syu</span><span class="s14">,</span></li>
   <li class="li12"><span class="s1">ignore all errors and close the window and open a new one, this is not recommended and you should do what the wiki page says).</span></li>
   <li class="li12"><span class="s1">Install<span class="Apple-converted-space">  </span>all this tools : <br>
-</span><span class="s15">pacman -S autoconf</span></li>
-  <li class="li14"><span class="s1">pacman -S automake-wrapper</span></li>
-  <li class="li14"><span class="s1">pacman -S bash</span></li>
-  <li class="li14"><span class="s1">pacman -S bash-completion</span></li>
-  <li class="li14"><span class="s1">pacman -S bison</span></li>
-  <li class="li14"><span class="s1">pacman -S bsdcpio</span></li>
-  <li class="li14"><span class="s1">pacman -S bsdtar</span></li>
-  <li class="li14"><span class="s1">pacman -S bzip2</span></li>
-  <li class="li14"><span class="s1">pacman -S catgets</span></li>
-  <li class="li14"><span class="s1">pacman -S coreutils</span></li>
-  <li class="li14"><span class="s1">pacman -S crypt</span></li>
-  <li class="li14"><span class="s1">pacman -S curl</span></li>
-  <li class="li14"><span class="s1">pacman -S dash</span></li>
-  <li class="li14"><span class="s1">pacman -S file</span></li>
-  <li class="li14"><span class="s1">pacman -S filesystem</span></li>
-  <li class="li14"><span class="s1">pacman -S findutils</span></li>
-  <li class="li14"><span class="s1">pacman -S flex</span></li>
-  <li class="li14"><span class="s1">pacman -S gawk</span></li>
-  <li class="li14"><span class="s1">pacman -S gcc-libs</span></li>
-  <li class="li14"><span class="s1">pacman -S grep</span></li>
-  <li class="li14"><span class="s1">pacman -S gzip</span></li>
-  <li class="li14"><span class="s1">pacman -S inetutils</span></li>
-  <li class="li14"><span class="s1">pacman -S info</span></li>
-  <li class="li14"><span class="s1">pacman -S less</span></li>
-  <li class="li14"><span class="s1">pacman -S lndir</span></li>
-  <li class="li14"><span class="s1">pacman -S make</span></li>
-  <li class="li14"><span class="s1">pacman -S man-db</span></li>
-  <li class="li14"><span class="s1">pacman -S mercurial</span></li>
-  <li class="li14"><span class="s1">pacman -S mingw-w64-x86_64-freeglut</span></li>
-  <li class="li14"><span class="s1">pacman -S mingw-w64-x86_64-gcc</span></li>
-  <li class="li14"><span class="s1">pacman -S mingw-w64-x86_64-gcc-fortran</span></li>
-  <li class="li14"><span class="s1">pacman -S mingw-w64-x86_64-gsl</span></li>
-  <li class="li14"><span class="s1">pacman -S mingw-w64-x86_64-hdf5</span></li>
-  <li class="li14"><span class="s1">pacman -S mingw-w64-x86_64-openblas</span></li>
-  <li class="li14"><span class="s1">pacman -S mintty</span></li>
-  <li class="li14"><span class="s1">pacman -S msys2-keyring</span></li>
-  <li class="li14"><span class="s1">pacman -S msys2-launcher-git</span></li>
-  <li class="li14"><span class="s1">pacman -S msys2-runtime</span></li>
-  <li class="li14"><span class="s1">pacman -S ncurses</span></li>
-  <li class="li14"><span class="s1">pacman -S pacman</span></li>
-  <li class="li14"><span class="s1">pacman -S pacman-mirrors</span></li>
-  <li class="li14"><span class="s1">pacman -S pactoys-git</span></li>
-  <li class="li14"><span class="s1">pacman -S patch</span></li>
-  <li class="li14"><span class="s1">pacman -S pax-git</span></li>
-  <li class="li14"><span class="s1">pacman -S perl</span></li>
-  <li class="li14"><span class="s1">pacman -S pkg-config</span></li>
-  <li class="li14"><span class="s1">pacman -S pkgfile</span></li>
-  <li class="li14"><span class="s1">pacman -S rebase</span></li>
-  <li class="li14"><span class="s1">pacman -S sed</span></li>
-  <li class="li14"><span class="s1">pacman -S tar</span></li>
-  <li class="li14"><span class="s1">pacman -S tftp-hpa</span></li>
-  <li class="li14"><span class="s1">pacman -S time</span></li>
-  <li class="li14"><span class="s1">pacman -S tzcode</span></li>
-  <li class="li14"><span class="s1">pacman -S unzip</span></li>
-  <li class="li14"><span class="s1">pacman -S util-linux</span></li>
-  <li class="li14"><span class="s1">pacman -S which</span></li>
-  <li class="li15"><span class="s1"></span><br></li>
-  <li class="li16"><span class="s1"></span><br></li>
+</span><span class="s15">pacman -S autoconf</span><br>
+
+  <span class="s15">pacman -S automake-wrapper</span><br>
+  <span class="s15">pacman -S bash</span><br>
+  <span class="s15">pacman -S bash-completion</span><br>
+  <span class="s15">pacman -S bison</span><br>
+  <span class="s15">pacman -S bsdcpio</span><br>
+  <span class="s15">pacman -S bsdtar</span><br>
+  <span class="s15">pacman -S bzip2</span><br>
+  <span class="s15">pacman -S catgets</span><br>
+  <span class="s15">pacman -S coreutils</span><br>
+  <span class="s15">pacman -S crypt</span><br>
+  <span class="s15">pacman -S curl</span><br>
+  <span class="s15">pacman -S dash</span><br>
+  <span class="s15">pacman -S file</span><br>
+  <span class="s15">pacman -S filesystem</span><br>
+  <span class="s15">pacman -S findutils</span><br>
+  <span class="s15">pacman -S flex</span><br>
+  <span class="s15">pacman -S gawk</span><br>
+  <span class="s15">pacman -S gcc-libs</span><br>
+  <span class="s15">pacman -S grep</span><br>
+  <span class="s15">pacman -S gzip</span><br>
+  <span class="s15">pacman -S inetutils</span><br>
+  <span class="s15">pacman -S info</span><br>
+  <span class="s15">pacman -S less</span><br>
+  <span class="s15">pacman -S lndir</span><br>
+  <span class="s15">pacman -S make</span><br>
+  <span class="s15">pacman -S man-db</span><br>
+  <span class="s15">pacman -S mercurial</span><br>
+  <span class="s15">pacman -S mingw-w64-x86_64-freeglut</span><br>
+  <span class="s15">pacman -S mingw-w64-x86_64-gcc</span><br>
+  <span class="s15">pacman -S mingw-w64-x86_64-gcc-fortran</span><br>
+  <span class="s15">pacman -S mingw-w64-x86_64-gsl</span><br>
+  <span class="s15">pacman -S mingw-w64-x86_64-hdf5</span><br>
+  <span class="s15">pacman -S mingw-w64-x86_64-openblas</span><br>
+  <span class="s15">pacman -S mintty</span><br>
+  <span class="s15">pacman -S msys2-keyring</span><br>
+  <span class="s15">pacman -S msys2-launcher-git</span><br>
+  <span class="s15">pacman -S msys2-runtime</span><br>
+  <span class="s15">pacman -S ncurses</span><br>
+  <span class="s15">pacman -S pacman</span><br>
+  <span class="s15">pacman -S pacman-mirrors</span><br>
+  <span class="s15">pacman -S pactoys-git</span><br>
+  <span class="s15">pacman -S patch</span><br>
+  <span class="s15">pacman -S pax-git</span><br>
+  <span class="s15">pacman -S perl</span><br>
+  <span class="s15">pacman -S pkg-config</span><br>
+  <span class="s15">pacman -S pkgfile</span><br>
+  <span class="s15">pacman -S rebase</span><br>
+  <span class="s15">pacman -S sed</span><br>
+  <span class="s15">pacman -S tar</span><br>
+  <span class="s15">pacman -S tftp-hpa</span><br>
+  <span class="s15">pacman -S time</span><br>
+  <span class="s15">pacman -S tzcode</span><br>
+  <span class="s15">pacman -S unzip</span><br>
+  <span class="s15">pacman -S util-linux</span><br>
+  <span class="s15">pacman -S which</span><br>
+ <br><br>
+</li>
   <li class="li12"><span class="s1">install any libraries/tools you may need. You can search the repositories by doing<br>
 </span><span class="s15">pacman -Ss package_name_of_something_i_want_to_install</span></li>
   <li class="li12"></li>
