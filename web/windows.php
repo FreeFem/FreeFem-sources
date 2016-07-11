@@ -193,7 +193,9 @@ b) To build 64-bit things, open the "MinGW-w64 64-bit Shell"</span></li>
 <p class="p23"><span class="s1"><span class="Apple-tab-span">	</span>make check</span></p>
 <p class="p24"><span class="s1"></span><br></p>
 <p class="p24"><span class="s1"></span><br></p>
-<p class="p24"><span class="s1"></span><br></p>
+<p class="p22"><span class="s18"></span> Remark to see all dll use by file.dll file <br></p>
+  <span class="s15">objdump.exe -p file.dll | grep -i dll</span><br>
+
 <p class="p24"><span class="s1"></span><br></p>
 <p class="p25"><span class="s1"></span><br></p>
 <p class="p26"><span class="s2">-- </span><span class="s1"><b>How to compile FreeFem++ on Microsoft Windows (win32) under Mingw32<span class="Apple-converted-space"> </span></b></span></p>

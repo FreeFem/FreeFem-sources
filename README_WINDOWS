@@ -1,5 +1,6 @@
 How to compile FreeFem++ on Microsoft Windows
 ---------------------------------------------
+See the web page  http://www.freefem.org/ff++/windows.php
 
 WARNING NOW the window is compile under MINGW  (from version 3.11  14/01/2011 FH)
 
