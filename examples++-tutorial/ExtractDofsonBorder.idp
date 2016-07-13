@@ -16,7 +16,7 @@ mesh Th=Wh.Th;
 fespace VhExtractDofsonBorder(Th,P1);
 VhExtractDofsonBorder abslabs,onlon,atest;
 solve Pbabciss(abslabs,atest) 
-= int2d(Th,qft=qf1pTlump)(abslabs*atest*1e-10)
+= int2d(Th,qft=qf1pTlump)(abslabs*atest*1e-6)
   +  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs),dy(abslabs)]'*[-N.y,+N.x]*atest)
   -  int1d(Th,labs,qfe=qf1pElump)(orient*atest);
   real abslabsmax = 2*abslabs[].max;

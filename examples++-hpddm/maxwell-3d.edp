@@ -1,3 +1,6 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
 load "hpddm"                        // HPDDM plugin
 load "metis"                        // Metis partitioner
 load "scotch"                       // SCOTCH partitioner
