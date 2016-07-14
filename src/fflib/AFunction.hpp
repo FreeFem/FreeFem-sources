@@ -3047,7 +3047,7 @@ class E_exception : public exception { public:
   AnyType r; // for return 
   public:
   E_exception(CODE_exception c,AnyType rr=Nothing) : code(c),r(rr)  {}
-  const int type() {return code;}
+  int type() {return code;}
   virtual const char *  what() const throw() { return "E_exception (break,continue or return) "; }
   ~E_exception() throw() {}
 };
