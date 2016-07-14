@@ -98,14 +98,14 @@ map<MPI_Request*,DoOnWaitMPI_Request *> ToDoOnWaitMPI_Request;
 void GetPendingWait() ;
 
 
-template<class T> struct MPI_TYPE {static const MPI_Datatype  TYPE(){return MPI_BYTE;}};;
-template<> struct MPI_TYPE<long>      {static const MPI_Datatype  TYPE(){return MPI_LONG;}};
-template<> struct MPI_TYPE<int>      {static const MPI_Datatype TYPE(){return MPI_INT;}};
-template<> struct MPI_TYPE<double>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE;}};
-template<> struct MPI_TYPE<char>    {static const MPI_Datatype TYPE(){return MPI_BYTE;}};
+template<class T> struct MPI_TYPE {static MPI_Datatype  TYPE(){return MPI_BYTE;}};;
+template<> struct MPI_TYPE<long>      {static MPI_Datatype  TYPE(){return MPI_LONG;}};
+template<> struct MPI_TYPE<int>      {static MPI_Datatype TYPE(){return MPI_INT;}};
+template<> struct MPI_TYPE<double>    {static MPI_Datatype TYPE(){return MPI_DOUBLE;}};
+template<> struct MPI_TYPE<char>    {static MPI_Datatype TYPE(){return MPI_BYTE;}};
 
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
-template<> struct MPI_TYPE<Complex>   {static const MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
+template<> struct MPI_TYPE<Complex>   {static MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
 #endif
 template<class T> struct MPI_WHAT {};
 template<> struct MPI_WHAT<long>      {static const int WHAT=101;};
