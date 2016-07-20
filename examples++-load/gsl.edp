@@ -21,3 +21,41 @@ gslrng r=gslrngtype(1);// chose a generator
 for (int i = 0; i < 10; i++) 
    cout << gslrnguniform(r) << endl;;  
  
+ int n=10;
+ real[int,int] dspline(2,n+1);
+ for(int i=0; i<= n; ++i)
+  {
+    real xx = square(real(i)/n); 
+    real yy = sin(xx*pi*2); 
+    dspline(0,i)= xx;
+    dspline(1,i)= yy;    
+  }
+  /*
+ the 7  type of spline of gsl are 
+  0: gslinterpcspline (default .
+  1: gslinterpakima
+  2: gslinterpsteffen
+  3: gslinterplinear
+  4:  gslinterppolynomial
+  5: gslinterpcsplineperiodic
+  6:  gslinterpakimaperiodic 
+  */
+  gslspline spline(gslinterplinear,dspline);
+  int mm=100;
+ real[int] xx(mm+1),yy(mm+1),zz(mm+1),dyy(mm+1),ddyy(mm+1),dzz(mm+1),ddzz(mm+1);
+ real err=0; 
+ for (int i=0; i<=mm; ++i)
+ { xx[i]= real(i)/mm;
+   yy[i]= spline(xx[i]);
+   dyy[i]= spline.d(xx[i]);
+   ddyy[i]= spline.dd(xx[i]);
+   zz[i]= sin(pi*xx[i]*2);
+   dzz[i]= 2*pi*cos(pi*xx[i]*2);
+   ddzz[i]= -2*pi*2*pi*sin(pi*xx[i]*2);
+   err = max( err , abs(yy[i]-zz[i]));
+   cout << xx[i] << " " << yy[i] << "  ~ " << zz[i] << ",  " << dyy[i] << " ~ " << dzz [i] <<  " , " << ddyy[i] << " " << ddzz[i] <<  endl; 
+ }
+ 
+ cout << " err = " << err << endl; 
+ plot([xx,yy],[xx,zz],cmm= "err = " + err);
+ assert(err < 0.3);
