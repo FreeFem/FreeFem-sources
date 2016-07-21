@@ -55,7 +55,7 @@ struct  GSLInterpolation  {
     gsl_spline * spline ;
     double *xy;
     size_t n;
-    
+    const gsl_interp_type *splinetype;
     void init() {spline=0;acc=0;n=0,xy=0;}
     GSLInterpolation() :acc(0),spline(0),n(0),xy(0) {}
     void init(const KN_<double> & x,const KN_<double> & f,bool INIT=false,long cas=0)
@@ -65,6 +65,7 @@ struct  GSLInterpolation  {
         if(INIT) destroy();
         ffassert(x.N()==f.N());
         n = x.N();
+        splinetype=interp[cas];
         xy= new double[n*2];
         
         for(long k=0;k<n;++k)
@@ -72,13 +73,25 @@ struct  GSLInterpolation  {
             xy[k]=x[k];
             xy[k+n] = f[k];
         }
-        spline = gsl_spline_alloc (interp[cas], n);
- //       spline = gsl_spline_alloc (gsl_interp_cspline, n);
+        spline = gsl_spline_alloc (splinetype, n);
         gsl_spline_init (spline, xy,xy+n,n);
     }
     void init(const KNM_<double> & kxy,bool INIT=false,long cas=0)
     {
         init(kxy(0,':'),kxy(1,':'),INIT,cas);
+    }
+    void init(GSLInterpolation * g,bool INIT=false)
+    {
+        if(INIT) destroy();
+        n=g->n;
+        
+        xy= new double[n*2];
+        splinetype=g->splinetype;
+        for(int i=0; i< 2*n; ++i)
+            xy[i]= g->xy[i];
+        spline = gsl_spline_alloc (splinetype, n);
+        gsl_spline_init (spline, xy,xy+n,n);
+
     }
 
     double eval(double xi) { return gsl_spline_eval (spline, xi, acc);}
@@ -94,7 +107,9 @@ struct  GSLInterpolation  {
     }
 
     ~GSLInterpolation() {destroy();}
- 
+private: // no copy operator
+    GSLInterpolation(const GSLInterpolation  &);
+    void operator=(const GSLInterpolation  &);
 };
 struct dGSLInterpolation {
     GSLInterpolation * p;
@@ -129,6 +144,35 @@ GSLInterpolation * init_GSLInterpolation(GSLInterpolation *  const & gi,long con
     gi->init(a,b,true,cas );
     return gi;
 }
+
+GSLInterpolation * set_GSLInterpolation(GSLInterpolation * const & gi, KNM_<double>  const & a)
+{
+    gi->init(a,false);
+    return gi;
+}
+GSLInterpolation * set_GSLInterpolation(GSLInterpolation * const & gi,GSLInterpolation * const & gj)
+{
+    gi->init(gj,false);
+    return gi;
+}
+
+GSLInterpolation * set_GSLInterpolation(GSLInterpolation *  const & gi, KN_<double>  const &  a,KN_<double>  const &  b)
+{
+    gi->init(a,b,false);
+    return gi;
+}
+GSLInterpolation * set_GSLInterpolation(GSLInterpolation * const & gi,long const & cas , KNM_<double>  const & a)
+{
+    gi->init(a,false,cas);
+    return gi;
+}
+GSLInterpolation * set_GSLInterpolation(GSLInterpolation *  const & gi,long const & cas ,  KN_<double>  const &  a,KN_<double>  const &  b)
+{
+    gi->init(a,b,false,cas );
+    return gi;
+}
+
+
 double GSLInterpolationeval(GSLInterpolation *  gi,double x)
 {
     return gi->eval(x);
@@ -347,9 +391,12 @@ zzzfff->Add("gslspline",atype<GSLInterpolation * >());
     
 TheOperators->Add("<-",new OneOperator2<gsl_rng  **,gsl_rng  **, const gsl_rng_type *  >(init_gsl_rng_type));
 TheOperators->Add("<-",new OneOperator2_<GSLInterpolation *,GSLInterpolation *,KNM_<double> >(init_GSLInterpolation));
+TheOperators->Add("=",new OneOperator2_<GSLInterpolation *,GSLInterpolation *,KNM_<double> >(set_GSLInterpolation));
+TheOperators->Add("=",new OneOperator2_<GSLInterpolation *,GSLInterpolation *,GSLInterpolation *>(set_GSLInterpolation));
+    
 TheOperators->Add("<-",new OneOperator3_<GSLInterpolation *,GSLInterpolation *,KN_<double> ,KN_<double> >(init_GSLInterpolation));
-    TheOperators->Add("<-",new OneOperator3_<GSLInterpolation *,GSLInterpolation *,long, KNM_<double> >(init_GSLInterpolation));
-    TheOperators->Add("<-",new OneOperator4_<GSLInterpolation *,GSLInterpolation *,long,KN_<double> ,KN_<double> >(init_GSLInterpolation));
+TheOperators->Add("<-",new OneOperator3_<GSLInterpolation *,GSLInterpolation *,long, KNM_<double> >(init_GSLInterpolation));
+TheOperators->Add("<-",new OneOperator4_<GSLInterpolation *,GSLInterpolation *,long,KN_<double> ,KN_<double> >(init_GSLInterpolation));
 Add<GSLInterpolation * >("(","",new OneOperator2<double ,GSLInterpolation *,double >(GSLInterpolationeval));
 Add<GSLInterpolation * >("d",".",new OneOperator1<dGSLInterpolation  ,GSLInterpolation*>(dGSLInterpolationedef));
 Add<GSLInterpolation * >("dd",".",new OneOperator1<ddGSLInterpolation  ,GSLInterpolation*>(ddGSLInterpolationedef));
