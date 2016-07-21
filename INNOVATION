@@ -1,3 +1,5 @@
+ - add spline interface of gsl library in gsl plugin see
+   gsl.edp examples. 
 version 3.47 (1/june/2016) 
  - tools to build new FiniteElement2d and FiniteElement3d from quadrature formula
     
