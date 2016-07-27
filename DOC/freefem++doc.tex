@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.46}
+\def\VERSION{3.47}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -55,7 +55,7 @@
     \\  \large  \Blue{Third Edition,   Version \VERSION }
  \\ \vglue 0.7cm
   {\large \Blue{\url{http://www.freefem.org/ff++}}} \\ ~
- \\~� \\
+ \\~\\
 \includegraphics[width=6cm]{ffauteur}
 \vglue 1cm
 \includegraphics[width=15cm]{chesapeake-2}
@@ -338,7 +338,14 @@ based on GLUT/OpenGL (use ffglut visualization tool) or not just add \texttt{ -n
 \item \texttt{ffglut} the visualization tools  through a pipe of freefem++ (remark: {\it if ffglut is not in the system path,
 you will have no plot})
 \item \texttt{FreeFem++-nw}, postscript plot output only and  ffmedit (batch version, no graphics windows via \texttt{ffglut} )
-\item \texttt{FreeFem++-mpi}, parallel version, postscript output only 
+\item \texttt{FreeFem++-mpi}, parallel version, postscript output only, but you can use the shell script like  
+\begin{enumerate}
+ \item \texttt{ff-mpirun -np nbproc mympiscript.edp}  \#\# without graphic \index{ff-mpirun}
+  \item \texttt{ff-mpirun -np nbproc mympiscript.edp -glut ffglut }  \#\# with graphic
+  \item \texttt{ff-mpirun -np nbproc mympiscript.edp -glut ffglut  parameters }   \#\# with graphic and script parameters
+  \item \texttt{ff-mpirun -np nbproc mympiscript.edp} -glut ffglut    \#\# with graphic
+\end{enumerate}
+  where \texttt{nbproc} in the number of process launch. 
 %\item \texttt{FreeFem++-glx}, graphics using OpenGL and X11
 %\item \texttt{FreeFem++-cs}, integrated development environment
 %\item \texttt{FreeFem++-ag}, integrated development environment
@@ -20028,8 +20035,47 @@ FreeFem++ SuperLu.edp
 \section{Plugin}
 \subsection{gsl}\index{plugin!gsl}
 \label{section:gsl}
+{The interface with de \texttt{gsl} spline is available from version 3.47
 
-The list of all gsl functions and the freefem name same name  without \_.  
+the seven kind of spline are 
+\begin{description}
+\item[0 ] \texttt{gslinterpcspline}\index{gslinterpakimaperiodic} (default type of spline)
+\item[1 ] \texttt{gslinterpakima}\index{gslinterpakima}
+\item[2 ] \texttt{gslinterpsteffen}\index{gslinterpsteffen}
+\item[3 ] \texttt{gslinterplinear}\index{gslinterplinear}
+\item[4 ]  \texttt{gslinterppolynomial}\index{gslinterppolynomial}
+\item[5 ] \texttt{gslinterpcsplineperiodic}\index{gslinterpcsplineperiodic}
+\item[6 ]  \texttt{gslinterpakimaperiodic} \index{gslinterpakimaperiodic}
+\end{description}
+A brief wing example given all the syntaxe: 
+\bFF
+ @int n=10;
+ @real[@int,@int] dspline(2,n+1); //data points to def the spline  
+ @for(int i=0; i<= n; ++i) // set data poin 
+  {
+    @real xx = square(real(i)/n); 
+    @real yy = sin(xx*pi*2); 
+    dspline(0,i)= xx;
+    dspline(1,i)= yy;    
+  }
+  @gslspline @spline1(gslinterpcspline,dspline);// def the spline1 \index{gslspline}
+  @gslspline @spline11(dspline);// def the spline11
+  @gslspline @spline2(gslinterpsteffen,dspline);// def the spline2
+  @gslspline @spline3(gslinterpcspline,dspline(0,:),,dspline(1,:));// def 
+  @gslspline @spline33(dspline(0,:),,dspline(1,:));// def the spline3
+  @spline1=@spline2; // copie et change in  spline1 in  spline2
+  @real t= 1; 
+  @real s1= @spline1(t); //eval the function spline1 at   t \index{gslspline!eval}
+  @real ds1= @spline1.d(t);//eval the derive of function spline1 at  t \index{gslspline!d}
+  @real dds1= @spline1.dd(t);//eval the 2 derive of function spline1 at t \index{gslspline!dd}
+\eFF
+This can be usefull to build  function  from data value.
+\index{gslinterpcspline}
+}
+
+\bigskip
+The list of all \texttt{gsl} functions and the freefem name same name  without \_.  
+
 {\small
 
 \begin{itemize}
