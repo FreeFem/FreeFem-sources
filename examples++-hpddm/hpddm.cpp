@@ -14,8 +14,8 @@ bool isSetOpt(string* const& ss) {
     return HPDDM::Option::get()->set(*ss);
 }
 template<class Type, class K>
-bool clearRecycling(Type* const& Op, const long& mu) {
-    HPDDM::Recycling<K>::get(mu)->~Recycling();
+bool destroyRecycling(Type* const& Op, const long& mu) {
+    HPDDM::Recycling<K>::get(mu)->destroy();
     return false;
 }
 
@@ -579,9 +579,9 @@ AnyType distributedMV_Op<Type, K>::operator()(Stack stack) const {
     unsigned short mu = pin->n / pA->getDof();
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-    bool alloc = pA->setBuffer(mu);
+    bool allocate = pA->setBuffer();
     pA->GMV((K*)*pin, (K*)*pout, mu, &dA);
-    pA->clearBuffer(alloc);
+    pA->clearBuffer(allocate);
     return 0L;
 }
 
@@ -624,7 +624,7 @@ class ProdSchwarz {
         const T t;
         const U u;
         ProdSchwarz(T v, U w) : t(v), u(w) {}
-        void prod(U x) const { bool alloc = t->setBuffer(1); t->GMV(*(this->u), *x); t->clearBuffer(alloc); };
+        void prod(U x) const { bool allocate = t->setBuffer(); t->GMV(*(this->u), *x); t->clearBuffer(allocate); };
         static U mv(U Ax, ProdSchwarz<T, U, K> A) {
             A.prod(Ax);
             return Ax;
@@ -684,7 +684,7 @@ void add() {
     Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
-    Global.Add("clearRecycling", "(", new OneOperator2_<bool, Type<K, S>*, long>(Schwarz::clearRecycling<Type<K, S>, K>));
+    Global.Add("destroyRecycling", "(", new OneOperator2_<bool, Type<K, S>*, long>(Schwarz::destroyRecycling<Type<K, S>, K>));
 }
 }
 
