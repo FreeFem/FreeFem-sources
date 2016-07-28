@@ -20,6 +20,7 @@
 #else
 #define DSUITESPARSE
 #endif
+#define MU_ARPACK
 
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
