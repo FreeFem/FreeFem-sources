@@ -1,165 +1,94 @@
-%!TEX root = /Users/nataf/test/DOC/freefem++doc.tex
+%!TEX root = ./freefem++doc.tex
 
-\subsection{PETSc and HPDDM solvers}
-
+\subsection{HPDDM solvers}
+The corresponding examples are in the directory \texttt{examples++-hpddm}. Real valued problems (diffusion, heat, elasticity and Stokes) and complex valued problems (Maxwell and Helmholtz) are given in both 2D and 3D. We detail here the 3D elasticity problem and the 3D time-dependent heat problem.
 
 \begin{example}[elasticity-3d.edp]
-	A three dimensional elasticity problem is defined. The solver can be either a  domain decomposition method, a direct solver or an algebraic multigrid method. The last two solvers are available via the PETSc~\cite{petsc-efficient,petsc-web-page} interface. Details are given below. 
+	A three dimensional elasticity problem is defined. The solver is a  domain decomposition method. Domain decomposition methods are a natural framework for parallel computers. The scripts in the directory \texttt{examples++-hpddm} run on multicores computers (from 2 to tens of thousands of cores). Recall that like in any MPI code the number of MPI processes, \texttt{mpisize},  is given in the command line via the option \texttt{-np}. We focus on the script \texttt{elasticity-3d.edp} but the other scripts have the same structure. The command line to run the example on four processes with \texttt{ffglut} visualization is:\\
+	
+	\texttt{ff-mpirun -np 4 elasticity-3d.edp -glut ffglut}
 \end{example}
 
-\def\parallelScript{elasticity-3d.edp}
+\def\parallelScript{../examples++-hpddm/elasticity-3d.edp}
 
+\lstinput[linerange=SchwarzMethod-SchwarzMethodEnd]{\parallelScript}
 
-\subsubsection{Three dimensional elasticity problem} % (fold)
-\label{sub:three_dimensional_elasticity_problem}
+ The macro \texttt{build} is of particular interest since it handles the data distribution among the \texttt{mpisize} MPI processes with the following steps:
+\begin{itemize}
+	\item  the initial mesh \texttt{ThGlobal} is partitioned  by process 0 into \texttt{mpisize} submeshes
+	\item  the partition is broadcasted to every process $i$ for $0 < i < \texttt{mpisize}$. From then on, all tasks are parallel. 
+	\item  each process creates the local submesh \texttt{Th} (if the refinement factor \texttt{s} defined via the option \texttt{-split} is larger than 1, each local edge is splitted into $s$ subedges, resulting in each element being split into $s^2$ element in 2D and $s^3$ elements in 3D) so that the collection of these submeshes is an overlapping domain decomposition of a refined mesh. The number of extra layers added to the initial partition is monitored by the option \texttt{-overlap}.
+	\item  connectivity structures are created
+	\begin{itemize}
+		\item \texttt{D} is the diagonal of the local partition of unity (see below \S~\ref{sub:linear} for more details)
+		\item \texttt{arrayIntersection} is the list of neighbors of the current subdomain
+		\item For \texttt{j} in \texttt{arrayIntersection}, \texttt{restrictionIntersection[j]} is the list of the degrees of freedom that belong to the intersection of the current subdomain with its neighbor \texttt{j}. 
+	\end{itemize} 
+\end{itemize} 
+Then, the variational formulation \texttt{vPb} of a three dimensional elasticity problem is used to assemble a local matrix \texttt{Mat}. This matrix along with  \texttt{D}, \texttt{arrayIntersection} and \texttt{restrictionIntersection} are arguments for the constructor of the distributed matrix \texttt{A}. This is enough to solve the problem with a one-level additive Schwarz method which can be either ASM or RAS.\\
 
-%\paragraph{Physics of the problem} % (fold)
-%\label{par:physics_of_the_problem}
+For some problems it is interesting to use optimized interface conditions. When there are many subdomains, it is usually profitable to add a second level to the solver. Options are set in the sequel of the script:
+\lstinput[linerange=OsmTwolevel-OsmTwolevelEnd]{\parallelScript}
+ In the above line, the first option selects the one-level preconditioner \texttt{ras} (possible choices are \texttt{ras}, \texttt{oras}, \texttt{soras}, \texttt{asm}, \texttt{osm} or \texttt{none}), the second option selects the correction formula for the second level here \texttt{balanced} (possible options are \texttt{deflated}, \texttt{additive} or \texttt{balanced}), the third option selects right preconditioning, the fourth one is verbosity level of HPDDM (different from the one of FreeFem++), the fifth one prints all possible options of HPPDM and the last one specifies the number of coarse degrees of freedom per subdomain of the GENEO coarse space. All other options of \href{https://github.com/hpddm/hpddm/blob/master/doc/cheatsheet.pdf}{cheatsheet of the HPDDM} \cite{Jolivet:2014:HPD} library can be selected via the FreeFem++ function \texttt{set}.\\
 
-The mechanical properties of a solid can be characterized by its Young modulus $E$ and Poisson ratio $\nu$ or alternatively by its Lam\'e coefficients $\lambda$ and $\mu$. These coefficients relate to each other by the following formulas:
+%  The first part deals with \texttt{OSM} methods. The variational form \texttt{vOptimized} is  the one of the elasticity problem with an extra term on the interface labeled \texttt{fakeInterface}. The second part deals with the function \texttt{attachCoarseOperator} which constructs the coarse space based on solving generalized eigenvalue problems in the subdomains.  
+
+In the last part of the script, the global linear system is solved by the domain decomposition method defined above. 
+\lstinput[linerange=SolvePlot-SolvePlotEnd]{\parallelScript}
+
+\subsubsection{Time dependent problem} % (fold)
+\label{sub:time_dependent_problem}
+\begin{example}[heat-3d.edp]
+	A three dimensional heat problem
+\[
+\frac{\partial u}{\partial t} - \Delta u = 1,\ \ \ u(0,\cdot) := 0 \text{ in }\Omega\,.
+\]	
+is discretized by an implicit Euler scheme. At each time step $n$, we shall seek $u^n(x,y,z)$ satisfying for all $w\in H^1(\Omega)$:
+\[
+\int_\Omega \frac{u^n-u^{n-1}}{\delta t}\,w + \nabla u^n \nabla w = \int_\Omega w ,\ \ \ u^0 := 0 \text{ in }\Omega\,.
+\]
+	 so that at each time step a linear system
+\[
+(M+dt*K) u^n[] = M*u^{n-1}[] + \delta t*F
+\]	
+is solved by a domain decomposition method where $M$ is the mass matrix and $K$ is the rigidity matrix. In order to save computational efforts, the domain decomposition method preconditioner is built only once and then reused for all subsequent solves with matrix $A:=M+dt*K$. The distributed matrix vector product with matrix $M$ is made through the call to the function \texttt{dmv} using the partition of unity associated to matrix $A$. 
+\end{example}
+
+\def\parallelScript{../examples++-hpddm/heat-3d.edp}
+
+\lstinput[linerange=SolvePlot-SolvePlotEnd]{\parallelScript}
+
+% subsubsection time_dependent_problem (end)
+
+\subsubsection{Distributed vectors in HPDDM} % (fold)
+\label{sub:linear}
+We give here some hints on the way vectors are distributed among $np$ processes when using FreeFem++ interfaced with HPDDM. The set of degrees of freedom ${\mathcal N}$ is decomposed into $np$ overlapping sets $({\mathcal N}_i)_{1\le i\le np}$. A MPI-process is in charge of each subset. Let $n:=\#{\mathcal N}$ be the number of degrees of freedom of the global finite element space. Let $R_i$ denote the restriction operator from $\R^n$ onto $\R^{\#{\mathcal N}_i}$. We have also defined local diagonal matrices $D_i\in \R^{\#{\mathcal N}_i}\times \R^{\#{\mathcal N}_i}$ so that we have a partition of unity at the algebraic level:
 \begin{equation}
-	\label{eq:parallel:lambdanu}
-\lambda = \frac{E \nu}{(1+\nu) (1- 2 \nu)}\ \text{ and } \ \mu = \frac{E}{2(1+\nu)}\,.
+	\label{eq:hpddm:14}
+  {\mathbf U} = \sum_{i=1}^{np} R_i^T\,D_i\,R_i\,{\mathbf U}\ \ \ \ \forall\ {\mathbf U}\in\R^n\,.
 \end{equation}
+A global vector ${\mathbf U}\in\R^n$ is actually not stored. Rather, it is stored in a distributed way. Each process $i$, $1\le i\le N$, stores the local vector ${\mathbf U}_i:=R_i {\mathbf U}\in \R^{\#{\mathcal N}_i}$. 
 
-The reference geometry of the solid is the open $\Omega\subset \R^3$. The solid is subjected to a volume force $\mathbf{f}$ and on part of its boundary ($\Gamma_3$) to a normal stress $\mathbf{g}$. It is clamped on the other part of its boundary  ($\Gamma_1$). Let $\mathbf{u}:\Omega\rightarrow \R^3$ denote the displacement of the solid. In Cartesian coordinates $(x_1,x_2,x_3)$, the linearized strain tensor $\varepsilon({\mathbf{u}})$ is given by:
+ It is important to ensure that the result of all linear algebra operators applied to this representation are coherent.\\
+As an example, consider the scalar product of two distributed vectors ${\mathbf U}, {\mathbf V} \in \mathbb{R}^{n}$. Using the partition of unity~\eqref{eq:hpddm:14}, we have:
+\begin{align*}({\mathbf U}, {\mathbf V}) = \left({\mathbf U}, \sum_{i=1}^{np} R_i^T D_i R_i {\mathbf V}\right) &= \sum_{i=1}^{np} (R_i {\mathbf U}, D_i R_i {\mathbf V})\\
+&=\sum_{i=1}^{np} \left({\mathbf U}_i, D_i {\mathbf V}_i\right)\,. 
+\end{align*}
+Thus, the formula for the scalar product is:
+\begin{equation*}
+({\mathbf U}, {\mathbf V}) = \sum_{i = 1}^{np} (R_i {\mathbf U}, D_i R_i {\mathbf V})\,.
+\end{equation*}
+Local scalar products are performed concurrently. Thus, the implementation is parallel except for the sum which corresponds to a {\tt MPI\_Reduce} call across the $np$ MPI processes. Note also that the implementation relies on the knowledge of a partition of unity so that the FreeFem++ syntax is {\tt dscalprod(D,u,v)}.\\
+
+A {\tt axpy} procedure $y \leftarrow \alpha\,x+y$ for $x,y\in \mathbb{R}^{n}$ and $\alpha\in\R$ is easily implemented concurrently for distributed vectors in the form:
 \[
-\epsilon_{ij} (\mathbf{u}) :=  \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) \,, \text{ for }1\le i,j\le 3\,. 
+y_i \leftarrow \alpha\,x_i+y_i\,, \forall\ 1\le i \le np\,.
 \]
-The inner product of two strain-tensors is defined by:
-\[
-\epsilon (\mathbf{u}) : \epsilon(\mathbf{v}) := \sum_{i=1}^3 \sum_{j=1}^3 \epsilon_{ij} (\mathbf{u})  \epsilon_{ij} (\mathbf{v})\,.
-\]
-The divergence of the displacement is defined by
-\[
-\nabla \cdot \mathbf{u} := \sum_{i=1}^3 \frac{\partial u_i}{\partial x_i}\,.
-\]
+The matrix vector product is more involved and details are given in the SIAM book  \href{https://www.ljll.math.upmc.fr/nataf/OT144DoleanJolivetNataf_full.pdf}{An Introduction to Domain Decomposition Methods: algorithms, theory and parallel implementation} \cite{Dolean:2015:IDD} and even more details are given in \href{http://jolivet.perso.enseeiht.fr/thesis.pdf}{P.~Jolivet's PhD manuscrit}.
 
-The finite element approximation of the system of linear elasticity is defined by a variational formulation:\\
-Find a displacement $\mathbf{u}:\Omega\rightarrow \R^3$ in ${\mathbb P}_2$ so that for any test function $\mathbf{v}:\Omega\rightarrow \R^3$  in ${\mathbb P}_2$, we have:
-\begin{align}
-\label{eq:linear_elasticity}
-a(\mathbf{u}, \mathbf{v}) &\ds := \int_\Omega \lambda\, \nabla \cdot \mathbf{u}\ \nabla \cdot \mathbf{v} + \mu\, \varepsilon(\mathbf{u}) : \varepsilon(\mathbf{v}) 
-%\\ &
-\ds - \int_\Omega \mathbf{f} \cdot \mathbf{v} = 0\,,
-\end{align}
-where
-\begin{itemize}
-\item where $\lambda$ and $\nu$ are defined by formula~\eqref{eq:parallel:lambdanu} Young's modulus $E$ and Poisson's ratio $\nu$ vary between two sets of values, $(E_1, \nu_1) = (2 \cdot 10^{11}, 0.25)$, and $(E_2, \nu_2) = (10^7, 0.45)$.
-\item $\mathbf{f}$ are the body forces, in this case only the gravity. 
-\end{itemize}
-In the FreeFem++ script, equation~\eqref{eq:linear_elasticity} corresponds to three parametrized macros: {\tt epsilon}, {\tt div} and {\tt Varf}. \asupprimer{Pierre : expliquer la notation u\#B} 
-\lstinput[linerange=problemPhysics-problemPhysicsEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-\vspace{0.5cm}
-
-%\paragraph{Geometry} % (fold)
-%\label{par:geometry}
-A first geometry is defined via a three dimensional mesh of a (simplified) bridge that is built in two steps:
-\begin{itemize}
-	\item the mesh of a two dimensional bridge is built {\tt ThGlobal2d}. 
-	\item a third dimension is added to the previous 2D mesh using the {\tt buildlayers} function.
-\end{itemize}
-Note that the three dimensional mesh is not actually built but a macro is defined. 
-\lstinput[linerange=sequentialMesh-sequentialMeshEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-This geometry is partitioned and distributed among the MPI processes.
-\begin{figure}
-\centering
-\includegraphics[width=.4\textwidth]{PARALLEL/part.png}
-\caption[]{Partitioning into eight subdomains}
-\end{figure}
-From now on, all the tasks can be computed concurrently, meaning that each MPI process is in charge of only one subdomain and variables are local to each process. Then a parallel mesh refinement is made by cutting each tetrahedra into $8$ tetrahedra. This corresponds to a mesh refinement factor $s$ equals to $2$. Note also that at this point, the displacement field $\mathbf{u}$ is approximated by ${\mathbb P}_2$ continuous piecewise quadratic functions.
-\lstinput[linerange=parallelMesh-parallelMeshEnd]{./PARALLEL/FreefemProgram/\parallelScript}
+% subsubsection linear (end)
 
 
-
-%\paragraph{Physical parameters} % (fold)
-%\label{par:physical_parameters}
-The Young and Poisson modulus are heterogeneous and the exterior forces are constant.
-\begin{remark}
-In our numerical experiments, Poisson's ratio being relatively far from the incompressible limit of 0.5, it is not necessary to switch to a mixed finite element formulation since there is no locking effect. 
-\end{remark}
-\lstinput[linerange=physicalParameters-physicalParametersEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-% paragraph physical_parameters (end)
-
-
-
-% subsection three_dimensional_elasticity_problem (end)
-
-\subsubsection{Native DDM solvers and PETSc Interface} % (fold)
-\label{sub:ddm_solvers_and_petsc_interface}
-At this point, the physics, the geometry and the discretization of the three dimensional elasticity problem have been given in the script. In order to find the finite element approximation of the displacement field, we have to solve the corresponding global algebraic system which is actually never assembled. Its distributed storage among the processes depends on whether we use native FreeFem++ solvers or other solvers via the PETSc interface. The native FreeFem++ solvers are:
-	\begin{itemize}
-		\item a parallel GMRES solver which is the default parallel solver in FreeFem++,
-		\item a one-level Schwarz method, either ASM or RAS,
-		\item the two-level Schwarz method with a \geneo coarse space, \cite{Dolean:2015:IDD}.
-	\end{itemize}
- They are implemented inside HPDDM, a C++ framework for high-performance domain decomposition methods, available at the following URL: \url{https://github.com/hpddm/hpddm}, \cite{Jolivet:2014:HPD}. Its interface with FreeFem++ also include substructuring methods, like the FETI and BDD methods.
- The solvers interfaced with PETSc are:
-	\begin{itemize}
-		\item the PETSc parallel GMRES solver,
-		\item the multi frontal parallel solver MUMPS. %\cite{Amestoy:2001:FAM},
-        \item GAMG: an algebraic multigrid solver
-% \cite{adams2004ultra}.
-	\end{itemize}
-\lstinput[linerange=chooseSolver-chooseSolverEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-
-\paragraph{FreeFem++ interface} % (fold)
-\label{par:_tt_freefem_interface}
-
-
-If the native FreeFem++ solvers are used, the local stiffness matrices are assembled concurrently:
-\lstinput[linerange=localMatrix-localMatrixEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-The local operator is attached to a distributed structure \texttt{dschwarz} which is a FreeFem++ type. If necessary, the \geneo coarse space is built : 
-\lstinput[linerange=coarseSpace-coarseSpaceEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-The distributed linear system is solved by a call that includes additional command line arguments that are automatically passed to the solvers.
-\lstinput[linerange=SolverDDM-SolverDDMEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-
-% paragraph _tt_freefem_interface (end)
-
-
-\paragraph{PETSc interface} % (fold)
-\label{par:_tt_petsc_interface}
-
-If the PETSc interface is used, the local stiffness matrix $K := A_{ii} := R_i A R_i^T$ and the local load vector $rhs$ are built concurrently from the variational forms for all subdomains $1\le i\le N$.
-\lstinput[linerange=StiffnessRhsMatrix-StiffnessRhsMatrixEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-\texttt{dmatrix} is a FreeFem++ type.
-
-If an algebraic multigrid method is used via the PETSc interface, the near null space must be provided in order to enhance the convergence
-%, see e.g. \cite{henson2002boomeramg}
-. For an elasticity problem, it is made of the rigid body motions which are three translations and three rotations, here along the axis. 
-\lstinput[linerange=rigidBodyMotion-rigidBodyMotionEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-
-Eventually, the solver may be called by passing command line parameters to PETSc:
-\lstinput[linerange=SolverPETSc-SolverPETScEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-
-% paragraph _tt_petsc_interface (end)
-
-
-% subsection ddm_solvers_and_petsc_interface (end)
-
-\subsubsection{Validation of the computation} % (fold)
-\label{sub:validation_of_the_computation}
-The true residual is computed by first performing a parallel matrix vector product either via matrix {\tt Mat} that is interfaced with the PETSc interface
-\lstinput[linerange=matrixVectorPETSc-matrixVectorPETScEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-or via the matrix {\tt Aglob} in the ``native'' FreeFem++ Schwarz format.
-\lstinput[linerange=matrixVectorFFpp-matrixVectorFFppEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-
-
-Once the linear system is solved and the residual is computed, the sequel of the program does not depend on whether a FreeFem++ or a PETSc interface was used. 
-The residual is subtracted from the distributed right-hand side {\tt rhs}. Then distributed scalar product are performed using  partition of unity matrices $(D_i)_{1\le i \le N}$ where $N$ is the number of subdomains:
-\[
-\text{dscalprod}(D,U,V) := \sum_{i=1}^N D_i U_i V_i\,.
-\]
-\lstinput[linerange=trueResidual-trueResidualEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-The three dimensional solution can be visualized by the {\tt plot} command. 
-\lstinput[linerange=Visualization-VisualizationEnd]{./PARALLEL/FreefemProgram/\parallelScript}
-
-% subsection validation_of_the_computation (end)
-
-
-
-
-
-% section a_parallel_script (end)
+% subsection ddm_principles (end)
 
 

@@ -95,12 +95,12 @@ dpair ret;
         }
     }
 }
-
+/*# SolvePlot #*/
 set(A, sparams = "-hpddm_reuse_preconditioner=1");
 Wh<real> def(u) = init(0.0);    // local solution
 for(int i = 0; i < iMax; ++i) {
     real[int] newRhs(rhs.n);
-    dmv(A, M, u[], newRhs);
+    dmv(A, M, u[], newRhs);     // newRhs = M * u[]
     newRhs += rhs;
 
     if(Opt.n > 0)       // optimized Schwarz methods
@@ -110,3 +110,4 @@ for(int i = 0; i < iMax; ++i) {
 
     plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 0)
 }
+/*# SolvePlotEnd #*/
