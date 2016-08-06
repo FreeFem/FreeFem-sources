@@ -20,7 +20,7 @@ int partitioner = getARGV("-partitioner", 1);                   // partitioner (
 
 if(verbosity > 0 && mpirank == 0) {
     cout << " --- " << mpirank << "/" << mpisize;
-    cout << " - diffusion-2d.edp - input parameters: refinement factor = " << s << " - with partitioner? = " << partitioner << endl;
+    cout << " - diffusion-2d-substructuring-PETSc.edp - input parameters: refinement factor = " << s << " - with partitioner? = " << partitioner << endl;
 }
 
 meshN Th = square(1, 1);
