@@ -66,8 +66,8 @@ class DistributedCSR {
             }
         }
 };
-template<class HpddmType, class K, typename std::enable_if<std::is_same<HpddmType, DistributedCSR<HpSchwarz<K>>>::value>::type* = nullptr>
-void initPETScStructure(HpddmType* ptA, MatriceMorse<K>* mA, long& bs, KN<typename std::conditional<std::is_same<HpddmType, DistributedCSR<HpSchwarz<K>>>::value, double, long>::type>* ptD, KN<K>* rhs) {
+template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, DistributedCSR<HpSchwarz<PetscScalar>>>::value>::type* = nullptr>
+void initPETScStructure(HpddmType* ptA, MatriceMorse<PetscScalar>* mA, long& bs, KN<typename std::conditional<std::is_same<HpddmType, DistributedCSR<HpSchwarz<PetscScalar>>>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
     ptA->_A->initialize(*ptD);
     double timing = MPI_Wtime();
     ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, ptA->_global);
@@ -89,14 +89,17 @@ void initPETScStructure(HpddmType* ptA, MatriceMorse<K>* mA, long& bs, KN<typena
     }
     if(mA->symetrique)
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, PETSC_TRUE);
+    ptA->_A->setBuffer();
     if(verbosity > 0 && mpirank == 0)
         cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
     if(rhs)
         ptA->_A->exchange(*rhs);
 }
-template<class HpddmType, class K, typename std::enable_if<!std::is_same<HpddmType, DistributedCSR<HpSchwarz<K>>>::value>::type* = nullptr>
-void initPETScStructure(HpddmType* ptA, MatriceMorse<K>* mA, long& bs, KN<typename std::conditional<std::is_same<HpddmType, DistributedCSR<HpSchwarz<K>>>::value, double, long>::type>* ptD, KN<K>* rhs) {
-    const HPDDM::MatrixCSR<K>* M = ptA->_A->getMatrix();
+template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, DistributedCSR<HpSchwarz<PetscScalar>>>::value>::type* = nullptr>
+void initPETScStructure(HpddmType* ptA, MatriceMorse<PetscScalar>* mA, long& bs, KN<typename std::conditional<std::is_same<HpddmType, DistributedCSR<HpSchwarz<PetscScalar>>>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
+    const HPDDM::MatrixCSR<PetscScalar>* M = ptA->_A->getMatrix();
+    if(!M->_sym)
+        std::cout << "Please assemble a symmetric CSR" << std::endl;
     double timing = MPI_Wtime();
     ptA->_A->template renumber<false>(STL<long>(*ptD), nullptr);
     ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, ptA->_global);
@@ -143,7 +146,6 @@ void initPETScStructure(HpddmType* ptA, MatriceMorse<K>* mA, long& bs, KN<typena
     delete [] a;
     delete [] ja;
     delete [] ia;
-#if 1
     IS to, from;
     PetscInt nr;
     Vec rglobal;
@@ -158,8 +160,7 @@ void initPETScStructure(HpddmType* ptA, MatriceMorse<K>* mA, long& bs, KN<typena
     VecDestroy(&rglobal);
     ISDestroy(&from);
     ISDestroy(&to);
-#endif
-    ISLocalToGlobalMappingView(ptA->_rmap, PETSC_VIEWER_STDOUT_WORLD);
+    // ISLocalToGlobalMappingView(ptA->_rmap, PETSC_VIEWER_STDOUT_WORLD);
     if(verbosity > 0 && mpirank == 0)
         cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
 }
@@ -187,7 +188,7 @@ long initEmptyCSR(Type* const&) {
     return 0;
 }
 
-template<class HpddmType, class Type>
+template<class HpddmType>
 class initCSR_Op : public E_F0mps {
     public:
         Expression A;
@@ -205,33 +206,31 @@ class initCSR_Op : public E_F0mps {
         AnyType operator()(Stack stack) const;
 };
 
-template<class HpddmType, class Type>
-basicAC_F0::name_and_type initCSR_Op<HpddmType, Type>::name_param[] = {
+template<class HpddmType>
+basicAC_F0::name_and_type initCSR_Op<HpddmType>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
     {"rhs", &typeid(KN<PetscScalar>*)}
 };
 
-template<class HpddmType, class Type>
+template<class HpddmType>
 class initCSR : public OneOperator {
     public:
-        initCSR() : OneOperator(atype<DistributedCSR<HpddmType>*>(), atype<DistributedCSR<HpddmType>*>(), atype<Matrice_Creuse<PetscScalar>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<Type>>::value, double, long>::type>*>()) { }
+        initCSR() : OneOperator(atype<DistributedCSR<HpddmType>*>(), atype<DistributedCSR<HpddmType>*>(), atype<Matrice_Creuse<PetscScalar>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
-            return new initCSR_Op<HpddmType, Type>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]), t[4]->CastTo(args[4]));
+            return new initCSR_Op<HpddmType>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]), t[4]->CastTo(args[4]));
         }
 };
 
-template<class HpddmType, class Type>
-AnyType initCSR_Op<HpddmType, Type>::operator()(Stack stack) const {
+template<class HpddmType>
+AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
     DistributedCSR<HpddmType>* ptA = GetAny<DistributedCSR<HpddmType>*>((*A)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     KN<long>* ptO = GetAny<KN<long>*>((*O)(stack));
-    KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<Type>>::value, double, long>::type>* ptD = GetAny<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<Type>>::value, double, long>::type>*>((*D)(stack));
+    KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>* ptD = GetAny<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>((*D)(stack));
     long bs = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 1;
     MatriceMorse<PetscScalar> *mA = static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->A));
-    if(!mA->symetrique)
-        std::cout << "Please assemble a symmetric CSR" << std::endl;
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
     KN<PetscScalar>* rhs = nargs[2] ? GetAny<KN<PetscScalar>*>((*nargs[2])(stack)) : 0;
     ptA->_A = new HpddmType;
@@ -239,7 +238,7 @@ AnyType initCSR_Op<HpddmType, Type>::operator()(Stack stack) const {
         PETSC_COMM_WORLD = *comm;
     if(ptO && ptA) {
         HPDDM::MatrixCSR<PetscScalar>* dA = new HPDDM::MatrixCSR<PetscScalar>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->_A->HPDDM::template Subdomain<Type>::initialize(dA, STL<long>(*ptO), *ptR, comm);
+        ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>(*ptO), *ptR, comm);
     }
     if(!ptA->_num)
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
@@ -252,24 +251,20 @@ AnyType initCSR_Op<HpddmType, Type>::operator()(Stack stack) const {
     double timing = MPI_Wtime();
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
     KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-    double eps = 1e-8;
+    double eps = 1.0e-8;
     FFPetscOptionsGetReal(NULL, "-eps", &eps, NULL);
     int it = 100;
     FFPetscOptionsGetInt(NULL, "-iter", &it, NULL);
     KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
     KSPSetFromOptions(ptA->_ksp);
     KSPSetUp(ptA->_ksp);
-    Mat local;
-    MatISGetLocalMat(ptA->_petsc, &local);
     if(verbosity > 0 && mpirank == 0)
         cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
     MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
-    if(std::is_same<HpddmType, HpSchwarz<Type>>::value)
-        ptA->_A->setBuffer();
     return ptA;
 }
 
-template<class Type, class K>
+template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
@@ -283,24 +278,24 @@ class setOptions_Op : public E_F0mps {
         AnyType operator()(Stack stack) const;
 };
 
-template<class Type, class K>
-basicAC_F0::name_and_type setOptions_Op<Type, K>::name_param[] = {
+template<class Type>
+basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"sparams", &typeid(std::string*)},
-    {"nearnullspace", &typeid(FEbaseArrayKn<K>*)}
+    {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)}
 };
 
-template<class Type, class K>
+template<class Type>
 class setOptions : public OneOperator {
     public:
         setOptions() : OneOperator(atype<long>(), atype<Type*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
-            return new setOptions_Op<Type, K>(args, t[0]->CastTo(args[0]));
+            return new setOptions_Op<Type>(args, t[0]->CastTo(args[0]));
         }
 };
 
-template<class Type, class K>
-AnyType setOptions_Op<Type, K>::operator()(Stack stack) const {
+template<class Type>
+AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
     if(options) {
@@ -322,8 +317,8 @@ AnyType setOptions_Op<Type, K>::operator()(Stack stack) const {
         delete [] *data;
         delete [] data;
     }
-    if(std::is_same<Type, PETSc::DistributedCSR<HpSchwarz<K>>>::value) {
-        FEbaseArrayKn<K>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
+    if(std::is_same<Type, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value) {
+        FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
         int dim = ptNS ? ptNS->N : 0;
         if(dim) {
             Vec x;
@@ -331,12 +326,12 @@ AnyType setOptions_Op<Type, K>::operator()(Stack stack) const {
             Vec* ns;
             VecDuplicateVecs(x, dim, &ns);
             for(unsigned short i = 0; i < dim; ++i) {
-                K* x;
+                PetscScalar* x;
                 VecGetArray(ns[i], &x);
                 ptA->_A->template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, *(ptNS->get(i)), x, ptA->_A->getDof());
                 VecRestoreArray(ns[i], &x);
             }
-            K* dots = new K[dim];
+            PetscScalar* dots = new PetscScalar[dim];
             for(unsigned short i = 0; i < dim; ++i) {
                 if(i > 0) {
                     VecMDot(ns[i], i, ns, dots);
@@ -372,6 +367,7 @@ AnyType setOptions_Op<Type, K>::operator()(Stack stack) const {
 
 template<class T, class U, class K>
 class InvPETSc {
+    static_assert(std::is_same<K, PetscScalar>::value, "Wrong types");
     public:
         const T t;
         const U u;
@@ -380,8 +376,8 @@ class InvPETSc {
             Vec y;
             double timing = MPI_Wtime();
             MatCreateVecs((*t)._petsc, nullptr, &y);
-            K* x;
-            if(std::is_same<T, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value) {
+            PetscScalar* x;
+            if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
                 VecGetArray((*t)._x, &x);
                 (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), x, (*t)._A->getDof());
                 VecRestoreArray((*t)._x, &x);
@@ -408,7 +404,7 @@ class InvPETSc {
             KSPSolve((*t)._ksp, (*t)._x, y);
             if(verbosity > 0 && mpirank == 0)
                 cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
-            if(std::is_same<T, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value) {
+            if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
                 VecGetArray(y, &x);
                 (*t)._A->template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, *out, x, (*t)._A->getDof());
                 VecRestoreArray(y, &x);
@@ -430,8 +426,8 @@ class InvPETSc {
 #endif
             }
             VecDestroy(&y);
-            if(std::is_same<T, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value)
-                (*t)._A->HPDDM::template Subdomain<K>::exchange(*out);
+            if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value)
+                (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*out);
         };
         static U init(U Ax, InvPETSc<T, U, K> A) {
             A.solve(Ax);
@@ -441,6 +437,7 @@ class InvPETSc {
 
 template<class T, class U, class K>
 class ProdPETSc {
+    static_assert(std::is_same<K, PetscScalar>::value, "Wrong types");
     public:
         const T t;
         const U u;
@@ -449,7 +446,7 @@ class ProdPETSc {
             Vec z;
             Vec y;
             MatCreateVecs((*t)._petsc, &z, &y);
-            K* w;
+            PetscScalar* w;
             VecGetArray(z, &w);
             (*t)._A->template distributedVec<0>(t->_num, t->_first, t->_last, *u, w, t->_A->getDof());
             VecRestoreArray(z, &w);
@@ -459,7 +456,7 @@ class ProdPETSc {
             VecRestoreArray(y, &w);
             VecDestroy(&y);
             VecDestroy(&z);
-            (*t)._A->HPDDM::template Subdomain<K>::exchange(*x);
+            (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*x);
         }
         static U mv(U Ax, ProdPETSc<T, U, K> A) {
             A.prod(Ax);
@@ -479,21 +476,21 @@ static void Init_PETSc() {
     Dcl_Type<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>*>(Initialize<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>, Delete<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>);
     zzzfff->Add("dmatrix", atype<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>*>());
     TheOperators->Add("<-", new OneOperator1_<long, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>*>(PETSc::initEmptyCSR<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>));
-    TheOperators->Add("<-", new PETSc::initCSR<HpSchwarz<PetscScalar>, PetscScalar>);
-    Global.Add("set", "(", new PETSc::setOptions<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar>());
+    TheOperators->Add("<-", new PETSc::initCSR<HpSchwarz<PetscScalar>>);
+    Global.Add("set", "(", new PETSc::setOptions<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>());
     addProd<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar>();
     addInv<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
 
     Dcl_Type<PETSc::DistributedCSR<HpBdd<PetscScalar>>*>(Initialize<PETSc::DistributedCSR<HpBdd<PetscScalar>>>, Delete<PETSc::DistributedCSR<HpBdd<PetscScalar>>>);
     zzzfff->Add("dbddc", atype<PETSc::DistributedCSR<HpBdd<PetscScalar>>*>());
     TheOperators->Add("<-", new OneOperator1_<long, PETSc::DistributedCSR<HpBdd<PetscScalar>>*>(PETSc::initEmptyCSR<PETSc::DistributedCSR<HpBdd<PetscScalar>>>));
-    TheOperators->Add("<-", new PETSc::initCSR<HpBdd<PetscScalar>, PetscScalar>);
+    TheOperators->Add("<-", new PETSc::initCSR<HpBdd<PetscScalar>>);
 
     Global.Add("globalNumbering", "(", new OneOperator2_<long, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>*, KN<long>*>(PETSc::globalNumbering<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>));
     Global.Add("globalNumbering", "(", new OneOperator2_<long, PETSc::DistributedCSR<HpBdd<PetscScalar>>*, KN<long>*>(PETSc::globalNumbering<PETSc::DistributedCSR<HpBdd<PetscScalar>>>));
     Global.Add("originalNumbering", "(", new OneOperator3_<long, PETSc::DistributedCSR<HpBdd<PetscScalar>>*, KN<PetscScalar>*, KN<long>*>(PETSc::originalNumbering));
-    Global.Add("set", "(", new PETSc::setOptions<PETSc::DistributedCSR<HpBdd<PetscScalar>>, PetscScalar>());
-    addInv<PETSc::DistributedCSR<HpBdd<PetscScalar>>, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
+    Global.Add("set", "(", new PETSc::setOptions<PETSc::DistributedCSR<HpBdd<PetscScalar>>>());
+    addInv<PETSc::DistributedCSR<HpBdd<PetscScalar>>, PETSc::InvPETSc, KN<PetscScalar>>();
 }
 
 LOADFUNC(Init_PETSc)
