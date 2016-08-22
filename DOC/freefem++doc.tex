@@ -499,7 +499,10 @@ It is also an editor for TeX/LaTeX. It has a ``tool'' menu which can be configur
 
 \verb!nedit -import edp.nedit!
 
- \item[Smultron/fraise] on the Mac, available at \url{http://smultron.sourceforge.net}. It comes ready with color syntax for .edp file.  To teach it to launch \freefempp files, do a "command B" (i.e. the menu Tools/Handle Command/new command) and create a command which does
+ \item[textmate 2] for  Mac 10.7 or better, download drom \url{https://macromates.com/download} and install it, when  get the textmate freefem++ syntax from
+  \url{http://www.freefem.org/ff++/textmate2.zip} unzip and follow the explanation given in file \texttt{How\_To.rtf}.
+  
+ \item[Smultron/fraise] (Obsolete) on the Mac , available at \url{http://smultron.sourceforge.net}. It comes ready with color syntax for .edp file.  To teach it to launch \freefempp files, do a "command B" (i.e. the menu Tools/Handle Command/new command) and create a command which does
 \begin{verbatim}
  /usr/local/bin/FreeFem++-CoCoa %%p
 \end{verbatim}
@@ -17880,183 +17883,185 @@ Operation use in reduce is: \textit{MPI\_Op op} which can be: \textit{mpiMAX},
 Note that, for all global operations, only int[int] and real[int] are data type
 take in account in \freefempp.
 
-The following example present in details of Schwartz domain decomposition
-algorithm for solving Laplacian2d problem. In this example we use two level
-of parallelism to solve simple Laplacian2d in square domain. We have few number
-of subdomain and in every subdomain we use parallel sparse solver to solve local problem.
-
-
-\begin{example}[schwarz.edp]\label{sch:comm}
-\bFF
-//
-1:load "hypre_FreeFem"; //Load Hypre solver
-2:func bool AddLayers(mesh & Th,real[int] &ssd,int n,real[int] &unssd)
-{
-  //  build a continuous function  uussd (P1) :
-  //  ssd in the caracteristics function on the input sub domain.
-  //  such that :
-  //   unssd = 1 when   ssd =1;
-  //   add n layer of element (size of the overlap)
-  //   and unssd = 0 ouside of this layer ...
-  // ---------------------------------
-  fespace Vh(Th,P1);
-  fespace Ph(Th,P0);
-  Ph s;
-  assert(ssd.n==Ph.ndof);
-  assert(unssd.n==Vh.ndof);
-  unssd=0;
-  s[]= ssd;
-  //  plot(s,wait=1,fill=1);
-  Vh u;
-  varf vM(u,v)=int2d(Th,qforder=1)(u*v/area);
-  matrix M=vM(Ph,Vh);
-
-  for(int i=0;i<n;++i)
-    {
-      u[]= M*s[];
-      // plot(u,wait=1);
-      u = u>.1;
-      // plot(u,wait=1);
-      unssd+= u[];
-      s[]= M'*u[];//';
-      s = s >0.1;
-    }
-  unssd /= (n);
-  u[]=unssd;
-  ssd=s[];
-  return true;
-}
-3: mpiComm   myComm;       // Create communicator with value MPI\_COMM\_WORLD
-
-4: int membershipKey,rank,size; //Variables for manage communicators
-5: rank=mpiRank(myComm); size=mpiSize(myComm); //Rank of process and size of communicator
-6: bool withmetis=1, RAS=0; //Use or not metis for partitioning Mesh
-7: int sizeoverlaps=5; // size off overlap
-8: int withplot=1;
-9: mesh Th=square(100,100);
-10: int[int] chlab=[1,1  ,2,1  ,3,1  ,4,1  ];
-11: Th=change(Th,refe=chlab);
-12: int nn=2,mm=2, npart= nn*mm;
-13: membershipKey = mpiRank(myComm)\%npart; // Coloring for partitioning process group
-14: mpiComm cc(processor(membershipKey,myComm),rank); //Create MPI communicator according previous coloring
-15: fespace Ph(Th,P0),fespace Vh(Th,P1);
-16: Ph  part;
-17: Vh  sun=0,unssd=0;
-18: real[int] vsum=sun[],reducesum=sun[]; //Data use for control partitioning.
-19: Ph xx=x,yy=y,nupp;
-20: part = int(xx*nn)*mm + int(yy*mm);
-21: if(withmetis)
-    {
-    load "metis";
-    int[int] nupart(Th.nt);
-    metisdual(nupart,Th,npart);
-    for(int i=0;i<nupart.n;++i)
-      part[][i]=nupart[i];
-    }
-22: if(withplot>1)
-21: plot(part,fill=1,cmm="dual",wait=1);
-22: mesh[int] aTh(npart);
-23: mesh Thi=Th;
-24: fespace Vhi(Thi,P1);
-25: Vhi[int] au(npart),pun(npart);
-26: matrix[int] Rih(npart), Dih(npart), aA(npart);
-27: Vhi[int] auntgv(npart), rhsi(npart);
-28: i=membershipKey;
-    Ph suppi= abs(part-i)<0.1;
-    AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
-    Thi=aTh[i]=trunc(Th,suppi>0,label=10,split=1);
-    Rih[i]=interpolate(Vhi,Vh,inside=1); //  Vh -> Vhi
-    if(RAS)
-      {
-        suppi= abs(part-i)<0.1;
-        varf vSuppi(u,v)=int2d(Th,qforder=1)(suppi*v/area);
-        unssd[]= vSuppi(0,Vh);
-        unssd = unssd>0.;
-        if(withplot>19)
-          plot(unssd,wait=1);
-      }
-    pun[i][]=Rih[i]*unssd[];//this is global operation
-    sun[] += Rih[i]'*pun[i][];// also global operation like broadcast';
-    vsum=sun[];
-    if(withplot>9)
-      plot(part,aTh[i],fill=1,wait=1);
- // Add mpireduce for sum all sun and pun local contribution.
-29: mpiReduce(vsum, reducesum,processor(0,myComm),mpiSUM); //MPI global operation MPi\_Reduce on global communicator
-30: broadcast(processor(0,myComm),reducesum); //Broadcast sum on process 0 to all process
-31: sun[]=reducesum;
-32: plot(sun,wait=1);
-33: i=membershipKey
-34: Thi=aTh[i];
-35: pun[i]= pun[i]/sun;
-36: if(withplot>8)  plot(pun[i],wait=1);
-37: macro Grad(u) [dx(u),dy(u)]//EOM
-38: sun=0;
-39: i=membershipKey
-    Thi=aTh[i];
-    varf va(u,v) =
-      int2d(Thi)(Grad(u)'*Grad(v))//')
-      +on(1,u=1) + int2d(Th)(v)
-      +on(10,u=0) ;
-40: aA[i]=va(Vhi,Vhi);
-41: set(aA[i],solver=sparsesolver,mpicomm=cc); //Set parameters for Solver Hypre. mpicomm=cc means you not solve on global process but in group on of process define by cc
-42: rhsi[i][]= va(0,Vhi);
-43: Dih[i]=pun[i][];
-44: real[int]  un(Vhi.ndof);
-45: un=1.;
-46: real[int] ui=Dih[i]*un;
-47: sun[] += Rih[i]'*ui;//';
-48: varf vaun(u,v) = on(10,u=1);
-49: auntgv[i][]=vaun(0,Vhi); // store arry of tgv on Gamma intern.
-56: reducesum=0; vsum=sun;
-57: mpiReduce(vsum, reducesum,processor(0,myComm),mpiSUM); //MPI global operation MPi\_Reduce on global communicator
-58: broadcast(processor(0,myComm),reducesum); //Broadcast sum on process 0 to all other process
-59: sun[]=reducesum;
-60: if(withplot>5)
-61: plot(sun,fill=1,wait=1);
-62: cout << sun[].max << " " << sun[].min<< endl;
-63: assert( 1.-1e-9 <= sun[].min  && 1.+1e-9 >= sun[].max);
-64: int nitermax=1000;
-{
-  Vh un=0;
-  for(int iter=0;iter<nitermax;++iter)
-    {
-      real err=0,rerr=0;
-      Vh un1=0;
-          i=membershipKey;
-          Thi=aTh[i];	
-          real[int]  ui=Rih[i]*un[];//';
-	  real[int] bi = ui .* auntgv[i][];
-          bi = auntgv[i][] ? bi :  rhsi[i][];
-          ui=au[i][];
-          ui= aA[i] ^-1 * bi; //Solve local linear system on group of process represented by color membershipKey
-          bi = ui-au[i][];
-          err += bi'*bi;//';
-	  au[i][]= ui;
-          bi = Dih[i]*ui; //Prolongation of current solution to obtain right hand
-          un1[] += Rih[i]'*bi;// ';
-}
-65: reducesum=0; vsum=un1[];
-66: mpiReduce(vsum, reducesum,processor(0,myComm),mpiSUM); //MPI global operation MPi\_Reduce on global communicator
-67: broadcast(processor(0,myComm),reducesum); //Broadcast sum on process 0 to all other process
-68: un1[]=reducesum;
-69: real residrela=0;
-70: mpiReduce(err,residrela ,processor(0,myComm),mpiSUM);
-71: broadcast(processor(0,myComm),residrela);
-72: err=residrela; err= sqrt(err);
-73: if(rank==0)	cout << iter << " Err = " << err << endl;
-74:    if(err<1e-5) break;
-75:      un[]=un1[];
-76:        if(withplot>2)
-77:        plot(au,dim=3,wait=0,cmm=" iter  "+iter,fill=1 );
-78:    }
-79:  plot(un,wait=1,dim=3);
-80: }
-\eFF
-\end{example}
-
-
-
-
+%   exemple obsolete F. Hecht revmove 10/08/2016 
+% ---------------
+%The following example present in details of Schwartz domain decomposition
+%algorithm for solving Laplacian2d problem. In this example we use two level
+%of parallelism to solve simple Laplacian2d in square domain. We have few number
+%of subdomain and in every subdomain we use parallel sparse solver to solve local problem.
+%
+%
+%\begin{example}[schwarz.edp]\label{sch:comm}
+%\bFF
+%//
+%1:load "hypre_FreeFem"; //Load Hypre solver
+%2:func bool AddLayers(mesh & Th,real[int] &ssd,int n,real[int] &unssd)
+%{
+%  //  build a continuous function  uussd (P1) :
+%  //  ssd in the caracteristics function on the input sub domain.
+%  //  such that :
+%  //   unssd = 1 when   ssd =1;
+%  //   add n layer of element (size of the overlap)
+%  //   and unssd = 0 ouside of this layer ...
+%  // ---------------------------------
+%  fespace Vh(Th,P1);
+%  fespace Ph(Th,P0);
+%  Ph s;
+%  assert(ssd.n==Ph.ndof);
+%  assert(unssd.n==Vh.ndof);
+%  unssd=0;
+%  s[]= ssd;
+%  //  plot(s,wait=1,fill=1);
+%  Vh u;
+%  varf vM(u,v)=int2d(Th,qforder=1)(u*v/area);
+%  matrix M=vM(Ph,Vh);
+%
+%  for(int i=0;i<n;++i)
+%    {
+%      u[]= M*s[];
+%      // plot(u,wait=1);
+%      u = u>.1;
+%      // plot(u,wait=1);
+%      unssd+= u[];
+%      s[]= M'*u[];//';
+%      s = s >0.1;
+%    }
+%  unssd /= (n);
+%  u[]=unssd;
+%  ssd=s[];
+%  return true;
+%}
+%3: mpiComm   myComm;       // Create communicator with value MPI\_COMM\_WORLD
+%
+%4: int membershipKey,rank,size; //Variables for manage communicators
+%5: rank=mpiRank(myComm); size=mpiSize(myComm); //Rank of process and size of communicator
+%6: bool withmetis=1, RAS=0; //Use or not metis for partitioning Mesh
+%7: int sizeoverlaps=5; // size off overlap
+%8: int withplot=1;
+%9: mesh Th=square(100,100);
+%10: int[int] chlab=[1,1  ,2,1  ,3,1  ,4,1  ];
+%11: Th=change(Th,refe=chlab);
+%12: int nn=2,mm=2, npart= nn*mm;
+%13: membershipKey = mpiRank(myComm)\%npart; // Coloring for partitioning process group
+%14: mpiComm cc(processor(membershipKey,myComm),rank); //Create MPI communicator according previous coloring
+%15: fespace Ph(Th,P0),fespace Vh(Th,P1);
+%16: Ph  part;
+%17: Vh  sun=0,unssd=0;
+%18: real[int] vsum=sun[],reducesum=sun[]; //Data use for control partitioning.
+%19: Ph xx=x,yy=y,nupp;
+%20: part = int(xx*nn)*mm + int(yy*mm);
+%21: if(withmetis)
+%    {
+%    load "metis";
+%    int[int] nupart(Th.nt);
+%    metisdual(nupart,Th,npart);
+%    for(int i=0;i<nupart.n;++i)
+%      part[][i]=nupart[i];
+%    }
+%22: if(withplot>1)
+%21: plot(part,fill=1,cmm="dual",wait=1);
+%22: mesh[int] aTh(npart);
+%23: mesh Thi=Th;
+%24: fespace Vhi(Thi,P1);
+%25: Vhi[int] au(npart),pun(npart);
+%26: matrix[int] Rih(npart), Dih(npart), aA(npart);
+%27: Vhi[int] auntgv(npart), rhsi(npart);
+%28: i=membershipKey;
+%    Ph suppi= abs(part-i)<0.1;
+%    AddLayers(Th,suppi[],sizeoverlaps,unssd[]);
+%    Thi=aTh[i]=trunc(Th,suppi>0,label=10,split=1);
+%    Rih[i]=interpolate(Vhi,Vh,inside=1); //  Vh -> Vhi
+%    if(RAS)
+%      {
+%        suppi= abs(part-i)<0.1;
+%        varf vSuppi(u,v)=int2d(Th,qforder=1)(suppi*v/area);
+%        unssd[]= vSuppi(0,Vh);
+%        unssd = unssd>0.;
+%        if(withplot>19)
+%          plot(unssd,wait=1);
+%      }
+%    pun[i][]=Rih[i]*unssd[];//this is global operation
+%    sun[] += Rih[i]'*pun[i][];// also global operation like broadcast';
+%    vsum=sun[];
+%    if(withplot>9)
+%      plot(part,aTh[i],fill=1,wait=1);
+% // Add mpireduce for sum all sun and pun local contribution.
+%29: mpiReduce(vsum, reducesum,processor(0,myComm),mpiSUM); //MPI global operation MPi\_Reduce on global communicator
+%30: broadcast(processor(0,myComm),reducesum); //Broadcast sum on process 0 to all process
+%31: sun[]=reducesum;
+%32: plot(sun,wait=1);
+%33: i=membershipKey
+%34: Thi=aTh[i];
+%35: pun[i]= pun[i]/sun;
+%36: if(withplot>8)  plot(pun[i],wait=1);
+%37: macro Grad(u) [dx(u),dy(u)]//EOM
+%38: sun=0;
+%39: i=membershipKey
+%    Thi=aTh[i];
+%    varf va(u,v) =
+%      int2d(Thi)(Grad(u)'*Grad(v))//')
+%      +on(1,u=1) + int2d(Th)(v)
+%      +on(10,u=0) ;
+%40: aA[i]=va(Vhi,Vhi);
+%41: set(aA[i],solver=sparsesolver,mpicomm=cc); //Set parameters for Solver Hypre. mpicomm=cc means you not solve on global process but in group on of process define by cc
+%42: rhsi[i][]= va(0,Vhi);
+%43: Dih[i]=pun[i][];
+%44: real[int]  un(Vhi.ndof);
+%45: un=1.;
+%46: real[int] ui=Dih[i]*un;
+%47: sun[] += Rih[i]'*ui;//';
+%48: varf vaun(u,v) = on(10,u=1);
+%49: auntgv[i][]=vaun(0,Vhi); // store arry of tgv on Gamma intern.
+%56: reducesum=0; vsum=sun;
+%57: mpiReduce(vsum, reducesum,processor(0,myComm),mpiSUM); //MPI global operation MPi\_Reduce on global communicator
+%58: broadcast(processor(0,myComm),reducesum); //Broadcast sum on process 0 to all other process
+%59: sun[]=reducesum;
+%60: if(withplot>5)
+%61: plot(sun,fill=1,wait=1);
+%62: cout << sun[].max << " " << sun[].min<< endl;
+%63: assert( 1.-1e-9 <= sun[].min  && 1.+1e-9 >= sun[].max);
+%64: int nitermax=1000;
+%{
+%  Vh un=0;
+%  for(int iter=0;iter<nitermax;++iter)
+%    {
+%      real err=0,rerr=0;
+%      Vh un1=0;
+%          i=membershipKey;
+%          Thi=aTh[i];	
+%          real[int]  ui=Rih[i]*un[];//';
+%	  real[int] bi = ui .* auntgv[i][];
+%          bi = auntgv[i][] ? bi :  rhsi[i][];
+%          ui=au[i][];
+%          ui= aA[i] ^-1 * bi; //Solve local linear system on group of process represented by color membershipKey
+%          bi = ui-au[i][];
+%          err += bi'*bi;//';
+%	  au[i][]= ui;
+%          bi = Dih[i]*ui; //Prolongation of current solution to obtain right hand
+%          un1[] += Rih[i]'*bi;// ';
+%}
+%65: reducesum=0; vsum=un1[];
+%66: mpiReduce(vsum, reducesum,processor(0,myComm),mpiSUM); //MPI global operation MPi\_Reduce on global communicator
+%67: broadcast(processor(0,myComm),reducesum); //Broadcast sum on process 0 to all other process
+%68: un1[]=reducesum;
+%69: real residrela=0;
+%70: mpiReduce(err,residrela ,processor(0,myComm),mpiSUM);
+%71: broadcast(processor(0,myComm),residrela);
+%72: err=residrela; err= sqrt(err);
+%73: if(rank==0)	cout << iter << " Err = " << err << endl;
+%74:    if(err<1e-5) break;
+%75:      un[]=un1[];
+%76:        if(withplot>2)
+%77:        plot(au,dim=3,wait=0,cmm=" iter  "+iter,fill=1 );
+%78:    }
+%79:  plot(un,wait=1,dim=3);
+%80: }
+%\eFF
+%\end{example}
+%
+%
+%
+% ------ 
 
 
 
