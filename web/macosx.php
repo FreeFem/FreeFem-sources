@@ -43,12 +43,12 @@ include 'phpfiles.php';
 ?>
 
 <p class="p1"><b>Installation from a pkg<span class="Apple-converted-space">  </span>file is standard,</b></p>
-<p class="p1"><b>Remark </b>on version 10.10, 10.9 and 10.8 to authorise the install from everywhere <a href="http://maypalo.com/2013/1
+<p class="p1"><br><b>Remark </b>on version 10.10, 10.9 and 10.8 to authorise the install from everywhere <a href="http://maypalo.com/2013/1
 0/28/install-non-approved-apps-mavericks-10-9/"> (see System Preferences > Security & Privacy > General > Allow applications dow
 nloaded from > Anywhere)<A> 
 
 
-<p class="p1">Take the file from and download </p> 
+<br><p class="p1">Take the file from and download </p> 
 	<? pfile($m11file,"MacOS 10.11 (with mpich), ifort MKL     ") ?>		
 	<? pfile($m10file,"MacOS 10.10 (with mpich), ifort MKL    ") ?>		
 	<? pfile($m9file,"MacOS 10.9 (with mpich), ifort MKL   ") ?>		
@@ -58,7 +58,7 @@ nloaded from > Anywhere)<A>
 	<? pfile($mfile,"MacOS 10.4") ?>	
 <p class="p1"><br></p>
 <p class="p1">The <tt>textmate 2</tt> editor is a good editor for  Mac 10.7 or better, <a href="https://macromates.com/download"> download  from macromates.com </a> and install it, when  get the 
-  <a href="http://www.freefem.org/ff++/textmate2.zip"> textmate freefem++ syntax from freefem.org </a> unzip and follow the explanation given in file \texttt{How\_To.rtf}.</p>
+  <a href="http://www.freefem.org/ff++/textmate2.zip"> textmate freefem++ syntax from www.freefem.org/ff++/textmate2.zip </a> unzip textmate2.zip and follow the explanation given in file \texttt{How\_To.rtf}.</p>
 <p class="p1"><br></p>
 
 <p class="p1"><span class="s1"> Please read the <a href="README_MAC.txt"> README_MAC</a> form the distribution for the full infomation </span></p>
