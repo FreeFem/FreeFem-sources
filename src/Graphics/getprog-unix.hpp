@@ -272,6 +272,7 @@ if( ch2edpdir && edpfilenamearg)
 	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
            << "        -cd               : Change dir to script dir\n"
+           << "        -jc               : just compile\n"
            << "        -cdtmp            : Change dir to tmp dir (for test)\n"
            << endl ;
 
