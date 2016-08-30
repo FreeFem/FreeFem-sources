@@ -587,7 +587,7 @@ long ff_flann_search( KNM_<double> const &  P ,KNM_<double> const &  Q, double c
     IJ.resize(nq);
     cout << np << " " << mq << endl;
     cout << nq << " " << mq << endl;
-    flann::Matrix<double> dataset(p,np,nq);
+    flann::Matrix<double> dataset(p,np,mp);
     flann::Matrix<double> query(q,nq,mq);
     std::vector< std::vector<int> > indices;
     std::vector<std::vector<double> > dists;

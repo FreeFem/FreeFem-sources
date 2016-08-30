@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.47}
+\def\VERSION{3.47-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -10083,7 +10083,69 @@ Vh ww;
 @real[int] dd=[1,2]; 
 ww[]= Ixx*dd;
 \eFF
+%%%  add OP .... 08/2016
+\begin{example}[schwarz2.edp]~
 
+The following shows how to implement with an interpolation matrix a domain decomposition algorithm based on Schwarz method with Robin conditions.
+
+Given a non-overlapping partition $\bar\Omega=\bar\Omega_0\cup\bar\Omega_1$ with $\Omega_0\cap\Omega_1=\emptyset$, $\Sigma:=\bar\Omega_0\cap\bar\Omega_1$ the algorithm is
+\begin{eqnarray*}&&
+-\Delta u_i= f \hbox{ in }\Omega_i,~i=0,1,~~\frac{\partial(u_1-u_0)}{\partial n} + \alpha (u_1-u_0)=0\hbox{ on }\Sigma.
+%\cr&&
+\end{eqnarray*}
+The same in variational form is:
+\begin{eqnarray*}&
+\int_{\Omega_i}\nabla u_i\cdot\nabla v &+ \int_\Sigma\alpha u_i v  = \int_{\Omega_i}f v
+\cr&&
+- \int_{\Omega_j}(\nabla u_j\cdot\nabla v-f v) + \int_\Sigma\alpha u_j v,~~
+\forall v\in H^1_0(\Omega), i,j=[0,1]\cup[1,0]
+\end{eqnarray*}
+To discretized with the $P^1$ triangular Lagrangian finite element space $V_h$ simply replace $H^1_0(\Omega)$ by $V_h(\Omega_0)\cup V_h(\Omega_1)$.
+Then difficulty is to compute $\int_{\Omega_j} \nabla u_j\cdot\nabla v$ when $v$ is a basis function of $V_h(\Omega_i)$, $i\ne j$.  It is done as follows (with $\Gamma=\partial\Omega$)
+%
+\bFF
+// from file schwarz2.edp 
+@fespace Vh0(Th[0],P1),Vh1(Th[1],P1);
+Vh0 u0=0;Vh1 u1=0;
+
+@macro grad(u) [dx(u),dy(u)] //
+@varf a(u,v)=int2d(Th[i])(grad(u)'*grad(v))+int1d(Th[i],Interface)(alpha*u*v)
+           +on(Gamma,u=0);
+@varf b(u,v)=int2d(Th[i])(f*v)+on(Gamma,u=0);
+@varf du1dn(u,v)=-int2d(Th[1])(grad(u1)'*grad(v)-f*v)+int1d(Th[1],Sigma)(alpha*u1*v)
+           +on(Gamma,u=0);
+@varf du0dn(u,v)=-int2d(Th[0])(grad(u0)'*grad(v)-f*v)+int1d(Th[0],Sigma)(alpha*u0*v)
+           +on(Gamma,u=0);
+
+@matrix I01=@interpolate(Vh1,Vh0);
+@matrix I10=@interpolate(Vh0,Vh1);
+
+@matrix[@int] A(2);
+ A[0]=a(Vh0,Vh0);
+ A[1]=a(Vh1,Vh1);
+
+@for(@int iter=0;iter<Niter;iter++)
+{
+ 	 // Solve on Th[0]
+	{
+		@real[@int] b0=b(0,Vh0);
+		@real[@int] Du1dn=du1dn(0,Vh1);
+		@real[@int] Tdu1dn(Vh0.ndof); Tdu1dn=I01'*Du1dn;
+		b0+=Tdu1dn;
+		u0[]=A[0]^-1*b0;
+	}
+ 	 // Solve on Th[1]
+	{
+		@real[@int] b1=b(0,Vh1);
+		@real[@int] Du0dn=du0dn(0,Vh0);
+		@real[@int] Tdu0dn(Vh1.ndof); Tdu0dn=I10'*Du0dn;
+		b1+=Tdu0dn;
+		u1[]=A[1]^-1*b1;
+	}
+	@plot(u0,u1,cmm="iter="+iter);
+}
+\eFF
+\end{example}
 \subsection{Finite elements connectivity}
 Here, we show how to get  informations on a finite element space $W_h({\cal T}_n,*)$, where ``*'' may be P1, P2, P1nc, etc.
 \index{nt} \index{ndof} \index{ndofK} \index{connectivity}

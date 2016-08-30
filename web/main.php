@@ -102,6 +102,14 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 <div class="thema">Some FreeFem++ presentation (with useful information):
 </div>
 <ul>
+   <li>  Tutorial with Freefem++, 
+<A HREF="http://smai.emath.fr/cemracs/cemracs16/">   CEMRACS 2016  </A> CIRM, Luminy, Marseille, july 18-22, 2016. <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++/ff-cemracs-2016/"> The directory with all data  </A> 
+ </li>
+   <li>  FreeFem++, 
+<A HREF="http://www.math.iitb.ac.in/~neela/CIMPA/home.html">   Cimpa Summer School on Current Research in FEM  at IIT Bombay, India <A/> 6-17 July, 2015.  
+<A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++/2015-cimpa-IIT"> The directory with all data  </A> and <A HREF="http://library.cirm-math.fr/Record.htm?idlist=3&record=19281150124910093329"> the movie of the lecture </A>
+ </li>
+
     <li> <font > <bf>  <font color=blue>  Graduate Course: </bf> </font>
 <A HREF="https://www.fields.utoronto.ca/programs/scientific/15-16/scientificcomputing/graduate/">  
  An introduction to scientific computing using free software FreeFem++ <A/> , 
