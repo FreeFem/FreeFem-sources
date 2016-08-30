@@ -14,8 +14,8 @@ bool isSetOpt(string* const& ss) {
     return HPDDM::Option::get()->set(*ss);
 }
 template<class Type, class K>
-bool destroyRecycling(Type* const& Op, const long& mu) {
-    HPDDM::Recycling<K>::get(mu)->destroy();
+bool destroyRecycling(Type* const& Op) {
+    HPDDM::Recycling<K>::get()->destroy(Op->prefix());
     return false;
 }
 
@@ -27,7 +27,7 @@ class initDDM_Op : public E_F0mps {
         Expression Mat;
         Expression o;
         Expression R;
-        static const int n_name_param = 3;
+        static const int n_name_param = 4;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), Mat(param2), o(param3), R(param4) {
@@ -40,7 +40,8 @@ template<class Type, class K>
 basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"scaling", &typeid(KN<HPDDM::underlying_type<K>>*)},
-    {"deflation", &typeid(FEbaseArrayKn<K>*)}
+    {"deflation", &typeid(FEbaseArrayKn<K>*)},
+    {"prefix", &typeid(string*)}
 };
 template<class Type, class K>
 class initDDM : public OneOperator {
@@ -62,10 +63,9 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
-    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
     if(ptO && mA) {
         HPDDM::MatrixCSR<K>* dA = new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>(*ptO), *ptR, comm);
+        ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
     }
     FEbaseArrayKn<K>* deflation = nargs[2] ? GetAny<FEbaseArrayKn<K>*>((*nargs[2])(stack)) : 0;
     K** const& v = ptA->getVectors();
@@ -79,11 +79,12 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
         ptA->setVectors(ev);
         ptA->Type::super::initialize(deflation->N);
     }
-    KN<HPDDM::underlying_type<K>>* ptD = nargs[1] ? GetAny<KN<HPDDM::underlying_type<K>>*>((*nargs[1])(stack)) : 0;
-    if(ptD)
-        ptA->initialize(*ptD);
+    if(nargs[1])
+        ptA->initialize(*GetAny<KN<HPDDM::underlying_type<K>>*>((*nargs[1])(stack)));
     else
         std::cerr << "Something is really wrong here !" << std::endl;
+    if(nargs[3])
+        ptA->setPrefix(*(GetAny<string*>((*nargs[3])(stack))));
     return ptA;
 }
 
@@ -684,7 +685,7 @@ void add() {
     Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
-    Global.Add("destroyRecycling", "(", new OneOperator2_<bool, Type<K, S>*, long>(Schwarz::destroyRecycling<Type<K, S>, K>));
+    Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(Schwarz::destroyRecycling<Type<K, S>, K>));
 }
 }
 
