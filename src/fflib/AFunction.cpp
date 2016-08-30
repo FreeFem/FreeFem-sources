@@ -1,26 +1,26 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,17 +28,15 @@
 //#pragma dont_inline on
 //#pragma inline_depth(1)
 
-#include "config-wrapper.h"
-
 #include <cmath>
 #include <complex>
-//  put here some def dur to c++11 
-// problem with mixed with using namespace std; 
+//  put here some def dur to c++11
+// problem with mixed with using namespace std;
 // to correct bug in g++ v 4.8.1 add std
 #if defined (_WIN32  ) || (__GNUC__ >=5)
 #define NM_STD std::
 #else
-#define NM_STD 
+#define NM_STD
 #endif
 long isNaN(double x){return NM_STD isnan(x);}
 long isInf(double x){return NM_STD isinf(x);}
@@ -59,7 +57,7 @@ double myjn(long n, double x){ return jn((int) n,x);}
 #include "RNM.hpp"
 
 #include "Operator.hpp"
-// for exec routine 
+// for exec routine
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 #include <queue>
@@ -70,7 +68,7 @@ double myjn(long n, double x){ return jn((int) n,x);}
 #if __APPLE__
 #include <malloc/malloc.h>
 #elif HAVE_MALLOC_H
-#include <malloc.h> 
+#include <malloc.h>
 #endif
 #ifdef HAVE_TIMES
 #include <time.h>
@@ -105,15 +103,15 @@ long storagetotal()
 #endif
 }
 // end add mach 2014 ...
-extern Map_type_of_map map_type_of_map ; //  to store te type 
-extern Map_type_of_map map_pair_of_type ; //  to store te type 
+extern Map_type_of_map map_type_of_map ; //  to store te type
+extern Map_type_of_map map_pair_of_type ; //  to store te type
 
 extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
 
 extern int TheCurrentLine; // unset: by default
 extern long mpisize,mpirank;
 // FH  for g++ 3.4  the prototypage  have change
-double  VersionNumber(); 
+double  VersionNumber();
 double Imag(const  complex<double> & z){ return imag(z);}
 double Real(const  complex<double> & z){ return real(z);}
 const  basicForEachType * basicForEachType::type_C_F0 =0; //  for any type un formal operation .... FH add 09/2012
@@ -127,14 +125,14 @@ template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(M
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 template<class T> inline T Square (const T &a){return a*a;}
 
-struct SubArray2: public binary_function<long,long,SubArray> { 
-  static SubArray f(const long & a,const long & b)  { 
+struct SubArray2: public binary_function<long,long,SubArray> {
+  static SubArray f(const long & a,const long & b)  {
    // cout << "SubArray: " << a << " " << b << endl;
-    return SubArray(b-a+1,a);} }; 
-struct SubArray3: public ternary_function<long,long,long,SubArray> { 
-  static SubArray f(Stack s,const long & a,const long & b,const long & c)  {  
+    return SubArray(b-a+1,a);} };
+struct SubArray3: public ternary_function<long,long,long,SubArray> {
+  static SubArray f(Stack s,const long & a,const long & b,const long & c)  {
   // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
-   return SubArray((b-a+1)/c,a,c);} }; 
+   return SubArray((b-a+1)/c,a,c);} };
 
 #ifdef OLDCPP
 template<class T> inline
@@ -147,62 +145,62 @@ complex<T> polar(const T& r, const T& theta)
 
 double preal( Complex * const& p){return real(*p);}
 
- 
+
 template<class A,class B>  A Build(B b) {  return A(b);}
-  
-  
+
+
 
 
 long Exit(long i) {throw(ErrorExit("Exit",i));return 0;}
 bool Assert(bool b) {if (!b) throw(ErrorExec("exec assert",1));return true;}
-  
+
 inline void MyAssert(int i,char * ex,char * file,long line)
 {if (i) {
-    cout << "CompileError assertion :  " << ex << " in file " << file << "  line = " << line << endl; 
+    cout << "CompileError assertion :  " << ex << " in file " << file << "  line = " << line << endl;
      CompileError();}
  }
 
 
-/*  
+/*
 template<class R>
 class  OneOperator0 : public OneOperator {
  class E_F0_F :public  E_F0 { public:
-  typedef  R (*func)( ) ; 
+  typedef  R (*func)( ) ;
   func f;
   E_F0_F(func ff)  : f(ff) {}
-  AnyType operator()(Stack )  const  {return SetAny<R>( f()) ;}  
-     operator aType () const { return atype<R>();} 
+  AnyType operator()(Stack )  const  {return SetAny<R>( f()) ;}
+     operator aType () const { return atype<R>();}
 
 };
 
   //  aType r; //  return type
-    typedef  R (*func)() ; 
+    typedef  R (*func)() ;
     func  f;
-    public: 
-    E_F0 * code(const basicAC_F0 & ) const 
-     { return  new E_F0_F(f);} 
+    public:
+    E_F0 * code(const basicAC_F0 & ) const
+     { return  new E_F0_F(f);}
     OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 */
 template<class R>
 class  OneOperatorConst : public OneOperator {
     E_F0 * e;
-    public: 
-    E_F0 * code(const basicAC_F0 & ) const  { return  e;} 
+    public:
+    E_F0 * code(const basicAC_F0 & ) const  { return  e;}
     OneOperatorConst(E_F0 * ee):  OneOperator(map_type[typeid(R).name()]),e(ee){}
 };
 
 class  OneOperator_array : public OneOperator {public:
-    E_F0 * code(const basicAC_F0 & a) const 
-     { return  new E_Array(a);} 
+    E_F0 * code(const basicAC_F0 & a) const
+     { return  new E_Array(a);}
     OneOperator_array(): OneOperator(atype<E_Array>(),true) {}
 };
 class  OneOperator_border : public OneOperator {public:
-    E_F0 * code(const basicAC_F0 & a) const 
-     { if (a.size()==1 && a[0].left()==atype<E_Array>() ) 
+    E_F0 * code(const basicAC_F0 & a) const
+     { if (a.size()==1 && a[0].left()==atype<E_Array>() )
         return new E_Border(dynamic_cast<const E_Array*>(a[0].LeftValue()));
-        else     
-        return  new E_Border(a);} 
+        else
+        return  new E_Border(a);}
     OneOperator_border(): OneOperator(atype<const E_Border *>(),true) {}
 };
 
@@ -212,9 +210,9 @@ class  OneOperator_border_label : public OneOperator {public:
       Op( const  E_Border *bb) : b(bb) {}
       AnyType operator()(Stack)  const { return SetAny<long>(b->label);}
    };
-    E_F0 * code(const basicAC_F0 & a) const 
+    E_F0 * code(const basicAC_F0 & a) const
      {  const  E_Border * b = dynamic_cast<const E_Border *>(a[0].LeftValue());
-        return new Op(b);} 
+        return new Op(b);}
     OneOperator_border_label(): OneOperator(atype<long>(),atype<const E_Border *>()) {}
 };
 
@@ -227,8 +225,8 @@ template<class RR> RR RDecremantation(RR* a){ return (*a)--;}
 
 template<class RR,class B>
  RR * New_form_string(string * s) {B * r=  new B(s);freestring(s);return r;}// correct Mars 2011 remove * if delete
- 
- 
+
+
 
 
 inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
@@ -244,39 +242,39 @@ R *MakePtrWithDel( A  const & a)
   delete a;
   return r;}
 
-template<class R,class RR> 
-struct Op1_new_pstring: public unary_function<string*,R> { 
+template<class R,class RR>
+struct Op1_new_pstring: public unary_function<string*,R> {
   static R f(string * const & a)  {R r =  new RR(a->c_str());
     // delete a;  (stack ptr) FH mars 2006
-    return r;} }; 
+    return r;} };
 
-template<class R,class RR> 
-struct Op2_set_pstring: public binary_function<R,string*,R> { 
+template<class R,class RR>
+struct Op2_set_pstring: public binary_function<R,string*,R> {
   static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
-   if ( !*p || !**p) { 
-       cerr << " Error openning file " << *a << endl; 
+   if ( !*p || !**p) {
+       cerr << " Error openning file " << *a << endl;
        ExecError("Error openning file");}
   //  delete a; modif mars 2006 FH
-   return p;} }; 
+   return p;} };
 
-template<class R,class RR> 
-struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R> { 
-  static R  f(Stack s,R const & p,string * const & a,const ios::openmode & mode) 
+template<class R,class RR>
+struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R> {
+  static R  f(Stack s,R const & p,string * const & a,const ios::openmode & mode)
    {*p =  new RR(a->c_str(),mode);
      // delete a;   modif mars 2006 FH
-    return p;} }; 
+    return p;} };
 
 AnyType FWhile(Stack s ,Expression test,Expression ins)
-{ 
+{
   bool sptrclean=true;
   AnyType a;
   StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
   while ( GetAny<bool>((*test)(s)))
-     try  { 
+     try  {
         a=(*ins)(s);
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        }
-     catch ( E_exception & e) { 
+     catch ( E_exception & e) {
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
@@ -284,9 +282,9 @@ AnyType FWhile(Stack s ,Expression test,Expression ins)
        }
   return a;
 }
-    
+
 AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
-{ 
+{
   bool sptrclean=true;
   AnyType a;
      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
@@ -296,9 +294,9 @@ AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
         a=(*ins)(s);
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        }
-     catch ( E_exception & e) { 
+     catch ( E_exception & e) {
         if (verbosity>50)
-          cerr << "FFor " << e.what() << e.code << endl; 
+          cerr << "FFor " << e.what() << e.code << endl;
         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
        if (e.code == E_exception::e_break) break;
        else if  (e.code == E_exception::e_continue) continue;
@@ -309,33 +307,33 @@ AnyType FFor(Stack s ,Expression i0,Expression i1,Expression i2,Expression ins)
 }
 
 AnyType TTry(Stack s ,Expression ins,Expression ccatch,Expression fin,Expression notused)
-{ 
+{
   assert(notused == 0);
   AnyType a;
      try  {a=(*ins)(s);}
-     catch ( E_exception & e) { 
-        throw e; 
+     catch ( E_exception & e) {
+        throw e;
        }
      catch(...) {
         if(verbosity> 2) cerr << "Try:: catch (...) exception " << endl;
-        a=(*ccatch)(s);         
+        a=(*ccatch)(s);
      }
-   
+
    a=(*fin)(s);
   return a;
 }
 
 AnyType FIf(Stack s ,Expression test,Expression i1,Expression i2,Expression )
  {  AnyType a;
-   if (GetAny<bool>((*test)(s))) 
+   if (GetAny<bool>((*test)(s)))
      {
        if(i1) a=(*i1)(s);//Add if FH oct 2010
      }
-      else if (i2) 
+      else if (i2)
     {
      if(i2) a=(*i2)(s); //Add if FH oct 2010
     }
-   	     	
+
   return a;
  }
 
@@ -349,7 +347,7 @@ aType TypeArray(aType b,aType a)
       cerr << " list: " << endl;
       Map_type_of_map::const_iterator i;
       for(i=map_type_of_map.begin();i!=map_type_of_map.end();i++)
-        cerr << "\t " << *i->first.second << " [" << *i->first.first << "]" << "=" << *i->second << endl;        
+        cerr << "\t " << *i->first.second << " [" << *i->first.first << "]" << "=" << *i->second << endl;
       CompileError();
    }
    return r;
@@ -363,21 +361,21 @@ aType TypeTemplate(aType b,aType a)
       cerr << " list: " << endl;
       Map_type_of_map::const_iterator i;
       for(i=map_type_of_map.begin();i!=map_type_of_map.end();i++)
-        cerr << "\t " << *i->first.second << " <" << *i->first.first << ">" << "=" << *i->second << endl;        
+        cerr << "\t " << *i->first.second << " <" << *i->first.first << ">" << "=" << *i->second << endl;
       CompileError();
    }
    return r;
 }
 aType TypeArray(aType c,aType b,aType a)
 {
-   // type of  c[ b, a] 
+   // type of  c[ b, a]
    aType ba=map_pair_of_type[make_pair(b->right(),a->right())];
    if (!ba) {
       cerr << "Sorry is not possible to make a type of pair  "<< *b->right() << ", " << *c->right() << " " << endl;
       cerr << " list: " << endl;
       Map_type_of_map::const_iterator i;
       for(i=map_pair_of_type.begin();i!=map_pair_of_type.end();i++)
-        cerr << "\t (" << *i->first.second << " , " << *i->first.first << ") " << "=" << *i->second << endl;        
+        cerr << "\t (" << *i->first.second << " , " << *i->first.first << ") " << "=" << *i->second << endl;
       CompileError();
    }
    return TypeArray(c,ba);
@@ -385,17 +383,17 @@ aType TypeArray(aType c,aType b,aType a)
 
 
 inline  void ShowOn_cerr(const pair<const char * ,const OneOperator *> & i)
-{ 
+{
    cerr << "\t" <<  *i.first << ":" <<  endl;
    i.second->Show(cerr);
 }
 
 
 
-void ShowKeyWord(ostream & f ) 
+void ShowKeyWord(ostream & f )
  {
    zzzfff->dump(f);
- 
+
  }
 
 // <<dumptable>>
@@ -404,11 +402,11 @@ ostream* dumptable(ostream* f)
 
   *f << " the keywords " << endl;
   ShowKeyWord(*f);
-  *f << " the types " << endl; 
+  *f << " the types " << endl;
   ShowType(*f);
    ListOfTOfId::const_iterator i=tables_of_identifier.begin();
    for(;i!=tables_of_identifier.end();++i)
-    { 
+    {
       cout << "  --------- table of identifier ---------\n";
       TableOfIdentifier * ti=*i;
       TableOfIdentifier::const_iterator mc=ti->m.begin();
@@ -419,9 +417,9 @@ ostream* dumptable(ostream* f)
          const Polymorphic * op =dynamic_cast<const Polymorphic *>(mc->second.second) ;
          if ( op )  *f << *op << endl;
        }
-      
+
      }
-  
+
   return f;
 }
 
@@ -431,10 +429,10 @@ long exec(string *s)
       int r=execute(s->c_str());
     //  delete s;    modif mars 2006 FH
       return r;}
-      
 
 
- 
+
+
  class ostream_precis { public:
  ostream_precis(ostream * ff) :f(ff) {}
   ostream * f;
@@ -484,10 +482,10 @@ long fftellg( istream_seekg  pf) { return pf.f->tellg() ;}
  };
  inline istream_good to_istream_good(istream **f){ return istream_good(*f);}
  inline istream_good to_istream_good(istream *f){ return istream_good(f);}
-  
+
   inline long get_good( istream_good  pf) { return pf.f->good();}
   inline bool get_eof(istream ** p){ return (**p).eof();}
- 
+
 typedef ios_base& ( * ostream_manipulateur )(ios_base&);
 
 ios_base&  default1(ios_base& f)
@@ -497,23 +495,23 @@ ios_base&  default1(ios_base& f)
 }
 
 
-template< ostream_manipulateur pf> 
+template< ostream_manipulateur pf>
 inline ostream **set_os(ostream **f)
-{ 
+{
     **f << pf  ; return f;
 }
 
 inline ostream **set_os_flush(ostream **f)
-{ 
+{
     (**f).flush()  ; return f;
 }
 inline ostream *set_os_flush(ostream *f)
-{ 
+{
     (*f).flush()  ; return f;
 }
-template< ostream_manipulateur pf> 
+template< ostream_manipulateur pf>
 inline ostream *set_os1(ostream *f)
-{ 
+{
     *f << pf  ; return f;
 }
 
@@ -521,19 +519,19 @@ inline ostream *set_os1(ostream *f)
 template<class R>
 class  OneOperator_0 : public OneOperator {
   class E_F0_F :public  E_F0mps { public:
-    typedef  R (*func)( ) ; 
+    typedef  R (*func)( ) ;
     func f;
     E_F0_F(func ff)  : f(ff) {}
-    AnyType operator()(Stack )  const {return SetAny<R>( f()) ;}  
-    operator aType () const { return atype<R>();} 
+    AnyType operator()(Stack )  const {return SetAny<R>( f()) ;}
+    operator aType () const { return atype<R>();}
 
   };
 
-  typedef  R (*func)() ; 
+  typedef  R (*func)() ;
   func  f;
-public: 
-  E_F0 * code(const basicAC_F0 & ) const 
-  { return  new E_F0_F(f);} 
+public:
+  E_F0 * code(const basicAC_F0 & ) const
+  { return  new E_F0_F(f);}
   OneOperator_0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
 };
 
@@ -546,8 +544,8 @@ long genrandint32 () {return (long)  genrand_int32();}
 
 template<class A,class B,bool RO=true>
 struct  MIMul {
-  static bool MeshIndependent(Expression a,Expression b)   
-   { 
+  static bool MeshIndependent(Expression a,Expression b)
+   {
     bool mia= a->MeshIndependent() ;
     bool mib= b->MeshIndependent();
     if ( mia && mib) return true;
@@ -558,8 +556,8 @@ struct  MIMul {
             A va = GetAny<A>((*a)(NullStack));
            // cout << " va = " << va << endl;
             if ( va == A() )
-             { 
-             //  cout << " va = " << va << endl; 
+             {
+             //  cout << " va = " << va << endl;
                return true;
              }
           }
@@ -567,19 +565,19 @@ struct  MIMul {
           {
             B vb = GetAny<B>((*b)(NullStack));
             // cout << " vb = " << vb << endl;
-            if ( vb == B() ) 
+            if ( vb == B() )
             { //cout << " vb = " << vb << endl;
              return true; }
            }
          return false;
         }
-      
+
     }
   static bool ReadOnly() { return RO;}
-    
+
 };
 // add frev 2007
-class TransE_Array:  public E_F0 {  public:  
+class TransE_Array:  public E_F0 {  public:
      const E_Array * v;
     int size() const {return v->size();}
     size_t nbitem() const {return v->size();}
@@ -589,13 +587,13 @@ class TransE_Array:  public E_F0 {  public:
 };
 
 
-// add frev 2007 
+// add frev 2007
 class opTrans : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     opTrans():   OneOperator(atype<TransE_Array>(),atype<E_Array>()  ) {}
     E_F0 * code(const basicAC_F0 & args) const {
-	  return new TransE_Array(dynamic_cast<const E_Array*>((Expression) args[0])); } 
+	  return new TransE_Array(dynamic_cast<const E_Array*>((Expression) args[0])); }
 };
 
 /*
@@ -604,20 +602,20 @@ public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     opTTrans():   OneOperator(atype<E_Array>(),atype<TransE_Array>()  ) {}
     E_F0 * code(const basicAC_F0 & args) const {
-	return dynamic_cast<const TransE_Array*>((Expression) args[0])->v; } 
+	return dynamic_cast<const TransE_Array*>((Expression) args[0])->v; }
 };
-*/ 
+*/
 
 class opDot : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
-    
+
     opDot(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {}
     opDot(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
-    
+
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const;       
+    C_F0  code2(const basicAC_F0 &args) const;
 };
 
 
@@ -625,12 +623,12 @@ class opColumn : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
-    
+
     opColumn(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {if( A== basicForEachType::type_C_F0)pref=-100;}
     opColumn(aType A): OneOperator(atype<C_F0>(),ArrayOfaType(A,true)) {pref=-100;}
-    
+
   //  opColumn(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
-    
+
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;
 };
@@ -640,11 +638,11 @@ public:
     const char * op;
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
-    
+
     opSum(const char *opp,aType A, aType B): OneOperator(atype<C_F0>(),A,B),op(opp) {}
-    
+
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const;       
+    C_F0  code2(const basicAC_F0 &args) const;
 };
 
 
@@ -654,11 +652,11 @@ public:
     const char * op;
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
-    
+
     opSum(const char *opp,aType A, aType B): OneOperator(atype<C_F0>(),A,B),op(opp) {}
-    
+
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const;       
+    C_F0  code2(const basicAC_F0 &args) const;
 };
 */
 
@@ -666,10 +664,10 @@ class opFormal : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
-    C_F0  (*thecode2)(const basicAC_F0 &args);     
-    opFormal(aType A,C_F0  (c2)(const basicAC_F0 &args) ): OneOperator(atype<C_F0>(),A),thecode2(c2) {}       
+    C_F0  (*thecode2)(const basicAC_F0 &args);
+    opFormal(aType A,C_F0  (c2)(const basicAC_F0 &args) ): OneOperator(atype<C_F0>(),A),thecode2(c2) {}
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const { return (*thecode2)(args);}    
+    C_F0  code2(const basicAC_F0 &args) const { return (*thecode2)(args);}
 };
 // fin frev 2007
 // nov 2007   v[i]
@@ -677,27 +675,27 @@ class opVI : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     bool MeshIndependent() const { return false;}
-    
+
     opVI(aType A): OneOperator(atype<C_F0>(),A,atype<long>()) {}
-    
+
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const;       
+    C_F0  code2(const basicAC_F0 &args) const;
 };
 // fin nov 2007
 //  add 2010 feb.  FH
 C_F0 TryConj(const C_F0 & c) {
-    //   here put the conj   operator ... 
-    ArrayOfaType at(c.left()); 
+    //   here put the conj   operator ...
+    ArrayOfaType at(c.left());
     basicAC_F0_wa p(c);
     const  OneOperator *  ff=TheOperators->Find("\'",at);
-	if (ff) { 
-	    if(verbosity>10) 
+	if (ff) {
+	    if(verbosity>10)
 	    cout << " ( do Conj) "  ;
 	     return ff->code2(p);
 	}
-	
+
     return c; }
-// fin add 2010 feb.	  
+// fin add 2010 feb.
 // avril 2007
 
 C_F0  formalMatCofactor(const basicAC_F0 &args)
@@ -718,9 +716,9 @@ C_F0  formalMatCofactor(const basicAC_F0 &args)
 	for (int i=1;i<na;i++)
 	    if( ma != (int) a[i].LeftValue()->nbitem())
 		CompileError(" a matrix with variable number of columm");
-        
+
     }
-    
+
     int na1=na,ma1=ma;
     if(ta) RNM::Exchange(na1,ma1);
     if(na1 != ma1) CompileError(" CoFactor:  no square matrix ");
@@ -740,8 +738,8 @@ C_F0  formalMatCofactor(const basicAC_F0 &args)
         for (int i=0;i<na;++i)
             if(!ta)  A(i,0) = a[i];
             else     A(0,i) = TryConj(a[i]);
-    
-    
+
+
     AC_F0  v,cc;
     if(na1==2)
     {
@@ -762,12 +760,12 @@ C_F0  formalMatCofactor(const basicAC_F0 &args)
               i2 = (i+2)%3;
               j1 = (j+1)%3;
               j2 = (j+2)%3;
-              
+
             C(i,j) = A(i1,j1)*A(i2,i2)-A(i1,j2)*A(i2,j1);
           }
     }
     v=C(0,0);
-    
+
     for (int i=0;i<na1;++i)
     {  cc = C(i,0);
         for (int j=1;j<ma1;++j)
@@ -778,10 +776,10 @@ C_F0  formalMatCofactor(const basicAC_F0 &args)
     }
     return C_F0(TheOperators,"[]",v);
 
-    
+
 }
 
-C_F0  formalMatTrace(const basicAC_F0 &args)       
+C_F0  formalMatTrace(const basicAC_F0 &args)
 {
     bool ta =args[0].left()==atype<TransE_Array>();
     const TransE_Array * tea=0;
@@ -797,16 +795,16 @@ C_F0  formalMatTrace(const basicAC_F0 &args)
     if(maa) {
 	ma= a[0].LeftValue()->nbitem();
 	for (int i=1;i<na;i++)
-	    if( ma != (int) a[i].LeftValue()->nbitem()) 
+	    if( ma != (int) a[i].LeftValue()->nbitem())
 		CompileError(" first matrix with variable number of columm");
-        
+
     }
 
     int na1=na,ma1=ma;
     if(ta) RNM::Exchange(na1,ma1);
     if(na1 != ma1) CompileError(" trace:  no square matrix ");
     KNM<CC_F0> A(na1,ma1);
-    
+
     if(maa)
 	for (int i=0;i<na;++i)
 	{
@@ -815,19 +813,19 @@ C_F0  formalMatTrace(const basicAC_F0 &args)
 	    for (int j=0; j<ma;++j)
 		if(!ta)  A(i,j) = (*li)[j];
 		else     A(j,i) = TryConj((*li)[j]);
-	} 
+	}
 	    else
 		for (int i=0;i<na;++i)
 		    if(!ta)  A(i,0) = a[i];
 		    else     A(0,i) = TryConj(a[i]);
-    
-    
+
+
     CC_F0 s;
-    s= A(0,0); // correction feb. 2016 Thank to O. Pironneau 
+    s= A(0,0); // correction feb. 2016 Thank to O. Pironneau
     for (int i=1;i<na1;++i)
 	s = C_F0(TheOperators,"+",s,A(i,i));
     return  s;
-     
+
 }
 
 
@@ -847,16 +845,16 @@ C_F0  formalMatDet(const basicAC_F0 &args)
     if(maa) {
 	ma= a[0].LeftValue()->nbitem();
 	for (int i=1;i<na;i++)
-	    if( ma != (int) a[i].LeftValue()->nbitem()) 
+	    if( ma != (int) a[i].LeftValue()->nbitem())
 		CompileError("  matrix with variable number of columm");
-        
+
     }
-    
+
     int na1=na,ma1=ma;
     if(ta) RNM::Exchange(na1,ma1);
     if(na1 != ma1) CompileError(" trace:  no square matrix ");
     KNM<CC_F0> A(na1,ma1);
-    
+
     if(maa)
 	for (int i=0;i<na;++i)
 	{
@@ -865,13 +863,13 @@ C_F0  formalMatDet(const basicAC_F0 &args)
 	    for (int j=0; j<ma;++j)
 		if(!ta)  A(i,j) = (*li)[j];
 		else     A(j,i) = TryConj((*li)[j]);
-	} 
+	}
 	    else
 		for (int i=0;i<na;++i)
 		    if(!ta)  A(i,0) = a[i];
 		    else     A(0,i) = TryConj(a[i]);
-    
-    
+
+
     if(na1==1)
       return  A(0,0);
     else if( na1==2 )
@@ -895,26 +893,26 @@ C_F0  formalMatDet(const basicAC_F0 &args)
     {
 	CompileError("FH: sorry only det of 1x1 and 2x2 matrix ");
     }
-    return  C_F0(); 
-    
+    return  C_F0();
+
 }
 
-//  Add juin  2007 
+//  Add juin  2007
 template<class A,class B=A,class R=A>
 struct evalE_mul {
-    static AnyType eval(Stack s,const E_F0 * ab,const E_F0 * a,const E_F0 * b, bool & meshidenp) 
+    static AnyType eval(Stack s,const E_F0 * ab,const E_F0 * a,const E_F0 * b, bool & meshidenp)
     {
 	A aa = GetAny<A>((*a)(s)) ;
 	B bb = GetAny<B>((*b)(s)) ;
 	R rr(aa*bb);
 	bool mia=a->MeshIndependent();
 	bool mib=b->MeshIndependent();
-	
+
 	if (( aa == A()) && mia ) meshidenp=true;
 	else if(( bb == B()) && mib ) meshidenp=true;
         else meshidenp = mib && mia;
 	cout << " meshidenp ??? " << meshidenp << " " << rr << endl;
-	return SetAny<R>(static_cast<R>(rr)); 
+	return SetAny<R>(static_cast<R>(rr));
     }
 };
 istream *Getline(istream * f, string ** s)
@@ -923,35 +921,35 @@ istream *Getline(istream * f, string ** s)
     getline(*f,**s);
     size_t l = (**s).length();
     if( l > 0 && ((**s)[l-1]=='\r')) (**s).resize(l-1); //
-       return f;    
+       return f;
 }
 // Fin Add ne marche pas ....
 // fiun avril 2007
-//  Hack to Bypass a bug in freefem FH  ... 
-template<> 
-class ForEachType<void *>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...) 
+//  Hack to Bypass a bug in freefem FH  ...
+template<>
+class ForEachType<void *>:  public basicForEachType{public:// correction july 2009..... FH  Hoooo....  (Il y a un bug DUR DUR FH  ...)
     ForEachType(Function1 iv=0,Function1 id=0,Function1 OOnReturn=0):basicForEachType(typeid(void *),sizeof(void *),0,0,iv,id,OOnReturn) { }
 };
 
 inline double walltime(){
 #ifdef HAVE_GETTIMEOFDAY
 
-    
+
     struct              timeval currentWallTime;
     double             msecTime;
-    
+
     gettimeofday(&currentWallTime, NULL);
-    
+
     //time with milliseconds
     msecTime = ( currentWallTime.tv_sec*1000. + currentWallTime.tv_usec/1000. )/1000.0;
-    
+
     // return time with milliseconds
     return msecTime;
 
-    
+
 #else
 
-    // add for Pichon mars 2010 
+    // add for Pichon mars 2010
     time_t currentWallTime;
     time(&currentWallTime);
     return (double)currentWallTime;
@@ -972,7 +970,7 @@ double atof(string* p) {return atof(p->c_str());}// add march 2010
 double NaN(string* p) {
 return nan(p->c_str());}// add march 2012
 double NaN() {return nan("");}// add march 2012
-int ShowAlloc(const char *s,size_t & lg); 
+int ShowAlloc(const char *s,size_t & lg);
 long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
 long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}
 
@@ -983,17 +981,17 @@ class E_ForAllLoopMapSS
     typedef String V;
     typedef string *KK;
     typedef string *VV;
-    
+
     typedef MyMap<K,V>  *Tab;
     typedef   MyMap<K,V>::iterator TabI ;
-    
+
     typedef  ForAllLoopOpBase DataL;
     const DataL *data;
     E_ForAllLoopMapSS(const DataL *t): data(t){}
     AnyType f(Stack s) const {
         TabI  ii;
         Tab t= GetAny<Tab >(data->tab(s));
-        
+
         KK * i   =   GetAny<KK* >(data->i(s));
         VV * v   =   GetAny<VV* >(data->v(s));
         if(verbosity>1000) {
@@ -1001,8 +999,8 @@ class E_ForAllLoopMapSS
             cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
             cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
             cout << endl;}
-        
-        
+
+
         ffassert(i && v);
         if(t->m)
             ii=t->m->begin();
@@ -1015,13 +1013,13 @@ class E_ForAllLoopMapSS
             String  kk = iip->first;
             String  vv = iip->second;
             const string * pvo=iip->second;
-            
+
             *i =  kk;
             *v =  vv;
             const string * pv =*v;
             // for  Windows otherwise trap ???? FH. march 2016
             if(verbosity>99999) cout << "  b:" << i << " "<< v  << " "  << kk << " " <<  vv << endl;
-            
+
             data->code(s);
             if(verbosity>99999) cout << "  a:" << i << " "<< v  << " "  << kk << " " <<  **v << endl;
             if( pvo  == (const string *) iip->second) // no  change m[i]=
@@ -1034,7 +1032,7 @@ class E_ForAllLoopMapSS
                 ffassert(0);
             }
             if(verbosity>99999) cout << " A;" << i << " "<< v  << " "  << kk << " " <<  vv << " ok =" << ok << endl;
-            
+
             *i=0;
             *v=0;
             if(verbosity>99999)
@@ -1043,27 +1041,27 @@ class E_ForAllLoopMapSS
                 for (TabI iii=t->m->begin();iii!= t->m->end();++iii)
                     cout << " map =" << iii->first << " -> " << iii->second << endl;
                 cout << " end of map " << endl;
-            }           
-            // ii=iinext;//  
-            
+            }
+            // ii=iinext;//
+
         }
         if(verbosity>99999) cout << "befor end \n";
         data->end(s);
         if(verbosity>99999) cout <<"afert end \n";
         return Nothing  ;
     }
-    
+
 };
 
 void Init_map_type()
 {
-   TheOperators=new Polymorphic(), 
+   TheOperators=new Polymorphic(),
    TheRightOperators=new Polymorphic();
   //  cout << sizeof(string) << endl;
     map_type[typeid(AnyType).name()] = new ForTypeAnyType();
     map_type[typeid(void).name()] = new ForTypeVoid();
        InitLoop();
-    Dcl_Type<Expression>(0);    
+    Dcl_Type<Expression>(0);
     Dcl_TypeandPtr<double>(0,0,::InitializeDef<double>,0);
     Dcl_TypeandPtr<long>(0,0,::InitializeDef<long>,0);
     Dcl_TypeandPtr<bool>(0,0,::InitializeDef<bool>,0);
@@ -1082,7 +1080,7 @@ void Init_map_type()
     Dcl_Type< NothingType > ();
     Dcl_Type<OP_setw>();
     Dcl_Type<Polymorphic*>();
-    
+
 //    Dcl_Type<C_F0>();
     basicForEachType::type_C_F0 = map_type[typeid(C_F0).name()] =  new TypeLineFunction;
     Dcl_Type<E_Array>();
@@ -1093,19 +1091,19 @@ void Init_map_type()
     typedef MyMap<String,String> MyMapSS;
     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;
     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();
-    
-    
+
+
     Dcl_Type<SubArray>();
     Dcl_Type<pair<long,long> >();
-    
+
     initArrayDCLlong();
     initArrayDCLdouble();
     initArrayDCLComplex();
-        
+
     Dcl_Type<ios::openmode>();
-    
-    // <<known_variable_types>> les types des variables 
-    
+
+    // <<known_variable_types>> les types des variables
+
   zzzfff->Add("real",typevarreal=atype<double*>());
   zzzfff->Add("int",atype<long*>());
   zzzfff->Add("complex",typevarcomplex=atype<Complex*>());
@@ -1114,17 +1112,17 @@ void Init_map_type()
   zzzfff->Add("ifstream",atype<istream**>());
   zzzfff->Add("ofstream",atype<ostream**>());
   zzzfff->AddF("func",atype<C_F0>());
-  
-  
-    
+
+
+
 //  end of know types
 
      map_type[typeid(bool).name()]->AddCast(
        new E_F1_funcT<bool,bool*>(UnRef<bool>),
        new E_F1_funcT<bool,long>(Cast<bool,long>),
        new E_F1_funcT<bool,double>(Cast<bool,double>)
-       );                                         
-                        
+       );
+
 
      map_type[typeid(long).name()]->AddCast(
        new E_F1_funcT<long,long*>(UnRef<long>),
@@ -1134,20 +1132,20 @@ void Init_map_type()
        new E_F1_funcT<long,ostream_seekp>(Cast<long,ostream_seekp>),
        new E_F1_funcT<long,istream_seekg>(Cast<long,istream_seekg>)
        );
-       
-       
+
+
      map_type[typeid(double).name()]->AddCast(
        new E_F1_funcT<double,double*>(UnRef<double>),
        new E_F1_funcT<double,long>(Cast<double,long>),
        new E_F1_funcT<double,bool>(Cast<double,bool>)
-       
-       ); 
-                                               
+
+       );
+
      map_type[typeid(Complex).name()]->AddCast(
        new E_F1_funcT<Complex,Complex*>(UnRef<Complex>),
        new E_F1_funcT<Complex,long>(Cast<Complex,long>),
        new E_F1_funcT<Complex,double>(Cast<Complex,double>)
-       );                                         
+       );
 
      map_type[typeid(string*).name()]->AddCast(
        new E_F1_funcT<string*,string**>(UnRefCopyPtr<string>),
@@ -1155,23 +1153,23 @@ void Init_map_type()
        new E_F1_funcT<string*,double>(FCast<string*,double,toString>),
        new E_F1_funcT<string*,bool>(FCast<string*,bool,toString>),
        new E_F1_funcT<string*,Complex>(FCast<string*,Complex,toString>)
-        ); 
-     //   a changer ---------------  modif                                         
-        map_type[typeid(string*).name()]->AddCast(					       
+        );
+     //   a changer ---------------  modif
+        map_type[typeid(string*).name()]->AddCast(
           new E_F1_funcT<string*,char *>(FCast<string*,char *,toStringC>),
           new E_F1_funcT<string*,const char *>(FCast<string* ,const char *,toStringCconst>)
        );
-       
+
      map_type[typeid(long).name()]->AddCast(new OneOperator_border_label);
-      
+
      Global.New("verbosity",CPValue<long>(verbosity));
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
-    extern long newconvect3;// def in global.cpp 
+    extern long newconvect3;// def in global.cpp
     Global.New("newconvect",CPValue<long>(newconvect3)); //pichon
-    
+
      // <<cout>> uses [[file:AFunction.hpp::CConstant]]
      Global.New("cout",CConstant<ostream*>(&cout));
-     
+
      Global.New("cerr",CConstant<ostream*>(&cerr));// add jan 2014 FH.
      Global.New("cin",CConstant<istream*>(&cin));
      Global.New("append",CConstant<ios::openmode>(ios::app));
@@ -1182,47 +1180,47 @@ void Init_map_type()
      Global.New("false",CConstant<bool>(false));
      Global.New("pi",CConstant<double>(3.14159265358979323846264338328));
      Global.New("version",CConstant<double>(VersionNumber()));
-      
+
      Global.New("CPUTime",CConstant<bool*>(&showCPU));
      // def de Zero et One
      pZero = new  C_F0(CConstant<double>(0.0));
      pOne = new  C_F0(CConstant<double>(1.0));
      pminusOne = new  C_F0(CConstant<double>(-1.0));
-     
+
      TheOperators->Add(":",
        new OneOperatorConst<char>(new EConstant<char>(':')),
        new OneBinaryOperator<SubArray2>,
        new OneTernaryOperator3<SubArray3>);
-     
-       
+
+
      TheOperators->Add("+",
        new OneBinaryOperator<Op2_add<long,long,long> >,
        new OneBinaryOperator<Op2_add<double,double,double> >,
        new OneBinaryOperator<Op2_add<double,double,long> >,
        new OneBinaryOperator<Op2_add<double,long,double> >,
-       new OneBinaryOperator<Op2_add<long,bool,bool> >,       
-       new OneBinaryOperator<Op2_add<long,long,bool> >,       
-       new OneBinaryOperator<Op2_add<long,bool,long> >,       
+       new OneBinaryOperator<Op2_add<long,bool,bool> >,
+       new OneBinaryOperator<Op2_add<long,long,bool> >,
+       new OneBinaryOperator<Op2_add<long,bool,long> >,
        new OneBinaryOperator<Op2_add<Complex,Complex,Complex> >,
        new OneBinaryOperator<Op2_add<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_add<Complex,double,Complex> >,
        new OneBinaryOperator<Op2_add<Complex,Complex,long> >,
-       new OneBinaryOperator<Op2_add<Complex,long,Complex> > ,      
-       new OneBinaryOperator_st<Op2_padd<string,string*,string*> >  // a changer to do FH string * mars 2006    
+       new OneBinaryOperator<Op2_add<Complex,long,Complex> > ,
+       new OneBinaryOperator_st<Op2_padd<string,string*,string*> >  // a changer to do FH string * mars 2006
        );
      TheOperators->Add("-",
        new OneBinaryOperator<Op2_sub<long,long,long> >,
        new OneBinaryOperator<Op2_sub<double,double,double> >,
        new OneBinaryOperator<Op2_sub<double,double,long> >,
        new OneBinaryOperator<Op2_sub<double,long,double> >,
-       new OneBinaryOperator<Op2_sub<long,bool,bool> >,              
+       new OneBinaryOperator<Op2_sub<long,bool,bool> >,
        new OneBinaryOperator<Op2_sub<Complex,Complex,Complex> >,
        new OneBinaryOperator<Op2_sub<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_sub<Complex,double,Complex> >,
        new OneBinaryOperator<Op2_sub<Complex,Complex,long> >,
-       new OneBinaryOperator<Op2_sub<Complex,long,Complex> >       
+       new OneBinaryOperator<Op2_sub<Complex,long,Complex> >
        );
-       
+
      TheOperators->Add("*",
        new OneBinaryOperator<Op2_mul<long,long,long>,OneBinaryOperatorMI,evalE_mul<long> >,
        new OneBinaryOperator<Op2_mul<double,double,double>,MIMul<double,double>,evalE_mul<double> >,
@@ -1232,7 +1230,7 @@ void Init_map_type()
        new OneBinaryOperator<Op2_mul<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_mul<Complex,double,Complex> >,
        new OneBinaryOperator<Op2_mul<Complex,Complex,long> >,
-       new OneBinaryOperator<Op2_mul<Complex,long,Complex> >       
+       new OneBinaryOperator<Op2_mul<Complex,long,Complex> >
        );
      TheOperators->Add("/",
        new OneBinaryOperator<Op2_div<long,long,long> >,
@@ -1243,7 +1241,7 @@ void Init_map_type()
        new OneBinaryOperator<Op2_div<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_div<Complex,double,Complex> >,
        new OneBinaryOperator<Op2_div<Complex,Complex,long> >,
-       new OneBinaryOperator<Op2_div<Complex,long,Complex> >       
+       new OneBinaryOperator<Op2_div<Complex,long,Complex> >
        );
 
      TheOperators->Add("%",
@@ -1255,12 +1253,12 @@ void Init_map_type()
        new OneUnaryOperator<Op1_plus<double> >,
        new OneUnaryOperator<Op1_plus<long> >,
        new OneUnaryOperator<Op1_plus<Complex> >);
-     
+
     TheOperators->Add("-",
        new OneUnaryOperator<Op1_neg<double> >,
        new OneUnaryOperator<Op1_neg<long> >,
        new OneUnaryOperator<Op1_neg<Complex> >);
-              
+
      TheOperators->Add("^",
 		       new OneBinaryOperator<Op2_pow<long,long,long> >,
     //   new OneBinaryOperator<Op2_pow<double,long,double> >,
@@ -1270,74 +1268,74 @@ void Init_map_type()
     //  new OneBinaryOperator<Op2_pow<Complex,double,Complex> >,
 		       new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >
      );
-     
+
      TheOperators->Add("<",
        new OneBinaryOperator<Op2_lt<long,long> >,
        new OneBinaryOperator<Op2_lt<double,double> >,
-       new OneBinaryOperator<Op2_plt<string*,string*> >  //  FH string * mars 2006 
+       new OneBinaryOperator<Op2_plt<string*,string*> >  //  FH string * mars 2006
      );
      TheOperators->Add("<=",
        new OneBinaryOperator<Op2_le<long,long> >,
        new OneBinaryOperator<Op2_le<double,double> >,
-       new OneBinaryOperator<Op2_ple<string*,string*> >  //  FH string * mars 2006 
+       new OneBinaryOperator<Op2_ple<string*,string*> >  //  FH string * mars 2006
      );
      TheOperators->Add(">",
        new OneBinaryOperator<Op2_gt<long,long> >,
        new OneBinaryOperator<Op2_gt<double,double> >,
-       new OneBinaryOperator<Op2_pgt<string*,string*> >  //  string * mars 2006 
+       new OneBinaryOperator<Op2_pgt<string*,string*> >  //  string * mars 2006
      );
      TheOperators->Add(">=",
        new OneBinaryOperator<Op2_ge<long,long> >,
        new OneBinaryOperator<Op2_ge<double,double> >,
-       new OneBinaryOperator<Op2_pge<string*,string*> >  //  FH string * mars 2006 
+       new OneBinaryOperator<Op2_pge<string*,string*> >  //  FH string * mars 2006
      );
      TheOperators->Add("==",
        new OneBinaryOperator<Op2_eq<long,long> >,
        new OneBinaryOperator<Op2_eq<double,double> >,
        new OneBinaryOperator<Op2_eq<Complex,Complex> >,
-       new OneBinaryOperator<Op2_peq<string*,string*> >  //   FH string * mars 2006 
+       new OneBinaryOperator<Op2_peq<string*,string*> >  //   FH string * mars 2006
      );
 
      TheOperators->Add("!=",
        new OneBinaryOperator<Op2_ne<long,long> >,
        new OneBinaryOperator<Op2_ne<double,double> >,
        new OneBinaryOperator<Op2_ne<Complex,Complex> >,
-       new OneBinaryOperator<Op2_pne<string*,string*> >  //  FH string * mars 2006 
+       new OneBinaryOperator<Op2_pne<string*,string*> >  //  FH string * mars 2006
      );
-     
+
      TheOperators->Add("!",
        new OneUnaryOperator<Op1_not<bool > >
      );
-     
+
      TheOperators->Add("&&", new OneBinaryOperator<Op2_and > );
      TheOperators->Add("&", new OneBinaryOperator<Op2_and > );
      TheOperators->Add("||", new OneBinaryOperator<Op2_or> );
      TheOperators->Add("|", new OneBinaryOperator<Op2_or> );
-       
+
       // Unary_Op_Comparaision
-     
+
      TheOperators->Add("=",
        new OneBinaryOperator<set_eq<bool> ,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<set_eq<long> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq<double> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq<Complex> ,OneBinaryOperatorMIWO>,
-       new OneBinaryOperator<set_peqstring ,OneBinaryOperatorMIWO>  // FH string * mars 2006 
-       ); 
+       new OneBinaryOperator<set_peqstring ,OneBinaryOperatorMIWO>  // FH string * mars 2006
+       );
 
      TheOperators->Add("?:",
        new Operator_Aritm_If<bool >,
        new Operator_Aritm_If<long >,
        new Operator_Aritm_If<double >,
        new Operator_Aritm_If<Complex >,
-       new Operator_Aritm_If<string* >  // (OK???)  to do FH string * mars 2006 
-       ); 
-       
+       new Operator_Aritm_If<string* >  // (OK???)  to do FH string * mars 2006
+       );
+
 /*
      ArrayOperator<double>();
      ArrayOperator<Complex>();
      ArrayOperator<long>();
 */
-//      initArrayOperators()   ;  
+//      initArrayOperators()   ;
      initArrayOperatorlong();
      initArrayOperatordouble();
      initArrayOperatorComplex();
@@ -1362,58 +1360,58 @@ void Init_map_type()
      TheOperators->Add("*=",
        new OneBinaryOperator<set_eq_mul<long> ,OneBinaryOperatorMIWO>,
        new OneBinaryOperator<set_eq_mul<double>,OneBinaryOperatorMIWO >,
-       new OneBinaryOperator<set_eq_mul<Complex>,OneBinaryOperatorMIWO >     
+       new OneBinaryOperator<set_eq_mul<Complex>,OneBinaryOperatorMIWO >
       );
 
 
      TheOperators->Add("/=",
        new OneBinaryOperator<set_eq_div<long>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<set_eq_div<double>,OneBinaryOperatorMIWO >,
-       new OneBinaryOperator<set_eq_div<Complex>,OneBinaryOperatorMIWO >     
+       new OneBinaryOperator<set_eq_div<Complex>,OneBinaryOperatorMIWO >
      );
 
      TheOperators->Add("+",
-    //   new OneBinaryOperator<Op2_addp<const E_BorderN *,const E_BorderN *,const E_BorderN * > >,  
+    //   new OneBinaryOperator<Op2_addp<const E_BorderN *,const E_BorderN *,const E_BorderN * > >,
        new AddBorderOperator
        );
 
       // add frev 2007
-      TheOperators->Add("\'", new opTrans); 
-      
-     // TheOperators->Add("\'", new opTTrans); 
-      TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
+      TheOperators->Add("\'", new opTrans);
+
+     // TheOperators->Add("\'", new opTTrans);
+      TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opColumn(atype<E_Array >() )   );  //  [ ]* C_F0 (all)
       TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<E_Array >() )   );  //  [ ]* C_F0 (all)
       TheOperators->Add("*",new opColumn(basicForEachType::type_C_F0,atype<TransE_Array >() )   );  //  [ ]* C_F0 (all)
 //    type_C_F0
       TheOperators->Add("::",new opColumn(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
-      TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
- 
+      TheOperators->Add("*",new opDot(atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+
      // car le type de retour depent des objets du tableau
-      atype<E_Array >()->Add("[","",new opVI(atype<E_Array >())   );  
-      atype<TransE_Array >()->Add("[","",new opVI(atype<TransE_Array >())   );  
-      TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("+",new opSum("+",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("+",new opSum("+",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add(".*",new opSum("*",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add(".*",new opSum("*",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add(".*",new opSum("*",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add(".*",new opSum("*",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur 
-      TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
+      atype<E_Array >()->Add("[","",new opVI(atype<E_Array >())   );
+      atype<TransE_Array >()->Add("[","",new opVI(atype<TransE_Array >())   );
+      TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("+",new opSum("+",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("+",new opSum("+",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add("+",new opSum("+",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("-",new opSum("-",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add("-",new opSum("-",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add(".*",new opSum("*",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add(".*",new opSum("*",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add(".*",new opSum("*",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add(".*",new opSum("*",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+      TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
+      TheOperators->Add("./",new opSum("/",atype<E_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
     // correct in sept. 2009
-      TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur 
-    
-      
-     // il faut refechir  .....  FH 
+      TheOperators->Add("./",new opSum("/",atype<TransE_Array >(),atype<TransE_Array>() )   );  // a faire mais dur
+
+
+     // il faut refechir  .....  FH
      // il faut definir le type d'un tableau bof, bof (atype<C_F0>())
      TheOperators->Add(">>",
        new OneBinaryOperator<Op_Read<bool>,OneBinaryOperatorMIWO >,
@@ -1421,30 +1419,30 @@ void Init_map_type()
        new OneBinaryOperator<Op_Read<double>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_Read<Complex>,OneBinaryOperatorMIWO >,
        new OneBinaryOperator<Op_ReadP<string>,OneBinaryOperatorMIWO >
-		       
+
        );
-     
+
      TheOperators->Add("<<",
        new OneBinaryOperator<Print<bool> >,
        new OneBinaryOperator<Print<long> >,
        new OneBinaryOperator<Print<double> >,
        new OneBinaryOperator<Print<Complex> >,
-       new OneBinaryOperator<PrintP<string*> >  //  FH string * mars 2006 
+       new OneBinaryOperator<PrintP<string*> >  //  FH string * mars 2006
        );
 
-     
-     TheRightOperators->Add("++",       
+
+     TheRightOperators->Add("++",
        new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&RIncremantation<long>));
-     TheRightOperators->Add("--",       
+     TheRightOperators->Add("--",
        new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&RDecremantation<long>));
-     TheOperators->Add("++",       
+     TheOperators->Add("++",
        new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&LIncremantation<long>));
-     TheOperators->Add("--",       
+     TheOperators->Add("--",
        new OneOperator1<long,long*, E_F_F0<long,long*,false> >(&LDecremantation<long>));
-//   init        
-     TheOperators->Add("<-", 
-       new OneOperator2<string**,string**,string*>(&set_copyp_new<string>),  //  FH string * mars 2006 
-       new OneOperator2_<double*,double*,double>(&set_copyp),  // 
+//   init
+     TheOperators->Add("<-",
+       new OneOperator2<string**,string**,string*>(&set_copyp_new<string>),  //  FH string * mars 2006
+       new OneOperator2_<double*,double*,double>(&set_copyp),  //
        new OneOperator2_<long*,long*,long>(&set_copyp),
        new OneOperator2_<bool*,bool*,bool>(&set_copyp), //  mars 2006
        new OneOperator2_<Complex*,Complex*,Complex>(&set_copy),
@@ -1452,52 +1450,52 @@ void Init_map_type()
    //    new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy_new<ostream>),
 //       new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >,
 //       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
-       new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006 
-       new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,  //  FH string * mars 2006 
+       new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006
+       new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,  //  FH string * mars 2006
        new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >  ,    //  FH string * mars 2006
        new OneTernaryOperator3<Op2_set_pstringiomode<istream**,ifstream> >   //  FH string * april  2014
        );
-       
-     atype<istream* >()->AddCast( new E_F1_funcT<istream*,istream**>(UnRef<istream* >)); 
-     atype<ostream* >()->AddCast( new E_F1_funcT<ostream*,ostream**>(UnRef<ostream* >)); 
-   
+
+     atype<istream* >()->AddCast( new E_F1_funcT<istream*,istream**>(UnRef<istream* >));
+     atype<ostream* >()->AddCast( new E_F1_funcT<ostream*,ostream**>(UnRef<ostream* >));
+
 //     Add<istream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >);
-     Add<ostream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >);  //  FH string * mars 2006 
-     
+     Add<ostream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >);  //  FH string * mars 2006
+
     // Polymorphic * precis =new Polymorphic();
     //  Add<ostream*>("precision",".",precis);
      Add<ostream**>("precision",".",new OneOperator1<ostream_precis,ostream**>(ostream_precision));
      Add<ostream*>("precision",".",new OneOperator1<ostream_precis,ostream*>(ostream_precision));
-    
+
     // add FH jan 2010 ...
     Add<ostream**>("seekp",".",new OneOperator1<ostream_seekp,ostream**>(ff_oseekp));
     Add<ostream*>("seekp",".",new OneOperator1<ostream_seekp,ostream*>(ff_oseekp));
-    
+
     Add<istream**>("seekg",".",new OneOperator1<istream_seekg,istream**>(ff_iseekg));
     Add<istream*>("seekg",".",new OneOperator1<istream_seekg,istream*>(ff_iseekg));
     Add<ostream**>("tellp",".",new OneOperator1<ostream_seekp,ostream**>(ff_oseekp));
     Add<ostream*>("tellp",".",new OneOperator1<ostream_seekp,ostream*>(ff_oseekp));
-    
+
     Add<istream**>("tellg",".",new OneOperator1<istream_seekg,istream**>(ff_iseekg));
     Add<istream*>("tellg",".",new OneOperator1<istream_seekg,istream*>(ff_iseekg));
-    
+
  //   Add<istream_seekp>("(","",new OneOperator1<long,istream_seekp>(fftellp),
-//			new OneOperator2<long,istream_seekp,long>(ffseekp));    
+//			new OneOperator2<long,istream_seekp,long>(ffseekp));
     Add<ostream_seekp>("(","",new OneOperator1<long,ostream_seekp>(fftellp),
 		       new OneOperator2<long,ostream_seekp,long>(ffseekp));
     Add<istream_seekg>("(","",new OneOperator1<long,istream_seekg>(fftellg),
 		       new OneOperator2<long,istream_seekg,long>(ffseekg));
-    // end add  jan 2010 .. 
+    // end add  jan 2010 ..
     Add<ostream_precis>("(","",new OneOperator1<long,ostream_precis>(get_precis),
                                 new OneOperator2<long,ostream_precis,long>(set_precis));
-//  add v 1.41   
+//  add v 1.41
      Add<istream**>("good",".",new OneOperator1<istream_good,istream**>(to_istream_good));
      Add<istream*>("good",".",new OneOperator1<istream_good,istream*>(to_istream_good));
-     Add<istream*>("good",".",new OneOperator1<istream_good,istream*>(to_istream_good));    
+     Add<istream*>("good",".",new OneOperator1<istream_good,istream*>(to_istream_good));
      Add<istream_good>("(","",new OneOperator1<long,istream_good>(get_good));
 
      Add<istream**>("eof",".",new OneOperator1<bool,istream**>(get_eof));
-// add v 2.8 
+// add v 2.8
      Add<ostream**>("scientific",".",new OneOperator1<ostream**,ostream**>(set_os<scientific>));
      Add<ostream**>("fixed",".",new OneOperator1<ostream**,ostream**>(set_os<fixed>));
      Add<ostream**>("showbase",".",new OneOperator1<ostream**,ostream**>(set_os<showbase>));
@@ -1506,7 +1504,7 @@ void Init_map_type()
      Add<ostream**>("noshowpos",".",new OneOperator1<ostream**,ostream**>(set_os<noshowpos>));
      Add<ostream**>("default",".",new OneOperator1<ostream**,ostream**>(set_os<default1>));
      Add<ostream**>("flush",".",new OneOperator1<ostream**,ostream**>(set_os_flush));// ADD may 2010
-     
+
      Add<ostream*>("scientific",".",new OneOperator1<ostream*,ostream*>(set_os1<scientific>));
      Add<ostream*>("fixed",".",new OneOperator1<ostream*,ostream*>(set_os1<fixed>));
      Add<ostream*>("showbase",".",new OneOperator1<ostream*,ostream*>(set_os1<showbase>));
@@ -1515,20 +1513,20 @@ void Init_map_type()
      Add<ostream*>("noshowpos",".",new OneOperator1<ostream*,ostream*>(set_os1<noshowpos>));
      Add<ostream*>("default",".",new OneOperator1<ostream*,ostream*>(set_os1<default1>));
      Add<ostream*>("flush",".",new OneOperator1<ostream*,ostream*>(set_os_flush));// ADD may 2010
-     
+
     Global.Add("getline","(",new OneOperator2<istream*,istream*,string **>(Getline));
 // add 2.16
      Global.Add("trace","(",new opFormal(atype<E_Array>(),formalMatTrace ));
      Global.Add("det","(",new opFormal(atype<E_Array>(),formalMatDet ));
 // end add
-                                
+
     // add 3.20
     Global.Add("Cofactor","(",new opFormal(atype<E_Array>(),formalMatCofactor ));
-      
+
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
-     
-      
+
+
      Global.Add("cos","(",new OneOperator1<double>(cos));
 //     Global.Add("square","(",new OneOperator1_<double>(Square));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
@@ -1545,7 +1543,7 @@ void Init_map_type()
      Global.Add("ceil","(",new OneOperator1<double>(ceil));  // add march 2006
      Global.Add("rint","(",new OneOperator1<double>(rint));  // add june 2006
      Global.Add("lrint","(",new OneOperator1<long,double>(lrint));  // add mars  2014
-    
+
      Global.Add("sin","(",new OneOperator1<double>(sin));
      Global.Add("tan","(",new OneOperator1<double>(tan));
      Global.Add("atan","(",new OneOperator1<double>(atan));
@@ -1555,7 +1553,7 @@ void Init_map_type()
 
     Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
     Global.Add("atof","(",new OneOperator1<double,string*>(atof));// add march 2010
-    
+
 #ifdef HAVE_ATANH
      Global.Add("atanh","(",new OneOperator1<double>(atanh));
 #endif
@@ -1575,14 +1573,14 @@ void Init_map_type()
      Global.Add("tgamma","(",new OneOperator1<double>(tgamma));
      Global.Add("lgamma","(",new OneOperator1<double>(lgamma));
 #endif
-     //  function de bessel j0, j1, jn, y0, y1, yn -- bessel functions of first and second kind     
+     //  function de bessel j0, j1, jn, y0, y1, yn -- bessel functions of first and second kind
 #ifdef HAVE_JN
       Global.Add("j0","(",new OneOperator1<double>(j0));
       Global.Add("j1","(",new OneOperator1<double>(j1));
       Global.Add("jn","(",new OneOperator2<double,long,double>(myjn));
       Global.Add("y0","(",new OneOperator1<double>(y0));
       Global.Add("y1","(",new OneOperator1<double>(y1));
-      Global.Add("yn","(",new OneOperator2<double,long,double>(myyn));      
+      Global.Add("yn","(",new OneOperator2<double,long,double>(myyn));
 #endif
      Global.Add("exp","(",new OneOperator1<double>(exp));
      Global.Add("log","(",new OneOperator1<double>(log));
@@ -1595,7 +1593,7 @@ void Init_map_type()
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
      Global.Add("atan2","(",new OneOperator2<double>(atan2));
      Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
-    
+
      Global.Add("atan","(",new OneOperator2<double>(atan2));
      Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));
      Global.Add("abs","(",new OneOperator1<double>(Abs));
@@ -1610,16 +1608,16 @@ void Init_map_type()
      Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
      //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
-    
+
     Global.Add("pow","(",new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >);
                 //new OneOperator2_<Complex,Complex>(pow ));
      Global.Add("sqrt","(",new OneOperator1_<Complex>(sqrt,0));
      Global.Add("conj","(",new OneOperator1_<Complex>(conj,0));
      Global.Add("conj","(",new OneOperator1_<double>(RNM::conj,1));
-     TheOperators->Add("\'",new OneOperator1_<Complex>(conj,0));       
-     TheOperators->Add("\'",new OneOperator1_<double>(RNM::conj,1));       //  add F.  Feb 2010  of conj of varf.. 
-     
-     
+     TheOperators->Add("\'",new OneOperator1_<Complex>(conj,0));
+     TheOperators->Add("\'",new OneOperator1_<double>(RNM::conj,1));       //  add F.  Feb 2010  of conj of varf..
+
+
      Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
      //  Big probleme  real is a type
      Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
@@ -1627,34 +1625,34 @@ void Init_map_type()
     // Add<double>(typevarreal->right()->name(),".",new OneOperator1_<double,Complex>(Real));
     // Global.Add(typevarreal->right()->name(),".",new OneOperator1_<double,Complex>(Real));
     // Add<double*>(typevarreal->left()->name(),".",new OneOperator1_<double,Complex*>(preal));
-    
+
      Global.Add("abs","(",new OneOperator1_<double,Complex>(abs));
 
      Global.Add("arg","(",new OneOperator1_<double,Complex>(arg));
      Global.Add("norm","(",new OneOperator1_<double,Complex>(norm));
-     Global.Add("exit","(",new OneOperator1<long>(Exit));     
-     Global.Add("assert","(",new OneOperator1<bool>(Assert));     
-     
+     Global.Add("exit","(",new OneOperator1<long>(Exit));
+     Global.Add("assert","(",new OneOperator1<bool>(Assert));
+
      Global.Add("clock","(",new OneOperator0<double>(CPUtime));
     Global.Add("time","(",new OneOperator0<double>(walltime));// add mars 2010 for Pichon.
     Global.Add("ltime","(",new OneOperator0<long>(fftime));// add mars 2014 ( the times unix fonction)
     Global.Add("storageused","(",new OneOperator0<long>(storageused));
     Global.Add("storagetotal","(",new OneOperator0<long>(storagetotal));
-    
+
      Global.Add("dumptable","(",new OneOperator1<ostream*,ostream*>(dumptable));
-     Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006 
-     Global.Add("system","(",new OneOperator1<long,string* >(exec));  //FH string fevr 2011 
-    
+     Global.Add("exec","(",new OneOperator1<long,string* >(exec));  //FH string * mars 2006
+     Global.Add("system","(",new OneOperator1<long,string* >(exec));  //FH string fevr 2011
+
      Global.Add("polar","(",new OneOperator2_<Complex,double,double>(polar));
  // rand generator ---
-  unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;                                                            
+  unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;
   init_by_array(init, length);
-  extern long genrand_int31(void);   
+  extern long genrand_int31(void);
   extern double genrand_real1(void);
   extern double genrand_real2(void);
   extern double genrand_real3(void);
   extern double  genrand_res53(void) ;
-  
+
   Global.Add("randint32","(",new OneOperator_0<long>(genrandint32));
   Global.Add("randint31","(",new OneOperator_0<long>(genrand_int31));
   Global.Add("randreal1","(",new OneOperator_0<double>(genrand_real1));
@@ -1662,10 +1660,10 @@ void Init_map_type()
   Global.Add("randreal3","(",new OneOperator_0<double>(genrand_real3));
   Global.Add("randres53","(",new OneOperator_0<double>(genrand_res53));
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
-  
-   //  NaN and Inf 
-  Global.Add("ShowAlloc","(",new OneOperator1<long,string*>(ShowAlloc1));// debuging 
-  Global.Add("ShowAlloc","(",new OneOperator2<long,string*,long*>(ShowAlloc1));// debuging 
+
+   //  NaN and Inf
+  Global.Add("ShowAlloc","(",new OneOperator1<long,string*>(ShowAlloc1));// debuging
+  Global.Add("ShowAlloc","(",new OneOperator2<long,string*,long*>(ShowAlloc1));// debuging
   Global.Add("NaN","(",new OneOperator0<double>(NaN));
 
   Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
@@ -1673,25 +1671,25 @@ void Init_map_type()
     Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
     Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
     Global.Add("chtmpdir","(",new OneOperator0<long>(ffapi::chtmpdir));
- 
-  
+
+
 
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
 
      atype<MyMapSS*>()->SetTypeLoop(atype<string**>(),atype<string**>());
-    
-          
+
+
      tables_of_identifier.push_back(&Global);
-    
+
     TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMapSS*> >);
- 
+
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSS >);
    // add setw freb 2015 FH
     Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
     TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
 
 }
-//int ShowAlloc(const char *s,size_t & lg); 
+//int ShowAlloc(const char *s,size_t & lg);
 
 
 
@@ -1703,27 +1701,27 @@ void Init_map_type()
      delete pZero;
      delete pOne;
      delete pminusOne;
-      
+
      tables_of_identifier.clear();
      for (map<const string,basicForEachType *>::iterator i=map_type.begin();i!=map_type.end();++i)
         delete i->second;
-        
+
      map_type.clear();
      map_type_of_map.clear();
      map_pair_of_type.clear();
      Global.clear();
-     if(TheOperators) 
+     if(TheOperators)
        TheOperators->clear();
      if(TheRightOperators)
        TheRightOperators->clear();
-        
+
      CodeAlloc::clear();
-     ShowAlloc("ClearMem: end" , lg); 
+     ShowAlloc("ClearMem: end" , lg);
 
  }
 
 // <<addingInitFunct>>
-static addingInitFunct TheaddingInitFunct(-10000,Init_map_type); 
+static addingInitFunct TheaddingInitFunct(-10000,Init_map_type);
 
 C_F0  opVI::code2(const basicAC_F0 &args) const
 {
@@ -1743,7 +1741,7 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     assert( ea || tea );
     const E_Array & a=  ta ? *tea->v : *ea;
     // cout << " pv =" << pv << " size = "<< a.size() << endl;
-    
+
     //ffassert(pv >=0 && pv <a.size());
     if(tea){
         AC_F0  v  ;
@@ -1751,23 +1749,23 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
         {
             const E_Array * li=  dynamic_cast<const E_Array *>(a[i].LeftValue());
             ffassert(li && (li->size() >pv));
-            
+
             const C_F0 vi = TryConj( (*li)[pv]);
             if(i==0) v=vi;
             else v+= vi;
-            
+
         }
-        
+
         return C_F0(TheOperators,"[]",v);
-        
+
     }
-    
+
     if(!(pv >=0 && pv <a.size()))
     {
         cerr << "\n\nerror [ ... ][" << pv <<" ] " << " the  size of [ ...]  is "<< a.size() << endl;
         lgerror(" bound of  [ .., .. , ..][ . ] operation  ");
     }
-    
+
     return (* a.v)[pv];
 }
 
@@ -1797,29 +1795,29 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
     if(maa) {
 	ma= a[0].LeftValue()->nbitem();
 	for (int i=1;i<na;i++)
-	    if( ma != (int) a[i].LeftValue()->nbitem()) 
+	    if( ma != (int) a[i].LeftValue()->nbitem())
 		CompileError(" first matrix with variable number of columm");
-        
+
     }
     if(mab) {
 	mb= b[1].LeftValue()->nbitem();
 	for (int i=1;i<nb;i++)
-	    if( mb != (int) b[i].LeftValue()->nbitem()) 
+	    if( mb != (int) b[i].LeftValue()->nbitem())
 		CompileError(" second matrix with variable number of columm");
     }
     int na1=na,ma1=ma,nb1=nb,mb1=mb;
     if(ta) RNM::Exchange(na1,ma1);
     if(tb) RNM::Exchange(nb1,mb1);
-    
+
     KNM<CC_F0> A(na1,ma1), B(nb1,mb1);
     if ( A.M() != B.N())
     {
 	cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " << endl;
 	cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
-	cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;	
+	cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
 	CompileError(" no same size  [ ...]'*[ ...  ] sorry ");
     }
-    
+
     if(maa)
 	for (int i=0;i<na;++i)
 	{
@@ -1828,12 +1826,12 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	    for (int j=0; j<ma;++j)
 		if(!ta)  A(i,j) = (*li)[j];
 		else     A(j,i) = TryConj((*li)[j]);
-	} 
+	}
     else
 	for (int i=0;i<na;++i)
 	    if(!ta)  A(i,0) = a[i];
 	    else     A(0,i) = TryConj(a[i]);
-	 
+
     if(mab)
 	for (int i=0;i<nb;++i)
 	{
@@ -1842,12 +1840,12 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	    for (int j=0; j<mb;++j)
 		if(!tb)  B(i,j) = (*li)[j];
 		else     B(j,i) = TryConj((*li)[j]);
-	} 
+	}
     else
 	for (int i=0;i<nb;++i)
 	    if(!tb)  B(i,0) = b[i];
 	    else     B(0,i) = TryConj(b[i]);
-    
+
     KNM<CC_F0> C(na1,mb1);
     CC_F0 s,abi;
     for (int i=0;i<na1;++i)
@@ -1862,7 +1860,7 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
    // cout << "\n ***na1 nb1 == = "<< na1 << " " << nb1 << endl;
     if( na1==1 && mb1 ==1)
 	return C(0,0);
-    else if ( mb1 ==1 ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010 
+    else if ( mb1 ==1 ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010
     {
 	AC_F0  v;
 	v=C(0,0);
@@ -1870,14 +1868,14 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	for (int i=1;i<nn;++i)
 	    v+=C(i0*i,j0*i);
 	C_F0  r(TheOperators,"[]",v);
-	if(mb1==1) return r;                                                                                                                                                                                         
-	else return C_F0(TheOperators,"\'",r);// Bug car on conj encore r . mars 2010 
+	if(mb1==1) return r;
+	else return C_F0(TheOperators,"\'",r);// Bug car on conj encore r . mars 2010
     }
     else
     {
 	AC_F0  v,cc;
 	v=C(0,0);
-	for (int i=0;i<na1;++i)	
+	for (int i=0;i<na1;++i)
 	{  cc = C(i,0);
 	    for (int j=1;j<mb1;++j)
 		cc+= C(i,j);
@@ -1887,13 +1885,13 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	}
 	return C_F0(TheOperators,"[]",v);
     }
-/*	  
+/*
     if ( !mab && ! maa)
     {
-	
+
 	if( na != nb)
 	    CompileError(" no same size  [ ...]'*[ ...  ] sorry ");
-	
+
 	if( ta && ! tb)
 	{
 	    s= C_F0(TheOperators,"*",a[0],b[0]);
@@ -1904,18 +1902,18 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	    }
 	    return s;//Type_Expr(s); //new C_F0(s);   ATTENTION le type est variable ici   FH
 	}
-	
+
 	if(!ma && mb)
-	{  
+	{
 	}
-	
+
     }*/
-    
+
     cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " << na << "x" << nb << endl;
     cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " <<  endl;
     cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
     cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
-    CompileError("  not implemented sorry ..... (FH) to do ???? ");	
+    CompileError("  not implemented sorry ..... (FH) to do ???? ");
     return C_F0();
 
 }
@@ -1931,9 +1929,9 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
     else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
-    
+
     // ffassert( ea || tea );
-    
+
     if( (eb || teb) && ( ea || tea ) )
     {
         const E_Array & a=  ta ? *tea->v : *ea;
@@ -1950,7 +1948,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
             for (int i=1;i<na;i++)
                 if( ma != (int) a[i].LeftValue()->nbitem())
                     CompileError(" first matrix with variable number of columm");
-            
+
         }
         if(mab) {
             mb= b[1].LeftValue()->nbitem();
@@ -1961,7 +1959,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
         int na1=na,ma1=ma,nb1=nb,mb1=mb;
         if(ta) RNM::Exchange(na1,ma1);
         if(tb) RNM::Exchange(nb1,mb1);
-        
+
         KNM<CC_F0> A(na1,ma1), B(nb1,mb1);
         if ( (na1!=nb1 ) || (ma1 != mb1) || (na1 * ma1 ==0)  )
         {
@@ -1970,7 +1968,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
             cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
             CompileError(" no same size  [ ...] : [ ...  ] sorry ");
         }
-        
+
         if(maa)
             for (int i=0;i<na;++i)
             {
@@ -1984,7 +1982,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
             for (int i=0;i<na;++i)
                 if(!ta)  A(i,0) = a[i];
                 else     A(0,i) = TryConj(a[i]);
-        
+
         if(mab)
             for (int i=0;i<nb;++i)
             {
@@ -1998,55 +1996,55 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
             for (int i=0;i<nb;++i)
                 if(!tb)  B(i,0) = b[i];
                 else     B(0,i) = TryConj(b[i]);
-        
+
         //KNM<CC_F0> C(na1,mb1);
         CC_F0 s,aibi;
-        
+
         for (int i=0;i<na1;++i)
             for (int j=0;j<ma1;++j)
             {
                 aibi = C_F0(TheOperators,"*",A(i,j),B(i,j));
                 if( (i==0) && (j==0))
-                    s = aibi; 
-                else 
+                    s = aibi;
+                else
                     s = C_F0(TheOperators,"+",s,aibi);
             };
         //   if( na1==1 && mb1 ==1)
         return s;
     }
     else if ( ea || tea )
-    { // modif 2 /08/  2013  FH .. bug in [ a0,a1,... ]'*b 
+    { // modif 2 /08/  2013  FH .. bug in [ a0,a1,... ]'*b
         //  [a0,a1,... ]*b  or [ a0,a1,... ]'*b  => [ a0*b',a1*b',
         const E_Array & a=  ta ? *tea->v : *ea;
         int na=a.size();
         AC_F0  v;
         v = 0; // empty
-        C_F0 b =ta ? TryConj(args[1]) :args[1]; 
+        C_F0 b =ta ? TryConj(args[1]) :args[1];
         for (int i=0;i<na;++i)
-        v += C_F0(TheOperators,"*",a[i],b)  ;            
+        v += C_F0(TheOperators,"*",a[i],b)  ;
         return ta ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
-        
+
     }
     else if(eb || teb)
     {  // modif 2 /08/  2013  FH .. bug in a*[ b0,b1,... ]'
         const E_Array & b=  tb ? *teb->v : *eb;
         int nb=b.size();
-        C_F0 a =tb ? TryConj(args[0]) :args[0]; 
+        C_F0 a =tb ? TryConj(args[0]) :args[0];
         AC_F0  v;
         v = 0; // empty
         for (int i=0;i<nb;++i)
             v += C_F0(TheOperators,"*",a,b[i]) ;
         return tb ? C_F0(TheOperators,"\'",C_F0(TheOperators,"[]",v)) :   C_F0(TheOperators,"[]",v);
-        
+
     }
-    else ffassert(0); 
+    else ffassert(0);
     /*
      cout << "   formal : array or matrix : [ .. ] : [ .. ]   " << na << "x" << nb << endl;
      cout << "   formal : array or matrix : [ .. ] : [ .. ]   " <<  endl;
      cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
      cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
      CompileError("  not implemented sorry ..... (FH) to do ???? ");
-     
+
      */
     return C_F0();
 }
@@ -2054,7 +2052,7 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
 
 C_F0  opSum::code2(const basicAC_F0 &args) const
 {
-    
+
     bool ta =args[0].left()==atype<TransE_Array>();
     bool tb = args[1].left()==atype<TransE_Array>();
     const TransE_Array * tea=0;
@@ -2072,14 +2070,14 @@ C_F0  opSum::code2(const basicAC_F0 &args) const
     int na=a.size();
     int nb=b.size();
     if(na != nb) CompileError(" formal   [ [...] [] ] : [ [..], [..] , ... ]  ");
-    
+
 
     AC_F0  v;
     v = 0; // empty
-	for (int i=0;i<na;++i)	
+	for (int i=0;i<na;++i)
 	    v += C_F0(TheOperators,op,ta ? TryConj(a[i]) : a[i],tb ? TryConj(b[i]): b[i]) ;
 	return C_F0(TheOperators,"[]",v);
-    
+
 }
 //  to be sure new and delele be in see dll for windows
 string  *newstring(){if(verbosity>999999) cout << "newstring()\n";

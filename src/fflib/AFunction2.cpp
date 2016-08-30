@@ -1,34 +1,32 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 //#pragma dont_inline on
 //#pragma inline_depth(1)
-
-#include "config-wrapper.h"
 
 #include <complex>
 #include "AFunction.hpp"
@@ -40,7 +38,7 @@
 #include "RNM.hpp"
 
 #include "Operator.hpp"
-// for exec routine 
+// for exec routine
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 
@@ -63,48 +61,48 @@ class vectorOfInst : public  E_F0mps { public:
       }
       return Nothing;
    }
-  private: 
+  private:
   vectorOfInst(const vectorOfInst &);
-  void operator=(const vectorOfInst &);  
+  void operator=(const vectorOfInst &);
 };
 
-double  VersionNumber(); 
+double  VersionNumber();
 
 OneOperator::pair_find OneOperator::Find(const ArrayOfaType & at)const
- { 
+ {
       const OneOperator *w=0,*oo;
       int nn=0,p=-10000;
  /*     for (oo=this;oo;oo=oo->next)
-        if (oo->pref>=p && oo->WithOutCast(at)) 
+        if (oo->pref>=p && oo->WithOutCast(at))
           {
            if(p<oo->pref) {nn=0;p=oo->pref;}
            nn++;
            w=oo;}
       if (nn) return make_pair(w,nn);*/
-      for (int ncast=0;ncast<=n;ncast++) // loop on the number of cast 
+      for (int ncast=0;ncast<=n;ncast++) // loop on the number of cast
        {
          p=-10000;
          for (oo=this;oo;oo=oo->next)
-          if (oo->pref>=p && oo->WithCast(at,ncast)) 
-          { 
+          if (oo->pref>=p && oo->WithCast(at,ncast))
+          {
            if(p<oo->pref) {nn=0;p=oo->pref;}
             nn++;
             w=oo;}
          if (nn) return make_pair(w,nn);
        }
       for (oo=this;oo;oo=oo->next)
-        if (oo->WithCast(at)) 
+        if (oo->WithCast(at))
           {nn++;
            w=oo;}
-       return make_pair(w,nn);       
+       return make_pair(w,nn);
 }
 
 OneOperator::pair_find OneOperator::FindWithOutCast(const ArrayOfaType & at)const
- { 
+ {
       const OneOperator *w=0,*oo;
       int n=0;
       for (oo=this;oo;oo=oo->next)
-        if (oo->WithOutCast(at)) 
+        if (oo->WithOutCast(at))
           {n++;
            w=oo;}
       return make_pair(w,n);
@@ -112,14 +110,14 @@ OneOperator::pair_find OneOperator::FindWithOutCast(const ArrayOfaType & at)cons
 
 // <<FindSameR>>
 OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
- { 
+ {
      if (this==tnull) return 0;
       OneOperator *oo,*r;
       int n=0;
       for (oo=this;oo;oo=oo->next)
-        { 
-        //if (oo->WithOutCast(at)) 
-        if  (at==*oo)  n++,r=oo;        
+        {
+        //if (oo->WithOutCast(at))
+        if  (at==*oo)  n++,r=oo;
         else if (oo->WithOutCast(at)) n++,r=oo;
       //  if (n) cout << " \t " << oo << " " << *oo  << " <-----> " << at << " n =" << n << endl;
         }
@@ -127,60 +125,60 @@ OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
      // if (n)       cout << *r << " <-----> " << at << " n =" << n << endl;
       return n==1 ? r : 0;
 }
-      
+
 void OneOperator::Show(ostream &f) const
-{         
+{
    const OneOperator *oo;
    for (oo=this;oo;oo=oo->next)
      f << "\t (" <<  *oo << ")\n";
- }   
+ }
 
 void OneOperator::Show(const ArrayOfaType & at,ostream &f) const
-{         
+{
          const OneOperator *oo;
          int n=0,np=0;
          for (oo=this;oo;oo=oo->next)
            if (oo->WithOutCast(at)) {n++;f << "\t (" <<  *oo << ")\n";}
-         if(n==0) 
+         if(n==0)
           for (oo=this;oo;oo=oo->next)
            if (oo->WithCast(at)) {
               n++;
               if (oo->pref) np++;
-              if (oo->pref) 
+              if (oo->pref)
                 f <<   " c(" << oo->pref << ") \t (" <<  *oo << ")\n" ;
                 else f <<  " \t c(" <<  *oo << ")\n";
               }
-         if (n==0) 
+         if (n==0)
           {
            f << " List of choices "<< endl;
-           Show(f);            
+           Show(f);
           }
-         else if (np != 1) 
-           f << " We have ambiguity " << n << endl; 
- }   
-       
+         else if (np != 1)
+           f << " We have ambiguity " << n << endl;
+ }
+
 const  OneOperator * Polymorphic::Find(const char *op, const  ArrayOfaType &at) const
   {
     const_iterator i=m.find(op);
-    if (i!=m.end())  
-      { 
+    if (i!=m.end())
+      {
        OneOperator::pair_find r=i->second->Find(at);
        if (r.second==1) return r.first;
-       }    
+       }
     return 0;
   }
 const  OneOperator * Polymorphic::FindWithOutCast(const char *op, const  ArrayOfaType &at) const
   {
     const_iterator i=m.find(op);
-    if (i!=m.end())  
-      { 
+    if (i!=m.end())
+      {
        OneOperator::pair_find r=i->second->FindWithOutCast(at);
        if (r.second==1) return r.first;
-       }    
+       }
     return 0;
   }
- 
-  
+
+
 void Polymorphic::Show(const char *op,const ArrayOfaType & at,ostream &f)  const
     {
     const_iterator i=m.find(op);
@@ -191,10 +189,10 @@ void Polymorphic::Show(const char *op,const ArrayOfaType & at,ostream &f)  const
 // <<C_F0_constructor_pop_char_basicAC_F0_impl>> cf [[file:AFunction.hpp::C_F0_constructor_pop_char_basicAC_F0_decl]]
 C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 {
-    ArrayOfaType at(p); 
+    ArrayOfaType at(p);
     if (poly) { // a Polymorphic => polymorphisme
 	const  OneOperator *  ff=poly->Find(op,at);
-	if (ff) { 
+	if (ff) {
             if( verbosity>9999) {cout << endl;
 	     poly->Show(op,at,cout);
                 cout << op << ": (in " << at << ") => " << " " << *ff<< "\n\n";}
@@ -213,28 +211,28 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 	      CompileError();
 	  }
     }
-    else { 
+    else {
 	//  no polymorphisme
 	if(mpirank==0){
 	    cerr << " const Polymorphic * poly,const char *op,const basicAC_F0 & p)   " << endl;
 	    cerr  << op << " " << at << endl;
 	}
-	    CompileError();          
+	    CompileError();
 	}
     }
-       
+
 
 
 
 //  operator without parameter
-C_F0::C_F0(const Polymorphic * pop,const char *op) 
+C_F0::C_F0(const Polymorphic * pop,const char *op)
 {
   basicAC_F0  p;
   p=0;
   *this= C_F0(pop,op,p);
 }
 //  operator unaire
-C_F0::C_F0(const Polymorphic * pop,const char *op,const C_F0 & aa) 
+C_F0::C_F0(const Polymorphic * pop,const char *op,const C_F0 & aa)
 {
   basicAC_F0  p;
   C_F0 a(aa);
@@ -243,7 +241,7 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const C_F0 & aa)
 }
 
 // <<C_F0_constructor_binary_operator>> operator binaire
-C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b) 
+C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b)
 {
   C_F0 tab[2]={a,b};
   basicAC_F0 p;
@@ -254,7 +252,7 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & 
 }
 
 //  operator trinaire
-C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b,const  C_F0 & c) 
+C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & b,const  C_F0 & c)
 {
   C_F0 tab[3]={a,b,c};
   basicAC_F0  p;
@@ -263,12 +261,12 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & 
 }
 
 
- OneOperator::~OneOperator(){ 
+ OneOperator::~OneOperator(){
        OneOperator * d=next;
-       next=0; 
+       next=0;
        if(! CodeAlloc::cleanning) // hash FH (pour les fuite de mémoire)
-         while(d) 
-        { 
+         while(d)
+        {
          OneOperator * dd=d->next;
          d->next=0;
          delete d;
@@ -276,68 +274,68 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & 
         }
   }
 
-    OneOperator::OneOperator(aType rr) 
+    OneOperator::OneOperator(aType rr)
       : ArrayOfaType(),r(rr),next(0),pref(0) {throwassert(r);}
-    OneOperator::OneOperator(aType rr,aType  a) 
+    OneOperator::OneOperator(aType rr,aType  a)
       : ArrayOfaType(a,false),r(rr),next(0),pref(0) {throwassert(rr && a );}
     OneOperator::OneOperator(aType rr,aType  a,aType  b)
       : ArrayOfaType(a,b,false),r(rr),next(0),pref(0) {
-     throwassert(rr && a && b);} 
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c) 
+     throwassert(rr && a && b);}
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c)
       : ArrayOfaType(a,b,c,false),r(rr),next(0),pref(0)
-        {throwassert(rr && a && b && c);} 
+        {throwassert(rr && a && b && c);}
     OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d)
-      : ArrayOfaType(a,b,c,d,false),r(rr),next(0),pref(0) 
-      {throwassert(rr && a && b && c);} 
-    
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e) 
+      : ArrayOfaType(a,b,c,d,false),r(rr),next(0),pref(0)
+      {throwassert(rr && a && b && c);}
+
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e)
       : ArrayOfaType(a,b,c,d,e,false),r(rr),next(0),pref(0)
        {throwassert(rr && a && b && c && d);} // Added by Fabian Dortu (5 parameters)
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f) 
-      : ArrayOfaType(a,b,c,d,e,f,false),r(rr),next(0),pref(0) 
-      {throwassert(rr && a && b && c && d && e && f);} // Added by Fabian Dortu (6 parameters) 
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g) 
-      : ArrayOfaType(a,b,c,d,e,f,g,false),r(rr),next(0),pref(0) 
-       {throwassert(rr && a && b && c && d && e && f && g);} // Added by Fabian Dortu (7 parameters) 
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h) 
-     : ArrayOfaType(a,b,c,d,e,f,g,h,false),r(rr),next(0),pref(0) 
-       {throwassert(rr && a && b && c && d && e && f && g && h);} // Added by Fabian Dortu (8 parameters) 
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i) 
-      : ArrayOfaType(a,b,c,d,e,f,g,h,i,false),r(rr),next(0),pref(0) 
-      {throwassert(rr && a && b && c && d && e && f && g && h && i);} // Added by Fabian Dortu (9 parameters) 
-    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i, aType j) 
-      : ArrayOfaType(a,b,c,d,e,f,g,h,i,j,false),r(rr),next(0),pref(0) 
-     {throwassert(rr && a && b && c && d && e && f && g && h && i && j);} // Added by Fabian Dortu (10 parameters) 
-    
-    
-    
-    OneOperator::OneOperator(aType rr,const ArrayOfaType &ta) 
-      : ArrayOfaType(ta),r(rr),next(0),pref(0) 
-       {throwassert(rr);} 
-    OneOperator::OneOperator(aType rr,bool ellipse) 
-      : ArrayOfaType(ellipse),r(rr),next(0),pref(0) 
-        {throwassert(rr );} 
-    OneOperator::OneOperator(aType rr,const ListOfId *l) 
-      : ArrayOfaType(l),r(rr),next(0),pref(0) 
-      {throwassert(rr );} 
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f)
+      : ArrayOfaType(a,b,c,d,e,f,false),r(rr),next(0),pref(0)
+      {throwassert(rr && a && b && c && d && e && f);} // Added by Fabian Dortu (6 parameters)
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g)
+      : ArrayOfaType(a,b,c,d,e,f,g,false),r(rr),next(0),pref(0)
+       {throwassert(rr && a && b && c && d && e && f && g);} // Added by Fabian Dortu (7 parameters)
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h)
+     : ArrayOfaType(a,b,c,d,e,f,g,h,false),r(rr),next(0),pref(0)
+       {throwassert(rr && a && b && c && d && e && f && g && h);} // Added by Fabian Dortu (8 parameters)
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i)
+      : ArrayOfaType(a,b,c,d,e,f,g,h,i,false),r(rr),next(0),pref(0)
+      {throwassert(rr && a && b && c && d && e && f && g && h && i);} // Added by Fabian Dortu (9 parameters)
+    OneOperator::OneOperator(aType rr,aType  a,aType  b,aType c,aType d,aType e,aType f, aType g, aType h, aType i, aType j)
+      : ArrayOfaType(a,b,c,d,e,f,g,h,i,j,false),r(rr),next(0),pref(0)
+     {throwassert(rr && a && b && c && d && e && f && g && h && i && j);} // Added by Fabian Dortu (10 parameters)
 
-void Polymorphic::Addp(const char * op,Value pp,...) const 
+
+
+    OneOperator::OneOperator(aType rr,const ArrayOfaType &ta)
+      : ArrayOfaType(ta),r(rr),next(0),pref(0)
+       {throwassert(rr);}
+    OneOperator::OneOperator(aType rr,bool ellipse)
+      : ArrayOfaType(ellipse),r(rr),next(0),pref(0)
+        {throwassert(rr );}
+    OneOperator::OneOperator(aType rr,const ListOfId *l)
+      : ArrayOfaType(l),r(rr),next(0),pref(0)
+      {throwassert(rr );}
+
+void Polymorphic::Addp(const char * op,Value pp,...) const
 {
   pair<iterator,bool>  p=m.insert(pair<const Key,Value>(op,pp));
-  Value f= p.first->second;	
-  if (!p.second)  // not insert => old 
+  Value f= p.first->second;
+  if (!p.second)  // not insert => old
     *f += *pp;
   va_list ap;
   va_start(ap,pp);
   for(pp=va_arg(ap,OneOperator * );pp;pp=va_arg(ap,OneOperator * ))
     *f += *pp;
-/*  if ( ! strlen(op) )  
+/*  if ( ! strlen(op) )
    { // no polymorphisme
      if(m.size() !=1 ||  !f->Simple()) {
        cerr << " no polymorphisme and polymorphisme are mixed " << endl;
     //   for_each(m.begin,m.end(),ShowOn_cerr);
-       CompileError();       
-     }   
+       CompileError();
+     }
    } */
 }
 
@@ -346,47 +344,47 @@ void Polymorphic::Add(const char * op,Value *pp) const
   if (*pp)
    {
     pair<iterator,bool>  p=m.insert(pair<const Key,Value>(op,*pp));
-    Value f= p.first->second;	
-    if (!p.second)  // not insert => old 
+    Value f= p.first->second;
+    if (!p.second)  // not insert => old
       *f += **pp;
     pp++;
     for(;*pp;pp++)
      *f += **pp;
-   /*if ( ! strlen(op) )  
+   /*if ( ! strlen(op) )
      { // no polymorphisme
       if(m.size() !=1 ||  !f->Simple()) {
        cerr << " no polymorphisme and polymorphisme are mixed " << endl;
       //   for_each(m.begin,m.end(),ShowOn_cerr);
-       CompileError();       
+       CompileError();
      }  } */ }
-     
+
 }
 
 
 // <<FindType>>
- int  FindType(const char * name)  
+ int  FindType(const char * name)
    {
    C_F0 r;
 
      ListOfTOfId::const_iterator i=tables_of_identifier.begin();
       for(;i!=tables_of_identifier.end();++i)
-      { 
-      TableOfIdentifier * ti=*i;     
+      {
+      TableOfIdentifier * ti=*i;
       r = ti->Find(name);
       if (r.NotNull()) return r.TYPEOFID();
     }
      return 0;
-   } 
+   }
 
 /// <<Find>> uses [[file:global.cpp::tables_of_identifier]]
 
-C_F0 Find(const char * name)   
+C_F0 Find(const char * name)
 {
    C_F0 r;
    ListOfTOfId::const_iterator i=tables_of_identifier.begin();
    for(;i!=tables_of_identifier.end();++i)
-    { 
-      TableOfIdentifier * ti=*i;     
+    {
+      TableOfIdentifier * ti=*i;
       r = ti->Find(name);
       if (r.NotNull()) return r;
     }
@@ -399,7 +397,7 @@ C_F0 Find(const char * name)
 C_F0 TableOfIdentifier::destroy()
 {
  int k=0;
-// cout << "\n\t List of destroy variables " << m.size() << " : " ; 
+// cout << "\n\t List of destroy variables " << m.size() << " : " ;
  for (pKV * i=listofvar;i;i=i->second.next)
    {
      if  (i->second.del && i->second.first->ExistDestroy() )
@@ -408,36 +406,36 @@ C_F0 TableOfIdentifier::destroy()
      if (i->second.del && i->second.first->ExistDestroy() ) k++;
    }
 // cout << endl;
-/*  old code 
+/*  old code
  ListOfInst *l=new ListOfInst(k);
  for (pKV * i=listofvar;i;i=i->second.next)
-     if (i->second.del && i->second.first->ExistDestroy()) 
+     if (i->second.del && i->second.first->ExistDestroy())
        l->Add(i->second.first->Destroy(i->second) );
 */
-// new code 
+// new code
   vectorOfInst * l= new vectorOfInst(k);
   int j=0;
  for (pKV * i=listofvar;i;i=i->second.next)
-     if (i->second.del && i->second.first->ExistDestroy()) 
+     if (i->second.del && i->second.first->ExistDestroy())
        l->v[j++]=i->second.first->Destroy(i->second) ;
   ffassert(j==k);
- return C_F0(l);     
+ return C_F0(l);
 }
 
    void TableOfIdentifier::clear()
    {
      for (iterator i=m.begin();i!=m.end();++i)
        {
-        
+
    //     delete i->first;
         }
      m.clear();
-   } 
+   }
 
-Expression basicForEachType::Destroy(const C_F0 & e) const 
+Expression basicForEachType::Destroy(const C_F0 & e) const
 {
     return destroy ? NewExpression(destroy,e) : (Expression)  e;
-} 
+}
 
 basicForEachType::~basicForEachType()
   {
@@ -449,16 +447,16 @@ basicForEachType::basicForEachType(const type_info  & k,
                                           const size_t s,
                                           const E_F1_funcT_Type * p,
                                           basicForEachType *rr,
-                                          Function1 iv,Function1 id, Function1  dreturn) 
+                                          Function1 iv,Function1 id, Function1  dreturn)
       : ktype(&k),//ktypefunc(0),
         size(s),
-        un_ptr_type(rr?rr:this), 
-        casting(0), // no casting to 
+        un_ptr_type(rr?rr:this),
+        casting(0), // no casting to
         un_ptr(p),
         InitExp(iv),
         DoOnReturn(dreturn),
         //funct_type(0),
-        destroy(id) {} 
+        destroy(id) {}
  void basicForEachType::SetArgs(const ListOfId *lid) const
 { SHOWVERB(cout << "SetArgs::\n ") ;ffassert(lid==0 || lid->size()==0);}
 
@@ -469,28 +467,28 @@ basicForEachType::basicForEachType(const type_info  & k,
 
 
 Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),topmax(top)
-    {     
+    {
       itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
     }
-Block::~Block(){} 
+Block::~Block(){}
 
  CC_F0  Block::close(Block *& c) {
-     tables_of_identifier.erase(itabl);      
+     tables_of_identifier.erase(itabl);
      c=fatherblock;
      if (fatherblock) {fatherblock->topmax=topmax;
                        fatherblock->top=top;}
-        
+
      CC_F0 r;
      r = table.destroy();
      delete this;
      return r;}
- 
+
    Block * Block::open(Block *& cb)
    {
-     return  cb = new Block(cb); 
+     return  cb = new Block(cb);
    }
-  
-    
+
+
 const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
   {
     if( this != &Global) {
@@ -498,12 +496,12 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
 	  {
 	    if(mpirank==0 && (verbosity>0))
 	      cerr << "\n *** Warning  The identifier " << k << " hide a Global identifier  \n";
-	    
+
 	  }
     }
       pair<iterator,bool>  p=m.insert(pKV(k,Value(v,listofvar,del)));
       listofvar = &*m.find(k);
-      if (!p.second) 
+      if (!p.second)
 	{
 	    if(mpirank==0) {
 		cerr << " The identifier " << k << " exists \n";
@@ -520,12 +518,12 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
       iterator i= m.find(k);
       if (i==m.end()) // new
 	{
-	    Value poly0=Value(atype<Polymorphic*>(),new Polymorphic(),listofvar);     
+	    Value poly0=Value(atype<Polymorphic*>(),new Polymorphic(),listofvar);
 	    i=m.insert(pair<const Key,Value>(k,poly0)).first;
 	    listofvar= &*i;
 	}
       const Polymorphic * p= dynamic_cast<const Polymorphic *>(i->second.second);
-      if ( !p) { 
+      if ( !p) {
 	  if(mpirank==0)
 	      cerr << k << " is not a Polymorphic id " << endl;
 	  CompileError();
@@ -536,39 +534,39 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
  ArrayOfaType::ArrayOfaType(const ListOfId * l)
   : n(l->size()),t(new aType[n]),ellipse(false)
  {
-    for (int i=0;i<n;i++) 
+    for (int i=0;i<n;i++)
       {
-      t[i]=(*l)[i].r;  
+      t[i]=(*l)[i].r;
        if ( ! t[i])
         {
-	   if(mpirank==0) 
+	   if(mpirank==0)
            cerr << " Argument " << i << " '"<< (*l)[i].id << "' without type\n";
            CompileError("DCL routine: Argument without type ");
          }
       }
  }
 
-bool ArrayOfaType::WithOutCast( const ArrayOfaType & a) const 
+bool ArrayOfaType::WithOutCast( const ArrayOfaType & a) const
  {
    if ( ( !ellipse && (a.n != n))  || (ellipse && n > a.n) ) return false;
    for (int i=0;i<n;i++)
-       if (! a.t[i]->SametypeRight(t[i])) 
-        return false;       
- // cerr << " TRUE " << endl;    
+       if (! a.t[i]->SametypeRight(t[i]))
+        return false;
+ // cerr << " TRUE " << endl;
    return true;
  }
 
-  
-bool ArrayOfaType::WithCast( const ArrayOfaType & a,int nbcast) const 
- {  
+
+bool ArrayOfaType::WithCast( const ArrayOfaType & a,int nbcast) const
+ {
    if (  ( !ellipse && (a.n != n))  || (ellipse && n > a.n) ) return false;
    for (int i=0;i<n;i++)
      if ( a.t[i]->SametypeRight(t[i])) ;
-     else if (! t[i]->CastingFrom(a.t[i])) return false; 
+     else if (! t[i]->CastingFrom(a.t[i])) return false;
      else if ( --nbcast <0) return false;
    return true;
- }    
- 
+ }
+
 void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
   CastFunc f5,CastFunc f6,CastFunc f7,CastFunc f8)
   {
@@ -588,8 +586,8 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
 	      }
 	    if (casting)  *casting += *ff[i];
 	    else casting = ff[i];
-	    /*      
-	     if( ! mapofcast.insert(make_pair<const aType,CastFunc>(ff[i]->a,ff[i])).second) 
+	    /*
+	     if( ! mapofcast.insert(make_pair<const aType,CastFunc>(ff[i]->a,ff[i])).second)
 	     {
 	     cerr << " The casting to "<< *this << " from " << ff[i]->a << " exists " << endl;
 	     cerr << " List of cast " << endl;
@@ -599,11 +597,11 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
 	}
   }
 
- ostream & operator<<(ostream & f,const OneOperator & a)     
+ ostream & operator<<(ostream & f,const OneOperator & a)
 {
 //   for(const OneOperator * tt=&a;tt;tt=tt->next)
      f << "\t  " << * (a.r) << " :  "  <<(const ArrayOfaType &) a;
-   return f;   
+   return f;
 }
 
  ostream & operator<<(ostream & f,const Polymorphic & a)
@@ -616,13 +614,13 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
     i->second->Show(f);
    }
   return f;
-}  
+}
  ostream & operator<<(ostream & f,const ArrayOfaType & a)
-   { 
-     for (int i=0;i<a.n;i++) 
+   {
+     for (int i=0;i<a.n;i++)
        f <<  (i ? ", " : " ") << *a.t[i];
        if (a.ellipse ) f << "... ";
-       else            f << " "; 
+       else            f << " ";
       return f;}
     ostream & operator<<(ostream & f,const TableOfIdentifier & t )
  {
@@ -630,14 +628,14 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
    for(i=t.m.begin();i!=t.m.end();i++)
     {
       TableOfIdentifier::Value v=i->second;
-      f << i->first << ":  " << *v.first << " <- " ; 
+      f << i->first << ":  " << *v.first << " <- " ;
       const Polymorphic * p=dynamic_cast<const Polymorphic *>(v.second);
       if(p) f << "Polymorphic " << *p << endl;
       else  f << " Simple @" <<  v.second << endl;
     }
     return f;
  }
- 
+
 Expression NewExpression(Function1 f,Expression a)
 {
   ffassert(f);
@@ -647,17 +645,17 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
 {
   ffassert(f);
   return new E_F0_Func2(f,a,b);
- 
+
 }
 
 // <<ShowType>>
  void ShowType(ostream & f)
  {
- 
+
    map<const string,basicForEachType *>::const_iterator i;
    for(i=map_type.begin();i!=map_type.end();i++)
      {
-       f << " --"<< i->first <<" = " ; 
+       f << " --"<< i->first <<" = " ;
        i->second->Show(f) ;
        f << endl;
      }
@@ -668,7 +666,7 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
        f << " " <<* this << endl;
        if (casting) casting->Show(f) ;
        if (ti.m.size())
-        { 
+        {
           TableOfIdentifier::const_iterator mc=ti.m.begin();
           TableOfIdentifier::const_iterator end=ti.m.end();
           for (;mc != end;mc++)
@@ -679,7 +677,7 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
           }
         }
    }
- 
+
 
 
 
@@ -687,12 +685,12 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
 E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
   :    code(routine->ins),
        clean(routine->clean),
-       rt(routine->tret),      
+       rt(routine->tret),
        nbparam(args.size()),
        param(new Expression[nbparam]),
        name(routine->name)
-{    
-   assert(routine->ins); 
+{
+   assert(routine->ins);
    for (int i=0;i<args.size();i++)  //  bug pb copie des string   dec 2007  FH  ???????????????
    {
       // cout << "E_Routine " << *routine->param[i].r << " <- " << *args[i].left() << endl;
@@ -703,14 +701,14 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
 E_Routine::~E_Routine() { delete [] param;}
 
 struct CleanE_Routine {
-  const E_Routine * er; 
+  const E_Routine * er;
     Stack s;
     AnyType * l;
     CleanE_Routine(const  E_Routine * r,Stack ss,AnyType *ll): er(r),s(ss),l(ll) {}
     ~CleanE_Routine() {
-   // cout << " Clean E_routine " << er <<endl;	
+   // cout << " Clean E_routine " << er <<endl;
     (*er->clean)(s);
-    delete [] l; 
+    delete [] l;
     }
 };
 
@@ -720,44 +718,44 @@ AnyType E_Routine::operator()(Stack s)  const  {
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
-   memcpy(save,s,lgsave); // save  
+   memcpy(save,s,lgsave); // save
     AnyType *listparam;
  //  Add2StackOfPtr2Free(s,new CleanE_Routine(this,s,listparam=new AnyType[nbparam]));
     Add2StackOfPtr2FreeA(s,listparam=new AnyType[nbparam]);
-    
+
     //   AnyType *listparam =Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
-   // 
+   //
  //  WhereStackOfPtr2Free(s)->Add2StackOfPtr2Free(s,listparam);
-//  to day the memory gestion of the local variable are static,   
+//  to day the memory gestion of the local variable are static,
    for (int i=0;i<nbparam;i++)
-     listparam[i]= (*param[i])(s); // set of the parameter 
+     listparam[i]= (*param[i])(s); // set of the parameter
    Stack_Ptr<AnyType>(s,ParamPtrOffset) = listparam;
-   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2006 
- 
-   try {  
+   WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2006
+
+   try {
       ret=(*code)(s);  }
-   catch( E_exception & e) { 
+   catch( E_exception & e) {
           // cout << " catch " << e.what() << " clean & throw " << endl;
             if (e.type() == E_exception::e_return)
               ret = e.r;
-           else 
+           else
               ErrorExec("E_exception: break or contine not in loop ",1);
   }
-  catch(...) { // clean and rethrow the exception 
-      //::delete [] listparam; 
-       (*clean)(s); 
-      WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
-      memcpy(s,save,lgsave);  // restore 
+  catch(...) { // clean and rethrow the exception
+      //::delete [] listparam;
+       (*clean)(s);
+      WhereStackOfPtr2Free(s)->clean(); // FH mars 2005
+      memcpy(s,save,lgsave);  // restore
       TheCurrentLine=debugstack->back().second;
       debugstack->pop_back();
      // cout << " E_Routine:: ... pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
 
       throw ;
      }
-  
-    (*clean)(s); //  the clean is done in CleanE_Routine delete .         
-   //  delete [] listparam; after return 
-    memcpy(s,save,lgsave);  // restore 
+
+    (*clean)(s); //  the clean is done in CleanE_Routine delete .
+   //  delete [] listparam; after return
+    memcpy(s,save,lgsave);  // restore
     TheCurrentLine=debugstack->back().second;
     debugstack->pop_back();
    // cout << " E_Routine::  pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
@@ -766,14 +764,14 @@ AnyType E_Routine::operator()(Stack s)  const  {
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
    // plus safe ?????  FH.  (fait 2008)
    // mais pb si   a = f()+g()   OK les pointeurs des instruction sont detruit
-    //  en fin d'instruction programme de l'appelant  FH 2007 
+    //  en fin d'instruction programme de l'appelant  FH 2007
    // ... ou alors changer le return ???? qui doit copie le resultat.. (voir)
    return ret;
 }
 
-void ListOfInst::Add(const C_F0 & ins) { 
+void ListOfInst::Add(const C_F0 & ins) {
        if( (!ins.Empty()) ) {
-      if (n%nx==0){ 
+      if (n%nx==0){
                 Expression   *  l = new Expression [n+nx];
                 int * ln =  new int [n+nx];
       			for (int i=0;i<n;i++) {
@@ -785,75 +783,75 @@ void ListOfInst::Add(const C_F0 & ins) {
       			linenumber=ln;
       		    }
       throwassert(list);
-      linenumber[n]= TheCurrentLine;		    
+      linenumber[n]= TheCurrentLine;
       list[n++] = ins;
       }}
-      
+
 /// <<ListOfInst::operator()>> Iteratively calls each item in the local array #list of type #Expression
 
-AnyType ListOfInst::operator()(Stack s) const {     
-    AnyType r; 
+AnyType ListOfInst::operator()(Stack s) const {
+    AnyType r;
     double s0=CPUtime(),s1=s0,ss0=s0;
     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
-    try { // modif FH oct 2006 
-	for (int i=0;i<n;i++) 
+    try { // modif FH oct 2006
+	for (int i=0;i<n;i++)
 	{
 	    TheCurrentLine=linenumber[i];
 	    r=(*list[i])(s);
 	    sptr->clean(); // modif FH mars 2006  clean Ptr
 	    s1=CPUtime();
-	    if (showCPU)  
+	    if (showCPU)
 		cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
 	    s0=CPUtime();
 	}
     }
-    catch( E_exception & e) 	
+    catch( E_exception & e)
     {
-	if (e.type() != E_exception::e_return)  
+	if (e.type() != E_exception::e_return)
 	    sptr->clean(); // pour ne pas detruire la valeur retourne  ...  FH  jan 2007
-	throw; // rethow  
+	throw; // rethow
     }
     catch(...)
     {
 	sptr->clean();
-	throw; 
+	throw;
     }
     return r;}
 
 AnyType E_block::operator()(Stack s)  const {
     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
-    if (clean) 
+    if (clean)
     {
-	try { 
+	try {
 	    for (int i=0;i<n;i++) {
 		TheCurrentLine=linenumber[i];
-		(*code[i])(s); 
+		(*code[i])(s);
 		sptr->clean();
-		
+
             }}
-	catch( E_exception & e) { 
-	    (*clean)(s); 
-	    if (e.type() != E_exception::e_return)  
+	catch( E_exception & e) {
+	    (*clean)(s);
+	    if (e.type() != E_exception::e_return)
 		sptr->clean();
-	    throw; // rethow  
+	    throw; // rethow
 	}
-	catch(/* E_exception & e*/...) { // catch all for cleanning 
-	    (*clean)(s); 
+	catch(/* E_exception & e*/...) { // catch all for cleanning
+	    (*clean)(s);
 	    sptr->clean();
 	    // if(verbosity>50)
 	    //  cout << " catch " << e.what() << " clean & throw " << endl;
 	    // throw(e);
-            throw; // rethow 
+            throw; // rethow
 	}
-	
-	(*clean)(s); 
+
+	(*clean)(s);
 	sptr->clean();
-	
+
     }
-    else  // not catch  exception if no clean (optimization} 
-	for (int i=0;i<n;i++) 
+    else  // not catch  exception if no clean (optimization}
+	for (int i=0;i<n;i++)
 	{
-	    (*code[i])(s); 
+	    (*code[i])(s);
 	    sptr->clean(); // mars 2006 FH clean Ptr
 	}
 	    return Nothing;
@@ -863,30 +861,30 @@ AnyType E_block::operator()(Stack s)  const {
 void ShowDebugStack()
  {
    if (mpisize)
-   cerr << "  current line = " << TheCurrentLine  
-        << " mpirank " << mpirank << " / " << mpisize <<endl; 
+   cerr << "  current line = " << TheCurrentLine
+        << " mpirank " << mpirank << " / " << mpisize <<endl;
    else
    cerr << "  current line = " << TheCurrentLine  << endl;
   if(debugstack)
       for (int i=0; i<debugstack->size(); ++i)
      {
-        
+
         cerr << " call " << debugstack->at(i).first->name<< "  at  line "
              <<debugstack->at(i).second << endl;
      }
  }
- 
 
-  int  E_F0::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n)  
+
+  int  E_F0::Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n)
      {
       int rr = find(m);
       if (rr) return rr;
-      if( (verbosity / 10)% 10 == 1) 
-      	 cout << "\n new expression : " << n  << " mi=" << MeshIndependent()<< " " << typeid(*this).name()  
-      	      << " :" << *this << endl;        
+      if( (verbosity / 10)% 10 == 1)
+      	 cout << "\n new expression : " << n  << " mi=" << MeshIndependent()<< " " << typeid(*this).name()
+      	      << " :" << *this << endl;
        return insert(this,l,m,n);
-     }   
-     
+     }
+
 
 class E_F0para :public E_F0 { public:
   const int i;
@@ -895,43 +893,43 @@ class E_F0para :public E_F0 { public:
     return Stack_Ptr<AnyType>(s,ParamPtrOffset)[i];
   }
    E_F0para(int ii) : i(ii){}
-};        
-     
+};
+
 Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
     : OneOperator(tr,l),offset(cb->OffSet(sizeof(void*))),
      tfunc(tf),tret(tr),name(iden),param(*l),
-      currentblock(new Block(cb)),ins(0),clean(0) 
+      currentblock(new Block(cb)),ins(0),clean(0)
      {
-       delete l;  // add  FH 24032005 (trap ) 
-       cb = currentblock; 
+       delete l;  // add  FH 24032005 (trap )
+       cb = currentblock;
 	// cout <<"Routine: tf = " << *tf << "  " <<  *tr << endl;
        for (size_t i=0;i<param.size();i++)
        {
 	//   cout << "Routine " << i << " ref=  " << param[i].ref << " " << *param[i].r << " " << *param[i].r->right() << endl;
-           currentblock->NewID(param[i].r,param[i].id,C_F0(new E_F0para(i),// modif FH 2007 
-							   param[i].r), 
+           currentblock->NewID(param[i].r,param[i].id,C_F0(new E_F0para(i),// modif FH 2007
+							   param[i].r),
 							  // (param[i].ref ? param[i].r :  param[i].r->right() ),
 							   !param[i].ref);
        }
      }
-   Block * Routine::Set(C_F0 instrs) 
-       { 
+   Block * Routine::Set(C_F0 instrs)
+       {
          ins=instrs;
          clean = (C_F0) currentblock->close(currentblock);
-         return    currentblock;} 
-         
- 
-E_F0 * Routine::code(const basicAC_F0 & args) const 
+         return    currentblock;}
+
+
+E_F0 * Routine::code(const basicAC_F0 & args) const
 {
-   
+
    return new E_Routine(this,args);
 }
 
-void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const 
+void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
 {
  int k=0;
  if ( !n && !named_parameter)  return;
- 
+
   for (int i=0;i<n;i++)
   {
      C_F0  ce=find(l[i].name) ;
@@ -952,16 +950,16 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
        k++;
        }
   }
-  
+
  if (!named_parameter) return;
-  
-  if ((size_t) k!=  named_parameter->size()) 
+
+  if ((size_t) k!=  named_parameter->size())
    {
       cout << " Sorry some name parameter are not used!  found" <<  k << " == " << named_parameter->size() <<endl;
       for(const_iterator ii=named_parameter->begin(); ii != named_parameter->end();ii++)
        {
         for (int i=0;i<n;i++)
-          if (!strcmp(l[i].name,ii->first)) 
+          if (!strcmp(l[i].name,ii->first))
             goto L1;
          cout << "\t the parameter is '" << ii->first << "' is unused " << endl;
         L1:;
@@ -971,19 +969,19 @@ void basicAC_F0::SetNameParam(int n,name_and_type *l , Expression * e) const
     for (int i=0;i<n;i++)
        cerr << "\t" << l[i].name << " =  <" << l[i].type->name() << ">\n";
     }
-    CompileError("Unused named parameter");  
+    CompileError("Unused named parameter");
    }
 }
 
 
-//  change FH to bluid .dll 
+//  change FH to bluid .dll
 
-void lgerror (const char* s) 
+void lgerror (const char* s)
   {
       if(mpirank==0)
 	{
 	    cerr << endl;
-	    cerr <<" Error line number " << zzzfff->lineno() << ", in file " << zzzfff->filename() 
+	    cerr <<" Error line number " << zzzfff->lineno() << ", in file " << zzzfff->filename()
 	    <<", before  token " <<zzzfff->YYText() << endl
 	    << s << endl;
 	}
@@ -994,18 +992,18 @@ void lgerror (const char* s)
 
  C_F0 ForAll(Block *cb,ListOfId * id,C_F0  m)
 {
-    
+
 //Block::open(cb); // new block
      //  decl variable
     if(verbosity>1000)
      cout << "InitAutoLoop ::: " <<  id->size()<< " type=" << *(m.left()) << endl;
-    
+
      ffassert(id->size()<4);
      aType t=m.left() ;
      ffassert(id->size()<=0 || t->typev);
      ffassert(id->size()<=1 || t->typei);
      ffassert(id->size()<=2 || t->typej);
-    // missing this king of code atype<T>->SetTypeLoop(atype<string**>(),atype<K*>())  maybe !!!! FH. 
+    // missing this king of code atype<T>->SetTypeLoop(atype<string**>(),atype<K*>())  maybe !!!! FH.
      ffassert(id->size()<4);
      // find the size do data
      aType tt[4];
@@ -1013,7 +1011,7 @@ void lgerror (const char* s)
      if(t->typei) tt[k++]=t->typei;
      if(t->typej) tt[k++]=t->typej;
      if(t->typev) tt[k++]=t->typev;
-    
+
      for(int i=0;i<k;++i)
      {
      if(verbosity>1000)
@@ -1037,13 +1035,13 @@ void lgerror (const char* s)
      Expression loop= new PolymorphicLoop(m,args);
     if(verbosity>1000)
      cout << "a type: " << *atype<PolymorphicLoop*>() << " " << loop << endl;
-    
+
      return C_F0(loop,atype<PolymorphicLoop*>());
 }
 
  C_F0 ForAll(C_F0  cloop,C_F0  inst,C_F0 end)
 {
-    if(verbosity>1000) 
+    if(verbosity>1000)
     cout << " type cloop " << *cloop.left() << " " << cloop.LeftValue() << " "  << endl;
     const PolymorphicLoop *loop=  dynamic_cast<const PolymorphicLoop *>(cloop.LeftValue());
     ffassert(loop);
@@ -1063,5 +1061,5 @@ void InitLoop()
 {
    // TheLoopOpt=new Polymorphic();
      Dcl_Type<PolymorphicLoop*>(0);
-    
+
 }

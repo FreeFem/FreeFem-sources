@@ -1,32 +1,30 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "config-wrapper.h" // needed for HAVE_DLFCN_H
-
 #include  <iostream>
 #include  <map>
 #include  <set>
@@ -55,9 +53,9 @@ set<string> SetLoadFile;
 
 bool load(string ss)
 {
-  
+
   // FFCS - do not allow potentially dangerous commands from remote anonymous clients
-  
+
   if(ffapi::protectedservermode() && (ss=="pipe" || ss=="shell")){
     cerr<<"library "<<ss<<" not allowed in server environment"<<endl;
     CompileError("Error load");
@@ -65,7 +63,7 @@ bool load(string ss)
   }
 
   if(SetLoadFile.find(ss) != SetLoadFile.end())
-    { 
+    {
       if( (mpirank==0)&& verbosity)
 	cout << " (already loaded : " <<  ss << " ) " ;
     }
@@ -81,52 +79,52 @@ bool load(string ss)
 	  prefix.push_back("");
 	  prefix.push_back("./");
 	}
-      
+
       string suffix[nbsuffix] ;
-	
+
       suffix[0]="";
       suffix[1]=".so";
 #ifdef  __APPLE__
       suffix[1]=".dylib";
-#endif  
-#ifdef _WIN32  
+#endif
+#ifdef _WIN32
       suffix[1]=".dll";
-#endif 
-      int j; 
+#endif
+      int j;
       for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
 	for ( j= 0;j< nbsuffix;++j)
 	  {
 	    string s= *i+ss+suffix[j];
-	    
-#ifdef LOAD  
-	    handle = dlopen (s.c_str(), RTLD_LAZY ); 
+
+#ifdef LOAD
+	    handle = dlopen (s.c_str(), RTLD_LAZY );
 	    if (verbosity>9) cout << " test dlopen(" << s << ")= " << handle <<  endl;
-	    
+
 	    // FFCS - 20/9/11 - print explanation for load errors
 	    if(verbosity>9 && !handle){
 	      cout<<"load error was: "<<dlerror()<<endl;
 	    }
-	    
+
 	    ret= handle !=0;
-	    if (  ret ) 
+	    if (  ret )
 	      {
 		if(verbosity > 1 && (mpirank ==0))
 		  cout << " (load: dlopen " << s << " " << handle << ") ";
 		callInitsFunct() ;   // [[file:InitFunct.cpp::callInitsFunct]]
 		return handle;
 	      }
-	    
+
 #elif _WIN32
 	    {
 	      HINSTANCE mod=  LoadLibrary(s.c_str());
 	      if (verbosity>9) cout << " test LoadLibrary(" << s << ")= " << mod <<  endl;
-	      if(mod==0) 
+	      if(mod==0)
 		{
 		  DWORD merr = GetLastError();
 		  if(verbosity>19)
 		    cerr  <<   "\n try loadLibary : " <<s << "\n \t fail : " << merr << endl;
 		}
-	      else 
+	      else
 		{
 		  if(verbosity&& (mpirank ==0))
 		    cout << "(load: loadLibary " <<  s <<  " = " << handle << ")";
@@ -135,19 +133,19 @@ bool load(string ss)
 		}
 	    }
 #elif STATIC_LINKING
-	    
+
 	    // <<STATIC_LINKING>> Enable statically linked libraries for [[file:~/fflib/Makefile::STATIC_LINKING]] - ALH
 	    bool ok=false;
 
 	    // <<static_load_msh3>> [[file:~/ff/examples++-load/msh3.cpp::dynamic_loading]]
 	    if(ss=="msh3"){
-	      
+
 	      // [[file:~/ff/examples++-load/msh3.cpp::msh3_Load_Init]]
 	      void msh3_Load_Init();
 	      msh3_Load_Init();
 	      ok=true;
 	    }
-	    
+
 	    // <<static_load_medit>> [[file:~/ff/examples++-load/medit.cpp::dynamic_loading]]
 	    if(ss=="medit"){
 	      // [[file:~/ff/examples++-load/medit.cpp::medit_Load_Init]]
@@ -158,7 +156,7 @@ bool load(string ss)
 
 	    if(ok && verbosity && (mpirank ==0)) cout << " (static load: " << ss << " " << ") ";
 	    return ok;
-#else	    
+#else
 	    if(mpirank ==0)
 	      {
 		cout << "------------------------------------   \n" ;
@@ -167,7 +165,7 @@ bool load(string ss)
 	      }
 	    CompileError("Error load");
 	    return 0;
-#endif  
+#endif
 	  }
       if(mpirank ==0)
 	{
@@ -184,8 +182,8 @@ bool load(string ss)
 	  cerr << "list  prefix: " ;
 	  for (list<string>::const_iterator i= prefix.begin();i !=prefix.end();++i)
 	    cerr <<"'"<<*i<<"' ";
-	  cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' "; 
-	  
+	  cerr << "list  suffix : '"<< suffix[0] << "' , '"  << suffix[1] << "' ";
+
 	  cerr << endl;
 	}
       CompileError("Error load");
