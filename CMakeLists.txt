@@ -32,46 +32,9 @@ INCLUDE(FFInstallPackage)
 #FF_INSTALL_PACKAGE(Tetgen)
 
 
-FILE(DOWNLOAD http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz 
-              mydownload/superlu_4.3.tar.gz
-              SHOW_PROGRESS)
-
-#########
-# LIBMESH
-#########
-
-
-#######
-# LGLIB
-#######
-
-ADD_LIBRARY(lglib ${LGLIB_SRC})
-INCLUDE_DIRECTORIES(src/bamglib src/femlib/ src/fflib/ src/Graphics/ src/lglib/)
-SET_TARGET_PROPERTIES(lglib PROPERTIES PREFIX "")
-
-#######
-# LIBFF
-#######
-
-SET(LIBFF_SRC ${BAMGLIB_SRC} ${FEMLIB_SRC} ${FFLIB_SRC})
-LIST(REMOVE_ITEM LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/ConjuguedGradrientNL.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/FESpace-v0.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/glutdraw.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/InvIntFunc.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/mortar.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/Pkorder.cpp
-                           ${CMAKE_SOURCE_DIR}/src/femlib/P3korder.cpp
-                           ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
-LIST(APPEND LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/Algo/lgalgo.cpp 
-                      ${CMAKE_SOURCE_DIR}/src/Eigen/eigenvalue.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/libmesh5.c
-                      ${CMAKE_SOURCE_DIR}/src/Graphics/DefColor.cpp)
-
-ADD_LIBRARY(libff ${LIBFF_SRC})
-TARGET_LINK_LIBRARIES(libff dl cblas )
-INCLUDE_DIRECTORIES(src/bamglib src/fflib/ src/Graphics/ src/lglib/)
-SET_TARGET_PROPERTIES(libff PROPERTIES PREFIX "")
+#FILE(DOWNLOAD http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz 
+#              mydownload/superlu_4.3.tar.gz
+#              SHOW_PROGRESS)
 
 ###########
 # FREEFEM++
@@ -118,30 +81,11 @@ FIND_PACKAGE(MPI REQUIRED)
 INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
 TARGET_LINK_LIBRARIES(FreeFem++-mpi ${MPI_CXX_LIBRARIES} libff umfpack hdf5 arpack blas)
 
-#########
-# FFMEDIT
-#########
-
-ADD_EXECUTABLE(ffmedit ${MEDIT_SRC})
-FILE(WRITE src/medit/compil.date "\#define COMPIL  \" jeudi 4 août 2016, 13:47:25 (UTC+0200) (with ff++ 3.47)\"")
-INCLUDE_DIRECTORIES(src/libMesh src/medit)
-TARGET_LINK_LIBRARIES(ffmedit libMesh m ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GLUT_LIBRARIES} )
-
-
-######
-# BAMG
-######
-
-LIST(REMOVE_ITEM BAMGLIB_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp)
-ADD_EXECUTABLE(bamg src/bamg/bamg.cpp src/bamg/global.cpp ${BAMGLIB_SRC})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} src/bamg src/bamglib src/fflib/ src/Graphics/)
-TARGET_LINK_LIBRARIES(bamg libff ${HDF5_LIBRARIES})
-#${HDF5_LIBRARIES})
 
 ########
 # CVMSH2
 ########
-
+LIST(REMOVE_ITEM BAMGLIB_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp)
 ADD_EXECUTABLE(cvmsh2 ${CMAKE_SOURCE_DIR}/src/bamg/cvmsh2.cpp src/bamg/global.cpp ${BAMGLIB_SRC})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} src/bamg src/bamglib src/fflib/ src/Graphics/ ${HDF5_INCUDE_DIRS})
 TARGET_LINK_LIBRARIES(cvmsh2 libff hdf5 ${HDF5_LIBRARIES})

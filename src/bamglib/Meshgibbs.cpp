@@ -1,26 +1,26 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -48,16 +48,16 @@
 int gibbs1_(integer* n,integer*  record,integer*  ptvois);
 int gibbs2_(integer* n,integer*  record,integer*  criter);
 int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
-             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2, 
+             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2,
 	integer* pfold,integer*  pfnew,integer*  impre,integer*  nfout);
 int gibbsb_(integer* x,integer*  y,integer*  n,integer*  ptvois,
 						integer*  vois,integer*  nx,integer*  ny,integer*  nv,integer*  nn,integer*  m,
 						integer*  wh,integer*  wl,integer* r, integer* impre, integer* nfout);
 int gibbsc_(integer* nz,integer*  nv,integer*  niveau,integer*  n,integer* );
-int gibbsd_(integer* racine,integer*  n,integer*  ptvois,integer*  
+int gibbsd_(integer* racine,integer*  n,integer*  ptvois,integer*
 							vois,integer*  nv,integer*  r,integer*  niveau);
 int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,integer*  vois,
-						integer*  m,integer*  r,integer*  new_,integer*  option, 
+						integer*  m,integer*  r,integer*  new_,integer*  option,
 						integer* pfnew,integer*  impre,integer*  nfout);
 
 /* Subroutine */ int gibbs1_(integer* n,integer*  record,integer*  ptvois)
@@ -73,7 +73,7 @@ int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,in
 /*     routine appele par gibbs0 */
 /* -----------------------------------------------------------------------
  */
-/*     but: trie record (ensemble de n sommet) telle que l'ordre des somm 
+/*     but: trie record (ensemble de n sommet) telle que l'ordre des somm
 */
 /*     soit croissant (ordre du sommet i est ptvois(i+1)-ptvois(i)) */
 /* -----------------------------------------------------------------------
@@ -118,7 +118,7 @@ L4:
 	goto L8;
     }
 L5:
-    if (ptvois[record[j] + 1] - ptvois[record[j]] < ptvois[record[j + 1] + 1] 
+    if (ptvois[record[j] + 1] - ptvois[record[j]] < ptvois[record[j + 1] + 1]
 	    - ptvois[record[j + 1]]) {
 	++j;
     }
@@ -200,9 +200,9 @@ L999:
     return 0;
 } /* gibbs2_ */
 
-/* Subroutine */ 
+/* Subroutine */
 int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
-             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2, 
+             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2,
 	integer* pfold,integer*  pfnew,integer*  impre,integer*  nfout)
 {
     /* System generated locals */
@@ -220,7 +220,7 @@ int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
 
 /* -----------------------------------------------------------------------
  */
-/*  but: calculer une renumerotation des sommets d'un graphe defini par: 
+/*  but: calculer une renumerotation des sommets d'un graphe defini par:
 */
 /*     par la methode de gibbs */
 /* -----------------------------------------------------------------------
@@ -409,7 +409,7 @@ s */
 /*      if(impre.ne.0) then */
 /*        write(nfout,*)'profile  old  = ',pfold,', profile  new = ',pfnew
  */
-/*        write(nfout,*)'1/2 bande old = ',bold ,', 1/2 band new = ',bnew 
+/*        write(nfout,*)'1/2 bande old = ',bold ,', 1/2 band new = ',bnew
 */
 /*      endif */
 return 0;
@@ -432,7 +432,7 @@ integer*  wh,integer*  wl,integer* r, integer* impre, integer* nfout)
 
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-/* ...................................................................... 
+/* ......................................................................
 */
 /*     attention on met la descente optimiser dans r <0 ou nulle */
 /* .......................................................................
@@ -467,7 +467,7 @@ integer*  wh,integer*  wl,integer* r, integer* impre, integer* nfout)
 /* L20: */
     }
     if (flag_) {
-/*       calcul des composantes connexe du graphe sans les sommets de 
+/*       calcul des composantes connexe du graphe sans les sommets de
 nn */
 /*       ------------------------------------------------------------
 --- */
@@ -518,7 +518,7 @@ L50:
 /*        if(impre.le.-10) write(nfout,5555)'nv(0:n+n) = ',(nv(i),i=0,
 n+n) */
 	gibbs1_(&nbc, &m[1], nv);
-/*        if(impre.le.-10)write(nfout,5555)'trie m =',(m(i),i=1,nbc) 
+/*        if(impre.le.-10)write(nfout,5555)'trie m =',(m(i),i=1,nbc)
 */
 	i__1 = p;
 	for (i = 0; i <= i__1; ++i) {
@@ -602,7 +602,7 @@ n+n) */
 	}
     }
 /*     on met les nouveaux niveaux de la descendance optimiser dans nn */
-/*     ----------------------------------------------------------------- 
+/*     -----------------------------------------------------------------
 */
     i__1 = *n;
     for (i = 1; i <= i__1; ++i) {
@@ -737,7 +737,7 @@ L20:
 return 0;} /* gibbsd_ */
 
 
-/* Subroutine */ int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,integer*  vois,integer*  m,integer*  r,integer*  new_,integer*  option, 
+/* Subroutine */ int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,integer*  vois,integer*  m,integer*  r,integer*  new_,integer*  option,
 	integer* pfnew,integer*  impre,integer*  nfout)
 {
     /* System generated locals */
@@ -885,16 +885,16 @@ return 0;} /* gibbsd_ */
 /*      endif */
 return 0;} /* gibbst_ */
 
-/* function */ 
+/* function */
 int Triangles::gibbsv (integer* ptvoi,
 		       integer* vois,integer* lvois,integer* w,integer* v)
 {
   /* System generated locals */
   integer  i__2;
-  
+
   /* Local variables */
   integer i, j, k, T, ss, iii, ptv, ptv1;
-  integer nbss = nbv; 
+  integer nbss = nbv;
   /*--- Prepare les donees pour gibbsa en construisant ptvoi, vois, lvois -
     ------------*/
   /*     in */
@@ -918,8 +918,8 @@ int Triangles::gibbsv (integer* ptvoi,
     w[i] = -1;
     ptvoi[i] = 0; }
   ptvoi[nbss + 1] = 0;
-  for (i = 0; i < nt; ++i) 
-    { 
+  for (i = 0; i < nt; ++i)
+    {
       assert(triangles[i].link);
       for (j = 0; j < 3; ++j)
 	{
@@ -928,19 +928,19 @@ int Triangles::gibbsv (integer* ptvoi,
 	  w[ss] = 0;
 	}
     }
-  
-  for (i = 1; i <= nbss; ++i) 
+
+  for (i = 1; i <= nbss; ++i)
     ptvoi[i + 1] += ptvoi[i];
-  
+
   for (i = 0; i < nt; ++i)
-    if (triangles[i].link) 
-      for (j = 0; j < 3; ++j) 
+    if (triangles[i].link)
+      for (j = 0; j < 3; ++j)
 	{
 	  ss = Number(triangles[i][j])+1;
 	  ++ptvoi[ss];
 	  v[ptvoi[ss]] = i;
 	}
-  
+
     ptv1 = 0;
     iii = 1;
     for (i = 1; i <= nbss; ++i) {
@@ -956,7 +956,7 @@ int Triangles::gibbsv (integer* ptvoi,
 	    w[ss] = i;
 	    if (iii > *lvois)  return 2 ;
 	    /* print*,'pas assez de place memoire' */
-	    
+
 	    vois[iii] = ss;
 	    ++iii;}
 	}
@@ -968,11 +968,11 @@ int Triangles::gibbsv (integer* ptvoi,
     return 0;} /* gibbsv_ */
 
 int Triangles::gibbs()
-/* -------- 
+/* --------
 	renumber vertices by gibbs method; updates triangle and edge array
-	in:   mesh  
+	in:   mesh
 	out:   mesh
- 	auxiliary arrays: ptvois,vois,r,m,nv,nx,ny,nn,w1,w2,f 
+ 	auxiliary arrays: ptvois,vois,r,m,nv,nx,ny,nn,w1,w2,f
  	all of size nv+1 except vois (10(nv+1)) and nv (2(nv+1))
  	err = -1 : memory alloc pb; err = -3: fatal erreur  gibbs 2 : pb racine
 */
@@ -995,7 +995,7 @@ int Triangles::gibbs()
     int err=0;
     ptvois = new long[nv+1]; 		//(long*)calloc((long)(nv + 1) , sizeof(long));
     nn = 	 new long[3*nt]; 			//(long*)calloc(3 * nt ,sizeof(long));
-    vois = 	 new long[nbvoisin+10];	//(long*)calloc((long)(nbvoisin + 10) , sizeof(long)); 
+    vois = 	 new long[nbvoisin+10];	//(long*)calloc((long)(nbvoisin + 10) , sizeof(long));
     r = 	 new long[nv+1];				//(long*)calloc((long)(nv + 1) , sizeof(long));
     if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
     err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;
@@ -1020,10 +1020,10 @@ int Triangles::gibbs()
 	delete [] w1;
 	delete [] w2;
       }
-    
+
     delete [] vois;
   delete [] ptvois;
-  /*          
+  /*
 	      if (err == 0 && (pfnew <= pfold))
 	      {
 	      A<bVertex> f(nv);
@@ -1037,27 +1037,27 @@ int Triangles::gibbs()
 	 		v[r[i] - 1].y = f[i].y;
 	 		v[r[i] - 1].where = f[i].where;
 			}
-			
+
        for (j = 0; j < nt; ++j)  // updates triangle array
        for (i = 0; i < 3; i++)
        t[j].v[i] = &v[r[no(t[j].v[i])] - 1];
-       
+
        for (j = 0; j < ne; ++j)	// updates edge array
        {
 	   		e[j].in = &v[r[no(e[j].in)] - 1];
 	   		e[j].out = &v[r[no(e[j].out)] - 1];
 			}
 			f.destroy();
-       if (!NumThinGrid) 
+       if (!NumThinGrid)
        {  NumThinGrid= new int [nv];
-       for (i=0;i<nv;i++) NumThinGrid[i]=i;// Same numbering 
+       for (i=0;i<nv;i++) NumThinGrid[i]=i;// Same numbering
        }
-       for (i=0;i<nv;i++) NumThinGrid[i]=r[NumThinGrid[i]]-1;  
-       
+       for (i=0;i<nv;i++) NumThinGrid[i]=r[NumThinGrid[i]]-1;
+
        }
   */
   delete [] r;
   return err;
-} 
-			
+}
+
 /*  message d'erreur:         *err = 2;    print*,'pas assez de place memoire'   */
