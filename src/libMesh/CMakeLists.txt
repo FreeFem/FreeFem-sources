@@ -1,0 +1,9 @@
+FILE(GLOB_RECURSE BAMGLIB_SRC src/bamglib/*.cpp)
+FILE(GLOB_RECURSE LIBMESH_SRC ${CMAKE_SOURCE_DIR}/src/libMesh/*.c)
+LIST(REMOVE_ITEM BAMGLIB_SRC ${CMAKE_SOURCE_DIR}/src/libMesh/test_sol.c
+                             ${CMAKE_SOURCE_DIR}/src/libMesh/test_libmesh5.c)
+
+ADD_LIBRARY(libMesh ${LIBMESH_SRC})
+INCLUDE_DIRECTORIES(src/libMesh)
+SET_TARGET_PROPERTIES(libMesh PROPERTIES PREFIX "")
+

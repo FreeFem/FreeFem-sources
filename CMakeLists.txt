@@ -18,6 +18,7 @@ FILE(GLOB_RECURSE GRAPHICS_SRC src/Graphics//*.cpp)
 FILE(GLOB_RECURSE LGLIB_SRC src/lglib/*.cpp)
 FILE(GLOB_RECURSE MEDIT_SRC src/medit/*.c)
 FILE(GLOB_RECURSE MPI_SRC src/mpi/*.cpp)
+FILE(GLOB_RECURSE LIBMESH_SRC ${CMAKE_SOURCE_DIR}/src/libMesh/*.c)
 
 ###########
 # DOWNLOAD
@@ -39,13 +40,6 @@ FILE(DOWNLOAD http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz
 # LIBMESH
 #########
 
-FILE(GLOB_RECURSE LIBMESH_SRC ${CMAKE_SOURCE_DIR}/src/libMesh/*.c)
-LIST(REMOVE_ITEM BAMGLIB_SRC ${CMAKE_SOURCE_DIR}/src/libMesh/test_sol.c
-                             ${CMAKE_SOURCE_DIR}/src/libMesh/test_libmesh5.c)
-
-ADD_LIBRARY(libMesh ${LIBMESH_SRC})
-INCLUDE_DIRECTORIES(src/libMesh)
-SET_TARGET_PROPERTIES(libMesh PROPERTIES PREFIX "")
 
 #######
 # LGLIB
@@ -163,3 +157,4 @@ TARGET_LINK_LIBRARIES(cvmsh2 libff hdf5 ${HDF5_LIBRARIES})
 #  SET_TARGET_PROPERTIES(${FILENAME} PROPERTIES PREFIX "")
 #ENDFOREACH(CPPFILE)
 
+ADD_SUBDIRECTORY(src)
