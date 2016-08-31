@@ -1,5 +1,29 @@
 //#define NCHECKPTR // BUg with MPI ??? FH
+/*
+#if __cplusplus >= 201103L
+#define PARAM_THROW(i) (i)
+#define PARAM_NOTHROW(i) (i,nothrow) noexcept
+#define DCLPARAM_NOTHROW(i) (i,const std::nothrow_t& nothrow_constant) noexcept
+#define DLDCLPARAM_NOTHROW(i) (i,const std::nothrow_t& nothrow_constant) noexcept
+#define DCLPARAM_THROW(i) (i) noexcept
+#else
+#define PARAM_THROW(i) (i) throw(std::bad_alloc);
+#define PARAM_NOTHROW(i) (i,nothrow) throw()
+#define DCLPARAM_NOTHROW(i) (i,const std::nothrow_t& nothrow_constant) throw()
+#define DLDCLPARAM_NOTHROW(i) (i,const std::nothrow_t& nothrow_constant) throw()
+#define DCLPARAM_THROW(i) (i) throw(std::bad_alloc)
+#endif
+ 98: // nothrow
+ void* operator new (std::size_t size) throw (std::bad_alloc);
+ void* operator new (std::size_t size, const std::nothrow_t& nothrow_value) throw();
+ void operator delete[] (void* ptr) throw();
+ void operator delete[] (void* ptr, const std::nothrow_t& nothrow_constant) throw();
 
+   11:
+ void* operator new (std::size_t size);
+ void* operator new (std::size_t size, const std::nothrow_t& nothrow_value) noexcept;
+ p
+ */
 #if __APPLE__
 #include <malloc/malloc.h>
 #else
@@ -115,13 +139,17 @@ void myfree(char *p,size_t l=0,int nordre=0)
    }
   }
 }
+/*
+void* operator new(std::size_t ) throw(std::bad_alloc) ;
+void* operator new[](std::size_t ) throw(std::bad_alloc) ;
+void* operator new(std::size_t ,const std::nothrow_t& nothrow_constant) throw() ;
+void* operator new[](std::size_t ,const std::nothrow_t& nothrow_constant) throw() ;
 
-void *operator new(std::size_t) throw (std::bad_alloc);
-void *operator  new[] (std::size_t) throw (std::bad_alloc);
-void operator delete(void *  ) throw ();
-
-
-
+void operator delete[](void * ) throw();
+void operator delete(void * ) throw();
+void operator delete(void * ,const std::nothrow_t& nothrow_constant) throw();
+void operator delete[](void * ,const std::nothrow_t& nothrow_constant) throw();
+*/
 const int N100 = 100;
 class  AllocData;
 
@@ -433,22 +461,42 @@ AllocExtern::~AllocExtern()
 // ------------------
 
 
-void *operator new(size_t ll ) throw (std::bad_alloc)
+void * operator new(std::size_t ll,const std::nothrow_t& nothrow_constant) throw()
 { void * p =  AllocExternData.MyNewOperator(ll,false);
  if (ll && !p) { printf("EXIT BECAUSE MEMORY FULL \n");
  exitalloc(1); };
  return p;}
-void *operator new[](size_t ll ) throw (std::bad_alloc)
+
+void * operator new[](std::size_t ll,const std::nothrow_t& nothrow_constant) throw()
 { void * p =  AllocExternData.MyNewOperator(ll,true);
  if (ll && !p) { printf("EXIT BECAUSE MEMORY FULL \n");
  exitalloc(1); };
  return p;}
 
+void *operator new(std::size_t ll) throw(std::bad_alloc)
+{ void * p =  AllocExternData.MyNewOperator(ll,false);
+    if (ll && !p) { printf("THROW BECAUSE MEMORY FULL \n");
+        std::bad_alloc exception;
+        throw exception; };
+    return p;}
+
+void *operator new[] (std::size_t ll) throw(std::bad_alloc)
+{ void * p =  AllocExternData.MyNewOperator(ll,true);
+    if (ll && !p) {
+        printf("THROW BECAUSE MEMORY FULL \n");
+        std::bad_alloc exception;
+        throw exception; };
+    return p;}
+
   
-void operator delete(void * pp) throw ()
+void operator delete(void * pp,const std::nothrow_t& nothrow_constant) throw()
 {  AllocExternData.MyDeleteOperator(pp,false);}
-void operator delete[](void * pp) throw ()
-{  AllocExternData.MyDeleteOperator(pp,true);}
+void operator delete[] (void * pp,const std::nothrow_t& nothrow_constant) throw()
+{  AllocExternData.MyDeleteOperator(pp,false);}
+void operator delete(void * pp) throw()
+{  AllocExternData.MyDeleteOperator(pp,false);}
+void operator delete[](void * pp) throw()
+{  AllocExternData.MyDeleteOperator(pp,false);}
 
 int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
     size_t m =StorageUsage;
@@ -473,27 +521,50 @@ int ShowAlloc(const char *s,size_t & lg)
 long  CheckPtr___nbptr=0;
 size_t CheckPtr___memoryusage =0;
 
-void* operator new( size_t size ) throw(std::bad_alloc) {
+void * operator new(std::size_t size,const std::nothrow_t& nothrow_constant) throw()
+{
     CheckPtr___nbptr++;
     void *p = malloc( size );
     if(verbosity > 1000000 )
-        std::cout << " CheckPtr: new " << CheckPtr___nbptr << " " << size
+        std::cout << " CheckPtr: new nothrow" << CheckPtr___nbptr << " " << size
                   << " p =" << p <<std::endl;
     
     return p;
 }
 
-void* operator new[]( size_t size ) throw(std::bad_alloc) {  
+void * operator new[](std::size_t size,const std::nothrow_t& nothrow_constant) throw()
+{
     void *p = malloc(size);
      CheckPtr___nbptr++;
     if(verbosity > 1000000 )
-        std::cout << " CheckPtr: new[] " << CheckPtr___nbptr << " " << size << " p =" << p <<std::endl;
+        std::cout << " CheckPtr: new[] nothrow" << CheckPtr___nbptr << " " << size << " p =" << p <<std::endl;
     return p;
 }
 
-void operator delete( void *p ) throw() {  
+void *operator new(std::size_t size) throw(std::bad_alloc)
+{
+    CheckPtr___nbptr++;
+    void *p = malloc( size );
     if(verbosity > 1000000 )
-        std::cout << " CheckPtr: free " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
+        std::cout << " CheckPtr: new throw " << CheckPtr___nbptr << " " << size
+        << " p =" << p <<std::endl;
+    
+    return p;
+}
+
+void *operator new[](std::size_t size) throw(std::bad_alloc)
+{
+    void *p = malloc(size);
+    CheckPtr___nbptr++;
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: new[]  throw" << CheckPtr___nbptr << " " << size << " p =" << p <<std::endl;
+    return p;
+}
+
+void operator delete(void * p,const std::nothrow_t& nothrow_constant) throw()
+{
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: free nothrow " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
 
     free(p);
     
@@ -501,12 +572,32 @@ void operator delete( void *p ) throw() {
 
 }
 
-void operator delete[]( void *p ) throw() {
+void operator delete[](void * p,const std::nothrow_t& nothrow_constant) throw()
+{
     if(verbosity > 1000000 )
-        std::cout << " CheckPtr: free " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
+        std::cout << " CheckPtr: free[] thow" << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
     free(p);
     CheckPtr___nbptr--;
 
+}
+void operator delete(void * p) throw()
+{
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: free throw " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
+    
+    free(p);
+    
+    CheckPtr___nbptr--;
+    
+}
+
+void operator delete[](void * p) throw()
+{
+    if(verbosity > 1000000 )
+        std::cout << " CheckPtr: free[] throw " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
+    free(p);
+    CheckPtr___nbptr--;
+    
 }
 
 int ShowAlloc(const char *s,size_t & lg)
