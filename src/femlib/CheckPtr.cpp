@@ -338,7 +338,7 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 		p->a[i].p = NextFree;
 		p->a[i].n =0;
 		if (p->a[i].is_array != is_array)
-		  printf("\t\tCheckPtr:  erreur delete [] ");
+		  printf("\t\tCheckPtr:  erreur delete [] \n");
 		//if( p->a[i].n < NbAllocShow )		  debugalloc();      
 		NextFree = & p->a[i].p;
 		return;}
@@ -492,11 +492,11 @@ void *operator new[] (std::size_t ll) throw(std::bad_alloc)
 void operator delete(void * pp,const std::nothrow_t& nothrow_constant) throw()
 {  AllocExternData.MyDeleteOperator(pp,false);}
 void operator delete[] (void * pp,const std::nothrow_t& nothrow_constant) throw()
-{  AllocExternData.MyDeleteOperator(pp,false);}
+{  AllocExternData.MyDeleteOperator(pp,true);}
 void operator delete(void * pp) throw()
 {  AllocExternData.MyDeleteOperator(pp,false);}
 void operator delete[](void * pp) throw()
-{  AllocExternData.MyDeleteOperator(pp,false);}
+{  AllocExternData.MyDeleteOperator(pp,true);}
 
 int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
     size_t m =StorageUsage;
