@@ -170,7 +170,7 @@ class OptimAlgo : public OneOperator
       if(ophJ)
 	hJ= to< Matrice_Creuse<R> *>(C_F0(ophJ,"(",theparam));
       
-      closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+        closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ;   // the cleanning block expression
       /*         
 		 if (nargs[2]) 
 		 {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);

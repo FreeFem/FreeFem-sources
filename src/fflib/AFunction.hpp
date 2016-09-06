@@ -188,6 +188,7 @@ struct Keyless : binary_function<const char *,const char *, bool>
     
 
 // <<TableOfIdentifier>>
+class vectorOfInst;
 class TableOfIdentifier: public CodeAlloc {
   public:
   struct Value;
@@ -210,6 +211,7 @@ class TableOfIdentifier: public CodeAlloc {
 
 
   maptype m;
+  int nIdWithDelete;
   C_F0 Find(Key) const ; 
   C_F0 Find(Key,const basicAC_F0 &) const ; 
   
@@ -232,6 +234,8 @@ template<class T>
 template<class T>   
   C_F0 NewFESpace(Key k,aType t,size_t & top,const basicAC_F0 &args);
   friend   ostream & operator<<(ostream & f,const TableOfIdentifier & );
+    
+  vectorOfInst* newdestroy();
   C_F0 destroy();
   TableOfIdentifier() ; //: listofvar(0) {};
   ~TableOfIdentifier(); //
@@ -852,7 +856,7 @@ template<class A> inline AnyType  DestroyPtr(Stack,const AnyType &x) {
 };
 template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
   const A *  a=PGetAny<A>(x);
-  SHOWVERB(cout << "DeletePtr " << typeid(A).name() << *a  << endl);
+ if(verbosity>99)cout << "DeletePtr " << typeid(A).name() << *a  << endl;
   // (*a)->destroy(); 
     delete *a; 
 
@@ -1382,7 +1386,7 @@ Type_Expr CConstant(const R & v)
  }
 
 /// <<CC_F0>>, same as [[C_F0]] but without constructor/destructor to be used in union [[file:../lglib/lg.ypp::YYSTYPE]]
-
+class vectorOfInst;
 class CC_F0 {
   Expression f; // [[Expression]]
   aType r;
@@ -1405,16 +1409,22 @@ class ListOfInst :
   int n;
   Expression   *   list;
   int   *   linenumber;
+  int * lsldel;
   const int nx;
+  vectorOfInst * atclose;  // Sep 2017 FH
+    // add sep. 2016 FH
+
 public:
-  ListOfInst():n(0),list(0),linenumber(0),nx(10){}
-  ListOfInst(int nn):n(0),list(0),linenumber(0),nx(nn?nn:10){}
+   
+  ListOfInst():n(0),list(0),linenumber(0),lsldel(0),nx(10),atclose(0){}
+  ListOfInst(int nn):n(0),list(0),linenumber(0),lsldel(0),nx(nn?nn:10),atclose(0) {}
   void Add(const C_F0 & ins); 
 
   /// <<ListOfInst::operator()>> implemented at [[file:AFunction2.cpp::ListOfInst::operator()]]
 
   AnyType operator()(Stack s) const; 
-
+//  AnyType reval(Stack s,int & i) const; //  eval of Routine
+//  AnyType rcleaneval(Stack s,int & i) const; // clean of Routine
   operator aType () const { return n ? (aType) * (list[n-1]) : atype<void>();} 
    
   Expression &operator[](int i){return list[i];}
@@ -1422,13 +1432,15 @@ public:
   int size() const {return n;}
   Expression * ptr() const {return list;}
   int * nlines() const {return linenumber;}
-
+  void setclose(vectorOfInst * at) {atclose=at;} // Sep 2017 FH
   ~ListOfInst(){
-    cout << " ----- ~ListOfInst " << endl;
+   // cout << " ----- ~ListOfInst " << endl;
     if(list) delete [] list;
     list=0;
     if(linenumber)  delete[] linenumber;
+    if(lsldel)      delete[] lsldel;
     linenumber=0;
+    lsldel=0;
   }
 };
 
@@ -1448,8 +1460,15 @@ public:
     if( !a.Empty() ) {
       f->Add(a);
       r=a.left(); }}
-  CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;} 
+  CListOfInst & operator+=(const CC_F0 & a);//{ if( !a.Empty()){ f->Add(a);r=a.left();};return *this;}
+  void setclose( vectorOfInst * fin) {
+      assert(f);
+      if(verbosity>99999) cout << "CListOfInst: setclose  n " << f->size() << " " << f << " " << fin << endl;
+      f->setclose(fin);
+      
+  }
   operator C_F0 () const  { return C_F0(f,r);}
+  operator ListOfInst * () const  { return f;}
 
   /// <<CListOfInst::eval>> Called by yyparse() at [[file:../lglib/lg.ypp::start_symbol]] to evaluate the
   /// complete expression tree when reaching the end of its "start" symbol. It calls ListOfInst::operator()() at
@@ -1489,6 +1508,7 @@ inline C_F0 toComplex(const C_F0 & a)  {return ATYPE(Complex)->CastTo(a);}
 inline C_F0 While(C_F0 test,C_F0 ins) {return C_F0(new E_F0_CFunc2(FWhile,to<bool>(test),ins),0);}
 inline C_F0 For(C_F0 i0,C_F0 i1,C_F0 i2,C_F0 ins) {return C_F0(new E_F0_CFunc4(FFor,i0,to<bool>(i1),i2,ins),0);}
 inline C_F0 Try(C_F0 i0,C_F0 i1,C_F0 i2)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,i2,0),0);}
+inline C_F0 Try(C_F0 i0,C_F0 i1)  {return C_F0(new E_F0_CFunc4(TTry,i0,i1,0,0),0);}
 inline C_F0 FIf(C_F0 i0,C_F0 i1,C_F0 i2) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,i2,0),0);}
 inline C_F0 FIf(C_F0 i0,C_F0 i1) {return C_F0(new E_F0_CFunc4(FIf,to<bool>(i0),i1,0,0),0);}
 //inline  C_F0 C_F0::PtrValue() const{ 
@@ -1853,16 +1873,19 @@ inline Type_Expr  NewVariable(aType t,size_t &off,const U & data)
    off += t->un_ptr_type->size;
    return  Type_Expr(t,new T(o,t,data));
 }
+//extern int NbNewVarWithDel; // def in global.cpp sep 2016 FH.
 
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const C_F0 &i) 
-   { 
+   {
+ //     if( t-> ExistDestroy()) NbNewVarWithDel++;
      return C_F0(TheOperators,"<-",New(k,NewVariable<T>(t,top)),i);}
 
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_F0 &args) 
    {  
  //      return C_F0(TheOperators,"<-",New(k,NewVariable(t,top)),t->Find("<-",args));}
+ //       if( t-> ExistDestroy()) NbNewVarWithDel++;
         return C_F0(TheOperators,"<-",basicAC_F0_wa(New(k,NewVariable<T>(t,top)),args));}
         
 template<class T>   
@@ -1873,7 +1896,8 @@ inline  C_F0 TableOfIdentifier::NewFESpace(Key k,aType t,size_t & top,const basi
 
 template<class T,class U>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_F0 &args,const U & data) 
-   {  
+   {
+ //       if( t-> ExistDestroy()) NbNewVarWithDel++;
  //      return C_F0(TheOperators,"<-",New(k,t->NewVar(top)),t->Find("<-",args));}
         return C_F0(TheOperators,"<-",basicAC_F0_wa(New(k,NewVariable<T,U>(t,top,data)),args));}
    
@@ -1882,7 +1906,8 @@ inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top,const basicAC_
 
 template<class T>   
 inline  C_F0 TableOfIdentifier::NewVar(Key k,aType t,size_t & top) 
-   {  return t->Initialization(New(k,NewVariable<T>(t,top))); }
+   { //  if( t-> ExistDestroy()) NbNewVarWithDel++;
+       return t->Initialization(New(k,NewVariable<T>(t,top))); }
 
 // save a expression 
 inline  C_F0 TableOfIdentifier::NewID(aType r,Key k, C_F0 & c,size_t &top, bool del ) 
@@ -2046,7 +2071,8 @@ class Block { //
    Block * fatherblock;
    size_t  top,topmax;
    TableOfIdentifier table;
-   ListOfTOfId::iterator itabl;    
+   ListOfTOfId::iterator itabl;
+ 
 public:
    //  list of variable
    size_t OffSet(size_t ssize) {
@@ -2106,8 +2132,12 @@ template<class T>
       topmax=Max(topmax,top);
       return r;}
 
- static   Block * open(Block *& c); 
-   CC_F0  close(Block *& c); /* {
+ static   Block * open(Block *& c);
+   static  vectorOfInst * snewclose(Block *& c);
+   //vectorOfInst * newclose(Block *& c) ;// sep 2016 FH
+    
+   CC_F0  close(Block *& c,CC_F0 & );
+   CC_F0  close(Block *& c,CListOfInst & ); /* {
      tables_of_identifier.erase(itabl);      
      c=fatherblock;
      if (fatherblock) {fatherblock->topmax=topmax;
@@ -2118,8 +2148,8 @@ template<class T>
      delete this;
      return r;}*/
    C_F0 Find(const char * k) const  {return table.Find(k);}
-   
-   ~Block(); //{} 
+   ~Block(); //{}
+    int nIdWithDelete() const { return table.nIdWithDelete;}
 }; 
 
 
@@ -3065,6 +3095,7 @@ class E_throw : public E_F0mps { public:
       
  } ;
 
+/*
 class E_block :  public E_F0mps { public:
   const int n;
   Expression  * code;
@@ -3072,17 +3103,19 @@ class E_block :  public E_F0mps { public:
   Expression clean;
    E_block(CListOfInst l,C_F0   c)
      : n(l.size()),code(l.ptr()),linenumber(l.nlines()),clean(c) {}
+    E_block(CListOfInst l,vectorOfInst *  c)
+    : n(l.size()),code(l.ptr()),linenumber(l.nlines()),clean(0) {l.setclose(c);}
    E_block( C_F0  l,C_F0  c)
      : n(1),code(new Expression),clean(c) { code[0]=l;}
    AnyType operator()(Stack s)  const ;
     operator aType () const { return atype<void>();}         
    
 };
-
+*/
 class Routine;
 class E_Routine :  public E_F0mps { public:
-  Expression code;
-  Expression clean;
+  ListOfInst * code;
+ // Expression clean;
   aType rt;
   int nbparam;
   Expression * param;
@@ -3105,12 +3138,12 @@ class Routine: public OneOperator{  public:
    const char * name;
    const ListOfId param;
    Block * currentblock;
-   Expression  ins;   
-   Expression  clean;
+   ListOfInst *  ins;
+   
    
     E_F0 * code(const basicAC_F0 & args) const  ;
    Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb);
-   Block * Set(C_F0   instr) ;
+   Block * Set(CListOfInst   instr) ;
 };
 
 
@@ -3269,7 +3302,7 @@ Type_Expr CVariable(R  (*ff)() )
 }
 void InitLoop();
 C_F0 ForAll(Block *,ListOfId * id,C_F0  m);
-C_F0 ForAll(C_F0  loop,C_F0  inst,C_F0  end);
+C_F0 ForAll(C_F0  loop,C_F0  inst);
 
 class PolymorphicLoop:public Polymorphic {
 public:
@@ -3295,12 +3328,12 @@ public:
 
 
 class ForAllLoopOpBase :  public E_F0mps { public:
-    Expression et,ecode,efin;
+    Expression et,ecode;
     const PolymorphicLoop *epl;
     ForAllLoopOpBase( basicForEachType * ret,const basicAC_F0 & args)
-    : et(ret->CastTo(args[0])), ecode(args[2]),efin(0),epl(0)
+    : et(ret->CastTo(args[0])), ecode(args[2]),epl(0)
     {
-        if(args.size() > 3) efin=args[3];
+      //  if(args.size() > 3) efin=args[3];
         epl = dynamic_cast<const PolymorphicLoop *>((Expression) args[1]);
         assert(epl!=0);
     }
@@ -3309,7 +3342,7 @@ class ForAllLoopOpBase :  public E_F0mps { public:
     AnyType i(Stack s)   const { return epl->fi(s);}
     AnyType j(Stack s)   const { return epl->fj(s);}
     void code(Stack s) const { (*ecode)(s) ;}
-    void end(Stack s) const { if(efin) (*efin)(s);}
+  //  void end(Stack s) const { if(efin) (*efin)(s);}
     
     
 };

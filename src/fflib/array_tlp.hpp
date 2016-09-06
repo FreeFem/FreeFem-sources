@@ -1081,7 +1081,7 @@ class E_ForAllLoopRNM
                 data->code(s);
                 t(*i,*j)= *v;
             }
-        data->end(s);
+      //  data->end(s);
         return Nothing  ;
      }
     
@@ -1112,7 +1112,7 @@ class E_ForAllLoopRN
                 data->code(s);
                 t[*i]= *v;
             }
-        data->end(s);
+     //   data->end(s);
         return Nothing  ;
     }
     
@@ -1158,7 +1158,7 @@ class E_ForAllLoopMapSI
                 ii->second  = *v;
                 *i=0;
             }
-        data->end(s);
+      //  data->end(s);
         return Nothing  ;
     }
     

@@ -928,7 +928,7 @@ int  Triangles::SplitElement(int choice)
   nbt = nbtold;
   NbOutT = NbOutTold;
   // cleaning memory ---
-  delete newedges;
+  if (newedges) delete [] newedges;
   if (ksplitarray) delete [] ksplitarray;
   if (kedge) delete [] kedge;
   if (newVerticesOnGeomEdge) delete [] newVerticesOnGeomEdge;

@@ -183,6 +183,8 @@ void ff_atend(AtEnd f)
  ListOfId *clist_id;
  
 /* ListCatch * clist_Catchs;*/
+
+ vectorOfInst * endb;
 }
 
 /* BISON Declarations */
@@ -211,7 +213,7 @@ void ff_atend(AtEnd f)
 %type <args>  array 
 %type <args>  parameters_list
 %type  <cexp> begin
-%type  <cexp> end
+%type  <endb> end
 %type  <clist_id> list_of_id_args
 %type  <clist_id> list_of_id1
 %type <cexp>  spaceIDs
@@ -326,7 +328,8 @@ start:   input ENDOFFILE {
                         size_t sizestack = currentblock->size()+1024 ; //  before close
 
                         // <<close_final_block>>
-                        $1+=currentblock->close(currentblock);
+                       // $1+=currentblock->close(currentblock);
+                       $1.setclose(Block::snewclose(currentblock));// Sep 2016 FH
                         if(verbosity>2 || ( (mpirank==0) && verbosity)) cout << " sizestack + 1024 =" << sizestack << "  ( " << sizestack-1024 <<" )\n" ;
                         size_t lg0,lg1;
                         ffapi::ifchtmpdir(); // change  to tmp after compile FH sep 2015 ...
@@ -521,14 +524,17 @@ declaration:   type_of_dcl {dcltype=$1;} list_of_dcls ';' {$$=$3;} /* [[type_of_
              | FUNCTION ID '(' list_of_id_args ')' 
                       {Block::open(currentblock); $1->SetArgs($4);}
                    '='   no_comma_expr  ';' 
-                      {  $<cinst>$=currentblock->close(currentblock);
+                      {  //$<cinst>$=currentblock->close(currentblock);
+                         $<cinst>$.setclose(Block::snewclose(currentblock));// Sep 2016 FH.
                          $$=currentblock->NewID($1,$2,$8,*$4);
                          delete $4; //  FH 23032005
                          } 
 ;              
 
 begin: '{'  {  Block::open(currentblock);};
-end:   '}'  {  $$=currentblock->close(currentblock);};
+end:   '}'  { $$=Block::snewclose(currentblock);
+//  $$=currentblock->close(currentblock);
+};
 
 for_loop:  FOR {ffassert(inloopcount<sizeStackOfLoop);  // modif FH july 2005
                 StackOfLoop[inloopcount++]=currentblock;};
@@ -548,22 +554,25 @@ IDfor:     id  { $$ = new ListOfId(); $$->push_back(UnId($1));Block::open(curren
 instruction:   ';' {$$=0;}
          | INCLUDE  STRING  {zzzfff->input($2);$$= 0; }
          | LOAD  STRING  {load($2);$$= 0; }
-         |  try  '{' instructions '}' catchs {$$=Try($3,$5,currentblock->close(currentblock));}
+         |  try  '{' instructions '}' catchs {$$=Try($3,currentblock->close(currentblock,$5));}
          |  Expr ';' {$$=$1;} /*[[Expr:]]*/
          |  declaration  {$$=$1;} /*[[declaration:]]*/
          |  for_loop  '[' IDfor  ':' primary ']'
                 {$5=ForAll(currentblock,$3,$5);}
-                 instruction {inloopcount--; $$=ForAll($5,$8,currentblock->close(currentblock))}
+                 instruction {inloopcount--; $$=ForAll($5,currentblock->close(currentblock,$8))}
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)}
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
                 {inloopcount--; 
-                $$=C_F0(For($3,$5,$7,$9),currentblock->close(currentblock));}
+                $$=C_F0(For($3,$5,$7,currentblock->close(currentblock,$9)));}
                  
          |  while_loop '(' Expr ')' instruction {inloopcount--;$$=While($3,$5);}
          |  IF '(' Expr ')'   instruction  {$$=FIf($3,$5);}
          |  IF '(' Expr ')'   instruction  ELSE instruction {$$=FIf($3,$5,$7);}
          |  begin  instructions end { /* [[begin:]] [[end:]] */
-                      $$=C_F0(new E_block($2,$3),atype<void>());}
+             $2.setclose($3);
+             $$=$2;
+                    //  $$=C_F0(new E_block($2,$3),atype<void>());
+         }
          |  BORDER  ID   border_expr { /* <<BORDER_ID>> */
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$3));}
          |  BORDER  ID   '['  array ']' ';' {
@@ -603,9 +612,10 @@ bornes: '(' ID '=' Expr ',' Expr ';' ID ')' {
     $$+= currentblock->NewVar<LocalVariable>($8,atype<long*>());}
 ;
 
-border_expr:   bornes instruction {   
-   $$ = ($1 += $2);
-   currentblock->close(currentblock);}
+border_expr:   bornes instruction {
+    //currentblock->close(currentblock;);
+   $$ = ($1 += currentblock->close(currentblock,$2));
+   }
  ;
 
 Expr:	 
