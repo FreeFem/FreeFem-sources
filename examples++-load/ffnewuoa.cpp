@@ -124,7 +124,8 @@ class ffcalfunc {  //   to call the freefem function .. J
 	  assert(opJ);
 	}      
       JJ= to<R>(C_F0(opJ,"(",theparam));
-      closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+     // closetheparam=currentblock->close(currentblock);   // the cleanning block expression
+        closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ; 
     }
     
     virtual AnyType operator()(Stack stack)  const

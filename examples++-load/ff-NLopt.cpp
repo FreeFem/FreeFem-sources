@@ -497,7 +497,8 @@ template<nlopt::algorithm ALGO,bool SA=Info<ALGO>::SA> class OptimNLopt : public
 					if(gradiconst) EGradIConst = to<Rnm_>(C_F0(gradiconst,"(",theparam));
 					if(econst) EEConst = to<Rn_>(C_F0(econst,"(",theparam));
 					if(gradeconst) EGradEConst = to<Rnm_>(C_F0(gradeconst,"(",theparam));
-					closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+					//closetheparam=currentblock->close(currentblock);   // the cleanning block expression
+                                    closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ;
 				}
     
 				virtual AnyType operator()(Stack stack)  const
@@ -674,7 +675,8 @@ template<nlopt::algorithm ALGO> class OptimNLopt<ALGO,true> : public OneOperator
 					if(gradiconst) EGradIConst = to<Rnm_>(C_F0(gradiconst,"(",theparam));
 					if(econst) EEConst = to<Rn_>(C_F0(econst,"(",theparam));
 					if(gradeconst) EGradEConst = to<Rnm_>(C_F0(gradeconst,"(",theparam));
-					closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+					//closetheparam=currentblock->close(currentblock);   // the cleanning block expression
+                                    closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ;
 				}
     
 				virtual AnyType operator()(Stack stack)  const
