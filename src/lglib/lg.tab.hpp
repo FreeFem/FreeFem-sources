@@ -151,20 +151,39 @@ typedef union YYSTYPE
 #line 156 "lg.ypp"
 {
  double dnum;
+
+ /* <<YYSTYPE_lnum>> */
  long lnum;
+
+ /* <<YYSTYPE_str>> */
  char * str;
  char oper[8];
+
+ /* <<YYSTYPE_cexp>> [[file:../fflib/AFunction.hpp::CC_F0]] */
  CC_F0 cexp;
+ 
  Routine   *routine;
+
+ /* <<YYSTYPE_args>> [[file:~/ff/src/fflib/AFunction.hpp::AC_F0]] */
  AC_F0 args;
+ 
+ /* <<YYSTYPE_type>> refers to [[file:~/ff/src/fflib/AnyType.hpp::aType]] */
  aType type;
+
+ /* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
  CListOfInst cinst;
- Block * block; 
+ 
+ Block * block;
+
+ /* <<YYSTYPE_clist_id>> [[file:~/ff/src/fflib/AFunction.hpp::ListOfId]] */
  ListOfId *clist_id;
+ 
 /* ListCatch * clist_Catchs;*/
+
+ vectorOfInst * endb;
 }
 /* Line 1529 of yacc.c.  */
-#line 168 "lg.tab.hpp"
+#line 187 "lg.tab.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

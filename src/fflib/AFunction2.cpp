@@ -63,6 +63,17 @@ class vectorOfInst : public  E_F0mps { public:
       }
       return Nothing;
    }
+   void  eval(Stack s,int j=-1)  const {
+       if(j>=0) j = n-j;
+       else j =0;
+       if(verbosity>99) cout << " eval vectorOfInst " << j << " " << n << endl;
+        for (int i=j;i<n;++i)
+        {
+            ffassert(v[i]);
+            (*(v[i]))(s);
+        }
+    }
+  
   private: 
   vectorOfInst(const vectorOfInst &);
   void operator=(const vectorOfInst &);  
@@ -396,7 +407,7 @@ C_F0 Find(const char * name)
     return r;
 }
 
-C_F0 TableOfIdentifier::destroy()
+vectorOfInst* TableOfIdentifier::newdestroy()
 {
  int k=0;
 // cout << "\n\t List of destroy variables " << m.size() << " : " ; 
@@ -407,6 +418,7 @@ C_F0 TableOfIdentifier::destroy()
      assert(i->second.first);
      if (i->second.del && i->second.first->ExistDestroy() ) k++;
    }
+  ffassert(nIdWithDelete==k); 
 // cout << endl;
 /*  old code 
  ListOfInst *l=new ListOfInst(k);
@@ -421,9 +433,9 @@ C_F0 TableOfIdentifier::destroy()
      if (i->second.del && i->second.first->ExistDestroy()) 
        l->v[j++]=i->second.first->Destroy(i->second) ;
   ffassert(j==k);
- return C_F0(l);     
+ return l;
 }
-
+C_F0  TableOfIdentifier::destroy() {return C_F0(newdestroy());}
    void TableOfIdentifier::clear()
    {
      for (iterator i=m.begin();i!=m.end();++i)
@@ -464,7 +476,7 @@ basicForEachType::basicForEachType(const type_info  & k,
 
 
 
- TableOfIdentifier::TableOfIdentifier() : listofvar(0) {}
+ TableOfIdentifier::TableOfIdentifier() : listofvar(0),nIdWithDelete(0) {}
  TableOfIdentifier:: ~TableOfIdentifier() {}
 
 
@@ -472,18 +484,49 @@ Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),t
     {     
       itabl=tables_of_identifier.insert(tables_of_identifier.begin(),&table);
     }
-Block::~Block(){} 
+Block::~Block(){}
 
- CC_F0  Block::close(Block *& c) {
-     tables_of_identifier.erase(itabl);      
-     c=fatherblock;
-     if (fatherblock) {fatherblock->topmax=topmax;
-                       fatherblock->top=top;}
-        
-     CC_F0 r;
-     r = table.destroy();
-     delete this;
-     return r;}
+/*
+vectorOfInst * Block::newclose(Block *& c) {
+    tables_of_identifier.erase(itabl);
+    c=fatherblock;
+    if (fatherblock) {fatherblock->topmax=topmax;
+        fatherblock->top=top;}
+    
+    vectorOfInst * r;
+    r = table.newdestroy();
+    delete this;
+    return r;}
+*/
+   vectorOfInst * Block::snewclose(Block *& c) {
+    Block * a=c;
+    tables_of_identifier.erase(a->itabl);
+    c=a->fatherblock;
+    if (a->fatherblock) {a->fatherblock->topmax=a->topmax;
+        a->fatherblock->top=a->top;}
+    
+    vectorOfInst * r;
+    r = a->table.newdestroy();
+    delete a;
+    return r;}
+
+CC_F0  Block::close(Block *& c,CC_F0 & ins)
+{
+    CListOfInst inst;
+    inst = ins;
+    inst.setclose(Block::snewclose(c));
+    CC_F0 rr;
+    rr=inst;
+    return rr;
+}
+
+ CC_F0  Block::close(Block *& c,CListOfInst & inst) {
+     
+     inst.setclose(Block::snewclose(c));
+     CC_F0 rr;
+     rr=inst;
+     return rr;
+ }
  
    Block * Block::open(Block *& cb)
    {
@@ -512,6 +555,12 @@ const  Type_Expr &   TableOfIdentifier::New(Key k,const Type_Expr & v,bool del)
 	    }
 	    CompileError();
 	}
+      if(del && v.first->ExistDestroy() )
+      {
+          nIdWithDelete++;
+          if(verbosity>9999) cout << "\n \t add ExistDestroy" << endl;
+          
+      }
       return v;
   }
  void  TableOfIdentifier::Add(Key k,Key op,OneOperator *p0,OneOperator *p1,
@@ -686,7 +735,7 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
 
 E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
   :    code(routine->ins),
-       clean(routine->clean),
+       //clean(routine->clean),
        rt(routine->tret),      
        nbparam(args.size()),
        param(new Expression[nbparam]),
@@ -701,7 +750,7 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
 };
 
 E_Routine::~E_Routine() { delete [] param;}
-
+/*
 struct CleanE_Routine {
   const E_Routine * er; 
     Stack s;
@@ -709,11 +758,11 @@ struct CleanE_Routine {
     CleanE_Routine(const  E_Routine * r,Stack ss,AnyType *ll): er(r),s(ss),l(ll) {}
     ~CleanE_Routine() {
    // cout << " Clean E_routine " << er <<endl;	
-    (*er->clean)(s);
+  //  (*er->clean)(s);
     delete [] l; 
     }
 };
-
+*/
 AnyType E_Routine::operator()(Stack s)  const  {
   //cout << " E_Routine:: push "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
    debugstack->push_back(pair<const E_Routine*,int>(this,TheCurrentLine));
@@ -735,7 +784,8 @@ AnyType E_Routine::operator()(Stack s)  const  {
    WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH mars 2006 
  
    try {  
-      ret=(*code)(s);  }
+      ret=(*code)(s);
+     }
    catch( E_exception & e) { 
           // cout << " catch " << e.what() << " clean & throw " << endl;
             if (e.type() == E_exception::e_return)
@@ -745,7 +795,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
   }
   catch(...) { // clean and rethrow the exception 
       //::delete [] listparam; 
-       (*clean)(s); 
+     //  (*clean)(s);
       WhereStackOfPtr2Free(s)->clean(); // FH mars 2005 
       memcpy(s,save,lgsave);  // restore 
       TheCurrentLine=debugstack->back().second;
@@ -755,7 +805,7 @@ AnyType E_Routine::operator()(Stack s)  const  {
       throw ;
      }
   
-    (*clean)(s); //  the clean is done in CleanE_Routine delete .         
+  //  (*clean)(s); //  the clean is done in CleanE_Routine delete .
    //  delete [] listparam; after return 
     memcpy(s,save,lgsave);  // restore 
     TheCurrentLine=debugstack->back().second;
@@ -770,56 +820,73 @@ AnyType E_Routine::operator()(Stack s)  const  {
    // ... ou alors changer le return ???? qui doit copie le resultat.. (voir)
    return ret;
 }
+extern Block *currentblock;// def in lg.ypp
+void ListOfInst::Add(const C_F0 & ins) {
+    if( (!ins.Empty()) ) {
+        if( verbosity > 9999 )
+            cout << " Add " << n << " " << TheCurrentLine << endl;
+        if (n%nx==0){
+            Expression   *  l = new Expression [n+nx];
+            int * ln =  new int [n+nx];
+            int * lsd =  new int [n+nx];
+            for (int i=0;i<n;i++) {
+                l[i]=list[i];
+                ln[i]=linenumber[i];
+                lsd[i]=lsldel[i];
+            }
+            delete [] list;
+            delete [] linenumber;
+            delete [] lsldel;
+            list =l;
+            linenumber=ln;
+            lsldel=lsd;
+        }
+        throwassert(list);
+        linenumber[n]= TheCurrentLine;
+        lsldel[n]=currentblock->nIdWithDelete();
+    //     NbNewVarWithDel=0;
+        list[n++] = ins;
+    }
+}
 
-void ListOfInst::Add(const C_F0 & ins) { 
-       if( (!ins.Empty()) ) {
-      if (n%nx==0){ 
-                Expression   *  l = new Expression [n+nx];
-                int * ln =  new int [n+nx];
-      			for (int i=0;i<n;i++) {
-      			  l[i]=list[i];
-      			  ln[i]=linenumber[i];}
-      			delete [] list;
-      			delete [] linenumber;
-      			list =l;
-      			linenumber=ln;
-      		    }
-      throwassert(list);
-      linenumber[n]= TheCurrentLine;		    
-      list[n++] = ins;
-      }}
-      
 /// <<ListOfInst::operator()>> Iteratively calls each item in the local array #list of type #Expression
 
-AnyType ListOfInst::operator()(Stack s) const {     
-    AnyType r; 
+AnyType ListOfInst::operator()(Stack s) const {
+    AnyType r;
+    int i;
     double s0=CPUtime(),s1=s0,ss0=s0;
     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
-    try { // modif FH oct 2006 
-	for (int i=0;i<n;i++) 
+    try { // modif FH oct 2006
+	for (i=0;i<n;i++)
 	{
-	    TheCurrentLine=linenumber[i];
-	    r=(*list[i])(s);
+	    TheCurrentLine=linenumber[i]  ;
+  	    r=(*list[i])(s);
 	    sptr->clean(); // modif FH mars 2006  clean Ptr
 	    s1=CPUtime();
 	    if (showCPU)  
-		cout << " CPU: "<< i << " " << s1-s0 << "s" << " " << s1-ss0 << "s" << endl;
+             cout << " CPU: "<< i <<" " << linenumber[i] <<  ": " << s1-s0 << "s" << " " << s1-ss0 << "s" << " / " << " " <<lsldel[i] <<endl;
 	    s0=CPUtime();
 	}
+        if(atclose) { if(verbosity>99999) cout << " ListOfInst::operator()  " << n << " " << atclose->n << " // " << lsldel[n-1] << endl;
+            atclose->eval(s,atclose->n);}// Add for sep 2016  FH
     }
     catch( E_exception & e) 	
     {
+        if(verbosity>9) cout << " catch E_exception " << i << " " << lsldel[i]  << endl;
+        if(atclose) {atclose->eval(s,lsldel[i]);}// Add sep 2016  FH for clean init varaible
 	if (e.type() != E_exception::e_return)  
 	    sptr->clean(); // pour ne pas detruire la valeur retourne  ...  FH  jan 2007
 	throw; // rethow  
     }
     catch(...)
     {
+        if(verbosity>99) cout << " catch ....  " << i << " " << lsldel[i]  << endl;
+        if(atclose) {atclose->eval(s,lsldel[i]);}
 	sptr->clean();
 	throw; 
     }
     return r;}
-
+/*
 AnyType E_block::operator()(Stack s)  const {
     StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
     if (clean) 
@@ -837,7 +904,7 @@ AnyType E_block::operator()(Stack s)  const {
 		sptr->clean();
 	    throw; // rethow  
 	}
-	catch(/* E_exception & e*/...) { // catch all for cleanning 
+	catch(...) { // catch all for cleanning 
 	    (*clean)(s); 
 	    sptr->clean();
 	    // if(verbosity>50)
@@ -858,7 +925,7 @@ AnyType E_block::operator()(Stack s)  const {
 	}
 	    return Nothing;
    }
-
+*/
 
 void ShowDebugStack()
  {
@@ -900,7 +967,7 @@ class E_F0para :public E_F0 { public:
 Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
     : OneOperator(tr,l),offset(cb->OffSet(sizeof(void*))),
      tfunc(tf),tret(tr),name(iden),param(*l),
-      currentblock(new Block(cb)),ins(0),clean(0) 
+      currentblock(new Block(cb)),ins(0)//,clean(0)
      {
        delete l;  // add  FH 24032005 (trap ) 
        cb = currentblock; 
@@ -914,10 +981,11 @@ Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
 							   !param[i].ref);
        }
      }
-   Block * Routine::Set(C_F0 instrs) 
-       { 
-         ins=instrs;
-         clean = (C_F0) currentblock->close(currentblock);
+   Block * Routine::Set(CListOfInst instrs)
+       {
+           instrs.setclose(Block::snewclose(currentblock));
+           ins=instrs;
+        // clean = (C_F0) currentblock->close(currentblock);
          return    currentblock;} 
          
  
@@ -1041,7 +1109,7 @@ void lgerror (const char* s)
      return C_F0(loop,atype<PolymorphicLoop*>());
 }
 
- C_F0 ForAll(C_F0  cloop,C_F0  inst,C_F0 end)
+ C_F0 ForAll(C_F0  cloop,C_F0  inst)
 {
     if(verbosity>1000) 
     cout << " type cloop " << *cloop.left() << " " << cloop.LeftValue() << " "  << endl;
@@ -1052,10 +1120,10 @@ void lgerror (const char* s)
     args+=loop->t;
     args+=cloop;
     C_F0 instt(inst,atype<NothingType>());
-    C_F0 eend(end,atype<NothingType>());
+ //   C_F0 eend(end,atype<NothingType>());
     args+=instt;
-    if( (Expression) end !=0)
-      args+=end;
+ //   if( (Expression) end !=0)
+  //    args+=end;
     return C_F0(TheOperators,"{}",args);
 }
 

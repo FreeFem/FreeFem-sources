@@ -2760,7 +2760,7 @@ class E_ForAllLoopMatrix
                 data->code(s);
                 mm->a[k] = *v;
             }
-        data->end(s);
+      //  data->end(s);
         return Nothing  ;
     }
     

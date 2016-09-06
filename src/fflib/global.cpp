@@ -135,6 +135,7 @@ bool lexdebug;
 YYSTYPE *plglval;
 
  int TheCurrentLine=-1; // unset: by default
+//int NbNewVarWithDel =0; // add FH sep 2016 (bof bof global variable not got but hard to set in E_F0 or C_F0
  long mpisize=0,mpirank=0;
 
  

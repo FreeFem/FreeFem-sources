@@ -320,8 +320,7 @@ AnyType TTry(Stack s ,Expression ins,Expression ccatch,Expression fin,Expression
         if(verbosity> 2) cerr << "Try:: catch (...) exception " << endl;
         a=(*ccatch)(s);         
      }
-   
-   a=(*fin)(s);
+   if(fin)  a=(*fin)(s);
   return a;
 }
 
@@ -1047,9 +1046,9 @@ class E_ForAllLoopMapSS
             // ii=iinext;//  
             
         }
-        if(verbosity>99999) cout << "befor end \n";
-        data->end(s);
-        if(verbosity>99999) cout <<"afert end \n";
+      //  if(verbosity>99999) cout << "befor end \n";
+      //  data->end(s);
+      //  if(verbosity>99999) cout <<"afert end \n";
         return Nothing  ;
     }
     
@@ -1183,6 +1182,7 @@ void Init_map_type()
      Global.New("pi",CConstant<double>(3.14159265358979323846264338328));
      Global.New("version",CConstant<double>(VersionNumber()));
       
+     Global.New("showCPU",CPValue<bool>(showCPU));
      Global.New("CPUTime",CConstant<bool*>(&showCPU));
      // def de Zero et One
      pZero = new  C_F0(CConstant<double>(0.0));
