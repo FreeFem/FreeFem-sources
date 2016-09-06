@@ -281,7 +281,8 @@ class OptimCMA_ES : public OneOperator
 						assert(opJ);
 					}      
 					JJ= to<R>(C_F0(opJ,"(",theparam));
-					closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+                                        closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ;
+					//closetheparam=currentblock->close(currentblock);   // the cleanning block expression
 				}
     
 				virtual AnyType operator()(Stack stack)  const

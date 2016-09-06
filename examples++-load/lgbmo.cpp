@@ -165,7 +165,8 @@ public:
       JJ= to<R>(C_F0(opJ,"(",theparam));
       if(opdJ)
         dJJ= to<Kn_>(C_F0(opdJ,"(",theparam));// Modif FH 17102005 (a verifier) to<Kn*> ->to<Kn>
-      closetheparam=currentblock->close(currentblock);   // the cleanning block expression 
+     // closetheparam=currentblock->close(currentblock);   // the cleanning block expression
+      closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ;   
     }
      
      virtual AnyType operator()(Stack stack)  const

@@ -122,7 +122,7 @@ void destroy() { freestring(p);p=0;} // Add FH march 2010
   String(const double * c) : p(PtoString(c)){/*cout << "String" << p <<","<< *p << endl;*/} 
   String & operator=(const String & s){ freestring(p);p=newstring(s);return *this;}
   String  operator+(const String & s)const {return String(newstring(*p+*s.p));} 
-  ~String(){/* cout << "~String" << p << *p << endl;*/  freestring(p); p=0;}
+  ~String(){ if(verbosity>999999) cout << "~String" << p <<" "<<  *p << "." << endl; freestring(p); p=0;}
    operator const string & () const {return *p;}
    operator  string & ()  {return *p;}
    operator  const string * ()  const {return p;}

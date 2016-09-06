@@ -969,7 +969,8 @@ public:
             fitness_datas = GenericFitnessFunctionDatas::New(AF,args,nargs,theparam,objfact,L_m); //Creates links to the freefem objects
             constraints_datas = GenericConstraintFunctionDatas::New(AG,args,nargs,theparam);      //defining the functions
             spurious_cases = AG==no_assumption_g && (AF==P2_f || AF==mv_P2_f || AF==quadratic_f || AF==linear_f);
-            closetheparam=currentblock->close(currentblock);   // the cleanning block expression
+            //closetheparam=currentblock->close(currentblock);   // the cleanning block expression
+            closetheparam=C_F0((Expression) Block::snewclose(currentblock),atype<void>()) ; 
         }
         ~E_Ipopt()
         {
