@@ -1568,8 +1568,9 @@ then
     fi
 
     AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
-	ff_umfpack_header=yes
-	ff_umfpack_dir=`dirname $ac_header`)
+	[ff_umfpack_header=yes
+	ff_umfpack_dir=`dirname $ac_header`
+	break])
 
     # Somes systems like FreeBSD hide umfpack.h in a directory called UMFPACK (all capitals). This breaks the
     # standard #define produced by autoconf in config.h.in.
