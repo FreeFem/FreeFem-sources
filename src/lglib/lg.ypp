@@ -559,12 +559,15 @@ instruction:   ';' {$$=0;}
          |  declaration  {$$=$1;} /*[[declaration:]]*/
          |  for_loop  '[' IDfor  ':' primary ']'
                 {$5=ForAll(currentblock,$3,$5);}
-                 instruction {inloopcount--; $$=ForAll($5,currentblock->close(currentblock,$8))}
+             instruction {
+                    inloopcount--;
+                    $$=Block::close(currentblock,C_F0(ForAll($5,$8)));
+                 }
          |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)}
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
-                {inloopcount--; 
-                $$=C_F0(For($3,$5,$7,currentblock->close(currentblock,$9)));}
-                 
+                {inloopcount--;
+                 $$=Block::close(currentblock,C_F0(For($3,$5,$7,$9)));
+                }
          |  while_loop '(' Expr ')' instruction {inloopcount--;$$=While($3,$5);}
          |  IF '(' Expr ')'   instruction  {$$=FIf($3,$5);}
          |  IF '(' Expr ')'   instruction  ELSE instruction {$$=FIf($3,$5,$7);}

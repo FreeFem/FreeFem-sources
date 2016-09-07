@@ -510,17 +510,18 @@ vectorOfInst * Block::newclose(Block *& c) {
     delete a;
     return r;}
 
-CC_F0  Block::close(Block *& c,CC_F0 & ins)
+CC_F0  Block::close(Block *& c,C_F0  ins)
 {
     CListOfInst inst;
-    inst = ins;
+    CC_F0 cins; cins=ins;
+    inst = cins;
     inst.setclose(Block::snewclose(c));
     CC_F0 rr;
     rr=inst;
     return rr;
 }
 
- CC_F0  Block::close(Block *& c,CListOfInst & inst) {
+ CC_F0  Block::close(Block *& c,CListOfInst  inst) {
      
      inst.setclose(Block::snewclose(c));
      CC_F0 rr;
