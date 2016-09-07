@@ -1574,7 +1574,11 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
     else {cerr << " the named in the list already exists "<< nm <<endl; CompileError();}
     return *this;}
   int size() const {return nb;}
-  const C_F0 & operator [] (int i) const {throwassert(a && i<nb);return a[i];}
+  const C_F0 & operator [] (int i) const {
+      if( !(a && i<nb))
+      { cout << " AC_F0 bug " << a << " " <<i<<endl;
+          ffassert(a && i<nb);}      
+        return a[i];}
   void destroy() {
       
         nb=0;       
@@ -2136,8 +2140,8 @@ template<class T>
    static  vectorOfInst * snewclose(Block *& c);
    //vectorOfInst * newclose(Block *& c) ;// sep 2016 FH
     
-   CC_F0  close(Block *& c,CC_F0 & );
-   CC_F0  close(Block *& c,CListOfInst & ); /* {
+ static  CC_F0  close(Block *& c,C_F0  );
+ static  CC_F0  close(Block *& c,CListOfInst  ); /* {
      tables_of_identifier.erase(itabl);      
      c=fatherblock;
      if (fatherblock) {fatherblock->topmax=topmax;
