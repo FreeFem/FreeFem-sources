@@ -1,3 +1,13 @@
+version 3.48 (7 sep 2016)
+ - add doc for time depend Stokes problem with matrix (O. Pironneau)
+ - add doc for time depend Heat problem  with matrix (O. Pironneau)
+ - correct a very old bug (F. hecht)
+     the return, exit, break and continue instruction in freefem++ is code with exception
+     so this imply before the foget of delete some avariable or delete to much varaible
+     this problem is coorect but I have make all of change in the kernel of freefem++  
+    example of wrong code before
+       ofstream f("out.txt"); f << " bla bla \n"; exit(0);
+      // the file is empty becouse never close due the no destruction of varaible f. 
  - add spline interface of gsl library in gsl plugin see
    gsl.edp examples. 
 version 3.47 (1/june/2016) 
