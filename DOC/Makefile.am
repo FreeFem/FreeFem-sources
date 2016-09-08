@@ -8,6 +8,12 @@
 # out during FFCS compilation. Tip found at [[http://stackoverflow.com/questions/15874325/conditional-ac-output]]
 
 ## ls */*.eps|column -c 80|sed 's/$/ \\/' 
+all-local:documentation
+dist_pkgdata_DATA=$(DOCPDF)
+documentation: $(DOCPDF) 
+docps:  $(DOCPS) $(DOCPSGZ) 
+docpdf: $(DOCPDF) 
+
 FIGS_EPS=  \
 figures/1stCOD.eps              figures/LastCOD.eps             figures/cfunc1.eps \
 figures/1stCOD2.eps             figures/LastCOD2.eps            figures/cfunc2.eps \
@@ -69,6 +75,15 @@ plots/cube.eps plots/cone.eps \
 plots/Hex-Sphere.eps plots/Cube-With-Ball.eps \
 plots/multiendborder.eps plots/multiendmesh.eps \
 plots/leman.eps 
+
+freefem++doc.pdf:
+	$(MAKE) -f gnu.mak $@ EPSTOPDF="$(EPSTOPDF)"
+freefem++doc.ps:
+	$(MAKE) -f gnu.mak $@ EPSTOPDF="$(EPSTOPDF)"
+freefem++doc.ps.gz:
+	$(MAKE) -f gnu.mak $@ EPSTOPDF="$(EPSTOPDF)"
+clean:
+	$(MAKE) -f gnu.mak $@
 
 #  Pour la page de garde FH
 FIGS_JPG=plots/fig-alh.jpg       plots/fig-fh.jpg        plots/fig-ko.jpg        plots/fig-op.jpg  \

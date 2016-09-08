@@ -65,7 +65,7 @@ clean-local::
 clean:
 	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
 	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
-	-rm FAIT
+	-rm FAIT *.done
 	-rm -rf tetgen1.4.?
 cxxflags: ../Makefile  Makefile
 	grep 'CXX *=' ../Makefile >cxxflags
