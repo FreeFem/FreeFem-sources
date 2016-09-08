@@ -48,7 +48,7 @@
 #include <gsl/gsl_cdf.h>
 
 #include "ff_gsl_awk.hpp"
-
+#include "gsl/gsl_version.h"
 struct  GSLInterpolation  {
     
     gsl_interp_accel *acc;
@@ -61,6 +61,10 @@ struct  GSLInterpolation  {
     void init(const KN_<double> & x,const KN_<double> & f,bool INIT=false,long cas=0)
     {
         typedef const gsl_interp_type * cgsl_interpp ;
+#if (GSL_MAJOR_VERSION < 2)
+        static const cgsl_interpp gsl_interp_steffen=gsl_interp_cspline;
+#endif
+
         static  cgsl_interpp interp[] = {gsl_interp_cspline,gsl_interp_akima,gsl_interp_steffen,gsl_interp_linear,gsl_interp_polynomial,gsl_interp_cspline_periodic,gsl_interp_akima_periodic};
         if(INIT) destroy();
         ffassert(x.N()==f.N());
