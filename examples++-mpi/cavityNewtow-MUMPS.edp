@@ -1,10 +1,12 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
+// time on 4 proc times: compile 0.013393s, execution 2.28842s,  mpirank:0
+// time on 1 proc times: compile 0.012316s, execution 4.92302s,  mpirank:0
 // NBPROC 4
 
-load "MUMPS_FreeFem"
+load "MUMPS"
 
-string ssparams="";//nprow="+npr+", npcol="+npc;
-real ttgv=1e10;
+verbosity=0; 
+real ttgv=1e30;
 
 /*
   Incompressible Navier Stokes 
@@ -15,6 +17,7 @@ real ttgv=1e10;
 */
 real  reymax = 1600; // ok < 125000 
 mesh Th=square(8,8);
+Th=change(Th,fregion=nuTriangle%mpisize); 
 fespace Xh(Th,P2);
 fespace Mh(Th,P1);
 fespace XXMh(Th,[P2,P2,P1]);
@@ -26,8 +29,8 @@ macro grad(u1,u2) [dx(u1),dy(u2)]//
 macro ugrad(u1,u2,v) (u1*dx(v)+u2*dy(v)) //
 macro Ugrad(u1,u2,v1,v2) [ugrad(u1,u2,v1),ugrad(u1,u2,v2)]//
 
-solve Stokes ([u1,u2,p],[v1,v2,q],solver=sparsesolver,tgv=ttgv,sparams=ssparams) =
-    int2d(Th)( ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+solve Stokes ([u1,u2,p],[v1,v2,q],solver=sparsesolver,tgv=ttgv,master=-1) =
+    int2d(Th,mpirank)( ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
             + p*q*(0.000001) 
             - p*div(v1,v2)-q*div(u1,u2)
@@ -42,9 +45,9 @@ plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2],wait=0);
 Xh psi,phi;
 
 
-solve streamlines(psi,phi) = 
-      int2d(Th)( dx(psi)*dx(phi) + dy(psi)*dy(phi))
-   +  int2d(Th)( -phi*(dy(u1)-dx(u2)))
+solve streamlines(psi,phi,master=-1) = 
+      int2d(Th,mpirank)( dx(psi)*dx(phi) + dy(psi)*dy(phi))
+   +  int2d(Th,mpirank)( -phi*(dy(u1)-dx(u2)))
    +  on(1,2,3,4,psi=0);
 if(mpirank==0)
 plot(psi,wait=0);
@@ -72,7 +75,7 @@ real alpha=1/dt;
 
 XXMh [up1,up2,pp];
 varf   vDNS ([u1,u2,p],[v1,v2,q]) =
-    int2d(Th)(
+    int2d(Th,mpirank)(
             
             + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
@@ -87,7 +90,7 @@ varf   vDNS ([u1,u2,p],[v1,v2,q]) =
 
 
 varf   vNS ([u1,u2,p],[v1,v2,q]) =
-    int2d(Th)(
+    int2d(Th,mpirank)(
           
             + nu * ( dx(up1)*dx(v1) + dy(up1)*dy(v1)
             +  dx(up2)*dx(v2) + dy(up2)*dy(v2) )
@@ -108,7 +111,14 @@ for(real re=100;re<=reymax;re *=2)
     if(re>10000) lerr=0.005; 
     for(int step=0;step<2;step++)
       {
-	Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000);
+		  
+	   if( mpirank==0) {
+		    Th=change(Th,fregion=1);
+			Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000);
+		    Th=change(Th,fregion=nuTriangle%mpisize);			
+		   } 
+	    broadcast(processor(0),Th);
+      
 	//plot(Th,wait=0);
 	[u1,u2,p]=[u1,u2,p];
 	[up1,up2,pp]=[up1,up2,pp];
@@ -117,12 +127,12 @@ for(real re=100;re<=reymax;re *=2)
 	  {
 	    nu =1./re;
 	    up1[]=u1[];
-	    real[int] b = vNS(0,XXMh,tgv=ttgv);
+	    real[int] b = vNS(0,XXMh);
 	    matrix Ans=vDNS(XXMh,XXMh,tgv=ttgv);
-	    set(Ans,solver=sparsesolver,tgv=ttgv,sparams=ssparams);
+	    set(Ans,solver=sparsesolver,master=-1);
 	    real[int] w = Ans^-1*b;
 	    u1[] -= w;
-	    cout << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
+	    if( mpirank==0)  cout << step << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
 	    if(w.l2<1e-6) break; 
 	    // uu1=u1;uu2=u2;
 	    //plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2]);  
@@ -132,5 +142,6 @@ for(real re=100;re<=reymax;re *=2)
     uu1=u1;uu2=u2;
     streamlines;
     if( mpirank==0) 
-    plot(coef=0.2,cmm="rey="+re+" [u1,u2] et p  ",psi,[uu1,uu2],wait=0,nbiso=20,ps="cavity-"+re+".ps");  
+    plot(coef=0.2,cmm="rey="+re+" [u1,u2] et psi  ",psi,[uu1,uu2],wait=0,nbiso=20,ps="cavity-"+re+".ps");  
   }
+  
