@@ -5,7 +5,7 @@
 SUBDIRS=libMesh  bamglib femlib  Graphics Algo lglib fflib 	\
 nw mpi  bamg medit bin-win32 
 
-EXTRA_DIST=FreeFem++-CoCoa Carbon.r  \
+EXTRA_DIST= Carbon.r  \
 solver/MUMPS_FreeFem.cpp \
 solver/README_COMPILE \
 solver/complex_SuperLU_DIST_FreeFem.cpp \
