@@ -2597,6 +2597,7 @@ void ffinit()
   DefSparseSolver<Complex>::solver =BuildSolverMUMPSmpi;
   if(! Global.Find("defaultsolver").NotNull() )
     Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+  if(! Global.Find("defaulttoMUMPS").NotNull() )
   Global.Add("defaulttoMUMPS","(",new OneOperator0<bool>(SetMUMPSmpi));
 }
 #include "InitFunct.hpp"

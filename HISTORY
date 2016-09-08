@@ -1,5 +1,10 @@
-@  changeset:   3804:1aa9573ffd84
+@  changeset:   3805:b8f571d4acb4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Sep 08 11:49:24 2016 +0200
+|  summary:     correct type in download/Makefile.am
+|
+o  changeset:   3804:1aa9573ffd84
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Sep 08 11:36:34 2016 +0200
 |  summary:     correct pb of reinstall hpddm is some case
