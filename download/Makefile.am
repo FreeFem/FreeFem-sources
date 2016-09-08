@@ -129,7 +129,7 @@ tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
 	touch tag-install-other
 
-WHERE-OTHER: lib/WHERE.hpddm-*
+WHERE-OTHER: lib/WHERE.hpddm
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD

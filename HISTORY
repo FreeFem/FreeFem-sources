@@ -1,5 +1,10 @@
-@  changeset:   3803:367df83c1f78
+@  changeset:   3804:1aa9573ffd84
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Sep 08 11:36:34 2016 +0200
+|  summary:     correct pb of reinstall hpddm is some case
+|
+o  changeset:   3803:367df83c1f78
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Sep 08 11:14:13 2016 +0200
 |  summary:     coorect pb off gls versio 1.16 under linux no gsl_interp_steffen
