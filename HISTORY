@@ -1,5 +1,10 @@
-@  changeset:   3802:57d1894cb627
+@  changeset:   3803:367df83c1f78
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Sep 08 11:14:13 2016 +0200
+|  summary:     coorect pb off gls versio 1.16 under linux no gsl_interp_steffen
+|
+o  changeset:   3802:57d1894cb627
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Sep 08 10:12:06 2016 +0200
 |  summary:     do small correction  for dist

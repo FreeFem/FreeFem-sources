@@ -129,21 +129,22 @@ tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
 	touch tag-install-other
 
-WHERE-OTHER: lib/WHERE.hpddm
+WHERE-OTHER: lib/WHERE.hpddm-*
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
-install-hpddm:./getall
-	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm  lib/WHERE.hpddm; else true;fi
+install-hpddm: ./getall
+	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:./getall
 	-rm lib/WHERE.hpddm
 	-rm ./pkg/hpddm.zip 
 	-rm -rf include/hpddm
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
-include/hpddm:
-	-if test -f ./pkg/hpddm.zip ; then cd include;rm -rf hpddm hpddm-*;  unzip ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; else true;  fi
-
-lib/WHERE.hpddm: 
+include/hpddm/done.tag:./pkg/hpddm.zip
+	-if test -f ./pkg/hpddm.zip ; then \
+          cd include;rm -rf hpddm hpddm-*;  unzip ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; touch hpddm/done.tag; \
+         else true;  fi
+lib/WHERE.hpddm: ./getall
 	if test -d include/hpddm/include ; then \
 	echo hpddm LD -L@DIR@/lib > $@ ;\
 	echo hpddm  INCLUDE -I@DIR@/include/hpddm/include >> $@ ;\
