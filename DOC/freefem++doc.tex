@@ -5336,10 +5336,10 @@ where $m_j$ are positive or negative numbers to indicate how many vertices shoul
 \Gamma=\cup_{j=1}^J \Gamma_J$, and the optional parameter (separed with comma) can be
 \begin{description}
 \item[\texttt{nbvx=<int value>}] ,  to set the maximal number of  vertices in the mesh.\index{buildmesh!nbvx=}
-\index{buildmesh!fixeborder=}
-\item[\texttt{fixeborder=<bool value>}] , to say if the mesh generator can change the boundary mesh
+\index{buildmesh!fixedborder=}
+\item[\texttt{fixedborder=<bool value>}] , to say if the mesh generator can change the boundary mesh
 or not (by default the boundary mesh can change; beware that with periodic boundary conditions 
-(see. \ref{periodic BC}), it can be dangerous .\label{buildmesh fixeborder}\index{buildmesh!fixeborder}
+(see. \ref{periodic BC}), it can be dangerous .\label{buildmesh fixedborder}\index{buildmesh!fixedborder}
 \end{description}
 
 The orientation of boundaries can be changed by changing the sign of $m_j$.
@@ -8350,7 +8350,7 @@ if the two parameters are equal.
 
 
 \begin{remark} The 2D  mesh of the two identified borders must be the same, so
-to be sure,  use  the parameter  \texttt{fixeborder=true} in \texttt{buildmesh} command (see \ref{buildmesh fixeborder})
+to be sure,  use  the parameter  \texttt{fixedborder=true} in \texttt{buildmesh} command (see \ref{buildmesh fixedborder})
 like in example \texttt{periodic2bis.edp} (see \ref{exm:periodic4bis}).
 \end{remark}
 
@@ -12275,7 +12275,7 @@ LINEBORDER(D,A,4)
 @func s3=dist(Cx,Cy,x,y)/l3;  // absisse on  CD  = ||CX||/||CD||
 @func s4=dist(Dx,Dy,x,y)/l4;  // absisse on  DA  = ||DX||/||DA||
 
-@mesh Th=buildmesh(AB(n)+BC(n)+CD(n)+DA(n),fixeborder=1);//\index{buildmesh!fixeborder=1}
+@mesh Th=buildmesh(AB(n)+BC(n)+CD(n)+DA(n),fixedborder=1);//\index{buildmesh!fixedborder=1}
 
 @verbosity=6;// to see the abscisse value pour the periodic condition.
 @fespace Vh(Th,P1,periodic=[[1,s1],[3,s3],[2,s2],[4,s4]]);

@@ -31,7 +31,7 @@ cout << "  s1:4 (final point: :)= " << s1(Bx,By) << " "
      << s3(Dx,Dy) << " " 
      << s4(Ax,Ay) << "\n "; 
 
-mesh Th=buildmesh(AB(n)+BC(n)+CD(n)+DA(n),fixeborder=1);
+mesh Th=buildmesh(AB(n)+BC(n)+CD(n)+DA(n),fixedborder=1);
 
 verbosity=6;// to see the abscisse value pour the periodic condition.
 fespace Vh(Th,P1,periodic=[[1,s1],[3,s3],[2,s2],[4,s4]]);

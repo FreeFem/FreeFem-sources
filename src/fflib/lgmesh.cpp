@@ -80,7 +80,7 @@ class classBuildMesh :  public E_F0mps { public:
    typedef pmesh  Result;
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =3;
+   static const int n_name_param =4;
    
     Expression nargs[n_name_param];
    
@@ -194,8 +194,9 @@ class classBuildMeshArray :  public E_F0mps { public:
 
 basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
     {  "nbvx", &typeid(long)} ,
-    {"fixeborder", &typeid(bool)},
-    {"points", &typeid(KNM<double>*)}
+    {"fixeborder", &typeid(bool)},// obsolete 
+    {"points", &typeid(KNM<double>*)},
+    {"fixedborder", &typeid(bool)}
 };
 // modif aout 2007
 class BuildMeshFile :  public E_F0mps { public:  
@@ -485,7 +486,7 @@ basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_nam
 AnyType classBuildMesh::operator()(Stack stack)  const { 
     const E_BorderN * borders = GetAny<const E_BorderN *>((*getborders)(stack));
    long  nbvx         = arg(0,stack,0L); 
-   bool  requireborder=  arg(1,stack,false);
+   bool  requireborder= arg(3,stack,arg(1,stack,false));
     KNM<double> * p=0;  p=arg(2,stack,p);
    ffassert(   nbvx >= 0);
    return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder,p)));

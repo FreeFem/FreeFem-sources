@@ -1,0 +1,23 @@
+/*
+  Example to cumpute min max of min size of edge on each triangle.
+*/
+mesh Th=square(10,10,[x,y*(1+x)]);
+fespace Ph(Th,P0);
+fespace Eh(Th,P0edge);
+Ph hmin = hTriangle;
+
+varf vle(u,v)=intalledges(Th)(v*1./nTonEdge);
+
+real[int] lenedges = vle(0,Eh);
+cout << " min / max len edges " << lenedges.min << " "  << lenedges.max <<endl; 
+
+for(int k=0; k< Th.nt; ++k)
+for(int i=0; i<3; ++i)
+{
+	hmin[][k]= min(hmin[][k],lenedges[Eh(k,i)]);
+}
+plot(hmin,fill=1,value=1);
+real hminmin = 0.1, hminmax= 0.141421;
+cout << " hmin = " << hmin[].min << " max = " << hmin[].max << endl;
+assert(abs(hmin[].min-hminmin) < 0.0001); 
+assert(abs(hmin[].max-hminmax) < 0.0001); 
