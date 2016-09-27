@@ -1,3 +1,11 @@
+version 3.49 
+ - add tool to compute integral with maping on test or unknow function (in test just in 2d to day
+   and only on varf definition
+     int1d(Th,mapu=[x+1,y],mapt=[x-1,y]) ( ...) 
+     int2d(Th,mapu=[x+1,y],mapt=[x-1,y]) ( ...) 
+ - add distance plugin to computation the signed distance to a curve defined by a iso isovalue 
+   of P1 finite elemnet function (see distance*.epd examples )
+ - change fixeborder in fixedborder in buildmesh 
 version 3.48 (7 sep 2016)
  - add doc for time depend Stokes problem with matrix (O. Pironneau)
  - add doc for time depend Heat problem  with matrix (O. Pironneau)

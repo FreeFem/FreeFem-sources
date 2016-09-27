@@ -1,0 +1,16 @@
+load "distance"
+mesh Th=buildmesh("g.gmesh",nbvx=10000);
+fespace Vh(Th,P1);
+Vh u = x; ;y-0.500; 
+cout << u[].min << endl;
+u = x+1.2;
+plot(u, dim=3, value=1); 
+Vh v=u;
+verbosity=1; 
+//cout << v[] << endl; 
+
+distance(Th,u,v[]);
+
+real[int] v0 = [-10,-1,-0.01,0,0.01,1,10];
+plot(u,wait=1,viso=v0);
+plot(v,wait=1,cmm="distance");

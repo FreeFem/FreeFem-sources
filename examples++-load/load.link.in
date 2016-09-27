@@ -90,7 +90,7 @@ while [ $# -ne 0 ]  ; do
 	-[h?]*) echo usage $0 "[-n] [-g] [-win32] [-l libfile] [-I includedir]  files"
 	    echo "    -auto :  build automaticaly the dependance (in test FH) "
 	    echo "    -n  :  do nothing just print"
-	    echo "    -g  :  compile with -g option"
+	    echo "    -g  :  compile with -g option add remove optimisation"
 	    echo "    -c  : compile only"
 	    echo "    -mpi:  with  mpi"
 	    echo "    -nompi:  without   $MPI_LIB links "
@@ -117,7 +117,8 @@ while [ $# -ne 0 ]  ; do
 	-mpi) withmpi=yes;;
 	-nompi) MPI_LIB='';withmpi='';;
 	-n)  do="no";;
-	-g)  DEBUG="$DEBUG $1";;
+	-g)  DEBUG="$DEBUG $1"; 
+            FFCXXFLAGS=`echo $FFCXXFLAGS| sed -e 's/-O[0-9]*//g' -e 's/-DNDEBUG//g' ` ;;
 	-c)  CONLY=yes;;
 	-O*) DEBUG="$DEBUG $1";;
 	-cygwin)  onwin32=1; uu="cygwin-version";; 

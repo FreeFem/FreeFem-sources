@@ -273,7 +273,7 @@ class BC_set : public E_F0mps { public:
 
 class CDomainOfIntegration: public E_F0mps { 
 public:
-  static const int n_name_param =10;
+  static const int n_name_param =12;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
@@ -281,12 +281,15 @@ public:
   int d; // 3d
    typedef const CDomainOfIntegration* Result;
   Expression Th;
+  Expression mapt[3],mapu[3];
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ??? 
   CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
     :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
      
   {
+    mapt[0]=mapt[1]=mapt[2]=0; // no map of intergration points for test function
+    mapu[0]=mapu[1]=mapu[2]=0; // no map of intergration points for unknows function
     args.SetNameParam(n_name_param,name_param,nargs);
     if(d==2) // 3d
       Th=CastTo<pmesh>(args[0]);
@@ -306,7 +309,22 @@ public:
 	   whatis[i-1]=1;
 	   what[i-1]=CastTo<KN_<long> >(args[i]); 	   
 	 }
-    // cout << " CDomainOfIntegration " << this << endl;       
+      const E_Array *pmapt = dynamic_cast<E_Array *>(nargs[10]);
+      const E_Array *pmapu = dynamic_cast<E_Array *>(nargs[11]);
+      if(pmapt )
+      {
+          if( pmapt->size() != d ) ErrorCompile("mapt bad arry size ",1);
+          for(int i=0; i<d; ++i)
+              mapt[i]=CastTo<double >((*pmapt)[i]);
+      }
+      if(pmapu )
+      {
+          if( pmapu->size() != d ) ErrorCompile("mapu bad arry size ",1);
+          for(int i=0; i<d; ++i)
+              mapu[i]=CastTo<double >((*pmapu)[i]);
+         
+      }
+    // cout << " CDomainOfIntegration " << this << endl;
   }
   static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh>(), true);} // all type
   AnyType operator()(Stack ) const  { return SetAny<const CDomainOfIntegration *>(this);}
@@ -321,7 +339,7 @@ public:
   bool intmortar(Stack s) const { return nargs[7] ? GetAny<bool>( (*(nargs[7])) (s) )  : 1;} // truc  pour 
   double levelset(Stack s) const { return nargs[9] ? GetAny<double>( (*(nargs[9]))(s) )  : 0;}
   bool  islevelset() const { return nargs[9] != 0; }
-    
+  bool withmap() const {return mapu[0] || mapt[0]; }
 };  
 
 class CDomainOfIntegrationBorder: public CDomainOfIntegration { 

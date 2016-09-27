@@ -2854,7 +2854,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
  CDomainOfIntegration::typeofkind kind = di->kind;
  set<int> setoflab;
  bool all=true;
-      
+  if( di->withmap()) { ExecError(" no map  in the case (1)??");}
   if (verbosity>3)
   {
       if(dim==2)
@@ -2889,7 +2889,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      all=false;
    }
  */
-      
+
  if(dim==2)
    {
      if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 2d)");
