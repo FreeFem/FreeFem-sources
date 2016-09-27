@@ -1,24 +1,43 @@
-o  changeset:   3809:7c6657c9e25a
+o  changeset:   3812:8b8a9ff57361
 |  branch:      cmake
 |  tag:         tip
 |  user:        Cedric Doucet <cedric.doucet@inria.fr>
-|  date:        Tue Aug 30 19:57:12 2016 +0200
-|  summary:     Split main CMakeLists for bamg fflib lglib and medit
+|  date:        Tue Sep 27 16:24:54 2016 +0200
+|  summary:     Separate libraries wrt directories
 |
-o  changeset:   3808:24acd4e0c907
+o  changeset:   3811:e153fb2e2727
 |  branch:      cmake
+|  parent:      3809:7c6657c9e25a
 |  user:        Cedric Doucet <cedric.doucet@inria.fr>
-|  date:        Tue Aug 30 19:01:21 2016 +0200
-|  summary:     Split main CMakeLists for libMesh
+|  date:        Tue Sep 27 11:55:54 2016 +0200
+|  summary:     Management of C++ compiler options in debug and release modes
 |
-o  changeset:   3807:f3b42dfadbfa
-|  branch:      cmake
-|  parent:      3791:e28759d12cb3
-|  user:        Cedric Doucet <cedric.doucet@inria.fr>
-|  date:        Tue Aug 30 17:15:36 2016 +0200
-|  summary:     Initial CMake skeleton
-|
-| @  changeset:   3806:bba41d9a3ee2
+| @  changeset:   3810:9aac8c157fab
+| |  parent:      3806:bba41d9a3ee2
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Sep 27 21:45:22 2016 +0200
+| |  summary:     add distance and new integration tools
+| |
+o |  changeset:   3809:7c6657c9e25a
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Aug 30 19:57:12 2016 +0200
+| |  summary:     Split main CMakeLists for bamg fflib lglib and medit
+| |
+o |  changeset:   3808:24acd4e0c907
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Aug 30 19:01:21 2016 +0200
+| |  summary:     Split main CMakeLists for libMesh
+| |
+o |  changeset:   3807:f3b42dfadbfa
+| |  branch:      cmake
+| |  parent:      3791:e28759d12cb3
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Aug 30 17:15:36 2016 +0200
+| |  summary:     Initial CMake skeleton
+| |
+| o  changeset:   3806:bba41d9a3ee2
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Thu Sep 08 16:23:33 2016 +0200
 | |  summary:     correct defaulttoMUMPS() in MUMPS_FreeFem.cpp to remove ambiguity
