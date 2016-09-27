@@ -1,4 +1,4 @@
-SET(LIBFF_SRC ${BAMGLIB_SRC} ${FEMLIB_SRC} ${FFLIB_SRC})
+SET(LIBFF_SRC ${FEMLIB_SRC} ${FFLIB_SRC})
 LIST(REMOVE_ITEM LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp
                            ${CMAKE_SOURCE_DIR}/src/femlib/ConjuguedGradrientNL.cpp
                            ${CMAKE_SOURCE_DIR}/src/femlib/FESpace-v0.cpp
@@ -14,7 +14,11 @@ LIST(APPEND LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/Algo/lgalgo.cpp
                       ${CMAKE_SOURCE_DIR}/src/Graphics/DefColor.cpp)
 
 ADD_LIBRARY(libff ${LIBFF_SRC})
-TARGET_LINK_LIBRARIES(libff dl cblas )
-INCLUDE_DIRECTORIES(src/bamglib src/fflib/ src/Graphics/ src/lglib/)
+TARGET_LINK_LIBRARIES(libff bamglib dl cblas )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib 
+                    ${CMAKE_SOURCE_DIR}/src/fflib/ 
+                    ${CMAKE_SOURCE_DIR}/src/Graphics/ 
+                    ${CMAKE_SOURCE_DIR}/src/lglib/)
 SET_TARGET_PROPERTIES(libff PROPERTIES PREFIX "")
+
 

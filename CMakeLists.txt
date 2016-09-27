@@ -25,15 +25,8 @@ ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNCHECKPTR -O3" )
 ENDIF(CMAKE_BUILD_TYPE EQUAL "Debug")
 
-FILE(GLOB_RECURSE BAMG_SRC src/bamg/*.cpp)
-FILE(GLOB_RECURSE BAMGLIB_SRC src/bamglib/*.cpp)
 FILE(GLOB FEMLIB_SRC src/femlib/*.cpp)
 FILE(GLOB_RECURSE FFLIB_SRC src/fflib/*.cpp)
-FILE(GLOB_RECURSE GRAPHICS_SRC src/Graphics//*.cpp)
-FILE(GLOB_RECURSE LGLIB_SRC src/lglib/*.cpp)
-FILE(GLOB_RECURSE MEDIT_SRC src/medit/*.c)
-FILE(GLOB_RECURSE MPI_SRC src/mpi/*.cpp)
-FILE(GLOB_RECURSE LIBMESH_SRC ${CMAKE_SOURCE_DIR}/src/libMesh/*.c)
 
 ###########
 # DOWNLOAD
@@ -51,15 +44,13 @@ INCLUDE(FFInstallPackage)
 #              mydownload/superlu_4.3.tar.gz
 #              SHOW_PROGRESS)
 
-###########
-# FREEFEM++
-###########
 FIND_PACKAGE(HDF5 REQUIRED)
 ADD_EXECUTABLE(FreeFem++ ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp 
                          ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi-empty.cpp 
                          ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
 INCLUDE_DIRECTORIES(src/lglib src/fflib src/Graphics)
 TARGET_LINK_LIBRARIES(FreeFem++ arpack cblas ${HDF5_LIBRARIES} dl umfpack lglib libff)
+
 
 ########
 # FFGLUT
@@ -97,13 +88,6 @@ INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
 TARGET_LINK_LIBRARIES(FreeFem++-mpi ${MPI_CXX_LIBRARIES} libff umfpack hdf5 arpack blas)
 
 
-########
-# CVMSH2
-########
-LIST(REMOVE_ITEM BAMGLIB_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp)
-ADD_EXECUTABLE(cvmsh2 ${CMAKE_SOURCE_DIR}/src/bamg/cvmsh2.cpp src/bamg/global.cpp ${BAMGLIB_SRC})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} src/bamg src/bamglib src/fflib/ src/Graphics/ ${HDF5_INCUDE_DIRS})
-TARGET_LINK_LIBRARIES(cvmsh2 libff hdf5 ${HDF5_LIBRARIES})
 
 
 ADD_SUBDIRECTORY(src)
