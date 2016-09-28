@@ -6,7 +6,6 @@ FUNCTION(ff_install_package LIBRARY_NAME)
         SET(FF_DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/download)
     ENDIF(NOT FF_DOWNLOAD_DIR)
     
-
     INCLUDE(Install${LIBRARY_NAME})
 
     STRING(TOLOWER ${LIBRARY_NAME} LIBRARY_LOWERNAME)
@@ -28,12 +27,13 @@ FUNCTION(ff_install_package LIBRARY_NAME)
                     TMP_DIR ${${LIBRARY_UPPERNAME}_TMP_DIR}
                     STAMP_DIR ${${LIBRARY_UPPERNAME}_STAMP_DIR}
                     INSTALL_DIR ${${LIBRARY_UPPERNAME}_INSTALL_DIR}
-                    URL ${${LIBRARY_UPPERNAME}_URL}
-                    CMAKE_ARGS ${${LIBRARY_UPPERNAME}_ARGS}
-                    PATCH_COMMAND ${${LIBRARY_UPPERNAME}_PATCH_COMMAND}
-                    CONFIGURE_COMMAND ${${LIBRARY_UPPERNAME}_CONFIGURE_COMMAND}
-                    BUILD_COMMAND ${${LIBRARY_UPPERNAME}_BUILD_COMMAND}
-                    INSTALL_COMMAND ${${LIBRARY_UPPERNAME}_INSTALL_COMMAND}
+                    URL ${URL}
+                    URL_MD5 ${URL_MD5}
+                    CMAKE_ARGS ${CMAKE_ARGS}
+                    PATCH_COMMAND ${PATCH_COMMAND}
+                    CONFIGURE_COMMAND ${CONFIGURE_COMMAND}
+                    BUILD_COMMAND ${BUILD_COMMAND}
+                    INSTALL_COMMAND ${INSTALL_COMMAND}
                     LOG_UPDATE 1
                     LOG_TEST 1
                    )
