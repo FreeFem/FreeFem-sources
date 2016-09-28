@@ -90,8 +90,6 @@ namespace ffapi {
     
 }
 
-#include "config-wrapper.h"
-
 #include <cstdio>
 #include <complex>
 #include <queue>

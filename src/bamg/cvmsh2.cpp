@@ -28,7 +28,6 @@
 //
 // ORIG-DATE:     Dec 97
 // ORIG-DATE:     Dec 97
-#include "config-wrapper.h"
 #include <cstdlib>
 #include <cstdio>
 #include <string.h>
