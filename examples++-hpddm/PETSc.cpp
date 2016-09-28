@@ -381,6 +381,7 @@ class InvPETSc {
                 VecGetArray((*t)._x, &x);
                 (*t)._A->template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), x, (*t)._A->getDof());
                 VecRestoreArray((*t)._x, &x);
+                std::fill(static_cast<PetscScalar*>(*out), static_cast<PetscScalar*>(*out) + out->n, 0);
             }
             else {
                 PetscScalar zero = 0.0;
