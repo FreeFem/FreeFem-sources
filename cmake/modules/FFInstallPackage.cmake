@@ -1,5 +1,6 @@
 FUNCTION(ff_install_package LIBRARY_NAME)
     
+IF(ENABLE_DOWNLOAD)
     INCLUDE(ExternalProject)
 
     IF(NOT FF_DOWNLOAD_DIR)
@@ -38,7 +39,7 @@ FUNCTION(ff_install_package LIBRARY_NAME)
                     LOG_TEST 1
                    )
     SET(${LIBRARY_UPPERNAME}_INSTALL_DIR ${${LIBRARY_UPPERNAME}_PREFIX}/install PARENT_SCOPE)
-
+ENDIF()
 
 
 ENDFUNCTION(ff_install_package)
