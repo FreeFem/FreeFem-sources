@@ -53,7 +53,7 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  iohd5-beam-2d.edp	iohd5-beam-3d.edp ff-AiryBiry.cpp \
  exactpartition.cpp	exactpartition.edp \
  ClosePoints.cpp aniso.cpp Element_HCT.cpp Curvature.cpp waveguide.edp waveguide2.edp Element_P1bl.cpp \
- Element_QF.cpp distance.edp	distance2.edp	distance3.edp g.gmesh
+ Element_QF.cpp distance.edp	distance2.edp	distance3.edp g.gmesh distance.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
