@@ -1465,7 +1465,7 @@ void OneWindow::cadreortho(R2 A, R2 B)
     
     Bmin= M - D2;
     Bmax= M + D2;
-    
+    hpixel = (Bmax.x-Bmin.x)/width;     
     if((debug > 10)) cout << " cadreortho: "<< " :: " << Bmin << " " << Bmax <<" oB " << oBmin << " " << oBmax << endl;
     
     // if((debug > 10)) cout << "cadreortho\n";
