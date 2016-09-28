@@ -38,7 +38,7 @@ INCLUDE(FFInstallPackage)
 #FF_INSTALL_PACKAGE(Scalapack)
 #FF_INSTALL_PACKAGE(Scotch)
 #FF_INSTALL_PACKAGE(Tetgen)
-#FF_INSTALL_PACKAGE(FFTW)
+FF_INSTALL_PACKAGE(FFTW)
 
 #FILE(DOWNLOAD http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz 
 #              mydownload/superlu_4.3.tar.gz
