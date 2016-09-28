@@ -1,3 +1,4 @@
+ - correct problem of size of the arrowhead when zooming 
 version 3.49 
  - add tool to compute integral with maping on test or unknow function (in test just in 2d to day
    and only on varf definition

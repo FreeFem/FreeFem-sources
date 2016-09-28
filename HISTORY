@@ -1,5 +1,10 @@
-@  changeset:   3813:ec40e102fa0a
+@  changeset:   3814:41131e3152fb
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Sep 28 07:59:19 2016 +0200
+|  summary:     add missing file in distrib.
+|
+o  changeset:   3813:ec40e102fa0a
 |  parent:      3810:9aac8c157fab
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Sep 27 21:55:33 2016 +0200
