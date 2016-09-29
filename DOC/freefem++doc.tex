@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.48}
+\def\VERSION{3.49}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -5674,7 +5674,11 @@ The following example explains methods to obtain mesh information.
       cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label "
            << Th.be(k).label <<  " tria  " << int(Th.be(k).Element)
            << " " << Th.be(k).whoinElement <<  endl;
-
+  @real[int] @bb(4);
+  boundingbox(Th,bb); //  \index{mesh!boundingbox}  \index{boundingbox}
+  // bb[0] = xmin, bb[1] = xmax, bb[2] = ymin, bb[3] =ymax 
+  cout << "\n boundingbox  xmin: " << bb[0] << " xmax: " << bb[1] 
+                    << " ymin: " << bb[2] << " ymax: " << bb[3] << endl; 
 }
 \eFF
 the output is:
@@ -5727,6 +5731,7 @@ Th(8) : 1 1 3       old method: 1 1
 6 : 0 3 , label 4 tria  1 1
 7 : 3 6 , label 4 tria  5 1
 
+ boundingbox  xmin: 0 xmax: 1 ymin: 0 ymax: 1
 \eFF
 
 

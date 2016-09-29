@@ -276,6 +276,11 @@ plot(rh,ps="lshape.eps");
     for (int k=0;k<nbboundaryelement;++k)
       cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label " << Th.be(k).label 
 	   <<  " tria  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  endl; 
+	
+	real[int] bb(4);
+	boundingbox(Th,bb); // bb[0] = xmin, bb[1] = xmax, bb[2] = ymin, bb[3] =ymax 
+	   cout << " boundingbox  xmin: " << bb[0] << " xmax: " << bb[1] 
+	                     << " ymin: " << bb[2] << " ymax: " << bb[3] << endl; 
 
 regtest=Th.nv;
 }
