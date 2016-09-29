@@ -1,5 +1,10 @@
-@  changeset:   3818:4f037e8e8498
+@  changeset:   3819:4a2d481d2b97
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Sep 28 16:38:23 2016 +0200
+|  summary:     patch de Pierre Jolivet he example HPDDM code
+|
+o  changeset:   3818:4f037e8e8498
 |  parent:      3814:41131e3152fb
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Sep 28 16:27:22 2016 +0200
