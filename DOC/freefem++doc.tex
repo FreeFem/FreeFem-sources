@@ -4909,7 +4909,7 @@ declare a new variable \texttt{ofstream ofile("filename");} or \texttt{ofstream 
 as \texttt{cout} (resp. \texttt{cin}).
 
 The word \texttt{append} in  \texttt{ofstream ofile("filename",append|binary);}
- means openning a file in append and binary mode.
+ means opening a file in append and binary mode.
 
 \begin{note} The file is closed
 at the exit of the enclosing block,
@@ -4940,7 +4940,6 @@ at the exit of the enclosing block,
 \eFF
 
 
-
   
 
 Some functions are available  to format the output.
@@ -4962,6 +4961,59 @@ Remark, all these methods except the first return the stream \texttt{f}, so they
     cout.scientific.showpos << 3 << endl;
 \eFF
 
+An usefull example to see usage of some  function on file stream: 
+ \index{teelp}\index{good}\index{seekg}\index{flush}
+\index{ofstream!teelp}\index{ofstream!good}\index{ofstream!seekg}\index{ofstream!flush}
+
+\bFF
+{ 
+  @ofstream file("f.txt",@binary);// for windows add binary version 3.30 
+  file.@precision(16);
+  file << f[] << endl;
+  where=file.@tellp();
+  file << 0.1 ;
+  //  file << " " << 0.2 ;
+  @cout << " where in file " << where << endl;
+  file << " # comment bla bla ...  0.3 \n";
+  file << 0.2 << endl; 
+  file.@flush; // to flush the buffer of file
+}
+//  Idea to skip comment in a file ...  start with  # too EOL
+@func ifstream skipcomment(@ifstream &ff)
+{
+    
+    @while(1)
+    {
+    int where = ff.@tellg(); // store file position 
+    string comment;
+    ff >> comment; 
+    @if ( ! ff.@good() ) @break; 
+    @if( comment(0:0)=="#") {
+         @getline(ff,comment);
+         cout << " -- #" << comment << endl;
+    }
+    @else {
+        ff.@seekg(where); //restore file position 
+        @break;        
+    }    
+    }
+    @return ff;
+}
+{
+  @ifstream file("f.txt",@binary); // for windows (pb CRNL EOL  translation ) 
+  cout << " where " << file.@seekg << endl; 
+  file.@seekg(where);
+  file >> xx;
+  cout <<  " xx = " << xx << " good ? " << file.@good() << endl;
+  assert(xx==0.1);
+  @skipcomment(file) >> xx;
+  assert(xx==0.2);
+  file.@seekg(0);//  rewind ...
+  cout << " where " << file.@tellg() << " " << file.@good() << endl; 
+  file >> g[] ;
+}
+\eFF
+
 \subsubsection{\setS{Script arguments}}
 There is a very useful predefined array in \freefempp \texttt{ARGV} that contains all the arguments of the script used in the command line. The following code prints out the first three of these arguments:\index{ARGV} 
 \bFF
@@ -4977,7 +5029,8 @@ There is a very useful predefined array in \freefempp \texttt{ARGV} that contain
 
 And to get argument unused in \texttt{getARGV.idp} include script file, 
 \bFF
-@getARGV(n,defaultvalue) // get the nth parameter  unused if exist (n = 1, ...)
+@getARGV(n,defaultvalue) // get the nth parameter unused 
+// if exist (n = 1, ...)
 @getARGV(after,defaultvalue) // get the arg after the string after if exist
 \eFF
 The type of default value can be \texttt{int}, \texttt{real}, \texttt{string},
