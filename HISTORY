@@ -1,5 +1,10 @@
-@  changeset:   3822:4bd93677123b
+@  changeset:   3823:234b96dc9a6b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Oct 04 20:51:09 2016 +0200
+|  summary:     correct missing resize function of fespace complex array function
+|
+o  changeset:   3822:4bd93677123b
 |  parent:      3819:4a2d481d2b97
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Sep 29 11:08:01 2016 +0200

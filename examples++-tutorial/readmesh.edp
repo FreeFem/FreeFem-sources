@@ -24,6 +24,7 @@ real xx;
   cout << " where in file " << where << endl;
   file << " # comment bla bla ...  0.3 \n";
   file << 0.2 << endl; 
+  file.flush; // to flush the io  buffer of file
 }
 //  Idea to skip comment in a file ...  start with  # too EOL
 func ifstream skipcomment(ifstream &ff)
