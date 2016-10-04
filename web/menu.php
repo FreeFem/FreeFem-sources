@@ -19,7 +19,7 @@ include 'phpfiles.php';
 	<div class="menuItem"><a href="main.php"  target="main">Home</a></div>	
 	<div class="menuItem"><a href="http://www.um.es/freefem/ff++/pmwiki.php" target="_top">Wiki</a></div>
 	<div class="menuItem"><a href="https://ljll.math.upmc.fr/cgi-bin/mailman/listinfo/freefempp" target="_top">Mailing list </a></div>
-	 <div class="menuItem"><a href="http://www.ann.jussieu.fr/~lehyaric/ffcs/index.htm"  target="_top"> FreeFem++-cs </a></div>
+	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/lehyaric/ffcs/index.htm"  target="_top"> FreeFem++-cs </a></div>
 	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/lehyaric/ffjs/15.6/ffjs.htm"  target="_top"> FreeFem++ on the web </a></div>
 	<div class="menuItem"><a href="examples.html"  target="main">Showcase</a></div>	
 	<div class="menuItem"><a href="news.php"  target="main">Web News</a></div>	
@@ -54,7 +54,7 @@ include 'phpfiles.php';
 
 	
 	<div class="menuTitle">Oldies</div>
-	<div class="menuItem"> <a href="http://www.ann.jussieu.fr/~hecht/bookIDFHOP/bp.tar.gz" target="_top">To
+	<div class="menuItem"> <a href="https://www.ljll.math.upmc.fr/hecht/bookIDFHOP/bp.tar.gz" target="_top">To
 download all the examples</a> (in tar.gz format) from the book
 "Simulation numérique en C++" by Ionut Danaila, Frédéric
 Hecht, Olivier Pironneau, DUNOD 2003  </div>
@@ -64,7 +64,7 @@ Hecht, Olivier Pironneau, DUNOD 2003  </div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff3d/index.html" target="_top">freeFEM3D</a>: the 3D version based on ficticious domain.</div>
 
 	<div class="menuItem"><a href="http://www.freefem.org/ff2a3" target="_top">ANR FF2A3</a></div>
-		<div class="menuItem"><a href="http://www.ljll.math.umpc.fr/~hecht/ftp/emc2" target="main">emc2 (CAD 2d) </a></div>
+		<div class="menuItem"><a href="https://www.ljll.math.upmc.fr/hecht/ftp/emc2" target="main">emc2 (CAD 2d) </a></div>
 
 	
 	</p>

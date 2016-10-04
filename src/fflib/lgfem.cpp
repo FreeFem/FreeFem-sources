@@ -4720,6 +4720,14 @@ long get_size(pf3rbasearray *const & a)
 {
     return (**a).N;
 }
+long get_size(pf3carray const & a)
+{
+    return a.first->N;
+}
+long get_size(pf3cbasearray *const & a)
+{
+    return (**a).N;
+}
 long resize(pferbasearray *const & a, long const & n)
 {
     (**a).resize(n);
@@ -5739,11 +5747,17 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
     Dcl_Type< Resize1<pf3rbasearray* > > ();
     Dcl_Type< Resize1<pf3rarray > > ();
+    Dcl_Type< Resize1<pf3cbasearray* > > (); //   FH oct. 2016
+    Dcl_Type< Resize1<pf3carray > > (); //   FH oct. 2016
     Add<pf3rbasearray*>("resize",".",new OneOperator1<Resize1<pf3rbasearray* >,pf3rbasearray*>(to_Resize1));  //   FH fev. 2013
     Add<pf3rarray>("resize",".",new OneOperator1<Resize1<pf3rarray >,pf3rarray>(to_Resize1));  //  FH fev 2013
-    new OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize<pf3rbasearray*>);
+    Add<pf3cbasearray*>("resize",".",new OneOperator1<Resize1<pf3cbasearray* >,pf3cbasearray*>(to_Resize1));  //   FH oct. 2016
+    Add<pf3carray>("resize",".",new OneOperator1<Resize1<pf3carray >,pf3carray>(to_Resize1));  //  FH Oct 2016
+    //new OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize<pf3rbasearray*>);
     Add<Resize1<pf3rbasearray* > >("(","",new  OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize));
     Add<Resize1<pf3rarray > >("(","",new OneOperator2_<pf3rarray,Resize1<pf3rarray > , long  >(feresize));
+    Add<Resize1<pf3cbasearray* > >("(","",new  OneOperator2_<pf3cbasearray*,Resize1<pf3cbasearray* > , long  >(fepresize));//  FH Oct 2016
+    Add<Resize1<pf3carray > >("(","",new OneOperator2_<pf3carray,Resize1<pf3carray > , long  >(feresize));//  FH Oct 2016
 
 // end of resize ...
    
@@ -5754,12 +5768,15 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
   Add<pf3rbasearray*>("n",".",new OneOperator1_<long,pf3rbasearray*>(get_size));  //   FH fev. 2013
   Add<pf3rarray>("n",".",new OneOperator1_<long,pf3rarray>(get_size));  //  FH fev 2013
+  Add<pf3cbasearray*>("n",".",new OneOperator1_<long,pf3cbasearray*>(get_size));  //   FH  Oct 2016
+  Add<pf3carray>("n",".",new OneOperator1_<long,pf3carray>(get_size));  //  FH Oct 2016
     
     
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
    
   Add<pf3rarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
+  Add<pf3carray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());// FH Oct 2016
 
 //    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
 //    Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));

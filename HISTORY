@@ -1,15 +1,34 @@
-@  changeset:   3819:4a2d481d2b97
+@  changeset:   3822:4bd93677123b
 |  tag:         tip
+|  parent:      3819:4a2d481d2b97
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Sep 28 16:38:23 2016 +0200
-|  summary:     patch de Pierre Jolivet he example HPDDM code
+|  date:        Thu Sep 29 11:08:01 2016 +0200
+|  summary:     change a little distance exampel to be pretty
 |
-o  changeset:   3818:4f037e8e8498
-|  parent:      3814:41131e3152fb
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Sep 28 16:27:22 2016 +0200
-|  summary:     coorect problem of size of arrowhead when zooming
-|
+| o  changeset:   3821:5ec069868497
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Sep 28 17:41:17 2016 +0200
+| |  summary:     creation of recipe file for scotch library
+| |
+| o  changeset:   3820:d5fb9529839c
+| |  branch:      cmake
+| |  parent:      3817:7c77d778cc04
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Sep 28 15:44:02 2016 +0200
+| |  summary:     Simplify syntax of recipes for external libraries
+| |
+o |  changeset:   3819:4a2d481d2b97
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Sep 28 16:38:23 2016 +0200
+| |  summary:     patch de Pierre Jolivet he example HPDDM code
+| |
+o |  changeset:   3818:4f037e8e8498
+| |  parent:      3814:41131e3152fb
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Sep 28 16:27:22 2016 +0200
+| |  summary:     coorect problem of size of arrowhead when zooming
+| |
 | o  changeset:   3817:7c77d778cc04
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
