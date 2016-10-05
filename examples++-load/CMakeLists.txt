@@ -72,8 +72,12 @@ FIND_PACKAGE(LAPACK)
 ADD_LIBRARY(Element_Mixte SHARED Element_Mixte.cpp)
 TARGET_LINK_LIBRARIES(Element_Mixte libMesh libff lglib ${LAPACK_LIBRARIES})
 
-# tetgen.cpp
+# lapack
+ADD_LIBRARY(example-lapack SHARED lapack.cpp)
+TARGET_LINK_LIBRARIES(example-lapack libMesh libff lglib ${LAPACK_LIBRARIES})
 
+
+# tetgen.cpp
 FF_INSTALL_PACKAGE(Tetgen)
 ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
                                   ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
