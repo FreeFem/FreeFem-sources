@@ -2,7 +2,6 @@
 // ---------------------------------------------------------------------                                                     
 // $Id$                                                              
 
-#include "config.h"
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
