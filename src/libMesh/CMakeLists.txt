@@ -3,6 +3,6 @@ LIST(REMOVE_ITEM CFILES ${CMAKE_SOURCE_DIR}/src/libMesh/test_sol.c
                         ${CMAKE_SOURCE_DIR}/src/libMesh/test_libmesh5.c)
 
 ADD_LIBRARY(libMesh ${CFILES})
-INCLUDE_DIRECTORIES(src/libMesh)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/femlib)
 SET_TARGET_PROPERTIES(libMesh PROPERTIES PREFIX "")
 

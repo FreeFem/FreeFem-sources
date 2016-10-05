@@ -18,7 +18,8 @@ TARGET_LINK_LIBRARIES(libff bamglib dl cblas )
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib 
                     ${CMAKE_SOURCE_DIR}/src/fflib/ 
                     ${CMAKE_SOURCE_DIR}/src/Graphics/ 
-                    ${CMAKE_SOURCE_DIR}/src/lglib/)
+                    ${CMAKE_SOURCE_DIR}/src/lglib/
+                    ${CMAKE_SOURCE_DIR}/src/femlib)
 SET_TARGET_PROPERTIES(libff PROPERTIES PREFIX "")
 
 
