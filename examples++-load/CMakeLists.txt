@@ -9,7 +9,6 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/ffnewuoa.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ffrandom.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/FreeFemQA.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/funcTemplate.cpp
