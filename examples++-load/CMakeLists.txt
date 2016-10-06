@@ -41,30 +41,49 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib
                     ${CMAKE_SOURCE_DIR}/src/Graphics
                     ${CMAKE_SOURCE_DIR}/src/libMesh)
 
+SET(FREEFEM_LIBRARIES libMesh libff lglib)
+
 FOREACH(CPPFILE ${CPPFILES})
   GET_FILENAME_COMPONENT(FILENAME ${CPPFILE} NAME_WE)
   ADD_LIBRARY(${FILENAME} SHARED ${CPPFILE})
-  TARGET_LINK_LIBRARIES(${FILENAME} libMesh libff lglib)
+  TARGET_LINK_LIBRARIES(${FILENAME} ${FREEFEM_LIBRARIES})
 ENDFOREACH(CPPFILE)
 
-# Element_Mixte
+FF_INSTALL_PACKAGE(Tetgen)
+
+FIND_PACKAGE(HDF5)
 FIND_PACKAGE(LAPACK)
-ADD_LIBRARY(Element_Mixte SHARED Element_Mixte.cpp)
-TARGET_LINK_LIBRARIES(Element_Mixte libMesh libff lglib ${LAPACK_LIBRARIES})
+
+# Element_Mixte
+IF(LAPACK_FOUND)
+  ADD_LIBRARY(Element_Mixte SHARED Element_Mixte.cpp)
+  TARGET_LINK_LIBRARIES(Element_Mixte ${FREEFEM_LIBRARIES}
+                                      ${LAPACK_LIBRARIES})
+ENDIF()
 
 # fflapack
-ADD_LIBRARY(fflapack SHARED fflapack.cpp)
-TARGET_LINK_LIBRARIES(fflapack libMesh libff lglib ${LAPACK_LIBRARIES})
-
-
-
+IF(LAPACK_FOUND)
+	ADD_LIBRARY(fflapack SHARED fflapack.cpp)
+	TARGET_LINK_LIBRARIES(fflapack ${FREEFEM_LIBRARIES}
+                                 ${LAPACK_LIBRARIES})
+ENDIF()
+	
 # lapack
-ADD_LIBRARY(example-lapack SHARED lapack.cpp)
-TARGET_LINK_LIBRARIES(example-lapack libMesh libff lglib ${LAPACK_LIBRARIES})
+IF(LAPACK_FOUND)
+	ADD_LIBRARY(example-lapack SHARED lapack.cpp)
+	TARGET_LINK_LIBRARIES(example-lapack ${FREEFEM_LIBRARIES}
+                                       ${LAPACK_LIBRARIES})
 
+ENDIF()
+
+# iohdf5
+IF(HDF5_FOUND)
+  ADD_LIBRARY(iohdf5 SHARED iohdf5.cpp)
+  TARGET_LINK_LIBRARIES(iohdf5 ${HDF5_LIBRARIES})
+  INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+ENDIF()
 
 # tetgen.cpp
-FF_INSTALL_PACKAGE(Tetgen)
 ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
                                   ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
                                   ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
