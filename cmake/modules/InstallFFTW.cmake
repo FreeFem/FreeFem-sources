@@ -6,7 +6,7 @@ SET(CONFIGURE_COMMAND  <SOURCE_DIR>/configure
                        --disable-fortran 
                        --prefix=<INSTALL_DIR> 
                        CXX=${CMAKE_CXX_COMPILER} 
-                       CC=${CMAKE_CXX_COMPILER}  
+                       CC=${CMAKE_C_COMPILER}  
                        CFLAGS=${CMAKE_C_FLAGS} 
                        CXXFLAGS=${CMAKE_CXX_FLAGS})
 
