@@ -5,7 +5,7 @@ TARGET_LINK_LIBRARIES(bamg libff bamglib ${HDF5_LIBRARIES})
 
 ADD_EXECUTABLE(cvmsh2 ${CMAKE_SOURCE_DIR}/src/bamg/cvmsh2.cpp 
                       ${CMAKE_SOURCE_DIR}/src/bamg/global.cpp)
-TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff hdf5 ${HDF5_LIBRARIES})
+TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff ${HDF5_LIBRARIES})
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} 
                     ${CMAKE_SOURCE_DIR}/src/bamg 

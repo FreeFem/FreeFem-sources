@@ -68,6 +68,6 @@ FF_INSTALL_PACKAGE(Tetgen)
 ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
                                   ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
                                   ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
-TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib /Users/cdoucet/ff-download/tetgen/install/libtet.a)
+TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${FF_DOWNLOAD_DIR}/tetgen/install/libtet.a)
 ADD_DEPENDENCIES(example_tetgen tetgen)
 INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/tetgen/src)
