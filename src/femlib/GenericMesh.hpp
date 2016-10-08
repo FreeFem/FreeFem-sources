@@ -634,10 +634,10 @@ public:
   
   // Add J. Morice 
   template<int N,int M>
-  SortArray<int,N> itemadjs(const int (* const  nu )[N],int k,int i, int *sens) 
+  SortArray<int,N> itemadjs(const int (* const  nu )[N],int k,int i, int *sens) const
   {
     int nnv[N];
-    B & K(borderelements[CheckBE(k)]);
+    const B & K(borderelements[CheckBE(k)]);
     ASSERTION(i>=0 && i <M);
     for (int j=0;j<N;++j){
       nnv[j] = operator()(K[nu[i][j]]);
@@ -649,17 +649,17 @@ public:
     return SortArray<int,N>(nnv);
   }
 
-  SortArray<int,B::nva> items(int k,int i,int *sens) 
+  SortArray<int,B::nva> items(int k,int i,int *sens) const
   {
     return itemadjs<B::nva,B::nv>(B::nvadj,k,i,sens);
   }
 
   
   template<int N,int M>
-  SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i) 
+  SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i)  const
   {
     int nnv[N];
-    Element & K(elements[CheckT(k)]);
+    const Element & K(elements[CheckT(k)]);
     ASSERTION(i>=0 && i <M);
     for (int j=0;j<N;++j){
       nnv[j] = operator()(K[nu[i][j]]);
@@ -668,15 +668,15 @@ public:
     return SortArray<int,N>(nnv);
   }
 
-  SortArray<int,B::nv> itemadj(int k,int i) 
+  SortArray<int,B::nv> itemadj(int k,int i) const
   {
     return iteme<B::nv,T::nea>(T::nvadj,k,i);
   }
   
-  SortArray<int,B::nv> itembe(int k) 
+  SortArray<int,B::nv> itembe(int k) const
   {
     int nnv[B::nv];
-    B & K(borderelements[CheckBE(k)]);
+    const B & K(borderelements[CheckBE(k)]);
     
     for (int j=0;j<B::nv;++j){
       nnv[j] = operator()(K[j]);

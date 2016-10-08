@@ -21,11 +21,12 @@ gslrng r=gslrngtype(1);// chose a generator
 for (int i = 0; i < 10; i++) 
    cout << gslrnguniform(r) << endl;;  
  
+ real x0=0.2;
  int n=10;
- real[int,int] dspline(2,n+1);
- for(int i=0; i<= n; ++i)
+ real[int,int] dspline(2,n+6);
+ for(int i=0; i<= n+5; ++i)
   {
-    real xx = square(real(i)/n); 
+    real xx = square(real(i)/n)+x0; 
     real yy = sin(xx*pi*2); 
     dspline(0,i)= xx;
     dspline(1,i)= yy;    
@@ -45,7 +46,7 @@ for (int i = 0; i < 10; i++)
  real[int] xx(mm+1),yy(mm+1),zz(mm+1),dyy(mm+1),ddyy(mm+1),dzz(mm+1),ddzz(mm+1);
  real err=0; 
  for (int i=0; i<=mm; ++i)
- { xx[i]= real(i)/mm;
+ { xx[i]= real(i)/mm+x0;
    yy[i]= spline(xx[i]);
    dyy[i]= spline.d(xx[i]);
    ddyy[i]= spline.dd(xx[i]);
@@ -55,7 +56,9 @@ for (int i = 0; i < 10; i++)
    err = max( err , abs(yy[i]-zz[i]));
    cout << xx[i] << " " << yy[i] << "  ~ " << zz[i] << ",  " << dyy[i] << " ~ " << dzz [i] <<  " , " << ddyy[i] << " " << ddzz[i] <<  endl; 
  }
- 
+ //  test out of  bound v 3.50
+ // OUT => VALUE AT BOUND ... FH OCT 2015 
+ cout << dspline(1,0) << " ==  " << spline(-1) << " " << spline(100) << " == "<< dspline(1,dspline.m-1) << endl; 
  cout << " err = " << err << endl; 
  plot([xx,yy],[xx,zz],cmm= "err = " + err);
  assert(err < 0.3);

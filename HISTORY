@@ -1,5 +1,10 @@
-@  changeset:   3823:234b96dc9a6b
+@  changeset:   3824:be5320d89f0a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Oct 04 21:14:33 2016 +0200
+|  summary:     add remark on io function in doc.
+|
+o  changeset:   3823:234b96dc9a6b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Oct 04 20:51:09 2016 +0200
 |  summary:     correct missing resize function of fespace complex array function

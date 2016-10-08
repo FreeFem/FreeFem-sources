@@ -6308,7 +6308,160 @@ AnyType Op_GluMesh3tab::Op::operator()(Stack stack)  const {
     return Tht;
 }
 
+long BuildBoundaryElementAdj(const Mesh3 &Th,bool check=0,KN<long> * pborder=0)
+{
+    typedef Mesh3::Element T;
+    typedef Mesh3::Vertex V;
+    typedef Mesh3::BorderElement B;
+    
+    // Return in TheBorderElementAjacencesLink
+    //  if exist a link :: sign(nk_link)*(nk_link+1)
+    //  else            :: sign(nk)*(nk)
+    
+    // assert(TheBoundaryElementAdjacencesLink==0); plus tard
+    int nbe = Th.nbe;
+    int nv = Th.nv;
+    int *TheBoundaryElementAdjacencesLink = new int[B::nea*nbe];
+    HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe,nv);
+    int nk=0;
+    int err=0,err3=0;
+    int sens;
+    int debug = verbosity > 999;
+    if(verbosity>9)
+            cout << "nea/nva" << B::nea << " "  << B::nva << endl;
+    for (int k=0;k<nbe;++k)
+        for (int i=0;i<B::nea;++i)
+        {
+            SortArray<int,B::nva> a(Th.items(k,i,&sens));
+            
+            HashTable<SortArray<int,B::nva>,int>::iterator p= h.find(a);
+            if(!p)
+            {
+                h.add(a,nk);
+                TheBoundaryElementAdjacencesLink[nk] = sens*(nk+1)   ;  // sens;
+            }
+            else
+            {
+                ASSERTION(p->v>=0);
+                if( sens*TheBoundaryElementAdjacencesLink[p->v] > 0 ){
+                    
+                    const B & K(Th.be(k));
+                    int firstVertex  =  Th(K[B::nvadj[i][0]])+1;
+                    int secondVertex =  Th(K[B::nvadj[i][1]])+1;
+                    if(err < 100 && check )
+                        cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex
+                             << ", is oriented in the same direction in element " << k+1
+                             << " and in element "<<  1+(p->v/B::nea) << endl;
+                    err++;
+                   
+                }
+                if( abs(TheBoundaryElementAdjacencesLink[p->v]) != 1+p->v ){
+                    
+                    const B & K(Th.be(k));
+                    int firstVertex  =  Th(K[B::nvadj[i][0]])+1;
+                    int secondVertex =  Th(K[B::nvadj[i][1]])+1;
+                    if(err3 < 100 && check)
+                    {
+                    cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex
+                         << "belong to the three border elements ::"
+                         << 1+(p->v)/B::nea <<", "<< k+1 <<" and "
+                         << 1+(abs(TheBoundaryElementAdjacencesLink[p->v])-1)/B::nea << endl;
+                    cout << " The Surface contains these edges is not a manifold" << endl;
+                    }
+                    err3++;
+                }
+                
+                TheBoundaryElementAdjacencesLink[nk]= TheBoundaryElementAdjacencesLink[p->v];
+                TheBoundaryElementAdjacencesLink[p->v]= sens*(nk+1);  
+                
+            }
+             nk++;
+        }
+    if(err  && err3 && check) ExecError(" The surface mesh in no manifold ");
+    long nb =0,mk=0;
+    int  nc =0;
+    KN<long> nx(nv),ns(nv),mark(nv);
+    nx = -1; // no next
+    mark=mk;// mark
 
+
+    {
+        int errv;
+        nk=0;
+        
+        for (int k=0;k<nbe;++k)
+            for (int i=0;i<B::nea;++i)
+            {
+                if(abs(TheBoundaryElementAdjacencesLink[nk])==nk+1)
+                   {
+                       nb++;
+                       const B & K(Th.be(k));
+                       int v0  =  Th(K[B::nvadj[i][0]]);
+                       int v1 =  Th(K[B::nvadj[i][1]]);
+                       if(nx[v0]>=0) errv++;
+                       else nx[v0] = v1;
+                       if(debug)  cout << v0 << " " << v1 << endl;
+                   }
+                nk++;
+            }
+        if(errv ) { cout<< " nb of crossing case " << errv;
+            ExecError(" Boundary of surface crossing ???");}
+         mk++;
+        for( int i=0,m=0; i<nv; ++i)
+        {
+            if (nx[i]>=0 && mark[i] != mk)
+            {
+                int p=i;
+                ns[nc++]=i;// start
+                while (nx[p]>=0 && mark[p] != mk)
+                {
+                    mark[p] = mk;
+                    int pn=nx[p];
+                    if(debug)  cout << p << " -> " << pn << endl;
+                    p=pn;
+                    
+                }
+            }
+        }
+        if(verbosity>3) cout<< " nb curve in boundary of manifold  = " << nc << " " << pborder << endl;
+        if( pborder)
+        {
+            pborder->resize(nb+nc+1);
+            KN<long> &bd=*pborder;
+            int j=nc+1;
+            for(int c=0; c<nc;++c)
+            {
+                bd[c] = j;
+                int p= ns[c];
+                mk++;
+                while (nx[p]>=0 && mark[p] != mk)
+                {
+                    mark[p] = mk;
+                    int pn=nx[p];
+                    if(debug)  cout << j << " " << p << " -> " << pn << endl;
+                    bd[j++] =p;
+                    p=pn;
+                    
+                }
+              bd[c+1] = j;
+            }
+            if(debug) cout<< j << " " << nc << " " << nb << endl;
+            ffassert( j== nc+1+nb);
+        }
+     }
+    
+    delete [ ] TheBoundaryElementAdjacencesLink;
+    if(verbosity) cout << "number of adjacents edges " << nk << " nb border edge :" << nb << " " << nc <<  endl;
+    return nc;
+}
+long ShowBorder(const Mesh3 *pth)
+{
+    return  BuildBoundaryElementAdj(*pth);
+}
+long GetBorder(const Mesh3 *pth,KN<long> *pb)
+{
+    return  BuildBoundaryElementAdj(*pth,0,pb);
+}
 
 // <<WITH_NO_INIT>> because i include this file in tetgen.cpp (very bad) [[file:tetgen.cpp::WITH_NO_INIT]]
 #ifndef WITH_NO_INIT
@@ -6349,8 +6502,9 @@ static void Load_Init()
 
   Global.Add("extract","(",new ExtractMesh);
   Global.Add("extract","(",new ExtractMesh2D);
-    
-  Global.Add("AddLayers","(",new OneOperator4_<bool, const Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
+    Global.Add("showborder","(",new OneOperator1<long, const Mesh3 *>(ShowBorder));
+    Global.Add("getborder","(",new OneOperator2<long, const Mesh3 *,KN<long> *>(GetBorder));
+    Global.Add("AddLayers","(",new OneOperator4_<bool, const Mesh3 * , KN<double> *,long, KN<double> * >(AddLayers));
   typedef const Mesh3 *pmesh3;
   // Global.Add("trunc","(", new Op_trunc_mesh3);
 }
