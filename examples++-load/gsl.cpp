@@ -97,10 +97,10 @@ struct  GSLInterpolation  {
         gsl_spline_init (spline, xy,xy+n,n);
 
     }
-
-    double eval(double xi) { return gsl_spline_eval (spline, xi, acc);}
-    double deval(double xi) { return gsl_spline_eval_deriv (spline, xi, acc);}
-    double ddeval(double xi) { return gsl_spline_eval_deriv2 (spline, xi, acc);}
+    double bb(double xi) const  { return max(min(xi,xy[n-1]),xy[0]);}
+    double eval(double xi) { return gsl_spline_eval (spline, bb(xi), acc);}
+    double deval(double xi) { return gsl_spline_eval_deriv (spline, bb(xi), acc);}
+    double ddeval(double xi) { return gsl_spline_eval_deriv2 (spline, bb(xi), acc);}
     
     void destroy()
     {
