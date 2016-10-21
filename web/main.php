@@ -102,6 +102,16 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 <div class="thema">Some FreeFem++ presentation (with useful information):
 </div>
 <ul>
+           <li><font > <bf>  <font color=red > 
+         The 8th   tutorial and Workshop on FreeFem++ 
+   <A HREF="https://www.ljll.math.upmc.fr/freefem++/">  (inscription here)</A>, 
+   held december 8th and 9th, 2016, in Paris at Universit&eacute Pierre
+  et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>  
+  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2016/Schedule.html"> Schedule, All Presentation, examples </A> and
+  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2016/.">  directory this all data  </A>.
+   </font></li> 
+	
+	
    <li>  Tutorial with Freefem++, 
 <A HREF="http://smai.emath.fr/cemracs/cemracs16/">   CEMRACS 2016  </A> CIRM, Luminy, Marseille, july 18-22, 2016. <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++/ff-cemracs-2016/"> The directory with all data  </A> 
  </li>
@@ -122,7 +132,6 @@ Research in Mathematical Sciences <A/>,  Toronto, Canada , 7-17 March . 2016
  
          <li><font > <bf>  <font color=black> <font color=black> 
        The 7th   tutorial and Workshop on FreeFem++ </font>
- <A HREF="http://www.ljll.math.upmc.fr/FreeFem++">  (inscription here)</A>, 
  held december 15th and 16th, 2015, in Paris at Universit&eacute Pierre
 et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>  
 <A HREF="http://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2015/Schedule.html"> Schedule, All Presentation, examples </A> and
