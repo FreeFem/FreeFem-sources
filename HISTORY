@@ -1,20 +1,69 @@
-@  changeset:   3824:be5320d89f0a
+@  changeset:   3832:96d067aa2866
 |  tag:         tip
+|  parent:      3824:be5320d89f0a
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Oct 04 21:14:33 2016 +0200
-|  summary:     add remark on io function in doc.
+|  date:        Sat Oct 08 12:16:43 2016 +0200
+|  summary:     add tools to extract border of surface meshes
 |
-o  changeset:   3823:234b96dc9a6b
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Oct 04 20:51:09 2016 +0200
-|  summary:     correct missing resize function of fespace complex array function
-|
-o  changeset:   3822:4bd93677123b
-|  parent:      3819:4a2d481d2b97
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Thu Sep 29 11:08:01 2016 +0200
-|  summary:     change a little distance exampel to be pretty
-|
+| o  changeset:   3831:d61c84c1b4fe
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Oct 06 16:05:18 2016 +0200
+| |  summary:     Check existence of third-party libraries before commpiling sources in example++-load
+| |
+| o  changeset:   3830:da0b97dd35a4
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Oct 06 15:39:12 2016 +0200
+| |  summary:     Fix some compilation and linking problems on Ubuntu 16.04
+| |
+| o  changeset:   3829:8ec9bc943988
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Oct 05 23:36:53 2016 +0200
+| |  summary:     More managed tests in examples++-load
+| |
+| o  changeset:   3828:35d687eb7f90
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Oct 05 20:56:02 2016 +0200
+| |  summary:     Management of ffrandom example
+| |
+| o  changeset:   3827:411d97b04ca1
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Oct 05 20:52:28 2016 +0200
+| |  summary:     Management of example lapack.cpp
+| |
+| o  changeset:   3826:aaa9eced0d85
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Oct 05 20:40:14 2016 +0200
+| |  summary:     Management of the example tetgen.cpp
+| |
+| o  changeset:   3825:67677e8e192c
+| |  branch:      cmake
+| |  parent:      3821:5ec069868497
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Oct 05 17:01:56 2016 +0200
+| |  summary:     Splitting of CMakeList done. Management of examples++-load
+| |
+o |  changeset:   3824:be5320d89f0a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Oct 04 21:14:33 2016 +0200
+| |  summary:     add remark on io function in doc.
+| |
+o |  changeset:   3823:234b96dc9a6b
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Oct 04 20:51:09 2016 +0200
+| |  summary:     correct missing resize function of fespace complex array function
+| |
+o |  changeset:   3822:4bd93677123b
+| |  parent:      3819:4a2d481d2b97
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Sep 29 11:08:01 2016 +0200
+| |  summary:     change a little distance exampel to be pretty
+| |
 | o  changeset:   3821:5ec069868497
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
