@@ -20,10 +20,10 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp      
                           ${CMAKE_SOURCE_DIR}/examples++-load/netgen.cpp                                # gestion de netgen???
                           ${CMAKE_SOURCE_DIR}/examples++-load/NewSolver.cpp                             # umfpack
                           ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp                               # gestion de pardiso???
-                          ${CMAKE_SOURCE_DIR}/examples++-load/scotch.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/SuperLu.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/scotch.cpp                                # scotch
+                          ${CMAKE_SOURCE_DIR}/examples++-load/SuperLu.cpp                               # superlu
                           ${CMAKE_SOURCE_DIR}/examples++-load/tetgen.cpp                                # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/UMFPACK64.cpp)
+                          ${CMAKE_SOURCE_DIR}/examples++-load/UMFPACK64.cpp)                            # gestion de umfpack???
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib
                     ${CMAKE_SOURCE_DIR}/src/fflib
@@ -40,10 +40,14 @@ FOREACH(CPPFILE ${CPPFILES})
 ENDFOREACH(CPPFILE)
 
 FF_INSTALL_PACKAGE(FFTW)
-#FF_INSTALL_PACKAGE(FREEYAMS)
-#FF_INSTALL_PACKAGE(IPOPT)   # necessite patch makefile
-#FF_INSTALL_PACKAGE(MMG3D)   # depend de scotch
-#FF_INSTALL_PACKAGE(Scotch)  # necessite patch makefile
+#FF_INSTALL_PACKAGE(FREEYAMS)         # probleme acces
+#FF_INSTALL_PACKAGE(IPOPT)            # makefile
+#FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
+#FF_INSTALL_PACKAGE(OPENBLAS)         # probleme acces
+#FF_INSTALL_PACKAGE(OPENBLAS-WIN32)   # binaire
+#FF_INSTALL_PACKAGE(OPENBLAS-WIN64)   # binaire
+#FF_INSTALL_PACKAGE(Scotch)           # makefile
+#FF_INSTALL_PACKAGE(SUPERLU)          # makefile
 FF_INSTALL_PACKAGE(Tetgen)
 
 FIND_PACKAGE(GSL)
