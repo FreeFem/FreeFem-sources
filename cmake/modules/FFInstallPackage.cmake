@@ -31,6 +31,7 @@ IF(ENABLE_DOWNLOAD)
                     URL ${URL}
                     URL_MD5 ${URL_MD5}
                     CMAKE_ARGS ${CMAKE_ARGS}
+                    CMAKE_COMMAND ${CMAKE_COMMAND}
                     PATCH_COMMAND ${PATCH_COMMAND}
                     CONFIGURE_COMMAND ${CONFIGURE_COMMAND}
                     BUILD_COMMAND ${BUILD_COMMAND}

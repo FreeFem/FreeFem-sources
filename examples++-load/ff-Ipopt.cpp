@@ -26,7 +26,6 @@
 //ff-c++-LIBRARY-dep:  ipopt mumps_seq blas  libseq  fc
 
 //using namespace std;
-#include "../config.h"
 #include "IpTNLP.hpp"
 #include "IpIpoptApplication.hpp"
 #include "ff++.hpp"

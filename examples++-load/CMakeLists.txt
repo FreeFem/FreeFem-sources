@@ -1,38 +1,28 @@
 FILE(GLOB CPPFILES *.cpp)
-LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/buildlayer.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-AiryBiry.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-cmaes.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp
+LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp                              # ff-cs
+                          ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # Ipopt
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ffnewuoa.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/FreeFemQA.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/gmsh.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/gsl.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp                              # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp                              # freeyams (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/ilut.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/iohdf5.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/iovtk.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/lapack.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/iohdf5.cpp                                # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/lapack.cpp                                # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/lgbmo.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/medit.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/metis.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/MetricPkuate.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/MetricPkuate.cpp                          # ne compile pas
                           ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d-v4.0.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/mshmet.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS_seq.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/netgen.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/NewSolver.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/pcm2rnm.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/netgen.cpp                                # gestion de netgen???
+                          ${CMAKE_SOURCE_DIR}/examples++-load/NewSolver.cpp                             # umfpack
+                          ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp                               # gestion de pardiso???
                           ${CMAKE_SOURCE_DIR}/examples++-load/scotch.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/SuperLu.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/tetgen.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/tetgen.cpp                                # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/UMFPACK64.cpp)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib
@@ -50,8 +40,13 @@ FOREACH(CPPFILE ${CPPFILES})
 ENDFOREACH(CPPFILE)
 
 FF_INSTALL_PACKAGE(FFTW)
+#FF_INSTALL_PACKAGE(FREEYAMS)
+#FF_INSTALL_PACKAGE(IPOPT)   # necessite patch makefile
+#FF_INSTALL_PACKAGE(MMG3D)   # depend de scotch
+#FF_INSTALL_PACKAGE(Scotch)  # necessite patch makefile
 FF_INSTALL_PACKAGE(Tetgen)
 
+FIND_PACKAGE(GSL)
 FIND_PACKAGE(HDF5)
 FIND_PACKAGE(LAPACK)
 
