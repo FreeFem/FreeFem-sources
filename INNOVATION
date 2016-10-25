@@ -1,11 +1,21 @@
+version 3.49-1
+ - add  new function in examples++-tutorial/movemeshsmooth.idp to do movemesh with
+   some Laplacien Smoothing (see file for doc. )
+ - change HeapSort.hpp (put c index rather to shift array)
  - correct problem of size of the arrowhead when zooming 
+ - add tools to extract border of 3d surface 
+    int[int] bb(1);
+    int nc= getborder(Th3s,bb);
+     nc nb of border (curve)
+     the  list vertex number curve i is bb(k) for k in bb(i) to bb(i+1)-1; 
+     see bottle.edp mesh examples in 3d examples directory.
 version 3.49 
  - add tool to compute integral with maping on test or unknow function (in test just in 2d to day
    and only on varf definition
      int1d(Th,mapu=[x+1,y],mapt=[x-1,y]) ( ...) 
      int2d(Th,mapu=[x+1,y],mapt=[x-1,y]) ( ...) 
  - add distance plugin to computation the signed distance to a curve defined by a iso isovalue 
-   of P1 finite elemnet function (see distance*.epd examples )
+   of P1 finite element function (see distance*.epd examples )
  - change fixeborder in fixedborder in buildmesh 
 version 3.48 (7 sep 2016)
  - add doc for time depend Stokes problem with matrix (O. Pironneau)
