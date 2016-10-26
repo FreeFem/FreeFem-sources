@@ -49,8 +49,9 @@ nloaded from > Anywhere)<A>
 
 
 <br><p class="p1">Take the file from and download </p> 
-	<? pfile($m11file,"MacOS 10.11 (with mpich), ifort MKL     ") ?>		
-	<? pfile($m10file,"MacOS 10.10 (with mpich), ifort MKL    ") ?>		
+	<? pfile($m12file,"MacOS 10.12 (with openmpi,petc), ifort MKL     ") ?>		
+	<? pfile($m11file,"MacOS 10.11 (with openmpi,petc), ifort MKL     ") ?>		
+	<? pfile($m10file,"MacOS 10.10 (with openmpi,petc), ifort MKL    ") ?>		
 	<? pfile($m9file,"MacOS 10.9 (with mpich), ifort MKL   ") ?>		
 	<? pfile($m8file,"MacOS 10.8") ?>		
 	<? pfile($m7file,"MacOS 10.7") ?>		

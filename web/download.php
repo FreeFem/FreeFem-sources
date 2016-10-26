@@ -39,8 +39,8 @@ hg  clone  http://www.freefem.org/ff++/ff++
 <div class="thema"> Download precompile version  </div>
 <div class="themaBlog">  
     <? pfile($w64file,"Windows 64bit (in test)") ?>
-    <? pfile($wfile,"Windows 32bit") ?>
-    
+    <? pfile($wfile,"Windows 32bit") ?>    
+	<? pfile($m12file,"MacOS 10.12") ?>
 	<? pfile($m11file,"MacOS 10.11") ?>
 	<? pfile($m10file,"MacOS 10.10") ?>
 	<? pfile($m9file,"MacOS 10.9") ?>
