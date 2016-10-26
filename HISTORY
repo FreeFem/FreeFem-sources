@@ -1,10 +1,45 @@
-@  changeset:   3832:96d067aa2866
+@  changeset:   3838:31b9c8a48907
 |  tag:         tip
-|  parent:      3824:be5320d89f0a
+|  parent:      3834:eba94b6f9c69
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Sat Oct 08 12:16:43 2016 +0200
-|  summary:     add tools to extract border of surface meshes
+|  date:        Tue Oct 25 20:57:25 2016 +0200
+|  summary:     pass to version 3.49-1
 |
+| o  changeset:   3837:538a6042f49b
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Oct 24 17:03:52 2016 +0200
+| |  summary:     Comments about external libraries and load-based examples
+| |
+| o  changeset:   3836:1c5145fcbe54
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Oct 24 15:32:45 2016 +0200
+| |  summary:     Recipes for external libraries
+| |
+| o  changeset:   3835:ef8ab4f7a29a
+| |  branch:      cmake
+| |  parent:      3831:d61c84c1b4fe
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Oct 06 16:13:57 2016 +0200
+| |  summary:     Management of dfft example
+| |
+o |  changeset:   3834:eba94b6f9c69
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Oct 21 19:21:19 2016 +0200
+| |  summary:     update HeapSort (changer index from fortran to C)
+| |
+o |  changeset:   3833:068b097eb3b7
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Fri Oct 21 11:17:27 2016 +0200
+| |  summary:     New interface to build distributed block matrices.
+| |
+o |  changeset:   3832:96d067aa2866
+| |  parent:      3824:be5320d89f0a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Sat Oct 08 12:16:43 2016 +0200
+| |  summary:     add tools to extract border of surface meshes
+| |
 | o  changeset:   3831:d61c84c1b4fe
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
