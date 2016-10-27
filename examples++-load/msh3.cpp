@@ -6386,7 +6386,7 @@ long BuildBoundaryElementAdj(const Mesh3 &Th,bool check=0,KN<long> * pborder=0)
 
 
     {
-        int errv;
+        int errv=0;
         nk=0;
         
         for (int k=0;k<nbe;++k)
