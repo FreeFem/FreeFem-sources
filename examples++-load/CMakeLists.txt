@@ -43,7 +43,7 @@ FF_INSTALL_PACKAGE(FFTW)
 #FF_INSTALL_PACKAGE(FREEYAMS)         # probleme acces
 #FF_INSTALL_PACKAGE(IPOPT)            # makefile
 #FF_INSTALL_PACKAGE(METIS)
-#FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
+FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
 #FF_INSTALL_PACKAGE(OPENBLAS)         # probleme acces
 #FF_INSTALL_PACKAGE(OPENBLAS-WIN32)   # binaire
 #FF_INSTALL_PACKAGE(OPENBLAS-WIN64)   # binaire
@@ -95,7 +95,7 @@ IF(HDF5_FOUND)
 ENDIF()
 
 # metis.cpp
-ADD_LIBRARY(metis metis.cpp)
+ADD_LIBRARY(metis SHARED metis.cpp)
 
 
 # MUMPS_seq.cpp
@@ -105,6 +105,11 @@ INCLUDE_DIRECTORIES(${MPI_C_INCLUDE_PATH})
 # MUMPS.cpp
 ADD_LIBRARY(mumps SHARED MUMPS.cpp)
 INCLUDE_DIRECTORIES(${MPI_C_INCLUDE_PATH})
+
+
+# mmg3d.cpp
+ADD_LIBRARY(ff-mmg3d SHARED mmg3d.cpp)
+INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
 
 # scotch.cpp
