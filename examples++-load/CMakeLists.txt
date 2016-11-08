@@ -2,8 +2,8 @@ FILE(GLOB CPPFILES *.cpp)
 LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp                              # ff-cs
                           ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # Ipopt
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp                              # freeyams (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/ilut.cpp                                  # ok (avec gmm++)
@@ -41,7 +41,8 @@ ENDFOREACH(CPPFILE)
 
 FF_INSTALL_PACKAGE(FFTW)
 #FF_INSTALL_PACKAGE(FREEYAMS)         # probleme acces
-FF_INSTALL_PACKAGE(IPOPT)            # makefile
+FF_INSTALL_PACKAGE(IPOPT)            
+FF_INSTALL_PACKAGE(NLOPT)            # makefile
 #FF_INSTALL_PACKAGE(METIS)
 FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
 #FF_INSTALL_PACKAGE(OPENBLAS)         # probleme acces
@@ -78,6 +79,10 @@ IF(LAPACK_FOUND)
 	TARGET_LINK_LIBRARIES(fflapack ${FREEFEM_LIBRARIES}
                                  ${LAPACK_LIBRARIES})
 ENDIF()
+
+# ff-NLpopt.cpp
+ADD_LIBRARY(ff-NLopt SHARED ff-NLopt.cpp)
+INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
 
 # ilut.cpp
 ADD_LIBRARY(ilut SHARED ilut.cpp)
