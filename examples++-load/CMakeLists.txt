@@ -12,14 +12,14 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp      
                           ${CMAKE_SOURCE_DIR}/examples++-load/lgbmo.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/metis.cpp                                 # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/MetricPkuate.cpp                          # ne compile pas
-                          ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d-v4.0.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/mshmet.cpp
+                          ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d.cpp                                 # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d-v4.0.cpp                            # dataff.h
+                          ${CMAKE_SOURCE_DIR}/examples++-load/mshmet.cpp                                # mshmet (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS.cpp                                 # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS_seq.cpp                             # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/netgen.cpp                                # gestion de netgen???
                           ${CMAKE_SOURCE_DIR}/examples++-load/NewSolver.cpp                             # umfpack
-                          ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp                               # gestion de pardiso???
+                          ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp                               # MKL
                           ${CMAKE_SOURCE_DIR}/examples++-load/scotch.cpp                                # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/SuperLu.cpp                               # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/tetgen.cpp                                # ok
@@ -41,7 +41,7 @@ ENDFOREACH(CPPFILE)
 
 FF_INSTALL_PACKAGE(FFTW)
 #FF_INSTALL_PACKAGE(FREEYAMS)         # probleme acces
-#FF_INSTALL_PACKAGE(IPOPT)            # makefile
+FF_INSTALL_PACKAGE(IPOPT)            # makefile
 #FF_INSTALL_PACKAGE(METIS)
 FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
 #FF_INSTALL_PACKAGE(OPENBLAS)         # probleme acces
@@ -57,7 +57,7 @@ FIND_PACKAGE(LAPACK)
 FIND_PACKAGE(MPI)
 
 # dfft
-ADD_LIBRARY(dfft dfft.cpp)
+ADD_LIBRARY(dfft SHARED dfft.cpp)
 INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/fftw/install/include)
 
 
@@ -67,6 +67,10 @@ IF(LAPACK_FOUND)
   TARGET_LINK_LIBRARIES(Element_Mixte ${FREEFEM_LIBRARIES}
                                       ${LAPACK_LIBRARIES})
 ENDIF()
+
+# ff-Ipopt.cpp
+ADD_LIBRARY(ff-Ipopt SHARED ff-Ipopt.cpp)
+INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/ipopt/install/include/coin)
 
 # fflapack
 IF(LAPACK_FOUND)
@@ -97,6 +101,9 @@ ENDIF()
 # metis.cpp
 ADD_LIBRARY(metis SHARED metis.cpp)
 
+# mshmet.cpp
+#ADD_LIBRARY(mshmet mshmet.cpp)
+
 
 # MUMPS_seq.cpp
 ADD_LIBRARY(mumps-seq SHARED MUMPS_seq.cpp)
@@ -106,14 +113,15 @@ INCLUDE_DIRECTORIES(${MPI_C_INCLUDE_PATH})
 ADD_LIBRARY(mumps SHARED MUMPS.cpp)
 INCLUDE_DIRECTORIES(${MPI_C_INCLUDE_PATH})
 
-
 # mmg3d.cpp
 ADD_LIBRARY(ff-mmg3d SHARED mmg3d.cpp)
 INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
+# mmg3d-v4.0.cpp
+#ADD_LIBRARY(ff-mmg3d-v4.0 SHARED mmg3d-v4.0.cpp)
+#INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
 # scotch.cpp
-
 ADD_LIBRARY(scotch SHARED scotch.cpp)
 INCLUDE_DIRECTORIES(/usr/include/scotch)
 
