@@ -1,6 +1,5 @@
 FILE(GLOB CPPFILES *.cpp)
-LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp                              # ff-cs
-                          ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
+LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp                              # ok
@@ -8,16 +7,12 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/bmo_user.cpp      
                           ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp                              # freeyams (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/ilut.cpp                                  # ok (avec gmm++)
                           ${CMAKE_SOURCE_DIR}/examples++-load/iohdf5.cpp                                # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/lapack.cpp                                # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/lgbmo.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/metis.cpp                                 # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/MetricPkuate.cpp                          # ne compile pas
                           ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d.cpp                                 # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d-v4.0.cpp                            # dataff.h
                           ${CMAKE_SOURCE_DIR}/examples++-load/mshmet.cpp                                # mshmet (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS.cpp                                 # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS_seq.cpp                             # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/netgen.cpp                                # gestion de netgen???
                           ${CMAKE_SOURCE_DIR}/examples++-load/NewSolver.cpp                             # umfpack
                           ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp                               # MKL
                           ${CMAKE_SOURCE_DIR}/examples++-load/scotch.cpp                                # ok
@@ -57,6 +52,7 @@ FIND_PACKAGE(HDF5)
 FIND_PACKAGE(LAPACK)
 FIND_PACKAGE(MPI)
 
+
 # dfft
 ADD_LIBRARY(dfft SHARED dfft.cpp)
 INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/fftw/install/include)
@@ -88,14 +84,6 @@ INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
 ADD_LIBRARY(ilut SHARED ilut.cpp)
 
 	
-# lapack
-IF(LAPACK_FOUND)
-	ADD_LIBRARY(example-lapack SHARED lapack.cpp)
-	TARGET_LINK_LIBRARIES(example-lapack ${FREEFEM_LIBRARIES}
-                                       ${LAPACK_LIBRARIES})
-
-ENDIF()
-
 # iohdf5
 IF(HDF5_FOUND)
   ADD_LIBRARY(iohdf5 SHARED iohdf5.cpp)
@@ -127,8 +115,11 @@ INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 #INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
 # scotch.cpp
-ADD_LIBRARY(scotch SHARED scotch.cpp)
-INCLUDE_DIRECTORIES(/usr/include/scotch)
+FIND_PACKAGE(SCOTCH)
+IF(SCOTCH_FOUND)
+  ADD_LIBRARY(scotch SHARED scotch.cpp)
+  INCLUDE_DIRECTORIES(/usr/include/scotch)
+ENDIF()
 
 #superlu.cpp
 ADD_LIBRARY(superlu SHARED SuperLu.cpp)

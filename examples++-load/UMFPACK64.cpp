@@ -17,7 +17,10 @@ using namespace std;
  
 #ifdef HAVE_LIBUMFPACK
 extern "C" {
-#ifdef HAVE_UMFPACK_H
+
+#include <suitesparse/umfpack.h>
+
+/*#ifdef HAVE_UMFPACK_H
 #include <umfpack.h>
 #else
 #ifdef HAVE_UMFPACK_UMFPACK_H
@@ -40,7 +43,9 @@ extern "C" {
 #endif // HAVE_UFSPARSE_UMFPACK_H
 #endif // HAVE_BIG_UMFPACK_UMFPACK_H
 #endif // HAVE_UMFPACK_UMFPACK_H
-#endif // HAVE_UMFPACK_H
+#endif // HAVE_UMFPACK_H*/
+
+
 }
 #endif
 template<class R>
