@@ -193,8 +193,8 @@ public:
     long n;
     read(n);
    // cout << "PlotStream >>  : n " << n << endl;
-      
-    if( ! b.N() ) b.init(n);
+      //  read empty array .... (n ==0)
+    if( ! b.N() && n) b.init(n);//   if n ==0 do nothing ..  Add FH nov. 2016
     ffassert( b.N()==n); 
     for (int i=0;i<n;++i)
       read(b[i]);

@@ -98,6 +98,11 @@ int   ReadOnePlot(FILE *fp)
   const char *  magic2="#!ffglutdata2..";
   const char *  magic3="#!ffglutdata3..";
   const char *  magic3_1="#!ffglutdata3.1";
+  const char *  magic3_2="#!ffglutdata3.2";
+/*
+ 
+   change version 3.2 add colored curve
+ */
   const int lmagic=strlen(magic2);
     char magicxx[32];
   err=0;
@@ -114,7 +119,8 @@ int   ReadOnePlot(FILE *fp)
 	if( strcmp(magicxx,magic2)==0)  version=2;
 	else if( strcmp(magicxx,magic3)==0)  version=3;
 	else if( strcmp(magicxx,magic3_1)==0)  version=3;
-	else err =1; 
+        else if( strcmp(magicxx,magic3_2)==0)  version=3;
+	else err =1;
 	
       if(err) {
 	if(debug>2)
@@ -992,25 +998,41 @@ template<class Mesh>
     }
 }
 
-
-
+void OnePlotCurve::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const
+{
+    if( cc.N() == xx.N())
+    {
+        0; // afaire ????
+    }
+}
 void OnePlotCurve::Draw(OneWindow *win)
 {
   initlist();
-
   ThePlot & plot= *win->theplot;
-  plot.SetColorTable(16) ;
-    double z = plot.z0;
+  if( cc.N() != xx.N())
+      plot.SetColorTable(16) ;
+  else
+    plot.SetColorTable(Max(plot.Niso,plot.Narrow)+4) ;
+  double z = plot.z0;
   
   glBegin(GL_LINE_STRIP);    
   plot.color(2);
   // cout << "nePlotCurve::Draw " << xx << " " << yy << endl;
-  for (int i=0;i<xx.N();i++)
-    {
+  if( (zz.N()!=xx.N())  && (cc.N()==0)  )
+   for (int i=0;i<xx.N();i++)
       glVertex3d(xx[i],yy[i],z);
-      
-    }
-  glEnd(); 
+  else if (cc.N()==0)
+      for (int i=0;i<xx.N();i++)
+          glVertex3d(xx[i],yy[i],zz[i]);
+  else
+      for (int i=0;i<xx.N();i++)
+      {
+          int col = 2+dichotomie(plot.Viso,cc[i]);
+          plot.color(2+col);
+          glVertex3d(xx[i],yy[i],zz[i]);
+      }
+
+  glEnd();
     
 }
 
@@ -1956,8 +1978,9 @@ case 20+index: {type dummy; fin >= dummy;} break;
       OnePlot *p=0;
       fin >> what;
       long imsh;
-      if((debug > 2)) cout << "    plot  " << i << " what " << what << endl;
-      if(what !=3 && !uaspectratio) aspectratio= true;
+      if((what !=3 && what != 13  )&& !uaspectratio) aspectratio= true;
+        if((debug > 2)) cout << "    plot  " << i << " what " << what << " as : " << aspectratio << endl;
+        
       if(what==-1)  // gestion of error (empty plot)
 	p = new OnePlotError(fin);
       else if(what==0) 
@@ -1984,6 +2007,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
 	}
       else if(what==3)
 	p=new OnePlotCurve(fin);
+      else if(what==13)
+          p=new OnePlotCurve(fin,4);// add zz and color ..
       else if(what==4)
 	p=new OnePlotBorder(fin);
       else if(what==5) 

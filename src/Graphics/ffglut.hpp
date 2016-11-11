@@ -158,19 +158,35 @@ struct OnePlotFE3: public OnePlot
 };
 
 struct OnePlotCurve: public OnePlot {
-  KN<double> xx,yy;
-  OnePlotCurve(PlotStream & f)
+  KN<double> xx,yy,zz,cc;
+  OnePlotCurve(PlotStream & f,int nfield=2)
     :OnePlot(3,2,1)
   {
     f >> xx>>yy;
-    // cout << xx << " " << yy <<endl;
+    if( nfield >=3)
+       f >> zz;
+    if( nfield ==4)
+       f >> cc;
+     if(debug>3) cout << " OnePlotCurve nbfield "<< nfield << " max, N= " << xx.max() << " "
+         << xx.N() << ", " << yy.max() << " " << yy.N() << " "<< zz.N() << " " << cc.N() << endl;;
+   // cout << xx << " " << yy <<endl;
     ffassert(f.good());
     ffassert(xx.N() && yy.N() && xx.N() == yy.N());
     Pmin=Minc(Pmin,R2(xx.min(),yy.min()));
     Pmax=Maxc(Pmax,R2(xx.max(),yy.max()));
-    
+    if(zz.N())
+    {
+        Pmin.z = Min(Pmin.z,zz.min());
+        Pmax.z = Min(Pmax.z,zz.max());
+    }
+    if( cc.N() )
+    {
+        fmax = Max(fmax,cc.max());
+        fmin = Max(fmin,cc.min());
+    }
   }
   void Draw(OneWindow *win);
+  void  dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const;
 };
 
 struct OnePlotBorder: public OnePlot {

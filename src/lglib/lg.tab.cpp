@@ -2117,7 +2117,8 @@ yyreduce:
     {
                         if(  ffapi::ff_justcompile) exit(0);
     // clean FH  mach 2014
-		        const char *  magicffglut="#!ffglutdata3.1\n";// for complex and vector 3d plot 
+		        const char *  magicffglut="#!ffglutdata3.2\n";// for complex and vector 3d plot
+                        // FH. 11/ 2016: #!ffglutdata3.2 for 3d curve and colored curve (what = 13 ) ( 4 array ..)
 			//FFCS: divert stream to FFCS
                         if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
 
