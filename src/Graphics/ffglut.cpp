@@ -974,7 +974,7 @@ template<class Mesh>
 	if(inCadre[i])
 	  {
 	    ccc=true;
-	    if(what%10==1)
+	    if(what%10==1 )
 	      {
 		R f=v[o+i];
 		fmn=min(f,fmn);
@@ -996,6 +996,42 @@ template<class Mesh>
 	     <<  " : " << Pn[0] << endl;
       
     }
+}
+
+OnePlotCurve::OnePlotCurve(PlotStream & f,int nfield,ThePlot *theplot)
+:OnePlot(3,2,1)
+{
+    f >> xx>>yy;
+    if( nfield >=3)
+        f >> zz;
+    if( nfield ==4)
+        f >> cc;
+     // cout << xx << " " << yy <<endl;
+    ffassert(f.good());
+    ffassert(xx.N() && yy.N() && xx.N() == yy.N());
+    Pmin=Minc(Pmin,R2(xx.min(),yy.min()));
+    Pmax=Maxc(Pmax,R2(xx.max(),yy.max()));
+    if(zz.N())
+    {
+        Pmin.z = Min(Pmin.z,zz.min());
+        Pmax.z = Max(Pmax.z,zz.max());
+        if( cc.N() ==0)
+        {
+        fmax = Max(fmax,zz.max());
+        fmin = Min(fmin,zz.min());
+        theplot->withiso=true;
+        }
+
+    }
+    if( cc.N() )
+    {
+        fmax = Max(fmax,cc.max());
+        fmin = Min(fmin,cc.min());
+        theplot->withiso=true;
+    }
+    if(debug>3) cout << " OnePlotCurve nbfield "<< nfield << " max, N= " << xx.max() << " "
+        << xx.N() << ", " << yy.max() << " " << yy.N() << " "<< zz.N() << " " << cc.N() << " f " << fmin << " " << fmax << endl;;
+
 }
 
 void OnePlotCurve::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const
@@ -1028,7 +1064,9 @@ void OnePlotCurve::Draw(OneWindow *win)
       for (int i=0;i<xx.N();i++)
       {
           int col = 2+dichotomie(plot.Viso,cc[i]);
-          plot.color(2+col);
+          if(col<1) col=1;
+          if(col>plot.Viso.N()) col=plot.Viso.N();
+          plot.color(col);
           glVertex3d(xx[i],yy[i],zz[i]);
       }
 
@@ -2008,7 +2046,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
       else if(what==3)
 	p=new OnePlotCurve(fin);
       else if(what==13)
-          p=new OnePlotCurve(fin,4);// add zz and color ..
+          p=new OnePlotCurve(fin,4,this);// add zz and color ..
       else if(what==4)
 	p=new OnePlotBorder(fin);
       else if(what==5) 
@@ -2077,8 +2115,9 @@ case 20+index: {type dummy; fin >= dummy;} break;
   Viso.resize(Niso);
   Varrow.resize(Narrow);
   
-  SetColorTable(Max(Niso,Narrow)+4) ;           
-  SetDefIsoV() ;
+  SetColorTable(Max(Niso,Narrow)+4) ;
+  SetDefIsoV(Niso,Narrow,fmin,fmax) ;
+   //SetDefIsoV(ni,na,fmn,fmx,vmn,vmx)
 
 }
 
@@ -2087,11 +2126,13 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
 {
   bool dyn=false; 
   R d,x;
-  
+  if(debug>3 && !(fmx>fmn) )
+        cout << " SetDefIsoV  (not) " << endl;
+
   if( fmx>fmn)
     {
       if(debug>3)
-	cout << "Set Def dyn_bfv  " << fmn << " " << fmx << endl;
+	cout << " SetDefIsoV  " << fmn << " " << fmx << endl;
 
       if(niso>2) 
 	Viso.resize(niso); 
