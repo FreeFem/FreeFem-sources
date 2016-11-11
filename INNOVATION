@@ -1,3 +1,6 @@
+ - add plot of multy curve (array of array int 2d, 3d ,  with color 
+   see testplot.edp  
+
 version 3.49-1
  - add  new function in examples++-tutorial/movemeshsmooth.idp to do movemesh with
    some Laplacien Smoothing (see file for doc. )

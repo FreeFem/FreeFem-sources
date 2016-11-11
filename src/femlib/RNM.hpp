@@ -391,6 +391,7 @@ public:
   long N() const {return n;}
   bool unset() const { return !v;}
   void set(R * vv,int nn,int st=1,int nx=-1) {v=vv;n=nn;step=st;next=nx;}
+  void set(KN_<R> t) {v=t.v;n=t.n;step=t.step;next=t.next;} //  FH Add Nov 2016
   long size() const{return step?n*step:n;}
   operator R *() const {return v;}
   KN_(const KN_<R> & u) :ShapeOfArray(u),v(u.v){} 

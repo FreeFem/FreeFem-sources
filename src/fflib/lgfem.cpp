@@ -2310,6 +2310,7 @@ long  Convect::count=0;
 class Plot :  public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
 public:
     typedef KN_<R>  tab;
+    typedef KN<KN<R> >*  pttab;
     typedef pferbase sol;
     typedef pferbasearray asol;
     typedef pf3rbase sol3;
@@ -2322,18 +2323,19 @@ public:
     typedef long  Result;
     struct ListWhat {
 	int what,i;
-	int cmp[3];
+	int cmp[4];
 	int n;
        union {
-	void * v[3];//  for
-        const void * cv[3];//  for
+        long l[4];
+	void * v[4];//  for
+        const void * cv[4];//  for
        };
 	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
 	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
 	
 	void Set(int nn=0,void **vv=0,int *c=0) {
-	    cmp[0]=cmp[1]=cmp[2]=-1;
-	    v[0]=v[1]=v[2]=0;
+	    cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
+	    v[0]=v[1]=v[2]=v[3]=0;
 	    n=nn;
 	    for(int i=0;i<nn;++i)
 	      {   
@@ -2342,9 +2344,9 @@ public:
 	      }		   
 	}	
         void Set(int nn,const void **vv,int *c=0) {
-            cmp[0]=cmp[1]=cmp[2]=-1;
-            v[0]=v[1]=v[2]=0;
-            cv[0]=cv[1]=cv[2]=0;
+            cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
+            v[0]=v[1]=v[2]=v[3]=0;
+            cv[0]=cv[1]=cv[2]=cv[3]=0;
             n=nn;
             for(int i=0;i<nn;++i)
             {
@@ -2362,10 +2364,17 @@ public:
         
 	ListWhat(int what,int ii,void * f0)
 	: what(what),i(ii){ Set(1,&f0,0);}
-        
         ListWhat(int what,int ii,const void * f0)
         : what(what),i(ii){ Set(1,&f0,0);}
-	
+        
+        ListWhat(int what,int ii,int nn,long *f0)
+        : what(what),i(ii),n(nn){
+            cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
+            v[0]=v[1]=v[2]=v[3]=0;
+            for(int i=0; i<n; ++i)
+                l[i]=f0[i];
+        }
+        
 	template<typename S>
 	void eval(S *f,int *c)
 	{ for(int i=0;i<3;++i) {
@@ -2390,15 +2399,32 @@ public:
 
   /// <<Expression2>>
     struct Expression2 
-     {
+     {//  FH. change nov 2016  add one  expression  for  colored curve ...
 	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
 	// 7: vector 3d  ( +10 -> complex visu ???? ) 
-	// 101 array of iso 2d  , 106 array of iso 3d  , 100  array of meshes 
+	// 101 array of iso 2d  , 106 array of iso 3d  , 100  array of meshes
+        // 103  array of curves ...
 	bool composant;
-	Expression e[3];
-	Expression2() {e[0]=0;e[1]=0;e[2]=0;composant=false;what=0;}
+	Expression e[4];
+	Expression2() {e[0]=0;e[1]=0;e[2]=0;e[3]=0;composant=false;what=0;}
 	Expression &operator[](int i){return e[i];}
-	
+
+        int EvalandPush(Stack s,int ii,vector<ListWhat> & ll,vector<AnyType> & lat ) const
+         {  // add for curve ... and multi curve ...
+             //  store date in lat..
+             long  f[4];
+             for(int i=0; i< 4;++i)
+             {
+                 f[i]=-1;
+                 if( e[i] ) { // eval ..
+                     f[i]= lat.size();
+                     lat.push_back((*e[i])(s));
+                 }
+             }
+             ll.push_back(ListWhat(what,ii,4,f));
+             return 4;
+         }
+ 
 	template<class S>
 	int EvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
 	{ 
@@ -2419,8 +2445,45 @@ public:
 	    ll.push_back(ListWhat(what,ii,n+1,f,cmp));
 	    return n;}
 	
-	template<class A,class S> // ok of mesh too because composant=true; 
- 	int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
+         int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll,vector<AnyType> & lat) const
+         {
+        
+          pttab pt[4]={0,0,0,0};
+          pt[0] =evalptt(0,s);
+          pt[1]=evalptt(1,s);
+          if (e[2]) pt[2]=evalptt(2,s);
+         if (e[3]) pt[3]=evalptt(3,s);
+         int kt = min(pt[0]->N() , pt[1]->N());
+             
+         for( int j=0; j<kt; ++j)
+         {
+          int what = 13;
+          long  f[4];
+         if(verbosity>99)
+             cout << " plot : A curve "<< j << " " ;
+          for(int k=0; k<4; ++k)
+          {
+              pttab ptk=pt[k];
+              f[k]=-1;
+              if(ptk)
+              {
+                  KN_<double> t=(*ptk)[j];
+                  f[k]=lat.size();
+                  if(verbosity>99) cout << " ("<<k << ") " << t.N() << " "<< f[k] ;
+                  
+                  lat.push_back(SetAny<KN_<double> >(t));
+              }
+          }
+         if(verbosity>99) cout << endl;
+             
+          ll.push_back(ListWhat(what,ii,4,f));
+         }
+         return 4;
+         }
+         
+    
+	template<class A,class S> // ok of mesh too because composant=true;
+ 	int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const
 	{  typedef pair<A,int> PA;
 	    int nn=-1;
 	    A f[3];
@@ -2537,6 +2600,7 @@ public:
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
+         pttab  evalptt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<pttab>((*e[i])(s)) ;}
     };
 
   // see [[Plot_name_param]]
@@ -2550,7 +2614,7 @@ public:
 
   /// [[Expression2]] is a description of an object to plot
   vector<Expression2> l;
-
+    typedef KN<KN<double> > * ptaboftab;
     Expression nargs[n_name_param];
     Plot(const basicAC_F0 & args) : l(args.size()) 
     {
@@ -2576,8 +2640,9 @@ public:
 	      bool bpf3r=  BCastTo<pf3r>((*a)[0]);
 	      bool bpfec=  BCastTo<pfec>((*a)[0]);
 	      bool bpf3c=  BCastTo<pf3c>((*a)[0]);
-	      
-	      if ( bpfer && asizea <3) 
+              bool bptab=  BCastTo<tab> ((*a)[0]);
+              bool bpttab=  BCastTo<pttab>((*a)[0]);
+	      if ( bpfer && asizea <3)
 		{
 		  l[i].what=asizea;
 		  for (int j=0;j<a->size();j++)             
@@ -2589,12 +2654,18 @@ public:
 		  for (int j=0;j<a->size();j++)             
 		      l[i][j]= CastTo<pfec>((*a)[j]);
 		}
-	      else if (asizea==2)
+	      else if (bptab && asizea>=2 && asizea<=4)// change nov 2016 FH  for color corve
 		{
 		  l[i].what=3;
 		  for (int j=0;j<a->size();j++)             
 		      l[i][j]= CastTo<tab>((*a)[j]);
 		}
+              else if (bpttab && asizea>=2 && asizea<=4)// change nov 2016 FH  for  arry of curve
+              {
+                  l[i].what=103;
+                  for (int j=0;j<a->size();j++)
+                      l[i][j]= CastTo<pttab>((*a)[j]);
+              }
 	      else if (asizea == 3 && bpf3r ) // 3d vector ...
 		{
 		  l[i].what=7; // new 3d vector 
@@ -3471,11 +3542,11 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
 }
    
 /// <<Plot_operator_brackets>> from class [[Plot]]
-
-AnyType Plot::operator()(Stack s) const{ 
+AnyType Plot::operator()(Stack s) const{
     
    // remap  case 107 and 108 , 109  for array of FE. 
   vector<ListWhat> ll;
+  vector<AnyType> lat;
   ll.reserve(l.size());
   // generation de la list de plot ...
     for (size_t i=0;i<l.size();i++)
@@ -3484,6 +3555,7 @@ AnyType Plot::operator()(Stack s) const{
 	  //pmesh th;
 	  //int cmp0=0,cmp1=1,cmp2=2;
 	  switch (l[i].what) {
+              case 3:  l[i].EvalandPush(s,i,ll,lat); break;
 	      case 0:
 	      case 5:  
 	        l[i].EvalandPush<void *>(s,i,ll);		
@@ -3504,7 +3576,7 @@ AnyType Plot::operator()(Stack s) const{
 	      case  106 : l[i].AEvalandPush<asol3, sol3>(s,i,ll);break;
               case  111:  l[i].AEvalandPush<asolc, solc>(s,i,ll);break;  
               case  116:  l[i].AEvalandPush<asolc3, solc3>(s,i,ll);break; 
-	        
+              case  103 : l[i].AEvalandPush(s,i,ll,lat); break;
 
 		  
 	      default:
@@ -3522,8 +3594,9 @@ AnyType Plot::operator()(Stack s) const{
 	 what = 0 -> mesh
 	 what = 1 -> scalar field (FE function  2d) 
 	 what = 2 -> 2d vector field (two FE function  2d) 
-	 what = 3 -> curve def by 2 plot
-	 what = 4 -> border 
+	 what = 3 -> curve def by 2,.., 4 array
+         what = 13 -> curve def by 4  array : x,y,z,  value for color ...
+	 what = 4 -> border
 	 what = 5 3d meshes
 	 what = 6  FE function 3d
 	 what = 100,101,106 //  remap ...
@@ -3759,24 +3832,31 @@ AnyType Plot::operator()(Stack s) const{
 			    }
 		      }
 		}*/	    
-		  else if (l[i].what==3 )
+		  else if (what==3 || what==13 )
 		{
-		    tab x=l[i].evalt(0,s);
-		    tab y=l[i].evalt(1,s);
-		    if( x.N() >0 && y.N() == x.N())
-		      {
-			  err=0; // correction dec 2008 FH 
-			  theplot << what ;
-			  theplot << x << y ;
-		      }
-		    else  
-		      {
-			  if(verbosity)
-			      cerr << "Warning:  Plot of array with wrong size (item "<< i + 1 
-			      << ") sizes = " << x.size()<< " , " << y.size()  << endl;
-		      }
-		    
+                    
+                    what=13;
+                    theplot << what  ; //
+                   KN<double> z0;
+                    if(verbosity>99)
+                        cout << " sendplot curve "<< what << " " << ii ;
+
+                   for(int k=0; k<4; ++k)
+                   {
+                     int ilat=ll[ii].l[k];
+                     if (ilat>=0)
+                     {
+                         KN_<double> t = GetAny<KN_<double> >(lat[ilat]);
+                         theplot << t;
+                         if(verbosity>99) cout << " (" << k <<" " << ilat << ") " << t.N();
+                     }
+                     else theplot << z0;// empty arry ...
+                   }
+                    if(verbosity>99)
+                        cout <<endl;
+                err=0;
 		}
+
 	      else if (l[i].what==4 )
 		{
 		    err=0;
@@ -4161,7 +4241,14 @@ AnyType Plot::operator()(Stack s) const{
 			 
 			 tab x=l[i].evalt(0,s);
 			 tab y=l[i].evalt(1,s);
-			 long k= Min(x.N(),y.N());
+                         KN<double> pz0;
+                         KN_<double> z(pz0), v(pz0);
+                         if (l[i].e[2]) { z.set(l[i].evalt(2,s));}
+                         if (l[i].e[3]) { v.set(l[i].evalt(3,s));}
+                         long k= Min(x.N(),y.N());
+                         bool colored= (v.N()==k);
+                        // if(colored)
+                         //   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
 			 // cout << " a faire " << endl;
 			 // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
 			 rmoveto(x[0],y[0]);
@@ -4169,6 +4256,31 @@ AnyType Plot::operator()(Stack s) const{
 			 for (int i= 1;i<k;i++)
 			     rlineto(x[i],y[i]);
 		     }
+               /*
+                   else if(l[i].what==23)
+                   {
+                       pttab ptx=l[i].evalptt(0,s),ptz=0,ptv=0;
+                       pttab pty=l[i].evalptt(1,s);
+                       if (l[i].e[2]) ptz=l[i].evalptt(2,s);
+                       if (l[i].e[3]) ptv=l[i].evalptt(3,s);
+                       int kt = min(ptx->N() , pty->N());
+                       for( int j=0; j<kt; ++j)
+                       {
+                           tab x = (*ptx)[j];
+                           tab y = (*pty)[j];
+                           long k= Min(x.N(),y.N());
+                           //bool colored= (v.N()==k);
+                       // if(colored)
+                       //   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
+                       // cout << " a faire " << endl;
+                       // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
+                       rmoveto(x[0],y[0]);
+                       couleur(2+i);
+                       for (int i= 1;i<k;i++)
+                           rlineto(x[i],y[i]);
+                       }
+                   }
+*/
 	       thfill=false;
 	   }
 	 if (value) {

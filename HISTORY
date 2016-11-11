@@ -1,5 +1,10 @@
-@  changeset:   3840:a2aa4c1b4311
+@  changeset:   3841:2bdaaafbde7e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Oct 27 21:20:35 2016 +0200
+|  summary:     coorect big in getborder missing initialisatio
+|
+o  changeset:   3840:a2aa4c1b4311
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Oct 26 13:49:48 2016 +0200
 |  summary:     update web site
