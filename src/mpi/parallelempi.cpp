@@ -114,6 +114,9 @@ template<> struct MPI_WHAT<Complex>   {static const int WHAT=103;};
 template<> struct MPI_WHAT<KN<long> *>   {static const int WHAT=104;};
 template<> struct MPI_WHAT<KN<double>* >   {static const int WHAT=105;};
 template<> struct MPI_WHAT<KN<Complex>* >   {static const int WHAT=106;};
+template<> struct MPI_WHAT<KNM<long> *>   {static const int WHAT=107;};
+template<> struct MPI_WHAT<KNM<double>* >   {static const int WHAT=108;};
+template<> struct MPI_WHAT<KNM<Complex>* >   {static const int WHAT=109;};
 
 template<class T> struct MPI_TAG {};
 template<> struct MPI_TAG<long>   {static const int TAG=5;};
@@ -122,6 +125,9 @@ template<> struct MPI_TAG<Complex >   {static const int TAG=6;};
 template<> struct MPI_TAG<KN<long>* >   {static const int TAG=11;};
 template<> struct MPI_TAG<KN<double>* >   {static const int TAG=12;};
 template<> struct MPI_TAG<KN<Complex>* >   {static const int TAG=13;};
+template<> struct MPI_TAG<KNM<long>* >   {static const int TAG=14;};
+template<> struct MPI_TAG<KNM<double>* >   {static const int TAG=15;};
+template<> struct MPI_TAG<KNM<Complex>* >   {static const int TAG=16;};
 template<> struct MPI_TAG<Mesh *>   {static const int TAG=1000;};
 template<> struct MPI_TAG<Mesh3 *>   {static const int TAG=1010;};
 template<> struct MPI_TAG<const Mesh *>   {static const int TAG=1000;};
@@ -157,6 +163,15 @@ long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
       else MPI_Request_free(request); 
     }
     return ret;
+}
+
+template<class T>
+void CheckContigueKNM(const KNM_<T> &t)
+{
+    if( t.step != 1 && !t.IsVector1() ) {
+        cout<< " step= "<< t.step << " size " << t.N() << " " << & t[0] << " " << & t[1] << endl;
+        ExecError("Sorry the array is not contigue (step != 1) ");
+    }
 }
 
 template<class T>
@@ -321,7 +336,49 @@ struct MPIrank {
     ffassert(a.N()==n);
     return *this;
   }
-  
+ // KNM *********************************** Add FH. Nov 2016
+    template<class R>
+    long Recv(KNM<R> & a) const {
+        assert(&a);
+        CheckContigueKNM(a);
+        
+        if(verbosity>99)
+            cout << " ---- " << who  << "  >> " << & a << " " << a.N() << "x" <<  a.M() << " " << MPI_TAG<KNM<R>* >::TAG
+            <<" from " << mpirank << "  "<<  (R *) a << endl;
+        int n= a.N()*a.M();
+        long ll=WRecv((R *) a, n, who, MPI_TAG<KNM<R>* >::TAG ,comm,rq);
+        if(verbosity>99)
+            cout << " ++++ " << who  << "  >> " << & a << " " << a.N() << "x" <<  a.M()<<" " << MPI_TAG<KNM<R>* >::TAG
+            <<" from  " << mpirank << "  "<<  (R *) a << endl;
+        ffassert(a.N()*a.M()==n);
+        return ll;
+    }
+    
+    template<class R>
+    long Send(const KNM<R> *aa)const  {
+        const KNM<R> & a=*aa;
+        ffassert(&a);
+        int n= a.N()*a.M();
+        CheckContigueKNM(*aa);
+        if(verbosity>99)
+            cout << " .... " << who  << "  >> " << & a << " " << a.N() <<"x" << a.M() << " " << a.step<< " " << MPI_TAG<KNM<R>* >::TAG
+            <<" from  " << mpirank << "  "<<  (R *) a << endl;
+        return WSend((R *) a,n,who,MPI_TAG<KNM<R>* >::TAG,comm,rq);
+    }
+    
+    template<class R>
+    const MPIrank & Bcast(const KNM<R> &a) const  {
+        //const KN<R> & a=*aa;
+        assert(&a);
+        int n= a.N()*a.M();
+        CheckContigueKNM(a);
+        
+        WBcast((R *) a, n, who,comm);
+        ffassert(a.N()*a.M()==n);
+        return *this;
+    }
+   
+ // KNM ***********************************
   
   const MPIrank & Bcast(Fem2D::Mesh const *&  a) const {
     if(verbosity>1) 
@@ -2482,7 +2539,12 @@ void f_init_lgparallele()
 		      new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<R> > > ,
 		      new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<Complex> > > 
 		      );
-    
+      
+   TheOperators->Add(">>",
+                     new OneBinaryOperator<Op_Readmpi<KNM<double> > > ,
+                     new OneBinaryOperator<Op_Readmpi<KNM<long> > > ,
+                     new OneBinaryOperator<Op_Readmpi<KNM<Complex> > > );
+
      TheOperators->Add("<<",
 		       new OneBinaryOperator<Op_Writempi<double> >,
 		       new OneBinaryOperator<Op_Writempi<Complex> >,
@@ -2496,13 +2558,21 @@ void f_init_lgparallele()
 		       new OneBinaryOperator<Op_Writempi<Matrice_Creuse<Complex>* > > 
 		       
 		       );
-     
+    
+      TheOperators->Add("<<",
+                        new OneBinaryOperator<Op_Writempi<KNM<double> * > > ,
+                        new OneBinaryOperator<Op_Writempi<KNM<long> * > > ,
+                        new OneBinaryOperator<Op_Writempi<KNM<Complex> * > > );
+      
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<double> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<long> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Complex> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<double> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<long> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KN<Complex> *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<double> *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<long> *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<Complex> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh3 *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<R> *> >);
@@ -2514,6 +2584,9 @@ void f_init_lgparallele()
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<double> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<long> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KN<Complex> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<double> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<long> *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<Complex> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh3 *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<R> *> >);
@@ -2525,6 +2598,9 @@ void f_init_lgparallele()
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<double> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<long> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KN<Complex> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KNM<double> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KNM<long> > >);
+      Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KNM<Complex> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const Mesh *> >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const Mesh3 *> >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<R> > >);
@@ -2536,6 +2612,9 @@ void f_init_lgparallele()
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<double> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<long> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KN<Complex> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KNM<double> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KNM<long> > >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KNM<Complex> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const Mesh *> >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const Mesh3 *> >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<R> > >);
@@ -2550,6 +2629,9 @@ void f_init_lgparallele()
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<double> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<long> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KN<Complex> > >);
+      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KNM<double> > >);
+      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KNM<long> > >);
+      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KNM<Complex> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const Mesh *> >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const Mesh3 *> >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Matrice_Creuse<R> > >);

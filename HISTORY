@@ -1,5 +1,10 @@
-@  changeset:   3852:a1b55eb59aa3
+@  changeset:   3853:c2a70d48bdaa
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 11 22:48:41 2016 +0100
+|  summary:     coorect pb of bound in ffglut
+|
+o  changeset:   3852:a1b55eb59aa3
 |  parent:      3841:2bdaaafbde7e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 11 18:07:45 2016 +0100
