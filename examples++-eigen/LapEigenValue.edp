@@ -36,7 +36,7 @@ real[int] ev(nev); // to store nev eigein value
 Vh[int] eV(nev);   // to store nev eigen vector
 
 
-int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
+int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0,which="LM"); // which="LM" default 
 //   tol= the tolerace
 //   maxit= the maximal iteration see arpack doc.
 //   ncv   see arpack doc.
