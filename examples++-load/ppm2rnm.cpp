@@ -305,6 +305,12 @@ pRn  seta( pRn  const & a,const pRnm & b)
 };
 
 $1 */
+template  <class K>
+AnyType MyCast(Stack,const AnyType &b) {
+    KNM<K>* bb=GetAny<KNM<K>*>(b);
+    ffassert(bb->IsVector1());
+    return   b;}
+
 static void Load_Init(){
   cout << " lood: init ppm2rmn  " << endl;
 
@@ -315,12 +321,13 @@ static void Load_Init(){
   TheOperators->Add("=", 
 		    new OneOperator2_<KN<double> *,KN<double> *,KNM<double>* >(seta)
 		    );
-  /*
-  map_type[typeid(KN<double> ).name()]->AddCast(
-						new E_F1_funcT<KN<double>,KNM<double>*>(UnRef<KN<double>,KNM<double> >));
+  
+  map_type[typeid(KN<double>* ).name()]->AddCast(
+						new E_F1_funcT<KN<double>*,KNM<double>*>(MyCast<double>
+                                                                                ));
 					      //  map_type[typeid(KN<double> ).name()]->AddCast(
 						//new E_F1_funcT<KN<double>*,KNM<double>*>(Cast<KN<double>*,KNM<double>*>));
 					       
-						*/
+    
 }
 LOADFUNC(Load_Init)
