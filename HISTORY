@@ -1,5 +1,15 @@
-@  changeset:   3853:c2a70d48bdaa
+@  changeset:   3855:bb8dc85fcd7f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 18 17:23:18 2016 +0100
+|  summary:     Add
+|
+o  changeset:   3854:e8012201b592
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 17 13:54:58 2016 +0100
+|  summary:     add send, recv, broadcast of real[ini,int] , ... array
+|
+o  changeset:   3853:c2a70d48bdaa
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 11 22:48:41 2016 +0100
 |  summary:     coorect pb of bound in ffglut
