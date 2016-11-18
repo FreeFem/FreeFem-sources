@@ -321,12 +321,12 @@ static void Load_Init(){
   TheOperators->Add("=", 
 		    new OneOperator2_<KN<double> *,KN<double> *,KNM<double>* >(seta)
 		    );
-  
+  // autocast KNM<douyble>  *->    KN<double> (no) 
+  /*
   map_type[typeid(KN<double>* ).name()]->AddCast(
 						new E_F1_funcT<KN<double>*,KNM<double>*>(MyCast<double>
                                                                                 ));
-					      //  map_type[typeid(KN<double> ).name()]->AddCast(
-						//new E_F1_funcT<KN<double>*,KNM<double>*>(Cast<KN<double>*,KNM<double>*>));
+  */
 					       
     
 }
