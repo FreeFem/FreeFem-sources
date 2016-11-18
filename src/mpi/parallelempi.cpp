@@ -2477,7 +2477,7 @@ void f_init_lgparallele()
     map_type_of_map[make_pair(atype<long>(),atype<fMPI_Request>())]=atype<KN<MPI_Request>*>(); // vector
     
     
-    map_type[typeid(MPIrank).name()]->AddCast(new E_F1_funcT<MPIrank,MPIrank*>(UnRef<MPIrank>));
+    map_type[typeid(MPIrank).name()]->AddCast(new E_F1_funcT<MPIrank,MPIrank*>(KNM<MPIrank>));
     map_type[typeid(fMPI_Group).name()]->AddCast(new E_F1_funcT<fMPI_Group,fMPI_Group*>(UnRef<fMPI_Group>));
     map_type[typeid(fMPI_Comm).name()]->AddCast(new E_F1_funcT<fMPI_Comm,fMPI_Comm*>(UnRef<fMPI_Comm>));
     map_type[typeid(bool).name()]->AddCast(new OneOperator1<bool,fMPI_Comm*>(toBool));
