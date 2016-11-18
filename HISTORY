@@ -1,5 +1,10 @@
-@  changeset:   3855:bb8dc85fcd7f
+@  changeset:   3856:19d2bb1cc01c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 18 17:32:30 2016 +0100
+|  summary:     coorect type in parallelempi.cpp
+|
+o  changeset:   3855:bb8dc85fcd7f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 18 17:23:18 2016 +0100
 |  summary:     Add

@@ -106,7 +106,21 @@ typedef KN<R> Kn;
  };
  
 
-
+void ToWhich(Stack stack,char *which,Expression ew) {
+    if(!ew) strcpy(which,"LM");
+    else {
+    string * sw=GetAny<string*>((*ew)(stack));
+    if (sw && sw->length()==2)
+        strcpy(which,sw->c_str());
+    int ok=0;
+    if( strcmp(which,"LM")==0) ok=1;
+    else if( strcmp(which,"LA")==0) ok=1;
+    else if( strcmp(which,"SM")==0) ok=1;
+    else if( strcmp(which,"SA")==0) ok=1;
+    else if( strcmp(which,"BE")==0) ok=1;
+    ffassert(ok);
+  }
+}
 
 template<class K,class Mat>
 void  DoIdoAction(int ido,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work,Mat &OP1,Mat &B)
@@ -158,7 +172,7 @@ class EigenValue : public OneOperator
       const int cas;
     
     static basicAC_F0::name_and_type name_param[] ;
-    static const int n_name_param =12;
+    static const int n_name_param =13;
     Expression nargs[n_name_param];
     Expression expOP1,expB,expn;
     const OneOperator * codeOP1, *codeB;
@@ -233,7 +247,7 @@ class EigenValueC : public OneOperator
         const int cas;
         
         static basicAC_F0::name_and_type name_param[] ;
-        static const int n_name_param =10;
+        static const int n_name_param =11;
         Expression nargs[n_name_param];
         Expression expOP1,expB,expn;
         const OneOperator * codeOP1, *codeB;
@@ -354,8 +368,9 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
   {   "ivalue",&typeid(KN<double> *)},
   {   "rawvector",&typeid(KNM<double> *) },
   {   "resid",&typeid(KN<double> *) },
-  {   "mode",&typeid(long) } // 12 ieme
-  
+  {   "mode",&typeid(long) }, // 11 ieme
+  {   "which",&typeid(string*) } // 12 ieme
+
   
 };
 
@@ -369,8 +384,9 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
   {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations 
   {  "rawvector",&typeid(KNM<Complex> *) }, 
   {  "resid",&typeid(KN<Complex> *)},
-  {   "mode",&typeid(long) } // 10 ieme   
-  
+  {   "mode",&typeid(long) },// 9 ieme
+    {   "which",&typeid(string*) } // 10 ieme
+
 };
 
 
@@ -404,7 +420,8 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
   rawvector=arg<KNM<double> *>(9,stack,0);
   resid=arg<KN<double> *>(10,stack,0);
   mode = arg<long>(11,stack,3);
-
+  char which[3];
+  ToWhich(stack,which,nargs[12]);
  
  // evector=evector2.first;
     
@@ -487,7 +504,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
         
     if(verbosity>9 || err)
 	cout << "    n " << n << ", nev "<< nbev << ", tol =" << tol << ", maxit =" << maxit 
-	<< ", ncv = " <<ncv << ", mode = " << mode << endl;
+	<< ", ncv = " <<ncv << ", mode = " << mode << " which = " << which << endl;
     if(err) 
       {
 	  cerr << " list of the error " << endl;
@@ -502,7 +519,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     {
       int ido=0;
       char bmat= mode == 1 ? 'I' : 'G';
-      char which[3]= "LM";	// larger value
+ //     char which[3]= "LM";	// larger value
       //      if(mode >2) which[0] ='S'; // smaller value
       int ishift=1; // Auto Shift true by default
       int iparam[12]= {0,ishift,0,(int)maxit,1,(int) nconv,0,mode,0,0,0,0};
@@ -620,7 +637,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
         //int mode=3; //  Shift invert                                                                                                               
         int ido=0;
         char bmat='G';
-        char which[]="LM";
+       // char which[]="LM";
         int ishift=1; // Auto Shift true by default                                                                                                
         int iparam[12]= {0,ishift,0,(int)maxit,1,(int)nconv,0,mode,0,0,0,0};
         int ipntr[15]={ 0,0,0, 0,0,0,  0,0,0, 0,0,0 ,0,0,0};
@@ -797,6 +814,9 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
   resid=arg<KN<K> *>(8,stack,0);
   mode = arg<long>(9,stack,3);
   K * residptr= resid ? (K*) *resid : 0;
+  char which[3];
+  ToWhich(stack,which,nargs[10]);
+
   //evector=evector2.first;
   ffassert(mode>0 && mode <4) ; 
  // Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
@@ -868,7 +888,8 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     if(verbosity)
 	cout << "Real complex eigenvalue problem: A*x - B*x*lambda" << endl;
   if(verbosity>9 ||  err)
-	cout << "   n " << n << " nev "<< nbev << " tol =" << tol << " maxit =" << maxit << " ncv = " << ncv << " mode = " << mode << endl;	
+	cout << "   n " << n << " nev "<< nbev << " tol =" << tol << " maxit =" << maxit << " ncv = " << ncv
+             << " mode = " << mode << " which = " << which << endl;
   if(err) 
     {
 	cerr << " list of the error " << endl;
@@ -912,7 +933,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
 
   int ido=0;
   char bmat='G';
-  char which[]="LM";
+ // char which[]="LM";
   int ishift=1; // Auto Shift true by default                                                                                               \
 
   int iparam[12]= { 0, ishift, 0, (int) maxit, 1,(int)  nconv, 0,(int) mode, 0, 0, 0, 0 };
