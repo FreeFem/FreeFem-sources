@@ -446,12 +446,13 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
      ptOP1= & (const VirtualMatrice<K>&)(pOP1->A);
    if(pB)
      ptB = &  (const VirtualMatrice<K>&)(pB->A);
- 
-  FuncMat<R> *pcOP1=0,  *pcB=0;
+    int signeOP1 = 1;
+    if(mode<=2) signeOP1=-1; // mode direct
+    FuncMat<R> *pcOP1=0,  *pcB=0;
   if(codeOP1)
-   ptOP1=pcOP1= new FuncMat<K>(-1,n,stack,codeOP1);
+   ptOP1=pcOP1= new FuncMat<K>(-signeOP1,n,stack,codeOP1);
   if(codeB)
-   ptB=pcB= new FuncMat<K>(1,n,stack,codeB);
+   ptB=pcB= new FuncMat<K>(signeOP1,n,stack,codeB);
   MatriceIdentite<K>  Id(n);
     
   if(!ptB) ptB = &Id;
@@ -853,12 +854,14 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
         ptOP1= & (const VirtualMatrice<K>&)(pOP1->A);
     if(pB)
         ptB = &  (const VirtualMatrice<K>&)(pB->A);
-    
+    int signeOP1 = 1;
+    if(mode<=2) signeOP1=-1; // mode direct
+
     FuncMat<K> *pcOP1=0,  *pcB=0;
     if(codeOP1)
-        ptOP1=pcOP1= new FuncMat<K>(-1,n,stack,codeOP1);
+        ptOP1=pcOP1= new FuncMat<K>(-signeOP1,n,stack,codeOP1);
     if(codeB)
-        ptB=pcB= new FuncMat<K>(1,n,stack,codeB);
+        ptB=pcB= new FuncMat<K>(signeOP1,n,stack,codeB);
     MatriceIdentite<K>  Id(n);
     
     if(!ptB) ptB = &Id;

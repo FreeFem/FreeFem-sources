@@ -1,5 +1,10 @@
-@  changeset:   3856:19d2bb1cc01c
+@  changeset:   3857:0ab18d98113d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 18 18:11:44 2016 +0100
+|  summary:     add which given parametre  name in eigenvalue (arpack)
+|
+o  changeset:   3856:19d2bb1cc01c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 18 17:32:30 2016 +0100
 |  summary:     coorect type in parallelempi.cpp
