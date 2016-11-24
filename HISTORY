@@ -1,40 +1,65 @@
-@  changeset:   3858:4fa1ecbafe5e
+@  changeset:   3862:34e34d7b389e
 |  tag:         tip
+|  parent:      3858:4fa1ecbafe5e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Nov 21 10:39:11 2016 +0100
-|  summary:     in Arpack coorect pb of mode in cas of Functional amtrix def.
+|  date:        Thu Nov 24 17:12:27 2016 +0100
+|  summary:     try to complet  arpack interface ...
 |
-o  changeset:   3857:0ab18d98113d
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Nov 18 18:11:44 2016 +0100
-|  summary:     add which given parametre  name in eigenvalue (arpack)
-|
-o  changeset:   3856:19d2bb1cc01c
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Nov 18 17:32:30 2016 +0100
-|  summary:     coorect type in parallelempi.cpp
-|
-o  changeset:   3855:bb8dc85fcd7f
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Nov 18 17:23:18 2016 +0100
-|  summary:     Add
-|
-o  changeset:   3854:e8012201b592
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Thu Nov 17 13:54:58 2016 +0100
-|  summary:     add send, recv, broadcast of real[ini,int] , ... array
-|
-o  changeset:   3853:c2a70d48bdaa
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Nov 11 22:48:41 2016 +0100
-|  summary:     coorect pb of bound in ffglut
-|
-o  changeset:   3852:a1b55eb59aa3
-|  parent:      3841:2bdaaafbde7e
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Nov 11 18:07:45 2016 +0100
-|  summary:     see INNOVATION
-|
+| o  changeset:   3861:5b37f875a607
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Nov 24 13:28:53 2016 +0100
+| |  summary:     put back installscotch.cmake to solve case-folding error on mac
+| |
+| o  changeset:   3860:0deaa578ae32
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Nov 24 13:26:39 2016 +0100
+| |  summary:     put back modules to solve case-folding error on Mac
+| |
+| o  changeset:   3859:39003569e6ab
+| |  branch:      cmake
+| |  parent:      3851:d08fa4ac9f19
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Nov 24 13:22:02 2016 +0100
+| |  summary:     Remove modules repo to solve case-folding error on Mac
+| |
+o |  changeset:   3858:4fa1ecbafe5e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Nov 21 10:39:11 2016 +0100
+| |  summary:     in Arpack coorect pb of mode in cas of Functional amtrix def.
+| |
+o |  changeset:   3857:0ab18d98113d
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Nov 18 18:11:44 2016 +0100
+| |  summary:     add which given parametre  name in eigenvalue (arpack)
+| |
+o |  changeset:   3856:19d2bb1cc01c
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Nov 18 17:32:30 2016 +0100
+| |  summary:     coorect type in parallelempi.cpp
+| |
+o |  changeset:   3855:bb8dc85fcd7f
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Nov 18 17:23:18 2016 +0100
+| |  summary:     Add
+| |
+o |  changeset:   3854:e8012201b592
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Nov 17 13:54:58 2016 +0100
+| |  summary:     add send, recv, broadcast of real[ini,int] , ... array
+| |
+o |  changeset:   3853:c2a70d48bdaa
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Nov 11 22:48:41 2016 +0100
+| |  summary:     coorect pb of bound in ffglut
+| |
+o |  changeset:   3852:a1b55eb59aa3
+| |  parent:      3841:2bdaaafbde7e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Nov 11 18:07:45 2016 +0100
+| |  summary:     see INNOVATION
+| |
 | o  changeset:   3851:d08fa4ac9f19
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>

@@ -832,8 +832,8 @@ class MatriceIdentite:public  VirtualMatrice<R> { public:
     void addMatTransMul(const  KN_<R>  & x, KN_<R> & Ax) const {
     ffassert(x.N()==Ax.N());
     Ax+=x; }
-    virtual void Solve( KN_<R> & y ,const KN_<R> & x) const { y=x; }
-
+     void Solve( KN_<R> & y ,const KN_<R> & x) const { y=x; }
+      bool WithSolver() const {return true;}
  plusAx operator*(const KN<R> &  x) const {return plusAx(this,x);} 
   bool ChecknbLine(int n) const { return true;}  
   bool ChecknbColumn(int m) const { return true;} 
