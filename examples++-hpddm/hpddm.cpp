@@ -128,13 +128,10 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
     Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
     HPDDM::Option& opt = *HPDDM::Option::get();
-    unsigned short nu = opt.val<unsigned short>("geneo_nu", 20);
-    HPDDM::underlying_type<K> threshold = opt.val("geneo_threshold", 0.0);
     KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
     std::pair<MPI_Request, const K*>* ret = nullptr;
     double t;
     if(mA) {
-        nu = std::max(nu, static_cast<unsigned short>(1));
         long nbSolver = 0;
         std::vector<const HPDDM::MatrixCSR<K>*> vecAIJ;
         if(mA) {
@@ -146,10 +143,10 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                 const HPDDM::MatrixCSR<K>* const dP = mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
                 if(mB) {
                     HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
-                    ptA->template solveGEVP<EIGENSOLVER>(&dA, nu, threshold, &dB, dP);
+                    ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
                 }
                 else
-                    ptA->template solveGEVP<EIGENSOLVER>(&dA, nu, threshold, nullptr, dP);
+                    ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
                 mA->nbcoef = dA._nnz;
                 mA->a = dA._a;
                 mA->lg = dA._ia;
@@ -172,7 +169,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                 int dof = ptA->getDof();
                 HPDDM::Eigensolver<K> solver(dof);
                 const HPDDM::MatrixCSR<K>& first = *vecAIJ.front();
-                nu = std::min(nu, static_cast<unsigned short>(first._m));
+                unsigned short nu = std::min(opt.template val<unsigned short>("geneo_nu", 20), static_cast<unsigned short>(first._m));
                 K** ev = new K*[nu];
                 *ev = new K[nu * dof];
                 for(int i = 0; i < nu; ++i)
@@ -248,13 +245,13 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                 ptA->Type::super::initialize(nu);
                 if(nbSolver == 100)
                     std::for_each(vecAIJ.begin(), vecAIJ.end(), std::default_delete<const HPDDM::MatrixCSR<K>>());
+                opt["geneo_nu"] = nu;
             }
             else
                 ptA->Type::super::initialize(0);
         }
         if(timing)
             (*timing)[3] = MPI_Wtime() - t;
-        opt["geneo_nu"] = nu;
         MPI_Barrier(MPI_COMM_WORLD);
         if(timing)
             t = MPI_Wtime();
@@ -275,7 +272,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     }
     else {
         MPI_Barrier(MPI_COMM_WORLD);
-        if(!threshold)
+        if(opt.set("geneo_threshold"))
             ret = ptA->template buildTwo<2>(comm);
     }
     if(ret)

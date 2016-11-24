@@ -320,7 +320,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                 nu = opt["geneo_nu"];
 #if defined(MUMPSSUB) || defined(PASTIXSUB) || defined(MKL_PARDISOSUB)
             t = MPI_Wtime();
-            ptA->solveGEVP(nu, threshold);
+            ptA->solveGEVP();
             if(timing)
                 (*timing)[5] = MPI_Wtime() - t;
 #else
