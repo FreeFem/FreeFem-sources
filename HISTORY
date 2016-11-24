@@ -1,5 +1,10 @@
-@  changeset:   3857:0ab18d98113d
+@  changeset:   3858:4fa1ecbafe5e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Nov 21 10:39:11 2016 +0100
+|  summary:     in Arpack coorect pb of mode in cas of Functional amtrix def.
+|
+o  changeset:   3857:0ab18d98113d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Nov 18 18:11:44 2016 +0100
 |  summary:     add which given parametre  name in eigenvalue (arpack)

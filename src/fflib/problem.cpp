@@ -371,6 +371,7 @@ void Check(const Opera &Op,int N,int  M)
 	       "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
    }
    SHOWVERB(cout << " FormBilinear " << endl);
+     double CPU0 = CPUtime();
     MatriceElementaireSymetrique<R,FESpace> *mates =0;
     MatriceElementairePleine<R,FESpace> *matep =0;
     const int useopt=di.UseOpt(stack);
@@ -502,7 +503,8 @@ void Check(const Opera &Op,int N,int  M)
     mate.bilinearform=b->b;
     
     Check(*mate.bilinearform,mate.Uh.N,mate.Vh.N);
-    
+    if(verbosity>9) cout << "  -- CPU init assemble mat " <<  CPUtime()-CPU0 << " s\n";
+
     if (di.kind == CDomainOfIntegration::int1d )
       {
           if(di.islevelset())
@@ -640,6 +642,7 @@ void Check(const Opera &Op,int N,int  M)
     
     if (where_in_stack) delete [] where_in_stack;
     delete &mate;
+     if(verbosity>9) cout << "  -- CPU assemble mat " <<  CPUtime()-CPU0 << " s\n";
  }
 // --------- FH 120105
 // 3d
