@@ -101,7 +101,7 @@ class FuncMat: public VirtualMatrice<R> { public:
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);}
     virtual bool ChecknbLine(int n) const { return true;}
     virtual bool ChecknbColumn(int m) const { return true;}
-    
+    bool WithSolver() const {return mat1;}
 };
 
 
@@ -306,13 +306,20 @@ class EigenValueC : public OneOperator
             if( cas==3)
             {
                 expn=to< long>(args[0]);
-                ffassert(0);
+                
             }
             else
             {
                 expOP1=to< Matrice_Creuse<K> *>(args[0]);
                 expB=to< Matrice_Creuse<K> *>(args[1]);
             }
+            ffassert( (codeOP1==0) || (nargs[13]==0) ); // Double def
+            ffassert( (codeB==0) || (nargs[12]==0) ); // Double def
+            codeOP=ToCode<K>(nargs[11]);
+            if(!codeB)codeB=ToCode<K>(nargs[12]);
+            if(!codeOP1)codeOP1=ToCode<K>(nargs[13]);
+            codeB1=ToCode<K>(nargs[14]);
+
         }
         
         AnyType operator()(Stack stack)  const;
@@ -495,6 +502,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
         ptOP1=pcOP= new FuncMat<K>(n,stack,codeOP,codeOP1);
     if(codeB || codeB1)
         ptB=pcB= new FuncMat<K>(n,stack,codeB,codeB1);
+    
     
     MatriceIdentite<K>  Id(n);
     
