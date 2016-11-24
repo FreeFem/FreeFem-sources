@@ -213,9 +213,7 @@ class EigenValue : public OneOperator
                     const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[2].LeftValue());
                     ffassert(op);
                     codeB = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
-                    
                 }
-                
             }
             else if( cas== 3)
             {
@@ -303,10 +301,9 @@ class EigenValueC : public OneOperator
                     codeB = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
                 }
             }
-            if( cas==3)
+            else if( cas==3)
             {
                 expn=to< long>(args[0]);
-                
             }
             else
             {

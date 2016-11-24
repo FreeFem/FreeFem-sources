@@ -1,5 +1,10 @@
-@  changeset:   3862:34e34d7b389e
+@  changeset:   3863:4f1ab286e5a9
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 24 21:02:23 2016 +0100
+|  summary:     update eigen complex functionnal case
+|
+o  changeset:   3862:34e34d7b389e
 |  parent:      3858:4fa1ecbafe5e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 24 17:12:27 2016 +0100
