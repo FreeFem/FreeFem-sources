@@ -47,7 +47,8 @@ compilepkg::$(ARPACKLIB)
 ARPACK/ARmake.inc:ARPACK/ARmake.incnew
 	if diff -q ARPACK/ARmake.incnew ARPACK/ARmake.inc ; then echo No Modif skip compile of arpack ; else cp ARPACK/ARmake.incnew ARPACK/ARmake.inc; fi
 $(ARPACKLIB): ARPACK/fait  ARPACK/ARmake.inc
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
+	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
+	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) $(F77) -c $(FFLAGS) veclib_cdotc.f -o ARPACK/SRC/veclib_cdotc.o ;; esac; 
 	mkdir -p ../include ../lib
 	if [ -n '@FF_LAPACKdir@' ] ; then \
 	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
@@ -65,9 +66,12 @@ ARPACK/fait ARPACK/ARmake.incnew: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4
 	gunzip -c $(ARPACK96_TAR_GZ) | tar xf -
 	gunzip -c $(PATCH_TAR_GZ) | tar xf -
 	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*) \
+	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) \
          for i in  ARPACK/LAPACK/zlatrs.f ARPACK/LAPACK/ztrsyl.f ARPACK/SRC/zgetv0.f ARPACK/SRC/znaitr.f ARPACK/SRC/znaup2.f ARPACK/SRC/zneupd.f;\
 	   do  mv  $$i $$i.cpy; sed -e 's/ZDOTC/ZZDOTC/' -e 's/zdotc/zzdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
+	    done;; \
+         for i in  ARPACK/LAPACK/clatrs.f ARPACK/LAPACK/ctrsyl.f ARPACK/SRC/cgetv0.f ARPACK/SRC/cnaitr.f ARPACK/SRC/cnaup2.f ARPACK/SRC/cneupd.f;\
+	   do  mv  $$i $$i.cpy; sed -e 's/CDOTC/CCDOTC/' -e 's/cdotc/ccdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
 	    done;; \
 	 esac 
 
