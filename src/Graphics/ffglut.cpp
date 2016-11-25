@@ -1045,12 +1045,14 @@ void OnePlotCurve::Draw(OneWindow *win)
 {
   initlist();
   ThePlot & plot= *win->theplot;
-  if( cc.N() != xx.N())
-      plot.SetColorTable(16) ;
-  else
-    plot.SetColorTable(Max(plot.Niso,plot.Narrow)+4) ;
+  // correct of color bug thank to Jon Sauer
+ // if( cc.N() != xx.N())
+ //     plot.SetColorTable(16) ;
+ // else
+ //   plot.SetColorTable(Max(plot.Niso,plot.Narrow)+4) ;
+    // end of correct !!!! FH nov 2016 
   double z = plot.z0;
-  
+    if(debug>3) cout << " OnePlotCurve::Draw " << (cc.N() != xx.N()) << endl;
   glBegin(GL_LINE_STRIP);    
   plot.color(2);
   // cout << "nePlotCurve::Draw " << xx << " " << yy << endl;
