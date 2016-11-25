@@ -69,12 +69,11 @@ ARPACK/fait ARPACK/ARmake.incnew: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4
 	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) \
          for i in  ARPACK/LAPACK/zlatrs.f ARPACK/LAPACK/ztrsyl.f ARPACK/SRC/zgetv0.f ARPACK/SRC/znaitr.f ARPACK/SRC/znaup2.f ARPACK/SRC/zneupd.f;\
 	   do  mv  $$i $$i.cpy; sed -e 's/ZDOTC/ZZDOTC/' -e 's/zdotc/zzdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
-	    done;; \
+	    done; \
          for i in  ARPACK/LAPACK/clatrs.f ARPACK/LAPACK/ctrsyl.f ARPACK/SRC/cgetv0.f ARPACK/SRC/cnaitr.f ARPACK/SRC/cnaup2.f ARPACK/SRC/cneupd.f;\
 	   do  mv  $$i $$i.cpy; sed -e 's/CDOTC/CCDOTC/' -e 's/cdotc/ccdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
-	    done;; \
+	    done; \
 	 esac 
-
 	for i in ARPACK/SRC/*.f ; do \
 	    mv  $$i $$i.cpy; sed -e 's/, second/, secnd2/' -e 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
 	for i in  ARPACK/UTIL/second.f;  do  \
