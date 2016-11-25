@@ -1,5 +1,25 @@
-@  changeset:   3864:fb6de994a0dd
+@  changeset:   3868:96671d8641e3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Nov 25 12:45:51 2016 +0100
+|  summary:     pass tu version 5.0.2 of MUMPS
+|
+o  changeset:   3867:5c365fc311ab
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Fri Nov 25 11:51:43 2016 +0100
+|  summary:     Bump to MUMPS 5.0.2 via N7 server.
+|
+o  changeset:   3866:6c398ec26b37
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Fri Nov 25 10:18:47 2016 +0100
+|  summary:     Fix Makefile.am.
+|
+o  changeset:   3865:ebd5af5db222
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Thu Nov 24 22:06:17 2016 +0100
+|  summary:     Update HPDDM version and fix ARPACK with complex numbers and MKL.
+|
+o  changeset:   3864:fb6de994a0dd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 24 21:14:43 2016 +0100
 |  summary:     correct type in eigen
