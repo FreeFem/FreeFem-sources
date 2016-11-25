@@ -33,7 +33,14 @@ Th3=readmesh3("spherewithahole.mesh"); // This .mesh file is obtaing with tetgen
 }
 catch (...) {
   // FFCS - path to example scripts are changed, so this needs to be in the local directory to be common to FF and FFCS
+  //  trick to extract Th3finhole from "tetgenholeregion_rugby.edp"
+  //  warning Th3 mesh3 exist in "tetgenholeregion_rugby.edp"
+  mesh3 Thedp;// mesh3 variable  out the block 
+  {
   include "tetgenholeregion_rugby.edp"
+  Thedp=Th3finhole;// save de correcte mesh 
+  }
+  Th3=Thedp;// set coorect variable ...
 }
 fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;

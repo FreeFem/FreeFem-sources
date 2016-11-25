@@ -31,7 +31,7 @@ all-local: mumps
 DIRPKG=../pkg
 SRCDIR=MUMPS_$(VERSION)
 PACKAGE1=$(DIRPKG)/MUMPS_$(VERSION).tar.gz
-VERSION=5.0.1
+VERSION=5.0.2
 
 mumps:../lib/WHERE.mumps
 

@@ -1,4 +1,9 @@
-version 3.50 
+ - correct bug in examples++-load/ttestio.edp in case of the no existance of  file 
+   "spherewithahole.mesh"  (after clean) 
+ - pass to version 5.0.2 of MUMPS 
+ - add new function stuff in arpack interface see 
+   examples++-eigen/LapEigenValueFuncV2.edp
+ - pass to version 3.50 
  WARNING ffglut interface 
  - add send, recv, broadcast of real[ini,int] , ... array
  - add plot of multy curve (array of array int 2d, 3d ,  with color 
