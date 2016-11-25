@@ -1,3 +1,4 @@
+ - correct bug in color when mixing line and iso. (Thank to Jon Sauer) 
  - correct bug in examples++-load/ttestio.edp in case of the no existance of  file 
    "spherewithahole.mesh"  (after clean) 
  - pass to version 5.0.2 of MUMPS 
