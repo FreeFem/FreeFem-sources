@@ -40,9 +40,9 @@ EXTRA_DIST= \
 ./mshmet/mshmetlib.c \
 ./mshmet/mshmetlib.h \
 ./mumps/Makefile \
-./mumps-seq/Makefile-mumps-5.0.1.inc \
+./mumps-seq/Makefile-mumps-5.0.2.inc \
 ./mumps-seq/Makefile \
-./mumps/Makefile-mumps-5.0.1.inc \
+./mumps/Makefile-mumps-5.0.2.inc \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/makefile \
 ./parmetis/parmetis-4.0.3.patch \

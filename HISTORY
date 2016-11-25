@@ -1,5 +1,10 @@
-@  changeset:   3863:4f1ab286e5a9
+@  changeset:   3864:fb6de994a0dd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 24 21:14:43 2016 +0100
+|  summary:     correct type in eigen
+|
+o  changeset:   3863:4f1ab286e5a9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 24 21:02:23 2016 +0100
 |  summary:     update eigen complex functionnal case
