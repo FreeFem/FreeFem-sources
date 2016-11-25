@@ -142,8 +142,8 @@ download('mshmet','http://www.ann.jussieu.fr/~frey/ftp/archives/mshmet.2012.04.2
 #	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz','959e9981b606cd574f713b8422ef0d9f');
 #download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.0.tar.gz',
 #	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.0.tar.gz','3c6aeab847e9d775ca160194a9db2b75');
-download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.1.tar.gz',
-	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.1.tar.gz','b477573fdcc87babe861f62316833db0');
+download('MUMPS','http://mumps.enseeiht.fr/MUMPS_5.0.2.tar.gz',
+	 'http://mumps.enseeiht.fr/','MUMPS_5.0.2.tar.gz','591bcb2c205dcb0283872608cdf04927');
 
 download('NLopt','http://ab-initio.mit.edu/nlopt/nlopt-2.2.4.tar.gz',
 	 'http://ab-initio.mit.edu/wiki/index.php/NLopt','nlopt-2.2.4.tar.gz','9c60c6380a10c6d2a06895f0e8756d4f');
