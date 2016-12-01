@@ -7,19 +7,6 @@
 #include "common.hpp"
 
 namespace Schwarz {
-double getOpt(string* const& ss) {
-    return HPDDM::Option::get()->val(*ss);
-}
-bool isSetOpt(string* const& ss) {
-    return HPDDM::Option::get()->set(*ss);
-}
-template<class Type, class K>
-bool destroyRecycling(Type* const& Op) {
-    HPDDM::Recycling<K>::get()->destroy(Op->prefix());
-    return false;
-}
-
-
 template<class Type, class K>
 class initDDM_Op : public E_F0mps {
     public:
@@ -54,11 +41,6 @@ class initDDM : public OneOperator {
 };
 template<class Type, class K>
 AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
-    const char** argv = new const char*[pkarg->n];
-    for(int i = 0; i < pkarg->n; ++i)
-        argv[i] = (*((*pkarg)[i].getap()))->data();
-    HPDDM::Option::get()->parse(pkarg->n, argv, mpirank == 0);
-    delete [] argv;
     Type* ptA = GetAny<Type*>((*A)(stack));
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
@@ -252,7 +234,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
         }
         if(timing)
             (*timing)[3] = MPI_Wtime() - t;
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(comm);
         if(timing)
             t = MPI_Wtime();
         if(ptA->exclusion(comm)) {
@@ -271,9 +253,13 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             (*timing)[4] = MPI_Wtime() - t;
     }
     else {
-        MPI_Barrier(MPI_COMM_WORLD);
-        if(opt.set("geneo_threshold"))
+        MPI_Barrier(comm);
+        if(!ptA->getVectors())
             ret = ptA->template buildTwo<2>(comm);
+        else if(ptA->exclusion(comm))
+            ret = ptA->template buildTwo<1>(comm);
+        else
+            ret = ptA->template buildTwo<0>(comm);
     }
     if(ret)
         delete ret;
@@ -395,7 +381,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         (*timing)[timing->n - 1] += MPI_Wtime() - timer;
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
-    if(rank != 0 || excluded)
+    if(rank != mpirank || rank != 0)
         opt.remove("verbosity");
     timer = MPI_Wtime();
     if(!excluded)
@@ -682,13 +668,12 @@ void add() {
     Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
-    Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(Schwarz::destroyRecycling<Type<K, S>, K>));
+    Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
 }
 }
 
 static void Init_Schwarz() {
-    Global.Add("getOption", "(", new OneOperator1_<double, string*>(Schwarz::getOpt));
-    Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(Schwarz::isSetOpt));
+    Init_Common();
 #if defined(DSUITESPARSE) || defined(DHYPRE)
     const char ds = 'G';
 #else

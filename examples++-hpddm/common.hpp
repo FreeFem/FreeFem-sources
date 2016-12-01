@@ -53,8 +53,7 @@ class Pair {
     public:
         Pair() : p() { };
         std::pair<MPI_Request, const K*>* p;
-        void init() {
-        }
+        void init() { }
         void destroy() {
             delete p;
             p = nullptr;
@@ -104,4 +103,28 @@ void addProd() {
 
 extern KN<String>* pkarg;
 
+#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
+double getOpt(string* const& ss) {
+    return HPDDM::Option::get()->val(*ss);
+}
+bool isSetOpt(string* const& ss) {
+    return HPDDM::Option::get()->set(*ss);
+}
+template<class Type, class K>
+bool destroyRecycling(Type* const& Op) {
+    HPDDM::Recycling<K>::get()->destroy(Op->prefix());
+    return false;
+}
+
+static void Init_Common() {
+    Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
+    Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
+    int argc = pkarg->n;
+    const char** argv = new const char*[argc];
+    for(int i = 0; i < argc; ++i)
+        argv[i] = (*((*pkarg)[i].getap()))->data();
+    HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
+    delete [] argv;
+}
+#endif
 #endif // _COMMON_
