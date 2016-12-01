@@ -98,7 +98,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             real intersection = intN(globalName)(phi) / eps;
             if(intersection > 1.0e-6) {
                 partitionIntersection[numberIntersection] = phi;
-                if(usedARGV("-true_restrict") != -1)
+                if(usedARGV("-true_restrict") == -1)
                     sum[] += partitionIntersection[numberIntersection][];
                 arrayIntersection[numberIntersection++] = arrayIntersection[i];
             }
@@ -107,13 +107,12 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             arrayIntersection.resize(numberIntersection);
         fespace WhPart(meshName, PkPart);
         WhPart defPart(func2vec);
-        if(usedARGV("-true_restrict") != -1) {
+        if(usedARGV("-true_restrict") == -1) {
             khi[] = khi[] ./= sum[];
             defPart(func2vec) = initPart(khi);
         }
         else {
-            fespace PhLocal(meshName, P0);
-            PhLocal loc = abs(part - mpiRank(comm)) < 0.1;
+            VhLocal loc = abs(part - mpiRank(comm)) < 0.1;
             defPart(func2vec) = initPart(loc);
         }
         D.resize(Wh.ndof);

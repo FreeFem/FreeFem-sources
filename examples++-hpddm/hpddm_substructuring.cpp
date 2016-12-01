@@ -7,12 +7,6 @@
 #include "common.hpp"
 
 namespace Substructuring {
-double getOpt(string* const& ss) {
-    return HPDDM::Option::get()->val(*ss);
-}
-bool isSetOpt(string* const& ss) {
-    return HPDDM::Option::get()->set(*ss);
-}
 class Skeleton_Op : public E_F0mps {
     public:
         Expression interface;
@@ -234,11 +228,6 @@ class initDDM : public OneOperator {
 };
 template<class Type, class K>
 AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
-    const char** argv = new const char*[pkarg->n];
-    for(int i = 0; i < pkarg->n; ++i)
-        argv[i] = (*((*pkarg)[i].getap()))->data();
-    HPDDM::Option::get()->parse(pkarg->n, argv, mpirank == 0);
-    delete [] argv;
     Type* ptA = GetAny<Type*>((*A)(stack));
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
@@ -372,7 +361,8 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             if(timing)
                 (*timing)[timing->n - 1] = MPI_Wtime() - t;
             delete [] pair->p->second;
-            delete pair->p;
+            pair->destroy();
+            pair = nullptr;
         }
     return 0L;
 }
@@ -426,7 +416,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(iter != -1)
         opt["max_it"] = iter;
     KN<double>* timing = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
-    bool excluded = nargs[3] ? GetAny<long>((*nargs[3])(stack)) : false;
+    bool excluded = nargs[3] ? GetAny<bool>((*nargs[3])(stack)) : false;
     if(excluded)
         opt["master_exclude"];
     double timer = MPI_Wtime();
@@ -446,7 +436,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     timer = MPI_Wtime();
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
-    if(rank != 0 || excluded)
+    if(rank != mpirank || rank != 0)
         opt.remove("verbosity");
     timer = MPI_Wtime();
     if(!excluded)
@@ -601,8 +591,7 @@ void add() {
 template<class K, char S>
 using HpFetiPrec = HpFeti<HPDDM::FetiPrcndtnr::DIRICHLET, K, S>;
 static void Init_Substructuring() {
-    Global.Add("getOption", "(", new OneOperator1_<double, string*>(Substructuring::getOpt));
-    Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(Substructuring::isSetOpt));
+    Init_Common();
     Global.Add("buildSkeleton", "(", new Substructuring::Skeleton);
 #if defined(DSUITESPARSE) || defined(DHYPRE)
     const char ds = 'G';
