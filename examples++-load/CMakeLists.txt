@@ -67,7 +67,8 @@ ENDIF()
 
 # ff-Ipopt.cpp
 ADD_LIBRARY(ff-Ipopt SHARED ff-Ipopt.cpp)
-INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/ipopt/install/include/coin)
+ADD_DEPENDENCIES(ff-Ipopt ipopt)
+INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
 
 # fflapack
 IF(LAPACK_FOUND)
@@ -78,6 +79,7 @@ ENDIF()
 
 # ff-NLpopt.cpp
 ADD_LIBRARY(ff-NLopt SHARED ff-NLopt.cpp)
+ADD_DEPENDENCIES(ff-NLopt nlopt)
 INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
 
 # ilut.cpp
@@ -108,6 +110,7 @@ INCLUDE_DIRECTORIES(${MPI_C_INCLUDE_PATH})
 
 # mmg3d.cpp
 ADD_LIBRARY(ff-mmg3d SHARED mmg3d.cpp)
+ADD_DEPENDENCIES(ff-mmg3d mmg3d)
 INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
 # mmg3d-v4.0.cpp
