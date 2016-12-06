@@ -1686,7 +1686,7 @@ void Init_map_type()
     TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMapSS*> >);
  
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSS >);
-   // add setw freb 2015 FH
+   // add setw feb 2015 FH
     Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
     TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
 

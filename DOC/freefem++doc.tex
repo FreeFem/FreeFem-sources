@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.49}
+\def\VERSION{3.50}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -13326,19 +13326,19 @@ Remark: This  example is in \texttt{Newton.edp} file of \texttt{examples++-tutor
 
 This section depends on your installation of \freefempp; you need to have compiled (see \texttt{README\_arpack}),
 ARPACK.
-This tools is available in \freefempp  if the word ``eigenvalue'' appear in line ``Load:'', like:
+This tool is available in \freefempp  if the word ``eigenvalue'' appears in line ``Load:'', like:
 \bFF
 -- FreeFem++ v1.28 (date Thu Dec 26 10:56:34 CET 2002)
  file : LapEigenValue.edp
  Load: lg_fem lg_mesh @eigenvalue
 \eFF
-This tools is based on the \texttt{arpack++} \footnote{\url{http://www.caam.rice.edu/software/ARPACK/}}
+This tool is based on the \texttt{arpack++} \footnote{\url{http://www.caam.rice.edu/software/ARPACK/}}
 the object-oriented version of ARPACK eigenvalue package \cite{arpack}.
 
 The function EigenValue computes the generalized eigenvalue
-of  $ A u = \lambda B u $ where sigma =$\sigma$ is the shift of the method.
+of  $ A u = \lambda B u $. The Shift-invert method is used by default, with sigma =$\sigma$ the shift of the method.
 The matrix  $ OP$ is defined with $ A - \sigma B $.
-The return value is the number of converged eigenvalue (can be greater than the number of eigen value nev=)
+The return value is the number of converged eigenvalues (can be greater than the number of requested  eigenvalues nev=)
 
 \bFF
 @int k=@EigenValue(OP,B,nev= , sigma= );
@@ -13346,17 +13346,49 @@ The return value is the number of converged eigenvalue (can be greater than the 
 where the matrix $OP=  A - \sigma B $ with a solver and boundary condition,
 and the matrix $B$.
 
-From version 3.31 you have also a functional interface like
+From version 3.31 there is also a functional interface:
 \bFF
 @int k=@EigenValue(n,FOP1,FB,nev= , sigma= );
 \eFF
-where $n$ is the size of the matrix and  the now the matrix defined throught function 
-which defined the respectively the matrix product of $OP^{-1}$ and $B$, like in 
+where $n$ is the size of the problem,  and the operators are now defined through functions, defining respectively the matrix product of $OP^{-1}$ and $B$, as in 
 \bFF
 int n = OP1.n; 
 func real[int] FOP1(real[int] & u) { real[int] Au=OP^-1*u;return Au;}
 func real[int] FB(real[int] & u) { real[int] Au=B*u;return Au;}
 \eFF
+
+If you want finer control over the method employed in ARPACK, you can specify which mode ARPACK will work with (mode= , see ARPACK documentation). The operators necessary for the chosen mode can be passed through the optional parameters A=, A1= , B=, B1= (see below).
+
+\begin{itemize}
+\item mode=1: Regular mode for solving $ A u = \lambda u $
+
+\bFF
+         @int k=@EigenValue(n,A=FOP,mode=1,nev= );
+\eFF
+
+where the function FOP defines the matrix product of A
+
+\item mode=2: Regular inverse mode for solving $ A u = \lambda B u $
+
+\bFF
+         @int k=@EigenValue(n,A=FOP,B=FB,B1=FB1,mode=2, nev= );
+\eFF
+
+where the functions FOP, FB and FB1 define respectively the matrix product of $A$, $B$ and $B^{-1}$
+
+\item mode=3: Shift-invert mode for solving $ A u = \lambda B u $
+
+\bFF
+         @int k=@EigenValue(n,A1=FOP1,B=FB,mode=3,sigma=sigma, nev= );
+\eFF
+
+where the functions FOP1 and FB define respectively the matrix product of $OP^{-1} = (A - \sigma B)^{-1} $ and $B$
+
+\end{itemize}
+
+You can also specify which subset of eigenvalues you want to compute (which= ). The default value is which=``LM'', for eigenvalues with largest magnitude. ``SM'' is for smallest magnitude, ``LA'' for largest algebraic value, ``SA'' for smallest algebraic value, and ``BE'' for both ends of the spectrum.\\
+
+Remark: For complex problems, you need to use the keyword \ttCC{@complexEigenValue} instead of \ttCC{@EigenValue} when passing operators through functions.
 
 \begin{note}{Boundary condition and Eigenvalue Problems\label{note BC EV}}\label{pp BC EV}
 
@@ -13393,7 +13425,9 @@ We compute only small mode, so we get the good  one in this case.
          the relative accuracy to which eigenvalues are to be determined;
          \item[\texttt{sigma=}]  \index{EigenValue!sigma=}  the shift value;
          \item[\texttt{maxit=}]  \index{EigenValue!maxit=}  the maximum number of iterations allowed;
-          \item[\texttt{ncv=}]  \index{EigenValue!ncv=}   the number of Arnoldi vectors generated at each iteration of ARPACK.
+         \item[\texttt{ncv=}]  \index{EigenValue!ncv=}   the number of Arnoldi vectors generated at each iteration of ARPACK;
+         \item[\texttt{mode=}]  \index{EigenValue!mode=}   the computational mode used by ARPACK (see above);
+         \item[\texttt{which=}]  \index{EigenValue!which=}   the  requested subset of eigenvalues (see above).
  \end{description}
 
 
