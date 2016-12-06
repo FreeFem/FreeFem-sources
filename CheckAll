@@ -1,5 +1,5 @@
 test -x ./src/nw/FreeFem++-nw && ff=../src/nw/FreeFem++ || ff=`which FreeFem++`
-test -x ./src/mpi/ff-mpirun && ff=../src/mpi/ff-mpirun || ffmpi=`which ff-mpirun` 
+test -x ./src/mpi/ff-mpirun && ffmpi=../src/mpi/ff-mpirun || ffmpi=`which ff-mpirun` 
 
 if [ -x ./src/bin/FreeFem++-nw.exe ] ; then ff=../src/bin/FreeFem++-nw.exe; fi
 if [ -x ./src/bin-win32/FreeFem++-nw.exe ] ; then ff=../src/bin-win32/FreeFem++-nw.exe; fi
