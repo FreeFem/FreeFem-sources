@@ -111,15 +111,18 @@ double distmin(const Rd & A,double a,const Rd & B,double b,const Rd & Q,double a
         Rd C = A + lc*AB;// or Q - CQ
         assert( abs((CQ,AB)) < 1e-6);
         double r2=  (CQ,CQ)/ab2 ;
-        double lpm = lc -  sqrt(r2*h2/(1-h2));
+        double lpm = lc + copysign(sqrt(r2*h2/(1-h2)),-ab);
         //  lpm in [0,1]
-        if(verbosity>999) cout << " lgm " << lpm << " r= " << sqrt(r2) << endl;
+        if(verbosity>999) {
+            Rd M =A +lpm*AB;
+            cout << " lgm " << lpm << " r= " << sqrt(r2) << " M= " << M << " Q =" << Q << " ::" <<  a + lpm*ab << " " << ab <<  endl;
+        }
         lpm = max(0.,min(1.,lpm));
         
         if( lpm > 0. && lpm < 1)
         {
             cas =2;
-            Rd MQ(A +lpm*AB,Q);
+            Rd M =A +lpm*AB,MQ(M,Q);
             dmin = a + lpm*ab + sqrt((MQ,MQ));
             /*  // check ???? min ....
              lpm += 0.001;
@@ -344,6 +347,7 @@ int DistanceIso0(const Tet &K,double *f,double *fK)
 int DistanceIso0(const Triangle &K,double *f,double *fK)
 {
     // fk value f
+  
     const double eps =1e-16;
     R2 P[6];
     int np =0;
@@ -378,8 +382,8 @@ int DistanceIso0(const Triangle &K,double *f,double *fK)
             fK[j]=distmin(P[0],P[1],(R2) K[j]);
     }
     else  fK[0]=fK[1]=fK[2]=0. ;//
-    if(debug) cout << "1 DistanceIso0  " <<fK[0] << " " << fK[1] << fK[2] << endl;
-    return 1;
+    if(debug) cout << np << " DistanceIso0  np="  << " " << fK[0] << " " << fK[1] << " "<< fK[2] << endl;
+    return np;
     
 }
 
@@ -435,7 +439,7 @@ pair<double,long > Add(const Mesh & Th,int kk,int ee,double *fv)
     int q = ee;
     int ia = Th(kk,a), ib=Th(kk,b), iq = Th(kk,q);
     double fq=distmin<R2>(K[a],fv[ia],K[b],fv[ib],K[q]);
-    if(debug)  cout << " ** add " << kk << " " << ee << " ; " <<  fq << " :: " << fv[ia] << " " << fv[ib]<< " || " << fv[iq] << endl;
+    if(debug)  cout << iq << " ** add " << kk << " " << ee << " ; " <<  fq << " :: " << fv[ia] << " " << fv[ib]<< " || " << fv[iq] << endl;
     return pair<double,long >(fq,kk*3+ee);
 }
 pair<double,long > Add(const Mesh3 & Th,int kk,int ee,double *fv)
@@ -464,14 +468,17 @@ int DistanceIso0(const Mesh &Th,int k,double *f,double *fv)
     // cut here ..
     double FK[nbve]={fv[iK[0]],fv[iK[1]],fv[iK[2]]};
     int cas=DistanceIso0(K,fk,FK) ;
-    if( cas > 0)//  OK iso cut triangle
+    if( cas > 1)//  OK iso cut triangle
     {  //
        
         fv[iK[0]]= min(fv[iK[0]],FK[0]);
         fv[iK[1]]= min(fv[iK[1]],FK[1]);
         fv[iK[2]]= min(fv[iK[2]],FK[2]);
+        if( debug)  cout << " DistanceIso0 set K" <<cas << " " <<  iK[0] << " "<< iK[1] << " "<< iK[2]
+            << " " << fv[iK[0]] << " " << fv[iK[1]] << " " << fv[iK[2]] << endl;
+        
     }
-    return cas;
+    return cas>1;
 }
 
 int DistanceIso0(const Mesh3 &Th,int k,double *f,double *fv)
@@ -489,7 +496,6 @@ int DistanceIso0(const Mesh3 &Th,int k,double *f,double *fv)
     int cas=DistanceIso0(K,fk,FK) ;
     if( cas > 0)//  OK iso cut triangle
     {  //
-        
         fv[iK[0]]= min(fv[iK[0]],FK[0]);
         fv[iK[1]]= min(fv[iK[1]],FK[1]);
         fv[iK[2]]= min(fv[iK[2]],FK[2]);
@@ -555,7 +561,7 @@ AnyType Distance(Stack stack,const Mesh * pTh,Expression eff,KN<double> *pxx,dou
     for (long k=0;k<Th.nt;++k)
     {
         int cas=DistanceIso0(Th,k,f,fv) ;
-        if( cas > 0)
+        if( cas )
         {
          ++nt0;
          markT[k]=0;
@@ -588,7 +594,7 @@ AnyType Distance(Stack stack,const Mesh * pTh,Expression eff,KN<double> *pxx,dou
         int iq = Th(k,e);
         
         if(debug)
-            cout << fm << " iq " << iq << " k=" << k <<" e=" <<  e << " fv:"<< fv[iq] << " / " << markT[k] <<endl;
+            cout <<iq << " "  <<  fm << " -- k=" << k <<" e=" <<  e << " fv:"<< fv[iq] << " / " << markT[k] <<endl;
         
         if( markT[k] != 0) // already done, skeep
         {
