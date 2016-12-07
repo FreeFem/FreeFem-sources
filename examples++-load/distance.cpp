@@ -573,7 +573,7 @@ AnyType Distance(Stack stack,const Mesh * pTh,Expression eff,KN<double> *pxx,dou
             for(int e=0; e<nbve; ++e)
             {
                 int ee=e,kk= Th.ElementAdj(k,ee);
-                if( kk>0 &&  (markT[kk]!=0))
+                if( kk>=0 &&  (markT[kk]!=0))
                     pqs.push(Add(Th,kk,ee,fv));
                 
             }
@@ -603,7 +603,7 @@ AnyType Distance(Stack stack,const Mesh * pTh,Expression eff,KN<double> *pxx,dou
             for(int e=0; e<nbve; ++e)
             {
                 int ee=e,kk= Th.ElementAdj(k,ee);
-                if( kk>0 &&  (markT[kk]!=0))
+                if( kk>=0 &&  (markT[kk]!=0))
                     pqs.push(Add(Th,kk,ee,fv));
             }
         }
