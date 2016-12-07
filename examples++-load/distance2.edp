@@ -18,7 +18,7 @@ plot(u, dim=3, value=1,wait=1);
 verbosity=1; 
 
 
-distance(Th,u,v[]);
+distance(Th,f0,v[]);
 
 real[int] v0 = [-10,-1,-0.01,0,0.01,1,10];
 plot(u,wait=1,viso=v0);
