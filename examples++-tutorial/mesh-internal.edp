@@ -1,0 +1,47 @@
+// FFCS: for regression tests
+real regtest;
+{
+    // example of mesh with a given set of internal point (P)
+    // P(i,0) x,
+    // P(i,1) y,
+    // P(i,2) = mesh density close to x,y not mandatory ..
+    verbosity=1;
+   
+ real[int,int] P(100,3);
+ for(int i=0; i<P.n; ++i)
+  {
+      P(i,0) = 0.5+0.1*cos(i*0.02*pi);
+      P(i,1) = 0.5+0.1*sin(i*0.02*pi);
+      P(i,2) = 0.05*0.02*2*pi;// mesh size auron point..
+  }
+// multy border syntax version 3.30 avril 2014 ... 
+  real[int] xx=[0,1,1,0],
+            yy=[0,0,1,1];
+  // radius, centre of the 4 circles .. 
+  real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
+            XC= [0.2,0.8,0.2,0.8],
+            YC= [0.2,0.8,0.8,0.2];
+  int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
+  // of the 4 circles borders  
+
+  border bb(t=0,1;i) 
+  {
+  // i is the the index variable of the multi border loop 
+    int ii = (i+1)%4; real t1 = 1-t;
+    x =  xx[i]*t1 + xx[ii]*t;
+    y =  yy[i]*t1 + yy[ii]*t;
+    label = 0; ; 
+  }
+  
+  border cc(t=0,2*pi;i) 
+ {
+    x = RC[i]*cos(t)+XC[i];
+    y = RC[i]*sin(t)+YC[i];
+    label = i+1; 
+  }
+  int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively . 
+  plot(bb(nn),cc(NC),wait=1);
+  mesh th= buildmesh(bb(nn)+cc(NC), points=P,nbvx=100000) ; 
+  plot(th,wait=1,ps="multy-border+internal.eps"); 
+  regtest = th.area; 
+}

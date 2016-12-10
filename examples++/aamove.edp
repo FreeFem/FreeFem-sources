@@ -1,0 +1,30 @@
+verbosity=4;
+border a(t=0,1){x=t;y=0;label=1;};
+border b(t=0,0.5){x=1;y=t;label=1;};
+border c(t=0,0.5){x=1-t;y=0.5;label=1;};
+border d(t=0.5,1){x=0.5;y=t;label=1;};
+border e(t=0.5,1){x=1-t;y=1;label=1;};
+border f(t=0,1){x=0;y=1-t;label=1;};
+func uu= sin(y*pi)/10;
+func vv= cos(x*pi)/10;
+
+mesh Th = buildmesh ( a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
+Th=movemesh(Th,[x+uu,y+vv]);
+plot(Th,wait=1,fill=1);
+fespace Vh(Th,P2);
+
+Vh u,v;
+
+u=0;
+func ff= 1;
+func gg= 0;
+int i=0;
+problem Probem1(u,v,solver=LU,init=i,eps=-1.0e-6) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th) ( v*ff ) 
+  + on(1,u=gg)  ;
+  
+real cpu=clock();
+Probem1; // SOLVE THE PROBLEM 1
+plot(u,wait=1);
+cout << " CPU = " << clock()-cpu << endl;
