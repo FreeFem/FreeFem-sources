@@ -554,13 +554,13 @@ bool mylex::SetMacro(int &ret)
 	string item;
 	int i = source().get();
 	if (i == EOF) {  cerr << "in macro " <<macroname <<  endl;
-	ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // ");}
+	ErrorScan(" ENDOFFILE in macro definition. remark:a macro end with // or EndMacro");}
 	int ii = source().peek();
-	if(isspace(i) && isalpha(ii) ) {
-	    def +=char(i);
+	if(isalpha(i) && isalpha(ii) ) {//  Modif F.H
+	    //def +=char(i);
+            item = char(i);
 	    i = source().get();
-	    item = "";
-	    while(isalpha(i))
+            while(isalpha(i))
 	      {
 		item += char(i);
 		i = source().get();
