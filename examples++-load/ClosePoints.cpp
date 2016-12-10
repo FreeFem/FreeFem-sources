@@ -622,13 +622,14 @@ static void init()
     Global.Add("radiusSearch","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(ff_flann_search));
 #endif
     Global.Add("Voisinage","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(Voisinage));
+    Global.Add("neighborhood","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(Voisinage));
     Global.Add("ClosePoints2","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2));
   //s  Global.Add("ClosePoints2t","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2t));
     
     //   numbering ..
    // Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<false>));
    // Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<false>,1));
-    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<false>,0));
+    Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<false>));
     //Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<false>));
    // Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<false>));
    // Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<false>));
@@ -637,7 +638,7 @@ static void init()
     // inv  numbering ..
    // Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<true>));
    // Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<true>,1));
-    Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<true>,0));
+    Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM_<double>     >(CloseTo<true>));
   //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<true>));
   //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<true>));
   //  Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<true>));
