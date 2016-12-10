@@ -1,5 +1,10 @@
-@  changeset:   3875:41ff20691e6b
+@  changeset:   3876:358024a440dd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Dec 07 19:08:22 2016 +0100
+|  summary:     coorect typ in distance (miss 0  element) and add trivail exact  test
+|
+o  changeset:   3875:41ff20691e6b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Dec 07 18:44:21 2016 +0100
 |  summary:     coorect problem of signe in optimisation part in distance function
