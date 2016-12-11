@@ -2491,8 +2491,6 @@ void Check(const Opera &Op,int N,int  M)
 	      int li=Kv.dfcend(icomp);
 	      int fj=Ku.dfcbegin(jcomp);
 	      int lj=Ku.dfcend(jcomp);
-	      fi=0,fj=0;
-	      li=n,lj=m;
 	      ccc *= coef;
 	      
 	      // attention la fonction test donne la ligne 

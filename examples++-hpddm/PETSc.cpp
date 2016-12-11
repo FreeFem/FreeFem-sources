@@ -225,7 +225,7 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
     DistributedCSR<HpddmType>* ptA = GetAny<DistributedCSR<HpddmType>*>((*A)(stack));
     KN<Matrice_Creuse<PetscScalar>>* ptK = GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*K)(stack));
     KN<long>* ptJ = nargs[0] ? GetAny<KN<long>*>((*nargs[0])(stack)) : nullptr;
-    if((ptJ && ptJ->n == ptK->n) || size == ptK->n) {
+    if(!ptJ || ptJ->n == ptK->n) {
         double timing = MPI_Wtime();
         std::vector<std::pair<int, int>> v;
         if(ptJ) {
@@ -241,8 +241,8 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         std::vector<std::pair<int, int>>::const_iterator it = std::lower_bound(v.cbegin(), v.cend(), std::make_pair(rank, 0), [](const std::pair<int, int>& lhs, const std::pair<int, int>& rhs) { return lhs.first < rhs.first; });
         int n = 0;
         if(!ptJ) {
-            dims[rank] = ptK->operator[](rank).M();
-            n = ptK->operator[](rank).N();
+            dims[rank] = ptK->operator[](mpisize / ptK->n > 1 ? 0 : rank).M();
+            n = ptK->operator[](mpisize / ptK->n > 1 ? 0 : rank).N();
         }
         else if(it->first == rank) {
             dims[rank] = ptK->operator[](it->second).M();
@@ -251,6 +251,8 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         MPI_Allreduce(MPI_IN_PLACE, dims, size, MPI_INT, MPI_SUM, PETSC_COMM_WORLD);
         if(ptJ)
             size = v.size();
+        else
+            size = ptK->n;
         int* ia = new int[n + 1];
         for(int i = 0; i < n + 1; ++i) {
             ia[i] = 0;
@@ -284,7 +286,10 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         MatCreate(PETSC_COMM_WORLD, &(ptA->_petsc));
         if(bs > 1)
             MatSetBlockSize(ptA->_petsc, bs);
-        MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
+        if(!ptJ && (mpisize / ptK->n > 1))
+            MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
+        else
+            MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
         MPI_Comm_size(PETSC_COMM_WORLD, &size);
         if(size > 1) {
             MatSetType(ptA->_petsc, MATMPIAIJ);
