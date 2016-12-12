@@ -1,5 +1,23 @@
-@  changeset:   3876:358024a440dd
-|  tag:         tip
+@    changeset:   3879:13909d300b8c
+|\   tag:         tip
+| |  parent:      3877:c4b6e5efc988
+| |  parent:      3878:fc43c7fcb915
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Sat Dec 10 21:51:44 2016 +0100
+| |  summary:     amerge with P Jolivet
+| |
+| o  changeset:   3878:fc43c7fcb915
+| |  parent:      3876:358024a440dd
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sat Dec 10 11:00:16 2016 +0100
+| |  summary:     FreeFem++ days examples.
+| |
+o |  changeset:   3877:c4b6e5efc988
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Sat Dec 10 21:47:23 2016 +0100
+|    summary:     and english name to function voisinage
+|
+o  changeset:   3876:358024a440dd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Dec 07 19:08:22 2016 +0100
 |  summary:     coorect typ in distance (miss 0  element) and add trivail exact  test

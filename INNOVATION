@@ -1,3 +1,5 @@
+- version 3.50-1 
+ - correct bug in distance plugin add test  examples++-load/testdist.edp to see ans correct the bug. 
  - correct bug in color when mixing line and iso. (Thank to Jon Sauer) 
  - correct bug in examples++-load/ttestio.edp in case of the no existance of  file 
    "spherewithahole.mesh"  (after clean) 
