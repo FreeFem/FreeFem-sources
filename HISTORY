@@ -1,6 +1,16 @@
-@    changeset:   3879:13909d300b8c
-|\   tag:         tip
-| |  parent:      3877:c4b6e5efc988
+@  changeset:   3881:829e2f79ec20
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Dec 12 10:02:59 2016 +0100
+|  summary:     pass to version 3.50-1
+|
+o  changeset:   3880:1b22610e87d8
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Sun Dec 11 11:24:52 2016 +0100
+|  summary:     Huge performance issue with unsymmetric matrix assembly fixed.
+|
+o    changeset:   3879:13909d300b8c
+|\   parent:      3877:c4b6e5efc988
 | |  parent:      3878:fc43c7fcb915
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Sat Dec 10 21:51:44 2016 +0100
