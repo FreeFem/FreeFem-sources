@@ -2,19 +2,19 @@ load "BernadiRaugel"
 // remark: the sign of p is correct 
 real s0=clock();
 mesh Th=square(10,10);
-fespace Vh2(Th,P2BR);
-fespace Vh(Th,P0);
-Vh2 [u1,u2],[up1,up2];
-Vh2 [v1,v2]; 
+fespace Vh2(Th,[P2BR,P0]);
+//fespace Vh(Th,P0);
+Vh2 [u1,u2,p],[up1,up2,pp];
+Vh2 [v1,v2,q]; 
 
 
 real reylnods=400;
 //cout << " Enter the reynolds number :"; cin >> reylnods;
 assert(reylnods>1 && reylnods < 100000); 
-[up1,up2]=[0.,0.];
+[up1,up2,pp]=[0.,0.,0.];
 
 func g=(x)*(1-x)*4; 
-Vh p=0,q;
+//Vh p=0,q;
 real alpha=0;
 real  nu=1;
 int i=0,iter=0;
@@ -74,10 +74,10 @@ for (iter=1;iter<=nbiter;iter++)
   dt = dt*coefdt;
   tol = tol *coeftol;
   cut = cut *coefcut;
-  [u1,u2]=[u1,u2];// reinterpolation 
-  [up1,up2]=[u1,u2];// reinterpolation 
+  [u1,u2,p]=[u1,u2,p];// reinterpolation 
+  [up1,up2,pp]=[u1,u2,p];// reinterpolation 
 	
-  p=p;	
+ // p=p;	
 //  plot(coef=0.2,cmm=" [u1,u2] et p --------- ",p,[u1,u2],wait=1);  	
    }
 cout << "CPU " << clock()-s0 << "s " << endl;     
