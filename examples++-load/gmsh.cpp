@@ -154,7 +154,8 @@ Mesh * GMSH_Load(const string & filename)
 	  if(!fgets(str, sizeof(str), fp)) exit(1);
 	  
 	  if(sscanf(str, "%d", &nv) != 1) exit(1);
-	  printf("%d vertices\n", nv);
+      if(verbosity > 0)
+          printf("%d vertices\n", nv);
 	  
 	  // local variables freefem++
 	  vff = new Mesh::Vertex[nv]; 
@@ -532,7 +533,8 @@ Mesh3 * GMSH_Load3(const string & filename)
 	  if(!fgets(str, sizeof(str), fp)) exit(1);
 	  
 	  if(sscanf(str, "%d", &nv) != 1) exit(1);
-	  printf("%d vertices\n", nv);
+      if(verbosity > 0)
+          printf("%d vertices\n", nv);
 	  
 	  // local variables freefem++
 	  vff = new Vertex3[nv]; 
@@ -673,9 +675,11 @@ Mesh3 * GMSH_Load3(const string & filename)
 	  int numElements;
 	  sscanf(str, "%d", &numElements);
 
-	  printf("%d tetrahedrons\n", nt);
-	  printf("%d triangles\n", nbe);
-	  printf("%d numElements\n", numElements);
+      if(verbosity > 0) {
+          printf("%d tetrahedrons\n", nt);
+          printf("%d triangles\n", nbe);
+          printf("%d numElements\n", numElements);
+      }
 	  if(!binary){
 
 	    int ie=0; 
