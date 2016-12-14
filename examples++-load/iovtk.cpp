@@ -4026,7 +4026,7 @@ static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"
   //typedef Mesh2 *pmesh2;
   typedef Mesh3 *pmesh3;
   //if (verbosity)
-  if(verbosity) cout << " load: iovtk " << endl;
+  if(verbosity&& (mpirank==0)) cout << " load: iovtk " << endl;
   Global.Add("savevtk","(",new OneOperatorCode<VTK_WriteMesh_Op>);
   Global.Add("savevtk","(",new OneOperatorCode<VTK_WriteMesh3_Op>);
   Global.Add("vtkload3","(",new VTK_LoadMesh3);

@@ -2552,7 +2552,7 @@ $1 */
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
-  if(verbosity) cout << " load: tetgen  " << endl;
+  if(verbosity&& (mpirank==0)) cout << " load: tetgen  " << endl;
   
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg_file);
   Global.Add("tetgconvexhull","(",new ConvexHull3D_tetg_file(1));
