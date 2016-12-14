@@ -120,8 +120,8 @@ LIBPAR  = #$(SCALAP) $(FFMPILIB)
 # The parallel version is not concerned by the next two lines.
 # They are related to the sequential library provided by MUMPS,
 # to use instead of ScaLAPACK and MPI.l
-INCSEQ  = -I$(DOWNLOADFF)/mumps-seq/MUMPS_5.0.1/libseq
-LIBSEQ  = -L$(DOWNLOADFF)//mumps-seq/MUMPS_5.0.1/libseq  -lmpiseq$(PLAT)
+INCSEQ  = -I$(DOWNLOADFF)/mumps-seq/MUMPS_5.0.2/libseq
+LIBSEQ  = -L$(DOWNLOADFF)//mumps-seq/MUMPS_5.0.2/libseq  -lmpiseq$(PLAT)
 
 # DEFINE HERE YOUR BLAS LIBRARY
 
