@@ -931,10 +931,9 @@ bool SaveGMSH(pmesh3 pTh,string *filewoext)
 static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
   
   //if (verbosity)
-  if(verbosity>1) cout << " load: gmsh " << endl;
+  if(verbosity>1&& (mpirank==0)) cout << " load: gmsh " << endl;
   Global.Add("gmshload3","(",new GMSH_LoadMesh3);
   Global.Add("gmshload","(",new GMSH_LoadMesh);
    Global.Add("savegmsh","(",new OneOperator2<bool,pmesh3,string*>(SaveGMSH));
-  if(verbosity>1) cout << " load: gmsh  " << endl;
 }
 LOADFUNC(Load_Init)
