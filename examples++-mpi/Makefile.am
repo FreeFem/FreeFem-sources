@@ -26,7 +26,7 @@ TESTS=  DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp 
 	NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp Stokes-v1-matrix-superludist.edp		\
 	Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp beam-3d-matrix-superludist.edp			\
 	cavityNewtow-MUMPS.edp chaleur3D-hips.edp chaleur3D-mumps.edp chaleur3D-superludist.edp cmaes-mpi-VarIneq.edp	\
-	essai.edp mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp 
+	essai.edp mortar-DN-4-mpi.edp testsolver_MUMPS.edp testsolver_SuperLU_DIST.edp parmetis.edp parmetis-3d.edp
 
 XFAIL_TESTS=$(TESTS)
 
@@ -52,7 +52,7 @@ parms_FreeFem.cpp \
 real_SuperLU_DIST_FreeFem.cpp \
 real_pastix_FreeFem.cpp mpi-cmaes.cpp \
 ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt \
-MUMPS.cpp   \
+MUMPS.cpp parmetis.cpp  \
 MUMPS.edp  dmatrix.hpp  ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperlu_dist_fileparam.txt
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
@@ -60,7 +60,7 @@ MUMPS.edp  dmatrix.hpp  ffmumps_fileparam.txt		ffpastix_iparm_dparm.txt	ffsuperl
 # deactivated).
 
 LIST_COMPILE=@TOOL_DYLIB_mumps@ @TOOL_DYLIB_hips@ @TOOL_DYLIB_superludist@ @TOOL_DYLIB_pastix@ MPICG.$(DYLIB_SUFFIX)	\
-@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX)
+@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX) parmetis.$(DYLIB_SUFFIX)
 
 if FFCS_MPIOK
 
