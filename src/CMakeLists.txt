@@ -33,14 +33,14 @@ TARGET_LINK_LIBRARIES(ffglut lglib ${CMAKE_THREAD_LIBS_INIT} ${OPENGL_gl_LIBRARY
 ###############
 # FREEFEM++-MPI
 ###############
-#ADD_EXECUTABLE(FreeFem++-mpi ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi.cpp
-#                             ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp
-#                             ${CMAKE_SOURCE_DIR}/src/lglib/mymain.cpp
-#                             ${CMAKE_SOURCE_DIR}/src/lglib/lg.tab.cpp
-#                             ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
+ADD_EXECUTABLE(FreeFem++-mpi ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi.cpp
+                             ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp
+                             ${CMAKE_SOURCE_DIR}/src/lglib/mymain.cpp
+                             ${CMAKE_SOURCE_DIR}/src/lglib/lg.tab.cpp
+                             ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
 FIND_PACKAGE(MPI REQUIRED)
 INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
-#TARGET_LINK_LIBRARIES(FreeFem++-mpi ${MPI_CXX_LIBRARIES} libff umfpack ${HDF5_LIBRARIES} arpack blas)
+TARGET_LINK_LIBRARIES(FreeFem++-mpi ${MPI_CXX_LIBRARIES} libff umfpack ${HDF5_LIBRARIES} arpack blas)
 
 
 
