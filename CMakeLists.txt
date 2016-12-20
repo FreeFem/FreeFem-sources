@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(FreeFem++ C CXX Fortran)
 
+SET(FREEFEM_VERSION 3.5)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 INCLUDE(ProcessorCount)
@@ -32,20 +34,17 @@ ENDIF(CMAKE_BUILD_TYPE EQUAL "Debug")
 FILE(GLOB FEMLIB_SRC src/femlib/*.cpp)
 FILE(GLOB_RECURSE FFLIB_SRC src/fflib/*.cpp)
 
+#############
+# TEST
+######
+
+ADD_CUSTOM_TARGET(check ${CMAKE_SOURCE_DIR}/CheckAll)
+
 ###########
 # DOWNLOAD
 ##########
 
 INCLUDE(FFInstallPackage)
-
-#FF_INSTALL_PACKAGE(MMG3D)
-#FF_INSTALL_PACKAGE(Scalapack)
-#FF_INSTALL_PACKAGE(Scotch)
-#FF_INSTALL_PACKAGE(FFTW)
-
-#FILE(DOWNLOAD http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz 
-#              mydownload/superlu_4.3.tar.gz
-#              SHOW_PROGRESS)
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples++-load)
