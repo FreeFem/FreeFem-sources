@@ -2711,6 +2711,7 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
     Triangle3 *b= new Triangle3[nbe_t];
     Triangle3 *bb=b;
     double mes=0,mesb=0;
+    if(verbosity > 1)
     cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
     
     // determination of vertex

@@ -192,8 +192,8 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 
 #download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.5.2.tar.gz',
 #	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.5.2.tar.gz','d707336a98d7cb31d843804d020edc94');
-download('hpddm','https://github.com/hpddm/hpddm/archive/90a9bb7370b8e548a10669321ec4bf523eaedc1c.zip',
-	 'https://github.com/hpddm','hpddm.zip','fb1f4a2020c4586600e00188aa84b0c9','BAD_CERT');
+download('hpddm','https://github.com/hpddm/hpddm/archive/cbad391f2eaa3e9464786ca3dffe1f2ad0da9837.zip',
+	 'https://github.com/hpddm','hpddm.zip','0f75c005cde5910886fbe26aabc171c1','BAD_CERT');
 
 # run all downloads concurrently
 

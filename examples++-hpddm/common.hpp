@@ -115,6 +115,11 @@ bool destroyRecycling(Type* const& Op) {
     HPDDM::Recycling<K>::get()->destroy(Op->prefix());
     return false;
 }
+template<class Type>
+bool statistics(Type* const& Op) {
+    Op->statistics();
+    return false;
+}
 
 static void Init_Common() {
     Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));

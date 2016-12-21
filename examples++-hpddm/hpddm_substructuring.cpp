@@ -585,6 +585,7 @@ void add() {
     Global.Add("nbMult", "(", new OneOperator1_<long, Type<K, S>*>(nbMult));
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
     addInv<Type<K, S>, InvSubstructuring, KN<K>, K>();
+    Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
 }
 }
 

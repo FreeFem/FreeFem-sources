@@ -309,26 +309,27 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(ptX->n != ptRHS->n || ptRHS->n < ptA->getDof())
         return 0L;
     HPDDM::Option& opt = *HPDDM::Option::get();
+    const std::string& prefix = ptA->prefix();
     HPDDM::underlying_type<K> eps = nargs[0] ? GetAny<HPDDM::underlying_type<K>>((*nargs[0])(stack)) : -1.0;
     if(nargs[0])
         std::cerr << "Please do not use the legacy option \"-eps\", set instead \"-hpddm_tol\", cf. \"-hpddm_help\"" << std::endl;
     if(std::abs(eps + 1.0) > 1.0e-6)
-        opt["tol"] = eps;
+        opt[prefix + "tol"] = eps;
     int dim = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : -1;
     if(nargs[1])
         std::cerr << "Please do not use the legacy option \"-dim\", set instead \"-hpddm_gmres_restart\", cf. \"-hpddm_help\"" << std::endl;
     if(dim != -1)
-        opt["gmres_restart"] = dim;
+        opt[prefix + "gmres_restart"] = dim;
     int iter = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : -1;
     if(nargs[2])
         std::cerr << "Please do not use the legacy option \"-iter\", set instead \"-hpddm_max_it\", cf. \"-hpddm_help\"" << std::endl;
     if(iter != -1)
-        opt["max_it"] = iter;
+        opt[prefix + "max_it"] = iter;
     if(nargs[7])
         std::cerr << "Please do not use the legacy option \"-solver\", set instead \"-hpddm_schwarz_method\" and \"-hpddm_schwarz_coarse_correction\", cf. \"-hpddm_help\"" << std::endl;
     KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
     Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
-    if(opt.set("schwarz_coarse_correction") && pair)
+    if(opt.set(prefix + "schwarz_coarse_correction") && pair)
         if(pair->p) {
             int flag;
             MPI_Test(&(pair->p->first), &flag, MPI_STATUS_IGNORE);
@@ -344,7 +345,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
     }
     double timer = MPI_Wtime();
-    if(mpisize > 1 && (mA && opt.any_of("schwarz_method", { 1, 2, 4 }))) {
+    if(mpisize > 1 && (mA && opt.any_of(prefix + "schwarz_method", { 1, 2, 4 }))) {
         HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
         ptA->callNumfact(&dA);
     }
@@ -363,7 +364,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     }
     bool excluded = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
     if(excluded)
-        opt["master_exclude"];
+        opt[prefix + "master_exclude"];
     if(pair)
         if(pair->p) {
             if(timing)
@@ -377,12 +378,15 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             timer = MPI_Wtime();
         }
     MPI_Barrier(MPI_COMM_WORLD);
-    if(opt.val<unsigned short>("reuse_preconditioner") <= 1 && !excluded && pair && pair->p && timing && mpisize > 1)
+    if(timing && opt.val<unsigned short>(prefix + "reuse_preconditioner") <= 1 && !excluded && pair && pair->p && mpisize > 1)
         (*timing)[timing->n - 1] += MPI_Wtime() - timer;
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
-    if(rank != mpirank || rank != 0)
+    if(rank != mpirank || rank != 0) {
         opt.remove("verbosity");
+        if(prefix.size() > 0)
+            opt.remove(prefix + "verbosity");
+    }
     timer = MPI_Wtime();
     if(!excluded)
         HPDDM::IterativeMethod::solve(*ptA, (K*)*ptRHS, (K*)*ptX, mu, MPI_COMM_WORLD);
@@ -394,8 +398,8 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             std::cout << std::scientific << " --- system solved (in " << timer << ")" << std::endl;
         HPDDM::underlying_type<K>* storage = new HPDDM::underlying_type<K>[2 * mu];
         ptA->computeError(*ptX, *ptRHS, storage, mu);
-        char v = opt.val<char>("verbosity", 0);
-        if(v > 0 && rank == 0) {
+        char v = opt.val<char>(prefix + "verbosity", 0);
+        if(v > 0) {
             std::cout << std::scientific << " --- error = " << storage[1] << " / " << storage[0];
             if(mu > 1)
                 std::cout << " (rhs #1)\n";
@@ -624,7 +628,6 @@ class InvSchwarz {
         void solve(U out) const {
             if(out->n != u->n || u->n < (*t).getDof())
                 return;
-            HPDDM::Option& opt = *HPDDM::Option::get();
             unsigned short mu = u->n / (*t).getDof();
             MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, (*t).getCommunicator());
             const HPDDM::MatrixCSR<K>* A = (*t).getMatrix();
@@ -645,7 +648,7 @@ class InvSchwarz {
                 std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
             }
             if(mpirank != 0)
-                opt.remove("verbosity");
+                HPDDM::Option::get()->remove((*t).prefix("verbosity"));
             HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, mu, MPI_COMM_WORLD);
         }
         static U init(U Ax, InvSchwarz<T, U, K> A) {
@@ -669,6 +672,7 @@ void add() {
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
+    Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
 }
 }
 
