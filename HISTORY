@@ -1,5 +1,30 @@
-@  changeset:   3881:829e2f79ec20
+@  changeset:   3886:a6db2521d6f4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Dec 14 14:12:52 2016 +0100
+|  summary:     coorect apss mump 5.01 to 5.0.2
+|
+o  changeset:   3885:a6c6da1830a1
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Wed Dec 14 09:23:52 2016 +0100
+|  summary:     Some more unnecessary messages.
+|
+o  changeset:   3884:e5b0ba488ca7
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Tue Dec 13 13:14:15 2016 +0100
+|  summary:     No output when verbosity set to 0.
+|
+o  changeset:   3883:9b07ae43fc6e
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Dec 12 11:42:09 2016 +0100
+|  summary:     coorect NSP2BRP0 example
+|
+o  changeset:   3882:eb0ff5bce9eb
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Dec 12 10:45:38 2016 +0100
+|  summary:     jsute commit
+|
+o  changeset:   3881:829e2f79ec20
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Dec 12 10:02:59 2016 +0100
 |  summary:     pass to version 3.50-1
