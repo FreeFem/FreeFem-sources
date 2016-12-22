@@ -47,10 +47,6 @@ FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
 #FF_INSTALL_PACKAGE(SUPERLU)          # makefile
 FF_INSTALL_PACKAGE(Tetgen)
 
-FIND_PACKAGE(GSL)
-FIND_PACKAGE(HDF5)
-FIND_PACKAGE(LAPACK)
-FIND_PACKAGE(MPI)
 
 
 # dfft
@@ -118,7 +114,6 @@ INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 #INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
 # scotch.cpp
-FIND_PACKAGE(SCOTCH)
 IF(SCOTCH_FOUND)
   ADD_LIBRARY(scotch SHARED scotch.cpp)
   INCLUDE_DIRECTORIES(/usr/include/scotch)
