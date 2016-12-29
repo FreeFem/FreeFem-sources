@@ -41,8 +41,9 @@
 #include "FESpace.hpp" 
 
 namespace Fem2D {
+void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=true);
 
-void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=true)
+void NewSetColorTable(int nb,float *colors,int nbcolors,bool hsv)
 {
   if(colors && nbcolors)
     SetColorTable1(nb,hsv,nbcolors,colors);
