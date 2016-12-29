@@ -3540,7 +3540,16 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
       }
     return err;
 }
-   
+//  missing function
+inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=true)
+{
+    if(colors && nbcolors)
+        SetColorTable1(nb,hsv,nbcolors,colors);
+    else
+        SetColorTable(nb);
+}
+
+
 /// <<Plot_operator_brackets>> from class [[Plot]]
 AnyType Plot::operator()(Stack s) const{
     
@@ -4238,7 +4247,7 @@ AnyType Plot::operator()(Stack s) const{
 	       
 		   else if(l[i].what==3)
 		     {
-			 
+                         penthickness(6);
 			 tab x=l[i].evalt(0,s);
 			 tab y=l[i].evalt(1,s);
                          KN<double> pz0;
@@ -4248,7 +4257,7 @@ AnyType Plot::operator()(Stack s) const{
                          long k= Min(x.N(),y.N());
                          bool colored= (v.N()==k);
                         // if(colored)
-                         //   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
+                         NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
 			 // cout << " a faire " << endl;
 			 // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
 			 rmoveto(x[0],y[0]);

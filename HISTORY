@@ -1,73 +1,122 @@
-@  changeset:   3886:a6db2521d6f4
+@  changeset:   3894:f9cb3b4b0c8c
 |  tag:         tip
+|  parent:      3891:09c748bf975b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Dec 14 14:12:52 2016 +0100
-|  summary:     coorect apss mump 5.01 to 5.0.2
+|  date:        Thu Dec 22 16:59:06 2016 +0100
+|  summary:     correct problem of link with hpddm know by defaut they use mumps if possible
 |
-o  changeset:   3885:a6c6da1830a1
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Wed Dec 14 09:23:52 2016 +0100
-|  summary:     Some more unnecessary messages.
-|
-o  changeset:   3884:e5b0ba488ca7
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Tue Dec 13 13:14:15 2016 +0100
-|  summary:     No output when verbosity set to 0.
-|
-o  changeset:   3883:9b07ae43fc6e
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Dec 12 11:42:09 2016 +0100
-|  summary:     coorect NSP2BRP0 example
-|
-o  changeset:   3882:eb0ff5bce9eb
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Dec 12 10:45:38 2016 +0100
-|  summary:     jsute commit
-|
-o  changeset:   3881:829e2f79ec20
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Dec 12 10:02:59 2016 +0100
-|  summary:     pass to version 3.50-1
-|
-o  changeset:   3880:1b22610e87d8
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Sun Dec 11 11:24:52 2016 +0100
-|  summary:     Huge performance issue with unsymmetric matrix assembly fixed.
-|
-o    changeset:   3879:13909d300b8c
-|\   parent:      3877:c4b6e5efc988
-| |  parent:      3878:fc43c7fcb915
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Sat Dec 10 21:51:44 2016 +0100
-| |  summary:     amerge with P Jolivet
+| o  changeset:   3893:22f47abf2301
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Dec 22 16:38:00 2016 +0100
+| |  summary:     Management of package manager paths
 | |
-| o  changeset:   3878:fc43c7fcb915
-| |  parent:      3876:358024a440dd
+| o  changeset:   3892:15bd56f51dc5
+| |  branch:      cmake
+| |  parent:      3890:ce60bc7eded6
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Dec 22 15:31:05 2016 +0100
+| |  summary:     Management files for compilers and modules
+| |
+o |  changeset:   3891:09c748bf975b
+| |  parent:      3887:a0f49798c452
 | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Sat Dec 10 11:00:16 2016 +0100
-| |  summary:     FreeFem++ days examples.
+| |  date:        Wed Dec 21 23:32:00 2016 +0100
+| |  summary:     New HPDDM version and less verbose output.
 | |
-o |  changeset:   3877:c4b6e5efc988
-|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|    date:        Sat Dec 10 21:47:23 2016 +0100
-|    summary:     and english name to function voisinage
-|
-o  changeset:   3876:358024a440dd
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Dec 07 19:08:22 2016 +0100
-|  summary:     coorect typ in distance (miss 0  element) and add trivail exact  test
-|
-o  changeset:   3875:41ff20691e6b
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Dec 07 18:44:21 2016 +0100
-|  summary:     coorect problem of signe in optimisation part in distance function
-|
-o  changeset:   3874:a970f09e1454
-|  parent:      3872:a0c25d2074b1
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Dec 06 13:25:37 2016 +0100
-|  summary:     correct CheckAll  no ffmpi in case of sequentiel test
-|
+| o  changeset:   3890:ce60bc7eded6
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Dec 20 16:15:40 2016 +0100
+| |  summary:     Management of make check (on going)
+| |
+| o  changeset:   3889:884fd1049853
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Dec 20 15:30:00 2016 +0100
+| |  summary:     Reactivate freefem++-mpi
+| |
+| o  changeset:   3888:d6be230b87d4
+| |  branch:      cmake
+| |  parent:      3873:e07802ccf5a5
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Dec 20 14:48:17 2016 +0100
+| |  summary:     Management of freefem version number
+| |
+o |  changeset:   3887:a0f49798c452
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sun Dec 18 12:24:22 2016 +0100
+| |  summary:     New ParMETIS interface.
+| |
+o |  changeset:   3886:a6db2521d6f4
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Dec 14 14:12:52 2016 +0100
+| |  summary:     coorect apss mump 5.01 to 5.0.2
+| |
+o |  changeset:   3885:a6c6da1830a1
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Wed Dec 14 09:23:52 2016 +0100
+| |  summary:     Some more unnecessary messages.
+| |
+o |  changeset:   3884:e5b0ba488ca7
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Tue Dec 13 13:14:15 2016 +0100
+| |  summary:     No output when verbosity set to 0.
+| |
+o |  changeset:   3883:9b07ae43fc6e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Dec 12 11:42:09 2016 +0100
+| |  summary:     coorect NSP2BRP0 example
+| |
+o |  changeset:   3882:eb0ff5bce9eb
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Dec 12 10:45:38 2016 +0100
+| |  summary:     jsute commit
+| |
+o |  changeset:   3881:829e2f79ec20
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Dec 12 10:02:59 2016 +0100
+| |  summary:     pass to version 3.50-1
+| |
+o |  changeset:   3880:1b22610e87d8
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sun Dec 11 11:24:52 2016 +0100
+| |  summary:     Huge performance issue with unsymmetric matrix assembly fixed.
+| |
+o |    changeset:   3879:13909d300b8c
+|\ \   parent:      3877:c4b6e5efc988
+| | |  parent:      3878:fc43c7fcb915
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Sat Dec 10 21:51:44 2016 +0100
+| | |  summary:     amerge with P Jolivet
+| | |
+| o |  changeset:   3878:fc43c7fcb915
+| | |  parent:      3876:358024a440dd
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Sat Dec 10 11:00:16 2016 +0100
+| | |  summary:     FreeFem++ days examples.
+| | |
+o | |  changeset:   3877:c4b6e5efc988
+|/ /   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |    date:        Sat Dec 10 21:47:23 2016 +0100
+| |    summary:     and english name to function voisinage
+| |
+o |  changeset:   3876:358024a440dd
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Dec 07 19:08:22 2016 +0100
+| |  summary:     coorect typ in distance (miss 0  element) and add trivail exact  test
+| |
+o |  changeset:   3875:41ff20691e6b
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Dec 07 18:44:21 2016 +0100
+| |  summary:     coorect problem of signe in optimisation part in distance function
+| |
+o |  changeset:   3874:a970f09e1454
+| |  parent:      3872:a0c25d2074b1
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Dec 06 13:25:37 2016 +0100
+| |  summary:     correct CheckAll  no ffmpi in case of sequentiel test
+| |
 | o  changeset:   3873:e07802ccf5a5
 | |  branch:      cmake
 | |  parent:      3861:5b37f875a607
