@@ -1,5 +1,10 @@
-@  changeset:   3894:f9cb3b4b0c8c
+@  changeset:   3895:85dbb9596d53
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Dec 29 17:07:51 2016 +0100
+|  summary:     coorect thickness of plot line in postscript
+|
+o  changeset:   3894:f9cb3b4b0c8c
 |  parent:      3891:09c748bf975b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Dec 22 16:59:06 2016 +0100

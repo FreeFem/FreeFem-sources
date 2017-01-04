@@ -1215,7 +1215,9 @@ void Init_map_type()
        new OneBinaryOperator<Op2_sub<double,double,double> >,
        new OneBinaryOperator<Op2_sub<double,double,long> >,
        new OneBinaryOperator<Op2_sub<double,long,double> >,
-       new OneBinaryOperator<Op2_sub<long,bool,bool> >,              
+       new OneBinaryOperator<Op2_sub<long,bool,bool> >,
+       new OneBinaryOperator<Op2_sub<long,long,bool> >,
+       new OneBinaryOperator<Op2_sub<long,bool,long> >,
        new OneBinaryOperator<Op2_sub<Complex,Complex,Complex> >,
        new OneBinaryOperator<Op2_sub<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_sub<Complex,double,Complex> >,
@@ -1224,6 +1226,7 @@ void Init_map_type()
        );
        
      TheOperators->Add("*",
+       new OneBinaryOperator<Op2_mul<bool,bool,bool>,OneBinaryOperatorMI,evalE_mul<bool> >,
        new OneBinaryOperator<Op2_mul<long,long,long>,OneBinaryOperatorMI,evalE_mul<long> >,
        new OneBinaryOperator<Op2_mul<double,double,double>,MIMul<double,double>,evalE_mul<double> >,
        new OneBinaryOperator<Op2_mul<double,double,long>, MIMul<double,long>,evalE_mul<double,long,double> >,
@@ -1232,8 +1235,28 @@ void Init_map_type()
        new OneBinaryOperator<Op2_mul<Complex,Complex,double> >,
        new OneBinaryOperator<Op2_mul<Complex,double,Complex> >,
        new OneBinaryOperator<Op2_mul<Complex,Complex,long> >,
-       new OneBinaryOperator<Op2_mul<Complex,long,Complex> >       
+       new OneBinaryOperator<Op2_mul<Complex,long,Complex> >,
+       new OneBinaryOperator<Op2_mul<long,long,bool> >,
+       new OneBinaryOperator<Op2_mul<long,bool,long> >
        );
+    // add missing operation jan 2017 FH.
+    TheOperators->Add("*",
+                      new OneBinaryOperator<Op2_mul<Complex,Complex,bool> >,
+                      new OneBinaryOperator<Op2_mul<Complex,bool,Complex> >
+                      );
+    TheOperators->Add("+",
+                      new OneBinaryOperator<Op2_add<Complex,Complex,bool> >,
+                      new OneBinaryOperator<Op2_add<Complex,bool,Complex> >
+                      );
+    TheOperators->Add("-",
+                      new OneBinaryOperator<Op2_sub<Complex,Complex,bool> >,
+                      new OneBinaryOperator<Op2_sub<Complex,bool,Complex> >
+                      );
+    TheOperators->Add("/",
+                //      new OneBinaryOperator<Op2_sub<Complex,Complex,bool> >,
+                      new OneBinaryOperator<Op2_div<Complex,bool,Complex> >
+                      );
+
      TheOperators->Add("/",
        new OneBinaryOperator<Op2_div<long,long,long> >,
        new OneBinaryOperator<Op2_div<double,double,double> >,
@@ -1593,7 +1616,12 @@ void Init_map_type()
      Global.Add("min","(",new OneOperator2_<double,double>(Min<double> ));
      Global.Add("max","(",new OneOperator2_<long,long>(Max));
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
-     Global.Add("atan2","(",new OneOperator2<double>(atan2));
+    Global.Add("max","(",new OneOperator3_<double,double>(Max<double> ));
+    Global.Add("min","(",new OneOperator3_<double,double>(Min<double> ));
+    Global.Add("max","(",new OneOperator3_<long,long>(Max));
+    Global.Add("min","(",new OneOperator3_<long,long>(Min));
+
+    Global.Add("atan2","(",new OneOperator2<double>(atan2));
      Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
     
      Global.Add("atan","(",new OneOperator2<double>(atan2));

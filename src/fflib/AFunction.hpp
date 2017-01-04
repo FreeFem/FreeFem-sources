@@ -2209,13 +2209,21 @@ struct OneBinaryOperator_Traits {
   typedef C::first_argument_type A;
   typedef C::second_argument_type B;
 };*/
-
+//   the greatest pref win ...
 template<class A,class B>  struct SameType { static const int OK=0;};
 template<class A>  struct SameType<A,A> { static const int OK=1;};
 template<>  struct SameType<bool,bool> { static const int OK=10;};
+//template<>  struct SameType<bool,long> { static const int OK=19;};
+//template<>  struct SameType<long,bool> { static const int OK=19;};
 template<>  struct SameType<long,long> { static const int OK=20;};
 template<>  struct SameType<double,double> { static const int OK=30;};
 template<>  struct SameType<Complex,Complex> { static const int OK=40;};
+//template<>  struct SameType<double,Complex> { static const int OK=43;};
+//template<>  struct SameType<Complex,double> { static const int OK=43;};
+//template<>  struct SameType<long,Complex> { static const int OK=42;};
+//template<>  struct SameType<Complex,long> { static const int OK=42;};
+//template<>  struct SameType<bool,Complex> { static const int OK=41;};
+//template<>  struct SameType<Complex,bool> { static const int OK=41;};
 template<>  struct SameType<string*,string*> { static const int OK=50;};
 
 template <typename Arg1, typename Arg2,typename Arg3, class Result>
