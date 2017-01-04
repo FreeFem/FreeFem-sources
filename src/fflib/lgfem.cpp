@@ -5818,8 +5818,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<FormLinear> );
  
- Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<double> >);
- Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<complex<double> > >);
+ Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<double>,1 >);
+ Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<complex<double> >,0 >);
  
 
 
