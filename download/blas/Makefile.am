@@ -109,11 +109,13 @@ BLAS:BLAS/fait
 
 BLAS/fait:$(BLAS_TGZ)
 	mkdir -p ../include ../lib
-	-if tar xvzf $(BLAS_TGZ) BLAS/xerbla.f 2>&1 1>/dev/null ; then \
-	tar xvzf $(BLAS_TGZ) ; \
-	else \
-	mkdir -p BLAS;cd BLAS && tar xvzf ../$(BLAS_TGZ);\
-	fi
+	pxerbla=`tar tf $(BLAS_TGZ) | grep xerbla.f`; \
+	dirblas=`dirname $$pxerbla` ;\
+	case $$dirblas in \
+	BLAS) tar xvzf $(BLAS_TGZ) ;; \
+	BLAS-*) tar xvzf $(BLAS_TGZ) ; mv $$dirblas BLAS ;; \
+	.) mkdir -p BLAS; tar xvzf $(BLAS_TGZ) -c BLAS;; \
+	esac
 	cp BLAS/xerbla.f blas_xerbla.f
 	touch BLAS/fait
 $(F77BLAS_SOURCES): BLAS
