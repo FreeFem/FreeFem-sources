@@ -1,5 +1,10 @@
-@  changeset:   3900:e64806f1e8e1
+@  changeset:   3901:6745cb3d6fd7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 06 13:50:07 2017 +0100
+|  summary:     update INNOVATION
+|
+o  changeset:   3900:e64806f1e8e1
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 06 13:45:50 2017 +0100
 |  summary:     correct Fini element BernadiRaugel error in bound/composant
