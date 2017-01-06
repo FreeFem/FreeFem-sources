@@ -107,6 +107,7 @@ Source: "examples++-load\*.cpp"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.pgm"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\*.pts"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\cube.msh"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\g.gmesh"; DestDir: "{app}\examples++-load"
 
 Source: "examples++-load\load.link"; DestDir: "{app}\examples++-load"
 Source: "examples++-load\include-tmp\*"; DestDir: "{app}\examples++-load\include"
