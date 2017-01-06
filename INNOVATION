@@ -1,4 +1,6 @@
 - version 3.50-1 
+ - correct fini element P2BR 
+ - correct md5 code for blas.tgz file 
  - correct bug in distance plugin add test  examples++-load/testdist.edp to see ans correct the bug. 
  - correct bug in color when mixing line and iso. (Thank to Jon Sauer) 
  - correct bug in examples++-load/ttestio.edp in case of the no existance of  file 
