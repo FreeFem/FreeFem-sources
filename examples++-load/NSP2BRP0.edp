@@ -1,7 +1,7 @@
 load "BernadiRaugel"
 // remark: the sign of p is correct 
 real s0=clock();
-mesh Th=square(10,10);
+mesh Th=square(2,2);
 fespace Vh2(Th,P2BR);
 fespace Vh(Th,P0);
 
@@ -62,9 +62,8 @@ for (iter=1;iter<=nbiter;iter++)
   for (i=0;i<=10;i++)
    {
      up1[]=u1[]; // copie vectoriel 
-     real[int] b=
-          b=  NS(0,Wh); 
-		  u1[] = A^-1*b; 
+     real[int] b= NS(0,Wh); 
+	 u1[] = A^-1*b; 
      //NS;
      if ( !(i % 10)) 
      plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="plotNS_"+iter+"_"+i+".eps");  
