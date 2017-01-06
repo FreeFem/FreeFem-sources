@@ -1,5 +1,10 @@
-@  changeset:   3895:85dbb9596d53
+@  changeset:   3896:d9aee0e5da72
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 04 15:07:13 2017 +0100
+|  summary:     correct PB of  arithmetics of multiplication operator
+|
+o  changeset:   3895:85dbb9596d53
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Dec 29 17:07:51 2016 +0100
 |  summary:     coorect thickness of plot line in postscript

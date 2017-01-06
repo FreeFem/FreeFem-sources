@@ -170,11 +170,12 @@ P3(li,li1,li2)} \
         //  we must have $$ int_{e_i} dn(w_{3+j) ) =  \delta_{ij} $
         // $int_e_i dn(w_{3+i} )  = ccc[i] (Dl[i],Ne[i]) = 1 $
         //  $ ccc[i] = 1/  (Dl[i],Ne[i]) $
+        /*
         R2 Ne[3]= {
             E[0].perp() *sgE[0],
             E[1].perp() *sgE[1],
             E[2].perp() *sgE[2]
-        };
+        };*/
         val=0;
         
         throwassert( val.N()>=6);
@@ -210,7 +211,7 @@ P3(li,li1,li2)} \
         // ( P(q_ij), Dp(q_ij-1 - q_ij), Dp(q_ij+1 - q_ij), (j=0,1,2) (9 DOF)
         //  Dp(b_ij)(h_ij)  ou bij = middle of edge ij (j=0,1,2) (3 DOF)
         //  Warning
-        double ccc[] = { 1./(Dl[0],Ne[0]), 1./(Dl[1],Ne[1]), 1./(Dl[2],Ne[2]) };
+       // double ccc[] = { 1./(Dl[0],Ne[0]), 1./(Dl[1],Ne[1]), 1./(Dl[2],Ne[2]) };
         double c12 =1./12.;
         double Ai[12][10] = {
             {(-0.5)*(etai1-etai2)  ,  0,  0, (1.5)*(3+etai1),     (1.5)*(3-etai2),    0,     0,     0,     0,     0 },
@@ -266,13 +267,10 @@ P3(li,li1,li2)} \
             for (int i=0;i<12;++i)
             {
                 AAA[p12[i]][jj]  += Ai[i][jj] ;
-                AA[p12[i]][jj]  += Ai[i][jj] ;
             }
         }
         
-        if(1)
-        {
-            set2zero(&AA[0][0],120);
+        
             for(int k=0; k< nnzdd;++k)
             {
                 int i= idd[k];
@@ -281,7 +279,7 @@ P3(li,li1,li2)} \
                 for(int jj=0; jj< 10; ++jj)
                     AA[i][jj] += dij*AAA[j][jj];
             }
-        }
+        
         
         
         
