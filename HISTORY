@@ -1,5 +1,10 @@
-@  changeset:   3908:c9e068d1435d
+@  changeset:   3909:7cb1e65a7804
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jan 09 15:10:02 2017 +0100
+|  summary:     chnage verbosity in distance.edp  to remove dump
+|
+o  changeset:   3908:c9e068d1435d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jan 09 14:35:21 2017 +0100
 |  summary:     change the rand by myrand to have the same rand geneartor for mesh in bamg
