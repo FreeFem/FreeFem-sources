@@ -48,6 +48,18 @@ using namespace std;
 namespace bamg {
 
 
+    static unsigned long myrand_next = 1;
+    
+    /* RAND_MAX assumed to be 32767 */
+    int myrand(void) {
+        myrand_next = myrand_next * 1103515245 + 12345;
+        return((unsigned)(myrand_next/65536) % 32768);
+    }
+    
+    void mysrand(unsigned int seed) {
+        myrand_next = seed;
+    }
+
 #ifdef DEBUG1
 extern int SHOW ; // for debugging 
 int SHOW = 0; // for debugging 
@@ -1732,7 +1744,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
     return 0; 
   if (nbvnew) {
   const Int4 PrimeNumber= AGoodNumberPrimeWith(nbv)  ;
-  Int4 k3 = rand()%nbvnew ; 
+  Int4 k3 = myrand()%nbvnew ;
   for (Int4 is3=0; is3<nbvnew; is3++) {
      Int4 j = nbvold +(k3 = (k3 + PrimeNumber)% nbvnew);
      Int4 i = nbvold+is3; 
@@ -2378,7 +2390,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
     break; 
   if (nbvnew) {
   const Int4 PrimeNumber= AGoodNumberPrimeWith(nbv)  ;
-  Int4 k3 = rand()%nbvnew ; 
+  Int4 k3 = myrand()%nbvnew ;
   for (Int4 is3=0; is3<nbvnew; is3++) 
     ordre[nbvold+is3]= &vertices[nbvold +(k3 = (k3 + PrimeNumber)% nbvnew)];
 
@@ -2444,8 +2456,6 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 void Triangles::Insert() 
 {
   if (verbosity>2) cout << "  -- Insert initial " << nbv << " vertices " << endl ;
-  if( verbosity > 99)
-        cout << "       coefIcoor "<< coefIcoor << " pmin:  "<< pmin << endl;
 
   Triangles * OldCurrentTh =CurrentTh;
 
@@ -2458,7 +2468,7 @@ void Triangles::Insert()
 
   // construction d'un ordre aleatoire 
   const Int4 PrimeNumber= AGoodNumberPrimeWith(nbv) ;
-  Int4 k3 = rand()%nbv ; 
+  Int4 k3 = myrand()%nbv ;
   for (int is3=0; is3<nbv; is3++) 
     ordre[is3]= &vertices[k3 = (k3 + PrimeNumber)% nbv];
 
@@ -2551,7 +2561,7 @@ void Triangles::Insert()
   //  const int PrimeNumber= (nbv % 999983) ? 1000003: 999983 ;
 #ifdef NBLOOPOPTIM
 
-  k3 = rand()%nbv ; 
+  k3 = myrand()%nbv ;
   for (int is4=0; is4<nbv; is4++) 
     ordre[is4]= &vertices[k3 = (k3 + PrimeNumber)% nbv];
   
@@ -3199,7 +3209,7 @@ Vertex * Triangles::NearestVertex(Icoor1 i,Icoor1 j)
 
 void Triangles::PreInit(Int4 inbvx,char *fname)
 {
-  srand(19999999);
+  mysrand(19999999);
   OnDisk =0;
   NbRef=0;
   //  allocGeometry=0;

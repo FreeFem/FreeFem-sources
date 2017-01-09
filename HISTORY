@@ -1,5 +1,10 @@
-@  changeset:   3906:d1e200532fe1
+@  changeset:   3907:10d0838ec363
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jan 09 14:12:42 2017 +0100
+|  summary:     add dump in mesh2.cpp for debug
+|
+o  changeset:   3906:d1e200532fe1
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jan 09 13:23:09 2017 +0100
 |  summary:     cdd ddump in swap for debug

@@ -73,7 +73,9 @@ inline int BinaryRand(){
  return rand() & 16384; // 2^14 (for sun because RAND_MAX is not def in stdlib.h)
 #endif
 
-} 
+}
+    
+    
 typedef P2<Real8,Real8> R2;
 typedef P2xP2<Int2,Int4> I2xI2;
 typedef P2<Real4,Real8> R2xR2;
