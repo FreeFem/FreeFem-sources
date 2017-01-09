@@ -1,5 +1,15 @@
-@  changeset:   3901:6745cb3d6fd7
+@  changeset:   3903:63c258bda9bd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 06 17:18:45 2017 +0100
+|  summary:     add missing in distribution g.gmesh
+|
+o  changeset:   3902:da39d75d0ed3
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 06 16:45:50 2017 +0100
+|  summary:     correct missing plugin and example associaded P1dcnc
+|
+o  changeset:   3901:6745cb3d6fd7
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 06 13:50:07 2017 +0100
 |  summary:     update INNOVATION
