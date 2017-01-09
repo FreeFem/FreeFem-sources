@@ -1227,10 +1227,12 @@ int Triangle::swap(Int2 a,int koption){
    else if(( s1 != 0) && (s2 != 0) ) {
      det1 = bamg::det(s1->i,sa->i,s2->i);
      det2 = detT - det1;
-     OnSwap = (Abs(det1) + Abs(det2)) < detA;
-   
+     OnSwap = (Abs(det1) + Abs(det2)) < detA;// convexe
+
      Icoor2 detMinNew=Min(det1,det2);
-     //     if (detMin<0 && (Abs(det1) + Abs(det2) == detA)) OnSwap=BinaryRand();// just for test   
+       if(verbosity>99999) cout << "Triangle::swap int"<< OnSwap << " " <<  det1 << " " << det2 << " "<< detMinNew << endl;
+
+     //     if (detMin<0 && (Abs(det1) + Abs(det2) == detA)) OnSwap=BinaryRand();// just for test
      if (! OnSwap &&(detMinNew>0)) {
        OnSwap = detMin ==0;
        if (! OnSwap) {
