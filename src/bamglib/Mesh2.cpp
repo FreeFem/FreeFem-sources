@@ -1256,7 +1256,8 @@ int Triangle::swap(Int2 a,int koption){
 	 // angle b12 > angle ba2 => cotg(angle b12) < cotg(angle ba2)
 	 OnSwap =  ((double) cosb12 * (double)  sinba2) <  ((double) cosba2 * (double) sinb12);
              if(verbosity>99999) cout << "Triangle::swap "<< OnSwap << " " <<  ((double) cosb12 * (double)  sinba2)
-                                                << " " << ((double) cosba2 * (double) sinb12) << endl;
+                                                << " " << ((double) cosba2 * (double) sinb12)
+                 << " " << ((double) cosba2 * (double) sinb12)-((double) cosb12 * (double)  sinba2) << endl;
 //  	 if(CurrentTh) 
 //  	   cout << "swap " << CurrentTh->Number(sa) << " " << CurrentTh->Number(sb) << " " ;
 //  	 cout <<  cosb12 << " " <<  sinba2 << " "  <<  cosba2 << " " << sinb12 
