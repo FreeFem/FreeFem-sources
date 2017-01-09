@@ -1,3 +1,4 @@
+ - put myrand() function to have the almost same mesh under mac and unix  
 - version 3.50-1 
  - correct fini element P2BR 
  - correct md5 code for blas.tgz file 

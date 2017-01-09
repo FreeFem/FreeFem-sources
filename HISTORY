@@ -1,5 +1,10 @@
-@  changeset:   3907:10d0838ec363
+@  changeset:   3908:c9e068d1435d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jan 09 14:35:21 2017 +0100
+|  summary:     change the rand by myrand to have the same rand geneartor for mesh in bamg
+|
+o  changeset:   3907:10d0838ec363
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jan 09 14:12:42 2017 +0100
 |  summary:     add dump in mesh2.cpp for debug
