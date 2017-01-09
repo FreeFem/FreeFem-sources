@@ -1230,7 +1230,7 @@ int Triangle::swap(Int2 a,int koption){
      OnSwap = (Abs(det1) + Abs(det2)) < detA;// convexe
 
      Icoor2 detMinNew=Min(det1,det2);
-       if(verbosity>99999) cout << "Triangle::swap int"<< OnSwap << " " <<  det1 << " " << det2 << " "<< detMinNew << endl;
+       if(verbosity>99999) cout << "Triangle::swap int "<< OnSwap << " " <<  det1 << " " << det2 << " "<< detMinNew << endl;
 
      //     if (detMin<0 && (Abs(det1) + Abs(det2) == detA)) OnSwap=BinaryRand();// just for test
      if (! OnSwap &&(detMinNew>0)) {
@@ -1720,7 +1720,10 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
 
   const Int4 nbvnew = nbv-nbvold;
   if (verbosity>5) 
-    cout << "    Try to Insert the " <<nbvnew<< " new points " << endl;  
+    cout << "    Try to Insert the " <<nbvnew<< " new points " << endl;
+  if( verbosity > 99)
+      cout << "       coefIcoor "<< coefIcoor << " pmin:  "<< pmin << endl;
+     
   Int4 NbSwap=0;
   Icoor2 dete[3];
   
@@ -1748,7 +1751,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
       Icoor1 hi=(Icoor1) (hx*coefIcoor),hj=(Icoor1) (hy*coefIcoor);
       if (!quadtree->ToClose(vi,seuil,hi,hj)) 
         {
-			// a good new point 
+			// a good new point
 			Vertex & vj = vertices[iv];
 			Int4 j = vj.ReferenceNumber; 
 			assert( &vj== ordre[j]);
@@ -1757,7 +1760,9 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
 			    Exchange(vi,vj);
 			    Exchange(ordre[j],ordre[i]);
 			  }
-		      vj.ReferenceNumber=0; 
+                     if(verbosity >9999) cout << "  Add "<<Number(vj) << " " << vj  << endl;
+
+		      vj.ReferenceNumber=0;
 			//	cout << " Add " << Number(vj) << " " << vj 
 			// << "   " <<  Number(vi) << " <--> " << Number(vj) <<endl;
 			Triangle *tcvj = FindTriangleContening(vj.i,dete);
@@ -2439,6 +2444,9 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 void Triangles::Insert() 
 {
   if (verbosity>2) cout << "  -- Insert initial " << nbv << " vertices " << endl ;
+  if( verbosity > 99)
+        cout << "       coefIcoor "<< coefIcoor << " pmin:  "<< pmin << endl;
+
   Triangles * OldCurrentTh =CurrentTh;
 
   CurrentTh=this;
@@ -2518,6 +2526,9 @@ void Triangles::Insert()
   for (Int4 icount=2; icount<nbv; icount++) {
     Vertex *vi  = ordre[icount];
     //    cout << " Insert " << Number(vi) << endl;
+    if(verbosity>9999)
+        cout <<" Insert " << Number(vi) << ": " << *vi << endl;
+
     Icoor2 dete[3];
     Triangle *tcvi = FindTriangleContening(vi->i,dete);
     quadtree->Add(*vi); 
