@@ -1,5 +1,10 @@
-@  changeset:   3910:f5f5074156bc
+@  changeset:   3911:c798ca8ff83c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jan 09 15:29:21 2017 +0100
+|  summary:     correct typo
+|
+o  changeset:   3910:f5f5074156bc
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jan 09 15:14:30 2017 +0100
 |  summary:     update HISTORY
