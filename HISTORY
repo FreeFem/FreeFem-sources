@@ -1,5 +1,10 @@
-@  changeset:   3904:83467c8ef746
+@  changeset:   3905:7554c1bd09b4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jan 09 13:14:13 2017 +0100
+|  summary:     add print in swap
+|
+o  changeset:   3904:83467c8ef746
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jan 09 12:56:55 2017 +0100
 |  summary:     add debug in swap
