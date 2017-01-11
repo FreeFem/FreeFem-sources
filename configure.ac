@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.50-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.50-2,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -2013,8 +2013,14 @@ test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
 ##  search of HDF5 ....
 AX_LIB_HDF5()
 if test "$with_hdf5" = "yes"; then  
-  AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
-  LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
+  ff_save_cppflags="$CPPFLAGS";
+  CPPFLAGS="$CPPFLAGS $HDF5_CPPFLAGS" 
+  AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf=no])
+  CPPFLAGS="$ff_save_cppflags"
+  if test "$with_hdf5" = "yes"; then
+   AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
+   LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
+  fi
 else
   enable_iohdf5=no  
 fi
