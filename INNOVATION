@@ -1,4 +1,4 @@
-- version 3.50-2  (version after 3916:7dc7a694dbd3)
+- version 3.50-2  (version 3917:2affb5616fe3)
  - correct pb in configure for hdf5 c++ if missing file H5Cpp.h
  - update hpddm to 082f06f633d912e879c93258df53234f9c94e492
  - put myrand() function to have the almost same mesh under mac and unix  

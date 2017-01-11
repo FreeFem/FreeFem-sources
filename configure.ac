@@ -609,6 +609,17 @@ AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFem++ build date)
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR,"${ff_prefix_dir}",FreeFem prefix  dir)
 AC_SUBST(ff_prefix_dir,$ff_prefix_dir)
 
+ff_prefix_dir_lib="$ff_prefix_dir/lib"
+ff_prefix_dir_include="$ff_prefix_dir/include"
+ff_prefix_dir_etc="$ff_prefix_dir/etc"
+ff_prefix_dir_lib_mpi="$ff_prefix_dir/lib/mpi"
+ff_prefix_dir_example="$pkgdatadir/$VERSION"
+AC_SUBST(ff_prefix_dir_lib,$ff_prefix_dir_lib)
+AC_SUBST(ff_prefix_dir_include,$ff_prefix_dir_include)
+AC_SUBST(ff_prefix_dir_etc,$ff_prefix_dir_etc)
+AC_SUBST(ff_prefix_dir_lib_mpi,$ff_prefix_dir_lib_mpi)
+AC_SUBST(ff_prefix_dir_example,$ff_prefix_dir_example)
+
 # Separate configuration header file for version information, included
 # in config-macos9.h
 
