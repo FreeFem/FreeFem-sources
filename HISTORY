@@ -1,5 +1,10 @@
-@  changeset:   3916:7dc7a694dbd3
+@  changeset:   3917:2affb5616fe3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 11 11:09:39 2017 +0100
+|  summary:     correct pb in configure for hdf5 c++ if missing file H5Cpp.h
+|
+o  changeset:   3916:7dc7a694dbd3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jan 10 16:05:47 2017 +0100
 |  summary:     include modif of PJ
