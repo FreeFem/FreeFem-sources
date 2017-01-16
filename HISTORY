@@ -1,5 +1,10 @@
-@  changeset:   3917:2affb5616fe3
+@  changeset:   3918:4562c20bdd46
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 11 14:03:16 2017 +0100
+|  summary:     reput all version of examples++-3d/Laplace-Adapt-aniso-3d.edptory to update configure.ac
+|
+o  changeset:   3917:2affb5616fe3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jan 11 11:09:39 2017 +0100
 |  summary:     correct pb in configure for hdf5 c++ if missing file H5Cpp.h
