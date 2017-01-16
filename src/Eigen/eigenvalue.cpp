@@ -127,7 +127,49 @@ void CheckMode(int mode,bool A,bool A1,bool B, bool B1)
     if( mode ==3) {ffassert(A1 && B );}
 }
 template<class K,class Mat>
-void  DoIdoAction(int ido,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work,Mat &A,Mat &B)
+void  DoIdoAction(int ido,char bmat,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work,Mat &OP1,Mat &B)
+{
+  if ((mode==3)&&(bmat=='G')) // shift-invert mode, generalized problem
+    switch (ido) {
+    case -1: //y <--- OP*x = inv[A-SIGMA*M]*M*x   
+      if(dddd) Show(ido,xx,"  <- (xx) ");
+      OP1.Solve(yy,work=B*xx);
+      if(dddd) Show(ido,yy,"  -> (yy) ");
+      break;
+    case  1://  y <-- OP*x = inv[A-sigma*M]*z
+      if(dddd) Show(ido,zz,"  <- (zz) ");
+      OP1.Solve(yy,zz);
+      if(dddd) Show(ido,yy,"  -> (yy) ");
+      break;
+    case  2: //  y <--- M*x 
+      if(dddd) Show(ido,xx,"  <- (xx) ");
+      yy = B*xx;
+      if(dddd) Show(ido,yy,"  -> (yy) ");
+      break;
+    default :
+      ffassert(0);
+    }
+  else if ((mode==1)&&(bmat=='I')) // direct mode, simple problem
+    switch (ido)
+      {
+      case  1:
+	      B.Solve(yy,work=OP1*xx);
+	      break;
+      default :
+	      ffassert(0);  
+      }
+  else if ((mode==3)&&(bmat=='I')) // shift-invert mode, simple problem
+    switch (ido)
+      {
+      case -1:
+      case  1:
+	      OP1.Solve(yy,work=B*xx);
+	      break;
+      default :
+	      ffassert(0);  
+      }
+}
+/*void  DoIdoAction(int ido,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work,Mat &A,Mat &B)
 {
     if(mode>2) // inverse mode
         switch (ido) {
@@ -165,7 +207,7 @@ void  DoIdoAction(int ido,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN_<K> &work
         default :
             ffassert(0);
     }
-}
+}*/
 
 template<class K>
 const OneOperator *  ToCode(Expression e)
@@ -190,7 +232,7 @@ class EigenValue : public OneOperator
         const int cas;
         
         static basicAC_F0::name_and_type name_param[] ;
-        static const int n_name_param =17;
+        static const int n_name_param =18;
         Expression nargs[n_name_param];
         Expression expOP1,expB,expn;
         const OneOperator * codeOP1, *codeB, *codeOP,*codeB1;
@@ -275,7 +317,7 @@ class EigenValueC : public OneOperator
         const int cas;
         
         static basicAC_F0::name_and_type name_param[] ;
-        static const int n_name_param =15;
+        static const int n_name_param =16;
         Expression nargs[n_name_param];
         Expression expOP1,expB,expn;
         const OneOperator * codeOP1, *codeB, *codeOP, *codeB1;
@@ -407,12 +449,13 @@ basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
     {   "ivalue",&typeid(KN<double> *)},
     {   "rawvector",&typeid(KNM<double> *) },
     {   "resid",&typeid(KN<double> *) },
-    {   "mode",&typeid(long) }, // 11 ieme
+    {   "driver",&typeid(long) }, // 11 ieme
     {   "which",&typeid(string*) }, // 12 ieme
     {   "A",&typeid(Polymorphic*)},
     {   "B",&typeid(Polymorphic*)},
     {   "A1",&typeid(Polymorphic*)},
-    {   "B1",&typeid(Polymorphic*)}
+    {   "B1",&typeid(Polymorphic*)},
+    {   "mode",&typeid(long) } // 17 ieme
     
 };
 
@@ -426,12 +469,14 @@ basicAC_F0::name_and_type  EigenValueC::E_EV::name_param[]= {
     {  "maxit",&typeid(long)}, // the maximum number of Arnoldi iterations
     {  "rawvector",&typeid(KNM<Complex> *) },
     {  "resid",&typeid(KN<Complex> *)},
-    {   "mode",&typeid(long) },// 9 ieme
+    {   "driver",&typeid(long) },// 9 ieme
     {   "which",&typeid(string*) }, // 10 ieme
     {   "A",&typeid(Polymorphic*)},
     {   "B",&typeid(Polymorphic*)},
     {   "A1",&typeid(Polymorphic*)},
-    {   "B1",&typeid(Polymorphic*)}
+    {   "B1",&typeid(Polymorphic*)},
+    {   "mode",&typeid(long) } // 15 ieme
+
     
 };
 
@@ -446,7 +491,8 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     long ncv =0;  // the number of Arnoldi vectors generated
     long maxit=0;  // the maximum number of Arnoldi iterations
     double sigma=0;
-    int mode = 3; //
+    int driver = 4; //
+    int mymode = -1;// unset
     KN<double> * evalue=0;
     KN<double> * evaluei=0;
     KN<double> * resid=0;
@@ -465,7 +511,9 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     evaluei=arg<KN<double> *>(8,stack,0);
     rawvector=arg<KNM<double> *>(9,stack,0);
     resid=arg<KN<double> *>(10,stack,0);
-    mode = arg<long>(11,stack,3);
+    driver = arg<long>(11,stack,3);
+    mymode = arg<long>(17,stack,-1);
+
     char which[3];
     ToWhich(stack,which,nargs[12]);
     
@@ -525,10 +573,10 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     if( ! (nbev < n) )
         serr[err++]="  Number of eigenvalues of OP to be computed nev <= n ";
     
-    if( (mode < 1 || mode > 5) && sym)
-        serr[err++]="  the mode = 1 ,2 ,3, 4, 5  ";
-    if( (mode < 1 || mode > 4) && !sym)
-        serr[err++]="  the mode = 1 ,2 ,3, 4  ";
+    if( (driver < 1 || driver > 5) && sym)
+        serr[err++]="  the driver = 1 ,2 ,3, 4, 5  ";
+    if( (driver < 1 || driver > 4) && !sym)
+        serr[err++]="  the driver = 1 ,2 ,3, 4  ";
     // 2 <= NCV-NEV and NCV <= N
     
     if( ! (   ncv <= n) && sym )
@@ -553,7 +601,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     
     if(verbosity>9 || err)
         cout << "    n " << n << ", nev "<< nbev << ", tol =" << tol << ", maxit =" << maxit
-        << ", ncv = " <<ncv << ", mode = " << mode << " which = " << which << endl;
+        << ", ncv = " <<ncv << ", driver = " << driver << " which = " << which << endl;
     if(err)
     {
         cerr << " list of the error " << endl;
@@ -567,7 +615,13 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     if(sym)
     {
         int ido=0;
-        char bmat= mode == 1 ? 'I' : 'G';
+        //char bmat= mode == 1 ? 'I' : 'G';
+      char bmat = (driver<3)? 'I' : 'G';
+      int  mode = (driver==1)? 1 : 3;
+      if( mymode>0 && (mymode != mode)) {
+            cerr << " Erreur  mode== " << mymode << " == " << mode << " driver =" << driver << endl;
+            ExecError("wrong mod in Arpack sym");}
+        
         //     char which[3]= "LM";	// larger value
         //      if(mode >2) which[0] ='S'; // smaller value
         int ishift=1; // Auto Shift true by default
@@ -596,7 +650,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
             KN_<double>  xx(&workd[ipntr[1]],n);
             KN_<double>  yy(&workd[ipntr[2]],n);
             KN_<double>  zz(&workd[ipntr[3]],n);
-            DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
+            DoIdoAction(ido,bmat,mode,xx,yy,zz,work,OP1,B);
         }
         
         nconv = iparam[5];
@@ -685,7 +739,13 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
         // Finding an Arnoldi basis.
         //int mode=3; //  Shift invert
         int ido=0;
-        char bmat='G';
+        //char bmat='G';
+      char bmat = (driver<3)? 'I' : 'G';
+      int  mode = (driver==1)? 1 : 3;
+      if( mymode>0 && (mymode != mode)) {
+            cerr << " Erreur  nosym  mode== " << mymode << " == " << mode << " driver =" << driver << endl;
+            ExecError("wrong mod in Arpack no sym");}
+        
         // char which[]="LM";
         int ishift=1; // Auto Shift true by default
         int iparam[12]= {0,ishift,0,(int)maxit,1,(int)nconv,0,mode,0,0,0,0};
@@ -711,7 +771,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
             KN_<double>  xx(&workd[ipntr[1]],n);
             KN_<double>  yy(&workd[ipntr[2]],n);
             KN_<double>  zz(&workd[ipntr[3]],n);
-            DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
+            DoIdoAction(ido,bmat,mode,xx,yy,zz,work,OP1,B);
         }
         
         nconv = iparam[5];
@@ -843,7 +903,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     long nbev=1;
     long ncv =0;  // the number of Arnoldi vectors generated
     long maxit=0;  // the maximum number of Arnoldi iterations
-    long mode=3;
+    long driver=4;
     K sigma=0;
     KN<K> * evalue=0;
     KN<K> * resid=0;
@@ -861,13 +921,14 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     maxit= arg<long>(6,stack,0);
     rawvector=arg<KNM<K> *>(7,stack,0);
     resid=arg<KN<K> *>(8,stack,0);
-    mode = arg<long>(9,stack,3);
+    driver = arg<long>(9,stack,4);
+    int mymode = arg<long>(15,stack,-1);
     K * residptr= resid ? (K*) *resid : 0;
     char which[3];
     ToWhich(stack,which,nargs[10]);
     
     //evector=evector2.first;
-    ffassert(mode>0 && mode <4) ;
+    ffassert(driver>0 && driver <5) ;
     // Matrice_Creuse<K> *pOP1 =  GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
     //  Matrice_Creuse<K> *pB =  GetAny<Matrice_Creuse<K> *>((*expB)(stack));
     
@@ -922,8 +983,8 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     int err=0;
     if(nbev>= n-1)
         serr[err++]="  Number of eigenvalues of OP to be computed <= n-2 ";
-    if( mode < 1 || mode > 3)
-        serr[err++]="  the mode = 1 ,2 ,3  ";
+    if( driver < 1 || driver > 4)
+        serr[err++]="  the driver = 1 ,2 ,4  ";
     // 2 <= NCV-NEV and NCV <= N
     if( ! ( 2 <= nbev && ncv <= n))
         serr[err++]="   ( 2 <= nbve && nvc <= n) ";
@@ -934,10 +995,10 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     if (n != B.M )
         serr[err++]="Sorry the colum's number of the secand matrix in EigneValue is wrong.";
     if(verbosity)
-        cout << "Real complex eigenvalue problem: A*x - B*x*lambda" << endl;
+        cout << "Complex eigenvalue problem: A*x - B*x*lambda" << endl;
     if(verbosity>9 ||  err)
         cout << "   n " << n << " nev "<< nbev << " tol =" << tol << " maxit =" << maxit << " ncv = " << ncv
-        << " mode = " << mode << " which = " << which << endl;
+        << " driver = " << driver << " which = " << which << endl;
     if(err)
     {
         cerr << " list of the error " << endl;
@@ -980,10 +1041,16 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     // int mode=3; //  Shift invert			\
     
     int ido=0;
-    char bmat='G';
-    // char which[]="LM";
-    int ishift=1; // Auto Shift true by default                                                                                               \
+    //char bmat='G';
+      char bmat = (driver<3)? 'I' : 'G';
+      int  mode = (driver==1)? 1 : 3;
     
+    // char which[]="LM";
+    int ishift=1; // Auto Shift true by default
+    if( mymode>0 && (mymode != mode)) {
+        cerr << " Erreur  complex case:  mode== " << mymode << " == " << mode << " driver =" << driver << endl;
+        ExecError("wrong mod in Arpack complex case:");}
+
     int iparam[12]= { 0, ishift, 0, (int) maxit, 1,(int)  nconv, 0,(int) mode, 0, 0, 0, 0 };
     int ipntr[15]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     KN<K> workd(3*n+1);
@@ -1014,7 +1081,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
         KN_<K>  yy(&workd[ipntr[2]],n);
         KN_<K>  zz(&workd[ipntr[3]],n);
         
-        DoIdoAction(ido,mode,xx,yy,zz,work,OP1,B);
+        DoIdoAction(ido,bmat,mode,xx,yy,zz,work,OP1,B);
     }
     
     nconv = iparam[5];
@@ -1038,7 +1105,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
         if (verbosity)
         {
             cout << "Complex eigenvalue problem: A*x - B*x*lambda" << endl;
-            cout << "mode =" << mode << "  sigma=" << sigma <<  endl << endl;
+            cout << "driver =" << driver << "  sigma=" << sigma <<  endl << endl;
             
             cout << "Dimension of the system            : " << n              << endl;
             cout << "Number of 'requested' eigenvalues  : " << nbev  << endl;

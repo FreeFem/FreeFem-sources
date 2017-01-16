@@ -5,7 +5,7 @@ all-local: all.edp freefem++.pref
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw SKIP=$(SKIP_TESTS_EIGEN)
 
-TESTS=BeamEigenValue.edp BeamEigenValueperio.edp Lap3dEigenValue.edp  LapEigenValue.edp LapnosymEigenValue.edp Stokes-eigen.edp VP-Steklov-Poincare.edp neuman.edp  WGM-sphere.edp free-cyl-axi.edp LapEigenValueFunc.edp
+TESTS=BeamEigenValue.edp BeamEigenValueperio.edp Lap3dEigenValue.edp  LapEigenValue.edp LapnosymEigenValue.edp Stokes-eigen.edp VP-Steklov-Poincare.edp neuman.edp  WGM-sphere.edp free-cyl-axi.edp LapEigenValueFunc.edp LapnosymComplexEigenValue.edp
 #  LapComplexEigenValue.edp  (buggus) 
 EXTRA_DIST=*.edp all.edp
 

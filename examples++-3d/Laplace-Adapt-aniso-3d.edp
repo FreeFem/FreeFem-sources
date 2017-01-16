@@ -2,8 +2,13 @@
 load "msh3"
 load "tetgen"
 load "mshmet"
+<<<<<<< Local Changes
+//load "mmg3d-v4.0"
+load "freeyams"
+=======
 load "mmg3d-v4.0"
 load "freeyams"
+>>>>>>> External Changes
 load "medit"
 searchMethod=1; // more safe seach algo ..
 macro det2(a,b,c,d) (a*d-c*b) //
