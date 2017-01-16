@@ -1,0 +1,7 @@
+hg clone <address>
+cd ff++
+hg up cmake
+mkdir cmake_build
+cd cmake_build
+sudo apt-get install libhdf5-dev freeglut3-dev libopenmpi-dev libsuperlu-dev libscotch-dev libgsl-dev liblapack-dev libxmu-dev libxmi-dev libgmm++-dev libmumps-seq-dev libmetis-dev libnlopt-dev libsuitesparse-dev liblapack2-dev libatlas-base-dev
+make
