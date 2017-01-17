@@ -50,9 +50,10 @@ FF_INSTALL_PACKAGE(Tetgen)
 
 
 # dfft
-ADD_LIBRARY(dfft SHARED dfft.cpp)
-INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/fftw/install/include)
-
+IF(FFTW_DOWNLOADED)
+  ADD_LIBRARY(dfft SHARED dfft.cpp)
+  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/fftw/install/include)
+ENDIF(FFTW_DOWNLOADED)
 
 # Element_Mixte
 IF(LAPACK_FOUND)
@@ -62,9 +63,11 @@ IF(LAPACK_FOUND)
 ENDIF()
 
 # ff-Ipopt.cpp
-ADD_LIBRARY(ff-Ipopt SHARED ff-Ipopt.cpp)
-ADD_DEPENDENCIES(ff-Ipopt ipopt)
-INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
+IF(IPOPT_DOWNLOADED)
+  ADD_LIBRARY(ff-Ipopt SHARED ff-Ipopt.cpp)
+  ADD_DEPENDENCIES(ff-Ipopt ipopt)
+  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
+ENDIF(IPOPT_DOWNLOADED)
 
 # fflapack
 IF(LAPACK_FOUND)
@@ -74,12 +77,16 @@ IF(LAPACK_FOUND)
 ENDIF()
 
 # ff-NLpopt.cpp
-ADD_LIBRARY(ff-NLopt SHARED ff-NLopt.cpp)
-ADD_DEPENDENCIES(ff-NLopt nlopt)
-INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
+IF(NLOPT_DOWNLOADED)
+  ADD_LIBRARY(ff-NLopt SHARED ff-NLopt.cpp)
+  ADD_DEPENDENCIES(ff-NLopt nlopt)
+  INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
+ENDIF(NLOPT_DOWNLOADED)
 
 # ilut.cpp
-ADD_LIBRARY(ilut SHARED ilut.cpp)
+IF(GMM3D_FOUND)
+  ADD_LIBRARY(ilut SHARED ilut.cpp)
+ENDIF(GMM3D_FOUND)
 
 	
 # iohdf5
@@ -90,7 +97,9 @@ IF(HDF5_FOUND)
 ENDIF()
 
 # metis.cpp
-ADD_LIBRARY(metis SHARED metis.cpp)
+IF(METIS_FOUND)
+  ADD_LIBRARY(metis SHARED metis.cpp)
+ENDIF(METIS_FOUND)
 
 # mshmet.cpp
 #ADD_LIBRARY(mshmet mshmet.cpp)
@@ -105,9 +114,11 @@ ADD_LIBRARY(mumps SHARED MUMPS.cpp)
 INCLUDE_DIRECTORIES(${MPI_C_INCLUDE_PATH})
 
 # mmg3d.cpp
-ADD_LIBRARY(ff-mmg3d SHARED mmg3d.cpp)
-ADD_DEPENDENCIES(ff-mmg3d mmg3d)
-INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
+IF(MMG3D_DOWNLOADED)
+  ADD_LIBRARY(ff-mmg3d SHARED mmg3d.cpp)
+  ADD_DEPENDENCIES(ff-mmg3d mmg3d)
+  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
+ENDIF(MMG3D_DOWNLOADED)
 
 # mmg3d-v4.0.cpp
 #ADD_LIBRARY(ff-mmg3d-v4.0 SHARED mmg3d-v4.0.cpp)
@@ -120,17 +131,32 @@ IF(SCOTCH_FOUND)
 ENDIF()
 
 #superlu.cpp
-ADD_LIBRARY(superlu SHARED SuperLu.cpp)
-INCLUDE_DIRECTORIES(/usr/include/superlu)
+IF(SUPERLU_FOUND)
+  ADD_LIBRARY(superlu SHARED SuperLu.cpp)
+  INCLUDE_DIRECTORIES(${SUPERLU_INCLUDES})
+ENDIF(SUPERLU_FOUND)
 
 
 # tetgen.cpp
-ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
-                                  ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
-                                  ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
-TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${FF_DOWNLOAD_DIR}/tetgen/install/libtet.a)
-ADD_DEPENDENCIES(example_tetgen tetgen)
-INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/tetgen/src)
+IF(TETGEN_FOUND)
+
+  ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
+                             ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
+                             ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
+  TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${TETGEN_LIBRARIES})
+  INCLUDE_DIRECTORIES(${TETGEN_INCLUDES})
+
+ELSEIF(TETGEN_DOWNLOADED)
+
+  ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
+                             ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
+                             ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
+  TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${FF_DOWNLOAD_DIR}/tetgen/install/libtet.a)
+  ADD_DEPENDENCIES(example_tetgen tetgen)
+  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/tetgen/src)
+
+ENDIF(TETGEN_FOUND)
+
 
 
 # UMFPACK64.cpp
