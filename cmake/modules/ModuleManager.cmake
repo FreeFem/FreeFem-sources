@@ -4,13 +4,16 @@ FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(MPI REQUIRED)
 
-
 FIND_PACKAGE(GSL)
 FIND_PACKAGE(LAPACK)
-#FIND_PACKAGE(SCOTCH)
 
-LIST(APPEND MODULE_LIST SCOTCH
-                        SUPERLU)
+LIST(APPEND MODULE_LIST FFTW
+                        GMM
+                        IPOPT
+                        NLOPT
+                        SCOTCH
+                        SUPERLU
+                        TETGEN)
 
 
 FOREACH(MODULE ${MODULE_LIST})
@@ -21,7 +24,11 @@ FOREACH(MODULE ${MODULE_LIST})
 
 ENDFOREACH(MODULE)
 
-MESSAGE(STATUS ${DOWNLOAD_LIST})
+IF(ENABLE_DOWNLOAD)
+  MESSAGE(STATUS "The following modules will be downloaded: ${DOWNLOAD_LIST}")
+ELSE()
+  MESSAGE(STATUS "The following modules are missing: ${DOWNLOAD_LIST}")
+ENDIF(ENABLE_DOWNLOAD)
 
 
 
