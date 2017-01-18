@@ -6,6 +6,7 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp 
                           ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/ffrandom.cpp                              # depend de GSL
                           ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp                              # freeyams (probleme acces)
+                          ${CMAKE_SOURCE_DIR}/examples++-load/gsl.cpp                                   # depend de gsl
                           ${CMAKE_SOURCE_DIR}/examples++-load/ilut.cpp                                  # ok (avec gmm++)
                           ${CMAKE_SOURCE_DIR}/examples++-load/iohdf5.cpp                                # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/metis.cpp                                 # ok
@@ -82,8 +83,6 @@ IF(GSL_FOUND)
   ADD_LIBRARY(ffrandom SHARED ffrandom.cpp)
   TARGET_LINK_LIBRARIES(ffrandom ${GSL_LIBRARIES})
   INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
-  MESSAGE(STATUS "GSL lib = ${GSL_LIBRARIES}")
-  MESSAGE(STATUS "GSL inc = ${GSL_INCLUDE_DIRS}")
 ENDIF(GSL_FOUND)
 
 
@@ -94,6 +93,13 @@ IF(NLOPT_DOWNLOADED)
   ADD_DEPENDENCIES(ff-NLopt nlopt)
   INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
 ENDIF(NLOPT_DOWNLOADED)
+
+# gsl
+IF(GSL_FOUND)
+  ADD_LIBRARY(gsl SHARED gsl.cpp)
+  TARGET_LINK_LIBRARIES(gsl ${GSL_LIBRARIES})
+  INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
+ENDIF(GSL_FOUND)
 
 # ilut.cpp
 IF(GMM3D_FOUND)
