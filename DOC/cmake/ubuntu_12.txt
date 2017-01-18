@@ -63,3 +63,9 @@ cdoucet@pl-59031:~/Depots/ff++/cmake_build$ /home/cdoucet/Logiciels/cmake-3.7.1-
 /home/cdoucet/Depots/ff++/examples++-load/gsl.cpp: In member function ‘void GSLInterpolation::init(const KN_<double>&, const KN_<double>&, bool, long int)’:
 /home/cdoucet/Depots/ff++/examples++-load/gsl.cpp:64:78: erreur: ‘gsl_interp_steffen’ was not declared in this scope
 
+CD: gsl_interp.h is NOT included directly in gsl.cpp (but it may included in a transitive way though); to be checked;
+CD: gsl_interp.h does not declare gsl_interp_steffen as expected on Ubuntu 12 (GSL version 1.5)
+CD: a minimal version should be fixed but which one?
+
+
+
