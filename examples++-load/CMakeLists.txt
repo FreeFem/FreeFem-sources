@@ -4,6 +4,7 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp 
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp                              # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/ffrandom.cpp                              # depend de GSL
                           ${CMAKE_SOURCE_DIR}/examples++-load/freeyams.cpp                              # freeyams (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/ilut.cpp                                  # ok (avec gmm++)
                           ${CMAKE_SOURCE_DIR}/examples++-load/iohdf5.cpp                                # ok
@@ -74,7 +75,18 @@ IF(LAPACK_FOUND)
 	ADD_LIBRARY(fflapack SHARED fflapack.cpp)
 	TARGET_LINK_LIBRARIES(fflapack ${FREEFEM_LIBRARIES}
                                  ${LAPACK_LIBRARIES})
-ENDIF()
+ENDIF(LAPACK_FOUND)
+
+# ffrandom
+IF(GSL_FOUND)
+  ADD_LIBRARY(ffrandom SHARED ffrandom.cpp)
+  TARGET_LINK_LIBRARIES(ffrandom ${GSL_LIBRARIES})
+  INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
+  MESSAGE(STATUS "GSL lib = ${GSL_LIBRARIES}")
+  MESSAGE(STATUS "GSL inc = ${GSL_INCLUDE_DIRS}")
+ENDIF(GSL_FOUND)
+
+
 
 # ff-NLpopt.cpp
 IF(NLOPT_DOWNLOADED)

@@ -1,0 +1,65 @@
+cdoucet@pl-59031:~/Depots/ff++/cmake_build$ /home/cdoucet/Logiciels/cmake-3.7.1-Linux-x86_64/bin/cmake -D ENABLE_DOWNLOAD=True -D FF_DOWNLOAD_DIR=/home/cdoucet/Logiciels/modules_ff++/ ..
+-- The C compiler identification is GNU 4.6.4
+-- The CXX compiler identification is GNU 4.6.4
+-- The Fortran compiler identification is GNU 4.6.4
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Check for working Fortran compiler: /usr/bin/gfortran
+-- Check for working Fortran compiler: /usr/bin/gfortran  -- works
+-- Detecting Fortran compiler ABI info
+-- Detecting Fortran compiler ABI info - done
+-- Checking whether /usr/bin/gfortran supports Fortran 90
+-- Checking whether /usr/bin/gfortran supports Fortran 90 -- yes
+-- Found HDF5: /usr/lib/libhdf5.so (found version "1.8.4.1")  
+-- Found GLUT: /usr/lib/x86_64-linux-gnu/libglut.so  
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libGL.so  
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Found MPI_C: /usr/lib/openmpi/lib/libmpi.so;/usr/lib/openmpi/lib/libopen-rte.so;/usr/lib/openmpi/lib/libopen-pal.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libnsl.so;/usr/lib/x86_64-linux-gnu/libutil.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/libdl.so  
+-- Found MPI_CXX: /usr/lib/openmpi/lib/libmpi_cxx.so;/usr/lib/openmpi/lib/libmpi.so;/usr/lib/openmpi/lib/libopen-rte.so;/usr/lib/openmpi/lib/libopen-pal.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libnsl.so;/usr/lib/x86_64-linux-gnu/libutil.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/libdl.so  
+-- Found MPI_Fortran: /usr/lib/openmpi/lib/libmpi_f90.so;/usr/lib/openmpi/lib/libmpi_f77.so;/usr/lib/openmpi/lib/libmpi.so;/usr/lib/openmpi/lib/libopen-rte.so;/usr/lib/openmpi/lib/libopen-pal.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libnsl.so;/usr/lib/x86_64-linux-gnu/libutil.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/libdl.so  
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.26") 
+-- Found GSL: /usr/include (found version "1.15") 
+-- Looking for Fortran dgemm
+-- Looking for Fortran dgemm - found
+-- A library with BLAS API found.
+-- Looking for Fortran cheev
+-- Looking for Fortran cheev - found
+-- A library with LAPACK API found.
+-- Could NOT find FFTW (missing:  FFTW_INCLUDES FFTW_LIBRARIES) 
+-- Could NOT find GMM (missing:  GMM_INCLUDES) 
+-- Could NOT find IPOPT (missing:  IPOPT_INCLUDES IPOPT_LIBRARIES) 
+-- Could NOT find NLOPT (missing:  NLOPT_INCLUDES NLOPT_LIBRARIES) 
+-- A library with SCOTCH API found.
+-- Found SCOTCH: /usr/include/scotch  
+-- Could NOT find SUPERLU (missing:  SUPERLU_INCLUDES SUPERLU_LIBRARIES) 
+-- Could NOT find TETGEN (missing:  TETGEN_INCLUDES TETGEN_LIBRARIES) 
+-- The following modules will be downloaded: FFTW;GMM;IPOPT;NLOPT;SUPERLU;TETGEN
+-- examples++examples++-3dexamples++-bugexamples++-chapt3examples++-eigenexamples++-hpddmexamples++-loadexamples++-mpiexamples++-otherexamples++-tutorialexamples-bamg
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/cdoucet/Depots/ff++/cmake_build
+
+
+
+
+/home/cdoucet/Depots/ff++/examples++-load/gsl.cpp: In member function ‘void GSLInterpolation::init(const KN_<double>&, const KN_<double>&, bool, long int)’:
+/home/cdoucet/Depots/ff++/examples++-load/gsl.cpp:64:78: erreur: ‘gsl_interp_steffen’ was not declared in this scope
+
