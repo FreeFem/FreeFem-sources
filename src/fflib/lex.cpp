@@ -423,6 +423,7 @@ int mylex::scan1()
   if(debugmacro)  cout << " scan1 " << ret << " " << token() << " " << ID << endl;
     while ( ret == ID &&SetMacro(ret)); // correction mars 2014 FH
     while ( ret == ID && CallMacro(ret)) ; // correction mars 2014 FH
+    while ( ret == ID && IFMacro(ret)) ; // correction mars 2014 FH
     
   return ret;
 }    
@@ -507,7 +508,25 @@ char * mylex::match(int i)
   ErrorScan(" err macro ");};
  return buf; }
 
-
+bool mylex::AddMacro(string m,string def)
+{
+    bool ok=1;
+    char *macroname=newcopy(m.c_str());
+    int nbparam =0;
+    deque<string> macroparm;
+    macroparm.push_back(def);
+    MapMacroDef & MacroDef =listMacroDef->back();
+    MapMacroDef::const_iterator i=MacroDef.find(macroname);
+    if(verbosity>3) cout << " add macro parmam"<< m << "->" << def << endl;
+    if ( i == MacroDef.end() )
+        MacroDef[macroname]=macroparm;
+    else {
+        cerr << " Error add macro varf: "<< m << "->" << def << " the macro exist"<< endl;
+        ErrorScan("Error in AddMacro parameters");
+        ok = false;
+    }
+    return ok;
+}
 bool mylex::SetMacro(int &ret)
 { 
   char endmacro[]="EndMacro";
@@ -611,6 +630,102 @@ bool mylex::SetMacro(int &ret)
   return rt;
 }
 
+bool mylex::IFMacro(int &ret)
+{// A faire !!!! F.H
+    const char *ifm="IFMACRO";
+    const char *ife="ENDIFMACRO";
+    int kif=0;
+    int isnot=0;
+    
+    if (strcmp(buf,ifm)==0  )
+    {
+        string val;
+        int rr=basescan();
+        if (rr!='(') {ErrorScan(" missing '(' after IFMACRO ");}
+         rr=basescan();
+        if( rr=='!') { isnot =1;rr=basescan();}
+        if (rr != ID)
+            cerr <<"IFMACRO: Erreur waiting of an ID: " << buf << " " << rr <<  endl;
+        string id =buf;
+        int withval=0;
+         rr=basescan();
+        if( rr == ',') {
+            while(1) {
+            int i = source().get();
+            if (i == EOF) {  cerr << "in IFMACRO " <<id <<  endl;
+                    ErrorScan(" ENDOFFILE in IFMACRO definition. remark:a end with ENDIFMACRO ");}
+            
+            if( char(i) ==')') break;
+            val +=char(i);
+            withval=1;
+        }
+            source().putback(')');
+            rr=basescan();
+        }
+    
+        if (rr!=')') {ErrorScan(" missing ')' after IFMACRO(macro)  ");}
+        int kmacro=0;
+        cout << " IFMacro:: " << id << endl;
+        string def;
+        do {
+            int lk=0;
+            string item;
+            int i = source().get();
+            if (i == EOF) {  cerr << "in IFMACRO " <<id <<  endl;
+                ErrorScan(" ENDOFFILE in IFMACRO definition. remark:a end with ENDIFMACRO ");}
+            int ii = source().peek();
+            if(isalpha(i) && isalpha(ii) ) {//  Modif F.H
+                //def +=char(i);
+                item = char(i);
+                i = source().get();
+                while(isalpha(i))
+                {
+                    item += char(i);
+                    i = source().get();
+                }
+                if( item == ifm)  kif++;
+                if( item == ife)  {
+                    if (kif==0)
+                    { source().putback(i); break;}
+                    kif--;
+                }
+                def += item;
+                item ="";
+                ii = source().peek();
+            }
+     
+           
+        def +=char(i);
+       } while(1);
+        bool exist=false;
+        MapMacroDef::const_iterator j;
+        for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
+        {
+            j=i->find(id.c_str());
+            if( j != i->end()) { exist =true; break;}
+        }
+        
+        if(withval && exist)
+        {
+            const deque<string>  & macroparm= j->second;
+            if(macroparm.size()>0)
+            {
+              const string & mval = macroparm[macroparm.size()-1];
+              cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
+              exist = mval == val;
+            }
+        }
+        cout << "IFMacro def: " << def << "\n .. exist "<< exist  << " " << isnot << " "<< (exist == (isnot==0)) << " \n....\n";
+
+        if(exist == (isnot==0))
+         {
+          string * ifmc= newstring(" ifmacro ");
+          input(def,ifmc);
+        }
+       ret =  scan1();
+    }
+  
+}
 
 bool mylex::CallMacro(int &ret)
 {
@@ -889,7 +1004,8 @@ bool mylex::close() {
    }
 }
 
- mylex::mylex(ostream & out,bool eecho):
+ mylex::mylex(ostream & out,bool eecho,const KN<String> *pargs)
+:
     linenumber(1),
     charnumber(0),
     ffincludedir(ffenvironment["includepath"]),
@@ -901,11 +1017,28 @@ bool mylex::close() {
     listMacroParam(0)
  {    
     listMacroDef->push_front(MapMacroDef());
+     if(pargs)
+     {
+         const KN<string> &args=*pargs;
+         for (int i=1;i<args.N();++i)
+         {
+             const string &a= args[i];
+             size_t id=a.find_first_of("-D");
+             if( id == 0)
+             {
+                 size_t ie=a.find_first_of("=");
+                 if( ie != std::string::npos && ie > 3)
+                     AddMacro(a.substr(2,ie-2),a.substr(ie+1,a.length()-ie-1));
+                
+             }
+             
+         }
+     }
    };
    
-mylex * Newlex(  ostream & out,bool eecho)
+mylex * Newlex(  ostream & out,bool eecho,KN<String> * args)
   {
-    return new mylex(out,eecho);
+    return new mylex(out,eecho,args);
   }
 void Destroylex(mylex * m)
  {

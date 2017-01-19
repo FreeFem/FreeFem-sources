@@ -1,3 +1,9 @@
+ - change myrand to randon (better result ???)
+ - add argument like -Dmacroname=macrodef to def macro 
+ - add IFMACRO(macroname) codes ENDIFMACRO compile codes if macro variable is def 
+ - add IFMACRO(!macroname) codes ENDIFMACRO compile codes if macro variable is undef 
+ - add IFMACRO(macroname,val) codes ENDIFMACRO compile codes if macro variable is def and equal to val 
+   val is a string 
 - version 3.50-2  (version 3917:2affb5616fe3)
  - correct pb in configure for hdf5 c++ if missing file H5Cpp.h
  - update hpddm to 082f06f633d912e879c93258df53234f9c94e492
