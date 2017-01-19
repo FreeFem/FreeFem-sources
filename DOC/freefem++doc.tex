@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.50}
+\def\VERSION{3.51-2}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -5025,7 +5025,7 @@ There is a very useful predefined array in \freefempp \texttt{ARGV} that contain
 \eFF
 \end{example}
 
-
+The parameter   \index{ARGV!-D} \texttt{-Dmacroname=macrovalue}  of \texttt{ARGV} is a simple way to add macro the the script like in "C++". 
 
 And to get argument unused in \texttt{getARGV.idp} include script file, 
 \bFF
@@ -5149,7 +5149,70 @@ the result:
 
 To defined \texttt{macro} in a \texttt{macro} you can use 
 the two new word \texttt{NewMacro} , \texttt{EndMacro} key word to set and
-and claose de macro definition (version 3.11, and not well tested). 
+and close de macro definition (version 3.11, and not well tested). 
+
+In version 3.51-2, we test in macro generation like \verb!#ifdef ... #endif! in \texttt{C++},
+the syntaxe is :\index{IFMACRO} \index{ENDIFMACRO}\index{Stringification}
+
+\bFF
+@macro AA  tt// \hfilll
+
+@IFMACRO(AA,tt)
+// if AA == tt \hfilll
+cout << " AA " << @Stringification(AA) <<  endl;  
+@macro f1 cas1// \hfilll
+@ENDIFMACRO
+@IFMACRO(AA,bb)
+// if AA == bb \hfilll
+@macro CAS 2// \hfilll
+@ENDIFMACRO
+
+@IFMACRO(DIR)
+// macro DIR exist \hfilll
+@include @Stringification(DIR/f1.edp)
+@ENDIFMACRO
+
+\eFF
+
+the output is
+
+\begin{verbatim}
+MBP-FH3:~ hecht$ FreeFem++ aa.edp -DDIR=.
+-- FreeFem++ v  3.500002 (date Jeu 19 jan 2017 16:46:23 CET)
+ Load: lg_fem lg_mesh lg_mesh3 eigenvalue 
+    1 :    macro AAtt//
+    2 : 
+    3 : 
+    1 : // if AA == tt
+    2 : cout << " AA " << Stringification(tt) <<  endl;  
+    3 :   macro f1cas1//
+    4 : 
+    4 : 
+    5 : 
+    6 : 
+    1 : // macro DIR exist 
+    2 : include Stringification(./cas1.edp)cout << "f1.edp"<<endl; 
+    3 : 
+    7 :  sizestack + 1024 =1072  ( 48 )
+
+ AA tt
+f1.edp
+times: compile 0.003547s, execution 1.6e-05s,  mpirank:0
+ CodeAlloc : nb ptr  2604,  size :340800 mpirank: 0
+Ok: Normal End
+MBP-FH3:~ hecht$ 
+
+\end{verbatim}
+
+And 
+    FILE,LINE,Stringification() to get line number and edp filename,
+    add quote to a parameter after macro generation ? 
+    Like in 
+\bFF    
+    @cout << "in " << @FILE << " line " << @LINE << "    -- '" 
+         << @Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
+\eFF
+
 
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 

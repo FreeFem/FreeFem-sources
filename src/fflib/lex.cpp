@@ -517,7 +517,7 @@ bool mylex::AddMacro(string m,string def)
     macroparm.push_back(def);
     MapMacroDef & MacroDef =listMacroDef->back();
     MapMacroDef::const_iterator i=MacroDef.find(macroname);
-    if(verbosity>3) cout << " add macro parmam"<< m << "->" << def << endl;
+    if(verbosity>3) cout << " add macro "<< m << "->" << def << endl;
     if ( i == MacroDef.end() )
         MacroDef[macroname]=macroparm;
     else {
@@ -665,7 +665,7 @@ bool mylex::IFMacro(int &ret)
     
         if (rr!=')') {ErrorScan(" missing ')' after IFMACRO(macro)  ");}
         int kmacro=0;
-        cout << " IFMacro:: " << id << endl;
+        if(debugmacro) cout << " IFMacro:: " << id << endl;
         string def;
         do {
             int lk=0;
@@ -711,11 +711,11 @@ bool mylex::IFMacro(int &ret)
             if(macroparm.size()>0)
             {
               const string & mval = macroparm[macroparm.size()-1];
-              cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
+             if(debugmacro)  cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
               exist = mval == val;
             }
         }
-        cout << "IFMacro def: " << def << "\n .. exist "<< exist  << " " << isnot << " "<< (exist == (isnot==0)) << " \n....\n";
+       if(debugmacro)  cout << "IFMacro def: " << def << "\n .. exist "<< exist  << " " << isnot << " "<< (exist == (isnot==0)) << " \n....\n";
 
         if(exist == (isnot==0))
          {
