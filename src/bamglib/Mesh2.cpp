@@ -46,7 +46,17 @@ using namespace std;
 #include "SetOfE4.h"
 
 namespace bamg {
+#ifdef _WIN32
+    long genrand_int31(void);
+    void init_genrand(unsigned long);
+#define random genrand_int31
+#define srandom init_genrand
+    
+#else
+    
+#endif
 
+    
     static unsigned long myrand_next = 1;
     
     /* RAND_MAX assumed to be 32767 */
@@ -54,12 +64,12 @@ namespace bamg {
         
       //  myrand_next = myrand_next * 1103515245 + 12345;
        // return((unsigned)(myrand_next/65536) % 32768);
-        return  random();
+        return  random ();
     }
     
     void mysrand(unsigned int seed) {
        // myrand_next = seed;
-        srandom(seed);
+        srandom (seed);
     }
 
 #ifdef DEBUG1

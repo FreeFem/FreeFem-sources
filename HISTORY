@@ -1,5 +1,10 @@
-@  changeset:   3928:18972855c405
+@  changeset:   3929:e8ebe3179989
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 19 17:00:59 2017 +0100
+|  summary:     add new macro stuff in doc
+|
+o  changeset:   3928:18972855c405
 |  parent:      3920:188f1e6a0b7e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 19 15:53:28 2017 +0100
