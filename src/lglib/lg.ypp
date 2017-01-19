@@ -922,7 +922,7 @@ int mainff (int  argc, char **argv)
     pkarg= &karg;
 
     /// <<zzzfff>>
-    zzzfff = Newlex(cout,echo_edp);
+    zzzfff = Newlex(cout,echo_edp,pkarg);
     
   
 /*  

@@ -91,7 +91,7 @@ class mylex : public CodeAlloc {
   list<MapMacroParam> *listMacroParam;
   public:
   
-  mylex(ostream & out,bool eecho=true);
+  mylex(ostream & out,bool eecho=true,const KN<String> *pargs=0 );
   string token() const;
   void print(ostream &f) const; 
 
@@ -148,6 +148,9 @@ private:
   int scan1();
   bool SetMacro(int &ret);
   bool CallMacro(int &ret);
+  bool IFMacro(int &ret);
+    
+  bool AddMacro(string m,string def) ;
   char * match(int i);
   void ErrorScan(const char * s) {
       cerr  << "\n" ;
@@ -157,7 +160,7 @@ private:
   
 } ;
 
-mylex * Newlex(  ostream & out,bool =true);
+mylex * Newlex(  ostream & out,bool =true,KN<String> * args=0);
  void Destroylex(mylex * m);
 
 /// <<zzzfff>> This pointer is allocated in [[file:global.cpp::zzzfff]] and initialized in
