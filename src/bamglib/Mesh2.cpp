@@ -45,10 +45,13 @@ using namespace std;
 #include "QuadTree.h"
 #include "SetOfE4.h"
 
+#ifdef _WIN32
+long genrand_int31(void);
+void init_genrand(unsigned long);
+#endif
+
 namespace bamg {
 #ifdef _WIN32
-    long genrand_int31(void);
-    void init_genrand(unsigned long);
 #define random genrand_int31
 #define srandom init_genrand
  
