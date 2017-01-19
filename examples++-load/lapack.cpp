@@ -408,7 +408,7 @@ long lapack_zhegv(KNM<Complex> *const &A,KNM<Complex> *const &B,KN<double> *cons
   KNM<Complex> vl(1,1);
   intblas info,lw=-1;  
   KN<Complex> w(1);
-  KN<double> wr(max(1,3*n-2));
+  KN<double> wr(max(1,int(3*n-2)));
   intblas itype=1; // generalized eigenvalue problem Ax = lambda Bx
   // VL: By default, we compute the eigenvectors and use the upper triangles of A and B
   char JOBZ='V',UPLO='U';
@@ -803,7 +803,7 @@ long lapack_zheev(KNM<Complex> *const &A,KN<double> *const &vp,KNM<Complex> *con
   KNM<Complex> mat(*A);
   intblas info,lw=-1;  
   KN<Complex> w(1);
-  KN<double> rw(max(1, 3*n-2));
+  KN<double> rw(max(1, int(3*n-2)));
   char JOBZ='V',UPLO='U';
   zheev_(&JOBZ,&UPLO,&n,mat,&n,*vp,w,&lw,rw,&info);
   lw=w[0].real();
