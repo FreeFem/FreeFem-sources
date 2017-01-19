@@ -1,5 +1,10 @@
-@  changeset:   3929:e8ebe3179989
+@  changeset:   3930:de94873241d9
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 19 17:18:13 2017 +0100
+|  summary:     coorect pb randow under windows
+|
+o  changeset:   3929:e8ebe3179989
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 19 17:00:59 2017 +0100
 |  summary:     add new macro stuff in doc

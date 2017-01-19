@@ -51,27 +51,42 @@ namespace bamg {
     void init_genrand(unsigned long);
 #define random genrand_int31
 #define srandom init_genrand
-    
-#else
-    
-#endif
-
-    
+ 
     static unsigned long myrand_next = 1;
     
     /* RAND_MAX assumed to be 32767 */
     int myrand(void) {
         
-      //  myrand_next = myrand_next * 1103515245 + 12345;
-       // return((unsigned)(myrand_next/65536) % 32768);
+        //  myrand_next = myrand_next * 1103515245 + 12345;
+        // return((unsigned)(myrand_next/65536) % 32768);
+        return  genrand_int31 ();
+    }
+    
+    void mysrand(unsigned int seed) {
+        // myrand_next = seed;
+        init_genrand (seed);
+    }
+
+#else
+    static unsigned long myrand_next = 1;
+    
+    /* RAND_MAX assumed to be 32767 */
+    int myrand(void) {
+        
+        //  myrand_next = myrand_next * 1103515245 + 12345;
+        // return((unsigned)(myrand_next/65536) % 32768);
         return  random ();
     }
     
     void mysrand(unsigned int seed) {
-       // myrand_next = seed;
+        // myrand_next = seed;
         srandom (seed);
     }
+    
+#endif
 
+    
+ 
 #ifdef DEBUG1
 extern int SHOW ; // for debugging 
 int SHOW = 0; // for debugging 
