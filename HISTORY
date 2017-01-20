@@ -1,5 +1,10 @@
-@  changeset:   3933:2f06fe918b47
+@  changeset:   3934:799602f34ed4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 20 09:20:24 2017 +0100
+|  summary:     correct bug in convert 3d (thank to guyotyann@yahoo.fr)
+|
+o  changeset:   3933:2f06fe918b47
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 19 18:06:19 2017 +0100
 |  summary:     coorect type on win32 systeme
