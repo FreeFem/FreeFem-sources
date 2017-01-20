@@ -10,6 +10,7 @@ FIND_PACKAGE(LAPACK)
 LIST(APPEND MODULE_LIST FFTW
                         GMM
                         IPOPT
+                        METIS
                         NLOPT
                         SCOTCH
                         SUPERLU
