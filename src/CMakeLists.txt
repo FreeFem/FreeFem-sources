@@ -1,43 +1,76 @@
 ###########
 # FREEFEM++
-###########
-ADD_EXECUTABLE(FreeFem++ ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp 
+###########i
+IF(CBLAS_FOUND)
+  ADD_EXECUTABLE(FreeFem++ ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp 
                          ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi-empty.cpp 
                          ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/lglib ${CMAKE_SOURCE_DIR}/src/fflib ${CMAKE_SOURCE_DIR}/src/Graphics)
-TARGET_LINK_LIBRARIES(FreeFem++ arpack cblas ${HDF5_LIBRARIES} dl umfpack lglib libff)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/lglib ${CMAKE_SOURCE_DIR}/src/fflib ${CMAKE_SOURCE_DIR}/src/Graphics)
+  TARGET_LINK_LIBRARIES(FreeFem++ 
+# arpack 
+#                                cblas 
+                                ${HDF5_LIBRARIES} 
+                                dl 
+#                                umfpack 
+                                lglib 
+                                libff)
+ENDIF(CBLAS_FOUND)
 
 ########
 # FFGLUT
 ########
 
-ADD_EXECUTABLE(ffglut ${CMAKE_SOURCE_DIR}/src/Graphics/ffglut.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/fem.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/Mesh3dn.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/Mesh2dn.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/Mesh1dn.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/GQuadTree.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/FQuadTree.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/Drawing.cpp
-                      ${CMAKE_SOURCE_DIR}/src/femlib/mshptg.cpp
-                      ${CMAKE_SOURCE_DIR}/src/Graphics/gggg.cpp
-                      ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp
-                      ${CMAKE_SOURCE_DIR}/src/Graphics/ffthreads.cpp)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src/mpi ${CMAKE_SOURCE_DIR}/src/femlib ${CMAKE_SOURCE_DIR}/src/fflib/ ${CMAKE_SOURCE_DIR}/src/Graphics/)
-TARGET_LINK_LIBRARIES(ffglut lglib ${CMAKE_THREAD_LIBS_INIT} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GLUT_LIBRARIES} libff)
+IF(GLUT_FOUND)
+
+  ADD_EXECUTABLE(ffglut ${CMAKE_SOURCE_DIR}/src/Graphics/ffglut.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/fem.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/Mesh3dn.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/Mesh2dn.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/Mesh1dn.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/GQuadTree.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/FQuadTree.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/Drawing.cpp
+                        ${CMAKE_SOURCE_DIR}/src/femlib/mshptg.cpp
+                        ${CMAKE_SOURCE_DIR}/src/Graphics/gggg.cpp
+                        ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp
+                        ${CMAKE_SOURCE_DIR}/src/Graphics/ffthreads.cpp)
+  
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} 
+                      ${CMAKE_SOURCE_DIR}/src/mpi 
+                      ${CMAKE_SOURCE_DIR}/src/femlib 
+                      ${CMAKE_SOURCE_DIR}/src/fflib/ 
+                      ${CMAKE_SOURCE_DIR}/src/Graphics/)
+  
+  TARGET_LINK_LIBRARIES(ffglut lglib libff
+                               ${CMAKE_THREAD_LIBS_INIT} 
+                               ${OPENGL_gl_LIBRARY} 
+                               ${OPENGL_glu_LIBRARY} 
+                               ${GLUT_LIBRARIES})
+
+ENDIF(GLUT_FOUND)
 
 ###############
 # FREEFEM++-MPI
 ###############
-ADD_EXECUTABLE(FreeFem++-mpi ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi.cpp
-                             ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp
-                             ${CMAKE_SOURCE_DIR}/src/lglib/mymain.cpp
-                             ${CMAKE_SOURCE_DIR}/src/lglib/lg.tab.cpp
-                             ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
-INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
-TARGET_LINK_LIBRARIES(FreeFem++-mpi ${MPI_CXX_LIBRARIES} libff umfpack ${HDF5_LIBRARIES} arpack blas)
 
+IF(MPI_FOUND)
 
+  ADD_EXECUTABLE(FreeFem++-mpi ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi.cpp
+                               ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp
+                               ${CMAKE_SOURCE_DIR}/src/lglib/mymain.cpp
+                               ${CMAKE_SOURCE_DIR}/src/lglib/lg.tab.cpp
+                               ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
+
+  INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+
+  TARGET_LINK_LIBRARIES(FreeFem++-mpi arpack
+                                      blas
+                                      libff
+                                      umfpack
+                                      ${HDF5_LIBRARIES}
+                                      ${MPI_CXX_LIBRARIES})
+
+ENDIF(MPI_FOUND)
 
 
 ADD_SUBDIRECTORY(bamg)
