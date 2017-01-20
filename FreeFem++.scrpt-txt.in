@@ -1,0 +1,68 @@
+#  Author F. hecht with the help of Vincent Bernardi
+#  frederic.hecht@upmc.fr 
+#  this is a free software with no garanty at all.
+#---------------
+
+# take from the web (thank to Alec Web log). 
+# http://www.alecjacobson.com/weblog/
+on last_offset(the_text, char)
+	try
+		set len to count of the_text
+		set reversed to reverse of characters of the_text as string
+		set last_occurrence to len - (offset of char in reversed) + 1
+		if last_occurrence > len then
+			return 0
+		end if
+	on error
+		return 0
+	end try
+	return last_occurrence
+end last_offset
+
+
+
+on dirname(the_path)
+	set last_occurrence to last_offset(the_path, "/")
+	if last_occurrence is equal to 0 then
+		return "."
+	end if
+	if last_occurrence is equal to 1 then
+		return "/"
+	end if
+	if last_occurrence is equal to (count of the_path) then
+		set the_path to items 1 thru (last_occurrence - 1) of the_path as string
+		return dirname(the_path)
+	end if
+	return items 1 thru (last_occurrence - 1) of the_path as string
+end dirname
+
+# end of web part ... 
+
+
+#  the freefem++ action 
+# ------------------- 
+on freefem(edpfile)
+	set edppath to POSIX path of edpfile
+	set edpdir to dirname(edppath)
+	tell application "Terminal"
+		activate
+		try
+			do shell script "cd \"" & edpdir & "\";@prefix@/bin/FreeFem++  \"" & edppath & "\""
+		end try
+	end tell
+end freefem
+
+#  to do on drag and drop 
+# -------------------
+on open filelist
+	repeat with edpfile in filelist
+		freefem(edpfile)
+	end repeat
+	return
+end open
+
+# other default case …. 
+# -------------------
+set edpfile to choose file with prompt "Choose a edp script:"
+freefem(edpfile)
+
