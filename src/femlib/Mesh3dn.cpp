@@ -1226,6 +1226,7 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
 
         // corrected by F.H 23 juin 2015
         bool ddd=verbosity>2000;
+        bool ddd9=verbosity>9;
         bool nomove=true;
         R lambda[4],dl[4],cl[4];
         Phat.toBary(lambda);
@@ -1357,6 +1358,7 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
                         l[p[2]]+=epsb+epsb;
                         l[p[3]]=0;
                         kk  =p[3];
+                        if(ddd9 )
                         cout << "  *** WalkInTetn: on bouge convect le point d'une arete  sur un face .... \n";
                     }
                     else
@@ -1365,6 +1367,7 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
                         l[p[2]]+=epsb;
                         l[p[3]]=0;
                         kk=p[3];
+                        if(ddd9 )
                         cout << "  *** WalkInTetn: on bouge convect le point d'un sommet sur un face .... \n";
 
                     }
