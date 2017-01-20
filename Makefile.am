@@ -26,7 +26,8 @@ uninstall-ff++ \
 ./build/cleancrlf		./build/download		./build/links2files \
 ./build/orgindex ./build/ff-md5  script/PostInstall.m4 \
 web/download.php	web/index.php		web/macosx.php		web/menu.php		web/phpfiles.php \
-web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php 
+web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php \
+FreeFem++.app.tgz 
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -172,7 +173,7 @@ install-exec-local::
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
 	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
-	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
+#	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
 
 script/PostInstall.sh:./Makefile script/PostInstall.m4
 	m4 script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" >script/PostInstall.sh

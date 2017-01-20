@@ -1342,7 +1342,7 @@ int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & of
                 if(l[p[1]] <l[p[3]]) swap(p[1],p[3]);
                 if(l[p[0]] <l[p[1]]) swap(p[0],p[1]);// 0 ok
                 if(l[p[2]] <l[p[3]]) swap(p[2],p[3]);// 3 ok
-                if(l[p[1]] <l[p[2]]) swap(p[2],p[3]);// 1,2 ok
+                if(l[p[1]] <l[p[2]]) swap(p[1],p[2]);// 1,2 ok
                 
                 ffassert((l[p[0]]  >= l[p[1]]) && (l[p[1]]  >= l[p[2]]) && (l[p[2]]  >= l[p[3]]) );
                 if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< l[0]  << " "
