@@ -52,6 +52,35 @@ using namespace  Fem2D;
 
 // fonction determinant les points d'intersection
 static int debug =0;
+class FINDLOCALMIN_P1_Op : public E_F0mps
+{
+public:
+    Expression eTh,eu,er;
+    static const int n_name_param = 2; //
+    static basicAC_F0::name_and_type name_param[] ;
+    Expression nargs[n_name_param];
+    double  arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
+    long  arg(int i,Stack stack,long  a) const{ return nargs[i] ? GetAny< long  >( (*nargs[i])(stack) ): a;}
+    bool   arg(int i,Stack stack,bool  a) const{ return nargs[i] ? GetAny< bool   >( (*nargs[i])(stack) ): a;}
+    
+    KN<long> * arg(int i,Stack stack,KN<long> *  a) const{ return nargs[i] ? GetAny< KN<long> *  >( (*nargs[i])(stack) ): a;}
+    string * arg(int i,Stack stack,string *  a) const{ return nargs[i] ? GetAny< string  *  >( (*nargs[i])(stack) ): a;}
+public:
+    FINDLOCALMIN_P1_Op(const basicAC_F0 &  args,Expression tth, Expression fu,Expression fr)
+    : eTh(tth),eu(fu),er(fr)
+    {
+        args.SetNameParam(n_name_param,name_param,nargs);
+    }
+    AnyType operator()(Stack stack)  const ;
+    
+};
+basicAC_F0::name_and_type FINDLOCALMIN_P1_Op::name_param[]= {
+    {  "eps", &typeid(double)},
+    {  "convex", &typeid(bool)}
+    
+};
+
+
 class ISOLINE_P1_Op : public E_F0mps
 {
 public:
@@ -155,15 +184,15 @@ int IsoLineK(R2 *P,double *f,R2 *Q,int *i0,int *i1,double eps)
         // the first edge must be
         
         if(te[0]<3)  // oriente the line
-	{
+        {
             assert(te[1] >=3);
             std::swap(te[0],te[1]);
             std::swap(i0[0],i0[1]);
             std::swap(i1[0],i1[1]);
             if(debug) cout << " swap " << endl;
-	}
+        }
         for(int i=0;i<2;++i)
-	{
+        {
             int j0=i0[i],j1=i1[i];
             if( j0== j1)
                 Q[i] = P[j0];
@@ -171,20 +200,20 @@ int IsoLineK(R2 *P,double *f,R2 *Q,int *i0,int *i1,double eps)
                 Q[i] = (P[j0]*(f[j1]) -  P[j1]*(f[j0]) ) /(f[j1]-f[j0]);
             if(debug) cout << i << " " << j0 << " " << j1 << " : "
                 << Q[i] << "***" << endl;
-	}
-	if(debug)
-	{
+        }
+        if(debug)
+        {
             cout << "i0 " << i0[0] << " " << i0[1] << " " << det(P[i1[0]],Q[0],Q[1]) <<endl;
             cout << "i1 " << i1[0] << " " << i1[1] << " " << det(P[i0[1]],Q[1],Q[0]) <<endl;
             cout << "f " << f[0] << " " << f[1] << " " << f[2] << endl;
             cout << "P " << P[0] << ", " << P[1] << ", " << P[2] << endl;
             cout << "Q " << Q[0] << ", " << Q[1]  << endl;
-	}
-	if(!vk[i1[0]])
+        }
+        if(!vk[i1[0]])
             assert( det(P[i1[0]],Q[0],Q[1]) > 0);
-	if(!vk[i0[1]])
+        if(!vk[i0[1]])
             assert( det(P[i0[1]],Q[1],Q[0]) > 0);
-	return 2;
+        return 2;
     }
     // remark, the left of the line is upper .
     return 0;
@@ -198,23 +227,23 @@ int LineBorder(R2 *P,double *f,long close,R2 *Q,int *i1,int *i2,double eps)
     if(close)
     {
         if(f[0]>-eps)
-	{
+        {
             Q[np]=P[0];
             i1[np]=i2[np]=0,np++;
             
-	}
+        }
         
         if (f[0]*f[1] <= - eps*eps)
-	{
+        {
             Q[np]= (P[0]*(f[1]) -  P[1]*(f[0]) ) /(f[1]-f[0]);
             i1[np]=0,i2[np]=1,np++;
-	}
+        }
         
         if(f[1]>-eps)
-	{
+        {
             Q[np]=P[1];
             i1[np]=i2[np]=1,np++;
-	}
+        }
         
     }
     else
@@ -277,38 +306,178 @@ int Th_Grid(const KNM_<double> *g, int k,int ii)
     //  (0,0),(1,1),(0,1) Q2  <=> (ii%2, ii != 0
     int I =  kq%N + ( k0 ?  (ii%2)  : (ii !=0) ) ;
     int J =  kq/N + ( k0 ?  (ii!=0) : (ii ==2) );
-
-   return J*(N+1)+I;
+    
+    return J*(N+1)+I;
 }
-R2  V_Grid(const KNM_<double> *g, int k) 
+R2  V_Grid(const KNM_<double> *g, int k)
 {
-  int i = k % g->N() , j = k / g->N() ; 
-  return R2( i,j);
+    int i = k % g->N() , j = k / g->N() ;
+    return R2( i,j);
 }
-int  EA_Grid(const KNM_<double> *g, int k,int & e) 
+int  EA_Grid(const KNM_<double> *g, int k,int & e)
 {
-  int N = g->N()-1;
-  int kq= k/2; // number of the quad
-  int k0 = k%2; // up or down
-  bool intern = k0  ? (e==0)  : (e==2);
-  if(intern) {e = 2-e; return 2*kq+ 1-k0;}
-  ffassert(0);
-  return 0;
+    int N = g->N()-1;
+    int kq= k/2; // number of the quad
+    int k0 = k%2; // up or down
+    bool intern = k0  ? (e==0)  : (e==2);
+    if(intern) {e = 2-e; return 2*kq+ 1-k0;}
+    ffassert(0);
+    return 0;
 }
 
 struct SMesh {
-  const Mesh *pTh;
-  const KNM_<double> *g;
-  int nv,nt, neb; 
-  int operator()(int k,int i) const  { return pTh ? (*pTh)(k,i) : Th_Grid(g,k,i);  }
-  R2  operator()(int i) const  { return pTh ? (*pTh)(i) : V_Grid(g,i);  }
-  int ElementAdj(int k,int &e) { return pTh ? pTh->ElementAdj(k,e) : EA_Grid(g,k,e);  }
-  SMesh(const Mesh *PTh) : pTh(PTh),g(0)   , nv(pTh->nv), nt(pTh->nt),neb(pTh->neb) {}
-  SMesh(KNM_<double> *gg): pTh(0),g(gg)   ,
-			   nv(gg->N()*gg->M()),
-			   nt((gg->N()-1) *(gg->M()-1)*2),
-			   neb( ( gg->N()+gg->M()-2 )*2 ) {}
+    const Mesh *pTh;
+    const KNM_<double> *g;
+    int nv,nt, neb;
+    int operator()(int k,int i) const  { return pTh ? (*pTh)(k,i) : Th_Grid(g,k,i);  }
+    R2  operator()(int i) const  { return pTh ? (*pTh)(i) : V_Grid(g,i);  }
+    int ElementAdj(int k,int &e) { return pTh ? pTh->ElementAdj(k,e) : EA_Grid(g,k,e);  }
+    SMesh(const Mesh *PTh) : pTh(PTh),g(0)   , nv(pTh->nv), nt(pTh->nt),neb(pTh->neb) {}
+    SMesh(KNM_<double> *gg): pTh(0),g(gg)   ,
+    nv(gg->N()*gg->M()),
+    nt((gg->N()-1) *(gg->M()-1)*2),
+    neb( ( gg->N()+gg->M()-2 )*2 ) {}
 };
+::
+AnyType FINDLOCALMIN_P1_Op::operator()(Stack stack)  const
+{
+    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+    const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
+    ffassert(pTh);
+    const Mesh & Th = *pTh;
+    int ddd1 = verbosity> 9;
+    int nbv=Th.nv; // nombre de sommet
+    int nbt=Th.nt; // nombre de triangles
+    int nbe=Th.neb; // nombre d'aretes fontiere
+    bool convex = arg(1,stack,false);
+    double eps= arg(0,stack,0.);
+    if( verbosity>2) cout <<  "    -- findlocalmin: convex = " << convex << " eps= " << eps << endl;
+    long nbc;
+    KN<long> rs(nbv);
+    KN<double> *pu = GetAny<KN<double>*>((*eu)(stack));
+    KN<double> *pr = GetAny<KN<double>*>((*er)(stack));
+    KN<double> & U(*pu), &R(*pr);
+    if( U.N() != nbv) {ffassert(0); }
+    if( R.N() != nbt) {ffassert(0); }
+    R=-1. ; //
+    //  1 recher de min local
+    rs=1;
+    //  voisanage de sommet
+    KN<long> head(nbv),next(3*nbt);
+    head=-1;
+    for(int p=0; p<next.N();++p)
+    {
+        int j = Th(p/3,p%3);
+        next[p]= head[j];
+        head[j]= p;
+    }
+    
+    for( int k=0; k< nbt; ++k)
+    {
+        const Mesh::Element &K= Th[k];
+        for(int i=0; i<3; ++i)
+        {
+            int i0= Th(K[(i+1)%3]);
+            int i1= Th(K[(i+2)%3]);
+            if( U[i0] > U[i1]) rs[i0]=0;
+            if( U[i1] > U[i0]) rs[i1]=0;
+        }
+    }
+    if(ddd1) cout  << "rq nb min =  " << rs.sum() << endl;
+    // analyse des minimals locaux
+    int nml=0;
+    KN<long> ct(nbt);ct=0L;
+    KN<long> cv(nbv);cv=0L;
+    KN<long> st(nbt),sv(nbt);
+    long col=0;
+    int nmin=0;
+    KN<long> sm(nbv);
+    R2 Gl[3];
+    for(int i=0; i<nbv; ++i)
+    {
+        col+=2; // change the color
+        int col1= col+1;
+        long kt=0,kv=0;
+        if(rs[i]==1) {//  possiblement in minima
+            double ui=U[i]; // val min
+            
+            if(ddd1) cout << " ** " << i<< " " << "ui =" << ui << endl;
+            cv[i]=col1;
+
+            int tmin = true;
+
+            for(int p=head[i]; p >=0; p=next[p]) // le triangle
+            {
+              int k=p/3,ik=p%3;
+              for(int v=0; v<3; ++v)
+                if(v != ik){
+                    int j= Th(k,v);
+                    if(  U[i] > U[j]) tmin = false;
+                }
+                ffassert(st[k] < col);
+                st[kt++] = k;
+                ct[k]= col1;
+                
+            }
+            if(tmin)
+            {
+            sv[kv++]=i;
+            for(int q=0; q < kt; ++q)
+            {
+                int k = st[q];
+                R[k]=i;
+                const Mesh::Element &K= Th[k];
+                R2 gUk = K.H(0)*U[Th(k,0)]+K.H(1)*U[Th(k,1)]+K.H(2)*U[Th(k,2)];
+                
+                for(int e=0; e<3; ++e)
+                {
+                    rs[Th(k,e)]= 2;// deja fait ..
+                    int ee=e, kk=Th.ElementAdj(k,ee);
+                    if(ddd1) cout << "   tyr add " << kk <<" " <<  ee << endl;
+
+                    if( kk >= 0 && ct[kk] < col && R[kk]<0) // new element
+                    {
+                        //ct[kk]= col;
+                        const Mesh::Element &KK= Th[kk];
+                        int i0=Th(kk,0),i1=Th(kk,1),i2=Th(kk,2);
+                        Gl[0]=KK.H(0);
+                        Gl[1]=KK.H(1);
+                        Gl[2]=KK.H(2);
+                        R2 gUkk = Gl[0]*U[i0]+Gl[1]*U[i1]+Gl[2]*U[i2];
+                        double sensk = (Gl[ee],gUk), senskk = (Gl[ee],gUkk);
+                        if(ddd1) cout << "     add " << kk <<" " <<  senskk <<" / " << sensk << endl;
+                        double ccc =eps;
+                        if(convex) ccc += sensk;
+                        if( senskk > ccc )
+                        {
+                            st[kt++] = kk;
+                            ct[kk]= col1;
+                            R[kk]=i;
+                           
+                        }
+                    }
+                }
+            }
+            }
+        }
+        if(ddd1) cout << "  ******************* " << i<<" :"  << "kt = " << kt ;
+        if(kt>0)
+        {
+            sm[nmin++]=i;
+            for(int j=0; j<kt; ++j)
+            {
+                int k= st[j];
+                if(ddd1) cout << " " << k ;
+            }
+        }
+        cout << endl;
+    }
+    if(ddd1)cout << " R = " << R << endl;
+    if(verbosity>2)  cout << "    -- FindlocalMin nb min =" << nmin << endl;
+    sm.resize(nmin);
+    KN<long> *ppr = new KN<long>(sm);
+    return  Add2StackOfPtr2Free(stack,ppr);
+}
 
 AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 {
@@ -343,25 +512,25 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     vector< R2_I2 >  P;
     multimap<int,int> L;
     if(verbosity>= 1000) debug =verbosity/1000;
-    else debug = 0; 
+    else debug = 0;
     map<pair<int,int>, int> FP;
     const   double unset = -1e-100;
     KN<double> tff(nbv, unset);
     
     // loop over triangle
     if(pTh)
-    for (int it=0;it<Th.nt;++it)
-    {
-        for( int iv=0; iv<3; ++iv)
-	{
-            int i=Th(it,iv);
-            if(tff[i]==unset){
-                mp->setP(pTh,it,iv);
-                tff[i]=GetAny<double>((*eff)(stack))-isovalue;
+        for (int it=0;it<Th.nt;++it)
+        {
+            for( int iv=0; iv<3; ++iv)
+            {
+                int i=Th(it,iv);
+                if(tff[i]==unset){
+                    mp->setP(pTh,it,iv);
+                    tff[i]=GetAny<double>((*eff)(stack))-isovalue;
+                }
             }
-	}
-    }
-    else ffassert(0); 
+        }
+    else ffassert(0);
     if(close<0)
     {
         tff=-tff;
@@ -388,18 +557,18 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         int i1[6],i2[6];
         int np=IsoLineK(Pk,fk,Qk,i1,i2,eps);
         if(np==2)
-	{
+        {
             for(int i=0;i<np;++i) // sort i1,i2 ..
             {
-	  	i1[i]=iK[i1[i]];
-	  	i2[i]=iK[i2[i]];
-	  	if(i2[i]<i1[i])
+                i1[i]=iK[i1[i]];
+                i2[i]=iK[i2[i]];
+                if(i2[i]<i1[i])
                     std::swap(i1[i],i2[i]);
                 
             }
             int p[2]; // point number
             for(int i=0;i<2;++i)
-	    {
+            {
                 pair< map<pair<int,int>, int>::iterator , bool > ii;
                 pair<int,int> e(i1[i],i2[i]);
                 ii=FP.insert(make_pair(e,P.size()));
@@ -408,7 +577,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
                 if(debug) cout << i1[i] << " ---  " << i2[i] <<" ;     " << ii.second<<  endl;
                 
                 p[i] = ii.first->second ;
-	    }
+            }
             // add line k[0], k[1]
             P[p[0]].add(p[0],p[1],L);
             if(debug)
@@ -416,20 +585,20 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
             if(fff) *fff << Qk[0] << "\n" << Qk[1] << "\n" << ((Qk[0]*0.4 + Qk[1]*.6)+R2(Qk[0],Qk[1]).perp()*.4) <<  "\n\n";
             
             
-	}
+        }
     }
     if(fff) delete fff;
     if(close)
     {
         if(debug) cout<< " Close path " << endl;
         for (int k=0;k<Th.nt;++k)
-	{
-	  // Triangle &K=Th[k];
+        {
+            // Triangle &K=Th[k];
             for(int e=0;e<3;++e)
-	    {
+            {
                 int ee,kk=Th.ElementAdj(k,ee=e);
                 if( kk==k || kk<0)
-		{ // true border element edge
+                { // true border element edge
                     int iK[2]={Th(k,(e+1)%3),Th(k,(e+2)%3)};
                     R2 Pk[2]={Th(iK[0]),Th(iK[1])};
                     R  fk[2]={tff[iK[0]],tff[iK[1]]};
@@ -440,24 +609,24 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
                     int np=LineBorder(Pk,fk,close,Qk,i1,i2,eps);
                     //		  cout << np << endl;
                     if(np>=10)
-		    { // full edge
+                    { // full edge
                         int ke =  0;
                         
-		    }
+                    }
                     else if(np==2)
-		    {
+                    {
                         for(int i=0;i<2;++i)
-			{
+                        {
                             i1[i]=iK[i1[i]];
                             i2[i]=iK[i2[i]];
                             if(i2[i]<i1[i])
                                 std::swap(i1[i],i2[i]);
-			}
+                        }
                         if(debug) cout << " add  : " <<  Qk[0] << ", " << i1[0] <<',' << i2[0]
                             << " ->   " << Qk[1] << ", " << i1[1] <<',' << i2[1]<< endl;
                         int p[2]; // point number
                         for(int i=0;i<2;++i)
-			{
+                        {
                             pair< map<pair<int,int>, int>::iterator , bool > ii;
                             pair<int,int> ee(i1[i],i2[i]);
                             ii=FP.insert(make_pair(ee,P.size()));
@@ -465,17 +634,17 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
                                 P.push_back(R2_I2(Qk[i]));
                             if(debug) cout << i1[i] << " ---  " << i2[i] <<" ;     " << ii.second<<  endl;
                             p[i] = ii.first->second ;
-			}
+                        }
                         // add line k[0], k[1]
                         P[p[0]].add(p[0],p[1],L);
                         if(debug)
                             cout <<  " +++ " << Qk[0] << " ->  " << Qk[1] << " :: " << p[0] << " -> " << p[1] << endl;
-		    }
+                    }
                     
-		}
+                }
                 
-	    }
-	}
+            }
+        }
         if(debug) cout<< " End Close path " << endl;
         
     }
@@ -497,11 +666,11 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     int kkk=0;
     for(int i=0;i<np;++i)
     {
-      int nx = P[i].next(i,L,0);
-      if( nx>=0)  start[nx]=i;
+        int nx = P[i].next(i,L,0);
+        if( nx>=0)  start[nx]=i;
     }
     vector<int> starting;
-    int iss=0; 
+    int iss=0;
     for( multimap<int,int>::const_iterator i= L.begin(); i!= L.end();++i)
     {
         starting.push_back(i->first);
@@ -509,8 +678,8 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     }
     
     for(int i=0;i<np;++i)
-         if(start[i] == -1)
-             starting.push_back(i);
+        if(start[i] == -1)
+            starting.push_back(i);
     while(1)
     {
         ffassert(kkk++ < 100000);
@@ -522,74 +691,74 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
                 k++;
         }
         if(kk==0)
-          break;
-       
+            break;
         
-	int i=-1;
+        
+        int i=-1;
         if(iss<starting.size())
             start[i = starting[iss++]]=-1;
-        else            
-        for(int ii=0;ii<np;++ii)
-          if(  (start[ii]>=0) ) i=ii;
+        else
+            for(int ii=0;ii<np;++ii)
+                if(  (start[ii]>=0) ) i=ii;
         
         if(i<0) break;
+        {
+            if(verbosity>9)
+                cout << "  isolineP1: start curve  = " << i << " -> " << P[i].next(i,L,0) ;
+            if(verbosity>99)
+                cout << " (" <<  i  <<endl;
+            iQ.push_back(QQ.size());
+            QQ.push_back(i);
+            start[i]=-2;
+            int i0=i,i1=0,ie=i;
+            while(1)
             {
-                if(verbosity>9)
-                    cout << "  isolineP1: start curve  = " << i << " -> " << P[i].next(i,L,0) ;
-                if(verbosity>99)
-                    cout << " (" <<  i  <<endl;
-                iQ.push_back(QQ.size());
-                QQ.push_back(i);
-                start[i]=-2;
-                int i0=i,i1=0,ie=i;
-                while(1)
-                {
-                    i1= P[i0].next(i0,L,1);
-                    if(i1<0) break;
-                    if(start[i1]<0) {
-                        if(verbosity>99)
-                            cout << " -- " << i1;
-                        QQ.push_back(i1);
-                        break;
-                    }
-                    
-                    QQ.push_back(i1);
+                i1= P[i0].next(i0,L,1);
+                if(i1<0) break;
+                if(start[i1]<0) {
                     if(verbosity>99)
-                        cout << " " << i1;
-                    start[i1]=-2;
-                    i0=i1;
-                }
- /*      do in brak          if(i1==ie) // close the path ..
-                {
+                        cout << " -- " << i1;
                     QQ.push_back(i1);
-                    if(verbosity>99)
-                        cout << " " << i1;
+                    break;
                 }
-  */
                 
+                QQ.push_back(i1);
                 if(verbosity>99)
-                    cout << ") "<< endl;
-                else if(verbosity>9) cout << endl;
-                iQ.push_back(QQ.size());
-                
+                    cout << " " << i1;
+                start[i1]=-2;
+                i0=i1;
             }
+            /*      do in brak          if(i1==ie) // close the path ..
+             {
+             QQ.push_back(i1);
+             if(verbosity>99)
+             cout << " " << i1;
+             }
+             */
+            
+            if(verbosity>99)
+                cout << ") "<< endl;
+            else if(verbosity>9) cout << endl;
+            iQ.push_back(QQ.size());
+            
+        }
     }
     // sort iQ
     if(iQ.size()>2)
     {
         vector< pair<int , pair<int,int> > > sQ(iQ.size()/2);
         for(int i=0,j=0; i<iQ.size();i+=2,++j)
-	{
+        {
             int i0=iQ[i];
             int i1=iQ[i+1];
             sQ[j] = make_pair(i0-i1,make_pair(i0,i1));
-	}
+        }
         std::sort(sQ.begin(), sQ.end());
         for(int i=0,j=0; i<iQ.size();i+=2,++j)
-	{
+        {
             iQ[i]   =sQ[j].second.first;
             iQ[i+1] =sQ[j].second.second;
-	}
+        }
     }
     if(smoothing>0)
     {
@@ -598,7 +767,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
             P1[i]=  P[QQ[i]].P ;
         
         
-  	//  Smoothing the curve
+        //  Smoothing the curve
         double c1=1, c0=4, ct=2*c1+c0;
         c1/=ct;
         c0/=ct;
@@ -644,12 +813,12 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         pxx->resize(QQ.size());
         pyy->resize(QQ.size());
         for(int i=0;i<QQ.size();++i)
-	{
+        {
             int j=QQ[i];
             (*pxx)[i]=  P[j].P.x ;
             (*pyy)[i]=  P[j].P.y ;
             
-	}
+        }
     }
     else if(pxy)
     {
@@ -657,39 +826,39 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         
         
         for(int k=0; k<iQ.size();k+=2)
-	{
+        {
             int i0=iQ[k],i1=iQ[k+1];
             double lg=0;
             R2 Po=P[QQ[i0]].P;
             for(int i=i0;i<i1;++i)
-	    {
+            {
                 int j=QQ[i];
                 (*pxy)(0,i)=  P[j].P.x ;
                 (*pxy)(1,i)=  P[j].P.y ;
                 lg += R2(P[j].P,Po).norme() ;
-                (*pxy)(2,i)=  lg; 
+                (*pxy)(2,i)=  lg;
                 Po = P[j].P;
-	    }
-	}
+            }
+        }
     }
-    else ffassert(0); 
+    else ffassert(0);
     
     
-    nbc = iQ.size()/2; 
-    if(file) 
+    nbc = iQ.size()/2;
+    if(file)
     {
         
         ofstream fqq(file->c_str());
         int i=0,i0,i1,n2= iQ.size(),k=0;
         while(i<n2)
-        { 
+        {
             k++;
             i0=iQ[i++];
             i1=iQ[i++];
             //cout<< i0 << " " << i1 << endl;
             for(int l=i0;l<i1;++l)
             {
-                int j=QQ[l];	
+                int j=QQ[l];
                 fqq << P[j].P.x << " " << P[j].P.y << " " << k << " "<< j <<  endl;
             }
             fqq << endl;
@@ -701,8 +870,8 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
      for(int i=0;i< P.size();++i)
      {
      int pb = P[i].count(i,L);
-     if(pb) 
-     if(err<10) 
+     if(pb)
+     if(err<10)
      pe[err++]=i;
      else
      err++;
@@ -714,33 +883,33 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
      cout << " PB point = " << pe[i] << " " << P[pe[i]].P << " odd count = " << P[pe[i]].count(pe[i],L)  << endl;
      ffassert(0);
      }
-     */  
-    // construction des courble 
+     */
+    // construction des courble
     
     return nbc;
 }
 
-class  ISOLINE_P1: public OneOperator { public:  
+class  ISOLINE_P1: public OneOperator { public:
     typedef const Mesh *pmesh;
     int cas;
     
     ISOLINE_P1() : OneOperator(atype<long>(),atype<pmesh>(),atype<double>(), atype<KN<double>*>(),atype<KN<double>* >() ) ,cas(4){}
     ISOLINE_P1(int ) : OneOperator(atype<long>(),atype<pmesh>(),atype<double>(), atype<KNM<double>*>() ),cas(3) {}
     
-    E_F0 * code(const basicAC_F0 & args) const 
-    { 
+    E_F0 * code(const basicAC_F0 & args) const
+    {
         if(cas==4)
             return  new ISOLINE_P1_Op( args,
                                       t[0]->CastTo(args[0]),
                                       t[1]->CastTo(args[1]),
                                       t[2]->CastTo(args[2]),
-                                      t[3]->CastTo(args[3]) ); 
-        else if(cas==3) 
+                                      t[3]->CastTo(args[3]) );
+        else if(cas==3)
             return  new ISOLINE_P1_Op( args,
                                       t[0]->CastTo(args[0]),
                                       t[1]->CastTo(args[1]),
-                                      t[2]->CastTo(args[2]) ); 
-        else ffassert(0); // bug 
+                                      t[2]->CastTo(args[2]) );
+        else ffassert(0); // bug
     }
     
     
@@ -748,6 +917,30 @@ class  ISOLINE_P1: public OneOperator { public:
     
     
 };
+
+class  FINDLOCALMIN_P1: public OneOperator { public:
+    typedef const Mesh *pmesh;
+    int cas;
+    
+    FINDLOCALMIN_P1() : OneOperator(atype<KN<long>*>(),atype<pmesh>(), atype<KN<double>*>(),atype<KN<double>* >() ) ,cas(1){}
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        if(cas==1)
+            return  new FINDLOCALMIN_P1_Op( args,
+                                           t[0]->CastTo(args[0]),
+                                           t[1]->CastTo(args[1]),
+                                           t[2]->CastTo(args[2])
+                                           );
+        else ffassert(0); // bug
+    }
+    
+    
+    
+    
+    
+};
+
 
 
 
@@ -759,7 +952,7 @@ R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1
     if(i1<0) i1=b.M()-1;
     double lg=b(2,i1);
     R3 Q;
-    ffassert(lg>0 && b(2,0)==0.); 
+    ffassert(lg>0 && b(2,0)==0.);
     double s = ss*lg;
     int k=0,k1=i1;
     while(i0 < i1-1)
@@ -767,11 +960,11 @@ R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1
         ffassert(k++ < k1);
         im = (i0+i1)/2;
         if(s <b(2,im)  )
-	{ i1=im;
-	}
+        { i1=im;
+        }
         else if(s>b(2,im)  )
-	{ i0= im;
-	}
+        { i0= im;
+        }
         else {  Q=R3(b(0,im),b(1,im),0);  i0=i1=im;break;}
     }
     if(i0<i1)
@@ -786,10 +979,10 @@ R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1
     }
     if(pi) *pi=i0;
     R3 *pQ = Add2StackOfPtr2Free(stack,new R3(Q));
-    // MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value 
+    // MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
     //mp.P.x=Q.x; // get the current x value
     //mp.P.y=Q.y; // get the current y value
-    return pQ; 
+    return pQ;
 }
 R3  * Curve(Stack stack,const KNM_<double> &b,const  long &li0,const  long & li1,const double & ss)
 { return Curve(stack,b,li0,li1,ss,0);}
@@ -801,12 +994,12 @@ double mesure(Stack stack,const KNM_<double> &b,const KN_<long> &be)
     {
         int i0= be[k++];
         int i1= be[k++];
-         R2 A(b(0,i0),b(1,i0));
+        R2 A(b(0,i0),b(1,i0));
         double mk=0;
         for(int i=i0+1; i< i1; ++i)
         {
-          R2 B(b(0,i-1),b(1,i-1));
-          R2 C(b(0,i),b(1,i));
+            R2 B(b(0,i-1),b(1,i-1));
+            R2 C(b(0,i),b(1,i));
             mk += det(A,B,C);
         }
         if( verbosity>9) cout << " mesure: composante " << k/2 << "  mesure  " << mk/2. << endl;
@@ -826,11 +1019,11 @@ class E_F_F0F0F0F0F0s_ :public  E { public:                               // ext
     func f;
     Expression a0,a1,a2,a3,a4;          // extend
     E_F_F0F0F0F0F0s_(func ff,
-                   Expression aa0,
-                   Expression aa1,
-                   Expression aa2,
-                   Expression aa3,
-                    Expression aa4)   // extend
+                     Expression aa0,
+                     Expression aa1,
+                     Expression aa2,
+                     Expression aa3,
+                     Expression aa4)   // extend
     : f(ff), a0(aa0), a1(aa1), a2(aa2), a3(aa3),a4(aa4) {}  // extend (4th arg.)
     AnyType operator()(Stack s)  const
     {return SetAny<R>( f( s, GetAny<A0>((*a0)(s)),
@@ -873,7 +1066,7 @@ public:
 
 
 static void finit()
-{  
+{
     
     typedef const Mesh *pmesh;
     
@@ -885,6 +1078,8 @@ static void finit()
     Global.Add("Curve","(",new OneOperator5s_<R3*,KNM_<double>,long,long,double,long *>(Curve));
     
     Global.Add("Area","(",new OneOperator2s_<double ,KNM_<double>,KN_<long> >(mesure));
+    Global.Add("findalllocalmin","(",new  FINDLOCALMIN_P1);
+    
     
 }
 

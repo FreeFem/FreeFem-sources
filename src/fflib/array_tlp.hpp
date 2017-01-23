@@ -274,15 +274,40 @@ template<class RR,class A,class B,class C>
 RR get_element_si(const A &  a,const B & b,const C & c){ 
  //  cout << c << " .... " << ((*a)(b,SubArray(1,c) )) << endl;;
      return  ((*a)('.',c)(b));}
-     
+
+template<class A,class B,class C>
+struct check_get_element_lineorcol
+{
+  static  void check(const A &  a,const B & b,const C & c){
+        if(c == ':' && (b<0 || a->N() <= b))
+            ExecError("Out of bound");
+        if(b == ':' && (c<0 || a->M() <= c))
+            ExecError("Out of bound");
+
+    }
+};
+template<class A,class B>
+struct check_get_element_lineorcol<A,B, char>
+{
+    static  void check(const A &  a,const B & b,const char & c){
+        if( (b<0 || a->N() <= b))
+            ExecError("Out of bound");
+    }
+};
+template<class A,class B>
+struct check_get_element_lineorcol<A, char,B>
+{
+    static  void check(const A &  a,const char & b,const B & c){
+        if( (c<0 || a->M() <= c))
+            ExecError("Out of bound");
+    }
+};
+
 template<class RR,class A,class B,class C>  
 RR get_element_lineorcol(const A &  a,const B & b,const C & c){ 
  //  cout << b << " .... " << ((*a)(SubArray(1,b),c)) << endl;;
-    if(c == ':' && (b<0 || a->N() <= b))
-            ExecError("Out of bound");
-    if(b == ':' && (c<0 || a->M() <= c))
-            ExecError("Out of bound");
-    return  ((*a)(b,c));
+     check_get_element_lineorcol<A,B,C>::check(a,b,c);
+     return  ((*a)(b,c));
     }
 
 template<class RR,class A,class B,class C>  
