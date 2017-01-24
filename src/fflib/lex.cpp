@@ -534,7 +534,7 @@ bool mylex::SetMacro(int &ret)
     
   bool rt=false;
   int oldmacro=1;
-  if (strcmp(buf,"macro")==0 || (oldmacro=strcmp(buf,newmacro))==0 )
+  if (strncmp(buf,"macro",6)==0 || (oldmacro=strncmp(buf,newmacro,9))==0 )
     {
       char *macroname=newcopy(match(ID));
       int nbparam =0;
@@ -637,7 +637,7 @@ bool mylex::IFMacro(int &ret)
     int kif=0;
     int isnot=0;
     
-    if (strcmp(buf,ifm)==0  )
+    if (strncmp(buf,ifm,8)==0  )
     {
         string val;
         int rr=basescan();
@@ -733,7 +733,7 @@ bool mylex::CallMacro(int &ret)
   // FH  jan 2005 
   // -----------------------------------------
 //  add Stringification,FILE, LINE  march 2014 FH..
-  if(strcmp(buf,"Stringification")==0)
+  if(strncmp(buf,"Stringification",16)==0)
   {
       if(debugmacro) cout <<"call Stringification : " << buf << endl;
 
@@ -772,7 +772,7 @@ bool mylex::CallMacro(int &ret)
   }
 
   // <<FILE_macro>>
-  else if(strcmp(buf,"FILE")==0)
+  else if(strncmp(buf,"FILE",5)==0)
   {
       plglval->str = newcopy(filename() );
       ret = STRING;
@@ -780,7 +780,7 @@ bool mylex::CallMacro(int &ret)
   }
 
   // <<LINE_macro>>
-  else if(strcmp(buf,"LINE")==0)
+  else if(strncmp(buf,"LINE",5)==0)
   {
     plglval->lnum = linenumber;
     ret=LNUM;
