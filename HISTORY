@@ -1,5 +1,10 @@
-@  changeset:   3946:d15cadc94ba3
+@  changeset:   3947:0a6be53d15fd
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jan 24 18:40:32 2017 +0100
+|  summary:     remove rong example Laplace-Adapt-aniso-3d.edp
+|
+o  changeset:   3946:d15cadc94ba3
 |  parent:      3939:4e87a7e11b3e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jan 24 18:34:17 2017 +0100

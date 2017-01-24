@@ -632,6 +632,7 @@ bool mylex::SetMacro(int &ret)
 
 bool mylex::IFMacro(int &ret)
 {// A faire !!!! F.H
+    bool rt=false;
     const char *ifm="IFMACRO";
     const char *ife="ENDIFMACRO";
     int kif=0;
@@ -713,6 +714,7 @@ bool mylex::IFMacro(int &ret)
               const string & mval = macroparm[macroparm.size()-1];
              if(debugmacro)  cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
               exist = mval == val;
+              rt=true;
             }
         }
        if(debugmacro)  cout << "IFMacro def: " << def << "\n .. exist "<< exist  << " " << isnot << " "<< (exist == (isnot==0)) << " \n....\n";
@@ -724,7 +726,7 @@ bool mylex::IFMacro(int &ret)
         }
        ret =  scan1();
     }
-  
+ return rt;
 }
 
 bool mylex::CallMacro(int &ret)
