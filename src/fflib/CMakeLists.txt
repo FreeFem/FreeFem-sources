@@ -1,4 +1,3 @@
-IF(CBLAS_FOUND)
   SET(LIBFF_SRC ${FEMLIB_SRC} ${FFLIB_SRC})
   LIST(REMOVE_ITEM LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp
                            ${CMAKE_SOURCE_DIR}/src/femlib/ConjuguedGradrientNL.cpp
@@ -23,7 +22,6 @@ IF(CBLAS_FOUND)
 
   TARGET_LINK_LIBRARIES(libff bamglib 
                             dl 
-                            ${CBLAS_LIBRARIES} 
                             strversionnumber)
 
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib 
@@ -34,4 +32,3 @@ IF(CBLAS_FOUND)
 
   SET_TARGET_PROPERTIES(libff PROPERTIES PREFIX "")
 
-ENDIF(CBLAS_FOUND)
