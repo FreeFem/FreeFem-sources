@@ -7,10 +7,7 @@ IF(CBLAS_FOUND)
                          ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/lglib ${CMAKE_SOURCE_DIR}/src/fflib ${CMAKE_SOURCE_DIR}/src/Graphics)
   TARGET_LINK_LIBRARIES(FreeFem++ 
-#                                cblas 
-                                ${HDF5_LIBRARIES} 
                                 dl 
-#                                umfpack 
                                 lglib 
                                 libff)
 ENDIF(CBLAS_FOUND)
@@ -63,10 +60,7 @@ IF(MPI_FOUND)
   INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
 
   TARGET_LINK_LIBRARIES(FreeFem++-mpi
-                                      blas
                                       libff
-                                      umfpack
-                                      ${HDF5_LIBRARIES}
                                       ${MPI_CXX_LIBRARIES})
 
 ENDIF(MPI_FOUND)
