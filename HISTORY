@@ -1,5 +1,10 @@
-@  changeset:   3947:0a6be53d15fd
+@  changeset:   3948:12e46f0f7812
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jan 24 20:50:21 2017 +0100
+|  summary:     coorect bug in return of IFMacro
+|
+o  changeset:   3947:0a6be53d15fd
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jan 24 18:40:32 2017 +0100
 |  summary:     remove rong example Laplace-Adapt-aniso-3d.edp

@@ -421,9 +421,13 @@ int mylex::scan1()
 
   int ret= basescan(); // [[mylex_basescan]]
   if(debugmacro)  cout << " scan1 " << ret << " " << token() << " " << ID << endl;
-    while ( ret == ID &&SetMacro(ret)); // correction mars 2014 FH
-    while ( ret == ID && CallMacro(ret)) ; // correction mars 2014 FH
-    while ( ret == ID && IFMacro(ret)) ; // correction mars 2014 FH
+    while ( ret == ID  && (
+                              SetMacro(ret) // correction mars 2014 FH
+                          ||  CallMacro(ret) // correction mars 2014 FH
+                          || IFMacro(ret)
+                          )
+        )
+           ; // correction mars 2014 FH
     
   return ret;
 }    
