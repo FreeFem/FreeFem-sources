@@ -1,4 +1,10 @@
-- version 3.51 (version  3950:4f6fdf3836a4)
+- version 3.51 (version  3951:4f6fdf3836a4)
+ - add example of usage of IFmacro in
+     examples++-tutorial/Stokes-macro2d-3d.edp
+     to launch the 2d version do
+       FreeFem++ examples++-tutorial/Stokes-macro2d-3d.edp -Ddim=2
+     to launch the 3d version  
+       FreeFem++ examples++-tutorial/Stokes-macro2d-3d.edp -Ddim=3
  - correct a big bug on IFmacro c++ function (infinity loop in some architecture, Thanks to P. Jolivet)
  - change myrand to randon (better result ???)
  - add argument like -Dmacroname=macrodef to def macro 
