@@ -173,7 +173,7 @@ install-exec-local::
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
 	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
-#	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
+	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
 
 script/PostInstall.sh:./Makefile script/PostInstall.m4
 	m4 script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" >script/PostInstall.sh
