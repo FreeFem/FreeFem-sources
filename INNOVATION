@@ -1,3 +1,5 @@
+- version 3.51 ()
+ - correct a big bug on IFmacro c++ function (infinity loop in some architecture, Thanks to P. Jolivet)
  - change myrand to randon (better result ???)
  - add argument like -Dmacroname=macrodef to def macro 
  - add IFMACRO(macroname) codes ENDIFMACRO compile codes if macro variable is def 
