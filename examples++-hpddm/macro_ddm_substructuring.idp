@@ -63,23 +63,14 @@ macro buildSubstructuring(Th, interfaceNb, ThGlobal, labNeumann, s, arrayInterse
         PhGlobal part;
         if(mpiRank(comm) == 0) {
             if(verbosity > 0)
-                cout.scientific << " --- global mesh of " << ThGlobal.nt << " elements (prior to refinement) generated (in " << mpiWtime() - timing << ") and partitioned with ";
+                cout.scientific << " --- global mesh of " << ThGlobal.nt << " elements (prior to refinement) partitioned with " << Stringification(partitioner);
             timing = mpiWtime();
-            if(partitioner == 2) {
-                scotch(part[], ThGlobal, mpiSize(comm));
-                if(verbosity > 0)
-                    cout << "SCOTCH";
-            }
-            else {
-                metisdual(part[], ThGlobal, mpiSize(comm));
-                if(verbosity > 0)
-                    cout << "Metis";
-            }
-            if(verbosity > 0)
-                cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
+            partitionerSeq(part[], ThGlobal, mpiSize(comm));
         }
+        partitionerPar(part[], ThGlobal, mpiSize(comm), processor(0, comm));
+        if(mpiRank(comm) == 0 && verbosity > 0)
+            cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
         timing = mpiWtime();
-        broadcast(processor(0, comm), part[]);
         partitionSubstructuring(Th, interfaceNb, ThGlobal, PhGlobal, part, s, restrictionIntersection, BC, comm)
     }
     else if(mpisize == 1) {

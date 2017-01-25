@@ -2,14 +2,10 @@
 // NBPROC 4
 
 load "hpddm"                        // HPDDM plugin
-load "metis"                        // Metis partitioner
-load "scotch"                       // SCOTCH partitioner
+macro partitioner()metis// EOM      // metis, scotch, or parmetis
+macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
-macro meshN()mesh// EOM             // two-dimensional problem
-macro bbN()bb2// EOM                // two-dimensional bounding box
-macro intN()int2d// EOM             // two-dimensional integral
-macro intN1()int1d// EOM            // one-dimensional integral
 macro def(i)i// EOM                 // scalar field definition
 macro init(i)i// EOM                // scalar field initialization
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
@@ -19,7 +15,6 @@ string deflation = getARGV("-deflation", "geneo");              // coarse space 
 int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
 int fakeInterface = getARGV("-interface", 10);                  // interface between subdomains
 int s = getARGV("-split", 1);                                   // refinement factor
-int partitioner = getARGV("-partitioner", 1);                   // partitioner (1: Metis, 2: SCOTCH)
 
 mpiComm comm;
 int p = getARGV("-hpddm_master_p", 1);
@@ -27,7 +22,7 @@ bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_mast
 
 if(verbosity > 0 && mpirank == 0) {
     cout << " --- " << mpirank << "/" << mpisize;
-    cout << " - helmholtz-2d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << " - with partitioner? = " << partitioner << endl;
+    cout << " - helmholtz-2d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << endl;
 }
 
 meshN ThBorder, Th = square(1, 1);
