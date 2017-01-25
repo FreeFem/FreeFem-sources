@@ -1,5 +1,10 @@
-@  changeset:   3951:9aca9572033e
+@  changeset:   3952:d9191b99a5fa
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 25 11:31:25 2017 +0100
+|  summary:     add example with IFMACRO
+|
+o  changeset:   3951:9aca9572033e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jan 25 10:15:53 2017 +0100
 |  summary:     put hg tag in INNOVATION
