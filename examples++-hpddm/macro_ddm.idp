@@ -1,5 +1,48 @@
 load "thresholdings"
 include "getARGV.idp"
+IFMACRO(!partitioner)
+macro partitioner()metis// EOM
+ENDIFMACRO
+IFMACRO(partitioner,metis)
+load "metis"
+macro partitionerSeq(part, Th, size)metisdual(part, Th, size)// EOM
+macro partitionerPar(part, Th, size, proc)broadcast(proc, part)// EOM
+ENDIFMACRO
+IFMACRO(partitioner,scotch)
+load "scotch"
+macro partitionerSeq(part, Th, size)scotch(part, Th, size)// EOM
+macro partitionerPar(part, Th, size, proc)broadcast(proc, part)// EOM
+ENDIFMACRO
+IFMACRO(partitioner,parmetis)
+load "parmetis"
+macro partitionerSeq(part, Th, size)// EOM
+macro partitionerPar(part, Th, size, proc)parmetis(part, Th, size, worker = getARGV("-parmetis_worker", 1))// EOM
+ENDIFMACRO
+IFMACRO(!partitionerSeq)
+cout << "The macro 'partitioner' must be set to 'metis', 'scotch', or 'parmetis'" << endl;
+exit(1);
+ENDIFMACRO
+IFMACRO(!dimension)
+cout << "The macro 'dimension' must be defined" << endl;
+exit(1);
+ENDIFMACRO
+IFMACRO(dimension,2)
+macro meshN()mesh// EOM             // two-dimensional problem
+macro bbN()bb2// EOM                // two-dimensional bounding box
+macro intN()int2d// EOM             // two-dimensional integral
+macro intN1()int1d// EOM            // one-dimensional integral
+ENDIFMACRO
+IFMACRO(dimension,3)
+load "msh3"
+macro meshN()mesh3// EOM            // three-dimensional problem
+macro bbN()bb3// EOM                // three-dimensional bounding box
+macro intN()int3d// EOM             // three-dimensional integral
+macro intN1()int2d// EOM            // two-dimensional integral
+ENDIFMACRO
+IFMACRO(!meshN)
+cout << "The macro 'dimension' must be set to '2' or '3'" << endl;
+exit(1);
+ENDIFMACRO
 searchMethod = 1;
 
 macro bb2(boundingMesh, overshoot, ThGlobal)
@@ -85,7 +128,8 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
         supp = supp;
         suppSmooth = suppSmooth;
         meshName = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
-        borderName = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
+        if(suppSmooth[].min < 0.501)
+            borderName = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
         VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
         VhLocal sum = khi;
         VhGlobal phi = 0;
@@ -137,23 +181,14 @@ macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayInter
         PhGlobal part;
         if(mpiRank(comm) == 0) {
             if(verbosity > 0)
-                cout.scientific << " --- global mesh of " << ThGlobal.nt << " elements (prior to refinement) generated (in " << mpiWtime() - timing << ") and partitioned with ";
+                cout.scientific << " --- global mesh of " << ThGlobal.nt << " elements (prior to refinement) partitioned with " << Stringification(partitioner);
             timing = mpiWtime();
-            if(partitioner == 2) {
-                scotch(part[], ThGlobal, mpiSize(comm));
-                if(verbosity > 0)
-                    cout << "SCOTCH";
-            }
-            else {
-                metisdual(part[], ThGlobal, mpiSize(comm));
-                if(verbosity > 0)
-                    cout << "Metis";
-            }
-            if(verbosity > 0)
-                cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
+            partitionerSeq(part[], ThGlobal, mpiSize(comm));
         }
+        partitionerPar(part[], ThGlobal, mpiSize(comm), processor(0, comm));
+        if(mpiRank(comm) == 0 && verbosity > 0)
+            cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
         timing = mpiWtime();
-        broadcast(processor(0, comm), part[]);
         partition(Th, ThBorder, ThGlobal, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
     }
     else if(mpisize == 1) {

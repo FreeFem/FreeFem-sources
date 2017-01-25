@@ -2,15 +2,10 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-load "metis"                        // Metis partitioner
-load "scotch"                       // SCOTCH partitioner
+macro partitioner()metis// EOM      // metis, scotch, or parmetis
+macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
-load "msh3"
 
-macro meshN()mesh3// EOM            // two-dimensional problem
-macro bbN()bb3// EOM                // two-dimensional bounding box
-macro intN()int3d// EOM             // two-dimensional integral
-macro intN1()int2d// EOM            // one-dimensional integral
 macro def(i)[i, i#B, i#C, i#D]// EOM// vector field definition
 macro init(i)[i, i, i, i]// EOM     // vector field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]//// two-dimensional gradient
@@ -19,11 +14,10 @@ macro div(u)(dx(u) + dy(u#B) + dz(u#C))// EOM
 func Pk = [P2, P2, P2, P1];             // finite element space
 
 int s = getARGV("-split", 1);                                   // refinement factor
-int partitioner = getARGV("-partitioner", 1);                   // partitioner (1: Metis, 2: SCOTCH)
 
 if(verbosity > 0 && mpirank == 0) {
     cout << " --- " << mpirank << "/" << mpisize;
-    cout << " - stokes-3d-PETSc.edp - input parameters: refinement factor = " << s << " - with partitioner? = " << partitioner << endl;
+    cout << " - stokes-3d-PETSc.edp - input parameters: refinement factor = " << s << endl;
 }
 
 meshN Th = buildlayers(square(1, 1), 1);
