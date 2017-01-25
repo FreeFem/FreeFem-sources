@@ -1,5 +1,15 @@
-@  changeset:   3952:d9191b99a5fa
+@  changeset:   3954:067d39136e61
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 25 13:38:08 2017 +0100
+|  summary:     upate version in INNOVATION
+|
+o  changeset:   3953:16b99c52b1fc
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 25 11:38:02 2017 +0100
+|  summary:     update the doc on macro
+|
+o  changeset:   3952:d9191b99a5fa
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jan 25 11:31:25 2017 +0100
 |  summary:     add example with IFMACRO
