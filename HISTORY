@@ -1,5 +1,10 @@
-@  changeset:   3948:12e46f0f7812
+@  changeset:   3949:13c5deb81c35
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jan 24 21:20:07 2017 +0100
+|  summary:     corret order in class defmacro, setmacro or ifmacro
+|
+o  changeset:   3948:12e46f0f7812
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jan 24 20:50:21 2017 +0100
 |  summary:     coorect bug in return of IFMacro
