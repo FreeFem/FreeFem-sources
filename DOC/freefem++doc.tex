@@ -40,7 +40,7 @@
 \author{}
 \date{}
 \makeindex
-\def\hrefffexample#1{\href{}}
+\def\hrefexample#1#2{\href{http://www.freefem.org/ff++/ff++/examples++-#1/#2}{\color{purple}{\texttt{#2 in #1}}}}
 \begin{document}
 \graphicspath{{./}{plots/}{figures/}{cpfigs/}}
 \ifpdf
@@ -3247,7 +3247,7 @@ $$
 
 
  First, it is possible to define variational forms, and use this forms to build matrix 
-  and vector to make very fast script (4 times faster here) (see the example \texttt{Heat.edp} in chap3 examples directory).
+  and vector to make very fast script (4 times faster here) (see the example  \hrefexample{chapt3}{Heat.edp}  directory).
   
   For example solve the Thermal Conduction problem of section \ref{ss Thermal Conduction}
   We must solve the temperature equation in $\Omega$ in a time interval (0,T).
@@ -5215,7 +5215,7 @@ And
 \eFF
 
 
-Remark, you can see  \texttt{examples++-tutorial/Stokes-macro2d-3d.edp} for a true 
+Remark, you can see  the example \hrefexample{tutorial}{Stokes-macro2d-3d.edp} for a true 
 usage of  this functionality.  
 \subsection{Exception handling}\index{exception}\index{catch}\index{try}
 
