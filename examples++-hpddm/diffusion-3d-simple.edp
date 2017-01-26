@@ -12,7 +12,6 @@ macro init(i)i// EOM                        // scalar field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 func Pk = P1;                               // finite element space
 
-string deflation = getARGV("-deflation", "geneo");              // coarse space construction
 int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
 int s = getARGV("-split", 1);                                   // refinement factor
 
