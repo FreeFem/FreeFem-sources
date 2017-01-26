@@ -67,7 +67,7 @@ macro buildSubstructuring(Th, interfaceNb, ThGlobal, labNeumann, s, arrayInterse
             timing = mpiWtime();
             partitionerSeq(part[], ThGlobal, mpiSize(comm));
         }
-        partitionerPar(part[], ThGlobal, mpiSize(comm), processor(0, comm));
+        partitionerPar(part[], ThGlobal, comm);
         if(mpiRank(comm) == 0 && verbosity > 0)
             cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
         timing = mpiWtime();
