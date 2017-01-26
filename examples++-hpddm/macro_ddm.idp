@@ -6,17 +6,17 @@ ENDIFMACRO
 IFMACRO(partitioner,metis)
 load "metis"
 macro partitionerSeq(part, Th, size)metisdual(part, Th, size)// EOM
-macro partitionerPar(part, Th, size, proc)broadcast(proc, part)// EOM
+macro partitionerPar(part, Th, comm)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,scotch)
 load "scotch"
 macro partitionerSeq(part, Th, size)scotch(part, Th, size)// EOM
-macro partitionerPar(part, Th, size, proc)broadcast(proc, part)// EOM
+macro partitionerPar(part, Th, comm)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,parmetis)
 load "parmetis"
 macro partitionerSeq(part, Th, size)// EOM
-macro partitionerPar(part, Th, size, proc)parmetis(part, Th, size, worker = getARGV("-parmetis_worker", 1))// EOM
+macro partitionerPar(part, Th, comm)parmetis(part, Th, mpiSize(comm), communicator = comm, worker = getARGV("-parmetis_worker", 1))// EOM
 ENDIFMACRO
 IFMACRO(!partitionerSeq)
 cout << "The macro 'partitioner' must be set to 'metis', 'scotch', or 'parmetis'" << endl;
@@ -185,7 +185,7 @@ macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayInter
             timing = mpiWtime();
             partitionerSeq(part[], ThGlobal, mpiSize(comm));
         }
-        partitionerPar(part[], ThGlobal, mpiSize(comm), processor(0, comm));
+        partitionerPar(part[], ThGlobal, comm);
         if(mpiRank(comm) == 0 && verbosity > 0)
             cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
         timing = mpiWtime();
