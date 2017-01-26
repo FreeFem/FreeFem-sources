@@ -1,5 +1,10 @@
-@  changeset:   3954:067d39136e61
+@  changeset:   3955:563c79bf8d1a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 25 22:25:55 2017 +0100
+|  summary:     correct mac appli
+|
+o  changeset:   3954:067d39136e61
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jan 25 13:38:08 2017 +0100
 |  summary:     upate version in INNOVATION
