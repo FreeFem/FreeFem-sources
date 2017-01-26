@@ -2,7 +2,7 @@
 // NBPROC 4
 
 load "hpddm"                        // HPDDM plugin
-macro partitioner()parmetis// EOM   // metis, scotch, or parmetis
+macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
