@@ -65,7 +65,7 @@ plotMPI(ThMoved, u[], "Global moved solution", Pk, def, real, 3, 1)
 Wh<real> def(Rb)[3];
 [Rb[0], RbB[0]] = [1, 0];
 [Rb[1], RbB[1]] = [0, 1];
-[Rb[2], RbB[2]] = [x, -y];
+[Rb[2], RbB[2]] = [y, -x];
 set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_max_it 200", nearnullspace = Rb);
 [u, uB] = init(0.0);
 u[] = A^-1 * rhs;

@@ -67,7 +67,7 @@ else {
             Rb.resize(3);
             [Rb[0], RbB[0]] = [1, 0];
             [Rb[1], RbB[1]] = [0, 1];
-            [Rb[2], RbB[2]] = [x, -y];
+            [Rb[2], RbB[2]] = [y, -x];
         }
         if(getARGV("-hpddm_substructuring_scaling", 0) != 2)
             renumber(A, Mat, interfaceNb, R = Rb, effort = rhs);
