@@ -1,7 +1,6 @@
 INCLUDE(FindPackageHandleStandardArgs)
 
-FIND_PATH(SUPERLU_INCLUDES NAMES scotch.h 
-                                 colamd.h  
+FIND_PATH(SUPERLU_INCLUDES NAMES colamd.h  
                                  slu_cdefs.h  
                                  slu_Cnames.h  
                                  slu_dcomplex.h  
