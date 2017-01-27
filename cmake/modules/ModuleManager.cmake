@@ -14,6 +14,7 @@ LIST(APPEND MODULE_LIST FFTW
                         GMM
                         IPOPT
                         METIS
+                        MUMPS
                         NLOPT
                         SCOTCH
                         SUPERLU
