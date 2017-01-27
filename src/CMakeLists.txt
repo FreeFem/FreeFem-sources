@@ -1,7 +1,6 @@
 ###########
 # FREEFEM++
 ###########i
-IF(CBLAS_FOUND)
   ADD_EXECUTABLE(FreeFem++ ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp 
                          ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi-empty.cpp 
                          ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
@@ -10,7 +9,6 @@ IF(CBLAS_FOUND)
                                 dl 
                                 lglib 
                                 libff)
-ENDIF(CBLAS_FOUND)
 
 ########
 # FFGLUT
