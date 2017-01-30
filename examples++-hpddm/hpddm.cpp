@@ -42,7 +42,8 @@ class initDDM : public OneOperator {
 template<class Type, class K>
 AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
-    MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
+    Matrice_Creuse<K>* pA = GetAny<Matrice_Creuse<K>*>((*Mat)(stack));
+    MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     if(ptO)
