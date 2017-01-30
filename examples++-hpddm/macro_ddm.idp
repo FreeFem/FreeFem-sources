@@ -96,6 +96,28 @@ macro plotMPI(Th, u, legend, Pk, def, K, d, w)
         mpiWait(rq[1]);
     }// EOM
 
+macro export(name, mesh, sol, fforder, comm)
+load "iovtk"
+savevtk(name + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtk", mesh, sol, order = fforder);
+
+exec("pvpython vtk2vtu.py " + name + "_" + mpiRank(comm) + "_" + mpiSize(comm));
+if(mpiRank(comm) == 0) {
+    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd");
+    pvd << "<?xml version=\"1.0\"?>\n";
+    pvd << "<VTKFile type=\"Collection\" version=\"0.1\"\n";
+    pvd << "         byte_order=\"LittleEndian\"\n";
+    pvd << "         compressor=\"vtkZLibDataCompressor\">\n";
+    pvd << "  <Collection>\n";
+    for(int i = 0; i < mpiSize(comm); ++i) {
+        pvd << "    <DataSet timestep=\"0\" group=\"\" part=\"" << i << "\"\n";
+        pvd << "             file=\""; pvd << name << "_" << i << "_" << mpiSize(comm) << ".vtu\"/>\n";
+    }
+    pvd << "  </Collection>\n";
+    pvd << "</VTKFile>\n";
+}
+// EOM
+
+
 macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
         meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);
         mpiBarrier(comm);

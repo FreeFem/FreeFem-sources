@@ -90,4 +90,14 @@ if(Opt.n > 0)       // optimized Schwarz methods
 else
     u[] = A^-1 * rhs;
 
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+{
+    Wh def(z);
+    z[] = D;
+    mesh3 ThExport = trunc(Th, z > 0.4);
+    fespace WhExport(ThExport, Pk);
+    WhExport def(uExport);
+    def(uExport) = def(u);
+    int[int] order = [1];
+    export("stokes", ThExport, [uExport, uExportB, uExportC], order, comm);
+}
+
