@@ -7,7 +7,7 @@
 //   optimize version 
 // ------------
 //  problem is  find $(uu,vn)$  minimizing  $J$
-//  $ min J(un,vn) = \int f(F2) -  int Pa * un $
+//  $ min J(un,vn) = \int 1/2 (F2) -  int Pa * un $
 //   $ dJ(u,u,uu,vv) = int dF2(u,v,uu,vv) df(F2(u,v)) $
 //   where $F2 =  (^t {E}  A {E} ) $,
 //   $E(U) =  1/2 (\nabla U + \nabla U^t + \nabla U^t  \nabla U) $
@@ -17,6 +17,19 @@
 // so: 
 //$$ E_ij = 0.5 ( d_i u_j + d_j u_i ) + \sum_k d_i u_k * d_j*u_k  \leqno(1)$$
 //  the symetric tensor $t_{ij}$ are a vector  [t11,2*t12,t22] 
+// date from
+/*
+Proposal for numerical benchmarking of fluid-structure interaction between an elastic object and laminar incompressible flow
+
+Stefan Turek and Jaroslav Hron⋆
+Institute for Applied Mathematics and Numerics, University of Dortmund,
+Vogelpothsweg 87, 44227 Dortmund, Germany
+
+http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.550.1689&rep=rep1&type=pdf
+
+section 4.2 CSM test: 
+*/
+
 macro EL(u,v) [dx(u),(dx(v)+dy(u)),dy(v)] // is $[\epsilon_{11},2\epsilon_{12},\epsilon_{22}]$
 
 macro ENL(u,v) [ 
@@ -33,10 +46,10 @@ macro E(u,v) (EL(u,v)+ENL(u,v)) // is $[\E{11},\sqrt2\E{12},\E{22}]
 macro dE(u,v,uu,vv) (EL(uu,vv)+dENL(u,v,uu,vv)) //
 macro ddE(u,v,uu,vv,uuu,vvv) dENL(uuu,vvv,uu,vv) //
 macro F2(u,v) (E(u,v)'*A*E(u,v)) // 
-macro dF2(u,v,uu,vv)  (E(u,v)'*A*dE(u,v,uu,vv)*2. ) //
+macro dF2(u,v,uu,vv)  (E(u,v)'*A*dE(u,v,uu,vv) ) //
 macro ddF2(u,v,uu,vv,uuu,vvv) (
-            (dE(u,v,uu,vv)'*A*dE(u,v,uuu,vvv))*2. 
-          + (E(u,v)'*A*ddE(u,v,uu,vv,uuu,vvv))*2.  )// EOM
+            (dE(u,v,uu,vv)'*A*dE(u,v,uuu,vvv)) 
+          + (E(u,v)'*A*ddE(u,v,uu,vv,uuu,vvv))  )// EOM
 
 //  for hyper elasticity problem 
 //  -----------------------------
@@ -44,10 +57,7 @@ macro f(u) (u) // end of macro
 macro df(u) (1) // end of macro
 macro ddf(u) (0) // end of macro
 
-//  -- du caouchouc --- CF cours de Herve Le Dret.
 // -------------------------------
-real mu = 0.012e5; //  kg/cm^2
-real lambda =  0.4e5; //  kg/cm^2
 //  
 //   $  \sigma = 2 \mu E + \lambda tr(E) Id $
 //   $   A(u,v)= \sigma(u):\E(v) $
@@ -61,6 +71,26 @@ real lambda =  0.4e5; //  kg/cm^2
 //   ( 0 0 0 )
 //   ( 1 0 1 ) 
 // ------------------
+verbosity=0;
+
+// data CMS 1 
+real xp=0.35,yp=0.0;//
+real upbench= -0.007187, vpbench= -0.066;
+
+real EE = 1.4e6;
+real rho = 1000;
+real sigma = 0.4;
+real mu = EE/(2*(1+sigma));
+real lambda = EE*sigma/((1+sigma)*(1-2*sigma));
+real gravity = -2;
+int nnn = 10;
+
+mesh Th = square(17*nnn,nnn,[0.35*x,0.02*(y-0.5)]);
+cout<<" Th nt : " << Th.nt<<endl;
+int bottom=1, right=2,upper=3,left=4;
+
+plot(Th);
+
 real a11= 2*mu +  lambda  ;
 real a22= mu ; //  because [0,2*t12,0]' A [0,2*s12,0]  = 2*mu*(t12*s12+t21*s21) = 4*mu*t12*s12
 real a33= 2*mu +   lambda ;
@@ -73,71 +103,48 @@ real a31= a13 ;
 real a32= a23 ;
 func A = [ [ a11,a12,a13],[ a21,a22,a23],[ a31,a32,a33] ];  
 
-real Pa=1e2; //  a pressure of 100 Pa
-// ----------------
 
-int n=30,m=10;
-mesh Th= square(n,m,[x,.3*y]); // label: 1 bottom, 2 right, 3 up, 4 left;
-int bottom=1, right=2,upper=3,left=4;
 
-plot(Th);
 
 
  
-fespace Wh(Th,P1dc);
-fespace Vh(Th,[P1,P1]);
-fespace Sh(Th,P1);
+fespace Vh(Th,[P2,P2]);
 
 
 
 
 
-Wh e2,fe2,dfe2,ddfe2; // optimisation 
-Wh ett,ezz,err,erz; // optimisation 
 
 Vh [uu,vv], [w,s],[un,vn];
 [un,vn]=[0,0];//  intialisation 
 [uu,vv]=[0,0];
 
-varf vmass([uu,vv],[w,s],solver=CG) =  int2d(Th)( uu*w + vv*s );
-matrix M=vmass(Vh,Vh);
-problem NonLin([uu,vv],[w,s],solver=LU)=
- int2d(Th,qforder=1)( // (D^2 J(un)) part
-                       dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2
-                    +  ddF2(un,vn,w,s,uu,vv)*dfe2        
-	            )
-   - int1d(Th,3)(Pa*s) 
-   - int2d(Th,qforder=1)( // (D J(un)) part
-           dF2(un,vn,w,s)*dfe2   ) 
-   + on(right,left,uu=0,vv=0);
-;
+
+
+real errb=0; 
 // Newton's method
 // ---------------
-Sh u1,v1;
 for (int i=0;i<10;i++)
 {
   cout << "Loop " << i << endl;
-  e2 = F2(un,vn);
-  dfe2 = df(e2) ;
-  ddfe2 = ddf(e2);
-  cout << "  e2 max " <<e2[].max << " , min" << e2[].min << endl;
-  cout << " de2 max "<< dfe2[].max << " , min" << dfe2[].min << endl;
-  cout << "dde2 max "<< ddfe2[].max << " , min" << ddfe2[].min << endl;
-  NonLin; //  compute [uu,vv] = (D^2 J(un))^{-1}(D J(un))
-  
-  w[]   = M*uu[];
-  real res = sqrt(w[]' * uu[]); //  norme  L^2 of [uu,vv]
-  u1 = uu;
-  v1 = vv;
-  cout << " L^2 residual = " << res << endl;
-  cout << " u1 min =" <<u1[].min << ", u1 max= " << u1[].max << endl;
-  cout << " v1 min =" <<v1[].min << ", v2 max= " << v1[].max << endl;
-  plot([uu,vv],wait=1,cmm=" uu, vv " );
+  solve NonLin([uu,vv],[w,s])=
+    int2d(Th)(        ddF2(un,vn,uu,vv,w,s)  )
+     - int2d(Th)(  dF2(un,vn,w,s) - rho*gravity*s)    
+     + on(left,uu=0,vv=0);
+  ;  
+  real res = uu[].linfty ; //  norme  L^2 of [uu,vv]
+  errb = max(abs(un(xp,yp)-upbench) , abs(vn(xp,yp)-vpbench));
+
   un[] -= uu[]; 
-  plot([un,vn],wait=1,cmm=" deplacement " );
-  if (res<1e-5) break;
+  cout << "     Linfty residual = " << res << endl;
+  cout << "     u of A =" << un(xp,yp) << " " << vn(xp,yp)  <<  " bench " << upbench  << " "<< vpbench << " err bench =" << errb << endl; 
+  plot(movemesh(Th, [x+un, y+vn]),wait=1,cmm=" i =" +i + " err =" + res);
+
+  if (res<1e-10) break;
 }
 
-plot([un,vn],wait=1);
+cout << " err bench = " << errb << endl;  
+//plot([un,vn],wait=1);
 mesh th1 = movemesh(Th, [x+un, y+vn]);
 plot(th1,wait=1,ps="nl-elas.eps");
+assert( errb < 1e-2);

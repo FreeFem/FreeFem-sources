@@ -15615,8 +15615,8 @@ And it is easy to make automatic differentiation.
 
 //  for hyper elasticity problem
 //  -----------------------------
-@macro f(u) (u) // end of macro
-@macro df(u) (1) // end of macro
+@macro f(u) ((u)*0.5) // end of macro
+@macro df(u) (0.5) // end of macro
 @macro ddf(u) (0) // end of macro
 
 //  -- du caouchouc --- (see the notes of Herve Le Dret.)
@@ -15682,7 +15682,7 @@ Vh [uu,vv], [w,s],[un,vn];
 @problem NonLin([uu,vv],[w,s],solver=LU)=
  @int2d(Th,qforder=1)( // $(D^2 J(un))$ part
                        dF2(un,vn,uu,vv)*dF2(un,vn,w,s)*ddfe2
-                    +  ddF2(un,vn,w,s,uu,vv)*dfe2
+                    +  ddF2(un,vn,w,s,uu,vv)*ddfe2
 	            )
    - @int1d(Th,3)(Pa*s)
    - @int2d(Th,qforder=1)( // $(D J(un))$ part
