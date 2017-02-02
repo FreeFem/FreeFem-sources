@@ -1,55 +1,132 @@
-@  changeset:   3955:563c79bf8d1a
+@  changeset:   3969:310d576bf867
 |  tag:         tip
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Jan 25 22:25:55 2017 +0100
-|  summary:     correct mac appli
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Mon Jan 30 16:13:58 2017 +0100
+|  summary:     Be careful with Matrice_Creuse!
 |
-o  changeset:   3954:067d39136e61
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Jan 25 13:38:08 2017 +0100
-|  summary:     upate version in INNOVATION
+o  changeset:   3968:79f896ba41d5
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Mon Jan 30 10:28:58 2017 +0100
+|  summary:     New macro for parallel I/O using ParaView.
 |
-o  changeset:   3953:16b99c52b1fc
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Jan 25 11:38:02 2017 +0100
-|  summary:     update the doc on macro
+o  changeset:   3967:34eb4bbeb9e1
+|  parent:      3961:377617a2f890
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Sun Jan 29 21:15:19 2017 +0100
+|  summary:     Updates HPDDM to version 000603.
 |
-o  changeset:   3952:d9191b99a5fa
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Jan 25 11:31:25 2017 +0100
-|  summary:     add example with IFMACRO
-|
-o  changeset:   3951:9aca9572033e
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Jan 25 10:15:53 2017 +0100
-|  summary:     put hg tag in INNOVATION
-|
-o  changeset:   3950:4f6fdf3836a4
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Jan 25 10:14:23 2017 +0100
-|  summary:     pasd to version 3.51
-|
-o  changeset:   3949:13c5deb81c35
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Jan 24 21:20:07 2017 +0100
-|  summary:     corret order in class defmacro, setmacro or ifmacro
-|
-o  changeset:   3948:12e46f0f7812
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Jan 24 20:50:21 2017 +0100
-|  summary:     coorect bug in return of IFMacro
-|
-o  changeset:   3947:0a6be53d15fd
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Jan 24 18:40:32 2017 +0100
-|  summary:     remove rong example Laplace-Adapt-aniso-3d.edp
-|
-o  changeset:   3946:d15cadc94ba3
-|  parent:      3939:4e87a7e11b3e
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Jan 24 18:34:17 2017 +0100
-|  summary:     change somt strcmp in strncmp more safe
-|
+| o  changeset:   3966:a1e4116c357f
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Jan 27 17:03:23 2017 +0100
+| |  summary:     Minimal compilation on Mac OSX OK (except FreeFemQA buildlayer ffnewuoa)
+| |
+| o  changeset:   3965:a96c10cb55d2
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Jan 27 14:29:09 2017 +0100
+| |  summary:     Remove Fortran from project languages
+| |
+| o  changeset:   3964:29cf1d30ea7c
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Jan 27 12:15:51 2017 +0100
+| |  summary:     Compilation without BLAS
+| |
+| o  changeset:   3963:f6938c2e8e21
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Jan 27 12:05:26 2017 +0100
+| |  summary:     Compilation without MUMPS and LAPACK
+| |
+| o  changeset:   3962:d22a20229a01
+| |  branch:      cmake
+| |  parent:      3945:dc409bdc5c82
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Jan 27 11:48:38 2017 +0100
+| |  summary:     Fix a typo in FindSUPERLU.cmake
+| |
+o |  changeset:   3961:377617a2f890
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Thu Jan 26 21:56:04 2017 +0100
+| |  summary:     Handles different communicators.
+| |
+o |  changeset:   3960:0a4d1b69665e
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Thu Jan 26 15:16:04 2017 +0100
+| |  summary:     Wrong basis for rigid bodies.
+| |
+o |  changeset:   3959:9e13f9d37009
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Thu Jan 26 11:46:39 2017 +0100
+| |  summary:     This parameter is not needed.
+| |
+o |  changeset:   3958:61d739c46796
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Thu Jan 26 11:17:10 2017 +0100
+| |  summary:     Stick to Metis for now...
+| |
+o |  changeset:   3957:410861365992
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Jan 26 08:40:49 2017 +0100
+| |  summary:     update the doc.
+| |
+o |  changeset:   3956:c0e6428f9143
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Wed Jan 25 23:24:46 2017 +0100
+| |  summary:     Changed all examples to use IFMACRO.
+| |
+o |  changeset:   3955:563c79bf8d1a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 25 22:25:55 2017 +0100
+| |  summary:     correct mac appli
+| |
+o |  changeset:   3954:067d39136e61
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 25 13:38:08 2017 +0100
+| |  summary:     upate version in INNOVATION
+| |
+o |  changeset:   3953:16b99c52b1fc
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 25 11:38:02 2017 +0100
+| |  summary:     update the doc on macro
+| |
+o |  changeset:   3952:d9191b99a5fa
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 25 11:31:25 2017 +0100
+| |  summary:     add example with IFMACRO
+| |
+o |  changeset:   3951:9aca9572033e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 25 10:15:53 2017 +0100
+| |  summary:     put hg tag in INNOVATION
+| |
+o |  changeset:   3950:4f6fdf3836a4
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 25 10:14:23 2017 +0100
+| |  summary:     pasd to version 3.51
+| |
+o |  changeset:   3949:13c5deb81c35
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Jan 24 21:20:07 2017 +0100
+| |  summary:     corret order in class defmacro, setmacro or ifmacro
+| |
+o |  changeset:   3948:12e46f0f7812
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Jan 24 20:50:21 2017 +0100
+| |  summary:     coorect bug in return of IFMacro
+| |
+o |  changeset:   3947:0a6be53d15fd
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Jan 24 18:40:32 2017 +0100
+| |  summary:     remove rong example Laplace-Adapt-aniso-3d.edp
+| |
+o |  changeset:   3946:d15cadc94ba3
+| |  parent:      3939:4e87a7e11b3e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Jan 24 18:34:17 2017 +0100
+| |  summary:     change somt strcmp in strncmp more safe
+| |
 | o  changeset:   3945:dc409bdc5c82
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
