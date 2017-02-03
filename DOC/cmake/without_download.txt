@@ -1,0 +1,17 @@
+Procedure sous :
+- Linux Ubuntu 16.04
+- Mac OSX Mavericks 10.9
+
+
+
+cd ff++
+mkdir cmake_build
+cd cmake_build
+cmake ..
+make -j 8
+(make install a tester + packaging)
+
+
+
+
+
