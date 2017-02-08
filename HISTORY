@@ -1,5 +1,10 @@
-@  changeset:   3969:310d576bf867
+@  changeset:   3970:88961c74485e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 02 18:21:52 2017 +0100
+|  summary:     correct nolinear-elas.edp test  (more safe)
+|
+o  changeset:   3969:310d576bf867
 |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
 |  date:        Mon Jan 30 16:13:58 2017 +0100
 |  summary:     Be careful with Matrice_Creuse!

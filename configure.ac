@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.51,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.51-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -41,7 +41,7 @@ AC_CONFIG_HEADERS(config.h)
 AC_PROG_MAKE_SET
 dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
-
+inc_usr_include=""
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 dnl search of associad software
 m4_define([AC_FF_ADDWHERELIB],
@@ -1893,19 +1893,19 @@ fi
 m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],	
 	[[mumps_seq],[-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq],[dmumps_c.h],[]],
-	[[libseq],[-lmpiseq_seq],[/usr/include/mumps_seq/mpi.h]],
+	[[libseq],[-lmpiseq_seq],[${inc_usr_include}mumps_seq/mpi.h]],
 	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
 	[[hypre],[-lHYPRE]],
-	[[fftw3],[-lfftw3],[/usr/include/fftw3.h],[]],
-	[[superlu_dist],[-lsuperlu-dist],[/usr/include/superlu-dist/superlu_defs.h],[]],
-	[[superlu],[-lsuperlu],[/usr/include/superlu/superlu_enum_consts.h],[]],
-	[[superlu4],[-lsuperlu4],[/usr/include/superlu4/superlu_enum_consts.h],[]],
+	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
+	[[superlu_dist],[-lsuperlu-dist],[${inc_usr_include}superlu-dist/superlu_defs.h],[]],
+	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
+	[[superlu4],[-lsuperlu4],[${inc_usr_include}superlu4/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[scotch.h]],
         [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h]],
-	[[metis],[-lmetis],[/usr/include/metis/metis.h],[]],
+	[[metis],[-lmetis],[${inc_usr_include}metis/metis.h],[]],
 	[[metis],[-lmetis],[metis.h],[]],
 	[[parmetis],[-lparmetis -lmetis],[],[]],
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
@@ -1914,7 +1914,7 @@ m4_map([AC_FF_WHERELIB],[
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
-	[[ipopt],[ -lipopt],[/usr/include/coin/IpTNLP.hpp],[]],
+	[[ipopt],[ -lipopt],[${inc_usr_include}coin/IpTNLP.hpp],[]],
 	[[nlopt],[ -lnlopt],[nlopt.hpp],[]]
     ]
     )
