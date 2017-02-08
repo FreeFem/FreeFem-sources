@@ -17,6 +17,7 @@ VERSION=3.12.4
 # 3.10.2
 URL=http://www.coin-or.org/download/source/Ipopt
 FHSL=#$(DIRPKG)/ddeps.f $(DIRPKG)/ma27ad.f  $(DIRPKG)/mc19d.f 
+
 LIBMUMPS=-L$(DOWNLOADFF)/lib  -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lmpiseqFREEFEM-SEQ
 INCMUMPS=$(DOWNLOADFF)/include/libseq 
 #/Ipopt-3.10.2.tgz
@@ -44,16 +45,16 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	touch $(SRCDIR)/FAIT	
 
 # FFCS - avoid remaking install every time
-install.done: $(SRCDIR)/FAIT
+install.done: Makefile $(SRCDIR)/FAIT
 	$(MAKE)  -C  $(SRCDIR) install	
 	touch $@
 clean-local::
 	-rm *.done
 
 # FFCS - install and WHERE need to be sequential
-WHERE.done: install.done
+WHERE.done: install.done Makefile
 	echo ipopt LD -L@DIR@/lib   -lipopt   >$(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt;
-	echo ipopt INCLUDE -I@DIR@/include/coin  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt ;
+	echo ipopt INCLUDE -I@DIR@/include  >> $(SRCDIR)/$(INSTALL)/lib/WHERE.Ipopt ;
 	touch $@
 
 Makefile.inc:

@@ -27,8 +27,8 @@
 
 //using namespace std;
 #include "../config.h"
-#include "IpTNLP.hpp"
-#include "IpIpoptApplication.hpp"
+#include "coin/IpTNLP.hpp"
+#include "coin/IpIpoptApplication.hpp"
 #include "ff++.hpp"
 
 

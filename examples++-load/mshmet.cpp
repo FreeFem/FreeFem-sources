@@ -43,6 +43,29 @@
 //#include "libmesh5.h"
 #include "mshmetlib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+#include <stdlib.h>
+#include <assert.h>
+    
+    /* prototype (re)definitions */
+    void  *M_malloc(size_t size,char *call);
+    void  *M_calloc(size_t nelem,size_t elsize,const char *call);
+    void  *M_realloc(void *ptr, size_t size,const char *call);
+    void   M_free(void *ptr);
+    
+    /* ptototypes : tools */
+    int    M_memLeak();
+    void   M_memDump();
+    size_t M_memSize();
+    
+    
+#ifdef __cplusplus
+}
+#endif
+
 using namespace  Fem2D;
 using namespace  mshmet;
 typedef const Mesh * pmesh;
@@ -53,28 +76,28 @@ typedef const Mesh3 * pmesh3;
 static void myMSHMET_free( MSHMET_pMesh mesh, MSHMET_pSol sol)
 {
     /* free mem */
-    free(mesh->point);
-    if ( mesh->nt )  free(mesh->tria);
-    if ( mesh->ne )  free(mesh->tetra);
-    free(mesh->adja);
-    free(mesh);
-    free(sol->sol);
-    free(sol->met);
-    free(sol);
+    M_free(mesh->point);
+    if ( mesh->nt )  M_free(mesh->tria);
+    if ( mesh->ne )  M_free(mesh->tetra);
+    M_free(mesh->adja);
+    M_free(mesh);
+    M_free(sol->sol);
+    M_free(sol->met);
+    M_free(sol);
    }
 
 MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
   MSHMET_pMesh meshMSHMET;
-  meshMSHMET = (MSHMET_pMesh)calloc(1,sizeof(MSHMET_Mesh)) ;
+  meshMSHMET = (MSHMET_pMesh)M_calloc(1,sizeof(MSHMET_Mesh),"mesh2") ;
   
   meshMSHMET->dim = 2;
   meshMSHMET->np = Th.nv;
   meshMSHMET->nt = Th.nt;
   meshMSHMET->ne = 0;
 
-  meshMSHMET->point = (MSHMET_pPoint)calloc(meshMSHMET->np+1,sizeof(MSHMET_Point));
-  meshMSHMET->tria = (MSHMET_pTria)calloc(meshMSHMET->nt+1,sizeof(MSHMET_Tria));
-  meshMSHMET->adja = (int*)calloc(3*meshMSHMET->nt+5,sizeof(int)); 
+  meshMSHMET->point = (MSHMET_pPoint)M_calloc(meshMSHMET->np+1,sizeof(MSHMET_Point),"point");
+  meshMSHMET->tria = (MSHMET_pTria)M_calloc(meshMSHMET->nt+1,sizeof(MSHMET_Tria),"tria");
+  meshMSHMET->adja = (int*)M_calloc(3*meshMSHMET->nt+5,sizeof(int),"adja");
   
   int k;
   MSHMET_pPoint ppt;
@@ -143,16 +166,16 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh( const Mesh &Th ){
 
 MSHMET_pMesh mesh3_to_MSHMET_pMesh( const Mesh3 &Th3 ){
   MSHMET_pMesh meshMSHMET;
-  meshMSHMET = (MSHMET_pMesh)calloc(1,sizeof(MSHMET_Mesh)) ;
+  meshMSHMET = (MSHMET_pMesh)M_calloc(1,sizeof(MSHMET_Mesh),"Mesh3") ;
   
   meshMSHMET->dim = 3;
   meshMSHMET->np = Th3.nv;
   meshMSHMET->nt = 0;
   meshMSHMET->ne = Th3.nt;
 
-  meshMSHMET->point = (MSHMET_pPoint)calloc(meshMSHMET->np+1,sizeof(MSHMET_Point));
-  meshMSHMET->tetra = (MSHMET_pTetra)calloc(meshMSHMET->ne+1,sizeof(MSHMET_Tetra));
-  meshMSHMET->adja = (int*)calloc(4*meshMSHMET->ne+5,sizeof(int)); 
+  meshMSHMET->point = (MSHMET_pPoint)M_calloc(meshMSHMET->np+1,sizeof(MSHMET_Point),"point3");
+  meshMSHMET->tetra = (MSHMET_pTetra)M_calloc(meshMSHMET->ne+1,sizeof(MSHMET_Tetra),"tetra");
+    meshMSHMET->adja = (int*)M_calloc(4*meshMSHMET->ne+5,sizeof(int),"adja3");
   
   int k;
   MSHMET_pPoint ppt;
@@ -194,7 +217,7 @@ MSHMET_pSol sol_mshmet(const int &dim, const int & np, const int &type, const in
   MSHMET_pSol sol;
   int k,ia,i;
 
-  sol= (MSHMET_pSol)calloc(1,sizeof(MSHMET_Sol)) ;
+  sol= (MSHMET_pSol)M_calloc(1,sizeof(MSHMET_Sol),"sol") ;
   sol->ver = 0;
   sol->np  = np;
   sol->dim = dim;
@@ -203,7 +226,7 @@ MSHMET_pSol sol_mshmet(const int &dim, const int & np, const int &type, const in
   for(i=0; i<sol->type; i++)
     sol->typtab[i] = typtab[i];  // types des differentes solutions
 
-  sol->sol = (double*) calloc(sol->np+1,sol->size*sizeof(double));
+  sol->sol = (double*) M_calloc(sol->np+1,sol->size*sizeof(double),"sol->sol");
   assert(sol->sol);
 
   for (k=1; k<=sol->np; k++) {
@@ -223,7 +246,7 @@ void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric
   cout << " info->iso " << info->iso << endl;
   if( info->iso == 1 ){
     cout << " info->iso 11 " << info->iso << endl;
-    sol->met = (double*)calloc(sol->np+1,sizeof(double));
+    sol->met = (double*)M_calloc(sol->np+1,sizeof(double),"sol->met");
     assert(sol->met);
     // isotrope
     for (k=1; k<=sol->np; k++) {
@@ -232,7 +255,7 @@ void metric_mshmet( MSHMET_pSol sol, MSHMET_Info *info, const KN<double> &metric
   }
   else{
     // anisotropie :: Hessian
-    sol->met = (double*)calloc(sol->np+1,6*sizeof(double));
+    sol->met = (double*)M_calloc(sol->np+1,6*sizeof(double),"sol->met6");
     assert(sol->met);
   
     for (k=1; k<=sol->np; k++) {
@@ -381,6 +404,8 @@ ostream & dumpp(const T * p,int n,ostream & f)
   return f; 
 }
 
+
+
 AnyType mshmet3d_Op::operator()(Stack stack)  const 
 {
   // initialisation
@@ -516,7 +541,7 @@ AnyType mshmet3d_Op::operator()(Stack stack)  const
   // faire les free
     
   myMSHMET_free( mshmetmesh, mshmetsol);
-
+  if(verbosity>1000)  M_memDump();
   Add2StackOfPtr2Free(stack,pmetric);
   *mp=mps;
   return SetAny< KN<double> >(metric);
@@ -728,6 +753,7 @@ AnyType mshmet2d_Op::operator()(Stack stack)  const
   // faire les free
   myMSHMET_free( mshmetmesh, mshmetsol);
   *mp=mps;
+  if(verbosity>1000)  M_memDump();
 
   Add2StackOfPtr2Free(stack,pmetric);
   return SetAny< KN<double> >(metric);
@@ -753,6 +779,6 @@ static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"
 }
 
 
-#define  WITH_NO_INIT
-#include "msh3.hpp" 
+//#define  WITH_NO_INIT
+//#include "msh3.hpp"
 LOADFUNC(Load_Init)
