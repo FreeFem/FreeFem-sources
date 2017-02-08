@@ -1,11 +1,11 @@
 INCLUDE(FindPackageHandleStandardArgs)
 INCLUDE(PackageManagerPaths)
 
-FIND_PATH(MUMPS_INCLUDES NAMES mumps.h 
+FIND_PATH(MUMPS_INCLUDES NAMES dmumps_c.h zmumps_c.h 
                           PATHS ${PACKMAN_INCLUDE_PATHS} 
                           PATH_SUFFIXES mumps)
 
-FIND_LIBRARY(MUMPS_LIBRARIES NAMES mumps 
+FIND_LIBRARY(MUMPS_LIBRARIES NAMES dmumps zmumps 
                               PATHS ${PACKMAN_LIBRARIES_PATHS})
 
 IF(MUMPS_INCLUDES AND MUMPS_LIBRARIES)
