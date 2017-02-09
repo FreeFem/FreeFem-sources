@@ -1,25 +1,56 @@
-@  changeset:   3970:88961c74485e
+@  changeset:   3975:13b24d8a52c5
 |  tag:         tip
+|  parent:      3970:88961c74485e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Thu Feb 02 18:21:52 2017 +0100
-|  summary:     correct nolinear-elas.edp test  (more safe)
+|  date:        Wed Feb 08 11:00:26 2017 +0100
+|  summary:     crrect on meromy leak in mshmet pulgin due to mix of allocateur.
 |
-o  changeset:   3969:310d576bf867
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Mon Jan 30 16:13:58 2017 +0100
-|  summary:     Be careful with Matrice_Creuse!
-|
-o  changeset:   3968:79f896ba41d5
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Mon Jan 30 10:28:58 2017 +0100
-|  summary:     New macro for parallel I/O using ParaView.
-|
-o  changeset:   3967:34eb4bbeb9e1
-|  parent:      3961:377617a2f890
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Sun Jan 29 21:15:19 2017 +0100
-|  summary:     Updates HPDDM to version 000603.
-|
+| o  changeset:   3974:0ca9b17ba44e
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 07 16:08:45 2017 +0100
+| |  summary:     Version OK for Ubuntu and Mac without gsl.cpp and ffrandom.cpp (regression)
+| |
+| o  changeset:   3973:6af93c7200eb
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 03 12:39:24 2017 +0100
+| |  summary:     Procedure pour installer sans telechargement sous ubuntu et mac
+| |
+| o  changeset:   3972:ba66fed08bf2
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 03 12:06:06 2017 +0100
+| |  summary:     Default value of ENABLE_DOWNLOAD set to false
+| |
+| o  changeset:   3971:89d5ad535a0c
+| |  branch:      cmake
+| |  parent:      3966:a1e4116c357f
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Jan 31 10:51:02 2017 +0100
+| |  summary:     Fix some interdependency problems between examples
+| |
+o |  changeset:   3970:88961c74485e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Feb 02 18:21:52 2017 +0100
+| |  summary:     correct nolinear-elas.edp test  (more safe)
+| |
+o |  changeset:   3969:310d576bf867
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Mon Jan 30 16:13:58 2017 +0100
+| |  summary:     Be careful with Matrice_Creuse!
+| |
+o |  changeset:   3968:79f896ba41d5
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Mon Jan 30 10:28:58 2017 +0100
+| |  summary:     New macro for parallel I/O using ParaView.
+| |
+o |  changeset:   3967:34eb4bbeb9e1
+| |  parent:      3961:377617a2f890
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sun Jan 29 21:15:19 2017 +0100
+| |  summary:     Updates HPDDM to version 000603.
+| |
 | o  changeset:   3966:a1e4116c357f
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
