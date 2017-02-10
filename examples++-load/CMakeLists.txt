@@ -167,7 +167,8 @@ ENDIF(MMG3D_DOWNLOADED)
 # scotch.cpp
 IF(SCOTCH_FOUND)
   ADD_LIBRARY(scotch SHARED scotch.cpp)
-  INCLUDE_DIRECTORIES(/usr/include/scotch)
+  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDES})
+  TARGET_LINK_LIBRARIES(scotch libff lglib ${SCOTCH_LIBRARIES})
 ENDIF()
 
 #superlu.cpp
