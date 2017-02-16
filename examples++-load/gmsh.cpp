@@ -140,7 +140,7 @@ Mesh * GMSH_Load(const string & filename)
 	  }
 	}
 	else if(!strncmp(&str[1], "PhysicalNames", 13)) {	  
-	  if(verbosity>0) cout << " PhysicalNames is not considered in freefem++ " << endl;
+	  if(verbosity>1) cout << " PhysicalNames is not considered in freefem++ " << endl;
 	}
 	
 	else if(!strncmp(&str[1], "NO", 2) || !strncmp(&str[1], "Nodes", 5) ||
@@ -154,7 +154,7 @@ Mesh * GMSH_Load(const string & filename)
 	  if(!fgets(str, sizeof(str), fp)) exit(1);
 	  
 	  if(sscanf(str, "%d", &nv) != 1) exit(1);
-      if(verbosity > 0)
+      if(verbosity > 1)
           printf("%d vertices\n", nv);
 	  
 	  // local variables freefem++
@@ -533,7 +533,7 @@ Mesh3 * GMSH_Load3(const string & filename)
 	  if(!fgets(str, sizeof(str), fp)) exit(1);
 	  
 	  if(sscanf(str, "%d", &nv) != 1) exit(1);
-      if(verbosity > 0)
+      if(verbosity > 1)
           printf("%d vertices\n", nv);
 	  
 	  // local variables freefem++

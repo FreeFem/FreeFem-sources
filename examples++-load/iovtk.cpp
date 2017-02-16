@@ -1744,7 +1744,7 @@ public:
     string vecs("vector"); 
     string tens("tensor"); 
 
-    if(verbosity) cout << "Write Mesh and Solutions in VTK Formats" << endl;
+    if(verbosity > 2) cout << "Write Mesh and Solutions in VTK Formats" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
 
     if (BCastTo<string *>(args[0])) filename = CastTo<string *>(args[0]);
@@ -3327,7 +3327,7 @@ public:
     string vecs("vector"); 
     string tens("tensor"); 
 
-    if(verbosity) cout << "Write Mesh and Solutions in VTK Formats" << endl;
+    if(verbosity > 2) cout << "Write Mesh and Solutions in VTK Formats" << endl;
     args.SetNameParam(n_name_param,name_param,nargs);
 
     if (BCastTo<string *>(args[0])) filename = CastTo<string *>(args[0]);
