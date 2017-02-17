@@ -10,6 +10,10 @@ FIND_PACKAGE(MPI)
 FIND_PACKAGE(OpenGL)
 FIND_PACKAGE(Threads)
 
+#  INCLUDE(FFInstallPackage)
+#FF_INSTALL_PACKAGE(PETSC)
+
+
 LIST(APPEND MODULE_LIST FFTW
                         GMM
                         IPOPT
