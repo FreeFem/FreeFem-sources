@@ -1053,6 +1053,11 @@ class E_ForAllLoopMapSS
     }
     
 };
+double projection(const double & aa, const double & bb, const double & x )
+{ double a=aa,b=bb; if(a>b) std::swap(a,b); return min(max(a,x),b);}
+double dist(const double & aa, const double & bb) { return sqrt( aa*aa+bb*bb);}
+double dist(const double & aa, const double & bb,const double & cc) { return sqrt(aa*aa+bb*bb+cc*cc);}
+
 
 void Init_map_type()
 {
@@ -1701,7 +1706,10 @@ void Init_map_type()
     Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
     Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
     Global.Add("chtmpdir","(",new OneOperator0<long>(ffapi::chtmpdir));
- 
+    Global.Add("projection","(",new OneOperator3_<double,double   >(projection));
+    Global.Add("dist","(",new OneOperator2_<double,double>(dist));
+    Global.Add("dist","(",new OneOperator3_<double,double>(dist));
+
   
 
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));

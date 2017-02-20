@@ -381,3 +381,8 @@ cout << vh.n <<endl;
   cout << t(1:3,0:1)' << endl; 
 
 }
+{
+  for(real a=-1;a< 2; a+= 0.4)
+  cout << projection(-0.1,1,a)<< endl; 
+  cout << dist(3,4)<< " " << dist(1,2,3) << " = " << sqrt( 14.  ) << endl; 
+}

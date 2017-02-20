@@ -1,3 +1,6 @@
+ - add  3 fonctions 
+    projection(a,b,x) projection on segement [a,b] = min(max(a,x),b) if a< b 
+   dist(a,b) = sqrt(a*ä+b*b) and dist(a,b,c) = sqrt(a*a+b*b+c*c); 
  - correct hpddm v 603 ( 25996228 janv. 30 17:18 freefem++-3.51.tar.gz
                       version hg:  3969:310d576bf867 )
 - version 3.51 (version 3953:16b99c52b1fc)

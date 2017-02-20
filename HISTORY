@@ -1,10 +1,35 @@
-@  changeset:   3975:13b24d8a52c5
+@  changeset:   3979:6a694a7b679f
 |  tag:         tip
-|  parent:      3970:88961c74485e
+|  parent:      3975:13b24d8a52c5
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Feb 08 11:00:26 2017 +0100
-|  summary:     crrect on meromy leak in mshmet pulgin due to mix of allocateur.
+|  date:        Thu Feb 09 17:27:51 2017 +0100
+|  summary:     add new exemple
 |
+| o  changeset:   3978:492ac77de3f3
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Feb 08 16:07:18 2017 +0100
+| |  summary:     FFTW3 successfully found with macport
+| |
+| o  changeset:   3977:e0f0ff2d6904
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Feb 08 15:37:08 2017 +0100
+| |  summary:     Mumps successfully found with macport
+| |
+| o  changeset:   3976:cbfea8403ef3
+| |  branch:      cmake
+| |  parent:      3974:0ca9b17ba44e
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Feb 08 15:34:33 2017 +0100
+| |  summary:     Research paths for macport
+| |
+o |  changeset:   3975:13b24d8a52c5
+| |  parent:      3970:88961c74485e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Feb 08 11:00:26 2017 +0100
+| |  summary:     crrect on meromy leak in mshmet pulgin due to mix of allocateur.
+| |
 | o  changeset:   3974:0ca9b17ba44e
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
