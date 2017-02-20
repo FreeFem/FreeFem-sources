@@ -1,0 +1,39 @@
+FUNCTION(FREEFEM_FIND_PACKAGE LIBRARY_NAME)
+
+  FIND_PACKAGE(${LIBRARY_NAME})
+
+  IF(${LIBRARY_NAME}_FOUND)
+
+    # Unifying variables names for include directory paths
+
+    SET(POSSIBLE_INCLUDE_PATH_VARIABLES "${LIBRARY_NAME}_INCLUDE"
+                                        "${LIBRARY_NAME}_INCLUDES"
+                                        "${LIBRARY_NAME}_INCLUDE_PATH"
+                                        "${LIBRARY_NAME}_INCLUDE_PATHS"
+                                        "${LIBRARY_NAME}_C_INCLUDE_PATHS")
+
+    FOREACH(INCLUDE_PATH_VARIABLE IN ${POSSIBLE_INCLUDE_PATH_VARIABLES}) 
+      LIST(APPEND INCLUDE_PATHS ${INCLUDE_PATH_VARIABLE})
+    ENDFOREACH(INCLUDE_PATH_VARIABLE)
+
+    # Unifying variables names for library directory paths
+
+    SET(POSSIBLE_LIBRARY_PATH_VARIABLES "${LIBRARY_NAME}_LIBRARY"
+                                        "${LIBRARY_NAME}_LIBRARIES"
+                                        "${LIBRARY_NAME}_LIBRARY_PATH"
+                                        "${LIBRARY_NAME}_LIBRARY_PATHS"
+                                        "${LIBRARY_NAME}_C_LIBRARY_PATHS")
+
+    FOREACH(LIBRARY_PATH_VARIABLE IN ${POSSIBLE_LIBRARY_PATH_VARIABLES}) 
+      LIST(APPEND LIBRARY_PATHS ${LIBRARY_PATH_VARIABLE})
+    ENDFOREACH(LIBRARY_PATH_VARIABLE)
+
+    # Return unified names
+
+    SET(FREEFEM_${LIBRARY_NAME}_INSTALLED TRUE PARENT_SCOPE)
+    SET(FREEFEM_${LIBRARY_NAME}_INCLUDE_PATHS ${INCLUDE_PATHS} PARENT_SCOPE)
+    SET(FREEFEM_${LIBRARY_NAME}_LIBRARY_PATHS ${LIBRARY_PATHS} PARENT_SCOPE)
+  
+  ENDIF(${LIBRARY_NAME}_FOUND)
+
+ENDFUNCTION(FREEFEM_FIND_PACKAGE)
