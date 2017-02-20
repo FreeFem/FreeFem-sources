@@ -1,10 +1,102 @@
-@  changeset:   3979:6a694a7b679f
+@  changeset:   3994:4e35da5178fe
 |  tag:         tip
-|  parent:      3975:13b24d8a52c5
+|  parent:      3984:0643baa6ff5a
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Thu Feb 09 17:27:51 2017 +0100
-|  summary:     add new exemple
+|  date:        Mon Feb 20 17:27:11 2017 +0100
+|  summary:     add 3 new small usefull function projection(a,b,x) , dist(a,b), dist(a,c,b)
 |
+| o  changeset:   3993:3c1988503697
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Feb 20 17:12:30 2017 +0100
+| |  summary:     Set FREEFEM_FOO_INSTALLED to TRUE when installing FOO from the internet
+| |
+| o  changeset:   3992:3df933c2277b
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Feb 20 17:09:06 2017 +0100
+| |  summary:     Fix some typos
+| |
+| o  changeset:   3991:9a3550a2ec75
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Feb 20 15:39:48 2017 +0100
+| |  summary:     unified find_package function
+| |
+| o  changeset:   3990:a3dc6f1c02a2
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 17 19:07:18 2017 +0100
+| |  summary:     CMake scripts for scotch and mumps
+| |
+| o  changeset:   3989:563044d22da0
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 17 15:09:18 2017 +0100
+| |  summary:     Automatic installation of PETSC
+| |
+| o  changeset:   3988:d880d7bd5f2b
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 17 14:28:34 2017 +0100
+| |  summary:     Fix naming typos
+| |
+| o  changeset:   3987:6a7292f01c4f
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Feb 16 17:08:18 2017 +0100
+| |  summary:     Remove mumps and mumps-seq (regression)
+| |
+| o  changeset:   3986:afd60002ffbe
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Feb 16 13:00:57 2017 +0100
+| |  summary:     Remove superlu example (regression)
+| |
+| o  changeset:   3985:90ffbf35ffbf
+| |  branch:      cmake
+| |  parent:      3983:51e538dabeca
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Feb 16 12:54:40 2017 +0100
+| |  summary:     Remove iohdf5 temporarily (regression)
+| |
+o |  changeset:   3984:0643baa6ff5a
+| |  parent:      3979:6a694a7b679f
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Thu Feb 16 16:04:19 2017 +0100
+| |  summary:     Verbosity + HPDDM version.
+| |
+| o  changeset:   3983:51e538dabeca
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 10 16:49:09 2017 +0100
+| |  summary:     Add bamglib for hdf5 example on Mac OSX
+| |
+| o  changeset:   3982:ecd2aa7d743f
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 10 16:01:22 2017 +0100
+| |  summary:     Fix linking problems with metis on mac osx
+| |
+| o  changeset:   3981:e8f2279965af
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 10 15:53:51 2017 +0100
+| |  summary:     fftw3 ok on Mac OSX
+| |
+| o  changeset:   3980:3d3417489bd1
+| |  branch:      cmake
+| |  parent:      3978:492ac77de3f3
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Feb 10 15:29:50 2017 +0100
+| |  summary:     Fix linking problems with scotch on Mac OSX
+| |
+o |  changeset:   3979:6a694a7b679f
+| |  parent:      3975:13b24d8a52c5
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Feb 09 17:27:51 2017 +0100
+| |  summary:     add new exemple
+| |
 | o  changeset:   3978:492ac77de3f3
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
