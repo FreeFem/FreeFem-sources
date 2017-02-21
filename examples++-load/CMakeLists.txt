@@ -41,21 +41,6 @@ FOREACH(CPPFILE ${CPPFILES})
   TARGET_LINK_LIBRARIES(${FILENAME} ${FREEFEM_LIBRARIES})
 ENDFOREACH(CPPFILE)
 
-#FF_INSTALL_PACKAGE(FREEYAMS)         # probleme acces
-#FF_INSTALL_PACKAGE(METIS)
-#FF_INSTALL_PACKAGE(OPENBLAS)         # probleme acces
-#FF_INSTALL_PACKAGE(OPENBLAS-WIN32)   # binaire
-#FF_INSTALL_PACKAGE(OPENBLAS-WIN64)   # binaire
-#FF_INSTALL_PACKAGE(Scotch)           # makefile
-#FF_INSTALL_PACKAGE(SUPERLU)          # makefile
-
-# etaient non commentes
-#FF_INSTALL_PACKAGE(Tetgen)
-#FF_INSTALL_PACKAGE(FFTW)
-#FF_INSTALL_PACKAGE(MMG3D)            # depend de scotch
-#FF_INSTALL_PACKAGE(IPOPT)            
-#FF_INSTALL_PACKAGE(NLOPT)            # makefile
-
 
 ADD_LIBRARY(buildlayer buildlayer.cpp)
 TARGET_LINK_LIBRARIES(buildlayer LayerMesh)
@@ -70,31 +55,32 @@ ADD_LIBRARY(FreeFemQA FreeFemQA.cpp)
 TARGET_LINK_LIBRARIES(FreeFemQA GeometryQA)
 
 # dfft
-IF(FFTW_DOWNLOADED)
+IF(FREEFEM_FFTW_INSTALLED)
   ADD_LIBRARY(dfft SHARED dfft.cpp)
-  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/fftw/install/include)
-ENDIF(FFTW_DOWNLOADED)
+  INCLUDE_DIRECTORIES(${FREEFEM_FFTW_INCLUDE_PATHS})
+ENDIF(FREEFEM_FFTW_INSTALLED)
 
 # Element_Mixte
-IF(LAPACK_FOUND)
+IF(FREEFEM_LAPACK_INSTALLED)
   ADD_LIBRARY(Element_Mixte SHARED Element_Mixte.cpp)
   TARGET_LINK_LIBRARIES(Element_Mixte ${FREEFEM_LIBRARIES}
-                                      ${LAPACK_LIBRARIES})
-ENDIF()
+                                      ${FREEFEM_LAPACK_LIBRARY_PATHS})
+ENDIF(FREEFEM_LAPACK_INSTALLED)
 
 # ff-Ipopt.cpp
-IF(IPOPT_DOWNLOADED)
+IF(FREEFEM_IPOPT_INSTALLED)
   ADD_LIBRARY(ff-Ipopt SHARED ff-Ipopt.cpp)
   ADD_DEPENDENCIES(ff-Ipopt ipopt)
-  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
-ENDIF(IPOPT_DOWNLOADED)
+  INCLUDE_DIRECTORIES(${FREEFEM_IPOPT_INCLUDE_PATHS})
+  #INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
+ENDIF(FREEFEM_IPOPT_INSTALLED)
 
 # fflapack
-IF(LAPACK_FOUND)
+IF(FREEFEM_LAPACK_INSTALLED)
 	ADD_LIBRARY(fflapack SHARED fflapack.cpp)
 	TARGET_LINK_LIBRARIES(fflapack ${FREEFEM_LIBRARIES}
-                                 ${LAPACK_LIBRARIES})
-ENDIF(LAPACK_FOUND)
+                                 ${FREEFEM_LAPACK_LIBRARIES})
+ENDIF(FREEFEM_LAPACK_INSTALLED)
 
 # ffrandom
 #IF(GSL_FOUND)
@@ -106,11 +92,13 @@ ENDIF(LAPACK_FOUND)
 
 
 # ff-NLpopt.cpp
-IF(NLOPT_DOWNLOADED)
+IF(FREEFEM_NLOPT_INSTALLED)
   ADD_LIBRARY(ff-NLopt SHARED ff-NLopt.cpp)
-  ADD_DEPENDENCIES(ff-NLopt nlopt)
-  INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
-ENDIF(NLOPT_DOWNLOADED)
+  #ADD_DEPENDENCIES(ff-NLopt nlopt)
+  INCLUDE_DIRECTORIES(${FREEFEM_NLOPT_INCLUDE_PATHS})
+  MESSAGE(STATUS "my path is ${FREEFEM_NLOPT_INCLUDE_PATHS}") 
+ #INCLUDE_DIRECTORIES(/home/cdoucet/Logiciels/modules_ff++/nlopt/install/include)
+ENDIF(FREEFEM_NLOPT_INSTALLED)
 
 # gsl
 #IF(GSL_FOUND)
@@ -120,9 +108,9 @@ ENDIF(NLOPT_DOWNLOADED)
 #ENDIF(GSL_FOUND)
 
 # ilut.cpp
-IF(GMM3D_FOUND)
+IF(FREEFEM_GMM3D_INSTALLED)
   ADD_LIBRARY(ilut SHARED ilut.cpp)
-ENDIF(GMM3D_FOUND)
+ENDIF(FREEFEM_GMM3D_INSTALLED)
 
 	
 # iohdf5
@@ -133,11 +121,11 @@ ENDIF(GMM3D_FOUND)
 #ENDIF(HDF5_FOUND)
 
 # metis.cpp
-IF(METIS_FOUND)
-  ADD_LIBRARY(metis SHARED metis.cpp)
-  INCLUDE_DIRECTORIES(${METIS_INCLUDES})
-  TARGET_LINK_LIBRARIES(metis libff lglib ${METIS_LIBRARIES})
-ENDIF(METIS_FOUND)
+IF(FREEFEM_METIS_INSTALLED)
+  ADD_LIBRARY(ff-metis SHARED metis.cpp)
+  INCLUDE_DIRECTORIES(${FREEFEM_METIS_INCLUDE_PATHS})
+  TARGET_LINK_LIBRARIES(ff-metis libff lglib ${FREEFEM_METIS_LIBRARIES})
+ENDIF(FREEFEM_METIS_INSTALLED)
 
 # mshmet.cpp
 #ADD_LIBRARY(mshmet mshmet.cpp)
@@ -158,22 +146,22 @@ ENDIF(METIS_FOUND)
 #ENDIF(MPI_FOUND AND MUMPS_FOUND)
 
 # mmg3d.cpp
-IF(MMG3D_DOWNLOADED)
+IF(FREEFEM_MMG3D_INSTALLED)
   ADD_LIBRARY(ff-mmg3d SHARED mmg3d.cpp)
   ADD_DEPENDENCIES(ff-mmg3d mmg3d)
   INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
-ENDIF(MMG3D_DOWNLOADED)
+ENDIF(FREEFEM_MMG3D_INSTALLED)
 
 # mmg3d-v4.0.cpp
 #ADD_LIBRARY(ff-mmg3d-v4.0 SHARED mmg3d-v4.0.cpp)
 #INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
 
 # scotch.cpp
-IF(SCOTCH_FOUND)
-  ADD_LIBRARY(scotch SHARED scotch.cpp)
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDES})
-  TARGET_LINK_LIBRARIES(scotch libff lglib ${SCOTCH_LIBRARIES})
-ENDIF()
+#IF(SCOTCH_FOUND)
+#  ADD_LIBRARY(scotch SHARED scotch.cpp)
+#  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDES})
+#  TARGET_LINK_LIBRARIES(scotch libff lglib ${SCOTCH_LIBRARIES})
+#ENDIF()
 
 #superlu.cpp
 #IF(SUPERLU_FOUND)
@@ -185,24 +173,25 @@ ENDIF()
 
 
 # tetgen.cpp
-IF(TETGEN_FOUND)
+IF(FREEFEM_TETGEN_INSTALLED)
 
   ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
                              ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
                              ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
-  TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${TETGEN_LIBRARIES})
-  INCLUDE_DIRECTORIES(${TETGEN_INCLUDES})
+  TARGET_LINK_LIBRARIES(example_tetgen ${FREEFEM_LIBRARIES}
+                                       ${FREEFEM_TETGEN_LIBRARY_PATHS})
+  INCLUDE_DIRECTORIES(${FREEFEM_TETGEN_INCLUDE_PATHS})
 
-ELSEIF(TETGEN_DOWNLOADED)
+#ELSEIF(TETGEN_DOWNLOADED)
 
-  ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
-                             ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
-                             ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
-  TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${FF_DOWNLOAD_DIR}/tetgen/install/libtet.a)
-  ADD_DEPENDENCIES(example_tetgen tetgen)
-  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/tetgen/src)
+#  ADD_LIBRARY(example_tetgen SHARED tetgen.cpp
+#                             ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
+#                             ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
+#  TARGET_LINK_LIBRARIES(example_tetgen libMesh libff lglib ${FF_DOWNLOAD_DIR}/tetgen/install/libtet.a)
+#  ADD_DEPENDENCIES(example_tetgen tetgen)
+#  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/tetgen/src)
 
-ENDIF(TETGEN_FOUND)
+ENDIF(FREEFEM_TETGEN_INSTALLED)
 
 
 
