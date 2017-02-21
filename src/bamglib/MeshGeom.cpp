@@ -1014,10 +1014,10 @@ void Geometry::AfterRead()
     NbOfCurves = 0;
     Int4  nbgem=0;
     for (int level=0;level < 2 && nbgem != nbe;level++)
+     for(jj=0;jj<2;jj++) //  change the sens of loop to keep interior normal in general..  feb. 2017 
       for (i=0;i<nbe;i++) {
 	GeometricalEdge & ei = edges[i];   
-	for(jj=0;jj<2;jj++) 
-	  if (!ei.Mark() && (level || ei[jj].Required())) { 
+	  if (!ei.Mark() && (level || ei[jj].Required())) {
 	    // warning ei.Mark() can be change in loop for(jj=0;jj<2;jj++) 
 	    int k0=jj,k1;
 	    GeometricalEdge *e = & ei;
