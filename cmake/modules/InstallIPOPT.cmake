@@ -8,3 +8,4 @@ SET(BUILD_COMMAND make)
 SET(INSTALL_COMMAND make install)
 
 SET(INCLUDE_PATHS ${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
+SET(LIBRARIES libipopt.so)

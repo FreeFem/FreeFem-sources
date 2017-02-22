@@ -7,5 +7,5 @@ SET(CONFIGURE_COMMAND ../src/configure --prefix=<INSTALL_DIR>)
 SET(BUILD_COMMAND make)
 SET(INSTALL_COMMAND make install)
 
-
+SET(LIBRARIES libnlopt.a)
 
