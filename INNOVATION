@@ -1,3 +1,4 @@
+ - correct BLASLIBS in case of download openblas in configure.
  - add  3 fonctions 
     projection(a,b,x) projection on segement [a,b] = min(max(a,x),b) if a< b 
    dist(a,b) = sqrt(a*ä+b*b) and dist(a,b,c) = sqrt(a*a+b*b+c*c); 

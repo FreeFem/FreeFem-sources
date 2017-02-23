@@ -1,5 +1,10 @@
-@  changeset:   3995:7902ed51c951
+@  changeset:   3996:18cc604db33d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 21 16:21:09 2017 +0100
+|  summary:     correct problem of lose normal sens after adaptmesh
+|
+o  changeset:   3995:7902ed51c951
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Feb 20 17:29:10 2017 +0100
 |  summary:     add comment

@@ -9,7 +9,7 @@ $m8ver=0;$m8file="";$m8mver="";
 $m9ver=0;$m9file="";$m9mver="";
 $m10ver=0;$m10file="";$m10mver="";
 $m11ver=0;$m11file="";$m11mver="";
-$m12er=0;$m12file="";$m12mver="";
+$m12ver=0;$m12file="";$m12mver="";
 $sver=0;$sfile="";$ssver="";
 $lstfiles="";
 $adown = array();
