@@ -1063,18 +1063,47 @@ void Geometry::AfterRead()
     for(int i=0;i<NbOfCurves ;i++)
      {
        GeometricalEdge * be=curves[i].be, *eqbe=be->link;
-       //GeometricalEdge * ee=curves[i].ee, *eqee=be->link;
+       GeometricalEdge * ee=curves[i].ee, *eqee=ee->link;
        curves[i].master=true;
        if(be->Equi() || be->ReverseEqui() ) 
         {
+            
           assert(eqbe);
           int nc = eqbe->CurveNumber;
+            GeometricalEdge * bee=curves[nc].be;
+            GeometricalEdge * eee=curves[nc].ee;
+            
           assert(i!=nc);
           curves[i].next=curves[nc].next;
           curves[i].master=false;
           curves[nc].next=curves+i;
-          if(be->ReverseEqui())
-           curves[i].Reverse();           
+          int sens =1;
+          if( eqbe != bee )
+          {
+              assert(eqee == bee);// eq end == begin
+              assert(eqbe == eee);// eq beg == end
+              assert(eqbe == eee);
+              if(be != ee)
+                sens = -1;
+            
+          }
+          else {
+              if( (be==ee) && (curves[i].kb != curves[nc].kb)) sens = -1;
+          }
+            
+           bool reverse =be->ReverseEqui();
+            if( sens<0) reverse = !reverse;
+          if(reverse)
+           curves[i].Reverse();
+            if(verbosity>9)
+            {
+                cout << " --  curve equi "<< reverse <<endl;
+                cout << "    curve  "<< i << ": "<< Number(be) << " <=> " << Number(eqbe) << " " << be->Equi() << be->ReverseEqui()
+                     <<" -->  "<< Number(ee) << " <=>" << Number(eqee) << " " << ee->Equi() << ee->ReverseEqui() <<endl;
+                cout << "    curve eq: "<< nc << ": "<< Number(bee)  << " " << bee->Equi() << bee->ReverseEqui()
+                <<" -->  "<< Number(eee)  << " !" << eee->Equi() << eee->ReverseEqui() <<endl;
+            }
+            
         }
      }
     	 

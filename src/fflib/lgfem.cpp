@@ -1095,7 +1095,7 @@ bool BuildPeriodic(
                  double x1=GetAny<double>((*periodic[k+kk1])(stack));
 		 if(verbosity>5)
 			cout << "lab1:  e[" << pke1[i1] << "]  v0:   " <<  e[0].x << " " << e[0].y << "  s = " << x0
-			<< "\t v1 " <<  e[0].x << " " << e[0].y << "  s = " << x1 << endl;
+			<< "\t v1 " <<  e[1].x << " " << e[1].y << "  s = " << x1 << endl;
 		    xmn=Min(x1,x0,xmn);
                  xmx=Max(x1,x0,xmx); 
                  hmn=Min(hmn,Abs(x1-x0));
@@ -1150,9 +1150,9 @@ bool BuildPeriodic(
                  double xx0=GetAny<double>((*periodic[k+kk2])(stack));
                  mp->set(e[1].x,e[1].y);
                  double xx1=GetAny<double>((*periodic[k+kk2])(stack));
-		 if(verbosity>5 && !(verbosity >50))
+		 if(verbosity>5 )
 		      cout << "lab2:  e[" << pke2[i2] << "]  v0:   " <<  e[0].x << " " << e[0].y << "  s = " << xx0
-		      << "\t v1 " <<  e[0].x << " " << e[0].y << "  s = " << xx1 << endl;
+		      << "\t v1 " <<  e[1].x << " " << e[1].y << "  s = " << xx1 << endl;
 		    
                  int i0= int((xx0-x0)*coef);
                  int i1= int((xx1-x0)*coef);

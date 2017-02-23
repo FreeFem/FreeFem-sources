@@ -1,5 +1,15 @@
-@  changeset:   4001:b10f9595a202
+@  changeset:   4003:6b2d22590e5c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 23 09:39:12 2017 +0100
+|  summary:     merge INNOVATION
+|
+o  changeset:   4002:b0f13c82d00f
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 23 09:38:12 2017 +0100
+|  summary:     correct INNOVATION
+|
+o  changeset:   4001:b10f9595a202
 |  parent:      3996:18cc604db33d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 23 09:34:14 2017 +0100
