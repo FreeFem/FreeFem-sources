@@ -140,9 +140,16 @@ all-local::@COMPILE_OPENBLAS@
 pkgcompile::@COMPILE_OPENBLAS@
 generic:
 
-openblas:install.done
+openblas:install.done ../lib/WHERE.blas
 
 # The library may sometimes have a complex name with version number, just copy it into a standard location
+
+../lib/WHERE.blas:install.done
+	echo blas  LD -L@DIR@/lib  -lopenblas $(FLIBS)> $@
+	echo blas INCLUDE -I@DIR@/include  >> $@
+	echo blaslapack   LD -L@DIR@/lib  -lopenblas $(FLIBS) > $@
+	echo blaslapack  INCLUDE -I@DIR@/include  >> $@
+
 
 if FFCS_WINDOWS
 
@@ -152,12 +159,12 @@ links.done:openblas.done
 	touch $@
 install.done:links.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS; make PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARE=1 DDYNAMIC_ARCH=1 PREFIX=../.. install	
 	touch $@
 else
 install.done:openblas.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS; make PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARE=1 PREFIX=../.. install	
 	touch $@
 endif
 
@@ -170,7 +177,7 @@ openblas.done:openpatches.done
 #
 
 	test  -d ../lib ||  mkdir  ../lib 
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 libs netlib
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARE=1  "FLIBS=$(FLIBS)" libs netlib 
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
