@@ -1,20 +1,51 @@
-@  changeset:   3996:18cc604db33d
+@  changeset:   4001:b10f9595a202
 |  tag:         tip
+|  parent:      3996:18cc604db33d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Feb 21 16:21:09 2017 +0100
-|  summary:     correct problem of lose normal sens after adaptmesh
+|  date:        Thu Feb 23 09:34:14 2017 +0100
+|  summary:     passe to version 3.51-1 correct error in BLASLIBS in configure in case of download openblas
 |
-o  changeset:   3995:7902ed51c951
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Feb 20 17:29:10 2017 +0100
-|  summary:     add comment
-|
-o  changeset:   3994:4e35da5178fe
-|  parent:      3984:0643baa6ff5a
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Feb 20 17:27:11 2017 +0100
-|  summary:     add 3 new small usefull function projection(a,b,x) , dist(a,b), dist(a,c,b)
-|
+| o  changeset:   4000:14851b9ee0fc
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Feb 22 19:11:57 2017 +0100
+| |  summary:     Refactoring
+| |
+| o  changeset:   3999:d0f70b8917f1
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Feb 22 17:41:23 2017 +0100
+| |  summary:     Add -p to mkdir for tetgen installation
+| |
+| o  changeset:   3998:a65d52f5f62d
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Feb 22 17:20:42 2017 +0100
+| |  summary:     Simplify package management with imported targets
+| |
+| o  changeset:   3997:8ddc06e454f2
+| |  branch:      cmake
+| |  parent:      3993:3c1988503697
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 21 17:48:34 2017 +0100
+| |  summary:     Unified management of system-based and download-based packages
+| |
+o |  changeset:   3996:18cc604db33d
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Feb 21 16:21:09 2017 +0100
+| |  summary:     correct problem of lose normal sens after adaptmesh
+| |
+o |  changeset:   3995:7902ed51c951
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Feb 20 17:29:10 2017 +0100
+| |  summary:     add comment
+| |
+o |  changeset:   3994:4e35da5178fe
+| |  parent:      3984:0643baa6ff5a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Feb 20 17:27:11 2017 +0100
+| |  summary:     add 3 new small usefull function projection(a,b,x) , dist(a,b), dist(a,c,b)
+| |
 | o  changeset:   3993:3c1988503697
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
