@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.51-2,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.51-3,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1343,7 +1343,7 @@ AC_SUBST(BLASINC,$ff_blas_inc)
 
 #looking for cblas.h  FH
 
-if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes ;
+if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes -a -z "$ff_download_blas" ;
 then
     AC_CHECK_HEADERS(cblas.h,
 	ff_cblas_h=yes,
