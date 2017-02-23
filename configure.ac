@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.51-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.51-2,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1297,7 +1297,7 @@ then
 	# LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which will fail. But libopenblas.a is placed in
 	# the standard directory download/lib so the -L option is not required anymore.
 
-	ff_blas_libs="-lopenblas -lgfortran -lquadmath $ff_pthread"
+	ff_blas_libs="-L${curdir}/download/blas -lopenblas -lgfortran -lquadmath $ff_pthread"
 	ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
 
         # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
