@@ -1,5 +1,10 @@
-@  changeset:   4004:b90f25b9e40d
+@  changeset:   4005:08197237842d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 23 16:15:28 2017 +0100
+|  summary:     correct param of atna2 in the doc.
+|
+o  changeset:   4004:b90f25b9e40d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 23 15:48:59 2017 +0100
 |  summary:     coorect configure

@@ -152,10 +152,12 @@ links.done:openblas.done
 	touch $@
 install.done:links.done
 	cp OpenBLAS/libopenblas.a ../lib
+	cd OpenBLAS; make PREFIX=../.. install	
 	touch $@
 else
 install.done:openblas.done
 	cp OpenBLAS/libopenblas.a ../lib
+	cd OpenBLAS; make PREFIX=../.. install	
 	touch $@
 endif
 
