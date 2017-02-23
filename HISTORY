@@ -1,5 +1,10 @@
-@  changeset:   4003:6b2d22590e5c
+@  changeset:   4004:b90f25b9e40d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 23 15:48:59 2017 +0100
+|  summary:     coorect configure
+|
+o  changeset:   4003:6b2d22590e5c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 23 09:39:12 2017 +0100
 |  summary:     merge INNOVATION
