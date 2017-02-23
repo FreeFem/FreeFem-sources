@@ -19,15 +19,16 @@ IF(WITH_PETSC)
 ENDIF(WITH_PETSC)
 
 
-LIST(APPEND MODULE_LIST FFTW
-                        GMM
-                        IPOPT
+LIST(APPEND MODULE_LIST #FFTW
+                        #GMM
+                        #IPOPT
                         METIS
                         #MUMPS
-                        NLOPT
+                        #NLOPT
                         #SCOTCH
                         SUPERLU
-                        TETGEN)
+                        #TETGEN
+)
 
 
 FOREACH(MODULE ${MODULE_LIST})
