@@ -159,12 +159,12 @@ links.done:openblas.done
 	touch $@
 install.done:links.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARE=1 DDYNAMIC_ARCH=1 PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARED=1 DDYNAMIC_ARCH=1 PREFIX=../.. install	
 	touch $@
 else
 install.done:openblas.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARE=1 PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARED=1 PREFIX=../.. install	
 	touch $@
 endif
 
@@ -177,7 +177,7 @@ openblas.done:openpatches.done
 #
 
 	test  -d ../lib ||  mkdir  ../lib 
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARE=1  "FLIBS=$(FLIBS)" libs netlib 
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=1  "FLIBS=$(FLIBS)" libs netlib 
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
