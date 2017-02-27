@@ -1,5 +1,10 @@
-@  changeset:   4012:d6d5395c03b9
+@  changeset:   4013:12749584a75b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 27 16:08:02 2017 +0100
+|  summary:     change the dir of install mpi.h for mumps_seq and libseq to be
+|
+o  changeset:   4012:d6d5395c03b9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Feb 27 09:48:04 2017 +0100
 |  summary:     add ZScalce in ffglut
