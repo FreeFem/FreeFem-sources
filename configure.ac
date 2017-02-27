@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.51-3,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.51-4,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -45,7 +45,8 @@ inc_usr_include=""
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 dnl search of associad software
 m4_define([AC_FF_ADDWHERELIB],
-  [	if test -z "$ff_where_lib_conf_$1" ; then
+  [	
+    if test -z "$ff_where_lib_conf_$1"  ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    test -n "$3" && echo "$1 INCLUDE $3 "  >>$ff_where_lib_conf
             ff_where_lib_conf_$1=1
@@ -57,7 +58,7 @@ m4_define([AC_FF_ADDWHERELIB],
         fi
 ]) dnl
 m4_define([AC_FF_WHERELIB],
-    [  	if test -z "$ff_where_lib_conf_$1" ; then
+    [  	if test -z "$ff_where_lib_conf_$1" -a "$enable_download_$1"  != "yes" ; then
         AC_MSG_CHECKING(check $1)
 	ff_save_libs=$LIBS
 	LIBS="$LIBS $2 $4"
@@ -94,9 +95,11 @@ m4_define([AC_FF_PETSC_WHERELIB],
 # m4 macro parameters: $1 = tool name, $2 = dynamic library name, $3 = download directory name if different from $1
 
 m4_define([TOOL_PARAMETERS],
-    [AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
+    [
+	AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
     AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
-
+	AC_ARG_ENABLE(download-$1,AC_HELP_STRING([--enable-download_$1],[force the download of $1]))
+ 
     if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
     then
 
@@ -106,7 +109,7 @@ m4_define([TOOL_PARAMETERS],
         AC_SUBST([TOOL_COMPILE_$1],"")
 	enable_$1_download=no
     fi
-])
+   ])
 
 m4_define([TOOL_DISABLE],
     [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))

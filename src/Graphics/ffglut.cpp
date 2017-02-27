@@ -1159,13 +1159,16 @@ void OneWindow::set(ThePlot *p)
     if(p)
       {
 	plotdim=p->plotdim;
+        rapz0 = p->ZScale;
       }
     if(!init)
     {
-    rapz0 =-1; // to recompute the defalut rapz
+      rapz0 =-1;
+      if(p) rapz0 = p->ZScale;
+    // to recompute the defalut rapz
     //    p->win=this;
     //    if(first)
-    DefaultView(2) ;
+     DefaultView(2) ;
     }
     
 }
@@ -1202,9 +1205,12 @@ void OneWindow::DefaultView(int state)
    {
       if(state==0 && init) return;
   }
-  else /*if(state==2)*/ rapz0=-1;
-    
-  if(theplot)
+  else /*if(state==2)*/ {
+      if( theplot && theplot->ZScale>0) rapz0=theplot->ZScale;
+      else rapz0=-1;
+  }
+
+    if(theplot)
     {
       init =1;
       plotdim=theplot->plotdim;
@@ -1215,6 +1221,7 @@ void OneWindow::DefaultView(int state)
       zmin = theplot->fmin;
       theta=theplot->theta;
       phi=theplot->phi;
+      if(theplot->ZScale>0) rapz0=theplot->ZScale;
       if(theplot->datadim==3) rapz0=1;
       else   if(rapz0<=0)
 	{ //  ( zmax-zmin )*rapz0 =  0.3 dxyy
@@ -1767,6 +1774,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
   psfile=0;
   cm=0;
   grey=0;
+  ZScale=-1; // auto
   ArrowSize=-1;
   if(old) {
     grey=old->grey;
@@ -1847,8 +1855,10 @@ case 20+index: {type dummy; fin >= dummy;} break;
 	  case 18: fin >= add; break;
 	  case 19: fin >= keepPV; break;
 	  case 20: fin >= echelle;break;
+          case 21: fin >= ZScale;break;
+                  
                   // unsed parameter ...
-                  READ_VTK_PARAM(1,double); // ZScale
+                  //READ_VTK_PARAM(1,double); // ZScale
                   READ_VTK_PARAM(2,bool); // WhiteBackground
                   READ_VTK_PARAM(3,bool); // OpaqueBorders
                   READ_VTK_PARAM(4,bool); // BorderAsMesh

@@ -227,7 +227,8 @@ public:
   R3 Pvue,Peyes;
   R alpha; 
   R coefr; 
-  R z0; //  z pour les objets 2d. 
+  R z0; //  z pour les objets 2d.
+  R ZScale; 
   //  for 3d plot jan 2009
   int  plotdim;
   R theta, phi, dcoef, focal;
@@ -303,7 +304,7 @@ public:
   
   int  plotdim;
   R theta, phi, coef_dist, focal, dtheta;
-  R  rapz,rapz0;     
+  R  rapz,rapz0;
   R3 Bmin3,Bmax3,Pvue3;
   R3 cam;
   bool withlight;
