@@ -43,14 +43,14 @@ VERSION=5.0.2
 ../lib/WHERE.mumpsseq: install.done
 	echo mumps_seq LD -L@DIR@/lib -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ	\
 		-lpordFREEFEM-SEQ $(LIBSPTHREAD)  > ../lib/WHERE.mumpsseq
-	echo mumps-seq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
+	echo mumps-seq INCLUDE -I@DIR@/include/mumps_seq >> ../lib/WHERE.mumpsseq
 	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
-	echo libseq INCLUDE -I@DIR@/include/libseq >> ../lib/WHERE.mumpsseq
+	echo libseq INCLUDE -I@DIR@/include -I@DIR@/include/mumps_seq >> ../lib/WHERE.mumpsseq
 
 install.done: $(SRCDIR)/FAIT
-	-mkdir -p ../include/libseq
-	cp $(SRCDIR)/include/*.h ../include/libseq
-	cp $(SRCDIR)/libseq/*.h  ../include/libseq
+	-mkdir -p ../include/mumps_seq
+	cp $(SRCDIR)/include/*.h ../include/mumps_seq
+	cp $(SRCDIR)/libseq/*.h  ../include/mumps_seq
 	-mkdir -p ../lib
 	cp $(SRCDIR)/lib/*.a ../lib/
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/

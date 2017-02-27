@@ -17,9 +17,16 @@ VERSION=3.12.4
 # 3.10.2
 URL=http://www.coin-or.org/download/source/Ipopt
 FHSL=#$(DIRPKG)/ddeps.f $(DIRPKG)/ma27ad.f  $(DIRPKG)/mc19d.f 
+WHERE_MUMPSSEQ=$(wildcard ../lib/WHERE.mumpsseq)
 
+ifeq ($(WHERE_MUMPSSEQ),)
+LIBMUMPS=-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq 
+INCMUMPS=/usr/include/mumps_seq
+else
 LIBMUMPS=-L$(DOWNLOADFF)/lib  -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ -lpordFREEFEM-SEQ -lmpiseqFREEFEM-SEQ
-INCMUMPS=$(DOWNLOADFF)/include/libseq 
+INCMUMPS=$(DOWNLOADFF)/include/mumps_seq
+endif
+
 #/Ipopt-3.10.2.tgz
 Ipopt: $(SRCDIR)/FAIRE
 #  --enable-static  --disable-shared  
