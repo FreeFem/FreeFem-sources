@@ -1,5 +1,10 @@
-@  changeset:   4011:5dc98d125e9f
+@  changeset:   4012:d6d5395c03b9
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 27 09:48:04 2017 +0100
+|  summary:     add ZScalce in ffglut
+|
+o  changeset:   4011:5dc98d125e9f
 |  parent:      4009:e7336e3eb99a
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 24 20:57:07 2017 +0100
