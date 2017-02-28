@@ -26,6 +26,7 @@ LIST(APPEND MODULE_LIST FFTW
                         #MUMPS
                         #NLOPT
                         #SCOTCH
+                        SUITESPARSE
                         SUPERLU
                         #TETGEN
 )

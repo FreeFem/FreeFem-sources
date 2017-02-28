@@ -1,4 +1,5 @@
   SET(LIBFF_SRC ${FEMLIB_SRC} ${FFLIB_SRC})
+  
   LIST(REMOVE_ITEM LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp
                            ${CMAKE_SOURCE_DIR}/src/femlib/ConjuguedGradrientNL.cpp
                            ${CMAKE_SOURCE_DIR}/src/femlib/FESpace-v0.cpp
@@ -15,6 +16,7 @@
                       ${CMAKE_SOURCE_DIR}/src/femlib/libmesh5.c
                       ${CMAKE_SOURCE_DIR}/src/Graphics/DefColor.cpp)
 
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D HAVE_SUITESPARSE_UMFPACK")
   ADD_LIBRARY(libff ${LIBFF_SRC})
 
   ADD_LIBRARY(strversionnumber SHARED strversionnumber.cpp)
@@ -22,7 +24,8 @@
 
   TARGET_LINK_LIBRARIES(libff bamglib 
                             dl 
-                            strversionnumber)
+                            strversionnumber
+                            FREEFEM::SUITESPARSE)
 
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib 
                     ${CMAKE_SOURCE_DIR}/src/fflib/ 
