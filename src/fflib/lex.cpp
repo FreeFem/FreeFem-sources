@@ -109,7 +109,12 @@ bool mylex::InMotClef(const char *b,aType &t,int &r)const{
 // <<mylex_Add_Key_int_aType>>
 void  mylex::Add(Key k,int r,aType t){ 
   iterator ii= MotClef.find(k);
-  ffassert(ii==MotClef.end());
+  if(ii!=MotClef.end())
+  {
+    cout << "erreur add motclef " <<  k<< " " << r << " " << *t << endl; 
+    ffassert(ii==MotClef.end());
+  }
+  //ffassert(ii==MotClef.end());
   MotClef.insert(pair<const Key,Value>(k,Value(r,t))); }
 
 // <<dump>>
