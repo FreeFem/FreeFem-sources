@@ -25,9 +25,7 @@ extern "C" {
 #else
 #ifdef HAVE_SUITESPARSE_UMFPACK_H
 #include <suitesparse/umfpack.h>
-#warning "UMFPACK from SuiteSparse is used!"
 #else
-  #warning "UMFPACK from download is used!"
   // Defaults to a local version of the UMFPACK headers
 #include "../../download/include/umfpack.h"
 
