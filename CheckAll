@@ -10,8 +10,7 @@ for i in examples++*/.; do
     echo "dossier $i"
     cd $i;
      echo $ff;
-     ff=/home/cdoucet/Depots/ff++/cmake_build/src/FreeFem++;
-     ../CheckAllEdp "$ff -nw" *.edp | tee -a ../CheckAll-out ;
+     ../CheckAllEdp "$1 -nw" *.edp | tee -a ../CheckAll-out ;
     cd ..;
 done
 
