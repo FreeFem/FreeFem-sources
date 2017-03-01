@@ -1,5 +1,10 @@
-@  changeset:   4013:12749584a75b
+@  changeset:   4014:a624f2f7f4e3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Feb 27 16:31:10 2017 +0100
+|  summary:     update innovatio
+|
+o  changeset:   4013:12749584a75b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Feb 27 16:08:02 2017 +0100
 |  summary:     change the dir of install mpi.h for mumps_seq and libseq to be
