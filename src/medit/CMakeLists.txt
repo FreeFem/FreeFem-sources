@@ -1,4 +1,6 @@
-FILE(WRITE ${CMAKE_SOURCE_DIR}/src/medit/compil.date "\#define COMPIL  \" jeudi 4 août 2016, 13:47:25 (UTC+0200) (with ff++ 3.47)\"")
+EXECUTE_PROCESS(COMMAND "date" OUTPUT_VARIABLE FREEFEM_DATE)
+
+FILE(WRITE ${CMAKE_SOURCE_DIR}/src/medit/compil.date "\#define COMPIL  \" ${FREEFEM_DATE} (with ff++ ${FREEFEM_VERSION})\"")
 
 FILE(GLOB_RECURSE CFILES *.c)
 ADD_EXECUTABLE(ffmedit ${CFILES})
