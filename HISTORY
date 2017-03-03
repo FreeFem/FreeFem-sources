@@ -1,10 +1,47 @@
-@  changeset:   4023:3897fc16c62f
+@  changeset:   4029:7495993006e6
 |  tag:         tip
-|  parent:      4014:a624f2f7f4e3
+|  parent:      4023:3897fc16c62f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Mar 01 18:12:40 2017 +0100
-|  summary:     add missing file
+|  date:        Fri Mar 03 09:18:57 2017 +0100
+|  summary:     update doc for coloring syntaxe of emacs
 |
+| o  changeset:   4028:c39d9e5d546c
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 02 17:17:29 2017 +0100
+| |  summary:     Handle metis package with FREEFEM::METIS target
+| |
+| o  changeset:   4027:22a77a2e7af5
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 02 16:59:12 2017 +0100
+| |  summary:     Downloaded packages are now stored in download/pkgs and installations are performed in download with creation of download/bin, download/include, download/lib, etc.
+| |
+| o  changeset:   4026:368c29d775d9
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 02 16:43:19 2017 +0100
+| |  summary:     Remove trailing whitespace in the date returned for medit (bug fixing)
+| |
+| o  changeset:   4025:8d6e8f8decd4
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 02 15:56:58 2017 +0100
+| |  summary:     Search for FLEX as a required package
+| |
+| o  changeset:   4024:110bb841f82c
+| |  branch:      cmake
+| |  parent:      4022:e04dbf9cb844
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 02 14:46:45 2017 +0100
+| |  summary:     Get the current date to generate compil.date for medit
+| |
+o |  changeset:   4023:3897fc16c62f
+| |  parent:      4014:a624f2f7f4e3
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 01 18:12:40 2017 +0100
+| |  summary:     add missing file
+| |
 | o  changeset:   4022:e04dbf9cb844
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
