@@ -67,7 +67,7 @@ hg  clone  http://www.freefem.org/ff++/ff++
  <div class="themaBlog">  
 <ul>	 
 <li>for emacs you can download <tt>ff++-mode.el<tt> :
-<A href="https://github.com/rrgalvan/freefem-mode" > here </A> (thanks to Rafa Rodríguez Galván <rafael.rodriguez@uca.es>).
+<A href="https://github.com/rrgalvan/freefem-mode" > here </A> (thanks to Rafa Rodríguez Galván &lt;rafael.rodriguez@uca.es&gt;).
 </li> 
  </ul>
  </div>    
