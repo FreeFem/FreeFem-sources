@@ -32,8 +32,8 @@ an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy w
 <p><TT><font color=black size=+0>
 hg  clone  http://www.freefem.org/ff++/ff++
 </font></tt></p>
-</li> 
-<li>     <? pfile($sfile,"Source code") ?> </li> 
+</li>
+    <? pfile($sfile,"Source code") ?> 
 </div>
 
 <div class="thema"> Download precompile version  </div>
@@ -54,17 +54,26 @@ hg  clone  http://www.freefem.org/ff++/ff++
 <div class="themaBlog">  
 <? download($adown) ?>
 </p>
-</menu>
+
 
 <div class="thema"> All  the  versions of <i>FreeFem++</i></div>
 <div class="themaBlog">  
-
+<ul>
 <li>   <p> are <a href="ftp"> in this place</A>. </li> 
 </ul>
 </div>    
  
+ <div class="thema"> Coloring Syntax <i>FreeFem++</i></div>
+ <div class="themaBlog">  
+<ul>	 
+<li>for emacs you can download <tt>ff++-mode.el<tt> :
+<A href="https://github.com/rrgalvan/freefem-mode" > here </A>.
+</li> 
+ </ul>
+ </div>    
+ 
 <address></address>
-<!-- hhmts start --> Last modified: 30 May 2014 <!-- hhmts end -->
+<!-- hhmts start --> Last modified: 3 March 2017 <!-- hhmts end -->
 </body> </html>
 </body>
 </html>

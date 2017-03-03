@@ -1,25 +1,80 @@
-@  changeset:   4014:a624f2f7f4e3
+@  changeset:   4023:3897fc16c62f
 |  tag:         tip
+|  parent:      4014:a624f2f7f4e3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Feb 27 16:31:10 2017 +0100
-|  summary:     update innovatio
+|  date:        Wed Mar 01 18:12:40 2017 +0100
+|  summary:     add missing file
 |
-o  changeset:   4013:12749584a75b
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Feb 27 16:08:02 2017 +0100
-|  summary:     change the dir of install mpi.h for mumps_seq and libseq to be
-|
-o  changeset:   4012:d6d5395c03b9
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Feb 27 09:48:04 2017 +0100
-|  summary:     add ZScalce in ffglut
-|
-o  changeset:   4011:5dc98d125e9f
-|  parent:      4009:e7336e3eb99a
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Feb 24 20:57:07 2017 +0100
-|  summary:     correct typo compile  openblas
-|
+| o  changeset:   4022:e04dbf9cb844
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 20:04:38 2017 +0100
+| |  summary:     Reactivate medit
+| |
+| o  changeset:   4021:5d7c03bb0a0e
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 17:10:07 2017 +0100
+| |  summary:     Remove spurious debug messages
+| |
+| o  changeset:   4020:7cc27d73f2b1
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 17:06:04 2017 +0100
+| |  summary:     Add -D HAVE_LIBUMFPACK as a compilation flag to activate UMFPACK
+| |
+| o  changeset:   4019:f859a4dadb5d
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 16:27:33 2017 +0100
+| |  summary:     Remove lib prefix for libraries coming from example++-load
+| |
+| o  changeset:   4018:5112fd0541c4
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 15:57:29 2017 +0100
+| |  summary:     Fix a typo in HAVE_SUITESPARSE_UMFPACK_H
+| |
+| o  changeset:   4017:be744d5fa514
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 15:51:40 2017 +0100
+| |  summary:     Automatic detection of dlopen for load.cpp
+| |
+| o  changeset:   4016:52cd66a700f6
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 15:39:15 2017 +0100
+| |  summary:     No more hard copied path in CheckAll
+| |
+| o  changeset:   4015:c7e36cd1b157
+| |  branch:      cmake
+| |  parent:      4010:54a956193a33
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Feb 28 12:54:51 2017 +0100
+| |  summary:     Build fflib with UMFPACK when suitesparse has been found
+| |
+o |  changeset:   4014:a624f2f7f4e3
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Feb 27 16:31:10 2017 +0100
+| |  summary:     update innovatio
+| |
+o |  changeset:   4013:12749584a75b
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Feb 27 16:08:02 2017 +0100
+| |  summary:     change the dir of install mpi.h for mumps_seq and libseq to be
+| |
+o |  changeset:   4012:d6d5395c03b9
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Feb 27 09:48:04 2017 +0100
+| |  summary:     add ZScalce in ffglut
+| |
+o |  changeset:   4011:5dc98d125e9f
+| |  parent:      4009:e7336e3eb99a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Feb 24 20:57:07 2017 +0100
+| |  summary:     correct typo compile  openblas
+| |
 | o  changeset:   4010:54a956193a33
 | |  branch:      cmake
 | |  parent:      4007:e9b977610423
