@@ -73,6 +73,7 @@ void initPETScStructure(HpddmType* ptA, MatriceMorse<PetscScalar>* mA, long& bs,
     MatSetSizes(ptA->_petsc, ptA->_last - ptA->_first, ptA->_last - ptA->_first, ptA->_global, ptA->_global);
     if(size > 1) {
         MatSetType(ptA->_petsc, MATMPIAIJ);
+        MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
     }
     else {
@@ -293,6 +294,7 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         MPI_Comm_size(PETSC_COMM_WORLD, &size);
         if(size > 1) {
             MatSetType(ptA->_petsc, MATMPIAIJ);
+            MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
             MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         }
         else {
