@@ -249,7 +249,7 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
             dims[rank] = ptK->operator[](it->second).M();
             n = ptK->operator[](it->second).N();
         }
-        MPI_Allreduce(MPI_IN_PLACE, dims, size, MPI_INT, MPI_SUM, PETSC_COMM_WORLD);
+        MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, dims, 1, MPI_INT, PETSC_COMM_WORLD);
         if(ptJ)
             size = v.size();
         else
