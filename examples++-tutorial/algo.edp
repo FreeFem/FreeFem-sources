@@ -151,7 +151,7 @@ matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);
 
 func real[int] C(real[int] & u)
 {
-   real[int] w=Amass*u;
+   real[int] w=u;
    u = Alap^-1*w;
    return u; // no return of local array  variable 
 }

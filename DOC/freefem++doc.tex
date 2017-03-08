@@ -10851,13 +10851,13 @@ where $ \alpha=f'(|\nabla u|^2)$.
 
 @varf amass(uh)= @int2d(Th)( uh*vh)  + @on(1,2,3,4,uh=0);
 
-@matrix Amass = alap(Vh,Vh,solver=CG); // \index{matrix}
+@matrix amass = alap(Vh,Vh,solver=CG); // \index{matrix}
 @matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   // \index{Cholesky}\index{factorize=}\index{solver=}
 
 // the preconditionner function
 @func @real[@int] C(@real[@int] & u)
 {
-   @real[@int] w = Amass*u;
+   @real[@int] w = u;
    u = Alap^-1*w;
    @return u; // no return of local array  variable
 }
