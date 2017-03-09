@@ -1,5 +1,10 @@
-@  changeset:   4035:1edcc4fcaa6d
+@  changeset:   4036:9fc180698793
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 09 11:55:51 2017 +0100
+|  summary:     correct findlocalmin  function in soline.cpp
+|
+o  changeset:   4035:1edcc4fcaa6d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Mar 08 18:14:17 2017 +0100
 |  summary:     correct pb un precon of NLGC remove a mass matric Thank to O. Pantz.
