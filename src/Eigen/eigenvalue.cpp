@@ -116,6 +116,8 @@ void ToWhich(Stack stack,char *which,Expression ew) {
         else if( strcmp(which,"LA")==0) ok=1;
         else if( strcmp(which,"SM")==0) ok=1;
         else if( strcmp(which,"SA")==0) ok=1;
+        else if( strcmp(which,"SR")==0) ok=1;
+        else if( strcmp(which,"LR")==0) ok=1;
         else if( strcmp(which,"BE")==0) ok=1;
         ffassert(ok);
     }
@@ -149,6 +151,25 @@ void  DoIdoAction(int ido,char bmat,int mode,KN_<K> &xx,KN_<K> &yy,KN_<K> &zz,KN
     default :
       ffassert(0);
     }
+  else if ((mode==2)&&(bmat=='G')) // shift-invert mode, generalized problem
+  {
+      switch (ido)
+      {
+          case -1: // y <--- OP*x = inv[M]*A*x
+          case  1:
+              if(mode== 1)  // M = Id
+                  yy=OP1*xx;
+              else
+                  B.Solve(yy,work=OP1*xx);
+              break;
+          case 2: //  y <--- M*x. // not use mode = 1
+              yy = B*xx;
+              break;
+          default :
+              ffassert(0);
+      }
+      
+  }
   else if ((mode==1)&&(bmat=='I')) // direct mode, simple problem
     switch (ido)
       {
@@ -511,9 +532,9 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     evaluei=arg<KN<double> *>(8,stack,0);
     rawvector=arg<KNM<double> *>(9,stack,0);
     resid=arg<KN<double> *>(10,stack,0);
-    driver = arg<long>(11,stack,3);
     mymode = arg<long>(17,stack,-1);
-
+    driver = arg<long>(11,stack,mymode==2 ? 3 : 4);
+ 
     char which[3];
     ToWhich(stack,which,nargs[12]);
     
@@ -611,13 +632,14 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     }
     
     KN<K> work(n);
+    int dmode[]={-1,1,3,2,3};
     
     if(sym)
     {
         int ido=0;
         //char bmat= mode == 1 ? 'I' : 'G';
       char bmat = (driver<3)? 'I' : 'G';
-      int  mode = (driver==1)? 1 : 3;
+      int  mode = dmode[driver];
       if( mymode>0 && (mymode != mode)) {
             cerr << " Erreur  mode== " << mymode << " == " << mode << " driver =" << driver << endl;
             ExecError("wrong mod in Arpack sym");}
@@ -741,7 +763,8 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
         int ido=0;
         //char bmat='G';
       char bmat = (driver<3)? 'I' : 'G';
-      int  mode = (driver==1)? 1 : 3;
+      int  mode = dmode[driver];
+
       if( mymode>0 && (mymode != mode)) {
             cerr << " Erreur  nosym  mode== " << mymode << " == " << mode << " driver =" << driver << endl;
             ExecError("wrong mod in Arpack no sym");}
@@ -921,8 +944,8 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     maxit= arg<long>(6,stack,0);
     rawvector=arg<KNM<K> *>(7,stack,0);
     resid=arg<KN<K> *>(8,stack,0);
-    driver = arg<long>(9,stack,4);
     int mymode = arg<long>(15,stack,-1);
+    driver = arg<long>(9,stack,mymode==2 ? 3: 4);
     K * residptr= resid ? (K*) *resid : 0;
     char which[3];
     ToWhich(stack,which,nargs[10]);
@@ -1042,9 +1065,9 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     
     int ido=0;
     //char bmat='G';
+    int dmode[]={-1,1,3,2,3};
       char bmat = (driver<3)? 'I' : 'G';
-      int  mode = (driver==1)? 1 : 3;
-    
+    int  mode = dmode[driver];
     // char which[]="LM";
     int ishift=1; // Auto Shift true by default
     if( mymode>0 && (mymode != mode)) {
