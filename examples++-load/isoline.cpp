@@ -45,6 +45,7 @@ using namespace std;
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <queue>
 //#include "msh3.hpp"
 
 using namespace  Fem2D;
@@ -76,7 +77,7 @@ public:
 };
 basicAC_F0::name_and_type FINDLOCALMIN_P1_Op::name_param[]= {
     {  "eps", &typeid(double)},
-    {  "convex", &typeid(bool)}
+    {  "convex", &typeid(long)}
     
 };
 
@@ -100,12 +101,12 @@ public:
     
 public:
     ISOLINE_P1_Op(const basicAC_F0 &  args,Expression tth, Expression fff,Expression xxx,Expression yyy)
-    : eTh(tth),emat(0),eff(fff),exx(xxx),eyy(yyy),exy(0)
+    : eTh(tth),eff(fff),emat(0),exx(xxx),eyy(yyy),exy(0)
     {
         args.SetNameParam(n_name_param,name_param,nargs);
     }
     ISOLINE_P1_Op(const basicAC_F0 &  args,Expression tth, Expression fff,Expression xxyy)
-    : eTh(tth),emat(0),eff(fff),exx(0),eyy(0),exy(xxyy)
+    : eTh(tth),eff(fff),emat(0),exx(0),eyy(0),exy(xxyy)
     {
         args.SetNameParam(n_name_param,name_param,nargs);
     }
@@ -341,18 +342,23 @@ struct SMesh {
 ::
 AnyType FINDLOCALMIN_P1_Op::operator()(Stack stack)  const
 {
-    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+    typedef std::pair<double,int> KEY;
+    typedef std::priority_queue< KEY,std::vector<KEY>, std::greater<KEY> >  myPQ;
+    typedef std::priority_queue< KEY >  myPQL;
+    
+  //  MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
     const Mesh * pTh= GetAny<const Mesh *>((*eTh)(stack));
     ffassert(pTh);
     const Mesh & Th = *pTh;
     int ddd1 = verbosity> 9;
+    int ddd0 = verbosity>2;
     int nbv=Th.nv; // nombre de sommet
     int nbt=Th.nt; // nombre de triangles
-    int nbe=Th.neb; // nombre d'aretes fontiere
-    bool convex = arg(1,stack,false);
+  //  int nbe=Th.neb; // nombre d'aretes fontiere
+    int convex = arg(1,stack,0L);
     double eps= arg(0,stack,0.);
     if( verbosity>2) cout <<  "    -- findlocalmin: convex = " << convex << " eps= " << eps << endl;
-    long nbc;
+    
     KN<long> rs(nbv);
     KN<double> *pu = GetAny<KN<double>*>((*eu)(stack));
     KN<double> *pr = GetAny<KN<double>*>((*er)(stack));
@@ -371,117 +377,99 @@ AnyType FINDLOCALMIN_P1_Op::operator()(Stack stack)  const
         next[p]= head[j];
         head[j]= p;
     }
-    
+    KN<int> nbrv(nbv);//  nb traingle around  vertices
+    nbrv=0;
     for( int k=0; k< nbt; ++k)
     {
         const Mesh::Element &K= Th[k];
         for(int i=0; i<3; ++i)
         {
+            ++nbrv[Th(K[i])];
             int i0= Th(K[(i+1)%3]);
             int i1= Th(K[(i+2)%3]);
             if( U[i0] > U[i1]) rs[i0]=0;
-            if( U[i1] > U[i0]) rs[i1]=0;
+            else if( U[i1] > U[i0]) rs[i1]=0;
         }
     }
-    if(ddd1) cout  << "rq nb min =  " << rs.sum() << endl;
+    if(ddd0) cout  << "rq nb min =  " << rs.sum() << endl;
+    myPQ lvm;
+    for(int i=0; i<nbv; ++i)
+    {
+        if(rs[i]==1)
+            lvm.push(make_pair(U[i],i));
+    }
+            
     // analyse des minimals locaux
-    int nml=0;
-    KN<long> ct(nbt);ct=0L;
     KN<long> cv(nbv);cv=0L;
-    KN<long> st(nbt),sv(nbt);
     long col=0;
     int nmin=0;
     KN<long> sm(nbv);
     R2 Gl[3];
-    for(int i=0; i<nbv; ++i)
+    long rkm=0;// Numero de region
+    while (!lvm.empty())
     {
-        col+=2; // change the color
-        int col1= col+1;
-        long kt=0,kv=0;
-        if(rs[i]==1) {//  possiblement in minima
-            double ui=U[i]; // val min
+        KEY tlvm=lvm.top();
+        lvm.pop();
+        double Ui=tlvm.first;
+        int i = tlvm.second;
+        
+        if(rs[i]==1&& nbrv[i]>0)
+         {
+             ++col; // change the color
+            myPQ pqv;
+            pqv.push(make_pair(Ui,i));
             
-            if(ddd1) cout << " ** " << i<< " " << "ui =" << ui << endl;
-            cv[i]=col1;
-
-            int tmin = true;
-
-            for(int p=head[i]; p >=0; p=next[p]) // le triangle
+            if(ddd1) cout << " ** " << i<< " " << "ui =" << Ui << endl;
+            double Uvp=Ui;
+            while (!pqv.empty())
             {
-              int k=p/3,ik=p%3;
-              for(int v=0; v<3; ++v)
-                if(v != ik){
-                    int j= Th(k,v);
-                    if(  U[i] > U[j]) tmin = false;
-                }
-                ffassert(st[k] < col);
-                st[kt++] = k;
-                ct[k]= col1;
+                KEY tp=pqv.top();
+                pqv.pop();
+                double Uv=tp.first;
+                int iv = tp.second;
+                //if(cv[iv]==col) continue;
                 
-            }
-            if(tmin)
-            {
-            sv[kv++]=i;
-            for(int q=0; q < kt; ++q)
-            {
-                int k = st[q];
-                R[k]=i;
-                const Mesh::Element &K= Th[k];
-                R2 gUk = K.H(0)*U[Th(k,0)]+K.H(1)*U[Th(k,1)]+K.H(2)*U[Th(k,2)];
-                
-                for(int e=0; e<3; ++e)
+               // cv[iv]=col;
+                if(ddd1) cout << "\t\t"<< iv << " " <<Uv << endl;
+                assert(Uv>=Uvp);// verif piority queue
+                Uvp = Uv;
+                for(int p=head[iv]; p >=0; p=next[p]) // lpour les triangle autour de iv
                 {
-                    rs[Th(k,e)]= 2;// deja fait ..
-                    int ee=e, kk=Th.ElementAdj(k,ee);
-                    if(ddd1) cout << "   tyr add " << kk <<" " <<  ee << endl;
-
-                    if( kk >= 0 && ct[kk] < col && R[kk]<0) // new element
+                    int k=p/3,ik=p%3, i1=(ik+1)%3,i2=(ik+2)%3;
+                    if(R[k]<0) // nouveau triangle
                     {
-                        //ct[kk]= col;
-                        const Mesh::Element &KK= Th[kk];
-                        int i0=Th(kk,0),i1=Th(kk,1),i2=Th(kk,2);
-                        Gl[0]=KK.H(0);
-                        Gl[1]=KK.H(1);
-                        Gl[2]=KK.H(2);
-                        R2 gUkk = Gl[0]*U[i0]+Gl[1]*U[i1]+Gl[2]*U[i2];
-                        double sensk = (Gl[ee],gUk), senskk = (Gl[ee],gUkk);
-                        if(ddd1) cout << "     add " << kk <<" " <<  senskk <<" / " << sensk << endl;
-                        double ccc =eps;
-                        if(convex) ccc += sensk;
-                        if( senskk > ccc )
+                        int j1= Th(k,i1);
+                        int j2= Th(k,i2);
+                        if(Uv <= U[j1] && Uv <= U[j2] )
                         {
-                            st[kt++] = kk;
-                            ct[kk]= col1;
-                            R[kk]=i;
-                           
+                            R[k]= rkm;
+                            --nbrv[iv];
+                            --nbrv[j1];
+                            --nbrv[j2];
+
+                            if(ddd1) cout << "\t\t\t Add "<< k  << " " << j1 << " " << U[j1] << " / " <<  j2 << " " << U[j2] <<endl;
+                            
+                            if(nbrv[j1]>0) pqv.push(make_pair(U[j1],j1));
+                            if(nbrv[j2]>0) pqv.push(make_pair(U[j2],j2));
+                            
                         }
                     }
                 }
+                if(convex>1) break;
             }
-            }
+            sm[rkm++] = i;
         }
-        if(ddd1) cout << "  ******************* " << i<<" :"  << "kt = " << kt ;
-        if(kt>0)
-        {
-            sm[nmin++]=i;
-            for(int j=0; j<kt; ++j)
-            {
-                int k= st[j];
-                if(ddd1) cout << " " << k ;
-            }
-        }
-        cout << endl;
     }
     if(ddd1)cout << " R = " << R << endl;
     if(verbosity>2)  cout << "    -- FindlocalMin nb min =" << nmin << endl;
-    sm.resize(nmin);
+    sm.resize(rkm);
     KN<long> *ppr = new KN<long>(sm);
     return  Add2StackOfPtr2Free(stack,ppr);
 }
 
 AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
 {
-    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
+   MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
     KNM<double> * pxy=0;
     KN<double> * pxx=0;
     KN<double> * pyy=0;
@@ -498,10 +486,10 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
     SMesh Th(pTh);
     int nbv=Th.nv; // nombre de sommet
     int nbt=Th.nt; // nombre de triangles
-    int nbe=Th.neb; // nombre d'aretes fontiere
+ //   int nbe=Th.neb; // nombre d'aretes fontiere
     long nbc;
     // value of isoline
-    int ka=0;
+  //  int ka=0;
     double isovalue = arg(0,stack,0.);
     long close      = arg(1,stack,1L);
     double smoothing   = arg(2,stack,0.);
@@ -537,7 +525,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         close=-close;
     }
     
-    
+    *mp = mps; // restore the stat of local variable ...
     
     double tffmax=tff.max(), tffmin=tff.min();
     if(verbosity)
@@ -545,7 +533,7 @@ AnyType ISOLINE_P1_Op::operator()(Stack stack)  const
         <<      "    bound  isovalue :" << tffmin << " " << tffmax << endl;
     double eps = (tffmax-tffmin)*epsr;
     if( (tffmax <0.) || (tffmin > 0.)) return 0L;
-    if(epsr>0) eps = epsr;
+    if(epsr<0) eps = -epsr;
     ostream *fff=0;
     if(debug>9) fff = new ofstream("g-iso");
     for (int k=0;k<Th.nt;++k)

@@ -1,20 +1,43 @@
-@  changeset:   4031:1f69edc3a8ea
+@  changeset:   4035:1edcc4fcaa6d
 |  tag:         tip
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Mar 03 09:27:06 2017 +0100
-|  summary:     coorect typo
+|  date:        Wed Mar 08 18:14:17 2017 +0100
+|  summary:     correct pb un precon of NLGC remove a mass matric Thank to O. Pantz.
 |
-o  changeset:   4030:abd338221d21
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Mar 03 09:22:20 2017 +0100
-|  summary:     correct web/download.php
+o  changeset:   4034:16b7cf40dc2b
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Tue Mar 07 10:52:15 2017 +0100
+|  summary:     Less communication during matrix assembly.
 |
-o  changeset:   4029:7495993006e6
-|  parent:      4023:3897fc16c62f
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Mar 03 09:18:57 2017 +0100
-|  summary:     update doc for coloring syntaxe of emacs
+o  changeset:   4033:ee714a338f27
+|  parent:      4031:1f69edc3a8ea
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Mon Mar 06 19:20:17 2017 +0100
+|  summary:     Slight improvement for matrix assembly.
 |
+| o  changeset:   4032:38ec603a4f5f
+| |  branch:      cmake
+| |  parent:      4028:c39d9e5d546c
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Mar 03 18:39:32 2017 +0100
+| |  summary:     Add missing FindDLOPEN file
+| |
+o |  changeset:   4031:1f69edc3a8ea
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Mar 03 09:27:06 2017 +0100
+| |  summary:     coorect typo
+| |
+o |  changeset:   4030:abd338221d21
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Mar 03 09:22:20 2017 +0100
+| |  summary:     correct web/download.php
+| |
+o |  changeset:   4029:7495993006e6
+| |  parent:      4023:3897fc16c62f
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Mar 03 09:18:57 2017 +0100
+| |  summary:     update doc for coloring syntaxe of emacs
+| |
 | o  changeset:   4028:c39d9e5d546c
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
