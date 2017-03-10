@@ -60,7 +60,7 @@ if [   -d $DESTDIR$DIR/lib -a -d $DESTDIR$DIR/include  ] ; then
     cd "$DESTDIR$LIB"
 #  set -x
     for i in $LIB/WHERE.* ; do            
-	test -f $i && ( sed "s;@DIR@;$DIR;" <$i  )
+	test -f $i && ( sed "s;@DIR@;$DIR;g" <$i  )
     done
     # ALH - 6/1/14 - remove umfpack and amd because some versions of umfpack needs more than just adding -L (they need
     # the colamd and cholmod libraries, which are setup in [[file:configure.ac]]).

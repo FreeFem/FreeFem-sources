@@ -43,7 +43,7 @@ VERSION=5.0.2
 ../lib/WHERE.mumpsseq: install.done
 	echo mumps_seq LD -L@DIR@/lib -ldmumpsFREEFEM-SEQ -lzmumpsFREEFEM-SEQ -lmumps_commonFREEFEM-SEQ	\
 		-lpordFREEFEM-SEQ $(LIBSPTHREAD)  > ../lib/WHERE.mumpsseq
-	echo mumps-seq INCLUDE -I@DIR@/include/mumps_seq >> ../lib/WHERE.mumpsseq
+	echo mumps_seq INCLUDE -I@DIR@/include/mumps_seq >> ../lib/WHERE.mumpsseq
 	echo libseq LD -L@DIR@/lib  -lmpiseqFREEFEM-SEQ >>../lib/WHERE.mumpsseq
 	echo libseq INCLUDE -I@DIR@/include -I@DIR@/include/mumps_seq >> ../lib/WHERE.mumpsseq
 

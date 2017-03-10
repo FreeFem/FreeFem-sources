@@ -1,5 +1,10 @@
-@  changeset:   4036:9fc180698793
+@  changeset:   4037:2be9ae9fd8f5
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Mar 09 16:04:40 2017 +0100
+|  summary:     coorrect arpack interface with driver 3 modE 2 thank to P-H Tournier and M. Bonazzoli
+|
+o  changeset:   4036:9fc180698793
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 09 11:55:51 2017 +0100
 |  summary:     correct findlocalmin  function in soline.cpp
