@@ -11,6 +11,9 @@ Ph r;
 verbosity=3;
 int[int] lm=findalllocalmin(Th,u[],r[],convex=1,eps=0);
 plot(r,u,fill=1,wait=1);
+// lm.n == number of min
+// r  bassin number 
+// lm[int(r[k])] is the minimal vertex of the bassin associated 
 //cout << r[]<<endl; 
 
 cout << lm << endl; 
