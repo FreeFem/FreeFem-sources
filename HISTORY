@@ -1,5 +1,10 @@
-@  changeset:   4038:6dd4da3f7ff4
+@  changeset:   4039:332f27e53716
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 10 09:54:32 2017 +0100
+|  summary:     add info
+|
+o  changeset:   4038:6dd4da3f7ff4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Mar 10 09:38:25 2017 +0100
 |  summary:     correct compile of mumps-seq pb of generation of WHERE-LIBRARY-download
