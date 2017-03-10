@@ -1,5 +1,10 @@
-@  changeset:   4037:2be9ae9fd8f5
+@  changeset:   4038:6dd4da3f7ff4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 10 09:38:25 2017 +0100
+|  summary:     correct compile of mumps-seq pb of generation of WHERE-LIBRARY-download
+|
+o  changeset:   4037:2be9ae9fd8f5
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Mar 09 16:04:40 2017 +0100
 |  summary:     coorrect arpack interface with driver 3 modE 2 thank to P-H Tournier and M. Bonazzoli
