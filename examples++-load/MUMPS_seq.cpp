@@ -38,7 +38,7 @@ using namespace std;
 
 #include "ff++.hpp"
 
-#include "mpi.h"
+#include "mumps_seq/mpi.h"
 #include "dmumps_c.h"
 #include "zmumps_c.h"
 

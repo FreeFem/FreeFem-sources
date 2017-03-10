@@ -38,7 +38,7 @@ using namespace std;
 
 #include "ff++.hpp"
 
-#include "mpi.h"
+#include "mumps_seq/mpi.h"
 #include "dmumps_c.h"
 #include "zmumps_c.h"
 
@@ -282,8 +282,7 @@ bool SetMUMPS_seq()
 
 
 static void init22()
-{
-    cout << " MUMPS (sep) "<<endl;
+{    
   SparseMatSolver_R= DefSparseSolver<double>::solver;
   SparseMatSolver_C= DefSparseSolver<Complex>::solver;
   SparseMatSolverSym_R= DefSparseSolverSym<double>::solver;
