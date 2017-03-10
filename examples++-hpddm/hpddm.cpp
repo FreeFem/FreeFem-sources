@@ -477,8 +477,8 @@ class set : public OneOperator {
 };
 template<class Type, class K>
 AnyType set_Op<Type, K>::operator()(Stack stack) const {
-    std::string params = nargs[0] ? *(GetAny<string*>((*nargs[0])(stack))) : "";
-    HPDDM::Option::get()->parse(params);
+    if(nargs[0])
+        HPDDM::Option::get()->parse(*(GetAny<string*>((*nargs[0])(stack))));
     return 0L;
 }
 
@@ -656,6 +656,115 @@ class InvSchwarz {
         }
 };
 
+template<class R>
+class IterativeMethod : public OneOperator {
+    public:
+        typedef KN<R> Kn;
+        typedef KN_<R> Kn_;
+        class MatF_O : VirtualMatrice<R> {
+            public:
+                Stack stack;
+                mutable Kn x;
+                C_F0 c_x;
+                Expression mat1, mat;
+                typedef typename VirtualMatrice<R>::plusAx plusAx;
+                MatF_O(int n, Stack stk, const OneOperator* op) :
+                    VirtualMatrice<R>(n), stack(stk), x(n), c_x(CPValue(x)),
+                    mat1(op ? op->code(basicAC_F0_wa(c_x)) : 0),
+                    mat(op ? CastTo<Kn_>(C_F0(mat1, (aType)*op)) : 0) { }
+                ~MatF_O() {
+                    if(mat1 != mat)
+                        delete mat;
+                    delete mat1;
+                    Expression zzz = c_x;
+                    delete zzz;
+                }
+                void addMatMul(const Kn_& xx, Kn_& Ax) const {
+                    ffassert(xx.N() == Ax.N());
+                    x = xx;
+                    Ax += GetAny<Kn_>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                void mv(const R* const in, const int& n, R* const out) const {
+                    KN_<R> xx((R*)in, n);
+                    KN_<R> yy(out, n);
+                    yy = R();
+                    yy = plusAx(this, xx);
+                }
+        };
+        class Operator : public HPDDM::EmptyOperator<R> {
+            public:
+                MatF_O& mat;
+                MatF_O& prec;
+                Operator(MatF_O& m, MatF_O& p) : mat(m), prec(p), HPDDM::EmptyOperator<R>(m.x.N()){ }
+                void GMV(const R* const in, R* const out, const int& mu = 1) const {
+                    mat.mv(in, HPDDM::EmptyOperator<R>::_n, out);
+                }
+                template<bool = true>
+                void apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
+                    if(prec.mat)
+                        prec.mv(in, HPDDM::EmptyOperator<R>::_n, out);
+                    else
+                        std::copy_n(in, HPDDM::EmptyOperator<R>::_n, out);
+                }
+        };
+        class E_LCG : public E_F0mps {
+            public:
+                static const int n_name_param = 4;
+                static basicAC_F0::name_and_type name_param[];
+                Expression nargs[n_name_param];
+                const OneOperator *A, *C;
+                Expression X, B;
+                E_LCG(const basicAC_F0& args) {
+                    args.SetNameParam(n_name_param, name_param, nargs);
+                    { const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
+                        ffassert(op);
+                        A = op->Find("(", ArrayOfaType(atype<Kn*>(), false)); }
+                    if(nargs[0]) {
+                        const Polymorphic* op = dynamic_cast<const Polymorphic*>(nargs[0]);
+                        ffassert(op);
+                        C = op->Find("(", ArrayOfaType(atype<Kn*>(), false));
+                    }
+                    else
+                        C = 0;
+                    X = to<Kn*>(args[1]);
+                    B = to<Kn*>(args[2]);
+                }
+                virtual AnyType operator()(Stack stack)  const {
+                    int ret = -1;
+                    try {
+                        Kn& x = *GetAny<Kn*>((*X)(stack));
+                        int n = x.N();
+                        MPI_Comm comm = nargs[3] ? *(MPI_Comm*)GetAny<pcommworld>((*nargs[3])(stack)) : MPI_COMM_WORLD;
+                        Kn& b = *GetAny<Kn*>((*B)(stack));
+                        MatF_O AA(n, stack, A);
+                        MatF_O PP(n, stack, C);
+                        Operator Op(AA, PP);
+                        if(nargs[1])
+                            Op.setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
+                        if(nargs[2])
+                            HPDDM::Option::get()->parse(*(GetAny<string*>((*nargs[2])(stack))));
+                        ret = HPDDM::IterativeMethod::solve(Op, (R*)b, (R*)x, 1, comm);
+                    }
+                    catch(...) {
+                        throw;
+                    }
+                    return SetAny<long>(ret);
+                }
+                operator aType() const { return atype<long>(); }
+        };
+        E_F0* code(const basicAC_F0& args) const { return new E_LCG(args); }
+        IterativeMethod() : OneOperator(atype<long>(), atype<Polymorphic*>(), atype<KN<R>*>(), atype<KN<R>*>()) { }
+};
+
+template<class R>
+basicAC_F0::name_and_type IterativeMethod<R>::E_LCG::name_param[] = {
+    {"precon", &typeid(Polymorphic*)},
+    {"prefix", &typeid(string*)},
+    {"sparams", &typeid(string*)},
+    {"comm", &typeid(pcommworld)}
+};
+
 template<template<class, char> class Type, class K, char S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
@@ -672,6 +781,7 @@ void add() {
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
+    Global.Add("IterativeMethod","(",new IterativeMethod<K>());
 }
 }
 
