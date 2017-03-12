@@ -94,6 +94,7 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
         ivt[2] = jj;
         (*tt++).set(v,ivt,K.lab);
     }
+  const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;
   for (int k=0;k<nbt;k++)
   {
       for (int e = 0; e<4;++e) {
@@ -102,33 +103,11 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
           if( kk>k){
               const Tet & K=Th[k];
               const Tet & KAdj=Th[kk];
-              int ABC[3];
               {
-                  int KNo = -1;
-                  {
-                      for(int i = 0; i < 3 && KNo == -1; ++i) {
-                          int diff = 0;
-                          for(int j = 0 ; j < 4; ++j) {
-                              R3 d = KAdj[j] - K[i];
-                              if(d.norme() > 1e-8)
-                                  ++diff;
-                          }
-                          if(diff == 4)
-                              KNo = i;
-                      }
-                  }
-                  if(KNo == 0)
-                      ABC[0] = 1, ABC[1] = 2, ABC[2] = 3;
-                  else if(KNo == 1)
-                      ABC[0] = 0, ABC[1] = 2, ABC[2] = 3;
-                  else if(KNo == 2)
-                      ABC[0] = 0, ABC[1] = 1, ABC[2] = 3;
-                  else
-                      ABC[0] = 0, ABC[1] = 1, ABC[2] = 2;
-                  R3 uuu = K[ABC[1]] - K[ABC[0]], vvv = K[ABC[2]] - K[ABC[0]];
+                  R3 uuu = K[nvfaceTet[e][1]] - K[nvfaceTet[e][0]], vvv = K[nvfaceTet[e][2]] - K[nvfaceTet[e][0]];
                   R3 n = uuu^vvv;
                   Vertex3 dir(v[nbv+k] - v[nbv+kk]);
-                  Vertex3 w0(v[nbv+kk] - K[ABC[0]]);
+                  Vertex3 w0(v[nbv+kk] - K[nvfaceTet[e][0]]);
                   double aa = -(n,w0);
                   double bb =  (n,dir);
                   double rr =  aa / bb;
@@ -137,7 +116,7 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
                   vv->z=v[nbv+kk].z + rr * dir.z;
                   vv->lab = 0;
               }
-              int i0=Th.operator()(K[ABC[0]]), i1=Th.operator()(K[ABC[1]]),i2=Th.operator()(K[ABC[2]]);
+              int i0=Th.operator()(K[nvfaceTet[e][0]]), i1=Th.operator()(K[nvfaceTet[e][1]]),i2=Th.operator()(K[nvfaceTet[e][2]]);
               for(int ij = 0; ij < 2; ++ij) {
                   int ivt[4] = {ij==0?nbv+k:nbv+kk,i1,i2,vv - v};
                   if(det(v[ivt[0]], v[ivt[1]], v[ivt[3]]) > 0)
