@@ -194,13 +194,13 @@ ENDIF(FREEFEM_MMG3D_INSTALLED)
 # tetgen.cpp
 IF(FREEFEM_TETGEN_INSTALLED)
 
-#  ADD_LIBRARY(example_tetgen MODULE tetgen.cpp)
+  ADD_LIBRARY(example_tetgen MODULE tetgen.cpp)
 #                             ${CMAKE_SOURCE_DIR}/src/femlib/BamgFreeFem.cpp
 #                             ${CMAKE_SOURCE_DIR}/src/femlib/splitsimplex.cpp)
-#  TARGET_LINK_LIBRARIES(example_tetgen FREEFEM::TETGEN)
+  TARGET_LINK_LIBRARIES(example_tetgen FREEFEM::TETGEN)
   #TARGET_LINK_LIBRARIES(example_tetgen ${FREEFEM_TETGEN_LIBRARY_PATHS})
   #INCLUDE_DIRECTORIES(${FREEFEM_TETGEN_INCLUDE_PATHS})
-#  SET_TARGET_PROPERTIES(example_tetgen PROPERTIES PREFIX "")
+  SET_TARGET_PROPERTIES(example_tetgen PROPERTIES PREFIX "")
 
 #ELSEIF(TETGEN_DOWNLOADED)
 
