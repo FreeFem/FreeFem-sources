@@ -20,7 +20,7 @@ if [ -n "$ffmpi" ] ; then
 	case $i in
 	    *mpi/.|*hpddm/.) 
 		echo  MPI ----  $i  ---
-		../../CheckAllEdp "$ffmpi -np 4" *.edp | tee -a ../CheckAll-out;;
+		../../CheckAllEdp "ffmpi -np 4" *.edp | tee -a ../CheckAll-out;;
 	esac;
 	cd ..;
     done

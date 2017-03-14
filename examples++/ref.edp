@@ -15,6 +15,6 @@ real REFNSP1P1b=0.0464396;
 real REFNSP1P1=0.0503365;
 real REFNSP1P2=0.04534;
 real REFparareal=1383.27;
-real REFRichard=95.86;
+real REFRichard=95.8863;
 real REFteste=1;
 real REFwaferXheatingXlaserXaxi=285;
