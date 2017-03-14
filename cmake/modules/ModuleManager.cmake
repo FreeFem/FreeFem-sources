@@ -31,7 +31,7 @@ LIST(APPEND MODULE_LIST FFTW
                         #SCOTCH
                         SUITESPARSE
                         SUPERLU
-                        #TETGEN
+                        TETGEN
 )
 
 

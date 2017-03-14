@@ -3,9 +3,11 @@ FUNCTION(ff_install_package LIBRARY_NAME)
 IF(ENABLE_DOWNLOAD)
     INCLUDE(ExternalProject)
 
+
     IF(NOT FF_DOWNLOAD_DIR)
         SET(FF_DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/download)
     ENDIF(NOT FF_DOWNLOAD_DIR)
+    file(MAKE_DIRECTORY ${FF_DOWNLOAD_DIR}/include)
     
     INCLUDE(Install${LIBRARY_NAME})
 
