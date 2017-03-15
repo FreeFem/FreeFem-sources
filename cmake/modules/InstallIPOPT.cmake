@@ -7,5 +7,5 @@ SET(CONFIGURE_COMMAND ../src/configure --prefix=<INSTALL_DIR>)
 SET(BUILD_COMMAND make)
 SET(INSTALL_COMMAND make install)
 
-SET(INCLUDE_PATHS ${FF_DOWNLOAD_DIR}/ipopt/install/include/coin)
+SET(INCLUDE_PATHS ${FF_DOWNLOAD_DIR}/include/coin)
 SET(LIBRARIES libipopt.so)

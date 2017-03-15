@@ -24,7 +24,7 @@ ENDIF(WITH_PETSC)
 
 LIST(APPEND MODULE_LIST FFTW
                         #GMM
-                        #IPOPT
+                        IPOPT
                         METIS
                         #MUMPS
                         #NLOPT
