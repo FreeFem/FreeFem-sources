@@ -27,7 +27,7 @@ LIST(APPEND MODULE_LIST FFTW
                         IPOPT
                         METIS
                         #MUMPS
-                        #NLOPT
+                        NLOPT
                         #SCOTCH
                         SUITESPARSE
                         SUPERLU

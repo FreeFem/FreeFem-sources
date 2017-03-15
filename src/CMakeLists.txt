@@ -48,18 +48,23 @@ ENDIF(GLUT_FOUND)
 ###############
 
 IF(MPI_FOUND)
-
+  #  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D PARALLELE")
   ADD_EXECUTABLE(FreeFem++-mpi ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi.cpp
                                ${CMAKE_SOURCE_DIR}/src/Graphics/sansrgraph.cpp
                                ${CMAKE_SOURCE_DIR}/src/lglib/mymain.cpp
                                ${CMAKE_SOURCE_DIR}/src/lglib/lg.tab.cpp
                                ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
+  TARGET_COMPILE_DEFINITIONS(FreeFem++-mpi PRIVATE PARALLELE)
 
   INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+  TARGET_LINK_LIBRARIES(FreeFem++-mpi libff ${MPI_CXX_LIBRARIES})
 
-  TARGET_LINK_LIBRARIES(FreeFem++-mpi
-                                      libff
-                                      ${MPI_CXX_LIBRARIES})
+  IF(FREEFEM_VERBOSE)
+    MESSAGE(STATUS "MPI_C_INCLUDE_PATH: ${MPI_C_INCLUDE_PATH}")
+    MESSAGE(STATUS "MPI_CXX_INCLUDE_PATH: ${MPI_CXX_INCLUDE_PATH}")
+    MESSAGE(STATUS "MPI_CXX_LIBRARIES: ${MPI_CXX_LIBRARIES}")
+    MESSAGE(STATUS "MPI_C_LIBRARIES: ${MPI_C_LIBRARIES}")
+  ENDIF(FREEFEM_VERBOSE)
 
 ENDIF(MPI_FOUND)
 
