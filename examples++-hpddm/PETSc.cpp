@@ -192,7 +192,7 @@ class initCSRfromArray_Op : public E_F0mps {
     public:
         Expression A;
         Expression K;
-        static const int n_name_param = 4;
+        static const int n_name_param = 5;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         initCSRfromArray_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), K(param2) {
@@ -206,7 +206,8 @@ basicAC_F0::name_and_type initCSRfromArray_Op<HpddmType>::name_param[] = {
     {"columns", &typeid(KN<long>*)},
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
-    {"symmetrique", &typeid(bool)}
+    {"symmetrique", &typeid(bool)},
+    {"clean", &typeid(bool)}
 };
 template<class HpddmType>
 class initCSRfromArray : public OneOperator {
@@ -291,6 +292,29 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
             MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
         else
             MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
+        bool clean = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
+        if(clean) {
+            int* cl = nullptr;
+            int* lg = nullptr;
+            PetscScalar* a = nullptr;
+            for(int k = 0; k < size; ++k) {
+                MatriceMorse<PetscScalar> *mA = static_cast<MatriceMorse<PetscScalar>*>(&(*(ptK->operator[](ptJ ? v[k].second : k)).A));
+                if(k == 0) {
+                    cl = mA->cl;
+                    lg = mA->lg;
+                    a = mA->a;
+                }
+                else {
+                    if(mA->cl == cl)
+                        mA->cl = nullptr;
+                    if(mA->lg == lg)
+                        mA->lg = nullptr;
+                    if(mA->a == a)
+                        mA->a = nullptr;
+                }
+            }
+            ptK->resize(0);
+        }
         MPI_Comm_size(PETSC_COMM_WORLD, &size);
         if(size > 1) {
             MatSetType(ptA->_petsc, MATMPIAIJ);
