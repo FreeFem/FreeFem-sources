@@ -6,9 +6,9 @@ SET(CONFIGURE_COMMAND cmake -D CMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                             -D INCLUDE_SCOTCH=/usr/include/scotch
                             -D COMPIL_SHARED_LIBRARY=True
                             ../src/build)
-SET(INSTALL_COMMAND mkdir -p ../install/include &&
-                    mkdir -p ../install/lib && 
-                    cp <SOURCE_DIR>/build/sources/libmmg3d.h ../install/include &&
-                    cp libmmg3dlib4.0.so ../install/lib/)
+SET(INSTALL_COMMAND mkdir -p <INSTALL_DIR>/include &&
+                    mkdir -p <INSTALL_DIR>/lib && 
+                    cp <SOURCE_DIR>/build/sources/libmmg3d.h <INSTALL_DIR>/include &&
+                    cp libmmg3dlib4.0.so <INSTALL_DIR>/lib/)
 
 
