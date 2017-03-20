@@ -1,5 +1,15 @@
-@  changeset:   4039:332f27e53716
+@  changeset:   4041:eac2aca07878
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Mar 10 17:16:10 2017 +0100
+|  summary:     coorect seq MUMPS interface pb change  mpi.h  to mumps_seq/mpi.h
+|
+o  changeset:   4040:e9d9a09e8a33
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Fri Mar 10 12:05:13 2017 +0100
+|  summary:     Exposes HPDDM iterative methods.
+|
+o  changeset:   4039:332f27e53716
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Mar 10 09:54:32 2017 +0100
 |  summary:     add info

@@ -965,8 +965,47 @@ inline long fftime()
 #endif
     return -1;
 }
+long ffstrtol(string* p)
+{
+    char * pe;
+    const char *pp=p->c_str();
+    long r = strtol(pp,&pe,10);
+    const char *ppe = pe, *pppe= pp+p->size();
+   // cout << " .ffstrtol. " << pppe - pe << endl;
+    assert(ppe <= pppe);
+    for(const char *ppe = pe; ppe < pppe; ++ppe)
+        ffassert(isspace(*ppe));
+    return r;
+    
+}
+long ffstrtol(string* p,long d)
+{
+    char * pe;
+    const char *pp=p->c_str();
+    long r = strtol(pp,&pe,d);
+    const char *ppe = pe, *pppe= pp+p->size();
+  //  cout << " .ffstrtol. " << pppe - pe << endl;
+    ffassert(ppe <= pppe);
+    for(const char *ppe = pe; ppe < pppe; ++ppe)
+        ffassert(isspace(*ppe));
+    return r;
+}
 
-long atoi(string* p) {return atoi(p->c_str());}// add march 2010
+double ffstrtod(string* p)
+{
+    char * pe;
+    const char *pp=p->c_str();
+    double r = strtod(pp,&pe);
+    const char *ppe = pe, *pppe= pp+p->size();
+    //  cout << " .ffstrtol. " << pppe - pe << endl;
+    ffassert(ppe <= pppe);
+    for(const char *ppe = pe; ppe < pppe; ++ppe)
+        ffassert(isspace(*ppe));
+    return r;
+    
+}
+
+long atoi(string* p) {return atol(p->c_str());}// add march 2010
 double atof(string* p) {return atof(p->c_str());}// add march 2010
 double NaN(string* p) {
 return nan(p->c_str());}// add march 2012
@@ -1583,7 +1622,11 @@ void Init_map_type()
 
     Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
     Global.Add("atof","(",new OneOperator1<double,string*>(atof));// add march 2010
-    
+
+    Global.Add("strtol","(",new OneOperator1<long,string*>(ffstrtol));// add march 2017
+    Global.Add("strtol","(",new OneOperator2<long,string*,long>(ffstrtol));// add march 2017
+    Global.Add("strtod","(",new OneOperator1<double,string*>(ffstrtod));// add march 2017
+
 #ifdef HAVE_ATANH
      Global.Add("atanh","(",new OneOperator1<double>(atanh));
 #endif

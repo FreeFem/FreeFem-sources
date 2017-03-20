@@ -42,14 +42,14 @@ func int getARGV(int n,int default)
 {
    int d=default;
    int k=usedARGV(n);
-   if(k>0) d=atoi(ARGV[k]);
+   if(k>0) d=strtol(ARGV[k]);
     return d;
 }
 func real getARGV(int n,real default)
 {
    real d=default;
    int k=usedARGV(n);
-   if(k>0) d=atof(ARGV[k]);
+   if(k>0) d=strtod(ARGV[k]);
    return d;
 }
 func string getARGV(int n,string default)
@@ -64,14 +64,14 @@ func int getARGV(string after,int default)
 {
    int d=default;
    int k=usedARGV(after);
-   if(k>0) d=atoi(ARGV[k]);
+   if(k>0) d=strtol(ARGV[k]);
     return d;
 }
 func real getARGV(string after,real default)
 {
    real d=default;
    int k=usedARGV(after);
-   if(k>0) d=atof(ARGV[k]);
+   if(k>0) d=strtod(ARGV[k]);
    return d;
 }
 func string getARGV(string after,string default)

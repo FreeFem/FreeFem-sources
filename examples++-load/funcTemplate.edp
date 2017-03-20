@@ -49,3 +49,11 @@ cout << "8 args: uh1: " << uh1[].min  << " " << uh1[].max << endl;
 cout << " funcs1 " << funcs1(2) << endl;
 cout << " funcs2 " << funcs2(2,3) << endl;
 cout << " funcs3 " << funcs3(1,2,3) << endl;
+
+
+
+Vh[int] U(10); // Array of finite element function 
+for(int i=0; i<10; ++i)
+  U[i]= i; 
+//  plot(U,wait=1);	
+cout << "test = "<< test(U) << endl; 
