@@ -108,6 +108,37 @@ double funcs3(Stack s,const double &a,const  double &b,const  double &c){  retur
 double funcs2(Stack s,const double &a,const  double &b){  return a+b;}
 double funcs1(Stack s,const double &a){  return a;}
 
+
+// OneOperator1s_   s => add stack  to parameter of the function ...
+// _ => pass const reference ... 
+typedef pair<pferbasearray,int> pferarray ;
+
+double mytest(Stack stack,pferarray const & p)
+{
+    double ret=0;
+    typedef double K;
+    int comp=p.second;
+    cout << " " << comp << endl;//  Numero de la composation generalement 0
+    pferbasearray pa= p.first;
+    int N = pa->N;
+    cout << " N = " << N  << " ";
+    //FEbaseArray
+    for(int i=0; i<N; ++i)
+    {
+        FEbase<K,v_fes>** ppui=(*pa)[i]; // DATA elememt FINI
+        KN<K>* pui=pa->get(i);
+        ret+= (*pui)[0];
+        KN<K> ui=*pui; // copie du tableau
+        (*pui)[0]+= 1;
+        pa->set(i, ui);
+        
+    }
+    
+    
+    
+    return ret;
+}
+
 //   add the function name to the freefem++ table 
 /*  class Init { public:
   Init();
@@ -124,6 +155,10 @@ static void Load_Init(){
   Global.Add("CppModTemplate6","(",new OneOperator6_<double, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*>(CppModTemplate6)); 
   Global.Add("CppModTemplate7","(",new OneOperator7_<double, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*>(CppModTemplate7)); 
   Global.Add("CppModTemplate8","(",new OneOperator8_<double, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*, KN<double>*>(CppModTemplate8)); 
+ 
+  Global.Add("test","(",new OneOperator1s_<double,pferarray>(mytest));
+
+
 }
 
 

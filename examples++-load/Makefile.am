@@ -213,6 +213,8 @@ WHERE_LIBRARY:
 FORCE: ;
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
+	echo includepath += \"../examples++-3d/\" >freefem++.pref
+
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi || true
