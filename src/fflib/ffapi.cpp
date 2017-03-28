@@ -119,7 +119,21 @@ static  void ffapi_newplot(){}
 #else
 
     // need #include <cstdio>
-    return popen(command,type);
+      FILE *f= popen(command,type);
+      if( f!=0) {
+//     ne marche pas car ffglut plante si flux  vide  
+//          int ppok=pclose(f);
+//	f =0;
+//	if(ppok==0)
+//	  f= popen(command,type);
+//	else
+//	  std::cerr << " fopen ok but plose bug ! =" << ppok <<  "\n";
+      }
+      if( f==0) { 
+	std::cerr << "Error: popen " << f << " " << command << " " << type << std::endl;
+	exit(1); }
+
+      return f;
 #endif
   }
 
