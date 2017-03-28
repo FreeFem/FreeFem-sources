@@ -5,10 +5,7 @@
                          ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi-empty.cpp 
                          ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/lglib ${CMAKE_SOURCE_DIR}/src/fflib ${CMAKE_SOURCE_DIR}/src/Graphics)
-  TARGET_LINK_LIBRARIES(FreeFem++ 
-                                dl 
-                                lglib 
-                                libff)
+  TARGET_LINK_LIBRARIES(FreeFem++ dl lglib libff)
 
 ########
 # FFGLUT
@@ -56,7 +53,7 @@ IF(MPI_FOUND)
 #                               ${CMAKE_SOURCE_DIR}/src/lglib/lg.tab.cpp
   TARGET_COMPILE_DEFINITIONS(FreeFem++-mpi PRIVATE PARALLELE)
 
-  INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+  INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/src/femlib)
   TARGET_LINK_LIBRARIES(FreeFem++-mpi lglib libff ${MPI_CXX_LIBRARIES})
 
   IF(FREEFEM_VERBOSE)
