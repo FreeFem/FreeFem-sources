@@ -1,50 +1,188 @@
-@  changeset:   4041:eac2aca07878
+@  changeset:   4064:ab896dfe6f8a
 |  tag:         tip
+|  parent:      4051:0e9993329278
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Mar 10 17:16:10 2017 +0100
-|  summary:     coorect seq MUMPS interface pb change  mpi.h  to mumps_seq/mpi.h
+|  date:        Mon Mar 20 14:05:46 2017 +0100
+|  summary:     add example of plugin (array of finite element function)
 |
-o  changeset:   4040:e9d9a09e8a33
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Fri Mar 10 12:05:13 2017 +0100
-|  summary:     Exposes HPDDM iterative methods.
-|
-o  changeset:   4039:332f27e53716
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Mar 10 09:54:32 2017 +0100
-|  summary:     add info
-|
-o  changeset:   4038:6dd4da3f7ff4
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Mar 10 09:38:25 2017 +0100
-|  summary:     correct compile of mumps-seq pb of generation of WHERE-LIBRARY-download
-|
-o  changeset:   4037:2be9ae9fd8f5
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Thu Mar 09 16:04:40 2017 +0100
-|  summary:     coorrect arpack interface with driver 3 modE 2 thank to P-H Tournier and M. Bonazzoli
-|
-o  changeset:   4036:9fc180698793
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Thu Mar 09 11:55:51 2017 +0100
-|  summary:     correct findlocalmin  function in soline.cpp
-|
-o  changeset:   4035:1edcc4fcaa6d
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Mar 08 18:14:17 2017 +0100
-|  summary:     correct pb un precon of NLGC remove a mass matric Thank to O. Pantz.
-|
-o  changeset:   4034:16b7cf40dc2b
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Tue Mar 07 10:52:15 2017 +0100
-|  summary:     Less communication during matrix assembly.
-|
-o  changeset:   4033:ee714a338f27
-|  parent:      4031:1f69edc3a8ea
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Mon Mar 06 19:20:17 2017 +0100
-|  summary:     Slight improvement for matrix assembly.
-|
+| o  changeset:   4063:c633518253e7
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 16 21:36:01 2017 +0100
+| |  summary:     patch command for suitesparse (copy of cmake script)
+| |
+| o  changeset:   4062:b0d5b4832606
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 16 21:31:38 2017 +0100
+| |  summary:     CMake script for suitesparse
+| |
+| o  changeset:   4061:c9ae80d12aa4
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 16 21:22:20 2017 +0100
+| |  summary:     Compilation of lglib with ARPACK if available
+| |
+| o  changeset:   4060:6fc944a7e334
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 16 15:35:27 2017 +0100
+| |  summary:     Update installation procedure for MMG3D
+| |
+| o  changeset:   4059:2c9b0c4f9543
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Thu Mar 16 14:14:55 2017 +0100
+| |  summary:     Use the same compiler and flags for FreFem and Nlopt
+| |
+| o  changeset:   4058:51dfee183fca
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 23:10:48 2017 +0100
+| |  summary:     Main compilation loop for c++ files in examples++-load-mpi
+| |
+| o  changeset:   4057:7639cbe2a6c0
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 22:40:10 2017 +0100
+| |  summary:     Add the path to examples++-mpi in LD_LIBRARY_PATH for make check
+| |
+| o  changeset:   4056:2ffb055a14fc
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 22:30:01 2017 +0100
+| |  summary:     Compilation of MPICG in examples++-mpi
+| |
+| o  changeset:   4055:d4af335802a5
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 22:10:43 2017 +0100
+| |  summary:     make check can now use FreeFem++-mpi if available
+| |
+| o  changeset:   4054:80bc18ee170b
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 18:29:19 2017 +0100
+| |  summary:     Define PARALLELE for the generation of FreeFem++-mpi
+| |
+| o  changeset:   4053:c1152e89aee3
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 13:34:46 2017 +0100
+| |  summary:     Update include directory path of Ipopt
+| |
+| o  changeset:   4052:737b2651a402
+| |  branch:      cmake
+| |  parent:      4050:921b239a9aac
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Wed Mar 15 12:58:55 2017 +0100
+| |  summary:     Generate shared libraries instead of static ones for superlu and metis
+| |
+o |  changeset:   4051:0e9993329278
+| |  parent:      4043:2dcc76ba1076
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Wed Mar 15 12:07:27 2017 +0100
+| |  summary:     Small memory improvement.
+| |
+| o  changeset:   4050:921b239a9aac
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 14 18:46:46 2017 +0100
+| |  summary:     Modify target name in ExternalProject_Add to avoid conflict names
+| |
+| o  changeset:   4049:205e60a644ac
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 14 17:51:13 2017 +0100
+| |  summary:     Fix a problem in installation of tetgen
+| |
+| o  changeset:   4048:1ea1d844a550
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 14 16:02:55 2017 +0100
+| |  summary:     Create download/include directory if needed
+| |
+| o  changeset:   4047:2798fa877ce1
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 14 15:26:42 2017 +0100
+| |  summary:     Add a dependency between external_projects and imported libraries in order to prevent CMake from building libraries before having downloaded their dependencies
+| |
+| o  changeset:   4046:df57e75109e2
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 14 13:21:23 2017 +0100
+| |  summary:     Set LD_LIBRARY_PATH for make check and replace SHARED by MODULE for all tests in examples++-load
+| |
+| o  changeset:   4045:6c44889176fd
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Mar 13 23:16:01 2017 +0100
+| |  summary:     Replace SHARED by MODULE in some calls to ADD_LIBRARY
+| |
+| o  changeset:   4044:4d858f0e425e
+| |  branch:      cmake
+| |  parent:      4032:38ec603a4f5f
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Mon Mar 13 11:50:59 2017 +0100
+| |  summary:     Minimal CMake version is now 3.0
+| |
+o |  changeset:   4043:2dcc76ba1076
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sun Mar 12 21:03:14 2017 +0100
+| |  summary:     Simpler way to detect vertices.
+| |
+o |  changeset:   4042:c6d925f8f2dc
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sun Mar 12 11:39:47 2017 +0100
+| |  summary:     Adds splitmesh4 and splitmesh12.
+| |
+o |  changeset:   4041:eac2aca07878
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Mar 10 17:16:10 2017 +0100
+| |  summary:     coorect seq MUMPS interface pb change  mpi.h  to mumps_seq/mpi.h
+| |
+o |  changeset:   4040:e9d9a09e8a33
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Fri Mar 10 12:05:13 2017 +0100
+| |  summary:     Exposes HPDDM iterative methods.
+| |
+o |  changeset:   4039:332f27e53716
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Mar 10 09:54:32 2017 +0100
+| |  summary:     add info
+| |
+o |  changeset:   4038:6dd4da3f7ff4
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Mar 10 09:38:25 2017 +0100
+| |  summary:     correct compile of mumps-seq pb of generation of WHERE-LIBRARY-download
+| |
+o |  changeset:   4037:2be9ae9fd8f5
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Mar 09 16:04:40 2017 +0100
+| |  summary:     coorrect arpack interface with driver 3 modE 2 thank to P-H Tournier and M. Bonazzoli
+| |
+o |  changeset:   4036:9fc180698793
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Mar 09 11:55:51 2017 +0100
+| |  summary:     correct findlocalmin  function in soline.cpp
+| |
+o |  changeset:   4035:1edcc4fcaa6d
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Mar 08 18:14:17 2017 +0100
+| |  summary:     correct pb un precon of NLGC remove a mass matric Thank to O. Pantz.
+| |
+o |  changeset:   4034:16b7cf40dc2b
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Tue Mar 07 10:52:15 2017 +0100
+| |  summary:     Less communication during matrix assembly.
+| |
+o |  changeset:   4033:ee714a338f27
+| |  parent:      4031:1f69edc3a8ea
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Mon Mar 06 19:20:17 2017 +0100
+| |  summary:     Slight improvement for matrix assembly.
+| |
 | o  changeset:   4032:38ec603a4f5f
 | |  branch:      cmake
 | |  parent:      4028:c39d9e5d546c

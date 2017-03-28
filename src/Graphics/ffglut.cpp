@@ -2144,15 +2144,16 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
   if( fmx>fmn)
     {
       if(debug>3)
-	cout << " SetDefIsoV  " << fmn << " " << fmx << endl;
-
+	cout << " SetDefIsoV  " << fmn << " " << fmx << "pViso= " << pViso << endl;
+        dyn = niso !=Viso.N() ;
+        pViso = pViso && niso ==Viso.N();
       if(niso>2) 
 	Viso.resize(niso); 
       Niso=Viso.N();
       Narrow=narr;
       d =  (fmx-fmn)/(Niso-2) ;
       x =  (fmn+fmx)/2-d*0.5*(Niso-1);
-      dyn=true;
+     // dyn=true;
     }
   else
     {
@@ -3026,6 +3027,7 @@ int main(int argc,  char** argv)
 	    else if( strcmp(argv[i1],"-v")==0) i1++,debug=2,verbosity=2;
 	    else if( strcmp(argv[i1],"-vv")==0) i1++,debug=5,verbosity=2;
 	    else if( strcmp(argv[i1],"-vvv")==0) i1++,debug=10, verbosity=1000;
+            else if( strcmp(argv[i1],"-vvvv")==0) i1++,debug=99999, verbosity=1000;
 	  }
 	  if( (i1+1 < argc) && (strcmp(argv[i1],"-wait")==0)) { i1++; gwait=atof(argv[i1++]); }
 	  if( (i1+1 < argc) && (strcmp(argv[i1],"-g")==0)) { 
