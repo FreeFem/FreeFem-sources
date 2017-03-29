@@ -4,6 +4,7 @@
 #define HPDDM_SCHWARZ 0
 #define HPDDM_FETI    1
 #define HPDDM_BDD     1
+
 #include "common.hpp"
 
 namespace Substructuring {

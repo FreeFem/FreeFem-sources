@@ -62,7 +62,7 @@ dpair ret;
     int solver = getOption("schwarz_method");
     if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
         fespace Ph(Th, P0);
-        real kZero = getARGV("-kZero", 10);
+        real kZero = getARGV("-kZero", 10.0);
         Ph transmission = kZero;
         varf vOptimized(u, v) = intN(Th)(grad(u)' * grad(v)) + intN1(Th, fakeInterface)(transmission * (u * v)) + on(1, u = 1.0);
         Opt = vOptimized(Wh, Wh, tgv = -1);

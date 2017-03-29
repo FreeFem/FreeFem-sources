@@ -4,6 +4,7 @@
 #define HPDDM_SCHWARZ 1
 #define HPDDM_FETI    0
 #define HPDDM_BDD     0
+
 #include "common.hpp"
 
 namespace Schwarz {

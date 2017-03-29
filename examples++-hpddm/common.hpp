@@ -6,6 +6,7 @@
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 
+#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
 #ifdef WITH_mkl
 #define HPDDM_MKL 1
 #define MKL_PARDISOSUB
@@ -21,6 +22,7 @@
 #define DSUITESPARSE
 #endif
 #define MU_ARPACK
+#endif
 
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
