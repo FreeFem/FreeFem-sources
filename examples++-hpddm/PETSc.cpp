@@ -199,7 +199,7 @@ template<class HpddmType>
 basicAC_F0::name_and_type initCSRfromMatrix_Op<HpddmType>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
-    {"symetric", &typeid(bool)},
+    {"symmetric", &typeid(bool)},
     {"clean", &typeid(bool)},
     {"bsr", &typeid(bool)}
 };
@@ -279,7 +279,7 @@ basicAC_F0::name_and_type initCSRfromArray_Op<HpddmType>::name_param[] = {
     {"columns", &typeid(KN<long>*)},
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
-    {"symetric", &typeid(bool)},
+    {"symmetric", &typeid(bool)},
     {"clean", &typeid(bool)}
 };
 template<class HpddmType>
