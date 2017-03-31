@@ -365,6 +365,8 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
             MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
         else
             MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
+        ptA->_first = 0;
+        ptA->_last = n;
         bool clean = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
         if(clean) {
             int* cl = nullptr;
@@ -604,7 +606,8 @@ class InvPETSc {
                     MatGetBlockSize((*t)._petsc, &bs);
                 HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), x, u->n / bs, bs);
                 VecRestoreArray((*t)._x, &x);
-                std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
+                if(t.A->_A)
+                    std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
             }
             else {
                 PetscScalar zero = 0.0;
