@@ -9,5 +9,5 @@ SET(CMAKE_ARGS -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                -D SHARED=true
                -D GKLIB_PATH=../src/GKlib)
 
-SET(LIBRARIES libmetis.a)
+SET(LIBRARIES libmetis.so)
 
