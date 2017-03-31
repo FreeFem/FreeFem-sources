@@ -74,6 +74,7 @@ Mesh3 * Transfo_Mesh3(const double &precis_mesh,const Mesh3 & Th3, const double 
 	// set size of Mesh T_Th3 
 	T_Th3->set(nv_t,nt_t,nbe_t);
 
+    if(verbosity > 1)
 	cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
 		
 	// determination of vertex		
@@ -387,6 +388,7 @@ Mesh3 * Transfo_Mesh3_surf(const double &precis_mesh, const Mesh3 & Th3, const d
 	// set size of Mesh T_Th3 
 	T_Th3->set(nv_t,nt_t,nbe_t);
 
+    if(verbosity > 1)
 	cout << "Transfo TH3 : Vertex, Tetrahedra, Border : "<< "nv_t="<< nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
 		
 	// determination of vertex		
