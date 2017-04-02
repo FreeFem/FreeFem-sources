@@ -161,7 +161,7 @@ public:
     typedef Complex R;
     typedef  KN_<R>  Result;
     ;
-    static basicAC_F0::name_and_type name_param[] ;
+    static basicAC_F0::name_and_type *name_param ;
     static const int n_name_param =0;
     Expression expv, expm,exp;
     Expression nargs[n_name_param];
@@ -192,7 +192,7 @@ public:
     
 };
 
-basicAC_F0::name_and_type Mapkk::name_param[]={};
+basicAC_F0::name_and_type *Mapkk::name_param=0;
 
 AnyType Mapkk::operator()(Stack s) const
 {
