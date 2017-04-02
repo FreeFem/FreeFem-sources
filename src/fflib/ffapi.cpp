@@ -33,6 +33,7 @@
 
 // headerfilter [[shell:headerfilter '../../ff/src/fflib/ffapi.cpp']] [[file:~/alh/bin/headerfilter]]
 #include "ffapi.hpp" // [[file:ffapi.hpp]] found by [[file:~/alh/bin/headerfilter]]
+#include <cstdlib> 
 #ifdef FFLANG
 #include "socket.hpp"
 #include "spawn.hpp"
@@ -72,7 +73,7 @@ extern long verbosity ;
 
 /// if FFCS is around, we need to bufferize all communications to avoid mixing up CMD_FFG and CMD_STDOUT messages
 #ifdef FFLANG
-using std::exit; 
+
 void bufferwrite(const char *b,const int l){
   Socket::dialoglock->WAIT(); // need #include "socket.hpp"
 
