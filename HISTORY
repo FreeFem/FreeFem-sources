@@ -1,5 +1,10 @@
-@  changeset:   4075:09d2d521bdbf
+@  changeset:   4076:bb200d6ce17e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Apr 02 16:04:54 2017 +0200
+|  summary:     remove the launch of ffglut in case of no compile ffglut
+|
+o  changeset:   4075:09d2d521bdbf
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sun Apr 02 15:30:07 2017 +0200
 |  summary:     correct PB of compile with gcc 6.3.0
