@@ -1,5 +1,15 @@
-@  changeset:   4077:75fd45bb597f
+@  changeset:   4079:16c53a5e6938
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Apr 02 16:40:02 2017 +0200
+|  summary:     add missing include in ffapi.cpp 'cstdlib for exit)
+|
+o  changeset:   4078:a94ffa9f3087
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Apr 02 16:36:58 2017 +0200
+|  summary:     add missing std to exit
+|
+o  changeset:   4077:75fd45bb597f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sun Apr 02 16:24:50 2017 +0200
 |  summary:     correct typo in new gestion of ffglut
