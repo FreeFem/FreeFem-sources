@@ -82,23 +82,35 @@ int getprog(char* fn,int argc, char **argv)
 #endif
   const char *progffglut=0;
   const char *fileglut=0;
-  bool noffglut=false;
+ bool noffglut=true; //
+  
  
   // FFCS - remove the test for noffglut to be able to create pictures
   // in any situation. Even FreeFem++-mpilang needs to send pictures
   // (eg when called in a FreeFem++-server situation by EJS)
-  // is the name -nw or -nw.exe  -> no graphics 
-  noffglut=false;
+  // is the name -nw or -nw.exe  -> no graphics
+    
+  // if no ffglut do try to launch ffglut by default ..  april 2017 (FH)
+#ifdef PROG_FFGLUT
+   noffglut=false;
+    NoGraphicWindow=false;
+#else
+    noffglut=true;
+    NoGraphicWindow=true;
+#endif
         ffapi::ff_ch2edpdtmpir = false;
   bool ch2edpdir = false;
   if(argc)
     prognamearg=argv[0];
 
    
-   if(prognamearg )      // FH add to remove ffglut in case of -nw or -nw.exe program. FH juin 2014..
+   if(prognamearg )      // FH add to remove ffglut in case of -nw or -nw.exe , mpi ,mpi.exp program FH juin 2014.., april 2017
     {int l = strlen(prognamearg);
         if( (( l>4 ) && (strcmp("-nw",prognamearg+l-3) ==0))
-           || (( l>8) &&(strcmp("-nw.exe",prognamearg+l-7) ==0)))
+           || (( l>8) &&(strcmp("-nw.exe",prognamearg+l-7) ==0))
+           || (( l>5) &&(strcmp("-mpi",prognamearg+l-7) ==0))
+           || (( l>9) &&(strcmp("-mpi.exe",prognamearg+l-7) ==0))
+           )
         {
             consoleatend=false;
             noffglut=true;
@@ -123,13 +135,19 @@ int getprog(char* fn,int argc, char **argv)
 	  i++;	
             if(verbosity>10) cout << " verbosity " <<verbosity << endl;
 	}
-      else if  (strcmp(argv[i],"-nw")==0 ) 
+      else if  ((strcmp(argv[i],"-nw")==0 ) && (strcmp(argv[i],"-ng")==0 ))// add -ng april 2017
 	{
 	  consoleatend=false;
 	  noffglut=true;
 	  NoGraphicWindow=true;
           waitatend=false; // add modif FH. juin 2014 ..
 	}
+      else if  (strcmp(argv[i],"-wg")==0 )
+      {
+          noffglut=false;
+          NoGraphicWindow=false;
+      }
+    
       else if  (strcmp(argv[i],"-ne")==0 ) // no edp 
 	  echo_edp=false;
       else if  (strcmp(argv[i],"-cd")==0 ) // 
@@ -269,7 +287,8 @@ if( ch2edpdir && edpfilenamearg)
            << "        -gff     command  : change  command  compatible with ffglut (with space quoting)\n"
 	   << "        -nowait           : nowait at the end on window   \n"
 	   << "        -wait             : wait at the end on window   \n"
-	   << "        -nw               : no ffglut, ffmedit  (=> no graphics windows) \n"
+	   << "        -nw  or -ng       : no ffglut, ffmedit  (=> no graphics windows) \n"
+           << "        -wg               : with graphic   (=>  graphics windows) \n"
 	   << "        -ne               : no edp script output\n"
            << "        -cd               : Change dir to script dir\n"
            << "        -jc               : just compile\n"
