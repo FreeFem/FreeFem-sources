@@ -1,15 +1,74 @@
-@  changeset:   4065:10f3b5a4fb7b
+@  changeset:   4075:09d2d521bdbf
 |  tag:         tip
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Tue Mar 28 16:02:47 2017 +0200
-|  summary:     correct in ffglput plot with give isovalue
+|  date:        Sun Apr 02 15:30:07 2017 +0200
+|  summary:     correct PB of compile with gcc 6.3.0
 |
-o  changeset:   4064:ab896dfe6f8a
-|  parent:      4051:0e9993329278
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Mon Mar 20 14:05:46 2017 +0100
-|  summary:     add example of plugin (array of finite element function)
+o  changeset:   4074:5b9736346f35
+|  parent:      4072:f150af9a69e5
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Sun Apr 02 11:06:23 2017 +0200
+|  summary:     Zero-size array should be at the end of class.
 |
+| o  changeset:   4073:17722adc6e15
+| |  branch:      cmake
+| |  parent:      4069:124641314fa3
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Fri Mar 31 16:54:20 2017 +0200
+| |  summary:     Fix some bugs (peculiar regressions in my CMake scripts)
+| |
+o |  changeset:   4072:f150af9a69e5
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Fri Mar 31 09:25:02 2017 +0200
+| |  summary:     Small fix for PETSc initializer with arrays.
+| |
+o |  changeset:   4071:ef548205db40
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Wed Mar 29 11:44:36 2017 +0200
+| |  summary:     Typo.
+| |
+o |  changeset:   4070:6ed6b01849b4
+| |  parent:      4065:10f3b5a4fb7b
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Wed Mar 29 11:43:01 2017 +0200
+| |  summary:     New constructor for PETSc matrices. Fixed kZero.
+| |
+| o  changeset:   4069:124641314fa3
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 28 17:38:01 2017 +0200
+| |  summary:     Conditional compilation of fflib wrt UMFPACK
+| |
+| o  changeset:   4068:365f6393cd64
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 28 16:46:50 2017 +0200
+| |  summary:     Do not look for OpenGL and GLUT in ModuleManager anymore
+| |
+| o  changeset:   4067:ee61ce3cde0d
+| |  branch:      cmake
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 28 16:46:03 2017 +0200
+| |  summary:     ffmedit is now built iff OpenGL and GLUT are installed
+| |
+| o  changeset:   4066:0ac201a3fef1
+| |  branch:      cmake
+| |  parent:      4063:c633518253e7
+| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| |  date:        Tue Mar 28 16:40:39 2017 +0200
+| |  summary:     Remove subdirectories from download directory
+| |
+o |  changeset:   4065:10f3b5a4fb7b
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Mar 28 16:02:47 2017 +0200
+| |  summary:     correct in ffglput plot with give isovalue
+| |
+o |  changeset:   4064:ab896dfe6f8a
+| |  parent:      4051:0e9993329278
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Mar 20 14:05:46 2017 +0100
+| |  summary:     add example of plugin (array of finite element function)
+| |
 | o  changeset:   4063:c633518253e7
 | |  branch:      cmake
 | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
