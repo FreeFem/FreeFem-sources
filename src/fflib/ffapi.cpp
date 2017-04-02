@@ -72,6 +72,7 @@ extern long verbosity ;
 
 /// if FFCS is around, we need to bufferize all communications to avoid mixing up CMD_FFG and CMD_STDOUT messages
 #ifdef FFLANG
+using std::exit; 
 void bufferwrite(const char *b,const int l){
   Socket::dialoglock->WAIT(); // need #include "socket.hpp"
 

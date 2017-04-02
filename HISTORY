@@ -1,5 +1,10 @@
-@  changeset:   4076:bb200d6ce17e
+@  changeset:   4077:75fd45bb597f
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Apr 02 16:24:50 2017 +0200
+|  summary:     correct typo in new gestion of ffglut
+|
+o  changeset:   4076:bb200d6ce17e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sun Apr 02 16:04:54 2017 +0200
 |  summary:     remove the launch of ffglut in case of no compile ffglut
