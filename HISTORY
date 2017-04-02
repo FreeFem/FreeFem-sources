@@ -1,5 +1,10 @@
-@  changeset:   4064:ab896dfe6f8a
+@  changeset:   4065:10f3b5a4fb7b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Mar 28 16:02:47 2017 +0200
+|  summary:     correct in ffglput plot with give isovalue
+|
+o  changeset:   4064:ab896dfe6f8a
 |  parent:      4051:0e9993329278
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Mar 20 14:05:46 2017 +0100

@@ -111,6 +111,7 @@ int   ReadOnePlot(FILE *fp)
     {
       for(int i=0;i<lmagic;i++)
 	{ int c=getc(fp);
+            if(i==0 && c == EOF) return -2; // empty file 
 	    magicxx[i]=c;
 	  //err += c != magic[i];
 	  //if(err) break;
@@ -3028,6 +3029,7 @@ int main(int argc,  char** argv)
 	    else if( strcmp(argv[i1],"-vv")==0) i1++,debug=5,verbosity=2;
 	    else if( strcmp(argv[i1],"-vvv")==0) i1++,debug=10, verbosity=1000;
             else if( strcmp(argv[i1],"-vvvv")==0) i1++,debug=99999, verbosity=1000;
+            else if( strcmp(argv[i1],"-0")==0) return 0; // do nothing 
 	  }
 	  if( (i1+1 < argc) && (strcmp(argv[i1],"-wait")==0)) { i1++; gwait=atof(argv[i1++]); }
 	  if( (i1+1 < argc) && (strcmp(argv[i1],"-g")==0)) { 
