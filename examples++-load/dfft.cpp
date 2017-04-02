@@ -163,8 +163,8 @@ public:
     ;
     static basicAC_F0::name_and_type name_param[] ;
     static const int n_name_param =0;
-    Expression nargs[n_name_param];
     Expression expv, expm,exp;
+    Expression nargs[n_name_param];
     
     Mapkk(const basicAC_F0 & args)
     : expv(0), expm(0),exp(0)
