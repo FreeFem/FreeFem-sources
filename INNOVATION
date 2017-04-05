@@ -1,4 +1,7 @@
 version 3.51-4 ( 28/mars 2017)
+ - do launch ffglut if no ffglut program by default add exec flag
+    -ng (no graphic)
+    -wg with graphic in any cas 
  - correct in ffglut plot with  viso given the value of iso was not used before. 
  - add a first verion  of search bassin attration (wrong but not to bad see examples++-load/findalllocalmin.edp)
  - correct pb of mumps_seq  compilation PB of missing mpi.h
