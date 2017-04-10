@@ -1,0 +1,61 @@
+** dissection solver Ver 1.0.0  : written in C++ with qd libiray or **
+**                                                   GNU __float128 **
+** Atsushi Suzuki, 25 Jun. 2015
+**                 30 Nov. 2016
+
+How to compile:
+
+- directory structure needs to be the follownig.
+  include/ lib/ src/ are needed to be the same place called as $(PROJ_DIR)
+
+- copy src/Defs.inc.Intel to src/Defs.inc
+- copy src/Makfile.Intel to src/Makefile
+  
+- src/Defs.inc contains definition of the place of header files
+    METIS_INC = $(PROJ_DIR)/metis-5.1.0/include
+    SCOTCH_INC = $(PROJ_DIR)/scotch_6.0.4/include
+    QD_INC = $(PROJ_DIR)/include
+  and libraries
+    METIS_DIR =  $(PROJ_DIR)/metis-5.0.2/build/Darwin-x86_64/libmetis
+    LIB_DIR_SCOTCH = $(PROJ_DIR)/scotch_6.0.4/lib
+    LIB_DIR_QD =  $(PROJ_DIR)/qd-2.3.17/lib
+
+- to use intel MKL specify BLAS in Def.inc
+    BLAS = MKL
+  On the MacOSX (Mavericks or Yosemite),
+    BLAS = VECLIB
+  attains 90 % of the speed of MKL. For preparation to use vecLib
+  framework, command line Xcode needs to be installed by
+  % xcode-select --install
+
+
+- qd library needs to be compiled with patches to handle complex class of
+  LLVM clang++.
+  qd-2.3.17.tar.gz will be obtained from
+  http://crd-legacy.lbl.gov/~dhbailey/mpdist/qd-2.3.17.tar.gz
+  to extract tar ball and apply patches
+  % tar xvzf qd-2.3.17.tar.gz
+  % cd qd-2.3.17
+  % patch -p1 < qd-2.3.17-for-LLVM.patch
+  configure needs to be done with specifying install directory $(PROJ_DIR)
+  % ./configure --prefix=$(PROJ_DIR) CXX=clang++ CC=clang
+  % make install
+
+- to clean directories under $(PROJ_DIR)/src,
+  % make distclean
+  % make distclean
+
+- to build $(PROJ_DIR)/libDissection.dyld, in $(PROJ_DIR)/src
+  % make
+
+- a test program is located in $(PROJ_DIR)/src/C-test
+  % make
+  % ./MM-Dissection ../MM-matrix/MM.testA.data 0 1 1.e-2 8 2
+  the first argument specifies 0 for SCOTCH and 1 for METIS
+  the second specifies number of threads, which should be less or equal to
+  number of the physical CPU cores
+  the third specifies pivot threshold
+  the fourth specifies number of level of dissection
+  the fifth specifies scaling strategy : 0 for no-scaling, 1 for diagonal
+                                         2 for scaling for KKT-type matrix
+

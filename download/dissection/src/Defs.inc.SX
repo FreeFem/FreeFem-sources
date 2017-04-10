@@ -1,0 +1,71 @@
+#! \file DissectionSolver.hpp
+#  \brief task mangemanet of dissection algorithm
+#  \author Atsushi Suzuki, Laboratoire Jacques-Louis Lions
+#  \date   Mar. 30th 2012
+#  \date   Jul. 12th 2015
+
+# This file is part of dissection solver
+# 
+# Dissection solver is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Dissection solver is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with diisection solver.  If not, see <http://www.gnu.org/licenses/>.
+
+PROJ_DIR = $(HOME)/work/sx-ace/dissection
+PROJ_SRC = $(PROJ_DIR)/src
+PROJ_LIBDIR = $(PROJ_DIR)/lib
+UNAME := $(shell uname -s)
+# define BLAS MKL or ATLAS : be careful with no space after the name of variable
+# QUAD specifies 128bit floating point arithmetic : DD_REAL by qd library
+MAKE       = make -j 8
+#
+DEBUGFLAG  = #-C sopt
+#
+CPP = sxc++ -Pmulti
+CC  = sxc++ -Pmulti
+CXX = sxc++ -Pmulti -Csopt -Tnoauto,used -Kgcc -Kcpp11
+LD  = $(CXX)
+QUAD = SX_ACE
+QUAD_FLAG = -D$(QUAD) -DNO_OCTRUPLE
+BLAS = GENERIC
+
+LDOPT      = 
+MODULES    = -I../Modules
+MAKE_DEP_OPT = -M
+#
+METIS_INC =  $(PROJ_DIR)/metis-5.1.0/include
+SCOTCH_INC = $(PROJ_DIR)/scotch_6.0.4/include
+QD_INC =     $(PROJ_DIR)/include
+ifeq ($(UNAME), Darwin)
+METIS_DIR =  $(PROJ_DIR)/metis-5.1.0/build/Darwin-x86_64/libmetis
+endif
+ifeq ($(UNAME), Linux)
+METIS_DIR =  $(PROJ_DIR)/metis-5.1.0/build/Linux-x86_64/libmetis
+endif
+LIB_DIR_SCOTCH = $(PROJ_DIR)/scotch_6.0.4/lib
+LIB_DIR_QD =  $(PROJ_DIR)/lib
+LINK_QD = #-L$(LIB_DIR_QD) -lqd
+LDOPT      = $(DEBUGFLAG)
+#
+BLAS_DEF = -DBLAS_GENERIC #
+SHARED_COMPILER = -lpthread -lm
+#
+CCFLAGS    = $(DEBUGFLAG) -I$(METIS_INC) -I$(SCOTCH_INC) $(BLAS_DEF) -I$(BLAS_INC) -I.. $(CCFLAGS_OMP) $(QUAD_FLAG) -I$(QD_INC) -DNO_METIS
+FFLAGS     = $(DEBUGFLAG) -I.. $(FFFLAGS_OMP) 
+#
+#LDOPT      = $(DEBUGFLAG) -shared 
+#
+ifeq ($(UNAME), Darwin)
+   CCFLAGS      += #-DGETRUSAGE
+endif
+ifeq ($(UNAME), Linux)
+   CCFLAGS      += #-DCLOCK_GETTIME
+endif
