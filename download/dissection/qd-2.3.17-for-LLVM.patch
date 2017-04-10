@@ -1,0 +1,104 @@
+*** qd-2.3.17/include/qd/dd_real.h	Tue Dec 29 04:18:53 2009
+--- qd-2.3.17-for-LLVM/include/qd/dd_real.h	Thu Jul 23 15:54:13 2015
+***************
+*** 25,30 ****
+--- 25,32 ----
+   *
+   * Yozo Hida
+   */
++ // operator int(), dd_real copysign(), fmax(), lobg(), scalbn() are added
++ // for complex class of LLVM Clang++ : 23 Jul.2015 Atsushi Suzuki
+  
+  #ifndef _QD_DD_REAL_H
+  #define _QD_DD_REAL_H
+***************
+*** 156,161 ****
+--- 158,167 ----
+                   std::ostream &os = std::cerr) const;
+  
+    static dd_real debug_rand();
++ 
++   // added for complex class of LLVM Clang++: 23 Jul.2015 Atsushi Suzuki
++   operator int() { return int(x[0]); }
++   operator int() const { return int(x[0]); }
+  };
+  
+  
+***************
+*** 286,290 ****
+--- 292,313 ----
+  #include <qd/dd_inline.h>
+  #endif
+  
++ // added for complex class of LLVM Clang++ : 23 Jul.2015 Atsushi Suzuki
++ inline dd_real copysign(const dd_real &x, const dd_real &y) {
++   return (y.x[0] < 0.0) ? ((x.x[0] < 0.0) ? x : (-x)) : ((x.x[0] < 0.0) ? (-x) : x); 
++ }
++ 
++ inline dd_real fmax(const dd_real &x, const dd_real &y) {
++   return x.x[0] < y.x[0] ? y : x;
++ }
++ 
++ inline dd_real logb(const dd_real &y) {
++   return dd_real(logb(y.x[0]));
++ }
++ 
++ inline dd_real scalbn(const dd_real &x, int n) {
++   return dd_real(scalb(x.x[0], n));
++ }
++ 
+  #endif /* _QD_DD_REAL_H */
+  
+*** qd-2.3.17/include/qd/qd_real.h	Mon May 11 19:45:05 2009
+--- qd-2.3.17-for-LLVM/include/qd/qd_real.h	Thu Jul 23 15:41:24 2015
+***************
+*** 20,25 ****
+--- 20,28 ----
+   *
+   * Yozo Hida
+   */
++ // operator int(), dd_real copysign(), fmax(), lobg(), scalbn() are added
++ // for complex class of LLVM Clang++ : 23 Jul.2015 Atsushi Suzuki
++ 
+  #ifndef _QD_QD_REAL_H
+  #define _QD_QD_REAL_H
+  
+***************
+*** 134,139 ****
+--- 137,146 ----
+  
+    static qd_real debug_rand();
+  
++   // added for complex class of LLVM Clang++: 23 Jul.2015 Atsushi Suzuki
++   operator int() { return int(x[0]); }
++   operator int() const { return int(x[0]); }
++ 
+  };
+  
+  namespace std {
+***************
+*** 289,293 ****
+--- 296,318 ----
+  #include <qd/qd_inline.h>
+  #endif
+  
++ // added for complex class of LLVM Clang++ : 23 Jul.2015 Atsushi Suzuki
++ 
++ inline qd_real copysign(const qd_real &x, const qd_real &y) {
++   return (y.x[0] < 0.0) ? ((x.x[0] < 0.0) ? x : (-x)) : ((x.x[0] < 0.0) ? (-x) : x); 
++ }
++ 
++ inline qd_real fmax(const qd_real &x, const qd_real &y) {
++   return x.x[0] < y.x[0] ? y : x;
++ }
++ 
++ inline qd_real logb(const qd_real &y) {
++   return qd_real(logb(y.x[0]));
++ }
++ 
++ inline qd_real scalbn(const qd_real &x, int n) {
++   return qd_real(scalb(x.x[0], n));
++ }
++ 
+  #endif /* _QD_QD_REAL_H */
+  

@@ -1,0 +1,23 @@
+Dissection is a C++ implementation of parallel sparse direct solver on shared
+memory architecture with a kernel detection algorithm for singular matrices.
+
+The source is available under GPL v3 from the FreeFem++ repository,
+< http://www.freefem.org/ff++/ff++/download/dissection/ >
+
+The copyright holders of Dissection give you permission to combine Dissection
+program with free software programs or libraries that are released under the
+GNU LGPL and with independent modules that communicate with Dissection solely
+through the Dissection-fortran interface. You may copy and distribute such a
+system following the terms of the GNU GPL for Dissection and the licenses of
+the other code concerned, provided that you include the source code of that
+other code when and as the GNU GPL requires distribution of source code and
+provided that you do not modify the Dissection-fortran interface.
+
+If you want to link Dissection to your proprietary application through other
+than the Dissection-fortran interface, Dissection will be licensed under
+CeCILL-C, < http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html >.
+In such case, please contact directly one of authors,
+Atsushi Suzuki <Atsushi.Suzuki@ann.jussieu.fr> and
+François-Xavier Roux <roux@ann.jussieu.fr>
+
+Copyright (C) 2016  Atsushi Suzuki, François-Xavier Roux, Xavier Juvigny
