@@ -5,12 +5,8 @@
 #include "petsc.h"
 
 #if PETSC_VERSION_LT(3,7,0)
-#define FFPetscOptionsGetInt(a,b,c,d) PetscOptionsGetInt(a,b,c,d)
-#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(a,b,c,d)
 #define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(a,b,c)
 #else
-#define FFPetscOptionsGetInt(a,b,c,d) PetscOptionsGetInt(NULL,a,b,c,d)
-#define FFPetscOptionsGetReal(a,b,c,d) PetscOptionsGetReal(NULL,a,b,c,d)
 #define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(NULL,a,b,c)
 #endif
 
@@ -255,8 +251,6 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE);
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
     KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-    KSPSetFromOptions(ptA->_ksp);
-    KSPSetUp(ptA->_ksp);
     MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
@@ -403,10 +397,6 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         timing = MPI_Wtime();
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-        KSPSetFromOptions(ptA->_ksp);
-        KSPSetUp(ptA->_ksp);
-        if(verbosity > 0 && mpirank == 0)
-            cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
         MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     }
     return ptA;
@@ -469,14 +459,8 @@ AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
         mA->lg = ptA->_A->getMatrix()->_ia;
         mA->cl = ptA->_A->getMatrix()->_ja;
     }
-    double timing = MPI_Wtime();
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
     KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-    double eps = 1.0e-8;
-    FFPetscOptionsGetReal(NULL, "-eps", &eps, NULL);
-    int it = 100;
-    FFPetscOptionsGetInt(NULL, "-iter", &it, NULL);
-    KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
     MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
@@ -602,17 +586,8 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             delete [] ns;
         }
     }
-    double timing = MPI_Wtime();
-    KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-    double eps = 1e-8;
-    FFPetscOptionsGetReal(NULL, "-eps", &eps, NULL);
-    int it = 100;
-    FFPetscOptionsGetInt(NULL, "-iter", &it, NULL);
-    KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
     KSPSetFromOptions(ptA->_ksp);
     KSPSetUp(ptA->_ksp);
-    if(verbosity > 0 && mpirank == 0)
-        cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
     return 0L;
 }
 
