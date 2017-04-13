@@ -477,10 +477,6 @@ AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
     int it = 100;
     FFPetscOptionsGetInt(NULL, "-iter", &it, NULL);
     KSPSetTolerances(ptA->_ksp, eps, PETSC_DEFAULT, PETSC_DEFAULT, it);
-    KSPSetFromOptions(ptA->_ksp);
-    KSPSetUp(ptA->_ksp);
-    if(verbosity > 0 && mpirank == 0)
-        cout << " --- PETSc preconditioner built (in " << MPI_Wtime() - timing << ")" << endl;
     MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
@@ -489,7 +485,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 2;
+        static const int n_name_param = 4;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -501,7 +497,9 @@ class setOptions_Op : public E_F0mps {
 template<class Type>
 basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"sparams", &typeid(std::string*)},
-    {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)}
+    {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)},
+    {"fields", &typeid(KN<double>*)},
+    {"names", &typeid(KN<String>*)}
 };
 template<class Type>
 class setOptions : public OneOperator {
@@ -515,6 +513,41 @@ class setOptions : public OneOperator {
 template<class Type>
 AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
+    if(std::is_same<Type, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value) {
+        KN<double>* fields = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
+        if(fields) {
+            KN<String>* names = nargs[3] ? GetAny<KN<String>*>((*nargs[3])(stack)) : 0;
+            PC pc;
+            KSPGetPC(ptA->_ksp, &pc);
+            PCSetType(pc, PCFIELDSPLIT);
+            unsigned short* local = new unsigned short[fields->n + ptA->_last - ptA->_first];
+            for(int i = 0; i < fields->n; ++i)
+                local[i] = fields->operator[](i);
+            unsigned short nb = *std::max_element(local, local + fields->n);
+            MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_UNSIGNED_SHORT, MPI_MAX, PETSC_COMM_WORLD);
+            local += fields->n;
+            HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, local - fields->n, local, fields->n);
+            unsigned long* counts = new unsigned long[nb]();
+            for(unsigned int i = 0; i < ptA->_last - ptA->_first; ++i)
+                ++counts[local[i] - 1];
+            PetscInt* idx = new PetscInt[*std::max_element(counts, counts + nb)];
+            for(unsigned short j = 0; j < nb; ++j) {
+                IS is;
+                unsigned short* pt = local;
+                for(unsigned int i = 0; i < counts[j]; ++pt) {
+                    if(*pt == j + 1)
+                        idx[i++] = ptA->_first + std::distance(local, pt);
+                }
+                ISCreateGeneral(PETSC_COMM_WORLD, counts[j], idx, PETSC_COPY_VALUES, &is);
+                PCFieldSplitSetIS(pc, names && j < names->size() ? (*(names->operator[](j))).c_str() : NULL, is);
+                ISDestroy(&is);
+            }
+            delete [] idx;
+            delete [] counts;
+            local -= fields->n;
+            delete [] local;
+        }
+    }
     std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
     if(options) {
         std::vector<std::string> elems;
@@ -546,7 +579,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             for(unsigned short i = 0; i < dim; ++i) {
                 PetscScalar* x;
                 VecGetArray(ns[i], &x);
-                HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, *(ptNS->get(i)), x, ptNS->get(i)->n);
+                HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*(ptNS->get(i))), x, ptNS->get(i)->n);
                 VecRestoreArray(ns[i], &x);
             }
             PetscScalar* dots = new PetscScalar[dim];
@@ -640,7 +673,7 @@ class InvPETSc {
                 PetscStrcmp(type, MATMPIBAIJ, &isBlock);
                 if(isBlock)
                     MatGetBlockSize((*t)._petsc, &bs);
-                HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, *out, x, out->n / bs, bs);
+                HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), x, out->n / bs, bs);
                 VecRestoreArray(y, &x);
             }
             else {
@@ -688,11 +721,11 @@ class ProdPETSc {
             PetscStrcmp(type, MATMPIBAIJ, &isBlock);
             if(isBlock)
                 MatGetBlockSize((*t)._petsc, &bs);
-            HPDDM::Subdomain<K>::template distributedVec<0>(t->_num, t->_first, t->_last, *u, w, u->n / bs, bs);
+            HPDDM::Subdomain<K>::template distributedVec<0>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*u), w, u->n / bs, bs);
             VecRestoreArray((*t)._x, &w);
             MatMult(t->_petsc, (*t)._x, y);
             VecGetArray(y, &w);
-            HPDDM::Subdomain<K>::template distributedVec<1>(t->_num, t->_first, t->_last, *x, w, x->n / bs, bs);
+            HPDDM::Subdomain<K>::template distributedVec<1>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*x), w, x->n / bs, bs);
             if(t->_A)
                 (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*x);
             VecRestoreArray(y, &w);
