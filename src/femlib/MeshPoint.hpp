@@ -1,4 +1,5 @@
-
+#ifndef MeshPoint_hpp_
+#define MeshPoint_hpp_
 //typedef double R;
 namespace  Fem2D {
 class MeshPointBase { public:
@@ -462,3 +463,4 @@ inline static void MeshPointStack( void *s,MeshPoint* mp) {*static_cast<MeshPoin
 #endif
 
 }
+#endif

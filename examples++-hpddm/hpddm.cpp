@@ -692,6 +692,8 @@ class IterativeMethod : public OneOperator {
                     yy = R();
                     yy = plusAx(this, xx);
                 }
+                bool ChecknbLine(int) const { return false; }
+                bool ChecknbColumn(int) const { return false; }
         };
         class Operator : public HPDDM::EmptyOperator<R> {
             public:

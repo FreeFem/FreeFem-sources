@@ -1,4 +1,5 @@
-
+#ifndef libmesh5_h_
+#define libmesh5_h_
 
 /*----------------------------------------------------------*/
 /*															*/
@@ -175,4 +176,5 @@ int call(gmfsethexahedronf77)(int *, int *, int *, int *, int *, int *, int *, i
 extern char *KwdFmt[ GmfMaxKwd + 1 ][3];
 extern int GmfCpyLin(int, int, int);
 
+#endif
 #endif
