@@ -25,6 +25,8 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifndef lgsolver_hpp_
+#define lgsolver_hpp_
 #include "gmres.hpp"
 typedef void *    pcommworld;
 
@@ -584,3 +586,4 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	assert(++kk == n_name_param);
     }
 } // end of namespace Fem2D
+#endif

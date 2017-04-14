@@ -1,4 +1,5 @@
 #ifndef  MatriceCreuse_tpl_
+#define MatriceCreuse_tpl_
 #ifndef  MatriceCreuse_h_
 #include "MatriceCreuse.hpp"
 #include <limits>

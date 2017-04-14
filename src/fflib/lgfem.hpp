@@ -31,7 +31,8 @@
 //  l'espace change 
 //   cf la fonction set qui reconstruit FESpace
 
-
+#ifndef lgfem_hpp_
+#define lgfem_hpp_
 extern Block *currentblock;
 
 void init_lgmat(); // initialisation for sparse mat functionnallity
@@ -811,5 +812,4 @@ public:
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
     t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ){}
 };
-
-    
+#endif
