@@ -3,27 +3,40 @@
 #include <string>
 using namespace std;
 #include <windows.h>
-#include <commdlg.h>
+
+#ifdef _WIN64
+#pragma pack( push )
+#pragma pack( 16 )
+#include "Commdlg.h"
+#pragma pack( pop )
+#else
+#include "Commdlg.h"
+#endif   // _WIN64
+//#include <commdlg.h>
 #include <io.h>      //*OT  use for the console window
 
 BOOL ShowOpenDialogBox1(char *fileName)
 {
-  OPENFILENAME ofn; 
+  OPENFILENAME *pofn= new OPENFILENAME[2], &ofn= *pofn;
+    
   char szDirName[256];   
   const char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
   
-  memset(&ofn, 0, sizeof(OPENFILENAME));
+  memset(&ofn, 0, 2*sizeof(OPENFILENAME));
   getcwd(szDirName,sizeof(szDirName));
   ofn.lStructSize = sizeof(OPENFILENAME);
   ofn.hwndOwner = NULL;
   ofn.lpstrFilter = strFilter;
   ofn.lpstrFileTitle = fileName;
-  ofn.nMaxFileTitle = 80;
+  ofn.nMaxFileTitle = 1024;
   ofn.lpstrInitialDir=szDirName;
   ofn.lpstrTitle ="Choose you freefem '*.edp' File";
   ofn.Flags=OFN_SHOWHELP|OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
   
-  return GetOpenFileName(&ofn);
+  BOOL ret= GetOpenFileName(pofn);
+    cout << " ret "<< ret << " "<< fileName << " "<< szDirName << endl;
+  delete[] pofn;
+  return ret;
 } 
 
 
