@@ -2,10 +2,11 @@
 ; $Id$
 ;;  m4 def
 ;; `DHOSTOS' = HOSTOS  
+;; `SIZEOFPTR' = SIZEOFPTR  
 ;; ifelse(SIZEOFPTR,64, define(`SUFF64',`-64' ),define(`SUFF64',`' ))
 ;; define(IFMPI,ifelse(len(MPIPROG),0,; ,))
-;; define(IFMGW32,ifelse(HOSTOS,mingw32,,;))
-;; define(IFMGW64,ifelse(HOSTOS,mingw64,,;))
+;; define(IFMGW32,ifelse(SIZEOFPTR,32,,;))
+;; define(IFMGW64,ifelse(SIZEOFPTR,64,,;))
 
 
 ;; -- end def m4  
@@ -67,7 +68,13 @@ Source: "src\bin-win32\bamg.exe"; DestDir: "{app}"
 Source: "src\bin-win32\cvmsh2.exe"; DestDir: "{app}"
 ; Source: "src\bin-win32\drawbdmesh.exe"; DestDir: "{app}"
 Source: "src\bin-win32\*.dll"; DestDir: "{app}"
-Source: "examples++-load\ff-c++"; DestDir: "{app}"
+Source: "examples++-load\ff-c++"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\ff-get-dep.awk"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\WHERE_LIBRARY-config"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\WHERE_LIBRARY"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\WHERE_LIBRARY-download"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\ff-pkg-download"; DestDir: "{app}\examples++-load"
+Source: "examples++-load\ff-get-dep"; DestDir: "{app}\examples++-load"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
