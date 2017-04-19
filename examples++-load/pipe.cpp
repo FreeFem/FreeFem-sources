@@ -16,8 +16,8 @@ long ffsleep(long  s) { return sleep(s);}
 long ffusleep(long  s) { return usleep(s);}
 #endif
 
-#if __clang_major__ > 4
-
+//#if __clang_major__ > 4
+#ifndef _WIN32
 #include "pstream.h"
 
 struct pstream {
