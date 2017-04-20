@@ -37,7 +37,8 @@ Name: "{app}\examples++-tutorial"; Permissions: everyone-full
 Name: "{app}\examples++-3d"; Permissions: everyone-full
 Name: "{app}\examples++-chap3"; Permissions: everyone-full
 Name: "{app}\examples++-eigen"; Permissions: everyone-full
-ifelse(len(MPIPROG),0,; ,)Name: "{app}\examples++-mpi"; Permissions: everyone-full
+IFMPI Name: "{app}\examples++-mpi"; Permissions: everyone-full
+IFMPI Name: "{app}\examples++-hpddm"; Permissions: everyone-full
 
 
 [Files]
@@ -122,9 +123,11 @@ Source: "examples++-3d\*.edp"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\dodecaedre01.mesh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\lac-leman-v4.msh"; DestDir: "{app}\examples++-3d"
 Source: "examples++-3d\*.idp"; DestDir: "{app}\examples++-3d"
-ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\*.idp"; DestDir: "{app}\examples++-mpi"
-ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\ff*.txt"; DestDir: "{app}\examples++-mpi"
-ifelse(len(MPIPROG),0,; ,)Source: "examples++-mpi\*.edp"; DestDir: "{app}\examples++-mpi"
+Source: "examples++-mpi\*.idp"; DestDir: "{app}\examples++-mpi"
+IFMPI Source: "examples++-mpi\ff*.txt"; DestDir: "{app}\examples++-mpi"
+IFMPI Source: "examples++-mpi\*.edp"; DestDir: "{app}\examples++-mpi"
+IFMPI Source: "examples++-hpddm\*.edp"; DestDir: "{app}\examples++-hpddm"
+IFMPI Source: "examples++-hpddm\*.idp"; DestDir: "{app}\examples++-hpddm"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-load"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-tutorial"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-chapt3"
@@ -156,7 +159,8 @@ Name: "{group}\Examples\load"; Filename: "{app}\examples++-load"
 Name: "{group}\Examples\Main"; Filename: "{app}\examples++"
 Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples++-eigen"
 Name: "{group}\Examples\3d"; Filename: "{app}\examples++-3d"
-ifelse(len(MPIPROG),0,; ,)Name: "{group}\Examples\mpi"; Filename: "{app}\examples++-mpi"
+IFMPI Name: "{group}\Examples\mpi"; Filename: "{app}\examples++-mpi"
+IFMPI Name: "{group}\Examples\hpddm"; Filename: "{app}\examples++-hpddm"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop

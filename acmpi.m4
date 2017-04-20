@@ -96,8 +96,42 @@ case "$MPIRUN" in
         fi
 	;;
 esac
-    
-if test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
+	echo " ####   --$MSMPI_INC--$MSMPI_BIN--$ff_win32"
+ if test -n "$MSMPI_INC" -a -n "$MSMPI_BIN" -a  "$ff_win32" = yes   ; then
+   echo " ####  check  MSMPI"
+		   # MSMPI_LIB64 MSMPI_LIB32   $ff_ptrbit is  32 or 64 
+		   mkdir -p download/include/msmpi 
+		   mkdir -p download/lib/msmpi 
+		   cp "$MSMPI_INC"/*.h download/include/msmpi
+		   grep -v INT_PTR_KIND "$MSMPI_INC"/mpif.h >download/include/msmpi/mpif.h
+		   test "$ff_ptrbit" -eq 64 && cp "$MSMPI_INC"/x64/*.h download/include/msmpi
+		   test "$ff_ptrbit" -eq 32 && cp "$MSMPI_INC"/x86/*.h download/include/msmpi
+		   ff_MPI_INCLUDE_DIR=`pwd`/download/include/msmpi
+		   ff_msmpi_lib="$MSMPI_LIB64"
+		   test "$ff_ptrbit" -eq 32 && ff_msmpi_lib="$MSMPI_LIB32"
+		   cp "$ff_msmpi_lib/msmpifec.lib" "$ff_msmpi_lib/msmpi.lib" download/lib/msmpi
+		   ff_msmpi_lib=`pwd`/download/lib/msmpi	   
+#  MSMPI  
+    if  with_mpilibs=`where msmpi.dll` 
+    then
+#  Remove for scotch and parmetis 
+	ff_MPI_INCLUDE="-I$ff_MPI_INCLUDE_DIR  '-D__int64=long long'"
+	with_mpiinc="$ff_MPI_INCLUDE"
+	test -z "$MPIRUN" && MPIRUN="where mpiexe.exe"
+	ff_MPI_LIBC="'$ff_msmpi_lib/msmpi.lib'"
+	ff_MPI_LIB="'$ff_msmpi_lib/msmpi.lib'"
+	ff_MPI_LIBFC="'$ff_msmpi_lib/msmpifec.lib' '$ff_msmpi_lib/msmpi.lib'"
+	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
+	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
+	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
+	test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
+    else
+	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_LOG_FD
+	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_FD
+	with_mpipath=no
+	with_mpi=no
+    fi
+elif test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
 #    sed -e "s?@MPIDIR@?$with_mpipath?" -e "s?@F77@?$F77?" -e "s?@CC@?$CC?" -e "s?@CXX@?$CXX?"   -e "s?@FC@?$FC?"  <mpic++.in >mpic++
  #   chmod a+rx mpic++ 
   #  for i in mpicc mpif90 mpifc mpif77 ; do cp mpic++ $i; done 

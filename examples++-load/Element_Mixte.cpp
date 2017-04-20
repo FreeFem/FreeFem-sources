@@ -1123,6 +1123,7 @@ namespace  Fem2D {
         
         int df=0;
         R CKK = 2* K.area;
+        /*
         for(int e=0;e<3;++e)
         {
             int i=e;
