@@ -76,13 +76,17 @@ string DirName(const char * f)
   if(!c) return string("");
   else return string(f,strlen(f)-strlen(c));
 }
-string TransDir(string dir)
+string TransDir(string dir,string adddir="")
 {
   for (size_t i=0; i<dir.size(); ++i)
     if(dir[i]==dirnsep) dir[i]=dirsep;
   if(dir.size()>1 && dir[dir.size()-1] != dirsep) 
     dir += dirsep;
-  return  dir;    
+   if(adddir.length() && dir[0]=='!')
+   {
+       dir = adddir +dirsep +dir.substr(1);
+   }
+  return  dir;
 }
 
 
@@ -188,7 +192,7 @@ int  readinitfile(const string & file)
 	if( ! f) {
 		if(verbosity>=20) cout << "error opening init  file: " << file << endl;
 		return 0;}
-	
+        string dirfile=DirName(file.c_str());
 	char c,c1,bv=0;
 	int linenumber = 1;
 	bool inkey=false,invalue=false,cmm=false;
@@ -237,7 +241,7 @@ int  readinitfile(const string & file)
 				    {
 				      bool path=key.find("path")!= string::npos;
 				      if(path)
-					EnvironmentInsert(key,TransDir(value),"$");		      
+					EnvironmentInsert(key,TransDir(value,dirfile),"$");
 				      else 
 					EnvironmentInsert(key,value,"$");		      
 				    }
@@ -294,11 +298,15 @@ void GetEnvironment()
 
  // FFCS: we must make sure that FFCS does not reuse the same freefem++.pref as FF because some shared libraries must be
  // recompiled.
-
+#ifdef PURE_WIN32 
+string     ffprefsuffix ="pref";
+#else
+string     ffprefsuffix ="pref";
+#endif
 #ifdef ENABLE_FFCS
  string  ffpref="freefem++-cs.pref";
 #else
-  string  ffpref="freefem++.pref";
+  string  ffpref="freefem++."+ffprefsuffix;
 #endif
 
 #ifdef HAVE_GETENV
@@ -315,7 +323,7 @@ void GetEnvironment()
   char envl[LEN];
   char envi[LEN];
   char envh[LEN];
-  
+  char execpath[MAX_PATH+1];
 
   if (GetEnvironmentVariable("FF_VERBOSITY", envv, LEN) > 0) 
    ff_verbosity=envv;
@@ -338,6 +346,16 @@ void GetEnvironment()
   }
 
 #ifdef PURE_WIN32 
+     int bytes = GetModuleFileName(NULL, execpath, MAX_PATH);
+     execpath[bytes]='\0';
+     if(bytes)
+     {
+         string execdir=DirName(execpath);
+         if(execdir.length())
+         {
+             EnvironmentInsert("init-files",execdir+"\\"+ffpref,"$");
+         }
+     }
 #else
   EnvironmentInsert("init-files","/etc/"+ffpref,"$");
 #ifdef FF_PREFIX_DIR_APPLE

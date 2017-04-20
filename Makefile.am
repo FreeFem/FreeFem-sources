@@ -135,6 +135,8 @@ WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
 	-DHOSTOS='$(host_os)'  WindowsPackage.m4 > WindowsPackage.iss
+	echo loadpath += '"!\."'  >freefem++.pref
+	echo includepath += '"!\idp"'  >>freefem++.pref
 
 # Debian package
 # --------------
