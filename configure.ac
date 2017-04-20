@@ -200,8 +200,10 @@ AC_SUBST(SIZEOF_INT,$ff_size_int)
 AC_SUBST(SIZEOF_PTR,$ff_size_ptr)
 if test "0$ff_size_ptr" -eq 4  ;then
  AC_SUBST(SIZEOF_PTRINBIT,32)
+ ff_ptrbit=32
 elif test  "0$ff_size_ptr" -eq 8  ;then
  AC_SUBST(SIZEOF_PTRINBIT,64)
+ ff_ptrbit=64
 else
   AC_MSG_NOTICE( [ fatal error : sizeof pointer $ff_size_ptr !  or no c++ compiler: $CXX] );
   AC_MSG_ERROR([ Sorry  sizeof c++ pointer $ff_size_ptr are not  4 or 8 ])
