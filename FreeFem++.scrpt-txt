@@ -47,7 +47,7 @@ on freefem(edpfile)
 	tell application "Terminal"
 		activate
 		try
-			do shell script "/bin/bash -c 'export PATH=\"PATH:/usr/local/ff++/openmpi/3.51-4/bin\";cd \"" & edpdir & "\";FreeFem++  \"" & edppath & "\"'"
+			do shell script "/bin/bash -c 'export PATH=\"PATH:/usr/local/ff++/openmpi/3.52/bin\";cd \"" & edpdir & "\";FreeFem++  \"" & edppath & "\"'"
 		end try
 	end tell
 end freefem
