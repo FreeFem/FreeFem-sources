@@ -1,0 +1,39 @@
+// +=====================================================================+
+// | Un bug en arithmetique complexe.                                    |
+// +---------------------------------------------------------------------+
+// | 01/09/02 : Les tableaux de complexes ne sont pas dispos             |
+// | 11/09/03, V1.34                                                     |
+// |   variable du contexte sont ecrasees c'est le cas de j              |
+// |                                                                     |
+// +=====================================================================+
+
+
+   complex z1, z2, j    ;
+   real    ReZ, ImZ ;
+
+   j = 0 + 1i ;
+   cout << "j = " << j <<" attendu : i" << endl ;
+
+   cout << "trace 1 de j = " << j  << endl ;
+   ReZ = 4.5 ; ImZ = 6.7 ; 
+   cout << "ReZ = " << ReZ << " attendu : 4.5 " << endl ;
+   cout << "ImZ = " << ImZ << " attendu : 6.7 " << endl ;
+   cout << "trace 2 de j = " << j  << endl ;
+   cout << "Voila, j est ecrase par 0 + (ReZ) i !" << endl ;
+   
+   cout << endl ;
+   cout << "Le meme Pb pour les reels ? " << endl ;
+
+   
+   real r1, r2, jR   ;
+
+   jR = 2 ;
+   cout << "jR = " << jR <<" attendu : 2" << endl ;
+
+   cout << "trace 1 de jR = " << jR  << endl ;
+   ReZ = 4.5 ; ImZ = 6.7 ; 
+   cout << "ReZ = " << ReZ << " attendu : 4.5 " << endl ;
+   cout << "ImZ = " << ImZ << " attendu : 6.7 " << endl ;
+   cout << "trace 2 de jR = " << jR  << endl ;
+   cout << "NON jR n'est pas ecrase" << endl ;
+   cout << endl ;

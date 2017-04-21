@@ -1,0 +1,58 @@
+Compilation of FreeFem++ under unix, MacOs X or mingw  (Windows)
+and bamg (mesh generator)
+----------------------------------------------------------------
+read respectively the following  url depending of systeme 
+to compile le software 
+http://www.freefem.org/ff++/linux.php      or  web/linux.php 
+http://www.freefem.org/ff++/windows.php    or  web/windows.php
+http://www.freefem.org/ff++/macosx.php   or web/macosx.php
+
+To use Some special configuration file 
+
+1) create  file config.param an use 
+# ./reconfigure 
+shell script to reconfigure 
+
+
+# mac version precompile version 
+MBP-FH2:ff-OSX10.10 hecht$ cat config.param 
+'--enable-download'
+'--enable-optim'
+'--enable-m64'
+'F77=ifort'
+'FC=ifort'
+'--enable-maintainer-mode'
+'--with-mkl=/opt/intel/mkl/lib'
+'--with-petsc=/usr/local/ff++/mpich/petsc/lib/petsc/conf/petscvariables'
+'-with-hdf5=/usr/local/ff++/mpich/bin/h5cc'
+'--with-gsl-prefix=/usr/local/ff++/mpich/'
+'--disable-pastix'
+'--with-mpipath=/usr/local/ff++/mpich/bin/'
+
+# window version precompile version 
+
+MBP-FH2:ff-OSX10.10 hecht$ cat /Volumes/C/msys64/home/hecht/ff++/config.param 
+'-with-glut=-lfreeglut -lglu32 -lopengl32 -lwinmm -lgdi32 -Wl,--subsystem,windows'
+'-without-mpi'
+'-with-blas=/home/hecht/64/bin/libopenblas.dll'
+'-with-lapack=/home/hecht/64/mingw/bin/libopenblas.dll'
+'--disable-hips'
+'--disable-pastix'
+'--enable-download'
+'CXX=x86_64-w64-mingw32-g++'
+'FC=x86_64-w64-mingw32-gfortran'
+'F77=x86_64-w64-mingw32-gfortran'
+'CC=x86_64-w64-mingw32-gcc'
+
+
+# ubuntu version version
+#  without mpi
+cat config.param 
+'--enable-download'
+'--without-mpi'
+
+# with mpi
+cat config.param 
+'--enable-download'
+
+

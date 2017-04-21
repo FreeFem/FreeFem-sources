@@ -1,0 +1,82 @@
+int err=0;
+mesh Th=square(50,50,[3*x-1.5,3*y-1.5]);
+func r = sqrt(x*x +y*y);
+// wrong ...
+real lc ;
+verbosity=0;
+lc = int1d(Th,levelset=r-1.)(1.) ; 
+cout << " len of the level set = " <<  lc  << " =  2pi " << 2*pi ;
+cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl; 
+if( abs(lc-2*pi) > 1e-1) err++;
+fespace Vh(Th,P1);
+// test linear and bilinear ... 
+varf vl(u,v) = int1d(Th,levelset=r-1.)(v) + int1d(Th,levelset=r-1.)(u*v);
+real[int] vv=vl(0,Vh);
+
+cout << " len of the level set (varf linear ) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi ;
+cout  << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;
+if( abs(lc-2*pi) > 1e-1) err++; 
+real[int]  one(Vh.ndof); 
+one=1.;
+matrix VV=vl(Vh,Vh); //  matrix with levelset
+vv = VV*one;
+cout << " len of the level set (varf bilinear same) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi;
+cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;; 
+if( abs(lc-2*pi) > 1e-1) err++;
+
+// FFCS regression test
+real ffcsreg;
+
+//  just for test a idea approximation of int of negative part of levelset 
+//   to we just change the mesure of the element not the quadrature point 
+{ // test new stuff for level set  ... 
+    macro grad(u) [dx(u),dy(u)] //
+    Vh u,v;
+    solve Pxx(u,v) = int2d(Th) ( grad(u)'*grad(v)*1e-8 ) + int2d(Th, levelset= 1-r) ( grad(u)'*grad(v) ) + on(1,u=0) + int2d(Th, levelset= 1-r) ( 1*v);
+    plot(u,wait=1);   
+    varf vxx(u,v) =  int2d(Th, levelset= 1-r) ( u*v ) + int2d(Th, levelset= 1-r) ( 1*v);
+  matrix XX=vxx(Vh,Vh);
+  real[int] xx=vxx(0,Vh);
+  real area1= int2d(Th, levelset= 1-r)(1.);
+  cout << "  area1 = " << area1 << "  ~= " << Th.area - pi << endl;
+  assert(abs(area1-(Th.area - pi)) < 0.1); 
+  cout << " xx.sum = " << xx.sum << " == " << area1 <<endl;
+  assert(abs(area1-xx.sum) < 1e-8); 
+  
+  real[int] yy(Vh.ndof); yy=1;
+  xx= XX*yy;
+  cout << " XX.sum = " << xx.sum << " == " << area1 << endl;
+  assert(abs(area1-xx.sum) < 1e-8); 
+
+  // FFCS regression tests
+  ffcsreg=abs(area1-xx.sum);
+}
+
+
+
+if(1){// test on diff mesh  not wet implemented (FH  frev 2014)
+mesh Th1=square(10,10,[3*x-1.5,3*y-1.5]);
+mesh Th2=square(11,11,[3*x-1.5,3*y-1.5]);
+fespace Vh1(Th1,P1);
+fespace Vh2(Th2,P1);
+
+varf vl(u,v) = int1d(Th,levelset=r-1.)(v) + int1d(Th,levelset=r-1.)(u*v);
+real[int] vv=vl(0,Vh2);
+
+cout << " len of the level set (varf linear diff    ) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi ;
+cout  << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;
+if( abs(lc-2*pi) > 1e-1) err++; 
+real[int]  one(Vh1.ndof); 
+one=1.;
+// sorry not implemented to day ... FH 
+//verbosity=10000;
+matrix VV=vl(Vh1,Vh2); // no build of matrix with levelset 
+vv = VV*one;
+cout << " len of the level set (varf bilinear diff ) = " <<  (lc=vv.sum)  << "=  2pi " << 2*pi;
+cout << ", Ok = " << (abs(lc-2*pi) < 1e-1) << endl;; 
+if( abs(lc-2*pi) > 1e-1) err++;
+
+}
+cout << " Nb err " << err << endl;
+assert(err==0);
+

@@ -1,0 +1,81 @@
+# -*- mode:diff;coding:raw-text; -*-
+diff -r -u ref/OpenBLAS/c_check OpenBLAS/c_check
+--- ref/OpenBLAS/c_check	2010-01-28 20:26:25.000000000 +0100
++++ OpenBLAS/c_check	2012-06-05 15:17:47.877934400 +0200
+@@ -22,15 +22,16 @@
+ 
+ $cross_suffix = "";
+ 
+-if ($ARGV[0] =~ /(.*)(-[.\d]+)/) {
+-    if ($1 =~ /(.*-)(.*)/) {
+-	$cross_suffix = $1;
+-    }
+-} else {
+-    if ($ARGV[0] =~ /(.*-)(.*)/) {
+-	$cross_suffix = $1;
+-    }
+-}
++# FFCS - this test is broken when using full paths with dashes for compilers
++#if ($ARGV[0] =~ /(.*)(-[.\d]+)/) {
++#    if ($1 =~ /(.*-)(.*)/) {
++#	$cross_suffix = $1;
++#    }
++#} else {
++#    if ($ARGV[0] =~ /(.*-)(.*)/) {
++#	$cross_suffix = $1;
++#    }
++#}
+ 
+ $compiler = "";
+ $compiler = PGI       if ($data =~ /COMPILER_PGI/);
+--- ref/OpenBLAS/Makefile.install	2017-02-23 17:40:19.000000000 +0100
++++ OpenBLAS/Makefile.install	2017-02-23 18:28:48.000000000 +0100
+@@ -2,7 +2,7 @@
+ export GOTOBLAS_MAKEFILE = 1
+ -include $(TOPDIR)/Makefile.conf_last
+ include ./Makefile.system
+-
++install=../../../install-sh 
+ PREFIX ?= /opt/OpenBLAS
+ 
+ OPENBLAS_INCLUDE_DIR := $(PREFIX)/include
+@@ -44,16 +44,16 @@
+ 
+ ifndef NO_LAPACKE
+ 	@echo Copying LAPACKE header files to $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
+-	@-install -pDm644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke.h
+-	@-install -pDm644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke_config.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke_config.h
+-	@-install -pDm644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke_mangling_with_flags.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke_mangling.h
+-	@-install -pDm644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke_utils.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke_utils.h
++	@-$(install) -m 644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke.h
++	@-$(install) -m 644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke_config.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke_config.h
++	@-$(install) -m 644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke_mangling_with_flags.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke_mangling.h
++	@-$(install) -m 644 $(NETLIB_LAPACK_DIR)/lapacke/include/lapacke_utils.h $(DESTDIR)$(OPENBLAS_INCLUDE_DIR)/lapacke_utils.h
+ endif
+ 
+ #for install static library
+ ifndef NO_STATIC
+ 	@echo Copying the static library to $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
+-	@install -pm644 $(LIBNAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
++	@$(install) -m 644 $(LIBNAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
+ 	@cd $(DESTDIR)$(OPENBLAS_LIBRARY_DIR) ; \
+ 	ln -fs $(LIBNAME) $(LIBPREFIX).$(LIBSUFFIX)
+ endif
+@@ -61,7 +61,7 @@
+ ifndef NO_SHARED
+ 	@echo Copying the shared library to $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
+ ifeq ($(OSNAME), Linux)
+-	@install -pm755 $(LIBSONAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
++	@$(install) -m755 $(LIBSONAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
+ 	@cd $(DESTDIR)$(OPENBLAS_LIBRARY_DIR) ; \
+ 	ln -fs $(LIBSONAME) $(LIBPREFIX).so ; \
+ 	ln -fs $(LIBSONAME) $(LIBPREFIX).so.$(MAJOR_VERSION)
+@@ -78,7 +78,7 @@
+ endif
+ ifeq ($(OSNAME), Darwin)
+ 	@-cp $(LIBDYNNAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)
+-	@-install_name_tool -id $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)/$(LIBDYNNAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)/$(LIBDYNNAME)
++	@-$(install)_name_tool -id $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)/$(LIBDYNNAME) $(DESTDIR)$(OPENBLAS_LIBRARY_DIR)/$(LIBDYNNAME)
+ 	@cd $(DESTDIR)$(OPENBLAS_LIBRARY_DIR) ; \
+ 	ln -fs $(LIBDYNNAME) $(LIBPREFIX).dylib
+ endif

@@ -1,0 +1,14 @@
+#!/bin/sh
+if [ -f ./config.param ]; then 
+   test -s  ./config.path && eval export PATH="'`cat ./config.path`:$PATH'"
+  ##  remove dup
+  export PATH=`echo $PATH|awk -F: ' {p=""; for(i=1; i< NF; i++) {  ok =0; for(j=1; j<i; j++) {ok +=  ( $i == $j)} ; if(!ok) {if( p) p =p  ":";p = p  $i;}} print p;   } '`
+  echo PATH=$PATH 
+  cat ./config.param | xargs echo "$@"
+  cat ./config.param | xargs  ./configure "$@"
+elif [ -f ./configure.param ]; then 
+  echo ./configure `cat ./configure.param` "$@"
+  echo ./configure `cat ./configure.param` "$@"|sh
+else
+  echo " sorry not previouly configurate, sorry "
+fi
