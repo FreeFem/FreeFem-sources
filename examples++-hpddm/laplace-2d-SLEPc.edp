@@ -40,7 +40,7 @@ real sigma = getARGV("-sigma", 0.0); // Shift
 if(verbosity > 0 && mpirank == 0) {
     cout << "********************************************"  << endl
 	 << " --- " << mpirank << "/" << mpisize 
-	 << "- hpddm-petsc-v9-Eigenvalues-Laplace.edp "     << endl
+	 << "- laplace-2d-SLEPc.edp "     << endl
 	 << "********************************************"  << endl
 	 << "- input parameters: "                          << endl
 	 << "  refinement factor  = " << s                  << endl
@@ -135,7 +135,7 @@ int k = deigensolver
    DistB,
    vectors = EigenVEC,
    values = EigenVAL,
-   sparams = "-eps_nev 20 -eps_type krylovschur -eps_target -1.0 -st_type sinvert -st_pc_type lu -st_pc_factor_mat_solver_package mumps -eps_view -eps_gen_hermitian"
+   sparams = "-eps_nev 20 -eps_type krylovschur -eps_target 0.0 -st_type sinvert -st_pc_type lu -st_pc_factor_mat_solver_package mumps -eps_view -eps_gen_hermitian"
    );
 /***************************************/
 /*           View the solution         */
