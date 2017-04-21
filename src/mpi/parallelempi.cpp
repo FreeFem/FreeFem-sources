@@ -710,7 +710,7 @@ public:
   {
     int tag=MPI_TAG<Mesh *>::TAG;
     ffassert(rq == rrq);
-    long l = * (long *) (void *) p ;
+    long l = r_endian(* (long *) (void *) p );
     long l1 = l -( sizempibuf-sizeof(long));
     if(verbosity>100)
       cout << mpirank << " Do RevcWMeshd " <<  l  <<" " << state << "  cont  : " <<  (l1 >0)  << " " << rq << " " << comm << endl; 
@@ -751,7 +751,7 @@ public:
     if(verbosity>100)
       cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << endl; 
     char * pp = p-sizeof(long);
-    count()=lg; // store length in count 
+    count()=w_endian((long) lg); // store length in count
     size_t ls=lg+sizeof(long);
     if (ls<=sizempibuf)
       WSend(pp,ls, who, tag,comm,rq);
@@ -916,7 +916,7 @@ void Serialize::mpisend(const MPIrank & rank,long tag,const void * vmpirank)
   char * pp = p-sizeof(long);
   long countsave=count(); // save count 
   count()=lg; // store length in count 
-  int l=lg+sizeof(long);
+  long l=lg+sizeof(long);
   if(verbosity>100) 
     cout << " -- send from  " << mpirank << " to " << rank << " serialized " << what 
 	 <<   ", l=" << l << ", tag=" << tag << " " << (l < sizempibuf) << endl;
@@ -952,7 +952,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag,const void *
   char * buf= new char [sizempibuf];
   WRecv(buf, sizempibuf,  rank, tag,comm,rq);
   lg = * (long *) (void *) buf;
-  int l=lg+sizeof(long);
+  long l=lg+sizeof(long);
   char * pp= new char[l]  ;
   if ( l <= sizempibuf) 
     memcpy(pp,buf,l);
