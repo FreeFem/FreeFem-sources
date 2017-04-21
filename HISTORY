@@ -1,5 +1,34 @@
-@  changeset:   4092:59ee0288cca9
-|  tag:         tip
+@    changeset:   4097:2c2b704c8d4c
+|\   tag:         tip
+| |  parent:      4096:6ffe983bf2fc
+| |  parent:      4095:b48b2a2df22a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Apr 21 14:08:51 2017 +0200
+| |  summary:     merge branch
+| |
+| o  changeset:   4096:6ffe983bf2fc
+| |  parent:      4093:fccca933681f
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Apr 21 14:05:08 2017 +0200
+| |  summary:     try to correct send/recv mesh under mpi
+| |
+o |  changeset:   4095:b48b2a2df22a
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Fri Apr 21 12:13:14 2017 +0200
+| |  summary:     Typo.
+| |
+o |  changeset:   4094:27ab447c0022
+| |  parent:      4092:59ee0288cca9
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Fri Apr 21 11:32:02 2017 +0200
+| |  summary:     New interface to SLEPc (distributed eigensolver).
+| |
+| o  changeset:   4093:fccca933681f
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Fri Apr 21 09:21:11 2017 +0200
+|    summary:     correct pb of launching ffglut by default a mpi cas
+|
+o  changeset:   4092:59ee0288cca9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Apr 20 20:55:22 2017 +0200
 |  summary:     update web/windows.php
