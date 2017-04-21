@@ -2006,7 +2006,7 @@ Mesh::Mesh(const  Serialize &serialized)
     serialized.get( pp,nv);
     serialized.get( pp,neb);
     if (verbosity>2) 
-	cout << " mesh serialized : " << l << " " << nt << " " << nv << " " << neb << endl;
+	cout << " mesh serialized : l " << l << " / " << nt << " " << nv << " " << neb << endl;
     assert ( nt > 0 && nv >0 && neb >=0);
     triangles = new Triangle [nt];
     vertices  = new Vertex[nv];
@@ -2063,7 +2063,7 @@ Serialize  Mesh::serialize() const
     serialized.put( pp,nv);
     serialized.put( pp,neb);
     if (verbosity>2) 
-      cout << " mesh Serialized : " << l << " "  << nt << " " << nv << " " << neb << endl;
+      cout << " mesh dSerialized : " << l << " /"  << nt << " " << nv << " " << neb << endl;
     for (int i=0;i<nv;i++)
     {
 	serialized.put(pp, vertices[i].x);
