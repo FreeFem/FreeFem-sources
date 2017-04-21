@@ -1,7 +1,42 @@
 How to compile FreeFem++ on Microsoft Windows
 ---------------------------------------------
-See the web page  http://www.freefem.org/ff++/windows.php
+See the web page  http://www.freefem.org/ff++/windows.php (april 2017)
 
+Warning bug: if you launch freefem++ without filename script by double clip with win64 version, 
+your get a error due (it is due to bug of usage GetOpenFileName in win64 ).
+
+After version 3.52 the Windows 64 version is build with mpi and  the folling option 
+./configure --enable-download' '--disable-pastix' '--disable-hips'
+And execute  and  follow the instruction.
+
+Add to launch mpi version use : in terminal windows (cmd, shell, PowerShell) 
+you can try in directory C:\Program Files (86)\FreeFem++\examples++-mpi
+
+mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp
+
+But before  you must install 
+Install MSMPI  for parallel version under window64 
+download MS MPI V7 ( https://www.microsoft.com/en-us/download/details.aspx?id=49926 ), and install both msmpisdk.msi and MSMpiSetup.exe
+
+remark under msys2 do not forger to do 
+         open c:\msys64\mingw64.ini in an editor and remove 
+         “rem” before “set MSYS2_PATH_TYPE=inherit” 
+
+
+mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp 
+
+
+
+
+
+
+
+
+
+
+
+
+AFTER THIS OBSOLETE FILE (F. Hecht) 
 WARNING NOW the window is compile under MINGW  (from version 3.11  14/01/2011 FH)
 
   So the old dll are incompatible with the new version. 
