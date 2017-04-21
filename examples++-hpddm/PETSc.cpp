@@ -182,7 +182,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
         HPDDM::MatrixCSR<PetscScalar>* dA = new HPDDM::MatrixCSR<PetscScalar>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
         ptA->_A->setMatrix(dA);
-        ptA->_num = new unsigned int[mA->_n];
+        ptA->_num = new unsigned int[mA->n];
         std::copy_n(ptB->_num, dA->_n, ptA->_num);
         ptA->_first = ptB->_first;
         ptA->_last = ptB->_last;
