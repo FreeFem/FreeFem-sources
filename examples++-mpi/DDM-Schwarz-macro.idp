@@ -373,7 +373,7 @@ macro BuildTransferMat(ipart,mesh,Pk,N,U2V,Thi,Whi,Whij,Thij,aThij,Usend,Vrecv,j
 // usage uplot is  allu or [allu,allu1] :
 macro PLOTMPIALLU(mesh,Pk,defPk, Th, u, uplot, plotparm)
 { int ver=verbosity;
-  verbosity=0;
+  verbosity=10;
   if(NoGraphicWindow==0)
   {
   if(mpirank==0)

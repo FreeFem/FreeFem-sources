@@ -108,8 +108,8 @@ int getprog(char* fn,int argc, char **argv)
     {int l = strlen(prognamearg);
         if( (( l>4 ) && (strcmp("-nw",prognamearg+l-3) ==0))
            || (( l>8) &&(strcmp("-nw.exe",prognamearg+l-7) ==0))
-           || (( l>5) &&(strcmp("-mpi",prognamearg+l-7) ==0))
-           || (( l>9) &&(strcmp("-mpi.exe",prognamearg+l-7) ==0))
+           || (( l>5) &&(strcmp("-mpi",prognamearg+l-4) ==0)) // Correct april 2017 FH
+           || (( l>9) &&(strcmp("-mpi.exe",prognamearg+l-8) ==0)) // Correct april 2017 FH
            )
         {
             consoleatend=false;
