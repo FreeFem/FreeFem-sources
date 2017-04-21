@@ -694,46 +694,49 @@ class RevcWMeshd : public DoOnWaitMPI_Request,Serialize
 public:  
   Mesh const ** ppTh;
   int state;
+    long long lsz;
   RevcWMeshd(const MPIrank *mpirank,Mesh const ** ppThh)
     : DoOnWaitMPI_Request(*mpirank),Serialize(sizempibuf,Fem2D::Mesh::magicmesh),
-      ppTh(ppThh),state(0)
+      ppTh(ppThh),state(0),lsz(0)
   {
+    // remark the first data in p is the size in long long
+      
     int tag=MPI_TAG<Mesh *>::TAG;
-    if(verbosity>100)
-      cout << " -- RevcWMeshd   " << rq << " " << comm << " " << p << endl; 
-    char * pp = p-sizeof(long);
-    int ll=WRecv(pp, sizempibuf,  who, tag,comm,rq); // wait first part ..
-    // cout << mpirank << " ++ ll= " << ll << " pp= " << pp << endl;
+    if(verbosity>99)
+      cout << " -- RevcWMeshd   " << rq << " " << comm << " " << p << endl;
+    int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part ..
+    size_t kk=0;
+    get(kk,lsz);
+    if(verbosity>199) cout << mpirank << "     --  lsk = "  <<lsz << " p= " << p << endl;
   }
   
   bool  Do(MPI_Request *rrq)
   {
     int tag=MPI_TAG<Mesh *>::TAG;
     ffassert(rq == rrq);
-    long l = r_endian(* (long *) (void *) p );
-    long l1 = l -( sizempibuf-sizeof(long));
+    
+    long l1 = lsz - sizempibuf;
     if(verbosity>100)
-      cout << mpirank << " Do RevcWMeshd " <<  l  <<" " << state << "  cont  : " <<  (l1 >0)  << " " << rq << " " << comm << endl; 
+      cout << mpirank << " Do RevcWMeshd " <<  lsz  <<" " << state << "  cont  : " <<  (l1 >0)  << " " << rq << " " << comm << endl;
     
     if(0==state++ &&  l1>0 ) // recv first part ..
       {
 	if(verbosity>100)
-	  cout << mpirank << " + Do RevcWMeshd " <<  l  <<" " << state << "  cont  : " <<  ( l > sizempibuf) <<  " " << rq << " " << l-sizempibuf << " p = " << (void *) p <<  endl; 
-	resize(l);
-	int ll=WRecv(p-sizeof(long)+sizempibuf,l1,  who, tag+state,comm,rq);
+	  cout << mpirank << " + Do RevcWMeshd " <<  lsz  <<" " << state << "  cont  : " <<  ( l1 > sizempibuf) <<  " " << rq << " " << l1  <<  endl;
+	resize(lsz);
+	int ll=WRecv(p+sizempibuf,l1,  who, tag+state,comm,rq);
 	return true;// continue .. 	
       }
-    else resize(l);
+    else resize(lsz);
     // we have the all buffer => DeSerialize
-    DeSerialize(this,ppTh);      
-    count()=0; 
+    DeSerialize(this,ppTh);
     if(verbosity>100) 
       cout << "    " << mpirank << " recived from " << who << " serialized " << what <<   ", l=" 
-	   << l << ", tag=" << tag << " rq = " << rq << " "  << *ppTh << endl;
+	   << lsz << ", tag=" << tag << " rq = " << rq << " "  << *ppTh << endl;
     
     return false; // OK 
   }
-  ~RevcWMeshd() {count()=0;}	
+  ~RevcWMeshd() {}
   
 };
 
@@ -743,20 +746,27 @@ class SendWMeshd : public DoOnWaitMPI_Request,Serialize
 public:  
   const Mesh ** ppTh;
   int state;
+  
   SendWMeshd(const MPIrank *mpirank,const Mesh ** ppThh)
     : DoOnWaitMPI_Request(*mpirank),Serialize((**ppThh).serialize()),
       ppTh(ppThh),state(0)
   {
+      {
+      long long lsz;
+      size_t kk=0;
+      get(kk,lsz);
+      ffassert(lsz==lg); //  verif
+      }
     int tag=MPI_TAG<Mesh *>::TAG;
+
     if(verbosity>100)
-      cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << endl; 
-    char * pp = p-sizeof(long);
-    count()=w_endian((long) lg); // store length in count
-    size_t ls=lg+sizeof(long);
-    if (ls<=sizempibuf)
-      WSend(pp,ls, who, tag,comm,rq);
+          cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << " "<< lg << " "<< count() <<endl;
+
+   
+    if (lg<=sizempibuf)
+      WSend(p,lg, who, tag,comm,rq);
     else 
-      WSend(pp,sizempibuf,who, tag,comm,rq);
+      WSend(p,sizempibuf,who, tag,comm,rq);
   }
   
   bool  Do(MPI_Request *rrq)
