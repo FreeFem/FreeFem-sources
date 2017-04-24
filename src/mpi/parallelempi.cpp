@@ -772,14 +772,13 @@ public:
   bool  Do(MPI_Request *rrq)
   {
     int tag=MPI_TAG<Mesh *>::TAG;
-    char * pp = p-sizeof(long);
-    long l1 = lg -(sizempibuf- sizeof(long));
+    long l1 = lg -sizempibuf;
     if(verbosity>100)
       cout << mpirank << " Do SendWMeshd " <<  lg  <<" " << state << "  cont  : " <<  (l1 >0)  << " " << rq << " " << comm << endl; 
     
     if(0==state++ &&  l1>0 ) // send the second part 
       {
-	int ll=WSend(pp+sizempibuf,l1,  who, tag+state,comm,rq);
+	int ll=WSend(p+sizempibuf,l1,  who, tag+state,comm,rq);
 	return true;// Fini
       }
     return false; // OK 
