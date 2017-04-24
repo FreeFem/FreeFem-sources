@@ -707,7 +707,7 @@ public:
     int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part ..
     size_t kk=0;
     get(kk,lsz);
-    if(verbosity>199) cout << mpirank << "     --  lsk = "  <<lsz << " p= " << p << endl;
+      if(verbosity>199) cout << mpirank << "     --  lsk = "  <<lsz << " p= " << p << " p[]= " << (int) p[0] << (int) p[1] <<endl;
   }
   
   bool  Do(MPI_Request *rrq)
@@ -760,7 +760,7 @@ public:
     int tag=MPI_TAG<Mesh *>::TAG;
 
     if(verbosity>100)
-          cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << " "<< lg << " "<< count() <<endl;
+          cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << " "<< lg << " "<< " p[]= " << (int) p[0] << (int) p[1] <<endl;
 
    
     if (lg<=sizempibuf)
