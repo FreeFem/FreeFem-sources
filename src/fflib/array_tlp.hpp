@@ -1089,8 +1089,8 @@ class Unique : public OneOperator {
 };
 template<class K, class L>
 AnyType Unique_Op<K, L>::operator()(Stack stack) const {
-    KN<K>* const& array = GetAny<KN<K>*>((*ar)(stack));
-    KN<L>* const& val = GetAny<KN<L>*>((*va)(stack));
+    KN<K>* array = GetAny<KN<K>*>((*ar)(stack));
+    KN<L>* val = GetAny<KN<L>*>((*va)(stack));
     long remove = nargs[0] ? GetAny<long>((*nargs[0])(stack)) : 0;
     std::set<L> vals;
     for(int i = 0; i < array->n; ++i)
