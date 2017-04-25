@@ -6,7 +6,7 @@
 //   test 
 /*
 
---  edp script associed: 
+--  edp script associated:
  LaplaceRT1.edp
  lame-TD-NSS.edp
  test-ElementMixte.edp
@@ -18,19 +18,13 @@
 #include "ff++.hpp"
 #include "AddNewFE.h"
 
-/*
- Per vedere se ci sono errori di compilazione e per poter usare elementi in un file edp con load:
- scrivo in terminale ff-c++ P012_3d_Modif.cpp
- (cio' crea P012_3d_Modif.o e P012_3d_Modif.dylib)
- */
 
 namespace Fem2D {
     
-    //------------------- New: --------------------//
-    
-    // Nedelec order 1 (degree 2) 3D
+    // Author: Marcella Bonazzoli
+    // Edge elements of degree 2, 3D
+    // (they are called Edge13d because the Nedelec elements of degree 1 are called Edge03d)
     // TypeOfFE_Edge1_3d derived from GTypeOfFE<> (which is defined in FESpacen.hpp)
-    
     class TypeOfFE_Edge1_3d : public GTypeOfFE<Mesh3>
     {
     public:
@@ -41,8 +35,7 @@ namespace Fem2D {
         static int dfon[];
         static const int d=Mesh::Rd::d;
         static const GQuadratureFormular<R1> QFe; // quadrature formula on an edge
-        static const GQuadratureFormular<R2> QFf; // quadrature formule on a face
-        int edgeface[4][3]; // not used?!
+        static const GQuadratureFormular<R2> QFf; // quadrature formula on a face
         TypeOfFE_Edge1_3d(); // constructor
         void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd & P,RNMK_ & val) const;
         void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
@@ -52,15 +45,14 @@ namespace Fem2D {
     
     // Quadrature formula on an edge, exact for degree 3 (ok: int_e (deg2*t *lambda))
     const GQuadratureFormular<R1> TypeOfFE_Edge1_3d:: QFe(-1+2*2,2,GaussLegendre(2),true);
-    // argomenti: exact, num pti integrazione, pti integrazione, clean (~GQuadratureFormular() {if(clean) delete [] p;})
-    // GaussLegendre definita in QuadratureFormular.cpp (nel commento dice che è su [0,1])
+    // arguments: exact, num of integration pts, integration pts, clean (~GQuadratureFormular() {if(clean) delete [] p;})
+    // GaussLegendre defined in QuadratureFormular.cpp
     
-    // Quadrature formule on a face, exact for degree 2 (ok: int_f (deg2*t)), internal quadrature points
+    // Quadrature formula on a face, exact for degree 2 (ok: int_f (deg2*t)), internal quadrature points
     static GQuadraturePoint<R2> P_QuadratureFormular_T_2_intp[3] = {
         GQuadraturePoint<R2>(1./3.,R2(1./6.,4./6.)) ,
         GQuadraturePoint<R2>(1./3.,R2(4./6.,1./6.)) ,
         GQuadraturePoint<R2>(1./3.,R2(1./6.,1./6.)) };
-    // GQuadratureFormular<R2> const QuadratureFormular_T_2_int(2,3,P_QuadratureFormular_T_2_intp);
     const GQuadratureFormular<R2> TypeOfFE_Edge1_3d:: QFf(2,3,P_QuadratureFormular_T_2_intp);
     
     // In Mesh3dn.cpp:
@@ -68,7 +60,6 @@ namespace Fem2D {
     // static const int  nvfaceTet[4][3] = { {3,2,1},{0,2,3},{3,1,0},{0,1,2} };
     // In GenericMesh.hpp:
     // Vertex& at(int i) {return *vertices[i];}
-    // penso che vertices venga riempito nell'ordine dato dal file di mesh per ogni tetraedro
     // In GenericMesh.hpp:
     // Rd Edge(int i) const {ASSERTION(i>=0 && i <ne);
     // return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}
@@ -77,16 +68,15 @@ namespace Fem2D {
     // { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
     
     // Constructor
-    // (usando parte di quello madre)
-    // dfon, d, nsub ('per grafica'),
-    // kPi = NbcoefforInterpolation e' num di alfa di (13.1) (chapter 13 ff++doc)
+    // dfon, d, nsub,
+    // kPi = NbcoefforInterpolation is the number of alphas in (13.1) (chapter 13 ff++doc)
     //     = 3(=numComp)*QFe.n(num quad pts edge)*2*ne(2 fncts per edge) +
     //       3(=numComp)*QFf.n(num quad pts face)*2*nf(2 fncts per face)
     // npPi = NbPtforInterpolation = ne*QFe.n+nf*QFf.n
     // invariantinterpolationMatrix = false (i.e. it depends on the tetrahedron), discon=true
     TypeOfFE_Edge1_3d:: TypeOfFE_Edge1_3d(): GTypeOfFE<Mesh3>(TypeOfFE_Edge1_3d::dfon,d,1, Element::ne*2*3*QFe.n+Element::nf*2*3*QFf.n, Element::ne*QFe.n+Element::nf*QFf.n, false,true)
     {
-        assert(QFe.n); // a cosa serve?
+        assert(QFe.n);
         assert(QFf.n);
         R3 Pt[] = {R3(0.,0.,0.),R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)}; // 4 ref tetrahedron vertices
         
@@ -99,7 +89,6 @@ namespace Fem2D {
                 {
                     double x=QFe[q].x;
                     this->PtInterpolation[i] = Pt[Element::nvedge[e][0]]*(1.-x)+Pt[Element::nvedge[e][1]]*(x);
-                    // rispetto all'originale ho scambiato x e 1-x ! ?? (forse non e' importante l'ordine perche' ho gruppo di pti di quadratura simmetrico ?)
                 }
             // We build the interpolation pts on the faces of the reference tetrahedron:
             // (the index i mustn't be reinitialised!)
@@ -109,16 +98,15 @@ namespace Fem2D {
                     double x=QFf[q].x;
                     double y=QFf[q].y;
                     this->PtInterpolation[i] = Pt[Element::nvface[f][0]]*(1.-x-y) + Pt[Element::nvface[f][1]]*x + Pt[Element::nvface[f][2]]*y;
-                    // penso che non sia importante l'ordine perche' i tre punti di quadratura sono simmetrici
                 }
         }
         {
-            // We build the indices in (13.1) : edge basis fncts
+            // We build the indices in (13.1) : edge dofs
             int i=0, p=0; // i is the k in (13.1) (chapter 13 ff++doc)
             int e; // we will need e also below, in the part referred to faces
-            for(e=0; e<(Element::ne)*2; e++) // loop on the 12 edge basis fcts
+            for(e=0; e<(Element::ne)*2; e++) // loop on the 12 dofs
             {
-                if (e%2==1) {p = p-QFe.n;} // if I consider an 'even' basis fct, the quad pts are the ones of the previous basis fnct (they correspond to the same edge)
+                if (e%2==1) {p = p-QFe.n;} // if I consider an 'even' dof, the quad pts are the ones of the previous dof (they correspond to the same edge)
                 for(int q=0; q<QFe.n; ++q,++p) // loop on the 2 edge quadrature pts
                     for (int c=0; c<3; c++,i++) // loop on the 3 components
                     {
@@ -128,11 +116,11 @@ namespace Fem2D {
                         this->coefInterpolation[i]=0.; // alfak: we will fill them with 'set' (below) because they depend on the tetrahedron
                     }
             }
-            // We build the indices in (13.1) : face basis fncts
+            // We build the indices in (13.1) : face dofs
             // (the indices i and p mustn't be reinitialised)
-            for(int f=0; f<(Element::nf)*2; f++) // loop on the 8 face basis fcts
+            for(int f=0; f<(Element::nf)*2; f++) // loop on the 8 dofs
             {
-                if (f%2==1) {p = p-QFf.n;} // if I consider an 'even' basis fct, the quad pts are the ones of the previous basis fnct (they correspond to the same face)
+                if (f%2==1) {p = p-QFf.n;} // if I consider an 'even' dof, the quad pts are the ones of the previous dof (they correspond to the same face)
                 for(int q=0; q<QFf.n; ++q,++p) // loop on the 3 face quadrature pts
                     for (int c=0; c<3; c++,i++) // loop on the 3 components
                     {
@@ -143,40 +131,39 @@ namespace Fem2D {
                     }
             }
         }
-        // cout <<  " ++ TypeOfFE_Edge1_3d():"<< this->PtInterpolation << endl; // a cosa serve?
     }
     
-    // For the coefficients of interpolation alphak in (13.1) (same 'for loops' as above) (vedi foglio)
+    // For the coefficients of interpolation alphak in (13.1)
     void TypeOfFE_Edge1_3d:: set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const
     {
-        int i=ocoef, p=0; // Edge0_3d: parto da ocoef a riempire M perche' 'potrei avere un elemento finito dentro un altro elemento finito' (non capito) ??qui??
+        int i=ocoef, p=0;
         
-        // Edge basis fncts:
-        int e; // we will need e also below, in the part referred to faces
+        // 12 edge dofs
+        int e;
         for(e=0; e<(Element::ne)*2; e++)
         {
             int ee=e/2;
             R3 E=K.Edge(ee); // the edge local number is given by the integer division between e and 2
             int eo = K.EdgeOrientation(ee);
             if(!eo) E=-E;
-            if (e%2==1) {p = p-QFe.n;} // if I consider an 'even' basis fct, the quad pts are the ones of the previous basis fnct (they correspond to the same edge)
+            if (e%2==1) {p = p-QFe.n;} // if I consider an 'even' dof, the quad pts are the ones of the previous dof (they correspond to the same edge)
             for(int q=0; q<QFe.n; ++q,++p)
             {
-                double ll=QFe[q].x; // value of lambda_0 or lambda_1 // why not (1-QFe[q].x) ??
+                double ll=QFe[q].x; // value of lambda_0 or lambda_1
                 if( (e%2+eo) == 1 ) ll = 1-ll; // if exactly one between e%2 and eo is equal to 1 (so the sum is equal to 1), take the other lambda
                 // i.e. if I'm considering the 2nd dof of the edge (or) if the edge is badly oriented, take the other lambda (but not if both)
                 for(int c=0; c<3; c++,i++)
                 {
                     M.coef[i] = E[c]*QFe[q].a*ll;
-                    // QFe[q].a e' il peso su [0,1] del pto di integrazione q
-                    // QFe[q].x e' la x su [0,1] del pto di integrazione q,
-                    // quindi la sua prima lambda e' 1-QFe[q].x e la sua seconda lambda e' QFe[q].x
+                    // QFe[q].a is the weight of the integration point q
+                    // QFe[q].x is the x over [0,1] of the integration point q
                 }
             }
         }
-        // Face basis fncts:
+      
         // (the indices i and p mustn't be reinitialised)
-        for(int f=0; f<(Element::nf)*2; f++) // loop on the 8 face basis fcts
+        // 8 face dofs
+        for(int f=0; f<(Element::nf)*2; f++) // loop on the 8 face dofs
         {
             int ff=f/2; // the face number
             int iff=f%2; // 1st or 2nd dof of the face
@@ -193,13 +180,11 @@ namespace Fem2D {
             i0 = Element::nvface[ff][i0], i1 = Element::nvface[ff][i1], i2 = Element::nvface[ff][i2];
             int ie0=i0, ie1 = iff==0? i1 : i2; // edge for the face dof (its endpoints local numbers)
             R3 E(K[ie0],K[ie1]);
-            if (iff) {p = p-QFf.n;} // if I consider an 'even' basis fct, the quad pts are the ones of the previous basis fnct (they correspond to the same face)
+            if (iff) {p = p-QFf.n;} // if I consider an 'even' dof, the quad pts are the ones of the previous dof (they correspond to the same face)
             for(int q=0; q<QFf.n; ++q,++p) // loop on the 3 face quadrature pts
                 for (int c=0; c<3; c++,i++) // loop on the 3 components
                 {
                     M.coef[i] = E[c]*QFf[q].a;
-                    // con questa formula di quadratura QFf i pesi sono tutti uguali,
-                    // se fossero diversi bisognerebbe vedere se i punti di quadratura si incollano bene su una faccia in comune a due tetraedri ??
                 }
         }
         ffassert(i==M.ncoef && M.np == p);
@@ -228,26 +213,21 @@ namespace Fem2D {
      and the 1st examined face is the one opposite the vertex with the smallest GLOBAL number
      (and 2 edges of the face are chosen and oriented looking at its 3 global numbers), and so on.
      In this way:
-     - a dof which is common to 2 adjacent tetrahedra is the same in the two tetraedra
+     - a dof which is common to 2 adjacent tetrahedra is the same in the two tetrahedra
      (since the orientation of each edge is chosen using the global numbers),
      - we can use the coefficients giving a dual basis that were calculated for the reference tetrahedron
      since the structure of orientation of the edges is the same (up to a rotation) as the one used in the reference tetrahedron.
-     ([On the contrary, in the previous not working version we built the omegas in the order given the LOCAL numbering,
-     changing the orientation of each edge using the GLOBAL numbers, but in that way the structure of orientation of the edges
-     was not the same as the one used in the reference tetrahedron, and actually we couldn't use the coefficients calculated.
-     Indeed, it didn't work for the tetrahedra whose vertices were not listed with increasing global number e.g. Th2.mesh,
-     but it worked for tetrahedra whose vertices were listed with increasing global number e.g. Th1 and Th2b,
-     since in this second case the orientation of each edge was actually left unchanged.])
      
      BUT THEN, when we build the DUAL basis functions PHI, we use the permutation p20 to go back to the FreeFem numbering of the dofs
      (which follows the LOCAL numbering).
      For instance the 1st examined edge can be the 3rd edge looking at the local numbering.
+     Here with 'dual' I mean basis functions and dofs in duality.
      */
     
     // val contains the values of the basis functions and of their derivatives at the point of K corresponding to the point P of the reference tetrahedron, by components
     void TypeOfFE_Edge1_3d:: FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P,RNMK_ & val) const
     {
-        assert(val.N()>=20); // 20 degrees of freedom, why >= ??
+        assert(val.N()>=20); // 20 degrees of freedom
         assert(val.M()==3); // 3 components
         // -------------
         // perm: the permutation for which the 4 tetrahedron vertices are listed with increasing GLOBAL number
@@ -298,9 +278,9 @@ namespace Fem2D {
         }
         // -----
         
-        if (whatd & Fop_D0) // Fop_D0 definito in FESpacen.hpp ma non capito bene il <<
+        if (whatd & Fop_D0) // Fop_D0 defined in FESpacen.hpp
         {
-            R3 X = K(P); //usato nella riga commentata più sotto
+            R3 X = K(P);
             // First, the functions omega (they don't constitute a dual basis! only a basis)
             R3 omega[20];
             // 12 edge functions:
@@ -311,7 +291,6 @@ namespace Fem2D {
                 // ! :
                 // using perm, [i0,i1] is already from the smallest global number to the greatest global number,
                 // since nvedge always gives indices which read perm from left to right
-                //cout << i << " oriented edge (" << K.at(i0) << "->" << K.at(i1) << ")" << endl;
                 omega[i*2] = l[i0]*(l[i0]*D[i1]-l[i1]*D[i0]);
                 omega[i*2+1] = l[i1]*(l[i0]*D[i1]-l[i1]*D[i0]);
             }
@@ -410,7 +389,6 @@ namespace Fem2D {
                     omegadz[12+j*2+1] = D[i1].z*(l[i0]*D[i2]-l[i2]*D[i0]) + l[i1]*(D[i0].z*D[i2]-D[i2].z*D[i0]);
                 }
             }
-            // Now, the functions phi that really constitute a dual basis
             R3 phidx[20];
             if (whatd & Fop_dx)
             {
@@ -592,7 +570,6 @@ namespace Fem2D {
                     omegadyz[12+j*2+1] = D[i1].y*(D[i0].z*D[i2]-D[i2].z*D[i0]) + D[i1].z*(D[i0].y*D[i2]-D[i2].y*D[i0]);
                 }
             }
-            // Now, the functions phi that really constitute a dual basis
             R3 phidxx[20];
             if (whatd & Fop_dxx)
             {
@@ -782,10 +759,10 @@ namespace Fem2D {
         }
     }
  
+ 
     // Author: Marcella Bonazzoli
     // Edge elements of degree 3, 3D
     // (they are called Edge23d because the Nedelec elements of degree 1 are called Edge03d)
-    
     // TypeOfFE_Edge2_3d derived from GTypeOfFE<> (which is defined in FESpacen.hpp)
     class TypeOfFE_Edge2_3d : public GTypeOfFE<Mesh3>
     {
@@ -808,8 +785,8 @@ namespace Fem2D {
     
     // Quadrature formula on an edge, exact for degree 5 (ok: int_e (deg3*t *lambda*lambda))
     const GQuadratureFormular<R1> TypeOfFE_Edge2_3d:: QFe(2*3-1,3,GaussLegendre(3),true);
-    // argomenti: exact, num pti integrazione, pti integrazione, clean (~GQuadratureFormular() {if(clean) delete [] p;})
-    // GaussLegendre definita in QuadratureFormular.cpp (nel commento dice che è su [0,1])
+    // arguments: exact, num of integration pts, integration pts, clean (~GQuadratureFormular() {if(clean) delete [] p;})
+    // GaussLegendre defined in QuadratureFormular.cpp
     
     // Quadrature formula on a face, exact for degree 4 (ok: int_f (deg3*t*lambda))
     // (From Mark A. Taylor, Beth A. Wingate, Len P. Bos,
@@ -821,7 +798,7 @@ namespace Fem2D {
         GQuadraturePoint<R2>(0.4467631793560/2,R2(0.1081030181681,0.4459484909160)) ,
         GQuadraturePoint<R2>(0.4467631793560/2,R2(0.4459484909160,0.1081030181681)) ,
         GQuadraturePoint<R2>(0.4467631793560/2,R2(0.4459484909160,0.4459484909160)) };
-    const GQuadratureFormular<R2> TypeOfFE_Edge2_3d:: QFf(4,6,P_QuadratureFormular_T_4_TWB); // devo aggiungerci il true come in QFe??
+    const GQuadratureFormular<R2> TypeOfFE_Edge2_3d:: QFf(4,6,P_QuadratureFormular_T_4_TWB);
     
     // Quadrature formula on a tetrahedron, exact for degree 3 (ok: int_v (deg3*t))
     // (From Table 4.57 pag 247 Solin HOFEM, coords trasformed like on pag 68,
@@ -832,14 +809,13 @@ namespace Fem2D {
         GQuadraturePoint<R3>(R3(1./6.,1./6.,0.5),0.45),
         GQuadraturePoint<R3>(R3(1./6.,0.5,1./6.),0.45),
         GQuadraturePoint<R3>(R3(0.5,1./6.,1./6.),0.45)  };
-    const GQuadratureFormular<R3> TypeOfFE_Edge2_3d:: QFv(3,5,P_QuadratureFormular_Tet_3_solin); // devo aggiungerci il true come in QFe??
+    const GQuadratureFormular<R3> TypeOfFE_Edge2_3d:: QFv(3,5,P_QuadratureFormular_Tet_3_solin);
     
     // In Mesh3dn.cpp:
     // static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
     // static const int  nvfaceTet[4][3] = { {3,2,1},{0,2,3},{3,1,0},{0,1,2} };
     // In GenericMesh.hpp:
     // Vertex& at(int i) {return *vertices[i];}
-    // penso che vertices venga riempito nell'ordine dato dal file di mesh per ogni tetraedro
     // In GenericMesh.hpp:
     // Rd Edge(int i) const {ASSERTION(i>=0 && i <ne);
     // return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}
@@ -848,9 +824,8 @@ namespace Fem2D {
     // { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
     
     // Constructor
-    // (usando parte di quello madre)
-    // dfon, d, nsub ('per grafica'?),
-    // kPi = NbcoefforInterpolation e' num di alfa di (13.1) (chapter 13 ff++doc)
+    // dfon, d, nsub,
+    // kPi = NbcoefforInterpolation is the number of alphas in (13.1) (chapter 13 ff++doc)
     //     = 3(=numComp)*QFe.n(num quad pts edge)*3*ne(3 fncts per edge) +
     //       3(=numComp)*QFf.n(num quad pts face)*6*nf(6 fncts per face) +
     //       3(=numComp)*QFv.n(num quad pts volume)*3(3 volume fncts)
@@ -858,7 +833,7 @@ namespace Fem2D {
     // invariantinterpolationMatrix = false (i.e. it depends on the tetrahedron), discon=true
     TypeOfFE_Edge2_3d:: TypeOfFE_Edge2_3d(): GTypeOfFE<Mesh3>(TypeOfFE_Edge2_3d::dfon,d,1, 3*QFe.n*3*Element::ne+3*QFf.n*6*Element::nf+3*QFv.n*3, Element::ne*QFe.n+Element::nf*QFf.n+QFv.n, false,true)
     {
-        assert(QFe.n); // a cosa serve?
+        assert(QFe.n);
         assert(QFf.n);
         assert(QFv.n);
         R3 Pt[] = {R3(0.,0.,0.),R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)}; // 4 ref tetrahedron vertices
@@ -872,7 +847,6 @@ namespace Fem2D {
                 {
                     double x=QFe[q].x;
                     this->PtInterpolation[p] = Pt[Element::nvedge[e][0]]*(1.-x)+Pt[Element::nvedge[e][1]]*(x);
-                    // rispetto all'originale ho scambiato x e 1-x (forse non e' importante l'ordine perche' ho gruppo di pti di quadratura simmetrico ?)
                 }
             // We build the interpolation pts on the faces of the reference tetrahedron:
             // (the index i mustn't be reinitialised!)
@@ -882,7 +856,6 @@ namespace Fem2D {
                     double x=QFf[q].x;
                     double y=QFf[q].y;
                     this->PtInterpolation[p] = Pt[Element::nvface[f][0]]*(1.-x-y) + Pt[Element::nvface[f][1]]*x + Pt[Element::nvface[f][2]]*y;
-                    // penso che non sia importante l'ordine perche' ho gruppo di pti di quadratura simmetrico
                 }
             // We build the interpolation pts on the tetrahedron:
             // (the index i mustn't be reinitialised!)
@@ -892,17 +865,15 @@ namespace Fem2D {
                 double y=QFv[q].y;
                 double z=QFv[q].z;
                 this->PtInterpolation[p] = Pt[0]*(1.-x-y-z) + Pt[1]*x + Pt[2]*y + Pt[3]*z;
-                // penso che non sia importante l'ordine perche' ho gruppo di pti di quadratura simmetrico
-                //this->PtInterpolation[i] = QFf[q]; // sarebbe andato bene anche cosi'?
             }
         }
         {
-            // We build the indices in (13.1) : edge basis fncts
+            // We build the indices in (13.1) : edge dofs
             int i=0, p=0; // i is the k in (13.1) (chapter 13 ff++doc)
             int e; // we will need e also below, in the parts referred to faces and volumes
-            for(e=0; e<(Element::ne)*3; e++) // loop on the 18 edge basis fcts
+            for(e=0; e<(Element::ne)*3; e++) // loop on the 18 edge dofs
             {
-                if (e%3!=0) {p = p-QFe.n;} // for 3 successive basis fcts the quad pts are the same (they correspond to the same edge)
+                if (e%3!=0) {p = p-QFe.n;} // for 3 successive dofs the quad pts are the same (they correspond to the same edge)
                 for(int q=0; q<QFe.n; ++q,++p) // loop on the edge quadrature pts
                     for (int c=0; c<3; c++,i++) // loop on the 3 components
                     {
@@ -912,12 +883,12 @@ namespace Fem2D {
                         this->coefInterpolation[i]=0.; // alfak: we will fill them with 'set' (below) because they depend on the tetrahedron
                     }
             }
-            // We build the indices in (13.1) : face basis fncts
+            // We build the indices in (13.1) : face dofs
             // (the indices i and p mustn't be reinitialised)
             int f; // we will need f also below, in the part referred to volumes
-            for(f=0; f<(Element::nf)*6; f++) // loop on the 24 face basis fcts
+            for(f=0; f<(Element::nf)*6; f++) // loop on the 24 face dofs
             {
-                if (f%6!=0) {p = p-QFf.n;} // for 6 successive basis fcts the quad pts are the same (they correspond to the same face)
+                if (f%6!=0) {p = p-QFf.n;} // for 6 successive dofs the quad pts are the same (they correspond to the same face)
                 for(int q=0; q<QFf.n; ++q,++p) // loop on the face quadrature pts
                     for (int c=0; c<3; c++,i++) // loop on the 3 components
                     {
@@ -927,9 +898,9 @@ namespace Fem2D {
                         this->coefInterpolation[i]=0.; // alphak: we will fill them with 'set' (below) because they depend on the tetrahedron
                     }
             }
-            // We build the indices in (13.1) : volume basis fncts
+            // We build the indices in (13.1) : volume dofs
             // (the indices i and p mustn't be reinitialised)
-            for(int v=0; v<3; v++) // loop on the 3 volume basis fcts
+            for(int v=0; v<3; v++) // loop on the 3 volume dofs
             {
                 if (v>0) {p = p-QFv.n;}
                 for(int q=0; q<QFv.n; ++q,++p) // loop on the volume quadrature pts
@@ -944,10 +915,10 @@ namespace Fem2D {
         }
     }
     
-    // For the coefficients of interpolation alphak in (13.1) (same 'for loops' as above)
+    // For the coefficients of interpolation alphak in (13.1)
     void TypeOfFE_Edge2_3d:: set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const
     {
-        int i=ocoef, p=0; // Edge0_3d: parto da ocoef a riempire M perche' 'potrei avere un elemento finito dentro un altro elemento finito' ??
+        int i=ocoef, p=0;
         // (p is used only to check)
         
         // perm: the permutation for which the 4 tetrahedron vertices are listed with increasing GLOBAL number
@@ -985,9 +956,8 @@ namespace Fem2D {
                     for(int c=0; c<3; c++,i++) // loop on the 3 components
                     {
                         M.coef[i] = E[c]*QFe[q].a*prodll;
-                        // QFe[q].a e' il peso su [0,1] del pto di integrazione q
-                        // QFe[q].x e' la x su [0,1] del pto di integrazione q,
-                        // quindi la sua prima lambda e' 1-QFe[q].x e la sua seconda lambda e' QFe[q].x
+                        // QFe[q].a is the weight of the integration point q
+                        // QFe[q].x is the x over [0,1] of the integration point q
                     }
                 }
             }
@@ -1067,27 +1037,22 @@ namespace Fem2D {
      and the 1st examined face is the one opposite the vertex with the smallest GLOBAL number
      (and 2 edges of the face are chosen and oriented looking at its 3 GLOBAL numbers), and so on.
      In this way:
-     - a dof which is common to 2 adjacent tetrahedra is the same in the two tetraedra
+     - a dof which is common to 2 adjacent tetrahedra is the same in the two tetrahedra
      (since the orientation of each edge is chosen using the global numbers),
      - we can use the coefficients giving a dual basis that were calculated for the reference tetrahedron
      since the structure of orientation of the edges is the same (up to a rotation) as the one used in the reference tetrahedron.
-     ([On the contrary, in the previous not working version we built the omegas in the order given by the LOCAL numbering,
-     changing the orientation of each edge using the GLOBAL numbers, but in that way the structure of orientation of the edges
-     was not the same as the one used in the reference tetrahedron, and actually we couldn't use the coefficients calculated.
-     Indeed, it didn't work for the tetrahedra whose vertices were not listed with increasing global number e.g. Th2.mesh,
-     but it worked for tetrahedra whose vertices were listed with increasing global number e.g. Th1 and Th2b,
-     since in this second case the orientation of each edge was actually left unchanged.])
      
      BUT THEN, when we build the DUAL basis functions PHI, we use the permutation p45 to go back to the FreeFem numbering of the dofs,
      in which edges and faces are ordered following the LOCAL numbering
      (for instance the 1st examined edge can be the 3rd edge looking at the local numbering);
      however inside each edge (resp face) the 3 (resp 6) related dofs are still ordered according to the GLOBAL numbers.
+     Here with 'dual' I mean basis functions and dofs in duality.
      */
     
     // val contains the values of the basis functions and of their derivatives at the point of K corresponding to the point P of the reference tetrahedron, by components
     void TypeOfFE_Edge2_3d:: FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P,RNMK_ & val) const
     {
-        assert(val.N()>=45); // 45 degrees of freedom, why >= ??
+        assert(val.N()>=45); // 45 degrees of freedom
         assert(val.M()==3); // 3 components
         // -------------
         // perm: the permutation for which the 4 tetrahedron vertices are listed with increasing GLOBAL number
@@ -1106,17 +1071,16 @@ namespace Fem2D {
         // We build mynvface to be used here instead of the FreeFem nvface,
         // (in order to exploit the results of perm and write a better code),
         // in mynvface in all the triplets the numbers are increasing
-        static const int  mynvface[4][3] = { {1,2,3},{0,2,3},{0,1,3},{0,1,2} }; // static/const? la metto fuori?
+        static const int  mynvface[4][3] = { {1,2,3},{0,2,3},{0,1,3},{0,1,2} };
         // -------------
         // If [a,b] is the i-th edge (where a,b are its vertices local numbers), edgesMap[(a+1)*(b+1)] = i
         int edgesMap[13] = {-1,-1,0,1,2,-1,3,-1,4,-1,-1,-1,5}; // a map<int,int> would be more slow
-        // devo aggiungere static/const? la metto fuori?
         // -------------
         // the 4 barycentric coordinates for the reference tetrahedron evaluated at the point P
         // (they have the same value at the real tetrahedron's point corresponding to the reference tetrahedron's point P)
         R l[] = {1.-P.sum(),P.x,P.y,P.z};
         R3 D[4];
-        K.Gradlambda(D); // (riempie un array di 4 R3)
+        K.Gradlambda(D);
         val = 0;
         // -------------
         int p45[45]; // the permutation from the dofs numbering of my tetrahedron (numbered using the global vertex numbers)
@@ -1141,7 +1105,7 @@ namespace Fem2D {
         p45[42] = 42; p45[43] = 43; p45[44] = 44; // (there is only 1 'volume', the FF dofs numbering is the same as mine)
         // -------------
         
-        if (whatd & Fop_D0) // Fop_D0 definito in FESpacen.hpp ma non capito bene il <<
+        if (whatd & Fop_D0) // Fop_D0 defined in FESpacen.hpp
         {
             // First, the functions omega (om) (they don't constitute a dual basis! only a basis)
             R3 om[45];
@@ -1153,7 +1117,6 @@ namespace Fem2D {
                 // ! :
                 // using perm, [i0,i1] is already from the smallest global number to the greatest global number,
                 // since nvedge always gives indices which read perm from left to right
-                //cout << i << " oriented edge (" << K.at(i0) << "->" << K.at(i1) << ")" << endl;
                 om[i*3] = l[i0]*l[i0]*(l[i0]*D[i1]-l[i1]*D[i0]);
                 om[i*3+1] = l[i0]*l[i1]*(l[i0]*D[i1]-l[i1]*D[i0]);
                 om[i*3+2] = l[i1]*l[i1]*(l[i0]*D[i1]-l[i1]*D[i0]);
@@ -1183,7 +1146,6 @@ namespace Fem2D {
             om[44] = l[perm[1]]*l[perm[2]]*(l[perm[0]]*D[perm[3]]-l[perm[3]]*D[perm[0]]);
             
             // Now, the functions phi that really constitute a dual basis
-            // (see dualE_deg3mio_commenti.sci)
             R3 phi[45];
             phi[p45[0]] = +9*om[0]-18*om[1]+3*om[2]-27*om[30]+12*om[31]+9*om[32]+9*om[33]-6*om[34]-6*om[35]-27*om[36]+12*om[37]+9*om[38]+9*om[39]-6*om[40]-6*om[41]+18*om[42]-6*om[43]-6*om[44];
             phi[p45[1]] = -18*om[0]+84*om[1]-18*om[2]-6*om[30]-36*om[31]+12*om[32]-30*om[33]+30*om[34]-6*om[36]-36*om[37]+12*om[38]-30*om[39]+30*om[40]+24*om[42];
@@ -1320,7 +1282,6 @@ namespace Fem2D {
                 omdz[43] = (D[perm[1]].z*l[perm[3]] + l[perm[1]]*D[perm[3]].z)*(l[perm[0]]*D[perm[2]]-l[perm[2]]*D[perm[0]]) + l[perm[1]]*l[perm[3]]*(D[perm[0]].z*D[perm[2]]-D[perm[2]].z*D[perm[0]]);
                 omdz[44] = (D[perm[1]].z*l[perm[2]] + l[perm[1]]*D[perm[2]].z)*(l[perm[0]]*D[perm[3]]-l[perm[3]]*D[perm[0]]) + l[perm[1]]*l[perm[2]]*(D[perm[0]].z*D[perm[3]]-D[perm[3]].z*D[perm[0]]);
             }
-            // Now, the functions phi that really constitute a dual basis
             R3 phidx[45];
             if (whatd & Fop_dx)
             {
@@ -1644,8 +1605,7 @@ namespace Fem2D {
                 
                 omdyz[44] = (D[perm[1]].y*D[perm[2]].z + D[perm[1]].z*D[perm[2]].y)*(l[perm[0]]*D[perm[3]]-l[perm[3]]*D[perm[0]]) + (D[perm[1]].y*l[perm[2]] + l[perm[1]]*D[perm[2]].y)*(D[perm[0]].z*D[perm[3]]-D[perm[3]].z*D[perm[0]]) + (D[perm[1]].z*l[perm[2]] + l[perm[1]]*D[perm[2]].z) *(D[perm[0]].y*D[perm[3]]-D[perm[3]].y*D[perm[0]]);
             }
-            
-            // Now, the functions phi that really constitute a dual basis
+          
             R3 phidxx[45];
             if (whatd & Fop_dxx)
             {
@@ -1978,10 +1938,13 @@ namespace Fem2D {
             }
         }
     }
+
+
+// Auxiliary Finite Elements for the partition of unity of DDM methods
     
-// Element of the DDM methode
-    
-    
+    // FE space Edge03ds0 useful to build a partition of unity for the FE space Edge03d of
+    // edge elements of degree 1 in 3d
+    // It has only the interpolation operator, it doesn't have basis functions
     class TypeOfFE_P0Edge3ds0: public  GTypeOfFE<Mesh3>
     {
         
@@ -2034,10 +1997,10 @@ namespace Fem2D {
     {
         assert(0);
     }
+  
     // FE space Edge13ds0 useful to build a partition of unity for the FE space Edge13d of
     // edge elements of degree 2 in 3d
     // It has only the interpolation operator, it doesn't have basis functions
-    
     class TypeOfFE_P1Edge3ds0: public  GTypeOfFE<Mesh3>
     {
     public:
@@ -2084,7 +2047,7 @@ namespace Fem2D {
         int i=0, p=0;
         int e;
         
-        for(e=0; e<(Element::ne)*2; e++) // loop on the 12 edge dofs
+        for(e=0; e<(Element::ne)*2; e++)
         {
             if (e%2==1) {p = p-1;}
             this->pInterpolation[i]=p;
@@ -2114,7 +2077,6 @@ namespace Fem2D {
     // FE space Edge23ds0 useful to build a partition of unity for the FE space Edge23d of
     // edge elements of degree 3 in 3d
     // It has only the interpolation operator, it doesn't have basis functions
-    
     class TypeOfFE_P2Edge3ds0 : public GTypeOfFE<Mesh3>
     {
     public:
@@ -2221,7 +2183,7 @@ namespace Fem2D {
     {
         assert(0);
     }
-    //  add new F.E for DDM buil of the matrix / unity partition...
+    //  add new FEs for DDM to build the partition of unity
     static TypeOfFE_P2Edge3ds0 Elm_P2Edge3ds0;
     // a static variable to add the finite element to freefem++
     static AddNewFE3  P2Edge3ds0("Edge23ds0",&Elm_P2Edge3ds0);
@@ -2234,26 +2196,14 @@ namespace Fem2D {
     // a static variable to add the finite element to freefem++
     static AddNewFE3  P0Edge3d("Edge03ds0",&Elm_P0Edge3ds0);
     
-    static TypeOfFE_Edge1_3d  Edge1_3d; // TypeOfFE_Edge1_3d e' il nome della classe appena definita
-    GTypeOfFE<Mesh3> & GEdge13d(Edge1_3d); // GTypeOfFE<Mesh3> e' la classe madre
-    static AddNewFE3 TypeOfFE_Edge1_3d("Edge13d",&GEdge13d); // Edge13d sara' il nome usato dall'utente
+    static TypeOfFE_Edge1_3d  Edge1_3d; // TypeOfFE_Edge1_3d is the name of the class we defined
+    GTypeOfFE<Mesh3> & GEdge13d(Edge1_3d); // GTypeOfFE<Mesh3> is the mother class
+    static AddNewFE3 TypeOfFE_Edge1_3d("Edge13d",&GEdge13d); // Edge13d will be the name used by the user
  
-    static TypeOfFE_Edge2_3d  Edge2_3d; // TypeOfFE_Edge2_3d e' il nome della classe appena definita
-    GTypeOfFE<Mesh3> & GEdge23d(Edge2_3d); // GTypeOfFE<Mesh3> e' la classe madre
-    static AddNewFE3 TypeOfFE_Edge2_3d("Edge23d",&GEdge23d); // Edge23d sara' il nome usato dall'utente
+    static TypeOfFE_Edge2_3d  Edge2_3d;
+    GTypeOfFE<Mesh3> & GEdge23d(Edge2_3d);
+    static AddNewFE3 TypeOfFE_Edge2_3d("Edge23d",&GEdge23d);
 
-    //    // Come in BernardiRaugel.cpp (MA se scrivo in terminale ff-c++ P012_3d_Modif.cpp, ERRORE compilazione)
-    //    //  ----   cooking to add the finite elemet to freefem table --------
-    //    // a static variable to def the finite element
-    //    static TypeOfFE_Edge1_3d Edge1_3d;
-    //    //  now adding   FE in FreeFEm++  table
-    //    static AddNewFE Edge13d("Edge13d",&Edge1_3d);
-    //    // --- end cooking
-    
-    //    // Come a pag 345 docu (MA se scrivo in terminale ff-c++ P012_3d_Modif.cpp, ERRORI compilazione)
-    //    static TypeOfFE_Edge1_3d Edge1_3d;
-    //    static AddNewFE("Edge13d", Edge1_3d);
-    //    static AddNewFE("Edge13d",&GEdge13d);
     
     
     class TypeOfFE_RT1_3d : public GTypeOfFE<Mesh3>
@@ -2271,9 +2221,8 @@ namespace Fem2D {
         void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd & P,RNMK_ & val) const;
        // void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
     };
-    int TypeOfFE_RT1_3d:: dfon[] = {0,0,3,3}; // 2 dofs on each edge, 2 dofs on each face
-    
-    // Quadrature formula on an edge, exact for degree 3 (ok: int_e (deg2*t *lambda))
+    int TypeOfFE_RT1_3d:: dfon[] = {0,0,3,3};
+  
     const GQuadratureFormular<R3> & TypeOfFE_RT1_3d:: QFt( QuadratureFormular_Tet_1);
     
      const GQuadratureFormular<R2> TypeOfFE_RT1_3d:: QFf(2,3,P_QuadratureFormular_T_2_intp);
@@ -2288,7 +2237,7 @@ namespace Fem2D {
         ffassert(0);
     }
     
-} // chiude namespace Fem2D {
+} // closes namespace Fem2D {
 
 
 
