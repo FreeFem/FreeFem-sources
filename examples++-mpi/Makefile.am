@@ -33,8 +33,8 @@ XFAIL_TESTS=$(TESTS)
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
-LIST_IDP= AddLayer2d.idp		DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
-AddLayer3d.idp		DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp func-max.idp 
+LIST_IDP= 	DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
+	DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp func-max.idp 
 
 EXTRA_DIST=*.edp *.idp  regtests.sh  \
 MPICG.cpp \

@@ -1,5 +1,44 @@
-@  changeset:   4099:49be5adb9a1b
+@  changeset:   4106:2e475c1137be
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Apr 25 10:00:45 2017 +0200
+|  summary:     pass to version 3.53
+|
+o    changeset:   4105:2ca1722b1fe4
+|\   parent:      4104:aa312dd04cf2
+| |  parent:      4103:d3bfa65766e2
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Apr 25 09:53:36 2017 +0200
+| |  summary:     coorect of P. Jolivet
+| |
+| o  changeset:   4104:aa312dd04cf2
+| |  parent:      4102:966c49fbab6e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Apr 25 09:53:01 2017 +0200
+| |  summary:     correct pb under mpi window isend / revc do not works
+| |
+o |  changeset:   4103:d3bfa65766e2
+| |  parent:      4100:9a8bfb725d63
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Tue Apr 25 09:32:53 2017 +0200
+| |  summary:     Fixes for meshes with highly varying aspect ratios.
+| |
+| o  changeset:   4102:966c49fbab6e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Tue Apr 25 07:37:39 2017 +0200
+| |  summary:     coorect bug insend/renv mesh (2,3)  pb of async
+| |
+| o  changeset:   4101:690d986b3c76
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Mon Apr 24 18:55:01 2017 +0200
+|    summary:     try coorect mpi send / recv mesh under windows
+|
+o  changeset:   4100:9a8bfb725d63
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Apr 24 17:33:14 2017 +0200
+|  summary:     coorect  type in send / recv mesh mpi
+|
+o  changeset:   4099:49be5adb9a1b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Apr 21 19:27:10 2017 +0200
 |  summary:     cooret mpi send / recv of mesh under window
