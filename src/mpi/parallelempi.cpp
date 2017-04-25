@@ -154,7 +154,7 @@ long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
   MPI_Request rq0,*request=&rq0;
   if(verbosity>100)
     cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) <<endl;
-  if(rq == Syncro_block) 
+  if(rq == Syncro_block || rq == 0)
     ret=MPI_Send((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm);
   else
     {
@@ -189,7 +189,7 @@ long  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Reque
   MPI_Request rq0,*request=&rq0;
   if(verbosity>100)
     cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) << endl;
-  if(rq == Syncro_block) 
+  if(rq == Syncro_block || rq ==0)
     {
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
       ret=MPI_Send(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm);
@@ -694,26 +694,28 @@ class RevcWMeshd : public DoOnWaitMPI_Request,Serialize
 public:  
   Mesh const ** ppTh;
   int state;
-    long long lsz;
+   
   RevcWMeshd(const MPIrank *mpirank,Mesh const ** ppThh)
     : DoOnWaitMPI_Request(*mpirank),Serialize(sizempibuf,Fem2D::Mesh::magicmesh),
-      ppTh(ppThh),state(0),lsz(0)
+      ppTh(ppThh),state(0)
   {
     // remark the first data in p is the size in long long
       
     int tag=MPI_TAG<Mesh *>::TAG;
     if(verbosity>99)
       cout << " -- RevcWMeshd   " << rq << " " << comm << " " << p << endl;
-    int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part ..
-    size_t kk=0;
-    get(kk,lsz);
-    if(verbosity>199) cout << mpirank << "     --  lsk = "  <<lsz << " p= " << p << endl;
-  }
+    int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part Warning async => not wait.
+   }
   
   bool  Do(MPI_Request *rrq)
   {
+     long long lsz;
     int tag=MPI_TAG<Mesh *>::TAG;
     ffassert(rq == rrq);
+      size_t kk=0;
+      get(kk,lsz);
+      if(verbosity>199) cout << mpirank << "     --  lsk = "  <<lsz << " p= " << p << " p[]= "
+          << (int) p[0] << (int) p[1] << (int) p[2] << (int) p[3]<<endl;
     
     long l1 = lsz - sizempibuf;
     if(verbosity>100)
@@ -760,7 +762,8 @@ public:
     int tag=MPI_TAG<Mesh *>::TAG;
 
     if(verbosity>100)
-          cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << " "<< lg << " "<< count() <<endl;
+          cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << " "<< lg << " "<< " p[]= "
+          << (int) p[0] << (int) p[1] << (int) p[2] << (int) p[3] <<endl;
 
    
     if (lg<=sizempibuf)
