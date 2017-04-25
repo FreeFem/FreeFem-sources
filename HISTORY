@@ -1,5 +1,10 @@
-@  changeset:   4106:2e475c1137be
+@  changeset:   4107:4b9155945ebe
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Apr 25 10:44:09 2017 +0200
+|  summary:     correct examples++-mpi/Makefile.am
+|
+o  changeset:   4106:2e475c1137be
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Apr 25 10:00:45 2017 +0200
 |  summary:     pass to version 3.53
