@@ -95,6 +95,9 @@ include 'phpfiles.php';
 <p class="p1"><span class="s19">Warning: if you launch freefem++ without filename script by double clip, your get a error due (it is bug of usage <tt>GetOpenFileName</tt> in win64 ) </span></p>
 <p class="p1"><span class="s1"> to launch mpi version use :</span> </p> 
 <span class="s15"><span class="s13">mpiexec.exe -np 4  FreeFem++-mpi DDM-Schwarz-Lame-2d.edp</span></span><br>
+<p class="p1"> after install MSMPI  for parallel version under window64.
+	Download : <a href="https://www.microsoft.com/en-us/download/details.aspx?id=49926">MS MPI V7</a>, and install both msmpisdk.msi and MSMpiSetup.exe</p>
+
 	
 <p class="p1"><span class="s1"><br>
 </span></p>
