@@ -133,10 +133,10 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
         VhGlobal suppSmooth;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         {
-            meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999);
+            meshN neighbors = trunc(globalName, suppSmooth > 0.001);
             fespace Oh(neighbors, P0);
             Oh partOverlap = part;
-            Unique(partOverlap[], arrayIntersection);
+            Unique(partOverlap[], arrayIntersection, remove = mpiRank(comm));
         }
         fespace VhLocal(meshName, P1);
         VhLocal[int] partitionIntersection(arrayIntersection.n);
@@ -147,6 +147,13 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         }
         globalName = trunc(globalName, suppSmooth > 0.001);
+        real eps = intN(globalName)(1.0);
+        real[int] epsTab(arrayIntersection.n);
+        mpiRequest[int] rq(2 * arrayIntersection.n);
+        for(int j = 0; j < arrayIntersection.n; ++j)
+            Irecv(processor(arrayIntersection[j], comm, rq[j]), epsTab[j]);
+        for(int j = 0; j < arrayIntersection.n; ++j)
+            Isend(processor(arrayIntersection[j], comm, rq[arrayIntersection.n + j]), eps);
         supp = supp;
         suppSmooth = suppSmooth;
         meshName = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
@@ -155,13 +162,14 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
         VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
         VhLocal sum = khi;
         VhGlobal phi = 0;
-        real eps = intN(globalName)(1.0);
         part = part;
         int numberIntersection = 0;
+        for(int k = 0; k < 2 * arrayIntersection.n; ++k)
+            mpiWaitAny(rq);
         for(int i = 0; i < arrayIntersection.n; ++i) {
             PhGlobal suppPartition = abs(arrayIntersection[i] - part) < 0.1;
             AddLayers(globalName, suppPartition[], overlap, phi[]);
-            real intersection = intN(globalName)(phi) / eps;
+            real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
             if(intersection > 1.0e-6) {
                 partitionIntersection[numberIntersection] = phi;
                 if(usedARGV("-true_restrict") == -1)

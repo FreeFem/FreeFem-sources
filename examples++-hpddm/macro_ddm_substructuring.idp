@@ -13,10 +13,10 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         VhGlobal suppSmooth;
         AddLayers(globalName, supp[], 2, suppSmooth[]);
         {
-            meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999);
+            meshN neighbors = trunc(globalName, suppSmooth > 0.001);
             fespace Oh(neighbors, P0);
             Oh partOverlap = part;
-            Unique(partOverlap[], arrayIntersection);
+            Unique(partOverlap[], arrayIntersection, remove = mpiRank(comm));
         }
 
         VhGlobal[int] partitionIntersection(arrayIntersection.n);
@@ -28,14 +28,22 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
             meshName = trunc(meshName, 1, split = s);
         }
         globalName = trunc(globalName, suppSmooth > 0.501, label = 10);
-        VhGlobal phi = 0;
         real eps = intN(globalName)(1.0);
+        real[int] epsTab(arrayIntersection.n);
+        mpiRequest[int] rq(2 * arrayIntersection.n);
+        for(int j = 0; j < arrayIntersection.n; ++j)
+            Irecv(processor(arrayIntersection[j], comm, rq[j]), epsTab[j]);
+        for(int j = 0; j < arrayIntersection.n; ++j)
+            Isend(processor(arrayIntersection[j], comm, rq[arrayIntersection.n + j]), eps);
+        VhGlobal phi = 0;
         part = part;
         int numberIntersection = 0;
+        for(int k = 0; k < 2 * arrayIntersection.n; ++k)
+            mpiWaitAny(rq);
         for(int i = 0; i < arrayIntersection.n; ++i) {
             PhGlobal suppPartition = abs(arrayIntersection[i] - part) < 0.1;
             AddLayers(globalName, suppPartition[], 1, phi[]);
-            real intersection = intN(globalName)(phi) / eps;
+            real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
             if(intersection > 1.0e-6) {
                 partitionIntersection[numberIntersection] = phi;
                 arrayIntersection[numberIntersection++] = arrayIntersection[i];

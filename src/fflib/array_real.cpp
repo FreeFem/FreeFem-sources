@@ -75,8 +75,8 @@ void initArrayOperatordouble()
     Global.Add("toRarray","(",new OneOperator_2KN_<double>);
     Add<KN<K> *>("imin",".",new OneOperator1<long,KN<K> *>(get_imin));
     Add<KN<K> *>("imax",".",new OneOperator1<long,KN<K> *>(get_imax));
-    Global.Add("Unique", "(", new OneOperator2_<long, KN<K>*, KN<K>*>(Unique));
-    Global.Add("Unique", "(", new OneOperator2_<long, KN<K>*, KN<long>*>(Unique));
+    Global.Add("Unique", "(", new Unique<K, K>);
+    Global.Add("Unique", "(", new Unique<K, long>);
 
     
 //     ArrayDCL<long>();

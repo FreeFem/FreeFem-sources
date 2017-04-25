@@ -1062,16 +1062,45 @@ class  OneOperator_2KN_ : public OneOperator {public:
     OneOperator_2KN_<K>(): OneOperator(atype<KN_<K> >(),atype<E_Array>()) { pref=-1;}
 };
 template<class K, class L>
-long Unique(KN<K>* const& array, KN<L>* const& val)
-{
+class Unique_Op : public E_F0mps {
+    public:
+        Expression ar;
+        Expression va;
+        static const int n_name_param = 1;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        Unique_Op<K, L>(const basicAC_F0& args, Expression param1, Expression param2) : ar(param1), va(param2) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+        AnyType operator()(Stack stack) const;
+};
+template<class K, class L>
+basicAC_F0::name_and_type Unique_Op<K, L>::name_param[] = {
+    {"remove", &typeid(long)},
+};
+template<class K, class L>
+class Unique : public OneOperator {
+    public:
+        Unique() : OneOperator(atype<long>(), atype<KN<K>*>(), atype<KN<L>*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new Unique_Op<K, L>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+        }
+};
+template<class K, class L>
+AnyType Unique_Op<K, L>::operator()(Stack stack) const {
+    KN<K>* const& array = GetAny<KN<K>*>((*ar)(stack));
+    KN<L>* const& val = GetAny<KN<L>*>((*va)(stack));
+    long remove = nargs[0] ? GetAny<long>((*nargs[0])(stack)) : 0;
     std::set<L> vals;
     for(int i = 0; i < array->n; ++i)
-        vals.insert((*array)[i]);
+        if(!nargs[0] || (*array)[i] != remove)
+            vals.insert((*array)[i]);
     val->resize(vals.size());
     int i = 0;
     for(typename std::set<L>::iterator it = vals.begin(); it != vals.end(); ++it)
         (*val)[i++] = *it;
-    return vals.size();
+    return static_cast<long>(vals.size());
 }
 
 
