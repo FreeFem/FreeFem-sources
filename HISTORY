@@ -1,5 +1,15 @@
-@  changeset:   4107:4b9155945ebe
+@  changeset:   4109:d3b680ad49f8
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Apr 25 11:35:26 2017 +0200
+|  summary:     clean  README_WINDOWS
+|
+o  changeset:   4108:b0a724d18b49
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Apr 25 11:31:43 2017 +0200
+|  summary:     update window comment
+|
+o  changeset:   4107:4b9155945ebe
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Apr 25 10:44:09 2017 +0200
 |  summary:     correct examples++-mpi/Makefile.am
