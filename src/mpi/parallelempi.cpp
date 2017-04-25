@@ -154,7 +154,7 @@ long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
   MPI_Request rq0,*request=&rq0;
   if(verbosity>100)
     cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) <<endl;
-  if(rq == Syncro_block) 
+  if(rq == Syncro_block || rq == 0)
     ret=MPI_Send((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm);
   else
     {
@@ -189,7 +189,7 @@ long  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Reque
   MPI_Request rq0,*request=&rq0;
   if(verbosity>100)
     cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) << endl;
-  if(rq == Syncro_block) 
+  if(rq == Syncro_block || rq ==0)
     {
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
       ret=MPI_Send(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm);
@@ -704,7 +704,7 @@ public:
     int tag=MPI_TAG<Mesh *>::TAG;
     if(verbosity>99)
       cout << " -- RevcWMeshd   " << rq << " " << comm << " " << p << endl;
-    int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part Warnonh async => not wait.
+    int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part Warning async => not wait.
    }
   
   bool  Do(MPI_Request *rrq)
