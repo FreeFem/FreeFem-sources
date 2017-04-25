@@ -1,4 +1,9 @@
+version 3.53
+  - add SLEPc interfa thank to P. Jolivet
+  - correct problem on incompatibility between send/revc mode 
+    isend / revc couple do not work under mpi/win64 => remove 
 version 3.52 (10 april 2017) 
+  - first mpi version for window 64 (bug in send/recv mesh) 
 version 3.51-4 ( 28/mars 2017)
  - do launch ffglut if no ffglut program by default add exec flag
     -ng (no graphic)
