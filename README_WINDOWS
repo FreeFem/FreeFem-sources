@@ -12,7 +12,10 @@ And execute  and  follow the instruction.
 Add to launch mpi version use : in terminal windows (cmd, shell, PowerShell) 
 you can try in directory C:\Program Files (86)\FreeFem++\examples++-mpi
 
-mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp
+To  lauch the example 
+mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp -wg 
+or without graphic: 
+mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp 
 
 But before  you must install 
 Install MSMPI  for parallel version under window64 
@@ -23,7 +26,6 @@ remark under msys2 do not forger to do
          “rem” before “set MSYS2_PATH_TYPE=inherit” 
 
 
-mpiexec.exe -np 4 FreeFem++-mpi DDM-Schwarz-Lame-2d.edp 
 
 
 
