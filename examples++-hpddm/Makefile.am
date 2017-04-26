@@ -33,7 +33,7 @@ TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_T
 
 LIST_IDP=  macro_ddm.idp macro_ddm_substructuring.idp
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp common.hpp hpddm.cpp hpddm_substructuring.cpp
+EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp common.hpp hpddm.cpp hpddm_substructuring.cpp 	SLEPc.cpp PETSc.hpp 
 
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see

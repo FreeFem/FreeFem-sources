@@ -1091,11 +1091,16 @@ template<class K, class L>
 AnyType Unique_Op<K, L>::operator()(Stack stack) const {
     KN<K>* array = GetAny<KN<K>*>((*ar)(stack));
     KN<L>* val = GetAny<KN<L>*>((*va)(stack));
-    long remove = nargs[0] ? GetAny<long>((*nargs[0])(stack)) : 0;
     std::set<L> vals;
     for(int i = 0; i < array->n; ++i)
-        if(!nargs[0] || (*array)[i] != remove)
+    //    if(!nargs[0] || (*array)[i] != remove)
             vals.insert((*array)[i]);
+    if( nargs[0]) // remove
+    {
+        long remove = GetAny<long>((*nargs[0])(stack)) ;
+        typename std::set<L>::iterator lr = vals.find(remove);
+        if( lr != vals.end()) vals.erase(lr);
+    }
     val->resize(vals.size());
     int i = 0;
     for(typename std::set<L>::iterator it = vals.begin(); it != vals.end(); ++it)
