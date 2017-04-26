@@ -1,5 +1,10 @@
-@  changeset:   4109:d3b680ad49f8
+@  changeset:   4110:0b79eb5a4159
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Apr 25 12:03:26 2017 +0200
+|  summary:     clean version of Element_Mixte3d.cpp (thank to Marcelel Bonazzoli)
+|
+o  changeset:   4109:d3b680ad49f8
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Apr 25 11:35:26 2017 +0200
 |  summary:     clean  README_WINDOWS
