@@ -1,9 +1,35 @@
 // This codes shows how to calculate the eigenvalue spectrum of
-// the Laplace operator on a 2d square domain, using SLEPc.
+// the Schrodinger operator with an axially symmetric potential
+// well of finite depth and diameter, on a 2d domain, using SLEPc.
+//
+// Here, we consider the problem of a 2d quantum harmonic oscillator:
+//   -0.5 \nabla^2 u + V(x,y)* u = E u
+//  since this is an hermitian operator, its eigenvalues E are real
+//  The eigenspectrum is not known in general. Yet it features few
+//  qualitative properties:
+//      - the lowest excitations (eigenstates with the lowest eigenvalues)
+//        are bound-states (the eigenstate is localized in the well since
+//        it asymptotically goes to zero as a exponential)
+//        and they are quantized (discrete eigenvalues)
+//      - states with higher energies (when the eigenvalue is larger than
+//        the depth of the potential well) are called diffusion states.
+//        they are not localized (oscillating functions). This part of
+//        the spectrum is also called radiative spectrum.
+//        In principle, this is a continuous spectrum.
+//
+//   for the default values of the potential well, there are 11 bound-states
+//   before entering the diffusion spectrum.
+//
+//   Note that here, the bound-states can be degenerate in energy
+//
+//   See e.g. :
+//   - Complement H-I in Quantum mechanics Vol. 1 by C. Cohen-Tannoudji, B. Diu, F. Laloe
+//   - Landau & Lifshitz, Volume 3 : (Quantum Mechanics) Chap. III-22
+//   - Complement D-VI in Quantum mechanics Vol. 1 by C. Cohen-Tannoudji, B. Diu, F. Laloe
 //
 // Usage :
-// mpirun -np 4 FreeFem++-mpi -wg hpddm-slepc-v0-Laplace.edp \
-//        -split 1 -npts 400 -nev 10 -sigma 0.0
+// mpirun -np 4 FreeFem++-mpi -wg schrodinger-2d-axial-well-SLEPc.edp \
+//        -split 1 -npts 800 -nev 15 -sigma 0.0
 //
 // Authors: Julien Garaud <julien.garaud@gmail.com>
 //          Pierre Jolivet <pierre.jolivet@enseeiht.fr>
@@ -26,19 +52,22 @@ func Pk = P1;                    // Finite-element space
 /***************************************/
 int s      = getARGV("-split", 1)   ; // Refinement factor
 //
-int Npts   = getARGV("-npts" , 200) ; // Number of points on the perimeter
-real Lx    = getARGV("-lx"   , pi)  ; // Dimension of the domain
-real Ly    = getARGV("-ly"   , pi)  ; // Dimension of the domain
+int Npts   = getARGV("-npts" , 800) ; // Number of points on the perimeter
+real Lx    = getARGV("-lx"   , 80.0); // Dimension of the domain
+real Ly    = getARGV("-ly"   , 80.0); // Dimension of the domain
 //
-int nEV    = getARGV("-nev"  , 10)  ; // Number of eigenvalues
+int nEV    = getARGV("-nev"  ,  20)  ; // Number of eigenvalues
 real sigma = getARGV("-sigma", 0.0) ; // Shift
+//
+real width = getARGV("-width",10.0) ; // Diameter of the axial well
+real depth = getARGV("-depth", 2.0) ; // Depth of the square well
 /***************************************/
 /*     Verbosity and passed options    */
 /***************************************/
 if(verbosity > 0 && mpirank == 0) {
     cout << "********************************************"  << endl
         << " --- " << mpirank << "/" << mpisize
-        << "- hpddm-slepc-v0-Laplace.edp "     << endl
+        << "- schrodinger-2d-axial-well-SLEPc.edp "        << endl
         << "********************************************"  << endl
         << "- input parameters: "                          << endl
         << "  refinement factor  = " << s                  << endl
@@ -48,6 +77,9 @@ if(verbosity > 0 && mpirank == 0) {
         << "********************************************"  << endl
         << "  nb of eigenvalues  = " << nEV                << endl
         << "  value of the shift = " << sigma              << endl
+        << "********************************************"  << endl
+        << "  diameter of the well = " << width            << endl
+        << "  depth of the well = " << depth               << endl
         << "********************************************"  << endl
         << endl;
 }
@@ -60,16 +92,16 @@ int[int][int] restrictionIntersection(0);   // Local-to-neighbors renumbering
 real[int] D;                                // Partition of unity
 
 /***************************************/
+/*         Geometry parameters         */
+/***************************************/
+int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
+
+/***************************************/
 /*         Finite Element space        */
 /***************************************/
 // Definition of the finite element space on the domain Th
 // P1 are the first order Lagrange elements
 fespace Vh(Th, Pk);      // local finite element space
-
-/***************************************/
-/*         Geometry parameters         */
-/***************************************/
-int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 
 /***************************************/
 /*            ##############           */
@@ -99,17 +131,18 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 /***************************************/
 /*          Problem parameters         */
 /***************************************/
+macro V(W,D)(0.5*(sqrt(x^2+y^2)-0.5*W < 0.0 ? 0.0 : D)) // End Of Macro
 
 /***************************************/
 /*          Problem definition         */
 /***************************************/
 varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
-( dx(uh)*dx(vh)+dy(uh)*dy(vh)
-    -sigma*uh*vh               )//  Bilinear form
-    +on(Labels[3], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[2], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[1], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[0], uh = 0.0)    //  Boundary Conditions
+( 0.5*(dx(uh)*dx(vh)+dy(uh)*dy(vh))
++( V(width,depth)-sigma)*uh*vh               )//  Bilinear form
+//  +on(Labels[3], uh = 0.0)      //  Boundary Conditions bottom
+//  +on(Labels[2], uh = 0.0)      //  Boundary Conditions right
+//  +on(Labels[1], uh = 0.0)      //  Boundary Conditions top
+//  +on(Labels[0], uh = 0.0)      //  Boundary Conditions left
 ;
 
 varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
@@ -121,13 +154,13 @@ matrix<real> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
-dmatrix DistA(A, arrayIntersection, restrictionIntersection, D, clean = true);
-dmatrix DistB(DistA, B, clean = true);
+dmatrix DistA(A, arrayIntersection, restrictionIntersection, D);
+dmatrix DistB(DistA, B);
 /***************************************/
 /*          Problem resolution         */
 /***************************************/
 real[int]     EigenVAL(0);       // array to store eigenvalues
-Vh<real>[int] def(EigenVEC)(1);  // array to store eigenvectors
+Vh<real>[int] def(EigenVEC)(1); // array to store eigenvectors
 EigenVEC[0][] = 0.0;
 
 string ssparams =            // Parameters for the distributed EigenValue solver
@@ -154,7 +187,8 @@ k=min(k,nEV); // some time the number of converged eigen value
 /***************************************/
 /*           View the solution         */
 /***************************************/
-Vh<real> Temp;
+Vh<real> Temp=V(width,depth);
+plotMPI(Th,Temp[],"Square potential well",Pk,def,real,3,1);
 
 for(int i=0;i<k;i++){
     if(!mpirank) cout << " Eigenvalue #"+i+" = "+EigenVAL[i]<<endl;

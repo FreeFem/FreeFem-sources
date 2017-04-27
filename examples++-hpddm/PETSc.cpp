@@ -196,7 +196,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
     }
     bool clean = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(clean)
-        ptK->~Matrice_Creuse<PetscScalar>();
+        ptK->A = nullptr;
     return ptA;
 }
 template<class HpddmType>
@@ -269,7 +269,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     else
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, mK->lg, mK->cl, mK->a);
     if(clean)
-        ptK->~Matrice_Creuse<PetscScalar>();
+        ptK->A = nullptr;
     if(nargs[2])
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE);
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
@@ -483,7 +483,7 @@ AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
         if(clean) {
             ptO->resize(0);
             ptR->resize(0);
-            GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->~Matrice_Creuse<PetscScalar>();
+            GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->A = nullptr;
         }
     }
     return ptA;

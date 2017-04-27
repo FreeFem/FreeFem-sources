@@ -1,12 +1,29 @@
-// This codes shows how to calculate the eigenvalue spectrum of
-// the Laplace operator on a 2d square domain, using SLEPc.
+// This codes shows how to solve an eigenvalue problems
+// in different coordinate systems. The example here is
+// the Laplace equation in spherical coordinates, in the
+// [theta,phi] plane. Solutions are the spherical harmonics.
+// the [theta,phi] plane is a 2d domain, using SLEPc.
+//
+// Here, we consider the problem in spherical coordinates
+// \theta \in [0,\pi] and \phi \in [0,2\pi], for  a fixed
+// radius: -\nabla^2 u = E u
+//
+//  The eigenspectrum is :
+//    E_n = n(n+1)  ;  deg(n) = 2n+1
 //
 // Usage :
-// mpirun -np 4 FreeFem++-mpi -wg hpddm-slepc-v0-Laplace.edp \
-//        -split 1 -npts 400 -nev 10 -sigma 0.0
+// mpirun -np 4 FreeFem++-mpi -wg laplace-2d-spherical-harmonics-SLEPc.edp \
+//        -split 1 -npts 400 -nev 15 -sigma 0.0
 //
 // Authors: Julien Garaud <julien.garaud@gmail.com>
 //          Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+//
+// WARNING: to properly work, this code would require periodic boundary
+//          conditions for the variable phi. Since this is not implemented
+//          yet, the eigensolver finds additional modes. Namely, it find
+//          the eigenmodes that are periodic and that have integer
+//          eigenvalues, but it also find mode that are anti-periodic,
+//          and that should be eliminated by the periodicity...
 
 /**************************************/
 /*     Load PETSc & SLEPc macros      */
@@ -26,28 +43,29 @@ func Pk = P1;                    // Finite-element space
 /***************************************/
 int s      = getARGV("-split", 1)   ; // Refinement factor
 //
-int Npts   = getARGV("-npts" , 200) ; // Number of points on the perimeter
-real Lx    = getARGV("-lx"   , pi)  ; // Dimension of the domain
-real Ly    = getARGV("-ly"   , pi)  ; // Dimension of the domain
+int Npts   = getARGV("-npts" , 800) ; // Number of points on the perimeter
 //
-int nEV    = getARGV("-nev"  , 10)  ; // Number of eigenvalues
+int nEV    = getARGV("-nev"  ,  5)  ; // Number of eigenvalues
 real sigma = getARGV("-sigma", 0.0) ; // Shift
+//
+real radius = getARGV("-radius",1.0); // Radius of the sphere
 /***************************************/
 /*     Verbosity and passed options    */
 /***************************************/
 if(verbosity > 0 && mpirank == 0) {
     cout << "********************************************"  << endl
         << " --- " << mpirank << "/" << mpisize
-        << "- hpddm-slepc-v0-Laplace.edp "     << endl
+        << "- laplace-2d-spherical-harmonics-SLEPc.edp "   << endl
         << "********************************************"  << endl
         << "- input parameters: "                          << endl
         << "  refinement factor  = " << s                  << endl
         << "********************************************"  << endl
-        << "  nb of pts on perimeter = " << Npts
-        << "  Domain size [Lx,Ly]    = ["<<Lx<<","<<Ly<<"]"<< endl
+        << "  nb of pts on perimeter = " << Npts           << endl
         << "********************************************"  << endl
         << "  nb of eigenvalues  = " << nEV                << endl
         << "  value of the shift = " << sigma              << endl
+        << "********************************************"  << endl
+        << "  Radius of the sphere = " << radius           << endl
         << "********************************************"  << endl
         << endl;
 }
@@ -60,26 +78,27 @@ int[int][int] restrictionIntersection(0);   // Local-to-neighbors renumbering
 real[int] D;                                // Partition of unity
 
 /***************************************/
-/*         Finite Element space        */
-/***************************************/
-// Definition of the finite element space on the domain Th
-// P1 are the first order Lagrange elements
-fespace Vh(Th, Pk);      // local finite element space
-
-/***************************************/
 /*         Geometry parameters         */
 /***************************************/
 int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 
 /***************************************/
+/*         Finite Element space        */
+/***************************************/
+// Definition of the finite element space on the domain Th
+// P1 are the first order Lagrange elements
+fespace Vh(Th, Pk);      // local finite element space
+//fespace Vh(Th,Pk,periodic=[[Labels[0],x],[Labels[2],x]]); // Periodic does not work
+
+/***************************************/
 /*            ##############           */
 /***************************************/
 { // Construction of the rectangular domain
-    int Xpts= int(0.5*Npts*Lx/(Lx+Ly)); // pts on the x-axis sides
-    int Ypts= int(0.5*Npts*Ly/(Lx+Ly)); // pts on the y-axis sides
+    int Thetapts = int(Npts/6.0); // pts on the x-axis sides
+    int Phipts   = int(Npts/3.0); // pts on the y-axis sides
 
     meshN ThBorder, ThGlobal ;
-    ThGlobal = square(Xpts,Ypts,[Lx*(x-0.5),Ly*(y-0.5)],label=Labels);
+    ThGlobal = square(Thetapts,Phipts,[x*pi,2.0*pi*y],label=Labels);
     // .....
     build(Th,       // The local mesh
             ThBorder, // The interface mesh
@@ -96,6 +115,35 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
             false         // excluded
          );
 }
+/***********************************************************************/
+/*         Coordinate dependant differential operators                 */
+/***********************************************************************/
+/*        Spherical coordinates in the (theta,phi)-plane               */
+/*                                                                     */
+/*                  r     --> not used                                 */
+/*                  theta --> x  in [0,pi]                             */
+/*                  phi   --> y  in [0,2*pi]                           */
+/*                                                                     */
+/*           Jacobian determinant on the half-plane                    */
+/*              The det(J) = r^2*sin(theta) --> r^2*sin(x)             */
+/*                                                                     */
+macro Jac()( radius^2*sin(x) )             // End Of Macro /*          */
+  ;; /*  The Jacobian                                                  */
+/*                                                                     */
+/*        The gradiant operator in spherical coordinates               */
+/*                                                                     */
+/*                d/dr                                                 */
+/*       grad =   1/r*d/dtheta              ->  1/radius*d/dx          */
+/*                1/(r*sin(theta))*d/dphi   ->                         */
+/*                                   1/(radius*sin(x)*d/dy             */
+/*                                                                     */
+macro Grad(u) [dx(u)/radius,dy(u)/(radius*sin(x))] // End Of Macro /*  */
+  ;; /*  The Gradient operator                                         */
+macro Lap(u,v) ( Grad(u)'*Grad(v)) //')      // End Of Macro /*        */
+  ;; /*  The Laplace operator                                          */
+/*                                                                     */
+/*                                                                     */
+/***********************************************************************/
 /***************************************/
 /*          Problem parameters         */
 /***************************************/
@@ -104,30 +152,31 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 /*          Problem definition         */
 /***************************************/
 varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
-( dx(uh)*dx(vh)+dy(uh)*dy(vh)
-    -sigma*uh*vh               )//  Bilinear form
-    +on(Labels[3], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[2], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[1], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[0], uh = 0.0)    //  Boundary Conditions
-;
+  (Jac*(Lap(uh,vh)-sigma*uh*vh ))//  Bilinear form
+  //  ( 0.5*(dx(uh)*dx(vh)+dy(uh)*dy(vh))
+  //+( 0.5*(x^2+y^2)-sigma)*uh*vh)//  Bilinear form
+//  +on(Labels[3], uh = 0.0)      //  Boundary Conditions bottom
+//  +on(Labels[2], uh = 0.0)      //  Boundary Conditions right
+//  +on(Labels[1], uh = 0.0)      //  Boundary Conditions top
+//  +on(Labels[0], uh = 0.0)      //  Boundary Conditions left
+  ;
 
 varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
-( uh*vh )               //  Bilinear form
-;
+  ( Jac*uh*vh )               //  Bilinear form
+  ;
 
 matrix<real> A = vA(Vh,Vh);
 matrix<real> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
-dmatrix DistA(A, arrayIntersection, restrictionIntersection, D, clean = true);
-dmatrix DistB(DistA, B, clean = true);
+dmatrix DistA(A, arrayIntersection, restrictionIntersection, D);
+dmatrix DistB(DistA, B);
 /***************************************/
 /*          Problem resolution         */
 /***************************************/
 real[int]     EigenVAL(0);       // array to store eigenvalues
-Vh<real>[int] def(EigenVEC)(1);  // array to store eigenvectors
+Vh<real>[int] def(EigenVEC)(1); // array to store eigenvectors
 EigenVEC[0][] = 0.0;
 
 string ssparams =            // Parameters for the distributed EigenValue solver
@@ -165,7 +214,7 @@ for(int i=0;i<k;i++){
             Pk,     // Local FE-space
             def,    // Macro for field definition
             real,   // Type
-            3,      // 2d/3d view
+            2,      // 2d/3d view
             1       // Wait
            )
 }
