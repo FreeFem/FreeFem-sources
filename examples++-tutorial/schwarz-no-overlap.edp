@@ -1,0 +1,41 @@
+// schwarz1 without overlapping
+int inside = 2;
+int outside = 1;
+border a(t=1,2){x=t;y=0;label=outside;};
+border b(t=0,1){x=2;y=t;label=outside;};
+border c(t=2,0){x=t ;y=1;label=outside;};
+border d(t=1,0){x = 1-t; y = t;label=inside;};
+border e(t=0, 1){ x= 1-t; y = t;label=inside;};
+border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
+int n=4;
+mesh th = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
+mesh TH = buildmesh ( e(6*n) + e1(25*n) );
+plot(th,TH,wait=1,ps="schwarz-no-th.eps");
+fespace vh(th,P1);
+fespace VH(TH,P1);
+vh u=0,v; VH U,V;
+vh lambda=0;
+int i=0;
+
+problem PB(U,V,init=i,solver=Cholesky) = 
+    int2d(TH)( dx(U)*dx(V)+dy(U)*dy(V) )
+  + int2d(TH)( -V) 
+  + int1d(TH,inside)(lambda*V) +    on(outside,U= 0 ) ;
+problem pb(u,v,init=i,solver=Cholesky) = 
+    int2d(th)( dx(u)*dx(v)+dy(u)*dy(v) )
+  + int2d(th)( -v) 
+  + int1d(th,inside)(-lambda*v) +    on(outside,u = 0 ) ;
+
+
+for ( i=0 ;i< 20; i++) 
+{   
+   PB; 
+   pb;
+   lambda = lambda - (u-U)/2;
+//  if (i==0)
+
+    // FFCS: add 3d view
+  plot(U,u,wait=true,ps="schwarz-no-u"+i+".eps",dim=3,fill=1);
+};
+
+plot(U,u,ps="schwarz-no-u.eps");

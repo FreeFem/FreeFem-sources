@@ -1,0 +1,48 @@
+// irregular boundary condition. 
+real Ax=0.9,Ay=1;
+real Bx=2,By=1;
+real Cx=2.5,Cy=2.5;
+real Dx=1,Dy=2;
+real gx = (Ax+Bx+Cx+Dx)/4.;
+real gy = (Ay+By+Cy+Dy)/4.;
+
+macro  LINEBORDER(A,B,lab) border A#B(t=0,1){real t1=1.-t;x=A#x*t1+B#x*t;y=A#y*t1+B#y*t;label=lab;}//EOM
+
+LINEBORDER(A,B,1)
+LINEBORDER(B,C,2)
+LINEBORDER(C,D,3)
+LINEBORDER(D,A,4)
+
+// , A (1-x)(1-y) B x(1-y)  C: x*y  , D (x-1)*y) 
+//mesh Th=square(10,10,[Cx*x*y+ Bx*(1-x)*y + Cx*(1-x)*(1-y) + Dx*(x)*(1-y),Ay*x*y+ By*(1-x)*y + Cy*(1-x)*(1-y) + Dy*(x)*(1-y)]  );
+int n=10;
+macro dist(ax,ay,bx,by) sqrt(square((ax)-(bx))+ square((ay)-(by)))  // EOM  
+real l1=dist(Ax,Ay,Bx,By);
+real l2=dist(Bx,By,Cx,Cy);
+real l3=dist(Cx,Cy,Dx,Dy);
+real l4=dist(Dx,Dy,Ax,Ay);
+func s1=dist(Ax,Ay,x,y)/l1;
+func s2=dist(Bx,By,x,y)/l2;
+func s3=dist(Cx,Cy,x,y)/l3;
+func s4=dist(Dx,Dy,x,y)/l4;
+cout << " l1:4 = "<< l1 << " " << l2 << " "<< l3 << " " <<l4 << endl;
+cout << "  s1:4 (final point: :)= " << s1(Bx,By) << " " 
+     << s2(Cx,Cy) << " " 
+     << s3(Dx,Dy) << " " 
+     << s4(Ax,Ay) << "\n "; 
+
+mesh Th=buildmesh(AB(n)+BC(n)+CD(n)+DA(n),fixedborder=1);
+
+verbosity=6;// to see the abscisse value pour the periodic condition.
+fespace Vh(Th,P1,periodic=[[1,s1],[3,s3],[2,s2],[4,s4]]);
+verbosity=1;
+macro Grad(u) [dx(u),dy(u)]//EOM
+Vh u,v;
+
+real cc=0;
+cc= int2d(Th)((x-gx)*(y-gy)-cc)/Th.area;
+cout << " compatibility =" << int2d(Th)((x-gx)*(y-gy)-cc) <<endl;
+
+solve Poission(u,v)=int2d(Th)(Grad(u)'*Grad(v)+ 1e-10*u*v)-int2d(Th)(10*v*((x-gx)*(y-gy)-cc));
+plot(u,wait=1,value=1);
+
