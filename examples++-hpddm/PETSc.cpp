@@ -189,7 +189,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         PetscInt bs;
         MatGetBlockSize(ptB->_petsc, &bs);
         KN<PetscScalar>* rhs = nargs[0] ? GetAny<KN<PetscScalar>*>((*nargs[0])(stack)) : nullptr;
-        initPETScStructure(ptA, mA, bs, nullptr, rhs);
+        initPETScStructure(ptA, mA, bs, static_cast<KN<PetscScalar>*>(nullptr), rhs);
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
