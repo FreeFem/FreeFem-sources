@@ -1241,6 +1241,10 @@ bool BuildPeriodic(
         delete [] link2;
         return true; //new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe);
       }
+        else {
+	      delete [] link1;
+	      delete [] link2;
+        }
    }
    return false;   
 }
@@ -2021,7 +2025,9 @@ AnyType E_set_fev<K>::Op2d(Stack s)  const
     if (optiexp0) (*optiexp0)(s); // init 
   }
   
+#ifdef OLDPih    
   ffassert(dim<100);
+#endif
   //   R F[100]; // buffer 
   
   TabFuncArg tabexp(s,Vh.N);
