@@ -6,17 +6,17 @@ ENDIFMACRO
 IFMACRO(partitioner,metis)
 load "metis"
 macro partitionerSeq(part, Th, size)metisdual(part, Th, size)// EOM
-macro partitionerPar(part, Th, comm)broadcast(processor(0, comm), part)// EOM
+macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,scotch)
 load "scotch"
 macro partitionerSeq(part, Th, size)scotch(part, Th, size)// EOM
-macro partitionerPar(part, Th, comm)broadcast(processor(0, comm), part)// EOM
+macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,parmetis)
 load "parmetis"
 macro partitionerSeq(part, Th, size)// EOM
-macro partitionerPar(part, Th, comm)parmetis(part, Th, mpiSize(comm), communicator = comm, worker = getARGV("-parmetis_worker", 1))// EOM
+macro partitionerPar(part, Th, comm, size)parmetis(part, Th, size, communicator = comm, worker = getARGV("-parmetis_worker", 1))// EOM
 ENDIFMACRO
 IFMACRO(!partitionerSeq)
 cout << "The macro 'partitioner' must be set to 'metis', 'scotch', or 'parmetis'" << endl;
@@ -118,7 +118,7 @@ if(mpiRank(comm) == 0) {
 // EOM
 
 
-macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
+macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
         meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);
         mpiBarrier(comm);
         real timerPartition = mpiWtime();
@@ -128,7 +128,6 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             real max = 2.0 * overlap * overshoot[].max;
             bbN(meshName, max, globalName)
         }
-        fespace VhGlobal(globalName, P1);
         PhGlobal supp = abs(part - mpiRank(comm)) < 0.1;
         VhGlobal suppSmooth;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
@@ -146,7 +145,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             suppSmooth = 0;
             AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         }
-        globalName = trunc(globalName, suppSmooth > 0.001);
+        globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
         real eps = intN(globalName)(1.0);
         real[int] epsTab(arrayIntersection.n);
         mpiRequest[int] rq(2 * arrayIntersection.n);
@@ -193,8 +192,8 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
         D = func2vec[];
         restrictionIntersection.resize(numberIntersection);
         for(int i = 0; i < numberIntersection; ++i) {
-            meshN meshIntersection = trunc(meshName, partitionIntersection[i] > 1.0e-6);
-            fespace WhIntersection(meshIntersection, P);
+            meshN meshIntersection = trunc(meshName, partitionIntersection[i] > 1.0e-6, label = 9999);
+            fespace WhIntersection(meshIntersection, Pk);
             matrix R = interpolate(WhIntersection, Wh);
             R.thresholding(1.0e-10);
             real[int] C;
@@ -203,23 +202,64 @@ macro partition(meshName, borderName, globalName, PhGlobal, part, s, overlap, D,
             restrictionIntersection[i].resize(R.nbcoef);
         }// EOM
 
-macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart)
+macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, labPeriodic)
 {
     real timing = mpiWtime();
     if(mpisize > 1 && !excluded) {
         fespace PhGlobal(ThGlobal, P0);
+        fespace VhGlobal(ThGlobal, P1);
         PhGlobal part;
+        timing = mpiWtime();
+        meshN ThGlobalPeriodic;
+        if(labPeriodic.n > 0) {
+            VhGlobal marker;
+            for(int i = 0; i < labPeriodic.n; ++i) {
+                varf vMarker(u, v) = on(labPeriodic[i], u = 1.0);
+                marker[] += vMarker(0, VhGlobal, tgv = -1);
+            }
+            PhGlobal partPeriodic = marker > 0.1;
+            while(1) {
+                AddLayers(ThGlobal, partPeriodic[], 1 + overlap, marker[]);
+                partPeriodic = marker > 0.001;
+                ThGlobalPeriodic = trunc(ThGlobal, partPeriodic < 0.999);
+                if(ThGlobal.nt / real(ThGlobalPeriodic.nt) > mpisize / real(mpisize - 1))
+                    break;
+            }
+        }
         if(mpiRank(comm) == 0) {
             if(verbosity > 0)
                 cout.scientific << " --- global mesh of " << ThGlobal.nt << " elements (prior to refinement) partitioned with " << Stringification(partitioner);
-            timing = mpiWtime();
-            partitionerSeq(part[], ThGlobal, mpiSize(comm));
+            if(labPeriodic.n > 0) {
+                fespace PhPeriodic(ThGlobalPeriodic, P0);
+                PhPeriodic partPeriodic;
+                if(mpiSize(comm) > 2) {
+                    partitionerSeq(partPeriodic[], ThGlobalPeriodic, mpiSize(comm) - 1);
+                    partPeriodic[] += 1.0;
+                }
+                else
+                    partPeriodic[] = 1.0;
+                part = partPeriodic;
+            }
+            else
+                partitionerSeq(part[], ThGlobal, mpiSize(comm));
         }
-        partitionerPar(part[], ThGlobal, comm);
+        if(labPeriodic.n > 0 && Stringification(partitioner) != "metis" && Stringification(partitioner) != "scotch") {
+            fespace PhPeriodic(ThGlobalPeriodic, P0);
+            PhPeriodic partPeriodic;
+            if(mpiSize(comm) > 2) {
+                partitionerPar(partPeriodic[], ThGlobalPeriodic, comm, mpiSize(comm) - 1);
+                partPeriodic[] += 1.0;
+            }
+            else
+                partPeriodic[] = 1.0;
+            part = partPeriodic;
+        }
+        else
+            partitionerPar(part[], ThGlobal, comm, mpiSize(comm));
         if(mpiRank(comm) == 0 && verbosity > 0)
             cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
         timing = mpiWtime();
-        partition(Th, ThBorder, ThGlobal, PhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
+        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
     }
     else if(mpisize == 1) {
         Th = ThGlobal;
@@ -230,5 +270,19 @@ macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayInter
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
 }// EOM
 
+macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart)
+{
+    int[int] emptyArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray)
+}// EOM
+
 macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded)
-buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init)// EOM
+{
+    int[int] emptyArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray)
+}// EOM
+
+macro buildPeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, labPeriodic)
+{
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, labPeriodic)
+}// EOM

@@ -547,8 +547,8 @@ inline FESpace * v_fes::update() {
        KN<int> ndfv(Th.nv);
        KN<int> ndfe(Th.neb);
        int nbdfv,nbdfe;    
-       buildperiodic(stack,nbdfv,ndfv,nbdfe,ndfe);
-       return   buildupdate(nbdfv,ndfv,nbdfe,ndfe);
+       bool ret = buildperiodic(stack,nbdfv,ndfv,nbdfe,ndfe);
+       return   ret ? buildupdate(nbdfv,ndfv,nbdfe,ndfe) : buildupdate();
       }
      else 
        return  buildupdate();
@@ -564,8 +564,8 @@ inline FESpace3 * v_fes3::update() {
    //    KN<int> ndfv(Th.nv);
        KN<int> ndfe;
      //  int nbdfv,nbdfe;    
-	  buildperiodic(stack,ndfe);
-       return   buildupdate(ndfe);
+       bool ret = buildperiodic(stack,ndfe);
+       return   ret ? buildupdate(ndfe) : buildupdate();
       }
      else 
        return  buildupdate();

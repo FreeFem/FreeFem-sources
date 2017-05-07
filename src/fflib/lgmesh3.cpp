@@ -373,6 +373,10 @@ bool BuildPeriodic(
 	      delete [] link2;
 	      return true; //new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe);
 	  }
+        else {
+	      delete [] link1;
+	      delete [] link2;
+        }
 	
     }
     return false;   
