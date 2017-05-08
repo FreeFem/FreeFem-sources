@@ -166,7 +166,8 @@ public:
 		}
 		for (int k=0;k<nt;k++) TonBoundary[k]=0;
 		
-		BoundaryEdgeHeadLink = new int[neb];       
+		BoundaryEdgeHeadLink = new int[neb];
+                int nbbadsensedge=0;
 		for (i=0;i<neb;i++)
 		{  
 		    BoundaryEdge & be(bedges[i]);
@@ -178,7 +179,8 @@ public:
 		    throwassert(i1 >=0 && i1 < nv);
 		    throwassert(i1 != i0) ;
 		    int im=Min(i0,i1);
-		    BoundaryEdgeHeadLink[i]=-1; 
+		    BoundaryEdgeHeadLink[i]=-1;
+                    int badsens =1; // bad
 		    for ( n=Head[i0+i1]; n>=0; n=TheAdjacencesLink[n])
 		    {
 			int jj=n%3,ii=n/3, jj0,jj1;
@@ -187,15 +189,16 @@ public:
 			{
 			    TonBoundary[n/3] += MaskEdge[n%3];
 			    BoundaryEdgeHeadLink[i]=n;                  
-			    if(i0==jj0) break; // FH 01072005 bon cote de l'arete 
+                            if(i0==jj0) {badsens=0;break;} // add check
+                            // FH 01072005 bon cote de l'arete
 					       // sinon on regard si cela existe?
 			}
 		    } 
 		    if ( BoundaryEdgeHeadLink[i] <0 && verbosity) 
 			cout << "   Attention l'arete frontiere " << i 
 			    << " n'est pas dans le maillage " <<i0 << " " << i1 <<  endl;
+                    else if(badsens) nbbadsensedge++;
 		}
-		
 		//  find adj
 		// reffecran();    
 		

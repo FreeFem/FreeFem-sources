@@ -1014,8 +1014,10 @@ void Geometry::AfterRead()
     NbOfCurves = 0;
     Int4  nbgem=0;
     for (int level=0;level < 2 && nbgem != nbe;level++)
-     for(jj=0;jj<2;jj++) //  change the sens of loop to keep interior normal in general..  feb. 2017 
-      for (i=0;i<nbe;i++) {
+     for(jj=0;jj<2;jj++) //  change the sens of loop to keep interior normal in general..  feb. 2017
+      for (i=0;i<nbe;i++)
+//        for(jj=0;jj<2;jj++)  // old code
+          {
 	GeometricalEdge & ei = edges[i];   
 	  if (!ei.Mark() && (level || ei[jj].Required())) {
 	    // warning ei.Mark() can be change in loop for(jj=0;jj<2;jj++) 
@@ -1092,12 +1094,13 @@ void Geometry::AfterRead()
           }
             
            bool reverse =be->ReverseEqui();
-            if( sens<0) reverse = !reverse;
+            //if( sens<0) reverse = !reverse; // remove 9 may 2017 
+            reverse=sens; // FH  Correct 9 may 2017 (ReverseEqui is wrong ??? maybe)
           if(reverse)
            curves[i].Reverse();
             if(verbosity>9)
             {
-                cout << " --  curve equi "<< reverse <<endl;
+                cout << " --  curve equi /reverse="<< reverse << " sens: " << sens << endl;
                 cout << "    curve  "<< i << ": "<< Number(be) << " <=> " << Number(eqbe) << " " << be->Equi() << be->ReverseEqui()
                      <<" -->  "<< Number(ee) << " <=>" << Number(eqee) << " " << ee->Equi() << ee->ReverseEqui() <<endl;
                 cout << "    curve eq: "<< nc << ": "<< Number(bee)  << " " << bee->Equi() << bee->ReverseEqui()
