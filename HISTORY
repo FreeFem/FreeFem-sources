@@ -1,5 +1,15 @@
-@  changeset:   4110:0b79eb5a4159
+@  changeset:   4112:c0e017f6c371
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Apr 26 09:04:26 2017 +0200
+|  summary:     coorect Unique and add missing file for petsc in  distrib.
+|
+o  changeset:   4111:89b56c2cbb81
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Tue Apr 25 21:15:55 2017 +0200
+|  summary:     Fixes pointers.
+|
+o  changeset:   4110:0b79eb5a4159
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Apr 25 12:03:26 2017 +0200
 |  summary:     clean version of Element_Mixte3d.cpp (thank to Marcelel Bonazzoli)
