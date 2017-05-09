@@ -17,13 +17,12 @@
 //
 // Authors: Julien Garaud <julien.garaud@gmail.com>
 //          Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-//
-// WARNING: to properly work, this code would require periodic boundary
-//          conditions for the variable phi. Since this is not implemented
-//          yet, the eigensolver finds additional modes. Namely, it find
-//          the eigenmodes that are periodic and that have integer
-//          eigenvalues, but it also find mode that are anti-periodic,
-//          and that should be eliminated by the periodicity...
+
+/***************************************/
+/*         Geometry parameters         */
+/***************************************/
+int[int] Labels = [1,2,3,4]; // labels : bottom, right, top, left sides
+int[int] labPeriodic = [Labels[0],Labels[2]];
 
 /**************************************/
 /*     Load PETSc & SLEPc macros      */
@@ -36,7 +35,7 @@ include "macro_ddm.idp"                  // Additional DDM functions
 macro def(i)i// EOM
 macro init(i)i// EOM
 
-func Pk = P1;                    // Finite-element space
+macro Pk() P1, periodic=[[Labels[0],x],[Labels[2],x]]//EOM
 
 /***************************************/
 /*    Options for distributed solver   */
@@ -78,17 +77,11 @@ int[int][int] restrictionIntersection(0);   // Local-to-neighbors renumbering
 real[int] D;                                // Partition of unity
 
 /***************************************/
-/*         Geometry parameters         */
-/***************************************/
-int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
-
-/***************************************/
 /*         Finite Element space        */
 /***************************************/
 // Definition of the finite element space on the domain Th
 // P1 are the first order Lagrange elements
 fespace Vh(Th, Pk);      // local finite element space
-//fespace Vh(Th,Pk,periodic=[[Labels[0],x],[Labels[2],x]]); // Periodic does not work
 
 /***************************************/
 /*            ##############           */
@@ -100,7 +93,7 @@ fespace Vh(Th, Pk);      // local finite element space
     meshN ThBorder, ThGlobal ;
     ThGlobal = square(Thetapts,Phipts,[x*pi,2.0*pi*y],label=Labels);
     // .....
-    build(Th,       // The local mesh
+    buildPeriodic(Th,       // The local mesh
             ThBorder, // The interface mesh
             ThGlobal, // The global mesh
             10,       // Fake interface
@@ -112,7 +105,8 @@ fespace Vh(Th, Pk);      // local finite element space
             Vh,           // The local Finite Element space
             Pk,           // FE-space
             mpiCommWorld, // Communicator
-            false         // excluded
+            false,        // excluded
+            labPeriodic   // Array of labels for periodic boundaries
          );
 }
 /***********************************************************************/
@@ -162,7 +156,7 @@ varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
   ;
 
 varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
-  ( Jac*uh*vh )               //  Bilinear form
+  ( Jac*uh*vh )           //  Bilinear form
   ;
 
 matrix<real> A = vA(Vh,Vh);
