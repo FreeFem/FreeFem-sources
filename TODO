@@ -1,0 +1,35 @@
+add doc:
+  gsl interface 
+  imax of tableau 
+
+Short time:
+ build a true aniso 3d adaptation example
+  to day bug in interface of mmg3d with metric and in tetgen ...
+
+
+long time: 
+
+Add Finite Volume interface. 
+
+Track: 
+
+add the sup of a function on a mesh
+real uinfty=sup(Th,abs(f));
+real uhinfty=sup(uh); 
+
+
+Newton algorithm.
+
+automatique scheme for time depend problem:
+dt(u) or u_t
+
+implicite:
+problem a(u,v, sheme=Euler , dt = 0.1, tinit = 0, tfinal = 10 , previous=[u1]) = 
+  int2d( u_t*v + dx(u)*dx(v)+dy(u)*dy(v) ) ;
+  
+explicit:
+problem a(u,v, sheme=thetaScheme(0.5) , dt = 0.1 , tinit = 0  , tfinal = 10 , previous=[u1]) = 
+  int2d( u_t*v) + int(dx(u1)*dx(v)+dy(u1)*dy(v)) ;
+
+
+

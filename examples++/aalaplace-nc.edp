@@ -1,0 +1,20 @@
+
+mesh Th=square(10,10);
+fespace Vh(Th,P1nc);
+Vh u,v;
+u=0;
+plot(u);
+func f= 0;
+func g= x*x+y*y*2;
+u=0; 
+int i=0;
+// dcl the problem 
+problem a(u,v,solver=CG,init=i) =
+    int2d(Th)(  dx(u)*dx(v) + dy(u)*dy(v)) 
+  + int2d(Th) ( v*f ) 
+  + on(1,2,3,4,u=g+i); 
+cout << "-------------------" << i << endl;  
+i++;
+a; //  solve  the problem 
+cout << "-------------------" << endl;  
+plot(u);

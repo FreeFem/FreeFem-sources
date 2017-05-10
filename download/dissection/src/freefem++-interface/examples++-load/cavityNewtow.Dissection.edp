@@ -1,0 +1,148 @@
+/*
+  Incompressible Navier Stokes 
+    with Taylor-Hood Finite element
+    No linearity : Newton methode 
+    continuation on Reynols Number
+    Mesh adaptation 
+*/
+//load "UMFPACK64"
+//defaulttoUMFPACK64();
+load "Dissection"
+defaulttoDissection();
+
+real  reymax = 6400; // ok < 125000 
+mesh Th=square(60,60);
+fespace Xh(Th,P2);
+fespace Mh(Th,P1);
+fespace XXMh(Th,[P2,P2,P1]);
+XXMh [u1,u2,p];
+XXMh [v1,v2,q]; 
+
+macro div(u1,u2) (dx(u1)+dy(u2))//
+macro grad(u1,u2) [dx(u1),dy(u2)]//
+macro ugrad(u1,u2,v) (u1*dx(v)+u2*dy(v)) //
+macro Ugrad(u1,u2,v1,v2) [ugrad(u1,u2,v1),ugrad(u1,u2,v2)]//
+verbosity=1;
+solve Stokes ([u1,u2,p],[v1,v2,q],solver=sparsesolver,strategy=102,tolpivot=1.0e-2) =
+    int2d(Th)( ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            - p*div(v1,v2)-q*div(u1,u2)
+            //    - p*q*(0.000001) 
+           )
+  + on(3,u1=4*x*(1-x),u2=0) 
+  + on(1,2,4,u1=0,u2=0);
+
+ Xh uu1=u1,uu2=u2;  
+//plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[uu1,uu2]);
+
+Xh psi,phi;
+
+solve streamlines(psi,phi,solver=sparsesolver,strategy=101) = 
+      int2d(Th)( dx(psi)*dx(phi) + dy(psi)*dy(phi))
+   +  int2d(Th)( -phi*(dy(u1)-dx(u2)))
+   +  on(1,2,3,4,psi=0);
+// default tolpivot=1.0e-16 without kernel detection
+// strategy=101 <=> symmetric = 100 + diagonal scaling = 1
+//plot(psi,wait=1);
+int i=0;
+real  nu=1./100.;
+real dt=0.1;
+real alpha=1/dt;
+
+/* NL 
+ varf   vNS ([u1,u2,p],[v1,v2,q],solver=Crout,init=i) =
+    int2d(Th)(
+             alpha*( u1*v1 + u2*v2) 
+            + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            + p*q*(0.000001) 
+            + p*dx(v1)+ p*dy(v2)
+            + dx(u1)*q+ dy(u2)*q
+            + Ugrad(u1,u2,u1,u2)'*[v1,v2]
+           )   
+  + on(3,u1=1,u2=0) 
+  + on(1,2,4,u1=0,u2=0) 
+*/
+
+XXMh [up1,up2,pp];
+varf   vDNS ([u1,u2,p],[v1,v2,q]) =
+    int2d(Th)(
+            + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+ //           + p*q*(0.000001) 
+            + p*dx(v1)+ p*dy(v2)
+            - dx(u1)*q- dy(u2)*q
+            + Ugrad(u1,u2,up1,up2)'*[v1,v2]
+            + Ugrad(up1,up2,u1,u2)'*[v1,v2]
+           )
+  + on(1,2,3,4,u1=0,u2=0) 
+;
+
+varf   vNS ([u1,u2,p],[v1,v2,q]) =
+    int2d(Th)(
+          
+            + nu * ( dx(up1)*dx(v1) + dy(up1)*dy(v1)
+            +  dx(up2)*dx(v2) + dy(up2)*dy(v2) )
+  //          + pp*q*(0.000001) 
+            + pp*dx(v1)+ pp*dy(v2)
+            - dx(up1)*q- dy(up2)*q
+            + Ugrad(up1,up2,up1,up2)'*[v1,v2]//'
+	      )
+  + on(1,2,3,4,u1=0,u2=0) 
+  ;
+
+for(real re=100;re<=reymax;re *=2)
+  { 
+    
+    real lerr=0.04;
+    
+    if(re>8000) lerr=0.01;
+    if(re>10000) lerr=0.005; 
+    for(int step=0;step<2;step++)
+      {
+	Th=adaptmesh(Th,[u1,u2],p,err=lerr,nbvx=100000);
+	//plot(Th,wait=0,ps="mesh."+re+".eps");
+	[u1,u2,p]=[u1,u2,p];
+        [up1,up2,pp]=[up1,up2,pp];
+	
+	for (i=0;i<=20;i++)
+	  {
+	    nu =1./re;
+	    up1[]=u1[];
+	    real walltime0=time();
+	    real clocktime0=clock();      		 
+	    matrix Ans=vDNS(XXMh,XXMh,tgv=1e+30);
+	    real walltime1=time();
+	    real clocktime1=clock();      		 
+	    real[int] b = vNS(0,XXMh,tgv=1e+30);
+	    real walltime2=time();
+	    real clocktime2=clock();      		 
+	    set(Ans,solver=sparsesolver,tolpivot=1.0e-2);
+            // default scaling startegy = KKT_SCALE
+	    real walltime3=time();
+	    real clocktime3=clock();      		 
+	    real[int] w = Ans^-1*b;
+	    real walltime4=time();
+	    real clocktime4=clock();      		 
+	    u1[] -= w;
+	    cout << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
+/*
+	    cout << " time "
+		 << walltime1 - walltime0 << " / "
+		 << clocktime1 - clocktime0 << " : "
+		 << walltime2 - walltime1 << " / "
+		 << clocktime2 - clocktime1 << " : "
+		 << walltime3 - walltime2 << " / "
+		 << clocktime3 - clocktime2 << " : "
+		 << walltime4 - walltime3 << " / "
+		 << clocktime4 - clocktime3 << endl;
+*/
+	    if(w.l2<1e-6) break; 
+	    uu1=u1;uu2=u2;
+	  } ;
+      }
+    uu1=u1;uu2=u2;
+//    streamlines;
+   plot(Th,wait=0);  
+   plot(coef=0.2,cmm="rey="+re+" [u1,u2]",[uu1,uu2],wait=0,nbiso=20,ps="cavity-"+re+".eps");  
+}
