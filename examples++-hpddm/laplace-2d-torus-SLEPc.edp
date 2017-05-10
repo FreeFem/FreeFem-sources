@@ -1,18 +1,21 @@
 // This codes shows how to solve an eigenvalue problems
 // in different coordinate systems. The example here is
-// the Laplace equation in spherical coordinates, in the
-// [theta,phi] plane. Solutions are the spherical harmonics.
-// the [theta,phi] plane is a 2d domain, using SLEPc.
+// the Laplace equation on a toroidal surface embedded
+// in R3. The cartesian coordinates on the torus read
+//     x = (r1+r2*cos(u))*cos(v)
+//     y = (r1+r2*cos(u))*sin(v)
+//     z = r2*sin(v)
+// with r1>r2 the major and minor radii and u,v \in [0,2\pi]
+// The toroidal surface thus maps to a square domain of
+// side 2\pi and periodic boundary conditions in both
+// coordinates.
 //
-// Here, we consider the problem in spherical coordinates
-// \theta \in [0,\pi] and \phi \in [0,2\pi], for  a fixed
-// radius: -\nabla^2 u = E u
+// Laplace-Beltrami on a torus, using SLEPc.
 //
-//  The eigenspectrum is :
-//    E_n = n(n+1)  ;  deg(n) = 2n+1
+// Is the eigenspectrum known analytically?
 //
 // Usage :
-// mpirun -np 4 FreeFem++-mpi -wg laplace-2d-spherical-harmonics-SLEPc.edp \
+// mpirun -np 4 FreeFem++-mpi -wg laplace-2d-torus-SLEPc.edp \
 //        -split 1 -npts 400 -nev 15 -sigma 0.0
 //
 // Authors: Julien Garaud <julien.garaud@gmail.com>
@@ -22,7 +25,7 @@
 /*         Geometry parameters         */
 /***************************************/
 int[int] Labels = [1,2,3,4]; // labels : bottom, right, top, left sides
-int[int] labPeriodic = [Labels[0],Labels[2]];
+int[int] labPeriodic = [Labels[0],Labels[2],Labels[1],Labels[3]];
 
 /**************************************/
 /*     Load PETSc & SLEPc macros      */
@@ -35,7 +38,7 @@ include "macro_ddm.idp"                  // Additional DDM functions
 macro def(i)i// EOM
 macro init(i)i// EOM
 
-macro Pk() P1, periodic=[[Labels[0],x],[Labels[2],x]]//EOM
+macro Pk() P1, periodic=[[Labels[0],x],[Labels[2],x],[Labels[1],y],[Labels[3],y]]//EOM
 
 /***************************************/
 /*    Options for distributed solver   */
@@ -47,14 +50,16 @@ int Npts   = getARGV("-npts" , 800) ; // Number of points on the perimeter
 int nEV    = getARGV("-nev"  ,  5)  ; // Number of eigenvalues
 real sigma = getARGV("-sigma", 0.0) ; // Shift
 //
-real radius = getARGV("-radius",1.0); // Radius of the sphere
+real r1 = getARGV("-r1",2.0); // Large radius of the torus
+real r2 = getARGV("-r2",1.0); // Small radius of the torus
+if (r1<=r2){if(!mpirank) cout << "Error r1<r2 is a wrong dimensions of the torus"<<endl; exit(1);}
 /***************************************/
 /*     Verbosity and passed options    */
 /***************************************/
 if(verbosity > 0 && mpirank == 0) {
     cout << "********************************************"  << endl
         << " --- " << mpirank << "/" << mpisize
-        << "- laplace-2d-spherical-harmonics-SLEPc.edp "   << endl
+        << "- laplace-2d-torus-SLEPc.edp "        << endl
         << "********************************************"  << endl
         << "- input parameters: "                          << endl
         << "  refinement factor  = " << s                  << endl
@@ -64,7 +69,8 @@ if(verbosity > 0 && mpirank == 0) {
         << "  nb of eigenvalues  = " << nEV                << endl
         << "  value of the shift = " << sigma              << endl
         << "********************************************"  << endl
-        << "  Radius of the sphere = " << radius           << endl
+        << "  Large radius of the torus = " << r1          << endl
+        << "  Small radius of the torus = " << r2          << endl
         << "********************************************"  << endl
         << endl;
 }
@@ -87,11 +93,11 @@ fespace Vh(Th, Pk);      // local finite element space
 /*            ##############           */
 /***************************************/
 { // Construction of the rectangular domain
-    int Thetapts = int(Npts/6.0); // pts on the x-axis sides
-    int Phipts   = int(Npts/3.0); // pts on the y-axis sides
+    int Thetapts = int(0.25*Npts); // pts on the x-axis sides
+    int Phipts   = int(0.25*Npts); // pts on the y-axis sides
 
     meshN ThBorder, ThGlobal ;
-    ThGlobal = square(Thetapts,Phipts,[x*pi,2.0*pi*y],label=Labels);
+    ThGlobal = square(Thetapts,Phipts,[2.0*x*pi,2.0*pi*y],label=Labels);
     // .....
     buildPeriodic(Th,       // The local mesh
             ThBorder, // The interface mesh
@@ -112,30 +118,26 @@ fespace Vh(Th, Pk);      // local finite element space
 /***********************************************************************/
 /*         Coordinate dependant differential operators                 */
 /***********************************************************************/
-/*        Spherical coordinates in the (theta,phi)-plane               */
+/*              Parametric coordinates in the (u,v)-plane              */
 /*                                                                     */
-/*                  r     --> not used                                 */
-/*                  theta --> x  in [0,pi]                             */
-/*                  phi   --> y  in [0,2*pi]                           */
+/*                  u  --> x  in [0,2*pi]                              */
+/*                  v  --> y  in [0,2*pi]                              */
 /*                                                                     */
-/*           Jacobian determinant on the half-plane                    */
-/*              The det(J) = r^2*sin(theta) --> r^2*sin(x)             */
+/*          Jacobian determinant on the bi-periodic square             */
+/*        The det(J) = r2*(r1+r2*cos(u)) --> r2(r1+r2*cos(x))          */
 /*                                                                     */
-macro Jac()( radius^2*sin(x) )             // End Of Macro /*          */
+macro Jac()( r2*(r1+r2*cos(x)) )            // End Of Macro /*         */
   ;; /*  The Jacobian                                                  */
 /*                                                                     */
-/*        The gradiant operator in spherical coordinates               */
+/*       The gradiant operator on the induced toroidal surface         */
 /*                                                                     */
-/*                d/dr                                                 */
-/*       grad =   1/r*d/dtheta              ->  1/radius*d/dx          */
-/*                1/(r*sin(theta))*d/dphi   ->                         */
-/*                                   1/(radius*sin(x)*d/dy             */
+/*       grad =   1/r2*d/du              ->  1/r2*d/dx                 */
+/*                1/(r1+r2*cos(u))*d/dv  ->  1/(r1+r2*cos(x)*d/dy      */
 /*                                                                     */
-macro Grad(u) [dx(u)/radius,dy(u)/(radius*sin(x))] // End Of Macro /*  */
+macro Grad(u) [dx(u)/r2,dy(u)/(r1+r2*cos(x))]      // End Of Macro /*  */
   ;; /*  The Gradient operator                                         */
 macro Lap(u,v) ( Grad(u)'*Grad(v)) //')      // End Of Macro /*        */
-  ;; /*  The Laplace operator                                          */
-/*                                                                     */
+  ;; /*  The Laplace-Beltrami operator on the induced surface          */ 
 /*                                                                     */
 /***********************************************************************/
 /***************************************/
