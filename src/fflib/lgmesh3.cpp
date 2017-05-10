@@ -773,7 +773,8 @@ AnyType MoveMesh3::operator()(Stack stack) const
 
 inline pmesh3 *  initMesh(pmesh3 * const & p, string * const & s) {
   Mesh3 * m;
-  cout << " initMesh " << *s << endl;
+  if(verbosity > 2)
+      cout << " initMesh " << *s << endl;
   *p= m =new Mesh3(*s); 
   m->BuildGTree();
  //  delete s;  modif mars 2006 auto del ptr 
