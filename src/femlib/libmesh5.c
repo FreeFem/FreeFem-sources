@@ -365,7 +365,6 @@ int GmfCloseMesh(int MshIdx)
     ret=fclose(msh->hdl);
 
     free(msh);
-    fprintf(stdout,"NmbMsh=%d",NmbMsh);
     return ret!=0;
 }
 
