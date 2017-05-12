@@ -59,7 +59,7 @@ plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)
 
 Wh<real> def(Rb)[1];
 Rb[0] = 1;
-set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_max_it 200", nearnullspace = Rb);
+set(A, sparams = "-pc_type gamg -ksp_type gmres -pc_gamg_threshold -1.0 -ksp_max_it 200", nearnullspace = Rb);
 u[] = 0.0;
 u[] = A^-1 * rhs;
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)

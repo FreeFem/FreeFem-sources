@@ -189,7 +189,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         PetscInt bs;
         MatGetBlockSize(ptB->_petsc, &bs);
         KN<PetscScalar>* rhs = nargs[0] ? GetAny<KN<PetscScalar>*>((*nargs[0])(stack)) : nullptr;
-        initPETScStructure(ptA, mA, bs, static_cast<KN<PetscScalar>*>(nullptr), rhs);
+        initPETScStructure(ptA, mA, bs, static_cast<KN<double>*>(nullptr), rhs);
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
@@ -768,7 +768,7 @@ static void Init_PETSc() {
     Global.Add("globalNumbering", "(", new OneOperator2_<long, PETSc::DistributedCSR<HpSchur<PetscScalar>>*, KN<long>*>(PETSc::globalNumbering<PETSc::DistributedCSR<HpSchur<PetscScalar>>>));
     Global.Add("originalNumbering", "(", new OneOperator3_<long, PETSc::DistributedCSR<HpSchur<PetscScalar>>*, KN<PetscScalar>*, KN<long>*>(PETSc::originalNumbering));
     Global.Add("set", "(", new PETSc::setOptions<PETSc::DistributedCSR<HpSchur<PetscScalar>>>());
-    addInv<PETSc::DistributedCSR<HpSchur<PetscScalar>>, PETSc::InvPETSc, KN<PetscScalar>>();
+    addInv<PETSc::DistributedCSR<HpSchur<PetscScalar>>, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
 }
 
 LOADFUNC(Init_PETSc)

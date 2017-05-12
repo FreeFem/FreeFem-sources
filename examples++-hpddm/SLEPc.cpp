@@ -6,18 +6,18 @@
 #include "PETSc.hpp"
 
 namespace SLEPc {
-template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
+template<class K, typename std::enable_if<std::is_same<K, double>::value || !std::is_same<PetscScalar, double>::value>::type* = nullptr>
 void copy(K* pt, PetscInt n, PetscScalar* xr, PetscScalar* xi) { }
-template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
+template<class K, typename std::enable_if<!std::is_same<K, double>::value && std::is_same<PetscScalar, double>::value>::type* = nullptr>
 void copy(K* pt, PetscInt n, PetscScalar* xr, PetscScalar* xi) {
     for(int i = 0; i < n; ++i)
         pt[i] = K(xr[i], xi[i]);
 }
-template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
+template<class K, typename std::enable_if<std::is_same<K, double>::value || !std::is_same<PetscScalar, double>::value>::type* = nullptr>
 void assign(K* pt, PetscScalar& kr, PetscScalar& ki) {
     *pt = kr;
 }
-template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
+template<class K, typename std::enable_if<!std::is_same<K, double>::value && std::is_same<PetscScalar, double>::value>::type* = nullptr>
 void assign(K* pt, PetscScalar& kr, PetscScalar& ki) {
     *pt = K(kr, ki);
 }
@@ -150,6 +150,12 @@ void finalizeSLEPc() {
     PETSC_COMM_WORLD = MPI_COMM_WORLD;
     SlepcFinalize();
 }
+template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
+void addSLEPc() {
+    Global.Add("deigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, double>());
+}
+template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
+void addSLEPc() { }
 }
 
 static void Init_SLEPc() {
@@ -164,8 +170,7 @@ static void Init_SLEPc() {
     SlepcInitialize(&argc, &argv, 0, "");
     delete [] argv;
     ff_atend(SLEPc::finalizeSLEPc);
-    if(std::is_same<PetscScalar, double>::value)
-        Global.Add("deigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, double>());
+    SLEPc::addSLEPc<PetscScalar>();
     Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
 }
 

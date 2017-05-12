@@ -50,7 +50,7 @@ matrix<complex> Mat;                        // local operator
 }
 
 dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
-set(A, sparams = "-ksp_view");
+set(A, sparams = "-ksp_view -pc_type lu");
 Wh<complex> def(u);    // local solution
 
 u[] = A^-1 * rhs;

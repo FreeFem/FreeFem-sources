@@ -2,8 +2,8 @@
 // the Laplace operator on a 2d square domain, using SLEPc.
 //
 // Usage :
-// mpirun -np 4 FreeFem++-mpi -wg laplace-2d-SLEPc.edp \
-//        -split 1 -npts 400 -nev 10 -sigma 0.0
+// mpirun -np 4 FreeFem++-mpi -wg lplace-complex-2d-SLEPc.edp \
+//        -split 1 -npts 400 -nev 10
 //
 // Authors: Julien Garaud <julien.garaud@gmail.com>
 //          Pierre Jolivet <pierre.jolivet@enseeiht.fr>
@@ -31,14 +31,13 @@ real Lx    = getARGV("-lx"   , pi)  ; // Dimension of the domain
 real Ly    = getARGV("-ly"   , pi)  ; // Dimension of the domain
 //
 int nEV    = getARGV("-nev"  , 10)  ; // Number of eigenvalues
-real sigma = getARGV("-sigma", 0.0) ; // Shift
 /***************************************/
 /*     Verbosity and passed options    */
 /***************************************/
 if(verbosity > 0 && mpirank == 0) {
     cout << "********************************************"  << endl
         << " --- " << mpirank << "/" << mpisize
-        << "- laplace-2d-SLEPc.edp "     << endl
+        << "- laplace-complex-2d-SLEPc.edp "     << endl
         << "********************************************"  << endl
         << "- input parameters: "                          << endl
         << "  refinement factor  = " << s                  << endl
@@ -47,7 +46,6 @@ if(verbosity > 0 && mpirank == 0) {
         << "  Domain size [Lx,Ly]    = ["<<Lx<<","<<Ly<<"]"<< endl
         << "********************************************"  << endl
         << "  nb of eigenvalues  = " << nEV                << endl
-        << "  value of the shift = " << sigma              << endl
         << "********************************************"  << endl
         << endl;
 }
@@ -103,8 +101,10 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 /***************************************/
 /*          Problem definition         */
 /***************************************/
+complex sigma = 1.0 + 1i;
+complex nu = 1.0 + 1i;
 varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
-( dx(uh)*dx(vh)+dy(uh)*dy(vh)
+( nu*(dx(uh)*dx(vh)+dy(uh)*dy(vh))
     -sigma*uh*vh               )//  Bilinear form
     +on(Labels[3], uh = 0.0)    //  Boundary Conditions
     +on(Labels[2], uh = 0.0)    //  Boundary Conditions
@@ -116,8 +116,8 @@ varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
 ( uh*vh )               //  Bilinear form
 ;
 
-matrix<real> A = vA(Vh,Vh);
-matrix<real> B = vB(Vh,Vh);
+matrix<complex> A = vA(Vh,Vh);
+matrix<complex> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
@@ -126,22 +126,21 @@ dmatrix DistB(DistA, B, clean = true);
 /***************************************/
 /*          Problem resolution         */
 /***************************************/
-real[int]     EigenVAL(0);       // array to store eigenvalues
-Vh<real>[int] def(EigenVEC)(1);  // array to store eigenvectors
+complex[int]     EigenVAL(0);       // array to store eigenvalues
+Vh<complex>[int] def(EigenVEC)(1);  // array to store eigenvectors
 EigenVEC[0][] = 0.0;
 
 string ssparams =            // Parameters for the distributed EigenValue solver
   " -eps_nev " + nEV       + // Number of eigenvalues
   " -eps_type krylovschur" +
-  " -eps_target "+ sigma   + // Shift value
   " -st_type sinvert "     +
   " -st_pc_type lu "       +
   " -st_pc_factor_mat_solver_package mumps" +
   " -eps_view"             +
-  " -eps_gen_hermitian"      // The problem is symmetric
+  " -eps_pos_gen_non_hermitian"      // The problem is symmetric
   ;
 
-int k = deigensolver
+int k = zeigensolver
 (DistA,              // matrix OP = A − sigma*B
  DistB,              //
  vectors = EigenVEC, // Array to store the FEM-EigenFunctions
@@ -154,7 +153,7 @@ k=min(k,nEV); // some time the number of converged eigen value
 /***************************************/
 /*           View the solution         */
 /***************************************/
-Vh<real> Temp;
+Vh<complex> Temp;
 
 for(int i=0;i<k;i++){
     if(!mpirank) cout << " Eigenvalue #"+i+" = "+EigenVAL[i]<<endl;
@@ -164,7 +163,7 @@ for(int i=0;i<k;i++){
             "Psi("+i+")  EV = "+EigenVAL[i], // Comment
             Pk,     // Local FE-space
             def,    // Macro for field definition
-            real,   // Type
+            complex,// Type
             3,      // 2d/3d view
             1       // Wait
            )
