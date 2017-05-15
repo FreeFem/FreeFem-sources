@@ -149,14 +149,14 @@ load "MPICG"
 	real[int] u=A*v;
 	u += b; 
 	u = projC(u);
-	verbosity=101;
+	verbosity=1;
 	return u;  // return 
       };		  
       
       func real[int] matId(real[int] &u) { 
 	verbosity=0;
 	u =projD(u);
-	verbosity=100;
+	verbosity=1;
 	return u;};
       
       
@@ -165,7 +165,7 @@ load "MPICG"
       Vh u=0;
       
       u=0;
-      verbosity=100;
+      verbosity=1;
       MPIAffineCG(DJJ,u[],eps=1.e-4,nbiter=200,precon=matId,comm=comm);
       projD(u[]);
       Plot(u[]);
@@ -176,7 +176,7 @@ load "MPICG"
 	  // u = x , dn(x) = N.x 
 	  solve PPPP(uuu,vvv) = int2d(Thh)(uuu*vvv+Grad(uuu)'*Grad(vvv)) - int2d(Thh)( x*vvv ) -int1d(Thh,1)( N.x*vvv)  ; //');
 	  cout << " err = " << int2d(Th)( square(uuu-u)) << " " << int2d(Thh)( square(uuu-x)) << endl;
-	  savemesh(Thh,"/tmp/Thh.msh");
+	 // savemesh(Thh,"/tmp/Thh.msh");
 	}
     }
 }
