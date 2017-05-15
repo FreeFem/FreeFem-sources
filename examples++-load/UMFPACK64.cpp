@@ -376,6 +376,7 @@ bool SetUMFPACK64()
     DefSparseSolver<double>::solver  =BuildSolverIUMFPack64;
     DefSparseSolver<Complex>::solver =BuildSolverIUMFPack64;    
     TypeSolveMat::defaultvalue =TypeSolveMatdefaultvalue;
+    
     return  true;
 }
 
