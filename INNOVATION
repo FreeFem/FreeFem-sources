@@ -1,3 +1,13 @@
+version 3.54 may, 17th 2017 ?
+  - add complex version of PETSc and SLEPc 
+     remarque to day SLEPc must be configure by hand 
+        edit file examples++-load/WHERE_LIBRARY like:
+       MBP-FH3:ff-OSX11 hecht$ cat examples++-load/WHERE_LIBRARY
+        slepc LD  -L/Users/hecht/work/soft/slepc-3.7.3/arch-ff++/lib -lslepc
+        slepc  INCLUDE -I/Users/hecht/work/soft/slepc-3.7.3/arch-ff++/include -I/Users/hecht/work/soft/slepc-3.7.3/include  -I/usr/local/ff++/openmpi-2.1/petsc/include -I/usr/local/ff++/openmpi-2.1/petsc/include -I/usr/local/ff++/openmpi-2.1/petsc/include -I/opt/X11/include
+
+version 3.53-1
+   correct propleme in adapet mesh with periodic boundary condition (Thank to P. Ventura
 version 3.53
   - add SLEPc interfa thank to P. Jolivet
   - correct problem on incompatibility between send/revc mode 

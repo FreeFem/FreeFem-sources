@@ -786,13 +786,15 @@ static void Init_PETSc() {
     }
     if(!exist_type<DbddcC*>())
     {
-        Dcl_Type<DbddcR*>(Initialize<DbddcC>, Delete<DbddcC>);
+        Dcl_Type<DbddcC*>(Initialize<DbddcC>, Delete<DbddcC>);
         zzzfff->Add("zbddc", atype<DbddcC*>());
         
     }
     
     map_type_of_map[make_pair(atype<DmatR*>(),atype<Complex*>())] =atype<DmatC*>();
     map_type_of_map[make_pair(atype<DmatR*>(),atype<double*>())] =atype<DmatR*>();
+    map_type_of_map[make_pair(atype<DbddcR*>(),atype<Complex*>())] =atype<DbddcC*>();
+    map_type_of_map[make_pair(atype<DbddcR*>(),atype<double*>())] =atype<DbddcR*>();
     
    
     TheOperators->Add("<-", new OneOperator1_<long, Dmat*>(PETSc::initEmptyCSR<Dmat>));
