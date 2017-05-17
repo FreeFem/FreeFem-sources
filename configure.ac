@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.53-1,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.54,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -76,11 +76,11 @@ m4_define([AC_FF_WHERELIB],
 	LIBS=$ff_save_libs
 	fi
     ])dnl end m4_define AC_FF_WHERELIB
-define([AC_FF_PETSC_AWK],[awk -F'=' '"$1 "==[$]1 {print [$]2}' [$]ffconfpetsc])
+define([AC_FF_PETSC_AWK],[awk -F'=' '"$1 "==[$]1 {print [$]2}' $2])
 m4_define([AC_FF_PETSC_WHERELIB],
 	  [
-	    ff_$2=`AC_FF_PETSC_AWK($2)`
-	    ff_$3=`AC_FF_PETSC_AWK($3)`
+	    ff_$2=`AC_FF_PETSC_AWK($2,$4)`
+	    ff_$3=`AC_FF_PETSC_AWK($3,$4)`
 	   if test -n "[$]ff_$2"; then 
 			    ff_$1_ok=yes;
 			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
@@ -929,28 +929,23 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 	    ffconfpetsc="$d$dd"		
 	    if test -f "$ffconfpetsc" ; then 
 		if test  "$ff_petsc_ok" = no ; then
+		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-		    test "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
+		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
-		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES)
-		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE)
-		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE)
-		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE)
-		        AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE)
-		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE)
-		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE)
-		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE)
-			AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE)
-			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE)
+		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
+  			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
+			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
 			
-		#	PETSC_WITH_EXTERNAL_LIB=`awk -F'=' '"PETSC_WITH_EXTERNAL_LIB "==$1 {print $2}' $ffconfpetsc`
-		#	PETSC_CC_INCLUDES=`awk -F'=' '"PETSC_CC_INCLUDES "==$1 {print $2}' $ffconfpetsc`
-		#	if test -n "$PETSC_WITH_EXTERNAL_LIB"; then 
-		#	    ff_petsc_ok=yes;
-		#	    AC_FF_ADDWHERELIB(petsc,$PETSC_WITH_EXTERNAL_LIB,$PETSC_CC_INCLUDES)
-		#	fi
 		    else
-			AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN." ]);			
+			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);			
 		    fi
 		fi
 	    else
@@ -968,6 +963,39 @@ if test "$ff_petsc_ok" != no ;   then
 else
     AC_MSG_NOTICE([ without petsc ***** ])
 fi
+
+## PETSc complex 
+AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvariables   --without-petsc_complex  ])
+ff_petsccomplex_ok=no
+if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
+    for d in "$with_petsc_complex" /usr/local/ff++/petsc-complex/lib ;do
+	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
+	    ffconfpetscc="$d$dd"		
+	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
+		    
+		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
+		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`			
+		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
+		    if test "$?"  -eq 0 ; then
+	        AC_FF_PETSC_WHERELIB(petsccomplex,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetscc)
+			
+			else
+			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);			
+		    fi
+		fi
+	done
+    done
+fi
+
+
+if test "$ff_petsccomplex_ok" != no ;   then
+    AC_MSG_NOTICE([ with petsc complex  $ff_petsccomplex_ok])
+else
+    AC_MSG_NOTICE([ without petsc complex ***** ])
+fi
+##  slepc 
+
+### end petsc .... 
 
 if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'` 
@@ -2062,12 +2090,22 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_hpddm" != no && enable_hpddm=yes  
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o "$ff_umfpack_ok" != "yes"  &&  enable_hpddm=no
-FF_PETCS_DYLIB=""
+FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
-FF_PETCS_DYLIB="PETSc.$DYLIB_SUFFIX"
+FF_PETSC_DYLIB="PETSc.$DYLIB_SUFFIX"
 fi
+if test "$ff_petsccomplex_ok" != no ;   then
+FF_PETSC_DYLIB="$FF_PETSC_DYLIB PETSc-complex.$DYLIB_SUFFIX"
+fi
+if test "$ff_slepccomplex_ok" != no ;   then
+FF_PETSC_DYLIB="$FF_PETSC_DYLIB SLEPc-complex.$DYLIB_SUFFIX"
+fi
+if test "$ff_slepc_ok" != no ;   then
+FF_PETSC_DYLIB="$FF_PETSC_DYLIB SLEPc.$DYLIB_SUFFIX"
+fi
+
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB" 
-TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETCS_DYLIB"])
+TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 
 
 # All makefiles
@@ -2108,7 +2146,7 @@ AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
 AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
-AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok ]);
+AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
 AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
 
 
