@@ -20,8 +20,8 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
         KSPGetOperators(_ksp, &A, &P);
         int N;
         MatGetSize(A, &N, NULL);
-        VecCreateMPIWithArray(PETSC_COMM_WORLD, bs, n, N, NULL, &_right);
-        VecCreateMPIWithArray(PETSC_COMM_WORLD, bs, n, N, NULL, &_left);
+        VecCreateMPIWithArray(PETSC_COMM_WORLD, bs, bs * n, N, NULL, &_right);
+        VecCreateMPIWithArray(PETSC_COMM_WORLD, bs, bs * n, N, NULL, &_left);
     }
     ~CustomOperator() {
         VecDestroy(&_right);
@@ -280,7 +280,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         PetscInt bs;
         MatGetBlockSize(ptB->_petsc, &bs);
         KN<PetscScalar>* rhs = nargs[0] ? GetAny<KN<PetscScalar>*>((*nargs[0])(stack)) : nullptr;
-        initPETScStructure(ptA, mA, bs, nargs[3] ? (GetAny<bool>((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, static_cast<KN<double>*>(nullptr), rhs);
+        initPETScStructure(ptA, mA, bs, nargs[2] ? (GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, static_cast<KN<double>*>(nullptr), rhs);
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
@@ -772,12 +772,11 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     std::fill_n(work, op._n, 0.0);
     HPDDM::IterativeMethod::solve(op, x, work, 1, PETSC_COMM_WORLD);
     VecRestoreArray(ptA->_x, &x);
-    if(isBlock)
-        MatGetBlockSize(ptA->_petsc, &bs);
     HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptX), work, ptX->n / bs, bs);
     VecRestoreArray(y, &work);
     VecDestroy(&y);
-    ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<PetscScalar*>(*ptX));
+    if(ptA->_A)
+        ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<PetscScalar*>(*ptX));
     return 0L;
 }
 
