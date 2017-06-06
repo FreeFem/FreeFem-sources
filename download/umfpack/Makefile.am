@@ -29,30 +29,34 @@ EXTRA_DIST= SuiteSparse_config.mk.in
 # ---------------------------------
 
 DIRPKG=../pkg
-SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-4.4.4.tar.gz
+SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-4.5.5.tar.gz
 
 UMFPACKLIB=../lib/libumfpack.a 
 AMDLIB=../lib/libamd.a
 CAMDLIB=../lib/libcamd.a
 CHOLMODLIB=../lib/libcholmod.a
 COLAMDLIB=../lib/libcolamd.a
+KLULIB=../lib/libklu.a
+BTFLIB=../lib/libbtf.a
 SUITESPARSECONFIGLIB=../lib/libsuitesparseconfig.a
 
 # ALH - 4/9/13 - parallel make crashes ("pipe from processes is a directory"?). make sure that everything is run
 # sequentially
 
 umfpack:
-	$(MAKE) MAKEFLAGS= $(AMDLIB)
-	$(MAKE) MAKEFLAGS= $(UMFPACKLIB)
-	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB)
+	$(MAKE)  $(AMDLIB)
+	$(MAKE)  $(UMFPACKLIB)
+	$(MAKE)  $(SUITESPARSECONFIGLIB)
 #
 # ALH - 19/9/13 - cholmod part built sequentially
 #
-	$(MAKE) MAKEFLAGS= $(CAMDLIB)
-	$(MAKE) MAKEFLAGS= $(COLAMDLIB)
-	$(MAKE) MAKEFLAGS= $(AMDLIB)
-	$(MAKE) MAKEFLAGS= $(CHOLMODLIB)
-	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB) 
+	$(MAKE)  $(CAMDLIB)
+	$(MAKE)  $(COLAMDLIB)
+	$(MAKE)  $(CHOLMODLIB)
+	$(MAKE) $(BTFLIB)
+	$(MAKE)  $(KLULIB)
+	$(MAKE)  $(SUITESPARSECONFIGLIB) 
+	$(MAKE) install.done 
 
 # FFCS: SuiteSparse/*/Source are not able to compile in parallel from scratch ("pipe from processes is a
 # directory"?). But specifying "make -j 1" is not enough (another error pops up). Use "$(MAKE) MAKEFLAGS=" instead
@@ -100,6 +104,18 @@ $(COLAMDLIB): SuiteSparse/FF
 	cp -f  SuiteSparse/COLAMD/Include/*.h ../include
 	cp  SuiteSparse/COLAMD/Lib/libcolamd.a ../lib/libcolamd.a
 	$(RANLIB) ../lib/libcolamd.a
+$(KLULIB): SuiteSparse/FF 
+	cd SuiteSparse/KLU/Lib && $(MAKE) MAKEFLAGS=
+	mkdir -p ../include ../lib
+	cp -f  SuiteSparse/KLU/Include/*.h ../include
+	cp  SuiteSparse/KLU/Lib/libklu.a ../lib/libklu.a
+	$(RANLIB) ../lib/libklu.a
+$(BTFLIB): SuiteSparse/FF 
+	cd SuiteSparse/BTF/Lib && $(MAKE) MAKEFLAGS=
+	mkdir -p ../include ../lib
+	cp -f  SuiteSparse/BTF/Include/*.h ../include
+	cp  SuiteSparse/BTF/Lib/libbtf.a ../lib/libbtf.a
+	$(RANLIB) ../lib/libbtf.a
 
 UMFPACKv4.4:
 	tar xzf UMFPACKv4.4.tar.gz
@@ -129,8 +145,9 @@ SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk:SuiteSparse/DATE Makefile S
 	   (cd SuiteSparse/CHOLMOD && make clean); \
 	   (cd SuiteSparse/COLAMD && make clean); \
 	   (cd SuiteSparse/CAMD && make clean); \
-	   (cd SuiteSparse/CAMD && make clean); \
 	   (cd SuiteSparse/AMD && make clean); \
+	   (cd SuiteSparse/BTF && make clean); \
+	   (cd SuiteSparse/KLU && make clean); \
 	   find . -name '*.exe'|xargs rm;  \
 	fi; 
 	touch SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk
@@ -154,13 +171,21 @@ UMFPACKv4.4.tar.gz:
 $(SUITESPARSE_TGZ):
 	../getall -o SuiteSparse -a
 
+../lib/WHERE.suitesparse:
+	echo suitesparse  LD -L@DIR@/lib -lumfpack -lklu -lcholmod -lbtf -lccolamd -lcolamd -lcamd -lamd -lsuitesparseconfig  > $@
+	echo suitesparse INCLUDE -I@DIR@/include  >> $@
+install.done:../lib/WHERE.suitesparse
+	touch install.done
+
 clean-local:
-	-rm $(AMDLIB) $(CAMDLIB) $(CHOLMODLIB) $(COLAMDLIB) $(SUITESPARSECONFIGLIB)
+	-rm $(AMDLIB) $(CAMDLIB) $(CHOLMODLIB) $(COLAMDLIB) $(SUITESPARSECONFIGLIB) $(KLULIB)  $(BTFLIB) 
 	-rm ../include/amd*.h 
 	-rm ../include/umfpack*.h 
 	-rm ../include/colmod*.h 
 	-rm ../include/camd*.h 
 	-rm ../include/amd*.h
+	-rm ../include/klu*.h
+	-rm ../include/btf*.h
 	-rm ../include/SuiteSparse_config.h 
 	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
 	-rm SuiteSparse*gz 

@@ -968,11 +968,12 @@ KNM<R>* mult(KNM<R >* a,const KNM_<R> & A,const KNM_<R> & B)
     intblas lsa=A10-A00 ,lsb=B10-B00,lsc=C10-C00;
     intblas lda=A01-A00 ,ldb=B01-B00,ldc=C01-C00;
     if(verbosity>10) {
+        cout << " N:" << N << " " << M << " " << K <<endl;
 	cout << lsa << " " << lsb << " "<< lsc << " init " << init <<  endl;
 	cout << lda << " " << ldb << " "<< ldc << endl;	
     }
-    tA=lda==1?'T':'N';
-    tB=ldb==1?'T':'N';
+    tA=(lda==1 && N != 1)?'T':'N';// N,K
+    tB=(ldb==1&& K!=1) ?'T':'N';// K,M
     
     if(lda==1) lda=lsa;
     if(ldb==1) ldb=lsb;
