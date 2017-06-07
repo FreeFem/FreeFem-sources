@@ -59,7 +59,7 @@ nloaded from > Anywhere)<A>
 	<? pfile($mfile,"MacOS 10.4") ?>	
 <p class="p1"><br></p>
 <p class="p1">The <tt>textmate 2</tt> editor is a good editor for  Mac 10.7 or better, <a href="https://macromates.com/download"> download  from macromates.com </a> and install it, when  get the 
-  <a href="http://www.freefem.org/ff++/textmate2.zip"> textmate freefem++ syntax from www.freefem.org/ff++/textmate2.zip </a> unzip textmate2.zip and follow the explanation given in file \texttt{How\_To.rtf}.</p>
+  <a href="http://www.freefem.org/ff++/textmate2.zip"> textmate freefem++ syntax from www.freefem.org/ff++/Textmate2-ff++.zip (version june 2107)</a> unzip Textmate2-ff++.zip and follow the explanation given in file \texttt{How\_To.rtf}.</p>
 <p class="p1"><br></p>
 
 <p class="p1"><span class="s1"> Please read the <a href="README_MAC.txt"> README_MAC</a> form the distribution for the full infomation </span></p>
