@@ -176,10 +176,12 @@ download('Scotch','https://gforge.inria.fr/frs/download.php/file/34618/scotch_6.
 # 	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.3.1.tar.gz',
 # 	 'f8f26a3b1c7f82444c0db0b375215287');
 
+# reput version 4.4.4 of umpfack pb of install under windows ... F. H. 
 download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.5.5.tar.gz',
-	 'http://faculty.cse.tamu.edu/davis/SuiteSparse/','SuiteSparse-4.5.5.tar.gz',
-	 '0a5b38af0016f009409a9606d2f1b555') ;
-#	4.4.4  'e0af74476935c9ff6d971df8bb6b82fc') ;
+#	 'http://faculty.cse.tamu.edu/davis/SuiteSparse/','SuiteSparse-4.5.5.tar.gz',
+#	 '0a5b38af0016f009409a9606d2f1b555') ;
+	 'http://faculty.cse.tamu.edu/davis/SuiteSparse/','SuiteSparse-4.4.4.tar.gz',
+  	 4.4.4  'e0af74476935c9ff6d971df8bb6b82fc') ;
 
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
 	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz','b72c6309f25e9660133007b82621ba7c');
