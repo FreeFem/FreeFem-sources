@@ -85,8 +85,8 @@ F77LIB =
 # LIB = -lm
 
 # For "make install"
-INSTALL_LIB = @abs_srcdir@/../lib
-INSTALL_INCLUDE = @abs_srcdir@/../include
+INSTALL_LIB = @abs_srcdir@/download//lib
+INSTALL_INCLUDE = @abs_srcdir@/download/include
 
 # Which version of MAKE you are using (default is "make")
 # MAKE = make
