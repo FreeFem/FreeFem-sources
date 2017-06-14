@@ -445,14 +445,8 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     else
         HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, 1, MPI_COMM_WORLD);
     timer = MPI_Wtime() - timer;
-    if(!excluded) {
-        if(rank == 0)
-            std::cout << scientific << " --- system solved (in " << timer << ")" << std::endl;
-        HPDDM::underlying_type<K> storage[2];
-        ptA->computeError(*ptX, *ptRHS, storage);
-        if(rank == 0)
-            std::cout << scientific << " --- error = " << storage[1] << " / " << storage[0] << std::endl;
-    }
+    if(!excluded && verbosity > 0 && rank == 0)
+        std::cout << scientific << " --- system solved (in " << timer << ")" << std::endl;
     return 0L;
 }
 
