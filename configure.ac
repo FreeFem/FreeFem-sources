@@ -924,13 +924,16 @@ AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --witho
 ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" "${prefix}/ff-petsc/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"		
+		echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then 
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
+			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]); 
+			
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetsc)
@@ -968,13 +971,14 @@ fi
 AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvariables   --without-petsc_complex  ])
 ff_petsccomplex_ok=no
 if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc_complex" /usr/local/ff++/petsc-complex/lib ;do
-	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
+    for d in "$with_petsc_complex" "${prefix}/ff-petsc/complex/lib" /usr/local/ff++/petsc-complex/lib ;do
+	for dd in ""  "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetscc="$d$dd"		
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
-		    
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
-		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`			
+		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`	
+		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetsc]);
+					
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 	        AC_FF_PETSC_WHERELIB(petsccomplex,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetscc)

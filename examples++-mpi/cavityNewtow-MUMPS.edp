@@ -15,7 +15,7 @@ real ttgv=1e30;
     continuation on Reynols Number
     Mesh adaptation 
 */
-real  reymax = 1600; // ok < 125000 
+real  reymax = 9000; // ok < 125000 
 mesh Th=square(8,8);
 Th=change(Th,fregion=nuTriangle%mpisize); 
 fespace Xh(Th,P2);
