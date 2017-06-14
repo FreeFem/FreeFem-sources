@@ -1,0 +1,69 @@
+#!/bin/bash
+  red='[0;31m' # Red.
+  grn='[0;32m' # Green.
+  lgn='[1;32m' # Light green.
+  blu='[1;34m' # Blue.
+  mgn='[0;35m' # Magenta.
+  std='[m'     # No color.
+
+NL=0
+NA=0
+NX=0
+NN=0
+NO=0
+NC=0
+NF=0
+
+cmm=$1;shift;
+if [ $# -eq 0 ]; then
+list=*.edp
+elif  [ $# -gt  0 ]; then
+list="$@"
+fi
+for i in $list
+do
+    case $i in
+	all.edp|regtests.edp) 
+	    echo  pass   $i;; 
+	*)
+	    ((NN++))
+	    ( $cmm "$i" )2>&1 1>$i-out;
+	    RES=$?
+	    ((SIG=$RES%128));
+
+	    ## error Compile error : Error load   # 1
+	    ## error Compile error :
+            ## Exec error : exec assert
+	    ## Exec error :
+	    errl=`grep 'error Compile error : Error load' $i-out`
+	    errC=`grep 'error Compile error :' $i-out`
+	    errX=`grep 'Exec error :' $i-out`
+	    errA=`grep 'Exec error : exec assert' $i-out`
+	  #  echo "$RES,$SIG,$errC,$errA."
+	    if [ -n "$errl" ] ; then
+		((NL++))
+		MSG="${mgn} FAIL(load)        ${std}"
+	    elif [ -n "$errC" ] ; then
+		((NC++))
+		MSG="${lgn} FAIL(Compile)     ${std}"
+	    elif [ -n "$errA" -a  $SIG -ne 0 ] ; then
+		((NA++))
+		MSG="${blu} FAIL(Assert)      ${std}"
+	    elif [ -n "$errX" -a  $SIG -ne 0 ] ; then
+		((NX++))
+		MSG="${mgn} FAIL(Exec)        ${std}"
+	    elif [ $SIG -eq 0 ] ; then
+		((NO++))
+		MSG="${grn} OK  (Exec)        ${std}"
+	    else
+		MSG="${red} FAIL(signal)=$SIG ${std}"
+		((NF++))
+	    fi
+	    echo $MSG  $cmm $i  >>$i-out
+	    echo  $MSG  $cmm $i "( see $i-out )";
+#	    echo  $MSG  $cmm $i "(see $i-out )" >>/tmp/list-ff-$$
+	    ;;
+    esac
+done
+
+echo "Nb Case $NN / ${grn}OK $NO / ${red} FAIL $NF / ${blu} Assert Error $NA/ ${lgn} Compile Error $NC  / ${mgn} load Error $NL / Exec Error $NX${std}"

@@ -1,0 +1,142 @@
+#!/usr/bin/perl
+# Build an index of all Emacs org-mode hyperlinks
+# ======================================================================
+# Written by Antoine Le Hyaric
+# http://www.ljll.math.upmc.fr/lehyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+#
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh brief="Build an index of all Emacs org-mode hyperlinks" default=0 freefem perl start=22/10/2013 upmc written
+
+use strict;
+use warnings;
+use threads;
+use threads::shared;
+use Path::Class; # relative()
+use File::Basename; # dirname()
+use Cwd; # getcwd()
+
+# Scan all files in the FF directory tree
+
+my $pwd=getcwd();
+my %anchors;
+share %anchors;
+my @q;
+share @q;
+my $dir='';
+my @ignore=`cat .hgignore`;
+foreach my $f(`find . -type f`){push @q,$f}
+
+# core count inspired from [[file:../../../alh/perl/System.ph::nbcores]]
+sub nbcores{
+  my $n=1;
+  if(-e "/proc/cpuinfo"){$n=`grep 'processor.*:' /proc/cpuinfo|wc -l`} # linux
+  elsif(-x "/usr/sbin/sysctl"){$n=`sysctl -n hw.ncpu`} # macos
+  elsif(defined $ENV{NUMBER_OF_PROCESSORS}){$n=$ENV{NUMBER_OF_PROCESSORS}} # windows
+  return $n;
+}
+
+# start as many threads as possible
+my @threads;
+for(my $i=0;$i<nbcores();$i++){push @threads,threads->create(\&scanfiles)}
+foreach(@threads){$_->join()}
+
+sub scanfiles{
+  while(defined(my $f=pop @q)){
+
+    # relative path name is required for the index to be operational on any user machine
+    $f=~s/^\.\///;
+    chomp $f;
+    my $frel=file($f)->relative($pwd);
+
+    # files to skip because of .hgignore
+    my $found=0;
+    foreach my $r(@ignore){
+      chomp $r;
+      if($f=~/$r/){
+	$found=1;
+	last;
+      }
+    }
+    next if $found;
+
+    # files to skip for other reasons
+    next if $f=~/\.(bmp|png|jpg|eps|pdf|tar|gz|zip|tgz)$/; # not text
+    next if $f=~/\.hg\//; # not text
+    next if $f=~/examples\+\+-load\/include\//; # duplicated text
+
+    # make sure that we don't leave absolute paths in the hyperlinks because these would not work on other machines
+
+    my $cref=`cat $f`;
+    my $c=$cref;
+    while($cref=~m/\[\[file:([^:\]]+)(.*)\]\]/g){
+
+      # hyperlink potentially containing an absolute path
+      my $labs=$1;
+      if($labs=~/^~\//){
+
+	# set HOME value
+	my $labshome=$labs;
+	$labshome=~s/^~/$ENV{HOME}/;
+
+	# change absolute path to relative in file contents
+	my $lrel=file($labshome)->relative(dirname($f));
+	my $labsqm=quotemeta($labs);
+	$c=~s/\[\[file:$labsqm/\[\[file:$lrel/g;
+      }
+    }
+
+    # update file if some paths were changed
+
+    if($c ne $cref){
+      print "Changed hyperlink paths to relative in $f\n";
+      open FILE,">$f" or die;
+      print FILE $c;
+      close FILE;
+    }
+
+    # find name anchors in file contents
+
+    while($c=~m/<<([^<> ,{}]+)>>/g){$anchors{$1}.=" [[file:${frel}::$1][$frel]]"}
+  }
+}
+
+# print out all existing hyperlink anchors
+
+print "\n";
+open OUT,">index.org" or die;
+print OUT "# -*- mode:org;coding:utf-8 -*-\n";
+print OUT "# Hyperlinks into the FreeFem++ source, built with [[file:build/orgindex]]\n";
+print OUT "# (do not modify this file manually: update the source files and run [[file:build/orgindex]] again)\n";
+print OUT "\n";
+
+foreach(sort {uc($a) cmp uc($b)} keys %anchors){
+  print OUT "$_";
+  my $padding=25;
+  if(length($_)<$padding){print OUT " "x($padding-length($_))}
+  print OUT "$anchors{$_}\n";
+}
+
+close OUT;
+
+# Local Variables:
+# mode:cperl
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

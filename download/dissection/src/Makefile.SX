@@ -1,0 +1,51 @@
+#! \file   Makefile
+#  \brief  top of Makefile
+#  \author Atsushi Suzuki, Laboratoire Jacques-Louis Lions
+#  \date   Jul. 12th 2015
+
+# This file is part of dissection solver
+# 
+# Dissection solver is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Dissection solver is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with diisection solver.  If not, see <http://www.gnu.org/licenses/>.
+
+include ./Defs.inc
+all:
+	@(cd ../include ; cd ../src ; tar cfp - `find . -name '*.hpp'` | (cd ../include ; tar xvfp -) )
+	@(tar cfp - `find . -name '*.h'` | (cd ../include ; tar xvfp -) )
+	@(cd Compiler;        $(MAKE) )
+	@(cd Splitters;       $(MAKE) )
+	@(cd Algebra;         $(MAKE) )
+	@(cd Driver;          $(MAKE) )
+	@(cd C-test; $(MAKE) )
+	$(LD) $(LDOPT) -o MM-Dissection C-test/MM-Dissection.o \
+	Driver/*.o \
+	Algebra/*.o \
+	Splitters/*.o \
+	Compiler/*.o \
+	-L$(LIB_DIR_SCOTCH) -lscotch -lscotcherr \
+	$(SHARED_COMPILER)
+clean:
+	@(cd Compiler;        make clean)
+	@(cd Splitters;       make clean)
+	@(cd Algebra;         make clean)
+	@(cd Driver;          make clean)
+	@(cd Interfaces;      make clean)
+	@rm -fr *~ *.o *.so core *.d *.mod *.a *.i90
+
+distclean:
+	-make clean
+	@rm -rf */*.d  */*.ti
+	@(cd C-test; make clean)
+
+tar:
+	@tar cvzf src.tar.gz Defs.inc Make.inc Makefile */*.cpp */*.hpp */*.h */Makefile */Make.inc */*/Makefile

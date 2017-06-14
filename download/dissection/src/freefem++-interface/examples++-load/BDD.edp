@@ -1,0 +1,431 @@
+// Interative Substructuring metod with Neumann-Neuman / BDD
+// for tutorial by Japan SIAM, Tokyo, 4-5 Jun.2016, Atsushi Suzuki
+
+bool withmetis=true;
+if (withmetis)   {
+  load "metis";
+}
+load "Dissection";
+bool flagRAS=true;
+bool twolevel = true;
+int sizeoverlaps=1; // size off overlap 
+int nn=10,mm=10;
+
+func bool SubdomainsPartitionUnity(mesh & Th, int nnpart, real[int] & partdof,
+				   int sizeoverlaps, mesh[int] & aTh,
+				   matrix[int] & Rih, matrix[int] & Dih)
+{
+  fespace Vh(Th,P1);
+  fespace Ph(Th,P0);
+
+  mesh Thi=Th;
+  fespace Vhi(Thi,P1);  // FreeFem++ trick, formal definition
+  Vhi[int] pun(nnpart); // local fem functions Vh sun=0, unssd=0;
+  Vh sun = 0, unssd = 0;
+  Ph part;
+  part[]=partdof;
+  for(int i=0;i<nnpart;++i) {
+    Ph suppi= abs(part - i) < 0.1; // boolean 1 in the subdomain 0 elsewhere
+    Thi=aTh[i]=trunc(Th,suppi>0,label=10,split=1); //  mesh interfaces label 10
+    Rih[i]=interpolate(Vhi,Vh,inside=true); // Restriction operator : Vh to Vhi
+    pun[i][] = 1.0;
+    sun[] += Rih[i]'*pun[i][]; // '
+  }
+  for(int i=0;i<nnpart;++i) {
+    Thi=aTh[i];
+    pun[i]= pun[i]/sun;
+    Dih[i]=pun[i][]; //diagonal matrix built from a vector if(verbosity > 1)
+  }
+  return true;
+}
+
+func int SkeltonIndex(mesh & Th, int nnpart, mesh[int] & Tha, matrix[int] & Rih,
+		      matrix[int] & Dih, int[int] &skelindex)
+{
+  fespace Vh(Th, P1);
+  int ndeg = 0;
+  mesh Thi = Th;
+  Vh sum = 0;
+  int[int] lindex(Vh.ndof);
+  for (int n = 0; n < nnpart; n++) {
+    real[int] bi(Tha[n].nv);
+    bi = 0.0;
+    for (int k = 0; k < Tha[n].nbe; k++) { // over boundary elements
+      if (Tha[n].be(k).label == 10) {
+	bi[Tha[n].be(k)[0]] = 1.0;
+	bi[Tha[n].be(k)[1]] = 1.0;
+      }
+    }
+    real[int] di = Dih[n]*bi;
+    Vh localone;
+    localone[] = Rih[n]'*di; // '
+    sum[] +=localone[];
+  }
+  for (int i = 0; i < Vh.ndof; i++) {
+    if (abs(sum[][i] - 1.0) < 0.1) {
+      lindex[ndeg++] = i;
+    }
+  }
+  skelindex = lindex;
+  return ndeg;
+}
+
+func int LocalIndexes(int nnpart, mesh[int] & Tha,
+		      int[int] &num0, int[int,int] &idx0,
+		      int[int] &num1, int[int,int] &idx1,
+                      int[int] &num2, int[int,int] &idx2)
+{
+  for (int n = 0; n < nnpart; n++) {
+    mesh Thi = Tha[n];
+    fespace Vhi(Thi, P1);
+    Vhi u;
+    u = 0.0;
+    for (int k = 0; k < Tha[n].nbe; k++) { // over boundary elements
+      if (Tha[n].be(k).label == 10) {
+	u[][Tha[n].be(k)[0]] = 1.0;
+	u[][Tha[n].be(k)[1]] = 1.0;
+      }
+      if (Tha[n].be(k).label == 1) {
+	u[][Tha[n].be(k)[0]] = -1.0;
+	u[][Tha[n].be(k)[1]] = -1.0;
+      }
+    }
+    int itmp0 = 0;
+    int itmp1 = 0;
+    int itmp2 = 0;
+    for (int i = 0; i < Vhi.ndof; i++) {
+      if (u[][i] == 0.0) {
+	idx0(n, itmp0++) = i;
+      }
+      else if (u[][i] == (-1.0)) {
+	idx2(n, itmp2++) = i;
+      }
+      else {
+	idx1(n, itmp1++) = i;
+      }	
+      num0[n] = itmp0;
+      num1[n] = itmp1;
+      num2[n] = itmp2;
+    }
+  }
+}
+	
+int withplot=3;
+mesh Thg=square(160,160);
+int[int] chlab=[1,1  ,2,1  ,3,1  ,4,1  ]; // Dirichlet b.c. segments w label 1
+Thg=change(Thg,refe=chlab);
+int npart= nn*mm;
+fespace Ph(Thg,P0);
+fespace Vh(Thg,P1);
+
+Ph  part;
+Vh  sun=0,unssd=0;
+Ph xx=x,yy=y;
+part = int(xx*nn)*mm + int(yy*mm);
+//plot(part,wait=1);
+if (withmetis)   {
+  int[int] nupart(Thg.nt);
+  metisdual(nupart,Thg,npart); 
+  for(int n=0;n<nupart.n; n++)
+    part[][n]=nupart[n];
+}
+if (withplot>1) {
+  plot(part,fill=1,cmm="subdomains",wait=1);
+}
+
+mesh[int] aTh(npart);
+matrix[int] Rih(npart);
+matrix[int] Dih(npart);
+
+SubdomainsPartitionUnity(Thg, npart, part[],
+			 sizeoverlaps, aTh,
+			 Rih, Dih);
+
+int nskel;
+int[int] skelindexg(Vh.ndof);
+nskel = SkeltonIndex(Thg, npart, aTh, Rih, Dih, skelindexg);
+skelindexg.resize(nskel);
+int[int] interiorn(npart);
+int[int, int] interior(npart, Vh.ndof); // too large => max Vhi[n].ndof
+int[int] interfn(npart);
+int[int, int] interf(npart, Vh.ndof); // too large => max Vhi[n].nbe * 2
+int[int] bcorign(npart);
+int[int, int] bcorig(npart, Vh.ndof); // too large => max Vhi[n].nbe * 2
+
+LocalIndexes(npart, aTh, interiorn, interior, interfn, interf,
+	     bcorign, bcorig);
+
+Vh sum=0,fctone=1;
+for(int n=0; n < npart;n++) {
+  Vh localone;
+  real[int] bi = Rih[n]*fctone[]; // restriction to the local domain
+  real[int] di = Dih[n]*bi;
+  localone[] = Rih[n]'*di; // '
+  sum[] +=localone[];
+  cout << "# interior(" << n << ",) = " << interiorn[n] << " "
+       << "# interf(" << n << ",) =" << interfn[n]
+       << "# bcorig(" << n << ",) =" << bcorign[n]
+       << endl;
+}
+
+sum = 0;
+for (int i = 0; i < nskel; i++) {
+  sum[][skelindexg[i]] = 1.0;
+}
+cout << "DOF skelton " << nskel << endl;
+plot(sum, cmm="Skelton",wait=true);
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+			     
+varf vBC(u,v)= on(1, u=1.0); // to treat original bc
+func f = 1.0;
+varf vexternal(u,v)=int2d(Thg)(f*v);
+Vh fh, uglobal;
+fh[] = vexternal(0, Vh);
+real tgv = 1e+30;
+real[int] bc = vBC(0, Vh, tgv=tgv);
+
+matrix[int] AAD(npart);
+matrix[int] AAN(npart);
+Vh[int] Z(npart);          // coarse space : only used as set of arrays
+matrix E;
+
+for (int n = 0; n < npart; n++) {
+  mesh Thi;
+  fespace Vhi(Thi, P1);
+  Thi = aTh[n];
+  Vhi u, v;
+  if (bcorign[n] == 0) {   // floating subdomain
+    cout << n << " : floating subdomain" << endl;
+    varf aD(u,v)=int2d(Thi)(Grad(u)'*Grad(v)) + on(10, u=1.0); // '
+    varf aN(u,v)=int2d(Thi)(Grad(u)'*Grad(v));                 // '
+    AAD[n] = aD(Vhi, Vhi, strategy=102,solver=sparsesolver,tolpivot=1.0e-16);
+    AAN[n] = aN(Vhi, Vhi, strategy=102,solver=sparsesolver,tolpivot=1.0e-2);
+			                       // Neumann matrix is singular
+  }
+  else {
+    varf aD(u,v)=int2d(Thi)(Grad(u)'*Grad(v)) + on(1,10, u=1.0); // '
+    varf aN(u,v)=int2d(Thi)(Grad(u)'*Grad(v)) + on(1, u=1.0); // '
+    AAD[n] = aD(Vhi, Vhi, strategy=102,solver=sparsesolver,tolpivot=1.0e-16);
+    AAN[n] = aN(Vhi, Vhi, strategy=102,solver=sparsesolver,tolpivot=1.0e-16);   
+  }
+}
+
+func real[int] opS(real[int] &v)
+{
+  real[int] s(v.n);
+  Vh vh, uh;
+  vh = 0.0;
+  for (int i = 0; i < nskel; i++) {
+    vh[][skelindexg[i]] = v[i];
+  }
+  uh = 0.0;
+  for (int n = 0; n < npart; n++) {
+    real[int] vi = Rih[n] * vh[]; 
+    for (int i = 0; i < interfn[n]; i++) {
+      vi[interf(n, i)] *= tgv;    // tgv to treat Dirichlet data
+    }
+    for (int i = 0; i < bcorign[n]; i++) {
+      vi[bcorig(n, i)] = 0.0;    // homogeneous Dirichlet data
+    }
+    real[int] ui = AAD[n]^-1 * vi;   // solve local problem with Dirichlet data
+    real[int] wi = AAN[n] * ui;
+    uh[] += Rih[n]'*wi; //'
+  }
+  uh[] = bc ? 0.0 : uh[];    // set homogeneous Dirichlet on the original BC
+  for (int i = 0; i < nskel; i++) {
+    s[i] = uh[][skelindexg[i]];
+  }
+  return s;
+}  
+
+func real[int] opNN(real[int] &v)
+{
+  real[int] s(v.n);
+  Vh vh, uh;
+  vh = 0.0;
+  for (int i = 0; i < nskel; i++) {
+    vh[][skelindexg[i]] = v[i];
+  }
+  uh = 0.0;
+  for (int n = 0; n < npart; n++) {
+    real[int] vi = Rih[n] * vh[];
+    real[int] wi = Dih[n] * vi;
+    for (int i = 0; i < interiorn[n]; i++) {
+      wi[interior(n, i)] = 0.0;
+    }
+    for (int i = 0; i < bcorign[n]; i++) {
+      wi[bcorig(n, i)] = 0.0;
+    }
+    vi = AAN[n]^-1 * wi;   // solve local problem with Dirichlet data
+    for (int i = 0; i < interiorn[n]; i++) {
+      vi[interior(n, i)] = 0.0;
+    }
+    wi = Dih[n] * vi;
+    uh[] += Rih[n]'*wi; //'
+  }
+  uh[] = bc ? 0.0 : uh[];    // set homogeneous Dirichlet on the original BC
+  for (int i = 0; i < nskel; i++) {
+    s[i] = uh[][skelindexg[i]];
+  }
+  return s;
+}  
+
+func bool CoarseSpace(matrix &EE)   
+{
+  for (int n = 0; n < npart; n++) {
+    Z[n] = 1.0;                      // Z is kept on the whole domain
+    real[int] zit = Rih[n]*Z[n][];
+    real[int] zitemp = Dih[n]*zit;   // with the partition of unity
+    Z[n][] = Rih[n]'*zitemp; //'
+  }
+  real[int,int] Ef(npart,npart); //
+  real[int] zz(nskel), vv(nskel);
+  Vh vh;
+  for(int m=0;m<npart;m++) {
+    for (int i = 0; i < nskel; i++) {
+      zz[i]= Z[m][][skelindexg[i]];
+    }
+    vv = opS(zz);
+    vh = 0;
+    for (int i = 0; i < nskel; i++) {
+      vh[][skelindexg[i]] = vv[i];
+    }
+    for(int n=0;n<npart;n++) {
+      Ef(m,n) = Z[n][]' * vh[]; // '
+    }
+  }
+  // symmetrize the matrix : lower -> upper
+  for(int n=0;n<npart;n++) {
+    for(int m=0;m<n;m++) {
+      Ef(m,n)=Ef(n,m);
+    }
+  }
+  EE = Ef;
+  set(EE,solver=sparsesolver,strategy=102,tolpivot=1e-2);
+  return true;
+}
+
+func real[int] opQ(real[int] &v)  // CarseGrid solver
+{
+  Vh vh, wh;
+  vh = 0.0;
+  for (int i = 0; i < nskel; i++) {
+    vh[][skelindexg[i]] = v[i];
+  }
+  real[int] vv(npart);
+  for(int n=0;n<npart;n++) {
+    vv[n]= Z[n][]'*vh[]; // '
+  }
+  real[int] zz=E^-1*vv;
+  wh = 0.0;
+  for(int n=0;n<npart;n++) {
+    wh[] +=zz[n]*Z[n][];
+  }
+  real[int] s(v.n);
+  for (int i = 0; i < nskel; i++) {
+    s[i] = wh[][skelindexg[i]];
+  }
+  return s;
+}
+
+func real[int] opP(real[int] &v) // S-orthogonal projection onto Z^T : I - SQ
+{
+  real[int] w(v.n), sv(v.n);
+  w = opQ(v);
+  sv = opS(w);
+  w = v - sv;
+  return w;
+}
+
+func real[int] opPt(real[int] &v) // I - QS
+{
+  real[int] w(v.n), sv(v.n);
+  sv = opS(v);
+  w = opQ(sv);
+  sv = v - w;
+  return sv;
+}
+
+func real[int] opBNN(real[int] &v)
+{
+  real[int] s(v.n);
+  s = opQ(v);
+  real[int] ss(v.n);
+  ss = opP(v);
+  real[int] sss(v.n);
+  sss = opNN(ss);
+  ss = opPt(sss);
+  s += ss;
+  return s;
+}  
+
+func bool plotSkelton(real[int] &v, string &str)
+{
+  Vh uh;
+  uh = 0.0;
+  for (int i = 0; i < nskel; i++) {
+   uh[][skelindexg[i]]= v[i];
+  }
+  plot(uh,cmm=str, wait=true,value=true);
+  return true;
+}
+
+real[int] fskel(nskel);
+real[int] uskel(nskel);
+{
+  Vh vh,wh;
+  vh = 0.0;
+  fh[] = bc ? 0.0 : fh[];
+  for (int n = 0; n < npart; n++) {
+    real[int] vi = Rih[n] * fh[];    // load vector on the subdomain n
+    for (int i = 0; i < interfn[n]; i++) {
+      vi[interf(n,i)] = 0.0;
+    }
+    real[int] ui = AAD[n]^-1 * vi;   // solve local problem with 0 Dirichlet
+    for (int i = 0; i < interfn[n]; i++) {
+      ui[interf(n, i)] = 0.0;
+    }
+    real[int] wi = AAN[n] * ui;
+    wh[] += Rih[n]'*wi;  // '
+  }
+  wh = fh - wh;    // f3 - A31 A11^-1 f1 -  A32 A22^-1 f2
+  wh[] = bc ? 0.0 : wh[];
+  for (int i = 0; i < nskel; i++) {
+    fskel[i]= wh[][skelindexg[i]];
+  }
+}
+
+CoarseSpace(E);
+   
+string sttmp;
+sttmp = "RHS on the skelton";		  
+plotSkelton(fskel, sttmp);
+
+uskel = 0.0;
+LinearCG(opS, uskel, fskel, precon=opBNN,
+	 nbiter=200, eps=1.e-10, verbosity=50);
+
+sttmp = "solution on the skelton";		  
+plotSkelton(uskel, sttmp);
+
+{
+  Vh vh, wh, uh;
+  uh = 0.0;
+  for (int i = 0; i < nskel; i++) {
+   uh[][skelindexg[i]]= uskel[i];
+  }
+  uglobal = 0.0;
+  for (int n = 0; n < npart; n++) {
+    real[int] vi = Rih[n] * fh[];    // load vector on the subdomain n
+    real[int] wi = Rih[n] * uh[];
+    for (int i = 0; i < interfn[n]; i++) {
+      vi[interf(n, i)] = wi[interf(n, i)] *tgv; // tgv to treat Dirichlet data
+    }
+    real[int] ui = AAD[n]^-1 * vi; // solve local problem with Dirichlet data
+    real[int] di = Dih[n]*ui;
+    wh[] = Rih[n]'*di;  // '
+    uglobal[] += wh[];
+  }
+}
+plot(uglobal,cmm="global", wait=true,value=true);
