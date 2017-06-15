@@ -662,6 +662,8 @@ void Check(const Opera &Op,int N,int  M)
    typedef FESpace3::Mesh Mesh;
    typedef Mesh *pmesh ;
    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+   Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
+  
    bool sptrclean=true;
    const CDomainOfIntegration & di= *b->di;
    ffassert(di.d==3);
@@ -938,6 +940,7 @@ void Check(const Opera &Op,int N,int  M)
     
     if (where_in_stack) delete [] where_in_stack;
     delete &mate;
+     mp = mps;// restore data x,yz 
  }
 
 // end 3d
@@ -1961,6 +1964,7 @@ void Check(const Opera &Op,int N,int  M)
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
       bool sptrclean=true;
       //     sptr->clean(); // modif FH mars 2006  clean Ptr
+      Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
       
       const CDomainOfIntegration & di= *b->di;
       const Mesh3 * pThdi = GetAny<pmesh3>( (* di.Th)(stack));
@@ -2164,7 +2168,8 @@ void Check(const Opera &Op,int N,int  M)
       else 
           InternalError(" kind of CDomainOfIntegration unkown");
       
-      if (where_in_stack) delete [] where_in_stack;      
+      if (where_in_stack) delete [] where_in_stack;
+      mp=mps;// restore x,y,z
    
   }
 // --------- FH 170605
