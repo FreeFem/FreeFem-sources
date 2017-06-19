@@ -1,5 +1,28 @@
-@  changeset:   4142:05d85e2012f5
+@  changeset:   4146:0c1cf91856cb
 |  tag:         tip
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Thu Jun 15 20:53:16 2017 +0200
+|  summary:     Fixed HPDDM version.
+|
+o    changeset:   4145:a208347e48e7
+|\   parent:      4143:13bc30ff02f7
+| |  parent:      4144:3d1438b6d081
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Jun 15 17:49:58 2017 +0200
+| |  summary:     merge with P. version
+| |
+| o  changeset:   4144:3d1438b6d081
+| |  parent:      4142:05d85e2012f5
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Wed Jun 14 20:37:33 2017 +0200
+| |  summary:     New HPDDM version.
+| |
+o |  changeset:   4143:13bc30ff02f7
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Thu Jun 15 17:42:32 2017 +0200
+|    summary:     correct the bug find  Ivan Rychetsky rychet@fzu.cz
+|
+o  changeset:   4142:05d85e2012f5
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jun 14 11:57:48 2017 +0200
 |  summary:     add missing in distrib
