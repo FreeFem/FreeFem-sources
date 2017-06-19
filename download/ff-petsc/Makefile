@@ -143,6 +143,10 @@ WHERE-all:
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lpetsc' >> $@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
+	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lslepc' >> $@
+	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
+	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' >> $@
+	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
 
 
 $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
