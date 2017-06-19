@@ -52,18 +52,18 @@ PETSc-complex:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex WHERE-complex ;\
 	else echo " -- No  Petc , no MPI, no Petsc real"; fi
 
-WHERE:../lib/WHERE.PETSc  
+WHERE:../lib/WHERE.PETSc ../lib/WHERE.SLEPc  
 
 ../lib/WHERE.PETSc:$(SRCDIR)/tag-install-real
 	-mkdir ../lib
-	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lPETSc' > $@
+	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lpetsc' > $@
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
 
 SLEPc-real:
-	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) $(SRCDIR_SLEPC)/tag-install-real ;\
+	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) ../lib/WHERE.PETSc ;\
 	else echo " -- No  Petc , no MPI"; fi
 SLEPc-complex:
-	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex $(SRCDIR_SLEPC)/tag-install-complex ;\
+	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex ../lib/WHERE.PETSc-complex ;\
 	else echo " -- No  Petc , no MPI"; fi
 
 $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
@@ -118,10 +118,16 @@ $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex
 	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex WHERE-all
+	
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
 	-mkdir ../lib
-	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lPETSc' > $@
+	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lpetsc' > $@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
+../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
+	-mkdir ../lib
+	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
+	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
+
 
 ##  need include include Make-petsc-download.mk	
 WHERE-all:
@@ -189,11 +195,17 @@ $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
 $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real 
 	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
 	touch $@
+	
+../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
+	-mkdir ../lib
+	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lslepc' > $@
+	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
+
 
 clean:clean-local
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
-	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc
+	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc* ../lib/WHERE.SLEPc* 
 	-rm -rf ../include/*PETSc*
 	-rm -rf ../lib/lib*PETSc* 
 	-rm -rf $(SRCDIR)
