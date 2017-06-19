@@ -1,5 +1,10 @@
-@  changeset:   4147:64c2781287d9
+@  changeset:   4148:ca228d8e3aec
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 19 16:35:30 2017 +0200
+|  summary:     add missing spelc in WHERE-all
+|
+o  changeset:   4147:64c2781287d9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jun 19 16:11:34 2017 +0200
 |  summary:     correct intype in getall and makefie
