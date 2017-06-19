@@ -1,5 +1,10 @@
-@  changeset:   4146:0c1cf91856cb
+@  changeset:   4147:64c2781287d9
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 19 16:11:34 2017 +0200
+|  summary:     correct intype in getall and makefie
+|
+o  changeset:   4146:0c1cf91856cb
 |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
 |  date:        Thu Jun 15 20:53:16 2017 +0200
 |  summary:     Fixed HPDDM version.
