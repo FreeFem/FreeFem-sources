@@ -41,32 +41,30 @@ DIR_INSTALL_REAL:=$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
-	
+
 petsc-slepc: PETSc-real PETSc-complex SLEPc-real SLEPc-complex
-		
+
 PETSc-real:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) WHERE ;\
 	else echo " -- No  Petc , no MPI"; fi
-	
-	
 
 PETSc-complex:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex WHERE-complex ;\
 	else echo " -- No  Petc , no MPI, no Petsc real"; fi
 
-WHERE:../lib/WHERE.PETSc 
-	
+WHERE:../lib/WHERE.PETSc  
+
 ../lib/WHERE.PETSc:$(SRCDIR)/tag-install-real
+	-mkdir ../lib
 	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lPETSc' > $@
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
-	
+
 SLEPc-real:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) $(SRCDIR_SLEPC)/tag-install-real ;\
 	else echo " -- No  Petc , no MPI"; fi
 SLEPc-complex:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex $(SRCDIR_SLEPC)/tag-install-complex ;\
 	else echo " -- No  Petc , no MPI"; fi
-	
 
 $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real all
@@ -76,7 +74,6 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real 
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  
 	touch $@
-	
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
@@ -95,7 +92,6 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 Make-petsc-download.mk:
 	egrep 'SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 
-	
 ifdef 	MUMPS_LIB	
 #  version COMPLEX  .....  
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk 
@@ -121,10 +117,9 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex 
 	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
-	
 WHERE-complex:../lib/WHERE.PETSc-complex WHERE-all
-	
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
+	-mkdir ../lib
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lPETSc' > $@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
 
@@ -164,7 +159,6 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
 	touch $@
-	
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	tar xvzf $(PACKAGE)
@@ -172,7 +166,6 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 $(SRCDIR_SLEPC)/tag-tar:$(PACKAGE_SLEPC)
 	tar xvzf $(PACKAGE_SLEPC)
 	touch $@
-	
 $(PACKAGE):
 	../getall -o PETSc -a
 $(PACKAGE_SLEPC):
