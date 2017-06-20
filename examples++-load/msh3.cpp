@@ -6677,7 +6677,7 @@ public:
 basicAC_F0::name_and_type Cube_Op::name_param[]= {
     {  "region", &typeid(long)},
     {  "label", &typeid(KN_<long>)},
-    {  "flag", &typeid(long)}
+    {  "flags", &typeid(long)}
 };
 
 

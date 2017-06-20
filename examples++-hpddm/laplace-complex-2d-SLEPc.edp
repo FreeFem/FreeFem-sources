@@ -11,8 +11,8 @@
 /**************************************/
 /*     Load PETSc & SLEPc macros      */
 /**************************************/
-load "PETSc"                             // PETSc plugin
-load "SLEPc"                             // SLEPc plugin
+load "PETSc-complex"                             // PETSc plugin
+load "SLEPc-complex"                             // SLEPc plugin
 macro partitioner()metis// End Of Macro  // metis, scotch, or parmetis
 macro dimension(      )2// End Of Macro  // 2D or 3D
 include "macro_ddm.idp"                  // Additional DDM functions
@@ -121,8 +121,8 @@ matrix<complex> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
-dmatrix DistA(A, arrayIntersection, restrictionIntersection, D, clean = true);
-dmatrix DistB(DistA, B, clean = true);
+dmatrix<complex> DistA(A, arrayIntersection, restrictionIntersection, D, clean = true);
+dmatrix<complex>   DistB(DistA, B, clean = true);
 /***************************************/
 /*          Problem resolution         */
 /***************************************/
