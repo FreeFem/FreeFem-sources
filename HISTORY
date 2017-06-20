@@ -1,5 +1,10 @@
-@  changeset:   4149:c020291ac9f4
+@  changeset:   4150:9bd704383b65
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jun 20 12:52:25 2017 +0200
+|  summary:     change the function cube to build mesh of cube (more light)
+|
+o  changeset:   4149:c020291ac9f4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jun 19 17:03:50 2017 +0200
 |  summary:     coorect typy in config petsc/slepc
