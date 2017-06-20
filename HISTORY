@@ -1,5 +1,10 @@
-@  changeset:   4150:9bd704383b65
+@  changeset:   4151:1eeef4145372
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jun 20 16:29:43 2017 +0200
+|  summary:     coorect laplace-complex-2d-SLEPc.edp
+|
+o  changeset:   4150:9bd704383b65
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Jun 20 12:52:25 2017 +0200
 |  summary:     change the function cube to build mesh of cube (more light)

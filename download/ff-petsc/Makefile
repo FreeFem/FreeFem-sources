@@ -89,7 +89,8 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	--download-superlu --download-pastix --download-suitesparse --download-fftw \
 	PETSC_ARCH=ff-real
 	touch $@
-Make-petsc-download.mk:
+	
+Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 
 ifdef 	MUMPS_LIB	
@@ -130,7 +131,7 @@ WHERE-complex:../lib/WHERE.PETSc-complex WHERE-all
 
 
 ##  need include include Make-petsc-download.mk	
-WHERE-all:
+WHERE-all:Makefile $(SRCDIR)/tag-install-complex $(SRCDIR_SLEPC)/tag-install-complex $(SRCDIR)/tag-install-real $(SRCDIR_SLEPC)/tag-install-real
 	echo scalapack LD $(SCALAPACK_LIB) >$@
 	echo scalapack INCLUDE -I$(CALAPACK_INCLUDE) >>$@
 	echo metis LD $(METIS_LIB) >>$@
@@ -169,6 +170,9 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
 	touch $@
+else	
+WHERE-all:Makefile Make-petsc-download.mk
+	 $(MAKE) -f Makefile.complex $@ 
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	tar xvzf $(PACKAGE)
