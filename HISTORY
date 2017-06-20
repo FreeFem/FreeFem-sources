@@ -1,5 +1,10 @@
-@  changeset:   4148:ca228d8e3aec
+@  changeset:   4149:c020291ac9f4
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 19 17:03:50 2017 +0200
+|  summary:     coorect typy in config petsc/slepc
+|
+o  changeset:   4148:ca228d8e3aec
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jun 19 16:35:30 2017 +0200
 |  summary:     add missing spelc in WHERE-all
