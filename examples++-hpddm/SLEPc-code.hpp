@@ -1,7 +1,18 @@
+#include "PETSc.hpp"
+
+#ifdef WITH_slepc
+#define WITH_SLEPC
+#endif
+#ifdef WITH_slepccomplex
+#define WITH_SLEPC
+#endif
+
+
+
+#ifdef WITH_SLEPC
 
 #include "slepc.h"
 
-#include "PETSc.hpp"
 
 namespace SLEPc {
 template<class K, typename std::enable_if<std::is_same<K, double>::value || !std::is_same<PetscScalar, double>::value>::type* = nullptr>
@@ -155,21 +166,52 @@ void addSLEPc() {
 template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
 void addSLEPc() { }
 }
+;
 
-static void Init_SLEPc() {
-    int argc = pkarg->n;
-    char** argv = new char*[argc];
-    for(int i = 0; i < argc; ++i)
-        argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
-    PetscBool isInitialized;
-    PetscInitialized(&isInitialized);
-    if(!isInitialized && mpirank == 0)
-        std::cout << "PetscInitialize has not been called, do not forget to load PETSc before loading SLEPc" << std::endl;
-    SlepcInitialize(&argc, &argv, 0, "");
-    delete [] argv;
-    ff_atend(SLEPc::finalizeSLEPc);
-    SLEPc::addSLEPc<PetscScalar>();
-    Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
+static void Init() {
+    //  to load only once
+    aType t;
+    int r;
+#ifdef WITH_slepccomplex
+    const char * mmmm= "Petsc Slepc complex";
+#else
+    const char * mmmm= "Petsc Slepc real";
+#endif
+    if(!zzzfff->InMotClef(mmmm,t,r) )
+    {
+        
+#ifdef PETScandSLEPc
+        Init_PETSc();
+#endif
+        
+        int argc = pkarg->n;
+        char** argv = new char*[argc];
+        for(int i = 0; i < argc; ++i)
+            argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
+        PetscBool isInitialized;
+        PetscInitialized(&isInitialized);
+        if(!isInitialized && mpirank == 0)
+            std::cout << "PetscInitialize has not been called, do not forget to load PETSc before loading SLEPc" << std::endl;
+        SlepcInitialize(&argc, &argv, 0, "");
+        delete [] argv;
+        ff_atend(SLEPc::finalizeSLEPc);
+        SLEPc::addSLEPc<PetscScalar>();
+        Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
+        if(verbosity>1)cout << "*** End:: load PETSc & SELPc "<< typeid(PetscScalar).name() <<"\n\n"<<endl;
+        zzzfff->Add(mmmm, atype<Dmat*>());
+    }
+    else {
+        if(verbosity>1)cout << "*** reload and skip load PETSc & SELPc "<< typeid(PetscScalar).name() <<"\n\n"<<endl;
+    }
+}
+#else
+static void Init() {
+    
+     Init_PETSc();
+
 }
 
-LOADFUNC(Init_SLEPc)
+#endif 
+
+
+

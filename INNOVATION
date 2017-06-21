@@ -1,3 +1,21 @@
+version 3.55,  21 june 2017
+ - add way to compile in freefem++ PETSc and SLEPc (real and complex)
+      1) do configure
+      ./configure --enable-download --prefix PREFIX
+      # need MPI and git 
+      cd dowload/ff-petsc
+      # petsc and slepc will be install PREFIX/ff-petsc 
+      # so you need acces to this director 
+      make WHERE-all
+      cd ../..
+      ./reconfigure
+      make 
+      make check 
+      
+      
+  - correct SLEPc on MacOS due a problem of glabal variable in dynamics lib     
+     =>  SLEPc and PETsc must be in same plugin on MacOS to day.
+
 version 3.54 may, 17th 2017 ?
   - add complex version of PETSc and SLEPc 
      remarque to day SLEPc must be configure by hand 
