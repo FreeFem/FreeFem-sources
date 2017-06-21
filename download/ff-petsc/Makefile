@@ -42,7 +42,7 @@ DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 
-petsc-slepc: PETSc-real PETSc-complex SLEPc-real SLEPc-complex
+petsc-slepc: WHERE-all
 
 PETSc-real:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) WHERE ;\
@@ -118,7 +118,7 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex 
 	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
-WHERE-complex:../lib/WHERE.PETSc-complex WHERE-all
+WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex 
 	
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
 	-mkdir ../lib
@@ -131,7 +131,7 @@ WHERE-complex:../lib/WHERE.PETSc-complex WHERE-all
 
 
 ##  need include include Make-petsc-download.mk	
-WHERE-all:Makefile $(SRCDIR)/tag-install-complex $(SRCDIR_SLEPC)/tag-install-complex $(SRCDIR)/tag-install-real $(SRCDIR_SLEPC)/tag-install-real
+WHERE-all:Makefile WHERE-complex WHERE
 	echo scalapack LD $(SCALAPACK_LIB) >$@
 	echo scalapack INCLUDE -I$(CALAPACK_INCLUDE) >>$@
 	echo metis LD $(METIS_LIB) >>$@
@@ -170,6 +170,11 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
 	touch $@
+	
+../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
+	-mkdir ../lib
+	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
+	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@	
 else	
 WHERE-all:Makefile Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@ 
@@ -179,6 +184,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 	touch $@
 $(SRCDIR_SLEPC)/tag-tar:$(PACKAGE_SLEPC)
 	tar xvzf $(PACKAGE_SLEPC)
+	patch -p1 <patch-slepc-3.7.4
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a

@@ -2,6 +2,7 @@
 #include "petsc.h"
 
 #include "PETSc.hpp"
+#include "petsc/private/petscimpl.h"
 
 typedef PETSc::DistributedCSR<HpSchwarz<PetscScalar>> Dmat;
 typedef PETSc::DistributedCSR<HpSchwarz<PetscReal>> DmatR;
@@ -901,6 +902,15 @@ class ProdPETSc {
         }
 };
 }
+
+template<typename Type>
+bool CheckPetscMatrix(Type* ptA)
+{
+ ffassert(ptA);
+ PetscValidHeaderSpecific(ptA->_petsc,MAT_CLASSID,2);
+ return true;
+}
+
 template<typename T>
 inline bool exist_type() {
     map<const string,basicForEachType *>::iterator ir=map_type.find(typeid(T).name());
@@ -938,6 +948,7 @@ static void Init_PETSc() {
     map_type_of_map[make_pair(atype<DmatR*>(),atype<double*>())] = atype<DmatR*>();
     map_type_of_map[make_pair(atype<DbddcR*>(),atype<Complex*>())] = atype<DbddcC*>();
     map_type_of_map[make_pair(atype<DbddcR*>(),atype<double*>())] = atype<DbddcR*>();
+    
     TheOperators->Add("<-", new OneOperator1_<long, Dmat*>(PETSc::initEmptyCSR<Dmat>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchwarz<PetscScalar>>);
     TheOperators->Add("<-", new PETSc::initCSRfromArray<HpSchwarz<PetscScalar>>);
@@ -957,6 +968,9 @@ static void Init_PETSc() {
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Dbddc*, KN<PetscScalar>*, KN<long>*>(PETSc::originalNumbering));
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
     addInv<Dbddc, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
+    
+    Global.Add("check","(",new OneOperator1<bool,Dmat *>(CheckPetscMatrix< Dmat > ));
 }
-
+#ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)
+#endif
