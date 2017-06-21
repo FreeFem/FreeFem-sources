@@ -10,7 +10,7 @@ load "msh3"
 //  z = 1 ) label 6.
 // the region numbering is 0 by default.
 
-int[int] l6=[21,42,45,40,25,53];
+int[int] l6=[37,42,45,40,25,57];
 int r11=11;
 mesh3 Th=cube(4,5,6,[x*2-1,y*2-1,z*2-1],label=l6,flags =3,region=r11); 
 
@@ -25,7 +25,8 @@ for(int i=0; i<100; ++i)
     
     if( s )
     {
-      int ix = sx/s+1, iy=sy/s+1, iz=sz/s+1, ii=(ix + 4*(iy+1) + 16*(iz+1) ) ;    
+	 cout << 	sx/s  << " " << sy/s << " " << sz/s << " " ; 
+      int ix = (sx/s+1.5), iy=(sy/s+1.5), iz=(sz/s+1.5), ii=(ix + 4*(iy+1) + 16*(iz+1) ) ;    
       //  value of ix,iy,iz =>  face min 0 ,  face max 2  , no face 1
       cout <<" label="<< i << " s " << s << " " << ix << iy << iz << " : " << ii << endl; 
       if( i != ii ) err++;

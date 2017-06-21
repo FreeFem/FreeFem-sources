@@ -1,4 +1,6 @@
 version 3.55,  21 june 2017
+ - change the cube construct and coorct une cube/edp example
+    to build mesh with 5 tet /  hex.  
  - add way to compile in freefem++ PETSc and SLEPc (real and complex)
       1) do configure
       ./configure --enable-download --prefix PREFIX
