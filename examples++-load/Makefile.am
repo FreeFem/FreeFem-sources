@@ -18,7 +18,7 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
   SuperLu.cpp  \
   NewSolver.cpp \
   splitmesh3.cpp    splitmesh6.cpp   \
-  splitmesh4.cpp    splitmesh14.cpp   \
+  splitmesh4.cpp    splitmesh12.cpp   \
   README_SuperLU \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
