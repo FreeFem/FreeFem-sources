@@ -37,8 +37,8 @@ PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
 SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
-DIR_INSTALL_REAL:=$(prefix)/ff-petsc/real
-DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
+DIR_INSTALL_REAL:=$(DESTDIR)$(prefix)/ff-petsc/real
+DIR_INSTALL_COMPLEX:=$(DESTDIR)$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 
@@ -60,10 +60,10 @@ WHERE:../lib/WHERE.PETSc ../lib/WHERE.SLEPc
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
 
 SLEPc-real:
-	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) ../lib/WHERE.PETSc ;\
+	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) ../lib/WHERE.SLEPc ;\
 	else echo " -- No  Petc , no MPI"; fi
 SLEPc-complex:
-	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex ../lib/WHERE.PETSc-complex ;\
+	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex ../lib/WHERE.SLEPc-complex ;\
 	else echo " -- No  Petc , no MPI"; fi
 
 $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
@@ -81,6 +81,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) &&  ./configure \
 	--prefix=$(DIR_INSTALL_REAL) \
+	--with-ssl=0 ---with-x=0 \
     '--with-scalar-type=real' \
     --with-mpi-dir='$(MPI_DIR)' \
 	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
@@ -95,10 +96,11 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/
 
 ifdef 	MUMPS_LIB	
 #  version COMPLEX  .....  
-$(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk 
+$(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	cd $(SRCDIR) &&  ./configure \
 	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
     '--with-scalar-type=complex' \
+	--with-ssl=0 ---with-x=0 \
     --with-mpi-dir='$(MPI_DIR)' \
 	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
 	--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
@@ -109,6 +111,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	--with-parmetis-include='$(PARMETIS_INCLUDE)'  --with-parmetis-lib='$(PARMETIS_LIB)' \
 	--with-fftw-include='$(FFTW_INCLUDE)'  --with-fftw-lib='$(FFTW_LIB)' \
 	PETSC_ARCH=ff-complex
+
 	touch $@
 
 $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk 
@@ -176,7 +179,7 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@	
 else	
-WHERE-all:Makefile Make-petsc-download.mk
+WHERE-all:Makefile  Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@ 
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
@@ -216,9 +219,11 @@ clean:clean-local
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc* ../lib/WHERE.SLEPc* 
+	-rm $(prefix)/ff-petsc
 	-rm -rf ../include/*PETSc*
 	-rm -rf ../lib/lib*PETSc* 
 	-rm -rf $(SRCDIR)
+	-rm -rf $(prefix)/ff-petsc
 #	-rm $(PACKAGE1)
 	-rm config.log *.done
 
