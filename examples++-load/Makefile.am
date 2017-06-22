@@ -18,6 +18,7 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
   SuperLu.cpp  \
   NewSolver.cpp \
   splitmesh3.cpp    splitmesh6.cpp   \
+  splitmesh4.cpp    splitmesh14.cpp   \
   README_SuperLU \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
@@ -62,6 +63,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
 	 Element_PkEdge.$(DYLIB_SUFFIX)  msh3.$(DYLIB_SUFFIX) \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
+	splitmesh4.$(DYLIB_SUFFIX)  splitmesh12.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	medit.$(DYLIB_SUFFIX)  \
 	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX)\
