@@ -1,5 +1,10 @@
-@  changeset:   4155:c93a6fe39368
+@  changeset:   4156:0f16ba0d7d1b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jun 22 10:22:39 2017 +0200
+|  summary:     coorect mistake for  macos install
+|
+o  changeset:   4155:c93a6fe39368
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jun 21 19:12:43 2017 +0200
 |  summary:     coorect helmholtz passe to complex
