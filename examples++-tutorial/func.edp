@@ -1,0 +1,63 @@
+//  test of diff kind of freefem++ function
+// work if version >= 3.3 
+
+verbosity=500;
+
+real[int] G=[7,8,9];
+
+func mesh carre(int n) 
+{ mesh th=square(n,n);
+  return th;}
+  
+  
+func real[int]   aaa(int n) 
+{ real[int] a(n);
+  a=0;
+  a[2]=n;
+  return a;}
+  
+  
+ func real[int]   bb(real[int] &a) 
+{ cout << " sum " <<a.sum <<endl;
+  return a;}
+ func real[int]   bbb(real[int] a) 
+{ cout << " sum " <<a.sum <<endl;
+  a[0]=100; // change the value of the parameter  
+  return a;}
+
+ func real[int]   GG(int i) 
+{ G[1]=i;
+  return G;}
+ 
+ func real[int]   GGG(int i) 
+{ G[1]=i;
+  return G(1:2);} 
+
+  
+  
+mesh Th=  carre(2);
+carre(3); // the mesh is lose 
+cout << Th.nt << endl;
+cout << aaa(3) << endl;
+  
+real[int] A=[1,4,7];
+cout << bb(A) << endl;
+real[int] aa=bb(A);
+real[int] ac=bbb(A); //  warning A[0] is set to 100.
+cout << " xxxx "<< endl;
+cout << aa << " == "  << A <<endl;
+assert(A[0]==100);
+cout << ac << " == " << A << endl;
+cout << GG(3) << endl;
+cout << GGG(5) << endl;
+
+verbosity=1;
+
+//  test Nan and inf  version 3.19 
+
+real x=1e1000;
+cout << x << " " << isInf(x) << " " << isNaN(x) << " " << isNormal(x) <<endl;
+x =1;
+cout << x << " " << isInf(x) << " " << isNaN(x) << " " << isNormal(x)<<endl;
+x = NaN();
+cout << x << " " << isInf(x) << " " << isNaN(x) << " " << isNormal(x)<<endl;

@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+# ======================================================================
+# Written by Antoine Le Hyaric
+# http://www.ljll.math.upmc.fr/lehyaric
+# Laboratoire Jacques-Louis Lions
+# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
+# ======================================================================
+# This file is part of Freefem++
+#
+# Freefem++ is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation; either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# Freefem++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with Freefem++; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+# ======================================================================
+# headeralh default=0 freefem perl start=04/06/2012 upmc written
+
+# clean-up all CR/LF line endings (usually before patching to avoid failures after editing the same source files on
+# different systems)
+
+use strict;
+
+# change files that have been recorded in FF using DOS line endings
+my @files=`find $ARGV[0] -type f`;
+chomp @files;
+foreach my $file(@files){
+  next if $file=~/\.(jpg|eps|mcp|pdf|pgm|o|a|so|png|jpg|gz|tgz)$/;
+  next if $file=~/\.hg\//;
+  my $contents=`cat $file`;
+  my $oldcontents=$contents;
+
+  # changing line-ending conventions. all ffcs patches work from unix-style (ie no CR) files
+
+  $contents=~s/\r$//gm;
+  next if $contents eq $oldcontents;
+  print "cleancrlf: Unix line-ending for $file...\n";
+  open FILE,">$file" or die;
+  print FILE $contents;
+  close FILE;
+}
+
+# Local Variables:
+# mode:cperl
+# ispell-local-dictionary:"british"
+# coding:utf-8
+# End:

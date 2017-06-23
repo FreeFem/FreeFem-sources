@@ -1,0 +1,101 @@
+//  
+//   calcul d'une zone saturation en eau (nappe phreatique)
+//
+verbosity=1;
+real weak=1;
+string com= "  avec du/dn ";
+if(weak) com = " avec du/du = residu  ";
+real L=10;        // longueur du domaine					   	
+real Q=0.02;      // flux entrant
+real K=0.5;	      //permeabilite	
+
+real  erradap=0.001;
+real  coef=1;
+
+
+
+real h=2.1;	 // hauteur du bord gauche
+real h1=0.35;    // hauteur du bord droite
+
+//  maillage d'un tapeze
+border a(t=0,L){x=t;y=0;};       // bas			   	
+border b(t=0,h1){x=L;y=t;};      // droite
+border f(t=L,0){x=t;y=t*(h1-h)/L+h;}; //  free surface
+border d(t=h,0){x=0;y=t;};      // gauche
+
+int n=10;
+mesh Th=buildmesh (a(L*n)+b(h1*n)+f(sqrt(L^2+(h-h1)^2)*n)+d(h*n));
+
+plot(Th,ps="dTh.eps");
+
+fespace Vh(Th,P1);
+
+int j=0,ii=0;
+
+Vh p,v,pp,vv;
+
+varf vPp(p,pp) = int2d(Th)( dx(p)*dx(pp)+dy(p)*dy(pp));
+varf vonfree(p,pp) =on(f,p=1);
+Vh onfree,wdpdn;
+onfree[]=vonfree(0,Vh);
+cout << "pb ?" << endl;
+onfree[]/=onfree[].max; // sauce
+cout << "pb non " << endl;
+matrix A= vPp(Vh,Vh,solver=CG);
+
+
+problem Pp(p,pp,solver=CG) = int2d(Th)( dx(p)*dx(pp)+dy(p)*dy(pp)) 
+  + on(b,f,p=y) ;
+
+//  --  imprecise (fort)
+problem Pv(v,vv,solver=CG) = int2d(Th)( dx(v)*dx(vv)+dy(v)*dy(vv)) 
+  +  on (a, v=0) + int1d(Th,f)(vv*((Q/K)*N.y- (dx(p)*N.x+dy(p)*N.y))); 
+//   -- precise (faible)
+problem Pw(v,vv,solver=CG) = int2d(Th)( dx(v)*dx(vv)+dy(v)*dy(vv)) 
+  +  on (a, v=0) + int1d(Th,f)(vv*((Q/K)*N.y)) + wdpdn[]; 
+  
+
+real errv=1;
+verbosity=1;
+while(errv>1e-6)
+{
+  j++;       
+  Pp;
+  if (weak) {   wdpdn[] = A*p[]; wdpdn[] = wdpdn[].*onfree[];   wdpdn[] = -wdpdn[];
+             Pw;}
+  else Pv;
+  errv=int1d(Th,f)(v*v);
+  plot(Th,p,v ,cmm=com+"   iter = "+j+ "  errv =" +errv,wait=0);
+  
+//  if (j%10==0)
+//    Th=adaptmesh(Th,p,err=erradap ) ;
+  real coef=1;
+  real mintcc = checkmovemesh(Th,[x,y])/5.; 
+  real mint = checkmovemesh(Th,[x,y-v*coef]); 
+  
+  if (mint<mintcc ||  j%10==0) {  
+    Th=adaptmesh(Th,p,err=erradap ) ;
+    
+     mintcc = checkmovemesh(Th,[x,y])/5.;     
+     wdpdn=0; 	
+     onfree=0;
+  }
+  
+  while (1) 
+  {  	    
+    real mint = checkmovemesh(Th,[x,y-v*coef]); 
+    
+    if (mint>mintcc) break;
+    
+    cout << " min |T]  " << mint << endl;    
+    coef /= 1.5;
+  }
+  
+  Th=movemesh(Th,[x,y-coef*v]); // calcul de la deformation 
+  A= vPp(Vh,Vh,solver=CG);	
+  onfree[]=vonfree(0,Vh);onfree[]/=onfree[].max; // sauce
+  cout << "\n\n"<<j <<"------------ errv = " << errv << "\n\n";
+
+}
+//plot(Th,wiat=1,ps="d_Thf.eps",cmm=com);
+plot(p,wait=1,ps="d_u.eps",cmm=com);
