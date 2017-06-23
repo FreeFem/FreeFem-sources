@@ -1,3 +1,4 @@
+//#define SHOWALLOC
 //#define NCHECKPTR // BUg with MPI ??? FH
 /*
 #if __cplusplus >= 201103L
@@ -150,7 +151,7 @@ void operator delete(void * ) throw();
 void operator delete(void * ,const std::nothrow_t& nothrow_constant) throw();
 void operator delete[](void * ,const std::nothrow_t& nothrow_constant) throw();
 */
-const int N100 = 100;
+const int N100 = 10000;
 class  AllocData;
 
 class AllocExtern {
@@ -216,6 +217,8 @@ private:
   static char filename[128];
   AllocData * NewAllocData();
   OneAlloc *Alloc();
+  static   const int nblastalloc=20;
+    static OneAlloc *  LastAlloc[nblastalloc];
 public:
   
   void * MyNewOperator(size_t ll,bool is_array );
@@ -250,7 +253,7 @@ long AllocExtern::NbuDelPtr =0;
 long AllocExtern::uDelPtr[Maxundelptr];
 bool AllocExtern::after_end =false;
 char AllocExtern::filename[128] ="ListOfUnAllocPtr.bin";
-
+AllocExtern::OneAlloc * AllocExtern::LastAlloc[nblastalloc];
 AllocExtern::AllocData * AllocExtern::NewAllocData()
 {
   
@@ -289,6 +292,8 @@ void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
   a->l = ll+1; // pour les allocation null
   a->n = ++NbAlloc;
   a->is_array = is_array;
+  LastAlloc[NbPtr%nblastalloc] = a;
+
   NbPtr++;
   AllocSize += ll;
 #ifdef DEBUGUNALLOC
@@ -315,9 +320,39 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 {
   if(after_end) { /*free(pp)*/; return;}
   init();
+    for( int i=0; i< nblastalloc; ++i)
+    {
+        if( (NbPtr-i) <0) break; 
+        int k =(NbPtr-i)%nblastalloc;
+         if (LastAlloc[k]  && LastAlloc[k]->l>0 && LastAlloc[k]->p ==pp)
+         {
+             AllocExtern::OneAlloc * pa=LastAlloc[k];
+             LastAlloc[k]=0;
+             size_t ll = pa->l-1;
+             for (size_t kkk=0;kkk<ll;kkk++)
+                 ((char *) pp)[kkk]=18;
+             
+             myfree((char*)pp,ll,pa->n);
+#ifdef SHOWALLOC
+             printf("\t%d\tCheckPtr: fast delete  Alloc %ld %lx when %ld \n",pa->n,pa->l-1,  pa->p, pa->n);
+#endif
+             
+             AllocSize -= ll;
+             NbPtr--;
+             pa->l=0;
+             pa->p = NextFree;
+             pa->n =0;
+             if (pa->is_array != is_array)
+                 printf("\t\tCheckPtr:  erreur delete [] \n");
+             //if( pa->n < NbAllocShow )		  debugalloc();      
+             NextFree = & pa->p;
+             return;
+         }
+    }
   if (AllocHead)
     {
       AllocExtern::AllocData *p = AllocHead;
+        int kloop=0;
       while (p)
 	{
 	  for (int i=0;i<N100;i++)
@@ -342,6 +377,12 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 		//if( p->a[i].n < NbAllocShow )		  debugalloc();      
 		NextFree = & p->a[i].p;
 		return;}
+                if(p == p->next ||  kloop++ > 10000)
+                  {
+                   printf("\n\n ****CheckPTR Big BUG ??????? loop %d\n",kloop);
+                   break;
+                  }
+            
 	  p = p->next;
 	}
       if(pp) 
@@ -370,10 +411,11 @@ void AllocExtern::init()
       NbuDelPtr = 0;
         
       after_end = false;
-      
+      for(int i=0; i<nblastalloc; i++)
+          LastAlloc[i]=0;
       FILE *file=fopen(filename,"rb");
       
-      if (file) 
+      if (file)
 	{
 	  fread(&NbuDelPtr,sizeof(long),1,file);
 	  fread(uDelPtr,sizeof(long),NbuDelPtr,file);
@@ -414,6 +456,7 @@ AllocExtern::~AllocExtern()
 	   else
 	     if (kk<Maxundelptr)
 	       list[kk++]=p->a+i;
+             
 	 }
       p = p->next;
      }
