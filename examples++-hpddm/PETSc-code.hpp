@@ -470,8 +470,13 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         MatCreate(PETSC_COMM_WORLD, &(ptA->_petsc));
         if(bs > 1)
             MatSetBlockSize(ptA->_petsc, bs);
-        if(!ptJ && (mpisize / ptK->n > 1))
-            MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
+        if(!ptJ && (mpisize / ptK->n > 1)) {
+            int N = 0;
+            for(int i = 0; i < ptK->n; ++i) {
+                N += static_cast<MatriceMorse<PetscScalar>*>(&(*(ptK->operator[](i)).A))->m;
+            }
+            MatSetSizes(ptA->_petsc, n, n, N, N);
+        }
         else
             MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
         ptA->_first = 0;
