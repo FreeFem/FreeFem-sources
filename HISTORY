@@ -1,5 +1,10 @@
-@  changeset:   4158:c55409682fa9
+@  changeset:   4159:0fffb09a07ef
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jun 23 12:42:41 2017 +0200
+|  summary:     coorect pb on loo long check in CheckPtr.cpp
+|
+o  changeset:   4158:c55409682fa9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jun 22 17:12:15 2017 +0200
 |  summary:     coorect typo in missing file

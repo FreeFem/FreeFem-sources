@@ -642,11 +642,7 @@ public:
     for (int j=0;j<N;++j){
       nnv[j] = operator()(K[nu[i][j]]);
     }
-    if(nnv[0] > nnv[1] )
-      *sens = 1;
-    else
-      *sens =-1;
-    return SortArray<int,N>(nnv);
+     return SortArray<int,N>(nnv,sens);
   }
 
   SortArray<int,B::nva> items(int k,int i,int *sens) const
@@ -656,7 +652,7 @@ public:
 
   
   template<int N,int M>
-  SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i)  const
+  SortArray<int,N> iteme(const int (* const  nu )[N],int k,int i,int *psens=0)  const
   {
     int nnv[N];
     const Element & K(elements[CheckT(k)]);
@@ -665,15 +661,15 @@ public:
       nnv[j] = operator()(K[nu[i][j]]);
     }
 
-    return SortArray<int,N>(nnv);
+    return SortArray<int,N>(nnv,psens);
   }
 
-  SortArray<int,B::nv> itemadj(int k,int i) const
+  SortArray<int,B::nv> itemadj(int k,int i,int *psens=0) const
   {
-    return iteme<B::nv,T::nea>(T::nvadj,k,i);
+    return iteme<B::nv,T::nea>(T::nvadj,k,i,psens);
   }
   
-  SortArray<int,B::nv> itembe(int k) const
+  SortArray<int,B::nv> itembe(int k,int *psens=0) const
   {
     int nnv[B::nv];
     const B & K(borderelements[CheckBE(k)]);
@@ -682,7 +678,7 @@ public:
       nnv[j] = operator()(K[j]);
     }
 
-    return SortArray<int,B::nv>(nnv);
+    return SortArray<int,B::nv>(nnv,psens);
   }
 
   //  const Element * Find(const Rd & P) const ;
@@ -767,7 +763,8 @@ if(verbosity>5)
   for (int k=0;k<nt;++k)
     for (int i=0;i<nea;++i)
       {
-        SortArray<int,nva> a(itemadj(k,i));
+        int sens;
+        SortArray<int,nva> a(itemadj(k,i,&sens));//  warning the face of tet given interieon normal FH.
 	//cout << " ### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
 	typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
 	if(!p) 
@@ -786,11 +783,12 @@ if(verbosity>5)
 	  }
 	++nk;
       }
-    
+    int kerr=0,kerrf=0,nbei=0;
   for (int k=0;k<nbe;++k)
      {
-	SortArray<int,nva> a(itembe(k));
-
+         int sens,s=0,ss=0,sk=0,intern=0;
+	SortArray<int,nva> a(itembe(k,&sens));
+        
 	typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
 	//cout << k << " ### "   << " item(k,i)= " << itembe(k) << " a= " << a << endl;
 	if(!p) { err++;
@@ -799,18 +797,38 @@ if(verbosity>5)
 	}
 	 else
 	   {
-	     BoundaryElementHeadLink[k] = p->v <0 ? -p->v-1 : p->v;
-	     #ifndef NDEBUG
-	     int tt=BoundaryElementHeadLink[k]/nea;
-	     int ee=BoundaryElementHeadLink[k]%nea;
-	     //cout << k << " ### "   << a << " = " << itemadj(t,e) << " t " << t << " e " << e << endl;
-	     assert(itemadj(tt,ee)==a);
-	     #endif
+             int nk = p->v <0 ? -p->v-1 : p->v;
+             int nkk= TheAdjacencesLink[nk];
+             if( nkk>=0)
+             {   nbei ++;
+                 intern=1;
+                 // choise le bon .. too get the correct normal
+                 int k= nk/nea, e=nk%nea;
+                 int kk= nkk/nea, ee=nkk%nea;
+                 itemadj(k,e,&s);
+                 itemadj(kk,ee,&ss);
+                 assert(s && ss && s== -ss);
+                 if( sens == s) nk=nkk; //  autre cote
+             }
+	     BoundaryElementHeadLink[k] = nk;
+              int sk;
+             int tt=BoundaryElementHeadLink[k]/nea;
+             int ee=BoundaryElementHeadLink[k]%nea;
+             itemadj(tt,ee,&sk);
+             if(!(itemadj(tt,ee)==a)) {
+                   if(kerrf< 10) cout << " err face  not in element "<< k << " =="
+                   << tt << " " << ee << endl;
+                   kerrf++;
+               }
 	   }
      }
-
-    
-  assert(err==0);
+    if( kerr || kerrf ) {
+        cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
+        cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";
+        
+    }
+   ffassert(kerr==0 && kerrf==0);
+  ffassert(err==0);
   int na= h.n;
   if(verbosity>1) 
     {

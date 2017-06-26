@@ -1,3 +1,10 @@
+version 3.55-1
+ -  correction of bug of normal N in 3d in internal boundary, 
+    the oriantation before are random, now the orientation are given 
+	by the face numbering, let a face A,B,C, 
+	the normal will be ABxAC/||ABxAC||,  for external boundary we do not 
+	use the orientation of the face, we use the ext. normal of the tet. 
+	Thank to Svetoslav Nakov <sisqo_nakov@yahoo.com>
 version 3.55,  21 june 2017
  - change the cube construct and coorct une cube/edp example
     to build mesh with 5 tet /  hex.  
