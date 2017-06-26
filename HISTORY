@@ -1,5 +1,23 @@
-@  changeset:   4159:0fffb09a07ef
-|  tag:         tip
+@    changeset:   4162:4de588b19a9e
+|\   tag:         tip
+| |  parent:      4160:dafbadf60c39
+| |  parent:      4161:4601144bd646
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Mon Jun 26 18:54:05 2017 +0100
+| |  summary:     merge modif of Pierre
+| |
+| o  changeset:   4161:4601144bd646
+| |  parent:      4159:0fffb09a07ef
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Sun Jun 25 14:45:38 2017 +0200
+| |  summary:     Small improvement.
+| |
+o |  changeset:   4160:dafbadf60c39
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Mon Jun 26 18:46:38 2017 +0100
+|    summary:     see inovation
+|
+o  changeset:   4159:0fffb09a07ef
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jun 23 12:42:41 2017 +0200
 |  summary:     coorect pb on loo long check in CheckPtr.cpp
