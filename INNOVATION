@@ -1,5 +1,6 @@
-version 3.55-1 26 june 2017 (rev: 4163:3d7dd99ab2d1)
- -  correction of bug of normal N in 3d in internal boundary, 
+version 3.55-1 26 june 2017 (rev: 4164:)
+ - correction in cube (missing initialisation)
+ - correction of bug of normal N in 3d in internal boundary, 
     the oriantation before are random, now the orientation are given 
 	by the face numbering, let a face A,B,C, 
 	the normal will be ABxAC/||ABxAC||,  for external boundary we do not 

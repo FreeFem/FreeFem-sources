@@ -6651,7 +6651,7 @@ public:
     Expression nargs[n_name_param],enx,eny,enz,xx,yy,zz;
 public:
     Cube_Op(const basicAC_F0 &  args,Expression nx,Expression ny,Expression nz,Expression transfo=0)
-    : enx(nx),eny(ny),enz(nz)
+    : enx(nx),eny(ny),enz(nz),xx(0),yy(0),zz(0) 
     {
         args.SetNameParam(n_name_param,name_param,nargs);
         if(transfo)
@@ -6667,6 +6667,7 @@ public:
                 yy=to<double>( (*a2)[1]);
                 zz=to<double>( (*a2)[2]);
             }
+            
             
         }
         
