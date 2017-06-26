@@ -1,0 +1,40 @@
+
+int nn =10;// 10 coubre 
+
+real[int][int] xx(nn);
+real[int][int] yy(nn);
+real[int][int] zz(nn);
+real[int][int] vv(nn);
+
+mesh Th=square(1,1);
+fespace Vh(Th,P1);
+Vh u=1;
+
+for(int i=0; i<nn; ++i)
+{
+	int m = 100+i;
+	real dm = 1./(m-1);
+	xx[i].resize(m);
+	yy[i].resize(m);
+	zz[i].resize(m);
+	vv[i].resize(m);
+	real dd = i*pi/nn, cc = 0.5*(4.*nn+i)/(5.*nn);
+	real  px =dd; 
+	
+   for(int j=0; j<m; ++j)
+   {
+	   
+	   xx[i][j] = px;
+	   x =  px*4*pi+dd;
+	   px += dm; 
+	   yy[i][j] = cc*sin(x);
+	   zz[i][j] = cos(x)/10+x/10.;
+	   vv[i][j] = x;
+   }
+
+
+}
+
+plot([xx,yy],dim=2,cmm="2");
+plot([xx,yy,zz],dim=3,cmm="3");
+plot([xx,yy,zz,vv],dim=3,cmm="4");
