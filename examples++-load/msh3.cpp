@@ -54,6 +54,7 @@ using namespace std;
 #include <vector>
 #include "msh3.hpp" // [[file:msh3.hpp]]
 #include "splitsimplex.hpp" // [[file:../src/femlib/splitsimplex.hpp]]
+#include "renumb.hpp"
 
 using namespace  Fem2D;
 
@@ -5470,6 +5471,101 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
     return Tht;
 }
 
+void Renumb(Fem2D::Mesh3*& pTh)
+{
+    assert(pTh);
+    const Mesh3 & Th(*pTh);  // le maillage d'origne a decoupe
+    using  Fem2D::Triangle;
+    using  Fem2D::Vertex;
+    using  Fem2D::R2;
+    using  Fem2D::BoundaryEdge;
+    using  Fem2D::Mesh;
+    int nbv = Th.nv;
+    int nbt = Th.nt;
+    int* xadg = new int[nbv + 1];
+    int nve = Mesh3::Rd::d + 1;
+    xadg[0] = 0;
+    std::vector<int> adjncy;
+    std::set<int>* adjncyVec = new std::set<int>[nbv]();
+    for(int k = 0; k < nbt; ++k) {
+        const Tet& K = Th[k];
+        for(int j = 0; j < nve - 1; ++j) {
+            for(int i = j + 1; i < nve; ++i) {
+                adjncyVec[Th.operator()(K[i])].insert(Th.operator()(K[j]));
+                adjncyVec[Th.operator()(K[j])].insert(Th.operator()(K[i]));
+            }
+        }
+    }
+    int cpt = 0;
+    for(int k = 0; k < nbv; ++k) {
+        cpt += adjncyVec[k].size();
+        xadg[k + 1] = cpt;
+    }
+    adjncy.reserve(xadg[nbv]);
+    for(int k = 0; k < nbv; ++k) {
+        for (std::set<int>::iterator it = adjncyVec[k].begin(); it != adjncyVec[k].end(); ++it)
+            adjncy.push_back(*it);
+    }
+    delete [] adjncyVec;
+    // renumb::i4vec_print ( nbt + 1, xadg, "  ADJ_ROW:" );
+    // renumb::adj_print ( nbt, adjncy.size(), xadg,adjncy.data() , "  ADJ" );
+    int bandwidth;
+    if(verbosity > 2) {
+        bandwidth = renumb::adj_bandwidth ( nbv, adjncy.size(), xadg, &(adjncy[0]) );
+        cout << "\n";
+        cout << "  ADJ bandwidth = " << bandwidth << "\n";
+    }
+    int* perm = renumb::genrcm ( nbv, adjncy.size(), xadg, &(adjncy[0]) );
+    int* perm_inv = renumb::perm_inverse3 ( nbv, perm );
+    if(verbosity > 2) {
+        bandwidth = renumb::adj_perm_bandwidth ( nbv, adjncy.size(), xadg, &(adjncy[0]),
+                perm, perm_inv );
+
+        cout << "\n";
+        cout << "  ADJ bandwidth after RCM permutation = " << bandwidth << "\n";
+    }
+    delete [] xadg;
+    int nbe = Th.nbe;
+    Vertex3 * v= new Vertex3[nbv];
+    Tet *t= new Tet[nbt];
+    Triangle3 *b  = new Triangle3[nbe];
+    Vertex3 *vv=v;
+    for (int i=0;i<nbv;i++)
+    {
+        const Vertex3 & V=Th(perm[i]);
+        vv->x=V.x;
+        vv->y=V.y;
+        vv->z=V.z;
+        vv->lab = V.lab;
+        vv++;
+    }
+
+    Tet *tt= t;
+
+    for (int i=0;i<nbt;i++)
+    {
+        int i0=perm_inv[Th(i,0)], i1=perm_inv[Th(i,1)],i2=perm_inv[Th(i,2)],i3=perm_inv[Th(i,3)];
+        int ivt[4] = {i0,i1,i2,i3};
+        (*tt++).set(v,ivt,Th[i].lab);
+    }
+
+    Triangle3 * bb=b;
+    for (int i=0;i<nbe;i++)
+    {
+        const Triangle3 &K(Th.be(i));
+        int ivv[3];
+
+        ivv[0] = perm_inv[Th.operator()(K[0])];
+        ivv[1] = perm_inv[Th.operator()(K[1])];
+        ivv[2] = perm_inv[Th.operator()(K[2])];
+        (bb++)->set( v, ivv, K.lab);
+    }
+    delete [] perm_inv;
+    delete [] perm;
+    delete pTh;
+    pTh = new Mesh3(nbv,nbt,nbe,v,t,b);
+    pTh->BuildGTree();
+}
 
 AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
     
@@ -5522,7 +5618,7 @@ KN<long> * po2n =  arg(3,stack);
             }
             else o2n[k]=-1;
     }
-  // if(renum) Tht->renum(); do not  exist ???? FH ....
+  if(renum) Renumb(Tht);
   Add2StackOfPtr2FreeRC(stack,Tht);//  07/2008 FH
   *mp=mps;
   return Tht;
