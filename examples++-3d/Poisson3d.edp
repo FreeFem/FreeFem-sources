@@ -61,7 +61,7 @@ problem Lap3d(u,v,solver=CG)=int3d(Th3)(Grad3(v)' *Grad3(u)) - int3d(Th3)(f*v) +
 Lap3d;
 cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
 real err= int3d(Th3)( square(u-ue) );
-cout << int3d(Th3)(1.) << " = " << Th3.mesure << endl;
+cout << int3d(Th3)(1.) << " = " << Th3.measure << endl;
 Vh d= ue-u;
 cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
 Vh2 u2=u,u2e=ue;

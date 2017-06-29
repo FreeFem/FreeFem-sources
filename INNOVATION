@@ -1,3 +1,4 @@
+ - change mesure -> measure in all example and add the coorection in code. 
 version 3.55-1 26 june 2017 (rev: 4164:)
  - correction in cube (missing initialisation)
  - correction of bug of normal N in 3d in internal boundary, 

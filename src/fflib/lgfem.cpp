@@ -1613,6 +1613,9 @@ long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
  
 double pmesh_area(pmesh * p)
  { throwassert(p && *p) ;  return (**p).area ;}
+double pmesh_bordermeasure(pmesh * p)
+{ throwassert(p && *p) ;  return (**p).lenbord ;}
+
 long pmesh_nt(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nt ;}
 long pmesh_nbe(pmesh * p)
@@ -5337,6 +5340,7 @@ void  init_lgfem()
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("measure",".",new OneOperator1<double,pmesh*>(pmesh_area));
+ Add<pmesh*>("bordermeasure",".",new OneOperator1<double,pmesh*>(pmesh_bordermeasure));// add june 2017 F.H
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
     

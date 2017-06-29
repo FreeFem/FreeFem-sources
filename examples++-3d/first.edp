@@ -4,7 +4,7 @@ border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
 mesh Th2=buildmesh(cc(50));
 fespace Vh2(Th2,P2);
 int nbtets=Th.nt;
-cout << " Th mes " << Th.mesure << " border mes " << Th.bordermesure << endl;
+cout << " Th mes " << Th.measure << " border mes " << Th.bordermeasure << endl;
 cout << " nb of Tets = " << nbtets << endl;
 if(1) {
   nbtets=2;
