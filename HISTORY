@@ -1,5 +1,15 @@
-@  changeset:   4165:92c0836c900c
+@  changeset:   4167:350892ee146e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jun 29 12:09:03 2017 +0100
+|  summary:     rermove  typo mesure _> measure
+|
+o  changeset:   4166:913834aaa383
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Tue Jun 27 09:40:14 2017 +0200
+|  summary:     Add 3D meshes renumbering with RCM.
+|
+o  changeset:   4165:92c0836c900c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Jun 26 21:44:31 2017 +0100
 |  summary:     coorect pb of initialization in cube function
