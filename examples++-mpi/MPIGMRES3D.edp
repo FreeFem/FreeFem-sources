@@ -162,7 +162,7 @@ if(withplot>1)
    sumphi[] +=  pii[];
    if(dplot) plot(sumphi,wait=1,cmm=" summ 0000");
    Vhii phii=0;
-   real epsmes=1e-10*Thii.mesure;
+   real epsmes=1e-10*Thii.measure;
    for (int i=0;i<npart;++i)
      if(i != ipart ) 
        { 

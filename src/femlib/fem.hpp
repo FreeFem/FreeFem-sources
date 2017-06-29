@@ -463,8 +463,8 @@ public:
   Mesh( const Serialize & ) ;
   Mesh(int nbv,R2 * P);
 
-  R mesure(){ return area;}
-  R bordermesure(){ return lenbord;}
+  R mesure() const { return area;}
+  R bordermesure() const { return lenbord;}
   
   Serialize serialize() const;
   Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b);  

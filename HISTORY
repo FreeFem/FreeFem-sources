@@ -1,6 +1,21 @@
-@    changeset:   4162:4de588b19a9e
-|\   tag:         tip
-| |  parent:      4160:dafbadf60c39
+@  changeset:   4165:92c0836c900c
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 26 21:44:31 2017 +0100
+|  summary:     coorect pb of initialization in cube function
+|
+o  changeset:   4164:9b1ee19eb250
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 26 21:09:36 2017 +0100
+|  summary:     update innovation
+|
+o  changeset:   4163:3d7dd99ab2d1
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Jun 26 21:08:23 2017 +0100
+|  summary:     Pass to version 3.55-1
+|
+o    changeset:   4162:4de588b19a9e
+|\   parent:      4160:dafbadf60c39
 | |  parent:      4161:4601144bd646
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Mon Jun 26 18:54:05 2017 +0100

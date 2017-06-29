@@ -87,9 +87,9 @@ real aa2= int3d(Th,qfV=qfV1lump)(u) ;
 
 cout << " aa1 = " << aa1 << endl;
 cout << " aa2 = " << aa2 << endl;
-cout << int3d(Th)(1.) << " = " << Th.mesure << endl;
-cout << int3d(Th,qfV=qfV1)(1.) << " = " << Th.mesure << endl;
-cout << int3d(Th,qfV=qfV1lump)(1.) << " = " << Th.mesure << endl;
+cout << int3d(Th)(1.) << " = " << Th.measure << endl;
+cout << int3d(Th,qfV=qfV1)(1.) << " = " << Th.measure << endl;
+cout << int3d(Th,qfV=qfV1lump)(1.) << " = " << Th.measure << endl;
 Vh d= ue-u;
 cout <<  " err = " << err <<  " diff l^\intfy = " << d[].linfty << endl;
 real  aire2=int2d(Th,2)(1.); // bug correct in version 3.0-4 
