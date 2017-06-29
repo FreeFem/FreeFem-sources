@@ -33,6 +33,7 @@
 
 static long verbosity;
 
+
 static long StorageUsed()
 {
 #if MALLOC_ZONE_SPECIFIC_FLAGS
@@ -220,6 +221,7 @@ private:
   static   const int nblastalloc=20;
     static OneAlloc *  LastAlloc[nblastalloc];
 public:
+  static  bool CheckAlloc ;
   
   void * MyNewOperator(size_t ll,bool is_array );
   void MyDeleteOperator(void * pp,bool is_array);
@@ -252,6 +254,7 @@ void * AllocExtern::NextFree =0;
 long AllocExtern::NbuDelPtr =0;
 long AllocExtern::uDelPtr[Maxundelptr];
 bool AllocExtern::after_end =false;
+bool AllocExtern::CheckAlloc = true;
 char AllocExtern::filename[128] ="ListOfUnAllocPtr.bin";
 AllocExtern::OneAlloc * AllocExtern::LastAlloc[nblastalloc];
 AllocExtern::AllocData * AllocExtern::NewAllocData()
@@ -285,7 +288,7 @@ AllocExtern::OneAlloc * AllocExtern::Alloc()
 
 void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
 { 
-  if(after_end) return malloc(ll);
+  if(after_end || !CheckAlloc)  return malloc(ll);
   init();
   AllocExtern::OneAlloc * a = Alloc();
   a->p = mymalloc(ll);
@@ -319,6 +322,8 @@ void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
 void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 {
   if(after_end) { /*free(pp)*/; return;}
+  if( !AllocExtern::CheckAlloc) {free(pp); return;}
+ 
   init();
     for( int i=0; i< nblastalloc; ++i)
     {
@@ -552,6 +557,9 @@ int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
 }
 int ShowAlloc(const char *s,size_t & lg) 
 {  return  AllocExternData.ShowAlloc(s,lg);}
+void WithoutCheckPtr(){AllocExtern::CheckAlloc=false;}
+void WithCheckPtr(){AllocExtern::CheckAlloc=true;}
+
 #else
 #define XXXX
 #ifdef XXXX
@@ -651,6 +659,9 @@ int ShowAlloc(const char *s,size_t & lg)
         printf("CheckPtr:  Warning memory leak with malloc = %ld \n ",diff);
     CheckPtr___memoryusage=m;
     lg = 0; return CheckPtr___nbptr;}
+void WithoutCheckPtr(){}
+void WithCheckPtr(){}
+        
 int UnShowAlloc =0;
 #else
 #include <stdlib.h>
@@ -658,5 +669,8 @@ int UnShowAlloc =0;
 int ShowAlloc(const char *s,size_t & lg)
 {lg=0; return 0;}
 int UnShowAlloc =0;
+        void WithoutCheckPtr(){}
+        void WithCheckPtr(){}
+    
 #endif
 #endif
