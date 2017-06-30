@@ -1,5 +1,10 @@
-@  changeset:   4167:350892ee146e
+@  changeset:   4168:362c5171c093
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jun 29 15:49:27 2017 +0100
+|  summary:     Add trick to set/remove CheckPtr
+|
+o  changeset:   4167:350892ee146e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jun 29 12:09:03 2017 +0100
 |  summary:     rermove  typo mesure _> measure
