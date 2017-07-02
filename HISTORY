@@ -1,5 +1,10 @@
-@  changeset:   4168:362c5171c093
+@  changeset:   4169:a95498e8d99a
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jun 30 14:40:17 2017 +0100
+|  summary:     correct type in getall Suitepasce
+|
+o  changeset:   4168:362c5171c093
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jun 29 15:49:27 2017 +0100
 |  summary:     Add trick to set/remove CheckPtr
