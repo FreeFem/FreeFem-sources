@@ -2343,10 +2343,10 @@ void hsvToRgb (float h, float s, float v, float & r, float & g, float & b)
     if (s == 0) /* Grayscale */
 	r = g = b = v;
     else {
-	if (h == 1.0) h = 0;
-	h *= 6.0;
-	i =  int(h);
-	f = h - i;
+        h = h - floorf(h);
+        h*=6.;
+        i =  int(h);
+        f = h - i;
 	aa = v * (1 - s);
 	bb = v * (1 - (s * f));
 	cc = v * (1 - (s * (1 - f)));

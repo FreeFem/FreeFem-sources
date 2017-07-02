@@ -28,7 +28,8 @@ for ( i=0 ;i< 10; i++)
 {   
    PB; 
    pb;
-   if (i==0)      plot(U,u,wait=true,ps="schwarz-u"+i+".eps");
+   //if (i==0) 
+        plot(U,u,wait=true,ps="schwarz-u"+i+".eps");
 };
 
 plot(U,u,ps="schwarz-u.eps");
