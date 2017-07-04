@@ -1,5 +1,15 @@
-@  changeset:   4169:a95498e8d99a
+@  changeset:   4171:cc0fab237a04
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Jul 04 16:09:54 2017 +0200
+|  summary:     correct hsv2Rgv to take h mod 1
+|
+o  changeset:   4170:8079c87e77b7
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Jul 02 15:47:29 2017 +0200
+|  summary:     correct hsv2rgv  to be preiodic in h ..
+|
+o  changeset:   4169:a95498e8d99a
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jun 30 14:40:17 2017 +0100
 |  summary:     correct type in getall Suitepasce
