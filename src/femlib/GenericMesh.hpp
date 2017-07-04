@@ -319,7 +319,7 @@ public:
     return *this;
   }
 
-  
+  void changeOrientation() {swap(vertices[0],vertices[1]);}
   istream & Read1(istream & f,Vertex * v0,int n)
   {
     int iv[nv],ir,err=0;
@@ -747,99 +747,157 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
     ffassert(kerr==0);//  Sure Error.
 
 } 
-template<typename T,typename B,typename V>
-void GenericMesh<T,B,V>::BuildAdj()
-{
- // const int nva   = T::nva;
- // const int nea   = T::nea;
-  if(TheAdjacencesLink!=0) return ;//  already build ... 
-  TheAdjacencesLink = new int[nea*nt];
-  BoundaryElementHeadLink = new int[nbe];
-  HashTable<SortArray<int,nva>,int> h(nea*nt,nv);
-  int nk=0,nba=0;
-  int err=0;
-if(verbosity>5) 
-  cout << "   -- BuildAdj:nva=// nea=" << nva << " " << nea << " "<< nbe << endl;
-  for (int k=0;k<nt;++k)
-    for (int i=0;i<nea;++i)
-      {
-        int sens;
-        SortArray<int,nva> a(itemadj(k,i,&sens));//  warning the face of tet given interieon normal FH.
-	//cout << " ### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
-	typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
-	if(!p) 
-	  { 
-	    h.add(a,nk);
-	    TheAdjacencesLink[nk]=-1;
-	    nba++;
-	  }
-	else 
-	  {	  
-	    ASSERTION(p->v>=0);
-	    TheAdjacencesLink[nk]=p->v;
-	    TheAdjacencesLink[p->v]=nk;
-	    p->v=-1-nk;
-	    nba--;
-	  }
-	++nk;
-      }
-    int kerr=0,kerrf=0,nbei=0;
-  for (int k=0;k<nbe;++k)
-     {
-         int sens,s=0,ss=0,sk=0,intern=0;
-	SortArray<int,nva> a(itembe(k,&sens));
+    template<typename T,typename B,typename V>
+    void GenericMesh<T,B,V>::BuildAdj()
+    {
+        // const int nva   = T::nva;
+        // const int nea   = T::nea;
+        if(TheAdjacencesLink!=0) return ;//  already build ...
+        TheAdjacencesLink = new int[nea*nt];
+        BoundaryElementHeadLink = new int[nbe];
+        HashTable<SortArray<int,nva>,int> h(nea*nt,nv);
+        int nk=0,nba=0;
+        int err=0;
+        if(verbosity>5)
+            cout << "   -- BuildAdj:nva=// nea=" << nva << " " << nea << " "<< nbe << endl;
+        for (int k=0;k<nt;++k)
+            for (int i=0;i<nea;++i)
+            {
+                int sens;
+                SortArray<int,nva> a(itemadj(k,i,&sens));//  warning the face of tet given interieon normal FH.
+                //cout << " ### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
+                typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
+                if(!p)
+                {
+                    h.add(a,nk);
+                    TheAdjacencesLink[nk]=-1;
+                    nba++;
+                }
+                else
+                {
+                    ASSERTION(p->v>=0);
+                    TheAdjacencesLink[nk]=p->v;
+                    TheAdjacencesLink[p->v]=nk;
+                    p->v=-1-nk;
+                    nba--;
+                }
+                ++nk;
+            }
+        int kerr=0,kerrf=0,nbei=0;
+        map<pair<int,int>,pair<int,int> > mapfs;
+        int uncorrect =0, nbchangeorient=0;
+        for(int step=0; step<2; ++step)
+        {
+            for (int ke=0;ke<nbe;++ke)
+            {
+                int sens,s=0,ss=0,sk=0,intern=0;
+                SortArray<int,nva> a(itembe(ke,&sens));
+                
+                typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
+                //cout << k << " ### "   << " item(k,i)= " << itembe(k) << " a= " << a << endl;
+                if(!p) { err++;
+                    if(err==1) cerr << "Err  Border element not in mesh \n";
+                    if (err<10)  cerr << " \t " << ke << " " << a << endl;
+                }
+                else
+                {
+                    int nk = p->v <0 ? -p->v-1 : p->v;
+                    int nkk= TheAdjacencesLink[nk];
+                    if( nkk>=0)
+                    {
+                        nbei ++;
+                        intern=1;
+                        // choise le bon .. too get the correct normal
+                        int k= nk/nea, e=nk%nea;
+                        int kk= nkk/nea, ee=nkk%nea;
+                        itemadj(k,e,&s);
+                        itemadj(kk,ee,&ss);
+                        assert(s && ss && s== -ss);
+                        if( sens == s) {swap(nk,nkk);swap(k,kk);} //  autre cote
+                        //  verif sens normal
+                        int regk= elements[k].lab;
+                        int regkk= elements[kk].lab;
+                        
+                        if(regk != regkk)
+                        { //  verif orientation  interior normal
+                            int sr =1;
+                            if(step==0)
+                            {
+                                if(regk>regkk)
+                                    mapfs[make_pair(regkk,regk)].second++;// increme le + grand
+                                else
+                                    mapfs[make_pair(regk,regkk)].first++;// increme le + grand
+                            }
+                            else { // correct the sens of face
+                                if(regk>regkk) sr=-1,swap(regk,regkk);
+                                // change orientation de du plus petit nombre
+                                map<pair<int,int>,pair<int,int> >::iterator p= mapfs.find(make_pair(regk,regkk));
+                                int nfk = p->second.first;
+                                int nfkk =p->second.second;
+                                //  event regkk
+                                bool change=0;
+                                if( (nfk < nfkk) && sr == 1 ) change=1;
+                                if( (nfk > nfkk) && sr == -1 ) change=1;
+                                if( change)
+                                {
+                                    nbchangeorient++;
+                                    borderelements[ke].changeOrientation();
+                                    if(verbosity>1) cout << " changeOrientation face:"<< ke << endl;
+                                    swap(nk,nkk);
+                                    swap(k,kk);
+                                }
+                            }
+                            
+                        }
+                        
+                    }
+                
+            
+            
+                BoundaryElementHeadLink[ke] = nk;
+                int sk;
+                int tt=BoundaryElementHeadLink[ke]/nea;
+                int ee=BoundaryElementHeadLink[ke]%nea;
+                itemadj(tt,ee,&sk);
+                if(!(itemadj(tt,ee)==a)) {
+                    if(kerrf< 10) cout << " err face  not in element "<< ke << " =="
+                        << tt << " " << ee << endl;
+                    kerrf++;
+                }
+            }
+        }
         
-	typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
-	//cout << k << " ### "   << " item(k,i)= " << itembe(k) << " a= " << a << endl;
-	if(!p) { err++;
-	  if(err==1) cerr << "Err  Border element not in mesh \n";
-	  if (err<10)  cerr << " \t " << k << " " << a << endl;
-	}
-	 else
-	   {
-             int nk = p->v <0 ? -p->v-1 : p->v;
-             int nkk= TheAdjacencesLink[nk];
-             if( nkk>=0)
-             {   nbei ++;
-                 intern=1;
-                 // choise le bon .. too get the correct normal
-                 int k= nk/nea, e=nk%nea;
-                 int kk= nkk/nea, ee=nkk%nea;
-                 itemadj(k,e,&s);
-                 itemadj(kk,ee,&ss);
-                 assert(s && ss && s== -ss);
-                 if( sens == s) nk=nkk; //  autre cote
-             }
-	     BoundaryElementHeadLink[k] = nk;
-              int sk;
-             int tt=BoundaryElementHeadLink[k]/nea;
-             int ee=BoundaryElementHeadLink[k]%nea;
-             itemadj(tt,ee,&sk);
-             if(!(itemadj(tt,ee)==a)) {
-                   if(kerrf< 10) cout << " err face  not in element "<< k << " =="
-                   << tt << " " << ee << endl;
-                   kerrf++;
-               }
-	   }
-     }
+        for(map<pair<int,int>,pair<int,int> >::iterator p=mapfs.begin(); p != mapfs.end(); ++p)
+        {
+            if( p->second.first && p->second.second)
+            {
+                if(verbosity && step==0)  cout << " error in orientation of internal face beetwen region "
+                    << p->first.first << " , " << p->first.second << " to no zero value "
+                    << p->second.first << "  " << p->second.second << endl;
+                uncorrect++;
+            }
+        }
+        if(uncorrect==0) break;
+    }
+    if( nbchangeorient && verbosity) cout << " Warning change oriantation of " << nbchangeorient << " faces \n";
     if( kerr || kerrf ) {
         cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
         cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";
         
-    }
-   ffassert(kerr==0 && kerrf==0);
-  ffassert(err==0);
-  int na= h.n;
-  if(verbosity>1) 
-    {
-	cout << "  -- BuildAdj: nb Elememt " << nt << " nb vertices " << nv << endl;
-	cout << "             : nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva ;
-      if(nea==2)
-        cout << " Const d'Euler: " << nt - na + nv << endl;
-      else
-        cout << endl;	
-    }	
-}
+        }
+        ffassert(kerr==0 && kerrf==0);
+        ffassert(err==0);
+        int na= h.n;
+        if(verbosity>1) 
+        {
+            cout << "  -- BuildAdj: nb Elememt " << nt << " nb vertices " << nv << endl;
+            cout << "             : nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva ;
+            if(nea==2)
+                cout << " Const d'Euler: " << nt - na + nv << endl;
+            else
+                cout << endl;	
+        }	
+        }
 /*
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::BuildSurface(const int &nb, KN<int> SurfaceDef)
@@ -865,7 +923,7 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj()
   int nk=0;
   int err=0;
   int sens;
-
+  
   cout << "nea/nva" << B::nea << " "  << B::nva << endl;
   for (int k=0;k<nbe;++k)
     for (int i=0;i<B::nea;++i)

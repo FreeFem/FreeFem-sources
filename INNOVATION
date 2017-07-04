@@ -1,4 +1,8 @@
- - change mesure -> measure in all example and add the coorection in code. 
+version 3.55-2 
+ - correct internal normal in cas of sens of the normal change 
+     from region1 to region2 
+ - correct hsv2rgb fonction in case to take k mod 1. to get pretty color 
+ - change mesure -> measure in all example and add the correction in code. 
 version 3.55-1 26 june 2017 (rev: 4164:)
  - correction in cube (missing initialisation)
  - correction of bug of normal N in 3d in internal boundary, 

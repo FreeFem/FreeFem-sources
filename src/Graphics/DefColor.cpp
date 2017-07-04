@@ -32,32 +32,32 @@ void DefColor(float & r, float & g, float & b,
               int k,int nb, bool hsv,bool grey,int nbcolors,float *colors);
 
 
- void hsvToRgb (float h, float s, float v, float & r, float & g, float & b)
+void hsvToRgb (float h, float s, float v, float & r, float & g, float & b)
 {
-  int i;
-  float aa, bb, cc, f;
-
-  if (s == 0) /* Grayscale */
-    r = g = b = v;
-  else {
-    h = h - floor(h);
-    if (h == 1.0) h = 0;
-    h *= 6.0;
-    i =  int(h);
-    f = h - i;
-    aa = v * (1 - s);
-    bb = v * (1 - (s * f));
-    cc = v * (1 - (s * (1 - f)));
-    switch (i) {
-    case 0: r = v;  g = cc; b = aa; break;
-    case 1: r = bb; g = v;  b = aa; break;
-    case 2: r = aa; g = v;  b = cc; break;
-    case 3: r = aa; g = bb; b = v;  break;
-    case 4: r = cc; g = aa; b = v;  break;
-    case 5: r = v;  g = aa; b = bb; break;
+    int i;
+    float aa, bb, cc, f;
+    
+    if (s == 0) /* Grayscale */
+        r = g = b = v;
+    else {
+        h = h - floorf(h);
+        h*=6.;
+        i =  int(h);
+        f = h - i;
+        aa = v * (1 - s);
+        bb = v * (1 - (s * f));
+        cc = v * (1 - (s * (1 - f)));
+        switch (i) {
+            case 0: r = v;  g = cc; b = aa; break;
+            case 1: r = bb; g = v;  b = aa; break;
+            case 2: r = aa; g = v;  b = cc; break;
+            case 3: r = aa; g = bb; b = v;  break;
+            case 4: r = cc; g = aa; b = v;  break;
+            case 5: r = v;  g = aa; b = bb; break;
+        }
     }
-  }
 }
+
 //  def des couleurs de la tables 
 void DefColor(float & r, float & g, float & b,
               int k,int nb, bool hsv,bool grey,int nbcolors,float *colors)
