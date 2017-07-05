@@ -22,7 +22,7 @@
 # headeralh brief="Downloading and compiling extra BLAS libraries" default=0 freefem make multipleauthors start=04/06/04 upmc
 
 DIRPKG=../pkg
-BLAS_TGZ=$(DIRPKG)/blas.tgz
+BLAS_TGZ=$(DIRPKG)/blas-3.7.1.tgz
 CBLAS_TGZ=$(DIRPKG)/cblas.tgz
 
 PKGCOMMON_PACKTITLE=BLAS
