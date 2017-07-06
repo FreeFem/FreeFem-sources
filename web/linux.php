@@ -101,8 +101,6 @@ an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy w
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>make <b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>make check <b></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>make install <b>(under root)</span></p>
-
-<p class="p6"><span class="s1"><b><span class="Apple-converted-space">  </span>make<span 	
 <p class="p12"></p>
 <p class="p12"></p>
  <A NAME="before all install ">   
