@@ -49,7 +49,7 @@ include 'phpfiles.php';
 ?>
 
 <p class="p1"><span class="s1">How to compile FreeFem++ under Linux.<span class="Apple-converted-space"> </span></span></p>
-<p class="p2"><span class="s1"><i>in tested FH (08/03/2016) on Ubuntu 14.04.4 LTS (form scatch) .</i></span></p>
+<p class="p2"><span class="s1"><i>in tested FH (04/07/2017) on Ubuntu 16.04.4 LTS (form scatch) .</i></span></p>
 <p class="p3"><span class="s1"><br>
 </span></p>
 <p class="p5"><span class="s1"> Before the build process check the installed software <A HREF="linux.php#before">   (here) </A>  </p> 
@@ -110,13 +110,16 @@ an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy w
 <p class="p9"><span class="s9"><b>sudo apt-get install cpp  freeglut3-dev g++ gcc  gfortran</b></span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>ghostscript  m4 make  patch pkg-config wget python</b></span></p>
 <p class="p3"><span class="s9"> # other lib of a full freefem++ can be change </span></p>
-<p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>libopenblas-dev liblapack-dev libhdf5-dev libgsl0-dev</b></span></p>
+<p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span>libopenblas-dev liblapack-dev libhdf5-dev libgsl2-dev</b></span> </p>
+<p class="p3"><span class="s9"> # Remark:  On old version pkg  "libgsl2-dev" is  "libgsl0-dev"</span></p>
+<p class="p3"><span class="s9"> # Remark:  the next package can be download automaticaly by FreeFem++"</span></p>
+
 <p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span> libscotch-dev  libfftw3-dev   libarpack2-dev libsuitesparse-dev  </b></span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install<span class="Apple-converted-space">  </span> libmumps-seq-dev  libnlopt-dev  coinor-libipopt-dev  libgmm++-dev libtet1.5-dev </b></span></p>
 <p class="p3"><span class="s9"> # Remark:  superlu-dev  package is too old on ubuntu  Trusty (14.0.4) </span></p>
-<p class="p3"><span class="s9"> # not mandatory package  but usefull for develloppenemt </span></p>
+<p class="p3"><span class="s9"> # not mandatory package  but usefull for developpement </span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install autoconf automake autotools-dev  bison  flex gdb  valgrind </b></span></p>
-<p class="p3"><span class="s9"> # not mandatory package for downlaod with hg / mercurail tool</span></p>
+<p class="p3"><span class="s9"> # not mandatory package for download with hg / mercurail tool</span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install mercurial </b></span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install gnuplot-qt </b></span></p>
 
