@@ -1,4 +1,4 @@
-version 3.55-3 
+version 3.55-3 6 july 2017 ( 4176:3c8b1dd2d3d7)
  - correct url of slepc 
  - add tool in shell plugin
     dirbase, basename,cpfile
