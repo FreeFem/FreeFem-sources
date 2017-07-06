@@ -622,7 +622,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     int itstart[100],kstart=0;
   int it,j,it00;
   const int mxbord=100;
-  int kbord[mxbord];
+  int kbord[mxbord+1];
   int nbord=0;
   if(searchMethod>1) goto PICHON;
   if ( tstart )
@@ -711,7 +711,7 @@ RESTART:
       int  inkbord=find5(it,kbord,nbord);
       if(inkbord<0 )  
 	{
-	  assert(nbord < mxbord);
+	  ffassert(nbord < mxbord);
 	  kbord[nbord++]=it;
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
