@@ -14,8 +14,8 @@ const char sepdir='\\';
 #else
 const char sepdir='/';
 #endif
-extern const char *  prognamearg;
-extern const char *  edpfilenamearg;
+//extern const char *  prognamearg;
+//extern const char *  edpfilenamearg;
 
 //#include <tr1/regex>
 using namespace Fem2D;
@@ -226,8 +226,8 @@ static void init(){
   Global.Add("getenv","(",new OneOperator1s_<string*,string*>(ffgetenv));
   Global.Add("setenv","(",new OneOperator2_<long,string*,string*>(ffsetenv));
   Global.Add("unsetenv","(",new OneOperator1_<long,string*>(ffunsetenv));
-    static string edpfilenameargstr=edpfilenamearg;
-    Global.New("edpfilenamearg",CConstant<string *>(&edpfilenameargstr));
+  //  static string edpfilenameargstr=edpfilenamearg;
+//    Global.New("edpfilenamearg",CConstant<string *>(&edpfilenameargstr));
 }
 
 LOADFUNC(init);
