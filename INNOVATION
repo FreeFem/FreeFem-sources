@@ -1,3 +1,8 @@
+
+ - correct bug in   const typename  Mesh::Element * Find(const Mesh & Th,
+   	              GTree<typename Mesh::Vertex> *quadtree,
+  overflow in array kbord, change size and add test 
+  thank to Yann Guyot <guyotyann@infront.kyoto-u.ac.jp>
 version 3.55-3 6 july 2017 ( 4176:3c8b1dd2d3d7)
  - correct url of slepc 
  - add tool in shell plugin
