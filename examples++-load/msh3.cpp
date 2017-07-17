@@ -5575,7 +5575,7 @@ AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
   long label =arg(1,stack,2L);
    KN<long> * pn2o =  arg(2,stack);
 KN<long> * po2n =  arg(3,stack);
-  bool renum=arg(4,stack,true);// not use to day to by compatible with 2d version ...
+  bool renum=arg(4,stack,false);
     
   KN<int> split(Th.nt);
   split=kkksplit;
