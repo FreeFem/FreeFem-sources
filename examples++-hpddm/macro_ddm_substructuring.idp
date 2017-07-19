@@ -5,7 +5,7 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         {
             fespace PhLocal(meshName, P0);
             PhLocal overshoot = hTriangle;
-            real max = 2.0 * overshoot[].max;
+            real max = 4.0 * overshoot[].max;
             bbN(meshName, max, globalName)
         }
         fespace VhGlobal(globalName, P1);

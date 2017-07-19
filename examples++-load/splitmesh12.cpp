@@ -118,7 +118,7 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
               }
               int i0=Th.operator()(K[nvfaceTet[e][0]]), i1=Th.operator()(K[nvfaceTet[e][1]]),i2=Th.operator()(K[nvfaceTet[e][2]]);
               for(int ij = 0; ij < 2; ++ij) {
-                  int ivt[4] = {ij==0?nbv+k:nbv+kk,i1,i2,vv - v};
+                  int ivt[4] = {ij==0?nbv+k:nbv+kk,i1,i2,static_cast<int>(vv - v)};
                   if(det(v[ivt[0]], v[ivt[1]], v[ivt[3]]) > 0)
                       std::swap(ivt[0], ivt[3]);
                   int lab = ij==0?K.lab:KAdj.lab;
