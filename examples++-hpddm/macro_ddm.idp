@@ -125,7 +125,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         {
             fespace PhLocal(meshName, P0);
             PhLocal overshoot = hTriangle;
-            real max = 2.0 * overlap * overshoot[].max;
+            real max = 4.0 * overlap * overshoot[].max;
             bbN(meshName, max, globalName)
         }
         PhGlobal supp = abs(part - mpiRank(comm)) < 0.1;
