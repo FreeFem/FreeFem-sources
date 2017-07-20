@@ -1,12 +1,21 @@
 real [int,int] a(10,10);
+real [int,int] aa(2,3);
+for [i,j,aij : aa] 
+{
+   aij= 1.+i+2*j;
+   cout << i << " "<< j << " " << aij << endl; 
+}
+	
 real [int] b(10);
 for [i,bi : b] {bi=i+1; cout << i << " " << bi << endl;}
 cout << " b="<< b<< endl;  
 for [i,j,aij : a] 
 {
-   aij= 1./(2+i+j);
-   if(abs(aij)<0.2) aij=0;
+   aij= 1.+i+2*j;
+   if(abs(i-j)>2) aij=0;
 }
+cout << a(1,2) << " == " << 1.+1+2*2 << endl; 
+assert(abs(a(1,2)- (1.+1+2*2))<1e-9);
 cout << " a= "<< a << endl; 
 matrix A=a;
 string[string] ss;

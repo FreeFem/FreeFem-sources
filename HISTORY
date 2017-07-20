@@ -1,5 +1,10 @@
-@  changeset:   4178:4a1c64629d1d
+@  changeset:   4179:41bce9928596
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jul 07 13:36:42 2017 +0200
+|  summary:     corret array overflow in Find tet contening points
+|
+o  changeset:   4178:4a1c64629d1d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jul 06 15:50:31 2017 +0200
 |  summary:     correct pb un win32

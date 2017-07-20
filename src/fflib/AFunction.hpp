@@ -3324,9 +3324,10 @@ public:
     PolymorphicLoop(C_F0 tt,AC_F0 &args) : t(tt),v(0),i(0), j(0){
         if(verbosity>1000)
         cout << "PolymorphicLoop  args " << args.size()  << endl;
-        if(args.size()>1) v=args[1];
-        if(args.size()>2) i=args[2];
-        if(args.size()>3) j=args[3];
+        if(args.size()>1) v=args[1];  // v
+        if(args.size()>2) i=args[2];  // i,v
+        if(args.size()>3) j=i,i=args[3];//  i,j, v 
+        
         if(verbosity>1000) 
         cout <<" v " << v << " i=" << i << " j=" << j << endl;
     }

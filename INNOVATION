@@ -1,4 +1,10 @@
-
+version 3.56
+ - fix bug in syntax of implicit loop in matrix (Thank to gonghelin@gmail.com )
+   like in : 
+     real [int,int] a(2,3);  for [i,j,aij : a] a(i,j) = 2*i+3*j; 
+	before version 3.56, you get  
+                              for [j,i,aij : a] a(i,j) = 2*i+3*j; 
+							  
  - correct bug in   const typename  Mesh::Element * Find(const Mesh & Th,
    	              GTree<typename Mesh::Vertex> *quadtree,
   overflow in array kbord, change size and add test 
