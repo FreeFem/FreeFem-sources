@@ -168,12 +168,14 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         for(int i = 0; i < arrayIntersection.n; ++i) {
             PhGlobal suppPartition = abs(arrayIntersection[i] - part) < 0.1;
             AddLayers(globalName, suppPartition[], overlap, phi[]);
-            real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
-            if(intersection > 1.0e-6) {
-                partitionIntersection[numberIntersection] = phi;
-                if(usedARGV("-true_restrict") == -1)
-                    sum[] += partitionIntersection[numberIntersection][];
-                arrayIntersection[numberIntersection++] = arrayIntersection[i];
+            if(min(eps, epsTab[i]) > 0.0) {
+                real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
+                if(intersection > 1.0e-6) {
+                    partitionIntersection[numberIntersection] = phi;
+                    if(usedARGV("-true_restrict") == -1)
+                        sum[] += partitionIntersection[numberIntersection][];
+                    arrayIntersection[numberIntersection++] = arrayIntersection[i];
+                }
             }
         }
         if(numberIntersection != arrayIntersection.n)
