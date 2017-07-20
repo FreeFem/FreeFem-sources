@@ -128,7 +128,6 @@ dmatrix<complex>   DistB(DistA, B, clean = true);
 /***************************************/
 complex[int]     EigenVAL(0);       // array to store eigenvalues
 Vh<complex>[int] def(EigenVEC)(1);  // array to store eigenvectors
-EigenVEC[0][] = 0.0;
 
 string ssparams =            // Parameters for the distributed EigenValue solver
   " -eps_nev " + nEV       + // Number of eigenvalues

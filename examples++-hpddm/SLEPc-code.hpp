@@ -35,7 +35,7 @@ class eigensolver_Op : public E_F0mps {
     public:
         Expression A;
         Expression B;
-        static const int n_name_param = 4;
+        static const int n_name_param = 5;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         eigensolver_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), B(param2) {
@@ -49,7 +49,8 @@ basicAC_F0::name_and_type eigensolver_Op<Type, K>::name_param[] = {
     {"sparams", &typeid(std::string*)},
     {"prefix", &typeid(std::string*)},
     {"values", &typeid(KN<K>*)},
-    {"vectors", &typeid(FEbaseArrayKn<K>*)}
+    {"vectors", &typeid(FEbaseArrayKn<K>*)},
+    {"array", &typeid(KNM<K>*)}
 };
 template<class Type, class K>
 class eigensolver : public OneOperator {
@@ -99,39 +100,45 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
         if(nconv > 0 && (nargs[2] || nargs[3])) {
             KN<K>* eigenvalues = nargs[2] ? GetAny<KN<K>* >((*nargs[2])(stack)) : nullptr;
             FEbaseArrayKn<K>* eigenvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>* >((*nargs[3])(stack)) : nullptr;
+            KNM<K>* array = nargs[4] ? GetAny<KNM<K>* >((*nargs[4])(stack)) : nullptr;
             if(eigenvalues)
                 eigenvalues->resize(nconv);
             if(eigenvectors)
                 eigenvectors->resize(nconv);
+            if(array)
+                array->resize(ptA->_A->getDof(), nconv);
             Vec xr, xi;
             PetscInt n;
-            if(eigenvectors) {
+            if(eigenvectors || array) {
                 MatCreateVecs(ptA->_petsc, PETSC_NULL, &xr);
                 MatCreateVecs(ptA->_petsc, PETSC_NULL, &xi);
                 VecGetLocalSize(xr, &n);
             }
             for(PetscInt i = 0; i < nconv; ++i) {
                 PetscScalar kr, ki;
-                EPSGetEigenpair(eps, i, &kr, &ki, eigenvectors ? xr : NULL, eigenvectors && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
-                if(eigenvectors) {
+                EPSGetEigenpair(eps, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
+                if(eigenvectors || array) {
                     PetscScalar* tmpr;
                     PetscScalar* tmpi;
                     VecGetArray(xr, &tmpr);
-                    K* array;
+                    K* pt;
                     if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value) {
                         VecGetArray(xi, &tmpi);
-                        array = new K[n];
-                        copy(array, n, tmpr, tmpi);
+                        pt = new K[n];
+                        copy(pt, n, tmpr, tmpi);
                     }
                     else
-                        array = reinterpret_cast<K*>(tmpr);
-                    KN<K> cpy(eigenvectors->get(0)->n);
+                        pt = reinterpret_cast<K*>(tmpr);
+                    KN<K> cpy(ptA->_A->getDof());
                     cpy = K(0.0);
-                    HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), array, cpy.n, 1);
+                    HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pt, cpy.n, 1);
                     ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
-                    eigenvectors->set(i, cpy);
+                    if(eigenvectors)
+                        eigenvectors->set(i, cpy);
+                    if(array)
+                        (*array)(':', i) = cpy;
                     if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
-                        delete [] array;
+                        delete [] pt;
                     else
                         VecRestoreArray(xi, &tmpi);
                     VecRestoreArray(xr, &tmpr);
@@ -144,7 +151,7 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
 
                 }
             }
-            if(eigenvectors) {
+            if(eigenvectors || array) {
                 VecDestroy(&xr);
                 VecDestroy(&xi);
             }
