@@ -1,5 +1,25 @@
-@  changeset:   4179:41bce9928596
+@  changeset:   4183:8f13e9825d74
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jul 20 19:00:01 2017 +0200
+|  summary:     correct big problem in implicit loop for matrix
+|
+o  changeset:   4182:f7e0fb2488c3
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Thu Jul 20 16:36:19 2017 +0200
+|  summary:     No need to preallocate eigenvectors anymore.
+|
+o  changeset:   4181:6fd7264198d4
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Wed Jul 19 08:17:56 2017 +0200
+|  summary:     Non-constant-expression in initializer list.
+|
+o  changeset:   4180:dcedaee06781
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Mon Jul 17 09:34:42 2017 +0200
+|  summary:     Bump HPDDM. Fix 3D examples.
+|
+o  changeset:   4179:41bce9928596
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jul 07 13:36:42 2017 +0200
 |  summary:     corret array overflow in Find tet contening points
