@@ -1,5 +1,15 @@
-@  changeset:   4185:814d4406807c
+@  changeset:   4187:756e174b670c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 03 19:23:31 2017 +0100
+|  summary:     update history
+|
+o  changeset:   4186:455e38b1ea1a
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Thu Aug 03 14:34:07 2017 +0200
+|  summary:     Throw an error when using the same array as input and output.
+|
+o  changeset:   4185:814d4406807c
 |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
 |  date:        Fri Jul 21 15:51:56 2017 +0200
 |  summary:     Pointer freed twice.
