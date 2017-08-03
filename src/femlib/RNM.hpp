@@ -544,15 +544,15 @@ public:
  //  KN_& operator =(const MatriceCreuseMulKN_<R> & ) ;
  //  KN_& operator +=(const MatriceCreuseMulKN_<R> & ) ;
    KN_& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
-    {*this=R(); Ax.A->addMatMul(Ax.x,*this);return *this;}
+    {ffassert(&Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatMul(Ax.x,*this);return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
-    {*this=R(); Ax.A->addMatTransMul(Ax.x,*this);return *this;}
+    {ffassert(&Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatTransMul(Ax.x,*this);return *this;}
    KN_& operator +=(const typename VirtualMatrice<R>::plusAx & Ax)  
-    {  Ax.A->addMatMul(Ax.x,*this);return *this;}
+    { ffassert(&Ax.x[0] != &this->operator[](0)); Ax.A->addMatMul(Ax.x,*this);return *this;}
    KN_& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
-    {  Ax.A->addMatTransMul(Ax.x,*this);return *this;}
+    {  ffassert(&Ax.x[0] != &this->operator[](0)); Ax.A->addMatTransMul(Ax.x,*this);return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
-    {*this=R(); Ab.A->Solve(*this,Ab.b);return *this;}
+    {ffassert(&Ab.b[0] != &this->operator[](0));*this=R(); Ab.A->Solve(*this,Ab.b);return *this;}
     
   template<class  A,class B,class C,class D> KN_&  operator =  (const F_KN_<A,B,C,D>  & u) ;
   template<class  A,class B,class C,class D> KN_&  operator +=  (const F_KN_<A,B,C,D>  & u) ;
