@@ -868,7 +868,7 @@ class LinearGMRES : public OneOperator
          if ( !B ) bbgmres=bb; // none zero if gmres without B
          MatF_O AA(n,stack,A,bbgmres);
          if(bbgmres ){
-             *bbgmres= AA* *bbgmres; // Ok Ax == b -> not translation of b .
+             AA.addMatMul(*bbgmres,*bbgmres); // Ok Ax == b -> not translation of b .
              *bbgmres = - *bbgmres;
              if(verbosity>1) cout << "  ** GMRES set b =  -A(0);  : max=" << bbgmres->max() << " " << bbgmres->min()<<endl;
          }

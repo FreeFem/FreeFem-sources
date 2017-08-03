@@ -1,3 +1,6 @@
+version 3.56-1
+ - add check in u=A*b do be sure that u and b are not the same vector
+   thank to P. Jolivet
 version 3.56
  - fix bug in syntax of implicit loop in matrix (Thank to gonghelin@gmail.com )
    like in : 
