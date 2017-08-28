@@ -1,5 +1,10 @@
-@  changeset:   4187:756e174b670c
+@  changeset:   4188:324fb9db1242
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Aug 03 22:05:24 2017 +0100
+|  summary:     correct pb in affine gmres  with check of P. Jolivet
+|
+o  changeset:   4187:756e174b670c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Aug 03 19:23:31 2017 +0100
 |  summary:     update history

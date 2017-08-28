@@ -5510,11 +5510,11 @@ the global variable are defined  at this time andhere since $r$ is changed betwe
 \eFF
 \end{note}
 
-\subsubsection{\setS{Multy Border}}\index{border!multy}\index{label}
+\subsubsection{\setS{Multi-Border}}\index{border!multi}\index{label}
 (Version 3.30)
 
 Some time it can be useful to to make array of border, but unfortunately it is incompatible with the \freefempp syntax. 
-So to bypass this , thes dea is small, if the number of segment of the discretization $n$ is a array, we make  a loop on all the value of the array, and
+So to bypass this problem, the idea is small, if the number of segment of the discretization $n$ is a array, we make  a implicit loop on all the value of the array, and
 the index variable $i$ of the loop  is defined after  parameter definition,  like in \verb!border a(t=0,2*pi;i) ...!.
 
 \medskip A first very small example: 
@@ -5527,7 +5527,7 @@ the index variable $i$ of the loop  is defined after  parameter definition,  lik
 
 And  more complex exemple (take from \texttt{mesh.edp} example )  to defined a square with small circies: 
 \bFF
-// multy border syntax version 3.30 avril 2014 ... 
+// multi border syntax version 3.30 avril 2014 ... 
   @real[int] xx=[0,1,1,0],
             yy=[0,0,1,1];
   // radius, centre of the 4 circles .. 
