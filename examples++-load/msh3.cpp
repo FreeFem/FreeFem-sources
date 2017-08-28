@@ -7003,7 +7003,7 @@ Mesh3 * BuildCube(long nx,long ny,long nz,long region,long *label,long kind,Move
 
 AnyType Cube_Op::operator()(Stack stack)  const
 {
-    long nx,ny,nz,region=0,label[]={4,2,1,3,5,6},kind=6;
+    long nx,ny,nz,region=0,label[]={1,2,3,4,5,6},kind=6;
     nx = GetAny<long>( (*enx)(stack) );
     ny = GetAny<long>( (*eny)(stack) );
     nz = GetAny<long>( (*enz)(stack) );

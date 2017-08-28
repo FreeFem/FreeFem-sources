@@ -101,8 +101,19 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 
 <div class="thema">Some FreeFem++ presentation (with useful information):
 </div>
+
+
+
 <ul>
-           <li><font > <bf>  <font color=red > 
+	   <li> 
+	<A HREF="http://www.mathematics.pitt.edu/node/2052">  An Introduction to Scientific Computing using Free Software FreeFem++ , </A>    August 28 to September 1  2017, 
+	Department of Mathematics, University of Pittsburgh, USA
+	<A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++/2017-Pitt.zip"> the zip file of the  folder (presentation, examples,  7.8Mb)</A> and the
+	<A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++/2017-Pitt"> folder </A>. 
+	 </li>
+	
+	
+           <li><font > <bf>  <font color=black > 
          The 8th   tutorial and Workshop on FreeFem++ 
    <A HREF="https://www.ljll.math.upmc.fr/freefem++/">  (inscription here)</A>, 
    held december 8th and 9th, 2016, in Paris at Universit&eacute Pierre

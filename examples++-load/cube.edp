@@ -9,7 +9,24 @@ load "msh3"
 //  z = 0 ) label 5,
 //  z = 1 ) label 6.
 // the region numbering is 0 by default.
-
+{
+	real[int,int] mm= [ [0.5,0.0,0.5], [1.0,0.5,0.5], 
+	                    [0.5,1.0,0.5], [0.0,0.5,0.5], 
+						[0.5,0.5,0.0], [0.5,0.5,1.0] ];
+	int[int] l6=[1,2,3,4,5,6];
+	mesh3 Th=cube(2,2,2); //[x*4,y*1+0.1*sin(4*pi*x)]);
+	for (int i=1; i< 7; ++i)
+	{
+		real s = int2d(Th,i)(1.); 
+		real mx = int2d(Th,i)(x); 
+		real my = int2d(Th,i)(y); 
+		real mz = int2d(Th,i)(z); 	
+		cout<< i << " " << s <<  " "<< mx << " " << my << " " << mz << endl;
+		int j=i-1;
+		real err= abs(mx-mm(j,0)) + abs(my-mm(j,1)) + abs(mz-mm(j,2)) ;
+		assert(err< 0.1);
+	}
+}
 int[int] l6=[37,42,45,40,25,57];
 int r11=11;
 mesh3 Th=cube(4,5,6,[x*2-1,y*2-1,z*2-1],label=l6,flags =3,region=r11); 
