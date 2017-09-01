@@ -1610,7 +1610,7 @@ void Init_map_type()
      Global.Add("lround","(",new OneOperator1<long,double>(lround)); // add june 2007
      Global.Add("floor","(",new OneOperator1<double>(floor)); // add march 2006
      Global.Add("ceil","(",new OneOperator1<double>(ceil));  // add march 2006
-     Global.Add("rint","(",new OneOperator1<double>(rint));  // add june 2006
+    Global.Add("rint","(",new OneOperator1<double>(rint));  // add june 2006
      Global.Add("lrint","(",new OneOperator1<long,double>(lrint));  // add mars  2014
     
      Global.Add("sin","(",new OneOperator1<double>(sin));
@@ -1670,7 +1670,12 @@ void Init_map_type()
     Global.Add("min","(",new OneOperator3_<long,long>(Min));
 
     Global.Add("atan2","(",new OneOperator2<double>(atan2));
-     Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
+    Global.Add("fmod","(",new OneOperator2<double>(fmod));// add sep 2017
+    Global.Add("fdim ","(",new OneOperator2<double>(fdim));// add sep 2017
+    Global.Add("fmax ","(",new OneOperator2<double>(fmax));// add sep 2017
+    Global.Add("fmin ","(",new OneOperator2<double>(fmin));// add sep 2017
+ 
+    Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
     
      Global.Add("atan","(",new OneOperator2<double>(atan2));
      Global.Add("sqrt","(",new OneOperator1<double>(sqrt,2));

@@ -1,5 +1,10 @@
-@  changeset:   4189:e1bb62e36a9a
+@  changeset:   4190:da5938f8ce0e
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Aug 28 18:21:32 2017 -0400
+|  summary:     update doc
+|
+o  changeset:   4189:e1bb62e36a9a
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Aug 28 17:30:35 2017 -0400
 |  summary:     coorect bug in cube function without label parameter
