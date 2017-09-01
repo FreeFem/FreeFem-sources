@@ -1,3 +1,4 @@
+ - add new math.h function: fmod(x,y),fdim(x,y),fmax(x,y),fmin(x,y) 
  - correct cube label if no argument label= in version 3.55 to version 3.56-1
 version 3.56-1
  - add check in u=A*b do be sure that u and b are not the same vector

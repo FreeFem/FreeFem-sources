@@ -3828,9 +3828,16 @@ by \ttCC{@sinh(x)}, \ttCC{@cosh(x)}, \ttCC{@tanh(x)}, \ttCC{@asinh(x)},
 \sinh^{-1}x=\ln \left[x+\sqrt{x^2+1}\right],\qquad
 \cosh^{-1}x=\ln \left[x+\sqrt{x^2-1}\right].
 \]
-The  real function which rounds a real to an integer   \ttCC{@floor}$(x)$  rounds to largest integral value not greater than x, \ttCC{@ceil}$(x)$  round to smallest integral value not less than x; similarly \ttCC{@rint}$(x)$
+The  real function which rounds a real to an integer   \ttCC{@round}$(x)$ (resp. \ttCC{@lround}$(x)$) round to integral value, regardless of rounding direction and return real (resp.  integer).
+\ttCC{@floor}$(x)$   rounds to largest integral value not greater than x vue as real, \ttCC{@ceil}$(x)$  round to smallest integral value not less than x; similarly \ttCC{@rint}$(x)$
 returns the integral value nearest to x (according to
-     the prevailing rounding mode) in floating-point format).\index{floor}\index{rint}\index{ceil}.
+     the prevailing rounding mode) in floating-point format) and \ttCC{@lrint}$(x)$ return an integer.
+     With a have also of the function from \texttt{cmath} :  \ttCC{fmod}$(x,y)$, \ttCC{fmin}$(x,y)$, \ttCC{fmax}$(x,y)$,\ttCC{fdim}$(x,y)$  such that 
+     fmod functions compute the floating-point remainder of $x/ y$, fmin return the min, fmax return the max, 
+     fdim() functions return the "positive difference" between their arguments:  $x - y$ if $x > y$, +$0$ if $x \le y$ .
+     
+     \index{floor}\index{rint}\index{ceil}\index{lrint}\index{round}\index{lround}\index{ceil}\index{fmod}\index{fmax}\index{fmin}\index{fdim}     
+     
 
 \itemtt[Elementary Functions] denotes for us  the class of functions presented above
 (polynomials, exponential, logarithmic, trigonometric, circular) and
