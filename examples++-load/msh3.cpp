@@ -5131,7 +5131,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
     
     
     // computation of number of border elements and vertex without split
-    int nbe = 0;
+    int nbe = 0,nbei=0;
     int nt  = 0;
     int nv  = 0;
     int nvtrunc =0;
@@ -5171,7 +5171,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
                 else nbfi++; // internal face count 2 times ...
                 if(it==i || it <0) nbe += kksplit2;  //on est sur la frontiere
                 else if (!split[it]) nbe += kksplit2; //le voisin ne doit pas etre decoupe
-                else if ( (tagTonB[i]&tagb[j] ) != 0 && i<it) nbe += kksplit2; // internal boundary ..
+                else if ( (tagTonB[i]&tagb[j] ) != 0 && i<it) nbei++,nbe += kksplit2; // internal boundary ..
             }
             
             for (int e=0;e<6;e++){
@@ -5253,7 +5253,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
         cout << "  -- trunc (3d) : Th.nv= " << Th.nv << "kksplit="<< kksplit << endl;
     
     int ntnosplit  = nt/kksplit3;
-    int nbenosplit = nbe/kksplit2;
+    int nbenosplit = nbe/kksplit2-nbei;// warning true bounding => remove internal border
     int nfacenosplit = (4*ntnosplit+nbenosplit)/2;
     nv = ntnosplit*(nvsub - 4*( (kksplit+1)*(kksplit+2)/2 - 3*(kksplit-1) -3 ) - 6*( kksplit-1 ) - 4);
     if(verbosity>100) cout << "       1) nv= " << nv << endl;

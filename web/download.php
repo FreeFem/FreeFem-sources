@@ -66,9 +66,12 @@ hg  clone  http://www.freefem.org/ff++/ff++
  <div class="thema"> Coloring Syntax <i>FreeFem++</i></div>
  <div class="themaBlog">  
 <ul>	 
-<li>for emacs you can download <tt>ff++-mode.el<tt> :
-<A href="https://github.com/rrgalvan/freefem-mode" > here </A> (thanks to Rafa Rodríguez Galván &lt;rafael.rodriguez@uca.es&gt;).
-</li> 
+<li>for emacs editor  you can download <tt>ff++-mode.el<tt> :
+<A href="http://github.com/rrgalvan/freefem-mode/",target="_blank"> here </A> (thanks to Rafa Rodríguez Galván &lt;rafael.rodriguez@uca.es&gt;).
+</li>
+<li> for  <tt>textmate 2</tt>  editor on   Mac 10.7 or better, <a href="https://macromates.com/download"> download  from macromates.com </a> and install it, when  get the 
+  <a href="http://www.freefem.org/ff++/Textmate2-ff++.zip"> textmate freefem++ syntax from www.freefem.org/ff++/Textmate2-ff++.zip (version june 2107)</a> unzip Textmate2-ff++.zip and follow the explanation given in file <tt> How_To.rtf</tt>.</li>
+ <li> for <A href="https://notepad-plus-plus.org",target="_blank">  notepad++ </A>  editor under windows and  <A href="color-syntax-win.pdf">  read and follow the instruction <A>
  </ul>
  </div>    
  
