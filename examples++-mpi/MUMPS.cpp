@@ -241,7 +241,7 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     ICNTL(14) = 30;                // percentage increase in the estimated working space
     _id->job = 4;
     mumps_c(_id);
-    if(INFOG(1) != 0 || verbosity>1)
+    if(INFOG(1) != 0 && verbosity>1)
       std::cout << "BUG MUMPS, INFOG(1) = " << INFOG(1) << " distributed: " << distributed << " master " << matrank << std::endl;
     if(I) {
       if(_id->sym == 0) {

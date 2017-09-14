@@ -1,5 +1,10 @@
-@  changeset:   4190:da5938f8ce0e
+@  changeset:   4191:c05b9333ac1c
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Sep 01 14:22:54 2017 -0400
+|  summary:     correct the doc
+|
+o  changeset:   4190:da5938f8ce0e
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Aug 28 18:21:32 2017 -0400
 |  summary:     update doc
