@@ -172,26 +172,13 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
                 real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
                 if(intersection > 1.0e-6) {
                     partitionIntersection[numberIntersection] = phi;
-                    if(usedARGV("-true_restrict") == -1)
-                        sum[] += partitionIntersection[numberIntersection][];
+                    sum[] += partitionIntersection[numberIntersection][];
                     arrayIntersection[numberIntersection++] = arrayIntersection[i];
                 }
             }
         }
         if(numberIntersection != arrayIntersection.n)
             arrayIntersection.resize(numberIntersection);
-        fespace WhPart(meshName, PkPart);
-        WhPart defPart(func2vec);
-        if(usedARGV("-true_restrict") == -1) {
-            khi[] = khi[] ./= sum[];
-            defPart(func2vec) = initPart(khi);
-        }
-        else {
-            VhLocal loc = abs(part - mpiRank(comm)) < 0.1;
-            defPart(func2vec) = initPart(loc);
-        }
-        D.resize(Wh.ndof);
-        D = func2vec[];
         restrictionIntersection.resize(numberIntersection);
         for(int i = 0; i < numberIntersection; ++i) {
             meshN meshIntersection = trunc(meshName, partitionIntersection[i] > 1.0e-6, label = 9999);
@@ -202,7 +189,28 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
             int[int] I;
             [I, restrictionIntersection[i], C] = R;
             restrictionIntersection[i].resize(R.nbcoef);
-        }// EOM
+        }
+        fespace WhPart(meshName, PkPart);
+        WhPart defPart(func2vec);
+        khi[] = khi[] ./= sum[];
+        if(usedARGV("-true_restrict") != -1) {
+            khi = abs(part - mpiRank(comm)) < 0.1;
+            VhLocal sigma;
+            for(int i = 0; i < numberIntersection; ++i) {
+                if(mpiRank(comm) < arrayIntersection[i]) {
+                    sigma = abs(part - arrayIntersection[i]) < 0.1;
+                    for(int j = 0; j < VhLocal.ndof; ++j) {
+                        if(khi[][j] > 0.9 && abs(sigma[][j] - khi[][j]) < 0.1) {
+                            khi[][j] = 0.0;
+                        }
+                    }
+                }
+            }
+        }
+        defPart(func2vec) = initPart(khi);
+        D.resize(Wh.ndof);
+        D = func2vec[];
+// EOM
 
 macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, labPeriodic)
 {

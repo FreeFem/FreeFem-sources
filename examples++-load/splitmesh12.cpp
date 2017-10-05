@@ -16,6 +16,23 @@ using namespace std;
 
   using namespace  Fem2D;
 
+static void findPerm(int* ivt, int* pivt, Vertex3* v) {
+    std::copy(ivt, ivt + 4, pivt);
+    R3 AB(v[ivt[0]],v[ivt[1]]);
+    R3 AC(v[ivt[0]],v[ivt[2]]);
+    R3 AD(v[ivt[0]],v[ivt[3]]);
+    if(det(AB,AC,AD) > 0)
+        return;
+    else if(det(AB,AD,AC) > 0) {
+        std::swap(pivt[2], pivt[3]);
+        return;
+    }
+    else if(det(AC,AB,AD) > 0) {
+        std::swap(pivt[1], pivt[2]);
+        return;
+    }
+}
+
 Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
 {
   assert(pTh);
@@ -73,7 +90,6 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
         vv->lab = Th.be(i).lab;
         vv++;
     }
-
   //  generation des triangles 
   Tet *tt= t; 
    
@@ -86,13 +102,17 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
         int ii = nbv + nbt + i; // numero du 
         int jj = nbv + k; // numero du 
         int ivt[4] = {jj,i1,i2,ii};
-        (*tt++).set(v,ivt,K.lab);
+        int pivt[4];
+        findPerm(ivt, pivt, v);
+        (*tt++).set(v,pivt,K.lab);
         ivt[0] = i0;
         ivt[1] = jj;
-        (*tt++).set(v,ivt,K.lab);
+        findPerm(ivt, pivt, v);
+        (*tt++).set(v,pivt,K.lab);
         ivt[1] = i1;
         ivt[2] = jj;
-        (*tt++).set(v,ivt,K.lab);
+        findPerm(ivt, pivt, v);
+        (*tt++).set(v,pivt,K.lab);
     }
   const int  nvfaceTet[4][3]  ={{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;
   for (int k=0;k<nbt;k++)
@@ -119,16 +139,18 @@ Mesh3 const * SplitMesh12(Stack stack,Fem2D::Mesh3 const * const & pTh)
               int i0=Th.operator()(K[nvfaceTet[e][0]]), i1=Th.operator()(K[nvfaceTet[e][1]]),i2=Th.operator()(K[nvfaceTet[e][2]]);
               for(int ij = 0; ij < 2; ++ij) {
                   int ivt[4] = {ij==0?nbv+k:nbv+kk,i1,i2,static_cast<int>(vv - v)};
-                  if(det(v[ivt[0]], v[ivt[1]], v[ivt[3]]) > 0)
-                      std::swap(ivt[0], ivt[3]);
                   int lab = ij==0?K.lab:KAdj.lab;
-                  (*tt++).set(v,ivt,lab);
+                  int pivt[4];
+                  findPerm(ivt, pivt, v);
+                  (*tt++).set(v,pivt,lab);
                   ivt[1] = ivt[0];
                   ivt[0] = i0;
-                  (*tt++).set(v,ivt,lab);
+                  findPerm(ivt, pivt, v);
+                  (*tt++).set(v,pivt,lab);
                   ivt[2] = ivt[1];
                   ivt[1] = i1;
-                  (*tt++).set(v,ivt,lab);
+                  findPerm(ivt, pivt, v);
+                  (*tt++).set(v,pivt,lab);
               }
               vv++;
           }
