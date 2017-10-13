@@ -1943,10 +1943,11 @@ long Boundingbox(pmesh const& pTh,KN<double>* const& pb )
 { return  Boundingbox(pb,pTh);}
 double Chi(Stack stack,pmesh const &pTh)
 {  // version 2d  oct 2017 FH.
+    if(pTh == 0) return 0.;
     R2 PHat;
     bool outside;
     MeshPoint & mp = *MeshPointStack(stack);
-    if(pTh == 0) return 0.;
+    if(pTh == mp.Th) return 1.;// point of mesh
     const Triangle * K=pTh->Find(mp.P.p2(),PHat,outside);
     if (!outside)
         mp.set(*pTh,mp.P.p2(),PHat,*K,K->lab);
@@ -1955,10 +1956,13 @@ double Chi(Stack stack,pmesh const &pTh)
 }
 double Chi(Stack stack,pmesh3 const &pTh)
 { // version 3d oct 2017 FH.
+    if(pTh == 0) return 0.;
     R3 PHat;
     bool outside;
+    
     MeshPoint & mp = *MeshPointStack(stack);
-    if(pTh == 0) return 0.;
+    
+    if(pTh == mp.Th3) return 1.;
     const Tet * K=pTh->Find(mp.P,PHat,outside);
     if (!outside)
         mp.set(*pTh,mp.P,PHat,*K,K->lab);
@@ -2010,7 +2014,7 @@ void init_lgmesh() {
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh3,KN<double>*>(Boundingbox));
     
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(Chi)); // oct 2017 FH function characteristic
-    Global.Add("chi", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh,E_F0mps> >(Chi));// oct 2017 FH function characteristic
+    Global.Add("chi", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(Chi));// oct 2017 FH function characteristic
 
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));

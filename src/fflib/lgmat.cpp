@@ -3089,7 +3089,7 @@ template<class T>
 class removeDOF : public OneOperator {
    const  bool withA;
 public:
-    binside() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(true) {}
+    removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(true) {}
     removeDOF(int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(false) {}
    
     E_F0* code(const basicAC_F0& args) const {
