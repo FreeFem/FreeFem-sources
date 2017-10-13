@@ -3,6 +3,7 @@
 //typedef double R;
 namespace  Fem2D {
 class MeshPointBase { public:
+    static const long notaregion=LONG_MIN;
   R3 P;
   R3 PHat;
   union {
@@ -206,6 +207,7 @@ class MeshPointBase { public:
      T=0;
      Th=0;
       label =0;
+       region = notaregion;
      VF=0;  
       d=0;
    }
@@ -217,7 +219,9 @@ class MeshPointBase { public:
      P.z=z;
      T=0;
      Th=0;
-      label =0;
+     label =0;
+     region = notaregion;
+
       t=f=e=v=-1; 
       VF=0;  
       d=0;

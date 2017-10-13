@@ -1667,7 +1667,7 @@ long mp_nuTriangle(MeshPoint * p)
    return nu ;}
    
 long mp_region(MeshPoint * p)
- { throwassert(p && p->Th);
+ { //throwassert(p && p->Th);
    long  nu(p->region);
    delete p;
    return nu ;}
@@ -2883,6 +2883,7 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("z",z);
   Global.New("label",label);
   Global.New("region",region);
+  Global.New("notaregion",CConstant<long>(MeshPointBase::notaregion));
   Global.New("nuTriangle",nu_triangle);   
   Global.New("nuEdge",nu_edge);   
   Global.New("P",P);   

@@ -101,7 +101,7 @@ namespace {
   lgElement(const Mesh * Th,Triangle * kk): pTh(Th),k(kk) {}
   operator int() const { Check(); return (* pTh)(k);} 
   lgVertex operator [](const long & i) const { Check(); return lgVertex(pTh,&(*k)[i]);}   
-  long lab() const {Check() ; return k ? k->lab : 0;}
+      long lab() const {Check() ; return k ? k->lab : LONG_MIN;}
   double area() const {Check() ; return k->area ;}
   long n() const { return k ? 3: 0 ;}
   bool operator==(const lgElement & l) const { return pTh==l.pTh && k == l.k;}
