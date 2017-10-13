@@ -1,5 +1,10 @@
-@  changeset:   4199:fa38fb8e3feb
+@  changeset:   4200:0e49f168efcc
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Oct 13 18:14:26 2017 +0200
+|  summary:     update INNOVATION
+|
+o  changeset:   4199:fa38fb8e3feb
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Oct 13 18:10:20 2017 +0200
 |  summary:     coorect small mistake
