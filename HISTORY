@@ -1,5 +1,10 @@
-@  changeset:   4198:2f17eaba55af
+@  changeset:   4199:fa38fb8e3feb
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Oct 13 18:10:20 2017 +0200
+|  summary:     coorect small mistake
+|
+o  changeset:   4198:2f17eaba55af
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Oct 13 17:59:01 2017 +0200
 |  summary:     add chi function as characterisc function of a mesh

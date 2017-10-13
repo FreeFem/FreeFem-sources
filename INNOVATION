@@ -1,3 +1,5 @@
+ - update dissection linear solve package form atsushi.suzuki@cas.cmc.osaka-u.ac.jp
+ - chi(Th) characteristics function of mesh domain
  - add new math.h function: fmod(x,y),fdim(x,y),fmax(x,y),fmin(x,y) 
  - correct cube label if no argument label= bug in version 3.55 to version 3.56-1
 version 3.56-1
