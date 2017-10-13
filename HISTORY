@@ -1,5 +1,10 @@
-@  changeset:   4191:c05b9333ac1c
+@  changeset:   4192:4b2f46f5231d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Sep 14 17:18:56 2017 +0200
+|  summary:     coorect bug in trunc split > 2 internal boundary
+|
+o  changeset:   4191:c05b9333ac1c
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Sep 01 14:22:54 2017 -0400
 |  summary:     correct the doc

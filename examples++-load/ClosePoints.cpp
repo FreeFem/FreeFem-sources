@@ -565,11 +565,11 @@ long Voisinage( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &
 long ff_flann_search( KNM_<double> const &  P ,KNM_<double> const &  Q, double const &  eps,KN<KN<long> >  * const & pIJ)
 {
     KN<KN<long> > &IJ=*pIJ;
-    int np=P.M();
-    int nq=Q.M();
+    int mp=P.M();
+    int mq=Q.M();
     
-    int mp=P.N();
-    int mq=Q.N();
+    int np=P.N();
+    int nq=Q.N();
     int nn=nq;
     double *p= &P(0,0);
     double *q= &Q(0,0);
@@ -578,16 +578,17 @@ long ff_flann_search( KNM_<double> const &  P ,KNM_<double> const &  Q, double c
     double * q0=&(Q(0,0));
     int qoffset01 = Q.step*Q.shapej.step;;
     int qoffset10 = Q.step*Q.shapei.step;;
-    cout << np << " " << nq << " po 01, 10 " << offset01 << " " << offset10 << " " << &P(0,1) - p
-                            << " qo 01 , 01 =: "  << qoffset01 << " "<< qoffset10 << endl;
+    cout << np << " " << nq << " po 01,10 =:" <<  offset01 << ", " << offset10 << ", " << &P(0,1) - p
+                            << " qo 01,10 =:" << qoffset01 << ", "<< qoffset10 <<", " << &Q(0,1) - q<< endl;
+    cout << np << " " << mp << endl;
+    cout << nq << " " << mq << endl;
+
     ffassert( mp == mq && offset10==1 && qoffset10==1);
     //ffassert( mq ==2);
     
     
     IJ.resize(nq);
-    cout << np << " " << mq << endl;
-    cout << nq << " " << mq << endl;
-    flann::Matrix<double> dataset(p,np,mp);
+     flann::Matrix<double> dataset(p,np,mp);
     flann::Matrix<double> query(q,nq,mq);
     std::vector< std::vector<int> > indices;
     std::vector<std::vector<double> > dists;
@@ -618,7 +619,7 @@ long ff_flann_search( KNM_<double> const &  P ,KNM_<double> const &  Q, double c
 #endif
 static void init()
 {
-    #ifdef WITH_flann
+#ifdef WITH_flann
     Global.Add("radiusSearch","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(ff_flann_search));
 #endif
     Global.Add("Voisinage","(",new OneOperator4_<long, KNM_<double> , KNM_<double>  ,double,KN<KN<long> > *   >(Voisinage));
