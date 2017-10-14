@@ -379,6 +379,7 @@ struct C_SparseNumFact_arg {
   double *eps_pivot;
   double *pivot;
   bool *kernel_detection;
+  bool *higher_precision;
   int *dim_aug_kern;
   U *eps_machine;
   SquareBlockMatrix<T>* localSchur;
@@ -411,6 +412,7 @@ struct C_SparseNumFact_arg {
 		       double *eps_pivot_,
 		       double *pivot_,
 		       bool *kernel_detection_,
+		       bool *higher_precision_,
 		       int *dim_aug_kern_,
 		       U *eps_machine_,
 		       SquareBlockMatrix<T>* localSchur_,
@@ -431,6 +433,7 @@ struct C_SparseNumFact_arg {
     eps_pivot(eps_pivot_),
     pivot(pivot_),
     kernel_detection(kernel_detection_),
+    higher_precision(higher_precision_),
     dim_aug_kern(dim_aug_kern_),
     eps_machine(eps_machine_),
     localSchur(localSchur_),
@@ -460,6 +463,7 @@ struct C_SparseNumFact_arg {
     eps_pivot = im.eps_pivot;
     pivot = im.pivot;
     kernel_detection = im.kernel_detection;
+    higher_precision = im.higher_precision;
     dim_aug_kern = im.dim_aug_kern;
     eps_machine = im.eps_machine;
     localSchur = im.localSchur;
@@ -2111,10 +2115,6 @@ void dump_matrix(FILE *fp,
 template<typename T>
 void dump_matrix(FILE *fp, const int nrow, const int nnz, int *prow,
 		 int *indcols, int *indvals, T *a);
-#if 0
-template<typename T>
-void verify_nan(FILE *fp, const int nnz, T *a);
-#endif
 template<typename T, typename U>
 void C_dfull_gauss_b(void *arg_);
 
@@ -2222,10 +2222,6 @@ int combine_two_strips(list<index_strip> &stripsa,
 		       list<index_strip> &strips0, 
 		       list<index_strip> &strips1,
 		       const int size);
-#if 0
-void copy_one_strip(list<index_strip> &strips_dst, 
-		    list<index_strip> &strips_src);
-#endif
 void copy_two_strips(list<index_strip2> &strips2,
 		     list<index_strip> &strips0, 
 		     list<index_strip> &strips1);
@@ -2326,12 +2322,13 @@ int CSR_sym2unsym(CSR_indirect *unsym,
 		  const int *ptSymRows, const int *indSymCols, 
 		  const int *map_eqn, const int *remap_eqn,
 		  const int dim, 
-		  const bool upper_flag = true);
+		  const bool upper_flag = true,
+		  const bool verbose = false, FILE *fp = NULL);
 
 bool CSR_unsym2unsym(CSR_indirect *unsym,
 		     const int *ptUnSymRows, const int *indUnSymCols, 
 		     const int *map_eqn, const int *remap_eqn, 
-		     const int dim);
+		     const int dim, const bool vebose, FILE *fp);
 
 void swap_queues_n(vector <C_task *> &queue,
 		   vector<int> &queue_index,
@@ -2356,9 +2353,6 @@ void swap_2x2pivots(const int way,
 		      const int dim_augkern, const int nn0, 
 		      const int n_dim, double *a1, long double *aq,
 		      double *d1, long double *d1q, double *a_fact);
-#if 0
-  void test_2x2(int *print_cntrl);
-#endif
 
 template<typename T> void dump_vectors(int nrow, int nn0, T *v,
 				       string fname);

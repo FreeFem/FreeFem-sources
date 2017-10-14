@@ -48,12 +48,14 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
+
 #include "Driver/C_threads_tasks.hpp"
 #include "Driver/C_Dsub.hpp"
 #include "Driver/DissectionQueue.hpp"
 #include "Driver/QueueRuntime.hpp"
+#include "Compiler/DissectionIO.hpp"
 
-#include <string>
 
 #define RATIO_DTRSM_MERGED 0.4
 
@@ -116,33 +118,13 @@ DissectionQueue<T, U>::DissectionQueue(Dissection::Tree *btree,
                                   // the other is not easy in thread execution
   // initialize state to controle tasks
 
-  _dissectionRuntime = new QueueRuntime(nb_doms, num_threads, verbose, fp);
+  _dissectionRuntime = new QueueRuntime(nb_doms, num_threads, isSym,
+					verbose, fp);
 
-#if 0 // move to QueueRuntime
-  _zone_entered = new int[DIST_TASK_CRITICAL];
-  _zone_finished = new int[DIST_TASK_CRITICAL];
-  _zone_static_assigned = new int[DIST_TASK_CRITICAL];
-
-  allocate_int2d(_begins, num_threads);
-  allocate_int2d(_ends, num_threads);
-
-  allocate_int3d(_group_entered, num_threads);
-  allocate_int3d(_group_finished, num_threads);
-  allocate_int3d(_group_task_ends, num_threads);
-  allocate_int3d(_group_static_assigned, num_threads);
-
-  _group_task_id = new int[num_threads];
-
-  allocate_int3d(_begins_group, num_threads);
-  allocate_int3d(_ends_group, num_threads);
-  allocate_unsigned2d(_group_nops, num_threads);
-
-  _mutex_group = new pthread_mutex_t[num_threads];
-#endif
 }
 
 template
-DissectionQueue<double, double>::
+DissectionQueue<double>::
 DissectionQueue(Dissection::Tree *btree,
 		vector<DissectionMatrix<double>* >& dM,
 		const int num_threads,
@@ -150,7 +132,7 @@ DissectionQueue(Dissection::Tree *btree,
 		const bool verbose,
 		FILE *fp);
 template
-DissectionQueue<quadruple, quadruple>::
+DissectionQueue<quadruple>::
 DissectionQueue(Dissection::Tree *btree,
 		vector<DissectionMatrix<quadruple>* >& dM,
 		const int num_threads,
@@ -174,6 +156,24 @@ DissectionQueue(Dissection::Tree *btree,
 		const bool isSym,
 		const bool verbose,
 		FILE *fp);
+
+template
+DissectionQueue<float>::
+DissectionQueue(Dissection::Tree *btree,
+		vector<DissectionMatrix<float>* >& dM,
+		const int num_threads,
+		const bool isSym,
+		const bool verbose,
+		FILE *fp);
+
+template
+DissectionQueue<complex<float>, float>::
+DissectionQueue(Dissection::Tree *btree,
+		vector<DissectionMatrix<complex<float>, float>* >& dM,
+		const int num_threads,
+		const bool isSym,
+		const bool verbose,
+		FILE *fp);
 //
 
 template<typename T, typename U>
@@ -181,18 +181,6 @@ DissectionQueue<T, U>::~DissectionQueue()
 {
   //  const int nb_level = _btree->NumberOfLevels();
   //  const int num_threads = _num_threads;
-#if 0
-  for (list<C_task *>::iterator it = _queue_dummy.begin();
-       it != _queue_dummy.end(); ++it) {
-    fprintf(stderr, "%s %d : %s\n", __FILE__, __LINE__, (*it)->task_name);
-    C_dummy_arg *arg = (C_dummy_arg *)(*it)->func_arg;
-    delete arg;
-    (*it)->func_arg = NULL;
-    delete (*it);
-    (*it) = NULL;
-  }
-  _queue_dummy.clear();
-#endif
   erase_queue();
   erase_queue_fwbw();
   // set up working arrays for C_Dsub
@@ -217,16 +205,22 @@ DissectionQueue<T, U>::~DissectionQueue()
 }
 
 template
-DissectionQueue<double, double>::~DissectionQueue();
+DissectionQueue<double>::~DissectionQueue();
 
 template
-DissectionQueue<quadruple, quadruple>::~DissectionQueue();
+DissectionQueue<quadruple>::~DissectionQueue();
 
 template
 DissectionQueue<complex<double>, double>::~DissectionQueue();
 
 template
 DissectionQueue<complex<quadruple>, quadruple>::~DissectionQueue();
+
+template
+DissectionQueue<float>::~DissectionQueue();
+
+template
+DissectionQueue<complex<float>, float>::~DissectionQueue();
 //
 
 template<typename T, typename U> 
@@ -244,6 +238,8 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
   const int nb_doms_sparse = (1U << level_last);
   // set up working arrays for C_Dsub
 
+  vector<C_task *> null_task;
+  
   for (int level = (level_last - 1); level >= 0; level--){
     const int begdom = 1U << level;
     const int enddom = begdom * 2;
@@ -297,6 +293,7 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 				   &_eps_piv,
 				   &_pivots[j],
 				   &_kernel_detection,
+				   &_higher_precision,
 				   &_aug_dim,
 				   &_eps_machine,
 				   _tasks_SparseSymb[k],
@@ -318,6 +315,7 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
       dM[j]->ChildContrib(_child_contribs, 
 			  _btree,
 			  dM,
+			  _verbose,
 			  &_fp);
     } // loop : d
     
@@ -345,12 +343,14 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 		      (vector<C_task*> *)NULL, // _tasks_DSymmGEMM
 		      (vector<int> *)NULL,
 		      false,
-		      _tasks_DFillSym,
+		      _tasks_DFillSym[(*it)],
 		      _tasks_SparseLocalSchur, 
-		      (vector<C_task*> *)NULL,
+		      null_task, //    (vector<C_task*> *)NULL,
 		      _tasks_deallocLocalSchur,
 		      tasks_deallocLocalSchur_indcol,
-		      level_last, _verbose, _fp);
+		      level_last,
+		      true,
+		      _verbose, _fp);
     }
     // tasks to deallocate local Schur complement
     _tasks_deallocLower[level_last].resize(0); // no C- working array of DTSRM
@@ -476,7 +476,6 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 		(RectBlockMatrix<T> *) NULL);
       lower1 = (isEven ? dM[j - 1]->addrlowerBlock() :
 		(RectBlockMatrix<T> *) NULL);
-      vector<C_task *> null_task;
       vector<C_task *> &tasks_q = (isEven ? _tasks_DTRSMScale[j - 1] :
 				   null_task);
       vector<int> null_idx;
@@ -526,6 +525,7 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
       dM[j]->ChildContrib(_child_contribs, 
 			  _btree,
 			  dM,
+			  _verbose,
 			  &_fp);
 	
     } // loop : d(j)
@@ -547,13 +547,11 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	  skip_flag = ((dM[child_id0]->isAlignedFather() &&
 			dM[child_id1]->isAlignedFather()) ? 
 		       true : false);
-	  if (_verbose) {
-	    fprintf(_fp,
-		    "%s %d : father_id = %d children_id = %d %d skip_flag = %s\n",
-		    __FILE__, __LINE__, 
-		    ((*it) + 1), (child_id0 + 1), (child_id1 + 1), 
-		    skip_flag ? "true" : "false");
-	  }
+	  diss_printf(_verbose, _fp,
+		      "%s %d : father_id = %d children_id = %d %d skip = %s\n",
+		      __FILE__, __LINE__, 
+		      ((*it) + 1), (child_id0 + 1), (child_id1 + 1), 
+		      skip_flag ? "true" : "false");
 	}
       }
       C_Dsub_queue<T>(_isSym, (*it),
@@ -563,16 +561,17 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 		      _tasks_DSymmGEMM,
 		      tasks_DSymmGEMM_indcol,
 		      true,
-		      (vector<C_task*> *)NULL, // _tasks_DFillSym,
-		      (vector<C_task*>*)NULL,
-		      &_tasks_Dsub[level + 1][(*it)],
+		      //      (vector<C_task*> *)NULL, // _tasks_DFillSym,
+		      null_task,
+		      (vector<C_task*> *)NULL,
+		      _tasks_Dsub[level + 1][(*it)],
 		      _tasks_deallocLocalSchur,
 		      tasks_deallocLocalSchur_indcol,
 		      level,
+		      true,
 		      _verbose,
 		      _fp);
-      // itmp = EraseNullParents(_tasks_Dsub[level][(*it)]);
-    }
+    } // loop : it
     // tasks to deallocate lower column matrix and local Schur complement
     if (level > 0) {
       _tasks_deallocLower[level].resize(enddom - begdom);
@@ -593,41 +592,6 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
       itmp = EraseNullParents(_tasks_deallocLower[level]);
     }  // if (level > 0)
   } // loop : level
-#if 0
-  if (_verbose) {
-    for (int level = level_last; level > 0; level--) {
-      for (vector<C_task *>::const_iterator it = _tasks_deallocLower[level].begin();
-	   it != _tasks_deallocLower[level].end(); ++it) {
-	fprintf(stderr, "%s : parents = %d : ", 
-		(*it)->task_name, (*it)->parents->size());
-	for (list<C_task *>::const_iterator jt = (*it)->parents->begin();
-	     jt != (*it)->parents->end(); ++jt) {
-	  fprintf(stderr, "%s / ", (*jt)->task_name);
-	}
-	fprintf(stderr, "\n");
-      }
-    }
-    
-    for (int level = level_last; level > 0; level--) {
-      const int begdom = 1U << level;
-      const int enddom = begdom * 2;
-      for (int d = begdom; d < enddom; d++) {
-	const int j = _btree->selfIndex(d);
-	fprintf(stderr, "nb = %d\n", j);
-	for (vector<C_task *>::const_iterator it = _tasks_deallocLocalSchur[j].begin();
-	     it != _tasks_deallocLocalSchur[j].end(); ++it) {
-	  fprintf(stderr, "%s : parents = %d : ", 
-		  (*it)->task_name, (*it)->parents->size());
-	  for (list<C_task *>::const_iterator jt = (*it)->parents->begin();
-	       jt != (*it)->parents->end(); ++jt) {
-	    fprintf(stderr, "%s / ", (*jt)->task_name);
-	  }
-	  fprintf(stderr, "\n");
-	}
-      } // loop : d
-    } // loop : level
-  }
-#endif
   for (int level = (level_last - 1); level > 0; level--) {
     const int begdom = 1U << level;
     const int enddom = begdom * 2;
@@ -698,20 +662,13 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	    }
 	    i1 += atomic_size;
 	  } // loop : m
-	  for (list<C_task *>::const_iterator it = tmp1.begin(); it != tmp1.end(); 
+	  for (list<C_task *>::const_iterator it = tmp1.begin();
+	       it != tmp1.end(); 
 	       ++it) {
 	    if ((*it)->parallel_max == 0) { 
 	      (*it)->parallel_max = kk1;
 	    }
 	  }
-#if 0
-	  for (list<C_task *>::const_iterator it = tmp2.begin(); it != tmp2.end(); 
-	       ++it) {
-	    if ((*it)->parallel_max == 0) { 
-	      (*it)->parallel_max = kk2;
-	    }
-	  }
-#endif
 	  if (i0 >= _tasks_DFullLDLt[j].size()) {
 	    break;
 	  }
@@ -728,8 +685,8 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	    i0 += atomic_size;
 	    kk1++;
 	  } // loop : m 
-	  for (list<C_task *>::const_iterator it = tmp1.begin(); it != tmp1.end(); 
-	       ++it) {
+	  for (list<C_task *>::const_iterator it = tmp1.begin();
+	       it != tmp1.end(); ++it) {
 	    if ((*it)->parallel_max == 0) { 
 	      (*it)->parallel_max = kk1;
 	    }
@@ -794,27 +751,6 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	     ++it, ++jt) {
 	  (*jt) = (*it);
 	}
-#if 0
-	if (_verbose) {
-	  fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
-	  for (vector<C_task *>::const_iterator it = _tasks_DFullLDLt[j].begin();
-	       it != _tasks_DFullLDLt[j].end(); 
-	       ++it) {
-	    fprintf(stderr, "%s : %d / %d : %d / %d\n", 
-		    (*it)->task_name, (*it)->atomic_id, (*it)->atomic_size,
-		    (*it)->parallel_id, (*it)->parallel_max);
-	  }
-	  fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
-	  for (vector<C_task *>::const_iterator it = _tasks_DTRSMScale[j].begin();
-	       it != _tasks_DTRSMScale[j].end(); 
-	       ++it) {
-	    fprintf(stderr, "%s : %d / %d : %d / %d\n", 
-		    (*it)->task_name, (*it)->atomic_id, (*it)->atomic_size,
-		    (*it)->parallel_id, (*it)->parallel_max);
-	  }
-	}
-#endif
-	
 	isMergedDTRSM[j] = true;
 	isDividedDTRSM[j] = true;
       } //   if(nrow_DFullLDLt[j] > 2)
@@ -835,17 +771,6 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	    tmp[ii]->parallel_max += size0;
 	    tmp[ii]->parallel_id += size0;
 	  }
-#if 0
-	  if (_verbose) {
-	    fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
-	    for (vector<C_task *>::const_iterator it = tmp.begin(); it != tmp.end(); 
-		 ++it) {
-	      fprintf(stderr, "%s : %d / %d : %d / %d\n", 
-		      (*it)->task_name, (*it)->atomic_id, (*it)->atomic_size,
-		      (*it)->parallel_id, (*it)->parallel_max);
-	    }
-	  }
-#endif
 	  _tasks_DFullLDLt[j].resize(tmp.size());
 	  vector<C_task *>::iterator jt = _tasks_DFullLDLt[j].begin();
 	  for (vector<C_task *>::const_iterator it = tmp.begin(); it != tmp.end(); 
@@ -886,10 +811,6 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 
   queue_null.sort(compare_task_name);
   queue_null.unique();
-#if 0
-  _queue_dummy.sort(compare_task_name); // to avoid multiple copies for safty
-  _queue_dummy.unique();
-#endif
 // #define DEBUG_QUEUE_NULL
 #ifdef DEBUG_QUEUE_NULL
   fprintf(_fp, "%s %d : NULL queues : ", __FILE__, __LINE__);
@@ -913,44 +834,17 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
   delete [] nops_queue[0];
   delete [] nops_queue;  
   
-#if 0
-  for (int level = level_last; level > 0; level--) {
-    cout << "_tasks_Dsub: level = " << level << endl;
-    const int begdom = 1U << (level - 1);
-    const int enddom = begdom * 2;
-    for (int d = 1; d < enddom; d++) {
-      const int j = _btree->selfIndex(d);
-      cout << "id = " << j
-	   << " size = " << _tasks_Dsub[level][j].size() << endl;
-      for (vector<C_task *>::const_iterator it = _tasks_Dsub[level][j].begin();
-	   it != _tasks_Dsub[level][j].end(); ++it) {
-	cout << (*it)->task_name << " :: ";
-	list<C_Dsub_task *>*arg = (list<C_Dsub_task*>*)(*it)->func_arg;
-	cout << arg->size() << " | ";
-	int k = 0;
-	for (list<C_Dsub_task *>::const_iterator it = arg->begin();
-	     it != arg->end(); ++it, k++) {
-	  cerr << k ;
-	  cerr << "[ " << (*it)->atomic_id << " " << (*it)->atomic_size 
-	       << (*it)->ir_bgn << " " << (*it)->ir_end << " ] ";
-	}
-      }
-      cout << endl;
-    } // loop : d
-  }
-  //  exit(-1);
-#endif
   _queue_symb_allocated = true;
   _queue_numrc_allocated = true;
 }
 
 template 
-void DissectionQueue<double, double>::
+void DissectionQueue<double>::
 generate_queue(vector<DissectionMatrix<double>*>& dM,   
 	       int nnz, double *coefs);
 
 template 
-void DissectionQueue<quadruple, quadruple>::
+void DissectionQueue<quadruple>::
 generate_queue(vector<DissectionMatrix<quadruple>*>& dM,   
 	       int nnz, quadruple *coefs);
 
@@ -963,6 +857,16 @@ template
 void DissectionQueue<complex<quadruple>, quadruple>::
 generate_queue(vector<DissectionMatrix<complex<quadruple>, quadruple>*>& dM,   
 	       int nnz, complex<quadruple> *coefs);
+
+template 
+void DissectionQueue<float>::
+generate_queue(vector<DissectionMatrix<float>*>& dM,   
+	       int nnz, float *coefs);
+
+template 
+void DissectionQueue<complex<float>, float>::
+generate_queue(vector<DissectionMatrix<complex<float>, float>*>& dM,   
+	       int nnz, complex<float> *coefs);
 //
 
 template<typename T, typename U>
@@ -1883,24 +1787,9 @@ generate_queue_fwbw(vector<DissectionMatrix<T, U>*>& dM,
 				0); // dummy
 
   _dissectionRuntime->set_queue_fwbw(_queue_fwbw);
-  if (_verbose) {
-    fprintf(_fp, 
-	    "%s %d : void DissectionQueue::generate_queue_fwbw\n",
+  diss_printf(_verbose, _fp, 
+	      "%s %d : void DissectionQueue::generate_queue_fwbw\n",
 	  __FILE__, __LINE__);
-  }
-#if 0
-  fprintf(_fp, "-- queue begin --\n");
-  for (vector<C_task*>::const_iterator it = _queue_fwbw->queue->begin(); 
-       it != _queue_fwbw->queue->end(); ++it) {
-    fprintf(_fp, "%s : %d :: ", (*it)->task_name, (*it)->parents->size());
-    for (list<C_task*>::const_iterator jt = (*it)->parents->begin();
-	 jt != (*it)->parents->end(); ++jt) {
-      fprintf(_fp, "%s : ", (*jt)->task_name);
-    }
-    fprintf(_fp, "\n");
-  }
-  fprintf(_fp, "-- queue end --\n");
-#endif
 
   delete [] tasks_de[0]; // 
   delete [] tasks_de;    // vector<C_task*>** 
@@ -1917,12 +1806,12 @@ generate_queue_fwbw(vector<DissectionMatrix<T, U>*>& dM,
 }
 
 template
-void DissectionQueue<double, double>::
+void DissectionQueue<double>::
 generate_queue_fwbw(vector<DissectionMatrix<double>*>& dissectionMatrix,
 		    int dim, int nnz, double *coefs);
 
 template
-void DissectionQueue<quadruple, quadruple>::
+void DissectionQueue<quadruple>::
 generate_queue_fwbw(vector<DissectionMatrix<quadruple>*>& dissectionMatrix,
 		    int dim, int nnz, quadruple *coefs);
 
@@ -1935,6 +1824,17 @@ template
 void DissectionQueue<complex<quadruple>, quadruple>::
 generate_queue_fwbw(vector<DissectionMatrix<complex<quadruple>, quadruple>*>& dissectionMatrix,
 		    int dim, int nnz, complex<quadruple> *coefs);
+
+template
+void DissectionQueue<float>::
+generate_queue_fwbw(vector<DissectionMatrix<float>*>& dissectionMatrix,
+		    int dim, int nnz, float *coefs);
+
+template
+void DissectionQueue<complex<float>, float>::
+generate_queue_fwbw(vector<DissectionMatrix<complex<float>, float>*>& dissectionMatrix,
+		    int dim, int nnz, complex<float> *coefs);
+
 //
 
 template<typename T, typename U>
@@ -1944,16 +1844,23 @@ void DissectionQueue<T, U>::exec_symb_fact(void)
 }
 
 template
-void DissectionQueue<double, double>::exec_symb_fact();
+void DissectionQueue<double>::exec_symb_fact();
 
 template
-void DissectionQueue<quadruple, quadruple>::exec_symb_fact();
+void DissectionQueue<quadruple>::exec_symb_fact();
 
 template
 void DissectionQueue<complex<double>, double>::exec_symb_fact();
 
 template
 void DissectionQueue<complex<quadruple>, quadruple>::exec_symb_fact();
+
+template
+void DissectionQueue<float>::exec_symb_fact();
+
+template
+void DissectionQueue<complex<float>, float>::exec_symb_fact();
+
 
 //
 
@@ -1962,36 +1869,50 @@ void DissectionQueue<T, U>::exec_num_fact(const int called,
 					  const double eps_piv, 
 					  const bool kernel_detection,
 					  const int aug_dim,
-					  const U eps_machine)
+					  const U eps_machine,
+					  const bool higher_precision)
 {
-  _eps_piv = eps_piv;
   _kernel_detection = kernel_detection;
   _aug_dim = aug_dim;
+#if 0
+  if (higher_precision) {
+    _eps_piv = eps_machine;
+  }
+  else {
+    _eps_piv = eps_piv;
+  }
+#else
+    _eps_piv = eps_piv;
+#endif
   _eps_machine = eps_machine;
+  _higher_precision = higher_precision;
   _dissectionRuntime->exec_num_fact(called);
 }
 
 template
-void DissectionQueue<double, double>::
+void DissectionQueue<double>::
 exec_num_fact(const int called,
 	      const double eps_piv,
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const double eps_machine);
+	      const double eps_machine,
+	      const bool higher_precision);
 template
-void DissectionQueue<quadruple, quadruple>::
+void DissectionQueue<quadruple>::
 exec_num_fact(const int called,
 	      const double eps_piv,
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const quadruple eps_machine);
+	      const quadruple eps_machine,
+	      const bool higher_precision);
 template
 void DissectionQueue<complex<double>, double>::
 exec_num_fact(const int called,
 	      const double eps_piv, 
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const double eps_machine);
+	      const double eps_machine,
+	      const bool higher_precision);
 
 template
 void DissectionQueue<complex<quadruple>, quadruple>::
@@ -1999,7 +1920,26 @@ exec_num_fact(const int called,
 	      const double eps_piv, 
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const quadruple eps_machine);
+	      const quadruple eps_machine,
+	      const bool higher_precision);
+
+template
+void DissectionQueue<float>::
+exec_num_fact(const int called,
+	      const double eps_piv,
+	      const bool kernel_detection,
+	      const int aug_dim,
+	      const float eps_machine,
+	      const bool higher_precision);
+
+template
+void DissectionQueue<complex<float>, float>::
+exec_num_fact(const int called,
+	      const double eps_piv, 
+	      const bool kernel_detection,
+	      const int aug_dim,
+	      const float eps_machine,
+	      const bool higher_precision);
 //
 
 template<typename T, typename U>
@@ -2038,9 +1978,7 @@ void DissectionQueue<T, U>::exec_fwbw_seq(T *x, const int nrhs, bool isTrans)
     *_zi[d0] = zzi.addrCoefs() + ntmp * nrhs;
     ntmp += _btree->sizeOfFathersStrips(d);
   }
-  if(_verbose) {
-    fprintf(_fp, "exec_fwbw_seq for nrhs = %d \n", nrhs);
-  }
+  diss_printf(_verbose, _fp, "exec_fwbw_seq for nrhs = %d \n", nrhs);
   _dissectionRuntime->exec_fwbw_seq();
 
   xxi.free();
@@ -2050,11 +1988,11 @@ void DissectionQueue<T, U>::exec_fwbw_seq(T *x, const int nrhs, bool isTrans)
 }
 
 template 
-void DissectionQueue<double, double>::exec_fwbw_seq(double *x, const int nrhs, 
-						    bool isTrans);
+void DissectionQueue<double>::exec_fwbw_seq(double *x, const int nrhs, 
+					    bool isTrans);
 
 template 
-void DissectionQueue<quadruple, quadruple>::exec_fwbw_seq(quadruple *x,
+void DissectionQueue<quadruple>::exec_fwbw_seq(quadruple *x,
 							  const int nrhs, 
 							  bool isTrans);
 template 
@@ -2069,6 +2007,16 @@ exec_fwbw_seq(complex<quadruple> *x,
 	      const int nrhs, 
 	      bool isTrans);
 
+template 
+void DissectionQueue<float>::exec_fwbw_seq(float *x, const int nrhs, 
+						    bool isTrans);
+
+template 
+void DissectionQueue<complex<float>, float>::
+exec_fwbw_seq(complex<float> *x, 
+	      const int nrhs, 
+	      bool isTrans);
+
 //
 
 template<typename T, typename U>
@@ -2079,9 +2027,8 @@ void DissectionQueue<T, U>::exec_fwbw(T *x, const int nrhs, bool isTrans)
   //  struct timespec ts0, ts1;
   const int nb_doms = _btree->NumberOfSubdomains();
   int ntmp;
-  if (_verbose) {
-    fprintf(_fp, "fwbw for nrhs = %d with %d threads\n", nrhs, num_threads);
-  }
+  diss_printf(_verbose, _fp,
+	      "fwbw for nrhs = %d with %d threads\n", nrhs, num_threads);
   *_x = x;
   *_nrhs = (int *)&nrhs;
   *_isTrans = &isTrans;
@@ -2123,15 +2070,24 @@ void DissectionQueue<T, U>::exec_fwbw(T *x, const int nrhs, bool isTrans)
 }
 
 template
-void DissectionQueue<double, double>::exec_fwbw(double *x, const int nrhs,
+void DissectionQueue<double>::exec_fwbw(double *x, const int nrhs,
 						bool isTrans); 
 template
-void DissectionQueue<quadruple, quadruple>::exec_fwbw(quadruple *x,
+void DissectionQueue<quadruple>::exec_fwbw(quadruple *x,
 						      const int nrhs,
 						      bool isTrans); 
 
 template
 void DissectionQueue<complex<double>, double>::exec_fwbw(complex<double> *x, 
+							 const int nrhs,
+							 bool isTrans);
+
+template
+void DissectionQueue<float>::exec_fwbw(float *x, const int nrhs,
+						bool isTrans); 
+
+template
+void DissectionQueue<complex<float>, float>::exec_fwbw(complex<float> *x, 
 							 const int nrhs,
 							 bool isTrans);
 
@@ -2146,10 +2102,8 @@ template<typename T, typename U>
 void DissectionQueue<T, U>::erase_queue(void)
 {
   const int num_threads = _num_threads;
-  if (_verbose) {
-    fprintf(_fp, "%s %d : void QueueRuntime::erase_queue(void)",
-	    __FILE__, __LINE__);
-  }
+  diss_printf(_verbose, _fp, "%s %d : void QueueRuntime::erase_queue(void)",
+	      __FILE__, __LINE__);
   if (_queue_symb_allocated) {
 #ifdef DEBUG_ERASE
   cerr << "symbolic ";
@@ -2294,10 +2248,10 @@ void DissectionQueue<T, U>::erase_queue(void)
 }
 
 template
-void DissectionQueue<double, double>::erase_queue(void);
+void DissectionQueue<double>::erase_queue(void);
 
 template
-void DissectionQueue<quadruple, quadruple>::erase_queue(void);
+void DissectionQueue<quadruple>::erase_queue(void);
 
 template
 void DissectionQueue<complex<double>, double>::erase_queue(void);
@@ -2305,15 +2259,20 @@ void DissectionQueue<complex<double>, double>::erase_queue(void);
 template
 void DissectionQueue<complex<quadruple>, quadruple>::erase_queue(void);
 
+template
+void DissectionQueue<float>::erase_queue(void);
+
+template
+void DissectionQueue<complex<float>, float>::erase_queue(void);
+
 //
 
 template<typename T, typename U>
 void DissectionQueue<T, U>::erase_queue_fwbw(void)
 {
-  if (_verbose) {
-    fprintf(_fp, "%s %d : void QueueRuntime::erase_queue_fwbw(void)",
+  diss_printf(_verbose, _fp,
+	      "%s %d : void QueueRuntime::erase_queue_fwbw(void)",
 	    __FILE__, __LINE__);
-  }
   if (_queue_fwbw_allocated) {
   delete [] _diag_contribs;
   delete _x;
@@ -2345,15 +2304,19 @@ void DissectionQueue<T, U>::erase_queue_fwbw(void)
 }
 
 template
-void DissectionQueue<double, double>::erase_queue_fwbw(void);
+void DissectionQueue<double>::erase_queue_fwbw(void);
 
 template
-void DissectionQueue<quadruple, quadruple>::erase_queue_fwbw(void);
+void DissectionQueue<quadruple>::erase_queue_fwbw(void);
 
 template
 void DissectionQueue<complex<double>, double>::erase_queue_fwbw(void);
 
-
 template
 void DissectionQueue<complex<quadruple>, quadruple>::erase_queue_fwbw(void);
 
+template
+void DissectionQueue<float>::erase_queue_fwbw(void);
+
+template
+void DissectionQueue<complex<float>, float>::erase_queue_fwbw(void);

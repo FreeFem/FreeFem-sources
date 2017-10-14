@@ -58,12 +58,9 @@
 
 using std::vector;
 
-void CopySparseMatrix(SparseMatrix<double> *b,
-		      SparseMatrix<quadruple, double, double> *a);
-
-void CopySparseMatrix(SparseMatrix<complex<double>, complex<double>, double> *b,
-		      SparseMatrix<complex<quadruple>, complex<double>, double> *a);
-
+template <typename T, typename W>
+void CopySparseMatrix(SparseMatrix<W> *b,
+		      SparseMatrix<T> *a);
 
 template<typename T, typename W>
 void CopySquareBlockMatrix(SquareBlockMatrix<W> &b,

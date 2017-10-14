@@ -62,12 +62,37 @@
 #include <time.h>
 #include <cstdlib>
 #include <string>
+#ifdef POSIX_THREADS
 #include <pthread.h>
+#else
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#endif
+
+#ifdef POSIX_THREADS
+typedef pthread_t          QueueRuntime_thread;
+typedef pthread_mutex_t    QueueRuntime_mutex;
+typedef pthread_cond_t    QueueRuntime_cond;
+#define MUTEX_LOCK(a, b)   pthread_mutex_lock(&(a))
+#define COND_BROADCAST(b)  pthread_cond_broadcast(&(b))
+#define MUTEX_UNLOCK(b)    pthread_mutex_unlock(&(b))
+#define COND_WAIT(a, b, c) pthread_cond_wait(&(b), &(a))
+#else
+typedef std::thread             QueueRuntime_thread;
+typedef std::mutex              QueueRuntime_mutex;
+typedef std::condition_variable QueueRuntime_cond;
+#define MUTEX_LOCK(a, b)        std::unique_lock<std::mutex>(b)((a))
+#define COND_BROADCAST(b)       (b).notify_all()
+#define MUTEX_UNLOCK(b)
+#define COND_WAIT(a, b, c)      (b).wait((c))
+#endif
 
 class QueueRuntime
 {
 public:
-  QueueRuntime(int nb_doms, int num_threads, const bool verbose, FILE *fp);
+  QueueRuntime(int nb_doms, int num_threads, const bool isSym,
+	       const bool verbose, FILE *fp);
 
   ~QueueRuntime(); 
 
@@ -133,22 +158,22 @@ public:
 			   int *permute_block, 
 			   const int zone_idxn);
 
-  void taskstatus_mutex_lock(pthread_mutex_t *mutex_dependency);
-  void taskstatus_mutex_unlock(pthread_mutex_t *mutex_dependency);
-
   int execute_task_dynamic_buffer(int *permute_block, 
 				  int pid,
-				  pthread_mutex_t *mutex_dependency);
+				  QueueRuntime_mutex &mutex_depenency);
   
   void execute_task(C_task_seq *seq, int pos, 
-		   int *permute_block, 
-		   int pid,
-		   pthread_mutex_t *mutex_dependency);
+		    int *permute_block, 
+		    int pid,
+		    QueueRuntime_mutex &mutex_depenency);
+
   void execute_task(C_task_seq *seq, int pos, 
 		    int *permute_block,
 		    int pid);
   
-  int check_parents_done(C_task *it, pthread_mutex_t *mutex_dependency);
+  int check_parents_done(C_task *it,
+			 QueueRuntime_mutex &mutex_depenency);
+
   int check_parents_done(C_task *it);
 
   void set_queue_fwbw(C_task_seq* &queue_fwbw)
@@ -167,13 +192,14 @@ private:
   list<C_task_seq*> *_queue_static;
   vector<C_task_seq *> *_queue_dynamic;
   //  list<C_task *>* _queue_dummy;
-  pthread_mutex_t _mutex_root; 
-  pthread_mutex_t _mutex_dependency; 
-  pthread_mutex_t *_mutex_group;
-  pthread_mutex_t _mutex_debug;
-  pthread_mutex_t _mutex_file;
-  
-  pthread_cond_t _cond_root;
+
+  QueueRuntime_mutex _mutex_root; 
+  QueueRuntime_mutex _mutex_dependency; 
+  QueueRuntime_mutex *_mutex_group;
+  QueueRuntime_mutex _mutex_debug;
+  QueueRuntime_mutex _mutex_file;
+  QueueRuntime_cond _cond_root;
+
   int *_zone_entered;
   int *_zone_finished;
 

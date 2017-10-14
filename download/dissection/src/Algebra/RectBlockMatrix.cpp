@@ -199,6 +199,14 @@ template
 void RectBlockMatrix<complex<quadruple> >::init(int dim_r, int dim_c,
 						int block_size,
 						int first_block);
+
+template
+void RectBlockMatrix<float>::init(int dim_r, int dim_c, int block_size,
+				   int first_block);
+template
+void RectBlockMatrix<complex<float> >::init(int dim_r, int dim_c,
+					     int block_size, int first_block);
+
 //
   
 template<typename T>
@@ -225,6 +233,11 @@ template
 void RectBlockMatrix<complex<double> >::allocateBlock(int i, int j);
 template
 void RectBlockMatrix<complex<quadruple> >::allocateBlock(int i, int j);
+template
+void RectBlockMatrix<float>::allocateBlock(int i, int j);
+template
+void RectBlockMatrix<complex<float> >::allocateBlock(int i, int j);
+
 //
 
 template<typename T>
@@ -256,12 +269,16 @@ template
 void RectBlockMatrix<complex<double> >::allocate();
 template
 void RectBlockMatrix<complex<quadruple> >::allocate();
+template
+void RectBlockMatrix<float>::allocate();
+template
+void RectBlockMatrix<complex<float> >::allocate();
+
 //
 
 template<typename T>
 void RectBlockMatrix<T>::free(int i, int j)
 {
-    //    fprintf(stderr, "%s %d : free()\n", __FILE__, __LINE__);
   if (_allocation_status[i + j * _num_blocks_r]) {
     delete[] _coefs[i + j * _num_blocks_r];  // need to be mananged
   }
@@ -276,12 +293,15 @@ template
 void RectBlockMatrix<complex<double> >::free(int i, int j);
 template
 void RectBlockMatrix<complex<quadruple> >::free(int i, int j);
+template
+void RectBlockMatrix<float>::free(int i, int j);
+template
+void RectBlockMatrix<complex<float> >::free(int i, int j);
 //
 
 template<typename T>
 void RectBlockMatrix<T>::free()
 {
-  //    fprintf(stderr, "%s %d : free()\n", __FILE__, __LINE__);
   for (int i = 0; i < _num_blocks_r; i++) {
     for (int j = 0; j < _num_blocks_c; j++) {
       if (_allocation_status[i + j * _num_blocks_r]) {
@@ -300,6 +320,10 @@ template
 void RectBlockMatrix<complex<double> >::free();
 template
 void RectBlockMatrix<complex<quadruple> >::free();
+template
+void RectBlockMatrix<float>::free();
+template
+void RectBlockMatrix<complex<float> >::free();
 //
 
 template<typename T>
@@ -320,6 +344,13 @@ addrCoefBlock(int i, int j);
 
 template
 complex<quadruple>* RectBlockMatrix<complex<quadruple> >::
+addrCoefBlock(int i, int j);
+
+template
+float* RectBlockMatrix<float>::addrCoefBlock(int i, int j);
+
+template
+complex<float>* RectBlockMatrix<complex<float> >::
 addrCoefBlock(int i, int j);
 //
 
@@ -351,6 +382,12 @@ void RectBlockMatrix<complex<double> >::ZeroClear();
 
 template
 void RectBlockMatrix<complex<quadruple> >::ZeroClear();
+
+template
+void RectBlockMatrix<float>::ZeroClear();
+
+template
+void RectBlockMatrix<complex<float> >::ZeroClear();
 //
 
 template<typename T>
@@ -392,6 +429,14 @@ operator () (int i, int j);
 template
 complex<quadruple> & RectBlockMatrix<complex<quadruple> >::
 operator () (int i, int j);
+
+template
+float& RectBlockMatrix<float>::operator () (int i, int j);
+
+template
+complex<float> & RectBlockMatrix<complex<float> >::
+operator () (int i, int j);
+
 //
 
 template<typename T>
@@ -418,5 +463,12 @@ operator () (int i, int j) const;
 
 template
 const complex<quadruple>& RectBlockMatrix<complex<quadruple> >::
+operator () (int i, int j) const;
+
+template
+const float& RectBlockMatrix<float>::operator () (int i, int j) const;
+
+template
+const complex<float>& RectBlockMatrix<complex<float> >::
 operator () (int i, int j) const;
 //

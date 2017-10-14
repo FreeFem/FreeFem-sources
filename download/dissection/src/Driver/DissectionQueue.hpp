@@ -58,7 +58,6 @@
 #include "Compiler/elapsed_time.hpp"
 #include <time.h>
 #include <string>
-#include <pthread.h>
 
 template<typename T, typename U = T>
 class DissectionQueue
@@ -85,7 +84,8 @@ public:
 		     const double eps_piv, 
 		     const bool kernel_detection,
 		     const int aug_dim,
-		     const U eps_machine);
+		     const U eps_machine,
+		     const bool higher_precision);
 
   void exec_fwbw(T *x, const int nrhs, bool isTrans);
   void exec_fwbw_seq(T *x, const int nrhs, bool isTrans);
@@ -138,6 +138,7 @@ private:
  
   double _eps_piv;           // used in selecting pivot
   bool _kernel_detection;
+  bool _higher_precision;
   int _aug_dim;
   U _eps_machine;            // magnitude of numerical perturbation
   double *_pivots;

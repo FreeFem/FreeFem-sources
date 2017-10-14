@@ -48,11 +48,13 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
 #include "Compiler/blas.hpp"
 #include "Compiler/OptionLibrary.h"
 #include "Driver/C_threads_tasks.hpp"
 #include "Driver/C_Dsub.hpp"
-#include <string>
+#include "Compiler/DissectionIO.hpp"
+
 
 template<typename T>
 void C_Dsub_task_exec(void *arg_)
@@ -76,6 +78,11 @@ void C_Dsub_task_exec<complex<double> >(void *arg_);
 template
 void C_Dsub_task_exec<complex<quadruple> >(void *arg_);
 
+template
+void C_Dsub_task_exec<float>(void *arg_);
+
+template
+void C_Dsub_task_exec<complex<float> >(void *arg_);
 
 // #define DEBUG_BLOCKSUBT
 
@@ -142,10 +149,9 @@ void dsub_sym2sym_diag(C_Dsub_task<T> *arg)
     } // loop : j0, j1
   }
   else {
-    if (arg->verbose) {
-      fprintf(arg->fp, "%s %d : bad block indices in diagonal %d %d\n", 
-	      __FILE__, __LINE__, iblock0, iblock1);
-    }
+    diss_printf(arg->verbose, arg->fp,
+		"%s %d : bad block indices in diagonal %d %d\n", 
+		__FILE__, __LINE__, iblock0, iblock1);
   }
 }
 
@@ -160,6 +166,13 @@ void dsub_sym2sym_diag<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_sym2sym_diag<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_sym2sym_diag<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_sym2sym_diag<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_sym2sym_diag<T>
  
 template<typename T>
@@ -228,10 +241,9 @@ void dsub_unsym2unsym_diag(C_Dsub_task<T> *arg)
     } // loop : j0, j1
   }
   else {
-    if (arg->verbose) {
-      fprintf(arg->fp, "%s %d : bad block indices in diagonal %d %d\n", 
-	      __FILE__, __LINE__, iblock0, iblock1);
-    }
+    diss_printf(arg->verbose, arg->fp,
+		"%s %d : bad block indices in diagonal %d %d\n", 
+		__FILE__, __LINE__, iblock0, iblock1);
   }
 }
 
@@ -246,6 +258,13 @@ void dsub_unsym2unsym_diag<complex<double> >(C_Dsub_task<complex<double> >*arg);
 
 template
 void dsub_unsym2unsym_diag<complex<quadruple> >(C_Dsub_task<complex<quadruple> >*arg);
+
+template
+void dsub_unsym2unsym_diag<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2unsym_diag<complex<float> >(C_Dsub_task<complex<float> >*arg);
+
 // end of template function dsub_unsym2unsym_diag<T>
  
 template<typename T>
@@ -335,10 +354,9 @@ void dsub_sym2sym(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-		__FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		  __FILE__, __LINE__, jblock0, jblock1);
     }
   }
   else if (iblock0 == iblock1) {
@@ -384,10 +402,9 @@ void dsub_sym2sym(C_Dsub_task<T> *arg)
     }
   } // if ((jblock0 + 1) == jblock1) 
   else {
-    if (arg->verbose) {
-      fprintf(arg->fp, "%s %d : bad block indices in row : %d %d\n",
-	      __FILE__, __LINE__, iblock0, iblock1);
-    }
+    diss_printf(arg->verbose, arg->fp,
+		"%s %d : bad block indices in row : %d %d\n",
+		__FILE__, __LINE__, iblock0, iblock1);
   }
 }
 template
@@ -401,6 +418,13 @@ void dsub_sym2sym<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_sym2sym<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_sym2sym<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_sym2sym<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_sym2sym<T>
 
 template<typename T>
@@ -593,10 +617,9 @@ void dsub_unsym2unsym(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-		__FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		  __FILE__, __LINE__, jblock0, jblock1);
     }
   }
   else if (iblock0 == iblock1) {
@@ -697,10 +720,9 @@ void dsub_unsym2unsym(C_Dsub_task<T> *arg)
     }
   } // if ((jblock0 + 1) == jblock1) 
   else {
-    if (arg->verbose) {
-      fprintf(arg->fp, "%s %d : bad block indices in row : %d %d\n",
-	      __FILE__, __LINE__, iblock0, iblock1);
-    }
+    diss_printf(arg->verbose, arg->fp,
+		"%s %d : bad block indices in row : %d %d\n",
+		__FILE__, __LINE__, iblock0, iblock1);
   }
 }
 template
@@ -714,6 +736,13 @@ void dsub_unsym2unsym<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_unsym2unsym<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_unsym2unsym<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2unsym<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_unsym2unsym<T>
 
 template<typename T>
@@ -876,10 +905,9 @@ void dsub_unsym2diag(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-		__FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		  __FILE__, __LINE__, jblock0, jblock1);
     }
   }
   else if (iblock0 == iblock1) {
@@ -965,10 +993,9 @@ void dsub_unsym2diag(C_Dsub_task<T> *arg)
     }
   } // if ((jblock0 + 1) == jblock1) 
   else {
-    if (arg->verbose) {
-      fprintf(arg->fp, "%s %d : bad block indices in row : %d %d\n",
-	      __FILE__, __LINE__, iblock0, iblock1);
-    }
+    diss_printf(arg->verbose, arg->fp,
+		"%s %d : bad block indices in row : %d %d\n",
+		__FILE__, __LINE__, iblock0, iblock1);
   }
 }
 
@@ -983,6 +1010,13 @@ void dsub_unsym2diag<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_unsym2diag<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_unsym2diag<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2diag<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_unsym2diag<T>
 
 template<typename T>
@@ -1117,10 +1151,9 @@ void dsub_sym2rct(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-		__FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		  __FILE__, __LINE__, jblock0, jblock1);
     }
   }   // if (iblock0 < iblock1)
   else {
@@ -1163,10 +1196,9 @@ void dsub_sym2rct(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-		__FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		  __FILE__, __LINE__, jblock0, jblock1);
     }
   } // if (iblock0 < iblock1) 
 }
@@ -1182,6 +1214,14 @@ void dsub_sym2rct<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_sym2rct<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_sym2rct<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_sym2rct<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
+
 // end of template function dsub_sym2rct<T>
 
 template<typename T>
@@ -1451,10 +1491,9 @@ void dsub_unsym2rct(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-	      __FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		    __FILE__, __LINE__, jblock0, jblock1);
     }
   }
   else {
@@ -1540,10 +1579,9 @@ void dsub_unsym2rct(C_Dsub_task<T> *arg)
       }
     }
     else {
-      if (arg->verbose) {
-	fprintf(arg->fp, "%s %d : bad block indices in column : %d %d\n", 
-		__FILE__, __LINE__, jblock0, jblock1);
-      }
+      diss_printf(arg->verbose, arg->fp,
+		  "%s %d : bad block indices in column : %d %d\n", 
+		  __FILE__, __LINE__, jblock0, jblock1);
     }
   } // if (iblock0 < iblock1)
 }
@@ -1560,6 +1598,13 @@ void dsub_unsym2rct<complex<double> >(C_Dsub_task<complex<double> > *arg);
 template
 void dsub_unsym2rct<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
 // end of template function dsub_unsym2rct<T>
+
+template
+void dsub_unsym2rct<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2rct<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 
 template<typename T>
 void dsub_sym2sym_diag_two(C_Dsub_task<T> *arg)
@@ -1639,6 +1684,14 @@ void dsub_sym2sym_diag_two<complex<double> >(C_Dsub_task<complex<double> > *arg)
 
 template
 void dsub_sym2sym_diag_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_sym2sym_diag_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_sym2sym_diag_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
+
 // end of template function dsub_sym2sym_diag_two<T> 
 
 template<typename T>
@@ -1720,6 +1773,13 @@ void dsub_unsym2unsym_diag_two<complex<double> >(C_Dsub_task<complex<double> > *
 
 template
 void dsub_unsym2unsym_diag_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_unsym2unsym_diag_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2unsym_diag_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_unsym2unsym_diag_two<T>
 
 template<typename T>
@@ -1800,6 +1860,12 @@ void dsub_sym2sym_two<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_sym2sym_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_sym2sym_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_sym2sym_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
 // end of template function dsub_sym2sym_two<T>
 
 
@@ -1880,6 +1946,13 @@ void dsub_unsym2unsym_two<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_unsym2unsym_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_unsym2unsym_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2unsym_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_unsym2unsym_two<T>
 
 template<typename T>
@@ -1958,9 +2031,15 @@ void dsub_unsym2diag_two<quadruple>(C_Dsub_task<quadruple> *arg);
 template
 void dsub_unsym2diag_two<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
-
 template
 void dsub_unsym2diag_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_unsym2diag_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2diag_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_unsym2diag_two<T>
 
 template<typename T>
@@ -2034,11 +2113,19 @@ void dsub_sym2rct_two<double>(C_Dsub_task<double> *arg);
 
 template
 void dsub_sym2rct_two<quadruple>(C_Dsub_task<quadruple> *arg);
+
 template
 void dsub_sym2rct_two<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_sym2rct_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_sym2rct_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_sym2rct_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
 // end of template function dsub_sym2rct_two<T>
 
 template<typename T>
@@ -2116,6 +2203,14 @@ void dsub_unsym2rct_two<complex<double> >(C_Dsub_task<complex<double> > *arg);
 
 template
 void dsub_unsym2rct_two<complex<quadruple> >(C_Dsub_task<complex<quadruple> > *arg);
+
+template
+void dsub_unsym2rct_two<float>(C_Dsub_task<float> *arg);
+
+template
+void dsub_unsym2rct_two<complex<float> >(C_Dsub_task<complex<float> > *arg);
+
+
 // end of template function dsub_unsym2rct_two<T>
 
 //#define DEBUG_QUEUE_GENERATION2
@@ -2133,12 +2228,13 @@ void C_Dsub_queue(bool isSym,
 		  vector<C_task *>* tasks_p, // _tasks_DSymmGEMM
 		  vector<int>* tasks_p_indcol,
 		  const bool tasks_p_flag,
-		  vector<C_task *>* tasks_q, // _tasks_DfillSymm
+		  vector<C_task *>& tasks_q, // _tasks_DfillSymm
 		  vector<C_task *>* tasks_r, // _tasks_SparseLocalSchur
-		  vector<C_task *>* tasks_s, // _tasks_DSub[level + 1][(*it)]
+		  vector<C_task *>& tasks_s, // _tasks_DSub[level + 1][(*it)]
 		  vector<C_task *>* tasks_d, // _tasks_deallocateLocalSchur
 		  vector<int>* tasks_d_indcol,
 		  int level,
+		  const bool direct_flag,
 		  const bool verbose,
 		  FILE *fp)
 {
@@ -2172,7 +2268,8 @@ void C_Dsub_queue(bool isSym,
 			  0, // atomic_id,
 			  arg->ops_complexity);
     queue[0]->parents->clear();
-    fprintf(fp, "%s %d : %s\n", __FILE__, __LINE__, task_name.c_str());
+      diss_printf(verbose, fp, "%s %d : %s\n",
+		  __FILE__, __LINE__, task_name.c_str());
     return;
   }
 #ifdef DEBUG_PREPARE_THREAD
@@ -2213,7 +2310,7 @@ void C_Dsub_queue(bool isSym,
   } // loop: jt
 #endif
   //
-  if (child_contrib.size() == 2) {
+  if (child_contrib.size() == 2 && direct_flag) {
     //      vector<C_task *>&queue = tasks_C_DSUB[*it];
     //     queue.resize(block_diag_size + num_block2);
     //      vector<list<C_Dsub_task *>*>&C_task_arg = lists_C_DSUB[*it];
@@ -2223,30 +2320,16 @@ void C_Dsub_queue(bool isSym,
 #endif
     child_contribution<T> child0 = child_contrib.front();
     child_contribution<T> child1 = child_contrib.back();
-#if 0
-    for (typename list<child_contribution<T> >::const_iterator jt = child_contrib.begin();
-	 jt != child_contrib.end(); ++jt) {
-      cout << "child = " << (*jt).child_id 
-	   << " offdiag = ";
-      for (list <index_strip>::const_iterator kt = (*jt).offdiag_strip.begin();
-	   kt != (*jt).offdiag_strip.end();
-	   ++kt) {
-	cout << "[ " << (*kt).begin_dst << " , " 
-	     << (*kt).begin_src << " , "
-	     << (*kt).width << " ] ";
-      }
-      cout << endl;
-    }
-#endif
     if ((child0.child_pt->dimension() == 0) ||
-	(child1.child_pt->dimension() == 0)) {
-      fprintf(fp, "%s %d : %d %d %d : %d %d %d\n", __FILE__, __LINE__,
-	      child0.child_id,
-	      (int)child0.diag_strip.size(),
-	      (int)child0.offdiag_strip.size(),
-	      child1.child_id,
-	      (int)child1.diag_strip.size(),
-	      (int)child1.offdiag_strip.size());
+        (child1.child_pt->dimension() == 0)) {
+      diss_printf(verbose, fp ,
+		  "%s %d : %d %d %d : %d %d %d\n", __FILE__, __LINE__,
+		  child0.child_id,
+		  (int)child0.diag_strip.size(),
+		  (int)child0.offdiag_strip.size(),
+		  child1.child_id,
+		  (int)child1.diag_strip.size(),
+		  (int)child1.offdiag_strip.size());
     }
 
     list <index_strip> *strips_r, *strips_c;
@@ -2264,13 +2347,11 @@ void C_Dsub_queue(bool isSym,
     RectBlockMatrix<T> *father_offdiag_pt = child0.father_offdiag_pt;
     RectBlockMatrix<T> *father_offdia2_pt = child0.father_offdiag_unsym_pt;
 
-    if(verbose) {
-      fprintf(fp, "%s %d : father id = %d\n",
+    diss_printf(verbose, fp, "%s %d : father id = %d\n",
 	      __FILE__, __LINE__, (father_id + 1));
-    }
     if (child0.diag_strip.size() > 1 || child1.diag_strip.size() > 1) {
 #ifdef DEBUG_PREPARE_THREAD
-      fprintf(fp, "%s %d : row block is not continous\n",
+      diss_printf(verbose, fp, "%s %d : row block is not continous\n",
 	      __FILE__, __LINE__);
 #endif
       combine_two_strips(strips_r[0], strips_r[1], strips_r01, 
@@ -2281,48 +2362,36 @@ void C_Dsub_queue(bool isSym,
     else {
       if ((child0.diag_strip.size() == 0) &&
 	  (child1.diag_strip.size() == 0)) {
-	if (verbose) {
-	  fprintf(fp, "%s %d : both rows are null : father = %d\n",
+	diss_printf(verbose, fp, "%s %d : both rows are null : father = %d\n",
 		  __FILE__, __LINE__, (father_id + 1));
-	}
 	strips_r[0].clear();
 	strips_r[1].clear();
 	strips_r01.clear();
       }
       if ((child0.diag_strip.size() == 0) || 
 	  (child1.diag_strip.size() == 0)) {
-	if (verbose) {
-	  fprintf(fp, "%s %d : one of rows is null / ",
-		  __FILE__, __LINE__);
-	}
+	diss_printf(verbose, fp, "%s %d : one of rows is null / ",
+		    __FILE__, __LINE__);
 	if (child0.diag_strip.size() == 0) {
-	  if (verbose) {
-	    fprintf(fp, " r0 null / ");
-	  }
+	  diss_printf(verbose, fp, " r0 null / ");
 	  strips_r[0].clear();
 	  strips_r[1] = child1.diag_strip;
 	}
 	else {
-	  if (verbose) {
-	    fprintf(fp, "%d : %d / ",  
-		    child0.diag_strip.front().begin_dst,
-		    child0.diag_strip.front().width);
-	  }
+	  diss_printf(verbose, fp, "%d : %d / ",  
+		      child0.diag_strip.front().begin_dst,
+		      child0.diag_strip.front().width);
 	}
 	if (child1.diag_strip.size() == 0) {
-	  if (verbose) {
-	    fprintf(fp, " r1 null\n");
-	  }
+	  diss_printf(verbose, fp, " r1 null\n");
 	  strips_r[0] = child0.diag_strip;
 	  strips_r[1].clear();
 	}
 	else {
-	  if (verbose) {
-	    fprintf(fp, "%d : %d\n",  
-		    child1.diag_strip.front().begin_dst,
-		    child1.diag_strip.front().width);
-	  }
-	} // if (verbose)
+	  diss_printf(verbose, fp, "%d : %d\n",  
+		      child1.diag_strip.front().begin_dst,
+		      child1.diag_strip.front().width);
+	} 
 	strips_r01.clear();
       } //  (child0.diag_strip.size() == 0) || (child1.diag_strip.size() == 0)
       else {
@@ -2330,59 +2399,53 @@ void C_Dsub_queue(bool isSym,
 	     child1.diag_strip.front().begin_dst) ||
 	    (child0.diag_strip.front().width != 
 	     child1.diag_strip.front().width)) {
-	  if (verbose) {
-	    fprintf(fp, 
-		    "%s %d : row blocks are not same / ",
-		    __FILE__, __LINE__);
-	    fprintf(fp, "%d : %d : %d / %d : %d : %d\n",
-		    (int)child0.diag_strip.size(),
+	  diss_printf(verbose, fp, 
+		       "%s %d : row blocks are not same / ",
+		       __FILE__, __LINE__);
+	  diss_printf(verbose, fp, "%d : %d : %d / %d : %d : %d\n",
+		      (int)child0.diag_strip.size(),
 		    child0.diag_strip.front().begin_dst,
-		    child0.diag_strip.front().width,
+		      child0.diag_strip.front().width,
 		    (int)child1.diag_strip.size(),
 		    child1.diag_strip.front().begin_dst,
 		    child1.diag_strip.front().width);
-	  } // if (verbose)
 	  split_two_strips(strips_r[0], strips_r[1], strips_r01, 
 			   child0.diag_strip.front(),
 			   child1.diag_strip.front());
-	  if (verbose) {
-	    fprintf(fp, "%s %d : split of strips r0 ",
-		    __FILE__, __LINE__);
-	    for (list<index_strip>::const_iterator kt = strips_r[0].begin(); 
-		 kt != strips_r[0].end(); ++kt) {
-	      fprintf(fp, "%d : %d : %d ", 
-		      (*kt).begin_dst, (*kt).begin_src, (*kt).width);
-	    }
-	    fprintf(fp, " r1 ");
-	    for (list<index_strip>::const_iterator kt = strips_r[1].begin(); 
+	  diss_printf(verbose, fp, "%s %d : split of strips r0 ",
+		      __FILE__, __LINE__);
+	  for (list<index_strip>::const_iterator kt = strips_r[0].begin(); 
+	       kt != strips_r[0].end(); ++kt) {
+	    diss_printf(verbose, fp, "%d : %d : %d ", 
+			(*kt).begin_dst, (*kt).begin_src, (*kt).width);
+	  }
+	  diss_printf(verbose, fp, " r1 ");
+	  for (list<index_strip>::const_iterator kt = strips_r[1].begin(); 
 		 kt != strips_r[1].end(); ++kt) {
-	      fprintf(fp, "%d : %d : %d ", 
-		      (*kt).begin_dst, (*kt).begin_src, (*kt).width);
-	    }
-	    fprintf(fp, "r01 ");
-	    for (list<index_strip2>::const_iterator kt = strips_r01.begin(); 
-		 kt != strips_r01.end(); ++kt) {
-	      fprintf(fp, "%d : %d : %d : %d ", 
-		    (*kt).begin_dst, (*kt).begin_src0, (*kt).begin_src1,
-		      (*kt).width);
-	    }
-	    fprintf(fp, "\n");
-	  } // if (verbose)
+	    diss_printf(verbose, fp, "%d : %d : %d ", 
+			(*kt).begin_dst, (*kt).begin_src, (*kt).width);
+	  }
+	  diss_printf(verbose, fp, "r01 ");
+	  for (list<index_strip2>::const_iterator kt = strips_r01.begin(); 
+	       kt != strips_r01.end(); ++kt) {
+	    diss_printf(verbose, fp, "%d : %d : %d : %d ", 
+			(*kt).begin_dst, (*kt).begin_src0, (*kt).begin_src1,
+			(*kt).width);
+	  }
+	  diss_printf(verbose, fp, "\n");
 	}
 	else {
 	  strips_r[0].clear();
 	  strips_r[1].clear();
 	  copy_two_strips(strips_r01, child0.diag_strip, child1.diag_strip);
-	  if (verbose) {
-	    fprintf(fp, "%s %d : r01 ", __FILE__, __LINE__);
-	    for (list<index_strip2>::const_iterator kt = strips_r01.begin(); 
-		 kt != strips_r01.end(); ++kt) {
-	      fprintf(fp, "%d : %d : %d : %d ", 
-		      (*kt).begin_dst, (*kt).begin_src0,
-		      (*kt).begin_src1, (*kt).width);
-	    }
-	    fprintf(fp, "\n");
-	  } // if (verbose)
+	  diss_printf(verbose, fp, "%s %d : r01 ", __FILE__, __LINE__);
+	  for (list<index_strip2>::const_iterator kt = strips_r01.begin(); 
+	       kt != strips_r01.end(); ++kt) {
+	    diss_printf(verbose, fp, "%d : %d : %d : %d ", 
+			(*kt).begin_dst, (*kt).begin_src0,
+			(*kt).begin_src1, (*kt).width);
+	  }
+	  diss_printf(verbose, fp, "\n");
 	}
       }//  (child0.diag_strip.size() == 0) || (child1.diag_strip.size() == 0)
     }  //  (child0.diag_strip.size() > 1 || child1.diag_strip.size() > 1)
@@ -2405,34 +2468,20 @@ void C_Dsub_queue(bool isSym,
     }
     if ((child0.child_pt->dimension() == 0) ||
 	(child1.child_pt->dimension() == 0)) {
-      fprintf(fp, "%s %d : %d %d %d\n", __FILE__, __LINE__,
-	      (int)strips_c[0].size(), (int)strips_c[1].size(),
-	      (int)strips_c01.size());
+      diss_printf(verbose, fp, "%s %d : %d %d %d\n", __FILE__, __LINE__,
+		  (int)strips_c[0].size(), (int)strips_c[1].size(),
+		  (int)strips_c01.size());
     }
     queue.resize(block_diag_size + num_block2);
     //    queue.resize(block_diag_size + block_offdiag_size);
-    if (verbose) {
-#if 0
-      print_strips("child0.diag_strip", child0.diag_strip, fp);
-      print_strips("child1.diag_strip", child1.diag_strip, fp);
-      print_strips("strips_r0", strips_r[0], fp);
-      print_strips("strips_r1", strips_r[1], fp);
-      print_strips("strips_r01", strips_r01, fp);
-      print_strips("child0.offdiag_strip", child0.offdiag_strip, fp);
-      print_strips("child1.offdiag_strip", child1.offdiag_strip, fp);
-      print_strips("strips_c0", strips_c[0], fp);
-      print_strips("strips_c1", strips_c[1], fp);
-      print_strips("strips_c01", strips_c01, fp);
-#endif
-      fprintf(fp, "%s %d : C_Dsub with father id = %d %d %d ", 
-	      __FILE__, __LINE__, (father_id + 1), num_block, num_block2);
-      if (skip_flag) {
-	fprintf(fp, "skipped\n");
-      }
-      else {
-	fprintf(fp, "\n");
-      }
-    } // if (verbose)
+    diss_printf(verbose, fp, "%s %d : C_Dsub with father id = %d %d %d ", 
+		__FILE__, __LINE__, (father_id + 1), num_block, num_block2);
+    if (skip_flag) {
+      diss_printf(verbose, fp, "skipped\n");
+    }
+    else {
+      diss_printf(verbose, fp, "\n");
+    }
     int kk = 0;
     for (int kc0 = 0; kc0 < num_block; kc0++) {
       const int kc = kc0 * SIZE_B1;
@@ -2563,13 +2612,6 @@ void C_Dsub_queue(bool isSym,
 				    ir_bgn_src, ir_end_src, child_pt[ll]);
 		update_parents_list(parents_c[ll], 
 				    ic_bgn_src, ic_end_src, child_pt[ll]);
-#if 0
-		if (father_id == 0 && ll == 1) {
-		  fprintf(stderr, "%s : %d [%d %d] %d\n",
-			  __FILE__, __LINE__,
-			  ic_bgn_src, ic_end_src, parents_c[ll].back());
-		}
-#endif
 		//SIZE_B1);
 	      } // if ((ir_bgn < ir_end) && (ic_bgn < ic_end)) 
 	    } // if (kc == kr)
@@ -2632,13 +2674,6 @@ void C_Dsub_queue(bool isSym,
 				    ir_bgn_src, ir_end_src, child_pt[ll]);
 		update_parents_list(parents_c[ll], 
 				    jc_bgn_src, jc_end_src, child_pt[ll]);
-#if 0
-		if (father_id == 0 && ll == 1) {
-		  fprintf(stderr, "%s : %d [%d %d] %d\n",
-			  __FILE__, __LINE__,
-			  jc_bgn_src, jc_end_src, parents_c[ll].back());
-		}
-#endif
 	      } // if ((ir_bgn < ir_end) && (jc_bgn < jc_end))
 	    } // loop : nt
 	    // -- child_ll * child01
@@ -2705,13 +2740,6 @@ void C_Dsub_queue(bool isSym,
 				    ir_bgn_src, ir_end_src, child_pt[ll]);
 		update_parents_list(parents_c[ll], 
 				    jc_bgn_src, jc_end_src, child_pt[ll]);
-#if 0
-		if (father_id == 0 && ll == 1) {
-		  fprintf(stderr, "%s : %d [%d %d] %d\n",
-			  __FILE__, __LINE__,
-			  jc_bgn_src, jc_end_src, parents_c[ll].back());
-		}
-#endif
 	      } //  if ((ir_bgn < ir_end) && (jc_bgn < jc_end))v
 	    } // loop : nt
 	  }   // loop : mt
@@ -2905,13 +2933,6 @@ void C_Dsub_queue(bool isSym,
 		update_parents_list(parents_c[ll], 
 				    jc_bgn_srcs[ll], jc_end_srcs[ll], 
 				    child_pt[ll]);
-#if 0
-		if (father_id == 0 && ll == 1) {
-		  fprintf(stderr, "%s : %d [%d %d] %d\n",
-			  __FILE__, __LINE__,
-			  jc_bgn_srcs[ll], jc_end_srcs[ll], parents_c[ll].back());
-		}
-#endif
 	      }
 	    } //	if ((ir_bgn < ir_end) && (jc_bgn < jc_end)) {
 	  } // loop : nt
@@ -2981,14 +3002,6 @@ void C_Dsub_queue(bool isSym,
 				    ir_bgn_src, ir_end_src, child_pt[ll]);
 		update_parents_list(parents_c[ll], 
 				    jc_bgn_src, jc_end_src, child_pt[ll]);
-#if 0
-		if (father_id == 0 && ll == 1) {
-		  fprintf(stderr, "%s : %d [%d %d] %d : %d %d %d\n",
-			  __FILE__, __LINE__,
-			  jc_bgn_src, jc_end_src, parents_c[ll].back(),
-			  (*nt).begin_src, (*nt).begin_dst, (*nt).width);
-		}
-#endif
 	      } 	//      if ((ir_bgn < ir_end) && (jc_bgn < jc_end)) 
 	    } // loop : nt
 	  }   // loop : ll
@@ -3014,12 +3027,13 @@ void C_Dsub_queue(bool isSym,
 	    queue[kk]->parents->push_back(tasks_r[(*jt).child_id][0]); 
 	  }
 	}
-	if (tasks_q != NULL) {
-	  queue[kk]->parents->push_back(tasks_q[father_id][0]); // diag
+	if (tasks_q.size() > 0) {
+	  //	  queue[kk]->parents->push_back(tasks_q[father_id][0]); // diag
+	  queue[kk]->parents->push_back(tasks_q[0]); // diag
 	}
-	if (tasks_s != NULL) {
+	if (tasks_s.size() > 0) {
 	  const int itmp = (kc0 * (kc0 + 1)) / 2 + kr0;
-	  queue[kk]->parents->push_back((*tasks_s)[itmp]);     
+	  queue[kk]->parents->push_back(tasks_s[itmp]);     
 	}
 	//	if (tasks_p != NULL) {
 #ifdef DEBUG_QUEUE_GENERATION
@@ -3078,51 +3092,20 @@ void C_Dsub_queue(bool isSym,
 		    vector<int> &indcolp = tasks_p_indcol[child_id[ll]];
 		    //		    if (indcolp.size() > idx) {
 		    queue[kk]->parents->push_back(tasks_tmp[indcolp[idx]]);
-#if 0
-		    }
-		    else {
-			fprintf(stderr,
-				"%s %d : %d < %d : prnts_c[%d].size=%d %d %d kr0=%d kc0=%d\n",
-				__FILE__, __LINE__,
-				(int)indcolp.size(), idx,
-				ll, parents_c[ll].size(), *mt, *nt, kr0, kc0);
-		    }
-#endif
 		  }
 		  if (tasks_tmq.size() > 0) {
 		    //		    if (indcolq.size() > idx) {
 		      tasks_tmq[indcolq[idx]]->parents->push_back(queue[kk]);
-#if 0
-		    }
-		    else {
-			fprintf(stderr, "%s %d : % d : (%d %d) %d < %d\n",
-				__FILE__, __LINE__, ll, (*nt), (*mt),
-				(int)indcolq.size(), idx);
-		    }
-		  #endif
 		  if (!isSym) {
 		    if (tasks_p_flag) {
 		      vector<C_task *> &tasks_tmp = tasks_p[child_id[ll]];
 		      vector<int> &indcolp = tasks_p_indcol[child_id[ll]];
 		      //		      if (indcolp.size() > (idx + 1)) {
 			queue[kk]->parents->push_back(tasks_tmp[indcolp[idx + 1]]);		      }
-#if 0
-		      else {
-			fprintf(stderr, "%s %d : %d < %d\n", __FILE__, __LINE__,
-				(int)indcolp.size(), (idx + 1));
-		      }
-#endif
 		    }
 		    if (tasks_tmq.size() > 0) {
 		      //		      if (indcolq.size() > (idx + 1)) {
 			tasks_tmq[indcolq[idx + 1]]->parents->push_back(queue[kk]);
-#if 0
-		      }
-		      else {
-			fprintf(stderr, "%s %d : %d < %d\n", __FILE__, __LINE__,
-				(int)indcolq.size(), (idx + 1));
-		      }
-#endif
 		    }
 		  }
 		}
@@ -3132,28 +3115,29 @@ void C_Dsub_queue(bool isSym,
 	}   //  if (!skip_flag)
 	else {
 	  // verify skip
-	  if (verbose ) {
+	  if (verbose) {
 	    for (int ll = 0; ll < 2; ll++) {
 	      for (list<int>::const_iterator mt = parents_r[ll].begin(); 
 		   mt != parents_r[ll].end(); ++mt) {
 		if ((*mt) > child_pt[ll]->num_blocks0()) {
-		  fprintf(stderr, "%s %d : %d incorrect skip : %d %d\n", 
-			  __FILE__, __LINE__, ll, (*mt), 
+		  diss_printf(verbose, stderr,
+			      "%s %d : %d incorrect skip : %d %d\n", 
+			      __FILE__, __LINE__, ll, (*mt), 
 			  child_pt[ll]->num_blocks0());
 		}
 	      }
 	      for (list<int>::const_iterator mt = parents_c[ll].begin(); 
 		   mt != parents_c[ll].end(); ++mt) {
 		if ((*mt) > child_pt[ll]->num_blocks0()) {
-		  fprintf(stderr, "%s %d : %d incorrect skip : %d %d\n", 
-			  __FILE__, __LINE__, ll, (*mt), 
+		  diss_printf(verbose, stderr,
+			      "%s %d : %d incorrect skip : %d %d\n", 
+			      __FILE__, __LINE__, ll, (*mt), 
 			  child_pt[ll]->num_blocks0());
 		}
 	      }
 	    }
 	  }  // if (verbose)
 	}
-	// }   // 	if (tasks_p != NULL)
 	queue[kk]->parents->sort(compare_task_name);
 	queue[kk]->parents->unique();
 	EraseNullParents(queue[kk]);
@@ -3490,13 +3474,14 @@ void C_Dsub_queue(bool isSym,
 	  queue[kk]->parents->push_back(tasks_r[(*jt).child_id][0]); 
 	} 
       }
-      if (tasks_q != NULL) {
-	queue[kk]->parents->push_back(tasks_q[father_id][1]); //  offdiag
+      if (tasks_q.size() > 0) {
+	//	queue[kk]->parents->push_back(tasks_q[father_id][1]); //  offdiag
+	queue[kk]->parents->push_back(tasks_q[1]); //  offdiag
       }
-      if (tasks_s != NULL) {   // offiag
+      if (tasks_s.size() > 0) {   // offiag
 	for (int i = 0; i < num_block; i++) {
-	  const int itmp = kc0 * num_block + i + (*tasks_s)[0]->parallel_max; 
-	  queue[kk]->parents->push_back((*tasks_s)[itmp]);     
+	  const int itmp = kc0 * num_block + i + tasks_s[0]->parallel_max; 
+	  queue[kk]->parents->push_back(tasks_s[itmp]);     
 	}
       }
       //      if (tasks_p != NULL) {
@@ -3830,12 +3815,13 @@ void C_Dsub_queue(bool isSym,
 	    queue[kk]->parents->push_back(tasks_r[(*jt).child_id][0]); 
 	  }
 	}
-	if (tasks_q != NULL) {
-	  queue[kk]->parents->push_back(tasks_q[father_id][0]); // diag
+	if (tasks_q.size() > 0) {
+	  //	  queue[kk]->parents->push_back(tasks_q[father_id][0]); // diag
+	  queue[kk]->parents->push_back(tasks_q[0]); // diag
 	}
-	if (tasks_s != NULL) {
+	if (tasks_s.size() > 0) {
 	  const int itmp = ((kc0 * (kc0 + 1)) / 2) + kr0;  // diag
-	  queue[kk]->parents->push_back((*tasks_s)[itmp]);     
+	  queue[kk]->parents->push_back(tasks_s[itmp]);     
 	}
 	//	if (tasks_p != NULL) {
 	ll = 0;
@@ -4063,12 +4049,13 @@ void C_Dsub_queue(bool isSym,
 	    queue[kk]->parents->push_back(tasks_r[(*jt).child_id][0]); 
 	  }
 	}
-	if (tasks_q != NULL) {
-	  queue[kk]->parents->push_back(tasks_q[father_id][1]); //  offdiag
+	if (tasks_q.size() > 0) {
+	  //	  queue[kk]->parents->push_back(tasks_q[father_id][1]); //  offdiag
+	  queue[kk]->parents->push_back(tasks_q[1]); //  offdiag
 	}
-	if (tasks_s != NULL) {   // offiag
-	  const int itmp = kc0 * num_block + kr0 + (*tasks_s)[0]->parallel_max;
-	  queue[kk]->parents->push_back((*tasks_s)[itmp]);     
+	if (tasks_s.size() > 0) {   // offiag
+	  const int itmp = kc0 * num_block + kr0 + tasks_s[0]->parallel_max;
+	  queue[kk]->parents->push_back(tasks_s[itmp]);     
 	}
 	//	if (tasks_p != NULL) {
 	ll = 0;
@@ -4121,21 +4108,6 @@ void C_Dsub_queue(bool isSym,
       }           // loop : kr0
     }             // loop : kc0
   } // else (child_contrib.size() == 2)
-#if 0
-  if (verbose) {
-    for (vector<C_task *>::const_iterator kt = queue.begin();
-	 kt != queue.end(); ++kt) {
-      fprintf(fp, "%s :: %d : parents = %d ",
-	      (*kt)->task_name, (int)*((*kt)->ops_complexity),
-	      (int)(*kt)->parents->size());
-      for (list<C_task *>::const_iterator jt = (*kt)->parents->begin();
-	   jt != (*kt)->parents->end(); ++jt) {
-	fprintf(fp, "%s /", (*jt)->task_name);
-      }
-      fprintf(fp, "\n");
-    }
-  }
-#endif
 }
 
 template
@@ -4147,12 +4119,13 @@ void C_Dsub_queue<double>(bool isSym,
 			  vector<C_task *>* tasks_p, 
 			  vector<int>* tasks_p_indcol,
 			  const bool tasks_p_flag,
-			  vector<C_task *>* tasks_q,
+			  vector<C_task *>& tasks_q,
 			  vector<C_task *>* tasks_r,
-			  vector<C_task *>* tasks_s,
+			  vector<C_task *>& tasks_s,
 			  vector<C_task *>* tasks_d, 
 			  vector<int>* tasks_d_indcol,
 			  int level,
+			  const bool direct_flag,
 			  const bool verbose,
 			  FILE *fp);
 
@@ -4165,12 +4138,13 @@ void C_Dsub_queue<quadruple>(bool isSym,
 			     vector<C_task *>* tasks_p, 
 			     vector<int>* tasks_p_indcol,
 			     const bool tasks_p_flag,
-			     vector<C_task *>* tasks_q,
+			     vector<C_task *>& tasks_q,
 			     vector<C_task *>* tasks_r,
-			     vector<C_task *>* tasks_s,
+			     vector<C_task *>& tasks_s,
 			     vector<C_task *>* tasks_d, 
 			     vector<int>* tasks_d_indcol,
 			     int level,
+			     const bool direct_flag,
 			     const bool verbose,
 			     FILE *fp);
  
@@ -4183,12 +4157,13 @@ void C_Dsub_queue<complex<double> >(bool isSym,
 				    vector<C_task *>* tasks_p, 
 				    vector<int>* tasks_p_indcol,
 				    const bool tasks_p_flag,
-				    vector<C_task *>* tasks_q,
+				    vector<C_task *>& tasks_q,
 				    vector<C_task *>* tasks_r,
-				    vector<C_task *>* tasks_s,
+				    vector<C_task *>& tasks_s,
 				    vector<C_task *>* tasks_d, 
 				    vector<int>* tasks_d_indcol,
 				    int level,
+				    const bool direct_flag,
 				    const bool verbose,
 				    FILE *fp);
 
@@ -4201,14 +4176,54 @@ void C_Dsub_queue<complex<quadruple> >(bool isSym,
 				       vector<C_task *>* tasks_p, 
 				       vector<int>* tasks_p_indcol,
 				       const bool tasks_p_flag,
-				       vector<C_task *>* tasks_q,
+				       vector<C_task *>& tasks_q,
 				       vector<C_task *>* tasks_r,
-				       vector<C_task *>* tasks_s,
+				       vector<C_task *>& tasks_s,
 				       vector<C_task *>* tasks_d, 
 				       vector<int>* tasks_d_indcol,
 				       int level,
+				       const bool direct_flag,
 				       const bool verbose,
 				       FILE *fp);
+
+template
+void C_Dsub_queue<float>(bool isSym, 
+			  int father_id,
+			  bool skip_flag,
+			  vector<C_task *>& queue,
+			  list <child_contribution<float> > &child_contrib,
+			  vector<C_task *>* tasks_p, 
+			  vector<int>* tasks_p_indcol,
+			  const bool tasks_p_flag,
+			  vector<C_task *>& tasks_q,
+			  vector<C_task *>* tasks_r,
+			  vector<C_task *>& tasks_s,
+			  vector<C_task *>* tasks_d, 
+			  vector<int>* tasks_d_indcol,
+			  int level,
+			  const bool direct_flag,
+			  const bool verbose,
+			  FILE *fp);
+
+template
+void C_Dsub_queue<complex<float> >(bool isSym, 
+				    int father_id,
+				    bool skip_flag,
+				    vector<C_task *>& queue,
+				    list <child_contribution<complex<float> > > &child_contrib,
+				    vector<C_task *>* tasks_p, 
+				    vector<int>* tasks_p_indcol,
+				    const bool tasks_p_flag,
+				    vector<C_task *>& tasks_q,
+				    vector<C_task *>* tasks_r,
+				    vector<C_task *>& tasks_s,
+				    vector<C_task *>* tasks_d, 
+				    vector<int>* tasks_d_indcol,
+				    int level,
+				    const bool direct_flag,
+				    const bool verbose,
+				    FILE *fp);
+
 //
   
 template<typename T>
@@ -4252,4 +4267,15 @@ template
 void update_parents_list<complex<quadruple> >(list <int>& parents,
 					   const int begin, const int end, 
 					   SquareBlockMatrix<complex<quadruple> >* mtrx);
+
+template
+void update_parents_list<float>(list <int>& parents,
+				 const int begin, const int end, 
+				 SquareBlockMatrix<float>* mtrx);
+
+template
+void update_parents_list<complex<float> >(list <int>& parents,
+					   const int begin, const int end, 
+					   SquareBlockMatrix<complex<float> >* mtrx);
+
 //

@@ -47,7 +47,6 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef _ALGEBRA_SQUAREMATRIX_HPP
 #define _ALGEBRA_SQUAREMATRIX_HPP
 #include <cassert>

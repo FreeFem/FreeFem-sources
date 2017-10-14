@@ -51,8 +51,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <list>
+#include <algorithm>
 #include "Algebra/SparseRenumbering.hpp"
 #include "Driver/DissectionDefault.hpp"
+#include "Compiler/arithmetic.hpp"
+#include "Compiler/DissectionIO.hpp"
 
 using std::list;
 
@@ -87,10 +90,9 @@ void CMK_number(const int dim, const int *ptrows, const int *indcols,
     i1_prev = i1;
     i2_prev = i2;
   }
-  if (verbose) {
-    fprintf(fp, "%s %d : Cuthill McKee renumbering : init block : %g :: ",
-	    __FILE__, __LINE__, min_profile);
-  }
+  diss_printf(verbose, fp,
+	      "%s %d : Cuthill McKee renumbering : init block : %g :: ",
+	      __FILE__, __LINE__, min_profile);
 
   // initialize frontal renumbering from an excentric point
   for (int i = 0; i < dim; i++) {
@@ -111,9 +113,7 @@ void CMK_number(const int dim, const int *ptrows, const int *indcols,
   profile = frontal_numb(dim, ptrows, indcols, i0, list, indic, connect);
   i1 = list[dim - 1];
 
-  if (verbose) {
-    fprintf(fp, "- > node %d : %g :: ", i0, profile);
-  }
+  diss_printf(verbose, fp, "- > node %d : %g :: ", i0, profile);
   if (profile < min_profile) {
     min_profile = profile;
   }
@@ -156,14 +156,10 @@ void CMK_number(const int dim, const int *ptrows, const int *indcols,
     mask[i0] = true;
     profile = frontal_numb(dim, ptrows, indcols, i0, list, indic, connect);
     i1 = list[dim - 1];
-    if (verbose) {
-      fprintf(fp, "- > node: %d : %g :: ", i0, profile);
-    }
+    diss_printf(verbose, fp, "- > node: %d : %g :: ", i0, profile);
   } // while
 
-  if (verbose) {
-    fprintf(fp, "-> optimazied : %g\n", min_profile);
-  }
+  diss_printf(verbose, fp, "-> optimazied : %g\n", min_profile);
 }
 
 double frontal_numb(const int dim, const int *ptrows, const int *indcols,
@@ -290,7 +286,7 @@ double frontal_numb(const int dim, const int *ptrows, const int *indcols,
     for (int i = i1_prev; i <= i2_prev; i++) {
       k1 = ptrows[list[i]];
       k2 = ptrows[list[i] + 1];
-      i2 = std::max(i2, indic[indcols[k1]]);
+      i2 = std::max<int>((int)i2, (int)indic[indcols[k1]]);
       for (int k = (k1 + 1); k < k2; k++) {
 	  i2 = indic[indcols[k]] > i2 ? indic[indcols[k]] : i2;
       }
@@ -303,7 +299,8 @@ double frontal_numb(const int dim, const int *ptrows, const int *indcols,
 }
     
 int point_front(const int dim, const int *ptrows, const int *indcols,
-		vector<int> &new2old, vector<int> &p_front)
+		vector<int> &new2old, vector<int> &p_front, const bool verbose,
+		FILE *fp)
 {
   int nfront, ilast;
   vector<int> old2new, p_front1;
@@ -437,7 +434,7 @@ int point_front(const int dim, const int *ptrows, const int *indcols,
     } // while (k < nfront)
   } // scope for k, n etc.
   if ((p_front1[0] != 0)|| (p_front1[n] != p_front[nfront])) {
-    fprintf(stderr, "%s %d : error %d -> %d\n", __FILE__, __LINE__,
+    diss_printf(verbose, fp, "%s %d : error %d -> %d\n", __FILE__, __LINE__,
 	    p_front[nfront], p_front1[n]);
     exit(-1);
   }
@@ -468,8 +465,9 @@ int getColorMaskCSR(int *color_mask, const CSR_indirect *csr,
       color_mask[i] = 0;
     }
   }
-  if (verbose && (num_isolated > 0)) {
-    fprintf(fp, "%s %d : isolated = %d\n", __FILE__, __LINE__, num_isolated);
+  if (num_isolated > 0) {
+    diss_printf(verbose, fp,
+		"%s %d : isolated = %d\n", __FILE__, __LINE__, num_isolated);
   }
   int color = 0;
   for (int i = 0; i < dim; i++) {
@@ -491,10 +489,8 @@ int getColorMaskCSR(int *color_mask, const CSR_indirect *csr,
   } // loop : i
   // post process merge color with small size into previous color
   int reduced = 0;
-  if (verbose) {
-    fprintf(fp, "%s %d : before color = %d\n",
-	    __FILE__, __LINE__, color);
-  }
+  diss_printf(verbose, fp, "%s %d : before color = %d\n",
+	      __FILE__, __LINE__, color);
   int m = 1;
   while (m <= color) {
     int count = 0;
@@ -519,10 +515,8 @@ int getColorMaskCSR(int *color_mask, const CSR_indirect *csr,
       m++;
     }
   }
-  if (verbose) {
-    fprintf(fp, "%s %d : after fused = %d color = %d\n",
-	    __FILE__, __LINE__, reduced, color);
-  }
+  diss_printf(verbose, fp, "%s %d : after fused = %d color = %d\n",
+	      __FILE__, __LINE__, reduced, color);
   return color;
 }
 

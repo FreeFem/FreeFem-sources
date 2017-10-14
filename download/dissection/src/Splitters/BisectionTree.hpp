@@ -53,10 +53,9 @@
 #ifndef _DISSECTION_SPLITTERS_BISECTIONTREE_HPP_
 #define _DISSECTION_SPLITTERS_BISECTIONTREE_HPP_
 #include <cstdio>
-// #include "BitTools/BitManipulations.hpp"
-#include "BitManipulations.hpp"
-#include "BisectionInterConnection.hpp"
-#include "Splitter.hpp"
+#include "Splitters/BitManipulations.hpp"
+#include "Splitters/BisectionInterConnection.hpp"
+#include "Splitters/Splitter.hpp"
 #include "Algebra/CSR_matrix.hpp"
 
 namespace Dissection

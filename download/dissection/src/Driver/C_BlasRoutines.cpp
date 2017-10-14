@@ -62,7 +62,7 @@ Z matrix_infty_norm_(const int n, T *a, const int lda)
     for (int j = 0; j < n; j++) {
       err_tmp1 += blas_abs<T, U>(a[i + j * lda]);
     }
-    Z err_tmp0 = tolower<U, Z>(err_tmp1); // accuracy conversion : U to Z
+    Z err_tmp0 = conv_prec<Z, U>(err_tmp1); // accuracy conversion : U to Z
     err = err > err_tmp0 ? err : err_tmp0;
   }
   return err;
@@ -79,11 +79,24 @@ quadruple matrix_infty_norm_<octruple, octruple, quadruple>(const int n,
 							    const int lda);
 #endif
 template
+float matrix_infty_norm_<double, double, float>(const int n,
+						 double *a,
+						 const int lda);
+
+template
 double matrix_infty_norm_<complex<quadruple>,
 			  quadruple,
 			  double>(const int n,
 				  complex<quadruple> *a,
 				  const int lda);
+
+template
+float matrix_infty_norm_<complex<double>,
+			  double,
+			  float>(const int n,
+				  complex<double> *a,
+				  const int lda);
+
 #ifndef NO_OCTRUPLE
 template
 quadruple matrix_infty_norm_<complex<octruple>,
@@ -107,6 +120,14 @@ double matrix_infty_norm<quadruple, double>(const int n,
 {
   return matrix_infty_norm_<quadruple, quadruple, double>(n, a, lda);
 }
+
+template<>
+float matrix_infty_norm<double, float>(const int n,
+					double *a, const int lda)
+{
+  return matrix_infty_norm_<double, double, float>(n, a, lda);
+}
+
 #ifndef NO_OCTRUPLE
 template<>
 quadruple matrix_infty_norm<octruple, quadruple>(const int n,
@@ -122,6 +143,15 @@ double matrix_infty_norm<complex<quadruple>,
 {
   return matrix_infty_norm_<complex<quadruple>, quadruple, double>(n, a, lda);
 }
+
+template<>
+float matrix_infty_norm<complex<double>,
+			float>(const int n,
+			       complex<double> *a, const int lda)
+{
+  return matrix_infty_norm_<complex<double>, double, float>(n, a, lda);
+}
+
 #ifndef NO_OCTRUPLE
 template<>
 quadruple matrix_infty_norm<complex<octruple>,
@@ -235,6 +265,21 @@ bool full_ldlt_permute<complex<double>, double>(int *nn0, const int n0,
 						const double eps, double *fop);
 
 template
+bool full_ldlt_permute<float, float>(int *nn0, const int n0,
+				     const int n, 
+				     float *a, const int lda, 
+				       double *pivot, int *permute, 
+				     const double eps, double *fop);
+
+template
+bool full_ldlt_permute<complex<float>, float>(int *nn0, const int n0,
+					      const int n, 
+					      complex<float> *a,
+					      const int lda, 
+					      double *pivot, int *permute, 
+					      const double eps, double *fop);
+
+template
 bool full_ldlt_permute<quadruple, quadruple>(int *nn0, const int n0,
 					     const int n, 
 					     quadruple *a, const int lda, 
@@ -322,6 +367,20 @@ bool full_ldu_permute<complex<double>, double>(int *nn0, const int n0,
 					       double *pivot, int *permute, 
 					       const double eps, double *fop);
 template
+bool full_ldu_permute<float, float>(int *nn0, const int n0,
+				    const int n, 
+				    float *a, const int lda, 
+				    double *pivot, int *permute, 
+				    const double eps, double *fop);
+template
+bool full_ldu_permute<complex<float>, float>(int *nn0, const int n0,
+					       const int n, 
+					       complex<float> *a,
+					       const int lda,
+					       double *pivot, int *permute, 
+					       const double eps, double *fop);
+
+template
 bool full_ldu_permute<quadruple, quadruple>(int *nn0, const int n0,
 					    const int n, 
 					    quadruple *a, const int lda, 
@@ -384,6 +443,18 @@ void swap_sym_lower<complex<double> >(const int n, complex<double> *a,
 				      complex<double> *col_k, 
 				      complex<double> *col_km);
 template
+void swap_sym_lower<float>(const int n, float *a, const int lda, 
+			   const int k, const int km, 
+			   float *col_k, float *col_km);
+
+template
+void swap_sym_lower<complex<float> >(const int n, complex<float> *a, 
+				     const int lda, 
+				     const int k, const int km, 
+				     complex<float> *col_k, 
+				     complex<float> *col_km);
+
+template
 void swap_sym_lower<quadruple>(const int n, quadruple *a, const int lda, 
 			       const int k, const int km, 
 			       quadruple *col_k, quadruple *col_km);
@@ -443,6 +514,18 @@ void swap_sym_upper<complex<double> >(const int n, complex<double> *a,
 				      complex<double> *col_km);
 
 template
+void swap_sym_upper<float>(const int n, float *a, const int lda, 
+			   const int k, const int km, 
+			   float *col_k, float *col_km);
+
+template
+void swap_sym_upper<complex<float> >(const int n, complex<float> *a, 
+				     const int lda, 
+				     const int k, const int km, 
+				     complex<float> *col_k, 
+				     complex<float> *col_km);
+
+template
 void swap_sym_upper<quadruple>(const int n, quadruple *a, const int lda, 
 			       const int k, const int km, 
 			       quadruple *col_k, quadruple *col_km);
@@ -489,16 +572,28 @@ void swap_unsym<complex<double> >(const int n, complex<double> *a,
 				  complex<double> *col_k, 
 				  complex<double> *col_km);
 template
+void swap_unsym<float>(const int n, float *a, const int lda, 
+		       const int k, const int km, 
+		       float *col_k, float *col_km);
+
+template
+void swap_unsym<complex<float> >(const int n, complex<float> *a, 
+				 const int lda, 
+				 const int k, const int km, 
+				 complex<float> *col_k, 
+				 complex<float> *col_km);
+
+template
 void swap_unsym<quadruple>(const int n, quadruple *a, const int lda, 
 			   const int k, const int km, 
 			   quadruple *col_k, quadruple *col_km);
 
 template
 void swap_unsym<complex<quadruple> >(const int n, complex<quadruple> *a, 
-				  const int lda, 
-				  const int k, const int km, 
-				  complex<quadruple> *col_k, 
-				  complex<quadruple> *col_km);
+				     const int lda, 
+				     const int k, const int km, 
+				     complex<quadruple> *col_k, 
+				     complex<quadruple> *col_km);
 //
 
 template<typename T>
@@ -523,12 +618,6 @@ void full_ldlt(const int n, T *a, const int lda)
     }
   }
   a[(n - 1) * lda1] = one / a[(n - 1) * lda1];
-#if 0
-  d[n - 1] = one / a[(n - 1) * lda1];
-  for (int i = 0; i < n; i++) {
-    a[i * lda1] = d[i];
-  }
-#endif
 }
 
 template
@@ -536,6 +625,10 @@ void full_ldlt<double>(const int n, double *a, const int lda);
 
 template
 void full_ldlt<quadruple>(const int n, quadruple *a, const int lda);
+
+template
+void full_ldlt<float>(const int n, float *a, const int lda);
+
 
 #ifndef NO_OCTRUPLE
 template
@@ -548,6 +641,11 @@ void full_ldlt<complex<double> >(const int n,
 template
 void full_ldlt<complex<quadruple> >(const int n,
 				    complex<quadruple> *a, const int lda);
+template
+void full_ldlt<complex<float> >(const int n,
+				complex<float> *a, const int lda);
+
+
 #ifndef NO_OCTRUPLE
 template
 void full_ldlt<complex<octruple> >(const int n,
@@ -577,12 +675,6 @@ void full_ldlh(const int n, T *a, const int lda)
     }
   }
   a[(n - 1) * lda1] = one / a[(n - 1) * lda1];
-#if 0
-  d[n - 1] = one / a[(n - 1) * lda1];
-  for (int i = 0; i < n; i++) {
-    a[i * lda1] = d[i];
-  }
-#endif
 }
 
 template<>
@@ -595,6 +687,12 @@ template<>
 void full_ldlh<quadruple>(const int n, quadruple *a, const int lda)
 {
   full_ldlt<quadruple>(n, a, lda);
+}
+
+template<>
+void full_ldlh<float>(const int n, float *a, const int lda)
+{
+  full_ldlt<float>(n, a, lda);
 }
 
 #ifndef NO_OCTRUPLE
@@ -611,6 +709,11 @@ void full_ldlh<complex<double> >(const int n,
 template
 void full_ldlh<complex<quadruple> >(const int n,
 				    complex<quadruple> *a, const int lda);
+
+template
+void full_ldlh<complex<float> >(const int n,
+				complex<float> *a, const int lda);
+
 #ifndef NO_OCTRUPLE
 template
 void full_ldlh<complex<octruple> >(const int n,
@@ -636,12 +739,6 @@ void full_ldu(const int n, T *a, const int lda)
     blas_scal<T>((n - k - 1), d, &a[k * lda1 + 1], 1);
   }
   a[(n - 1) * lda1] = one / a[(n - 1) * lda1];
-  #if 0
-  d[n - 1] = one / a[(n - 1) * lda1];
-  for (int i = 0; i < n; i++) {
-    a[i * lda1] = d[i];
-  }
-  #endif
 }
 
 template
@@ -649,6 +746,11 @@ void full_ldu<double>(const int n, double *a, const int lda);
 
 template
 void full_ldu<quadruple>(const int n, quadruple *a, const int lda);
+
+template
+void full_ldu<float>(const int n, float *a, const int lda);
+
+
 #ifndef NO_OCTRUPLE
 template
 void full_ldu<octruple>(const int n, octruple *a, const int lda);
@@ -660,6 +762,10 @@ void full_ldu<complex<double> >(const int n,
 template
 void full_ldu<complex<quadruple> >(const int n,
 				   complex<quadruple> *a, const int lda);
+template
+void full_ldu<complex<float> >(const int n,
+			       complex<float> *a, const int lda);
+
 #ifndef NO_OCTRUPLE
 template
 void full_ldu<complex<octruple> >(const int n,
@@ -707,6 +813,18 @@ void FillUpperBlock<complex<quadruple> >(const int nnz,
 					 const int *indvals1,
 					 const int *new2old, const int *old_j,
 					 ColumnMatrix<complex<quadruple> > &b);
+template
+void FillUpperBlock<float>(const int nnz, float *coef, const int *prow1,
+			   const int *indcols1, const int *indvals1,
+			   const int *new2old, const int *old_j,
+			   ColumnMatrix<float> &b);
+template
+void FillUpperBlock<complex<float> >(const int nnz, complex<float> *coef,
+				     const int *prow1,
+				     const int *indcols1, const int *indvals1,
+				     const int *new2old, const int *old_j,
+				     ColumnMatrix<complex<float> > &b);
+
 //
 
 template<typename T>
@@ -797,6 +915,23 @@ void full_fw_multiprofile<complex<quadruple> >(bool isTransposed,
 					       complex<quadruple> *y,
 					       const int ldy,
 					       vector<int> &i0, double *fop);
+
+template
+void full_fw_multiprofile<float>(bool isTransposed, const int nrow,
+				  const int n0,
+				  const int ncol,
+				  float *a, const int lda,
+				  float *y, const int ldy,
+				  vector<int> &i0, double *fop);
+
+template
+void full_fw_multiprofile<complex<float> >(bool isTransposed, const int nrow,
+					    const int n0,
+					    const int ncol,
+					    complex<float> *a,
+					    const int lda,
+					    complex<float> *y, const int ldy,
+					    vector<int> &i0, double *fop);
 //
 
 template<typename T>
@@ -854,6 +989,21 @@ void full_fw_multi<complex<quadruple> >(bool isTransposed, const int nrow,
 					complex<quadruple> *y, const int ldy,
 					double *fop);
 
+template
+void full_fw_multi<float>(bool isTransposed, const int nrow, const int n0,
+			  float *a, const int lda,
+			  const int ncol,
+			  float *y, const int ldy,
+			   double *fop);
+
+template
+void full_fw_multi<complex<float> >(bool isTransposed, const int nrow,
+				    const int n0,
+				    complex<float> *a, const int lda,
+				    const int ncol,
+				    complex<float> *y, const int ldy,
+				    double *fop);
+
 //
 
 template<typename T>
@@ -899,6 +1049,20 @@ void full_fw_single<complex<quadruple> >(bool isTransposed, const int nrow,
 					complex<quadruple> *a, const int lda,
 					complex<quadruple> *y,
 					double *fop);
+
+template
+void full_fw_single<float>(bool isTransposed, const int nrow, const int n0,
+			   float *a, const int lda,
+			   float *y,
+			   double *fop);
+
+template
+void full_fw_single<complex<float> >(bool isTransposed, const int nrow,
+				     const int n0,
+				     complex<float> *a, const int lda,
+				     complex<float> *y,
+				     double *fop);
+
 //
 
 template<typename T>
@@ -944,6 +1108,20 @@ void full_bw_single<complex<quadruple> >(bool isTransposed, const int nrow,
 					complex<quadruple> *a, const int lda,
 					complex<quadruple> *y, 
 					double *fop);
+
+template
+void full_bw_single<float>(bool isTransposed, const int nrow, const int n0,
+			   float *a, const int lda,
+			   float *y,
+			   double *fop);
+
+template
+void full_bw_single<complex<float> >(bool isTransposed, const int nrow,
+				     const int n0,
+				     complex<float> *a, const int lda,
+				     complex<float> *y,
+				     double *fop);
+
 //
 
 template<typename T>
@@ -1000,6 +1178,22 @@ void full_bw_multi<complex<quadruple> >(bool isTransposed, const int nrow,
 					const int ncol,
 					complex<quadruple> *y, const int ldy,
 					double *fop);
+
+template
+void full_bw_multi<float>(bool isTransposed, const int nrow, const int n0,
+			   float *a, const int lda,
+			   const int ncol,
+			   float *y, const int ldy,
+			   double *fop);
+
+template
+void full_bw_multi<complex<float> >(bool isTransposed, const int nrow,
+				     const int n0,
+				     complex<float> *a, const int lda,
+				     const int ncol,
+				     complex<float> *y, const int ldy,
+				     double *fop);
+
 //
 
 template<typename T>
@@ -1067,6 +1261,23 @@ void SparseSchur<complex<quadruple> >(const bool isSym,
 				   ColumnMatrix<complex<quadruple> > &lower,
 				   ColumnMatrix<complex<quadruple> > &diag,
 				   double *fop);
+template
+void SparseSchur<float>(const bool isSym,
+			const int dim2, const int dim1, vector<int>& i0,
+			ColumnMatrix<float> &upper,
+			ColumnMatrix<float> &lower,
+			ColumnMatrix<float> &diag,
+			double *fop);
+
+template
+void SparseSchur<complex<float> >(const bool isSym,
+				  const int dim2, const int dim1,
+				  vector<int>& i0,
+				  ColumnMatrix<complex<float> > &upper,
+				  ColumnMatrix<complex<float> > &lower,
+				  ColumnMatrix<complex<float> > &diag,
+				  double *fop);
+
 //
 
 template<typename T>
@@ -1110,6 +1321,17 @@ void full_fwbw_single<complex<quadruple> >(const bool isTrans, const int n,
 					   const int n0, complex<quadruple> *a,
 					   const int lda,
 					   complex<quadruple> *z);
+template
+void full_fwbw_single<float>(const bool isTrans, const int n, const int n0,
+			     float *a, const int lda,
+			     float *z);
+
+template
+void full_fwbw_single<complex<float> >(const bool isTrans, const int n,
+				       const int n0, complex<float> *a,
+				       const int lda,
+				       complex<float> *z);
+
 //
 
 template<typename T>
@@ -1169,6 +1391,19 @@ void full_fwbw_multi<complex<quadruple> >(const bool isTrans,
 					  complex<quadruple> *a, const int lda,
 					  const int m, complex<quadruple> *x,
 					  const int ldx);
+template
+void full_fwbw_multi<float>(const bool isTrans,
+			    const int n, const int n0,
+			    float *a, const int lda,
+			    const int m, float *x, const int ldx);
+
+template
+void full_fwbw_multi<complex<float> >(const bool isTrans,
+				      const int n, const int n0,
+				      complex<float> *a, const int lda,
+				      const int m, complex<float> *x,
+				      const int ldx);
+
 //
 
 template<typename T>
@@ -1204,6 +1439,12 @@ void full_fwbw_part<double>(const int n,
 template
 void full_fwbw_part<quadruple>(const int n,
 			       quadruple *a, const int lda, quadruple *x);
+
+template
+void full_fwbw_part<float>(const int n,
+			    float *a, const int lda, float *x);
+
+
 #ifndef NO_OCTRUPLE
 template
 void full_fwbw_part<octruple>(const int n,
@@ -1219,6 +1460,11 @@ void full_fwbw_part<complex<quadruple> >(const int n,
 					 complex<quadruple> *a,
 					 const int lda, 
 					 complex<quadruple> *x);
+template
+void full_fwbw_part<complex<float> >(const int n, 
+				     complex<float> *a, const int lda,
+				     complex<float> *x);
+
 #ifndef NO_OCTRUPLE
 template
 void full_fwbw_part<complex<octruple> >(const int n, 
@@ -1344,6 +1590,25 @@ void SchurProfileSym<complex<quadruple> >(const int nrow, const int ncol,
 					  complex<quadruple> *s,
 					  const int size_b1,
 					  double *fop);
+
+template
+void SchurProfileSym<float>(const int nrow, const int ncol,
+			     vector<int> &i0,
+			     ColumnMatrix<float> &b,
+			     ColumnMatrix<float> &c,
+			     float *s,
+			     const int size_b1,
+			     double *fop);
+
+template
+void SchurProfileSym<complex<float> >(const int nrow, const int ncol,
+				       vector<int> &i0,
+				       ColumnMatrix<complex<float> > &b,
+				       ColumnMatrix<complex<float> > &c,
+				       complex<float> *s,
+				       const int size_b1,
+				       double *fop);
+
 //
 
 template<typename T>
@@ -1409,6 +1674,21 @@ SchurProfileUnSym<complex<quadruple> >(const int nrow, const int ncol,
 				       ColumnMatrix<complex<quadruple> > &c,
 				       complex<quadruple> *s, const int size_b1,
 				       double *fop);
+template
+void SchurProfileUnSym<float>(const int nrow, const int ncol,
+			       vector<int> &i0,
+			       ColumnMatrix<float> &b,
+			       ColumnMatrix<float> &c,
+			       float *s, const int size_b1, double *fop);
+
+template
+void SchurProfileUnSym<complex<float> >(const int nrow, const int ncol,
+					 vector<int> &i0,
+					 ColumnMatrix<complex<float> > &b,
+					 ColumnMatrix<complex<float> > &c,
+					 complex<float> *s, const int size_b1,
+					 double *fop);
+
 //
 
 // Z for perturbation has lower precision than T (real or complex valued)
@@ -1422,7 +1702,7 @@ void full_fwbw_perturb_single(const int n,
   //  T *upper, *lower, *schur;
   const T one(1.0);
   const T none(-1.0);
-  const T Teps = tohigher<T, Z>(eps);
+  const T Teps = conv_prec<T, Z>(eps);
   int n1;
   if (dim_augkern < n) {
     n1 = n - dim_augkern;
@@ -1557,6 +1837,16 @@ void full_fwbw_perturb_single<quadruple, double>(const int n,
 						 const int dim_augkern,
 						 const double &eps,
 						 bool flag_sym);
+
+template
+void full_fwbw_perturb_single<double, float>(const int n,
+					     double *a, const int lda, 
+					     double *a_fact,
+					     double *x,
+					     const int dim_augkern,
+					     const float &eps,
+					     bool flag_sym);
+
 #ifndef NO_OCTRUPLE
 template
 void full_fwbw_perturb_single<octruple, quadruple>(const int n,
@@ -1576,6 +1866,16 @@ void full_fwbw_perturb_single<complex<quadruple>,
 				      const int dim_augkern,
 				      const double &eps,
 				      bool flag_sym);
+template
+void full_fwbw_perturb_single<complex<double>,
+			      float>(const int n,
+				     complex<double> *a, const int lda,
+				     complex<double> *a_fact,
+				     complex<double> *x,
+				     const int dim_augkern,
+				     const float &eps,
+				     bool flag_sym);
+
 #ifndef NO_OCTRUPLE
 template
 void full_fwbw_perturb_single<complex<octruple>,
@@ -1598,7 +1898,7 @@ void full_fwbw_perturb_multi(const int n, const int m,
   //  T *upper, *lower, *schur, *v;
   const T one(1.0);
   const T none(-1.0);
-  const T Teps = tohigher<T, Z>(eps);
+  const T Teps = conv_prec<T, Z>(eps);
   if (dim_augkern >= n) {
 // forward
 //    alpha = one;
@@ -1734,6 +2034,16 @@ void full_fwbw_perturb_multi<quadruple, double>(const int n,
 						const int dim_augkern,
 						const double &eps,
 						bool flag_sym);
+template
+void full_fwbw_perturb_multi<double, float>(const int n,
+					    const int m,
+					    double *a, const int lda, 
+					    double *a_fact,
+					    double *x,
+					    const int dim_augkern,
+					    const float &eps,
+					    bool flag_sym);
+
 #ifndef NO_OCTRUPLE
 template
 void full_fwbw_perturb_multi<octruple, quadruple>(const int n,
@@ -1755,6 +2065,18 @@ void full_fwbw_perturb_multi<complex<quadruple>,
 				     const int dim_augkern,
 				     const double &eps,
 				     bool flag_sym);
+
+template
+void full_fwbw_perturb_multi<complex<double>,
+			     float>(const int n,
+				    const int m,
+				    complex<double> *a, const int lda, 
+				    complex<double> *a_fact,
+				    complex<double> *x,
+				    const int dim_augkern,
+				    const float &eps,
+				    bool flag_sym);
+
 #ifndef NO_OCTRUPLE
 template
 void full_fwbw_perturb_multi<complex<octruple>,
@@ -1768,156 +2090,6 @@ void full_fwbw_perturb_multi<complex<octruple>,
 					bool flag_sym);
 #endif
 
-#if 0
-template<>
-void full_sym_2x2BK<double>(int n, double *a, double *dd1,
-			    int *pivot_width, int *permute)
-{
-  double *v, *col_k, *col_km;
-  double *dd0;
-  double *aa;
-  const double bk_const = (1.0 + sqrt(17.0)) / 8.0;
-  const int lda = n;
-  const int lda1 = n + 1;
-  int k, kk, km, kn;
-  double colmax, rowmax, deta;
-  double alpha, beta;
-  
-  v = new double[n];
-  col_k = new double[n];
-  col_km = new double[n];
-  dd0 = new double[n];
-
-  for (int i = 0; i < n; i++) {
-    dd1[i] = 0.0;
-  }
-  for (int i = 0; i < n; i++) {
-    permute[i] = i;
-  }
-
-  k = 0;
-  while (k < n) {
-    bool pivot_flag = false;
-    if (k == (n - 1)) {
-      pivot_width[k] = 1;
-    }
-    else {
-      {
-        double vmax = 0.0;
-        for (int i = k + 1 ; i < n; i++) {
-	  double xtmp = fabs(a[i + k * n]);
-          if (vmax < xtmp) {
-            km = i;
-            vmax = xtmp;
-          }
-        }
-        colmax = vmax;
-      }
-      if (a[k * lda1] >= bk_const * colmax) {
-        pivot_width[k] = 1;
-      }
-      else {
-	{
-	  double vmax = 0.0;
-	  for (int i = k + 1 ; i < n; i++) {
-	    double xtmp = fabs(a[k + i * n]);
-	    if (vmax < xtmp) {
-	      kn = i;
-	      vmax = xtmp;
-	    }
-	  }
-	  rowmax = vmax;
-	}
-	if (rowmax * fabs(a[k * lda1]) >= (bk_const * colmax * colmax)) {
-	  pivot_width[k] = 1;
-	}
-	else if (fabs(a[km * lda1]) >= (bk_const * rowmax)) {
-	  pivot_width[k] = 1;
-	  kk = permute[km];
-	  permute[km] = permute[k];
-	  permute[k] = kk;
-	  swap_sym_lower<double>(n, a, lda, k, km, col_k, col_km);
-	}
-	else {
-	  pivot_width[k] = 20;
-	  pivot_width[k + 1] = 21;
-	  pivot_flag = true;
-	  swap_sym_lower<double>(n, a, lda, (k+ 1), km, col_k, col_km);
-	}
-      }
-    }  // if (k == (n - 1)) {
-    if (pivot_flag) {
-      dd0[k] = 1.0 / a[k * lda1];
-      a[k * lda1] = dd0[k];
-      if (k == (n - 1)) {
-	break;
-      }
-      alpha = (-dd0[k]);
-      blas_syr<double>(CblasLower, (n - k - 1), alpha, &a[k + 1 + k * lda], 1,
-	       &a[(k + 1) * lda1], n);
-      blas_scal<double>((n - k  -1), dd0[k], &a[k + 1 + k * lda], 1);
-      k++;
-    }
-    else { // if (pivot_flag)
-      // computation of inverse of 2x2 matrix
-      deta = (a[k * lda1] * a[(k + 1) * lda1] -
-	      a[(k + 1) + k * lda] * a[k + (k + 1) * lda]);
-      deta = 1.0 / deta;
-      dd0[k] = a[(k + 1) * lda1] * deta;
-      dd0[k + 1] = a[k * lda1] * deta;
-      dd1[k] = (-a[(k + 1) + k * lda]) * deta;
-      dd1[k + 1] = dd1[k];
-      a[k * lda1] = dd0[k];
-      a[(k + 1) * lda1] = dd1[k];
-      a[(k + 1) * lda1 + k] = 0.0;
-      if (k == (n - 2)) {
-	break;
-      }
-      aa[0] = dd0[k];     // (0 ,0) 
-      aa[2] = dd1[k];     // (0, 1)
-      aa[1] = dd1[k];     // (1, 0)
-      aa[3] = dd0[k + 1]; // (1, 1)
-      //
-      alpha = (-aa[0]);
-      blas_syr<double>(CblasLower, (n - k - 2), alpha, &a[k + 2 + k * lda], 1,
-	       &a[(k + 2) * lda1], n);
-      //
-      alpha = (-aa[3]);
-      blas_syr<double>(CblasLower, (n - k - 2), alpha, &a[k + 2 + (k + 1) * lda], 1,
-	       &a[(k + 2) * lda1], n);
-      //
-      alpha = (-aa[2]);
-      blas_syr2<double>(CblasLower, (n - k - 2), alpha, &a[k + 2 + k * lda], 1,
-		&a[k + 2 + (k + 1) * lda], 1,
-		&a[(k + 2) * lda1], n);
-      // copy lower to upper to save working palce
-      for (int i = k + 2; i < n; i++) {
-	for (int j = k; j <= k + 2; j++) { // three lines?
-	  a[j + i * lda] = a[i + j * lda];
-	}
-      }
-      alpha = 1.0;
-      beta = 0.0;
-      blas_gemm<double>(CblasTrans, CblasNoTrans, (n - k - 2), 2, 2, alpha,
-		&a[k + (k + 2) * lda], n, aa, 2, beta,
-		&a[(k + 2) + k * lda], n);
-      k += 2;
-    } // if (pivot_flag)
-  } // while (k < n)
-  // symmetrize
-  for (int j = 1; j < n; j++) {
-    for (int i = 0; i < j; i++) {
-      a[i + j * n] = a[j + i * n];
-    }
-  }
-   
-  delete [] v;
-  delete [] col_k;
-  delete [] col_km;
-  delete [] dd0;
-}
-
-#else
 
 template<typename T>
 void full_sym_2x2BK(int n, T *a, T *dd1,
@@ -1931,7 +2103,6 @@ template
 void full_sym_2x2BK<double>(int n, double *a,
 			    double *dd1,
 			    int *pivot_width, int *permute);
-#endif
 template
 void full_sym_2x2BK<complex<double> >(int n, complex<double> *a,
 				      complex<double> *dd1,
@@ -1943,6 +2114,15 @@ template
 void full_sym_2x2BK<complex<quadruple> >(int n, complex<quadruple> *a,
 					 complex<quadruple> *dd1,
 					 int *pivot_width, int *permute);
+
+template
+void full_sym_2x2BK<float>(int n, float *a,
+			   float *dd1,
+			   int *pivot_width, int *permute);
+template
+void full_sym_2x2BK<complex<float> >(int n, complex<float> *a,
+				     complex<float> *dd1,
+				     int *pivot_width, int *permute);
 //
 template<typename T>
 void C_gemm_symm(const int ncol, const int nrow, const T &alpha, 
@@ -2021,4 +2201,19 @@ void C_gemm_symm<complex<quadruple> >(const int ncol, const int nrow,
 				   const complex<quadruple> *b, const int ldb,
 				   const complex<quadruple> &beta,
 				   complex<quadruple> *c, const int ldc);
+
+template
+void C_gemm_symm<float>(const int ncol, const int nrow, const float &alpha, 
+			const float *a, const int lda, 
+			const float *b, const int ldb,
+			const float &beta,
+			float *c, const int ldc);
+
+template
+void C_gemm_symm<complex<float> >(const int ncol, const int nrow, 
+				  const complex<float> &alpha, 
+				  const complex<float> *a, const int lda, 
+				  const complex<float> *b, const int ldb,
+				  const complex<float> &beta,
+				  complex<float> *c, const int ldc);
 //

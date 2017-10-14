@@ -54,10 +54,9 @@
 # include <list>
 # include <algorithm>
 # include <cassert>
-// # include <iostream>
-# include "BitTools/BitManipulations.hpp"
+# include "Splitters/BitManipulations.hpp"
 # include "Compiler/DebugUtils.hpp"
-# include "BisectionInterConnection.hpp"
+# include "Splitters/BisectionInterConnection.hpp"
 using namespace Dissection;
 
 // ==============================================================
@@ -90,15 +89,6 @@ Strip::inside(const Strip& T, unsigned& decal) const
   return flg;
 }
 // --------------------------------------------------------------
-#if 0
-std::ostream& 
-operator << (std::ostream& out, const Dissection::Strip& strp)
-{
-    out << "Strip(first " << strp.begin_dst << ", size " 
-	<< strp.width << " )";
-    return out;
-}
-#endif
 // ==============================================================
 // ==                     SetOfStrips methods                  ==
 // ==============================================================
@@ -301,7 +291,7 @@ SetOfStrips::para_union(const SetOfStrips& strips,
   unsigned parFromStrip; // Number from which is build the strip
   unsigned begCurStrip, szCurStrip, endCurStrip;
 
-  begCurStrip=std::min((*itS1).begin_dst,(*itS2).begin_dst);
+  begCurStrip=std::min<unsigned>((*itS1).begin_dst,(*itS2).begin_dst);
   if ((*itS1).begin_dst == (*itS2).begin_dst)
   {// First strip is sequential in this case :
     curStripSeq = true;    
@@ -379,7 +369,7 @@ SetOfStrips::para_union(const SetOfStrips& strips,
       // |--|                <---- The current union strip
 
       begCurStrip=
-	  std::min((*itS1).begin_dst,(*itS2).begin_dst);
+	std::min<unsigned>((*itS1).begin_dst,(*itS2).begin_dst);
       // In this case, the next strip is sequential only
       // if both strips to union begin with same indices
       curStripSeq=((*itS1).begin_dst==(*itS2).begin_dst);
@@ -463,22 +453,6 @@ SetOfStrips::para_union(const SetOfStrips& strips,
   // End of the algorithm....
 }
 // ............................................................
-#if 0
-std::ostream& operator << (std::ostream& out, 
-			   const Dissection::SetOfStrips& set)
-{
-    out << "[ ";
-    for (Dissection::SetOfStrips::const_iterator itS = set.begin();
-	 itS != set.end(); )
-    {
-	out << (*itS);
-	itS++;
-	if (itS != set.end()) out << ", ";
-    }
-    out << " ]";
-    return out;
-}
-#endif
 // ==============================================================
 // ==          FathersStrips methods implementation          ==
 // ==============================================================

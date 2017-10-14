@@ -44,6 +44,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 DIRECTORY  = Algebra
 SOURCESCPP = SparseMatrix.cpp \

@@ -49,6 +49,7 @@
 //
 
 #include <cstdlib>
+#include <algorithm>
 #include "Driver/TridiagBlockMatrix.hpp"
 #include "Driver/C_BlasRoutines.hpp"
 #include "Driver/C_KernDetect.hpp"
@@ -58,6 +59,7 @@
 #include "Compiler/elapsed_time.hpp"
 #include "Algebra/SparseRenumbering.hpp"
 #include "Algebra/VectorArray.hpp"
+#include "Compiler/DissectionIO.hpp"
 
 template<typename T, typename U>
 const T TridiagBlockMatrix<T, U>::_one = T(1.0);
@@ -141,7 +143,7 @@ void TridiagBlockMatrix<T, U>::SymbolicFact(const int color,
     map_eqn[remap_eqn[i]] = i; // map : old(original) to new (mapped) index
   }
   RenumberCSR(dim_, remap_eqn, map_eqn, 
-	      prow_, indcols_, prow1, indcols1);
+	      prow_, indcols_, prow1, indcols1, _verbose, _fp);
 
   vector<int> new2old, old2new;
   new2old.resize(dim_);
@@ -160,7 +162,7 @@ void TridiagBlockMatrix<T, U>::SymbolicFact(const int color,
       _new2old[i + dim1 + dim3] = remap_eqn[i + dim1];
     }
     _nfront = point_front(dim1, &prow1[0], &indcols1[0], new2old,
-			 _p_front);
+			  _p_front, _verbose, _fp);
   }
   else {
     _nfront = 1;
@@ -183,17 +185,16 @@ void TridiagBlockMatrix<T, U>::SymbolicFact(const int color,
   //  remap_eqn.clear();
   map_eqn.clear();
 
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : SymbolicFact : %d ", __FILE__, __LINE__, _nb);
-    fprintf(_fp,
-	    "color = %d dim = %d = %d + %d + %d nfront = %d : ", 
-	  color, _dim, dim1, dim2, dim3, _nfront);
-    for (int i = 0; i <= _nfront; i++) {
-      fprintf(_fp, "%d ", _p_front[i]);
-    }
-    fprintf(_fp, "\n");
-  } // if (_verbose)
+  diss_printf(_verbose, _fp,
+	      "%s %d : SymbolicFact : %d ", __FILE__, __LINE__, _nb);
+  diss_printf(_verbose, _fp,
+	      "color = %d dim = %d = %d + %d + %d nfront = %d : ", 
+	      color, _dim, dim1, dim2, dim3, _nfront);
+  for (int i = 0; i <= _nfront; i++) {
+    diss_printf(_verbose, _fp, "%d ", _p_front[i]);
+  }
+  diss_printf(_verbose, _fp, "\n");
+
   _ptRows.resize(_dim + 1);
   _indCols.resize(_nnz);
   _indVals.resize(_nnz);
@@ -211,7 +212,7 @@ void TridiagBlockMatrix<T, U>::SymbolicFact(const int color,
     bool shrink_flag = (_dim < dim_);
     RenumberCSR(shrink_flag,
 		_dim, nnz_, new2old, old2new, prow_, indcols_, indvals_, 
-	      _ptRows, _indCols, _indVals);
+		_ptRows, _indCols, _indVals, _verbose, _fp);
   }
   new2old.clear();
   old2new.clear();
@@ -223,11 +224,11 @@ void TridiagBlockMatrix<T, U>::SymbolicFact(const int color,
 
   if (_isSymmetric) {
     _nop = 0.0;
-    n2 = (double)(_p_front[1] - _p_front[0]);
+    n2 = (long long)(_p_front[1] - _p_front[0]);
     _nop += (n2 * n2 * n2) / 3.0;
     for (int n = 1; n < _nfront; n++) {
       n1 = n2;
-      n2 = (double)(_p_front[n + 1] - _p_front[n]);
+      n2 = (long long)(_p_front[n + 1] - _p_front[n]);
       _nop += (n1 * n1 * n2) / 3.0;
       _nop += (n1 * n2 * n2) / 3.0;
       _nop += (n2 * n2 * n2) / 3.0;
@@ -235,11 +236,11 @@ void TridiagBlockMatrix<T, U>::SymbolicFact(const int color,
   }
   else {
     _nop = 0.0;
-    n2 = (double)(_p_front[1] - _p_front[0]);
+    n2 = (long long)(_p_front[1] - _p_front[0]);
     _nop += (2.0 * n2 * n2 * n2) / 3.0;
     for (int n = 1; n < _nfront; n++) {
       n1 = n2;
-      n2 = (double)(_p_front[n + 1] - _p_front[n]);
+      n2 = (long long)(_p_front[n + 1] - _p_front[n]);
       _nop += (2.0 * n1 * n1 * n2) / 3.0;
       _nop += (2.0 * n1 * n2 * n2) / 3.0;
       _nop += (2.0 * n2 * n2 * n2) / 3.0;
@@ -284,7 +285,17 @@ void TridiagBlockMatrix<quadruple>::SymbolicFact(const int color,
 						 const int *indcols_,
 						 const int *indvals_);
 template
-void TridiagBlockMatrix<complex<double>, double>::
+void TridiagBlockMatrix<float>::SymbolicFact(const int color,
+					      const int color_max,
+					      int *color_mask,
+					      const int dim_,
+					      const int nnz_,
+					      const int *prow_,
+					      const int *indcols_,
+					      const int *indvals_);
+
+template void
+TridiagBlockMatrix<complex<double>, double>::
 SymbolicFact(const int color,
 	     const int color_max,
 	     int *color_mask,
@@ -304,13 +315,383 @@ SymbolicFact(const int color,
 	     const int *prow_,
 	     const int *indcols_,
 	     const int *indvals_);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+SymbolicFact(const int color,
+	     const int color_max,
+	     int *color_mask,
+	     const int dim_,
+	     const int nnz_,
+	     const int *prow_,
+	     const int *indcols_,
+	     const int *indvals_);
 //
+
+
+template<typename T, typename U>
+void TridiagBlockMatrix<T, U>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<T> *diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+  fprintf(stderr, "%s %d : only specialized template version is impelemneted\n",
+	  __FILE__, __LINE__);
+}
+
+template<>
+void TridiagBlockMatrix<double>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<double> *diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+#if 1
+  ColumnMatrix<quadruple>* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<quadruple>[_nfront];
+  TridiagNumericFact_<double, double,
+		      quadruple, quadruple>(pivot,
+#else
+  ColumnMatrix<double>* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<double>[_nfront];
+  TridiagNumericFact_<double, double,
+		      double, double>(pivot,
+#endif					    
+					    eps_pivot,
+					    dim_aug_kern,
+					    diag_block_save,
+					    num_null_aug,
+					    nopd,
+					    higher_precision,
+					    _verbose,
+					    _fp,
+					    _dim,
+					    _isSymmetric,
+					    _nfront,
+					    _p_front,
+					    _p_diag,
+					    _p_upper,
+					    _coef,
+					    _ptRows,
+					    _indCols, // column_numb
+					    _indVals, // column_numb
+					    _num_null,
+					    _permute,
+					    _permute_ginv,
+					    _diag_blocks,
+					    diag_blocks_high,
+					    _upper_blocks,
+					    _lower_blocks,
+					    high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+					    ,
+					  _factorized_whole
+#endif
+					  );
+  for (list<int>::iterator it = high_blocks.begin(); it != high_blocks.end();
+       ++it) {
+    //    fprintf(stderr, "%s %d : %d\n", __FILE__, __LINE__, (*it));
+    diag_blocks_high[(*it)].free();
+  }
+  delete [] diag_blocks_high;
+  high_blocks.clear();
+#if 0
+  fprintf(stderr, "%s %d : _num_null[%d]= ", __FILE__, __LINE__, _nfront);
+  for (int i = 0; i < _nfront; i++) {
+    fprintf(stderr, "%d ", _num_null[i]);
+  }
+  fprintf(stderr, "\n");
+#endif
+}
+
+template<>
+void TridiagBlockMatrix<complex<double>, double>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<complex<double> > *diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+  ColumnMatrix<complex<quadruple> >* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<complex<quadruple> >[_nfront];
+  TridiagNumericFact_<complex<double>, double,
+		      complex<quadruple>, quadruple>(pivot,
+					    eps_pivot,
+					    dim_aug_kern,
+					    diag_block_save,
+					    num_null_aug,
+					    nopd,
+					    higher_precision,
+					    _verbose,
+					    _fp,
+					    _dim,
+					    _isSymmetric,
+					    _nfront,
+					    _p_front,
+					    _p_diag,
+					    _p_upper,
+					    _coef,
+					    _ptRows,
+					    _indCols, // column_numb
+					    _indVals, // column_numb
+					    _num_null,
+					    _permute,
+					    _permute_ginv,
+					    _diag_blocks,
+					    diag_blocks_high,
+					    _upper_blocks,
+					    _lower_blocks,
+					    high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+					    ,
+					  _factorized_whole
+#endif
+					  );
+  for (list<int>::iterator it = high_blocks.begin(); it != high_blocks.end();
+       ++it) {
+    diag_blocks_high[(*it)].free();
+  }
+  delete [] diag_blocks_high;
+  high_blocks.clear();
+}
+
+template<>
+void TridiagBlockMatrix<quadruple>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<quadruple> *diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+  ColumnMatrix<quadruple>* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<quadruple>[_nfront];
+  TridiagNumericFact_<quadruple, quadruple,
+		      quadruple, quadruple>(pivot,
+					    eps_pivot,
+					    dim_aug_kern,
+					    diag_block_save,
+					    num_null_aug,
+					    nopd,
+					    false,     // higher_precision,
+					    _verbose,
+					    _fp,
+					    _dim,
+					    _isSymmetric,
+					    _nfront,
+					    _p_front,
+					    _p_diag,
+					    _p_upper,
+					    _coef,
+					    _ptRows,
+					    _indCols, // column_numb
+					    _indVals, // column_numb
+					    _num_null,
+					    _permute,
+					    _permute_ginv,
+					    _diag_blocks,
+					    diag_blocks_high,
+					    _upper_blocks,
+					    _lower_blocks,
+					    high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+					    ,
+					  _factorized_whole
+#endif
+					  );
+  for (list<int>::iterator it = high_blocks.begin(); it != high_blocks.end();
+       ++it) {
+    diag_blocks_high[(*it)].free();
+  }
+  delete [] diag_blocks_high;
+  high_blocks.clear();
+
+}
+
+template<>
+void TridiagBlockMatrix<complex<quadruple>, quadruple>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<complex<quadruple> >*diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+  ColumnMatrix<complex<quadruple> >* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<complex<quadruple> >[_nfront];
+  TridiagNumericFact_<complex<quadruple>, quadruple,
+		      complex<quadruple>, quadruple>(pivot,
+					    eps_pivot,
+					    dim_aug_kern,
+					    diag_block_save,
+					    num_null_aug,
+					    nopd,
+					    false,     // higher_precision,
+					    _verbose,
+					    _fp,
+					    _dim,
+					    _isSymmetric,
+					    _nfront,
+					    _p_front,
+					    _p_diag,
+					    _p_upper,
+					    _coef,
+					    _ptRows,
+					    _indCols, // column_numb
+					    _indVals, // column_numb
+					    _num_null,
+					    _permute,
+					    _permute_ginv,
+					    _diag_blocks,
+					    diag_blocks_high,
+					    _upper_blocks,
+					    _lower_blocks,
+					    high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+					    ,
+					  _factorized_whole
+#endif
+					  );
+  for (list<int>::iterator it = high_blocks.begin(); it != high_blocks.end();
+       ++it) {
+    diag_blocks_high[(*it)].free();
+  }
+  delete [] diag_blocks_high;
+  high_blocks.clear();
+
+}
+
+template<>
+void TridiagBlockMatrix<float>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<float> *diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+  ColumnMatrix<double>* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<double>[_nfront];
+  TridiagNumericFact_<float, float,
+		      double, double>(pivot,
+				      eps_pivot,
+				      dim_aug_kern,
+				      diag_block_save,
+				      num_null_aug,
+				      nopd,
+				      higher_precision,
+				      _verbose,
+				      _fp,
+				      _dim,
+				      _isSymmetric,
+				      _nfront,
+				      _p_front,
+				      _p_diag,
+				      _p_upper,
+				      _coef,
+				      _ptRows,
+				      _indCols, // column_numb
+				      _indVals, // column_numb
+				      _num_null,
+				      _permute,
+				      _permute_ginv,
+				      _diag_blocks,
+				      diag_blocks_high,
+				      _upper_blocks,
+				      _lower_blocks,
+				      high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+				      ,
+				      _factorized_whole
+#endif
+				      );
+  for (list<int>::iterator it = high_blocks.begin(); it != high_blocks.end();
+       ++it) {
+    //    fprintf(stderr, "%s %d : %d\n", __FILE__, __LINE__, (*it));
+    diag_blocks_high[(*it)].free();
+  }
+  delete [] diag_blocks_high;
+  high_blocks.clear();
+#if 0
+  fprintf(stderr, "%s %d : _num_null[%d]= ", __FILE__, __LINE__, _nfront);
+  for (int i = 0; i < _nfront; i++) {
+    fprintf(stderr, "%d ", _num_null[i]);
+  }
+  fprintf(stderr, "\n");
+#endif
+}
+
+template<>
+void TridiagBlockMatrix<complex<float>, float>::
+TridiagNumericFact(double *pivot,
+		   const double eps_pivot,
+		   const int dim_aug_kern,
+		   ColumnMatrix<complex<float> > *diag_block_save,
+		   vector<int> &num_null_aug,
+		   double *nopd, const bool higher_precision)
+{
+  ColumnMatrix<complex<double> >* diag_blocks_high;
+  list<int> high_blocks;
+  diag_blocks_high = new ColumnMatrix<complex<double> >[_nfront];
+  TridiagNumericFact_<complex<float>, float,
+		      complex<double>, double>(pivot,
+					       eps_pivot,
+					       dim_aug_kern,
+					       diag_block_save,
+					       num_null_aug,
+					       nopd,
+					       higher_precision,
+					       _verbose,
+					       _fp,
+					       _dim,
+					       _isSymmetric,
+					       _nfront,
+					       _p_front,
+					       _p_diag,
+					       _p_upper,
+					       _coef,
+					       _ptRows,
+					       _indCols, // column_numb
+					       _indVals, // column_numb
+					       _num_null,
+					       _permute,
+					       _permute_ginv,
+					       _diag_blocks,
+					       diag_blocks_high,
+					       _upper_blocks,
+					       _lower_blocks,
+					       high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+					       ,
+					       _factorized_whole
+#endif
+					  );
+  for (list<int>::iterator it = high_blocks.begin(); it != high_blocks.end();
+       ++it) {
+    diag_blocks_high[(*it)].free();
+  }
+  delete [] diag_blocks_high;
+  high_blocks.clear();
+}
 
 template<typename T, typename U>
 void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
 					   const double eps_pivot,
 					   double *pivot,
 					   const bool kernel_detection,
+					   const bool higher_precision,
 					   const int dim_aug_kern,
 					   const U eps_machine,
 					   double *nopd)
@@ -330,7 +711,7 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
   TridiagNumericFact(pivot, eps_pivot,
 		     dim_aug_kern,
 		     diag_block_save,
-		     num_null_aug, nopd);
+		     num_null_aug, nopd, higher_precision);
   nsing = 0;
   for (int n = 0; n < _nfront; n++) {
     nsing += _num_null[n];
@@ -348,17 +729,16 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
   }
   else { // if (nsing > 0)
     _detected = false; // initialization : detection is not activated
-    if (_verbose) {
-      fprintf(_fp, "%s %d nsing  = %d nfront=%d : ",
-	      __FILE__, __LINE__, nsing, _nfront);
-      for (int n = 0; n < _nfront; n++) {
-	fprintf(_fp, "%d/%d ", _num_null[n], (_p_front[n + 1] - _p_front[n]));
-	if (num_null_aug[n] > 0) {
-	  fprintf(_fp, "(+%d)", num_null_aug[n]);
-	}
+    diss_printf(_verbose, _fp, "%s %d nsing  = %d nfront=%d : ",
+		__FILE__, __LINE__, nsing, _nfront);
+    for (int n = 0; n < _nfront; n++) {
+      diss_printf(_verbose, _fp, "%d/%d ",
+		  _num_null[n], (_p_front[n + 1] - _p_front[n]));
+      if (num_null_aug[n] > 0) {
+	diss_printf(_verbose, _fp, "(+%d)", num_null_aug[n]);
       }
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    }
+    diss_printf(_verbose, _fp, "\n");
     s22.init(nsing, nsing);
     perm.resize(nsing);
     list_sing.resize(nsing);
@@ -371,21 +751,17 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
 	list_sing[nsing] = _permute[i + offset] + offset;  
       }
     }
-#if 0
-    if (_verbose) {
-      fprintf(_fp, "%s %d : list_sing : %d\n", __FILE__, __LINE__, nsing);
-      for (int i = 0; i < nsing; i++) {
-	fprintf(_fp, "%d ", list_sing[i]);
-      }
-      fprintf(_fp, "\n");
-    }
-#endif
     a12.init(_dim, nsing);
     a21.init(_dim, nsing);
     a22.init(nsing, nsing);
     ComputeSchurComplement(nsing, list_sing, a12, a21, a22);
 
-    eps_piv = eps_pivot; // initial is given by user and then repeated
+    if (higher_precision) {
+      eps_piv = machine_epsilon<double, double>();
+    }
+    else {
+      eps_piv = eps_pivot; // initial is given by user and then repeated
+    }
     flag_repeat_piv = true;
     int count_repeat = 0;
     while (flag_repeat_piv) {
@@ -408,10 +784,9 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
 	full_ldu_permute<T, U>(&nn0, n0, nsing, s22.addrCoefs(), nsing,
 			       &pivot_val, &perm[0], eps_piv, &fop);
       }
-      if (_verbose) {
-	fprintf(_fp, "%s %d factorize dim = %d eps_piv = %g -> sing = %d\n",
-		__FILE__, __LINE__, nsing, eps_piv, nn0);
-      }
+      diss_printf(_verbose, _fp,
+		  "%s %d factorize dim = %d eps_piv = %g -> sing = %d\n",
+		  __FILE__, __LINE__, nsing, eps_piv, nn0);
       //
       if (((nsing - dim_aug_kern) >= nn0) || (eps_piv < TOL_PIVOT)) {
 	flag_repeat_piv = false;
@@ -423,22 +798,9 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
       }
     } // while (flag_repeat_piv)
     n0 = nn0;
-    if (_verbose) {
-      fprintf(_fp, "%s %d : n0 = %d count_repeat = %d\n", __FILE__, __LINE__,
-	    n0, count_repeat);
-    }
-#if 0
-    if (_verbose) {
-      fprintf(_fp, "%s %d : s22() dim = %d\n", __FILE__, __LINE__, nsing);
-      for (int i = 0; i < nsing; i++) {
-	fprintf(_fp, "%d ", i);
-	for (int j = 0; j < nsing; j++) {
-	  printscalar<T>(_fp, s22(i, j));
-	}
-	fprintf(_fp, "\n");
-      }
-    }
-#endif
+    diss_printf(_verbose, _fp,
+		"%s %d : n0 = %d count_repeat = %d\n", __FILE__, __LINE__,
+		n0, count_repeat);
     if ((n0 == 0) && (count_repeat == 0)) {
       _n0 = 0;
       _detected = true;  // without kernel check
@@ -566,22 +928,6 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
 	list_sing[nsing] = _permute[i + offset] + offset;
       }
     }
-#if 0
-    if (_verbose) {
-      fprintf(_fp, "%s %d : list_sing in tridiag: nsing = %d : ",
-	      __FILE__, __LINE__, nsing);
-      for (int i = 0; i < nsing; i++) {
-	fprintf(_fp, "%d ", list_sing[i]);
-      }
-      fprintf(_fp, "\n");
-      fprintf(_fp, "%s %d : singular entries : nsing = %d : ",
-	      __FILE__, __LINE__, nsing);
-      for (int i = 0; i < nsing; i++) {
-	fprintf(_fp, "%d ", _new2old[list_sing[i]]);
-      }
-      fprintf(_fp, "\n");
-    } // if (_verbose)
-#endif
     a12.free();
     a21.free();
     a21.free();
@@ -605,29 +951,6 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
       a21.init(_dim, nsing);
       a22.init(nsing, nsing);
       ComputeSchurComplement(nsing, list_sing, a12, a21, a22);
-#if 0
-      // debug : begin
-      if (_verbose) {
-	fprintf(_fp, "%s %d : a22() dim = %d\n", __FILE__, __LINE__, nsing);
-	for (int i = 0; i < nsing; i++) {
-	  fprintf(_fp, "%d : ", i);
-	  for (int j = 0; j < nsing; j++) {
-	    printscalar<T>(_fp, a22(i, j));
-	  }
-	  fprintf(_fp, "\n");
-	}
-	
-	fprintf(_fp, "%s %d : a12() dim = %d nsing = %d \n",
-		__FILE__, __LINE__, _dim, nsing);
-	for (int j = 0; j < nsing; j++) {
-	  fprintf(_fp, "%d : ", j);
-	  for (int  i = 0; i < _dim; i++) {
-	    printscalar<T>(_fp, a12(i, j));
-	  }
-	  fprintf(_fp, "\n");
-	}
-      } // if (_verbose)
-#endif
     // debug : end
       pivot_val = 0.0;
       for (int i = 0; i < nsing; i++) {
@@ -635,18 +958,17 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
 	const double tmp = blas_abs<T, double>(a22(i, i));  
 	pivot_val = tmp > pivot_val ? tmp : pivot_val;
       }
-      if (_verbose) {
-	fprintf(_fp, "%s %d : _n0 = %d nsing = %d\n",
-		__FILE__, __LINE__, _n0, nsing);
-      }
+      diss_printf(_verbose, _fp, "%s %d : _n0 = %d nsing = %d\n",
+		  __FILE__, __LINE__, _n0, nsing);
       // factorize Schur complement by knowing the dimension of the kernle : _n0
       if (_isSymmetric) {
 	double fop;
 	bool flag;
 	flag = full_ldlt_permute<T, U>(&nn0, _n0, nsing, a22.addrCoefs(), nsing,
 				       &pivot_val, &perm[0], machine_eps, &fop);
-	if (_verbose && !flag) {
-	  fprintf(_fp, "%s %d : full_ldlt_permute fails : %d != %d\n",
+	if (!flag) {
+	  diss_printf(_verbose, _fp,
+		      "%s %d : full_ldlt_permute fails : %d != %d\n",
 		  __FILE__, __LINE__, _n0, nn0);
 	}
       }
@@ -655,21 +977,20 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
 	bool flag;
 	flag = full_ldu_permute<T, U>(&nn0, _n0, nsing, a22.addrCoefs(), nsing,
 				      &pivot_val, &perm[0], machine_eps, &fop);
-	if (_verbose && !flag) {
-	fprintf(_fp, "%s %d : full_ldu_permute fails : %d != %d\n",
-		__FILE__, __LINE__, _n0, nn0);
+	if (!flag) {
+	  diss_printf(_verbose, _fp,
+		      "%s %d : full_ldu_permute fails : %d != %d\n",
+		      __FILE__, __LINE__, _n0, nn0);
 	}
       }
       _nscol = nsing - _n0;
-      if (_verbose) {
-	fprintf(_fp, "%s %d : detected = %s : _nscol = %d _n0 = %d : perm[] = ",
-		__FILE__, __LINE__, (_detected ? "true" : "false"),
-		_nscol, _n0);
-	for (int i = 0; i < nsing; i++) {
-	  fprintf(_fp, "%d ", perm[i]);
-	}
-	fprintf(_fp, "\n");
-      } // if (_verbose)
+      diss_printf(_verbose, _fp, "%s %d : detected = %s : _nscol = %d _n0 = %d : perm[] = ",
+		  __FILE__, __LINE__, (_detected ? "true" : "false"),
+		  _nscol, _n0);
+      for (int i = 0; i < nsing; i++) {
+	diss_printf(_verbose, _fp, "%d ", perm[i]);
+      }
+      diss_printf(_verbose, _fp, "\n");
       _list_schur.resize(_nscol);
       if (_n0 > 0) {
 	_list_elim.resize(_n0);
@@ -680,30 +1001,29 @@ void TridiagBlockMatrix<T, U>::NumericFact(const T* coef,
       for (int i = 0; i < _n0; i++){
 	_list_elim[i] = list_sing[perm[i + _nscol]];
       }
-
-      if (_verbose) {
-	fprintf(_fp, "%s %d : _nscol = %d : _list_schur[] = ",
-		__FILE__, __LINE__, _nscol);
-	for (int i = 0; i < _nscol; i++) {
-	  fprintf(_fp, "%d ", _list_schur[i]);
+      
+      diss_printf(_verbose, _fp, "%s %d : _nscol = %d : _list_schur[] = ",
+		  __FILE__, __LINE__, _nscol);
+      for (int i = 0; i < _nscol; i++) {
+	diss_printf(_verbose, _fp, "%d ", _list_schur[i]);
+      }
+      diss_printf(_verbose, _fp, "\n");
+      if (_n0 > 0) {
+	diss_printf(_verbose, _fp, "%s %d : n0 = %d : _list_elim[] = ",
+		    __FILE__, __LINE__, _n0);
+	for (int i = 0; i < _n0; i++) {
+	  diss_printf(_verbose, _fp, "%d ", _list_elim[i]);
 	}
-	fprintf(_fp, "\n");
-	if (_n0 > 0) {
-	  fprintf(_fp, "%s %d : n0 = %d : _list_elim[] = ",
-		  __FILE__, __LINE__, _n0);
-	  for (int i = 0; i < _n0; i++) {
-	    fprintf(_fp, "%d ", _list_elim[i]);
-	  }
-	  fprintf(_fp, "\n");
-	  
-	  fprintf(_fp, "%s %d : n0 = %d : _new2old[_list_elim[]] = ",
-		  __FILE__, __LINE__, _n0);
-	  for (int i = 0; i < _n0; i++) {
-	    fprintf(_fp, "%d ", _new2old[_list_elim[i]]);
-	  }
-	  fprintf(_fp, "\n");
-	} // if (_n0 > 0)
-      }   // if (_verbose)
+	diss_printf(_verbose, _fp, "\n");
+	
+	diss_printf(_verbose, _fp,
+		    "%s %d : n0 = %d : _new2old[_list_elim[]] = ",
+		    __FILE__, __LINE__, _n0);
+	for (int i = 0; i < _n0; i++) {
+	  diss_printf(_verbose, _fp, "%d ", _new2old[_list_elim[i]]);
+	}
+	diss_printf(_verbose, _fp, "\n");
+      } // if (_n0 > 0)
       
       _a12.init(_dim, _nscol);
       for (int j = 0; j < _nscol; j++) {
@@ -745,6 +1065,7 @@ NumericFact(const double* coef,
 	    const double eps_pivot,
 	    double *pivot,
 	    const bool kernel_detection,
+	    const bool higher_precision,
 	    const int dim_aug_kern,
 	    const double eps_machine,
 	    double *nopd);
@@ -755,16 +1076,18 @@ NumericFact(const quadruple* coef,
 	    const double eps_pivot,
 	    double *pivot,
 	    const bool kernel_detection,
+	    const bool higher_precision,
 	    const int dim_aug_kern,
 	    const quadruple eps_machine,
 	    double *nopd);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 NumericFact(const complex<double>* coef,
 	    const double eps_pivot,
 	    double *pivot,
 	    const bool kernel_detection,
+	    const bool higher_precision,
 	    const int dim_aug_kern,
 	    const double eps_machine,
 	    double *nopd);
@@ -775,8 +1098,31 @@ NumericFact(const complex<quadruple>* coef,
 	    const double eps_pivot,
 	    double *pivot,
 	    const bool kernel_detection,
+	    const bool higher_precision,
 	    const int dim_aug_kern,
 	    const quadruple eps_machine,
+	    double *nopd);
+
+template
+void TridiagBlockMatrix<float>::
+NumericFact(const float* coef,
+	    const double eps_pivot,
+	    double *pivot,
+	    const bool kernel_detection,
+	    const bool higher_precision,
+	    const int dim_aug_kern,
+	    const float eps_machine,
+	    double *nopd);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+NumericFact(const complex<float>* coef,
+	    const double eps_pivot,
+	    double *pivot,
+	    const bool kernel_detection,
+	    const bool higher_precision,
+	    const int dim_aug_kern,
+	    const float eps_machine,
 	    double *nopd);
 //
 
@@ -850,8 +1196,8 @@ ComputeSchurComplement(const int nsing, vector<int> &list_sing,
 		       ColumnMatrix<quadruple>& a21,
 		       ColumnMatrix<quadruple>& a22);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 ComputeSchurComplement(const int nsing, vector<int> &list_sing,
 		       ColumnMatrix<complex<double> >& a12,
 		       ColumnMatrix<complex<double> >& a21,
@@ -864,6 +1210,21 @@ ComputeSchurComplement(const int nsing, vector<int> &list_sing,
 		       ColumnMatrix<complex<quadruple> >& a12,
 		       ColumnMatrix<complex<quadruple> >& a21,
 		       ColumnMatrix<complex<quadruple> >& a22);
+
+template
+void TridiagBlockMatrix<float>::
+ComputeSchurComplement(const int nsing, vector<int> &list_sing,
+		       ColumnMatrix<float>& a12,
+		       ColumnMatrix<float>& a21,
+		       ColumnMatrix<float>& a22);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+ComputeSchurComplement(const int nsing, vector<int> &list_sing,
+		       ColumnMatrix<complex<float> >& a12,
+		       ColumnMatrix<complex<float> >& a21,
+		       ColumnMatrix<complex<float> >& a22);
+ 
 //
 
 template<typename T, typename U>
@@ -876,7 +1237,7 @@ void TridiagBlockMatrix<T, U>::SingularNode(vector<int> &list_sing)
     }
   }
   else {
-    fprintf(_fp, "%s %d : _n0 = %d\n", __FILE__, __LINE__, _n0);
+    diss_printf(_verbose, _fp, "%s %d : _n0 = %d\n", __FILE__, __LINE__, _n0);
   }
 }
 
@@ -888,24 +1249,58 @@ template
 void TridiagBlockMatrix<quadruple>::
 SingularNode(vector<int> &list_sing);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 SingularNode(vector<int> &list_sing);
 
 template
 void TridiagBlockMatrix<complex<quadruple>, quadruple>::
 SingularNode(vector<int> &list_sing);
+
+template
+void TridiagBlockMatrix<float>::
+SingularNode(vector<int> &list_sing);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+SingularNode(vector<int> &list_sing);
+
 //
 
 //#define DEBUG_FACTORIZATION
-template<typename T, typename U>
-void TridiagBlockMatrix<T, U>::
-TridiagNumericFact(double *pivot,
-		   const double eps_pivot,
-		   const int dim_aug_kern,
-		   ColumnMatrix<T> *diag_block_save,
-		   vector<int> &num_null_aug,
-		   double *nopd)
+template<typename T, typename U, typename W, typename Z>
+void TridiagNumericFact_(double *pivot,
+			 const double eps_pivot,
+			 const int dim_aug_kern,
+			 ColumnMatrix<T> *diag_block_save,
+			 vector<int> &num_null_aug,
+			 double *nopd,
+			 const bool higher_precision,
+			 bool &_verbose,
+			 FILE* &_fp,
+			 int &_dim,
+			 bool &_isSymmetric,
+			 int &_nfront,
+			 vector<int> &_p_front,
+			 vector<int> &_p_diag,
+			 vector<int> &_p_upper,
+			 const T* &_coef,
+			 vector<int> &_ptRows,
+			 vector<int> &_indCols, // column_numb
+			 vector<int> &_indVals, // column_numb
+			 vector<int> &_num_null,
+			 vector<int> &_permute,
+			 vector<int> &_permute_ginv,
+			 ColumnMatrix<T>* &_diag_blocks,
+			 ColumnMatrix<W>* &_diag_blocks_high,
+			 ColumnMatrix<T>* &_upper_blocks,
+			 ColumnMatrix<T>* &_lower_blocks,
+			 list<int> &_high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+			 ,
+			 ColumnMatrix<T> &_factorized_whole
+#endif
+			 )
 {
   int dim1, dim2, nn0;
   const int n0 = 0;
@@ -913,14 +1308,17 @@ TridiagNumericFact(double *pivot,
   ColumnMatrix<T> diag_works, diag_origs; // supposing "dim2 <= size_b2"
 #ifdef SPARSE_OFFDIAG
   ColumnMatrix<T> upper, lower;
+  ColumnMatrix<W> upper_high, lower_high;
 #endif
   int upper_size_max;
   int diag_size_max;
   int *permute_diag, *permute_offdiag, *permute_work;
   int *permute_diag_inv, *permute_offdiag_inv;
   double fop;
-  //  const T zero(0.0);
-  
+  //const double eps_pivot_high = machine_epsilon<double, quadruple>();
+  const double eps_pivot_high = machine_epsilon<double, double>();
+  const T _zero(0.0);
+  double pivot_save;
   _num_null.resize(_nfront);
   //  _null_lists_local.resize(_nfront);
   _permute.resize(_dim);
@@ -934,9 +1332,15 @@ TridiagNumericFact(double *pivot,
 #ifdef SPARSE_OFFDIAG
   VectorArray<T> upper_work(upper_size_max);
   VectorArray<T> lower_work(upper_size_max);
+  if (higher_precision) {
+    VectorArray<W> upper_high_work(upper_size_max);
+    VectorArray<W> lower_high_work(upper_size_max);
+  }
 #else
   VectorArray<T> permute_vals(upper_size_max);
 #endif
+  bool high_factorization = false;
+  bool high_schur_complement = false;
   diag_size_max = 0;
   for (int n = 0; n < _nfront; n++) {
     const int itmp = _p_front[n + 1] - _p_front[n];
@@ -947,9 +1351,7 @@ TridiagNumericFact(double *pivot,
   permute_offdiag_inv = new int[diag_size_max];
   permute_diag_inv = new int[diag_size_max];
   permute_work = new int[diag_size_max];
-#ifdef DEBUG_FACTORIZATION
-  ColumnMatrix<T> diag_orig(diag_size_max, diag_size_max);
-#endif
+
   { // n = 0
     dim2 = _p_front[1] - _p_front[0];
     ColumnMatrix<T> &diag = _diag_blocks[0];
@@ -963,112 +1365,81 @@ TridiagNumericFact(double *pivot,
 	diag(ii, jj) = _coef[_indVals[k]];
       }
     }
-#ifdef DEBUG_FACTORIZATION
-    diag_origs.init(dim2, dim2, diag_orig.addrCoefs(), false);
-    for (int j = 0; j < dim2; j++) {
-      for (int i = 0; i < dim2; i++) {
-	diag_origs(i, j) = diag(i, j);
+    if (higher_precision) { // copy to higher precision
+      ColumnMatrix<W> &diag_high = _diag_blocks_high[0];
+      diag_high.init(dim2, dim2);
+      for (int j = 0; j < dim2; j++) {
+	for (int i = 0; i < dim2; i++) {
+	  diag_high(i, j) = conv_prec<W, T>(diag(i, j));
+	}
       }
+      pivot_save = *pivot;
     }
-#endif
     if (_isSymmetric) {
       bool flag;
       flag = full_ldlt_permute<T, U>(&nn0, n0, dim2,
-				     _diag_blocks[0].addrCoefs(), dim2, pivot,
+				     diag.addrCoefs(), dim2, pivot,
 				     permute_diag, eps_pivot, &fop);
     }
     else {
       bool flag;
       flag = full_ldu_permute<T, U>(&nn0, n0, dim2,
-				    _diag_blocks[0].addrCoefs(), dim2, pivot,
+				    diag.addrCoefs(), dim2, pivot,
 				    permute_diag, eps_pivot, &fop);
     }
-#ifdef STORE_WHOLE_FACTORIZED
-    for (int j = 0; j < dim2; j++) {
-      for (int i = 0; i < dim2; i++) {
-	_factorized_whole(i, j) = diag(i, j);
-      }
-    }
-#endif
-#ifdef DEBUG_FACTORIZATION
-    if (_verbose) {
-      fprintf(_fp, "%s %d matrix dump residual dim2 = %d\n",
-	      __FILE__, __LINE__,
-	      dim2);
-      fprintf(_fp, "permute_diag[] = ");
-      for (int i = 0; i < dim2; i++) {
-	fprintf(_fp, "%d ", permute_diag[i]);
-      }
-      fprintf(_fp, "\n");
-      fprintf(stderr, "%s %d : n = %d\n", __FILE__, __LINE__, 0);
-      for (int i = 0; i < dim2; i++) {
-	fprintf(stderr, "%d : ", i);
-	for (int j = 0; j < dim2; j++) {
-	  printscalar<T>(stderr, diag(i, j));
-	  fprintf(stderr, " ");
-	}
-	fprintf(stderr, "\n");
-      }
-    }
-    for (int i = 0; i < dim2; i++) {
-      if (_verbose) {
-	fprintf(_fp, "%d : ", i);
-	printscalar<T>(_fp, diag_origs(i, i));
-      	fprintf(_fp, " : ");
-	printscalar<T>(_fp, diag(i, i));
-	fprintf(_fp, " : ");
-      } // if (_verbose)
-      for (int j = 0; j <= i; j++) { // lower
-	T tmpx(0.0);
+    if (higher_precision) {
+      high_factorization = false;
+      if (nn0 > 0) {
+	//      if (true) {
+	fprintf(stderr, "%s %d : switch to quadruple at %d %d/%d ",
+		__FILE__, __LINE__, 0, nn0, dim2);
+	high_factorization = true;
+	_high_blocks.push_back(0);
+	ColumnMatrix<W> &diag_high = _diag_blocks_high[0];
+	*pivot = pivot_save;
 	if (_isSymmetric) {
-	  for (int k = 0; k < j; k++) {
-	    tmpx += diag(k, i) * diag(k, j) / diag(k, k);
-	  }
-	  if (j < i) {
-	    tmpx +=  diag(j, i) / diag(j, j);
-	  }
-	  else {
-	    tmpx +=  _one / diag(j, j);
-	  }
+	  bool flag;
+	  flag = full_ldlt_permute<W, Z>(&nn0, n0, dim2,
+					 diag_high.addrCoefs(), dim2, pivot,
+					 permute_diag, eps_pivot_high, &fop);
 	}
 	else {
-	  for (int k = 0; k < j; k++) {
-	    tmpx += diag(i, k) * diag(k, j) / diag(k, k);
-	  }
-	  if (j < i) {
-	    tmpx +=  diag(i, j) / diag(j, j);
-	  }
-	  else {
-	    tmpx +=  _one / diag(j, j);
-	  }
+	  bool flag;
+	  flag = full_ldu_permute<W, Z>(&nn0, n0, dim2,
+					diag_high.addrCoefs(), dim2, pivot,
+					permute_diag, eps_pivot_high, &fop);
 	}
-	const T tmpy = diag_origs(permute_diag[i], permute_diag[j]) - tmpx;
-	const double tmpabs = blas_abs<T, double>(tmpy);
-	const double eps_machine = machine_epsilon<double, double>();
-	if (_verbose && (tmpabs > eps_machine)) {
-	    fprintf(_fp, "%d : ", j);
-	    printscalar<T>(_fp, tmpy);
+	fprintf(stderr, "%d\n", nn0);
+#if 0
+	for (int i = 0; i < dim2; i++) {
+	  fprintf(stderr, "%d %s %s\n", i,
+		  tostring<T>(diag(i,i)).c_str(),
+		  tostring<W>(diag_high(i,i)).c_str());
 	}
-      }
-      if (_verbose) {
-	fprintf(_fp, "\n");
-      }
-    }
 #endif
-    _num_null[0] = nn0;
-    *nopd += fop;
-    for (int i = 0; i < nn0; i++) {
-      //      _null_lists_local[0].push_back(i + (dim2 - nn0));
-      // nullifying rows and columns
-      for (int i = (dim2 - nn0); i < dim2; i++) {
 	for (int j = 0; j < dim2; j++) {
-	  diag(i, j) = _zero;
-	  diag(j, i) = _zero;
+	  for (int i = 0; i < dim2; i++) {
+	    diag(i, j) = conv_prec<T, W>(diag_high(i, j));
+	  }
 	}
       }
     }
-    n0_total += nn0;
-  }
+    {
+      _num_null[0] = nn0;
+      *nopd += fop;
+      for (int i = 0; i < nn0; i++) {
+	//      _null_lists_local[0].push_back(i + (dim2 - nn0));
+	// nullifying rows and columns
+	for (int i = (dim2 - nn0); i < dim2; i++) {
+	  for (int j = 0; j < dim2; j++) {
+	    diag(i, j) = _zero;
+	    diag(j, i) = _zero;
+	  }
+	}
+      }
+      n0_total += nn0;
+    }
+  } // n = 0
   for (int n = 1; n < _nfront; n++) {
     ColumnMatrix<T> &diag1 = _diag_blocks[n - 1];
     vector<int> i0;
@@ -1077,11 +1448,19 @@ TridiagNumericFact(double *pivot,
 #ifdef SPARSE_OFFDIAG
     upper.init(dim1, dim2, upper_work.addrCoefs(), false);
     lower.init(dim1, dim2, lower_work.addrCoefs(), false);
+    upper_high.init(dim1, dim2, upper_high_work.addrCoefs(), false);
+    lower_high.init(dim1, dim2, lower_high_work.addrCoefs(), false);
 #else
     ColumnMatrix<T> &upper = _upper_blocks[n]; // 27 Nov.2015
     ColumnMatrix<T> &lower = _lower_blocks[n]; // 27 Nov.2015
     upper.init(dim1, dim2);
     lower.init(dim1, dim2);
+    ColumnMatrix<W> upper_high;
+    ColumnMatrix<W> lower_high; 
+    if (high_factorization) {
+      upper_high.init(dim1, dim2);
+      lower_high.init(dim1, dim2); 
+    }
 #endif
     //  ColumnMatrix<T> upper, lower
     // permute_diag[] is defined in the previous step n-1
@@ -1120,51 +1499,122 @@ TridiagNumericFact(double *pivot,
 	}
       }
     }
-    full_fw_multiprofile<T>(false, dim1, _num_null[n - 1], dim2,
-			    diag1.addrCoefs(), dim1,
-			    upper.addrCoefs(), dim1, i0, &fop);
-    if (_isSymmetric) { // reduce arithmeic by setting T(0) for 0 <=i< i0[j]
-      for (int j = 0; j < dim2; j++) {
-	for (int i = 0; i < dim1; i++) {
-	  lower(i, j) = upper(i, j) * diag1(i, i);
-	}
-      }
-    }
-    else {
-      full_fw_multiprofile<T>(true, dim1, _num_null[n - 1], dim2,
-			      diag1.addrCoefs(), dim1,
-			      lower.addrCoefs(), dim1, i0, &fop);
-      for (int j = 0; j < dim2; j++) {
-	for (int i = 0; i < dim1; i++) {
-	  lower(i, j) *= diag1(i, i);
-	}
-      }
-    }
     ColumnMatrix<T> &diag = _diag_blocks[n];
-    // alpha = -1, beta = 0
-    SparseSchur<T>(_isSymmetric, dim2, dim1, i0, upper, lower, diag, &fop);
-    for (int i = _p_front[n]; i < _p_front[n + 1]; i++) {
-      for (int k = _p_diag[i]; k < _p_upper[i]; k++) { 
-	const int ii = permute_offdiag_inv[i - _p_front[n]];
-	const int jj = permute_offdiag_inv[_indCols[k] - _p_front[n]];
-	diag(ii, jj) += _coef[_indVals[k]];
+    if (high_factorization) {
+      ColumnMatrix<W> &diag1_high = _diag_blocks_high[n - 1];
+      for (int j = 0; j < dim2; j++) {
+	for (int i = 0; i < dim1; i++) {
+	  upper_high(i, j)=conv_prec<W, T>(upper(i,j));
+	  lower_high(i, j)=conv_prec<W, T>(lower(i,j));
+	}
       }
-    }
+      full_fw_multiprofile<W>(false, dim1, _num_null[n - 1], dim2,
+			      diag1_high.addrCoefs(), dim1,
+			      upper_high.addrCoefs(), dim1, i0, &fop);
+      if (_isSymmetric) { // reduce arithmeic by setting T(0) for 0 <=i< i0[j]
+	for (int j = 0; j < dim2; j++) {
+	  for (int i = 0; i < dim1; i++) {
+	    lower_high(i, j) = upper_high(i, j) * diag1_high(i, i);
+	  }
+	}
+      }
+      else {
+	full_fw_multiprofile<W>(true, dim1, _num_null[n - 1], dim2,
+				diag1_high.addrCoefs(), dim1,
+				lower_high.addrCoefs(), dim1, i0, &fop);
+	for (int j = 0; j < dim2; j++) {
+	  for (int i = 0; i < dim1; i++) {
+	    lower_high(i, j) *= diag1_high(i, i);
+	  }
+	}
+      }
+      ColumnMatrix<W> &diag_high = _diag_blocks_high[n];
+      diag_high.init(dim2, dim2);
+      // alpha = -1, beta = 0
+      SparseSchur<W>(_isSymmetric, dim2, dim1, i0, upper_high, lower_high,
+		     diag_high, &fop);
+      for (int i = _p_front[n]; i < _p_front[n + 1]; i++) {
+	for (int k = _p_diag[i]; k < _p_upper[i]; k++) { 
+	  const int ii = permute_offdiag_inv[i - _p_front[n]];
+	  const int jj = permute_offdiag_inv[_indCols[k] - _p_front[n]];
+	  diag_high(ii, jj) += conv_prec<W, T>(_coef[_indVals[k]]);
+	}
+      }
+      for (int j = 0; j < dim2; j++) {
+	for (int i = 0; i < dim2; i++) {
+	  diag(i, j) = conv_prec<T, W>(diag_high(i, j));
+	}
+      }
 #ifndef SPARSE_OFFDIAG
-    for (int j = 0; j < dim2; j++) {
-      for (int i = 0; i < dim1; i++) {
-	upper(i, j) *= diag1(i, i);
+      for (int j = 0; j < dim2; j++) {
+	for (int i = 0; i < dim1; i++) {
+	  upper_high(i, j) *= diag1_high(i, i);
+	}
       }
-    }
 #endif
-#ifdef DEBUG_FACTORIZATION
-    diag_origs.init(dim2, dim2, diag_orig, false);
-    for (int j = 0; j < dim2; j++) {
-      for (int i = 0; i < dim2; i++) {
-	diag_origs(i, j) = diag(i, j);
+      for (int j = 0; j < dim2; j++) {
+	for (int i = 0; i < dim1; i++) {
+	  upper(i, j)=conv_prec<T, W>(upper_high(i,j));
+	  lower(i, j)=conv_prec<T, W>(lower_high(i,j));
+	}
       }
-    }
+#ifndef SPARSE_OFFDIAG
+      upper_high.free();
+      lower_high.free();
 #endif
+      high_schur_complement = true;
+      //      diag_high.free();
+    } //  if (high_factorization)
+    else {
+      full_fw_multiprofile<T>(false, dim1, _num_null[n - 1], dim2,
+			      diag1.addrCoefs(), dim1,
+			      upper.addrCoefs(), dim1, i0, &fop);
+      if (_isSymmetric) { // reduce arithmeic by setting T(0) for 0 <=i< i0[j]
+	for (int j = 0; j < dim2; j++) {
+	  for (int i = 0; i < dim1; i++) {
+	    lower(i, j) = upper(i, j) * diag1(i, i);
+	  }
+	}
+      }
+      else {
+	full_fw_multiprofile<T>(true, dim1, _num_null[n - 1], dim2,
+				diag1.addrCoefs(), dim1,
+				lower.addrCoefs(), dim1, i0, &fop);
+	for (int j = 0; j < dim2; j++) {
+	  for (int i = 0; i < dim1; i++) {
+	    lower(i, j) *= diag1(i, i);
+	  }
+	}
+      }
+      // alpha = -1, beta = 0
+      SparseSchur<T>(_isSymmetric, dim2, dim1, i0, upper, lower, diag, &fop);
+      for (int i = _p_front[n]; i < _p_front[n + 1]; i++) {
+	for (int k = _p_diag[i]; k < _p_upper[i]; k++) { 
+	  const int ii = permute_offdiag_inv[i - _p_front[n]];
+	  const int jj = permute_offdiag_inv[_indCols[k] - _p_front[n]];
+	  diag(ii, jj) += _coef[_indVals[k]];
+	}
+      }
+#ifndef SPARSE_OFFDIAG
+      for (int j = 0; j < dim2; j++) {
+	for (int i = 0; i < dim1; i++) {
+	  upper(i, j) *= diag1(i, i);
+	}
+      }
+#endif
+    } //  if (high_factorization)
+    if (higher_precision) { // copy to higher precision
+      ColumnMatrix<W> &diag_high = _diag_blocks_high[n];
+      if (!high_schur_complement) {
+	diag_high.init(dim2, dim2);
+	for (int j = 0; j < dim2; j++) {
+	  for (int i = 0; i < dim2; i++) {
+	    diag_high(i, j) = conv_prec<W, T>(diag(i, j));
+	  }
+	}
+      }
+      pivot_save = *pivot;
+    }
     if (_isSymmetric) {
       bool flag;
       flag = full_ldlt_permute<T, U>(&nn0, n0, dim2, diag.addrCoefs(), dim2,
@@ -1176,9 +1626,62 @@ TridiagNumericFact(double *pivot,
 				    pivot, permute_work, eps_pivot, &fop);
     }
 
-    _num_null[n] = nn0;
+    if (higher_precision) {
+      high_factorization = false;
+      if (nn0 > 0) {
+	//      if (true) {
+	fprintf(stderr, "%s %d : switch to quadruple at %d %d/%d : ",
+		__FILE__, __LINE__, n, nn0, dim2);
+	high_factorization = true;
+	_high_blocks.push_back(n);
+	ColumnMatrix<W> &diag_high = _diag_blocks_high[n];
+	*pivot = pivot_save;
+	if (_isSymmetric) {
+	  bool flag;
+	  flag = full_ldlt_permute<W, Z>(&nn0, n0, dim2,
+					 diag_high.addrCoefs(), dim2, pivot,
+					 permute_work, eps_pivot_high, &fop);
+	}
+	else {
+	  bool flag;
+	  flag = full_ldu_permute<W, Z>(&nn0, n0, dim2,
+					diag_high.addrCoefs(), dim2, pivot,
+					permute_work, eps_pivot_high, &fop);
+	}
+	fprintf(stderr, "%d\n", nn0);
+#if 0
+	for (int i = 0; i < dim2; i++) {
+	  fprintf(stderr, "%d %s %s\n", i,
+		  tostring<T>(diag(i,i)).c_str(),
+		  tostring<W>(diag_high(i,i)).c_str());
+	}
+#endif
+	for (int j = 0; j < dim2; j++) {
+	  for (int i = 0; i < dim2; i++) {
+	    diag(i, j) = conv_prec<T, W>(diag_high(i, j));
+	  }
+	}
+      }
+      else {
+#if 0
+	fprintf(stderr, "%s %d : not using quadruple at %d %d/%d : ",
+		__FILE__, __LINE__, n, nn0, dim2);
+      	fprintf(stderr, "%d\n", nn0);
+	//	if (nn0 > 0) {
+	{
+	  for (int i = 0; i < dim2; i++) {
+	    fprintf(stderr, "%d %s\n", i,
+		    tostring<T>(diag(i,i)).c_str());
+	  }
+	}
+#endif
+	ColumnMatrix<W> &diag_high = _diag_blocks_high[n];
+	diag_high.free();
+      }	
+      high_schur_complement = false;
+    } // if (higher_precision)
     permute_diag = &_permute[0] + _p_front[n];
-        // generate permute_diag from pemrute_work + perumte_upper
+    // generate permute_diag from pemrute_work + perumte_upper
     for (int i = 0; i < dim2; i++) {
       permute_diag[i] = permute_offdiag[permute_work[i]];
     }
@@ -1204,111 +1707,20 @@ TridiagNumericFact(double *pivot,
       }
     }
 #endif
-#ifdef STORE_WHOLE_FACTORIZED
-    for (int j = 0; j < dim2; j++) {
-      for (int i = 0; i < dim2; i++) {
-	_factorized_whole(_p_front[n] + i, _p_front[n] + j) = diag(i, j);
-      }
+    {
+      _num_null[n] = nn0;
+      *nopd += fop;
+      for (int i = 0; i < nn0; i++) {
+	// nullifying rows and columns
+	for (int i = (dim2 - nn0); i < dim2; i++) {
+	  for (int j = 0; j < dim2; j++) {
+	    diag(i, j) = _zero;
+	    diag(j, i) = _zero;
+	  }
+	}
+      } // loop : i
+      n0_total += nn0;
     }
-    if (_isSymmetric) {
-      for (int j = 0; j < dim2; j++) {
-	for (int i = 0; i < dim1; i++) {
-	  _factorized_whole(_p_front[n] + j, _p_front[n - 1] + i) =
-	    lower(i, permute_work[j]);
-	}
-      }
-    }
-    else {
-      for (int j = 0; j < dim2; j++) {
-	for (int i = 0; i < dim1; i++) {
-	  _factorized_whole(_p_front[n - 1] + i, _p_front[n] + j) =
-	    upper(i, permute_work[j]) * diag1(i, i);
-	  _factorized_whole(_p_front[n] + j, _p_front[n - 1] + i) =
-	    lower(i, permute_work[j]);
-	}
-      }
-    }
-#endif
-    // debug
-#ifdef DEBUG_FACTORIZATION
-    if (_verbose) {
-      fprintf(_fp, "%s %d matrix dump residual dim2 = %d\n",
-	      __FILE__, __LINE__,
-	      dim2);
-      fprintf(_fp, "permute_diag[] = ");
-      for (int i = 0; i < dim2; i++) {
-	fprintf(_fp, "%d ", permute_diag[i]);
-      }
-      fprintf(_fp, "\n");
-      fprintf(stderr, "%s %d : n = %d\n", __FILE__, __LINE__, n);
-      for (int i = 0; i < dim2; i++) {
-	fprintf(stderr, "%d : ", i);
-	for (int j = 0; j < dim2; j++) {
-	  printscalar<T>(stderr, diag(i, j));
-	  fprintf(stderr, " ");
-	}
-	fprintf(stderr, "\n");
-      }
-    } // if (_verbose)
-     for (int i = 0; i < dim2; i++) {
-       if (_verbose) {
-	 fprintf(_fp, "%d : ", i);
-	 printscalar<T>(_fp, diag_origs(i, i));
-	 fprintf(_fp, " : ");
-	 printscalar<T>(_fp, diag(i, i));
-	 fprintf(_fp, " : ");
-       } // if (_verbose)
-       for (int j = 0; j <= i; j++) { // lower
-	T tmpx(0.0);
-	if (_isSymmetric) {
-	  for (int k = 0; k < j; k++) {
-	    tmpx += diag(k, i) * diag(k, j) / diag(k, k);
-	  }
-	  if (j < i) {
-	    tmpx += diag(j, i) / diag(j, j);
-	  }
-	  else {
-	    tmpx += _one / diag(j, j);
-	  }
-	}
-	else {
-	  for (int k = 0; k < j; k++) {
-	    tmpx += diag(i, k) * diag(k, j) / diag(k, k);
-	  }
-	  if (j < i) {
-	    tmpx += diag(i, j) / diag(j, j);
-	  }
-	  else {
-	    tmpx += _one / diag(j, j);
-	  }
-	}
-	if (blas_abs<T, U>(diag_origs(permute_work[i], permute_work[j]) - tmpx) >
-	    machine_epsilon<T, U>()) {
-	  if (_verbose) {
-	    fprintf(_fp, "%d : ", j);
-	    printscalar<T>(_fp,
-			   (diag_origs(permute_work[i], permute_work[j])
-			    - tmpx));
-	  } // if (_verbose)
-	}
-      }
-      if (_verbose) {
-	fprintf(_fp, "\n");
-      }
-    }
-#endif
-    // debug
-    *nopd += fop;
-    for (int i = 0; i < nn0; i++) {
-      // nullifying rows and columns
-      for (int i = (dim2 - nn0); i < dim2; i++) {
-	for (int j = 0; j < dim2; j++) {
-	  diag(i, j) = _zero;
-	  diag(j, i) = _zero;
-	}
-      }
-    }
-    n0_total += nn0;
   } // loop : n
   if ((n0_total > 0) && (dim_aug_kern > 0)) {
     int count = 0;
@@ -1330,10 +1742,8 @@ TridiagNumericFact(double *pivot,
       }
     }
     if (flag == false) {
-      if (_verbose) {
-	fprintf(_fp, "%s %d : dim_aug_kern = %d > dim = %d?\n",
-		__FILE__, __LINE__, dim_aug_kern, _dim);
-      }
+      diss_printf(_verbose, _fp, "%s %d : dim_aug_kern = %d > dim = %d?\n",
+		  __FILE__, __LINE__, dim_aug_kern, _dim);
     }
     for (int n = (_nfront - 1); n >= 0; n--) {
       diag_block_save[n].free();
@@ -1375,42 +1785,147 @@ TridiagNumericFact(double *pivot,
 
 }
 
-template
-void TridiagBlockMatrix<double>::
-TridiagNumericFact(double *pivot,
-		   const double eps_pivot,
-		   const int dim_aug_kern,
-		   ColumnMatrix<double> *diag_block_save,
-		   vector<int> &num_null_aug,
-		   double *nopd);
+template void
+TridiagNumericFact_<double, double,
+		    quadruple, quadruple>(double *pivot,
+					  const double eps_pivot,
+					  const int dim_aug_kern,
+					  ColumnMatrix<double> *diag_block_save,
+					  vector<int> &num_null_aug,
+					  double *nopd,
+					  const bool higher_precision,
+					  bool &_verbose,
+					  FILE* &_fp,
+					  int &_dim,
+					  bool &_isSymmetric,
+					  int &_nfront,
+					  vector<int> &_p_front,
+					  vector<int> &_p_diag,
+					  vector<int> &_p_upper,
+					  const double* &_coef,
+					  vector<int> &_ptRows,
+					  vector<int> &_indCols, // column_numb
+					  vector<int> &_indVals, // column_numb
+					  vector<int> &_num_null,
+					  vector<int> &_permute,
+					  vector<int> &_permute_ginv,
+					  ColumnMatrix<double>* &_diag_blocks,
+					  ColumnMatrix<quadruple>* &_diag_blocks_high,
+					  ColumnMatrix<double>* &_upper_blocks,
+					  ColumnMatrix<double>* &_lower_blocks,
+					  list<int> &_high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+					  ,
+					  ColumnMatrix<double> &_factorized_whole
+#endif
+					  );
 
-template
-void TridiagBlockMatrix<quadruple>::
-TridiagNumericFact(double *pivot,
-		   const double eps_pivot,
-		   const int dim_aug_kern,
-		   ColumnMatrix<quadruple> *diag_block_save,
-		   vector<int> &num_null_aug,
-		   double *nopd);
+template void
+TridiagNumericFact_<complex<double>, double,
+		    complex<quadruple>, quadruple>(double *pivot,
+			  const double eps_pivot,
+		          const int dim_aug_kern,
+			  ColumnMatrix<complex<double> > *diag_block_save,
+			  vector<int> &num_null_aug,
+			  double *nopd,
+			  const bool higher_precision,
+			  bool &_verbose,
+			  FILE* &_fp,
+			  int &_dim,
+			  bool &_isSymmetric,
+			  int &_nfront,
+			  vector<int> &_p_front,
+			  vector<int> &_p_diag,
+			  vector<int> &_p_upper,
+		          const complex<double>* &_coef,
+			  vector<int> &_ptRows,
+			  vector<int> &_indCols, // column_numb
+			  vector<int> &_indVals, // column_numb
+			  vector<int> &_num_null,
+			  vector<int> &_permute,
+			  vector<int> &_permute_ginv,
+		          ColumnMatrix<complex<double> >* &_diag_blocks,
+		          ColumnMatrix<complex<quadruple> >* &_diag_blocks_high,
+			  ColumnMatrix<complex<double> >* &_upper_blocks,
+		          ColumnMatrix<complex<double> >* &_lower_blocks,
+			  list<int> &_high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+			  ,
+			  ColumnMatrix<complex<double> > &_factorized_whole
+#endif
+			  );
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
-TridiagNumericFact(double *pivot,
-		   const double eps_pivot,
-		   const int dim_aug_kern,
-		   ColumnMatrix<complex<double> > *diag_block_save,
-		   vector<int> &num_null_aug,
-		   double *nopd);
+template void
+TridiagNumericFact_<float, float, double, double>
+  (double *pivot,
+   const double eps_pivot,
+   const int dim_aug_kern,
+   ColumnMatrix<float> *diag_block_save,
+   vector<int> &num_null_aug,
+   double *nopd,
+   const bool higher_precision,
+   bool &_verbose,
+   FILE* &_fp,
+   int &_dim,
+   bool &_isSymmetric,
+   int &_nfront,
+   vector<int> &_p_front,
+   vector<int> &_p_diag,
+   vector<int> &_p_upper,
+   const float* &_coef,
+   vector<int> &_ptRows,
+   vector<int> &_indCols, // column_numb
+   vector<int> &_indVals, // column_numb
+   vector<int> &_num_null,
+   vector<int> &_permute,
+   vector<int> &_permute_ginv,
+   ColumnMatrix<float>* &_diag_blocks,
+   ColumnMatrix<double>* &_diag_blocks_high,
+   ColumnMatrix<float>* &_upper_blocks,
+   ColumnMatrix<float>* &_lower_blocks,
+   list<int> &_high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+   ,
+   ColumnMatrix<float> &_factorized_whole
+#endif
+   );
 
-template
-void TridiagBlockMatrix<complex<quadruple>, quadruple>::
-TridiagNumericFact(double *pivot,
-		   const double eps_pivot,
-		   const int dim_aug_kern,
-		   ColumnMatrix<complex<quadruple> > *diag_block_save,
-		   vector<int> &num_null_aug,
-		   double *nopd);
-//
+template void
+TridiagNumericFact_<complex<float>, float,
+		    complex<double>, double>
+  (double *pivot,
+   const double eps_pivot,
+   const int dim_aug_kern,
+   ColumnMatrix<complex<float> > *diag_block_save,
+   vector<int> &num_null_aug,
+   double *nopd,
+   const bool higher_precision,
+   bool &_verbose,
+   FILE* &_fp,
+   int &_dim,
+   bool &_isSymmetric,
+   int &_nfront,
+   vector<int> &_p_front,
+   vector<int> &_p_diag,
+   vector<int> &_p_upper,
+   const complex<float>* &_coef,
+   vector<int> &_ptRows,
+   vector<int> &_indCols, // column_numb
+   vector<int> &_indVals, // column_numb
+   vector<int> &_num_null,
+   vector<int> &_permute,
+   vector<int> &_permute_ginv,
+   ColumnMatrix<complex<float> >* &_diag_blocks,
+   ColumnMatrix<complex<double> >* &_diag_blocks_high,
+   ColumnMatrix<complex<float> >* &_upper_blocks,
+   ColumnMatrix<complex<float> >* &_lower_blocks,
+   list<int> &_high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+   ,
+   ColumnMatrix<complex<float> > &_factorized_whole
+#endif
+   );
+
 
 template<typename T, typename U>
 void TridiagBlockMatrix<T, U>::ComputeSchur(const int dim_,
@@ -1444,8 +1959,6 @@ void TridiagBlockMatrix<T, U>::ComputeSchur(const int dim_,
 
   int jtmp = _dim;
   int itmp = 0;
-  //  fprintf(_fp, "%s %d : graph_colors = %d %d x %d _nscol = %d\n",
-  //	  __FILE__, __LINE__, _color, _dim, ncol_, _nscol);
   for (int i = 0; i < dim_; i++) {
     if ((color_mask[i] == _color) || (color_mask[i] == (-_color)) ||
 	((_color == 1) && color_mask[i] == 0)) {
@@ -1502,15 +2015,6 @@ void TridiagBlockMatrix<T, U>::ComputeSchur(const int dim_,
 	b(_list_schur[i], j) = _zero;
       }
     }
-#if 0
-    fprintf(_fp, "y nscol = %d ncol = %d\n", _nscol, ncol);
-    for (int i = 0; i < _nscol; i++) {
-      for (int j = 0; j < ncol; j++) {
-	printscalar<T>(stderr, y(i, j));
-      }
-      fprintf(_fp, "\n");
-    }
-#endif
     // alpha = -1; beta = 1;
     if (_isSymmetric) {
       // y -= A_12 ^T b
@@ -1524,23 +2028,8 @@ void TridiagBlockMatrix<T, U>::ComputeSchur(const int dim_,
 		   _a21.addrCoefs(), nrow, b.addrCoefs(), nrow, _one,
 		   y.addrCoefs(), _nscol);
     }
-#if 0
-    fprintf(_fp, "y nscol = %d ncol = %d\n", _nscol, ncol);
-    for (int i = 0; i < _nscol; i++) {
-      for (int j = 0; j < ncol; j++) {
-	printscalar<T>(_fp, y(i, j));
-      }
-      fprintf(_fp, "\n");
-    }
-#endif
   } // if (_nscol > 0)
   ForwardUpper(false, ncol, b, i0, dscale); // normal
-#if 0
-  if (_verbose) {
-    fprintf(_fp, "%s %d singular part nscol = %d\n",
-	    __FILE__, __LINE__, _nscol);
-  }
-#endif
   if (_nscol > 0) {
     // alpha = 1.0
     blas_trsm<T>(CblasLeft, CblasLower, CblasNoTrans, CblasUnit, _nscol, ncol,
@@ -1554,32 +2043,6 @@ void TridiagBlockMatrix<T, U>::ComputeSchur(const int dim_,
 	  z(i, j) = y(i, j) * _s22(i, i);
 	}
       }
-#if 0
-      if (_verbose) {
-	fprintf(_fp, "%s %d : s22() dim = %d\n", __FILE__, __LINE__, _nscol);
-	for (int i = 0; i < _nscol; i++) {
-	  fprintf(_fp, "%d ", i);
-	  for (int j = 0; j < _nscol; j++) {
-	    printscalar<T>(_fp, _s22(i, j));
-	  }
-	  fprintf(_fp, "\n");
-	}
-	fprintf(_fp, "y nscol = %d ncol = %d\n", _nscol, ncol);
-	for (int i = 0; i < _nscol; i++) {
-	  for (int j = 0; j < ncol; j++) {
-	    printscalar<T>(_fp, y(i, j));
-	  }
-	  fprintf(_fp, "\n");
-	}
-	fprintf(_fp, "z nscol = %d ncol = %d\n", _nscol, ncol);
-	for (int i = 0; i < _nscol; i++) {
-	  for (int j = 0; j < ncol; j++) {
-	    printscalar<T>(_fp, z(i, j));
-	  }
-	  fprintf(_fp, "\n");
-	}
-      } // if (_verbose)
-#endif
     }
   }
   if (_isSymmetric) {
@@ -1793,37 +2256,6 @@ void TridiagBlockMatrix<T, U>::ComputeSchur(const int dim_,
   } // if (_isSymmetric)
   get_realtime(&tt[3]); // after sparse dgemm
 #endif
-#if 0
-  if (_verbose) {
-    fprintf(_fp, "%s %d : local_s : ncol_ = %d color_max = %d\n",
-	    __FILE__, __LINE__, ncol_, _color_max);
-    
-    fprintf(_fp, "permute_diag_inv : ");
-    vector<int>::const_iterator it, jt;
-    it = permute_diag_inv.begin();
-    for ( ; it != permute_diag_inv.end(); ++it) {
-      fprintf(_fp, "%d ", *it);
-    }
-    fprintf(_fp, "\n");
-    fprintf(_fp, "permute_upper_inv : ");
-    it = permute_upper_inv.begin();
-    jt = i0.begin();
-    for ( ; it != permute_upper_inv.end(); ++it, ++jt) {
-      fprintf(_fp, "%d:%d ", *it, *jt);
-    }
-    fprintf(_fp, "\n");
-    
-    if (_color == _color_max) {
-      for (int i = 0; i < ncol_; i++) {
-	fprintf(_fp, "%d : ", i);
-	for (int j = i; j < ncol_; j++) {
-	  printscalar<T>(_fp, local_s(i, j));
-	}
-	fprintf(_fp, "\n");
-      }
-    }
-  } // if (_verbose)
-#endif
   b.free();
   c.free();
   y.free();
@@ -1867,8 +2299,8 @@ ComputeSchur(const int dim_,
 	     double *nopd,
 	     elapsed_t *tt);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 ComputeSchur(const int dim_,
 	     int* color_mask,
 	     const int ncol,
@@ -1892,6 +2324,35 @@ ComputeSchur(const int dim_,
 	     SquareBlockMatrix<complex<quadruple> > &local_s,
 	     double *nopd,
 	     elapsed_t *tt);
+
+template
+void TridiagBlockMatrix<float>::
+ComputeSchur(const int dim_,
+	     int* color_mask,
+	     const int ncol,
+	     const int *ptrow1,
+	     const int *indcols1,
+	     const int *indvals1,
+	     const int *indvals2, 
+	     const float *coef,
+	     const int size_b1,
+	     SquareBlockMatrix<float> &local_s,
+	     double *nopd,
+	     elapsed_t *tt);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+ComputeSchur(const int dim_,
+	     int* color_mask,
+	     const int ncol,
+	     const int *ptrow1, const int *indcols1,
+	     const int *indvals1, const int *indvals2, 
+	     const complex<float> *coef,
+	     const int size_b1,
+	     SquareBlockMatrix<complex<float> > &local_s,
+	     double *nopd,
+	     elapsed_t *tt);
+
 //
 
 template<typename T, typename U>
@@ -2167,11 +2628,13 @@ void TridiagBlockMatrix<T, U>::SolveMulti(const bool flag_new2old,
 }
 
 template
-void TridiagBlockMatrix<double>::SolveMulti(const bool flag_new2old,
-					    const bool isTrans,
-					    const int nhrs,
-					    ColumnMatrix<double>& x,
-					    const int nscol_);
+void TridiagBlockMatrix<double>::
+SolveMulti(const bool flag_new2old,
+	   const bool isTrans,
+	   const int nhrs,
+	   ColumnMatrix<double>& x,
+	   const int nscol_);
+
 template
 void TridiagBlockMatrix<quadruple>::
 SolveMulti(const bool flag_new2old,
@@ -2179,8 +2642,9 @@ SolveMulti(const bool flag_new2old,
 	   const int nhrs,
 	   ColumnMatrix<quadruple>& x,
 	   const int nscol_);
-template
-void TridiagBlockMatrix<complex<double>, double>::
+
+template void
+TridiagBlockMatrix<complex<double>, double>::
 SolveMulti(const bool flag_new2old, const bool isTrans,
 	   const int nhrs, ColumnMatrix<complex<double> >& x,
 	   const int nscol_);
@@ -2189,6 +2653,20 @@ template
 void TridiagBlockMatrix<complex<quadruple>, quadruple>::
 SolveMulti(const bool flag_new2old, const bool isTrans,
 	   const int nhrs, ColumnMatrix<complex<quadruple> >& x,
+	   const int nscol_);
+
+template
+void TridiagBlockMatrix<float>::
+SolveMulti(const bool flag_new2old,
+	   const bool isTrans,
+	   const int nhrs,
+	   ColumnMatrix<float>& x,
+	   const int nscol_);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+SolveMulti(const bool flag_new2old, const bool isTrans,
+	   const int nhrs, ColumnMatrix<complex<float> >& x,
 	   const int nscol_);
 
 //
@@ -2421,9 +2899,10 @@ void TridiagBlockMatrix<T, U>::SolveSingle(const bool flag_new2old,
 }
 
 template
-void TridiagBlockMatrix<double>::SolveSingle(const bool flag_new2old,
-					     const bool isTrans,
-					     double *x, const int nscol_);
+void TridiagBlockMatrix<double>::
+SolveSingle(const bool flag_new2old,
+	    const bool isTrans,
+	    double *x, const int nscol_);
 
 template
 void TridiagBlockMatrix<quadruple>::
@@ -2431,8 +2910,8 @@ SolveSingle(const bool flag_new2old,
 	    const bool isTrans,
 	    quadruple *x, const int nscol_);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 SolveSingle(const bool flag_new2old,
 	    const bool isTrans,
 	    complex<double> *x, const int nscol_);
@@ -2442,6 +2921,19 @@ void TridiagBlockMatrix<complex<quadruple>, quadruple>::
 SolveSingle(const bool flag_new2old,
 	    const bool isTrans,
 	    complex<quadruple> *x, const int nscol_);
+
+template
+void TridiagBlockMatrix<float>::
+SolveSingle(const bool flag_new2old,
+	    const bool isTrans,
+	    float *x, const int nscol_);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+SolveSingle(const bool flag_new2old,
+	    const bool isTrans,
+	    complex<float> *x, const int nscol_);
+
 //
 
 template<typename T, typename U>
@@ -2474,7 +2966,7 @@ void TridiagBlockMatrix<T, U>::ForwardUpper(bool isTransposed,
     ColumnMatrix<T> &diag = _diag_blocks[n];
     ncol0 = ncol;
     for (int j = 0; j < ncol; j++) {
-      int itmp = std::max((i0[j] - _p_front[n]), 0);
+      int itmp = std::max<int>((int)(i0[j] - _p_front[n]), 0);
       if (i0[j] >= _p_front[n + 1]) {
 	ncol0 = j;
 	break;
@@ -2553,7 +3045,7 @@ void TridiagBlockMatrix<T, U>::ForwardUpper(bool isTransposed,
     ColumnMatrix<T> &diag = _diag_blocks[n];
     ncol0 = ncol;
     for (int j = 0; j < ncol; j++) {
-      int itmp = std::max((i0[j] - _p_front[n]), 0);
+      int itmp = std::max<int>((int)(i0[j] - _p_front[n]), 0);
       if (i0[j] >= _p_front[n + 1]) {
 	ncol0 = j;
 	break;
@@ -2579,18 +3071,20 @@ void TridiagBlockMatrix<T, U>::ForwardUpper(bool isTransposed,
 }
 
 template
-void TridiagBlockMatrix<double>::ForwardUpper(bool isTransposed,
-					      int ncol, ColumnMatrix<double> &b,
-					      vector<int>& i0,
-					      vector<double> &dscale);
+void TridiagBlockMatrix<double>::
+ForwardUpper(bool isTransposed,
+	     int ncol, ColumnMatrix<double> &b,
+	     vector<int>& i0,
+	     vector<double> &dscale);
+
 template
 void TridiagBlockMatrix<quadruple>::ForwardUpper(bool isTransposed,
 						 int ncol,
 						 ColumnMatrix<quadruple> &b,
 						 vector<int>& i0,
 						 vector<quadruple> &dscale);
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 ForwardUpper(bool isTransposed,
 	     int ncol, ColumnMatrix<complex<double> > &b,
 	     vector<int>& i0,
@@ -2602,6 +3096,21 @@ ForwardUpper(bool isTransposed,
 	     int ncol, ColumnMatrix<complex<quadruple> > &b,
 	     vector<int>& i0,
 	     vector<complex<quadruple> > &dscale);
+
+template
+void TridiagBlockMatrix<float>::
+ForwardUpper(bool isTransposed,
+	     int ncol, ColumnMatrix<float> &b,
+	     vector<int>& i0,
+	     vector<float> &dscale);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+ForwardUpper(bool isTransposed,
+	     int ncol, ColumnMatrix<complex<float> > &b,
+	     vector<int>& i0,
+	     vector<complex<float> > &dscale);
+
 //
 
 void RenumberCSR(const bool shrink_flag,
@@ -2613,7 +3122,8 @@ void RenumberCSR(const bool shrink_flag,
 		 const int *aindcols,
 		 const int *aindvals,
 		 vector<int> &bptrows,
-		 vector<int> &bindcols, vector<int> &bindvals)
+		 vector<int> &bindcols, vector<int> &bindvals,
+		 const bool verbose, FILE *fp)
 {
   vector<int> *bbindcols, *bbindvals;
   if (shrink_flag) {
@@ -2670,7 +3180,7 @@ void RenumberCSR(const bool shrink_flag,
   if (shrink_flag) {
     int nnz1 = bptrows[dim];
     if (nnz1 != bindcols.size()) {
-      fprintf(stderr, "%s %d : %d != %d\n",
+      fprintf(fp, "%s %d : %d != %d\n",
 	      __FILE__, __LINE__, nnz1, (int)bindcols.size());
     }
     for (int i = 0; i < nnz1; i++) {
@@ -2690,7 +3200,9 @@ void RenumberCSR(const int dim,
 		 const int *aptrows,
 		 const int *aindcols,
 		 vector<int> &bptrows,
-		 vector<int> &bindcols)
+		 vector<int> &bindcols,
+		 const bool verbose,
+		 FILE *fp)
 {
   //  const int dim = b2a.size();
   bptrows[0] = 0;
@@ -2894,22 +3406,29 @@ void TridiagBlockMatrix<T, U>::extract_column(const int jcol, T *dcol)
 }
 
 template
-void TridiagBlockMatrix<double>::extract_column(const int jcol,
-							double *dcol);
+void TridiagBlockMatrix<double>::
+extract_column(const int jcol, double *dcol);
 
 template
-void TridiagBlockMatrix<quadruple>::extract_column(const int jcol,
-							      quadruple *dcol);
+void TridiagBlockMatrix<quadruple>::
+extract_column(const int jcol, quadruple *dcol);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
-extract_column(const int jcol, 
-	       complex<double> *dcol);
+template void
+TridiagBlockMatrix<complex<double>, double>::
+extract_column(const int jcol, complex<double> *dcol);
 
 template
 void TridiagBlockMatrix<complex<quadruple>, quadruple>::
-extract_column(const int jcol, 
-	       complex<quadruple> *dcol);
+extract_column(const int jcol, complex<quadruple> *dcol);
+
+template
+void TridiagBlockMatrix<float>::
+extract_column(const int jcol, float *dcol);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+extract_column(const int jcol, complex<float> *dcol);
+
 //
 
 template<typename T, typename U>
@@ -2922,22 +3441,30 @@ void TridiagBlockMatrix<T, U>::extract_row(const int irow, T *drow)
 }
 
 template
-void TridiagBlockMatrix<double>::extract_row(const int irow,
-					     double *drow);
+void TridiagBlockMatrix<double>::
+extract_row(const int irow, double *drow);
 
 template
 void TridiagBlockMatrix<quadruple>::extract_row(const int irow,
 						quadruple *drow);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::extract_row(const int irow,
-						       complex<double> *drow);
+template void
+TridiagBlockMatrix<complex<double>, double>::
+extract_row(const int irow, complex<double> *drow);
 			
 template
 void TridiagBlockMatrix<complex<quadruple>, quadruple>::
 extract_row(const int irow,
 	    complex<quadruple> *drow);
-//
+
+template
+void TridiagBlockMatrix<float>::
+extract_row(const int irow, float *drow);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+extract_row(const int irow, complex<float> *drow);
+ //
 
 template<typename T>
 void FillBlockSparse(const T *coef,
@@ -3004,6 +3531,29 @@ void FillBlockSparse<complex<quadruple> >(const complex<quadruple> *coef,
 					  vector<int> &old2new_i,
 					  vector<int> &old2new_j,
 					  ColumnMatrix<complex<quadruple> > &b);
+
+template
+void FillBlockSparse<float>(const float *coef,
+			     const int dim,
+			     vector<int>& map_eqn,
+			     const int *ptrow,
+			     const int *indcols,
+			     const int *indvals,
+			     vector<int> &old2new_i,
+			     vector<int> &old2new_j,
+			     ColumnMatrix<float> &b);
+
+template
+void FillBlockSparse<complex<float> >(const complex<float> *coef,
+				       const int dim,
+				       vector<int>& map_eqn,
+				       const int *ptrow,
+				       const int *indcols,
+				       const int *indvals,
+				       vector<int> &old2new_i,
+				       vector<int> &old2new_j,
+				       ColumnMatrix<complex<float> > &b);
+
 //
 
 bool isnegative(const double x) {
@@ -3020,6 +3570,14 @@ bool isnegative(const complex<double> &x) {
 
 bool isnegative(const complex<quadruple> &x) {
   return (x.real() < quadruple(0.0)) && (x.imag() == quadruple(0.0));
+}
+
+bool isnegative(const float x) {
+  return (x < 0.0);
+}
+
+bool isnegative(const complex<float> &x) {
+  return ((x.real() < 0.0) && (x.imag() == 0.0));
 }
 
 template<typename T, typename U>
@@ -3044,17 +3602,27 @@ int TridiagBlockMatrix<T, U>::NumNegativeDiags()
 }
 
 template
-int TridiagBlockMatrix<double>::NumNegativeDiags();
+int TridiagBlockMatrix<double>::
+NumNegativeDiags();
 
 template
 int TridiagBlockMatrix<quadruple>::NumNegativeDiags();
 
-template
-int TridiagBlockMatrix<complex<double>, double>::NumNegativeDiags();
+template int
+TridiagBlockMatrix<complex<double>, double>::
+NumNegativeDiags();
 
 template
 int TridiagBlockMatrix<complex<quadruple>, quadruple>::NumNegativeDiags();
 //
+
+template
+int TridiagBlockMatrix<float>::
+NumNegativeDiags();
+
+template int
+TridiagBlockMatrix<complex<float>, float>::
+NumNegativeDiags();
 
 template<typename T, typename U>
 void TridiagBlockMatrix<T, U>::KernelBasis(const bool isTrans,
@@ -3102,15 +3670,16 @@ void TridiagBlockMatrix<T, U>::KernelBasis(const bool isTrans,
 }
 
 template
-void TridiagBlockMatrix<double>::KernelBasis(const bool isTrans,
-					     ColumnMatrix<double> &a12);
+void TridiagBlockMatrix<double>::
+KernelBasis(const bool isTrans,
+	    ColumnMatrix<double> & a12);
 
 template
 void TridiagBlockMatrix<quadruple>::KernelBasis(const bool isTrans,
 						ColumnMatrix<quadruple> &a12);
 
-template
-void TridiagBlockMatrix<complex<double>, double>::
+template void
+TridiagBlockMatrix<complex<double>, double>::
 KernelBasis(const bool isTrans,
 	    ColumnMatrix<complex<double> > & a12);
 
@@ -3118,4 +3687,14 @@ template
 void TridiagBlockMatrix<complex<quadruple>, quadruple >::
 KernelBasis(const bool isTrans,
 	    ColumnMatrix<complex<quadruple> > & a12);
+
+template
+void TridiagBlockMatrix<float>::
+KernelBasis(const bool isTrans,
+	    ColumnMatrix<float> & a12);
+
+template void
+TridiagBlockMatrix<complex<float>, float>::
+KernelBasis(const bool isTrans,
+	    ColumnMatrix<complex<float> > & a12);
 //

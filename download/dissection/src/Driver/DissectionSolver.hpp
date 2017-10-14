@@ -98,17 +98,25 @@ void SaveMMMatrix_(const int dim,
 		   const complex<double> *coefs_);
 
 // example on usage of template
+// T : complex<double>, U : double, W : complex<quadruple>, Z : quadruple
 // T : complex<quadruple>, U : quadruple, W : complex<duoble>, Z : double
 // T : complex<quadruple>, U : quadruple, W = T, Z = U
 // T : quadruple,  U = T,  W = T,  Z = U
-template<typename T, typename U = T, typename W = T, typename Z = U, typename X = T, typename Y = U>
+template<typename T, typename U = T, typename W = T, typename Z = U>
 class DissectionSolver
 {
 public:
   DissectionSolver(int num_threads, bool verbose, int called, FILE *fp) :
-    _precDiag(NULL), _verbose(verbose), _num_threads(num_threads),
-    _status_factorized(false), _called(called), _fp(fp)
-  {  
+    _precDiag(NULL), _num_threads(num_threads),
+    _status_factorized(false), _called(called)
+  {
+    if (fp == NULL) {
+      _verbose = false;
+    }
+    else {
+      _verbose = verbose;
+      _fp = fp;
+    }
   }
 
   ~DissectionSolver()
@@ -124,14 +132,28 @@ public:
   }
   
   void SaveCSRMatrix(const int called,
-		     const W *coefs);
+		     const T *coefs);
   void SaveMMMatrix(const int called,
-		    const W *coefs);
+		    const T *coefs);
 
   void Destroy(void);
 
   void NumericFree(void);
-
+  
+  void SymbolicFact_(const int dim_,
+		     const int nz_,
+		     const bool flagint64,
+		     const int *ptRows,
+		     const int *indCols,
+		     const long long int *ptRows64,
+		     const long long int *indCols64,
+		     const bool sym,
+		     const bool upper,
+		     const bool isWhole,
+		     const int decomposer,
+		     const int nbLevels,
+		     const int minNodes);
+  
   void SymbolicFact(const int dim,
 		    const int *ptRows,
 		    const int *indCols,
@@ -142,17 +164,28 @@ public:
 		    const int nbLevels = (-1),
 		    const int minNodes = MINNODES);
 
+  void SymbolicFact(const int dim,
+		    const long long int *ptRows64,
+		    const long long int *indCols64,
+		    const bool sym,
+		    const bool upper,
+		    const bool isWhole = false,
+		    const int decomposer = SCOTCH_DECOMPOSER,
+		    const int nbLevels = (-1),
+		    const int minNodes = MINNODES);
+
   void NumericFact(const int called,
-		   W *coefs,
+		   T *coefs,
 		   const int scaling = KKT_SCALING, //useful for the Stokes eqs.
 		   const double eps_pivot = EPS_PIVOT,
 		   const bool kernel_detection_all = false,
 		   const int dim_augkern = DIM_AUG_KERN,
-		   const double machine_eps_ = -1.0);
+		   const double machine_eps_ = -1.0,
+		   const bool higher_precision = false);
 
   bool getFactorized(void) { return _status_factorized; };
 
-  void CopyQueueFwBw(DissectionSolver<X, Y, T, U> &qdslv);
+  void CopyQueueFwBw(DissectionSolver<W, Z, T, U> &qdslv);
   int GetMaxColors();
   void GetNullPivotIndices(int *pivots);
   void GetSmallestPivotIndices(const int n, int *pivots);
@@ -165,8 +198,8 @@ public:
   void ProjectionKernelOrthSingle(T *x, bool isTrans);
   void ProjectionImageMulti(T *x, int nrhs);
 
-  void SpMV(const T *x, T *y);
-  void SpMtV(const T *x, T *y);
+  void SpMV(const T *x, T *y, bool scaling_flag = true);
+  void SpMtV(const T *x, T *y, bool scaling_flag = true);
 
   void SolveScaled(T *x, int nrhs, bool isTrans);
   void QueueFwBw(T **x, int *nrhs);
@@ -197,7 +230,7 @@ public:
 			     SchurMatrix<T> &Schur,
 			     KernelMatrix<T> &kernel);
   Dissection::Tree** btree() { return _btree; }
-  SparseMatrix<T, W, Z>* ptDA() { return _ptDA; }
+  SparseMatrix<T>* ptDA() { return _ptDA; }
   int dimension(void) { return _dim; }
   int kern_dimension(void); 
   int ComputeTransposedKernels(void);
@@ -211,7 +244,7 @@ public:
   int graph_colors() const { return _graph_colors; }
   
   FILE* get_filedescriptor() { return _fp; }
-  Z* addrPrecDiag() { return _precDiag; }
+  U* addrPrecDiag() { return _precDiag; }
   DissectionQueue<T, U>** getDissectionQueue() { return _dissectionQueue; }
   TridiagQueue<T, U>** getTridiagQueue() { return _tridiagQueue; }
 
@@ -237,11 +270,9 @@ public:
     _verbose = s._verbose;
     _num_threads = s._num_threads;
   }
-
-  T fromreal(const U &y);
-
+  
 private:
-  SparseMatrix<T, W, Z>*                        _ptDA;
+  SparseMatrix<T>*                              _ptDA;
   Dissection::Tree**                           _btree;
   vector<DissectionMatrix<T, U>* >* _dissectionMatrix;
   DissectionQueue<T, U>**            _dissectionQueue;
@@ -250,7 +281,7 @@ private:
   SchurMatrix<T>*                              _Schur;
   KernelMatrix<T>*                            _kernel;
   vector<int>*                               _singIdx;
-  Z*                                        _precDiag;
+  U*                                        _precDiag;
   vector<int>                         _index_isolated;
   int _scaling;
   bool _verbose;
