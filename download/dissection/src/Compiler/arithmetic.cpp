@@ -48,44 +48,73 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include <cstdio>
 #include "Compiler/arithmetic.hpp"
 #include "Compiler/blas.hpp"
 
 template<>
-void printscalar<double>(FILE *fp, double x)
+void printscalar<double>(const bool verbose, FILE *fp, double x)
 {
-  fprintf(fp, "%16.8e ", x);
+  if (verbose && (fp != NULL)) {
+    fprintf(fp, "%16.8e ", x);
+  }
 }
 
 template<>
-void printscalar<quadruple>(FILE *fp, quadruple x)
+void printscalar<float>(const bool verbose, FILE *fp, float x)
 {
-  fprintf(fp, "%16.8e ", quad2double(x));
-}
-template<>
-void printscalar<complex<double> >(FILE *fp, complex<double> x)
-{
-  fprintf(fp, "(%16.8e %16.8e) ", x.real(), x.imag());
+  if (verbose && (fp != NULL)) {
+    fprintf(fp, "%16.8e ", x);
+  }
 }
 
 template<>
-void printscalar<complex<quadruple> >(FILE *fp, complex<quadruple> x)
+void printscalar<quadruple>(const bool verbose, FILE *fp, quadruple x)
 {
-  fprintf(fp, "(%16.8e %16.8e) ",
-	  quad2double(x.real()), quad2double(x.imag()));
+  if (verbose && (fp != NULL)) {
+    fprintf(fp, "%16.8e ", quad2double(x));
+  }
+}
+
+template<>
+void printscalar<complex<double> >(const bool verbose, FILE *fp,
+				   complex<double> x)
+{
+  if (verbose && (fp != NULL)) {
+    fprintf(fp, "(%16.8e %16.8e) ", x.real(), x.imag());
+  }
+}
+
+template<>
+void printscalar<complex<float> >(const bool verbose, FILE *fp,
+				   complex<float> x)
+{
+  if (verbose && (fp != NULL)) {
+    fprintf(fp, "(%16.8e %16.8e) ", x.real(), x.imag());
+  }
+}
+
+template<>
+void printscalar<complex<quadruple> >(const bool verbose, FILE *fp,
+				      complex<quadruple> x)
+{
+  if (verbose && (fp != NULL)) {
+    fprintf(fp, "(%16.8e %16.8e) ",
+	    quad2double(x.real()), quad2double(x.imag()));
+  }
 }
 
 template<typename T>
-void printscalar(FILE *fp, T x)
+void printscalar(const bool verbose, FILE *fp, T x)
 {
-  fprintf(stderr, "%s %d : printscalar is not implented\n", __FILE__, __LINE__);
+  fprintf(stderr, "%s %d : printscalar is not implented\n",
+	  __FILE__, __LINE__);
 }
 #ifndef NO_OCTRUPLE
 template
-void printscalar<octruple>(FILE *fp, octruple x);
+void printscalar<octruple>(const bool verbose, FILE *fp, octruple x);
 template
-void printscalar<complex<octruple> >(FILE *fp, complex<octruple> x);
+void printscalar<complex<octruple> >(const bool verbose,
+				     FILE *fp, complex<octruple> x);
 #endif
 

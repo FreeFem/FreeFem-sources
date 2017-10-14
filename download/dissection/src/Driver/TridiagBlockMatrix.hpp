@@ -74,7 +74,8 @@ class TridiagBlockMatrix
 public:
   TridiagBlockMatrix(int dim, int size_b1, bool isSymmetric,
 		     const int nb, const bool verbose, FILE *fp) :
-    _diag_block_alloc_status(false), _nb(nb), _verbose(verbose), _fp(fp) {
+    _diag_block_alloc_status(false), _diag_block_alloc_status_high(false),
+    _nb(nb), _verbose(verbose), _fp(fp) {
     init(dim, size_b1, isSymmetric);
   }
   
@@ -128,6 +129,7 @@ public:
 		   const double eps_pivot,
 		   double *pivot,
 		   const bool kernel_detection,
+		   const bool higher_precision,
 		   const int dim_aug_kern,
 		   const U eps_machine,
 		   double *nopd);
@@ -143,7 +145,8 @@ public:
 			  const int dim_aug_kern,
 			  ColumnMatrix<T> *diag_block_save,
 			  vector<int> &num_null_aug,
-			  double *nopd);
+			  double *nopd,
+			  const bool higher_precision = false);
   
   void ComputeSchur(const int dim_,
 		    int *color_mask,
@@ -187,6 +190,8 @@ public:
   bool detected() const { return _detected; }
   double nop() const {return _nop; }
   bool diag_block_alloc_status() const {return _diag_block_alloc_status; }
+  bool diag_block_alloc_status_high() const {
+    return _diag_block_alloc_status_high; }
   int maxdim() const { return _maxdim; }
   int nnz() const { return _nnz; }
   int nscol() const {return _nscol; }
@@ -215,6 +220,9 @@ public:
   void setNop(double nop) { _nop = nop; }
   void setDiag_block_alloc_status(int diag_block_alloc_status) {
     _diag_block_alloc_status = diag_block_alloc_status;
+  }
+  void setDiag_block_alloc_status_high(int diag_block_alloc_status) {
+    _diag_block_alloc_status_high = diag_block_alloc_status;
   }
   void setNscol(int nscol) { _nscol = nscol; }
   void setNsing(int n0) { _n0 = n0; }
@@ -259,6 +267,7 @@ private:
   ColumnMatrix<T> _factorized_whole;
 #endif
   bool _diag_block_alloc_status;
+  bool _diag_block_alloc_status_high;
   int _nscol;   // number of postponed entries
   int _n0;      // kernel dimension
   bool _detected;
@@ -283,7 +292,9 @@ void RenumberCSR(const bool shrink_flag,
 		 const int *aindcols,
 		 const int *aindvals,
 		 vector<int> &bptrows,
-		 vector<int> &bindcols, vector<int> &bindvals);
+		 vector<int> &bindcols, vector<int> &bindvals,
+		 const bool verbose,
+		 FILE *fp);
 
 void RenumberCSR(const int dim,
 		 vector<int> &b2a,
@@ -291,7 +302,9 @@ void RenumberCSR(const int dim,
 		 const int *aptrows,
 		 const int *aindcols,
 		 vector<int> &bptrows,
-		 vector<int> &bindcols);
+		 vector<int> &bindcols,
+		 const bool verbose,
+		 FILE *fp);
 
 void TridiagStruct(vector<int> &ptrow, vector<int> &indcols,
 		   const int nfront,
@@ -329,5 +342,38 @@ void FillBlockSparse(const T *coef,
 		     vector<int> &new2old_j,
 		     vector<int> &old2new_j,
 		     ColumnMatrix<T> &b);
+
+template<typename T, typename U, typename W, typename Z>
+void TridiagNumericFact_(double *pivot,
+			 const double eps_pivot,
+			 const int dim_aug_kern,
+			 ColumnMatrix<T> *diag_block_save,
+			 vector<int> &num_null_aug,
+			 double *nopd, const bool higher_precision,
+			 bool &_verbose,
+			 FILE* &_fp,
+			 int &_dim,
+			 bool &_isSymmetric,
+			 int &_nfront,
+			 vector<int> &_p_front,
+			 vector<int> &_p_diag,
+			 vector<int> &_p_upper,
+			 const T* &_coef,
+			 vector<int> &_ptRows,
+			 vector<int> &_indCols, // column_numb
+			 vector<int> &_indVals, // column_numb
+			 vector<int> &_num_null,
+			 vector<int> &_permute,
+			 vector<int> &_permute_ginv,
+			 ColumnMatrix<T>* &_diag_blocks,
+			 ColumnMatrix<W>* &_diag_blocks_high,
+			 ColumnMatrix<T>* &_upper_blocks,
+			 ColumnMatrix<T>* &_lower_blocks,
+			 list<int> &_high_blocks
+#ifdef STORE_WHOLE_FACTORIZED
+			 ,
+			 ColumnMatrix<T> &_factorized_whole
+#endif
+		    );
 
 #endif

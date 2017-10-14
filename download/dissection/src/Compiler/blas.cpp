@@ -55,9 +55,15 @@
 #include <cstdio>
 #include <cstring>
 
+#define FORCE_EXPLICIT_INSTANTIATION
+#if __clang_major__ == 4
+#undef FORCE_EXPLICIT_INSTANTIATION
+#endif
+
 #ifdef BLAS_FORTRAN
 
 extern "C" {
+  // double precision
   extern int FORTRAN_DECL(idamax)(const int &n,     // return Fortran index
 				  const double *x,
 				  const int &incx);
@@ -202,6 +208,153 @@ extern "C" {
 				  const double *B, const int &ldb,
 				  const double *beta,
 				  double *C, const int &ldc);
+
+  // single precision
+  extern int FORTRAN_DECL(isamax)(const int &n,     // return Fortran index
+				  const float *x,
+				  const int &incx);
+  
+  extern int FORTRAN_DECL(icamax)(const int &n,     // retrun Fortran index
+				  const float *x,
+				  const int &incx);
+  
+  extern void FORTRAN_DECL(scopy)(const int &n,
+				  const float *x, const int &incx,
+				  float *y, const int &incy);
+
+  extern void FORTRAN_DECL(ccopy)(const int &n,
+				  const float *x, const int &incx,
+				  float *y, const int &incy);
+
+  extern void FORTRAN_DECL(saxpy)(const int &n, const float &alpha,
+				  const float *x, const int &incx,
+				  float *y, const int &incy);
+
+  extern void FORTRAN_DECL(caxpy)(const int &n, const float *alpha,
+				  const float *x, const int &incx,
+				  float *y, const int &incy);
+
+  extern float FORTRAN_DECL(sdot)(const int &n,
+				   const float *x, const int &incx,
+				   const float *y, const int &incy);
+  
+  extern void FORTRAN_DECL(cdotc)(float *z,
+				  const int &n,
+				  const float *x, const int &incx,
+				  const float *y, const int &incy);
+
+  extern void FORTRAN_DECL(sscal)(const int &N, const float &alpha,
+				  float *X, const int &incX);
+
+  extern void FORTRAN_DECL(cscal)(const int &N, const float *alpha,
+				  float *X, const int &incX);
+
+  extern void FORTRAN_DECL(sgemv)(unsigned char &tra_,
+				  const int &m,
+				  const int &n,
+				  const float &alpha,
+				  const float *A,
+				  const int &lda,
+				  const float *x,
+				  const int &incx,
+				  const float &beta,
+				  float *y,
+				  const int &incy);
+  extern void FORTRAN_DECL(cgemv)(unsigned char &tra_,
+				  const int &m,
+				  const int &n,
+				  const float *alpha,
+				  const float *A,
+				  const int &lda,
+				  const float *x,
+				  const int &incx,
+				  const float *beta,
+				  float *y,
+				  const int &incy);
+  
+  extern void FORTRAN_DECL(strsv)(unsigned char &uplo_,
+				  unsigned char &transa_,
+				  unsigned char &diag_,
+				  const int &N,
+				  const float *A,
+				  const int &lda,
+				  float *X,
+				  const int &incX);
+  
+  extern void FORTRAN_DECL(ctrsv)(unsigned char &uplo_,
+				  unsigned char &transa_,
+				  unsigned char &diag_,
+				  const int &N,
+				  const float *A,
+				  const int &lda,
+				  float *X,
+				  const int &incX);
+  
+  extern void FORTRAN_DECL(ssyr)(unsigned char &uplo_,
+				 const int &N,
+				 const float &alpha,
+				 const float *X,
+				 const int &incX,
+				 float *A,
+				 const int &lda);
+  
+  extern void FORTRAN_DECL(ssyr2)(unsigned char &uplo_,
+				  const int &N,
+				  const float &alpha,
+				  const float *X,
+				  const int &incX,
+				  const float *Y,
+				  const int &incY,
+				  float *A,
+				  const int &lda);
+  extern void FORTRAN_DECL(sger)(const int &M, const int &N,
+				 const float &alpha,
+				 const float *X, const int &incX,
+				 const float *Y, const int &incY,
+				 float *A, const int  &lda);
+  
+  extern void FORTRAN_DECL(cgeru)(const int &M, const int &N,
+				  const float *alpha,
+				  float *X, const int &incX,
+				  float *Y, const int &incY, 
+				  float *A, const int &lda); 
+  
+  extern void FORTRAN_DECL(cgerc)(const int &M, const int &N,
+				  const float *alpha,
+				  const float *X, const int &incX,
+				  const float *Y, const int &incY, 
+				  float *A, const int &lda); 
+
+  extern void FORTRAN_DECL(strsm)(unsigned char &side_, unsigned char &uplo_,
+				  unsigned char &transa_, unsigned char &diag_,
+				  const int &M, const int &N,
+				  const float &alpha,
+				  const float *A, const int &lda,
+				  float *B, const int &ldb);
+  
+  extern void FORTRAN_DECL(ctrsm)(unsigned char &side_, unsigned char &uplo_,
+				  unsigned char &transa_, unsigned char &diag_,
+				  const int &M, const int &N,
+				  const float *alpha,
+				  const float *A, const int &lda,
+				  float *B, const int &ldb);
+  
+  extern void FORTRAN_DECL(sgemm)(unsigned char &tra_, unsigned char &trb_,
+				  const int &m, const int &n, const int &k,
+				  const float &alpha,
+				  const float *A, const int &lda,
+				  const float *B, const int &ldb,
+				  const float &beta,
+				  float *C, const int &ldc);
+  
+  extern void FORTRAN_DECL(cgemm)(unsigned char &tra_, unsigned char &trb_,
+				  const int &m, const int &n, const int &k,
+				  const float *alpha,
+				  const float *A, const int &lda,
+				  const float *B, const int &ldb,
+				  const float *beta,
+				  float *C, const int &ldc);
+
 }
 #endif
 // BLAS 1
@@ -219,7 +372,7 @@ blas_copy<double>(const int n, const double* x, const int incx, double* y,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(dcopy)(n, x, incx, y, incy);
 #else
-  cblas_dcopy(n, x, incx, y, incy);
+  cblas_dcopy((BLAS_INT)n, x, (BLAS_INT)incx, y, (BLAS_INT)incy);
 #endif
   }
 }
@@ -237,14 +390,48 @@ blas_copy<complex<double> >(const int n,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(zcopy)(n, (double *)x, incx, (double *)y, incy);
 #else
-#ifdef OPENBLAS
-    cblas_zcopy(n, (double *)x, incx, (double *)y, incy);
-#else
-    cblas_zcopy(n, (void *)x, incx, (void *)y, incy);
-#endif
+    cblas_zcopy((BLAS_INT)n, (void *)x, (BLAS_INT)incx,
+		(BLAS_VOID *)y, (BLAS_INT)incy);
 #endif
   }
 }
+
+template<>
+void
+blas_copy<float>(const int n, const float* x, const int incx, float* y,
+		  const int incy)
+{
+  if ((incx == 1) && (incy == 1)) {
+    memcpy((void *)y, (void *)x, n * sizeof(float));
+  }
+  else {
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(scopy)(n, x, incx, y, incy);
+#else
+  cblas_scopy((BLAS_INT)n, x, (BLAS_INT)incx, y, (BLAS_INT)incy);
+#endif
+  }
+}
+
+template<>
+void
+blas_copy<complex<float> >(const int n,
+			    const complex<float>* x, const int incx,
+			    complex<float>* y, const int incy)
+{
+  if ((incx == 1) && (incy == 1)) {
+    memcpy((void *)y, (void *)x, n * sizeof(complex<float>));
+  }
+  else {
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(ccopy)(n, (float *)x, incx, (float *)y, incy);
+#else
+    cblas_ccopy((BLAS_INT)n, (void *)x, (BLAS_INT)incx,
+		(BLAS_VOID *)y, (BLAS_INT)incy);
+#endif
+  }
+}
+
 #endif
 template<typename T>
 void
@@ -261,7 +448,8 @@ blas_copy(const int n, const T* x, const int incx, T *y, const int incy)
     }
   }
 }
-#if 0
+
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_copy<double>(const int n, const double* x, const int incx,
@@ -272,12 +460,21 @@ void
 blas_copy<complex<double> > (const int n,
 			     const complex<double>* x, const int incx,
 			     complex<double> *y, const int incy);
+template
+void
+blas_copy<float>(const int n, const float* x, const int incx,
+		  float *y, const int incy);
+
+template
+void
+blas_copy<complex<float> > (const int n,
+			     const complex<float>* x, const int incx,
+			     complex<float> *y, const int incy);
 #endif
 template
 void
 blas_copy<quadruple>(const int n, const quadruple* x, const int incx,
 		     quadruple *y, const int incy);
-
 template
 void
 blas_copy<complex<quadruple> > (const int n,
@@ -294,7 +491,7 @@ blas_axpy<double>(const int n, const double &alpha,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(daxpy)(n, alpha, x, incx, y, incy);
 #else
-  cblas_daxpy(n, alpha, x, incx, y, incy);
+  cblas_daxpy((BLAS_INT)n, alpha, x, (BLAS_INT)incx, y, (BLAS_INT)incy);
 #endif
 }
 
@@ -307,12 +504,36 @@ blas_axpy<complex<double> >(const int n, const complex<double> &alpha,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(zaxpy)(n, (double *)&alpha, (double *)x, incx, (double *)y, incy);
 #else
-#ifdef OPENBLAS
-  cblas_zaxpy(n, (double *)&alpha, (double *)x, incx, (double *)y, incy);
-#else
-  cblas_zaxpy(n, (void *)&alpha, (void *)x, incx, (void *)y, incy);
+  cblas_zaxpy((BLAS_INT)n, (BLAS_VOID *)&alpha, (BLAS_VOID *)x, (BLAS_INT)incx,
+	      (BLAS_VOID *)y, (BLAS_INT)incy);
 #endif
-  #endif
+}
+
+template<>
+void
+blas_axpy<float>(const int n, const float &alpha, 
+		  const float* x, const int incx, 
+		  float* y, const int incy)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(saxpy)(n, alpha, x, incx, y, incy);
+#else
+  cblas_saxpy((BLAS_INT)n, alpha, x, (BLAS_INT)incx, y, (BLAS_INT)incy);
+#endif
+}
+
+template<>
+void 
+blas_axpy<complex<float> >(const int n, const complex<float> &alpha, 
+			    const complex<float>* x, const int incx, 
+			    complex<float>* y, int incy)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(caxpy)(n, (float *)&alpha, (float *)x, incx, (float *)y, incy);
+#else
+  cblas_caxpy((BLAS_INT)n, (BLAS_VOID *)&alpha, (BLAS_VOID *)x, (BLAS_INT)incx,
+	      (BLAS_VOID *)y, (BLAS_INT)incy);
+#endif
 }
 #endif
 
@@ -328,7 +549,7 @@ blas_axpy(const int n, const T &alpha,
     y[iy] += alpha * x[ix];
   }
 }
-#if 0
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void 
 blas_axpy<double>(const int n, const double &alpha, 
@@ -339,6 +560,17 @@ void
 blas_axpy<complex<double> >(const int n, const complex<double> &alpha, 
 			    const complex<double>* x, const int incx, 
 			    complex<double>* y, int incy);
+
+template
+void 
+blas_axpy<float>(const int n, const float &alpha, 
+		  const float* x, const int incx, 
+		  float* y, int incy);
+template
+void 
+blas_axpy<complex<float> >(const int n, const complex<float> &alpha, 
+			    const complex<float>* x, const int incx, 
+			    complex<float>* y, int incy);
 #endif
 template
 void 
@@ -361,7 +593,7 @@ blas_dot<double>(const int n, const double* x, const int incx,
 #ifdef BLAS_FORTRAN
   return FORTRAN_DECL(ddot)(n, x, incx, y, incy); // ?
 #else
-  return cblas_ddot(n, x, incx, y, incy);
+  return cblas_ddot((BLAS_INT)n, x, (BLAS_INT)incx, y, (BLAS_INT)incy);
 #endif
 }
 
@@ -376,14 +608,41 @@ blas_dot<complex<double> >(const int n,
   // fortran function that returns complex is called as C void function
   FORTRAN_DECL(zdotc)((double*) &val, n, (double *)x, incx, (double *)y, incy);
 #else
-#ifdef OPENBLAS
-  cblas_zdotc_sub(n, (double *)x, incx, (double *)y, incy, (double *)&val);
-#else
-  cblas_zdotc_sub(n, (void *)x, incx, (void *)y, incy, (void *)&val);
-#endif
+  cblas_zdotc_sub((BLAS_INT)n, (BLAS_VOID *)x, (BLAS_INT)incx,
+		  (BLAS_VOID *)y, (BLAS_INT)incy, (BLAS_VOID *)&val);
 #endif
   return val;
 }
+
+template<>
+float
+blas_dot<float>(const int n, const float* x, const int incx, 
+		 const float* y, const int incy)
+{
+#ifdef BLAS_FORTRAN
+  return FORTRAN_DECL(sdot)(n, x, incx, y, incy); // ?
+#else
+  return cblas_sdot((BLAS_INT)n, x, (BLAS_INT)incx, y, (BLAS_INT)incy);
+#endif
+}
+
+template<>
+complex<float>
+blas_dot<complex<float> >(const int n,
+			   const complex<float>* x, const int incx, 
+			   const complex<float>* y, const int incy)
+{
+  complex<float> val;
+#ifdef BLAS_FORTRAN
+  // fortran function that returns complex is called as C void function
+  FORTRAN_DECL(cdotc)((float*) &val, n, (float *)x, incx, (float *)y, incy);
+#else
+  cblas_cdotc_sub((BLAS_INT)n, (BLAS_VOID *)x, (BLAS_INT)incx,
+		  (BLAS_VOID *)y, (BLAS_INT)incy, (BLAS_VOID *)&val);
+#endif
+  return val;
+}
+
 #endif
 
 template<typename T>
@@ -420,6 +679,7 @@ blas_dot(const int n, const T* x, const int incx,
   return temp;
 }
 // explicit instantiation of blas_dot
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 double
 blas_dot<double>(const int n, const double* x, const int incx, 
@@ -429,6 +689,16 @@ complex<double>
 blas_dot<complex<double> >(const int n,
 			   const complex<double>* x, const int incx, 
 			   const complex<double>* y, const int incy);
+template
+float
+blas_dot<float>(const int n, const float* x, const int incx, 
+		 const float* y, const int incy);
+template
+complex<float>
+blas_dot<complex<float> >(const int n,
+			   const complex<float>* x, const int incx, 
+			   const complex<float>* y, const int incy);
+#endif
 template
 quadruple
 blas_dot<quadruple>(const int n, const quadruple* x, const int incx, 
@@ -458,7 +728,7 @@ blas_scal<double>(const int N, const double &alpha, double *X, const int incX)
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(dscal)(N, alpha, X, incX);
 #else
-  cblas_dscal(N, alpha, X, incX);
+  cblas_dscal((BLAS_INT)N, alpha, X, (BLAS_INT)incX);
 #endif
 }
 
@@ -470,12 +740,31 @@ blas_scal<complex<double> >(const int N, const complex<double> &alpha,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(zscal)(N, (double *)&alpha, (double *)X, incX);
 #else
-#ifdef OPENBLAS
-  cblas_zscal(N, (double *)&alpha, (double *)X, incX);
-#else
-  cblas_zscal(N, (void *)&alpha, (void *)X, incX);
+  cblas_zscal((BLAS_INT)N, (BLAS_VOID *)&alpha, (BLAS_VOID *)X, (BLAS_INT)incX);
 #endif
-  #endif
+}
+
+template<>
+void
+blas_scal<float>(const int N, const float &alpha, float *X, const int incX)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(sscal)(N, alpha, X, incX);
+#else
+  cblas_sscal((BLAS_INT)N, alpha, X, (BLAS_INT)incX);
+#endif
+}
+
+template<>
+void
+blas_scal<complex<float> >(const int N, const complex<float> &alpha, 
+			    complex<float> *X, const int incX)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(cscal)(N, (float *)&alpha, (float *)X, incX);
+#else
+  cblas_cscal((BLAS_INT)N, (BLAS_VOID *)&alpha, (BLAS_VOID *)X, (BLAS_INT)incX);
+#endif
 }
 #endif // #ifdef BLAS_GENERIC
 
@@ -500,6 +789,7 @@ blas_scal(const int N, const T &alpha,
   }
 }
 // explicit instantiation of blas_scal
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_scal<double>(const int N, const double &alpha,
@@ -510,6 +800,16 @@ void
 blas_scal<complex<double> >(const int N, const complex<double> &alpha,
 			    complex<double> *X, const int incX);
 
+template
+void
+blas_scal<float>(const int N, const float &alpha,
+		  float *X, const int incX);
+
+template
+void
+blas_scal<complex<float> >(const int N, const complex<float> &alpha,
+			    complex<float> *X, const int incX);
+#endif
 template
 void
 blas_scal<quadruple>(const int N, const quadruple &alpha,
@@ -541,7 +841,7 @@ blas_scal2<double, double>(const int N, const double &alpha,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(dscal)(N, alpha, X, incX);
 #else
-  cblas_dscal(N, alpha, X, incX);
+  cblas_dscal((BLAS_INT)N, alpha, X, (BLAS_INT)incX);
 #endif
 }
 
@@ -554,13 +854,34 @@ blas_scal2<complex<double>, double>(const int N, const double &alpha_,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(zscal)(N, (double *)&alpha, (double *)X, incX);
 #else
-#ifdef OPENBLAS
-  cblas_zscal(N, (double *)&alpha, (double *)X, incX);
-#else
-  cblas_zscal(N, (void *)&alpha, (void *)X, incX);
-#endif
+  cblas_zscal((BLAS_INT)N, (BLAS_VOID *)&alpha, (BLAS_VOID *)X, (BLAS_INT)incX);
 #endif
 }
+template<>
+void
+blas_scal2<float, float>(const int N, const float &alpha,
+			  float *X, const int incX)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(sscal)(N, alpha, X, incX);
+#else
+  cblas_sscal((BLAS_INT)N, alpha, X, (BLAS_INT)incX);
+#endif
+}
+
+template<>
+void
+blas_scal2<complex<float>, float>(const int N, const float &alpha_, 
+				   complex<float> *X, const int incX)
+{
+  const complex<float> alpha = complex<float>(alpha_, 0.0);
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(cscal)(N, (float *)&alpha, (float *)X, incX);
+#else
+  cblas_cscal((BLAS_INT)N, (BLAS_VOID *)&alpha, (BLAS_VOID *)X, (BLAS_INT)incX);
+#endif
+}
+
 template<>
 void
 blas_scal2<quadruple, quadruple>(const int N, const quadruple &alpha,
@@ -621,6 +942,7 @@ blas_scal2(const int N, const U &alpha_,
 }
 
 // explicit instantiation blas_scal with real number saling
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template void
 blas_scal2<double, double>(const int N, const double &alpha,
 			  double *X, const int incX);
@@ -628,6 +950,15 @@ blas_scal2<double, double>(const int N, const double &alpha,
 template void
 blas_scal2<complex<double>, double>(const int N, const double &alpha_,
 				   complex<double> *X, const int incX);
+
+template void
+blas_scal2<float, float>(const int N, const float &alpha,
+			  float *X, const int incX);
+
+template void
+blas_scal2<complex<float>, float>(const int N, const float &alpha_,
+				   complex<float> *X, const int incX);
+
 
 template void
 blas_scal2<quadruple, quadruple>(const int N, const quadruple &alpha,
@@ -644,7 +975,7 @@ template void
 blas_scal2<complex<octruple>, octruple>(const int N, const octruple &alpha,
 				       complex<octruple> *X, const int incX);
 #endif
-
+#endif
 template<typename T, typename U>
 int blas_iamax(const int n, const T *x, const int incx)
 {
@@ -690,7 +1021,7 @@ int blas_iamax<double, double>(const int n, const double *x, const int incx)
 #ifdef BLAS_FORTRAN
   return (FORTRAN_DECL(idamax)(n, x, incx) - 1); // Fortran to C index
 #else
-  return cblas_idamax(n, x, incx);
+  return cblas_idamax((BLAS_INT)n, x, (BLAS_INT)incx);
 #endif
 }
 
@@ -702,18 +1033,47 @@ int blas_iamax<complex<double>, double>(const int n,
 #ifdef BLAS_FORTRAN                                  // Fortran to C index
   return (FORTRAN_DECL(izamax)(n, (double *)x, incx) - 1);
 #else
-  return cblas_izamax(n, (double *)x, incx);
+  return cblas_izamax((BLAS_INT)n, (double *)x, (BLAS_INT)incx);
 #endif
 }
-#endif
 
+template<>
+int blas_iamax<float, float>(const int n, const float *x, const int incx)
+{
+#ifdef BLAS_FORTRAN
+  return (FORTRAN_DECL(isamax)(n, x, incx) - 1); // Fortran to C index
+#else
+  return cblas_isamax((BLAS_INT)n, x, (BLAS_INT)incx);
+#endif
+}
+
+template<>
+int blas_iamax<complex<float>, float>(const int n,
+					const complex<float> *x,
+					const int incx)
+{
+#ifdef BLAS_FORTRAN                                  // Fortran to C index
+  return (FORTRAN_DECL(icamax)(n, (float *)x, incx) - 1);
+#else
+  return cblas_icamax((BLAS_INT)n, (float *)x, (BLAS_INT)incx);
+#endif
+}
+
+#endif
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 int blas_iamax<double, double>(const int n, const double *x, const int incx);
 template
-int blas_iamax<quadruple, quadruple>(const int n, const quadruple *x, const int incx);
-template
 int blas_iamax<complex<double>, double>(const int n, const complex<double> *x,
 					const int incx);
+template
+int blas_iamax<float, float>(const int n, const float *x, const int incx);
+template
+int blas_iamax<complex<float>, float>(const int n, const complex<float> *x,
+					const int incx);
+#endif
+template
+int blas_iamax<quadruple, quadruple>(const int n, const quadruple *x, const int incx);
 template
 int blas_iamax<complex<quadruple>, quadruple>(const int n,
 					      const complex<quadruple> *x,
@@ -745,7 +1105,8 @@ blas_gemv<double>(const CBLAS_TRANSPOSE trA,
   }
   FORTRAN_DECL(dgemv)(tra_, m, n, alpha, A, lda, x, incx, beta, y, incy); //
 #else
-  cblas_dgemv(CblasColMajor, trA, m, n, alpha, A, lda, x, incx, beta, y, incy );
+  cblas_dgemv(CblasColMajor, trA, (BLAS_INT)m, (BLAS_INT)n, alpha,
+	      A, (BLAS_INT)lda, x, (BLAS_INT)incx, beta, y, (BLAS_INT)incy);
 #endif
 }
 
@@ -775,16 +1136,72 @@ blas_gemv<complex<double> >(const CBLAS_TRANSPOSE trA,
   FORTRAN_DECL(zgemv)(tra_, m, n, (double *)&alpha, (double *)A, lda, 
 	 (double *)x, incx, (double *)&beta, (double *)y, incy);
 #else
-#ifdef OPENBLAS
-  cblas_zgemv(CblasColMajor, trA, m, n, (double *)&alpha, (double *)A, lda, 
-	      (double *)x, incx, (double *)&beta, (double *)y, incy);
-  
-#else
-  cblas_zgemv(CblasColMajor, trA, m, n, (void *)&alpha, (void *)A, lda, 
-	      (void *)x, incx, (void *)&beta, (void *)y, incy);
-#endif
+  cblas_zgemv(CblasColMajor, trA, (BLAS_INT)m, (BLAS_INT)n, (BLAS_VOID *)&alpha,
+	      (BLAS_VOID *)A, (BLAS_INT)lda, (BLAS_VOID *)x, (BLAS_INT)incx,
+	      (BLAS_VOID *)&beta, (void *)y, (BLAS_INT)incy);
 #endif
 }
+
+template<>
+void
+blas_gemv<float>(const CBLAS_TRANSPOSE trA, 
+		 const int m, const int n, const float &alpha, 
+		 const float* A, const int lda, const float* x,
+		 const int incx, 
+		 const float &beta, float* y, const int incy)
+{
+#ifdef BLAS_FORTRAN
+  unsigned char tra_ = 0;
+  switch(trA) {
+  case CblasNoTrans :
+    tra_ = 'n';
+    break;
+  case CblasTrans :
+    tra_ = 't';
+    break;
+  case CblasConjTrans:
+    tra_ = 'c';
+    break;
+  }
+  FORTRAN_DECL(sgemv)(tra_, m, n, alpha, A, lda, x, incx, beta, y, incy); //
+#else
+  cblas_sgemv(CblasColMajor, trA, (BLAS_INT)m, (BLAS_INT)n, alpha,
+	      A, (BLAS_INT)lda, x, (BLAS_INT)incx, beta, y, (BLAS_INT)incy);
+#endif
+}
+
+template<>
+void
+blas_gemv<complex<float> >(const CBLAS_TRANSPOSE trA, 
+			    const int m, const int n,
+			    const complex<float> &alpha, 
+			    const complex<float>* A, const int lda, 
+			    const complex<float>* x, const int incx, 
+			    const complex<float> &beta,
+			    complex<float>* y, const int incy)
+{
+#ifdef BLAS_FORTRAN
+  unsigned char tra_ = 0;
+  switch(trA) {
+  case CblasNoTrans:
+    tra_ = 'n';
+    break;
+  case CblasTrans:
+    tra_ = 't';
+    break;
+  case CblasConjTrans:
+    tra_ = 'c';
+    break;
+  }
+  FORTRAN_DECL(cgemv)(tra_, m, n, (float *)&alpha, (float *)A, lda, 
+		      (float *)x, incx, (float *)&beta, (float *)y, incy);
+#else
+  cblas_cgemv(CblasColMajor, trA, (BLAS_INT)m, (BLAS_INT)n, (BLAS_VOID *)&alpha,
+	      (BLAS_VOID *)A, (BLAS_INT)lda, (BLAS_VOID *)x, (BLAS_INT)incx,
+	      (BLAS_VOID *)&beta, (void *)y, (BLAS_INT)incy);
+#endif
+}
+
 #endif
 
 template<typename T>
@@ -931,6 +1348,7 @@ blas_gemv(const CBLAS_TRANSPOSE trA,
 }
 
 // explicit instantiation of blas_gemv
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_gemv<double>(const CBLAS_TRANSPOSE trA, 
@@ -948,6 +1366,25 @@ blas_gemv<complex<double> >(const CBLAS_TRANSPOSE trA,
 			       const complex<double>* x, const int incx, 
 			       const complex<double> &beta,
 			       complex<double>* y, const int incy);
+
+template
+void
+blas_gemv<float>(const CBLAS_TRANSPOSE trA, 
+		     const int m, const int n, const float &alpha, 
+		     const float* A, const int lda,
+		     const float* x, const int incx, 
+		     const float &beta, float* y, const int incy);
+
+template
+void
+blas_gemv<complex<float> >(const CBLAS_TRANSPOSE trA, 
+			       const int m, const int n,
+			       const complex<float> &alpha, 
+			       const complex<float>* A, const int lda, 
+			       const complex<float>* x, const int incx, 
+			       const complex<float> &beta,
+			       complex<float>* y, const int incy);
+#endif
 template
 void
 blas_gemv<quadruple>(const CBLAS_TRANSPOSE trA, 
@@ -1027,7 +1464,8 @@ blas_trsv<double>(const CBLAS_UPLO Uplo,
   }
   FORTRAN_DECL(dtrsv)(uplo_, transa_, diag_, N, A, lda, X, incX);
 #else
-  cblas_dtrsv(CblasColMajor, Uplo, TransA, Diag, N, A, lda, X, incX);
+  cblas_dtrsv(CblasColMajor, Uplo, TransA, Diag, (BLAS_INT)N,
+	      A, (BLAS_INT)lda, X, (BLAS_INT)incX);
 #endif
 }
 
@@ -1073,13 +1511,100 @@ blas_trsv<complex<double> >(const CBLAS_UPLO Uplo,
   FORTRAN_DECL(ztrsv)(uplo_, transa_, diag_, N, (double *)A, lda,
 		      (double *)X, incX);
 #else
-#ifdef OPENBLAS
-  cblas_ztrsv(CblasColMajor, Uplo, TransA, Diag, N, (double *)A, lda,
-	      (double *)X, incX);
-#else
-  cblas_ztrsv(CblasColMajor, Uplo, TransA, Diag, N, (void *)A, lda,
-	      (void *)X, incX);
+  cblas_ztrsv(CblasColMajor, Uplo, TransA, Diag, (BLAS_INT)N,
+	      (BLAS_VOID *)A, (BLAS_INT)lda, (BLAS_VOID *)X, (BLAS_INT)incX);
 #endif
+}
+
+template<>
+void
+blas_trsv<float>(const CBLAS_UPLO Uplo,
+		  const CBLAS_TRANSPOSE TransA, const CBLAS_DIAG Diag,
+		  const int N, const float *A, const int lda, float *X,
+		  const int incX) 
+{
+#ifdef BLAS_FORTRAN
+  unsigned char uplo_ = 0;
+  unsigned char transa_ = 0;
+  unsigned char diag_ = 0;
+  switch(Uplo) {
+  case CblasUpper:
+    uplo_ = 'u';
+    break;
+  case CblasLower:
+    uplo_ = 'l';
+    break;
+  }
+  switch(TransA) {
+  case CblasNoTrans:
+    transa_ = 'n';
+    break;
+  case CblasTrans:
+    transa_ = 't';
+    break;
+  case CblasConjTrans:
+    transa_ = 'c';
+    break;
+  }
+  switch(Diag) {
+  case CblasNonUnit:
+    diag_ = 'n';
+    break;
+  case CblasUnit:
+    diag_ = 'u';
+    break;
+  }
+  FORTRAN_DECL(strsv)(uplo_, transa_, diag_, N, A, lda, X, incX);
+#else
+  cblas_strsv(CblasColMajor, Uplo, TransA, Diag, (BLAS_INT)N,
+	      A, (BLAS_INT)lda, X, (BLAS_INT)incX);
+#endif
+}
+
+template<>
+void
+blas_trsv<complex<float> >(const CBLAS_UPLO Uplo,
+			    const CBLAS_TRANSPOSE TransA, const CBLAS_DIAG Diag,
+			    const int N, const complex<float>* A,
+			    const int lda, 
+			    complex<float> *X, const int incX) 
+{
+#ifdef BLAS_FORTRAN
+  unsigned char uplo_ = 0;
+  unsigned char transa_ = 0;
+  unsigned char diag_ = 0;
+  switch(Uplo) {
+  case CblasUpper:
+    uplo_ = 'u';
+    break;
+  case CblasLower:
+    uplo_ = 'l';
+    break;
+  }
+  switch(TransA) {
+  case CblasNoTrans:
+    transa_ = 'n';
+    break;
+  case CblasTrans:
+    transa_ = 't';
+    break;
+  case CblasConjTrans:
+    transa_ = 'c';
+    break;
+  }
+  switch(Diag) {
+  case CblasNonUnit:
+    diag_ = 'n';
+    break;
+  case CblasUnit:
+    diag_ = 'u';
+    break;
+  }
+  FORTRAN_DECL(ctrsv)(uplo_, transa_, diag_, N, (float *)A, lda,
+		      (float *)X, incX);
+#else
+  cblas_ctrsv(CblasColMajor, Uplo, TransA, Diag, (BLAS_INT)N,
+	      (BLAS_VOID *)A, (BLAS_INT)lda, (BLAS_VOID *)X, (BLAS_INT)incX);
 #endif
 }
 #endif
@@ -1281,6 +1806,7 @@ blas_trsv(const CBLAS_UPLO Uplo,
 }
 
 // explicit instantiation of blas_trsv
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_trsv<double>(const CBLAS_UPLO Uplo,
@@ -1296,6 +1822,21 @@ blas_trsv<complex<double> >(const CBLAS_UPLO Uplo,
 			  const complex<double> *A, const int lda,
 			  complex<double> *X, const int incX);
 
+template
+void
+blas_trsv<float>(const CBLAS_UPLO Uplo,
+		const CBLAS_TRANSPOSE TransA, const CBLAS_DIAG Diag,
+		const int N, const float *A, const int lda,
+		float *X, const int incX);
+
+template
+void
+blas_trsv<complex<float> >(const CBLAS_UPLO Uplo,
+			  const CBLAS_TRANSPOSE TransA, const CBLAS_DIAG Diag,
+			  const int N,
+			  const complex<float> *A, const int lda,
+			  complex<float> *X, const int incX);
+#endif
 template
 void
 blas_trsv<quadruple>(const CBLAS_UPLO Uplo,
@@ -1421,7 +1962,8 @@ blas_syr<double>(const CBLAS_UPLO Uplo,
   }
   FORTRAN_DECL(dsyr)(uplo_, N, alpha, X, incX, A, lda);
 #else
-  cblas_dsyr(CblasColMajor, Uplo, N, alpha, X, incX, A, lda);
+  cblas_dsyr(CblasColMajor, Uplo, (BLAS_INT)N, alpha,
+	     X, (BLAS_INT)incX, A, (BLAS_INT)lda);
 #endif
 }
 
@@ -1437,20 +1979,59 @@ blas_syr<complex<double> >(const CBLAS_UPLO Uplo,
 		      (double *)&alpha, (double *)X, incX, (double *)X, incX, 
 		      (double *)A, lda); // no zsyr in BLAS! : Uplo is ignored
 #else
-#ifdef OPENBLAS
   cblas_zgeru(CblasColMajor, N, N,
-	      (double *)&alpha, (double *)X, incX, (double *)X, incX, 
-	      (double *)A, lda); // no zsyr in BLAS! : Uplo is ignored
-#else
-  cblas_zgeru(CblasColMajor, N, N,
-	      (void *)&alpha, (void *)X, incX, (void *)X, incX, 
-	      (void *)A, lda); // no zsyr in BLAS! :  Uplo is ignored
+	      (BLAS_VOID *)&alpha, (BLAS_VOID *)X, (BLAS_INT)incX,
+	      (BLAS_VOID *)X, (BLAS_INT)incX, 
+	      (BLAS_VOID *)A, (BLAS_INT)lda); // no zsyr in BLAS! :  Uplo is ignored
 #endif
+}
+
+template<>
+void
+blas_syr<float>(const CBLAS_UPLO Uplo, 
+		 const int N, const float &alpha,
+		 const float *X, const int incX,
+		 float *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  unsigned char uplo_ = 0;
+  switch(Uplo) {
+  case CblasUpper:
+    uplo_ = 'u';
+    break;
+  case CblasLower:
+    uplo_ = 'l';
+    break;
+  }
+  FORTRAN_DECL(ssyr)(uplo_, N, alpha, X, incX, A, lda);
+#else
+  cblas_ssyr(CblasColMajor, Uplo, (BLAS_INT)N, alpha,
+	     X, (BLAS_INT)incX, A, (BLAS_INT)lda);
+#endif
+}
+
+template<>
+void
+blas_syr<complex<float> >(const CBLAS_UPLO Uplo, 
+			   const int N, const complex<float> &alpha,
+			   const complex<float> *X, const int incX,
+			   complex<float> *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(cgeru)(N, N,
+		      (float *)&alpha, (float *)X, incX, (float *)X, incX, 
+		      (float *)A, lda); // no zsyr in BLAS! : Uplo is ignored
+#else
+  cblas_cgeru(CblasColMajor, N, N,
+	      (BLAS_VOID *)&alpha, (BLAS_VOID *)X, (BLAS_INT)incX,
+	      (BLAS_VOID *)X, (BLAS_INT)incX, 
+	      (BLAS_VOID *)A, (BLAS_INT)lda); // no zsyr in BLAS! :  Uplo is ignored
 #endif
 }
 #endif
 
 // explicit instantiation of blas_syr
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_syr<double>(const CBLAS_UPLO Uplo, const int N,
@@ -1465,6 +2046,20 @@ blas_syr<complex<double> >(const CBLAS_UPLO Uplo, const int N,
 			   const complex<double> *X, const int incX,
 			   complex<double> *A, const int lda);
 
+template
+void
+blas_syr<float>(const CBLAS_UPLO Uplo, const int N,
+		 const float &alpha,
+		 const float *X, const int incX,
+		 float *A, const int lda);
+
+template
+void
+blas_syr<complex<float> >(const CBLAS_UPLO Uplo, const int N,
+			   const complex<float> &alpha,
+			   const complex<float> *X, const int incX,
+			   complex<float> *A, const int lda);
+#endif
 template
 void
 blas_syr<quadruple>(const CBLAS_UPLO Uplo, const int N,
@@ -1578,6 +2173,13 @@ blas_syrc<complex<double> >(const CBLAS_UPLO Uplo,
 
 template
 void
+blas_syrc<complex<float> >(const CBLAS_UPLO Uplo,
+			    const int N, const complex<float> &alpha,
+			    const complex<float> *X, const int incX,
+			    complex<float> *A, const int lda);
+
+template
+void
 blas_syrc<complex<quadruple> >(const CBLAS_UPLO Uplo,
 			  const int N, const complex<quadruple> &alpha,
 			  const complex<quadruple> *X, const int incX,
@@ -1613,7 +2215,33 @@ blas_syr2<double>(const CBLAS_UPLO Uplo, const int N,
   }
   FORTRAN_DECL(dsyr2)(uplo_, N, alpha, X, incX, Y, incY, A, lda);
 #else
-  cblas_dsyr2(CblasColMajor, Uplo, N, alpha, X, incX, Y, incY, A, lda);
+  cblas_dsyr2(CblasColMajor, Uplo, (BLAS_INT)N, alpha,
+	      X, (BLAS_INT)incX, Y, (BLAS_INT)incY, A, (BLAS_INT)lda);
+#endif
+}
+
+template<>
+void
+blas_syr2<float>(const CBLAS_UPLO Uplo, const int N,
+		  const float &alpha,
+		  const float *X, const int incX,
+		  const float *Y, const int incY,
+		  float *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  unsigned char uplo_ = 0;
+  switch(Uplo) {
+  case CblasUpper:
+    uplo_ = 'u';
+    break;
+  case CblasLower:
+    uplo_ = 'l';
+    break;
+  }
+  FORTRAN_DECL(ssyr2)(uplo_, N, alpha, X, incX, Y, incY, A, lda);
+#else
+  cblas_ssyr2(CblasColMajor, Uplo, (BLAS_INT)N, alpha,
+	      X, (BLAS_INT)incX, Y, (BLAS_INT)incY, A, (BLAS_INT)lda);
 #endif
 }
 #endif
@@ -1711,6 +2339,7 @@ blas_syr2(const CBLAS_UPLO Uplo,
   }
 }
 // explicit instantiation of blas_syr2
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_syr2<double>(const CBLAS_UPLO Uplo, const int N,
@@ -1719,6 +2348,14 @@ blas_syr2<double>(const CBLAS_UPLO Uplo, const int N,
 		  const double *Y, const int incY,
 		  double *A, const int lda);
 
+template
+void
+blas_syr2<float>(const CBLAS_UPLO Uplo, const int N,
+		  const float &alpha,
+		  const float *X, const int incX,
+		  const float *Y, const int incY,
+		  float *A, const int lda);
+#endif
 template
 void
 blas_syr2<complex<double> >(const CBLAS_UPLO Uplo, const int N,
@@ -1756,7 +2393,8 @@ blas_ger<double>(const int M, const int N, const double &alpha,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(dger)(M, N, alpha, X, incX, Y, incY, A, lda);
 #else
-  cblas_dger(CblasColMajor, M, N, alpha, X, incX, Y, incY, A, lda);
+  cblas_dger(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N, alpha,
+	     X, (BLAS_INT)incX, Y, (BLAS_INT)incY, A, (BLAS_INT)lda);
 #endif
 }
 
@@ -1773,15 +2411,43 @@ blas_ger<complex<double> >(const int M, const int N,
 	 (double *)X, incX, (double *)Y, incY, 
 	 (double *)A, lda);
 #else
-#ifdef OPENBLAS
-    cblas_zgeru(CblasColMajor, M, N, (double *)&alpha,
-	      (double *)X, incX, (double *)Y, incY, 
-	      (double *)A, lda);
+    cblas_zgeru(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N, (BLAS_VOID *)&alpha,
+		(BLAS_VOID *)X, (BLAS_INT)incX, (BLAS_VOID *)Y, (BLAS_INT)incY, 
+		(BLAS_VOID *)A, (BLAS_INT)lda); 
+  #endif
+}
+
+template<>
+void
+blas_ger<float>(const int M, const int N, const float &alpha,
+		 const float *X, const int incX,
+		 const float *Y, const int incY,
+		 float *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(sger)(M, N, alpha, X, incX, Y, incY, A, lda);
 #else
-  cblas_zgeru(CblasColMajor, M, N, (void *)&alpha,
-	      (void *)X, incX, (void *)Y, incY, 
-	      (void *)A, lda); 
+  cblas_sger(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N, alpha,
+	     X, (BLAS_INT)incX, Y, (BLAS_INT)incY, A, (BLAS_INT)lda);
 #endif
+}
+
+template<>
+void
+blas_ger<complex<float> >(const int M, const int N,
+			   const complex<float> &alpha,
+			   const complex<float> *X, const int incX,
+			   const complex<float> *Y, const int incY,
+			   complex<float> *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(cgeru)(M, N, (float *)&alpha,
+	 (float *)X, incX, (float *)Y, incY, 
+	 (float *)A, lda);
+#else
+    cblas_cgeru(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N, (BLAS_VOID *)&alpha,
+		(BLAS_VOID *)X, (BLAS_INT)incX, (BLAS_VOID *)Y, (BLAS_INT)incY, 
+		(BLAS_VOID *)A, (BLAS_INT)lda); 
   #endif
 }
 #endif
@@ -1838,6 +2504,7 @@ blas_ger(const int M, const int N, const T &alpha,
 }
 
 // explicit instantiation of blas_ger
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_ger<double>(const int M, const int N, const double &alpha,
@@ -1855,18 +2522,25 @@ blas_ger<complex<double> >(const int M, const int N,
 
 template
 void
+blas_ger<float>(const int M, const int N, const float &alpha,
+		 const float *X, const int incX,
+		 const float *Y, const int incY,
+		 float *A, const int lda);
+
+template
+void
+blas_ger<complex<float> >(const int M, const int N,
+			   const complex<float> &alpha,
+			   const complex<float> *X, const int incX,
+			   const complex<float> *Y, const int incY,
+			   complex<float> *A, const int lda);
+#endif
+template
+void
 blas_ger<quadruple>(const int M, const int N, const quadruple &alpha,
 		    const quadruple *X, const int incX,
 		    const quadruple *Y, const int incY,
 		    quadruple *A, const int lda);
-#ifndef NO_OCTRUPLE
-template
-void
-blas_ger<octruple>(const int M, const int N, const octruple &alpha,
-		   const octruple *X, const int incX,
-		   const octruple *Y, const int incY,
-		   octruple *A, const int lda);
-#endif
 template
 void
 blas_ger<complex<quadruple> >(const int M, const int N,
@@ -1877,13 +2551,18 @@ blas_ger<complex<quadruple> >(const int M, const int N,
 #ifndef NO_OCTRUPLE
 template
 void
+blas_ger<octruple>(const int M, const int N, const octruple &alpha,
+		   const octruple *X, const int incX,
+		   const octruple *Y, const int incY,
+		   octruple *A, const int lda);
+template
+void
 blas_ger<complex<octruple> >(const int M, const int N,
 			     const complex<octruple> &alpha,
 			     const complex<octruple> *X, const int incX,
 			     const complex<octruple> *Y, const int incY,
 			     complex<octruple> *A, const int lda);
 #endif
-
 // dz gerc : rank-1 update with complex conjugate
 #ifndef BLAS_GENERIC
 template<>
@@ -1896,7 +2575,8 @@ blas_gerc<double>(const int M, const int N, const double &alpha,
 #ifdef BLAS_FORTRAN
   FORTRAN_DECL(dger)(M, N, alpha, X, incX, Y, incY, A, lda);
 #else
-  cblas_dger(CblasColMajor, M, N, alpha, X, incX, Y, incY, A, lda);
+  cblas_dger(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N,
+	     alpha, X, (BLAS_INT)incX, Y, (BLAS_INT)incY, A, (BLAS_INT)lda);
 #endif
 }
 
@@ -1913,17 +2593,46 @@ blas_gerc<complex<double> >(const int M, const int N,
 		      (double *)X, incX, (double *)Y, incY, 
 		      (double *)A, lda); // no zsyr in BLAS!
 #else
-#ifdef OPENBLAS
-  cblas_zgerc(CblasColMajor, M, N, (double *)&alpha,
-	      (double *)X, incX, (double *)Y, incY, 
-	      (double *)A, lda); // no zsyr in BLAS!
-#else
-  cblas_zgerc(CblasColMajor, M, N, (void *)&alpha,
-	      (void *)X, incX, (void *)Y, incY, 
-	      (void *)A, lda); // no zsyr in BLAS!
-#endif
+  cblas_zgerc(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N, (BLAS_VOID *)&alpha,
+	      (BLAS_VOID *)X, (BLAS_INT)incX, (void *)Y, (BLAS_INT)incY, 
+	      (BLAS_VOID *)A, (BLAS_INT)lda); // no zsyr in BLAS!
 #endif
 }
+
+template<>
+void
+blas_gerc<float>(const int M, const int N, const float &alpha,
+		  const float *X, const int incX,
+		  const float *Y, const int incY,
+		  float *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(sger)(M, N, alpha, X, incX, Y, incY, A, lda);
+#else
+  cblas_sger(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N,
+	     alpha, X, (BLAS_INT)incX, Y, (BLAS_INT)incY, A, (BLAS_INT)lda);
+#endif
+}
+
+template<>
+void
+blas_gerc<complex<float> >(const int M, const int N,
+			    const complex<float> &alpha,
+			    const complex<float> *X, const int incX,
+			    const complex<float> *Y, const int incY,
+			    complex<float> *A, const int lda)
+{
+#ifdef BLAS_FORTRAN
+  FORTRAN_DECL(cgerc)(M, N, (float *)&alpha,
+		      (float *)X, incX, (float *)Y, incY, 
+		      (float *)A, lda); // no zsyr in BLAS!
+#else
+  cblas_cgerc(CblasColMajor, (BLAS_INT)M, (BLAS_INT)N, (BLAS_VOID *)&alpha,
+	      (BLAS_VOID *)X, (BLAS_INT)incX, (void *)Y, (BLAS_INT)incY, 
+	      (BLAS_VOID *)A, (BLAS_INT)lda); // no zsyr in BLAS!
+#endif
+}
+
 #endif
 
 template<typename T>
@@ -1977,6 +2686,7 @@ blas_gerc(const int M, const int N, const T &alpha,
 }
 
 // explicit instantiation of blas_gerc
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_gerc<double>(const int M, const int N, const double &alpha,
@@ -1992,6 +2702,21 @@ blas_gerc<complex<double> >(const int M, const int N,
 			    const complex<double> *Y, const int incY,
 			    complex<double> *A, const int lda);
 
+template
+void
+blas_gerc<float>(const int M, const int N, const float &alpha,
+		  const float *X, const int incX,
+		  const float *Y, const int incY,
+		  float *A, const int lda);
+
+template
+void
+blas_gerc<complex<float> >(const int M, const int N,
+			    const complex<float> &alpha,
+			    const complex<float> *X, const int incX,
+			    const complex<float> *Y, const int incY,
+			    complex<float> *A, const int lda);
+#endif
 template
 void
 blas_gerc<quadruple>(const int M, const int N, const quadruple &alpha,
@@ -2065,9 +2790,9 @@ blas_trsm<double>(const CBLAS_SIDE Side,
 		      B, ldb);
 #else
   cblas_dtrsm(CblasColMajor, Side, Uplo, TransA,
-	      Diag, M, N,
-              alpha, A, lda,
-              B, ldb);
+	      Diag, (BLAS_INT)M, (BLAS_INT)N,
+              alpha, A, (BLAS_INT)lda,
+              B, (BLAS_INT)ldb);
 #endif
 }
 
@@ -2126,17 +2851,132 @@ blas_trsm<complex<double> >(const CBLAS_SIDE Side,
 		      (double *)B, ldb);
   
 #else
-#ifdef OPENBLAS
-    cblas_ztrsm(CblasColMajor, Side, Uplo, TransA,
-	      Diag, M, N,
-              (double *)&alpha, (double *)A, lda,
-              (double *)B, ldb);
-#else
   cblas_ztrsm(CblasColMajor, Side, Uplo, TransA,
-	      Diag, M, N,
-              (void *)&alpha, (void *)A, lda,
-              (void *)B, ldb);
+	      Diag, (BLAS_INT)M, (BLAS_INT)N,
+              (BLAS_VOID *)&alpha, (BLAS_VOID *)A, (BLAS_INT)lda,
+              (BLAS_VOID *)B, (BLAS_INT)ldb);
 #endif
+}
+
+template<>
+void
+blas_trsm<float>(const CBLAS_SIDE Side,
+		  const CBLAS_UPLO Uplo, const CBLAS_TRANSPOSE TransA,
+		  const CBLAS_DIAG Diag, const int M, const int N,
+		  const float &alpha, const float *A, const int lda,
+		  float *B, const int ldb)
+{
+#ifdef BLAS_FORTRAN
+  unsigned char side_ = 0;
+  unsigned char uplo_ = 0;
+  unsigned char transa_ = 0;
+  unsigned char diag_ = 0;
+  switch(Side) {
+  case CblasLeft:
+    side_ = 'l';
+    break;
+  case CblasRight:
+    side_ = 'r';
+    break;
+  }
+  switch(Uplo) {
+  case CblasUpper:
+    uplo_ = 'u';
+    break;
+  case CblasLower:
+    uplo_ = 'l';
+    break;
+  }
+  switch(TransA) {
+  case CblasNoTrans:
+    transa_ = 'n';
+    break;
+  case CblasTrans:
+    transa_ = 't';
+    break;
+  case CblasConjTrans:
+    transa_ = 'c';
+    break;
+  }
+  switch(Diag) {
+  case CblasNonUnit:
+    diag_ = 'n';
+    break;
+  case CblasUnit:
+    diag_ = 'u';
+    break;
+  }
+  FORTRAN_DECL(strsm)(side_, uplo_, transa_,
+		      diag_, M, N,
+		      alpha, A, lda,
+		      B, ldb);
+#else
+  cblas_strsm(CblasColMajor, Side, Uplo, TransA,
+	      Diag, (BLAS_INT)M, (BLAS_INT)N,
+              alpha, A, (BLAS_INT)lda,
+              B, (BLAS_INT)ldb);
+#endif
+}
+
+template<>
+void
+blas_trsm<complex<float> >(const CBLAS_SIDE Side,
+			    const CBLAS_UPLO Uplo, const CBLAS_TRANSPOSE TransA,
+			    const CBLAS_DIAG Diag, const int M, const int N,
+			    const complex<float> &alpha,
+			    const complex<float> *A, const int lda,
+			    complex<float> *B, const int ldb)
+{
+#ifdef BLAS_FORTRAN
+  unsigned char side_ = 0;
+  unsigned char uplo_ = 0;
+  unsigned char transa_ = 0;
+  unsigned char diag_ = 0;
+  switch(Side) {
+  case CblasLeft:
+    side_ = 'l';
+    break;
+  case CblasRight:
+    side_ = 'r';
+    break;
+  }
+  switch(Uplo) {
+  case CblasUpper:
+    uplo_ = 'u';
+    break;
+  case CblasLower:
+    uplo_ = 'l';
+    break;
+  }
+  switch(TransA) {
+  case CblasNoTrans:
+    transa_ = 'n';
+    break;
+  case CblasTrans:
+    transa_ = 't';
+    break;
+  case CblasConjTrans:
+    transa_ = 'c';
+    break;
+  }
+  switch(Diag) {
+  case CblasNonUnit:
+    diag_ = 'u';
+    break;
+  case CblasUnit:
+    diag_ = 'n';
+    break;
+  }
+  FORTRAN_DECL(cztrsm)(side_, uplo_, transa_,
+		      diag_, M, N,
+		      (float *)&alpha, (float *)A, lda,
+		      (float *)B, ldb);
+  
+#else
+  cblas_ctrsm(CblasColMajor, Side, Uplo, TransA,
+	      Diag, (BLAS_INT)M, (BLAS_INT)N,
+              (BLAS_VOID *)&alpha, (BLAS_VOID *)A, (BLAS_INT)lda,
+              (BLAS_VOID *)B, (BLAS_INT)ldb);
 #endif
 }
 #endif
@@ -2350,7 +3190,6 @@ blas_trsm(const CBLAS_SIDE Side,
 	}     // loop 330 : k
       }       // if (upper)
       else {
-	//	fprintf(stderr, "%s %d Trans Lower\n", __FILE__, __LINE__);
 	for (int k = 0; k < N; k++) {
 	  if (nounit) {
 	    T temp;
@@ -2390,6 +3229,7 @@ blas_trsm(const CBLAS_SIDE Side,
 }
 //#endif
 // explicit instantiation of blas_trsm
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_trsm<double>(const CBLAS_SIDE Side,
@@ -2408,7 +3248,24 @@ blas_trsm<complex<double> >(const CBLAS_SIDE Side,
 			    const complex<double> *A, const int lda,
 			    complex<double> *B, const int ldb);
 
+template
+void
+blas_trsm<float>(const CBLAS_SIDE Side,
+		  const CBLAS_UPLO Uplo, const CBLAS_TRANSPOSE TransA,
+		  const CBLAS_DIAG Diag, const int M, const int N,
+		  const float &alpha,
+		  const float *A, const int lda,
+		  float *B, const int ldb);
 
+template
+void
+blas_trsm<complex<float> >(const CBLAS_SIDE Side,
+			    const CBLAS_UPLO Uplo, const CBLAS_TRANSPOSE TransA,
+			    const CBLAS_DIAG Diag, const int M, const int N,
+			    const complex<float> &alpha,
+			    const complex<float> *A, const int lda,
+			    complex<float> *B, const int ldb);
+#endif
 template
 void
 blas_trsm<quadruple>(const CBLAS_SIDE Side,
@@ -2486,7 +3343,8 @@ blas_gemm<double>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
  FORTRAN_DECL(dgemm)(tra_, trb_, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
 #else  
   cblas_dgemm(CblasColMajor,
-	      trA, trB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
+	      trA, trB, (BLAS_INT)m, (BLAS_INT)n, k, alpha,
+	      A, (BLAS_INT)lda, B, (BLAS_INT)ldb, beta, C, (BLAS_INT)ldc );
 #endif
 }
 
@@ -2528,17 +3386,98 @@ blas_gemm<complex<double> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
 		      (const double *)A, lda, (const double *)B, ldb, 
 		      (const double *)&beta, (double *)C, ldc );
 #else
-#ifdef OPENBLAS
   cblas_zgemm(CblasColMajor,
-	      trA, trB, m, n, k, (const double *)&alpha,
-	      (const double *)A, lda, (const double *)B, ldb, 
-	      (const double *)&beta, (double *)C, ldc );
-#else
-  cblas_zgemm(CblasColMajor,
-	      trA, trB, m, n, k, (const void *)&alpha, (const void *)A, lda,
-	      (const void *)B, ldb, 
-	      (const void *)&beta, C, ldc );
+	      trA, trB, (BLAS_INT)m, (BLAS_INT)n, (BLAS_INT)k,
+	      (const BLAS_VOID *)&alpha, (const BLAS_VOID *)A, (BLAS_INT)lda,
+	      (const BLAS_VOID *)B, (BLAS_INT)ldb, 
+	      (const BLAS_VOID *)&beta, C, (BLAS_INT)ldc );
 #endif
+}
+
+template<>
+void
+blas_gemm<float>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+		  int m, int n, int k,
+		  const float &alpha, const float* A, int lda,
+		  const float* B, int ldb, const float &beta,
+		  float* C, int ldc )
+{
+#ifdef BLAS_FORTRAN
+  unsigned char tra_ = 0;
+  unsigned char trb_ = 0;
+  switch(trA) {
+  case CblasNoTrans:
+    tra_ = 'n';
+    break;
+  case CblasTrans:
+    tra_ = 't';
+    break;
+  case CblasConjTrans:
+    tra_ = 'c';
+    break;
+  }
+ switch(trB) {
+ case CblasNoTrans:
+   trb_ = 'n';
+   break;
+ case CblasTrans:
+   trb_ = 't';
+   break;
+ case CblasConjTrans:
+   trb_ = 'c';
+   break;
+ }
+ FORTRAN_DECL(sgemm)(tra_, trb_, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
+#else  
+  cblas_sgemm(CblasColMajor,
+	      trA, trB, (BLAS_INT)m, (BLAS_INT)n, k, alpha,
+	      A, (BLAS_INT)lda, B, (BLAS_INT)ldb, beta, C, (BLAS_INT)ldc );
+#endif
+}
+
+template<>
+void
+blas_gemm<complex<float> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+			    int m, int n, int k, const complex<float> &alpha, 
+			    const complex<float>* A, int lda,
+			    const complex<float>* B, int ldb,
+			    const complex<float> &beta, 
+			    complex<float>* C, int ldc )
+{
+#ifdef BLAS_FORTRAN
+  unsigned char tra_ = 0;
+  unsigned char trb_ = 0;
+  switch(trA) {
+  case CblasNoTrans:
+    tra_ = 'n';
+    break;
+  case CblasTrans:
+    tra_ = 't';
+    break;
+  case CblasConjTrans:
+    tra_ = 'c';
+    break;
+  }
+  switch(trB) {
+  case CblasNoTrans:
+    trb_ = 'n';
+    break;
+  case CblasTrans:
+    trb_ = 't';
+    break;
+  case CblasConjTrans:
+    trb_ = 'c';
+    break;
+  }
+  FORTRAN_DECL(cgemm)(tra_, trb_, m, n, k, (const float *)&alpha,
+		      (const float *)A, lda, (const float *)B, ldb, 
+		      (const float *)&beta, (float *)C, ldc );
+#else
+  cblas_cgemm(CblasColMajor,
+	      trA, trB, (BLAS_INT)m, (BLAS_INT)n, (BLAS_INT)k,
+	      (const BLAS_VOID *)&alpha, (const BLAS_VOID *)A, (BLAS_INT)lda,
+	      (const BLAS_VOID *)B, (BLAS_INT)ldb, 
+	      (const BLAS_VOID *)&beta, C, (BLAS_INT)ldc );
 #endif
 }
 #endif
@@ -2771,6 +3710,7 @@ blas_gemm(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
   }  // if (notb)
 }
 // explicit instantiation of blas_gemm
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 void
 blas_gemm<double>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
@@ -2791,7 +3731,26 @@ blas_gemm<complex<double> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
 			    const complex<double> &beta_, 
 			    complex<double>* C, int ldc );
 
+template
+void
+blas_gemm<float>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+		  int m, int n, int k,
+		  const float &alpha,
+		  const float* A, int lda,
+		  const float* B, int ldb,
+		  const float &beta,
+		  float* C, int ldc );
 
+template
+void
+blas_gemm<complex<float> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+			    int m, int n, int k,
+			    const complex<float> &alpha_, 
+			    const complex<float>* A, int lda,
+			    const complex<float>* B, int ldb,
+			    const complex<float> &beta_, 
+			    complex<float>* C, int ldc );
+#endif
 template
 void
 blas_gemm<quadruple>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
@@ -2801,17 +3760,6 @@ blas_gemm<quadruple>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
 		     const quadruple* B, int ldb,
 		     const quadruple &beta,
 		     quadruple* C, int ldc );
-#ifndef NO_OCTRUPLE
-template
-void
-blas_gemm<octruple>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
-		    int m, int n, int k,
-		    const octruple &alpha,
-		    const octruple* A, int lda,
-		    const octruple* B, int ldb,
-		    const octruple &beta,
-		    octruple* C, int ldc );
-#endif
 template
 void
 blas_gemm<complex<quadruple> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
@@ -2822,6 +3770,15 @@ blas_gemm<complex<quadruple> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
 			       const complex<quadruple> &beta_, 
 			       complex<quadruple>* C, int ldc );
 #ifndef NO_OCTRUPLE
+template
+void
+blas_gemm<octruple>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+		    int m, int n, int k,
+		    const octruple &alpha,
+		    const octruple* A, int lda,
+		    const octruple* B, int ldb,
+		    const octruple &beta,
+		    octruple* C, int ldc );
 template
 void
 blas_gemm<complex<octruple> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
@@ -2839,7 +3796,7 @@ U blas_l2norm(const int n, T *x, const int incX)
 {
   U tmp;
   tmp = blas_dot<T>(n, x, incX, x, incX);
-  return sqrt(tmp); // works for T = double, quadruple, etc. not for complex<U>
+  return sqrt<T>(tmp); // works for T = double, quadruple, etc. not for complex<U>
 }
 
 template<>
@@ -2848,7 +3805,16 @@ double blas_l2norm<complex<double>, double>(const int n, complex<double> *x,
 {
   complex<double> tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt(tmp.real()); 
+  return sqrt<double>(tmp.real()); 
+}
+
+template<>
+float blas_l2norm<complex<float>, float>(const int n, complex<float> *x,
+					    const int incX)
+{
+  complex<float> tmp;
+  tmp = blas_dot(n, x, incX, x, incX);
+  return sqrt<float>(tmp.real()); 
 }
 
 template<>
@@ -2858,7 +3824,7 @@ quadruple blas_l2norm<complex<quadruple>, quadruple>(const int n,
 {
   complex<quadruple> tmp;
   tmp = blas_dot<complex<quadruple> >(n, x, incX, x, incX);
-  return sqrt(tmp.real()); //
+  return sqrt<quadruple>(tmp.real()); //
 }
 #ifndef NO_OCTRUPLE
 template<>
@@ -2868,7 +3834,7 @@ octruple blas_l2norm<complex<octruple>, octruple>(const int n,
 {
   complex<octruple> tmp;
    tmp = blas_dot<complex<octruple> >(n, x, incX, x, incX);
-  return sqrt(tmp.real()); //
+   return sqrt<octruple>(tmp.real()); //
 }
 #endif
 
@@ -2878,39 +3844,42 @@ double blas_l2norm<double, double>(const int n, double *x, const int incX);
 template
 quadruple blas_l2norm<quadruple, quadruple>(const int n, quadruple *x,
 					    const int incX);
-#if 0
+template
+float blas_l2norm<float, float>(const int n, float *x, const int incX);
+
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 double blas_l2norm<complex<double>, double>(const int n, complex<double> *x,
 					    const int incX);
-
 template
 quadruple blas_l2norm<complex<quadruple>, quadruple>(const int n,
 						     complex<quadruple> *x,
 						     const int incX);
+#ifndef NO_OCTRUPLE
+template 
+octruple blas_l2norm<complex<octruple>, octruple>(const int n,
+						  complex<octruple> *x,
+						  const int incX);
+#endif
 #endif
 #ifndef NO_OCTRUPLE
 template 
 octruple blas_l2norm<octruple, octruple>(const int n, octruple *x,
 					 const int incX);
-
-template 
-octruple blas_l2norm<complex<octruple>, octruple>(const int n,
-						  complex<octruple> *x,
-						  const int incX);
 #endif
 
 double blas_l2norm_lower_prec(const int n, quadruple *x, const int incX)
 {
   quadruple tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt(quad2double(tmp)); //
+  return sqrt<double>(quad2double(tmp)); //
 }
 #ifndef NO_OCTRUPLE
 quadruple blas_l2norm_lower_prec(const int n, octruple *x, const int incX)
 {
   octruple tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt(oct2quad(tmp)); //
+  return sqrt<double>(oct2quad(tmp)); //
 }
 #endif
 double blas_l2norm_lower_prec(const int n, complex<quadruple> *x,
@@ -2918,7 +3887,7 @@ double blas_l2norm_lower_prec(const int n, complex<quadruple> *x,
 {
   complex<quadruple> tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt(quad2double(tmp.real())); //
+  return sqrt<double>(quad2double(tmp.real())); //
 }
 #ifndef NO_OCTRUPLE
 quadruple blas_l2norm_lower_prec(const int n, complex<octruple> *x,
@@ -2926,7 +3895,7 @@ quadruple blas_l2norm_lower_prec(const int n, complex<octruple> *x,
 {
   complex<octruple> tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt(oct2quad(tmp.real())); //
+  return sqrt<double>(oct2quad(tmp.real())); //
 }
 #endif
 
@@ -2948,6 +3917,15 @@ double blas_l2norm2<complex<double>, double>(const int n, complex<double> *x,
 }
 
 template<>
+float blas_l2norm2<complex<float>, float>(const int n, complex<float> *x,
+					     const int incX)
+{
+  complex<float> tmp;
+  tmp = blas_dot<complex<float> >(n, x, incX, x, incX);
+  return tmp.real(); 
+}
+
+template<>
 quadruple blas_l2norm2<complex<quadruple>, quadruple>(const int n,
 						      complex<quadruple> *x,
 						      const int incX)
@@ -2961,10 +3939,13 @@ template
 double blas_l2norm2<double, double>(const int n, double *x, const int incX);
 
 template
+float blas_l2norm2<float, float>(const int n, float *x, const int incX);
+
+template
 quadruple blas_l2norm2<quadruple, quadruple>(const int n, quadruple *x,
 					     const int incX);
 
-#if 0
+#ifdef FORCE_EXPLICIT_INSTANTIATION
 template
 double blas_l2norm2<complex<double>, double>(const int n,
 					     complex<double> *x,
@@ -2975,4 +3956,3 @@ quadruple blas_l2norm2<complex<quadruple>, quadruple>(const int n,
 						      complex<quadruple> *x,
 						      const int incX);
 #endif
-

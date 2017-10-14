@@ -69,6 +69,8 @@ inline double machine_epsilon<double, double>() { return DBL_EPSILON; }
 template<typename T>
 inline std::string tostring(const T &x) { std::string dummy; return dummy; };
 
+template<typename T>
+inline T sqrt(const T &x) { };
   
 #ifdef DD_REAL
 #include "qd/dd_real.h"
@@ -96,6 +98,11 @@ inline quadruple machine_epsilon<quadruple, double>() { // argument is dummy
 }
 
 template<>
+inline double machine_epsilon<double, quadruple>() { // argument is dummy
+  return double(dd_real::_eps);                     // to define type
+}
+
+template<>
 inline std::string tostring<quadruple>(const quadruple &x)  {
   return x.to_string(dd_real::_ndigits);
 }
@@ -106,7 +113,20 @@ inline std::string tostring<complex<quadruple> >(const complex<quadruple> &x) {
               + x.imag().to_string(dd_real::_ndigits) + " )";
 }
 
-#else  // #ifdef DD_REAL
+template<>
+inline double sqrt<double> (const double &x) {return sqrt(x); }
+
+template<>
+inline quadruple sqrt<quadruple> (const quadruple &x) {return sqrt(x); }
+
+template<>
+inline octruple sqrt<octruple> (const octruple &x) {return sqrt(x); }
+
+
+template<>
+inline float sqrt<float> (const float &x) {return sqrtf(x); }
+
+#else
 #ifdef LONG_DOUBLE
 typedef long double quadruple;
 inline double quad2double(const quadruple &x) { return (double)x; }
@@ -120,11 +140,22 @@ template<>
 inline quadruple machine_epsilon<quadruple, double>() {
   return (long double)DBL_EPSILON;
 }
-
+#if ((!defined(SX_ACE)) && (!defined(_MSC_VER)))
 inline long double fabs(const long double x) {
   return (x > 0.0L ? x : (-x));
 }
-#else  // #ifdef LONG_DOUBLE
+#endif
+
+template<>
+inline double sqrt<double> (const double &x) {return sqrt(x); }
+
+template<>
+inline quadruple sqrt<quadruple> (const quadruple &x) {return sqrtl(x); }
+
+emplate<>
+inline float sqrt<float> (const float &x) {return sqrtf(x); }
+
+#else
 #ifdef FAST_DD
 #include <fast_dd.h>
 typedef dd_real quadruple; // implementation of quadruple precisio
@@ -160,7 +191,6 @@ inline quadruple atan2(const quadruple &y, const quadruple &x) {
 #include <quadmath.h>
 typedef __float128 quadruple;
 inline double quad2double(const quadruple &x) { return (double)x; }
-inline quadruple sqrt(const quadruple &x) { return sqrtq(x); }
 template<>
 inline std::string tostring<quadruple> (const quadruple &x) {
   char buf[256];
@@ -173,10 +203,18 @@ inline std::string tostring<complex<quadruple> >(const complex<quadruple> &x) {
   quadmath_snprintf(buf, 256, "%.32Qe %.32Qe", x.real(), x.imag());
   return std::string(buf);
 }
+template<>
+inline double sqrt<double> (const double &x) {return sqrt(x); }
 
-#endif // #endif FAST_DD
-#endif // #endif LONG_DOUBLE
-#endif // #endif DD_REAL
+template<>
+inline quadruple sqrt<quadruple> (const quadruple &x) {return sqrtq(x); }
+
+template<>
+inline float sqrt<float> (const float &x) {return sqrtf(x); }
+
+#endif
+#endif
+#endif
 
 template<>
 inline std::string tostring<double>(const double &x)  {
@@ -191,74 +229,149 @@ inline std::string tostring<complex<double> >(const complex<double> &x)  {
   return std::string(buf);
 }
 
+template<>
+inline std::string tostring<float>(const float &x)  {
+  char buf[256];
+  sprintf(buf, "%16.8e", x);
+  return std::string(buf);
+}
+template<>
+inline std::string tostring<complex<float> >(const complex<float> &x)  {
+  char buf[256];
+  sprintf(buf, "(%16.8e %16.8e)", x.real(), x.imag());
+  return std::string(buf);
+}
+
+
 #ifndef NO_OCTRUPLE
 template<>
 inline std::string tostring<octruple>(const octruple &x)  { return x.to_string(); }
 #endif
 
-template<typename T, typename Z>
-inline T tohigher(const Z &x){ };
+template<typename Z, typename T>
+inline Z conv_prec(const T &x){
+  fprintf(stderr,
+	  "%s %d : specialized template is not implemented\n",
+	  __FILE__, __LINE__);
+  return Z(0.0);
+};
 
 template<>
-inline quadruple tohigher<quadruple, double>(const double &y)
+inline double conv_prec<double, quadruple>(const quadruple &y)
+{
+  return quad2double(y);
+}
+
+template<>
+inline quadruple conv_prec<quadruple, double>(const double &y)
 {
   return quadruple(y);
 }
 
+template<>
+inline quadruple conv_prec<quadruple, quadruple>(const quadruple &y)
+{
+  return y;
+}
+
+template<>
+inline complex<quadruple> conv_prec<complex<quadruple>, complex<quadruple> >(const complex<quadruple> &y)
+{
+  return y;
+}
+
 #ifndef NO_OCTRUPLE
 template<>
-inline octruple tohigher<octruple, quadruple>(const quadruple &y)
+inline octruple conv_prec<octruple, quadruple>(const quadruple &y)
 {
   return octruple(y);
 }
 #endif
 
 template<>
-inline complex<quadruple> tohigher<complex<quadruple>, double>(const double &y)
+inline complex<quadruple> conv_prec<complex<quadruple>, double>(const double &y)
 {
   return complex<quadruple>(quadruple(y), quadruple(0.0));
 }
+
+
+template<>
+inline complex<quadruple> conv_prec<complex<quadruple>,complex<double> >
+       (const complex<double> &y)
+{
+  return complex<quadruple>(quadruple(y.real()), quadruple(y.imag()));
+}
+
 #ifndef NO_OCTRUPLE
 template<>
-inline complex<octruple> tohigher<complex<octruple>, quadruple>(const quadruple &y)
+inline complex<octruple> conv_prec<complex<octruple>, quadruple>
+       (const quadruple &y)
 {
   return complex<octruple>(octruple(y), octruple(0.0));
 }
+template<>
+inline complex<octruple> conv_prec<complex<octruple>, complex<quadruple> >(const complex<quadruple> &y)
+{
+  return complex<octruple>(octruple(y.real()), octruple(y.imag()));
+}
 #endif
 
-template<typename T, typename U>
-inline U tolower(const T &x) { };
-
 template<>
-inline double tolower<quadruple, double>(const quadruple &x) {
-  return quad2double(x);
-}
-
-template<>
-inline complex<double> tolower<complex<quadruple>, complex<double> >(const complex<quadruple> &x) {
+inline complex<double> conv_prec<complex<double>, complex<quadruple> >(const complex<quadruple> &x) {
   return complex<double>(quad2double(x.real()), quad2double(x.imag()));
 }
 
+
 #ifndef NO_OCTRUPLE
 template<>
-inline quadruple tolower<octruple, quadruple>(const octruple &x) {
+inline quadruple conv_prec<quadruple, octruple>(const octruple &x) {
   return oct2quad(x);
 }
 template<>
-inline complex<quadruple> tolower<complex<octruple>, complex<quadruple> >(const complex<octruple> &x) {
+inline complex<quadruple> conv_prec<complex<quadruple>, complex<octruple> >(const complex<octruple> &x) {
   return complex<quadruple>(oct2quad(x.real()), oct2quad(x.imag()));
 }
 #endif
 
+template<>
+inline double conv_prec<double, double>(const double &x) {
+  return x;
+}
+
+template<>
+inline complex<double> conv_prec<complex<double>,
+			        complex<double> >(const complex<double> &x) {
+  return x;
+}
+
+
+template<>
+inline float conv_prec<float, double>(const double &y)
+{
+  return (float)y;
+}
+
+template<>
+inline double conv_prec<double, float>(const float &y)
+{
+  return (double)y;
+}
+
+
 template<typename T>
-inline double todouble(const T &x){ };
+inline double todouble(const T &x){ return double(x); };
 
 template<>
 inline double todouble<double>(const double &x) { return x; }
 template<>
+inline double todouble<float>(const float &x) { return x; }
+template<>
 inline double todouble<quadruple>(const quadruple &x) { return quad2double(x); }
 template<>
 inline double todouble<complex<double> >(const complex<double> &x) { return x.real(); }
+template<>
+inline double todouble<complex<float> >(const complex<float> &x) { return x.real(); }
+
 template<>
 inline double todouble<complex<quadruple> >(const complex<quadruple> &x) {
   return quad2double(x.real());
@@ -275,20 +388,29 @@ inline double todouble<complex<octruple> >(const complex<octruple> &x) {
 
 
 template<typename T>
-void printscalar(FILE *fp, T x);
+void printscalar(const bool verbose, FILE *fp, T x);
 template<>
-void printscalar<double>(FILE *fp, double x);
+void printscalar<double>(const bool verbose, FILE *fp, double x);
 template<>
-void printscalar<quadruple>(FILE *fp, quadruple x);
+void printscalar<float>(const bool verbose, FILE *fp, float x);
 template<>
-void printscalar<complex<double> >(FILE *fp, complex<double> x);
+void printscalar<quadruple>(const bool verbose, FILE *fp, quadruple x);
 template<>
-void printscalar<complex<quadruple> >(FILE *fp, complex<quadruple> x);
+void printscalar<complex<double> >(const bool verbose,
+				   FILE *fp, complex<double> x);
+template<>
+void printscalar<complex<float> >(const bool verbose,
+				   FILE *fp, complex<float> x);
+template<>
+void printscalar<complex<quadruple> >(const bool verbose,
+				      FILE *fp, complex<quadruple> x);
 
 template<typename T, typename U>
 T tocomplex(const U &x);
 template<>
 double tocomplex<double, double>(const double &x);
+template<>
+float tocomplex<float, float>(const float &x);
 template<>
 quadruple tocomplex<quadruple, quadruple>(const quadruple &x);
 template<>
@@ -307,6 +429,9 @@ inline T tocomplex(const U &x)
 
 template<>
 inline double tocomplex<double, double>(const double &x){ return x; }
+
+template<>
+inline float tocomplex<float, float>(const float &x){ return x; }
 
 template<>
 inline quadruple tocomplex<quadruple, quadruple>(const quadruple &x)
@@ -338,4 +463,5 @@ inline complex<octruple> tocomplex<complex<octruple> >(const octruple &x) {
   return std::complex<octruple>(x, zero);
 }
 #endif
+
 #endif

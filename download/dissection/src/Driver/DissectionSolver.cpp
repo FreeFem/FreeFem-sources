@@ -1,4 +1,4 @@
-/*! \file DissectionSolver.cpp
+ /*! \file DissectionSolver.cpp
     \brief task mangemanet of dissection algorithm
     \author Atsushi Suzuki, Laboratoire Jacques-Louis Lions
     \date   Mar. 30th 2012
@@ -48,6 +48,10 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <float.h>
+#include <vector>
+#include <algorithm>
+
 #include "Driver/DissectionSolver.hpp"
 #include "Driver/C_BlasRoutines.hpp"
 #include "Driver/C_KernDetect.hpp"
@@ -56,20 +60,19 @@
 #include "Splitters/MetisSplitter.hpp"
 #include "Algebra/SparseRenumbering.hpp"
 #include "Algebra/VectorArray.hpp"
-#include <float.h>
-#include <vector>
+#include "Compiler/DissectionIO.hpp"
 
 #define NORMALIZE_KERNEL_BASIS
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-const T DissectionSolver<T, U, W, Z, X, Y>::_one = T(1.0);
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-const T DissectionSolver<T, U, W, Z, X, Y>::_none = T(-1.0);
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-const T DissectionSolver<T, U, W, Z, X, Y>::_zero = T(0.0);
+template<typename T, typename U, typename W, typename Z>
+const T DissectionSolver<T, U, W, Z>::_one = T(1.0);
+template<typename T, typename U, typename W, typename Z>
+const T DissectionSolver<T, U, W, Z>::_none = T(-1.0);
+template<typename T, typename U, typename W, typename Z>
+const T DissectionSolver<T, U, W, Z>::_zero = T(0.0);
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 Destroy(void) 
 {
   for (int m = 0; m < _graph_colors;m++) {
@@ -117,8 +120,7 @@ template
 void DissectionSolver<quadruple, quadruple, double, double>::Destroy(void);
 
 template
-void DissectionSolver<double, double, double, double,
-		      quadruple, quadruple>::Destroy(void);
+void DissectionSolver<double, double, quadruple, quadruple>::Destroy(void);
 
 template
 void DissectionSolver<complex<double>, double>::Destroy(void);
@@ -131,37 +133,35 @@ void DissectionSolver<complex<quadruple>, quadruple,
 		      complex<double>, double>::Destroy(void);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double,
+void DissectionSolver<complex<double>, double,
 		      complex<quadruple>, quadruple>::Destroy(void);
+
+template
+void DissectionSolver<float>::Destroy(void);
+
+template
+void DissectionSolver<complex<float>, float>::Destroy(void);
+
 //
 
-
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 NumericFree(void) 
 {
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : void DissectionSolver::NumericFree()",
-	  __FILE__, __LINE__ );
-  }
+  diss_printf(_verbose, _fp,
+	      "%s %d : void DissectionSolver::NumericFree()",
+	      __FILE__, __LINE__ );
   if (_status_factorized) {
-    if (_verbose) {
-      fprintf(_fp, "start ");
-    }
+    diss_printf(_verbose, _fp, "start ");
     for (int m = 0; m < _graph_colors; m++) {
       _Schur[m].free();
       _kernel[m].free();
       _singIdx[m].clear(); // added 01 Oct.2013 Atsushi
     }
-    if (_verbose) {
-      fprintf(_fp, "end");
-    }
+    diss_printf(_verbose, _fp, "end");
   }
   _status_factorized = false;
-  if (_verbose) {
-    fprintf(_fp, ".\n");
-  }
+  diss_printf(_verbose, _fp, ".\n");
 } 
 
 template
@@ -174,7 +174,7 @@ template
 void DissectionSolver<quadruple, quadruple, double, double>::NumericFree(void);
 
 template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::NumericFree(void);
+void DissectionSolver<double, double, quadruple, quadruple>::NumericFree(void);
 
 template
 void DissectionSolver<complex<double>, double>::NumericFree(void);
@@ -187,17 +187,23 @@ template
 void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::NumericFree(void);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::NumericFree(void);
+void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::NumericFree(void);
+
+template
+void DissectionSolver<float>::NumericFree(void);
+
+template
+void DissectionSolver<complex<float>, float>::NumericFree(void);
 
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
-SaveCSRMatrix(const int called,	const W *coefs_)
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+SaveCSRMatrix(const int called,	const T *coefs_)
 {
-  fprintf(_fp,
-	  "%s %d : specialized template is not yet defined.\n",
-	  __FILE__, __LINE__);
+  diss_printf(true, stderr,
+	      "%s %d : specialized template is not yet defined.\n",
+	      __FILE__, __LINE__);
 }
 
 template
@@ -215,70 +221,29 @@ SaveCSRMatrix(const int called,
 	      const quadruple *coefs);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::
-SaveCSRMatrix(const int called,
-	      const double *coefs);
-
-template
 void DissectionSolver<complex<quadruple>, quadruple>::
 SaveCSRMatrix(const int called,
 	      const complex<quadruple> *coefs);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
+void DissectionSolver<float>::SaveCSRMatrix(const int called,
+					     const float *coefs);
+
+template
+void DissectionSolver<complex<float>, float>::
 SaveCSRMatrix(const int called,
-	      const complex<double> *coefs);
+	      const complex<float> *coefs);
 //
 
-#if 0
-template<>
-void DissectionSolver<double>::SaveCSRMatrix(const int called,
-					     const double *coefs)
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+SaveMMMatrix(const int called, const T *coefs_)
 {
-
-  int pid = get_process_id();
-  int is_sym = (_ptDA->isSymmetric() ? 1 : 0);
-  int real_or_cmplx = 1;
-
-  FORTRAN_DECL(csrmatrix_save)(called, pid, 
-			       is_sym,
-			       real_or_cmplx, 
-			       _dim,
-			       _ptDA->nnz(),
-			       _ptDA->getRows(),
-			       _ptDA->getIndCols(),
-			       (void *)coefs);
+  diss_printf(true, stderr,
+	      "%s %d : specialized template is not yet defined.\n",
+	      __FILE__, __LINE__);
 }
 
-template<>
-void DissectionSolver<complex<double>, double>::
-SaveCSRMatrix(const int called,
-	      const complex<double> *coefs)
-{
-  int pid = get_process_id();
-  int is_sym = (_ptDA->isSymmetric() ? 1 : 0);
-  int real_or_cmplx = 2;
-
-  FORTRAN_DECL(csrmatrix_save)(called, pid, 
-			       is_sym,
-			       real_or_cmplx, 
-			       _dim,
-			       _ptDA->nnz(),
-			       _ptDA->getRows(),
-			       _ptDA->getIndCols(),
-			       (void *)coefs);
-}
-
-#endif
-
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
-SaveMMMatrix(const int called, const W *coefs_)
-{
-  fprintf(_fp,
-	  "%s %d : specialized template is not yet defined.\n",
-	  __FILE__, __LINE__);
-}
 
 template<>
 void DissectionSolver<double>::SaveMMMatrix(const int called,
@@ -295,13 +260,13 @@ void DissectionSolver<double>::SaveMMMatrix(const int called,
 }
 
 template<>
-void DissectionSolver<quadruple, quadruple,
-		      double, double>::SaveMMMatrix(const int called,
-						    const double *coefs_)
+void DissectionSolver<complex<double>, double>::
+SaveMMMatrix(const int called,
+	      const complex<double> *coefs_)
 {
   SaveMMMatrix_(_dim,
 		_ptDA->nnz(),
-		_ptDA->isSymmetric(),
+		_ptDA->isWhole() ? false : _ptDA->isSymmetric(),
 		_ptDA->isUpper(),
 		_ptDA->getRows(),
 		_ptDA->getIndCols(),
@@ -317,36 +282,6 @@ void DissectionSolver<complex<quadruple>, quadruple>::
 SaveMMMatrix(const int called,
 	     const complex<quadruple> *coefs_);
 //
-
-template<>
-void DissectionSolver<complex<double>, double>::
-SaveMMMatrix(const int called,
-	      const complex<double> *coefs_)
-{
-  SaveMMMatrix_(_dim,
-		_ptDA->nnz(),
-		_ptDA->isWhole() ? false : _ptDA->isSymmetric(),
-		_ptDA->isUpper(),
-		_ptDA->getRows(),
-		_ptDA->getIndCols(),
-		called, coefs_);
-}
-
-template<>
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-SaveMMMatrix(const int called,
-	      const complex<double> *coefs_)
-{
-  SaveMMMatrix_(_dim,
-		_ptDA->nnz(),
-		_ptDA->isWhole() ? false : _ptDA->isSymmetric(),
-		_ptDA->isUpper(),
-		_ptDA->getRows(),
-		_ptDA->getIndCols(),
-		called, coefs_);
-}
-//
-
 
 void SaveMMMatrix_(const int dim,
 		   const int nnz,
@@ -443,9 +378,9 @@ void SaveMMMatrix_(const int dim,
 }
 
 // copy from higher precision than T and U : quadruple <- T = double
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
-CopyQueueFwBw(DissectionSolver<X, Y, T, U> &qdslv)
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+CopyQueueFwBw(DissectionSolver<W, Z, T, U> &qdslv)
 {
   bool isSym = qdslv.ptDA()->isSymmetric();
   bool isUpper = qdslv.ptDA()->isUpper();
@@ -472,20 +407,14 @@ CopyQueueFwBw(DissectionSolver<X, Y, T, U> &qdslv)
     _Schur[m].getAcol() = new SparseMatrix<T>(); // dummy allocation
     _Schur[m].getArow() = new SparseMatrix<T>(); // dummy allocation
   }
-  DissectionQueue<X, Y>** dQ = qdslv.getDissectionQueue();
-  TridiagQueue<X, Y>** tQ = qdslv.getTridiagQueue();
-#if 0
-  // copy scaled coef
-  for (int i = 0; i < qdslv.ptDA()->nnz(); i++) {
-    coefs[i] = tolower<X, T>(qdslv.ptDA()->Coef(i));
-  }
-#endif
+  DissectionQueue<W, Z>** dQ = qdslv.getDissectionQueue();
+  TridiagQueue<W, Z>** tQ = qdslv.getTridiagQueue();
   _precDiag = new U[_dim];
   for (int i = 0; i < _dim; i++) {
-    _precDiag[i] = tolower<Y, U>(qdslv.addrPrecDiag()[i]);
+    _precDiag[i] = conv_prec<Z, U>(qdslv.addrPrecDiag()[i]);
   }
   
-  _ptDA = new SparseMatrix<T, W, Z>(isSym, isUpper, isWhole);
+  _ptDA = new SparseMatrix<T>(isSym, isUpper, isWhole);
   
   CopySparseMatrix(_ptDA, qdslv.ptDA());
   //  coefs = _ptDA->getCoef();
@@ -525,7 +454,7 @@ CopyQueueFwBw(DissectionSolver<X, Y, T, U> &qdslv)
 						      verbose,
 						      _fp);
       
-      typename vector<DissectionMatrix<X, Y>* >::const_iterator it = qdslv.getDissectionMatrix()[m].begin();
+      typename vector<DissectionMatrix<W, Z>* >::const_iterator it = qdslv.getDissectionMatrix()[m].begin();
       typename vector<DissectionMatrix<T, U>* >::const_iterator jt = _dissectionMatrix[m].begin();
       for ( ; it != qdslv.getDissectionMatrix()[m].end(); ++it, ++jt) {
 	if ((*it)->islast()) {
@@ -561,7 +490,7 @@ CopyQueueFwBw(DissectionSolver<X, Y, T, U> &qdslv)
     CopyKernelMatrix(_kernel[m], qdslv.getKernelMatrix()[m]);
     _singIdx[m] = qdslv.getSingVal()[m];
   } // loop : m
-  qdslv.GetMatrixScaling(_precDiag);
+  //  qdslv.GetMatrixScaling(_precDiag);
   _index_isolated = qdslv.getIndexIsolated();
   _status_factorized = true;
   _btree = new Dissection::Tree*[_graph_colors]; // dummy allocation
@@ -569,18 +498,33 @@ CopyQueueFwBw(DissectionSolver<X, Y, T, U> &qdslv)
 }
 
 template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
+void DissectionSolver<double, double, quadruple, quadruple>::
 CopyQueueFwBw(DissectionSolver<quadruple, quadruple, double, double> &qdslv);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double,
-		      complex<quadruple>, quadruple>::
+void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::
 CopyQueueFwBw(DissectionSolver<complex<quadruple>, quadruple,
 	      complex<double>, double> &qdslv);
 
+template
+void DissectionSolver<quadruple, quadruple, double, double>::
+CopyQueueFwBw(DissectionSolver<double, double, quadruple, quadruple> &qdslv);
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template
+void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
+CopyQueueFwBw(DissectionSolver<complex<double>, double, complex<quadruple>, quadruple> &qdslv);
+
+template
+void DissectionSolver<float, float, double, double>::
+CopyQueueFwBw(DissectionSolver<double, double, float, float> &qdslv);
+
+template
+void DissectionSolver<complex<float>, float, complex<double>, double>::
+CopyQueueFwBw(DissectionSolver<complex<double>, double, complex<float>, float> &qdslv);
+
+
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 SymbolicFact(const int dim_,
 	     const int *ptRows,
 	     const int *indCols,
@@ -591,13 +535,255 @@ SymbolicFact(const int dim_,
 	     const int nbLevels_,
 	     const int minNodes)
 {
+  SymbolicFact_(dim_,
+		ptRows[dim_],
+		false,
+		ptRows,
+		indCols,
+		(long long int *)NULL, //  const long long int *ptRows,
+		(long long int *)NULL, //  const long long int *indCols,
+		isSym,
+		isUpper,
+		isWhole,
+		decomposer_, 
+		nbLevels_,
+		minNodes);
+}
+
+template
+void DissectionSolver<double>::SymbolicFact(const int dim_,
+					    const int *ptRows,
+					    const int *indCols,
+					    const bool isSym,
+					    const bool isUpper,
+					    const bool isWhole,
+					    const int decomposer,
+					    const int nbLevels_,
+					    const int minNodes);
+
+template
+void DissectionSolver<quadruple>::SymbolicFact(const int dim_,
+					       const int *ptRows,
+					       const int *indCols,
+					       const bool isSym,
+					       const bool isUpper,
+					       const bool isWhole,
+					       const int decomposer, 
+					       const int nbLevels_,
+					       const int minNodes);
+
+template
+void DissectionSolver<complex<double>, double>::
+SymbolicFact(const int dim_,
+	     const int *ptRows,
+	     const int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer,
+	     const int nbLevels_,
+	     const int minNodes);
+
+template
+void DissectionSolver<complex<quadruple>, quadruple>::
+SymbolicFact(const int dim_,
+	     const int *ptRows,
+	     const int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer,
+	     const int nbLevels_,
+	     const int minNodes);
+
+template
+void DissectionSolver<double, double,
+		      quadruple, quadruple>::SymbolicFact(const int dim_,
+							  const int *ptRows,
+							  const int *indCols,
+							  const bool isSym,
+							  const bool isUpper,
+							  const bool isWhole,
+							  const int decomposer,
+							  const int nbLevels_,
+							  const int minNodes);
+template
+void DissectionSolver<quadruple, quadruple,
+		      double, double>::SymbolicFact(const int dim_,
+						    const int *ptRows,
+						    const int *indCols,
+						    const bool isSym,
+						    const bool isUpper,
+						    const bool isWhole,
+						    const int decomposer, 
+						    const int nbLevels_,
+						    const int minNodes);
+
+template
+void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::
+SymbolicFact(const int dim_,
+	     const int *ptRows,
+	     const int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer,
+	     const int nbLevels_,
+	     const int minNodes);
+
+template
+void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
+SymbolicFact(const int dim_,
+	     const int *ptRows,
+	     const int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer,
+	     const int nbLevels_,
+	     const int minNodes);
+
+template
+void DissectionSolver<float>::SymbolicFact(const int dim_,
+					   const int *ptRows,
+					   const int *indCols,
+					   const bool isSym,
+					   const bool isUpper,
+					   const bool isWhole,
+					   const int decomposer,
+					   const int nbLevels_,
+					   const int minNodes);
+
+template
+void DissectionSolver<complex<float>, float>::SymbolicFact(const int dim_,
+							   const int *ptRows,
+							   const int *indCols,
+							   const bool isSym,
+							   const bool isUpper,
+							   const bool isWhole,
+							   const int decomposer,
+							   const int nbLevels_,
+							   const int minNodes);
+//
+
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+SymbolicFact(const int dim_,
+	     const long long int *ptRows,
+	     const long long int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer_, 
+	     const int nbLevels_,
+	     const int minNodes)
+{
+  SymbolicFact_(dim_,
+		(int)ptRows[dim_],
+		true,
+		(int *)NULL,         //  const int *ptRows,
+		(int *)NULL,         //  const int *indCols,
+		ptRows,
+		indCols,
+		isSym,
+		isUpper,
+		isWhole,
+		decomposer_, 
+		nbLevels_,
+		minNodes);
+}
+
+template
+void DissectionSolver<double>::SymbolicFact(const int dim_,
+					    const long long int *ptRows,
+					    const long long int *indCols,
+					    const bool isSym,
+					    const bool isUpper,
+					    const bool isWhole,
+					    const int decomposer,
+					    const int nbLevels_,
+					    const int minNodes);
+template
+void DissectionSolver<quadruple>::SymbolicFact(const int dim_,
+					       const long long int *ptRows,
+					       const long long int *indCols,
+					       const bool isSym,
+					       const bool isUpper,
+					       const bool isWhole,
+					       const int decomposer, 
+					       const int nbLevels_,
+					       const int minNodes);
+
+template
+void DissectionSolver<complex<double>, double>::
+SymbolicFact(const int dim_,
+	     const long long int *ptRows,
+	     const long long int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer,
+	     const int nbLevels_,
+	     const int minNodes);
+
+template
+void DissectionSolver<complex<quadruple>, quadruple>::
+SymbolicFact(const int dim_,
+	     const long long int *ptRows,
+	     const long long int *indCols,
+	     const bool isSym,
+	     const bool isUpper,
+	     const bool isWhole,
+	     const int decomposer,
+	     const int nbLevels_,
+	     const int minNodes);
+
+template
+void DissectionSolver<float>::SymbolicFact(const int dim_,
+					   const long long int *ptRows,
+					   const long long int *indCols,
+					   const bool isSym,
+					   const bool isUpper,
+					   const bool isWhole,
+					   const int decomposer,
+					   const int nbLevels_,
+					   const int minNodes);
+
+template
+void DissectionSolver<complex<float>, float>::SymbolicFact(const int dim_,
+							   const long long int *ptRows,
+							   const long long int *indCols,
+							   const bool isSym,
+							   const bool isUpper,
+							   const bool isWhole,
+							   const int decomposer,
+							   const int nbLevels_,
+							   const int minNodes);
+
+//
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+SymbolicFact_(const int dim_,
+	      const int nz_,
+	      const bool flagint64,
+	      const int *ptRows,
+	      const int *indCols,
+	      const long long int *ptRows64,
+	      const long long int *indCols64,
+	      const bool isSym,
+	      const bool isUpper,
+	      const bool isWhole,
+	      const int decomposer_, 
+	      const int nbLevels_,
+	      const int minNodes)
+{
   // decomposer = 0: SCOTCH, 1 : METIS, 2 : TRIDIAG(Cuthill-McKee)
   int dim = dim_;
   clock_t t0_cpu, t1_cpu, t2_cpu;
   elapsed_t t0_elapsed, t1_elapsed, t2_elapsed;
 
   _dim = dim_;
-  const int nz = ptRows[dim];
+  const int nz = nz_;
   int nbLevels, decomposer;
   bool flag, berr;
   int *map_eqn, *remap_eqn;
@@ -606,25 +792,27 @@ SymbolicFact(const int dim_,
   t0_cpu = clock();
   get_realtime(&t0_elapsed);
 
-  _ptDA = new SparseMatrix<T, W, Z>(dim, nz, ptRows, indCols,
-				    isSym, isUpper, isWhole);
-
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : isSym = %s isUpper = %s isWhole = %s decomposer = %d\n",
-	    __FILE__, __LINE__,
-	    isSym ? "ture" : "false",
-	    isUpper ? "ture" : "false",
-	    isWhole ? "ture" : "false",
-	    decomposer_);
+  if (flagint64) {
+      _ptDA = new SparseMatrix<T>(dim, nz, ptRows64, indCols64,
+				  isSym, isUpper, isWhole);
   }
+  else {
+    _ptDA = new SparseMatrix<T>(dim, nz, ptRows,  indCols,
+				isSym, isUpper, isWhole);
+  }
+
+  diss_printf(_verbose, _fp,
+	      "%s %d : isSym = %s isUpper = %s isWhole = %s decomposer = %d\n",
+	      __FILE__, __LINE__,
+	      isSym ? "ture" : "false",
+	      isUpper ? "ture" : "false",
+	      isWhole ? "ture" : "false",
+	      decomposer_);
   switch(nbLevels_) {
   case 1 :
-    if (_verbose) {
-      fprintf(_fp, 
-	      "%s %d : Dissection :: not activated, switch to tridiag\n",
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp, 
+		"%s %d : Dissection :: not activated, switch to tridiag\n",
+		__FILE__, __LINE__);
     decomposer = TRIDIAG_DECOMPOSER;
     break;
   case (-1):
@@ -647,12 +835,13 @@ SymbolicFact(const int dim_,
   CSR_indirect *unsym_csr = new CSR_indirect;
   bool unsym_csr_alloc = false;
   //  int *ptUnsymRows, *indUnsymCols, *indVals, *indSymVals;
+
   if (isSym) {
     if (isWhole) {
       unsym_csr->n = dim;
       unsym_csr->nnz = nz;
-      unsym_csr->ptRows = (int *)ptRows;
-      unsym_csr->indCols = (int *)indCols;
+      unsym_csr->ptRows = _ptDA->getRows(); // (int *)ptRows;
+      unsym_csr->indCols = _ptDA->getIndCols(); //(int *)indCols;
       unsym_csr->indVals = new int[nz];
       unsym_csr->indVals_unsym = new int[nz]; // for safe use of delete []
     }
@@ -668,7 +857,7 @@ SymbolicFact(const int dim_,
       // only used as extend symmetric symbolic structure to unsymmetric
       int nnz1;
       nnz1 = CSR_sym2unsym(unsym_csr, 
-			   ptRows, indCols, 
+			   _ptDA->getRows(), _ptDA->getIndCols(), 
 			   map_eqn, remap_eqn, //
 			   dim, isUpper);
       if (nnz1 != nnz0) {
@@ -682,10 +871,10 @@ SymbolicFact(const int dim_,
   else {
     unsym_csr->n = dim;
     unsym_csr->nnz = nz;
-    unsym_csr->ptRows = (int *)ptRows;
-    unsym_csr->indCols = (int *)indCols;
     unsym_csr->indVals = new int[nz];
     unsym_csr->indVals_unsym = new int[nz];
+    unsym_csr->ptRows = _ptDA->getRows(); //(int *)ptRows;
+    unsym_csr->indCols = _ptDA->getIndCols(); //(int *)indCols;
   }
   int* graph_mask = new int[dim];
 
@@ -755,13 +944,15 @@ SymbolicFact(const int dim_,
 	  unsym_csr_alloc = true;
 	}
 	CSR_unsym2unsym(unsym_csr,
-			ptRows, indCols, map_eqn, remap_eqn, //
-			dim);
+			_ptDA->getRows(), _ptDA->getIndCols(),
+			map_eqn, remap_eqn, //
+			dim, _verbose, _fp);
       }
       else {
 	CSR_sym2unsym(unsym_csr,
-		      ptRows, indCols, map_eqn, remap_eqn, //
-		      dim, isUpper);
+		      _ptDA->getRows(), _ptDA->getIndCols(),
+		      map_eqn, remap_eqn, //
+		      dim, isUpper, _verbose, _fp);
       }
     }
     else {
@@ -771,9 +962,11 @@ SymbolicFact(const int dim_,
 	unsym_csr_alloc = true;
       }
       CSR_unsym2unsym(unsym_csr,
-		      ptRows, indCols, map_eqn, remap_eqn, //
-		      dim);
+		      _ptDA->getRows(), _ptDA->getIndCols(),
+		      map_eqn, remap_eqn, //
+		      dim, _verbose, _fp);
     }
+
     flag = false;
     
     if (_graph_colors > 1) {
@@ -781,22 +974,19 @@ SymbolicFact(const int dim_,
       nbLevels = nbLevels < level_tmp ? nbLevels : level_tmp;
       nbLevels = nbLevels < 2 ? 2 : nbLevels; //
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : count = %d decomposer = %d\n", __FILE__, __LINE__,
-	      count, decomposer);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d : count = %d decomposer = %d\n", __FILE__, __LINE__,
+		count, decomposer);
+
     if ((count > SIZE_TRIDIAG) && ((decomposer == SCOTCH_DECOMPOSER) ||
 				   (decomposer == METIS_DECOMPOSER))) {
       flag_dissection = true;
-      if (_verbose) {
-	fprintf(_fp,
-		"%s %d : %s applied to color %d neq = %d with %d levels\n",
-		__FILE__, __LINE__,
-		(decomposer == METIS_DECOMPOSER) ? "METIS" : "SCOTCH",
-		color, count, 
-		nbLevels);
-      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : %s applied to color %d neq = %d with %d levels\n",
+		  __FILE__, __LINE__,
+		  (decomposer == METIS_DECOMPOSER) ? "METIS" : "SCOTCH",
+		  color, count, 
+		  nbLevels);
       while (flag == false) { 
 	_btree[m] = 
 	  new Dissection::Tree(_fp, 
@@ -813,25 +1003,19 @@ SymbolicFact(const int dim_,
 			       ((decomposer == METIS_DECOMPOSER) ? MetisSplitter : NULL),
 #endif
 			       true, _verbose);
-	if (_verbose) {
-	  fprintf(_fp, 
-		  "%s %d : Dissection::Tree %s decomposition\n",
-		  __FILE__, __LINE__,
-		  (decomposer == METIS_DECOMPOSER) ? "METIS" : "SCOTCH");
-	}
+	diss_printf(_verbose, _fp, 
+		    "%s %d : Dissection::Tree %s decomposition\n",
+		    __FILE__, __LINE__,
+		    (decomposer == METIS_DECOMPOSER) ? "METIS" : "SCOTCH");
 	flag = true;
 	for (int d = 1; d <= _btree[m]->NumberOfSubdomains(); d++) {
 	  //	  if (_btree[m]->sizeOfDomain(d) == 0) {
 	  const int isd = _btree[m]->sizeOfDomain(d);
 	  if (isd <= DIM_AUG_KERN) {
 	    if (d > 1) {
-	      if (_verbose) {
-		fprintf(_fp, 
-			"%s %d : Dissection:: %d-th too small nrow = %d\n",
-			__FILE__, __LINE__, d, isd);
-	      }
-	      //	      nbLevels = (int)log2((double)d) + 1;
-	      //	      break;
+	      diss_printf(_verbose, _fp, 
+			  "%s %d : Dissection:: %d-th too small nrow = %d\n",
+			  __FILE__, __LINE__, d, isd);
 	    }
 	    else {
 	      fprintf(stderr,
@@ -839,7 +1023,6 @@ SymbolicFact(const int dim_,
 		      __FILE__, __LINE__, isd);
 	      exit(-1);
 	    }
-	    //	    flag = false;
 	  } // if (isd == 0)
 	} // loop : d
 	if (flag) {
@@ -852,12 +1035,10 @@ SymbolicFact(const int dim_,
 	}
       } // while
       //      _nbLevels = _btree[m]->NumberOfLevels();
-      if (_verbose) {
-	fprintf(_fp, 
-		"%s %d : Dissection::Tree strategy = 0 : nblevels = %d -> %d\n",
+      diss_printf(_verbose, _fp, 
+		  "%s %d : Tree strategy = 0 : nblevels = %d -> %d\n",
 		__FILE__, __LINE__,
 		nbLevels, _btree[m]->NumberOfLevels());
-      }
 
       if ((_btree[m]->NumberOfLevels() == 1) 
 	  || ((nbLevels - _btree[m]->NumberOfLevels()) > 3) || berr == false) {
@@ -865,11 +1046,9 @@ SymbolicFact(const int dim_,
 	flag_dissection = false;
 #else
 	flag_dissection = true;
-	if (_verbose) {
-	  fprintf(_fp, 
-		  "%s %d : Dissection :: retry partitioning by METIS : %d\n",
-		  __FILE__, __LINE__, nbLevels);
-	}
+	diss_printf(_verbose, _fp, 
+		    "%s %d :: retry partitioning by METIS : %d\n",
+		    __FILE__, __LINE__, nbLevels);
 	nbLevels = nbLevels > 4 ? (nbLevels - 3) : 2;
 	flag = false;
 	while (flag == false) { 
@@ -881,11 +1060,9 @@ SymbolicFact(const int dim_,
 				 nbLevels, minNodes, 
 				 MetisSplitter,
 				 true, _verbose);
-	  if (_verbose) {
-	    fprintf(_fp, 
-		    "%s %d : Dissection :: Tree METIS decomposition **\n",
-		    __FILE__, __LINE__ );
-	  }
+	  diss_printf(_verbose, _fp, 
+		      "%s %d :: Tree METIS decomposition **\n",
+		      __FILE__, __LINE__ );
 	  flag = true;
 	  for (int d = 1; d <= _btree[m]->NumberOfSubdomains(); d++) {
 	    if (_btree[m]->sizeOfDomain(d) == 0) {
@@ -908,28 +1085,26 @@ SymbolicFact(const int dim_,
        bool verify_root = (_btree[m]->sizeOfDomain(1) <= SIZE_B1);
       int nb_doms = _btree[m]->NumberOfSubdomains();
       _dissectionMatrix[m].resize(nb_doms);
-      if (_verbose) {
-	fprintf(_fp,
+      diss_printf(_verbose, _fp,
 		"%s %d : ", __FILE__, __LINE__);
-	fprintf(_fp, 
-		"num_threads = %d dim = %d dim_dissect. = %d nbLevels = %d\n", 
-		_num_threads, _dim, count, _btree[m]->NumberOfLevels());
-	for (int d = 1; d <= _btree[m]->NumberOfSubdomains(); d++) {
-           fprintf(_fp, "( %d % d) ", d, _btree[m]->sizeOfDomain(d));
-	}
-	fprintf(_fp, "\n");
-      } // if (_verbose)
+      diss_printf(_verbose, _fp, 
+		  "num_threads = %d dim = %d dim_diss. = %d nbLevels = %d\n", 
+		  _num_threads, _dim, count, _btree[m]->NumberOfLevels());
+      for (int d = 1; d <= _btree[m]->NumberOfSubdomains(); d++) {
+	diss_printf(_verbose, _fp,
+		    "( %d % d) ", d, _btree[m]->sizeOfDomain(d));
+      }
+      diss_printf(_verbose, _fp, "\n");
       const int level_last = _btree[m]->NumberOfLevels();
       const int nb_doms_dense0 = (1U << (level_last - 1));
       if (_num_threads > nb_doms_dense0 || verify_root) {
-	if (_verbose) {
-	  fprintf(_fp,
-		  "%s %d : ", __FILE__, __LINE__);
-	  fprintf(_fp, 
-		  "thread number reduced : %d -> %d\n",
+	diss_printf(_verbose, _fp,
+		     "%s %d : ", __FILE__, __LINE__);
+	diss_printf(_verbose, _fp, 
+		    "thread number reduced : %d -> %d\n",
 		    _num_threads, 1);
-	  fprintf(_fp, "which is used as number of threads for computation\n");
-	} // if (_verbose)
+	diss_printf(_verbose, _fp,
+		    "which is used as number of threads for computation\n");
 	//	num_threads = nb_doms_dense0;
 	num_threads = 1;
       }
@@ -952,10 +1127,9 @@ SymbolicFact(const int dim_,
       _tridiagQueue[m] = new TridiagQueue<T, U>(false, _verbose, _fp);
     }  //   if (flag_dissection) 
     else {
-      if (_verbose) {
-	fprintf(_fp, "%s %d : TridiagSolver : m = %d count = %d\n",
-		__FILE__, __LINE__, m, count);
-      }
+	diss_printf(_verbose, _fp,
+		    "%s %d : TridiagSolver : m = %d count = %d\n",
+		    __FILE__, __LINE__, m, count);
       const int nnz = unsym_csr->ptRows[count];
       bool isMapped = ((_graph_colors > 1) || (_index_isolated.size() > 0));
       _tridiagMatrix[m] = new TridiagBlockMatrix<T, U>(count, SIZE_B1, isSym,
@@ -969,7 +1143,7 @@ SymbolicFact(const int dim_,
 				       unsym_csr->indVals,
 				       _ptDA->getCoef());
     }
-  } // loop : m      
+  }  // loop : m      
   if (unsym_csr_alloc) {
     delete [] unsym_csr->ptRows;
     delete [] unsym_csr->indCols;
@@ -993,7 +1167,7 @@ SymbolicFact(const int dim_,
     }
   }
 
-  _precDiag = new Z[_dim]; // preparation for numerical fact.
+  _precDiag = new U[_dim]; // preparation for numerical fact.
 
   _Schur = new SchurMatrix<T>[_graph_colors];
   _kernel = new KernelMatrix<T>[_graph_colors];
@@ -1001,95 +1175,28 @@ SymbolicFact(const int dim_,
   _status_factorized = false;
   t2_cpu = clock();
   get_realtime(&t2_elapsed);
-  if (_verbose) {
-    fprintf(_fp, "graph paritioner. : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t1_elapsed, t0_elapsed));
+  diss_printf(_verbose, _fp,
+		"graph paritioner. : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t1_elapsed, t0_elapsed));
 
-    fprintf(_fp, "queue symb. fact. : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t2_cpu - t1_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t2_elapsed, t1_elapsed));
-  } // if (_verbose)
+  diss_printf(_verbose, _fp,
+	      "queue symb. fact. : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t2_cpu - t1_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t2_elapsed, t1_elapsed));
 }
 
-template
-void DissectionSolver<double>::SymbolicFact(const int dim_,
-					    const int *ptRows,
-					    const int *indCols,
-					    const bool isSym,
-					    const bool isUpper,
-					    const bool isWhole,
-					    const int decomposer,
-					    const int nbLevels_,
-					    const int minNodes);
-template
-void DissectionSolver<quadruple>::SymbolicFact(const int dim_,
-					       const int *ptRows,
-					       const int *indCols,
-					       const bool isSym,
-					       const bool isUpper,
-					       const bool isWhole,
-					       const int decomposer, 
-					       const int nbLevels_,
-					       const int minNodes);
-template
-void DissectionSolver<quadruple, quadruple, double, double>::
-SymbolicFact(const int dim_,
-	     const int *ptRows,
-	     const int *indCols,
-	     const bool isSym,
-	     const bool isUpper,
-	     const bool isWhole,
-	     const int decomposer, 
-	     const int nbLevels_,
-	     const int minNodes);
 
-template
-void DissectionSolver<complex<double>, double>::
-SymbolicFact(const int dim_,
-	     const int *ptRows,
-	     const int *indCols,
-	     const bool isSym,
-	     const bool isUpper,
-	     const bool isWhole,
-	     const int decomposer,
-	     const int nbLevels_,
-	     const int minNodes);
-
-template
-void DissectionSolver<complex<quadruple>, quadruple>::
-SymbolicFact(const int dim_,
-	     const int *ptRows,
-	     const int *indCols,
-	     const bool isSym,
-	     const bool isUpper,
-	     const bool isWhole,
-	     const int decomposer,
-	     const int nbLevels_,
-	     const int minNodes);
-
-template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-SymbolicFact(const int dim_,
-	     const int *ptRows,
-	     const int *indCols,
-	     const bool isSym,
-	     const bool isUpper,
-	     const bool isWhole,
-	     const int decomposer,
-	     const int nbLevels_,
-	     const int minNodes);
-//
-
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 NumericFact(const int called,
-	    W *coefs,
+	    T *coefs,
 	    const int scaling,
 	    const double eps_pivot,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
-	    const double machine_eps_)
+	    const double machine_eps_,
+	    const bool higher_precision)
 {
   clock_t t0_cpu, t1_cpu, t2_cpu, t3_cpu;
   elapsed_t t0_elapsed, t1_elapsed, t2_elapsed, t3_elapsed;
@@ -1097,15 +1204,14 @@ NumericFact(const int called,
   t0_cpu = clock();
   get_realtime(&t0_elapsed);
 
-  if (_verbose) {
-    fprintf(_fp, "%s %d : eps_machine = %s scaling = %d\n",
-	    __FILE__, __LINE__,
-	    tostring<U>(eps_machine).c_str(), scaling);
-  }
+  diss_printf(_verbose, _fp, "%s %d : eps_machine = %s scaling = %d\n",
+	      __FILE__, __LINE__,
+	      tostring<U>(eps_machine).c_str(), scaling);
   
   _scaling = scaling;
 
-  _ptDA->normalize(_scaling, coefs, _precDiag);
+  //  _ptDA->normalize(_scaling, coefs, _precDiag);
+  normalize<T, U>(_scaling, coefs, _ptDA, _precDiag);
   t1_cpu = clock();
   get_realtime(&t1_elapsed);
   for (int m = 0; m < _graph_colors; m++) {
@@ -1114,27 +1220,22 @@ NumericFact(const int called,
 				      eps_pivot, 
 				      true, // matrix will not be decomposed
 				      dim_augkern,
-				      eps_machine);
+				      eps_machine,
+				      higher_precision);
     }
     else {
       _dissectionQueue[m]->exec_num_fact(called, 
 					 eps_pivot, 
 					 kernel_detection_all, 
 					 dim_augkern,
-					 eps_machine);
+					 eps_machine,
+					 higher_precision);
     }
   }
   t2_cpu = clock();
   get_realtime(&t2_elapsed);
 
   // dense {0 [1 2] [3 4 5 6] .... } + sparse {[2^(_nbLevels-1)-1... ]}
-#if 0  // ?? 11 Aug.2015 Atsushi
-  if (_status_factorized) {  // for safty of second call
-    for (int m = 0; m < _graph_colors; m++) {
-      delete _ptDA_arow[m];
-    }
-  }
-#endif
   int sz_total = 0;
   VectorArray<T> work(_dim);
   for (int m = 0; m < _graph_colors; m++) {
@@ -1172,47 +1273,42 @@ NumericFact(const int called,
 	} // 	if (_tridiagQueue[m]->isMapped()) 
 	T *kern_basis = _kernel[m].getKernBasis().addrCoefs();
 	              //_ptDA_kern_basis[m].addrCoefs();
-	if (_verbose) {
-	  fprintf(_fp,
-		  "%s %d : residual of kernel vertors : %d\n",
-		  __FILE__, __LINE__, nn0);
-	}
-	for (int i = 0; i < nn0; i++) {
-	  _ptDA->prod((kern_basis + (i * _dim)), work.addrCoefs());
-	  U stmp = blas_l2norm<T, U>(_dim, work.addrCoefs(), 1);
-	  if (_verbose) {
-	    fprintf(_fp, "%d %s\n", i, tostring<U>(stmp).c_str());
-	  }
-	}
-	//	work.free();
-	if(_scaling) {
-	  for (int j = 0; j < nn0; j++) {
-	    const int jtmp = j * _dim;
-	    for (int i = 0; i < _dim; i++) {
-	      kern_basis[i + jtmp] *= _precDiag[i];
-	    }
-	  }
-	}
-	_kernel[m].getTKernBasis().init(_dim, nn0);
-
-	// normalize each kernel_basis
+	diss_printf(_verbose, _fp,
+		    "%s %d : residual of kernel vertors : %d\n",
+		    __FILE__, __LINE__, nn0);
+      for (int i = 0; i < nn0; i++) {
+	_ptDA->prod((kern_basis + (i * _dim)), work.addrCoefs());
+	U stmp = blas_l2norm<T, U>(_dim, work.addrCoefs(), 1);
+	diss_printf(_verbose, _fp, "%d %s\n", i, tostring<U>(stmp).c_str());
+      }
+      if(_scaling) {
 	for (int j = 0; j < nn0; j++) {
-	  U stmp(0.0);
-	  U one(1.0);
-	  stmp = blas_l2norm<T, U>(_dim, kern_basis + (j * _dim), 1);
-	  stmp = one / stmp;
-	  blas_scal2<T, U>(_dim, stmp, (kern_basis + (j * _dim)), 1);
-	}
-
-	for (int i = 0; i < nn0; i++) {
-	  for(int j = i; j < nn0; j++) {
-	    //	    _ptDA_kern_proj[m](i, j) =
-	    _kernel[m].getKernProj()(i,j) =
-	      blas_dot<T>(_dim,
-			  (kern_basis + (i * _dim)), 1,
-			  (kern_basis + (j * _dim)), 1);
+	  const int jtmp = j * _dim;
+	  for (int i = 0; i < _dim; i++) {
+	    kern_basis[i + jtmp] *= _precDiag[i];
 	  }
-	  // symmetrize
+	}
+      }
+      _kernel[m].getTKernBasis().init(_dim, nn0);
+      
+      // normalize each kernel_basis
+      for (int j = 0; j < nn0; j++) {
+	U stmp(0.0);
+	U one(1.0);
+	stmp = blas_l2norm<T, U>(_dim, kern_basis + (j * _dim), 1);
+	stmp = one / stmp;
+	blas_scal2<T, U>(_dim, stmp, (kern_basis + (j * _dim)), 1);
+      }
+      
+      for (int i = 0; i < nn0; i++) {
+	for(int j = i; j < nn0; j++) {
+	  //	    _ptDA_kern_proj[m](i, j) =
+	  _kernel[m].getKernProj()(i,j) =
+	    blas_dot<T>(_dim,
+			(kern_basis + (i * _dim)), 1,
+			(kern_basis + (j * _dim)), 1);
+	}
+	// symmetrize
 	  for (int j = (i + 1); j < nn0; j++) {
 	    _kernel[m].getKernProj()(j,i) = _kernel[m].getKernProj()(i,j);
 	    //	    _ptDA_kern_proj[m](j, i) = _ptDA_kern_proj[m](i, j);
@@ -1243,17 +1339,13 @@ NumericFact(const int called,
 	    }
 	    kernel_tmp.free();
 	  } // 	if (_tridiagQueue[m]->isMapped()) 
-	  if (_verbose) {
-	    fprintf(_fp,
-		    "%s %d : residual of transposed kernel vertors : %d\n",
-		  __FILE__, __LINE__, nn0);
-	  }
+	  diss_printf(_verbose, _fp,
+		      "%s %d : residual of transposed kernel vertors : %d\n",
+		      __FILE__, __LINE__, nn0);
 	  for (int i = 0; i < nn0; i++) {
 	    _ptDA->prodt((kernt_basis + (i * _dim)), work.addrCoefs());
 	    U stmp = blas_l2norm<T, U>(_dim, work.addrCoefs(), 1);
-	    if (_verbose) {
-	      fprintf(_fp, "%d %s\n", i, tostring<U>(stmp).c_str());
-	    }
+	    diss_printf(_verbose, _fp, "%d %s\n", i, tostring<U>(stmp).c_str());
 	  }
 	  if(_scaling) {
 	    for (int j = 0; j < nn0; j++) {
@@ -1264,7 +1356,7 @@ NumericFact(const int called,
 	    }
 	  }
 	} //  if (!_tridiagMatrix[m]->isSym())
-      }
+      } // if (nn0 > 0)
       else {
 	_kernel[m].set_dimension(0);
 	_kernel[m].getKernProj().init(0);
@@ -1286,31 +1378,30 @@ NumericFact(const int called,
       //      int id_dom = 1;
       for (int j = 0; j < _dissectionMatrix[m].size(); j++ ) {
 	vector<int>& singIdx = _dissectionMatrix[m][j]->singIdxPermute();
-	if (_verbose && (singIdx.size() > 0)) { 
-	  fprintf(_fp,
-		  "%s %d : ", __FILE__, __LINE__);
-	  fprintf(_fp, "%d : %s : %d :: %d [ ", (j + 1),  // selfIndex() == j
-		  _dissectionMatrix[m][j]->KernelDetected() ? "true" : "false",
-		  _dissectionMatrix[m][j]->nrow(),
-		  (int)singIdx.size());
+	if (singIdx.size() > 0) { 
+	  diss_printf(_verbose, _fp,
+		      "%s %d : ", __FILE__, __LINE__);
+	  diss_printf(_verbose, _fp,
+		      "%d : %s : %d :: %d [ ", (j + 1),  // selfIndex() == j
+		      _dissectionMatrix[m][j]->KernelDetected() ? "true" : "false",
+		      _dissectionMatrix[m][j]->nrow(),
+		      (int)singIdx.size());
 	  vector<int>::const_iterator it =  singIdx.begin();
 	  for ( ;it !=  singIdx.end(); ++it) {   
-	    fprintf(_fp, "%d ", *it);
+	    diss_printf(_verbose, _fp, "%d ", *it);
 	  }
-	  fprintf(_fp, "]\n");
-	} // if (_verbose && (singIdx.size() > 0)) 
+	  diss_printf(_verbose, _fp, "]\n");
+	} // if (singIdx.size() > 0) 
 	if (singIdx.size() > 0) {
 	  //	  id_dom = j + 1;
 	  kernel_found.push_back(j);
 	  sz += singIdx.size(); 
 	  if (!_dissectionMatrix[m][j]->KernelDetected()) {
-	     //if (true) { // 29 Oct.2014 debug
+	    //if (true) { // 29 Oct.2014 debug
 	    sz1 += singIdx.size();
-	    if (_verbose) {
-	      fprintf(_fp,
-		      "%s %d : ", __FILE__, __LINE__);
-	      fprintf(_fp, "domain %d kernel is not detected\n", j);
-	    }
+	    diss_printf(_verbose, _fp,
+		    "%s %d : ", __FILE__, __LINE__);
+	    diss_printf(_verbose, _fp, "domain %d kernel is not detected\n", j);
 	    kernel_detected = false;
 	  }
 	}
@@ -1356,11 +1447,9 @@ NumericFact(const int called,
 	  // need to copy kern basis projection matrix from global to m-th array
 	} // if (kernel_detected)
 	else {
-	  if (_verbose) {
-	    fprintf(_fp, 
-		    "%s %d : candidates of null pivots = %d, to be fixed\n",
-		    __FILE__, __LINE__, sz);
-	  }
+	  diss_printf(_verbose, _fp, 
+		      "%s %d : candidates of null pivots = %d, to be fixed\n",
+		      __FILE__, __LINE__, sz);
 	  _singIdx[m].resize(sz + dim_augkern); //= vector<int>
 	  int k = 0;
 	  for (int d = 1; d <= _btree[m]->NumberOfSubdomains(); d++) {
@@ -1378,15 +1467,13 @@ NumericFact(const int called,
 	    }
 	  } // loop : d
       // selecting dim_augkern indices for comparison in the kernel detection
-	  if (_verbose) {
-	    fprintf(_fp,
-		    "%s %d : size = %d : ", __FILE__, __LINE__,
-		    (int)_singIdx[m].size());
-	    for (int i = 0; i < _singIdx[m].size(); i++) {
-	      fprintf(_fp, "%d ", _singIdx[m][i]);
-	    }
-	    fprintf(_fp, "\n");
-	  } // if (_verbose)
+	  diss_printf(_verbose, _fp,
+		      "%s %d : size = %d : ", __FILE__, __LINE__,
+		      (int)_singIdx[m].size());
+	  for (int i = 0; i < _singIdx[m].size(); i++) {
+	    diss_printf(_verbose, _fp, "%d ", _singIdx[m][i]);
+	  }
+	  diss_printf(_verbose, _fp, "\n");
 	  vector<SquareBlockMatrix<T>* > diags;
 	  vector<vector<int> >augkern_indexes;
 	  int nn = 1; // level of dense part with 1 indexing
@@ -1424,46 +1511,34 @@ NumericFact(const int called,
 	    }
 	    nn++; // 
 	  } // while (nn <= dim_augkern)
-	  if (_verbose) {
-	    fprintf(_fp,
-		    "%s %d : adding local node using %d diag matrices ",
-		  __FILE__, __LINE__, (int)augkern_indexes.size());
-	    for (vector<vector<int> >::const_iterator it = augkern_indexes.begin();
-		 it != augkern_indexes.end(); ++it) {
-	      for (vector<int>::const_iterator jt = (*it).begin(); jt != (*it).end();
-		   ++jt) {
-		fprintf(_fp, "%d ", (*jt));
-	      }
+	  diss_printf(_verbose, _fp,
+		      "%s %d : adding local node using %d diag matrices ",
+		      __FILE__, __LINE__, (int)augkern_indexes.size());
+	  for (vector<vector<int> >::const_iterator it = augkern_indexes.begin();
+	       it != augkern_indexes.end(); ++it) {
+	    for (vector<int>::const_iterator jt = (*it).begin();
+		 jt != (*it).end();
+		 ++jt) {
+	      diss_printf(_verbose, _fp, "%d ", (*jt));
 	    }
-	    fprintf(_fp, "to the last level.\n");
-	    fprintf(_fp,
-		    "%s %d : singIdx = %d : ",
-		    __FILE__, __LINE__, (int)_singIdx[m].size());
-	    for (int i = 0; i < _singIdx[m].size(); i++) {
-	      fprintf(_fp, "%d ", _singIdx[m][i]);
-	    }
-	    fprintf(_fp, "\n");
-	  } // if (_verbose)
-	  if (0) {
-	    int dim = _ptDA->dimension();
-	    int pid = get_process_id();
-	    SaveMMMatrix(_called, coefs);
-	    fprintf(_fp, 
-		    "%s %d : DissectionSolver MM matrix dumped %d : %d %d\n", 
-		    __FILE__, __LINE__, dim, _called, pid);
-	    fprintf(stderr, "Dissection abort\n");
-	    exit(-1);
 	  }
+	  diss_printf(_verbose, _fp, "to the last level.\n");
+	  diss_printf(_verbose, _fp,
+		      
+		      "%s %d : singIdx = %d : ",
+		      __FILE__, __LINE__, (int)_singIdx[m].size());
+	  for (int i = 0; i < _singIdx[m].size(); i++) {
+	    diss_printf(_verbose, _fp, "%d ", _singIdx[m][i]);
+	  }
+	  diss_printf(_verbose, _fp, "\n");
 	  std::sort(_singIdx[m].begin(), _singIdx[m].end());
-  	  if (_verbose)  {
-	    fprintf(_fp,
-		    "%s %d : singIdx sorted = %d : ",
-		    __FILE__, __LINE__, (int)_singIdx[m].size());
-	    for (int i = 0; i < _singIdx[m].size(); i++) {
-	      fprintf(_fp, "%d ", _singIdx[m][i]);
-	    }
-	    fprintf(_fp, "\n");
-	  } // 	if (_verbose) 
+	  diss_printf(_verbose, _fp,
+		      "%s %d : singIdx sorted = %d : ",
+		      __FILE__, __LINE__, (int)_singIdx[m].size());
+	  for (int i = 0; i < _singIdx[m].size(); i++) {
+	    diss_printf(_verbose,_fp, "%d ", _singIdx[m][i]);
+	  }
+	  diss_printf(_verbose, _fp, "\n");
 	  int kern_dim = 0;
 	  BuildKernelsDetection(kern_dim, 
 				_singIdx[m],
@@ -1497,7 +1572,7 @@ NumericFact(const int called,
 	}
       }
     } //  if (_tridiagQueue[m]->tridiagSolver()) 
-  } // loop : _graph_colors
+  }   // loop : _graph_colors
   work.free();
   {
     int itmp = 0;
@@ -1505,49 +1580,43 @@ NumericFact(const int called,
       itmp += _singIdx[m].size();
     }
     _nsing = itmp; // keep total dimension of kernel of singluar blocks
-#if 0
-    _singIdx.resize(itmp);
-    itmp = 0;
-    for (int m = 0; m < _graph_colors; m++, itmp++) {
-      for (int i = 0; i < _singIdx[m].size(); i++) {
-	_singIdx[itmp] = _singIdx[m][i];
-      }
-    }
-#endif
   }
   t3_cpu = clock();
   get_realtime(&t3_elapsed);
 
   //clock_gettime(CLOCK_REALTIME, &ts3);
-  if (_verbose) {
-    fprintf(_fp, "queue num. fact. : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t2_cpu - t1_cpu) / (double)CLOCKS_PER_SEC,
-	 convert_time(t2_elapsed, t1_elapsed));
-    fprintf(_fp, "total num. fact. : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t3_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t2_elapsed, t0_elapsed));
-    fprintf(_fp, "scaling matrix   : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t1_elapsed, t0_elapsed));
-    if (sz_total > 0) {
-      fprintf(_fp, "kernel vec. gen  : cpu time = %.4e elapsed time = %.4e\n", 
+  diss_printf(_verbose, _fp,
+	      "queue num. fact. : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t2_cpu - t1_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t2_elapsed, t1_elapsed));
+  diss_printf(_verbose, _fp,
+	      "total num. fact. : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t3_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t2_elapsed, t0_elapsed));
+  diss_printf(_verbose, _fp,
+	      "scaling matrix   : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t1_elapsed, t0_elapsed));
+  if (sz_total > 0) {
+    diss_printf(_verbose, _fp,
+		"kernel vec. gen  : cpu time = %.4e elapsed time = %.4e\n", 
 	      (double)(t3_cpu - t2_cpu) / (double)CLOCKS_PER_SEC,
 	      convert_time(t3_elapsed, t2_elapsed));
-    }
-  } // if (_verbose)
+  } // (sz_total > 0) {
   // check error
   // this should be a function with specialized template
   if (_verbose) {
     int count = 0;
     for (int m = 0; m < _graph_colors; m++) {
-      fprintf(_fp,
+      diss_printf(_verbose, _fp,
 	      "%s %d :negative diagnol entries : color = %d\n",
 	      __FILE__, __LINE__, m);
       if (_tridiagQueue[m]->tridiagSolver()) {
 	int count0;
 	count0 = _tridiagMatrix[m]->NumNegativeDiags();
 	if (count0 > 0) {
-	  fprintf(_fp, "%d / %d\n", count0, _tridiagMatrix[m]->nrow());
+	  diss_printf(_verbose, _fp,
+		      "%d / %d\n", count0, _tridiagMatrix[m]->nrow());
 	}
 	count += count0;
       }
@@ -1567,7 +1636,7 @@ NumericFact(const int called,
 	    count0 += tridiag[i]->NumNegativeDiags();
 	  }
 	  if (count0 > 0) {
-	    fprintf(_fp, "%d : %d / %d\n",
+	    diss_printf(_verbose, _fp, "%d : %d / %d\n",
 		    d0, count0, _dissectionMatrix[m][d0]->nrow());
 	  }
 	  count += count0;
@@ -1582,7 +1651,7 @@ NumericFact(const int called,
 	    SquareBlockMatrix<T>& diag = _dissectionMatrix[m][d0]->diagBlock();
 	    count0 = count_diag_negative<T>(diag);
 	    if (count0 > 0) {
-	      fprintf(_fp, "%d : %d / %d\n",
+	      diss_printf(_verbose, _fp, "%d : %d / %d\n",
 		      d0, count0, _dissectionMatrix[m][d0]->nrow());
 	    }
 	    count += count0;
@@ -1594,15 +1663,16 @@ NumericFact(const int called,
 	SubSquareMatrix<T>& diag = _Schur[m].getSldu();
 	count0 = count_diag_negative<T>(diag);
 	if (count0 > 0) {
-	  fprintf(_fp, "-1 : %d / %d\n", count0, diag.dimension());
+	  diss_printf(_verbose, _fp,
+		      "-1 : %d / %d\n", count0, diag.dimension());
 	}
 	count += count0;
       }
     } // loop : m
     if (count > 0) {
-      fprintf(_fp,
-	      "%s %d :negative diagnol entries = %d / %d\n", 
-	      __FILE__, __LINE__, count, _dim);
+      diss_printf(_verbose, _fp,
+		  "%s %d :negative diagnol entries = %d / %d\n", 
+		  __FILE__, __LINE__, count, _dim);
     }
   } // if (_verbose)
     //
@@ -1621,7 +1691,6 @@ NumericFact(const int called,
   if(_verbose) {
     int n1 = 0;
     for (int m = 0; m < _graph_colors; m++) {
-      //      n1 += _ptDA_sldu_list[m].size();
       n1 += _Schur[m].getSlduList().size();
     }
     VectorArray<T> xx(_dim);
@@ -1629,19 +1698,19 @@ NumericFact(const int called,
     VectorArray<T> ww(_dim);
     for (int i = 0; i < _dim; i++) {
       ww[i] = T(2.0 * ((double)rand() / (double)RAND_MAX) - 1.0);
-// 	ww[i] = T((double)(i % 11));
+//    ww[i] = T((double)(i % 11));
     }
     VectorArray<T> bb(_dim);
     bb.ZeroClear();
-    SpMV(ww.addrCoefs(), xx.addrCoefs()); // SpMtV transposed
+    SpMV(ww.addrCoefs(), xx.addrCoefs(), true); //  isScaling = true
     if (!nokernel_flag) {
       ProjectionImageSingle(xx.addrCoefs(), "creating solution");
       //      ProjectionKernelOrthSingle(xx.addrCoefs(), "creating solution");
     }
-    SpMV(xx.addrCoefs(), bb.addrCoefs());  // SpMtV transposed
+    SpMV(xx.addrCoefs(), bb.addrCoefs(), true);  //  isScaling = true
     blas_copy<T>(_dim, bb.addrCoefs(), 1, yy.addrCoefs(), 1);
     SolveSingle(yy.addrCoefs(), false, false, true); // isScaling = true
-    blas_copy<T>(_dim, yy.addrCoefs(), 1, bb.addrCoefs(), 1);
+    //    blas_copy<T>(_dim, yy.addrCoefs(), 1, bb.addrCoefs(), 1);
     if (!nokernel_flag) {
       ProjectionImageSingle(yy.addrCoefs(), "computed solution");
       //      ProjectionKernelOrthSingle(yy.addrCoefs(), "computed solution");
@@ -1650,23 +1719,21 @@ NumericFact(const int called,
     norm0 = blas_l2norm<T, U>(_dim, xx.addrCoefs(), 1); 
     blas_axpy<T>(_dim, _none, xx.addrCoefs(), 1, yy.addrCoefs(), 1);
     norm1 = blas_l2norm<T, U>(_dim, yy.addrCoefs(), 1);
-    fprintf(_fp, "%s %d : error = %s / %s = %s\n",
+    diss_printf(_verbose, _fp, "%s %d : error = %s / %s = %s\n",
 	    __FILE__, __LINE__,
 	    tostring<U>(norm1).c_str(), tostring<U>(norm0).c_str(),
 	    tostring<U>(norm1 / norm0).c_str());
-#if 1
     if (todouble<U>(norm1 / norm0) > 1.0e-5) {
       int pid = get_process_id();
       int nnz = _ptDA->nnz();
-      fprintf(stderr, "%s %d : too large error = %s / %s = %s\n",
-	      __FILE__, __LINE__,
-	      tostring<U>(norm1).c_str(), tostring<U>(norm0).c_str(),
-	      tostring<U>(norm1 / norm0).c_str());
+      diss_printf(_verbose, stderr, "%s %d : too large error = %s / %s = %s\n",
+		  __FILE__, __LINE__,
+		  tostring<U>(norm1).c_str(), tostring<U>(norm0).c_str(),
+		  tostring<U>(norm1 / norm0).c_str());
       //      SaveMMMatrix(_called, coefs);
       _status_factorized = false;
       return;
     }
-#endif
   } //  if (_verbose)
   _status_factorized = true;
 }
@@ -1678,7 +1745,8 @@ void DissectionSolver<double>::NumericFact(const int called,
 					   const double eps_pivot,
 					   const bool kernel_detection_all,
 					   const int dim_augkern,
-					   const double machine_eps_);
+					   const double machine_eps_,
+					   const bool higher_precision);
 
 template
 void DissectionSolver<complex<double>, double>::
@@ -1688,7 +1756,8 @@ NumericFact(const int called,
 	    const double eps_pivot,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
-	    const double machine_eps_);
+	    const double machine_eps_,
+	    const bool higher_precision);
 
 template
 void DissectionSolver<quadruple>::NumericFact(const int called,
@@ -1697,18 +1766,8 @@ void DissectionSolver<quadruple>::NumericFact(const int called,
 					      const double eps_pivot,
 					      const bool kernel_detection_all,
 					      const int dim_augkern,
-					      const double machine_eps_);
-
-template
-void DissectionSolver<quadruple, quadruple, double, double>::
-NumericFact(const int called,
-	    double *coefs,
-	    const int scaling,
-	    const double eps_pivot,
-	    const bool kernel_detection_all,
-	    const int dim_augkern,
-	    const double machine_eps_);
-
+					      const double machine_eps_,
+					      const bool higher_precision);
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
 NumericFact(const int called,
@@ -1717,21 +1776,74 @@ NumericFact(const int called,
 	    const double eps_pivot,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
-	    const double machine_eps_);
+	    const double machine_eps_,
+	    const bool higher_precision);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
+void DissectionSolver<double, double, quadruple, quadruple>::NumericFact(const int called,
+					   double *coefs,
+					   const int scaling,
+					   const double eps_pivot,
+					   const bool kernel_detection_all,
+					   const int dim_augkern,
+					   const double machine_eps_,
+					   const bool higher_precision);
+
+template
+void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::
 NumericFact(const int called,
 	    complex<double> *coefs,
 	    const int scaling,
 	    const double eps_pivot,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
-	    const double machine_eps_);
+	    const double machine_eps_,
+	    const bool higher_precision);
+
+template
+void DissectionSolver<quadruple, quadruple, double, double>::NumericFact(const int called,
+					      quadruple *coefs,
+					      const int scaling,
+					      const double eps_pivot,
+					      const bool kernel_detection_all,
+					      const int dim_augkern,
+					      const double machine_eps_,
+					      const bool higher_precision);
+template
+void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
+NumericFact(const int called,
+	    complex<quadruple> *coefs,
+	    const int scaling,
+	    const double eps_pivot,
+	    const bool kernel_detection_all,
+	    const int dim_augkern,
+	    const double machine_eps_,
+	    const bool higher_precision);
+
+template
+void DissectionSolver<float>::NumericFact(const int called,
+					   float *coefs,
+					   const int scaling,
+					   const double eps_pivot,
+					   const bool kernel_detection_all,
+					   const int dim_augkern,
+					   const double machine_eps_,
+					   const bool higher_precision);
+template
+void DissectionSolver<complex<float>, float>::
+NumericFact(const int called,
+	    complex<float> *coefs,
+	    const int scaling,
+	    const double eps_pivot,
+	    const bool kernel_detection_all,
+	    const int dim_augkern,
+	    const double machine_eps_,
+	    const bool higher_precision);
+
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 GetNullPivotIndices(int *pivots)
 {
   int i0 = 0;
@@ -1751,27 +1863,30 @@ template
 void DissectionSolver<quadruple>::GetNullPivotIndices(int *pivots);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::GetNullPivotIndices(int *pivots);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::GetNullPivotIndices(int *pivots);
-
-template
 void DissectionSolver<complex<double>, double>::GetNullPivotIndices(int *pivots);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::GetNullPivotIndices(int *pivots);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::GetNullPivotIndices(int *pivots);
+void DissectionSolver<double, double, quadruple, quadruple>::GetNullPivotIndices(int *pivots);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::GetNullPivotIndices(int *pivots);
+void DissectionSolver<quadruple, quadruple, double, double>::GetNullPivotIndices(int *pivots);
+
+template
+void DissectionSolver<float>::GetNullPivotIndices(int *pivots);
+
+template
+void DissectionSolver<complex<float>, float>::GetNullPivotIndices(int *pivots);
+
+template
+void DissectionSolver<float, float, double, double>::GetNullPivotIndices(int *pivots);
+
 //
 
-
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-int DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+int DissectionSolver<T, U, W, Z>::
 GetMaxColors()
 {
   int nn = 0;
@@ -1790,26 +1905,26 @@ template
 int DissectionSolver<quadruple>::GetMaxColors();
 
 template
-int DissectionSolver<quadruple, quadruple, double, double>::GetMaxColors();
-
-template
-int DissectionSolver<double, double, double, double, quadruple, quadruple>::GetMaxColors();
-
-template
 int DissectionSolver<complex<double>, double>::GetMaxColors();
 
 template
 int DissectionSolver<complex<quadruple>, quadruple>::GetMaxColors();
 
 template
-int DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::GetMaxColors();
+int DissectionSolver<double, double, quadruple, quadruple>::GetMaxColors();
 
 template
-int DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::GetMaxColors();
+int DissectionSolver<quadruple, quadruple, double, double>::GetMaxColors();
+
+template
+int DissectionSolver<float>::GetMaxColors();
+
+template
+int DissectionSolver<complex<float>, float>::GetMaxColors();
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 GetSmallestPivotIndices(const int n, int *pivots)
 {
   int nn = 0;
@@ -1821,7 +1936,7 @@ GetSmallestPivotIndices(const int n, int *pivots)
       vector<int> &permute = diag->getPermute();
       int ndiag = diag->dimension();
       if (n > ndiag) {
-	fprintf(stderr, "%s %d : GetSmallestPivotIndices %d > %d\n",
+	diss_printf(_verbose, _fp, "%s %d : GetSmallestPivotIndices %d > %d\n",
 		__FILE__, __LINE__, n, ndiag);
       }
       for (int k = (ndiag - 1); k >= (ndiag - n); k--, nn++) {
@@ -1839,27 +1954,27 @@ template
 void DissectionSolver<quadruple>::GetSmallestPivotIndices(const int n, int *pivots);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::GetSmallestPivotIndices(const int n, int *pivots);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::GetSmallestPivotIndices(const int n, int *pivots);
-
-template
 void DissectionSolver<complex<double>, double>::GetSmallestPivotIndices(const int n, int *pivots);
-
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::GetSmallestPivotIndices(const int n, int *pivots);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::GetSmallestPivotIndices(const int n, int *pivots);
+void DissectionSolver<double, double, quadruple, quadruple>::GetSmallestPivotIndices(const int n, int *pivots);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::GetSmallestPivotIndices(const int n, int *pivots);
+void DissectionSolver<quadruple, quadruple, double, double>::GetSmallestPivotIndices(const int n, int *pivots);
+
+template
+void DissectionSolver<float>::GetSmallestPivotIndices(const int n,
+						       int *pivots);
+
+template
+void DissectionSolver<complex<float>, float>::GetSmallestPivotIndices(const int n, int *pivots);
 
 //
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 GetKernelVectors(T *kern_basis)
 {
   int ii = 0;
@@ -1881,27 +1996,26 @@ template
 void DissectionSolver<quadruple>::GetKernelVectors(quadruple *kern_basis);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::GetKernelVectors(quadruple *kern_basis);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::GetKernelVectors(double *kern_basis);
-
-template
 void DissectionSolver<complex<double>, double>::GetKernelVectors(complex<double> *kern_basis);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::GetKernelVectors(complex<quadruple> *kern_basis);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::GetKernelVectors(complex<quadruple> *kern_basis);
+void DissectionSolver<double, double, quadruple, quadruple>::GetKernelVectors(double *kern_basis);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::GetKernelVectors(complex<double> *kern_basis);
+void DissectionSolver<quadruple, quadruple, double, double>::GetKernelVectors(quadruple *kern_basis);
 
+template
+void DissectionSolver<float>::GetKernelVectors(float *kern_basis);
+
+template
+void DissectionSolver<complex<float>, float>::GetKernelVectors(complex<float> *kern_basis);
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 GetTransKernelVectors(T *kernt_basis)
 {
   int ii = 0;
@@ -1924,27 +2038,27 @@ template
 void DissectionSolver<quadruple>::GetTransKernelVectors(quadruple *kernt_basis);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::GetTransKernelVectors(quadruple *kern_basis);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::GetTransKernelVectors(double *kern_basis);
-
-template
 void DissectionSolver<complex<double>, double>::GetTransKernelVectors(complex<double> *kernt_basis);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::GetTransKernelVectors(complex<quadruple> *kernt_basis);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::GetTransKernelVectors(complex<quadruple> *kern_basis);
+void DissectionSolver<double, double, quadruple, quadruple>::GetTransKernelVectors(double *kernt_basis);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::GetTransKernelVectors(complex<double> *kern_basis);
+void DissectionSolver<quadruple, quadruple, double, double>::GetTransKernelVectors(quadruple *kernt_basis);
+
+template
+void DissectionSolver<float>::GetTransKernelVectors(float *kernt_basis);
+
+template
+void DissectionSolver<complex<float>, float>::GetTransKernelVectors(complex<float> *kernt_basis);
 
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 GetMatrixScaling(Z *weight)
 {
   for (int i = 0; i < _dim; i++) {
@@ -1963,19 +2077,19 @@ template
 void DissectionSolver<quadruple>::GetMatrixScaling(quadruple *weight);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::GetMatrixScaling(double *weight);
-
-template
 void DissectionSolver<complex<quadruple>, quadruple>::
 GetMatrixScaling(quadruple *weight);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-GetMatrixScaling(double *weight);
+void DissectionSolver<float>::GetMatrixScaling(float *weight);
+
+template
+void DissectionSolver<complex<float>, float>::
+GetMatrixScaling(float *weight);
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 ProjectionImageSingle(T *x, string name)
 {
   for (int m = 0; m < _graph_colors; m++) {
@@ -1996,37 +2110,14 @@ ProjectionImageSingle(T *x, string name)
 			  1,
 			  x, 1);
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : %s : check orthogonality of the given vector\n",
-	      __FILE__, __LINE__,
-	      name.c_str());
-      for (int j = 0; j < n0; j++) {
-	fprintf(_fp, "%.6e ", blas_abs<T, double>(xx[j]));
-      }
-      fprintf(_fp, "\n");
-    } // if (_verbose)
-#if 0
-    bool flag = true;
+    diss_printf(_verbose, _fp,
+		"%s %d : %s : check orthogonality of the given vector : ",
+		__FILE__, __LINE__,
+		name.c_str());
     for (int j = 0; j < n0; j++) {
-      if (xx[j] > 1.0e-11) {
-	fprintf(_fp, "%.6e ", xx[j]);
-	flag = false;
-	break;
-      }
+      diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
     }
-    if (!flag) {
-      int dim = _ptDA->dimension();
-      int pid = get_process_id();
-      int nnz =  _ptDA->nnz();
-      SaveMMMatrix(_called, _ptDA->getCoef());
-      fprintf(_fp, 
-	      "%s %d : DissectionSolver MM matrix dumped %d : %d %d\n", 
-	      __FILE__, __LINE__, dim, _called, pid);
-      fprintf(stderr, "%s %d : Dissection abort\n", __FILE__, __LINE__);
-      exit(-1);
-    }
-#endif
+    diss_printf(_verbose, _fp, "\n");
     blas_trsv<T>(CblasLower, CblasNoTrans, CblasUnit,
 		 n0, kern_proj,
 		 n0, xx.addrCoefs(), 1);
@@ -2040,15 +2131,14 @@ ProjectionImageSingle(T *x, string name)
     blas_trsv<T>(CblasUpper, CblasNoTrans, CblasUnit,
 		 n0, kern_proj,
 		 n0, xx.addrCoefs(), 1);
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : %s : solution of kernel adjustment\n",
-	      __FILE__, __LINE__, name.c_str());
-      for (int j = 0; j < n0; j++) {
-	fprintf(_fp, "%.6e ", blas_abs<T, double>(xx[j]));
-      } 
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp,
+		"%s %d : %s : solution of kernel adjustment : ",
+		__FILE__, __LINE__, name.c_str());
+    for (int j = 0; j < n0; j++) {
+      diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
+    } 
+    diss_printf(_verbose, _fp, "\n");
+
     for (int i = 0; i < _dim; i++) {
       for (int j = 0; j < n0; j++) {
 	x[i] -= xx[j] * kern_basis0[i + j * _dim];
@@ -2060,17 +2150,14 @@ ProjectionImageSingle(T *x, string name)
 			  (kern_basis1 + j * _dim), 1,
 			  x, 1);
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : %s : after projection, component of each kernel\n",
-	      __FILE__, __LINE__, name.c_str());
-      for (int j = 0; j < n0; j++) {
-	fprintf(_fp, "%.6e ", blas_abs<T, double>(xx[j]));
-      } 
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp,
+		"%s %d : %s : after projection, component of each kernel : ",
+		__FILE__, __LINE__, name.c_str());
+    for (int j = 0; j < n0; j++) {
+      diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
+    }
+    diss_printf(_verbose, _fp, "\n");
     xx.free();
-    //    delete [] xx;
   }  // loop : _graph_colors : m
 }
 
@@ -2081,14 +2168,6 @@ template
 void DissectionSolver<quadruple>::ProjectionImageSingle(quadruple *x,
 							string name);
 template
-void DissectionSolver<quadruple, quadruple, double, double>::
-ProjectionImageSingle(quadruple *x, string name);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
-ProjectionImageSingle(double *x, string name);
-
-template
 void DissectionSolver<complex<double>, double>::
 ProjectionImageSingle(complex<double> *x, string name);
 
@@ -2097,16 +2176,15 @@ void DissectionSolver<complex<quadruple>, quadruple>::
 ProjectionImageSingle(complex<quadruple> *x, string name);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-ProjectionImageSingle(complex<quadruple> *x, string name);
+void DissectionSolver<float>::ProjectionImageSingle(float *x, string name);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-ProjectionImageSingle(complex<double> *x, string name);
-//
+void DissectionSolver<complex<float>, float>::
+ProjectionImageSingle(complex<float> *x, string name);
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+//
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 ProjectionKernelOrthSingle(T *x, bool isTrans)
 {
   for (int m = 0; m < _graph_colors; m++) {
@@ -2124,15 +2202,14 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
 			  1,
 			  x, 1);
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : check orthogonality of the given vector\n",
-	      __FILE__, __LINE__);
-      for (int j = 0; j < n0; j++) {
-	fprintf(_fp, "%.6e ", blas_abs<T, double>(xx[j]));
-      } 
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp,
+		"%s %d : check orthogonality of the given vector\n",
+		__FILE__, __LINE__);
+    for (int j = 0; j < n0; j++) {
+      diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
+    } 
+    diss_printf(_verbose, _fp, "\n");
+
     blas_trsv<T>(CblasLower, CblasNoTrans, CblasUnit,
 		 n0, kern_proj,
 		 n0, xx.addrCoefs(), 1);
@@ -2146,15 +2223,14 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
     blas_trsv<T>(CblasUpper, CblasNoTrans, CblasUnit,
 		 n0, kern_proj,
 		 n0, xx.addrCoefs(), 1);
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : solution of kernel adjustment\n",
-	      __FILE__, __LINE__);
-      for (int j = 0; j < n0; j++) {
-	fprintf(_fp, "%.6e ", blas_abs<T, double>(xx[j]));
-      } 
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp,
+		"%s %d : solution of kernel adjustment\n",
+		__FILE__, __LINE__);
+    for (int j = 0; j < n0; j++) {
+      diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
+    } 
+    diss_printf(_verbose, _fp, "\n");
+
     for (int i = 0; i < _dim; i++) {
       for (int j = 0; j < n0; j++) {
 	x[i] -= xx[j] * kern_basis[i + j * _dim];
@@ -2166,15 +2242,13 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
 			  (kern_basis + j * _dim), 1,
 			  x, 1);
     }
-    if (_verbose) {    
-      fprintf(_fp,
-	      "%s %d : after projection, component of each kernel\n",
-	      __FILE__, __LINE__);
-      for (int j = 0; j < n0; j++) {
-	fprintf(_fp, "%.6e ", blas_abs<T, double>(xx[j]));
-      } 
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp,
+		"%s %d : after projection, component of each kernel\n",
+		__FILE__, __LINE__);
+    for (int j = 0; j < n0; j++) {
+      diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
+    } 
+    diss_printf(_verbose, _fp, "\n");
     xx.free();
   } // loop : _graph_colors : m
 }
@@ -2185,15 +2259,6 @@ void DissectionSolver<double>::ProjectionKernelOrthSingle(double *x,
 template
 void DissectionSolver<quadruple>::ProjectionKernelOrthSingle(quadruple *x,
 							     bool isTrans);
-template
-void DissectionSolver<quadruple, quadruple, double, double>::
-ProjectionKernelOrthSingle(quadruple *x,
-			   bool isTrans);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
-ProjectionKernelOrthSingle(double *x,
-			   bool isTrans);
 
 template
 void DissectionSolver<complex<double>, double>::
@@ -2204,71 +2269,30 @@ void DissectionSolver<complex<quadruple>, quadruple>::
 ProjectionKernelOrthSingle(complex<quadruple> *x, bool isTrans);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-ProjectionKernelOrthSingle(complex<quadruple> *x, bool isTrans);
+void DissectionSolver<float>::ProjectionKernelOrthSingle(float *x,
+							  bool isTrans);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-ProjectionKernelOrthSingle(complex<double> *x,
-			   bool isTrans);
-//
-
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-T DissectionSolver<T, U, W, Z, X, Y>::
-fromreal(const U &y)
-{
-  fprintf(stderr, "%s %d : dummy function : fromreal()\n", __FILE__, __LINE__);
-  return T(1.0);
-}
-
-template <>
-inline double DissectionSolver<double>::
-fromreal(const double &y) { return y; }
-
-template<>
-inline quadruple DissectionSolver<quadruple>::
-fromreal(const quadruple &y) { return y; }
-
-template<>
-inline quadruple DissectionSolver<quadruple, quadruple, double, double>::
-fromreal(const quadruple &y) { return y; }
-
-template<>
-inline double DissectionSolver<double, double, double, double, quadruple, quadruple>::
-fromreal(const double &y) { return y; }
-
-template<>
-inline complex<double> DissectionSolver<complex<double>, double>::
-fromreal(const double &y) { return complex<double>(y, 0.0); }
-
-template<>
-inline complex<quadruple> DissectionSolver<complex<quadruple>, quadruple>::
-fromreal(const quadruple &y) { return complex<quadruple>(y, quadruple(0)); }
-
-template<>
-inline complex<quadruple> DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-fromreal(const quadruple &y) { return complex<quadruple>(y, quadruple(0)); }
-
-template<>
-inline complex<double> DissectionSolver<complex<double>, double,
-					complex<double>, double,
-					complex<quadruple>, quadruple>::
-fromreal(const double &y) { return complex<double>(y, 0.0); }
+void DissectionSolver<complex<float>, float>::
+ProjectionKernelOrthSingle(complex<float> *x, bool isTrans);
 
 //
+//
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
-SpMV(const T *x, T *y)
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+SpMV(const T *x, T *y, bool scaling_flag)
 {
-  if (_scaling) {
+  if (_scaling && scaling_flag) {
     VectorArray<T> w(_dim);
     for (int i = 0; i < _dim; i++) {
-      w[i] = x[i] / fromreal(_precDiag[i]); // conversion if T == complex<U>
+      //      w[i] = x[i] / fromreal(_precDiag[i]); // conversion if T == complex<U>
+      w[i] = x[i] / _precDiag[i]; // without conversion when complex
     }
     _ptDA->prod(w.addrCoefs(), y); 
     for (int i = 0; i < _dim; i++) {
-      y[i] /= fromreal(_precDiag[i]);
+      //      y[i] /= fromreal(_precDiag[i]);
+      y[i] /= _precDiag[i];
     }
     w.free();
   }
@@ -2278,49 +2302,55 @@ SpMV(const T *x, T *y)
 }
 
 template
-void DissectionSolver<double>::SpMV(const double *x, double *y);
+void DissectionSolver<double>::SpMV(const double *x, double *y, bool scaling_flag);
 
 template
-void DissectionSolver<quadruple>::SpMV(const quadruple *x, quadruple *y);
-
-template
-void DissectionSolver<quadruple, quadruple, double, double>::SpMV(const quadruple *x, quadruple *y);
+void DissectionSolver<quadruple>::SpMV(const quadruple *x, quadruple *y, bool scaling_flag);
 
 template
 void DissectionSolver<complex<double>, double>::
-SpMV(const complex<double> *x, complex<double> *y);
+SpMV(const complex<double> *x, complex<double> *y, bool scaling_flag);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
-SpMV(const complex<quadruple> *x, complex<quadruple> *y);
+SpMV(const complex<quadruple> *x, complex<quadruple> *y, bool scaling_flag);
 
 template
-void DissectionSolver<complex<quadruple>, quadruple,
-		      complex<double>, double>::
-SpMV(const complex<quadruple> *x, complex<quadruple> *y);
+void DissectionSolver<double, double, quadruple, quadruple>::SpMV(const double *x, double *y, bool scaling_flag);
 
 template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
-SpMV(const double *x, double *y);
+void DissectionSolver<quadruple, quadruple, double, double>::SpMV(const quadruple *x, quadruple *y, bool scaling_flag);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-SpMV(const complex<double> *x, complex<double> *y);
+void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::
+SpMV(const complex<double> *x, complex<double> *y, bool scaling_flag);
 
+template
+void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
+SpMV(const complex<quadruple> *x, complex<quadruple> *y, bool scaling_flag);
+
+template
+void DissectionSolver<float>::SpMV(const float *x, float *y, bool scaling_flag);
+
+template
+void DissectionSolver<complex<float>, float>::
+SpMV(const complex<float> *x, complex<float> *y, bool scaling_flag);
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
-SpMtV(const T *x, T *y)
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
+SpMtV(const T *x, T *y, bool scaling_flag)
 {
-  if (_scaling) {
+  if (_scaling && scaling_flag) {
     VectorArray<T> w(_dim);
     for (int i = 0; i < _dim; i++) {
-      w[i] = x[i] / fromreal(_precDiag[i]);
+      //      w[i] = x[i] / fromreal(_precDiag[i]);
+      w[i] = x[i] / _precDiag[i];
     }
     _ptDA->prodt(w.addrCoefs(), y); 
     for (int i = 0; i < _dim; i++) {
-      y[i] /= fromreal(_precDiag[i]);
+      //      y[i] /= fromreal(_precDiag[i]);
+      y[i] /= _precDiag[i];
     }
     w.free();
   }
@@ -2330,30 +2360,30 @@ SpMtV(const T *x, T *y)
 }
 
 template
-void DissectionSolver<double>::SpMtV(const double *x, double *y);
+void DissectionSolver<double>::SpMtV(const double *x, double *y, bool scaling_flag);
 
 template
-void DissectionSolver<quadruple>::SpMtV(const quadruple *x, quadruple *y);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
-SpMtV(const double *x, double *y);
+void DissectionSolver<quadruple>::SpMtV(const quadruple *x, quadruple *y, bool scaling_flag);
 
 template
 void DissectionSolver<complex<double>, double>::
-SpMtV(const complex<double> *x, complex<double> *y);
+SpMtV(const complex<double> *x, complex<double> *y, bool scaling_flag);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
-SpMtV(const complex<quadruple> *x, complex<quadruple> *y);
+SpMtV(const complex<quadruple> *x, complex<quadruple> *y, bool scaling_flag);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-SpMtV(const complex<double> *x, complex<double> *y);
+void DissectionSolver<float>::SpMtV(const float *x, float *y, bool scaling_flag);
+
+template
+void DissectionSolver<complex<float>, float>::
+SpMtV(const complex<float> *x, complex<float> *y, bool scaling_flag);
+
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 SolveSingle(T *x, bool projection,
 	    bool isTrans,
 	    bool isScaling,
@@ -2368,26 +2398,23 @@ SolveSingle(T *x, bool projection,
   for (int m = 0; m < _graph_colors; m++) {
     n1 += _Schur[m].getSlduList().size();
   }
-  if (_verbose) {
-    fprintf(_fp, "%s %d : colors = %d n1 = %d nexcls = %d\n",
-	    __FILE__, __LINE__, _graph_colors, n1, nexcls);
-  }
+  diss_printf(_verbose, _fp, "%s %d : colors = %d n1 = %d nexcls = %d\n",
+	      __FILE__, __LINE__, _graph_colors, n1, nexcls);
+
   VectorArray<T> yy(n1); // allocation with size 0 is defined in PlainMatirx.hpp
   elapsed_t t0_elapsed, t1_elapsed;
   get_realtime(&t0_elapsed);
 
   if (n0 > 0 && projection) {
-    if (_verbose) {
-      fprintf(_fp, 
-	      "%s %d : projection of the scaled RHS onto the image\n", 
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp, 
+		"%s %d : projection of the scaled RHS onto the image\n", 
+		__FILE__, __LINE__);
     ProjectionImageSingle(x, "scaled RHS");
   }
-
   if (isScaling) {
     for (int i = 0; i < _dim; i++) {
-      x[i] *= _precDiag[i];
+      //      x[i] *= fromreal(_precDiag[i]);
+            x[i] *= _precDiag[i];
     }
   }
   if (n1 > 0) {
@@ -2404,11 +2431,9 @@ SolveSingle(T *x, bool projection,
   } // if (n1 > 0)
   if (isTrans) {
     if (n1 > 0) {
-      if (_verbose) {
-	fprintf(_fp, 
-		"%s %d : _ptDA_sldu[] are solved with n1=%d\n", 
-		__FILE__, __LINE__, n1);
-      }
+      diss_printf(_verbose, _fp, 
+		  "%s %d : _ptDA_sldu[] are solved with n1=%d\n", 
+		  __FILE__, __LINE__, n1);
       int mm0 = 0;
       for (int m = 0; m < _graph_colors; m++) {
 	const int nnn1 = _Schur[m].getSlduList().size();
@@ -2464,7 +2489,8 @@ SolveSingle(T *x, bool projection,
   else {
     for (int m = 0; m < _graph_colors; m++) {
       const int nnn1 = _Schur[m].getSlduList().size();
-      fprintf(_fp, "%s %d : color = %d %d\n", __FILE__, __LINE__, m, nnn1);
+      diss_printf(_verbose, _fp, "%s %d : color = %d %d\n",
+		  __FILE__, __LINE__, m, nnn1);
       if (nnn1 < nexcls) {
 	if (!_tridiagQueue[m]->tridiagSolver()) {
 	  SquareBlockMatrix<T>* diag =
@@ -2472,7 +2498,8 @@ SolveSingle(T *x, bool projection,
 	  vector<int> &singIdx0 = diag->getSingIdx0();
 	  int pseudosing;
 	  if (singIdx0.size() > 0) {
-	    pseudosing = std::min(singIdx0.front(), singIdx0.back()) - 1;
+	    pseudosing = std::min<int>((int)singIdx0.front(),
+				       (int)singIdx0.back()) - 1;
 	  }
 	  else {
 	    pseudosing = diag->dimension() - 1;
@@ -2489,30 +2516,28 @@ SolveSingle(T *x, bool projection,
 	    &_dissectionMatrix[m][_btree[m]->selfIndex(1)]->diagBlock();
 	vector<int> &singIdx0 = diag->getSingIdx0();
 	if (singIdx0.size() > 0) {
-	  fprintf(_fp, "%s %d : color = %d modify dim = %d : ",
+	  diss_printf(_verbose, _fp, "%s %d : color = %d modify dim = %d : ",
 		  __FILE__, __LINE__, m, diag->dimension());
 	  for (vector<int>::const_iterator it = singIdx0.begin();
 	       it != singIdx0.end(); ++it) {
-	    fprintf(_fp, " %d", *it);
+	    diss_printf(_verbose, _fp, " %d", *it);
 	  }
-	    fprintf(_fp, "\n");
-	}
+	  diss_printf(_verbose, _fp, "\n");
+	} //if (_verbose && (singIdx0.size() > 0))
       }
     }
     SolveScaled(x, 1, false);
     if (n1 > 0) {
-      if (_verbose) {
-	fprintf(_fp, 
-		"%s %d : _ptDA_sldu[] are solved with n1=%d\n", 
-		__FILE__, __LINE__, n1);
-      }
+      diss_printf(_verbose, _fp, 
+		  "%s %d : _ptDA_sldu[] are solved with n1=%d\n", 
+		  __FILE__, __LINE__, n1);
       int mm0 = 0;
       for (int m = 0; m < _graph_colors; m++) {
 	const int nnn1 = _Schur[m].getSlduList().size();
 	if (nnn1 > nexcls) {
 	  const int nn1 = nnn1 - nexcls;
-	  fprintf(_fp, "%s %d : sldu %d\n", __FILE__, __LINE__,
-		  nn1);
+	  diss_printf(_verbose, _fp, "%s %d : sldu %d\n", __FILE__, __LINE__,
+		      nn1);
 	  for (int i = 0; i < nn1; i++) {
 	    T stmp(0.0);
 	    const int ii = _Schur[m].getSlduList()[i];
@@ -2561,12 +2586,13 @@ SolveSingle(T *x, bool projection,
 	      &_dissectionMatrix[m][_btree[m]->selfIndex(1)]->diagBlock();
 	    vector<int> &singIdx0 = diag->getSingIdx0();
 	    if (singIdx0.size() > 0) {
-	      fprintf(_fp, "%s %d : restore ", __FILE__, __LINE__);
+	      diss_printf(_verbose, _fp, "%s %d : restore ",
+			  __FILE__, __LINE__);
 	      for (vector<int>::const_iterator it = singIdx0.begin();
 		   it != singIdx0.end(); ++it) {
-		fprintf(_fp, " %d", *it);
+		diss_printf(_verbose, _fp, " %d", *it);
 	      }
-	      fprintf(_fp, "\n");
+	      diss_printf(_verbose, _fp, "\n");
 	      for (int i = nnn1; i < nexcls; i++) {
 		singIdx0.pop_back();
 	      }
@@ -2576,13 +2602,15 @@ SolveSingle(T *x, bool projection,
       }   // loop : m
     }     // if (n1 > 0)
   }       // if (isTrans)
-    // adjust the kernel  : x = x - N (N{^T} N)^-1 N^{T} x
+  // adjust the kernel  : x = x - N (N{^T} N)^-1 N^{T} x
   if (isScaling) {
     for (int i = 0; i < _dim; i++) {
+      //      x[i] *= fromreal(_precDiag[i]);
       x[i] *= _precDiag[i];
     }
   }
-  else { // inversion of isolated diagonal entries
+  //  
+  if (_index_isolated.size() > 0) {
     for (vector<int>::const_iterator it = _index_isolated.begin();
 	 it != _index_isolated.end(); ++it) {
       T atmp(1.0);
@@ -2594,13 +2622,11 @@ SolveSingle(T *x, bool projection,
       }
       x[(*it)] *= atmp;
     } // loop : it
-  } // if (_scaling)
+  }   //  if (_index_isolated.size() > 0)
   if (n0 > 0 && projection) {
-    if (_verbose) {
-      fprintf(_fp, 
-	      "%s %d : projection of the scaled solution onto the image\n", 
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp, 
+		"%s %d : projection of the scaled solution onto the image\n", 
+		__FILE__, __LINE__);
     ProjectionImageSingle(x, "scaled solution");
   }
   get_realtime(&t1_elapsed);
@@ -2617,17 +2643,6 @@ void DissectionSolver<quadruple>::SolveSingle(quadruple *x, bool projection,
 					      const int nexcls);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::
-SolveSingle(quadruple *x, bool projection,
-	    bool isTrans, bool isScaling,
-	    const int nexcls);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
-SolveSingle(double *x, bool projection,
-	    bool isTrans, bool isScaling, const int nexcls);
-
-template
 void DissectionSolver<complex<double>, double>::
 SolveSingle(complex<double> *x, bool projection, bool isTrans, bool isScaling,
 	    const int nexcls);
@@ -2636,6 +2651,21 @@ template
 void DissectionSolver<complex<quadruple>, quadruple>::
 SolveSingle(complex<quadruple> *x, bool projection, bool isTrans,
 	    bool isScaling, const int nexcls);
+//
+template
+void DissectionSolver<double, double, quadruple, quadruple>::SolveSingle(double *x, bool projection,
+					   bool isTrans, bool isScaling,
+					   const int nexcls);
+
+template
+void DissectionSolver<quadruple, quadruple, double, double>::SolveSingle(quadruple *x, bool projection,
+					      bool isTrans, bool isScaling,
+					      const int nexcls);
+
+template
+void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::
+SolveSingle(complex<double> *x, bool projection, bool isTrans, bool isScaling,
+	    const int nexcls);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
@@ -2643,13 +2673,18 @@ SolveSingle(complex<quadruple> *x, bool projection, bool isTrans,
 	    bool isScaling, const int nexcls);
 
 template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-SolveSingle(complex<double> *x, bool projection,
-	    bool isTrans, bool isScaling, const int nexcls);
-//
+void DissectionSolver<float>::SolveSingle(float *x, bool projection,
+					   bool isTrans, bool isScaling,
+					   const int nexcls);
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template
+void DissectionSolver<complex<float>, float>::
+SolveSingle(complex<float> *x, bool projection, bool isTrans, bool isScaling,
+	    const int nexcls);
+
+//
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 SolveScaled(T *x, int nrhs, bool isTrans)
 {
   for (int m = 0; m < _graph_colors; m++) {
@@ -2684,10 +2719,19 @@ template
 void DissectionSolver<complex<quadruple>, quadruple>::
 SolveScaled(complex<quadruple> *x, 
 	    int nrhs, bool isTrans);
+
+template
+void DissectionSolver<float>::SolveScaled(float *x, int nrhs, bool isTrans);
+
+
+template
+void DissectionSolver<complex<float>, float>::
+SolveScaled(complex<float> *x, 
+	    int nrhs, bool isTrans);
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 SolveMulti(T *x, int nrhs, bool projection, 
 	   bool isTrans, bool isScaling, const int nexcls)
 {
@@ -2727,16 +2771,13 @@ SolveMulti(T *x, int nrhs, bool projection,
     } // loop : n
   } 
   if (n0 > 0 && projection) {
-    if (_verbose) {
-      fprintf(_fp, 
-	      "%s %d : projection of the scaled RHS onto the image\n",
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp, 
+		"%s %d : projection of the scaled RHS onto the image\n",
+		__FILE__, __LINE__);
     for (int n = 0; n < nrhs; n++) {
       ProjectionImageSingle(xx.addrCoefs() + (n * _dim), "scaled RHS");
     }
   }
-  
   if (n1 > 0) {
     yy.init(n1, nrhs);
     i0 = 0;
@@ -2816,7 +2857,8 @@ SolveMulti(T *x, int nrhs, bool projection,
   else {
     for (int m = 0; m < _graph_colors; m++) {
       const int nnn1 = _Schur[m].getSlduList().size();
-      fprintf(_fp, "%s %d : color = %d %d\n", __FILE__, __LINE__, m, nnn1);
+      diss_printf(_verbose, _fp, "%s %d : color = %d %d\n",
+		  __FILE__, __LINE__, m, nnn1);
       if (nnn1 < nexcls) {
 	if (!_tridiagQueue[m]->tridiagSolver()) {
 	  SquareBlockMatrix<T>* diag =
@@ -2824,7 +2866,8 @@ SolveMulti(T *x, int nrhs, bool projection,
 	  vector<int> &singIdx0 = diag->getSingIdx0();
 	  int pseudosing;
 	  if (singIdx0.size() > 0) {
-	    pseudosing = std::min(singIdx0.front(), singIdx0.back()) - 1;
+	    pseudosing = std::min<int>((int)singIdx0.front(),
+				       (int)singIdx0.back()) - 1;
 	  }
 	  else {
 	    pseudosing = diag->dimension() - 1;
@@ -2841,14 +2884,14 @@ SolveMulti(T *x, int nrhs, bool projection,
 	    &_dissectionMatrix[m][_btree[m]->selfIndex(1)]->diagBlock();
 	vector<int> &singIdx0 = diag->getSingIdx0();
 	if (singIdx0.size() > 0) {
-	  fprintf(_fp, "%s %d : color = %d modify dim = %d : ",
-		  __FILE__, __LINE__, m, diag->dimension());
+	  diss_printf(_verbose, _fp, "%s %d : color = %d modify dim = %d : ",
+		      __FILE__, __LINE__, m, diag->dimension());
 	  for (vector<int>::const_iterator it = singIdx0.begin();
 	       it != singIdx0.end(); ++it) {
-	    fprintf(_fp, " %d", *it);
+	    diss_printf(_verbose, _fp, " %d", *it);
 	  }
-	    fprintf(_fp, "\n");
-	}
+	  diss_printf(_verbose, _fp, "\n");
+	} //if (singIdx0.size() > 0) 
       }
     }
     SolveScaled(xx.addrCoefs(), nrhs, false);
@@ -2937,11 +2980,9 @@ SolveMulti(T *x, int nrhs, bool projection,
     } // loop : it 
   }     // if (nsing > 0)
   if (n0 > 0 && projection) {
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : projection of the scaled solution onto the image\n",
+    diss_printf(_verbose, _fp,
+		"%s %d : projection of the scaled solution onto the image\n",
 	      __FILE__, __LINE__);
-    }
     for (int n = 0; n < nrhs; n++) {
       ProjectionImageSingle(xx.addrCoefs() + (n * _dim), "scaled solution");
     }
@@ -2973,22 +3014,6 @@ void DissectionSolver<quadruple>::SolveMulti(quadruple *x, int nrhs,
 					     const int nexcls);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::
-SolveMulti(quadruple *x, int nrhs,
-	   bool projection, 
-	   bool isTrans,
-	   bool isScaling,
-	   const int nexcls);
-
-template
-void DissectionSolver<double, double, double, double, quadruple, quadruple>::
-SolveMulti(double *x, int nrhs,
-	   bool projection, 
-	   bool isTrans,
-	   bool isScaling,
-	   const int nexcls);
-
-template
 void DissectionSolver<complex<double>, double>::
 SolveMulti(complex<double> *x, int nrhs, bool projection, 
 	   bool isTrans, bool isScaling,
@@ -3000,23 +3025,20 @@ SolveMulti(complex<quadruple> *x, int nrhs, bool projection,
 	   bool isTrans, bool isScaling,
 	   const int nexcls);
 
-
 template
-void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-SolveMulti(complex<quadruple> *x, int nrhs, bool projection, 
+void DissectionSolver<float>::SolveMulti(float *x, int nrhs,
+					  bool projection, 
+					  bool isTrans, bool isScaling,
+					  const int nexcls);
+template
+void DissectionSolver<complex<float>, float>::
+SolveMulti(complex<float> *x, int nrhs, bool projection, 
 	   bool isTrans, bool isScaling,
 	   const int nexcls);
-
-template
-void DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-SolveMulti(complex<double> *x, int nrhs, bool projection, 
-	   bool isTrans, bool isScaling,
-	   const int nexcls);
-
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 BuildSingCoefs(T *DSsingCoefs, 
 	       SparseMatrix<T> *DCsCoefs,
 	       T *DBsCoefs,
@@ -3060,26 +3082,10 @@ BuildSingCoefs(T *DSsingCoefs,
       }
     }
   } //   if ( _ptDA->isSymmetric() ) {
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : Schur complement on the singular dofs set %d x %d\n",
+  diss_printf(_verbose, _fp,
+	      "%s %d : Schur complement on the singular dofs set %d x %d\n",
 	    __FILE__, __LINE__,
 	    nsing, nsing);
-  }
-#if 0
-  fout.open("ssingmatrix.data");
-  fout << "\nSchur complement on the singular dofs set " 
-       << nsing << " x " << nsing << endl;
-  
-  for (int i = 0; i < nsing; i++) {
-    fout << i << " :: ";
-    for (int j = 0; j< nsing; j++) {
-      fout << j << " : " << DSsingCoefs[i + j * _dim] << " / ";
-    }
-    fout << "\n";
-  }
-  fout.close();
-#endif
 }
 
 template
@@ -3107,10 +3113,23 @@ BuildSingCoefs(complex<quadruple> *DSsingCoefs,
 	       SparseMatrix<complex<quadruple> > *DCsCoefs,
 	       complex<quadruple> *DBsCoefs,
 	       vector<int>& singIdx);
+
+template
+void DissectionSolver<float>::
+BuildSingCoefs(float *DSsingCoefs, 
+	       SparseMatrix<float> *DCsCoefs,
+	       float *DBsCoefs,
+	       vector<int>& singIdx);
+template
+void DissectionSolver<complex<float>, float>::
+BuildSingCoefs(complex<float> *DSsingCoefs, 
+	       SparseMatrix<complex<float> > *DCsCoefs,
+	       complex<float> *DBsCoefs,
+	       vector<int>& singIdx);
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 BuildKernels(vector<int> &singIdx_, 
 	     int n2,
 	     SchurMatrix<T> &Schur,
@@ -3122,11 +3141,9 @@ BuildKernels(vector<int> &singIdx_,
   const int n1 = n0 - n2; // regular nodes
   const int nsing = n2; // singIdx.size();
   ColumnMatrix<T> DBsCoefs(_dim, nsing);
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : BuildKernels n0 = %d n2 = %d\n",
-	    __FILE__, __LINE__, n0, n2);
-  }
+  diss_printf(_verbose, _fp,
+	      "%s %d : BuildKernels n0 = %d n2 = %d\n",
+	      __FILE__, __LINE__, n0, n2);
   if (n1 > 0) {
     //IndiceArray regularVal(n1);
     vector<int> regularVal;
@@ -3163,15 +3180,6 @@ BuildKernels(vector<int> &singIdx_,
 	Schur.getScol()(icol, j) = Schur.getAcol()->Coef(k);
       }
     }
-#if 0
-    // nullify [ A_12 / 0 / A_13 ] -> [ A_12 / 0 / 0 ]
-    for (int i = 0; i < n0; i++) {
-      int ii = singIdx_[i]; // regularVal[i];
-      for (int j = 0; j < n1; j++, ii += _dim) {
-	Schur.getScol()->addrCoefs()[ii] = _zero;
-      }
-    }
-#endif
     //IndiceArray s_list_eq(n1); // local -> global mapping
     vector<int> s_list_eq;
     s_list_eq.resize(n1);
@@ -3187,46 +3195,22 @@ BuildKernels(vector<int> &singIdx_,
 		   Schur.getArow(),
 		   Schur.getScol().addrCoefs(), //Schur.getScol().addrCoefs(),
 		   regularVal);
-#if 0
-    double last_pivot = 1.0;
-    double eps2 = DBL_EPSILON; // machine eps of double?
-    //IndiceArray permute(n1);
-    vector<int> permute;
-    permute.resize(n1);
-    int nn0 = 0;
-    ptDA_sldu_list.resize(n1);
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : ddufll_sym_gauss_part before nn0 = %d, ",
-	      __FILE__, __LINE__, nn0);
-    }
-    // ptDA_sldu_list contains permutaiton of the last Schur complement
-    full_sym_gauss_part<T>(&nn0, ptDA_sldu.addrCoefs(),
-			   n1, &last_pivot,
-			   &ptDA_sldu_list[0], eps2);
-    if (_verbose) {
-      fprintf(_fp, "after nn0 = %d\n", nn0);
-    }
-    ptDA_sldu.getPivot2x2().resize(0);
-#else
     int *pivot_width = &(Schur.getSldu().getPivotWidth()[0]); //&ptDA_sldu.getPivotWidth()[0];
     T *d1 = Schur.getSldu().addr2x2();
     int *permute = &Schur.getSldu().getPermute()[0];
     full_sym_2x2BK<T>(n1, Schur.getSldu().addrCoefs(), d1, pivot_width,
 		      permute);
     //    fprintf(_fp, "Bunch-Kaufman permutation : ");
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : permutation for Schur complement: ", __FILE__, __LINE__);
-      for (int i = 0; i < n1; i++) {
-	fprintf(_fp, "%3d ", pivot_width[i]);
-      }
-      fprintf(_fp, "\n");
-      for (int i = 0; i < n1; i++) {
-	fprintf(_fp, "%3d ", permute[i]);
-      }
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp, "%s %d : permutation for Schur complement: ",
+		__FILE__, __LINE__);
+    for (int i = 0; i < n1; i++) {
+      diss_printf(_verbose, _fp, "%3d ", pivot_width[i]);
+    }
+    diss_printf(_verbose, _fp, "\n");
+    for (int i = 0; i < n1; i++) {
+      diss_printf(_verbose, _fp, "%3d ", permute[i]);
+    }
+    diss_printf(_verbose, _fp, "\n");
     Schur.getSlduList().resize(n1);
     for (int i = 0; i < n1; i++) {
       Schur.getSlduList()[i] = permute[i]; // ?? 20 Apr.2016 ??
@@ -3246,14 +3230,13 @@ BuildKernels(vector<int> &singIdx_,
       }
     }
     // 1x1 + 2x2
-#endif
     //    delete ptDA_acol;
   }  // if (n1 > 0)
   else { // if (n1 == 0)
     Schur.getAcol() = new SparseMatrix<T>(); // dummy allocation
     Schur.getArow() = new SparseMatrix<T>(); // dummy allocation
   } // if (n1 > 0)
-
+  
   if (n2 == 0) {
     kernel.set_dimension(0);
     kernel.getKernProj().init(0);
@@ -3281,11 +3264,9 @@ BuildKernels(vector<int> &singIdx_,
 	}
       }
     }
-    if (_verbose) {    
-      fprintf(_fp,
-	      "%s %d : Cs matrix: row = %d\n",
-	      __FILE__, __LINE__, nsing);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d : Cs matrix: row = %d\n",
+		__FILE__, __LINE__, nsing);
     // generate DBsCoefs[]
     // copy from lower part (sparse) with transporse to upper part (dense)
     DBsCoefs.ZeroClear();
@@ -3301,12 +3282,10 @@ BuildKernels(vector<int> &singIdx_,
 	DBsCoefs(singIdx[i], j) = _zero;
       }
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d Bs matrix: singular columns of global matrix %d x %d\n",
-	      __FILE__, __LINE__,
-	      _dim, nsing);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d Bs matrix: singular columns of global matrix %d x %d\n",
+		__FILE__, __LINE__,
+		_dim, nsing);
   // Compute Am-1*Bs
   // scaling flag is off : internal solver A_11^-1 [A^12 A^13]
     if (n1 > 0) {
@@ -3324,12 +3303,10 @@ BuildKernels(vector<int> &singIdx_,
       get_realtime(&t0_elapsed);
       SolveScaled(DBsCoefs.addrCoefs(), nsing, false);
       get_realtime(&t1_elapsed);
-      if (_verbose) {
-	fprintf(_fp,
-		"%s %d : dissection solve : %d RHS (sec.) = %.6f\n", 
-		__FILE__, __LINE__, nsing,
-		convert_time(t1_elapsed, t0_elapsed));
-      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : dissection solve : %d RHS (sec.) = %.6f\n", 
+		  __FILE__, __LINE__, nsing,
+		  convert_time(t1_elapsed, t0_elapsed));
       for (int m = 0; m < nsing; m++) {    // Block SpMV
 	for (int i = 0; i < n1; i++) {
 	  T stmp(0.0); // = _zero;
@@ -3385,23 +3362,11 @@ BuildKernels(vector<int> &singIdx_,
       get_realtime(&t0_elapsed);
       SolveScaled(DBsCoefs.addrCoefs(), nsing, false);
       get_realtime(&t1_elapsed);
-      if (_verbose) {
-	fprintf(_fp,
-		"%s %d : dissection solve : %d RHS (sec.) = %.6f\n", 
-		__FILE__, __LINE__, nsing,
-		convert_time(t1_elapsed, t0_elapsed));
-      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : dissection solve : %d RHS (sec.) = %.6f\n", 
+		  __FILE__, __LINE__, nsing,
+		  convert_time(t1_elapsed, t0_elapsed));
     }
-#if 0
-    fprintf(_fp, "%s %d : kernel vectors A_11^-1 A_12\n", __FILE__, __LINE__);
-    for (int i = 0; i < _dim; i++) {
-      fprintf(_fp, "%d : ", i);
-      for (int j = 0; j < nsing; j++) {
-	fprintf(_fp, "%g ", DBsCoefs(i, j));
-      }
-      fprintf(_fp, "\n");
-    }
-#endif
       // clear diagonal blocks of Bs in the place of Schur complement
     for (int i = 0; i < nsing; i++) {
       DBsCoefs(singIdx[i], i) = _none;
@@ -3411,15 +3376,14 @@ BuildKernels(vector<int> &singIdx_,
     for (int i = 0; i < nsing; i++) {
       kernel.getKernListEq()[i]= singIdx[i];
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : kern_list_eq[] = ",
-	      __FILE__, __LINE__);
-      for (int i = 0; i < kernel.getKernListEq().size(); i++) {
-	fprintf(_fp, "%d ", kernel.getKernListEq()[i]);
-      }
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp,
+		 "%s %d : kern_list_eq[] = ",
+		 __FILE__, __LINE__);
+    for (int i = 0; i < kernel.getKernListEq().size(); i++) {
+      diss_printf(_verbose, _fp, "%d ", kernel.getKernListEq()[i]);
+    }
+    diss_printf(_verbose, _fp, "\n");
+
     kernel.getKernBasis().init(_dim, nsing);
     T *kern_basis = kernel.getKernBasis().addrCoefs();
     kernel.getKernBasis().copy(DBsCoefs);
@@ -3430,36 +3394,29 @@ BuildKernels(vector<int> &singIdx_,
       stmp = one / blas_l2norm<T, U>(_dim, (kern_basis + (j * _dim)), 1);
       blas_scal2<T, U>(_dim, stmp, (kern_basis + (j * _dim)), 1);
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : check kern_basis belonging to the kernel of A\n",
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d : check kern_basis belonging to the kernel of A\n",
+		__FILE__, __LINE__);
     VectorArray<T> v(_dim);
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : orthogonality of the kernel vectors\n",
+    diss_printf(_verbose, _fp,
+		"%s %d : orthogonality of the kernel vectors\n",
 	      __FILE__, __LINE__);
-    }
     for (int j = 0; j < nsing; j++) {
       _ptDA->prod((kern_basis + (j * _dim)), v.addrCoefs());
       double norm_l2, norm_infty;
       calc_relative_norm<T>(&norm_l2, &norm_infty, v.addrCoefs(),
 			    kern_basis + (j * _dim), _dim);
-      if (_verbose) {
-	fprintf(_fp,
-		"%d-th kernel scaled : l2_norm = %.6e, infty_norm = %.6e / ",
-		j, norm_l2, norm_infty);
-      }
+      diss_printf(_verbose, _fp,
+		  "%d-th kernel scaled : l2_norm = %.6e, infty_norm = %.6e / ",
+		  j, norm_l2, norm_infty);
       if(_scaling) {
-	calc_relative_normscaled<T, Z>(&norm_l2, &norm_infty,
+	calc_relative_normscaled<T, U>(&norm_l2, &norm_infty,
 				       v.addrCoefs(),
 				       kern_basis + (j * _dim),
 				       &_precDiag[0], _dim);
-	if (_verbose) {
-	  fprintf(_fp, "original : l2_norm = %.6e, infty_norm = %.6e\n",
-		  norm_l2, norm_infty);
-	}
+	diss_printf(_verbose, _fp,
+		    "original : l2_norm = %.6e, infty_norm = %.6e\n",
+		    norm_l2, norm_infty);
       } // if (_scaling)
     }
 #ifdef DEBUG_DATA
@@ -3531,10 +3488,25 @@ BuildKernels(vector<int> &singIdx_,
 	     int n2,
 	     SchurMatrix<complex<quadruple> > &Schur,
 	     KernelMatrix<complex<quadruple> > &kernel);
+
+template
+void DissectionSolver<float>::
+BuildKernels(vector<int> &singIdx_, 
+	     int n2,
+	     SchurMatrix<float> &Schur,
+	     KernelMatrix<float> &kernel);
+
+template
+void DissectionSolver<complex<float>, float>::
+BuildKernels(vector<int> &singIdx_, 
+	     int n2,
+	     SchurMatrix<complex<float> > &Schur,
+	     KernelMatrix<complex<float> > &kernel);
+
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-void DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+void DissectionSolver<T, U, W, Z>::
 BuildKernelsDetection(int &n0,
 		      vector<int> &singIdx, 
 		      vector<vector<int> >& augkern_indexes,
@@ -3562,39 +3534,26 @@ BuildKernelsDetection(int &n0,
   VectorArray<T> save_diag(dim_augkern);
   {
     int i = 0;
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : nullifying diagonal entries\n",
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d : nullifying diagonal entries\n",
+		__FILE__, __LINE__);
     typename vector<SquareBlockMatrix<T>* >::const_iterator kt = diags.begin();
     for (vector<vector<int> >::const_iterator it = augkern_indexes.begin();
 	 it != augkern_indexes.end(); ++it, ++kt) {
       SquareBlockMatrix<T> &diag = *(*kt);
       const int n0_diag = diag.rank();
-      if (_verbose) {
-	fprintf(_fp, "diagonal entries modifed : %d -> %d\n",
-		n0_diag, n0_diag - (int)(*it).size());
-      }
+      diss_printf(_verbose, _fp, "diagonal entries modifed : %d -> %d\n",
+		  n0_diag, n0_diag - (int)(*it).size());
       for (vector<int>::const_iterator jt = (*it).begin(); jt != (*it).end();
 	   ++jt) {
-	if (_verbose) {
-	  fprintf(_fp, "%d : %s\n", *jt, tostring<T>(diag.diag(*jt)).c_str());
-	}
+	diss_printf(_verbose, _fp, "%d : %s\n",
+		    *jt, tostring<T>(diag.diag(*jt)).c_str());
 	save_diag[i++] = diag.diag((*jt));
 	diag.diag((*jt)) = _zero;
       }
       diag.set_rank(n0_diag - (*it).size());
     }
   }
-#if 0							       
-  for (int i = 0; i < dim_augkern; i++) {
-    const int ii = augkern_index[i];
-    save_diag[i] = diag(ii, ii); 
-    diag(ii, ii) = _zero;
-  }
-  diag.set_rank(n0_diag - dim_augkern);  // modification to the last block
-#endif
   // singIdx is sorted with increasing-order
   Schur.getAcol() = _ptDA->PartialCopyCSR(singIdx, nsing, true);  // 28 Dec.2015
   Schur.getArow() = _ptDA->PartialCopyCSR(singIdx, nsing, false); // 28 Dec.2015
@@ -3612,11 +3571,9 @@ BuildKernelsDetection(int &n0,
 	}
       }
     }
-    if (_verbose) {
-      fprintf(_fp, 
-	      "%s %d : Cs matrix: from global sparse matrix : row = %d\n",
-	      __FILE__, __LINE__, nsing);
-    }
+    diss_printf(_verbose, _fp, 
+		"%s %d : Cs matrix: from global sparse matrix : row = %d\n",
+		__FILE__, __LINE__, nsing);
     // generate DBsCoefs[]
     // copy from lower part (sparse) with transporse to upper part (dense)
     DBsCoefs.ZeroClear();
@@ -3627,11 +3584,10 @@ BuildKernelsDetection(int &n0,
       }
     }
   }  // scope of acol
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : Bs matrix: from global sparse matrix %d x %d\n",
-	    __FILE__, __LINE__, _dim, nsing);
-  }
+  diss_printf(_verbose, _fp,
+	      "%s %d : Bs matrix: from global sparse matrix %d x %d\n",
+	      __FILE__, __LINE__, _dim, nsing);
+
   // Compute Am-1*Bs
   // scaling flag is off : internal solver A_11^-1 [A^12 A^13]
   get_realtime(&t0_elapsed);
@@ -3639,12 +3595,11 @@ BuildKernelsDetection(int &n0,
   SolveScaled(DBsCoefs.addrCoefs(), nsing, false);
   get_realtime(&t1_elapsed);
   //  clock_gettime(CLOCK_REALTIME, &ts1);
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : dissection solve : %d RHS (sec.) = %.6f\n", 
-	    __FILE__, __LINE__,
-	    nsing, convert_time(t1_elapsed, t0_elapsed));
-  }
+  diss_printf(_verbose, _fp,
+	      "%s %d : dissection solve : %d RHS (sec.) = %.6f\n", 
+	      __FILE__, __LINE__,
+	      nsing, convert_time(t1_elapsed, t0_elapsed));
+
   BuildSingCoefs(DSsingCoefs.addrCoefs(),
 		 Schur.getArow(), DBsCoefs.addrCoefs(), singIdx);
   // copy DSsingCoefs
@@ -3656,28 +3611,28 @@ BuildKernelsDetection(int &n0,
   }
   get_realtime(&t2_elapsed);
   DSsingCoefs0.copy(DSsingCoefs);
-#if 1
-  fprintf(_fp,
-	  "%s %d : DSsingCoefs0[]\n",
-	  __FILE__, __LINE__);
+
+  diss_printf(_verbose, _fp,
+	      "%s %d : DSsingCoefs0[]\n",
+	      __FILE__, __LINE__);
   for (int i = 0; i < nsing; i++) {
     for (int j = 0; j < nsing; j++) {
-      fprintf(_fp, "%s ",
-	      tostring<T>(DSsingCoefs0(i, j)).c_str());
+      diss_printf(_verbose, _fp, "%s ",
+		  tostring<T>(DSsingCoefs0(i, j)).c_str());
     }
-    fprintf(_fp, "\n");
+    diss_printf(_verbose, _fp, "\n");
   }
-#endif
+
   pivot_ref = 0.0;
   for (int i = 0; i < nsing; i++) { // find maximum of abs value of diagonal
     const double stmp = blas_abs<T, double>(DSsingCoefs0(i, i));
     pivot_ref = stmp > pivot_ref ? stmp : pivot_ref;
   }
-  if (_verbose) {
-    fprintf(_fp,
-	    "%s %d : pviot_ref = %.8e\n",
+  
+  diss_printf(_verbose, _fp,
+	      "%s %d : pviot_ref = %.8e\n",
 	    __FILE__, __LINE__, pivot_ref);
-  }
+
   // permute0[] is initialized in ddfull_sym_gauss_part
   int nn = 0;
   {
@@ -3697,26 +3652,24 @@ BuildKernelsDetection(int &n0,
     }
     nn = nn0;
   }
-  if (_verbose) {
-    fprintf(_fp, 
-	    "%s %d : factorization with eps_piv = %g : dim kern = %d\n",
-	    __FILE__, __LINE__, eps_piv, nn);
-    fprintf(_fp, "permute[] = ");
-    for (int i = 0; i < nsing; i++) {
-      fprintf(_fp, "%d ", permute0[i]);
+  diss_printf(_verbose, _fp, 
+	      "%s %d : factorization with eps_piv = %g : dim kern = %d\n",
+	      __FILE__, __LINE__, eps_piv, nn);
+  diss_printf(_verbose, _fp, "permute[] = ");
+  for (int i = 0; i < nsing; i++) {
+    diss_printf(_verbose, _fp, "%d ", permute0[i]);
+  }
+  diss_printf(_verbose, _fp, "\n");
+  diss_printf(_verbose, _fp,
+	      "%s %d : DSsingCoefs0[]\n",
+	      __FILE__, __LINE__);
+  for (int i = 0; i < nsing; i++) {
+    for (int j = 0; j < nsing; j++) {
+      diss_printf(_verbose, _fp, "%s ",
+		  tostring<T>(DSsingCoefs0(i, j)).c_str());
     }
-    fprintf(_fp, "\n");
-    fprintf(_fp,
-	    "%s %d : DSsingCoefs0[]\n",
-	    __FILE__, __LINE__);
-    for (int i = 0; i < nsing; i++) {
-      for (int j = 0; j < nsing; j++) {
-	fprintf(_fp, "%s ",
-		tostring<T>(DSsingCoefs0(i, j)).c_str());
-      }
-      fprintf(_fp, "\n");
-    }
-  } // if (_verbose)
+    diss_printf(_verbose, _fp, "\n");
+  }
   if (nn == 0) {
     n0 = 0;
   }
@@ -3728,7 +3681,7 @@ BuildKernelsDetection(int &n0,
     }
     else{ // recompute smaller Schur complement with size nsing1
       DSsingCoefs1.init(nsing1, nsing1); 
-    // nullify rows and columns
+      // nullify rows and columns
       for (int j = nsing0; j < nsing; j++) {
 	for (int i = 0; i < nsing; i++) {
 	  DSsingCoefs0(i, j) = _zero;
@@ -3809,17 +3762,15 @@ BuildKernelsDetection(int &n0,
 	  }
 	} 
       }
-      if (_verbose) {
-	fprintf(_fp,
-		"%s %d : DSsingCoefs1[]\n",
-		__FILE__, __LINE__);
-	for (int i = 0; i < nsing1; i++) {
-	  for (int j = 0; j < nsing1; j++) {
-	    fprintf(_fp, "%s ",
-		    tostring<T>(DSsingCoefs1(i, j)).c_str());
-	  }
-	  fprintf(_fp, "\n");
+      diss_printf(_verbose, _fp,
+		  "%s %d : DSsingCoefs1[]\n",
+		  __FILE__, __LINE__);
+      for (int i = 0; i < nsing1; i++) {
+	for (int j = 0; j < nsing1; j++) {
+	  diss_printf(_verbose,_fp, "%s ",
+		      tostring<T>(DSsingCoefs1(i, j)).c_str());
 	}
+	diss_printf(_verbose, _fp, "\n");
       }
     }  //   if (nsing0 <= 0)
     bool flag, flag_2x2;
@@ -3834,11 +3785,9 @@ BuildKernelsDetection(int &n0,
 				  _fp);
     
     if (flag == false) {
-      if (_verbose) {
-	fprintf(_fp,
-		"%s %d : ERROR: kernel detection failed!\n",
-		__FILE__, __LINE__);
-      }
+      fprintf(stderr,
+	      "%s %d : ERROR: kernel detection failed!\n",
+	      __FILE__, __LINE__);
       exit(-1);
     }
   } // if (nn > 0)
@@ -3846,12 +3795,10 @@ BuildKernelsDetection(int &n0,
   delete [] permute0;
   get_realtime(&t3_elapsed);
   //  clock_gettime(CLOCK_REALTIME, &ts3);
-  if (_verbose) {
-    fprintf(_fp, 
-	    "%s %d : detection of the _dim. of the kernel (sec.) = %.6f\n",
-	    __FILE__, __LINE__,
-	    convert_time(t3_elapsed, t2_elapsed));
-  }
+  diss_printf(_verbose, _fp, 
+	      "%s %d : detection of the _dim. of the kernel (sec.) = %.6f\n",
+	      __FILE__, __LINE__,
+	      convert_time(t3_elapsed, t2_elapsed));
     // 11 Jun.2012 : Atsushi
   // if (n0 == (nsing - dim_augkern)) { 
   // recomputation A_II^-1 A_IB by DissectionSolve() might be more accurate }
@@ -3879,18 +3826,16 @@ BuildKernelsDetection(int &n0,
     n0 = nn0;
   }
   
-  if (_verbose) {
-    if (n0 != (nsing - n1)) {
-      fprintf(_fp,
-	      "%s %d : factroization of suspicious pivots fails : %d -> %d\n",
-	      __FILE__, __LINE__, (nsing - n1), n0);
-    }
-    else {
-      fprintf(_fp,
-	      "%s %d : after n0 = %d\n",
-	      __FILE__, __LINE__, n0);
-    }
-  } // if (_verbose)
+  if (n0 != (nsing - n1)) {
+    diss_printf(_verbose, _fp,
+		"%s %d : factroization of suspicious pivots fails : %d -> %d\n",
+		__FILE__, __LINE__, (nsing - n1), n0);
+  }
+  else {
+    diss_printf(_verbose, _fp,
+		"%s %d : after n0 = %d\n",
+		__FILE__, __LINE__, n0);
+  } 
 // keep offdiagonal part corresponding to the last Schur complement
   Schur.getScol().init(_dim, n1);
   //  T *scol = Schur.getScol().addrCoefs();
@@ -3959,29 +3904,24 @@ BuildKernelsDetection(int &n0,
       stmp = one / blas_l2norm<T, U>(_dim, (kern_basis + (j * _dim)), 1);
       blas_scal2<T, U>(_dim, stmp, (kern_basis + (j * _dim)), 1);
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : == ptDA * kernel\n", __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d : == ptDA * kernel\n", __FILE__, __LINE__);
+
     for (int j = 0; j < n0; j++) {
       _ptDA->prod((kern_basis + (j * _dim)), v.addrCoefs());
 
       double norm_l2, norm_infty;
       calc_relative_norm<T>(&norm_l2, &norm_infty,
 			    v.addrCoefs(), (kern_basis + (j * _dim)), _dim);
-      if (_verbose) {
-	fprintf(_fp,
-		"%d -th kernel scaled : infty = %.6e, norm_infty = %.6e / ",
-		j, norm_l2, norm_infty);
-      }
+      diss_printf(_verbose, _fp,
+		  "%d -th kernel scaled : infty = %.6e, norm_infty = %.6e / ",
+		  j, norm_l2, norm_infty);
       if(_scaling) {
-	calc_relative_normscaled<T, Z>(&norm_l2, &norm_infty,
+	calc_relative_normscaled<T, U>(&norm_l2, &norm_infty,
 				       v.addrCoefs(), kern_basis + (j * _dim),
 				       &_precDiag[0], _dim);
-	if (_verbose) {
-	  fprintf(_fp, "original : infty = %.6e, norm_infty = %.6e\n",
-		  norm_l2, norm_infty);
-	}
+	diss_printf(_verbose, _fp, "original : infty = %.6e, norm_infty = %.6e\n",
+		    norm_l2, norm_infty);
       } // if (_scaling)
     }
     if(_scaling) {
@@ -4021,29 +3961,24 @@ BuildKernelsDetection(int &n0,
     // inverse of diagonal part is also storead in the factorized matrix
   } // if (n0 > 0)
   //
-  if (_verbose) {
-    fprintf(_fp,
+  diss_printf(_verbose, _fp,
 	    "%s %d : nsing = %d dim_augkern = %d n1 = %d n0 = %d\n",
 	    __FILE__, __LINE__, nsing, dim_augkern, n1, n0);
-  }
+
   // for some applications which need index of singular entries
   kernel.getKernListEq().resize(n0); // = IndiceArray(n0);
   for (int i = 0; i < n0; i++) {
     kernel.getKernListEq()[i]= singIdx[permute[i + n1]];
   }
-  if (_verbose) {
-    fprintf(_fp, "%s %d : kern_list_eq[] = ", __FILE__, __LINE__);
-    for (int i = 0; i < kernel.getKernListEq().size(); i++) {
-      fprintf(_fp, "%d ", kernel.getKernListEq()[i]);
-    }
-    fprintf(_fp, "\n");
+  diss_printf(_verbose, _fp, "%s %d : kern_list_eq[] = ", __FILE__, __LINE__);
+  for (int i = 0; i < kernel.getKernListEq().size(); i++) {
+    diss_printf(_verbose,_fp, "%d ", kernel.getKernListEq()[i]);
   }
+  diss_printf(_verbose, _fp, "\n");
   if (n1 == dim_augkern) {
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d dimension of detected kernel == suspicous one = %d\n",
-	      __FILE__, __LINE__, n0);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d dimension of detected kernel == suspicous one = %d\n",
+		__FILE__, __LINE__, n0);
     {
       int i = 0;
       typename vector<SquareBlockMatrix<T>* >::const_iterator kt = diags.begin();
@@ -4071,15 +4006,13 @@ BuildKernelsDetection(int &n0,
     for (int i = 0; i < n1; i++) {
       s_list_eq[i] = singIdx[permute[i]];
     }
-    if (_verbose) {
-      fprintf(_fp, "%s %d : s_list_eq[] = ",  __FILE__, __LINE__);
-      for (int i = 0; i < s_list_eq.size(); i++) {
-	fprintf(_fp, "%d ", s_list_eq[i]);
-      }
-      fprintf(_fp, "\n");
-    } // if (_verbose)
+    diss_printf(_verbose, _fp, "%s %d : s_list_eq[] = ",  __FILE__, __LINE__);
+    for (int i = 0; i < s_list_eq.size(); i++) {
+      diss_printf(_verbose, _fp, "%d ", s_list_eq[i]);
+    }
+    diss_printf(_verbose, _fp, "\n");
     Schur.getSldu().init(s_list_eq);
-
+    
   // copy regular part n1*n1 from nsing*nsing matrix DSsingCoefs[]
     for (int j = 0; j < n1; j++) {
       blas_copy<T>(n1, DSsingCoefs.addrCoefs() + j * nsing, 1,
@@ -4147,10 +4080,32 @@ BuildKernelsDetection(int &n0,
 		      const int dim_augkern,
 		      SchurMatrix<complex<quadruple> > &Schur,
 		      KernelMatrix<complex<quadruple> > &kernel);
+template
+void DissectionSolver<float>::
+BuildKernelsDetection(int &n0,
+		      vector<int> &singIdx, 
+		      vector<vector<int> > &augkern_indexes, 
+		      vector<SquareBlockMatrix<float>* >& diags, 
+		      const double eps_piv,
+		      const int dim_augkern,
+		      SchurMatrix<float> &Schur,
+		      KernelMatrix<float> &kernel);
+
+template
+void DissectionSolver<complex<float>, float>::
+BuildKernelsDetection(int &n0,
+		      vector<int> &singIdx, 
+		      vector<vector<int> >& augkern_indexes, 
+		      vector<SquareBlockMatrix<complex<float> >* >& diags, 
+		      const double eps_piv,
+		      const int dim_augkern,
+		      SchurMatrix<complex<float> > &Schur,
+		      KernelMatrix<complex<float> > &kernel);
+
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-int DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+int DissectionSolver<T, U, W, Z>::
 kern_dimension(void) 
 { 
   int itmp = 0;
@@ -4168,39 +4123,34 @@ template
 int DissectionSolver<quadruple>::kern_dimension(void);
 
 template
-int DissectionSolver<quadruple, quadruple, double, double>::
-kern_dimension(void);
-
-template
-int DissectionSolver<double, double, double, double, quadruple, quadruple>::
-kern_dimension(void);
-
-template
 int DissectionSolver<complex<double>, double>::kern_dimension(void);
 
 template
 int DissectionSolver<complex<quadruple>, quadruple>::kern_dimension(void);
 
 template
-int DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
-kern_dimension(void);
+int DissectionSolver<double, double, quadruple, quadruple>::kern_dimension(void);
 
 template
-int DissectionSolver<complex<double>, double, complex<double>, double, complex<quadruple>, quadruple>::
-kern_dimension(void);
+int DissectionSolver<quadruple, quadruple, double, double>::kern_dimension(void);
+
+template
+int DissectionSolver<float>::kern_dimension(void);
+
+template
+int DissectionSolver<complex<float>, float>::kern_dimension(void);
+
 //
 
-template<typename T, typename U, typename W, typename Z, typename X, typename Y>
-int DissectionSolver<T, U, W, Z, X, Y>::
+template<typename T, typename U, typename W, typename Z>
+int DissectionSolver<T, U, W, Z>::
 ComputeTransposedKernels(void)
 {
   int n0_max = 0;
   if (_ptDA->isSymmetric()) {
-    if (_verbose) {
-      fprintf(_fp, 
-	      "%s %d : ComputeTransposedKernels : matrix is symmetric\n",
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp,
+	    "%s %d : ComputeTransposedKernels : matrix is symmetric\n",
+	    __FILE__, __LINE__);
     return (-1);
   }
 
@@ -4259,43 +4209,34 @@ ComputeTransposedKernels(void)
       }
     } //  if (_tridiagQueue[m]->tridiagSolver())
     else {
-      if (_verbose) {
-	fprintf(_fp,
-		"%s %d : transposed kernel from tridiag_kernelt_basis()\n",
-		__FILE__, __LINE__);
-      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : transposed kernel from tridiag_kernelt_basis()\n",
+		  __FILE__, __LINE__);
     }
     VectorArray<T> vn(_dim);
     VectorArray<T> vt(_dim);
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : check kern_basis belonging to the kernel of A\n",
+    diss_printf(_verbose, _fp,
+		"%s %d : check kern_basis belonging to the kernel of A\n",
 	      __FILE__, __LINE__);
-    }
     for (int j = 0; j < n0; j++) {
       SpMV(&kernn_basis[j * _dim], vn.addrCoefs()); //&vn[j][0]);
       double norm_l2, norm_infty;
       calc_relative_norm<T>(&norm_l2, &norm_infty, vn.addrCoefs(), //&vn[j][0],
 			    &kernn_basis[j * _dim], _dim);
-      if (_verbose) {
-	fprintf(_fp, "%s %d : %d-th : l2_norm = %.6e, infty_norm = %.6e\n",
+      diss_printf(_verbose, _fp, "%s %d : %d-th : l2_norm = %.6e, infty_norm = %.6e\n",
 		__FILE__, __LINE__, j, norm_l2, norm_infty);
-      }
     }
-    if (_verbose) {
-      fprintf(_fp,
-	      "%s %d : check kern_basis belonging to the kernel of A^T\n",
-	      __FILE__, __LINE__);
-    }
+    diss_printf(_verbose, _fp,
+		"%s %d : check kern_basis belonging to the kernel of A^T\n",
+		__FILE__, __LINE__);
     for (int j = 0; j < n0; j++) {
       SpMtV(&kernt_basis[j * _dim], vt.addrCoefs()); 
       double norm_l2, norm_infty;
       calc_relative_norm<T>(&norm_l2, &norm_infty, vt.addrCoefs(),  //&vt[j][0],
 			    &kernt_basis[j * _dim], _dim);
-      if (_verbose) {
-	fprintf(_fp, "%s %d : %d-th : l2_norm = %.6e, infty_norm = %.6e\n",
-		__FILE__, __LINE__, j, norm_l2, norm_infty);
-      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : %d-th : l2_norm = %.6e, infty_norm = %.6e\n",
+		  __FILE__, __LINE__, j, norm_l2, norm_infty);
     }  // loop : j
     vn.free();
     vt.free();
@@ -4330,19 +4271,17 @@ ComputeTransposedKernels(void)
 		      (kernn_basis + (j * _dim)), 1);
       }
     }
-    if (_verbose) {
-      fprintf(_fp,
+    diss_printf(_verbose, _fp,
 	      "%s %d : orthogonality matrix kernels of A and A^T : %d\n",
-	      __FILE__, __LINE__, m);
-      for (int i = 0; i < n0; i++) {
-	fprintf(_fp, "%d : ", i);
-	for(int j = 0; j < n0; j++) {
-	  fprintf(_fp, "%.16e ",
-		  blas_abs<T, double>(_kernel[m].getNTKernProj()(i, j)));
-	}
-	fprintf(_fp, "\n");
+		__FILE__, __LINE__, m);
+    for (int i = 0; i < n0; i++) {
+      diss_printf(_verbose, _fp, "%d : ", i);
+      for(int j = 0; j < n0; j++) {
+	diss_printf(_verbose, _fp, "%.16e ",
+		    blas_abs<T, double>(_kernel[m].getNTKernProj()(i, j)));
       }
-    } // if (_verbose)
+      diss_printf(_verbose, _fp, "\n");
+    }
     full_ldu<T>(n0, _kernel[m].getNTKernProj().addrCoefs(), n0);
   } // loop : m
   return 1;
@@ -4361,4 +4300,10 @@ int DissectionSolver<quadruple>::ComputeTransposedKernels(void);
 template
 int DissectionSolver<complex<quadruple>, quadruple>::
 ComputeTransposedKernels(void);
+
+template
+int DissectionSolver<float>::ComputeTransposedKernels(void);
+
+template
+int DissectionSolver<complex<float>, float>::ComputeTransposedKernels(void);
 

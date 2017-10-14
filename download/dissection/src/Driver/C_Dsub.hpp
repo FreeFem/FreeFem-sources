@@ -106,12 +106,13 @@ void C_Dsub_queue(bool isSym,
 		  vector<C_task *>* tasks_p, // _tasks_DSymmGEMM
 		  vector<int>* tasks_p_indcol,
 		  const bool tasks_p_flag,
-		  vector<C_task *>* tasks_q, // _tasks_DfillSymm
+		  vector<C_task *>& tasks_q, // _tasks_DfillSymm
 		  vector<C_task *>* tasks_r, // _tasks_SparseLocalSchur
-		  vector<C_task *>* tasks_s, // _tasks_DSub[level + 1][(*it)]
+		  vector<C_task *>& tasks_s, // _tasks_DSub[level + 1][(*it)]
 		  vector<C_task *>* tasks_d, // _tasks_deallocateLocalSchur
 		  vector<int>* tasks_d_indcol,
 		  int level,
+		  const bool direct_flag,
 		  const bool verbose,
 		  FILE *fp);
 

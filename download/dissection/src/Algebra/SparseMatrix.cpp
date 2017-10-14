@@ -54,6 +54,7 @@
 #include "Algebra/SparseMatrix.hpp"
 #include "Algebra/VectorArray.hpp"
 #include "Compiler/OptionCompiler.hpp"
+#include "Compiler/arithmetic.hpp"
 #include "Driver/DissectionDefault.hpp" // for definition of scaling option
 #include <cstring>
 #include <cstdio>
@@ -72,38 +73,37 @@ quadruple SpMAX(quadruple a, quadruple b)
 }
 
 
-// T : higher precision to keep scaled matrix, "complex/real" value
-// Z : precision to keep diagonal scaling matrix, "real" value
-// W : precision to keep input entries, "complex/real" value
-template<typename T, typename W, typename Z> void
-SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
+template<typename T, typename U> void
+normalize(const int type, const T* coefs0, SparseMatrix<T> *ptDA, U* u)
 {
-  const Z zero(0.0);
-  const Z one(1.0);
-  const W Wzero(0.0);
-  const int n = dimension();
-  VectorArray<Z> v(n);    //  Z* v = new Z[n];
-  VectorArray<Z> d(n);     //  Z* d = new Z[n];
+  const T zero(0.0);
+  const T one(1.0);
+  const U Uone(1.0);
+  const U Uzero(0.0);
+  const int n = ptDA->dimension();
+  VectorArray<U> v(n);    //  Z* v = new Z[n];
+  VectorArray<U> d(n);     //  Z* d = new Z[n];
   int *ptUnsymRows, *indUnsymCols, *indVals;
-  if (_isSymmetric && (type == KKT_SCALING)) {
-    if (_isWhole) {
-      ptUnsymRows = &_ptRows[0];
-      indUnsymCols = &_indCols[0];
-      indVals = new int[nnz()];
-      for (int i = 0; i < nnz(); i++) {
+  if (ptDA->isSymmetric() && (type == KKT_SCALING)) {
+    const int nnz = ptDA->nnz();
+    if (ptDA->isWhole()) {
+      ptUnsymRows = ptDA->getRows();
+      indUnsymCols = ptDA->getIndCols();
+      indVals = new int[nnz];
+      for (int i = 0; i < nnz; i++) {
 	indVals[i] = i;
       }
     }
     else {
-      const int nnz0 = nnz() * 2 - n;
+      const int nnz0 = nnz * 2 - n;
       ptUnsymRows = new int[n + 1];
       indUnsymCols = new int[nnz0]; // diagonal entries exits though
       indVals = new int[nnz0];      // coeficient equals to zero
       // only used as extend symmetric symbolic structure to unsymmetric
       int nnz1;
-      nnz1 = CSR_sym2unsym(ptUnsymRows, indUnsymCols, indVals, getRows(), 
-			   getIndCols(), 
-			   n, isUpper());
+      nnz1 = CSR_sym2unsym(ptUnsymRows, indUnsymCols, indVals, ptDA->getRows(), 
+			   ptDA->getIndCols(), 
+			   n, ptDA->isUpper());
       if (nnz1 != nnz0) {
 	fprintf(stderr, 
 		"%s %d : symmetric matrix has no diagonal entry %d != %d\n",
@@ -114,27 +114,27 @@ SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
   }
 
   for (int i = 0; i < n; i++) {
-    d[i] = zero;
-    u[i] = zero;
-    v[i] = zero;
+    d[i] = Uzero;
+    u[i] = Uzero;
+    v[i] = Uzero;
   }
   for (int i = 0; i < n; i++) {
-    for (unsigned k = (_ptRows[i] + 1); k < _ptRows[i + 1]; k++) {
-      int j = _indCols[k];
+    for (unsigned k = (ptDA->getRows()[i] + 1); k < ptDA->getRows()[i + 1]; k++) {
+      int j = ptDA->getIndCols()[k];
       if (i == j) {
-	d[i] = blas_abs<W, Z>(coefs0[k]);
+	d[i] = blas_abs<T, U>(coefs0[k]);
       }
     }
   }
   // 23 Jun.2011 Atsushi
   // u[i] = |a(i, i)|, v[i] = max_{k}{|a(i,k)|,|a(k,j)|} 
-  if (_isSymmetric && (!_isWhole)) {
+  if (ptDA->isSymmetric() && (!ptDA->isWhole())) {
     for (int i = 0; i < n; i++) {
-      u[i] = blas_abs<W, Z>(coefs0[_ptRows[i]]);
+      u[i] = blas_abs<T, U>(coefs0[ptDA->getRows()[i]]);
       v[i] = SpMAX(v[i], u[i]);
-      for (int k = (_ptRows[i] + 1); k < _ptRows[i + 1]; k++) {
-	int j = _indCols[k];
-	Z acoef = blas_abs<W, Z>(coefs0[k]);
+      for (int k = (ptDA->getRows()[i] + 1); k < ptDA->getRows()[i + 1]; k++) {
+	int j = ptDA->getIndCols()[k];
+	U acoef = blas_abs<T, U>(coefs0[k]);
 	v[i] = SpMAX(v[i], acoef);
 	v[j] = SpMAX(v[j], acoef);
       }
@@ -142,36 +142,36 @@ SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
   }
   else {
     for (int i = 0; i < n; i++) {
-      for (int k = _ptRows[i]; k < _ptRows[i + 1]; k++) {
-	int j = _indCols[k];
+      for (int k = ptDA->getRows()[i]; k < ptDA->getRows()[i + 1]; k++) {
+	int j = ptDA->getIndCols()[k];
 	if (j == i) {
-	  u[i] = blas_abs<W, Z>(coefs0[k]);
+	  u[i] = blas_abs<T, U>(coefs0[k]);
 	  v[i] = SpMAX(v[i],u[i]);
 	}
 	else {
-	  Z acoef = blas_abs<W, Z>(coefs0[k]);
+	  U acoef = blas_abs<T, U>(coefs0[k]);
 	  v[i] = SpMAX(v[i], acoef);
 	  v[j] = SpMAX(v[j], acoef);
 	}
       }
     }
   }
-  W alower, aupper, adiag;
+  T alower, aupper, adiag;
   switch(type) {
   case DIAGONAL_SCALING:
     for (int i = 0; i < n; i++) {
-      u[i] = ((u[i] != zero) ? sqrt(one / u[i]) : 
-	      ((v[i] != zero) ? sqrt(one / v[i]) : one));
+      u[i] = ((u[i] != Uzero) ? sqrt<U>(Uone / u[i]) : 
+	      ((v[i] != Uzero) ? sqrt<U>(Uone / v[i]) : Uone));
     }
     break;
   case KKT_SCALING:
-    if (_isSymmetric && (!_isWhole)) {
+    if (ptDA->isSymmetric() && (!ptDA->isWhole())) {
       for (int i = 0 ; i < n; i++) {
-	if (d[i] != zero) {
-	  u[i] = sqrt(one / u[i]);
+	if (d[i] != Uzero) {
+	  u[i] = sqrt<U>(Uone / u[i]);
 	}
 	else {
-	  W xtmp = Wzero;
+	  T xtmp = zero;
 	  for (int m = ptUnsymRows[i]; m < ptUnsymRows[i + 1]; m++) {
 	    const int j = indUnsymCols[m];
 	    alower = coefs0[indVals[m]];
@@ -180,7 +180,7 @@ SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
 	      const int k = indUnsymCols[n];
 	      if (k == j) {
 		adiag = coefs0[indVals[n]];
-		if (adiag != Wzero) {
+		if (adiag != zero) {
 		  flag++;
 		}
 		else {
@@ -199,26 +199,26 @@ SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
 	      xtmp += alower * aupper / adiag;
 	    }
 	  } // loop : m
-	  u[i] = one / sqrt(blas_abs<W, Z>(xtmp));
+	  u[i] = Uone / sqrt<U>(blas_abs<T, U>(xtmp));
 	} // if (d[i] != zero)
       } // loop : i
     } // if (_isSymmetric && (!_isWhole))
     else {
       for (int i = 0 ; i < n; i++) {
-	if (d[i] != zero) {
-	  u[i] = sqrt(one / u[i]);
+	if (d[i] != Uzero) {
+	  u[i] = sqrt<U>(Uone / u[i]);
 	}
 	else {
-	  W xtmp = Wzero;
-	  for (int m = _ptRows[i]; m < _ptRows[i + 1]; m++) {
-	    const int j = _indCols[m];
+	  T xtmp = zero;
+	  for (int m = ptDA->getRows()[i]; m < ptDA->getRows()[i + 1]; m++) {
+	    const int j = ptDA->getIndCols()[m];
 	    alower = coefs0[m];
 	    int flag = 0;
-	    for (int n = _ptRows[j]; n < _ptRows[j + 1]; n++) {
-	      const int k = _indCols[n];
+	    for (int n = ptDA->getRows()[j]; n < ptDA->getRows()[j + 1]; n++) {
+	      const int k = ptDA->getIndCols()[n];
 	      if (k == j) {
 		adiag = coefs0[n];
-		if (adiag != Wzero) {
+		if (adiag != zero) {
 		  flag++;
 		}
 		else {
@@ -237,38 +237,39 @@ SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
 	      xtmp += alower * aupper / adiag;
 	    }
 	  } // loop : m
-	  u[i] = one / sqrt(blas_abs<W, Z>(xtmp));
+	  u[i] = Uone / sqrt<U>(blas_abs<T, U>(xtmp));
 	} // if (d[i] != zero)
       }   // loop : i
     }  // if (_isSymmetric && (!_isWhole))
     break;
   default: 
     for (int i = 0; i < n; i++) {
-      u[i] = one;
+      u[i] = Uone;
     }
     break;
   } // witch (type)
   // Scaling
-  if (type == NO_SCALING) {
-    for (int i = 0; i < _ptRows[n]; i++) {
-      _coefs[i] = coefs0[i];
+  switch(type) {
+  case NO_SCALING:
+    for (int i = 0; i < ptDA->getRows()[n]; i++) {
+      ptDA->getCoef()[i] = coefs0[i];
     }
-    // blas_copy<T>(_ptRows[n], coefs0, 1, &_coefs[0], 1);
-    // const W* coefs0 to T* _coefs is not supported becuase of type conversion
-  }
-  else {
+    break;
+  case DIAGONAL_SCALING:
+  case KKT_SCALING:
     for ( int i = 0; i < n; i++) {
-      for (int k = _ptRows[i]; k < _ptRows[i+1]; k++) {
-	int j = _indCols[k];
-	//      _coefs[k] = tohigher((1), coefs0[k] * W(u[i]) * W(u[j]));
-	_coefs[k] = coefs0[k] * W(u[i]) * W(u[j]);
+      for (int k = ptDA->getRows()[i]; k < ptDA->getRows()[i+1]; k++) {
+	int j = ptDA->getIndCols()[k];
+		ptDA->getCoef()[k] = coefs0[k] * u[i] *u[j];
       }
     }
+    break;
   }
+  
   //  delete [] v;
   //  delete [] d;
-  if (_isSymmetric && (type == KKT_SCALING)) {
-    if (!_isWhole) {
+  if (ptDA->isSymmetric() && (type == KKT_SCALING)) {
+    if (!ptDA->isWhole()) {
       delete [] ptUnsymRows;
       delete [] indUnsymCols;
     }
@@ -277,42 +278,38 @@ SparseMatrix<T, W, Z>::normalize(const int type, const W* coefs0, Z* u)
 }
 
 template void
-SparseMatrix<double>::normalize(const int type, 
-				const double *coefs0,
-				double *u);
+normalize<double, double>(const int type, const double *coefs0,
+				  SparseMatrix<double> *ptDA, double *u);
 
 template void
-SparseMatrix<quadruple>::normalize(const int type, 
-				   const quadruple *coefs0,
-				   quadruple *u);
-template void
-SparseMatrix<quadruple, double>::normalize(const int type, 
-					   const double *coefs0,
-					   double *u);
-
+normalize<quadruple, quadruple>(const int type, 
+					   const quadruple *coefs0,
+					   SparseMatrix<quadruple> *ptDA,
+					   quadruple *u);
 
 template void
-SparseMatrix<complex<double>, complex<double>,
-	     double>::normalize(const int type, 
-				const complex<double> *coefs0,
-				double *u);
+normalize<complex<double>, double>
+   (const int type, const complex<double> *coefs0,
+    SparseMatrix<complex<double> > *ptDA, double *u);
 
 template void
-SparseMatrix<complex<quadruple>, complex<quadruple>,
-	     quadruple>::normalize(const int type, 
-				   const complex<quadruple> *coefs0,
-				   quadruple *u);
+normalize<complex<quadruple>, quadruple>
+    (const int type, const complex<quadruple> *coefs0,
+     SparseMatrix<complex<quadruple> > *ptDA, quadruple *u);
 
 template void
-SparseMatrix<complex<quadruple>, complex<double>,
-	     double>::normalize(const int type, 
-				const complex<double> *coefs0,
-				double *u);
+normalize<float, float>(const int type, const float *coefs0,
+				  SparseMatrix<float> *ptDA, float *u);
+
+template void
+normalize<complex<float>, float>
+   (const int type, const complex<float> *coefs0,
+    SparseMatrix<complex<float> > *ptDA, float *u);
 
 //
 
-template<typename T, typename W, typename Z> void
-SparseMatrix<T, W, Z>::extractSquareMatrix(T* DSsingCoefs, vector<int> &singVal)
+template<typename T> void
+SparseMatrix<T>::extractSquareMatrix(T* DSsingCoefs, vector<int> &singVal)
 {
   const T zero(0.0);
   const int nsing = singVal.size();
@@ -381,26 +378,24 @@ SparseMatrix<quadruple>::extractSquareMatrix(quadruple* DSsingCoefs,
 					     vector<int> &singVal);
 
 template void
-SparseMatrix<quadruple, double>::extractSquareMatrix(quadruple* DSsingCoefs, 
-					     vector<int> &singVal);
-template void
-SparseMatrix<complex<double>, complex<double>,
-	     double >::extractSquareMatrix(complex<double>* DSsingCoefs, 
+SparseMatrix<complex<double> >::extractSquareMatrix(complex<double>* DSsingCoefs, 
 					   vector<int> &singVal);
 
 template void
-SparseMatrix<complex<quadruple>, complex<quadruple>,
-	     quadruple>::extractSquareMatrix(complex<quadruple>* DSsingCoefs, 
+SparseMatrix<complex<quadruple> >::extractSquareMatrix(complex<quadruple>* DSsingCoefs, 
 					     vector<int> &singVal);
 
 template void
-SparseMatrix<complex<quadruple>, complex<double>,
-	     double>::extractSquareMatrix(complex<quadruple>* DSsingCoefs, 
-					     vector<int> &singVal);
+SparseMatrix<float>::extractSquareMatrix(float* DSsingCoefs, 
+					  vector<int> &singVal);
+
+template void
+SparseMatrix<complex<float> >::extractSquareMatrix(complex<float>* DSsingCoefs, 
+					   vector<int> &singVal);
 //
 
-template<typename T, typename W, typename Z>
-void SparseMatrix<T, W, Z>::prod(const T *u, T *v) const
+template<typename T>
+void SparseMatrix<T>::prod(const T *u, T *v) const
 {
   const T zero(0.0);
   for (int i = 0; i < dimension(); i++) {
@@ -446,26 +441,23 @@ template
 void SparseMatrix<quadruple>::prod(const quadruple *u, quadruple *v) const;
 
 template
-void SparseMatrix<quadruple, double>::prod(const quadruple *u,
-					   quadruple *v) const;
+void SparseMatrix<complex<double> >::prod(const complex<double> *u, 
+					  complex<double> *v) const;
 
 template
-void SparseMatrix<complex<double>, complex<double>,
-		  double>::prod(const complex<double> *u, 
-				complex<double> *v) const;
+void SparseMatrix<complex<quadruple> >::prod(const complex<quadruple> *u, 
+					     complex<quadruple> *v) const;
 
 template
-void SparseMatrix<complex<quadruple>, complex<quadruple>,
-		  quadruple>::prod(const complex<quadruple> *u, 
-				   complex<quadruple> *v) const;
+void SparseMatrix<float>::prod(const float *u, float *v) const;
+
 template
-void SparseMatrix<complex<quadruple>, complex<double>,
-		  double>::prod(const complex<quadruple> *u, 
-				   complex<quadruple> *v) const;
+void SparseMatrix<complex<float> >::prod(const complex<float> *u, 
+					  complex<float> *v) const;
 //
 
-template<typename T, typename W, typename Z>
-void SparseMatrix<T, W, Z>::prodt(const T *u, T *v ) const
+template<typename T>
+void SparseMatrix<T>::prodt(const T *u, T *v ) const
 {
   const T zero(0.0);
   for (int i = 0; i < dimension(); i++) {
@@ -485,28 +477,25 @@ template
 void SparseMatrix<quadruple>::prodt(const quadruple *u, quadruple *v) const;
 
 template
-void SparseMatrix<quadruple, double>::prodt(const quadruple *u,
-					    quadruple *v) const;
-
-template
-void SparseMatrix<complex<double>, complex<double>,
-		  double>::prodt(const complex<double> *u, 
+void SparseMatrix<complex<double> >::prodt(const complex<double> *u, 
 				 complex<double> *v) const;
 
 template
-void SparseMatrix<complex<quadruple>, complex<quadruple>,
-		  quadruple>::prodt(const complex<quadruple> *u, 
+void SparseMatrix<complex<quadruple> >::prodt(const complex<quadruple> *u, 
 				    complex<quadruple> *v) const;
+
 template
-void SparseMatrix<complex<quadruple>, complex<double>,
-		  double>::prodt(const complex<quadruple> *u, 
-				    complex<quadruple> *v) const;
+void SparseMatrix<float>::prodt(const float *u, float *v) const;
+
+template
+void SparseMatrix<complex<float> >::prodt(const complex<float> *u, 
+				 complex<float> *v) const;
 //
 
-template<typename T, typename W, typename Z>
-SparseMatrix<T>* SparseMatrix<T, W, Z>::PartialCopyCSR(vector<int> &permute,
-							const int n,
-							bool transposed)
+template<typename T>
+SparseMatrix<T>* SparseMatrix<T>::PartialCopyCSR(vector<int> &permute,
+						 const int n,
+						 bool transposed)
 {  
   vector<int> dist_ptRows;
   dist_ptRows.resize(n + 1);
@@ -647,34 +636,30 @@ PartialCopyCSR(vector<int> &permute, const int n,
 	       bool transposed);
 
 template
-SparseMatrix<quadruple>* SparseMatrix<quadruple, double>::
+SparseMatrix<complex<double> >* SparseMatrix<complex<double> >::
 PartialCopyCSR(vector<int> &permute, const int n,
 	       bool transposed);
 
 template
-SparseMatrix<complex<double> >*
-SparseMatrix<complex<double>, complex<double>, double>::
+SparseMatrix<complex<quadruple> >* SparseMatrix<complex<quadruple> >::
 PartialCopyCSR(vector<int> &permute, const int n,
 	       bool transposed);
 
 template
-SparseMatrix<complex<quadruple> >*
-SparseMatrix<complex<quadruple>, complex<quadruple>, quadruple>::
+SparseMatrix<float>* SparseMatrix<float>::
 PartialCopyCSR(vector<int> &permute, const int n,
 	       bool transposed);
 
 template
-SparseMatrix<complex<quadruple> >*
-SparseMatrix<complex<quadruple>, complex<double>, double>::
+SparseMatrix<complex<float> >* SparseMatrix<complex<float> >::
 PartialCopyCSR(vector<int> &permute, const int n,
 	       bool transposed);
+
 //
-
-template<typename T, typename W, typename Z> int 
-SparseMatrix<T, W, Z>::CSR_sym2unsym(int *ptRows, int *indCols, int *toSym, 
-				     const int *ptSymRows,
-				     const int *indSymCols, 
-				     const int dim, const bool upper_flag)
+int CSR_sym2unsym(int *ptRows, int *indCols, int *toSym, 
+		  const int *ptSymRows,
+		  const int *indSymCols, 
+		  const int dim, const bool upper_flag)
 {
   int* nbIndPerRow = new int[dim];
 

@@ -48,13 +48,13 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
 #include "Driver/DissectionMatrix.hpp"
 #include "Algebra/SparseRenumbering.hpp"
 
 // to_stirng is available in C++11 but NEC SXC++ does not support it
 #include "Compiler/OptionLibrary.h"
-
-#include <string>
+#include "Compiler/DissectionIO.hpp"
 
 template<typename T, typename U>
 DissectionMatrix<T, U>::DissectionMatrix(Dissection::Tree *btree, 
@@ -88,7 +88,7 @@ DissectionMatrix<T, U>::DissectionMatrix(Dissection::Tree *btree,
    if (_level == level_last) {
      _islast = true;
     _color_mask = new int[_nrow];
-    _colors = getColorMaskCSR(_color_mask, _csr_diag, verbose,fp);
+    _colors = getColorMaskCSR(_color_mask, _csr_diag, verbose, fp);
     _tridiag = new TridiagBlockMatrix<T,U>*[_colors];
     for (int i = 0; i < _colors; i++) {
       _tridiag[i] = new TridiagBlockMatrix<T,U>(_nrow, SIZE_B1, _isSym, nb,
@@ -113,19 +113,17 @@ DissectionMatrix<T, U>::DissectionMatrix(Dissection::Tree *btree,
     else {
       _diag = new SquareBlockMatrix<T>(); // dummy
     }
-    _tridiag = (TridiagBlockMatrix<T,U> **)NULL;
+    _tridiag = (TridiagBlockMatrix<T, U> **)NULL;
     if (_nb > 1) {
       int ntmp = 0;
       if (_nrow > 0) {
 	const int b_id = btree->brotherIndex(_nb);
 	const int ll = _level - 1;
-	const Dissection::SetOfStrips& f0 =
-	  btree->getFathersStrips(_nb)[ll];
-	const Dissection::SetOfStrips& f1 =
-	  btree->getFathersStrips(b_id)[ll];
+	const Dissection::SetOfStrips& f0 = btree->getFathersStrips(_nb)[ll];
+	const Dissection::SetOfStrips& f1 = btree->getFathersStrips(b_id)[ll];
 	_alignedFather = false;
 	if ((btree->sizeOfDomain(b_id) > 0) &&
-	    (f0.numberOfStrips() == 1) && (f0.numberOfStrips() == 1)) {
+	    (f0.numberOfStrips() == 1) && (f1.numberOfStrips() == 1)) {
 	  Dissection::SetOfStrips::const_iterator it0 = f0.begin();
 	  Dissection::SetOfStrips::const_iterator it1 = f1.begin();
 	  if (((*it0).begin_src == (*it1).begin_src) &&
@@ -139,7 +137,7 @@ DissectionMatrix<T, U>::DissectionMatrix(Dissection::Tree *btree,
 	_alignedFather = false; // the other brother is treaed as nonaligned
       }
       if (!_alignedFather) {
-      	fprintf(fp, "%s %d : %d : %s\n", __FILE__, __LINE__,
+      	diss_printf(verbose, fp, "%s %d : %d : %s\n", __FILE__, __LINE__,
       		_nb, (_alignedFather ? "aligned" : "nonaligned"));
       }
       _upper->init(_nrow, _ncol_offdiag, SIZE_B1, ntmp);
@@ -155,24 +153,22 @@ DissectionMatrix<T, U>::DissectionMatrix(Dissection::Tree *btree,
             // C_dfull_sym_gauss_b() 
   _factorize_LDLt = new ColumnMatrix<T>; //new T*;     
   //  _factorize_LDLt_diag = new ColumnMatrix<T>; // new T*;
-  if (verbose) {
-    fprintf(fp,
+  diss_printf(verbose, fp,
 	    "%s %d : %d : nrow : %d : %d = %d + %d num_blocks : %d = %d + %d\n",
-	    __FILE__,
-	    __LINE__,
-	    _nb,
-	    _nrow,
-	    _ncol_offdiag, 
-	    _localSchur->dimension0(),
-	    _localSchur->dimension1(),
-	    _localSchur->num_blocks(),
-	    _localSchur->num_blocks0(),
-	    _localSchur->num_blocks1());
-  }
+	      __FILE__,
+	      __LINE__,
+	      _nb,
+	      _nrow,
+	      _ncol_offdiag, 
+	      _localSchur->dimension0(),
+	      _localSchur->dimension1(),
+	      _localSchur->num_blocks(),
+	      _localSchur->num_blocks0(),
+	      _localSchur->num_blocks1());
 }
 
 template
-DissectionMatrix<double, double>::
+DissectionMatrix<double>::
 DissectionMatrix(Dissection::Tree *btree, 
 		 const int nb, 
 		 const bool isSym,
@@ -188,7 +184,7 @@ DissectionMatrix(Dissection::Tree *btree,
 		 FILE *fp);
 
 template
-DissectionMatrix<quadruple, quadruple>::
+DissectionMatrix<quadruple>::
 DissectionMatrix(Dissection::Tree *btree, 
 		 const int nb, 
 		 const bool isSym,
@@ -197,6 +193,22 @@ DissectionMatrix(Dissection::Tree *btree,
 
 template
 DissectionMatrix<complex<quadruple>, quadruple>::
+DissectionMatrix(Dissection::Tree *btree, 
+		 const int nb, 
+		 const bool isSym,
+		 const bool verbose,
+		 FILE *fp);
+
+template
+DissectionMatrix<float>::
+DissectionMatrix(Dissection::Tree *btree, 
+		 const int nb, 
+		 const bool isSym,
+		 const bool verbose,
+		 FILE *fp);
+
+template
+DissectionMatrix<complex<float>, float>::
 DissectionMatrix(Dissection::Tree *btree, 
 		 const int nb, 
 		 const bool isSym,
@@ -236,12 +248,11 @@ void DissectionMatrix<T, U>::C_SparseSymbFact_queue(vector<C_task*>& queue,
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 C_SparseSymbFact_queue(vector<C_task*>& queue,
 		       Dissection::Tree *btree,
 		       const bool verbose,
 		       FILE **fp);
-
 
 template
 void DissectionMatrix<complex<double>, double>::
@@ -251,7 +262,7 @@ C_SparseSymbFact_queue(vector<C_task*>& queue,
 		       FILE **fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 C_SparseSymbFact_queue(vector<C_task*>& queue,
 		       Dissection::Tree *btree,
 		       const bool verbose,
@@ -263,6 +274,21 @@ C_SparseSymbFact_queue(vector<C_task*>& queue,
 		       Dissection::Tree *btree,
 		       const bool verbose,
 		       FILE **fp);
+
+template
+void DissectionMatrix<float>::
+C_SparseSymbFact_queue(vector<C_task*>& queue,
+		       Dissection::Tree *btree,
+		       const bool verbose,
+		       FILE **fp);
+
+template
+void DissectionMatrix<complex<float>, float>::
+C_SparseSymbFact_queue(vector<C_task*>& queue,
+		       Dissection::Tree *btree,
+		       const bool verbose,
+		       FILE **fp);
+
 //
 
 template<typename T, typename U>
@@ -273,6 +299,7 @@ void DissectionMatrix<T, U>::C_SparseNumFact_queue(vector<C_task*>& queue,
 						   double *eps_pivot,
 						   double *pivot,
 						   bool *kernel_detection,
+						   bool *higher_precision,
 						   int *aug_dim,
 						   U *eps_machine,
 						   vector<C_task*>& task_q,
@@ -302,6 +329,7 @@ void DissectionMatrix<T, U>::C_SparseNumFact_queue(vector<C_task*>& queue,
 				   eps_pivot,
 				   pivot,
 				   kernel_detection,
+				   higher_precision,
 				   aug_dim,
 				   eps_machine,
 				   _localSchur,
@@ -322,7 +350,7 @@ void DissectionMatrix<T, U>::C_SparseNumFact_queue(vector<C_task*>& queue,
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 C_SparseNumFact_queue(vector<C_task*>& queue,
 		      Dissection::Tree *btree,
 		      int nnz,
@@ -330,6 +358,7 @@ C_SparseNumFact_queue(vector<C_task*>& queue,
 		      double *eps_pivot,
 		      double *pivot,
 		      bool *kernel_detection,
+		      bool *higher_precision,
 		      int *aug_dim,
 		      double *eps_machine,
 		      vector<C_task*>& task_q,
@@ -345,6 +374,7 @@ C_SparseNumFact_queue(vector<C_task*>& queue,
 		      double *eps_pivot,
 		      double *pivot,
 		      bool *kernel_detection,
+		      bool *higher_precision,
 		      int *aug_dim,
 		      double *eps_machine,
 		      vector<C_task*>& task_q,
@@ -352,7 +382,7 @@ C_SparseNumFact_queue(vector<C_task*>& queue,
 		      FILE **fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 C_SparseNumFact_queue(vector<C_task*>& queue,
 		      Dissection::Tree *btree,
 		      int nnz,
@@ -360,6 +390,7 @@ C_SparseNumFact_queue(vector<C_task*>& queue,
 		      double *eps_pivot,
 		      double *pivot,
 		      bool *kernel_detection,
+		      bool *higher_precision,
 		      int *aug_dim,
 		      quadruple *eps_machine,
 		      vector<C_task*>& task_q,
@@ -375,8 +406,41 @@ C_SparseNumFact_queue(vector<C_task*>& queue,
 		      double *eps_pivot,
 		      double *pivot,
 		      bool *kernel_detection,
+		      bool *higher_precision,
 		      int *aug_dim,
 		      quadruple *eps_machine,
+		      vector<C_task*>& task_q,
+		      const bool verbose,
+		      FILE **fp);
+
+template
+void DissectionMatrix<float>::
+C_SparseNumFact_queue(vector<C_task*>& queue,
+		      Dissection::Tree *btree,
+		      int nnz,
+		      float *coefs,
+		      double *eps_pivot,
+		      double *pivot,
+		      bool *kernel_detection,
+		      bool *higher_precision,
+		      int *aug_dim,
+		      float *eps_machine,
+		      vector<C_task*>& task_q,
+		      const bool verbose,
+		      FILE **fp);
+
+template
+void DissectionMatrix<complex<float>, float>::
+C_SparseNumFact_queue(vector<C_task*>& queue,
+		      Dissection::Tree *btree,
+		      int nnz,
+		      complex<float> *coefs,
+		      double *eps_pivot,
+		      double *pivot,
+		      bool *kernel_detection,
+		      bool *higher_precision,
+		      int *aug_dim,
+		      float *eps_machine,
 		      vector<C_task*>& task_q,
 		      const bool verbose,
 		      FILE **fp);
@@ -410,7 +474,8 @@ void DissectionMatrix<T, U>::C_SparseLocalSchur_queue(vector<C_task*>& queue,
 				   _diag,
 				   (double *)NULL, // eps_pivot
 				   (double *)NULL, // pivot
-				   (bool *)NULL, // dummy
+				   (bool *)NULL, // kernel detection dummy
+				   (bool *)NULL, // higher preicision dummy
 				   (int *)NULL, // dummy 
 				   (U *)NULL, // dummy
 				   _localSchur,
@@ -431,7 +496,7 @@ void DissectionMatrix<T, U>::C_SparseLocalSchur_queue(vector<C_task*>& queue,
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 C_SparseLocalSchur_queue(vector<C_task*>& queue,
 			 Dissection::Tree *btree,
 			 int nnz,
@@ -451,7 +516,7 @@ C_SparseLocalSchur_queue(vector<C_task*>& queue,
 			 FILE **fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 C_SparseLocalSchur_queue(vector<C_task*>& queue,
 			 Dissection::Tree *btree,
 			 int nnz,
@@ -469,6 +534,27 @@ C_SparseLocalSchur_queue(vector<C_task*>& queue,
 			 vector<C_task*>& task_p,
 			 const bool verbose,
 			 FILE **fp);
+
+template
+void DissectionMatrix<float>::
+C_SparseLocalSchur_queue(vector<C_task*>& queue,
+			 Dissection::Tree *btree,
+			 int nnz,
+			 float *coefs,
+			 vector<C_task*>& task_p,
+			 const bool verbose,
+			 FILE **fp);
+
+template
+void DissectionMatrix<complex<float>,  float>::
+C_SparseLocalSchur_queue(vector<C_task*>& queue,
+			 Dissection::Tree *btree,
+			 int nnz,
+			 complex<float> *coefs,
+			 vector<C_task*>& task_p,
+			 const bool verbose,
+			 FILE **fp);
+
 //
 
 template<typename T, typename U>
@@ -545,7 +631,7 @@ void DissectionMatrix<T, U>::C_FillMatrix_queue(vector<C_task*>& queue,
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 C_FillMatrix_queue(vector<C_task*>& queue,
 		   int nnz,
 		   double *coefs,
@@ -561,7 +647,7 @@ C_FillMatrix_queue(vector<C_task*>& queue,
 		   FILE **fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 C_FillMatrix_queue(vector<C_task*>& queue,
 		   int nnz,
 		   quadruple *coefs,
@@ -573,6 +659,22 @@ void DissectionMatrix<complex<quadruple>, quadruple>::
 C_FillMatrix_queue(vector<C_task*>& queue,
 		   int nnz,
 		   complex<quadruple> *coefs,
+		   const bool verbose,
+		   FILE **fp);
+
+template
+void DissectionMatrix<float>::
+C_FillMatrix_queue(vector<C_task*>& queue,
+		   int nnz,
+		   float *coefs,
+		   const bool verbose,
+		   FILE **fp);
+
+template
+void DissectionMatrix<complex<float>, float>::
+C_FillMatrix_queue(vector<C_task*>& queue,
+		   int nnz,
+		   complex<float> *coefs,
 		   const bool verbose,
 		   FILE **fp);
 //
@@ -635,12 +737,6 @@ int DissectionMatrix<T, U>::C_DFullLDLt_queue(vector<C_task*>& queue,
   else {
     task_ptr.resize(num_block + 1);
   }
-#if 0 // verbose
-  if (queue.size() != (num_tasks0 + num_tasks1)) {
-    cout << "queue.size() is incorrect : " << queue.size()
-	 << " : " << (num_tasks0 + num_tasks1) << endl;
-  }
-#endif
 #ifdef DEBUG_MUTEX_C_DFULLLDLT
   cout << "**** C_DFullLDLt " 
        << " starts with " << n << " sized-matrix by " << SIZE_B1 
@@ -888,14 +984,6 @@ int DissectionMatrix<T, U>::C_DFullLDLt_queue(vector<C_task*>& queue,
 	  queue[ipos]->parallel_max = ((num_block - k - 1) *
 				       (num_block - k)) / 2 - 1;
 	  queue[ipos]->parallel_id = (j * (j + 1)) / 2 + i - 1 ;
-#if 0
-	  fprintf(stderr, "%s %d : %d/", __FILE__, __LINE__, (int)task_p.size());
-	  for (vector<C_task *>::iterator jt = task_p.begin();
-	       jt != task_p.end(); ++jt) {
-	    fprintf(stderr, "%s/", (*jt)->task_name);
-	  }
-	  fprintf(stderr, "\n");
-#endif
 	  if (k == 0) {
 	    // depndency on dgemm/dsub of previous factorization level
 	    // (i + 1)-th row, (j + 1)-th column
@@ -1173,7 +1261,7 @@ int DissectionMatrix<T, U>::C_DFullLDLt_queue(vector<C_task*>& queue,
 }
 
 template
-int DissectionMatrix<double, double>::
+int DissectionMatrix<double>::
 C_DFullLDLt_queue(vector<C_task*>& queue,
 		  vector<int>& task_indcol,
 		  vector<int>& task_ptr,
@@ -1207,7 +1295,7 @@ C_DFullLDLt_queue(vector<C_task*>& queue,
 		  FILE **fp);
 
 template
-int DissectionMatrix<quadruple, quadruple>::
+int DissectionMatrix<quadruple>::
 C_DFullLDLt_queue(vector<C_task*>& queue,
 		  vector<int>& task_indcol,
 		  vector<int>& task_ptr,
@@ -1237,6 +1325,40 @@ C_DFullLDLt_queue(vector<C_task*>& queue,
 		  double *pivot1,
 		  vector<C_task*>& task_p,
                   const bool isChldrnAlgnd,
+		  const bool verbose,
+		  FILE **fp);
+
+template
+int DissectionMatrix<float>::
+C_DFullLDLt_queue(vector<C_task*>& queue,
+		  vector<int>& task_indcol,
+		  vector<int>& task_ptr,
+		  double *eps_piv,
+		  bool *kernel_detection,
+		  int *aug_dim,
+		  float *eps_machine,
+		  double *pivot,
+		  double *pivot0,
+		  double *pivot1,
+		  vector<C_task*>& task_p,
+	          const bool isChldrnAlgnd,
+		  const bool verbose,
+		  FILE **fp);
+
+template
+int DissectionMatrix<complex<float>, float>::
+C_DFullLDLt_queue(vector<C_task*>& queue,
+		  vector<int>& task_indcol,
+		  vector<int>& task_ptr,
+		  double *eps_piv,
+		  bool *kernel_detection,
+		  int *aug_dim,
+		  float *eps_machine,
+		  double *pivot,
+		  double *pivot0,
+		  double *pivot1,
+		  vector<C_task*>& task_p,
+	          const bool isChldrnAlgnd,
 		  const bool verbose,
 		  FILE **fp);
 //
@@ -1533,42 +1655,11 @@ C_DTRSMScale_queue(vector<C_task*> &queue,
       jpos += _isSym ? 1 : 2;
     } // loop : m
   } // loop k
-#if 0
-  fprintf(*fp, "%s %d : C_DTRSMScale_queue()\n", __FILE__, __LINE__);
-  fprintf(*fp, "ptr[] = ");
-  for (vector<int>::const_iterator it = ptr.begin(); it != ptr.end(); ++it) {
-    fprintf(*fp, "%d ", (*it));
-  }
-  fprintf(*fp, " ");
-  fprintf(*fp, "indcol[] = ");
-  for (vector<int>::const_iterator it = indcol.begin(); it != indcol.end(); ++it) {
-    fprintf(*fp, "%d ", (*it));
-  }
-  fprintf(*fp, "\nnum_block_col = %d ", num_block_col);
-  fprintf(*fp, ": num_block0 = %d num_block1 = %d\n", 
-	  _localSchur->num_blocks0(), _localSchur->num_blocks1());
-  {
-    int j = 0;
-    for (vector<C_task *>::const_iterator it = queue.begin(); 
-	 it != queue.end(); ++it, j++) {
-      fprintf(*fp, "%s : %d / %d : %d / %d : %d parents : ", 
-	      (*it)->task_name, 
-	      (*it)->atomic_id, (*it)->atomic_size,
-	      (*it)->parallel_id, (*it)->parallel_max,
-	    (*it)->parents->size());
-      for (list<int>::const_iterator jt = qparents_index[j].begin();
-	   jt != qparents_index[j].end(); ++jt) {
-      fprintf(*fp, "%s : ", queue[(*jt)]->task_name);
-      }
-      fprintf(*fp, "\n");
-    }
-  }
-#endif
   return queue.size();
 }
 
 template
-int DissectionMatrix<double, double>::
+int DissectionMatrix<double>::
 C_DTRSMScale_queue(vector<C_task*> &queue,
 		   vector<list<int> > &qparents_index,
 		   vector<int> &queue_index,
@@ -1598,7 +1689,7 @@ C_DTRSMScale_queue(vector<C_task*> &queue,
 		   FILE **fp);
 
 template
-int DissectionMatrix<quadruple, quadruple>::
+int DissectionMatrix<quadruple>::
 C_DTRSMScale_queue(vector<C_task*> &queue,
 		   vector<list<int> > &qparents_index,
 		   vector<int> &queue_index,
@@ -1626,6 +1717,37 @@ C_DTRSMScale_queue(vector<C_task*> &queue,
 		   vector<C_task*> &task_p,
 		   const bool verbose,
 		   FILE **fp);
+
+template
+int DissectionMatrix<float>::
+C_DTRSMScale_queue(vector<C_task*> &queue,
+		   vector<list<int> > &qparents_index,
+		   vector<int> &queue_index,
+		   vector<int> &indcol,
+		   vector<int> &ptr,
+		   Dissection::Tree *btree,
+		   vector<C_task*> &task_o,
+		   vector<int> &task_o_indcol,
+		   vector<int> &task_o_ptr,
+		   vector<C_task*> &task_p,
+		   const bool verbose,
+		   FILE **fp);
+
+template
+int DissectionMatrix<complex<float>, float>::
+C_DTRSMScale_queue(vector<C_task*> &queue,
+		   vector<list<int> > &qparents_index,
+		   vector<int> &queue_index,
+		   vector<int> &indcol,
+		   vector<int> &ptr,
+		   Dissection::Tree *btree,
+		   vector<C_task*> &task_o,
+		   vector<int> &task_o_indcol,
+		   vector<int> &task_o_ptr,
+		   vector<C_task*> &task_p,
+		   const bool verbose,
+		   FILE **fp);
+
 //
 
 
@@ -1947,34 +2069,10 @@ C_DTRSMScale_rearrange(vector<C_task*> &queue,
     (*it)->parents->sort(compare_task_name);
     (*it)->parents->unique();
   }
-#if 0
-  fprintf(fp, "%s %d : C_DTRSMScale_rearrange()\n", __FILE__, __LINE__);
-  for (vector<C_task *>::const_iterator it = queue.begin(); 
-                                  it != queue.end(); ++it) {
-    fprintf(fp, "%s : %d / %d : %d / %d : %d parents : ", 
-	    (*it)->task_name, 
-	    (*it)->atomic_id, (*it)->atomic_size,
-	    (*it)->parallel_id, (*it)->parallel_max,
-	    (*it)->parents->size());
-    for (list<C_task*>::const_iterator jt = (*it)->parents->begin(); 
-	 jt != (*it)->parents->end(); ++jt) {
-      fprintf(fp, "%s : ", (*jt)->task_name);
-    }
-    fprintf(fp, "\n");
-  }
-
-  fprintf(fp, "%s %d C_DTRSMScale_rearrange() end : ", 
-	  __FILE__, __LINE__);
-  for (vector<int>::const_iterator it = queue_index.begin(); it != queue_index.end();
-       ++it) {
-    fprintf(fp, "%d ", *it);
-  }
-  fprintf(fp, "\n");
-#endif
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 C_DTRSMScale_rearrange(vector<C_task*> &queue,
 		       vector<list<int> > &qparents_index,
 		       vector<int> &queue_index,
@@ -1994,7 +2092,7 @@ C_DTRSMScale_rearrange(vector<C_task*> &queue,
 		       FILE *fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 C_DTRSMScale_rearrange(vector<C_task*> &queue,
 		       vector<list<int> > &qparents_index,
 		       vector<int> &queue_index,
@@ -2012,6 +2110,26 @@ C_DTRSMScale_rearrange(vector<C_task*> &queue,
 		       vector<int>& ptr,
 		       const bool verbose,
 		       FILE *fp);
+template
+void DissectionMatrix<float>::
+C_DTRSMScale_rearrange(vector<C_task*> &queue,
+		       vector<list<int> > &qparents_index,
+		       vector<int> &queue_index,
+		       vector<int>& indcol,
+		       vector<int>& ptr,
+		       const bool verbose,
+		       FILE *fp);
+
+template
+void DissectionMatrix<complex<float>, float>::
+C_DTRSMScale_rearrange(vector<C_task*> &queue,
+		       vector<list<int> > &qparents_index,
+		       vector<int> &queue_index,
+		       vector<int>& indcol,
+		       vector<int>& ptr,
+		       const bool verbose,
+		       FILE *fp);
+
 //
 
 template<typename T, typename U>
@@ -2045,7 +2163,8 @@ int DissectionMatrix<T, U>::C_DGEMM_local_queue(vector<C_task*> &queue,
     queue.resize(1);
     string task_name = ("f dummy : " +
 			to_string(_level) + " : " +to_string(_nb));
-    fprintf(*fp, "%s %d : %s\n", __FILE__, __LINE__, task_name.c_str());
+    diss_printf(verbose, *fp,
+		"%s %d : %s\n", __FILE__, __LINE__, task_name.c_str());
     C_dummy_arg *arg = new C_dummy_arg(verbose, fp, _nb);
     // *(arg->ops_complexity) = (-1L);
     queue[0] = new C_task(C_DUMMY,
@@ -2701,7 +2820,7 @@ int DissectionMatrix<T, U>::C_DGEMM_local_queue(vector<C_task*> &queue,
 }
 
 template
-int DissectionMatrix<double, double>::
+int DissectionMatrix<double>::
 C_DGEMM_local_queue(vector<C_task*> &queue,
 		    vector<int> &indcol,
 		    RectBlockMatrix<double> *upper1,
@@ -2743,7 +2862,7 @@ C_DGEMM_local_queue(vector<C_task*> &queue,
 		    FILE **fp);
 
 template
-int DissectionMatrix<quadruple, quadruple>::
+int DissectionMatrix<quadruple>::
 C_DGEMM_local_queue(vector<C_task*> &queue,
 		    vector<int> &indcol,
 		    RectBlockMatrix<quadruple> *upper1,
@@ -2772,6 +2891,48 @@ C_DGEMM_local_queue(vector<C_task*> &queue,
 		    bool isSkip,
 		    bool isDirect,
 		    SquareBlockMatrix<complex<quadruple> > *fdiag,
+		    vector<C_task *> &task_p,
+		    vector<int> &task_p_index,
+		    vector<int> &task_p_indcol,
+		    vector<int> &task_p_ptr,
+		    vector<C_task *> &task_q,
+		    vector<int> &task_q_index,
+		    vector<int> &task_q_indcol,
+		    vector<int> &task_q_ptr,
+		    vector<C_task *> *task_s,
+		    const bool verbose,
+		    FILE **fp);
+
+template
+int DissectionMatrix<float>::
+C_DGEMM_local_queue(vector<C_task*> &queue,
+		    vector<int> &indcol,
+		    RectBlockMatrix<float> *upper1,
+		    RectBlockMatrix<float> *lower1,
+		    bool isSkip,
+		    bool isDirect,
+		    SquareBlockMatrix<float>* fdiag,
+		    vector<C_task *> &task_p,
+		    vector<int> &task_p_index,
+		    vector<int> &task_p_indcol,
+		    vector<int> &task_p_ptr,
+		    vector<C_task *> &task_q,
+		    vector<int> &task_q_index,
+		    vector<int> &task_q_indcol,
+		    vector<int> &task_q_ptr,
+		    vector<C_task *> *task_s,
+		    const bool verbose,
+		    FILE **fp);
+
+template
+int DissectionMatrix<complex<float>, float>::
+C_DGEMM_local_queue(vector<C_task*> &queue,
+		    vector<int> &indcol,
+		    RectBlockMatrix<complex<float> > *upper1,
+		    RectBlockMatrix<complex<float> > *lower1,
+		    bool isSkip,
+		    bool isDirect,
+		    SquareBlockMatrix<complex<float> > *fdiag,
 		    vector<C_task *> &task_p,
 		    vector<int> &task_p_index,
 		    vector<int> &task_p_indcol,
@@ -2954,24 +3115,10 @@ void DissectionMatrix<T, U>::C_deallocLocalSchur_queue(vector<C_task*> &queue,
       ipos++;
     } 
   } // loop : j
-#if 0
-  for (vector<C_task *>::const_iterator it = queue.begin(); it != queue.end(); ++it) {
-    fprintf(stderr, "%s : %d / %d : %d parents : ", 
-	    (*it)->task_name, 
-	    (*it)->parallel_id,
-	    (*it)->parallel_max,
-	    (*it)->parents->size());
-    for (list<C_task*>::const_iterator jt = (*it)->parents->begin(); 
-	 jt != (*it)->parents->end(); ++jt) {
-      fprintf(stderr, "%s : ", (*jt)->task_name);
-    }
-    fprintf(stderr, "\n");
-  }
-#endif
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 C_deallocLocalSchur_queue(vector<C_task*> &queue,
 			  vector<int> &indcol,
 			  const bool verbose,
@@ -2985,7 +3132,7 @@ C_deallocLocalSchur_queue(vector<C_task*> &queue,
 			  FILE **fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 C_deallocLocalSchur_queue(vector<C_task*> &queue,
 			  vector<int> &indcol,
 			  const bool verbose,
@@ -2998,6 +3145,19 @@ C_deallocLocalSchur_queue(vector<C_task*> &queue,
 			  const bool verbose,
 			  FILE **fp);
 
+template
+void DissectionMatrix<float>::
+C_deallocLocalSchur_queue(vector<C_task*> &queue,
+			  vector<int> &indcol,
+			  const bool verbose,
+			  FILE **fp);
+
+template
+void DissectionMatrix<complex<float>, float>::
+C_deallocLocalSchur_queue(vector<C_task*> &queue,
+			  vector<int> &indcol,
+			  const bool verbose,
+			  FILE **fp);
 //
 
 template<typename T, typename U> 
@@ -3005,11 +3165,9 @@ void DissectionMatrix<T, U>::
 ChildContrib(list<child_contribution<T> > *child_contribs,
 	     Dissection::Tree *btree,
 	     vector<DissectionMatrix<T, U>* >& dM,
+	     const bool verbose,
 	     FILE **fp)
 {
-#if 0
-  cout << "** strips : _nb = " << _nb << endl;
-#endif
   int offset_diag_src = 0;
   for (int ll = (_level - 1); ll >= 0; ll--) {
     // copy of strips with shifting position from inside of each block to 
@@ -3039,22 +3197,6 @@ ChildContrib(list<child_contribution<T> > *child_contribs,
 	btree->getFathersStrips(_nb)[m];
       const Dissection::SetOfStrips &offdiag_xjf = 
 	btree->getFathersStrips(father_id)[m];
-#if 0
-      cout << "chlid = " << _nb << " level = " << m << endl;
-      for (Dissection::SetOfStrips::const_iterator it = offdiag_xjc.begin();
-	   it != offdiag_xjc.end(); ++it) {
-	cout << " / " << (*it).begin_dst << " : " << (*it).begin_src
-	     << " : " << (*it).width;
-      }
-      cout << endl;
-      cout << "father= " << father_id << " level = " << m << endl;
-      for (Dissection::SetOfStrips::const_iterator it = offdiag_xjf.begin();
-	   it != offdiag_xjf.end(); ++it) {
-	cout << " / " << (*it).begin_dst << " : " << (*it).begin_src
-	     << " : " << (*it).width;
-      }
-      cout << endl;
-#endif
       //
       int offset_offdiagf_src = 0;
       for (int k = ll - 1; k > m; k--) {
@@ -3091,44 +3233,13 @@ ChildContrib(list<child_contribution<T> > *child_contribs,
     } //loop : ll
 
     //    cout << "** father_id = " << father_id << endl;
-#if 0
-    cout << "diag strips = " << diag.size();
-    for (list<index_strip>::const_iterator it = diag.begin();
-	 it != diag.end(); ++it) {
-      cout << " / " << (*it).begin_dst << " : " << (*it).begin_src
-	   << " : " << (*it).width;
-    }
-    cout << endl;
-    cout << "offdiag strips = " << offdiag.size() << " = ";
-    for (int m = (ll - 1); m >= 0; m--) {
-      const Dissection::SetOfStrips &offdiag_xj = 
-	btree->getFathersStrips(_nb)[m];
-      cout << offdiag_xj.numberOfStrips() << " ";
-    }
-
-    int begin_src0 = (-1);
-    int begin_dst0 = (-1);
-    //    int begin_dst0 = (-1);
-    for (list<index_strip>::const_iterator it = offdiag.begin();
-	 it != offdiag.end(); ++it) {
-      if ((begin_src0 > (*it).begin_src) || 
-	  (begin_dst0 > (*it).begin_dst)) {
-	cerr << "**ERROR**";
-      }
-      cout << " / " << (*it).begin_dst << " : " << (*it).begin_src
-	   << " : " << (*it).width;
-      begin_src0 = (*it).begin_src;
-      begin_dst0 = (*it).begin_dst;
-    }
-    cout << endl;
-#endif
     
     list<child_contribution<T> > &tmp = child_contribs[father_id0];
     if (fatherM.nrow() == 0 || _nrow == 0) {
-      fprintf(*fp, "%s %d : %d/%d %d/%d %d %d:%d\n",
-	      __FILE__, __LINE__,
-	      _nrow, _nb, fatherM.nrow(), father_id, ll,
-	      (int)diag.size(), (int)offdiag.size());
+      diss_printf(verbose, *fp, "%s %d : %d/%d %d/%d %d %d:%d\n",
+		  __FILE__, __LINE__,
+		  _nrow, _nb, fatherM.nrow(), father_id, ll,
+		  (int)diag.size(), (int)offdiag.size());
       diag.clear();
       if (_nrow == 0) {
 	offdiag.clear();
@@ -3149,10 +3260,11 @@ ChildContrib(list<child_contribution<T> > *child_contribs,
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 ChildContrib(list<child_contribution<double> > *child_contribs,
 	     Dissection::Tree *btree,
 	     vector<DissectionMatrix<double>* >& dM,
+	     const bool verbose,
 	     FILE **fp);
 
 template
@@ -3160,13 +3272,15 @@ void DissectionMatrix<complex<double>, double>::
 ChildContrib(list<child_contribution<complex<double> > > *child_contribs,
 	     Dissection::Tree *btree,
 	     vector<DissectionMatrix<complex<double>, double>* >& dM,
+	     const bool verbose,
 	     FILE **fp);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 ChildContrib(list<child_contribution<quadruple> > *child_contribs,
 	     Dissection::Tree *btree,
 	     vector<DissectionMatrix<quadruple>* >& dM,
+	     const bool verbose,
 	     FILE **fp);
 
 template
@@ -3174,6 +3288,23 @@ void DissectionMatrix<complex<quadruple>, quadruple>::
 ChildContrib(list<child_contribution<complex<quadruple> > > *child_contribs,
 	     Dissection::Tree *btree,
 	     vector<DissectionMatrix<complex<quadruple>, quadruple>* >& dM,
+	     const bool verbose,
+	     FILE **fp);
+
+template
+void DissectionMatrix<float>::
+ChildContrib(list<child_contribution<float> > *child_contribs,
+	     Dissection::Tree *btree,
+	     vector<DissectionMatrix<float>* >& dM,
+	     const bool verbose,
+	     FILE **fp);
+
+template
+void DissectionMatrix<complex<float>, float>::
+ChildContrib(list<child_contribution<complex<float> > > *child_contribs,
+	     Dissection::Tree *btree,
+	     vector<DissectionMatrix<complex<float>, float>* >& dM,
+	     const bool verbose,
 	     FILE **fp);
 //
 
@@ -3215,7 +3346,7 @@ void DissectionMatrix<T, U>::deallocLower_queue(C_task*& queue,
 }
 
 template
-void DissectionMatrix<double, double>::
+void DissectionMatrix<double>::
 deallocLower_queue(C_task*& queue,
 		   bool isSym,
 		   vector<C_task*> &task_p,
@@ -3231,7 +3362,7 @@ deallocLower_queue(C_task*& queue,
 		   vector<C_task*> &task_q);
 
 template
-void DissectionMatrix<quadruple, quadruple>::
+void DissectionMatrix<quadruple>::
 deallocLower_queue(C_task*& queue,
 		   bool isSym,
 		   vector<C_task*> &task_p,
@@ -3240,6 +3371,22 @@ deallocLower_queue(C_task*& queue,
 
 template
 void DissectionMatrix<complex<quadruple>, quadruple>::
+deallocLower_queue(C_task*& queue,
+		   bool isSym,
+		   vector<C_task*> &task_p,
+		   bool isDirect,
+		   vector<C_task*> &task_q);
+
+template
+void DissectionMatrix<float>::
+deallocLower_queue(C_task*& queue,
+		   bool isSym,
+		   vector<C_task*> &task_p,
+		   bool isDirect,
+		   vector<C_task*> &task_q);
+
+template
+void DissectionMatrix<complex<float>, float>::
 deallocLower_queue(C_task*& queue,
 		   bool isSym,
 		   vector<C_task*> &task_p,

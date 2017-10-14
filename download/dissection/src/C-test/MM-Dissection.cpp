@@ -426,11 +426,11 @@ int main(int argc, char **argv)
     val = new double[nnz];
     if (upper_flag) {
       for (int i = 0; i < nnz; i++) {
-	fscanf(fp, "%d %d %lf", &jcol[i], &irow[i], &val[i]); // read lower
+	fscanf(fp, "%d %d %lf", &irow[i], &jcol[i], &val[i]); // read upper
 	irow[i]--;
 	jcol[i]--;
 	if (isSym && irow[i] > jcol[i]) {
-	  fprintf(stderr, "exchanged : %d > %d\n", irow[i], jcol[i]);
+	  //	  fprintf(stderr, "exchanged : %d > %d\n", irow[i], jcol[i]);
 	  itmp = irow[i];
 	  irow[i] = jcol[i];
 	  jcol[i] = itmp;
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 	irow[i]--;
 	jcol[i]--;
 	if (isSym && irow[i] < jcol[i]) {
-	  fprintf(stderr, "exchanged : %d > %d\n", irow[i], jcol[i]);
+	  //	  fprintf(stderr, "exchanged : %d > %d\n", irow[i], jcol[i]);
 	  itmp = irow[i];
 	  irow[i] = jcol[i];
 	  jcol[i] = itmp;
@@ -571,7 +571,7 @@ int main(int argc, char **argv)
   fclose(fp);
 #endif
   int pid = (int)getpid();
-#if 0 
+#if 1 
   fprintf(stderr, "pid = %d\n", pid);
   sprintf(fname, "dissection.%04d.log", pid);
   fp = fopen(fname, "a");

@@ -62,7 +62,8 @@ double frontal_numb(const int dim, const int *ptrows, const int *indcols,
 		    vector<int> &indic, vector<int> &connect);
 
 int point_front(const int dim, const int *ptrows, const int *indcols,
-		vector<int> &new2old, vector<int> &p_front);
+		vector<int> &new2old, vector<int> &p_front, const bool verbose,
+		FILE *fp);
 
 int getColorMaskCSR(int *color_mask, const CSR_indirect *csr,
 		    const bool verbose,	FILE *fp);
