@@ -1,9 +1,17 @@
 #ifndef MeshPoint_hpp_
 #define MeshPoint_hpp_
 //typedef double R;
+#ifndef LONG_MIN
+#if sizeof(LONG) == 4
+# define LONG_MIN -2147483647
+#elif sizeof(LONG) == 8
+# define LONG_MIN -9223372036854775807
+#endif
+#endif
 namespace  Fem2D {
+const long notaregion=LONG_MIN;    
 class MeshPointBase { public:
-    static const long notaregion=LONG_MIN;
+
   R3 P;
   R3 PHat;
   union {
