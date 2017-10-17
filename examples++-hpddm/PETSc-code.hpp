@@ -3,6 +3,7 @@
 
 #include "PETSc.hpp"
 #include "petsc/private/petscimpl.h"
+#include "petsc/private/kspimpl.h"
 
 typedef PETSc::DistributedCSR<HpSchwarz<PetscScalar>> Dmat;
 typedef PETSc::DistributedCSR<HpSchwarz<PetscReal>> DmatR;
@@ -13,16 +14,19 @@ typedef PETSc::DistributedCSR<HpSchur<PetscComplex>> DbddcC;
 
 namespace PETSc {
 struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
-    const KSP& _ksp;
+    const KSP  _ksp;
     Vec      _right;
     Vec       _left;
+    CustomOperator(const CustomOperator&) = delete;
     CustomOperator(int n, int bs, const KSP& ksp) : HPDDM::EmptyOperator<PetscScalar>(bs * n), _ksp(ksp) {
-        Mat A, P;
-        KSPGetOperators(_ksp, &A, &P);
+        Mat A;
+        KSPGetOperators(_ksp, &A, NULL);
         int N;
         MatGetSize(A, &N, NULL);
-        VecCreateMPIWithArray(PETSC_COMM_WORLD, bs, bs * n, N, NULL, &_right);
-        VecCreateMPIWithArray(PETSC_COMM_WORLD, bs, bs * n, N, NULL, &_left);
+        MPI_Comm comm;
+        PetscObjectGetComm((PetscObject)ksp, &comm);
+        VecCreateMPIWithArray(comm, bs, bs * n, N, NULL, &_right);
+        VecCreateMPIWithArray(comm, bs, bs * n, N, NULL, &_left);
     }
     ~CustomOperator() {
         VecDestroy(&_right);
@@ -31,12 +35,16 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
 
     void GMV(const PetscScalar* const in, PetscScalar* const out, const int& mu = 1) const {
         Mat A;
-        KSPGetOperators(_ksp, &A, &A);
+        KSPGetOperators(_ksp, &A, NULL);
         MatType type;
         MatGetType(A, &type);
         PetscBool isBlock;
         PetscStrcmp(type, MATMPIBAIJ, &isBlock);
-        if(isBlock) {
+        MPI_Comm comm;
+        PetscObjectGetComm((PetscObject)A, &comm);
+        int size;
+        MPI_Comm_size(comm, &size);
+        if(isBlock || size == 1) {
             for(unsigned short nu = 0; nu < mu; ++nu) {
                 VecPlaceArray(_right, in + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
                 VecPlaceArray(_left, out + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
@@ -49,8 +57,8 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
             int N;
             MatGetSize(A, &N, NULL);
             Mat B, C;
-            MatCreateDense(PETSC_COMM_WORLD, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, const_cast<PetscScalar*>(in), &B);
-            MatCreateDense(PETSC_COMM_WORLD, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, out, &C);
+            MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, const_cast<PetscScalar*>(in), &B);
+            MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, out, &C);
             MatMatMult(A, B, MAT_REUSE_MATRIX, PETSC_DEFAULT, &C);
             MatDestroy(&C);
             MatDestroy(&B);
@@ -69,6 +77,99 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
         }
     }
 };
+
+static PetscErrorCode KSPSetFromOptions_HPDDM(PetscOptionItems *PetscOptionsObject, KSP ksp) {
+    const char* prefix;
+    PetscFunctionBegin;
+    PetscOptionsHead(PetscOptionsObject, "KSP HPDDM Options, cf. https://github.com/hpddm/hpddm/blob/master/doc/cheatsheet.pdf");
+    PetscOptionsTail();
+    HPDDM::Option& opt = *HPDDM::Option::get();
+    KSPGetOptionsPrefix(ksp, &prefix);
+    std::string p = prefix ? std::string(prefix) : "";
+
+    if(ksp->pc_side == PC_RIGHT)
+        opt[p + "variant"] = 1;
+    else
+        opt[p + "variant"] = 0;
+    opt[p + "tol"] = ksp->rtol;
+    opt[p + "max_it"] = ksp->max_it;
+    {
+        char **names, **values;
+        int N;
+        PetscOptionsLeftGet(NULL, &N, &names, &values);
+        std::vector<std::string> optionsLeft;
+        optionsLeft.reserve(2 * N);
+        for(int i = 0; i < N; ++i) {
+            std::string name(names[i]);
+            if(name.find(std::string(HPDDM_PREFIX) + p) != std::string::npos) {
+                optionsLeft.emplace_back("-" + name);
+                if(values[i])
+                    optionsLeft.emplace_back(std::string(values[i]));
+            }
+        }
+        PetscOptionsLeftRestore(NULL, &N, &names, &values);
+        opt.parse<false, true>(optionsLeft, false, { }, p);
+    }
+    if(mpirank != 0)
+        opt.remove(p + "verbosity");
+    ksp->rtol = opt[p + "tol"];
+    ksp->max_it = opt[p + "max_it"];
+    int variant = opt[p + "variant"];
+    if(variant == 0)
+        ksp->pc_side = PC_LEFT;
+    else
+        ksp->pc_side = PC_RIGHT;
+    PetscFunctionReturn(0);
+}
+static PetscErrorCode KSPSetUp_HPDDM(KSP ksp) {
+    const char* prefix;
+    int n;
+    Mat A;
+    PetscFunctionBegin;
+    KSPGetOperators(ksp, &A, NULL);
+    MatGetLocalSize(A, &n, NULL);
+    CustomOperator* op = new CustomOperator(n, 1, ksp);
+    ksp->data = reinterpret_cast<void*>(op);
+    KSPGetOptionsPrefix(ksp, &prefix);
+    if(prefix)
+        op->setPrefix(prefix);
+    PetscFunctionReturn(0);
+}
+static PetscErrorCode KSPDestroy_HPDDM(KSP ksp) {
+    PetscFunctionBegin;
+    delete reinterpret_cast<CustomOperator*>(ksp->data);
+    ksp->data = NULL;
+    KSPDestroyDefault(ksp);
+    PetscFunctionReturn(0);
+}
+static PetscErrorCode KSPSolve_HPDDM(KSP ksp) {
+    MPI_Comm        comm;
+    PetscScalar*       x;
+    const PetscScalar* b;
+    PetscFunctionBegin;
+    VecGetArray(ksp->vec_sol, &x);
+    VecGetArrayRead(ksp->vec_rhs, &b);
+    PetscObjectGetComm((PetscObject)ksp, &comm);
+    const CustomOperator& op = *reinterpret_cast<CustomOperator*>(ksp->data);
+    ksp->its = HPDDM::IterativeMethod::solve(op, b, x, 1, comm);
+    VecRestoreArrayRead(ksp->vec_rhs, &b);
+    VecRestoreArray(ksp->vec_sol, &x);
+    if(ksp->its < ksp->max_it)
+        ksp->reason = KSP_CONVERGED_RTOL;
+    else
+        ksp->reason = KSP_DIVERGED_ITS;
+    PetscFunctionReturn(0);
+}
+PETSC_EXTERN PetscErrorCode KSPCreate_HPDDM(KSP ksp) {
+    PetscFunctionBegin;
+    KSPSetSupportedNorm(ksp, KSP_NORM_PRECONDITIONED, PC_LEFT, 2);
+    KSPSetSupportedNorm(ksp, KSP_NORM_UNPRECONDITIONED, PC_RIGHT, 1);
+    ksp->ops->setup          = KSPSetUp_HPDDM;
+    ksp->ops->solve          = KSPSolve_HPDDM;
+    ksp->ops->destroy        = KSPDestroy_HPDDM;
+    ksp->ops->setfromoptions = KSPSetFromOptions_HPDDM;
+    PetscFunctionReturn(0);
+}
 
 template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, Dmat>::value>::type* = nullptr>
 void initPETScStructure(HpddmType* ptA, MatriceMorse<PetscScalar>* mA, long bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
@@ -205,13 +306,24 @@ long changeOperator(Type* const& A, Matrice_Creuse<PetscScalar>* const& mat) {
             PetscInt row = A->_first + i;
             MatSetValues(A->_petsc, 1, &row, ia[i + 1] - ia[i], ja + ia[i], c + ia[i], INSERT_VALUES);
         }
-        MatAssemblyBegin(A->_petsc, MAT_FINAL_ASSEMBLY);
-        MatAssemblyEnd(A->_petsc, MAT_FINAL_ASSEMBLY);
-        KSPSetOperators(A->_ksp, A->_petsc, A->_petsc);
         if(free) {
             delete [] ia;
             delete [] ja;
             delete [] c;
+        }
+        MatAssemblyBegin(A->_petsc, MAT_FINAL_ASSEMBLY);
+        MatAssemblyEnd(A->_petsc, MAT_FINAL_ASSEMBLY);
+        KSPSetOperators(A->_ksp, A->_petsc, A->_petsc);
+        KSPSetFromOptions(A->_ksp);
+        KSPSetUp(A->_ksp);
+        if(std::is_same<Type, Dmat>::value && A->_S) {
+            PC pc;
+            KSPGetPC(A->_ksp, &pc);
+            PetscInt nsplits;
+            KSP* subksp;
+            PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+            KSPSetOperators(subksp[nsplits - 1], A->_S, A->_S);
+            PetscFree(subksp);
         }
     }
     return 0L;
@@ -270,7 +382,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
     DistributedCSR<HpddmType>* ptB = GetAny<DistributedCSR<HpddmType>*>((*B)(stack));
     Matrice_Creuse<PetscScalar>* ptK = GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack));
     if(ptB->_A && ptK->A) {
-        ptA->_A = new HpddmType(*ptB->_A);
+        ptA->_A = new HpddmType(static_cast<const HPDDM::Subdomain<PetscScalar>&>(*ptB->_A));
         MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
         HPDDM::MatrixCSR<PetscScalar>* dA = new HPDDM::MatrixCSR<PetscScalar>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
         ptA->_A->setMatrix(dA);
@@ -586,7 +698,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 5;
+        static const int n_name_param = 7;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -601,7 +713,9 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)},
     {"fields", &typeid(KN<double>*)},
     {"names", &typeid(KN<String>*)},
-    {"prefix", &typeid(std::string*)}
+    {"prefix", &typeid(std::string*)},
+    {"schurPreconditioner", &typeid(Matrice_Creuse<PetscScalar>*)},
+    {"schurList", &typeid(KN<PetscScalar>*)}
 };
 template<class Type>
 class setOptions : public OneOperator {
@@ -612,6 +726,13 @@ class setOptions : public OneOperator {
             return new setOptions_Op<Type>(args, t[0]->CastTo(args[0]));
         }
 };
+template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
+void globalMapping(HpddmType* const& A, unsigned int*& num, unsigned int& start, unsigned int& end, unsigned int& global, unsigned int* const list) {
+    num = new unsigned int[A->getMatrix()->_n];
+    A->template globalMapping<'C'>(num, num + A->getMatrix()->_n, start, end, global, A->getScaling(), list);
+}
+template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
+void globalMapping(HpddmType* const& A, unsigned int* const& num, unsigned int& start, unsigned int& end, unsigned int& global, unsigned int* const list) { }
 template<class Type>
 AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
@@ -643,6 +764,83 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                 ISCreateGeneral(PETSC_COMM_WORLD, counts[j], idx, PETSC_COPY_VALUES, &is);
                 PCFieldSplitSetIS(pc, names && j < names->size() ? (*(names->operator[](j))).c_str() : NULL, is);
                 ISDestroy(&is);
+            }
+            if(nargs[5] && nargs[6]) {
+                MatriceMorse<PetscScalar>* mS = static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[5])(stack))->A));
+                int *is, *js;
+                PetscScalar *s;
+                KN<PetscScalar>* pL = GetAny<KN<PetscScalar>*>((*nargs[6])(stack));
+                unsigned int* re = new unsigned int[pL->n];
+                unsigned int nbSchur = 1;
+                for(int i = 0; i < pL->n; ++i)
+                    re[i] = ((*pL)[i]) ? nbSchur++ : 0;
+                nbSchur--;
+                unsigned int* num;
+                unsigned int start, end, global;
+                ptA->_A->clearBuffer();
+                globalMapping(ptA->_A, num, start, end, global, re);
+                delete [] re;
+                unsigned int* numSchur = new unsigned int[nbSchur];
+                {
+                    re = new unsigned int[nbSchur];
+                    for(int i = 0, j = 0; i < pL->n; ++i) {
+                        if((*pL)[i]) {
+                            *numSchur++ = num[i];
+                            re[static_cast<int>((*pL)[i]) - 1] = j++;
+                        }
+                    }
+                    std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(mS->n);
+                    for(int i = 0; i < mS->n; ++i) {
+                        unsigned int row = re[i];
+                        tmp[row].reserve(mS->lg[i + 1] - mS->lg[i]);
+                        for(int j = mS->lg[i]; j < mS->lg[i + 1]; ++j)
+                            tmp[row].emplace_back(re[mS->cl[j]], mS->a[j]);
+                        std::sort(tmp[row].begin(), tmp[row].end());
+                    }
+                    is = new int[mS->n + 1];
+                    js = new int[mS->nbcoef];
+                    s = new PetscScalar[mS->nbcoef];
+                    is[0] = 0;
+                    for(int i = 0; i < mS->n; ++i) {
+                        for(int j = 0; j < tmp[i].size(); ++j) {
+                            *js++ = tmp[i][j].first;
+                            *s++ = tmp[i][j].second;
+                        }
+                        is[i + 1] = is[i] + tmp[i].size();
+                    }
+                    js -= mS->nbcoef;
+                    s -= mS->nbcoef;
+                    delete [] re;
+                }
+                delete [] num;
+                numSchur -= nbSchur;
+                int* ia, *ja;
+                PetscScalar* c;
+                ia = ja = nullptr;
+                c = nullptr;
+                HPDDM::MatrixCSR<PetscScalar>* dN = new HPDDM::MatrixCSR<PetscScalar>(mS->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
+                bool free = ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN);
+                /*
+                HPDDM::MatrixCSR<PetscScalar>* nP = new HPDDM::MatrixCSR<PetscScalar>(end - start, global, ia[end - start], c, ia, ja, false);
+                if(mpirank == 0) {
+                    cout << *dN << endl;
+                    cout << *nP << endl;
+                }
+                delete nP;
+                */
+                MatCreate(PETSC_COMM_WORLD, &(ptA->_S));
+                MatSetSizes(ptA->_S, end - start, end - start, global, global);
+                MatSetType(ptA->_S, MATMPIAIJ);
+                MatMPIAIJSetPreallocationCSR(ptA->_S, ia, ja, c);
+                MatSetOption(ptA->_S, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+                if(free) {
+                    delete [] ia;
+                    delete [] ja;
+                    delete [] c;
+                }
+                delete [] numSchur;
+                delete dN;
+                ptA->_A->setBuffer();
             }
             delete [] idx;
             delete [] counts;
@@ -708,6 +906,15 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
     KSPSetFromOptions(ptA->_ksp);
     KSPSetUp(ptA->_ksp);
+    if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
+        PC pc;
+        KSPGetPC(ptA->_ksp, &pc);
+        PetscInt nsplits;
+        KSP* subksp;
+        PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+        KSPSetOperators(subksp[nsplits - 1], ptA->_S, ptA->_S);
+        PetscFree(subksp);
+    }
     return 0L;
 }
 
@@ -926,7 +1133,14 @@ static void Init_PETSc() {
     for(int i = 0; i < argc; ++i)
         argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
     PetscInitialize(&argc, &argv, 0, "");
+    if(argc > 1) {
+        HPDDM::Option& opt = *HPDDM::Option::get();
+        opt.parse(argc - 1, argv + 1, mpirank == 0);
+        if(mpirank != 0)
+            opt.remove("verbosity");
+    }
     delete [] argv;
+    KSPRegister("hpddm", PETSc::KSPCreate_HPDDM);
     ff_atend(PETSc::finalizePETSc);
     if(!exist_type<DmatR*>()) {
         Dcl_Type<DmatR*>(Initialize<DmatR>, Delete<DmatR>);
@@ -948,7 +1162,7 @@ static void Init_PETSc() {
     map_type_of_map[make_pair(atype<DmatR*>(),atype<double*>())] = atype<DmatR*>();
     map_type_of_map[make_pair(atype<DbddcR*>(),atype<Complex*>())] = atype<DbddcC*>();
     map_type_of_map[make_pair(atype<DbddcR*>(),atype<double*>())] = atype<DbddcR*>();
-    
+
     TheOperators->Add("<-", new OneOperator1_<long, Dmat*>(PETSc::initEmptyCSR<Dmat>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchwarz<PetscScalar>>);
     TheOperators->Add("<-", new PETSc::initCSRfromArray<HpSchwarz<PetscScalar>>);
@@ -968,7 +1182,7 @@ static void Init_PETSc() {
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Dbddc*, KN<PetscScalar>*, KN<long>*>(PETSc::originalNumbering));
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
     addInv<Dbddc, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
-    
+
     Global.Add("check","(",new OneOperator1<bool,Dmat *>(CheckPetscMatrix< Dmat > ));
 }
 #ifndef PETScandSLEPc
