@@ -688,14 +688,14 @@ class IterativeMethod : public OneOperator {
                     yy = R();
                     yy = plusAx(this, xx);
                 }
-                bool ChecknbLine(int) const { return false; }
-                bool ChecknbColumn(int) const { return false; }
+                bool ChecknbLine(int) const { return true; }
+                bool ChecknbColumn(int) const { return true; }
         };
         class Operator : public HPDDM::EmptyOperator<R> {
             public:
                 MatF_O& mat;
                 MatF_O& prec;
-                Operator(MatF_O& m, MatF_O& p) : mat(m), prec(p), HPDDM::EmptyOperator<R>(m.x.N()){ }
+                Operator(MatF_O& m, MatF_O& p) : mat(m), prec(p), HPDDM::EmptyOperator<R>(m.x.N()) { }
                 void GMV(const R* const in, R* const out, const int& mu = 1) const {
                     mat.mv(in, HPDDM::EmptyOperator<R>::_n, out);
                 }

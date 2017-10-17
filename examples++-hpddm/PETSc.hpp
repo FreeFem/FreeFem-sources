@@ -19,6 +19,7 @@ class DistributedCSR {
     public:
         HpddmType*                  _A;
         Mat                     _petsc;
+        Mat                         _S;
         Vec                         _x;
         ISLocalToGlobalMapping   _rmap;
         VecScatter            _scatter;
@@ -27,9 +28,10 @@ class DistributedCSR {
         unsigned int*             _num;
         unsigned int            _first;
         unsigned int             _last;
-        DistributedCSR() : _A(), _petsc(), _x(), _ksp(), _num(), _first(), _last() { };
+        DistributedCSR() : _A(), _petsc(), _S(), _x(), _ksp(), _num(), _first(), _last() { };
         ~DistributedCSR() {
             MatDestroy(&_petsc);
+            MatDestroy(&_S);
             VecDestroy(&_x);
             KSPDestroy(&_ksp);
             if(_A) {
