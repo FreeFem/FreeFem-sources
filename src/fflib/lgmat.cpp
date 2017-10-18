@@ -1835,6 +1835,10 @@ template <class R>
   TheDiagMat(Matrice_Creuse<R> * AA) :A(AA) {ffassert(A);}
   void   get_mat_daig( KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->getdiag(x);}
+  void  init_get_mat_daig( KN<R> & x) {
+      ffassert(A && A->A  && A->A->n == A->A->m );
+         x.init(A->A->n);
+         A->A->getdiag(x);}
   void   set_mat_daig(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->setdiag(x);}
  };
@@ -1869,6 +1873,13 @@ KN<R> * get_mat_daig(KN<R> * x,TheDiagMat<R> dm)
   dm.get_mat_daig(*x);
   return x;
 }
+template<class R>
+KN<R> * init_get_mat_daig(KN<R> * x,TheDiagMat<R> dm)
+{
+    dm.init_get_mat_daig(*x);
+    return x;
+}
+
 
 template<class R>
 TheCoefMat<R> set_mat_coef(TheCoefMat<R> dm,KN<R> * x)
@@ -2940,7 +2951,8 @@ TheOperators->Add("+",
 
 // Add<Matrice_Creuse<R> *>("setdiag",".",new OneOperator2<long,Matrice_Creuse<R> *,KN<R> *>(set_diag<R>) );
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
- TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
+ TheOperators->Add("<-", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(init_get_mat_daig<R>) );
+    TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
  
 // TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
 // TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );

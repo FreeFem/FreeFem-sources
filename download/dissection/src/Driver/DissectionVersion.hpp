@@ -4,7 +4,7 @@
     \date   Jul. 24th 2015
     \date   Sep. 29th 2015
     \date   Nov. 30th 2016
-    \date   Oct. 13th 2017
+    \date   Oct. 15th 2017
 */
 
 // This file is part of Dissection

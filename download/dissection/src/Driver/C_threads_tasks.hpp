@@ -2049,7 +2049,11 @@ template<>
 int count_diag_negative<quadruple>(SquareBlockMatrix<quadruple>& Diag);
 template<>
 int count_diag_negative<complex<quadruple> >(SquareBlockMatrix<complex<quadruple> >& Diag);
-
+template<>
+int count_diag_negative<float>(SquareBlockMatrix<float>& Diag);
+template<>
+int count_diag_negative<complex<float> >(SquareBlockMatrix<complex<float> >& D
+					  
 template<typename T>
 int count_diag_negative(SubSquareMatrix<T>& Diag);
 template<>
@@ -2060,6 +2064,10 @@ template<>
 int count_diag_negative<quadruple>(SubSquareMatrix<quadruple>& Diag);
 template<>
 int count_diag_negative<complex<quadruple> >(SubSquareMatrix<complex<quadruple> >& Diag);
+template<>
+int count_diag_negative<float>(SubSquareMatrix<float>& Diag);
+template<>
+int count_diag_negative<complex<float> >(SubSquareMatrix<complex<float> >& Diag);
 
 template<typename T, typename U>
 void full_gauss3(int *n0,

@@ -141,8 +141,8 @@ LIB_DIR_SCOTCH = $(WORK_DIR)/scotch_6.0.4/lib
 LIB_DIR_QD =     $(WORK_DIR)/lib
 #
 ifeq ($(BLAS), MKL)
-  BLAS_DEF = -DBLAS_MKL -DMKL_ILP64   # for 64bit MKL
-# BLAS_DEF = -DBLAS_MKL               # for 32bit MKL
+  BLAS_DEF = -DBLAS_MKL -DMKL_ILP64  # 64bit (long long) int for CSR data
+# BLAS_DEF = -DBLAS_MKL              # 32bit int
   ifeq ($(VER), 17)
     ifeq ($(UNAME), Linux)
       BLAS_INC = /opt/intel//compilers_and_libraries_2017/linux/mkl/include/
@@ -187,8 +187,8 @@ ifeq ($(BLAS), MKL)
   endif
   endif
 #
-  SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core 
-#  SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_lp64 -lmkl_sequential -lmkl_core 
+  SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core
+# SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_lp64 -lmkl_sequential -lmkl_core 
   ifeq ($(UNAME), Linux)
      SHARED_COMPILER = -L$(LIB_DIR_INTEL) -lpthread -lrt
      SHARED_OPT   = -Xlinker -rpath=$(LIB_DIR_MKL) 

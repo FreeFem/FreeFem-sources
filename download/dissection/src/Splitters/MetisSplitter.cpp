@@ -3,6 +3,7 @@
     \author Xavier Juvigny, ONERA
     \date   Jul.  2nd 2012
     \date   Nov. 30th 2016
+    \date   Oct. 15th 2017
 */
 
 // This file is part of Dissection
@@ -68,20 +69,23 @@ static unsigned compBegOfDomains(unsigned invLevel,
 			         const int* sizeOfDomains,
 			         int* ptOnDomains)
 {
-    if (invLevel==1) {
-      ptOnDomains[indDom-1] = begDom;
-      return sizeOfDomains[indDom-1];
-    }
-    else {
-	begDom += compBegOfDomains(invLevel-1, begDom,
-				   2*indDom, sizeOfDomains,
-				   ptOnDomains);
-	begDom += compBegOfDomains(invLevel-1, begDom,
-				   2*indDom+1, sizeOfDomains,
-				   ptOnDomains);
-	ptOnDomains[indDom-1] = begDom;
-	return sizeOfDomains[indDom-1];
-    }
+  unsigned left,right;
+  if (invLevel==1) {
+    ptOnDomains[indDom-1] = begDom;
+    return sizeOfDomains[indDom-1];
+  }
+  else {
+    left = compBegOfDomains(invLevel-1, begDom,
+			    2*indDom, sizeOfDomains,
+			    ptOnDomains);
+    begDom += left;   // to prevent aggressive optimization
+    right = compBegOfDomains(invLevel-1, begDom,
+			     2*indDom+1, sizeOfDomains,
+			     ptOnDomains);
+    begDom += right;  // to prevent aggressive optimization
+    ptOnDomains[indDom-1] = begDom;
+    return sizeOfDomains[indDom-1];
+  }
 }
 			     
 

@@ -660,7 +660,7 @@ int main(int argc, char **argv)
     get_realtime(&t4_elapsed);  
     _stat = 1;
     usleep(5000);
-    dslv->SolveSingle(y, false, false, true); // with projection : true
+    dslv->SolveSingle(y, true, false, true); // with projection + scaling
     _stat = (-1);
     usleep(5000);
     fprintf(stderr, "%s %d : SolveSingle() done\n", __FILE__, __LINE__);
@@ -783,13 +783,6 @@ int main(int argc, char **argv)
     for (int i = 0; i < nrow; i++) {
       y[i] = (double)(i % 11);
     }
-#define NORMAL
-#ifdef NORMAL
-#if 0
-    if (!isSym && (n0 > 0)) {
-    dslv->ComputeTransposedKernels(true);
-    }
-#endif
     dslv->SpMV(y, x);
     if (n0 > 0) {
       dslv->ProjectionImageSingle(x);
@@ -802,7 +795,7 @@ int main(int argc, char **argv)
     usleep(5000);
     t4_cpu = clock();
     get_realtime(&t4_elapsed);  
-    dslv->SolveSingle(y, false, false, true); // with projection : true
+    dslv->SolveSingle(y, true, false, true); // with projection + scaling 
     _stat = (-1);
     usleep(5000);
     fprintf(stderr, "%s %d : SolveSingle() done\n", __FILE__, __LINE__);
@@ -811,26 +804,7 @@ int main(int argc, char **argv)
     }
     t5_cpu = clock();
     get_realtime(&t5_elapsed);
-#else
-    dslv->SpMtV(y, x);
-    //  dslv->ProjectionImageSingle(x);
-    dslv->SpMtV(x, y);
-    for (int i = 0; i < nrow; i++) {
-      z[i] = y[i];
-    }
 
-    _stat = 1;
-    usleep(5000);   
-    t4_cpu = clock();
-    get_realtime(&t4_elapsed);  
-    dslv->SolveSingle(y, false, true); // with projection : true
-    //  dslv->ProjectionImageSingle(y);
-    t5_cpu = clock();
-    get_realtime(&t5_elapsed);
-    _stat = (-1);
-    usleep(5000);
-    fprintf(stderr, "%s %d : SolveSingle() done\n", __FILE__, __LINE__);
-#endif  
     double norm0, norm1;
     norm0 = 0.0;
     norm1 = 0.0;
@@ -840,11 +814,8 @@ int main(int argc, char **argv)
     }
     fprintf(fp, "%s %d : ## error    = %18.7e\n",
 	    __FILE__, __LINE__, sqrt(norm1 / norm0));
-#ifdef NORMAL
+
     dslv->SpMV(y, x);
-#else
-    dslv->SpMtV(y, x);
-#endif
     
     norm0 = 0.0;
     norm1 = 0.0;
@@ -876,22 +847,6 @@ int main(int argc, char **argv)
 	    __FILE__, __LINE__, 
 	    (double)(t5_cpu - t4_cpu) / (double)CLOCKS_PER_SEC,
 	    convert_time(t5_elapsed, t4_elapsed));
-    
-#if 0
-    double *scalediag;
-    scalediag = new double[nrow];
-    dslv->GetMatrixScaling(scalediag);
-    for (int i = 0; i < nrow; i++) {
-      for (int k = ptrows[i]; k < ptrows[i + 1]; k++) {
-	if (indcols[k] == i) {
-	  fprintf(fp, "%i : %g : %g %g\n", i, scalediag[i], 
-		  1.0 / (scalediag[i] * scalediag[i]), coefs[k]);
-	  break;
-	}
-      }
-    }
-    delete [] scalediag;
-#endif
     
     delete dslv;
     delete [] ptrows;
