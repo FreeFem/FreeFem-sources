@@ -1,5 +1,15 @@
-@  changeset:   4203:c7d07950faaf
+@  changeset:   4205:4adf7dab4237
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Oct 18 15:28:48 2017 +0100
+|  summary:     put modif of pierre en coorect version of dissectio
+|
+o  changeset:   4204:e66c6ff01593
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Tue Oct 17 17:45:58 2017 +0200
+|  summary:     New FieldSplit preconditionner.
+|
+o  changeset:   4203:c7d07950faaf
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sun Oct 15 12:47:43 2017 +0200
 |  summary:     correct pb if LONG_MIN macro is undef .
