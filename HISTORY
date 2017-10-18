@@ -1,5 +1,10 @@
-@  changeset:   4202:a788a1ae88a0
+@  changeset:   4203:c7d07950faaf
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Oct 15 12:47:43 2017 +0200
+|  summary:     correct pb if LONG_MIN macro is undef .
+|
+o  changeset:   4202:a788a1ae88a0
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Sat Oct 14 17:57:36 2017 +0200
 |  summary:     updat download/dissection

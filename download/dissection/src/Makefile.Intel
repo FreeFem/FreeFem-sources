@@ -53,18 +53,19 @@ all:
 	@(cd Splitters;       $(MAKE) )
 	@(cd Algebra;         $(MAKE) )
 	@(cd Driver;          $(MAKE) )
+	@(cd Interfaces; $(MAKE) )
 	$(LD) $(LDOPT) -o libDissection.$(EXT_SHAREDLIB) \
 	Driver/*.o \
 	Algebra/*.o \
 	Splitters/*.o \
 	Compiler/*.o \
+	Interfaces/*.o \
 	$(LIB_METIS) \
 	$(LIB_SCOTCH) \
 	$(LIB_QD) \
         $(SHARED_BLAS) $(SHARED_COMPILER)
 	mv libDissection.$(EXT_SHAREDLIB) $(PROJ_LIBDIR)
-#	Interfaces/*.o \
-#	@(cd Interfaces; $(MAKE) )
+
 clean:
 	@(cd Compiler;        make clean)
 	@(cd Splitters;       make clean)

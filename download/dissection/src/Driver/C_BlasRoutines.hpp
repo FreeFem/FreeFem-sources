@@ -82,6 +82,14 @@ quadruple matrix_infty_norm<complex<octruple>,
 			    quadruple>(const int n,
 				       complex<octruple> *a, const int lda);
 #endif
+template<>
+float matrix_infty_norm<double, float>(const int n, double *a,
+					const int lda);
+
+template<>
+float matrix_infty_norm<complex<double>, float>(const int n, complex<double> *a,
+						const int lda);
+
 template<typename T>
 void full_ldlt(const int n, T *a, const int lda);
 
@@ -91,6 +99,8 @@ template<>
 void full_ldlh<double>(const int n, double *a, const int lda);
 template<>
 void full_ldlh<quadruple>(const int n, quadruple *a, const int lda);
+template<>
+void full_ldlh<float>(const int n, float *a, const int lda);
 
 template<typename T>
 void full_ldu(const int n, T *a, const int lda);
