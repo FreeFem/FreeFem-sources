@@ -2,10 +2,10 @@
 // NBPROC 1
 
 load "hpddm"                        // HPDDM plugin
+load "medit"
 macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
-include "cube.idp"
 
 macro def(i)[i, i#B, i#C]// EOM     // vector field definition
 macro init(i)[i, i, i]// EOM        // vector field initialization
@@ -20,23 +20,18 @@ if(mpisize != 1)
     exit(1);
 
 /*# DDMoptions #*/
-int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
-int fakeInterface = getARGV("-interface", 10);                  // interface between subdomains
 int s = getARGV("-split", 1);                                   // refinement factor
 
-int[int, int] LL = [[1,3], [2,2], [2,2]];
-real[int, int] BB = [[0,10], [0,1], [0,1]];
-int[int] NN = [10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5)];
-int[int] CC = [1, 1, 1];
-meshN ThBorder, Th = Cube(CC, BB, LL);
+int[int] LL = [2,3, 2,1, 2,2];
+meshN Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);                         // local finite element space
 /*# SchwarzMethod #*/
 int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
-    meshN ThGlobal = Cube(NN, BB, LL);      // global mesh
-    build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false)
+    meshN ThBorder, ThGlobal = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
+    build(Th, ThBorder, ThGlobal, 10, s, 1, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false)
 }
 
 real f = -9000.0;

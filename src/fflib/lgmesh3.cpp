@@ -438,7 +438,7 @@ typedef typename Mesh::Element Element;
   GlgElement(const Mesh * Th,Element * kk): pTh(Th),k(kk) {}
   operator int() const { Check(); return (* pTh)(k);} 
   GlgVertex<Mesh> operator [](const long & i) const { Check(); return GlgVertex<Mesh>(pTh,&(*k)[i]);}   
-  long lab() const {Check() ; return k ? k->lab : 0;}
+  long lab() const {Check() ; return k ? k->lab : LONG_MIN;}
   double mes() const {Check() ; return k->mesure() ;}
   long n() const { return k ? Element::nv: 0 ;}
     
@@ -1549,6 +1549,7 @@ void init_lgmesh3() {
    Add<pmesh3*>("mesure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
     Add<pmesh3*>("measure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
    Add<pmesh3*>("bordermesure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
+    Add<pmesh3*>("bordermeasure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
    Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
    Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
    Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));

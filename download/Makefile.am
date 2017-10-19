@@ -83,7 +83,11 @@ EXTRA_DIST= \
 ipopt/Makefile	\
 ipopt/Makefile.inc.in \
 ipopt/patch-IpBlas  \
-getall
+ff-petsc/Makefile \
+ff-petsc/Makefile-PETSc.inc \
+ff-petsc/Makefile.complex \
+ff-petsc/patch-slepc-3.7.4 \
+getall 
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 

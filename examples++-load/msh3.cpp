@@ -54,6 +54,7 @@ using namespace std;
 #include <vector>
 #include "msh3.hpp" // [[file:msh3.hpp]]
 #include "splitsimplex.hpp" // [[file:../src/femlib/splitsimplex.hpp]]
+#include "renumb.hpp"
 
 using namespace  Fem2D;
 
@@ -5130,7 +5131,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
     
     
     // computation of number of border elements and vertex without split
-    int nbe = 0;
+    int nbe = 0,nbei=0;
     int nt  = 0;
     int nv  = 0;
     int nvtrunc =0;
@@ -5170,7 +5171,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
                 else nbfi++; // internal face count 2 times ...
                 if(it==i || it <0) nbe += kksplit2;  //on est sur la frontiere
                 else if (!split[it]) nbe += kksplit2; //le voisin ne doit pas etre decoupe
-                else if ( (tagTonB[i]&tagb[j] ) != 0 && i<it) nbe += kksplit2; // internal boundary ..
+                else if ( (tagTonB[i]&tagb[j] ) != 0 && i<it) nbei++,nbe += kksplit2; // internal boundary ..
             }
             
             for (int e=0;e<6;e++){
@@ -5252,7 +5253,7 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
         cout << "  -- trunc (3d) : Th.nv= " << Th.nv << "kksplit="<< kksplit << endl;
     
     int ntnosplit  = nt/kksplit3;
-    int nbenosplit = nbe/kksplit2;
+    int nbenosplit = nbe/kksplit2-nbei;// warning true bounding => remove internal border
     int nfacenosplit = (4*ntnosplit+nbenosplit)/2;
     nv = ntnosplit*(nvsub - 4*( (kksplit+1)*(kksplit+2)/2 - 3*(kksplit-1) -3 ) - 6*( kksplit-1 ) - 4);
     if(verbosity>100) cout << "       1) nv= " << nv << endl;
@@ -5470,6 +5471,101 @@ Mesh3 * truncmesh(const Mesh3 &Th,const long &kksplit,int *split, bool kk, const
     return Tht;
 }
 
+void Renumb(Fem2D::Mesh3*& pTh)
+{
+    assert(pTh);
+    const Mesh3 & Th(*pTh);  // le maillage d'origne a decoupe
+    using  Fem2D::Triangle;
+    using  Fem2D::Vertex;
+    using  Fem2D::R2;
+    using  Fem2D::BoundaryEdge;
+    using  Fem2D::Mesh;
+    int nbv = Th.nv;
+    int nbt = Th.nt;
+    int* xadg = new int[nbv + 1];
+    int nve = Mesh3::Rd::d + 1;
+    xadg[0] = 0;
+    std::vector<int> adjncy;
+    std::set<int>* adjncyVec = new std::set<int>[nbv]();
+    for(int k = 0; k < nbt; ++k) {
+        const Tet& K = Th[k];
+        for(int j = 0; j < nve - 1; ++j) {
+            for(int i = j + 1; i < nve; ++i) {
+                adjncyVec[Th.operator()(K[i])].insert(Th.operator()(K[j]));
+                adjncyVec[Th.operator()(K[j])].insert(Th.operator()(K[i]));
+            }
+        }
+    }
+    int cpt = 0;
+    for(int k = 0; k < nbv; ++k) {
+        cpt += adjncyVec[k].size();
+        xadg[k + 1] = cpt;
+    }
+    adjncy.reserve(xadg[nbv]);
+    for(int k = 0; k < nbv; ++k) {
+        for (std::set<int>::iterator it = adjncyVec[k].begin(); it != adjncyVec[k].end(); ++it)
+            adjncy.push_back(*it);
+    }
+    delete [] adjncyVec;
+    // renumb::i4vec_print ( nbt + 1, xadg, "  ADJ_ROW:" );
+    // renumb::adj_print ( nbt, adjncy.size(), xadg,adjncy.data() , "  ADJ" );
+    int bandwidth;
+    if(verbosity > 2) {
+        bandwidth = renumb::adj_bandwidth ( nbv, adjncy.size(), xadg, &(adjncy[0]) );
+        cout << "\n";
+        cout << "  ADJ bandwidth = " << bandwidth << "\n";
+    }
+    int* perm = renumb::genrcm ( nbv, adjncy.size(), xadg, &(adjncy[0]) );
+    int* perm_inv = renumb::perm_inverse3 ( nbv, perm );
+    if(verbosity > 2) {
+        bandwidth = renumb::adj_perm_bandwidth ( nbv, adjncy.size(), xadg, &(adjncy[0]),
+                perm, perm_inv );
+
+        cout << "\n";
+        cout << "  ADJ bandwidth after RCM permutation = " << bandwidth << "\n";
+    }
+    delete [] xadg;
+    int nbe = Th.nbe;
+    Vertex3 * v= new Vertex3[nbv];
+    Tet *t= new Tet[nbt];
+    Triangle3 *b  = new Triangle3[nbe];
+    Vertex3 *vv=v;
+    for (int i=0;i<nbv;i++)
+    {
+        const Vertex3 & V=Th(perm[i]);
+        vv->x=V.x;
+        vv->y=V.y;
+        vv->z=V.z;
+        vv->lab = V.lab;
+        vv++;
+    }
+
+    Tet *tt= t;
+
+    for (int i=0;i<nbt;i++)
+    {
+        int i0=perm_inv[Th(i,0)], i1=perm_inv[Th(i,1)],i2=perm_inv[Th(i,2)],i3=perm_inv[Th(i,3)];
+        int ivt[4] = {i0,i1,i2,i3};
+        (*tt++).set(v,ivt,Th[i].lab);
+    }
+
+    Triangle3 * bb=b;
+    for (int i=0;i<nbe;i++)
+    {
+        const Triangle3 &K(Th.be(i));
+        int ivv[3];
+
+        ivv[0] = perm_inv[Th.operator()(K[0])];
+        ivv[1] = perm_inv[Th.operator()(K[1])];
+        ivv[2] = perm_inv[Th.operator()(K[2])];
+        (bb++)->set( v, ivv, K.lab);
+    }
+    delete [] perm_inv;
+    delete [] perm;
+    delete pTh;
+    pTh = new Mesh3(nbv,nbt,nbe,v,t,b);
+    pTh->BuildGTree();
+}
 
 AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
     
@@ -5479,7 +5575,7 @@ AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
   long label =arg(1,stack,2L);
    KN<long> * pn2o =  arg(2,stack);
 KN<long> * po2n =  arg(3,stack);
-  bool renum=arg(4,stack,true);// not use to day to by compatible with 2d version ...
+  bool renum=arg(4,stack,false);
     
   KN<int> split(Th.nt);
   split=kkksplit;
@@ -5522,7 +5618,7 @@ KN<long> * po2n =  arg(3,stack);
             }
             else o2n[k]=-1;
     }
-  // if(renum) Tht->renum(); do not  exist ???? FH ....
+  if(renum) Renumb(Tht);
   Add2StackOfPtr2FreeRC(stack,Tht);//  07/2008 FH
   *mp=mps;
   return Tht;
@@ -6465,6 +6561,478 @@ long GetBorder(const Mesh3 *pth,KN<long> *pb)
 }
 
 // <<WITH_NO_INIT>> because i include this file in tetgen.cpp (very bad) [[file:tetgen.cpp::WITH_NO_INIT]]
+
+// ORIG-DATE:   September 2017
+// -*- Mode : c++ -*%
+//
+// SUMMARY  : interface avec le logiciel gmsh
+// USAGE    : LGPL
+// ORG      : LJLL Universite Pierre et Marie Curie, Paris,  FRANCE
+// AUTHOR   : Frederic Hecht
+// E-MAIL   : Frederic Hecht@ann.jussieu.fr
+//
+
+/*
+ This file is part of Freefem++
+ 
+ Freefem++ is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or
+ (at your option) any later version.
+ 
+ Freefem++  is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with Freefem++; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ 
+ Thank to the ARN ()  FF2A3 grant
+ ref:ANR-07-CIS7-002-01
+ */
+
+//  FH   July 2017 a cartienne cube
+//
+#include "ff++.hpp"
+
+using namespace Fem2D;
+// genere with split-Hexa-simplexe.cpp (Thank to D. Bernardi)
+const int nbsimplexes =58;
+const int simplexes[nbsimplexes][4] = {
+    { /* -   0 */ 5,3,6,7},
+    { /* -   1 */ 5,2,6,7},
+    { /* -   2 */ 5,1,6,7},
+    { /* -   3 */ 5,0,6,7},
+    { /* -   4 */ 4,3,6,7},
+    { /* -   5 */ 4,2,6,7},
+    { /* -   6 */ 4,1,6,7},
+    { /* -   7 */ 4,0,6,7},
+    { /* +   8 */ 1,3,6,7},
+    { /* +   9 */ 0,3,6,7},
+    { /* +  10 */ 1,2,6,7},
+    { /* +  11 */ 0,2,6,7},
+    { /* +  12 */ 3,4,5,7},
+    { /* +  13 */ 2,4,5,7},
+    { /* +  14 */ 1,4,5,7},
+    { /* +  15 */ 0,4,5,7},
+    { /* -  16 */ 3,2,5,7},
+    { /* -  17 */ 3,0,5,7},
+    { /* +  18 */ 1,2,5,7},
+    { /* -  19 */ 1,0,5,7},
+    { /* -  20 */ 3,2,4,7},
+    { /* +  21 */ 1,3,4,7},
+    { /* +  22 */ 1,2,4,7},
+    { /* +  23 */ 0,2,4,7},
+    { /* -  24 */ 1,0,4,7},
+    { /* -  25 */ 2,1,3,7},
+    { /* -  26 */ 2,0,3,7},
+    { /* +  27 */ 0,1,3,7},
+    { /* +  28 */ 0,1,2,7},
+    { /* +  29 */ 3,4,5,6},
+    { /* +  30 */ 2,4,5,6},
+    { /* +  31 */ 1,4,5,6},
+    { /* +  32 */ 0,4,5,6},
+    { /* -  33 */ 3,2,5,6},
+    { /* -  34 */ 3,1,5,6},
+    { /* -  35 */ 3,0,5,6},
+    { /* -  36 */ 2,0,5,6},
+    { /* -  37 */ 1,0,5,6},
+    { /* -  38 */ 3,2,4,6},
+    { /* -  39 */ 3,0,4,6},
+    { /* +  40 */ 1,2,4,6},
+    { /* -  41 */ 1,0,4,6},
+    { /* -  42 */ 2,1,3,6},
+    { /* -  43 */ 2,0,3,6},
+    { /* +  44 */ 0,1,3,6},
+    { /* +  45 */ 0,1,2,6},
+    { /* +  46 */ 1,3,4,5},
+    { /* +  47 */ 0,3,4,5},
+    { /* +  48 */ 1,2,4,5},
+    { /* +  49 */ 0,2,4,5},
+    { /* -  50 */ 2,1,3,5},
+    { /* -  51 */ 2,0,3,5},
+    { /* +  52 */ 0,1,3,5},
+    { /* +  53 */ 0,1,2,5},
+    { /* -  54 */ 2,1,3,4},
+    { /* -  55 */ 2,0,3,4},
+    { /* +  56 */ 0,1,3,4},
+    { /* +  57 */ 0,1,2,4}};
+const int nhex_decoupe=74;
+const int hex_decoupe[74][7] = {// 74
+    { /* 1 */ 5,57,22,25,14,5, -1},
+    { /* 2 */ 5,32,35,52,43,0, -1},
+    { /* 1 */ 6,57,54,46,29,38,0},
+    { /* 2 */ 6,57,54,46,12,20,5},
+    { /* 3 */ 6,57,54,46,12,4,38},
+    { /* 4 */ 6,57,54,21,14,20,5},
+    { /* 5 */ 6,57,54,21,14,4,38},
+    { /* 6 */ 6,57,48,50,33,30,0},
+    { /* 7 */ 6,57,48,50,16,13,5},
+    { /* 8 */ 6,57,48,50,16,1,30},
+    { /* 9 */ 6,57,48,18,25,13,5},
+    { /* 10 */ 6,57,48,18,25,1,30},
+    { /* 11 */ 6,57,40,42,34,31,0},
+    { /* 12 */ 6,57,40,42,8,6,14},
+    { /* 13 */ 6,57,40,42,8,2,31},
+    { /* 14 */ 6,57,40,10,25,6,14},
+    { /* 15 */ 6,57,40,10,25,2,31},
+    { /* 16 */ 6,55,56,46,29,38,0},
+    { /* 17 */ 6,55,56,46,12,20,5},
+    { /* 18 */ 6,55,56,46,12,4,38},
+    { /* 19 */ 6,55,56,21,14,20,5},
+    { /* 20 */ 6,55,56,21,14,4,38},
+    { /* 21 */ 6,55,47,52,29,38,0},
+    { /* 22 */ 6,55,47,52,12,20,5},
+    { /* 23 */ 6,55,47,52,12,4,38},
+    { /* 24 */ 6,49,53,50,33,30,0},
+    { /* 25 */ 6,49,53,50,16,13,5},
+    { /* 26 */ 6,49,53,50,16,1,30},
+    { /* 27 */ 6,49,53,18,25,13,5},
+    { /* 28 */ 6,49,53,18,25,1,30},
+    { /* 29 */ 6,49,51,52,33,30,0},
+    { /* 30 */ 6,49,51,52,16,13,5},
+    { /* 31 */ 6,49,51,52,16,1,30},
+    { /* 32 */ 6,41,45,42,34,31,0},
+    { /* 33 */ 6,41,45,42,8,6,14},
+    { /* 34 */ 6,41,45,42,8,2,31},
+    { /* 35 */ 6,41,45,10,25,6,14},
+    { /* 36 */ 6,41,45,10,25,2,31},
+    { /* 37 */ 6,41,44,43,34,31,0},
+    { /* 38 */ 6,41,44,43,8,6,14},
+    { /* 39 */ 6,41,44,43,8,2,31},
+    { /* 40 */ 6,39,56,46,29,0,43},
+    { /* 41 */ 6,39,56,46,12,4,43},
+    { /* 42 */ 6,39,56,21,14,4,43},
+    { /* 43 */ 6,39,47,52,29,0,43},
+    { /* 44 */ 6,39,47,52,12,4,43},
+    { /* 45 */ 6,32,37,45,42,34,0},
+    { /* 46 */ 6,32,37,45,42,8,2},
+    { /* 47 */ 6,32,37,45,10,25,2},
+    { /* 48 */ 6,32,37,44,43,34,0},
+    { /* 49 */ 6,32,37,44,43,8,2},
+    { /* 50 */ 6,32,36,53,50,33,0},
+    { /* 51 */ 6,32,36,53,50,16,1},
+    { /* 52 */ 6,32,36,53,18,25,1},
+    { /* 53 */ 6,32,36,51,52,33,0},
+    { /* 54 */ 6,32,36,51,52,16,1},
+    { /* 55 */ 6,32,3,19,28,11,25},
+    { /* 56 */ 6,32,3,19,27,26,11},
+    { /* 57 */ 6,32,3,19,27,9,43},
+    { /* 58 */ 6,32,3,17,52,26,11},
+    { /* 59 */ 6,32,3,17,52,9,43},
+    { /* 60 */ 6,23,28,24,14,25,5},
+    { /* 61 */ 6,23,28,19,15,25,5},
+    { /* 62 */ 6,23,26,27,24,14,5},
+    { /* 63 */ 6,23,26,27,19,15,5},
+    { /* 64 */ 6,23,26,17,52,15,5},
+    { /* 65 */ 6,7,24,28,11,25,14},
+    { /* 66 */ 6,7,24,27,26,11,14},
+    { /* 67 */ 6,7,24,27,9,43,14},
+    { /* 68 */ 6,7,15,19,28,11,25},
+    { /* 69 */ 6,7,15,19,27,26,11},
+    { /* 70 */ 6,7,15,19,27,9,43},
+    { /* 71 */ 6,7,15,17,52,26,11},
+    { /* 72 */ 6,7,15,17,52,9,43}};
+
+
+
+class Cube_Op : public E_F0mps
+{
+public:
+    Expression filename;
+    static const int n_name_param = 3; //
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param],enx,eny,enz,xx,yy,zz;
+public:
+    Cube_Op(const basicAC_F0 &  args,Expression nx,Expression ny,Expression nz,Expression transfo=0)
+    : enx(nx),eny(ny),enz(nz),xx(0),yy(0),zz(0) 
+    {
+        args.SetNameParam(n_name_param,name_param,nargs);
+        if(transfo)
+        {
+            const E_Array * a2 = dynamic_cast<const E_Array *>(transfo);
+            int err =0;
+            //cout << nargs[0] << " "<< a1 << endl;
+            //cout << nargs[1] << " "<< a2 << endl;
+            if(a2) {
+                if(a2->size() !=3)
+                    CompileError("Cube (n1,n2,n3, [X,Y,Z]) ");
+                xx=to<double>( (*a2)[0]);
+                yy=to<double>( (*a2)[1]);
+                zz=to<double>( (*a2)[2]);
+            }
+            
+            
+        }
+        
+    }
+    
+    AnyType operator()(Stack stack)  const ;
+};
+basicAC_F0::name_and_type Cube_Op::name_param[]= {
+    {  "region", &typeid(long)},
+    {  "label", &typeid(KN_<long>)},
+    {  "flags", &typeid(long)}
+};
+
+
+class Cube : public OneOperator { public:
+    int cas;
+    Cube() : OneOperator(atype<pmesh3>(),atype<long>(),atype<long>(),atype<long>()),cas(0) {}
+    Cube(int ) : OneOperator(atype<pmesh3>(),atype<long>(),atype<long>(),atype<long>(),atype<E_Array>()),cas(1) {}
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    {  if(cas==0)
+        return  new Cube_Op( args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]) );
+    else{
+        return  new Cube_Op( args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]) );
+        
+    }
+        
+    }
+};
+struct MovePoint {
+    Stack stack;
+    Expression xx,yy,zz;
+    MeshPoint *mp , mps;
+    MovePoint(Stack ss,Expression x,Expression y, Expression z)
+    :stack(ss),xx(x),yy(y),zz(z),mp(MeshPointStack(ss)),mps(*mp){}
+    ~MovePoint() { *mp=mps;}
+    R3 eval(R3 P)
+    {  R3 Q;
+        mp->set(P.x,P.y,P.z);
+        Q.x=GetAny<double>((*xx)(stack));
+        Q.y=GetAny<double>((*yy)(stack));
+        Q.z=GetAny<double>((*zz)(stack));
+        return Q;
+    }
+};
+
+Mesh3 * BuildCube(long nx,long ny,long nz,long region,long *label,long kind,MovePoint *tf=0)
+{
+    const int (* const nvface)[3]  = Tet::nvface;
+    int debug = verbosity!=0 + verbosity/10 ;
+    int codesb[64],kcode[20];
+    int kstable=0;
+    if(debug) cout << "  Enter: BuildCube: " << kind << endl;
+    int code6=-1;
+    for(int i=0; i<64; ++i)
+    {
+        codesb[i] =-1;
+        int d[6]; //
+        for(int b=0; b< 6; ++b)
+            d[b] = ( i & (1<< b)) !=0;
+        if ( d[0] ==d[1] && d[2]==d[3] && d[4] == d[5]) // stable
+        {
+            if(debug>3) cout << " code stable " << i << " n " << kstable << endl;
+            kcode[kstable]=i;
+            codesb[i] = kstable++;
+        }
+    }
+    int df[74]; // decoupe des 6  du cube
+    {
+        int l8[8];
+        int diag[8]={0,0,0,1,0,1,1,0};
+        int cdiag[8]={0,0,0,0,0,0,0,0},col=0;
+        for(int c=0;c<2;++c)
+            for(int b=0;b<2;++b)
+                for(int a=0;a<2;++a)
+                {
+                    l8[a+2*b+4*c] = 1*(a==0) + 2*( a == 1) + 4 *(b==0) + 8 *(b == 1) + 16* (c==0) + 32* ( c == 1);
+                }
+        
+        for(int d=0; d<nhex_decoupe; ++d)
+        {
+            int dk=0;
+            int dd[7]={-1,-1,-1,-1,-1,-1,-1};
+            for (int kt=2; kt<=hex_decoupe[d][0]; ++kt)
+            {
+                int k=hex_decoupe[ d ][kt];
+                const int *nu=simplexes[k];
+                for (int f=0; f<4; ++f)
+                { // pour le 4 face
+                    int b=0;
+                    int nf[3]={ nu[nvface[f][0]], nu[nvface[f][1]],nu[nvface[f][2]]};
+                    int l = l8[nf[0]]  & l8[nf[1]] & l8[nf[2]] ;
+                    for(int k=0; k<6; ++k)
+                        if( l == (1<<k))
+                        {  // boundary face
+                            // arete diagonal =>
+                            // k =  2*i + j; // i => normal 0,1,2 , j = min , max (0,1)
+                            // vecteur i+1 %2 , i+2 %3
+                            int ni = k/2, j0 = k%2;
+                            int oi = (1<<ni)*j0;
+                            int j1 =  1 << (ni+1)%3;
+                            int j2 =  1 << (ni+2)%3;
+                            if(j1>j2) std::swap(j1,j2);
+                            int i4[]={oi , oi+j1, oi+ j1+j2, oi+j2};//  4 sommet de la face
+                            int c1=++col, c2=++col;
+                            cdiag[i4[0]] = cdiag[i4[2]] = c1; //diag 1
+                            cdiag[i4[1]] = cdiag[i4[3]] = c2; //diag 2
+                            for(int e=0; e<3; ++e)
+                            {
+                                int i0 = nf[e], i1= nf[(e+1)%3];
+                                int di;
+                                if( cdiag[i0]==cdiag[i1])
+                                {
+                                    if( cdiag[i0]==c1 )// diag1   pointe vers plus petit  numero ...
+                                        di=0;
+                                    else // diag2
+                                        di=1;
+                                    
+                                    if(debug>5) cout <<d << " f " << f << " k " << k << " i =" << i0 << " " << i1
+                                        << " fc =" <<  i4[0] << " " <<i4[1] << " " <<i4[2] << " " <<i4[3] << " J=  " << j1 << " " << j2 << " di = " << di <<  endl;
+                                    if (dd[k]<0) dd[k]=di;
+                                    else  ffassert(dd[k]==di);
+                                }
+                                
+                            }
+                        }
+                }
+            }
+            int code =0;
+            for(int i=0,p=1; i<6; ++i, p*=2)
+                code += dd[i]*p;
+            if(code==0) code6=d;
+            if( codesb[code]  >=0 )
+            {
+                kcode[codesb[code]]=d; //  save decoupe ok ..
+            }
+            if(debug>3) cout <<"\t"<< d << " " << code << " // " << codesb[code]  <<endl;
+            df[d]=code;
+        }
+    }
+    
+    int ntetcube= abs(kind)==5 ? 5 : 6;
+    if(kind!=6)code6 =  kcode[abs(kind) % kstable] ;
+    if( verbosity )  cout << "    kind = "<< kind << " n tet Cube = " <<ntetcube << " / n slip 6 " << code6 << endl;
+    int nc = (nx)*(ny)*(nz);
+    int nv = (nx+1)*(ny+1)*(nz+1), nt=nc*ntetcube ,nbe=4*(nx*ny+nx*nz+ny*nz);
+    int nj = nx+1;
+    int nk = nj*(ny+1);
+    
+    Vertex3   *vff = new Vertex3[nv];
+    double x0=0,y0=0,z0=0;
+    double xd=1./nx,yd=1./ny,zd=1./nz;
+    
+    for(int p=0,k=0; k<= nz; ++k)
+        for(int j=0; j<= ny; ++j)
+            for(int i=0; i<= nx; ++i,++p)
+            {
+                vff[p].x=x0+xd*i;
+                vff[p].y=y0+yd*j;
+                vff[p].z=z0+zd*k;
+                vff[p].lab = 1*(i==0) + 2*( i == nx) + 4 *(j==0) + 8 *(j == ny) + 16* (k==0) + 32* ( k == nz);
+                if(tf) (R3 &) vff[p]= tf->eval(vff[p]);
+                if(debug>9) cout << p << " : " << vff[p] << endl;
+                assert(p == i+nj*j+nk*k);
+            }
+    
+    Tet *tff  = new Tet[nt];
+    Triangle3 *bff  = new Triangle3[nbe];
+    
+    int ppinit=0;
+    int nff[6]={3,1,0,2,4,5}; //  renumbering for face cube
+    int kf=0,p=0;
+    for(int k=0; k< nz; ++k)
+    {
+        for(int j=0; j< ny; ++j)
+        {
+            
+            for(int i=0; i< nx; ++i)
+            {
+                int pair = ntetcube ==6? code6 : (ppinit+k+j+i)%2;
+                int n[8];
+                for(int c=0;c<2;++c)
+                    for(int b=0;b<2;++b)
+                        for(int a=0;a<2;++a)
+                            n[a+2*b+4*c] = (i+a)+nj*(j+b)+nk*(k+c) ;
+                if(debug>9) cout << "  h " << n[0] << " " <<n[1] << " "
+                    << n[2] << " " <<n[3] << " "
+                    << n[4] << " " <<n[5] << " "
+                    << n[6] << " " <<n[7] << endl;
+                for (int d=0;d<ntetcube;++d)
+                {
+                    int nu[4];
+                    int kt = hex_decoupe[pair][d+1];
+                    for(int i=0; i<4;++i)
+                    {
+                        nu[i] = n[ simplexes[ kt ][i]];
+                        assert(nu[i]>=0 && nu[i] < nv);
+                    }
+                    tff[p].set(vff,nu,region);
+                    
+                    if(debug>4)  cout << " tet = " << p << " " << nu[0] << " " << nu[1] << " " << nu[2] << " " << nu[3] << " / " << kt << " " << tff[p].mesure() << endl;
+                    for (int f=0; f<4; ++f)
+                    { // pour le 4 face
+                        int b=0;
+                        int nf[3]={ nu[nvface[f][0]], nu[nvface[f][1]],nu[nvface[f][2]]};
+                        int l = vff[nf[0]].lab & vff[nf[1]].lab & vff[nf[2]].lab;
+                        for(int k=0; k<6; ++k)
+                        {
+                            int lk = 1 << k; // 2^k
+                            if( l==lk)
+                            {
+                                if(debug>9)  cout <<kf<< " " << l << " " <<k<< " :" << nf[0] << " " << nf[1] << " " << nf[2] << " / " << nff[k] << endl;
+                                int lf = label[nff[k]];
+                                bff[kf].set(vff,nf,lf);
+                                
+                                kf++;
+                            }
+                            
+                            
+                        }
+                        
+                        
+                    }
+                    p++;
+                }
+            }
+        }
+    }
+    if(verbosity) cout << "  Cube  nv=" << nv << " nt=" << nt << " nbe=" << nbe << endl;
+    assert(nbe== kf);
+    assert(nt = p);
+    if(debug) cout << "  Out:  BuildCube" << endl;
+    
+    return new Mesh3(nv,nt,nbe,vff,tff,bff);
+    
+}
+
+AnyType Cube_Op::operator()(Stack stack)  const
+{
+    long nx,ny,nz,region=0,label[]={1,2,3,4,5,6},kind=6;
+    nx = GetAny<long>( (*enx)(stack) );
+    ny = GetAny<long>( (*eny)(stack) );
+    nz = GetAny<long>( (*enz)(stack) );
+    int renumsurf = 0;
+    if( nargs[0] )   region = GetAny<long>( (*nargs[0])(stack) );
+    if( nargs[2] )   kind = GetAny<long>( (*nargs[2])(stack) );
+    if( nargs[1] ) {
+        KN<long> l  = GetAny<KN_<long> >( (*nargs[1])(stack) );
+        ffassert(l.N()==6);
+        for(int i=0; i<6; ++i)
+            label[i]=l[i];
+    }
+    
+    Mesh3 * Th3_t = 0;
+    if( xx && yy && zz )
+    {
+        MovePoint pf(stack,xx,yy,zz);
+        Th3_t=BuildCube(nx,ny,nz,region,label,kind,&pf);
+    }
+    else
+        Th3_t=BuildCube(nx,ny,nz,region,label,kind);
+    Th3_t->BuildGTree();
+    Add2StackOfPtr2FreeRC(stack,Th3_t);
+    
+    return Th3_t;
+}
+
+
+
 #ifndef WITH_NO_INIT
 
 // <<dynamic_loading>>
@@ -6496,8 +7064,11 @@ static void Load_Init()
   Global.Add("deplacement","(",new DeplacementTab);
   Global.Add("checkbemesh","(",new CheckManifoldMesh);  
   Global.Add("buildlayers","(",new  BuildLayerMesh);  
-  Global.Add("cube","(",new  cubeMesh);
-  Global.Add("cube","(",new  cubeMesh(1));
+  Global.Add("bcube","(",new  cubeMesh);
+  Global.Add("bcube","(",new  cubeMesh(1));
+  Global.Add("cube","(",new Cube);
+  Global.Add("cube","(",new Cube(1));
+    
   Global.Add("trunc","(", new Op_trunc_mesh3);
   Global.Add("gluemesh","(",new Op_GluMesh3tab);
 

@@ -25,9 +25,9 @@ TESTS=   diffusion-2d-PETSc.edp	diffusion-2d-PETSc-complex.edp diffusion-3d-PETS
 diffusion-2d.edp	diffusion-3d.edp	elasticity-2d.edp	elasticity-3d.edp	heat-2d.edp		helmholtz-2d.edp	maxwell-3d.edp \
 diffusion-3d-simple.edp	elasticity-3d-simple.edp \
 stokes-2d-PETSc.edp 	stokes-3d-PETSc.edp	stokes-3d.edp	stokes-2d.edp	diffusion-2d-substructuring.edp	elasticity-2d-substructuring.edp \
-laplace-2d-SLEPc.edp				laplace-complex-2d-SLEPc.edp			schrodinger-2d-axial-well-SLEPc.edp \
+laplace-2d-SLEPc.edp				laplace-complex-2d-SLEPc.edp			 \
 laplace-2d-spherical-harmonics-SLEPc.edp	schrodinger-1d-harmonic-oscillator-SLEPc.edp	schrodinger-2d-harmonic-oscillator-SLEPc.edp \
-laplace-2d-torus-SLEPc.edp			schrodinger-1d-square-well-SLEPc.edp 
+laplace-2d-torus-SLEPc.edp			schrodinger-1d-square-well-SLEPc.edp  helmholtz-2d.edp
 
 XFAIL_TESTS=$(TESTS)
 

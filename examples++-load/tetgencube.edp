@@ -71,8 +71,8 @@ func mv2z = z;
 //savemesh(Thmv2,"halfcylindricalshell.mesh");
 verbosity=2;
 mesh3 Thmv2surf = movemesh(Th33, [mv2x,mv2y,mv2z], facemerge=0);
-cout << "\b\b Thmv2surf.mesure=" << Thmv2surf.mesure << endl;
-cout << " Thmv2surf.bordermesure=" << Thmv2surf.bordermesure << endl;
+cout << "\b\b Thmv2surf.measure=" << Thmv2surf.measure << endl;
+cout << " Thmv2surf.bordermeasure=" << Thmv2surf.bordermeasure << endl;
 
 medit("maiAllagesurf",Thmv2surf,wait=1);
 //savemesh(Thmv2surf,"maillagesurfacecylindre.mesh");

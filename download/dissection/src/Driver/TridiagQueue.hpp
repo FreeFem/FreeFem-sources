@@ -85,7 +85,8 @@ public:
 		     const double eps_pivot,
 		     const bool kernel_detection_all,
 		     const int aug_dim,
-		     const U eps_machine);
+		     const U eps_machine,
+		     const bool higher_precision = false);
 
   void exec_fwbw(T *x, const int nrhs, bool isTrans);
 

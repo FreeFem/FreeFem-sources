@@ -59,8 +59,10 @@ extern"C" {
 }
 
 #include "Compiler/DebugUtils.hpp"
-#include "BitTools/BitManipulations.hpp"
-#include "ScotchSplitter.hpp"
+#include "Compiler/arithmetic.hpp"
+#include "Splitters/BitManipulations.hpp"
+#include "Splitters/ScotchSplitter.hpp"
+#include "Compiler/DissectionIO.hpp"
 
 #define TOO_SMALL 16
 
@@ -112,13 +114,6 @@ compLevelOfDoms(int nbDoms, int maxLevels,
       }
       if (levels[iCurScan]!=levels[iEndScan]+1) { // Ooops, wrong level for the first domain
 	int diff = levels[iCurScan]-levels[iEndScan]-1;// Correction to do
-#if 0 // verbose
-	if (diff < 0) {
-	  std::cerr << "iCurScan = " << iCurScan << ", iEndScan = " << iEndScan << std::endl;
-	  std::cerr << "levels[" << iCurScan << "] = " << levels[iCurScan]
-		    << ", levels[" << iEndScan << "] = " << levels[iEndScan] << std::endl;
-	}
-#endif
 	assert(diff > 0);
 	iCurScan = iDebScan;
 	while (iCurScan != iEndScan) {
@@ -133,10 +128,6 @@ compLevelOfDoms(int nbDoms, int maxLevels,
   memset(nbDomsPerLevel,0,nbLvls*sizeof(int));
   for (int i = 0; i < nbDoms; i++) {
     assert(levels[i] >= 0);
-#if 0 // verbose
-    if (levels[i]>=nbLvls) std::cerr << "levels[" << i << "] = " << levels[i]
-					<< std::endl;
-#endif
     CHECK((levels[i]<nbLvls),"Wrong levels value ?");
     CHECK((i<nbDoms), "Wrong value for i");
     nbDomsPerLevel[levels[i]] += 1;
@@ -159,10 +150,8 @@ ScotchSplitter(unsigned dim,
   if (verbose) {
     int vers, rela, patc;
     SCOTCH_version(&vers, &rela, &patc);
-    fprintf(fp, "%s %d : Soctch version : %d.%d.%d\n",
-	    __FILE__, __LINE__, vers, rela, patc);
-    //      fprintf(fp, "%s %d : 0 : ptRows = %p indCols = %p\n", 
-    //	    __FILE__, __LINE__, (void *)ptRows, (void *)indCols);
+    diss_printf(verbose, fp, "%s %d : Soctch version : %d.%d.%d\n",
+		__FILE__, __LINE__, vers, rela, patc);
   }
   // Allocate and initialize the Scotch graph
   SCOTCH_Graph ptGraph;
@@ -185,9 +174,8 @@ ScotchSplitter(unsigned dim,
     //TRACE("Check Scotch graph\n");
     ierr = SCOTCH_graphCheck(&ptGraph);
     if (ierr) {
-      if (verbose) {
-	fprintf(fp, "Failed the checking of the graph : bad data ?\n");
-      }
+      diss_printf(verbose, fp,
+		  "Failed the checking of the graph : bad data ?\n");
       SCOTCH_graphFree(&ptGraph);
       return false;
     }
@@ -202,9 +190,7 @@ ScotchSplitter(unsigned dim,
   char *str_Strat = new char[1024];
   int nbLvls = std::min(unsigned(nbMaxLevels),
 			highestbit(unsigned(dim/minSize)));
-  if (verbose) {
-    fprintf(fp, "nbLevels = %d\n", nbLvls);
-  }
+  diss_printf(verbose, fp, "nbLevels = %d\n", nbLvls);
   sprintf(str_Strat,"c{rat=0.7,cpr=n{sep=/((levl<%d)|(vert>%d))?m{type=h,rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},org=h{pass=10}f{bal=0.2}}}|m{type=h,rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},org=h{pass=10}f{bal=0.2}}};,ole=f{cmin=%d,cmax=%d,frat=0.05},ose=s},unc=n{sep=/(levl<%d)?(m{type=h,rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},org=h{pass=10}f{bal=0.2}}})|m{type=h,rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},org=h{pass=10}f{bal=0.2}}};,ole=f{cmin=%d,cmax=%d,frat=0.05},ose=s}}",
 	  nbLvls-1,2*minSize-1,minSize,dim,nbLvls-1,minSize,dim);
   //  DBG_PRINT("Strategy string : %s\n", str_Strat);
@@ -229,7 +215,7 @@ ScotchSplitter(unsigned dim,
 			     (SCOTCH_Num*)rangtab,
 			     (SCOTCH_Num*)treetab);
     if (ierr) {
-      fprintf(fp, "Failed reordering sparse matrix graph !\n");
+      diss_printf(verbose, fp, "Failed reordering sparse matrix graph !\n");
       SCOTCH_stratExit(&ptStrat);
       SCOTCH_graphFree(&ptGraph);
       return false;
@@ -239,15 +225,6 @@ ScotchSplitter(unsigned dim,
 //    int *nbDomsPerLevels;// = new int[nbLvls];
     unsigned nbLvlsScotch= compLevelOfDoms(nbSplitDoms, nbLvls, treetab, levels,
 					   nbDomsPerLevels);
-# if 0 //defined(DISSECTION_DEBUG)
-    printf("Level of each domains : \n");
-    for (int i = 0; i < nbSplitDoms; i++)
-      printf("Domain % d : level %d\n",i+1,levels[i]);
-    printf("Domains per level :\n");
-    for (int i = 0; i < nbLvls; i++) {
-      printf("Level %d : %d domains\n",i,nbDomsPerLevels[i]);
-    }
-# endif
     /** Search last level where number of domains is a power of two
      */
     lastCompleteLevel = 0;
@@ -305,17 +282,10 @@ ScotchSplitter(unsigned dim,
     begDom += sizeOfDomains[indDom];
     indDomPerLevel[levels[i]] += 1;
   }
-  if (verbose) {
-    fprintf(fp, "%s %d : indDomPerlevel[lastCompleteLevel] = %d\n",
-	    __FILE__, __LINE__, indDomPerLevel[lastCompleteLevel]);
-  }
+  diss_printf(verbose, fp, "%s %d : indDomPerlevel[lastCompleteLevel] = %d\n",
+	      __FILE__, __LINE__, indDomPerLevel[lastCompleteLevel]);
   ptOnDomains[nbDoms] = dim;
   nbMaxLevels = lastCompleteLevel;
-  //  if (verbose) {
-  //    fprintf(fp, "%s %d : 5 : ptRows = %p indCols = %p\n", 
-  //	    __FILE__, __LINE__, (void *)ptRows, (void *)indCols);
-  //}
-  // Cleaning temporary arrays :
   delete [] indDomPerLevel;
   delete [] nbDomsPerLevels;
   delete [] levels;

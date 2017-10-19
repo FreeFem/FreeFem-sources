@@ -47,6 +47,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <cstdio>
@@ -66,12 +67,9 @@ struct dissection_solver_ptr
   DissectionSolver<double> *rptr;
   DissectionSolver<complex<double>, double> *cptr;
   DissectionSolver<quadruple, quadruple, double, double> *rqtr;
-  DissectionSolver<double, double, double, double, quadruple, quadruple> *rqtr_fwbw;
-  DissectionSolver<complex<quadruple>, quadruple,
-		   complex<double>, double,
-		   complex<quadruple>, quadruple> *cqtr;
+  DissectionSolver<double, double, quadruple, quadruple> *rqtr_fwbw;
+  DissectionSolver<complex<quadruple>, quadruple> *cqtr;
   DissectionSolver<complex<double>, double,
-		   complex<double>, double,
 		   complex<quadruple>, quadruple> *cqtr_fwbw;
   FILE *fp;
   bool verbose;
@@ -95,7 +93,6 @@ DISSECTION_API void DISS_VERSION(int *versn,
 DISSECTION_API void DISS_INIT(uint64_t &dslv_,
 			      const int &called,
 			      const int &real_or_complex,
-			      const int &quad_fact,
 			      const int &nthreads,
 			      const int &verbose)
 {
@@ -104,7 +101,7 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
   dslv_ = (uint64_t)new dissection_solver_ptr;
   dslv = (dissection_solver_ptr *)dslv_;
   dslv->real_or_complex = real_or_complex;
-  dslv->quad_fact = (quad_fact == 1);
+  dslv->quad_fact = false;
   dslv->called = called;
   dslv->symbolic = 0;
   dslv->numeric = 0;
@@ -165,36 +162,7 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
   if (nthreads > 0) {
     num_threads = nthreads;
   }
-  if (dslv->quad_fact) {
-    switch(real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr = new DissectionSolver<quadruple, quadruple,
-				    double, double>(num_threads, 
-						    (verbose != 0 ? true : false), 
-						    dslv->called, dslv->fp);
-      dslv->rqtr_fwbw = new DissectionSolver<double, double,
-					     double, double,
-					     quadruple, quadruple>(num_threads, 
-								   (verbose != 0 ? true : false), 
-								   dslv->called, dslv->fp);
-
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr = new DissectionSolver<complex<quadruple>, quadruple,
-					complex<double>, double,
-					complex<quadruple>, quadruple>(num_threads, 
-						  (verbose != 0 ? true : false), 
-						  dslv->called, dslv->fp);
-      dslv->cqtr_fwbw = new DissectionSolver<complex<double>, double,
-					     complex<double>, double,
-					     complex<quadruple>, quadruple>(num_threads, 
-						  (verbose != 0 ? true : false), 
-						  dslv->called, dslv->fp);
-
-      break;
-    }
-  }
-  else {
+  {
     switch(real_or_complex) {
     case DISSECTION_REAL_MATRIX:
       dslv->rptr = new DissectionSolver<double>(num_threads, 
@@ -314,30 +282,7 @@ DISSECTION_API void DISS_S_FACT(uint64_t &dslv_,
   //            = 2 : TRIDAIG without nested bisection
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
   //  int num_levels;
-#if 0
-  double *coefs;
-  const int nnz = ptRows[dim];
-  coefs = new double[nnz];
-  memset(coefs, 0, sizeof(double) * nnz);
-  SaveMMMatrix_(dim, nnz, false, false, ptRows, indCols, dslv->called, coefs);
-  delete [] coefs;
-#endif
   
-#if 0
-  switch(dslv->real_or_complex) {
-  case DISSECTION_REAL_MATRIX:
-    fout = dslv->rptr->get_filedescriptor();
-    break;
-  case DISSECTION_COMPLEX_MATRIX:
-    fout = dslv->cptr->get_filedescriptor();
-    break;
-  default:
-    if (dslv->verbose > 0) {
-      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-	      __FILE__, __LINE__, dslv->real_or_complex);
-    }
-  }
-#endif
   if (dslv->quad_fact) {
     switch(dslv->real_or_complex) {
     case DISSECTION_REAL_MATRIX:
@@ -419,22 +364,6 @@ DISSECTION_API void DISS_N_FACT(uint64_t &dslv_,
 #endif
   //  dslv->NumericFree(); // for debugging : 20 Nov.2013
     if (dslv->quad_fact) {
-      switch(dslv->real_or_complex) {
-	case DISSECTION_REAL_MATRIX:
-	  dslv->rqtr->NumericFact(dslv->numeric,
-				  (double *)coefs, scaling, 
-				  eps_pivot, 
-				  kernel_detection_all);
-	  dslv->rqtr_fwbw->CopyQueueFwBw(*(dslv->rqtr));
-	  break;
-      case DISSECTION_COMPLEX_MATRIX:
-	dslv->cqtr->NumericFact(dslv->numeric,
-				(complex<double> *)coefs, scaling, 
-				eps_pivot, 
-				kernel_detection_all);
-	dslv->cqtr_fwbw->CopyQueueFwBw(*(dslv->cqtr));
-	break;
-      }
     }
     else {
       switch(dslv->real_or_complex) {

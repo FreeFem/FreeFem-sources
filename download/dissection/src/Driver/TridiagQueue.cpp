@@ -48,10 +48,10 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <float.h>
 #include "Driver/TridiagQueue.hpp"
 #include "Algebra/VectorArray.hpp"
-
-#include <float.h>
+#include "Compiler/DissectionIO.hpp"
 
 template<typename T, typename U>
 void TridiagQueue<T, U>::
@@ -86,7 +86,7 @@ generate_queue(TridiagBlockMatrix<T, U> *tridiag,
   _coef = coef;
 
   if (_tridiag_solver == false) {
-    fprintf(stderr, "%s %d : tridiga_solver is not defined\n",
+    diss_printf(_verbose, stderr, "%s %d : tridiga_solver is not defined\n",
 	    __FILE__, __LINE__);
   }
   _allocated = true;
@@ -128,7 +128,6 @@ generate_queue(TridiagBlockMatrix<complex<double>, double> *tridiag,
 	       int *indVals,
 	       complex<double> *coef);
 
-
 template
 void TridiagQueue<complex<quadruple>, quadruple>::
 generate_queue(TridiagBlockMatrix<complex<quadruple>, quadruple> *tridiag,
@@ -140,10 +139,35 @@ generate_queue(TridiagBlockMatrix<complex<quadruple>, quadruple> *tridiag,
 	       int *indUnsymCol,
 	       int *indVals,
 	       complex<quadruple> *coef);
+
+template
+void TridiagQueue<float>::
+generate_queue(TridiagBlockMatrix<float> *tridiag,
+	       const int dim,
+	       const int nnz,
+	       const bool isMapped,
+	       int *remap_eqn,
+	       int *ptUnsymRows,
+	       int *indUnsymCol,
+	       int *indVals,
+	       float *coef);
+
+template
+void TridiagQueue<complex<float>, float>::
+generate_queue(TridiagBlockMatrix<complex<float>, float> *tridiag,
+	       const int dim,
+	       const int nnz,
+	       const bool isMapped,
+	       int *remap_eqn,
+	       int *ptUnsymRows,
+	       int *indUnsymCol,
+	       int *indVals,
+	       complex<float> *coef);
 //
 
 template<typename T, typename U>
 void TridiagQueue<T, U>::generate_queue_fwbw() {} // dummy
+
 template
 void TridiagQueue<double>::generate_queue_fwbw();
 
@@ -153,16 +177,21 @@ void TridiagQueue<quadruple>::generate_queue_fwbw();
 template
 void TridiagQueue<complex<double>, double>::generate_queue_fwbw();
 
-
 template
 void TridiagQueue<complex<quadruple>, quadruple>::generate_queue_fwbw();
+
+template
+void TridiagQueue<float>::generate_queue_fwbw();
+
+template
+void TridiagQueue<complex<float>, float>::generate_queue_fwbw();
 //
 
 template<typename T, typename U>
 void TridiagQueue<T, U>::exec_symb_fact() 
 {
   if (_tridiag_solver == false) {
-    fprintf(stderr, "%s %d : tridiga_solver is not defined\n",
+    diss_printf(_verbose, stderr, "%s %d : tridiga_solver is not defined\n",
 	    __FILE__, __LINE__);
   }
   vector<int> color_mask(_dim, 1);
@@ -182,6 +211,12 @@ void TridiagQueue<complex<double>, double>::exec_symb_fact();
 
 template
 void TridiagQueue<complex<quadruple>, quadruple>::exec_symb_fact();
+
+template
+void TridiagQueue<float>::exec_symb_fact();
+
+template
+void TridiagQueue<complex<float>, float>::exec_symb_fact();
 //
 
 template<typename T, typename U>
@@ -189,13 +224,14 @@ void TridiagQueue<T, U>::exec_num_fact(const int called,
 				       const double eps_pivot,
 				       const bool kernel_detection,
 				       const int aug_dim,
-				       const U eps_machine)
+				       const U eps_machine,
+				       const bool higher_precision)
 {
   double pivot;
   vector<int> list_sing;
   double nopd;
   if (_tridiag_solver == false) {
-    fprintf(stderr, "%s %d : tridiga_solver is not defined\n",
+    diss_printf(_verbose, stderr, "%s %d : tridiga_solver is not defined\n",
 	    __FILE__, __LINE__);
   }
 
@@ -203,6 +239,7 @@ void TridiagQueue<T, U>::exec_num_fact(const int called,
 			eps_pivot,
 			&pivot,
 			kernel_detection,
+			higher_precision,
 			aug_dim,
 			eps_machine,
 			&nopd);
@@ -213,7 +250,8 @@ void TridiagQueue<double>::exec_num_fact(const int called,
 					 const double eps_pivot,
 					 const bool kernel_detection,
 					 const int aug_dim,
-					 const double eps_machine);
+					 const double eps_machine,
+					 const bool higher_precision);
 
 template
 void TridiagQueue<quadruple>::
@@ -221,7 +259,8 @@ exec_num_fact(const int called,
 	      const double eps_pivot,
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const quadruple eps_machine);
+	      const quadruple eps_machine,
+	      const bool higher_precision);
 
 template
 void TridiagQueue<complex<double>, double>::
@@ -229,7 +268,8 @@ exec_num_fact(const int called,
 	      const double eps_pivot,
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const double eps_machine);
+	      const double eps_machine,
+	      const bool higher_precision);
 
 template
 void TridiagQueue<complex<quadruple>, quadruple>::
@@ -237,14 +277,31 @@ exec_num_fact(const int called,
 	      const double eps_pivot,
 	      const bool kernel_detection,
 	      const int aug_dim,
-	      const quadruple eps_machine);
+	      const quadruple eps_machine,
+	      const bool higher_precision);
+
+template
+void TridiagQueue<float>::exec_num_fact(const int called,
+					 const double eps_pivot,
+					 const bool kernel_detection,
+					 const int aug_dim,
+					 const float eps_machine,
+					 const bool higher_precision);
+template
+void TridiagQueue<complex<float>, float>::
+exec_num_fact(const int called,
+	      const double eps_pivot,
+	      const bool kernel_detection,
+	      const int aug_dim,
+	      const float eps_machine,
+	      const bool higher_precision);
 //
 
 template<typename T, typename U>
 void TridiagQueue<T, U>::exec_fwbw(T *x, const int nrhs, bool isTrans)
 {
   if (_tridiag_solver == false) {
-    fprintf(stderr, "%s %d : tridiga_solver is not defined\n",
+    diss_printf(_verbose, stderr, "%s %d : tridiga_solver is not defined\n",
 	    __FILE__, __LINE__);
   }
 
@@ -302,4 +359,11 @@ exec_fwbw(complex<double> *x, const int nrhs, bool isTrans);
 template
 void TridiagQueue<complex<quadruple>, quadruple>::
 exec_fwbw(complex<quadruple> *x, const int nrhs, bool isTrans);
+
+template
+void TridiagQueue<float>::exec_fwbw(float *x, const int nrhs, bool isTrans);
+
+template
+void TridiagQueue<complex<float>, float>::
+exec_fwbw(complex<float> *x, const int nrhs, bool isTrans);
 //

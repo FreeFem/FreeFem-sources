@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.54,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.56-1,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -924,13 +924,16 @@ AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --witho
 ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" "${prefix}/ff-petsc/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"		
+		echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then 
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
+			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]); 
+			
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetsc)
@@ -968,13 +971,14 @@ fi
 AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvariables   --without-petsc_complex  ])
 ff_petsccomplex_ok=no
 if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc_complex" /usr/local/ff++/petsc-complex/lib ;do
-	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
+    for d in "$with_petsc_complex" "${prefix}/ff-petsc/complex/lib" /usr/local/ff++/petsc-complex/lib ;do
+	for dd in ""  "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetscc="$d$dd"		
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
-		    
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
-		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`			
+		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`	
+		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetsc]);
+					
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 	        AC_FF_PETSC_WHERELIB(petsccomplex,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetscc)
@@ -1213,21 +1217,21 @@ then
 	    if test  -f "$ff_mkl_libpath/libmkl_rt.$ff_suffix_dylib" ; then
 		mkl_blas=rt
 		mkl_lapack=rt
-		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
-		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
+		ff_mkl_mlt="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
+		ff_mkl_blas="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
 		ff_mkl_lapack="$ff_mkl_blas"
 	    elif test -f "$ff_mkl_libpath/libmkl_lapack.$ff_suffix_dylib" ; then
-		ff_mkl_mlt="-L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
-		ff_mkl_blas="-L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
-		ff_mkl_lapack="-L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+		ff_mkl_mlt="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
+		ff_mkl_blas="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+		ff_mkl_lapack="-Wl,-rpath,$ff_mkl_root/lib/$ff_mkl_arch -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
 	    else
-		ff_mkl_mlt="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread $ff_iomp5  $ff_ldeg  -lm $ff_pthread"
-		ff_mkl_blas="$ff_ldbg  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
+		ff_mkl_mlt="$ff_ldbg -Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread $ff_iomp5  $ff_ldeg  -lm $ff_pthread"
+		ff_mkl_blas="$ff_ldbg -Wl,-rpath,$ff_mkl_libpath  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
 		ff_mkl_lapack="$ff_mkl_blas"
 	    fi
 	    if test -f "-L$ff_mkl_libpathmkl_scalapack${ff_mkl_lp}" ; then 
-            ff_mkl_scalapack="-L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
-            ff_mkl_blacs="-L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+            ff_mkl_scalapack="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
+            ff_mkl_blacs="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	    fi
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes

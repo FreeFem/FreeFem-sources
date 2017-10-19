@@ -11,10 +11,12 @@ struct SortArray {
 template<typename T>
 struct SortArray<T,1> {
   T v[1];
-  SortArray(T *a)
-  { 
-    v[0]=a[0];
-  }
+
+SortArray(T *a,int * sens=0)
+    {
+        v[0]=a[0];
+        if(sens) *sens =1;
+    }
   SortArray(const T& a0)
   { 
     v[0]=a0;
@@ -32,12 +34,15 @@ template<typename T>
 struct SortArray<T,2> {
   //  using std::swap;
   T v[2];
-  SortArray(T *a)
-  { 
+
+    SortArray(T *a,int * sens=0)
+    { int s=1;
     v[0]=a[0];
     v[1]=a[1];
-    if(v[0]>v[1]) swap(v[0],v[1]);
+    if(v[0]>v[1]) s=-s,swap(v[0],v[1]);
+    if(sens) *sens=s;
   }
+
   SortArray(const T& a0,const T &a1)
   { 
     v[0]=a0;
@@ -56,17 +61,19 @@ struct SortArray<T,2> {
 template<typename T>
 struct SortArray<T,3> {
   T v[3];
-  SortArray(T *a)
-  { 
+  SortArray(T *a,int *sens=0)
+  {
+      int s=1;
     v[0]=a[0];
     v[1]=a[1];
     v[2]=a[2];
-    if(v[0]>v[1]) swap(v[0],v[1]);
+    if(v[0]>v[1]) s=-s,swap(v[0],v[1]);
     if(v[1]>v[2]) { 
-      swap(v[1],v[2]);
-      if(v[0]>v[1]) swap(v[0],v[1]);
+      s=-s,swap(v[1],v[2]);
+      if(v[0]>v[1]) s=-s,swap(v[0],v[1]);
     ASSERTION(v[0] <= v[1] && v[1] <= v[2] );
     }
+   if(sens) *sens=s;
   }
   
   SortArray(){}

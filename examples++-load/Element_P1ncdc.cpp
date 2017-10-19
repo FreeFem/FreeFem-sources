@@ -19,7 +19,7 @@ namespace  Fem2D {
 	static double Pi_h_coef[];
 	
 	
-	TypeOfFE_P1ttdcnc1_(): TypeOfFE(0,0,3,1,Data,1,1,3,3,Pi_h_coef)
+	TypeOfFE_P1ttdcnc1_(): TypeOfFE(0,0,3,1,Data,2,1,3,3,Pi_h_coef)
 	{
             const R2 Pt[] = { R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
             for (int i=0;i<NbDoF;i++) {

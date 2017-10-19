@@ -91,7 +91,6 @@ extern "C" {
   DISSECTION_API void DISS_INIT(uint64_t &dslv_,
 				const int &called,
 				const int &real_or_complex,
-				const int &quad_fact,
 				const int &nthreads,
 				const int &verbose);
 

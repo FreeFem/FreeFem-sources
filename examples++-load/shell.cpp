@@ -9,8 +9,15 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#ifdef _WIN32
+const char sepdir='\\';
+#else
+const char sepdir='/';
+#endif
+//extern const char *  prognamearg;
+//extern const char *  edpfilenamearg;
 
-//#include <tr1/regex> 
+//#include <tr1/regex>
 using namespace Fem2D;
 long ff_chdir(string * c) { return chdir(c->c_str());}
 long ff_rmdir(string * c) { return rmdir(c->c_str());}
@@ -102,6 +109,82 @@ long  ffunsetenv(string * const & k)
     return r ;
 }
 #endif
+string  dirname(const string * ppath)
+{
+    const string & path= *ppath;
+    int i,l=path.length();
+    for(i=l-1;i>=0;i--)
+        if(path[i]==sepdir) break;
+    if(i==0) return ".";
+    else if(i==1) return "/";
+    else return path.substr(0,i-1);
+}
+string  basename(const string * ppath)
+{
+    const string & path= *ppath;
+    int i,l=path.length();
+    for(i=l-1;i>=0;i--)
+        if(path[i]==sepdir) {i++;break;}
+    if(i<0) i=0;
+    return path.substr(i);
+}
+
+
+string * ff_dirname(Stack s,string * const &path)
+{
+    return Add2StackOfPtr2Free(s,new string(dirname(path)));
+}
+string * ff_basename(Stack s,string * const & path)
+{
+    return Add2StackOfPtr2Free(s,new string(basename(path)));
+}
+long copyfile(string * const & filecp, string * const & target)
+{
+    int tagetisdir = ff_isdir(target);
+    string filein = *filecp;
+    string filetarget = *target;
+    if( verbosity>9)
+        cout << "  cpfile :"<< filein << "-> " <<filetarget << " "<< tagetisdir << endl;
+    
+    if(tagetisdir ==1 )
+    {
+        int i,l=filein.length();
+        for(i=l-1;i>=0;i--)
+            if(filein[i]==sepdir) break;
+        if(i<0) i=0;
+        // cout << filein << " " << i << " " << l << endl;
+        filetarget +=sepdir;
+         filetarget +=filein.substr(i);
+    }
+    
+    FILE* source = fopen(filein.c_str(), "rb");
+    FILE* dest = fopen(filetarget.c_str(), "wb");
+    if( verbosity>1)
+        cout << "  cpfile :"<< filein << "-> " <<filetarget << endl;
+    if(!source && !dest)
+    {
+        cout << " erreur copy file form " << endl;
+        cout << " file in    : " << filein    << " " <<source << endl;
+        cout << " file taget : " << filetarget << " " <<dest << endl;
+        ffassert(0);
+        return -1; // erreur
+        
+    }
+    char buf[BUFSIZ];
+    size_t size;
+
+    while ((size = fread(buf, 1, BUFSIZ, source))) {
+        fwrite(buf, 1, size, dest);
+    }
+    
+    fclose(source);
+    fclose(dest);
+    return 0;
+    
+    
+}
+
+
 
 extern  mylex *zzzfff;
 
@@ -129,17 +212,22 @@ static void init(){
   Global.Add("unlink","(",new OneOperator1<long,string*>(ff_unlink));
   Global.Add("rmdir","(",new OneOperator1<long,string*>(ff_rmdir));
   Global.Add("cddir","(",new OneOperator1<long,string*>(ff_chdir));
-  Global.Add("chdir","(",new OneOperator1<long,string*>(ff_chdir));
+    Global.Add("chdir","(",new OneOperator1<long,string*>(ff_chdir));
+    Global.Add("basename","(",new OneOperator1s_<string*,string*>(ff_basename));
+  Global.Add("dirname","(",new OneOperator1s_<string*,string*>(ff_dirname));
   #ifndef _WIN32
   Global.Add("mkdir","(",new OneOperator2<long,string*,long>(ff_mkdir));
   #endif
   Global.Add("chmod","(",new OneOperator2<long,string*,long>(ff_chmod));
   Global.Add("mkdir","(",new OneOperator1<long,string*>(ff_mkdir));
+  Global.Add("cpfile","(",new OneOperator2_<long,string*,string*>(copyfile));
   Global.Add("stat","(",new OneOperator1<long,string*>(ff_stat));
   Global.Add("isdir","(",new OneOperator1<long,string*>(ff_isdir));
   Global.Add("getenv","(",new OneOperator1s_<string*,string*>(ffgetenv));
   Global.Add("setenv","(",new OneOperator2_<long,string*,string*>(ffsetenv));
   Global.Add("unsetenv","(",new OneOperator1_<long,string*>(ffunsetenv));
+  //  static string edpfilenameargstr=edpfilenamearg;
+//    Global.New("edpfilenamearg",CConstant<string *>(&edpfilenameargstr));
 }
 
 LOADFUNC(init);

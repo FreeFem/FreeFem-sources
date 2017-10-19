@@ -101,8 +101,19 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 
 <div class="thema">Some FreeFem++ presentation (with useful information):
 </div>
+
+
+
 <ul>
-           <li><font > <bf>  <font color=red > 
+	   <li> 
+	<A HREF="http://www.mathematics.pitt.edu/node/2052">  An Introduction to Scientific Computing using Free Software FreeFem++ , </A>    August 28 to September 1  2017, 
+	Department of Mathematics, University of Pittsburgh, USA
+	<A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++/2017-Pitt.zip"> the zip file of the  folder (presentation, examples,  7.8Mb)</A> and the
+	<A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++/2017-Pitt"> folder </A>. 
+	 </li>
+	
+	
+           <li><font > <bf>  <font color=black > 
          The 8th   tutorial and Workshop on FreeFem++ 
    <A HREF="https://www.ljll.math.upmc.fr/freefem++/">  (inscription here)</A>, 
    held december 8th and 9th, 2016, in Paris at Universit&eacute Pierre
@@ -379,6 +390,19 @@ Self-contained archives for all other systems&nbsp;:
 versions of <i>FreeFem++</i>.</font> </li> 
 </ul>
 </div>    
+ 
+ <div class="thema"> Coloring Syntax <i>FreeFem++</i></div>
+ <div class="themaBlog">  
+<ul>	 
+<li>for emacs editor  you can download <tt>ff++-mode.el<tt> :
+<A href="http://github.com/rrgalvan/freefem-mode/",target="_blank"> here </A> (thanks to Rafa Rodríguez Galván &lt;rafael.rodriguez@uca.es&gt;).
+</li>
+<li> for  <tt>textmate 2</tt>  editor on   Mac 10.7 or better, <a href="https://macromates.com/download"> download  from macromates.com </a> and install it, when  get the 
+  <a href="http://www.freefem.org/ff++/Textmate2-ff++.zip"> textmate freefem++ syntax from www.freefem.org/ff++/Textmate2-ff++.zip (version june 2107)</a> unzip Textmate2-ff++.zip and follow the explanation given in file <tt> How_To.rtf</tt>.</li>
+ <li> for <A href="https://notepad-plus-plus.org",target="_blank">  notepad++ </A>  editor under windows and  <A href="color-syntax-win.pdf">  read and follow the instruction <A>
+ </ul>
+ </div>    
+  
  
 <address></address>
 <!-- hhmts start --> Last modified: 2 juin  2014 <!-- hhmts end -->

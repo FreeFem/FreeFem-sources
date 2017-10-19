@@ -174,6 +174,14 @@ void SquareBlockMatrix<complex<double> >::init(int dim, int block_size,
 template
 void SquareBlockMatrix<complex<quadruple> >::init(int dim, int block_size,
 						  bool isSym, int first_block);
+
+template
+void SquareBlockMatrix<float>::init(int dim, int block_size, bool isSym,
+				     int first_block);
+template
+void SquareBlockMatrix<complex<float> >::init(int dim, int block_size,
+					       bool isSym, int first_block);
+
 //
 
 template<typename T>
@@ -181,8 +189,6 @@ void SquareBlockMatrix<T>::allocateBlock(int i, int j)
 {
   const int nrow = _block_sizes[i];
   const int ncol = _block_sizes[j];
-  //    fprintf(stderr, "%s %d : allocateBlock %d %d : %d x %d\n", 
-  //	    __FILE__, __LINE__, i, j, nrow, ncol);
   const int itmp = i + j * _num_blocks;
   if (!_allocation_status[itmp]) {
     try {
@@ -203,6 +209,11 @@ template
 void SquareBlockMatrix<complex<double> >::allocateBlock(int i, int j);
 template
 void SquareBlockMatrix<complex<quadruple> >::allocateBlock(int i, int j);
+template
+void SquareBlockMatrix<float>::allocateBlock(int i, int j);
+template
+void SquareBlockMatrix<complex<float> >::allocateBlock(int i, int j);
+
 //
 
 template<typename T>
@@ -258,6 +269,10 @@ template
 void SquareBlockMatrix<complex<double> >::allocate();
 template
 void SquareBlockMatrix<complex<quadruple> >::allocate();
+template
+void SquareBlockMatrix<float>::allocate();
+template
+void SquareBlockMatrix<complex<float> >::allocate();
 //
 
 template<typename T>
@@ -278,6 +293,11 @@ template
 void SquareBlockMatrix<complex<double> >::free(int i, int j);
 template
 void SquareBlockMatrix<complex<quadruple> >::free(int i, int j);
+template
+void SquareBlockMatrix<float>::free(int i, int j);
+template
+void SquareBlockMatrix<complex<float> >::free(int i, int j);
+
 //
 
 template<typename T>
@@ -314,6 +334,11 @@ template
 void SquareBlockMatrix<complex<double> >::free();
 template
 void SquareBlockMatrix<complex<quadruple> >::free();
+template
+void SquareBlockMatrix<float>::free();
+template
+void SquareBlockMatrix<complex<float> >::free();
+
 //
 
 template<typename T>
@@ -340,6 +365,14 @@ addrCoefBlock(int i, int j);
 template
 complex<quadruple>* SquareBlockMatrix<complex<quadruple> >::
 addrCoefBlock(int i, int j);
+
+template
+float* SquareBlockMatrix<float>::addrCoefBlock(int i, int j);
+
+template
+complex<float>* SquareBlockMatrix<complex<float> >::
+addrCoefBlock(int i, int j);
+
 //
 
 template<typename T>
@@ -385,6 +418,13 @@ void SquareBlockMatrix<complex<double> >::ZeroClear();
 
 template
 void SquareBlockMatrix<complex<quadruple> >::ZeroClear();
+
+template
+void SquareBlockMatrix<float>::ZeroClear();
+
+template
+void SquareBlockMatrix<complex<float> >::ZeroClear();
+
 //
 
 template<typename T>
@@ -417,6 +457,12 @@ complex<double> & SquareBlockMatrix<complex<double> >::diag(int i);
 
 template
 complex<quadruple> & SquareBlockMatrix<complex<quadruple> >::diag(int i);
+
+template
+float& SquareBlockMatrix<float>::diag(int i);
+
+template
+complex<float> & SquareBlockMatrix<complex<float> >::diag(int i);
 //
 
 template<typename T>
@@ -448,6 +494,12 @@ const complex<double> & SquareBlockMatrix<complex<double> >::diag(int i) const;
 template
 const complex<quadruple> & SquareBlockMatrix<complex<quadruple> >::
 diag(int i) const;
+
+template
+const float & SquareBlockMatrix<float>::diag(int i) const;
+
+template
+const complex<float> & SquareBlockMatrix<complex<float> >::diag(int i) const;
 //
 
 template<typename T>
@@ -527,6 +579,13 @@ operator () (int i, int j);
 
 template
 complex<quadruple> & SquareBlockMatrix<complex<quadruple> >::
+operator () (int i, int j);
+
+template
+float& SquareBlockMatrix<float>::operator () (int i, int j);
+
+template
+complex<float> & SquareBlockMatrix<complex<float> >::
 operator () (int i, int j);
 //
 
@@ -608,13 +667,18 @@ operator () (int i, int j) const;
 template
 const complex<quadruple>& SquareBlockMatrix<complex<quadruple> >::
 operator () (int i, int j) const;
+
+template
+const float& SquareBlockMatrix<float>::operator () (int i, int j) const;
+
+template
+const complex<float>& SquareBlockMatrix<complex<float> >::
+operator () (int i, int j) const;
 //
 
 template<typename T>
 void SquareBlockMatrix<T>::copyFromArray(const T *a, int dim)
 {
-  //  fprintf(stderr, "%s %d dim = %d block_size = %d\n", __FILE__, __LINE__,
-  //	  _dim, _block_size);
   if (_isdecomposed) {
     fprintf(stderr, "%s %d : copyFromArray() cannot copy decompesd data\n",
 	    __FILE__, __LINE__);
@@ -663,6 +727,7 @@ void SquareBlockMatrix<double>::copyFromArray(const double *a, int dim);
 
 template
 void SquareBlockMatrix<quadruple>::copyFromArray(const quadruple *a, int dim);
+
 template
 void SquareBlockMatrix<complex<double> >::
 copyFromArray(const complex<double> *a, int dim);
@@ -670,14 +735,19 @@ copyFromArray(const complex<double> *a, int dim);
 template
 void SquareBlockMatrix<complex<quadruple> >::
 copyFromArray(const complex<quadruple> *a, int dim);
+
+template
+void SquareBlockMatrix<float>::copyFromArray(const float *a, int dim);
+
+template
+void SquareBlockMatrix<complex<float> >::
+copyFromArray(const complex<float> *a, int dim);
 //
 
 template<typename T>
 void SquareBlockMatrix<T>::copyFromArrayPermute(const T *a, int dim,
 						int *permute)
 {
-  //  fprintf(stderr, "%s %d dim = %d block_size = %d\n", __FILE__, __LINE__,
-  //	  _dim, _block_size);
   if (_isdecomposed) {
     fprintf(stderr, "%s %d : copyFromArray() cannot copy decompesd data\n",
 	    __FILE__, __LINE__);
@@ -759,6 +829,14 @@ template
 void SquareBlockMatrix<complex<quadruple> >::
 copyFromArrayPermute(const complex<quadruple> *a, int dim,
 		     int *permute);
+template
+void SquareBlockMatrix<float>::copyFromArrayPermute(const float *a, int dim,
+						     int *permute);
+template
+void SquareBlockMatrix<complex<float> >::
+copyFromArrayPermute(const complex<float> *a, int dim,
+		     int *permute);
+
 //
 
 template<typename T> 
@@ -825,14 +903,21 @@ void SquareBlockMatrix<double>::copyToArrayFull(const double *a, int dim);
 
 template
 void SquareBlockMatrix<quadruple>::copyToArrayFull(const quadruple *a, int dim);
+
 template
 void SquareBlockMatrix<complex<double> >::
 copyToArrayFull(const complex<double> *a, int dim);
 
-
 template
 void SquareBlockMatrix<complex<quadruple> >::
 copyToArrayFull(const complex<quadruple> *a, int dim);
+
+template
+void SquareBlockMatrix<float>::copyToArrayFull(const float *a, int dim);
+
+template
+void SquareBlockMatrix<complex<float> >::
+copyToArrayFull(const complex<float> *a, int dim);
 //
 
 template<typename T>
@@ -890,3 +975,11 @@ copyBlockToArray(int i, int j, const complex<double> *a, int dim);
 template
 void SquareBlockMatrix<complex<quadruple> >::
 copyBlockToArray(int i, int j, const complex<quadruple> *a, int dim);
+
+template
+void SquareBlockMatrix<float>::copyBlockToArray(int i, int j, 
+						 const float *a, int dim);
+
+template
+void SquareBlockMatrix<complex<float> >::
+copyBlockToArray(int i, int j, const complex<float> *a, int dim);

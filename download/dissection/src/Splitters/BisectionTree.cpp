@@ -56,11 +56,13 @@
 # include <algorithm>
 # include <map>
 # include <time.h>
-# include "BisectionTree.hpp"
-# include "ScotchSplitter.hpp"
-# include "MetisSplitter.hpp"
-# include "BitTools/BitManipulations.hpp"
+# include "Splitters/BisectionTree.hpp"
+# include "Splitters/ScotchSplitter.hpp"
+# include "Splitters/MetisSplitter.hpp"
+# include "Splitters/BitManipulations.hpp"
 # include "Compiler/DebugUtils.hpp"
+# include "Compiler/arithmetic.hpp"
+# include "Compiler/DissectionIO.hpp"
 
 #include <vector>
 #include <list>
@@ -215,74 +217,16 @@ Tree::Tree(FILE *fp,
   int * ptRows2, * indCols2;
   int *indCols_sbdmn, *indCols_idxStrip, *indCols_idxSbdmn;
   unsigned *l2d;
-  //  int *ptRow_diag; // 01 Feb 2013 : Atsushi
-#if 0
-  struct timespec tt0, tt1, tt2, tt3, tt4, tt5;
-  clock_gettime(CLOCK_REALTIME, &tt0);
-#endif
-  //  TRACE("Removing loops\n");
+
   removeLoops(dim, ptRows, indCols, ptRows2, indCols2);
-  // 1. Use splitter utility (Scotch, Metis or other tool)
-  //    which convert CSR format into internal format
-  //    (by example, removing diagonal part in the graph)
-  //  TRACE("Call Scotch/Metis splitter\n");
   _local2global = new int[dim];
   _global2local = new int[dim];
-#if 0
-  clock_gettime(CLOCK_REALTIME, &tt1);
-#endif
   int  nbDoms;
-#if 0
-  fich = fopen("splitter.data", "r");
-  fscanf(fich, "# %d %d", &itmp, &nbDoms);
-  if (itmp != dim) {
-    fprintf(stderr, "splitter.data error : %d != %d\n", itmp, dim);
-  }
-  for (int i = 0 ; i < dim; i++) {
-    fscanf(fich, "%d %d", &_global2local[i], &_local2global[i]);
-  }
-  for (int i = 0; i < (nbDoms + 1); i++) {
-    fscanf(fich, "%d", &_ptOnDomains[i]);
-  }
-  for (int i = 0; i < nbDoms; i++) {
-    fscanf(fich, "%d", &_sizeOfDomains[i]);
-  }
-  fclose(fich);
-#else
+
   ok = (*spltFct)(dim, ptRows2,indCols2,nbMaxLevel,minSize,
 		  _global2local,_local2global,
 		  nbDoms,_ptOnDomains,_sizeOfDomains, 
 		  checkData, verbose, fp);
-#if 0
-  fich = fopen("splitter.data", "w");
-  fprintf(fich, "# %d %d\n", dim, nbDoms);
-  for (int i = 0 ; i < dim; i++) {
-    fprintf(fich, "%d %d\n", _global2local[i], _local2global[i]);
-  }
-  for (int i = 0; i < (nbDoms + 1); i++) {
-    fprintf(fich, "%d\n", _ptOnDomains[i]);
-  }
-  for (int i = 0; i < nbDoms; i++) {
-    fprintf(fich, "%d\n", _sizeOfDomains[i]);
-  }
-  fclose(fich);
-#endif
-#endif
-#if 0
-  if (!ok) {
-    berr = false;
-    std::cerr << __FILE__ << " : " << __LINE__ << std::endl;
-    delete [] _sizeOfDomains;
-    delete [] _ptOnDomains;
-    delete [] _local2global;
-    delete [] _global2local;
-    if (_interco) delete [] _interco;
-    return;
-    // 4 Jul.2013 Atsushi
-    throw std::runtime_error("Failed splitting matrix graph");
-  }
-  clock_gettime(CLOCK_REALTIME, &tt2);
-#endif
   _nbLevels = nbMaxLevel;
   assert(nbDoms == (1<<_nbLevels)-1);
 
@@ -584,9 +528,6 @@ Tree::Tree(FILE *fp,
   }
 #endif
   // Atsushi : 03 Mar.2012
-#if 0
-  clock_gettime(CLOCK_REALTIME, &tt3);
-#endif
   //
   std::map<int, int>* indCols_bylvl = new std::map<int, int>[_nbLevels];
 
@@ -598,9 +539,6 @@ Tree::Tree(FILE *fp,
   indCols_idxStrip = new int[ptRows[dim]];
   indCols_idxSbdmn = new int[ptRows[dim]];
 
-#if 0
-  fich = fopen("debug.dat", "w");
-#endif
   for (int n = (_nbLevels - 1); n >=0; n--) {
     unsigned begDom = (1 << n);
     unsigned endDom = 2 * begDom; // (1 << (n + 1)); 
@@ -623,42 +561,6 @@ Tree::Tree(FILE *fp,
 	    indCols_bylvl[ndl].insert(std::map<int,int>::value_type(jj, k));
 	  }
 	} // loop : k
-#if 0
-	dd = d;
-	for (int m = n; m >= 0; m--) {
-	  const unsigned dd1 = dd - 1;
-	  if (indCols_bylvl[m].size() > 0) {
-	    fprintf(fich, 
-		    "i = %d (global = %d) sbdmn = %d level = %d size = %d\n", 
-		    i, ii, l2d[i], m, indCols_bylvl[m].size());
-	    for (std::map<int, int>::iterator it = indCols_bylvl[m].begin();
-		 it != indCols_bylvl[m].end();
-		 ++it) {
-	      fprintf(fich, "( %d %d ) ", (*it).first, (*it).second);
-	    }
-	    fprintf(fich, "\n");
-	    if (m == n) {
-	      fprintf(fich, "dd = %d m = %d : %d %d\n", 
-		      dd, m, _ptOnDomains[dd1],
-		      _sizeOfDomains[dd1]);
-	    }
-	    else {
-	      fprintf(fich, "dd = %d m = %d : %d ", 
-		      dd, m, _ptOnDomains[dd1]);
-	      for (SetOfStrips::iterator itQ = _interco[d1][m].begin();
-		   itQ != _interco[d1][m].end();
-		   ++itQ) {
-		fprintf(fich, "(%d %d %d) ", 
-			(*itQ).begin_src,
-			(*itQ).begin_dst,
-			(*itQ).width);
-	      }
-	      fprintf(fich, "\n");
-	    }
-	  }
-	  dd /= 2;
-	}
-#endif
 	// m == n : diagonal
 	dd = d;
 	for (std::map<int, int>::iterator it = indCols_bylvl[n].begin();
@@ -683,17 +585,6 @@ Tree::Tree(FILE *fp,
 	      width_strips += (*is).width;
 	      ++is;
 	      if (is == _interco[d1][m].end()) {
-#if 0
-		  berr = false;
-		  delete [] _sizeOfDomains;
-		  delete [] _ptOnDomains;
-		  delete [] _local2global;
-		  delete [] _global2local;
-		  if (_interco) delete [] _interco;
-		  return; 
-		// 4 Jul.2013 Atsushi
-		  throw std::runtime_error("Failed map CRS in strip");
-#endif
 	      }
 	      else {
 		endStrip = ((*is).begin_dst + _ptOnDomains[dd1] + 
@@ -702,10 +593,6 @@ Tree::Tree(FILE *fp,
 	    }
 	    const int begStrip = (*is).begin_dst + _ptOnDomains[dd1];
 	    if ((begStrip <= (*it).first) && ((*it).first < endStrip)) {
-#if 0
-	      fprintf(fich, "(%d %d : %d [%d %d])\n", 
-		      (*it).first, (*it).second, dd, begStrip, (*is).width);
-#endif
 	      indCols_sbdmn[(*it).second] = dd;
 	      indCols_idxStrip[(*it).second] = 
 		(((*it).first - begStrip) + width_strips);
@@ -717,104 +604,8 @@ Tree::Tree(FILE *fp,
       }  // loop : i
     }
   }
-#if 0
-  fclose(fich);
-#endif
 
-#if 0
-  fich = fopen("sparseMatrix2.dat", "w");
-  fprintf(fich, "dim = %d\n", dim);
-
-  for (int n = (_nbLevels - 1); n >=0; n--) {
-    unsigned begDom = (1 << n);
-    unsigned endDom = 2 * begDom; // (1 << (n + 1)); 
-    for (unsigned d = begDom; d < endDom; d++) {
-      for (int ii = _ptOnDomains[d - 1]; 
-	   ii < (_ptOnDomains[d - 1] + _sizeOfDomains[d - 1]); 
-	   ii++) {
-	const int i = _local2global[ii];
-	fprintf(fich, "i = %d (%d) ptRows[] = %d width = %d\n", 
-		i, 
-		_global2local[i],
-		ptRows[i], (ptRows[i + 1] - ptRows[i]));
-	for (int k = ptRows[i]; k < ptRows[i + 1]; k++) {
-	  int jj = _global2local[indCols[k]];
-	  int dd = l2d[jj];
-	  if (dd <= d) {
-	  //	  fprintf(fich, "%d %d [%d : %d %d]\n", 
-	    if ((indCols_sbdmn[k] >= 1) &&
-		(indCols_sbdmn[k] < (1 << (_nbLevels + 1)))) {
-	      const int itmp = (indCols_idxSbdmn[k] +
-				_ptOnDomains[indCols_sbdmn[k] - 1]);
-	      fprintf(fich, "[%d : %d] %d(%d) %d [%d->%d :: %d : %d %d]", 
-		      d, dd,
-		      indCols[k],
-		      _global2local[indCols[k]],
-		      itmp,
-		      k,
-		      toSym[k],
-		      indCols_sbdmn[k],
-		      indCols_idxStrip[k],
-		      indCols_idxSbdmn[k]);
-	      if (_global2local[indCols[k]] != itmp) {
-		fprintf(fich, " mismatch\n");
-	      }
-	      else {
-		fprintf(fich, "\n");
-	      }
-	    }
-	    else {
-	      fprintf(fich, 
-		      "err [%d : %d] i=%d(%d) k=%d j=%d(%d) [%d : %d %d] ", 
-		      d, dd,
-		      i,           // unsymmetirized CSR
-		      ii,          // permuted by METIS 
-		      k,
-		      indCols[k],  // unsymmetirized CSR
-		      jj,          // permuted by METIS
-		      indCols_sbdmn[k],
-		      indCols_idxStrip[k],
-		      indCols_idxSbdmn[k]);
-	      unsigned m = nodeLayer(dd);
-	      fprintf(fich, "%d (%d th father = %d)\n",
-		      _ptOnDomains[nthfatherIndex(d, (n - m)) - 1],
-		      (n - m),
-		      nthfatherIndex(d, (n - m)));
-	      for (SetOfStrips::iterator itQ = _interco[d - 1][m].begin();
-		  itQ != _interco[d - 1][m].end();
-		   ++itQ) {
-		fprintf(fich, "(%d %d %d) ", 
-			(*itQ).begin_src,
-			(*itQ).begin_dst,
-			(*itQ).width);
-	      }
-	      fprintf(fich, "\n");
-	    }
-	  } // if (dd <= d)
-	} // loop : j
-      }   // loop : i
-    }     // loop : d
-  }       // loop : n
-  fclose(fich);
-#endif
   //
-#if 0
-  for (int i = 0; i < dim; i++) {
-    bool flag = false;
-    for (int k = ptRows[i]; k < ptRows[i + 1]; k++) {
-      if (i == indCols[k]) {
-	ptRow_diag[i] = k;
-	flag = true;
-	break;
-      }
-    }
-    assert(flag);
-    CHECK(flag, "no diagonal entry in unsymmeterized CSR\n");
-  }
-#endif
-#if 0
-  clock_gettime(CLOCK_REALTIME, &tt4);
-#endif
   // gnereating map from diagonal matrix / offdiagonal strips to matrix value 
   // in original CSR format
   int itmp = 0;
@@ -823,9 +614,7 @@ Tree::Tree(FILE *fp,
       itmp =  _sizeOfDomains[d];
     }
   }
-  if (verbose) {
-    fprintf(fp, "max of size of subdomains = %d\n", itmp);
-  }
+  diss_printf(verbose, fp, "max of size of subdomains = %d\n", itmp);
   std::map<int, int> *sparse_row_diag = new std::map<int, int>[itmp];
   std::map<int, int> *sparse_row_offdiag = new std::map<int, int>[itmp];
   
@@ -992,62 +781,6 @@ Tree::Tree(FILE *fp,
     fprintf(fich, "\n");
   } // loop : d
 #endif
-#if 0
-  if (isSym) {
-    for (int i = 0; i < dim; i++) {
-      bool flag = false;
-      for (int k = ptRows[i]; k < ptRows[i + 1]; k++) {
-	if (i == indCols[k]) {
-	  ptRow_diag[i] = k;
-	flag = true;
-	break;
-	}
-      }
-      assert(flag);
-      CHECK(flag, "no diagonal entry in unsymmeterized CSR\n");
-    }
-    // prepare CSR for upper symmetric format
-    for (int i = 0; i < nnzh; i++) {
-      indVals_tmp[i] = 0;
-    }
-    //    fprintf(stderr, "half of nnz = %d\n", nnzh);
-    for (int d = 0; d < nbDoms; d++) {
-      for (int i = 0; i < _csr_diag[d].n; i++) {
-	for (int k = _csr_diag[d].ptRows[i]; k < _csr_diag[d].ptRows[i + 1]; 
-	     k++) {
-	  if (_csr_diag[d].indVals0[k] >= nnzh) {
-	    fprintf(stderr, 
-		    "too large element in upper symmetric %d : %d %d -> %d\n", 
-		    d, i, k, _csr_diag[d].indVals0[k]);
-	  }
-	  else {
-	    indVals_tmp[_csr_diag[d].indVals0[k]]++;
-	  }
-	}
-	for (int k = _csr_offdiag[d].ptRows[i]; 
-	     k < _csr_offdiag[d].ptRows[i + 1];
-	     k++) {
-	  if (_csr_offdiag[d].indVals0[k] >= nnzh) {
-	    fprintf(stderr, 
-		    "too large element in upper symmetric %d : %d %d -> %d\n", 
-		    d, i, k, _csr_offdiag[d].indVals0[k]);
-	  }
-	  else {
-	    indVals_tmp[_csr_offdiag[d].indVals0[k]]++;
-	  }
-	}
-      }
-    }
-    for (int k = 0; k < nnzh; k++) {
-      if (indVals_tmp[k] == 0) {
-	fprintf(stderr, "non touched element in upper symmetric %d\n", k);
-      }
-    }
-  }
-#endif
-#if 0
-  clock_gettime(CLOCK_REALTIME, &tt5);
-#endif
   _nbDoms = nbDoms;
   for (int d = 0; d < nbDoms; d++) {
     _sizeOfFathersStrips[d] = 0;
@@ -1101,11 +834,6 @@ Tree::Tree(FILE *fp,
     }
   }
 
-#if 0
-  draw_csr("matrix-debug.ps", dim, 
-	   ptRows, indCols, ptRow_diag, indVals, l2d);
-  exit(-1);
-#endif
 
   // Destroy temporary data
   for (int d = 0; d < nbDoms; d++) {
@@ -1134,23 +862,6 @@ Tree::Tree(FILE *fp,
   delete [] width_strips_sbdmn;
   // 01 Feb.2013 : Atsushi -- end
   berr = true;
-#if 0
-  fprintf(stderr, "elapsed time (sec.): \n");
-  fprintf(stderr, "preprocess:         %g\n", 
-	  ((tt1.tv_sec - tt0.tv_sec) + (tt1.tv_nsec - tt0.tv_nsec) * 1.0e-9));
-  fprintf(stderr, "%6s:             %g\n", 
-	  spltFct == &ScotchSplitter ? "SCOTCH" : "METIS ",
-	  ((tt2.tv_sec - tt1.tv_sec) + (tt2.tv_nsec - tt1.tv_nsec) * 1.0e-9));
-  fprintf(stderr, "generating strips:  %g\n",
-	  ((tt3.tv_sec - tt2.tv_sec) + (tt3.tv_nsec - tt2.tv_nsec) * 1.0e-9));
-  fprintf(stderr, "+ CSR -> strip:    %g\n",
-  	  ((tt4.tv_sec - tt3.tv_sec) + (tt4.tv_nsec - tt3.tv_nsec) * 1.0e-9));
-  fprintf(stderr, "+ local CSR index: %g\n",
-	  ((tt5.tv_sec - tt4.tv_sec) + (tt5.tv_nsec - tt4.tv_nsec) * 1.0e-9));
-  fprintf(stderr, "postprocess index:  %g\n",
-	  (((tt4.tv_sec - tt3.tv_sec) + (tt4.tv_nsec - tt3.tv_nsec) * 1.0e-9)+
-	   ((tt5.tv_sec - tt4.tv_sec) + (tt5.tv_nsec - tt4.tv_nsec) * 1.0e-9)));
-#endif
 }
 // --------------------------------------------------------------
 Tree::~Tree()
@@ -1269,25 +980,19 @@ Tree::symbolicFactorization(SetOfStrips** connections)
   bool verbose = false;
   unsigned iLevel, iDom, layer, iLayer, jLayer;
   unsigned nbDoms = (1U<<_nbLevels)-1;
-  if (verbose) {
-    fprintf(stderr, "nbDoms = %d\n", nbDoms);
-  }
+  diss_printf(verbose, stderr, "nbDoms = %d\n", nbDoms);
   // Initialize initial filling for each block :
   FathersStrips* factConnect = new FathersStrips[nbDoms];
   assert(factConnect != NULL);
   for (iDom = 2; iDom <= nbDoms; iDom++)
   {// For iDom==1, nothing to do...
     layer = nodeLayer(iDom);
-    if (verbose) {
-      fprintf(stderr, "iDom  %d at level %d\n", iDom, layer);
-    }
+    diss_printf(verbose, stderr, "iDom  %d at level %d\n", iDom, layer);
     factConnect[iDom-1].alloc(layer);
     for (iLayer = 0; iLayer < layer; iLayer++)
     {
-      if (verbose) {
-	fprintf(stderr, "initial connection for %d with layer %d\n",
-		iDom, iLayer);
-      }
+      diss_printf(verbose, stderr, "initial connection for %d with layer %d\n",
+		  iDom, iLayer);
       // Initial connection block with his ancestors :
       factConnect[iDom-1][iLayer] = connections[iDom-1][iLayer];
     }
@@ -1302,20 +1007,15 @@ Tree::symbolicFactorization(SetOfStrips** connections)
     // Gauss symbolic elimination for each domain iDom at level iLevel
     for (iDom = begDom; iDom < endDom; iDom++)
     {
-      if (verbose) {
-	fprintf(stderr, "Eliminating dom %d \n", iDom);
-      }
+      diss_printf(verbose, stderr, "Eliminating dom %d \n", iDom);
       unsigned ancestDom = iDom;
       for (iLayer = iLevel-1; iLayer > 0; iLayer--) {
 	ancestDom = ancestDom/2;// Compute indice (starting to 1)
 	                        // of next ancestor :
-	if (verbose) {
-	  fprintf(stderr, "ancestDom = %d\niLayer = %d\n", ancestDom, iLayer);
-	}
+	diss_printf(verbose, stderr,
+		    "ancestDom = %d\niLayer = %d\n", ancestDom, iLayer);
 	for (jLayer = iLayer; jLayer > 0; jLayer--) {
-	  if (verbose) {
-	    fprintf(stderr, "jLayer = %d\n", (jLayer - 1));
-	  }
+	  diss_printf(verbose, stderr, "jLayer = %d\n", (jLayer - 1));
   	  factConnect[ancestDom-1][jLayer-1] += 
 	                        factConnect[iDom-1][jLayer-1];
 	}

@@ -35,7 +35,7 @@ cout << ", Ok = " << (abs(lc-surfS1) < eps) << endl;;
 if( abs(lc-surfS1) > eps) err++;
 
 //  just for test a idea approximation of int of negative part of levelset 
-//   to we just change the mesure of the element not the quadrature point 
+//   to we just change the measure of the element not the quadrature point 
 { // test new stuff for level set  ... 
     macro grad(u) [dx(u),dy(u),dz(u)] //
     Vh u,v;
@@ -45,8 +45,8 @@ if( abs(lc-surfS1) > eps) err++;
   matrix XX=vxx(Vh,Vh);
   real[int] xx=vxx(0,Vh);
   real vol1= int3d(Th, levelset= 1-r)(1.);
-  cout << "   vol1 = " << vol1 << "  ~= " << Th.mesure - volS1 << endl;
-  err += (abs(vol1-(Th.mesure - volS1)) > eps); 
+  cout << "   vol1 = " << vol1 << "  ~= " << Th.measure - volS1 << endl;
+  err += (abs(vol1-(Th.measure - volS1)) > eps); 
   cout << " xx.sum = " << xx.sum << " == " << vol1 <<endl;
   err += (abs(vol1-xx.sum) > 1e-8); 
   

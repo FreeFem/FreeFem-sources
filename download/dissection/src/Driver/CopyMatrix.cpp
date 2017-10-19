@@ -49,30 +49,48 @@
 
 #include "Driver/CopyMatrix.hpp"
 
-void CopySparseMatrix(SparseMatrix<double> *b,
-		      SparseMatrix<quadruple, double, double> *a)
+template <typename T, typename W>
+void CopySparseMatrix(SparseMatrix<W> *b,
+		      SparseMatrix<T> *a)
 {
   b->ptRows() = a->ptRows();
   b->indCols() = a->indCols();
   const int nnz = a->nnz();
   b->coefs().resize(nnz);
   for (int i = 0; i < nnz; i++) {
-    b->coefs()[i] = tolower<quadruple, double>(a->coefs()[i]);
+    b->coefs()[i] = conv_prec<W, T>(a->coefs()[i]);
   }
 }
 
-void CopySparseMatrix(SparseMatrix<complex<double>, complex<double>, double> *b,
-		      SparseMatrix<complex<quadruple>, complex<double>, double> *a)
-{
-  b->ptRows() = a->ptRows();
-  b->indCols() = a->indCols();
-  const int nnz = a->nnz();
-  b->coefs().resize(nnz);
-  for (int i = 0; i < nnz; i++) {
-    b->coefs()[i] = tolower<complex<quadruple>, complex<double> >(a->coefs()[i]);
-  }
-}
-		      
+template
+void CopySparseMatrix<quadruple, double>(SparseMatrix<double> *b,
+					 SparseMatrix<quadruple> *a);
+template
+void CopySparseMatrix<complex<quadruple>, complex<double> >(SparseMatrix<complex<double> > *b,
+					 SparseMatrix<complex<quadruple> > *a);
+
+template
+void CopySparseMatrix<double, quadruple>(SparseMatrix<quadruple> *b,
+					 SparseMatrix<double> *a);
+
+template
+void CopySparseMatrix<complex<double>, complex<quadruple> >
+  (SparseMatrix<complex<quadruple> > *b,
+   SparseMatrix<complex<double> > *a);
+
+template
+void CopySparseMatrix<double, float>(SparseMatrix<float> *b,
+				     SparseMatrix<double> *a);
+
+template
+void CopySparseMatrix<float, double>(SparseMatrix<double> *b,
+				     SparseMatrix<float> *a);
+
+
+template
+void CopySparseMatrix<complex<double>, complex<float> >(SparseMatrix<complex<float> > *b,
+					 SparseMatrix<complex<double> > *a);
+
 template<typename T, typename W>
 void CopySquareBlockMatrix(SquareBlockMatrix<W> &b,
 			   SquareBlockMatrix<T> &a)
@@ -99,7 +117,7 @@ void CopySquareBlockMatrix(SquareBlockMatrix<W> &b,
 	const int nrow = a.nrowBlock(i);
 	const int ncol = a.nrowBlock(j);
 	for (int k = 0; k < (nrow * ncol); k++) {
-	  b.addrCoefBlock(i, j)[k] = tolower<T, W>(a.addrCoefBlock(i, j)[k]);
+	  b.addrCoefBlock(i, j)[k] = conv_prec<W, T>(a.addrCoefBlock(i, j)[k]);
 	}
       } // loop : j
     }   // loop : i
@@ -111,7 +129,7 @@ void CopySquareBlockMatrix(SquareBlockMatrix<W> &b,
 	const int nrow = a.nrowBlock(i);
 	const int ncol = a.nrowBlock(j);
 	for (int k = 0; k < (nrow * ncol); k++) {
-	  b.addrCoefBlock(i, j)[k] = tolower<T, W>(a.addrCoefBlock(i, j)[k]);
+	  b.addrCoefBlock(i, j)[k] = conv_prec<W, T>(a.addrCoefBlock(i, j)[k]);
 	}
       } // loop : j
     }   // loop : i
@@ -119,14 +137,40 @@ void CopySquareBlockMatrix(SquareBlockMatrix<W> &b,
 }
 
 template
-void CopySquareBlockMatrix<quadruple, double>(SquareBlockMatrix<double> &b,
-					      SquareBlockMatrix<quadruple> &a);
+void CopySquareBlockMatrix<quadruple,
+			   double>(SquareBlockMatrix<double> &b,
+				   SquareBlockMatrix<quadruple> &a);
+template
+void CopySquareBlockMatrix<complex<quadruple>, complex<double> >
+   (SquareBlockMatrix<complex<double> > &b,
+    SquareBlockMatrix<complex<quadruple> > &a);
 
 template
-void CopySquareBlockMatrix<complex<quadruple>,
-			   complex<double> >(SquareBlockMatrix<complex<double> > &b,
-			   SquareBlockMatrix<complex<quadruple> > &a);
+void CopySquareBlockMatrix<double,
+			   quadruple>(SquareBlockMatrix<quadruple> &b,
+					 SquareBlockMatrix<double> &a);
+template
+void CopySquareBlockMatrix<complex<double>, complex<quadruple> >
+   (SquareBlockMatrix<complex<quadruple> > &b,
+    SquareBlockMatrix<complex<double> > &a);
 
+template
+void CopySquareBlockMatrix<double,
+			   float>(SquareBlockMatrix<float> &b,
+				   SquareBlockMatrix<double> &a);
+template
+void CopySquareBlockMatrix<complex<double>, complex<float> >
+   (SquareBlockMatrix<complex<float> > &b,
+    SquareBlockMatrix<complex<double> > &a);
+
+template
+void CopySquareBlockMatrix<float,
+			   double>(SquareBlockMatrix<double> &b,
+					 SquareBlockMatrix<float> &a);
+template
+void CopySquareBlockMatrix<complex<float>, complex<double> >
+   (SquareBlockMatrix<complex<double> > &b,
+    SquareBlockMatrix<complex<float> > &a);
 //
 
 template<typename T, typename W>
@@ -138,7 +182,7 @@ void CopyRectBlockMatrix(RectBlockMatrix<W> &b,
       const int nrow = a.nrowBlock(i);
       const int ncol = a.ncolBlock(j);
       for (int k = 0; k < (nrow * ncol); k++) {
-	b.addrCoefBlock(i, j)[k] = tolower<T, W>(a.addrCoefBlock(i, j)[k]);
+	b.addrCoefBlock(i, j)[k] = conv_prec<W, T>(a.addrCoefBlock(i, j)[k]);
       }
     } // loop : j
   }   // loop : i
@@ -149,8 +193,37 @@ void CopyRectBlockMatrix<quadruple, double>(RectBlockMatrix<double> &b,
 					    RectBlockMatrix<quadruple> &a);
 
 template
-void CopyRectBlockMatrix<complex<quadruple>, complex<double> >(RectBlockMatrix<complex<double> > &b,
-			 RectBlockMatrix<complex<quadruple> > &a);
+void CopyRectBlockMatrix<complex<quadruple>, complex<double> >
+        (RectBlockMatrix<complex<double> > &b,
+	 RectBlockMatrix<complex<quadruple> > &a);
+
+template
+void CopyRectBlockMatrix<double, quadruple>(RectBlockMatrix<quadruple> &b,
+					    RectBlockMatrix<double> &a);
+
+template
+void CopyRectBlockMatrix<complex<double>, complex<quadruple> >
+         (RectBlockMatrix<complex<quadruple> > &b,
+	  RectBlockMatrix<complex<double> > &a);
+
+template
+void CopyRectBlockMatrix<double, float>(RectBlockMatrix<float> &b,
+					    RectBlockMatrix<double> &a);
+
+template
+void CopyRectBlockMatrix<complex<double>, complex<float> >
+        (RectBlockMatrix<complex<float> > &b,
+	 RectBlockMatrix<complex<double> > &a);
+
+template
+void CopyRectBlockMatrix<float, double>(RectBlockMatrix<double> &b,
+					    RectBlockMatrix<float> &a);
+
+template
+void CopyRectBlockMatrix<complex<float>, complex<double> >
+         (RectBlockMatrix<complex<double> > &b,
+	  RectBlockMatrix<complex<float> > &a);
+
 //
 
 template<typename T, typename U, typename W, typename Z>
@@ -197,7 +270,7 @@ void CopyTridiagBlockMatrix(TridiagBlockMatrix<W, Z> &b,
       b.getaddrDiagMatrix()[n].init(nbRows, nbCols);  // allocation
       for (int i = 0; i < size; i++) {
 	b.getaddrDiagMatrix()[n].coefs()[i] =
-	  tolower<T, W>(a.getaddrDiagMatrix()[n].coefs()[i]);
+	  conv_prec<W, T>(a.getaddrDiagMatrix()[n].coefs()[i]);
       }
     }
 #ifndef SPARSE_OFFDIAG
@@ -209,24 +282,24 @@ void CopyTridiagBlockMatrix(TridiagBlockMatrix<W, Z> &b,
       b.getaddrUpperMatrix()[n].init(nbRows, nbCols);  // allocation
       for (int i = 0; i < size; i++) {
 	b.getaddrLowerMatrix()[n].coefs()[i] =
-	  tolower<T, W>(a.getaddrLowerMatrix()[n].coefs()[i]);
+	  conv_prec<W, T>(a.getaddrLowerMatrix()[n].coefs()[i]);
 	b.getaddrUpperMatrix()[n].coefs()[i] =
-	  tolower<T, W>(a.getaddrUpperMatrix()[n].coefs()[i]);
+	  conv_prec<W, T>(a.getaddrUpperMatrix()[n].coefs()[i]);
       }
     }
-    #endif
+#endif
   }
   b.getA12().init(a.getA12().nbRows(), a.getA12().nbColumns()); // allocation
   for (int i = 0; i < a.getA12().size(); i++) {
-    b.getA12().coefs()[i] = tolower<T, W>(a.getA12().coefs()[i]);
+    b.getA12().coefs()[i] = conv_prec<W, T>(a.getA12().coefs()[i]);
   }
   b.getA21().init(a.getA21().nbRows(), a.getA21().nbColumns()); // allocation
   for (int i = 0; i < a.getA21().size(); i++) {
-    b.getA21().coefs()[i] = tolower<T, W>(a.getA21().coefs()[i]);
+    b.getA21().coefs()[i] = conv_prec<W, T>(a.getA21().coefs()[i]);
   }
   b.getS22().init(a.getS22().nbRows(), a.getS22().nbColumns()); // allocation
   for (int i = 0; i < a.getS22().size(); i++) {
-    b.getS22().coefs()[i] = tolower<T, W>(a.getS22().coefs()[i]);
+    b.getS22().coefs()[i] = conv_prec<W, T>(a.getS22().coefs()[i]);
   }
 }
 
@@ -237,9 +310,34 @@ void CopyTridiagBlockMatrix(TridiagBlockMatrix<double, double> &b,
 template
 void CopyTridiagBlockMatrix(TridiagBlockMatrix<complex<double>, double> &b,
 			    TridiagBlockMatrix<complex<quadruple>,
-			                      quadruple> &a,
+			    quadruple> &a,
 			    complex<double> *coef);
-//
+template
+void CopyTridiagBlockMatrix(TridiagBlockMatrix<quadruple, quadruple> &b,
+			    TridiagBlockMatrix<double, double> &a,
+			    quadruple *coef);
+template
+void CopyTridiagBlockMatrix(TridiagBlockMatrix<complex<quadruple>, quadruple> &b,
+			    TridiagBlockMatrix<complex<double>, double> &a,
+			    complex<quadruple> *coef);
+
+template
+void CopyTridiagBlockMatrix(TridiagBlockMatrix<float, float> &b,
+			    TridiagBlockMatrix<double, double> &a,
+			    float *coef);
+template
+void CopyTridiagBlockMatrix(TridiagBlockMatrix<complex<float>, float> &b,
+			    TridiagBlockMatrix<complex<double>,
+			    double> &a,
+			    complex<float> *coef);
+template
+void CopyTridiagBlockMatrix(TridiagBlockMatrix<double, double> &b,
+			    TridiagBlockMatrix<float, float> &a,
+			    double *coef);
+template
+void CopyTridiagBlockMatrix(TridiagBlockMatrix<complex<double>, double> &b,
+			    TridiagBlockMatrix<complex<float>, float> &a,
+			    complex<double> *coef);
 
 template<typename T, typename U, typename W, typename Z>
 void CopyDissectionMatrix(DissectionMatrix<W, Z> *b,
@@ -280,6 +378,59 @@ void CopyDissectionMatrix<complex<quadruple>, quadruple,
 			  RectBlockMatrix<complex<double> > *upper);
 //
 
+template
+void CopyDissectionMatrix<double, double, quadruple, quadruple>
+                         (DissectionMatrix<quadruple, quadruple> *b,
+			  DissectionMatrix<double, double> *a,
+			  SquareBlockMatrix<quadruple> *diag,
+			  RectBlockMatrix<quadruple> *lower,
+			  RectBlockMatrix<quadruple> *upper);
+
+template
+void CopyDissectionMatrix<complex<double>, double,
+			  complex<quadruple>, quadruple>
+                         (DissectionMatrix<complex<quadruple>, quadruple> *b,
+			  DissectionMatrix<complex<double>, double> *a,
+			  SquareBlockMatrix<complex<quadruple> > *diag,
+			  RectBlockMatrix<complex<quadruple> > *lower,
+			  RectBlockMatrix<complex<quadruple> > *upper);
+
+template
+void CopyDissectionMatrix<double, double,
+			  float, float>(DissectionMatrix<float, float> *b,
+			  DissectionMatrix<double, double> *a,
+			  SquareBlockMatrix<float> *diag,
+			  RectBlockMatrix<float> *lower,
+			  RectBlockMatrix<float> *upper);
+
+template
+void CopyDissectionMatrix<complex<double>, double,
+			  complex<float>, float>(DissectionMatrix<complex<float>, float> *b,
+			  DissectionMatrix<complex<double>, double> *a,
+			  SquareBlockMatrix<complex<float> > *diag,
+			  RectBlockMatrix<complex<float> > *lower,
+			  RectBlockMatrix<complex<float> > *upper);
+//
+
+template
+void CopyDissectionMatrix<float, float, double, double>
+                         (DissectionMatrix<double, double> *b,
+			  DissectionMatrix<float, float> *a,
+			  SquareBlockMatrix<double> *diag,
+			  RectBlockMatrix<double> *lower,
+			  RectBlockMatrix<double> *upper);
+
+template
+void CopyDissectionMatrix<complex<float>, float,
+			  complex<double>, double>
+                         (DissectionMatrix<complex<double>, double> *b,
+			  DissectionMatrix<complex<float>, float> *a,
+			  SquareBlockMatrix<complex<double> > *diag,
+			  RectBlockMatrix<complex<double> > *lower,
+			  RectBlockMatrix<complex<double> > *upper);
+
+//
+
 template<typename T, typename W>
 void CopySchurMatrix(SchurMatrix<W> &b,
 		     SchurMatrix<T> &a)
@@ -289,24 +440,15 @@ void CopySchurMatrix(SchurMatrix<W> &b,
     const int dim = a.getSldu().dimension();
     b.getSldu().init(a.getSldu().loc2glob());
     for (int i = 0; i < (dim * dim); i++) {
-      b.getSldu().addrCoefs()[i] = tolower<T, W>(a.getSldu().addrCoefs()[i]);
+      b.getSldu().addrCoefs()[i] = conv_prec<W, T>(a.getSldu().addrCoefs()[i]);
     }
     for (int i = 0; i < dim; i++) {
-      b.getSldu().addr2x2()[i] = tolower<T, W>(a.getSldu().addr2x2()[i]);
+      b.getSldu().addr2x2()[i] = conv_prec<W, T>(a.getSldu().addr2x2()[i]);
     }
     b.getSldu().getPivotWidth() = a.getSldu().getPivotWidth();
     b.getSldu().getPivot2x2() = a.getSldu().getPivot2x2();
     b.getSldu().getPermute() = a.getSldu().getPermute();
   }
-#if 0
-  {
-    const int dim = a.getSchur().dimension();
-    for (int i = 0; i < (dim * dim); i++) {
-      b.getSchur().addrCoefs()[i] = tolower<T, W>(a.getSchur().addrCoefs()[i]);
-    }
-    b.getSchur().getPermute() = a.getSchur().getPermute();
-  }
-#endif
   {
     const bool isUpper = a.getArow()->isUpper();
     const bool isSym = a.getArow()->isSymmetric();
@@ -317,7 +459,7 @@ void CopySchurMatrix(SchurMatrix<W> &b,
 				      &(a.getArow()->getIndCols()[0]),
 				      isSym, isUpper);
     for (int i = 0; i < nnz; i++) {
-      b.getArow()->Coef(i) = tolower<T, W>(a.getArow()->Coef(i));
+      b.getArow()->Coef(i) = conv_prec<W, T>(a.getArow()->Coef(i));
     }
   }
   {
@@ -330,13 +472,13 @@ void CopySchurMatrix(SchurMatrix<W> &b,
 				      &(a.getAcol()->getIndCols()[0]),
 				      isSym, isUpper);
     for (int i = 0; i < nnz; i++) {
-      b.getAcol()->Coef(i) = tolower<T, W>(a.getAcol()->Coef(i));
+      b.getAcol()->Coef(i) = conv_prec<W, T>(a.getAcol()->Coef(i));
     }
   }
   {
     const int size = a.getScol().size();
     for (int i = 0; i < size; i++) {
-      b.getScol().addrCoefs()[i] = tolower<T, W>(a.getScol().addrCoefs()[i]);
+      b.getScol().addrCoefs()[i] = conv_prec<W, T>(a.getScol().addrCoefs()[i]);
     }
   }
 }
@@ -348,7 +490,27 @@ void CopySchurMatrix(SchurMatrix<double> &b,
 template
 void CopySchurMatrix(SchurMatrix<complex<double> > &b,
 		     SchurMatrix<complex<quadruple> > &a);
+template
+void CopySchurMatrix(SchurMatrix<quadruple> &b,
+		     SchurMatrix<double> &a);
 
+template
+void CopySchurMatrix(SchurMatrix<complex<quadruple> > &b,
+		     SchurMatrix<complex<double> > &a);
+template
+void CopySchurMatrix(SchurMatrix<float> &b,
+		     SchurMatrix<double> &a);
+
+template
+void CopySchurMatrix(SchurMatrix<complex<float> > &b,
+		     SchurMatrix<complex<double> > &a);
+template
+void CopySchurMatrix(SchurMatrix<double> &b,
+		     SchurMatrix<float> &a);
+
+template
+void CopySchurMatrix(SchurMatrix<complex<double> > &b,
+		     SchurMatrix<complex<float> > &a);
 //
 
 template<typename T, typename W>
@@ -364,7 +526,7 @@ void CopyKernelMatrix(KernelMatrix<W> &b,
     const int size = a.getKernBasis().size();
     for (int i = 0; i < size; i++) {
       b.getKernBasis().addrCoefs()[i] =
-	tolower<T, W>(a.getKernBasis().addrCoefs()[i]);
+	conv_prec<W, T>(a.getKernBasis().addrCoefs()[i]);
     }
   }
   {
@@ -374,14 +536,14 @@ void CopyKernelMatrix(KernelMatrix<W> &b,
     const int size = a.getTKernBasis().size();
     for (int i = 0; i < size; i++) {
       b.getTKernBasis().addrCoefs()[i] =
-	tolower<T, W>(a.getTKernBasis().addrCoefs()[i]);
+	conv_prec<W, T>(a.getTKernBasis().addrCoefs()[i]);
     }
   }
   {
     const int dim = a.getKernProj().dimension();
     b.getKernProj().init(dim);
     for (int i = 0; i < (dim * dim); i++) {
-      b.getKernProj().addrCoefs()[i] = tolower<T, W>(a.getKernProj().addrCoefs()[i]);
+      b.getKernProj().addrCoefs()[i] = conv_prec<W, T>(a.getKernProj().addrCoefs()[i]);
     }
     b.getKernProj().getPermute() = a.getKernProj().getPermute();
   }
@@ -391,7 +553,7 @@ void CopyKernelMatrix(KernelMatrix<W> &b,
     b.getTKernProj().init(dim);
     for (int i = 0; i < (dim * dim); i++) {
       b.getTKernProj().addrCoefs()[i] =
-	tolower<T, W>(a.getTKernProj().addrCoefs()[i]);
+	conv_prec<W, T>(a.getTKernProj().addrCoefs()[i]);
     }
     b.getTKernProj().getPermute() = a.getTKernProj().getPermute();
   }
@@ -400,7 +562,7 @@ void CopyKernelMatrix(KernelMatrix<W> &b,
     b.getNTKernProj().init(dim);
     for (int i = 0; i < (dim * dim); i++) {
       b.getNTKernProj().addrCoefs()[i] =
-	tolower<T, W>(a.getNTKernProj().addrCoefs()[i]);
+	conv_prec<W, T>(a.getNTKernProj().addrCoefs()[i]);
     }
     b.getNTKernProj().getPermute() = a.getNTKernProj().getPermute();
   }
@@ -414,4 +576,31 @@ void CopyKernelMatrix<quadruple, double>(KernelMatrix<double> &b,
 template
 void CopyKernelMatrix<complex<quadruple>,
 		      complex<double> >(KernelMatrix<complex<double> > &b,
-					KernelMatrix<complex<quadruple> > &a);
+					      KernelMatrix<complex<quadruple> > &a);
+
+template
+void CopyKernelMatrix<double, quadruple>(KernelMatrix<quadruple> &b,
+					 KernelMatrix<double> &a);
+
+template
+void CopyKernelMatrix<complex<double>,
+		      complex<quadruple> >(KernelMatrix<complex<quadruple> > &b,
+					KernelMatrix<complex<double> > &a);
+
+template
+void CopyKernelMatrix<double, float>(KernelMatrix<float> &b,
+					 KernelMatrix<double> &a);
+
+template
+void CopyKernelMatrix<complex<double>,
+		      complex<float> >(KernelMatrix<complex<float> > &b,
+					      KernelMatrix<complex<double> > &a);
+
+template
+void CopyKernelMatrix<float, double>(KernelMatrix<double> &b,
+					 KernelMatrix<float> &a);
+
+template
+void CopyKernelMatrix<complex<float>,
+		      complex<double> >(KernelMatrix<complex<double> > &b,
+					KernelMatrix<complex<float> > &a);

@@ -1515,8 +1515,6 @@ public:
 	    MPI_Bcast(  dataint, 40, MPI_INT,  0, comm );
 	    MPI_Bcast(  datadouble, 15, MPI_DOUBLE,  0, comm );
 	    
-	    fclose(pFile);
-	    delete [] retfile;
 	  }
 	  else{
 	    

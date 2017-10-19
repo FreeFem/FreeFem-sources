@@ -55,9 +55,10 @@
 #define METIS_DECOMPOSER   1
 #define TRIDIAG_DECOMPOSER 2
 
-#define NO_SCALING       0  // needs to be compatible to the definition in
-#define DIAGONAL_SCALING 1  // SparseMatrix<T, U>::normalize(), SparseMatrix.cpp
-#define KKT_SCALING      2  //
+#define NO_SCALING         0  // needs to be compatible to the definition in
+#define DIAGONAL_SCALING   1  // normalize(), SparseMatrix.cpp
+#define KKT_SCALING        2  //
+
 
 #define MINNODES     256    // minimum size of the first layer of dissection
 #define SIZE_TRIDIAG 1000   // more than this value, dissection is used

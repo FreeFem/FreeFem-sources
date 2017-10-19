@@ -112,7 +112,6 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     HPDDM::Option& opt = *HPDDM::Option::get();
     KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
     std::pair<MPI_Request, const K*>* ret = nullptr;
-    double t;
     if(mA) {
         long nbSolver = 0;
         std::vector<const HPDDM::MatrixCSR<K>*> vecAIJ;
@@ -120,8 +119,11 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
             MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
             MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
-            t = MPI_Wtime();
             if(dA._n == dA._m) {
+                if(timing) { // tic
+                    timing->resize(timing->n + 1);
+                    (*timing)[timing->n - 1] = MPI_Wtime();
+                }
                 const HPDDM::MatrixCSR<K>* const dP = mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
                 if(mB) {
                     HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
@@ -134,6 +136,9 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                 mA->lg = dA._ia;
                 mA->cl = dA._ja;
                 delete dP;
+                if(timing) { // toc
+                    (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
+                }
             }
             else {
                 vecAIJ.emplace_back(&dA);
@@ -232,11 +237,11 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             else
                 ptA->Type::super::initialize(0);
         }
-        if(timing)
-            (*timing)[3] = MPI_Wtime() - t;
         MPI_Barrier(comm);
-        if(timing)
-            t = MPI_Wtime();
+        if(timing) { // tic
+            timing->resize(timing->n + 1);
+            (*timing)[timing->n - 1] = MPI_Wtime();
+        }
         if(ptA->exclusion(comm)) {
             if(pair)
                 pair->p = ptA->template buildTwo<1>(comm);
@@ -249,8 +254,9 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             else
                 ret = ptA->template buildTwo<0>(comm);
         }
-        if(timing)
-            (*timing)[4] = MPI_Wtime() - t;
+        if(timing) { // toc
+            (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
+        }
     }
     else {
         MPI_Barrier(comm);
@@ -344,7 +350,10 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
         std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
     }
-    double timer = MPI_Wtime();
+    if(timing) { // tic
+        timing->resize(timing->n + 1);
+        (*timing)[timing->n - 1] = MPI_Wtime();
+    }
     if(mpisize > 1 && (mA && opt.any_of(prefix + "schwarz_method", { 1, 2, 4 }))) {
         HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
         ptA->callNumfact(&dA);
@@ -357,7 +366,9 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             ptA->template callNumfact<'F'>();
 #endif
     }
-    if(timing) (*timing)[1] = MPI_Wtime() - timer;
+    if(timing) { // toc
+        (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
+    }
     if(HPDDM::Wrapper<K>::I == 'F' && SUBDOMAIN<K>::_numbering == 'C' && mu > 1) {
         std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
         std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
@@ -367,19 +378,12 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         opt[prefix + "master_exclude"];
     if(pair)
         if(pair->p) {
-            if(timing)
-                timer = MPI_Wtime();
             MPI_Wait(&(pair->p->first), MPI_STATUS_IGNORE);
-            if(timing)
-                (*timing)[timing->n - 1] = MPI_Wtime() - timer;
             delete [] pair->p->second;
             pair->destroy();
             pair = nullptr;
-            timer = MPI_Wtime();
         }
     MPI_Barrier(MPI_COMM_WORLD);
-    if(timing && opt.val<unsigned short>(prefix + "reuse_preconditioner") <= 1 && !excluded && pair && pair->p && mpisize > 1)
-        (*timing)[timing->n - 1] += MPI_Wtime() - timer;
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
     if(rank != mpirank || rank != 0) {
@@ -387,29 +391,21 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         if(prefix.size() > 0)
             opt.remove(prefix + "verbosity");
     }
-    timer = MPI_Wtime();
+    double timer = MPI_Wtime();
+    if(timing) { // tic
+        timing->resize(timing->n + 1);
+        (*timing)[timing->n - 1] = timer;
+    }
     if(!excluded)
         HPDDM::IterativeMethod::solve(*ptA, (K*)*ptRHS, (K*)*ptX, mu, MPI_COMM_WORLD);
     else
         HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, MPI_COMM_WORLD);
     timer = MPI_Wtime() - timer;
-    if(!excluded) {
-        if(verbosity > 0 && rank == 0)
-            std::cout << std::scientific << " --- system solved (in " << timer << ")" << std::endl;
-        HPDDM::underlying_type<K>* storage = new HPDDM::underlying_type<K>[2 * mu];
-        ptA->computeError(*ptX, *ptRHS, storage, mu);
-        char v = opt.val<char>(prefix + "verbosity", 0);
-        if(v > 0) {
-            std::cout << std::scientific << " --- error = " << storage[1] << " / " << storage[0];
-            if(mu > 1)
-                std::cout << " (rhs #1)\n";
-            else
-                std::cout << "\n";
-            for(unsigned short nu = (v > 2 ? 1 : v > 1 ? std::max(2, mu - 1) : mu); nu < mu; ++nu)
-                std::cout << std::scientific << "             " << storage[2 * nu + 1] << " / " << storage[2 * nu] << " (rhs #" << (nu + 1) << ")\n";
-        }
-        delete [] storage;
+    if(timing) { // toc
+        (*timing)[timing->n - 1] = timer;
     }
+    if(!excluded && verbosity > 0 && rank == 0)
+        std::cout << std::scientific << " --- system solved (in " << timer << ")" << std::endl;
     if(HPDDM::Wrapper<K>::I == 'F' && mu > 1) {
         std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { --i; });
         std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { --i; });
@@ -692,14 +688,14 @@ class IterativeMethod : public OneOperator {
                     yy = R();
                     yy = plusAx(this, xx);
                 }
-                bool ChecknbLine(int) const { return false; }
-                bool ChecknbColumn(int) const { return false; }
+                bool ChecknbLine(int) const { return true; }
+                bool ChecknbColumn(int) const { return true; }
         };
         class Operator : public HPDDM::EmptyOperator<R> {
             public:
                 MatF_O& mat;
                 MatF_O& prec;
-                Operator(MatF_O& m, MatF_O& p) : mat(m), prec(p), HPDDM::EmptyOperator<R>(m.x.N()){ }
+                Operator(MatF_O& m, MatF_O& p) : mat(m), prec(p), HPDDM::EmptyOperator<R>(m.x.N()) { }
                 void GMV(const R* const in, R* const out, const int& mu = 1) const {
                     mat.mv(in, HPDDM::EmptyOperator<R>::_n, out);
                 }

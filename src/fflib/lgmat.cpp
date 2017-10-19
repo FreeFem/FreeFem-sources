@@ -1835,6 +1835,10 @@ template <class R>
   TheDiagMat(Matrice_Creuse<R> * AA) :A(AA) {ffassert(A);}
   void   get_mat_daig( KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->getdiag(x);}
+  void  init_get_mat_daig( KN<R> & x) {
+      ffassert(A && A->A  && A->A->n == A->A->m );
+         x.init(A->A->n);
+         A->A->getdiag(x);}
   void   set_mat_daig(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->setdiag(x);}
  };
@@ -1869,6 +1873,13 @@ KN<R> * get_mat_daig(KN<R> * x,TheDiagMat<R> dm)
   dm.get_mat_daig(*x);
   return x;
 }
+template<class R>
+KN<R> * init_get_mat_daig(KN<R> * x,TheDiagMat<R> dm)
+{
+    dm.init_get_mat_daig(*x);
+    return x;
+}
+
 
 template<class R>
 TheCoefMat<R> set_mat_coef(TheCoefMat<R> dm,KN<R> * x)
@@ -2940,7 +2951,8 @@ TheOperators->Add("+",
 
 // Add<Matrice_Creuse<R> *>("setdiag",".",new OneOperator2<long,Matrice_Creuse<R> *,KN<R> *>(set_diag<R>) );
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
- TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
+ TheOperators->Add("<-", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(init_get_mat_daig<R>) );
+    TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
  
 // TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
 // TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
@@ -3105,12 +3117,13 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
       static const double defEPS=1e-12;
     
     Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
-    if(pA)
-    {
     Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
     KN<T>* pX = GetAny<KN<T>* >((*x)(stack));
     KN<T>* pOut = GetAny<KN<T>* >((*out)(stack));
-    ffassert( pR && pX && pOut);
+    ffassert(pR && pX && pOut);
+    bool rhs = pOut->n > 0 || pX->n > 0;
+    if(pA)
+    {
     pA->Uh = pR->Uh;
     pA->Vh = pR->Vh;
     MatriceMorse<T> *mA = static_cast<MatriceMorse<T>*>(&(*pA->A));
@@ -3124,7 +3137,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     int* cl;
     T* val;
     T* b;
-     if(pOut->n != n) pOut->resize(n);
+     if(rhs && pOut->n != n) pOut->resize(n);
     
     std::vector<signed int> tmpVec;
     if(!condensation) {
@@ -3150,7 +3163,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 }
                 std::sort(tmp.begin() + lg[i], tmp.end(),cmp<T> );
                 // c++11 , [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
-                *(*pOut + i) = *(*pX + mR->cl[i]);
+                if(rhs)
+                    *(*pOut + i) = *(*pX + mR->cl[i]);
                 lg[i + 1] = tmp.size();
             }
             mA->nbcoef = tmp.size();
@@ -3184,7 +3198,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                         ++nnz;
                     }
                 }
-                *(*pOut + i) = *(*pX + mR->cl[i]);
+                if(rhs)
+                    *(*pOut + i) = *(*pX + mR->cl[i]);
             }
             mA->nbcoef = nnz;
             cl = new int[nnz];
@@ -3256,7 +3271,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                         tmpBoundary.push_back(make_pair(col - 1, mA->a[j]));
                 }
                 // std::sort(tmp.begin() + lg[i], tmp.end());
-                *(*pOut + i) = *(*pX + *(*condensation + i));
+                if(rhs)
+                    *(*pOut + i) = *(*pX + *(*condensation + i));
                 lg[i + 1] = tmpBoundary.size();
             }
         }
@@ -3273,12 +3289,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         m->dummy = false;
     }
     }
-    else
+    else if(rhs)
      {
-         Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
-         KN<T>* pX = GetAny<KN<T>* >((*x)(stack));
-         KN<T>* pOut = GetAny<KN<T>* >((*out)(stack));
-         ffassert(pR && pX && pOut);
          MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
         
          unsigned int n = mR->nbcoef;

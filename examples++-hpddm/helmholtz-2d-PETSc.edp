@@ -1,7 +1,7 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "PETSc"                        // PETSc plugin
+load "PETSc-complex"                        // PETSc plugin
 macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
@@ -49,7 +49,7 @@ matrix<complex> Mat;                        // local operator
     rhs = vPb(0, Wh, tgv = -1);
 }
 
-dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+dmatrix<complex> A(Mat, arrayIntersection, restrictionIntersection, D);
 set(A, sparams = "-ksp_view -pc_type lu");
 Wh<complex> def(u);    // local solution
 

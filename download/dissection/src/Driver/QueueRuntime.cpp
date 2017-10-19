@@ -4,6 +4,7 @@
     \date   Jun. 20th 2014
     \date   Jul. 12th 2015
     \date   Nov. 30th 2016
+    \date   Apr. 17th 2016
 */
 
 // This file is part of Dissection
@@ -48,39 +49,13 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Driver/QueueRuntime.hpp"
-
 #include <string>
+#include "Driver/QueueRuntime.hpp"
+#include "Compiler/DissectionIO.hpp"
 
-#if 0
-#define DEBUG_MUTEX
-#define DEBUG_MUTEX1
-#define DEBUG_MUTEX2
-#define DEBUG_MUTEX3
-#define DEBUG_STATIC_QUEUE1
-#define DEBUG_STATIC_QUEUE2
-#define DEBUG_MUTEX_C_BLAS_BLOCK1
-#define DEBUG_MUTEX_C_DFULLLDLT
-#endif
 
 #define RATIO_STATIC 0.7       // for slow DGEMM'
 #define RATIO_QUEUE_GREEDY 0.8
-
-// #define DEBUG_PRINT_TASK
-// #define DEBUG_EXEC_THREAD_21Jun2012
-// #define DEBUG_THREAD_DONE_PRINT
-// #define DEBUG_CHECKPARENTS_DONE 
-// #define DEBUG_EXEC_THREAD
-// #define DEBUG_EXEC_THREAD_IDLE
-// #define DEBUG_PREPARE_THREAD
-#if 0
-#define DEBUG_EXEC_THREAD    
-#define DEBUG_THREAD_LOOP
-#define DEBUG_THREAD_DONE_PRINT
-#define DEBUG_EXEC_THREAD_IDLE
-#define DEBUG_EXEC_THREAD_FILE
-#define DEBUG_CHECKPARENTS_DONE 
-#endif
 
 //#define DEBUG_THREAD_TIME
 //#define DEBUG_EXEC_THREAD
@@ -93,15 +68,14 @@
 #endif // DEBUG_EXEC_THREAD_IDLE
 #endif //  DEBUG_DEADLOCK
 
-extern pthread_mutex_t _mutex_debug; 
-
 // constructor
-QueueRuntime::QueueRuntime(int nb_doms, int num_threads,
+QueueRuntime::QueueRuntime(int nb_doms, int num_threads, const bool isSym,
 			   const bool verbose, FILE *fp)
 {
 
   _nb_doms = nb_doms;
   _num_threads = num_threads;
+  _isSym = isSym;
   _verbose = verbose;
   _fp = fp;
 
@@ -122,8 +96,8 @@ QueueRuntime::QueueRuntime(int nb_doms, int num_threads,
   allocate_int3d(_begins_group, num_threads);
   allocate_int3d(_ends_group, num_threads);
   allocate_unsigned2d(_group_nops, num_threads);
+  _mutex_group = new QueueRuntime_mutex[num_threads];
 
-  _mutex_group = new pthread_mutex_t[num_threads];
 }
 
 
@@ -251,13 +225,6 @@ void copytask_list2seq(list<C_task_seq*> &queue_static,
 	num_tasks++;
 //    	itmp++;
       }
-#if 0
-      else if (*((*(*it)->queue)[j]->ops_complexity) == (-1L)) {
-	fprintf(stderr, "%s %d : copytask_list2seq() dummy task = %s\n",
-		__FILE__, __LINE__, (*(*it)->queue)[j]->task_name);
-	queue_dummy.push_back((*(*it)->queue)[j]);
-      }
-#endif
       else {
 	(*(*it)->queue)[j]->status = TASK_DONE;
 #ifdef DEBUG_NULL_TASK
@@ -289,16 +256,6 @@ void copytask_list2seq(list<C_task_seq*> &queue_static,
 	  nops += *((*(*it)->queue)[j]->ops_complexity);
 	}
       }
-#if 0
-      else if (*((*(*it)->queue)[j]->ops_complexity) == 0L) {
-	(*(*it)->queue)[j]->status = TASK_DONE;
-#ifdef DEBUG_NULL_TASK
-	fprintf(stderr, "%s %d : copytask_list2seq() null task = %s\n",
-		__FILE__, __LINE__, (*(*it)->queue)[j]->task_name);
-#endif
-	queue_null.push_back((*(*it)->queue)[j]);
-      }
-#endif
     }
   }
   C_task_seq* seq_tmp = new C_task_seq(task_id,
@@ -417,8 +374,6 @@ void task_assign_diag1(list<C_task_seq*> * &queue_static,
       }
       else {
 	for (int i = begin; i < end; i++) {
-	  //	  fprintf(stderr, "%s %d : %s\n",
-	  //		  __FILE__, __LINE__, tasks_queue[jc][i]->task_name);
 	  queue_null.push_back(tasks_queue[jc][i]);
 	}
       }
@@ -1108,59 +1063,6 @@ void QueueRuntime::generate_queue(C_task_seq* &queue_symb_,
     for (int p = 0; p < num_threads; p++) {
       queue_lists[p].clear();
     }
-#if 0  // treat tasks of C_FILLMATRIX in greedy manner
-    for (int d = begdom; d < enddom; d++) {
-      const int j = btree->selfIndex(d);
-//
-#ifdef DEBUG_PREPARE_THREAD
-      cout << "* level = " << (level + 1) << " j = " << j << endl;
-#endif
-      C_task_seq* tmp = 
-	new C_task_seq(C_FILLMATRIX,
-		       _null_name, // dummy
-		       (-1), // mutex_id
-		       (-1), // TASK_SINGLE,
-		       (-1), // 1,
-		       (-1), // (level + 1),
-		       (-1), // (level_last - 1 - level) * 5 + 1,
-		       &tasks_DFillSym[j],
-		       0,
-		       1,
-		       *(tasks_DFillSym[j][0]->ops_complexity));
-      
-      queue_tmp0.push_back(tmp);
-    }
-    {
-      int itmp = 0;
-      queue_tmp0.sort(C_task_seq_complexity_greater);
-      for (list<C_task_seq*>::const_iterator it = queue_tmp0.begin();
-	   it != queue_tmp0.end(); ++it, itmp++) {
-	queue_lists[itmp % num_threads].push_back(*it);
-      }
-    } // scope of itmp
-    {  // begin : scope of task_name
-      string task_name = "v " + to_string(level_last);
-      for (int p = 0; p < num_threads; p++) {
-	copytask_list2seq(_queue_static[p],
-			  queue_lists[p],
-			  queue_null_,
-  //			  queue_dummy_,
-			  task_name,
-			  C_FILLMATRIX,
-			  p,
-			  TASK_SINGLE,
-			  1,
-			  level_last,
-			  2);
-      } // loop : p
-// erase temporary C_task_seq whose elements are copied to queue_dynamic[]
-      for (list<C_task_seq*>::iterator it = queue_tmp0.begin();
-	   it != queue_tmp0.end(); ++it) {
-	delete (*it);
-	(*it) = NULL;
-      }
-    }  // end : scope of task_name
-#endif
     {
       string task_name = "v " + to_string(level_last) + " : ";
       queue_tmp0.clear();
@@ -1470,44 +1372,6 @@ void QueueRuntime::generate_queue(C_task_seq* &queue_symb_,
 	} 
       }
     }
-#if 0
-    // -- DEALLACATE
-    {
-      string task_name = "X " + to_string(level + 1) + " : ";
-      queue_tmp0.clear();
-      C_task_seq* tmp = 
-	new C_task_seq(C_DEALLOCATE,
-		       _null_name,
-		       (-1), // mutex_id
-		       (-1), //TASK_PARALLEL,
-		       (-1),//num_threads,
-		       (-1),//(level + 1),
-		       (-1),//(level_last - 1 - level) * 5 + 3,
-		       &tasks_deallocLower[level + 1],
-		       0,
-		       tasks_deallocLower[level + 1].size(),
-		       0L// nops);
-		       );
-      queue_tmp0.push_back(tmp);
-      copytask_list2seq(queue_dynamic2[level],
-			queue_tmp0,
-			queue_null_,
-//			queue_dummy_,
-			task_name,
-			C_DEALLOCATE1,
-			0,               // shared by all threads
-			TASK_PARALLEL,
-			num_threads,
-			(level + 1),
-			(level_last - 1 - level) * 6 + 4);
- // erase temporary C_task_seq whose elements are copied to queue_dynamic[]
-      for (list<C_task_seq*>::iterator it = queue_tmp0.begin();
-	   it != queue_tmp0.end(); ++it) {
-	delete (*it);
-	(*it) = NULL;
-      } 
-    }
-#endif
     // -- DEALLACATE
     {
       string task_name = "x " + to_string(level + 1)  + " : ";
@@ -2296,15 +2160,6 @@ void QueueRuntime::generate_queue(C_task_seq* &queue_symb_,
       {
 	string task_name = "t " + to_string(level);
 	for (int p = 0; p < num_threads; p++) {
-#if 0
-	  cerr << __FILE__ << " " << __LINE__ << " " << endl;
-	  for (list<C_task_seq*>::const_iterator it = queue_lists[p].begin();
-	       it != queue_lists[p].end(); ++it) {
-	    cerr << (*it)->task_id
-		 << " [ " << (*it)->end << " " << (*it)->begin << " ] ";
-	  }
-	  cerr << endl;	  
-#endif
 	  copytask_list2seq(_queue_static[p],
 			    queue_lists[p],
 			    queue_null_,
@@ -2407,9 +2262,6 @@ void QueueRuntime::generate_queue(C_task_seq* &queue_symb_,
 // copy tasks in reverse order
   {
     int itmp = 0;  
-#if 0
-    itmp += queue_dynamic0->size();          // C_SPARSELOCALSCHUR
-#endif
     for (int i = 0; i <= level_last; i++) {
       itmp += queue_dynamic[i].size();
       itmp += queue_dynamic1[i].size();
@@ -2418,12 +2270,6 @@ void QueueRuntime::generate_queue(C_task_seq* &queue_symb_,
     }
     _queue_dynamic->reserve(itmp);
   }
-#if 0
-  for (list<C_task_seq*>::const_iterator it = queue_dynamic0->begin();
-       it != queue_dynamic0->end(); ++it) {
-      _queue_dynamic->push_back(*it);
-  }
-#endif
   for (int i = 0; i <= level_last; i++) {
     const int level = level_last - i;
     for (list<C_task_seq*>::const_iterator it = queue_dynamic[level].begin();
@@ -2438,36 +2284,23 @@ void QueueRuntime::generate_queue(C_task_seq* &queue_symb_,
 	 it != queue_dynamic2[level].end(); ++it) {
       _queue_dynamic->push_back(*it);
     }
-#if 0
-    for (list<C_task_seq*>::const_iterator it = queue_dynamic3[level].begin();
-	 it != queue_dynamic3[level].end(); ++it) {
-      _queue_dynamic->push_back(*it);
-    }
-#endif
   }
-#if 0
- for (int p = 0; p < num_threads; p++) {
-   C_task_seq * queue_tmp = _queue_static[p].back();
-   cerr << p << " : " << queue_tmp->task_id << " : " 
-	<< queue_tmp->task_name << endl;
- }
-#endif
-// begin : scope for fout
- if (0) {
-   char fname[256];
-   int pid = get_process_id();
-   sprintf(fname, "tasks-created.%d.data", pid);
-   FILE *fp;
-   if ((fp = fopen(fname, "a")) != NULL) {
-     write_dependency(fp);
-   }
-   else {
-    fprintf(stderr,
-	    "%s %d : fail to open %s\n",
-	    __FILE__, __LINE__, fname);
-    exit(-1);
-   }
- }
+  // begin : scope for fout
+  if (false) {
+    char fname[256];
+    int pid = get_process_id();
+    sprintf(fname, "tasks-created.%d.data", pid);
+    FILE *fp;
+    if ((fp = fopen(fname, "a")) != NULL) {
+      write_dependency(fp);
+    }
+    else {
+      fprintf(stderr,
+	      "%s %d : fail to open %s\n",
+	      __FILE__, __LINE__, fname);
+      exit(-1);
+    }
+  }
   queue_dynamic0->clear();
   for (int i = 0; i < (level_last + 1); i++) {
     queue_dynamic[i].clear();
@@ -2545,34 +2378,46 @@ void QueueRuntime::write_dependency(FILE *fp)
 void QueueRuntime::exec_symb_fact()
 {
   const int num_threads = _num_threads;
+#ifdef POSIX_THREADS
   void* results;
   pthread_attr_t th_attr;
-  pthread_t *threads;
-
+#endif
+  vector<QueueRuntime_thread> threads;
+  //#else
+  //  vector<std::thread> threads;
+  //#endif
   clock_t t0_cpu, t1_cpu;
   elapsed_t t0_elapsed, t1_elapsed;
   //  struct timespec ts0, ts1;
   int ierr;
-  if (_verbose) {
-    fprintf(_fp, "symbolic factorization of sparse matrices with %d threads\n",
+
+  diss_printf(_verbose, _fp,
+	      "symbolic factorization of sparse matrices with %d threads\n",
 	    num_threads);
-  }
-  threads = new pthread_t[num_threads]; 
+#ifdef POSIX_THREADS
+  //  threads = new pthread_t[num_threads];
+  threads.resize(num_threads); 
 
   ierr = pthread_mutex_init(&_mutex_root, NULL);
-  if (_verbose && (ierr != 0)) {
-    fprintf(_fp, "%s %d : pthread_mutex_init(&_mutex_root, NULL) : %d\n",
-	    __FILE__, __LINE__, ierr);
-  }
-#ifdef DEBUG_EXEC_THREAD
-  ierr = pthread_mutex_init(&_mutex_debug, NULL);
-  if (_verbose && (ierr != 0)) {
-    fprintf(_fp, "%s %d : pthread_mutex_init(&_mutex_debug, NULL) %d\n", 
-	    __FILE__, __LINE__, ierr);
+  if (ierr != 0) {
+    diss_printf(_verbose, _fp,
+		"%s %d : pthread_mutex_init(&_mutex_root, NULL) : %d\n",
+		__FILE__, __LINE__, ierr);
   }
 #endif
+
+#ifdef POSIX_THREADS
+#ifdef DEBUG_EXEC_THREAD
+  ierr = pthread_mutex_init(&_mutex_debug, NULL);
+#endif
+  if (ierr != 0) {
+    diss_printf(_verbose, _fp,
+		"%s %d : pthread_mutex_init(&_mutex_debug, NULL) %d\n", 
+		__FILE__, __LINE__, ierr);
+  }
   pthread_attr_init(&th_attr);
   pthread_attr_setdetachstate(&th_attr, PTHREAD_CREATE_JOINABLE);       
+#endif
 
 #ifdef DEBUG_EXEC_THREAD_FILE
   {
@@ -2582,10 +2427,9 @@ void QueueRuntime::exec_symb_fact()
     _fout.open(fname);
   }
 #endif
-
   t0_cpu = clock();
   get_realtime(&t0_elapsed);
-
+#ifdef POSIX_THREADS
   THREAD_QUEUE_EXEC **params = new THREAD_QUEUE_EXEC*[num_threads];
   for (int p = 0; p < num_threads; p++) {
     params[p] = new THREAD_QUEUE_EXEC(p, num_threads, this);
@@ -2593,9 +2437,7 @@ void QueueRuntime::exec_symb_fact()
 			     &thread_queue_symb_factorize_,
 			     (void *)params[p]);
     if (pid != 0) {
-      if (_verbose) {
-	fprintf(_fp, "bad thread creation ? : %d\n", pid);
-      }
+      fprintf(stderr, "bad thread creation ? : %d\n", pid);
       exit(0);
     }
   }
@@ -2603,23 +2445,31 @@ void QueueRuntime::exec_symb_fact()
   for (int p = 0; p < num_threads; p++) {
     int pid = pthread_join(threads[p], &results);
     if (pid != 0) {
-      if (_verbose) {
-	fprintf(_fp, "bad thread creation ? : %d\n", pid);
-      }
+      fprintf(stderr, "bad thread creation ? : %d\n", pid);
       exit(0);
     }
     delete params[p];
   }
   delete [] params;
-
+#else
+  THREAD_QUEUE_EXEC **params = new THREAD_QUEUE_EXEC*[num_threads];
+  for (int p = 0; p < num_threads; p++) {
+    params[p] = new THREAD_QUEUE_EXEC(p, num_threads, this);
+    threads.push_back(std::thread(thread_queue_symb_factorize_,
+				  (void *)params[p]));
+  }
+  for (int p = 0; p < num_threads; p++) {
+    threads[p].join();
+    delete params[p];
+  }
+  delete [] params;
+#endif
   t1_cpu = clock();
   get_realtime(&t1_elapsed);
-  if (_verbose) {
-    fprintf(_fp, 
-	    "execution of symb queue : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t1_elapsed, t0_elapsed));
-  }
+  diss_printf(_verbose, _fp, 
+	      "execution of symb queue : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t1_elapsed, t0_elapsed));
 #ifdef DEBUG_EXEC_THREAD_FILE
   _fout.close();
 #endif
@@ -2650,75 +2500,69 @@ void QueueRuntime::exec_symb_fact()
     } // if fopen()
   }
 #endif
-
+#ifdef POSIX_THEADS
   pthread_mutex_destroy(&_mutex_root);
 #ifdef DEBUG_EXEC_THREAD
   pthread_mutex_destroy(&_mutex_debug);
 #endif
-
-  delete [] threads;
+#endif
+  threads.clear();
+    
 }
 
 void QueueRuntime::exec_num_fact_debug()
 {
-  if (_verbose) {
-    fprintf(_fp, "numerical factorization with single threads :: DEBUG\n");
-  }
+  diss_printf(_verbose, _fp,
+	      "numerical factorization with single threads :: DEBUG\n");
   int *permute_block = new int[SIZE_B1];
   list<C_task_seq*>::const_iterator *its = new list<C_task_seq*>::const_iterator[_num_threads];
-  if (_verbose) {
-    fprintf(_fp, "*** thread = 0 @ %d ***\n", (int)_queue_static[0].size());
-  }
-  for (int p = 0; p < _num_threads; p++) {
+  diss_printf(_verbose, _fp,
+	      "*** thread = 0 @ %d ***\n", (int)_queue_static[0].size());
+    for (int p = 0; p < _num_threads; p++) {
     its[p] = _queue_static[p].begin();
   }
   for (list<C_task_seq*>::const_iterator it = _queue_static[0].begin();
        it != _queue_static[0].end(); ++it) {
-    if (_verbose) {
-      fprintf(_fp, "** C_task_seq = %d : %s, %s **\n",
-	      (*it)->task_id, (*it)->task_name , 
-	      (((*it)->parallel_single == TASK_SINGLE) ? " single " : " shared "));
-    } 
+    diss_printf(_verbose, _fp, "** C_task_seq = %d : %s, %s **\n",
+	    (*it)->task_id, (*it)->task_name , 
+	    (((*it)->parallel_single == TASK_SINGLE) ? " single " : " shared "));
     for (int j = (*it)->begin; j < (*it)->end; j++) {
-      if (_verbose) {
-	fprintf(_fp, "%s : ", (*(*it)->queue)[j]->task_name);
-	if ((*(*it)->queue)[j]->atomic_size > 1) {
-	  fprintf(_fp, "atomic %d / %d ",
-		  (*(*it)->queue)[j]->atomic_id,
-		  (*(*it)->queue)[j]->atomic_size);
-	}
-	else {
-	  fprintf(_fp, "\n");
-	}
+      diss_printf(_verbose, _fp, "%s : ", (*(*it)->queue)[j]->task_name);
+      if ((*(*it)->queue)[j]->atomic_size > 1) {
+	diss_printf(_verbose, _fp, "atomic %d / %d ",
+		(*(*it)->queue)[j]->atomic_id,
+		(*(*it)->queue)[j]->atomic_size);
+      }
+      else {
+	diss_printf(_verbose, _fp, "\n");
       }
       execute_task_debug(*it, j, permute_block, 0);
       if ((*(*it)->queue)[j]->quit_queue) {
 	return;
       }
-    }
+    } // loop : j
     for (int p = 1 ; p < _num_threads; p++) {
-      fprintf(_fp, "** C_task_seq = %d : %s %s **\n",
+      diss_printf(_verbose, _fp, "** C_task_seq = %d : %s %s **\n",
 	      (*its[p])->task_id, (*its[p])->task_name,
 	      (((*its[p])->parallel_single == TASK_SINGLE) ? " single " : " shared "));
       if ((*its[p])->parallel_single == TASK_SINGLE) {
 	for (int j = (*its[p])->begin; j < (*its[p])->end; j++) {
-	  if (_verbose) {
-	    fprintf(_fp, "%s : ", (*(*its[p])->queue)[j]->task_name);
-	    if ((*(*its[p])->queue)[j]->atomic_size > 1) {
-	      fprintf(_fp, " atomic %d / %d\n",
-		      (*(*its[p])->queue)[j]->atomic_id,
-		      (*(*its[p])->queue)[j]->atomic_size);
-	    }
-	    else {
-	      fprintf(_fp, "\n");
-	    }
+	  diss_printf(_verbose, _fp, "%s : ",
+		      (*(*its[p])->queue)[j]->task_name);
+	  if ((*(*its[p])->queue)[j]->atomic_size > 1) {
+	    diss_printf(_verbose, _fp, " atomic %d / %d\n",
+		    (*(*its[p])->queue)[j]->atomic_id,
+		    (*(*its[p])->queue)[j]->atomic_size);
+	  }
+	  else {
+	    diss_printf(_verbose, _fp, "\n");
 	  }
 	  execute_task_debug(*its[p], j, permute_block, 0);
 	  if ((*(*its[p])->queue)[j]->quit_queue) {
 	    return;
 	  }
-	}
-      }
+	} // loop : j
+      }   // if ((*its[p])->parallel_single == TASK_SINGLE) 
       ++its[p];
     } // loop : p > 0
   } // loop : it
@@ -2746,14 +2590,6 @@ void QueueRuntime::execute_task_debug(C_task_seq *seq, int pos,
   }
   //
 #endif
-#if 0
-  switch (task->task_id) {
-  case C_DFULL_SYM_GAUSS:
-    ((C_dfull_gauss_arg*)task->func_arg)->permute_block = 
-      permute_block;
-    break;
-  }
-#endif
   // accuessing to unsigned char does not need mutex
   task->status = TASK_WORKING;
   //
@@ -2779,10 +2615,13 @@ void QueueRuntime::exec_num_fact(const int called)
 {
   //   unsigned int ui;
   const int num_threads = _num_threads;
+#ifdef POSIX_THREADS
   void* results;
   pthread_attr_t th_attr;
-  pthread_t *threads;
-
+  vector<pthread_t> threads;
+#else
+  vector<std::thread> threads;
+#endif
   clock_t t0_cpu, t1_cpu;
   elapsed_t t0_elapsed, t1_elapsed;
   //  struct timespec ts0, ts1;
@@ -2798,9 +2637,8 @@ void QueueRuntime::exec_num_fact(const int called)
   t0_cpu = clock(); 
   get_realtime(&t0_elapsed);
   //  clock_gettime(CLOCK_REALTIME, &ts0);
-  if (_verbose) {
-    fprintf(_fp, "numerical factorization with %d threads\n", num_threads);
-  }
+  diss_printf(_verbose, _fp,
+	      "numerical factorization with %d threads\n", num_threads);
   _queue_dynamic_pos_start = (int)((double)(_queue_dynamic->size())
 				   * RATIO_QUEUE_GREEDY);
   _queue_dynamic_pos = _queue_dynamic_pos_start;
@@ -2833,7 +2671,7 @@ void QueueRuntime::exec_num_fact(const int called)
       }
     } // loop : q
   } // loop : p
-
+#ifdef POSIX_THREADS
   pthread_mutex_init(&_mutex_file, NULL);
   pthread_mutex_init(&_mutex_dependency, NULL);
 
@@ -2843,12 +2681,14 @@ void QueueRuntime::exec_num_fact(const int called)
   for (int p = 0; p < num_threads; p++) {
     pthread_mutex_init(&_mutex_group[p], NULL);
   }
-  threads = new pthread_t[num_threads]; 
+  //  threads = new pthread_t[num_threads];
+  threads.resize(num_threads);
 
   pthread_mutex_init(&_mutex_root, NULL);
   pthread_mutex_init(&_mutex_debug, NULL);
   pthread_cond_init(&_cond_root, NULL);
-
+#endif
+  
 #ifdef DEBUG_EXEC_THREAD_FILE
   {
     int pid = get_process_id();
@@ -2867,10 +2707,6 @@ void QueueRuntime::exec_num_fact(const int called)
        vector<C_task *> &queue = *(*it)->queue;
        for (int j = (*it)->begin; j < (*it)->end; j++) {
 	 list<C_task *>& parents_work = *(queue[j]->parents_work);
-#if 0
-	 cerr << queue[j]->task_name 
-	      << " parents_work.size() = " << parents_work.size() << endl;
-#endif
 	 if (parents_work.size() > 0) { // to avoid double free
 	   parents_work.clear();  
 	 }
@@ -2882,10 +2718,6 @@ void QueueRuntime::exec_num_fact(const int called)
      vector<C_task *> &queue = *((*it)->queue);
      for (int j = (*it)->begin; j < (*it)->end; j++) {
        list<C_task *>& parents_work = *(queue[j]->parents_work);
-#if 0
-       cerr << queue[j]->task_name 
-	    << " parents_work.size() = " << parents_work.size() << endl;
-#endif
        if (parents_work.size() > 0) {  // to avoid double free
 	 parents_work.clear(); 
        }
@@ -2912,14 +2744,6 @@ void QueueRuntime::exec_num_fact(const int called)
 		     back_inserter(parents_work));
 #endif
 	 }
-#if 0   // verify task name with printing single/parallel task sequence
-	 else {
-	   cerr << queue[j]->task_name << " " 
-		<< (*it)->task_name << " "
-		<< ((*it)->parallel_single == TASK_SINGLE ? "serl" : "para")
-	      << " parents_work.size() = " << parents_work.size() << endl;
-	 }
-#endif
 	 queue[j]->status = TASK_WAITING;  // reset status
        }  // loop : j
        (*it)->pos = (*it)->begin;
@@ -2943,14 +2767,6 @@ void QueueRuntime::exec_num_fact(const int called)
 	 std::copy(parents.begin(), parents.end(), back_inserter(parents_work));
 #endif     
        }
-#if 0    // verify task name with printing single/parallel task sequence
-       else {
-	 cerr << queue[j]->task_name << " " 
-	      << (*it)->task_name << " "
-	      << ((*it)->parallel_single == TASK_SINGLE ? "serl" : "para")
-	      << " parents_work.size() = " << parents_work.size() << endl;
-       }
-#endif
        queue[j]->status = TASK_WAITING;  // reset status
      }  // loop : j
      (*it)->pos = (*it)->begin;
@@ -2977,7 +2793,7 @@ void QueueRuntime::exec_num_fact(const int called)
 
   t0_cpu = clock();
   get_realtime(&t0_elapsed);
-
+#ifdef POSIX_THREADS
   THREAD_QUEUE_EXEC **params = new THREAD_QUEUE_EXEC*[num_threads];
   for (int p = 0; p < num_threads; p++) {
     params[p] = new THREAD_QUEUE_EXEC(p, num_threads, this);
@@ -2985,9 +2801,7 @@ void QueueRuntime::exec_num_fact(const int called)
 			     &thread_queue_num_factorize_,
 			     (void *)params[p]);
     if (pid != 0) {
-      if (_verbose) {
-	fprintf(_fp, "bad thread creation ? : %d\n", pid);
-      }
+      fprintf(_fp, "bad thread creation ? : %d\n", pid);
       exit(0);
     }
   }
@@ -2995,23 +2809,31 @@ void QueueRuntime::exec_num_fact(const int called)
   for (int p = 0; p < num_threads; p++) {
     int pid = pthread_join(threads[p], &results);
     if (pid != 0) {
-      if (_verbose) {
-	fprintf(_fp, "bad thread creation ? : %d\n", pid);
-      }
+      fprintf(_fp, "bad thread creation ? : %d\n", pid);
       exit(0);
     }
     delete params[p];
   }
   delete [] params;
-
+#else
+  THREAD_QUEUE_EXEC **params = new THREAD_QUEUE_EXEC*[num_threads];
+  for (int p = 0; p < num_threads; p++) {
+    params[p] = new THREAD_QUEUE_EXEC(p, num_threads, this);
+    threads.push_back(std::thread(thread_queue_num_factorize_,
+				  (void *)params[p]));
+  }
+  for (int p = 0; p < num_threads; p++) {
+    threads[p].join();
+    delete params[p];
+  }
+  delete [] params;
+#endif
   t1_cpu = clock();
   get_realtime(&t1_elapsed);
-  if (_verbose) {
-    fprintf(_fp,
-	    "execution of numr queue : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t1_elapsed, t0_elapsed));
-  }
+  diss_printf(_verbose, _fp,
+	      "execution of num queue : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t1_elapsed, t0_elapsed));
 #ifdef DEBUG_EXEC_THREAD_FILE
   _fout.close();
 #endif
@@ -3147,7 +2969,8 @@ void QueueRuntime::exec_num_fact(const int called)
   }
   delete [] _fps;
 #endif
-  delete [] threads;
+
+  threads.clear();
 }
 
 void *thread_queue_symb_factorize_(void *arg)
@@ -3155,11 +2978,11 @@ void *thread_queue_symb_factorize_(void *arg)
   THREAD_QUEUE_EXEC *params = (THREAD_QUEUE_EXEC *)arg;
   params->dissectionRuntime->thread_queue_symb_factorize(params->id, 
 							 params->num_threads);
+#ifdef POSIX_THREADS
   pthread_exit(arg);
-
+#endif
   return (void *)NULL;
 }
-
 void QueueRuntime::thread_queue_symb_factorize(const int pid,
 					       const int num_threads)
 {
@@ -3168,17 +2991,16 @@ void QueueRuntime::thread_queue_symb_factorize(const int pid,
   // greedy -- better to be in seperated function
   int pos, end;
   C_task_seq* it = _queue_symb;
-
   while(1) {
-    pthread_mutex_lock(&_mutex_root);
-    {
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
       pos = it->pos;
       end = it->end;
       if (pos < end) {
 	it->pos++;
       }
-    }
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    }  // scope of mutex
     if (pos >= end) {
       break;
     }
@@ -3198,20 +3020,20 @@ void QueueRuntime::thread_queue_symb_factorize(const int pid,
     task->status = TASK_DONE;
 
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << "( " << pid << " " << pos << " ) " ;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
   } // while (1)
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " " << it->task_name 
 	 << " @ " << it->task_id << " greedy end." << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif     
 }
 
@@ -3220,8 +3042,9 @@ void *thread_queue_num_factorize_(void *arg)
   THREAD_QUEUE_EXEC *params = (THREAD_QUEUE_EXEC *)arg;
   params->dissectionRuntime->thread_queue_num_factorize(params->id, 
 							params->num_threads);
+#ifdef POSIX_THREADS  
   pthread_exit(arg);
-
+#endif
   return (void *)NULL;
 }
 
@@ -3242,20 +3065,20 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
   zone = 0;
   while(it != _queue_static[pid].end()) {
 #ifdef DEBUG_THREAD_LOOP
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << " : " << (*it)->task_name 
 	   << " _phase_dynamic = " << _phase_dynamic << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     //
     zone_idxp = (zone + DIST_TASK_CRITICAL - 1) % DIST_TASK_CRITICAL;
     zone_idxn = zone % DIST_TASK_CRITICAL;
     zone_first_entered = 0;
     zone_last_entered = 0;
-    pthread_mutex_lock(&_mutex_root);
-    {
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
       if (_zone_entered[zone_idxn] == 0) {
 	zone_first_entered = 1;
 	_zone_static_assigned[zone_idxn] = 0;
@@ -3265,27 +3088,27 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
       if (zone_flag) {
 	// clear cyclic buffer
  	_zone_entered[zone_idxp] = 0;
-	_zone_static_assigned[zone_idxp] = 0;  // only fol safety
+	_zone_static_assigned[zone_idxp] = 0;  // only for safety
 	zone_last_entered = 1;
       }
-    }
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // scope of mutex
     zone++;
     //
     if ((*it)->parallel_single == TASK_PARALLEL) {
       switch((*it)->task_id) {
       case C_DFULL :
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " C_DFULL " 
 	       << (*it)->task_name << " : " << (*it)->task_id 
 	       << " @ " << zone << " : " << zone_flag << " : "
 	       << " zone ( " << zone_first_entered << " : "
 	       << zone_last_entered  << " )"
 	       << " : " << (*it)->pos << " " << (*it)->end << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	thread_queue_C_DFULL(pid, num_threads, *it, 
 			     permute_block, 
@@ -3293,12 +3116,12 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
 			     zone_first_entered,
 			     zone_idxn);
 #ifdef DEBUG_THREAD_LOOP
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " C_DFULL " 
 	       << (*it)->task_name << " end." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	break;
       case C_SPARSELOCALSCHUR:
@@ -3309,27 +3132,27 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
       case C_DEALLOCATE:
       case C_SPARSESOLVER: 
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " remaining diagonal " 
 	       << (*it)->task_name << " : " << (*it)->task_id 
 	       << " @ " << zone << " : " << zone_flag << " : "
 	       << " zone ( " << zone_first_entered << " : "
 	       << zone_last_entered  << " )"
 	       << " : " << (*it)->pos << " " << (*it)->end << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	thread_queue_parallel_dynamic(pid, num_threads, *it,
 				      permute_block, 
 				      zone_idxn);
 #ifdef DEBUG_THREAD_LOOP
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " remaining diagonal " 
 	       << (*it)->task_name << " end." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	break;
       case C_SPARSELOCALSCHUR1:
@@ -3339,16 +3162,16 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
       case C_FILLMATRIX1:
       case C_DEALLOCATE1:
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " remaining off-diagonal " 
 	       << (*it)->task_name << " : " << (*it)->task_id 
 	       << " @ " << zone << " : " << zone_flag << " : "
 	       << " zone ( " << zone_first_entered << " : "
 	       << zone_last_entered  << " )"
 	       << " : " << (*it)->pos << " " << (*it)->end << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	thread_queue_parallel_static(pid, num_threads, *it, 
 				     permute_block, 
@@ -3357,44 +3180,44 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
 				     zone_first_entered,
 				     zone_last_entered);
 #ifdef DEBUG_THREADS_LOOP
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " remaining off-diagonal " 
 	       << (*it)->task_name << " end." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	break;
       }
     }
     else {  //     if ((*it)->parallel_single == TASK_SINGLE)
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " single " 
 	     << (*it)->task_name << " : " << (*it)->task_id 
 	     << " @ " << zone << " : " << zone_flag << " : "
 	     << " zone ( " << zone_first_entered << " : "
 	     << zone_last_entered  << " )"
 	     << " : " << (*it)->pos << " " << (*it)->end << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       thread_queue_single(pid, num_threads, *it,
 			  permute_block, 
 			  zone_idxn);
 #ifdef DEBUG_THREAD_LOOP
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " single " 
 	       << (*it)->task_name << " end." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
     } //  if ((*it)->parallel_single == TASK_SINGLE) 
     int clear_flag = 0;
-    pthread_mutex_lock(&_mutex_root);
-    {
+    {  // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
       if (_zone_finished[zone_idxn] == 0) {
 	zone_first_finished = 1;
       }
@@ -3409,26 +3232,18 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
 	  clear_flag = 1;
 	}
 #ifdef DEBUG_THREAD_LOOP
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " " 
 	       << (*it)->task_name << " end." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
       }
-    }
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // scope of mutex
     // without mutex
     if((*it)->task_id == C_DFULL) {
-#if 0
-      pthread_mutex_lock(&_mutex_debug);
-      {
-	cerr << pid << " cnt_cdfull = " << cnt_cdfull << " : "
-	     << (*it)->task_id << " : " << (*it)->task_name << endl;
-      }
-      pthread_mutex_unlock(&_mutex_debug);
-#endif
       cnt_cdfull = (cnt_cdfull + 1) % DIST_TASK_CRITICAL;
       if (clear_flag) {
 	const int cnt_cdfull_p = 
@@ -3446,7 +3261,6 @@ void QueueRuntime::thread_queue_num_factorize(const int pid,
   } // while (it != _queue_static[pid].end()) {
   delete [] permute_block;
 }
-
 
 void QueueRuntime::thread_queue_C_DFULL(const int pid,
 					const int num_threads,
@@ -3467,25 +3281,24 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
   int *_grp_task_ends = _group_task_ends[pid_g][cnt_cdfull];
   int *_grp_static_assigned = _group_static_assigned[pid_g][cnt_cdfull];
   bool zone_flag;
-  
+
   // get status other threads entered the same zone
-  pthread_mutex_lock(&_mutex_root);
   {
+    //    std::unique_lock<std::mutex>lck_root(_mutex_root);
+    MUTEX_LOCK(_mutex_root, lck_root);
     zone_flag = (_zone_entered[zone_idxn] == num_threads);
+    MUTEX_UNLOCK(_mutex_root);
   }
-  pthread_mutex_unlock(&_mutex_root);
-  
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " cnt_cdfull = " << cnt_cdfull << " parallel : c_dfull " 
 	 << it->task_name << " pos = " << it->pos << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
-
-  pthread_mutex_lock(&_mutex_group[pid_g]);
-  {
+  { // scope of mutex
+    MUTEX_LOCK(_mutex_group[pid_g], lck_root);
     if (_grp_entered[0] == 0) {
       // reset flags to keep status of entered/finshed tasks
       for (int i = 1; i < DIST_TASK_CRITICAL; i++) {
@@ -3498,11 +3311,11 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       group_first_entered = 1;
       _grp_static_assigned[0] = 0; // 12 Feb.2013 Atsusti : for safety?
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);	      
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " : " << it->pos << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
     }
     // pid0 is decided by arrived order
@@ -3510,10 +3323,8 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
     if (_grp_entered[0] == it->num_threads) {
       group_last_entered = 1;
     }
-  }
-  pthread_mutex_unlock(&_mutex_group[pid_g]);
-
-
+    MUTEX_UNLOCK(_mutex_group[pid_g]);
+  } // scope of mutex
   //
   while (1) {    // global loop of task queue
     //
@@ -3522,8 +3333,8 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
     int finish_group = 0;
     int skip_flag = 0;
     if (group > 0) {
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
+      { // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	_begins_group[pid_g][pid0][gidxn] = (-1);
 	_ends_group[pid_g][pid0][gidxn] = (-1);
 	group_first_entered = 0;
@@ -3547,7 +3358,7 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 #else
 	  _group_task_ends[pid_g][cnt_cdfull][gidxn] = (-1);
 #endif
-	}
+	} // if (_grp_entered[gidxn] == 0) 
 	_grp_entered[gidxn]++;
 	if (_grp_entered[gidxn] == it->num_threads) {
 	  // clear status of cyclic buffer
@@ -3563,12 +3374,12 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	  }
 	  skip_flag = 1;
 	} // if ((_grp_finished[gidxn] > 0) && (group_first_finished == 0))
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
-    }
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      }  // scope of mutex
+    } //  if (group > 0)
     else {
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
+      {  // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	if ((_grp_finished[gidxn] > 0) && 
 	    (group_first_finished == 0)) {
 	  _grp_finished[gidxn]++;
@@ -3579,12 +3390,12 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	  }
 	  skip_flag = 1;
 	}
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
-    }
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      }  // scope mutex
+    } //  if (group > 0)
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << " pid_g = " << pid_g << " pid0 " << pid0
 	   << " group " << group << " entered " 
 	   << group_first_entered << " / " << group_last_entered 
@@ -3601,47 +3412,14 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       cerr << " zone_flag = " << zone_flag
 	   << " zone_idxn = " << zone_idxn
 	   << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     group++; 
     //
     if (skip_flag) {
       continue;
     }
-#if 0  // this has no effect ? 20 Jun.2012 Atsushi
-    if (group_first_entered) {
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      { 
-	const int group_static_assigned = _grp_static_assigned[gidxn];
-	if (group_static_assigned == 0) {
-	  for (int p = 0; p < it->num_threads; p++) {
-	    _begins_group[pid_g][p][gidxn] = (-1);
-	    _ends_group[pid_g][p][gidxn] = (-1);
-	  }
-	}
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
-    }
-#endif
-#if 0
-    if (group_first_entered) {
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
-	pos = it->pos; 
-	int jtmp = pos; 
-	for (int i = (*it->queue)[pos]->parallel_id;
-	     i < (*it->queue)[pos]->parallel_max; i++) {
-	  jtmp += (*it->queue)[jtmp]->atomic_size;
-	}
-	const int end_queue = jtmp;
-	_grp_task_ends[gidxn] = jtmp;
-	_grp_task_ends[gidxp] = (-1);
-	_grp_static_assigned[gidxn] = 0;
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
-    }
-#endif
 #if 1
     // wait until other threads enter the same zone
     while (!zone_flag) {
@@ -3650,31 +3428,32 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       while ((flag == 1) && (!zone_flag)) {
 	flag = execute_task_dynamic_buffer(permute_block, 
 					   pid,
-					   &_mutex_dependency);
-	pthread_mutex_lock(&_mutex_root);
-	{
+					   _mutex_dependency);
+	{ // scope of mutex
+	  //	  std::unique_lock<std::mutex>lck_root(_mutex_root);
+	  MUTEX_LOCK(_mutex_root, lck_root);
 	  zone_flag = (_zone_entered[zone_idxn] == num_threads);
+	  MUTEX_UNLOCK(_mutex_root);
 	}
-	pthread_mutex_unlock(&_mutex_root);
-      }
+      } //  while ((flag == 1) && (!zone_flag)) 
       if (zone_flag) {
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " pid_g = " << pid_g << " pid0 " << pid0
 	       << " zone_idxn = " << zone_idxn
 	       << " zone_flag = " << zone_flag 
 	       << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	break;
       }
 // get tasks with atomic_size from the queue : *it
       int itmp, jtmp;
       int exit_flag = 0;
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
+      {  // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	pos = it->pos;
 	// do not increase queue more than its size
 	if (pos == it->end) {
@@ -3687,54 +3466,54 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	  jtmp = (itmp - 1 + ((*it->queue)[pos]->parallel_max -
 			      (*it->queue)[pos]->parallel_id));
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " pos = " << pos << " +atomic_size = " << itmp
 		 << " parallel_max " << jtmp << " : " << it->end 
 		 << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  if (itmp <= jtmp) {
 	    it->pos = itmp;
 	  }
 	}
-      } 
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      }  // scope of mutex
       if (exit_flag) {
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " pod = " << pos << "it->end = " << it->end
 	       << " : " << it->task_name << " already finished.." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	return;
       }
       if (itmp == jtmp) {
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " pos = " << pos << " jtmp = " << jtmp << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	finish_group = 1;
       }
       // reserve tasks and conunt estimated job size
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
+      {  // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	for (int i = 0; i < (*it->queue)[pos]->atomic_size; i++) {
 	  _group_nops[pid_g][pid0] += 
 	    *((*it->queue)[pos + i]->ops_complexity);
 	}
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
-	
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      } // scope mutex
+
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	if ((*it->queue)[pos]->atomic_size > 1) {
 	  C_task *kt = (*it->queue)[pos];
 	  cerr << pid << " b-c-a " << pos << " : " 
@@ -3746,18 +3525,18 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	  }
 	  cerr << "before statically assigned task : with status check." 
 	       << endl;
-	  }
+	}
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       for (int i = 0; i < (*it->queue)[pos]->atomic_size; i++) {
 	C_task *kt = (*it->queue)[pos + i];
-	int waiting1 = check_parents_done(kt, &_mutex_dependency);
+	int waiting1 = check_parents_done(kt, _mutex_dependency);
 	
 	while(waiting1 > 0) {
 	  //
-	  pthread_mutex_lock(&_mutex_root);
-	  {
+	  { // scope of mutex
+	    MUTEX_LOCK(_mutex_root, lck_root);
 	    _waiting_root++;
 #ifdef DEBUG_DEADLOCK
 	    if (_waiting_root > num_threads) {
@@ -3767,7 +3546,6 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    }
 #endif
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    // pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << pid << " " << kt->task_name << " "
 		   << "waiting = "<< waiting1 << " : " 
@@ -3779,104 +3557,100 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	      }
 	      cerr << " : sleeping" << endl;
 	    }
-	    // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	    pthread_cond_wait(&_cond_root, &_mutex_root);
+	    COND_WAIT(_mutex_root, _cond_root, lck_root); //
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    // pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << "\t" << pid 
 		   << " waked up : _waiting_root = " << (int)_waiting_root 
 		     << endl;
 	    }
-	    // pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    _waiting_root--;
 	    // other thread broacast wake up and decreasing _waiting_root
-	    waiting1 = check_parents_done(kt, &_mutex_dependency);
-	  }
-	  pthread_mutex_unlock(&_mutex_root);
+	    waiting1 = check_parents_done(kt, _mutex_dependency);
+	    MUTEX_UNLOCK(_mutex_root);
+	  } // scope of mutex
+	  //#endif
 	} // while (waiting > 0)
 	if (waiting1 == (-1)) {
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " pod = " << pos << " : "
 		 << (*it->queue)[pos + i]->task_name		
 		 << " : " << it->task_name << " quitted..." << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  return;
 	}
 	execute_task(it, (pos + i), 
 		     permute_block, 
-		     pid, &_mutex_dependency);
+		     pid, _mutex_dependency);
 	if ((*it->queue)[pos + i]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " pos = " << pos << " atomic_size= " 
 		 << (*it->queue)[pos]->atomic_size
 		   << " : " << it->task_name << " finished..." 
 		 << "skip " << (*it->queue)[pos + i]->to_next_task
 		 << " : " << __FILE__ << " : " << __LINE__
 		 << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	    }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  pos += (*it->queue)[pos + i]->to_next_task;
 	  return;
-	  //	  break;
 	}
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
  	  cerr << "{ " 
 	       << (*it->queue)[pos + i]->task_name << " @ "
 	       << pid << " " << (pos + i) << " }";
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
       } // loop : i
 	// static tasks are assigned by other thread
- 	
       if (finish_group) {
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
-	{
-	  cerr << pid << " C_FULL : the first greedy end the queue." 
-	       << it->pos << endl;
-	}
-	pthread_mutex_unlock(&_mutex_debug);
+	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
+	    cerr << pid << " C_FULL : the first greedy end the queue." 
+		 << it->pos << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
+	  }
 #endif
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{
+	  { // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  pos = it->pos; 
 	  for (int p = 0; p < it->num_threads; p++) {
 	    _begins_group[pid_g][p][gidxn] = pos;
 	    _ends_group[pid_g][p][gidxn] = pos;
 	  }
 	  _grp_static_assigned[gidxn] = 1;
-	}
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);
+	} // scope of mutex
 	continue;
       }
-      pthread_mutex_lock(&_mutex_root);
-      {
+      { // scope of mutex
+	MUTEX_LOCK(_mutex_root, lck_root);
 	zone_flag = (_zone_entered[zone_idxn] == num_threads);
-      }
-      pthread_mutex_unlock(&_mutex_root);
+	MUTEX_UNLOCK(_mutex_root);
+      } // scope of mutex
     } //  while (zone_flag)
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
-     cerr << pid << " pid_g = " << pid_g << " pid0 " << pid0
-	  << " group " << (group - 1)   // after increment of group
-	  << " zone_flag = " << zone_flag
-	  << endl;
+      MUTEX_LOCK(_mutex_debug, lck_debug);
+      cerr << pid << " pid_g = " << pid_g << " pid0 " << pid0
+	   << " group " << (group - 1)   // after increment of group
+	   << " zone_flag = " << zone_flag
+	   << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
 #endif
     if (group_last_entered) {
@@ -3884,41 +3658,33 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       long nops, nops_total, nops_static, nops_per_thread; 
       nops = 0L;
       nops_total = 0L;
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
-	pos = it->pos;   
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
-      // this value might be changed but
-      // no difference on condition queue_size < num_threads
-      // pos becomes larger then queue_size smaller 
+      { // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
+	pos = it->pos;
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      } // scope of mutex
       if (pos == it->end) {
 	break;
       }
       const int queue_size = ((*it->queue)[pos]->parallel_max - 
 			      (*it->queue)[pos]->parallel_id);
       if (queue_size < it->num_threads) {
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  pos = it->pos; 
 	  for (int p = 0; p < it->num_threads; p++) {
 	    _begins_group[pid_g][p][gidxn] = pos;
 	    _ends_group[pid_g][p][gidxn] = pos;
 	  }
 	  _grp_static_assigned[gidxn] = 1;
-	}
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
-      }
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);
+	} // scope of mutex
+      }	
       else {
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  pos = it->pos;
 	  int jj = pos; 
-#if 0
-	  for (int i = 0; i < it->num_threads; i++) {
-	    nops_total += _group_nops[pid_g][i];
-	  }
-#endif
 	  for (int i = (*it->queue)[pos]->parallel_id;
 	       i < (*it->queue)[pos]->parallel_max; i++) {
 	    // atomic_size
@@ -3931,12 +3697,12 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	  nops_static = (long)((double)nops_total * RATIO_QUEUE_GREEDY);
 	  nops_per_thread = (nops_static / (long)it->num_threads);
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pos << " " <<  _grp_task_ends[gidxn] << " " 
 		 << nops_total << " " << nops_per_thread << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  long ntmp = 0L;
 	  for (int p = 0; p < it->num_threads; p++) {
@@ -3946,12 +3712,12 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	  }
 	  if (ntmp >= nops_per_thread) { // greedy
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pos << " max _group_nops[pid_g][] =  " << ntmp
 		   << " nops_per_threads = " << nops_per_thread << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    for (int p = 0; p < it->num_threads; p++) {
 	      _begins_group[pid_g][p][gidxn] = pos;
@@ -3987,13 +3753,13 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    if (p < it->num_threads) {
 	      // static assignment is failed.
 #ifdef DEBUG_EXEC_THREAD
-	      pthread_mutex_lock(&_mutex_debug);
 	      {
+		MUTEX_LOCK(_mutex_debug, lck_debug);
 		cerr << pid << "pid_g = " << pid_g << " gidxn = " << gidxn
 		     << " : pos = " << pos << " static assignment is failed"
 		     << endl;
+		MUTEX_UNLOCK(_mutex_debug);
 	      }
-	      pthread_mutex_unlock(&_mutex_debug);
 #endif
 	      for (int j = 0; j < it->num_threads; j++) {
 		_begins_group[pid_g][j][gidxn] = pos;
@@ -4005,50 +3771,50 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    //	    _group_task_ends[pid_g][cnt_cdfull][gidxn] = end_queue;
 	  } // if (ntmp < nops_per_thread)
 	  _grp_static_assigned[gidxn] = 1;
-	}
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
-      } //  if (queue_size < it->num_threads) 
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);
+	} // scope of mutex
+      } //  if (queue_size < it->num_threads)
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " : ";
 	for (int p = 0; p < it->num_threads; p++) {
 	  cerr << "[ " << _begins_group[pid_g][p][gidxn] 
 	       << " : "  << _ends_group[pid_g][p][gidxn] << " ] ";
 	}
 	cerr << _grp_task_ends[gidxn] << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
     }  // if (group_last_entered)
     else {
       int group_task_end, group_static_assigned;
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
+      { // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	group_task_end = _grp_task_ends[gidxn];
 	group_static_assigned = _grp_static_assigned[gidxn];
 	pos = it->pos;
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      } // scope of mutex
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " pos = " << pos << " gidxn = " << gidxn
 	     << " group_task_end " << group_task_end 
 	     << " group_static_assigned " << group_static_assigned
 	     << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       if (pos == it->end && (group_static_assigned == 0)) {
 	// not yet static assigned but queue is exhausted
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " pod = " << pos << "it->end = " << it->end
 	       << " : " << it->task_name << " finished." << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	return;
       }
@@ -4056,22 +3822,22 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       while (group_static_assigned != 1) { 	      // greedy
 	int exit_flag = 0;
 	// to skip un-necessary access to _dynamic_queue
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  pos = it->pos;
 	  if (pos == it->end) {
 	    exit_flag = 1;
 	  }
-	} 
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);	  
+	} // scope of mutex
 	if (exit_flag) {
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " pod = " << pos << "it->end = " << it->end
 		 << " : " << it->task_name << " already finished." << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  return;
 	}
@@ -4081,21 +3847,21 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	while ((flag == 1) && (group_static_assigned != 1)) {
 	  flag = execute_task_dynamic_buffer(permute_block, 
 					     pid,
-					     &_mutex_dependency);
-	  
-	  pthread_mutex_lock(&_mutex_group[pid_g]);
-	  { 
+					     _mutex_dependency);
+	  { // scope of mutex
+	    //	    std::unique_lock<std::mutex>lck_root(_mutex_group[pid_g]);
+	    MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	    group_static_assigned = _grp_static_assigned[gidxn];
-	  }
-	  pthread_mutex_unlock(&_mutex_group[pid_g]);
+	    MUTEX_UNLOCK(_mutex_group[pid_g]);
+	  } // scope of mutex
 	} // while ((flag == 1) && (group_static_assigned != 0))
 	if (group_static_assigned) {
 	  break;
 	}
 	// get tasks with atomic_size from the queue : *it
 	int itmp, jtmp;
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  pos = it->pos;
 	  // do not increase queue more than its size
 	  if (pos == it->end) {
@@ -4108,54 +3874,53 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    jtmp = (itmp - 1 + ((*it->queue)[pos]->parallel_max -
 				(*it->queue)[pos]->parallel_id));
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " pos = " << pos << " +atomic_size = " << itmp
 		   << " parallel_max " << jtmp << " : " << it->end 
 		   << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    if (itmp <= jtmp) {
 	      it->pos = itmp;
 	    }
 	  }
-	} 
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);
+	} // scope of mutex
 	if (exit_flag) {
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " pod = " << pos << "it->end = " << it->end
 		 << " : " << it->task_name << " already finished.." << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  return;
 	}
 	if (itmp == jtmp) {
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " pos = " << pos << " jtmp = " << jtmp << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	  finish_group = 1;
 	}
 	// reserve tasks and conunt estimated job size
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  for (int i = 0; i < (*it->queue)[pos]->atomic_size; i++) {
 	    _group_nops[pid_g][pid0] += 
 	      *((*it->queue)[pos + i]->ops_complexity);
 	  }
-	}
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
-	
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);
+	} // scope of mutex
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  if ((*it->queue)[pos]->atomic_size > 1) {
 	    C_task *kt = (*it->queue)[pos];
 	    cerr << pid << " b-c-a " << pos << " : " 
@@ -4168,18 +3933,19 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    cerr << "before statically assigned task : with status check." 
 		 << endl;
 	  }
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 
 	for (int i = 0; i < (*it->queue)[pos]->atomic_size; i++) {
 	  C_task *kt = (*it->queue)[pos + i];
-	  int waiting = check_parents_done(kt, &_mutex_dependency);
+	  int waiting = check_parents_done(kt, _mutex_dependency);
 	  
 	  while(waiting > 0) {
 	    //
-	    pthread_mutex_lock(&_mutex_root);
-	    {
+	    { // scope of mutex
+	      //	      std::unique_lock<std::mutex>lck_root(_mutex_root);
+	      MUTEX_LOCK(_mutex_root, lck_root);	      
 	      _waiting_root++;
 #ifdef DEBUG_DEADLOCK
 	      if (_waiting_root > num_threads) {
@@ -4189,7 +3955,6 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	      }
 #endif
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	      // pthread_mutex_lock(&_mutex_debug);
 	      {
 		cerr << pid << " " << kt->task_name << " "
 		     << "waiting = "<< waiting << " : " 
@@ -4201,69 +3966,67 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 		}
 		cerr << " : sleeping" << endl;
 	      }
-	      // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	      pthread_cond_wait(&_cond_root, &_mutex_root);
+	      COND_WAIT(_mutex_root, _cond_root, lck_root); //
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	      // pthread_mutex_lock(&_mutex_debug);
 	      {
 		cerr << "\t" << pid 
 		     << " waked up : _waiting_root = " << (int)_waiting_root 
 		     << endl;
 	      }
-	      // pthread_mutex_unlock(&_mutex_debug);
 #endif
+	      
 	      _waiting_root--;
 	      // other thread broacast wake up and decreasing _waiting_root
-	      waiting = check_parents_done(kt, &_mutex_dependency);
-	    }
-	    pthread_mutex_unlock(&_mutex_root);
+	      waiting = check_parents_done(kt, _mutex_dependency);
+	      MUTEX_UNLOCK(_mutex_root);
+	    } // scope of mutex
 	  } // while (waiting > 0)
 	  if (waiting == (-1)) {
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " pod = " << pos + i << " : " 
 		   << (*it->queue)[pos + i]->task_name
 		   << " : " << it->task_name << " quitted..." << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    return;
 	  }
 	  execute_task(it, (pos + i), 
 		       permute_block, 
-		       pid, &_mutex_dependency);
+		       pid, _mutex_dependency);
 	  if ((*it->queue)[pos + i]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " pos = " << pos << " atomic_size= " 
 		   << (*it->queue)[pos]->atomic_size
 		   << " : " << it->task_name << " finished..." 
 		   << "skip " << (*it->queue)[pos + i]->to_next_task
 		   << " : " << __FILE__ << " : " << __LINE__
 		   << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    pos += (*it->queue)[pos + i]->to_next_task;
 	    return;
 	    //	    break;
 	  }
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << "{ " 
 		 << (*it->queue)[pos + i]->task_name << " @ "
 		 << pid << " " << (pos + i) << " }";
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	} // loop : i
 	// static tasks are assigned by other thread
-	pthread_mutex_lock(&_mutex_group[pid_g]);
-	{ 
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	  group_static_assigned = _grp_static_assigned[gidxn];
 	  if ((finish_group == 1) && (group_static_assigned == 0)) {
 	    // static task is not assigned but queue becomes empty
@@ -4273,39 +4036,38 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    }
 	    _grp_task_ends[gidxn] = jtmp;
 	  }
-	}
-	pthread_mutex_unlock(&_mutex_group[pid_g]);
-	
+	  MUTEX_UNLOCK(_mutex_group[pid_g]);
+	} // scope of mutex
 	if (finish_group) {
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " C_FULL : the first greedy end the queue." 
 		 << it->pos << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
-	  pthread_mutex_lock(&_mutex_group[pid_g]);
-	  {
+	  { // scope of mutex
+	    MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	    pos = it->pos; 
 	    for (int p = 0; p < it->num_threads; p++) {
 	      _begins_group[pid_g][p][gidxn] = pos;
 	      _ends_group[pid_g][p][gidxn] = pos;
 	    }
 	    _grp_static_assigned[gidxn] = 1;
-	  }
-	  pthread_mutex_unlock(&_mutex_group[pid_g]);
+	    MUTEX_UNLOCK(_mutex_group[pid_g]);
+	  } // scope of mutex
 	  continue;
 	}
       // just for debugging : group_task_end >=0 <=> braek while ( < 0 )
 #ifdef DEBUG_EXEC_THREAD
 	if (group_static_assigned) {
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " end the first greedy " 
 		 << it->pos << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 	}
 #endif
       } // while (group_static_assigned != 1) 
@@ -4317,13 +4079,13 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       // this never happen?
       _begin_grp = _end_grp = (-1);
 #ifdef DEBUG_EXEC_THREAD_21Jun2012
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << ": pid0 = " << pid0 << " gidxn = " << gidxn
 	     << " static assignment is not yet done! "
 	     << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
     }
     else {
@@ -4332,13 +4094,13 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
     }
 
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << ": pid0 = " << pid0 << " gidxn = " << gidxn
 	   << " < " << _begin_grp << " " << _end_grp << " > assigned" 
 	   << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     for (int i = _begin_grp; i < _end_grp; i++) {
       // no need to check dependency for static assignement 
@@ -4351,20 +4113,20 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	i += (*it->queue)[i]->to_next_task;
       }
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << "( "
 	     << (*it->queue)[i]->task_name << " @ "
 	     << pid << " " << i << " )";
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
     } // loop : i
     // greedy
     while(1) {
       int group_task_end;
-      pthread_mutex_lock(&_mutex_group[pid_g]);
-      {
+      { // scope of mutex
+	MUTEX_LOCK(_mutex_group[pid_g], lck_root);
 	pos = it->pos;
 	group_task_end = _grp_task_ends[gidxn];
 	if (pos < group_task_end) {
@@ -4374,16 +4136,16 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    it->pos = itmp;
 	  }
 	}
-      }
-      pthread_mutex_unlock(&_mutex_group[pid_g]);
+	MUTEX_UNLOCK(_mutex_group[pid_g]);
+      } // scope of mutex
       if (pos >= group_task_end) {
 	break;
       }
       if (_begin_grp < _end_grp) {
       // <==> statically assigned block is computed
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  if ((*it->queue)[pos]->atomic_size > 1) {
 	    C_task *kt = (*it->queue)[pos];
 	    cerr << pid << " b-c-a " << pos << " : " << kt->task_name << " : "
@@ -4396,24 +4158,24 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    cerr << "within statically assigned task : without status check." 
 		 << endl;
 	  }
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	for (int i = 0; i < (*it->queue)[pos]->atomic_size; i++) {
 	  execute_task(it, (pos + i), permute_block, 
 		       pid,
-		       &_mutex_group[pid_g]);
+		       _mutex_group[pid_g]);
 	  if ((*it->queue)[pos + i]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " pos = " << pos << " atomic_size= " 
 		   << (*it->queue)[pos]->atomic_size
 		   << " : " << it->task_name << " finished..." 
 		   << "skip " << (*it->queue)[pos + i]->to_next_task
 		   << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    //	    const int ibegin = pos + i + 1;
 	    pos += (*it->queue)[pos + i]->to_next_task;
@@ -4421,21 +4183,21 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    // break;
 	  }
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << "( "
 		 << (*it->queue)[pos + i]->task_name << " @ "
 	       << pid << " " << (pos + i) << " )";
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	} // loop : i
       } // if (_begins_grp == _ends_grp)
       else {
 	// <==> no statically assigned block 
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  if ((*it->queue)[pos]->atomic_size > 1) {
 	    C_task *kt = (*it->queue)[pos];
 	    cerr << pid << " b-c-a " << pos << " : " << kt->task_name << " : "
@@ -4447,17 +4209,18 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	    }
 	    cerr << "no statically assigned task : with status check." << endl;
 	  }
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	for (int i = 0; i < (*it->queue)[pos]->atomic_size; i++) {
 	  C_task *kt = (*it->queue)[pos + i];
-	  int waiting = check_parents_done(kt, &_mutex_dependency);
+	  int waiting = check_parents_done(kt, _mutex_dependency);
 	  while(waiting > 0) {
-	    pthread_mutex_lock(&_mutex_root);
-	    {
+	    { // scope of mutex
+	      //	      std::unique_lock<std::mutex>lck_root(_mutex_root);
+	      MUTEX_LOCK(_mutex_root, lck_root);
 	      _waiting_root++;
-#ifdef DEBUG_DEADLOCK
+	      #ifdef DEBUG_DEADLOCK
 	      if (_waiting_root > num_threads) {
 		fprintf(stderr, "dead lock occured : %s %d\n",
 			__FILE__,  __LINE__);
@@ -4465,7 +4228,6 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 	      }
 #endif
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	      // pthread_mutex_lock(&_mutex_debug);
 	      {
 		cerr << pid << " " << kt->task_name << " "
 		     << "waiting = " << waiting 
@@ -4477,86 +4239,84 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
 		}
 		cerr << " : sleeping" << endl;
 	      }
-	      // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	      pthread_cond_wait(&_cond_root, &_mutex_root);
+	      COND_WAIT(_mutex_root, _cond_root, lck_root); //	      
 	      _waiting_root--;
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	      // pthread_mutex_lock(&_mutex_debug);
 	      {
 		cerr << endl
 		     << pid << " " << kt->task_name << " "
 		     << " waked up : _waiting_root = " << (int)_waiting_root 
 		     << endl;
 	      }
-	      // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	      waiting = check_parents_done(kt, &_mutex_dependency);
-	    }
-	    pthread_mutex_unlock(&_mutex_root);
-	  }
+	      waiting = check_parents_done(kt, _mutex_dependency);
+	      MUTEX_UNLOCK(_mutex_root);
+	    } // scope of mutex
+	  } // while (waiting > 0) 
 	  if (waiting == (-1)) {
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " pod = " << pos + i << " : " 
 		   << (*it->queue)[pos + i]->task_name
 		   << " : " << it->task_name << " quitted..." << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    return;
 	  } // if (wating == (-1))
 	  execute_task(it, (pos + i), permute_block, 
 		       pid,
-		       &_mutex_group[pid_g]);
+		       _mutex_group[pid_g]);
+	  
 	  if ((*it->queue)[pos + i]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " i = " << i
 		   << " : " << it->task_name << " finished... skip " 
 		   << (*it->queue)[pos + i]->to_next_task << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    //	    const int ibegin = pos + i + 1;
 	    i += (*it->queue)[pos + i]->to_next_task;
 	    return;
 	  } // if (quit_queue)
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << "( "
 		 << (*it->queue)[pos + i]->task_name << " @ "
 		 << pid << " " << (pos + i) << " )";
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	} // loop : i
       } // // if (_begin_grp <_end_grp)
     } // while (1)
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << " finish " << group 
 	   << " pos = " << it->pos << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     if (pos >= it->end) {
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " pod = " << pos << "it->end = " << it->end
 	     << " : " << it->task_name << " finished..." << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       return;
     }
-    pthread_mutex_lock(&_mutex_group[pid_g]);
-    {
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_group[pid_g], lck_root);
       group_first_finished = 0;
       if (_grp_finished[gidxn] == 0) {
 	group_first_finished = 1;
@@ -4566,8 +4326,8 @@ void QueueRuntime::thread_queue_C_DFULL(const int pid,
       // clear status of cyclic buffer
 	_grp_finished[gidxp] = 0;
       }
-    }
-    pthread_mutex_unlock(&_mutex_group[pid_g]);
+      MUTEX_UNLOCK(_mutex_group[pid_g]);
+    } // scope of mutex
   } // while (1)
 }
 
@@ -4580,8 +4340,8 @@ void QueueRuntime::thread_queue_parallel_dynamic(const int pid,
   // completely greedy
   int pos, end, atomic_size, atomic_id, update_flag;
   while(1) {
-    pthread_mutex_lock(&_mutex_root);
-    {
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
       pos = it->pos;
       end = it->end;
       if (pos < end) {
@@ -4592,23 +4352,22 @@ void QueueRuntime::thread_queue_parallel_dynamic(const int pid,
 	  update_flag = 1;
 	}
       }
-    }
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // scope of mutex
     if (pos >= end) {
       break;
     }
     C_task *kt = (*it->queue)[pos]; // [pos + atomic_size - 1]; 
-    int waiting = check_parents_done(kt, &_mutex_dependency);
+    int waiting = check_parents_done(kt, _mutex_dependency);
     while (waiting > 0) {
       // looking for dynamic queue
       int flag = execute_task_dynamic_buffer(permute_block, 
 					     pid,
-					     &_mutex_dependency);
+					     _mutex_dependency);
       if (flag != 1) {
-	//
 	while(waiting > 0) {
-	  pthread_mutex_lock(&_mutex_root);
-	  {
+	  { // scope of mutex
+	    MUTEX_LOCK(_mutex_root, lck_root);
 	    _waiting_root++;
 #ifdef DEBUG_DEADLOCK
 	      if (_waiting_root > num_threads) {
@@ -4618,7 +4377,6 @@ void QueueRuntime::thread_queue_parallel_dynamic(const int pid,
 	      }
 #endif
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    // pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << pid << " " << kt->task_name << " "
 		   << "waiting = "<< waiting << " : " 
@@ -4630,62 +4388,59 @@ void QueueRuntime::thread_queue_parallel_dynamic(const int pid,
 	      }
 	      cerr << " : sleeping" << endl;
 	    }
-	    // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	    pthread_cond_wait(&_cond_root, &_mutex_root);
+	    COND_WAIT(_mutex_root, _cond_root, lck_root); //
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    // pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << endl 
 		   << pid << " " << kt->task_name << " "
 		   << " waked up : _waiting_root = " << (int)_waiting_root 
 		   << endl;
 	    }
-	    // pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    _waiting_root--;
 	    // other thread broacast wake up and decreasing _waiting_root
-	  }
-	  pthread_mutex_unlock(&_mutex_root);
-	  waiting = check_parents_done(kt, &_mutex_dependency);
+	    MUTEX_UNLOCK(_mutex_root);
+	  } // scope of mutex
+	  waiting = check_parents_done(kt, _mutex_dependency);
 	} // while (waiting > 0)
       } // if (flag != 1)
-      waiting = check_parents_done(kt, &_mutex_dependency);
+      waiting = check_parents_done(kt, _mutex_dependency);
     } // while (waiting > 0)
     for (int m = 0; m < atomic_size; m++) {
       execute_task(it, (pos + m), permute_block,  // loop with atomic_size
 		   pid,
-		   &_mutex_dependency);
+		   _mutex_dependency);
     }
     if ((*it->queue)[pos]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " pos = " << pos
 		   << " : " << it->task_name << " finished..." 
 	     << "skip " << (*it->queue)[pos]->to_next_task
 		   << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       //      const int ibegin = pos + 1;
       pos += (*it->queue)[pos]->to_next_task;
     } // if (quit_queue)
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << "( " << pid << " " << pos << " ) " ;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
   } // while (1)
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " " << it->task_name 
 	 << " @ " << it->task_id << " greedy end." << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
 }
 
@@ -4701,29 +4456,12 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
   // the last thread which turns into the zone assigns jobs statiscally
   int pos, end, atomic_size, atomic_id;
   int finished_status = 0;
-#if 0 // 12 Feb.2013 Atsushi --> move to just after zone_first_entered = 1
-  if (zone_first_entered) {
-    pthread_mutex_lock(&_mutex_root);
-    {
-      _zone_static_assigned[zone_idxn] = 0;
-    }
-    pthread_mutex_unlock(&_mutex_root);
-  } 
-#endif
-  pthread_mutex_lock(&_mutex_root);
-  {
+  { // scope of mutex
+    MUTEX_LOCK(_mutex_root, lck_root);
+    //    std::unique_lock<std::mutex>lck_root(_mutex_root);
     pos = it->pos;
-  }
-  pthread_mutex_unlock(&_mutex_root);
-
-#ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
-  {
-    cerr << pid << "_phase_dynamic = " << _phase_dynamic << " @ "
-	 << _queue_dynamic->size() << endl;
-  }
-  pthread_mutex_unlock(&_mutex_debug);
-#endif
+    MUTEX_UNLOCK(_mutex_root);
+  } // scope of mutex
   // reach the end before all threads entered
   if (pos == it->end) {
     return;
@@ -4733,12 +4471,8 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
     int begin, end;
     // this mutex is relatively larage
     //  : lock out other threads until assingnment is finished
-    
-    pthread_mutex_lock(&_mutex_root);
-    {
-#if 0 // 12 Feb.2013 Atsushi --> move to just after zone_last_entered = 1 
-      _zone_static_assigned[zone_idxp] = 0;
-#endif
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
       begin = it->pos;
       end = it->end;
       if ((end - begin) < num_threads) {
@@ -4762,14 +4496,14 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 	nops_static = (long)((double)nops_total * RATIO_QUEUE_GREEDY);
 	nops_per_thread = nops_static / (long)num_threads;
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " begin = " << begin << " end = " 
 	       << end << " "
 	       << nops_total << " " << nops_static << " " 
 	       << nops_per_thread << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	_begins[0][zone_idxn] = begin;
 	_ends[num_threads - 1][zone_idxn] = end;
@@ -4801,44 +4535,27 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 	}
 	_zone_static_assigned[zone_idxn] = 1;
       }
-    } //  if ((end - begin) < num_threads) 
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // scope of mutex
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       for (int p = 0; p < num_threads; p++) {
 	cerr << "[ " << _begins[p][zone_idxn] 
 	     << " : "  << _ends[p][zone_idxn] << " ] ";
       }
       cerr << it->pos << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     //
   }  // if (zone_last_entered)
   else { // if (zone_last_entered)
     int zone_static_assigned = 0;
-#if 0
-    pthread_mutex_lock(&_mutex_root);
-    {
-      zone_static_assigned = _zone_static_assigned[zone_idxn];
-    }
-    pthread_mutex_unlock(&_mutex_root);
-#ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
-    {
-      cerr << pid << " pos = " << pos << " zone_idxn = " << zone_idxn
-	   << " zone_static_assigned " << zone_static_assigned << " : "
-	   << _zone_static_assigned[zone_idxn]
-	   << endl;
-    }
-    pthread_mutex_unlock(&_mutex_debug);
-#endif
-#endif
     while(zone_static_assigned == 0) {
       // similar to the routine : execute_task_dynamic_buffer()
-      pthread_mutex_lock(&_mutex_root);
-      {
+      { // scope of mutex
+	MUTEX_LOCK(_mutex_root, lck_root);
 	zone_static_assigned = _zone_static_assigned[zone_idxn];
 	if (zone_static_assigned == 0) {
 	  pos = it->pos;
@@ -4860,42 +4577,41 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 	      }
 	    } // if (it->pos == end) {
 	  }
-	} // if (zone_static_assigned == 0) 
-      }
+	} // if (zone_static_assigned == 0)
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
-      {
-	cerr << pid << " pos = " << pos << " zone_idxn = " << zone_idxn
-	     << " zone_static_assigned " << zone_static_assigned << " : "
-	     << _zone_static_assigned[zone_idxn]
-	     << endl;
-      }
-      pthread_mutex_unlock(&_mutex_debug);
+	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
+	  cerr << pid << " pos = " << pos << " zone_idxn = " << zone_idxn
+	       << " zone_static_assigned " << zone_static_assigned << " : "
+	       << _zone_static_assigned[zone_idxn]
+	       << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
+	}
 #endif
-      pthread_mutex_unlock(&_mutex_root);
+	MUTEX_UNLOCK(_mutex_root);
+      } // scope of mutex
       if (zone_static_assigned == 1) {
 	break;
       }
       if (pos >= end) { 
 	// skip my task
 	_begins[pid][zone_idxn] = _ends[pid][zone_idxn] = end;
-
-	//	pthread_mutex_unlock(&_mutex_root);  // bug : 25 Jun.2012
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " queue is already exhausted " 
 	       << it->pos << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	break;
       }
       C_task *kt = (*it->queue)[pos]; // [pos + atomic_size - 1];   
-      int waiting = check_parents_done(kt, &_mutex_dependency);
+      int waiting = check_parents_done(kt, _mutex_dependency);
       if (waiting > 0) {
-	pthread_mutex_lock(&_mutex_root);
-	{
+	{  // scope of mutex
+	  MUTEX_LOCK(_mutex_root, lck_root);
+	  //	  std::unique_lock<std::mutex>lck_root(_mutex_root);
 	  while (waiting > 0) { // real sleeping
 	    _waiting_root++;
 #ifdef DEBUG_DEADLOCK
@@ -4906,7 +4622,6 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 	      }
 #endif
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	      // pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << pid << " " << kt->task_name << " "
 		   << "waiting = "<< waiting << " : " 
@@ -4918,87 +4633,74 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 	      }
 	      cerr << " : sleeping" << endl;
 	    }
-	    // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	    //
-	    pthread_cond_wait(&_cond_root, &_mutex_root);
+	    COND_WAIT(_mutex_root, _cond_root, lck_root);
+	    _waiting_root--;
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    // pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << endl
 		   << pid << " " << kt->task_name << " "
 		   << " waked up : _waiting_root = " << (int)_waiting_root 
 		   << endl;
 	    }
-	    // pthread_mutex_unlock(&_mutex_debug);
 #endif
-	    _waiting_root--;
 	    // other thread broacast wake up and decreasing _waiting_root
-	    waiting = check_parents_done(kt, &_mutex_dependency);
+	    waiting = check_parents_done(kt, _mutex_dependency);
 	  } // while (waiting > 0)
-	}
-	pthread_mutex_unlock(&_mutex_root);
+	  MUTEX_UNLOCK(_mutex_root);
+	}  // scope of mutex
       } // if (waiting > 0)
       atomic_size = (*it->queue)[pos]->atomic_size;
       for (int m = 0; m < atomic_size; m++) {
 	execute_task(it, (pos + m), permute_block,  // loop with atomic_size
-		     pid, &_mutex_dependency);
+		     pid, _mutex_dependency);
       }
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << "{ " << pid << " " << pos << " }";
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       if (finished_status) { //  && (zone_static_assigned == 0)) {
-#if 0
-	// enforcing other tasks to quit
-	pthread_mutex_lock(&_mutex_root);
-	{
-	  for (int p = 0; p < num_threads; p++) {
-	    _begins[p][zone_idxn] = _ends[p][zone_idxn] = end;
-	  }
-	}
-	pthread_mutex_unlock(&_mutex_root);
-#endif
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " queue is exhausted in the first greedy" 
 	       << it->pos << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
 	break;
       }
-      pthread_mutex_lock(&_mutex_root);
-      {
+      {  // scope of mutex
+	MUTEX_LOCK(_mutex_root, lck_root);
+	//	std::unique_lock<std::mutex>lck_root(_mutex_root);
 	it->ops_complexity -= *((*it->queue)[pos]->ops_complexity);
 	zone_static_assigned = _zone_static_assigned[zone_idxn];
-      }
-      pthread_mutex_unlock(&_mutex_root);
-      if (zone_static_assigned == 1) {
+	MUTEX_UNLOCK(_mutex_root);
+      }  // scope of mutex
 #ifdef DEBUG_EXEC_THREAD
-	pthread_mutex_lock(&_mutex_debug);
+      if (zone_static_assigned == 1) {
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << pid << " end the first greedy " 
 	       << it->pos << endl;
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
+      }
 #endif
-      } 
     } // while (zone_static_assigned == 0)
   } //    if (zone_last_entered)
   // static
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << "pid = " << pid << " zone_idxn = " << zone_idxn 
 	 << "< " << _begins[pid][zone_idxn]
 	 << " " << _ends[pid][zone_idxn] << " > assigned" << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
 
   for (int i = _begins[pid][zone_idxn]; i < _ends[pid][zone_idxn]; i++) {
@@ -5006,26 +4708,26 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 		 pid);
   }  
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << ": " << "< " << _begins[pid][zone_idxn]
 	 << " " << _ends[pid][zone_idxn] << " > done." << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
  // greedy
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " " 
 	 << it->task_name << " @ " << it->task_id 
 	 << " greedy begin: " << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
   while(1) {
-    pthread_mutex_lock(&_mutex_root);
-    {
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
       pos = it->pos;
       end = it->end;
       if (pos < end) {
@@ -5039,8 +4741,8 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 	    _phase_dynamic = (-1);
 	  } // queue is exhausted
 #ifdef DEBUG_EXEC_THREAD
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " _phase_dynamic = " 
 		 << _phase_dynamic << " @ " 
 		 << _queue_dynamic->size() << endl;
@@ -5049,20 +4751,20 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
 		   << (*_queue_dynamic)[_phase_dynamic]->task_name 
 		   << endl;
 	    }
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	}
       } // if (pos < end)
-    }
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // scope of mutex
     if (pos >= end) {
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " queue is already exhausted " << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       break;
     }
@@ -5070,15 +4772,15 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
     for (int m = 0; m < atomic_size; m++) {
       execute_task(it, (pos + m), permute_block,    // loop with atomic_size
 		   pid,
-		   &_mutex_dependency);
+		   _mutex_dependency);
     }
 #ifdef DEBUG_EXEC_THREAD1
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << "( " << pid << " " << pos << " : " 
 	   << (*it->queue)[pos]->task_name << " ) ";
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif	      
 
     if (finished_status) {
@@ -5087,11 +4789,11 @@ void QueueRuntime::thread_queue_parallel_static(const int pid,
   } // while(1)
   //
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " greedy end : " << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
 }
 
@@ -5104,37 +4806,38 @@ void QueueRuntime::thread_queue_single(const int pid,
 // tasks are excuted by a single thread : atomic operation will not be divided.
   int start = it->begin;
   bool zone_flag;
-  pthread_mutex_lock(&_mutex_root);
-  {
+  { // scope of mutex
+    MUTEX_LOCK(_mutex_root, lck_root);
+    //    std::unique_lock<std::mutex>lck_root(_mutex_root);
     zone_flag = (_zone_entered[zone_idxn] == num_threads);
-  }
-  pthread_mutex_unlock(&_mutex_root);
-
+    MUTEX_UNLOCK(_mutex_root);
+  } // scope of mutex
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " @ " << num_threads << " single " 
        << it->task_name << " : " << it->task_id 
        << " zone_flag = " << zone_flag << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
 
   while ((start < it->end) && (!zone_flag)) {
     C_task *kt = (*it->queue)[start];
-    int waiting = check_parents_done(kt, &_mutex_dependency);
+    int waiting = check_parents_done(kt, _mutex_dependency);
     while(waiting > 0) {
       // looking for dynamic queue
       int flag = execute_task_dynamic_buffer(permute_block, 
 					     pid,
-					     &_mutex_dependency);
+					     _mutex_dependency);
       if (flag != 1) {
 	//
 	int waiting2;
-	waiting2 = check_parents_done(kt, &_mutex_dependency);
+	waiting2 = check_parents_done(kt, _mutex_dependency);
 	while(waiting2 > 0) {
-	  pthread_mutex_lock(&_mutex_root);
-	  {
+	  { // scope of mutex
+	    MUTEX_LOCK(_mutex_root, lck_root);
+	    //	    std::unique_lock<std::mutex>lck_root(_mutex_root);
 	    _waiting_root++;
 #ifdef DEBUG_DEADLOCK
 	    if (_waiting_root > num_threads) {
@@ -5144,7 +4847,6 @@ void QueueRuntime::thread_queue_single(const int pid,
 	    }
 #endif
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    //	    pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << pid << " " << kt->task_name << " "
 		   << "waiting = "<< waiting << " : " 
@@ -5156,79 +4858,78 @@ void QueueRuntime::thread_queue_single(const int pid,
 	      }
 	      cerr << " : sleeping" << endl;
 	    }
-	    //pthread_mutex_unlock(&_mutex_debug);
 #endif
-	    pthread_cond_wait(&_cond_root, &_mutex_root);
+	    COND_WAIT(_mutex_root, _cond_root, lck_root);
 #ifdef DEBUG_EXEC_THREAD_IDLE
-	    //	    pthread_mutex_lock(&_mutex_debug);
 	    {
 	      cerr << endl
 		   << pid << " " << kt->task_name << " "
 		   << " waked up : _waiting_root = " << (int)_waiting_root
 		   << endl;
 	    }
-	    //  pthread_mutex_unlock(&_mutex_debug);
 #endif
 	    _waiting_root--;
 	    // other thread broacast wake up and decreasing _waiting_root
-	    waiting2 = check_parents_done(kt, &_mutex_dependency);
-	  }
-	  pthread_mutex_unlock(&_mutex_root);
+	    waiting2 = check_parents_done(kt, _mutex_dependency);
+	    MUTEX_UNLOCK(_mutex_root);
+	  } // scope of mutex
 	} // while (waiting2)
       } // if (flag != 1)
-      waiting = check_parents_done(kt, &_mutex_dependency);
-      pthread_mutex_lock(&_mutex_root);
-      {
-	zone_flag = (_zone_entered[zone_idxn] == num_threads); 
-      }
-      pthread_mutex_unlock(&_mutex_root);
+      waiting = check_parents_done(kt, _mutex_dependency);
+      {  // scope of mutex
+	MUTEX_LOCK(_mutex_root, lck_root);
+	//	std::unique_lock<std::mutex>lck_root(_mutex_root);
+	zone_flag = (_zone_entered[zone_idxn] == num_threads);
+	MUTEX_UNLOCK(_mutex_root);
+      }  // scope of mutex
       if (zone_flag) {
 	break;
       }
     } // while (waiting > 0)
     execute_task(it, start, permute_block, 
 		 pid,
-		 &_mutex_dependency);
+		 _mutex_dependency);
     if ((*it->queue)[start]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " start = " << start
 	     << " : " << it->task_name << " finished... skip " 
 	     << (*it->queue)[start]->to_next_task << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       //      const int ibegin = start + 1;
       start += (*it->queue)[start]->to_next_task;
    }
 #ifdef DEBUG_EXEC_THREAD      
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << "( " << pid << " : " 
 	   << (*it->queue)[start]->task_name << " ) ";
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     start++;
-    pthread_mutex_lock(&_mutex_root);
-    {
-      zone_flag = (_zone_entered[zone_idxn] == num_threads);     
-    }
-    pthread_mutex_unlock(&_mutex_root);
+    {  // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
+      //      std::unique_lock<std::mutex>lck_root(_mutex_root);
+      zone_flag = (_zone_entered[zone_idxn] == num_threads);
+      MUTEX_UNLOCK(_mutex_root);
+    }  // scope of mutex
   } // while ((start < it->end) || (!zone_flag))
   for (int j = start; j < it->end; j++) {
     execute_task(it, j, permute_block, 
 		 pid);
     if ((*it->queue)[j]->quit_queue) {
 #ifdef DEBUG_EXEC_THREAD
-      pthread_mutex_lock(&_mutex_debug);
       {
+	MUTEX_LOCK(_mutex_debug, lck_debug);
 	cerr << pid << " j = " << j
 	     << " : " << it->task_name << " finished... skip " 
 	     << (*it->queue)[j]->to_next_task << endl;
+	MUTEX_UNLOCK(_mutex_debug);
       }
-      pthread_mutex_unlock(&_mutex_debug);
 #endif
       //      const int ibegin = j + 1;
       j += (*it->queue)[j]->to_next_task;
@@ -5236,51 +4937,29 @@ void QueueRuntime::thread_queue_single(const int pid,
   } // loop : j
 
 #ifdef DEBUG_EXEC_THREAD2
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     for (int j = start; j < it->end; j++) {
       cerr << "( " << pid << " : " 
 	   << (*it->queue)[j]->task_name << " ) ";
     }
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
   //
 }
-// #define TASKSTATUS_MUTEX
-#ifdef TASKSTATUS_MUTEX
-inline void QueueRuntime::taskstatus_mutex_lock(pthread_mutex_t *mutex_dependency)
-{
-  pthread_mutex_lock(mutex_dependency);
-}
-
-inline void QueueRuntime::taskstatus_mutex_unlock(pthread_mutex_t *mutex_dependency)
-{
-  pthread_mutex_unlock(mutex_dependency);
-}
-#else
-inline void QueueRuntime::taskstatus_mutex_lock(pthread_mutex_t *mutex_dependency)
-{
-  //dummy
-}
-
-inline void QueueRuntime::taskstatus_mutex_unlock(pthread_mutex_t *mutex_dependency)
-{
-  //dummy
-}
-#endif
 
 int QueueRuntime::execute_task_dynamic_buffer(int *permute_block, 
-						 int pid,
-						 pthread_mutex_t *mutex_dependency)
+					      int pid,
+					      QueueRuntime_mutex &mutex_dependency)
 {
   int ph_dynmc, pos, end, atomic_size, atomic_id;
   int waiting;
   int update_status = 0;
   C_task *kt;
 
-  pthread_mutex_lock(&_mutex_root);
-  {
+  { // scope of mutex
+    MUTEX_LOCK(_mutex_root, lck_root);
     ph_dynmc = _phase_dynamic;
     if (ph_dynmc >= 0) {
       pos = (*_queue_dynamic)[ph_dynmc]->pos;
@@ -5288,11 +4967,6 @@ int QueueRuntime::execute_task_dynamic_buffer(int *permute_block,
       if (pos < end) {
 	atomic_size = (*(*_queue_dynamic)[ph_dynmc]->queue)[pos]->atomic_size;
 	atomic_id = (*(*_queue_dynamic)[ph_dynmc]->queue)[pos]->atomic_id;
-#if 0
-	if (atomic_id == (atomic_size - 1)) {
-	  atomic_size = 1;
-	}
-#endif
 	kt = (*(*_queue_dynamic)[ph_dynmc]->queue)[pos];
 	// to avoid other thread takes the same pos
 	waiting = check_parents_done(kt, mutex_dependency);
@@ -5311,9 +4985,8 @@ int QueueRuntime::execute_task_dynamic_buffer(int *permute_block,
 	ph_dynmc = (-1);
       }
     } // if (ph_dynmc > 0)
-  }
-  pthread_mutex_unlock(&_mutex_root);
-
+    MUTEX_UNLOCK(_mutex_root);
+  } // scope of mutex 
   if (ph_dynmc < 0) {
     return (-1);  // queue exhausted
   }
@@ -5322,45 +4995,44 @@ int QueueRuntime::execute_task_dynamic_buffer(int *permute_block,
   }
 
 #ifdef DEBUG_EXEC_THREAD
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << " from dynamic " 
 	   << (*_queue_dynamic)[ph_dynmc]->task_name << "  "
 	   << pos << " @ " << ph_dynmc
 	   << " " << (*_queue_dynamic)[ph_dynmc]->end
 	   << " " << kt->task_name << " : ";
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     for (int m = 0; m < atomic_size; m++) {
       execute_task((*_queue_dynamic)[ph_dynmc], (pos + m),  // pos
 		   permute_block, 
 		   pid, mutex_dependency);
     }
-
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
-  {
-    cerr << kt->task_name << " : " 
-	 << pos << " done" << endl;
-  }
-  pthread_mutex_unlock(&_mutex_debug);
-#endif
-  // ops_complexity is recalculated in each routine :-
-  pthread_mutex_lock(&_mutex_root);
-  {
-    (*_queue_dynamic)[ph_dynmc]->ops_complexity -= *(kt->ops_complexity);
-    if (update_status) {
-      (*_queue_dynamic)[ph_dynmc]->status = TASK_DONE;
+    {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
+      cerr << kt->task_name << " : " 
+	   << pos << " done" << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-  }
-  pthread_mutex_unlock(&_mutex_root);
-
+#endif
+    // ops_complexity is recalculated in each routine :-
+    {  // scope of mutex
+      //      std::unique_lock<std::mutex>lck_root(_mutex_root);
+      MUTEX_LOCK(_mutex_root, lck_root);
+      (*_queue_dynamic)[ph_dynmc]->ops_complexity -= *(kt->ops_complexity);
+      if (update_status) {
+	(*_queue_dynamic)[ph_dynmc]->status = TASK_DONE;
+      }
+      MUTEX_UNLOCK(_mutex_root);
+    }   // scope of mutex
   return 1;              // success 
 }
 
-int QueueRuntime::check_parents_done(C_task *it, 
-				     pthread_mutex_t *mutex_dependency)
+int QueueRuntime::check_parents_done(C_task *it,
+				     QueueRuntime_mutex &mutex_dependency)
 {
   unsigned char status;
   int dependency = 0;
@@ -5369,11 +5041,15 @@ int QueueRuntime::check_parents_done(C_task *it,
   for(list<C_task *>::iterator nt = it->parents_work->begin();
       nt != it->parents_work->end(); ) {
     //    cerr << (*nt)->task_name << " ";
-    taskstatus_mutex_lock(mutex_dependency); 
+#ifdef TASKSTATUS_MUTEX
     {
+      MUTEX_LOCK(_mutex_dependency, lck_dependency);
       status = (*nt)->status;
+      MUTEX_UNLOCK(_mutex_dependency);
     }
-    taskstatus_mutex_unlock(mutex_dependency); 
+#else
+    status = (*nt)->status;
+#endif
     if (status == TASK_DONE) {
       if ((*nt)->quit_queue) {
 	quit_queue = true;
@@ -5388,16 +5064,6 @@ int QueueRuntime::check_parents_done(C_task *it,
     }
   }
   //  cerr << " >> " << it->parents_work->size() << " . " << endl;
-#if 0 // 8 Jul.2015 Atsushi
-  if (it->parents_work->size() > 0) {
-    cerr << it->task_name << " size = " << it->parents_work->size() << " | ";
-    for(list<C_task *>::const_iterator nt = it->parents_work->begin();
-	nt != it->parents_work->end(); ++nt) {
-      cerr << (*nt)->task_name << " ";
-    }
-    cerr << "\n";
-  }
-#endif
   if (quit_queue && (dependency == 0)) {
     dependency = (-1);
   }
@@ -5425,24 +5091,6 @@ int QueueRuntime::check_parents_done(C_task *it)
       ++nt;
     }
   }
-#if 0 // 8 Jul.2015 Atsushi
-  //  cerr << " >> " << it->parents_work->size() << " . " << endl;
-  if (it->parents_work->size() > 0) {
-    cerr << it->task_name << " size = " << it->parents_work->size() << " | ";
-
-    for(list<C_task *>::const_iterator nt = it->parents->begin();
-	nt != it->parents->end(); ++nt) {
-      cerr << (*nt)->task_name << " ";
-    }
-    cerr << " || ";
-    
-    for(list<C_task *>::const_iterator nt = it->parents_work->begin();
-	nt != it->parents_work->end(); ++nt) {
-      cerr << (*nt)->task_name << " ";
-    }
-    cerr << "\n";
-  }
-#endif
   if (quit_queue && (dependency == 0)) {
     dependency = (-1);
   }
@@ -5452,17 +5100,17 @@ int QueueRuntime::check_parents_done(C_task *it)
 void QueueRuntime::execute_task(C_task_seq *seq, int pos, 
 				int *permute_block, 
 				int pid,
-				pthread_mutex_t *mutex_dependency)
+				QueueRuntime_mutex &mutex_depenency)
 {
   C_task *task = (*seq->queue)[pos];
-  // debugging
+
+    // debugging
 #ifdef DEBUG_CHECKPARENTS_DONE
   int waiting;
   waiting = check_parents_done(task, mutex_dependency);
   if (waiting > 0) {
-
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << " parents of task " << task->task_name 
 	   << " not finished : ";
       for(list<C_task *>::const_iterator nt = task->parents_work->begin();
@@ -5470,8 +5118,8 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
 	cerr << (*nt)->task_name << " ";
       }
       cerr << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
   }
 #endif
   //
@@ -5484,55 +5132,68 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
   case C_DGEMM_LOCAL_MULT:
   case C_DGEMM_LOCAL_TWO:
   case C_DGEMM_DIRECT_TWO:
-    fprintf(_fps[pid], "%s\n", task->task_name);
+    diss_printf(_verbose, _fps[pid], "%s\n", task->task_name);
     *(task->fp) = &_fps[pid];
     break;
   }
 #endif
-  taskstatus_mutex_lock(mutex_dependency);
+
+#ifdef TASKSTATUS_MUTEX
   {
+    MUTEX_LOCK(_mutex_dependency, lck_dependency);
     task->status = TASK_WORKING;
+    MUTEX_UNLOCK(_mutex_dependency);
   }
-  taskstatus_mutex_unlock(mutex_dependency);
+#else
+  task->status = TASK_WORKING;
+#endif // #ifdef TASKSTATUS_MUTEX
 #ifdef DEBUG_THREAD_TIME
   get_realtime(&(task->t0));
   //  clock_gettime(CLOCK_MONOTONIC, &(task->t0));
 #endif
   task->func(task->func_arg);
 #ifdef DEBUG_THREAD_DONE_PRINT
-  pthread_mutex_lock(&_mutex_debug);
   {
-     cerr << "pid = " << pid << " : " << task->task_name << endl;
+    MUTEX_LOCK(_mutex_debug, lck_debug);
+    fprintf(stderr, "pid = %d : %s\n", pid, task->task_name);
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
   if (task->task_id == C_DFULL_SYM_GAUSS) {
     // task->quit_queue = ((C_dfull_gauss_arg*)task->func_arg)->quit;
-    taskstatus_mutex_lock(mutex_dependency);
+#ifdef TASKSTATUS_MUTEX
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_dependency, lck_dependency);
+      //      std::unique_lock<std::mutex>lck_dependency(mutex_dependency);
+      for (int i = (pos + 1); i <= (pos + task->to_next_task); i++) {
+	(*seq->queue)[i]->status = TASK_DONE;
+	(*seq->queue)[i]->quit_queue = true;
+      }
+      MUTEX_UNLOCK(_mutex_dependency);
+    } // scope of mutex
+#endif // #ifdef TASKSTATUS_MUTEX
     {
       for (int i = (pos + 1); i <= (pos + task->to_next_task); i++) {
 	(*seq->queue)[i]->status = TASK_DONE;
 	(*seq->queue)[i]->quit_queue = true;
 #ifdef DEBUG_EXEC_THREAD2
-	pthread_mutex_lock(&_mutex_debug);
 	{
+	  MUTEX_LOCK(_mutex_debug, lck_debug);
 	  cerr << (*seq->queue)[i]->task_name << " ";
+	  MUTEX_UNLOCK(_mutex_debug);
 	}
-	pthread_mutex_unlock(&_mutex_debug);
 #endif
       }
     }
-    taskstatus_mutex_unlock(mutex_dependency);
-    //    task->to_next_task = ((C_dfull_gauss_arg*)task->func_arg)->to_next_task;
-  }
+  } //  if (task->task_id == C_DFULL_SYM_GAUSS)
 #ifdef DEBUG_THREAD_TIME
     get_realtime(&(task->t1));
   //  clock_gettime(CLOCK_MONOTONIC, &(task->t1));
   task->thread_id = pid;
 #endif
-#ifdef DEBUG_EXEC_THREAD_FILE
-  pthread_mutex_lock(&_mutex_file);
+  #ifdef DEBUG_EXEC_THREAD_FILE
   {
+    MUTEX_LOCK(_mutex_file, lck_file);
     const int sec_n0 = convert_sec(task->t0); 
     const int sec_m0 = convert_microsec(task->t0);
     _fout << task->task_name << " / ";
@@ -5548,32 +5209,33 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
       _fout << sec_n1 << " " << sec_m1 << "\t";
     }
     _fout << endl; // " : " << pid << endl;
+    MUTEX_UNLOCK(_mutex_file);
   }
-  pthread_mutex_unlock(&_mutex_file);
 #endif
-  taskstatus_mutex_lock(mutex_dependency);
-  {
+#ifdef TASKSTATUS_MUTEX
+  { // scope of mutex
+    MUTEX_LOCK(_mutex_dependency, lck_dependency);
     task->status = TASK_DONE;
-  }
-  taskstatus_mutex_unlock(mutex_dependency);
+    MUTEX_UNLOCK(_mutex_dependecny);
+  } // scope of mutex
+#else
+    task->status = TASK_DONE;
+#endif
   //
   if (_waiting_root > 0) {
-    pthread_mutex_lock(&_mutex_root);
-    {
-      pthread_cond_broadcast(&_cond_root);
-    }
-    pthread_mutex_unlock(&_mutex_root);
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
+      COND_BROADCAST(_cond_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // scope of mutex
 #ifdef DEBUG_EXEC_THREAD_IDLE
-    //    pthread_mutex_lock(&_mutex_debug);
     {
       cerr << pid << " " << task->task_name 
 	   << "_waiting_root = " << (int)_waiting_root 
 	   << " broadcast." << endl;
     }
-    //    pthread_mutex_unlock(&_mutex_debug);
 #endif
   }
-
 }
 
 void QueueRuntime::execute_task(C_task_seq *seq, int pos, 
@@ -5581,13 +5243,13 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
 				int pid)
 {
   C_task *task = (*seq->queue)[pos];
-#ifdef DEBUG_CHECKPARENTS_DONE
+  #ifdef DEBUG_CHECKPARENTS_DONE
  // debugging
   int waiting;
   waiting = check_parents_done(task);
   if (waiting > 0) {
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << pid << " parents of task " << task->task_name 
 	   << " not finished : " << task->parents_work->size() << " : ";
       // debug : 5 Jul. 2015, Atsushi
@@ -5596,8 +5258,8 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
 	cerr << (*nt)->task_name << " / ";
       }
       cerr << endl;
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
   }
   //
 #endif
@@ -5610,7 +5272,7 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
   case C_DGEMM_LOCAL_MULT:
   case C_DGEMM_LOCAL_TWO:
   case C_DGEMM_DIRECT_TWO:
-    fprintf(_fps[pid], "%s\n", task->task_name);
+    diss_printf(_verbose, _fps[pid], "%s\n", task->task_name);
     *(task->fp) = &_fps[pid];
     break;
   }
@@ -5625,57 +5287,53 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
   // debugging : 13 :Apr.2012 Atsushi
   task->func(task->func_arg);
 #ifdef DEBUG_THREAD_DONE_PRINT
-  pthread_mutex_lock(&_mutex_debug);
   {
-     cerr << "pid = " << pid << " : " << task->task_name << endl;
+    MUTEX_LOCK(_mutex_debug, lck_debug);
+     fprintf(stderr, "pid = %d : %s\n", pid, task->task_name);
+     MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif
   if (task->task_id == C_DFULL_SYM_GAUSS) {
-    // task->quit_queue = ((C_dfull_gauss_arg*)task->func_arg)->quit;
-    // task->to_next_task = ((C_dfull_gauss_arg*)task->func_arg)->to_next_task;
     for (int i = (pos + 1); i <= (pos + task->to_next_task); i++) {
       (*seq->queue)[i]->status = TASK_DONE;
       (*seq->queue)[i]->quit_queue = true;
 #ifdef DEBUG_EXEC_THREAD2
-    pthread_mutex_lock(&_mutex_debug);
     {
+      MUTEX_LOCK(_mutex_debug, lck_debug);
       cerr << (*seq->queue)[i]->task_name << " ";
+      MUTEX_UNLOCK(_mutex_debug);
     }
-    pthread_mutex_unlock(&_mutex_debug);
 #endif
     }
-    //    cout << task->task_name << " / " << task->to_next_task << endl;
   }
-
 #ifdef DEBUG_THREAD_TIME
   get_realtime(&(task->t1));
   //  clock_gettime(CLOCK_MONOTONIC, &(task->t1));
   task->thread_id = pid;
 #endif
-  // accuessing to unsigned char does not neet mutex
+  // accessing to unsigned char does not neet mutex
   task->status = TASK_DONE;
   //
   if (_waiting_root > 0) {
-    pthread_mutex_lock(&_mutex_root);
-    {
-      pthread_cond_broadcast(&_cond_root);
-    }
-    pthread_mutex_unlock(&_mutex_root);
+    { // scope of mutex
+      MUTEX_LOCK(_mutex_root, lck_root);
+      //       std::unique_lock<std::mutex>lck_root(_mutex_root);
+      COND_BROADCAST(_cond_root);
+      //       _cond_root.notify_all();
+      MUTEX_UNLOCK(_mutex_root);
+    } //scope of mutex
 #ifdef DEBUG_EXEC_THREAD_IDLE
-    //    pthread_mutex_lock(&_mutex_debug);
     {
       cerr << pid << " " << task->task_name
 	   << "_waiting_root = " << (int)_waiting_root 
 	   << " broadcast." << endl;
     }
-    //    pthread_mutex_unlock(&_mutex_debug);
 #endif
   }
   //
 #ifdef DEBUG_EXEC_THREAD_FILE
-  pthread_mutex_lock(&_mutex_file);
   {
+    MUTEX_LOCK(_mutex_file, lck_file);
     const int sec_n0 = convert_sec(task->t1); 
     const int sec_m0 = convert_microsec(task->t1);
     _fout << task->task_name << " / ";
@@ -5691,8 +5349,8 @@ void QueueRuntime::execute_task(C_task_seq *seq, int pos,
       _fout << sec_n1 << " " << sec_m1 << "\t";
     }
     _fout << endl; // " : " << pid << endl;
+    MUTEX_UNLOCK(_mutex_file);
   }
-  pthread_mutex_unlock(&_mutex_file);
 #endif
   task->status = TASK_DONE;
 }
@@ -5710,28 +5368,26 @@ void QueueRuntime::exec_fwbw_seq()
   }
   t1_cpu = clock();
   get_realtime(&t1_elapsed);
-  if (_verbose) {
-    fprintf(_fp, 
-	    "execution of fw/bw : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t1_elapsed, t0_elapsed));
-  }
+  diss_printf(_verbose, _fp, 
+	      "execution of fw/bw : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t1_elapsed, t0_elapsed));
 }
 
 void QueueRuntime::exec_fwbw()
 {
   const int num_threads = _num_threads; //_num_threads_symb;
+#ifdef POSIX_THREADS
   void* results;
   pthread_attr_t th_attr;
-  pthread_t *threads;
+#endif
+  vector<QueueRuntime_thread> threads;
 
   clock_t t0_cpu, t1_cpu;
   elapsed_t t0_elapsed, t1_elapsed;
   //  struct timespec ts0, ts1;
   int ierr;
-  if (_verbose) {
-    fprintf(_fp, "fwbw with %d threads\n", num_threads);
-  }
+  diss_printf(_verbose, _fp, "fwbw with %d threads\n", num_threads);
 
  // copy dependency data : parents -> parents_work 
   {
@@ -5762,23 +5418,14 @@ void QueueRuntime::exec_fwbw()
     }    // loop : it
     _queue_fwbw->pos = _queue_fwbw->begin;
   }
-#if 0  // for debugging : execution in sereial
-  pos = _queue_fwbw->begin;
-  cerr << "pos = " << pos << endl;
-  for (int i = 0; i < pos; i++) {
-    C_task * task = (*_queue_fwbw->queue)[i];
-    task->func(task->func_arg);
-    task->status = TASK_DONE;
-  }
-#endif
-  threads = new pthread_t[num_threads]; 
-
+#ifdef POSIX_THREADS  
+  //  threads = new pthread_t[num_threads]; 
+  threads.resize(num_threads); 
 #ifdef DEBUG_EXEC_THREAD
   pthread_mutex_init(&_mutex_debug, NULL);
 #endif
   pthread_mutex_init(&_mutex_dependency, NULL);
   pthread_cond_init(&_cond_root, NULL);
-
   ierr = pthread_mutex_init(&_mutex_root, NULL);
   if (ierr != 0) {
     fprintf(stderr, " pthread_mutex_init(&_mutex_root, NULL) %s %d : %d\n",
@@ -5786,14 +5433,15 @@ void QueueRuntime::exec_fwbw()
   }
 #ifdef DEBUG_EXEC_THREAD
   ierr = pthread_mutex_init(&_mutex_debug, NULL);
-  if (verbose && (ierr != 0)) {
-    fprintf(_fp, "%s %d : pthread_mutex_init(&_mutex_debug, NULL) %d\n", 
+  if (ierr != 0) {
+    diss_printf(_verbose, _fp,
+		"%s %d : pthread_mutex_init(&_mutex_debug, NULL) %d\n", 
 	    __FILE__, __LINE__, ierr);
   }
 #endif
   pthread_attr_init(&th_attr);
-  pthread_attr_setdetachstate(&th_attr, PTHREAD_CREATE_JOINABLE);       
-
+  pthread_attr_setdetachstate(&th_attr, PTHREAD_CREATE_JOINABLE);
+#endif
 #ifdef DEBUG_EXEC_THREAD_FILE
   {
     int pid = get_process_id();
@@ -5806,7 +5454,7 @@ void QueueRuntime::exec_fwbw()
   t0_cpu = clock();
   get_realtime(&t0_elapsed);
   //  clock_gettime(CLOCK_REALTIME, &ts0);
-
+#ifdef POSIX_THREADS
   THREAD_QUEUE_EXEC **params = new THREAD_QUEUE_EXEC*[num_threads];
   for (int p = 0; p < num_threads; p++) {
     params[p] = new THREAD_QUEUE_EXEC(p, num_threads, this);
@@ -5814,9 +5462,7 @@ void QueueRuntime::exec_fwbw()
 			     &thread_queue_fwbw_,
 			     (void *)params[p]);
     if (pid != 0) {
-      if (_verbose) {
-	fprintf(_fp, "bad thread creation ? : %d\n", pid);
-      }
+      fprintf(stderr, "bad thread creation ? : %d\n", pid);
       exit(0);
     }
   }
@@ -5824,33 +5470,34 @@ void QueueRuntime::exec_fwbw()
   for (int p = 0; p < num_threads; p++) {
     int pid = pthread_join(threads[p], &results);
     if (pid != 0) {
-      if (_verbose) {
-	fprintf(_fp, "bad thread creation ? : %d\n", pid);
-      }
+      fprintf(stderr, "bad thread creation ? : %d\n", pid);
       exit(0);
     }
     delete params[p];
   }
   delete [] params;
-#if 0 // for debugging : execution in sereial
-  pos = _queue_fwbw->pos;
-  cerr << "pos = " << pos << endl;
-  for (int i = pos; i < _queue_fwbw->queue->size(); i++) {
-    C_task * task = (*_queue_fwbw->queue)[i];
-    task->func(task->func_arg);
-    task->status = TASK_DONE;
+#else
+  THREAD_QUEUE_EXEC **params = new THREAD_QUEUE_EXEC*[num_threads];
+  for (int p = 0; p < num_threads; p++) {
+    params[p] = new THREAD_QUEUE_EXEC(p, num_threads, this);
+    threads.push_back(std::thread(thread_queue_fwbw_,
+				  (void *)params[p]));
   }
+  for (int p = 0; p < num_threads; p++) {
+    threads[p].join();
+    delete params[p];
+  }
+  delete [] params;
+
 #endif
   t1_cpu = clock();
   get_realtime(&t1_elapsed);
   // clock_gettime(CLOCK_REALTIME, &ts1);
-  if (_verbose) {
-    fprintf(_fp, 
-	    "execution of fw/bw : cpu time = %.4e elapsed time = %.4e\n", 
-	    (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
-	    convert_time(t1_elapsed, t0_elapsed));
-  }
-
+  diss_printf(_verbose, _fp, 
+	      "execution of fw/bw : cpu time = %.4e elapsed time = %.4e\n", 
+	      (double)(t1_cpu - t0_cpu) / (double)CLOCKS_PER_SEC,
+	      convert_time(t1_elapsed, t0_elapsed));
+  
 #ifdef DEBUG_EXEC_THREAD_FILE
   _fout.close();
 #endif
@@ -5896,13 +5543,13 @@ void QueueRuntime::exec_fwbw()
     } // if ((fp = fopen(filename, "a")) == NULL)
   }
 #endif
-
+#ifdef POSIX_THREADS
   pthread_mutex_destroy(&_mutex_root);
 #ifdef DEBUG_EXEC_THREAD
   pthread_mutex_destroy(&_mutex_debug);
 #endif
-
-  delete [] threads;
+  threads.clear();
+#endif
 }
 
 
@@ -5911,8 +5558,9 @@ void *thread_queue_fwbw_(void *arg)
   THREAD_QUEUE_EXEC *params = (THREAD_QUEUE_EXEC *)arg;
   params->dissectionRuntime->thread_queue_fwbw(params->id, 
 					       params->num_threads);
+#ifdef POSIX_THREADS
   pthread_exit(arg);
-
+#endif
   return (void *)NULL;
 }
 
@@ -5927,44 +5575,44 @@ void QueueRuntime::thread_queue_fwbw(const int pid, const int num_threads)
   C_task_seq* it = _queue_fwbw;
   //  cerr << "pid = " << pid 
   //     << " _queue_symb : pos = " << it->pos << " end = " << it->end << endl;
-  while(1) {
-    pthread_mutex_lock(&_mutex_root);
+  while (1) {
     {
+      //      std::unique_lock<std::mutex>lck_root(_mutex_root);
+      MUTEX_LOCK(_mutex_root, lck_root);
       pos = it->pos;
       end = it->end;
       if (pos < end) {
 	it->pos = it->pos + (*it->queue)[pos]->atomic_size;
       }
-    }
-    pthread_mutex_unlock(&_mutex_root);
+      MUTEX_UNLOCK(_mutex_root);
+    } // destruction of lck_root
     if (pos >= end) {
       break;
     }
     C_task *task_p = (*it->queue)[pos];
     for (int i = 0; i < task_p->atomic_size; i++) {
       C_task *task = (*it->queue)[pos + i];
-      int waiting = check_parents_done(task, &_mutex_dependency);
+      int waiting = check_parents_done(task, _mutex_dependency);
       while (waiting > 0) {
-	pthread_mutex_lock(&_mutex_root);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_root, lck_root);
 	  _waiting_root++;
 	  if (_waiting_root == num_threads) {
-	    // wake up other threads
 #ifdef DEBUG_EXEC_THREAD_IDLEa
-	    pthread_mutex_lock(&_mutex_debug);
 	    {
+	      MUTEX_LOCK(_mutex_debug, lck_debug);
 	      cerr << pid << " " << task->task_name 
 		   << " _waiting_root = " << (int)_waiting_root 
 		   << " dead locked! : emergency broadcast." << endl;
+	      MUTEX_UNLOCK(_mutex_debug);
 	    }
-	    pthread_mutex_unlock(&_mutex_debug);
 #endif // DEBUG_EXEC_THREAD_IDLEa
-	    pthread_cond_broadcast(&_cond_root); 
+	    COND_BROADCAST(_cond_root); 
 	    task->broadcast_deadlock++;
 	  }
 #ifdef DEBUG_EXEC_THREAD_IDLEa
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " " << task->task_name << " "
 		 << "waiting = "<< waiting << " : " 
 		 << (int)_waiting_root << " "
@@ -5974,28 +5622,30 @@ void QueueRuntime::thread_queue_fwbw(const int pid, const int num_threads)
 	      cerr << (*jt)->task_name << " ";
 	    }
 	    cerr << " : sleeping" << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif // DEBUG_EXEC_THREAD_IDLEa
-	  pthread_cond_wait(&_cond_root, &_mutex_root);
+	  COND_WAIT(_mutex_root, _cond_root, lck_root);
 	  _waiting_root--;
 #ifdef DEBUG_EXEC_THREAD_IDLEa
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " " << task->task_name 
 		 << " waked up : _waiting_root = " << (int)_waiting_root 
 		 << endl;
+	    MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif // DEBUG_EXEC_THREAD_IDLEa
 	  // other thread broacast wake up and decreasing _waiting_root
-	} 
-	waiting = check_parents_done(task, &_mutex_dependency);
-	pthread_mutex_unlock(&_mutex_root);
+	  waiting = check_parents_done(task, _mutex_dependency);
+	  MUTEX_UNLOCK(_mutex_root);
+	}  // destruction of lck_root
       } // while (waiting > 0)
-      pthread_mutex_lock(&_mutex_dependency);
-      task->status = TASK_WORKING;
-      pthread_mutex_unlock(&_mutex_dependency);
+      {
+	MUTEX_LOCK(_mutex_dependency, lck_dependency);
+	task->status = TASK_WORKING;
+	MUTEX_UNLOCK(_mutex_dependency);
+      }  // destruction of lck_dependency
 #ifdef DEBUG_THREAD_TIME
       get_realtime(&(task->t0));
 #endif
@@ -6004,45 +5654,35 @@ void QueueRuntime::thread_queue_fwbw(const int pid, const int num_threads)
       get_realtime(&(task->t1));
       task->thread_id = pid;
 #endif
-      pthread_mutex_lock(&_mutex_dependency);  // for completely greedy algorithm
-      task->status = TASK_DONE;
-      pthread_mutex_unlock(&_mutex_dependency);
+      {
+	MUTEX_LOCK(_mutex_dependency, lck_depenency);
+	task->status = TASK_DONE;
+	MUTEX_UNLOCK(_mutex_dependency);
+      } 
       if (_waiting_root > 0) {
-	pthread_mutex_lock(&_mutex_root);
-	{
+	{ // scope of mutex
+	  MUTEX_LOCK(_mutex_root, lck_root);
 #ifdef DEBUG_EXEC_THREAD_IDLEa
-	  pthread_mutex_lock(&_mutex_debug);
 	  {
+	    MUTEX_LOCK(_mutex_debug, lck_debug);
 	    cerr << pid << " " << task->task_name 
 		 << " _waiting_root = " << (int)_waiting_root 
 		 << " broadcast." << endl;
+	        MUTEX_UNLOCK(_mutex_debug);
 	  }
-	  pthread_mutex_unlock(&_mutex_debug);
 #endif // DEBUG_EXEC_THREAD_IDLEa
-	  pthread_cond_broadcast(&_cond_root);
-	}
-	pthread_mutex_unlock(&_mutex_root);
+	  COND_BROADCAST(_cond_root);
+	  MUTEX_UNLOCK(_mutex_root);
+	}  // destruction of lck_root
       }
-#ifdef DEBUG_EXEC_THREAD_IDLE
-#if 0 // better with sprintf
-      string stmp = (to_string(pid) + " " + to_string(pos) + " "
-	+ task->task_name + "\t" + convert_sec(task->t0) << "." << convert_microsec(task->t0) << " : "
-	   << convert_sec(task->t1) << "." << convert_microsec(task->t1) << endl;
-      pthread_mutex_lock(&_mutex_debug);
-      {
-	cerr << stmp.str();
-      }
-      pthread_mutex_unlock(&_mutex_debug);
-#endif
-#endif // DEBUG_EXEC_THREAD_IDLEa
     } // loop : i
   } // while (1)
 #ifdef DEBUG_EXEC_THREAD
-  pthread_mutex_lock(&_mutex_debug);
   {
+    MUTEX_LOCK(_mutex_debug, lck_debug);
     cerr << pid << " " << it->task_name 
 	 << " @ " << it->task_id << " greedy end." << endl;
+    MUTEX_UNLOCK(_mutex_debug);
   }
-  pthread_mutex_unlock(&_mutex_debug);
 #endif     
 }

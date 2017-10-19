@@ -59,7 +59,7 @@
 
 using std::vector;
 
-template<typename T, typename W = T, typename Z = W>
+template<typename T>
 class SparseMatrix
 {
 public:
@@ -99,6 +99,26 @@ public:
     _indCols.resize(nnz);
     for (int i = 0; i < nnz; i++) {
       _indCols[i] = indCols[i];
+    }
+    _coefs.resize(nnz);
+  }
+
+  SparseMatrix( int n, int nnz,
+		const long long int *ptRows64,
+		const long long int *indCols64,
+		bool isSym = false, bool isUpper = true,
+		bool isWhole = false) : 
+    _isSymmetric(isSym),
+    _isUpper(isUpper),
+    _isWhole(isWhole)
+  {
+    _ptRows.resize(n+1);
+    for (int i = 0; i < (n + 1); i++) {
+      _ptRows[i] = ptRows64[i];
+    }
+    _indCols.resize(nnz);
+    for (int i = 0; i < nnz; i++) {
+      _indCols[i] = indCols64[i];
     }
     _coefs.resize(nnz);
   }
@@ -166,17 +186,13 @@ public:
   void prod(const T *u, T *v) const;
   void prodt(const T *u, T *v ) const;
 
-  void normalize(const int type, const W* coefs0, Z* precDiag);
+  //  void normalize(const int type, const W* coefs0, Z* precDiag);
 
   void extractSquareMatrix(T *DSsingCofes, vector<int> &singVal);
 
  
   SparseMatrix<T>* PartialCopyCSR(vector<int> &permute, const int n,
 				  bool transposed);
-
-  int CSR_sym2unsym(int *ptRows, int *indCols, int *toSym, 
-		    const int *ptSymRows, const int *indSymCols, 
-		    const int dim, const bool upper_flag);
    
 private:
   SparseMatrix& operator = ( const SparseMatrix& A );
@@ -187,5 +203,13 @@ private:
   bool        _isUpper;
   bool        _isWhole;
 }; // End class SparseMatrix
+
+template<typename T, typename U> void
+normalize(const int type, const T* coefs0, SparseMatrix<T> *ptDA, U* u);
+
+
+int CSR_sym2unsym(int *ptRows, int *indCols, int *toSym, 
+		  const int *ptSymRows, const int *indSymCols, 
+		  const int dim, const bool upper_flag);
 
 #endif

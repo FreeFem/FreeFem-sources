@@ -62,21 +62,29 @@
 #define MKL_Complex16 std::complex<double>
 #include <mkl_cblas.h>
 #include <mkl_trans.h>
+typedef MKL_INT BLAS_INT;
+typedef void BLAS_VOID;
 #endif
 #ifdef VECLIB
 #include <cblas.h>
 #endif
 #ifdef SX_ACE_BLAS
 #include <cblas.h>
+typedef int BLAS_INT;
+typedef void BLAS_VOID;
 #endif
 #ifdef OPENBLAS
 #include "cblas.h"
+typedef int BLAS_INT;
+typedef double BLAS_VOID;
 #endif
 #ifdef SUNPERF
 #define floatcomplex std::complex<float>
 #define doublecomplex std::complex<double>
 #define _SUNPERF_COMPLEX
 #include <sunperf.h>
+typedef int BLAS_INT;
+typedef void BLAS_VOID;
 #endif
 #if (defined(BLAS_GENERIC) || defined(BLAS_FORTRAN))
 typedef enum {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113 } CBLAS_TRANSPOSE;
@@ -100,6 +108,29 @@ inline double
 blas_abs<complex<double>, double>(const complex<double> &x) {
   return abs(x);
 }
+
+template<>
+inline float blas_abs<float, float>(const float &x) {
+  return fabsf(x);
+}
+
+template<>
+inline double blas_abs<float, double>(const float &x) {
+  return double(fabsf(x));
+}
+
+template<>
+inline float
+blas_abs<complex<float>, float>(const complex<float> &x) {
+  return abs(x);  // using <complex> class
+}
+
+template<>
+inline double
+blas_abs<complex<float>, double>(const complex<float> &x) {
+  return double(abs(x));  // using <complex> class
+}
+
 
 template<>
 inline quadruple blas_abs<quadruple, quadruple>(const quadruple &x) {
@@ -167,6 +198,12 @@ blas_conj(double x)
   return x;
 }
 
+inline float
+blas_conj(float x)
+{
+  return x;
+}
+
 inline quadruple
 blas_conj(const quadruple &x)
 {
@@ -182,6 +219,12 @@ blas_conj(const octruple &x)
 #endif
 inline complex<double> 
 blas_conj(const complex<double> &x)
+{
+  return std::conj(x);
+}
+
+inline complex<float> 
+blas_conj(const complex<float> &x)
 {
   return std::conj(x);
 }
@@ -218,6 +261,16 @@ void
 blas_axpy<complex<double> >(const int n, const complex<double> &alpha, 
 			    const complex<double>* x, const int incx, 
 			    complex<double>* y, int incy);
+template<>
+void
+blas_axpy<float>(const int n, const float &alpha, 
+		  const float* x, const int incx, 
+		  float* y, const int incy);
+template<>
+void 
+blas_axpy<complex<float> >(const int n, const complex<float> &alpha, 
+			    const complex<float>* x, const int incx, 
+			    complex<float>* y, int incy);
 #endif
 
 template<typename T>
@@ -235,6 +288,17 @@ void
 blas_copy<complex<double> >(const int n,
 			    const complex<double>* x, const int incx,
 			    complex<double>* y, const int incy);
+
+template<>
+void
+blas_copy<float>(const int n, const float* x, const int incx, float* y,
+		  const int incy);
+
+template<>
+void
+blas_copy<complex<float> >(const int n,
+			    const complex<float>* x, const int incx,
+			    complex<float>* y, const int incy);
 #endif
 template<typename T>
 T
@@ -252,6 +316,17 @@ complex<double>
 blas_dot<complex<double> >(const int n,
 			   const complex<double>* x, const int incx, 
 			   const complex<double>* y, const int incy);
+template<>
+float
+blas_dot<float>(const int n, const float* x, const int incx, 
+		 const float* y, const int incy);
+
+template<>
+complex<float>
+blas_dot<complex<float> >(const int n,
+			   const complex<float>* x, const int incx, 
+			   const complex<float>* y, const int incy);
+
 #endif
 template<typename T>
 void
@@ -267,6 +342,15 @@ template<>
 void
 blas_scal<complex<double> >(const int N, const complex<double> &alpha, 
 			    complex<double> *X, const int incX);
+template<>
+void
+blas_scal<float>(const int N, const float &alpha, float *X, const int incX);
+
+template<>
+void
+blas_scal<complex<float> >(const int N, const complex<float> &alpha, 
+			    complex<float> *X, const int incX);
+
 #endif
 // T may be std::complex of U
 template<typename T, typename U>
@@ -283,6 +367,17 @@ template<>
 void
 blas_scal2<complex<double>, double>(const int N, const double &alpha_, 
 				    complex<double> *X, const int incX);
+
+template<>
+void
+blas_scal2<float, float>(const int N, const float &alpha,
+			   float *X, const int incX);
+
+template<>
+void
+blas_scal2<complex<float>, float>(const int N, const float &alpha_, 
+				    complex<float> *X, const int incX);
+
 
 template<>
 void
@@ -304,6 +399,13 @@ template<>
 int blas_iamax<complex<double>, double>(const int n,
 					const complex<double> *x,
 					const int incx);
+template<>
+int blas_iamax<float, float>(const int n, const float *x, const int incx);
+template<>
+int blas_iamax<complex<float>, float>(const int n,
+					const complex<float> *x,
+					const int incx);
+
 #endif
 // ====================== Blas subroutine level 2 =========================
 
@@ -331,6 +433,23 @@ blas_gemv<complex<double> >(const CBLAS_TRANSPOSE trA,
 			    const complex<double>* x, const int incx, 
 			    const complex<double> &beta,
 			    complex<double>* y, const int incy);
+template<>
+void
+blas_gemv<float>(const CBLAS_TRANSPOSE trA, 
+		  const int m, const int n, const float &alpha, 
+		  const float* A, const int lda, const float* x,
+		  const int incx, 
+		  const float &beta, float* y, const int incy);
+
+template<>
+void
+blas_gemv<complex<float> >(const CBLAS_TRANSPOSE trA, 
+			    const int m, const int n,
+			    const complex<float> &alpha, 
+			    const complex<float>* A, const int lda, 
+			    const complex<float>* x, const int incx, 
+			    const complex<float> &beta,
+			    complex<float>* y, const int incy);
 #endif
 template<typename T>
 void
@@ -353,6 +472,21 @@ blas_trsv<complex<double> >(const CBLAS_UPLO Uplo,
 			    const int N, const complex<double>* A,
 			    const int lda, 
 			    complex<double> *X, const int incX);
+template<>
+void
+blas_trsv<float>(const CBLAS_UPLO Uplo,
+		  const CBLAS_TRANSPOSE TransA, const CBLAS_DIAG Diag,
+		  const int N, const float *A, const int lda, float *X,
+		  const int incX);
+
+template<>
+void
+blas_trsv<complex<float> >(const CBLAS_UPLO Uplo,
+			    const CBLAS_TRANSPOSE TransA, const CBLAS_DIAG Diag,
+			    const int N, const complex<float>* A,
+			    const int lda, 
+			    complex<float> *X, const int incX);
+
 #endif
 
 template<typename T>
@@ -375,6 +509,20 @@ blas_syr<complex<double> >(const CBLAS_UPLO Uplo,
 			   const int N, const complex<double> &alpha,
 			   const complex<double> *X, const int incX,
 			   complex<double> *A, const int lda);
+template<>
+void
+blas_syr<float>(const CBLAS_UPLO Uplo, 
+		 const int N, const float &alpha,
+		 const float *X, const int incX,
+		 float *A, const int lda);
+
+template<>
+void
+blas_syr<complex<float> >(const CBLAS_UPLO Uplo, 
+			   const int N, const complex<float> &alpha,
+			   const complex<float> *X, const int incX,
+			   complex<float> *A, const int lda);
+
 #endif
 template<typename T>
 void
@@ -399,6 +547,13 @@ blas_syr2<double>(const CBLAS_UPLO Uplo, const int N,
 		  const double *X, const int incX,
 		  const double *Y, const int incY,
 		  double *A, const int lda);
+template<>
+void
+blas_syr2<float>(const CBLAS_UPLO Uplo, const int N,
+		  const float &alpha,
+		  const float *X, const int incX,
+		  const float *Y, const int incY,
+		  float *A, const int lda);
 #endif
 
 template<typename T>
@@ -423,6 +578,20 @@ blas_ger<complex<double> >(const int M, const int N,
 			   const complex<double> *X, const int incX,
 			   const complex<double> *Y, const int incY,
 			   complex<double> *A, const int lda);
+template<>
+void
+blas_ger<float>(const int M, const int N, const float &alpha,
+		 const float *X, const int incX,
+		 const float *Y, const int incY,
+		 float *A, const int lda);
+
+template<>
+void
+blas_ger<complex<float> >(const int M, const int N,
+			   const complex<float> &alpha,
+			   const complex<float> *X, const int incX,
+			   const complex<float> *Y, const int incY,
+			   complex<float> *A, const int lda);
 #endif
 
 template<typename T>
@@ -446,6 +615,19 @@ blas_gerc<complex<double> >(const int M, const int N,
 			    const complex<double> *X, const int incX,
 			    const complex<double> *Y, const int incY,
 			    complex<double> *A, const int lda);
+template<>
+void
+blas_gerc<float>(const int M, const int N, const float &alpha,
+		  const float *X, const int incX,
+		  const float *Y, const int incY,
+		  float *A, const int lda);
+template<>
+void
+blas_gerc<complex<float> >(const int M, const int N,
+			    const complex<float> &alpha,
+			    const complex<float> *X, const int incX,
+			    const complex<float> *Y, const int incY,
+			    complex<float> *A, const int lda);
 #endif
 // ====================== Blas subroutine level 3 =========================
 
@@ -476,6 +658,22 @@ blas_gemm<complex<double> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB,
 			    const complex<double>* B, int ldb,
 			    const complex<double> &beta, 
 			    complex<double>* C, int ldc );
+template<>
+void
+blas_gemm<float>(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+		  int m, int n, int k,
+		  const float &alpha, const float* A, int lda,
+		  const float* B, int ldb, const float &beta,
+		  float* C, int ldc );
+
+template<>
+void
+blas_gemm<complex<float> >(CBLAS_TRANSPOSE trA, CBLAS_TRANSPOSE trB, 
+			    int m, int n, int k, const complex<float> &alpha, 
+			    const complex<float>* A, int lda,
+			    const complex<float>* B, int ldb,
+			    const complex<float> &beta, 
+			    complex<float>* C, int ldc );
 #endif
 
 template<typename T>
@@ -503,6 +701,22 @@ blas_trsm<complex<double> >(const CBLAS_SIDE Side,
 			    const complex<double> &alpha,
 			    const complex<double> *A, const int lda,
 			    complex<double> *B, const int ldb);
+template<>
+void
+blas_trsm<float>(const CBLAS_SIDE Side,
+		  const CBLAS_UPLO Uplo, const CBLAS_TRANSPOSE TransA,
+		  const CBLAS_DIAG Diag, const int M, const int N,
+		  const float &alpha, const float *A, const int lda,
+		  float *B, const int ldb);
+
+template<>
+void
+blas_trsm<complex<float> >(const CBLAS_SIDE Side,
+			    const CBLAS_UPLO Uplo, const CBLAS_TRANSPOSE TransA,
+			    const CBLAS_DIAG Diag, const int M, const int N,
+			    const complex<float> &alpha,
+			    const complex<float> *A, const int lda,
+			    complex<float> *B, const int ldb);
 #endif
 #ifdef BLAS_MKL
 // ====================== MKL transposition routines =======================
@@ -543,6 +757,11 @@ U blas_l2norm(const int n, T *x, const int incX);
 template<>
 double blas_l2norm<complex<double>, double>(const int n, complex<double> *x,
 					    const int incX);
+
+template<>
+float blas_l2norm<complex<float>, float>(const int n, complex<float> *x,
+					 const int incX);
+
 template<>
 quadruple blas_l2norm<complex<quadruple>, quadruple>(const int n,
 						     complex<quadruple> *x,
@@ -553,6 +772,10 @@ U blas_l2norm2(const int n, T *x, const int incX);
 
 template<>
 double blas_l2norm2<complex<double>, double>(const int n, complex<double> *x,
+					     const int incX);
+
+template<>
+float blas_l2norm2<complex<float>, float>(const int n, complex<float> *x,
 					     const int incX);
 
 template<>

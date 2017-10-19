@@ -4,6 +4,7 @@
     \date   Jul. 24th 2015
     \date   Sep. 29th 2015
     \date   Nov. 30th 2016
+    \date   Oct. 15th 2017
 */
 
 // This file is part of Dissection
@@ -55,6 +56,6 @@
 
 #define DISSECTION_VERSION    1
 #define DISSECTION_RELEASE    0
-#define DISSECTION_PATCHLEVEL 0
+#define DISSECTION_PATCHLEVEL 3
 
 #endif

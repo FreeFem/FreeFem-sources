@@ -868,7 +868,7 @@ class LinearGMRES : public OneOperator
          if ( !B ) bbgmres=bb; // none zero if gmres without B
          MatF_O AA(n,stack,A,bbgmres);
          if(bbgmres ){
-             *bbgmres= AA* *bbgmres; // Ok Ax == b -> not translation of b .
+             AA.addMatMul(*bbgmres,*bbgmres); // Ok Ax == b -> not translation of b .
              *bbgmres = - *bbgmres;
              if(verbosity>1) cout << "  ** GMRES set b =  -A(0);  : max=" << bbgmres->max() << " " << bbgmres->min()<<endl;
          }
@@ -1613,6 +1613,9 @@ long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
  
 double pmesh_area(pmesh * p)
  { throwassert(p && *p) ;  return (**p).area ;}
+double pmesh_bordermeasure(pmesh * p)
+{ throwassert(p && *p) ;  return (**p).lenbord ;}
+
 long pmesh_nt(pmesh * p)
  { throwassert(p && *p) ;  return (**p).nt ;}
 long pmesh_nbe(pmesh * p)
@@ -1664,7 +1667,7 @@ long mp_nuTriangle(MeshPoint * p)
    return nu ;}
    
 long mp_region(MeshPoint * p)
- { throwassert(p && p->Th);
+ { //throwassert(p && p->Th);
    long  nu(p->region);
    delete p;
    return nu ;}
@@ -2880,6 +2883,7 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("z",z);
   Global.New("label",label);
   Global.New("region",region);
+  Global.New("notaregion",CConstant<long>(notaregion));
   Global.New("nuTriangle",nu_triangle);   
   Global.New("nuEdge",nu_edge);   
   Global.New("P",P);   
@@ -5337,6 +5341,7 @@ void  init_lgfem()
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("measure",".",new OneOperator1<double,pmesh*>(pmesh_area));
+ Add<pmesh*>("bordermeasure",".",new OneOperator1<double,pmesh*>(pmesh_bordermeasure));// add june 2017 F.H
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
     

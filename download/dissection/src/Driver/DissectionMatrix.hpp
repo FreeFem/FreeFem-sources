@@ -168,6 +168,7 @@ public:
 			     double *eps_pivot,
 			     double *pivot,
 			     bool *kernel_detection,
+			     bool *higher_precision,
 			     int *aug_dim,
 			     U *eps_machine,
 			     vector<C_task*>& task_q,
@@ -251,6 +252,7 @@ public:
   void ChildContrib(list<child_contribution<T> > *child_contribs,
 		    Dissection::Tree *btree,
 		    vector<DissectionMatrix<T, U>* >& dissectionMatrix,
+		    const bool verbose,
 		    FILE **fp);
 
   void deallocLower_queue(C_task*& queue,

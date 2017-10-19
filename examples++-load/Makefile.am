@@ -18,6 +18,7 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
   SuperLu.cpp  \
   NewSolver.cpp \
   splitmesh3.cpp    splitmesh6.cpp   \
+  splitmesh4.cpp    splitmesh12.cpp   \
   README_SuperLU \
   tetgen.cpp\
   msh3.cpp msh3.hpp\
@@ -54,7 +55,8 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  exactpartition.cpp	exactpartition.edp \
  ClosePoints.cpp aniso.cpp Element_HCT.cpp Curvature.cpp waveguide.edp waveguide2.edp Element_P1bl.cpp \
  Element_QF.cpp distance.edp	distance2.edp	distance3.edp g.gmesh distance.cpp testdist.edp \
- Element_P1ncdc.cpp testp1dcnc.edp 
+ Element_P1ncdc.cpp testp1dcnc.edp \
+ renumb.hpp 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -62,6 +64,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	 Element_P3dc.$(DYLIB_SUFFIX)    Element_P4dc.$(DYLIB_SUFFIX) 	\
 	 Element_PkEdge.$(DYLIB_SUFFIX)  msh3.$(DYLIB_SUFFIX) \
 	splitmesh3.$(DYLIB_SUFFIX)  splitmesh6.$(DYLIB_SUFFIX) \
+	splitmesh4.$(DYLIB_SUFFIX)  splitmesh12.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX)  \
 	medit.$(DYLIB_SUFFIX)  \
 	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX)\

@@ -54,6 +54,7 @@
 #include "Driver/DissectionDefault.hpp"
 #include "Compiler/arithmetic.hpp"
 #include "Algebra/VectorArray.hpp"
+#include "Compiler/DissectionIO.hpp"
 #include <time.h>
 
 #ifdef BLAS_MKL
@@ -124,6 +125,12 @@ void C_dupdateb_Schur_diag<complex<double> >(void *arg_);
 
 template
 void C_dupdateb_Schur_diag<complex<quadruple> >(void *arg_);
+
+template
+void C_dupdateb_Schur_diag<float>(void *arg_);
+
+template
+void C_dupdateb_Schur_diag<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -193,6 +200,12 @@ void C_dupdateb_Schur_offdiag<complex<double> >(void *arg_);
 
 template
 void C_dupdateb_Schur_offdiag<complex<quadruple> >(void *arg_);
+
+template
+void C_dupdateb_Schur_offdiag<float>(void *arg_);
+
+template
+void C_dupdateb_Schur_offdiag<complex<float> >(void *arg_);
 //
 
 template<typename T, typename U>
@@ -300,27 +313,14 @@ void C_dfull_gauss_b(void *arg_)
       D.set_pivrelaxed();
     }
     a_diag1.free();
-    if (verbose && (count_repeat > 0)) {
-      fprintf(fp,
-	      "%s %d : eps_pvi = %g pivot = %g n0 = %d count_repeat = %d\n",
+    if (count_repeat > 0) {
+      diss_printf(verbose, fp,
+	      "%s %d : eps_piv = %g pivot = %g n0 = %d count_repeat = %d\n",
 	      __FILE__, __LINE__, eps_piv1, pivot, n0, count_repeat);
     }    
   } //   if ((id_level == 0) && (task_position % 2 == 1)) 
   else {
     if (arg->isSym) {
-#if 0
-    // copy upper to lower for rank-1 update procedure by dsyr('L', ) 
-    // dsub_sym2sym{_diag} touch intersection of upper blocks, then some entries
-    // in the lower part of the blocks are not updated.
-    // symmetrize here is optimal. C_dinvDL_timesU works only with upper blocks
-    // the following symmetrization could be merged in ddfull_symm_gauss_b()
-    //    if (id_level > 0) {
-      for (int j = 0; j < nrow; j++) {
-	for (int i = 0; i < j; i++) {   // acess upper
-	  a_diag[j + i * nrow] = a_diag[i + j * nrow];
-	}
-      }
-#endif
       full_ldlt_permute<T, U>(&nn0, n0, nrow, a_diag, nrow_block, &pivot, 
 			      permute_block, 
 			      eps_piv, &fop);
@@ -331,11 +331,11 @@ void C_dfull_gauss_b(void *arg_)
 			     eps_piv, &fop);
     }
   }
-  if (verbose && (nn0 > 0)) {
-       fprintf(fp,
-	       "%s %d : nd = %d : level = %d block = %d null = %d / %d\n",
-	       __FILE__, __LINE__, arg->nb,  arg->id_level, arg->id_block,
-	       nn0, nrow);
+  if (nn0 > 0) {
+    diss_printf(verbose, fp,
+		"%s %d : nd = %d : level = %d block = %d null = %d / %d\n",
+		__FILE__, __LINE__, arg->nb,  arg->id_level, arg->id_block,
+		nn0, nrow);
   }
   // permute_block is defined by Fortran array, i.e. takes index starting 1
   for (int i = i1; i < i1 + nrow; i++) {
@@ -366,8 +366,9 @@ void C_dfull_gauss_b(void *arg_)
       tmp_idx.sort();
       tmp_idx.unique();
 
-      if (verbose && (sing_max > 0)) {
-	fprintf(fp, "%s %d : %d : %g\n", __FILE__, __LINE__, arg->nb, pivot);
+      if (sing_max > 0) {
+	diss_printf(verbose, fp,
+		    "%s %d : %d : %g\n", __FILE__, __LINE__, arg->nb, pivot);
       }
       for (list<int>::const_iterator it = tmp_idx.begin(); 
 	   it != tmp_idx.end(); ++it) {
@@ -377,10 +378,8 @@ void C_dfull_gauss_b(void *arg_)
 	    dispflag = true;
 	  }
 	}
-	if (verbose) {
-	  fprintf(fp, "%d %s %s\n", (*it), (dispflag ? "*" :":"),
-		  tostring<T>(D.diag(*it)).c_str());
-	}
+	diss_printf(verbose, fp, "%d %s %s\n", (*it), (dispflag ? "*" :":"),
+		    tostring<T>(D.diag(*it)).c_str());
       }
     }
     // nullifying diagonal entries
@@ -393,43 +392,31 @@ void C_dfull_gauss_b(void *arg_)
     int dim_kern = 0;
     bool flagKernelDetect = true;
     if (sing_max > 0) {
-      if (verbose) {
-	fprintf(fp,
-		"%s %d : C_dfull_gauss_b : id_level %d : nb = %d : %d / %d ",
-		__FILE__, __LINE__,
-		id_level, arg->nb, arg->id_block, arg->num_block);
-	fprintf(fp, "task_position = %d, i1 = %d , nrow = %d\n",
-		task_position, i1, nrow);
-	fprintf(fp, "%s %d : sing_max = %d : ",
-		__FILE__, __LINE__, sing_max);
-	for (int i = 0; i < sing_max; i++) {
-	  fprintf(fp, "%d ", singIdx0[i]);
-	}
-	fprintf(fp, "\n");
-      } // if (verbose)
+      diss_printf(verbose, fp,
+		  "%s %d : C_dfull_gauss_b : id_level %d : nb = %d : %d / %d ",
+		  __FILE__, __LINE__,
+		  id_level, arg->nb, arg->id_block, arg->num_block);
+      diss_printf(verbose, fp, "task_position = %d, i1 = %d , nrow = %d\n",
+		  task_position, i1, nrow);
+      diss_printf(verbose, fp, "%s %d : sing_max = %d : ",
+		  __FILE__, __LINE__, sing_max);
+      for (int i = 0; i < sing_max; i++) {
+	diss_printf(verbose, fp, "%d ", singIdx0[i]);
+      }
+      diss_printf(verbose, fp, "\n");
+
       if ((task_position == 3) && (sing_max + aug_dim) > nrow) {
 	// if (task_position == 3) {
 	*(arg->quit) = true;  // refactorize is only applied for the root matrix
-	if (verbose) {
-	  fprintf(fp,
- 		  "%s %d : nonsingular part is too small %d : %d - %d : %d\n",
-		  __FILE__, __LINE__,
-		  aug_dim, nrow, nn0, sing_max);
-	}
+	diss_printf(verbose, fp,
+		    "%s %d : nonsingular part is too small %d : %d - %d : %d\n",
+		    __FILE__, __LINE__,
+		    aug_dim, nrow, nn0, sing_max);
 	flagKernelDetect = false;
 	dim_kern = sing_max;       // nullify rows with all suspicious pivots
 	D.set_KernelDetected(false);  // kernel is unknown
 	singIdx0.resize(sing_max);
       }
-#if 0
-      // task_poistion == 0, 1 are excluded already
-      //               == 2 need to be verified by dimKernDense
-      if (D.is_pivrelaxed()) {
-	flagKernelDetect = false;
-	refactorize = true;
-	D.set_KernelDetected(false);
-      }
-#endif
     } // if (sing_max > 0)
     else {
       flagKernelDetect = false;
@@ -451,14 +438,12 @@ void C_dfull_gauss_b(void *arg_)
 				      arg->isSym,
 				      verbose,
 				      fp);
-	if (verbose) {
-	  fprintf(fp, "%s %d : dim_kern = %d : singIdx0 = [",
-		  __FILE__, __LINE__, dim_kern);
-	  for (int i = 0; i < singIdx0.size(); i++) {
-	    fprintf(fp, "%d ", singIdx0[i]);
-	  }
-	  fprintf(fp, "]\n");
-	} // if (verbose)
+	diss_printf(verbose, fp, "%s %d : dim_kern = %d : singIdx0 = [",
+		    __FILE__, __LINE__, dim_kern);
+	for (int i = 0; i < singIdx0.size(); i++) {
+	  diss_printf(verbose, fp, "%d ", singIdx0[i]);
+	}
+	diss_printf(verbose, fp, "]\n");
 	if (dim_kern == (-1)) {
 	  // refactorization happens in only the last level
 	  refactorize = true;
@@ -474,10 +459,9 @@ void C_dfull_gauss_b(void *arg_)
 	}
       }  //else if (*(arg->kernel_detection) || (id_level == 0)) {
       else {
-	if (verbose) {
-	  fprintf(fp, "%s %d : kernel detection will be done in the last\n",
-		  __FILE__, __LINE__);
-	}
+	diss_printf(verbose, fp,
+		    "%s %d : kernel detection will be done in the last\n",
+		    __FILE__, __LINE__);
 	dim_kern = sing_max;       // nullify rows with all suspicious pivots
 	D.set_KernelDetected(false);  // kernel is unknown
 	singIdx0.resize(sing_max);
@@ -492,11 +476,9 @@ void C_dfull_gauss_b(void *arg_)
       for (int i = 0; i < n; i++) {
 	permute[i] = i;
       }
-      if (verbose) {
-	fprintf(fp,
-		"%s %d : refactorization with whole diagonal pivots starts\n",
-		__FILE__, __LINE__);
-      }
+      diss_printf(verbose, fp,
+		  "%s %d : refactorization with whole diagonal pivots starts\n",
+		  __FILE__, __LINE__);
       *(arg->quit) = false;
     }
     else { // if (!refactorize)
@@ -538,6 +520,13 @@ void C_dfull_gauss_b<quadruple, quadruple>(void *arg_);
 
 template
 void C_dfull_gauss_b<complex<quadruple>, quadruple>(void *arg_);
+
+template
+void C_dfull_gauss_b<float, float>(void *arg_);
+
+template
+void C_dfull_gauss_b<complex<float>, float>(void *arg_);
+
 //
 
 template<typename T>
@@ -647,6 +636,13 @@ void C_dinvDL_timesU<complex<double> >(void *arg_);
 
 template
 void C_dinvDL_timesU<complex<quadruple> >(void *arg_);
+
+template
+void C_dinvDL_timesU<float>(void *arg_);
+
+template
+void C_dinvDL_timesU<complex<float> >(void *arg_);
+
 //
 
 template<typename T, typename U>
@@ -689,11 +685,9 @@ void C_gauss_whole_pivot(void *arg_)
     const double pivot1 = *(arg->pivot1);
     pivot = (pivot0 < pivot1 ? pivot0 : pivot1);
     int n0 = 0;
-    if (verbose) {
-      fprintf(fp,
-	      "%s %d : C_gauss_whole_pivot : serial factroization : n = %d\n",
+    diss_printf(verbose, fp,
+		"%s %d : C_gauss_whole_pivot : serial factroization : n = %d\n",
 	      __FILE__, __LINE__, n);
-    }
     int count_repeat = 0;
     bool flag_repeat_piv = true;
     double eps_piv1 = eps_piv;
@@ -716,10 +710,9 @@ void C_gauss_whole_pivot(void *arg_)
 			eps_piv1,
 			verbose,
 			fp);
-      if (verbose) {
-	fprintf(fp, "%s %d : C_gauss_whole_pivot : pivot = %g n0 = %d\n",
-		__FILE__, __LINE__, pivot, n0);
-      }
+      diss_printf(verbose, fp,
+		  "%s %d : C_gauss_whole_pivot : pivot = %g n0 = %d\n",
+		  __FILE__, __LINE__, pivot, n0);
       if (((n - n0) >= aug_dim) || (eps_piv1 < TOL_PIVOT)) {
 	flag_repeat_piv = false;
       }
@@ -728,11 +721,9 @@ void C_gauss_whole_pivot(void *arg_)
 	count_repeat++;
       }
     } // while (flag_repeat_piv)
-    if (verbose) {
-      fprintf(fp,
-	      "%s %d : eps_pvi = %g pivot = %g n0 = %d count_repeat = %d\n",
-	      __FILE__, __LINE__, eps_piv1, pivot, n0, count_repeat);
-    }    
+    diss_printf(verbose, fp,
+		"%s %d : eps_pvi = %g pivot = %g n0 = %d count_repeat = %d\n",
+		__FILE__, __LINE__, eps_piv1, pivot, n0, count_repeat);
     //    D.unsetBlocked(); // 
     D.copyFromArray(aa.addrCoefs(), n);
     // modification of lower blocks by removing D^-1 in the same mannar of
@@ -773,15 +764,13 @@ void C_gauss_whole_pivot(void *arg_)
 				    verbose,
 				    fp);
       dim_kern = n0;
-      if (verbose) {
-	fprintf(fp,
-		"%s %d : C_gauss_whole_pivot : dim_kern = %d\n",
-	      __FILE__, __LINE__, dim_kern);
-      }
+      diss_printf(verbose, fp,
+		  "%s %d : C_gauss_whole_pivot : dim_kern = %d\n",
+		  __FILE__, __LINE__, dim_kern);
       if (dim_kern == (-1)) {
-	fprintf(fp,
-		"%s %d : strict diagonal pivot is not enough!\n",
-		__FILE__, __LINE__);
+	diss_printf(verbose, fp,
+		    "%s %d : strict diagonal pivot is not enough!\n",
+		    __FILE__, __LINE__);
 	dim_kern = n0;
 	D.set_KernelDetected(false);
       }
@@ -872,6 +861,13 @@ void C_gauss_whole_pivot<quadruple, quadruple>(void *arg_);
 
 template
 void C_gauss_whole_pivot<complex<quadruple>, quadruple>(void *arg_);
+
+template
+void C_gauss_whole_pivot<float, float>(void *arg_);
+
+template
+void C_gauss_whole_pivot<complex<float>, float>(void *arg_);
+
 //
 
 template<typename T>
@@ -889,40 +885,10 @@ void C_dupdateb_Schur_offdiag_t(void *arg_)
   const int jj = D.IndexBlock(arg->jj_block); // arg->jj_block * SIZE_B1;
   FILE *fp = *(arg->fp);
   const bool verbose = arg->verbose;
-#if 1
-  if (verbose) {
-    fprintf(fp, 
+  diss_printf(verbose, fp, 
 	    "C_dupdate_Schur_offdiag_t : i1=%d ii=%d jj=%d nrow=%d ncol=%d b_size=%d\n",
 	    i1, ii, jj, nrow, ncol, b_size);
-  }
-#endif
-#if 0
-  struct timespec ts0, ts1;
-  get_realtime(&ts0);
-    //  clock_gettime(CLOCK_REALTIME, &ts0);
-  blas_gemm<T>(CblasNoTrans, CblasNoTrans,
-	       nrow, ncol, b_size,
-	       none, //alpha, 
-	       &a[ii + i1 * n], n,
-	       &a[i1 + jj * n], n,
-	       one, //beta, 
-	       &a[ii + jj * n], n);
-  if (!arg->isSym) {
-    blas_gemm<T>(CblasNoTrans, CblasNoTrans,
-		 nrow, ncol, b_size,
-		 none, // alpha, 
-		 &a[jj + i1 * n], n,
-		 &a[i1 + ii * n], n,
-		 one, //beta, 
-		 &a[jj + ii * n], n);
-  }
-  get_realtime(&ts1);
-  //  clock_gettime(CLOCK_REALTIME, &ts1);
-#else
-  if (verbose) {
-    fprintf(fp, "no computation\n");
-  }
-#endif
+  diss_printf(verbose, fp, "no computation\n");
 }
 
 template
@@ -936,4 +902,10 @@ void C_dupdateb_Schur_offdiag_t<complex<double> >(void *arg_);
 
 template
 void C_dupdateb_Schur_offdiag_t<complex<quadruple> >(void *arg_);
+
+template
+void C_dupdateb_Schur_offdiag_t<float>(void *arg_);
+
+template
+void C_dupdateb_Schur_offdiag_t<complex<float> >(void *arg_);
 //

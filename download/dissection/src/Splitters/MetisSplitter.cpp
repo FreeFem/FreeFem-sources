@@ -3,6 +3,7 @@
     \author Xavier Juvigny, ONERA
     \date   Jul.  2nd 2012
     \date   Nov. 30th 2016
+    \date   Oct. 15th 2017
 */
 
 // This file is part of Dissection
@@ -59,8 +60,8 @@
 #endif
 
 #include "Compiler/DebugUtils.hpp"
-#include "BitTools/BitManipulations.hpp"
-#include "MetisSplitter.hpp"
+#include "Splitters/BitManipulations.hpp"
+#include "Splitters/MetisSplitter.hpp"
 
 static unsigned compBegOfDomains(unsigned invLevel,
 		 	         unsigned&begDom,
@@ -68,20 +69,23 @@ static unsigned compBegOfDomains(unsigned invLevel,
 			         const int* sizeOfDomains,
 			         int* ptOnDomains)
 {
-    if (invLevel==1) {
-      ptOnDomains[indDom-1] = begDom;
-      return sizeOfDomains[indDom-1];
-    }
-    else {
-	begDom += compBegOfDomains(invLevel-1, begDom,
-				   2*indDom, sizeOfDomains,
-				   ptOnDomains);
-	begDom += compBegOfDomains(invLevel-1, begDom,
-				   2*indDom+1, sizeOfDomains,
-				   ptOnDomains);
-	ptOnDomains[indDom-1] = begDom;
-	return sizeOfDomains[indDom-1];
-    }
+  unsigned left,right;
+  if (invLevel==1) {
+    ptOnDomains[indDom-1] = begDom;
+    return sizeOfDomains[indDom-1];
+  }
+  else {
+    left = compBegOfDomains(invLevel-1, begDom,
+			    2*indDom, sizeOfDomains,
+			    ptOnDomains);
+    begDom += left;   // to prevent aggressive optimization
+    right = compBegOfDomains(invLevel-1, begDom,
+			     2*indDom+1, sizeOfDomains,
+			     ptOnDomains);
+    begDom += right;  // to prevent aggressive optimization
+    ptOnDomains[indDom-1] = begDom;
+    return sizeOfDomains[indDom-1];
+  }
 }
 			     
 
@@ -129,7 +133,12 @@ MetisSplitter(unsigned dim,
 # ifdef DEBUG
   options[METIS_OPTION_DBGLVL   ] = 255;/* Full debug */  
 # else
-  options[METIS_OPTION_DBGLVL   ] = METIS_DBG_TIME; /* only time profiling */  
+  if(verbose) {
+    options[METIS_OPTION_DBGLVL   ] = METIS_DBG_TIME; /* only time profiling */
+  }
+  else{
+    options[METIS_OPTION_DBGLVL   ] = 0;
+  }
 # endif
 //  Opt [0] = 0 ;	/* use defaults */
 //  Opt [1] = 3 ;	/* matching type */
@@ -166,7 +175,6 @@ MetisSplitter(unsigned dim,
   /** This metis subroutine make dissection with some history
       in sizes array
   */
-#if 1
   int err = METIS_NodeNDP(nvtxs, xadj, adjncy, NULL, 
 			  idx_t(nbDoms), options, 
 			  iperm, perm, sizes);
@@ -179,37 +187,6 @@ MetisSplitter(unsigned dim,
       else
 	fprintf(fp, "\t Other error in Metis\n");
   }
-#if 0
-  FILE *fpp;
-  fpp = fopen("metis.data", "w");
-  fprintf(fpp, "%d %d\n", dim, nbDoms);
-  for (int i = 0; i < dim; i++) {
-    fprintf(fpp, "%d\n", perm[i]);
-  }
-  for (int i = 0; i < dim; i++) {
-    fprintf(fpp, "%d\n", iperm[i]);
-  }
-  for (int i = 0; i < (2 * nbDoms - 1) ; i++) {
-    fprintf(fpp, "%d\n", sizes[i]);
-  }
-  fclose(fpp);
-#endif
-#else
-  FILE *fpp;
-  int itmp, jtmp;
-  fpp = fopen("metis.data", "r");
-  fscanf(fpp, "%d %d", &itmp, &jtmp);
-  for (int i = 0; i < dim; i++) {
-    fscanf(fpp, "%d", &perm[i]);
-  }
-  for (int i = 0; i < dim; i++) {
-    fscanf(fpp, "%d", &iperm[i]);
-  }
-  for (int i = 0; i < (2 * nbDoms - 1) ; i++) {
-    fscanf(fpp, "%d", &sizes[i]);
-  }
-  fclose(fpp);
-#endif
   //  TRACE("Finish to split ;)\n");
 
   nbDoms = nbDoms*2-1;
@@ -236,14 +213,6 @@ MetisSplitter(unsigned dim,
   // way !
   compBegOfDomains(nbMaxLevels, begDom, 1, sizeOfDomains,ptOnDomains);
   ptOnDomains[nbDoms] = dim;  
-# ifdef DEBUG
-  for (unsigned idom = 0; idom < nbDoms; idom++)
-      std::cerr << "dom " << idom+1 << " => "
-		<< "start : " << ptOnDomains[idom] 
-		<< " size : " << sizeOfDomains[idom] 
-		<< " next : " << ptOnDomains[idom]+sizeOfDomains[idom]
-		<< std::endl;
-# endif
   //assert(begDom==dim);
   assert(ptOnDomains[0]+sizeOfDomains[0]==dim);
   if (sizeof(idx_t)!=sizeof(int)) {

@@ -49,7 +49,6 @@
 include ./Defs.inc
 # @(cd Utilities;       $(MAKE) )
 all:
-	@(tar cfp - `find . -name '*.h'` | (cd ../include ; tar xvfp -) )
 	@(cd Compiler;        $(MAKE) )
 	@(cd Splitters;       $(MAKE) )
 	@(cd Algebra;         $(MAKE) )

@@ -48,15 +48,17 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <iostream>
+#include <float.h>
+#include <cmath> // for isnan()
+
 #include "Compiler/blas.hpp"
 #include "Compiler/OptionLibrary.h"
 #include "Driver/C_threads_tasks.hpp"
 #include "Driver/C_KernDetect.hpp"
 #include "Algebra/VectorArray.hpp"
+#include "Compiler/DissectionIO.hpp"
 
-#include <iostream>
-#include <float.h>
-#include <cmath> // for isnan()
 // #define DEBUG_SVD
 #ifdef DEBUG_SVD
 #include "mkl_lapack.h"
@@ -64,7 +66,7 @@
 
 void C_dummy(void *arg_) { };
 
-//#define DEBUG_ERASENULLPARETS
+//#define DEBUG_ERASENULLPARENTS
 int EraseNullParents(vector<C_task *> &queue)
 {
   int count = 0;
@@ -74,10 +76,6 @@ int EraseNullParents(vector<C_task *> &queue)
 	 jt != (*it)->parents->end(); ) {
       if (*(*jt)->ops_complexity == 0L) {
 	count++;
-#ifdef DEBUG_ERASENULLPARETS
-	fprintf(stderr, "%s %d : EraseNullParents() cmplxty=0 : %s <= %s\n",
-		__FILE__, __LINE__, (*it)->task_name, (*jt)->task_name);
-#endif
 	jt = (*it)->parents->erase(jt);
       }
       else {
@@ -85,45 +83,22 @@ int EraseNullParents(vector<C_task *> &queue)
       }
     }
   }
-#ifdef DEBUG_ERASENULLPARETS
-  fprintf(stderr, "%s %d : EraseNullParents() : %d\n", 
-	  __FILE__, __LINE__, count);
-#endif
   return count;
 }
 
 int EraseNullParents(C_task * task)
 {
   int count = 0;
-#ifdef DEBUG_ERASENULLPARETS
-  fprintf(stderr, "%s %d : EraseNullParents() : %s :: ",
-	  __FILE__, __LINE__, task->task_name);
-#endif
   for (list<C_task *>::iterator jt = task->parents->begin(); 
 	 jt != task->parents->end(); ) {
-#ifdef DEBUG_ERASENULLPARETS
-    fprintf(stderr, "[%s | %d] ",
-	    (*jt)->task_name, (int)*(*jt)->ops_complexity);
-#endif
-#ifdef DEBUG_ERASENULLPARETS
-    if (*(*jt)->ops_complexity == (-1L)) {
-      fprintf(stderr, " cmplxty=-1 ");
-    }
-#endif
     if (*(*jt)->ops_complexity == 0L) {
       count++;
-#ifdef DEBUG_ERASENULLPARETS
-      fprintf(stderr, " deleted ");
-#endif
       jt = task->parents->erase(jt);
     }
     else {
       ++jt;
     }
   }
-#ifdef DEBUG_ERASENULLPARETS
-  fprintf(stderr, "# deleted =  %d\n", count);
-#endif
   return count;
 }
 
@@ -145,11 +120,6 @@ void C_SparseSymbFact(void *arg_)
     tridiag[i]->SymbolicFact((i + 1), colors, color_mask, nrow,
 			     nnz0, prow0, indcols0, indvals0); //
   }  
-#if 0
-  cerr << "tridiag_s_fact_schur: estimation " << *(arg->ops_complexity) 
-       << " real = " << *(arg->nops) << " next = " << *(arg->nopd) 
-       << endl;
-#endif
 }
 
 template
@@ -163,6 +133,14 @@ void C_SparseSymbFact<complex<double>, double>(void *arg_);
 
 template
 void C_SparseSymbFact<complex<quadruple>, quadruple>(void *arg_);
+
+template
+void C_SparseSymbFact<float, float>(void *arg_);
+
+template
+void C_SparseSymbFact<complex<float>, float>(void *arg_);
+
+//
 
 void c_getrealtime_(uint64_t &tmprofiles, const int &m)
 {
@@ -378,96 +356,8 @@ int combine_two_strips(list<index_strip> &stripsa,
       break;
     }
   }
-#if 0
-  std::cout << "child-a " << std::endl;
-  //   std::cout << ary0 << std::endl;
-  for (list <index_strip>::const_iterator kt = stripsa.begin();
-       kt != stripsa.end();
-       ++kt) {
-    std::cout << "[ " << (*kt).begin_dst << " , " 
-	 << (*kt).begin_src << " , "
-	 << (*kt).width << " ] ";
-  }
-  std::cout << std::endl;
-  std::cout << "child-b " << std::endl;
-  //   std::cout << ary1 << std::endl;
-  for (list <index_strip>::const_iterator kt = stripsb.begin();
-	     kt != stripsb.end();
-       ++kt) {
-    std::cout << "[ " << (*kt).begin_dst << " , " 
-	 << (*kt).begin_src << " , "
-	 << (*kt).width << " ] ";
-  }
-  std::cout << std::endl;
-  std::cout << "children-a -b ";
-  for (list <index_strip2>::const_iterator kt = stripsc.begin();
-       kt != stripsc.end();
-       ++kt) {
-    std::cout << "[ " << (*kt).begin_dst << " , " 
-	 << (*kt).begin_src0 << " , "
-	 << (*kt).begin_src1 << " , "
-	 << (*kt).width << " ] ";
-  }
-  std::cout << std::endl;
-  // checking generated new three strips :
-  vector<int> bry0(size, (-1));
-  vector<int> bry1(size, (-1));
-
-  for (list <index_strip>::const_iterator kt = stripsa.begin();
-       kt != stripsa.end();
-       ++kt) {
-    int ii = (*kt).begin_dst;
-    int i0 = (*kt).begin_src;
-    for (int i = 0; i < (*kt).width; i++) {
-      bry0[ii++] = i0++;
-    }
-  }
-  for (list <index_strip>::const_iterator kt = stripsb.begin();
-       kt != stripsb.end();
-       ++kt) {
-    int ii = (*kt).begin_dst;
-    int i1 = (*kt).begin_src;
-    for (int i = 0; i < (*kt).width; i++) {
-      bry1[ii++] = i1++;
-    }
-  }
-  for (list <index_strip2>::const_iterator kt = stripsc.begin();
-       kt != stripsc.end();
-       ++kt) {
-    int ii = (*kt).begin_dst;
-    int i0 = (*kt).begin_src0;
-    int i1 = (*kt).begin_src1;
-    for (int i = 0; i < (*kt).width; i++) {
-      bry0[ii] = i0++;
-      bry1[ii++] = i1++;
-    }
-  }
-  for (int i = 0; i < size; i++) {
-
-    if (bry0[i] != ary0[i]) {
-      cout << "mismatch 0 in " << i << " : " 
-	   << bry0[i] << " " << ary0[i] << endl;
-    }
-    if (bry1[i] != ary1[i]) {
-      cout << "mismatch 1 in " << i << " : " 
-	   << bry1[i] << " " << ary1[i] << endl;
-    }
-  } // loop : i
-#endif  
   return (stripsa.size() + stripsb.size() + stripsc.size());
 }
-#if 0
-void copy_one_strip(list<index_strip> &strips_dst, 
-		    list<index_strip> &strips_src)
-{
-  strips_dst.clear();
-  
-  for (list <index_strip>::const_iterator mt = strips_src.begin();
-       mt != strips_src.end(); ++mt) {
-    strips_dst.push_back(*mt);
-  }
-}
-#endif
 void copy_two_strips(list<index_strip2> &strips2,
 		     list<index_strip> &strips0, 
 		     list<index_strip> &strips1) 
@@ -756,12 +646,6 @@ void assign_tasks_statically(list<C_task_seq*> *queue_static,
 			  + (*it)->task_name + " :: "
 			  + to_string(task_begin) + " : "
 			  + to_string((*it)->end));
-      //      char *task_name_cstr = new char[task_name.str().size() + 1];
-      //      strcpy(task_name_cstr, task_name.str().c_str());
-      //
-      //      cout << "*ll = " << ll << " nops_sum = " << nops << " "
-      //	   << task_name_cstr << endl;
-      //
       C_task_seq* tmp = 
 	new C_task_seq(task_id,
 		       task_name,
@@ -843,12 +727,6 @@ void assign_tasks_statically(list<C_task_seq*> *queue_static,
   }
   cout << "-- " << endl;
 #endif
-#if 0   // this also destroy dependency path
-  it = queue_dynamic.begin();
-  if (it != queue_dynamic.end()) {
-    task_begin = (*it)->begin;
-  }
-#endif
   for (ll = 0; ll < num_threads; ll++) {
 #ifdef DEBUG_PREPARE_THREAD  
     cout << "thread_id " << ll 
@@ -915,11 +793,9 @@ int dimKernDense(vector<int> &singIdx, const int n,
   const T one(1.0);
   const T none(-1.0);
   
-  if (verbose) {
-    fprintf(fp,
-	    "%s %d : Schur complement form %d x %d : block size = %d\n", 
-	    __FILE__, __LINE__, n, aug_max, D.block_size());
-  }
+  diss_printf(verbose, fp,
+	      "%s %d : Schur complement form %d x %d : block size = %d\n", 
+	      __FILE__, __LINE__, n, aug_max, D.block_size());
   RectBlockMatrix<T> b(n, aug_max, D.block_size());
   RectBlockMatrix<T> c(n, aug_max, D.block_size());
 
@@ -956,13 +832,11 @@ int dimKernDense(vector<int> &singIdx, const int n,
     }
   }
   aug_ind.clear();
-  if (verbose) {
-    fprintf(fp, "%s %d : suspicious dimension of pivots %d + %d\n",
-	    __FILE__, __LINE__, sing_max, aug_dim);
-    for (int i = 0; i < aug_max; i++) {
-      fprintf(fp, "%d : %d %d %s\n", i, aug_ind0[i], aug_ind1[i],
-	      tostring<T>(D.diag(aug_ind0[i])).c_str());
-    }
+  diss_printf(verbose, fp, "%s %d : suspicious dimension of pivots %d + %d\n",
+	      __FILE__, __LINE__, sing_max, aug_dim);
+  for (int i = 0; i < aug_max; i++) {
+    diss_printf(verbose, fp, "%d : %d %d %s\n", i, aug_ind0[i], aug_ind1[i],
+		tostring<T>(D.diag(aug_ind0[i])).c_str());
   }
   // save diagonal entries coressponding to nullification
   for (int i = 0; i < aug_max; i++) {
@@ -1055,23 +929,20 @@ int dimKernDense(vector<int> &singIdx, const int n,
       full_ldu_permute<T, U>(&nn0, n0, aug_max, ss.addrCoefs(), aug_max,
 			     &pivot, permute1, eps_piv, &fop);
     }
-    if (verbose) {
-      fprintf(fp, "%s %d : %d -> %d ", __FILE__, __LINE__, sing_max, nn0);
-    }
+    diss_printf(verbose, fp,
+		"%s %d : %d -> %d ", __FILE__, __LINE__, sing_max, nn0);
+
     if (nn0 < sing_max) {
       flagShrinkSchur = true;
-      if (verbose) {
-	fprintf(fp, "schrink the Schur complement by recursive computing\n");
-	for (int i = 0; i < aug_max; i++) {
-	  fprintf(fp, "%d ", permute1[i]);
-	}
-	fprintf(fp, "\n");
+      diss_printf(verbose, fp,
+		  "schrink the Schur complement by recursive computing\n");
+      for (int i = 0; i < aug_max; i++) {
+	diss_printf(verbose, fp, "%d ", permute1[i]);
       }
+      diss_printf(verbose, fp, "\n");
     }
     else {
-      if (verbose) {
-	fprintf(fp, "\n");
-      }
+      diss_printf(verbose, fp, "\n");
     }
   }
   int aug_max1 = aug_max;
@@ -1150,10 +1021,8 @@ int dimKernDense(vector<int> &singIdx, const int n,
 
   flag = ComputeDimKernel<T, U>(&n2, &flag_2x2, s.addrCoefs(), aug_max1, isSym,
 				aug_dim, eps_machine, eps_piv, verbose, fp);
-  if (verbose) {
-    fprintf(fp, "%s %d : detected dim. of the kernel = %d\n",
-	    __FILE__, __LINE__, n2);
-  }
+  diss_printf(verbose, fp, "%s %d : detected dim. of the kernel = %d\n",
+	      __FILE__, __LINE__, n2);
   // 
   // restore stored diagonal entries nullified for augmented dimenison
   for (int i = 0; i < aug_max; i++) {
@@ -1161,10 +1030,9 @@ int dimKernDense(vector<int> &singIdx, const int n,
   }
   if ((n2 != sing_max)) {
     if (refactorize) {
-      if (verbose) {
-	fprintf(fp, "%s %d : sing_max = %d n2 = %d -> refactorized\n",
-		__FILE__, __LINE__, sing_max, n2);
-      }
+      diss_printf(verbose, fp,
+		  "%s %d : sing_max = %d n2 = %d -> refactorized\n",
+		  __FILE__, __LINE__, sing_max, n2);
       return (-1);
     } 
   } // if (n2 != sing_max)
@@ -1238,6 +1106,35 @@ int dimKernDense<complex<quadruple>,
 			    const bool isSym,
 			    const bool verbose,
 			    FILE *fp);
+
+template
+int dimKernDense<float, float>(vector<int> &singIdx,
+				 const int n,
+				 const int aug_dim,
+				 const float eps_machine,
+				 const double eps_piv,
+				 SquareBlockMatrix<float> &D,
+				 float *a,
+				 const bool refactorize,
+				 const bool isFullPermute,
+				 const bool isSym,
+				 const bool verbose,
+				 FILE *fp);
+
+template
+int dimKernDense<complex<float>,
+		 float>(vector<int> &singIdx,
+			 const int n,
+			 const int aug_dim,
+			 const float eps_mahcine,
+			 const double eps_piv,
+			 SquareBlockMatrix<complex<float> > &D,
+			 complex<float> *a,
+			 const bool refactorize,
+			 const bool isFullPermute,
+			 const bool isSym,
+			 const bool verbose,
+			 FILE *fp);
 //
 
 template<typename T>
@@ -1348,10 +1245,21 @@ void calc_relative_norm<complex<quadruple> >(double *norm_l2,
   *norm_l2 = sqrt(ztmp1 / ztmp0);
   *norm_infty = xtmp1 / xtmp0;
 }
+
+template
+void calc_relative_norm<float>(double *norm_l2, double *norm_infty, 
+			       const float *v, const float *u, const int dim);
+
+template
+void calc_relative_norm<complex<float> >(double *norm_l2, double *norm_infty, 
+					 const complex<float> *v,
+					 const complex<float> *u,
+					 const int dim);
+
 //
-template<typename T, typename Z>
+template<typename T, typename U>
 void calc_relative_normscaled(double *norm_l2,  double *norm_infty, 
-			       const T *v, const T *u, const Z *w,
+			       const T *v, const T *u, const U *w,
 			       const int dim)
 {
   fprintf(stderr, "%s %d : specialized template is not yet defined.\n",
@@ -1415,37 +1323,6 @@ void calc_relative_normscaled<quadruple,
   *norm_l2 = sqrt(ztmp1 / ztmp0);
   *norm_infty = xtmp1 / xtmp0;
 }
-
-template<>
-void calc_relative_normscaled<quadruple,
-			      double>(double *norm_l2,
-				      double *norm_infty, 
-				      const quadruple *v,
-				      const quadruple *u,
-				      const double *w, const int dim)
-{
-  double xtmp1 = 0.0, xtmp0 = 0.0;
-  double ytmp1, ytmp0;
-  double ztmp1 = 0.0, ztmp0 = 0.0;
-  for (int i = 0; i < dim; i++) {
-    ytmp0 = quad2double(u[i]) / w[i];
-    ytmp1 = quad2double(v[i]) * w[i];
-    if (ytmp1 < 0.0) {
-      ytmp1 *= (-1.0);
-    }
-    if (ytmp0 < 0.0) {
-      ytmp0 *= (-1.0);
-    }
-    xtmp0 = (ytmp0 > xtmp0) ? ytmp0 : xtmp0;
-    ztmp0 += ytmp0 * ytmp0;
-    
-    xtmp1 = (ytmp1 > xtmp1) ? ytmp1 : xtmp1;
-    ztmp1 += ytmp1 * ytmp1;
-  }
-  *norm_l2 = sqrt(ztmp1 / ztmp0);
-  *norm_infty = xtmp1 / xtmp0;
-}
-
 template<>
 void calc_relative_normscaled<complex<double>, double>(double *norm_l2,
 						       double *norm_infty, 
@@ -1498,39 +1375,24 @@ void calc_relative_normscaled<complex<quadruple>,
   *norm_infty = xtmp1 / xtmp0;
 }
 //
-template<>
-void calc_relative_normscaled<complex<quadruple>,
-			      double>(double *norm_l2,
-				      double *norm_infty, 
-				      const complex<quadruple> *v,
-				      const complex<quadruple> *u,
-				      const double *w,
-				      const int dim)
-{
-  double xtmp1 = 0.0, xtmp0 = 0.0;
-  double ztmp1 = 0.0, ztmp0 = 0.0;
-  for (int i = 0; i < dim; i++) {
-    quadruple vr = v[i].real();
-    quadruple vi = v[i].imag();
-    quadruple ur = u[i].real();
-    quadruple ui = u[i].imag();
-    const double ytmp0 = quad2double(sqrt(ur * ur + ui * ui)) / w[i];
-    const double ytmp1 = quad2double(sqrt(vr * vr + vi * vi)) * w[i];
-    const double ww = w[i] * w[i];
-    xtmp0 = ytmp0 > xtmp0 ? ytmp0 : xtmp0;
-    ztmp0 += quad2double(ur * ur + ui * ui) / ww;
-    xtmp1 = ytmp1 > xtmp1 ? ytmp1 : xtmp1;
-    ztmp1 += quad2double(vr * vr + vi * vi) * ww;
-  }
-  *norm_l2 = sqrt(ztmp1 / ztmp0);
-  *norm_infty = xtmp1 / xtmp0;
-}
+template
+void calc_relative_normscaled<float,
+			      float>(double *norm_l2,  double *norm_infty, 
+				     const float *v, const float *u,
+				     const float *w, const int dim);
+
+template
+void calc_relative_normscaled<complex<float>,
+			      float>(double *norm_l2,  double *norm_infty, 
+				     const complex<float> *v,
+				     const complex<float> *u,
+				     const float *w, const int dim);
 //
 
 int CSR_sym2unsym(CSR_indirect *unsym,
 		  const int *ptSymRows, const int *indSymCols, 
 		  const int *map_eqn, const int *remap_eqn, 
-		  const int dim, const bool upper_flag)
+		  const int dim, const bool upper_flag, bool verbose, FILE *fp)
 {
   int* nbIndPerRow = new int[dim];
 
@@ -1596,7 +1458,7 @@ bool CSR_unsym2unsym(CSR_indirect *unsym,
 		     const int *ptUnSymRows, const int *indUnSymCols, 
 		     const int *map_eqn, const int *remap_eqn, 
 		     //const int *map_indcols,
-		     const int dim)
+		     const int dim, const bool verbose, FILE *fp)
 {
   int* nbIndPerRow = new int[dim];
   for (int i = 0; i < dim; i++) {
@@ -1625,9 +1487,9 @@ bool CSR_unsym2unsym(CSR_indirect *unsym,
 	}
       }
       if (!found) {
-	fprintf(stderr,
-		"%s %d : symmetric place of (%d, %d) -> (%d %d) not found\n",
-		__FILE__, __LINE__, ii, jj, i, j);
+	diss_printf(verbose, fp,
+		    "%s %d : symmetric place of (%d, %d) -> (%d %d) not found\n",
+		  __FILE__, __LINE__, ii, jj, i, j);
 	return false;
       }
     }
@@ -1636,575 +1498,7 @@ bool CSR_unsym2unsym(CSR_indirect *unsym,
   return true;
 }
 
-#if 0
-int CSR_sym2sym(int *ptRows, int *indCols, int *toSym, 
-		const int *ptSymRows, const int *indSymCols, 
-		const int *map_eqn, const int *remap_eqn, 
-		const int *map_indcols,
-		const int dim, const bool upper_flag)
-{
-  bool flag_sort;
-  int* nbIndPerRow = new int[dim];
 
-  //  memset(nbIndPerRow, 0, dim*sizeof(int));
-  for (int i = 0; i < dim; i++) {
-    nbIndPerRow[i] = 0;
-  }
-
-  if (upper_flag) {
-    for (int i = 0; i < dim; i++) {
-      const int ii = remap_eqn[i];
-      nbIndPerRow[i] += ptSymRows[ii + 1] - ptSymRows[ii];
-    }
-  }
-  else {
-    for (int i = 0; i < dim; i++) {
-      const int ii = remap_eqn[i];
-      for (int k = ptSymRows[ii]; k < ptSymRows[ii + 1]; k++) {
-	nbIndPerRow[map_eqn[indSymCols[k]]]++;
-      }
-    }
-  }
-  // Build ptRows array :
-  // ...................
-  ptRows[0] = 0;
-  for (int i = 0; i < dim; i++) {
-    ptRows[i + 1] = ptRows[i] + nbIndPerRow[i];
-  }
-  //  CHECK(ptRows[dim] == (2 * nz - dim),
-  //	"error in sym2unsym() : Wrong number of non zeros elemnts in ptRows !");
-	    // Allocate and fill indices columns :
-  for (int i = 0; i < dim; i++) {
-    nbIndPerRow[i] = 0;
-  }
-  //  memset(nbIndPerRow, 0, (dim * sizeof(int)));
-  // for upper case, nbIndPerRow[i] keeps entries added by transposed operation
-  // but for lower case counts all nonzero entries in progress 
-  if (upper_flag) {
-    for (int i = 0; i < dim; i++) {
-      int itmp = ptRows[i];
-      const int ii = remap_eqn[i];
-      for (int k = ptSymRows[ii]; k < ptSymRows[ii + 1]; k++) {
-	indCols[itmp] = map_eqn[indSymCols[k]];
-	toSym[itmp] = map_indcols[k];
-	itmp++;
-      } // loop : k
-    }
-  }
-  else {
-    for (int i = 0; i < dim; i++) {
-      const int ii = remap_eqn[i];
-      for (int k = ptSymRows[ii]; k < ptSymRows[ii + 1]; k++) {
-	const int j = map_eqn[indSymCols[k]];
-	const int jtmp = ptRows[j] + nbIndPerRow[j];
-	indCols[jtmp] = i;
-	toSym[jtmp] = map_indcols[k];
-	nbIndPerRow[j]++;
-      } // loop : k
-    }   // loop : i
-  }
-  delete [] nbIndPerRow;
-  return ptRows[dim];
-}
-#endif
-
-#if 0
-void test_2x2(int *print_cntrl)
-{ 
-  const int n_dim2 = 4;
-  const int n_dim22 = n_dim2 * n_dim2;
-  double *d1 = new double[n_dim2];
-  int *permute_width = new int[n_dim2];
-  int *permute_width2 = new int[n_dim2];
-  int *permute_index = new int[n_dim2];
-  int *permute = new int[n_dim2];
-  double *aaa = new double[n_dim2 * n_dim2];
-  double *bbb = new double[n_dim2 * n_dim2];
-  long double *aaq = new long double[n_dim2 * n_dim2];
-  long double *bbq = new long double[n_dim2 * n_dim2];
-  long double *d1q = new long double[n_dim2];
-  double ad1, ad3, al2, al3;
-  const double machine_eps0 = machine_epsilon<double, double>(); //DBL_EPSILON;
-  double *errors = new double[6];
-  int n0, n1, flag0;
-  int dim_augkern2 = 2;
-  int dim_augkern20 = 0;
-  int way_2x2;
-
-  ad1 = 1.0;
-  ad3 = 0.5;
-  al2 = 0.9;
-  al3 = 0.8;
-  aaa[0 + 0 * n_dim2] = ad1;
-  aaa[1 + 0 * n_dim2] = al2 * ad1;
-  aaa[0 + 1 * n_dim2] = aaa[1 + 0 * n_dim2];
-  aaa[2 + 0 * n_dim2] = al3 * ad1;
-  aaa[0 + 2 * n_dim2] = aaa[2 + 0 * n_dim2];
-  aaa[1 + 1 * n_dim2] = al2 * ad1 * al2;
-  aaa[1 + 2 * n_dim2] = al2 * ad1 * al2 + ad3;
-  aaa[2 + 1 * n_dim2] = aaa[1 + 2 * n_dim2];
-  aaa[2 + 2 * n_dim2] = al3 * ad1 * al3;
-
-  aaa[3 + 3 * 4] = machine_eps0;
-  for (int i = 0; i < (n_dim2 - 1); i++) {
-    double tmp = 0.0;
-    for (int j = 0; j < (n_dim2 - 1); j++) {
-      // weight cos(j) is a trick to avoid the case A [1 ... 1]^T = 0
-      tmp += aaa[i + j *n_dim2] + (random_bool() ? machine_eps0 : 0.0);
-      // emulate numerical error from floating point operations
-    }
-    aaa[i + (n_dim2 - 1) * n_dim2] = 0.0;//tmp;
-    aaa[(n_dim2 - 1) + i * n_dim2] = 0.0;//tmp; //keep symmetry of the matrix
-    aaa[(n_dim2 - 1) + (n_dim2 - 1) * n_dim2] += 0.0;//
-    //    tmp + (random_normalized() < 0.5 ? machine_eps0 : 0.0);
-  }
-
-  for (int i = 0; i < n_dim2; i++) {
-    for (int j = 0; j <=i; j++) {
-      fprintf(stdout, "%.8e ", aaa[i + j * n_dim2]);
-    }
-    cout << endl;
-  }
-  FORTRAN_DECL(d2qv)(n_dim22, aaa, aaq);
-#ifdef BUNCH_KAUFMAN
-  way_2x2 = 0;
-  cout << "Bunch-Kaufman permutation : " << endl;
-#else
-  way_2x2 = 1;
-  cout << "1x1 for image + 1x1/2x2 full for kernel : " << endl;
-#endif
-
-  FORTRAN_DECL(qfull_sym2x2)(way_2x2, n_dim2, dim_augkern20, aaq, d1q, 
-			     permute_width, permute_index);
-
-  FORTRAN_DECL(q2dv)(n_dim22, aaq, bbb);
-  FORTRAN_DECL(q2dv)(n_dim2, d1q, d1);
-
-  for (int i = 0; i < n_dim2; i++) {
-    fprintf(stdout, "%3d ", permute_width[i]);
-  }
-  cout << endl;
-  for (int i = 0; i < n_dim2; i++) {
-    fprintf(stdout, "%3d ", permute_index[i]);
-  }
-  cout << endl;
-  for (int i = 0; i < n_dim2; i++) {
-    for (int j = 0; j <=i; j++) {
-      fprintf(stdout, "%.8e ", bbb[i + j * n_dim2]);
-    }
-    cout << endl;
-  }
-  for (int i = 0; i < n_dim2; i++) {
-    fprintf(stdout, "%.8e ", d1[i]);
-  }
-  cout << endl;
-  for (int i = 0; i < n_dim22; i++) {
-    bbb[i] = aaa[i];
-  }
-
-  FORTRAN_DECL(d_hqr_pivot)(n_dim2, bbb, permute, n1);
-  cout << "dimension of the image deteced by d_hqr_pivot() is " 
-       << n1 << endl;
-  cout << "matrix" << endl;
-  for (int i = 0; i < n_dim2; i++) {
-    cout << i << " : ";
-    for (int j = 0; j < n_dim2; j++) {
-      cout << bbb[i + j * n_dim2] << " ";
-    }
-    cout << endl;
-  }
-  int *kk = new int[3];
-  kk[1] = 3; //  == n - canditates of kernel dimension - 1
-  kk[0] = (-1);
-  kk[2] = 4;
-  for (int m = (kk[1] - 1); m >= 0; m--) {
-    if (permute_width[m] == 1) {
-      kk[0] = m + 1;
-      break;
-    }
-  }
-  if (permute_width[kk[1]] == 1) {
-    kk[2] = kk[1]+1;  // keep 1x1, 2x2 structure after kk[1]
-  }
-  else {
-    kk[2] = n_dim2 + 1; // pickup 1x1 and Bunch-Kaufman after kk[1]+2 
-  }
-  if (kk[0] == (-1)) {
-    cerr << "regular part should be increment or decrement by 1" << endl;
-    exit(-1);
-  }
-  cerr << "kk[0] = " << kk[0] << " kk[1] = " << kk[1] 
-       << " kk[2] = " << kk[2] << endl;
-  FORTRAN_DECL(d2qv)(n_dim22, aaa, aaq);
-  FORTRAN_DECL(qfull_sym_2x2swap)(way_2x2, n_dim2, dim_augkern2, aaq, d1q, 
-				  permute_width, permute_index, 
-				  kk);
-  FORTRAN_DECL(q2dv)(n_dim22, aaq, bbb);
-  FORTRAN_DECL(q2dv)(n_dim2, d1q, d1);
-
-  for (int i = 0; i < n_dim2; i++) {
-    fprintf(stdout, "%3d ", permute_width[i]);
-  }
-  cout << endl;
-  for (int i = 0; i < n_dim2; i++) {
-    fprintf(stdout, "%3d ", permute_index[i]);
-  }
-  cout << endl;
-
-  for (int i = 0; i < n_dim2; i++) {
-    for (int j = 0; j <=i; j++) {
-      fprintf(stdout, "%.8e ", bbb[i + j * n_dim2]);
-    }
-    cout << endl;
-  }
-  for (int i = 0; i < n_dim2; i++) {
-    fprintf(stdout, "%.8e ", d1[i]);
-  }
-  cout << endl;
-
-  vector<int> dims;
-  dims.reserve(n_dim2);
-  for (int i = 0; i < n_dim2; i++) {
-    if ((permute_width[i] == 1) || (permute_width[i] == 21)) { 
-      dims.push_back(i + 1);
-    }
-  }
-  vector<double> errors_image(dims.size());
-  for (int i = 0; i < dims.size(); i++) {
-    FORTRAN_DECL(q_check_matrixerr2x2)(n_dim2, aaa, 
-				       dim_augkern2,
-				       dims[i],
-				       permute_width, 
-				       permute_index, 
-				       machine_eps0,
-				       errors_image[i],
-				       print_cntrl, fp_cptr);
-  }
-  for (int i = 0; i < dims.size(); i++) {
-    cout << dims[i] << " : " << errors_image[i] << endl;
-  }
-  double eps_param0;
-  for (int i = 0; i < dims.size(); i++) {
-    if (dims[i] == dim_augkern2) {
-      eps_param0 = sqrt(errors_image[i] * errors_image.back());
-    }
-  }
-  n0 = 1;
-    
-  FORTRAN_DECL(q_check_kern_2x2)(n_dim2, aaa, permute_width, permute_index,
-				 n0, dim_augkern2, machine_eps0,
-				 eps_param0, flag0, &errors[0], 
-				 print_cntrl, fp_cptr);
-
-  fprintf(stdout, "%d : eps_param = %g : %.12e / %.12e / %.12e\n",
-	  n0, eps_param0, errors[0], errors[1], errors[2]);
- 
-  delete [] d1;
-  delete [] permute_width;
-  delete [] permute_index;
-  //  for (int i = 0; i < n1; i++) {
-  //    cout << aa[i] << " ";
-  //  }
-  //  cout << endl;
-
-} // developping 2x2 Bunch-Kaufman
-
-
-void swap_2x2pivots(const int way, int *pivot_width, int *permute_q, 
-		    const int dim_augkern, const int nn0, 
-		    const int n_dim, double *a1, long double *aq,
-		    double *d1, long double *d1q, double *a_fact)
-{
-  const int n_dim2 = n_dim * n_dim;
-  int *kk = new int[3];
-  kk[1] = n_dim - nn0; // Fortran style array
-  kk[0] = (-1);
-  bool ftmp = false;
-  for (int m = kk[1] - 2; m >= 0; m--) {
-    if (pivot_width[m] == 1) {
-      if (ftmp) {
-	kk[0] = m + 1;  // Fortran style array
-	break;
-      }
-    }
-    else {
-      ftmp = true;
-    }
-  }
-  if (ftmp == false) {
-    kk[0] = kk[1];
-  }
-#if 1
-  if (pivot_width[kk[1]] == 1) {
-    kk[2] = kk[1] + 1;  // keep 1x1, 2x2 structure after kk[1]
-  }
-  else {
-    kk[2] = n_dim + 1; // pickup 1x1 and Bunch-Kaufman after kk[1]+2 
-  }
-#else
-    kk[2] = n_dim + 1; // pickup 1x1 and Bunch-Kaufman after kk[1]+2 
-#endif
-  if (kk[0] == (-1)) {
-    cerr << __FILE__ << " : " << __LINE__ << endl;
-    cerr << "conflict : regular part should contains 1x1 pivot" << endl;
-    exit(-1);
-  }
-  cerr << "kk[0] = " << kk[0] << " kk[1] = " << kk[1] 
-       << " kk[2] = " << kk[2] << endl;
-  if (((kk[0] + 1) != kk[1]) || ((kk[1] + 1) != kk[2])) {
-    FORTRAN_DECL(d2qv)(n_dim2, a1, aq);
-    FORTRAN_DECL(qfull_sym_2x2swap)(way, n_dim, dim_augkern, aq, d1q, 
-				    pivot_width, permute_q,
-				    kk);
-    FORTRAN_DECL(q2dv)(n_dim2, aq, a_fact);
-    FORTRAN_DECL(q2dv)(n_dim, d1q, d1);
-    
-    for (int i = 0; i < n_dim; i++) {
-      fprintf(stdout, "%3d ", pivot_width[i]);
-    }
-    cout << endl;
-    for (int i = 0; i < n_dim; i++) {
-      fprintf(stdout, "%3d ", permute_q[i]);
-    }
-    cout << endl;
-    
-    for (int i = 0; i < n_dim; i++) {
-      for (int j = 0; j <=i; j++) {
-	fprintf(stdout, "%.8e ", a_fact[i + j * n_dim]);
-      }
-      cout << endl;
-    }
-    for (int i = 0; i < n_dim; i++) {
-      fprintf(stdout, "%.8e ", d1[i]);
-    }
-    cout << endl;
-  }
-  delete [] kk;
-}
-#endif
-#ifdef DEBUG_SVD
-void ComputeSVD(double *b, const double *a_, const int n)
-{
-  double *a = new double[n * n];
-  //  double *b = new double[n * n];
-  double *d = new double[n];
-  double *e = new double[n];
-  double *d0 = new double[n];
-  double *e0 = new double[n];
-  double *tau = new double[n];
-  double *taup = new double[n];
-  double *tauq = new double[n];
-  double *vt = new double[1];
-  double *u = new double[1];
-  double *c = new double[1];
-  double *q = new double[1];
-  double *work;
-  double dwork;
-  int iwork, lwork, info, iflag, jflag, kflag;
-  char cflag, dflag;
-
-  int n0;
-  //
-  for (int i = 0; i < n * n; i++) {
-    a[i] = a_[i];
-  }
-  iflag = (-1);
-  cflag = 'U';
-  dsytrd(&cflag, &n, a, &n, d0, e0, tau, &dwork, &iflag, &info);
-  iwork = (int)dwork;
-  cout << "dim = " << n << " working array " << iwork << endl;
-  work = new double [iwork];
-  dsytrd(&cflag, &n, a, &n, d0, e0, tau, work, &iwork, &info);
-  if (info != 0) {
-    cerr << "fail in dsytrd() : " << info << endl;
-  }
-  // copy bidiagonal matrix
-  for (int i = 0; i < n; i++) {
-    d[i] = d0[i];
-    e[i] = e0[i];
-  }
-  //
-  cflag = 'N';
-  dsteqr(&cflag, &n, d, e, a, &n, work, &info);
-  if (info != 0) {
-    cerr << "fail in dsteqr() : " << info << endl;
-  }
-  cout << "dsytrd + dsteqr" << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, d[n - 1 - i]);
-  }
-
-  // copy bidiagonal matrix
-  for (int i = 0; i < n; i++) {
-    d[i] = d0[i];
-    e[i] = e0[i];
-  }
-  //
-  cflag = 'N';
-  kflag = 1;
-  dstedc(&cflag, &n, d, e, tau, &n, u, &kflag, &iwork, &kflag, &info);
-  if (info != 0) {
-    cerr << "fail in dstedc() : " << info << endl;
-  }
-  cout << "dsytrd + dstedc" << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, d[n - 1 - i]);
-  }
-
-  // dsyevd
-  for (int i = 0; i < n * n; i++) {
-    a[i] = a_[i];
-  }
-  cflag = 'N';
-  dflag = 'U';
-  kflag = 1;
-  lwork = 2 * n + 1;
-  work = new double[lwork];
-  dsyevd(&cflag, &dflag, &n, a, &n, tau, work, &lwork, &iwork, &kflag, &info);
-
-  cout << "dsyevd" << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, tau[n - 1 - i]);
-  }
-
-  // dsyevd for all eigenvectors
-  delete [] work;
-  for (int i = 0; i < n * n; i++) {
-    a[i] = a_[i];
-  }
-  cflag = 'V';
-  dflag = 'U';
-  kflag = 1;
-  lwork = 2 * n * n + 6 * n + 1;
-  work = new double[lwork];
-  int liwork = 5 * n + 3;
-  int *iiwork = new int[liwork];
-  dsyevd(&cflag, &dflag, &n, a, &n, tau, work, &lwork, iiwork, &liwork, &info);
-
-  cout << "dsyevd " << info << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, tau[n - 1 - i]);
-  }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      printf("%g ", a[i + j * n]);
-    }
-    printf("\n");
-  }
-#if 1   // aug_dim = 8 + testB.data creates good example, uesd in Table4
-  dwork = 1.0;   
-  for (int i = 0; i < 8; i++) {
-    tau[n - i - 1] *= dwork;
-    dwork *= 1.0e-1;
-  }
-  for (int i = 0; i < 4; i++) {
-    tau[n - (2 * i + 2)] = (-1.0) * tau[n - (2 * i + 1)];
-  }
-#endif
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      dwork = 0.0;
-      for (int k = 0; k < n; k++) {
-	dwork += a[i + k * n] *tau[k] * a[j + k * n];
-      }
-      b[i + j * n] = dwork;
-    }
-  }
-  cerr << "V\\Lambda V^T" << endl;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      printf("%g ", b[i + j * n] - a_[i + j * n]);
-    }
-    printf("\n");
-  }
-  for (int i = 0; i < n * n; i++) {
-    a[i] = b[i];
-  }
-  dsyevd(&cflag, &dflag, &n, a, &n, tau, work, &lwork, iiwork, &liwork, &info);
-  cout << "dsyevd - modified tau" << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, tau[n - 1 - i]);
-  }
-
-  //
-  for (int i = 0; i < n * n; i++) {
-    a[i] = a_[i];
-  }
-
-  iflag = (-1);
-  jflag = 0;
-  kflag = 1;
-  cflag = 'U';
-  dflag = 'N';
-  dgebrd(&n, &n, a, &n, d0, e0, tauq, taup, &dwork, &iflag, &info);
-  iwork = (int)dwork;
-  cout << "dim = " << n << " working array " << iwork << endl;
-  work = new double [iwork];
-  dgebrd(&n, &n, a, &n, d0, e0, tauq, taup, work, &iwork, &info);
-  if (info != 0) {
-    cerr << "fail in dgebrd() : " << info << endl;
-  }
-  // copy bidiagonal matrix
-  for (int i = 0; i < n; i++) {
-    d[i] = d0[i];
-    e[i] = e0[i];
-  }
-  //
-  delete [] work;
-  work = new double[4 * n];
-  iflag = (-1);
-  jflag = 0;
-  kflag = 1;
-  cflag = 'U';
-  info = 0;
-  dbdsqr(&cflag, &n, &jflag, &jflag, &jflag, d, e, vt, &kflag, u, &kflag, c, 
-	 &kflag, work, &info);
-  if (info != 0) {
-    cerr << "fail in dbdsqr() : " << info << endl;
-  }
-  cout << "dgebrd + dbdsqr" << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, d[i]);
-  }
-  // copy bidiagonal matrix
-  for (int i = 0; i < n; i++) {
-    d[i] = d0[i];
-    e[i] = e0[i];
-  }
-  //
-  delete [] work;
-  work = new double[4 * n];
-  int *jwork = new int[8 * n];
-  cflag = 'U';
-  dflag = 'N';
-  kflag = 1;
-  info = 0;
-  dbdsdc(&cflag, &dflag, &n, d, e, u, &kflag, vt, &kflag, q, &kflag, work, 
-	 jwork, &info);
-  if (info != 0) {
-    cerr << "fail in dbdsdc() : " << info << endl;
-  }
-  delete [] jwork;
-  cout << "dgebrd + dbdsdc" << endl;
-  for (int i = 0; i < n; i++) {
-    printf("%2d : %.16e\n", i, d[i]);
-  }
-  
-  delete [] work;
-  delete [] a;
-  delete [] d;
-  delete [] e;
-  delete [] d0;
-  delete [] e0;
-  delete [] tau;
-  delete [] taup;
-  delete [] tauq;
-  delete [] vt;
-  delete [] u;
-  delete [] c;
-  delete [] q;
-}
-#endif
 
 void swap_queues_n(vector <C_task *> &queue,
 		   vector <int> &queue_index,
@@ -2246,68 +1540,78 @@ bool compare_task_name(C_task *first, C_task *second) {
 
 // =====================================================================
 template<typename T>
+int count_diag_negative_real(SquareBlockMatrix<T>& Diag)
+{
+  int count = 0;
+  const int dim_diag = Diag.dimension();
+  for (int i = 0; i < dim_diag; i++) {
+    const T xtmp = Diag.diag(i);
+    if (xtmp < T(0.0)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+template<typename T>
+int count_diag_negative_complex(SquareBlockMatrix<complex<T> >& Diag)
+{
+  int count = 0;
+  const int dim_diag = Diag.dimension();
+  for (int i = 0; i < dim_diag; i++) {
+    const complex<T> xtmp = Diag.diag(i);
+    if ((xtmp.real() < T(0.0)) && xtmp.imag() == T(0.0)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+template<typename T>
 int count_diag_negative(SquareBlockMatrix<T>& Diag)
 {
    fprintf(stderr, "%s %d : specialized template is not yet defined.\n",
-	  __FILE__, __LINE__);
+          __FILE__, __LINE__);
    return (-1);
 }
 
 template<>
 int count_diag_negative<double>(SquareBlockMatrix<double>& Diag)
 {
-  int count = 0;
-  const int dim_diag = Diag.dimension();
-  for (int i = 0; i < dim_diag; i++) {
-    const double xtmp = Diag.diag(i);
-    if (xtmp < 0.0) {
-      count++;
-    }
-  }
-  return count;
+  return count_diag_negative_real<double>(Diag);
 }
 
 template<>
 int count_diag_negative<quadruple>(SquareBlockMatrix<quadruple>& Diag)
 {
-  int count = 0;
-  const int dim_diag = Diag.dimension();
-  for (int i = 0; i < dim_diag; i++) {
-    const double xtmp = quad2double(Diag.diag(i));
-    if (xtmp < 0.0) {
-      count++;
-    }
-  }
-  return count;
-}
-
-template<>
-int count_diag_negative<complex<quadruple> >(SquareBlockMatrix<complex<quadruple> >& Diag)
-{
-  int count = 0;
-  const int dim_diag = Diag.dimension();
-  for (int i = 0; i < dim_diag; i++) {
-    const complex<quadruple> &xtmp = Diag.diag(i);
-    if (quad2double(xtmp.real()) < 0.0 && quad2double(xtmp.imag()) == 0.0) {
-      count++;
-    }
-  }
-  return count;
+  return count_diag_negative_real<quadruple>(Diag);
 }
 
 template<>
 int count_diag_negative<complex<double> >(SquareBlockMatrix<complex<double> >& Diag)
 {
-  int count = 0;
-  const int dim_diag = Diag.dimension();
-  for (int i = 0; i < dim_diag; i++) {
-    const complex<double> &xtmp = Diag.diag(i);
-    if (xtmp.real() < 0.0 && xtmp.imag() == 0.0) {
-      count++;
-    }
-  }
-  return count;
+  return count_diag_negative_complex<double>(Diag);
 }
+
+template<>
+int count_diag_negative<complex<quadruple> >(SquareBlockMatrix<complex<quadruple> >& Diag)
+{
+  return count_diag_negative_complex<quadruple>(Diag);
+}
+
+template<>
+int count_diag_negative<float>(SquareBlockMatrix<float>& Diag)
+{
+  return count_diag_negative_real<float>(Diag);
+}
+
+
+template<>
+int count_diag_negative<complex<float> >(SquareBlockMatrix<complex<float> >& Diag)
+{
+  return count_diag_negative_complex<float>(Diag);
+}
+
 //
 template<typename T>
 int count_diag_negative(SubSquareMatrix<T>& Diag)
@@ -2373,6 +1677,35 @@ int count_diag_negative<complex<double> >(SubSquareMatrix<complex<double> >& Dia
   return count;
 }
 
+template<>
+int count_diag_negative<float>(SubSquareMatrix<float>& Diag)
+{
+  int count = 0;
+  const int dim_diag = Diag.dimension();
+  for (int i = 0; i < dim_diag; i++) {
+    const float xtmp = Diag(i, i);
+    if (xtmp < 0.0) {
+      count++;
+    }
+  }
+  return count;
+}
+
+template<>
+int count_diag_negative<complex<float> >(SubSquareMatrix<complex<float> >& Diag)
+{
+  int count = 0;
+  const int dim_diag = Diag.dimension();
+  for (int i = 0; i < dim_diag; i++) {
+    const complex<float> xtmp = Diag(i, i);
+    if (xtmp.imag() < 0.0 && xtmp.real() == 0.0) {
+      count++;
+    }
+  }
+  return count;
+}
+
+//
 template<typename T, typename U>
 void C_SparseNumFact(void *arg_)
 {
@@ -2382,6 +1715,7 @@ void C_SparseNumFact(void *arg_)
   int nrow = arg->nrow;
   double eps_pivot = *(arg->eps_pivot);
   const bool kernel_detection = *(arg->kernel_detection);
+  const bool higher_precision = *(arg->higher_precision);
   const int dim_aug_kern = *(arg->dim_aug_kern);
   const U eps_machine = *(arg->eps_machine);
   T *coefs = arg->coefs;
@@ -2406,6 +1740,7 @@ void C_SparseNumFact(void *arg_)
     tridiag[i]->NumericFact(coefs, eps_pivot,
 			    &pivot1,
 			    kernel_detection,
+			    higher_precision,
 			    dim_aug_kern,
 			    eps_machine,
 			    &nopd1);
@@ -2431,30 +1766,14 @@ void C_SparseNumFact(void *arg_)
   }
 	
   get_realtime(&t1);
-  if (verbose) { // Oct.2016 : needs lower level of verbose to prevent message
-    fprintf(fp, "%s %d : %d : pivot = %g n0 = %d detected = %s\n",
-	    __FILE__, __LINE__,
-	    arg->nb, *pivot, nsing, detected ? "true" : "false");
-  }
+  diss_printf(verbose, fp, "%s %d : %d : pivot = %g n0 = %d detected = %s\n",
+	      __FILE__, __LINE__,
+	      arg->nb, *pivot, nsing, detected ? "true" : "false");
   
-#if 0
-  {
-    double tmpt = convert_time(t1, t0);
-    fprintf(fp, 
-	    "SparseNumFact : %5d : %5d : %.7e : %.7e : %.7e\n",
-	    arg->nb,
-	    nrow, nopd, tmpt, (nopd / tmpt / 1.0e+9));
-  }
-#endif
   D.set_lastPivot(*pivot);
   D.set_KernelDetected(detected);
   D.set_rank(nrow - nsing);
 
-#ifdef DEBUG_MEMORY_ALLOC
-  cerr << "C_SparseNumFact: allocates ncol = " << ncol 
-    	 << " : " << (double)(ncol * ncol * sizeof(double)) / (1024.0 * 1024.0) 
-	 << " M bytes" << endl;
-#endif
   //*(arg->pivot) = pivot;
   *(arg->nopd) = (long)nopd; // ?? uninitialized ??
 }
@@ -2468,10 +1787,16 @@ void C_SparseNumFact<quadruple, quadruple>(void *arg_);
 template
 void C_SparseNumFact<complex<double>, double>(void *arg_);
 
-
 template
 void C_SparseNumFact<complex<quadruple>,  quadruple>(void *arg_);
+
+template
+void C_SparseNumFact<float, float>(void *arg_);
+
+template
+void C_SparseNumFact<complex<float>, float>(void *arg_);
 //
+
 
 template<typename T, typename U>
 void C_SparseLocalSchur(void *arg_)
@@ -2503,19 +1828,6 @@ void C_SparseLocalSchur(void *arg_)
     nopsum += nops[0] + nops[2];
   }
   *(arg->nops) = (long)nopsum;
-#if 0
-  if ((nb == 132) || (nb == 133)) {
-    fprintf(fp, "%s %d : sparse local Schur : nb = %d ncol = %d\n",
-	    __FILE__, __LINE__, arg->nb, ncol);
-    for (int i = 0; i < ncol; i++) {
-      fprintf(fp, "%d : ", i);
-      for (int j = i; j < ncol; j++) {
-	  printscalar<T>(fp, localSchur(i, j));
-      }
-      fprintf(fp, "\n");
-    }
-  }
-#endif
   delete [] nops;
 }
 
@@ -2530,43 +1842,14 @@ void C_SparseLocalSchur<complex<double>, double>(void *arg_);
 
 template
 void C_SparseLocalSchur<complex<quadruple>, quadruple>(void *arg_);
+
+template
+void C_SparseLocalSchur<float, float>(void *arg_);
+
+template
+void C_SparseLocalSchur<complex<float>, float>(void *arg_);
 //
 
-#if 0
-template<typename T>
-void verify_nan(FILE *fp, const int nnz, T *a)
-{
- fprintf(stderr, "%s %d : general case is not defined\n", __FILE__, __LINE__);
-}
-
-template<>
-void verify_nan<double>(FILE *fp, const int nnz, double *a)
-{
-  fprintf(fp, "scanning NaN : [0] ");
-  int count = 0;
-  for (int i = 0; i < nnz; i++) {
-    if (isnan(a[i]) != 0) {// ambigous error with std::isnan by icpc -std=c++11 
-      fprintf(fp, "%d ", i);
-      count++;
-      if ((count > 0) && (count % 10) == 0) {
-	fprintf(fp, "\n[%d] ", count);
-      }
-    }
-  }
-  fprintf(fp, "end\n");
-}
-
-template
-void verify_nan<quadruple>(FILE *fp, const int nnz, quadruple *a);
-
-template
-void verify_nan<complex<double> >(FILE *fp, const int nnz, complex<double> *a);
-
-template
-void verify_nan<complex<quadruple> >(FILE *fp, const int nnz,
-				     complex<quadruple> *a);
-
-#endif
 
 template<>
 void dump_matrix<double>(FILE *fp, const int nrow, double *a)
@@ -2598,8 +1881,24 @@ template
 void dump_matrix<complex<quadruple> >(FILE *fp, const int nrow, 
 				      complex<quadruple> *a);
 
+template
+void dump_matrix<complex<float> >(FILE *fp, const int nrow, 
+				    complex<float> *a);
+
 template<>
 void dump_matrix<double>(FILE *fp, const int nrow, const int ncol, double *a)
+{
+  for (int i = 0; i < nrow; i++) {
+    fprintf(fp, "%d : ", i);
+    for (int j = 0; j < ncol; j++) {
+      fprintf(fp, "%g ", a[i + nrow * j]);
+    }
+    fprintf(fp, "\n");
+  }
+}
+
+template<>
+void dump_matrix<float>(FILE *fp, const int nrow, const int ncol, float *a)
 {
   for (int i = 0; i < nrow; i++) {
     fprintf(fp, "%d : ", i);
@@ -2627,10 +1926,28 @@ template
 void dump_matrix<complex<quadruple> >(FILE *fp, const int nrow, const int ncol, 
 				      complex<quadruple> *a);
 
+template
+void dump_matrix<complex<float> >(FILE *fp, const int nrow, const int ncol, 
+				    complex<float> *a);
+
 template<>
 void dump_matrix<double>(FILE *fp, const int kk, 
 			 const int nrow, const int ncol, const int nn,
 			 double *a)
+{
+  for (int i = 0; i < nrow; i++) {
+    fprintf(fp, "%d : ", i);
+    for (int j = 0; j < ncol; j++) {
+      fprintf(fp, "%g ", a[kk + i + nn * j]);
+    }
+    fprintf(fp, "\n");
+  }
+}
+
+template<>
+void dump_matrix<float>(FILE *fp, const int kk, 
+			 const int nrow, const int ncol, const int nn,
+			 float *a)
 {
   for (int i = 0; i < nrow; i++) {
     fprintf(fp, "%d : ", i);
@@ -2662,9 +1979,27 @@ void dump_matrix<complex<quadruple> >(FILE *fp, const int kk,
 				      const int nrow, const int ncol,
 				      const int nn,
 				      complex<quadruple> *a);
+template
+void dump_matrix<complex<float> >(FILE *fp, const int kk, 
+				   const int nrow, const int ncol, const int nn,
+				    complex<float> *a);
+
 template<>
 void dump_matrix<double>(FILE *fp, 
 			 RectBlockMatrix<double> &a)
+{
+  for (int i = 0; i < a.dimension_r(); i++) {
+    fprintf(fp, "%d : ", i);
+    for (int j = 0; j < a.dimension_c(); j++) {
+      fprintf(fp, "%g ", a(i, j));
+    }
+    fprintf(fp, "\n");
+  }
+}
+
+template<>
+void dump_matrix<float>(FILE *fp, 
+			 RectBlockMatrix<float> &a)
 {
   for (int i = 0; i < a.dimension_r(); i++) {
     fprintf(fp, "%d : ", i);
@@ -2717,6 +2052,9 @@ template
 void dump_matrix<complex<quadruple> >(FILE *fp, 
 				      RectBlockMatrix<complex<quadruple> > &a);
 
+template
+void dump_matrix<complex<float> >(FILE *fp, 
+				   RectBlockMatrix<complex<float> > &a);
 //
 
 template<typename T>
@@ -2728,6 +2066,7 @@ void dump_matrix(FILE *fp,
 
 template
 void dump_matrix<quadruple>(FILE *fp, SquareBlockMatrix<quadruple> &a);
+
 template
 void dump_matrix<complex<double> >(FILE *fp, 
 				   SquareBlockMatrix<complex<double> > &a);
@@ -2736,6 +2075,10 @@ template
 void
 dump_matrix<complex<quadruple> >(FILE *fp, 
 				 SquareBlockMatrix<complex<quadruple> > &a);
+
+template
+void dump_matrix<complex<float> >(FILE *fp, 
+				   SquareBlockMatrix<complex<float> > &a);
 
 //
 template<>
@@ -2786,16 +2129,6 @@ void C_FillMatrix_diag(void *arg_)
     }
   }
   // 
-#if 0
-  if ((arg->nb == 809) || (arg->nb == 808) || (arg->nb == 810)) {
-    FILE *fp = *(arg->fp);
-    fprintf(fp, "%s %d : C_FillMatrix_diag : %d : %d\n",
-	    __FILE__, __LINE__,
-	    arg->nb,
-	    D.dimension());
-    dump_matrix(fp, D);
-  }
-#endif
 }
 
 template
@@ -2809,6 +2142,13 @@ void C_FillMatrix_diag<complex<double> >(void *arg_);
 
 template
 void C_FillMatrix_diag<complex<quadruple> >(void *arg_);
+
+template
+void C_FillMatrix_diag<float>(void *arg_);
+
+template
+void C_FillMatrix_diag<complex<float> >(void *arg_);
+
 //
 
 template<typename T>
@@ -2839,24 +2179,6 @@ void C_FillMatrix_offdiag(void *arg_)
       }
     }
   }
-#if 0
-  {
-    FILE *fp = *(arg->fp);
-    fprintf(fp, "%s %d : C_FillMatrix_offdiag : %d upper : %d x %d\n",
-	    __FILE__, __LINE__,
-	    arg->nb,
-	    upper.dimension_r(), upper.dimension_c());
-    dump_matrix(fp, upper);
-    if (!arg->isSym) {
-      RectBlockMatrix<T>& lower = *arg->lower;
-      fprintf(fp, "%s %d : C_FillMatrix_offdiag : %d lower : %d x %d\n",
-	      __FILE__, __LINE__,
-	      arg->nb,
-	      lower.dimension_r(), lower.dimension_c());
-      dump_matrix(fp, lower);
-    }
-  }
-#endif
 }
 
 template
@@ -2870,6 +2192,12 @@ void C_FillMatrix_offdiag<complex<double> >(void *arg_);
 
 template
 void C_FillMatrix_offdiag<complex<quadruple> >(void *arg_);
+
+template
+void C_FillMatrix_offdiag<float>(void *arg_);
+
+template
+void C_FillMatrix_offdiag<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -2936,6 +2264,12 @@ void DSchurGEMM_diag<complex<double> >(void *arg_);
 
 template
 void DSchurGEMM_diag<complex<quadruple> >(void *arg_);
+
+template
+void DSchurGEMM_diag<float>(void *arg_);
+
+template
+void DSchurGEMM_diag<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3008,29 +2342,6 @@ void DSchurGEMM_diag_two(void *arg_)
 		   s, nrow);
     }
   }
-#if 0
-  if (arg->nb == 3 && nrow == 23) {
-    FILE *fp = *(arg->fp);
-    fprintf(fp, "%s %d : DSchurGEMM_diag_two : after: %d nrow = %d\n", 
-	      __FILE__, __LINE__, arg->nb, nrow);
-    for (int i = 0; i < nrow; i++) {
-      fprintf(fp, "%d : ", i);
-      for (int j = i; j < nrow; j++) {
-	fprintf(fp, "%g : ", s[i + j * nrow]);
-      }
-	fprintf(fp, "\n");
-    }
-  }
-#endif
-#if 0
-  //  if ((arg->nb >= 32) && (arg->nb < 64)) {
-  {
-    FILE *fp = *(arg->fp);
-    fprintf(fp, "%s %d : DSchurGEMM_diag_two : after : %d nrow = %d\n",
-	    __FILE__, __LINE__, arg->nb, nrow);
-    dump_matrix<T>(fp, nrow, nrow, s);
-  }
-#endif
 }
 
 template
@@ -3044,6 +2355,13 @@ void DSchurGEMM_diag_two<complex<double> >(void *arg_);
 
 template
 void DSchurGEMM_diag_two<complex<quadruple> >(void *arg_);
+
+template
+void DSchurGEMM_diag_two<float>(void *arg_);
+
+template
+void DSchurGEMM_diag_two<complex<float> >(void *arg_);
+
 //
 
 template<typename T>
@@ -3110,6 +2428,12 @@ void DSchurGEMM_offdiag<complex<double> >(void *arg_);
 
 template
 void DSchurGEMM_offdiag<complex<quadruple> >(void *arg_);
+
+template
+void DSchurGEMM_offdiag<float>(void *arg_);
+
+template
+void DSchurGEMM_offdiag<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3195,6 +2519,12 @@ void DSchurGEMM_offdiag_two<complex<double> >(void *arg_);
 
 template
 void DSchurGEMM_offdiag_two<complex<quadruple> >(void *arg_);
+
+template
+void DSchurGEMM_offdiag_two<float>(void *arg_);
+
+template
+void DSchurGEMM_offdiag_two<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3311,6 +2641,13 @@ void C_DTRSMScale_diag_upper<complex<double> >(void *arg_);
 
 template
 void C_DTRSMScale_diag_upper<complex<quadruple> >(void *arg_);
+
+template
+void C_DTRSMScale_diag_upper<float>(void *arg_);
+
+template
+void C_DTRSMScale_diag_upper<complex<float> >(void *arg_);
+
 //
 
 template<typename T>
@@ -3378,6 +2715,12 @@ void C_DTRSMScale_offdiag_upper<complex<double> >(void *arg_);
 
 template
 void C_DTRSMScale_offdiag_upper<complex<quadruple> >(void *arg_);
+
+template
+void C_DTRSMScale_offdiag_upper<float>(void *arg_);
+
+template
+void C_DTRSMScale_offdiag_upper<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3444,6 +2787,12 @@ void C_DTRSMScale_diag_lower<quadruple>(void *arg_);
 
 template
 void C_DTRSMScale_diag_lower<complex<quadruple> >(void *arg_);
+
+template
+void C_DTRSMScale_diag_lower<float>(void *arg_);
+
+template
+void C_DTRSMScale_diag_lower<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3495,6 +2844,12 @@ void C_DTRSMScale_offdiag_lower<complex<double> >(void *arg_);
 
 template
 void C_DTRSMScale_offdiag_lower<complex<quadruple> >(void *arg_);
+
+template
+void C_DTRSMScale_offdiag_lower<float>(void *arg_);
+
+template
+void C_DTRSMScale_offdiag_lower<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3509,10 +2864,8 @@ void C_DTRSMScale_solve(void *arg_)
    if (!arg->localPermute) {
     VectorArray<T> xtmp(arg->nrow);
     vector<int> &permute = arg->LDLt->getPermute();
-    if (verbose) {
-      fprintf(fp, "%s %d : non blocked forward substituion\n",
+    diss_printf(verbose, fp, "%s %d : non blocked forward substituion\n",
 	      __FILE__, __LINE__);
-    }
     //    const int num_block = arg->LDLt->num_blocks(); 
     if (arg->isSym) {
       for (int k = 0; k < num_block; k++) {
@@ -3581,6 +2934,13 @@ void C_DTRSMScale_solve<complex<double> >(void *arg_);
 
 template
 void C_DTRSMScale_solve<complex<quadruple> >(void *arg_);
+
+template
+void C_DTRSMScale_solve<float>(void *arg_);
+
+template
+void C_DTRSMScale_solve<complex<float> >(void *arg_);
+
 //
 
 template<typename T>
@@ -3603,6 +2963,11 @@ void C_deallocLower<complex<double> >(void *arg_);
 template
 void C_deallocLower<complex<quadruple> >(void *arg_);
 
+template
+void C_deallocLower<float>(void *arg_);
+
+template
+void C_deallocLower<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3622,6 +2987,13 @@ void C_deallocLocalSchur<complex<double> >(void *arg_);
 
 template
 void C_deallocLocalSchur<complex<quadruple> >(void *arg_);
+
+template
+void C_deallocLocalSchur<float>(void *arg_);
+
+template
+void C_deallocLocalSchur<complex<float> >(void *arg_);
+
 //
 
 template<typename T, typename U>
@@ -3696,6 +3068,12 @@ void C_SparseFw<complex<double>, double>(void *arg_);
 
 template
 void C_SparseFw<complex<quadruple>, quadruple>(void *arg_);
+
+template
+void C_SparseFw<float, float>(void *arg_);
+
+template
+void C_SparseFw<complex<float>, float>(void *arg_);
 //
 
 template<typename T, typename U>
@@ -3798,6 +3176,12 @@ void C_SparseBw<complex<double>, double>(void *arg_);
 
 template
 void C_SparseBw<complex<quadruple>, quadruple>(void *arg_);
+
+template
+void C_SparseBw<float, float>(void *arg_);
+
+template
+void C_SparseBw<complex<float>, float>(void *arg_);
 //
 
 template<typename T>
@@ -3860,6 +3244,12 @@ void C_Dsub_FwBw<complex<double> >(void *arg_);
 
 template
 void C_Dsub_FwBw<complex<quadruple> >(void *arg_);
+
+template
+void C_Dsub_FwBw<float>(void *arg_);
+
+template
+void C_Dsub_FwBw<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3908,6 +3298,12 @@ void C_Dfill_FwBw<complex<double> >(void *arg_);
 
 template
 void C_Dfill_FwBw<complex<quadruple> >(void *arg_);
+
+template
+void C_Dfill_FwBw<float>(void *arg_);
+
+template
+void C_Dfill_FwBw<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -3932,6 +3328,7 @@ void C_DenseFwBw_diag(void *arg_)
   const int LDLt_nrow = Diag.nrowBlock(k_block, k_block);
   const int kk = Diag.IndexBlock(k_block);
   vector<int> singIdx0 = Diag.getSingIdx0();
+  const bool verbose = arg->verbose;
   FILE *fp = *(arg->fp);
   if (isBlocked) {
     if (!isBackward) {
@@ -3963,18 +3360,14 @@ void C_DenseFwBw_diag(void *arg_)
   if (nrhs == 1) {
     int nn0 = 0;
     if (singIdx0.size() > 0) {
-      fprintf(fp, "%s %d : %d singIdx0.size() = %d ", __FILE__, __LINE__,
-	      kk, (int)singIdx0.size());
       for (vector<int>::const_iterator it = singIdx0.begin(); 
 	   it != singIdx0.end(); ++it) {
 	// inside of the block
 	if (((*it) >= kk) && ((*it) < (kk + nrow))) {
-	  fprintf(fp, "%d ", (*it));
 	  xi[(*it)] = zero;
 	  nn0++;
 	}
       }
-      fprintf(fp, "\n");
       // if (d0 == 0) degmv for the regular part of singIdx0
     }  // if (singIdx.size() > 0)
     const int nn1 = nrow - nn0; // invertible part
@@ -4187,6 +3580,13 @@ void C_DenseFwBw_diag<complex<double> >(void *arg_);
 
 template
 void C_DenseFwBw_diag<complex<quadruple> >(void *arg_);
+
+template
+void C_DenseFwBw_diag<float>(void *arg_);
+
+template
+void C_DenseFwBw_diag<complex<float> >(void *arg_);
+
 //
 
 template<typename T>
@@ -4303,6 +3703,12 @@ void C_DenseFwBw_offdiag<complex<double> >(void *arg_);
 
 template
 void C_DenseFwBw_offdiag<complex<quadruple> >(void *arg_);
+
+template
+void C_DenseFwBw_offdiag<float>(void *arg_);
+
+template
+void C_DenseFwBw_offdiag<complex<float> >(void *arg_);
 //
 
 template<typename T>
@@ -4401,6 +3807,12 @@ void C_StripsFwBw_offdiag<complex<double> >(void *arg_);
 
 template
 void C_StripsFwBw_offdiag<complex<quadruple> >(void *arg_);
+
+template
+void C_StripsFwBw_offdiag<float>(void *arg_);
+
+template
+void C_StripsFwBw_offdiag<complex<float> >(void *arg_);
 //
 template<typename T, typename U>
 void erase_task(C_task *& task)
@@ -4595,6 +4007,12 @@ void erase_task<complex<double>, double>(C_task *& task);
 
 template
 void erase_task<complex<quadruple>, quadruple>(C_task *& task);
+
+template
+void erase_task<float, float>(C_task *& task);
+
+template
+void erase_task<complex<float>, float>(C_task *& task);
 //
 
 template<typename T, typename U>
@@ -4613,27 +4031,22 @@ void full_gauss3(int *n0,
   double fop;
 
   nn1 = *n0;
-    if(verbose) {
-    fprintf(fp,
-	    "%s %d : full_sym_gauss3 is not yet implemented %d ",
-	    __FILE__, __LINE__, nn1);
-  }
+  diss_printf(verbose, fp,
+	      "%s %d : full_sym_gauss3 is not yet implemented %d ",
+	      __FILE__, __LINE__, nn1);
   if (isSym) {
-    if(verbose) {
-      fprintf(fp,"ldlt_permute\n");
-    }
+    diss_printf(verbose, fp,"ldlt_permute\n");
     flag = full_ldlt_permute<T, U>(&nn0, nn1, n, a, n, pivot, permute, eps,
 				   &fop);
   }
   else {
-    if(verbose) {
-      fprintf(fp,"ldu_permute\n");
-    }
+    diss_printf(verbose, fp,"ldu_permute\n");
     flag = full_ldu_permute<T, U>(&nn0, nn1, n, a, n, pivot, permute, eps,
-				   &fop);
+				  &fop);
   }
   *n0 = nn0;
 }
+
 template
 void full_gauss3<double, double>(int *n0,
 				 double *a,
@@ -4677,6 +4090,28 @@ void full_gauss3<complex<quadruple>, quadruple >(int *n0,
 						 const double eps,
 						 const bool verbose,
 						 FILE *fp);
+
+template
+void full_gauss3<float, float>(int *n0,
+				 float *a,
+				 const int n,
+				 double *pivot,
+				 int *permute,
+				 const bool isSym,
+				 const double eps,
+				 const bool verbose,
+				 FILE *fp);
+
+template
+void full_gauss3<complex<float>, float >(int *n0,
+					   complex<float> *a,
+					   const int n,
+					   double *pivot,
+					   int *permute,
+					   const bool isSym,
+					   const double eps,
+					   const bool verbose,
+					   FILE *fp);
 //
 
 template<typename T>
@@ -4717,5 +4152,13 @@ void dump_vectors<quadruple>(int nrow, int nn0, quadruple *v,
 template
 void dump_vectors<complex<quadruple> >(int nrow, int nn0, complex<quadruple> *v,
 				       string fname);
+
+template
+void dump_vectors<float>(int nrow, int nn0, float *v,
+			     string fname);
+
+template
+void dump_vectors<complex<float> >(int nrow, int nn0, complex<float> *v,
+				    string fname);
 
 //

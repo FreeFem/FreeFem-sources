@@ -48,7 +48,7 @@ using namespace std;
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 
-
+#include  <set>
 
 extern   long npichon2d, npichon3d;
 extern   long npichon2d1, npichon3d1;
@@ -621,30 +621,34 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     int nReStart = 0;
     int itstart[100],kstart=0;
   int it,j,it00;
-  const int mxbord=100;
-  int kbord[mxbord];
+  const int mxbord=1000;
+  int kbord[mxbord+1];
   int nbord=0;
   if(searchMethod>1) goto PICHON;
   if ( tstart )
     it00=it =  Th(tstart);
   else  if(quadtree)
     {  
-      const Vertex * v=quadtree->NearestVertexWithNormal(P);
+      const Vertex * v=quadtree->NearestVertex(P);// Change Juil 2017 ..
+/*
       if (!v) 
 	{ 
 	  v=quadtree->NearestVertex(P);
 	  assert(v);
-	}
+	}*/
+        ffassert(v); // bug !!!!
       it00=it=Th.Contening(v);
+      nddd=  Norme2(P-*v);
       if(verbosity>200)
-	cout <<  "   Find: Close : "<<  *v << " , " << Th(v) << " ";
+          cout <<  "   Find: Close : "<<  *v << " , " << Th(v) << " dist " << nddd  << endl;
       
     }
   else ffassert(0);
 RESTART:
+    ffassert(kstart<100);
   itstart[kstart++]=it;
   if(verbosity>199)
-    cout << "    tstart=" << tstart << " "<< "it=" << it << " P="<< P << endl;
+    cout << "    " << nReStart << " tstart= " << tstart << " , it=" << it << " P="<< P << endl;
   outside=true; 
   Mesh::kfind++;
   while (1)
@@ -709,9 +713,8 @@ RESTART:
 	  continue;
 	}  
       int  inkbord=find5(it,kbord,nbord);
-      if(inkbord<0 )  
+      if(inkbord<0 && nbord < mxbord)
 	{
-	  assert(nbord < mxbord);
 	  kbord[nbord++]=it;
 	  if(nbord>=5)  HeapSort(kbord,nbord);
 	}
@@ -774,14 +777,14 @@ RESTART:
 	outside=true;
         // on retest with a other stating point??????
           // Mod.  23/02/2016 F. H 
-       while(nReStart++ < 10)
+       while(nReStart++ < 8)
         {
-             if(nReStart==1)
+ /*            if(nReStart==1)
             {
                 Delta =(P-Th[it](Phat));
                 nddd=Norme2(Delta);
             }
-            else
+            else*/
             {
                 int k= nReStart-1;
                 int i = (nReStart-2)/2;
@@ -800,11 +803,11 @@ RESTART:
            // if(!v) v=quadtree->NearestVertex(PP);
             it=Th.Contening(v);
             bool same=false;
-            if( verbosity>199)
-            cout << "   loop Search "<<nReStart << " " <<  Delta << " it " << it << endl;
 
             for(int j=0;j<kstart ; ++j)
                 if( it == itstart[j]) {same=true; break;}
+            if( verbosity>199)
+                cout << "   loop Search "<<nReStart << " Delta" <<  Delta << " it " << it << endl;
             if(same) continue;
             if( verbosity>199) cout << " Restart tet: " << it << " " << P << endl;
             if(Rd::d==2)  npichon2d1++;
