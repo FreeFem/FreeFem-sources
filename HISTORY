@@ -1,344 +1,362 @@
-@  changeset:   4205:4adf7dab4237
-|  tag:         tip
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Oct 18 15:28:48 2017 +0100
-|  summary:     put modif of pierre en coorect version of dissectio
-|
-o  changeset:   4204:e66c6ff01593
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Tue Oct 17 17:45:58 2017 +0200
-|  summary:     New FieldSplit preconditionner.
-|
-o  changeset:   4203:c7d07950faaf
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Sun Oct 15 12:47:43 2017 +0200
-|  summary:     correct pb if LONG_MIN macro is undef .
-|
-o  changeset:   4202:a788a1ae88a0
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Sat Oct 14 17:57:36 2017 +0200
-|  summary:     updat download/dissection
-|
-o  changeset:   4201:fed8b9c3fb18
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Oct 13 20:37:19 2017 +0200
-|  summary:     add notaregion and correct region data
-|
-o  changeset:   4200:0e49f168efcc
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Oct 13 18:14:26 2017 +0200
-|  summary:     update INNOVATION
-|
-o  changeset:   4199:fa38fb8e3feb
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Oct 13 18:10:20 2017 +0200
-|  summary:     coorect small mistake
-|
-o  changeset:   4198:2f17eaba55af
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Fri Oct 13 17:59:01 2017 +0200
-|  summary:     add chi function as characterisc function of a mesh
-|
-o  changeset:   4197:14abf8dce4a2
-|  parent:      4193:a52a16037dc1
-|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-|  date:        Mon Oct 09 12:11:24 2017 +0200
-|  summary:     New timers.
-|
-| o  changeset:   4196:aba998fc323b
-| |  branch:      cmake
-| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
-| |  date:        Fri Oct 06 11:18:56 2017 +0200
-| |  summary:     Installation of medit, bamg and cvmsh2
+@    changeset:   4208:17c7a73cf40a
+|\   tag:         tip
+| |  parent:      4206:dbdbdd1ec719
+| |  parent:      4207:8635b0b07a1a
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Thu Oct 19 14:08:15 2017 +0100
+| |  summary:     merge missing  update CheckPtr.cpp
 | |
-| o  changeset:   4195:fbfd4a7c58ef
-| |  branch:      cmake
-| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
-| |  date:        Fri Oct 06 11:15:57 2017 +0200
-| |  summary:     Install freefem++ freefem++-mpi and ffglut
+| o  changeset:   4207:8635b0b07a1a
+| |  parent:      4139:b49aee33967e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Jun 23 12:40:14 2017 +0200
+| |  summary:     correct pb of too long check in CheckPtr
 | |
-| o  changeset:   4194:46a48a0ce3b3
-| |  branch:      cmake
-| |  parent:      4073:17722adc6e15
-| |  user:        Cedric Doucet <cedric.doucet@inria.fr>
-| |  date:        Fri Oct 06 09:19:26 2017 +0200
-| |  summary:     Enables make install
+o |  changeset:   4206:dbdbdd1ec719
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Oct 18 22:01:12 2017 +0100
+| |  summary:     correct typo in INNOVATION
 | |
-o |  changeset:   4193:a52a16037dc1
+o |  changeset:   4205:4adf7dab4237
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Oct 18 15:28:48 2017 +0100
+| |  summary:     put modif of pierre en coorect version of dissectio
+| |
+o |  changeset:   4204:e66c6ff01593
 | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Thu Oct 05 20:48:31 2017 +0200
-| |  summary:     Multiple fixes.
+| |  date:        Tue Oct 17 17:45:58 2017 +0200
+| |  summary:     New FieldSplit preconditionner.
 | |
-o |  changeset:   4192:4b2f46f5231d
+o |  changeset:   4203:c7d07950faaf
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Sep 14 17:18:56 2017 +0200
-| |  summary:     coorect bug in trunc split > 2 internal boundary
+| |  date:        Sun Oct 15 12:47:43 2017 +0200
+| |  summary:     correct pb if LONG_MIN macro is undef .
 | |
-o |  changeset:   4191:c05b9333ac1c
+o |  changeset:   4202:a788a1ae88a0
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Fri Sep 01 14:22:54 2017 -0400
-| |  summary:     correct the doc
+| |  date:        Sat Oct 14 17:57:36 2017 +0200
+| |  summary:     updat download/dissection
 | |
-o |  changeset:   4190:da5938f8ce0e
+o |  changeset:   4201:fed8b9c3fb18
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Aug 28 18:21:32 2017 -0400
-| |  summary:     update doc
+| |  date:        Fri Oct 13 20:37:19 2017 +0200
+| |  summary:     add notaregion and correct region data
 | |
-o |  changeset:   4189:e1bb62e36a9a
+o |  changeset:   4200:0e49f168efcc
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Aug 28 17:30:35 2017 -0400
-| |  summary:     coorect bug in cube function without label parameter
+| |  date:        Fri Oct 13 18:14:26 2017 +0200
+| |  summary:     update INNOVATION
 | |
-o |  changeset:   4188:324fb9db1242
+o |  changeset:   4199:fa38fb8e3feb
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Aug 03 22:05:24 2017 +0100
-| |  summary:     correct pb in affine gmres  with check of P. Jolivet
+| |  date:        Fri Oct 13 18:10:20 2017 +0200
+| |  summary:     coorect small mistake
 | |
-o |  changeset:   4187:756e174b670c
+o |  changeset:   4198:2f17eaba55af
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Aug 03 19:23:31 2017 +0100
-| |  summary:     update history
+| |  date:        Fri Oct 13 17:59:01 2017 +0200
+| |  summary:     add chi function as characterisc function of a mesh
 | |
-o |  changeset:   4186:455e38b1ea1a
+o |  changeset:   4197:14abf8dce4a2
+| |  parent:      4193:a52a16037dc1
 | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Thu Aug 03 14:34:07 2017 +0200
-| |  summary:     Throw an error when using the same array as input and output.
+| |  date:        Mon Oct 09 12:11:24 2017 +0200
+| |  summary:     New timers.
 | |
-o |  changeset:   4185:814d4406807c
-| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Fri Jul 21 15:51:56 2017 +0200
-| |  summary:     Pointer freed twice.
-| |
-o |  changeset:   4184:54a881254c5b
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jul 20 19:02:50 2017 +0200
-| |  summary:     past to versopn 3.56 and rebuld AutoGeneratedFile.tar.gz
-| |
-o |  changeset:   4183:8f13e9825d74
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jul 20 19:00:01 2017 +0200
-| |  summary:     correct big problem in implicit loop for matrix
-| |
-o |  changeset:   4182:f7e0fb2488c3
-| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Thu Jul 20 16:36:19 2017 +0200
-| |  summary:     No need to preallocate eigenvectors anymore.
-| |
-o |  changeset:   4181:6fd7264198d4
-| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Wed Jul 19 08:17:56 2017 +0200
-| |  summary:     Non-constant-expression in initializer list.
-| |
-o |  changeset:   4180:dcedaee06781
-| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Mon Jul 17 09:34:42 2017 +0200
-| |  summary:     Bump HPDDM. Fix 3D examples.
-| |
-o |  changeset:   4179:41bce9928596
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Fri Jul 07 13:36:42 2017 +0200
-| |  summary:     corret array overflow in Find tet contening points
-| |
-o |  changeset:   4178:4a1c64629d1d
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jul 06 15:50:31 2017 +0200
-| |  summary:     correct pb un win32
-| |
-o |  changeset:   4177:976729443648
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jul 06 14:35:07 2017 +0200
-| |  summary:     past to verstion 3.55-3
-| |
-o |  changeset:   4176:3c8b1dd2d3d7
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jul 06 14:28:21 2017 +0200
-| |  summary:     correct url of slepc
-| |
-o |  changeset:   4175:9ced92317951
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jul 06 13:57:47 2017 +0200
-| |  summary:     add basename,dirname, cpfile in shell
-| |
-o |  changeset:   4174:311a204302f7
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jul 05 10:17:18 2017 +0200
-| |  summary:     coorect makefile of blas
-| |
-o |  changeset:   4173:a0c50bc6ada9
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jul 05 09:58:32 2017 +0200
-| |  summary:     correct md5 of blas.tgz  (new version)
-| |
-o |  changeset:   4172:f4b19720d358
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Tue Jul 04 16:47:38 2017 +0200
-| |  summary:     rebuil AutoGeneratedFile.tar.gz
-| |
-o |  changeset:   4171:cc0fab237a04
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Tue Jul 04 16:09:54 2017 +0200
-| |  summary:     correct hsv2Rgv to take h mod 1
-| |
-o |  changeset:   4170:8079c87e77b7
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Sun Jul 02 15:47:29 2017 +0200
-| |  summary:     correct hsv2rgv  to be preiodic in h ..
-| |
-o |  changeset:   4169:a95498e8d99a
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Fri Jun 30 14:40:17 2017 +0100
-| |  summary:     correct type in getall Suitepasce
-| |
-o |  changeset:   4168:362c5171c093
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jun 29 15:49:27 2017 +0100
-| |  summary:     Add trick to set/remove CheckPtr
-| |
-o |  changeset:   4167:350892ee146e
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jun 29 12:09:03 2017 +0100
-| |  summary:     rermove  typo mesure _> measure
-| |
-o |  changeset:   4166:913834aaa383
-| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Tue Jun 27 09:40:14 2017 +0200
-| |  summary:     Add 3D meshes renumbering with RCM.
-| |
-o |  changeset:   4165:92c0836c900c
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Jun 26 21:44:31 2017 +0100
-| |  summary:     coorect pb of initialization in cube function
-| |
-o |  changeset:   4164:9b1ee19eb250
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Jun 26 21:09:36 2017 +0100
-| |  summary:     update innovation
-| |
-o |  changeset:   4163:3d7dd99ab2d1
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Jun 26 21:08:23 2017 +0100
-| |  summary:     Pass to version 3.55-1
-| |
-o |    changeset:   4162:4de588b19a9e
-|\ \   parent:      4160:dafbadf60c39
-| | |  parent:      4161:4601144bd646
-| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| | |  date:        Mon Jun 26 18:54:05 2017 +0100
-| | |  summary:     merge modif of Pierre
+| | o  changeset:   4196:aba998fc323b
+| | |  branch:      cmake
+| | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| | |  date:        Fri Oct 06 11:18:56 2017 +0200
+| | |  summary:     Installation of medit, bamg and cvmsh2
 | | |
-| o |  changeset:   4161:4601144bd646
-| | |  parent:      4159:0fffb09a07ef
+| | o  changeset:   4195:fbfd4a7c58ef
+| | |  branch:      cmake
+| | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| | |  date:        Fri Oct 06 11:15:57 2017 +0200
+| | |  summary:     Install freefem++ freefem++-mpi and ffglut
+| | |
+| | o  changeset:   4194:46a48a0ce3b3
+| | |  branch:      cmake
+| | |  parent:      4073:17722adc6e15
+| | |  user:        Cedric Doucet <cedric.doucet@inria.fr>
+| | |  date:        Fri Oct 06 09:19:26 2017 +0200
+| | |  summary:     Enables make install
+| | |
+o | |  changeset:   4193:a52a16037dc1
 | | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| | |  date:        Sun Jun 25 14:45:38 2017 +0200
-| | |  summary:     Small improvement.
+| | |  date:        Thu Oct 05 20:48:31 2017 +0200
+| | |  summary:     Multiple fixes.
 | | |
-o | |  changeset:   4160:dafbadf60c39
-|/ /   user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |    date:        Mon Jun 26 18:46:38 2017 +0100
-| |    summary:     see inovation
-| |
-o |  changeset:   4159:0fffb09a07ef
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Fri Jun 23 12:42:41 2017 +0200
-| |  summary:     coorect pb on loo long check in CheckPtr.cpp
-| |
-o |  changeset:   4158:c55409682fa9
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jun 22 17:12:15 2017 +0200
-| |  summary:     coorect typo in missing file
-| |
-o |  changeset:   4157:b527ddbf7532
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jun 22 16:51:58 2017 +0200
-| |  summary:     rebuild AutoGeneratedFile.tar.gz
-| |
-o |  changeset:   4156:0f16ba0d7d1b
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Thu Jun 22 10:22:39 2017 +0200
-| |  summary:     coorect mistake for  macos install
-| |
-o |  changeset:   4155:c93a6fe39368
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jun 21 19:12:43 2017 +0200
-| |  summary:     coorect helmholtz passe to complex
-| |
-o |  changeset:   4154:400725c30e42
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jun 21 16:11:11 2017 +0200
-| |  summary:     corretc cube
-| |
-o |  changeset:   4153:f88d068c17a1
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jun 21 15:17:37 2017 +0200
-| |  summary:     build version 3.35 with full interface with petsc / slepc real and complex
-| |
-o |  changeset:   4152:245cd2cbedf5
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Tue Jun 20 17:39:48 2017 +0200
-| |  summary:     clean makefile
-| |
-o |  changeset:   4151:1eeef4145372
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Tue Jun 20 16:29:43 2017 +0200
-| |  summary:     coorect laplace-complex-2d-SLEPc.edp
-| |
-o |  changeset:   4150:9bd704383b65
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Tue Jun 20 12:52:25 2017 +0200
-| |  summary:     change the function cube to build mesh of cube (more light)
-| |
-o |  changeset:   4149:c020291ac9f4
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Jun 19 17:03:50 2017 +0200
-| |  summary:     coorect typy in config petsc/slepc
-| |
-o |  changeset:   4148:ca228d8e3aec
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Jun 19 16:35:30 2017 +0200
-| |  summary:     add missing spelc in WHERE-all
-| |
-o |  changeset:   4147:64c2781287d9
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Mon Jun 19 16:11:34 2017 +0200
-| |  summary:     correct intype in getall and makefie
-| |
-o |  changeset:   4146:0c1cf91856cb
-| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| |  date:        Thu Jun 15 20:53:16 2017 +0200
-| |  summary:     Fixed HPDDM version.
-| |
-o |    changeset:   4145:a208347e48e7
-|\ \   parent:      4143:13bc30ff02f7
-| | |  parent:      4144:3d1438b6d081
+o | |  changeset:   4192:4b2f46f5231d
 | | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| | |  date:        Thu Jun 15 17:49:58 2017 +0200
-| | |  summary:     merge with P. version
+| | |  date:        Thu Sep 14 17:18:56 2017 +0200
+| | |  summary:     coorect bug in trunc split > 2 internal boundary
 | | |
-| o |  changeset:   4144:3d1438b6d081
-| | |  parent:      4142:05d85e2012f5
+o | |  changeset:   4191:c05b9333ac1c
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Fri Sep 01 14:22:54 2017 -0400
+| | |  summary:     correct the doc
+| | |
+o | |  changeset:   4190:da5938f8ce0e
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Aug 28 18:21:32 2017 -0400
+| | |  summary:     update doc
+| | |
+o | |  changeset:   4189:e1bb62e36a9a
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Aug 28 17:30:35 2017 -0400
+| | |  summary:     coorect bug in cube function without label parameter
+| | |
+o | |  changeset:   4188:324fb9db1242
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Aug 03 22:05:24 2017 +0100
+| | |  summary:     correct pb in affine gmres  with check of P. Jolivet
+| | |
+o | |  changeset:   4187:756e174b670c
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Aug 03 19:23:31 2017 +0100
+| | |  summary:     update history
+| | |
+o | |  changeset:   4186:455e38b1ea1a
 | | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
-| | |  date:        Wed Jun 14 20:37:33 2017 +0200
-| | |  summary:     New HPDDM version.
+| | |  date:        Thu Aug 03 14:34:07 2017 +0200
+| | |  summary:     Throw an error when using the same array as input and output.
 | | |
-o | |  changeset:   4143:13bc30ff02f7
+o | |  changeset:   4185:814d4406807c
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Fri Jul 21 15:51:56 2017 +0200
+| | |  summary:     Pointer freed twice.
+| | |
+o | |  changeset:   4184:54a881254c5b
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jul 20 19:02:50 2017 +0200
+| | |  summary:     past to versopn 3.56 and rebuld AutoGeneratedFile.tar.gz
+| | |
+o | |  changeset:   4183:8f13e9825d74
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jul 20 19:00:01 2017 +0200
+| | |  summary:     correct big problem in implicit loop for matrix
+| | |
+o | |  changeset:   4182:f7e0fb2488c3
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Thu Jul 20 16:36:19 2017 +0200
+| | |  summary:     No need to preallocate eigenvectors anymore.
+| | |
+o | |  changeset:   4181:6fd7264198d4
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Wed Jul 19 08:17:56 2017 +0200
+| | |  summary:     Non-constant-expression in initializer list.
+| | |
+o | |  changeset:   4180:dcedaee06781
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Mon Jul 17 09:34:42 2017 +0200
+| | |  summary:     Bump HPDDM. Fix 3D examples.
+| | |
+o | |  changeset:   4179:41bce9928596
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Fri Jul 07 13:36:42 2017 +0200
+| | |  summary:     corret array overflow in Find tet contening points
+| | |
+o | |  changeset:   4178:4a1c64629d1d
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jul 06 15:50:31 2017 +0200
+| | |  summary:     correct pb un win32
+| | |
+o | |  changeset:   4177:976729443648
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jul 06 14:35:07 2017 +0200
+| | |  summary:     past to verstion 3.55-3
+| | |
+o | |  changeset:   4176:3c8b1dd2d3d7
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jul 06 14:28:21 2017 +0200
+| | |  summary:     correct url of slepc
+| | |
+o | |  changeset:   4175:9ced92317951
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jul 06 13:57:47 2017 +0200
+| | |  summary:     add basename,dirname, cpfile in shell
+| | |
+o | |  changeset:   4174:311a204302f7
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jul 05 10:17:18 2017 +0200
+| | |  summary:     coorect makefile of blas
+| | |
+o | |  changeset:   4173:a0c50bc6ada9
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jul 05 09:58:32 2017 +0200
+| | |  summary:     correct md5 of blas.tgz  (new version)
+| | |
+o | |  changeset:   4172:f4b19720d358
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Tue Jul 04 16:47:38 2017 +0200
+| | |  summary:     rebuil AutoGeneratedFile.tar.gz
+| | |
+o | |  changeset:   4171:cc0fab237a04
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Tue Jul 04 16:09:54 2017 +0200
+| | |  summary:     correct hsv2Rgv to take h mod 1
+| | |
+o | |  changeset:   4170:8079c87e77b7
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Sun Jul 02 15:47:29 2017 +0200
+| | |  summary:     correct hsv2rgv  to be preiodic in h ..
+| | |
+o | |  changeset:   4169:a95498e8d99a
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Fri Jun 30 14:40:17 2017 +0100
+| | |  summary:     correct type in getall Suitepasce
+| | |
+o | |  changeset:   4168:362c5171c093
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jun 29 15:49:27 2017 +0100
+| | |  summary:     Add trick to set/remove CheckPtr
+| | |
+o | |  changeset:   4167:350892ee146e
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jun 29 12:09:03 2017 +0100
+| | |  summary:     rermove  typo mesure _> measure
+| | |
+o | |  changeset:   4166:913834aaa383
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Tue Jun 27 09:40:14 2017 +0200
+| | |  summary:     Add 3D meshes renumbering with RCM.
+| | |
+o | |  changeset:   4165:92c0836c900c
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Jun 26 21:44:31 2017 +0100
+| | |  summary:     coorect pb of initialization in cube function
+| | |
+o | |  changeset:   4164:9b1ee19eb250
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Jun 26 21:09:36 2017 +0100
+| | |  summary:     update innovation
+| | |
+o | |  changeset:   4163:3d7dd99ab2d1
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Jun 26 21:08:23 2017 +0100
+| | |  summary:     Pass to version 3.55-1
+| | |
+o | |    changeset:   4162:4de588b19a9e
+|\ \ \   parent:      4160:dafbadf60c39
+| | | |  parent:      4161:4601144bd646
+| | | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | | |  date:        Mon Jun 26 18:54:05 2017 +0100
+| | | |  summary:     merge modif of Pierre
+| | | |
+| o | |  changeset:   4161:4601144bd646
+| | | |  parent:      4159:0fffb09a07ef
+| | | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | | |  date:        Sun Jun 25 14:45:38 2017 +0200
+| | | |  summary:     Small improvement.
+| | | |
+o | | |  changeset:   4160:dafbadf60c39
+|/ / /   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |    date:        Mon Jun 26 18:46:38 2017 +0100
+| | |    summary:     see inovation
+| | |
+o | |  changeset:   4159:0fffb09a07ef
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Fri Jun 23 12:42:41 2017 +0200
+| | |  summary:     coorect pb on loo long check in CheckPtr.cpp
+| | |
+o | |  changeset:   4158:c55409682fa9
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jun 22 17:12:15 2017 +0200
+| | |  summary:     coorect typo in missing file
+| | |
+o | |  changeset:   4157:b527ddbf7532
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jun 22 16:51:58 2017 +0200
+| | |  summary:     rebuild AutoGeneratedFile.tar.gz
+| | |
+o | |  changeset:   4156:0f16ba0d7d1b
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Thu Jun 22 10:22:39 2017 +0200
+| | |  summary:     coorect mistake for  macos install
+| | |
+o | |  changeset:   4155:c93a6fe39368
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jun 21 19:12:43 2017 +0200
+| | |  summary:     coorect helmholtz passe to complex
+| | |
+o | |  changeset:   4154:400725c30e42
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jun 21 16:11:11 2017 +0200
+| | |  summary:     corretc cube
+| | |
+o | |  changeset:   4153:f88d068c17a1
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jun 21 15:17:37 2017 +0200
+| | |  summary:     build version 3.35 with full interface with petsc / slepc real and complex
+| | |
+o | |  changeset:   4152:245cd2cbedf5
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Tue Jun 20 17:39:48 2017 +0200
+| | |  summary:     clean makefile
+| | |
+o | |  changeset:   4151:1eeef4145372
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Tue Jun 20 16:29:43 2017 +0200
+| | |  summary:     coorect laplace-complex-2d-SLEPc.edp
+| | |
+o | |  changeset:   4150:9bd704383b65
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Tue Jun 20 12:52:25 2017 +0200
+| | |  summary:     change the function cube to build mesh of cube (more light)
+| | |
+o | |  changeset:   4149:c020291ac9f4
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Jun 19 17:03:50 2017 +0200
+| | |  summary:     coorect typy in config petsc/slepc
+| | |
+o | |  changeset:   4148:ca228d8e3aec
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Jun 19 16:35:30 2017 +0200
+| | |  summary:     add missing spelc in WHERE-all
+| | |
+o | |  changeset:   4147:64c2781287d9
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Mon Jun 19 16:11:34 2017 +0200
+| | |  summary:     correct intype in getall and makefie
+| | |
+o | |  changeset:   4146:0c1cf91856cb
+| | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | |  date:        Thu Jun 15 20:53:16 2017 +0200
+| | |  summary:     Fixed HPDDM version.
+| | |
+o | |    changeset:   4145:a208347e48e7
+|\ \ \   parent:      4143:13bc30ff02f7
+| | | |  parent:      4144:3d1438b6d081
+| | | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | | |  date:        Thu Jun 15 17:49:58 2017 +0200
+| | | |  summary:     merge with P. version
+| | | |
+| o | |  changeset:   4144:3d1438b6d081
+| | | |  parent:      4142:05d85e2012f5
+| | | |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| | | |  date:        Wed Jun 14 20:37:33 2017 +0200
+| | | |  summary:     New HPDDM version.
+| | | |
+o | | |  changeset:   4143:13bc30ff02f7
+|/ / /   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |    date:        Thu Jun 15 17:42:32 2017 +0200
+| | |    summary:     correct the bug find  Ivan Rychetsky rychet@fzu.cz
+| | |
+o | |  changeset:   4142:05d85e2012f5
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jun 14 11:57:48 2017 +0200
+| | |  summary:     add missing in distrib
+| | |
+o | |  changeset:   4141:32925b9464e7
+| | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| | |  date:        Wed Jun 14 11:47:14 2017 +0200
+| | |  summary:     rebuild AutoGeneratedFile.tar.gz
+| | |
+o | |  changeset:   4140:91ba9db3e4f9
 |/ /   user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |    date:        Thu Jun 15 17:42:32 2017 +0200
-| |    summary:     correct the bug find  Ivan Rychetsky rychet@fzu.cz
-| |
-o |  changeset:   4142:05d85e2012f5
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jun 14 11:57:48 2017 +0200
-| |  summary:     add missing in distrib
-| |
-o |  changeset:   4141:32925b9464e7
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jun 14 11:47:14 2017 +0200
-| |  summary:     rebuild AutoGeneratedFile.tar.gz
-| |
-o |  changeset:   4140:91ba9db3e4f9
-| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-| |  date:        Wed Jun 14 10:41:16 2017 +0200
-| |  summary:     Add compile of petsc and slepc (in test)
+| |    date:        Wed Jun 14 10:41:16 2017 +0200
+| |    summary:     Add compile of petsc and slepc (in test)
 | |
 o |  changeset:   4139:b49aee33967e
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>

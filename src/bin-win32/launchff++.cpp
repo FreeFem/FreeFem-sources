@@ -9,16 +9,35 @@ using namespace std;
 
 const char C='"';
 
+
+const char SLACH='/';
+const char BACKSLACH='\\';
+#ifdef PURE_WIN32
+const  char dirsep=BACKSLACH, dirnsep=SLACH;
+#else
+const  char dirnsep=BACKSLACH, dirsep=SLACH;
+#endif
+string DirName(const char * f)
+{
+    const char *c= strrchr(f,dirsep);
+    if(!c) return string("");
+    else return string(f,strlen(f)-strlen(c))+dirsep;
+}
 int main(int argc,const char **argv)
 {
   int debug=0; 
-  char *dir=0;
-  const char *pp=0; 
-  string cmd="freefem++.exe ";
+  char *dirff=0;
+  const char *pp=0;
+  LPWSTR buffer; //or wchar_t * buffer;
+  int lbuffer = GetModuleFileName(NULL, buffer, MAX_PATH) ;
+  string dirff;
+  if lbuffer>0 dirff = DirName(buffer);
+    
+  string cmd=dirff+"freefem++.exe ";
   if(argc <=1)
   {
-    //      cerr << " Sorry no file name "<< endl;
-      //      cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
+        cerr << " Sorry no file name "<< endl;
+        cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
       cmd += " -wait -log";
       int ret= system(cmd.c_str());
       return 0; 

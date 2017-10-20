@@ -2885,7 +2885,8 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("region",region);
   Global.New("notaregion",CConstant<long>(notaregion));
   Global.New("nuTriangle",nu_triangle);   
-  Global.New("nuEdge",nu_edge);   
+  Global.New("nuTet",nu_triangle);
+  Global.New("nuEdge",nu_edge);
   Global.New("P",P);   
   Global.New("N",N);   
   
