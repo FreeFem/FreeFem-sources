@@ -199,8 +199,8 @@ download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-
 download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.8.0.tar.gz',
 	 'http://slepc.upv.es','slepc-3.8.0.tar.gz','a90d7836a27b9ef7961a068f68ace1d1');
 
-download('hpddm','https://github.com/hpddm/hpddm/archive/5a0b19b658af58ec70598c156eceac3956ff34c3.zip',
-	 'https://github.com/hpddm','hpddm.zip','c6b4c529f0ec07a4a90eb12e8bc999d1','BAD_CERT');
+download('hpddm','https://github.com/hpddm/hpddm/archive/35120ab45699ba687a9cea05934e635504bfe4db.zip',
+	 'https://github.com/hpddm','hpddm.zip','883e6d3dec98b1143b19ab0fed6c60b5','BAD_CERT');
 
 # run all downloads concurrently
 
