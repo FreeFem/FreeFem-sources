@@ -101,7 +101,7 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
         KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
         MatriceMorse<PetscScalar>* mS = nargs[7] ? static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[7])(stack))->A)) : 0;
         KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
-        if(fields && names && mS && pL && ptA->_S) {
+        if(fields && names && mS && pL) {
             ST st;
             KSP ksp;
             PC pc;
