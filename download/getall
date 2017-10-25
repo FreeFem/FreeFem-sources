@@ -193,11 +193,11 @@ download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_
 download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	 'http://www.tetgen.org/1.5/src/','tetgen1.5.1-beta1.tar.gz','3d55c197bcbfc611b7ced6f343643756');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.7.6.tar.gz',
-	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.7.6.tar.gz','152c1f15f535af22fc015de1d3099db3');
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.8.0.tar.gz',
+	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots','petsc-lite-3.8.0.tar.gz','afa85776d6f2bd7b92bee224147927d5');
 
-download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.7.4.tar.gz',
-	 'http://slepc.upv.es','slepc-3.7.4.tar.gz','cc1244d656e8c37bbdd3e4e897d0e391');
+download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.8.0.tar.gz',
+	 'http://slepc.upv.es','slepc-3.8.0.tar.gz','a90d7836a27b9ef7961a068f68ace1d1');
 
 download('hpddm','https://github.com/hpddm/hpddm/archive/5a0b19b658af58ec70598c156eceac3956ff34c3.zip',
 	 'https://github.com/hpddm','hpddm.zip','c6b4c529f0ec07a4a90eb12e8bc999d1','BAD_CERT');

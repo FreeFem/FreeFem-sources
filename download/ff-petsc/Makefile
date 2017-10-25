@@ -29,8 +29,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.7.6
-VERSION_SLEPC=3.7.4
+VERSION=3.8.0
+VERSION_SLEPC=3.8.0
 # http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz 
 PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz 
@@ -79,7 +79,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) &&  ./configure \
+	cd $(SRCDIR) &&  python2 ./configure \
 	--prefix=$(DIR_INSTALL_REAL) \
 	--with-ssl=0 ---with-x=0 \
     '--with-scalar-type=real' \
@@ -90,14 +90,13 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	--download-superlu --download-pastix --download-suitesparse --download-fftw \
 	PETSC_ARCH=ff-real
 	touch $@
-	
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 
 ifdef 	MUMPS_LIB	
 #  version COMPLEX  .....  
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) &&  ./configure \
+	cd $(SRCDIR) &&  python2 ./configure \
 	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
     '--with-scalar-type=complex' \
 	--with-ssl=0 ---with-x=0 \
@@ -122,7 +121,7 @@ $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex
 	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex 
-	
+
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
 	-mkdir ../lib
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lpetsc' > $@
@@ -162,7 +161,7 @@ WHERE-all:Makefile WHERE-complex WHERE
 $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_COMPLEX) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&    ./configure  --prefix=$(DIR_INSTALL_COMPLEX) 
+	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_COMPLEX) 
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
@@ -173,7 +172,7 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
 	touch $@
-	
+
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
@@ -187,7 +186,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 	touch $@
 $(SRCDIR_SLEPC)/tag-tar:$(PACKAGE_SLEPC)
 	tar xvzf $(PACKAGE_SLEPC)
-	patch -p1 <patch-slepc-3.7.4
+#	patch -p1 <patch-slepc-3.7.4
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
@@ -197,7 +196,7 @@ $(PACKAGE_SLEPC):
 $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&    ./configure  --prefix=$(DIR_INSTALL_REAL) 
+	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_REAL) 
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
@@ -208,7 +207,6 @@ $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
 $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real 
 	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
 	touch $@
-	
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
 	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lslepc' > $@
