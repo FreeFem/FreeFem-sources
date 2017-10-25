@@ -35,7 +35,7 @@ class eigensolver_Op : public E_F0mps {
     public:
         Expression A;
         Expression B;
-        static const int n_name_param = 5;
+        static const int n_name_param = 9;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         eigensolver_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), B(param2) {
@@ -50,7 +50,11 @@ basicAC_F0::name_and_type eigensolver_Op<Type, K>::name_param[] = {
     {"prefix", &typeid(std::string*)},
     {"values", &typeid(KN<K>*)},
     {"vectors", &typeid(FEbaseArrayKn<K>*)},
-    {"array", &typeid(KNM<K>*)}
+    {"array", &typeid(KNM<K>*)},
+    {"fields", &typeid(KN<double>*)},
+    {"names", &typeid(KN<String>*)},
+    {"schurPreconditioner", &typeid(Matrice_Creuse<PetscScalar>*)},
+    {"schurList", &typeid(KN<double>*)}
 };
 template<class Type, class K>
 class eigensolver : public OneOperator {
@@ -93,7 +97,26 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
         if(nargs[1])
             EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
         EPSSetFromOptions(eps);
-        EPSSetUp(eps);
+        KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
+        KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
+        MatriceMorse<PetscScalar>* mS = nargs[7] ? static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[7])(stack))->A)) : 0;
+        KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
+        if(fields && names && mS && pL && ptA->_S) {
+            ST st;
+            KSP ksp;
+            PC pc;
+            EPSGetST(eps, &st);
+            STGetKSP(st, &ksp);
+            KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
+            setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
+            KSPGetPC(ksp, &pc);
+            PCSetUp(pc);
+            PetscInt nsplits;
+            KSP* subksp;
+            PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+            KSPSetOperators(subksp[nsplits - 1], ptA->_S, ptA->_S);
+            PetscFree(subksp);
+        }
         EPSSolve(eps);
         PetscInt nconv;
         EPSGetConverged(eps, &nconv);
