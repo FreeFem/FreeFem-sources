@@ -5,6 +5,7 @@
 #include "ff++.hpp"
 #include "slu_ddefs.h"
 #include "superlu_enum_consts.h"
+/*
 #define GlobalLU_t GlobalLU_txxxx
 #define countnz countnzxxxx
 #define fixupL fixupLxxxx
@@ -12,8 +13,9 @@
 #define check_tempv check_tempvxxxx
 #define PrintPerf PrintPerfxxxx
 #define ilu_countnz  ilu_countnzxxxx
+ */
 #include "slu_zdefs.h"
-
+/*
 #undef GlobalLU_t
 #undef countnz
 #undef fixupL
@@ -21,7 +23,7 @@
 #undef check_tempv
 #undef PrintPerf
 #undef ilu_countnz
-
+*/
 
 template <class R> struct SuperLUDriver
 {
@@ -42,9 +44,9 @@ template <> struct SuperLUDriver<double>
 	gssvx(superlu_options_t * p1, SuperMatrix * p2, int * p3, int * p4, int * p5,
 	       char * p6, double * p7, double * p8, SuperMatrix * p9, SuperMatrix * p10,
 	       void * p11, int p12, SuperMatrix * p13, SuperMatrix * p14,
-	       double * p15, double * p16, double * p17, double * p18,
+	       double * p15, double * p16, double * p17, double * p18,GlobalLU_t   *pGlu,
 	       mem_usage_t * p19, SuperLUStat_t * p20, int * p21)
-    { dgssvx( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,  p11,p12,p13,p14,p15,p16,p17,p18,p19,p20, p21); }
+    { dgssvx( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,  p11,p12,p13,p14,p15,p16,p17,p18,pGlu,p19,p20, p21); }
     
     
     
@@ -111,9 +113,9 @@ template <> struct SuperLUDriver<Complex>
     gssvx(superlu_options_t * p1, SuperMatrix * p2, int * p3, int * p4, int * p5,
 	  char * p6, double * p7, double * p8, SuperMatrix * p9, SuperMatrix * p10,
 	  void * p11, int p12, SuperMatrix * p13, SuperMatrix * p14,
-	  double * p15, double * p16, double * p17, double * p18,
+	  double * p15, double * p16, double * p17, double * p18,GlobalLU_t   *pGlu,
 	  mem_usage_t * p19, SuperLUStat_t * p20, int * p21)
-    { zgssvx( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,  p11,p12,p13,p14,p15,p16,p17,p18,p19,p20, p21); }
+    { zgssvx( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,  p11,p12,p13,p14,p15,p16,p17,p18,pGlu,p19,p20, p21); }
     
     
     
@@ -455,6 +457,7 @@ class SolveSuperLU :   public MatriceMorse<R>::VirtualSolver, public SuperLUDriv
   mutable char           equed[1];
   yes_no_t       equil;
   mutable SuperMatrix    A, L, U;
+  mutable GlobalLU_t   Glu;
   NCformat       *Astore;
   NCformat       *Ustore;
   SCformat       *Lstore;
@@ -597,7 +600,7 @@ public:
     /* ONLY PERFORM THE LU DECOMPOSITION */
     B.ncol = 0;  /* Indicate not to solve the system */
     SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
-           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
+           &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,&Glu,
            &mem_usage, &stat, &info);
 
    
@@ -665,7 +668,7 @@ public:
 	  
 	  
 	  SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
-				  &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,
+				  &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr,&Glu,
 				  &mem_usage, &stat, &info);
 	  
 	  

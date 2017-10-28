@@ -1,6 +1,30 @@
-@    changeset:   4208:17c7a73cf40a
+@    changeset:   4212:a6ee8370de7d
 |\   tag:         tip
+| |  parent:      4211:e5e5e01ff499
+| |  parent:      4210:6b175ca36713
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Oct 25 09:49:11 2017 +0200
+| |  summary:     coorect pb with complex value
+| |
+| o  changeset:   4211:e5e5e01ff499
+| |  parent:      4209:0ffcfd64cb7e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Oct 25 09:48:15 2017 +0200
+| |  summary:     pass petsc to 3.8 and correct pb with new clang++ (clang-900.0.38)
+| |
+o |  changeset:   4210:6b175ca36713
 | |  parent:      4206:dbdbdd1ec719
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Tue Oct 24 21:54:22 2017 +0200
+| |  summary:     Fixes compilation with complex numbers.
+| |
+| o  changeset:   4209:0ffcfd64cb7e
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Fri Oct 20 13:28:50 2017 +0100
+| |  summary:     try to correct lauchff++  under windows
+| |
+| o  changeset:   4208:17c7a73cf40a
+|/|  parent:      4206:dbdbdd1ec719
 | |  parent:      4207:8635b0b07a1a
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Thu Oct 19 14:08:15 2017 +0100

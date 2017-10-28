@@ -7,7 +7,7 @@ the resolution of partial      differential equation using the finite
 element method">
    <meta name="Keywords" content="language, c++, Multi-platform, free      
 software, Navier-Stokes, elasticity, convection-diffusion, heat      
-equation, linear elliptic PDE's",MPI,"Scientific computing">
+equation, linear elliptic PDE's,MPI,Scientific computing">
 
    <title>Freefem++ Home Page (March .  2016)</title>
    <link href="mailto:frederic.hecht@upmc.fr" rev="Author">
@@ -25,7 +25,7 @@ include 'phpfiles.php'
 <div class="content">
 <div class="thema">Introduction</div>
 <div class="themaBlog">
-</tr></table>
+</table>
 
 <p>&nbsp;
 
@@ -53,8 +53,8 @@ href="freefem/frap.htm">freefem+</a>.  </td>
 </div> 
 
 If you use <tt size=-2>Freefem++</tt> please cite the following reference in your work (books, articles, reports, etc.):
-<a href="http://dx.doi.org/10.1515/jnum-2012-0013" > Hecht, F. New development in FreeFem++. J. Numer. Math. 20 (2012), no. 3-4, 251–265. 65Y15<a> 
-</p> </a>
+<a href="http://dx.doi.org/10.1515/jnum-2012-0013" > Hecht, F. New development in FreeFem++. J. Numer. Math. 20 (2012), no. 3-4, 251–265. 65Y15</a> 
+</p> 
 the bibtex is:
 <table><tr>
 <td>
@@ -66,7 +66,7 @@ the bibtex is:
     NUMBER = {3-4}, PAGES = {251--265},
       ISSN = {1570-2820}, MRCLASS = {65Y15}, MRNUMBER = {3043640},
 }
-<PRE><TT/></blockquote></td></tr><table>
+</PRE></TT></blockquote></td></tr><table>
 
 <br><br>
 <!-- 
@@ -105,6 +105,22 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 
 
 <ul>
+	           <li>  <font>
+	        <b>  The 9th   tutorial and Workshop on FreeFem++ </b>
+	   <A HREF="https://www.ljll.math.upmc.fr/freefem++/">  (registration here)</A>, 
+	   held december 14th and 15th, 2017, in Paris at Universit&eacute Pierre
+	  et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris
+	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/Schedule.html"> Schedule, All Presentation, examples </A> and
+	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/.">  directory this all data  </A>.
+	   </font> </li> 
+
+   <li> 
+<A HREF="https://www.maths.ox.ac.uk"> FreeFem++  cours, </A>    October 17th to 20   2017, 
+Department of Mathematics, Oxford University, UK
+<A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++/2017-Oxford.zip"> the zip file of the  folder (presentation, examples,  7.8Mb)</A> and the
+<A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++/2017-Oxford"> folder </A>. 
+ </li>
+	
 	   <li> 
 	<A HREF="http://www.mathematics.pitt.edu/node/2052">  An Introduction to Scientific Computing using Free Software FreeFem++ , </A>    August 28 to September 1  2017, 
 	Department of Mathematics, University of Pittsburgh, USA
@@ -399,7 +415,7 @@ versions of <i>FreeFem++</i>.</font> </li>
 </li>
 <li> for  <tt>textmate 2</tt>  editor on   Mac 10.7 or better, <a href="https://macromates.com/download"> download  from macromates.com </a> and install it, when  get the 
   <a href="http://www.freefem.org/ff++/Textmate2-ff++.zip"> textmate freefem++ syntax from www.freefem.org/ff++/Textmate2-ff++.zip (version june 2107)</a> unzip Textmate2-ff++.zip and follow the explanation given in file <tt> How_To.rtf</tt>.</li>
- <li> for <A href="https://notepad-plus-plus.org",target="_blank">  notepad++ </A>  editor under windows and  <A href="color-syntax-win.pdf">  read and follow the instruction <A>
+ <li> for <A href="https://notepad-plus-plus.org",target="_blank">  notepad++ </A>  editor under windows and  <A href="color-syntax-win.pdf">  read and follow the instruction </A>
  </ul>
  </div>    
   
