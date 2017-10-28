@@ -2093,7 +2093,7 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_hpddm" != no && enable_hpddm=yes  
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o "$ff_umfpack_ok" != "yes"  &&  enable_hpddm=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
 FF_PETSC_DYLIB="PETSc.$DYLIB_SUFFIX"
