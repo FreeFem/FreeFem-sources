@@ -1,0 +1,68 @@
+
+real alpha=1;int Niter=50;
+
+mesh TH;mesh[int] Th(2);int Dirichlet,Interface;
+int[int] reg(2);
+{
+	int n=30;
+	Dirichlet=1;Interface=2;
+	border a0(t=0,1){x=t;y=0;label=Dirichlet;}
+	border a1(t=1,2){x=t;y=0;label=Dirichlet;}
+	border b1(t=0,1){x=2;y=t;label=Dirichlet;}
+	border c1(t=2,1){x=t;y=1;label=Dirichlet;}
+	border c0(t=1,0){x=t;y=1;label=Dirichlet;}
+	border b0(t=1,0){x=0;y=t;label=Dirichlet;}
+	border d(t=0,1){x=1;y=t;label=Interface;}
+	plot(a0(n)+a1(n)+b1(n)+c1(n)+c0(n)+b0(n)+d(n));	
+	TH=buildmesh(a0(n)+a1(n)+b1(n)+c1(n)+c0(n)+b0(n)+d(n));	
+
+	reg(0)=TH(0.5,0.5).region;
+	reg(1)=TH(1.5,0.5).region;
+
+	for(int i=0;i<2;i++) Th[i]=trunc(TH,region==reg(i));
+}
+
+macro f 1 // Volumic flux
+
+int i;
+fespace Vh0(Th[0],P1),Vh1(Th[1],P1);
+Vh0 u0=0;Vh1 u1=0;
+
+macro grad(u) [dx(u),dy(u)] //
+
+varf a(u,v)=int2d(Th[i])(grad(u)'*grad(v))+int1d(Th[i],Interface)(alpha*u*v)+on(Dirichlet,u=0);
+varf b(u,v)=int2d(Th[i])(f*v)+on(Dirichlet,u=0);
+varf du1dn(u,v)=-int2d(Th[1])(grad(u1)'*grad(v)-f*v)+int1d(Th[1],Interface)(alpha*u1*v)+on(Dirichlet,u=0);
+varf du0dn(u,v)=-int2d(Th[0])(grad(u0)'*grad(v)-f*v)+int1d(Th[0],Interface)(alpha*u0*v)+on(Dirichlet,u=0);
+
+matrix[int] I(2);
+I[0]=interpolate(Vh1,Vh0);
+I[1]=interpolate(Vh0,Vh1);
+
+matrix[int] A(2); real[int][int] B(2);
+i=0; A[0]=a(Vh0,Vh0); B[0].resize(Vh0.ndof); B[0]=b(0,Vh0);
+i=1; A[1]=a(Vh1,Vh1); B[1].resize(Vh1.ndof); B[1]=b(0,Vh1);
+
+
+for(int iter=0;iter<Niter;iter++)
+{
+ 	// Solve on Th[0]
+	{
+		i=0;// for def of  b
+		real[int] b0=B[0];
+		real[int] Du1dn=du1dn(0,Vh1);
+		real[int] Tdu1dn(Vh0.ndof); Tdu1dn=I[0]'*Du1dn;
+		b0+=Tdu1dn;
+		u0[]=A[0]^-1*b0;
+	}
+ 	// Solve on Th[1]
+	{
+		i=1; // for def of  b
+		real[int] b1=B[1];
+		real[int] Du0dn=du0dn(0,Vh0);
+		real[int] Tdu0dn(Vh1.ndof); Tdu0dn=I[1]'*Du0dn;
+		b1+=Tdu0dn;
+		u1[]=A[1]^-1*b1;
+	}
+	plot(u0,u1,cmm="iter="+iter);
+}
