@@ -93,6 +93,7 @@ static PetscErrorCode KSPSetFromOptions_HPDDM(PetscOptionItems *PetscOptionsObje
         opt[p + "variant"] = 0;
     opt[p + "tol"] = ksp->rtol;
     opt[p + "max_it"] = ksp->max_it;
+#if !(PETSC_VERSION_LT(3,8,0))
     {
         char **names, **values;
         int N;
@@ -110,6 +111,7 @@ static PetscErrorCode KSPSetFromOptions_HPDDM(PetscOptionItems *PetscOptionsObje
         PetscOptionsLeftRestore(NULL, &N, &names, &values);
         opt.parse<false, true>(optionsLeft, false, { }, p);
     }
+#endif
     if(mpirank != 0)
         opt.remove(p + "verbosity");
     ksp->rtol = opt[p + "tol"];
@@ -409,7 +411,7 @@ class initCSRfromMatrix_Op : public E_F0mps {
         Expression A;
         Expression K;
         Expression size;
-        static const int n_name_param = 5;
+        static const int n_name_param = 6;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         initCSRfromMatrix_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), K(param2), size(param3) {
@@ -424,7 +426,8 @@ basicAC_F0::name_and_type initCSRfromMatrix_Op<HpddmType>::name_param[] = {
     {"bs", &typeid(long)},
     {"symmetric", &typeid(bool)},
     {"clean", &typeid(bool)},
-    {"bsr", &typeid(bool)}
+    {"bsr", &typeid(bool)},
+    {"prune", &typeid(bool)}
 };
 template<class HpddmType>
 class initCSRfromMatrix : public OneOperator {
@@ -448,11 +451,16 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     if(bs > 1)
         MatSetBlockSize(ptA->_petsc, bs);
     bool bsr = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
+    bool prune = bsr ? (nargs[5] ? GetAny<bool>((*nargs[5])(stack)) : false) : false;
+    if(prune)
+        MatCreate(PETSC_COMM_WORLD, &(ptA->_S));
     if(mpisize > 1) {
         ffassert(ptSize->n >= 3 + mK->n);
         ptA->_first = ptSize->operator()(0);
         ptA->_last = ptSize->operator()(1);
         MatSetSizes(ptA->_petsc, mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1), ptSize->operator()(2) * (bsr ? bs : 1), ptSize->operator()(2) * (bsr ? bs : 1));
+        if(prune)
+            MatSetSizes(ptA->_S, mK->n * bs, mK->n * bs, ptSize->operator()(2) * bs, ptSize->operator()(2) * bs);
         ptA->_num = new unsigned int[ptSize->n - 3];
         for(int i = 3; i < ptSize->n; ++i)
             ptA->_num[i - 3] = ptSize->operator()(i);
@@ -462,6 +470,8 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         ptA->_last = mK->n;
         ptA->_num = nullptr;
         MatSetSizes(ptA->_petsc, mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1));
+        if(prune)
+            MatSetSizes(ptA->_S, mK->n * bs, mK->n * bs, mK->n * bs, mK->n * bs);
     }
     bool clean = nargs[3] && GetAny<bool>((*nargs[3])(stack));
     if(clean)
@@ -471,13 +481,33 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         MatMPIBAIJSetPreallocationCSR(ptA->_petsc, bs, mK->lg, mK->cl, mK->a);
     else
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, mK->lg, mK->cl, mK->a);
+    if(prune) {
+        MatSetType(ptA->_S, MATMPIAIJ);
+        int* pI = new int[mK->n * bs + 1];
+        int* pJ = new int[mK->nbcoef * bs];
+        PetscScalar* pC = new PetscScalar[mK->nbcoef * bs];
+        for(int i = 0; i < mK->n; ++i) {
+            for(int k = 0; k < bs; ++k) {
+                for(int j = mK->lg[i]; j < mK->lg[i + 1]; ++j) {
+                    pJ[j - mK->lg[i] + bs * mK->lg[i] + k * (mK->lg[i + 1] - mK->lg[i])] = mK->cl[j] * bs + k;
+                    pC[j - mK->lg[i] + bs * mK->lg[i] + k * (mK->lg[i + 1] - mK->lg[i])] = mK->a[j * bs * bs + k * bs + k];
+                }
+                pI[i * bs + k] = mK->lg[i] * bs + k * (mK->lg[i + 1] - mK->lg[i]);
+            }
+        }
+        pI[mK->n * bs] = mK->nbcoef * bs;
+        MatMPIAIJSetPreallocationCSR(ptA->_S, pI, pJ, pC);
+        delete [] pC;
+        delete [] pJ;
+        delete [] pI;
+    }
     if(clean)
         ptK->A = nullptr;
     MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
     if(nargs[2])
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE);
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
-    KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+    KSPSetOperators(ptA->_ksp, ptA->_petsc, prune ? ptA->_S : ptA->_petsc);
     MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
