@@ -2052,7 +2052,7 @@ int count_diag_negative<complex<quadruple> >(SquareBlockMatrix<complex<quadruple
 template<>
 int count_diag_negative<float>(SquareBlockMatrix<float>& Diag);
 template<>
-int count_diag_negative<complex<float> >(SquareBlockMatrix<complex<float> >& D
+int count_diag_negative<complex<float> >(SquareBlockMatrix<complex<float> >& Diag);
 					  
 template<typename T>
 int count_diag_negative(SubSquareMatrix<T>& Diag);

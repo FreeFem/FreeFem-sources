@@ -1,10 +1,11 @@
 #ifndef MeshPoint_hpp_
 #define MeshPoint_hpp_
+#include <climits>
 //typedef double R;
 #ifndef LONG_MIN
-#if sizeof(LONG) == 4
+#if 1000000L*1000000L <0L
 # define LONG_MIN -2147483647
-#elif sizeof(LONG) == 8
+#elif 1000000L*1000000L >0L
 # define LONG_MIN -9223372036854775807
 #endif
 #endif
