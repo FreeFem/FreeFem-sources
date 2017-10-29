@@ -1,6 +1,21 @@
-@    changeset:   4212:a6ee8370de7d
-|\   tag:         tip
-| |  parent:      4211:e5e5e01ff499
+@  changeset:   4215:bdd53541358f
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sat Oct 28 19:07:13 2017 +0200
+|  summary:     add stuff of atsushi.suzuki@cas.cmc.osaka-u.ac.jp
+|
+o  changeset:   4214:a0f66a89fb0d
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Sat Oct 28 11:43:22 2017 +0200
+|  summary:     New preconditioner and macro to use predefined partitioning.
+|
+o  changeset:   4213:8eae2a6df306
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Wed Oct 25 11:27:21 2017 +0200
+|  summary:     No need to check for the Schur complement.
+|
+o    changeset:   4212:a6ee8370de7d
+|\   parent:      4211:e5e5e01ff499
 | |  parent:      4210:6b175ca36713
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Oct 25 09:49:11 2017 +0200
