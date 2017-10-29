@@ -1,3 +1,5 @@
+version 3.57 30 oct. 2017  4215:bdd53541358f
+ - pass to SuperLu 5.2.1
  - real [int] d=A.diag; when a matrix
  - add notaregion, in case of point outsize the region is not define ( value is LONG_MIN )
  - update dissection linear solve package form atsushi.suzuki@cas.cmc.osaka-u.ac.jp
