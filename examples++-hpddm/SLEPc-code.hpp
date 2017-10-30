@@ -75,48 +75,33 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
         EPSCreate(PETSC_COMM_WORLD, &eps);
         EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
         std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
-        if(options) {
-            std::vector<std::string> elems;
-            std::stringstream ss(*options);
-            std::string item;
-            while (std::getline(ss, item, ' '))
-                elems.push_back(item);
-            int argc = elems.size() + 1;
-            char** data = new char*[argc];
-            data[0] = new char[options->size() + argc]();
-            data[1] = data[0] + 1;
-            for(int i = 0; i < argc - 1; ++i) {
-                if(i > 0)
-                    data[i + 1] = data[i] + elems[i - 1].size() + 1;
-                strcpy(data[i + 1], elems[i].c_str());
-            }
-            FFPetscOptionsInsert(&argc, &data, NULL);
-            delete [] *data;
-            delete [] data;
-        }
+        bool fieldsplit = PETSc::insertOptions(options);
         if(nargs[1])
             EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
         EPSSetFromOptions(eps);
-        KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
-        KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
-        MatriceMorse<PetscScalar>* mS = nargs[7] ? static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[7])(stack))->A)) : 0;
-        KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
-        if(fields && names) {
-            ST st;
-            KSP ksp;
-            PC pc;
-            EPSGetST(eps, &st);
-            STGetKSP(st, &ksp);
-            KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
-            setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
-            if(ptA->_S) {
-                KSPGetPC(ksp, &pc);
-                PCSetUp(pc);
-                PetscInt nsplits;
-                KSP* subksp;
-                PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
-                KSPSetOperators(subksp[nsplits - 1], ptA->_S, ptA->_S);
-                PetscFree(subksp);
+        if(fieldsplit) {
+            KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
+            KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
+            MatriceMorse<PetscScalar>* mS = nargs[7] ? static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[7])(stack))->A)) : 0;
+            KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
+            if(fields && names) {
+                ST st;
+                KSP ksp;
+                PC pc;
+                EPSGetST(eps, &st);
+                STGetKSP(st, &ksp);
+                KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
+                setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
+                EPSSetUp(eps);
+                if(ptA->_S) {
+                    KSPGetPC(ksp, &pc);
+                    PCSetUp(pc);
+                    PetscInt nsplits;
+                    KSP* subksp;
+                    PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+                    KSPSetOperators(subksp[nsplits - 1], ptA->_S, ptA->_S);
+                    PetscFree(subksp);
+                }
             }
         }
         EPSSolve(eps);

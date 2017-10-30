@@ -321,11 +321,17 @@ long changeOperator(Type* const& A, Matrice_Creuse<PetscScalar>* const& mat) {
             KSPSetUp(A->_ksp);
             PC pc;
             KSPGetPC(A->_ksp, &pc);
-            PetscInt nsplits;
-            KSP* subksp;
-            PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
-            KSPSetOperators(subksp[nsplits - 1], A->_S, A->_S);
-            PetscFree(subksp);
+            PCType type;
+            PCGetType(pc, &type);
+            PetscBool isFieldSplit;
+            PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
+            if(isFieldSplit) {
+                PetscInt nsplits;
+                KSP* subksp;
+                PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+                KSPSetOperators(subksp[nsplits - 1], A->_S, A->_S);
+                PetscFree(subksp);
+            }
         }
     }
     return 0L;
@@ -759,32 +765,14 @@ class setOptions : public OneOperator {
 template<class Type>
 AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
-    if(std::is_same<Type, Dmat>::value) {
+    std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
+    bool fieldsplit = PETSc::insertOptions(options);
+    if(std::is_same<Type, Dmat>::value && fieldsplit) {
         KN<double>* fields = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
         KN<String>* names = nargs[3] ? GetAny<KN<String>*>((*nargs[3])(stack)) : 0;
         MatriceMorse<PetscScalar>* mS = nargs[5] ? static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[5])(stack))->A)) : 0;
         KN<double>* pL = nargs[6] ? GetAny<KN<double>*>((*nargs[6])(stack)) : 0;
         setFieldSplitPC(ptA, ptA->_ksp, fields, names, mS, pL);
-    }
-    std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
-    if(options) {
-        std::vector<std::string> elems;
-        std::stringstream ss(*options);
-        std::string item;
-        while (std::getline(ss, item, ' '))
-            elems.push_back(item);
-        int argc = elems.size() + 1;
-        char** data = new char*[argc];
-        data[0] = new char[options->size() + argc]();
-        data[1] = data[0] + 1;
-        for(int i = 0; i < argc - 1; ++i) {
-            if(i > 0)
-                data[i + 1] = data[i] + elems[i - 1].size() + 1;
-            strcpy(data[i + 1], elems[i].c_str());
-        }
-        FFPetscOptionsInsert(&argc, &data, NULL);
-        delete [] *data;
-        delete [] data;
     }
     if(std::is_same<Type, Dmat>::value) {
         FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
