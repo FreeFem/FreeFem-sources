@@ -278,7 +278,7 @@ class solveDDM_Op : public E_F0mps {
         Expression A;
         Expression x;
         Expression rhs;
-        static const int n_name_param = 8;
+        static const int n_name_param = 9;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         solveDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), x(param2), rhs(param3) {
@@ -296,7 +296,8 @@ basicAC_F0::name_and_type solveDDM_Op<Type, K>::name_param[] = {
     {"excluded", &typeid(bool)},
     {"ret", &typeid(Pair<K>*)},
     {"O", &typeid(Matrice_Creuse<K>*)},
-    {"solver", &typeid(long)}
+    {"solver", &typeid(long)},
+    {"communicator", &typeid(pcommworld)}
 };
 template<class Type, class K>
 class solveDDM : public OneOperator {
@@ -383,7 +384,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             pair->destroy();
             pair = nullptr;
         }
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Comm comm = nargs[8] ? *(MPI_Comm*)GetAny<pcommworld>((*nargs[8])(stack)) : MPI_COMM_WORLD;
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
     if(rank != mpirank || rank != 0) {
@@ -391,15 +392,16 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         if(prefix.size() > 0)
             opt.remove(prefix + "verbosity");
     }
+    MPI_Barrier(comm);
     double timer = MPI_Wtime();
     if(timing) { // tic
         timing->resize(timing->n + 1);
         (*timing)[timing->n - 1] = timer;
     }
     if(!excluded)
-        HPDDM::IterativeMethod::solve(*ptA, (K*)*ptRHS, (K*)*ptX, mu, MPI_COMM_WORLD);
+        HPDDM::IterativeMethod::solve(*ptA, (K*)*ptRHS, (K*)*ptX, mu, comm);
     else
-        HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, MPI_COMM_WORLD);
+        HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, comm);
     timer = MPI_Wtime() - timer;
     if(timing) { // toc
         (*timing)[timing->n - 1] = timer;
