@@ -1,5 +1,10 @@
-@  changeset:   4217:9495bd38512d
+@  changeset:   4218:67c28890c01b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 09 16:05:11 2017 +0100
+|  summary:     coorect space pb in equality
+|
+o  changeset:   4217:9495bd38512d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 09 15:40:19 2017 +0100
 |  summary:     try to coorect  petsc configure if only default mpicc

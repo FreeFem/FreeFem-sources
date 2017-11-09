@@ -230,7 +230,8 @@ clean-local:
 	-rm -rf $(prefix)/ff-petsc
 #	-rm $(PACKAGE1)
 	-rm config.log *.done
-
+echo:
+	echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 # Local Variables:
 # mode:makefile
 # ispell-local-dictionary:"british"
