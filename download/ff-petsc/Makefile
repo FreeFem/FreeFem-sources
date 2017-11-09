@@ -37,7 +37,7 @@ PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
 SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
-W_MPICC:=$(shell which mpicc)	
+W_MPICC:=$(strip $(shell which mpicc))
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=""
 else
