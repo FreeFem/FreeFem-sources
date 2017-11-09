@@ -39,7 +39,7 @@ SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
 W_MPICC:=$(strip $(shell which mpicc))
 ifeq ($(MPICC),$(W_MPICC))
-  WITH_MPI_DIR=""
+  WITH_MPI_DIR=
 else
   WITH_MPI_DIR="--with-mpi-dir='$(MPI_DIR)'"
 endif	

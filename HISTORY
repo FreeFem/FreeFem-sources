@@ -1,5 +1,10 @@
-@  changeset:   4218:67c28890c01b
+@  changeset:   4219:8b7b9f9f295d
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 09 16:09:25 2017 +0100
+|  summary:     add debug in Mafile
+|
+o  changeset:   4218:67c28890c01b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 09 16:05:11 2017 +0100
 |  summary:     coorect space pb in equality
