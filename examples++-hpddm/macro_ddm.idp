@@ -158,8 +158,10 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         supp = supp;
         suppSmooth = suppSmooth;
         meshName = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
-        if(suppSmooth[].min < 0.501)
-            borderName = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
+        if(!(usedARGV("-true_restrict") != -1 && usedARGV("-remove_zeros") != -1)) {
+            if(suppSmooth[].min < 0.501)
+                borderName = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
+        }
         VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
         VhLocal sum = khi;
         VhGlobal phi = 0;
@@ -174,7 +176,8 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
                 real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
                 if(intersection > 1.0e-6) {
                     partitionIntersection[numberIntersection] = phi;
-                    sum[] += partitionIntersection[numberIntersection][];
+                    if(usedARGV("-true_restrict") == -1)
+                        sum[] += partitionIntersection[numberIntersection][];
                     arrayIntersection[numberIntersection++] = arrayIntersection[i];
                 }
             }
@@ -182,36 +185,97 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         if(numberIntersection != arrayIntersection.n)
             arrayIntersection.resize(numberIntersection);
         restrictionIntersection.resize(numberIntersection);
+        meshN[int] meshIntersection(numberIntersection);
         for(int i = 0; i < numberIntersection; ++i) {
-            meshN meshIntersection = trunc(meshName, partitionIntersection[i] > 1.0e-6, label = 9999);
-            fespace WhIntersection(meshIntersection, P);
-            matrix R = interpolate(WhIntersection, Wh);
-            R.thresholding(1.0e-10);
-            real[int] C;
-            int[int] I;
-            [I, restrictionIntersection[i], C] = R;
-            restrictionIntersection[i].resize(R.nbcoef);
+            meshIntersection[i] = trunc(meshName, partitionIntersection[i] > 1.0e-6, label = 9999);
+            if(!(usedARGV("-true_restrict") != -1 && usedARGV("-remove_zeros") != -1)) {
+                fespace WhIntersection(meshIntersection[i], P);
+                matrix R = interpolate(WhIntersection, Wh);
+                R.thresholding(1.0e-10);
+                real[int] C;
+                int[int] I;
+                [I, restrictionIntersection[i], C] = R;
+                restrictionIntersection[i].resize(R.nbcoef);
+            }
         }
+        partitionIntersection.resize(0);
         fespace WhPart(meshName, PkPart);
         WhPart defPart(func2vec);
-        khi[] = khi[] ./= sum[];
         if(usedARGV("-true_restrict") != -1) {
             khi = abs(part - mpiRank(comm)) < 0.1;
-            VhLocal sigma;
+            VhLocal sigma = part;
             for(int i = 0; i < numberIntersection; ++i) {
                 if(mpiRank(comm) < arrayIntersection[i]) {
-                    sigma = abs(part - arrayIntersection[i]) < 0.1;
                     for(int j = 0; j < VhLocal.ndof; ++j) {
-                        if(khi[][j] > 0.9 && abs(sigma[][j] - khi[][j]) < 0.1) {
+                        if(khi[][j] > 0.9 && abs(sigma[][j] - arrayIntersection[i]) < 0.1)
                             khi[][j] = 0.0;
-                        }
                     }
                 }
             }
+            if(usedARGV("-remove_zeros") != -1) {
+                meshN ThIntersection;
+                fespace PhIntersection(ThIntersection, P0);
+                PhIntersection[int] recv(numberIntersection);
+                PhIntersection[int] send(numberIntersection);
+                mpiRequest[int] rq(2 * numberIntersection);
+                for(int i = 0; i < numberIntersection; ++i) {
+                    ThIntersection = meshIntersection[i];
+                    Irecv(processor(arrayIntersection[i], comm, rq[i]), recv[i][]);
+                    send[i] = khi;
+                    Isend(processor(arrayIntersection[i], comm, rq[numberIntersection + i]), send[i][]);
+                }
+                meshName = trunc(meshName, khi > 1.0e-6, label = 9999);
+                khi = khi;
+                int[int] skip(0);
+                for(int k = 0; k < 2 * numberIntersection; ++k) {
+                    int i = mpiWaitAny(rq);
+                    if(i < numberIntersection) {
+                        ThIntersection = meshIntersection[i];
+                        PhIntersection intersection = send[i] > 1.0e-6 && recv[i] > 1.0e-6;
+                        if(intersection[].l2 > 1.0e-6)
+                            meshIntersection[i] = trunc(meshIntersection[i], intersection  > 1.0e-6, label = 9999);
+                        else {
+                            skip.resize(skip.n + 1);
+                            skip[skip.n - 1] = i;
+                        }
+                    }
+                }
+                skip.sort;
+                restrictionIntersection.resize(numberIntersection - skip.n);
+                int j = 0;
+                for(int i = 0; i < numberIntersection; ++i) {
+                    bool skipped = false;
+                    if(j < skip.n) {
+                        if(skip[j] == i) {
+                            ++j;
+                            skipped = true;
+                        }
+                    }
+                    if(!skipped) {
+                        fespace WhIntersection(meshIntersection[i], P);
+                        matrix R = interpolate(WhIntersection, Wh);
+                        R.thresholding(1.0e-10);
+                        real[int] C;
+                        int[int] I;
+                        restrictionIntersection[i - j].resize(R.nbcoef);
+                        [I, restrictionIntersection[i - j], C] = R;
+                        restrictionIntersection[i - j].resize(R.nbcoef);
+                        arrayIntersection[i - j] = arrayIntersection[i];
+                    }
+                }
+                numberIntersection -= skip.n;
+                arrayIntersection.resize(numberIntersection);
+            }
         }
+        else
+            khi[] = khi[] ./= sum[];
         defPart(func2vec) = initPart(khi);
         D.resize(Wh.ndof);
         D = func2vec[];
+        if(!(usedARGV("-true_restrict") != -1 && usedARGV("-remove_zeros") != -1)) {
+            meshN ThEmpty;
+            borderName = ThEmpty;
+        }
 // EOM
 
 macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning)

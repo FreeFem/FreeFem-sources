@@ -53,7 +53,7 @@ basicAC_F0::name_and_type eigensolver_Op<Type, K>::name_param[] = {
     {"array", &typeid(KNM<K>*)},
     {"fields", &typeid(KN<double>*)},
     {"names", &typeid(KN<String>*)},
-    {"schurPreconditioner", &typeid(Matrice_Creuse<PetscScalar>*)},
+    {"schurPreconditioner", &typeid(KN<Matrice_Creuse<PetscScalar>>*)},
     {"schurList", &typeid(KN<double>*)}
 };
 template<class Type, class K>
@@ -82,7 +82,7 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
         if(fieldsplit) {
             KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
             KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
-            MatriceMorse<PetscScalar>* mS = nargs[7] ? static_cast<MatriceMorse<PetscScalar>*>(&(*GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[7])(stack))->A)) : 0;
+            KN<Matrice_Creuse<PetscScalar>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[7])(stack)) : 0;
             KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
             if(fields && names) {
                 ST st;
@@ -93,14 +93,10 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
                 KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                 setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
                 EPSSetUp(eps);
-                if(ptA->_S) {
+                if(!ptA->_S.empty()) {
                     KSPGetPC(ksp, &pc);
                     PCSetUp(pc);
-                    PetscInt nsplits;
-                    KSP* subksp;
-                    PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
-                    KSPSetOperators(subksp[nsplits - 1], ptA->_S, ptA->_S);
-                    PetscFree(subksp);
+                    setCompositePC(ptA, pc);
                 }
             }
         }
