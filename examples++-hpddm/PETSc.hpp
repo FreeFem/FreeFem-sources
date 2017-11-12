@@ -19,7 +19,7 @@ class DistributedCSR {
     public:
         HpddmType*                  _A;
         Mat                     _petsc;
-        Mat                         _S;
+        std::vector<Mat>            _S;
         Vec                         _x;
         ISLocalToGlobalMapping   _rmap;
         VecScatter            _scatter;
@@ -28,10 +28,11 @@ class DistributedCSR {
         unsigned int*             _num;
         unsigned int            _first;
         unsigned int             _last;
-        DistributedCSR() : _A(), _petsc(), _S(), _x(), _ksp(), _num(), _first(), _last() { };
+        DistributedCSR() : _A(), _petsc(), _x(), _ksp(), _num(), _first(), _last() { _S.clear(); };
         ~DistributedCSR() {
             MatDestroy(&_petsc);
-            MatDestroy(&_S);
+            for(int i = 0; i < _S.size(); ++i)
+                MatDestroy(&_S[i]);
             VecDestroy(&_x);
             KSPDestroy(&_ksp);
             if(_A) {
@@ -58,7 +59,7 @@ void globalMapping(HpddmType* const& A, unsigned int*& num, unsigned int& start,
 template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
 void globalMapping(HpddmType* const& A, unsigned int* const& num, unsigned int& start, unsigned int& end, unsigned int& global, unsigned int* const list) { }
 template<class Type>
-void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* const& names, MatriceMorse<PetscScalar>* const& mS, KN<double>* const& pL) {
+void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* const& names, KN<Matrice_Creuse<PetscScalar>>* const& mT, KN<double>* const& pL) {
     if(fields) {
         PC pc;
         KSPGetPC(ksp, &pc);
@@ -85,7 +86,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             PCFieldSplitSetIS(pc, names && j < names->size() ? (*(names->operator[](j))).c_str() : NULL, is);
             ISDestroy(&is);
         }
-        if(mS && pL) {
+        if(mT && mT->n > 0 && pL) {
             int *is, *js;
             PetscScalar *s;
             unsigned int* re = new unsigned int[pL->n];
@@ -98,15 +99,19 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             ptA->_A->clearBuffer();
             globalMapping(ptA->_A, num, start, end, global, re);
             delete [] re;
-            unsigned int* numSchur = new unsigned int[nbSchur];
-            {
-                re = new unsigned int[nbSchur];
-                for(int i = 0, j = 0; i < pL->n; ++i) {
-                    if((*pL)[i]) {
-                        *numSchur++ = num[i];
-                        re[static_cast<int>((*pL)[i]) - 1] = j++;
-                    }
+            re = new unsigned int[2 * nbSchur];
+            unsigned int* numSchur = re + nbSchur;
+            for(int i = 0, j = 0; i < pL->n; ++i) {
+                if((*pL)[i]) {
+                    *numSchur++ = num[i];
+                    re[static_cast<int>((*pL)[i]) - 1] = j++;
                 }
+            }
+            numSchur -= nbSchur;
+            delete [] num;
+            ptA->_S.resize(mT->n);
+            for(int k = 0; k < mT->n; ++k) {
+                MatriceMorse<PetscScalar>* mS = static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A));
                 std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(mS->n);
                 for(int i = 0; i < mS->n; ++i) {
                     unsigned int row = re[i];
@@ -128,36 +133,25 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                 }
                 js -= mS->nbcoef;
                 s -= mS->nbcoef;
-                delete [] re;
+                int* ia, *ja;
+                PetscScalar* c;
+                ia = ja = nullptr;
+                c = nullptr;
+                HPDDM::MatrixCSR<PetscScalar>* dN = new HPDDM::MatrixCSR<PetscScalar>(mS->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
+                bool free = ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN);
+                MatCreate(PETSC_COMM_WORLD, &ptA->_S[k]);
+                MatSetSizes(ptA->_S[k], end - start, end - start, global, global);
+                MatSetType(ptA->_S[k], MATMPIAIJ);
+                MatMPIAIJSetPreallocationCSR(ptA->_S[k], ia, ja, c);
+                MatSetOption(ptA->_S[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+                if(free) {
+                    delete [] ia;
+                    delete [] ja;
+                    delete [] c;
+                }
+                delete dN;
             }
-            delete [] num;
-            numSchur -= nbSchur;
-            int* ia, *ja;
-            PetscScalar* c;
-            ia = ja = nullptr;
-            c = nullptr;
-            HPDDM::MatrixCSR<PetscScalar>* dN = new HPDDM::MatrixCSR<PetscScalar>(mS->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
-            bool free = ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN);
-            /*
-            HPDDM::MatrixCSR<PetscScalar>* nP = new HPDDM::MatrixCSR<PetscScalar>(end - start, global, ia[end - start], c, ia, ja, false);
-            if(mpirank == 0) {
-                cout << *dN << endl;
-                cout << *nP << endl;
-            }
-            delete nP;
-            */
-            MatCreate(PETSC_COMM_WORLD, &(ptA->_S));
-            MatSetSizes(ptA->_S, end - start, end - start, global, global);
-            MatSetType(ptA->_S, MATMPIAIJ);
-            MatMPIAIJSetPreallocationCSR(ptA->_S, ia, ja, c);
-            MatSetOption(ptA->_S, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-            if(free) {
-                delete [] ia;
-                delete [] ja;
-                delete [] c;
-            }
-            delete [] numSchur;
-            delete dN;
+            delete [] re;
             ptA->_A->setBuffer();
         }
         delete [] idx;
@@ -165,6 +159,28 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         local -= fields->n;
         delete [] local;
     }
+}
+template<class Type>
+void setCompositePC(Type* A, PC pc) {
+    PetscInt nsplits;
+    KSP* subksp;
+    PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+    if(A->_S.size() == 1)
+        KSPSetOperators(subksp[nsplits - 1], A->_S[0], A->_S[0]);
+    else {
+        PC pcS;
+        KSPGetPC(subksp[nsplits - 1], &pcS);
+        for(int i = 0; i < A->_S.size(); ++i)
+            PCCompositeAddPC(pcS, PCNONE);
+        PCSetUp(pcS);
+        for(int i = 0; i < A->_S.size(); ++i) {
+            PC subpc;
+            PCCompositeGetPC(pcS, i, &subpc);
+            PCSetOperators(subpc, A->_S[i], A->_S[i]);
+            PCSetFromOptions(subpc);
+        }
+    }
+    PetscFree(subksp);
 }
 bool insertOptions(std::string* const& options) {
     bool fieldsplit = false;
