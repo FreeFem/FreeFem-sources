@@ -4,6 +4,7 @@
 load "hpddm"                        // HPDDM plugin
 macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
+macro vectorialfe()P2// EOM
 include "macro_ddm.idp"             // additional DDM functions
 
 macro def(i)[i, i#B]// EOM          // vector field definition
@@ -11,7 +12,7 @@ macro init(i)[i, i]// EOM           // vector field initialization
 real Sqrt = sqrt(2.0);
 macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]// EOM
 macro div(u)(dx(u) + dy(u#B))// EOM
-func Pk = [P2, P2];                 // finite element space
+func Pk = [vectorialfe, vectorialfe];                 // finite element space
 
 string deflation = getARGV("-deflation", "geneo");              // coarse space construction
 int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
@@ -35,7 +36,7 @@ real[int] D;                                // partition of unity
 {
     int[int] l = [2, 1, 2, 2];
     meshN ThGlobal = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
-    build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, Pk, comm, excluded)
+    build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, Pk, comm, excluded, 2)
 }
 
 real f = -90000.0;
