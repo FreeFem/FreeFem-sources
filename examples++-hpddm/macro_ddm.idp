@@ -120,7 +120,7 @@ if(mpiRank(comm) == 0) {
 // EOM
 
 
-macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
+macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
         meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);
         mpiBarrier(comm);
         real timerPartition = mpiWtime();
@@ -186,11 +186,20 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
             arrayIntersection.resize(numberIntersection);
         restrictionIntersection.resize(numberIntersection);
         meshN[int] meshIntersection(numberIntersection);
+IFMACRO(vectorialfe)
+        fespace blockWh(meshName, vectorialfe);
+ENDIFMACRO
         for(int i = 0; i < numberIntersection; ++i) {
             meshIntersection[i] = trunc(meshName, partitionIntersection[i] > 1.0e-6, label = 9999);
             if(usedARGV("-true_restrict") == -1 || usedARGV("-remove_zeros") == -1) {
+IFMACRO(vectorialfe)
+                fespace WhIntersection(meshIntersection[i], vectorialfe);
+                matrix R = interpolate(WhIntersection, blockWh);
+ENDIFMACRO
+IFMACRO(!vectorialfe)
                 fespace WhIntersection(meshIntersection[i], P);
                 matrix R = interpolate(WhIntersection, Wh);
+ENDIFMACRO
                 R.thresholding(1.0e-10);
                 real[int] C;
                 int[int] I;
@@ -252,8 +261,14 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
                         }
                     }
                     if(!skipped) {
+IFMACRO(vectorialfe)
+                        fespace WhIntersection(meshIntersection[i], vectorialfe);
+                        matrix R = interpolate(WhIntersection, blockWh);
+ENDIFMACRO
+IFMACRO(!vectorialfe)
                         fespace WhIntersection(meshIntersection[i], P);
                         matrix R = interpolate(WhIntersection, Wh);
+ENDIFMACRO
                         R.thresholding(1.0e-10);
                         real[int] C;
                         int[int] I;
@@ -269,6 +284,16 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         }
         else
             khi[] = khi[] ./= sum[];
+IFMACRO(vectorialfe)
+        if(bs > 1)
+            for(int i = 0; i < numberIntersection; ++i) {
+                int n = restrictionIntersection[i].n;
+                restrictionIntersection[i].resize(n * bs);
+                for(int j = n - 1; j != -1; --j)
+                    for(int k = bs - 1; k != -1; --k)
+                        restrictionIntersection[i][j * bs + k] = restrictionIntersection[i][j] * bs + k;
+            }
+ENDIFMACRO
         defPart(func2vec) = initPart(khi);
         D.resize(Wh.ndof);
         D = func2vec[];
@@ -278,7 +303,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         }
 // EOM
 
-macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning)
+macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs)
 {
     real timing = mpiWtime();
     if(mpisize > 1 && !excluded) {
@@ -341,7 +366,7 @@ macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, ar
             partGlobal[] = userPartitioning;
             broadcast(processor(0, comm), partGlobal[]);
         }
-        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart)
+        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
     }
     else if(mpisize == 1) {
         Th = ThGlobal;
@@ -352,34 +377,51 @@ macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, ar
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
 }// EOM
 
-macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart)
-{
+IFMACRO(vectorialfe)
+macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray)
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, bs)
 }// EOM
-
-macro buildEdgeWithPartitioning(Th, ThBorder, ThGlobal, part, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart)
-{
+macro buildEdgeWithPartitioning(Th, ThBorder, ThGlobal, part, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
-    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part)
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, bs)
 }// EOM
-
-macro buildWithPartitioning(Th, ThBorder, ThGlobal, part, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded)
-{
+macro buildWithPartitioning(Th, ThBorder, ThGlobal, part, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, bs) {
     int[int] emptyArray(0);
-    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray, part)
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray, part, bs)
 }// EOM
-
-macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded)
-{
+macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray, emptyRealArray)
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, bs)
 }// EOM
-
-macro buildPeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, labPeriodic)
-{
+macro buildPeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, labPeriodic, bs) {
     real[int] emptyArray(0);
-    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, labPeriodic, emptyArray)
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, labPeriodic, emptyArray, bs)
 }// EOM
+ENDIFMACRO
+IFMACRO(!vectorialfe)
+macro buildEdge(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, 1)
+}// EOM
+macro buildEdgeWithPartitioning(Th, ThBorder, ThGlobal, part, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart) {
+    int[int] emptyArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, 1)
+}// EOM
+macro buildWithPartitioning(Th, ThBorder, ThGlobal, part, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded) {
+    int[int] emptyArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray, part, 1)
+}// EOM
+macro build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, 1)
+}// EOM
+macro buildPeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, labPeriodic) {
+    real[int] emptyArray(0);
+    buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, P, comm, excluded, P, def, init, labPeriodic, emptyArray, 1)
+}// EOM
+ENDIFMACRO
