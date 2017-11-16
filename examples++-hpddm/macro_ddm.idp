@@ -187,14 +187,14 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, o
         restrictionIntersection.resize(numberIntersection);
         meshN[int] meshIntersection(numberIntersection);
 IFMACRO(vectorialfe)
-        fespace blockWh(meshName, vectorialfe);
+        fespace singleComponentWh(meshName, vectorialfe);
 ENDIFMACRO
         for(int i = 0; i < numberIntersection; ++i) {
             meshIntersection[i] = trunc(meshName, partitionIntersection[i] > 1.0e-6, label = 9999);
             if(usedARGV("-true_restrict") == -1 || usedARGV("-remove_zeros") == -1) {
 IFMACRO(vectorialfe)
                 fespace WhIntersection(meshIntersection[i], vectorialfe);
-                matrix R = interpolate(WhIntersection, blockWh);
+                matrix R = interpolate(WhIntersection, singleComponentWh);
 ENDIFMACRO
 IFMACRO(!vectorialfe)
                 fespace WhIntersection(meshIntersection[i], P);
@@ -263,7 +263,7 @@ ENDIFMACRO
                     if(!skipped) {
 IFMACRO(vectorialfe)
                         fespace WhIntersection(meshIntersection[i], vectorialfe);
-                        matrix R = interpolate(WhIntersection, blockWh);
+                        matrix R = interpolate(WhIntersection, singleComponentWh);
 ENDIFMACRO
 IFMACRO(!vectorialfe)
                         fespace WhIntersection(meshIntersection[i], P);
@@ -272,7 +272,6 @@ ENDIFMACRO
                         R.thresholding(1.0e-10);
                         real[int] C;
                         int[int] I;
-                        restrictionIntersection[i - j].resize(R.nbcoef);
                         [I, restrictionIntersection[i - j], C] = R;
                         restrictionIntersection[i - j].resize(R.nbcoef);
                         arrayIntersection[i - j] = arrayIntersection[i];
