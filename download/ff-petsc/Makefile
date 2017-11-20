@@ -37,6 +37,12 @@ PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
 SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
+W_MPICC:=$(strip $(shell which mpicc))
+ifeq ($(MPICC),$(W_MPICC))
+  WITH_MPI_DIR=
+else
+  WITH_MPI_DIR="--with-mpi-dir='$(MPI_DIR)'"
+endif	
 DIR_INSTALL_REAL:=$(DESTDIR)$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(DESTDIR)$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
@@ -83,7 +89,7 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	--prefix=$(DIR_INSTALL_REAL) \
 	--with-ssl=0 ---with-x=0 \
     '--with-scalar-type=real' \
-    --with-mpi-dir='$(MPI_DIR)' \
+    $(WITH_MPI_DIR) \
 	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
 	--download-scalapack --download-metis --download-ptscotch \
 	--download-mumps --download-ml --download-hypre --download-parmetis \
@@ -100,7 +106,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
     '--with-scalar-type=complex' \
 	--with-ssl=0 ---with-x=0 \
-    --with-mpi-dir='$(MPI_DIR)' \
+    $(WITH_MPI_DIR)  \
 	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
 	--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
 	--with-metis-include='$(METIS_INCLUDE)'  --with-metis-lib='$(METIS_LIB)' \
@@ -217,14 +223,16 @@ clean:clean-local
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc* ../lib/WHERE.SLEPc* 
-	-rm $(prefix)/ff-petsc
 	-rm -rf ../include/*PETSc*
 	-rm -rf ../lib/lib*PETSc* 
 	-rm -rf $(SRCDIR)
 	-rm -rf $(prefix)/ff-petsc
 #	-rm $(PACKAGE1)
-	-rm config.log *.done
+	-rm WHERE-all config.log *.done
+	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo -rf $(prefix)/ff-petsc ; fi
 
+echo:
+	echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 # Local Variables:
 # mode:makefile
 # ispell-local-dictionary:"british"
