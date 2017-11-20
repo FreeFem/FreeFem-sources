@@ -223,13 +223,14 @@ clean:clean-local
 clean-local:
 	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
 	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc* ../lib/WHERE.SLEPc* 
-	-rm $(prefix)/ff-petsc
 	-rm -rf ../include/*PETSc*
 	-rm -rf ../lib/lib*PETSc* 
 	-rm -rf $(SRCDIR)
 	-rm -rf $(prefix)/ff-petsc
 #	-rm $(PACKAGE1)
-	-rm config.log *.done
+	-rm WHERE-all config.log *.done
+	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo -rf $(prefix)/ff-petsc ; fi
+
 echo:
 	echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 # Local Variables:
