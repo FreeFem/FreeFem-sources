@@ -1,5 +1,10 @@
-@  changeset:   4219:8b7b9f9f295d
+@  changeset:   4220:6ebccd506501
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 09 16:24:10 2017 +0100
+|  summary:     correct typo download/ff-petsc/Makefile
+|
+o  changeset:   4219:8b7b9f9f295d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 09 16:09:25 2017 +0100
 |  summary:     add debug in Mafile
