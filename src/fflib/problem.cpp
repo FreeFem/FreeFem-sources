@@ -1706,7 +1706,7 @@ void Check(const Opera &Op,int N,int  M)
             if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
             else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
             else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
-            else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+            else cout << "  --  int 2d   (nQP: "<< FIT.n << " ) in "  ;
         }
         // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
         if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) )
@@ -2006,7 +2006,7 @@ void Check(const Opera &Op,int N,int  M)
           if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
           else  if (CDomainOfIntegration::intallfaces==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
           //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
-          else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+          else cout << "  --  int 3d   (nQP: "<< FIV.n << " ) in "  ;
       }
       if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (2)");
       if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
@@ -4837,7 +4837,7 @@ template<class R>
 	if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") , samemesh: " << sameMesh << " "   ;
 	else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
 	else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
-	else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+	else cout << "  --  int 3d   (nQP: "<< FIV.n << " ) in "  ;
       }
     if( di.withmap()) { ExecError(" no map  in the case (5)??");}
 
@@ -5176,7 +5176,7 @@ template<class R>
 	if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ";
 	else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
 	else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
-	else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+	else cout << "  --  int 2d  (nQP: "<< FIT.n << " ) in "  ;
         cout << ", samemesh :"<< sameMesh<< " int mortar: " << intmortar ;
       }
     /*

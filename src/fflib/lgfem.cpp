@@ -2923,6 +2923,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
  template<class R> 
   AnyType IntFunction<R>::operator()(Stack stack) const  { 
   MeshPoint mp=* MeshPointStack(stack);
+  StackOfPtr2Free  * wsptr2free=WhereStackOfPtr2Free(stack);
  R r=0;
  
  SHOWVERB(cout << " int " << endl);
@@ -2944,14 +2945,14 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
           if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
           else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
-          else cout << "  --  int    (nQP: "<< FIT.n << " ) in "  ;
+          else cout << "  --  int 2d   (nQP: "<< FIT.n << " ) in "  ;
       }
       else if(dim==3)
       {
           if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
           else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all faces ( nQP: "<< FIT.n << "),"  ;
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF face nQP: ("<< FIT.n << ")," ;
-          else cout << "  --  int    (nQP: "<< FIV.n << " ) in "  ;
+          else cout << "  --  int 3d   (nQP: "<< FIV.n << " ) in "  ;
       }
   }
  /*
@@ -3032,6 +3033,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        }
                        
                    }
+                   wsptr2free->clean();// ADD FH 11/2017
                }
                if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
                
@@ -3059,6 +3061,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
+               wsptr2free->clean();// ADD FH 11/2017
 	   }
        }
      else if (kind==CDomainOfIntegration::int2d)
@@ -3118,6 +3121,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                     }
                     
                 }
+                 wsptr2free->clean();// ADD FH 11/2017
              }
              
          }
@@ -3132,13 +3136,15 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		 MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
 		 r += K.area*pi.a*GetAny<R>( (*fonc)(stack)); 
 	       }
+             wsptr2free->clean();// ADD FH 11/2017
 	 }
      }
      else   if (kind==CDomainOfIntegration::intalledges)
        {
 	 const QuadratureFormular1d & FI = FIE;
 	 for (int i=0;i< Th.nt; i++) 
-	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
+	   if (all || setoflab.find(Th[i].lab) != setoflab.end())
+           {
 	     for( int ie=0;ie<3;ie++)
 	       {                                
 		 const Triangle & K(Th[i]);   
@@ -3156,6 +3162,8 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
+               wsptr2free->clean();// ADD FH 11/2017
+           }
        }
      else   if (kind==CDomainOfIntegration::intallVFedges)
        {
@@ -3187,6 +3195,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		       r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		     }
 		 }
+                 wsptr2free->clean();// ADD FH 11/2017
 	     }
        }
      else
@@ -3274,6 +3283,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        }
                        
                    }
+                   wsptr2free->clean();// ADD FH 11/2017
                }
                if(verbosity > 5) cout << " Area level set = " << llevelset << endl;
               // if(verbosity > 50) cout << "phi " << phi << endl;
@@ -3303,6 +3313,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
 		     r += mes*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
+                   wsptr2free->clean();// ADD FH 11/2017
 	       }
 	   }
        }
@@ -3347,6 +3358,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                          r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
                      }
                  }
+                 wsptr2free->clean();// ADD FH 11/2017
              }
 
             
@@ -3364,6 +3376,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
                        r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack)); 
                      }
+                   wsptr2free->clean();// ADD FH 11/2017
                }
          }
      }
@@ -3388,6 +3401,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     r += mes*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
+           wsptr2free->clean();// ADD FH 11/2017
        }
 
    }
