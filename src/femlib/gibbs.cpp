@@ -1128,8 +1128,14 @@ int FESpace::renum()
 	r = 	 new long[nv+1];			
 	if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
 	err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;
-	delete [] nn;					
-	if(err==0)
+	delete [] nn;
+    if(nbvoisin <= nv) // no renumbering if no enought  neighbour FH.  nov 2017
+        // thank to beniamin.bogosel@cmap.polytechnique.fr
+    {
+        err=1;
+        if(verbosity>1) cout << " No renumbering ( nbvois  " << nbvoisin << " <= " <<nv <<"  nb nodes  )" <<   endl;
+    }
+    else if(err==0   )
 	{
        m = new long[nv+1];
        nn = new long[nv+1];

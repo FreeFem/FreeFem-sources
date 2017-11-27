@@ -1,6 +1,11 @@
-@    changeset:   4229:167e81324588
-|\   tag:         tip
-| |  parent:      4221:10220fef25c0
+@  changeset:   4230:9ba0c6093f6f
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Nov 22 11:46:31 2017 +0100
+|  summary:     correct to problem of sisqo_nakov@yahoo.com:
+|
+o    changeset:   4229:167e81324588
+|\   parent:      4221:10220fef25c0
 | |  parent:      4228:7d220f2e262b
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Mon Nov 20 22:00:28 2017 +0100
