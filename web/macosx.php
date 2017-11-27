@@ -59,19 +59,12 @@ nloaded from > Anywhere)<A>
 	<? pfile($mfile,"MacOS 10.4") ?>	
 <p class="p1"><br></p>
 <p class="p1">The <tt>textmate 2</tt> editor is a good editor for  Mac 10.7 or better, <a href="https://macromates.com/download"> download  from macromates.com </a> and install it, when  get the 
-  <a href="http://www.freefem.org/ff++/Textmate2-ff++.zip"> textmate freefem++ syntax from www.freefem.org/ff++/Textmate2-ff++.zip (version june 2107)</a> unzip Textmate2-ff++.zip and follow the explanation given in file \texttt{How\_To.rtf}.</p>
+  <a href="http://www.freefem.org/ff++/Textmate2-ff++.zip"> textmate freefem++ syntax from www.freefem.org/ff++/Textmate2-ff++.zip (version nov.  2107)</a> unzip Textmate2-ff++.zip and follow the explanation given in file \texttt{How\_To.rtf}.</p>
 <p class="p1"><br></p>
 
 <p class="p1"><span class="s1"> Please read the <a href="README_MAC.txt"> README_MAC</a> form the distribution for the full infomation </span></p>
 <p class="p1"><span class="s1">Take the file from and download<span class="Apple-converted-space"> </span></span></p>
 <p class="p3"><span class="s1"><br>
-</span></p>
-<p class="p1"><span class="s1">Just follow the install, openmpi or mpich<span class="Apple-converted-space">  </span>is in the package for version 10.6 and 10.7 the version is compile with g++ v 4.9 (http://prdownloads.sourceforge.net/hpc/gfortran-4.9-bin.tar.gz?download)</span></p>
-<p class="p1"><span class="s1">take <a href="http://hpc.sourceforge.net/"><span class="s3">hpc.sourceforge.net </span></a>remarkversion.<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1">to install do:<span class="Apple-converted-space"> </span></span></p>
-<p class="p4"><span class="s1"><span class="Apple-converted-space"> </span></span></p>
-<p class="p5"><span class="s1"><span class="Apple-converted-space"> </span># sudo tar zxvf gfortran-4.9-bin.tar.gz -C /</span></p>
-<p class="p1"><span class="s1"><br>
 </span></p>
 <p class="p1"><span class="s1">remark,<span class="Apple-converted-space">  </span>all examples and documentation are in the directory</span></p>
 <p class="p2"><span class="s2"><span class="Apple-converted-space"> </span><a href="file:///usr/local/share/freefem++"><span class="s3">file:///usr/local/share/freefem++</span></a></span></p>
