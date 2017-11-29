@@ -1,5 +1,10 @@
-@  changeset:   4230:9ba0c6093f6f
+@  changeset:   4231:4cefd0ff49ef
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Nov 27 12:41:59 2017 +0100
+|  summary:     correct pb speed in renum
+|
+o  changeset:   4230:9ba0c6093f6f
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Nov 22 11:46:31 2017 +0100
 |  summary:     correct to problem of sisqo_nakov@yahoo.com:

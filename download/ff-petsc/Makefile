@@ -38,6 +38,7 @@ SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
 W_MPICC:=$(strip $(shell which mpicc))
+
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
 else
@@ -47,7 +48,7 @@ DIR_INSTALL_REAL:=$(DESTDIR)$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(DESTDIR)$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
-
+W_SUDO:=$(SHELL  mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
 petsc-slepc: WHERE-all
 
 PETSc-real:
@@ -78,7 +79,7 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real 
-	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  
+	cd $(SRCDIR) && $(W_SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -124,7 +125,7 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 	touch $@
 
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex 
-	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
+	cd $(SRCDIR) && $(W_SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex 
 
@@ -176,7 +177,7 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 
 
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
-	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
+	cd $(SRCDIR_SLEPC) &&   $(W_SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
 	touch $@
 
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
@@ -211,7 +212,7 @@ $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
 
 
 $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real 
-	cd $(SRCDIR_SLEPC) &&   make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
+	cd $(SRCDIR_SLEPC) &&   $(W_SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
 	touch $@
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
@@ -233,6 +234,8 @@ clean-local:
 
 echo:
 	echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
+	echo W_SUDO: $(W_SUDO)
+	echo MPI_DIR: $(MPI_DIR)
 # Local Variables:
 # mode:makefile
 # ispell-local-dictionary:"british"
