@@ -57,8 +57,19 @@ DIR_INSTALL_REAL:=$(DESTDIR)$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(DESTDIR)$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
-petsc-slepc: Makefile.inc WHERE-all
+petsc-slepc: Makefile.inc dir-install WHERE-all
 
+dir-install: $(DIR_INSTALL_REAL) $(DIR_INSTALL_COMPLEX)
+	-$(SUDO) mkdir -p $(DIR_INSTALL_REAL)
+	-$(SUDO) mkdir -p $(DIR_INSTALL_COMPLEX)
+	@if test -w 	"$(DIR_INSTALL_REAL)" -a -w 	"$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
+	else \
+	 echo  no write access in $(DIR_INSTALL_REAL) and $(DIR_INSTALL_COMPLEX); \
+	 echo " do:  make  petsc-slepc SUDO=sudo "; \
+	 echo " or add write access to  2 directory "; \
+	 echo sudo >do-sudo; \
+	fi
+	
 PETSc-real:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) WHERE ;\
 	else echo " -- No  Petc , no MPI"; fi
@@ -87,7 +98,7 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real 
-	cd $(SRCDIR) && $(W_SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  
+	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -133,7 +144,7 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 	touch $@
 
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex 
-	cd $(SRCDIR) && $(W_SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
+	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex 
 
@@ -185,7 +196,7 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 
 
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
-	cd $(SRCDIR_SLEPC) &&   $(W_SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
 	touch $@
 
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
@@ -220,7 +231,7 @@ $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
 
 
 $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real 
-	cd $(SRCDIR_SLEPC) &&   $(W_SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
 	touch $@
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
@@ -239,11 +250,15 @@ clean-local:
 #	-rm $(PACKAGE1)
 	-rm WHERE-all config.log *.done
 	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo -rf $(prefix)/ff-petsc ; fi
+	-rm do-sudo 
 
 echo:
-	echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
-	echo W_SUDO: $(W_SUDO)
-	echo MPI_DIR: $(MPI_DIR)
+	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
+	@echo SUDO: $(SUDO)
+	@echo MPI_DIR: $(MPI_DIR)
+	@echo " dir install real :" $(DIR_INSTALL_REAL) 
+	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX) 
+	@echo " do-sudo auto ???" $(SHELL  cat o-sudo)
 # Local Variables:
 # mode:makefile
 # ispell-local-dictionary:"british"
