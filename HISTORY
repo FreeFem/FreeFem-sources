@@ -1,5 +1,10 @@
-@  changeset:   4231:4cefd0ff49ef
+@  changeset:   4232:97d2c7ea3ffc
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Nov 29 16:11:22 2017 +0100
+|  summary:     Update install petsc (sudo case)
+|
+o  changeset:   4231:4cefd0ff49ef
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Mon Nov 27 12:41:59 2017 +0100
 |  summary:     correct pb speed in renum

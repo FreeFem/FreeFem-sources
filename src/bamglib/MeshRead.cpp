@@ -124,6 +124,7 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	   
 	   nbiv = nbv;
            for (i=0;i<nbv;i++) {
+               ordre[i]=0;
              f_in >> 
 	       	 	 vertices[i].r.x >>  
 	           vertices[i].r.y >> 
@@ -157,9 +158,29 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
 	      Int4 i1,i2,i3,iref;
 	      Triangle & t = triangles[nbt++];
 	      f_in >>  i1 >>  i2 >>   i3 >>   iref ;
+                ordre[i1-1]++;
+                ordre[i2-1]++;
+                ordre[i3-1]++;
+
 	      t = Triangle(this,i1-1,i2-1,i3-1);
 	      t.color=iref;
 	    }
+            // verif
+            {
+                int err=0;
+                for(int i=0; i< nbv; ++i)
+                {
+                    if( ordre[i] ==0)
+                    {
+                        cerr << " Err mesh vertices "<< i+1 << " is not in a  triangle " << endl;
+                        err++;
+                    }
+                }
+                if(err ) {
+                    cerr << " Fatal error read mesh  some vertices are in no traingle "<< err << endl ;
+                    MeshError(6666);
+                }
+            }
 	  // endtria=nbt;
 	}
       else if (!strcmp(fieldname,"Quadrilaterals"))

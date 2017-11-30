@@ -22,9 +22,18 @@
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
 
 include Makefile.inc
+W_SUDO:=$(SHELL  mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
+W_SUDO1=$(SHELL ls	)
 
 all-local:
-
+	@echo " # To build petsc and slepc  do # make petsc-slepc"
+	@echo " # warning tou have no writing acces in  $(DESTDIR)$(prefix)/ff-petsc"
+	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
+	@echo " # run under root "
+	@echo " # or create / add acces tp $(DESTDIR)$(prefix)/ff-petsc "
+	@echo " # do for examples:"
+	@echo "	sudo chmod a+rxw $(DESTDIR)$(prefix)/ff-petsc"
+	@echo "	make petsc-slepc "
 # Downloading and compiling mumps
 # -------------------------------
 
@@ -48,8 +57,7 @@ DIR_INSTALL_REAL:=$(DESTDIR)$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(DESTDIR)$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
-W_SUDO:=$(SHELL  mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
-petsc-slepc: WHERE-all
+petsc-slepc: Makefile.inc WHERE-all
 
 PETSc-real:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) WHERE ;\
