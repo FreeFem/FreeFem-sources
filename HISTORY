@@ -1,5 +1,10 @@
-@  changeset:   4232:97d2c7ea3ffc
+@  changeset:   4233:bb4fe3426fb8
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 30 14:45:35 2017 +0100
+|  summary:     add chech when read mesh with vertices in no triangle
+|
+o  changeset:   4232:97d2c7ea3ffc
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Nov 29 16:11:22 2017 +0100
 |  summary:     Update install petsc (sudo case)
