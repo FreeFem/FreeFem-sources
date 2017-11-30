@@ -1,5 +1,10 @@
-@  changeset:   4233:bb4fe3426fb8
+@  changeset:   4234:229f0cc29cca
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Nov 30 15:16:06 2017 +0100
+|  summary:     try to coorect ff-petsc makefle ...
+|
+o  changeset:   4233:bb4fe3426fb8
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 30 14:45:35 2017 +0100
 |  summary:     add chech when read mesh with vertices in no triangle

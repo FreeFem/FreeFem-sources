@@ -93,7 +93,8 @@ an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy w
 <p class="p3"><span class="s1">3)  download and compile petsc, slepc in real and complex, ...</p>
 <p class="p3"><span class="s1">  ...  Warning: Check that you can write in  directory : path_install/ff-petsc</p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>cd download/ff-petsc</b></span></p>
-<p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>make WHERE-all</b></span></p>
+<p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>make petsc-slepc SUDO=sudo (if need root access to install dir)</b></span></p>
+<p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>make petsc-slepc</b></span></p>
 <p class="p9"><span class="s9"><i>.... wait , ... wait , wait ...</i></span></p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>cd -</b></span></p>
 <p class="p3"><span class="s1">4)  reconfigure with  petsc, slepc in real and complex, ...</p>
