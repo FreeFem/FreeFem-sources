@@ -59,7 +59,7 @@ PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 
-dir-install: $(DIR_INSTALL_REAL) $(DIR_INSTALL_COMPLEX)
+dir-install: Makefile.inc 
 	-$(SUDO) mkdir -p $(DIR_INSTALL_REAL)
 	-$(SUDO) mkdir -p $(DIR_INSTALL_COMPLEX)
 	@if test -w 	"$(DIR_INSTALL_REAL)" -a -w 	"$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
