@@ -376,6 +376,7 @@ void Triangulation::hRefineQA(double h, unsigned int flag, Edge::refinement_prio
     Edge **minEdge= new Edge *[nv_iso]();
     Edge **maxEdge= new Edge *[nv_iso]();
     R2   *eigenVec= new R2[nv_iso];
+    cout << " nv = " << nv() << endl;
     for(int i=0; i<nv_iso; i++) eigenVec[i]=vertices[i].getm().eigensys();
     
     for(int i=0; i<ne_iso; i++){
@@ -400,10 +401,11 @@ void Triangulation::hRefineQA(double h, unsigned int flag, Edge::refinement_prio
     for(int i=0; i<ne_iso; i++){
         Edge *e=&edges[i]; 
         if(!e->isRepresentative()) continue;
-        
+        cout << " nv = " << nv() << " " << ne_oriented() << endl;
+
         const int indexu = vertices.index(e->getu()), indexv = vertices.index(e->getv());
-        bool extru= (e==minEdge[indexu]) || (e==maxEdge[indexu]);
-        bool extrv= (e==minEdge[indexv]) || (e==maxEdge[indexv]);
+        bool extru= indexu<nv_iso && ( (e==minEdge[indexu]) || (e==maxEdge[indexu]));
+        bool extrv= indexv<nv_iso && ( (e==minEdge[indexv]) || (e==maxEdge[indexv]));
         
         if(!extru && !extrv) continue;
         Edge *const f=e->hRefine2(h, edges, vertices, metric, NULL); //non recursive split. 
