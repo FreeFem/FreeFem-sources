@@ -1,5 +1,10 @@
-@  changeset:   4238:f5ed1e494feb
+@  changeset:   4239:66b92a75e831
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Dec 08 10:17:43 2017 +0100
+|  summary:     coorect type in download/ff-petsc/Makefile  missing rm
+|
+o  changeset:   4238:f5ed1e494feb
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Dec 08 07:33:50 2017 +0100
 |  summary:     coorect big probleme due of correct
