@@ -1,3 +1,4 @@
+ - build tar version 3.57 (8 dec 2017)
  - correct pb in solving the previous pb (memory crash in Element_QF.edp example)
  - solve pb : computing int3d(Th) of a manually defined function eats (Thank to sisqo_nakov@yahoo.com )
 version 3.57 30 oct. 2017  4215:bdd53541358f
