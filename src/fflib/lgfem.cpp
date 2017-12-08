@@ -2924,6 +2924,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
   AnyType IntFunction<R>::operator()(Stack stack) const  { 
   MeshPoint mp=* MeshPointStack(stack);
   StackOfPtr2Free  * wsptr2free=WhereStackOfPtr2Free(stack);
+  size_t  swsptr2free =wsptr2free->size();
  R r=0;
  
  SHOWVERB(cout << " int " << endl);
@@ -3033,7 +3034,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        }
                        
                    }
-                   wsptr2free->clean();// ADD FH 11/2017
+                   wsptr2free->clean(swsptr2free);// ADD FH 11/2017
                }
                if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
                
@@ -3061,7 +3062,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
-               wsptr2free->clean();// ADD FH 11/2017
+               wsptr2free->clean(swsptr2free);// ADD FH 11/2017
 	   }
        }
      else if (kind==CDomainOfIntegration::int2d)
@@ -3121,7 +3122,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                     }
                     
                 }
-                 wsptr2free->clean();// ADD FH 11/2017
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
              }
              
          }
@@ -3136,7 +3137,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		 MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
 		 r += K.area*pi.a*GetAny<R>( (*fonc)(stack)); 
 	       }
-             wsptr2free->clean();// ADD FH 11/2017
+             wsptr2free->clean(swsptr2free);// ADD FH 11/2017
 	 }
      }
      else   if (kind==CDomainOfIntegration::intalledges)
@@ -3162,7 +3163,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
-               wsptr2free->clean();// ADD FH 11/2017
+               wsptr2free->clean(swsptr2free);// ADD FH 11/2017
            }
        }
      else   if (kind==CDomainOfIntegration::intallVFedges)
@@ -3195,7 +3196,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		       r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		     }
 		 }
-                 wsptr2free->clean();// ADD FH 11/2017
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
 	     }
        }
      else
@@ -3283,7 +3284,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        }
                        
                    }
-                   wsptr2free->clean();// ADD FH 11/2017
+                   wsptr2free->clean(swsptr2free);// ADD FH 11/2017
                }
                if(verbosity > 5) cout << " Area level set = " << llevelset << endl;
               // if(verbosity > 50) cout << "phi " << phi << endl;
@@ -3313,7 +3314,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
 		     r += mes*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
-                   wsptr2free->clean();// ADD FH 11/2017
+                   wsptr2free->clean(swsptr2free);// ADD FH 11/2017
 	       }
 	   }
        }
@@ -3358,7 +3359,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                          r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
                      }
                  }
-                 wsptr2free->clean();// ADD FH 11/2017
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
              }
 
             
@@ -3376,7 +3377,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
                        r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack)); 
                      }
-                   wsptr2free->clean();// ADD FH 11/2017
+                   wsptr2free->clean(swsptr2free);// ADD FH 11/2017
                }
          }
      }
@@ -3401,7 +3402,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     r += mes*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
-           wsptr2free->clean();// ADD FH 11/2017
+           wsptr2free->clean(swsptr2free);// ADD FH 11/2017
        }
 
    }

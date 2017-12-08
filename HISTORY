@@ -1,5 +1,15 @@
-@  changeset:   4235:2e2d09093773
+@  changeset:   4237:42b2557a4088
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Dec 06 10:08:42 2017 +0100
+|  summary:     Pass sanity check
+|
+o  changeset:   4236:35d623dde651
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Dec 01 16:53:54 2017 +0100
+|  summary:     update download/ff-petsc/Makefile
+|
+o  changeset:   4235:2e2d09093773
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Nov 30 15:21:18 2017 +0100
 |  summary:     correct web site
@@ -10350,14 +10360,14 @@ o-------+  changeset:   2657:9641b54129e2
 | | | |  date:        Mon Aug 29 15:11:31 2011 +0200
 | | | |  summary:     Added tag 3.14-0 for changeset e34f8a052707
 | | | |
-| | | | o  changeset:   2323:a2284c53ea2c
+| | | | _  changeset:   2323:a2284c53ea2c
 | | | | |  branch:      alh-autoconf
 | | | | |  parent:      2005:815102f120b1
 | | | | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | | | | |  date:        Mon Aug 29 11:27:42 2011 +0200
 | | | | |  summary:     close branch incompreansible, plus utiliser
 | | | | |
-| | | | | o  changeset:   2322:234fd78ad3c5
+| | | | | _  changeset:   2322:234fd78ad3c5
 | | | | | |  branch:      graphical-user-interface-branch
 | | | | | |  parent:      1970:44a4659127b5
 | | | | | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
