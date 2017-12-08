@@ -401,7 +401,7 @@ void Triangulation::hRefineQA(double h, unsigned int flag, Edge::refinement_prio
     for(int i=0; i<ne_iso; i++){
         Edge *e=&edges[i]; 
         if(!e->isRepresentative()) continue;
-        cout << " nv = " << nv() << " " << ne_oriented() << endl;
+        //cout << " nv = " << nv() << " " << ne_oriented() << endl;
 
         const int indexu = vertices.index(e->getu()), indexv = vertices.index(e->getv());
         bool extru= indexu<nv_iso && ( (e==minEdge[indexu]) || (e==maxEdge[indexu]));

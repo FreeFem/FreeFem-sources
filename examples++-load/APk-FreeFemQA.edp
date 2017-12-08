@@ -46,7 +46,7 @@ Assertion fail : (area>0)
 	line :281, in file ./../femlib/fem.hpp
  err code 5 ,  mpirank 0
 Process 26872 exited with status = 5 (0x00000005) 
-
+*/
 load "FreeFemQA"
 
 
@@ -77,4 +77,5 @@ plot(Th,ps="QAMesh.ps");
 //mesh Th=square(1,1,[x,y]);
 //savemesh(Th,"ThFF.msh");
 
-*/
+
+;

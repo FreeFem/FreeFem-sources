@@ -207,8 +207,8 @@ public:
 			stackptr.reserve(20); 	
 			if(prev) Add2StackOfPtr2Free(s,this);
 	       }
-	
-	bool clean() 
+     size_t size() const {return stackptr.size();} // Add FH dec 2017
+	bool clean(int ssize=0)
 	 {
              topmemory4tmp=0;// clean the tmp allocation
              bool ret= !stackptr.empty();
@@ -218,14 +218,14 @@ public:
 	        if(stackptr.size()>=20 && verbosity>2) 
 		  // FFCS: nothing on following line for tests/compare
 	           cout << "\n\t\t ### big?? ptr/lg clean " << stackptr.size() << " ptr's\n";
-		
-		for (reverse_iterator i=stackptr.rbegin(); i != stackptr.rend();++i)
+                reverse_iterator re= stackptr.rend()-ssize;
+		for (reverse_iterator i=stackptr.rbegin(); i != re;++i)
 		{
 		   
 			delete  (* (i) );
 		       // cout << "StackOfPtr2Free: clean " << (* (i) ) << " " << endl;
 		}
-		stackptr.resize(0);// clean the
+		stackptr.resize(ssize);// clean the
 		
 	     }
 	   return ret;
