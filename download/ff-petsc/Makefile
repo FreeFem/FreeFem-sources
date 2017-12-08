@@ -249,7 +249,7 @@ clean-local:
 	-rm -rf $(prefix)/ff-petsc
 #	-rm $(PACKAGE1)
 	-rm WHERE-all config.log *.done
-	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo -rf $(prefix)/ff-petsc ; fi
+	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo rm -rf $(prefix)/ff-petsc ; fi
 	-rm do-sudo 
 
 echo:
