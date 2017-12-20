@@ -726,7 +726,7 @@ AnyType Adaptation::operator()(Stack stack) const
   
 
   Real8 err         = arg(2,stack,0.01);    // coef in the metric
-  Real8  errg       = Min(arg(3,stack,0.01),err);
+  Real8  errg       = arg(3,stack,Min(0.01,err));// Modif FH 201217 
   long nbsx         = Max(100L,arg(4,stack,9000L));
   long nbsmooth     =  arg(5,stack,3L);
   long nbjacobi     =  arg(6,stack,0L) ;              // if increased will be more smooth
