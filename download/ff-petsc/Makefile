@@ -30,7 +30,7 @@ all-local:
 	@echo " # warning tou have no writing acces in  $(DESTDIR)$(prefix)/ff-petsc"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
 	@echo " # run under root "
-	@echo " # or create / add acces tp $(DESTDIR)$(prefix)/ff-petsc "
+	@echo " # or create / add acces to $(DESTDIR)$(prefix)/ff-petsc "
 	@echo " # do for examples:"
 	@echo "	sudo chmod a+rxw $(DESTDIR)$(prefix)/ff-petsc"
 	@echo "	make petsc-slepc "
@@ -53,18 +53,18 @@ ifeq ($(MPICC),$(W_MPICC))
 else
   WITH_MPI_DIR="--with-mpi-dir='$(MPI_DIR)'"
 endif	
-DIR_INSTALL_REAL:=$(DESTDIR)$(prefix)/ff-petsc/real
-DIR_INSTALL_COMPLEX:=$(DESTDIR)$(prefix)/ff-petsc/complex
+DIR_INSTALL_REAL:=$(prefix)/ff-petsc/real
+DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 
 dir-install: Makefile.inc 
-	-$(SUDO) mkdir -p $(DIR_INSTALL_REAL)
-	-$(SUDO) mkdir -p $(DIR_INSTALL_COMPLEX)
-	@if test -w 	"$(DIR_INSTALL_REAL)" -a -w 	"$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
+	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
+	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_COMPLEX)
+	@if test -w 	"$(DESTDIR)$(DIR_INSTALL_REAL)" -a -w 	"$(DESTDIR)$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
 	else \
-	 echo  no write access in $(DIR_INSTALL_REAL) and $(DIR_INSTALL_COMPLEX); \
+	 echo  no write access in $(DESTDIR)$(DIR_INSTALL_REAL) and $(DESTDIR)$(DIR_INSTALL_COMPLEX); \
 	 echo " do:  make  petsc-slepc SUDO=sudo "; \
 	 echo " or add write access to  2 directory "; \
 	 echo sudo >do-sudo; \
@@ -98,7 +98,7 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real 
-	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  
+	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR) 
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -144,7 +144,7 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 	touch $@
 
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex 
-	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
+	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR) 
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex 
 
@@ -196,7 +196,7 @@ $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
 
 
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) DESTDIR=$(DESTDIR) 
 	touch $@
 
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
@@ -259,6 +259,12 @@ echo:
 	@echo " dir install real :" $(DIR_INSTALL_REAL) 
 	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX) 
 	@echo " do-sudo auto ???" $(SHELL  cat o-sudo)
+install-destdir:
+	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)$(DIR_INSTALL_REAL)
+	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR)$(DIR_INSTALL_COMPLEX)
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) DESTDIR=$(DESTDIR)$(DIR_INSTALL_COMPLEX)
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) DESTDIR=$(DESTDIR)$(DIR_INSTALL_REAL)
+	
 # Local Variables:
 # mode:makefile
 # ispell-local-dictionary:"british"
