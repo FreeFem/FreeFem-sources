@@ -88,8 +88,7 @@ if(Opt.n > 0)       // optimized Schwarz methods
 else
     u[] = A^-1 * rhs;
 
-real[int] err(u[].n);
-err = A * u[];      // global matrix-vector product
+real[int] err = A * u[]; // global matrix-vector product
 err -= rhs;
 
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)

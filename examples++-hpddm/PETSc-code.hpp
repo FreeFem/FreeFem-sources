@@ -38,13 +38,19 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
         KSPGetOperators(_ksp, &A, NULL);
         MatType type;
         MatGetType(A, &type);
-        PetscBool isBlock;
-        PetscStrcmp(type, MATMPIBAIJ, &isBlock);
+        PetscBool noMatMult = PETSC_FALSE;
+        PetscStrcmp(type, MATMPIBAIJ, &noMatMult);
+#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
+        if(!noMatMult)
+            PetscStrcmp(type, MATMPIBAIJMKL, &noMatMult);
+#endif
+        if(!noMatMult)
+            PetscStrcmp(type, MATSHELL, &noMatMult);
         MPI_Comm comm;
         PetscObjectGetComm((PetscObject)A, &comm);
         int size;
         MPI_Comm_size(comm, &size);
-        if(isBlock || size == 1) {
+        if(mu == 1 || noMatMult || size == 1) {
             for(unsigned short nu = 0; nu < mu; ++nu) {
                 VecPlaceArray(_right, in + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
                 VecPlaceArray(_left, out + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
@@ -68,12 +74,52 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
     void apply(const PetscScalar* const in, PetscScalar* const out, const unsigned short& mu = 1, PetscScalar* = nullptr, const unsigned short& = 0) const {
         PC pc;
         KSPGetPC(_ksp, &pc);
-        for(unsigned short nu = 0; nu < mu; ++nu) {
-            VecPlaceArray(_right, in + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
-            VecPlaceArray(_left, out + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
-            PCApply(pc, _right, _left);
-            VecResetArray(_left);
-            VecResetArray(_right);
+        PCType type;
+        PCGetType(pc, &type);
+        PetscBool isBJacobi;
+        if(mu > 1)
+            PetscStrcmp(type, PCBJACOBI, &isBJacobi);
+        else
+            isBJacobi = PETSC_FALSE;
+        if(isBJacobi) {
+            KSP* subksp;
+            PetscInt n_local, first_local;
+            PCBJacobiGetSubKSP(pc, &n_local, &first_local, &subksp);
+            if(n_local > 1)
+                isBJacobi = PETSC_FALSE;
+            else {
+                KSPSetUp(subksp[0]);
+                PC subpc;
+                KSPGetPC(subksp[0], &subpc);
+                PCGetType(subpc, &type);
+                PetscStrcmp(type, PCLU, &isBJacobi);
+                if(!isBJacobi)
+                    PetscStrcmp(type, PCCHOLESKY, &isBJacobi);
+                if(isBJacobi) {
+                    Mat F;
+                    PCFactorGetMatrix(subpc, &F);
+                    int N;
+                    MatGetSize(F, &N, NULL);
+                    Mat B, C;
+                    MPI_Comm comm;
+                    PetscObjectGetComm((PetscObject)F, &comm);
+                    MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, const_cast<PetscScalar*>(in), &B);
+                    MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, out, &C);
+                    MatMatSolve(F, B, C);
+                    MatDestroy(&C);
+                    MatDestroy(&B);
+                    return;
+                }
+            }
+        }
+        if(!isBJacobi) {
+            for(unsigned short nu = 0; nu < mu; ++nu) {
+                VecPlaceArray(_right, in + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
+                VecPlaceArray(_left, out + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
+                PCApply(pc, _right, _left);
+                VecResetArray(_left);
+                VecResetArray(_right);
+            }
         }
     }
 };
@@ -511,6 +557,10 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     if(nargs[2])
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE);
     KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
+#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
+    if(0 && prune && bsr)
+        MatConvert(ptA->_petsc, MATMPIBAIJMKL, MAT_INPLACE_MATRIX, &(ptA->_petsc));
+#endif
     KSPSetOperators(ptA->_ksp, ptA->_petsc, prune ? ptA->_S[0] : ptA->_petsc);
     MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
@@ -859,6 +909,10 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     int bs = 1;
     PetscBool isBlock;
     PetscStrcmp(type, MATMPIBAIJ, &isBlock);
+#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
+    if(!isBlock)
+        PetscStrcmp(type, MATMPIBAIJMKL, &isBlock);
+#endif
     if(isBlock)
         MatGetBlockSize(ptA->_petsc, &bs);
     CustomOperator op(ptA->_last - ptA->_first, bs, ptA->_ksp);
@@ -900,13 +954,17 @@ class InvPETSc {
             double timing = MPI_Wtime();
             MatCreateVecs((*t)._petsc, nullptr, &y);
             PetscScalar* x;
+            PetscBool isBlock;
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
                 VecGetArray((*t)._x, &x);
                 MatType type;
                 MatGetType((*t)._petsc, &type);
                 int bs = 1;
-                PetscBool isBlock;
                 PetscStrcmp(type, MATMPIBAIJ, &isBlock);
+#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
+                if(!isBlock)
+                    PetscStrcmp(type, MATMPIBAIJMKL, &isBlock);
+#endif
                 if(isBlock)
                     MatGetBlockSize((*t)._petsc, &bs);
                 HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), x, u->n / bs, bs);
@@ -941,8 +999,6 @@ class InvPETSc {
                 MatType type;
                 MatGetType((*t)._petsc, &type);
                 int bs = 1;
-                PetscBool isBlock;
-                PetscStrcmp(type, MATMPIBAIJ, &isBlock);
                 if(isBlock)
                     MatGetBlockSize((*t)._petsc, &bs);
                 HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), x, out->n / bs, bs);
@@ -974,7 +1030,7 @@ class InvPETSc {
         }
 };
 
-template<class T, class U, class K>
+template<class T, class U, class K, char N>
 class ProdPETSc {
     static_assert(std::is_same<K, PetscScalar>::value, "Wrong types");
     public:
@@ -991,11 +1047,18 @@ class ProdPETSc {
             int bs = 1;
             PetscBool isBlock;
             PetscStrcmp(type, MATMPIBAIJ, &isBlock);
+#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
+            if(!isBlock)
+                PetscStrcmp(type, MATMPIBAIJMKL, &isBlock);
+#endif
             if(isBlock)
                 MatGetBlockSize((*t)._petsc, &bs);
             HPDDM::Subdomain<K>::template distributedVec<0>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*u), w, u->n / bs, bs);
             VecRestoreArray((*t)._x, &w);
-            MatMult(t->_petsc, (*t)._x, y);
+            if(N == 'T')
+                MatMultTranspose(t->_petsc, (*t)._x, y);
+            else
+                MatMult(t->_petsc, (*t)._x, y);
             VecGetArray(y, &w);
             HPDDM::Subdomain<K>::template distributedVec<1>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*x), w, x->n / bs, bs);
             if(t->_A)
@@ -1003,9 +1066,13 @@ class ProdPETSc {
             VecRestoreArray(y, &w);
             VecDestroy(&y);
         }
-        static U mv(U Ax, ProdPETSc<T, U, K> A) {
+        static U mv(U Ax, ProdPETSc<T, U, K, N> A) {
             A.prod(Ax);
             return Ax;
+        }
+        static U init(U Ax, ProdPETSc<T, U, K, N> A) {
+            Ax->init(A.u->n);
+            return mv(Ax, A);
         }
 };
 }
@@ -1069,7 +1136,8 @@ static void Init_PETSc() {
     TheOperators->Add("<-", new PETSc::initCSRfromMatrix<HpSchwarz<PetscScalar>>);
     TheOperators->Add("<-", new PETSc::initCSRfromDMatrix<HpSchwarz<PetscScalar>>);
     Global.Add("set", "(", new PETSc::setOptions<Dmat>());
-    addProd<Dmat, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar>();
+    addProd<Dmat, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar, 'N'>();
+    addProd<Dmat, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar, 'T'>();
     addInv<Dmat, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
 
     TheOperators->Add("<-", new OneOperator1_<long, Dbddc*>(PETSc::initEmptyCSR<Dbddc>));

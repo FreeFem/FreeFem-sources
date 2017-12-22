@@ -96,11 +96,26 @@ void addInv() {
     TheOperators->Add("*", new OneOperator2<Inv<OpInv, V*, K>, OpInv, V*>(Build));
     TheOperators->Add("=", new OneOperator2<V*, V*, Inv<OpInv, V*, K>>(Inv<OpInv, V*, K>::init));
 }
-template<class Op, template<class, class, class> class Prod, class V, class K = double>
+template<class Op, template<class, class, class, char> class Prod, class V, class K = double, char N = 'N'>
 void addProd() {
-    Dcl_Type<Prod<Op*, V*, K>>();
-    TheOperators->Add("*", new OneOperator2<Prod<Op*, V*, K>, Op*, V*>(Build));
-    TheOperators->Add("=", new OneOperator2<V*, V*, Prod<Op*, V*, K>>(Prod<Op*, V*, K>::mv));
+    Dcl_Type<Prod<Op*, V*, K, N>>();
+    if(N == 'T') {
+        class OpTrans {
+            public:
+                Op* A;
+                OpTrans(Op* B) : A(B) { assert(A); }
+                operator Op& () const { return *A; }
+                operator Op* () const { return A; }
+        };
+        Dcl_Type<OpTrans>();
+        TheOperators->Add("\'", new OneOperator1<OpTrans, Op*>(Build));
+        TheOperators->Add("*", new OneOperator2<Prod<Op*, V*, K, N>, OpTrans, V*>(Build));
+    }
+    else {
+        TheOperators->Add("*", new OneOperator2<Prod<Op*, V*, K, N>, Op*, V*>(Build));
+    }
+    TheOperators->Add("=", new OneOperator2<V*, V*, Prod<Op*, V*, K, N>>(Prod<Op*, V*, K, N>::mv));
+    TheOperators->Add("<-", new OneOperator2<V*, V*, Prod<Op*, V*, K, N>>(Prod<Op*, V*, K, N>::init));
 }
 
 extern KN<String>* pkarg;

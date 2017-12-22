@@ -604,16 +604,20 @@ AnyType scaledExchange_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
-template<class T, class U, class K>
+template<class T, class U, class K, char N>
 class ProdSchwarz {
     public:
         const T t;
         const U u;
         ProdSchwarz(T v, U w) : t(v), u(w) {}
         void prod(U x) const { bool allocate = t->setBuffer(); t->GMV(*(this->u), *x); t->clearBuffer(allocate); };
-        static U mv(U Ax, ProdSchwarz<T, U, K> A) {
+        static U mv(U Ax, ProdSchwarz<T, U, K, N> A) {
             A.prod(Ax);
             return Ax;
+        }
+        static U init(U Ax, ProdSchwarz<T, U, K, N> A) {
+            Ax->init(A.u->n);
+            return mv(Ax, A);
         }
 };
 
