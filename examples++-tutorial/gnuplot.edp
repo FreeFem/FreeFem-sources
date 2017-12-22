@@ -1,0 +1,31 @@
+int n=20,nn=n+10;
+real[int] xx(nn),yy(nn);
+mesh Th=square(5,5);
+fespace Vh(Th,P2);
+Vh uh=x*x+y*y,vh=-y^2+x^2;
+assert(n+1 < nn);
+//  compute a cut 
+for (int i=0;i<=n;i++)
+ {
+   xx[i]=i;
+   yy[i]=uh(real(i)/n,real(i)/n); // value of uh at point (i/10. , i/10.) 
+ }
+ 
+ plot(Th,uh,[uh,vh],value=true,ps="three.eps",wait=true); // plot mesh, isovalue, and vector
+ plot([xx(0:n),yy(0:n)],[xx(0:n:5),yy(0:n:5)],ps="likegnu.eps",wait=true); //  like gnuplot plot a cut of uh
+// file for gnuplot
+{
+  ofstream gnu("plot.gp");
+for (int i=0;i<=n;i++)
+ {
+  gnu <<  xx[i] << " " << yy[i] << endl;
+ }
+}
+//  to call gnuplot command and wait 5 second (tanks to unix command)
+//  and make postscipt plot 
+exec("echo 'plot \"plot.gp\" w l \
+pause 5 \
+set term postscript \
+set output \"gnuplot.eps\" \
+replot \
+quit' | gnuplot"); 
