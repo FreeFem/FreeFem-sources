@@ -747,7 +747,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
      transpose=idata[0];
      op=idata[1];
      inside=idata[2];
-       iU2V= idata + 5;
+       iU2V= idata + 4;
      ffassert(op>=0 && op < 4);
    }
   if(verbosity>2) 
@@ -971,7 +971,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	transpose=idata[0];
 	op=idata[1];
 	inside=idata[2];
-	iU2V= idata + 5;
+	iU2V= idata + 4;
 	ffassert(op>=0 && op < 4);
       }
     if(verbosity>2) 
@@ -1350,7 +1350,10 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   const MatrixInterpolation<pfes>::Op * mi(dynamic_cast<const MatrixInterpolation<pfes>::Op *>(einter));
   ffassert(einter);
-  int data[ MatrixInterpolation<pfes>::Op::n_name_param+100];
+  pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
+  FESpace * Uh = **pUh;
+  int NUh =Uh->N;
+  int* data = new int[4 + NUh];
   data[0]=mi->arg(0,stack,false); // transpose not
   data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
   data[2]=mi->arg(2,stack,false); ; // get just value
@@ -1359,27 +1362,23 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   U2Vc= mi->arg(4,stack,U2Vc); ;
   if( mi->c==0)
   { // old cas 
-  pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
   pfes * pVh = GetAny<  pfes * >((* mi->b)(stack));
-  FESpace * Uh = **pUh;
   FESpace * Vh = **pVh;
   int NVh =Vh->N;
-  int NUh =Uh->N;
-  ffassert(NUh< 100-MatrixInterpolation<pfes>::Op::n_name_param);
 
       for(int i=0;i<NUh;++i)    
-        data[5+i]=i;// 
+        data[4+i]=i;// 
       for(int i=0;i<min(NUh,(int) U2Vc.size());++i)    
-	  data[5+i]= U2Vc[i];//
+	  data[4+i]= U2Vc[i];//
   if(verbosity>3)
 	for(int i=0;i<NUh;++i)
 	  {
-	    cout << "The Uh componante " << i << " -> " << data[5+i] << "  Componante of Vh  " <<endl;
+	    cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
 	  }
 	  for(int i=0;i<NUh;++i)    
-	if(data[5+i]>=NVh)
+	if(data[4+i]>=NVh)
 	  {
-	      cout << "The Uh componante " << i << " -> " << data[5+i] << " >= " << NVh << " number of Vh Componante " <<endl;
+	      cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
 	      ExecError("Interpolation incompability beetween componante ");
 	  }
       
@@ -1395,11 +1394,9 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   }
   else 
   {  // new cas mars 2006
-  pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
   KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
   KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
   ffassert( xx.N() == yy.N()); 
-  FESpace * Uh = **pUh;
   ffassert(Uh);
   
   //  sparse_mat->pUh=0;
@@ -1408,6 +1405,7 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
   }
+  delete [] data;
    return sparse_mat; // Warning .. no correct gestion of temp ptr ..
  // return Add2StackOfPtr2Free(stack,sparse_mat);
 }
@@ -1419,7 +1417,10 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
     const MatrixInterpolation<pfes3>::Op * mi(dynamic_cast<const MatrixInterpolation<pfes3>::Op *>(einter));
     ffassert(einter);
-    int data[ MatrixInterpolation<pfes3>::Op::n_name_param+100];
+    pfes3 * pUh = GetAny< pfes3 * >((* mi->a)(stack));
+    FESpace3 * Uh = **pUh;
+    int NUh =Uh->N;
+    int* data = new int[4 + NUh];
     data[0]=mi->arg(0,stack,false); // transpose not
     data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
     data[2]=mi->arg(2,stack,false); ; // get just value
@@ -1428,27 +1429,23 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
     U2Vc= mi->arg(4,stack,U2Vc); ;
     if( mi->c==0)
       { // old cas 
-	  pfes3 * pUh = GetAny< pfes3 * >((* mi->a)(stack));
 	  pfes3 * pVh = GetAny<  pfes3 * >((* mi->b)(stack));
-	  FESpace3 * Uh = **pUh;
 	  FESpace3 * Vh = **pVh;
 	  int NVh =Vh->N;
-	  int NUh =Uh->N;
-	  ffassert(NUh< 100-MatrixInterpolation<pfes3>::Op::n_name_param);
 	  
 	  for(int i=0;i<NUh;++i)    
-	      data[5+i]=i;// 
+	      data[4+i]=i;// 
 	  for(int i=0;i<min(NUh,(int) U2Vc.size());++i)    
-	      data[5+i]= U2Vc[i];//
+	      data[4+i]= U2Vc[i];//
 	  if(verbosity>3)
 	      for(int i=0;i<NUh;++i)
 		{
-		  cout << "The Uh componante " << i << " -> " << data[5+i] << "  Componante of Vh  " <<endl;
+		  cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
 		}
 	  for(int i=0;i<NUh;++i)    
-	      if(data[5+i]>=NVh)
+	      if(data[4+i]>=NVh)
 		{
-		  cout << "The Uh componante " << i << " -> " << data[5+i] << " >= " << NVh << " number of Vh Componante " <<endl;
+		  cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
 		  ExecError("Interpolation incompability beetween componante ");
 		}
 	  
@@ -1463,13 +1460,11 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
       }
     else 
       {  // new cas mars 2006
-	  pfes3 * pUh = GetAny< pfes3 * >((* mi->a)(stack));
 	  KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
 	  KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
 	  KN_<double>  zz = GetAny<  KN_<double>  >((* mi->d)(stack));
 	  ffassert( xx.N() == yy.N()); 
 	  ffassert( xx.N() == zz.N()); 
-	  FESpace3 * Uh = **pUh;
 	  ffassert(Uh);
 	  if(!init) sparse_mat->init();
 	  //  sparse_mat->pUh=0;
@@ -1477,6 +1472,7 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
 	  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	  sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,zz,data));
       }
+    delete [] data;
     return sparse_mat;
 }
 

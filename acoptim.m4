@@ -231,24 +231,39 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 		CHECK_COMPILE_FLAG(C++,-mmmx,CXXFLAGS)
 		CHECK_COMPILE_FLAG(Fortran 77,-mmmx,FFLAGS)
 	    fi
-	    if test `grep -e '^flags.*sse ' /proc/cpuinfo|wc -l` -gt 0
+	    if test `grep -e '^flags.*avx' /proc/cpuinfo|wc -l` -gt 0
 		then
-		CHECK_COMPILE_FLAG(C,-msse,CFLAGS)
-		CHECK_COMPILE_FLAG(C++,-msse,CXXFLAGS)
-		CHECK_COMPILE_FLAG(Fortran 77,-msse,FFLAGS)
-	    fi
-	    if test `grep -e '^flags.*sse2' /proc/cpuinfo|wc -l` -gt 0
-		then
-		CHECK_COMPILE_FLAG(C,-msse2,CFLAGS)
-		CHECK_COMPILE_FLAG(C++,-msse2,CXXFLAGS)
-		CHECK_COMPILE_FLAG(Fortran 77,-msse2,FFLAGS)
-	    fi
-	    if test `grep -e '^flags.*3dnow' /proc/cpuinfo|wc -l` -gt 0
-		then
-		CHECK_COMPILE_FLAG(C,-m3dnow,CFLAGS)
-		CHECK_COMPILE_FLAG(C++,-m3dnow,CXXFLAGS)
-		CHECK_COMPILE_FLAG(Fortran 77,-m3dnow,FFLAGS)
-	    fi
+		CHECK_COMPILE_FLAG(C,-mavx,CFLAGS)
+		CHECK_COMPILE_FLAG(C++,-mavx,CXXFLAGS)
+		CHECK_COMPILE_FLAG(Fortran 77,-mavx,FFLAGS)
+	    else
+	        if test `grep -e '^flags.*sse4_2' /proc/cpuinfo|wc -l` -gt 0
+		    then
+		    CHECK_COMPILE_FLAG(C,-msse4.2,CFLAGS)
+		    CHECK_COMPILE_FLAG(C++,-msse4.2,CXXFLAGS)
+		    CHECK_COMPILE_FLAG(Fortran 77,-msse4.2,FFLAGS)
+	        else
+	            if test `grep -e '^flags.*sse2' /proc/cpuinfo|wc -l` -gt 0
+	                then
+	                CHECK_COMPILE_FLAG(C,-msse2,CFLAGS)
+	                CHECK_COMPILE_FLAG(C++,-msse2,CXXFLAGS)
+	                CHECK_COMPILE_FLAG(Fortran 77,-msse2,FFLAGS)
+				else
+	            	if test `grep -e '^flags.*sse ' /proc/cpuinfo|wc -l` -gt 0
+		        	then
+		        	CHECK_COMPILE_FLAG(C,-msse,CFLAGS)
+		        	CHECK_COMPILE_FLAG(C++,-msse,CXXFLAGS)
+		        	CHECK_COMPILE_FLAG(Fortran 77,-msse,FFLAGS)
+	            	fi
+	            	if test `grep -e '^flags.*3dnow' /proc/cpuinfo|wc -l` -gt 0
+		        	then
+		        	CHECK_COMPILE_FLAG(C,-m3dnow,CFLAGS)
+		        	CHECK_COMPILE_FLAG(C++,-m3dnow,CXXFLAGS)
+		        	CHECK_COMPILE_FLAG(Fortran 77,-m3dnow,FFLAGS)
+	            	fi
+	            fi
+            fi
+        fi
 	fi
     fi
 fi
