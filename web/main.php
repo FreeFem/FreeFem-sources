@@ -110,8 +110,8 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 	   <A HREF="https://www.ljll.math.upmc.fr/freefem++/" target="_top">  (registration here)</A>, 
 	   held december 14th and 15th, 2017, in Paris at Universit&eacute Pierre
 	  et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris
-	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/Schedule.html"> Schedule, All Presentation, examples </A> and
-	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/.">  directory this all data  </A>.
+	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/Schedule.html" target="_top"> Schedule, All Presentation, examples </A> and
+	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/." target="_self">  directory this all data  </A>.
 	   </font> </li> 
 
    <li> 

@@ -84,7 +84,7 @@ version 3.51-4 ( 28/mars 2017)
  - add a first version  of search basin of attraction (wrong but not to bad see examples++-load/findalllocalmin.edp)
  - correct pb of mumps_seq  compilation PB of missing mpi.h
 version 3.51-3 (hg version 4013:12749584a75b)
- - add flags of force the usage of downlaod-package (--enable-download_mumps_seq)
+ - add flags of force the usage of download-package (--enable-download_mumps_seq)
  - correct compilation process  of ipopt package in cas of install  mumps-seq
 version 3.51-2 
  - correct INNOVATION 
