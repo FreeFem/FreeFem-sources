@@ -719,14 +719,14 @@ namespace  Fem2D {
        B_i = A_{i+2} - A_{i+1}  
        det( B_i ) = 9 *2 area 
        to be homogene
-       cc0= |K]  sqrt(area)*sqrt(18)
+       c0=  sqrt(area)*sqrt(18)
        ccK= 9 *2 area *c0; 
        bx_0 = det(R2(cc0,0),B1,B2)/ ( cck)  
        
        
        so all basic d function are the sum of 3 function 
        
-       sum_{k=0}^2  c_k  phi_{p_k} lambda_{l_k} 
+       sum_{k=0}^2  c_k  phi_{p_k} lambda_{l_k}
        
        */
       
