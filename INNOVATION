@@ -1,3 +1,11 @@
+version 3.57-1
+ - add new function : for FreeVol
+    diffpos(a,b) =  max(0,b-a)
+    invdiffpos(a,b)  = a<b ? 1/(b-a) :0
+	diffnp(a,b)      = a<0< b ? (b-a) :0
+	invdiffnp(a,b)   = a<0< b ? 1/(b-a) :0
+	edgeOrientation: 1,-1 ,BoundaryEdge: 0,1 ,InternalEdge : 0,1 : info on edge f
+ - correct ff-petsc/Makefile
  - build tar version 3.57 (8 dec 2017)
  - correct pb in solving the previous pb (memory crash in Element_QF.edp example)
  - solve pb : computing int3d(Th) of a manually defined function eats (Thank to sisqo_nakov@yahoo.com )
