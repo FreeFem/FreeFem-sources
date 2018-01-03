@@ -4843,6 +4843,28 @@ class MeanOp : public E_F0mps  { public:
        MeanOp(Expression aa) : a(aa) {} 
     };
 
+template<class RR,class AA=RR>
+class OthersideOp: public E_F0mps  { public:
+    typedef RR  R;
+    typedef AA A;
+    typedef RR result_type;
+    typedef AA argument_type;
+    
+    Expression a;
+public:
+    AnyType operator()(Stack stack)  const
+    { // a faire
+        A rd,rg;
+        MeshPoint *mp=MeshPointStack(stack),smp=*mp;
+        rd = 0.;
+        if ( mp->SetAdj() )
+            rd = GetAny<A>((*a)(stack));
+        *mp=smp;
+        return  SetAny<R>(rd);
+    }
+    OthersideOp(Expression aa) : a(aa) {}
+};
+
 long get_size(pferarray const & a)
 {
   return a.first->N;
@@ -5836,10 +5858,12 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<R>,JumpOp<R> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
  Global.Add("average","(",new OneUnaryOperator<MeanOp<R>,MeanOp<R> >);
- 
+ Global.Add("otherside","(",new OneUnaryOperator<OthersideOp<R>,OthersideOp<R> >);
+
  Global.Add("jump","(",new OneUnaryOperator<JumpOp<Complex>,JumpOp<Complex> >);
  Global.Add("mean","(",new OneUnaryOperator<MeanOp<Complex>,MeanOp<Complex> >);
  Global.Add("average","(",new OneUnaryOperator<MeanOp<Complex>,MeanOp<Complex> >);
+ Global.Add("otherside","(",new OneUnaryOperator<OthersideOp<Complex>,OthersideOp<Complex> >);
 
   
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
