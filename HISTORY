@@ -1,8 +1,31 @@
-@  changeset:   4241:e06afbb8814a
-|  tag:         tip
-|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
-|  date:        Wed Dec 20 14:14:11 2017 +0100
-|  summary:     correct pb of priority in param errg in adaptmesh
+@    changeset:   4245:1a3584c61803
+|\   tag:         tip
+| |  parent:      4242:1e0d0f9d66eb
+| |  parent:      4244:bfdabf4d7219
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 03 09:03:17 2018 +0100
+| |  summary:     merge change of Pierre Jolivet
+| |
+| o  changeset:   4244:bfdabf4d7219
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Mon Dec 25 09:27:50 2017 +0100
+| |  summary:     Avoids unnecessary assert. New instruction set added.
+| |
+| o  changeset:   4243:a050759244d2
+| |  parent:      4240:17eb84212ef5
+| |  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+| |  date:        Fri Dec 22 11:53:01 2017 +0100
+| |  summary:     Added product by transpose. Block Jacobi in a single go. Vector initialization.
+| |
+o |  changeset:   4242:1e0d0f9d66eb
+| |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+| |  date:        Wed Jan 03 09:01:13 2018 +0100
+| |  summary:     add othersite like jump or maen  and correct  ff-petsc/Makefiel
+| |
+o |  changeset:   4241:e06afbb8814a
+|/   user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|    date:        Wed Dec 20 14:14:11 2017 +0100
+|    summary:     correct pb of priority in param errg in adaptmesh
 |
 o  changeset:   4240:17eb84212ef5
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>

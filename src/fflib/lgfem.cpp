@@ -480,7 +480,19 @@ class E_P_Stack_nTonEdge   :public  E_F0mps { public:
     return SetAny<long>( l) ;} 
     operator aType () const  { return atype<long>();}         
     
-}; 
+};
+
+template<int NBT>
+class E_P_Stack_TypeEdge   :public  E_F0mps { public:
+    AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+        MeshPoint * mp=MeshPointStack(s);
+        assert(mp->T && mp->e > -1 && mp->d==2 ) ;
+        long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
+        // cout << " nTonEdge " << l << endl;
+        return SetAny<long>( l) ;}
+    operator aType () const  { return atype<long>();}
+    
+};
 
 class E_P_Stack_areaTriangle   :public  E_F0mps { public: 
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
@@ -502,7 +514,29 @@ class E_P_Stack_areaTriangle   :public  E_F0mps { public:
     return SetAny<double>(l);} 
     operator aType () const { return atype<double>();}         
     
-}; 
+};
+
+// Add jan 2018
+class E_P_Stack_EdgeOrient  :public  E_F0mps { public:
+    AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+        MeshPoint &mp= *MeshPointStack(s); // the struct to get x,y, normal , value
+        double r=1;
+        if(mp.d==2)
+        {
+            if( mp.T && mp.e >=0  )
+                r=mp.T->EdgeOrientation(mp.e);
+        }
+        else // 3D ...
+        {
+             if( mp.T3 && mp.f >=0  )
+                 r = mp.T3->faceOrient( mp.f);
+        }
+        return r ;
+    }
+    operator aType () const  { return atype<double>();}
+    
+};
+
 
 // add FH
 class E_P_Stack_VolumeTet   :public  E_F0mps { public: 
@@ -2856,7 +2890,7 @@ class pb2mat : public E_F0 { public:
   }
   
   
-};  
+};
 
 
 //template<class RR,class A>  void PrintP(RR* a, A  b){  *a <<*b;}
@@ -2896,7 +2930,11 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("hTriangle",hTriangle);
   Global.New("inside",inside);   
   Global.New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));   
-  
+  Global.New("edgeOrientation",make_Type_Expr(atype<R>(),new E_P_Stack_EdgeOrient)); // Add FH jan 2018
+  Global.New("BoundaryEdge",make_Type_Expr(atype<long>(),new E_P_Stack_TypeEdge<1>));// Add FH jan 2018
+  Global.New("InternalEdge",make_Type_Expr(atype<long>(),new E_P_Stack_TypeEdge<2>));// Add FH jan 2018
+
+    
 }
 
 

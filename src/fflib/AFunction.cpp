@@ -1096,6 +1096,11 @@ double projection(const double & aa, const double & bb, const double & x )
 { double a=aa,b=bb; if(a>b) std::swap(a,b); return min(max(a,x),b);}
 double dist(const double & aa, const double & bb) { return sqrt( aa*aa+bb*bb);}
 double dist(const double & aa, const double & bb,const double & cc) { return sqrt(aa*aa+bb*bb+cc*cc);}
+// Add Jan 2017 FH
+double diffpos(const double & aa, const double & bb) { return aa<bb ? bb-aa : 0.;}
+double invdiffpos(const double & aa, const double & bb) { return aa<bb ? 1./(bb-aa) : 0.;}
+double diffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb ? bb-aa : 0.;}
+double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb  ? 1./(bb-aa) : 0.;}
 
 
 void Init_map_type()
@@ -1662,6 +1667,11 @@ void Init_map_type()
 //     Global.Add("pow","(",new OneOperator2<double,double,long>(pow));
      Global.Add("max","(",new OneOperator2_<double,double>(Max<double> ));
      Global.Add("min","(",new OneOperator2_<double,double>(Min<double> ));
+    Global.Add("diffpos","(",new OneOperator2_<double,double>(diffpos )); // jan 2018 FH
+    Global.Add("invdiffpos","(",new OneOperator2_<double,double>(invdiffpos )); // jan 2018 FH
+    Global.Add("diffnp","(",new OneOperator2_<double,double>(diffnp )); // jan 2018 FH
+    Global.Add("invdiffnp","(",new OneOperator2_<double,double>(invdiffnp )); // jan 2018 FH
+
      Global.Add("max","(",new OneOperator2_<long,long>(Max));
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
     Global.Add("max","(",new OneOperator3_<double,double>(Max<double> ));
