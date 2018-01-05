@@ -119,6 +119,38 @@ if(mpiRank(comm) == 0) {
 }
 // EOM
 
+macro exportBegin(name, comm)
+load "iovtk"
+if(mpiRank(comm) == 0) {
+    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd");
+    pvd << "<?xml version=\"1.0\"?>\n";
+    pvd << "<VTKFile type=\"Collection\" version=\"0.1\"\n";
+    pvd << "         byte_order=\"LittleEndian\"\n";
+    pvd << "         compressor=\"vtkZLibDataCompressor\">\n";
+    pvd << "  <Collection>\n";
+}
+// EOM
+
+macro exportTimeStep(name, mesh, sol, fforder, ts, comm)
+savevtk(name + "_" + int(ts) + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtk", mesh, sol, order = fforder);
+
+exec("pvpython vtk2vtu.py " + name + "_" + int(ts) + "_" + mpiRank(comm) + "_" + mpiSize(comm));
+if(mpiRank(comm) == 0) {
+    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd", append);
+    for(int ijk = 0; ijk < mpiSize(comm); ++ijk) {
+        pvd << "    <DataSet timestep=\"" + int(ts) + "\" group=\"\" part=\"" << ijk << "\"\n";
+        pvd << "             file=\""; pvd << name << "_" << int(ts) << "_" << ijk << "_" << mpiSize(comm) << ".vtu\"/>\n";
+    }
+}
+// EOM
+
+macro exportEnd(name, comm)
+if(mpiRank(comm) == 0) {
+    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd", append);
+    pvd << "  </Collection>\n";
+    pvd << "</VTKFile>\n";
+}
+// EOM
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
         meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);

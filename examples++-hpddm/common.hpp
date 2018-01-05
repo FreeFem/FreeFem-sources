@@ -137,16 +137,30 @@ bool statistics(Type* const& Op) {
     Op->statistics();
     return false;
 }
+template<template<class, char> class Type, class K, char S>
+long exchange(Type<K, S>* const& Op, KN<K>* const& in, KN<K>* const& out) {
+    *out = *in;
+    const auto& map = Op->getMap();
+    bool allocate = map.size() > 0 && Op->getBuffer()[0] == nullptr ? Op->setBuffer() : false;
+    Op->HPDDM::template Subdomain<K>::exchange(static_cast<K*>(*out));
+    Op->clearBuffer(allocate);
+    *out -= *in;
+    return 0L;
+}
 
 static void Init_Common() {
-    Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
-    Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
-    int argc = pkarg->n;
-    const char** argv = new const char*[argc];
-    for(int i = 0; i < argc; ++i)
-        argv[i] = (*((*pkarg)[i].getap()))->data();
-    HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
-    delete [] argv;
+    aType t;
+    int r;
+    if(!zzzfff->InMotClef("dpair", t, r)) {
+        Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
+        Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
+        int argc = pkarg->n;
+        const char** argv = new const char*[argc];
+        for(int i = 0; i < argc; ++i)
+            argv[i] = (*((*pkarg)[i].getap()))->data();
+        HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
+        delete [] argv;
+    }
 }
 #endif
 #endif // _COMMON_

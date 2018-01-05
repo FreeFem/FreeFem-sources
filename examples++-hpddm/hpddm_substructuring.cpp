@@ -230,13 +230,13 @@ class initDDM : public OneOperator {
 template<class Type, class K>
 AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
-    MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
+    Matrice_Creuse<K>* pA = GetAny<Matrice_Creuse<K>*>((*Mat)(stack));
+    MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    if(ptO && mA) {
-        HPDDM::MatrixCSR<K>* dA = new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>(*ptO), *ptR, comm);
+    if(ptO) {
+        ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, comm);
     }
     FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
     K** const& v = ptA->getVectors();
@@ -581,6 +581,7 @@ void add() {
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
     addInv<Type<K, S>, InvSubstructuring, KN<K>, K>();
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
+    Global.Add("exchange", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<K>*>(exchange<Type, K, S>));
 }
 }
 
@@ -615,14 +616,18 @@ static void Init_Substructuring() {
     // Substructuring::add<HpFetiPrec, std::complex<float>, zs>();
     // zzzfff->Add("cfeti", atype<HpFetiPrec<std::complex<float>, zs>*>());
 #endif
-    // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
-    // zzzfff->Add("spair", atype<Pair<double>*>());
-    Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
-    zzzfff->Add("dpair", atype<Pair<double>*>());
-    // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
-    // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
-    Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
-    zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
+    aType t;
+    int r;
+    if(!zzzfff->InMotClef("dpair", t, r)) {
+        // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
+        // zzzfff->Add("spair", atype<Pair<double>*>());
+        Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
+        zzzfff->Add("dpair", atype<Pair<double>*>());
+        // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
+        // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
+        Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
+        zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
+    }
 }
 
 LOADFUNC(Init_Substructuring)
