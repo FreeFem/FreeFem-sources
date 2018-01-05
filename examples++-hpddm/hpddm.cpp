@@ -600,7 +600,10 @@ AnyType scaledExchange_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
     KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
     unsigned short mu = pin->n / pA->getDof();
+    const auto& map = pA->getMap();
+    bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
     pA->Type::template scaledExchange<true>((K*)*pin, mu);
+    pA->clearBuffer(allocate);
     return 0L;
 }
 
@@ -786,6 +789,7 @@ void add() {
     Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
+    Global.Add("exchange", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<K>*>(exchange<Type, K, S>));
     Global.Add("IterativeMethod","(",new IterativeMethod<K>());
 }
 }
@@ -808,14 +812,18 @@ static void Init_Schwarz() {
     // Schwarz::add<HpSchwarz, std::complex<float>, zs>();
     // zzzfff->Add("cschwarz", atype<HpSchwarz<std::complex<float>, zs>*>());
 #endif
-    // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
-    // zzzfff->Add("spair", atype<Pair<double>*>());
-    Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
-    zzzfff->Add("dpair", atype<Pair<double>*>());
-    // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
-    // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
-    Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
-    zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
+    aType t;
+    int r;
+    if(!zzzfff->InMotClef("dpair", t, r)) {
+        // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
+        // zzzfff->Add("spair", atype<Pair<double>*>());
+        Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
+        zzzfff->Add("dpair", atype<Pair<double>*>());
+        // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
+        // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
+        Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
+        zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
+    }
 }
 
 LOADFUNC(Init_Schwarz)
