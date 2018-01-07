@@ -76,11 +76,20 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
         KSPGetPC(_ksp, &pc);
         PCType type;
         PCGetType(pc, &type);
-        PetscBool isBJacobi;
-        if(mu > 1)
+        PetscBool isBJacobi, isDirectSolve;
+        if(mu > 1) {
             PetscStrcmp(type, PCBJACOBI, &isBJacobi);
+            if(!isBJacobi) {
+                PetscStrcmp(type, PCLU, &isDirectSolve);
+                if(!isDirectSolve)
+                    PetscStrcmp(type, PCCHOLESKY, &isDirectSolve);
+            }
+            else
+                isDirectSolve = PETSC_FALSE;
+        }
         else
-            isBJacobi = PETSC_FALSE;
+            isBJacobi = isDirectSolve = PETSC_FALSE;
+        Mat F;
         if(isBJacobi) {
             KSP* subksp;
             PetscInt n_local, first_local;
@@ -95,24 +104,25 @@ struct CustomOperator : public HPDDM::EmptyOperator<PetscScalar> {
                 PetscStrcmp(type, PCLU, &isBJacobi);
                 if(!isBJacobi)
                     PetscStrcmp(type, PCCHOLESKY, &isBJacobi);
-                if(isBJacobi) {
-                    Mat F;
+                if(isBJacobi)
                     PCFactorGetMatrix(subpc, &F);
-                    int N;
-                    MatGetSize(F, &N, NULL);
-                    Mat B, C;
-                    MPI_Comm comm;
-                    PetscObjectGetComm((PetscObject)F, &comm);
-                    MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, const_cast<PetscScalar*>(in), &B);
-                    MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, out, &C);
-                    MatMatSolve(F, B, C);
-                    MatDestroy(&C);
-                    MatDestroy(&B);
-                    return;
-                }
             }
         }
-        if(!isBJacobi) {
+        else if(isDirectSolve)
+            PCFactorGetMatrix(pc, &F);
+        if(isBJacobi || isDirectSolve) {
+            int N;
+            MatGetSize(F, &N, NULL);
+            Mat B, C;
+            MPI_Comm comm;
+            PetscObjectGetComm((PetscObject)F, &comm);
+            MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, const_cast<PetscScalar*>(in), &B);
+            MatCreateDense(comm, HPDDM::EmptyOperator<PetscScalar>::_n, PETSC_DECIDE, N, mu, out, &C);
+            MatMatSolve(F, B, C);
+            MatDestroy(&C);
+            MatDestroy(&B);
+        }
+        else {
             for(unsigned short nu = 0; nu < mu; ++nu) {
                 VecPlaceArray(_right, in + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
                 VecPlaceArray(_left, out + nu * HPDDM::EmptyOperator<PetscScalar>::_n);
@@ -1078,17 +1088,16 @@ class ProdPETSc {
 }
 
 template<typename Type>
-bool CheckPetscMatrix(Type* ptA)
-{
- ffassert(ptA);
- PetscValidHeaderSpecific(ptA->_petsc,MAT_CLASSID,2);
- return true;
+bool CheckPetscMatrix(Type* ptA) {
+    ffassert(ptA);
+    PetscValidHeaderSpecific(ptA->_petsc,MAT_CLASSID,2);
+    return true;
 }
 
 template<typename T>
 inline bool exist_type() {
-    map<const string,basicForEachType *>::iterator ir=map_type.find(typeid(T).name());
-    return  ir != map_type.end();
+    map<const string,basicForEachType*>::iterator ir = map_type.find(typeid(T).name());
+    return ir != map_type.end();
 }
 
 static void Init_PETSc() {
