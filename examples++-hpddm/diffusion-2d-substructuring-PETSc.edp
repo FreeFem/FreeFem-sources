@@ -26,7 +26,7 @@ int[int] interfaceNb;                       //
 {
     int[int] l = [2, 1, 2, 2];
     meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    buildSubstructuring(Th, interfaceNb, ThGlobal, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, Pk, BC, mpiCommWorld, false)
+    buildSubstructuring(Th, interfaceNb, ThGlobal, 10, 1, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, Pk, BC, mpiCommWorld, false)
 }
 
 func f = 10;

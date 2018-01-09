@@ -234,10 +234,8 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
-    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    if(ptO) {
-        ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, comm);
-    }
+    if(ptO)
+        ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
     FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
     K** const& v = ptA->getVectors();
     if(deflation && deflation->N > 0 && !v) {
