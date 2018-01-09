@@ -775,6 +775,8 @@ AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
         ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>(*ptO), *ptR, comm);
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
         initPETScStructure(ptA, mA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs);
+        if(!std::is_same<HpddmType, Dmat>::value)
+            mA->lg = ptA->_A->getMatrix()->_ia;;
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
@@ -782,7 +784,7 @@ AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
         if(clean) {
             ptO->resize(0);
             ptR->resize(0);
-            GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->A = nullptr;
+            GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->destroy();
         }
     }
     return ptA;
