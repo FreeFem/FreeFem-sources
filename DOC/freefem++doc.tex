@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.56-2}
+\def\VERSION{3.57-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3540,7 +3540,9 @@ the language to the finite element tools:
     \itemtt[z]  is the $z$ coordinate of the current point (real value) \index{z}\index{global!z}
 \itemtt[label] contains the label number of a boundary if the  current point is
 on a boundary, 0 otherwise  (int value). \index{label}\index{global!label}
-    \item[region]   returns the region number of  the current point (x,y) (int value). \index{region}\index{global!region}
+    \item[region]   returns the region number of  the current point (x,y) (int value) \index{region}\index{global!region}
+    and if the point is outside then  \texttt{region == notaregion} where \texttt{notaregion} is a freefem++ integer constant.
+    \index{notaregion}  \index{global!notaregion}
 \itemtt[P]  gives the  current point  ($\R^{2}$ value. \index{P}).
 By \texttt{P.x}, \texttt{P.y}, we can get the $x,\, y$ components of \texttt{P} .
 Also \texttt{P.z} is reserved and can be used in 3D.
@@ -3548,10 +3550,19 @@ Also \texttt{P.z} is reserved and can be used in 3D.
      curve defined by \texttt{border} ($\R^{3}$ value).\index{global!N}
 \texttt{N.x} and \texttt{N.y} are $x$ and $y$ components of the normal vector.
 \texttt{N.z} is reserved. \index{N}.
-    \itemtt[lenEdge] gives the length of the current edge\index{lenEdge}\index{global!lenEdge}\\
-    \[
-    \texttt{lenEdge} = |q^i-q^j|\quad \textrm{if the current edge is }[q^i,q^j]
-    \]
+    \itemtt[lenEdge] $= |q^i-q^j|$ gives the length of the current edge\index{lenEdge}\index{global!lenEdge}
+    {if the current edge is }$ [q^i,q^j]$
+    
+
+    \itemtt[edgeOrientation] = $\pm 1$  : signe of $(i-j)$  if the current edge is  $[q^i,q^j]$
+    \index{edgeOrientation}\index{global!edgeOrientation}
+    \itemtt[BoundaryEdge]  = $1$ if the current edge the current edge on true  boundary or $0$ otherwise
+    \index{BoundaryEdge}\index{global!BoundaryEdge}
+
+    \itemtt[InternalEdge] =   $0$ if the current edge the current edge on true  boundary or $1$ otherwise
+    \index{InternalEdge}\index{global!InternalEdge}
+ 
+    
     \itemtt[hTriangle] gives the size of the current triangle \index{hTriangle}\index{global!hTriangle}
 
     \itemtt[nuTriangle] gives the index of the current triangle (int value).
@@ -3763,10 +3774,15 @@ Some usefull function exist also (version 3.51-1):
 \item \verb!dist(a,b,c) ! = $\sqrt{a^2+b^2+c^2}$
 \item \verb!min(a,b,c) ! 
 \item \verb!max(a,b,c) ! 
+\item \verb!diffpos(a,b) ! = $ max(b-a,0) $
+\item \verb!invdiffpos(a,b) ! = $ a<b ? 1./(b-a): 0 $
+\item \verb!diffnp(a,b) ! = $ (a<0) \& (0< b)  ? (b-a): 0 $
+\item \verb!invdiffnp(a,b) ! = $ (a<0) \& (0< b)  ? 1/(b-a): 0 $
+\index{projection}\index{projection}\index{dist}\index{min}\index{max}\index{max}\index{diffpos}\index{invdiffpos}\index{diffnp}\index{invdiffnp}
 \end{itemize}
 
 \subsection{string expression}
-In the following example you some example string expression 
+In the following example you can see some  string example expression:
 \bFF
 @string tt="toto1"+1+" -- 77"; // string concatenation \index{string!concatenation}\index{string!find} \index{getline} 
 @string t1="0123456789";

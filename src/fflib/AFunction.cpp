@@ -1101,7 +1101,7 @@ double diffpos(const double & aa, const double & bb) { return aa<bb ? bb-aa : 0.
 double invdiffpos(const double & aa, const double & bb) { return aa<bb ? 1./(bb-aa) : 0.;}
 double diffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb ? bb-aa : 0.;}
 double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb  ? 1./(bb-aa) : 0.;}
-
+extern double ff_tgv; // Add FH jan 2017
 
 void Init_map_type()
 {
@@ -1214,6 +1214,8 @@ void Init_map_type()
       
      Global.New("verbosity",CPValue<long>(verbosity));
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
+     Global.New("tgv",CPValue<double>(ff_tgv));
+    
     extern long newconvect3;// def in global.cpp 
     Global.New("newconvect",CPValue<long>(newconvect3)); //pichon
     

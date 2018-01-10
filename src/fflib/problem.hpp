@@ -575,7 +575,7 @@ class FormLinear : public E_F0mps { public:
 };
 
 template<class VFES>
-class Call_FormLinear: public E_F0mps 
+class Call_FormLinear: public E_F0mps
 { 
 public:
   const int d;
@@ -1066,7 +1066,7 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
   FESpace & Vh = *pVh ;
-  double tgv= 1e30;
+  double tgv= ff_tgv;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));  
   long NbOfDF =  pVh ? Vh.NbOfDF: 0;
   KN<R> *px=0;
@@ -1092,6 +1092,30 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   return SetAny<KN_<R> >(xx);
 }
 
+template<typename KK,typename vv_fes,typename CC>
+struct FF_L_args {
+    typedef  KK K;
+    typedef vv_fes v_fes;
+    typedef v_fes *pfes;
+    typedef typename  v_fes::FESpace FESpace;
+    typedef FEbase<K,v_fes> ** R;
+    typedef R  A;
+    typedef pfes* B;
+    typedef const CC *  C;
+    typedef  CC *  MC;
+    static bool Check(MC l) {return IsComplexType<K>::value==FieldOfForm(l->largs,IsComplexType<K>::value);}
+    static MC  Clone(Expression ll){C l = dynamic_cast<C>(ll);ffassert(l);return new CC(*l); }
+    static void f(KN<K>   *x,MC l,A pp,Stack stack)
+    {
+        ffassert(l);
+        double tgv=ff_tgv;
+        if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
+        FESpace * pVh= (*pp)->newVh();
+        KN_<K>  xx=*x;
+        if (  pVh && AssembleVarForm<K,MatriceCreuse<K>,FESpace >(stack,pVh->Th,*pVh,*pVh,false,0,&xx,l->largs) )
+            AssembleBC<K,FESpace>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,0,l->largs,tgv);
+    }
+};
 template<class R>
 void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds) 
 	       /*Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,
@@ -1190,7 +1214,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
     long NbSpace = 50; 
   long itmax=0; 
   double epsilon=1e-6;
-  double tgv = 1e30;
+  double tgv = ff_tgv;
   int strategy=0;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;

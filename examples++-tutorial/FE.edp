@@ -59,3 +59,11 @@ mesh TTh=Wdch.Th;
 plot(TTh,wait=1);
 mesh Tw =w.Th; 
 }
+{// Version 3.58  
+	Vh uu=x;
+	Vh uuu=uu[]; 
+	varf va(u,v) = int2d(Th)(v)+on(1,u=1);
+	Vh vu = va(0,Vh,tgv=1);
+	plot(vu, wait=1); 
+
+}

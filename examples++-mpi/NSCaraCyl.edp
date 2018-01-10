@@ -23,6 +23,7 @@
 // corresponding to gnuplot visualization
 // --------------------------------------------------
 include "getARGV.idp"
+include "getARGV.idp"
 load "MUMPS"
 load "shell"
 load "scotch"

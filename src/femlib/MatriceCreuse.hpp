@@ -39,7 +39,7 @@ extern "C" {
 #include "FESpace.hpp" 
 #include "DOperator.hpp"
 #include "QuadratureFormular.hpp" 
-
+extern double ff_tgv;
 using  Fem2D::Mesh;
 using  Fem2D::FESpace;
 using Fem2D::FElement;
@@ -939,7 +939,7 @@ struct Data_Sparse_Solver {
     initmat(1),
     typemat(0),
     strategy(0),
-    tgv(1e30),
+    tgv(ff_tgv),
     factorize(0),
     epsilon(1e-6),
     precon(0),
