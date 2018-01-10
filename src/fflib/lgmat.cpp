@@ -605,7 +605,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 //  bool VF=false;
 //  VF=isVF(op->largs);
  // assert(!VF); 
-  double tgv = 1e30;
+  double tgv = ff_tgv;
   double tol_pivot=-1;
   double tol_pivot_sym=-1;
   

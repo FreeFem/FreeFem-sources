@@ -183,4 +183,5 @@ CodeAlloc *CodeAlloc::tnull=0;
 
 #include <RefCounter.hpp>
 RefCounter *RefCounter::tnull=0;
+double ff_tgv=1e30; 
 

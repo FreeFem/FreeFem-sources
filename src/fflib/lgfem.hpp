@@ -812,4 +812,83 @@ public:
     OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
     t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ){}
 };
+
+template<typename KK,typename vv_fes,typename CC>
+struct FFset3 {
+    typedef KK K;
+    typedef vv_fes v_fes;
+    typedef vv_fes *pfes;
+    typedef FEbase<K,vv_fes> ** R;
+    typedef R  A;
+    typedef pfes* B;
+    typedef CC C;
+    typedef Expression MC;
+    static Expression Clone(Expression e){return e;}
+    static bool Check(MC l) {return true;}
+    static void f(KN<K>   *x,MC a,A pp,Stack stack) {
+        CC at= GetAny<C>((*a)(stack));
+        *x = at;}
+};
+
+
+
+template<typename FF >
+class init_FE_eqarray : public OneOperator {
+public:
+    // <pferbase*,pferbase*,pfes*
+    typedef typename FF::K K;
+    typedef typename FF::v_fes v_fes;
+    typedef v_fes *pfes;
+    typedef typename v_fes::FESpace FESpace;
+    typedef FEbase<K,v_fes> ** R;
+    typedef R  A;
+    typedef pfes* B;
+    typedef typename FF::C C;
+    typedef typename FF::MC MC;
+    class CODE :public  E_F0{ public:
+        Expression a0,a1;
+        MC a2;
+        CODE(Expression aa0,Expression aa1,Expression aa2)
+        : a0(aa0),a1(aa1),a2(FF::Clone(aa2)) {ffassert(FF::Check(a2));}
+        AnyType operator()(Stack s)  const
+        {
+            
+            AnyType aa0= (*a0)(s);
+            AnyType aa1= (*a1)(s);
+           
+            A pp = GetAny<A>(aa0);
+            B a=  GetAny<B>(aa1);
+            *pp=new FEbase<K,v_fes>(a);
+            KN<K>   *x = (**pp).x();
+            if ( !x) {  // defined
+                FESpace * Vh= (*pp)->newVh();
+                throwassert( Vh);
+                **pp = x = new KN<K>(Vh->NbOfDF);
+                *x=K();
+            }
+            int n= x->N();
+            FF::f(x,a2,pp,s);
+            int nn= x->N();
+            ffassert(n==nn);
+            return  aa0;
+        }
+        virtual size_t nbitem() const {return a2->nbitem(); }
+        bool MeshIndependent() const {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent();} //
+        
+    };
+    init_FE_eqarray(int ppref):  OneOperator(
+                                             map_type[typeid(R).name()],
+                                             map_type[typeid(A).name()],
+                                             map_type[typeid(B).name()],
+                                             map_type[typeid(C).name()])
+    {pref=ppref;}
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        
+        return new CODE(args[0],args[1],map_type[typeid(C).name()]->CastTo(args[2]));
+    }
+    
+};
+
+
 #endif

@@ -1,3 +1,12 @@
+version 3.58  (Warning add global ff_tgv)
+  set global value of tgv through thv variable  (defaut = 1e30) 
+  Add code of initialise Vh whit add of dof in real or complex case 
+  real[int] b(Vh.ndof); varf va(u,v) =int2d(Th)(v); 
+  Vh u=b;
+  Vh u1= A*b; 
+  Vh u2= va(0,Vh,tgv=1);
+  Vh u1= A^-1*b; 
+  ..
 version 3.57-1
  - add new function : for FreeVol
     diffpos(a,b) =  max(0,b-a)

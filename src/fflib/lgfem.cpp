@@ -5219,6 +5219,10 @@ template<typename  T> T feresize(const Resize1<T> & rt,const long &n) {
     return rt.v;}
 double get_R3(R3 *p,long i){return (*p)[i];}
 R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
+
+
+
+
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
@@ -5776,8 +5780,42 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >    
 		   
 		);
- 
-     
+    // Jan 2018  FH  Vh uh=yu[]; //  A FAIRE FH POUR F NATAF FFFFFFFF
+    TheOperators->Add("<-"
+                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,KN_<R> > >(10)
+                      , new init_FE_eqarray<FF_L_args<R,v_fes,Call_FormLinear<v_fes> > >(10)
+                      
+                      );
+    TheOperators->Add("<-"
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,KN_<Complex> > >(10)
+                      , new init_FE_eqarray<FF_L_args<Complex,v_fes,Call_FormLinear<v_fes> > >(10)
+                      );
+    TheOperators->Add("<-"
+                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,KN_<R> > >(10)
+                      , new init_FE_eqarray<FF_L_args<R,v_fes3,Call_FormLinear<v_fes3> > >(10)
+                      
+                      );
+    TheOperators->Add("<-"
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,KN_<Complex> > >(10)
+                      , new init_FE_eqarray<FF_L_args<Complex,v_fes3,Call_FormLinear<v_fes3> > >(10)
+                      );
+
+    // Fin
+
+    
+    // Fin
  TheOperators->Add("+=",
 		 //-   new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
 		  //-  new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > > ,

@@ -1,6 +1,11 @@
-@    changeset:   4245:1a3584c61803
-|\   tag:         tip
-| |  parent:      4242:1e0d0f9d66eb
+@  changeset:   4246:96189b377045
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 03 13:47:00 2018 +0100
+|  summary:     past to versio 3.57-1
+|
+o    changeset:   4245:1a3584c61803
+|\   parent:      4242:1e0d0f9d66eb
 | |  parent:      4244:bfdabf4d7219
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Jan 03 09:03:17 2018 +0100
