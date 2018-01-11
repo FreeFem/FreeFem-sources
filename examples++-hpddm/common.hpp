@@ -6,9 +6,12 @@
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 
-#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
 #ifdef WITH_mkl
 #define HPDDM_MKL 1
+#endif
+
+#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
+#ifdef WITH_mkl
 #define MKL_PARDISOSUB
 #elif defined(WITH_mumps)
 #define MUMPSSUB
