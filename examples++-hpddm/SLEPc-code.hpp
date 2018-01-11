@@ -7,12 +7,9 @@
 #define WITH_SLEPC
 #endif
 
-
-
 #ifdef WITH_SLEPC
 
 #include "slepc.h"
-
 
 namespace SLEPc {
 template<class K, typename std::enable_if<std::is_same<K, double>::value || !std::is_same<PetscScalar, double>::value>::type* = nullptr>
@@ -29,6 +26,12 @@ void assign(K* pt, PetscScalar& kr, PetscScalar& ki) {
 template<class K, typename std::enable_if<!std::is_same<K, double>::value && std::is_same<PetscScalar, double>::value>::type* = nullptr>
 void assign(K* pt, PetscScalar& kr, PetscScalar& ki) {
     *pt = K(kr, ki);
+}
+template<class K, typename std::enable_if<(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)>::type* = nullptr>
+void distributedVec(unsigned int* num, unsigned int first, unsigned int last, K* const in, PetscScalar* pt, unsigned int n) { }
+template<class K, typename std::enable_if<!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)>::type* = nullptr>
+void distributedVec(unsigned int* num, unsigned int first, unsigned int last, K* const in, PetscScalar* pt, unsigned int n) {
+    HPDDM::Subdomain<K>::template distributedVec<0>(num, first, last, in, pt, n, 1);
 }
 template<class Type, class K>
 class eigensolver_Op : public E_F0mps {
@@ -100,13 +103,33 @@ AnyType eigensolver_Op<Type, K>::operator()(Stack stack) const {
                 }
             }
         }
+        FEbaseArrayKn<K>* eigenvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>*>((*nargs[3])(stack)) : nullptr;
+        Vec* basis = nullptr;
+        PetscInt n = 0;
+        if(eigenvectors && eigenvectors->N > 0 && eigenvectors->get(0) && eigenvectors->get(0)->n > 0) {
+            n = eigenvectors->N;
+            basis = new Vec[n];
+            for(int i = 0; i < n; ++i) {
+                MatCreateVecs(ptA->_petsc, &basis[i], NULL);
+                PetscScalar* pt;
+                VecGetArray(basis[i], &pt);
+                if(!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
+                    distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(eigenvectors->get(i))), pt, eigenvectors->get(i)->n);
+                VecRestoreArray(basis[i], &pt);
+            }
+        }
+        eigenvectors->resize(0);
+        if(n)
+            EPSSetInitialSpace(eps, n, basis);
         EPSSolve(eps);
+        for(int i = 0; i < n; ++i)
+            VecDestroy(&basis[i]);
+        delete [] basis;
         PetscInt nconv;
         EPSGetConverged(eps, &nconv);
         if(nconv > 0 && (nargs[2] || nargs[3])) {
-            KN<K>* eigenvalues = nargs[2] ? GetAny<KN<K>* >((*nargs[2])(stack)) : nullptr;
-            FEbaseArrayKn<K>* eigenvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>* >((*nargs[3])(stack)) : nullptr;
-            KNM<K>* array = nargs[4] ? GetAny<KNM<K>* >((*nargs[4])(stack)) : nullptr;
+            KN<K>* eigenvalues = nargs[2] ? GetAny<KN<K>*>((*nargs[2])(stack)) : nullptr;
+            KNM<K>* array = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
             if(eigenvalues)
                 eigenvalues->resize(nconv);
             if(eigenvectors)
@@ -179,7 +202,6 @@ void addSLEPc() {
 template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
 void addSLEPc() { }
 }
-;
 
 static void Init() {
     //  to load only once
@@ -190,13 +212,11 @@ static void Init() {
 #else
     const char * mmmm= "Petsc Slepc real";
 #endif
-    if(!zzzfff->InMotClef(mmmm,t,r) )
+    if(!zzzfff->InMotClef(mmmm,t,r))
     {
-        
 #ifdef PETScandSLEPc
         Init_PETSc();
 #endif
-        
         int argc = pkarg->n;
         char** argv = new char*[argc];
         for(int i = 0; i < argc; ++i)
@@ -219,12 +239,6 @@ static void Init() {
 }
 #else
 static void Init() {
-    
      Init_PETSc();
-
 }
-
-#endif 
-
-
-
+#endif
