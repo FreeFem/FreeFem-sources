@@ -1,8 +1,8 @@
 /*
-   solving   laplace operator with neumam boundary condition
+   solving   Laplace operator with Neumann boundary condition
    with 1D lagrange multiplier
    
-   The variationnal form is
+   The variational form is
    find (u,l) such that
 
    $\forall (v,m)   a(u,v) + b(u,m) + b(v,l) = L(v) $
@@ -14,10 +14,10 @@
 int n = Vh.ndof;
 int n1 = n+1;
 
- Vh uh,vh;              // unkown and test function. 
+ Vh uh,vh;              // unknown and test function. 
  func f=1+x-y;                 //  right hand side function 
   
-varf va(uh,vh) =                    //  definion of  the problem 
+varf va(uh,vh) =                    //  definition of  the problem 
     int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
 ;
 varf vL(uh,vh)=  int2d(Th)( f*vh )  ;
@@ -34,14 +34,14 @@ real[int]  B = vb(0,Vh);
 matrix AA = [ [ A ,  B ] ,
               [ B', 0 ] ] ;
 
-real[int]  bb(n+1),x(n+1),b1(1),l(1);
+real[int]  bb(n+1),xx(n+1),b1(1),l(1);
 b1=0;
 // build the block rhs 
 bb = [ b, b1];
-set(AA,solver=UMFPACK);
-x = AA^-1*bb; // solve the linear systeme 
+set(AA,solver=sparsesolver);
+xx = AA^-1*bb; // solve the linear system
 
-[uh[],l] = x;  // set the value 
+[uh[],l] = xx;  // set the value 
 cout << " l = " << l(0) <<  " ,  b(u,1)  =" << B'*uh[]  << endl;  
 plot(uh,wait=1);
 

@@ -1,5 +1,30 @@
-@  changeset:   4246:96189b377045
+@  changeset:   4251:9f0dc5e17391
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 10 20:45:50 2018 +0100
+|  summary:     pass to version 3.58
+|
+o  changeset:   4250:c8c54fefc878
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Tue Jan 09 15:29:39 2018 +0100
+|  summary:     Improved the nonoverlapping macros for FreeVol++.
+|
+o  changeset:   4249:ed817da7e4eb
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Sun Jan 07 09:14:15 2018 +0100
+|  summary:     Use MatMatSolve with direct methods.
+|
+o  changeset:   4248:2f93d44fe3b1
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Fri Jan 05 09:35:49 2018 +0100
+|  summary:     Not everyone use ParaView, remove from tests.
+|
+o  changeset:   4247:41dcd724070f
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Fri Jan 05 09:34:10 2018 +0100
+|  summary:     New macro for transient simulation exporting with ParaView.
+|
+o  changeset:   4246:96189b377045
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jan 03 13:47:00 2018 +0100
 |  summary:     past to versio 3.57-1

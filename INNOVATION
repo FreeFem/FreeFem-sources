@@ -1,3 +1,5 @@
+  unset x,y,z at initialisation to remove bug like  
+     Vh u ..;  real a=u; //  hard to find 
 version 3.58  (Warning add global ff_tgv)
   set global value of tgv through thv variable  (defaut = 1e30) 
   Add code of initialise Vh whit add of dof in real or complex case 

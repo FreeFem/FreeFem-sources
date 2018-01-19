@@ -12,7 +12,7 @@
 //  Thesis of Sabine Zaglmayr, High Order Finite Element Methods for Electromagnetic Field Computation, 2006
 //     JOHANNES KEPLER UNIVERSITA,T LINZ
 // http://www.numerik.math.tugraz.at/~zaglmayr/pub/szthesis.pdf
-// 
+// s
 // F. Hecht  May 2011
 // ------------------------------------------------------------
 //   test 
