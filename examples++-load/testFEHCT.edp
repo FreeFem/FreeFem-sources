@@ -125,10 +125,10 @@ for (int i=0;i<Vh.ndofK;++i)
   cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1) << " == " << DD(a1,h,0) << " == " << a2(x1,y1) << endl; 
   cout << " dy(a1)(x1,y1) = " << dy(a1)(x1,y1) << " == " << DD(a1,0,h) << " == " << a3(x1,y1) << endl; 
 
-  cout << " dx(a2)(x1,y1) = " << dx(a2)(x1,y1) << " == " << DD(a2,h,0)  << " == " << dxx(a1) << endl; 
-  cout << " dy(a2)(x1,y1) = " << dy(a2)(x1,y1) << " == " << DD(a2,0,h)  << " == " << dxy(a1) << endl; 
-  cout << " dx(a3)(x1,y1) = " << dx(a3)(x1,y1) << " == " << DD(a3,h,0)  << " == " << dxy(a1) << endl; 
-  cout << " dy(a3)(x1,y1) = " << dy(a3)(x1,y1) << " == " << DD(a3,0,h)  << " == " << dyy(a1) << endl; 
+  cout << " dx(a2)(x1,y1) = " << dx(a2)(x1,y1) << " == " << DD(a2,h,0)  << " == " << dxx(a1)(x1,y1) << endl; 
+  cout << " dy(a2)(x1,y1) = " << dy(a2)(x1,y1) << " == " << DD(a2,0,h)  << " == " << dxy(a1)(x1,y1) << endl; 
+  cout << " dx(a3)(x1,y1) = " << dx(a3)(x1,y1) << " == " << DD(a3,h,0)  << " == " << dxy(a1)(x1,y1) << endl; 
+  cout << " dy(a3)(x1,y1) = " << dy(a3)(x1,y1) << " == " << DD(a3,0,h)  << " == " << dyy(a1)(x1,y1) << endl; 
 
   assert( abs(dx(a1)(x1,y1)-DD(a1,h,0) ) < 1e-4);
   assert( abs((a2)(x1,y1)-DD(a1,h,0) ) < 1e-4);

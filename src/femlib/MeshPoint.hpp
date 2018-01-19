@@ -10,9 +10,10 @@
 #endif
 #endif
 namespace  Fem2D {
-const long notaregion=LONG_MIN;    
+const long notaregion=LONG_MIN;
+const double doublenotset = -123e100;
 class MeshPointBase { public:
-
+  
   R3 P;
   R3 PHat;
   union {
@@ -210,17 +211,17 @@ class MeshPointBase { public:
     
    void unset() 
    {
-     P.x=-1e30;
-     P.y=-1e30;
-     P.z=-1e30;
+     P.x=doublenotset;
+     P.y=doublenotset;
+     P.z=doublenotset;
      T=0;
      Th=0;
-      label =0;
+      label =notaregion;
        region = notaregion;
      VF=0;  
       d=0;
    }
-   bool isUnset() const { return P.x == -1e30;} // BofBof   
+   bool isUnset() const { return P.x == doublenotset;} // BofBof
    void set(R x=0.0,R y=0.0,R z=0.0) 
    {
      P.x=x;

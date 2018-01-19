@@ -102,13 +102,23 @@ namespace ffapi {
 #include "RNM.hpp"
 #include <queue>
 #include "environment.hpp"
+#include "ufunction.hpp"
+using namespace std;
+
+
 
 
 
 
 #define  FF_GRAPH_PTR_DCL
 #include "rgraph.hpp"
-//#include "PlotStream.hpp"
+#include "fem.hpp"
+#include "Mesh3dn.hpp"
+
+
+#include "MatriceCreuse_tpl.hpp"
+
+#include "MeshPoint.hpp"
 
  bool  NoGraphicWindow=false;
 
@@ -185,3 +195,8 @@ CodeAlloc *CodeAlloc::tnull=0;
 RefCounter *RefCounter::tnull=0;
 double ff_tgv=1e30; 
 
+void InitMeshPoint(void * p)
+{
+    EF23::MeshPoint*mps=static_cast<EF23::MeshPoint*>(p);
+    mps->unset();
+}
