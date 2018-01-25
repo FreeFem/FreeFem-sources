@@ -432,17 +432,25 @@ R TypeOfFE_LagrangeDC3d::operator()(const FElement & K,const  R3 & PHat1,const K
     const R3 TypeOfFE_LagrangeDC3d::G(1./4.,1./4.,1./4.);   
     
 
-// link with FreeFem++ 
-static TypeOfFE_P1ttdc1_ P1dc1LagrangeP1dc1;
-static TypeOfFE_P2ttdc1_ P2dc1LagrangeP2dc1;
-static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt(1,0.999);
-        
-// a static variable to add the finite element to freefem++
-static AddNewFE  P1dcLagrange("P1dc1",&P1dc1LagrangeP1dc1); 
-static AddNewFE  P2dcLagrange("P2dc1",&P2dc1LagrangeP2dc1); 
-static AddNewFE3  P1dttLagrange3d("P1dc3d",&TypeOfFE_LagrangeDC3dtt,"P1dc"); 
+    
+} // FEM2d namespace
 
-} // FEM2d namespace 
+static void finit()
+{
+    // link with FreeFem++
+    static TypeOfFE_P1ttdc1_ P1dc1LagrangeP1dc1;
+    static TypeOfFE_P2ttdc1_ P2dc1LagrangeP2dc1;
+    static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt(1,0.999);
+    static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt1(1,1.);
+    
+    // a static variable to add the finite element to freefem++
+    static AddNewFE  P1dcLagrange("P1dc1",&P1dc1LagrangeP1dc1);
+    static AddNewFE  P2dcLagrange("P2dc1",&P2dc1LagrangeP2dc1);
+    static AddNewFE3  P1dttLagrange3d("P1dc3d",&TypeOfFE_LagrangeDC3dtt,"P1dc");
+    static AddNewFE3  P1dttLagrange3d1("P1dc3d1",&TypeOfFE_LagrangeDC3dtt1  );
+}
+LOADFUNC(finit)
+
 
 
 // --- fin -- 
