@@ -1,5 +1,10 @@
-@  changeset:   4253:70b34fc67094
+@  changeset:   4254:8d0b5db796eb
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Jan 25 15:32:25 2018 +0100
+|  summary:     add new FE and new basis function sign , signbit, ...
+|
+o  changeset:   4253:70b34fc67094
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 19 19:24:36 2018 +0100
 |  summary:     unset x,y,z at init to find error.

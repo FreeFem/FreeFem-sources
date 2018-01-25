@@ -1103,7 +1103,7 @@ double diffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb ? bb
 double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb  ? 1./(bb-aa) : 0.;}
 extern double ff_tgv; // Add FH jan 2018
 double sign(double x){return (x>0.)-(x<0.); }// Add FH jan 2018
-long sign(long x){return return (x>0)-(x<0); }// Add FH jan 2018
+long sign(long x){return (x>0)-(x<0); }// Add FH jan 2018
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
