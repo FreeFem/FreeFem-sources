@@ -1101,8 +1101,9 @@ double diffpos(const double & aa, const double & bb) { return aa<bb ? bb-aa : 0.
 double invdiffpos(const double & aa, const double & bb) { return aa<bb ? 1./(bb-aa) : 0.;}
 double diffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb ? bb-aa : 0.;}
 double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb  ? 1./(bb-aa) : 0.;}
-extern double ff_tgv; // Add FH jan 2017
-
+extern double ff_tgv; // Add FH jan 2018
+double sign(double x){return (x>0.)-(x<0.); }// Add FH jan 2018
+long sign(long x){return return (x>0)-(x<0); }// Add FH jan 2018
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -1763,6 +1764,12 @@ void Init_map_type()
 
   Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
     Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
+    Global.Add("copysign","(",new OneOperator2<double>(copysign));// Add jan 2018 FH
+    Global.Add("sign","(",new OneOperator1<double>(sign));// Add jan 2018 FH
+    Global.Add("sign","(",new OneOperator1<long>(sign));// Add jan 2018 FH
+    Global.Add("signbit","(",new OneOperator1<bool,long>(signbit));// Add jan 2018 FH
+    Global.Add("signbit","(",new OneOperator1<bool,double>(signbit));// Add jan 2018 FH
+
     Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
     Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
     Global.Add("chtmpdir","(",new OneOperator0<long>(ffapi::chtmpdir));

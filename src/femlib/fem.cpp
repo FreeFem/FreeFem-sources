@@ -1744,9 +1744,9 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 
 		//   cout << "          (debug)  nb vertices on egdes " << nv << endl;  
 		    //  cout << " " <<  nebmax << " " << neb << endl;
-	assert(neb==nebmax);
-	assert(nebi==nebimax);
-	assert(nbsdd==nbsddmax);
+	ffassert(neb==nebmax);
+	ffassert(nebi==nebimax);
+	ffassert(nbsdd==nbsddmax);
 	
 	//   create the new vertices and the new triangle 
 	int   kt=0;
@@ -1777,7 +1777,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    if ( addv )			
 		    { // new vertex
 		      // cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
-			assert(nv<nvmax);
+			ffassert(nv<nvmax);
 			vertices[nv]=Pj;
 			(Label&) vertices[nv]=0; //  Internal vertices 
 			pV = vertices + nv;

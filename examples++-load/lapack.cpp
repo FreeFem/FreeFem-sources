@@ -696,7 +696,58 @@ long lapack_dgesdd(KNM<double> *const &A,KNM<double> *const &U,KN<double> *const
     }
   return info;
 }
-
+long lapack_dgelsy(KNM<double> *const &A,KN<double> *const &B)
+{
+/*
+ ubroutine dgelsy    (    integer     M,
+ integer     N,
+ integer     NRHS,
+ double precision, dimension( lda, * )     A,
+ integer     LDA,
+ double precision, dimension( ldb, * )     B,
+ integer     LDB,
+ integer, dimension( * )     JPVT,
+ double precision     RCOND,
+ integer     RANK,
+ double precision, dimension( * )     WORK,
+ integer     LWORK,
+ integer     INFO
+ )
+ */
+    int N = A->M(), M=A->N(), NB=1,LDA = &(*A)(1,0) -&(*A)(0,0) ;
+    intblas INFO,LW=3*N+NB*(N+1),RANK;
+    KN<double> W(LW);
+    double RCOND = 0.01;
+    KN<intblas> JPVT(N);JPVT=0;
+    dgelsy_(&M,&N,&NB,&(*A)(0,0),&LDA,&(*B)[0],&M,&JPVT[0],&RCOND,&RANK,&W(0),&LW,&INFO);
+    return RANK ;
+}
+long lapack_dgelsy(KNM<double> *const &A,KNM<double> *const &B)
+{
+    /*
+     ubroutine dgelsy    (    integer     M,
+     integer     N,
+     integer     NRHS,
+     double precision, dimension( lda, * )     A,
+     integer     LDA,
+     double precision, dimension( ldb, * )     B,
+     integer     LDB,
+     integer, dimension( * )     JPVT,
+     double precision     RCOND,
+     integer     RANK,
+     double precision, dimension( * )     WORK,
+     integer     LWORK,
+     integer     INFO
+     )
+     */
+    int N = A->M(), M=A->N(), NB=B->N(),LDA = &(*A)(1,0) -&(*A)(0,0) ;
+    intblas INFO,LW=3*N+NB*(N+1),RANK;
+    KN<double> W(LW);
+    double RCOND = 0.01;
+    KN<intblas> JPVT(N);JPVT=0;
+    dgelsy_(&M,&N,&NB,&(*A)(0,0),&LDA,&(*B)[0],&M,&JPVT[0],&RCOND,&RANK,&W(0),&LW,&INFO);
+    return RANK ;
+}
 // GL,28/09/2011 (computation of the eigenvalues and eigenvectors of a real symmetric matrix)
 long lapack_dsyev(KNM<double> *const &A,KN<double> *const &vp,KNM<double> *const &vectp)
 {
@@ -1128,6 +1179,8 @@ static void Load_Init(){  // le constructeur qui ajoute la fonction "splitmesh3"
       Global.Add("zhegv","(",new  OneOperator4_<long,KNM<Complex>*,KNM<Complex>*,KN<double>*,KNM<Complex>*>(lapack_zhegv));
       Global.Add("dsyev","(",new  OneOperator3_<long,KNM<double>*,KN<double>*,KNM<double>*>(lapack_dsyev));
       Global.Add("zheev","(",new  OneOperator3_<long,KNM<Complex>*,KN<double>*,KNM<Complex>*>(lapack_zheev));
+      Global.Add("dgelsy","(",new  OneOperator2_<long,KNM<double>*,KN<double>*>(lapack_dgelsy));
+      Global.Add("dgelsy","(",new  OneOperator2_<long,KNM<double>*,KNM<double>*>(lapack_dgelsy));
     }
   else
     if(verbosity)

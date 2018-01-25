@@ -1,5 +1,15 @@
-@  changeset:   4251:9f0dc5e17391
+@  changeset:   4253:70b34fc67094
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 19 19:24:36 2018 +0100
+|  summary:     unset x,y,z at init to find error.
+|
+o  changeset:   4252:d0148995d020
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Thu Jan 11 09:39:39 2018 +0100
+|  summary:     Forgot iterative.edp in Makefile.am
+|
+o  changeset:   4251:9f0dc5e17391
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Jan 10 20:45:50 2018 +0100
 |  summary:     pass to version 3.58
