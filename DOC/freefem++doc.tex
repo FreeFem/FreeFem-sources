@@ -4921,7 +4921,7 @@ si[1]=2;
 si[50]=1;
 @for [i,vi : si]
    {
-   cout << " i " << setw(3) << i << " " << setw(10) <<vi << endl;
+   cout << " i " << setw(3) << i << " " << setw(10) <<vi << endl;// \index{setw}
     vi= atoi(i)*2;
     }
 
@@ -4983,7 +4983,7 @@ at the exit of the enclosing block,
   
 
 Some functions are available  to format the output.
-\index{precision}\index{scientific}\index{fixed}\index{showbase}\index{noshowbase}\index{showpos}\index{noshowpos}\index{default}
+\index{precision}\index{scientific}\index{fixed}\index{showbase}\index{noshowbase}\index{showpos}\index{noshowpos}\index{default}\index{setw}
 \begin{itemize}
 \item \ttCC{ int nold=f.@precision(n) } Sets the number of digits printed to the right of the decimal point. This applies to all subsequent floating point numbers written to that output stream. However, this won't make floating-point "integers" print with a decimal point. It's necessary to use fixed for that effect.
 \item     \ttCC{f.@scientific}  Formats floating-point numbers in scientific notation (  \texttt{d.dddEdd} )
@@ -4993,6 +4993,8 @@ Some functions are available  to format the output.
 \item     \ttCC{f.@showpos}    inserts a plus sign (+) into a decimal conversion of a positive integral value.
 \item     \ttCC{f.@noshowpos}  unset \texttt{showpos} flags
  \item   \ttCC{f.@default}     reset all  the previous  flags (\texttt{fmtflags}) to the  default expect precision.
+ \item   \ttCC{@setw(n)} Behaves as if member width were called with n as argument on the stream on which it is inserted as a manipulator (it can be inserted on output streams).
+
 \end{itemize}
 Where \ttCC{f} is output stream descriptor, for example \texttt{cout}.
 

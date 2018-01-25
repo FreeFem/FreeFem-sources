@@ -1,3 +1,11 @@
+  Build version 3.58 for Mac and windows
+  add new finite element P2bulle3 TRhank to P-H Tournier and Jet Hoe Tang 
+  add new standard function
+  +    Global.Add("copysign","(",new OneOperator2<double>(copysign));// Add jan 2018 FH
+  +    Global.Add("sign","(",new OneOperator1<double>(sign));// Add jan 2018 FH
+  +    Global.Add("sign","(",new OneOperator1<long>(sign));// Add jan 2018 FH
+  +    Global.Add("signbit","(",new OneOperator1<bool,long>(signbit));// Add jan 2018 FH
+  +    Global.Add("signbit","(",new OneOperator1<bool,double>(signbit));// Add jan 2018 FH 
   unset x,y,z at initialisation to remove bug like  
      Vh u ..;  real a=u; //  hard to find 
 version 3.58  (Warning add global ff_tgv)
