@@ -1,5 +1,10 @@
-@  changeset:   4259:a6df009e5874
+@  changeset:   4260:84faeecea39b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 26 09:12:04 2018 +0100
+|  summary:     correct in typo in lapack.cpp
+|
+o  changeset:   4259:a6df009e5874
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 26 09:07:40 2018 +0100
 |  summary:     second coorect
