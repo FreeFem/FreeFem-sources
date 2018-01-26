@@ -1,5 +1,10 @@
-@  changeset:   4261:121a74549df4
+@  changeset:   4262:17f0192bcb57
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 26 09:18:11 2018 +0100
+|  summary:     next test
+|
+o  changeset:   4261:121a74549df4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 26 09:16:19 2018 +0100
 |  summary:     corect type in lapack
