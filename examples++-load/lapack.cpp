@@ -740,7 +740,7 @@ long lapack_dgelsy(KNM<double> *const &A,KNM<double> *const &B)
      integer     INFO
      )
      */
-    int N = A->M(), M=A->N(), NB=B->N(),LDA = &(*A)(1,0) -&(*A)(0,0) ;
+    intblas N = A->M(), M=A->N(), NB=B->N(),LDA = &(*A)(1,0) -&(*A)(0,0) ;
     intblas INFO,LW=3*N+NB*(N+1),RANK;
     KN<double> W(LW);
     double RCOND = 0.01;
