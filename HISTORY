@@ -1,5 +1,10 @@
-@  changeset:   4257:74966757452d
+@  changeset:   4258:db8a9c1626d0
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 26 09:03:09 2018 +0100
+|  summary:     coreect pb type int in lapack
+|
+o  changeset:   4257:74966757452d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Jan 25 21:52:11 2018 +0100
 |  summary:     add new Finite  element 3d p1dc3d1 for O. pantz
