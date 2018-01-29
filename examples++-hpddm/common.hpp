@@ -123,6 +123,113 @@ void addProd() {
 
 extern KN<String>* pkarg;
 
+template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 1>::type* = nullptr>
+void scaledExchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) {
+    if(allocate)
+        pA->template scaledExchange<true>(pin, mu);
+    else
+        pA->template scaledExchange<false>(pin, mu);
+}
+template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 1>::type* = nullptr>
+void scaledExchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) { }
+template<class Type, class K>
+void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
+    if(pA) {
+        unsigned short mu = pA->getDof() ? pin->n / pA->getDof() : 1;
+        const auto& map = pA->getMap();
+        bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
+        if(scaled) {
+            scaledExchange(pA, static_cast<K*>(*pin), mu, allocate);
+        }
+        else
+            pA->HPDDM::template Subdomain<K>::exchange(static_cast<K*>(*pin), mu);
+        pA->clearBuffer(allocate);
+    }
+}
+template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 0>::type* = nullptr>
+void exchange(Type* const& pA, KN<K>* pin, bool scaled) {
+    exchange_dispatched(pA, pin, scaled);
+}
+template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
+void exchange(Type* const& pA, KN<K>* pin, bool scaled) {
+    if(pA)
+        exchange_dispatched(pA->_A, pin, scaled);
+}
+template<class Type, class K>
+class exchangeIn_Op : public E_F0mps {
+    public:
+        Expression A;
+        Expression in;
+        static const int n_name_param = 1;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        exchangeIn_Op<Type, K>(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), in(param2) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+
+        AnyType operator()(Stack stack) const;
+};
+template<class Type, class K>
+basicAC_F0::name_and_type exchangeIn_Op<Type, K>::name_param[] = {
+    {"scaled", &typeid(bool)}
+};
+template<class Type, class K>
+class exchangeIn : public OneOperator {
+    public:
+        exchangeIn() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new exchangeIn_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+        }
+};
+template<class Type, class K>
+AnyType exchangeIn_Op<Type, K>::operator()(Stack stack) const {
+    Type* pA = GetAny<Type*>((*A)(stack));
+    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
+    bool scaled = nargs[0] && GetAny<bool>((*nargs[0])(stack));
+    exchange(pA, pin, scaled);
+    return 0L;
+}
+template<class Type, class K>
+class exchangeInOut_Op : public E_F0mps {
+    public:
+        Expression A;
+        Expression in;
+        Expression out;
+        static const int n_name_param = 1;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        exchangeInOut_Op<Type, K>(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), in(param2), out(param3) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+
+        AnyType operator()(Stack stack) const;
+};
+template<class Type, class K>
+basicAC_F0::name_and_type exchangeInOut_Op<Type, K>::name_param[] = {
+    {"scaled", &typeid(bool)}
+};
+template<class Type, class K>
+class exchangeInOut : public OneOperator {
+    public:
+        exchangeInOut() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new exchangeInOut_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+        }
+};
+template<class Type, class K>
+AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
+    Type* pA = GetAny<Type*>((*A)(stack));
+    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
+    KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
+    bool scaled = nargs[0] && GetAny<bool>((*nargs[0])(stack));
+    *pout = *pin;
+    exchange(pA, pin, scaled);
+    *pout -= *pin;
+    return 0L;
+}
+
 #if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
 double getOpt(string* const& ss) {
     return HPDDM::Option::get()->val(*ss);
@@ -139,16 +246,6 @@ template<class Type>
 bool statistics(Type* const& Op) {
     Op->statistics();
     return false;
-}
-template<template<class, char> class Type, class K, char S>
-long exchange(Type<K, S>* const& Op, KN<K>* const& in, KN<K>* const& out) {
-    *out = *in;
-    const auto& map = Op->getMap();
-    bool allocate = map.size() > 0 && Op->getBuffer()[0] == nullptr ? Op->setBuffer() : false;
-    Op->HPDDM::template Subdomain<K>::exchange(static_cast<K*>(*out));
-    Op->clearBuffer(allocate);
-    *out -= *in;
-    return 0L;
 }
 
 static void Init_Common() {

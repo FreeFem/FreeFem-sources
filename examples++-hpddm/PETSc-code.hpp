@@ -391,7 +391,7 @@ template<class Type, class K>
 long originalNumbering(Type* const& A, KN<K>* const& in, KN<long>* const& interface) {
     if(A)
         A->_A->originalNumbering(STL<long>(*interface), *in);
-    return 0;
+    return 0L;
 }
 void finalizePETSc() {
     PETSC_COMM_WORLD = MPI_COMM_WORLD;
@@ -402,7 +402,7 @@ void finalizePETSc() {
 }
 template<class Type>
 long initEmptyCSR(Type* const&) {
-    return 0;
+    return 0L;
 }
 
 template<class HpddmType>
@@ -455,11 +455,10 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         initPETScStructure(ptA, mA, bs, nargs[2] ? (GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, static_cast<KN<double>*>(nullptr), rhs);
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-        MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     }
     bool clean = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(clean)
-        ptK->A = nullptr;
+        ptK->destroy();
     return ptA;
 }
 template<class HpddmType>
@@ -507,8 +506,8 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     MatCreate(PETSC_COMM_WORLD, &(ptA->_petsc));
     if(bs > 1)
         MatSetBlockSize(ptA->_petsc, bs);
-    bool bsr = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
-    bool prune = bsr ? (nargs[5] ? GetAny<bool>((*nargs[5])(stack)) : false) : false;
+    bool bsr = nargs[4] && GetAny<bool>((*nargs[4])(stack));
+    bool prune = bsr ? (nargs[5] && GetAny<bool>((*nargs[5])(stack))) : false;
     if(prune) {
         ptA->_S.resize(1);
         MatCreate(PETSC_COMM_WORLD, &ptA->_S[0]);
@@ -561,7 +560,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         delete [] pI;
     }
     if(clean)
-        ptK->A = nullptr;
+        ptK->destroy();
     MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
     if(nargs[2])
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE);
@@ -571,7 +570,6 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         MatConvert(ptA->_petsc, MATMPIBAIJMKL, MAT_INPLACE_MATRIX, &(ptA->_petsc));
 #endif
     KSPSetOperators(ptA->_ksp, ptA->_petsc, prune ? ptA->_S[0] : ptA->_petsc);
-    MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     return ptA;
 }
 template<class HpddmType>
@@ -681,7 +679,7 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
             MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
         ptA->_first = 0;
         ptA->_last = n;
-        bool clean = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
+        bool clean = nargs[4] && GetAny<bool>((*nargs[4])(stack));
         if(clean) {
             int* cl = nullptr;
             int* lg = nullptr;
@@ -717,7 +715,6 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         timing = MPI_Wtime();
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-        MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
     }
     return ptA;
 }
@@ -774,11 +771,10 @@ AnyType initCSR_Op<HpddmType>::operator()(Stack stack) const {
         ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>(*ptO), *ptR, comm);
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
         initPETScStructure(ptA, mA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs);
-        if(!std::is_same<HpddmType, Dmat>::value)
+        if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
             mA->lg = ptA->_A->getMatrix()->_ia;
         KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-        MatCreateVecs(ptA->_petsc, &(ptA->_x), nullptr);
         bool clean = nargs[3] && GetAny<bool>((*nargs[3])(stack));
         if(clean) {
             ptO->resize(0);
@@ -935,18 +931,18 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
         if(mpirank != 0)
             opt.remove("verbosity");
     }
-    Vec y;
-    MatCreateVecs(ptA->_petsc, nullptr, &y);
-    PetscScalar* x;
-    VecGetArray(ptA->_x, &x);
-    HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptRhs), x, ptRhs->n / bs, bs);
-    PetscScalar* work;
-    VecGetArray(y, &work);
-    std::fill_n(work, op._n, 0.0);
-    HPDDM::IterativeMethod::solve(op, x, work, 1, PETSC_COMM_WORLD);
-    VecRestoreArray(ptA->_x, &x);
-    HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptX), work, ptX->n / bs, bs);
-    VecRestoreArray(y, &work);
+    Vec x, y;
+    MatCreateVecs(ptA->_petsc, &x, &y);
+    PetscScalar* ptr_x;
+    VecGetArray(x, &ptr_x);
+    HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptRhs), ptr_x, ptRhs->n / bs, bs);
+    PetscScalar* ptr_y;
+    VecGetArray(y, &ptr_y);
+    std::fill_n(ptr_y, op._n, 0.0);
+    HPDDM::IterativeMethod::solve(op, ptr_x, ptr_y, 1, PETSC_COMM_WORLD);
+    VecRestoreArray(x, &ptr_x);
+    HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptX), ptr_y, ptX->n / bs, bs);
+    VecRestoreArray(y, &ptr_y);
     VecDestroy(&y);
     if(ptA->_A)
         ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<PetscScalar*>(*ptX));
@@ -961,13 +957,13 @@ class InvPETSc {
         const U u;
         InvPETSc(T v, U w) : t(v), u(w) {}
         void solve(U out) const {
-            Vec y;
+            Vec x, y;
             double timing = MPI_Wtime();
-            MatCreateVecs((*t)._petsc, nullptr, &y);
-            PetscScalar* x;
+            MatCreateVecs((*t)._petsc, &x, &y);
+            PetscScalar* ptr;
             PetscBool isBlock;
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
-                VecGetArray((*t)._x, &x);
+                VecGetArray(x, &ptr);
                 MatType type;
                 MatGetType((*t)._petsc, &type);
                 int bs = 1;
@@ -978,59 +974,60 @@ class InvPETSc {
 #endif
                 if(isBlock)
                     MatGetBlockSize((*t)._petsc, &bs);
-                HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), x, u->n / bs, bs);
-                VecRestoreArray((*t)._x, &x);
+                HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
+                VecRestoreArray(x, &ptr);
                 if(t.A->_A)
                     std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
             }
             else {
                 PetscScalar zero = 0.0;
-                VecSet((*t)._x, zero);
+                VecSet(x, zero);
 #if 0
                 Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
-                VecGetArray(is->y, &x);
-                std::copy_n(static_cast<PetscScalar*>(*u), (*t)._A->getMatrix()->_n, x);
-                VecRestoreArray(is->y, &x);
-                VecScatterBegin(is->rctx,is->y,(*t)._x,ADD_VALUES,SCATTER_REVERSE);
-                VecScatterEnd(is->rctx,is->y,(*t)._x,ADD_VALUES,SCATTER_REVERSE);
+                VecGetArray(is->y, &ptr);
+                std::copy_n(static_cast<PetscScalar*>(*u), (*t)._A->getMatrix()->_n, ptr);
+                VecRestoreArray(is->y, &ptr);
+                VecScatterBegin(is->rctx,is->y,x,ADD_VALUES,SCATTER_REVERSE);
+                VecScatterEnd(is->rctx,is->y,x,ADD_VALUES,SCATTER_REVERSE);
 #else
-                VecGetArray((*t)._isVec, &x);
-                std::copy_n(static_cast<PetscScalar*>(*u), (*t)._A->getMatrix()->_n, x);
-                VecRestoreArray((*t)._isVec, &x);
-                VecScatterBegin((*t)._scatter, (*t)._isVec, (*t)._x, ADD_VALUES, SCATTER_REVERSE);
-                VecScatterEnd((*t)._scatter, (*t)._isVec, (*t)._x, ADD_VALUES, SCATTER_REVERSE);
+                VecGetArray((*t)._isVec, &ptr);
+                std::copy_n(static_cast<PetscScalar*>(*u), (*t)._A->getMatrix()->_n, ptr);
+                VecRestoreArray((*t)._isVec, &ptr);
+                VecScatterBegin((*t)._scatter, (*t)._isVec, x, ADD_VALUES, SCATTER_REVERSE);
+                VecScatterEnd((*t)._scatter, (*t)._isVec, x, ADD_VALUES, SCATTER_REVERSE);
 #endif
             }
             timing = MPI_Wtime();
-            KSPSolve((*t)._ksp, (*t)._x, y);
+            KSPSolve((*t)._ksp, x, y);
             if(verbosity > 0 && mpirank == 0)
                 cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
-                VecGetArray(y, &x);
+                VecGetArray(y, &ptr);
                 MatType type;
                 MatGetType((*t)._petsc, &type);
                 int bs = 1;
                 if(isBlock)
                     MatGetBlockSize((*t)._petsc, &bs);
-                HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), x, out->n / bs, bs);
-                VecRestoreArray(y, &x);
+                HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), ptr, out->n / bs, bs);
+                VecRestoreArray(y, &ptr);
             }
             else {
 #if 0
                 Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
                 VecScatterBegin(is->rctx,y,is->y,INSERT_VALUES,SCATTER_FORWARD);
                 VecScatterEnd(is->rctx,y,is->y,INSERT_VALUES,SCATTER_FORWARD);
-                VecGetArray(is->y, &x);
-                std::copy_n(x, (*t)._A->getMatrix()->_n, (PetscScalar*)*out);
-                VecRestoreArray(is->y, &x);
+                VecGetArray(is->y, &ptr);
+                std::copy_n(ptr, (*t)._A->getMatrix()->_n, (PetscScalar*)*out);
+                VecRestoreArray(is->y, &ptr);
 #else
                 VecScatterBegin((*t)._scatter, y, (*t)._isVec, INSERT_VALUES, SCATTER_FORWARD);
                 VecScatterEnd((*t)._scatter, y, (*t)._isVec, INSERT_VALUES, SCATTER_FORWARD);
-                VecGetArray((*t)._isVec, &x);
-                std::copy_n(x, (*t)._A->getMatrix()->_n, static_cast<PetscScalar*>(*out));
-                VecRestoreArray((*t)._isVec, &x);
+                VecGetArray((*t)._isVec, &ptr);
+                std::copy_n(ptr, (*t)._A->getMatrix()->_n, static_cast<PetscScalar*>(*out));
+                VecRestoreArray((*t)._isVec, &ptr);
 #endif
             }
+            VecDestroy(&x);
             VecDestroy(&y);
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value && t.A->_A)
                 (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*out);
@@ -1048,11 +1045,14 @@ class ProdPETSc {
         const T t;
         const U u;
         ProdPETSc(T v, U w) : t(v), u(w) {}
-        void prod(U x) const {
-            Vec y;
-            PetscScalar* w;
-            MatCreateVecs((*t)._petsc, nullptr, &y);
-            VecGetArray((*t)._x, &w);
+        void prod(U out) const {
+            Vec x, y;
+            PetscScalar* ptr;
+            if(N == 'N')
+                MatCreateVecs((*t)._petsc, &x, &y);
+            else
+                MatCreateVecs((*t)._petsc, &y, &x);
+            VecGetArray(x, &ptr);
             MatType type;
             MatGetType((*t)._petsc, &type);
             int bs = 1;
@@ -1064,17 +1064,19 @@ class ProdPETSc {
 #endif
             if(isBlock)
                 MatGetBlockSize((*t)._petsc, &bs);
-            HPDDM::Subdomain<K>::template distributedVec<0>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*u), w, u->n / bs, bs);
-            VecRestoreArray((*t)._x, &w);
+            HPDDM::Subdomain<K>::template distributedVec<0>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
+            VecRestoreArray(x, &ptr);
             if(N == 'T')
-                MatMultTranspose(t->_petsc, (*t)._x, y);
+                MatMultTranspose(t->_petsc, x, y);
             else
-                MatMult(t->_petsc, (*t)._x, y);
-            VecGetArray(y, &w);
-            HPDDM::Subdomain<K>::template distributedVec<1>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*x), w, x->n / bs, bs);
+                MatMult(t->_petsc, x, y);
+            VecGetArray(y, &ptr);
+            if(!t->_A)
+                std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
+            HPDDM::Subdomain<K>::template distributedVec<1>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*out), ptr, out->n / bs, bs);
             if(t->_A)
-                (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*x);
-            VecRestoreArray(y, &w);
+                (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*out);
+            VecRestoreArray(y, &ptr);
             VecDestroy(&y);
         }
         static U mv(U Ax, ProdPETSc<T, U, K, N> A) {
@@ -1082,6 +1084,9 @@ class ProdPETSc {
             return Ax;
         }
         static U init(U Ax, ProdPETSc<T, U, K, N> A) {
+            int n, m;
+            MatGetSize(A.t->_petsc, &n, &m);
+            ffassert(n == m);
             Ax->init(A.u->n);
             return mv(Ax, A);
         }
@@ -1153,6 +1158,8 @@ static void Init_PETSc() {
     TheOperators->Add("<-", new OneOperator1_<long, Dbddc*>(PETSc::initEmptyCSR<Dbddc>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchur<PetscScalar>>);
 
+    Global.Add("exchange", "(", new exchangeIn<Dmat, PetscScalar>);
+    Global.Add("exchange", "(", new exchangeInOut<Dmat, PetscScalar>);
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dmat*, KN<long>*>(PETSc::globalNumbering<Dmat>));
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dbddc*, KN<long>*>(PETSc::globalNumbering<Dbddc>));
     Global.Add("changeOperator", "(", new OneOperator2_<long, Dmat*, Matrice_Creuse<PetscScalar>*>(PETSc::changeOperator<Dmat>));
@@ -1161,7 +1168,7 @@ static void Init_PETSc() {
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
     addInv<Dbddc, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
 
-    Global.Add("check","(",new OneOperator1<bool,Dmat *>(CheckPetscMatrix< Dmat > ));
+    Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

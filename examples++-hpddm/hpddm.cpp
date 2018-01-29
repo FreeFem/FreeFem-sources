@@ -374,7 +374,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
         std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
     }
-    bool excluded = nargs[4] ? GetAny<bool>((*nargs[4])(stack)) : false;
+    bool excluded = nargs[4] && GetAny<bool>((*nargs[4])(stack));
     if(excluded)
         opt[prefix + "master_exclude"];
     if(pair)
@@ -571,42 +571,6 @@ AnyType distributedMV_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
-template<class Type, class K>
-class scaledExchange_Op : public E_F0mps {
-    public:
-        Expression A;
-        Expression in;
-        static const int n_name_param = 0;
-        static basicAC_F0::name_and_type name_param[];
-        scaledExchange_Op<Type, K>(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), in(param2) {
-            args.SetNameParam(n_name_param, name_param, nullptr);
-        }
-
-        AnyType operator()(Stack stack) const;
-};
-template<class Type, class K>
-basicAC_F0::name_and_type scaledExchange_Op<Type, K>::name_param[] = { };
-template<class Type, class K>
-class scaledExchange : public OneOperator {
-    public:
-        scaledExchange() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>()) { }
-
-        E_F0* code(const basicAC_F0& args) const {
-            return new scaledExchange_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        }
-};
-template<class Type, class K>
-AnyType scaledExchange_Op<Type, K>::operator()(Stack stack) const {
-    Type* pA = GetAny<Type*>((*A)(stack));
-    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
-    unsigned short mu = pin->n / pA->getDof();
-    const auto& map = pA->getMap();
-    bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
-    pA->Type::template scaledExchange<true>((K*)*pin, mu);
-    pA->clearBuffer(allocate);
-    return 0L;
-}
-
 template<class T, class U, class K, char N>
 class ProdSchwarz {
     public:
@@ -786,10 +750,10 @@ void add() {
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
     Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
-    Global.Add("scaledExchange", "(", new scaledExchange<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
-    Global.Add("exchange", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<K>*>(exchange<Type, K, S>));
+    Global.Add("exchange", "(", new exchangeIn<Type<K, S>, K>);
+    Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
     Global.Add("IterativeMethod","(",new IterativeMethod<K>());
 }
 }

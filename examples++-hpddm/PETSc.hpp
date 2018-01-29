@@ -24,7 +24,6 @@ class DistributedCSR {
         HpddmType*                  _A;
         Mat                     _petsc;
         std::vector<Mat>            _S;
-        Vec                         _x;
         ISLocalToGlobalMapping   _rmap;
         VecScatter            _scatter;
         Vec                     _isVec;
@@ -32,12 +31,11 @@ class DistributedCSR {
         unsigned int*             _num;
         unsigned int            _first;
         unsigned int             _last;
-        DistributedCSR() : _A(), _petsc(), _x(), _ksp(), _num(), _first(), _last() { _S.clear(); };
+        DistributedCSR() : _A(), _petsc(), _ksp(), _num(), _first(), _last() { _S.clear(); };
         ~DistributedCSR() {
             MatDestroy(&_petsc);
             for(int i = 0; i < _S.size(); ++i)
                 MatDestroy(&_S[i]);
-            VecDestroy(&_x);
             KSPDestroy(&_ksp);
             if(_A) {
                 if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value) {

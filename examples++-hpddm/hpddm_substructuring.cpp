@@ -415,7 +415,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(iter != -1)
         opt["max_it"] = iter;
     KN<double>* timing = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
-    bool excluded = nargs[3] ? GetAny<bool>((*nargs[3])(stack)) : false;
+    bool excluded = nargs[3] && GetAny<bool>((*nargs[3])(stack));
     if(excluded)
         opt["master_exclude"];
     double timer = MPI_Wtime();
@@ -579,7 +579,7 @@ void add() {
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
     addInv<Type<K, S>, InvSubstructuring, KN<K>, K>();
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
-    Global.Add("exchange", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<K>*>(exchange<Type, K, S>));
+    Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
 }
 }
 
