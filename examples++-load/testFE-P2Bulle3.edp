@@ -1,0 +1,51 @@
+load "Element_P2bulle3"
+load "msh3"
+load "medit"
+mesh3 Th=cube(2, 3, 4);
+//mesh3 Th = readmesh3("./T1.mesh");
+mesh3 Thf = trunc(Th,1,split=2);
+func bool fv(real[int] & v, ofstream of)
+{
+	of<< " ( ";
+	for(int i=0; i< v.n; ++i)
+	if(abs(v[i])>1e-10) of << i << " " << v[i] << ", " ;
+	of << " ) \n";
+	return 1; 
+}
+func f = x+2*y+3*z;                                            //sin(x) + sin(2*y)+sin(3*z);
+fespace Vh(Th,P2b33d);
+fespace Vh2(Thf,P1);
+
+Vh u =0,v,w;
+//verbosity=10;
+int err=0;
+for(int i=0; i< u[].n; ++i)
+{
+	//cout << "\n\t******  i = " << i << endl;
+	u=0; u[][i]=1; 
+	Vh2 u2 = u; 
+	v =u;
+	w[]=u[]-v[];
+	//plot(u2,cmm=" i =" + i ,wait=1,nbiso = 10);
+	if( w[].linfty> 1e-5)
+	{
+		err++;
+	  cout << i << " "<< v[][i] <<" ==" << v[].imax  ; fv(v[],cout); 
+     }
+	
+}
+assert(err==0);
+u=f; 
+real err1 = int3d(Thf)(sqr(f-u)) ;
+cout << " err1=" << err1 << endl; 
+//cout << u[] << endl;
+
+Vh2 u2 = u; 
+plot(u2);
+// cout << " u2 bounad = " << u2[].min << " " << u2[].max << endl; 
+real err2 = int3d(Th)(sqr(f-u2)) ;
+cout << " err2=" << err2 << endl; 
+//cout << u2[] << endl;
+
+ 
+

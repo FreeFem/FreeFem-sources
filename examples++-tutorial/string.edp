@@ -1,0 +1,74 @@
+//  bug string macro parameter   version < 1.41
+// bug in string parameter version before <2.5
+// -----------------
+
+ macro tyty(uu) uu//  
+cout << tyty("toto") << endl;
+
+func string   write(string  fn,real[int] & u)
+{
+  cout <<"write :   " <<  fn << " u = "<<  u << endl;  //  delete 2 times before version 2.5 
+  return fn; 
+}
+
+func string   write1(string  fn,real[int] & u)
+{
+  cout << "write 1 " << fn << " u = " << u << endl;   
+  string toto=fn; ;
+  return toto+"dfsdf"; 
+}
+
+real[int] u(3);
+u=1;
+
+string tt=tyty("toto1"+1+" -- 77");
+
+string t1="0123456789";// write(tt,u);
+
+string t2;
+
+
+  {
+    t2=  write1(t1,u)+write1(tt,u); // 
+    // because the local variable of write1 are  delete 2 times at the  ;
+    cout << " t2 = " << t2 << endl;
+  }
+if(0)
+   { // the correct way
+     t2=  write1(t1,u);
+     t2=t2 + write1(tt,u); 
+    cout << " t2 = " << t2 << endl;
+   }
+// new operator
+t2 ="12340005678";
+t2(4:3) = "abcdefghijk-"; 
+string t55=t2(4:3);
+//t2 = "12340abcdefghijk-005678";
+cout << t2 << endl;
+cout << "  find abc " << t2.find("abc") << endl;
+cout << "r find abc " << t2.rfind("abc") << endl;
+cout << " find abc from 10  " << t2.find("abc",10) << endl;
+cout << " ffind abc from 10 " <<t2.rfind("abc",10) << endl;
+cout << "   " << string("abcc").length << endl; 
+cout << " t55 " << t55 << endl;
+{  // add getline version 3.0-6 jan 2009 FH
+string s;
+ifstream toto("xyf");
+for (int i=0;i<10;++i)
+  {
+   getline(toto,s);
+   cout << i << " : " << s << endl;
+  }
+}
+// add  3.29 + Stringification, LINE, FILE, ltime ..
+
+macro aa()  "tyty"  //
+cout << aa << endl; 
+
+// <<Stringification>> reference example
+
+cout << "in " << FILE << " line " << LINE << "    -- '" << Stringification( "zzz" aa  () {} +  /* */  bb cc) << "'" << endl;
+
+cout << " unix time = " << time() << " " << ltime() << endl;
+
+ 
