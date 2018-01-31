@@ -1,5 +1,10 @@
-@  changeset:   4262:17f0192bcb57
+@  changeset:   4263:3f6b6f757f46
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Jan 26 10:42:13 2018 +0100
+|  summary:     coorect pb with signbit under linux
+|
+o  changeset:   4262:17f0192bcb57
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Jan 26 09:18:11 2018 +0100
 |  summary:     next test
