@@ -714,11 +714,11 @@ long lapack_dgelsy(KNM<double> *const &A,KN<double> *const &B)
  integer     INFO
  )
  */
-    int N = A->M(), M=A->N(), NB=1,LDA = &(*A)(1,0) -&(*A)(0,0) ;
+    intblas N = A->M(), M=A->N(), NB=1,LDA = &(*A)(1,0) -&(*A)(0,0) ;
     intblas INFO,LW=3*N+NB*(N+1),RANK;
     KN<double> W(LW);
     double RCOND = 0.01;
-    KN<intblas> JPVT(N);JPVT=0;
+    KN<intblas> JPVT(N,intblas());
     dgelsy_(&M,&N,&NB,&(*A)(0,0),&LDA,&(*B)[0],&M,&JPVT[0],&RCOND,&RANK,&W(0),&LW,&INFO);
     return RANK ;
 }
@@ -740,11 +740,11 @@ long lapack_dgelsy(KNM<double> *const &A,KNM<double> *const &B)
      integer     INFO
      )
      */
-    int N = A->M(), M=A->N(), NB=B->N(),LDA = &(*A)(1,0) -&(*A)(0,0) ;
+    intblas N = A->M(), M=A->N(), NB=B->N(),LDA = &(*A)(1,0) -&(*A)(0,0) ;
     intblas INFO,LW=3*N+NB*(N+1),RANK;
     KN<double> W(LW);
     double RCOND = 0.01;
-    KN<intblas> JPVT(N);JPVT=0;
+    KN<intblas> JPVT(N,intblas());
     dgelsy_(&M,&N,&NB,&(*A)(0,0),&LDA,&(*B)[0],&M,&JPVT[0],&RCOND,&RANK,&W(0),&LW,&INFO);
     return RANK ;
 }
