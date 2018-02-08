@@ -100,9 +100,8 @@ macro plotMPI(Th, u, legend, Pk, def, K, d, w)
 
 macro export(name, mesh, sol, fforder, comm)
 load "iovtk"
-savevtk(name + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtk", mesh, sol, order = fforder);
+savevtk(name + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtu", mesh, sol, order = fforder);
 
-exec("pvpython vtk2vtu.py " + name + "_" + mpiRank(comm) + "_" + mpiSize(comm));
 if(mpiRank(comm) == 0) {
     ofstream pvd(name + "_" + mpiSize(comm) + ".pvd");
     pvd << "<?xml version=\"1.0\"?>\n";
@@ -132,9 +131,8 @@ if(mpiRank(comm) == 0) {
 // EOM
 
 macro exportTimeStep(name, mesh, sol, fforder, ts, comm)
-savevtk(name + "_" + int(ts) + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtk", mesh, sol, order = fforder);
+savevtk(name + "_" + int(ts) + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtu", mesh, sol, order = fforder);
 
-exec("pvpython vtk2vtu.py " + name + "_" + int(ts) + "_" + mpiRank(comm) + "_" + mpiSize(comm));
 if(mpiRank(comm) == 0) {
     ofstream pvd(name + "_" + mpiSize(comm) + ".pvd", append);
     for(int ijk = 0; ijk < mpiSize(comm); ++ijk) {
