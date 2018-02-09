@@ -1,6 +1,11 @@
-@    changeset:   4266:e3a14acc6d3a
-|\   tag:         tip
-| |  parent:      4265:86c1b57e3291
+@  changeset:   4267:030fe0867dd5
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Jan 31 11:33:52 2018 +0100
+|  summary:     update INNOVATION
+|
+o    changeset:   4266:e3a14acc6d3a
+|\   parent:      4265:86c1b57e3291
 | |  parent:      4264:dc9be8dbac8f
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Wed Jan 31 11:25:03 2018 +0100

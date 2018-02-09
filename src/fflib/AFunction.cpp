@@ -1101,11 +1101,16 @@ double diffpos(const double & aa, const double & bb) { return aa<bb ? bb-aa : 0.
 double invdiffpos(const double & aa, const double & bb) { return aa<bb ? 1./(bb-aa) : 0.;}
 double diffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb ? bb-aa : 0.;}
 double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb  ? 1./(bb-aa) : 0.;}
+double invdiff(const double & aa, const double & bb) { double d= aa-bb; return abs(d) < 1e-30 ? d : 1/d;}
+double invdiff(const double & aa, const double & bb,const double &eps) { double d= aa-bb; return abs(d) < eps ? d : 1/d;}
 extern double ff_tgv; // Add FH jan 2018
 double sign(double x){return (x>0.)-(x<0.); }// Add FH jan 2018
 long sign(long x){return (x>0)-(x<0); }// Add FH jan 2018
 bool ffsignbit(long x){return signbit(x);}
 bool ffsignbit(double x){return signbit(x);}
+template<typename T>
+bool  pswap(T *a,T *b) {swap(*a,*b);return 0; }
+
 void Init_map_type()
 {
    TheOperators=new Polymorphic(), 
@@ -1676,6 +1681,8 @@ void Init_map_type()
     Global.Add("invdiffpos","(",new OneOperator2_<double,double>(invdiffpos )); // jan 2018 FH
     Global.Add("diffnp","(",new OneOperator2_<double,double>(diffnp )); // jan 2018 FH
     Global.Add("invdiffnp","(",new OneOperator2_<double,double>(invdiffnp )); // jan 2018 FH
+    Global.Add("invdiff","(",new OneOperator2_<double,double>(invdiff )); // jan 2018 FH
+    Global.Add("invdiff","(",new OneOperator3_<double,double,double>(invdiff )); // jan 2018 FH
 
      Global.Add("max","(",new OneOperator2_<long,long>(Max));
      Global.Add("min","(",new OneOperator2_<long,long>(Min));
@@ -1778,8 +1785,12 @@ void Init_map_type()
     Global.Add("projection","(",new OneOperator3_<double,double   >(projection));
     Global.Add("dist","(",new OneOperator2_<double,double>(dist));
     Global.Add("dist","(",new OneOperator3_<double,double>(dist));
+    Global.Add("swap","(",new OneOperator2<bool,double*>(pswap));
+    Global.Add("swap","(",new OneOperator2<bool,long*>(pswap));
+    Global.Add("swap","(",new OneOperator2<bool,bool*>(pswap));
+    Global.Add("swap","(",new OneOperator2<bool,Complex*>(pswap));
+    Global.Add("swap","(",new OneOperator2<bool,String*>(pswap));
 
-  
 
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
 

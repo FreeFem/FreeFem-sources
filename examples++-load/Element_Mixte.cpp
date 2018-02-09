@@ -165,113 +165,7 @@ namespace  Fem2D {
 	      }
 	}
       
-      /*
-       // s[.] [i] = 
-       { //     //  compute the inv of S with lapack 
-       for(int j=0;j<3;++j)
-       for(int i=0;i<3;++i)
-       S1[i][j]=S[i][j];
-       
-       intblas N=3,LWORK = 9;
-       double WORK[9] ;
-       intblas INFO,IPIV[4];
-       
-       dgetrf_(&N,&N,&(S1[0][0]),&N,IPIV,&INFO);
-       ffassert(INFO==0);
-       dgetri_(&N,&(S1[0][0]),&N,IPIV,WORK,&LWORK,&INFO);
-       ffassert(INFO==0);
-       
-       }
-       R B[3][3], BB[3][3];
-       R cc = 3./K.area; 
-       for(int j=0;j<3;++j)
-       for(int i=0;i<3;++i)
-       B[i][j]= S[i][j]*ll[j];
-       
-       for(int i=0;i<3;++i)
-       for(int k=0;k<3;++k)
-       {  BB[i][k]=0.;	      
-       for(int j=0;j<3;++j)
-       BB[i][k] += cc*S[i][j]*ll[j]*S1[j][k];
-       }
-       if(verbosity>1000)
-       {
-       
-       cout << endl;
-       cout <<  Rl[0] << " "<< Rl[1]  << ",  " <<Rl[2] << endl;	
-       for(int i=0;i<3;++i)
-       cout << " *****    " << BB[i][0] << " " << BB[i][1] << " " << BB[i][2] << "\t l " << ll[i] << endl;
-       }
-       
-       // the basic function are
-       //  the space S_i * ( a_i+b_1lambda_i) 
-       //  the base :
-       //  tree egde function: 
-       //   coefe*  S_i*( lambda_i - 1/3)   :  zero a barycenter 
-       //   coefk*BB_i ,withh     B_i =   (S_i * lambda_i),   BB = B * S1 , ok because lambda_i = 1/3 a bary
-       //  so BB_ij = coefk/3  delta_ij  at G the barycenter.
-       // 
-       KN<bool> wd(KN_<const bool>(whatd,last_operatortype));
-       val=0; 
-       
-       throwassert( val.N()>=6);
-       throwassert(val.M()==3);
-       
-       
-       val=0; 
-       
-       
-       if (wd[op_id])
-       {
-       for(int c=0;c<3;++c)
-       for(int i=0;i<3;++i){
-       val(i,c,op_id)    = S[c][i]*(c3-ll[i])/c3; //  (c3-ll[i])/c3 
-       val(i+3,c,op_id)  = BB[c][i];	      
-       }
-       }
-       if (wd[op_dx])
-       {
-       for(int i=0;i<3;++i)
-       for(int k=0;k<3;++k)
-       {  BB[i][k]=0.;	      
-       for(int j=0;j<3;++j)
-       BB[i][k] += cc*S[i][j]*Dl[j].x*S1[j][k];
-       }
-       
-       for(int c=0;c<3;++c)
-       for(int i=0;i<3;++i)
-       {
-       val(i  ,c,op_dx)    = -S[c][i]*Dl[i].x/c3;
-       val(i+3,c,op_dx)  = BB[c][i];	      
-       
-       }
-       
-       
-       }
-       
-       if (wd[op_dy])
-       {  
-       
-       for(int i=0;i<3;++i)
-       for(int k=0;k<3;++k)
-       {  BB[i][k]=0.	;      
-       for(int j=0;j<3;++j)
-       BB[i][k] += cc*S[i][j]*Dl[j].y*S1[j][k];
-       }
-       
-       for(int c=0;c<3;++c)
-       for(int i=0;i<3;++i)
-       {
-       val(i  ,c,op_dy)    = -S[c][i]*Dl[i].y/c3;
-       val(i+3,c,op_dy)  = BB[c][i];	      
-       
-       }
-       
-       
-       }	  
-       
-       
-       */
+   
       
     }
     
@@ -602,7 +496,7 @@ namespace  Fem2D {
 	TypeOfFE_RT1_2d(bool ortho)
 	:  InitTypeOfRTk_2d(1),
 	TypeOfFE(ndf,2,Data,2,1,
-		 2*2*3*QFE.n+QFK.n*2,// nb coef mat interpole
+		 2*2*3*QFE.n+QFK.n*4,// nb coef mat interpole
 		 3*QFE.n+QFK.n, // nb P interpolation 
 		 0),
 	Ortho(ortho)
@@ -624,12 +518,14 @@ namespace  Fem2D {
 		    P_Pi_h[i++]= B*(QFE[p].x)+ A*(1.-QFE[p].x);// X=0 => A  X=1 => B;       
 		  }
 	    int i6=6,i7=7;
-	    if(Ortho) Exchange(i6,i7); // x,y -> -y, x 
+	   // if(Ortho) Exchange(i6,i7); // x,y -> -y, x
 	    for (int p=0;p<QFK.n;++p) 
 	      {
 		pij_alpha[kkk++]= IPJ(i6,i,0);
-		pij_alpha[kkk++]= IPJ(i7,i,1);
-		P_Pi_h[i++]= QFK[p]; 
+                pij_alpha[kkk++]= IPJ(i6,i,1);
+		pij_alpha[kkk++]= IPJ(i7,i,0);
+                pij_alpha[kkk++]= IPJ(i7,i,1);
+		P_Pi_h[i++]= QFK[p];
 	      }
 	    //cout << kkk << " kkk == " << this->pij_alpha.N() << endl;
 	    //cout << i << "  ii == " << this->P_Pi_h.N() << endl;
@@ -641,11 +537,12 @@ namespace  Fem2D {
 	{ // compute the coef of interpolation ...
 	    const Triangle & T(K.T);
 	    int k=0;
+            R oe[3]={T.EdgeOrientation(0),T.EdgeOrientation(1),T.EdgeOrientation(2)};
 	    for (int i=0;i<3;i++)
 	      {  
 		  R2 E(Ortho? T.Edge(i) : -T.Edge(i).perp());
 		  
-		  R s = T.EdgeOrientation(i) ;
+		  R s =oe[i] ;
 		  for (int p=0;p<QFE.n;++p) 
 		    {
 		      R l0 = QFE[p].x, l1 = 1-QFE[p].x;
@@ -657,15 +554,23 @@ namespace  Fem2D {
 		      v[k++]= cc0*E.x;
 		      v[k++]= cc0*E.y; 
 		      v[k++]= cc1*E.x;
-		      v[k++]= cc1*E.y; 
+                          v[k++]= cc1*E.y;
 		    }
 	      }
-	    R sy= Ortho ? -1 : 1; 
-	    
+	   
+            R2 B[2]= { T.Edge(1) ,T.Edge(2)};
+            if(Ortho) {B[0]=-B[0]; B[1]=-B[1];}
+            else
+            {B[0]=B[0].perp();B[1]=B[1].perp();}
+           
+            double CK=0.5;//  dof U= [u1,u2] > |K| int_K ( B_i.U )
 	    for (int p=0;p<QFK.n;++p) 	
 	      {
-		v[k++]=sy*QFK[p].a * T.area; 
-		v[k++]=QFK[p].a * T.area; 
+                double w=QFK[p].a*CK;
+		v[k++]=w*B[0].x;
+                v[k++]=w*B[0].y;
+                v[k++]=w*B[1].x;
+		v[k++]=w*B[1].y;
 	      }
 	    // cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
 	    assert(k==this->pij_alpha.N());
@@ -682,7 +587,9 @@ namespace  Fem2D {
       R2 B[]={ R2(A[1],A[2]), R2(A[2],A[0]), R2(A[0],A[1])}; 
       R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y; 
       R L[3]={l0,l1,l2};
-      
+      int eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
+      R2 Bb[]={A[1].perp(),A[2].perp()};// Base local pour les bulle
+    
       static long  count=10;
       /*      
       if( count < 0)
@@ -707,21 +614,15 @@ namespace  Fem2D {
        i1= i+j+1, i2= i+2-j  remark : {i,i1,i2} <=> {i,i+1,i+2}  
        \phi_i ( \lambda_{i1} - 4/3 \lambda_i) + 1/3 \phi_{i1}\lambda_{i1}
        
-       internal function are 
-       \sum   bx_i \phi_{i}\lambda_{i}
-       \sum   by_i \phi_{i}\lambda_{i}
-       \sum bx_i = 1/c0
-       \sum by_i = 1/c0 
-       we have 
-       \phi_{i} = A_{i+2}  \lambda_{i+1} - A_{i+1}  \lambda_{i+2}
-       with
-       A_i = Th.edge(i)/ ( 2 |K])    
-       B_i = A_{i+2} - A_{i+1}  
-       det( B_i ) = 9 *2 area 
-       to be homogene
-       c0=  sqrt(area)*sqrt(18)
-       ccK= 9 *2 area *c0; 
-       bx_0 = det(R2(cc0,0),B1,B2)/ ( cck)  
+     
+       
+       we have 2 bulles functions
+       fb_6 =      8    \phi_0   \lambda_{0} +   16 \phi_1   \lambda_{1}
+       fb_7 =     - 8   \phi_0   \lambda_{0} + 8 \phi_1   \lambda_{1}
+
+     
+       such that  for i,j =0,1
+       int_K ( Bb_j  f_{6+i))  =   \delta_{ij}
        
        
        so all basic d function are the sum of 3 function 
@@ -737,20 +638,26 @@ namespace  Fem2D {
       
       val=0; 
       
-      R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2 
+      R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2
+        if(Ortho)
+        {
+            phi[0]=phi[0].perp();
+            phi[1]=phi[1].perp();
+            phi[2]=phi[2].perp();
+        }
       
       int pI[8][3];// store p_k 
       int lI[8][3];// store l_k 
       R   cI[8][3];// store c_k 
       
       int df=0;
-      R CKK = 2* K.area; 
+      R CKK = 2* K.area;
       for(int e=0;e<3;++e)
 	{
 	  int i=e;
 	  int ii[2]={(e+1)%3,(e+2)%3};
 	  int i2=(e+2)%3;
-	  R s = K.EdgeOrientation(e)/CKK;
+	  R s = eo[e]/CKK;
 	  if(s<0) Exchange(ii[0],ii[1]); // 
 	  for(int k=0;k<2;++k,df++)
 	    {
@@ -769,97 +676,30 @@ namespace  Fem2D {
 	      
 	    }
 	}
-      /*     
-       if(count<0)
-       {
-       // verif. 
-       R2 PP[] ={ R2(0.5,0),R2(0.5,0.5),R2(0,0.5)};
-       int err=0;
-       for(int df = 0;df < 6;++df)
-       {  
-       cout << " df = " << df << " : \t";
-       for(int k=0;k<3;++k)
-       cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << "  \t  ";
-       cout << endl;    
-       
-       R2 fd;
-       for(int p=0;p<3;++p)
-       {
-       R L[3]; PP[p].toBary(L);
-       R2 X=K(PP[p]);
-       cout << X << " ,\t " << L[0] << " " << L[1] << " " <<L[2] ;
-       R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2 
-       
-       R2 ff = (cI[df][0] * L[lI[df][0]]) * phi[pI[df][0]]
-       + (cI[df][1] * L[lI[df][1]]) * phi[pI[df][1]]
-       + (cI[df][2] * L[lI[df][2]]) * phi[pI[df][2]]
-       ;
-       fd += ff;
-       cout << " :::: " << 3*ff 
-       << " :  " <<  3*(cI[df][0] * L[lI[df][0]]) * phi[pI[df][0]]
-       << " ; " <<  3*(cI[df][1] * L[lI[df][1]]) * phi[pI[df][1]]
-       << " ; " <<  3*(cI[df][2] * L[lI[df][2]]) * phi[pI[df][2]]
-       << " :  " <<  3*(cI[df][0] * L[lI[df][0]])  <<"(" <<  phi[pI[df][0]] <<")"
-       << " ; " <<  3*(cI[df][1] * L[lI[df][1]]) <<"(" << phi[pI[df][1]]<<")"
-       << " ; " <<  3*(cI[df][2] * L[lI[df][2]]) <<"(" << phi[pI[df][2]]<<")"		    
-       <<endl;
-       
-       }
-       if( fd.norme() > 1e-5) err++;
-       cout << " Verif " << df << " [ " << 3*fd << " ] " << fd.norme()  <<endl;		
-       }
-       ffassert(err==0);
-       
-       }
-       */
-      R cK = 18.* K.area;
-      R c0 = sqrt(cK);
-      R cb = 12/c0;
-      R ccK = K.area*cK/c0; 
-      for(int k=0;k<2;++k,df++)
+ 
+        //  FB  (x-Q_i) l_i l_j  =
+        R s8=8/CKK, s01= s8;
+        R cbb[]={ s8,2*s01,-s01, s8} ; // { [ 8, 16], [ -8, 8] }
+ 
+        //  the 2 bubbles
+        for(int k=0;k<2;++k,df++)// k: ligne
 	{
-	  
-	  R2 PB(0,0);
-	  PB[k]=cb;
-	  // if( count <5) cout << " PB = " << PB << " df = " << df << " " << cK << " ==" << det(B[0] ,B[1],B[2]) <<endl;
-	  R b0 = det(PB   ,B[1],B[2])/ ccK;
-	  R b1 = det(B[0],PB   ,B[2])/ ccK;
-	  R b2 = det(B[0],B[1],PB   )/ ccK;
-	  
-	  // if( count <5) cout << " S= "<< b0*B[0]+b1*B[1]+b2*B[2] << " s= " << (b0+b1+b2) << " b=" << b0 << " " << b1 << " " << b2 <<  endl;
-	  pI[df][0]= 0;
+
+          pI[df][0]= 0; // i
 	  lI[df][0]= 0;
-	  cI[df][0]= b0;
+          cI[df][0]= cbb[k];//
 	  
-	  pI[df][1]= 1;
+	  pI[df][1]= 1;// i
 	  lI[df][1]= 1;
-	  cI[df][1]= b1;
+	  cI[df][1]= cbb[k+2];
 	  
 	  pI[df][2]= 2;
 	  lI[df][2]= 2;
-	  cI[df][2]= b2;
+	  cI[df][2]= 0;
 	  
 	}
-      /*
-       if( count< 5)
-       {
-       cout << Phat << " " << X << endl; 
-       for( int e=0;e<3;++e)
-       {  int e1= (e+1)%3, e2=(e+2)%3 ;
-       cout << " phi e " << phi[e] << " == " << L[e1]*A[e2] -  L[e2]*A[e1] << endl;		
-       }
-       for(int df=0;df< 8;++df)
-       {
-       cout << " df = " << df << " : \t";
-       for(int k=0;k<3;++k)
-       cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << "  \t  ";
-       cout << endl;    
-       }
-       
-       }
-       */      
-      int ortho0=0,ortho1=1; R s1ortho=1;
-      if(Ortho) { ortho0=1; ortho1=0; s1ortho=-1;}
+        ffassert(df==8);
+  
       
       if (whatd[op_id])
 	{
@@ -871,8 +711,8 @@ namespace  Fem2D {
 		  fd += (cI[df][k] * L[lI[df][k]]) * phi[pI[df][k]] ;
 	      }
 	      
-	      val(df,ortho0,op_id)= fd.x;
-	      val(df,ortho1,op_id)= s1ortho*fd.y;
+	      val(df,0,op_id)= fd.x;
+	      val(df,1,op_id)= fd.y;
 	    }
 	}
       
@@ -882,7 +722,7 @@ namespace  Fem2D {
           R2 DL[3]={K.H(0),K.H(1),K.H(2)};
 	  R2 Dphix(1,0);
 	  R2 Dphiy(0,1);
-	  
+            if(Ortho) {Dphix=R2(0,1);Dphix=R2(-1,0);}// x,y -> (-y,x)
 	  if (whatd[op_dx])
 	    {
 	      
@@ -891,8 +731,8 @@ namespace  Fem2D {
 		  R2 fd(0.,0.);
 		  for(int k=0;k<3;++k)
 		      fd += cI[df][k] * (DL[lI[df][k]].x * phi[pI[df][k]] + L[lI[df][k]]* Dphix);
-		  val(df,ortho0,op_dx)= fd.x;
-		  val(df,ortho1,op_dx)= s1ortho*fd.y;	      
+		  val(df,0,op_dx)= fd.x;
+		  val(df,1,op_dx)= fd.y;
 		}
 	      
 	    }
@@ -904,8 +744,8 @@ namespace  Fem2D {
 		  R2 fd(0.,0.);
 		  for(int k=0;k<3;++k)
 		      fd += cI[df][k] * (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy);
-		  val(df,ortho0,op_dy)= fd.x;
-		  val(df,ortho1,op_dy)= s1ortho*fd.y;	      
+		  val(df,0,op_dy)= fd.x;
+		  val(df,1,op_dy)= fd.y;
 		}
 	      
 	    }
@@ -926,15 +766,18 @@ namespace  Fem2D {
         
         TypeOfFE_RT2_2d(bool ortho)
         :  InitTypeOfRTk_2d(2),
-        TypeOfFE(ndf,2,Data,2,1,
-                 2*3*3*QFE.n+QFK.n*2*3,// nb coef mat interpole
+        TypeOfFE(ndf,2,Data,3,1,
+                 2*3*3*QFE.n+QFK.n*4*3,// nb coef mat interpole
                  3*QFE.n+QFK.n, // nb P interpolation
                  0),
         Ortho(ortho)
         {
             //      cout << " Pk = " << k << endl;
             int dofE=this->k+1;// == 3
-            int dofKs=(dofE-1)*(dofE)/2;//== 3 ..
+            int dofKs=(dofE-1)*(dofE)/2;//== 3 ..(
+            ffassert(dofKs==3);
+            ffassert(dofE==3);
+
             int kkk=0,i=0;
             for (int e=0;e<3;++e)
                 for (int p=0;p<QFE.n;++p)
@@ -946,8 +789,6 @@ namespace  Fem2D {
                     pij_alpha[kkk++]= IPJ(dofE*e+l,i,0);
                     pij_alpha[kkk++]= IPJ(dofE*e+l,i,1);
                     }
-                    
-                    
                     P_Pi_h[i++]= B*(QFE[p].x)+ A*(1.-QFE[p].x);// X=0 => A  X=1 => B;
                 }
   
@@ -955,11 +796,12 @@ namespace  Fem2D {
             
                 for (int p=0;p<QFK.n;++p)
                 {
-                int i6=3*k,i7=i6+1;
-                if(Ortho) Exchange(i6,i7); // x,y -> -y, x
+                 int i6=3*3,i7=i6+1;
                  for(int l= 0; l< dofKs; ++l )
                   {
                     pij_alpha[kkk++]= IPJ(i6,i,0);
+                    pij_alpha[kkk++]= IPJ(i6,i,1);
+                    pij_alpha[kkk++]= IPJ(i7,i,0);
                     pij_alpha[kkk++]= IPJ(i7,i,1);
                     i6 +=2;
                     i7 +=2;
@@ -978,11 +820,15 @@ namespace  Fem2D {
         { // compute the coef of interpolation ...
             const Triangle & T(K.T);
             int k=0;
+              R oe[3]={T.EdgeOrientation(0),T.EdgeOrientation(1),T.EdgeOrientation(2)};
             // magic fom:
             //
             // inv of [[4!,3!,2!2!],[3!,2!2!,2!],[2!2!,3!,4!]]/5! =
-            const double a11=9,a12=-18,a22=3,b11=-18, b12=84;// thank maple ..
-            // inv [[2, 1, 1], [1, 2, 1], [1, 1, 2]]/12 = diag [9, hors diag -3]
+            double c1[][3] = {
+                { 9, -18, 3 } /* 0 */ ,
+                { -18, 84, -18 } /* 1 */ ,
+                { 3, -18, 9 } /* 2 */  };
+    
             for (int i=0;i<3;i++)
             {
                 R2 E(Ortho? T.Edge(i) : -T.Edge(i).perp());
@@ -994,20 +840,16 @@ namespace  Fem2D {
                     R l11=l1*l1;
                     R l22=l2*l2;
                     R l21=l2*l1;
-                    /*
-                      l1^2, l1*l2 l2^2 
-                       int l1^n l2^(4-n) = (n!)(4-n)!/5!
-                      (l1^4,l1l2 l1^2,
-                     */
-                    
-                    R p0= a11*l11+a12*l21+a22*l22;// poly othogonaux to l11,l21, l22
-                    R p1= b11*l11+b12*l21+b11*l22;//
-                    R p2= a22*l11+a12*l21+a11*l22;//
+                    R p0= c1[0][0]*l11+c1[0][1]*l21+c1[0][2]*l22;//
+                    R p1= c1[1][0]*l11+c1[1][1]*l21+c1[1][2]*l22;//
+                    R p2= c1[2][0]*l11+c1[2][1]*l21+c1[2][2]*l22;//
                     R sa=s*QFE[p].a;
                     R cc2 = sa*p0; //
                     R cc1 = sa*p1; //
                     R cc0 = sa*p2; //
-                    if(s<0) Exchange(cc2,cc0); // exch l11,l22
+                    if(s<0) swap(cc0,cc2);
+
+                    
                     v[k++]= cc0*E.x;
                     v[k++]= cc0*E.y;
                     v[k++]= cc1*E.x;
@@ -1016,30 +858,205 @@ namespace  Fem2D {
                     v[k++]= cc2*E.y;
                 }
             }
-            R sy= Ortho ? -1 : 1;
-            R dd=9, hd=-3;
+            R2 B[2]= { T.Edge(1) ,T.Edge(2)};
+            if(Ortho) {B[0]=-B[0]; B[1]=-B[1];}
+            else
+             {B[0]=B[0].perp();B[1]=B[1].perp();}
+           // cout << " B= " << B[0] << " " << B[1] << endl;
+            double CK=0.5;//  dof U= [u1,u2] > |K| int_K ( B_i.U )
+           R dd=9, hd=-3;
             R ll[3],lo[3];
             for (int p=0;p<QFK.n;++p)
             {
+                double w=-QFK[p].a*CK;
                 QFK[p].toBary(ll);
-                // poly orto ..
-                lo[0]=ll[0]*dd+ll[1]*hd+ll[2]*hd;
-                lo[1]=ll[0]*hd+ll[1]*dd+ll[2]*hd;
-                lo[2]=ll[0]*hd+ll[1]*hd+ll[2]*dd;
+                ll[0]*=w;
+                ll[1]*=w;
+                ll[2]*=w;
                 
                 for( int l=0; l<3;++l)
                 {
-                  v[k++]=sy*QFK[p].a * T.area*lo[l];
-                  v[k++]=QFK[p].a * T.area*lo[l];
-                }
+                  v[k++]=ll[l]*B[0].x;
+                  v[k++]=ll[l]*B[0].y;
+                  v[k++]=ll[l]*B[1].x;
+                  v[k++]=ll[l]*B[1].y;
+               }
             }
             // cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
             assert(k==this->pij_alpha.N());
         }
-        void FB(const bool * whatd, const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+        void FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & Phat,RNMK_ & val) const;
     } ;
     // ENDOFCLASS TypeOfFE_PkEdge
-    
+/* The FreeFem to build table
+ load "Element_P4"
+ load "lapack"
+ load "qf11to25"
+ 
+ include "CC.idp"
+ 
+ int[int] ne1=[1,2,0];
+ int[int] ne2=[2,0,1];
+ // the fonctions bubble
+ int[int] k6=[4,5,  9, 11, 15,16 ];
+ //  the edges function
+ int[int] Be=[1,3,2, 8,10,6, 12,17,13];
+ 
+ func NN=[N.x,N.y];
+ 
+ // the ref triangle
+ int[int] ll=[2,0,0,1];
+ mesh Th=square(1,1,flags=2,label=ll);
+ 
+ Th = trunc(Th,x<0.5,label=0);
+ //  the 2 base vector [Cx,Cy] for interior DoF
+ real[int] Dx= [Th(2).x-Th(0).x, Th(0).x-Th(1).x];// 1: 20 et 2: 01
+ real[int] Dy= [Th(2).y-Th(0).y, Th(0).y-Th(1).y];
+ real dJ1 =1/Th.area/2;
+ real[int] Cx=  Dy*-dJ1;
+ real[int] Cy=  Dx*dJ1;
+ 
+ 
+ fespace Rh(Th,RT0);
+ fespace P1h(Th,P1);
+ fespace Ch(Th,[P4,P4]);// To store momoe function
+ Rh[int] [phi1,phi2](3);
+ P1h[int] l(3);
+ 
+ macro pp(i,j)  (l[i]*l[j])// P2 monome
+ real err =0;
+ 
+ // Build phi and l basic functions
+ real[int] sgf=[1,-1,1];
+ for(int i=0;i<3;++i)
+ {
+ l[i][]=0;     l[i][][i]=1;
+ phi1[i][]=0;  phi1[i][][i]=sgf[i];
+ }
+ Ch[int]  [b1,b2](6*3); //  build all momone functions
+ int [int,int] bii(18,3);
+ 
+ {
+ int k=0;
+ for(int i=0; i<3;++i)
+ for(int e=0; e<2;++e)//
+ for(int j=0; j<3;++j)//
+ {
+ int i1 = j, i2=j; //  sommet
+ if(e) {i1 = ne1[j]; i2 =ne2[j];} // vertex of edge j
+ bii(k,0) =i;
+ bii(k,1) =i1;
+ bii(k,2) =i2;
+ [b1[k],b2[k]]= [phi1[i],phi2[i]]*pp(i1,i2);
+ k++;
+ }
+ }
+ 
+ 
+ real[int,int] Cb(15,6); //  coef of monone too be with mass mod 0
+ Ch[int] [Fb1,Fb2](15);  // the mono funct for verif.
+ {
+ real[int,int] A(18,6);
+ for(int i=0;i<18; ++i)
+ for(int j=0;j<3; ++j)
+ for(int k=0;k<2; ++k)
+ A(i,2*j+k) = int2d(Th)( [b1[i],b2[i]]'*[Cx[k],Cy[k]]*l[j]);
+ 
+ real[int,int]  C(6,6),C1(6,6) ;
+ 
+ for( int j=0; j<6; ++j)// ligne
+ for( int l=0; l<6; ++l)
+ C(j,l)= A(k6(l),j);
+ C1=C^-1;
+ 
+ 
+ for( int i=0; i<9; ++i)
+ {
+ int ki = Be[i];
+ real[int] a6(6),b6(6);//
+ for( int j=0; j<6; ++j)// ligne
+ b6(j)= -A(ki,j) ;
+ a6 = C1*b6;
+ Cb(i,:)=a6;
+ }
+ for( int i=0; i<6; ++i)
+ Cb(9+i,:)=C1(:,i);
+ 
+ // les fonction bases
+ 
+ for(int i=0; i< 15; ++i)
+ {
+ Ch [F1,F2];
+ F1[]=0.;
+ if( i<9)
+ F1[] = b1[Be[i]][];
+ for(int k=0; k< 6; ++k) //
+ F1[] +=  Cb(i,k)*b1[k6[k]][];
+ Fb1[i][]=F1[];
+ }
+ }
+ //  Verif DOF
+ // Les flux
+ real[int][int] sigma(20);// To store all Dof linear form
+ real[int,int] C1(3,3);// the DOf on edge
+ {
+ real[int,int] CC=[[ 24 , 6 , 4],[6,4,6],[4 , 6  ,24]];//
+ CC /= 120.;
+ C1 = CC^-1;
+ int dof =0;
+ // Edge dof
+ for (int i=0; i<3; ++i)
+ {
+ int i1 = ne1[i], i2 =ne2[i];
+ for(int k=0;k<3;++k)
+ {
+ int kk = i*3+k;
+ func FF=[Fb1[kk],Fb2[kk]];
+ 
+ func fl = C1(0,k)*pp(i1,i1)
+ + C1(1,k)*pp(i1,i2)
+ + C1(2,k)*pp(i2,i2);
+ 
+ varf vdof([uu,vv],[u1,u2]) = int1d(Th,i,qforder=10)( fl*([u1,u2]'*[N.x,N.y]));
+ sigma[dof].resize(Ch.ndof);
+ sigma[dof++] = vdof(0,Ch);
+ }
+ }
+ // Internal Dof
+ for (int j=0; j<6; ++j)
+ {
+ int i=j/2;
+ int k=j%2;
+ varf vdof([uu,vv],[u1,u2]) = int2d(Th)( l[i]*[u1,u2]'*[Cx[k],Cy[k]]);
+ sigma[dof].resize(Ch.ndof);
+ sigma[dof++] =vdof(0,Ch);
+ }
+ assert(dof==15);
+ //  Check the if DoF and B.F are OK
+ 
+ for(int i=0; i<15; ++i)
+ {
+ for(int j=0; j<15; ++j)
+ {
+ real dij = Fb1[i][]'*sigma[j];
+ err = err+ abs( dij-(i==j));
+ cout << c00(dij) << " " ;
+ }
+ cout << " err=" << err << endl;
+ }
+ 
+ }
+ // data Genaration for  FF++
+ CCt("cf",Cb);
+ CCt("Bii",bii);
+ CC("fe",Be);
+ CC("k6",k6);
+ 
+ CC("c1",C1);
+ cout << endl;
+ assert(err< 1e-10);
+
+ */
     void TypeOfFE_RT2_2d::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & Phat,RNMK_ & val) const
     {
         R2 X=K(Phat);
@@ -1048,64 +1065,8 @@ namespace  Fem2D {
         R2 B[]={ R2(A[1],A[2]), R2(A[2],A[0]), R2(A[0],A[1])};
         R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y;
         R L[3]={l0,l1,l2};
-        assert(0); // in progress F. Hecht ...
-        static long  count=10;
-        /*
-         if( count < 0)
-         {
-         cout << "TypeOfFE_RT2_2d "<< " " << A[0]+A[1]+A[2] << " " <<  B[0]+B[1]+B[2] << endl;
-         cout << det(Q[0],Q[1],Q[2]) << " X = " << X << " Phat ="  << Phat << endl;
-         cout<< "Q="  << Q[0]<< "," << Q[1] << " , " << Q[2] <<endl;
-         cout<< "A="  << A[0]<< "," << A[1] << " , " << A[2] << endl;
-         cout<< "B="  << B[0]<< "," << B[1] << " , " << B[2] <<endl;
-         }
-         
-         THE 2 DOF k=0,1  are: on edge e   f -> \int_e f \lambda_{e+k} . n_e
-         THE 2 internal dof are : f -> \int_K f e_i  where e_i is the canonical basis of R^2
-         
-         
-         so the basis function are
-         
-         let call \phi_i the basic fonction of RT0 (without orientation) so the normal is exterior.
-         \phi_i (X) = ( X- Q_i ) / (2 |K|) =  \lambda_{i+1} Curl( \lambda_{i+2}) - \lambda_{i+2} Curl( \lambda_{i+1})
-         
-         remarque les bulles sont du type
-         \phi_i l_i l_k soit 9 bulles qui ne sont pas independent ..
-         car \sum \phi_i l_i = 0  => 6 bulles independents
-         
-         The Edges function j=0,1,2 , for ll_j = l1^2, l1l2 l2^2 on  edge i+1,i+2 with k=1,2 : lk = \lambda_{i+k}
-         \phi_i ll_j + c_jk \phi_i l_i l_k to remove the 3 internal node
-         
-         2 term int  \phi_i ll_j l_k =
-             Curl( \lambda_{i+2}) * cc(j,k)  - Curl( \lambda_{i+1}) * cc(j,k)
-          =  Curl( \lambda_{i}) cc(j,k)      + Curl( \lambda_{i+2}) 2 cc(j,k)
-         // c'est le bordel a calculer ..
-         i1= i+j+1, i2= i+2-j  remark : {i,i1,i2} <=> {i,i+1,i+2}
-        
-         
-         internal function are ???
-         \sum   bx_i \phi_{i}\lambda_{i}
-         \sum   by_i \phi_{i}\lambda_{i}
-         \sum bx_i = 1/c0
-         \sum by_i = 1/c0
-         we have
-         \phi_{i} = A_{i+2}  \lambda_{i+1} - A_{i+1}  \lambda_{i+2}
-         with
-         A_i = Th.edge(i)/ ( 2 |K])
-         B_i = A_{i+2} - A_{i+1}
-         det( B_i ) = 9 *2 area
-         to be homogene
-         cc0= |K]  sqrt(area)*sqrt(18)
-         ccK= 9 *2 area *c0;
-         bx_0 = det(R2(cc0,0),B1,B2)/ ( cck)
-         
-         
-         so all basic d function are the sum of 4 functions
-         Qu'il faut calculer ...
-         
-         sum_{k=0}^4  c_k  phi_{p_k} lambda_{l_k} lambda{ll_k}
-         
-         */
+    
+        int eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
         
         
         assert( val.N()>=ndf);
@@ -1113,184 +1074,154 @@ namespace  Fem2D {
         int ee=0;
         
         val=0;
+        int p[15]={0,1,2, 5,4,3, 6,7,8, 9,10,11, 12,13,14};// Permutation for orinatation
+        R2 Pm[18]; // all the momome function ..
+
+ 
+        double cf[][6] = {
+            { 0, -5.5, 0, -2.5, -0.5, -1.5 } /* 0 */ ,
+            { -1.25, -1.25, 0.25, -1, 0.25, -1 } /* 1 */ ,
+            { -5.5, 0, -0.5, -1.5, 0, -2.5 } /* 2 */ ,
+            { 0, -2.5, 0, -5.5, -1.5, -0.5 } /* 3 */ ,
+            { 0.25, -1, -1.25, -1.25, -1, 0.25 } /* 4 */ ,
+            { -0.5, -1.5, -5.5, 0, -2.5, 0 } /* 5 */ ,
+            { -2.5, 0, -1.5, -0.5, 0, -5.5 } /* 6 */ ,
+            { -1, 0.25, -1, 0.25, -1.25, -1.25 } /* 7 */ ,
+            { -1.5, -0.5, -2.5, 0, -5.5, 0 } /* 8 */ ,
+            { 30, 90, -30, 180, 30, 60 } /* 9 */ ,
+            { 90, 30, 30, 60, -30, 180 } /* 10 */ ,
+            { 30, -180, -30, -90, -60, -30 } /* 11 */ ,
+            { 60, -120, 60, -60, 120, -60 } /* 12 */ ,
+            { -120, 60, 120, -60, 60, -60 } /* 13 */ ,
+            { -180, 30, -60, -30, -30, -90 } /* 14 */  };
         
+        
+        int Bii[][3] = {
+            { 0, 0, 0 } /* 0 */ ,
+            { 0, 1, 1 } /* 1 */ ,
+            { 0, 2, 2 } /* 2 */ ,
+            { 0, 1, 2 } /* 3 */ ,
+            { 0, 2, 0 } /* 4 */ ,
+            { 0, 0, 1 } /* 5 */ ,
+            { 1, 0, 0 } /* 6 */ ,
+            { 1, 1, 1 } /* 7 */ ,
+            { 1, 2, 2 } /* 8 */ ,
+            { 1, 1, 2 } /* 9 */ ,
+            { 1, 2, 0 } /* 10 */ ,
+            { 1, 0, 1 } /* 11 */ ,
+            { 2, 0, 0 } /* 12 */ ,
+            { 2, 1, 1 } /* 13 */ ,
+            { 2, 2, 2 } /* 14 */ ,
+            { 2, 1, 2 } /* 15 */ ,
+            { 2, 2, 0 } /* 16 */ ,
+            { 2, 0, 1 } /* 17 */  };
+        
+        int fe[] = { 1, 3, 2, 6, 10, 8, 12, 17, 13 };
+        
+        int k6[] = { 4, 5, 9, 11, 15, 16 };
+
+        
+        R CKK = K.area*2;
         R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2
-        //3*3 + 2*3 = 15
-        int pI[15][4];// store p_k
-        int lI[15][4];// store l_k
-        int llI[15][4];// store ll_k
-        R   cI[15][4];// store c_k
-        
-        int df=0;
-        R CKK = 2* K.area;
-        /*
-        for(int e=0;e<3;++e)
+        if(Ortho)
         {
-            int i=e;
-            int ii[2]={(e+1)%3,(e+2)%3};
-            int i2=(e+2)%3;
-            R s = K.EdgeOrientation(e)/CKK;
-            if(s<0) Exchange(ii[0],ii[1]); //
-            for(int k=0;k<3;++k,df++)
+            phi[0]=phi[0].perp();
+            phi[1]=phi[1].perp();
+            phi[2]=phi[2].perp();
+        }
+ 
+ 
+        for(int l=0;l<18;++l)
             {
-                pI[df][0]= i;
-                lI[df][0]= ii[k];
-                llI[df][0]= ii[k];
-                cI[df][0]= s;
-                
-                pI[df][1]= i;
-                lI[df][1]= i;
-                cI[df][1]= -s*4./3.;
-                
-                pI[df][2]= ii[k];
-                lI[df][2]= ii[k];
-                cI[df][2]= s/3.;
-                
-                
+                int i = Bii[l][0];
+                int j = Bii[l][1];
+                int k = Bii[l][2];
+                Pm[l] = phi[i]*(L[j]*L[k]/CKK);
             }
-        }
-        /*
-         if(count<0)
-         {
-         // verif.
-         R2 PP[] ={ R2(0.5,0),R2(0.5,0.5),R2(0,0.5)};
-         int err=0;
-         for(int df = 0;df < 6;++df)
-         {
-         cout << " df = " << df << " : \t";
-         for(int k=0;k<3;++k)
-         cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << "  \t  ";
-         cout << endl;
-         
-         R2 fd;
-         for(int p=0;p<3;++p)
-         {
-         R L[3]; PP[p].toBary(L);
-         R2 X=K(PP[p]);
-         cout << X << " ,\t " << L[0] << " " << L[1] << " " <<L[2] ;
-         R2 phi[3] = { X-Q[0], X-Q[1], X-Q[2] };// phi * area *2
-         
-         R2 ff = (cI[df][0] * L[lI[df][0]]) * phi[pI[df][0]]
-         + (cI[df][1] * L[lI[df][1]]) * phi[pI[df][1]]
-         + (cI[df][2] * L[lI[df][2]]) * phi[pI[df][2]]
-         ;
-         fd += ff;
-         cout << " :::: " << 3*ff
-         << " :  " <<  3*(cI[df][0] * L[lI[df][0]]) * phi[pI[df][0]]
-         << " ; " <<  3*(cI[df][1] * L[lI[df][1]]) * phi[pI[df][1]]
-         << " ; " <<  3*(cI[df][2] * L[lI[df][2]]) * phi[pI[df][2]]
-         << " :  " <<  3*(cI[df][0] * L[lI[df][0]])  <<"(" <<  phi[pI[df][0]] <<")"
-         << " ; " <<  3*(cI[df][1] * L[lI[df][1]]) <<"(" << phi[pI[df][1]]<<")"
-         << " ; " <<  3*(cI[df][2] * L[lI[df][2]]) <<"(" << phi[pI[df][2]]<<")"
-         <<endl;
-         
-         }
-         if( fd.norme() > 1e-5) err++;
-         cout << " Verif " << df << " [ " << 3*fd << " ] " << fd.norme()  <<endl;
-         }
-         ffassert(err==0);
-         
-         }
-         */
-        R cK = 18.* K.area;
-        R c0 = sqrt(cK);
-        R cb = 12/c0;
-        R ccK = K.area*cK/c0;
-        for(int k=0;k<2;++k,df++)
-        {
-            
-            R2 PB(0,0);
-            PB[k]=cb;
-            // if( count <5) cout << " PB = " << PB << " df = " << df << " " << cK << " ==" << det(B[0] ,B[1],B[2]) <<endl;
-            R b0 = det(PB   ,B[1],B[2])/ ccK;
-            R b1 = det(B[0],PB   ,B[2])/ ccK;
-            R b2 = det(B[0],B[1],PB   )/ ccK;
-            
-            // if( count <5) cout << " S= "<< b0*B[0]+b1*B[1]+b2*B[2] << " s= " << (b0+b1+b2) << " b=" << b0 << " " << b1 << " " << b2 <<  endl;
-            pI[df][0]= 0;
-            lI[df][0]= 0;
-            cI[df][0]= b0;
-            
-            pI[df][1]= 1;
-            lI[df][1]= 1;
-            cI[df][1]= b1;
-            
-            pI[df][2]= 2;
-            lI[df][2]= 2;
-            cI[df][2]= b2;
-            
-        }
-        /*
-         if( count< 5)
-         {
-         cout << Phat << " " << X << endl;
-         for( int e=0;e<3;++e)
-         {  int e1= (e+1)%3, e2=(e+2)%3 ;
-         cout << " phi e " << phi[e] << " == " << L[e1]*A[e2] -  L[e2]*A[e1] << endl;
-         }
-         for(int df=0;df< 8;++df)
-         {
-         cout << " df = " << df << " : \t";
-         for(int k=0;k<3;++k)
-         cout  <<"+ " << cI[df][k] << " *l" << lI[df][k]  << " *phi" << pI[df][k] << "  \t  ";
-         cout << endl;    
-         }
-         
-         }
-         */      
-        int ortho0=0,ortho1=1; R s1ortho=1;
-        if(Ortho) { ortho0=1; ortho1=0; s1ortho=-1;}
-        
+  
+        //static int ddd=0;
+
+        if(eo[0]<0) Exchange(p[0],p[2]);
+        if(eo[1]<0) Exchange(p[3],p[5]);
+        if(eo[2]<0) Exchange(p[6],p[8]);
+       // if(ddd++<20) cout << "OE === "<<eo[0] <<eo[1]<< eo[2] << " " <<p[0]<<p[2]<< " "<< endl;
+
+        double sg[15]= {eo[0],eo[0],eo[0], eo[1],eo[1],eo[1], eo[2],eo[2],eo[2], 1.,1.,1.,1.,1.,1. };
+   
+
+
         if (whatd[op_id])
         {
-            
-            for(int df=0;df< 15;++df)
+            for(int pdf=0;pdf< 15;++pdf)
             {
+                int df=p[pdf];
                 R2 fd(0.,0.) ;
-                for(int k=0;k<3;++k) {
-                    fd += (cI[df][k] * L[lI[df][k]]* L[llI[df][k]]) * phi[pI[df][k]] ;
-                }
-                
-                val(df,ortho0,op_id)= fd.x;
-                val(df,ortho1,op_id)= s1ortho*fd.y;
+                if(df < 9 ) fd=Pm[fe[df]];//  edge function ..
+                for(int k=0;k<6;++k)
+                    fd +=  cf[df][k]*Pm[k6[k]] ;
+                fd *= sg[df];
+                val(pdf,0,op_id)= fd.x;
+                val(pdf,1,op_id)= fd.y;
             }
         }
         
         
         if(  whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
         {
+           
             R2 DL[3]={K.H(0),K.H(1),K.H(2)};
             R2 Dphix(1,0);
             R2 Dphiy(0,1);
+            R2 DxPm[18];
+            R2 DyPm[18];
+
+            if(Ortho) {Dphix=R2(0,1);Dphiy=R2(-1,0);}// x,y -> (-y,x)
+
+            for(int l=0;l<18;++l)
+            {
+                // Pm[l] = phi[i]*(L[j]*L[k]/CKK);
+                int i = Bii[l][0];
+                int j = Bii[l][1];
+                int k = Bii[l][2];
+                R Ljk=L[j]*L[k];
+                R2 DLjk = L[j]*DL[k] +  DL[j]*L[k];
+                R2 DF1 = (Dphix*Ljk +  phi[i].x * DLjk  )/CKK;
+                R2 DF2 = (Dphiy*Ljk +  phi[i].y * DLjk  )/CKK;
+                DxPm[l] = R2(DF1.x,DF2.x);
+                DyPm[l] = R2(DF1.y,DF2.y);
+            }
             
             if (whatd[op_dx])
             {
-                
-                for(int df=0;df< 15;++df)
+              
+                for(int pdf=0;pdf< 15;++pdf)
                 {
-                    R2 fd(0.,0.);
-                    for(int k=0;k<3;++k)
-                        fd += cI[df][k] * (  L[llI[df][k]]* (DL[lI[df][k]].x * phi[pI[df][k]] + L[lI[df][k]]* Dphix)
-                                           + DL[llI[df][k]].x* L[lI[df][k]]* phi[pI[df][k]]);
-                    val(df,ortho0,op_dx)= fd.x;
-                    val(df,ortho1,op_dx)= s1ortho*fd.y;	      
+                    int df=p[pdf];
+                    R2 fd(0.,0.) ;
+                    if(df < 9 ) fd=DxPm[fe[df]];//  edge function ..
+                    for(int k=0;k<6;++k)
+                        fd +=  cf[df][k]*DxPm[k6[k]] ;
+                    fd *= sg[df];
+                    val(pdf,0,op_dx)= fd.x;
+                    val(pdf,1,op_dx)= fd.y;
+                    
                 }
                 
             }
             if (whatd[op_dy])
             {
-                
-                for(int df=0;df< 15;++df)
+   
+                for(int pdf=0;pdf< 15;++pdf)
                 {
-                    R2 fd(0.,0.);
-                    for(int k=0;k<3;++k)
-                        fd += cI[df][k] * (  L[llI[df][k]]* (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy)
-                                           + DL[llI[df][k]].y* L[lI[df][k]]* phi[pI[df][k]]);
-                   //     fd += cI[df][k] * (DL[lI[df][k]].y * phi[pI[df][k]] + L[lI[df][k]]* Dphiy);
-                    val(df,ortho0,op_dy)= fd.x;
-                    val(df,ortho1,op_dy)= s1ortho*fd.y;	      
+                    int df=p[pdf];
+                    R2 fd(0.,0.) ;
+                    if(df < 9 ) fd=DyPm[fe[df]];//  edge function ..
+                    for(int k=0;k<6;++k)
+                        fd +=  cf[df][k]*DyPm[k6[k]] ;
+                    fd *= sg[df];
+                    val(pdf,0,op_dy)= fd.x;
+                    val(pdf,1,op_dy)= fd.y;
                 }
-                
             }
             if(whatd[op_dxx] || whatd[op_dyy] ||  whatd[op_dxy])
             {
@@ -1299,7 +1230,6 @@ namespace  Fem2D {
             }
             
         }
-        count++;
     }
 
     
