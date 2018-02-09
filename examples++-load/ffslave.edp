@@ -1,0 +1,66 @@
+/*
+
+ Example of coupling c program and freemfem++ script
+ with mmap and semaphore
+ 
+ the c code is    :   ffmaster.c
+ the ff++ code is : ffslave.edp
+ and here FreeFem++ is a slave process
+  the compile step is
+ 
+ cc -c libff-mmap-semaphore.c
+ cc ffmaster.c -o ffmaster  libff-mmap-semaphore.o -g
+ #build the freefem++ plugin
+  ff-c++ -auto ff-mmap-semaphore.cpp
+ # launch
+ ./ffmaster
+ 
+ 
+ F. Hecht Feb. 2018   Frederic.Hecht@upmc.fr
+ */
+
+load "ff-mmap-semaphore"
+Psemaphore smff("ff-slave",0);
+Psemaphore smc("ff-master",0);
+Pmmap sharedata("shared-data",1024);
+if(verbosity<4) verbosity =0; 
+mesh Th=square(10,10);
+fespace Vh(Th,P1);
+Vh u,v;
+int[int] Lab=[1,2,3,4]; 
+
+macro grad(u) [dx(u),dy(u)] //
+
+int status=1;
+//Read(sharedata,8,status);
+cout << " status = "<< status << endl;
+real cff,rff;
+problem Pb(u,v) = int2d(Th)(grad(u)'*grad(v))-int2d(Th)(cff*v)+ on(Lab,u=0);
+if(verbosity>9) cout << " ff: before ff post\n";
+Post(smff); // un lock master fin init 
+
+
+while( 1)
+{
+	if(verbosity>9) cout << " ff: before ff wait \n";
+	Wait(smc); // wait from cint ecriture ok 
+	Read(sharedata,0,cff);
+	Read(sharedata,8,status);
+	
+	
+	cout << " ..  ff "<< cff << " " << status << endl;
+	if(status<=0) break; 
+	Pb;
+	rff = int2d(Th)(u*u);
+	cout << " ** ff "<< cff << " " << rff << endl; 
+	
+	Write(sharedata,16,rff);
+	Post(smff); // unlock cc  
+}
+
+Post(smff); // wait from cint
+cout << " Fin FreeFem++ "<< endl;
+
+
+
+

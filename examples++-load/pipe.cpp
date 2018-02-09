@@ -177,7 +177,8 @@ long cflush(pstream ** ppf)
  // if( f.os ) f.os->flush();
  // if( f.f) fflush(f.f);
   return  0; 
-}; 
+};
+
 inline istream_good to_istream_good(pstream **f){ ffassert((**f).is) ; return istream_good((**f).is);}
 inline bool get_eof(pstream ** p){ return (**p).is ? (**p).is->eof(): EOF;}
 static void inittt()
