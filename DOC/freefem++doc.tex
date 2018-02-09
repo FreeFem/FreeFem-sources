@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.57-1}
+\def\VERSION{3.58}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -20892,6 +20892,218 @@ cout << random() << endl;
 cout << random() << endl;
 
 \eFF
+
+\subsection{coupling code with FreeFem++}\index{plugin!ff-mmap-semaphore}
+\label{section:ff-mmap-semaphore}
+
+The idea is just try to use 
+Interprocess communication using POSIX Shared Memory in Linux.
+
+We build a small library  \texttt{libff-mmap-semaphore.c} and  \texttt{libff-mmap-semaphore.h} to easly interface
+
+\begin{description}
+\item[mmap]   -- allocate memory, or map files or devices into memory
+\item[semaphore]  allow processes and threads to synchronize their
+       actions.
+
+       A semaphore is an integer whose value is never allowed to fall below
+       zero.  Two operations can be performed on semaphores: increment the
+       semaphore value by one (\texttt{sem\_post}); and decrement the semaphore
+       value by one (\texttt{sem\_wait}).  If the value of a semaphore is currently
+       zero, then a \texttt{sem\_wait} operation will block until the value becomes
+       greater than zero.
+\end{description}
+
+The function of library  
+First the semaphore interface to make synchronization. 
+\begin{itemize}
+\item\verb!typedef  struct FF_P_sem *ff_Psem ;! the pointer to data struct
+\item\verb!ff_Psem ffsem_malloc();! malloc a empty data struct 
+\item\verb!void ffsem_del(ff_Psem sem);! clean and free the pointer
+\item\verb!void ffsem_destroy(ff_Psem sem);! clean, close the data struct
+\item\verb!void ffsem_init0(ff_Psem sem);!  make a correct empty   data struct
+\item\verb!void ffsem_init(ff_Psem sem,const char *  nmm,int crea);! create or use a new semaphore 
+\item\verb!long ffsem_post(ff_Psem sem);! nlocked, the value of the semaphore is incremented, and all threads which are waiting on the semaphore are awakened.
+\item\verb!long ffsem_wait(ff_Psem sem);! The semaphore referenced by \texttt{sem} is locked.  When calling \texttt{sem\_wait()}, if the semaphore's value is zero, the calling thread will block until the lock is acquired or until the call is interrupted by a signal.
+     Alternatively, the \verb!sem_trywait()! function will fail if the semaphore is already locked, rather than blocking on the semaphore.
+\item\verb!long ffsem_trywait(ff_Psem p);!
+
+\end{itemize}
+Second the \texttt{mmap} function
+\begin{itemize}
+\item\verb!typedef  struct FF_P_mmap *ff_Pmmap ;! the pointer to data struct
+\item\verb!ff_Psem ffmmap_malloc();! malloc a empty data struct 
+\item\verb!void ffmmap_del(ff_Pmmap p);! clean and free the pointer
+\item\verb!void ffmmap_destroy(ff_Pmmap p);! clean, close the data struct
+\item\verb!void ffmmap_init0(ff_Pmmap p);!  make a correct empty   data struct
+\item\verb!long ffmmap_msync(ff_Pmmap p,long off, long ln);! call writes modified whole pages back to the filesystem and updates the file modification time.  Only those pages containing addr and len-1 succeeding locations will be examined.
+\item\verb!void ffmmap_init(ff_Pmmap p,const char *  nmm,long len);!  do allocate memory, or map files or devices into memory
+\item\verb!long ffmmap_read(ff_Pmmap p,void *t,size_t n,size_t off);! read \texttt{n} bytes from  the \texttt{mmap} at memory \texttt{off}
+in pointer \texttt{t}.
+\item\verb!long ffmmap_write(ff_Pmmap p,void *t,size_t n,size_t off);! write \texttt{n} bytes to  the \texttt{mmap} at memory \texttt{off}
+in pointer \texttt{t}.
+
+\end{itemize}
+
+The freefem++ corresponding function 
+\begin{itemize}
+\item \ttCC{@Pmmap  sharedata(filename,1024);} new type to store the mmap information of  name store in string \texttt{filename} with
+$1024$ is the size the sharedata zone and file.  
+\item \ttCC{@Psemaphore smff("ff-slave",creat);}  new type to store the semaphore of name \texttt{ff-slave} where 
+$creat$ is a boolean to create or use a existing semaphore.
+\item \ttCC{@Wait(sem)} The semaphore referenced by sem is locked.  When calling \ttCC{Wait(sem)}, if the semaphore's value is zero, the calling thread will block until the lock is acquired or until the call is interrupted by a signal. Alternatively, the \tt{trywait(sem)} func-
+     tion will fail if the semaphore is already locked, rather than blocking on the semaphore.
+\item \ttCC{@Post(sem)} The semaphore referenced by sem is unlocked, the value of the semaphore is incremented, and all threads which are waiting on the semaphore are awakened.
+\item \ttCC{@Read(sharedata,offset,data);} read  the variable \texttt{data} from the place \texttt{offset} in \texttt{sharedata} mmap.
+\item \ttCC{@Write(sharedata,offset,data);}  write  the variable \texttt{data} at the place \texttt{offset} in \texttt{sharedata} mmap.
+\end{itemize}
+
+The full example :
+
+the ffmaster.c  \texttt{C} file
+\bFF
+
+
+
+#include "libff-mmap-semaphore.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+ff_Psem sem_ff,sem_c;// the semaphore for mutex
+int main(int argc, const char ** argv)
+{
+    int debug =0;
+    ff_Pmmap shd;
+    double cff,rff;
+    long status;
+    if(argc>1)  debug = atoi(argv[1]);
+    ff_mmap_sem_verb= debug;
+
+    sem_ff=ffsem_malloc();
+    sem_c=ffsem_malloc();
+    shd=ffmmap_malloc();
+    
+    ffsem_init(sem_ff,"ff-slave",1);
+    ffsem_init(sem_c,"ff-master",1);
+    ffmmap_init(shd,"shared-data",1024);
+    
+    status = 1;
+    ffmmap_write(shd, & status, sizeof(status), 8);
+    ffmmap_msync(shd,0,32);
+    
+    char ff[1024];
+    sprintf(ff,"FreeFem++ ffslave.edp -nw -ns -v %d&",debug);
+    system(ff); //  Lauch FF++ in batch no graphique
+    if(debug) printf(" cc: before wait\n");
+ 
+
+    
+    if(debug)  printf(" cc: before wait 0 ff\n");
+    ffsem_wait(sem_ff);
+    
+    for(int i=0; i< 10; ++i)
+    {
+        printf(" iter : %d \n",i);
+        cff= 10+i;
+       ffmmap_write(shd, & cff, sizeof(cff), 0);
+       ffsem_post(sem_c);
+ 
+        
+       if(debug)  printf(" cc: before wait 2\n");
+       ffsem_wait(sem_ff);
+       ffmmap_read(shd, & rff, sizeof(rff), 16);
+       printf(" iter = %d rff= %f\n",i,rff);
+    }
+    status= 0; // Fin
+    ffmmap_write(shd, & status, sizeof(status), 8);
+    ffsem_post(sem_c);
+    printf("Fin Master \n");
+    ffsem_wait(sem_ff);
+    ffsem_del(sem_ff);
+    ffsem_del(sem_c);
+    ffmmap_del(shd);
+    return 0;
+}
+\eFF	
+
+the ffslave.edp \texttt{freefem++ script} file
+\bFF
+@load "ff-mmap-semaphore"
+@Psemaphore smff("ff-slave",0);
+@Psemaphore smc("ff-master",0);
+@Pmmap sharedata("shared-data",1024);
+if(verbosity<4) verbosity =0; 
+mesh Th=square(10,10);
+fespace Vh(Th,P1);
+Vh u,v;
+int[int] Lab=[1,2,3,4]; 
+
+macro grad(u) [dx(u),dy(u)] //
+
+int status=1;
+cout << " status = "<< status << endl;
+real cff,rff;
+problem Pb(u,v) = int2d(Th)(grad(u)'*grad(v))-int2d(Th)(cff*v)+ on(Lab,u=0);
+if(verbosity>9) cout << " ff: before ff post\n";
+@Post(smff); // un lock master fin init 
+
+
+while( 1)
+{
+	if(verbosity>9) cout << " ff: before ff wait \n";
+	@Wait(smc); // wait from cint ecriture ok 
+	@Read(sharedata,0,cff);
+	@Read(sharedata,8,status);
+	
+	
+	cout << " ..  ff "<< cff << " " << status << endl;
+	if(status<=0) break; 
+	Pb;
+	rff = int2d(Th)(u*u);
+	cout << " ** ff "<< cff << " " << rff << endl; 
+	
+	@Write(sharedata,16,rff);
+	@Post(smff); // unlock cc  
+}
+
+@Post(smff); // wait from cint
+cout << " Fin FreeFem++ "<< endl;
+
+\eFF	
+To test this example of coupling c program and freemfem++ script do:
+\bFF 
+ cc -c libff-mmap-semaphore.c
+ cc ffmaster.c -o ffmaster  libff-mmap-semaphore.o -g
+ #build the freefem++ plugin
+  ff-c++ -auto ff-mmap-semaphore.cpp
+ # launch the test
+ ./ffmaster
+\eFF
+ 
+ The output:
+{\scriptsize
+\begin{verbatim}
+brochet:examples++-load hecht$ ./ffmaster 
+ len 1024 size 1024 
+ len 1024 size 1024 
+ status = 1
+ iter : 0 
+ ..  ff 10 1
+ ** ff 10 0.161797
+ iter = 0 rff= 0.161797
+ iter : 1 
+ ..  ff 11 1
+...
+ iter : 9 
+ ..  ff 19 1
+ ** ff 19 0.584086
+ iter = 9 rff= 0.584086
+Fin Master 
+ ..  ff 19 0
+ Fin FreeFem++ 
+brochet:examples++-load hecht$ 
+\end{verbatim}
+}
 \section*{\freefempp LGPL License}
 This is The \freefempp software.
 Programs in it were maintained by
