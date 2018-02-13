@@ -187,7 +187,8 @@ namespace Fem2D {
                     M.coef[i] = E[c]*QFf[q].a;
                 }
         }
-        ffassert(i==M.ncoef && M.np == p);
+       // ffassert(i==M.ncoef);
+      //  ffassert( M.np == p);
     }
     
     // In Mesh3dn.hpp:
