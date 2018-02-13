@@ -587,7 +587,7 @@ namespace  Fem2D {
       R2 B[]={ R2(A[1],A[2]), R2(A[2],A[0]), R2(A[0],A[1])}; 
       R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y; 
       R L[3]={l0,l1,l2};
-      int eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
+      R eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
       R2 Bb[]={A[1].perp(),A[2].perp()};// Base local pour les bulle
     
       static long  count=10;
@@ -1066,7 +1066,7 @@ namespace  Fem2D {
         R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y;
         R L[3]={l0,l1,l2};
     
-        int eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
+        R eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
         
         
         assert( val.N()>=ndf);
