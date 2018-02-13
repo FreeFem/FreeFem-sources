@@ -51,6 +51,7 @@ for (int j=0;j<Vh.ndofK;++j)
 }
  Th=square(10,10);
  u=x*x*y*y;
+ 
  solve PL2(u,v)=int2d(Th,qforder=7)(u*v)-int2d(Th,qforder=7)(x*x*y*y*v);
 
  plot(u,wait=1);
@@ -64,7 +65,8 @@ for (int i=0;i<Vh.ndof;++i)
 	v=u;
 	v[]-=u[];
 	err += v[].linfty;
-	err1 += int2d(Th)(square(dx(u)-dx(u3)));
-	err2 += int2d(Th)(square(dy(u)-dy(u3)));
+	err1 += sqrt(int2d(Th)(square(dx(u)-dx(u3))));
+	err2 += sqrt(int2d(Th)(square(dy(u)-dy(u3))));
 }
 cout << " err=" << err << " " << err1 << " " << err2 << endl; 
+assert( err+err1+err2 < 1e-10);
