@@ -1,3 +1,4 @@
+  Add tool to use freefem++ in C, C++ throught mmap and semaphore 
   Add new P2pnc 2d finite element  a P2 discontinus finite element (like a P2 with continuity 
       of the mode 0 and 1 on edge (i.e.:  $\int_E jump(v) p) = 0$ for p polynome degree <= 1  )
     see testFE-P2pnc.edp LaplaceP2pnc.edp
