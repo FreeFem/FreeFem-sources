@@ -1,5 +1,10 @@
-@  changeset:   4271:660e84be087d
+@  changeset:   4272:49e9a87a53c8
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 13 13:13:07 2018 +0100
+|  summary:     update makefile for new test
+|
+o  changeset:   4271:660e84be087d
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 13 12:53:16 2018 +0100
 |  summary:     Add new finite element 3d Element_P2pnc
