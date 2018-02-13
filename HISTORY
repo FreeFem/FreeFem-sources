@@ -1,5 +1,10 @@
-@  changeset:   4269:dff540c9f7d3
+@  changeset:   4270:608a33f3dfd6
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Fri Feb 09 20:44:08 2018 +0100
+|  summary:     add in doc the new interface for mmap and semaphore
+|
+o  changeset:   4269:dff540c9f7d3
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Fri Feb 09 18:02:10 2018 +0100
 |  summary:     add new tools to coupling ff++ with other program
