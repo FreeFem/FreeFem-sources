@@ -1771,7 +1771,7 @@ void Init_map_type()
   Global.Add("ShowAlloc","(",new OneOperator2<long,string*,long*>(ShowAlloc1));// debuging 
   Global.Add("NaN","(",new OneOperator0<double>(NaN));
 
-  Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
+  Global.Add("NaN","(",new OneOperator1<double,string*   >());
     Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
     Global.Add("copysign","(",new OneOperator2<double>(copysign));// Add jan 2018 FH
     Global.Add("sign","(",new OneOperator1<double>(sign));// Add jan 2018 FH

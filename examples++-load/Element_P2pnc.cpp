@@ -109,7 +109,7 @@ namespace  Fem2D {
       //  const Triangle & K(FE.T);
       R2 A(K[0]), B(K[1]),C(K[2]);
       R l0=1-P.x-P.y,l1=P.x,l2=P.y;
-    int oe[3]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
+    R oe[3]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
       
         R l7[]={ l0,l1,l2, l1*l2, l0*l2, l0*l1, (l0-l1)*(l1-l2)*(l2-l0)}; // 7 monome
 
