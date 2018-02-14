@@ -13,7 +13,7 @@ func bool fv(real[int] & v, ofstream of)
 	return 1; 
 }
 func f = x+2*y+3*z;                                            //sin(x) + sin(2*y)+sin(3*z);
-fespace Vh(Th,P2b33d);
+fespace Vh(Th,P2b3d);
 fespace Vh2(Thf,P1);
 
 Vh u =0,v,w;

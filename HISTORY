@@ -1,5 +1,10 @@
-@  changeset:   4275:caca1e08b788
+@  changeset:   4276:f7b9ce387b5b
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Feb 14 11:17:52 2018 +0100
+|  summary:     revert  src/fflib/AFunction.cpp
+|
+o  changeset:   4275:caca1e08b788
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Feb 14 11:12:51 2018 +0100
 |  summary:     add missing file
