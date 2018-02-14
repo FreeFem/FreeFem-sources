@@ -1,5 +1,10 @@
-@  changeset:   4272:49e9a87a53c8
+@  changeset:   4273:164896103602
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 13 14:37:44 2018 +0100
+|  summary:     add computation of derivative in P2bulle3
+|
+o  changeset:   4272:49e9a87a53c8
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 13 13:13:07 2018 +0100
 |  summary:     update makefile for new test

@@ -11,7 +11,7 @@
 \newtheorem{remark}{Remark}
 \usepackage{enumitem}
 
-\def\VERSION{3.58}
+\def\VERSION{3.58-1}
 \def\key#1{\emph{#1}\index{#1}}
 \def\vec#1{\mbox{\boldmath $#1$}}
 \def\C{\mathbb{C}}
@@ -3766,10 +3766,9 @@ conjugate of (2.45+1.41421i) is (2.45-1.41421i)
 \eFF
 \end{example}
 
-Some usefull function exist also (version 3.51-1): 
-\index{projection}\index{dist}
+Some usefull function exist also (version 3.58): 
 \begin{itemize}
-\item \verb!projection(a,b,x) ! = $min(max(a,x),b)$
+\item \verb!projection(a,b,x) ! = $min(max(a,x),b)$ if $a < b$ ,  $min(max(b,x),a)$ else.
 \item \verb!dist(a,b) ! = $\sqrt{a^2+b^2}$
 \item \verb!dist(a,b,c) ! = $\sqrt{a^2+b^2+c^2}$
 \item \verb!min(a,b,c) ! 
@@ -3778,7 +3777,23 @@ Some usefull function exist also (version 3.51-1):
 \item \verb!invdiffpos(a,b) ! = $ a<b ? 1./(b-a): 0 $
 \item \verb!diffnp(a,b) ! = $ (a<0) \& (0< b)  ? (b-a): 0 $
 \item \verb!invdiffnp(a,b) ! = $ (a<0) \& (0< b)  ? 1/(b-a): 0 $
-\index{projection}\index{projection}\index{dist}\index{min}\index{max}\index{max}\index{diffpos}\index{invdiffpos}\index{diffnp}\index{invdiffnp}
+\item \verb!invdiffnp(a,b) ! = $ (a<0) \& (0< b)  ? 1/(b-a): 0 $
+\item \verb!invdiff(a,b) ! = $ (-|a-b| > 10^-{30})  ? 1/(b-a): 0 $
+\item \verb!invdiff(a,b,e) ! = $ (-|a-b| > e)  ? 1/(b-a): 0 $
+\item \verb!swap(a,b)! swap $a$ and $b$ value for numerics.\index{swp} 
+\item \verb!sign(a)! = $(x>0.)-(x<0.)$ for d-real and int. \index{sign} 
+\item \verb!signbit(a)! the math \texttt {bitsign} function of real and int. \index{bitsign} 
+\item \verb!copysign(a,b)! the math \texttt {copysign} function of real a. \index{copysign}  
+\item \verb!isNaN(a)! the math \texttt {isNaN} function of real . \index{isInf}  
+\item \verb!isInf(a)! the math \texttt {isInf} function of real. \index{isNaN}  
+\item \verb!NaN()! the math \texttt {nan("")} function to build a NaN number
+\item \verb!NaN(string)! the math \texttt {nan(string)} function to build a NaN number.\index{NaN}  
+
+\item \verb!signbit(a)! the math \texttt {bitsign} function of real and int. \index{bitsign} 
+\item \verb!atoi(string)! function converts the initial portion of the string to int representation.\index{atoi} 
+\item \verb!atof(string)! function converts the initial portion of the string to real representation.\index{atof} 
+
+\index{projection}\index{dist}\index{min}\index{max}\index{max}\index{diffpos}\index{invdiffpos}\index{diffnp}\index{invdiffnp}\index{invdiff}
 \end{itemize}
 
 \subsection{string expression}
@@ -3848,7 +3863,7 @@ The  real function which rounds a real to an integer   \ttCC{@round}$(x)$ (resp.
 \ttCC{@floor}$(x)$   rounds to largest integral value not greater than x vue as real, \ttCC{@ceil}$(x)$  round to smallest integral value not less than x; similarly \ttCC{@rint}$(x)$
 returns the integral value nearest to x (according to
      the prevailing rounding mode) in floating-point format) and \ttCC{@lrint}$(x)$ return an integer.
-     With a have also of the function from \texttt{cmath} :  \ttCC{fmod}$(x,y)$, \ttCC{fmin}$(x,y)$, \ttCC{fmax}$(x,y)$,\ttCC{fdim}$(x,y)$  such that 
+     With a have also of the function from \texttt{cmath} :  \ttCC{@fmod}$(x,y)$, \ttCC{@fmin}$(x,y)$, \ttCC{@fmax}$(x,y)$,\ttCC{@fdim}$(x,y)$  such that 
      fmod functions compute the floating-point remainder of $x/ y$, fmin return the min, fmax return the max, 
      fdim() functions return the "positive difference" between their arguments:  $x - y$ if $x > y$, +$0$ if $x \le y$ .
      
@@ -3957,7 +3972,37 @@ Remark, all special function of the gsllib are now interfaced in plugin \texttt{
 \index{plugin!gls} 
 
 \end{itemize}
+\itemtt[Usefull function]{ witten in C++} \par
 
+\index{dist}\index{projection}\index{}\index{}
+\begin{itemize}
+\item Euclidian distance $\mathtt{dist}(a,b) = sqrt(a^2+b^2)$ or $dist(a,b,c) = sqrt(a^2+b^2+c^2)$
+\item projection of $\xi$ on segment $[a,b]$:  $\mathtt{projection}(a,b,\xi)  =   min(max(a,\xi),b)$  if $a< b$ 
+\item \verb!projection(a,b,x) ! = $min(max(a,x),b)$ if $a < b$ ,  $min(max(b,x),a)$ else.
+\item \verb!min(a,b,c) ! 
+\item \verb!max(a,b,c) ! 
+\item \verb!diffpos(a,b) ! = $ max(b-a,0) $
+\item \verb!invdiffpos(a,b) ! = $ a<b ? 1./(b-a): 0 $
+\item \verb!diffnp(a,b) ! = $ (a<0) \& (0< b)  ? (b-a): 0 $
+\item \verb!invdiffnp(a,b) ! = $ (a<0) \& (0< b)  ? 1/(b-a): 0 $
+\item \verb!invdiffnp(a,b) ! = $ (a<0) \& (0< b)  ? 1/(b-a): 0 $
+\item \verb!invdiff(a,b) ! = $ (-|a-b| > 10^-{30})  ? 1/(b-a): 0 $
+\item \verb!invdiff(a,b,e) ! = $ (-|a-b| > e)  ? 1/(b-a): 0 $
+\item \verb!swap(a,b)! swap $a$ and $b$ value for numerics.\index{swp} 
+\item \verb!sign(a)! = $(x>0.)-(x<0.)$ for d-real and int. \index{sign} 
+\item \verb!signbit(a)! the math \texttt {bitsign} function of real and int. \index{bitsign} 
+\item \verb!copysign(a,b)! the math \texttt {copysign} function of real a. \index{copysign}  
+\item \verb!isNaN(a)! the math \texttt {isNaN} function of real . \index{isInf}  
+\item \verb!isInf(a)! the math \texttt {isInf} function of real. \index{isNaN}  
+\item \verb!NaN()! the math \texttt {nan("")} function to build a NaN number
+\item \verb!NaN(string)! the math \texttt {nan(string)} function to build a NaN number.\index{NaN}  
+
+\item \verb!signbit(a)! the math \texttt {bitsign} function of real and int. \index{bitsign} 
+\item \verb!atoi(string)! function converts the initial portion of the string to int representation.\index{atoi} 
+\item \verb!atof(string)! function converts the initial portion of the string to real representation.\index{atof} 
+
+\index{projection}\index{dist}\index{min}\index{max}\index{max}\index{diffpos}\index{invdiffpos}\index{diffnp}\index{invdiffnp}
+\end{itemize}
 \end{description}
 
 \subsection{Functions of two Variables}
@@ -4922,7 +4967,7 @@ si[50]=1;
 @for [i,vi : si]
    {
    cout << " i " << setw(3) << i << " " << setw(10) <<vi << endl;// \index{setw}
-    vi= atoi(i)*2;
+    vi= atoi(i)*2;// \index{atoi}
     }
 
 @cout <<" si = "<< si << endl;
@@ -8774,22 +8819,42 @@ So the number  degrees of freedom is 9.
 
       
      \item[P1nc] \index{P1nc|textbf}\index{fespace!P1nc} piecewise linear   element continuous at
-     the middle of edge only in 2D ?????.
+     the middle of edge only in 2D (Crouzeix-Raviart Finite Element 2d).
+     
+         \item[P2pnc] \index{P2pnc|textbf}\index{fespace!P2pnc} piecewise quadratic plus  a bubble  P3    element with the 
+     continuity of  the 2 moments on each edge (version 3.59)   (need \ttCC{@load "Element_P2pnc"}
+ 
     \item[RT1] \index{RT1|textbf}\index{fespace!RT1} (need \ttCC{@load "Element_Mixte"}, version 3.13)
      \begin{equation}
          RT1_{h} = \left\{ \mathbf{v} \in H(\textrm{div}) \left|\; \forall K \in
-         \mathcal{T}_{h} \quad  ( \alpha^2_{K}, \alpha^2_{K}, \beta_{K}) \in P_1^3,  \mathbf{v}_{|K}(x,y) = 
+         \mathcal{T}_{h} \quad  \alpha^1_{K}, \alpha^2_{K}, \beta_{K} \in P_1^2,P_0,  \mathbf{v}_{|K}(x,y) = 
          \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{x}{y}   \right.\right\}
          \label{eq:RT1}
      \end{equation}
-    
     \item[RT1Ortho] \index{RT1Ortho|textbf}\index{fespace!RT1Ortho} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2)
          \begin{equation}
          RT1_{h} = \left\{ \mathbf{v} \in H(\textrm{curl}) \left|\; \forall K \in
-         \mathcal{T}_{h} \quad  ( \alpha^2_{K}, \alpha^2_{K}, \beta_{K}) \in P_1^3,  \mathbf{v}_{|K}(x,y) = 
+         \mathcal{T}_{h},  \alpha^1_{K}, \alpha^2_{K}, \beta_{K} \in P_1^2,P_0,  \mathbf{v}_{|K}(x,y) = 
          \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{-y}{x}   \right.\right\}
          \label{eq:RT1Ortho}
      \end{equation}
+     
+       \item[RT2] \index{RT2|textbf}\index{fespace!RT2} (need \ttCC{@load "Element_Mixte"}, version 3.59
+     \begin{equation}
+         RT2_{h} = \left\{ \mathbf{v} \in H(\textrm{div}) \left|\; \forall K \in
+         \mathcal{T}_{h} \quad   \alpha^1_{K}, \alpha^2_{K}, \beta_{K} \in P_2^2, P_1,  \mathbf{v}_{|K}(x,y) = 
+         \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{x}{y}   \right.\right\}
+         \label{eq:RT2}
+     \end{equation}
+   \item[RT2Ortho] \index{RT2Ortho|textbf}\index{fespace!RT2Ortho} (need \ttCC{@load "Element_Mixte"}, version 3.59, dimension 2)
+         \begin{equation}
+         RT2_{h} = \left\{ \mathbf{v} \in H(\textrm{curl}) \left|\; \forall K \in
+         \mathcal{T}_{h} ,  \alpha^1_{K}, \alpha^2_{K}, \beta_{K} \in P_2^2, P_1,  \mathbf{v}_{|K}(x,y) = 
+         \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{-y}{x}   \right.\right\}
+         \label{eq:RT1Ortho}
+     \end{equation}
+    
+
 
     \item[BDM1] \index{BDM1|textbf}\index{fespace!BDM1} (need \ttCC{@load "Element_Mixte"}, version 3.13, dimension 2) the Brezzi-Douglas-Marini finite element 
      \begin{equation}
