@@ -1,5 +1,10 @@
-@  changeset:   4273:164896103602
+@  changeset:   4274:c266b9a43c04
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Feb 14 11:07:12 2018 +0100
+|  summary:     Update doc
+|
+o  changeset:   4273:164896103602
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 13 14:37:44 2018 +0100
 |  summary:     add computation of derivative in P2bulle3
