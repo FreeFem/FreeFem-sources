@@ -82,7 +82,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
 	exactpartition.$(DYLIB_SUFFIX)  ClosePoints.$(DYLIB_SUFFIX)  \
 	Element_HCT.$(DYLIB_SUFFIX) Curvature.$(DYLIB_SUFFIX) Element_P1bl.$(DYLIB_SUFFIX) \
 	Element_QF.$(DYLIB_SUFFIX) distance.$(DYLIB_SUFFIX) Element_P1ncdc.$(DYLIB_SUFFIX) \
-	Element_P2bulle3.$(DYLIB_SUFFIX) ff-mmap-semaphore.$(DYLIB_SUFFIX) \
+	Element_P2bulle3.$(DYLIB_SUFFIX)  \
 	Element_P2pnc.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
@@ -91,9 +91,10 @@ LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu4@ dfft.$(DYLIB_SUFFIX) 
 	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ 		\
 	ffnewuoa.$(DYLIB_SUFFIX) @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mshmet@	\
 	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX)	\
-	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_pardiso@
+	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_pardiso@ @TOOL_DYLIB_MMAP@
 
-bin_PROGRAMS=
+EXTRA_PROGRAMS= ffmaster
+bin_PROGRAMS= @BIN_ffmaster@
 
 # FFCS parallel make: some targets need to be built first, sequentially
 

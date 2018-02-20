@@ -1,6 +1,8 @@
+version 3.59 ( 20 /02 /2018)
+  Add Finite Element P3  Lagrange in 3d (see LaplaceP3-3d.edp ) in examples++-load 
   Add tool to use freefem++ in C, C++ throught mmap and semaphore 
   Add new P2pnc 2d finite element  a P2 discontinus finite element (like a P2 with continuity 
-      of the mode 0 and 1 on edge (i.e.:  $\int_E jump(v) p) = 0$ for p polynome degree <= 1  )
+      of the mode 0 and 1 on edge (i.e.:  $\int_E jump(v) p) = 0$ for p polynome degree <= 1  ))
     see testFE-P2pnc.edp LaplaceP2pnc.edp
   Add new RT2 RT2ortho finite element
   Add new discontinus finite element on edge (31/01/2018)
