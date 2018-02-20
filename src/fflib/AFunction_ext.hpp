@@ -33,7 +33,7 @@ class E_F_F0F0s_ :public  E { public:                               // extend
   
 };
 
-template<class R,class A=R,class B=A,class C=B, class D=C ,class CODE=E_F_F0F0s_<R,A,B,E_F0> >    // extend (4th arg.)
+template<class R,class A=R,class B=A,class CODE=E_F_F0F0s_<R,A,B,E_F0> >    // extend (4th arg.)
 class  OneOperator2s_ : public OneOperator {     // 
   aType r; //  return type 
   typedef typename  CODE::func  func;
