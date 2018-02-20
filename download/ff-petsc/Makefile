@@ -115,7 +115,7 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	--download-mumps --download-ml --download-hypre --download-parmetis \
 	--download-superlu --download-pastix --download-suitesparse --download-fftw \
 	PETSC_ARCH=ff-real
-	test -f $(DIR_INSTALL_REAL)/ff-real/lib/petsc/conf/petscvariables
+	test -f $(SRCDIR)/ff-real/lib/petsc/conf/petscvariables
 	touch $@
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
@@ -137,7 +137,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	--with-parmetis-include='$(PARMETIS_INCLUDE)'  --with-parmetis-lib='$(PARMETIS_LIB)' \
 	--with-fftw-include='$(FFTW_INCLUDE)'  --with-fftw-lib='$(FFTW_LIB)' \
 	PETSC_ARCH=ff-complex
-	test -f $(DIR_INSTALL_COMPLEX)/ff-complex/lib/petsc/conf/petscvariables
+	test -f $(SRCDIR)/ff-complex/lib/petsc/conf/petscvariables
 	touch $@
 
 $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk 
