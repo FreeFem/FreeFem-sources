@@ -1,5 +1,6 @@
 #include "ff++.hpp"
 #include "AddNewFE.h"
+
 // Attention probleme de numerotation des inconnues
 // -------------------------------------------------
 // dans freefem, il y a un noeud par objets  sommet, arete, element.
@@ -187,13 +188,262 @@ namespace  Fem2D {
 #include "Element_P3.hpp"
   
 
+    
+    
+    
+    
+        
+        // Author: F. Hecht , P-H Tournier, Jet Hoe Tang jethoe.tang@googlemail.com
+        //   Jan 2017
+        // in tets
+        class TypeOfFE_P3_3d : public GTypeOfFE<Mesh3>
+        {
+        public:
+            typedef Mesh3  Mesh;
+            typedef Mesh3::Element  Element;
+            typedef GFElement<Mesh3>  FElement;
+            static const int kp=3; // P3
+            static const int ndof=(kp+3)*(kp+2)*(kp+1)/6;
+            static int dfon[];
+            static int nl[20][3];
+            static int cl[20][3];
+            static int cp[20];
+            static int pp[20][4] ;
+            static const int d=Mesh::Rd::d;
+            
+            TypeOfFE_P3_3d(); // constructor
+            void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd & P,RNMK_ & val) const;
+            void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
+        };
+        
+        int TypeOfFE_P3_3d::nl[20][3] = {
+            { 0, 0, 0 } /* 0 */ ,
+            { 1, 1, 1 } /* 1 */ ,
+            { 2, 2, 2 } /* 2 */ ,
+            { 3, 3, 3 } /* 3 */ ,
+            { 0, 0, 1 } /* 4 */ ,
+            { 0, 1, 1 } /* 5 */ ,
+            { 0, 0, 2 } /* 6 */ ,
+            { 0, 2, 2 } /* 7 */ ,
+            { 0, 0, 3 } /* 8 */ ,
+            { 0, 3, 3 } /* 9 */ ,
+            { 1, 1, 2 } /* 10 */ ,
+            { 1, 2, 2 } /* 11 */ ,
+            { 1, 1, 3 } /* 12 */ ,
+            { 1, 3, 3 } /* 13 */ ,
+            { 2, 2, 3 } /* 14 */ ,
+            { 2, 3, 3 } /* 15 */ ,
+            { 1, 2, 3 } /* 16 */ ,
+            { 0, 2, 3 } /* 17 */ ,
+            { 0, 1, 3 } /* 18 */ ,
+            { 0, 1, 2 } /* 19 */  };
+        
+        int TypeOfFE_P3_3d::cl[20][3] = {
+            { 0, 1, 2 } /* 0 */ ,
+            { 0, 1, 2 } /* 1 */ ,
+            { 0, 1, 2 } /* 2 */ ,
+            { 0, 1, 2 } /* 3 */ ,
+            { 0, 1, 0 } /* 4 */ ,
+            { 0, 0, 1 } /* 5 */ ,
+            { 0, 1, 0 } /* 6 */ ,
+            { 0, 0, 1 } /* 7 */ ,
+            { 0, 1, 0 } /* 8 */ ,
+            { 0, 0, 1 } /* 9 */ ,
+            { 0, 1, 0 } /* 10 */ ,
+            { 0, 0, 1 } /* 11 */ ,
+            { 0, 1, 0 } /* 12 */ ,
+            { 0, 0, 1 } /* 13 */ ,
+            { 0, 1, 0 } /* 14 */ ,
+            { 0, 0, 1 } /* 15 */ ,
+            { 0, 0, 0 } /* 16 */ ,
+            { 0, 0, 0 } /* 17 */ ,
+            { 0, 0, 0 } /* 18 */ ,
+            { 0, 0, 0 } /* 19 */  };
+        
+        int TypeOfFE_P3_3d::cp[20] = { 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1 };
+        
+        
+        int TypeOfFE_P3_3d::pp[20][4] = {
+            { 3, 0, 0, 0 } /* 0 */ ,
+            { 0, 3, 0, 0 } /* 1 */ ,
+            { 0, 0, 3, 0 } /* 2 */ ,
+            { 0, 0, 0, 3 } /* 3 */ ,
+            { 2, 1, 0, 0 } /* 4 */ ,
+            { 1, 2, 0, 0 } /* 5 */ ,
+            { 2, 0, 1, 0 } /* 6 */ ,
+            { 1, 0, 2, 0 } /* 7 */ ,
+            { 2, 0, 0, 1 } /* 8 */ ,
+            { 1, 0, 0, 2 } /* 9 */ ,
+            { 0, 2, 1, 0 } /* 10 */ ,
+            { 0, 1, 2, 0 } /* 11 */ ,
+            { 0, 2, 0, 1 } /* 12 */ ,
+            { 0, 1, 0, 2 } /* 13 */ ,
+            { 0, 0, 2, 1 } /* 14 */ ,
+            { 0, 0, 1, 2 } /* 15 */ ,
+            { 0, 1, 1, 1 } /* 16 */ ,
+            { 1, 0, 1, 1 } /* 17 */ ,
+            { 1, 1, 0, 1 } /* 18 */ ,
+            { 1, 1, 1, 0 } /* 19 */  };
+        
+        int TypeOfFE_P3_3d:: dfon[] = {1,2,1,0}; // 2 dofs on each edge, 2 dofs on each face
+        
+        TypeOfFE_P3_3d::TypeOfFE_P3_3d():  GTypeOfFE<Mesh>(TypeOfFE_P3_3d:: dfon,1,3,false,false)
+        {
+            typedef Element E;
+            int n=this->NbDoF;
+            const int d= E::Rd::d;
+            bool dd = verbosity>5;
+            if(dd)
+                cout << "\n +++ P3  : ndof : "<< n << " " <<this->PtInterpolation.N()  <<endl;
+            R3 *Pt= this->PtInterpolation;
+            // construction of interpolation ppoint
+            
+            {int k=0;
+                double cc =1./3.;
+                for(int i=0;i<=ndof;++i)
+                    Pt[k++]=   R3::KHat[0]*cc*pp[i][0]
+                    + R3::KHat[1]*cc*pp[i][1]
+                    + R3::KHat[2]*cc*pp[i][2]
+                    + R3::KHat[3]*cc*pp[i][3]
+                    ;
+                if(dd)  cout << this->PtInterpolation<< endl;
+            }
+            
+            for (int i=0;i<n;i++)
+            {
+                this->pInterpolation[i]=i;
+                this->cInterpolation[i]=0;
+                this->dofInterpolation[i]=i;
+                this->coefInterpolation[i]=1.;
+            }
+        }
+        void TypeOfFE_P3_3d:: set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const
+        {
+            int n=this->NbDoF;
+            int *p =M.p;
+            for(int i=0; i< n;++i)
+                M.p[i]=i;
+            int k=10;
+            if(verbosity>9) cout << " P3  set:";
+            int dof= 4;
+            for( int e=0; e<6;++e)
+            {
+                bool oe= K.EdgeOrientation(e);
+                if(!oe) swap(p[dof],p[dof+1]);
+                dof+=2;
+            }
+        }
+        
+        void TypeOfFE_P3_3d:: FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P,RNMK_ & val) const
+        {
+            assert(val.N()>=20); // 23 degrees of freedom
+            assert(val.M()==1); // 3 components
+            int n=this->NbDoF;
+            // -------------
+            // perm: the permutation for which the 4 tetrahedron vertices are listed with increasing GLOBAL number
+            // (i.e. perm[0] is the local number of the vertex with the smallest global number, ...
+            //       perm[3] is the local number of the vertex with the biggest global number.)
+            // -------------
+            R ld[4] ;
+            P.toBary(ld);
+            ld[0] *=3.;
+            ld[1] *=3.;
+            ld[2] *=3.;
+            ld[3] *=3.;
+            
+            int p[]={ 0,1,2,3, 4,5,6,7,8,9, 10,11,12,13,14,15, 16,17,18,19 };
+            
+            {
+                int dof= 4;
+                for( int e=0; e<6;++e)
+                {
+                    bool oe= K.EdgeOrientation(e);
+                    if(!oe) swap(p[dof],p[dof+1]);
+                    dof+=2;
+                }
+            }
+            static int ddd=100;ddd++;
+            val=0.;
+            RN_ f0(val('.',0,op_id));
+            if( ddd<20) cout << ld[0] << " " << ld[1] << " " << ld[2] << " " << ld[3] << " ::";
+            if (whatd & Fop_D0)
+            {
+                for(int i=0; i<20;++i)
+                {
+                    R fi=1./cp[i];
+                    for(int l=0; l<3;++l)
+                        fi  *= ld[nl[i][l]]-cl[i][l];
+                    if( ddd<20) cout << " " <<  fi ;
+                    f0[p[i]] = fi;
+                }
+                if( ddd<20) cout << endl;
+            }
+            if (whatd & (Fop_D1|Fop_D2))
+            {
+                R3 Dld[4],Df[20];
+                K.Gradlambda(Dld);
+                Dld[0] *=3.;
+                Dld[1] *=3.;
+                Dld[2] *=3.;
+                Dld[3] *=3.;
+
+                for(int i=0; i<20;++i)
+                {
+                    R fi = 1./cp[i];
+                    R3 &dfi=Df[p[i]];
+                    for(int l=0; l<3;++l)
+                    {
+                        double  ci =ld[nl[i][l]]-cl[i][l];
+                        dfi *= ci;
+                        dfi += fi*Dld[nl[i][l]];
+                        fi  *= ci;
+                    }
+                    RN_ f0x(val('.',0,op_dx));
+                    RN_ f0y(val('.',0,op_dy));
+                    RN_ f0z(val('.',0,op_dz));
+                    if (whatd & Fop_dx)
+                        for(int i=0; i< 20; ++i)
+                            f0x[i]= Df[i].x;
+                    if (whatd & Fop_dy)
+                        for(int i=0; i< 20; ++i)
+                            f0y[i]= Df[i].y;
+                    if (whatd & Fop_dz)
+                        for(int i=0; i< 20; ++i)
+                            f0z[i]= Df[i].z;
+                    ffassert( ! (whatd & Fop_D2) );// no D2 to do !!!
+                    
+                    
+                }
+                
+            }
+            
+            
+            
+        }
+        
+        
+        
+        
+    
+        
+
 
 // link with FreeFem++ 
 static TypeOfFE_P3Lagrange P3LagrangeP3;
 // a static variable to add the finite element to freefem++
-static AddNewFE  P3Lagrange("P3",&P3LagrangeP3); 
-} // FEM2d namespace 
+static AddNewFE  P3Lagrange("P3",&P3LagrangeP3);
+    
+static TypeOfFE_P3_3d  P3_3d;
+GTypeOfFE<Mesh3> & Elm_P3_3d(P3_3d);
+    
+static AddNewFE3  TFE_P3_3d("P33d",&Elm_P3_3d);
+static void init()
+    {
+     TEF2dto3d[&P3LagrangeP3]=&Elm_P3_3d;// P3 -> P33d
+    }
 
+} // FEM2d namespace 
+LOADFUNC(Fem2D::init);
 
 // --- fin -- 
 

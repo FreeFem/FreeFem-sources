@@ -1,5 +1,10 @@
-@  changeset:   4276:f7b9ce387b5b
+@  changeset:   4277:bf958cbdfc61
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Feb 14 11:30:44 2018 +0100
+|  summary:     coorect type in name of new FE
+|
+o  changeset:   4276:f7b9ce387b5b
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Feb 14 11:17:52 2018 +0100
 |  summary:     revert  src/fflib/AFunction.cpp
