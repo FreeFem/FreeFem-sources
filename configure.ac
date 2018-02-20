@@ -1733,10 +1733,12 @@ AC_CHECK_HEADERS(sys/mman.h,ff_mmap=1,ff_mmap=0)
 
 
 if test "$ff_sem" -eq  1 -a  "$ff_mmap" -eq  1 ; then
-AC_SUBST([TBIN_ffmaster],"ffmaster")
+BIN_ffmaster=ffmaster
 else
 enable_MMAP=no  
+BIN_ffmaster=
 fi
+AC_SUBST([BIN_ffmaster],"$BIN_ffmaster")
 TOOL_DISABLE(MMAP,libff-mmap-semaphore.$(DYLIB_SUFFIX))
 
 AC_CHECK_HEADERS(regex.h,ff_regex_h=1, ff_regex_h=0)
