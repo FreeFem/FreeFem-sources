@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.58,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.59,hecht@ann.jussieu.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1728,6 +1728,16 @@ fi
 # ----------------------------------------------------------
 AC_CHECK_HEADERS(cstddef)
 AC_CHECK_HEADERS(stddef.h)
+AC_CHECK_HEADERS(semaphore.h,ff_sem=1,ff_sem=0)
+AC_CHECK_HEADERS(sys/mman.h,ff_mmap=1,ff_mmap=0)
+
+
+if test "$ff_sem" -eq  1 -a  "$ff_mmap" -eq  1 ; then
+AC_SUBST([TBIN_ffmaster],"ffmaster")
+else
+enable_MMAP=no  
+fi
+TOOL_DISABLE(MMAP,libff-mmap-semaphore.$(DYLIB_SUFFIX))
 
 AC_CHECK_HEADERS(regex.h,ff_regex_h=1, ff_regex_h=0)
 AC_SUBST(FF_HAVE_REGEX_H,$ff_regex_h)

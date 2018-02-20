@@ -1,5 +1,10 @@
-@  changeset:   4278:c41226c7ebfc
+@  changeset:   4279:ff26c53f44a1
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 20 18:02:39 2018 +0100
+|  summary:     correct petsc compilatuion problem.
+|
+o  changeset:   4278:c41226c7ebfc
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 20 13:21:39 2018 +0100
 |  summary:     Add P3 lagrange finite element 3D in Element_P3
