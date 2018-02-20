@@ -1,5 +1,10 @@
-@  changeset:   4277:bf958cbdfc61
+@  changeset:   4278:c41226c7ebfc
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 20 13:21:39 2018 +0100
+|  summary:     Add P3 lagrange finite element 3D in Element_P3
+|
+o  changeset:   4277:bf958cbdfc61
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Feb 14 11:30:44 2018 +0100
 |  summary:     coorect type in name of new FE
