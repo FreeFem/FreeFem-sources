@@ -1738,8 +1738,6 @@ else
 enable_MMAP=no  
 BIN_ffmaster=
 fi
-AC_SUBST([BIN_ffmaster],"$BIN_ffmaster")
-TOOL_DISABLE(MMAP,libff-mmap-semaphore.$(DYLIB_SUFFIX))
 
 AC_CHECK_HEADERS(regex.h,ff_regex_h=1, ff_regex_h=0)
 AC_SUBST(FF_HAVE_REGEX_H,$ff_regex_h)
@@ -1990,6 +1988,8 @@ TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperL
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
+AC_SUBST([BIN_ffmaster],"$BIN_ffmaster")
+TOOL_DISABLE(MMAP,libff-mmap-semaphore.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 

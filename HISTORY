@@ -1,5 +1,10 @@
-@  changeset:   4281:851a1c9527b9
+@  changeset:   4282:16eefe0f7584
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 20 22:27:41 2018 +0100
+|  summary:     add new tools to build finite element
+|
+o  changeset:   4281:851a1c9527b9
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 20 19:34:21 2018 +0100
 |  summary:     try to pass to version 3.59
