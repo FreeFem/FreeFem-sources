@@ -1,5 +1,10 @@
-@  changeset:   4282:16eefe0f7584
+@  changeset:   4283:4a41f9e925b0
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Tue Feb 20 23:06:32 2018 +0100
+|  summary:     correct pb with complile or not of ffmaster/semaphore tools
+|
+o  changeset:   4282:16eefe0f7584
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Tue Feb 20 22:27:41 2018 +0100
 |  summary:     add new tools to build finite element
