@@ -1989,7 +1989,7 @@ TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 AC_SUBST([BIN_ffmaster],"$BIN_ffmaster")
-TOOL_DISABLE(MMAP,libff-mmap-semaphore.$DYLIB_SUFFIX)
+TOOL_DISABLE(MMAP,ff-mmap-semaphore.$DYLIB_SUFFIX)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 
