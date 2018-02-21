@@ -1,4 +1,7 @@
-version 3.59 ( 20 /02 /2018)
+version 3.59 ( 21 /02 /2018)
+  correct problem with the MeshIndependent() virtual function  
+    in all of case (thank to Svetoslav Nakov <sisqo_nakov@yahoo.com>)
+    the symptome is =>   Sorry error in Optimization ...  add:  int2d(Th,optimize=0)(...)
   Add Finite Element P3  Lagrange in 3d (see LaplaceP3-3d.edp ) in examples++-load 
   Add tool to use freefem++ in C, C++ throught mmap and semaphore 
   Add new P2pnc 2d finite element  a P2 discontinus finite element (like a P2 with continuity 
