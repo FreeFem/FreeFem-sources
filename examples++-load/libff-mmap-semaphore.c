@@ -114,7 +114,7 @@ void ffmmap_del(ff_Pmmap p)
 
 void ffmmap_destroy(ff_Pmmap p)
 {
-    if(ff_mmap_sem_verb>9) printf("  ** ffmmap_destroy %s len: %d new: %d\n",p->nm,p->len,p->isnew);
+    if(ff_mmap_sem_verb>9) printf("  ** ffmmap_destroy %s len: %lu new: %d\n",p->nm,p->len,p->isnew);
     if (p->map && munmap(p->map, p->len) == -1)
     {
         printf(" **Error munmap %s %zu\n",p->nm,p->len );
@@ -157,7 +157,7 @@ void ffmmap_init(ff_Pmmap p,const char *nm,long len)
     }
     off_t size =lseek(p->fd, 0, SEEK_END); // seek to end of file
     p->isnew=(size==0);
-    printf(" len %d size %d \n",len,size);
+    printf(" len %ld size %lld \n",len,size);
     if(size< len)
     {
         if(ftruncate(p->fd,len)==-1)
@@ -189,7 +189,7 @@ long ffmmap_read(ff_Pmmap p,void *pt,size_t ln,size_t off)
     void *pk = (char*)  p->map+off;
     memcpy(pt,pk, ln);
     long *pp=(long*)pt;
-    if(ff_mmap_sem_verb>9) printf(" R %d %d %d %p\n",*pp,off,ln,pk);
+    if(ff_mmap_sem_verb>9) printf(" R %ld %lu %lu %p\n",*pp,off,ln,pk);
     return ln;
 }
 long ffmmap_write(ff_Pmmap p,void *pt,size_t ln,size_t off)
@@ -203,9 +203,13 @@ long ffmmap_write(ff_Pmmap p,void *pt,size_t ln,size_t off)
     void *pk = (char*)  p->map+off;
     memcpy(pk,pt, ln);
     long *pp=(long*) pk;
-    if(ff_mmap_sem_verb>9) printf(" W %d %d %d %p\n",*pp,off,ln,pk);
+    if(ff_mmap_sem_verb>9) printf(" W %ld %lu %lu %p\n",*pp,off,ln,pk);
     return ln;
 }
 
+void  ffmmap_write_(long * p,void *pt,int *ln,int * off, long * ret)
+{
+    *ret= ffmmap_write( *(ff_Pmmap*) p,pt,*ln,* off);
+}
 
 

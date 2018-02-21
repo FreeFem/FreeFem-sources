@@ -1789,7 +1789,7 @@ void Init_map_type()
     Global.Add("swap","(",new OneOperator2<bool,long*>(pswap));
     Global.Add("swap","(",new OneOperator2<bool,bool*>(pswap));
     Global.Add("swap","(",new OneOperator2<bool,Complex*>(pswap));
-    Global.Add("swap","(",new OneOperator2<bool,String*>(pswap));
+    Global.Add("swap","(",new OneOperator2<bool,string**>(pswap));
 
 
      atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
