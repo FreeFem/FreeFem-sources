@@ -1,5 +1,10 @@
-@  changeset:   4284:41f872e737a4
+@  changeset:   4285:d7ad255bd4f7
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Wed Feb 21 08:52:03 2018 +0100
+|  summary:     correct problem with the MeshIndependent() virtual function
+|
+o  changeset:   4284:41f872e737a4
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Wed Feb 21 08:28:55 2018 +0100
 |  summary:     coorect typo in target name
