@@ -29,7 +29,7 @@ class E_F_F0F0s_ :public  E { public:                               // extend
 			GetAny<A1>((*a1)(s))  ) );}   // extend (2th arg.)
   virtual size_t nbitem() const {return a1->nbitem(); } // modif ??? 
   bool MeshIndependent() const 
-  {return a0->MeshIndependent() && a1->MeshIndependent() ;} // extend (2th arg.)
+  {return  E::MeshIndependent() &&a0->MeshIndependent() && a1->MeshIndependent() ;} // extend (2th arg.)
   
 };
 
@@ -82,7 +82,7 @@ class E_F_F0F0F0s_ :public  E { public:                               // extend
 			GetAny<A2>((*a2)(s))  ) );}   // extend (3th arg.)
   virtual size_t nbitem() const {return a2->nbitem(); } // modif ??? 
   bool MeshIndependent() const 
-  {return a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent() ;} // extend (2th arg.)
+    {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent() ;} // extend (2th arg.)
   
 };
 
@@ -131,7 +131,7 @@ class E_F_F0F0F0F0_ :public  E { public:                               // extend
 			  GetAny<A3>((*a3)(s))  ) );}   // extend (4th arg.)
   virtual size_t nbitem() const {return a3->nbitem(); } // modif
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()&& a3->MeshIndependent();} // extend (4th arg.)
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()&& a3->MeshIndependent();} // extend (4th arg.)
 
 };
 
@@ -180,7 +180,7 @@ class E_F_F0F0F0F0s_ :public  E { public:                               // exten
 			  GetAny<A3>((*a3)(s))  ) );}   // extend (4th arg.)
   virtual size_t nbitem() const {return a3->nbitem(); } // modif
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()&& a3->MeshIndependent();} // extend (4th arg.)
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()&& a3->MeshIndependent();} // extend (4th arg.)
 
 };
 
@@ -239,7 +239,7 @@ class E_F_F0F0F0F0F0_ :public  E { public:                               // exte
 			  GetAny<A4>((*a4)(s))  ) );}   // extend aX
     virtual size_t nbitem() const {return a4->nbitem(); } 
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
 	 && a3->MeshIndependent()&& a4->MeshIndependent();} // extend aX
 
 };
@@ -301,7 +301,7 @@ class E_F_F0F0F0F0F0F0_ :public  E { public:                               // ex
 			  GetAny<A5>((*a5)(s)) ) );}   // extend aX
     virtual size_t nbitem() const {return a5->nbitem(); } 
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
 	 && a3->MeshIndependent()&& a4->MeshIndependent()&& a5->MeshIndependent();} // extend aX
 
 };
@@ -368,7 +368,7 @@ class E_F_F0F0F0F0F0F0F0_ :public  E { public:                               // 
 			  GetAny<A6>((*a6)(s)) ) );}   // extend aX
   virtual size_t nbitem() const {return a6->nbitem(); } // modif
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
 	 && a3->MeshIndependent()&& a4->MeshIndependent()&& a5->MeshIndependent()&& a6->MeshIndependent();} // extend aX
 
 };
@@ -437,7 +437,7 @@ class E_F_F0F0F0F0F0F0F0F0_ :public  E { public:                               /
 			  GetAny<A7>((*a7)(s)) ) );}   // extend aX
   virtual size_t nbitem() const {return a7->nbitem(); } // modif
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
 	 && a3->MeshIndependent()&& a4->MeshIndependent()&& a5->MeshIndependent()&& a6->MeshIndependent()&& a7->MeshIndependent();} // extend aX
 
 };
@@ -510,7 +510,7 @@ class E_F_F0F0F0F0F0F0F0F0F0_ :public  E { public:                              
 			  GetAny<A8>((*a8)(s)) ) );}   // extend aX
   virtual size_t nbitem() const {return a8->nbitem(); } // modif
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
+      {return  E::MeshIndependent() &&a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
 	 && a3->MeshIndependent()&& a4->MeshIndependent()&& a5->MeshIndependent()&& a6->MeshIndependent()&& a7->MeshIndependent()&& a8->MeshIndependent();} // extend aX
 
 };
@@ -585,7 +585,7 @@ class E_F_F0F0F0F0F0F0F0F0F0F0_ :public  E { public:                            
 			  GetAny<A9>((*a9)(s)) ) );}   // extend aX
   virtual size_t nbitem() const {return a9->nbitem(); } // modif 
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
+      {return  E::MeshIndependent() &&a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent()
 	 && a3->MeshIndependent()&& a4->MeshIndependent()&& a5->MeshIndependent()&& a6->MeshIndependent()
 	 && a7->MeshIndependent()&& a8->MeshIndependent()&& a9->MeshIndependent();} // extend aX
 

@@ -1112,7 +1112,7 @@ template<class R,class A0,class A1,class E=E_F0>
   AnyType operator()(Stack s)  const 
     {return SetAny<R>( f( GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)) ) );} 
     bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent();} // 
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent();} //
  
 };
 // FH Add 07/2008 
@@ -1127,7 +1127,7 @@ E_F_F0F0_Add2RC(func ff,Expression aa0,Expression aa1)
 AnyType operator()(Stack s)  const 
 {return SetAny<R>(Add2StackOfPtr2FreeRC(s, f( GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)) ) ));} 
 bool MeshIndependent() const 
-{return a0->MeshIndependent() && a1->MeshIndependent();} // 
+{return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent();} //
 
 };
 // FH end 07/2008 
@@ -1142,7 +1142,7 @@ template<class R,class A0,class A1,class A2,class E=E_F0>
     {return SetAny<R>( f( GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)),GetAny<A2>((*a2)(s))  ) );}  
     virtual size_t nbitem() const {return a2->nbitem(); } 
       bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent();} // 
+      {return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent();} //
 
 };
 
@@ -1156,7 +1156,7 @@ template<class R,class A0,class A1,class A2,class E=E_F0>
   AnyType operator()(Stack s)  const 
     {return SetAny<R>( f(s, GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)),GetAny<A2>((*a2)(s))  ) );}  
     virtual size_t nbitem() const {return a2->nbitem(); } 
-   bool MeshIndependent() const { return true;}
+   bool MeshIndependent() const { return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent()&& a2->MeshIndependent();}
 };
 
 template<class R,class A0,class A1>
