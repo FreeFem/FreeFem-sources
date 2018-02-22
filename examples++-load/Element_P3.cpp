@@ -300,8 +300,8 @@ namespace  Fem2D {
             
             {int k=0;
                 double cc =1./3.;
-                for(int i=0;i<=ndof;++i)
-                    Pt[k++]=   R3::KHat[0]*cc*pp[i][0]
+                for(int i=0;i<ndof;++i)
+                    Pt[i]=   R3::KHat[0]*cc*pp[i][0]
                     + R3::KHat[1]*cc*pp[i][1]
                     + R3::KHat[2]*cc*pp[i][2]
                     + R3::KHat[3]*cc*pp[i][3]
