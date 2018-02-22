@@ -41,7 +41,7 @@ typedef  ff_pointeur_mmap *  pFF_p_mmap ;
 template<class T>
 long Read(pFF_p_mmap const &  map,const long & offset, KN<T> * const & data)
 {
-    long n=data->N(), ln = n*sizeof(long);
+    long n=data->N(), ln = n*sizeof(T);
     T *pt= *data;
     return ffmmap_read(map->map,(void*) pt,ln,offset);
 }
@@ -49,7 +49,7 @@ long Read(pFF_p_mmap const &  map,const long & offset, KN<T> * const & data)
 template<class T>
 long Write(pFF_p_mmap const &  map,const long & offset, KN<T> * const & data)
 {
-    long n=data->N(), ln = n*sizeof(long);
+    long n=data->N(), ln = n*sizeof(T);
     T *pt= *data;
     return ffmmap_write(map->map,(void*) pt,ln,offset);
 }
