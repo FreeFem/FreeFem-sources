@@ -1,4 +1,6 @@
 //ff-c++-cpp-dep:  libff-mmap-semaphore.c
+//ff-c++-LIBRARY-dep: pthread
+
 #include "ff++.hpp"
 #include "libff-mmap-semaphore.h"
 

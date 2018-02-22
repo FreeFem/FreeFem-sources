@@ -252,7 +252,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	fi
 
 ffmaster: libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h
-	$(CC) $(CCFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster
+	$(CC) $(CCFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster $(LIBSPTHREAD)
 libff-mmap-semaphore.o ff-mmap-semaphore.$(DYLIB_SUFFIX):include.done ff-mmap-semaphore.cpp libff-mmap-semaphore.c libff-mmap-semaphore.h ff-c++
 	./ff-c++ -auto ff-mmap-semaphore.cpp
  	
