@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 long ff_mmap_sem_verb=1;
 
 void (* libf_HandleError)(const char *,int err) =0;
@@ -289,6 +293,9 @@ void  ffmmap_write_(long * p,void *pt,int *ln,int * off, long * ret)
     *ret= ffmmap_write( *(ff_Pmmap*) p,pt,*ln,* off);
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 
 

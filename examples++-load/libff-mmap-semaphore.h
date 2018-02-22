@@ -4,11 +4,11 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <semaphore.h>
-extern long ff_mmap_sem_verb;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+extern long ff_mmap_sem_verb;
 extern void (*libf_HandleError)(const char *,int err);
 struct  FF_P_sem {
     sem_t *sem;
