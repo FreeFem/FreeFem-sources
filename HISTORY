@@ -1,5 +1,10 @@
-@  changeset:   4287:32de64294e65
+@  changeset:   4288:0967bddf1697
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 22 16:42:23 2018 +0100
+|  summary:     correct missing pthread lib  in semaphore test
+|
+o  changeset:   4287:32de64294e65
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 22 14:20:55 2018 +0100
 |  summary:     add missing file in distrib + compil ffmester
