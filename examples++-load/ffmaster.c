@@ -55,6 +55,7 @@ int main(int argc, const char ** argv)
     ff_Pmmap shd;
     double cff,rff;
     long status;
+	int i; 
     if(argc>1)  debug = atoi(argv[1]);
     ff_mmap_sem_verb= debug;
 
@@ -63,8 +64,8 @@ int main(int argc, const char ** argv)
     shd=ffmmap_malloc();
     
 
-    ffsem_init(sem_ff,"ff-slave",1);
-    ffsem_init(sem_c,"ff-master",1);
+    ffsem_init(sem_ff,"ff-slave1",1);
+    ffsem_init(sem_c,"ff-master1",1);
     ffmmap_init(shd,"shared-data",1024);
     
     status = 1;
@@ -81,7 +82,7 @@ int main(int argc, const char ** argv)
     if(debug)  printf(" cc: before wait 0 ff\n");
     ffsem_wait(sem_ff);
     
-    for(int i=0; i< 10; ++i)
+    for( i=0; i< 10; ++i)
     {
         printf(" iter : %d \n",i);
         cff= 10+i;

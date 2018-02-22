@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 long ff_mmap_sem_verb=1;
+
 void (* libf_HandleError)(const char *,int err) =0;
 static char *newstringcpy(const char *nm)
 {  char *p= (char*) malloc(strlen(nm)+1);
@@ -20,12 +21,14 @@ static char *newstringcpyadds(const char *nm)
       strcpy(p,nm);
     return p;
 }
+
 void ffDoError(const char *msg,int err)
 {
     if(libf_HandleError) (*libf_HandleError)(msg,err);
     printf(" Error libff-mmap-semaphore: %s Err: %d\n",msg,err);
     exit(1);
 }
+
 void ffsem_destroy(ff_Psem p)
 {
     if(ff_mmap_sem_verb>9) printf("  ** ffsem_destroy %s unlink: %d\n",p->nm,p->creat);
@@ -38,12 +41,22 @@ void ffsem_destroy(ff_Psem p)
     p->nm=0;
     p->sem=0;
 }
+void  ffsem_destroy_(long * p)
+{
+    ffsem_destroy(*(ff_Psem*) p);
+}
+
 void ffsem_init0(ff_Psem p)
 {
     p->sem=0;
     p->nm=0;
     p->creat=0;
 }
+void  ffsem_init0_(long * p)
+{
+    ffsem_init0(*(ff_Psem*) p);
+}
+
 ff_Psem ffsem_malloc()
 {
     ff_Psem p = (ff_Psem) malloc(sizeof(struct FF_P_sem));
@@ -52,17 +65,26 @@ ff_Psem ffsem_malloc()
     p->creat=0;
     return p;
 }
+
+
 void ffsem_del(ff_Psem p)
 {
     ffsem_destroy(p);
     free(p);
 }
+void  ffsem_del_(long * p)
+{
+    ffsem_del(*(ff_Psem*) p);
+}
+
 void ffsem_init(ff_Psem p,const char *  nm,int crea)
 {
     p->creat=crea;
     p->nm= newstringcpyadds(nm);
     if (crea)
+    {   unlink (p->nm);
         p->sem=sem_open (p->nm,  O_CREAT, 0660, 0);
+    }
     else
         p->sem=sem_open (p->nm, 0, 0, 0);
     if (p->sem  == SEM_FAILED)
@@ -75,6 +97,12 @@ void ffsem_init(ff_Psem p,const char *  nm,int crea)
     }
     
 }
+void  ffsem_init_(long * pp, const char *nm, int * crea,int lennm)
+{
+    ff_Psem* p= (ff_Psem*)pp;
+    *p = ffsem_malloc();
+    ffsem_init(*p, nm, * crea);
+}
 
 long ffsem_post(ff_Psem p)
 { int err=sem_post(p->sem);
@@ -82,12 +110,21 @@ long ffsem_post(ff_Psem p)
         ffDoError("sem_post",1002);}
     return err;
 }
+void  ffsem_post_(long * p, long * ret)
+{
+    *ret=ffsem_post(*(ff_Psem*) p);
+}
+
 long ffsem_wait(ff_Psem p)
 {
     int err=sem_wait(p->sem);
     if(err==-1)  {perror("ff/sem: sem_wait");
         ffDoError("sem_post",1003);}
     return err;
+}
+void  ffsem_wait_(long * p, long * ret)
+{
+    *ret=ffsem_wait(*(ff_Psem*) p);
 }
 
 long ffsem_trywait(ff_Psem p)
@@ -96,6 +133,10 @@ long ffsem_trywait(ff_Psem p)
     if(err==-1)  {perror("ff/sem: sem_trywait");
         ffDoError("sem_post",1004);}
     return err;
+}
+void  ffsem_trywait_(long * p, long * ret)
+{
+    *ret=ffsem_trywait(*(ff_Psem*) p);
 }
 
 
@@ -106,10 +147,17 @@ ff_Pmmap ffmmap_malloc()
     ffmmap_init0(p);
     return p;
 }
+
+
+
 void ffmmap_del(ff_Pmmap p)
 {
     ffmmap_destroy(p);
     free(p);
+}
+void  ffmmap_del_(long * p)
+{
+    ffmmap_del(*(ff_Pmmap*) p);
 }
 
 void ffmmap_destroy(ff_Pmmap p)
@@ -128,6 +176,11 @@ void ffmmap_destroy(ff_Pmmap p)
     p->fd =0;
     p->nm=0;
 }
+void  ffmmap_destroy_(long * p)
+{
+    ffmmap_destroy(*(ff_Pmmap*) p);
+}
+
 void ffmmap_init0(ff_Pmmap p)
 {
     p->len =0;
@@ -136,11 +189,21 @@ void ffmmap_init0(ff_Pmmap p)
     p->map=0;
     p->isnew=0;
 }
+void  ffmmap_init0_(long * p)
+{
+    ffmmap_init0(*(ff_Pmmap*) p);
+}
+
 long ffmmap_msync(ff_Pmmap p,long  off,long ln)
 {
    if(ln ==0) ln = p->len-off; //
    return  msync((char*)p->map+off,ln, MS_SYNC);
 }
+void  ffmmap_msync_(long * p,int * off,int * ln, long * ret)
+{
+    *ret= ffmmap_msync(*(ff_Pmmap*) p, * off, * ln);
+}
+
 void ffmmap_init(ff_Pmmap p,const char *nm,long len)
 {
     void *addr=0;
@@ -179,7 +242,14 @@ void ffmmap_init(ff_Pmmap p,const char *nm,long len)
     }
     
 }
-long ffmmap_read(ff_Pmmap p,void *pt,size_t ln,size_t off)
+void  ffmmap_init_(long * pp,const  char *nm,int * len, int lennm)
+{
+    ff_Pmmap* p= (ff_Pmmap *) pp;
+    *p= ffmmap_malloc();
+    ffmmap_init(*p, nm,* len);
+}
+
+long ffmmap_read(ff_Pmmap p,void *pt,size_t ln,long off)
 {
     if( off <0 || off+ln > p->len)
     {
@@ -192,7 +262,13 @@ long ffmmap_read(ff_Pmmap p,void *pt,size_t ln,size_t off)
     if(ff_mmap_sem_verb>9) printf(" R %ld %lu %lu %p\n",*pp,off,ln,pk);
     return ln;
 }
-long ffmmap_write(ff_Pmmap p,void *pt,size_t ln,size_t off)
+void  ffmmap_read_(long * p,void *pt,int *ln,int *off, long * ret)
+{
+    *ret= ffmmap_read( *(ff_Pmmap*) p,pt,*ln,* off);
+    printf("ffmmap_read_ %ld %f %d\n", *(long*) pt , *(double *) pt,*off);
+}
+
+long ffmmap_write(ff_Pmmap p,void *pt,size_t ln,long off)
 {
     if( off <0 || off+ln > p->len)
     {
@@ -209,7 +285,10 @@ long ffmmap_write(ff_Pmmap p,void *pt,size_t ln,size_t off)
 
 void  ffmmap_write_(long * p,void *pt,int *ln,int * off, long * ret)
 {
+    printf("ffmmap_write_ %ld %f %d \n", *(long*) pt , *(double *) pt,*off);
     *ret= ffmmap_write( *(ff_Pmmap*) p,pt,*ln,* off);
 }
+
+
 
 

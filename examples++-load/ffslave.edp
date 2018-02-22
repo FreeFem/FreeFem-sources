@@ -20,8 +20,8 @@
  */
 
 load "ff-mmap-semaphore"
-Psemaphore smff("ff-slave",0);
-Psemaphore smc("ff-master",0);
+Psemaphore smff("ff-slave1",0);
+Psemaphore smc("ff-master1",0);
 Pmmap sharedata("shared-data",1024);
 if(verbosity<4) verbosity =0; 
 mesh Th=square(10,10);
@@ -33,7 +33,7 @@ macro grad(u) [dx(u),dy(u)] //
 
 int status=1;
 //Read(sharedata,8,status);
-cout << " status = "<< status << endl;
+cout << " ff status = "<< status << endl;
 real cff,rff;
 problem Pb(u,v) = int2d(Th)(grad(u)'*grad(v))-int2d(Th)(cff*v)+ on(Lab,u=0);
 if(verbosity>9) cout << " ff: before ff post\n";
@@ -48,7 +48,7 @@ while( 1)
 	Read(sharedata,8,status);
 	
 	
-	cout << " ..  ff "<< cff << " " << status << endl;
+	cout << " After wait ..  ff "<< cff << " " << status << endl;
 	if(status<=0) break; 
 	Pb;
 	rff = int2d(Th)(u*u);

@@ -56,7 +56,8 @@ ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
  ClosePoints.cpp aniso.cpp Element_HCT.cpp Curvature.cpp waveguide.edp waveguide2.edp Element_P1bl.cpp \
  Element_QF.cpp distance.edp	distance2.edp	distance3.edp g.gmesh distance.cpp testdist.edp \
  Element_P1ncdc.cpp testp1dcnc.edp \
- renumb.hpp Element_P2bulle3.cpp Element_P2pnc.cpp
+ renumb.hpp Element_P2bulle3.cpp Element_P2pnc.cpp \
+ libff-mmap-semaphore.c ffmaster.c libff-mmap-semaphore.h ff-mmap-semaphore.cpp fortan_master.f90 
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernadiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -252,7 +253,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 
 ffmaster: libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h
 	$(CC) $(CCFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster
-libff-mmap-semaphore.o ff-mmap-semaphore.$(DYLIB_SUFFIX):ff-mmap-semaphore.cpp libff-mmap-semaphore.c libff-mmap-semaphore.h ff-c++
+libff-mmap-semaphore.o ff-mmap-semaphore.$(DYLIB_SUFFIX):include.done ff-mmap-semaphore.cpp libff-mmap-semaphore.c libff-mmap-semaphore.h ff-c++
 	./ff-c++ -auto ff-mmap-semaphore.cpp
  	
 clean-local::
