@@ -1022,7 +1022,7 @@ solver(0)
       f >> this->n >> this->m >> symetrique >>nbcoef;
       if(verbosity>3)
       cout << " read mat: " <<  this->n << " " <<  this->m << " " << symetrique << " " << nbcoef <<endl;
-      lg= new int [this->n+1];
+      lg= new int [this->n+1]();
       cl= new int[nbcoef];
       a= new R[nbcoef];
       ffassert(f.good() && lg && a && cl );
@@ -1048,6 +1048,10 @@ solver(0)
 	  cl[k]=j;
 	  a[k]=aij;
 	  j0=j;i0=i;
+      }
+      for(i = 0; i < this->n; ++i) {
+          if(lg[i + 1] < lg[i])
+              lg[i + 1] = lg[i];
       }
       ffassert( imx < this->n && jmx < this->m );
       ffassert( imn >=0 && jmn >=0);
