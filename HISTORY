@@ -1,5 +1,10 @@
-@  changeset:   4291:bfe02dcb4945
+@  changeset:   4292:3655baa0ab59
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Thu Feb 22 22:35:30 2018 +0100
+|  summary:     coorect pb on CFLAGS for compile ffmaster
+|
+o  changeset:   4291:bfe02dcb4945
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 22 19:32:38 2018 +0100
 |  summary:     correct a huge error in P3 /3D finied => trap in all example
