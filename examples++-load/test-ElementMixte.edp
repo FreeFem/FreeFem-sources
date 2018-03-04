@@ -1,7 +1,7 @@
 
 load "Element_P4"
 load "Element_Mixte"
-
+load "Element_PkEdge"
 macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
 macro dn(f) ( N.x*dx(f)+N.y*dy(f)) //
 macro ccn(f) ( N.x*f#1+N.y*f#2) //
@@ -21,6 +21,8 @@ fespace Vh(Th,TDNNS1);
 cout << Vh.ndof << endl;
 cout << Vh.ndofK << endl;
 fespace Eh(Th,P0edge);
+fespace Ehdc(Th,P0edgedc);
+
 fespace P3h(Th,[P0,P0,P0]);
 
 
