@@ -1,5 +1,15 @@
-@  changeset:   4292:3655baa0ab59
+@  changeset:   4294:cbdab5fdc9b3
 |  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Sun Mar 04 14:16:03 2018 +0100
+|  summary:     add test for element P0edgedc in examples++-load/test-ElementMixte.edp
+|
+o  changeset:   4293:4e365f9a1eb4
+|  user:        Pierre Jolivet <pierre.jolivet@enseeiht.fr>
+|  date:        Wed Feb 28 11:34:56 2018 +0100
+|  summary:     Bug when loading a matrix with less nnz than n.
+|
+o  changeset:   4292:3655baa0ab59
 |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 |  date:        Thu Feb 22 22:35:30 2018 +0100
 |  summary:     coorect pb on CFLAGS for compile ffmaster
