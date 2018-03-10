@@ -1,4 +1,5 @@
 // correct pressure sign 
+// correct for LU solver a -1r6*p*q term  FH. mars/2018  Thank to armand.favrot@yahoo.fr
 real s0=clock();
 mesh Th=square(10,10);
 fespace Vh2(Th,P1);
@@ -25,6 +26,8 @@ solve NS (u1,u2,p,v1,v2,q,init=i) =
             + (dx(p)*dx(q)+dy(p)*dy(q))*(0.00001) // stabilization term
             - p*dx(v1) - p*dy(v2)
             - dx(u1)*q - dy(u2)*q
+            - 1e-6*p*q
+			
            )
   + int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
   + on(3,u1=g,u2=0) 
