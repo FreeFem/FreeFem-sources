@@ -1,0 +1,18 @@
+How to use geneo4PETSc with FreeFem++ :
+---------------------------------------
+
+1. git clone https://github.com/geneo4PETSc/geneo4PETSc
+2. build and install geneo4PETSc
+3. set your environment (with module load)
+   the recommended way to do this is to rely on module:
+   - create a module file for geneo4PETSc
+   - set PATH and LD_LIBRARY_PATH
+   - set PKG_CONFIG_PATH to point at the pc file provided by geneo4PETSc
+   - set MPIRUN to point at the mpirun used by the PETSc's install used by geneo4PETSc
+4. configure freefem: ./configure --with-geneo4PETSc
+
+Example :
+---------
+
+An example using geneo4PETSc is provided in ./examples++-hpddm/elasticity-3d-geneo4PETSc.edp.
+This reduces basically to use PETSc with "-pc_type geneo".

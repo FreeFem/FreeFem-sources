@@ -29,6 +29,10 @@ laplace-2d-SLEPc.edp				laplace-complex-2d-SLEPc.edp	diffusion-2d-substructuring
 laplace-2d-spherical-harmonics-SLEPc.edp	schrodinger-1d-harmonic-oscillator-SLEPc.edp	schrodinger-2d-harmonic-oscillator-SLEPc.edp \
 laplace-2d-torus-SLEPc.edp			schrodinger-1d-square-well-SLEPc.edp  withPartitioning.edp
 
+if GENEO4PETSC
+TESTS += elasticity-3d-geneo4PETSc.edp
+endif
+
 XFAIL_TESTS=$(TESTS)
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff

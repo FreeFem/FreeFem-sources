@@ -3,6 +3,9 @@
 #include "PETSc.hpp"
 #include "petsc/private/petscimpl.h"
 #include "petsc/private/kspimpl.h"
+#ifdef WITH_geneo
+#include "geneo.hpp"
+#endif
 
 typedef PETSc::DistributedCSR<HpSchwarz<PetscScalar>> Dmat;
 typedef PETSc::DistributedCSR<HpSchwarz<PetscReal>> DmatR;
@@ -866,6 +869,20 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     if(nargs[4])
         KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
     KSPSetFromOptions(ptA->_ksp);
+    #ifdef WITH_geneo
+    PC pc = NULL; KSPGetPC(ptA->_ksp, &pc);
+    PCType type = NULL; PCGetType(pc, &type);
+    if (type && string(type) == "geneo") {
+      // TODO: compute all needed arguments needed by initGenEOPC !... (Note: B = X = NULL for a first version).
+      PetscInt nbDOF;    MatGetSize     (ptA->_petsc, &nbDOF,    NULL);
+      PetscInt nbDOFLoc; MatGetLocalSize(ptA->_petsc, &nbDOFLoc, NULL);
+      set<unsigned int> dofIdxDomLoc; // TODO
+      vector<unsigned int> dofIdxMultLoc; // TODO
+      vector<vector<unsigned int>> intersectLoc; //TODO
+      initGenEOPC(pc, nbDOF, nbDOFLoc, ptA->_rmap, ptA->_petsc /*pass MatIS here => is ptA->_petsc a MatIS ?*/, NULL, NULL, &dofIdxDomLoc, &dofIdxMultLoc, &intersectLoc);
+      //KSPSetInitialGuessNonzero(ptA->_ksp, PETSC_TRUE); // Needed when B and X are not NULL.
+    }
+    #endif
     KSPSetUp(ptA->_ksp);
     if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
         PC pc;
@@ -1123,6 +1140,9 @@ static void Init_PETSc() {
     }
     delete [] argv;
     KSPRegister("hpddm", PETSc::KSPCreate_HPDDM);
+    #ifdef WITH_geneo
+    PCRegister("geneo", createGenEOPC);
+    #endif
     ff_atend(PETSc::finalizePETSc);
     if(!exist_type<DmatR*>()) {
         Dcl_Type<DmatR*>(Initialize<DmatR>, Delete<DmatR>);
