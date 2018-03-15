@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 hpddm petsc [slepc] [mumps parmetis ptscotch scotch scalapack|umfpack] [mkl|blas] mpi
+//ff-c++-LIBRARY-dep: cxx11 hpddm [geneo|petsc slepc mpi] [mumps parmetis ptscotch scotch scalapack|umfpack] [mkl|blas]
 //ff-c++-cpp-dep:
 
 #define  PETScandSLEPc 1

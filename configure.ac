@@ -1001,6 +1001,48 @@ fi
 
 ### end petsc .... 
 
+AC_ARG_WITH([geneo4PETSc],
+            [AC_HELP_STRING([--with-geneo4PETSc], [use www.github.com/geneo4PETSc/geneo4PETSc])],
+            [# Rely on pkg-config to get geneo4PETSc.
+             PKG_CHECK_MODULES([GENEO4PETSC],
+                               [geneo4PETSc],
+                               [],
+                               [AC_MSG_ERROR(["geneo4PETSc not found: install it, then, export PKG_CONFIG_PATH=/path/to/geneo4PETSc/local/lib/pkgconfig:\${PKG_CONFIG_PATH}"],
+                                             [1])
+                               ])
+             # geneo4PETSc is a "PETSc plugin" compiled as a library: that's why it is highly recommended
+             # to use geneo4PETSc with it's own PETSc/SLEPc/Boot/MPI installs (to avoid problems at
+             # compile/link/run time...). geneo4PETSc comes with it's prerequisites.
+             AC_SUBST([GENEO4PETSC_CFLAGS])
+             AC_SUBST([GENEO4PETSC_LIBS])
+             with_geneo4PETSc=yes
+            ],
+            [with_geneo4PETSc=no])
+AM_CONDITIONAL([GENEO4PETSC], [test "$with_geneo4PETSc" = "yes"])
+if test "$with_geneo4PETSc" = "yes"; then
+  # RPATH must be handled at the build system level (not at the pc file level).
+  IFS=" " read -r -a GENEO4PETSC_LIBS_ARRAY <<< "${GENEO4PETSC_LIBS}"
+  GENEO4PETSC_LIBS_RPATH=""
+  for lib in "${GENEO4PETSC_LIBS_ARRAY[[@]]}"; do
+    if [[[ "$lib" == "-L"* ]]]; then
+      GENEO4PETSC_LIBS_RPATH="$GENEO4PETSC_LIBS_RPATH ${lib/-L/-Wl,-rpath,}"
+    fi
+    if [[[ "$lib" == *".so" ]]]; then
+      dir=$(dirname $lib)
+      GENEO4PETSC_LIBS_RPATH="$GENEO4PETSC_LIBS_RPATH -Wl,-rpath,${dir}"
+    fi
+    if [[[ "$lib" == *".dylib" ]]]; then
+      dir=$(dirname $lib)
+      GENEO4PETSC_LIBS_RPATH="$GENEO4PETSC_LIBS_RPATH -Wl,-rpath,${dir}"
+    fi
+    GENEO4PETSC_LIBS_RPATH="$GENEO4PETSC_LIBS_RPATH $lib"
+  done
+
+  # Add plugin to ff++.
+  AC_FF_ADDWHERELIB(geneo, $GENEO4PETSC_LIBS_RPATH, $GENEO4PETSC_CFLAGS)
+  AC_SUBST([TOOL_COMPILE_geneo],"")
+fi
+
 if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'` 
   AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
@@ -2152,6 +2194,12 @@ AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
 AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
 AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
+AC_MSG_NOTICE([          --  with geneo4PETSc $with_geneo4PETSc]);
+if test "$with_geneo4PETSc" = "yes"; then
+  AC_MSG_NOTICE([              => For consistency, freefem's MPI must be the same than geneo4PETSc's one.]);
+  AC_MSG_NOTICE([                 The recommended way to get that is to configure this way:]);
+  AC_MSG_NOTICE([                 MPIRUN=/path/to/geneo4PETSc/local/bin/mpirun ./configure --with-geneo4PETSc]);
+fi
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
