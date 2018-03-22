@@ -581,31 +581,31 @@ namespace  Fem2D {
     
     void TypeOfFE_RT1_2d::FB(const bool * whatd,const Mesh & ,const Triangle & K,const R2 & Phat,RNMK_ & val) const
     {
-      R2 X=K(Phat);
-      R2 Q[]={ R2(K[0]), R2(K[1]),R2(K[2])};
-      R2 A[]={ R2(Q[1],Q[2]), R2(Q[2],Q[0]), R2(Q[0],Q[1])}; 
-      R2 B[]={ R2(A[1],A[2]), R2(A[2],A[0]), R2(A[0],A[1])}; 
-      R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y; 
-      R L[3]={l0,l1,l2};
-      R eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
-      R2 Bb[]={A[1].perp(),A[2].perp()};// Base local pour les bulle
-    
-      static long  count=10;
-      /*      
-      if( count < 0)
-	{
-	  cout << "TypeOfFE_RT1_2d "<< " " << A[0]+A[1]+A[2] << " " <<  B[0]+B[1]+B[2] << endl;
-	  cout << det(Q[0],Q[1],Q[2]) << " X = " << X << " Phat ="  << Phat << endl;
-	  cout<< "Q="  << Q[0]<< "," << Q[1] << " , " << Q[2] <<endl; 
-	  cout<< "A="  << A[0]<< "," << A[1] << " , " << A[2] << endl; 
-	  cout<< "B="  << B[0]<< "," << B[1] << " , " << B[2] <<endl; 
-	}
-      
-       THE 2 DOF k=0,1  are: on edge e   f -> \int_e f \lambda_{e+k} . n_e 
-       THE 2 internal dof are : f -> \int_K f e_i  where e_i is the canonical basis of R^2 
-       
-       
-       so the basis function are 
+        R2 X=K(Phat);
+        R2 Q[]={ R2(K[0]), R2(K[1]),R2(K[2])};
+        R2 A[]={ R2(Q[1],Q[2]), R2(Q[2],Q[0]), R2(Q[0],Q[1])};
+        R2 B[]={ R2(A[1],A[2]), R2(A[2],A[0]), R2(A[0],A[1])};
+        R l0=1-Phat.x-Phat.y,l1=Phat.x,l2=Phat.y;
+        R L[3]={l0,l1,l2};
+        R eo[]={K.EdgeOrientation(0),K.EdgeOrientation(1),K.EdgeOrientation(2)};
+        R2 Bb[]={A[1].perp(),A[2].perp()};// Base local pour les bulle
+        
+        static long  count=10;
+        /*
+         if( count < 0)
+         {
+         cout << "TypeOfFE_RT1_2d "<< " " << A[0]+A[1]+A[2] << " " <<  B[0]+B[1]+B[2] << endl;
+         cout << det(Q[0],Q[1],Q[2]) << " X = " << X << " Phat ="  << Phat << endl;
+         cout<< "Q="  << Q[0]<< "," << Q[1] << " , " << Q[2] <<endl;
+         cout<< "A="  << A[0]<< "," << A[1] << " , " << A[2] << endl;
+         cout<< "B="  << B[0]<< "," << B[1] << " , " << B[2] <<endl;
+         }
+         
+         THE 2 DOF k=0,1  are: on edge e   f -> \int_e f \lambda_{e+k} . n_e
+         THE 2 internal dof are : f -> \int_K f e_i  where e_i is the canonical basis of R^2
+         
+         
+         so the basis function are
        
        let call \phi_i the basic fonction of RT0 (without orientation) so the normal is exterior.
        \phi_i (X) = ( X- Q_i ) / (2 |K|) =  \lambda_{i+1} Curl( \lambda_{i+2}) - \lambda_{i+2} Curl( \lambda_{i+1})
