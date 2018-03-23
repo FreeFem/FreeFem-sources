@@ -1,0 +1,69 @@
+//  test all FEspace
+verbosity=10;
+mesh Th=square(5,5);
+verbosity = 10;
+cout << " P0 " << endl;
+fespace Ph(Th,P0);
+cout << " P1 " << endl;
+fespace Vh(Th,P1);
+cout << " P2 " << endl;
+fespace Wh(Th,P2);
+cout << " nb of degre of freedom           : " << Wh.ndof << endl;
+cout << " nb of degre of freedom / ELEMENT : " << Wh.ndofK << endl;
+//*  don't work to day in progresse
+{
+ int k= 2;
+ int kdf= Wh.ndofK ;
+cout << " df of element " << k << ":" ;
+for (int i=0;i<kdf;i++)
+  cout << Wh(k,i) << " ";
+ cout << endl;
+}
+//int[int] IK=[1,2,4];
+//cout << "Wh(IK) = " << Wh(IK) << endl;  
+//*/
+cout << " P1nc " << endl;
+fespace Vnch(Th,P1nc);
+Vnch u1nc=x+10*y;
+cout << " Interpola P1nc : " << int2d(Th)(square(u1nc-(x+10*y))) << endl;
+
+cout << " P2dc " << endl;
+fespace Wdch(Th,P2dc);
+
+cout << " P1dc " << endl;
+fespace Vdch(Th,P1dc);
+Vdch u1dc=x+10*y;
+cout << " Interpola P1dc : " << int2d(Th)(square(u1dc-(x+10*y))) << endl;
+
+Wh w=x*x*y,dxw=2*x*y;
+
+Vdch vdc = dx(w);
+Wdch wdc = dx(w)*x;
+plot(vdc,dxw,wait=1);
+plot(wdc);
+Vnch vnc = x*x;
+Vh vh = x*x;
+Ph p = x*x;
+
+{
+func f=x*x+10*y*y+50*x*y;
+cout << " P2b " << endl;
+fespace Wh2b(Th,P2);
+Wh2b vh=f;
+cout << " ?? " << vh(0.1,0.4) << " == " << f(0.1,0.4) <<  " diff = " << vh(0.1,0.4) - f(0.1,0.4) <<endl;
+assert( abs(vh(0.1,0.4) - f(0.1,0.4)) < 1e-12 );
+}
+
+{ // version 3.41 
+mesh TTh=Wdch.Th;
+plot(TTh,wait=1);
+mesh Tw =w.Th; 
+}
+{// Version 3.58  
+	Vh uu=x;
+	Vh uuu=uu[]; 
+	varf va(u,v) = int2d(Th)(v)+on(1,u=1);
+	Vh vu = va(0,Vh,tgv=1);
+	plot(vu, wait=1); 
+
+}

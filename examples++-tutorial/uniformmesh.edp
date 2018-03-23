@@ -1,0 +1,9 @@
+mesh Th=square(2,2);
+plot(Th,wait=1,ps="square-0.eps");
+Th= adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);// \index{mesh!uniforme}
+plot(Th,wait=1,ps="square-1.eps");
+Th= adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);//  more the one time du to
+Th= adaptmesh(Th,1./30.,IsMetric=1,nbvx=10000);//  adaptation  bound \texttt{maxsubdiv=}
+plot(Th,wait=1,ps="square-2.eps");
+
+

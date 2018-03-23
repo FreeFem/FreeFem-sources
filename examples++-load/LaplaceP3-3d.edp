@@ -1,0 +1,29 @@
+
+load "msh3"
+load "Element_P3"
+load "qf11to25"
+ real umax = 0.0562131; // P2 
+verbosity=2;
+int[int] l1=[1,1,1,1,1,1];
+mesh3 Th=cube(10,10,10, label=l1);
+fespace Vh(Th,P3);
+
+Vh u,v;
+
+macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
+
+
+problem Lap3d(u,v,solver=CG)  =
+  int3d(Th,qfV=qfVp6)(Grad3(v)' *Grad3(u)) //') for emacs  
+  - int3d(Th,qfV=qfVp6)(1.*v) 
+  + on(1,u=0);
+ 
+  
+ 
+Lap3d;
+
+cout << " u max= " << u[].max << " // " << umax << endl; 
+plot(u,wait=1); 
+real err= abs(u[].max-umax);
+assert( err < 1e-2);
+

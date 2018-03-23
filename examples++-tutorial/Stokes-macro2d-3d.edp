@@ -1,0 +1,51 @@
+// -Ddim=3   parametre or -D=2
+int bar=4;
+// valeur par defaut ..
+IFMACRO(!dim)
+macro dim 2//
+ENDIFMACRO
+
+IFMACRO(dim,2) 
+macro intO int2d//
+macro intG int1d//
+macro Mesh mesh//
+macro Boite(n) square(n,n)//
+macro grad(u) [dx(u),dy(u)]//
+macro Grad(u) [ grad(u#1), grad(u#2)]//
+macro div(u) (dx(u#1)+dy(u#2))//
+macro cnd(u) u#1,u#2//
+macro ccd(u) u,u//
+macro Vd(u) [u#1,u#2]//
+macro myON1(l,u,v) on(l,u#1=0.,u#2=v)//
+ENDIFMACRO
+IFMACRO(dim,3) 
+load  "msh3"
+macro intO int3d//
+macro intG int2d//
+macro Mesh mesh3//
+macro Boite(n) cube(n,n,n)//
+macro grad(u) [dx(u),dy(u),dz(u)]//
+macro Grad(u) [ grad(u#1), grad(u#2),grad(u#3)]//
+macro div(u) (dx(u#1)+dy(u#2)+dz(u#3))//
+macro cnd(u) u#1,u#2,u#3//
+macro ccd(u) u,u,u//
+macro Vd(u) [u#1,u#2,u#3]//
+macro myON1(l,u,v) on(l,u#1=v,u#2=0.,u#3=0.)//
+ENDIFMACRO
+
+Mesh Th=Boite(10);
+int[int] ll(4);
+if(dim==2) ll=[1,1,2,1,3,2,4,1];
+else ll=[1,1,2,1,3,1,4,1,5,1,6,2];
+
+Th=change(Th,label=ll);
+
+plot(Th);
+fespace Vh(Th,[ccd(P2),P1]);
+Vh [cnd(u),p], [cnd(v),q],[cnd(up),pp];
+
+solve Stokes ([cnd(u),p], [cnd(v),q])
+= intO(Th)( (Grad(u):Grad(v)) - div(u)*q - div(v)*p - 1e6*p*q  )
++ myON1(1,u,0.) + myON1(2,u,1.);
+
+plot(p, wait=1);

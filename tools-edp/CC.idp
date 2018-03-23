@@ -1,0 +1,133 @@
+func real c00(real c) { real a=c; 
+	
+	if(abs(4*a-round(4*a))<1e-13) a=round(a*4)/4.;
+	return a;  }
+
+func bool  CC(string t,real[int] & v)
+{
+	cout << "\n  double "<< t<< "[] = ";
+	string s = "{ ";
+	for(int i=0; i< v.n; ++i)
+	{
+	   cout << s << c00(v[i]) ; 
+	   s = ", " ;
+   }
+   cout << " }; \n";
+   return 1; 
+}
+
+func bool  CC(string t,int[int] & v)
+{
+	cout << "\n  int "<< t<< "[] = ";
+	string s = "{ ";
+	for(int i=0; i< v.n; ++i)
+	{
+	   cout << s << v[i] ; 
+	   s = ", " ;
+   }
+   cout << " }; \n";
+   return 1; 
+}
+
+func bool  CC(string t,real[int,int] & v)
+{
+	cout << "\n  double "<< t<< "[]["<<v.n<<"] = ";
+	string s = "{\n";
+	for(int j=0; j< v.m; ++j)
+	{
+	   cout << s;
+	   s=",\n";
+	   string ss = "\t\t{ ";
+	   for(int i=0; i< v.n; ++i)
+	   {
+	   cout << ss << c00(v(i,j)) ; 
+	   ss = ", " ;
+       }
+	   cout << " } /* "<< j << " */ " ;
+    }
+   cout << " }; \n";
+   return 1; 
+}
+func bool  CC(string t,int[int,int] & v)
+{
+	cout << "\n  int "<< t<< "[]["<<v.n<<"] = ";
+	string s = "{\n";
+	for(int j=0; j< v.m; ++j)
+	{
+	   cout << s;
+	   s=",\n";
+	   string ss = "\t\t{ ";
+	   for(int i=0; i< v.n; ++i)
+	   {
+	   cout << ss << (v(i,j)) ; 
+	   ss = ", " ;
+       }
+	   cout << " } /* "<< j << " */ " ;
+    }
+   cout << " }; \n";
+   return 1; 
+}
+func int [int,int] renum(int [int,int] & v,int[int] &I,int[int] &J)
+{
+  int [int,int] w(I.n,J.n);
+  w=0; 
+  for(int i=0; i<I.n;++i)
+  for(int j=0; j<J.n;++j)
+  {
+	  int iv = I[i];
+	  int jv= J[j];
+	  if( iv >=0 && jv>=0)
+      w(i,j) = v(iv,jv);
+ }
+  return w; 
+}
+
+func int [int,int] renum1(int [int,int] & v,int[int] &I,int[int] &J)
+{
+  int [int,int] w(I.n,J.n);
+  w=0; 
+  for(int i=0; i<I.n;++i)
+  for(int j=0; j<J.n;++j)
+  {
+	  int iv = I[i];
+	  int jv= J[j];
+	  if( iv >=0 && jv>=0)
+      w(iv,jv) = v(i,j);
+ }
+  return w; 
+}
+
+func int [int] renum(int [int] & v,int[int] &I)
+{
+  int [int] w(I.n);
+  w=0; 
+  for(int i=0; i<I.n;++i)
+  {
+	  int iv = I[i];
+	  if( iv >=0 )
+      w(i) = v(iv);
+ }
+  return w; 
+}
+
+func int [int] renum1(int [int] & v,int[int] &I)
+{
+  int [int] w(I.n);
+  w=0; 
+  for(int i=0; i<I.n;++i)
+  {
+	  int iv = I[i];
+	  if( iv >=0 )
+      w(iv) = v(i);
+ }
+  return w; 
+}
+
+func bool  CCt(string t,real[int,int] & v)
+{ real[int,int] vt = v';
+   CC(t,vt); 
+}
+func bool  CCt(string t,int[int,int] & v)
+{ int[int,int] vt = v';
+   CC(t,vt); 
+}

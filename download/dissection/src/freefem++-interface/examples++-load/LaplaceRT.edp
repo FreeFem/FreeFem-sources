@@ -1,0 +1,44 @@
+/*
+   Solving the following Poisson problem 
+   Find $p$, such that;
+   $ - \Delta p = f $   on $\Omega$, 
+   $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{123}$ 
+   $ p = gd  $ on $\Gamma_{1}$ 
+  with de Mixte finite element formulation 
+   Find $p\in L^2(\Omega)   and $u\in H(div) $ such than  
+    u - Grad p = 0
+    - div u =  f
+   $  u. n = (g1d,g2d). n  $ on $\Gamma_{123}$
+   $ p = gd  $ on $\Gamma_{1}$
+
+   the variationnel form is:
+ $\forall v\in H(div)$;  $v.n = 0$ on $\Gamma_{4}\} $:    $ \int_\Omega  u v + p div v -\int_{\Gamma_{123}} gd* v.n  = 0 $
+
+ $\forall q\in L^2$:   $  -\int_\Omega q div u = \int_Omega f q  $ 
+and $ u.n = (g1n,g2n).n$ on $\Gamma_4$ 
+
+*/
+load "Dissection"
+defaulttoDissection();
+
+mesh Th=square(100,100);
+fespace Vh(Th,RT0);
+fespace Ph(Th,P0);
+
+func gd = 1.;
+func g1n = 1.;
+func g2n = 1.; 
+func f = 1.;
+
+Vh [u1,u2],[v1,v2];
+Ph p,q; 
+
+problem laplaceMixte([u1,u2,p],[v1,v2,q],solver=sparsesolver,strategy=102,tolpivot=1.e-2) =
+   int2d(Th)( p*q*0e-10+ u1*v1 + u2*v2 + p*(dx(v1)+dy(v2)) + (dx(u1)+dy(u2))*q )
+ + int2d(Th) ( f*q)
+ - int1d(Th,1,2,3)( gd*(v1*N.x +v2*N.y))   //  int on gamma 
+ + on(4,u1=g1n,u2=g2n);
+
+ laplaceMixte;
+ plot([u1,u2],coef=0.1,wait=1,ps="lapRTuv.eps",value=true); 
+ plot(p,fill=1,wait=1,ps="laRTp.eps",value=true);  
