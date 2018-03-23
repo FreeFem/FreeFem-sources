@@ -1,0 +1,361 @@
+// FFCS: for regression tests
+real regtest;
+{
+ // build from bamg geometrie
+
+  { // build the geom file
+    ofstream ff("g.mesh");
+    int n = 8;
+    real h = 0.1;
+    ff <<"MeshVersionFormatted 0\n";
+    ff <<"AngleOfCornerBound 46\n";
+    ff <<"Dimension 2 \n";
+    ff << "Vertices "<< n <<  endl;
+    for (int i=0;i<n;i++)
+      ff << cos(i*pi*2./n) << " " << sin(i*pi*2./n) << " 1\n"; 
+    
+    ff << "Edges "<< n<< endl;
+    for (int i=0;i<n;i++)
+      ff << i+1 << " " << (i+1)%n +1 << " 1\n";
+    
+    ff << "hVertices"<< endl;
+    for (int i=0;i<n;i++)
+      ff << h << endl;
+  }
+  
+  mesh Th=buildmesh("g.mesh",nbvx=100000);
+  plot(Th,wait=1);
+}
+
+//    example for mesh work 
+// --------------------------
+{ // square 
+  real x0=1.2,x1=1.8;
+  real y0=0,y1=1;
+  int n=5,m=20;
+  mesh Th=square(n,m,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+  int[int] lab=[5,5,5,5]; // the 4 side 1,2,3,4 have label 5
+  mesh th=square(4,5,label=lab,region=1);
+  plot(Th,th,ps="twosquare.eps");
+
+}
+// ------------------------------------------------------------
+{ //    hole 
+real pi=4*atan(1);
+border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+border b(t=0,2*pi){ x=0.3+0.3*cos(t); y=0.3*sin(t);label=2;}
+border c(t=0,2*pi){ x=0.3+0.0001*cos(t); y=0.0001*sin(t);label=2;}
+mesh Thwithouthole= buildmesh(a(50)+b(+30));
+mesh Thwithhole   = buildmesh(a(50)+b(-30));
+// to change the default maximun number of vertices to 100000
+mesh Thwithtinyhole   = buildmesh(a(50)+c(-5),nbvx=100000); 
+plot(Thwithouthole,wait=1,ps="Thwithouthole.eps");
+plot(Thwithhole,wait=1,ps="Thwithhole.eps");
+plot(Thwithtinyhole,wait=1,ps="Thwithtinyhole.eps");
+
+}
+// ------------------------------------------------------------
+{ //  square with border 
+border a(t=0,2){x=t; y=0;label=1;};
+border b(t=0,1){x=2; y=t;label=1;};
+border c(t=2,0){x=t; y=1;label=1;};
+border d(t=1,0){x=0; y=t;label=1;};
+int n = 20;
+plot(a(2*n)+b(n)+c(2*n)+d(n),wait=1,ps="squarebb.eps");
+mesh th= buildmesh(a(2*n)+b(n)+c(2*n)+d(n)); 
+plot(th,ps="squareb.eps");
+}
+// ------------------------------------------------------------
+// bug before version 2.24
+{ // L shape 
+border a(t=0,1){x=t;y=0;label=1;};
+border b(t=0,0.5){x=1;y=t;label=1;};
+border c(t=0,0.5){x=1-t;y=0.5;label=1;};
+border d(t=0.5,1){x=0.5;y=t;label=1;};
+border e(t=0.5,1){x=1-t;y=1;label=1;};
+border f(t=0,1){x=0;y=1-t;label=1;};
+assert(version >= 2.24);
+ func abc=  a(6) + b(4) + c(4)  ;
+ func def = d(4) + e(4) + f(6);
+ plot(abc  + def,wait=1);
+mesh rh = buildmesh (abc  + def );
+plot(rh,ps="lshape.eps");
+
+}
+// ------------------------------------------------------------
+{ // readmesh 
+  mesh th("aile.msh");
+  plot(th);
+  
+}
+// ------------------------------------------------------------
+{ // movemesh 
+  real Pi=atan(1)*4;
+  verbosity=4;
+  border a(t=0,1){x=t;y=0;label=1;};
+  border b(t=0,0.5){x=1;y=t;label=1;};
+  border c(t=0,0.5){x=1-t;y=0.5;label=1;};
+  border d(t=0.5,1){x=0.5;y=t;label=1;};
+  border e(t=0.5,1){x=1-t;y=1;label=1;};
+  border f(t=0,1){x=0;y=1-t;label=1;};
+  func uu= sin(y*Pi)/10;
+  func vv= cos(x*Pi)/10;
+  
+  mesh Th = buildmesh ( a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
+  
+  // find a good deformation coef. 
+  // ---------------------------------
+  // return the minimal area of a triangle of Th 
+  real okareamin = checkmovemesh(Th,[x,y])/10;
+  // we accept to divide by 10 the area of the smallest triangles
+  real coef=1000,cc=0;
+  while (okareamin > (cc=checkmovemesh(Th,[x+coef*uu,y+coef*vv]) ) )
+    {
+      cout << " coef = " << coef << " min area " << cc << endl;
+      coef /=2;
+    }
+  
+  
+  Th=movemesh(Th,[x+coef*uu,y+coef*vv]);
+  plot(Th,wait=1,fill=1,ps="movemesh.eps");
+  
+  // save mesh 
+  int i=12;
+  string filename="Th"+i+".msh";
+  savemesh(Th,filename);
+}
+// ------------------------------------------------------------
+{  //  trunc mesh  tools exemples 
+  mesh Th=square(3,3);
+  int[int] n2o(1); 
+  fespace Vh(Th,P1);
+  Vh u;	
+  int i,n=u.n;
+  u=0;
+  for (i=0;i<n;i++)
+    {
+      u[][i]=1;
+      plot(u,wait=1);
+      mesh Shi=trunc(Th,abs(u)>1e-10,split=2,label=2,new2old=n2o);
+      plot(Th,Shi,wait=1,ps="trunc"+i+".eps");                    
+      cout << " n2o " << n2o << endl; // where the element come
+      u[][i]=0;
+    }
+}
+// ------------------------------------------------------------
+{  //  new stuff 2004 splitmesh (version 1.37)
+  assert(version>=1.37);
+  border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+  mesh Th=buildmesh(a(20));
+  plot(Th,wait=1,ps="nosplitmesh.eps");
+  plot(Th,wait=1);
+  Th=splitmesh(Th,1+5*(square(x-0.5)+y*y));
+  plot(Th,wait=1,ps="splitmesh.eps");
+}
+
+// ------------------------------------------------------------
+{  //  new stuff 2004 emptymesh (version 1.40)
+ // -- usefull to build Multiplicator space 
+ //  build a mesh without internal point
+ // with the same boundary 
+ //  -----
+  assert(version>=1.40);
+  border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+  mesh Th=buildmesh(a(20));
+  plot(Th,wait=1,ps="nosplitmesh.eps");
+  plot(Th,wait=1);
+  Th=emptymesh(Th);
+  plot(Th,wait=1,ps="emptymesh-1.eps");
+}
+{  //  new stuff 2004 emptymesh (version 1.40)
+ // -- usefull to build Multiplicator space 
+ //  build a mesh without internal point
+ //   if the adj triangle 
+ //  -----
+  assert(version>=1.40);
+  mesh Th=square(10,10);
+  int[int] ssd(Th.nt);
+  fespace Ph(Th,P0);
+   Ph sd;
+  for(int i=0;i<ssd.n;i++)
+   {  int iq=i/2;   // because 2 traingle per quad 
+      int ix=iq%10;
+      int iy=iq/10;  
+    ssd[i]= 1 + (ix>=5) +  (iy>=5)*2;
+    sd[][i]=ssd[i];
+   }
+  plot(sd,fill=1,wait=1);
+  Th=emptymesh(Th,ssd);
+  plot(Th,wait=1,ps="emptymesh-2.eps");
+  savemesh(Th,"emptymesh-2.msh");
+}
+
+  // ------------------------------------------------------------
+{  // get mesh information (version 1.37)
+  mesh Th=square(2,2);
+  // get data of the mesh 
+  int nbtriangles=Th.nt;
+  cout << " nb of Triangles = " << nbtriangles << endl;
+  for (int i=0;i<nbtriangles;i++)
+    for (int j=0; j <3; j++)
+      cout << i << " " << j << " Th[i][j] = "
+	   << Th[i][j] << "  x = "<< Th[i][j].x  << " , y= "<< Th[i][j].y 
+	   << ",  label=" << Th[i][j].label << endl;
+	    
+//   Th(i)   return   the vextex i of Th
+//   Th[k]   return   the triangle k of Th.
+//   Th.be(i)  return  the boundary element 
+  fespace femp1(Th,P1);
+  femp1 Thx=x,Thy=y; 
+  // get vertices information : 
+  int nbvertices=Th.nv;
+  cout << " nb of vertices = " << nbvertices << endl;
+  for (int i=0;i<nbvertices;i++)
+	cout << "Th(" <<i  << ") : "   // << endl;	
+	     << Th(i).x << " " << Th(i).y  << " " << Th(i).label // version 2.19 
+	     << "       old method: " << Thx[][i] << " " << Thy[][i] << endl;
+
+// method to find information of point (0.55,0.6) 
+  int it00 = Th(0.55,0.6).nuTriangle;// then triangle numbe 
+  int nr00 = Th(0.55,0.6).region;
+  
+  real area00 = Th[it00].area; // new in version 2.19 
+  real nrr00 = Th[it00].region; // new in version 2.19 
+  real nll00 = Th[it00].label; // same as region in this case.
+      
+ //Hack  to get a triangle contening point x,y
+  //     or   region number
+  // -----------------------------------------
+  fespace femp0(Th,P0);
+  femp0 nuT; // a P0 function  to get triangle numbering
+    for (int i=0;i<Th.nt;i++)
+     nuT[][i]=i; 
+  femp0 nuReg=region; // a P0 function to get the region number
+  //  inquire 
+  int it0=nuT(0.55,0.6); //  number of triangle Th's contening point (0.55,0,6);
+  int nr0=nuReg(0.55,0.6); //  number of region of Th mesh contening point (0.55,0,6);
+  // dump  
+  cout << "  point (0.55,0,6) :triangle number " << it00 << " " << it00 
+       << ", region = " << nr0 << " == " << nr00 << ",  area K " << area00 << endl;
+
+  // new method to get boundary inforamtion 
+ 
+  // version >3.4-1
+  // --------- new stuff -----------------
+  int k=0,l=1,e=1;
+  Th.nbe ; // return the number of boundary element \hfilll
+  Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
+  Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary element k \hfilll
+  Th.be(k).Element ;   // return the triangle contening the  boundary element k \hfilll
+  Th.be(k).whoinElement ;   // return the egde number of triangle contening the  boundary element k \hfilll
+  Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change the value of e to \hfilll
+  // the corresponding edge in the adjacent triangle
+  Th[k] == Th[k].adj(e) ;// non adjacent triangle return the same 
+  Th[k] != Th[k].adj(e) ;// true adjacent triangle 
+  
+  cout << " print mesh connectivity " << endl;
+  int nbelement = Th.nt; 
+  for (int k=0;k<nbelement;++k)
+    cout << k << " :  " << int(Th[k][0]) << " " << int(Th[k][1]) << " " <<  int(Th[k][2])
+	 << " , label  " << Th[k].label << endl; 
+  //  
+  
+  for (int k=0;k<nbelement;++k)
+    for (int e=0,ee;e<3;++e) 
+      //  remark FH hack:  set ee to e, and ee is change by method adj, 
+      //  in () to make difference with  named parameters. 
+      {
+	    cout << k <<  " " << e << " <=>  " << int(Th[k].adj((ee=e))) << " " << ee  
+	     << "  adj: " << ( Th[k].adj((ee=e)) != Th[k]) << endl;  
+      }
+      // note :     if k == int(Th[k].adj(ee=e)) not adjacent element 
+
+
+  int nbboundaryelement = Th.nbe; 
+  Th.be;
+    for (int k=0;k<nbboundaryelement;++k)
+      cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label " << Th.be(k).label 
+	   <<  " tria  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  endl; 
+	
+	real[int] bb(4);
+	boundingbox(Th,bb); // bb[0] = xmin, bb[1] = xmax, bb[2] = ymin, bb[3] =ymax 
+	   cout << " boundingbox  xmin: " << bb[0] << " xmax: " << bb[1] 
+	                     << " ymin: " << bb[2] << " ymax: " << bb[3] << endl; 
+
+regtest=Th.nv;
+}
+//   test to catch bogus boundary ( just a test)
+{
+int err;
+real c0,c1;
+c0=0;
+c1=0;
+mesh Th;
+for( int i=0;i<=4;i++)
+{
+    c1=sin(i*pi/8);
+try 
+{
+err=0; 
+border a(t=0,2*pi){ x=cos(t); y=sin(t);label=1;}
+border b(t=0,2*pi){ x=c0+0.3*cos(t); y=c1+0.3*sin(t);label=2;}
+plot(a(50)+b(30),wait=1);
+Th   = buildmesh(a(50)+b(30));
+}
+catch(...)
+{
+  err=1;
+  plot(a(50)+b(30),wait=1,cmm="bogus border ",ps="bogusborder.eps");  
+}
+if(err==0)
+  plot(Th,wait=1,cmm="mesh ok");
+}
+}
+// <<multiborder>>
+// in test ... 
+{ 
+// multy border syntax version 3.30 avril 2014 ... 
+  real[int] xx=[0,1,1,0],
+            yy=[0,0,1,1];
+  // radius, centre of the 4 circles .. 
+  real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
+            XC= [0.2,0.8,0.2,0.8],
+            YC= [0.2,0.8,0.8,0.2];
+  int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
+  // of the 4 circles borders  
+
+  border bb(t=0,1;i) 
+  {
+  // i is the the index variable of the multi border loop 
+    int ii = (i+1)%4; real t1 = 1-t;
+    x =  xx[i]*t1 + xx[ii]*t;
+    y =  yy[i]*t1 + yy[ii]*t;
+    label = 0; ; 
+  }
+  
+  border cc(t=0,2*pi;i) 
+ {
+    x = RC[i]*cos(t)+XC[i];
+    y = RC[i]*sin(t)+YC[i];
+    label = i+1; 
+  }
+  int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively . 
+  plot(bb(nn),cc(NC),wait=1);
+  mesh th= buildmesh(bb(nn)+cc(NC)) ; 
+  plot(th,wait=1,ps="multy-border.eps");
+  // version 3.44-1
+  cout << " th max mesh size = h = " << th.hmax << endl;
+  cout << " th min mesh size     = " << th.hmin<< endl;
+}
+{
+	include "movemeshsmooth.idp"
+	mesh Th=square(3,3);
+	int[int] lab=[1,2,3,4]; 
+	Th=adaptmesh(Th,0.1,IsMetric=1);
+	fespace Vh(Th,P1); 
+
+	Vh u=x,v=y;
+	verbosity=5;// 1000 debbug => plot 
+	Th=movemeshsmooth(Th,lab,u[],v[],100);
+	verbosity=1;
+}

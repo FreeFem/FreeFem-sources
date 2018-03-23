@@ -1,0 +1,27 @@
+//  signe of pressure if correct 
+assert(version>1.18); 
+mesh Th=square(10,10);
+fespace Xh(Th,P2),Mh(Th,P1);
+Xh u1,u2,v1,v2;
+Mh p,q,ppp;
+
+
+varf bx(u1,q) = int2d(Th)( (dx(u1)*q)); 
+
+varf by(u1,q) = int2d(Th)( (dy(u1)*q));
+
+varf a(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                    +  on(1,2,4,u1=0)  +  on(3,u1=1) ;
+
+Xh bc1; bc1[] = a(0,Xh);
+Xh b;
+                   
+matrix A= a(Xh,Xh,solver=CG); 
+matrix Bx= bx(Xh,Mh);
+matrix By= by(Xh,Mh);
+Xh bcx=1,bcy=0;
+Mh f=x;
+Xh g=sin(x);
+b[]  = Bx'*f[]; 
+b[] += bc1[] .*bcx[];
+u1[] = A^-1*b[];
