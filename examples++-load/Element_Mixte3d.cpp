@@ -2184,6 +2184,364 @@ namespace Fem2D {
     {
         assert(0);
     }
+
+    
+    class TypeOfFE_RT1_3d : public    GTypeOfFE<Mesh3>  {
+    public:
+        typedef Mesh3 Mesh;
+        typedef  Mesh3::Element  Element;
+        
+        typedef GFElement<Mesh3> FElement;
+        static int dfon[];
+        static const int d=Mesh::Rd::d;
+        //quadrature Formula on a face
+        static const GQuadratureFormular<R2> QFface;
+        //quadrature Formula on an element
+        static const GQuadratureFormular<R3> QFtetra;
+        TypeOfFE_RT1_3d();
+        int edgeface[4][3] ;
+        void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+        void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump  ) const;
+    } ;
+    
+    int TypeOfFE_RT1_3d::dfon[]={0,0,3,3};   //dofs per vertice, edge, face, volume
+    
+    // Quadrature formula on a face,
+    const GQuadratureFormular<R2> TypeOfFE_RT1_3d:: QFface(QuadratureFormular_T_5);
+    
+    // Quadrature formula on the tetraedron
+    const GQuadratureFormular<R3> TypeOfFE_RT1_3d:: QFtetra(QuadratureFormular_Tet_2);
+    
+    
+    
+    TypeOfFE_RT1_3d:: TypeOfFE_RT1_3d(): GTypeOfFE<Mesh3>(dfon,d,1,3*QFface.n*3*Element::nf+3*QFtetra.n*3*3, Element::nf*QFface.n+QFtetra.n, false,true)
+    
+    {
+        assert(QFe.n);
+        assert(QFf.n);
+        // 4 ref tetra vertices
+        R3 Pt[] = {R3(0.,0.,0.),R3(1.,0.,0.),R3(0.,1.,0.),R3(0.,0.,1.)};
+        
+        
+        // We build the interpolation pts on the faces
+        int p=0;
+        for(int f=0; f<Element::nf; ++f)
+            for(int q=0; q<QFface.n; ++q,++p)
+            {
+                double x=QFface[q].x;
+                double y=QFface[q].y;
+                this->PtInterpolation[p] = Pt[Element::nvface[f][0]]*(1.-x-y) + Pt[Element::nvface[f][1]]*x + Pt[Element::nvface[f][2]]*y;
+            }
+        
+        // We build the interpolation bubble pts
+        for(int q=0; q<QFtetra.n; ++q,++p)
+        {
+            double x=QFtetra[q].x;
+            double y=QFtetra[q].y;
+            double z=QFtetra[q].z;
+            this->PtInterpolation[p] = Pt[0]*(1.-x-y-z) + Pt[1]*x + Pt[2]*y + Pt[3]*z;
+        }
+        
+        int i=0;p=0;
+        
+        for(int f=0; f<Element::nf; f++ ) // loop on the 4 face dofs
+            for(int q=0; q<QFface.n; ++q,p++) // loop on the face quadrature pts
+                for(int df=0; df<3; df++) // 3 dof par face
+                {
+                    int dof = 3*f+df;    // numero  du dof  3 dof / face
+                    for (int c=0; c<3; c++,i++) // loop on the 3 components
+                    {
+                        this->pInterpolation[i]=p; // pk
+                        this->cInterpolation[i]=c; // jk
+                        this->dofInterpolation[i]=dof; // ik
+                        this->coefInterpolation[i]=0.;
+                    }
+                }
+        int doff = Element::nf*3;
+        {
+            p=Element::nf*QFface.n;
+            for(int q=0; q<QFtetra.n; ++q,++p) // loop on the volume quadrature pts
+                for(int v=12; v<15; v++) // loop on the 3 volume dofs
+                    for (int c=0; c<3; c++,i++) // loop on the 3 components
+                    {
+                        this->pInterpolation[i]=p; // pk
+                        this->cInterpolation[i]=c; // jk
+                        this->dofInterpolation[i]=v; // ik
+                        this->coefInterpolation[i]=0.;
+                    }
+        }
+        //  verif bonne taille
+        ffassert(p== this->PtInterpolation.N());
+        //   ffassert(i== this->coefInterpolation());//
+        
+    }  // end TypeOfFE_RT1_3d()
+    
+    
+    
+    
+    
+    // For the coefficients of interpolation alphak in (13.1)
+    
+    void  TypeOfFE_RT1_3d::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump) const
+    {
+        
+        int i=ocoef;
+        
+        //*******************************************
+        // DOFs on the 4 faces --- 3 DOFs per face //
+        //*******************************************
+        
+        // inv of int(F) lamda_i lambda_j = Area(K) * (d! (1+delta ij) / (d+max n)! = 0.5 * 2(1+delta ij) /(2+2)!
+        double c1[][3]={
+            { 9, -3, -3 } /* 0 */ ,
+            { -3, 9, -3 } /* 1 */ ,
+            { -3, -3, 9 } /* 2 */  };
+        R3 NK[4];
+        K.Gradlambda(NK);// InteriorNormal of F /h = - N  3*|K|/|F|
+        double coefK = -3.*K.mesure();
+        for(int ff=0; ff<Element::nf; ff++) // loop on the 4 face dofs
+        {
+            
+            const Element::Vertex * fV[3] = {& K.at(Element::nvface[ff][0]), & K.at(Element::nvface[ff][1]), & K.at(Element::nvface[ff][2])};
+            int p[]={0,1,2};
+            int fp=K.facePermutation(ff);
+            if(fp&1) Exchange(p[0],p[1]);
+            if(fp&2) Exchange(p[1],p[2]);
+            if(fp&4) Exchange(p[0],p[1]);
+            R3 N = NK[ff];
+            N *= coefK*K.faceOrient(ff);
+            
+            for(int q=0; q<QFface.n; ++q ) // loop on the face quadrature pts
+            {
+                // the 3 lambdas of P1 on the face
+                
+                double lambda[3] = { 1.-QFface[q].x-QFface[q].y, QFface[q].x, QFface[q].y };
+                R sa =  QFface[q].a;
+                R cp[3] = {
+                    (c1[0][0]*lambda[0]+c1[0][1]*lambda[1]+ c1[0][2]*lambda[2])*sa,
+                    (c1[1][0]*lambda[0]+c1[1][1]*lambda[1]+ c1[1][2]*lambda[2])*sa,
+                    (c1[2][0]*lambda[0]+c1[2][1]*lambda[1]+ c1[2][2]*lambda[2])*sa};
+                for (int idof=0 ; idof<3 ; idof++) // loop sur 3 dof de la face
+                    for (int c=0; c<3; c++,i++) // loop on the 3 components
+                        M.coef[i] = N[c]*cp[p[idof]];
+            }
+        }
+        // cout << endl;
+        //**************************************************
+        // DOFs on the tetraedra --- 3 DOFs in the volume //
+        //**************************************************
+        // NK = i=1,2,3 = -N*6*|K|
+        // Base Piola compatible  B_i =N_i* |F_i|/6  for 3 face 1,2,3
+        double CK=-K.mesure();  //  dof U= [u1,u2,u3] > |K| int_K ( B_i.U )
+        for (int p=0;p<QFtetra.n;++p)
+        {
+            
+            double w=QFtetra[p].a*CK;
+            for (int l=0;l<3;l++) {
+                M.coef[i++]=w*NK[l+1].x;
+                M.coef[i++]=w*NK[l+1].y;
+                M.coef[i++]=w*NK[l+1].z;
+            }
+        }
+        
+        // ffassert(i==M.ncoef);
+    }   // end set function
+    
+    
+    //here the basis functions and theirs derivates
+    void  TypeOfFE_RT1_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
+    {
+        
+        assert(val.N() >=15);
+        assert(val.M()==3 );
+        
+        val=0;
+        
+        // basis functions to RT03d / multiply by sign to have a exterior normal and divide by the mesure of K
+        // phi = signe * (x - qi)/ (volume*d)
+        R cc =d*K.mesure();
+        R lambda[]={1.-P.sum(),P.x,P.y,P.z};
+        R3 X=K(P);
+        R3 phi[4] = { X-K[0], X-K[1], X-K[2], X-K[3] }; // phi * area *6
+        
+        // fo contain just the sign about permutation ----- 1perm=-1 / 2perm=1 / 3perm=-1
+        R fo[4]={ K.faceOrient(0),K.faceOrient(1),K.faceOrient(2),K.faceOrient(3)};
+        
+        
+        int ee=0;
+        int p[15]= {2,1,0, 3,4,5, 8,7,6, 9,10,11, 12,13,14};// Permutation for orientation to dof
+        R3 Pm[16]; // all the momome function ..
+        for(int ff=0,k=0; ff<Element::nf; ff++,k+=3)
+        {
+            // orientation de la face a envert
+            int fp=K.facePermutation(ff);
+            //fp=0; // No perm
+            if(fp&1) Exchange(p[k],p[k+1]);
+            if(fp&2) Exchange(p[k+1],p[k+2]);
+            if(fp&4) Exchange(p[k],p[k+1]);
+            
+        }
+        
+        double cf[][3] = {
+            { -1.25, 0.25, 0 } /* 0 */ ,
+            { -1.25, 0, 0.25 } /* 1 */ ,
+            { -1.5, -0.25, -0.25 } /* 2 */ ,
+            { 0.25, -1.25, 0 } /* 3 */ ,
+            { 0, -1.25, 0.25 } /* 4 */ ,
+            { -0.25, -1.5, -0.25 } /* 5 */ ,
+            { 0.25, 0, -1.25 } /* 6 */ ,
+            { 0, 0.25, -1.25 } /* 7 */ ,
+            { -0.25, -0.25, -1.5 } /* 8 */ ,
+            { 1.5, 1.25, 1.25 } /* 9 */ ,
+            { 1.25, 1.5, 1.25 } /* 10 */ ,
+            { 1.25, 1.25, 1.5 } /* 11 */ ,
+            { -15, 15, 0 } /* 12 */ ,
+            { -15, 0, 15 } /* 13 */ ,
+            { -30, -15, -15 } /* 14 */  };
+        
+        
+        int Bii[][2] = {
+            { 0, 0 } /* 0 */ ,
+            { 0, 1 } /* 1 */ ,
+            { 0, 2 } /* 2 */ ,
+            { 0, 3 } /* 3 */ ,
+            { 1, 0 } /* 4 */ ,
+            { 1, 1 } /* 5 */ ,
+            { 1, 2 } /* 6 */ ,
+            { 1, 3 } /* 7 */ ,
+            { 2, 0 } /* 8 */ ,
+            { 2, 1 } /* 9 */ ,
+            { 2, 2 } /* 10 */ ,
+            { 2, 3 } /* 11 */ ,
+            { 3, 0 } /* 12 */ ,
+            { 3, 1 } /* 13 */ ,
+            { 3, 2 } /* 14 */ ,
+            { 3, 3 } /* 15 */  };
+        
+        int fe[] = { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14 };
+        int k6[] = { 0, 5, 10 };
+        
+        //here we build all the monomials phi_i lambda_j
+        for(int l=0;l<16;++l)
+        {
+            int i = Bii[l][0];
+            int j = Bii[l][1];
+            Pm[l] = phi[i]*lambda[j]/cc;
+        }
+        
+        // caution to the numbering of the nodes of the face to the numbering of the basis function
+        // cci
+        
+        
+        double sg[15]= {fo[0],fo[0],fo[0], fo[1],fo[1],fo[1], fo[2],fo[2],fo[2], fo[3],fo[3],fo[3], 1.,1.,1. };
+        
+        
+        if (whatd & Fop_D0)
+        {
+            for(int pdf=0;pdf< 15;++pdf)
+            {
+                int df=p[pdf];
+                R3 fd(0.,0.,0.) ;
+                if(df < 12 ) fd=Pm[fe[df]];//  edge function ..
+                for(int k=0;k<3;++k)
+                    fd +=  cf[df][k]*Pm[k6[k]] ;
+                fd *= sg[pdf];
+                val(pdf,0,op_id)= fd.x;
+                val(pdf,1,op_id)= fd.y;
+                val(pdf,2,op_id)= fd.z;
+            }
+        }
+        
+        if (whatd & Fop_D1)
+        {
+            
+            R3 DL[4];
+            K.Gradlambda(DL);
+            R3 Dphix(1,0,0);
+            R3 Dphiy(0,1,0);
+            R3 Dphiz(0,0,1);
+            
+            R3 DxPm[16];
+            R3 DyPm[16];
+            R3 DzPm[16];
+            
+            //  if(Ortho) {Dphix=R2(0,1);Dphiy=R2(-1,0);}// x,y -> (-y,x)
+            
+            for(int l=0;l<16;++l)
+            {
+                // diff phi[i]*lambda[j]/cc;
+                int i = Bii[l][0];
+                int j = Bii[l][1];
+                
+                R Lj=lambda[j];
+                R3 DLj = DL[j];
+                
+                R3 DF1 = (Dphix*Lj +  phi[i].x * DLj  )/cc;
+                R3 DF2 = (Dphiy*Lj +  phi[i].y * DLj  )/cc;
+                R3 DF3 = (Dphiz*Lj +  phi[i].z * DLj  )/cc;
+                
+                DxPm[l] = R3(DF1.x,DF2.x,DF3.x);
+                DyPm[l] = R3(DF1.y,DF2.y,DF3.y);
+                DzPm[l] = R3(DF1.z,DF2.z,DF3.z);
+            }
+            
+            if (whatd & Fop_dx)
+            {
+                
+                for(int pdf=0;pdf< 15;++pdf)
+                {
+                    int df=p[pdf];
+                    R3 fd(0.,0.,0.) ;
+                    if(df < 12 ) fd=DxPm[fe[df]];//  edge function ..
+                    for(int k=0;k<3;++k)
+                        fd +=  cf[df][k]*DxPm[k6[k]] ;
+                    fd *= sg[df];
+                    val(pdf,0,op_dx)= fd.x;
+                    val(pdf,1,op_dx)= fd.y;
+                    val(pdf,2,op_dx)= fd.z;
+                    
+                }
+                
+            }
+            if (whatd & Fop_dy)
+            {
+                
+                for(int pdf=0;pdf< 15;++pdf)
+                {
+                    int df=p[pdf];
+                    R3 fd(0.,0.,0.) ;
+                    if(df < 12 ) fd=DyPm[fe[df]];//  edge function ..
+                    for(int k=0;k<3;++k)
+                        fd +=  cf[df][k]*DyPm[k6[k]] ;
+                    fd *= sg[df];
+                    val(pdf,0,op_dy)= fd.x;
+                    val(pdf,1,op_dy)= fd.y;
+                    val(pdf,2,op_dy)= fd.z;
+                }
+            }
+            
+            if (whatd & Fop_dz)
+            {
+                
+                for(int pdf=0;pdf< 15;++pdf)
+                {
+                    int df=p[pdf];
+                    R3 fd(0.,0.,0.) ;
+                    if(df < 12 ) fd=DzPm[fe[df]];//  edge function ..
+                    for(int k=0;k<3;++k)
+                        fd +=  cf[df][k]*DzPm[k6[k]] ;
+                    fd *= sg[df];
+                    val(pdf,0,op_dz)= fd.x;
+                    val(pdf,1,op_dz)= fd.y;
+                    val(pdf,2,op_dz)= fd.z;
+                }
+            }
+            
+            if (whatd & Fop_D2)
+                cout << " to do FH RT2 dxx, dyy, dzz, dxy, dxz, dyz " << endl;
+        }
+    }  // end basis functions declaration
+ 
     //  add new FEs for DDM to build the partition of unity
     static TypeOfFE_P2Edge3ds0 Elm_P2Edge3ds0;
     // a static variable to add the finite element to freefem++
@@ -2200,43 +2558,15 @@ namespace Fem2D {
     static TypeOfFE_Edge1_3d  Edge1_3d; // TypeOfFE_Edge1_3d is the name of the class we defined
     GTypeOfFE<Mesh3> & GEdge13d(Edge1_3d); // GTypeOfFE<Mesh3> is the mother class
     static AddNewFE3 TypeOfFE_Edge1_3d("Edge13d",&GEdge13d); // Edge13d will be the name used by the user
- 
+    
     static TypeOfFE_Edge2_3d  Edge2_3d;
     GTypeOfFE<Mesh3> & GEdge23d(Edge2_3d);
     static AddNewFE3 TypeOfFE_Edge2_3d("Edge23d",&GEdge23d);
 
-    
-    
-    class TypeOfFE_RT1_3d : public GTypeOfFE<Mesh3>
-    {
-    public:
-        typedef Mesh3  Mesh;
-        typedef Mesh3::Element  Element;
-        typedef GFElement<Mesh3>  FElement;
-        
-        static int dfon[];
-        static const int d=Mesh::Rd::d;
-        static const GQuadratureFormular<R3> & QFt; // quadrature formula on an tet
-        static const GQuadratureFormular<R2> QFf; // quadrature formule on a face
-        TypeOfFE_RT1_3d(); // constructor
-        void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd & P,RNMK_ & val) const;
-       // void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
-    };
-    int TypeOfFE_RT1_3d:: dfon[] = {0,0,3,3};
-  
-    const GQuadratureFormular<R3> & TypeOfFE_RT1_3d:: QFt( QuadratureFormular_Tet_1);
-    
-     const GQuadratureFormular<R2> TypeOfFE_RT1_3d:: QFf(2,3,P_QuadratureFormular_T_2_intp);
-    
-     TypeOfFE_RT1_3d:: TypeOfFE_RT1_3d(): GTypeOfFE<Mesh3>(TypeOfFE_Edge1_3d::dfon,d,1,Element::nf*QFf.n+QFt.n, Element::nf*QFf.n, false,true)
-    {
-        ffassert(0);
-    }
-    void TypeOfFE_RT1_3d:: FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P,RNMK_ & val) const
-    {
-        
-        ffassert(0);
-    }
+    static TypeOfFE_RT1_3d  RT1_3d;
+    GTypeOfFE<Mesh3> & RT13d(RT1_3d);
+    static AddNewFE3 TypeOfFE_RT1_3d("RT13d",&RT13d);
+ 
     
 } // closes namespace Fem2D {
 
