@@ -1,9 +1,11 @@
+ Add new finite Element RT13d (thank of Axel Fourmont) see 
+  LaplaceRT13d.edp  in examples++-load 
 version 3.59 ( 21 /02 /2018)
   correct problem with the MeshIndependent() virtual function  
     in all of case (thank to Svetoslav Nakov <sisqo_nakov@yahoo.com>)
-    the symptome is =>   Sorry error in Optimization ...  add:  int2d(Th,optimize=0)(...)
+    the symptoms is =>   Sorry error in Optimization ...  add:  int2d(Th,optimize=0)(...)
   Add Finite Element P3  Lagrange in 3d (see LaplaceP3-3d.edp ) in examples++-load 
-  Add tool to use freefem++ in C, C++ throught mmap and semaphore 
+  Add tool to use freefem++ in C, C++ through mmap and semaphore 
   Add new P2pnc 2d finite element  a P2 discontinus finite element (like a P2 with continuity 
       of the mode 0 and 1 on edge (i.e.:  $\int_E jump(v) p) = 0$ for p polynome degree <= 1  ))
     see testFE-P2pnc.edp LaplaceP2pnc.edp
@@ -11,7 +13,7 @@ version 3.59 ( 21 /02 /2018)
   Add new discontinus finite element on edge (31/01/2018)
      P0edgedc, P1edgedc,..,  P5edgedc in plugin Element_PkEdge for FreeVol 
   Build version 3.58 for Mac and windows
-  add new finite element P2bulle3 TRhank to P-H Tournier and Jet Hoe Tang 
+  add new finite element P2bulle3 Thank to P-H Tournier and Jet Hoe Tang 
   add new standard function
   +    Global.Add("copysign","(",new OneOperator2<double>(copysign));// Add jan 2018 FH
   +    Global.Add("sign","(",new OneOperator1<double>(sign));// Add jan 2018 FH
@@ -21,7 +23,7 @@ version 3.59 ( 21 /02 /2018)
   unset x,y,z at initialisation to remove bug like  
      Vh u ..;  real a=u; //  hard to find 
 version 3.58  (Warning add global ff_tgv)
-  set global value of tgv through thv variable  (defaut = 1e30) 
+  set global value of tgv through tgv variable  (defaut = 1e30) 
   Add code of initialise Vh whit add of dof in real or complex case 
   real[int] b(Vh.ndof); varf va(u,v) =int2d(Th)(v); 
   Vh u=b;
@@ -71,7 +73,7 @@ version 3.55-2
      from region1 to region2 
  - correct hsv2rgb fonction in case to take k mod 1. to get pretty color 
  - change mesure -> measure in all example and add the correction in code. 
-version 3.55-1 26 june 2017 (rev: 4164:)
+version 3.55-1 26 June 2017 (rev: 4164:)
  - correction in cube (missing initialization)
  - correction of bug of normal N in 3d in internal boundary, 
     the orientation before are random, now the orientation are given 
@@ -79,7 +81,7 @@ version 3.55-1 26 june 2017 (rev: 4164:)
 	the normal will be ABxAC/||ABxAC||,  for external boundary we do not 
 	use the orientation of the face, we use the ext. normal of the tet. 
 	Thank to Svetoslav Nakov <sisqo_nakov@yahoo.com>
-version 3.55,  21 june 2017
+version 3.55,  21 June 2017
  - change the cube construct and correct une cube.edp example
     to build mesh with 5 tet /  hex.  
  - add way to compile in freefem++ PETSc and SLEPc (real and complex)
@@ -97,7 +99,7 @@ version 3.55,  21 june 2017
       
       
   - correct SLEPc on MacOS due a problem of global variable in dynamics lib     
-     =>  SLEPc and PETsc must be in same plugin on MacOS to day.
+     =>  SLEPc and PETSc must be in same plugin on MacOS to day.
 
 version 3.54 may, 17th 2017 ?
   - add complex version of PETSc and SLEPc 
