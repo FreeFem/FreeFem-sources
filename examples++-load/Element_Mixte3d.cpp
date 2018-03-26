@@ -2365,7 +2365,8 @@ namespace Fem2D {
         R3 phi[4] = { X-K[0], X-K[1], X-K[2], X-K[3] }; // phi * area *6
         
         // fo contain just the sign about permutation ----- 1perm=-1 / 2perm=1 / 3perm=-1
-        int fo[4]={ K.faceOrient(0),K.faceOrient(1),K.faceOrient(2),K.faceOrient(3)};
+        double fo[4]={ (double) K.faceOrient(0), (double)K.faceOrient(1),
+                        (double)K.faceOrient(2),(double)K.faceOrient(3)};
         
         
         int ee=0;
