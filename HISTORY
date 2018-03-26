@@ -1,6 +1,11 @@
-@    changeset:   4301:2bd39b928f6b
-|\   tag:         tip
-| |  parent:      4300:bcf9028bf54a
+@  changeset:   4302:c672d1c02cbb
+|  tag:         tip
+|  user:        Frederic Hecht <frederic.hecht@upmc.fr>
+|  date:        Mon Mar 26 08:40:16 2018 +0200
+|  summary:     correct  Clang again : from "Frederick E. Stevens" <skatesgre8t@q.com>
+|
+o    changeset:   4301:2bd39b928f6b
+|\   parent:      4300:bcf9028bf54a
 | |  parent:      4297:6f6e8e138e5c
 | |  user:        Frederic Hecht <frederic.hecht@upmc.fr>
 | |  date:        Fri Mar 23 14:57:38 2018 +0100
