@@ -876,7 +876,10 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
       // TODO: compute all needed arguments needed by initGenEOPC !... (Note: B = X = NULL for a first version).
       PetscInt nbDOF;    MatGetSize     (ptA->_petsc, &nbDOF,    NULL);
       PetscInt nbDOFLoc; MatGetLocalSize(ptA->_petsc, &nbDOFLoc, NULL);
-      set<unsigned int> dofIdxDomLoc; // TODO
+      PetscInt nr = 0; ISLocalToGlobalMappingGetSize(ptA->_rmap, &nr);
+      vector<PetscInt>  locIdx;  locIdx.resize(nr); std::iota(locIdx.begin(), locIdx.end(), 0);
+      vector<PetscInt> globIdx; globIdx.resize(nr); ISLocalToGlobalMappingApply(ptA->_rmap, nr, locIdx.data(), globIdx.data());
+      set<unsigned int> dofIdxDomLoc; for (auto idx = globIdx.cbegin(); idx != globIdx.cend(); idx++) dofIdxDomLoc.insert(*idx);
       vector<unsigned int> dofIdxMultLoc; // TODO
       vector<vector<unsigned int>> intersectLoc; //TODO
       initGenEOPC(pc, nbDOF, nbDOFLoc, ptA->_rmap, ptA->_petsc /*pass MatIS here => is ptA->_petsc a MatIS ?*/, NULL, NULL, &dofIdxDomLoc, &dofIdxMultLoc, &intersectLoc);
