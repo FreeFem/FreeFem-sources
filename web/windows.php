@@ -151,7 +151,7 @@ include 'phpfiles.php';
 </span><span class="s13">pacman -S lndir</span><span class="s16"><br>
 </span><span class="s13">pacman -S make</span><span class="s16"><br>
 </span><span class="s13">pacman -S man-db</span><span class="s16"><br>
-</span><span class="s13">pacman -S mercurial</span><span class="s16"><br>
+</span><span class="s13">pacman -S git</span><span class="s16"><br>
 </span><span class="s13">pacman -S mingw-w64-x86_64-freeglut</span><span class="s16"><br>
 </span><span class="s13">pacman -S mingw-w64-x86_64-gcc</span><span class="s16"><br>
 </span><span class="s13">pacman -S mingw-w64-x86_64-gcc-fortran</span><span class="s16"><br>
@@ -198,11 +198,10 @@ b) To build 64-bit things, open the "MinGW-w64 64-bit Shell"</span></li>
 </span></li>
 </ol>
 <p class="p2"><span class="s1">Now you can do classical install<span class="Apple-converted-space"> </span></span></p>
-<p class="p18"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s1">hg clone<span class="Apple-converted-space">  </span>http://www.freefem.org/ff++/ff++</span></p>
+<p class="p18"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s1">glone clone<span class="Apple-converted-space">  </span>https://github.com/FreeFem/FreeFem-sources ff++</span></p>
 <p class="p19"><span class="s1">to update do to the last version:</span></p>
 <p class="p20"><span class="s21"><span class="Apple-converted-space">      </span></span><span class="s22"> </span><span class="s1">cd ff++</span></p>
-<p class="p21"><span class="s1"><span class="Apple-converted-space">   </span>hg pull</span></p>
-<p class="p21"><span class="s1"><span class="Apple-converted-space">   </span>hg up<span class="Apple-converted-space"> </span></span></p>
+<p class="p21"><span class="s1"><span class="Apple-converted-space">   </span>git git checkout master</span></p>
 <p class="p22"><span class="s1"><br>
 </span></p>
 <p class="p6"><span class="s1">To restore, all files build by autoreconf -i command (automake):</span></p>
@@ -285,11 +284,10 @@ b) To build 64-bit things, open the "MinGW-w64 64-bit Shell"</span></li>
 <p class="p6"><span class="s1"><br>
 </span></p>
 <p class="p6"><span class="s1">9) To download the latest freefem++ tar.gz file contening source form<span class="Apple-converted-space"> </span></span></p>
-<p class="p30"><span class="s1">or you can get the latest source from an anonymous <a href="http://mercurial.selenic.com/"><span class="s26">Mercurial SCM </span></a>copy with the following unix shell commands :</span></p>
-<p class="p31"><span class="s1">hg clone<span class="Apple-converted-space">  </span>http://www.freefem.org/ff++/ff++</span></p>
+<p class="p30"><span class="s1">or you can get the latest source from an anonymous <a href="https://git-scm.com"><span class="s26">git SCM </span></a>copy with the following unix shell commands :</span></p>
+<p class="p31"><span class="s1">git clone<span class="Apple-converted-space">  </span>https://github.com/FreeFem/FreeFem-sources ff++</span></p>
 <p class="p19"><span class="s1">to update do to the last version:</span></p>
-<p class="p31"><span class="s1">hg pull</span></p>
-<p class="p31"><span class="s1">hg up<span class="Apple-converted-space"> </span></span></p>
+<p class="p31"><span class="s1">git checkout master</span></p>
 <p class="p6"><span class="s1"><br>
 </span></p>
 <p class="p6"><span class="s1">To restore, all files build by autoreconf -i command (automake):</span></p>
@@ -394,16 +392,15 @@ b) To build 64-bit things, open the "MinGW-w64 64-bit Shell"</span></li>
 <p class="p8"><span class="s28"><a href="http://sourceforge.net/projects/mingw-cross/files/%5BLIB%5D%20GSL/mingw32-gsl-1.14-1/mingw32-gsl-1.14-1.zip/download">Download Now! mingw32-gsl-1.14-1.zip (3.5 MB)</a></span></p>
 <p class="p6"><span class="s1"><br>
 </span></p>
-<p class="p6"><span class="s1">8) download mercurail for windows from:</span></p>
-<p class="p8"><span class="s28"><a href="http://mercurial.selenic.com/">http://mercurial.selenic.com</a></span></p>
+<p class="p6"><span class="s1">8) download git for windows from:</span></p>
+<p class="p8"><span class="s28"><a href="https://git-scm.com">https://git-scm.com</a></span></p>
 <p class="p6"><span class="s1"><br>
 </span></p>
 <p class="p6"><span class="s1">9) To download the latest freefem++ tar.gz file contening source form<span class="Apple-converted-space"> </span></span></p>
-<p class="p30"><span class="s1">or you can get the latest source from an anonymous <a href="http://mercurial.selenic.com/"><span class="s26">Mercurial SCM </span></a>copy with the following unix shell commands :</span></p>
-<p class="p31"><span class="s1">hg clone<span class="Apple-converted-space">  </span>http://www.freefem.org/ff++/ff++</span></p>
+<p class="p30"><span class="s1">or you can get the latest source from an anonymous <a href="https://git-scm.com"><span class="s26">git SCM </span></a>copy with the following unix shell commands :</span></p>
+<p class="p31"><span class="s1">git  clone<span class="Apple-converted-space">  </span>https://github.com/FreeFem/FreeFem-sources ff++</span></p>
 <p class="p19"><span class="s1">to update do to the last version:</span></p>
-<p class="p31"><span class="s1">hg pull</span></p>
-<p class="p31"><span class="s1">hg up<span class="Apple-converted-space"> </span></span></p>
+<p class="p31"><span class="s1">git  checkout</span></p>
 <p class="p6"><span class="s1"><br>
 </span></p>
 <p class="p6"><span class="s1"><b>To restore, all file build by autoreconf -i command (automake c):</b></span></p>

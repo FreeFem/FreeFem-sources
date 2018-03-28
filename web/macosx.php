@@ -77,8 +77,8 @@ nloaded from > Anywhere)<A>
 <p class="p1"><span class="s1"><b>To compile a full version of FreeFem++ under MacOS<span class="Apple-converted-space"> </span></b></span></p>
 <p class="p1"><span class="s1">---------------------------------------------------------------------------</span></p>
 <p class="p1"><span class="s1">First download the tar.gz file contening source from<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1">or you can get the latest source from an anonymous <a href="http://mercurial.selenic.com/"><span class="s3">Mercurial SCM </span></a>copy with the following unix shell commands :</span></p>
-<p class="p6"><span class="s1"># hg clone http://www.freefem.org/ff++/ff++<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1">or you can get the latest source from an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with the following unix shell commands :</span></p>
+<p class="p6"><span class="s1"># git clone https://github.com/FreeFem/FreeFem-sources ff++<span class="Apple-converted-space"> </span></span></p>
 <p class="p1"><span class="s1"><b>Under Mavericks or better<span class="Apple-converted-space">  </span>(10.9,10.10)<span class="Apple-converted-space">  </span>2015 ( xcode 6.1.1<span class="Apple-converted-space">  </span>form scratch)</b></span></p>
 <p class="p1"><span class="s1"><b>-------------------------------------------------</b></span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>remark: All line beginning by # are<span class="Apple-converted-space">  </span>shell command in terminal.<span class="Apple-converted-space"> </span></span></p>
@@ -133,11 +133,11 @@ nloaded from > Anywhere)<A>
 <p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># sudo make install<span class="Apple-converted-space"> </span></span></p>
 <p class="p5"><span class="s1"><br>
 </span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>6) Install mercurial from the web http://mercurial.selenic.com</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>6) Install git from the web <A href="https://git-scm.com/downloads" > https://git-scm.com/downloads </A>/span></p>
 <p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>7)<span class="Apple-converted-space">  </span>Download freefem++ <span class="Apple-converted-space"> </span></span></p>
 <p class="p4"><span class="s1"></span><br></p>
-<p class="p10"><span class="s1"><span class="Apple-converted-space">  </span># hg clone<span class="Apple-converted-space">  </span>http://www.freefem.org/ff++/ff++</span></p>
+<p class="p10"><span class="s1"><span class="Apple-converted-space">  </span># git clone https://github.com/FreeFem/FreeFem-sources ff++</span></p>
 <p class="p11"><span class="s1"></span><br></p>
 <p class="p12"><span class="s1"><span class="Apple-converted-space">  </span>9) install autoconf and automake now not in xcode</span></p>
 <p class="p13"><span class="s1"></span><br></p>
@@ -198,10 +198,10 @@ nloaded from > Anywhere)<A>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>#./configure CC=/usr/local/bin/gcc</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># make</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># sudo make install<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>7) install mecurial from the web http://mercurial.selenic.com</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>7) install git from the web <A href="https://git-scm.com/downloads" > https://git-scm.com/downloads </A></span></p>
 <p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>8)<span class="Apple-converted-space">  </span>downlaod <span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># hg clone<span class="Apple-converted-space">  </span>http://www.freefem.org/ff++/ff++</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># git clone https://github.com/FreeFem/FreeFem-sources ff++</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>9)<span class="Apple-converted-space">  </span>compilation of freefem++<span class="Apple-converted-space"> </span></span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># cd ff++</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># ./configure '-with-suffix=macos-10.8' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=clang -isysroot /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk' 'CFLAGS=-mmacosx-version-min=10.8' 'CXXFLAGS=-mmacosx-version-min=10.8 -std=c++11' 'CXX=clang++ -isysroot /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran' 'MPICXX=/usr/local/bin/mpic++' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' 'MPIF77=/usr/local/bin/mpif90' '--enable-maintainer-mode'</span></p>
@@ -245,10 +245,10 @@ nloaded from > Anywhere)<A>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>#./configure CC=/usr/local/bin/gcc</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># make</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># sudo make install<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>7) install mecurial from the web http://mercurial.selenic.com</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>7) install git from the web <A href="https://git-scm.com/downloads" > git SCM </A></span></p>
 <p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>8)<span class="Apple-converted-space">  </span>download <span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># hg clone<span class="Apple-converted-space">  </span>http://www.freefem.org/ff++/ff++</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># git clone https://github.com/FreeFem/FreeFem-sources ff++</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>9)<span class="Apple-converted-space">  </span>compilation of freefem++<span class="Apple-converted-space"> </span></span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># cd ff++</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">  </span># ./configure '-with-suffix=lion' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=/usr/local/bin/gcc' 'CXX=/usr/local/bin/g++' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran' <span class="Apple-converted-space"> </span></span></p>

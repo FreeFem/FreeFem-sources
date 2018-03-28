@@ -23,7 +23,7 @@ include 'phpfiles.php';
 	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/lehyaric/ffjs/15.6/ffjs.htm"  target="_top"> FreeFem++ on the web </a></div>
 	<div class="menuItem"><a href="examples.html"  target="main">Showcase</a></div>	
 	<div class="menuItem"><a href="news.php"  target="main">Web News</a></div>	
-	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/hg/hgwebdir.cgi/ff++"  target="_top"> mercurial ff++ (user ff++, password: ff++)</a></div>
+	 <div class="menuItem"><a href="https://github.com/FreeFem/FreeFem-sources"  target="_top"> github site </a></div>
 
 	</p>
 	

@@ -56,9 +56,9 @@ include 'phpfiles.php';
 <p class="p5"><span class="s1">First download the tar.gz file contening source from  
     <? ppfile($sfile,"Source code") ?> </p>
  <p class="p5"><span class="s1"> or you can get the latest source from
-an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy with the following unix shell commands&nbsp;:
+an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with the following unix shell commands&nbsp;:
 </span></p>
-<p class="p5"><span class="s3"><b>hg clone http://www.freefem.org/ff++/ff++<br>
+<p class="p5"><span class="s3"><b>git clone https://github.com/FreeFem/FreeFem-sources ff++<br>
 </b></span><span class="s4"><br>
 </span><span class="s5">if your version of automake &gt;= 1.13 , autoconf &gt;= 2.69 do <br>
 </span><span class="s3"><b>autoreconf -i </b></span><span class="s1"><br>
@@ -120,8 +120,8 @@ an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy w
 <p class="p3"><span class="s9"> # Remark:  superlu-dev  package is too old on ubuntu  Trusty (14.0.4) </span></p>
 <p class="p3"><span class="s9"> # not mandatory package  but usefull for developpement </span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install autoconf automake autotools-dev  bison  flex gdb  valgrind </b></span></p>
-<p class="p3"><span class="s9"> # not mandatory package for download with hg / mercurail tool</span></p>
-<p class="p9"><span class="s9"><b>sudo apt-get install mercurial </b></span></p>
+<p class="p3"><span class="s9"> # not mandatory package for download with git  form https://git-scm.com/downloads </span></p>
+<p class="p9"><span class="s9"><b>sudo apt-get install git </b></span></p>
 <p class="p9"><span class="s9"><b>sudo apt-get install gnuplot-qt </b></span></p>
 
 <p class="p10"><span class="s9"></span><br></p>

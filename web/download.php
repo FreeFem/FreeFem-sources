@@ -28,9 +28,10 @@ include 'phpfiles.php'
 
 
 <ul> <li>  You can get the latest source from
-an anonymous <A href="http://mercurial.selenic.com/" > Mercurial SCM </A> copy with the following unix shell commands&nbsp;:
+an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with the following unix shell commands&nbsp;:
+
 <p><TT><font color=black size=+0>
-hg  clone  http://www.freefem.org/ff++/ff++
+	git clone https://github.com/FreeFem/FreeFem-sources ff++
 </font></tt></p>
 </li>
     <? pfile($sfile,"Source code") ?> 
