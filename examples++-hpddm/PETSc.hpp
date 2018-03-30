@@ -14,6 +14,7 @@
 #define HPDDM_SCHWARZ 0
 #define HPDDM_FETI    0
 #define HPDDM_BDD     0
+#define HPDDM_PETSC   1
 
 #include "common.hpp"
 
