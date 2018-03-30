@@ -3081,6 +3081,9 @@ public:
     removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4) : A(0), R(param2), x(param3), out(param4) ,nbarg(3){
         args.SetNameParam(n_name_param, name_param, nargs);
     }
+    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2) : A(param1), R(param2), x(0), out(0) ,nbarg(2){
+        args.SetNameParam(n_name_param, name_param, nargs);
+    }
     
     AnyType operator()(Stack stack) const;
 };
@@ -3089,22 +3092,25 @@ template<class T>
 basicAC_F0::name_and_type removeDOF_Op<T>::name_param[] = {
     {"symmetrize", &typeid(bool)},
     {"condensation", &typeid(KN<long>*)},
-    {"interaction", &typeid(Matrice_Creuse<T>*)},
+    {"R", &typeid(Matrice_Creuse<double>*)},
     {"eps",&typeid(double)}
 };
 
 template<class T>
 class removeDOF : public OneOperator {
-   const  bool withA;
+   const  unsigned short withA;
 public:
-    removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(true) {}
-    removeDOF(int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(false) {}
+    removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(1) {}
+    removeDOF(int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(0) {}
+    removeDOF(int, int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>()),withA(2) {}
    
     E_F0* code(const basicAC_F0& args) const {
-        if(withA)
+        if(withA == 1)
         return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
-        else
+        else if(withA == 0)
         return new removeDOF_Op<T>(args,  t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+        else
+        return new removeDOF_Op<T>(args,  t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
     }
 };
 template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
@@ -3114,21 +3120,31 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     
     Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
     Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
-    KN<T>* pX = GetAny<KN<T>* >((*x)(stack));
-    KN<T>* pOut = GetAny<KN<T>* >((*out)(stack));
-    ffassert(pR && pX && pOut);
-    bool rhs = pOut->n > 0 || pX->n > 0;
+    KN<T>* pX = x ? GetAny<KN<T>* >((*x)(stack)) : 0;
+    KN<T>* pOut = out ? GetAny<KN<T>* >((*out)(stack)) : 0;
+    Matrice_Creuse<T>* pC = nargs[2] ? GetAny<Matrice_Creuse<T>*>((*nargs[2])(stack)) : 0;
+    MatriceMorse<T> *mC = 0;
+    if(pC && pC->A) {
+        mC = static_cast<MatriceMorse<T>*>(&(*pC->A));
+    }
+    ffassert(pR);
+    bool rhs = (pX && pOut) && (pOut->n > 0 || pX->n > 0);
     if(pA)
     {
+    if(!pC)
+        pC = pR;
     pA->Uh = pR->Uh;
-    pA->Vh = pR->Vh;
+    pA->Vh = pC->Vh;
     MatriceMorse<T> *mA = static_cast<MatriceMorse<T>*>(&(*pA->A));
     MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+    if(!mC)
+        mC = mR;
     bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
     double EPS=nargs[3] ? GetAny<double>((*nargs[3])(stack)) :defEPS ;
     KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
     
     unsigned int n = condensation ? condensation->n : mR->nbcoef;
+    unsigned int m = condensation ? condensation->n : mC->nbcoef;
     int* lg = new int[n + 1];
     int* cl;
     T* val;
@@ -3137,9 +3153,9 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     
     std::vector<signed int> tmpVec;
     if(!condensation) {
-        tmpVec.resize(mA->n);
-        for(unsigned int i = 0; i < n; ++i)
-            tmpVec[mR->cl[i]] = i + 1;
+        tmpVec.resize(mA->m);
+        for(unsigned int i = 0; i < m; ++i)
+            tmpVec[mC->cl[i]] = i + 1;
         if(!mA->symetrique) {
             std::vector<std::pair<int, T> > tmp;
             tmp.reserve(mA->nbcoef);
@@ -3160,7 +3176,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 std::sort(tmp.begin() + lg[i], tmp.end(),cmp<T> );
                 // c++11 , [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
                 if(rhs)
-                    *(*pOut + i) = *(*pX + mR->cl[i]);
+                    *(*pOut + i) = *(*pX + mC->cl[i]);
                 lg[i + 1] = tmp.size();
             }
             mA->nbcoef = tmp.size();
@@ -3195,7 +3211,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                     }
                 }
                 if(rhs)
-                    *(*pOut + i) = *(*pX + mR->cl[i]);
+                    *(*pOut + i) = *(*pX + mC->cl[i]);
             }
             mA->nbcoef = nnz;
             cl = new int[nnz];
@@ -3217,9 +3233,9 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         delete [] mA->lg;
         delete [] mA->a;
         mA->n = n;
-        mA->m = n;
+        mA->m = m;
         mA->N = n;
-        mA->M = n;
+        mA->M = m;
         mA->lg = lg;
         mA->cl = cl;
         mA->a = val;
@@ -3411,6 +3427,8 @@ void  init_lgmat()
  Global.Add("renumbering", "(", new removeDOF<Complex>);
     Global.Add("renumbering", "(", new removeDOF<double>(1));
     Global.Add("renumbering", "(", new removeDOF<Complex>(1));
+    Global.Add("renumbering", "(", new removeDOF<double>(1, 1));
+    Global.Add("renumbering", "(", new removeDOF<Complex>(1, 1));
 
     
     TheOperators->Add("*",
