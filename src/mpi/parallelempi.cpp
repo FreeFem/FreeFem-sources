@@ -182,6 +182,8 @@ void CheckContigueKN(const KN_<T> &t)
 	ExecError("Sorry the array is not contigue (step != 1) ");
     }
 }
+
+
 template<> 
 long  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
 {
@@ -1343,6 +1345,23 @@ long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,
 }
 
 // fin J. Morice
+template<class Z>
+inline uint64_t  roll64(Z y,int r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
+template<class R>
+uint64_t CodeIJ(const MatriceMorse<R> * pa)
+{
+    
+    ffassert( pa );
+    uint64_t code=pa->n;
+    code ^=roll64(pa->n-pa->m,24);
+    long nnz = pa->nbcoef,n =pa->n,kk=0 ;
+    code ^=roll64(nnz,48);
+    for(long k=0; k<= n;++k)
+        code^=roll64(pa->lg[k],++kk);
+    for(long k=0; k< nnz;++k)
+        code^=roll64(pa->cl[k],++kk);
+    return code;
+}
 
 template<class R>
 struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,MPIrank,fMPI_Op,long> {
@@ -1354,13 +1373,23 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
 	ffassert( sA && rA); 
 	MatriceMorse<R> & sM = *dynamic_cast<MatriceMorse<R>* > (sA);
 	MatriceMorse<R> & rM = *dynamic_cast<MatriceMorse<R>* > (rA);
+        if( ! rA ) { // build a zero matric copy of sM
+            MatriceMorse<R> *rm=new MatriceMorse<R>(sM.n,sM.m,sM.nbcoef,sM.symetrique,0,sM.lg,sM.cl);
+            *rm=R(); // set the matrix to Zero ..
+            r->A.master(rm);
+            rA=r->A;
+            
+        }
+
 	ffassert( &sM && &rM);
 	int chunk = sM.nbcoef;
 	ffassert(chunk==rM.nbcoef);
-	
-	return MPI_Reduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);	
+        uint64_t rcode = CodeIJ(&rM);
+        uint64_t scode = ( &sM != &rM) ? CodeIJ(&sM) : rcode;
+	return MPI_Reduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);
     }
 };
+
 template<class R>
 struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,fMPI_Comm,fMPI_Op,long> {
     static long  f(Stack, Matrice_Creuse<R>*  const  & s,Matrice_Creuse<R>*  const  &r,  fMPI_Comm const & comm, fMPI_Op const &op)  
@@ -1386,7 +1415,28 @@ struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creu
 	ffassert( &sM && &rM);
 	int chunk = sM.nbcoef;
 	ffassert(chunk==rM.nbcoef);
-	
+        uint64_t rcode = CodeIJ(&rM);
+        uint64_t scode = ( &sM != &rM) ? CodeIJ(&sM) : rcode;
+        // verif same code ????
+        //  size machine
+        int mpirankw,mpisizew;
+        MPI_Comm_rank(comm, &mpirankw);
+        MPI_Comm_size(comm, &mpisizew);
+        KN<uint64_t>  allcode(mpisizew);
+        if(mpisizew>1)
+        {
+            int chunk = 1;
+            // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
+            KN<uint64_t> code(mpisizew);
+            MPI_Gather( (void *) & scode  , chunk,  MPI_UNSIGNED_LONG_LONG,
+                         (void *)  &code[0] , chunk,  MPI_UNSIGNED_LONG_LONG, 0 ,comm);
+            int ok=1;
+            if(mpirankw==0)
+                for(int i=1; i<mpisizew;++i)
+                    ok |= (scode== code[i]);
+            ffassert(ok);
+        }
+
 	return MPI_Allreduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,comm);	
     }
 };

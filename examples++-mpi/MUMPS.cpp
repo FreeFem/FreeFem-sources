@@ -117,7 +117,7 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
       distributed(matrank<0),
       rinfog(rinfogg),infog(infogg)
   {
-    
+    if(pcomm) MPI_Comm_dup(comm,&comm);
     MPI_Comm_rank(comm, &mpirank);
     int master = mpirank==matrank;  
     _id = new typename MUMPS_STRUC_TRAIT<R>::MUMPS ;
@@ -313,6 +313,7 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     mumps_c(_id);
     if(_id)
       delete _id;
+      if(comm != MPI_COMM_WORLD) MPI_Comm_free(&comm);
   };
 };
 

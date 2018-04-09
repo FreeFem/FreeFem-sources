@@ -9,13 +9,13 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.59,hecht@ann.jussieu.fr,freefem++)
+AC_INIT(FreeFem++,3.60,frederic.hecht@sobonne-universite.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
 dnl : ${FFLAGS=""}
 
-# progg test  expact under windows 
+# progg test  exec for windows 
 ff_TEST_FFPP="../src/nw/FreeFem++"
 ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
 

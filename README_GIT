@@ -56,9 +56,6 @@ files (in a subdirectory called '.git').
 
 * Exchanging changes with other repositories
 ** Pulling changes from another (readable) repository
-  hg checkout master -u http://www.freefem.org/ff++/ff++
-  hg pull -u /another/local/dir
-  hg pull -u ssh://myself@remotemachine/remote/directory
 
 ** Pushing changes into another (writable) repository branch 
   git push origin master
