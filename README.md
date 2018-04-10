@@ -16,6 +16,6 @@ The user documentation is avaible [here](https://github.com/FreeFem/FreeFem-doc)
 
 ## For developers
 
-All development take place in the develop branch (or in cmake, geneo4PETSc, ... for specific projects)
+All development take place in the develop branch (or in feature branches: cmake, geneo4PETSc, ... for specific projects)
 
 **Do not commit on master branch !**
