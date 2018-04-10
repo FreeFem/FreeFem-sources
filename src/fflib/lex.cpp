@@ -633,7 +633,12 @@ bool mylex::SetMacro(int &ret)
     }
   return rt;
 }
-
+std::string trim(std::string s, const char* t = " \t\n\r\f\v")
+{
+    s.erase(0, s.find_first_not_of(t));
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
+}
 bool mylex::IFMacro(int &ret)
 {// A faire !!!! F.H
     bool rt=false;
@@ -717,7 +722,7 @@ bool mylex::IFMacro(int &ret)
             {
               const string & mval = macroparm[macroparm.size()-1];
              if(debugmacro)  cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
-              exist = mval == val;
+              exist = trim(mval) == trim(val);
               rt=true;
             }
         }
