@@ -1,4 +1,9 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/710d25bb3c6040c19c3ff7c0f3201835)](https://www.codacy.com/app/sgarnotel/FreeFem-sources?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FreeFem/FreeFem-sources&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.org/FreeFem/FreeFem-sources.svg?branch=master)](https://travis-ci.org/FreeFem/FreeFem-sources)
+<a href="https://scan.coverity.com/projects/freefem-freefem-sources">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/15433/badge.svg"/>
+</a>
 
 | Branch | Ubuntu All | Ubuntu No | MacOSX All | MacOSX No | Windows All | Windows No |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
