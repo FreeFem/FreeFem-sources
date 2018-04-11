@@ -3282,7 +3282,7 @@ $ u^n, b^n, b',b", b_{cl}$
   \begin{array}{cl}   b"_i  & \mbox{if }\ i \in \Gamma_{24} \\
                        b'_i & \mbox{else } %\not\in \Gamma_{24}
                         \end{array}\right.
-                       \label{eq tgv}  $$}
+                       \label{eq:tgv}  $$}
 Where with $ \tgv = \Red{\mathtt{tgv}} = \Red{10^{30}}$ :
 \begin{eqnarray*}
  A_{ij} &=& \left\{\begin{array}{cl}   \tgv  & \mbox{if } i  \in \Gamma_{24}, \mbox{and}\quad  j=i \\  
@@ -8617,9 +8617,9 @@ types of finite element are: \index{type of finite element}
         \quad v_{|K} \in P_{1} \oplus \mathrm{Span}\{  \lambda^{K}_{0} \lambda^{K}_{1} \lambda^{K}_{2} \lambda^{K}_{3} \} \right.\right\} \label{eq:P1b-3d}
      \end{equation}
     where $\lambda ^{K}_{i}, i=0,..,d$ are the $d+1$ barycentric  coordinate functions of the element  $K$ (triangle or tetrahedron).
-    \item[P1bl,P1bl3d]  piecewise linear  continuous finite element plus linear bubble (2d, 3d) \label{warP1dc}
+    \item[P1bl,P1bl3d]  piecewise linear  continuous finite element plus linear bubble (2d, 3d) (cf. \ref{warP1dc})
      \index{P1bl|textbf}\index{fespace!P1bl}\index{fespace!P1bl3d}
-     the bulle is build by spliting the $K$ a barycenter in $d+1$ sub element. (need \ttCC{@load "Element_P1bl"})
+     the bubble is built by spliting the $K$ a barycenter in $d+1$ sub element. (need \ttCC{@load "Element_P1bl"})
      
      \item[P2,P23d] piecewise $P_{2}$  continuous finite element (2d, 3d),
      \index{P2|textbf}\index{fespace!P2}
@@ -8851,7 +8851,7 @@ So the number  degrees of freedom is 9.
          RT2_{h} = \left\{ \mathbf{v} \in H(\textrm{curl}) \left|\; \forall K \in
          \mathcal{T}_{h} ,  \alpha^1_{K}, \alpha^2_{K}, \beta_{K} \in P_2^2, P_1,  \mathbf{v}_{|K}(x,y) = 
          \vecttwo{\alpha^1_{K}}{\alpha^2_{K}} + \beta_{K}\vecttwo{-y}{x}   \right.\right\}
-         \label{eq:RT1Ortho}
+         \label{eq:RT2Ortho}
      \end{equation}
     
 
@@ -9392,7 +9392,7 @@ Fh ug=us,vg=vs;
 
 \twoplot[height=6cm]{us-ug}{vs-vg}{Extension of a continuous FE-function
  \label{fig:us-ug}}%
-{Extention of discontinuous FE-function\label{fig:vs-vg}, see warning \ref{warP1dc} }
+{Extension of discontinuous FE-function\label{fig:vs-vg}, see warning \ref{warP1dc} }
 
 \end{note}
 
@@ -10076,7 +10076,7 @@ $ u^n, b^n, b',b", b_{cl}$
   \quad  b^n_i = \left\{
   \begin{array}{cl}   b"_i  & \mbox{if }\ i \in \Gamma_{24} \\
                        b'_i & \mbox{else if } \not\in \Gamma_{24} \end{array}\right.
-                       \label{eq tgv}  \end{equation}
+                       \label{eq:tgv2}  \end{equation}
 Where with $ \tgv = \mathtt{tgv} = 10^{30}$ :
 \begin{eqnarray}
  A_{ij} &=& \left\{\begin{array}{cl}   \tgv  & \mbox{if } i  \in \Gamma_{24}, \mbox{and}  j=i \\
@@ -10105,7 +10105,7 @@ Where with $ \tgv = \mathtt{tgv} = 10^{30}$ :
 Vh u0=fu0,u=u0;
 \eFF
 
-Create three variational formulation, and build the matrices $A$,$M$.\label{matrix-varf}
+Create three variational formulation, and build the matrices $A$,$M$.\label{matrix-varf2}
 \bFF
 @varf vthermic (u,v)= @int2d(Th)(u*v/dt + k*(dx(u) * dx(v) + dy(u) * dy(v)))
             +  @int1d(Th,1,3)(alpha*u*v) + @on(2,4,u=1);
@@ -11155,7 +11155,7 @@ c(x) & = & 0 \\
 \end{equation}
 Where if $a$ is a vector of $\R^n$, $A$ denotes the diagonal matrix $A=(a_i \delta_{ij})_{1\leq i,j\leq n}$ and $e\in\R^{n} = (1,1,\dots,1)$. Solving this nonlinear system by the Newton methods is known as being
 the \textit{primal-dual} interior points method. Here again, more details are available in \cite{ipintro}. Most actual implementations introduce features in order to globalize the convergence capability of the method, essentially by 
-adding some line-search steps to the Newton algorithm, or by using trust regions. For the purpose of IPOPT, this is achieved by a \textit{filter line search} methods, the details of which can be found in \cite{iplinesearch}.
+adding some line-search steps to the Newton algorithm, or by using trust regions. For the purpose of IPOPT, this is achieved by a \textit{filter line search} methods, the details of which can be found in \cite{ipopt}.
 
 More IPOPT specific features or implementation details can be found in \cite{ipopt}. We will just retain that IPOPT is a smart Newton method for solving constrained optimization problem, with global convergence capabilities due to a robust line search method (in the sense that the algorithm will convergence no matter the initializer). Due to the underlying Newton method, the optimization process requires expressions of all derivatives up to the order 2 of the fitness function as well as those of the constraints. For problems whose hessian matrices are difficult to compute or lead to high dimensional dense matrices, it is possible to use a BFGS approximation of these objects at the cost of a much slower convergence rate.
 
@@ -11771,7 +11771,9 @@ to a derivative free algorithm, or set the population of a non-genetic one, etc.
   \item[ ]
   \item[\texttt{IConst}/\texttt{EConst} :] Allows to pass the name of a function implementing some inequality (resp. equality) constraints on the search space. The function type must be 
   {\tt real[int]} $\rightarrow$ {\tt real[int]} where the size of the returned array is equal to the number of constraints (of the same type - it means that all the constraints are computed in one vectorial function).
-  In order to mix inequality and equality constraints in a same minimization attempt, two vectorial functions have to be defined and passed. See example \ref{varineqex} for more details about how these
+  In order to mix inequality and equality constraints in a same minimization attempt, two vectorial functions have to be defined and passed. 
+  %%% Removed as the examples have been commented 11/04/18
+  %%% See example \ref{varineqex} for more details about how these
   constraints have to be implemented.
   \item[\texttt{gradIConst}/\texttt{gradEConst} :] Use to provide the inequality (resp. equality) constraints gradient. These are {\tt real[int]} $\rightarrow$ {\tt real[int,int]} type functions. Assuming we have defined
   a constraint function (either inequality or equality) with $p$ constraints, the size of the matrix returned by its associated gradient must be $p\times n$ (the $i$-th line of the matrix is the gradient of the $i$-th
@@ -13190,9 +13192,10 @@ cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
 @int[@int] ref2=[1,0,2,0];
 @mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],label=ref2);
 Thm=change(Thm,label=ref2);
-@plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );// see fig \ref{fig-beam-3d}
+@plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );// 
 \eFF
 \end{example}
+%% removed as the figure has been commented out 11/04/18 see fig \ref{fig-beam-3d}
 
 %%%ALH-25/2/10-compilation error
 %%%\plot[height=8cm]{beam-3d}{3d Beam deformed and undeformed box \label{fig-beam-3d}  }
@@ -13579,7 +13582,7 @@ Remark: For complex problems, you need to use the keyword \ttCC{@complexEigenVal
 \begin{note}{Boundary condition and Eigenvalue Problems\label{note BC EV}}\label{pp BC EV}
 
  The locking (Dirichlet ) boundary condition is make with exact penalization
- so   we put 1e30=tgv  on the diagonal term of the locked degree of freedom (see equation  (\ref{eq tgv})).
+ so   we put 1e30=tgv  on the diagonal term of the locked degree of freedom (see equation  (\ref{eq:tgv})).
   So take Dirichlet boundary condition just on $A$
   and not on  $B$.
   because we solve $ w=OP^-1*B*v$.
@@ -17449,7 +17452,7 @@ As usual in \freefempp, we will show by examples how to call pARMS in \freefempp
 There are three ways of doing this:
 \paragraph*{Example 1: Default parameters }
 This example comes from user guide of \freefempp \cite{ufreefem} at page 12.
-\begin{example}\label{exm:first}~
+\begin{example}\label{exm:first2}~
 \bFF
  1: @load parms_freefem   // Tell FreeFem that you will use pARMS 
  2: @border C(t=0,2*@pi){@x=cos(t); @y=sin(t);label=1;}
@@ -17469,7 +17472,7 @@ This example comes from user guide of \freefempp \cite{ufreefem} at page 12.
 \eFF
 \end{example}
 
-In line 1 of example \ref{exm:first} we load in memory the pARMS dynamic library
+In line 1 of example \ref{exm:first2} we load in memory the pARMS dynamic library
 with interface \freefempp.
 After this, in line 7 we specify that the bilinear form will be solved by the
 last sparse linear solver
@@ -17991,7 +17994,7 @@ we set parameters to Hypre solver.
 of the entries of these vectors is different from those of Hips .
 In the case of HYPRE, the meaning of differents entries of vectors
 \textbf{iparm} and \textbf{dparm} are given in tables \ref{communipramsHypre} to
-\ref{AMGHypre}.\\
+\ref{AMGHypre4}.\\
 
 In Table \ref{hyprelabel} the results of running example \ref{hypre:laplacian}
 on Cluster Paradent of Grid5000 are  reported. We can see in this running
@@ -18096,7 +18099,7 @@ dparms[1]& Drop tolerance in Parallel ILUT: \textbf{ Default=1e-5} \\ \hline
 \end{center}
 \caption{Definitions of other entries of \textbf{iparms} and \textbf{dparms} if
 preconditioner is \textbf{PILUT}}
-\label{AMGHypre}
+\label{AMGHypre2}
 \end{table}
 
 \begin{table}[hbtp]
@@ -18117,7 +18120,7 @@ dparms[2] & Threshold parameter: \textbf{ Default=0.1} \\ \hline
  \end{tabular}
 \caption{Definitions of other entries of \textbf{iparms} and \textbf{dparms} if
 preconditioner is \textbf{ParaSails}}
-\label{AMGHypre}
+\label{AMGHypre3}
 \end{table}
 
 \begin{table}[hbtp]
@@ -18140,7 +18143,7 @@ iparms[8]& Overlap for the Schwartz method: \textbf{ Default=1}\\ \hline
  \end{tabular}
 \caption{Definitions of other entries of \textbf{iparms} and \textbf{dparms} if
 preconditionner is \textbf{Schwartz}}
-\label{AMGHypre}
+\label{AMGHypre4}
 \end{table}
 
 \begin{table}
@@ -18889,7 +18892,7 @@ Let $E,\, F,\, G$ be three sets and $A$ subset of $E$.
   $E\ni x\mapsto f(x)\in F$
   \item[$I_E$ or $I$] the identity mapping in $E$,i.e., $I(x)=x\quad \forall x\in E$
   \item[$f\circ g$] for $f:\; F\to G$ and $g:\; E\to F$,
-  $E\ni x\mapsto (f\circ g)(x)=f(g(x))\in G$ (see \refSec{One Variable Functions})
+  $E\ni x\mapsto (f\circ g)(x)=f(g(x))\in G$ (see \refSec{Functions of one Variable})
   \item[$f|_A$] the restriction of $f:\; E\to F$ to the subset $A$ of $E$
   \item[$\{a_k\}$] column vector with components $a_k$
   \item[$(a_k)$] row vector with components $a_k$

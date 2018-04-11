@@ -1,12 +1,13 @@
-The version 3.41 is compile Under Yosemite  (10.10.5)  7/10/2015 
+The version 3.41 is compiled Under Yosemite  (10.10.5)  7/10/2015 
 xcode 7.0.1 + previous install of latex and with other brew install 
- Oct. 7th 2015 F. Hecht Paris. 
+Oct. 7th 2015 F. Hecht Paris. 
 -------------------------------------------------------
-precompile compile version    version 3.41 
+precompiled compile version    version 3.41 
 
 add installer intel ifort  compiler (ifort version 15.0.2 with mkl)
 build mpich, libgsl, hdf5 
-the configure of all sofware are: 
+
+the options used for conifgure are: 
 mpich-3.1.4: ./configure 'FC=ifort' 'F77=ifort' '-prefix=/usr/local/ff++/mpich'
 gsl-1.16 ./configure 'CC=clang' '--prefix=/usr/local/ff++/mpich/'
 hdf5-1.8.14  ./configure '--enable-cxx' 'CC=clang' 'CXX=clang++' '--prefix=/usr/local/ff++/mpich'
@@ -21,7 +22,7 @@ freefem++: ./configure '--prefix=/usr/local/ff++/mpich/3.41' '--enable-download'
     '--with-petsc=/usr/local/ff++/mpich/petsc/lib/petsc/conf/petscvariables' '-with-hdf5=/usr/local/ff++/mpich/bin/h5cc' \
     '--with-gsl-prefix=/usr/local/ff++/mpich/' '--disable-pastix'
 
-Please read  INNOVATION file to see  all modifaction and  news
+Please read  INNOVATION file to see recent changes and  news
 
 Plus all previous install 
 0-1) with brew install
