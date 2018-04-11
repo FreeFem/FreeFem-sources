@@ -1,5 +1,8 @@
+  Pass to petsc/slepc version 3.8.4/3.8.3 
+  Add cosmetics in macro (macro name, macro line , ...)
+  correct in mpi_comm with mulmps (very rare)
 version 3.60 
-NOW the main distribution is a github (28 march 2018 F. Hecht)
+  NOW the main distribution is a github (28 march 2018 F. Hecht)
   https://github.com/FreeFem/FreeFem-sources 
   
  Add new finite Element RT13d (thank of Axel Fourmont) see 
