@@ -5,7 +5,8 @@
 #include <cmath>
 #include <cstring>
 #include <complex>
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdint.h>
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
