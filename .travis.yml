@@ -1,0 +1,24 @@
+language: cpp
+
+script: echo "done"
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "sV/FGfJcciCi6taTWShyog4xomsJSZI8SB9xLW1r1bPfPX4Lr/qLgu9tG59eKnRFFRDm3ovYCF97+GCQ/QJE2E/ceJcBw0ebSO9CAot1L7ZCd9Whl8seuxK7QKZ7CIA/qHhp3FjZAAg2AtxiOptyKwHCX3RNv5wqcWsl49//4Zp3D0mNWXSdu0SXfpmfk2ZLc3YjVpZOLGnPsSJcM8Tz3WqUeizsAeXFOqmblJRj9KgYbOiNXxcixs7l4RA2ZAKxXWc28uy50rWBDBtFtg0N9q4C8xqsnXUhmQYE6zLFUovImA5L/D518yrUaA91Q0x4hCnaz2YqAgAvwLx2td/0plKlFjxBPbrG4zGBEabFbsa3v4X7s6fVgG1qwdKnvV6AksnM54gKfsZVkwtBsS2j86DRCvFfRHLZ6WgHu2maw5IYvK7OJIfM3Hg7XTg9jIZBCzosuCT7xC+6zh1lpGESY+KaPSCbI8R1fGukZOQltETtg1uzD8h5/CG/GrFSXgpSokbrnTKWbe3qzW+FbLmP7YcGuoO0RyDBJqGiur2ofK3TUVhdKhbDIgpdza0jF9GmOKdLpMsKX0bMMA5k95r+2CBLKDFebUNGAZSUyBZo38O9KWSZkNN9JhxbgDDWz0RNaodjH0UP240N8t2eoZx0xFc+ly6qChEXyvXdHxVrC9I="
+   
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake mpich
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: FreeFem/FreeFem-sources
+      description: freefem
+    notification_email: simon.garnotel@gmail.com
+    build_command_prepend: autoreconf -i && ./configure --enable-download --enable-optim --disable-pastix --prefix=/builds/freefem-source-master && ./download/getall -a
+    build_command: make
+    branch_pattern: master
