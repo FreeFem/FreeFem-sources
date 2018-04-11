@@ -17,8 +17,8 @@ addons:
   coverity_scan:
     project:
       name: FreeFem/FreeFem-sources
-      description: freefem
+      description: FreeFem
     notification_email: simon.garnotel@gmail.com
     build_command_prepend: autoreconf -i && ./configure --enable-download --enable-optim --disable-pastix --prefix=/builds/freefem-source-master && ./download/getall -a
     build_command: make
-    branch_pattern: master
+    branch_pattern: develop
