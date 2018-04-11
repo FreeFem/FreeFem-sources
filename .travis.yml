@@ -10,7 +10,7 @@ env:
    
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake mpich
+  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake openmpi-dev
   - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
 addons:
