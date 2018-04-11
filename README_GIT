@@ -35,7 +35,7 @@ files (in a subdirectory called '.git').
    git clone https://github.com/FreeFem/FreeFem-sources ff-git
 
 ** create the ~/.gitconfig   file  for commit like: 
-[user]
+[user] (change to your own name)
 	name = Frederic Hecht
 	email = frederic.hecht@upmc.fr
 [push]

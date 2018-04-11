@@ -1,20 +1,22 @@
-Compilation of FreeFem++ under unix, MacOs X or mingw  (Windows)
-and bamg (mesh generator)
+Compilation of FreeFem++ and bamg (mesh generator) 
+under unix, MacOs X or mingw  (Windows)
 ----------------------------------------------------------------
-read respectively the following  url depending of systeme 
-to compile le software 
+Follow the following links, depending on your system for
+installation instructions 
 http://www.freefem.org/ff++/linux.php      or  web/linux.php 
 http://www.freefem.org/ff++/windows.php    or  web/windows.php
-http://www.freefem.org/ff++/macosx.php   or web/macosx.php
+http://www.freefem.org/ff++/macosx.php     or  web/macosx.php
 
-To use Some special configuration file 
+To make use of a specific configuration file 
 
-1) create  file config.param an use 
+1) create  file config.param an use the shell script
 # ./reconfigure 
-shell script to reconfigure 
 
+to reconfigure your system
 
-# mac version precompile version 
+Examples of config.param files:
+-------------------------------
+# Used for the precompiled mac version
 MBP-FH2:ff-OSX10.10 hecht$ cat config.param 
 '--enable-download'
 '--enable-optim'
@@ -29,7 +31,7 @@ MBP-FH2:ff-OSX10.10 hecht$ cat config.param
 '--disable-pastix'
 '--with-mpipath=/usr/local/ff++/mpich/bin/'
 
-# window version precompile version 
+# Used for the precompiled Windows version 
 
 MBP-FH2:ff-OSX10.10 hecht$ cat /Volumes/C/msys64/home/hecht/ff++/config.param 
 '-with-glut=-lfreeglut -lglu32 -lopengl32 -lwinmm -lgdi32 -Wl,--subsystem,windows'
@@ -45,7 +47,7 @@ MBP-FH2:ff-OSX10.10 hecht$ cat /Volumes/C/msys64/home/hecht/ff++/config.param
 'CC=x86_64-w64-mingw32-gcc'
 
 
-# ubuntu version version
+# Used for the Ubuntu linux precompiled version
 #  without mpi
 cat config.param 
 '--enable-download'
