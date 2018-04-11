@@ -201,12 +201,16 @@ download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_5.2.1.tar.
 download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	 'http://www.tetgen.org/1.5/src/','tetgen1.5.1-beta1.tar.gz','3d55c197bcbfc611b7ced6f343643756');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/petsc-master.tar.gz',
-	 	 'http://ftp.mcs.anl.gov/pub/petsc/','petsc-master.tar.gz','none');
+## got back to version 3.8 (for slepc and petc )
+#download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.9.0.tar.gz',
+#	 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/','petsc-lite-3.9.0.tar.gz','6958049cafdbb7586c50e09b54e6fce9');
+
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.8.4.tar.gz',
+		 	 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/','petsc-lite-3.8.4.tar.gz','dbc724ec61e12258c4c7f8b52f026bb6');
 
 
-download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.8.2.tar.gz',
-	 	 'http://slepc.upv.es','slepc-3.8.2.tar.gz','35d04119923ef0daabb9b16e9a910068');
+download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.8.3.tar.gz',
+	 	 'https://bitbucket.org/slepc/slepc/get/','slepc-3.8.3.tar.gz','3446ebdf03bb0c850e6d1ad798a8d135');
 
 download('hpddm','https://github.com/hpddm/hpddm/archive/91a98d481e18e8ed20c9bb9a0fdd5b945eec0fa1.zip',
 	 'https://github.com/hpddm','hpddm.zip','5fd9f48e97059fdc80db814d8af90b3b','BAD_CERT');
@@ -275,7 +279,7 @@ sub downloadone{
   }
   # check if resulting package contents are valid
   my $md5check=md5_hex(`cat $pkg`);
-  if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg\n"}
+  if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg  $md5check\n"}
 }
 
 # Local Variables:

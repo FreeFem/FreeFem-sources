@@ -38,10 +38,10 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=master
-VERSION_SLEPC=3.8.2
+VERSION=3.8.4
+VERSION_SLEPC=3.8.3
 # http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
-PACKAGE=../pkg/petsc-$(VERSION).tar.gz 
+PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz 
 PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz 
 SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
@@ -212,8 +212,10 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 	tar xvzf $(PACKAGE)
 	touch $@
 $(SRCDIR_SLEPC)/tag-tar:$(PACKAGE_SLEPC)
+	rm -rf $(SRCDIR_SLEPC)
 	tar xvzf $(PACKAGE_SLEPC)
-#	patch -p1 <patch-slepc-3.7.4
+	#mv `tar tfz $(PACKAGE_SLEPC) | head -1` $(SRCDIR_SLEPC)
+	#cd $(SRCDIR_SLEPC);patch -p1 <../patch-slepc-3.8.3
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
