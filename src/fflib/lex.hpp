@@ -42,10 +42,13 @@ class mylex : public CodeAlloc {
   public:
   typedef const char * Key;
   typedef pair<int,aType> Value;
+   struct MacroData{ deque<string> d; int l; string f;};// f is not a pointeur (pb of delete) 
+    //   Warning  f not a pointeur because
+    //
   struct Keyless : binary_function<Key,Key, bool>
    { bool operator()(const Key& x, const Key& y) const{ return strcmp(x,y)<0;} };  
   typedef   map<const char *,Value,Keyless> MapMotClef;
-  typedef   map<const char *, deque<string> ,Keyless >  MapMacroDef;
+  typedef   map<const char *,MacroData ,Keyless >  MapMacroDef;
   typedef   map<string, string  >  MapMacroParam;
   typedef   MapMotClef::const_iterator const_iterator;
   typedef   MapMotClef::iterator iterator;
@@ -79,9 +82,10 @@ class mylex : public CodeAlloc {
   };
   
   friend struct mylex::xxxx;
-
+ 
   xxxx pilesource[100];
-  istream & source() const {return  * pilesource[level].f;} 
+  istream & source() const {return  * pilesource[level].f;}
+    const string file() const  { return pilesource[level].filename? *pilesource[level].filename : string("") ;}
   ostream & cout ;
 
   // <<MotClef>>
@@ -130,7 +134,7 @@ class mylex : public CodeAlloc {
     return "-- unkown --";}
     
   void input(const char *  filename) ;
-  void input(const string &str,const string *name=0);
+  void input(const string &str,const string *name=0,int lg=0);
   bool close() ;
 
   char * newcopy(const char * s)
@@ -143,7 +147,8 @@ class mylex : public CodeAlloc {
   ostream & ShowStack(ostream & f); 
   ~mylex();
 private: 
-  int basescan();  
+  int basescan();
+  int basescanprint(int lvl=0); // with print if lvl =0 
   int EatCommentAndSpace(string *data=0);
   int scan1();
   bool SetMacro(int &ret);
