@@ -61,10 +61,12 @@ history:
 		fi
 
 documentation:
-	cd DOC && $(MAKE) $(AM_MAKEFLAGS) documentation
+	rm freefem++doc.pdf
+	$(WGET) https://github.com/FreeFem/FreeFem-doc-pdf/raw/master/freefem%2B%2Bdoc.pdf
+#	cd DOC && $(MAKE) $(AM_MAKEFLAGS) documentation
 
-DOC/freefem++doc.pdf:
-	cd $(@D) && $(MAKE) $(AM_MAKEFLAGS) $(@F)
+#DOC/freefem++doc.pdf:
+#	cd $(@D) && $(MAKE) $(AM_MAKEFLAGS) $(@F)
 
 clean-local::
 	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
@@ -207,7 +209,7 @@ $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 
 $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-mkdir $@ 
-	cp   DOC/freefem++doc.pdf $@
+	cp   freefem++doc.pdf $@
 	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )  
 	cd  $@ ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \

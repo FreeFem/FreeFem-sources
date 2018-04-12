@@ -1858,40 +1858,40 @@ dnl	 CHECK_COMPILE_FLAG(Fortran,-rdynamic,FFLAGS)
 	fi
 fi
 AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
-
+#  the doc is now in https://github.com/FreeFem/FreeFem-doc-pdf/blob/master/freefem%2B%2Bdoc.pdf
 # Checking wether we can generate some documentation
 # --------------------------------------------------
-
-AC_CHECK_PROG(ff_latex,latex,yes,no)
-AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
-AC_CHECK_PROG(ff_dvips,dvips,yes,no)
-# to translate the figure
-AC_CHECK_PROG(ff_pdf2ps,pdf2ps,yes,no)
-AC_CHECK_PROGS(EPSTOPDF,[epstopdf pstopdf],[false])
-AC_CHECK_PROG(ff_convert,convert,yes,no)
-if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes -a $ff_pdf2ps = yes -a $ff_convert = yes;
-then
-	AC_SUBST(DOCPS,"freefem++doc.ps")
-
-	AC_CHECK_PROG(ff_gzip,gzip,yes,no)
-	if test "$ff_gzip" = yes;
-	then
-		AC_SUBST(DOCPSGZ,"freefem++doc.ps.gz")
-	fi
-fi
+dnl 
+dnl AC_CHECK_PROG(ff_latex,latex,yes,no)
+dnl AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
+dnl AC_CHECK_PROG(ff_dvips,dvips,yes,no)
+dnl # to translate the figure
+dnl AC_CHECK_PROG(ff_pdf2ps,pdf2ps,yes,no)
+dnl AC_CHECK_PROGS(EPSTOPDF,[epstopdf pstopdf],[false])
+dnl AC_CHECK_PROG(ff_convert,convert,yes,no)
+dnl if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes -a $ff_pdf2ps = yes -a $ff_convert = yes;
+dnl then
+dnl 	AC_SUBST(DOCPS,"freefem++doc.ps")
+dnl 
+dnl 	AC_CHECK_PROG(ff_gzip,gzip,yes,no)
+dnl 	if test "$ff_gzip" = yes;
+dnl 	then
+dnl 		AC_SUBST(DOCPSGZ,"freefem++doc.ps.gz")
+dnl 	fi
+dnl fi
 
 # PDF documentation building sometimes poses problems because of pdfsync.sty. So we need to be able to disable it.
 # FFCS - 9/4/14 - need to disable PDF also during FFCS build (which does not use the resulting PDF).
 
-AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
-if test "$enable_pdf" != no
-then
-   AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
-   if test "$ff_pdflatex" = yes -a $EPSTOPDF != false -a $ff_convert = yes;
-   then
-	AC_SUBST(DOCPDF,"freefem++doc.pdf")
-   fi
-fi
+dnl AC_ARG_ENABLE(pdf,[  --disable-pdf	Disable PDF documentation building])
+dnl if test "$enable_pdf" != no
+dnl then
+dnl    AC_CHECK_PROG(ff_pdflatex,pdflatex,yes,no)
+dnl    if test "$ff_pdflatex" = yes -a $EPSTOPDF != false -a $ff_convert = yes;
+dnl    then
+dnl 	AC_SUBST(DOCPDF,"freefem++doc.pdf")
+dnl    fi
+dnl fi
 
 # Choosing compilation options for the standard version (in src/std)
 # ------------------------------------------------------------------
@@ -2153,8 +2153,7 @@ AC_OUTPUT(Makefile
     examples++-chapt3/Makefile
     examples++-bug/Makefile
     examples++-other/Makefile
-    examples++-3d/Makefile
-    DOC/Makefile)
+    examples++-3d/Makefile)
 
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
 AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
