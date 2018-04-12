@@ -7,6 +7,9 @@ http://www.freefem.org/ff++/linux.php      or  web/linux.php
 http://www.freefem.org/ff++/windows.php    or  web/windows.php
 http://www.freefem.org/ff++/macosx.php   or web/macosx.php
 
+
+Now (april 2018) the pdf doc is on github on https://github.com/FreeFem/FreeFem-doc-pdf/
+
 To use Some special configuration file 
 
 1) create  file config.param an use 
