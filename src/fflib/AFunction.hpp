@@ -2679,7 +2679,6 @@ template<class C,class Op=Unary_Op<C> >
 class  OneUnaryOperator : public OneOperator{
   typedef typename C::result_type R;
   typedef typename C::argument_type A; 
-   // aType r; //  return type 
     aType tA;
     public: 
     E_F0 * code(const basicAC_F0 & args) const 
@@ -2694,7 +2693,6 @@ class  OneUnaryOperator : public OneOperator{
 
 template<class R,class A=R,class CODE=E_F_F0s_<R,A> >
 class  OneOperator1s_ : public OneOperator {
-    aType r; //  return type
     typedef  R (*func)(Stack stack, const A &) ; 
     func  f;
     public: 
@@ -2708,7 +2706,7 @@ class  OneOperator1s_ : public OneOperator {
 
 template<class R,class A=R,class CODE=E_F_F0_<R,A> >
 class  OneOperator1_ : public OneOperator {
-    aType r,t0; //  return type
+    aType t0; //  return type
     typedef  R (*func)(const A &) ; 
     func  f;
     public: 
@@ -2733,7 +2731,7 @@ template<class R,class A,class B,class E> class E_F_F0F0_;
 
 template<class R,class A=R,class B=A,class CODE=E_F_F0F0_<R,A,B,E_F0> >
 class  OneOperator2_ : public OneOperator {
-    aType r,t0,t1; //  return type  type de f,  f(t1, t2) 
+    aType t0,t1; //  return type  type de f,  f(t1, t2)
     typedef typename  CODE::func  func;
     func f;
     public: 

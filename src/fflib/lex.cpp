@@ -524,6 +524,8 @@ bool mylex::AddMacro(string m,string def)
     char *macroname=newcopy(m.c_str());
     int nbparam =0;
     MacroData macroparm;
+    macroparm.f="";
+    macroparm.l=0;
     macroparm.d.push_back(def);
     MapMacroDef & MacroDef =listMacroDef->back();
     MapMacroDef::const_iterator i=MacroDef.find(macroname);

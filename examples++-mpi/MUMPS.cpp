@@ -113,14 +113,14 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     
         typedef typename  MUMPS_STRUC_TRAIT<R>::R MR; 
   SolverMumps(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_R, MPI_Comm* pcomm,int strategy=3,int matrank=0,KN<double> *rinfogg=0  ,KN<long> *infogg=0)
-    : comm( pcomm ? *pcomm :MPI_COMM_WORLD ),
+    :_id(new typename MUMPS_STRUC_TRAIT<R>::MUMPS ),comm( pcomm ? *pcomm :MPI_COMM_WORLD ),
       distributed(matrank<0),
       rinfog(rinfogg),infog(infogg)
   {
     if(pcomm) MPI_Comm_dup(comm,&comm);
     MPI_Comm_rank(comm, &mpirank);
     int master = mpirank==matrank;  
-    _id = new typename MUMPS_STRUC_TRAIT<R>::MUMPS ;
+
     _id->job = JOB_INIT;
     _id->par = 1;
     
@@ -309,10 +309,12 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
   };
   
   ~SolverMumps() {
-    _id->job = JOB_END;
-    mumps_c(_id);
     if(_id)
+    {
+        _id->job = JOB_END;
+      mumps_c(_id);
       delete _id;
+    }
       if(comm != MPI_COMM_WORLD) MPI_Comm_free(&comm);
   };
 };

@@ -2551,6 +2551,7 @@ bool SetDefault()
     DefSparseSolver<double>::solver =SparseMatSolver_R;
     DefSparseSolver<Complex>::solver =SparseMatSolver_C;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
+       return false;
 }
 
 bool SetMUMPSmpi()
@@ -2560,6 +2561,7 @@ bool SetMUMPSmpi()
     DefSparseSolver<double>::solver  =BuildSolverMUMPSmpi;
     DefSparseSolver<Complex>::solver =BuildSolverMUMPSmpi;    
     TypeSolveMat::defaultvalue  = TypeSolveMatdefaultvalue;
+       return false;
 }
 
 

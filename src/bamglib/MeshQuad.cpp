@@ -571,7 +571,7 @@ int  Triangles::SplitElement(int choice)
 	     if (ii<nbt) // good triangle
 	       kedge[3*ii+jj] = ks;
 	     Vertex &A=vertices[ks];
-	     Real8 aa,bb,cc,dd;
+	     Real8 aa=0,bb=0,cc=0,dd=0;
 	     if ((dd=Area2(v0.r,v1.r,A.r)) >=0)
 	       { // warning PB roundoff error 
 		 if (t.link && ( (aa=Area2( A.r    , t[1].r , t[2].r )) < 0.0 
@@ -584,7 +584,7 @@ int  Triangles::SplitElement(int choice)
 	       }
 	     
 	     else
-	       {
+             { 
 		 if (tt.link && ( (aa=Area2( A.r     , tt[1].r , tt[2].r )) < 0 
 				 ||   (bb=Area2( tt[0].r , A.r     , tt[2].r )) < 0 
 				 ||   (cc=Area2( tt[0].r , tt[1].r , A.r     )) < 0)) 

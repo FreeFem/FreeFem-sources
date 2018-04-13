@@ -338,7 +338,7 @@ int DistanceIso0(const Tet &K,double *f,double *fK)
         
     }
     else
-        fK[0]=fK[1]=fK[2]=fK[4]=0. ;//
+        fK[0]=fK[1]=fK[2]=fK[3]=0. ;//
     if(debug)
         cout << ret << " 3d DistanceIso0  " << np << " " <<fK[0] << " " << fK[1] << fK[2] << " " << fK[3] <<endl;
     return ret;
