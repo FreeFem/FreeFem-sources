@@ -406,8 +406,8 @@ public:
   virtual void getcoef( KN_<R> & x) const =0 ;
   // Add FH oct 2005
    bool ChecknbLine(int nn) const { return n==nn;}  
-   bool ChecknbColumn(int mm) const { return m==mm;} 
-
+   bool ChecknbColumn(int mm) const { return m==mm;}
+   virtual R trace() const {ffassert(n==m);  R t=R(), *p;  for(int i=0; i<n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
   // end ADD
   virtual bool sym() const {return false;}
 
@@ -471,7 +471,7 @@ public:
     
     
     {return MatriceProfile(this->n,0,0,0,U,pU);}
-
+   R trace() const {ffassert(this->n==this->m);  R t=R();  for(int i=0; i<this->n; ++i) t+= D[i]; return t; }
   void Solve(KN_<R> &x,const KN_<R> &b) const {
     /*if (typefac==0)  code faux // FH   nov 2006
       switch(typefac) 
@@ -634,6 +634,7 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
   R  operator()(int i,int j) const {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & operator()(int i,int j)  {R * p= pij(i,j) ;throwassert(p); return *p;}
   R & diag(int i)  {R * p= pij(i,i) ;throwassert(p); return *p;}
+    R trace() const {ffassert(this->n==this->m);  R t=R(),*p;  for(int i=0; i<this->n; ++i) {p=pij(i,i) ;if(p) t+= *p; } return t; }
   void SetBC (int i,double tgv) {
 	R * p= pij(i,i) ;
 	ffassert(p);

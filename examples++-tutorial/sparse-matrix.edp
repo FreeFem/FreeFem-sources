@@ -160,11 +160,11 @@ ml[]/=2.;
 	//cout << sparseA << endl;
 	sparseA = 2*sparseA+sparseA;
 	sparseA = 4*sparseA+sparseA*5; //  * 27
-	matrix sparseB=sparseA+sparseA+sparseA; ;
+	matrix sparseB=sparseA+sparseA+sparseA-sparseA+2*sparseA; 
 	//cout << sparseA << endl;
 	//cout << sparseB << endl; // *81 
 	cout << "sparseB = " << sparseB(0,0) << endl;
-  
+    cout << " trace = " << sparseB.trace << " == " <<  sparseA.trace*4 << endl; 
 	cout << " -------- block matrix \n " << endl;
 	matrix B = [ [sparseA, 0 , sparseA ], 
 		     [ 0, sparseA , 0 ] ,

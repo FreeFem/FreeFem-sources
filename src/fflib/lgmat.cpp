@@ -216,8 +216,27 @@ struct Op2_ListCMCMadd: public binary_function<list<triplet<R,MatriceCreuse<R> *
   }    
     
 };
+template<class R>
+struct Op2_ListCMCMsub: public binary_function<list<triplet<R,MatriceCreuse<R> *,bool> > *,
+list<triplet<R,MatriceCreuse<R> *,bool> > *,
+list<triplet<R,MatriceCreuse<R> *,bool> > *  >
+{  //  ... + ...
+    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef list<P> L;
+    typedef L * RR;
+    
+    static   RR f(const RR & a,const RR & b)
+    {
+        Op1_LCMd<R>::f(b); 
+        a->insert(a->end(),b->begin(),b->end());
+        
+        delete b;
+        return a;
+    }
+    
+};
 
-template<class R> 
+template<class R,int cc=1>
 struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
                                               list<triplet<R,MatriceCreuse<R> *,bool> > *,                                               
                                                list<triplet<R,MatriceCreuse<R> *,bool> > *  >
@@ -230,14 +249,14 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
   static   RR f(const MM & a,const RR & b)  
   { 
     
-    b->push_front(make_triplet<R,MatriceCreuse<R> *>(R(1.),a->A,false));
+    b->push_front(make_triplet<R,MatriceCreuse<R> *>(R(cc),a->A,false));
     return b;
   }
     
     
 };
 
-template<class R> 
+template<class R,int cc=1>
 struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *,bool> > *,                                                                                              
                                                Matrice_Creuse<R> * ,
                                                list<triplet<R,MatriceCreuse<R> *,bool> > *>
@@ -250,14 +269,14 @@ struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *
   static   RR f(const RR & a,const MM & b)  
   { 
     
-    a->push_back(make_triplet<R,MatriceCreuse<R> *,bool>(R(1.),b->A,false));
+    a->push_back(make_triplet<R,MatriceCreuse<R> *,bool>(R(cc),b->A,false));
     return a;
   }
     
     
 };
 
-template<class R> 
+template<class R,int cc=1>
 struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
                                               Matrice_Creuse<R> * ,
                                               list<triplet<R,MatriceCreuse<R> *,bool> > *>
@@ -270,7 +289,7 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
   static   RR f(const MM & a,const MM & b)  
   { 
     L * l=to(a);
-    l->push_back(make_triplet<R,MatriceCreuse<R> *>(R(1.),b->A,false));
+    l->push_back(make_triplet<R,MatriceCreuse<R> *>(R(cc),b->A,false));
     return l;
   }
     
@@ -1847,8 +1866,16 @@ template <class R>
      A->A->getcoef(x);}
   void   set_mat_coef(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->NbCoef() );
      A->A->setcoef(x);}
+     R trace() { return A->A->trace(); }
  };
- 
+
+template<class R>
+R get_trace_mat(Matrice_Creuse<R> * p)
+{
+    return p ? p->A->trace():0.;
+    
+}
+
 template<class R>
 TheDiagMat<R> thediag(Matrice_Creuse<R> * p)
  {  return  TheDiagMat<R>(p);}
@@ -2931,7 +2958,16 @@ TheOperators->Add("+",
 //	new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MC,t_lM),
         new OneBinaryOperator<Op2_ListMMadd<R> >
        
-       ); 
+       );
+    TheOperators->Add("-",
+                      new OneBinaryOperator<Op2_ListCMCMsub<R> >,
+                      new OneBinaryOperator<Op2_ListCMMadd<R,-1> >,
+                      new OneBinaryOperator<Op2_ListMCMadd<R,-1> >,
+                      //    new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MCt,t_lM),
+                      //    new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MC,t_lM),
+                      new OneBinaryOperator<Op2_ListMMadd<R,-1> >
+                      
+                      );
  TheOperators->Add("-",  
 	 new OneUnaryOperator<Op1_LCMd<R> >
      );
@@ -2940,13 +2976,14 @@ TheOperators->Add("+",
  Add<Matrice_Creuse<R> *>("nbcoef",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("nnz",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("size",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
-    
+ Add<Matrice_Creuse<R> *>("trace",".",new OneOperator1<R,Matrice_Creuse<R>* >(get_trace_mat<R>) );
  
  Add<Matrice_Creuse<R> *>("diag",".",new OneOperator1<TheDiagMat<R> ,Matrice_Creuse<R> *>(thediag<R>) );
  Add<Matrice_Creuse<R> *>("coef",".",new OneOperator1<TheCoefMat<R> ,Matrice_Creuse<R> *>(thecoef<R>) );
 
 // Add<Matrice_Creuse<R> *>("setdiag",".",new OneOperator2<long,Matrice_Creuse<R> *,KN<R> *>(set_diag<R>) );
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
+    
  TheOperators->Add("<-", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(init_get_mat_daig<R>) );
     TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
  
