@@ -160,8 +160,7 @@ long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
   else
     {
       ret=MPI_Isend((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm,request);
-      if(rq) *rq=*request;
-      else MPI_Request_free(request); 
+      *rq=*request;
     }
     return ret;
 }
@@ -2364,7 +2363,7 @@ AnyType ClearReturnKK_(Stack stack, const AnyType & a)
 //template<class RR,class A,class B>  fMPI_Request*,KN<MPI_Request>*,long
 fMPI_Request * get_elementp_( KN<MPI_Request> * const & a,const long & b){ 
   if( a==0 || b<0 || a->N() <= b) 
-    { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " KN<MPI_Request> * " << endl;
+    { if(a) cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " KN<MPI_Request> * " << endl;
       ExecError("Out of bound in operator []");}
   return  reinterpret_cast<fMPI_Request *> (&((*a)[b]));}// bofBof ... 
 
