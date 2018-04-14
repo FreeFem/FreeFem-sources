@@ -110,7 +110,7 @@ void *M_malloc(size_t size,char *call) {
     return(mstack[i].ptr);
   }
   else {
-    fprintf(stderr,"M_malloc: unable to store %10Zd bytes pointer. table full\n",
+    fprintf(stderr,"M_malloc: unable to store %10d bytes pointer. table full\n",
 	    size);
     return(0);
   }
