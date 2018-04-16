@@ -22,7 +22,7 @@
        src="https://scan.coverity.com/projects/15433/badge.svg"/>
 </a>
 
-| Branch | Ubuntu All | Ubuntu No | MacOSX All | MacOSX No | Windows All | Windows No |
+| Branch | Ubuntu All<sup>1</sup> | Ubuntu No<sup>1</sup> | MacOSX All<sup>2</sup> | MacOSX No<sup>3</sup> | Windows All | Windows No |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Develop | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-MacOSXNo/) |  |  |
 | Master | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXNo/) |  |  ||
@@ -47,6 +47,12 @@ Have a look on the [Wiki](https://github.com/FreeFem/FreeFem-sources/wiki)!
 
 All: all dependency packages are installed (computer with root access).<br/>
 No : dependency packages are not installed (computer without root access).
+
+<sup>1</sup>: Ubuntu 16.04 x86
+
+<sup>2</sup>: mac OS X 10.13
+
+<sup>3</sup>: mac OS X 10.9
 
 __Executed commands:__
 
