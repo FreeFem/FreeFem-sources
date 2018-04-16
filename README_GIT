@@ -1,116 +1,173 @@
+<!----------------------------------------------------------------------------------->
+<!--- This file is part of FreeFem++.                                             --->
+<!--- Laboratoire Jacques-Louis Lions                                             --->
+<!--- Sorbonne Université, UMR 7598, Paris, F-75005 France                        --->
+<!---                                                                             --->
+<!--- Foobar is free software: you can redistribute it and/or modify              --->
+<!--- it under the terms of the GNU Lesser General Public License as published by --->
+<!--- the Free Software Foundation, either version 3 of the License, or           --->
+<!--- (at your option) any later version.                                         --->
+<!---                                                                             --->
+<!--- Foobar is distributed in the hope that it will be useful,                   --->
+<!--- but WITHOUT ANY WARRANTY; without even the implied warranty of              --->
+<!--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               --->
+<!--- GNU Lesser General Public License for more details.                         --->
+<!---                                                                             --->
+<!--- You should have received a copy of the GNU Lesser General Public License    --->
+<!--- along with Foobar.  If not, see <http://www.gnu.org/licenses/>.             --->
+<!----------------------------------------------------------------------------------->
 
-# Using git  for FreeFem++ source files management
-#  april 2018 
-#
-# ======================================================================
-# Laboratoire Jacques-Louis Lions
-# Sorbonne Université, UMR 7598, Paris, F-75005 France
-# ======================================================================
-# This file is part of Freefem++
-# 
-# Freefem++ is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation; either version 2.1 of
-# the License, or (at your option) any later version.
-# 
-# Freefem++ is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with Freefem++; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-# ======================================================================
-#+STARTUP: showeverything
-# ======================================================================
-# headeralh brief="Using git for FreeFem++ source files management" default=0 freefem multipleauthors org start=25/03/ upmc
 
-The main difference with the previous CVS setup or mercurail  is that every working
-copy of FreeFem++ contains a complete git database of all source
-files (in a subdirectory called '.git').
+# Using git for FreeFem++ source files management
+_april 2018_
 
-* Creating a local copy of the FreeFem++ repository
-** from the web in directory ff-git 
-   git clone https://github.com/FreeFem/FreeFem-sources ff-git
+The main difference with the previous CVS setup or mercurial is that every working
+copy of FreeFem++ contains a complete git database of all source files
+(in a subdirectory called `.git`).
 
-** create the ~/.gitconfig   file  for commit like: 
+See [git - the simple guide](http://rogerdudler.github.io/git-guide/).
+
+## Create a local copy of the FreeFem++ repository
+
+### From the web in directory ff-git
+
+```bash
+git clone https://github.com/FreeFem/FreeFem-sources ff-git
+```
+
+## Create the ~/.gitconfig file for commit like:
+
+Change to your own name:
+```
 [user]
 	name = Frederic Hecht
 	email = frederic.hecht@upmc.fr
 [push]
 	default = simple
+```
 
+## Working with a repository
 
-* Working with a repository
+All the commands below should be run from a directory of the current
+working copy.
 
-  All the commands below should be run from a directory of the current
-  working copy.
+### Adding a file
 
-** Adding a file
-   git add filename
-** Deleting a file
-   git rm filename
-** Deleting a file only from the Git repository    
-   git rm --cached  filenaem
-** Commiting all local changes to the local repository
-   git commit -a -m "description of changes"
-** Checking if there are some uncommitted local changes
-   git  status
+```bash
+git add filename
+```
 
-* Exchanging changes with other repositories
+### Deleting a file
+
+```bash
+git rm filename
+```
+
+### Deleting a file only from the Git repository
+
+```bash
+git rm --cached filename
+```
+
+### Commiting all local changes to the local repository
+
+```bash
+git commit -a -m "description of changes"
+```
+
+### Checking if there are some uncommitted local changes
+
+```bash
+git status
+```
+
+## Expanding changes with other repositories
+
 ** Pulling changes from another (readable) repository
 
-** Pushing changes into another (writable) repository branch 
-  git push origin master
-  change master to whatever branch you want to push your changes to. 
-  
-  repository to a remote server, you need to add it with
-  git remote add origin <server>
+### Pushing changes into another (writable) repository branch
 
-** create a new branch named "feature_x" and switch to it using
-     git checkout -b feature_x
-**  switch back to master
-     git checkout master	 
-    and delete the branch again
-     git branch -d feature_x	
-**  a branch is not available to others unless you push the branch to your 
-    git push origin <branch>
+```bash
+git push origin master
+```
+Change master to whatever branch you want to push your changes to.
 
+### Connect your repository to a remote server
 
-see http://rogerdudler.github.io/git-guide/ for  a basic  guide	
+```bash
+git remote add origin <server>
+```
 
+### Create a new branch named `feature_x` and switch to it using
 
-Developers that are not part of the official FreeFem team can fork the FreeFem-sources repository on their GitHub account, make modifications locally and submit a pull request to the FreeFem-sources repository
+```bash
+git checkout -b feature_x
+```
 
+### Switch back to master
 
-* Compile FreeFem++ 
-** first to restore build file.use (automake  > 1.13) 
-   autoreconf -i 
- * or extract  build with 
-   tar zxvf AutoGeneratedFile.tar.gz 
-** build makefile and compilte all third part library
-   ./configure --enable-download
- * and  compile petsc/slepc  if need (more than 30 mn) not mandatory
-   cd download/ff-petsc
-   make petsc-slepc SUDO=sudo (if need root access to install dir)
-   make petsc-slepc
-   ./configure --enable-download
- * of for a basic version with no downlad 
-   ./configure 
-** to build 
-   make 
-** to check (warning some test fail )
+```bash
+ git checkout master
+ ```
+
+### Delete the `feature_x` branch
+
+```bash
+git branch -d feature_x
+```
+
+### A branch is not available to others unless you push the branch
+
+```bash
+git push origin <branch>
+```
+
+## External developers
+
+Developers that are not part of the official FreeFem++ team can fork
+the FreeFem-sources repository on their GitHub account, make modifications
+locally and submit a pull request to the FreeFem-sources repository.
+
+# Compile FreeFem++
+
+First to restore build file:
+
+ * use `automake` (>1.13)
+	```bash
+	autoreconf -i
+	```
+ * or extract build file using
+	```bash
+	tar zxvf AutoGeneratedFile.tar.gz
+	```
+
+Build the Makefile:
+```bash
+./configure --enable-download
+```
+
+Optionnaly, compile PETSc/SLEPc if needed (more than 30 min):
+```bash
+cd download/ff-petsc
+make petsc-slepc [SUDO=sudo]
+./reconfigure
+```
+
+Build:
+```bash
+make
+```
+
+Check (warning some tests fail):
+```bash
 make check
-** install
-   sudo make install 
- * or
-   make install
+```
 
-* File info
-# Local Variables:
-# mode:org
-# mode:visual-line
-# ispell-local-dictionary:"british"
-# coding:utf-8
-# End:
+Install:
+```bash
+sudo make install
+```
+or
+```bash
+make install
+```
