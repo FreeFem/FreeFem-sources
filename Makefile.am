@@ -13,7 +13,7 @@ SUBDIRS=download src  examples++-load  examples++-mpi \
 EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
-WindowsPackage.m4 README README_ARPACK  README_WINDOWS README_MAC \
+WindowsPackage.m4 README_COMPILATION.md README_ARPACK.md README_WINDOWS.md README_MAC.md \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4 ax_lib_hdf5.m4  \
 freefem++.spec crimson-freefem++.zip \
@@ -32,7 +32,7 @@ FreeFem++.app.tgz
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 
-FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README README_WINDOWS README_MAC BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
+FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README_COMPILATION.md README_WINDOWS.md README_MAC.md BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
 mode-mi-edp.zip \
 examples++-tutorial/aile.msh examples++-tutorial/xyf \
 examples++-3d/dodecaedre01.mesh  \
