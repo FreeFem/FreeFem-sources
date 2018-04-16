@@ -110,7 +110,7 @@ void *M_malloc(size_t size,char *call) {
     return(mstack[i].ptr);
   }
   else {
-    fprintf(stderr,"M_malloc: unable to store %10Zd bytes pointer. table full\n",
+    fprintf(stderr,"M_malloc: unable to store %10zd bytes pointer. table full\n",
 	    size);
     return(0);
   }
@@ -153,7 +153,7 @@ void *M_calloc(size_t nelem, size_t elsize,char *call) {
     return(mstack[i].ptr);
   }
   else {
-    fprintf(stderr,"M_calloc: unable to allocate %10Zd bytes. table full\n",
+    fprintf(stderr,"M_calloc: unable to allocate %10zd bytes. table full\n",
 	    nelem*elsize);
     return(0);
   }
@@ -228,12 +228,12 @@ void primem(int np) {
   if ( memsize ) {
     fprintf(stdout,"\n  -- MEMORY REQUIREMENTS\n");
     if (memsize > 1024*1024)
-      fprintf(stdout,"  Total size :  %10Zd Mbytes",
+      fprintf(stdout,"  Total size :  %10zd Mbytes",
 	      (long int)(memsize/(1024.*1024.)));
     else if (memsize > 1024)
-      fprintf(stdout,"  Total size :  %10Zd Kbytes",(long int)(memsize/1024.));
+      fprintf(stdout,"  Total size :  %10zd Kbytes",(long int)(memsize/1024.));
     else
-      fprintf(stdout,"  Total size :  %10Zd bytes ",(long int)memsize);
+      fprintf(stdout,"  Total size :  %10zd bytes ",(long int)memsize);
     fprintf(stdout,"    (i.e. %d bytes/point)\n",memsize / np);
   }
 }

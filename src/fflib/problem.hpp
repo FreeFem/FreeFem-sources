@@ -138,7 +138,7 @@ class C_args: public E_F0mps  {public:
   operator aType () const { return atype<const C_args *>();}         
   
   static  E_F0 * f(const basicAC_F0 & args) { return new C_args(args);}
-  bool Zero() { return !largs.empty();}
+  bool Zero() const  { return !largs.empty();}
   bool IsLinearOperator() const;
   bool IsBilinearOperator() const;
 };
