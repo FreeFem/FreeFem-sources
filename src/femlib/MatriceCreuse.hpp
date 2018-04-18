@@ -640,7 +640,7 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
 	ffassert(p);
 	if( tgv>=0) *p=tgv;
 	else  {
-	    ffassert(!symetrique); 
+            ffassert(!symetrique || (tgv<-1.5) );// hack for P-H Tournier HPDD in test april 2018 FH. 
 	    for (int k=lg[i];k<lg[i+1]; ++k) a[k]=0;// put the line to Zero.
 	    *p = 1. ; // and the diag coef to 1.
 	}  

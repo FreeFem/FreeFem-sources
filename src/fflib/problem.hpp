@@ -128,6 +128,7 @@ class C_args: public E_F0mps  {public:
           {
             const C_args * a = dynamic_cast<const C_args *>(args[i].LeftValue());
             for (list<C_F0>::const_iterator i=a->largs.begin();i!=a->largs.end();i++)
+              if( ! i->Zero()) // skip Zero term
               largs.push_back(*i);                   
           } 
         else 
@@ -138,7 +139,7 @@ class C_args: public E_F0mps  {public:
   operator aType () const { return atype<const C_args *>();}         
   
   static  E_F0 * f(const basicAC_F0 & args) { return new C_args(args);}
-  bool Zero() const  { return !largs.empty();}
+  bool Zero()  const { return largs.empty();} // BIG WARNING April and wrong functon FH v 3.60 .......
   bool IsLinearOperator() const;
   bool IsBilinearOperator() const;
 };
