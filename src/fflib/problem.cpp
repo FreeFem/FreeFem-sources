@@ -4509,14 +4509,19 @@ void Check(const Opera &Op,int N,int  M)
      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
      bool sptrclean=true;
      //     sptr->clean(); // modif FH mars 2006  clean Ptr
-    
+
     int ktbc=0, nbon =0;
     bool Aii = A && A->n == A->m;
+
     int Nbcomp=Vh.N;
     Check(bc,Nbcomp);
     ffassert(Vh.N == Uh.N);
     TabFuncArg tabexp(stack,Vh.N);
     KN<double> buf(Vh.MaximalNbOfDF()*last_operatortype*Vh.N);
+    int ndofBC = Aii ?  A->n : 1;
+    KN<char> onBC(ndofBC);
+    onBC= '\0';
+      
     KN<R> gg(buf);
     if ( B && B->N() != Vh.NbOfDF) ExecError("AssembleBC size rhs and nb of DF of Vh");
     if(verbosity>99) cout << " Problem : BC_set "<< typeid(R).name() << " " ;
@@ -4623,7 +4628,7 @@ void Check(const Opera &Op,int N,int  M)
                       // cout << k << " df=" << df <<  " g= " << gg[df] <<" " << gg(FromTo(0,2)) << endl;
                       int ddf=K(df);
                       // AA(ddf,ddf) =tgv;
-                      if (Aii)  A->SetBC(ddf, tgv);// change 21 dec 2010 FH (Hack of ILU)
+                        if (Aii)  onBC[ddf]='1'; ;//A->SetBC(ddf, tgv);// change 21 dec 2010 FH (Hack of ILU)
                       if (B) (*B)[ddf]=  tgv1*gg[df]; 
                       if (X) (*X)[ddf]=gg[df];
                     }
@@ -4632,6 +4637,7 @@ void Check(const Opera &Op,int N,int  M)
 	      }
           }
       }
+    if( Aii) A->SetBC(onBC,tgv);
     if (! ktbc  && nbon && verbosity ) 
       {
         cout << " Warning: -- Your set of boundary condition is incompatible with the mesh label." << endl;
@@ -4659,6 +4665,10 @@ template<class R>
     
     int ktbc=0, nbon =0;
     bool Aii = A && A->n == A->m;
+    int ndofBC = Aii ?  A->n : 1;
+    KN<char> onBC(ndofBC);
+    onBC= '\0';
+      
     int Nbcomp=Vh.N;
     Check(bc,Nbcomp);
     assert(Vh.N == Uh.N);
@@ -4764,7 +4774,8 @@ template<class R>
 		      {
 			int ddf=K(df);
 			// cout << ddf << " " << df << " " << Vdf[df] << " " << it << " ib = " << ib  << " == " << Th(Th[it][df]) <<  endl;
-			if (Aii)  A->SetBC(ddf,tgv);// change 21 dec 2010 FH (Hack of ILU)
+			//if (Aii)  A->SetBC(ddf,tgv);// change 21 dec 2010 FH (Hack of ILU)
+                        if (Aii)  onBC[ddf]='1'; ;//   april 2018 FH
 			if (B) (*B)[ddf]=tgv1*Vdf[df]; 
 			if (X) (*X)[ddf]=Vdf[df];
 		      }
@@ -4773,6 +4784,7 @@ template<class R>
 	      }
           }
       }
+        if( Aii) A->SetBC(onBC,tgv);
     if (! ktbc  && nbon && verbosity ) 
       {
         cout << " Warning: -- Your set of boundary condition is incompatible with the mesh label." << endl;

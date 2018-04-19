@@ -389,7 +389,8 @@ public:
   virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
-  virtual void SetBC(int i,double tgv)=0; 
+  virtual void SetBC(int i,double tgv)=0;
+  virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<n; ++i)  if(wbc[i]) SetBC(i,tgv);}
   virtual R & operator()(int i,int j)=0;
   virtual R * pij(int i,int j) const =0; // Add FH 
   virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
@@ -499,6 +500,7 @@ public:
       if( tgv>=0) D[i]=tgv;
       else  { ffassert(tgv<0); }  // to hard ..
   }
+    
   R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
   R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
   MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
@@ -640,12 +642,40 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
 	ffassert(p);
 	if( tgv>=0) *p=tgv;
 	else  {
-            ffassert(!symetrique || (tgv<-1.5) );// hack for P-H Tournier HPDD in test april 2018 FH. 
+            ffassert(!symetrique);// 
 	    for (int k=lg[i];k<lg[i+1]; ++k) a[k]=0;// put the line to Zero.
 	    *p = 1. ; // and the diag coef to 1.
 	}  
     }
     
+void SetBC (char * wbc,double tgv)
+    {
+        for(int i=0; i< this->n; ++i)
+            if(tgv<0)
+            {
+                
+                if( wbc[i] )
+                {
+                    for (int k=lg[i];k<lg[i+1]; ++k)
+                        if( cl[k]==i)
+                            a[k] = 1.;
+                        else
+                            a[k]=0;// put the line to Zero.
+                }
+                else if(tgv < -1.999)
+                    for (int k=lg[i];k<lg[i+1]; ++k)
+                    {
+                        int j = cl[k];
+                        if( wbc[j] ) a[k]=0;//
+                    }
+            }
+            else  if( wbc[i] ) { // tgv >= 0
+                R * p= pij(i,i) ;
+                ffassert(p);
+                *p=tgv;
+            }
+    }
+  
   void SetSolver(const VirtualSolver & s){solver=&s;}
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}
