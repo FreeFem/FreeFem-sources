@@ -16,7 +16,7 @@ INSTALL INSTALL-MacOSX INNOVATION \
 WindowsPackage.m4 README_COMPILATION.md README_ARPACK.md README_WINDOWS.md README_MAC.md \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4 ax_lib_hdf5.m4  \
-freefem++.spec crimson-freefem++.zip \
+freefem++.spec \
 Install-MacOS.command.in \
 examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
 examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \

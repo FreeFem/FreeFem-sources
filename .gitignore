@@ -524,7 +524,6 @@ examples++-chapt3/all.edp
 examples++-chapt3/freefem++.pref
 examples++-chapt3/graph.txt
 examples++-chapt3/regtests-nw.log
-examples++-chapt3/regtests.edp
 examples++-eigen/.*.eps
 examples++-eigen/.*.log
 examples++-eigen/Makefile
@@ -564,7 +563,6 @@ examples++-load/movemeshglumesh.mesh
 examples++-load/pippo.data
 examples++-load/pippo.dx
 examples++-load/regtests-.*.log
-examples++-load/regtests.edp
 examples++-load/sphere2region.mesh
 examples++-load/spherewithahole.mesh
 examples++-load/spherewithtworegion.mesh
@@ -597,7 +595,6 @@ examples++-tutorial/makeref.edp
 examples++-tutorial/mm.faces
 examples++-tutorial/mm.points
 examples++-tutorial/plot.gp
-examples++-tutorial/regtests.edp
 examples++-tutorial/toto..*
 examples++-tutorial/u.txt
 examples++/.*.BB
