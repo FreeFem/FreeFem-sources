@@ -18,6 +18,9 @@
 #include "ff++.hpp"
 #include "AddNewFE.h"
 
+#ifdef __INTEL_COMPILER
+#pragma optimize("", off)
+#endif
 
 namespace Fem2D {
     
