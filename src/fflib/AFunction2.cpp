@@ -66,7 +66,7 @@ class vectorOfInst : public  E_F0mps { public:
    void  eval(Stack s,int j=-1)  const {
        if(j>=0) j = n-j;
        else j =0;
-       if(verbosity>99) cout << " eval vectorOfInst " << j << " " << n << endl;
+       if(verbosity>999) cout << " eval vectorOfInst " << j << " " << n << endl;
         for (int i=j;i<n;++i)
         {
             ffassert(v[i]);
@@ -875,7 +875,7 @@ AnyType ListOfInst::operator()(Stack s) const {
     }
     catch( E_exception & e) 	
     {
-        if(verbosity>9) cout << " catch E_exception " << i << " " << lsldel[i]  << endl;
+        if(verbosity>999) cout << " catch E_exception " << i << " " << lsldel[i]  << endl;
         if(atclose) {atclose->eval(s,lsldel[i]);}// Add sep 2016  FH for clean init varaible
 	if (e.type() != E_exception::e_return)  
 	    sptr->clean(); // pour ne pas detruire la valeur retourne  ...  FH  jan 2007
@@ -883,7 +883,7 @@ AnyType ListOfInst::operator()(Stack s) const {
     }
     catch(...)
     {
-        if(verbosity>99) cout << " catch ....  " << i << " " << lsldel[i]  << endl;
+        if(verbosity>999) cout << " catch ....  " << i << " " << lsldel[i]  << endl;
         if(atclose) {atclose->eval(s,lsldel[i]);}
 	sptr->clean();
 	throw; 
