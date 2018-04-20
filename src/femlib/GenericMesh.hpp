@@ -842,7 +842,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                                 {
                                     nbchangeorient++;
                                     borderelements[ke].changeOrientation();
-                                    if(verbosity>1) cout << " changeOrientation face:"<< ke << endl;
+                                    if(verbosity>2) cout << " changeOrientation face:"<< ke << endl;
                                     swap(nk,nkk);
                                     swap(k,kk);
                                 }
@@ -1321,7 +1321,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	int  nbhasheq = nbequibe ? of+nt : 1;
 	HashTable<Key,Key> equi(nbmaxeq,nbhasheq); 
 	  //  constuction of item translation for 
-	  if(verbosity>2)
+	  if(verbosity>9)
 	  cout << " nb equi be :  " << nbequibe << endl;
 	  for(int ieq=0,keq=0;keq<nbequibe;++keq)
 	    {
@@ -1534,8 +1534,8 @@ void GenericMesh<T,B,V>::Buildbnormalv()
 	    kk=ElementAdj(k,ii);
 	    if (kk<0 || kk==k) nb++;
 	}
-    if(verbosity>2)
-	cout << " number of real boundary  " << nb << endl;
+    if(verbosity>4)
+	cout << " number of real boundary element " << nb << endl;
     bnormalv= new Rd[nb];
     Rd *n=bnormalv;
     for (int k=0;k<nt;k++)
@@ -1569,7 +1569,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
     l += nt*(sizeof(int)*(nve + 1));
     l += nv*( sizeof(int) + sizeof(double)*d);
     l += nbe*(sizeof(int)*(nvbe+1));
-    if(verbosity>1)
+    if(verbosity>3)
        cout << "Serialize gmesh " << l << " " << nve << " " << nvbe << endl;
     Serialize  serialized(l,GenericMesh_magicmesh);
     // cout << l << magicmesh << endl;
@@ -1581,7 +1581,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
     serialized.put( pp,nt);
     serialized.put( pp,nv);
     serialized.put( pp,nbe);
-    if (verbosity>2) 
+    if (verbosity>9)
 	cout << " GenericMesh Serialized : " << l << " "  << nt << " " << nv << " " << nbe << endl;
     for (int i=0;i<nv;i++)
       {

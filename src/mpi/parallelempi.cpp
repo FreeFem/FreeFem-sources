@@ -383,7 +383,7 @@ struct MPIrank {
  // KNM ***********************************
   
   const MPIrank & Bcast(Fem2D::Mesh const *&  a) const {
-    if(verbosity>1) 
+    if(verbosity>100)
       cout << " MPI Bcast  (mesh *) " << a << endl;
     Serialize  *buf=0;
     long nbsize=0;
@@ -396,7 +396,7 @@ struct MPIrank {
     if (who != mpirank)
       buf= new Serialize(nbsize,Fem2D::Mesh::magicmesh);
     assert(nbsize);
-    if(verbosity>2) 
+    if(verbosity>200)
       cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
     
     WBcast( (char *)(*buf),nbsize,  who,comm);     
@@ -415,7 +415,7 @@ struct MPIrank {
    }
   
   const MPIrank & Bcast(Fem2D::Mesh3 const *&  a) const {
-    if(verbosity>1) 
+    if(verbosity>100)
       cout << " MPI Bcast  (const mesh3 *) " << a << endl;
     Serialize  *buf=0;
     long  nbsize=0;
@@ -428,7 +428,7 @@ struct MPIrank {
     if (who != mpirank)
       buf= new Serialize(nbsize,Fem2D::GenericMesh_magicmesh);
     assert(nbsize);
-    if(verbosity>2) 
+    if(verbosity>200)
       cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
     
     WBcast( (char *)(*buf),nbsize,  who,comm);     
@@ -447,7 +447,7 @@ struct MPIrank {
   template<class R>
   const MPIrank & Bcast(Matrice_Creuse<R> &  a) const
     {
-      if(verbosity>1) 
+      if(verbosity>100) 
 	cout << mpirank <<  ":  MPI Bcast " << who << "  (Matrice_Creuse &) " << &a << " " << a.A << endl;
       MatriceMorse<R> *mA=0;
       int ldata[4]={0,0,0,0};

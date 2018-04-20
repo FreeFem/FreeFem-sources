@@ -49,6 +49,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	  FLIBS='$(FLIBS)' \
 	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' \
 	 --with-blas='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
+	 -rm -rf ../include/coin
 	touch $(SRCDIR)/FAIT	
 
 # FFCS - avoid remaking install every time
