@@ -1,6 +1,6 @@
 #!/bin/sh
-# "-DFF__FVER=$(PACKAGE_VERSION)" 
-# "-DFF_BINDIR=$(bindir)" 
+# "-DFF__FVER=$(PACKAGE_VERSION)"
+# "-DFF_BINDIR=$(bindir)"
 # "-DFF__DATADIR=$(pkgdatadir)
 #  "FFBIN="@prefix@"/bin
 ff_desktop="$HOME/Desktop/FreeFem++-""3.60"
@@ -12,22 +12,22 @@ echo Install /etc/paths.d/FreeFem++ file:  "/usr/local/ff++/openmpi-2.1/3.58/bin
 echo "/usr/local/ff++/openmpi-2.1/3.58/bin" > /etc/paths.d/FreeFem++
 chmod a+r /etc/paths.d/FreeFem++
 echo " Try to Clean old file version "
-if [ -d  /usr/local/bin ] ; then  
+if [ -d  /usr/local/bin ] ; then
   cd /usr/local/bin
   for i in  FreeFem++ FreeFem++-CoCoa FreeFem++-mpi FreeFem++-nw bamg cvmsh2 ff-c++ ff-get-dep ff-mpirun ff-pkg-download ffglut ffmedit; 
-  do 
+  do
 
-      if [  -f  "$i" ] ; then 
+      if [  -f  "$i" ] ; then
 	  echo " clean $i "
 	  rm "$i";
       fi
   done
 
 
-echo ln -s /usr/local/ff++/openmpi-2.1/3.58/bin/FreeFem++-CoCoa  /usr/local/bin/ 
-ln -s /usr/local/ff++/openmpi-2.1/3.58/bin/FreeFem++-CoCoa  /usr/local/bin/ 
+echo ln -s /usr/local/ff++/openmpi-2.1/3.58/bin/FreeFem++-CoCoa  /usr/local/bin/
+ln -s /usr/local/ff++/openmpi-2.1/3.58/bin/FreeFem++-CoCoa  /usr/local/bin/
 
 fi
-# bluid new link to new 
+# bluid new link to new
 
 
