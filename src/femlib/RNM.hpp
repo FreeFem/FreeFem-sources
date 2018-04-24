@@ -1031,7 +1031,7 @@ class KN :public KN_<R> { public:
 //       { if(this->unset()) set(new R[A1x.v.N()],A1x.v.N());KN_<R>::operator=(A1x);return *this;}
   // correcton aout 2007 FH  add N,M flied in VirtualMatrice
    KN& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
-        { if(this->unset() && Ax.A->N ) this->set(new R[Ax.A->N],Ax.A->N);KN_<R>::operator=(Ax);return *this;}
+        { if(this->unset() && Ax.A && Ax.A->N ) this->set(new R[Ax.A->N],Ax.A->N); if(Ax.A) KN_<R>::operator=(Ax);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
         { if(this->unset()) this->set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
    KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)  
