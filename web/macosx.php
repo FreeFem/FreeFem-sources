@@ -53,6 +53,7 @@ nloaded from > Anywhere)<A>
 
 
 <br><p class="p1">Take the file from and download </p> 
+	<? pfile($m13file,"MacOS 10.13 (with openmpi,petc), ifort MKL     ") ?>		
 	<? pfile($m12file,"MacOS 10.12 (with openmpi,petc), ifort MKL     ") ?>		
 	<? pfile($m11file,"MacOS 10.11 (with openmpi,petc), ifort MKL     ") ?>		
 	<? pfile($m10file,"MacOS 10.10 (with openmpi,petc), ifort MKL    ") ?>		
@@ -78,7 +79,90 @@ nloaded from > Anywhere)<A>
 </span></p>
 <p class="p1"><span class="s1"><br>
 </span></p>
-<p class="p1"><span class="s1"><b>To compile a full version of FreeFem++ under MacOS<span class="Apple-converted-space"> </span></b></span></p>
+<p class="p1"><span class="s1"><b>(In progress (May 2018 FH) ) To compile a full version of FreeFem++ under MacOS<span class="Apple-converted-space"> </span></b></span></p>
+<p class="p1"><span class="s1">---------------------------------------------------------------------------</span></p>
+<p class="p1"><span class="s1">First download the tar.gz file contening source from<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1">or you can get the latest source from an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with the following unix shell commands :</span></p>
+<p class="p6"><span class="s1"># git clone https://github.com/FreeFem/FreeFem-sources ff++<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><b>Under Hight Sierra or better<span class="Apple-converted-space">  </span>(10.13)<span class="Apple-converted-space">  </span>2015 ( xcode 9.3 <span class="Apple-converted-space">  </span>form scratch)</b></span></p>
+<p class="p1"><span class="s1"><b>-------------------------------------------------</b></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>remark: All line beginning by # are<span class="Apple-converted-space">  </span>shell command in terminal.<span class="Apple-converted-space"> </span></span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><br>
+</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>1) install xcode  ,<span class="Apple-converted-space"> </span></span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>2) to install<span class="Apple-converted-space">  </span>the xcode command line tools <span class="Apple-converted-space"> </span></span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p5"><span class="s1">#<span class="Apple-converted-space">  </span>gcc<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1">answer to the dialogue<span class="Apple-converted-space">  </span>box</span></p>
+<p class="p1"><span class="s1">to check after</span></p>
+<p class="p7"><span class="s1"># clang++ -v</span></p>
+<p class="p8"><span class="s1">Apple LLVM version 9.1.0 (clang-902.0.39.1)</span></p>
+<p class="p8"><span class="s1">Target: x86_64-apple-darwin17.5.0</span></p>
+<p class="p8"><span class="s1">Thread model: posix</span></p>
+<p class="p8"><span class="s1">InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin</span></p>
+<p class="p1"><span class="s1"><br>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>3) install<span class="Apple-converted-space">  </span>ifort or gfortran with brew installer</p>
+<p class="p1"><span class="s1"><br>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>4) install </span><span class="s6">mpich or openmpi<span class="Apple-converted-space"> </span></span><span class="s1"> form the source<span class="Apple-converted-space"> </span></span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1">get :</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>http://www.mpich.org/static/downloads/3.1.3/mpich-3.2..tar.gz</span></p>
+<p class="p1"><span class="s1">or<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.1.tar.gz</span></p>
+<p class="p1"><span class="s1">un tar and:<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>#<span class="Apple-converted-space">  </span>./configure 'F77=gfortran' 'FC=gfortran' 'CC=clang' 'CXX=clang++'</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># make<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># sudo make install</span></p>
+<p class="p1"><span class="s1">remark: you can no use precompile version because the fortran in not correct.<br>
+</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>5) install gsl<span class="Apple-converted-space"> </span></span></p>
+<p class="p9"><span class="s2"><span class="Apple-converted-space">   </span>use homebrew (</span><span class="s1">http://brew.sh ) or do:</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p5"><span class="s7"><span class="Apple-converted-space"> </span></span><span class="s1"> # curl -O http://git.savannah.gnu.org/cgit/gsl.git/snapshot/gsl-release-2-4.tar.gz</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># tar zxvf gsl-release-2-4.tar.gz</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># cd gsl-release-2-4.tar.gz</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>#./configure CC=clang</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># make</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># sudo make install<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1"><br>
+</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>6) Install git from the web <A href="https://git-scm.com/downloads" > https://git-scm.com/downloads </A>/span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>7)<span class="Apple-converted-space">  </span>Download freefem++ <span class="Apple-converted-space"> </span></span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p10"><span class="s1"><span class="Apple-converted-space">  </span># git clone https://github.com/FreeFem/FreeFem-sources ff++</span></p>
+<p class="p11"><span class="s1"></span><br></p>
+<p class="p12"><span class="s1"><span class="Apple-converted-space">  </span>9) install autoconf and automake now not in xcode</span></p>
+<p class="p13"><span class="s1"></span><br></p>
+<p class="p12"><span class="s1"><span class="Apple-converted-space">   </span>I use the macport <span class="Apple-converted-space">  </span>distribution form http://www.macports.org</span></p>
+<p class="p12"><span class="s1"><span class="Apple-converted-space">    </span>or the home brew distribution from http://brew.sh</span></p>
+<p class="p10"><span class="s7"><span class="Apple-converted-space"> </span></span><span class="s1"><span class="Apple-converted-space">  </span># sudo port install<span class="Apple-converted-space">  </span>autoconf</span></p>
+<p class="p10"><span class="s1"><span class="Apple-converted-space">   </span># sudo port install<span class="Apple-converted-space">  </span>automake</span></p>
+<p class="p12"><span class="s1"><span class="Apple-converted-space">  </span>and to build<span class="Apple-converted-space">  </span>the file<span class="Apple-converted-space">  </span></span><span class="s8">./configure </span><span class="s9">with automake/autoconf<span class="Apple-converted-space">  </span>do<span class="Apple-converted-space"> </span></span></p>
+<p class="p14"><span class="s5"><span class="Apple-converted-space">  </span></span><span class="s1"># cd ff++</span></p>
+<p class="p5"><span class="s7"><span class="Apple-converted-space"> </span></span><span class="s1"># autoreconf <span class="Apple-converted-space"> </span></span></p>
+<p class="p15"><span class="s1"></span><br></p>
+<p class="p12"><span class="s1"><span class="Apple-converted-space">  </span>9bis) Or<span class="Apple-converted-space">  </span>untar AutoGeneratedFile.tar.gz</span></p>
+<p class="p13"><span class="s1"></span><br></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space"> </span># cd ff++</span></p>
+<p class="p5"><span class="s10"><span class="Apple-converted-space">  </span></span><span class="s1"># </span><span class="s11">tar zxvf AutoGeneratedFile.tar.gz<span class="Apple-converted-space"> </span></span></p>
+<p class="p10"><span class="s1"><br>
+</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space"> </span>10)<span class="Apple-converted-space">  </span>compilation of freefem++<span class="Apple-converted-space"> </span></span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># cd ff++</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span>#<span class="Apple-converted-space">  </span>./configure -—enable-download<span class="Apple-converted-space"> </span></span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># make</span></p>
+<p class="p5"><span class="s1"><span class="Apple-converted-space">  </span># sudo make install</span></p>
+<p class="p1"><span class="s1"><br>
+</span></p>
+<p class="p1"><span class="s1"><br>
+
+<p class="p1"><span class="s1"><br>
+</span></p>
+<p class="p1"><span class="s1"><b>(Out of Date ) To compile a full version of FreeFem++ under MacOS<span class="Apple-converted-space"> </span></b></span></p>
 <p class="p1"><span class="s1">---------------------------------------------------------------------------</span></p>
 <p class="p1"><span class="s1">First download the tar.gz file contening source from<span class="Apple-converted-space"> </span></span></p>
 <p class="p1"><span class="s1">or you can get the latest source from an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with the following unix shell commands :</span></p>

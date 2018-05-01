@@ -10,6 +10,7 @@ $m9ver=0;$m9file="";$m9mver="";
 $m10ver=0;$m10file="";$m10mver="";
 $m11ver=0;$m11file="";$m11mver="";
 $m12ver=0;$m12file="";$m12mver="";
+$m13ver=0;$m13file="";$m13mver="";
 $sver=0;$sfile="";$ssver="";
 $lstfiles="";
 $adown = array();
@@ -137,6 +138,12 @@ if ($handle = opendir('ftp/')) {
             {
             	$m12file=$file;
             	$m12ver=$lver;
+             	
+        	}
+            if(preg_match( "/_10\..*13.*\.pkg/", $file, $mm )  && $m13ver < $lver) 
+            {
+            	$m13file=$file;
+            	$m13ver=$lver;
              	
         	}
         	
