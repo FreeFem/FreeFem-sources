@@ -75,6 +75,15 @@ void initArrayOperatordouble()
     Global.Add("toRarray","(",new OneOperator_2KN_<double>);
     Add<KN<K> *>("imin",".",new OneOperator1<long,KN<K> *>(get_imin));
     Add<KN<K> *>("imax",".",new OneOperator1<long,KN<K> *>(get_imax));
+    Add<KNM<K> *>("imin",".",new OneOperator1<long,KNM<K> *>(get_imin));// Add april 2018 FH
+    Add<KNM<K> *>("imax",".",new OneOperator1<long,KNM<K> *>(get_imax));// Add april 2018 FH
+    Add<KNM<K> *>("jmin",".",new OneOperator1<long,KNM<K> *>(get_jmin));// Add april 2018 FH
+    Add<KNM<K> *>("jmax",".",new OneOperator1<long,KNM<K> *>(get_jmax));// Add april 2018 FH
+    Global.Add("ijmax","(",new OneOperator3_<NothingType,KNM<K> *,long*,long*>(get_ijmax));// Add april 2018 FH
+    Global.Add("ijmin","(",new OneOperator3_<NothingType,KNM<K> *,long*,long*>(get_ijmin));// Add april 2018 FH
+    // madd FH. march 2015 ...
+
+    
     Global.Add("Unique", "(", new Unique<K, K>);
     Global.Add("Unique", "(", new Unique<K, long>);
 

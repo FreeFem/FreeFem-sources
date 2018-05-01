@@ -685,13 +685,62 @@ public:
    
 
 
-template<class K> long get_n(KN<K> * p){ return p->N();}
-template<class K> long get_n(KNM<K> * p){ return p->N();}
-template<class K> long get_m(KNM<K> * p){ return p->M();}
-template<class K> K get_max(KN<K> * p){ return p->max();}
-template<class K> K get_min(KN<K> * p){ return p->min();}
+template<class K> long get_n(KN<K> * p){ return p->N();}//
+template<class K> long get_n(KNM<K> * p){ return p->N();}//
+template<class K> long get_m(KNM<K> * p){ return p->M();}//
+template<class K> K get_max(KN<K> * p){ return p->max();}//
+template<class K> K get_min(KN<K> * p){ return p->min();}// 
+
 template<class K> long get_imax(KN<K> * p){ long  i =0; for(long k=1;k< p->N(); ++k) if(  (*p)[k]>(*p)[i] ) i=k;  return i ;}
 template<class K> long get_imin(KN<K> * p){ long  i =0; for(long k=1;k< p->N(); ++k) if(  (*p)[k]<(*p)[i] ) i=k;  return i ;}
+template<class K> long get_imin(KNM<K> * p){
+    long  i =0,j=0;
+         for(long k=0;k< p->N(); ++k)
+             for(long l=0;l< p->M(); ++l) if(  (*p)(k,l) <(*p)(i,j) )  i=k,j=l;
+        return i ;}
+
+template<class K> long get_jmin(KNM<K> * p){
+    long  i =0,j=0;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (*p)(k,l) <(*p)(i,j) )  i=k,j=l;
+    return j ;}
+
+template<class K> long get_imax(KNM<K> * p){
+    long  i =0,j=0;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (*p)(k,l) >(*p)(i,j) )  i=k,j=l;
+    return i ;}
+/*template<class K> K get_max(KNM<K> * p){
+    K m = (*p)(0,0), mm;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (mm=(*p)(k,l)) > m ) m=mm ;
+    return m ;}
+template<class K> K get_min(KNM<K> * p){
+    K m = (*p)(0,0), mm;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (mm=(*p)(k,l)) < m ) m=mm ;
+    return m ;}
+*/
+template<class K> long get_jmax(KNM<K> * p){
+    long  i =0,j=0;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (*p)(k,l) >(*p)(i,j) )  i=k,j=l;
+    return j ;}
+template<class K> NothingType get_ijmax(KNM<K> * const & p,long * const & pi,long * const & pj ){
+    long  i =0,j=0;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (*p)(k,l) >(*p)(i,j) )  i=k,j=l;
+    *pi = i;
+    *pj = j;
+    return NothingType() ;}
+template<class K> NothingType get_ijmin(KNM<K> * const & p,long * const & pi,long * const & pj )
+{
+    long  i =0,j=0;
+    for(long k=0;k< p->N(); ++k)
+        for(long l=0;l< p->M(); ++l) if(  (*p)(k,l) <(*p)(i,j) )  i=k,j=l;
+    *pi = i;
+    *pj = j;
+    return NothingType() ;}
 
 template<class K> K get_sum(KN<K> * p){ return p->sum();}
 template<class K> double get_l2(KN<K> * p){ return p->l2();}

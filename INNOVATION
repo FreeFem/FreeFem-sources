@@ -1,3 +1,5 @@
+  add imax,jmax,imin,jmin to get index of row or column  of the min ,or max coef.
+    we have:   A(A.imin,A.jmin) = A.min 
   Pass to petsc/slepc version 3.8.4/3.8.3 
   Add cosmetics in macro (macro name, macro line , ...)
   correct in mpi_comm with mulmps (very rare)
@@ -54,7 +56,8 @@ version 3.57 30 oct. 2017  4215:bdd53541358f
  - real [int] d=A.diag; when a matrix
  - add notaregion, in case of point outsize the region is not define ( value is LONG_MIN )
  - update dissection linear solve package form atsushi.suzuki@cas.cmc.osaka-u.ac.jp
- - chi(Th) characteristics function of mesh domain
+ - chi(Th) characteristics function of mesh domain  you can use chi(Th)(a,b) to know if 
+    (a,b) is in Th or not. 
  - add new math.h function: fmod(x,y),fdim(x,y),fmax(x,y),fmin(x,y) 
  - correct cube label if no argument label= bug in version 3.55 to version 3.56-1
 version 3.56-1

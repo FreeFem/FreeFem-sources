@@ -243,10 +243,24 @@ cout << " b = a(I) : " << b << "\n  c(I) = a " << c << endl;
   FA >> RA ;
   cout << RA << endl; 
   RA -= A;
-  cout << " RA =  00 ??? " << RA.linfty  << endl; 
+  cout << " RA =  00 == " << RA.linfty  << endl; 
   assert( RA.linfty < 1e-12);
   }
-
+  //  Add april 2018
+   	real[int] AV(A.n*A.m);
+	for [i,j,aij: A ] AV[i+A.n*j]=aij;
+  	int i,j,ii,jj;
+  	ijmax(A,ii,jj);
+  	i = A.imax;	j=  A.jmax;
+  	cout << " max " << i << " " << j << " "<< AV.imax << " " << A.max << endl; 
+  	assert( i+A.n*j== AV.imax );
+  	assert( ii+A.n*jj == AV.imax );
+  	ijmin(A,i,j);
+  	ii = A.imin;	jj=  A.jmin;
+  	cout << " min  " << i << " " << j << " "<< AV.imin << " " << A.min<< " == " << AV.min << endl; 
+  	cout << " minn " << ii << " " << jj << " "<< AV.imin << " " << A.min<< " == " << AV.min << endl; 
+  	assert( i+A.n*j == AV.imin  );
+  	assert( ii+A.n*jj == AV.imin  );
 }
 {
 // sort array : 
