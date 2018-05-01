@@ -79,14 +79,17 @@ if ($handle = opendir('ftp/')) {
             	$fdate=date ("F d Y H:i:s.", filemtime("ftp/".$file));
             	$fver = $matches[1].".".$matches[2].$matches[3]; 
             } 
-            if(preg_match( "/\.exe/", $file, $mm )  && ($wver < $lver || $w64ver < $lver)  ) 
+            if(preg_match( "/\.exe/", $file, $mm )  ) 
             {
-                if(preg_match( "/win64/", $file, $mm ) )
+                if(preg_match( "/win64/", $file, $mm )) 
+				{
+				if  ( $w64ver < $lver) 
                 {
             	$w64file=$file;
             	$w64ver=$lver;
                 }
-                else
+				}
+                else if ( $wver < $lver  )
                 {
             	$wfile=$file;
             	$wver=$lver;
