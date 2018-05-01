@@ -43,6 +43,10 @@ include 'phpfiles.php';
 ?>
 
 <p class="p1"><b>Installation from a pkg<span class="Apple-converted-space">  </span>file is standard,</b></p>
+<br>
+<p class="p1">   on precompile version FreeFem++-3.60-MacOS_10.13.pkg to use petsc/slepc 
+        you need to install XQuartz 
+        form <a href="https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.11.dmg"> XQuartz-2.7.11.dmg </a></p>
 <p class="p1"><br><b>Remark </b>on version 10.10, 10.9 and 10.8 to authorise the install from everywhere <a href="http://maypalo.com/2013/1
 0/28/install-non-approved-apps-mavericks-10-9/"> (see System Preferences > Security & Privacy > General > Allow applications dow
 nloaded from > Anywhere)<A> 
