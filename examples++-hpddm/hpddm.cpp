@@ -50,8 +50,7 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     if(ptO)
         ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
     FEbaseArrayKn<K>* deflation = nargs[2] ? GetAny<FEbaseArrayKn<K>*>((*nargs[2])(stack)) : 0;
-    K** const& v = ptA->getVectors();
-    if(deflation && deflation->N > 0 && !v) {
+    if(deflation && deflation->N > 0 && !ptA->getVectors()) {
         K** ev = new K*[deflation->N];
         *ev = new K[deflation->N * deflation->get(0)->n];
         for(int i = 0; i < deflation->N; ++i) {
@@ -579,6 +578,7 @@ class ProdSchwarz {
         ProdSchwarz(T v, U w) : t(v), u(w) {}
         void prod(U x) const { bool allocate = t->setBuffer(); t->GMV(*(this->u), *x); t->clearBuffer(allocate); };
         static U mv(U Ax, ProdSchwarz<T, U, K, N> A) {
+            *Ax = K();
             A.prod(Ax);
             return Ax;
         }

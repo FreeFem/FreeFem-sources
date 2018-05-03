@@ -237,8 +237,7 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     if(ptO)
         ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
     FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
-    K** const& v = ptA->getVectors();
-    if(deflation && deflation->N > 0 && !v) {
+    if(deflation && deflation->N > 0 && !ptA->getVectors()) {
         K** ev = new K*[deflation->N];
         *ev = new K[deflation->N * deflation->get(0)->n];
         for(int i = 0; i < deflation->N; ++i) {
@@ -315,8 +314,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             cout << "Please change your solver" << endl;
 #endif
         }
-        K** const ev = ptA->getVectors();
-        if(!R && !ev)
+        if(!R && !ptA->getVectors())
             cout << "Problem !" << endl;
         R->resize(0);
         MPI_Barrier(MPI_COMM_WORLD);

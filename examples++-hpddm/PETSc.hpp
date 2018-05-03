@@ -67,16 +67,18 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         PC pc;
         KSPGetPC(ksp, &pc);
         PCSetType(pc, PCFIELDSPLIT);
-        unsigned short* local = new unsigned short[fields->n + ptA->_last - ptA->_first];
+        unsigned short* local = new unsigned short[fields->n + ptA->_last - ptA->_first]();
         for(int i = 0; i < fields->n; ++i)
-            local[i] = fields->operator[](i);
-        unsigned short nb = *std::max_element(local, local + fields->n);
+            local[i] = std::round(fields->operator[](i));
+        unsigned short nb = fields->n > 0 ? *std::max_element(local, local + fields->n) : 0;
         MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_UNSIGNED_SHORT, MPI_MAX, PETSC_COMM_WORLD);
         local += fields->n;
-        HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, local - fields->n, local, fields->n);
+        if(fields->n)
+            HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, local - fields->n, local, fields->n);
         unsigned long* counts = new unsigned long[nb]();
         for(unsigned int i = 0; i < ptA->_last - ptA->_first; ++i)
-            ++counts[local[i] - 1];
+            if(local[i])
+                ++counts[local[i] - 1];
         PetscInt* idx = new PetscInt[*std::max_element(counts, counts + nb)];
         for(unsigned short j = 0; j < nb; ++j) {
             IS is;

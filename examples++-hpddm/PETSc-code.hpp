@@ -693,17 +693,8 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     KN<PetscScalar>* ptX = GetAny<KN<PetscScalar>*>((*x)(stack));
     std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
     std::string* prefix = nargs[1] ? GetAny<std::string*>((*nargs[1])(stack)) : NULL;
-    MatType type;
-    MatGetType(ptA->_petsc, &type);
-    PetscInt bs = 1;
-    PetscBool isBlock;
-    PetscStrcmp(type, MATMPIBAIJ, &isBlock);
-#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
-    if(!isBlock)
-        PetscStrcmp(type, MATMPIBAIJMKL, &isBlock);
-#endif
-    if(isBlock)
-        MatGetBlockSize(ptA->_petsc, &bs);
+    PetscInt bs;
+    MatGetBlockSize(ptA->_petsc, &bs);
     HPDDM::PETScOperator op(ptA->_ksp, ptA->_last - ptA->_first, bs);
     if(prefix)
         op.setPrefix(*prefix);
@@ -743,19 +734,10 @@ class InvPETSc {
             double timing = MPI_Wtime();
             MatCreateVecs((*t)._petsc, &x, &y);
             PetscScalar* ptr;
-            PetscBool isBlock;
+            PetscInt bs;
+            MatGetBlockSize((*t)._petsc, &bs);
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
                 VecGetArray(x, &ptr);
-                MatType type;
-                MatGetType((*t)._petsc, &type);
-                PetscInt bs = 1;
-                PetscStrcmp(type, MATMPIBAIJ, &isBlock);
-#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
-                if(!isBlock)
-                    PetscStrcmp(type, MATMPIBAIJMKL, &isBlock);
-#endif
-                if(isBlock)
-                    MatGetBlockSize((*t)._petsc, &bs);
                 HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
                 VecRestoreArray(x, &ptr);
                 if(t.A->_A)
@@ -785,11 +767,6 @@ class InvPETSc {
                 cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
                 VecGetArray(y, &ptr);
-                MatType type;
-                MatGetType((*t)._petsc, &type);
-                PetscInt bs = 1;
-                if(isBlock)
-                    MatGetBlockSize((*t)._petsc, &bs);
                 HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), ptr, out->n / bs, bs);
                 VecRestoreArray(y, &ptr);
             }
@@ -862,6 +839,7 @@ class ProdPETSc {
             VecDestroy(&y);
         }
         static U mv(U Ax, ProdPETSc<T, U, K, N> A) {
+            *Ax = K();
             A.prod(Ax);
             return Ax;
         }

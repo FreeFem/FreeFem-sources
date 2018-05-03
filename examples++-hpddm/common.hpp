@@ -138,9 +138,8 @@ void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
         unsigned short mu = pA->getDof() ? pin->n / pA->getDof() : 1;
         const auto& map = pA->getMap();
         bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
-        if(scaled) {
-            scaledExchange(pA, static_cast<K*>(*pin), mu, allocate);
-        }
+        if(scaled)
+            scaledExchange(pA, static_cast<K*>(*pin), mu, false);
         else
             pA->HPDDM::template Subdomain<K>::exchange(static_cast<K*>(*pin), mu);
         pA->clearBuffer(allocate);
