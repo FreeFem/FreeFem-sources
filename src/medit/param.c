@@ -1,3 +1,20 @@
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -7,59 +24,56 @@ extern "C" {
 #include "sproto.h"
 
 #ifndef  ON
-#define  ON     1
-#define  OFF    0
+#define  ON 1
+#define  OFF 0
 #endif
 
-extern void ortho2D(pScene ,ubyte );
+extern void ortho2D (pScene, ubyte);
 
 /* globals */
 typedef struct sparval {
-  int   arg;
+	int arg;
 } Parval;
-typedef Parval * pParval;
+typedef Parval *pParval;
 
+static void parMotion (int x, int y) {
+	pScene sc;
 
-static void parMotion(int x,int y) {
-  pScene    sc;
+	sc = cv.scene[currentScene()];
+	glEnable(GL_COLOR_LOGIC_OP);
+	glLogicOp(GL_XOR);
 
-  sc = cv.scene[currentScene()];
-  glEnable(GL_COLOR_LOGIC_OP);
-  glLogicOp(GL_XOR);
-  
-  glColor3ub(255,255,0);
-  setFont("helvetica",10);
-  drwstr(10,sc->par.ys-120,"Vector length");
-  glColor3ub(0,255,128);
-  drwstr(150,sc->par.ys-120,"%g",10.1);
-  glFlush();
-  glDisable(GL_COLOR_LOGIC_OP);
+	glColor3ub(255, 255, 0);
+	setFont("helvetica", 10);
+	drwstr(10, sc->par.ys - 120, "Vector length");
+	glColor3ub(0, 255, 128);
+	drwstr(150, sc->par.ys - 120, "%g", 10.1);
+	glFlush();
+	glDisable(GL_COLOR_LOGIC_OP);
 }
 
-static void parMouse(int button,int state,int x,int y) {
-  pScene   sc;
-  if ( button != GLUT_LEFT_BUTTON )  return;
-  sc = cv.scene[currentScene()];
+static void parMouse (int button, int state, int x, int y) {
+	pScene sc;
 
-  if ( state == GLUT_DOWN ) {
-    glColor3ub(0,255,128);
-    glDrawBuffer(GL_FRONT);
-    ortho2D(sc,ON);
-    glutMotionFunc(parMotion);
-  }
-  else {
-    glDrawBuffer(GL_BACK);
-    ortho2D(sc,OFF);
-    glutMotionFunc(parMotion);
-  }
+	if (button != GLUT_LEFT_BUTTON) return;
+
+	sc = cv.scene[currentScene()];
+
+	if (state == GLUT_DOWN) {
+		glColor3ub(0, 255, 128);
+		glDrawBuffer(GL_FRONT);
+		ortho2D(sc, ON);
+		glutMotionFunc(parMotion);
+	} else {
+		glDrawBuffer(GL_BACK);
+		ortho2D(sc, OFF);
+		glutMotionFunc(parMotion);
+	}
 }
 
-
-
-void parEdit(pScene sc) {
-  glutMouseFunc(parMouse);
+void parEdit (pScene sc) {
+	glutMouseFunc(parMouse);
 }
-
 
 #ifdef __cplusplus
 }

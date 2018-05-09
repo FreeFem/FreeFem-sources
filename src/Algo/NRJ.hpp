@@ -1,3 +1,20 @@
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef NRJ_HH
 #define NRJ_HH
 
@@ -5,103 +22,92 @@
 
 // Attention :
 // pas de copie
-// pas d'opérateur =
+// pas d'opÃ©rateur =
 
-template <class Param, class Vect, class Mat,class Real>
-class tNRJ{
-protected:
+template<class Param, class Vect, class Mat, class Real>
+class tNRJ
+{
+	protected:
 
-  int				nappel_val;
-  int				nappel_grad;
-  int				nappel_hess;
-  int               nparam;
-  
-  Real              val;
-  Vect*             grad;
-  Mat*              hess;
-  
-public:
+		int nappel_val;
+		int nappel_grad;
+		int nappel_hess;
+		int nparam;
+		Real val;
+		Vect *grad;
+		Mat *hess;
 
-  // Attention : dans le constructeur de l'tNRJ, il faut vraiment
-  // initialiser grad ou hess, si on les utilise... Ce n'est pas
-  // fait ici (parce que l'initialisation dépend trop du type)
-  tNRJ(int);
-  virtual ~tNRJ();
-  
-  // à preciser pour chaque fonction tNRJ
-  virtual Real Val(const Param&) = 0;
-  
-  Real getVal(const Param&);
+	public:
 
-  // à preciser éventuellement, sinon ça rend nul
-  virtual Vect* Gradient(const Param&);
-  
-  Vect* getGradient(const Param&);
+		// Attention : dans le constructeur de l'tNRJ, il faut vraiment
+		// initialiser grad ou hess, si on les utilise... Ce n'est pas
+		// fait ici (parce que l'initialisation dÃ©pend trop du type)
+		tNRJ (int);
+		virtual ~tNRJ ();
 
-  // à preciser éventuellement, sinon ça rend nul
-  virtual Mat* Hessian(const Param&);
+		// Ã  preciser pour chaque fonction tNRJ
+		virtual Real Val (const Param &) = 0;
 
-  Mat* getHessian(const Param&);
-  
+		Real getVal (const Param &);
 
-  int Appel_Val() const {return nappel_val;};
-  int Appel_Grad() const {return nappel_grad;};
-  int Appel_Hess() const {return nappel_hess;};
-  
+		// Ã  preciser Ã©ventuellement, sinon Ã§a rend nul
+		virtual Vect*Gradient (const Param &);
+		Vect*getGradient (const Param &);
 
+		// Ã  preciser Ã©ventuellement, sinon Ã§a rend nul
+		virtual Mat*Hessian (const Param &);
+		Mat*getHessian (const Param &);
+
+		int Appel_Val () const {return nappel_val;};
+		int Appel_Grad () const {return nappel_grad;};
+		int Appel_Hess () const {return nappel_hess;};
 };
 
-template <class Param, class Vect, class Mat,class Real>
-tNRJ<Param,Vect, Mat, Real>::~tNRJ()
-{
-  if (grad!=NULL) delete grad;
-  if (hess!=NULL) delete hess;
+template<class Param, class Vect, class Mat, class Real>
+tNRJ<Param, Vect, Mat, Real>::~tNRJ () {
+	if (grad != NULL) delete grad;
+
+	if (hess != NULL) delete hess;
 }
 
-template <class Param, class Vect, class Mat,class Real>
-tNRJ<Param,Vect, Mat, Real>::tNRJ(int n)
-{
-  nparam=n;
-  nappel_val=0;
-  nappel_grad=0;
-  nappel_hess=0;
-  grad = NULL;
-  hess = NULL;
-  val=0.;
+template<class Param, class Vect, class Mat, class Real>
+tNRJ<Param, Vect, Mat, Real>::tNRJ (int n) {
+	nparam = n;
+	nappel_val = 0;
+	nappel_grad = 0;
+	nappel_hess = 0;
+	grad = NULL;
+	hess = NULL;
+	val = 0.;
 }
 
-template <class Param, class Vect, class Mat,class Real>
-Real tNRJ<Param,Vect, Mat, Real>::getVal(const Param& p)
-{
+template<class Param, class Vect, class Mat, class Real>
+Real tNRJ<Param, Vect, Mat, Real>::getVal (const Param &p) {
 	nappel_val++;
 	return Val(p);
 }
 
-template <class Param, class Vect, class Mat,class Real>
-Vect* tNRJ<Param,Vect, Mat, Real>::getGradient(const Param& p)
-{
+template<class Param, class Vect, class Mat, class Real>
+Vect *tNRJ<Param, Vect, Mat, Real>::getGradient (const Param &p) {
 	nappel_grad++;
 	return Gradient(p);
 }
 
-template <class Param, class Vect, class Mat,class Real>
-Vect* tNRJ<Param,Vect, Mat, Real>::Gradient(const Param&)
-{
-  return NULL;
+template<class Param, class Vect, class Mat, class Real>
+Vect *tNRJ<Param, Vect, Mat, Real>::Gradient (const Param &) {
+	return NULL;
 }
 
-template <class Param, class Vect, class Mat,class Real>
-Mat* tNRJ<Param,Vect, Mat, Real>::getHessian(const Param& p)
-{
+template<class Param, class Vect, class Mat, class Real>
+Mat *tNRJ<Param, Vect, Mat, Real>::getHessian (const Param &p) {
 	nappel_hess++;
 	return Hessian(p);
 }
 
-template <class Param, class Vect, class Mat,class Real>
-Mat* tNRJ<Param,Vect, Mat, Real>::Hessian(const Param&)
-{
-  return NULL;
+template<class Param, class Vect, class Mat, class Real>
+Mat *tNRJ<Param, Vect, Mat, Real>::Hessian (const Param &) {
+	return NULL;
 }
 
-
 #endif
+

@@ -1,4 +1,19 @@
-
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /*----------------------------------------------------------*/
 /*															*/
@@ -12,7 +27,6 @@
 /*	Last modification:	apr 10 2007							*/
 /*															*/
 /*----------------------------------------------------------*/
-
 
 /*----------------------------------------------------------*/
 /* Defines													*/
@@ -115,25 +129,22 @@ enum GmfKwdCod
 	GmfReserved38
 };
 
-
 /*----------------------------------------------------------*/
 /* External procedures										*/
 /*----------------------------------------------------------*/
-
-extern int GmfOpenMesh(const char *, int, ...);
-extern int GmfCloseMesh(int);
-extern int GmfStatKwd(int, int, ...);
-extern int GmfGotoKwd(int, int);
-extern int GmfSetKwd(int, int, ...);
-extern void GmfGetLin(int, int, ...);
-extern void GmfSetLin(int, int, ...);
-
+extern int GmfOpenMesh (const char *, int, ...);
+extern int GmfCloseMesh (int);
+extern int GmfStatKwd (int, int, ...);
+extern int GmfGotoKwd (int, int);
+extern int GmfSetKwd (int, int, ...);
+extern void GmfGetLin (int, int, ...);
+extern void GmfSetLin (int, int, ...);
 
 /*----------------------------------------------------------*/
 /* Fortran 77 API											*/
 /*----------------------------------------------------------*/
 
-#if defined(F77_NO_UNDER_SCORE)
+#if defined (F77_NO_UNDER_SCORE)
 #define call(x) x
 #else
 #define call(x) x ## _
@@ -161,14 +172,13 @@ int call(gmfsethexahedronf77)(int *, int *, int *, int *, int *, int *, int *, i
 int call(gmfsetsolf77)(int *, int *, int *);
 int call(gmfgetsolf77)(int *, int *, int *);
 
-
 /*----------------------------------------------------------*/
 /* Transmesh private API									*/
 /*----------------------------------------------------------*/
 
 #ifdef TRANSMESH
 
-extern char *KwdFmt[ GmfMaxKwd + 1 ][3];
-extern int GmfCpyLin(int, int, int);
+extern char *KwdFmt[GmfMaxKwd + 1][3];
+extern int GmfCpyLin (int, int, int);
 
 #endif

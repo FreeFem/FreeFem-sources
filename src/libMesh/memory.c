@@ -1,7 +1,24 @@
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* file    : memory.c
  *   C code for memory debugging, to be used in lieu
  *   of standard memory functions
-*/
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,231 +26,239 @@
 
 #include "memory.h"
 
-
 typedef struct memstack {
-  size_t   size;
-  void    *ptr;
-  int      nxt;
-  char     call[30];
+	size_t size;
+	void *ptr;
+	int nxt;
+	char call[30];
 } Memstack;
+typedef Memstack *pMemstack;
 
-typedef Memstack   * pMemstack;
+const int MAXMEM = 300;
+pMemstack mstack;
+int stack, cur;
 
-const int  MAXMEM = 300;
-pMemstack  mstack;
-int        stack,cur;
+int M_memLeak () {
+	int i, c = 0;
 
+	for (i = 1; i <= MAXMEM; i++)
+		if (mstack[i].ptr) c++;
 
-int M_memLeak() {
-  int   i,c=0;
-
-  for (i=1; i<=MAXMEM; i++)
-    if (mstack[i].ptr)  c++;
-  return(c);
+	return (c);
 }
 
 /* print out allocated pointers */
-void M_memDump() {
-  size_t  size;
-  int     i,c;
-  static long mega = 1024 * 1024;
-  static long kilo = 1024;
+void M_memDump () {
+	size_t size;
+	int i, c;
+	static long mega = 1024 * 1024;
+	static long kilo = 1024;
 
-  fprintf(stdout,"\n  -- MEMORY USAGE\n");
-  fprintf(stdout,"  Allocated pointers\n");
-  size = 0;
-  c    = 0;
-  for (i=1; i<=MAXMEM; i++)
-    if ( mstack[i].ptr ) {
-      fprintf(stdout,"   %3d  %3d Pointer %10p  size ",++c,i,mstack[i].ptr);
-      if (mstack[i].size > mega)
-        fprintf(stdout,"   %10d Mbytes  ",(int)(mstack[i].size/mega));
-      else if (mstack[i].size > kilo)
-        fprintf(stdout,"   %10d Kbytes  ",(int)(mstack[i].size/kilo));
-      else 
-        fprintf(stdout,"   %10d  bytes  ",(int)(mstack[i].size));
-      fprintf(stdout,"(%s)\n",mstack[i].call);
-      size += mstack[i].size;
-    }
-  fprintf(stdout,"  Memory leaks    ");
-  if ( size > mega )
-    fprintf(stdout,"  %10d Mbytes  %d pointers\n",(int)(size/mega),c);
-  else if ( size > kilo )
-    fprintf(stdout,"  %10d Kbytes  %d pointers\n",(int)(size/kilo),c);
-  else if ( size )
-    fprintf(stdout,"  %10d bytes   %d pointers\n",(int)size,c);
+	fprintf(stdout, "\n  -- MEMORY USAGE\n");
+	fprintf(stdout, "  Allocated pointers\n");
+	size = 0;
+	c = 0;
+
+	for (i = 1; i <= MAXMEM; i++)
+		if (mstack[i].ptr) {
+			fprintf(stdout, "   %3d  %3d Pointer %10p  size ", ++c, i, mstack[i].ptr);
+			if (mstack[i].size > mega)
+				fprintf(stdout, "   %10d Mbytes  ", (int)(mstack[i].size / mega));
+			else if (mstack[i].size > kilo)
+				fprintf(stdout, "   %10d Kbytes  ", (int)(mstack[i].size / kilo));
+			else
+				fprintf(stdout, "   %10d  bytes  ", (int)(mstack[i].size));
+
+			fprintf(stdout, "(%s)\n", mstack[i].call);
+			size += mstack[i].size;
+		}
+
+	fprintf(stdout, "  Memory leaks    ");
+	if (size > mega)
+		fprintf(stdout, "  %10d Mbytes  %d pointers\n", (int)(size / mega), c);
+	else if (size > kilo)
+		fprintf(stdout, "  %10d Kbytes  %d pointers\n", (int)(size / kilo), c);
+	else if (size)
+		fprintf(stdout, "  %10d bytes   %d pointers\n", (int)size, c);
 }
 
 /* Returns allocated memory space in bytes */
-size_t M_memSize() {
-  size_t size;
-  int    i;
+size_t M_memSize () {
+	size_t size;
+	int i;
 
-  size = 0;
-  for (i=1; i<=MAXMEM; i++)
-    if ( mstack[i].ptr )
-      size += mstack[i].size;
-  return size;
+	size = 0;
+
+	for (i = 1; i <= MAXMEM; i++)
+		if (mstack[i].ptr)
+			size += mstack[i].size;
+
+	return size;
 }
 
 /* Allocates space for a block of at least size bytes,
-   but does not initialize the space. */
-void *M_malloc(size_t size,char *call) {
-  int   i;
+ * but does not initialize the space. */
+void*M_malloc (size_t size, char *call) {
+	int i;
 
-  /* check if first call */
-  if ( !mstack ) {
-    mstack = (Memstack *)calloc((1+MAXMEM),sizeof(Memstack));
-    assert(mstack);
-    for (i=1; i<MAXMEM; i++)
-      mstack[i].nxt    = i+1;
-    cur   = 1;
-    stack = 0;
-  }
+	/* check if first call */
+	if (!mstack) {
+		mstack = (Memstack *)calloc((1 + MAXMEM), sizeof(Memstack));
+		assert(mstack);
 
-  /* store pointer, size */
-  if ( stack < MAXMEM ) {
-    mstack[cur].ptr  = malloc(size);
-    assert(mstack[cur].ptr);
-    mstack[cur].size = size;
-    /* i.e. mstack[cur].call = strdup(call) */
-    /* mstack[cur].call = (char*)malloc((strlen(call)+1) * sizeof(char));
-    assert(mstack[cur].call); */
-    strncpy(mstack[cur].call,call,19);
-    i = cur;
-    cur = mstack[cur].nxt;
-    ++stack;
+		for (i = 1; i < MAXMEM; i++)
+			mstack[i].nxt = i + 1;
+
+		cur = 1;
+		stack = 0;
+	}
+
+	/* store pointer, size */
+	if (stack < MAXMEM) {
+		mstack[cur].ptr = malloc(size);
+		assert(mstack[cur].ptr);
+		mstack[cur].size = size;
+		/* i.e. mstack[cur].call = strdup(call) */
+		/* mstack[cur].call = (char*)malloc((strlen(call)+1) * sizeof(char));
+		 * assert(mstack[cur].call); */
+		strncpy(mstack[cur].call, call, 19);
+		i = cur;
+		cur = mstack[cur].nxt;
+		++stack;
 #ifdef MEMDEBUG
-    fprintf(stdout,"M_malloc: allocate %p of size %10d         (%g,%d)\n",
-	    mstack[cur].ptr,size,stack,cur);
+		fprintf(stdout, "M_malloc: allocate %p of size %10d         (%g,%d)\n",
+		        mstack[cur].ptr, size, stack, cur);
 #endif
-    return(mstack[i].ptr);
-  }
-  else {
-    fprintf(stderr,"M_malloc: unable to store %10zd bytes pointer. table full\n",
-	    size);
-    return(0);
-  }
+		return (mstack[i].ptr);
+	} else {
+		fprintf(stderr, "M_malloc: unable to store %10zd bytes pointer. table full\n",
+		        size);
+		return (0);
+	}
 }
 
+/* Allocates space for an array of nelem elements, each of size
+ * elsize bytes, and initializes the space to zeros.
+ * Actual amount of space allocated is >=  nelem * elsize bytes. */
+void*M_calloc (size_t nelem, size_t elsize, char *call) {
+	int i;
 
-/* Allocates space for an array of nelem elements, each of size 
-   elsize bytes, and initializes the space to zeros.  
-   Actual amount of space allocated is >=  nelem * elsize bytes. */
-void *M_calloc(size_t nelem, size_t elsize,char *call) {
-  int    i;
+	/* check if first call */
+	if (!mstack) {
+		mstack = (Memstack *)calloc((1 + MAXMEM), sizeof(Memstack));
+		assert(mstack);
 
-  /* check if first call */
-  if ( !mstack ) {
-    mstack = (Memstack *)calloc((1+MAXMEM),sizeof(Memstack));
-    assert(mstack);
-    for (i=1; i<MAXMEM; i++)
-      mstack[i].nxt    = i+1;
-    cur   = 1;
-    stack = 0;
-  }
+		for (i = 1; i < MAXMEM; i++)
+			mstack[i].nxt = i + 1;
 
-  /* store pointer, size */
-  if ( stack < MAXMEM ) {
-    mstack[cur].ptr  = calloc(nelem,elsize);
-    if ( !mstack[cur].ptr )  return(0);
+		cur = 1;
+		stack = 0;
+	}
 
-    /*assert(mstack[cur].ptr);*/
-    mstack[cur].size = nelem * elsize;
-    /* mstack[cur].call = (char*)malloc((strlen(call)+1) * sizeof(char));
-    assert(mstack[cur].call); */
-    strncpy(mstack[cur].call,call,19);
-    i   = cur;
-    cur = mstack[cur].nxt;
-    ++stack;
+	/* store pointer, size */
+	if (stack < MAXMEM) {
+		mstack[cur].ptr = calloc(nelem, elsize);
+		if (!mstack[cur].ptr) return (0);
+
+		/*assert(mstack[cur].ptr);*/
+		mstack[cur].size = nelem * elsize;
+		/* mstack[cur].call = (char*)malloc((strlen(call)+1) * sizeof(char));
+		 * assert(mstack[cur].call); */
+		strncpy(mstack[cur].call, call, 19);
+		i = cur;
+		cur = mstack[cur].nxt;
+		++stack;
 #ifdef MEMDEBUG
-    fprintf(stdout,"M_calloc: allocate %p of size %d         (%d,%d)\n",
-	    mstack[cur].ptr,nelem*elsize,stack,cur);
+		fprintf(stdout, "M_calloc: allocate %p of size %d         (%d,%d)\n",
+		        mstack[cur].ptr, nelem * elsize, stack, cur);
 #endif
-    return(mstack[i].ptr);
-  }
-  else {
-    fprintf(stderr,"M_calloc: unable to allocate %10zd bytes. table full\n",
-	    nelem*elsize);
-    return(0);
-  }
+		return (mstack[i].ptr);
+	} else {
+		fprintf(stderr, "M_calloc: unable to allocate %10zd bytes. table full\n",
+		        nelem * elsize);
+		return (0);
+	}
 }
 
-/* Changes the size of the block pointed to by ptr to size bytes 
-   and returns a pointer to the (possibly moved) block. Existing 
-   contents are unchanged up to the lesser of the new and old sizes. */
-void *M_realloc(void *ptr, size_t size,char *call) {
-  int    i;
+/* Changes the size of the block pointed to by ptr to size bytes
+ * and returns a pointer to the (possibly moved) block. Existing
+ * contents are unchanged up to the lesser of the new and old sizes. */
+void*M_realloc (void *ptr, size_t size, char *call) {
+	int i;
 
-  if ( !ptr )
-    return 0;
+	if (!ptr)
+		return 0;
 
-  for (i=1; i<=MAXMEM; i++) {
-    if (ptr == mstack[i].ptr) {
-      /* free(mstack[i].call);
-      mstack[cur].call = (char*)malloc((strlen(call)+1) * sizeof(char));
-      assert(mstack[cur].call); */
-      strncpy(mstack[i].call,call,19);
-      mstack[i].ptr = realloc(mstack[i].ptr,size);
-      if (size)
-	assert(mstack[i].ptr);
-      mstack[i].size = size;
+	for (i = 1; i <= MAXMEM; i++) {
+		if (ptr == mstack[i].ptr) {
+			/* free(mstack[i].call);
+			 * mstack[cur].call = (char*)malloc((strlen(call)+1) * sizeof(char));
+			 * assert(mstack[cur].call); */
+			strncpy(mstack[i].call, call, 19);
+			mstack[i].ptr = realloc(mstack[i].ptr, size);
+			if (size)
+				assert(mstack[i].ptr);
+
+			mstack[i].size = size;
 #ifdef MEMDEBUG
-      fprintf(stdout,"M_realloc: reallocate %p of size %d       (%d)\n",
-	      mstack[i].ptr,mstack[i].size,size);
+			fprintf(stdout, "M_realloc: reallocate %p of size %d       (%d)\n",
+			        mstack[i].ptr, mstack[i].size, size);
 #endif
-      return(mstack[i].ptr);
-    }
-  }
+			return (mstack[i].ptr);
+		}
+	}
+
 #ifdef MEMDEBUG
-  fprintf(stderr,"M_realloc: pointer %p not found\n",ptr);
+	fprintf(stderr, "M_realloc: pointer %p not found\n", ptr);
 #endif
-  return(0);
+	return (0);
 }
 
-/* Deallocates the space pointed to by ptr (a pointer to a block 
-   previously allocated by malloc() and makes the space available
-   for further allocation.  If ptr is NULL, no action occurs. */
-void M_free(void *ptr) {
-  int   i;
-  
-  assert(ptr);
-  for (i=1; i<=MAXMEM; i++) {
-    if (mstack[i].ptr && ptr == mstack[i].ptr) {
-      --stack;
-      free(mstack[i].ptr);
-      mstack[i].ptr  = 0;
-      mstack[i].size = 0;
-      mstack[i].nxt  = cur;
-      mstack[i].call[0]  = '\0';
-      cur = i;
+/* Deallocates the space pointed to by ptr (a pointer to a block
+ * previously allocated by malloc() and makes the space available
+ * for further allocation.  If ptr is NULL, no action occurs. */
+void M_free (void *ptr) {
+	int i;
+
+	assert(ptr);
+
+	for (i = 1; i <= MAXMEM; i++) {
+		if (mstack[i].ptr && ptr == mstack[i].ptr) {
+			--stack;
+			free(mstack[i].ptr);
+			mstack[i].ptr = 0;
+			mstack[i].size = 0;
+			mstack[i].nxt = cur;
+			mstack[i].call[0] = '\0';
+			cur = i;
 #ifdef MEMDEBUG
-      fprintf(stdout,"M_free: deallocate %p of size %d       (%d,%d)\n",
-	      ptr,mstack[i].size,stack,cur);
+			fprintf(stdout, "M_free: deallocate %p of size %d       (%d,%d)\n",
+			        ptr, mstack[i].size, stack, cur);
 #endif
-      return;
-    }
-  }
+			return;
+		}
+	}
+
 #ifdef MEMDEBUG
-  fprintf(stderr,"M_free: pointer %p not found\n",ptr);
+	fprintf(stderr, "M_free: pointer %p not found\n", ptr);
 #endif
 }
-
 
 /* dump memory requirements */
-void primem(int np) {
-  int memsize;
+void primem (int np) {
+	int memsize;
 
-  memsize = M_memSize();
-  if ( memsize ) {
-    fprintf(stdout,"\n  -- MEMORY REQUIREMENTS\n");
-    if (memsize > 1024*1024)
-      fprintf(stdout,"  Total size :  %10zd Mbytes",
-	      (long int)(memsize/(1024.*1024.)));
-    else if (memsize > 1024)
-      fprintf(stdout,"  Total size :  %10zd Kbytes",(long int)(memsize/1024.));
-    else
-      fprintf(stdout,"  Total size :  %10zd bytes ",(long int)memsize);
-    fprintf(stdout,"    (i.e. %d bytes/point)\n",memsize / np);
-  }
+	memsize = M_memSize();
+	if (memsize) {
+		fprintf(stdout, "\n  -- MEMORY REQUIREMENTS\n");
+		if (memsize > 1024 * 1024)
+			fprintf(stdout, "  Total size :  %10zd Mbytes",
+			        (long int)(memsize / (1024. * 1024.)));
+		else if (memsize > 1024)
+			fprintf(stdout, "  Total size :  %10zd Kbytes", (long int)(memsize / 1024.));
+		else
+			fprintf(stdout, "  Total size :  %10zd bytes ", (long int)memsize);
+
+		fprintf(stdout, "    (i.e. %d bytes/point)\n", memsize / np);
+	}
 }

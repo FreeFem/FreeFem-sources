@@ -1,4 +1,19 @@
-
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /*----------------------------------------------------------*/
 /*															*/
@@ -13,7 +28,6 @@
 /*															*/
 /*----------------------------------------------------------*/
 
-
 /*----------------------------------------------------------*/
 /* Includes													*/
 /*----------------------------------------------------------*/
@@ -21,7 +35,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-
 
 /*----------------------------------------------------------*/
 /* Defines													*/
@@ -33,10 +46,10 @@
 #define LM_REAL 2
 #define LM_READ 1
 #define LM_WRITE 2
-#define LM_ASCII  1
+#define LM_ASCII 1
 #define LM_BINARY 2
-#define LM_MESH   4
-#define LM_SOL    8
+#define LM_MESH 4
+#define LM_SOL 8
 #define LM_SCALAR 1
 #define LM_VECTOR 2
 #define LM_SYM_MATRIX 3
@@ -126,7 +139,6 @@ enum LM_kw_tags
 	LM_VertexHack
 };
 
-
 /*----------------------------------------------------------*/
 /* Structures												*/
 /*----------------------------------------------------------*/
@@ -136,17 +148,15 @@ typedef struct
 	/* Public */
 
 	int dimension;
-	int kw_counters[ LM_NBKW + 1 ];
-	int *sol_headers[ LM_NBKW + 1 ];
+	int kw_counters[LM_NBKW + 1];
+	int *sol_headers[LM_NBKW + 1];
 
 	/* Private */
-
 	int version, mode, type, endian, current_kw;
 	FILE *handle;
 	char *filename;
-	size_t kw_pos[ LM_NBKW + 1 ][3];
-}LM_mesh_struct;
-
+	size_t kw_pos[LM_NBKW + 1][3];
+} LM_mesh_struct;
 
 /*----------------------------------------------------------*/
 /* External tables and procedures							*/
@@ -154,15 +164,14 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
-extern int LM_open_mesh(const char *, int, LM_mesh_struct *, ...);
-extern int LM_read_field(LM_mesh_struct *, int, int, void *);
-extern int LM_write_field(LM_mesh_struct *, int, int, void *, ...);
-extern int LM_read_line(LM_mesh_struct *, int, ...);
-extern int LM_write_line(LM_mesh_struct *, int, ...);
-extern int LM_close_mesh(LM_mesh_struct *);
-extern char *LM_kw_table[][3];
+
+extern int LM_open_mesh (const char *, int, LM_mesh_struct *, ...);
+extern int LM_read_field (LM_mesh_struct *, int, int, void *);
+extern int LM_write_field (LM_mesh_struct *, int, int, void *, ...);
+extern int LM_read_line (LM_mesh_struct *, int, ...);
+extern int LM_write_line (LM_mesh_struct *, int, ...);
+extern int LM_close_mesh (LM_mesh_struct *);
+extern char *LM_kw_table [][3];
 #ifdef __cplusplus
 }
 #endif
-    
