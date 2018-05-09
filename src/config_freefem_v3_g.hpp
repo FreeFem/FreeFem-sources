@@ -1,19 +1,34 @@
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef INIT_FREEFEM_V3_
 #define INIT_FREEFEM_V3_
-
 
 #ifndef VERBOSE
 // #define VERBOSE
 #endif
 
-
-//  bamg compilation FLAG
+// bamg compilation FLAG
 // ----------------------
-//   the freefem+ verson 
-//#define NDEBUG
-//#define TEST 100
-//  pour bamg en version DEBUG 
-//#define DEBUG
+// the freefem+ verson
+// #define NDEBUG
+// #define TEST 100
+// pour bamg en version DEBUG
+// #define DEBUG
 #define EIGENVALUE
 
 #ifndef DRAWING
@@ -32,14 +47,14 @@
 #define CHECK_KN
 #endif
 
- // to use the umfpack linear solver library
+// to use the umfpack linear solver library
 #define UMFPACK
 
-
-//  virtual machine exec type checking  flag (very slow)
-//  pour faire un chech dynamique de tous les type du laguage
-//  --------------------------------
+// virtual machine exec type checking  flag (very slow)
+// pour faire un chech dynamique de tous les type du laguage
+// --------------------------------
 #ifndef WITHCHECK
-//#define WITHCHECK
+// #define WITHCHECK
 #endif
 #endif
+

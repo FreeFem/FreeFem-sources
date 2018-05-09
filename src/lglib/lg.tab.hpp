@@ -1,95 +1,113 @@
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+ *
+ * Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+ * Free Software Foundation, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, you may create a larger work that contains
-   part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so long as that work isn't itself a
-   parser generator using the skeleton or a modified version thereof
-   as a parser skeleton.  Alternatively, if you modify or redistribute
-   the parser skeleton itself, you may (at your option) remove this
-   special exception, which will cause the skeleton and the resulting
-   Bison output files to be licensed under the GNU General Public
-   License without this special exception.
-
-   This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
+ * part or all of the Bison parser skeleton and distribute that work
+ * under terms of your choice, so long as that work isn't itself a
+ * parser generator using the skeleton or a modified version thereof
+ * as a parser skeleton.  Alternatively, if you modify or redistribute
+ * the parser skeleton itself, you may (at your option) remove this
+ * special exception, which will cause the skeleton and the resulting
+ * Bison output files to be licensed under the GNU General Public
+ * License without this special exception.
+ *
+ * This special exception was added by the Free Software Foundation in
+ * version 2.2 of Bison.  */
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     IF = 258,
-     ELSE = 259,
-     SET = 260,
-     GTGT = 261,
-     LTLT = 262,
-     OR = 263,
-     AND = 264,
-     NE = 265,
-     EQ = 266,
-     GE = 267,
-     LE = 268,
-     DOTSLASH = 269,
-     DOTSTAR = 270,
-     MOINSMOINS = 271,
-     PLUSPLUS = 272,
-     UNARY = 273,
-     LNUM = 274,
-     DNUM = 275,
-     CNUM = 276,
-     ID = 277,
-     FESPACEID = 278,
-     IDPARAM = 279,
-     STRING = 280,
-     ENDOFFILE = 281,
-     INCLUDE = 282,
-     LOAD = 283,
-     BIDON = 284,
-     FOR = 285,
-     WHILE = 286,
-     BREAK = 287,
-     CONTINUE = 288,
-     RETURN = 289,
-     TRY = 290,
-     CATCH = 291,
-     THROW = 292,
-     TYPE = 293,
-     FUNCTION = 294,
-     FESPACE = 295,
-     FESPACE1 = 296,
-     FESPACE3 = 297,
-     PLUSEQ = 298,
-     MOINSEQ = 299,
-     MULEQ = 300,
-     DIVEQ = 301,
-     DOTMULEQ = 302,
-     DOTDIVEQ = 303,
-     ARROW = 304,
-     BORDER = 305,
-     CURVE = 306,
-     SOLVE = 307
-   };
+/* Put the tokens into the symbol table, so that GDB and other debuggers
+ * know about them.  */
+enum yytokentype {
+	IF = 258,
+	ELSE = 259,
+	SET = 260,
+	GTGT = 261,
+	LTLT = 262,
+	OR = 263,
+	AND = 264,
+	NE = 265,
+	EQ = 266,
+	GE = 267,
+	LE = 268,
+	DOTSLASH = 269,
+	DOTSTAR = 270,
+	MOINSMOINS = 271,
+	PLUSPLUS = 272,
+	UNARY = 273,
+	LNUM = 274,
+	DNUM = 275,
+	CNUM = 276,
+	ID = 277,
+	FESPACEID = 278,
+	IDPARAM = 279,
+	STRING = 280,
+	ENDOFFILE = 281,
+	INCLUDE = 282,
+	LOAD = 283,
+	BIDON = 284,
+	FOR = 285,
+	WHILE = 286,
+	BREAK = 287,
+	CONTINUE = 288,
+	RETURN = 289,
+	TRY = 290,
+	CATCH = 291,
+	THROW = 292,
+	TYPE = 293,
+	FUNCTION = 294,
+	FESPACE = 295,
+	FESPACE1 = 296,
+	FESPACE3 = 297,
+	PLUSEQ = 298,
+	MOINSEQ = 299,
+	MULEQ = 300,
+	DIVEQ = 301,
+	DOTMULEQ = 302,
+	DOTDIVEQ = 303,
+	ARROW = 304,
+	BORDER = 305,
+	CURVE = 306,
+	SOLVE = 307
+};
+
 #endif
 /* Tokens.  */
 #define IF 258
@@ -143,49 +161,46 @@
 #define CURVE 306
 #define SOLVE 307
 
-
-
-
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+#if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 #line 156 "lg.ypp"
 {
- double dnum;
+	double dnum;
 
- /* <<YYSTYPE_lnum>> */
- long lnum;
+	/* <<YYSTYPE_lnum>> */
+	long lnum;
 
- /* <<YYSTYPE_str>> */
- char * str;
- char oper[8];
+	/* <<YYSTYPE_str>> */
+	char *str;
+	char oper[8];
 
- /* <<YYSTYPE_cexp>> [[file:../fflib/AFunction.hpp::CC_F0]] */
- CC_F0 cexp;
- 
- Routine   *routine;
+	/* <<YYSTYPE_cexp>> [[file:../fflib/AFunction.hpp::CC_F0]] */
+	CC_F0 cexp;
 
- /* <<YYSTYPE_args>> [[file:~/ff/src/fflib/AFunction.hpp::AC_F0]] */
- AC_F0 args;
- 
- /* <<YYSTYPE_type>> refers to [[file:~/ff/src/fflib/AnyType.hpp::aType]] */
- aType type;
+	Routine *routine;
 
- /* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
- CListOfInst cinst;
- 
- Block * block;
+	/* <<YYSTYPE_args>> [[file:~/ff/src/fflib/AFunction.hpp::AC_F0]] */
+	AC_F0 args;
 
- /* <<YYSTYPE_clist_id>> [[file:~/ff/src/fflib/AFunction.hpp::ListOfId]] */
- ListOfId *clist_id;
- 
+	/* <<YYSTYPE_type>> refers to [[file:~/ff/src/fflib/AnyType.hpp::aType]] */
+	aType type;
+
+	/* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
+	CListOfInst cinst;
+
+	Block *block;
+
+	/* <<YYSTYPE_clist_id>> [[file:~/ff/src/fflib/AFunction.hpp::ListOfId]] */
+	ListOfId *clist_id;
+
 /* ListCatch * clist_Catchs;*/
 
- vectorOfInst * endb;
+	vectorOfInst *endb;
 }
 /* Line 1529 of yacc.c.  */
 #line 187 "lg.tab.hpp"
-	YYSTYPE;
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
+YYSTYPE;
+# define yystype YYSTYPE/* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
 #endif

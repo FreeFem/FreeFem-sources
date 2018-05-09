@@ -1,4 +1,21 @@
-/* 
+/*
+ * This file is part of FreeFem++.
+ *
+ * FreeFem++ is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeFem++ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
  *  simulation of a chronograph
  *  in : tim
  *  out: tim.dtim = elapsed time in micro-secs
@@ -7,7 +24,7 @@
  *
  *  Written by Pascal J. Frey
  *  email: Pascal.Frey@inria.fr, 1999
-*/
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,81 +35,72 @@ extern "C" {
 #include <time.h>
 #include "chrono.h"
 
-
 /* return elapsed time in secs. */
-static double diftim(time_t t2,time_t t1) {
-  struct  tm  *ptm;
-  double  tim;
-  int     hh1,mm1,ss1,hh2,mm2,ss2;
+static double diftim (time_t t2, time_t t1) {
+	struct  tm *ptm;
+	double tim;
+	int hh1, mm1, ss1, hh2, mm2, ss2;
 
-  ptm = localtime(&t1);
-  hh1 = ptm->tm_hour;
-  mm1 = ptm->tm_min;
-  ss1 = ptm->tm_sec;
+	ptm = localtime(&t1);
+	hh1 = ptm->tm_hour;
+	mm1 = ptm->tm_min;
+	ss1 = ptm->tm_sec;
 
-  ptm = localtime(&t2);
-  hh2 = ptm->tm_hour;
-  mm2 = ptm->tm_min;
-  ss2 = ptm->tm_sec;
-  if ( hh2 < hh1 )  hh2 += 24;
-  
-  tim  = 3600.0*(hh2-hh1);
-  tim += 60.0*(mm2-mm1);
-  tim += ss2-ss1;
+	ptm = localtime(&t2);
+	hh2 = ptm->tm_hour;
+	mm2 = ptm->tm_min;
+	ss2 = ptm->tm_sec;
+	if (hh2 < hh1) hh2 += 24;
 
-  return(tim);
+	tim = 3600.0 * (hh2 - hh1);
+	tim += 60.0 * (mm2 - mm1);
+	tim += ss2 - ss1;
+
+	return (tim);
 }
-
 
 /* get system and user times in micro-seconds */
-void  chrono(int cmode,mytime *ptt) {
-  time_t tt;
+void chrono (int cmode, mytime *ptt) {
+	time_t tt;
 
-  if ( cmode == RESET ) {
-    ptt->dtim  = clock();
-    ptt->ctim  = 0.0f;
-    ptt->ptim  = 0;
-    ptt->call  = 0;
-  }
-  else {
-    ptt->dtim = difftime(clock(),ptt->dtim);  /* in secs */
-    if ( cmode == ON ) {
-      ptt->ptim = time(NULL);
-      ptt->call++;
-    }
-    else if ( cmode == OFF ) {
-      tt = time(NULL);
-      ptt->ctim += diftim(tt,ptt->ptim);
-      ptt->ptim  = 0;
-    }
-  }
+	if (cmode == RESET) {
+		ptt->dtim = clock();
+		ptt->ctim = 0.0f;
+		ptt->ptim = 0;
+		ptt->call = 0;
+	} else {
+		ptt->dtim = difftime(clock(), ptt->dtim);	/* in secs */
+		if (cmode == ON) {
+			ptt->ptim = time(NULL);
+			ptt->call++;
+		} else if (cmode == OFF) {
+			tt = time(NULL);
+			ptt->ctim += diftim(tt, ptt->ptim);
+			ptt->ptim = 0;
+		}
+	}
 }
-
 
 /* return time (converted in secs */
-double gttime(mytime t) {
-
-  if ( t.ctim < MAXCLK )
-    return(t.dtim / (double)CLOCKS_PER_SEC);
-  else
-    return(t.ctim);
+double gttime (mytime t) {
+	if (t.ctim < MAXCLK)
+		return (t.dtim / (double)CLOCKS_PER_SEC);
+	else
+		return (t.ctim);
 }
-
 
 /* initialize time table */
-void  tminit(mytime *t,int maxtim) {
-  int     k;
+void tminit (mytime *t, int maxtim) {
+	int k;
 
-  for (k=0; k<maxtim; k++) {
-    t[k].dtim = clock();
-    t[k].ptim = 0;
-    t[k].ctim = 0.0;
-    t[k].call = 0;
-  }
+	for (k = 0; k < maxtim; k++) {
+		t[k].dtim = clock();
+		t[k].ptim = 0;
+		t[k].ctim = 0.0;
+		t[k].call = 0;
+	}
 }
-
 
 #ifdef __cplusplus
 }
 #endif
-
