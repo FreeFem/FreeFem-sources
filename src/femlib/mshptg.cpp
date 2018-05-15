@@ -1700,6 +1700,7 @@ L50:
 				mshfr1_ (&c[3], &nu[7], &t, &ta, &is1, &s2, err);
 				if (*err != 0)
 				   {
+                                       printf(" Error %ld inforce edge   %ld = %ld;%ld  with vertices  %ld %d \n",*err,a,i_2, i_3, is1,s2 );
 				     return 0;
 				   }
 				goto L100;
@@ -2038,6 +2039,8 @@ L20:
   if (ta <= 0)
      {
        *err = 9;
+         long sa= nu[ (la+1)%3 + t * 6], sb=nu[(la+2)%3 + t * 6];
+       printf("mshptg: bug  boundary crossing %ld,%ld , %ld %ld \n", s1, *s2 , sa,sb);
        return 0;
      }
   t = ta / 8;

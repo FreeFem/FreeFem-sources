@@ -257,7 +257,7 @@ struct  VirtualMatrice { public:
     { InternalError("VirtualMatrice::addMatTransMul not implemented "); }
   virtual bool WithSolver() const {return false;} // by default no solver          
   virtual void Solve( KN_<R> &  ,const KN_<R> & ) const 
-    { InternalError("VirtualMatrice::solve not implemented "); } 
+    { InternalError("VirtualMatrice::solve not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); } 
 
 #ifdef VersionFreeFempp
   virtual bool ChecknbLine  (int n) const= 0; 

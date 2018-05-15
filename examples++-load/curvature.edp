@@ -1,0 +1,35 @@
+load "Curvature"
+load "isoline"
+
+real R= 1;
+real meshsize= 0.1;
+border DC(t=pi/2,-pi/2) { x=R*cos(t); y=R*sin(t); label=1;}
+border axe(t=R,-R) {x=0; y=t; label=2;}
+
+mesh Th=buildmesh(DC(-R*pi/meshsize)+axe(2*R/meshsize));
+
+fespace Vh(Th,P1); 
+Vh ca,c,cc,ccc;;
+c[]=curvature(Th,1);
+real cmean= int1d(Th,1,qforder=1)(c)/int1d(Th,1,qforder=1)(1.);
+cout<< " cmean = " << cmean << " == " << 1/R << endl;
+plot(c, wait=1,cmm=" curvature" ); 
+verbosity=1000;
+ca[]=raxicurvature(Th,1);
+verbosity=1;
+plot(ca, wait=1,cmm="axi curvature" );
+real s=int1d(Th,1,qforder=1)(x*2*pi); 
+cout << " s = " << s << " " << 4*pi*R*R << endl; 
+real cmeana= int1d(Th,1,qforder=1)(2*pi*ca)/s;
+solve AAA(cc,ccc)= int2d(Th)(cc*ccc*1e-10)+ int1d(Th,1)(x*cc*ccc)- int1d(Th,1)(ca*ccc);
+//cc = ca/max(x,0.01);
+plot(cc,wait=1); 
+cout<< " cmeana = " << cmeana << " == " << 2/R << endl;
+assert(abs(cmean-1/R)< 0.05/R); 
+
+int[int] ll=[1,2];
+real[int,int] b12(1,3); 
+real l12=extractborder(Th,ll,b12);
+cout << " size b12 = " << b12.n << " x " << b12.m << endl;
+border BB(t=0,1){ P=Curve(b12,t);label=3;}
+plot(BB(100),wait=1);
