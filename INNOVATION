@@ -1,3 +1,5 @@
+  add missing file curvature.edp 
+  correct the label definition in case of intalledges in 2d
   add imax,jmax,imin,jmin to get index of row or column  of the min ,or max coef.
     we have:   A(A.imin,A.jmin) = A.min 
   Pass to petsc/slepc version 3.8.4/3.8.3 

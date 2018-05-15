@@ -567,8 +567,16 @@ void Check(const Opera &Op,int N,int  M)
         for (int i=0;i< Th.nt; i++) 
           {
             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
-	      for (int ie=0;ie<3;ie++)   
-              A += mate(i,ie,Th[i].lab,paramate); 
+	      for (int ie=0;ie<3;ie++)
+              { // modif F.H to get the correct label in intalledges
+                  int e0=VerticesOfTriangularEdge[ie][0];
+                  int e1=VerticesOfTriangularEdge[ie][1];
+                  int i1 = Th(Th[i][e0]),i2 = Th(Th[i][e1]);
+                  BoundaryEdge * be = Th.TheBoundaryEdge(i1,i2);
+                  int lab = be ? be->lab :  notalabel;
+              
+              A += mate(i,ie,lab,paramate);
+              }
 	    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 	    
           }
@@ -5339,8 +5347,15 @@ template<class R>
 			  if ( sameMesh) 
 			    {
 			      int iie=ie,ii=Th.ElementAdj(i,iie);	
-			       if(ii<0) ii=i;//  sur le bord	
-			      Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,Th[i].lab,*l->l,buf,ip,&bstack,*B,FIE,useopt);
+			       if(ii<0) ii=i;//  sur le bord
+                                const Triangle & K(ThI[i]);
+                                int e0=VerticesOfTriangularEdge[ie][0];
+                                int e1=VerticesOfTriangularEdge[ie][1];
+                                int i1 = ThI(K[e0]),i2 = ThI(K[e1]);
+                                BoundaryEdge * be = ThI.TheBoundaryEdge(i1,i2);
+                                int lab = be ? be->lab :  notalabel;
+
+			      Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,lab,*l->l,buf,ip,&bstack,*B,FIE,useopt);
 			    }
 			  else 
 			      InternalError("To Do") ;

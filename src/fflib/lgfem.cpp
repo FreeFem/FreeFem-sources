@@ -3186,7 +3186,12 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
            {
 	     for( int ie=0;ie<3;ie++)
 	       {                                
-		 const Triangle & K(Th[i]);   
+		 const Triangle & K(Th[i]);
+                   int e0=VerticesOfTriangularEdge[ie][0];
+                   int e1=VerticesOfTriangularEdge[ie][1];
+                   int i1 = Th(K[e0]),i2 = Th(K[e1]);
+                   BoundaryEdge * be = Th.TheBoundaryEdge(i1,i2);
+                   int lab = be ? be->lab :  notaregion;
 		 R2 E=K.Edge(ie);
 		 double le = sqrt((E,E)); 
 		 R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
@@ -3197,7 +3202,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 		     QuadratureFormular1dPoint pi( FI[npi]);
 		     double sa=pi.x,sb=1-sa;
 		     R2 Pt(PA*sa+PB*sb ); //  
-		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,K.lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014 
+		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
 	       }
@@ -3425,8 +3430,9 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
          int lab;
 	 for (int i=0;i< Th.nt; i++) 
 	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
-	     for( int ie=0;ie<3;ie++)
-	       {                                
+	     for( int ie=0;ie<4;ie++) // Coorection mai 2018 FH ???????????????? never tested
+	       {
+                   
 		 const Mesh3::Element  & K(Th[i]);   
 		 R3 NN=K.N(ie);
 		 double mes = NN.norme(); 
