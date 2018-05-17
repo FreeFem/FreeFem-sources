@@ -31,8 +31,23 @@
 /* compute circumradius and center */
 int cenrad (pMesh mesh, int iel, double *c, double *rad) {
 	pTetra pt;
-	pPoint p1, p2, p3, p4;
-	double dd, ux, uy, uz, n1[3], n2[3], n3[3], c1, c2, c3, pl1, pl2, pl3;
+	pPoint p1;
+	pPoint p2;
+	pPoint p3;
+	pPoint p4;
+	double dd;
+	double ux;
+	double uy;
+	double uz;
+	double n1[3];
+	double n2[3];
+	double n3[3];
+	double c1;
+	double c2;
+	double c3;
+	double pl1;
+	double pl2;
+	double pl3;
 
 	pt = &mesh->tetra[iel];
 	if (!pt->v[0]) return (0);
@@ -100,4 +115,3 @@ int cenrad (pMesh mesh, int iel, double *c, double *rad) {
 
 	return (1);
 }
-

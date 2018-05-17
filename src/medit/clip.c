@@ -64,8 +64,14 @@ static void drawCap (pScene sc, pClip clip, GLboolean docap) {
 /* display clipping plane */
 void updateClip (pClip clip, pMesh mesh) {
 	pScene sc;
-	pTransform cliptr, view;
-	GLfloat dd, dmax, inv[16], axis[4], trans[4], matrix[16];
+	pTransform cliptr;
+	pTransform view;
+	GLfloat dd;
+	GLfloat dmax;
+	GLfloat inv[16];
+	GLfloat axis[4];
+	GLfloat trans[4];
+	GLfloat matrix[16];
 	int idw;
 
 	/* default */
@@ -177,8 +183,13 @@ void updateClip (pClip clip, pMesh mesh) {
 
 void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 	pPoint p0;
-	double dd1, zero;
-	int k, l, nbpos, nbneg, nbnul;
+	double dd1;
+	double zero;
+	int k;
+	int l;
+	int nbpos;
+	int nbneg;
+	int nbnul;
 
 	/* check points in plane */
 	zero = sc->dmax * 1.e-13;
@@ -197,6 +208,7 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 	/* update tetrahedra */
 	for (k = 1; k <= mesh->ntet; k++) {
 		pTetra pt;
+
 		pt = &mesh->tetra[k];
 		pt->clip = 0;
 		nbpos = nbneg = nbnul = 0;
@@ -214,6 +226,7 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 	/* update hexahedra */
 	for (k = 1; k <= mesh->nhex; k++) {
 		pHexa ph;
+
 		ph = &mesh->hexa[k];
 		ph->clip = 0;
 		nbpos = nbneg = nbnul = 0;
@@ -375,4 +388,3 @@ pClip createClip (pScene sc, pMesh mesh) {
 	resetClip(sc, clip, mesh);
 	return (clip);
 }
-

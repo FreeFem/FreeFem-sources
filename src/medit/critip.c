@@ -39,7 +39,8 @@ typedef struct saddle {
 static int idir[5] = {0, 1, 2, 0, 1};
 
 int closedBall (pMesh mesh, int depart, ubyte i) {
-	int adj, iadr;
+	int adj;
+	int iadr;
 	ubyte voy;
 
 	voy = idir[i + 1];
@@ -59,15 +60,45 @@ int closedBall (pMesh mesh, int depart, ubyte i) {
 
 GLuint listCritPoint (pScene sc, pMesh mesh) {
 	pTriangle pt;
-	pPoint p0, p1, p2;
-	pSolution s0, s1, s2;
+	pPoint p0;
+	pPoint p1;
+	pPoint p2;
+	pSolution s0;
+	pSolution s1;
+	pSolution s2;
 	pMaterial pm;
 	Saddle sad[MAXPS];
 	GLuint dlist;
-	double aire, ux, uy, vx, vy, dd, cb0[3], cb1[3], cb2[3], vv[3][2], bc[3];
-	double rgb[3], a0, a1, delta, rr1, rr2, aa, dmin;
+	double aire;
+	double ux;
+	double uy;
+	double vx;
+	double vy;
+	double dd;
+	double cb0[3];
+	double cb1[3];
+	double cb2[3];
+	double vv[3][2];
+	double bc[3];
+	double rgb[3];
+	double a0;
+	double a1;
+	double delta;
+	double rr1;
+	double rr2;
+	double aa;
+	double dmin;
 	float p[3];
-	int *adj, iadr, i, i1, i2, k, m, ncp, ps, ifilt;
+	int *adj;
+	int iadr;
+	int i;
+	int i1;
+	int i2;
+	int k;
+	int m;
+	int ncp;
+	int ps;
+	int ifilt;
 	ubyte typ, tag;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
@@ -342,4 +373,3 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 
 	return (dlist);
 }
-

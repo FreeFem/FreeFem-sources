@@ -62,12 +62,12 @@ static int getmesh (pMesh mesh, int range) {
 	}
 
 	if (mesh->sol && mesh->nbb) {
-		int k;
-		
-		if ((mesh->dim == 2 && mesh->nfield == 3) || (mesh->dim == 3 && mesh->nfield == 6))
+		if ((mesh->dim == 2 && mesh->nfield == 3) || (mesh->dim == 3 && mesh->nfield == 6)) {
+			int k;
 			for (k = 1; k <= mesh->nbb; k++)
 				free(mesh->sol[k].m);
-
+		}
+		
 		M_free(mesh->sol);
 		mesh->sol = (void *)0;
 	}
@@ -84,7 +84,8 @@ static int getmesh (pMesh mesh, int range) {
 	mesh->ntet = mesh->nhex = mesh->nbb = 0;
 
 	if (animdep == range) {
-		char data[256], *ptr;
+		char data[256];
+		char *ptr;
 		
 		sprintf(data, ".%d", range);
 		ptr = (char *)strstr(mesh->name, data);
@@ -159,7 +160,9 @@ int loadNextMesh (pMesh mesh, int k, int parse) {
 
 int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 	int k;
-	char *ptr, data[256], base[256];
+	char *ptr;
+	char data[256];
+	char base[256];
 
 	/* get basename */
 	sprintf(data, ".%d", deb);
@@ -215,7 +218,9 @@ int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 
 int animParticle (pScene sc, pMesh mesh) {
 	int cur;
-	char *ptr, data[256], base[256];
+	char *ptr;
+	char data[256];
+	char base[256];
 
 	/* get basename */
 	strcpy(base, mesh->name);

@@ -25,7 +25,8 @@
 #include "sproto.h"
 
 int EatLine (FILE *in) {
-	int k, c;
+	int k;
+	int c;
 
 	k = 0;
 
@@ -38,7 +39,9 @@ int EatLine (FILE *in) {
 }
 
 int EatSpace (FILE *in) {
-	int k, c, ret = 0;
+	int k;
+	int c;
+	int ret = 0;
 
 	k = 0;
 
@@ -58,10 +61,28 @@ int EatSpace (FILE *in) {
 int bbfile (pMesh mesh) {
 	FILE *in;
 	pSolution ps;
-	double a, b, c, lambda[3], eigv[3][3], m[6], vp[2][2];
+	double a;
+	double b;
+	double c;
+	double lambda[3];
+	double eigv[3][3];
+	double m[6];
+	double vp[2][2];
 	float dummy;
-	int j, k, l, dim, np, nf, i1, i2, i3, err, iord;
-	char *ptr, data[128], tmp[128];
+	int j;
+	int k;
+	int l;
+	int dim;
+	int np;
+	int nf;
+	int i1;
+	int i2;
+	int i3;
+	int err;
+	int iord;
+	char *ptr;
+	char data[128];
+	char tmp[128];
 	ubyte bigbb;
 
 	/* default */
@@ -191,7 +212,7 @@ int bbfile (pMesh mesh) {
 		for (k = 1; k <= mesh->nbb; k++) {
 			ps = &mesh->sol[k];
 			ps->bb = 0.0;
-			if (fscanf(in, "%s", data) != 1) continue;
+			if (fscanf(in, "%128s", data) != 1) continue;
 
 			if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 
