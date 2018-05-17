@@ -110,16 +110,16 @@ Complex GPvortices (Stack stack, const KNM_<double> &ps) {
 }
 
 static void init () {
-	Global.Add("BECtrap", "(", new OneOperator1s_<double, KN<double> *, E_F_F0s_<double, KN<double> *, E_F0mps>>(BECtrap));
+	Global.Add("BECtrap", "(", new OneOperator1s_<double, KN<double> *, E_F_F0s_<double, KN<double> *, E_F0mps> >(BECtrap));
 	Global.Add("GPvortex", "(",
 	           new OneOperator3s_<Complex, double, double, double,
-	                              E_F_F0F0F0s_<Complex, double, double, double, E_F0mps>>(GPvortex));
+	                              E_F_F0F0F0s_<Complex, double, double, double, E_F0mps> >(GPvortex));
 	Global.Add("GPvortices", "(",
 	           new OneOperator1s_<Complex, KNM_<double>,
-	                              E_F_F0s_<Complex, KNM_<double>, E_F0mps>>(GPvortices));
-	Global.Add("dxGPvortex", "(", new OneOperator3s_<Complex, double, double, double, E_F_F0F0F0s_<Complex, double, double, double, E_F0mps>>
+	                              E_F_F0s_<Complex, KNM_<double>, E_F0mps> >(GPvortices));
+	Global.Add("dxGPvortex", "(", new OneOperator3s_<Complex, double, double, double, E_F_F0F0F0s_<Complex, double, double, double, E_F0mps> >
 	               (dxGPvortex));
-	Global.Add("dyGPvortex", "(", new OneOperator3s_<Complex, double, double, double, E_F_F0F0F0s_<Complex, double, double, double, E_F0mps>>
+	Global.Add("dyGPvortex", "(", new OneOperator3s_<Complex, double, double, double, E_F_F0F0F0s_<Complex, double, double, double, E_F0mps> >
 	               (dyGPvortex));
 }
 

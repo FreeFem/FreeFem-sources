@@ -190,7 +190,7 @@ sp_angle_paren_empty            = remove   # ignore/add/remove/force
 sp_angle_word                   = force   # ignore/add/remove/force
 
 # Add or remove space between '>' and '>' in '>>' (template stuff C++/C# only). Default=Add.
-sp_angle_shift                  = remove      # ignore/add/remove/force
+sp_angle_shift                  = force      # ignore/add/remove/force
 
 # Permit removal of the space between '>>' in 'foo<bar<int> >' (C++11 only). Default=False.
 # sp_angle_shift cannot remove the space without this option.
