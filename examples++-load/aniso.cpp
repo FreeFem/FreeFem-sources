@@ -98,7 +98,7 @@ long Boundaniso (long const &k, KN<double> *const &pm, double const &animax) {
 	KN<double> &m(*pm);
 	long ns = m.N() / k;
 	ffassert(ns * k == m.N());
-	double lmin = sqrt(animax);
+	//double lmin = sqrt(animax);
 	ffassert(k == 3 || k == 6);
 	int err = 0;
 	if (k == 3)	// <[m11,m12,m22]

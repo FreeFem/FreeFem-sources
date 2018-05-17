@@ -67,7 +67,7 @@ static /* Subroutine */ double xrandme (integer ii) {
 #else
 	// srandom(ii);
 	long r = random();
-	r = random();
+	//r = random();	//TODO why twice?
 	const unsigned long rmax = (1UL << 31) - 1;
 	double xx = (double)r / (double)rmax;
 #endif

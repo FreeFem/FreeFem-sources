@@ -257,16 +257,16 @@ double dist2 (int n, double *p, double *q) {
 long Hcode (int n, double eps, double *p, double *p0);
 
 KN<long>*CloseTo2 (Stack stack, double const &eps, KNM_<double> const &P, KNM_<double> const &Q) {
-	long Pn0 = P.N();
+	//long Pn0 = P.N();
 	long Pm0 = P.M();
-	long Qn0 = Q.N();
+	//long Qn0 = Q.N();
 	long Qm0 = Q.M();
-	double *p0 = &(P(0, 0));
+	//double *p0 = &(P(0, 0));
 	int po10 = P.step * P.shapei.step;
-	int po01 = P.step * P.shapej.step;
-	double *q0 = &(Q(0, 0));
+	//int po01 = P.step * P.shapej.step;
+	//double *q0 = &(Q(0, 0));
 	int qo10 = Q.step * Q.shapei.step;
-	int qo01 = Q.step * Q.shapej.step;
+	//int qo01 = Q.step * Q.shapej.step;
 	double x0 = P(0, ':').min();
 	double y0 = P(1, ':').min();
 	double x1 = P(0, ':').max();
@@ -286,7 +286,7 @@ KN<long>*CloseTo2 (Stack stack, double const &eps, KNM_<double> const &P, KNM_<d
 		if (verbosity > 19)
 			cout << i << " :: " << P(0, i) << " " << P(1, i) << endl;
 
-		int j = S.AddSimple(&P(0, i));
+		/*int j = */S.AddSimple(&P(0, i));
 	}
 
 	KN<long> *pr = new KN<long>(Qm0);
@@ -328,7 +328,7 @@ KN<long>*CloseTo (Stack stack, double const &eps, KNM_<double> const &P, KNM<dou
 		cout << "     offset of 1 0 :  " << offset10 << endl;
 	}
 
-	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x,y, normal , value
+	//MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x, y, normal, value
 	double x0 = P(0, ':').min();
 	double y0 = P(1, ':').min();
 	double x1 = P(0, ':').max();
@@ -531,13 +531,13 @@ long Voisinage (KNM_<double> const &P, KNM_<double> const &Q, double const &eps,
 	int mp = P.M();
 	int mq = Q.M();
 	double *p = &P(0, 0);
-	double *q = &Q(0, 0);
+	//double *q = &Q(0, 0);
 	int offset01 = P.step * P.shapej.step;
 	;
 	int offset10 = P.step * P.shapei.step;
 	;
 	double *q0 = &(Q(0, 0));
-	int qoffset01 = Q.step * Q.shapej.step;
+	//int qoffset01 = Q.step * Q.shapej.step;
 	;
 	int qoffset10 = Q.step * Q.shapei.step;
 	;
@@ -604,18 +604,15 @@ long ff_flann_search (KNM_<double> const &P, KNM_<double> const &Q, double const
 	int mq = Q.M();
 	int np = P.N();
 	int nq = Q.N();
-	int nn = nq;
+	//int nn = nq;
 	double *p = &P(0, 0);
 	double *q = &Q(0, 0);
 	int offset01 = P.step * P.shapej.step;
-	;
 	int offset10 = P.step * P.shapei.step;
-	;
 	double *q0 = &(Q(0, 0));
 	int qoffset01 = Q.step * Q.shapej.step;
-	;
 	int qoffset10 = Q.step * Q.shapei.step;
-	;
+	
 	cout << np << " " << nq << " po 01,10 =:" << offset01 << ", " << offset10 << ", " << &P(0, 1) - p
 	     << " qo 01,10 =:" << qoffset01 << ", " << qoffset10 << ", " << &Q(0, 1) - q << endl;
 	cout << np << " " << mp << endl;

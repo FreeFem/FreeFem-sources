@@ -129,7 +129,7 @@ namespace Fem2D
 		// to get the flux = 1
 		R2 E[3] = {K.Edge(0), K.Edge(1), K.Edge(2)};
 		double l2E[3] = {(E[0], E[0]), (E[1], E[1]), (E[2], E[2])};
-		double lE[3] = {sqrt(l2E[0]), sqrt(l2E[1]), sqrt(l2E[2])};
+		//double lE[3] = {sqrt(l2E[0]), sqrt(l2E[1]), sqrt(l2E[2])};
 		double sgE[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
 		R2 cN[3] = {
 			E[0].perp() * (6. * sgE[0] / l2E[0]),

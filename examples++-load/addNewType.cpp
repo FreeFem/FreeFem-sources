@@ -30,7 +30,7 @@ class myType {
 
 		double x (double u, double v) const {return u + v;}
 
-		void init () {cout << " init myTpe \n"; nom = 0;}	// init des pointeur
+		void init () {cout << " init myTpe \n"; nom = 0;}	// initialization of the pointer
 
 		void destroy () {cout << " destroy de la variable associe \n"; delete nom; nom = 0;}
 };
