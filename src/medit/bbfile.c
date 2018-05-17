@@ -119,7 +119,7 @@ int bbfile (pMesh mesh) {
 	nf = 0;
 
 	if (bigbb) {
-		int nfield
+		int nfield;
 		
 		/* get only 1st field */
 		/* fscanf(in,"%d",&nfield);*/
