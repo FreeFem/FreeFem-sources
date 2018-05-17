@@ -27,8 +27,13 @@ namespace Fem2D {
 const int MaxDeep = 30;
 typedef  long  IntQuad;
 const IntQuad MaxISize = ( 1L << MaxDeep);
-
-
+    
+#define VERSION_Fem2D_FQuadTree 2
+/*
+ in version 2
+   add bool nearest=false Mai 20128 FH. for inytersect mesh 
+     Vertex *  ToClose(const R2 & ,R ,long,long,bool nearest=false);
+ */
 class Mesh;
 //typename Vertex;
 
@@ -107,10 +112,10 @@ public:
   Vertex * NearestVertex(long i,long j);
   
 //  Vertex *  NearestVertexWithNormal(long i,long j); // new version
-  Vertex *  ToClose(const R2 & ,R ,long,long);
-  Vertex *  ToClose(const R2 & P,R delta){
+  Vertex *  ToClose(const R2 & ,R ,long,long,bool nearest=false);
+  Vertex *  ToClose(const R2 & P,R delta,bool nearest=false){
       long hx = (long) (coef*delta);
-      return ToClose(P,delta,hx,hx);}
+      return ToClose(P,delta,hx,hx,nearest);}
   long SizeOf() const {return sizeof(FQuadTree)+sb->SizeOf();}
 
 #ifdef DRAWING

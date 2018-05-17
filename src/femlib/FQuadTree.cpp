@@ -229,14 +229,14 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 
 
 
-Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
+Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy,bool nearest)
 {
   I2 H(hx,hy);
   const I2 p(XtoI(v.x),YtoJ(v.y));
   const R2 X(v);
   R seuil2 = seuil*seuil;
  // const Metric  Mx(v.m);
-
+    Vertex *pvr =0; //   return vertex
   QuadTreeBox * pb[ MaxDeep ];
   int  pi[ MaxDeep  ];
     I2 pp[  MaxDeep ];
@@ -275,7 +275,15 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
 		R dd;
 	        if( (dd= (XY,XY) ) < seuil2 ) // LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
 	          {// cout << dd << " " << XY << " ";
-		    return &V; }
+                    if( nearest )  // modif FH
+                    {
+                        seuil2=dd;
+                        pvr = & V;
+                        // cout << "\n FQuadTree::ToClose( " <<  X << " / " << V << " / "<< dd << endl;
+                    }
+                    else
+		      return &V;
+                  }
 	      }
 	  }
 	else // Pointer QuadTreeBox 
@@ -302,7 +310,7 @@ Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy)
     hb <<= 1; // mul by 2 
   } while (l--);
   
-  return 0;
+  return pvr;
 }
 
 

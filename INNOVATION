@@ -1,3 +1,4 @@
+  add option in method  toClose function in fquatree to get the nearst point (for intersect meshes)
   add missing file curvature.edp 
   correct the label definition in case of intalledges in 2d
   add imax,jmax,imin,jmin to get index of row or column  of the min ,or max coef.

@@ -249,7 +249,7 @@ public:
 			if (NbAdj) NbOfEdges++;
 			if(NbAdj==1)
                         {
-                            if (! (TonBoundary[i]& MaskEdge[j]))
+                            if (! (TonBoundary[i]& MaskEdge[j]) && 0)
 			    { NbOfMEdges++;
 				if(verbosity>99) 
 				    cout << " Edge (" << j0 << " "<< j1 << ") : "  << j  << " of Triangle " << &T-triangles << " on mortar \n"
@@ -273,6 +273,7 @@ public:
 		    NbMortars =0;
 		    NbMortarsPaper=0;
 	    }
+        
 		{
 		    //  construct the mortar 
 		    int * linkg = new int [nv]; //  to link
