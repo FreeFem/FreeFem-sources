@@ -62,6 +62,7 @@ int loadGIS (pMesh mesh) {
 	/* check header file */
 	if (buf[0] != 'G') {
 		fprintf(stderr, "  ## Invalid format.\n");
+		fclose(fp);
 		return (0);
 	}
 
@@ -69,12 +70,13 @@ int loadGIS (pMesh mesh) {
 	else if (buf[1] == '2') ityp = 2;
 	else {
 		fprintf(stderr, "  ## Invalid format ('G?' expected).\n");
+		fclose(fp);
 		return (0);
 	}
 
 	/* check and strip comments */
 	do {
-		ret = fscanf(fp, "%s", buf, 256);
+		ret = fscanf(fp, "%s", buf);
 		if (ret == EOF) break;
 
 		if (buf[0] == '#')
@@ -95,6 +97,7 @@ int loadGIS (pMesh mesh) {
 	if (ret != 9) {
 		fprintf(stderr, "  ## Error loading terrain.\n");
 		free(mesh);
+		fclose(fp);
 		return (0);
 	}
 
@@ -153,6 +156,7 @@ int loadGIS (pMesh mesh) {
 				free(mesh->point);
 				free(mesh);
 				free(te);
+				fclose(fp);
 				return (0);
 			}
 

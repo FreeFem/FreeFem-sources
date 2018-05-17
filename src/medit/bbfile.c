@@ -191,7 +191,7 @@ int bbfile (pMesh mesh) {
 		for (k = 1; k <= mesh->nbb; k++) {
 			ps = &mesh->sol[k];
 			ps->bb = 0.0;
-			if (fscanf(in, "%s", data, 128) != 1) continue;
+			if (fscanf(in, "%s", data) != 1) continue;
 
 			if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 

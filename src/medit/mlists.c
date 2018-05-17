@@ -1250,6 +1250,9 @@ GLuint drawPalette (pScene sc) {
 			left = sc->par.xs / 10;
 			right = sc->par.xs - left;
 		}
+		else{
+			//TODO
+		}
 
 		inc = (sc->par.xs - 2 * left) / (MAXISO - 1);
 		xpos = left;
