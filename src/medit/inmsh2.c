@@ -43,7 +43,10 @@ int inmsh2 (pMesh mesh) {
 	strcpy(data, mesh->name);
 	strcat(data, ".faces");
 	inf = fopen(data, "r");
-	if (!inf) return (0);
+	if (!inf) {
+		fclose(inp);
+		return (0);
+	}
 
 	if (!quiet) fprintf(stdout, "  Reading %s.{points,.faces}\n", mesh->name);
 

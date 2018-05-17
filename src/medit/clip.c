@@ -176,8 +176,6 @@ void updateClip (pClip clip, pMesh mesh) {
 }
 
 void clipVertices (pMesh mesh, pScene sc, pClip clip) {
-	pTetra pt;
-	pHexa ph;
 	pPoint p0;
 	double dd1, zero;
 	int k, l, nbpos, nbneg, nbnul;
@@ -198,6 +196,7 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 
 	/* update tetrahedra */
 	for (k = 1; k <= mesh->ntet; k++) {
+		pTetra pt;
 		pt = &mesh->tetra[k];
 		pt->clip = 0;
 		nbpos = nbneg = nbnul = 0;
@@ -214,6 +213,7 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 
 	/* update hexahedra */
 	for (k = 1; k <= mesh->nhex; k++) {
+		pHexa ph;
 		ph = &mesh->hexa[k];
 		ph->clip = 0;
 		nbpos = nbneg = nbnul = 0;
@@ -230,13 +230,12 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 }
 
 void drawClip (pScene sc, pClip clip, pMesh mesh, GLboolean docap) {
-	pTransform cliptr, view;
+	pTransform cliptr;
 	GLfloat scale;
 
 	/* default */
 	if (ddebug) printf("drawClip\n");
 
-	view = sc->view;
 	cliptr = clip->cliptr;
 
 	if (clip->active & C_UPDATE) updateClip(clip, mesh);

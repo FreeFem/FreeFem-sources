@@ -37,7 +37,7 @@ GLuint capTetra (pMesh mesh) {
 	double dd1[6], d, ax, ay, az, bx, by, bz;
 	double cx[4], cy[4], cz[4], cc;
 	float n[3];
-	int m, k, k1, k2, l, transp, pos[6], neg[6], nbpos, nbneg, nbnul;
+	int m, pos[6], neg[6], nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 
@@ -55,6 +55,8 @@ GLuint capTetra (pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k, transp;
+		
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
@@ -78,6 +80,8 @@ GLuint capTetra (pMesh mesh) {
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &pm->shininess);
 
 		while (k != 0) {
+			int l;
+			
 			pt = &mesh->tetra[k];
 			if (!pt->v[0] || !pt->clip) {
 				k = pt->nxt;
@@ -97,6 +101,8 @@ GLuint capTetra (pMesh mesh) {
 			}
 
 			if (nbneg == 2 && nbpos == 2) {
+				int k1, k2;
+				
 				/* display quadrilateral */
 				for (l = 0; l < 4; l++) {
 					k1 = neg[tn[l]];
@@ -201,7 +207,7 @@ GLuint capTetraMap (pMesh mesh) {
 	double dd1[6], d, ax, ay, az, bx, by, bz;
 	double cx[4], cy[4], cz[4], cc;
 	float n[3], sol[4];
-	int m, k, k1, k2, l, pos[6], neg[6], nbpos, nbneg, nbnul;
+	int m, k1, k2, l, pos[6], neg[6], nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 	triangle t1, t2;
@@ -224,6 +230,7 @@ GLuint capTetraMap (pMesh mesh) {
 	glBegin(GL_TRIANGLES);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;

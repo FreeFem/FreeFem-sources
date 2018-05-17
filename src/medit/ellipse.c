@@ -46,13 +46,15 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 	pPoint p0;
 	GLfloat mat[16], cx, cy, cz;
 	double m[6], lambda[3], v[3][3];
-	int i, j, l, iord;
+	int i, j, l;
 
 	/* compute average size */
 	if (mesh->nfield != 6 || !mesh->nbb) return;
 
 	/* draw average ellipse at element */
 	if (typel == LPoint) {
+		int iord;
+		
 		p0 = &mesh->point[k];
 		/*pm = &sc->material[refmat];*/
 		pm = &sc->material[p0->ref];
@@ -223,14 +225,16 @@ void glCircle (float radius) {
 }
 
 void drawEllipse (pScene sc, pMesh mesh, int typel, int k) {
-	pMaterial pm;
 	pSolution ps;
-	pPoint p0;
-	double m[3], vp[2][2], lambda[2], dd1, dd2;
-	float theta;
+	double vp[2][2], lambda[2], dd1, dd2;
 
 	/* draw ellipse at vertex */
 	if (typel == LPoint) {
+		pMaterial pm;
+		pPoint p0;
+		double m[3];
+		float theta;
+		
 		ps = &mesh->sol[k];
 		p0 = &mesh->point[k];
 		pm = &sc->material[refmat];
@@ -283,11 +287,10 @@ GLuint drawAllEllipse (pScene sc, pMesh mesh) {
 	GLuint dlist;
 	pSolution ps;
 	pMaterial pm;
-	pTriangle pt;
 	pPoint p0;
 	double m[3], vp[2][2], lambda[2], dd1, dd2;
-	float theta, cx, cy;
-	int k, i, ref;
+	float theta, cy;
+	int k, ref;
 
 	dlist = glGenLists(1);
 	glNewList(dlist, GL_COMPILE);
@@ -299,6 +302,10 @@ GLuint drawAllEllipse (pScene sc, pMesh mesh) {
 
 	if (mesh->typage == 1)
 		for (k = 1; k <= mesh->ne; k++) {
+			pTriangle pt;
+			float cx;
+			int i;
+			
 			ps = &mesh->sol[k];
 			pt = &mesh->tria[k];
 			if (!pt->v[0]) continue;

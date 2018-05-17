@@ -49,6 +49,7 @@ int loadGIS (pMesh mesh) {
 
 	if (!fgets(buf, sizeof(buf), fp)) {
 		fprintf(stderr, "  ## Invalid header.\n");
+		fclose(fp);
 		return (0);
 	}
 
@@ -73,7 +74,7 @@ int loadGIS (pMesh mesh) {
 
 	/* check and strip comments */
 	do {
-		ret = fscanf(fp, "%s", buf);
+		ret = fscanf(fp, "%s", buf, 256);
 		if (ret == EOF) break;
 
 		if (buf[0] == '#')
@@ -151,6 +152,7 @@ int loadGIS (pMesh mesh) {
 				fprintf(stderr, "  ## Error loading terrain.\n");
 				free(mesh->point);
 				free(mesh);
+				free(te);
 				return (0);
 			}
 

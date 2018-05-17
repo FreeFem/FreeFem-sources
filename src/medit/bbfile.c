@@ -60,7 +60,7 @@ int bbfile (pMesh mesh) {
 	pSolution ps;
 	double a, b, c, lambda[3], eigv[3][3], m[6], vp[2][2];
 	float dummy;
-	int j, k, l, dim, np, nfield, nf, i1, i2, i3, i4, err, iord;
+	int j, k, l, dim, np, nf, i1, i2, i3, err, iord;
 	char *ptr, data[128], tmp[128];
 	ubyte bigbb;
 
@@ -91,7 +91,7 @@ int bbfile (pMesh mesh) {
 		return (0);
 
 	/* if ( !quiet )  fprintf(stdout,"  Reading %s\n",data); */
-	i1 = i2 = i3 = i4 = -1;
+	i1 = i2 = i3 = -1;
 	/* read file format */
 	err = 0;
 	fscanf(in, "%d", &dim);
@@ -119,6 +119,8 @@ int bbfile (pMesh mesh) {
 	nf = 0;
 
 	if (bigbb) {
+		int nfield
+		
 		/* get only 1st field */
 		/* fscanf(in,"%d",&nfield);*/
 		nfield = i1;
@@ -189,7 +191,7 @@ int bbfile (pMesh mesh) {
 		for (k = 1; k <= mesh->nbb; k++) {
 			ps = &mesh->sol[k];
 			ps->bb = 0.0;
-			if (fscanf(in, "%s", data) != 1) continue;
+			if (fscanf(in, "%s", data, 128) != 1) continue;
 
 			if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 

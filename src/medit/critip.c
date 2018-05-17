@@ -39,11 +39,9 @@ typedef struct saddle {
 static int idir[5] = {0, 1, 2, 0, 1};
 
 int closedBall (pMesh mesh, int depart, ubyte i) {
-	pTriangle pt;
 	int adj, iadr;
 	ubyte voy;
 
-	pt = &mesh->tria[depart];
 	voy = idir[i + 1];
 	iadr = 3 * (depart - 1) + 1;
 	adj = mesh->adja[iadr + voy];
@@ -72,7 +70,6 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	int *adj, iadr, i, i1, i2, k, m, ncp, ps, ifilt;
 	ubyte typ, tag;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
-	time_t t;
 
 	if (!mesh->nbb || mesh->nfield != mesh->dim) return (0);
 
@@ -311,6 +308,7 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	return (dlist);
 
 	if (ps) {
+		time_t t;
 		fprintf(stdout, " Building streamline(s)");
 		fflush(stdout);
 		t = clock();

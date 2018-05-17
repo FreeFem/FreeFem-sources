@@ -112,7 +112,6 @@ pCamera initCamera (pScene sc, int up) {
 	pCamera c;
 	pMesh mesh;
 	double dd;
-	double look[3];
 
 	if (ddebug) printf("    initCamera dmax %g\n", sc->dmax);
 
@@ -144,6 +143,8 @@ pCamera initCamera (pScene sc, int up) {
 	updateSun(sc, c);
 
 	if (ddebug) {
+		double look[3];
+		
 		look[0] = c->eye[0] + sc->dmax * c->speed[0];
 		look[1] = c->eye[1] + sc->dmax * c->speed[1];
 		look[2] = c->eye[2] + sc->dmax * c->speed[2];

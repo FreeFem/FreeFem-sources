@@ -1867,7 +1867,11 @@ pStream createStream (pScene sc, pMesh mesh) {
 	assert(st->listp);
 
 	sc->slist = (GLuint *)calloc(MAX_LST, sizeof(GLuint));
-	if (!sc->slist) return (0);
+	if (!sc->slist) {
+		free(st->listp);
+		free(st);
+		return (0);
+	}
 
 	return (st);
 }
@@ -1898,7 +1902,7 @@ int streamRefPoint (pScene sc, pMesh mesh) {
 /* read starting point in file.iso */
 int streamIsoPoint (pScene sc, pMesh mesh) {
 	pStream st;
-	int k, nbp, nbstl;
+	int nbp, nbstl;
 	time_t t;
 
 	if (!parseStream(sc, mesh)) return (0);
@@ -1912,6 +1916,8 @@ int streamIsoPoint (pScene sc, pMesh mesh) {
 	nbp = 0;
 	st->nbstl = 0;
 	if (mesh->dim == 3) {
+		int k;
+		
 		if (!mesh->ntet) return (0);
 
 		nbp = 0;

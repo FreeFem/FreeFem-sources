@@ -26,8 +26,7 @@
 
 extern void resetLists (pScene, pMesh);
 static int getmesh (pMesh mesh, int range) {
-	int k, ret;
-	char *ptr, data[256];
+	int ret;
 	static char base[256];
 
 	/* allocate mesh structure */
@@ -63,6 +62,8 @@ static int getmesh (pMesh mesh, int range) {
 	}
 
 	if (mesh->sol && mesh->nbb) {
+		int k;
+		
 		if ((mesh->dim == 2 && mesh->nfield == 3) || (mesh->dim == 3 && mesh->nfield == 6))
 			for (k = 1; k <= mesh->nbb; k++)
 				free(mesh->sol[k].m);
@@ -83,6 +84,8 @@ static int getmesh (pMesh mesh, int range) {
 	mesh->ntet = mesh->nhex = mesh->nbb = 0;
 
 	if (animdep == range) {
+		char data[256], *ptr;
+		
 		sprintf(data, ".%d", range);
 		ptr = (char *)strstr(mesh->name, data);
 		if (ptr) *ptr = '\0';
@@ -243,13 +246,14 @@ int animParticle (pScene sc, pMesh mesh) {
 int animat () {
 	pMesh mesh;
 	pScene sc;
-	char data[128], *name;
 
 	/* default */
 	if (ddebug) printf("animat: read file(s)\n");
 
 	/* enter basename */
 	if (!cv.nbm) {
+		char data[128], *name;
+		
 		fprintf(stdout, "  File name(s) missing. Please enter : ");
 		fflush(stdout);
 		fflush(stdin);
@@ -261,7 +265,7 @@ int animat () {
 
 		fprintf(stdout, "  Enter range [start,end] :");
 		fflush(stdout);
-		fflush(stdin);
+		fflush(stdin);	//TODO: replace bay `while(fgetc(stdin)!=EOF);` ?
 		fscanf(stdin, "%d %d", &animdep, &animfin);
 
 		/* parse file name(s) */

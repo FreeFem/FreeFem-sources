@@ -39,7 +39,7 @@ GLuint listTria (pScene sc, pMesh mesh) {
 	GLuint dlist;
 	double dd, ax, ay, az, bx, by, bz;
 	float cx, cy, cz, n[3], pp0[3], pp1[3], pp2[3];
-	int k, m, mm, is0, is1, is2, transp;
+	int m, mm, is0, is1, is2, transp;
 
 	/* default */
 	if (!mesh->nt) return (0);
@@ -53,6 +53,7 @@ GLuint listTria (pScene sc, pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LTria];
@@ -264,7 +265,7 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 	GLuint dlist = 0;
 	double ax, ay, az, bx, by, bz, dd;
 	float cx, cy, cz, n[3], pp0[3], pp1[3], pp2[3], pp3[3];
-	int k, m, mm, is0, is1, is2, is3, transp;
+	int m, mm, is0, is1, is2, is3, transp;
 
 	/* default */
 	if (!mesh->nq) return (0);
@@ -278,6 +279,7 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LQuad];
@@ -519,7 +521,7 @@ GLuint listTetra (pScene sc, pMesh mesh, ubyte clip) {
 	GLuint dlist;
 	double ax, ay, az, bx, by, bz, d;
 	float n[3], shrink, cx, cy, cz;
-	int k, l, m, mm;
+	int l, m, mm;
 
 	if (!mesh->ntet) return (0);
 
@@ -534,6 +536,7 @@ GLuint listTetra (pScene sc, pMesh mesh, ubyte clip) {
 
 	/* scan tetra */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LTets];
