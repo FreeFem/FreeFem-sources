@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,8 +56,12 @@ void setFont (char *name, int size) {
 	 * else if (strcmp(name, "8x13") == 0)
 	 * font_style = GLUT_BITMAP_8_BY_13;
 	 */
-	else if (strcmp(name, "9x15") == 0)
+	else if (strcmp(name, "9x15") == 0) {
 		font_style = GLUT_BITMAP_9_BY_15;
+	}
+
+	//TODO do something with that ?
+	printf("%s", font_style);
 }
 
 /* display string format at pos(x,y) */
@@ -70,8 +75,9 @@ void drwstr (GLuint x, GLuint y, char *format, ...) {
 
 	glRasterPos2i(x, y);
 
-	for (s = buffer; *s; s++)
+	for (s = buffer; *s; s++) {
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *s);
+	}
 }
 
 void output2 (GLfloat x, GLfloat y, char *format, ...) {
@@ -85,10 +91,11 @@ void output2 (GLfloat x, GLfloat y, char *format, ...) {
 
 	glRasterPos2f(x, y);
 
-	for (s = buffer; *s; s++)
+	for (s = buffer; *s; s++) {
 		/*glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10,*s);*/
 		/*glutBitmapCharacter(font_style,*s);*/
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, *s);
+	}
 }
 
 void output3 (GLfloat x, GLfloat y, GLfloat z, char *format, ...) {
@@ -101,8 +108,9 @@ void output3 (GLfloat x, GLfloat y, GLfloat z, char *format, ...) {
 	va_end(args);
 	glRasterPos3f(x, y, z);
 
-	for (s = buffer; *s; s++)
+	for (s = buffer; *s; s++) {
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, *s);
+	}
 }
 
 /* color converter */
@@ -240,24 +248,29 @@ void rotateMatrix (GLfloat angle, GLfloat x, GLfloat y, GLfloat z, GLfloat rm[16
 
 int invertMatrix (float src[16], float inverse[16]) {
 	double t;
-	int i, j, k, swap;
+	int i, j, k;
 	double tmp[4][4];
 
 	memcpy(inverse, IdMatrix, 16 * sizeof(GLfloat));
 
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
 			tmp[i][j] = src[i * 4 + j];
+		}
+	}
 
 	for (i = 0; i < 4; i++) {
+		int swap;
+
 		/* look for largest element in column. */
 		swap = i;
 
-		for (j = i + 1; j < 4; j++)
+		for (j = i + 1; j < 4; j++) {
 			if (fabs(tmp[j][i]) > fabs(tmp[i][i]))
 				swap = j;
+		}
 
-		if (swap != i)
+		if (swap != i) {
 			/* swap rows. */
 			for (k = 0; k < 4; k++) {
 				t = tmp[i][k];
@@ -267,6 +280,7 @@ int invertMatrix (float src[16], float inverse[16]) {
 				inverse[i * 4 + k] = inverse[swap * 4 + k];
 				inverse[swap * 4 + k] = t;
 			}
+		}
 
 		/* The matrix is singular. */
 		if (tmp[i][i] == 0)
@@ -279,7 +293,7 @@ int invertMatrix (float src[16], float inverse[16]) {
 			inverse[i * 4 + k] /= t;
 		}
 
-		for (j = 0; j < 4; j++)
+		for (j = 0; j < 4; j++) {
 			if (j != i) {
 				t = tmp[j][i];
 
@@ -288,6 +302,7 @@ int invertMatrix (float src[16], float inverse[16]) {
 					inverse[j * 4 + k] -= inverse[i * 4 + k] * t;
 				}
 			}
+		}
 	}
 
 	return (1);
@@ -298,8 +313,9 @@ void print_matrix (const GLfloat m[16], const char *ligne) {
 
 	printf("---- %s ----\n", ligne);
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 4; i++) {
 		printf("%f %f %f %f\n", m[i], m[4 + i], m[8 + i], m[12 + i]);
+	}
 
 	printf("---------------------------------\n");
 }
@@ -309,17 +325,18 @@ void print_matrixd (const GLdouble m[16], const char *ligne) {
 
 	printf("---- %s ----\n", ligne);
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 4; i++) {
 		printf("%f %f %f %f\n", m[i], m[4 + i], m[8 + i], m[12 + i]);
+	}
 
 	printf("---------------------------------\n");
 }
 
 int filnum (char *data, int numdep, char *ext) {
-	FILE *in;
-	char tmpstr[256];
-
 	do {
+		FILE *in;
+		char tmpstr[256];
+
 		sprintf(tmpstr, "%s.%.3d.%s", data, numdep, ext);
 		in = fopen(tmpstr, "r");
 		if (!in) return (numdep);
@@ -333,4 +350,3 @@ int filnum (char *data, int numdep, char *ext) {
 #ifdef __cplusplus
 }
 #endif
-

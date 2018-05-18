@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -41,17 +42,21 @@ enum   {Euler=1, RK4=2};
 
 /* find tetra containg p, starting nsdep */
 int locateTetra (pMesh mesh, int nsdep, int base, float *p, double *cb) {
-	pTetra pt;
-	pPoint p0, p1, p2, p3;
-	double bx, by, bz, cx, cy, cz, dx, dy, dz, vx, vy, vz, apx, apy, apz;
-	double epsra, vol1, vol2, vol3, vol4, dd;
-	int *adj, iadr, it, nsfin;
+	pPoint p1, p2, p3;
+
+	int *adj, it, nsfin;
 
 	it = 0;
 	nsfin = nsdep;
 
 	/*  printf("locateTetra: searching for %f %f %f\n",p[0],p[1],p[2]);*/
 	do {
+		pTetra pt;
+		pPoint p0;
+		double bx, by, bz, cx, cy, cz, dx, dy, dz, vx, vy, vz, apx, apy, apz;
+		double epsra, vol1, vol2, vol3, vol4, dd;
+		int iadr;
+
 		if (!nsfin) return (0);
 
 		pt = &mesh->tetra[nsfin];
@@ -191,16 +196,18 @@ int inSubTetra (pPoint pt[4], float *p, double *cb) {
 }
 
 int locateHexa (pMesh mesh, int nsdep, int base, float *p, double *cb, pPoint pt[4]) {
-	pHexa ph;
-	double bx, by, bz, cx, cy, cz, dx, dy, dz, vx, vy, vz, apx, apy, apz;
-	double epsra, vol1, vol2, vol3, vol4, dd;
-	int *adj, iadr, it, nsfin, in;
+	/*double bx, by, bz, cx, cy, cz, dx, dy, dz, vx, vy, vz, apx, apy, apz;
+	double epsra, vol1, vol2, vol3, vol4, dd;*/
+	int *adj, it, nsfin;
 
 	it = 0;
 	nsfin = nsdep;
 
 	/*printf("locateHexa: searching for %f %f %f\n",p[0],p[1],p[2]);*/
 	do {
+		pHexa ph;
+		int iadr, in;
+
 		if (!nsfin) return (0);
 
 		ph = &mesh->hexa[nsfin];
@@ -324,17 +331,20 @@ int locateHexa (pMesh mesh, int nsdep, int base, float *p, double *cb, pPoint pt
 }
 
 int locateTria (pMesh mesh, int nsdep, int base, float *p, double *cb) {
-	pTriangle pt;
 	pPoint p0, p1, p2;
-	double ax, ay, bx, by, cx, cy;
-	double epsra, aire1, aire2, aire3, dd;
-	int *adj, iadr, it, isign, nsfin;
+
+	int it, nsfin;
 
 	it = 0;
 	nsfin = nsdep;
 
 	/*printf("locateTria: searching for %f %f\n",p[0],p[1]);*/
 	do {
+		pTriangle pt;
+		double ax, ay, bx, by, cx, cy;
+		double epsra, aire1, aire2, aire3, dd;
+		int *adj, iadr, isign;
+
 		pt = &mesh->tria[nsfin];
 		if (!pt->v[0]) return (0);
 
@@ -519,19 +529,21 @@ int inTria (pMesh mesh, int nsdep, float *p, double *cb) {
 double sizeTetra (pMesh mesh, int k) {
 	pTetra pt;
 	pPoint p[4];
-	double ax, ay, az, dd;
 	double hmin;
 	int i;
 	static int idire[6][2] = {{0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3}};
 
 	pt = &mesh->tetra[k];
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 4; i++) {
 		p[i] = &mesh->point[pt->v[i]];
+	}
 
 	hmin = FLT_MAX;
 
 	for (i = 1; i < 6; i++) {
+		double ax, ay, az, dd;
+
 		ax = p[idire[i][0]]->c[0] - p[idire[i][1]]->c[0];
 		ay = p[idire[i][0]]->c[1] - p[idire[i][1]]->c[1];
 		az = p[idire[i][0]]->c[2] - p[idire[i][1]]->c[2];
@@ -545,7 +557,6 @@ double sizeTetra (pMesh mesh, int k) {
 double sizeHexa (pMesh mesh, int k) {
 	pHexa ph;
 	pPoint p[8];
-	double ax, ay, az, dd;
 	double hmin;
 	int i;
 	static int idire[12][2] = {{0, 1}, {1, 2}, {2, 3}, {0, 3}, {4, 5}, {5, 6},
@@ -553,12 +564,15 @@ double sizeHexa (pMesh mesh, int k) {
 
 	ph = &mesh->hexa[k];
 
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 8; i++) {
 		p[i] = &mesh->point[ph->v[i]];
+	}
 
 	hmin = FLT_MAX;
 
 	for (i = 1; i < 12; i++) {
+		double ax, ay, az, dd;
+
 		ax = p[idire[i][0]]->c[0] - p[idire[i][1]]->c[0];
 		ay = p[idire[i][0]]->c[1] - p[idire[i][1]]->c[1];
 		az = p[idire[i][0]]->c[2] - p[idire[i][1]]->c[2];
@@ -571,8 +585,6 @@ double sizeHexa (pMesh mesh, int k) {
 
 double sizeTria (pMesh mesh, int k) {
 	pTriangle pt;
-	pPoint p0, p1;
-	double ax, ay, dd;
 	double hmin;
 	int i;
 	static int idir[5] = {0, 1, 2, 0, 1};
@@ -581,6 +593,9 @@ double sizeTria (pMesh mesh, int k) {
 	hmin = FLT_MAX;
 
 	for (i = 0; i < 3; i++) {
+		pPoint p0, p1;
+		double ax, ay, dd;
+
 		p0 = &mesh->point[pt->v[i]];
 		p1 = &mesh->point[pt->v[idir[i + 1]]];
 		ax = p0->c[0] - p1->c[0];
@@ -594,8 +609,6 @@ double sizeTria (pMesh mesh, int k) {
 
 double sizeQuad (pMesh mesh, int k) {
 	pQuad pq;
-	pPoint p0, p1;
-	double ax, ay, dd;
 	double hmin;
 	int i;
 	static int idir[7] = {0, 1, 2, 3, 0, 1, 2};
@@ -604,6 +617,9 @@ double sizeQuad (pMesh mesh, int k) {
 	hmin = FLT_MAX;
 
 	for (i = 0; i < 4; i++) {
+		pPoint p0, p1;
+		double ax, ay, dd;
+
 		p0 = &mesh->point[pq->v[i]];
 		p1 = &mesh->point[pq->v[idir[i + 1]]];
 		ax = p0->c[0] - p1->c[0];
@@ -693,8 +709,7 @@ double field2DInterp (pMesh mesh, int iel, double *cb, double *v) {
 
 /* add point to display list, if needed */
 int filterPoint (pScene sc, Stream *st, float *p, ubyte color) {
-	double norm, rgb[3], kc, ux, uy, uz, vx, vy, vz, dd;
-	int i;
+	double norm, rgb[3], ux, uy, uz, vx, vy, vz, dd;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	/* store point */
@@ -704,13 +719,16 @@ int filterPoint (pScene sc, Stream *st, float *p, ubyte color) {
 	/* point color */
 	norm = st->norm;
 	if (!color) {
+		double kc;
+		int i;
+
 		if (norm < sc->iso.val[0])
 			norm = sc->iso.val[0];
 		else if (norm > sc->iso.val[MAXISO - 1])
 			norm = sc->iso.val[MAXISO - 1];
 
-		for (i = 0; i < MAXISO - 1; i++)
-			if (norm < sc->iso.val[i]) break;
+		for (i = 0; i < MAXISO - 1; i++) {
+			if (norm < sc->iso.val[i]) break; }
 
 		kc = (norm - sc->iso.val[i - 1]) / (sc->iso.val[i] - sc->iso.val[i - 1]);
 		st->stcol[st->stnp] = sc->iso.col[i - 1] * (1.0 - kc) + sc->iso.col[i] * kc;
@@ -793,7 +811,7 @@ int filterPoint (pScene sc, Stream *st, float *p, ubyte color) {
 
 /* add vertex to display list */
 void addPoint (pScene sc, Stream *st, float *p, ubyte color) {
-	double norm, rgb[3], kc;
+	double norm, rgb[3];
 	int i;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
@@ -801,14 +819,16 @@ void addPoint (pScene sc, Stream *st, float *p, ubyte color) {
 	norm = st->norm;
 	i = MAXISO - 1;
 	if (!color) {
+		double kc;
+
 		norm = st->norm;
 		if (norm < sc->iso.val[0])
 			norm = sc->iso.val[0];
 		else if (norm > sc->iso.val[MAXISO - 1])
 			norm = sc->iso.val[MAXISO - 1];
 
-		for (i = 0; i < MAXISO - 1; i++)
-			if (norm < sc->iso.val[i]) break;
+		for (i = 0; i < MAXISO - 1; i++) {
+			if (norm < sc->iso.val[i]) break; }
 
 		kc = (norm - sc->iso.val[i - 1]) / (sc->iso.val[i] - sc->iso.val[i - 1]);
 		hsv[0] = sc->iso.col[i - 1] * (1.0 - kc) + sc->iso.col[i] * kc;
@@ -829,7 +849,7 @@ void addPoint (pScene sc, Stream *st, float *p, ubyte color) {
 
 int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	pTetra pt;
-	double norm, h6, cb[4], v1[3], v2[3], v3[3];
+	double /*norm, */h6, cb[4], v1[3], v2[3], v3[3];
 	float xp1[3], xp2[3], xp3[3];
 	int k;
 
@@ -841,7 +861,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTetra(mesh, nsdep, ++mesh->mark, xp1, cb);
 	if (!k) return (0);
 
-	norm = field3DInterp(mesh, k, cb, v1);
+	/*norm = */field3DInterp(mesh, k, cb, v1);
 	pt = &mesh->tetra[k];
 	pt->cpt--;
 
@@ -852,7 +872,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTetra(mesh, k, ++mesh->mark, xp2, cb);
 	if (!k) return (0);
 
-	norm = field3DInterp(mesh, k, cb, v2);
+	/*norm = */field3DInterp(mesh, k, cb, v2);
 	pt = &mesh->tetra[k];
 	pt->cpt--;
 
@@ -863,7 +883,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTetra(mesh, k, ++mesh->mark, xp3, cb);
 	if (!k) return (0);
 
-	norm = field3DInterp(mesh, k, cb, v3);
+	/*norm = */field3DInterp(mesh, k, cb, v3);
 	pt = &mesh->tetra[k];
 	pt->cpt--;
 
@@ -877,7 +897,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 
 int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	pTriangle pt;
-	double norm, h6, cb[3], v1[3], v2[3], v3[3];
+	double /*norm, */h6, cb[3], v1[3], v2[3], v3[3];
 	float xp1[3], xp2[3], xp3[3];
 	int k;
 
@@ -888,7 +908,7 @@ int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTria(mesh, nsdep, ++mesh->mark, xp1, cb);
 	if (!k) return (0);
 
-	norm = field2DInterp(mesh, k, cb, v1);
+	/*norm = */field2DInterp(mesh, k, cb, v1);
 	pt = &mesh->tria[k];
 	pt->cpt--;
 
@@ -898,7 +918,7 @@ int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTria(mesh, k, ++mesh->mark, xp2, cb);
 	if (!k) return (0);
 
-	norm = field2DInterp(mesh, k, cb, v2);
+	/*norm = */field2DInterp(mesh, k, cb, v2);
 	pt = &mesh->tria[k];
 	pt->cpt--;
 
@@ -908,7 +928,7 @@ int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTria(mesh, k, ++mesh->mark, xp3, cb);
 	if (!k) return (0);
 
-	norm = field2DInterp(mesh, k, cb, v3);
+	/*norm = */field2DInterp(mesh, k, cb, v3);
 	pt = &mesh->tria[k];
 	pt->cpt--;
 
@@ -946,9 +966,11 @@ int parseStream (pScene sc, pMesh mesh) {
 	st = sc->stream;
 
 	while (!feof(in)) {
-		fscanf(in, "%s", key);
+		fscanf(in, "%255s", key);
 
-		for (i = 0; i < strlen(key); i++) key[i] = tolower(key[i]);
+		for (i = 0; i < strlen(key); i++) {
+			key[i] = tolower(key[i]);
+		}
 
 		if (!strcmp(key, "nblines")) {
 			fscanf(in, "%d", &nbp);
@@ -969,9 +991,9 @@ int parseStream (pScene sc, pMesh mesh) {
 					st->listp[k] = x - mesh->xtra;
 					st->listp[k + 1] = y - mesh->ytra;
 				}
-		} else if (!strcmp(key, "euler"))
+		} else if (!strcmp(key, "euler")) {
 			st->typtrack = Euler;
-		else if (!strcmp(key, "box")) {
+		} else if (!strcmp(key, "box")) {
 			ret = fscanf(in, "%f %f", &x, &y);
 			if (ret != 2) break;
 
@@ -989,8 +1011,9 @@ int parseStream (pScene sc, pMesh mesh) {
 				st->zmin = x - mesh->ztra;
 				st->zmax = y - mesh->ztra;
 			}
-		} else if (key[0] == '#')
+		} else if (key[0] == '#') {
 			fgets(key, 255, in);
+		}
 	}
 
 	fclose(in);
@@ -1011,7 +1034,7 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 	pTetra pt;
 	pStream st;
 	double dd, cb[4], cbdep[4], v[4], vdep[4], sizedep, normdep;
-	float step, p[3], ox, oy, oz, ldt;
+	float step, p[3], ldt;
 	int i, k, exh, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	clock_t ct;
 	FILE *out;
@@ -1108,6 +1131,8 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 	}
 
 	do {
+		float ox, oy, oz;
+
 		ox = p[0];
 		oy = p[1];
 		oz = p[2];
@@ -1120,9 +1145,9 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 		}
 
 		if (p[0] < st->xmin || p[1] < st->ymin || p[2] < st->zmin ||
-		    p[0] > st->xmax || p[1] > st->ymax || p[2] > st->zmax)
+		    p[0] > st->xmax || p[1] > st->ymax || p[2] > st->zmax) {
 			break;
-		else if (sc->par.maxtime < FLT_MAX) {
+		} else if (sc->par.maxtime < FLT_MAX) {
 			ox -= p[0];
 			oy -= p[1];
 			oz -= p[2];
@@ -1492,7 +1517,7 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 	pTriangle pt;
 	pStream st;
 	double dd, cb[3], cbdep[3], v[3], vdep[3], sizedep, normdep;
-	float step, p[3], ox, oy, ldt;
+	float step, p[3], ldt;
 	int i, k, exh, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	clock_t ct;
 	FILE *out;
@@ -1589,6 +1614,8 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 	}
 
 	do {
+		float ox, oy;
+
 		ox = p[0];
 		oy = p[1];
 
@@ -1599,9 +1626,9 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 		}
 
 		if (p[0] < st->xmin || p[1] < st->ymin ||
-		    p[0] > st->xmax || p[1] > st->ymax)
+		    p[0] > st->xmax || p[1] > st->ymax) {
 			break;
-		else if (sc->par.maxtime < FLT_MAX) {
+		} else if (sc->par.maxtime < FLT_MAX) {
 			ox -= p[0];
 			oy -= p[1];
 			dd = sqrt(ox * ox + oy * oy) / st->norm;
@@ -1735,7 +1762,7 @@ int listSaddleStream (pScene sc, pMesh mesh, int depart,
 	pStream st;
 	double cb[3], v[3];
 	float sens, step, p[3];
-	int i, k, nsdep, nsfin, nsold, nbp, maxpts;
+	int i, k, nsdep, nsold, nbp, maxpts;
 
 	/* default */
 	if (!mesh->nt) return (0);
@@ -1788,6 +1815,8 @@ int listSaddleStream (pScene sc, pMesh mesh, int depart,
 
 	/* build display list incrementally */
 	do {
+		int nsfin;
+
 		/* move to next point */
 		if (st->typtrack == Euler || !nxtPoint2D(mesh, nsdep, p, step, v)) {
 			p[0] += sens * step * v[0];
@@ -1868,7 +1897,6 @@ pStream createStream (pScene sc, pMesh mesh) {
 
 	sc->slist = (GLuint *)calloc(MAX_LST, sizeof(GLuint));
 	if (!sc->slist) {
-		free(st->listp);
 		free(st);
 		return (0);
 	}
@@ -1887,9 +1915,9 @@ int streamRefPoint (pScene sc, pMesh mesh) {
 	s[0] = ppt->c[0];
 	s[1] = ppt->c[1];
 	s[2] = ppt->c[2];
-	if (mesh->dim == 2)
+	if (mesh->dim == 2) {
 		listTriaStream(sc, mesh, s);
-	else {
+	} else {
 		if (mesh->ntet) listTetraStream(sc, mesh, s, 0);
 		else if (mesh->nhex) listHexaStream(sc, mesh, s, 0);
 	}
@@ -2068,4 +2096,3 @@ int streamRefQuad (pScene sc, pMesh mesh) {
 
 	return (1);
 }
-

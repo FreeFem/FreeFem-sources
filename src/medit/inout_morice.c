@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "libmesh5.h"
@@ -78,18 +79,19 @@ void getline_popen_vertex (int ddim, double *c, int *ref) {
 	char data[256];
 	char *tictac;
 	int i;
-	int lench;
+	/*int lench;
 	char keyseE [] = "eE";
 	char keyse [] = "e";
-	float res;
+	float res;*/
 
 	fgets(data, 256, stdin);
 	c[0] = strtod(data, &tictac);
 
 	// printf("valeur strtod c[0] %f c%sc \n",c[0], tictac);
-	for (i = 1; i < ddim; i++)
+	for (i = 1; i < ddim; i++) {
 		c[i] = strtod(tictac, &tictac);
 		// printf("valeur strtod c[i] %f c%sc \n",c[i], tictac);
+	}
 
 	/*
 	 * tictac = strtok(data," \n");
@@ -121,7 +123,7 @@ void getline_popen_vertex (int ddim, double *c, int *ref) {
 void getline_popen_firstvertex (int ddim, double *c, int *ref) {
 	char data[256];
 	char *tictac;
-	char *tictac2;
+	/*char *tictac2;*/
 	int i;
 
 	fgets(data, 256, stdin);
@@ -138,9 +140,10 @@ void getline_popen_firstvertex (int ddim, double *c, int *ref) {
 	c[0] = strtod(data, &tictac);
 
 	// printf("first strtod c[0] %f c%sc \n",c[0], tictac);
-	for (i = 1; i < ddim; i++)
+	for (i = 1; i < ddim; i++) {
 		c[i] = strtod(tictac, &tictac);
 		// printf("first strtod c[i] %f c%sc \n",c[i], tictac);
+	}
 
 	*ref = atoi(tictac);
 	// fprintf(stdout,"sortie vertex fonction:= %i \n", *ref);
@@ -284,24 +287,26 @@ void getline_popen_firstdouble (char *nature, int ddim, double *v) {
 
 	v[0] = strtod(data, &tictac);
 
-	for (i = 1; i < ddim; i++)
+	for (i = 1; i < ddim; i++) {
 		v[i] = strtod(tictac, &tictac);
+	}
 }
 
 void getline_popen_double (char *nature, int ddim, double *v) {
 	char data[256];
 	char *tictac;
 	int i;
-	int lench;
+	/*int lench;
 	char keyseE [] = "eE";
-	char keyse [] = "e";
+	char keyse [] = "e";*/
 
 	fgets(data, 256, stdin);
 	v[0] = strtod(data, &tictac);
 
-	for (i = 1; i < ddim; i++)
+	for (i = 1; i < ddim; i++) {
 		v[i] = strtod(tictac, &tictac);
 		// printf("v[i]= %f %s\n",v[i],tictac);
+	}
 }
 
 /**********************************/
@@ -348,7 +353,6 @@ int loadMesh_popen (pMesh mesh) {
 	int i, ia, ib, inm, ref, is, k, disc, nn, nt, nq;
 	char *ptr, data[256];
 	/* Rajout popen*/
-	char *tictac;
 	char *natureread;
 	int loopdebug;
 	int vatn[2];
@@ -374,6 +378,8 @@ int loadMesh_popen (pMesh mesh) {
 	loopdebug = -1;
 
 	while (!feof(stdin)) {
+		char *tictac;
+
 		fgets(data, 256, stdin);
 		tictac = strtok(data, " \n");
 
@@ -728,9 +734,9 @@ int loadMesh_popen (pMesh mesh) {
 			tictac = strtok(data, " \n");
 			is = atoi(tictac);
 
-			if (is < 1 || is > mesh->np)
+			if (is < 1 || is > mesh->np) {
 				disc++;
-			else {
+			} else {
 				ppt = &mesh->point[is];
 				ppt->tag |= M_CORNER;
 				ppt->tag &= ~M_UNUSED;
@@ -740,9 +746,9 @@ int loadMesh_popen (pMesh mesh) {
 				fgets(data, 256, stdin);
 				tictac = strtok(data, " \n");
 				is = atoi(tictac);
-				if (is < 1 || is > mesh->np)
+				if (is < 1 || is > mesh->np) {
 					disc++;
-				else {
+				} else {
 					ppt = &mesh->point[is];
 					ppt->tag |= M_CORNER;
 					ppt->tag &= ~M_UNUSED;
@@ -777,9 +783,9 @@ int loadMesh_popen (pMesh mesh) {
 			tictac = strtok(data, " \n");
 			is = atoi(tictac);
 
-			if (is < 1 || is > mesh->np)
+			if (is < 1 || is > mesh->np) {
 				disc++;
-			else {
+			} else {
 				ppt = &mesh->point[is];
 				ppt->tag |= M_REQUIRED;
 				ppt->tag &= ~M_UNUSED;
@@ -789,9 +795,9 @@ int loadMesh_popen (pMesh mesh) {
 				fgets(data, 256, stdin);
 				tictac = strtok(data, " \n");
 				is = atoi(tictac);
-				if (is < 1 || is > mesh->np)
+				if (is < 1 || is > mesh->np) {
 					disc++;
-				else {
+				} else {
 					ppt = &mesh->point[is];
 					ppt->tag |= M_REQUIRED;
 					ppt->tag &= ~M_UNUSED;
@@ -813,9 +819,9 @@ int loadMesh_popen (pMesh mesh) {
 
 			k = 1;
 			getline_popen_firstedge(&ia, &ib, &ref);
-			if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np)
+			if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np) {
 				disc++;
-			else {
+			} else {
 				pr = &mesh->edge[k];
 				pr->v[0] = ia;
 				pr->v[1] = ib;
@@ -829,9 +835,9 @@ int loadMesh_popen (pMesh mesh) {
 
 			for (k = 2; k <= mesh->na; k++) {
 				getline_popen_edge(&ia, &ib, &ref);
-				if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np)
+				if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np) {
 					disc++;
-				else {
+				} else {
 					pr = &mesh->edge[k];
 					pr->v[0] = ia;
 					pr->v[1] = ib;
@@ -850,18 +856,18 @@ int loadMesh_popen (pMesh mesh) {
 			getline_number(natureread, &(mesh->nri));
 
 			getline_1intfirst(natureread, &is);
-			if (is < 1 || is > mesh->na)
+			if (is < 1 || is > mesh->na) {
 				disc++;
-			else {
+			} else {
 				pr = &mesh->edge[is];
 				pr->tag |= M_RIDGE;
 			}
 
 			for (k = 2; k <= mesh->nri; k++) {
 				getline_1int(natureread, &is);
-				if (is < 1 || is > mesh->na)
+				if (is < 1 || is > mesh->na) {
 					disc++;
-				else {
+				} else {
 					pr = &mesh->edge[is];
 					pr->tag |= M_RIDGE;
 				}
@@ -873,18 +879,18 @@ int loadMesh_popen (pMesh mesh) {
 			getline_number(natureread, &(mesh->nre));
 
 			getline_1intfirst(natureread, &is);
-			if (is < 1 || is > mesh->na)
+			if (is < 1 || is > mesh->na) {
 				disc++;
-			else {
+			} else {
 				pr = &mesh->edge[is];
 				pr->tag |= M_REQUIRED;
 			}
 
 			for (k = 2; k <= mesh->nre; k++) {
 				getline_1int(natureread, &is);
-				if (is < 1 || is > mesh->na)
+				if (is < 1 || is > mesh->na) {
 					disc++;
-				else {
+				} else {
 					pr = &mesh->edge[is];
 					pr->tag |= M_REQUIRED;
 				}
@@ -1188,7 +1194,7 @@ int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, 
 
 	off = 0;
 
-	for (i = 0; i < numsol; i++)
+	for (i = 0; i < numsol; i++) {
 		switch (typtab[i]) {
 		case GmfSca:
 			off++;
@@ -1200,6 +1206,7 @@ int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, 
 			off += sol->dim * (sol->dim + 1) / 2;
 			break;
 		}
+	}
 
 	// printf("min= %f, max= %f\n",mesh->bbmin,mesh->bbmax);
 
@@ -1245,10 +1252,10 @@ int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, 
 			 */
 			getline_popen_firstdouble(natureread, sol->dim, VecSol);
 
-			for (i = 0; i < sol->dim; i++)
+			for (i = 0; i < sol->dim; i++) {
 				fbuf[off + i] = VecSol[i];
 				// printf("solution vectorielle %i composante %i %f\n",k,i,VecSol[i]);
-
+			}
 
 			for (i = 0; i < sol->dim; i++) {
 				mesh->sol[k].m[i] = fbuf[off + i];
@@ -1281,12 +1288,14 @@ int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, 
 			 */
 			getline_popen_firstdouble(natureread, sol->dim * (sol->dim + 1) / 2, TenSol);
 
-			for (i = 0; i < sol->dim * (sol->dim + 1) / 2; i++)
+			for (i = 0; i < sol->dim * (sol->dim + 1) / 2; i++) {
 				fbuf[off + i] = TenSol[i];
+			}
 
 			if (sol->dim == 2) {
-				for (i = 0; i < 3; i++)
+				for (i = 0; i < 3; i++) {
 					mesh->sol[k].m[i] = m[i] = fbuf[off + i];
+				}
 
 				iord = eigen2(m, lambda, vp);
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
@@ -1294,13 +1303,16 @@ int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, 
 
 				if (mesh->sol[k].bb > mesh->bbmax) mesh->bbmax = mesh->sol[k].bb;
 			} else {
-				for (i = 0; i < 6; i++)
+				for (i = 0; i < 6; i++) {
 					mesh->sol[k].m[i] = fbuf[off + i];
+				}
 
 				mesh->sol[k].m[2] = fbuf[off + 3];
 				mesh->sol[k].m[3] = fbuf[off + 2];
 
-				for (i = 0; i < 6; i++) m[i] = mesh->sol[k].m[i];
+				for (i = 0; i < 6; i++) {
+					m[i] = mesh->sol[k].m[i];
+				}
 
 				iord = eigenv(1, m, lambda, eigv);
 				if (iord) {
@@ -1327,16 +1339,17 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
 	int inm, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
-	char *ptr, data[128];
+	char *ptr, data[256];
 
 	// rajout pour popen
 	int NumberofSolAT;
-	char *tictac;
 	char *natureread;
 
 	NumberofSolAT = 0;
 
 	while (!feof(stdin)) {
+		char *tictac;
+		
 		// fprintf(stdout,"data= %s\n",data);
 		fgets(data, 256, stdin);
 		tictac = strtok(data, " \n");
@@ -1352,8 +1365,9 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 			if (tictac == NULL) {
 				printf(".sol: problem in reading the %s\n", natureread);
 				exit(1);
-			} else
+			} else {
 				ver = atoi(tictac);
+			}
 
 			if (debug) fprintf(stdout, ".sol: reading format %s %i \n", natureread, ver);
 		}
@@ -1367,9 +1381,10 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 			if (tictac == NULL) {
 				printf("problem in reading the %s\n", natureread);
 				exit(1);
-			} else
+			} else {
 				dim = atoi(tictac);
 				// if(debug) printf(".sol: %s %i (mesh)%i (lecture)%s \n",natureread,dim,mesh->dim,tictac);
+			}
 
 			/*control of the dimension*/
 			if (dim != mesh->dim) {
@@ -1401,7 +1416,7 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 			loadScaVecTen(mesh, 1, dim, ver, nel, type, size, typtab, key, natureread);
 		}
 
-		if (mesh->dim == 2 && mesh->nt)
+		if (mesh->dim == 2 && mesh->nt) {
 			if (!strncmp(tictac, "SolAtTriangles", 14)) {
 				NumberofSolAT = NumberofSolAT + 1;
 				natureread = "SolAtTriangles";
@@ -1423,8 +1438,9 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen(mesh, 1, dim, ver, nel, type, size, typtab, key, natureread);
 			}
+		}
 
-		if (mesh->dim == 2 && mesh->nq)
+		if (mesh->dim == 2 && mesh->nq) {
 			if (!strncmp(tictac, "SolAtQuadrilaterals", 19)) {
 				NumberofSolAT = NumberofSolAT + 1;
 				natureread = "SolAtQuadrilaterals";
@@ -1445,8 +1461,9 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen(mesh, 1, dim, ver, nel, type, size, typtab, key, natureread);
 			}
+		}
 
-		if (mesh->dim == 3 && mesh->ntet)
+		if (mesh->dim == 3 && mesh->ntet) {
 			if (!strncmp(tictac, "SolAtTetrahedra", 15)) {
 				fprintf(stdout, "data= %s\n", data);
 				NumberofSolAT = NumberofSolAT + 1;
@@ -1467,8 +1484,9 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen(mesh, 1, dim, ver, nel, type, size, typtab, key, natureread);
 			}
+		}
 
-		if (mesh->dim == 3 && mesh->nhex)
+		if (mesh->dim == 3 && mesh->nhex) {
 			if (!strncmp(tictac, "SolAtHexahedra", 14)) {
 				fprintf(stdout, "data= %s\n", data);
 				NumberofSolAT = NumberofSolAT + 1;
@@ -1490,6 +1508,7 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen(mesh, 1, dim, ver, nel, type, size, typtab, key, natureread);
 			}
+		}
 
 		if (!strncmp(tictac, "End", 3) || !strncmp(tictac, "END", 3)) {
 			if (ddebug) printf("Reading of mesh file is finished");
@@ -1501,4 +1520,3 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 	printf("NumberofSolAT %i\n", NumberofSolAT);
 	return (1);
 }
-

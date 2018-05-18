@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -93,8 +94,9 @@ void dumpCube (pScene sc, pMesh mesh, pCube cube) {
 
 	out = fopen("tr.data", "w");
 
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 4; i++) {
 		fprintf(out, "%f %f %f %f\n", tr[i], tr[4 + i], tr[8 + i], tr[12 + i]);
+	}
 
 	u[0] = cube->cmi[0] - mesh->xtra;
 	u[1] = cube->cmi[1] - mesh->ytra;
@@ -146,4 +148,3 @@ pCube createCube (pScene sc, pMesh mesh) {
 	resetCube(sc, cube, mesh);
 	return (cube);
 }
-

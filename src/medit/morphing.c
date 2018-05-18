@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -31,7 +32,6 @@ int imstep, imreverse;
 int modeMorphing () {
 	pScene scene;
 	pMesh mesh1, mesh2;
-	pPoint ppt1, ppt2;
 	int k;
 	clock_t ct;
 
@@ -57,6 +57,8 @@ int modeMorphing () {
 	meshRef(scene, mesh2);
 
 	for (k = 1; k <= mesh2->np; k++) {
+		pPoint ppt1, ppt2;
+
 		ppt1 = &mesh1->point[k];
 		ppt2 = &mesh2->point[k];
 		ppt2->c[0] -= ppt1->c[0];
@@ -77,7 +79,6 @@ int modeMorphing () {
 
 int morphMesh (pScene sc, pMesh mesh1) {
 	pMesh mesh2;
-	pPoint ppt1, ppt2;
 	int k;
 	static float dt = 1.0 / MAX_MORPH;
 
@@ -103,6 +104,8 @@ int morphMesh (pScene sc, pMesh mesh1) {
 	mesh2 = cv.mesh[1];
 
 	for (k = 1; k <= mesh1->np; k++) {
+		pPoint ppt1, ppt2;
+		
 		ppt1 = &mesh1->point[k];
 		ppt2 = &mesh2->point[k];
 		ppt1->c[0] += dt * ppt2->c[0];
@@ -113,4 +116,3 @@ int morphMesh (pScene sc, pMesh mesh1) {
 	doLists(sc, mesh1);
 	return (1);
 }
-

@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -35,9 +36,10 @@ int currentScene () {
 
 	idw = glutGetWindow();
 
-	for (k = 0; k < MAX_SCENE; k++)
+	for (k = 0; k < MAX_SCENE; k++) {
 		if (cv.scene[k] && idw == cv.scene[k]->idwin)
 			return (k);
+	}
 
 	return (0);
 }
@@ -332,8 +334,9 @@ static void displayScene (pScene sc, int mode, int clip) {
 			if (sc->mode & S_FILL) {
 				glColor4fv(sc->par.line);
 				drawList(sc, clip, 0);
-			} else
+			} else {
 				drawList(sc, clip, map);
+			}
 		} else if (sc->mode & S_ALTITUDE) {
 			glColor4fv(sc->par.line);
 			drawList(sc, clip, map);
@@ -348,8 +351,6 @@ static void displayScene (pScene sc, int mode, int clip) {
 }
 
 static void displayData (pScene sc, pMesh mesh) {
-	int kk;
-
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 
@@ -377,8 +378,8 @@ static void displayData (pScene sc, pMesh mesh) {
 				if (sc->vlist[LTets]) glCallList(sc->vlist[LTets]);
 
 				if (sc->vlist[LHexa]) glCallList(sc->vlist[LHexa]);
-			} else if (mesh->ntet + mesh->nhex == 0)
-				if (sc->vlist[LTria]) glCallList(sc->vlist[LTria]);
+			} else if (mesh->ntet + mesh->nhex == 0) {
+				if (sc->vlist[LTria]) glCallList(sc->vlist[LTria]); }
 		}
 	}
 
@@ -386,11 +387,13 @@ static void displayData (pScene sc, pMesh mesh) {
 	if (sc->isotyp & S_CRITP && sc->cplist)
 		glCallList(sc->cplist);
 
-	if (sc->isotyp & S_STREAML)
-		for (kk = 0; kk < sc->stream->nbstl; kk++)
-			glCallList(sc->slist[kk]);
+	if (sc->isotyp & S_STREAML) {
+		int kk;
 
-	else if (sc->isotyp & S_PARTICLE) {
+		for (kk = 0; kk < sc->stream->nbstl; kk++) {
+			glCallList(sc->slist[kk]);
+		}
+	} else if (sc->isotyp & S_PARTICLE) {
 		glEnable(GL_LIGHTING);
 		glEnable(GL_COLOR_MATERIAL);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -418,7 +421,6 @@ void setupView (pScene sc) {
 	pTransform view;
 	pPersp p;
 	pCamera c;
-	int clvol;
 
 	/* default */
 	if (ddebug) fprintf(stdout, "setupView\n");
@@ -479,6 +481,8 @@ void setupView (pScene sc) {
 
 	/* copy views */
 	if (!animate && sc->slave > -1) {
+		int clvol;
+
 		slave = cv.scene[sc->slave];
 		memcpy(slave->view, sc->view, sizeof(struct transform));
 		memcpy(slave->camera, sc->camera, sizeof(struct camera));
@@ -508,8 +512,9 @@ void drawModel (pScene sc) {
 		drawClip(sc, clip, mesh, 0);
 		glClipPlane(GL_CLIP_PLANE0, clip->eqn);
 		glEnable(GL_CLIP_PLANE0);
-	} else
+	} else {
 		glDisable(GL_CLIP_PLANE0);
+	}
 
 	/* draw object if static scene */
 	sstatic = view->mstate > 0 && clip->cliptr->mstate > 0;
@@ -526,8 +531,9 @@ void drawModel (pScene sc) {
 
 		/* draw data */
 		if (sstatic) displayData(sc, mesh);
-	} else if (!(sc->item & S_BOX))
+	} else if (!(sc->item & S_BOX)) {
 		drawBox(sc, mesh, 0);
+	}
 
 	/* draw ridges, corners, etc. */
 	if ((sc->item & S_GEOM) && sc->glist) {
@@ -576,9 +582,8 @@ void drawModel (pScene sc) {
 }
 
 void redrawMorphing (pScene sc) {
-	pMesh mesh;
-
 	if (morphing) {
+		pMesh mesh;
 		mesh = cv.mesh[sc->idmesh];
 		if (!morphMesh(sc, mesh)) return;
 	}
@@ -601,8 +606,6 @@ void glutIdle (void) {
 void streamIdle (void) {
 	pScene sc;
 	pMesh mesh;
-	float elp;
-	clock_t tim;
 	static clock_t timbase = 0;
 	static float maxtim = 0.;
 
@@ -625,10 +628,12 @@ void streamIdle (void) {
 			saveimg = 0;
 			glutIdleFunc(0);
 			printf("\nfin");
-		} else
+		} else {
 			glutPostRedisplay();
-	} else
+		}
+	} else {
 		glutPostRedisplay();
+	}
 
 	return;
 
@@ -638,6 +643,9 @@ void streamIdle (void) {
 		sc->par.advtim = 0;
 		glutPostRedisplay();
 	} else {
+		float elp;
+		clock_t tim;
+
 		tim = clock();
 		elp = (tim - timbase) / (float)CLOCKS_PER_SEC;
 		if (elp > sc->par.dt) {
@@ -655,11 +663,10 @@ void streamIdle (void) {
 
 /* OpenGL callbacks */
 void redrawScene () {
-	pScene sc, slave;
+	pScene sc;
 	pTransform view;
 	pPersp p;
 	pCamera c;
-	double ndfl, ratio, top, bottom, left, right, nnear, ffar;
 
 	sc = cv.scene[currentScene()];
 	view = sc->view;
@@ -682,6 +689,9 @@ void redrawScene () {
 		drawModel(sc);
 		if (sc->type & S_DECO) redrawStatusBar(sc);
 	} else {
+		double ndfl, ratio, top, bottom;
+		double left, right, nnear, ffar;
+
 		nnear = -p->depth - 0.5 * sc->dmax;
 		if (nnear < 0.1) nnear = 0.1;
 
@@ -750,6 +760,8 @@ void redrawScene () {
 
 	/* redraw linked scene */
 	if (!animate && sc->slave > -1) {
+		pScene slave;
+
 		slave = cv.scene[sc->slave];
 		glutSetWindow(slave->idwin);
 		redrawScene();
@@ -931,11 +943,11 @@ int createScene (pScene sc, int idmesh) {
 	if (!createMenus(sc, mesh)) return (0);
 
 	/* assign callbacks */
-	if (sc->type & S_SCISSOR)
+	if (sc->type & S_SCISSOR) {
 		glutDisplayFunc(scissorScene);
-	else if (option == SCHNAUZER)
+	} else if (option == SCHNAUZER) {
 		glutDisplayFunc(redrawSchnauzer);
-	else if (sc->persp->pmode == CAMERA) {
+	} else if (sc->persp->pmode == CAMERA) {
 		glutMouseFunc(mouseCamera);
 		glutMotionFunc(motionCamera);
 		glutDisplayFunc(redrawScene);
@@ -969,4 +981,3 @@ int createScene (pScene sc, int idmesh) {
 	initGrafix(sc, mesh);
 	return (1);
 }
-

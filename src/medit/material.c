@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include <stdarg.h>
 #include "medit.h"
@@ -117,7 +118,7 @@ cell shininess[1] = {
 
 void matInit (pScene sc) {
 	pMaterial pm;
-	int m, mm;
+	int m;
 
 	/* default */
 	if (!sc->material) {
@@ -129,6 +130,8 @@ void matInit (pScene sc) {
 
 	/* store color in table */
 	for (m = 0; m <= sc->par.nbmat; m++) {
+		int mm;
+
 		pm = &sc->material[m];
 		/* diffuse : primary color */
 		mm = m % MAX_MAT;
@@ -194,12 +197,13 @@ void matSort (pScene sc) {
 }
 
 int matRef (pScene sc, int ref) {
-	pMaterial pm;
 	int m;
 
 	if (!ref) return (ref);
 
 	for (m = 1; m < sc->par.nbmat; m++) {
+		pMaterial pm;
+		
 		pm = &sc->material[m];
 		if (pm->ref == ref) return (m);
 	}
@@ -262,8 +266,9 @@ static void cellDraw (cell *cel) {
 		glColor3ub(255, 255, 0);
 		drwstr(10, 240, cel->info);
 		glColor3ub(255, 0, 0);
-	} else
+	} else {
 		glColor3ub(0, 255, 128);
+	}
 
 	drwstr(cel->x, cel->y, cel->format, cel->value);
 }
@@ -478,9 +483,10 @@ void matMouse (int button, int state, int x, int y) {
 		selection += cellHit(&emission[2], x, y);
 		selection += cellHit(&emission[3], x, y);
 		selection += cellHit(&shininess[0], x, y);
-	} else
+	} else {
 		/* update material */
 		glutSetWindow(m_subwin);
+	}
 
 	old_y = y;
 	glutPostRedisplay();
@@ -578,4 +584,3 @@ void matEdit (pScene sc) {
 #ifdef __cplusplus
 }
 #endif
-

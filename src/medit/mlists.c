@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -31,8 +32,8 @@ static int ch[6][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4},
 /* recursively subdivide a triangle */
 void cutTriangle (pScene sc, triangle t) {
 	triangle t1, t2;
-	double kc, x, dd, rgb[4], maxe;
-	int i, ia, ib, ic, iedge;
+	double kc, rgb[4], maxe;
+	int ia, ib, ic, iedge;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	/* analyze triangle edges */
@@ -51,14 +52,14 @@ void cutTriangle (pScene sc, triangle t) {
 	else if (t.vc > sc->iso.val[MAXISO - 1])
 		t.vc = sc->iso.val[MAXISO - 1];
 
-	for (ia = 0; ia < MAXISO - 1; ia++)
-		if (t.va < sc->iso.val[ia]) break;
+	for (ia = 0; ia < MAXISO - 1; ia++) {
+		if (t.va < sc->iso.val[ia]) break; }
 
-	for (ib = 0; ib < MAXISO - 1; ib++)
-		if (t.vb < sc->iso.val[ib]) break;
+	for (ib = 0; ib < MAXISO - 1; ib++) {
+		if (t.vb < sc->iso.val[ib]) break; }
 
-	for (ic = 0; ic < MAXISO - 1; ic++)
-		if (t.vc < sc->iso.val[ic]) break;
+	for (ic = 0; ic < MAXISO - 1; ic++) {
+		if (t.vc < sc->iso.val[ic]) break; }
 
 	/* search longest edge */
 	maxe = fabs(t.va - t.vb);
@@ -74,7 +75,10 @@ void cutTriangle (pScene sc, triangle t) {
 	}
 
 	/* split longest edge */
-	if (maxe > 0.0)
+	if (maxe > 0.0) {
+		double x, dd;
+		int i;
+
 		switch (iedge) {
 		case 1:	/* edge a-b */
 			x = ia < ib ? sc->iso.val[ia] : sc->iso.val[ib];
@@ -135,6 +139,7 @@ void cutTriangle (pScene sc, triangle t) {
 
 			break;
 		}
+	}
 
 	/* draw triangle */
 	if (t.va < sc->iso.val[0])
@@ -187,7 +192,7 @@ GLuint listTriaMap (pScene sc, pMesh mesh) {
 	GLint dlist;
 	double ax, ay, az, bx, by, bz, dd;
 	float cx, cy, cz, n[3];
-	int k, m, is0, is1, is2;
+	int m, is0, is1, is2;
 	triangle t;
 
 	/* default */
@@ -204,6 +209,8 @@ GLuint listTriaMap (pScene sc, pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LTria];
 		if (!k || pm->flag) continue;
@@ -364,25 +371,25 @@ GLuint listTriaMap (pScene sc, pMesh mesh) {
 					t.c[2] = p2->c[2];
 				}
 
-				if (!is0)
+				if (!is0) {
 					memcpy(t.na, n, 3 * sizeof(float));
-				else {
+				} else {
 					t.na[0] = mesh->extra->n[3 * (is0 - 1) + 1];
 					t.na[1] = mesh->extra->n[3 * (is0 - 1) + 2];
 					t.na[2] = mesh->extra->n[3 * (is0 - 1) + 3];
 				}
 
-				if (!is1)
+				if (!is1) {
 					memcpy(t.nb, n, 3 * sizeof(float));
-				else {
+				} else {
 					t.nb[0] = mesh->extra->n[3 * (is1 - 1) + 1];
 					t.nb[1] = mesh->extra->n[3 * (is1 - 1) + 2];
 					t.nb[2] = mesh->extra->n[3 * (is1 - 1) + 3];
 				}
 
-				if (!is2)
+				if (!is2) {
 					memcpy(t.nc, n, 3 * sizeof(float));
-				else {
+				} else {
 					t.nc[0] = mesh->extra->n[3 * (is2 - 1) + 1];
 					t.nc[1] = mesh->extra->n[3 * (is2 - 1) + 2];
 					t.nc[2] = mesh->extra->n[3 * (is2 - 1) + 3];
@@ -421,7 +428,7 @@ GLuint listQuadMap (pScene sc, pMesh mesh) {
 	GLint dlist = 0;
 	double ax, ay, az, bx, by, bz, dd;
 	float cx, cy, cz, n[3];
-	int k, m, is0, is1, is2, is3;
+	int m, is0, is1, is2, is3;
 	triangle t1, t2;
 
 	/* default */
@@ -438,6 +445,8 @@ GLuint listQuadMap (pScene sc, pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LQuad];
 		if (!k || pm->flag) continue;
@@ -546,33 +555,33 @@ GLuint listQuadMap (pScene sc, pMesh mesh) {
 				if (!is3 && pq->v[3] <= mesh->extra->iq)
 					is3 = mesh->extra->nq[4 * (k - 1) + 4];
 
-				if (!is0)
+				if (!is0) {
 					memcpy(t1.na, n, 3 * sizeof(float));
-				else {
+				} else {
 					t1.na[0] = t2.na[0] = mesh->extra->n[3 * (is0 - 1) + 1];
 					t1.na[1] = t2.na[1] = mesh->extra->n[3 * (is0 - 1) + 2];
 					t1.na[2] = t2.na[2] = mesh->extra->n[3 * (is0 - 1) + 3];
 				}
 
-				if (!is1)
+				if (!is1) {
 					memcpy(t1.nb, n, 3 * sizeof(float));
-				else {
+				} else {
 					t1.nb[0] = mesh->extra->n[3 * (is1 - 1) + 1];
 					t1.nb[1] = mesh->extra->n[3 * (is1 - 1) + 2];
 					t1.nb[2] = mesh->extra->n[3 * (is1 - 1) + 3];
 				}
 
-				if (!is2)
+				if (!is2) {
 					memcpy(t1.nc, n, 3 * sizeof(float));
-				else {
+				} else {
 					t1.nc[0] = t2.nb[0] = mesh->extra->n[3 * (is2 - 1) + 1];
 					t1.nc[1] = t2.nb[1] = mesh->extra->n[3 * (is2 - 1) + 2];
 					t1.nc[2] = t2.nb[2] = mesh->extra->n[3 * (is2 - 1) + 3];
 				}
 
-				if (!is3)
+				if (!is3) {
 					memcpy(t1.nc, n, 3 * sizeof(float));
-				else {
+				} else {
 					t2.nc[0] = mesh->extra->n[3 * (is3 - 1) + 1];
 					t2.nc[1] = mesh->extra->n[3 * (is3 - 1) + 2];
 					t2.nc[2] = mesh->extra->n[3 * (is3 - 1) + 3];
@@ -617,7 +626,7 @@ GLuint listTetraMap (pScene sc, pMesh mesh, ubyte clip) {
 	pSolution ps0, ps1, ps2;
 	GLint dlist = 0;
 	float cx, cy, cz, ax, ay, az, bx, by, bz, d, n[3];
-	int k, l, m;
+	int l, m;
 	triangle t;
 
 	/* default */
@@ -634,6 +643,8 @@ GLuint listTetraMap (pScene sc, pMesh mesh, ubyte clip) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
@@ -739,7 +750,7 @@ GLuint listHexaMap (pScene sc, pMesh mesh, ubyte clip) {
 	GLint dlist = 0;
 	double ax, ay, az, bx, by, bz, d;
 	float n[3], cx, cy, cz;
-	int k, l, m;
+	int l, m;
 	triangle t1, t2;
 
 	if (!mesh->nhex) return (0);
@@ -755,6 +766,8 @@ GLuint listHexaMap (pScene sc, pMesh mesh, ubyte clip) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LHexa];
 		if (!k || pm->flag) continue;
@@ -923,9 +936,9 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 				p1 = &mesh->point[pt->v[1]];
 				p2 = &mesh->point[pt->v[2]];
 
-				if (mesh->typage == 1)
+				if (mesh->typage == 1) {
 					ps0 = ps1 = ps2 = &mesh->sol[k];
-				else {
+				} else {
 					ps0 = &mesh->sol[pt->v[0]];
 					ps1 = &mesh->sol[pt->v[1]];
 					ps2 = &mesh->sol[pt->v[2]];
@@ -973,17 +986,16 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 				t.vb = ps1->bb;
 				t.vc = ps2->bb;
 
-				if (mesh->typage == 2)
+				if (mesh->typage == 2) {
 					cutTriangle(sc, t);
-
-				else {
+				} else {
 					if (t.va < sc->iso.val[0])
 						t.va = sc->iso.val[0];
 					else if (t.va > sc->iso.val[MAXISO - 1])
 						t.va = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (t.va < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (t.va < sc->iso.val[ia]) break; }
 
 					kc = (t.va - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -1135,9 +1147,9 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 				p2 = &mesh->point[pq->v[2]];
 				p3 = &mesh->point[pq->v[3]];
 
-				if (mesh->typage == 1)
+				if (mesh->typage == 1) {
 					ps0 = ps1 = ps2 = ps3 = &mesh->sol[k];
-				else {
+				} else {
 					ps0 = &mesh->sol[pq->v[0]];
 					ps1 = &mesh->sol[pq->v[1]];
 					ps2 = &mesh->sol[pq->v[2]];
@@ -1212,12 +1224,13 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 
 /* setup color table */
 void setupPalette (pScene sc, pMesh mesh) {
-	double delta;
 	int i;
 
 	if (ddebug) printf("create palette %f %f\n", mesh->bbmin, mesh->bbmax);
 
 	if (!sc->iso.palette) {
+		double delta;
+
 		delta = mesh->bbmax - mesh->bbmin;
 
 		for (i = 0; i < MAXISO; i++) {
@@ -1226,19 +1239,23 @@ void setupPalette (pScene sc, pMesh mesh) {
 		}
 
 		sc->iso.palette = 1;
-	} else
-		for (i = 0; i < MAXISO; i++)
+	} else {
+		for (i = 0; i < MAXISO; i++) {
 			sc->iso.col[i] = 240.0 * (1.0 - (float)i / (MAXISO - 1));
+		}
+	}
 }
 
 /* build color palette */
 GLuint drawPalette (pScene sc) {
 	double rgb[3];
-	float xpos, ypos, inc, top, bottom, left, right;
+	float ypos, inc, top, bottom, left, right;
 	int i;
 	static double hsv[3] = {1.0, 1.0, 0.80};
 
 	if (sc->iso.palette < 3) {
+		float xpos;
+
 		if (sc->iso.palette <= 2) {
 			top = sc->par.ys - 20;
 			bottom = top - 10;
@@ -1249,9 +1266,6 @@ GLuint drawPalette (pScene sc) {
 			bottom = top - 10;
 			left = sc->par.xs / 10;
 			right = sc->par.xs - left;
-		}
-		else{
-			//TODO
 		}
 
 		inc = (sc->par.xs - 2 * left) / (MAXISO - 1);
@@ -1406,4 +1420,3 @@ GLuint drawPalette (pScene sc) {
 
 	return (1);
 }
-

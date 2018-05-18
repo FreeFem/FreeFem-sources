@@ -14,20 +14,18 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 
 GLuint drawNormals (pMesh mesh, pScene sc) {
-	pTriangle pt;
-	pQuad pq;
-	pEdge pr;
 	pPoint ppt;
 	GLuint dlist = 0;
 	double nn[3];
@@ -56,7 +54,7 @@ GLuint drawNormals (pMesh mesh, pScene sc) {
 	glBegin(GL_LINES);
 
 	/* normals at vertices */
-	if (mesh->extra->iv && mesh->extra->nv)
+	if (mesh->extra->iv && mesh->extra->nv) {
 		for (k = 1; k <= mesh->np; k++) {
 			ppt = &mesh->point[k];
 			ki = mesh->extra->nv[k];
@@ -72,10 +70,13 @@ GLuint drawNormals (pMesh mesh, pScene sc) {
 				drawVector3D(p, nn, scal);
 			}
 		}
+	}
 
 	/* normal at triangle vertices */
-	if (mesh->extra->it && mesh->extra->nt)
+	if (mesh->extra->it && mesh->extra->nt) {
 		for (k = 1; k <= mesh->nt; k++) {
+			pTriangle pt;
+
 			pt = &mesh->tria[k];
 			if (!pt->v[0]) continue;
 
@@ -96,10 +97,13 @@ GLuint drawNormals (pMesh mesh, pScene sc) {
 				}
 			}
 		}
+	}
 
 	/* normal at quad vertices */
-	if (mesh->extra->iq && mesh->extra->nq)
+	if (mesh->extra->iq && mesh->extra->nq) {
 		for (k = 1; k <= mesh->nq; k++) {
+			pQuad pq;
+
 			pq = &mesh->quad[k];
 			if (!pq->v[0]) continue;
 
@@ -120,6 +124,7 @@ GLuint drawNormals (pMesh mesh, pScene sc) {
 				}
 			}
 		}
+	}
 
 	/* tangents at vertices */
 	if (mesh->extra->jv && mesh->extra->tv) {
@@ -143,8 +148,10 @@ GLuint drawNormals (pMesh mesh, pScene sc) {
 	}
 
 	/* tangent at edge vertices */
-	if (mesh->extra->je && mesh->extra->te)
+	if (mesh->extra->je && mesh->extra->te) {
 		for (k = 1; k <= mesh->na; k++) {
+			pEdge pr;
+			
 			pr = &mesh->edge[k];
 			if (!pr->v[0]) continue;
 
@@ -165,10 +172,10 @@ GLuint drawNormals (pMesh mesh, pScene sc) {
 				}
 			}
 		}
+	}
 
 	glEnd();
 	glLineWidth(1.0);
 	glEndList();
 	return (dlist);
 }
-

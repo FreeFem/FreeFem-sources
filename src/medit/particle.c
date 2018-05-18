@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -52,8 +53,8 @@ void colorParticle (pScene sc, pParticle pp) {
 	else if (norm > sc->iso.val[MAXISO - 1])
 		norm = sc->iso.val[MAXISO - 1];
 
-	for (i = 0; i < MAXISO - 1; i++)
-		if (norm < sc->iso.val[i]) break;
+	for (i = 0; i < MAXISO - 1; i++) {
+		if (norm < sc->iso.val[i]) break; }
 
 	kc = (norm - sc->iso.val[i - 1]) / (sc->iso.val[i] - sc->iso.val[i - 1]);
 	hsv[0] = sc->iso.col[i - 1] * (1.0 - kc) + sc->iso.col[i] * kc;
@@ -80,12 +81,11 @@ void drawParticle (pScene sc, pParticle pp) {
 }
 
 void computeTetraParticle (pScene sc, pMesh mesh, int k) {
-	pTetra pt;
 	pStream st;
 	pParticle pp;
-	double dd, cb[4], v[4];
-	float ux, uy, uz, pos[3], ldt;
-	int cur, nsfin, nsold, nbp;
+	double cb[4], v[4];
+	float pos[3], ldt;
+	int cur, nsold, nbp;
 
 	st = sc->stream;
 	pp = &tp[k];
@@ -100,6 +100,11 @@ void computeTetraParticle (pScene sc, pMesh mesh, int k) {
 	pos[2] = pp->pos[pp->cur][2];
 
 	do {
+		pTetra pt;
+		double dd;
+		float ux, uy, uz;
+		int nsfin;
+
 		ux = pos[0];
 		uy = pos[1];
 		uz = pos[2];
@@ -177,17 +182,19 @@ void computeTetraParticle (pScene sc, pMesh mesh, int k) {
 }
 
 int displayParticle (pScene sc, pMesh mesh) {
-	pParticle pp;
 	pStream st;
 	int k;
 
 	st = sc->stream;
 	if (sc->par.advtim)
-		for (k = 1; k <= st->nbstl; k++)
+		for (k = 1; k <= st->nbstl; k++) {
 			computeTetraParticle(sc, mesh, k);
+		}
 
 	/* redraw particles */
 	for (k = 1; k <= st->nbstl; k++) {
+		pParticle pp;
+
 		pp = &tp[k];
 		if (pp->flag)
 			drawParticle(sc, pp);
@@ -277,11 +284,13 @@ int createParticle (pScene sc, pMesh mesh) {
 	tp = calloc((st->nbstl + 1), sizeof(Particle));
 	assert(tp);
 
-	for (k = 1; k <= st->nbstl; k++)
+	for (k = 1; k <= st->nbstl; k++) {
 		tp[k].nsdep = mesh->ntet / 2;
+	}
 
-	for (k = 1; k <= mesh->ntet; k++)
+	for (k = 1; k <= mesh->ntet; k++) {
 		mesh->tetra[k].cpt = 0;
+	}
 
 	l = 1;
 
@@ -331,7 +340,6 @@ int advectParticle (pScene sc, pMesh mesh) {
 	pParticle pp;
 	pStream st;
 	pTetra pt1;
-	pPoint ppt;
 	double v[4];
 	int i, j, k, l, base;
 
@@ -363,12 +371,15 @@ int advectParticle (pScene sc, pMesh mesh) {
 	base = ++mesh->mark;
 
 	for (i = 1; i <= mesh->np; i++) {
+		pPoint ppt;
+		
 		ppt = &mesh->point[i];
 		ppt->mark = base;
 	}
 
-	for (k = 1; k <= mesh->ntet; k++)
+	for (k = 1; k <= mesh->ntet; k++) {
 		mesh->tetra[k].cpt = 0;
+	}
 
 	l = 1;
 
@@ -424,4 +435,3 @@ int advectParticle (pScene sc, pMesh mesh) {
 
 	return (1);
 }
-

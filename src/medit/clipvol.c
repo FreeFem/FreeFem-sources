@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -32,28 +33,12 @@ GLuint capTetra (pMesh mesh) {
 	pClip clip;
 	GLuint dlist = 0;
 	pTetra pt;
-	pPoint p0;
-	pPoint p1;
+	pPoint p0, p1;
 	pMaterial pm;
-	double dd1[6];
-	double d;
-	double ax;
-	double ay;
-	double az;
-	double bx;
-	double by;
-	double bz;
-	double cx[4];
-	double cy[4];
-	double cz[4];
-	double cc;
+	double dd1[6], d, ax, ay, az, bx, by, bz;
+	double cx[4], cy[4], cz[4], cc;
 	float n[3];
-	int m;
-	int pos[6];
-	int neg[6];
-	int nbpos;
-	int nbneg;
-	int nbnul;
+	int m, k1, k2, l, transp, pos[6], neg[6], nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 
@@ -72,7 +57,6 @@ GLuint capTetra (pMesh mesh) {
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
 		int k;
-		int transp;
 
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
@@ -97,8 +81,6 @@ GLuint capTetra (pMesh mesh) {
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &pm->shininess);
 
 		while (k != 0) {
-			int l;
-
 			pt = &mesh->tetra[k];
 			if (!pt->v[0] || !pt->clip) {
 				k = pt->nxt;
@@ -120,9 +102,6 @@ GLuint capTetra (pMesh mesh) {
 			if (nbneg == 2 && nbpos == 2) {
 				/* display quadrilateral */
 				for (l = 0; l < 4; l++) {
-					int k1;
-					int k2;
-
 					k1 = neg[tn[l]];
 					k2 = pos[tp[l]];
 					p0 = &mesh->point[pt->v[k1]];
@@ -164,9 +143,6 @@ GLuint capTetra (pMesh mesh) {
 			} else {
 				/* display triangle */
 				for (l = 0; l < 3; l++) {
-					int k1;
-					int k2;
-
 					k1 = nbneg == 3 ? neg[l] : pos[l];
 					k2 = nbneg == 3 ? pos[0] : neg[0];
 					p0 = &mesh->point[pt->v[k1]];
@@ -222,38 +198,16 @@ GLuint capTetraMap (pMesh mesh) {
 	pClip clip;
 	GLuint dlist = 0;
 	pTetra pt;
-	pPoint p0;
-	pPoint p1;
+	pPoint p0, p1;
 	pMaterial pm;
-	pSolution ps0;
-	pSolution ps1;
-	double dd1[6];
-	double d;
-	double ax;
-	double ay;
-	double az;
-	double bx;
-	double by;
-	double bz;
-	double cx[4];
-	double cy[4];
-	double cz[4];
-	double cc;
-	float n[3];
-	float sol[4];
-	int m;
-	int k1;
-	int k2;
-	int l;
-	int pos[6];
-	int neg[6];
-	int nbpos;
-	int nbneg;
-	int nbnul;
+	pSolution ps0, ps1;
+	double dd1[6], d, ax, ay, az, bx, by, bz;
+	double cx[4], cy[4], cz[4], cc;
+	float n[3], sol[4];
+	int m, k1, k2, l, pos[6], neg[6], nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
-	triangle t1;
-	triangle t2;
+	triangle t1, t2;
 
 	/* default */
 	if (!mesh->ntet || !mesh->nbb) return (0);
@@ -274,7 +228,7 @@ GLuint capTetraMap (pMesh mesh) {
 
 	for (m = 0; m < sc->par.nbmat; m++) {
 		int k;
-
+		
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
@@ -454,37 +408,13 @@ GLuint capTetraIso (pMesh mesh) {
 	pClip clip;
 	GLuint dlist = 0;
 	pTetra pt;
-	pPoint p0;
-	pPoint p1;
+	pPoint p0, p1;
 	pMaterial pm;
-	pSolution ps0;
-	pSolution ps1;
+	pSolution ps0, ps1;
 	double dd1[6];
-	double rgb[3];
-	double cx[4];
-	double cy[4];
-	double cz[4];
-	double ccx;
-	double ccy;
-	double ccz;
-	double cc;
-	float iso;
-	float kc;
-	float sol[4];
-	int i;
-	int m;
-	int k;
-	int k1;
-	int k2;
-	int l;
-	int l1;
-	int nc;
-	int pos[6];
-	int neg[6];
-	int nbpos;
-	int nbneg;
-	int nbnul;
-	int ncol;
+	double rgb[3], cx[4], cy[4], cz[4], ccx, ccy, ccz, cc;
+	float iso, kc, sol[4];
+	int i, m, k, k1, k2, l, l1, nc, pos[6], neg[6], nbpos, nbneg, nbnul, ncol;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 	static double hsv[3] = {0.0f, 1.0f, 0.20f};

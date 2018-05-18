@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,11 +88,6 @@ void backTexture (pScene sc) {
 void redrawStatusBar (pScene sc) {
 	pClip clip = sc->clip;
 	pMesh mesh = cv.mesh[sc->idmesh];
-	double dd;
-	char buf[128];
-	float frame, elpms;
-	static float fps = 0.0, lastfr = 0.0;
-	static int nfr = 0, pps = 0;
 
 	if (sc->par.xs < 100) return;
 
@@ -112,6 +108,10 @@ void redrawStatusBar (pScene sc) {
 	/* other info */
 	glColor3f(1.0 - sc->par.back[0], 1.0 - sc->par.back[1], 1.0 - sc->par.back[2]);
 	if (animate && !(sc->isotyp & S_PARTICLE)) {
+		float frame, elpms;
+		static float fps = 0.0, lastfr = 0.0;
+		static int nfr = 0, pps = 0;
+
 		nfr++;
 		frame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 		elpms = frame - lastfr;
@@ -141,25 +141,30 @@ void redrawStatusBar (pScene sc) {
 
 	/* clip eqn */
 	if (clip->active & C_ON && !(clip->active & C_HIDE)) {
+		double dd;
+		char buf[128], tmpbuf[128];
+
 		sprintf(buf, "Eqn: ");
+		strcpy(tmpbuf, buf);
 		if (fabs(clip->eqn[0]) > EPS)
-			sprintf(buf, "%s %+.2gx", buf, clip->eqn[0]);
+			sprintf(buf, "%s %+.2gx", tmpbuf, clip->eqn[0]);
 
 		if (fabs(clip->eqn[1]) > EPS)
-			sprintf(buf, "%s %+.2gy", buf, clip->eqn[1]);
+			sprintf(buf, "%s %+.2gy", tmpbuf, clip->eqn[1]);
 
 		if (fabs(clip->eqn[2]) > EPS)
-			sprintf(buf, "%s %+.2gz", buf, clip->eqn[2]);
+			sprintf(buf, "%s %+.2gz", tmpbuf, clip->eqn[2]);
 
+		strcpy(tmpbuf, buf);
 		dd = clip->eqn[3] - clip->eqn[0] * mesh->xtra \
 		     - clip->eqn[1] * mesh->ytra - clip->eqn[2] * mesh->ztra;
-		if (dd) sprintf(buf, "%s %+.2g", buf, dd);
+		if (dd) sprintf(buf, "%s %+.2g", tmpbuf, dd);
 
 		if (sc->par.xs > 180)
 			output2(150, 8, "%s = 0", buf);
 	}
 
-	if (sc->picklist && sc->par.xs > 390 && !sc->isotyp & S_PARTICLE)
+	if ((sc->picklist) && (sc->par.xs > 390) && (!sc->isotyp) & (S_PARTICLE))
 		output2(350, 8, "%15s", sc->material[refmat].name);
 
 	if (sc->persp->pmode == PERSPECTIVE && sc->item & S_PALETTE)
@@ -209,4 +214,3 @@ void mouseStatus (int button, int state, int x, int y) {
 #ifdef __cplusplus
 }
 #endif
-

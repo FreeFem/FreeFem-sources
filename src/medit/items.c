@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -153,8 +154,6 @@ void drawAxis (pScene sc, int dim) {
 
 void drawBox (pScene sc, pMesh mesh, int mode) {
 	pMaterial pm;
-	float cx, cy, cz;
-	int i, k, m;
 
 	glDisable(GL_LIGHTING);
 	glPushMatrix();
@@ -166,11 +165,18 @@ void drawBox (pScene sc, pMesh mesh, int mode) {
 	glPopMatrix();
 
 	/* one box per sub-domain */
-	if (mode)
+	if (mode) {
+		int m;
+
 		for (m = 0; m < sc->par.nbmat; m++) {
+			int i;
+
 			pm = &sc->material[m];
 
 			for (i = 0; i < MAX_LIST; i++) {
+				float cx, cy, cz;
+				int k;
+
 				k = pm->depmat[i];
 				if (!k || pm->flag) continue;
 
@@ -186,12 +192,13 @@ void drawBox (pScene sc, pMesh mesh, int mode) {
 				glPopMatrix();
 			}
 		}
+	}
 }
 
 void drawCube (pScene sc, pMesh mesh) {
 	pTransform cubetr;
 	pCube cube;
-	float x1, y1, z1, x2, y2, z2, xd, yd, zd;
+	float x1, y1, z1/*, x2, y2*/, z2, xd, yd/*, zd*/;
 
 	cube = sc->cube;
 	cubetr = cube->cubetr;
@@ -210,12 +217,12 @@ void drawCube (pScene sc, pMesh mesh) {
 	x1 = cube->cmi[0] - mesh->xtra;
 	y1 = cube->cmi[1] - mesh->ytra;
 	z1 = cube->cmi[2] - mesh->ztra;
-	x2 = cube->cma[0] - mesh->xtra;
-	y2 = cube->cma[1] - mesh->ytra;
+	/*x2 = cube->cma[0] - mesh->xtra;*/
+	/*y2 = cube->cma[1] - mesh->ytra;*/
 	z2 = cube->cma[2] - mesh->ztra;
 	xd = cube->cma[0] - cube->cmi[0];
 	yd = cube->cma[1] - cube->cmi[1];
-	zd = cube->cma[2] - cube->cmi[2];
+	/*zd = cube->cma[2] - cube->cmi[2];*/
 
 	glBegin(GL_QUADS);
 	glVertex3f(x1, y1, z1);
@@ -248,12 +255,12 @@ void drawCube (pScene sc, pMesh mesh) {
 }
 
 void drawGrid (pScene sc, pMesh mesh) {
-	int k;
-
 	/* default */
 	if (ddebug) printf("draw grid + graduation\n");
 
 	if (!sc->grid) {
+		int k;
+
 		sc->grid = glGenLists(1);
 		glNewList(sc->grid, GL_COMPILE);
 		glBegin(GL_LINES);
@@ -298,12 +305,12 @@ void drawGrid (pScene sc, pMesh mesh) {
 }
 
 void drawBase (pScene sc, pMesh mesh) {
-	int k;
-
 	/* default */
 	if (ddebug) printf("draw base\n");
 
 	if (!sc->grid) {
+		int k;
+		
 		sc->grid = glGenLists(1);
 		glNewList(sc->grid, GL_COMPILE);
 		if (glGetError()) return;
@@ -531,4 +538,3 @@ void drawHUD (pScene sc) {
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_DEPTH_TEST);
 }
-

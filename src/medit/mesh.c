@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -80,25 +81,27 @@ void meshInfo (pMesh mesh) {
 }
 
 void meshCoord (pMesh mesh, int displ) {
-	pTetra pt1;
+
 	pPoint ppt;
 	pSolution ps;
-	double *c1, *c2, *c3, *c4, mul, vold, volf;
+	double mul;
 	int k;
 
 	/* default */
 	if (ddebug) printf("change mesh coord\n");
 
 	mul = 2.0 * displ - 1.;
-	if (mesh->dim == 2)
+	if (mesh->dim == 2) {
 		for (k = 1; k <= mesh->np; k++) {
 			ppt = &mesh->point[k];
 			ps = &mesh->sol[k];
 			ppt->c[0] = ppt->c[0] + mul * ps->m[0];
 			ppt->c[1] = ppt->c[1] + mul * ps->m[1];
 		}
+	} else {
+		pTetra pt1;
+		double *c1, *c2, *c3, *c4, vold, volf;
 
-	else {
 		vold = 0.0;
 
 		for (k = 1; k <= mesh->ntet; k++) {
@@ -181,20 +184,17 @@ void meshBox (pMesh mesh, int bb) {
 }
 
 int meshSurf (pMesh mesh) {
-	pTetra ptt, pt2;
+	pTetra ptt;
 	pHexa ph;
-	pTriangle pt;
-	pQuad pq;
 	int *adj, i, k, iadr;
-	ubyte i1, i2, i3;
 	static int idirt[7] = {0, 1, 2, 3, 0, 1, 2};
-	static int ch[6][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4},
-						   {1, 2, 6, 5}, {2, 3, 7, 6}, {0, 3, 7, 4}};
 
 	if (!dosurf) return (1);
 
 	/* extract surface */
 	if (mesh->ntet > 0 && !mesh->nt) {
+		pTetra pt2;
+
 		if (!hashTetra(mesh)) return (0);
 
 		for (k = 1; k <= mesh->ntet; k++) {
@@ -204,12 +204,12 @@ int meshSurf (pMesh mesh) {
 			iadr = 4 * (k - 1) + 1;
 			adj = &mesh->adja[iadr];
 
-			for (i = 0; i < 4; i++)
-				if (!adj[i]) ++mesh->nt;
-				else {
+			for (i = 0; i < 4; i++) {
+				if (!adj[i]) {++mesh->nt;} else {
 					pt2 = &mesh->tetra[adj[i]];
 					if (ptt->ref != pt2->ref && k < adj[i]) ++mesh->nt;
 				}
+			}
 		}
 
 		/* memory alloc */
@@ -232,6 +232,9 @@ int meshSurf (pMesh mesh) {
 			adj = &mesh->adja[iadr];
 
 			for (i = 0; i < 4; i++) {
+				pTriangle pt;
+				ubyte i1, i2, i3;
+
 				if (!adj[i]) {
 					pt = &mesh->tria[++mesh->nt];
 					i1 = idirt[i + 1];
@@ -275,8 +278,8 @@ int meshSurf (pMesh mesh) {
 			iadr = 6 * (k - 1) + 1;
 			adj = &mesh->adja[iadr];
 
-			for (i = 0; i < 6; i++)
-				if (!adj[i]) ++mesh->nq;
+			for (i = 0; i < 6; i++) {
+				if (!adj[i]) ++mesh->nq; }
 		}
 
 		/* memory alloc */
@@ -298,14 +301,19 @@ int meshSurf (pMesh mesh) {
 			iadr = 6 * (k - 1) + 1;
 			adj = &mesh->adja[iadr];
 
-			for (i = 0; i < 6; i++)
+			for (i = 0; i < 6; i++) {
 				if (!adj[i]) {
+					pQuad pq;
+					static int ch[6][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4},
+										   {1, 2, 6, 5}, {2, 3, 7, 6}, {0, 3, 7, 4}};
+
 					pq = &mesh->quad[++mesh->nq];
 					pq->v[0] = ph->v[ch[i][0]];
 					pq->v[1] = ph->v[ch[i][1]];
 					pq->v[2] = ph->v[ch[i][2]];
 					pq->v[3] = ph->v[ch[i][3]];
 				}
+			}
 		}
 	}
 
@@ -314,10 +322,6 @@ int meshSurf (pMesh mesh) {
 
 void meshRef (pScene sc, pMesh mesh) {
 	pMaterial pm;
-	pTriangle pt;
-	pQuad pq;
-	pTetra pte;
-	pHexa ph;
 	pPoint ppt;
 	int *old, i, k, m, nmat;
 
@@ -341,6 +345,8 @@ void meshRef (pScene sc, pMesh mesh) {
 	}
 
 	for (k = mesh->nt; k > 0; k--) {
+		pTriangle pt;
+
 		pt = &mesh->tria[k];
 		if (!pt->v[0]) continue;
 
@@ -368,6 +374,8 @@ void meshRef (pScene sc, pMesh mesh) {
 	}
 
 	for (k = mesh->nq; k > 0; k--) {
+		pQuad pq;
+
 		pq = &mesh->quad[k];
 		if (!pq->v[0]) continue;
 
@@ -395,6 +403,8 @@ void meshRef (pScene sc, pMesh mesh) {
 	}
 
 	for (k = mesh->ntet; k > 0; k--) {
+		pTetra pte;
+
 		pte = &mesh->tetra[k];
 		if (!pte->v[0]) continue;
 
@@ -422,6 +432,8 @@ void meshRef (pScene sc, pMesh mesh) {
 	}
 
 	for (k = mesh->nhex; k > 0; k--) {
+		pHexa ph;
+
 		ph = &mesh->hexa[k];
 		nmat = matRef(sc, ph->ref);
 		/*nmat = !ph->ref ? DEFAULT_MAT : 1+(ph->ref-1)%(sc->par.nbmat-1);*/
@@ -473,7 +485,7 @@ void meshRef (pScene sc, pMesh mesh) {
 }
 
 int meshUpdate (pScene sc, pMesh mesh) {
-	int k, ret;
+	int ret;
 	clock_t ct;
 
 	/* release mesh structure */
@@ -510,10 +522,13 @@ int meshUpdate (pScene sc, pMesh mesh) {
 
 	if (mesh->nbb && mesh->sol) {
 		if ((mesh->dim == 2 && mesh->nfield == 3) ||
-		    (mesh->dim == 3 && mesh->nfield == 6))
-			for (k = 1; k <= mesh->nbb; k++)
+		    (mesh->dim == 3 && mesh->nfield == 6)) {
+			int k;
+			for (k = 1; k <= mesh->nbb; k++) {
 				free(mesh->sol[k].m);
-
+			}
+		}
+		
 		M_free(mesh->sol);
 		mesh->sol = 0;
 	}
@@ -558,4 +573,3 @@ int meshUpdate (pScene sc, pMesh mesh) {
 
 	return (1);
 }
-

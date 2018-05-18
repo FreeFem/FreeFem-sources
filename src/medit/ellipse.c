@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -54,13 +55,15 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 	/* draw average ellipse at element */
 	if (typel == LPoint) {
 		int iord;
-		
+
 		p0 = &mesh->point[k];
 		/*pm = &sc->material[refmat];*/
 		pm = &sc->material[p0->ref];
 		ps = &mesh->sol[k];
 
-		for (j = 0; j < 6; j++) m[j] = ps->m[j];
+		for (j = 0; j < 6; j++) {
+			m[j] = ps->m[j];
+		}
 
 		iord = eigenv(1, m, lambda, v);
 		if (!iord) return;
@@ -77,17 +80,20 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 
 			fprintf(stdout, "  Sizes        : %f  %f  %f\n",
 			        1.0 / sqrt(lambda[0]), 1.0 / sqrt(lambda[1]), 1.0 / sqrt(lambda[2]));
-		} else if (lambda[0] <= 0.0 || lambda[1] <= 0.0 || lambda[2] <= 0.0)
+		} else if (lambda[0] <= 0.0 || lambda[1] <= 0.0 || lambda[2] <= 0.0) {
 			return;
+		}
 
 		lambda[0] = max(EPS, 0.5 / sqrt(lambda[0]));
 		lambda[1] = max(EPS, 0.5 / sqrt(lambda[1]));
 		lambda[2] = max(EPS, 0.5 / sqrt(lambda[2]));
 		memcpy(mat, IdMatrix, 16 * sizeof(GLfloat));
 
-		for (j = 0; j < 3; j++)
-			for (l = 0; l < 3; l++)
+		for (j = 0; j < 3; j++) {
+			for (l = 0; l < 3; l++) {
 				mat[j * 4 + l] = v[j][l];
+			}
+		}
 
 		glDisable(GL_LIGHTING);
 		glPushMatrix();
@@ -109,7 +115,9 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 
 		glColor4fv(pm->dif);
 
-		for (j = 0; j < 6; j++) m[j] = 0.;
+		for (j = 0; j < 6; j++) {
+			m[j] = 0.;
+		}
 
 		cx = cy = cz = 0.0;
 
@@ -120,15 +128,18 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 			cy += p0->c[1];
 			cz += p0->c[2];
 
-			for (j = 0; j < 6; j++)
+			for (j = 0; j < 6; j++) {
 				m[j] += ps->m[j];
+			}
 		}
 
 		cx /= 3.;
 		cy /= 3.;
 		cz /= 3.;
 
-		for (j = 0; j < 6; j++) m[j] /= 6.;
+		for (j = 0; j < 6; j++) {
+			m[j] /= 6.;
+		}
 
 		if (!eigenv(1, m, lambda, v)) return;
 
@@ -138,9 +149,11 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 
 		memcpy(mat, IdMatrix, 16 * sizeof(GLfloat));
 
-		for (j = 0; j < 3; j++)
-			for (l = 0; l < 3; l++)
+		for (j = 0; j < 3; j++) {
+			for (l = 0; l < 3; l++) {
 				mat[j * 4 + l] = v[j][l];
+			}
+		}
 
 		glDisable(GL_LIGHTING);
 		glPushMatrix();
@@ -156,7 +169,9 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 		pm = &sc->material[refmat];
 		glColor4fv(pm->dif);
 
-		for (j = 0; j < 6; j++) m[j] = 0.;
+		for (j = 0; j < 6; j++) {
+			m[j] = 0.;
+		}
 
 		cx = cy = cz = 0.0;
 
@@ -173,15 +188,18 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 			cy += p0->c[1];
 			cz += p0->c[2];
 
-			for (j = 0; j < 6; j++)
+			for (j = 0; j < 6; j++) {
 				m[j] += ps->m[j];
+			}
 		}
 
 		cx /= 4.;
 		cy /= 4.;
 		cz /= 4.;
 
-		for (j = 0; j < 6; j++) m[j] /= 6.;
+		for (j = 0; j < 6; j++) {
+			m[j] /= 6.;
+		}
 
 		if (!eigenv(1, m, lambda, v)) return;
 
@@ -191,9 +209,11 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 
 		memcpy(mat, IdMatrix, 16 * sizeof(GLfloat));
 
-		for (j = 0; j < 3; j++)
-			for (l = 0; l < 3; l++)
+		for (j = 0; j < 3; j++) {
+			for (l = 0; l < 3; l++) {
 				mat[j * 4 + l] = v[j][l];
+			}
+		}
 
 		glDisable(GL_LIGHTING);
 		glPushMatrix();
@@ -204,7 +224,7 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 		glutWireSphere(1., 30, 30);
 		glPopMatrix();
 		glEnable(GL_LIGHTING);
-	} else return;
+	} else {return;}
 }
 
 void glCircle (float radius) {
@@ -226,15 +246,15 @@ void glCircle (float radius) {
 
 void drawEllipse (pScene sc, pMesh mesh, int typel, int k) {
 	pSolution ps;
-	double vp[2][2], lambda[2], dd1, dd2;
+	double vp[2][2];
 
 	/* draw ellipse at vertex */
 	if (typel == LPoint) {
 		pMaterial pm;
 		pPoint p0;
-		double m[3];
+		double m[3], lambda[2], dd1, dd2;
 		float theta;
-		
+
 		ps = &mesh->sol[k];
 		p0 = &mesh->point[k];
 		pm = &sc->material[refmat];
@@ -289,7 +309,7 @@ GLuint drawAllEllipse (pScene sc, pMesh mesh) {
 	pMaterial pm;
 	pPoint p0;
 	double m[3], vp[2][2], lambda[2], dd1, dd2;
-	float theta, cy;
+	float theta;
 	int k, ref;
 
 	dlist = glGenLists(1);
@@ -300,12 +320,12 @@ GLuint drawAllEllipse (pScene sc, pMesh mesh) {
 	glDisable(GL_LIGHTING);
 	glLineWidth(1.0);
 
-	if (mesh->typage == 1)
+	if (mesh->typage == 1) {
 		for (k = 1; k <= mesh->ne; k++) {
 			pTriangle pt;
-			float cx;
+			float cx, cy;
 			int i;
-			
+
 			ps = &mesh->sol[k];
 			pt = &mesh->tria[k];
 			if (!pt->v[0]) continue;
@@ -343,8 +363,7 @@ GLuint drawAllEllipse (pScene sc, pMesh mesh) {
 			glCircle(1.0);
 			glPopMatrix();
 		}
-
-	else
+	} else {
 		for (k = 1; k <= mesh->np; k++) {
 			ps = &mesh->sol[k];
 			p0 = &mesh->point[k];
@@ -371,6 +390,7 @@ GLuint drawAllEllipse (pScene sc, pMesh mesh) {
 			glCircle(1.0);
 			glPopMatrix();
 		}
+	}
 
 	glEnable(GL_LIGHTING);
 
@@ -395,4 +415,3 @@ void circumSphere (pScene sc, pMesh mesh, int typel, int k) {
 	glPopMatrix();
 	glEnable(GL_LIGHTING);
 }
-

@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -26,12 +27,12 @@
 
 int inmsh2 (pMesh mesh) {
 	FILE *inp, *inf;
-	pPoint ppt, pp0, pp1, pp2, pp3;
+	pPoint pp0, pp1, pp2, pp3;
 	pTriangle pt1;
 	pQuad pq1;
 	pEdge pr;
-	int k, disc, ret, degree, dum, ref, tag;
-	char *ptr, data[256], sx[128], sy[128], sz[128];
+	int k, disc, degree, dum, ref, tag;
+	char data[256], sx[128], sy[128], sz[128];
 
 	/* check for .points */
 	strcpy(data, mesh->name);
@@ -63,6 +64,7 @@ int inmsh2 (pMesh mesh) {
 	if (!mesh->np) {/*|| (mesh->dim == 3 && !mesh->ne) ) {*/
 		fprintf(stdout, "  ## No vertex.\n");
 		fclose(inp);
+		fclose(inf);
 		return (-1);
 	}
 
@@ -77,12 +79,13 @@ int inmsh2 (pMesh mesh) {
 			fclose(inp);
 			fclose(inf);
 			return (0);
-		} else if (degree == 2)
+		} else if (degree == 2) {
 			mesh->na++;
-		else if (degree == 3)
+		} else if (degree == 3) {
 			mesh->nt++;
-		else if (degree == 4)
+		} else if (degree == 4) {
 			mesh->nq++;
+		}
 
 		/*fgets(data,80,inf);*/
 		EatLine(inf);
@@ -104,9 +107,14 @@ int inmsh2 (pMesh mesh) {
 
 	/* read mesh vertices */
 	for (k = 1; k <= mesh->np; k++) {
+		char *ptr;
+		int ret;
+
+		pPoint ppt;
+
 		ppt = &mesh->point[k];
 		/* parse coordinates into strings */
-		ret = fscanf(inp, "%s %s %s %d", sx, sy, sz, &ref);
+		ret = fscanf(inp, "%127s %127s %127s %d", sx, sy, sz, &ref);
 		if (ret != 4) {
 			fclose(inp);
 			fclose(inf);
@@ -221,4 +229,3 @@ int inmsh2 (pMesh mesh) {
 
 	return (1);
 }
-

@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : parse arguments from command line
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : Parse arguments from command line
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -66,10 +67,11 @@ int parsar (int argc, char *argv []) {
 	stereoMode = MONO;
 
 	while (i < argc) {
-		if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-help"))
+		if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-help")) {
 			usage();
-		else if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "-debug"))
+		} else if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "-debug")) {
 			ddebug = TRUE;
+		}
 		// Rajout de l option popen
 		else if (!strcmp(argv[i], "-popen")) {
 			// printf("valeur de i=%i \n",i);
@@ -116,23 +118,23 @@ int parsar (int argc, char *argv []) {
 			// assert(i==argc);
 		}
 		// Fin Rajout de popen
-		else if (!strcmp(argv[i], "-i"))
+		else if (!strcmp(argv[i], "-i")) {
 			infogl = TRUE;
-		else if (!strcmp(argv[i], "-fs"))
+		} else if (!strcmp(argv[i], "-fs")) {
 			fullscreen = TRUE;
-		else if (!strcmp(argv[i], "-l"))
+		} else if (!strcmp(argv[i], "-l")) {
 			option = VERYBIG;
-		else if (!strcmp(argv[i], "-m"))
+		} else if (!strcmp(argv[i], "-m")) {
 			option = MORPHING;
-		else if (!strcmp(argv[i], "-iso"))
+		} else if (!strcmp(argv[i], "-iso")) {
 			option = ISOSURF;
-		else if (!strcmp(argv[i], "-stereo"))
+		} else if (!strcmp(argv[i], "-stereo")) {
 			stereoMode = LEFT + RIGHT;
-		else if (!strcmp(argv[i], "-s"))
+		} else if (!strcmp(argv[i], "-s")) {
 			dosurf = 0;
-		else if (!strcmp(argv[i], "-v"))
+		} else if (!strcmp(argv[i], "-v")) {
 			quiet = 0;
-		else if (!strcmp(argv[i], "-xv")) {
+		} else if (!strcmp(argv[i], "-xv")) {
 			if (++i < argc && isdigit(argv[i][0]))
 				schw = atoi(argv[i]);
 			else
@@ -177,4 +179,3 @@ int parsar (int argc, char *argv []) {
 
 	return (1);
 }
-

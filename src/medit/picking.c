@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -179,8 +180,8 @@ static void drawTets (pScene sc, pMesh mesh, int k) {
 	pMaterial pm;
 	pTetra pt;
 	pPoint p0, p1, p2, p3;
-	float ax, ay, az, bx, by, bz, d, n[3];
-	float shrink, cx, cy, cz;
+	float n[3];
+	float shrink;
 	int l;
 
 	/* default */
@@ -200,6 +201,9 @@ static void drawTets (pScene sc, pMesh mesh, int k) {
 	glColor3f(1.0 - pm->dif[0], 1.0 - pm->dif[1], 1.0 - pm->dif[2]);
 
 	for (l = 0; l < 4; l++) {
+		float ax, ay, az, bx, by, bz, d;
+		float cx, cy, cz;
+
 		p0 = &mesh->point[pt->v[ct[l][0]]];
 		p1 = &mesh->point[pt->v[ct[l][1]]];
 		p2 = &mesh->point[pt->v[ct[l][2]]];
@@ -261,9 +265,9 @@ static void drawTets (pScene sc, pMesh mesh, int k) {
 static void drawHexa (pScene sc, pMesh mesh, int k) {
 	pMaterial pm;
 	pHexa ph;
-	pPoint p0, p1, p2, p3;
-	float ax, ay, az, bx, by, bz, d, n[3];
-	float shrink, cx, cy, cz;
+	pPoint p0;
+	float n[3];
+	/*float shrink; */
 	int l;
 
 	/* default */
@@ -276,12 +280,16 @@ static void drawHexa (pScene sc, pMesh mesh, int k) {
 
 	refmat = matRef(sc, ph->ref);
 	pm = &sc->material[refmat];
-	shrink = 0.95 * sc->shrink;
+	/*shrink = 0.95 * sc->shrink;*/
 
 	glBegin(GL_QUADS);
 	glColor3f(1.0 - pm->dif[0], 1.0 - pm->dif[1], 1.0 - pm->dif[2]);
 
 	for (l = 0; l < 6; l++) {
+		pPoint p1, p2, p3;
+		float ax, ay, az, bx, by, bz, d;
+		float cx, cy, cz;
+
 		p0 = &mesh->point[ph->v[ch[l][0]]];
 		p1 = &mesh->point[ph->v[ch[l][1]]];
 		p2 = &mesh->point[ph->v[ch[l][2]]];
@@ -360,9 +368,9 @@ static void infoData (pScene sc, pMesh mesh, int k, int typel) {
 	if (!mesh->nbb) return;
 
 	ps = &mesh->sol[k];
-	if (mesh->nfield == 1)
+	if (mesh->nfield == 1) {
 		fprintf(stdout, "  Data (scalar): %f\n", ps->bb);
-	else if (mesh->nfield == mesh->dim) {
+	} else if (mesh->nfield == mesh->dim) {
 		fprintf(stdout, "  Data (vector): %f %f", ps->m[0], ps->m[1]);
 		if (mesh->dim == 3) fprintf(stdout, " %f", ps->m[2]);
 
@@ -474,7 +482,6 @@ static void infoEntity (pScene sc, pMesh mesh, int k, int type) {
 static int getColorRange (Color *c, pMesh mesh) {
 	GLubyte mask;
 	GLint rBits, gBits, bBits, aBits;
-	long nbmax;
 	int i, nbits;
 
 	glGetIntegerv(GL_RED_BITS, &rBits);
@@ -484,6 +491,8 @@ static int getColorRange (Color *c, pMesh mesh) {
 	nbits = rBits + gBits + bBits + aBits;
 
 	if (nbits < 32) {
+		long nbmax;
+
 		nbmax = 2 << (nbits - 1);
 		if (nbmax < mesh->nt + mesh->nq + mesh->ntet + mesh->nhex) {
 			fprintf(stderr, "  Sorry. Picking disabled. (%ld,%d)\n", nbmax, mesh->nt + mesh->nq);
@@ -497,7 +506,9 @@ static int getColorRange (Color *c, pMesh mesh) {
 	mask = 0;
 	nbits = nbits - rBits;
 
-	for (i = 0; i < rBits; i++) mask |= 1 << i;
+	for (i = 0; i < rBits; i++) {
+		mask |= 1 << i;
+	}
 
 	c->rMask = mask << nbits;
 	c->rShift = nbits;
@@ -506,7 +517,9 @@ static int getColorRange (Color *c, pMesh mesh) {
 	mask = 0;
 	nbits = nbits - gBits;
 
-	for (i = 0; i < gBits; i++) mask |= 1 << i;
+	for (i = 0; i < gBits; i++) {
+		mask |= 1 << i;
+	}
 
 	c->gMask = mask << nbits;
 	c->gShift = nbits;
@@ -515,7 +528,9 @@ static int getColorRange (Color *c, pMesh mesh) {
 	mask = 0;
 	nbits = nbits - bBits;
 
-	for (i = 0; i < bBits; i++) mask |= 1 << i;
+	for (i = 0; i < bBits; i++) {
+		mask |= 1 << i;
+	}
 
 	c->bMask = mask << aBits;
 	c->bShift = nbits;
@@ -523,20 +538,24 @@ static int getColorRange (Color *c, pMesh mesh) {
 
 	mask = 0;
 
-	for (i = 0; i < aBits; i++) mask |= 1 << i;
+	for (i = 0; i < aBits; i++) {
+		mask |= 1 << i;
+	}
 
 	c->aMask = mask;
 	c->aBits = 8 - aBits;
 }
 
 static void displayPoint (pScene sc, pMesh mesh, Color *c) {
-	pPoint ppt;
-	unsigned int k, kk;
+	unsigned int k;
 
 	glPointSize(5);
 	glBegin(GL_POINTS);
 
 	for (k = 1; k <= mesh->np; k++) {
+		pPoint ppt;
+		unsigned int kk;
+
 		ppt = &mesh->point[k];
 
 		kk = 2 * k + 1;
@@ -558,13 +577,15 @@ static void displayPoint (pScene sc, pMesh mesh, Color *c) {
 static void displayTria (pScene sc, pMesh mesh, Color *c) {
 	pTriangle pt;
 	pPoint p0, p1, p2;
-	pMaterial pm;
 	int m;
-	unsigned int k, kk;
+	unsigned int kk;
 
 	glBegin(GL_TRIANGLES);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		pMaterial pm;
+		unsigned int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LTria];
 		if (!k || pm->flag) continue;
@@ -598,7 +619,7 @@ static int displayQuad (pScene sc, pMesh mesh, Color *c) {
 	pQuad pq;
 	pPoint p0, p1, p2, p3;
 	pMaterial pm;
-	int k, m, base;
+	int m, base;
 	unsigned int kk;
 
 	base = mesh->nt;
@@ -606,6 +627,8 @@ static int displayQuad (pScene sc, pMesh mesh, Color *c) {
 	glBegin(GL_QUADS);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LQuad];
 		if (!k || pm->flag) continue;
@@ -643,7 +666,7 @@ static int displayTets (pScene sc, pMesh mesh, Color *c) {
 	pPoint p0, p1, p2;
 	pMaterial pm;
 	pClip clip;
-	int k, l, m, base;
+	int l, m, base;
 	unsigned int kk;
 
 	clip = sc->clip;
@@ -652,13 +675,14 @@ static int displayTets (pScene sc, pMesh mesh, Color *c) {
 	glBegin(GL_TRIANGLES);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
 
 		while (k != 0) {
 			ptt = &mesh->tetra[k];
-			if (ptt->v[0])
+			if (ptt->v[0]) {
 				if ((clip->active & C_ON && ptt->clip) || !(clip->active & C_ON)) {
 					kk = base + k;
 					kk = 2 * kk + 1;
@@ -678,6 +702,7 @@ static int displayTets (pScene sc, pMesh mesh, Color *c) {
 						glVertex3f(p2->c[0], p2->c[1], p2->c[2]);
 					}
 				}
+			}
 
 			k = ptt->nxt;
 		}
@@ -691,7 +716,7 @@ static int displayHexa (pScene sc, pMesh mesh, Color *c) {
 	pPoint p0, p1, p2, p3;
 	pMaterial pm;
 	pClip clip;
-	int k, l, m, base;
+	int l, m, base;
 	unsigned int kk;
 
 	clip = sc->clip;
@@ -700,13 +725,15 @@ static int displayHexa (pScene sc, pMesh mesh, Color *c) {
 	glBegin(GL_QUADS);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LHexa];
 		if (!k || pm->flag) continue;
 
 		while (k != 0) {
 			ph = &mesh->hexa[k];
-			if (ph->v[0])
+			if (ph->v[0]) {
 				if ((clip->active & C_ON && ph->clip) || !(clip->active & C_ON)) {
 					kk = base + k;
 					kk = 2 * kk + 1;
@@ -728,6 +755,7 @@ static int displayHexa (pScene sc, pMesh mesh, Color *c) {
 						glVertex3f(p3->c[0], p3->c[1], p3->c[2]);
 					}
 				}
+			}
 
 			k = ph->nxt;
 		}
@@ -873,7 +901,6 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 	GLubyte pixel[4];
 	GLuint dlist;
 	Color c;
-	int k;
 	unsigned int item;
 
 	dlist = 0;
@@ -913,7 +940,7 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 	item /= 2;
 	if (!item) return (dlist);
 
-	if (ddebug) printf("item %d\n", item);
+	if (ddebug) printf("item %ud\n", item);
 
 	if (!mesh->ne) {
 		if (item <= mesh->np) {
@@ -935,11 +962,12 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 	}
 
 	/* peculiar case: vertex */
-	if (refitem > 0 && ident == LPoint)
+	if (refitem > 0 && ident == LPoint) {
 		if (mesh->ne) {
 			refitem = closestPoint(sc, mesh, x, y, refitem, reftype);
 			reftype = LPoint;
 		}
+	}
 
 	if (refitem > 0) {
 		dlist = glGenLists(1);
@@ -948,12 +976,14 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 
 		switch (reftype) {
 		case LPoint:
-			if (refitem <= mesh->np && !mesh->ne)
-				for (k = 1; k <= mesh->np; k++)
+			if (refitem <= mesh->np && !mesh->ne) {
+				int k;
+
+				for (k = 1; k <= mesh->np; k++) {
 					/*drawPoint(sc,mesh,k);*/
 					infoEntity(sc, mesh, k, LPoint);
-
-			else {
+				}
+			} else {
 				drawPoint(sc, mesh, refitem);
 				infoEntity(sc, mesh, refitem, LPoint);
 			}
@@ -979,17 +1009,15 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 
 		glEndList();
 		return (dlist);
-	} else
+	} else {
 		refmat = -1;
+	}
 
 	return (dlist);
 }
 
 GLuint pickItem (pMesh mesh, pScene sc, int numit) {
-	pMaterial pm;
-	pPoint ppt;
 	GLuint dlist;
-	int nm;
 
 	/* default */
 	if (ddebug) printf("create pickitem list\n");
@@ -999,10 +1027,15 @@ GLuint pickItem (pMesh mesh, pScene sc, int numit) {
 	if (glGetError()) return (0);
 
 	if (numit <= mesh->np && mesh->ne) {
+		pMaterial pm;
+		pPoint ppt;
+
 		ppt = &mesh->point[numit];
 		pm = &sc->material[DEFAULT_MAT];
 		if (ppt->tag != M_UNUSED) {
 			if (ppt->ref) {
+				int nm;
+
 				nm = matRef(sc, ppt->ref);
 				/*nm = 1+(ppt->ref-1) % (sc->par.nbmat-1);*/
 				pm = &sc->material[nm];
@@ -1025,4 +1058,3 @@ GLuint pickItem (pMesh mesh, pScene sc, int numit) {
 	glEndList();
 	return (dlist);
 }
-

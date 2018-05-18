@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : Mesh visualization tool
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : Mesh visualization tool
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "compil.date"
@@ -73,9 +74,9 @@ static void endcod () {
 
 static void grInfo (void) {
 	GLboolean b;
-	GLint i, win;
+	GLint i;
 
-	win = glutCreateWindow("Info");
+	glutCreateWindow("Info");
 	fprintf(stdout, "Graphic info:\n");
 	fprintf(stdout, " GL Vendor:\t%s\n", glGetString(GL_VENDOR));
 	fprintf(stdout, " GL Version:\t%s\n", glGetString(GL_VERSION));
@@ -120,9 +121,8 @@ static void grInfo (void) {
 }
 
 int medit0 () {
-	pMesh mesh;
-	char data[128], *name;
-	int k, l, ret;
+	char data[128];
+	int k, l;
 	clock_t ct;
 
 	/* default */
@@ -132,9 +132,11 @@ int medit0 () {
 
 	/* enter name */
 	if (!cv.nbm) {
+		char *name;
+
 		fprintf(stdout, "  File name(s) missing. Please enter : ");
 		fflush(stdout);
-		fflush(stdin);
+		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 		fgets(data, 120, stdin);
 		if (!strlen(data)) {
 			fprintf(stdout, "  ## No data\n");
@@ -162,7 +164,7 @@ int medit0 () {
 	if (!cv.nbm) {
 		fprintf(stdout, "  Number of mesh missing:. Please enter : ");
 		fflush(stdout);
-		fflush(stdin);
+		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 		fgets(data, 120, stdin);
 		cv.nbm = atoi(data);
 	}
@@ -171,6 +173,9 @@ int medit0 () {
 	k = 0;
 
 	do {
+		pMesh mesh;
+		int ret;
+
 		if (!cv.mesh[k]) {
 			cv.mesh[k] = M_calloc(1, sizeof(Mesh), "medit0.mesh");
 			if (!cv.mesh[k]) return (0);
@@ -189,8 +194,9 @@ int medit0 () {
 		}
 
 		if (ret <= 0) {
-			for (l = k + 1; l < cv.nbm; l++)
+			for (l = k + 1; l < cv.nbm; l++) {
 				cv.mesh[l - 1] = cv.mesh[l];
+			}
 
 			cv.nbm--;
 			k--;
@@ -222,9 +228,7 @@ int medit0 () {
 }
 
 int medit0_popen () {
-	pMesh mesh;
-	char data[128], *name;
-	int k, l, ret;
+	int k;
 	clock_t ct;
 
 	/* default */
@@ -234,9 +238,11 @@ int medit0_popen () {
 
 	/* enter number of mesh */
 	if (!cv.nbm) {
+		char data[128];
+
 		fprintf(stdout, "  Number of mesh missing:. Please enter : ");
 		fflush(stdout);
-		fflush(stdin);
+		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 		fgets(data, 128, stdin);
 		cv.nbm = atoi(data);
 	}
@@ -245,6 +251,8 @@ int medit0_popen () {
 	k = 0;
 
 	do {
+		pMesh mesh;
+
 		// printf("mesh number %i\n",k+1);
 		if (!cv.mesh[k]) {
 			cv.mesh[k] = M_calloc(1, sizeof(Mesh), "medit0.mesh");
@@ -261,9 +269,9 @@ int medit0_popen () {
 		// strcpy(cv.mesh[k]->name,name);
 
 		if (dpopenbin)
-			ret = loadMesh_popen_bin(mesh);
+			loadMesh_popen_bin(mesh);
 		else
-			ret = loadMesh_popen(mesh);
+			loadMesh_popen(mesh);
 
 		/* compute mesh box */
 		if ((mesh->ntet && !mesh->nt) || (mesh->nhex && !mesh->nq))
@@ -298,8 +306,6 @@ int medit0_popen () {
 }
 
 int medit1 () {
-	pScene scene;
-	pMesh mesh;
 	int k;
 	clock_t ct;
 
@@ -309,6 +315,9 @@ int medit1 () {
 	ct = clock();
 
 	for (k = 0; k < cv.nbs; k++) {
+		pScene scene;
+		pMesh mesh;
+
 		if (!cv.scene[k]) {
 			cv.scene[k] = (pScene)M_calloc(1, sizeof(Scene), "medit1.scene");
 			if (!cv.scene[k]) return (0);
@@ -417,8 +426,7 @@ int main (int argc, char *argv []) {
 	if (infogl) grInfo();
 
 	/* call animate or normal mode */
-	if (dpopen == FALSE)
-
+	if (dpopen == FALSE) {
 		switch (option) {
 		case STANDARD:
 
@@ -450,8 +458,7 @@ int main (int argc, char *argv []) {
 			exit(1);
 			break;
 		}
-
-	else
+	} else {
 		switch (option) {
 		case STANDARD:
 
@@ -486,6 +493,7 @@ int main (int argc, char *argv []) {
 			exit(1);
 			break;
 		}
+	}
 
 	/* main grafix loop */
 	fprintf(stdout, "\n Rendering scene(s)\n");
@@ -494,4 +502,3 @@ int main (int argc, char *argv []) {
 
 	return (0);
 }
-

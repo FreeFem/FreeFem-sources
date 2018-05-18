@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -35,7 +36,7 @@ int pathAdd (pScene sc, int x, int y) {
 	Trajet *path;
 	pMesh mesh;
 	pTransform view;
-	float *p, *p1, *a;
+	float *p;
 	int k;
 
 	if (ddebug) fprintf(stdout, "pathAdd");
@@ -58,13 +59,15 @@ int pathAdd (pScene sc, int x, int y) {
 			fprintf(stderr, "   Not enough memory to store tangents.\n");
 			return (0);
 		}
-	} else if (path->np > MAX_PATH - 1) return (0);
+	} else if (path->np > MAX_PATH - 1) {return (0);}
 
 	/* get 3D point */
 	glGetDoublev(GL_PROJECTION_MATRIX, projmat);
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	for (k = 0; k < 16; k++) modelmat[k] = view->matrix[k];
+	for (k = 0; k < 16; k++) {
+		modelmat[k] = view->matrix[k];
+	}
 
 	gluUnProject(x, y, -100, modelmat, projmat, viewport, &ptx, &pty, &ptz);
 
@@ -77,6 +80,8 @@ int pathAdd (pScene sc, int x, int y) {
 
 	/* compute tangent at point-1 */
 	if (path->np > 2) {
+		float *p1, *a;
+
 		p1 = &path->pt[mesh->dim * (path->np - 2)];
 		a = &path->tg[mesh->dim * path->np];
 		a[0] = 0.5 * (p[0] - p1[0]);
@@ -148,18 +153,9 @@ GLuint pathList (pScene sc) {
 
 /* follow path */
 void pathFollow (pScene sc) {
-	Trajet path;
-	int nbp;
-
 	if (!sc->path.np) return;
 
 	if (ddebug) fprintf(stdout, "pathFollow %d\n", sc->path.np);
-
-	path = sc->path;
-	if (sc->path.sec < 0)
-		nbp = sc->path.np;
-	else
-		nbp = (sc->path.sec * IMG_PER_SEC);
 }
 
 int pathLoad (char *file, pScene sc) {
@@ -182,6 +178,7 @@ int pathLoad (char *file, pScene sc) {
 
 	if (!quiet) fprintf(stdout, "  Loading %s\n", data);
 
+	fclose(in);
 	return (1);
 }
 
@@ -189,7 +186,6 @@ int pathSave (char *file, pScene sc) {
 	FILE *out;
 	pMesh mesh;
 	time_t timeptr;
-	float *p;
 	int i, k;
 	char *ptr, data[256];
 
@@ -219,10 +215,13 @@ int pathSave (char *file, pScene sc) {
 	fprintf(out, "NbPoints\n%d\n", sc->path.np);
 
 	for (k = 1; k <= sc->path.np; k++) {
+		float *p;
+		
 		p = &sc->path.pt[mesh->dim * k];
 
-		for (i = 0; i < mesh->dim; i++)
+		for (i = 0; i < mesh->dim; i++) {
 			fprintf(out, "%f ", p[i]);
+		}
 
 		fprintf(out, "\n");
 	}
@@ -230,4 +229,3 @@ int pathSave (char *file, pScene sc) {
 	fclose(out);
 	return (1);
 }
-

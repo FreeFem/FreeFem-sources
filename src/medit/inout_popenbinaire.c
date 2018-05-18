@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "libmesh5.h"
@@ -46,8 +47,9 @@ void getline_bin_float_vertex (int ddim, double *c, int *ref) {
 void getline_bin_double_vertex (int ddim, double *c, int *ref) {
 	int i;
 
-	for (i = 0; i < ddim; i++)
+	for (i = 0; i < ddim; i++) {
 		fread((unsigned char *)&(c[i]), WrdSiz, 2, stdin);
+	}
 
 	fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
 }
@@ -55,8 +57,9 @@ void getline_bin_double_vertex (int ddim, double *c, int *ref) {
 void getline_bin_elem (int ddim, int *v, int *ref) {
 	int i;
 
-	for (i = 0; i < ddim; i++)
+	for (i = 0; i < ddim; i++) {
 		fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+	}
 
 	fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
 }
@@ -70,8 +73,9 @@ void getline_bin_edge (int *v0, int *v1, int *ref) {
 void getline_bin_int_noref (int ddim, int *v) {
 	int i;
 
-	for (i = 0; i < ddim; i++)
+	for (i = 0; i < ddim; i++) {
 		fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+	}
 }
 
 void getline_bin_float_noref (int ddim, double *v) {
@@ -89,16 +93,15 @@ void getline_bin_float_noref (int ddim, double *v) {
 void getline_bin_double_noref (int ddim, double *v) {
 	int i;
 
-	for (i = 0; i < ddim; i++)
+	for (i = 0; i < ddim; i++) {
 		fread((unsigned char *)&(v[i]), WrdSiz, 2, stdin);
+	}
 }
 
 /**********************************/
 /*   function for loadsol_popen   */
 
 void read_TypeSizeTyptab_bin (int *type, int *size, int *typtab) {
-	char data[256];
-	char *tictac;
 	int i;
 	int tmptype;
 	int tmpsize;
@@ -372,9 +375,9 @@ int loadMesh_popen_bin (pMesh mesh) {
 			for (k = 1; k <= mesh->nc; k++) {
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
 				// fgets(data,256,stdin);  tictac = strtok(data," \n");  is = atoi(tictac);
-				if (is < 1 || is > mesh->np)
+				if (is < 1 || is > mesh->np) {
 					disc++;
-				else {
+				} else {
 					ppt = &mesh->point[is];
 					ppt->tag |= M_CORNER;
 					ppt->tag &= ~M_UNUSED;
@@ -389,9 +392,9 @@ int loadMesh_popen_bin (pMesh mesh) {
 			for (k = 1; k <= mesh->nr; k++) {
 				// fgets(data,256,stdin);  tictac = strtok(data," \n");  is = atoi(tictac);
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
-				if (is < 1 || is > mesh->np)
+				if (is < 1 || is > mesh->np) {
 					disc++;
-				else {
+				} else {
 					ppt = &mesh->point[is];
 					ppt->tag |= M_REQUIRED;
 					ppt->tag &= ~M_UNUSED;
@@ -414,9 +417,9 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			for (k = 1; k <= mesh->na; k++) {
 				getline_bin_edge(&ia, &ib, &ref);
-				if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np)
+				if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np) {
 					disc++;
-				else {
+				} else {
 					pr = &mesh->edge[k];
 					pr->v[0] = ia;
 					pr->v[1] = ib;
@@ -437,9 +440,9 @@ int loadMesh_popen_bin (pMesh mesh) {
 			for (k = 1; k <= mesh->nri; k++) {
 				// getline_1int( natureread, &is);
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
-				if (is < 1 || is > mesh->na)
+				if (is < 1 || is > mesh->na) {
 					disc++;
-				else {
+				} else {
 					pr = &mesh->edge[is];
 					pr->tag |= M_RIDGE;
 				}
@@ -453,9 +456,9 @@ int loadMesh_popen_bin (pMesh mesh) {
 			for (k = 2; k <= mesh->nre; k++) {
 				// getline_1int( natureread, &is);
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
-				if (is < 1 || is > mesh->na)
+				if (is < 1 || is > mesh->na) {
 					disc++;
-				else {
+				} else {
 					pr = &mesh->edge[is];
 					pr->tag |= M_REQUIRED;
 				}
@@ -801,10 +804,10 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 			mesh->sol[k].bb = 0.0;
 			getline_bin_double_noref(sol->dim, VecSol);
 
-			for (i = 0; i < sol->dim; i++)
+			for (i = 0; i < sol->dim; i++) {
 				fbuf[off + i] = VecSol[i];
 				// printf("solution vectorielle %i composante %i %f\n",k,i,VecSol[i]);
-
+			}
 
 			for (i = 0; i < sol->dim; i++) {
 				mesh->sol[k].m[i] = fbuf[off + i];
@@ -829,12 +832,14 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 			// reading data must be double !!!
 			getline_bin_double_noref(sol->dim * (sol->dim + 1) / 2, TenSol);
 
-			for (i = 0; i < sol->dim * (sol->dim + 1) / 2; i++)
+			for (i = 0; i < sol->dim * (sol->dim + 1) / 2; i++) {
 				fbuf[off + i] = TenSol[i];
+			}
 
 			if (sol->dim == 2) {
-				for (i = 0; i < 3; i++)
+				for (i = 0; i < 3; i++) {
 					mesh->sol[k].m[i] = m[i] = fbuf[off + i];
+				}
 
 				iord = eigen2(m, lambda, vp);
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
@@ -842,13 +847,16 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 
 				if (mesh->sol[k].bb > mesh->bbmax) mesh->bbmax = mesh->sol[k].bb;
 			} else {
-				for (i = 0; i < 6; i++)
+				for (i = 0; i < 6; i++) {
 					mesh->sol[k].m[i] = fbuf[off + i];
+				}
 
 				mesh->sol[k].m[2] = fbuf[off + 3];
 				mesh->sol[k].m[3] = fbuf[off + 2];
 
-				for (i = 0; i < 6; i++) m[i] = mesh->sol[k].m[i];
+				for (i = 0; i < 6; i++) {
+					m[i] = mesh->sol[k].m[i];
+				}
 
 				iord = eigenv(1, m, lambda, eigv);
 				if (iord) {
@@ -946,7 +954,7 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 			loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
 		}
 
-		if (mesh->dim == 2 && mesh->nt)
+		if (mesh->dim == 2 && mesh->nt) {
 			if (KwdCod == GmfSolAtTriangles) {
 				natureread = "SolAtTriangles";
 				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
@@ -970,8 +978,9 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
 			}
+		}
 
-		if (mesh->dim == 2 && mesh->nq)
+		if (mesh->dim == 2 && mesh->nq) {
 			if (KwdCod == GmfSolAtQuadrilaterals) {
 				natureread = "SolAtQuadrilaterals";
 				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
@@ -994,8 +1003,9 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
 			}
+		}
 
-		if (mesh->dim == 3 && mesh->ntet)
+		if (mesh->dim == 3 && mesh->ntet) {
 			if (KwdCod == GmfSolAtTetrahedra) {
 				natureread = "SolAtTetrahedra";
 				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
@@ -1018,8 +1028,9 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions */
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
 			}
+		}
 
-		if (mesh->dim == 3 && mesh->nhex)
+		if (mesh->dim == 3 && mesh->nhex) {
 			if (KwdCod == GmfSolAtHexahedra) {
 				natureread = "SolAtHexahedra";
 				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
@@ -1043,6 +1054,7 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 				/* Reading solutions*/
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
 			}
+		}
 
 		if (KwdCod == GmfEnd) {
 			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
@@ -1061,4 +1073,3 @@ Lret:
 #endif
 	return (retcode);
 }
-

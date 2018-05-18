@@ -14,19 +14,19 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 
 int EatLine (FILE *in) {
-	int k;
-	int c;
+	int k, c;
 
 	k = 0;
 
@@ -39,9 +39,7 @@ int EatLine (FILE *in) {
 }
 
 int EatSpace (FILE *in) {
-	int k;
-	int c;
-	int ret = 0;
+	int k, c, ret = 0;
 
 	k = 0;
 
@@ -61,28 +59,10 @@ int EatSpace (FILE *in) {
 int bbfile (pMesh mesh) {
 	FILE *in;
 	pSolution ps;
-	double a;
-	double b;
-	double c;
-	double lambda[3];
-	double eigv[3][3];
-	double m[6];
-	double vp[2][2];
+	double a, b, c, lambda[3], eigv[3][3], m[6], vp[2][2];
 	float dummy;
-	int j;
-	int k;
-	int l;
-	int dim;
-	int np;
-	int nf;
-	int i1;
-	int i2;
-	int i3;
-	int err;
-	int iord;
-	char *ptr;
-	char data[128];
-	char tmp[128];
+	int j, k, l, dim, np, nf, i1, i2, i3, err, iord;
+	char *ptr, data[128], tmp[128];
 	ubyte bigbb;
 
 	/* default */
@@ -141,7 +121,7 @@ int bbfile (pMesh mesh) {
 
 	if (bigbb) {
 		int nfield;
-		
+
 		/* get only 1st field */
 		/* fscanf(in,"%d",&nfield);*/
 		nfield = i1;
@@ -156,8 +136,9 @@ int bbfile (pMesh mesh) {
 			}
 
 			fscanf(in, "%d", &np);
-		} else
+		} else {
 			np = i3;
+		}
 
 		/* read file type */
 		fscanf(in, "%d", &mesh->typage);
@@ -212,7 +193,7 @@ int bbfile (pMesh mesh) {
 		for (k = 1; k <= mesh->nbb; k++) {
 			ps = &mesh->sol[k];
 			ps->bb = 0.0;
-			if (fscanf(in, "%128s", data) != 1) continue;
+			if (fscanf(in, "%127s", data) != 1) continue;
 
 			if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 
@@ -221,7 +202,9 @@ int bbfile (pMesh mesh) {
 
 			if (ps->bb > mesh->bbmax) mesh->bbmax = ps->bb;
 
-			for (j = 1; j <= nf; j++) fscanf(in, "%f", &dummy);
+			for (j = 1; j <= nf; j++) {
+				fscanf(in, "%f", &dummy);
+			}
 		}
 	}
 	/* vector field */
@@ -233,7 +216,7 @@ int bbfile (pMesh mesh) {
 			ps->bb = 0.0;
 
 			for (l = 0; l < mesh->dim; l++) {
-				if (fscanf(in, "%s", data) != 1) continue;
+				if (fscanf(in, "%127s", data) != 1) continue;
 
 				if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 
@@ -247,7 +230,9 @@ int bbfile (pMesh mesh) {
 			if (ps->bb > mesh->bbmax)
 				mesh->bbmax = ps->bb;
 
-			for (j = 1; j < nf; j++) fscanf(in, "%f", &dummy);
+			for (j = 1; j < nf; j++) {
+				fscanf(in, "%f", &dummy);
+			}
 		}
 
 		fclose(in);
@@ -270,7 +255,9 @@ int bbfile (pMesh mesh) {
 
 			if (ps->bb > mesh->bbmax) mesh->bbmax = ps->bb;
 
-			for (j = 1; j < nf; j++) fscanf(in, "%f", &dummy);
+			for (j = 1; j < nf; j++) {
+				fscanf(in, "%f", &dummy);
+			}
 		}
 	} else if (dim == 3 && mesh->nfield == 6) {
 		if (ddebug) fprintf(stdout, "   3D metric field\n");
@@ -280,7 +267,7 @@ int bbfile (pMesh mesh) {
 			ps->bb = 0.0f;
 
 			for (l = 0; l < 6; l++) {
-				if (fscanf(in, "%s", data) != 1) continue;
+				if (fscanf(in, "%127s", data) != 1) continue;
 
 				if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 
@@ -305,10 +292,13 @@ int bbfile (pMesh mesh) {
 				if (ps->bb < mesh->bbmin) mesh->bbmin = ps->bb;
 
 				if (ps->bb > mesh->bbmax) mesh->bbmax = ps->bb;
-			} else
+			} else {
 				fprintf(stdout, "  ## Eigenvalue problem.\n");
+			}
 
-			for (j = 1; j < nf; j++) fscanf(in, "%f", &dummy);
+			for (j = 1; j < nf; j++) {
+				fscanf(in, "%f", &dummy);
+			}
 		}
 	} else {
 		fprintf(stderr, " %%%% Solution not suitable. Ignored\n");
@@ -318,4 +308,3 @@ int bbfile (pMesh mesh) {
 	fclose(in);
 	return (np);
 }
-

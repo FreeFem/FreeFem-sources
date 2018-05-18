@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -39,8 +40,7 @@ typedef struct saddle {
 static int idir[5] = {0, 1, 2, 0, 1};
 
 int closedBall (pMesh mesh, int depart, ubyte i) {
-	int adj;
-	int iadr;
+	int adj, iadr;
 	ubyte voy;
 
 	voy = idir[i + 1];
@@ -60,45 +60,15 @@ int closedBall (pMesh mesh, int depart, ubyte i) {
 
 GLuint listCritPoint (pScene sc, pMesh mesh) {
 	pTriangle pt;
-	pPoint p0;
-	pPoint p1;
-	pPoint p2;
-	pSolution s0;
-	pSolution s1;
-	pSolution s2;
+	pPoint p0, p1, p2;
+	pSolution s0, s1, s2;
 	pMaterial pm;
 	Saddle sad[MAXPS];
 	GLuint dlist;
-	double aire;
-	double ux;
-	double uy;
-	double vx;
-	double vy;
-	double dd;
-	double cb0[3];
-	double cb1[3];
-	double cb2[3];
-	double vv[3][2];
-	double bc[3];
-	double rgb[3];
-	double a0;
-	double a1;
-	double delta;
-	double rr1;
-	double rr2;
-	double aa;
-	double dmin;
+	double aire, ux, uy, vx, vy, dd, cb0[3], cb1[3], cb2[3], vv[3][2], bc[3];
+	double rgb[3], a0, a1, delta, rr1, rr2, aa, dmin;
 	float p[3];
-	int *adj;
-	int iadr;
-	int i;
-	int i1;
-	int i2;
-	int k;
-	int m;
-	int ncp;
-	int ps;
-	int ifilt;
+	int *adj, iadr, i, i1, i2, k, m, ncp, ps, ifilt;
 	ubyte typ, tag;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
@@ -204,7 +174,9 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 			/* filtering boundary points */
 			tag = 0;
 
-			for (i = 0; i < 3; i++) tag |= (bc[i] < EPS3) << i;
+			for (i = 0; i < 3; i++) {
+				tag |= (bc[i] < EPS3) << i;
+			}
 
 			if (tag) {
 				iadr = 3 * (k - 1) + 1;
@@ -284,11 +256,11 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 					output2(p[0], p[1], "Af");	/* attracting focus */
 			} else if (!i1 && !i2) {
 				glColor3f(1.0, 0.5, 0.0);
-				if (rr1 > 0.0f && rr2 > 0.0f)
+				if (rr1 > 0.0f && rr2 > 0.0f) {
 					output2(p[0], p[1], "Rn");	/* repelling node */
-				else if (rr1 < 0.0f && rr2 < 0.0f)
+				} else if (rr1 < 0.0f && rr2 < 0.0f) {
 					output2(p[0], p[1], "An");	/* attracting node */
-				else if (rr1 * rr2 < 0.0f) {
+				} else if (rr1 * rr2 < 0.0f) {
 					output2(p[0], p[1], "Sp");	/* Saddle point */
 					if (ddebug)
 						printf("  saddle point %f %f\n", p[0] + mesh->xtra, p[1] + mesh->ytra);
@@ -340,6 +312,7 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 
 	if (ps) {
 		time_t t;
+
 		fprintf(stdout, " Building streamline(s)");
 		fflush(stdout);
 		t = clock();

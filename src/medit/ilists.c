@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -103,9 +104,9 @@ GLuint listTriaIso (pScene sc, pMesh mesh) {
 						cx = p0->c[0] + cc * (p1->c[0] - p0->c[0]);
 						cy = p0->c[1] + cc * (p1->c[1] - p0->c[1]);
 						nc++;
-						if (mesh->dim == 2)
+						if (mesh->dim == 2) {
 							glVertex2f(cx, cy);
-						else {
+						} else {
 							cz = p0->c[2] + cc * (p1->c[2] - p0->c[2]);
 							glVertex3f(cx, cy, cz);
 						}
@@ -210,9 +211,9 @@ GLuint listQuadIso (pScene sc, pMesh mesh) {
 
 						cx = p0->c[0] + cc * (p1->c[0] - p0->c[0]);
 						cy = p0->c[1] + cc * (p1->c[1] - p0->c[1]);
-						if (mesh->dim == 2)
+						if (mesh->dim == 2) {
 							glVertex2f(cx, cy);
-						else {
+						} else {
 							cz = p0->c[2] + cc * (p1->c[2] - p0->c[2]);
 							glVertex3f(cx, cy, cz);
 						}
@@ -238,7 +239,7 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double delta, rgb[4], d, ax, ay, az, bx, by, bz;
-	float iso, n[3], cx[4], cy[4], cz[4], cc;
+	float n[3], cx[4], cy[4], cz[4], cc;
 	int m, k, k1, k2, i, l, pos[4], neg[4], nbpos, nbneg, nbnul, nv, nf;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 	static int tn[4] = {0, 0, 1, 1};
@@ -275,6 +276,8 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 	glBegin(GL_TRIANGLES);
 
 	for (i = MAXISO - 1; i >= 0; i--) {
+		float iso;
+
 		iso = sc->iso.val[i];
 
 		/* base color */
@@ -455,9 +458,9 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double delta;
-	float iso, cx[4], cy[4], cz[4], cc;
+	float cx[4], cy[4], cz[4], cc;
 	int m, k, k1, k2, i, l, pos[4], neg[4], nbpos, nbneg, nbnul;
-	char *ptr, data[128];
+	char data[128];
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 
@@ -471,8 +474,6 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 	delta = sc->iso.val[MAXISO - 1] - sc->iso.val[0];
 
 	strcpy(data, mesh->name);
-	ptr = strstr(data, ".mesh");
-	if (ptr) ptr = '\0';
 
 	strcat(data, ".pov");
 	if (ddebug) fprintf(stdout, "  Writing POVRay file %s\n", data);
@@ -481,6 +482,8 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 	if (!isofil) return (0);
 
 	for (i = MAXISO - 1; i >= 0; i--) {
+		float iso;
+		
 		iso = sc->iso.val[i];
 
 		if (i == MAXISO - 1) iso -= 0.001 * fabs(iso) / delta;
@@ -588,4 +591,3 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 	fclose(isofil);
 	return (1);
 }
-

@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "libmesh5.h"
@@ -216,9 +217,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->nc; k++) {
 		GmfGetLin(inm, GmfCorners, &is);
-		if (is < 1 || is > mesh->np)
+		if (is < 1 || is > mesh->np) {
 			disc++;
-		else {
+		} else {
 			ppt = &mesh->point[is];
 			ppt->tag |= M_CORNER;
 			ppt->tag &= ~M_UNUSED;
@@ -230,9 +231,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->nr; k++) {
 		GmfGetLin(inm, GmfRequiredVertices, &is);
-		if (is < 1 || is > mesh->np)
+		if (is < 1 || is > mesh->np) {
 			disc++;
-		else {
+		} else {
 			ppt = &mesh->point[is];
 			ppt->tag |= M_REQUIRED;
 			ppt->tag &= ~M_UNUSED;
@@ -244,9 +245,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->na; k++) {
 		GmfGetLin(inm, GmfEdges, &ia, &ib, &ref);
-		if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np)
+		if (ia < 1 || ia > mesh->np || ib < 1 || ib > mesh->np) {
 			disc++;
-		else {
+		} else {
 			pr = &mesh->edge[k];
 			pr->v[0] = ia;
 			pr->v[1] = ib;
@@ -264,9 +265,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->nri; k++) {
 		GmfGetLin(inm, GmfRidges, &is);
-		if (is < 1 || is > mesh->na)
+		if (is < 1 || is > mesh->na) {
 			disc++;
-		else {
+		} else {
 			pr = &mesh->edge[is];
 			pr->tag |= M_RIDGE;
 		}
@@ -277,9 +278,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->nre; k++) {
 		GmfGetLin(inm, GmfRequiredEdges, &is);
-		if (is < 1 || is > mesh->na)
+		if (is < 1 || is > mesh->na) {
 			disc++;
-		else {
+		} else {
 			pr = &mesh->edge[is];
 			pr->tag |= M_REQUIRED;
 		}
@@ -290,9 +291,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->nvn; k++) {
 		n = &mesh->extra->n[3 * (k - 1) + 1];
-		if (mesh->ver == GmfFloat)
+		if (mesh->ver == GmfFloat) {
 			GmfGetLin(inm, GmfNormals, &n[0], &n[1], &n[2]);
-		else {
+		} else {
 			GmfGetLin(inm, GmfNormals, &dn[0], &dn[1], &dn[2]);
 			n[0] = dn[0];
 			n[1] = dn[1];
@@ -357,9 +358,9 @@ int loadMesh (pMesh mesh) {
 
 	for (k = 1; k <= mesh->ntg; k++) {
 		n = &mesh->extra->t[3 * (k - 1) + 1];
-		if (mesh->ver == GmfFloat)
+		if (mesh->ver == GmfFloat) {
 			GmfGetLin(inm, GmfTangents, &n[0], &n[1], &n[2]);
-		else {
+		} else {
 			GmfGetLin(inm, GmfTangents, &dn[0], &dn[1], &dn[2]);
 			n[0] = dn[0];
 			n[1] = dn[1];
@@ -414,8 +415,6 @@ int loadMesh (pMesh mesh) {
 
 /*mark clipped elements */
 static int markPt (pMesh mesh) {
-	pTriangle pt;
-	pQuad pq;
 	pPoint ppt;
 	int i, k, pos, neg, nul;
 
@@ -427,6 +426,8 @@ static int markPt (pMesh mesh) {
 	}
 
 	for (k = 1; k <= mesh->nt; k++) {
+		pTriangle pt;
+
 		pt = &mesh->tria[k];
 		if (!pt->v[0]) continue;
 
@@ -439,14 +440,17 @@ static int markPt (pMesh mesh) {
 			else nul++;
 		}
 
-		if (pos && pos + nul < 4)
+		if (pos && pos + nul < 4) {
 			for (i = 0; i < 3; i++) {
 				ppt = &mesh->point[pt->v[i]];
 				ppt->tmp = 1;
 			}
+		}
 	}
 
 	for (k = 1; k <= mesh->nq; k++) {
+		pQuad pq;
+
 		pq = &mesh->quad[k];
 		if (!pq->v[0]) continue;
 
@@ -459,11 +463,12 @@ static int markPt (pMesh mesh) {
 			else nul++;
 		}
 
-		if (pos && pos + nul < 5)
+		if (pos && pos + nul < 5) {
 			for (i = 0; i < 4; i++) {
 				ppt = &mesh->point[pq->v[i]];
 				ppt->tmp = 1;
 			}
+		}
 	}
 
 	return (1);
@@ -532,8 +537,8 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		pm = &sc->material[m];
 		if (pm->flag) continue;
 
-		for (i = 0; i < 3; i++)
-			if (!mesh->point[pt->v[i]].tmp) break;
+		for (i = 0; i < 3; i++) {
+			if (!mesh->point[pt->v[i]].tmp) break; }
 
 		if (i == 3) nt++;
 	}
@@ -548,8 +553,8 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		pm = &sc->material[m];
 		if (pm->flag) continue;
 
-		for (i = 0; i < 3; i++)
-			if (!mesh->point[pt->v[i]].tmp) break;
+		for (i = 0; i < 3; i++) {
+			if (!mesh->point[pt->v[i]].tmp) break; }
 
 		if (i < 3) continue;
 
@@ -569,8 +574,8 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		pm = &sc->material[m];
 		if (pm->flag) continue;
 
-		for (i = 0; i < 4; i++)
-			if (!mesh->point[pq->v[i]].tmp) break;
+		for (i = 0; i < 4; i++) {
+			if (!mesh->point[pq->v[i]].tmp) break; }
 
 		if (i == 4) nq++;
 	}
@@ -585,8 +590,8 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		pm = &sc->material[m];
 		if (pm->flag) continue;
 
-		for (i = 0; i < 4; i++)
-			if (!mesh->point[pq->v[i]].tmp) break;
+		for (i = 0; i < 4; i++) {
+			if (!mesh->point[pq->v[i]].tmp) break; }
 
 		if (i < 4) continue;
 
@@ -606,8 +611,8 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		pm = &sc->material[m];
 		if (pm->flag) continue;
 
-		for (i = 0; i < 4; i++)
-			if (!mesh->point[ptt->v[i]].tmp) break;
+		for (i = 0; i < 4; i++) {
+			if (!mesh->point[ptt->v[i]].tmp) break; }
 
 		if (i < 4) continue;
 
@@ -757,13 +762,14 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 		mesh->nfield = 1;
 
 		for (k = 1; k <= nel; k++) {
-			if (sol->ver == GmfFloat)
+			if (sol->ver == GmfFloat) {
 				GmfGetLin(inm, key, fbuf);
-			else {
+			} else {
 				GmfGetLin(inm, key, dbuf);
 
-				for (i = 0; i < GmfMaxTyp; i++)
+				for (i = 0; i < GmfMaxTyp; i++) {
 					fbuf[i] = dbuf[off + i];
+				}
 			}
 
 			mesh->sol[k].bb = fbuf[off];
@@ -783,13 +789,14 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 
 		for (k = 1; k <= nel; k++) {
 			mesh->sol[k].bb = 0.0;
-			if (sol->ver == GmfFloat)
+			if (sol->ver == GmfFloat) {
 				GmfGetLin(inm, key, fbuf);
-			else {
+			} else {
 				GmfGetLin(inm, key, dbuf);
 
-				for (i = 0; i < GmfMaxTyp; i++)
+				for (i = 0; i < GmfMaxTyp; i++) {
 					fbuf[i] = dbuf[off + i];
+				}
 			}
 
 			for (i = 0; i < sol->dim; i++) {
@@ -813,18 +820,20 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 		mesh->nfield = sol->dim * (sol->dim + 1) / 2;
 
 		for (k = 1; k <= nel; k++) {
-			if (sol->ver == GmfFloat)
+			if (sol->ver == GmfFloat) {
 				GmfGetLin(inm, key, fbuf);
-			else {
+			} else {
 				GmfGetLin(inm, key, dbuf);
 
-				for (i = 0; i < GmfMaxTyp; i++)
+				for (i = 0; i < GmfMaxTyp; i++) {
 					fbuf[i] = dbuf[off + i];
+				}
 			}
 
 			if (sol->dim == 2) {
-				for (i = 0; i < 3; i++)
+				for (i = 0; i < 3; i++) {
 					mesh->sol[k].m[i] = m[i] = fbuf[off + i];
+				}
 
 				iord = eigen2(m, lambda, vp);
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
@@ -832,13 +841,16 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 
 				if (mesh->sol[k].bb > mesh->bbmax) mesh->bbmax = mesh->sol[k].bb;
 			} else {
-				for (i = 0; i < 6; i++)
+				for (i = 0; i < 6; i++) {
 					mesh->sol[k].m[i] = fbuf[off + i];
+				}
 
 				mesh->sol[k].m[2] = fbuf[off + 3];
 				mesh->sol[k].m[3] = fbuf[off + 2];
 
-				for (i = 0; i < 6; i++) m[i] = mesh->sol[k].m[i];
+				for (i = 0; i < 6; i++) {
+					m[i] = mesh->sol[k].m[i];
+				}
 
 				iord = eigenv(1, m, lambda, eigv);
 				if (iord) {
@@ -858,4 +870,3 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	GmfCloseMesh(inm);
 	return (1);
 }
-

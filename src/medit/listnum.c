@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -49,11 +50,12 @@ void updatePoints (pScene sc, pMesh mesh, int refmat) {
 
 		while (k > 0) {
 			pt = &mesh->tria[k];
-			if (pt->v[0])
+			if (pt->v[0]) {
 				for (i = 0; i < 3; i++) {
 					ppt = &mesh->point[pt->v[i]];
 					ppt->tag &= ~M_UNUSED;
 				}
+			}
 
 			k = pt->nxt;
 		}
@@ -63,11 +65,12 @@ void updatePoints (pScene sc, pMesh mesh, int refmat) {
 
 		while (k > 0) {
 			pq = &mesh->quad[k];
-			if (pq->v[0])
+			if (pq->v[0]) {
 				for (i = 0; i < 4; i++) {
 					ppt = &mesh->point[pq->v[i]];
 					ppt->tag &= ~M_UNUSED;
 				}
+			}
 
 			k = pq->nxt;
 		}
@@ -77,11 +80,12 @@ void updatePoints (pScene sc, pMesh mesh, int refmat) {
 
 		while (k > 0) {
 			ptet = &mesh->tetra[k];
-			if (ptet->v[0])
+			if (ptet->v[0]) {
 				for (i = 0; i < 4; i++) {
 					ppt = &mesh->point[ptet->v[i]];
 					ppt->tag &= ~M_UNUSED;
 				}
+			}
 
 			k = ptet->nxt;
 		}
@@ -91,11 +95,12 @@ void updatePoints (pScene sc, pMesh mesh, int refmat) {
 
 		while (k > 0) {
 			ph = &mesh->hexa[k];
-			if (ph->v[0])
+			if (ph->v[0]) {
 				for (i = 0; i < 8; i++) {
 					ppt = &mesh->point[ph->v[i]];
 					ppt->tag &= ~M_UNUSED;
 				}
+			}
 
 			k = ph->nxt;
 		}
@@ -107,13 +112,11 @@ void listNum (pScene sc, pMesh mesh) {
 	pPoint ppt;
 	pTriangle pt;
 	pQuad pq;
-	double cx, cy, cz;
-	int k, i, m;
+	int k, m;
 
 	glDisable(GL_LIGHTING);
 	/* point numbers */
-	if (sc->item & S_NUMP)
-
+	if (sc->item & S_NUMP) {
 		for (k = 1; k <= mesh->np; k++) {
 			ppt = &mesh->point[k];
 			if (ppt->tag == M_UNUSED) continue;
@@ -122,17 +125,22 @@ void listNum (pScene sc, pMesh mesh) {
 				m = matRef(sc, ppt->ref);
 				pm = &sc->material[m];
 				glColor3f(pm->dif[0], pm->dif[1], pm->dif[2]);
-			} else
+			} else {
 				glColor3fv(sc->par.line);
+			}
 
 			output3(ppt->c[0], ppt->c[1], ppt->c[2], "%d", k);
 		}
+	}
 
 	/* facets numbers */
 	if (sc->item & S_NUMF) {
 		glColor4fv(sc->par.line);
 
 		for (m = 0; m < sc->par.nbmat; m++) {
+			double cx, cy, cz;
+			int i;
+
 			pm = &sc->material[m];
 			if (pm->flag) continue;
 
@@ -180,4 +188,3 @@ void listNum (pScene sc, pMesh mesh) {
 		}
 	}
 }
-

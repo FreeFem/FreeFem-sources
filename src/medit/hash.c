@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -70,8 +71,9 @@ int hashTetra (pMesh mesh) {
 	/* init */
 	inival = 2 << 30;
 
-	for (k = 0; k <= mesh->ntet; k++)
+	for (k = 0; k <= mesh->ntet; k++) {
 		hcode[k] = -inival;
+	}
 
 	/* build hash table */
 	for (k = 1; k <= mesh->ntet; k++) {
@@ -210,8 +212,9 @@ int hashHexa (pMesh mesh) {
 	/* init */
 	inival = 2 << 30;
 
-	for (k = 0; k <= 6 * mesh->nhex / 4; k++)
+	for (k = 0; k <= 6 * mesh->nhex / 4; k++) {
 		hcode[k] = -inival;
+	}
 
 	/* build hash table */
 	for (k = 1; k <= mesh->nhex; k++) {
@@ -222,11 +225,12 @@ int hashHexa (pMesh mesh) {
 			mins = ph->v[ch[i][0]];
 			imin = 0;
 
-			for (v = 1; v < 4; v++)
+			for (v = 1; v < 4; v++) {
 				if (ph->v[ch[i][v]] < mins) {
 					mins = ph->v[ch[i][v]];
 					imin = v;
 				}
+			}
 
 			i1 = (imin + 2) % 4;
 			opps = ph->v[ch[i][i1]];
@@ -257,11 +261,12 @@ int hashHexa (pMesh mesh) {
 		mins = ph->v[ch[i][0]];
 		imin = 0;
 
-		for (v = 1; v < 4; v++)
+		for (v = 1; v < 4; v++) {
 			if (ph->v[ch[i][v]] < mins) {
 				mins = ph->v[ch[i][v]];
 				imin = v;
 			}
+		}
 
 		i1 = (imin + 2) % 4;
 		opps = ph->v[ch[i][i1]];
@@ -279,11 +284,12 @@ int hashHexa (pMesh mesh) {
 			mins1 = ph1->v[ch[ii][0]];
 			imin = 0;
 
-			for (v = 1; v < 4; v++)
+			for (v = 1; v < 4; v++) {
 				if (ph1->v[ch[ii][v]] < mins1) {
 					mins1 = ph1->v[ch[ii][v]];
 					imin = v;
 				}
+			}
 
 			i1 = (imin + 2) % 4;
 			opps1 = ph1->v[ch[ii][i1]];
@@ -344,8 +350,9 @@ int hashTria (pMesh mesh) {
 	/* init */
 	inival = 2 << 30;
 
-	for (k = 0; k <= 3 * mesh->nt / 4; k++)
+	for (k = 0; k <= 3 * mesh->nt / 4; k++) {
 		hcode[k] = -inival;
+	}
 
 	/* build hash table */
 	for (k = 1; k <= mesh->nt; k++) {
@@ -426,4 +433,3 @@ int hashTria (pMesh mesh) {
 
 	return (1);
 }
-

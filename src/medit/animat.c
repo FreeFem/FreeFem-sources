@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -64,10 +65,11 @@ static int getmesh (pMesh mesh, int range) {
 	if (mesh->sol && mesh->nbb) {
 		if ((mesh->dim == 2 && mesh->nfield == 3) || (mesh->dim == 3 && mesh->nfield == 6)) {
 			int k;
-			for (k = 1; k <= mesh->nbb; k++)
+			for (k = 1; k <= mesh->nbb; k++) {
 				free(mesh->sol[k].m);
+			}
 		}
-		
+
 		M_free(mesh->sol);
 		mesh->sol = (void *)0;
 	}
@@ -84,12 +86,10 @@ static int getmesh (pMesh mesh, int range) {
 	mesh->ntet = mesh->nhex = mesh->nbb = 0;
 
 	if (animdep == range) {
-		char data[256];
-		char *ptr;
-		
+		/*char *ptr, data[256];
 		sprintf(data, ".%d", range);
 		ptr = (char *)strstr(mesh->name, data);
-		if (ptr) *ptr = '\0';
+		if (ptr) *ptr = '\0';*/
 
 		strcpy(base, mesh->name);
 	}
@@ -160,9 +160,7 @@ int loadNextMesh (pMesh mesh, int k, int parse) {
 
 int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 	int k;
-	char *ptr;
-	char data[256];
-	char base[256];
+	char *ptr, data[256], base[256];
 
 	/* get basename */
 	sprintf(data, ".%d", deb);
@@ -218,9 +216,7 @@ int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 
 int animParticle (pScene sc, pMesh mesh) {
 	int cur;
-	char *ptr;
-	char data[256];
-	char base[256];
+	char *ptr, data[256], base[256];
 
 	/* get basename */
 	strcpy(base, mesh->name);
@@ -261,7 +257,7 @@ int animat () {
 		
 		fprintf(stdout, "  File name(s) missing. Please enter : ");
 		fflush(stdout);
-		fflush(stdin);
+		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 		fgets(data, 120, stdin);
 		if (!strlen(data)) {
 			fprintf(stdout, "  ## Error\n");
@@ -270,7 +266,7 @@ int animat () {
 
 		fprintf(stdout, "  Enter range [start,end] :");
 		fflush(stdout);
-		fflush(stdin);	//TODO: replace bay `while(fgetc(stdin)!=EOF);` ?
+		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 		fscanf(stdin, "%d %d", &animdep, &animfin);
 
 		/* parse file name(s) */
@@ -306,4 +302,3 @@ int animat () {
 	quiet = 1;
 	return (1);
 }
-

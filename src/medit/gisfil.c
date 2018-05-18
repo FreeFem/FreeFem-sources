@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -33,7 +34,7 @@ int loadGIS (pMesh mesh) {
 	FILE *fp;
 	double xxm, yym, ggx, ggy, hhz;
 	float *te, cx, cy, cz, gu, hu, xmi, ymi;
-	int i, j, k, sx, sy, ni, ret, bitsize, pos, ref;
+	int i, j, k, sx, sy, ret, bitsize, pos, ref;
 	char *ptr, c, buf[256], data[256];
 	ubyte ityp;
 
@@ -56,8 +57,9 @@ int loadGIS (pMesh mesh) {
 	/* remove leading spaces */
 	pos = 0;
 
-	while ((buf[0] == ' ') && (buf[0] != 0x0d) && (buf[0] != 0x0a))
+	while ((buf[0] == ' ') && (buf[0] != 0x0d) && (buf[0] != 0x0a)) {
 		memmove(&buf[0], &buf[1], strlen(buf));
+	}
 
 	/* check header file */
 	if (buf[0] != 'G') {
@@ -66,9 +68,7 @@ int loadGIS (pMesh mesh) {
 		return (0);
 	}
 
-	if (buf[1] == '1') ityp = 1;
-	else if (buf[1] == '2') ityp = 2;
-	else {
+	if (buf[1] == '1') {ityp = 1;} else if (buf[1] == '2') {ityp = 2;} else {
 		fprintf(stderr, "  ## Invalid format ('G?' expected).\n");
 		fclose(fp);
 		return (0);
@@ -76,13 +76,13 @@ int loadGIS (pMesh mesh) {
 
 	/* check and strip comments */
 	do {
-		ret = fscanf(fp, "%s", buf);
+		ret = fscanf(fp, "%255s", buf);
 		if (ret == EOF) break;
 
 		if (buf[0] == '#')
-			do
+			do {
 				c = getc(fp);
-			while (c != '\n');
+			} while (c != '\n');
 
 		else break;
 	} while (1);
@@ -97,7 +97,6 @@ int loadGIS (pMesh mesh) {
 	if (ret != 9) {
 		fprintf(stderr, "  ## Error loading terrain.\n");
 		free(mesh);
-		fclose(fp);
 		return (0);
 	}
 
@@ -129,16 +128,19 @@ int loadGIS (pMesh mesh) {
 		ggy = gu * cy;
 		hhz = hu * cz;
 
-		for (j = 1; j <= sy; j++)
+		for (j = 1; j <= sy; j++) {
 			for (i = 1; i <= sx; i++) {
 				k = (j - 1) * sx + i;
 				ppt = &mesh->point[k];
-				fscanf(fp, "%f", &ppt->c[2]);
+				fscanf(fp, "%lf", &ppt->c[2]);
 				ppt->c[0] = (float)(ggx * (xxm + i - 1));
 				ppt->c[1] = (float)(ggy * (yym + j - 1));
 				ppt->c[2] = (float)(hhz * ppt->c[2]);
 			}
+		}
 	} else {
+		int ni;
+		
 		te = (float *)malloc(sx * sizeof(float));
 		if (!te) exit(1);
 
@@ -156,7 +158,6 @@ int loadGIS (pMesh mesh) {
 				free(mesh->point);
 				free(mesh);
 				free(te);
-				fclose(fp);
 				return (0);
 			}
 
@@ -176,7 +177,7 @@ int loadGIS (pMesh mesh) {
 	/* construct topology */
 	mesh->dim = 3;
 
-	for (j = 1; j < sy; j++)
+	for (j = 1; j < sy; j++) {
 		for (i = 1; i < sx; i++) {
 			k = (j - 1) * (sx - 1) + i;
 			pq = &mesh->quad[k];
@@ -186,6 +187,7 @@ int loadGIS (pMesh mesh) {
 			pq->v[3] = pq->v[2] - 1;
 			pq->ref = 0;
 		}
+	}
 
 	/* read references, if any */
 	if (ityp == 1) {
@@ -194,13 +196,14 @@ int loadGIS (pMesh mesh) {
 		if (ret != EOF) {
 			fseek(fp, pos, SEEK_SET);
 
-			for (j = 1; j < sy; j++)
+			for (j = 1; j < sy; j++) {
 				for (i = 1; i < sx; i++) {
 					k = (j - 1) * (sx - 1) + i;
 					pq = &mesh->quad[k];
 					fscanf(fp, "%d", &ref);
 					pq->ref = ref;
 				}
+			}
 		}
 	}
 
@@ -230,4 +233,3 @@ int loadGIS (pMesh mesh) {
 	fclose(fp);
 	return (1);
 }
-

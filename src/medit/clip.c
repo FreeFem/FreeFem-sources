@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -64,14 +65,8 @@ static void drawCap (pScene sc, pClip clip, GLboolean docap) {
 /* display clipping plane */
 void updateClip (pClip clip, pMesh mesh) {
 	pScene sc;
-	pTransform cliptr;
-	pTransform view;
-	GLfloat dd;
-	GLfloat dmax;
-	GLfloat inv[16];
-	GLfloat axis[4];
-	GLfloat trans[4];
-	GLfloat matrix[16];
+	pTransform cliptr, view;
+	GLfloat dd, dmax, inv[16], axis[4], trans[4], matrix[16];
 	int idw;
 
 	/* default */
@@ -183,13 +178,8 @@ void updateClip (pClip clip, pMesh mesh) {
 
 void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 	pPoint p0;
-	double dd1;
-	double zero;
-	int k;
-	int l;
-	int nbpos;
-	int nbneg;
-	int nbnul;
+	double dd1, zero;
+	int k, l, nbpos, nbnul;
 
 	/* check points in plane */
 	zero = sc->dmax * 1.e-13;
@@ -211,12 +201,12 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 
 		pt = &mesh->tetra[k];
 		pt->clip = 0;
-		nbpos = nbneg = nbnul = 0;
+		nbpos = nbnul = 0;
 
 		for (l = 0; l < 4; l++) {
 			p0 = &mesh->point[pt->v[l]];
 			if (p0->clip == 2) nbpos++;
-			else if (p0->clip == 1) nbneg++;
+			else if (p0->clip == 1);
 			else nbnul++;
 		}
 
@@ -229,12 +219,12 @@ void clipVertices (pMesh mesh, pScene sc, pClip clip) {
 
 		ph = &mesh->hexa[k];
 		ph->clip = 0;
-		nbpos = nbneg = nbnul = 0;
+		nbpos = nbnul = 0;
 
 		for (l = 0; l < 8; l++) {
 			p0 = &mesh->point[ph->v[l]];
 			if (p0->clip == 2) nbpos++;
-			else if (p0->clip == 1) nbneg++;
+			else if (p0->clip == 1);
 			else nbnul++;
 		}
 
@@ -288,7 +278,7 @@ void drawClip (pScene sc, pClip clip, pMesh mesh, GLboolean docap) {
 			}
 
 			if (!animate) clip->active ^= C_REDO;
-		} else clip->active ^= C_REDO;
+		} else {clip->active ^= C_REDO;}
 
 		if (sc->isotyp & S_VECTOR) {
 			if (sc->vlist[LTets]) glDeleteLists(sc->vlist[LTets], 1);

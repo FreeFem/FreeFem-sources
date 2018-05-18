@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -159,7 +160,7 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 
 	if (ddebug)
 		printf("size = %d  ptr = %p  buffer = %p  -> size = %d\n",
-		       size, ptr, buffer, ptr - buffer);
+		       size, ptr, buffer, (int)(ptr - buffer));
 
 	/* allocate mem to store tokens */
 	if (ddebug) printf("%d tokens found\n", nit);
@@ -190,8 +191,9 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 			v = (Feedback3Dcolor *)ptr;
 			ttoken[nit].depth = v[0].z;
 
-			for (k = 1; k < nbv; k++)
+			for (k = 1; k < nbv; k++) {
 				ttoken[nit].depth += v[k].z;
+			}
 
 			ttoken[nit].depth /= nbv;
 			ptr += (7 * nbv);
@@ -212,7 +214,7 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 	if (sc->mode == WIRE || sc->mode == WIRE + S_MATERIAL)
 		sorting = FALSE;
 
-	if (ddebug) printf("prim = %d  size = %d, %d\n", nit, ptr - buffer - 1, size);
+	if (ddebug) printf("prim = %d  size = %d, %d\n", nit, (int)(ptr - buffer - 1), size);
 
 	if (sorting == TRUE) {
 		if (ddebug) printf("start sorting %d tokens...\n", nit);
@@ -248,8 +250,9 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 				/* fprintf(file,"1. stg\n"); */
 				fprintf(file, "dc ");
 
-				for (i = 0; i < nbv; i++)
+				for (i = 0; i < nbv; i++) {
 					fprintf(file, " %g %g", v[i].x, v[i].y);
+				}
 
 				fprintf(file, "  %g %g %g fc\n", v[0].r, v[0].g, v[0].b);
 			}
@@ -258,8 +261,9 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 			if (sc->mode & S_BDRY) {
 				fprintf(file, "0. stg\n");
 
-				for (i = 0; i < nbv - 1; i++)
+				for (i = 0; i < nbv - 1; i++) {
 					fprintf(file, "%g %g %g %g sgm\n", v[i].x, v[i].y, v[i + 1].x, v[i + 1].y);
+				}
 
 				fprintf(file, "%g %g %g %g sgm\n\n", v[nbv - 1].x, v[nbv - 1].y, v[0].x, v[0].y);
 			}
@@ -276,6 +280,8 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 		}
 	}
 
+	free(ttoken);
+
 	return (1);
 }
 
@@ -284,22 +290,22 @@ int sftcpy (pScene sc, pMesh mesh) {
 	GLfloat *fbbuffer;
 	GLint nvalues;
 	GLsizei size;
-	char *ptr, data[128];
+	char *ptr, data[128], tmpdata[128];
 	static int nfree = 0;
 
 	/* default */
 	if (ddebug) printf("soft copy\n");
 
 	/* get file name */
-	strcpy(data, mesh->name);
-	ptr = (char *)strstr(data, ".mesh");
+	strcpy(tmpdata, mesh->name);
+	ptr = (char *)strstr(tmpdata, ".mesh");
 	if (ptr) *ptr = '\0';
 
-	nfree = filnum(data, nfree, "ps");
+	nfree = filnum(tmpdata, nfree, "ps");
 	if (nfree == -1) return (0);
 
 	/* open PS file */
-	sprintf(data, "%s.%.3d.ps", data, nfree);
+	sprintf(data, "%s.%.3d.ps", tmpdata, nfree);
 	file = fopen(data, "w");
 	if (!file) {
 		fprintf(stdout, "  Unable to open %s\n", data);
@@ -360,4 +366,3 @@ int sftcpy (pScene sc, pMesh mesh) {
 #ifdef __cplusplus
 }
 #endif
-

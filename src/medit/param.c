@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,10 +37,10 @@ extern "C" {
 extern void ortho2D (pScene, ubyte);
 
 /* globals */
-typedef struct sparval {
+/*typedef struct sparval {
 	int arg;
 } Parval;
-typedef Parval *pParval;
+typedef Parval *pParval;*/
 
 static void parMotion (int x, int y) {
 	pScene sc;
@@ -83,4 +84,3 @@ void parEdit (pScene sc) {
 #ifdef __cplusplus
 }
 #endif
-

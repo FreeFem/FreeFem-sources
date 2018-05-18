@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -28,9 +29,8 @@ extern ubyte stereoMode;
 
 int saveMeditFile (char *file, pScene sc) {
 	FILE *out;
-	pMaterial pm;
 	time_t timeptr;
-	int i, k, m;
+	int k;
 	char *ptr, data[128];
 
 	strcpy(data, file);
@@ -85,20 +85,24 @@ int saveMeditFile (char *file, pScene sc) {
 		fprintf(out, "# Color palette\n");
 		fprintf(out, "Palette\n");
 
-		for (k = 0; k < MAXISO; k++)
+		for (k = 0; k < MAXISO; k++) {
 			fprintf(out, "%f ", sc->iso.val[k]);
+		}
 
 		fprintf(out, "\n");
 	}
 
 	if (sc->par.nbmat) {
+		pMaterial pm;
+		int i, m;
+
 		m = 0;
 
 		for (k = 0; k < sc->par.nbmat; k++) {
 			pm = &sc->material[k];
 
-			for (i = LTria; i <= LHexa; i++)
-				if (pm->depmat[i] && !pm->flag) m++;
+			for (i = LTria; i <= LHexa; i++) {
+				if (pm->depmat[i] && !pm->flag) m++; }
 		}
 
 		fprintf(out, "\n# Subdomains colors\n");
@@ -108,8 +112,8 @@ int saveMeditFile (char *file, pScene sc) {
 			pm = &sc->material[k];
 			m = 0;
 
-			for (i = LTria; i <= LHexa; i++)
-				if (pm->depmat[i] && !pm->flag) break;
+			for (i = LTria; i <= LHexa; i++) {
+				if (pm->depmat[i] && !pm->flag) break; }
 
 			if (i > LHexa) continue;
 
@@ -222,14 +226,16 @@ int parsop (pScene sc, pMesh mesh) {
 	m = n = 0;
 
 	while (!feof(in)) {
-		fscanf(in, "%s", key);
+		fscanf(in, "%255s", key);
 		if (feof(in)) break;
 
-		for (i = 0; i < strlen(key); i++) key[i] = tolower(key[i]);
+		for (i = 0; i < strlen(key); i++) {
+			key[i] = tolower(key[i]);
+		}
 
-		if (key[0] == '#')
+		if (key[0] == '#') {
 			fgets(key, 255, in);
-		else if (!strcmp(key, "backgroundcolor")) {
+		} else if (!strcmp(key, "backgroundcolor")) {
 			fscanf(in, "%f %f %f", &r, &g, &b);
 			sc->par.back[0] = r;
 			sc->par.back[1] = g;
@@ -289,9 +295,11 @@ int parsop (pScene sc, pMesh mesh) {
 			sc->par.xs = (short)xs;
 			sc->par.ys = (short)ys;
 		} else if (!strcmp(key, "rendermode")) {
-			fscanf(in, "%s", buf);
+			fscanf(in, "%255s", buf);
 
-			for (i = 0; i < strlen(buf); i++) buf[i] = tolower(buf[i]);
+			for (i = 0; i < strlen(buf); i++) {
+				buf[i] = tolower(buf[i]);
+			}
 
 			if (strstr(buf, "hidden"))
 				sc->mode = HIDDEN;
@@ -314,12 +322,13 @@ int parsop (pScene sc, pMesh mesh) {
 			else if (!strcmp(key, "paletter"))
 				sc->iso.palette = 4;
 
-			for (k = 0; k < MAXISO; k++)
+			for (k = 0; k < MAXISO; k++) {
 				ret = fscanf(in, "%f", &sc->iso.val[k]);
+			}
 
 			if (sc->iso.val[MAXISO - 1] < sc->iso.val[0]) sc->iso.palette = 0;
 		} else if (!strcmp(key, "postscript")) {
-			fscanf(in, "%f %f %s %s", &sc->par.cm, &sc->par.dpi,
+			fscanf(in, "%f %f %255s %31s", &sc->par.cm, &sc->par.dpi,
 			       buf, pscol);
 			strncpy(sc->par.pscolor, pscol, 10);
 			sc->par.coeff = atof(buf);
@@ -345,7 +354,7 @@ int parsop (pScene sc, pMesh mesh) {
 			fgets(buf, 255, in);
 			if (n > sc->par.nbmat) continue;
 
-			ret = sscanf(buf, "%s %d", buf, &ref);
+			ret = sscanf(buf, "%255s %d", buf, &ref);
 			ptr = strstr(buf, "DEFAULT");
 			pm = ptr ? &sc->material[DEFAULT_MAT] : &sc->material[++n];
 			strcpy(pm->name, buf);
@@ -371,8 +380,9 @@ int parsop (pScene sc, pMesh mesh) {
 			++m;
 		}
 		/* stereo mode */
-		else if (!strcmp(key, "eyesep"))
+		else if (!strcmp(key, "eyesep")) {
 			fscanf(in, "%f", &sc->par.eyesep);
+		}
 	}
 
 	fclose(in);
@@ -380,7 +390,7 @@ int parsop (pScene sc, pMesh mesh) {
 	if (sc->par.nbmat < 0) {
 		sc->par.nbmat = MAX_MATERIAL;
 		matInit(sc);
-	} else if (m == n) sc->par.nbmat++;
+	} else if (m == n) {sc->par.nbmat++;}
 
 	if (!sc->par.linc) {
 		sc->par.line[0] = 1.0 - sc->par.back[0];
@@ -392,4 +402,3 @@ int parsop (pScene sc, pMesh mesh) {
 
 	return (1);
 }
-

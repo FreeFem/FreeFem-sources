@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -27,12 +28,9 @@
 GLuint geomList (pScene sc, pMesh mesh) {
 	GLuint list = 0;
 	pMaterial pm;
-	pEdge pr;
 	pPoint ppt, pp0, pp1;
-	double dd;
 	float n[3];
 	int k, it = 0, nm;
-	static float green[4] = {0.0, 1.0, 0.0, 1.0};
 	static float rouge[4] = {1.0, 0.0, 0.0, 1.0};
 	static float jaune[4] = {1.0, 1.0, 0.0, 1.0};
 
@@ -60,8 +58,10 @@ GLuint geomList (pScene sc, pMesh mesh) {
 
 			if (ppt->tag == M_CORNER)
 				glColor3fv(rouge);
-			else if (ppt->tag == M_REQUIRED)
+			else if (ppt->tag == M_REQUIRED){
+				static float green[4] = {0.0, 1.0, 0.0, 1.0};
 				glColor3fv(green);
+			}
 			else continue;
 
 			it++;
@@ -82,6 +82,8 @@ GLuint geomList (pScene sc, pMesh mesh) {
 		glBegin(GL_POINTS);
 
 		for (k = 1; k <= mesh->np; k++) {
+			double dd;
+
 			ppt = &mesh->point[k];
 			n[0] = ppt->c[0] - sc->cx;
 			n[1] = ppt->c[1] - sc->cy;
@@ -109,6 +111,8 @@ GLuint geomList (pScene sc, pMesh mesh) {
 	glBegin(GL_LINES);
 
 	for (k = 1; k <= mesh->na; k++) {
+		pEdge pr;
+
 		pr = &mesh->edge[k];
 		if (pr->v[0] > mesh->np || pr->v[1] > mesh->np)
 			continue;
@@ -118,9 +122,9 @@ GLuint geomList (pScene sc, pMesh mesh) {
 				glColor3fv(jaune);	/* ridge + ref en jaune */
 			else
 				glColor3fv(rouge);	/* ridges en rouge */
-		} else if (!pr->ref)
+		} else if (!pr->ref) {
 			glColor3fv(sc->par.edge);
-		else {
+		} else {
 			nm = matRef(sc, pr->ref);
 			pm = &sc->material[nm];
 			glColor3fv(pm->dif);
@@ -142,7 +146,7 @@ GLuint geomList (pScene sc, pMesh mesh) {
 	if (it == 0) {
 		glDeleteLists(list, 1);
 		return (0);
-	} else
+	} else {
 		return (list);
+	}
 }
-

@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "sproto.h"
@@ -49,7 +50,7 @@ int imgTiling (pScene sc, char *data, char key) {
 	GLubyte *tile, *buffer, *rowPtr;
 	GLint matmode, viewport[4];
 	double xmin, xmax, ymin, ymax, left, right, top, bottom, ratio;
-	float debhaut, finhaut, deblarg, finlarg, look[3];
+	float finhaut, finlarg, look[3];
 	int i, tw, th, col, row, nbcol, nbrow;
 	int imgWidth, imgHeight, tileWidth, tileHeight, tileWidthNB, tileHeightNB;
 	int bitsTileRow, bitsImgOffset, bitsCurTileRow, border;
@@ -78,7 +79,7 @@ int imgTiling (pScene sc, char *data, char key) {
 
 	tileWidth = sc->par.xs;
 	tileHeight = sc->par.ys;
-	border = sc->mode & S_BDRY ? 1 : 0;
+	border = (sc->mode & S_BDRY) ? 1 : 0;
 	tileWidthNB = tileWidth - 2 * border;
 	tileHeightNB = tileHeight - 2 * border;
 
@@ -113,6 +114,7 @@ int imgTiling (pScene sc, char *data, char key) {
 	if (!out) {
 		fprintf(stderr, "  ## Unable to open file %s.\n", name);
 		free(tile);
+		free(buffer);
 		return (0);
 	}
 
@@ -131,6 +133,8 @@ int imgTiling (pScene sc, char *data, char key) {
 	finhaut = sc->par.ys;
 
 	for (row = nbrow - 1; row >= 0; row--) {
+		float debhaut, deblarg;
+
 		if (row < nbrow - 1)
 			th = tileHeightNB;
 		else
@@ -212,13 +216,14 @@ int imgTiling (pScene sc, char *data, char key) {
 			bitsImgOffset = col * tileWidthNB * bitsPixel;
 			bitsTileRow = tileWidthNB * bitsPixel;
 			bitsCurTileRow = tw * bitsPixel;
-			bitsTileOffset = border * bitsPixel;
+			/*bitsTileOffset = border * bitsPixel;*/
 			bitsTileOffset = 0;
 
-			for (i = 0; i < th; i++)
+			for (i = 0; i < th; i++) {
 				memcpy(buffer + i * imgRowSize + bitsImgOffset,
 				       tile + i * bitsTileRow + bitsTileOffset,
 				       bitsCurTileRow);
+			}
 
 			deblarg = finlarg + 1;
 		}
@@ -227,11 +232,12 @@ int imgTiling (pScene sc, char *data, char key) {
 
 		/* modify color */
 		if (sc->par.coeff > 0.0f)
-			for (i = 0; i < imgWidth * tileHeightNB * bitsPixel; i++)
+			for (i = 0; i < imgWidth * tileHeightNB * bitsPixel; i++) {
 				if (buffer[i] > 10)
 					buffer[i] += (255 - buffer[i]) * sc->par.coeff;
 				else
 					buffer[i] += buffer[i] * sc->par.coeff;
+			}
 
 		/* write row of tiles */
 
@@ -260,4 +266,3 @@ int imgTiling (pScene sc, char *data, char key) {
 
 	return (1);
 }
-

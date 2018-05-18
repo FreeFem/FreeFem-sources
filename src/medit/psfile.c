@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,8 +35,6 @@ typedef unsigned char ubyte;
 #define CM2IN 0.3937
 
 void writeEPSheader (FILE *out, char *data, char key, int ww, int hh, float cm, float dpi) {
-	int wpad;
-
 	fprintf(out, "%%!PS-Adobe-2.0 EPSF-2.0\n");
 	fprintf(out, "%%LanguageLevel: 1\n");
 	fprintf(out, "%%%%Title: %s\n", data);
@@ -65,6 +64,8 @@ void writeEPSheader (FILE *out, char *data, char key, int ww, int hh, float cm, 
 
 	/* write BW image */
 	if (key == 'B') {
+		int wpad;
+
 		wpad = (ww + 7) & ~7;
 		fprintf(out, "/pix %d string def\n", wpad / 8);
 		fprintf(out, "\n%% dimensions of data\n");
@@ -159,7 +160,7 @@ void writeEPStrailer (FILE *out) {
 
 void writeEPSRow (FILE *out, char key, ubyte *buffer, int size, ubyte bckbyt) {
 	int c, k, l;
-	ubyte byte, bbyte;
+	ubyte byte;
 
 	l = 0;
 
@@ -169,6 +170,8 @@ void writeEPSRow (FILE *out, char key, ubyte *buffer, int size, ubyte bckbyt) {
 		c = 0;
 
 		for (k = 0; k < 3 * size; k += 3) {
+			ubyte bbyte;
+			
 			bbyte = (ubyte)(0.30 * buffer[k] + 0.59 * buffer[k + 1]
 			                + 0.11 * buffer[k + 2] + 0.5);
 			if (bbyte == bckbyt) byte |= (1 << (7 - c));
@@ -196,7 +199,9 @@ void writeEPSRow (FILE *out, char key, ubyte *buffer, int size, ubyte bckbyt) {
 
 		/* padding */
 		if (c) {
-			for (l = 8; l > c; l--) byte |= (1 << l);
+			for (l = 8; l > c; l--) {
+				byte |= (1 << l);
+			}
 
 			fprintf(out, "%.2x", byte);
 		}
@@ -233,4 +238,3 @@ void writeEPSRow (FILE *out, char key, ubyte *buffer, int size, ubyte bckbyt) {
 #ifdef __cplusplus
 }
 #endif
-

@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -64,8 +65,6 @@ void doLists (pScene sc, pMesh mesh) {
 
 /* build metric list */
 void doMapLists (pScene sc, pMesh mesh, int reset) {
-	int k;
-
 	/*default */
 	if (!mesh->sol) return;
 
@@ -74,12 +73,15 @@ void doMapLists (pScene sc, pMesh mesh, int reset) {
 	glutSetCursor(GLUT_CURSOR_WAIT);
 
 	/* delete old lists */
-	if (reset)
+	if (reset) {
+		int k;
+
 		for (k = 0; k < MAX_LIST; k++) {
 			if (sc->mlist[k]) glDeleteLists(sc->mlist[k], 1);
 
 			sc->mlist[k] = (GLuint)0;
 		}
+	}
 
 	/* create map list */
 	if (sc->mode & S_ALTITUDE) {
@@ -105,9 +107,6 @@ void doMapLists (pScene sc, pMesh mesh, int reset) {
 
 /* rebuild iso-values lists */
 void doIsoLists (pScene sc, pMesh mesh, int reset) {
-	pPoint ppt;
-	int k, kk, ret;
-
 	/*default */
 	if (ddebug) printf("build iso lists\n");
 
@@ -115,6 +114,8 @@ void doIsoLists (pScene sc, pMesh mesh, int reset) {
 
 	/* delete old lists */
 	if (reset) {
+		int k;
+
 		for (k = 0; k < MAX_LIST; k++) {
 			if (sc->ilist[k]) glDeleteLists(sc->ilist[k], 1);
 
@@ -127,6 +128,8 @@ void doIsoLists (pScene sc, pMesh mesh, int reset) {
 		}
 
 		if (sc->stream && sc->stream->nbstl) {
+			int kk;
+
 			for (kk = 0; kk < sc->stream->nbstl; kk++) {
 				if (sc->slist[kk]) glDeleteLists(sc->slist[kk], 1);
 
@@ -137,6 +140,8 @@ void doIsoLists (pScene sc, pMesh mesh, int reset) {
 			if (reset < 2) sc->stream->nbstl = 0;
 
 			for (k = 1; k <= mesh->np; k++) {
+				pPoint ppt;
+
 				ppt = &mesh->point[k];
 				ppt->flag = 0;
 			}
@@ -166,9 +171,9 @@ void doIsoLists (pScene sc, pMesh mesh, int reset) {
 			if (mesh->nq && !sc->vlist[LQuad])
 				sc->vlist[LQuad] = listQuad2dVector(mesh);
 		} else {
-			if (mesh->ntet + mesh->nhex == 0)
+			if (mesh->ntet + mesh->nhex == 0) {
 				sc->vlist[LTria] = listTria3dVector(mesh);
-			else {
+			} else {
 				if (mesh->ntet && !sc->vlist[LTets])
 					sc->vlist[LTets] = listClipTetraVector(mesh);
 				else if (mesh->nhex && !sc->vlist[LHexa])
@@ -186,13 +191,13 @@ void doIsoLists (pScene sc, pMesh mesh, int reset) {
 		}
 
 		if (sc->stream) {
-			if (reftype == LPoint)
-				ret = streamRefPoint(sc, mesh);
-			else if (mesh->dim == 3) {
+			if (reftype == LPoint) {
+				streamRefPoint(sc, mesh);
+			} else if (mesh->dim == 3) {
 				if (reftype == LTria)
-					ret = streamRefTria(sc, mesh);
+					streamRefTria(sc, mesh);
 				else if (reftype == LQuad)
-					ret = streamRefQuad(sc, mesh);
+					streamRefQuad(sc, mesh);
 
 				if (sc->picklist) glDeleteLists(sc->picklist, 1);
 
@@ -244,9 +249,8 @@ void keyFile (unsigned char key, int x, int y) {
 	pScene sc;
 	pMesh mesh;
 	pTransform view;
-	char *ptr, data[128];
+	char *ptr, data[128], tmpdata[128];;
 	ubyte post = FALSE, clipon;
-	static int nfree = 0;
 
 	/* default */
 	sc = cv.scene[currentScene()];
@@ -290,11 +294,11 @@ void keyFile (unsigned char key, int x, int y) {
 		break;
 
 	case 'S':	/* save mesh */
-		strcpy(data, mesh->name);
-		ptr = (char *)strstr(data, ".mesh");
+		strcpy(tmpdata, mesh->name);
+		ptr = (char *)strstr(tmpdata, ".mesh");
 		if (ptr) *ptr = '\0';
 
-		sprintf(data, "%s.d.mesh", data);
+		sprintf(data, "%s.d.mesh", tmpdata);
 		clipon = sc->clip->active & C_ON;
 		if (clipon)
 			clipVertices(mesh, sc, sc->clip);
@@ -307,24 +311,27 @@ void keyFile (unsigned char key, int x, int y) {
 	case 'G':
 	case 'H':	/* hardcopy */
 	case 'T':
-		strcpy(data, mesh->name);
-		ptr = (char *)strstr(data, ".mesh");
+		strcpy(tmpdata, mesh->name);
+		ptr = (char *)strstr(tmpdata, ".mesh");
 		if (ptr) *ptr = '\0';
 
-		ptr = (char *)strstr(data, ".gis");
+		ptr = (char *)strstr(tmpdata, ".gis");
 		if (ptr) *ptr = '\0';
 
 		if (option != SEQUENCE) {
+			static int nfree = 0;
+
 			if (key == 'H')
-				nfree = filnum(data, nfree, "ppm");
+				nfree = filnum(tmpdata, nfree, "ppm");
 			else
-				nfree = filnum(data, nfree, "ps");
+				nfree = filnum(tmpdata, nfree, "ps");
 
 			if (nfree == -1) break;
 
-			sprintf(data, "%s.%.3d", data, nfree);
-		} else
-			sprintf(data, "%s.ppm", data);
+			sprintf(data, "%s.%.3d", tmpdata, nfree);
+		} else {
+			sprintf(data, "%s.ppm", tmpdata);
+		}
 
 		if (!saveimg) glutSetCursor(GLUT_CURSOR_WAIT);
 
@@ -377,8 +384,9 @@ void keyItem (unsigned char key, int x, int y) {
 		if (cube->active & C_ON) {
 			cube->active &= ~(C_ON + C_EDIT);
 			dumpCube(sc, mesh, cube);
-		} else
+		} else {
 			cube->active |= C_ON;
+		}
 
 		break;
 	case 'G':	/* draw grid */
@@ -411,10 +419,12 @@ void keyItem (unsigned char key, int x, int y) {
 			if (sc->nlist) {
 				glDeleteLists(sc->nlist, 1);
 				sc->nlist = 0;
-			} else
+			} else {
 				post = FALSE;
-		} else
+			}
+		} else {
 			post = FALSE;
+		}
 
 		break;
 	}
@@ -812,8 +822,9 @@ void keyColor (unsigned char key, int x, int y) {
 		for (k = 0; k < sc->par.nbmat; k++) {
 			pm = &sc->material[k];
 
-			for (i = LTria; i <= LHexa; i++)
+			for (i = LTria; i <= LHexa; i++) {
 				pm->depmat[i] = abs(pm->depmat[i]);
+			}
 		}
 
 		dolist = TRUE;
@@ -844,9 +855,9 @@ void keyClip (unsigned char key, int x, int y) {
 
 	switch (key) {
 	case 'C':	/* toggle clipping */
-		if (clip->active & C_ON)
+		if (clip->active & C_ON) {
 			clip->active &= ~(C_ON + C_EDIT);
-		else {
+		} else {
 			clip->active |= C_ON;
 			if (mesh->ntet + mesh->nhex) clip->active |= C_VOL;
 		}
@@ -979,9 +990,9 @@ void keyFeature (unsigned char key, int x, int y) {
 		if (mesh->dim == 2) break;
 
 		sc->type ^= S_SCISSOR;
-		if (sc->type & S_SCISSOR)
+		if (sc->type & S_SCISSOR) {
 			glutDisplayFunc(scissorScene);
-		else {
+		} else {
 			glutDisplayFunc(redrawScene);
 			reshapeScene(sc->par.xs, sc->par.ys);
 		}
@@ -1010,9 +1021,6 @@ void menuImage (int item) {
 void keyMetric (unsigned char key, int x, int y) {
 	pScene sc;
 	pMesh mesh;
-	pPoint ppt;
-	float maxd;
-	int k, kk;
 	ubyte post = TRUE;
 
 	/* default */
@@ -1028,6 +1036,8 @@ void keyMetric (unsigned char key, int x, int y) {
 		break;
 	case 'f':	/* flush streamlines */
 		if (sc->stream->nbstl) {
+			int k, kk;
+
 			for (kk = 0; kk < sc->stream->nbstl; kk++) {
 				if (sc->slist[kk]) glDeleteLists(sc->slist[kk], 1);
 
@@ -1037,6 +1047,8 @@ void keyMetric (unsigned char key, int x, int y) {
 			sc->stream->nbstl = 0;
 
 			for (k = 1; k <= mesh->np; k++) {
+				pPoint ppt;
+
 				ppt = &mesh->point[k];
 				ppt->flag = 0;
 			}
@@ -1084,9 +1096,11 @@ void keyMetric (unsigned char key, int x, int y) {
 		if (refitem) {
 			sc->isotyp |= S_STREAML;
 			doIsoLists(sc, mesh, 0);
-		} else if (!streamIsoPoint(sc, mesh)) {
-			post = FALSE;
-			sc->isotyp &= ~S_STREAML;
+		} else {
+			if (!streamIsoPoint(sc, mesh)) {
+				post = FALSE;
+				sc->isotyp &= ~S_STREAML;
+			}
 		}
 
 		break;
@@ -1097,8 +1111,9 @@ void keyMetric (unsigned char key, int x, int y) {
 					glDeleteLists(sc->picklist, 1);
 					sc->picklist = 0;
 					break;
-				} else
+				} else {
 					sc->picklist = drawAllEllipse(sc, mesh);
+				}
 
 				break;
 			}
@@ -1119,6 +1134,8 @@ void keyMetric (unsigned char key, int x, int y) {
 
 		sc->mode ^= S_ALTITUDE;
 		if (altcoef == 0.0) {
+			float maxd;
+
 			maxd = max(mesh->xmax - mesh->xmin, mesh->ymax - mesh->ymin);
 			altcoef = 0.3 * maxd / mesh->bbmax;
 		}
@@ -1131,7 +1148,7 @@ void keyMetric (unsigned char key, int x, int y) {
 	case 'K':	/* elevation coeff */
 		fprintf(stdout, "elevation coeff (%.2f): ", altcoef);
 		fflush(stdout);
-		fflush(stdin);
+		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 		fscanf(stdin, "%f", &altcoef);
 		if (altcoef == 0.0) sc->mode |= ~S_ALTITUDE;
 
@@ -1150,8 +1167,9 @@ void keyMetric (unsigned char key, int x, int y) {
 
 			if (!(sc->item & S_PALETTE))
 				sc->item ^= S_PALETTE;
-		} else if (sc->item & S_PALETTE)
+		} else if (sc->item & S_PALETTE) {
 			sc->item ^= S_PALETTE;
+		}
 
 		break;
 	case 'p':	/* toggle palette */
@@ -1173,8 +1191,8 @@ void menuMetric (int item) {
 }
 
 int createMenus (pScene sc, pMesh mesh) {
-	int menu, amenu, fmenu, femenu, vmenu, mmenu, smenu;
-	int clmenu, cmenu, vwmenu, trmenu;
+	int amenu, fmenu, femenu, vmenu, mmenu, smenu;
+	int clmenu, cmenu, vwmenu;
 
 	/* default */
 	if (ddebug) printf("create menus\n");
@@ -1308,17 +1326,16 @@ int createMenus (pScene sc, pMesh mesh) {
 
 	/* trajectoire menu */
 	if (mesh->dim == 3 || mesh->nbb) {
-		trmenu = glutCreateMenu(menuTrajet);
+		glutCreateMenu(menuTrajet);
 		glutAddMenuEntry("New Ctrl point", 'C');
 		glutAddMenuEntry("Toggle path", 'S');
 		glutAddMenuEntry("Follow path", 'F');
 		glutAddMenuEntry("Load path", 'L');
 		glutAddMenuEntry("Save path", 'W');
-	} else
-		trmenu = 0;
+	}
 
 	/* main scene menu */
-	menu = glutCreateMenu(menuScene);
+	glutCreateMenu(menuScene);
 	glutAddSubMenu("File", fmenu);
 	glutAddSubMenu("Render mode", mmenu);
 	glutAddSubMenu("Colors, Materials", cmenu);
@@ -1332,13 +1349,9 @@ int createMenus (pScene sc, pMesh mesh) {
 	glutAddSubMenu("Features", femenu);
 	glutAddSubMenu("View", vwmenu);
 	glutAddSubMenu("Animation", amenu);
-	/*if ( trmenu )
-	 * glutAddSubMenu("Trajectory",trmenu);
-	 */
 	glutAddMenuEntry("", '\0');
 	glutAddMenuEntry("Close window", 'X');
 	glutAddMenuEntry("Quit", 'q');
 
 	return (1);
 }
-

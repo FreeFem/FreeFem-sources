@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,10 +30,7 @@ extern "C" {
 #include "sproto.h"
 
 double Azimuth (pCamera c) {
-	double dd;
-	double azim;
-	double cosazim;
-	double sinazim;
+	double dd, azim, cosazim, sinazim;
 
 	dd = sqrt((double)c->speed[0] * c->speed[0] + (double)c->speed[2] * c->speed[2]);
 	cosazim = c->speed[2] / dd;
@@ -52,11 +50,8 @@ double Elevation (pCamera c) {
 /* compute new sun position */
 void updateSun (pScene sc, pCamera c) {
 	double dd;
-	GLfloat axe[3];
-	GLfloat sunf[4];
-	GLdouble speed[3];
-	GLdouble sunp[4];
-	GLdouble matrix[16];
+	GLfloat axe[3], sunf[4];
+	GLdouble speed[3], sunp[4], matrix[16];
 
 	axe[0] = c->speed[2];
 	axe[1] = 0.0f;
@@ -92,9 +87,7 @@ void updateSun (pScene sc, pCamera c) {
 }
 
 void updateCamera (pScene sc, pCamera c, double azim, double elev) {
-	double d;
-	double lazim;
-	double lelev;
+	double d, lazim, lelev;
 
 	/* compute speed vector */
 	if (elev > 89.0f) elev = 89.0;
@@ -123,8 +116,7 @@ pCamera initCamera (pScene sc, int up) {
 
 	if (ddebug) printf("    initCamera dmax %g\n", sc->dmax);
 
-	if (sc->camera) c = sc->camera;
-	else {
+	if (sc->camera) {c = sc->camera;} else {
 		c = (pCamera)M_calloc(1, sizeof(struct camera), "camera");
 		if (!c) {
 			printf("  ## unable to allocate memory / camera\n");
@@ -152,7 +144,7 @@ pCamera initCamera (pScene sc, int up) {
 
 	if (ddebug) {
 		double look[3];
-
+		
 		look[0] = c->eye[0] + sc->dmax * c->speed[0];
 		look[1] = c->eye[1] + sc->dmax * c->speed[1];
 		look[2] = c->eye[2] + sc->dmax * c->speed[2];

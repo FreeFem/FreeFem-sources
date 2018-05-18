@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -309,8 +310,9 @@ void special (int key, int x, int y) {
 		} else if (keyact & GLUT_ACTIVE_CTRL) {
 			sc->par.eyesep *= 0.9;
 			printf("eyesep %f\n", sc->par.eyesep);
-		} else
+		} else {
 			view->panx -= pancoeff * sc->dmax;
+		}
 
 		break;
 	case GLUT_KEY_RIGHT:
@@ -321,8 +323,9 @@ void special (int key, int x, int y) {
 		} else if (keyact & GLUT_ACTIVE_CTRL) {
 			sc->par.eyesep *= 1.1;
 			printf("eyesep %f\n", sc->par.eyesep);
-		} else
+		} else {
 			view->panx += pancoeff * sc->dmax;
+		}
 
 		break;
 	case GLUT_KEY_UP:
@@ -330,8 +333,9 @@ void special (int key, int x, int y) {
 			clip->cliptr->pany += 0.02 * sc->dmax;
 			clip->cliptr->angle = 0.0;
 			clip->active |= C_UPDATE + C_REDO;
-		} else
+		} else {
 			view->pany += pancoeff * sc->dmax;
+		}
 
 		break;
 	case GLUT_KEY_DOWN:
@@ -339,8 +343,9 @@ void special (int key, int x, int y) {
 			clip->cliptr->pany -= 0.02 * sc->dmax;
 			clip->cliptr->angle = 0.0;
 			clip->active |= C_UPDATE + C_REDO;
-		} else
+		} else {
 			view->pany -= pancoeff * sc->dmax;
+		}
 
 		break;
 	default:
@@ -384,11 +389,11 @@ void keyScene (unsigned char key, int x, int y) {
 
 	keyact = glutGetModifiers();
 	if (key == ' ') {
-		if (option == MORPHING)
+		if (option == MORPHING) {
 			morphMesh(sc, mesh);
-		else if (sc->isotyp & S_PARTICLE)
+		} else if (sc->isotyp & S_PARTICLE) {
 			glutIdleFunc(0);
-		else {
+		} else {
 			cam = sc->camera;
 			cam->eye[0] += cam->spmod * cam->speed[0];
 			cam->eye[1] += cam->spmod * cam->speed[1];
@@ -397,7 +402,7 @@ void keyScene (unsigned char key, int x, int y) {
 		}
 
 		post = TRUE;
-	} else if (islower(key))
+	} else if (islower(key)) {
 		switch (key) {
 		case 'a':	/* toggle animate */
 			keyAnim('A', 0, 0);
@@ -406,9 +411,9 @@ void keyScene (unsigned char key, int x, int y) {
 			keyColor('b', 0, 0);
 			break;
 		case 'c':
-			if (keyact & GLUT_ACTIVE_ALT)
+			if (keyact & GLUT_ACTIVE_ALT) {
 				keyView('C', 0, 0);
-			else {
+			} else {
 				sc->mode ^= S_COLOR;
 				post = TRUE;
 			}
@@ -565,9 +570,9 @@ void keyScene (unsigned char key, int x, int y) {
 				reshapeScene(sc->par.xs, sc->par.ys);
 			}
 			/* tilt cut plane */
-			else if (clip->active & C_EDIT)
+			else if (clip->active & C_EDIT) {
 				tiltClip(sc, clip);
-			else return;
+			} else {return;}
 
 			post = TRUE;
 			break;
@@ -602,8 +607,7 @@ void keyScene (unsigned char key, int x, int y) {
 			glutSetWindow(sc->idwin);
 			break;
 		}
-
-	else if (isupper(key))
+	} else if (isupper(key)) {
 		switch (key) {
 		case 'A':	/* toggle axis */
 			keyItem('A', 0, 0);
@@ -729,8 +733,9 @@ void keyScene (unsigned char key, int x, int y) {
 			if (idw != cv.nbs) {
 				deleteScene(sc);
 
-				for (k = idw + 1; k < cv.nbs; k++)
+				for (k = idw + 1; k < cv.nbs; k++) {
 					cv.scene[k - 1] = cv.scene[k];
+				}
 
 				cv.scene[cv.nbs - 1] = 0;
 			}
@@ -777,8 +782,7 @@ void keyScene (unsigned char key, int x, int y) {
 			glutSetWindow(sc->idwin);
 			break;
 		}
-
-	else
+	} else {
 		switch (key) {
 		case '-':
 			if (keyact & GLUT_ACTIVE_ALT) {
@@ -882,7 +886,7 @@ void keyScene (unsigned char key, int x, int y) {
 		case '#':	/* select entity */
 			fprintf(stdout, "ENTITY NUMBER: ");
 			fflush(stdout);
-			fflush(stdin);
+			while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 			fscanf(stdin, "%d", &numit);
 			if (sc->picklist) glDeleteLists(sc->picklist, 1);
 
@@ -908,7 +912,7 @@ void keyScene (unsigned char key, int x, int y) {
 			        clip->eqn[0], clip->eqn[1], clip->eqn[2], dd);
 			fprintf(stdout, "Plane coeffs : ");
 			fflush(stdout);
-			fflush(stdin);
+			while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 			fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
 			resetClip(sc, clip, mesh);
 			clip->eqn[0] = a;
@@ -944,7 +948,7 @@ void keyScene (unsigned char key, int x, int y) {
 		case '%':
 			fprintf(stdout, "reference (%d): ", refpick);
 			fflush(stdout);
-			fflush(stdin);
+			while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
 			fscanf(stdin, "%d", &refpick);
 			break;
 
@@ -953,6 +957,7 @@ void keyScene (unsigned char key, int x, int y) {
 			parEdit(sc);
 			break;
 		}
+	}
 
 	if (dolist) {
 		doLists(sc, mesh);
@@ -962,4 +967,3 @@ void keyScene (unsigned char key, int x, int y) {
 
 	if (post) glutPostRedisplay();
 }
-

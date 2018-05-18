@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -132,7 +133,7 @@ GLuint listClipTetraVector (pMesh mesh) {
 	double rgb[3], u[3], epsra, iso, kc, dd, scal, scalemin, scalemax;
 	float cp[3];
 	GLuint dlist = 0;
-	int ia, k, l, m;
+	int ia, l, m;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	/* default */
@@ -156,6 +157,8 @@ GLuint listClipTetraVector (pMesh mesh) {
 	glLineWidth(2.0);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
@@ -174,7 +177,7 @@ GLuint listClipTetraVector (pMesh mesh) {
 			epsra = EPST * scal;
 
 			/* linear interpol. */
-			if (mesh->typage == 2)
+			if (mesh->typage == 2) {
 				for (l = 0; l < 4; l++) {
 					ppt = &mesh->point[pt->v[l]];
 					if (ppt->mark == mesh->mark) continue;
@@ -192,8 +195,8 @@ GLuint listClipTetraVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -210,8 +213,7 @@ GLuint listClipTetraVector (pMesh mesh) {
 					cp[2] = ppt->c[2];
 					drawVector3D(cp, u, scal);
 				}
-
-			else {
+			} else {
 				cp[0] = cp[1] = cp[2] = 0.0;
 
 				for (l = 0; l < 4; l++) {
@@ -235,8 +237,8 @@ GLuint listClipTetraVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -273,7 +275,7 @@ GLuint listClipHexaVector (pMesh mesh) {
 	double rgb[3], u[3], epsra, iso, kc, dd, scal, scalemin, scalemax;
 	float cp[3];
 	GLuint dlist = 0;
-	int ia, k, l, m;
+	int ia, l, m;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	/* default */
@@ -297,6 +299,8 @@ GLuint listClipHexaVector (pMesh mesh) {
 	glLineWidth(2.0);
 
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k;
+
 		pm = &sc->material[m];
 		k = pm->depmat[LHexa];
 		if (!k || pm->flag) continue;
@@ -315,7 +319,7 @@ GLuint listClipHexaVector (pMesh mesh) {
 			epsra = EPST * scal;
 
 			/* linear interpol. */
-			if (mesh->typage == 2)
+			if (mesh->typage == 2) {
 				for (l = 0; l < 8; l++) {
 					ppt = &mesh->point[ph->v[l]];
 					if (ppt->mark == mesh->mark) continue;
@@ -333,8 +337,8 @@ GLuint listClipHexaVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -351,8 +355,7 @@ GLuint listClipHexaVector (pMesh mesh) {
 					cp[2] = ppt->c[2];
 					drawVector3D(cp, u, scal);
 				}
-
-			else {
+			} else {
 				cp[0] = cp[1] = cp[2] = 0.0;
 
 				for (l = 0; l < 8; l++) {
@@ -376,8 +379,8 @@ GLuint listClipHexaVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -413,7 +416,7 @@ GLuint listTria2dVector (pMesh mesh) {
 	double rgb[3], u[2], epsra, iso, kc, dd, scalemin, scalemax, scal;
 	float cp[2];
 	GLuint dlist = 0;
-	int ia, i, k, l, m;
+	int ia, k, m;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	/* default */
@@ -443,6 +446,8 @@ GLuint listTria2dVector (pMesh mesh) {
 			if (!k || pm->flag) continue;
 
 			while (k != 0) {
+				int i;
+
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
 					k = pt->nxt;
@@ -468,8 +473,8 @@ GLuint listTria2dVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -498,6 +503,8 @@ GLuint listTria2dVector (pMesh mesh) {
 			if (!k || pm->flag) continue;
 
 			while (k != 0) {
+				int l;
+
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
 					k = pt->nxt;
@@ -530,8 +537,8 @@ GLuint listTria2dVector (pMesh mesh) {
 				else if (iso > sc->iso.val[MAXISO - 1])
 					iso = sc->iso.val[MAXISO - 1];
 
-				for (ia = 0; ia < MAXISO - 1; ia++)
-					if (iso < sc->iso.val[ia]) break;
+				for (ia = 0; ia < MAXISO - 1; ia++) {
+					if (iso < sc->iso.val[ia]) break; }
 
 				kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 				hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -563,7 +570,7 @@ GLuint listQuad2dVector (pMesh mesh) {
 	double rgb[3], u[2], epsra, iso, kc, dd, scalemin, scalemax, scal;
 	float cp[2];
 	GLuint dlist = 0;
-	int ia, i, k, l, m;
+	int ia, k, m;
 	static double hsv[3] = {0.0, 1.0, 0.80};
 
 	/* default */
@@ -593,6 +600,8 @@ GLuint listQuad2dVector (pMesh mesh) {
 			if (!k || pm->flag) continue;
 
 			while (k != 0) {
+				int i;
+
 				pq = &mesh->quad[k];
 				if (!pq->v[0]) {
 					k = pq->nxt;
@@ -618,8 +627,8 @@ GLuint listQuad2dVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -648,6 +657,8 @@ GLuint listQuad2dVector (pMesh mesh) {
 			if (!k || pm->flag) continue;
 
 			while (k != 0) {
+				int l;
+
 				pq = &mesh->quad[k];
 				if (!pq->v[0]) {
 					k = pq->nxt;
@@ -680,8 +691,8 @@ GLuint listQuad2dVector (pMesh mesh) {
 				else if (iso > sc->iso.val[MAXISO - 1])
 					iso = sc->iso.val[MAXISO - 1];
 
-				for (ia = 0; ia < MAXISO - 1; ia++)
-					if (iso < sc->iso.val[ia]) break;
+				for (ia = 0; ia < MAXISO - 1; ia++) {
+					if (iso < sc->iso.val[ia]) break; }
 
 				kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 				hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -713,7 +724,7 @@ GLuint listTria3dVector (pMesh mesh) {
 	double rgb[3], u[3], epsra, iso, kc, dd, scalemin, scalemax, scal;
 	float cp[3];
 	GLuint dlist = 0;
-	int ia, i, k, l, m;
+	int ia, k, m;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	/* default */
@@ -742,6 +753,8 @@ GLuint listTria3dVector (pMesh mesh) {
 			if (!k || pm->flag) continue;
 
 			while (k != 0) {
+				int i;
+
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
 					k = pt->nxt;
@@ -768,8 +781,8 @@ GLuint listTria3dVector (pMesh mesh) {
 					else if (iso > sc->iso.val[MAXISO - 1])
 						iso = sc->iso.val[MAXISO - 1];
 
-					for (ia = 0; ia < MAXISO - 1; ia++)
-						if (iso < sc->iso.val[ia]) break;
+					for (ia = 0; ia < MAXISO - 1; ia++) {
+						if (iso < sc->iso.val[ia]) break; }
 
 					kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 					hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -800,6 +813,8 @@ GLuint listTria3dVector (pMesh mesh) {
 			if (!k || pm->flag) continue;
 
 			while (k != 0) {
+				int l;
+				
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
 					k = pt->nxt;
@@ -835,8 +850,8 @@ GLuint listTria3dVector (pMesh mesh) {
 				else if (iso > sc->iso.val[MAXISO - 1])
 					iso = sc->iso.val[MAXISO - 1];
 
-				for (ia = 0; ia < MAXISO - 1; ia++)
-					if (iso < sc->iso.val[ia]) break;
+				for (ia = 0; ia < MAXISO - 1; ia++) {
+					if (iso < sc->iso.val[ia]) break; }
 
 				kc = (iso - sc->iso.val[ia - 1]) / (sc->iso.val[ia] - sc->iso.val[ia - 1]);
 				hsv[0] = sc->iso.col[ia - 1] * (1.0 - kc) + sc->iso.col[ia] * kc;
@@ -859,4 +874,3 @@ GLuint listTria3dVector (pMesh mesh) {
 	glEndList();
 	return (dlist);
 }
-

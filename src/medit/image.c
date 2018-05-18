@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "sproto.h"
@@ -28,16 +29,19 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 	pPPMimage result;
 	FILE *fp;
 	int i, k, typimg, ret, r, g, b, s, maxval, bitsize;
-	char *ptr, c, buff[1024], data[256];
+	char *ptr, c, buff[1024];
 
 	/* search for image */
 	ptr = strstr(imgname, ".ppm");
 	if (!ptr) {
+		char data[256];
+
 		strcpy(data, imgname);
 		strcat(data, ".ppm");
 		fp = fopen(data, "rb");
-	} else
+	} else {
 		fp = fopen(imgname, "rb");
+	}
 
 	if (!fp) {
 		fprintf(stderr, "  ## Unable to open file %s.\n", imgname);
@@ -46,12 +50,14 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 
 	if (!fgets(buff, sizeof(buff), fp)) {
 		fprintf(stderr, "  ## Invalid file header.\n");
+		fclose(fp);
 		return (0);
 	}
 
 	/* check header file */
 	if (buff[0] != 'P') {
 		fprintf(stderr, "  ## Invalid image format.\n");
+		fclose(fp);
 		return (0);
 	}
 
@@ -66,6 +72,7 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 		break;
 	default:
 		fprintf(stderr, "  ## Invalid image format.\n");
+		fclose(fp);
 		return (0);
 	}
 
@@ -73,18 +80,19 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 	result = malloc(sizeof(PPMimage));
 	if (!result) {
 		fprintf(stderr, "  ## Unable to load image.\n");
+		fclose(fp);
 		return (0);
 	}
 
 	do {
-		ret = fscanf(fp, "%s", buff);
+		ret = fscanf(fp, "%1023s", buff);
 		if (ret == EOF) break;
 
 		/* check and strip comments */
 		if (buff[0] == '#')
-			do
+			do {
 				c = getc(fp);
-			while (c != '\n');
+			} while (c != '\n');
 
 		else break;
 	} while (1);
@@ -97,6 +105,7 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 	if (ret != 2) {
 		fprintf(stderr, "  ## Error loading image.\n");
 		free(result);
+		fclose(fp);
 		return (0);
 	}
 
@@ -106,11 +115,12 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 	if (fscanf(fp, "%d", &maxval) != 1) {
 		fprintf(stderr, "  ## Invalid image size.\n");
 		free(result);
+		fclose(fp);
 		return (0);
 	}
 
 	/* strip line */
-	while (fgetc(fp) != '\n');
+	while (fgetc(fp) != '\n') {;}
 
 	/* size based on type */
 	if (typimg == P2 || typimg == P5)
@@ -119,9 +129,10 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 		bitsize = 3 * result->sizeX * result->sizeY;
 
 	result->data = (ubyte *)malloc(bitsize * sizeof(ubyte));
-	if (!result) {
+	if (!result->data) {
 		fprintf(stderr, "  ## Unable to load image.\n");
 		free(result);
+		fclose(fp);
 		return (0);
 	}
 
@@ -144,6 +155,7 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 			fprintf(stderr, "  ## Error loading image.\n");
 			free(result->data);
 			free(result);
+			fclose(fp);
 			return (0);
 		}
 
@@ -152,7 +164,7 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 
 	fclose(fp);
 
-	if (*type == DEFAULT)
+	if (*type == DEFAULT) {
 		switch (typimg) {
 		case P2:
 		case P5:
@@ -163,7 +175,7 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 			*type = RGB;
 			break;
 		}
-
+	}
 	/* convert to grey levels */
 	else if (*type == GREY && (typimg == P3 || typimg == P6)) {
 		fprintf(stdout, "  converting to grey levels\n");
@@ -260,8 +272,9 @@ int saveTGA (const char *imgname, GLubyte *img, int w, int h) {
 	tga.cmap_type = 0;
 	tga.image_type = 2;
 
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 5; i++) {
 		tga.cmap_spec[i] = 0;
+	}
 
 	for (i = 0; i < 2; i++) {
 		tga.x_orig[i] = 0;
@@ -281,12 +294,14 @@ int saveTGA (const char *imgname, GLubyte *img, int w, int h) {
 
 	/* Output image */
 	fwrite(img, sizeof(unsigned char), w * h * 3, out);
+
+	fclose(out);
 	return (1);
 }
 
 void swapPixels (PPMimage *pixels) {
 	GLubyte *row;
-	int i, k, ck, bits;
+	int i, bits;
 
 	bits = 3 * pixels->sizeX;
 	row = (GLubyte *)malloc(bits * sizeof(GLubyte));
@@ -294,6 +309,8 @@ void swapPixels (PPMimage *pixels) {
 
 	/* exchange rows */
 	for (i = 0; i < pixels->sizeY / 2; i++) {
+		int k, ck;
+
 		k = 3 * i * pixels->sizeX;
 		ck = 3 * (pixels->sizeY - i - 1) * pixels->sizeX;
 		memcpy(row, &pixels->data[k], bits);
@@ -367,11 +384,11 @@ int imgHard (pScene sc, char *data, char key) {
 	if (key == 'H') {
 		swapPixels(pixels);
 		savePPM(data, pixels, P6);
-	} else if (key == 'T')
+	} else if (key == 'T') {
 		saveTGA(data, pixels->data, ww, hh);
+	}
 
 	M_free(pixels->data);
 	M_free(pixels);
 	return (1);
 }
-

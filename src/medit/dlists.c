@@ -14,11 +14,12 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-// SUMMARY : ...
-// LICENSE : LGPLv3
-// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Pascal Frey
-// E-MAIL  : pascal.frey@sorbonne-universite.fr
+/* SUMMARY : ...
+/* LICENSE : LGPLv3
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+/* AUTHORS : Pascal Frey
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr
+ */
 
 #include "medit.h"
 #include "extern.h"
@@ -39,7 +40,7 @@ GLuint listTria (pScene sc, pMesh mesh) {
 	GLuint dlist;
 	double dd, ax, ay, az, bx, by, bz;
 	float cx, cy, cz, n[3], pp0[3], pp1[3], pp2[3];
-	int m, mm, is0, is1, is2, transp;
+	int m, is0, is1, is2, transp;
 
 	/* default */
 	if (!mesh->nt) return (0);
@@ -53,7 +54,8 @@ GLuint listTria (pScene sc, pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
-		int k;
+		int k, mm;
+
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LTria];
@@ -78,7 +80,7 @@ GLuint listTria (pScene sc, pMesh mesh) {
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pm->dif);
 
 		glBegin(GL_TRIANGLES);
-		if (sc->type & S_FLAT)
+		if (sc->type & S_FLAT) {
 			while (k != 0) {
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
@@ -138,8 +140,7 @@ GLuint listTria (pScene sc, pMesh mesh) {
 
 				k = pt->nxt;
 			}
-
-		else
+		} else {
 			while (k != 0) {
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
@@ -245,6 +246,7 @@ GLuint listTria (pScene sc, pMesh mesh) {
 
 				k = pt->nxt;
 			}
+		}
 
 		glEnd();
 		if (transp) {
@@ -265,7 +267,7 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 	GLuint dlist = 0;
 	double ax, ay, az, bx, by, bz, dd;
 	float cx, cy, cz, n[3], pp0[3], pp1[3], pp2[3], pp3[3];
-	int m, mm, is0, is1, is2, is3, transp;
+	int m, is0, is1, is2, is3, transp;
 
 	/* default */
 	if (!mesh->nq) return (0);
@@ -279,7 +281,8 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 
 	/* build list */
 	for (m = 0; m < sc->par.nbmat; m++) {
-		int k;
+		int k, mm;
+
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LQuad];
@@ -304,7 +307,7 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, pm->dif);
 
 		glBegin(GL_QUADS);
-		if (sc->type & S_FLAT)
+		if (sc->type & S_FLAT) {
 			while (k != 0) {
 				pq = &mesh->quad[k];
 				if (pq->v[0] == 0) {
@@ -372,8 +375,7 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 
 				k = pq->nxt;
 			}
-
-		else
+		} else {
 			while (k != 0) {
 				pq = &mesh->quad[k];
 				if (!pq->v[0]) {
@@ -501,6 +503,7 @@ GLuint listQuad (pScene sc, pMesh mesh) {
 
 				k = pq->nxt;
 			}
+		}
 
 		glEnd();
 		if (transp) {
@@ -521,7 +524,7 @@ GLuint listTetra (pScene sc, pMesh mesh, ubyte clip) {
 	GLuint dlist;
 	double ax, ay, az, bx, by, bz, d;
 	float n[3], shrink, cx, cy, cz;
-	int l, m, mm;
+	int l, m;
 
 	if (!mesh->ntet) return (0);
 
@@ -536,7 +539,8 @@ GLuint listTetra (pScene sc, pMesh mesh, ubyte clip) {
 
 	/* scan tetra */
 	for (m = 0; m < sc->par.nbmat; m++) {
-		int k;
+		int k, mm;
+
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LTets];
@@ -554,8 +558,9 @@ GLuint listTetra (pScene sc, pMesh mesh, ubyte clip) {
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pm->spe);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pm->emi);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &pm->shininess);
-		} else
+		} else {
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, redcol);
+		}
 
 		/* display triangular faces */
 		glBegin(GL_TRIANGLES);
@@ -640,7 +645,7 @@ GLuint listHexa (pScene sc, pMesh mesh, ubyte clip) {
 	GLuint dlist;
 	double ax, ay, az, bx, by, bz, d;
 	float n[3], cx, cy, cz, shrink;
-	int k, l, m, mm;
+	int l, m;
 
 	if (!mesh->nhex) return (0);
 
@@ -655,6 +660,8 @@ GLuint listHexa (pScene sc, pMesh mesh, ubyte clip) {
 
 	/* scan hexa */
 	for (m = 0; m < sc->par.nbmat; m++) {
+		int k, mm;
+
 		mm = sc->matsort[m];
 		pm = &sc->material[mm];
 		k = pm->depmat[LHexa];
@@ -672,8 +679,9 @@ GLuint listHexa (pScene sc, pMesh mesh, ubyte clip) {
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, pm->spe);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, pm->emi);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &pm->shininess);
-		} else
+		} else {
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, greencol);
+		}
 
 		/* display quadrilateral faces */
 		glBegin(GL_QUADS);
@@ -754,4 +762,3 @@ GLuint listHexa (pScene sc, pMesh mesh, ubyte clip) {
 	glEndList();
 	return (dlist);
 }
-
