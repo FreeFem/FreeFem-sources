@@ -22,7 +22,7 @@
 #ifdef WITH_mumps
 #define DMUMPS
 #else
-#define DMKL_PARDISO
+#define DSUITESPARSE
 #endif
 #define MU_ARPACK
 #endif
