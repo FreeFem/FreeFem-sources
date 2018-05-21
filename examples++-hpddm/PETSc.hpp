@@ -22,28 +22,36 @@ namespace PETSc {
 template<class HpddmType>
 class DistributedCSR {
     public:
-        HpddmType*                  _A;
-        Mat                     _petsc;
-        std::vector<Mat>            _S;
-        ISLocalToGlobalMapping   _rmap;
-        VecScatter            _scatter;
-        Vec                     _isVec;
-        KSP                       _ksp;
-        unsigned int*             _num;
-        unsigned int            _first;
-        unsigned int             _last;
-        DistributedCSR() : _A(), _petsc(), _ksp(), _num(), _first(), _last() { _S.clear(); };
+        HpddmType*                             _A;
+        Mat                                _petsc;
+        std::vector<Mat>                       _S;
+        VecScatter                       _scatter;
+        KSP                                  _ksp;
+        HPDDM::Subdomain<PetscScalar>** _exchange;
+        unsigned int*                        _num;
+        unsigned int                       _first;
+        unsigned int                        _last;
+        unsigned int*                       _cnum;
+        unsigned int                      _cfirst;
+        unsigned int                       _clast;
+        DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); };
         ~DistributedCSR() {
             MatDestroy(&_petsc);
             for(int i = 0; i < _S.size(); ++i)
                 MatDestroy(&_S[i]);
             KSPDestroy(&_ksp);
-            if(_A) {
-                if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value) {
-                    ISLocalToGlobalMappingDestroy(&_rmap);
-                    VecDestroy(&_isVec);
-                    VecScatterDestroy(&_scatter);
+            if(_exchange) {
+                _exchange[0]->clearBuffer();
+                delete _exchange[0];
+                if(_exchange[1]) {
+                    _exchange[1]->clearBuffer();
+                    delete _exchange[1];
                 }
+                delete [] _exchange;
+            }
+            if(_A) {
+                if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
+                    VecScatterDestroy(&_scatter);
                 else
                     _A->clearBuffer();
                 delete _A;

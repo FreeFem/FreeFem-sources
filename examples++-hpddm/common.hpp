@@ -22,7 +22,7 @@
 #ifdef WITH_mumps
 #define DMUMPS
 #else
-#define DSUITESPARSE
+#define DMKL_PARDISO
 #endif
 #define MU_ARPACK
 #endif
@@ -154,6 +154,29 @@ void exchange(Type* const& pA, KN<K>* pin, bool scaled) {
     if(pA)
         exchange_dispatched(pA->_A, pin, scaled);
 }
+template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 0>::type* = nullptr>
+void exchange_restriction(Type* const&, KN<K>*, KN<K>*, MatriceMorse<double>*) { }
+namespace PETSc {
+template<class Type, class K>
+void changeNumbering_func(Type*, KN<K>*, KN<K>*, bool);
+}
+template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
+void exchange_restriction(Type* const& pA, KN<K>* pin, KN<K>* pout, MatriceMorse<double>* mR) {
+    if(pA->_exchange && !pA->_exchange[1]) {
+        ffassert((!mR && pA->_exchange[0]->getDof() == pout->n) || (mR && mR->n == pin->n && mR->m == pout->n));
+        PETSc::changeNumbering_func(pA, pin, pout, false);
+        PETSc::changeNumbering_func(pA, pin, pout, true);
+        pout->resize(pA->_exchange[0]->getDof());
+        *pout = K();
+        if(mR) {
+            for(int i = 0; i < mR->n; ++i) {
+                for(int j = mR->lg[i]; j < mR->lg[i + 1]; ++j)
+                    pout->operator[](mR->cl[j]) += mR->a[j] * pin->operator[](i);
+            }
+        }
+        exchange_dispatched(pA->_exchange[0], pout, false);
+    }
+}
 template<class Type, class K>
 class exchangeIn_Op : public E_F0mps {
     public:
@@ -195,7 +218,7 @@ class exchangeInOut_Op : public E_F0mps {
         Expression A;
         Expression in;
         Expression out;
-        static const int n_name_param = 1;
+        static const int n_name_param = 2;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         exchangeInOut_Op<Type, K>(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), in(param2), out(param3) {
@@ -206,7 +229,8 @@ class exchangeInOut_Op : public E_F0mps {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type exchangeInOut_Op<Type, K>::name_param[] = {
-    {"scaled", &typeid(bool)}
+    {"scaled", &typeid(bool)},
+    {"restriction", &typeid(Matrice_Creuse<double>*)}
 };
 template<class Type, class K>
 class exchangeInOut : public OneOperator {
@@ -223,9 +247,16 @@ AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
     KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
     bool scaled = nargs[0] && GetAny<bool>((*nargs[0])(stack));
-    *pout = *pin;
-    exchange(pA, pin, scaled);
-    *pout -= *pin;
+    Matrice_Creuse<double>* pR = nargs[1] ? GetAny<Matrice_Creuse<double>*>((*nargs[1])(stack)) : nullptr;
+    MatriceMorse<double>* mR = pR ? static_cast<MatriceMorse<double>*>(&(*pR->A)) : nullptr;
+    if(pR) {
+        ffassert(!scaled);
+        exchange_restriction(pA, pin, pout, mR);
+    }
+    else if(pin->n == pout->n) {
+        *pout = *pin;
+        exchange(pA, pout, scaled);
+    }
     return 0L;
 }
 
