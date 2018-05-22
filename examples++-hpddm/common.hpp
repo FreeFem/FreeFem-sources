@@ -8,6 +8,9 @@
 
 #ifdef WITH_mkl
 #define HPDDM_MKL 1
+#define MKL_Complex8 std::complex<float>
+#define MKL_Complex16 std::complex<double>
+#include <mkl.h>
 #endif
 
 #if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
