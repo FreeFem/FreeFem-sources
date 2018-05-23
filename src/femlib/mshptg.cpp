@@ -90,11 +90,11 @@ III. Renvoie le type d'erreur:
   mshptg erreurs
 1: mshptg := 'le nb de point est < 3 or > que le nb max de point';
 2: mshptg := 'il y des points confondus ';
-3: mshptg := 'tout les points sont alignªs ';
-7: mshptg := 'bug dans l''algorithme pour retrouver la frontiüre (Internal Bug mshfrt)';
-8: mshptg := 'Une arçte a forcer traverse trop de triangles (Internal Bug : mshfr1)';
-9: mshptg := 'la frontiüre est croisªe ';
-10: mshptg := 'il y a un point qui est sur une arçte frontiüre';
+3: mshptg := 'tout les points sont align¬ªs ';
+7: mshptg := 'bug dans l''algorithme pour retrouver la fronti≈∏re (Internal Bug mshfrt)';
+8: mshptg := 'Une ar¬çte a forcer traverse trop de triangles (Internal Bug : mshfr1)';
+9: mshptg := 'la fronti≈∏re est crois¬ªe ';
+10: mshptg := 'il y a un point qui est sur une ar¬çte fronti≈∏re';
 11: mshptg := 'Un sous domaine est reference par aucun triangle ';
 20: mshptg := 'mshopt: 3 points confondus (Internal Bug) ';
 21: mshptg := 'la pile de mshopt est trop petit (Internal Bug)';
@@ -1700,7 +1700,7 @@ L50:
 				mshfr1_ (&c[3], &nu[7], &t, &ta, &is1, &s2, err);
 				if (*err != 0)
 				   {
-                                       printf(" Error %ld inforce edge   %ld = %ld;%ld  with vertices  %ld %d \n",*err,a,i_2, i_3, is1,s2 );
+                                       printf(" Error %ld inforce edge   %ld = %ld;%ld  with vertices  %ld %ld \n",*err,a,i_2, i_3, is1,s2 );
 				     return 0;
 				   }
 				goto L100;
