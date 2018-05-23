@@ -4,17 +4,17 @@
 # http://www.ljll.math.upmc.fr/lehyaric
 # ======================================================================
 # This file is part of Freefem++
-# 
+#
 # Freefem++ is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
-# 
+#
 # Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -22,12 +22,12 @@
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
 
 include Makefile.inc
-W_SUDO:=$(SHELL  mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
+W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
 W_SUDO1=$(SHELL ls	)
 
 all-local:
-	@echo " # To build petsc and slepc  do # make petsc-slepc"
-	@echo " # warning tou have no writing acces in  $(DESTDIR)$(prefix)/ff-petsc"
+	@echo " # To build petsc and slepc do $ make petsc-slepc"
+	@echo " # warning you have no write acces in $(DESTDIR)$(prefix)/ff-petsc"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
 	@echo " # run under root "
 	@echo " # or create / add acces to $(DESTDIR)$(prefix)/ff-petsc "
@@ -41,8 +41,8 @@ DIRPKG=../pkg
 VERSION=3.8.4
 VERSION_SLEPC=3.8.3
 # http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
-PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz 
-PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz 
+PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
+PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
 SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -52,14 +52,14 @@ ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
 else
   WITH_MPI_DIR=--with-mpi-dir='$(MPI_DIR)'
-endif	
+endif
 DIR_INSTALL_REAL:=$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 
-dir-install: Makefile.inc 
+dir-install: Makefile.inc
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_COMPLEX)
 	@if test -w 	"$(DESTDIR)$(DIR_INSTALL_REAL)" -a -w 	"$(DESTDIR)$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
@@ -78,7 +78,7 @@ PETSc-complex:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex WHERE-complex ;\
 	else echo " -- No  Petc , no MPI, no Petsc real"; fi
 
-WHERE:../lib/WHERE.PETSc ../lib/WHERE.SLEPc  
+WHERE:../lib/WHERE.PETSc ../lib/WHERE.SLEPc
 
 ../lib/WHERE.PETSc:$(SRCDIR)/tag-install-real
 	-mkdir ../lib
@@ -97,8 +97,8 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 	touch $@
 
 
-$(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real 
-	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install 
+$(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
+	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -113,15 +113,15 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
 	--download-scalapack --download-metis --download-ptscotch \
 	--download-mumps --download-ml --download-hypre --download-parmetis \
-	--download-superlu --download-pastix --download-suitesparse --download-fftw \
+	--download-superlu --download-suitesparse --download-fftw \
 	PETSC_ARCH=ff-real
 	test -f $(SRCDIR)/ff-real/lib/petsc/conf/petscvariables
 	touch $@
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 
-ifdef 	MUMPS_LIB	
-#  version COMPLEX  .....  
+ifdef 	MUMPS_LIB
+#  version COMPLEX  .....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	cd $(SRCDIR) &&  python2 ./configure \
 	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
@@ -140,14 +140,14 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	test -f $(SRCDIR)/ff-complex/lib/petsc/conf/petscvariables
 	touch $@
 
-$(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk 
+$(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex all
 	touch $@
 
-$(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex 
+$(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex
 	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	touch $@
-WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex 
+WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
 	-mkdir ../lib
@@ -159,7 +159,7 @@ WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
 
 
-##  need include include Make-petsc-download.mk	
+##  need include include Make-petsc-download.mk
 WHERE-all:Makefile WHERE-complex WHERE
 	echo scalapack LD $(SCALAPACK_LIB) >$@
 	echo scalapack INCLUDE -I$(CALAPACK_INCLUDE) >>$@
@@ -188,11 +188,11 @@ WHERE-all:Makefile WHERE-complex WHERE
 $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_COMPLEX) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_COMPLEX) 
+	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_COMPLEX)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
-	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) 
+	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX)
 	touch $@
 
 
@@ -203,10 +203,10 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
-	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@	
-else	
+	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
+else
 WHERE-all:Makefile  Make-petsc-download.mk
-	 $(MAKE) -f Makefile.complex $@ 
+	 $(MAKE) -f Makefile.complex $@
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	tar xvzf $(PACKAGE)
@@ -225,16 +225,16 @@ $(PACKAGE_SLEPC):
 $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_REAL) 
+	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_REAL)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
-	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
+	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL)
 	touch $@
 
 
-$(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real 
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) 
+$(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL)
 	touch $@
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
@@ -244,23 +244,23 @@ $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real
 
 clean:clean-local
 clean-local:
-	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR) 
-	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc* ../lib/WHERE.SLEPc* 
+	-cd $(SRCDIR) &&  $(MAKE) clean -C $(SRCDIR)
+	-rm Makefile.inc FAIRE* ../lib/WHERE.PETSc* ../lib/WHERE.SLEPc*
 	-rm -rf ../include/*PETSc*
-	-rm -rf ../lib/lib*PETSc* 
+	-rm -rf ../lib/lib*PETSc*
 	-rm -rf $(SRCDIR)
 	-rm -rf $(prefix)/ff-petsc
 #	-rm $(PACKAGE1)
 	-rm WHERE-all config.log *.done
 	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo rm -rf $(prefix)/ff-petsc ; fi
-	-rm do-sudo 
+	-rm do-sudo
 
 echo:
 	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 	@echo SUDO: $(SUDO)
 	@echo MPI_DIR: $(MPI_DIR)
-	@echo " dir install real :" $(DIR_INSTALL_REAL) 
-	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX) 
+	@echo " dir install real :" $(DIR_INSTALL_REAL)
+	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX)
 	@echo " do-sudo auto ???" $(SHELL  cat o-sudo)
 install-destdir:
 	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)$(DIR_INSTALL_REAL)
