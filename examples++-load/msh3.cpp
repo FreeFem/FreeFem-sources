@@ -5571,7 +5571,7 @@ AnyType Op_trunc_mesh3::Op::operator()(Stack stack)  const {
     
   Mesh3 *pTh = GetAny<Mesh3 *>((*getmesh)(stack));
   Mesh3 &Th = *pTh;
-  long kkksplit =arg(0,stack,1L);
+  long kkksplit =std::max(1L, arg(0,stack,1L));
   long label =arg(1,stack,2L);
    KN<long> * pn2o =  arg(2,stack);
 KN<long> * po2n =  arg(3,stack);
