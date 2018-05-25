@@ -21,7 +21,7 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: flann
+//ff-c++-LIBRARY-dep: [flann]
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
