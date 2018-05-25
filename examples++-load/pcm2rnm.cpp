@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: pcm.cpp
-//ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep: pcm.cpp
 // *INDENT-ON* //
 
 /*  use in freefem++ edp
