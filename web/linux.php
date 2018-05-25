@@ -76,7 +76,7 @@ an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with th
 <p class="p7"><span class="s6"><b><span class="Apple-converted-space"> </span></b></span><span class="s1"> <span class="Apple-converted-space"> </span></span></p>
 <p class="p3"><span class="s7"><span class="Apple-converted-space"> </span></span><span class="s1">To compile with lot of additionnal software.</span></p>
 <p class="p6"><span class="s8"><br>
-</span><span class="s1"><b>./configure --enable-download<span class="Apple-converted-space"> </span></b></span></p>
+</span><span class="s1"><b>./configure --enable-download  --disable-pastix <span class="Apple-converted-space"> </span></b></span></p>
 <p class="p6"><span class="s1"><b><span class="Apple-converted-space">  </span>make<span class="Apple-converted-space"> </span></b></span></p>
 <p class="p6"><span class="s1"><b><span class="Apple-converted-space">  </span>make check<span class="Apple-converted-space">    </span>(to test de version)</b></span></p>
 <p class="p6"><span class="s1"><b><span class="Apple-converted-space">  </span>make install<span class="Apple-converted-space">  </span>(under root)</b></span></p>
@@ -89,7 +89,7 @@ an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with th
 <p class="p3"><span class="s1">1)  install  git and cmake</p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>sudo apt-get install git cmake</b></span></p>
 <p class="p3"><span class="s1">2)  configure to def on compiler, mpi , ...</p>
-<p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>./configure --enable-download .....</b></span></p>
+<p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>./configure --enable-download  --disable-pastix .....</b></span></p>
 <p class="p3"><span class="s1">3)  download and compile petsc, slepc in real and complex, ...</p>
 <p class="p3"><span class="s1">  ...  Warning: Check that you can write in  directory : path_install/ff-petsc</p>
 <p class="p9"><span class="s9"><b><span class="Apple-converted-space">  </span>cd download/ff-petsc</b></span></p>
@@ -230,10 +230,12 @@ an anonymous <A href="https://git-scm.com/downloads" > git SCM </A> copy with th
 <p class="p7"><span class="s1"><span class="Apple-converted-space"> </span></span></p>
 <p class="p16"><span class="s1"><br>
 </span></p>
-<p class="p20"><span class="s1"><b><span class="Apple-converted-space"> </span>./configure --enable-download<span class="Apple-converted-space">  </span>--with-mpi=mpic++</b></span></p>
+<p class="p20"><span class="s1"><b><span class="Apple-converted-space"> </span>./configure --enable-download  --disable-pastix <span class="Apple-converted-space">  </span>--with-mpi=mpic++</b></span></p>
 <p class="p20"><span class="s1"><b>#<span class="Apple-converted-space">  </span>utility of parameter:</b></span></p>
 <p class="p20"><span class="s1"><b>#<span class="Apple-converted-space">  </span>--enable-download :<span class="Apple-converted-space">  </span>for fft and tetgen ...<span class="Apple-converted-space"> </span></b></span></p>
-<p class="p20"><span class="s1"><b>#<span class="Apple-converted-space">  </span>--with-mpi=mpic++ : for mpi version<span class="Apple-converted-space"> </span></b></span></p>
+<p class="p20"><span class="s1"><b>#<span class="Apple-converted-space">  </span>--with-mpi=mpic++ : for mpi version<span 
+<p class="p20"><span class="s1"><b>#<span class="Apple-converted-space">  </span>--disable-pastix : for mpi version<span 
+class="Apple-converted-space"> </span></b></span></p>
 <p class="p20"><span class="s1"><b><span class="Apple-converted-space">  </span>make<span class="Apple-converted-space"> </span></b></span></p>
 <p class="p16"><span class="s12"><b><span class="Apple-converted-space">  </span>make check<span class="Apple-converted-space">    </span></b></span><span class="s1">(to test de version)</span></p>
 <p class="p20"><span class="s1"><b><span class="Apple-converted-space">  </span>make install<span class="Apple-converted-space"> </span></b> </span><span class="s8">(under root)</span></p>
