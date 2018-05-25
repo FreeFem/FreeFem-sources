@@ -20,6 +20,11 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+// *INDENT-OFF* //
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
+// *INDENT-ON* //
+
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
@@ -103,4 +108,3 @@ static void Load_Init () {
 }
 
 LOADFUNC(Load_Init)
-

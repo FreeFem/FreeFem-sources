@@ -24,6 +24,11 @@
 // VALIDATION: test_P2BR.edp
 // EXAMPLE: NS_P2BR_P0.edp
 
+// *INDENT-OFF* //
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
+// *INDENT-ON* //
+
 #include <ff++.hpp>
 #include "AddNewFE.h"
 
@@ -42,21 +47,22 @@ namespace Fem2D
 			static int Data [];
 
 			TypeOfFE_P2BRLagrange (): TypeOfFE(
-					6 + 3 + 0,        // Number of degrees of freedom
-					2,                // Dimension N
-					Data,             // Data array
-					4,                // Number of subdivisions for plotting
-					1,                // Number of sub finite element
-					6 + 3 * (2 + 2),  // Number kPi of coefficients to build the interpolation
-					9,                // number nPi of integration points to build the interpolation
-					0                 // Array to store the coefficient alpha_k to build the interpolator
+					6 + 3 + 0,	// Number of degrees of freedom
+					2,	// Dimension N
+					Data,	// Data array
+					4,	// Number of subdivisions for plotting
+					1,	// Number of sub finite element
+					6 + 3 * (2 + 2),// Number kPi of coefficients to build the interpolation
+					9,	// number nPi of integration points to build the interpolation
+					0	// Array to store the coefficient alpha_k to build the interpolator
 					) {
 				const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
 				const double gauss2 = 1. - gauss1;
 				const R2 Pt [] = {R2(0, 0), R2(1, 0), R2(0, 1)};
-				
+
 				// For the 3 vertices: 6 coefficents
 				int kk = 0;
+
 				for (int p = 0; p < 3; p++) {
 					P_Pi_h[p] = Pt[p];
 					pij_alpha[kk] = IPJ(kk, p, 0);
@@ -67,6 +73,7 @@ namespace Fem2D
 
 				// Integration point on edge e
 				int p = 3;
+
 				for (int e = 0; e < 3; ++e) {
 					R2 A = Pt[VerticesOfTriangularEdge[e][0]];
 					R2 B = Pt[VerticesOfTriangularEdge[e][1]];
@@ -106,8 +113,9 @@ namespace Fem2D
 		int k = 0;
 
 		// Coefficents for the 3 vertices time the 2 components
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++) {
 			v[k++] = 1;
+		}
 
 		// Integration on edges
 		for (int i = 0; i < 3; i++) {
@@ -129,7 +137,7 @@ namespace Fem2D
 		// to get the flux = 1
 		R2 E[3] = {K.Edge(0), K.Edge(1), K.Edge(2)};
 		double l2E[3] = {(E[0], E[0]), (E[1], E[1]), (E[2], E[2])};
-		//double lE[3] = {sqrt(l2E[0]), sqrt(l2E[1]), sqrt(l2E[2])};
+		// double lE[3] = {sqrt(l2E[0]), sqrt(l2E[1]), sqrt(l2E[2])};
 		double sgE[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
 		R2 cN[3] = {
 			E[0].perp() * (6. * sgE[0] / l2E[0]),
@@ -251,16 +259,19 @@ namespace Fem2D
 			int nop = 0;
 			int vop[last_operatortype];
 
-			for (int j = 0; j < last_operatortype; j++)
-				if (whatd[j])
+			for (int j = 0; j < last_operatortype; j++) {
+				if (whatd[j]) {
 					vop[nop++] = j;
+				}
+			}
 
-			for (int i = 0; i < 6; ++i)
+			for (int i = 0; i < 6; ++i) {
 				for (int jj = 0; jj < nop; ++jj) {
 					int j = vop[jj];
 					val(i, 0, j) -= a[i] * val(k[i], 0, j) + b[i] * val(l[i], 0, j);
 					val(i, 1, j) -= a[i] * val(k[i], 1, j) + b[i] * val(l[i], 1, j);
 				}
+			}
 		}
 	}
 
@@ -270,4 +281,3 @@ namespace Fem2D
 	// now, adding FE in FreeFem++ table
 	static AddNewFE P2BR("P2BR", &P2LagrangeP2BR);
 }	// end FEM2d namespace
-
