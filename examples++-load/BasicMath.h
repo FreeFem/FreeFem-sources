@@ -85,24 +85,24 @@ inline ostream_math operator << (ostream_math f, double x) {
 		ostringstream oss;
 		oss << x;
 		const char *px = oss.str().c_str();
-		if (px[0] == 'N') f << "Indeterminate";
-		else if (px[0] == 'i') f << "Infinity";
-		else if (px[0] == '-' && px[1] == 'i') f << "-Infinity";
-		else {
-			for (int i = 0; i < 20 && px[i] > 0; i++)
+		if (px[0] == 'N') {f << "Indeterminate";} else if (px[0] == 'i') {f << "Infinity";} else if (px[0] == '-' && px[1] == 'i') {f << "-Infinity";} else {
+			for (int i = 0; i < 20 && px[i] > 0; i++) {
 				if (px[i] == 'e') {
 					char Buffer[20];
 
-					for (int j = 0; j < i; j++) Buffer[j] = px[j];
+					for (int j = 0; j < i; j++) {
+						Buffer[j] = px[j];
+					}
 
 					Buffer[i] = 0;
 					f << Buffer << "*10^" << px + i + 1;
 					return f;
 				}
+			}
 
 			f << px;
 		}	// if px[0]
-	} else f.os << x;
+	} else {f.os << x;}
 
 	return f;
 }
@@ -111,9 +111,9 @@ template<class ForwardIterator> void print_array (ostream_math f, ForwardIterato
 	string sep = one_per_line ? ",\n" : ",";
 
 	f << "{";
-	if (first != last) f << *first++;
+	if (first != last) {f << *first++;}
 
-	while (first != last) f << sep << *first++;
+	while (first != last) {f << sep << *first++;}
 
 	f << "}";
 }

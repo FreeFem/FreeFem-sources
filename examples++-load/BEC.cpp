@@ -20,6 +20,11 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+// *INDENT-OFF* //
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
+// *INDENT-ON* //
+
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 using namespace Fem2D;
@@ -35,12 +40,14 @@ double BECtrap (Stack stack, KN<double> *const &pd) {
 	// cout << "x = " << x << " y=" << y << " " << sin(x)*cos(y) <<  endl;
 	double ret;
 
-	if (n == 4)
+	if (n == 4) {
 		ret = x2 * d[0] + y2 * d[1] + z2 * d[2] + r4 * d[3];
-	else if (n == 6) {
+	} else if (n == 6) {
 		double s = sin(d[5] * z);
 		ret = x2 * d[0] + y2 * d[1] + z2 * d[2] + r4 * d[3] + d[4] * s * s;
-	} else ffassert(0);	//
+	} else {
+		ffassert(0);//
+	}
 
 	return ret;
 }
@@ -124,4 +131,3 @@ static void init () {
 }
 
 LOADFUNC(init);
-

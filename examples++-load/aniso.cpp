@@ -22,9 +22,11 @@
 
 // ORIG-DATE : March 2015
 
+// *INDENT-OFF* //
 // for automatic  compilation with ff-c++
-// ff-c++-LIBRARY-dep: mshmet libMesh
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: mshmet libMesh
+//ff-c++-cpp-dep:
+// *INDENT-ON* //
 
 /*
  * Thank to the ARN () FF2A3 grant
@@ -43,13 +45,15 @@
 static const int wrapperMetric[6] = {0, 1, 3, 2, 4, 5};
 
 void met3dwrap (double m[6], double mw[6]) {
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 6; ++i) {
 		mw[i] = m[wrapperMetric[i]];
+	}
 }
 
 void unmet3dwrap (double mw[6], double m[6]) {
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 6; ++i) {
 		m[wrapperMetric[i]] = mw[i];
+	}
 }
 
 int BoundAniso2d (double m[3], double cmin) {
@@ -84,10 +88,12 @@ int BoundAniso3d (double mff[6], double cmin) {
 		l[1] = max(l[1], vpmn);
 		l[2] = max(l[2], vpmn);
 
-		for (int k = 0, i = 0; i < 3; i++)
-			for (int j = i; j < 3; j++)
+		for (int k = 0, i = 0; i < 3; i++) {
+			for (int j = i; j < 3; j++) {
 				m[k++] = l[0] * vp[0][i] * vp[0][j] + l[1] * vp[1][i] * vp[1][j] \
 				         + l[2] * vp[2][i] * vp[2][j];
+			}
+		}
 	}
 
 	unmet3dwrap(m, mff);
@@ -98,17 +104,19 @@ long Boundaniso (long const &k, KN<double> *const &pm, double const &animax) {
 	KN<double> &m(*pm);
 	long ns = m.N() / k;
 	ffassert(ns * k == m.N());
-	//double lmin = sqrt(animax);
+	// double lmin = sqrt(animax);
 	ffassert(k == 3 || k == 6);
 	int err = 0;
-	if (k == 3)	// <[m11,m12,m22]
-		for (int i = 0; i < ns; ++i)
+	if (k == 3) {	// <[m11,m12,m22]
+		for (int i = 0; i < ns; ++i) {
 			err += BoundAniso2d(&m[i * k], animax);
-
-	else
+		}
+	} else {
 		// 3d [m11,m21,m22,m31,m32,m33
-		for (int i = 0; i < ns; ++i)
+		for (int i = 0; i < ns; ++i) {
 			err += BoundAniso3d(&m[i * k], animax);
+		}
+	}
 
 	ffassert(err == 0);
 	return ns;
@@ -116,7 +124,7 @@ long Boundaniso (long const &k, KN<double> *const &pm, double const &animax) {
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	// if (verbosity)
-	if (verbosity) cout << " load: aniso  " << endl;
+	if (verbosity) {cout << " load: aniso  " << endl;}
 
 	Global.Add("boundaniso", "(", new OneOperator3_<long, long, KN<double> *, double>(Boundaniso));
 }
@@ -124,4 +132,3 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 #define  WITH_NO_INIT
 #include "msh3.hpp"
 LOADFUNC(Load_Init)
-

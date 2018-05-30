@@ -20,6 +20,11 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+// *INDENT-OFF* //
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
+// *INDENT-ON* //
+
 // to compile: ff-c++ bstream.cpp
 // WARNING: do not compile under windows
 
@@ -57,7 +62,7 @@ istream*Read (Stream_b<istream> const &io, KN<T> *const &data) {
 
 	io.f->read(reinterpret_cast<char *>(&n), sizeof(long));
 	cout << " read  n =" << n << " " << n * sizeof(sizeof(T)) << " " << endl;
-	if (n != data->N()) data->resize(n);
+	if (n != data->N()) {data->resize(n);}
 
 	T *p = *data;
 	io.f->read(reinterpret_cast<char *>(p), n * sizeof(T));
@@ -118,4 +123,3 @@ static void inittt () {
 }
 
 LOADFUNC(inittt);
-

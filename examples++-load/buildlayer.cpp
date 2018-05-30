@@ -20,6 +20,11 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+// *INDENT-OFF* //
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
+// *INDENT-ON* //
+
 #include <iostream>
 #include <cfloat>
 #include <cmath>
@@ -75,16 +80,17 @@ class BuildLayeMesh_Op: public E_F0mps
 			cout << "construction par BuilLayeMesh_Op" << endl;
 			args.SetNameParam(n_name_param, name_param, nargs);
 			const E_Array *a2 = 0, *a1 = 0;
-			if (nargs[0]) a1 = dynamic_cast<const E_Array *>(nargs[0]);
+			if (nargs[0]) {a1 = dynamic_cast<const E_Array *>(nargs[0]);}
 
-			if (nargs[1]) a2 = dynamic_cast<const E_Array *>(nargs[1]);
+			if (nargs[1]) {a2 = dynamic_cast<const E_Array *>(nargs[1]);}
 
 			int err = 0;
 			// cout << nargs[0] << " "<< a1 << endl;
 			// cout << nargs[1] << " "<< a2 << endl;
 			if (a1) {
-				if (a1->size() != 2)
+				if (a1->size() != 2) {
 					CompileError("LayerMesh (Th,n, zbound=[zmin,zmax],) ");
+				}
 
 				// cout << "lecture de ezmin , ezmax" << endl;
 				ezmin = to<double>((*a1)[0]);
@@ -92,8 +98,9 @@ class BuildLayeMesh_Op: public E_F0mps
 			}
 
 			if (a2) {
-				if (a2->size() != 3)
+				if (a2->size() != 3) {
 					CompileError("LayerMesh (Th,n, transfo=[X,Y,Z],) ");
+				}
 
 				xx = to<double>((*a2)[0]);
 				yy = to<double>((*a2)[1]);
@@ -146,19 +153,20 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 	zmin = 0.;
 	zmax = 1.;
 
-	for (int it = 0; it < nbt; ++it)
+	for (int it = 0; it < nbt; ++it) {
 		for (int iv = 0; iv < 3; ++iv) {
 			int i = Th(it, iv);
 			if (clayer[i] < 0) {
 				mp->setP(&Th, it, iv);
 				// cout << "mp: fait " << endl;
-				if (ezmin) zmin[i] = GetAny<double>((*ezmin)(stack));
+				if (ezmin) {zmin[i] = GetAny<double>((*ezmin)(stack));}
 
-				if (ezmax) zmax[i] = GetAny<double>((*ezmax)(stack));
+				if (ezmax) {zmax[i] = GetAny<double>((*ezmax)(stack));}
 
 				clayer[i] = Max(0., Min(1., arg(2, stack, 1.)));
 			}
 		}
+	}
 
 	ffassert(clayer.min() >= 0);
 
@@ -195,33 +203,38 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 
 	for (int ii = 0; ii < nrtet.N(); ii += 2) {
 		imap = maptet.find(nrtet[ii]);
-		if (imap != maptet.end())
+		if (imap != maptet.end()) {
 			imap->second = nrtet[ii + 1];
+		}
 	}
 
 	for (int ii = 0; ii < nrfmid.N(); ii += 2) {
 		imap = maptrimil.find(nrfmid[ii]);
-		if (imap != maptrimil.end())
+		if (imap != maptrimil.end()) {
 			imap->second = nrfmid[ii + 1];
+		}
 	}
 
 	for (int ii = 0; ii < nrfup.N(); ii += 2) {
 		imap = maptrizmax.find(nrfup[ii]);
-		if (imap != maptrizmax.end())
+		if (imap != maptrizmax.end()) {
 			imap->second = nrfup[ii + 1];
+		}
 	}
 
 	for (int ii = 0; ii < nrfdown.N(); ii += 2) {
 		imap = maptrizmin.find(nrfdown[ii]);
-		if (imap != maptrizmin.end())
+		if (imap != maptrizmin.end()) {
 			imap->second = nrfdown[ii + 1];
+		}
 	}
 
 	int nebn = 0;
 	KN<int> ni(nbv);
 
-	for (int i = 0; i < nbv; i++)
+	for (int i = 0; i < nbv; i++) {
 		ni[i] = Max(0, Min(nlayer, (int)lrint(nlayer * clayer[i])));
+	}
 
 	Mesh3 *Th3 = build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
 
@@ -256,20 +269,21 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 		takemesh = 0;
 		Mesh3 &rTh3 = *Th3;
 
-		for (int it = 0; it < Th3->nt; ++it)
+		for (int it = 0; it < Th3->nt; ++it) {
 			for (int iv = 0; iv < 4; ++iv) {
 				int i = (*Th3)(it, iv);
 				if (takemesh[i] == 0) {
 					mp3->setP(Th3, it, iv);
-					if (xx) txx[i] = GetAny<double>((*xx)(stack));
+					if (xx) {txx[i] = GetAny<double>((*xx)(stack));}
 
-					if (yy) tyy[i] = GetAny<double>((*yy)(stack));
+					if (yy) {tyy[i] = GetAny<double>((*yy)(stack));}
 
-					if (zz) tzz[i] = GetAny<double>((*zz)(stack));
+					if (zz) {tzz[i] = GetAny<double>((*zz)(stack));}
 
 					takemesh[i] = takemesh[i] + 1;
 				}
 			}
+		}
 
 		int border_only = 0;
 		int recollement_elem = 0, recollement_border = 1;
@@ -297,8 +311,9 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 	typedef const Mesh *pmesh;
 	typedef const Mesh3 *pmesh3;
 
-	if (verbosity)
+	if (verbosity) {
 		cout << " load: buildlayers  " << endl;
+	}
 
 	// cout << " je suis dans Init " << endl;
 
@@ -306,4 +321,3 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 }
 
 LOADFUNC(Load_Init)
-
