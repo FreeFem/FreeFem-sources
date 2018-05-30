@@ -563,7 +563,7 @@ instruction:   ';' {$$=0;}
                     inloopcount--;
                     $$=Block::close(currentblock,C_F0(ForAll($5,$8)));
                  }
-         |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9)}
+         |  for_loop  '(' Expr ';' Expr ';' Expr ')' instruction {inloopcount--; $$=For($3,$5,$7,$9);}
          |  for_loop  '(' declaration_for ';' Expr ';' Expr ')' instruction 
                 {inloopcount--;
                  $$=Block::close(currentblock,C_F0(For($3,$5,$7,$9)));

@@ -174,7 +174,7 @@ int Mesh2::load(const string & filename)
   for(int i=0;i<nv;++i)
     {  
       if(ver<2) {
-	GmfGetLin(inm,GmfVertices,&cr[0],&cr[1],&cr[2],&lab);
+	GmfGetLin(inm,GmfVertices,&cr[0],&cr[1],&lab);
 	vertices[i].x=cr[0];
 	vertices[i].y=cr[1];
 	//	vertices[i].z=cr[2];
@@ -189,11 +189,11 @@ int Mesh2::load(const string & filename)
   
   
   //    /* read mesh triangles */
-  if(mnlab==0 &&mxlab==0 )
+  //if(mnlab==0 &&mxlab==0 )
     {
       mes=0;
       GmfGotoKwd(inm,GmfTriangles);
-      for(int i=0;i<nbe;++i)
+      for(int i=0;i<nt;++i)
 	{  
 	  GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
 	  for (int j=0;j<3;++j)  
@@ -217,7 +217,8 @@ int Mesh2::load(const string & filename)
       mesb += this->borderelements[i].mesure();	    
     }
   
-  GmfCloseMesh(inm);    
+  GmfCloseMesh(inm);
+    if(verbosity>1)  cout << "   mesure :  "<< mes << " border mesure : " << mesb<< endl;
   return(0); // OK
   
 }

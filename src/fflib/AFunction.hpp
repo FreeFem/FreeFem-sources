@@ -340,6 +340,12 @@ inline basicForEachType * atype() {
             throw(ErrorExec("exit",1));}
   return ir->second;}
 
+template<typename T>
+inline basicForEachType * atype0() {
+    map<const string,basicForEachType *>::iterator ir=map_type.find(typeid(T).name());
+    if (ir == map_type.end()) return  0;
+    return ir->second;}
+
 
 //  --------
 //typedef basicForEachType TheType;

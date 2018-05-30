@@ -50,6 +50,12 @@
 		3D15D4AD0BD3A6E000CEB4C6 /* mt19937ar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD23097015B4002A1826 /* mt19937ar.cpp */; };
 		3D15D4AF0BD3A6E000CEB4C6 /* problem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD26097015B4002A1826 /* problem.cpp */; };
 		3D15D4B40BD3A6E000CEB4C6 /* strversionnumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD31097015B4002A1826 /* strversionnumber.cpp */; };
+		3D23E89E20BE9F7D00B6683D /* libifport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89D20BE9F7D00B6683D /* libifport.a */; };
+		3D23E8A020BEA02300B6683D /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89F20BEA02300B6683D /* libarpack.a */; };
+		3D23E8A120BEA02300B6683D /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89F20BEA02300B6683D /* libarpack.a */; };
+		3D23E8A720BEAB5A00B6683D /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E8A620BEAB5A00B6683D /* libifport.dylib */; };
+		3D23E8A920BEAC3E00B6683D /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E8A820BEAC3E00B6683D /* libifcore.a */; };
+		3D23E8AD20BEAD6600B6683D /* libirc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E8AC20BEAD6600B6683D /* libirc.a */; };
 		3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
@@ -121,7 +127,6 @@
 		3D84AE401654DE9800301697 /* RefCounter.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1E1654DE9800301697 /* RefCounter.hpp */; };
 		3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1F1654DE9800301697 /* splitsimplex.hpp */; };
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
-		3D8BD47D1C3C2596000CB82B /* lg.ypp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8BD47C1C3C2596000CB82B /* lg.ypp */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
 		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
@@ -144,14 +149,6 @@
 		3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; };
 		3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; };
 		3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; };
-		3DA7405F1BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; };
-		3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405E1BBEEC6400C4EB0A /* libarpack.a */; };
-		3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; };
-		3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740611BBEECD900C4EB0A /* libifport.dylib */; };
-		3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; };
-		3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740621BBEECD900C4EB0A /* libifportmt.dylib */; };
-		3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; };
-		3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740671BBEED7C00C4EB0A /* libifcore.a */; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
 		3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
@@ -159,8 +156,6 @@
 		3DBBFE9E1A654E4900E3CF4E /* write_xdmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */; };
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
 		3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
-		3DD7CCFF1D0196A9006E5519 /* libirc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DD7CCFE1D0196A9006E5519 /* libirc.dylib */; };
-		3DD7CD001D0196A9006E5519 /* libirc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DD7CCFE1D0196A9006E5519 /* libirc.dylib */; };
 		3DDEA1830DFFD92F00F54E1C /* GQuadTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */; };
 		3DDEA1870DFFD97F00F54E1C /* lgmesh3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */; };
 		3DDEA18A0DFFF6DA00F54E1C /* FESpacen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */; };
@@ -185,6 +180,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D23E89D20BE9F7D00B6683D /* libifport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifport.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.a; sourceTree = "<group>"; };
+		3D23E89F20BEA02300B6683D /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../download/lib/libarpack.a; sourceTree = "<group>"; };
+		3D23E8A620BEAB5A00B6683D /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
+		3D23E8A820BEAC3E00B6683D /* libifcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifcore.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifcore.a; sourceTree = "<group>"; };
+		3D23E8AA20BEACB300B6683D /* libirc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libirc.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libirc.dylib; sourceTree = "<group>"; };
+		3D23E8AC20BEAD6600B6683D /* libirc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libirc.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libirc.a; sourceTree = "<group>"; };
 		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
 		3D5AF7D71C1863D30036669F /* libhdf5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libhdf5.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libhdf5.dylib"; sourceTree = "<group>"; };
@@ -254,7 +255,6 @@
 		3D84AE1E1654DE9800301697 /* RefCounter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RefCounter.hpp; path = ../src/femlib/RefCounter.hpp; sourceTree = "<group>"; };
 		3D84AE1F1654DE9800301697 /* splitsimplex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = splitsimplex.hpp; path = ../src/femlib/splitsimplex.hpp; sourceTree = "<group>"; };
 		3D84AE421654DEB600301697 /* ufunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ufunction.hpp; path = ../src/femlib/ufunction.hpp; sourceTree = "<group>"; };
-		3D8BD47C1C3C2596000CB82B /* lg.ypp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; path = lg.ypp; sourceTree = "<group>"; };
 		3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = parallelempi.cpp; path = ../src/mpi/parallelempi.cpp; sourceTree = SOURCE_ROOT; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
@@ -286,10 +286,6 @@
 		3DA740551BBEEBB900C4EB0A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = ../../../../../System/Library/Frameworks/Accelerate.framework; sourceTree = "<group>"; };
 		3DA740581BBEEBDC00C4EB0A /* libccolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libccolamd.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libccolamd.a"; sourceTree = "<group>"; };
 		3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcolamd.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libcolamd.a"; sourceTree = "<group>"; };
-		3DA7405E1BBEEC6400C4EB0A /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = "../../../ff/ff-OSX10.10/download/lib/libarpack.a"; sourceTree = "<group>"; };
-		3DA740611BBEECD900C4EB0A /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
-		3DA740621BBEECD900C4EB0A /* libifportmt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifportmt.dylib; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libifportmt.dylib; sourceTree = "<group>"; };
-		3DA740671BBEED7C00C4EB0A /* libifcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifcore.a; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libifcore.a; sourceTree = "<group>"; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
@@ -327,7 +323,6 @@
 		3DC62AF2097299D800D487F6 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		3DC62AF6097299F400D487F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ffglut.hpp; path = ../src/Graphics/ffglut.hpp; sourceTree = SOURCE_ROOT; };
-		3DD7CCFE1D0196A9006E5519 /* libirc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libirc.dylib; path = ../../../../../opt/intel/composer_xe_2015.2.132/compiler/lib/libirc.dylib; sourceTree = "<group>"; };
 		3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = GQuadTree.cpp; path = ../src/femlib/GQuadTree.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lgmesh3.cpp; sourceTree = "<group>"; };
 		3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = FESpacen.cpp; path = ../src/femlib/FESpacen.cpp; sourceTree = SOURCE_ROOT; };
@@ -346,16 +341,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3DA740641BBEECD900C4EB0A /* libifport.dylib in Frameworks */,
-				3DA740691BBEED7C00C4EB0A /* libifcore.a in Frameworks */,
-				3DA740601BBEEC6400C4EB0A /* libarpack.a in Frameworks */,
-				3DD7CD001D0196A9006E5519 /* libirc.dylib in Frameworks */,
 				3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
 				3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
 				3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
+				3D23E8A120BEA02300B6683D /* libarpack.a in Frameworks */,
+				3D23E8A720BEAB5A00B6683D /* libifport.dylib in Frameworks */,
+				3D23E8A920BEAC3E00B6683D /* libifcore.a in Frameworks */,
+				3D23E8AD20BEAD6600B6683D /* libirc.a in Frameworks */,
 				3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
 				3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */,
-				3DA740661BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */,
 				3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
 				3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
 				3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
@@ -372,32 +366,41 @@
 				3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */,
 				3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
 				3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
-				3DA7405F1BBEEC6400C4EB0A /* libarpack.a in Frameworks */,
 				3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */,
-				3DA740681BBEED7C00C4EB0A /* libifcore.a in Frameworks */,
 				3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
-				3DD7CCFF1D0196A9006E5519 /* libirc.dylib in Frameworks */,
 				3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
 				3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
 				3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
-				3DA740651BBEECD900C4EB0A /* libifportmt.dylib in Frameworks */,
 				3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
+				3D23E8A020BEA02300B6683D /* libarpack.a in Frameworks */,
 				3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */,
 				3D5AF7D81C1863D30036669F /* libhdf5.dylib in Frameworks */,
 				3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */,
-				3DA740631BBEECD900C4EB0A /* libifport.dylib in Frameworks */,
+				3D23E89E20BE9F7D00B6683D /* libifport.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3D23E8A520BEAB5A00B6683D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3D23E8AC20BEAD6600B6683D /* libirc.a */,
+				3D23E8AA20BEACB300B6683D /* libirc.dylib */,
+				3D23E8A820BEAC3E00B6683D /* libifcore.a */,
+				3D23E8A620BEAB5A00B6683D /* libifport.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		3D90DC7D097012B3002A1826 = {
 			isa = PBXGroup;
 			children = (
 				3D90DDE309704FA0002A1826 /* Lib */,
 				3D90DC95097014FF002A1826 /* Sources */,
 				3D90DC8D097012DB002A1826 /* Products */,
+				3D23E8A520BEAB5A00B6683D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -428,7 +431,6 @@
 		3D90DC960970155D002A1826 /* lglib */ = {
 			isa = PBXGroup;
 			children = (
-				3D8BD47C1C3C2596000CB82B /* lg.ypp */,
 				3D90DC9E0970155D002A1826 /* lg.tab.cpp */,
 				3DBBD5E50C3573DA007E5F45 /* mymain.cpp */,
 				3D90DCA00970155D002A1826 /* lg.tab.hpp */,
@@ -504,17 +506,14 @@
 				3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */,
 				3DA740491BBEEA4700C4EB0A /* libgsl.dylib */,
 				3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */,
-				3DA7405E1BBEEC6400C4EB0A /* libarpack.a */,
 				3DA740581BBEEBDC00C4EB0A /* libccolamd.a */,
 				3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */,
 				3DA740521BBEEB8C00C4EB0A /* libcholmod.a */,
 				3DA740461BBEEA2100C4EB0A /* libumfpack.a */,
 				3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */,
-				3DA740611BBEECD900C4EB0A /* libifport.dylib */,
-				3DA740621BBEECD900C4EB0A /* libifportmt.dylib */,
-				3DA740671BBEED7C00C4EB0A /* libifcore.a */,
+				3D23E89F20BEA02300B6683D /* libarpack.a */,
+				3D23E89D20BE9F7D00B6683D /* libifport.a */,
 				3D5AF7D71C1863D30036669F /* libhdf5.dylib */,
-				3DD7CCFE1D0196A9006E5519 /* libirc.dylib */,
 				3DC62AF6097299F400D487F6 /* OpenGL.framework */,
 				3DC62AF2097299D800D487F6 /* GLUT.framework */,
 				3DC62AED0972999000D487F6 /* Cocoa.framework */,
@@ -759,7 +758,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0710;
+				LastUpgradeCheck = 0930;
 			};
 			buildConfigurationList = 3D90DC80097012B3002A1826 /* Build configuration list for PBXProject "ff" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -862,7 +861,6 @@
 				3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
-				3D8BD47D1C3C2596000CB82B /* lg.ypp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -880,16 +878,42 @@
 		3D90DC81097012B3002A1826 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					CHECK_KN,
 					BAMG_LONG_LONG,
 					DRAWING,
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
 				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
@@ -904,14 +928,40 @@
 		3D90DC82097012B3002A1826 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					BAMG_LONG_LONG,
 					DRAWING,
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
 				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
@@ -926,6 +976,7 @@
 		3DAA7DC00BBFF3B20054E435 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				EXECUTABLE_PREFIX = lib;
@@ -953,6 +1004,7 @@
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
+					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 				);
 				"LIBRARY_SEARCH_PATHS[arch=*]" = (
 					"$(inherited)",
@@ -978,6 +1030,7 @@
 		3DAA7DC10BBFF3B20054E435 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				EXECUTABLE_PREFIX = lib;
@@ -1004,6 +1057,7 @@
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
+					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
@@ -1018,6 +1072,7 @@
 		3DC62AAA09728DA400D487F6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1050,7 +1105,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../download/lib\"",
 					/usr/local/lib,
-					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
@@ -1065,6 +1120,7 @@
 		3DC62AAB09728DA400D487F6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G4;
@@ -1073,7 +1129,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../download/lib\"",
 					/usr/local/lib,
-					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
+					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,

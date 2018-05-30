@@ -433,12 +433,12 @@ public:
 };
 
 
-template<class KNRR,bool isinit>
+template<class CR, class KNRR,bool isinit>
 class  InitArrayfromArray : public OneOperator { 
 public:
     typedef typename  myremove_pointer<KNRR>::type KNR ;
     typedef typename KNR::K RR;
-    typedef KNRR  A;
+     typedef KNRR  A;
     typedef KNRR  R;
     typedef E_Array B;
     
@@ -467,9 +467,9 @@ public:
         assert(&tt);
 	//      int err=0;
         for (int i=0;i<N;i++)
-	if(atype<RR>()->CastingFrom(tt[i].right() ) ) 
+	if(atype<CR>()->CastingFrom(tt[i].right() ) )
 	  {
-          tab[i]=atype<RR>()->CastTo(tt[i]);
+          tab[i]=atype<CR>()->CastTo(tt[i]);
 	    what[i]=0;
 	  }
 	else if(atype<KN_<RR> >()->CastingFrom(tt[i].right() ) ) 
@@ -508,7 +508,7 @@ public:
       {
        // cout << " ### " << i << " " << j << endl;
         if (what[i]==0)
-          a[j]= GetAny<RR>(v[i]);
+          a[j]= GetAny<CR>(v[i]);
         else if (what[i]==1) 
           a(SubArray(nn[i],j)) = GetAny<KN_<RR> >((*(tab[i]))(stack));// correct bug nov 2014
       }
@@ -1390,7 +1390,7 @@ void ArrayOperator()
     
      TheOperators->Add("<-", 
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
-       new InitArrayfromArray<KN<K>*,true>
+       new InitArrayfromArray<K,KN<K>*,true>
     //   new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),
     //   new OneOperator2_<KN<K> *,KN<K> *,KN_<K> >(&set_init)		????       
      //  new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp)
@@ -1421,7 +1421,7 @@ void ArrayOperator()
 
     // Add<KNM<K> *>("=","(",new OneOperator2_<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_tt));
     
-     Add<KN<K> *>("<-","(",new InitArrayfromArray<KN<K>*,true>);
+     Add<KN<K> *>("<-","(",new InitArrayfromArray<K,KN<K>*,true>);
      Add<KNM<K> *>("<-","(",new InitMatfromAArray<K,true>);
      Add<KN<K> *>("n",".",new OneOperator1<Z,KN<K> *>(get_n));
      Add<KNM<K> *>("n",".",new OneOperator1<Z,KNM<K> *>(get_n));
@@ -1441,8 +1441,8 @@ void ArrayOperator()
     
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
-     TheOperators->Add("=", new InitArrayfromArray<KN<K>*,false>(10));
-     TheOperators->Add("=", new InitArrayfromArray<KN_<K>,false>(1));// ???????? FH nov 2015 ..
+     TheOperators->Add("=", new InitArrayfromArray<K,KN<K>*,false>(10));
+     TheOperators->Add("=", new InitArrayfromArray<K,KN_<K>,false>(1));// ???????? FH nov 2015 ..
     TheOperators->Add("=", new InitMatfromAArray<K,false>
        );
      TheOperators->Add("=", new SetArrayofKNfromKN<K>
