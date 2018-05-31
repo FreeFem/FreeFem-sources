@@ -52,7 +52,7 @@ template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, Dmat>
 void initPETScStructure(HpddmType* ptA, MatriceMorse<PetscScalar>* mA, PetscInt& bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
     const HPDDM::MatrixCSR<PetscScalar>* M = ptA->_A->getMatrix();
     if(!M->_sym)
-        std::cout << "Please assemble a symmetric CSR" << std::endl;
+        cout << "Please assemble a symmetric CSR" << endl;
     double timing = MPI_Wtime();
     ptA->_A->template renumber<false>(STL<long>(*ptD), nullptr);
     unsigned int global;
@@ -879,7 +879,14 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
     std::string* prefix = nargs[1] ? GetAny<std::string*>((*nargs[1])(stack)) : NULL;
     PetscInt bs;
-    MatGetBlockSize(ptA->_petsc, &bs);
+    MatType type;
+    MatGetType(ptA->_petsc, &type);
+    PetscBool isNotBlock;
+    PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+    if(isNotBlock)
+        bs = 1;
+    else
+        MatGetBlockSize(ptA->_petsc, &bs);
     HPDDM::PETScOperator op(ptA->_ksp, ptA->_last - ptA->_first, bs);
     if(prefix)
         op.setPrefix(*prefix);
@@ -939,7 +946,14 @@ template<class Type, class K>
 void changeNumbering_func(Type* ptA, KN<K>* ptIn, KN<K>* ptOut, bool inverse) {
     if(ptA && ptA->_last - ptA->_first) {
         PetscInt bs;
-        MatGetBlockSize(ptA->_petsc, &bs);
+        MatType type;
+        MatGetType(ptA->_petsc, &type);
+        PetscBool isNotBlock;
+        PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+        if(isNotBlock)
+            bs = 1;
+        else
+            MatGetBlockSize(ptA->_petsc, &bs);
         PetscInt m;
         MatGetLocalSize(ptA->_petsc, &m, NULL);
         PetscScalar* out;
@@ -1092,7 +1106,14 @@ class InvPETSc {
             MatCreateVecs((*t)._petsc, &x, &y);
             PetscScalar* ptr;
             PetscInt bs;
-            MatGetBlockSize((*t)._petsc, &bs);
+            MatType type;
+            MatGetType((*t)._petsc, &type);
+            PetscBool isNotBlock;
+            PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+            if(isNotBlock)
+                bs = 1;
+            else
+                MatGetBlockSize((*t)._petsc, &bs);
             if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
                 VecGetArray(x, &ptr);
                 HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
@@ -1171,7 +1192,14 @@ class ProdPETSc {
                     MatCreateVecs((*t)._petsc, &y, &x);
                 VecGetArray(x, &ptr);
                 PetscInt bs;
-                MatGetBlockSize((*t)._petsc, &bs);
+                MatType type;
+                MatGetType((*t)._petsc, &type);
+                PetscBool isNotBlock;
+                PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+                if(isNotBlock)
+                    bs = 1;
+                else
+                    MatGetBlockSize((*t)._petsc, &bs);
                 if(!t->_cnum || N == 'T') {
                     if(t->_num)
                         HPDDM::Subdomain<K>::template distributedVec<0>(t->_num, t->_first, t->_last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
