@@ -38,8 +38,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.8.4
-VERSION_SLEPC=3.8.3
+VERSION=3.9.2
+VERSION_SLEPC=3.9.1
 # http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz

@@ -205,12 +205,12 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 #download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.9.0.tar.gz',
 #	 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/','petsc-lite-3.9.0.tar.gz','6958049cafdbb7586c50e09b54e6fce9');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.8.4.tar.gz',
-		 	 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/','petsc-lite-3.8.4.tar.gz','dbc724ec61e12258c4c7f8b52f026bb6');
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.9.2.tar.gz',
+		 	 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/','petsc-lite-3.9.2.tar.gz','647aa502b79f1fcedfbdf19a61d991f6');
 
 
-download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.8.3.tar.gz',
-	 	 'https://bitbucket.org/slepc/slepc/get/','slepc-3.8.3.tar.gz','3446ebdf03bb0c850e6d1ad798a8d135');
+download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.9.1.tar.gz',
+	 	 'https://bitbucket.org/slepc/slepc/get/','slepc-3.9.1.tar.gz','7eae35e7bcfe5c5144677731089d3ee9');
 
 download('hpddm','https://github.com/hpddm/hpddm/archive/22ca769760cc673ef4bb8385eef4e4e9eba07b17.zip',
 	 'https://github.com/hpddm','hpddm.zip','00522a3ea786804cc3e99f33a85ceb04');
