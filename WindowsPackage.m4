@@ -44,15 +44,15 @@ IFMPI Name: "{app}\examples++-hpddm"; Permissions: everyone-full
 
 [Files]
 ; README 
-Source: "README"; DestDir: "{app}"
-Source: "README_WINDOWS"; DestDir: "{app}"
+Source: "README.md"; DestDir: "{app}"
+Source: "README_WINDOWS.md"; DestDir: "{app}"
 Source: "INNOVATION"; DestDir: "{app}"
 Source: "AUTHORS"; DestDir: "{app}"
 Source: "BUGS"; DestDir: "{app}"
 Source: "COPYRIGHT"; DestDir: "{app}"
 Source: "COPYING"; DestDir: "{app}"
-Source: "README"; DestDir: "{app}"
-Source: "crimson-freefem++.zip"; DestDir: "{app}"
+;Source: "README"; DestDir: "{app}"
+;Source: "crimson-freefem++.zip"; DestDir: "{app}"
 Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
@@ -81,6 +81,9 @@ Source: "examples++-load\ff-get-dep"; DestDir: "{app}\examples++-load"
 
 ; mingwm10.dll is necessary when "-mthreads" is used as a compilation
 ; flag.
+;
+;ldd.exe src/bin-win32/FreeFem++.exe  |awk '/mingw64/ {print "cygpath -w ",$3}'|sh|awk '{print "IFMGW64 Source: @" $0 "@ DestDir: @{app}@"}'|sed 's/@/"/g'
+
 
 
 IFMGW32 ; mingw32  ....    FH. I have put all dll in bin-win32 dir ....
@@ -92,6 +95,13 @@ IFMGW32 Source: "C:\MinGW\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"
 IFMGW32 Source: "C:\MinGW\bin\libstdc++-6.dll"; DestDir: "{app}"
 IFMGW32 Source: "C:\MinGW\bin\libgfortran-3.dll"; DestDir: "{app}"
 IFMGW32 Source: "C:\MinGW\bin\libquadmath-0.dll"; DestDir: "{app}"
+
+IFMGW64 Source: "C:\msys64\mingw64\bin\libgcc_s_seh-1.dll"; DestDir: "{app}"
+IFMGW64 Source: "C:\msys64\mingw64\bin\libstdc++-6.dll"; DestDir: "{app}"
+IFMGW64 Source: "C:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
+IFMGW64 Source: "C:\msys64\mingw64\bin\libgfortran-4.dll"; DestDir: "{app}"
+IFMGW64 Source: "C:\msys64\mingw64\bin\libquadmath-0.dll"; DestDir: "{app}"
+IFMGW64 Source: "C:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
 
 
 IFMGW64 ; mingw64 ....   FH. I have put all dll in bin-win32 dir ....
@@ -144,7 +154,7 @@ Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples++-eigen"
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
 
-Source: "DOC\freefem++doc.pdf"; DestDir: "{app}"
+Source: "freefem++doc.pdf"; DestDir: "{app}"
 
 ; Icons for Windows can be created from a 32x32 image with icotool
 ; (Linux Debian unstable), or IrfanView (Windows, not very good
