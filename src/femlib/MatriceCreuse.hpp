@@ -952,6 +952,10 @@ struct Data_Sparse_Solver {
     // array for return information for mumps ...
     KN<double> * rinfo;
     KN<long> * info;
+    
+    KN<KN<double> >* kerneln;
+    KN<KN<double> >* kernelt;
+    long *kerneldim;
  /*   
   int *param_int;
   double *param_double;
@@ -1001,7 +1005,8 @@ struct Data_Sparse_Solver {
     commworld(0),
     master(0),
     rinfo(0),
-    info(0)
+    info(0),
+    kerneln(0), kernelt(0), kerneldim(0)
     {}
     
 private:

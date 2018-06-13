@@ -536,12 +536,15 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "commworld", &typeid(pcommworld)}, \
     { "master", &typeid(long)}, \
     { "rinfo", &typeid(KN<double>*)}, \
-    { "info", &typeid(KN<long>*)} \
+    { "info", &typeid(KN<long>*)}, \
+    { "kerneln", &typeid( KN<KN<double> > *)}, \
+    { "kernelt", &typeid( KN<KN<double> > *)}, \
+    { "kerneldim", &typeid(long*)} \
 
 
 
 
-const int NB_NAME_PARM_MAT =  24  ;
+const int NB_NAME_PARM_MAT =  24 +3  ;
     
     
 template<class R>
@@ -583,7 +586,11 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         // add FH nov 2015 ..
         if (nargs[++kk]) ds.rinfo = GetAny<KN<double>* >((*nargs[kk])(stack));
         if (nargs[++kk]) ds.info = GetAny<KN<long>* >((*nargs[kk])(stack));
-	assert(++kk == n_name_param);
+         // add FH juin 2018   ..
+        if (nargs[++kk]) ds.kerneln = GetAny<KN<KN<double> >* >((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.kernelt = GetAny<KN<KN<double> >* >((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.kerneldim = GetAny<long * >((*nargs[kk])(stack));
+        ffassert(++kk == n_name_param);
     }
 } // end of namespace Fem2D
 #endif
