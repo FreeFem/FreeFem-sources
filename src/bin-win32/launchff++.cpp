@@ -4,116 +4,169 @@
 #include <string>
 #include <cstring>
 #include <iostream>
-#include <tchar.h>
-#include <mmc.h>
+#include <cassert>
 using namespace std;
+#include <windows.h>
 
-
-const string  CB="\"",CE="\"";
-
-
-const char SLACH='/';
-const char BACKSLACH='\\';
-const  char dirsep=BACKSLACH, dirnsep=SLACH;
-string escapepath(string f)
+const char C='"';
+char * dirname(const char *pp)
 {
-	 string r;
-		for(int i=0; i< f.length(); ++i)
-		{
-		  if(f[i]==' '||f[i]=='('||f[i]==')'||f[i]=='=' )
-		   r.append("^");	  
-          r.append(f.begin()+i,f.begin()+i+1)	;		  
-			
-		}
-	return r; 
+   int i,l= strlen(pp);
+     for( i=l-1;i>=0;i--)
+       if(pp[i]=='\\') break;
+     char *dir= new char [l+1];
+     strcpy(dir,pp);
+     dir[i]=0;	
+	 return dir;
 }
-string MyGetModuleFileName()
+char * newq(const char *p)
 {
-  //  const size_t lx=2048;
-  //  char b[lx+1];
-    char fullPath[1024];
-    string r,f;
-    int lp=0;
-    int l=GetModuleFileName(NULL, fullPath, 1024);
-    if( l >0)
-    {
-	
-	   f=fullPath;
-	   r = escapepath(f); 
-      
-    }
-    //cout << l <<" MyGetModuleFileName " << fullPath << "\n" 
-	//     << r << "\n" << f << "*****"<< endl;
-       return r;
-}
-string DirName(const string & fn)
-{
-    //cout << " dir ff++ " << fn<< " ::" << dirsep << endl;
-
-    size_t s=fn.rfind(dirsep);
-    
-    if( s == string::npos ) return string();
-    //cout<< " **" << string(fn,0,s) << " s " << s << endl;
-    return string(fn,0,s)+dirsep;
+  int l = strlen(p);
+  assert(l< 1000);
+  char *c = new char[l+100];
+  assert(c); 
+  c[0]=C;
+   strcpy(c+1,p); 
+  c[l+1]=C;
+  c[l+2]=0; 
+  return c;
 }
 int main(int argc,const char **argv)
 {
-	string SC=" ";
-	string addargs=SC+"-wait"+SC+"-log";
-
-    int debug=0;
-    string pp;
-    
-    string cmd;
-
-
-    cmd +=DirName(MyGetModuleFileName()); 
-	cmd += "FreeFem++.exe" ;
+  char filename[ MAX_PATH ];
+  const int n100=100;
+  const char * ffargv[n100];	
+  int debug=0; 
+  char *dir=0;
+  const char *dirll=dirname(argv[0]);
+  const char *pp=0; 
+  char ff[1000];
+  const char *fe=//"C:\\msys64\\home\\hecht\\ff++\\src\\bin-win32\\ar v.exe";
+    "\\freefem++.exe";
+	*ff=0; 
+	strcat(ff,dirll);
+	strcat(ff,fe);
+  //string cmd="freefem++.exe ";
+  for(int i=0; i<n100; ++i)
+	    ffargv[i]=0;
+  int nffa=0; 
+  ffargv[nffa++]=newq(ff);
+ 
+ 
+  
+  for(int i=1;i<argc;++i)
+    {	
+	if(strcmp("++d",argv[i])==0) 
+	  debug=1;
+	else {
+ 		
+   // cmd += C;
+   // cmd += argv[i];
+    if(!pp &&strlen(argv[i])>2) 
+	if( argv[i][1]==':')
+          pp= argv[i];
+   // cmd += C;
+   // cmd += " ";
+	ffargv[nffa++]=newq(argv[i]);
+ 
+	if( debug) cout << "  ffl: arg " << i << argv[i] << endl;
+    }}
+ if(!pp)
+  {
+    //      cerr << " Sorry no file name "<< endl;
+      //      cerr << " Drag and Drop the file icon on the application  icon or double clip on script file" << endl;
+   //   cmd += " -wait -log";
+	  
  
 
-	
-    if(debug) cout << "cmd:: " << cmd << endl;
-    if(argc <=1)
+  OPENFILENAME ofn;
+    ZeroMemory( &filename, sizeof( filename ) );
+    ZeroMemory( &ofn,      sizeof( ofn ) );
+    ofn.lStructSize  = sizeof( ofn );
+    ofn.hwndOwner    = NULL;  // If you have a window to center over, put its HANDLE here
+    ofn.lpstrFilter  = "freefem++ Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0";
+    ofn.lpstrFile    = filename;
+    ofn.nMaxFile     = MAX_PATH;
+    ofn.lpstrTitle   = "Select a File, yo!";
+    ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+  
+  if (GetOpenFileNameA( &ofn ))
+  {
+    std::cout << "You chose the file \"" << filename << "\"\n";
+/*	cmd +=" -cd  ";
+	//cmd += C;
+	for(int i=0; i< MAX_PATH; ++i)
+		if( filename[i] == 0 ) break;
+	    else if( filename[i] == ' ' ) cmd += "\\ ";
+		else cmd += filename[i] ;
+*/
+    if(!pp &&strlen(filename)>2) 
+	if( filename[1]==':')
+          pp= filename;
+    ffargv[nffa++]=newq(filename);
+	//cmd += filename;
+	//cmd += C;
+	// cout << " system : " << cmd << endl;
+   //int ret= system(cmd.c_str());
+  }
+  else
+  {
+    // All this stuff below is to tell you exactly how you messed up above. 
+    // Once you've got that fixed, you can often (not always!) reduce it to a 'user cancelled' assumption.
+    switch (CommDlgExtendedError())
     {
-        cerr << " Sorry no file name "<< endl;
-        cerr << " Drag and Drop the file icon on the application  icon or double clip on script file"
-             << endl;
-        cmd += addargs;
-        int ret= system(cmd.c_str());
-        return 0;
+      case CDERR_DIALOGFAILURE   : std::cout << "CDERR_DIALOGFAILURE\n";   break;
+      case CDERR_FINDRESFAILURE  : std::cout << "CDERR_FINDRESFAILURE\n";  break;
+      case CDERR_INITIALIZATION  : std::cout << "CDERR_INITIALIZATION\n";  break;
+      case CDERR_LOADRESFAILURE  : std::cout << "CDERR_LOADRESFAILURE\n";  break;
+      case CDERR_LOADSTRFAILURE  : std::cout << "CDERR_LOADSTRFAILURE\n";  break;
+      case CDERR_LOCKRESFAILURE  : std::cout << "CDERR_LOCKRESFAILURE\n";  break;
+      case CDERR_MEMALLOCFAILURE : std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
+      case CDERR_MEMLOCKFAILURE  : std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
+      case CDERR_NOHINSTANCE     : std::cout << "CDERR_NOHINSTANCE\n";     break;
+      case CDERR_NOHOOK          : std::cout << "CDERR_NOHOOK\n";          break;
+      case CDERR_NOTEMPLATE      : std::cout << "CDERR_NOTEMPLATE\n";      break;
+      case CDERR_STRUCTSIZE      : std::cout << "CDERR_STRUCTSIZE\n";      break;
+      case FNERR_BUFFERTOOSMALL  : std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
+      case FNERR_INVALIDFILENAME : std::cout << "FNERR_INVALIDFILENAME\n"; break;
+      case FNERR_SUBCLASSFAILURE : std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
+      default                    : std::cout << "You cancelled.\n";
     }
-    
-    for(int i=1;i<argc;++i)
-    {
-        if(strcmp("++d",argv[i])==0)
-            debug=1;
-        else {
-			cmd +=SC;
-           	cmd += CB;		
-            cmd += argv[i];
-			cmd += CE;
-            if(!pp.length() && strlen(argv[i])>2)
-                if( argv[i][1]==':')
-                    pp= argv[i];
-			;
-            if( debug) cout << "  ffl: arg " << i << argv[i] << endl;
-        }}
-    if(pp.length() )
-    {
-        if( debug ) cout << "  ffl: file:" << pp << endl;
-        string dir = DirName(pp);
-        if(debug)
-            cout << "  ffl:  chdir to " << dir << endl;
-        _chdir(dir.c_str());
+	  //int ret= system(cmd.c_str());
+	 return 1;
+  }
 
-    }
-	cout << flush;
-   cerr << "\n*" << cmd <<"*\n";
+	  
 
-    cmd += addargs;
-    cerr << "\n**" << cmd <<"**\n";
-    if(debug) 
-        cout << "exec " << cmd << endl;
-    int ret= system(cmd.c_str());
-    return ret;
+      
+  }
+	debug =0;
+  if(pp)
+   {
+   	if( debug ) cout << "  ffl: file:" << pp << endl;  
+    int i=0;
+     dir = dirname(pp);
+	 if(debug) 
+     cout << "  ffl:  chdir to " << dir << endl;
+     _chdir(dir);
+     delete [] dir;
+   }
+    ffargv[nffa++]="-log";
+ // ffargv[nffa++]="-wait";
+ 
+ //  cmd += " -wait -log";
+   if(debug) {
+	   
+  // cout << "exec " << cmd << endl;
+   for(int i=0; i<n100; ++i)
+	   if( ffargv[i])
+		   cout << i << " " << ffargv[i] << endl; 
+	else break;
+   cout << " call "<<endl; 	
+   }
+
+   int ret= _execvp(ff, ffargv );  
+  // int ret= system(cmd.c_str());
+   return ret
+   ;
 }
