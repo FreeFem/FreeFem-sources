@@ -953,8 +953,8 @@ struct Data_Sparse_Solver {
     KN<double> * rinfo;
     KN<long> * info;
     
-    KN<KN<double> >* kerneln;
-    KN<KN<double> >* kernelt;
+    KNM<double>* kerneln;
+    KNM<double> * kernelt;
     long *kerneldim;
  /*   
   int *param_int;

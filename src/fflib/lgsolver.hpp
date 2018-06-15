@@ -537,8 +537,8 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "master", &typeid(long)}, \
     { "rinfo", &typeid(KN<double>*)}, \
     { "info", &typeid(KN<long>*)}, \
-    { "kerneln", &typeid( KN<KN<double> > *)}, \
-    { "kernelt", &typeid( KN<KN<double> > *)}, \
+    { "kerneln", &typeid(  KNM<double> *)}, \
+    { "kernelt", &typeid(  KNM<double> *)}, \
     { "kerneldim", &typeid(long*)} \
 
 
@@ -587,8 +587,8 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.rinfo = GetAny<KN<double>* >((*nargs[kk])(stack));
         if (nargs[++kk]) ds.info = GetAny<KN<long>* >((*nargs[kk])(stack));
          // add FH juin 2018   ..
-        if (nargs[++kk]) ds.kerneln = GetAny<KN<KN<double> >* >((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.kernelt = GetAny<KN<KN<double> >* >((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.kerneln = GetAny< KNM<double>* >((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.kernelt = GetAny< KNM<double>* >((*nargs[kk])(stack));
         if (nargs[++kk]) ds.kerneldim = GetAny<long * >((*nargs[kk])(stack));
         ffassert(++kk == n_name_param);
     }

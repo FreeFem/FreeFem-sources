@@ -20,7 +20,7 @@ include 'phpfiles.php';
 	<div class="menuItem"><a href="http://www.um.es/freefem/ff++/pmwiki.php" target="_top">Wiki</a></div>
 	<div class="menuItem"><a href="https://ljll.math.upmc.fr/cgi-bin/mailman/listinfo/freefempp" target="_top">Mailing list </a></div>
 	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/lehyaric/ffcs/index.htm"  target="_top"> FreeFem++-cs </a></div>
-	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/lehyaric/ffjs/15.6/ffjs.htm"  target="_top"> FreeFem++ on the web </a></div>
+	 <div class="menuItem"><a href="https://www.ljll.math.upmc.fr/lehyaric/ffjs"  target="_top"> FreeFem++ on the web </a></div>
 	<div class="menuItem"><a href="examples.html"  target="main">Showcase</a></div>	
 	<div class="menuItem"><a href="news.php"  target="main">Web News</a></div>	
 	 <div class="menuItem"><a href="https://github.com/FreeFem/FreeFem-sources"  target="_top"> github site </a></div>

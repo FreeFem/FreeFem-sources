@@ -10,7 +10,8 @@
 #endif
 #endif
 namespace  Fem2D {
-const long notaregion=LONG_MIN;
+const int notaregion=INT_MIN;
+const long lnotaregion=INT_MIN;
 const int notalabel=INT_MIN;
 const double doublenotset = -123e100;
 class MeshPointBase { public:

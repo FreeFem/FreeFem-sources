@@ -400,3 +400,24 @@ cout << vh.n <<endl;
   cout << projection(-0.1,1,a)<< endl; 
   cout << dist(3,4)<< " " << dist(1,2,3) << " = " << sqrt( 14.  ) << endl; 
 }
+{ // array of array
+	
+	real[int][int] a(10);
+
+	for(int i=0; i< a.n; ++i)
+	{
+	  a[i].resize(10+i);
+	  a[i]=1:10+i ;
+	}
+	cout << a[3] << endl; 
+	
+	real[int,int][int]  aa(5); //  array of matrix 
+	for(int i=0; i< aa.n; ++i)
+	{
+	  aa[i].resize(10+i,2);
+	  aa[i]= 10 ;
+	  aa[i](2,1)=2;
+	}
+	
+
+}
