@@ -52,7 +52,7 @@ using namespace Fem2D;
 
 #include "TransfoMesh_v2.hpp"
 
-Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
+Mesh3* Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok) {
 	// cas besoin memoire important
 
@@ -167,6 +167,15 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 
 	assert(i_border == nbe_t);
 
+	delete[] label_nt_t;
+	delete[] label_nbe_t;
+
+	delete[] ind_nv_t;
+	delete[] ind_nt_t;
+	delete[] ind_nbe_t;
+
+	delete[] Numero_Som;
+
 	return T_Th3;
 }
 
@@ -174,7 +183,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
                        int &recollement_element, int &recollement_border, int &point_confondus_ok,
                        int *Numero_Som, int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t,
                        int *label_nt_t, int *label_nbe_t, int &nv_t, int &nt_t, int &nbe_t) {
-	int Elem_ok, Border_ok;
+	int Border_ok;
 	double hmin, hmin_elem, hmin_border;
 	R3 bmin, bmax;
 
@@ -210,6 +219,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	for (int ii = 0; ii < Th3.nt; ii++) {
 		const Tet &K(Th3.elements[ii]);
 		int iv[4];
+		int Elem_ok;
 
 		Elem_ok = 1;
 
@@ -281,10 +291,15 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 			ind_nt_t[i_elem] = ind_nt_t_tmp[i_elem];
 		}
 
-		nt_t = np;
+		delete[] ind_np;
+		delete[] label_t;
+		for (int i = 0; i < nt_t; i++) {
+			delete[] Cdg_t[i];
+		}
+		delete[] Cdg_t;
+		delete[] ind_nt_t_tmp;
 
-		// delete [] ind_nbe_t_tmp;
-		// delete [] ind_np;
+		nt_t = np;
 
 		cout << "fin recollement : nt_t= " << nt_t << endl;
 	}
@@ -367,6 +382,14 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 		for (int i_border = 0; i_border < np; i_border++) {
 			ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
 		}
+
+		delete[] ind_np;
+		for (int i = 0; i < nbe_t; i++) {
+			delete[] Cdg_be[i];
+		}
+		delete[] Cdg_be;
+		delete[] label_be;
+		delete[] ind_nbe_t_tmp;
 
 		nbe_t = np;
 
@@ -466,6 +489,11 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 	}
 
 	assert(i_border == nbe_t);
+
+	delete[] Numero_Som;
+	delete[] ind_nv_t;
+	delete[] ind_nbe_t;
+	delete[] label_nbe_t;
 
 	return T_Th3;
 }
@@ -583,6 +611,15 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 		for (int i_border = 0; i_border < np; i_border++) {
 			ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
 		}
+
+		delete[] ind_np;
+		for (int i = 0; i < nbe_t; i++) {
+			delete[] Cdg_be[i];
+		}
+		delete[] Cdg_be;
+		delete[] label_be;
+
+		delete[] ind_nbe_t_tmp;
 
 		nbe_t = np;
 
@@ -751,6 +788,11 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
 		 */
 		T_Th3->be(ibe).set(T_Th3->vertices, iv, K.lab);
 	}
+
+	delete[] Numero_Som;
+	delete[] ind_nv_t;
+	delete[] ind_nbe_t;
+	delete[] label_nbe_t;
 
 	return T_Th3;
 }
@@ -1058,6 +1100,15 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
 		for (int i_border = 0; i_border < np; i_border++) {
 			ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
 		}
+
+		delete[] ind_np;
+		delete[] label_be;
+		for (int i = 0; i < nbe_t; i++) {
+			delete[] Cdg_be[i];
+		}
+		delete[] Cdg_be;
+
+		delete[] ind_nbe_t_tmp;
 
 		nbe_t = np;
 		cout << "fin recollement : nbe_t= " << nbe_t << endl;
@@ -1450,6 +1501,9 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 
 	cout << "nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv << endl;
 	assert(nv_t == numberofpoints);
+
+	delete[] tcode;
+	delete[] posv;
 }
 
 void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
@@ -1630,6 +1684,10 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 		cout << " point_confondus_ok dans fonction PointCommun_hcode vaut 1 ou 0." << endl;
 		exit(-1);
 	}
+
+	delete[] tcode;
+	delete[] posv;
+	delete[] Numero_Som;
 }
 
 // fonction avec Gtree pour FreeFem++
@@ -1710,6 +1768,9 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 		cout << "taille boite englobante =" << endl;
 		assert(nv_t == numberofpoints);
 	}
+
+	delete[] v;
+	delete gtree;
 }
 
 void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &point_confondus_ok,
@@ -1830,4 +1891,6 @@ void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &po
 	 * //assert( numberofpoints == np);
 	 * }
 	 */
+	 delete[] v;
+ 	delete gtree;
 }

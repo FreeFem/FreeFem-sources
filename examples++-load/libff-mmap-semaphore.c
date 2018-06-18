@@ -201,7 +201,7 @@ void ffmmap_del_ (long *p) {
 }
 
 void ffmmap_destroy (ff_Pmmap p) {
-	if (ff_mmap_sem_verb > 9) {printf("  ** ffmmap_destroy %s len: %lu new: %d\n", p->nm, p->len, p->isnew);}
+	if (ff_mmap_sem_verb > 9) {printf("  ** ffmmap_destroy %s len: %lu new: %d\n", p->nm, (unsigned long)p->len, p->isnew);}
 
 	if (p->map && munmap(p->map, p->len) == -1) {
 		printf(" **Error munmap %s %zu\n", p->nm, p->len);
@@ -293,14 +293,14 @@ void ffmmap_init_ (long *pp, const char *nm, int *len, int lennm) {
 
 long ffmmap_read (ff_Pmmap p, void *pt, size_t ln, long off) {
 	if (off < 0 || off + ln > p->len) {
-		printf("Fatal Error: ffmmap_read ff mmap out of bound len = %zu < %ld + %ld \n", p->len, ln, off);
+		printf("Fatal Error: ffmmap_read ff mmap out of bound len = %zu < %lu + %ld \n", p->len, (unsigned long)ln, off);
 		ffDoError(" Error out of bound  ", 2004);
 	}
 
 	void *pk = (char *)p->map + off;
 	memcpy(pt, pk, ln);
 	long *pp = (long *)pt;
-	if (ff_mmap_sem_verb > 9) {printf(" R %ld %lu %lu %p\n", *pp, off, ln, pk);}
+	if (ff_mmap_sem_verb > 9) {printf(" R %ld %ld %lu %p\n", *pp, off, ln, pk);}
 
 	return ln;
 }
@@ -312,14 +312,14 @@ void ffmmap_read_ (long *p, void *pt, int *ln, int *off, long *ret) {
 
 long ffmmap_write (ff_Pmmap p, void *pt, size_t ln, long off) {
 	if (off < 0 || off + ln > p->len) {
-		printf("Fatal Error: ffmmap_write ff mmap out of bound len = %zu < %ld + %ld \n", p->len, ln, off);
+		printf("Fatal Error: ffmmap_write ff mmap out of bound len = %zu < %lu + %ld \n", p->len, (unsigned long)ln, off);
 		ffDoError(" Error out of bound  ", 2005);
 	}
 
 	void *pk = (char *)p->map + off;
 	memcpy(pk, pt, ln);
 	long *pp = (long *)pk;
-	if (ff_mmap_sem_verb > 9) {printf(" W %ld %lu %lu %p\n", *pp, off, ln, pk);}
+	if (ff_mmap_sem_verb > 9) {printf(" W %ld %ld %lu %p\n", *pp, off, ln, pk);}
 
 	return ln;
 }
