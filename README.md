@@ -1,12 +1,12 @@
 <!----------------------------------------------------------------------------------->
 <!--- This file is part of FreeFem++.                                             --->
 <!---                                                                             --->
-<!--- Foobar is free software: you can redistribute it and/or modify              --->
+<!--- FreeFem++ is free software: you can redistribute it and/or modify           --->
 <!--- it under the terms of the GNU Lesser General Public License as published by --->
 <!--- the Free Software Foundation, either version 3 of the License, or           --->
 <!--- (at your option) any later version.                                         --->
 <!---                                                                             --->
-<!--- Foobar is distributed in the hope that it will be useful,                   --->
+<!--- FreeFem++ is distributed in the hope that it will be useful,                --->
 <!--- but WITHOUT ANY WARRANTY; without even the implied warranty of              --->
 <!--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               --->
 <!--- GNU Lesser General Public License for more details.                         --->
@@ -22,10 +22,10 @@
        src="https://scan.coverity.com/projects/15433/badge.svg"/>
 </a>
 
-| Branch | Ubuntu All<sup>1</sup> | Ubuntu No<sup>1</sup> | MacOSX All<sup>2</sup> | MacOSX No<sup>3</sup> | Windows 7<sup>4</sup> |
+| Branch | Ubuntu All<sup>1</sup> | Ubuntu No<sup>1</sup> | MacOSX All<sup>2</sup> | MacOSX No<sup>3</sup> | Windows 7 64bits<sup>4</sup> | Windows7 32bits<sup>4<sup> |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| Develop | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-MacOSXNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-Windows7)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-Windows7) |
-| Master | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-Windows7)](https://ci.inria.fr/freefem/job/FreeFem-source-master-Windows7) |
+| Develop | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-MacOSXNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-Windows7)](https://ci.inria.fr/freefem/job/FreeFem-source-develop-Windows7) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-develop-Windows7-32)](https://ci.inria.fr/freefem/job/FreeFem-source-devlop-Windows7-32) |
+| Master | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-Windows7)](https://ci.inria.fr/freefem/job/FreeFem-source-master-Windows7) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-Windows7-32)](https://ci.inria.fr/freefem/job/FreeFem-source-master-Windows7-32) |
 
 See [CI/CD Tools](#ci-cd-tools)
 
