@@ -21,7 +21,7 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep:
+//ff-c++-LIBRARY-dep: lapack blas
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
