@@ -77,7 +77,7 @@ cvmsh2.exe:  $(LIBS_FF)
 drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) -mwindows  -Wl,--enable-auto-import  $^ -o $@ 
 launchff++.exe:launchff++.cpp
-	$(CXX) $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe
+	$(CXX) $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe -lcomdlg32
 
 ff-c++:../../examples++-load/load.link.in
 	../../config.status  --file=ff-c++:$<
