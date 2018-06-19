@@ -54,7 +54,7 @@ namespace  Fem2D {
 			}
 
 			HeapSort((R *)X, npe);
-			int j = 0;
+			// int j = 0;
 			int o[6];
 			o[0] = 0;
 
@@ -223,7 +223,7 @@ namespace  Fem2D {
 			}
 
 			HeapSort((R *)X, npe);
-			int j = 0;
+			// int j = 0;
 			int o[6];
 			o[0] = 0;
 
@@ -232,8 +232,8 @@ namespace  Fem2D {
 			}
 
 			for (int df = 0; df < ndf; ++df) {
-				int e = df / npe;
-				int n = df % npe;
+				// int e = df / npe;
+				// int n = df % npe;
 				Data[o[0] + df] = 6;// 3+e;
 				Data[o[1] + df] = df;
 				Data[o[2] + df] = 0;

@@ -84,7 +84,8 @@ inline ostream_math operator << (ostream_math f, double x) {
 	if (f.format == Mathematica) {
 		ostringstream oss;
 		oss << x;
-		const char *px = oss.str().c_str();
+		string pxstr = oss.str();
+		const char *px = pxstr.c_str();
 		if (px[0] == 'N') {f << "Indeterminate";} else if (px[0] == 'i') {f << "Infinity";} else if (px[0] == '-' && px[1] == 'i') {f << "-Infinity";} else {
 			for (int i = 0; i < 20 && px[i] > 0; i++) {
 				if (px[i] == 'e') {
@@ -149,4 +150,3 @@ template<class ForwardIterator> void print_array (ostream_math f, ForwardIterato
 template<class E> std::string to_string (const E &e) {ostringstream oss; oss << e; return oss.str();}
 
 #endif
-

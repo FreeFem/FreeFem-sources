@@ -327,7 +327,7 @@ static void finit () {	// equivalent2d  3d EFQF
 					const GQuadratureFormular<R3> *qf = GetAny<const GQuadratureFormular<R3> *>((*efq)(0));
 					if (verbosity > 9) {cout << " \t " << sqfv << " " << qf->n << " " << qf->exact << ",  EF : " << EFsqfv << endl;}
 
-					int m = 5;
+					// int m = 5;
 					TypeOfFE_QF3d *FEqf = new TypeOfFE_QF3d(*qf);
 					pAddNewFE3[i] = new AddNewFE3(EFsqfv, FEqf);
 				}

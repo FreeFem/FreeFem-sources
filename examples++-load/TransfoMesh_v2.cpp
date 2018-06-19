@@ -183,8 +183,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
                        int &recollement_element, int &recollement_border, int &point_confondus_ok,
                        int *Numero_Som, int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t,
                        int *label_nt_t, int *label_nbe_t, int &nv_t, int &nt_t, int &nbe_t) {
-	int Border_ok;
-	double hmin, hmin_elem, hmin_border;
+	double hmin;
 	R3 bmin, bmax;
 
 	// int recollement_element=1,recollement_border=1;
@@ -252,6 +251,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 		int *ind_np = new int [nt_t];
 		int *label_t = new int [nt_t];
 		// int *ind_label_t = new int[nt_t];
+		double hmin_elem;
 		double **Cdg_t = new double *[nt_t];
 
 		for (int i = 0; i < nt_t; i++) {
@@ -308,7 +308,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	i_border = 0;
 
 	for (int ii = 0; ii < Th3.nbe; ii++) {
-		Border_ok = 1;
+		int Border_ok = 1;
 
 		const Triangle3 &K(Th3.be(ii));
 		int iv[3];
@@ -339,6 +339,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 
 		int np, dim = 3;
 		int *ind_np = new int [nbe_t];
+		double hmin_border;
 		double **Cdg_be = new double *[nbe_t];
 		int *label_be = new int [nbe_t];
 
@@ -501,8 +502,8 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3,
                             int &recollement_border, int &point_confondus_ok, int *Numero_Som,
                             int *ind_nv_t, int *ind_nbe_t, int *label_nbe_t, int &nv_t, int &nbe_t) {
-	int Elem_ok, Border_ok;
-	double hmin, hmin_elem, hmin_border;
+	int Elem_ok;
+	double hmin, hmin_elem;
 	R3 bmin, bmax;
 
 	// int recollement_element=1,recollement_border=1;
@@ -538,7 +539,7 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 	i_border = 0;
 
 	for (int ii = 0; ii < Th3.nbe; ii++) {
-		Border_ok = 1;
+		int Border_ok = 1;
 
 		const Triangle3 &K(Th3.be(ii));
 		int iv[3];
@@ -568,6 +569,7 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 
 		int np, dim = 3;
 		int *ind_np = new int [nbe_t];
+		double hmin_border;
 		double **Cdg_be = new double *[nbe_t];
 		int *label_be = new int [nbe_t];
 
@@ -995,10 +997,9 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
                              int &recollement_border, int &point_confondus_ok, int *Numero_Som,
                              int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t, int *label_nbe_t,
                              int &nv_t, int &nt_t, int &nbe_t) {
-	int Border_ok;
 	// int recollement_border=0;
 	R3 bmin, bmax;
-	double hmin, hmin_border;
+	double hmin;
 
 	cout << "calculus of bound and minimal distance" << endl;
 	BuildBoundMinDist_th2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, bmin, bmax, hmin);
@@ -1029,9 +1030,8 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
 	// determination of border elements
 	i_border = 0;
 
-	for (int
-	     ii = 0; ii < Th2.nt; ii++) {
-		Border_ok = 1;
+	for (int ii = 0; ii < Th2.nt; ii++) {
+		int Border_ok = 1;
 		const Mesh::Triangle &K(Th2.t(ii));	// const Triangle2 & K(Th2.elements[ii]); // avant Mesh2
 		int iv[3];
 
@@ -1061,6 +1061,7 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
 		int np, dim = 3;
 		int *ind_np = new int [nbe_t];
 		int *label_be = new int [nbe_t];
+		double hmin_border;
 		double **Cdg_be = new double *[nbe_t];
 
 		for (int i = 0; i < nbe_t; i++) {
@@ -1204,7 +1205,7 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
 		bmax.z = max(bmax.z, tab_ZZ[ii]);
 	}
 
-	double longmini_box = 1e10;
+	double longmini_box;// = 1e10;
 
 	longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
 	longmini_box = sqrt(longmini_box);
@@ -1369,7 +1370,6 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 //= =====================
 void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                                   const double *bmin, const double *bmax, const double hmin, int *Numero_Som, int *ind_nv_t, int &nv_t) {
-	size_t i;
 	size_t j[3];
 	size_t k[3];
 	size_t NbCode = 100000;
@@ -1409,13 +1409,14 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	k[2] = int((bmax[2] - bmin[2]) / epsilon);
 
 	int numberofpoints = 0;
-	int numberofpointsdiff;
 
 	for (int ii = 0; ii < tab_nv; ii++) {
+		int numberofpointsdiff;
+
 		numberofpointsdiff = 0;
 
 		for (int jj = ii + 1; jj < tab_nv; jj++) {
-			double dist = 0.;
+			double dist;// = 0.;
 			dist = pow(tab_XX[jj] - tab_XX[ii], 2) + pow(tab_YY[jj] - tab_YY[ii], 2) + pow(tab_ZZ[jj] - tab_ZZ[ii], 2);	// pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
 			if (sqrt(dist) < epsilon) {
 				numberofpointsdiff = 1;
@@ -1445,6 +1446,7 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	}
 
 	for (int ii = 0; ii < tab_nv; ii++) {
+		size_t i;
 		// boucle dans l autre sens pour assurer l'ordre des elements pour la suite
 		// cout << "vertex ii " << ii << "  max : " << tab_nv;
 		j[0] = int((tab_XX[ii] - bmin[0]) / epsilon);
@@ -1508,7 +1510,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 
 void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
                         const double *bmin, const double *bmax, const double hmin, int *ind_np, int &np) {
-	size_t i;
 	size_t j[dim];
 	size_t k[dim];
 	size_t NbCode = 100000;
@@ -1539,9 +1540,9 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 	}
 
 	int numberofpoints = 0;
-	int numberofpointsdiff;
 
 	for (int ii = 0; ii < NbPoints; ii++) {
+		int numberofpointsdiff;
 		numberofpointsdiff = 0;
 
 		for (int jj = ii + 1; jj < NbPoints; jj++) {
@@ -1571,6 +1572,7 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 	}
 
 	for (int ii = 0; ii < NbPoints; ii++) {
+		size_t i;
 		// boucle dans l autre sens pour assurer l'ordre des elements pour la suite
 
 		for (int jj = 0; jj < dim; jj++) {
@@ -1753,7 +1755,7 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 			numberofpointsdiff = 0;
 
 			for (int jj = ii + 1; jj < tab_nv; jj++) {
-				double dist = 0.;
+				double dist;// = 0.;
 				dist = pow(tab_XX[jj] - tab_XX[ii], 2) + pow(tab_YY[jj] - tab_YY[ii], 2) + pow(tab_ZZ[jj] - tab_ZZ[ii], 2);	// pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
 				if (sqrt(dist) < hseuil) {
 					// cout << "point_commun:"<< ii << "<--> " << jj << " coord ii " << tab_XX[ii] << " " << tab_YY[ii] << " " << tab_ZZ[ii] << " jj " << tab_XX[jj] << " " << tab_YY[jj] << " " << tab_ZZ[jj] << endl;

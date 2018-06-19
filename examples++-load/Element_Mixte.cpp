@@ -138,11 +138,11 @@ namespace  Fem2D {
 	void TypeOfFE_TD_NNS0::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
 		typedef double R;
 		// R2 A(K[0]), B(K[1]),C(K[2]);
-		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
-		const R c3 = 1. / 3.;
-		R ll3[3] = {l0 - c3, l1 - c3, l2 - c3};
-		R ll[3] = {l0, l1, l2};
-		R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
+		// R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
+		// const R c3 = 1. / 3.;
+		// R ll3[3] = {l0 - c3, l1 - c3, l2 - c3};
+		// R ll[3] = {l0, l1, l2};
+		// R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
 		/* if T_i=Edge(i) ,N=T.perp :
 		 * N_i' T_j T_k' N_i =0  if i=j or i=k
 		 * N_i' T_j = det(T_i,T_j) = aire(K)
@@ -291,8 +291,8 @@ namespace  Fem2D {
 	void TypeOfFE_TD_NNS1::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
 		typedef double R;
 		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
-		const R c3 = 1. / 3.;
-		R ll3[3] = {l0 - c3, l1 - c3, l2 - c3};
+		// const R c3 = 1. / 3.;
+		// R ll3[3] = {l0 - c3, l1 - c3, l2 - c3};
 		R ll[3] = {l0, l1, l2};
 		R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
 		/* if T_i=Edge(i) ,N=T.perp :
@@ -446,7 +446,7 @@ namespace  Fem2D {
 		InitTypeOfRTk_2d (int KK)
 			: k(KK), ndfi((k + 1) * (k)), npe(k + 1), ndf(3 * npe + ndfi), Data(5 * ndf + 6),
 			QFE(-1 + 2 * npe, npe, GaussLegendre(npe), true), QFK(QuadratureFormular_T_5) {
-			int j = 0;
+			// int j = 0;
 			int ndfe = ndf - ndfi;	//
 			int o[6];
 
@@ -582,13 +582,13 @@ namespace  Fem2D {
 	void TypeOfFE_RT1_2d::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &Phat, RNMK_ &val) const {
 		R2 X = K(Phat);
 		R2 Q [] = {R2(K[0]), R2(K[1]), R2(K[2])};
-		R2 A [] = {R2(Q[1], Q[2]), R2(Q[2], Q[0]), R2(Q[0], Q[1])};
-		R2 B [] = {R2(A[1], A[2]), R2(A[2], A[0]), R2(A[0], A[1])};
+		// R2 A [] = {R2(Q[1], Q[2]), R2(Q[2], Q[0]), R2(Q[0], Q[1])};
+		// R2 B [] = {R2(A[1], A[2]), R2(A[2], A[0]), R2(A[0], A[1])};
 		R l0 = 1 - Phat.x - Phat.y, l1 = Phat.x, l2 = Phat.y;
 		R L[3] = {l0, l1, l2};
 		R eo [] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
-		R2 Bb [] = {A[1].perp(), A[2].perp()};	// Base local pour les bulle
-		static long count = 10;
+		// R2 Bb [] = {A[1].perp(), A[2].perp()};	// Base local pour les bulle
+		// static long count = 10;
 
 		/*
 		 * if( count < 0)
@@ -632,7 +632,7 @@ namespace  Fem2D {
 
 		assert(val.N() >= ndf);
 		assert(val.M() == 2);
-		int ee = 0;
+		// int ee = 0;
 
 		val = 0;
 
@@ -652,7 +652,7 @@ namespace  Fem2D {
 		for (int e = 0; e < 3; ++e) {
 			int i = e;
 			int ii[2] = {(e + 1) % 3, (e + 2) % 3};
-			int i2 = (e + 2) % 3;
+			// int i2 = (e + 2) % 3;
 			R s = eo[e] / CKK;
 			if (s < 0) {
 				Exchange(ii[0], ii[1]);	//
@@ -745,7 +745,7 @@ namespace  Fem2D {
 			}
 		}
 
-		count++;
+		// count++;
 	}
 
 	class TypeOfFE_RT2_2d: public InitTypeOfRTk_2d, public TypeOfFE {
@@ -807,7 +807,7 @@ namespace  Fem2D {
 			void Pi_h_alpha (const baseFElement &K, KN_<double> &v) const {	// compute the coef of interpolation ...
 				const Triangle &T(K.T);
 				int k = 0;
-				R oe[3] = {T.EdgeOrientation(0), T.EdgeOrientation(1), T.EdgeOrientation(2)};
+				// R oe[3] = {T.EdgeOrientation(0), T.EdgeOrientation(1), T.EdgeOrientation(2)};
 				// magic fom:
 				//
 				// inv of [[4!,3!,2!2!],[3!,2!2!,2!],[2!2!,3!,4!]]/5! =
@@ -850,7 +850,7 @@ namespace  Fem2D {
 				// cout << " B= " << B[0] << " " << B[1] << endl;
 				double CK = 0.5;// dof U= [u1,u2] > |K| int_K ( B_i.U )
 				R dd = 9, hd = -3;
-				R ll[3], lo[3];
+				R ll[3];//, lo[3];
 
 				for (int p = 0; p < QFK.n; ++p) {
 					double w = -QFK[p].a * CK;
@@ -1047,15 +1047,15 @@ namespace  Fem2D {
 	void TypeOfFE_RT2_2d::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &Phat, RNMK_ &val) const {
 		R2 X = K(Phat);
 		R2 Q [] = {R2(K[0]), R2(K[1]), R2(K[2])};
-		R2 A [] = {R2(Q[1], Q[2]), R2(Q[2], Q[0]), R2(Q[0], Q[1])};
-		R2 B [] = {R2(A[1], A[2]), R2(A[2], A[0]), R2(A[0], A[1])};
+		// R2 A [] = {R2(Q[1], Q[2]), R2(Q[2], Q[0]), R2(Q[0], Q[1])};
+		// R2 B [] = {R2(A[1], A[2]), R2(A[2], A[0]), R2(A[0], A[1])};
 		R l0 = 1 - Phat.x - Phat.y, l1 = Phat.x, l2 = Phat.y;
 		R L[3] = {l0, l1, l2};
 		R eo [] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
 
 		assert(val.N() >= ndf);
 		assert(val.M() == 2);
-		int ee = 0;
+		// int ee = 0;
 
 		val = 0;
 		int p[15] = {0, 1, 2, 5, 4, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14};	// Permutation for orinatation
@@ -1290,11 +1290,11 @@ namespace  Fem2D {
 		R l0 = 1 - Phat.x - Phat.y, l1 = Phat.x, l2 = Phat.y;
 		R L[3] = {l0, l1, l2};
 		R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
-		static int count = 10;
+		// static int count = 10;
 
 		assert(val.N() >= 6);
 		assert(val.M() == 2);
-		int ee = 0;
+		// int ee = 0;
 
 		val = 0;
 		R cK = 2 * K.area;
@@ -1352,7 +1352,7 @@ namespace  Fem2D {
 			}
 		}
 
-		count++;
+		// count++;
 	}
 
 	// a static variable to add the finite element to freefem++

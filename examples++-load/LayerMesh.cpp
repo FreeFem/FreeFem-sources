@@ -108,7 +108,7 @@ int Ni_func_mesh (const int choix, const double x, const double y) {
 }
 
 void discretisation_max_mesh (const int choix, const Mesh &Th2, int &Nmax) {
-	int Ni;
+	// int Ni;
 
 	Nmax = 0;
 
@@ -118,6 +118,7 @@ void discretisation_max_mesh (const int choix, const Mesh &Th2, int &Nmax) {
 	 * }
 	 * Nmax=4;*/
 	for (int ii = 0; ii < Th2.nv; ii++) {
+		int Ni;
 		const Mesh::Vertex &P = Th2.vertices[ii];
 		Ni = Ni_func_mesh(choix, P.x, P.y);
 		Nmax = max(Ni, Nmax);
@@ -140,9 +141,10 @@ void tab_zmin_zmax_Ni_mesh (const int choix, const Mesh &Th2, int &Nmax, double 
 
 void Tet_mesh3_mes_neg (Mesh3 &Th3) {
 	int iv[4];
-	int lab;
 
 	for (int ii = 0; ii < Th3.nt; ii++) {
+		int lab;
+
 		const Tet &K(Th3.t(ii));
 		lab = K.lab;
 
@@ -350,8 +352,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 	// intent(in)  Nmax,Mesh &A2D
 	// intent(out) Mesh3 &A3D
 
-	double val_zmin, val_zmax, val_dz;
-	int Ni;
 	int NumSommet;
 	int NumElement;
 
@@ -361,8 +361,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 	int SommetPrisme[6];
 
 	// variable creer pour le bord
-	int i_ind1, Ni_ind1;
-	int i_ind2, Ni_ind2;
 	int i_recoll_1pp, i_recoll_2pp;
 	int i_recoll_1, i_recoll_2;
 	// int    pas_recoll_1, pas_recoll_2;
@@ -379,6 +377,8 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 	NumSommet = 0;
 
 	for (int ii = 0; ii < Th2.nv; ii++) {
+		int Ni;
+		double val_zmin, val_zmax, val_dz;
 		const Mesh::Vertex &P = Th2.vertices[ii];
 
 		val_zmin = tab_zmin[ii];
@@ -508,6 +508,8 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 	cout << "bord sur le cote" << endl;
 
 	for (int ii = 0; ii < Th2.neb; ii++) {	// Th2.neb ??
+		int i_ind1, Ni_ind1;
+		int i_ind2, Ni_ind2;
 		int ijj[3];
 		const Mesh::BorderElement &K(Th2.be(ii));
 		int lab;
@@ -1008,7 +1010,7 @@ void dpent1_mesh (int idl[3], int nu[12], int &nbe, int &option) {
 	// programmation : f77 ->c++ subroutine de f. hecht upmc
 
 	int idp[8];
-	int i1, i2, i3, i, nbdp, idf, idecou;
+	int i1, i2, i3, nbdp, idf;
 	const int pdd[8] = {1, 0, 2, 3, 4, 5, 0, 6};
 	int mu[6][12];
 	const int mu0[12] = {1, 6, 2, 3, 1, 5, 2, 6, 1, 6, 4, 5};
@@ -1050,6 +1052,7 @@ void dpent1_mesh (int idl[3], int nu[12], int &nbe, int &option) {
 	if (nbdp == 0) {
 		nbe = 0;
 	} else {
+		int idecou, i;
 		nbe = 3;
 		idf = idp[0];
 		idecou = pdd[idf];

@@ -60,8 +60,8 @@ namespace  Fem2D {
 				                           3 + 6,	// nb coef to build interpolation
 				                           6,	// np point to build interpolation
 				                           0) {
-				const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
-				const double gauss2 = 1. - gauss1;
+				// const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
+				// const double gauss2 = 1. - gauss1;
 				const R2 Pt [] = {R2(0, 0), R2(1, 0), R2(0, 1), R2(0.5, 0.5), R2(0, 0.5), R2(0.5, 0)};
 				// for the 3 vertices 6 coef
 				int kk = 0;

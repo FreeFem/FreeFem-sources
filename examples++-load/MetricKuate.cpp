@@ -133,7 +133,7 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 
 	// ----------------------------------------------------------------
 
-	int test = -1;
+	// int test = -1;
 	R X0;
 	R Y0;
 	R bmin = 0., bmax = inf, b1, b2, aik = 0., bik = 0., cik = 0.;
@@ -170,14 +170,14 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 
 	// ------------------------------------------------------------------------
 
-	int condition = -1;
-
 	if (r0 <= epsilon0) {epsilon0 = r0 * epsilon0;}
 
 	B = A = 1. / ((r0 - epsilon0) * (r0 - epsilon0));
 	R epsilon0min = epsilon0;
 
 	if (abs(Rmin - Rmax) > 1e-5) {
+		int condition = -1;
+
 		// cout<<" Rmax - Rmin  "<<Rmax-Rmin<<endl;
 		for (int ee = 0; ee < neps - 1; ee++) {	// boucle sur epsilon0---------------
 			epsilon0 = Tabepsilon[ee];
@@ -266,6 +266,7 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 				}
 
 				if (condition == 1) {
+					int test = -1;
 					// --cas : minoration de a-----------------------------------------------
 
 					R Gi = ((Xi * Yi * R0 * R0 - X0 * Y0 * Ri * Ri) / detXY + Xi * X0 / (Rmax * Rmax)) / (Yi * Y0);
@@ -417,7 +418,7 @@ class MetricKuate:  public E_F0mps
 
 			if (mp->size() != 2) {CompileError("syntax: MetricKuate(Th,np,o,err,[m11,m12,m22],[xx,yy])");}
 
-			int err = 0;
+			// int err = 0;
 			m11 = CastTo<KN<double> *>((*ma)[0]);	// fist exp of the array (must be a  double)
 			m12 = CastTo<KN<double> *>((*ma)[1]);	// second exp of the array (must be a  double)
 			m22 = CastTo<KN<double> *>((*ma)[2]);	// second exp of the array (must be a  double)

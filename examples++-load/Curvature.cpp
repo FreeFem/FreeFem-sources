@@ -20,8 +20,6 @@
 // AUTHORS : Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-// Compilation: ff-c++ -auto courbure.cpp
-
 // *INDENT-OFF* //
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
@@ -62,18 +60,17 @@
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"
 #include "eigenv.h"
-
 #endif
 
 using namespace std;
 
-using namespace  Fem2D;
+using namespace Fem2D;
 
 // fonction determinant les points d'intersection
 static int debug = 0;
 R3*courbe (Stack stack, const KNM_<double> &b, const long &li0, const long &li1, const double &ss, long *const &pi) {
 	assert(b.N() >= 3);
-	int i0 = li0, i1 = li1, im;
+	int i0 = li0, i1 = li1;
 	if (i0 < 0) {i0 = 0;}
 
 	if (i1 < 0) {i1 = b.M() - 1;}
@@ -85,6 +82,8 @@ R3*courbe (Stack stack, const KNM_<double> &b, const long &li0, const long &li1,
 	int k = 0, k1 = i1;
 
 	while (i0 < i1 - 1) {
+		int im;
+
 		ffassert(k++ < k1);
 		im = (i0 + i1) / 2;
 		if (s < b(2, im)) {
@@ -283,7 +282,7 @@ KNM<double>*equiparametre (Stack stack, const KNM_<double> &bb, const long &n) {
 	double delta = 1. / n1;
 	ffassert(b.N() == 3);
 	R2 P(b(0, 0), b(1, 0));
-	double s = 0;
+	// double s = 0;
 	c(':', 0) = b(':', 0);
 	c(':', n1) = b(':', m1);
 
