@@ -313,4 +313,3 @@ class Triangulation {
 };
 
 #endif
-

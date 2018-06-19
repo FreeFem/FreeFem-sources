@@ -29,6 +29,7 @@
 #include  <cfloat>
 #include  <cmath>
 using namespace std;
+
 #include "ff++.hpp"
 using namespace Fem2D;
 
@@ -473,9 +474,9 @@ namespace mir {
 			}
 		}
 
-		delete minDet;
-		delete maxDet;
-		delete eigenVec;
+		delete[] minDet;
+		delete[] maxDet;
+		delete[] eigenVec;
 
 		// refining these edges
 		Tab<Edge> halfEdges;
@@ -528,8 +529,8 @@ namespace mir {
 			movie_frame();
 		}
 
-		delete minEdge;
-		delete maxEdge;
+		delete[] minEdge;
+		delete[] maxEdge;
 		if (exportIntermediateData) {halfEdges.export_content("halfEdges.txt"); edges.export_content("edgesBeforeDelaunay.txt");}
 
 		cout << "Triangulation::hRefineQA : Intermediate anisotropic triangulation contains " << nt() << " triangles." << endl;
@@ -785,4 +786,4 @@ namespace mir {
 	}
 
 #endif
-}	// end namespace std
+}	// end namespace mir

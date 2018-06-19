@@ -250,9 +250,9 @@ class Dxwritesol_Op: public E_F0mps
 	public:
 		Dxwritesol_Op (const basicAC_F0 &args):  what(0), nbfloat(0) {
 			evct = 0;
-			int nbofsol;
-			int ddim = 2;
-			int stsize = 3;
+			// int nbofsol;
+			// int ddim = 2;
+			// int stsize = 3;
 			// There's no named parameter
 			args.SetNameParam();
 			if (args.size() != 4) {
@@ -321,7 +321,7 @@ AnyType Dxwritesol_Op::operator () (Stack stack)  const {
 	int nt = Th.nt;
 	int nv = Th.nv;
 	int nbsol = nv;
-	long longdefault;
+	long longdefault = 0;
 
 	KN<double> valsol(nbsol);
 	valsol = 0.;

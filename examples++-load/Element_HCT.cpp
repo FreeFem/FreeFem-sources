@@ -54,8 +54,8 @@ namespace  Fem2D {
 				                      9 + 6,// nb coef to build interpolation
 				                      6,// np point to build interpolation
 				                      0) {
-				const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
-				const double gauss2 = 1. - gauss1;
+				// const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
+				// const double gauss2 = 1. - gauss1;
 				const R2 Pt [] = {R2(0, 0), R2(1, 0), R2(0, 1), R2(0.5, 0.5), R2(0, 0.5), R2(0.5, 0)};
 				// for the 3 vertices 3 coef => 9 coef ..
 				int kk = 0;
@@ -281,7 +281,7 @@ namespace  Fem2D {
 		// cout << idd[k] << " " << jdd[k] << " " << add[k] << endl;
 		// cout << endl;
 
-		double i012[3] = {1, 0, 0}, i112[3] = {12, 12, 11};
+		// double i012[3] = {1, 0, 0}, i112[3] = {12, 12, 11};
 		double AAA[12][10];
 		set2zero(&AAA[0][0], 120);
 		double AA[12][10];

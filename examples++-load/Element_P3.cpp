@@ -314,7 +314,7 @@ namespace  Fem2D {
 	TypeOfFE_P3_3d::TypeOfFE_P3_3d ():  GTypeOfFE<Mesh>(TypeOfFE_P3_3d::dfon, 1, 3, false, false) {
 		typedef Element E;
 		int n = this->NbDoF;
-		const int d = E::Rd::d;
+		// const int d = E::Rd::d;
 		bool dd = verbosity > 5;
 		if (dd) {
 			cout << "\n +++ P3  : ndof : " << n << " " << this->PtInterpolation.N() << endl;
@@ -323,7 +323,7 @@ namespace  Fem2D {
 		R3 *Pt = this->PtInterpolation;
 		// construction of interpolation ppoint
 
-		{int k = 0;
+		{// int k = 0;
 		 double cc = 1. / 3.;
 
 		 for (int i = 0; i < ndof; ++i) {
@@ -352,7 +352,7 @@ namespace  Fem2D {
 			M.p[i] = i;
 		}
 
-		int k = 10;
+		// int k = 10;
 		if (verbosity > 9) {cout << " P3  set:";}
 
 		int dof = 4;
@@ -368,7 +368,7 @@ namespace  Fem2D {
 	void TypeOfFE_P3_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
 		assert(val.N() >= 20);	// 23 degrees of freedom
 		assert(val.M() == 1);	// 3 components
-		int n = this->NbDoF;
+		// int n = this->NbDoF;
 		// -------------
 		// perm: the permutation for which the 4 tetrahedron vertices are listed with increasing GLOBAL number
 		// (i.e. perm[0] is the local number of the vertex with the smallest global number, ...

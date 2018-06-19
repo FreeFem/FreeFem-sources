@@ -290,7 +290,7 @@ KN<long>*CloseTo2 (Stack stack, double const &eps, KNM_<double> const &P, KNM_<d
 	int po10 = P.step * P.shapei.step;
 	// int po01 = P.step * P.shapej.step;
 	// double *q0 = &(Q(0, 0));
-	int qo10 = Q.step * Q.shapei.step;
+	//int qo10 = Q.step * Q.shapei.step;
 	// int qo01 = Q.step * Q.shapej.step;
 	double x0 = P(0, ':').min();
 	double y0 = P(1, ':').min();
@@ -567,14 +567,14 @@ long Voisinage (KNM_<double> const &P, KNM_<double> const &Q, double const &eps,
 	double *p = &P(0, 0);
 	// double *q = &Q(0, 0);
 	int offset01 = P.step * P.shapej.step;
-	;
+	// ;
 	int offset10 = P.step * P.shapei.step;
-	;
-	double *q0 = &(Q(0, 0));
+	// ;
+	//double *q0 = &(Q(0, 0));
 	// int qoffset01 = Q.step * Q.shapej.step;
-	;
-	int qoffset10 = Q.step * Q.shapei.step;
-	;
+	// ;
+	// int qoffset10 = Q.step * Q.shapei.step;
+	// ;
 	ffassert(mp == 2);
 	ffassert(mq == 2);
 	KN<int> lp(np);
@@ -645,7 +645,7 @@ long ff_flann_search (KNM_<double> const &P, KNM_<double> const &Q, double const
 	double *q = &Q(0, 0);
 	int offset01 = P.step * P.shapej.step;
 	int offset10 = P.step * P.shapei.step;
-	double *q0 = &(Q(0, 0));
+	// double *q0 = &(Q(0, 0));
 	int qoffset01 = Q.step * Q.shapej.step;
 	int qoffset10 = Q.step * Q.shapei.step;
 

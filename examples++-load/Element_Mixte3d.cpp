@@ -2176,8 +2176,8 @@ namespace Fem2D {
 
 		{
 			// We build the interpolation pts on the edges of the reference tetrahedron:
-			int p;
-			p = 0;
+			// int p;
+			// p = 0;
 			int i = 0;
 
 			for (int e = 0; e < Element::ne; ++e, ++i) {
@@ -2316,7 +2316,7 @@ namespace Fem2D {
 			}
 		}
 
-		int doff = Element::nf * 3;
+		// int doff = Element::nf * 3;
 		{
 			p = Element::nf * QFface.n;
 
@@ -2424,7 +2424,7 @@ namespace Fem2D {
 		// fo contain just the sign about permutation ----- 1perm=-1 / 2perm=1 / 3perm=-1
 		double fo[4] = {(double)K.faceOrient(0), (double)K.faceOrient(1),
 			            (double)K.faceOrient(2), (double)K.faceOrient(3)};
-		int ee = 0;
+		// int ee = 0;
 		int p[15] = {2, 1, 0, 3, 4, 5, 8, 7, 6, 9, 10, 11, 12, 13, 14};	// Permutation for orientation to dof
 		R3 Pm[16];	// all the momome function ..
 

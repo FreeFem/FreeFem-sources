@@ -102,7 +102,7 @@ class SolveMUMPS_seq:   public MatriceMorse<R>::VirtualSolver
 				Clean();
 				id.job = JOB_END;
 				mumps_c(&id);	/* Terminate instance */
-				int ierr = MPI_Finalize();
+				/*int ierr = */MPI_Finalize();
 				ErrorExec(msg, INFO(1));
 			}
 		}
@@ -113,14 +113,14 @@ class SolveMUMPS_seq:   public MatriceMorse<R>::VirtualSolver
 			tgv(ttgv),
 			rinfog(rinfogg), infog(infogg) {
 			int myid = 0;
-			int ierr = 0;
+			// int ierr = 0;
 			int argc = 0;
 			char **argv = 0;
 
 			;
 
-			ierr = MPI_Init(&argc, &argv);
-			ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+			/*ierr = */MPI_Init(&argc, &argv);
+			/*ierr = */MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
 			id.job = JOB_INIT;
 			id.par = 1;
@@ -243,7 +243,7 @@ class SolveMUMPS_seq:   public MatriceMorse<R>::VirtualSolver
 			Clean();
 			id.job = JOB_END;
 			mumps_c(&id);	/* Terminate instance */
-			int ierr = MPI_Finalize();
+			/*int ierr = */MPI_Finalize();
 		}
 
 		void addMatMul (const KN_<R> &x, KN_<R> &Ax) const {

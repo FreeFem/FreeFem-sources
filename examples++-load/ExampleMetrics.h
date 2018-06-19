@@ -81,9 +81,16 @@ const sym2 ExampleMetric<5>(const R2 &P) {	// High anisotropy along the spiral r
 	const double r = Q.norm();
 	double theta = Q.x == -r ? pi : 2 * atan(Q.y / (r + Q.x));	// theta = theta >= 0 ? theta : theta+pi;
 
-	if (fabs(r - k * theta) <= width) {theta = theta;} else if (fabs(r - k * (theta + 2 * pi)) <= width) {theta = theta + 2 * pi;} else if (fabs(r - k * (theta + 4 * pi)) <= width) {theta = theta + 4 * pi;} else if (fabs(r - k * (theta + 6 * pi)) <= width && theta <= 0) {theta = theta + 6 * pi;} else {
+	if (fabs(r - k * theta) <= width)
+		theta = theta + 0 * pi;
+	else if (fabs(r - k * (theta + 2 * pi)) <= width)
+		theta = theta + 2 * pi;
+	else if (fabs(r - k * (theta + 4 * pi)) <= width)
+		theta = theta + 4 * pi;
+	else if (fabs(r - k * (theta + 6 * pi)) <= width && theta <= 0)
+		theta = theta + 6 * pi;
+	else
 		return sym2(1, 0, 1);	// {metric[0]=1; metric[1]=0; metric[2]=1; break;}
-	}
 
 	double c = cos(theta) - theta * sin(theta), s = sin(theta) + theta * cos(theta);// tangente à la spirale
 	double cOld = c;
@@ -137,4 +144,3 @@ const sym3 ExampleMetric3D<3>(const R3 &P) {// tire bouchon...
 }
 
 #endif
-

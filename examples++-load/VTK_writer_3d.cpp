@@ -137,9 +137,10 @@ class VtkWriter
 		double checkprecision (double val) {
 			double tmp;
 
-			if (val >= 0.) {tmp = max(0., val);}
-
-			if (val < 0.) {tmp = min(0., val);}
+			if (val >= 0.)
+				tmp = max(0., val);
+			else
+				tmp = min(0., val);
 
 			return tmp;
 		}
@@ -263,7 +264,7 @@ AnyType Vtkwritesol_Op::operator () (Stack stack)  const {
 	int nt = Th.nt;
 	int nv = Th.nv;
 	int nbsol = nv;
-	long longdefault;
+	long longdefault = 0;
 
 	KN<double> valsol(nbsol);
 	valsol = 0.;

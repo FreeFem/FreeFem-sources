@@ -492,7 +492,7 @@ class SolveSuperLU:   public MatriceMorse<R>::VirtualSolver, public SuperLUDrive
 			SuperMatrix B, X;
 			SuperLUStat_t stat;
 			void *work = 0;
-			int info, lwork = 0, nrhs = 1;
+			int info, lwork = 0/*, nrhs = 1*/;
 			int i;
 			double ferr[1];
 			double berr[1];
@@ -523,7 +523,7 @@ class SolveSuperLU:   public MatriceMorse<R>::VirtualSolver, public SuperLUDrive
 
 			/* Defaults */
 			lwork = 0;
-			nrhs = 0;
+			// nrhs = 0;
 
 			/* Set the default values for options argument:
 			 *  options.Fact = DOFACT;
@@ -646,9 +646,8 @@ class SolveSuperLU:   public MatriceMorse<R>::VirtualSolver, public SuperLUDrive
 		void Solver (const MatriceMorse<R> &AA, KN_<R> &x, const KN_<R> &b) const {
 			SuperMatrix B, X;
 			SuperLUStat_t stat;
-			void *work = 0;
-			int info = 0, lwork = 0, nrhs = 1;
-			int i;
+
+			int info = 0, lwork = 0;
 			double ferr[1], berr[1];
 			double rpg, rcond;
 			double *xx;
@@ -660,6 +659,9 @@ class SolveSuperLU:   public MatriceMorse<R>::VirtualSolver, public SuperLUDrive
 			Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T();
 
 			{
+				void *work = 0;
+				int nrhs = 1;
+
 				KN_2Ptr<R> xx(x), bb(b);
 				// cout << " xx #### " << xx.c.N() << " "<< xx.ca.N() <<  " " << xx.ca.step << endl;
 				// cout << " bb #### " << bb.c.N() << " "<< bb.ca.N() << " " << bb.ca.step <<endl;
@@ -684,9 +686,10 @@ class SolveSuperLU:   public MatriceMorse<R>::VirtualSolver, public SuperLUDrive
 			if (verbosity > 3) {
 				if (info == 0 || info == n + 1) {
 					/* This is how you could access the solution matrix. */
-					R *sol = (R *)((DNformat *)X.Store)->nzval;
+					// R *sol = (R *)((DNformat *)X.Store)->nzval;
 
 					if (options.IterRefine) {
+						int i = 0;
 						printf("Iterative Refinement:\n");
 						printf("%8s%8s%16s%16s\n", "rhs", "Steps", "FERR", "BERR");
 						printf("%8d%8d%16e%16e\n", i + 1, stat.RefineSteps, ferr[0], berr[0]);
