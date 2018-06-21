@@ -80,7 +80,7 @@ class classBuildMesh :  public E_F0mps { public:
    typedef pmesh  Result;
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =4;
+   static const int n_name_param =5;
    
     Expression nargs[n_name_param];
    
@@ -88,6 +88,7 @@ class classBuildMesh :  public E_F0mps { public:
    
    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
    bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+   double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
    KNM<double>* arg(int i,Stack stack,KNM<double>* p) const{ return nargs[i] ? GetAny<KNM<double>*>( (*nargs[i])(stack) ): p;}
     
     classBuildMesh(const basicAC_F0 & args) 
@@ -196,7 +197,8 @@ basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
     {  "nbvx", &typeid(long)} ,
     {"fixeborder", &typeid(bool)},// obsolete 
     {"points", &typeid(KNM<double>*)},
-    {"fixedborder", &typeid(bool)}
+    {"fixedborder", &typeid(bool)},
+     {"alea", &typeid(double)}
 };
 // modif aout 2007
 class BuildMeshFile :  public E_F0mps { public:  
@@ -488,8 +490,10 @@ AnyType classBuildMesh::operator()(Stack stack)  const {
    long  nbvx         = arg(0,stack,0L); 
    bool  requireborder= arg(3,stack,arg(1,stack,false));
     KNM<double> * p=0;  p=arg(2,stack,p);
+    double alea = arg(4,stack,0.);
+
    ffassert(   nbvx >= 0);
-   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder,p)));
+   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder,p,alea)));
 
 }
 

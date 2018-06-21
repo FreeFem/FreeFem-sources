@@ -411,10 +411,17 @@ Fem2D::Mesh *bamg2msh(const bamg::Geometry &Gh)
   return Tn;
 }
 
-
-
-const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern)
+extern double  genrand_res53(void) ;
+double NormalDistrib(double sigma)
 {
+    if( sigma <=0.) return 0.;
+    double rand = genrand_res53()  ;
+    const double TWOPI = 3.14159265358979323846264338328*2.;
+    return  sigma*sqrt(-2.0*log(rand))*cos(TWOPI*rand);
+}
+const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea)
+{
+    if(alea) Requiredboundary=1;
     int nbvinter=0;
     if( pintern)
     {
@@ -472,17 +479,19 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
     for(int index=0; index<nbd; ++index )
     {
       assert(k->b->xfrom); // a faire
-      double & t = *  k->var(stack);
+      double & t = *  k->var(stack),tt;
       double a(k->from(stack)),b(k->to(stack));
       long * indx = k->index(stack);
       if(indx) *indx = index;
       else ffassert(index==0);
       n=Max(Abs(k->Nbseg(stack,index)),1L);
-      t=a;
+      tt=t=a;
       double delta = (b-a)/n;
-      for ( nn=0;nn<=n;nn++,i++, t += delta)
+      for ( nn=0;nn<=n;nn++,i++, tt += delta)
         {
-          if (nn==n) t=b; // to remove roundoff error 
+          t = tt;
+          if (nn==n) t=b; // to remove roundoff error
+            if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Saas epee
           mp.label = k->label();
           k->code(stack); // compute x,y, label
           // cout << " ----- " << i << " " << mp.P.x << " " << mp.P.y << endl;
@@ -734,6 +743,22 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
       Triangles *Th = 0;
       try { 
 	  Th =new Triangles( nbtx ,*Gh);
+          if(alea)
+          {
+              Th->SetVertexFieldOn();
+              for( int i=0;i<Th->nbv;++i)
+              {
+                  VertexOnGeom *on=0;
+                  if( !(Th->vertices[i].on) ) // we are non on geometrie
+                  {
+                      // move a lillte points
+                      Th->vertices[i].r.x += NormalDistrib(alea);
+                      Th->vertices[i].r.y += NormalDistrib(alea);
+
+                  }
+              }
+                      
+          }
 	  if(0)
 	    {
 	      
