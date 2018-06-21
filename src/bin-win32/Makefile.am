@@ -36,6 +36,7 @@ LIBS_FFmpi = ../mpi/ffapi.o libff.dll
 all-local: $(WIN32DLLTARGET) 
 	-for i in $(LDADD2) ; do case $$i in  *.dll) echo cp -p $$i .; cp -p $$i . ;;	  esac ; done
 	echo done
+	./copy-dll.sh 
 
 # FFCS does not need most Windows executables since it compiles
 # executables in ffcs/src and ffcs/pack. But still keep one executable
