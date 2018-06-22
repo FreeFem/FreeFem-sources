@@ -92,9 +92,11 @@ echo "includepath += \"/usr/local/lib/ff++/3.61/idp\"" >> /etc/freefem++.pref
 checkErrorConfig
 
 # Append to bashrc
-if [ !grep -qe 'export LD_LIBRARY_PATH="*:/usr/local/ff-petsc/real/lib:/usr/local/ff-petsc/complex/lib"' /etc/bash.bashrc ]
+echo -e "$bold Append library path to bashrc$reset"
+if grep -qe 'export LD_LIBRARY_PATH="*:/usr/local/ff-petsc/real/lib:/usr/local/ff-petsc/complex/lib"' /etc/bash.bashrc 
 then
-	echo -e "$bold Append library path to bashrc$reset"
+	echo -e "\tbashrc already contains FreeFem++ libraries"
+else
 	echo -e "" >> /etc/bash.bashrc
 	checkErrorBashrc
 	echo -e "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:/usr/local/ff-petsc/real/lib:/usr/local/ff-petsc/complex/lib\"" >> /etc/bash.bashrc
