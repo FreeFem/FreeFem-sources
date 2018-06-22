@@ -491,7 +491,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
         {
           t = tt;
           if (nn==n) t=b; // to remove roundoff error
-            if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Saas epee
+            if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
           mp.label = k->label();
           k->code(stack); // compute x,y, label
           // cout << " ----- " << i << " " << mp.P.x << " " << mp.P.y << endl;
@@ -743,15 +743,15 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
       Triangles *Th = 0;
       try { 
 	  Th =new Triangles( nbtx ,*Gh);
-          if(alea)
+          if(alea) //  Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
           {
               Th->SetVertexFieldOn();
               for( int i=0;i<Th->nbv;++i)
               {
                   VertexOnGeom *on=0;
-                  if( !(Th->vertices[i].on) ) // we are non on geometrie
+                  if( !(Th->vertices[i].on) ) // we are non on geometry
                   {
-                      // move a lillte points
+                      // move a little the  points
                       Th->vertices[i].r.x += NormalDistrib(alea);
                       Th->vertices[i].r.y += NormalDistrib(alea);
 
