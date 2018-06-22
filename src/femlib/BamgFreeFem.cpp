@@ -177,6 +177,7 @@ const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
     }      
   Int4 *reft = new Int4[tTh->nbt];
   //Int4 nbref =
+  long nerr=0;
   tTh->ConsRefTriangle(reft);
   for( i=0,k=0;i<tTh->nbt;i++)
     if(tTh->triangles[i].link)
@@ -184,6 +185,7 @@ const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
         
         Fem2D::R2 A(t[k][0]),B(t[k][1]),C(t[k][2]);
         t[k].area = (( B-A)^(C-A))*0.5 ;
+          nerr += t[k].area <=0;
         t[k].lab = tTh->subdomains[reft[i]].ref;  // a faire
         throwassert(k == i);
         k++;
@@ -194,7 +196,14 @@ const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
   
   if (verbosity)
     cout << "  --  mesh:  Nb of Triangles = "  << setw(6) <<  nt << ", Nb of Vertices " << nv << endl;
-  
+  if(nerr)
+  {
+      cerr << "Fatal error: Number of Negative triangles "<< nerr << endl;
+      delete [] v;
+      delete [] t;
+      delete [] b_e;
+      ExecError("bamg2mesh error negative triangle ");
+  }
   {  
     Fem2D::Mesh *m = new Fem2D::Mesh(nv,nt,neb,v,t,b_e);
     if (renumbering) m->renum();
@@ -788,15 +797,18 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
 		  
 		}
 	    }
+          m=bamg2msh(Th,true);
+
       }
       catch(...)
       {
 	  Gh->NbRef=0; 
 	  delete Gh;
+          if(m) delete m;
+          if(Th) delete Th;// clean memory ???
 	  cout << " catch Err bamg "  << endl;
 	  throw ;
      }
-      m=bamg2msh(Th,true);      
       delete Th;
   }
   
