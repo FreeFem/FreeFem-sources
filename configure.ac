@@ -1018,7 +1018,7 @@ AC_ARG_WITH(wget,
 	   ff_wget=yes
 	   ff_wget_command="${withval}")
 
-ff_mkl_libpath=yes
+ff_MKL_libpath=yes
 AC_ARG_WITH(mkl,
 	[  --with-mkl= the  MKL LIBPATH : (ie. /opt/intel/mkl/RR.r.y.xxx/lib/<arch>)],
 	   ff_mkl_libpath="${withval}")
@@ -1155,6 +1155,8 @@ if test "$ff_where_lib_conf_blaslapack" = 1  ; then
 	   if  echo  "$ff_where_lib_blaslapack"| grep -q  " -lmkl"  ; then
 	     	AC_MSG_NOTICE([ MKL  from  petsc ***** ]) 
 	        AC_FF_ADDWHERELIB(mkl,$ff_blas_libs,$ff_blas_inc)
+            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 	   fi
 
 fi
@@ -1260,6 +1262,8 @@ then
 	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
             AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+			
 	else
 	    ff_mkl_libpath=no
 

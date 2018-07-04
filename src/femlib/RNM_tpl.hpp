@@ -182,7 +182,7 @@ template<class R>
   }
 
 template<class R>
- R  operator,(const KN_<const_R> & u,const conj_KN_<const_R> & vc) {
+inline R  operator,(const KN_<const_R> & u,const conj_KN_<const_R> & vc) {
   int n=u.n;
     K_throwassert(n == vc.a.n);
     R  s=0; 
@@ -194,7 +194,7 @@ template<class R>
   }
 
 template<class R>
- R  operator,(const conj_KN_<const_R> & u,const KN_<const_R> & vc) {
+inline  R  operator,(const conj_KN_<const_R> & u,const KN_<const_R> & vc) {
   int n=u.a.n;
     K_throwassert(n == vc.n);
     R  s=0; 
@@ -206,10 +206,86 @@ template<class R>
   }
 
 template<class R>
- R  operator,(const KN<const_R> & u,const conj_KN_<const_R> & vc) {  return ( (KN_<R>) u,vc);}
+inline  R  operator,(const KN<const_R> & u,const conj_KN_<const_R> & vc) {  return ( (KN_<R>) u,vc);}
 template<class R>
- R  operator,(const conj_KN_<const_R> & u,const KN<const_R> & vc) {  return (  u, (KN_<R>) vc);}
+inline R  operator,(const conj_KN_<const_R> & u,const KN<const_R> & vc) {  return (  u, (KN_<R>) vc);}
 
+
+#ifdef HAVE_BLAS
+
+
+extern "C" {
+typedef struct {
+        double r;
+        double i;
+    } blascomplex;
+    void   cblas_zdotu_sub(const int N, const void *X, const int incX,
+                           const void *Y, const int incY, void *dotu);
+    void   cblas_zdotc_sub(const int N, const void *X, const int incX,
+                           const void *Y, const int incY, void *dotu);
+
+}
+#define BLAS_ddot F77_FUNC_(ddot,DDOT)
+#define BLAS_zdotu F77_FUNC_(zdotu,ZDOTU)
+#define BLAS_zdotc F77_FUNC_(zdotc,ZDOTC)
+#define DCL_DOT(U,DOT) extern "C"  U DOT (const int*, const U*, const int*, const U*, const int*);
+
+DCL_DOT(double,BLAS_ddot);
+// XXDCL_DOT(complex<double>,BLAS_zdotu);
+//XXDCL_DOT(complex<double>,BLAS_zdotc);
+
+template<>
+inline double  KN_<double>::operator,(const KN_<double> & u) const {
+    K_throwassert(u.n == n);
+    double  s=0;
+    double * l(v);
+    double  *r(u.v);
+    int nr=n,ls = step,rs=u.step;
+    s= BLAS_ddot (&nr,l,&ls,r,&rs) ;
+    return s;
+}
+template<>
+ inline complex<double>    KN_<complex<double> >::operator,(const KN_<complex<double> > & u) const {
+    K_throwassert(u.n == n);
+    complex<double>  s=0;
+    complex<double> * l(v);
+    complex<double>  *r(u.v);
+    int nr=n,ls = step,rs=u.step;
+     cblas_zdotu_sub(nr,(const void *) l,ls,(const void *) r,rs, (void*) &s);
+//    s= BLAS_zdotu (&nr,l,&ls,r,&rs) ;// non conj
+    return s;
+}
+
+template<>
+inline complex<double>   operator,(const conj_KN_<complex<double> > & vc,const KN_<complex<double> > & u)
+{
+    K_throwassert(u.n == vc.a.n);
+   complex<double>   s=0;
+    complex<double>  * l(u);
+    complex<double>   *r(vc.a);
+    int nr=u.n,ls = u.step,rs=vc.a.step;
+     cblas_zdotc_sub(nr,(const void *) l,ls,(const void *) r,rs, (void*) &s);
+  //  s= BLAS_zdotc (&nr,r,&rs,l,&ls) ;
+    return s;
+}
+    
+template<>
+    inline complex<double>   operator,(const KN_<complex<double> > & u,const conj_KN_<complex<double> > & vc)
+        {
+            K_throwassert(u.n == vc.a.n);
+            complex<double>   s=0;
+            complex<double>  * l(u);
+            complex<double>   *r(vc.a);
+            int nr=u.n,ls = u.step,rs=vc.a.step;
+              cblas_zdotc_sub(nr,(const void *) l,ls,(const void *) r,rs, (void*) &s);
+          //  s= BLAS_zdotc (&nr,r,&rs,l,&ls) ;
+            return  s;
+        }
+
+/////////////////////////
+#endif
+        template<> inline double  operator,(const KN_<double> & u,const conj_KN_<double> & vc) {  return ( u,vc.a);}
+        template<> inline double  operator,(const conj_KN_<double> & u,const KN_<double> & vc) {  return ( u.a, vc);}
 
 template<class R>
 R  KN_<R>::min() const {
