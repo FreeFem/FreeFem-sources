@@ -665,7 +665,8 @@ AnyType SaveMesh3::operator()(Stack stack) const
   
    pmesh3 Thh = GetAny<pmesh3>((*getmesh)(stack));
    string * fn =  GetAny<string*>((*filename)(stack));
-   cout << "SaveMesh3 " << *fn << " " << Thh << endl;
+   if (verbosity > 2)
+       cout << "SaveMesh3 " << *fn << " " << Thh << endl;
    int ret=Thh->Save(*fn);
     if( ret!=0) {ExecError("PB Write error !");}
    return SetAny<pmesh3>(Thh);
