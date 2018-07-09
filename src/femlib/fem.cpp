@@ -1594,15 +1594,18 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    if (split[it]) 
 		hm=Min(hm,Th[it].h_min()/(R) split[it]);
 	}
-	R seuil=hm/400.0;
-	if(verbosity>5)   
-	    cout << " seuil = " <<  seuil << " hmin = " << hm <<  endl; 
-	assert(seuil>1e-15);
+	R seuil=hm/splitmax/4.0;
+	//assert(seuil>1e-15);
 	vertices = new Vertex[nvmax];
 	assert( vertices );
 	
 	nv =0;
 	quadtree = new FQuadTree(this,Pmin,Pmax,nv); // build empty the quadtree
+        long iseuil =(long) (quadtree->coef*seuil);
+        if(verbosity>5)
+         cout << " seuil = " <<  seuil << " hmin = " << hm << " iseuil/ quadtree: " << iseuil <<  endl;
+
+       ffassert(iseuil); //  zero => too smal
         {  // to keep the order of old vertices to have no problem in
              // interpolation on sub grid of RT finite element for example (Feb. 2016 F. Hecht)
         KN<bool> setofv(Th.nv,false);
@@ -1751,7 +1754,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	
 	//   create the new vertices and the new triangle 
 	int   kt=0;
-	for (int K=0;K<Th.nt;K++)
+ 	for (int K=0;K<Th.nt;K++)
 	{ // cout << K << endl;
 	    Triangle &T(Th[K]);
 	    R2 A(T[0]);
@@ -1771,13 +1774,14 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    R lmin = Min(la,lb,lc);
 		    R2 Pj= A*la+B*lb+C*lc; 
 		    Vertex *pV;
-		    pV=quadtree->ToClose(Pj,seuil);
+		    pV=quadtree->ToClose(Pj,seuil,true);
 		    // if !noregenereration => point du bord du triangle deja genere 
 		    bool addv = !pV;
 		    if(!noregenereration && pV==0) addv = lmin > 1e-5;
 		    if ( addv )			
 		    { // new vertex
 		      // cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
+                        if( !(nv < nvmax ))
 			ffassert(nv<nvmax);
 			vertices[nv]=Pj;
 			(Label&) vertices[nv]=0; //  Internal vertices 
