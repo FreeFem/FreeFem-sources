@@ -21,7 +21,7 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep:
+//ff-c++-LIBRARY-dep:libMesh
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
@@ -405,111 +405,6 @@ double ExtractBorder (Stack stack, pmesh const &pTh, long const &lab, KNM<double
 		 (((y) == 0.0f) ? (fabs(x) < EPS) : \
 		  (fabs((x) - (y)) / (fabs(x) + fabs(y)) < EPSX2))))
 
-/* eigen value + vector extraction */
-int eigen2 (double *mm, double *lambda, double vp[2][2]) {
-	double m[3], dd, a1, xn, ddeltb, rr1, rr2, ux, uy;
-
-	/* init */
-	ux = 1.0;
-	uy = 0.0;
-
-	/* normalize */
-	memcpy(m, mm, 3 * sizeof(double));
-	xn = fabs(m[0]);
-	if (fabs(m[1]) > xn) {xn = fabs(m[1]);}
-
-	if (fabs(m[2]) > xn) {xn = fabs(m[2]);}
-
-	if (xn < EPSD2) {
-		lambda[0] = lambda[1] = 0.0;
-		vp[0][0] = 1.0;
-		vp[0][1] = 0.0;
-		vp[1][0] = 0.0;
-		vp[1][1] = 1.0;
-		return 1;
-	}
-
-	xn = 1.0 / xn;
-	m[0] *= xn;
-	m[1] *= xn;
-	m[2] *= xn;
-
-	if (egal(m[1], 0.0)) {
-		rr1 = m[0];
-		rr2 = m[2];
-		goto vect;
-	}
-
-	/* eigenvalues of jacobian */
-	a1 = -(m[0] + m[2]);
-	ddeltb = a1 * a1 - 4.0 * (m[0] * m[2] - m[1] * m[1]);
-
-	if (ddeltb < 0.0) {
-		fprintf(stderr, "  Delta: %f\n", ddeltb);
-		ddeltb = 0.0;
-	}
-
-	ddeltb = sqrt(ddeltb);
-
-	if (fabs(a1) < EPS) {
-		rr1 = 0.5 * sqrt(ddeltb);
-		rr2 = -rr1;
-	} else if (a1 < 0.0) {
-		rr1 = 0.5 * (-a1 + ddeltb);
-		rr2 = (-m[1] * m[1] + m[0] * m[2]) / rr1;
-	} else if (a1 > 0.0) {
-		rr1 = 0.5 * (-a1 - ddeltb);
-		rr2 = (-m[1] * m[1] + m[0] * m[2]) / rr1;
-	} else {
-		rr1 = 0.5 * ddeltb;
-		rr2 = -rr1;
-	}
-
-vect:
-	xn = 1.0 / xn;
-	lambda[0] = rr1 * xn;
-	lambda[1] = rr2 * xn;
-
-	/* eigenvectors */
-	a1 = m[0] - rr1;
-	if (fabs(a1) + fabs(m[1]) < EPS) {
-		if (fabs(lambda[1]) < fabs(lambda[0])) {
-			ux = 1.0;
-			uy = 0.0;
-		} else {
-			ux = 0.0;
-			uy = 1.0;
-		}
-	} else if (fabs(a1) < fabs(m[1])) {
-		ux = 1.0;
-		uy = -a1 / m[1];
-	} else if (fabs(a1) > fabs(m[1])) {
-		ux = -m[1] / a1;
-		uy = 1.0;
-	} else if (fabs(lambda[1]) > fabs(lambda[0])) {
-		ux = 0.0;
-		uy = 1.0;
-	} else {
-		ux = 1.0;
-		uy = 0.0;
-	}
-
-	dd = sqrt(ux * ux + uy * uy);
-	dd = 1.0 / dd;
-	if (fabs(lambda[0]) > fabs(lambda[1])) {
-		vp[0][0] = ux * dd;
-		vp[0][1] = uy * dd;
-	} else {
-		vp[0][0] = uy * dd;
-		vp[0][1] = -ux * dd;
-	}
-
-	/* orthogonal vector */
-	vp[1][0] = -vp[0][1];
-	vp[1][1] = vp[0][0];
-
-	return 1;
-}
 
 double vp1 (const double &a11, const double &a12, const double &a22) {
 	double vp[2][2];
@@ -540,23 +435,42 @@ double Tresca (const double &arr, const double &arz, const double &azz, const do
 	return max(fabs(l[0] - l[1]), max(fabs(l[0] - l[2]), fabs(l[1] - l[2])));
 }
 
+
+double Tresca (const double &a11, const double &a22, const double &a33, const double &a12,const double &a23, const double &a13) {
+	double vp[3][3];
+	double l[3];
+	/*  numberinbg of m : a11 , a12 ,  a13,  a22,   a23   a33 	(symetrique )*/
+	double m[6] = { a11,a12,a13, a22,a23,a33};
+	int nv = eigenv(1,m, l, vp);
+	//cout << nv << " " <<l[0] << " " << l[1] << " " << l[2] << endl; 
+    return max(fabs(l[0] - l[1]), max(fabs(l[0] - l[2]), fabs(l[1] - l[2])));
+}
+double VonMises (const double &a11, const double &a22, const double &a33, const double &a12,const double &a23, const double &a13) {
+	double vp[3][3];
+	double l[3];
+	/*  numberinbg of m : a11 , a12 ,  a13,  a22,   a23   a33 	*/
+	double m[6] = { a11,a12,a13, a22,a23,a33};
+	int nv = eigenv(1,m, l, vp);
+	double s1 = l[1] - l[0];
+	double s2 = l[0] - l[2];
+	double s3 = l[1] - l[2];
+	return sqrt((s1 * s1 + s2 * s2 + s3 * s3) / 2.);
+}
 double VonMises (const double &a11, const double &a12, const double &a22) {
 	double vp[2][2];
 	double l[3];
 	double m[3] = {a11, a12, a22};
 	int nv = eigen2(m, l, vp);
-
-	l[2] = 0;
 	double s1 = l[1] - l[0];
 	double s2 = l[0] - l[2];
 	double s3 = l[1] - l[2];
 	return sqrt((s1 * s1 + s2 * s2 + s3 * s3) / 2.);
 }
 
-double VonMises (const double &a11, const double &a12, const double &a22, const double &att) {
+double VonMises (const double &arr, const double &arz, const double &azz, const double &att) {
 	double vp[2][2];
 	double l[3];
-	double m[3] = {a11, a12, a22};
+    double m[3] = {arr, arz, azz};
 	int nv = eigen2(m, l, vp);
 
 	l[2] = att;
@@ -578,10 +492,12 @@ static void finit () {
 	Global.Add("setcurveabcisse", "(", new OneOperator1s_<double, KNM_<double> >(reparametrage));
 	Global.Add("equiparameter", "(", new OneOperator2s_<KNM<double> *, KNM_<double>, long>(equiparametre));
 	// Global.Add("vp1","(",new OneOperator3_<double, double,double,double >(vp1));
-	Global.Add("Tresca", "(", new OneOperator3_<double, double, double, double>(Tresca));
-	Global.Add("VonMises", "(", new OneOperator3_<double, double, double, double>(VonMises));
-	Global.Add("Tresca", "(", new OneOperator4_<double, double, double, double, double>(Tresca));
-	Global.Add("VonMises", "(", new OneOperator4_<double, double, double, double, double>(VonMises));
+	Global.Add("Tresca", "(", new OneOperator3_<double, double>(Tresca));
+	Global.Add("VonMises", "(", new OneOperator3_<double, double>(VonMises));
+	Global.Add("Tresca", "(", new OneOperator4_<double, double>(Tresca));
+	Global.Add("Tresca", "(", new OneOperator6_<double, double>(Tresca));
+	Global.Add("VonMises", "(", new OneOperator4_<double, double>(VonMises));
+	Global.Add("VonMises", "(", new OneOperator6_<double,double>(VonMises));
 }
 
 LOADFUNC(finit);// une variable globale qui serat construite  au chargement dynamique
