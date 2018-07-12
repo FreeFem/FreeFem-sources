@@ -1019,9 +1019,9 @@ class KN :public KN_<R> { public:
         
         
    KN& operator =(const Mul_KNM_KN_<R> & u) 
-        { if(this->unset()) this->set(new R[u.b.N()],u.b.N());KN_<R>::operator=(u);return *this;}
+        { if(this->unset()) this->set(new R[u.A.N()],u.A.N());KN_<R>::operator=(u);return *this;}
     KN& operator =(const Mul_KNMh_KN_<R> & u)
-    { if(this->unset()) this->set(new R[u.b.N()],u.b.N());KN_<R>::operator=(u);return *this;}
+    { if(this->unset()) this->set(new R[u.A.M()],u.A.M());KN_<R>::operator=(u);return *this;}
    
 //   KN& operator =(const MatriceCreuseMulKN_<R> & Ax) 
 //       {if(this->unset()) set(new R[Ax.v.N()],Ax.v.N()); KN_<R>::operator=(Ax);return *this;}
