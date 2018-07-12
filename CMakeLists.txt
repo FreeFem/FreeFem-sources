@@ -48,3 +48,35 @@ ENDIF(NOT ENABLE_DOWNLOAD)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples++-load)
 ADD_SUBDIRECTORY(examples++-mpi)
+
+############
+# STRVERSIONNUMBER
+############
+
+EXECUTE_PROCESS(COMMAND "date" OUTPUT_VARIABLE VersionFreeFemDate)
+STRING(STRIP ${VersionFreeFemDate} VersionFreeFemDate)
+FILE(WRITE src/fflib/strversionnumber.cpp
+"#include \"config-wrapper.h\"\n
+#include \"strversionnumber.hpp\" // [[file:strversionnumber.hpp]] \n
+#include <cstdlib> \n
+using namespace std;\n
+#define TOSTRING1(i) #i \n
+#define TOSTRING(i) TOSTRING1(i) \n
+\n
+//#include <sstream>\n
+#include <cstdio>\n
+using namespace std;\n
+\n
+double VersionNumber(){\n
+  return VersionFreeFempp;\n
+}\n
+\n
+string StrVersionNumber(){\n
+//  std::ostringstream buffer;\n
+//  buffer.precision(8);\n
+//  buffer<<VersionNumber();\n
+  static char buffer[100];\n
+  sprintf(buffer,\" %9f (date " ${VersionFreeFemDate}")\",VersionNumber());\n
+  return buffer; //.str()+\" (date ${VersionFreeFemDate})\" ;\n
+}")
+
