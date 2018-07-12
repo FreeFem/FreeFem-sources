@@ -1,6 +1,6 @@
 load "Curvature"
 load "isoline"
-
+cout << " tersca " << Tresca(1,2,3,0,0,0) << endl;; 
 real R= 1;
 real meshsize= 0.1;
 border DC(t=pi/2,-pi/2) { x=R*cos(t); y=R*sin(t); label=1;}

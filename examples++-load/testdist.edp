@@ -13,5 +13,6 @@ distance(Th,u,v[]);
 //for (int i=0;i<v[].n; ++i)
 // cout << i << " " << v[][i] << " "<< e[][i] <<  endl;  
 e = v-y;
+cout << "err = "<< e[].linfty << endl; 
 plot(e, wait=1);
 assert( e[].linfty < 1e-10);

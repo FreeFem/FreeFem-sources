@@ -132,9 +132,7 @@ include 'phpfiles.php';
 </span><span class="s13">pacman -S bsdcpio</span><span class="s16"><br>
 </span><span class="s13">pacman -S bsdtar</span><span class="s16"><br>
 </span><span class="s13">pacman -S bzip2</span><span class="s16"><br>
-</span><span class="s13">pacman -S catgets</span><span class="s16"><br>
 </span><span class="s13">pacman -S coreutils</span><span class="s16"><br>
-</span><span class="s13">pacman -S crypt</span><span class="s16"><br>
 </span><span class="s13">pacman -S curl</span><span class="s16"><br>
 </span><span class="s13">pacman -S dash</span><span class="s16"><br>
 </span><span class="s13">pacman -S file</span><span class="s16"><br>
@@ -191,17 +189,19 @@ a) To build 32-bit things, open the "MinGW-w64 32-bit Shell"<br>
 b) To build 64-bit things, open the "MinGW-w64 64-bit Shell"</span></li>
   <li class="li15"><span class="s18"></span>install MSMPI<span class="Apple-converted-space">  </span>for parallel version under window64</li>
   <li class="li15"><span class="Apple-converted-space">    <span class="Apple-tab-span">	</span></span>download <a href="https://www.microsoft.com/en-us/download/details.aspx?id=49926">MS MPI V7</a>, and install both msmpisdk.msi and MSMpiSetup.exe</li>
-  <li class="li15"><span class="Apple-converted-space">         </span>open <span class="s19">c:\msys64\mingw64.ini</span> in an editor and remove<span class="Apple-converted-space"> </span></li>
-  <li class="li16"><span class="s20"><span class="Apple-converted-space">           </span>“</span>rem<span class="s20">” before “</span>set MSYS2_PATH_TYPE=inherit<span class="s20">”<span class="Apple-converted-space"> </span></span></li>
+  <li class="li15"><span class="Apple-converted-space">         </span>open <span class="s19">c:\msys64\mingw64.ini</span> in an editor and remove</span><span class="Apple-converted-space"> </span></li>
+  <li class="li15"><span class="s20"><span class="Apple-converted-space">           </span>“</span>rem<span class="s20">” or "<span class="s19">#</span>" before “</span>set MSYS2_PATH_TYPE=inherit<span class="s20">”<span class="Apple-converted-space"> </span></span></li>
   <li class="li15"><span class="Apple-converted-space">           </span>(this enables passing Windows environment variables to MSYS2-MINGW64)</li>
-  <li class="li17"><span class="s1"><br>
+ 
 </span></li>
 </ol>
 <p class="p2"><span class="s1">Now you can do classical install<span class="Apple-converted-space"> </span></span></p>
-<p class="p18"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s1">glone clone<span class="Apple-converted-space">  </span>https://github.com/FreeFem/FreeFem-sources ff++</span></p>
-<p class="p19"><span class="s1">to update do to the last version:</span></p>
+<p class="p18"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s1">git clone<span class="Apple-converted-space">  </span>https://github.com/FreeFem/FreeFem-sources ff++</span></p>
+<p class="p19"><span class="s1">Now you can do develop  install</span></p>
+<p class="p18"><span class="s6"><span class="Apple-converted-space">      </span></span><span class="s1">git clone -b develop <span class="Apple-converted-space">  </span>https://github.com/FreeFem/FreeFem-sources ff++</span></p>
+<p class="p19"><span class="s1">Now update version </span></p>
 <p class="p20"><span class="s21"><span class="Apple-converted-space">      </span></span><span class="s22"> </span><span class="s1">cd ff++</span></p>
-<p class="p21"><span class="s1"><span class="Apple-converted-space">   </span>git git checkout master</span></p>
+<p class="p21"><span class="s1"><span class="Apple-converted-space">   </span>git  pull </span></p>
 <p class="p22"><span class="s1"><br>
 </span></p>
 <p class="p6"><span class="s1">To restore, all files build by autoreconf -i command (automake):</span></p>

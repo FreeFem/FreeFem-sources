@@ -97,10 +97,10 @@ class eigensolver : public OneOperator {
 
                 AnyType operator()(Stack stack) const;
                 operator aType() const { return atype<long>(); }
-            };
-            E_F0* code(const basicAC_F0 & args) const { return new E_eigensolver(args, c); }
-            eigensolver() : OneOperator(atype<long>(), atype<Type*>(), atype<Type*>()), c(0) { }
-            eigensolver(int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>()), c(1) { }
+        };
+        E_F0* code(const basicAC_F0 & args) const { return new E_eigensolver(args, c); }
+        eigensolver() : OneOperator(atype<long>(), atype<Type*>(), atype<Type*>()), c(0) { }
+        eigensolver(int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>()), c(1) { }
 };
 template<class Type, class K>
 basicAC_F0::name_and_type eigensolver<Type, K>::E_eigensolver::name_param[] = {

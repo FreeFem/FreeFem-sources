@@ -830,6 +830,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        R hAh =(h,Ah);
          if (RNM::norm2(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
        ro =  - (g,h)*rop/hAh ; // ro optimal (produit scalaire usuel)
+       if ( ro != ro) ExecError("CG2: Bug : ro is NaN ???  ");
        x += (ro-rop) *h;
        g += (ro/rop) *Ah; // plus besoin de Ah, on utilise avec Cg optimisation
        Cg = C*g;

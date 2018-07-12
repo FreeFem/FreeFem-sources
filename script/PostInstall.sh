@@ -3,10 +3,10 @@
 # "-DFF_BINDIR=$(bindir)" 
 # "-DFF__DATADIR=$(pkgdatadir)
 #  "FFBIN="@prefix@"/bin
-ff_desktop="$HOME/Desktop/FreeFem++-""3.60"
+ff_desktop="$HOME/Desktop/FreeFem++-""3.61"
 mkdir -p -m 0755 /etc/paths.d
 ln -sf "/usr/local/ff++/share/freefem++"/"freefem++doc.pdf" "$HOME/Desktop"
-test -e "$ff_desktop" || ln -sf "/usr/local/ff++/share/freefem++"/"3.60" "$ff_desktop"
+test -e "$ff_desktop" || ln -sf "/usr/local/ff++/share/freefem++"/"3.61" "$ff_desktop"
 echo Install /etc/paths.d/FreeFem++ file:  "/usr/local/ff++/openmpi-2.1/3.60/bin"
 
 echo "/usr/local/ff++/openmpi-2.1/3.60/bin" > /etc/paths.d/FreeFem++

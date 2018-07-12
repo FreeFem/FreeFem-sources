@@ -34,7 +34,7 @@ class DistributedCSR {
         unsigned int*                       _cnum;
         unsigned int                      _cfirst;
         unsigned int                       _clast;
-        DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); };
+        DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); }
         ~DistributedCSR() {
             MatDestroy(&_petsc);
             for(int i = 0; i < _S.size(); ++i)

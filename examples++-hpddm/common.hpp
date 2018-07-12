@@ -263,7 +263,6 @@ AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
-#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
 double getOpt(string* const& ss) {
     return HPDDM::Option::get()->val(*ss);
 }
@@ -281,19 +280,73 @@ bool statistics(Type* const& Op) {
     return false;
 }
 
+template<class K>
+class distributedDot_Op : public E_F0mps {
+    public:
+        Expression A;
+        Expression in;
+        Expression out;
+        static const int n_name_param = 1;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        distributedDot_Op<K>(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), in(param2), out(param3) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+
+        AnyType operator()(Stack stack) const;
+};
+template<class K>
+basicAC_F0::name_and_type distributedDot_Op<K>::name_param[] = {
+    {"communicator", &typeid(pcommworld)}
+};
+template<class K>
+class distributedDot : public OneOperator {
+    public:
+        distributedDot() : OneOperator(atype<K>(), atype<KN<double>*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new distributedDot_Op<K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+        }
+};
+template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
+inline K prod(K u, double d, K v) {
+    return std::conj(u) * d * v;
+}
+template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
+inline K prod(K u, double d, K v) {
+    return u * d * v;
+}
+template<class K>
+AnyType distributedDot_Op<K>::operator()(Stack stack) const {
+    KN<double>* pA = GetAny<KN<double>*>((*A)(stack));
+    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
+    KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
+    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
+    K dot = K();
+    for(int i = 0; i < pin->n; ++i)
+        dot += prod(pin->operator[](i), pA->operator[](i), pout->operator[](i));
+    MPI_Allreduce(MPI_IN_PLACE, &dot, 1, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
+    return SetAny<K>(dot);
+}
+
 static void Init_Common() {
-    aType t;
-    int r;
-    if(!zzzfff->InMotClef("dpair", t, r)) {
-        Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
-        Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
-        int argc = pkarg->n;
-        const char** argv = new const char*[argc];
-        for(int i = 0; i < argc; ++i)
-            argv[i] = (*((*pkarg)[i].getap()))->data();
-        HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
-        delete [] argv;
+    if(!Global.Find("dscalprod").NotNull()) {
+#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
+        aType t;
+        int r;
+        if(!zzzfff->InMotClef("dpair", t, r)) {
+            Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
+            Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
+            int argc = pkarg->n;
+            const char** argv = new const char*[argc];
+            for(int i = 0; i < argc; ++i)
+                argv[i] = (*((*pkarg)[i].getap()))->data();
+            HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
+            delete [] argv;
+        }
+#endif
+        Global.Add("dscalprod", "(", new distributedDot<double>);
+        Global.Add("dscalprod", "(", new distributedDot<std::complex<double>>);
     }
 }
-#endif
 #endif // _COMMON_

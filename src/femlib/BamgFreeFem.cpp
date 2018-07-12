@@ -177,6 +177,7 @@ const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
     }      
   Int4 *reft = new Int4[tTh->nbt];
   //Int4 nbref =
+  long nerr=0;
   tTh->ConsRefTriangle(reft);
   for( i=0,k=0;i<tTh->nbt;i++)
     if(tTh->triangles[i].link)
@@ -184,6 +185,7 @@ const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
         
         Fem2D::R2 A(t[k][0]),B(t[k][1]),C(t[k][2]);
         t[k].area = (( B-A)^(C-A))*0.5 ;
+          nerr += t[k].area <=0;
         t[k].lab = tTh->subdomains[reft[i]].ref;  // a faire
         throwassert(k == i);
         k++;
@@ -194,7 +196,14 @@ const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
   
   if (verbosity)
     cout << "  --  mesh:  Nb of Triangles = "  << setw(6) <<  nt << ", Nb of Vertices " << nv << endl;
-  
+  if(nerr)
+  {
+      cerr << "Fatal error: Number of Negative triangles "<< nerr << endl;
+      delete [] v;
+      delete [] t;
+      delete [] b_e;
+      ExecError("bamg2mesh error negative triangle ");
+  }
   {  
     Fem2D::Mesh *m = new Fem2D::Mesh(nv,nt,neb,v,t,b_e);
     if (renumbering) m->renum();
@@ -411,10 +420,17 @@ Fem2D::Mesh *bamg2msh(const bamg::Geometry &Gh)
   return Tn;
 }
 
-
-
-const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern)
+extern double  genrand_res53(void) ;
+double NormalDistrib(double sigma)
 {
+    if( sigma <=0.) return 0.;
+    double rand = genrand_res53()  ;
+    const double TWOPI = 3.14159265358979323846264338328*2.;
+    return  sigma*sqrt(-2.0*log(rand))*cos(TWOPI*rand);
+}
+const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea)
+{
+    if(alea) Requiredboundary=1;
     int nbvinter=0;
     if( pintern)
     {
@@ -472,17 +488,19 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
     for(int index=0; index<nbd; ++index )
     {
       assert(k->b->xfrom); // a faire
-      double & t = *  k->var(stack);
+      double & t = *  k->var(stack),tt;
       double a(k->from(stack)),b(k->to(stack));
       long * indx = k->index(stack);
       if(indx) *indx = index;
       else ffassert(index==0);
       n=Max(Abs(k->Nbseg(stack,index)),1L);
-      t=a;
+      tt=t=a;
       double delta = (b-a)/n;
-      for ( nn=0;nn<=n;nn++,i++, t += delta)
+      for ( nn=0;nn<=n;nn++,i++, tt += delta)
         {
-          if (nn==n) t=b; // to remove roundoff error 
+          t = tt;
+          if (nn==n) t=b; // to remove roundoff error
+            if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
           mp.label = k->label();
           k->code(stack); // compute x,y, label
           // cout << " ----- " << i << " " << mp.P.x << " " << mp.P.y << endl;
@@ -734,6 +752,22 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
       Triangles *Th = 0;
       try { 
 	  Th =new Triangles( nbtx ,*Gh);
+          if(alea) //  Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
+          {
+              Th->SetVertexFieldOn();
+              for( int i=0;i<Th->nbv;++i)
+              {
+                  VertexOnGeom *on=0;
+                  if( !(Th->vertices[i].on) ) // we are non on geometry
+                  {
+                      // move a little the  points
+                      Th->vertices[i].r.x += NormalDistrib(alea);
+                      Th->vertices[i].r.y += NormalDistrib(alea);
+
+                  }
+              }
+                      
+          }
 	  if(0)
 	    {
 	      
@@ -763,15 +797,18 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
 		  
 		}
 	    }
+          m=bamg2msh(Th,true);
+
       }
       catch(...)
       {
 	  Gh->NbRef=0; 
 	  delete Gh;
+          if(m) delete m;
+          if(Th) delete Th;// clean memory ???
 	  cout << " catch Err bamg "  << endl;
 	  throw ;
      }
-      m=bamg2msh(Th,true);      
       delete Th;
   }
   

@@ -20,7 +20,7 @@ BOOL ShowOpenDialogBox1(char *fileName)
   OPENFILENAME *pofn= new OPENFILENAME[2], &ofn= *pofn;
     
   char szDirName[256];   
-  const char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
+  const char *strFilter="freefem++ Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
   
   memset(&ofn, 0, 2*sizeof(OPENFILENAME));
   getcwd(szDirName,sizeof(szDirName));
@@ -33,7 +33,7 @@ BOOL ShowOpenDialogBox1(char *fileName)
   ofn.lpstrTitle ="Choose you freefem '*.edp' File";
   ofn.Flags=OFN_SHOWHELP|OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
   
-  BOOL ret= GetOpenFileName(pofn);
+  BOOL ret= GetOpenFileNameA(pofn);
     cout << " ret "<< ret << " "<< fileName << " "<< szDirName << endl;
   delete[] pofn;
   return ret;

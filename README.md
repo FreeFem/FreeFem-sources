@@ -31,6 +31,14 @@ See [CI/CD Tools](#ci-cd-tools)
 
 # FreeFem++ sources
 
+FreeFem++ is a partial differential equation solver for non-linear multi-physics systems in 2D and 3D
+
+Problems involving partial differential equations from several branches of physics such as fluid-structure interactions require interpolations of data on several meshes and their manipulation within one program.
+
+FreeFem++ includes a fast interpolation algorithm and a language for the manipulation of data on multiple meshes.
+
+FreeFem++ is written in C++ and the FreeFem++ language is a C++ idiom.
+
 ## For users
 
 The user documentation is available [here](https://github.com/FreeFem/FreeFem-doc) in Web format, or [here](https://github.com/FreeFem/FreeFem-doc-pdf/raw/master/freefem%2B%2Bdoc.pdf) in PDF format.
