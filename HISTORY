@@ -1,4 +1,5 @@
-* [33m16fe542f6e063536d1ce7ca3103817ed3c10a683[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m, [m[1;31morigin/develop[m[33m)[m coorect bug in trunc in case of very fine mesh (eps too small ) thank to florian.feppon@polytechnique.edu
+* [33m6c8d9334527679c889a37edf9cc854b3771e92ba[m[33m ([m[1;36mHEAD -> [m[1;32mdevelop[m[33m)[m correct web site of windows install
+* [33m16fe542f6e063536d1ce7ca3103817ed3c10a683[m[33m ([m[1;31morigin/develop[m[33m)[m coorect bug in trunc in case of very fine mesh (eps too small ) thank to florian.feppon@polytechnique.edu
 *   [33m557ea2610c22a0b856e2cb9d834ac5c62d158858[m Merge branch 'develop' of https://github.com/FreeFem/FreeFem-sources into develop
 [32m|[m[33m\[m  
 [32m|[m * [33m2f6ad1bfc822b635478a6f1f476dd42713b3b0db[m Spurious output.

@@ -132,9 +132,7 @@ include 'phpfiles.php';
 </span><span class="s13">pacman -S bsdcpio</span><span class="s16"><br>
 </span><span class="s13">pacman -S bsdtar</span><span class="s16"><br>
 </span><span class="s13">pacman -S bzip2</span><span class="s16"><br>
-</span><span class="s13">pacman -S catgets</span><span class="s16"><br>
 </span><span class="s13">pacman -S coreutils</span><span class="s16"><br>
-</span><span class="s13">pacman -S crypt</span><span class="s16"><br>
 </span><span class="s13">pacman -S curl</span><span class="s16"><br>
 </span><span class="s13">pacman -S dash</span><span class="s16"><br>
 </span><span class="s13">pacman -S file</span><span class="s16"><br>
