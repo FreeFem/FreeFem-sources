@@ -480,55 +480,6 @@ AnyType set_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
-template<class K>
-class distributedDot_Op : public E_F0mps {
-    public:
-        Expression A;
-        Expression in;
-        Expression out;
-        static const int n_name_param = 1;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        distributedDot_Op<K>(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), in(param2), out(param3) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
-
-        AnyType operator()(Stack stack) const;
-};
-template<class K>
-basicAC_F0::name_and_type distributedDot_Op<K>::name_param[] = {
-    {"communicator", &typeid(pcommworld)}
-};
-template<class K>
-class distributedDot : public OneOperator {
-    public:
-        distributedDot() : OneOperator(atype<K>(), atype<KN<double>*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
-
-        E_F0* code(const basicAC_F0& args) const {
-            return new distributedDot_Op<K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
-        }
-};
-template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
-inline K prod(K u, double d, K v) {
-    return std::conj(u) * d * v;
-}
-template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
-inline K prod(K u, double d, K v) {
-    return u * d * v;
-}
-template<class K>
-AnyType distributedDot_Op<K>::operator()(Stack stack) const {
-    KN<double>* pA = GetAny<KN<double>*>((*A)(stack));
-    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
-    KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
-    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    K dot = K();
-    for(int i = 0; i < pin->n; ++i)
-        dot += prod(pin->operator[](i), pA->operator[](i), pout->operator[](i));
-    MPI_Allreduce(MPI_IN_PLACE, &dot, 1, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
-    return SetAny<K>(dot);
-}
-
 template<class Type, class K>
 class distributedMV_Op : public E_F0mps {
     public:
@@ -748,7 +699,6 @@ void add() {
     Global.Add("set", "(", new set<Type<K, S>, K>);
     addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
-    Global.Add("dscalprod", "(", new distributedDot<K>);
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
