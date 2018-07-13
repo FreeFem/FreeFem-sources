@@ -49,9 +49,29 @@ ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples++-load)
 ADD_SUBDIRECTORY(examples++-mpi)
 
-############
-# STRVERSIONNUMBER
-############
+##################
+# config.h
+##################
+
+FILE(WRITE config.h "")
+
+##################
+# config-wrapper.h
+##################
+
+FILE(WRITE config-wrapper.h "")
+
+#############################################################
+# Include root for config.h and config-wrapper.h
+# Only temporarily for coexistence of both autoconf and cmake
+# TODO: remove as soon as autoconf is removed
+#############################################################
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
+######################
+# strversionnumber.cpp
+######################
 
 EXECUTE_PROCESS(COMMAND "date" OUTPUT_VARIABLE VersionFreeFemDate)
 STRING(STRIP ${VersionFreeFemDate} VersionFreeFemDate)
@@ -76,7 +96,7 @@ string StrVersionNumber(){\n
 //  buffer.precision(8);\n
 //  buffer<<VersionNumber();\n
   static char buffer[100];\n
-  sprintf(buffer,\" %9f (date " ${VersionFreeFemDate}")\",VersionNumber());\n
+  sprintf(buffer,\" %9f (date ' ${VersionFreeFemDate}')\",VersionNumber());\n
   return buffer; //.str()+\" (date ${VersionFreeFemDate})\" ;\n
 }")
 

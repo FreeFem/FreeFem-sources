@@ -21,6 +21,9 @@
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D HAVE_DLFCN_H")
   ENDIF(DLOPEN_FOUND)
 
+  # TODO: remove this line as soon as autoconf is removed (only here for config.h and config-wrapper.h)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}) 
+ 
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib 
                     ${CMAKE_SOURCE_DIR}/src/fflib/ 
                     ${CMAKE_SOURCE_DIR}/src/Graphics/ 

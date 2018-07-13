@@ -1,3 +1,6 @@
+# TODO: remove this line as soon as autoconf is removed (only here for config.h and config-wrapper.h)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}) 
+
 FILE(GLOB CPPFILES *.cpp)
 LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
