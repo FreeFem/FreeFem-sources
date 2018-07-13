@@ -88,7 +88,7 @@ long SaveHB(std::string *const &hb_filename,
 {
     MatriceMorse<R> *A = sparse_mat->A->toMatriceMorse();
 
-    const bool isDouble = std::is_floating_point<R>::value;
+    const bool isDouble = sizeof(R) == sizeof(double);// std::is_floating_point<R>::value;
 
     if(!A)
 	return 1; // error
