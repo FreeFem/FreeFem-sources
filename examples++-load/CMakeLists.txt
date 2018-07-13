@@ -23,6 +23,7 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp 
                           ${CMAKE_SOURCE_DIR}/examples++-load/mshmet.cpp                                # mshmet (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS.cpp                                 # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS_seq.cpp                             # ok
+                          ${CMAKE_SOURCE_DIR}/examples++-load/netgen.cpp                                # probleme nglib.h introuvable
                           ${CMAKE_SOURCE_DIR}/examples++-load/NewSolver.cpp                             # umfpack
                           ${CMAKE_SOURCE_DIR}/examples++-load/PARDISO.cpp                               # MKL
                           ${CMAKE_SOURCE_DIR}/examples++-load/scotch.cpp                                # ok
@@ -75,6 +76,7 @@ IF(FREEFEM_IPOPT_INSTALLED)
   ADD_LIBRARY(ff-Ipopt MODULE ff-Ipopt.cpp)
   TARGET_LINK_LIBRARIES(ff-Ipopt FREEFEM::IPOPT)
   SET_TARGET_PROPERTIES(ff-Ipopt PROPERTIES PREFIX "")
+  TARGET_COMPILE_DEFINITIONS(ff-Ipopt PUBLIC "-DHAVE_CSTDDEF")
 ENDIF(FREEFEM_IPOPT_INSTALLED)
 
 # fflapack

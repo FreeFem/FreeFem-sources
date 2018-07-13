@@ -16,6 +16,7 @@ ENDIF()
 # C++ COMPILER OPTIONS
 ######################
 
+SET(CMAKE_CXX_STANDARD 11)
 INCLUDE(CompilerManager)
 INCLUDE(ModuleManager)
 
