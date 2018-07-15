@@ -51,8 +51,10 @@
 //#define EXTERN 
 #ifdef __cplusplus
 
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include "config-wrapper.h"
-
+#endif
 
 //extern "C" {
 EXTERNFF(	void ,getcadre,(float &xmin,float &xmax, float &ymin, float &ymax)) ;

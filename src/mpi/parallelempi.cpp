@@ -1,4 +1,7 @@
+#ifndef CMAKE
 #include <config.h>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <cfloat>

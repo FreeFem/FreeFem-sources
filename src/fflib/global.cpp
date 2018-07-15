@@ -92,8 +92,10 @@ namespace ffapi {
     
 }
 
-
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include "config-wrapper.h"
+#endif
 
 #include <complex>
 #include "AFunction.hpp"
