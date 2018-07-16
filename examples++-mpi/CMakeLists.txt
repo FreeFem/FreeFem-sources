@@ -16,6 +16,7 @@ IF(MPI_FOUND)
                             ${CMAKE_SOURCE_DIR}/examples++-mpi/mpi-cmaes.cpp
                             ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS.cpp
                             ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS_FreeFem.cpp
+                            ${CMAKE_SOURCE_DIR}/examples++-mpi/parmetis.cpp
                             ${CMAKE_SOURCE_DIR}/examples++-mpi/parms_FreeFem.cpp
                             ${CMAKE_SOURCE_DIR}/examples++-mpi/real_pastix_FreeFem.cpp
                             ${CMAKE_SOURCE_DIR}/examples++-mpi/real_SuperLU_DIST_FreeFem.cpp
@@ -32,6 +33,18 @@ IF(MPI_FOUND)
                         ${CMAKE_SOURCE_DIR}/src/fflib)
     SET_TARGET_PROPERTIES(${FILENAME} PROPERTIES PREFIX "")
   ENDFOREACH(CPPFILE)
+
+  FIND_PACKAGE(PARMETIS)
+  IF(PARMETIS_FOUND)
+    ADD_LIBRARY(parmetis MODULE parmetis.cpp)
+    TARGET_LINK_LIBRARIES(parmetis ${MPI_CXX_LIBRARIES})
+    INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH} 
+                        ${CMAKE_SOURCE_DIR}/src/bamglib
+                        ${CMAKE_SOURCE_DIR}/src/Graphics
+                        ${CMAKE_SOURCE_DIR}/src/femlib
+                        ${CMAKE_SOURCE_DIR}/src/fflib)
+    SET_TARGET_PROPERTIES(parmetis PROPERTIES PREFIX "")
+  ENDIF(PARMETIS_FOUND) 
 
 ENDIF(MPI_FOUND)
 
