@@ -51,6 +51,7 @@ ENDIF(NOT ENABLE_DOWNLOAD)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples++-load)
 ADD_SUBDIRECTORY(examples++-mpi)
+ADD_SUBDIRECTORY(examples++-tutorial)
 
 ######################
 # strversionnumber.cpp
