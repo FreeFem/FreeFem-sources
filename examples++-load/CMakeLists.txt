@@ -1,19 +1,11 @@
-FILE(GLOB EDPFILES *.edp)
-FOREACH(EDPFILE ${EDPFILES})
-  GET_FILENAME_COMPONENT(FILENAME ${EDPFILE} NAME_WE)
-  ADD_TEST(NAME ${FILENAME} COMMAND "${CMAKE_BINARY_DIR}/src/FreeFem++-mpi" ${EDPFILE})
-ENDFOREACH(EDPFILE)
-
-
-
 FILE(GLOB CPPFILES *.cpp)
 LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/buildlayer.cpp                            # depend de LayerMesh.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/pcm2rnm.cpp                               # depend de pcm.cpp
+                          #${CMAKE_SOURCE_DIR}/examples++-load/buildlayer.cpp                            # depend de LayerMesh.cpp
+                          #${CMAKE_SOURCE_DIR}/examples++-load/pcm2rnm.cpp                               # depend de pcm.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/ffnewuoa.cpp                              # pas compris
-                          ${CMAKE_SOURCE_DIR}/examples++-load/ff-cmaes.cpp                              # depend de cmaes.cpp
-                          ${CMAKE_SOURCE_DIR}/examples++-load/FreeFemQA.cpp                             # depend de GeometryQA.cpp
+                          #${CMAKE_SOURCE_DIR}/examples++-load/ff-cmaes.cpp                              # depend de cmaes.cpp
+                          #${CMAKE_SOURCE_DIR}/examples++-load/FreeFemQA.cpp                             # depend de GeometryQA.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp                              # ok
@@ -46,20 +38,8 @@ FOREACH(CPPFILE ${CPPFILES})
   GET_FILENAME_COMPONENT(FILENAME ${CPPFILE} NAME_WE)
   ADD_LIBRARY(${FILENAME} MODULE ${CPPFILE})
   SET_TARGET_PROPERTIES(${FILENAME} PROPERTIES PREFIX "")
+  #ADD_TEST(NAME ${FILENAME} COMMAND "${CMAKE_BINARY_DIR}/src/FreeFem++" ${FILENAME}.edp)
 ENDFOREACH(CPPFILE)
-
-
-ADD_LIBRARY(buildlayer MODULE buildlayer.cpp)
-SET_TARGET_PROPERTIES(buildlayer PROPERTIES PREFIX "")
-
-ADD_LIBRARY(pcm2rnm MODULE pcm2rnm.cpp)
-SET_TARGET_PROPERTIES(pcm2rnm PROPERTIES PREFIX "")
-
-ADD_LIBRARY(ff-cmaes MODULE ff-cmaes.cpp)
-SET_TARGET_PROPERTIES(ff-cmaes PROPERTIES PREFIX "")
-
-ADD_LIBRARY(FreeFemQA MODULE FreeFemQA.cpp)
-SET_TARGET_PROPERTIES(FreeFemQA PROPERTIES PREFIX "")
 
 # dfft
 IF(FREEFEM_FFTW_INSTALLED)
