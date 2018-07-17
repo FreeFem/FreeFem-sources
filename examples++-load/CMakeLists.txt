@@ -1,3 +1,11 @@
+FILE(GLOB EDPFILES *.edp)
+FOREACH(EDPFILE ${EDPFILES})
+  GET_FILENAME_COMPONENT(FILENAME ${EDPFILE} NAME_WE)
+  ADD_TEST(NAME ${FILENAME} COMMAND "${CMAKE_BINARY_DIR}/src/FreeFem++-mpi" ${EDPFILE})
+ENDFOREACH(EDPFILE)
+
+
+
 FILE(GLOB CPPFILES *.cpp)
 LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
@@ -194,3 +202,6 @@ ENDIF(FREEFEM_TETGEN_INSTALLED)
 #TARGET_LINK_LIBRARIES(umfpack64 /usr/lib/x86_64-linux-gnu/libumfpack.a)
   #SET_TARGET_PROPERTIES(umfpack64 PROPERTIES PREFIX "")
 #INCLUDE_DIRECTORIES(/usr/include/suitesparse)
+
+
+
