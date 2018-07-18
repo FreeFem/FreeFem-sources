@@ -30,7 +30,7 @@ LIST(APPEND MODULE_LIST FFTW
                         METIS
                         #MUMPS
                         NLOPT
-                        #SCOTCH
+                        SCOTCH
                         SUITESPARSE
                         SUPERLU
                         TETGEN

@@ -3,7 +3,7 @@ FUNCTION(FREEFEM_FIND_PACKAGE PACKAGE)
   FIND_PACKAGE(${PACKAGE})
 
   IF(${PACKAGE}_FOUND)
-
+  
     # Unifying variables names for include directory paths
 
     SET(POSSIBLE_INCLUDE_PATH_VARIABLES "${PACKAGE}_INCLUDE"
