@@ -1,11 +1,7 @@
 FILE(GLOB CPPFILES *.cpp)
 LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
-                          #${CMAKE_SOURCE_DIR}/examples++-load/buildlayer.cpp                            # depend de LayerMesh.cpp
-                          #${CMAKE_SOURCE_DIR}/examples++-load/pcm2rnm.cpp                               # depend de pcm.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/ffnewuoa.cpp                              # pas compris
-                          #${CMAKE_SOURCE_DIR}/examples++-load/ff-cmaes.cpp                              # depend de cmaes.cpp
-                          #${CMAKE_SOURCE_DIR}/examples++-load/FreeFemQA.cpp                             # depend de GeometryQA.cpp
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-Ipopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/ff-NLopt.cpp                              # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/fflapack.cpp                              # ok
