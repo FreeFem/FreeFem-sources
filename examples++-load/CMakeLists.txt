@@ -1,3 +1,10 @@
+FILE(GLOB EDP_FILES *.edp)
+
+FOREACH(EDP_FILE ${EDP_FILES})
+  GET_FILENAME_COMPONENT(FILENAME ${EDP_FILE} NAME_WE)
+  ADD_TEST(NAME ${FILENAME} COMMAND "$LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/examples++-mpi:${CMAKE_BINARY_DIR}/examples++-load {CMAKE_BINARY_DIR}/src/FreeFem++" ${EDP_FILE})
+ENDFOREACH(EDP_FILE)
+
 FILE(GLOB CPPFILES *.cpp)
 LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp                         # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/dfft.cpp                                  # ok
