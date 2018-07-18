@@ -1,7 +1,7 @@
 INCLUDE(FindPackageHandleStandardArgs)
 INCLUDE(PackageManagerPaths)
 
-FIND_PATH(PARMETIS_INCLUDES NAMES parmmetis.h 
+FIND_PATH(PARMETIS_INCLUDES NAMES parmetis.h 
                             PATHS ${PACKMAN_INCLUDE_PATHS}) 
 
 FIND_LIBRARY(PARMETIS_LIBRARIES NAMES parmetis 

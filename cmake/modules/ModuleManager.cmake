@@ -28,7 +28,7 @@ LIST(APPEND MODULE_LIST FFTW
                         #GMM
                         IPOPT
                         METIS
-                        #MUMPS
+                        MUMPS
                         NLOPT
                         SCOTCH
                         SUITESPARSE
@@ -39,7 +39,6 @@ LIST(APPEND MODULE_LIST FFTW
 
 FOREACH(MODULE ${MODULE_LIST})
   FREEFEM_FIND_PACKAGE(${MODULE})
-  MESSAGE(STATUS "FREEFEM_${MODULE}_INSTALLED=${FREEFEM_${MODULE}_INSTALLED}")
   IF(NOT FREEFEM_${MODULE}_INSTALLED)
     LIST(APPEND DOWNLOAD_LIST ${MODULE})
   ENDIF(NOT FREEFEM_${MODULE}_INSTALLED)
@@ -53,7 +52,9 @@ IF(ENABLE_DOWNLOAD)
     FF_INSTALL_PACKAGE(${MODULE}) 
   ENDFOREACH(MODULE)
 ELSE()
-  MESSAGE(STATUS "The following modules are missing: ${DOWNLOAD_LIST}")
+  IF(${DOWNLOAD_LIST})
+    MESSAGE(STATUS "The following modules are missing: ${DOWNLOAD_LIST}")
+  ENDIF()
 ENDIF(ENABLE_DOWNLOAD)
 
 
