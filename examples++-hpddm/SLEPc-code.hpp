@@ -172,19 +172,21 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             FEbaseArrayKn<K>* eigenvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>*>((*nargs[3])(stack)) : nullptr;
             Vec* basis = nullptr;
             PetscInt n = 0;
-            if(eigenvectors && eigenvectors->N > 0 && eigenvectors->get(0) && eigenvectors->get(0)->n > 0) {
-                n = eigenvectors->N;
-                basis = new Vec[n];
-                for(int i = 0; i < n; ++i) {
-                    MatCreateVecs(ptA->_petsc, &basis[i], NULL);
-                    PetscScalar* pt;
-                    VecGetArray(basis[i], &pt);
-                    if(!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
-                        distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(eigenvectors->get(i))), pt, eigenvectors->get(i)->n);
-                    VecRestoreArray(basis[i], &pt);
+            if(eigenvectors) {
+                if(eigenvectors->N > 0 && eigenvectors->get(0) && eigenvectors->get(0)->n > 0) {
+                    n = eigenvectors->N;
+                    basis = new Vec[n];
+                    for(int i = 0; i < n; ++i) {
+                        MatCreateVecs(ptA->_petsc, &basis[i], NULL);
+                        PetscScalar* pt;
+                        VecGetArray(basis[i], &pt);
+                        if(!(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
+                            distributedVec(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(*(eigenvectors->get(i))), pt, eigenvectors->get(i)->n);
+                        VecRestoreArray(basis[i], &pt);
+                    }
                 }
+                eigenvectors->resize(0);
             }
-            eigenvectors->resize(0);
             if(n)
                 EPSSetInitialSpace(eps, n, basis);
             EPSSolve(eps);
@@ -193,7 +195,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             delete [] basis;
             PetscInt nconv;
             EPSGetConverged(eps, &nconv);
-            if(nconv > 0 && (nargs[2] || nargs[3])) {
+            if(nconv > 0 && (nargs[2] || nargs[3] || nargs[4])) {
                 KN<K>* eigenvalues = nargs[2] ? GetAny<KN<K>*>((*nargs[2])(stack)) : nullptr;
                 KNM<K>* array = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
                 if(eigenvalues)
