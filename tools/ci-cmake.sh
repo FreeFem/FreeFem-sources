@@ -10,7 +10,7 @@ mkdir -p build_cmake \
 && export FF_ROOT=/builds/workspace/FreeFem-source-feature-cmake-UbuntuAll \
 && export LD_LIBRARY_PATH=$FF_ROOT/build_cmake/examples++-load \
 && cd $FF_ROOT/examples++ \
-&& export FF_INCLUDEPATH=$(PWD) \
+&& export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/examples++-3d \
 && export FF_INCLUDEPATH=$(pwd) \
