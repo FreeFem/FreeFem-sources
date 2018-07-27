@@ -13,18 +13,18 @@ mkdir -p build_cmake \
 && export FF_INCLUDEPATH=$(PWD) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/examples++-3d \
-&& export FF_INCLUDEPATH=$(PWD) \
+&& export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/examples++-bug \
-&& export FF_INCLUDEPATH=$(PWD) \
+&& export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/examples++-chapt3 \
-&& export FF_INCLUDEPATH=$(PWD) \
+&& export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/examples++-load \
-&& export FF_INCLUDEPATH=$(PWD) \
+&& export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/examples++-mpi \
-&& export FF_INCLUDEPATH=$(PWD) \
+&& export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On 
  
