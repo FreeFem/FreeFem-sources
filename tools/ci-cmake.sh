@@ -9,22 +9,22 @@ mkdir -p build_cmake \
 && make install \
 && export FF_ROOT=/builds/workspace/FreeFem-source-feature-cmake-UbuntuAll \
 && export LD_LIBRARY_PATH=$FF_ROOT/build_cmake/examples++-load \
-&& cd $FF_ROOT/examples++ \
+&& cd $FF_ROOT/build_cmake/examples++ \
 && export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-3d \
+&& cd $FF_ROOT/build_cmake/examples++-3d \
 && export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-bug \
+&& cd $FF_ROOT/build_cmake/examples++-bug \
 && export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-chapt3 \
+&& cd $FF_ROOT/build_cmake/examples++-chapt3 \
 && export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-load \
+&& cd $FF_ROOT/build_cmake/examples++-load \
 && export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-mpi \
+&& cd $FF_ROOT/build_cmake/examples++-mpi \
 && export FF_INCLUDEPATH=$(pwd) \
 && make test CTEST_OUTPUT_ON_FAILURE=On 
  
