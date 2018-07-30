@@ -41,6 +41,12 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib
                     ${CMAKE_SOURCE_DIR}/src/Graphics
                     ${CMAKE_SOURCE_DIR}/src/libMesh)
 
+LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Curvature.cpp)
+ADD_LIBRARY(Curvature MODULE Curvature.cpp)
+TARGET_LINK_LIBRARIES(Curvature libMesh)
+
+
+
 FOREACH(CPPFILE ${CPPFILES})
   GET_FILENAME_COMPONENT(FILENAME ${CPPFILE} NAME_WE)
   ADD_LIBRARY(${FILENAME} MODULE ${CPPFILE})
