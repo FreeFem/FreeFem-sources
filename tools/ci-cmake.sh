@@ -12,24 +12,24 @@ mkdir -p build_cmake \
 && export LD_LIBRARY_PATH=$FF_ROOT/build_cmake/examples++-load \
 && cd $FF_ROOT/examples++ \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-3d \
+&& cd $FF_ROOT/build_cmake/examples++-3d \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-bamg \
+&& cd $FF_ROOT/build_cmake/examples++-bamg \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-bug \
+&& cd $FF_ROOT/build_cmake/examples++-bug \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-chapt3 \
+&& cd $FF_ROOT/build_cmake/examples++-chapt3 \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-eigen \
+&& cd $FF_ROOT/build_cmake/examples++-eigen \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-hpddm \
+&& cd $FF_ROOT/build_cmake/examples++-hpddm \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-load \
+&& cd $FF_ROOT/build_cmake/examples++-load \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-mpi \
+&& cd $FF_ROOT/build_cmake/examples++-mpi \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-other \
+&& cd $FF_ROOT/build_cmake/examples++-other \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/examples++-tutorial \
+&& cd $FF_ROOT/build_cmake/examples++-tutorial \
 && make test CTEST_OUTPUT_ON_FAILURE=On 
  
