@@ -155,7 +155,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                 MatCreate(PETSC_COMM_WORLD, &ptA->_S[k]);
                 MatSetSizes(ptA->_S[k], end - start, end - start, global, global);
                 MatSetType(ptA->_S[k], MATMPIAIJ);
-                MatMPIAIJSetPreallocationCSR(ptA->_S[k], ia, ja, c);
+                MatMPIAIJSetPreallocationCSR(ptA->_S[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
                 MatSetOption(ptA->_S[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
                 if(free) {
                     delete [] ia;
