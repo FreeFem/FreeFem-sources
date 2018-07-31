@@ -10,15 +10,5 @@ mkdir -p build_cmake \
 && export FF_ROOT=/builds/workspace/FreeFem-source-feature-cmake-UbuntuAll \
 && export FF_LOADPATH=$FF_ROOT/build_cmake/examples++-load \
 && export LD_LIBRARY_PATH=$FF_ROOT/build_cmake/examples++-load \
-&& export FF_INCLUDEPATH="$FF_ROOT/examples++" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-3d" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-bamg" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-bug" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-chapt3" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-eigen" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-load" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-mpi" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-other" \
-&& export FF_INCLUDEPATH="$FF_INCLUDEPATH;$FF_ROOT/examples++-tutorial" \
 && make test CTEST_OUTPUT_ON_FAILURE=On 
  
