@@ -1,4 +1,4 @@
-load "BernadiRaugel"
+load "BernardiRaugel"
 // a macro the compute numerical derivative
 macro DD(f,hx,hy) ( (f(x1+hx,y1+hy)-f(x1-hx,y1-hy))/(2*(hx+hy))) //
 mesh Th=square(1,1,[10*(x+y/3),10*(y-x/3)]);
