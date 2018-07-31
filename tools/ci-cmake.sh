@@ -11,6 +11,7 @@ mkdir -p build_cmake \
 && export FF_LOADPATH=$FF_ROOT/build_cmake/examples++-load \
 && export LD_LIBRARY_PATH=$FF_ROOT/build_cmake/examples++-load \
 && cd $FF_ROOT/build_cmake/examples++ \
+&& export FF_INCLUDEPATH=$FF_ROOT/examples++ \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/build_cmake/examples++-3d \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
