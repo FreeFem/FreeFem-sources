@@ -530,6 +530,15 @@ examples++-3d/sphere.faces
 examples++-3d/sphere.points
 examples++-3d/spherewithahole.mesh
 examples++-3d/spherewithtworegion.mesh
+examples++-bamg/square/*.am_fmt
+examples++-bamg/square/*.bb
+examples++-bamg/square/*.mesh
+examples++-bamg/test/DATA_bamg
+examples++-bamg/test/*.am_fmt
+examples++-bamg/test/*.BB
+examples++-bamg/test/*.bb
+examples++-bamg/test/*.mesh
+examples++-bamg/test/*.mtr
 examples++-bug/Makefile
 examples++-chapt3/J.txt
 examples++-chapt3/Makefile
