@@ -1099,8 +1099,8 @@ double dist(const double & aa, const double & bb,const double & cc) { return sqr
 // Add Jan 2017 FH
 double diffpos(const double & aa, const double & bb) { return aa<bb ? bb-aa : 0.;}
 double invdiffpos(const double & aa, const double & bb) { return aa<bb ? 1./(bb-aa) : 0.;}
-double diffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb ? bb-aa : 0.;}
-double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.>bb  ? 1./(bb-aa) : 0.;}
+double diffnp(const double & aa, const double & bb) { return aa<0. && 0.<bb ? bb-aa : 0.;}//  Corr 08/18  G. Sadaka
+double invdiffnp(const double & aa, const double & bb) { return aa<0. && 0.<bb  ? 1./max(bb-aa,1e-30) : 0.;}//  Corr 08/18  G. Sadaka
 double invdiff(const double & aa, const double & bb) { double d= aa-bb; return abs(d) < 1e-30 ? d : 1/d;}
 double invdiff(const double & aa, const double & bb,const double &eps) { double d= aa-bb; return abs(d) < eps ? d : 1/d;}
 extern double ff_tgv; // Add FH jan 2018
