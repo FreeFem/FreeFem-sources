@@ -677,6 +677,8 @@ void SetBC (char * wbc,double tgv)
     }
   
   void SetSolver(const VirtualSolver & s){solver=&s;}
+  template<class T>
+  void GetSolver(const T*& s) { if(solver) s = dynamic_cast<const T*>(&*solver); else s = 0; }
   void SetSolverMaster(const VirtualSolver * s){solver.master(s);}
   bool sym() const {return symetrique;}
   // Add FH april 2005
