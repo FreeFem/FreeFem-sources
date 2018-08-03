@@ -443,7 +443,10 @@ ENDIFMACRO
         partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, D, Wh, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
     }
     else if(mpisize == 1) {
-        Th = ThGlobal;
+        if(s <= 1)
+            Th = ThGlobal;
+        else
+            Th = trunc(ThGlobal, 1, split = s);
         D.resize(Wh.ndof);
         D = 1.0;
     }
