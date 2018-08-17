@@ -35,9 +35,7 @@ FreeFem++ is a partial differential equation solver for non-linear multi-physics
 
 Problems involving partial differential equations from several branches of physics such as fluid-structure interactions require interpolations of data on several meshes and their manipulation within one program.
 
-FreeFem++ includes a fast interpolation algorithm and a language for the manipulation of data on multiple meshes.
-
-FreeFem++ is written in C++ and the FreeFem++ language is a C++ idiom.
+FreeFem++ includes a fast interpolation algorithm and a language for the manipulation of data on multiple meshes. It is written in C++ and the FreeFem++ language is a C++ idiom.
 
 ## For users
 
@@ -45,7 +43,7 @@ The user documentation is available [here](https://github.com/FreeFem/FreeFem-do
 
 ## For developers
 
-All development take place in the develop branch (or in feature branches: cmake, geneo4PETSc, ... for specific projects)
+All development efforts take place in the _develop_ branch (or in feature branches: cmake, geneo4PETSc, ... for specific projects)
 
 **Do not commit on master branch !**
 
