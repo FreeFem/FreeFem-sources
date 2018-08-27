@@ -5810,7 +5810,7 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 
 
 template<class R,class FESpace,class v_fes>
-AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA, 
+AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
 {  
     typedef typename  FESpace::Mesh Mesh;
@@ -6122,6 +6122,12 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   *mps=mp;
   return SetAny<const Problem *>(this);
 }
+
+//   force particular instace
+template AnyType Problem::eval<double,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse< typename CadnaType<double>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<Complex,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse< typename CadnaType<Complex>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<double,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse< typename CadnaType<double>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<Complex,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse< typename CadnaType<Complex>::Scalaire >  * & dataCadna) const;
 
 
 
