@@ -22,7 +22,7 @@
  */
 
 #include "medit.h"
-#include "libmesh5.h"
+#include "libmeshb7.h"
 #include "extern.h"
 
 int loadMesh (pMesh mesh) {
