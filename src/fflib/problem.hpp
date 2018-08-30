@@ -975,6 +975,14 @@ template<class K> class Matrice_Creuse_inv  { public:
   operator Matrice_Creuse<K> * () const {return A;}
 };
 
+template<class K> class Matrice_Creuse_inv_trans  { public:// add aug 2018 FH. 
+    Matrice_Creuse<K> * A;
+    Matrice_Creuse_inv_trans(Matrice_Creuse<K> * AA) : A(AA) {assert(A);}
+    Matrice_Creuse_inv_trans(Matrice_Creuse_Transpose<K> * AA) : A(AA) {assert(A);}
+    Matrice_Creuse_inv_trans(const Matrice_Creuse_Transpose<K> & AA) : A(AA.A) {assert(A);}
+    operator MatriceCreuse<K> & () const {return *A->A;}
+    operator Matrice_Creuse<K> * () const {return A;}
+};
 
 
 

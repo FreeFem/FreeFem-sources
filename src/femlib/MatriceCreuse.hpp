@@ -54,7 +54,7 @@ const double  EPSILON=1e-20;
 using Fem2D::onWhatIsEdge;
 
 //#define APROGRAMMER(a) {cerr << "A PROGRAMMER "  #a << endl; exit (1) ;}
-#define ERREUR(a,b) {cerr << "ERREUR " #a<< b <<endl; throw(ErrorExec("FATAL ERREUR dans " __FILE__  "\n" #a  " line: ",__LINE__)) ;}
+#define ERREUR(a,b) {cerr << "ERROR " #a<< b <<endl; throw(ErrorExec("FATAL ERROR in " __FILE__  "\n" #a  " line: ",__LINE__)) ;}
 
 template <class R> class MatriceCreuse; 
 template <class R> class MatriceElementaire; 
@@ -387,6 +387,7 @@ public:
     return ax;}
   virtual ostream& dump (ostream&)  const =0;
   virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
+  virtual void SolveT(KN_<R> & x,const KN_<R> & b) const {  ERREUR(SolveT, "No Solver of A^t in this matrix type ???"); }
   virtual ~MatriceCreuse(){}
   virtual R & diag(int i)=0;
   virtual void SetBC(int i,double tgv)=0;
@@ -453,8 +454,6 @@ public:
   const MatriceProfile t() const   
      {return MatriceProfile(this->n,D,L,pL,U,pU,typefac);}
   const MatriceProfile lt() const  
- 
-  
      {return MatriceProfile(this->n,0,L,pL,0,0);}
   const MatriceProfile l() const  
      {return MatriceProfile(this->n,0,0,0,L,pL);}
@@ -464,13 +463,13 @@ public:
      {return MatriceProfile(this->n,D,0,0,L,pL);}
   const MatriceProfile ldt() const 
      {return MatriceProfile(this->n,D,L,pL,0,0);}
-  const MatriceProfile du() const  
+  const MatriceProfile dut() const
+    {return MatriceProfile(this->n,D,0,0,U,pU);}
+  const MatriceProfile du() const
      {return MatriceProfile(this->n,D,U,pU,0,0);}
   const MatriceProfile u() const   
      {return MatriceProfile(this->n,0,U,pU,0,0);}
-  const MatriceProfile ut() const  
-    
-    
+  const MatriceProfile ut() const
     {return MatriceProfile(this->n,0,0,0,U,pU);}
    R trace() const {ffassert(this->n==this->m);  R t=R();  for(int i=0; i<this->n; ++i) t+= D[i]; return t; }
   void Solve(KN_<R> &x,const KN_<R> &b) const {
@@ -482,7 +481,27 @@ public:
 	FactorizationLU:      LU(); break; 
 	}*/ 
     if (&x != &b) x=b;x/=*this;} 
-  
+    void SolveT(KN_<R> &x,const KN_<R> &b) const {
+        if( L==U) Solve(x,b);// symetrique
+        else {
+           if( typefac == FactorizationNO && (U && L))
+             {cerr << "APROGRAMMER (solveT /MatriceProfile)";throw(ErrorExec("exit",2));}
+           if (&x != &b) x=b;
+            if( U && L )
+            {//  no trans:  x  /= l(); x  /= du();=> trans => x  /= dut(); x  /= lt();
+               // cout << "\n x  /= l(); x  /= du();=> trans => x  /= dut(); x  /= lt();" << endl;
+              x  /= dut();
+              x  /= lt();
+            }
+            else if (U && D == 0)
+                 x  /= ut();
+            else if (L && D )
+                 x  /= ldt();
+            else {ERREUR(SolveT, "SolveT profile unknow case ");}
+
+        }
+    }
+
   int size() const ;
   void  resize(int n,int m)  { AFAIRE("MatriceProfile::resize");}  // a faire ...  add march 2009  FH 
   ~MatriceProfile();
@@ -589,6 +608,7 @@ public:
  class VirtualSolver :public RefCounter { 
    friend class MatriceMorse;
    virtual void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
+     virtual void SolverT(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {ExecError("No Solver of Transpose matrix");};
 };
 
   MatriceMorse():MatriceCreuse<R>(0),nbcoef(0),symetrique(true),a(0),lg(0),cl(0),solver(0) {};
@@ -624,6 +644,7 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
      solver(s)
   { if(transpose) dotransposition(); };
   void Solve(KN_<R> &x,const KN_<R> &b) const;
+  void SolveT(KN_<R> &x,const KN_<R> &b) const;
   int size() const ;
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
   void addMatTransMul(const KN_<R> &x,KN_<R> &ax) const;

@@ -138,6 +138,36 @@ public:
     if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
      if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
   }
+    void SolverT(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
+        ffassert ( &x[0] != &b[0]);
+        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        // cout << " epsr = " << epsr << endl;
+        double Control[UMFPACK_CONTROL];
+        double Info[UMFPACK_INFO];
+        for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
+        for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
+        int n= b.N();
+        ffassert(A.ChecknbLine( n) && n == x.N() && A.ChecknbColumn(n) );
+        
+        umfpack_di_defaults (Control) ;
+        // change UMFPACK_At to UMFPACK_Aat in complex
+        int status = umfpack_di_solve (UMFPACK_A, A.lg, A.cl, A.a, KN_2Ptr<R>(x), KN_2Ptr<R>(b), Numeric,Control,Info) ;
+        if (status != 0)
+        {
+            umfpack_di_report_info (Control, Info) ;
+            umfpack_di_report_status (Control, status) ;
+            cerr << "umfpack_di_solve failed" << endl;
+            ExecError("umfpack_di_solve failed");
+            
+            ffassert(0);
+        }
+        if(verbosity>2)
+            cout << "  -- umfpack_di_solve,  peak Mem: " << long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
+        if(verbosity>3)
+            cout << "   b min max " << b.min() << " " <<b.max() << endl;
+        if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
+        if(verbosity>1) cout << "   x min max " << x.min() << " " <<x.max() << endl;
+    }
 
   ~SolveUMFPACK() { 
    if(verbosity>3)
@@ -265,6 +295,39 @@ public:
       cout << "   x min max " << x.min() << " " <<x.max() << endl;
     }
   }
+    void SolverT(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
+        ffassert ( &x[0] != &b[0]);
+        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        // cout << " epsr = " << epsr << endl;
+        double Control[UMFPACK_CONTROL];
+        double Info[UMFPACK_INFO];
+        umfpack_zi_defaults (Control) ;
+        int n = b.N();
+        ffassert(A.ChecknbLine( n) && n == x.N() && A.ChecknbColumn(n) );
+        KN<double> xr(n),xi(n),br(n),bi(n);
+        C2RR(n,b,br,bi);
+        // change UMFPACK_At to UMFPACK_Aat in complex  oct 2005
+        int status = umfpack_zi_solve (UMFPACK_A, A.lg, A.cl, ar,ai, xr, xi, br,bi, Numeric,Control,Info) ;
+        if (status < 0)
+        {
+            umfpack_zi_report_info (Control, Info) ;
+            umfpack_zi_report_status (Control, status) ;
+            cerr << "umfpack_zi_solve failed" << endl;
+            ExecError("umfpack_zi_numeric failed");
+            ffassert(0);
+            exit(2);
+        }
+        RR2C(n,xr,xi,x);
+        if(verbosity>1)
+        {
+            cout << "  -- umfpack_zi_solve, peak Mem : " <<  long(Info[UMFPACK_PEAK_MEMORY])/(1024*1024)*Info[UMFPACK_SIZE_OF_UNIT] << "Mbytes " << endl;
+            
+            if(verbosity>3)     (void)  umfpack_zi_report_info(Control,Info);
+            
+            cout << "   b min max " << b.min() << " " <<b.max() << endl;
+            cout << "   x min max " << x.min() << " " <<x.max() << endl;
+        }
+    }
 
   ~SolveUMFPACK() { 
     if(verbosity>5)

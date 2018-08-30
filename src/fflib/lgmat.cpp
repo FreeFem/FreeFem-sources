@@ -1804,6 +1804,24 @@ class OneBinaryOperatorA_inv : public OneOperator { public:
        return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0])); 
     }
 };
+template<class K>
+class OneBinaryOperatorAt_inv : public OneOperator { public:
+    OneBinaryOperatorAt_inv() : OneOperator(atype<Matrice_Creuse_inv_trans<K> >(),atype<Matrice_Creuse_Transpose<K> >(),atype<long>()) {}
+    E_F0 * code(const basicAC_F0 & args) const
+    { Expression p=args[1];
+        if ( ! p->EvaluableWithOutStack() )
+        {
+            bool bb=p->EvaluableWithOutStack();
+            cout << bb << " " <<  * p <<  endl;
+            CompileError(" A^p, The p must be a constant == -1, sorry");}
+        long pv = GetAny<long>((*p)(NullStack));
+        if (pv !=-1)
+        { char buf[100];
+            sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
+            CompileError(buf);}
+        return  new E_F_F0<Matrice_Creuse_inv_trans<K>,Matrice_Creuse_Transpose<K> >(Build<Matrice_Creuse_inv_trans<K>,Matrice_Creuse_Transpose<K> >,t[0]->CastTo(args[0]));
+    }
+};
 
 
 
@@ -2900,7 +2918,8 @@ void AddSparseMat()
 TheOperators->Add("*", 
         new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >,
         new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >,
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > >     
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > > ,
+        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAtxeqb,Matrice_Creuse_inv_trans<R>,KN_<R> > >
         );
 
 /*if(0)
@@ -2911,7 +2930,8 @@ TheOperators->Add("*",
         );
 */        
 TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
-  
+TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
+
 // matrix new code   FH (Houston 2004)        
  TheOperators->Add("=",
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
@@ -3471,7 +3491,8 @@ void  init_lgmat()
     TheOperators->Add("*",
                      new Op2_mulvirtAvCR< VirtualMatrice<Complex>::plusAx,Matrice_Creuse<double>*,KN_<Complex> > ,
                      new Op2_mulvirtAvCR< VirtualMatrice<Complex>::plusAtx,Matrice_Creuse_Transpose<double>,KN_<Complex> > ,
-                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
+                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >,
+                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::solveAtxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
                      );
     
 }

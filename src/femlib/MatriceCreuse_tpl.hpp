@@ -1775,6 +1775,14 @@ template<class R>
   {  cerr << "No Solver defined  for this Morse matrix " << endl;
     throw(ErrorExec("exit",1));}
   }
+template<class R>
+void MatriceMorse<R>::SolveT(KN_<R> &x,const KN_<R> &b) const{
+    if (solver)
+        solver->SolverT(*this,x,b);
+    else
+    {  cerr << "No Solver defined  for this Morse matrix " << endl;
+        throw(ErrorExec("exit",1));}
+}
 
 
 template<class R>

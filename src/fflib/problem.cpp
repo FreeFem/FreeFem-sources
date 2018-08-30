@@ -6124,10 +6124,10 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 }
 
 //   force particular instace
-template AnyType Problem::eval<double,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse< typename CadnaType<double>::Scalaire >  * & dataCadna) const;
-template AnyType Problem::eval<Complex,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse< typename CadnaType<Complex>::Scalaire >  * & dataCadna) const;
-template AnyType Problem::eval<double,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse< typename CadnaType<double>::Scalaire >  * & dataCadna) const;
-template AnyType Problem::eval<Complex,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse< typename CadnaType<Complex>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<double,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse<  CadnaType<double>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<Complex,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse<  CadnaType<Complex>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<double,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse<  CadnaType<double>::Scalaire >  * & dataCadna) const;
+template AnyType Problem::eval<Complex,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse<  CadnaType<Complex>::Scalaire >  * & dataCadna) const;
 
 
 

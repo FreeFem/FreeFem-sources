@@ -258,6 +258,8 @@ struct  VirtualMatrice { public:
   virtual bool WithSolver() const {return false;} // by default no solver          
   virtual void Solve( KN_<R> &  ,const KN_<R> & ) const 
     { InternalError("VirtualMatrice::solve not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); } 
+  virtual void SolveT( KN_<R> &  ,const KN_<R> & ) const
+    { InternalError("VirtualMatrice::solve trans/herm not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); }
 
 #ifdef VersionFreeFempp
   virtual bool ChecknbLine  (int n) const= 0; 
@@ -281,6 +283,10 @@ struct  VirtualMatrice { public:
    solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) 
     { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
   
+    struct  solveAtxeqb { const VirtualMatrice * A; const KN_<R>   b;
+        solveAtxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y)
+        { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
+
   virtual ~VirtualMatrice(){} 
 };
 
@@ -553,7 +559,9 @@ public:
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0)); Ax.A->addMatTransMul(Ax.x,*this); } return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
     { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));*this=R(); Ab.A->Solve(*this,Ab.b); } return *this;}
-    
+    KN_& operator =(const typename VirtualMatrice<R>::solveAtxeqb & Ab)
+    { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));*this=R(); Ab.A->SolveT(*this,Ab.b); } return *this;}
+
   template<class  A,class B,class C,class D> KN_&  operator =  (const F_KN_<A,B,C,D>  & u) ;
   template<class  A,class B,class C,class D> KN_&  operator +=  (const F_KN_<A,B,C,D>  & u) ;
   template<class  A,class B,class C,class D> KN_&  operator -=  (const F_KN_<A,B,C,D>  & u) ;
@@ -1034,7 +1042,9 @@ class KN :public KN_<R> { public:
         { if(this->unset() && Ax.A && Ax.A->N ) this->set(new R[Ax.A->N],Ax.A->N); if(Ax.A) KN_<R>::operator=(Ax);return *this;}
    KN& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
         { if(this->unset()) this->set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
-   KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)  
+    KN& operator =(const typename VirtualMatrice<R>::solveAtxeqb & Ab)
+    { if(this->unset()) this->set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
+  KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)
   { if(this->unset()  && Ax.A->N) {
         this->set(new R[Ax.A->N],Ax.A->N);
         KN_<R>::operator=(R());}

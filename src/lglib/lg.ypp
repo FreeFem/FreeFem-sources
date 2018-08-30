@@ -207,6 +207,7 @@ void ff_atend(AtEnd f)
 %type <cexp>   no_set_expr
 %type <cexp>   unary_expr
 %type <cexp>   pow_expr
+%type <cexp>   primaryp
 %type <cexp>   primary
 %type <oper>   unop
 %type <args>  parameters
@@ -710,9 +711,13 @@ unary_expr:                                                 /* returns a [[YYSTY
   ;   
 
 pow_expr:        /* returns a [[YYSTYPE_cexp]] */
+         primaryp /*[[primary:]]*/
+  |      primaryp '^'  unary_expr   {$$=C_F0(TheOperators,$2,$1,$3);}
+  |      primaryp '_'  unary_expr   {$$=C_F0(TheOperators,$2,$1,$3);}
+;
+
+primaryp:  /*  change prioryty of ' operator    */
          primary /*[[primary:]]*/
-  |      primary '^'  unary_expr   {$$=C_F0(TheOperators,$2,$1,$3);}
-  |      primary '_'  unary_expr   {$$=C_F0(TheOperators,$2,$1,$3);}
   |      primary '\''              {$$=C_F0(TheOperators,$2,$1);}
   ;
 

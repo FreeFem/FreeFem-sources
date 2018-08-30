@@ -319,7 +319,7 @@ long ffmmap_write (ff_Pmmap p, void *pt, size_t ln, long off) {
 	void *pk = (char *)p->map + off;
 	memcpy(pk, pt, ln);
 	long *pp = (long *)pk;
-	if (ff_mmap_sem_verb > 9) {printf(" W %ld %ld %lu %p\n", *pp, off, (unsigned int)ln, pk);}
+	if (ff_mmap_sem_verb > 9) {printf(" W %ld %ld %lu %p\n", *pp, off, (unsigned long)ln, pk);}
 
 	return ln;
 }

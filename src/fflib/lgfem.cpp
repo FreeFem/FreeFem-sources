@@ -5148,9 +5148,11 @@ void DclTypeMatrix()
   Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >, ClearReturn<Matrice_Creuse<R> >);
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
+  Dcl_Type<Matrice_Creuse_inv_trans<R> >();      // matrice^-1   A'^{-1}
   Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
   Dcl_Type<typename VirtualMatrice<R>::plusAtx >();       // A^t*x (A'*x)
-  Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^t*x (A'*x)
+  Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^-1*x (
+    Dcl_Type<typename VirtualMatrice<R>::solveAtxeqb >();       // A^t^-1*x 
   Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
   
@@ -5736,7 +5738,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAx > > ,       
 		   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAtx > >  ,      
 		   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
-		   
+                   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAtxeqb > >  ,
+
 		//-   new OpArraytoLinearForm<double,v_fes>(atype< KN<double>* >(),true,false)  ,
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false)  ,
 		   new OpMatrixtoBilinearForm<double,v_fes >);
@@ -5765,7 +5768,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
 		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,
 		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,      
-		   
+                   new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::solveAtxeqb > >  ,
+
 		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,false)  ,
 		   //- new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false)   ,
 		   new OpMatrixtoBilinearForm<Complex,v_fes >);
@@ -5780,16 +5784,19 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAx > > ,       
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAtx > >  ,      
 		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAxeqb > >  ,  
-		   
+                   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAtxeqb > >  ,
+
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >    
-		   
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >,
+                   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAtxeqb > >
+
 		);
     // Jan 2018  FH  Vh uh=yu[]; //  A FAIRE FH POUR F NATAF FFFFFFFF
     TheOperators->Add("<-"
                       , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::plusAx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::solveAtxeqb> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes,KN_<R> > >(10)
                       , new init_FE_eqarray<FF_L_args<R,v_fes,Call_FormLinear<v_fes> > >(10)
@@ -5798,6 +5805,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     TheOperators->Add("<-"
                       , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::plusAx> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::solveAtxeqb> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes,KN_<Complex> > >(10)
                       , new init_FE_eqarray<FF_L_args<Complex,v_fes,Call_FormLinear<v_fes> > >(10)
@@ -5805,6 +5813,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     TheOperators->Add("<-"
                       , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::plusAx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::solveAtxeqb> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes3,KN_<R> > >(10)
                       , new init_FE_eqarray<FF_L_args<R,v_fes3,Call_FormLinear<v_fes3> > >(10)
@@ -5813,6 +5822,7 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     TheOperators->Add("<-"
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::plusAx> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::solveAtxeqb> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,KN_<Complex> > >(10)
                       , new init_FE_eqarray<FF_L_args<Complex,v_fes3,Call_FormLinear<v_fes3> > >(10)
