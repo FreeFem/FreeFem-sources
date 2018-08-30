@@ -8,6 +8,6 @@
 noinst_LIBRARIES=libMesh.a
 
 libMesh_a_SOURCES= \
-chrono.c eigenv.c libmesh3.c  libmesh5.c memory.c \
-chrono.h	eigenv.h	libmesh3.h	libmesh5.h	memory.h
+	chrono.c eigenv.c libmeshb7.c memory.c \
+	chrono.h eigenv.h libmeshb7.h memory.h
 
