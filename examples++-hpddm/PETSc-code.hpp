@@ -1171,10 +1171,10 @@ class InvPETSc {
                 if(trans == 'N')
                     KSPSolve((*t)._ksp, x, y);
                 else {
-                    if(t.conjugate)
+                    if(!std::is_same<PetscScalar, PetscReal>::value && t.conjugate)
                         VecConjugate(x);
                     KSPSolveTranspose((*t)._ksp, x, y);
-                    if(t.conjugate)
+                    if(!std::is_same<PetscScalar, PetscReal>::value && t.conjugate)
                         VecConjugate(y);
                 }
                 if(verbosity > 0 && mpirank == 0)
