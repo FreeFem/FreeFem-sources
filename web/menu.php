@@ -30,11 +30,13 @@ include 'phpfiles.php';
 		<p>
 	<div class="menuTitle">Documentation</div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++doc.pdf" target="_top"> freefem++doc.pdf  <? sizefile("freefem++doc.pdf") ?></a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/INNOVATION" target="_top">  Last News (INNOVATION) </a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/HISTORY" target="_top">HISTORY </a></div>
+	<div class="menuItem"><a href="http://doc.freefem.org" target="_top">New web documentation</a></div>	
+	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/CHANGELOG.md" target="_top">  News after aug. 2018 (CHANGELOG) </a></div>
+	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/INNOVATION" target="_top">  News before aug. 2018 (INNOVATION) </a></div>
+	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/HISTORY" target="_top">HISTORY (crazy) </a></div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/BUGS" target="_top">knows BUGS  </a></div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++Spanish.pdf" target="_top">Una documentation en español</a></div>
-		<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++doc-chinese.pdf" target="_top"> Chinese documentation  </a></div>
+	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++doc-chinese.pdf" target="_top"> Chinese documentation  </a></div>
 
 	<div class="menuItem"><a href="http://comfos.org/jp/ffempp/index.html" target="_top">Japanese (Kohji Ohtsuka)</a></div>
 	 <div class="menuItem"><a href="http://homepage.ntu.edu.tw/~twhsheu/twsiamff++/freefem.html"  target="_top"> TWSIAM Activity Group </a></div>	
