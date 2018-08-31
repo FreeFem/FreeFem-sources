@@ -1,0 +1,49 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+macro trueRestrict()true//
+macro removeZeros()true//
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)i// EOM                 // scalar field definition
+macro init(i)i// EOM                // scalar field initialization
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P1;                       // finite element space
+
+int s = getARGV("-split", 1);                                   // refinement factor
+
+meshN Th = square(1, 1);
+fespace Wh(Th, Pk);                         // local finite element space
+int[int] arrayIntersection;                 // ranks of neighboring subdomains
+int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
+real[int] D;                                // partition of unity
+{
+    meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
+    buildPETSc(Th, ThGlobal, s, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld)
+}
+
+varf vPb(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(v) * u) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
+varf vPbT(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(u) * v) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
+matrix<real> Mat  = vPb(Wh, Wh);
+matrix<real> MatT = vPbT(Wh, Wh);
+real[int] rhs = vPb(0, Wh);
+
+dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+set(A, sparams = "");
+dmatrix AT(MatT, arrayIntersection, restrictionIntersection, D);
+set(AT, sparams = "");
+Wh<real> def(u);  // local solution
+Wh<real> def(v);  // local solution
+
+u[] = A^-1 * rhs;
+plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+u[] = A'^-1 * rhs;
+plotMPI(Th, u[], "Global solution transpose", Pk, def, real, 3, 1)
+v[] = AT^-1 * rhs;
+u[] -= v[];
+real local = u[].linfty;
+real norm;
+mpiAllReduce(local, norm, mpiCommWorld, mpiMAX);
+plotMPI(Th, v[], "Global solution transposed problem (linfty of error = " + norm + ")", Pk, def, real, 3, 1)
