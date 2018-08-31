@@ -1,3 +1,5 @@
+NOW the INNOVATION information are in CHANGELOG.md file (31 aug. 2018)
+
   add plugin to save matriox in Harwell-Boeing format (see Harwell-Boeing format)
   correct bug in trunc (2d) in case of very fine mesh (eps too small ) 
 version 3.61 june 20 2018

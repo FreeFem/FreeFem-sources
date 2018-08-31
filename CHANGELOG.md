@@ -23,9 +23,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] 2018-08-31
 
+### Added
+
+- A tool of solve adjoint matrix A with only one single LU decomposition with LU, UMFPACK, GMRES  
+    `u[]=A'^-1*b;`  
 - Add plugin to save matrix in Harwell-Boeing format (see Harwell-Boeing format)
+
+### Fixed
+
 - Fix bug in `trunc` (2d) in case of very fine mesh (eps too small)
 
 ## [3.61] - 2018-06-20
