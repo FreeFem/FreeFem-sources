@@ -1120,7 +1120,7 @@ AnyType augmentation_Op<Type>::operator()(Stack stack) const {
     return 0L;
 }
 
-template<class T, class U, class K>
+template<class T, class U, class K, char trans>
 class InvPETSc {
     static_assert(std::is_same<K, PetscScalar>::value, "Wrong types");
     public:
@@ -1128,75 +1128,85 @@ class InvPETSc {
         const U u;
         InvPETSc(T v, U w) : t(v), u(w) {}
         void solve(U out) const {
-            Vec x, y;
-            double timing = MPI_Wtime();
-            MatCreateVecs((*t)._petsc, &x, &y);
-            PetscScalar* ptr;
-            PetscInt bs;
-            MatType type;
-            MatGetType((*t)._petsc, &type);
-            PetscBool isNotBlock;
-            PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
-            if(isNotBlock)
-                bs = 1;
-            else
-                MatGetBlockSize((*t)._petsc, &bs);
-            if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
-                VecGetArray(x, &ptr);
-                HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
-                VecRestoreArray(x, &ptr);
-                if(t.A->_A)
-                    std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
-            }
-            else {
-                PetscScalar zero = 0.0;
-                VecSet(x, zero);
+            if((*t)._petsc) {
+                Vec x, y;
+                double timing = MPI_Wtime();
+                MatCreateVecs((*t)._petsc, &x, &y);
+                PetscScalar* ptr;
+                PetscInt bs;
+                MatType type;
+                MatGetType((*t)._petsc, &type);
+                PetscBool isNotBlock;
+                PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+                if(isNotBlock)
+                    bs = 1;
+                else
+                    MatGetBlockSize((*t)._petsc, &bs);
+                if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
+                    VecGetArray(x, &ptr);
+                    HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
+                    VecRestoreArray(x, &ptr);
+                    if(t.A->_A)
+                        std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
+                }
+                else {
+                    PetscScalar zero = 0.0;
+                    VecSet(x, zero);
 #if 0
-                Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
-                VecGetArray(is->y, &ptr);
-                std::copy_n(static_cast<PetscScalar*>(*u), (*t)._A->getMatrix()->_n, ptr);
-                VecRestoreArray(is->y, &ptr);
-                VecScatterBegin(is->rctx,is->y,x,ADD_VALUES,SCATTER_REVERSE);
-                VecScatterEnd(is->rctx,is->y,x,ADD_VALUES,SCATTER_REVERSE);
+                    Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
+                    VecGetArray(is->y, &ptr);
+                    std::copy_n(static_cast<PetscScalar*>(*u), (*t)._A->getMatrix()->_n, ptr);
+                    VecRestoreArray(is->y, &ptr);
+                    VecScatterBegin(is->rctx,is->y,x,ADD_VALUES,SCATTER_REVERSE);
+                    VecScatterEnd(is->rctx,is->y,x,ADD_VALUES,SCATTER_REVERSE);
 #else
-                Vec isVec;
-                VecCreateMPIWithArray(PETSC_COMM_SELF, bs, (*t)._A->getMatrix()->_n, (*t)._A->getMatrix()->_n, static_cast<PetscScalar*>(*u), &isVec);
-                VecScatterBegin((*t)._scatter, isVec, x, ADD_VALUES, SCATTER_REVERSE);
-                VecScatterEnd((*t)._scatter, isVec, x, ADD_VALUES, SCATTER_REVERSE);
-                VecDestroy(&isVec);
+                    Vec isVec;
+                    VecCreateMPIWithArray(PETSC_COMM_SELF, bs, (*t)._A->getMatrix()->_n, (*t)._A->getMatrix()->_n, static_cast<PetscScalar*>(*u), &isVec);
+                    VecScatterBegin((*t)._scatter, isVec, x, ADD_VALUES, SCATTER_REVERSE);
+                    VecScatterEnd((*t)._scatter, isVec, x, ADD_VALUES, SCATTER_REVERSE);
+                    VecDestroy(&isVec);
 #endif
-            }
-            timing = MPI_Wtime();
-            KSPSolve((*t)._ksp, x, y);
-            if(verbosity > 0 && mpirank == 0)
-                cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
-            if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
-                VecGetArray(y, &ptr);
-                HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), ptr, out->n / bs, bs);
-                VecRestoreArray(y, &ptr);
-            }
-            else {
+                }
+                timing = MPI_Wtime();
+                if(trans == 'N')
+                    KSPSolve((*t)._ksp, x, y);
+                else {
+                    if(t.conjugate)
+                        VecConjugate(x);
+                    KSPSolveTranspose((*t)._ksp, x, y);
+                    if(t.conjugate)
+                        VecConjugate(y);
+                }
+                if(verbosity > 0 && mpirank == 0)
+                    cout << " --- system solved with PETSc (in " << MPI_Wtime() - timing << ")" << endl;
+                if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value) {
+                    VecGetArray(y, &ptr);
+                    HPDDM::Subdomain<K>::template distributedVec<1>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), ptr, out->n / bs, bs);
+                    VecRestoreArray(y, &ptr);
+                }
+                else {
 #if 0
-                Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
-                VecScatterBegin(is->rctx,y,is->y,INSERT_VALUES,SCATTER_FORWARD);
-                VecScatterEnd(is->rctx,y,is->y,INSERT_VALUES,SCATTER_FORWARD);
-                VecGetArray(is->y, &ptr);
-                std::copy_n(ptr, (*t)._A->getMatrix()->_n, (PetscScalar*)*out);
-                VecRestoreArray(is->y, &ptr);
+                    Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
+                    VecScatterBegin(is->rctx,y,is->y,INSERT_VALUES,SCATTER_FORWARD);
+                    VecScatterEnd(is->rctx,y,is->y,INSERT_VALUES,SCATTER_FORWARD);
+                    VecGetArray(is->y, &ptr);
+                    std::copy_n(ptr, (*t)._A->getMatrix()->_n, (PetscScalar*)*out);
+                    VecRestoreArray(is->y, &ptr);
 #else
-                Vec isVec;
-                VecCreateMPIWithArray(PETSC_COMM_SELF, bs, (*t)._A->getMatrix()->_n, (*t)._A->getMatrix()->_n, static_cast<PetscScalar*>(*out), &isVec);
-                VecScatterBegin((*t)._scatter, y, isVec, INSERT_VALUES, SCATTER_FORWARD);
-                VecScatterEnd((*t)._scatter, y, isVec, INSERT_VALUES, SCATTER_FORWARD);
-                VecDestroy(&isVec);
+                    Vec isVec;
+                    VecCreateMPIWithArray(PETSC_COMM_SELF, bs, (*t)._A->getMatrix()->_n, (*t)._A->getMatrix()->_n, static_cast<PetscScalar*>(*out), &isVec);
+                    VecScatterBegin((*t)._scatter, y, isVec, INSERT_VALUES, SCATTER_FORWARD);
+                    VecScatterEnd((*t)._scatter, y, isVec, INSERT_VALUES, SCATTER_FORWARD);
+                    VecDestroy(&isVec);
 #endif
+                }
+                VecDestroy(&x);
+                VecDestroy(&y);
+                if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value && t.A->_A)
+                    (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*out);
             }
-            VecDestroy(&x);
-            VecDestroy(&y);
-            if(std::is_same<typename std::remove_reference<decltype(*t.A->_A)>::type, HpSchwarz<PetscScalar>>::value && t.A->_A)
-                (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*out);
         };
-        static U init(U Ax, InvPETSc<T, U, K> A) {
+        static U init(U Ax, InvPETSc<T, U, K, trans> A) {
             A.solve(Ax);
             return Ax;
         }

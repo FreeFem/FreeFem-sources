@@ -70,37 +70,51 @@ class Pair {
 template<class R, class A, class B> R Build(A a, B b) {
     return R(a, b);
 }
-template<class Op, class Inv>
-class OneBinaryOperatorInv : public OneOperator {
-    public:
-        OneBinaryOperatorInv() : OneOperator(atype<Inv>(), atype<Op*>(), atype<long>()) { }
-        E_F0* code(const basicAC_F0 & args) const {
-            Expression p = args[1];
-            if(!p->EvaluableWithOutStack())
-                CompileError("A^p, The p must be a constant == -1, sorry");
-            long pv = GetAny<long>((*p)(NullStack));
-            if(pv != -1) {
-                char buf[100];
-                sprintf(buf, "A^%ld, The pow must be == -1, sorry", pv);
-                CompileError(buf);
-            }
-            return new E_F_F0<Inv, Op*>(Build<Inv, Op*>, t[0]->CastTo(args[0]));
-        }
+template<class RR, class AA = RR, class BB = AA>
+struct BinaryOp : public binary_function<AA, BB, RR> {
+    static RR f(Stack s, const AA& a, const BB& b) { return RR(s, a, b); }
 };
-template<class Op, template<class, class, class> class Inv, class V, class K = double>
+template<class Op, char trans = 'N'>
+class pwr {
+    public:
+        Op* A;
+        pwr(Op* B) : A(B) { assert(A); }
+        const typename std::conditional<trans == 'N', long, std::string*>::type c;
+        static constexpr char tr = trans;
+        bool conjugate;
+        pwr(Stack s, Op* const& d, const typename std::conditional<trans == 'N', long, std::string*>::type e) : A(d), c(e), conjugate(false) { }
+        operator Op* () const { return A; }
+};
+template<class RR, class AA = RR, class BB = AA>
+struct assign : public binary_function<AA, BB, RR> {
+template<class V, class T>
+static T check(T t, typename std::enable_if<T::tr == 'N'>::type* = 0) {
+    if(t.c != -1)
+        CompileError("A^p, the p must be a constant == -1 or == \"-T\" or == \"-H\", sorry");
+    return t;
+}
+template<class V, class T>
+static T check(T t, typename std::enable_if<T::tr == 'T'>::type* = 0) {
+    if(t.c->compare("-H") == 0)
+        t.conjugate = true;
+    if(t.c->compare("-T") != 0 && !t.conjugate)
+        CompileError("A^p, the p must be a constant == -1 or == \"-T\" or == \"-H\", sorry");
+    return t;
+}
+static RR f(Stack stack, const AA& a, const BB& b) {
+    ffassert(a);
+    check<BB>(a);
+    RR p(a, b);
+    return p;
+}
+};
+template<class Op, template<class, class, class, char> class Inv, class V, class K = double, char trans = 'N'>
 void addInv() {
-    class OpInv {
-        public:
-            Op* A;
-            OpInv(Op* B) : A(B) { assert(A); }
-            operator Op& () const { return *A; }
-            operator Op* () const { return A; }
-    };
-    Dcl_Type<OpInv>();
-    Dcl_Type<Inv<OpInv, V*, K>>();
-    TheOperators->Add("^", new OneBinaryOperatorInv<Op, OpInv>());
-    TheOperators->Add("*", new OneOperator2<Inv<OpInv, V*, K>, OpInv, V*>(Build));
-    TheOperators->Add("=", new OneOperator2<V*, V*, Inv<OpInv, V*, K>>(Inv<OpInv, V*, K>::init));
+    Dcl_Type<pwr<Op, trans>>();
+    Dcl_Type<Inv<pwr<Op, trans>, V*, K, trans>>();
+    TheOperators->Add("^", new OneBinaryOperator_st<BinaryOp<pwr<Op, trans>, Op*, typename std::conditional<trans == 'N', long, std::string*>::type>>);
+    TheOperators->Add("*", new OneBinaryOperator_st<assign<Inv<pwr<Op, trans>, V*, K, trans>, pwr<Op, trans>, V*>>);
+    TheOperators->Add("=", new OneOperator2<V*, V*, Inv<pwr<Op, trans>, V*, K, trans>>(Inv<pwr<Op, trans>, V*, K, trans>::init));
 }
 template<class Op, template<class, class, class, char> class Prod, class V, class K = double, char N = 'N'>
 void addProd() {

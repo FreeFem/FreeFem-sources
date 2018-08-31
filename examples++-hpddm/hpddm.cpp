@@ -539,7 +539,7 @@ class ProdSchwarz {
         }
 };
 
-template<class T, class U, class K>
+template<class T, class U, class K, char trans>
 class InvSchwarz {
     public:
         const T t;
@@ -571,7 +571,7 @@ class InvSchwarz {
                 HPDDM::Option::get()->remove((*t).prefix("verbosity"));
             HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, mu, MPI_COMM_WORLD);
         }
-        static U init(U Ax, InvSchwarz<T, U, K> A) {
+        static U init(U Ax, InvSchwarz<T, U, K, trans> A) {
             A.solve(Ax);
             return Ax;
         }

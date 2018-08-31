@@ -539,7 +539,7 @@ long originalNumbering(Type* const& A, KN<K>* const& in, KN<long>* const& interf
     return 0;
 }
 
-template<class T, class U, class K>
+template<class T, class U, class K, char trans>
 class InvSubstructuring {
     public:
         const T t;
@@ -558,7 +558,7 @@ class InvSubstructuring {
                 opt.remove("verbosity");
             HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, 1, MPI_COMM_WORLD);
         }
-        static U init(U Ax, InvSubstructuring<T, U, K> A) {
+        static U init(U Ax, InvSubstructuring<T, U, K, trans> A) {
             A.solve(Ax);
             return Ax;
         }
