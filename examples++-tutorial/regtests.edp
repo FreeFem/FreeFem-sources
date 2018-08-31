@@ -523,3 +523,11 @@ verbosity=verbosityy;
 				assert(TESTtablefunction>REFtablefunction*(1-1e-2));
 };
 
+cout << "--------- file : AdjointSolve.edp -----------------" << endl;
+verbosity=verbosityy;
+{
+		
+	
+	include "AdjointSolve.edp";
+	
+};

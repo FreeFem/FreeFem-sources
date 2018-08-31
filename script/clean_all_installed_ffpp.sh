@@ -1,17 +1,28 @@
 #!/bin/sh 
 # clean all freefem++ version ...
+rm="rm"
+
 cd / 
 if [ -d Applications/FreeFem++.app ] ; then
-  rm -rf Applications/FreeFem++.app
+  $rm -rf Applications/FreeFem++.app
 fi
 if [ -d usr/local/share/freefem++ ] ; then
-  rm -rf usr/local/share/freefem++
+  $rm -rf usr/local/share/freefem++
 fi
 if [ -d  usr/local/lib/ff++/ ]; then
- rm -rf usr/local/lib/ff++
+ $rm -rf usr/local/lib/ff++
 fi
-rm usr/local/bin/FreeFem++		usr/local/bin/FreeFem++-nw	usr/local/bin/ff-c++		usr/local/bin/ff-pkg-download 
-rm usr/local/bin/FreeFem++-CoCoa		usr/local/bin/bamg	usr/local/bin/ff-get-dep
-rm  usr/local/bin/ffglut usr/local/bin/FreeFem++-mpi		usr/local/bin/cvmsh2	
-rm usr/local/bin/ff-mpirun  usr/local/bin/ffmedit
+
+ffexe="FreeFem++*  ff-c++ ff-pkg-download  bamg ff-get-dep ffglut cvmsh2 ff-mpirun ffmedit"
+( cd usr/local/bin &&echo cd "usr/local/bin" &&  $rm $ffexe; )
+
+if [ -f  etc/paths.d/FreeFem++  ]; then
+	ffbin=`cat etc/paths.d/FreeFem++`
+	( cd "$ffbin" &&echo cd "$ffbin" && $rm $ffexe; )
+fi
+if [ -d usr/local/ff++ ] ; then
+	echo " Warning dir usr/local/ff++ exist"
+	ls usr/local/ff++
+	echo " Warning the directory  /usr/local/ff++  no remove ? "
+fi
 exit 0 
