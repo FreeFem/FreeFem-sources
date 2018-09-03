@@ -30,7 +30,7 @@ include 'phpfiles.php';
 		<p>
 	<div class="menuTitle">Documentation</div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++doc.pdf" target="_top"> freefem++doc.pdf  <? sizefile("freefem++doc.pdf") ?></a></div>
-	<div class="menuItem"><a href="http://doc.freefem.org" target="_top">New web documentation</a></div>	
+	<div class="menuItem"><a href="https://doc.freefem.org" target="_top">New web documentation</a></div>	
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/CHANGELOG.md" target="_top">  News after aug. 2018 (CHANGELOG) </a></div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/INNOVATION" target="_top">  News before aug. 2018 (INNOVATION) </a></div>
 	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/HISTORY" target="_top">HISTORY (crazy) </a></div>
