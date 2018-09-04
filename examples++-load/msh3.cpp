@@ -5949,7 +5949,7 @@ AnyType ExtractMesh2D_Op::operator () (Stack stack)  const {
 		R2 Pn, Px;
 		pThnew->BoundingBox(Pn, Px);
 		if (!pThnew->quadtree) {
-			pThnew->quadtree = new Fem2D::FQuadTree(pTh, Pn, Px, pTh->nv);
+			pThnew->quadtree = new Fem2D::FQuadTree(pThnew, Pn, Px, pThnew->nv);
 		}
 
 		// Lorenzo
