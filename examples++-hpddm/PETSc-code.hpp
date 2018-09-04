@@ -1348,7 +1348,8 @@ static void Init_PETSc() {
     Global.Add("set", "(", new PETSc::setOptions<Dmat>());
     addProd<Dmat, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar, 'N'>();
     addProd<Dmat, PETSc::ProdPETSc, KN<PetscScalar>, PetscScalar, 'T'>();
-    addInv<Dmat, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
+    addInv<Dmat, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar, 'N'>();
+    addInv<Dmat, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar, 'T'>();
 
     TheOperators->Add("<-", new OneOperator1_<long, Dbddc*>(PETSc::initEmptyCSR<Dbddc>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchur<PetscScalar>>);
