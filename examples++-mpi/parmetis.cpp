@@ -29,6 +29,9 @@
 #include <ff++.hpp>
 #include <cmath>
 #include <parmetis.h>
+#ifndef IDX_T
+#define IDX_T MPI_INT
+#endif
 
 template<class Type, class Mesh>
 class ParMETIS_Op : public E_F0mps {
@@ -63,7 +66,7 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
     idx_t nparts = GetAny<long>((*lparts)(stack));
     Type* pt = *ptKN;
     long n = ptKN->n;
-    idx_t* ptInt = reinterpret_cast<idx_t*>(pt);
+    idx_t* ptInt = sizeof(idx_t) <= sizeof(Type) ? reinterpret_cast<idx_t*>(pt) : new idx_t[n];
     std::fill_n(ptInt, n, 0);
     MPI_Comm comm = nargs[0] ? *((MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack))) : MPI_COMM_WORLD;
     int worker = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 0;
@@ -100,9 +103,9 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
         std::vector<idx_t> adjncy;
         adjncy.reserve(loc * nve);
         xadg[0] = 0;
-        for(idx_t k = vtxdist[rank]; k < vtxdist[rank + 1]; ++k) {
+        for(int k = vtxdist[rank]; k < vtxdist[rank + 1]; ++k) {
             for(idx_t j = 0; j < nve; ++j) {
-                idx_t l = j;
+                int l = j;
                 idx_t m = Th.ElementAdj(k, l);
                 if(k != m && m > 0)
                     adjncy.push_back(m);
@@ -142,9 +145,11 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
         delete [] xadg;
         delete [] vtxdist;
     }
-    MPI_Allreduce(MPI_IN_PLACE, ptInt, n, MPI_INT, MPI_SUM, comm);
+    MPI_Allreduce(MPI_IN_PLACE, ptInt, n, IDX_T, MPI_SUM, comm);
     for(int i = n; i-- > 0; )
         pt[i] = ptInt[i];
+    if(sizeof(idx_t) > sizeof(Type))
+        delete [] ptInt;
     if(nargs[1] && workComm != MPI_COMM_NULL)
         MPI_Comm_free(&workComm);
     return 0L;
