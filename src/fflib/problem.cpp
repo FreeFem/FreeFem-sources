@@ -5626,15 +5626,15 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
         switch (ds.typemat->t) {
         case    TypeSolveMat::GC:   
           if (ds.precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon));
+            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon,ds.x0,ds.veps));
           else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon));
+            AA.SetSolverMaster(new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon,ds.x0,ds.veps));
           break; 
         case TypeSolveMat::GMRES :
           if (ds.precon)
-            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
+            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0,ds.veps));
           else 
-            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
+            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0,ds.veps));
          break;
 	 //#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::SparseSolver :

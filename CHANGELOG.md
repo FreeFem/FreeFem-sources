@@ -27,6 +27,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- add  x0=true/false, add veps=eps in solver parameters to initiaze of not the the CG , GMRES algo 
+  with 0 or previous value and veps is to get the absolue tolerance 
+  
 - A tool of solve adjoint matrix A with only one single LU decomposition with LU, UMFPACK, GMRES  
     `u[]=A'^-1*b;`  
 - Add plugin to save matrix in Harwell-Boeing format (see Harwell-Boeing format)

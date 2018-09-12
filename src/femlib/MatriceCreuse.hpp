@@ -795,13 +795,13 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
              eps =  epsold*epsold*g2; 
              if (verbosity>3 || (kprint<3))
              cout << "CG converge to fast (pb of BC)  restart: " << iter <<  "  ro = " 
-                  << ro << " ||g||^2 = " << g2 << " <= " << reps2 << "  new eps2 =" <<  eps <<endl; 
+                  << ro << " ||g||^2 = " << g2 << " <= " << reps2  <<endl;
               reps2=eps;
            } 
          else 
           { 
            if (verbosity>1 || (kprint<100000) )
-            cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
+            cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << " eps2 " << reps2  <<endl;
            return 1;// ok 
           }
           }
@@ -902,18 +902,26 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatr
   double eps;
   mutable double  epsr;
   KN<R> D1;
+    bool x0;
+    double *veps;
   public:
   typedef typename VirtualMatrice<R>::plusAx plusAx;
-  SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6) : 
+  SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6,bool x00=true,double *vveps=0) :
     VirtualMatrice<R>(A.n),
-    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n)
+    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n),x0(x00),veps(vveps)
   { //throwassert(A.sym());
     for (int i=0;i<n;i++)
       D1[i] = 1./A(i,i);}
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+       epsr = veps ? *veps : eps;
+   //    cout << " GC0 " << epsr<< " " << *veps << endl;
+   //  epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
+       if(x0) x=R();
+       double xl2 = x.l2() ;
      ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr  );
+    //  if(veps)  cout <<"  CG:" << epsr << " " << *veps << " " << xl2 <<endl;
+       if(veps) *veps=epsr; 
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
@@ -980,6 +988,8 @@ struct Data_Sparse_Solver {
     KNM<double>* kerneln;
     KNM<double> * kernelt;
     long *kerneldim;
+    bool x0; //  init by 0 the inital data the solution
+    double * veps; //    to get and set value of eps
  /*   
   int *param_int;
   double *param_double;
@@ -1030,7 +1040,7 @@ struct Data_Sparse_Solver {
     master(0),
     rinfo(0),
     info(0),
-    kerneln(0), kernelt(0), kerneldim(0)
+    kerneln(0), kernelt(0), kerneldim(0),x0(true),veps(0) 
     {}
     
 private:

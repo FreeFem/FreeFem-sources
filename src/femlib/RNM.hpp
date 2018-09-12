@@ -558,9 +558,9 @@ public:
    KN_& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0)); Ax.A->addMatTransMul(Ax.x,*this); } return *this;}
    KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
-    { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));*this=R(); Ab.A->Solve(*this,Ab.b); } return *this;}
+    { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));/* *this=R();*/ Ab.A->Solve(*this,Ab.b); } return *this;}
     KN_& operator =(const typename VirtualMatrice<R>::solveAtxeqb & Ab)
-    { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));*this=R(); Ab.A->SolveT(*this,Ab.b); } return *this;}
+    { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));/* *this=R();*/ Ab.A->SolveT(*this,Ab.b); } return *this;}
 
   template<class  A,class B,class C,class D> KN_&  operator =  (const F_KN_<A,B,C,D>  & u) ;
   template<class  A,class B,class C,class D> KN_&  operator +=  (const F_KN_<A,B,C,D>  & u) ;

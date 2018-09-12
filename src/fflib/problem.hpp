@@ -1162,17 +1162,17 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
       case    TypeSolveMat::GC:   
         if (pprecon)
           AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new Fem2D::SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon)));
+                                                                new Fem2D::SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon,ds.x0)));
         else 
           AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon)));
+                                                                new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon,ds.x0)));
         break; 
       case TypeSolveMat::GMRES :
         //        InternalError("GMRES solveur to do");
         if (pprecon)
-          AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
+          AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0));
         else 
-          AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
+          AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0));
         break;
 //#ifdef HAVE_LIBUMFPACK         
         case TypeSolveMat::SparseSolver :
