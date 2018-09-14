@@ -2103,9 +2103,9 @@ public:
 template<class T>   
    C_F0 NewVar(Key k,aType t,const C_F0 &i) 
      {return table.NewVar<T>(k, t,top,i);}
-template<class T>   
+/*template<class T>
    C_F0 NewFESpace(Key k,aType t,const basicAC_F0 &args) 
-     {return table.NewFESpace<T>(k, t,top,args);}
+     {return table.NewFESpace<T>(k, t,top,args);}*/
 template<class T>   
    C_F0 NewVar(Key k,aType t, AC_F0 &args) 
      {C_F0 r= table.NewVar<T>(k, t,top,args);

@@ -29,6 +29,65 @@
 #include "ff++.hpp"
 #include <vector>
 
+MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,int sup,bool sym)
+{
+    int nnz =0;
+    int n = A.n;
+    
+    if( A.symetrique )
+        return new MatriceMorse<R>(n,n,A.nbcoef,sym,A.a,A.lg,A.cl,true);//  copy
+    KN<int> ll(n+1);
+    ll=0;
+    for(int i=0; i< n; ++i)
+    {
+        
+        for(int k=A.lg[i]; k< A.lg[i+1]; ++k)
+        {
+            int j =A.cl[k] ;
+            if      ( sup && j  >= i) ll[j]++,nnz++;
+            else if ( !sup && j <= i) ll[i]++,nnz++;
+        }
+    }
+    // do alloc
+    MatriceMorse<R> *r=new MatriceMorse<R>(n,n,nnz,sym);
+    
+    int *cl =r->cl, *lg = r->lg;
+    double *a =r->a;
+    for(int i=0; i< n; ++i)
+        ll[i+1] += ll[i];
+    
+    for(int i=0; i< n; ++i)
+    {
+        lg[i]=ll[i];
+        
+        for(int k=A.lg[i]; k< A.lg[i+1]; ++k)
+        {
+            int j =A.cl[k] ;
+            double aij = A.a[k];
+            int kk=-1,ij=-1;
+            if(sup && j >=i ) kk = ll[j]++,ij=i;
+            else if (!sup && j <=i) kk = ll[i]++,ij=i;
+            if(kk>=0) cl[kk]=ij, a[kk]=aij;
+        }
+    }
+    ffassert(ll[n-1]== nnz);
+    lg[n]=nnz;
+    ffassert(ll[n]== nnz);
+    return r;
+}
+
+Matrice_Creuse<R> *removeHalf(Stack stack,Matrice_Creuse<R> *pA,long sup,bool sym)
+{
+    MatriceMorse<R> *pma=pA->A->toMatriceMorse(false,false);
+    Matrice_Creuse<R> *Mat= new Matrice_Creuse<R> ;
+    Mat->A.master(removeHalf(*pma,sup,sym));
+    Add2StackOfPtr2Free(stack,Mat);
+    return Mat;
+}
+Matrice_Creuse<R> *removeHalf(Stack stack,Matrice_Creuse<R> *pA,long sup)
+{
+    return removeHalf(stack,pA,sup,0);
+}
 void ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 {
     // cf https://en.wikipedia.org/wiki/Incomplete_Cholesky_factorization
