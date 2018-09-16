@@ -165,17 +165,18 @@ inline R pscal(R*L,int *cl,int kl,int kl1,int i, MatriceMorse<R> &  Ut,int j )
     int ku = Ut.lg[j],ku1=Ut.lg[j]-1;
     int k= min(i,j); //  common  part
     R r =0;
-    cout << " pscal: "<<  i << " " << j << "  min: " << k << endl;
+    //cout << " pscal: "<<  i << " " << j << "  min: " << k << endl;
     for(int l=kl;l<kl1;++l)
     {
         
         int jl = cl[l];
-        cout << "     ##" <<i << " " << jl << " " << (jl > k) << endl;
+        //cout << "     ##" <<i << " " << jl << " " << (jl > k) << endl;
         if( jl >= k) break;
         R Lijl = L[l];
         R * pUtjjl = Ut.pij(j,jl);
         if(pUtjjl) { r += Lijl* *pUtjjl;
-            cout <<   "   **  "<< Lijl << " " << *pUtjjl << " " << jl <<  " " << r << endl;}
+            //cout <<   "   **  "<< Lijl << " " << *pUtjjl << " " << jl <<  " " << r << endl;
+        }
     }
     ffassert ( r==r );
     return r;
@@ -196,7 +197,7 @@ void iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
     ffassert( A.n == L.n);
     ffassert( A.n == Ut.n);
     int n =A.n,i,j,k,kk;
-    double tgve =tgv*0.99999999;
+    double tgve =tgv*0.999;
     if(tgve < 1) tgve=1e200;
     double NaN=sqrt(-1.);
     fill(L.a,L.a+L.nbcoef,NaN);
@@ -213,8 +214,8 @@ void iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
         int ui0=Ut.lg[i];
         err += Ut.cl[ui1] != i;
         err += L.cl[li1] != i;
-
-        double  Aii=A.a[ai1],Uii;
+        ffassert( L.cl[li1]==i && Ut.cl[ui1]==i);
+        double  Aii=A(i,i),Uii;
         if (Aii > tgve)
         { // B.C
             fill(L.a+li0,L.a+li1,0.);
@@ -225,25 +226,28 @@ void iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
         }
         else
         {
+            //cout << " L " << i << " " << BC << " " << li0 << " " << li1 << endl;
+            //for(int l=0; l<li1; l++) cout << L.a[l] << " ";
+            //cout << endl;
             for(int l=li0;l<li1;++l) // coef of  L non zero
             {
                 R j   = L.cl[l];
                 R *pAij = A.pij(i,j), Aij = pAij ? *pAij : 0.;
+                R Ujj=Ut(j,j);
                 ffassert(j<i);
-                R Uii = Ut(i,i);
-                L.a[l] = (Aij - pscal(L.a,L.cl,li0,li1,i, Ut,j)) / Uii;
+                L.a[l] = (Aij - pscal(L.a,L.cl,li0,li1,i, Ut,j)) / Ujj;
             }
+            //cout << " U " << endl;
             for(int u=ui0;u<ui1;++u) // coef of  Ut  non zero
             {
                 R j   = Ut.cl[u];// Ut(j,i) == U(j,i)
-                R *pAij = A.pij(j,i), Aij = pAij ? *pAij : 0.;
+                R *pAji = A.pij(j,i), Aji = pAji ? *pAji : 0.;
                 ffassert(j<i);// transpose
-                R Uii = Ut(i,i);
-                Ut.a[u] = (Aij - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,j));
+                Ut.a[u] = (Aji - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,j));
             }
         // set Diag term
-            Ut(i,i) = Uii= A(i,i) - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,i);
-            cout << i << " " << Uii << endl;
+            Ut(i,i) = Uii= Aii - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,i);
+            //cout << " Uii " << i << " " << Uii << endl;
             L(i,i) =1.;
             ffassert(abs(Uii)> 1e-30);
         }
@@ -289,7 +293,7 @@ bool ff_ichol (Matrice_Creuse<R> *  pcA,Matrice_Creuse<R> *  pcL)
 void ichol_solve(MatriceMorse<R> &L,KN<double> & b,bool trans)
 {
     int n =L.n,i,j,k,k1,k0;
-    ffassert(L.symetrique);
+    //ffassert(L.symetrique);
     ffassert( L.n == b.N());
     if(trans)
     {
@@ -341,7 +345,7 @@ bool ff_ichol_solve(Matrice_Creuse<R> * pcL,KN<double> * b)
 }
 bool ff_ilu_solve(Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> *const &  pcU,KN<double> * const & b)
 {
-    // L L' u = b =>  L uu = b;  L' u = uu;
+    // L Ut u = b =>  L uu = b;  L' u = uu;
     MatriceCreuse<R> * pl=pcL->A;
     ffassert(pl );
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
@@ -364,7 +368,6 @@ static void Load_Init () {
     Global.Add("iLU", "(", new OneOperator4_<bool,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,Matrice_Creuse<R> *,double >(ff_ilu));
     Global.Add("iLU", "(", new OneOperator3_<bool,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,Matrice_Creuse<R> * >(ff_ilu));
     Global.Add("iluSolve", "(", new OneOperator3_<bool ,Matrice_Creuse<R> * ,Matrice_Creuse<R> * , KN<R> *>(ff_ilu_solve));
-    
     Global.Add("icholSolve", "(", new OneOperator2<bool ,Matrice_Creuse<R> * , KN<R> *>(ff_ichol_solve));
     Global.Add("removeHalf", "(", new OneOperator2s_<Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,long>(removeHalf));
     Global.Add("removeHalf", "(", new OneOperator3s_<Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,long,bool>(removeHalf));

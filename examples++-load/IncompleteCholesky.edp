@@ -1,13 +1,13 @@
 //load "symmetrizeCSR"
 load "IncompleteCholesky"
-//load "thresholdings"
-int nn=5;
+load "thresholdings"
+int nn=100;
 mesh Th=square(nn,nn);
 fespace Vh(Th,P1); 
 macro grad(u) [dx(u),dy(u)]//
 
 func f = sin(2*pi*x)*sin(2*pi*y);
-varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + 10*u*v ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
+varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + 10*u*dx(v) ) + int2d(Th)( f*v) ;//+on(1,2,3,4,u=0);
 if(0){
 matrix LL ;
 func real[int] incomp(real[int] & b) {real[int] bb=b;icholSolve(LL,bb); return bb;}
@@ -50,20 +50,31 @@ cout << u[].linfty << endl;
 
 }
 { // test ILU 
+	int n = Vh.ndof;
 	verbosity=3;
 	matrix L,Ut;
 	func real[int] incomp(real[int] & b) {real[int] bb=b;iluSolve(L,Ut,bb); return bb;}
 	matrix AI = va(Vh,Vh,solver=GMRES,precon=incomp);
-	matrix A = va(Vh,Vh,solver=GMRES);
+	matrix A = va(Vh,Vh,solver=GMRES,factorize=0);
 	real[int] b = va(0,Vh);
+	real[int,int] F(n,n); F=1; 
+	matrix FF=AI;
 	cout << "removeHalf" << endl; 
-	L=removeHalf(A,0,0);
-	cout << " L " <<  L << endl; 
+	L=removeHalf(FF,0,0);
+	if(nn<10)
+ 	cout << " L " <<  L << endl; 
 	cout << "removeHalf 1 " << endl; 
-	Ut=removeHalf(A,1,0);	
+	Ut=removeHalf(FF,1,0);
+	if(nn<10)	
 		cout << " Ut " <<  Ut << endl; 
 	cout << "removeHalf 2 " << endl; 
-	iLU(A,L,Ut);
+	iLU(AI	,L,Ut);
+	L.thresholding(1e-6);
+	Ut.thresholding(1e-6);
+	//cout << "A="<< A <<endl;
+	//cout << "L="<< L <<endl;
+	//cout << "Ut="<< Ut << endl;
+	
 	Vh u,ui;
 	verbosity = 3;
 	real t0=clock();
@@ -71,6 +82,6 @@ cout << u[].linfty << endl;
 	real t1=clock();
 	ui[]= AI^-1*b;
 	real t2=clock();
-	cout << " GC/  ichol "<< t2-t1 << " GC/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
+	cout << " GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
 	plot(u,wait=1);
 }
