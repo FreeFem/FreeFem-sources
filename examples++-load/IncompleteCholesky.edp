@@ -1,79 +1,64 @@
-//load "symmetrizeCSR"
+/*
+    Test of Incomplete factorization 
+    Choleski and LU
+
+    
+*/
 load "IncompleteCholesky"
-load "thresholdings"
-int nn=100;
+
+int nn=100	;
 mesh Th=square(nn,nn);
 fespace Vh(Th,P1); 
 macro grad(u) [dx(u),dy(u)]//
-
+real kconv =0;
 func f = sin(2*pi*x)*sin(2*pi*y);
-varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + 10*u*dx(v) ) + int2d(Th)( f*v) ;//+on(1,2,3,4,u=0);
-if(0){
-matrix LL ;
-func real[int] incomp(real[int] & b) {real[int] bb=b;icholSolve(LL,bb); return bb;}
-matrix AI = va(Vh,Vh,solver=CG,precon=incomp);
-matrix A = va(Vh,Vh,solver=CG);
-//matrix AA = va(Vh,Vh,solver=Cholesky		,factorize=1);	
-LL=removeHalf(A,0,1);
-/*
-int n = Vh.ndof;
-real[int,int] F(n,n);
-F=1; 
-LL=F;
+varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
+i{
+	matrix L ;// to store in incomplet factorizatin. 
+	func real[int] PreconIcho(real[int] & b) {// the precondtionner
+		icholSolve(L,b);
+		return b;}
+	
+	matrix AI = va(Vh,Vh,solver=CG,precon=PreconIcho);
+	matrix A = va(Vh,Vh,solver=CG);
+	L=removeHalf(A,0);// 
+	ichol(A,L);
 
-symmetrizeCSR(LL);
-
-cout << LL << endl;
-*/
-ichol(A,LL);
-
-//LL.thresholding(1e-6);
-//symmetrizeCSR(LL);
-//cout << LL << endl;
-real[int] b = va(0,Vh);
-Vh u,ui;
-verbosity = 3;
-real t0=clock();
-u[]= A^-1*b;
-real t1=clock();
-ui[]= AI^-1*b;
-real t2=clock();
-cout << " GC/  ichol "<< t2-t1 << " GC/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
-plot(u,wait=1);
-/*
-icholSolve(LL,b);
-u[]-=b;
-cout << u[].linfty << endl;
-
-//cout << AA << endl; 
-*/
+	real[int] b = va(0,Vh);
+	Vh u,ui;
+	verbosity = 3;
+	real t0=clock();
+	u[]= A^-1*b;
+	real t1=clock();
+	ui[]= AI^-1*b;
+	real t2=clock();
+	cout << " ** GC/  ichol "<< t2-t1 << " GC/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
+	plot(u,wait=1);
 
 }
 { // test ILU 
+    kconv =50;
 	int n = Vh.ndof;
 	verbosity=3;
-	matrix L,Ut;
-	func real[int] incomp(real[int] & b) {real[int] bb=b;iluSolve(L,Ut,bb); return bb;}
-	matrix AI = va(Vh,Vh,solver=GMRES,precon=incomp);
-	matrix A = va(Vh,Vh,solver=GMRES,factorize=0);
+	matrix L,Ut;// to store in incomplet factorizatin. 
+	
+	func real[int] PreconILU(real[int] & b) {
+		 iluSolve(L,Ut,b); 
+		 return b;}
+		 
+	matrix AI = va(Vh,Vh,solver=GMRES,precon=PreconILU);
+	matrix A = va(Vh,Vh,solver=GMRES);
+	
 	real[int] b = va(0,Vh);
-	real[int,int] F(n,n); F=1; 
-	matrix FF=AI;
-	cout << "removeHalf" << endl; 
-	L=removeHalf(FF,0,0);
-	if(nn<10)
- 	cout << " L " <<  L << endl; 
-	cout << "removeHalf 1 " << endl; 
-	Ut=removeHalf(FF,1,0);
-	if(nn<10)	
-		cout << " Ut " <<  Ut << endl; 
-	cout << "removeHalf 2 " << endl; 
-	iLU(AI	,L,Ut);
-	L.thresholding(1e-6);
-	Ut.thresholding(1e-6);
-	//cout << "A="<< A <<endl;
-	//cout << "L="<< L <<endl;
-	//cout << "Ut="<< Ut << endl;
+	
+	L=removeHalf(AI,-1);  // build the structure of L
+		if(nn<10)
+    	  cout << " L " <<  L << endl; 
+	Ut=removeHalf(AI,1); // build the structure of Ut ( transpose of )
+	    if(nn<10)	
+		  cout << " Ut " <<  Ut << endl; 
+		
+	iLU(AI,L,Ut);// do the incomplet LU  
 	
 	Vh u,ui;
 	verbosity = 3;
@@ -82,6 +67,6 @@ cout << u[].linfty << endl;
 	real t1=clock();
 	ui[]= AI^-1*b;
 	real t2=clock();
-	cout << " GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
+	cout << " ** GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
 	plot(u,wait=1);
 }
