@@ -89,10 +89,12 @@ MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,int half)
 
 Matrice_Creuse<R> *removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half)
 {
-    MatriceMorse<R> *pma=pA->A->toMatriceMorse(false,false);
+    MatriceCreuse<R> * pa=pA->A;
+    MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+    ffassert(pma);
     Matrice_Creuse<R> *Mat= new Matrice_Creuse<R> ;
     Mat->A.master(removeHalf(*pma,half));
-    delete pma; 
+    //delete pma;
     Add2StackOfPtr2Free(stack,Mat);
     return Mat;
 }
