@@ -13,7 +13,7 @@ macro grad(u) [dx(u),dy(u)]//
 real kconv =0;
 func f = sin(2*pi*x)*sin(2*pi*y);
 varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
-i{
+{
 	matrix L ;// to store in incomplet factorizatin. 
 	func real[int] PreconIcho(real[int] & b) {// the precondtionner
 		icholSolve(L,b);
