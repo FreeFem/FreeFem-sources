@@ -97,8 +97,6 @@
 		3D84AE201654DE9800301697 /* MeshPoint.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADFB1654DE9800301697 /* MeshPoint.hpp */; };
 		3D84AE211654DE9800301697 /* GenericMesh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADFC1654DE9800301697 /* GenericMesh.hpp */; };
 		3D84AE221654DE9800301697 /* Mesh3dn.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADFD1654DE9800301697 /* Mesh3dn.hpp */; };
-		3D84AE231654DE9800301697 /* MatriceCreuse_tpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADFE1654DE9800301697 /* MatriceCreuse_tpl.hpp */; };
-		3D84AE241654DE9800301697 /* MatriceCreuse.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84ADFF1654DE9800301697 /* MatriceCreuse.hpp */; };
 		3D84AE251654DE9800301697 /* DOperator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE001654DE9800301697 /* DOperator.hpp */; };
 		3D84AE261654DE9800301697 /* CGNL.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE011654DE9800301697 /* CGNL.hpp */; };
 		3D84AE271654DE9800301697 /* FESpacen.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE021654DE9800301697 /* FESpacen.hpp */; };
@@ -155,6 +153,27 @@
 		3DBBD5E60C3573DA007E5F45 /* mymain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5E50C3573DA007E5F45 /* mymain.cpp */; };
 		3DBBFE9E1A654E4900E3CF4E /* write_xdmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */; };
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
+		3DC023132148071A008C76D0 /* HashMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023122148071A008C76D0 /* HashMatrix.hpp */; };
+		3DC023182148072B008C76D0 /* SparseLinearSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023142148072B008C76D0 /* SparseLinearSolver.cpp */; };
+		3DC023192148072B008C76D0 /* SolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023152148072B008C76D0 /* SolverSkyLine.hpp */; };
+		3DC0231A2148072B008C76D0 /* SparseLinearSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023162148072B008C76D0 /* SparseLinearSolver.hpp */; };
+		3DC0231B2148072B008C76D0 /* SkyLineSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023172148072B008C76D0 /* SkyLineSolver.hpp */; };
+		3DC0231E21480746008C76D0 /* CG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC0231C21480745008C76D0 /* CG.cpp */; };
+		3DC0231F21480746008C76D0 /* CG.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0231D21480746008C76D0 /* CG.hpp */; };
+		3DC023212148075C008C76D0 /* gmres.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023202148075C008C76D0 /* gmres.hpp */; };
+		3DC023342148078C008C76D0 /* SparseLinearSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */; };
+		3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023272148078A008C76D0 /* SolverSkyLine.hpp */; };
+		3DC023362148078C008C76D0 /* CG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023282148078A008C76D0 /* CG.cpp */; };
+		3DC023372148078C008C76D0 /* SkyLineSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023292148078A008C76D0 /* SkyLineSolver.hpp */; };
+		3DC023382148078C008C76D0 /* SparseLinearSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */; };
+		3DC023392148078C008C76D0 /* VirtualSolverSparseSuite.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */; };
+		3DC0233A2148078C008C76D0 /* HashMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232C2148078B008C76D0 /* HashMatrix.hpp */; };
+		3DC0233D2148078C008C76D0 /* VirtualSolverCG.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232F2148078B008C76D0 /* VirtualSolverCG.hpp */; };
+		3DC023402148078C008C76D0 /* VirtualSolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023322148078C008C76D0 /* VirtualSolverSkyLine.hpp */; };
+		3DC023412148078C008C76D0 /* CG.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023332148078C008C76D0 /* CG.hpp */; };
+		3DC0234321480D6A008C76D0 /* MatriceCreuse.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0234221480D6A008C76D0 /* MatriceCreuse.hpp */; };
+		3DC0234521480D75008C76D0 /* MatriceCreuse_tpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0234421480D75008C76D0 /* MatriceCreuse_tpl.hpp */; };
+		3DC0234721480EA8008C76D0 /* MatriceElementaire.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0234621480EA8008C76D0 /* MatriceElementaire.hpp */; };
 		3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
 		3DDEA1830DFFD92F00F54E1C /* GQuadTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */; };
 		3DDEA1870DFFD97F00F54E1C /* lgmesh3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */; };
@@ -223,8 +242,6 @@
 		3D84ADFB1654DE9800301697 /* MeshPoint.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MeshPoint.hpp; path = ../src/femlib/MeshPoint.hpp; sourceTree = "<group>"; };
 		3D84ADFC1654DE9800301697 /* GenericMesh.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GenericMesh.hpp; path = ../src/femlib/GenericMesh.hpp; sourceTree = "<group>"; };
 		3D84ADFD1654DE9800301697 /* Mesh3dn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Mesh3dn.hpp; path = ../src/femlib/Mesh3dn.hpp; sourceTree = "<group>"; };
-		3D84ADFE1654DE9800301697 /* MatriceCreuse_tpl.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MatriceCreuse_tpl.hpp; path = ../src/femlib/MatriceCreuse_tpl.hpp; sourceTree = "<group>"; };
-		3D84ADFF1654DE9800301697 /* MatriceCreuse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MatriceCreuse.hpp; path = ../src/femlib/MatriceCreuse.hpp; sourceTree = "<group>"; };
 		3D84AE001654DE9800301697 /* DOperator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DOperator.hpp; path = ../src/femlib/DOperator.hpp; sourceTree = "<group>"; };
 		3D84AE011654DE9800301697 /* CGNL.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CGNL.hpp; path = ../src/femlib/CGNL.hpp; sourceTree = "<group>"; };
 		3D84AE021654DE9800301697 /* FESpacen.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FESpacen.hpp; path = ../src/femlib/FESpacen.hpp; sourceTree = "<group>"; };
@@ -291,6 +308,27 @@
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
 		3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = write_xdmf.cpp; path = ../src/bamglib/write_xdmf.cpp; sourceTree = "<group>"; };
 		3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = write_hdf5.cpp; path = ../src/bamglib/write_hdf5.cpp; sourceTree = "<group>"; };
+		3DC023122148071A008C76D0 /* HashMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HashMatrix.hpp; path = ../src/femlib/HashMatrix.hpp; sourceTree = "<group>"; };
+		3DC023142148072B008C76D0 /* SparseLinearSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparseLinearSolver.cpp; path = ../src/femlib/SparseLinearSolver.cpp; sourceTree = "<group>"; };
+		3DC023152148072B008C76D0 /* SolverSkyLine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolverSkyLine.hpp; path = ../src/femlib/SolverSkyLine.hpp; sourceTree = "<group>"; };
+		3DC023162148072B008C76D0 /* SparseLinearSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SparseLinearSolver.hpp; path = ../src/femlib/SparseLinearSolver.hpp; sourceTree = "<group>"; };
+		3DC023172148072B008C76D0 /* SkyLineSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SkyLineSolver.hpp; path = ../src/femlib/SkyLineSolver.hpp; sourceTree = "<group>"; };
+		3DC0231C21480745008C76D0 /* CG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CG.cpp; path = ../src/femlib/CG.cpp; sourceTree = "<group>"; };
+		3DC0231D21480746008C76D0 /* CG.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CG.hpp; path = ../src/femlib/CG.hpp; sourceTree = "<group>"; };
+		3DC023202148075C008C76D0 /* gmres.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = gmres.hpp; path = ../src/femlib/gmres.hpp; sourceTree = "<group>"; };
+		3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparseLinearSolver.cpp; path = ../src/femlib/SparseLinearSolver.cpp; sourceTree = "<group>"; };
+		3DC023272148078A008C76D0 /* SolverSkyLine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolverSkyLine.hpp; path = ../src/femlib/SolverSkyLine.hpp; sourceTree = "<group>"; };
+		3DC023282148078A008C76D0 /* CG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CG.cpp; path = ../src/femlib/CG.cpp; sourceTree = "<group>"; };
+		3DC023292148078A008C76D0 /* SkyLineSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SkyLineSolver.hpp; path = ../src/femlib/SkyLineSolver.hpp; sourceTree = "<group>"; };
+		3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SparseLinearSolver.hpp; path = ../src/femlib/SparseLinearSolver.hpp; sourceTree = "<group>"; };
+		3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolverSparseSuite.hpp; path = ../src/femlib/VirtualSolverSparseSuite.hpp; sourceTree = "<group>"; };
+		3DC0232C2148078B008C76D0 /* HashMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HashMatrix.hpp; path = ../src/femlib/HashMatrix.hpp; sourceTree = "<group>"; };
+		3DC0232F2148078B008C76D0 /* VirtualSolverCG.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolverCG.hpp; path = ../src/femlib/VirtualSolverCG.hpp; sourceTree = "<group>"; };
+		3DC023322148078C008C76D0 /* VirtualSolverSkyLine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolverSkyLine.hpp; path = ../src/femlib/VirtualSolverSkyLine.hpp; sourceTree = "<group>"; };
+		3DC023332148078C008C76D0 /* CG.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CG.hpp; path = ../src/femlib/CG.hpp; sourceTree = "<group>"; };
+		3DC0234221480D6A008C76D0 /* MatriceCreuse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MatriceCreuse.hpp; path = ../src/femlib/MatriceCreuse.hpp; sourceTree = "<group>"; };
+		3DC0234421480D75008C76D0 /* MatriceCreuse_tpl.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MatriceCreuse_tpl.hpp; path = ../src/femlib/MatriceCreuse_tpl.hpp; sourceTree = "<group>"; };
+		3DC0234621480EA8008C76D0 /* MatriceElementaire.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MatriceElementaire.hpp; path = ../src/femlib/MatriceElementaire.hpp; sourceTree = "<group>"; };
 		3DC6296009723F8E00D487F6 /* Mesh2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2.cpp; path = ../src/bamglib/Mesh2.cpp; sourceTree = SOURCE_ROOT; };
 		3DC6296209723F8E00D487F6 /* MeshDraw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MeshDraw.cpp; path = ../src/bamglib/MeshDraw.cpp; sourceTree = SOURCE_ROOT; };
 		3DC6296309723F8E00D487F6 /* MeshGeom.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MeshGeom.cpp; path = ../src/bamglib/MeshGeom.cpp; sourceTree = SOURCE_ROOT; };
@@ -564,8 +602,27 @@
 				3D84ADFB1654DE9800301697 /* MeshPoint.hpp */,
 				3D84ADFC1654DE9800301697 /* GenericMesh.hpp */,
 				3D84ADFD1654DE9800301697 /* Mesh3dn.hpp */,
-				3D84ADFE1654DE9800301697 /* MatriceCreuse_tpl.hpp */,
-				3D84ADFF1654DE9800301697 /* MatriceCreuse.hpp */,
+				3DC0231C21480745008C76D0 /* CG.cpp */,
+				3DC0231D21480746008C76D0 /* CG.hpp */,
+				3DC023282148078A008C76D0 /* CG.cpp */,
+				3DC023332148078C008C76D0 /* CG.hpp */,
+				3DC0232C2148078B008C76D0 /* HashMatrix.hpp */,
+				3DC0234621480EA8008C76D0 /* MatriceElementaire.hpp */,
+				3DC0234221480D6A008C76D0 /* MatriceCreuse.hpp */,
+				3DC0234421480D75008C76D0 /* MatriceCreuse_tpl.hpp */,
+				3DC023292148078A008C76D0 /* SkyLineSolver.hpp */,
+				3DC023272148078A008C76D0 /* SolverSkyLine.hpp */,
+				3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */,
+				3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */,
+				3DC0232F2148078B008C76D0 /* VirtualSolverCG.hpp */,
+				3DC023322148078C008C76D0 /* VirtualSolverSkyLine.hpp */,
+				3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */,
+				3DC023202148075C008C76D0 /* gmres.hpp */,
+				3DC023172148072B008C76D0 /* SkyLineSolver.hpp */,
+				3DC023152148072B008C76D0 /* SolverSkyLine.hpp */,
+				3DC023142148072B008C76D0 /* SparseLinearSolver.cpp */,
+				3DC023162148072B008C76D0 /* SparseLinearSolver.hpp */,
+				3DC023122148071A008C76D0 /* HashMatrix.hpp */,
 				3D84AE001654DE9800301697 /* DOperator.hpp */,
 				3D84AE011654DE9800301697 /* CGNL.hpp */,
 				3D84AE021654DE9800301697 /* FESpacen.hpp */,
@@ -649,12 +706,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */,
+				3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */,
 				3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */,
+				3DC0233D2148078C008C76D0 /* VirtualSolverCG.hpp in Headers */,
+				3DC0234721480EA8008C76D0 /* MatriceElementaire.hpp in Headers */,
+				3DC023412148078C008C76D0 /* CG.hpp in Headers */,
 				3D84ADDF1654DAE200301697 /* ffstack.hpp in Headers */,
 				3D84ADE01654DAE200301697 /* lgsolver.hpp in Headers */,
 				3D84ADE11654DAE200301697 /* problem.hpp in Headers */,
+				3DC0231B2148072B008C76D0 /* SkyLineSolver.hpp in Headers */,
+				3DC023402148078C008C76D0 /* VirtualSolverSkyLine.hpp in Headers */,
 				3D84ADE21654DAE200301697 /* lex.hpp in Headers */,
 				3D84ADE31654DAE200301697 /* AFunction.hpp in Headers */,
+				3DC0233A2148078C008C76D0 /* HashMatrix.hpp in Headers */,
 				3D84ADE41654DAE200301697 /* InitFunct.hpp in Headers */,
 				3D84ADE51654DAE200301697 /* ffapi.hpp in Headers */,
 				3D84ADE61654DAE200301697 /* AnyType.hpp in Headers */,
@@ -662,7 +726,10 @@
 				3D84ADE81654DAE200301697 /* array_tlp.hpp in Headers */,
 				3D84ADE91654DAE200301697 /* lgfem.hpp in Headers */,
 				3D84ADEA1654DAE200301697 /* PlotStream.hpp in Headers */,
+				3DC023372148078C008C76D0 /* SkyLineSolver.hpp in Headers */,
+				3DC023192148072B008C76D0 /* SolverSkyLine.hpp in Headers */,
 				3D84ADEB1654DAE200301697 /* AFunction_ext.hpp in Headers */,
+				3DC0234321480D6A008C76D0 /* MatriceCreuse.hpp in Headers */,
 				3D84ADEC1654DAE200301697 /* ff++.hpp in Headers */,
 				3D84ADED1654DAE200301697 /* Serialize.hpp in Headers */,
 				3D84ADEF1654DAE200301697 /* array_init.hpp in Headers */,
@@ -670,6 +737,7 @@
 				3D84ADF11654DAE200301697 /* CodeAlloc.hpp in Headers */,
 				3D84ADF21654DAE200301697 /* endian.hpp in Headers */,
 				3D84ADF31654DAE200301697 /* environment.hpp in Headers */,
+				3DC023392148078C008C76D0 /* VirtualSolverSparseSuite.hpp in Headers */,
 				3D84ADF41654DAE200301697 /* error.hpp in Headers */,
 				3D6406B8195B2DD200F33E4F /* getprog-unix.hpp in Headers */,
 				3D84ADF51654DAE200301697 /* lgmesh3.hpp in Headers */,
@@ -677,12 +745,12 @@
 				3D84ADF71654DAE200301697 /* String.hpp in Headers */,
 				3D84ADF81654DAE200301697 /* strversionnumber.hpp in Headers */,
 				3D84ADF91654DAE200301697 /* throwassert.hpp in Headers */,
+				3DC023382148078C008C76D0 /* SparseLinearSolver.hpp in Headers */,
 				3D84ADFA1654DAE200301697 /* versionnumber.hpp in Headers */,
 				3D84AE201654DE9800301697 /* MeshPoint.hpp in Headers */,
 				3D84AE211654DE9800301697 /* GenericMesh.hpp in Headers */,
+				3DC0231F21480746008C76D0 /* CG.hpp in Headers */,
 				3D84AE221654DE9800301697 /* Mesh3dn.hpp in Headers */,
-				3D84AE231654DE9800301697 /* MatriceCreuse_tpl.hpp in Headers */,
-				3D84AE241654DE9800301697 /* MatriceCreuse.hpp in Headers */,
 				3D84AE251654DE9800301697 /* DOperator.hpp in Headers */,
 				3D84AE261654DE9800301697 /* CGNL.hpp in Headers */,
 				3D84AE271654DE9800301697 /* FESpacen.hpp in Headers */,
@@ -705,11 +773,15 @@
 				3D84AE3A1654DE9800301697 /* Mesh1dn.hpp in Headers */,
 				3D84AE3B1654DE9800301697 /* P3_Lagrange.hpp in Headers */,
 				3D84AE3C1654DE9800301697 /* QuadratureFormular.hpp in Headers */,
+				3DC023212148075C008C76D0 /* gmres.hpp in Headers */,
 				3D84AE3D1654DE9800301697 /* R1.hpp in Headers */,
 				3D84AE3E1654DE9800301697 /* R2.hpp in Headers */,
+				3DC0234521480D75008C76D0 /* MatriceCreuse_tpl.hpp in Headers */,
 				3D84AE3F1654DE9800301697 /* R3.hpp in Headers */,
 				3D84AE401654DE9800301697 /* RefCounter.hpp in Headers */,
+				3DC023132148071A008C76D0 /* HashMatrix.hpp in Headers */,
 				3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */,
+				3DC0231A2148072B008C76D0 /* SparseLinearSolver.hpp in Headers */,
 				3D84AE431654DEB600301697 /* ufunction.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -787,6 +859,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */,
+				3DC0231E21480746008C76D0 /* CG.cpp in Sources */,
 				3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */,
 				3D15D4910BD3A6E000CEB4C6 /* AFunction.cpp in Sources */,
 				3D15D4930BD3A6E000CEB4C6 /* AFunction2.cpp in Sources */,
@@ -801,6 +874,7 @@
 				3D15D4A50BD3A6E000CEB4C6 /* lex.cpp in Sources */,
 				3D15D4A70BD3A6E000CEB4C6 /* lgfem.cpp in Sources */,
 				3D15D4A90BD3A6E000CEB4C6 /* lgmat.cpp in Sources */,
+				3DC023342148078C008C76D0 /* SparseLinearSolver.cpp in Sources */,
 				3D15D4AA0BD3A6E000CEB4C6 /* lgmesh.cpp in Sources */,
 				3D15D4AC0BD3A6E000CEB4C6 /* load.cpp in Sources */,
 				3D15D4AD0BD3A6E000CEB4C6 /* mt19937ar.cpp in Sources */,
@@ -819,6 +893,7 @@
 				3D15D48E0BD3A6D500CEB4C6 /* SetOfE4.cpp in Sources */,
 				3D15D47D0BD3A6BF00CEB4C6 /* eigenvalue.cpp in Sources */,
 				3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */,
+				3DC023182148072B008C76D0 /* SparseLinearSolver.cpp in Sources */,
 				3D15D4710BD3A6AE00CEB4C6 /* BamgFreeFem.cpp in Sources */,
 				3D15D4720BD3A6AE00CEB4C6 /* CheckPtr.cpp in Sources */,
 				3D15D4730BD3A6AE00CEB4C6 /* Element_P2h.cpp in Sources */,
@@ -846,6 +921,7 @@
 				3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
 				3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */,
+				3DC023362148078C008C76D0 /* CG.cpp in Sources */,
 				3D79E0601A5D280C0045F64D /* P1IsoValue.cpp in Sources */,
 				3DEB5BFD14C607C100BA47D8 /* ffapi.cpp in Sources */,
 			);
@@ -919,7 +995,7 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" \"$(inherited) /usr/local/ff++/mpich/include/\" \"/usr/local/include/\"";
 				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../dowload/include\"  \"$(SRCROOT)/..\" $(inherited)";
 				VALID_ARCHS = x86_64;
 			};

@@ -15,12 +15,14 @@ public:
     
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
+    CGMatVirt<I,K> *pC;
     int verb,itermax,erronerr;
     double eps;
     SolverCG(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int itx=0)
     :A(&AA),verb(v),itermax(itx>0?itx:A->n/2),erronerr(eoe),eps(eeps)
     {
         cout << " SolverCG  " << A->n << " "<<  A->m <<" eps " << eps << " eoe " << eoe << " v " << verb << " " << itermax <<endl;
+        pC = new HMatVirtPreconDiag(A);
         assert(A->n == A->m);
     }
  
@@ -31,7 +33,7 @@ public:
                   << " v " << verb << "itsmx " << itermax <<endl;
         assert(A->n == A->m);
     }
-    
+        SolverCG() {delete pC;}
     void SetState(){}
     
     struct HMatVirt: CGMatVirt<I,K> {
@@ -49,11 +51,11 @@ public:
     {
         std::cout <<" SolverCG::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
         HMatVirt AA(A,trans);
-        HMatVirtPreconDiag CC(A);
+        //HMatVirtPreconDiag CC(A);
         int err=0;
         for(int k=0,oo=0; k<N; ++k, oo+= A->n )
         {
-            int res=ConjugueGradient(AA,CC,b+oo,x+oo,itermax,eps,verb);
+            int res=ConjugueGradient(AA,*pC,b+oo,x+oo,itermax,eps,verb);
             if ( res==0 ) err++;
         }
         if(err && erronerr) {  std::cerr << "Error: ConjugueGradient do not converge nb end ="<< err << std::endl; assert(0); }
@@ -68,12 +70,15 @@ public:
     
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
+    CGMatVirt<I,K> *pC;
     long verb,itermax,restart,erronerr;
     double eps;
     SolverGMRES(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int rrestart=50,int itx=0)
     :A(&AA),verb(v),itermax(itx>0?itx:A->n/2),restart(rrestart),
      erronerr(eoe),eps(eeps)
-    {assert(A->n == A->m);}
+    {assert(A->n == A->m);
+        pC = new HMatVirtPreconDiag(A);
+    }
 
     SolverGMRES(HMat  &AA,const Data_Sparse_Solver & ds)
     :A(&AA),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),restart(ds.NbSpace),erronerr(1),eps(ds.epsilon)
@@ -83,7 +88,7 @@ public:
         assert(A->n == A->m);
     }
 
-    
+    ~SolverGMRES() {delete pC;}
     void SetState(){}
     
     struct HMatVirt: CGMatVirt<I,K> {
@@ -99,13 +104,13 @@ public:
     };
     void dosolver(K *x,K*b,int N=0,int trans=1)
     {
-        std::cout <<" SolverCG::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
+        std::cout <<" SolverGMRES::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
         HMatVirt AA(A,trans);
-        HMatVirtPreconDiag CC(A);
+        //HMatVirtPreconDiag CC(A);
         int err=0;
         for(int k=0,oo=0; k<N; ++k, oo+= A->n )
         {
-            bool res=fgmres(AA,CC,b+oo,x+oo,eps,itermax,restart);
+            bool res=fgmres(AA,*pC,b+oo,x+oo,eps,itermax,restart);
         
             if ( ! res ) err++;
         }

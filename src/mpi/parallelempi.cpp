@@ -1346,20 +1346,20 @@ long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,
 
 // fin J. Morice
 template<class Z>
-inline uint64_t  roll64(Z y,int r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
+inline uint64_t  roll_64(Z y,int r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
 template<class R>
 uint64_t CodeIJ(const MatriceMorse<R> * pa)
 {
     
     ffassert( pa );
     uint64_t code=pa->n;
-    code ^=roll64(pa->n-pa->m,24);
+    code ^=roll_64(pa->n-pa->m,24);
     long nnz = pa->nbcoef,n =pa->n,kk=0 ;
-    code ^=roll64(nnz,48);
+    code ^=roll_64(nnz,48);
     for(long k=0; k<= n;++k)
-        code^=roll64(pa->lg[k],++kk);
+        code^=roll_64(pa->lg[k],++kk);
     for(long k=0; k< nnz;++k)
-        code^=roll64(pa->cl[k],++kk);
+        code^=roll_64(pa->cl[k],++kk);
     return code;
 }
 

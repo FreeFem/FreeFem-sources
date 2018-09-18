@@ -72,7 +72,7 @@ class OptimAlgo : public OneOperator
   typedef Param<REAL> PARAM;
   typedef KN<REAL> VECT;
   typedef KNM<REAL> MAT;
-  typedef VirtualMatrice<REAL> VMAT;
+  typedef Matrice_Creuse<R>::VMat  VMAT;
   
    const int cas;
   
@@ -135,7 +135,7 @@ class OptimAlgo : public OneOperator
 	Matrice_Creuse<R> * M=  GetAny<Matrice_Creuse<R> *>( (*hJ)(stack));
 	WhereStackOfPtr2Free(stack)->clean(); 
 	assert(M && M->A );
-	return (VirtualMatrice<R>*) M->A;}
+	return (VMAT*) M->A;}
       
     };
     

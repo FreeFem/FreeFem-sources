@@ -38,7 +38,8 @@ extern "C" {
 #include "fem.hpp"
 #include "FESpace.hpp" 
 #include "DOperator.hpp"
-#include "QuadratureFormular.hpp" 
+#include "QuadratureFormular.hpp"
+
 extern double ff_tgv;
 using  Fem2D::Mesh;
 using  Fem2D::FESpace;
@@ -56,11 +57,16 @@ using Fem2D::onWhatIsEdge;
 //#define APROGRAMMER(a) {cerr << "A PROGRAMMER "  #a << endl; exit (1) ;}
 #define ERREUR(a,b) {cerr << "ERROR " #a<< b <<endl; throw(ErrorExec("FATAL ERROR in " __FILE__  "\n" #a  " line: ",__LINE__)) ;}
 
-template <class R> class MatriceCreuse; 
+template<class TypeIndex=int,class TypeScalar=double> class VirtualMatrix;
+template<class TypeIndex,class TypeScalaire> class HashMatrix ;
+template<class K>  using MatriceCreuse=VirtualMatrix<int, K>     ;
+template<class K>  using MatriceMorse=HashMatrix<int,K>;
+
+//template <class R> class MatriceCreuse;
 template <class R> class MatriceElementaire; 
 template <class R,class FESpace> class MatriceElementaireSymetrique;
 template <class R,class FESpace> class MatriceElementairePleine;
-template <class R> class MatriceMorse;
+template <class R> class MatriceMorseOld;
 template <class R> class MatriceProdTensoriel;
 
 //template <class R> R Square(R x){ return x*x;}
@@ -91,346 +97,76 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
 
 
 
-template <class R> 
-class MatriceElementaire {
 
+template <class R>
+class MatriceCreuseOld : public RefCounter,public VirtualMatrice<R> {
 public:
-  enum TypeOfMatriceElementaire {Full=1,Symmetric=2};
-
-
-       
-  int lga;  // size of array a    
-  R* a;          // array  coef --
-  int *ni,*nj;   //  list of df   
-  // to build matrice on face or edge -----
-
-  
-  int n,m;       // n,m number of df
-  const TypeOfMatriceElementaire mtype;
-  KN<double> data; // to store value of basic function 
-
-  const bool onFace ; //  true if do int on face or edge with jump (VF or GD : Galerkin Discontinus)
-  // in with case  add ... 
-  const int lnki,lnkj; // size of the 4 next array
-  int *nik,*nikk;  //  number of df in element   k,kk for VF and GD methode 
-  int *njk,*njkk;  //  number of df in element   k,kk  for VF and GD methode
-  const int optim;
-
-  MatriceElementaire(int datasize,int llga
-                     ,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,int ooptim=1)
+    MatriceCreuseOld(int NbOfDF,int mm,int ddummy)
+    : VirtualMatrice<R>(NbOfDF,mm),n(NbOfDF),m(mm),dummy(ddummy){}
+    MatriceCreuseOld(int NbOfDF)
+    : VirtualMatrice<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
+    int n,m,dummy;
+    virtual int size() const =0;
     
-    :   lga(llga),a(new R[lga]),
-        ni(nni),nj(nnj),n(0),m(0),mtype(t),data(datasize),
-        onFace(false),lnki(0),lnkj(0),nik(0),nikk(0),njk(0),njkk(0),optim(ooptim)
-        {}
-       
-
- //  for discontinous Galerkine method
-  MatriceElementaire(int datasize,int llga,int *nni,
-                     int lk,
-                     TypeOfMatriceElementaire t=Symmetric, int ooptim=1
-                     ) 
-    :
-    lga(llga),a(new R[lga]),
-    ni(nni),nj(nni),n(0),m(0),mtype(t),data(datasize*(lk?2:1)) ,
-       onFace(lk!=0),
-       lnki(lk),lnkj(lk),
-       nik(lk? new int[lk*2]:0),
-       nikk(nik+lk),
-       njk(nik),
-       njkk(nik+lk),
-        optim(ooptim)
-       { ffassert(lk>=0);}
-
-    //  for discontinous Galerkine method
-    MatriceElementaire(int datasize,int llga,int *nni,int lki,int *nnj,int lkj,
-                       TypeOfMatriceElementaire t=Full,int ooptim=1
-                       )
-    :
-    lga(llga),a(new R[lga]),
-    ni(nni),nj(nnj),n(0),m(0),mtype(t),data(datasize*(lki+lkj?2:1)) ,
-    onFace(lki+lkj),
-    lnki(lki),lnkj(lkj),
-    nik(lki? new int[lki*2]:0),
-    nikk(nik+lki),
-    njk(lkj? new int[lkj*2]:0),
-    njkk(njk+lkj),
-    optim(ooptim)
-    {  ffassert(lki>=0);}// non teste ??? .... F. hecht ...
-
-  virtual ~MatriceElementaire() {
-    if(ni != nj) 
-      delete [] nj;
-         
-    delete [] ni;
-    delete [] a;
-    if ( nik) delete[] nik;
-     }
-      
-  virtual R & operator() (int i,int j) =0;
-    virtual void call(int ,int ie,int label,void * data,void *Q=0) =0;  //
-  const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
-  
-  MatriceElementaire & operator()(int k,int ie,int label,void * s=0,void *B=0) {
-    call(k,ie,label,s,B);
-    return *this;}
-};
-
-template <class FES> 
-class MatDataFES { 
-public:
-  typedef FES FESpace;
-  typedef typename FESpace::FElement FElement;
-
-  typedef typename  FESpace::QFElement QFElement; 
-  typedef typename  FESpace::QFBorderElement QFBorderElement; 
-  CountPointer<const FESpace> cUh,cVh;
-  const FESpace &Uh;
-  const FESpace &Vh;
-  const QFElement & FIT;
-  const QFBorderElement & FIE;
-  MatDataFES(const FESpace & UUh,const QFElement & fit, const QFBorderElement & fie)
-    :Uh(UUh),Vh(UUh),FIT(fit),FIE(fie) {}
-  MatDataFES(const FESpace & UUh,const FESpace & VVh,const QFElement & fit, const QFBorderElement & fie)
-    :Uh(UUh),Vh(VVh),FIT(fit),FIE(fie) {}
+    virtual MatriceCreuseOld & operator +=(MatriceElementaire<R> & )=0;
+    virtual void operator=(const R & v) =0; // Mise a zero
+    KN_<R> & MatMul(KN_<R> &ax,const KN_<R> &x) const {
+        ax= R();
+        addMatMul(x,ax);
+        return ax;}
+    virtual ostream& dump (ostream&)  const =0;
+    virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
+    virtual void SolveT(KN_<R> & x,const KN_<R> & b) const {  ERREUR(SolveT, "No Solver of A^t in this matrix type ???"); }
+    virtual ~MatriceCreuseOld(){}
+    virtual R & diag(int i)=0;
+    virtual void SetBC(int i,double tgv)=0;
+    virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<n; ++i)  if(wbc[i]) SetBC(i,tgv);}
+    virtual R & operator()(int i,int j)=0;
+    virtual R * pij(int i,int j) const =0; // Add FH
+    virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuseOld::resize");}  // a faire dans les classe derive ... // add march 2009  FH
+    virtual MatriceMorseOld<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not
+    virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
+    // Add FH april 2005
+    virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire
+    virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
+    virtual void setdiag(const KN_<R> & x)=0 ;
+    virtual void getdiag( KN_<R> & x) const =0 ;
+    // end add
+    virtual int NbCoef() const {return 0;};
+    virtual void setcoef(const KN_<R> & x)=0 ;
+    virtual void getcoef( KN_<R> & x) const =0 ;
+    // Add FH oct 2005
+    bool ChecknbLine(int nn) const { return n==nn;}
+    bool ChecknbColumn(int mm) const { return m==mm;}
+    virtual R trace() const {ffassert(n==m);  R t=R(), *p;  for(int i=0; i<n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
+    // end ADD
+    virtual bool sym() const {return false;}
     
-
-};
-
-template <class R,class FES> 
-class MatriceElementaireFES :   public MatDataFES<FES> ,   public MatriceElementaire<R> 
-{  
-public:
-  typedef MatriceElementaire<R> MElm ;
-  using MElm::Full;
-  using MElm::Symmetric;
-
-  typedef typename MElm::TypeOfMatriceElementaire TypeOfMatriceElementaire;
-  typedef FES FESpace;
-
-  typedef typename  FESpace::FElement FElement; 
-  typedef typename  FESpace::QFElement QFElement; 
-  typedef typename  FESpace::QFBorderElement QFBorderElement; 
-
-  MatriceElementaireFES(const FESpace & UUh,const FESpace & VVh,int llga
-			,int *nnj,int * nni,TypeOfMatriceElementaire t=Full,
-			const QFElement & fit=*QFElement::Default,
-			const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-                     
-    :
-    MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,nni,t,optim)
-  {}
-       
-  MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
-			TypeOfMatriceElementaire t=Symmetric,
-			const QFElement & fit=*QFElement::Default,
-			const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    :
-    MatDataFES<FES>(UUh,UUh,fit,fie),
-    MatriceElementaire<R>(UUh.esize(),llga,nni,nni,t,optim)
-  {}
-
-  //  for discontinous Galerkine method
-  MatriceElementaireFES(const FESpace & UUh,int llga,int *nni,
-			int lk,
-			TypeOfMatriceElementaire t=Symmetric,
-			const QFElement & fit=*QFElement::Default,
-			const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    :
-    MatDataFES<FES>(UUh,UUh,fit,fie),
-    MatriceElementaire<R>(UUh.esize(),llga,nni,lk,t,optim)
-  {}
-    
-    MatriceElementaireFES(const FESpace & UUh,const FESpace & VVh,int llga
-                          ,int *nnj,int lkj,int * nni,int lki,TypeOfMatriceElementaire t=Full,
-                          const QFElement & fit=*QFElement::Default,
-                          const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    
-    :
-    MatDataFES<FES>(UUh,VVh,fit,fie),
-    MatriceElementaire<R>(UUh.esize()+VVh.esize(),llga,nnj,lkj,nni,lki,t,optim)
-    {}
-    
-  ~MatriceElementaireFES() {}
-  const LinearComb<pair<MGauche,MDroit>,C_F0> * bilinearform;
-  
-  MatriceElementaireFES & operator()(int k,int ie,int label,void * s=0,void *Q=0) {
-    this->call(k,ie,label,s,Q);
-    return *this;}
-};
-
-template <class R,class FES=FESpace> 
-class MatriceElementairePleine:public MatriceElementaireFES<R,FES> {
-
-  /* --- stockage --
-     //  n = 4 m = 5
-     //  0  1  2  3  4
-     //  5  6  7  8  9
-     // 10 11 12 13 14
-     // 15 16 17 18 19
-     ------------------*/
-public:
-  typedef FES FESpace;
-  typedef typename  FESpace::Mesh Mesh;
-  typedef typename  FESpace::QFElement QFElement;
-  typedef typename  FESpace::QFBorderElement QFBorderElement;
-  typedef typename  FESpace::FElement FElement;
-  typedef typename  FESpace::Mesh::Rd Rd;
-    
-
-  R & operator() (int i,int j) {return this->a[i*this->m+j];}
-  // MatPleineElementFunc element;
-  void  (* element)(MatriceElementairePleine &,const FElement &,const FElement &, double*,int ie,int label,void *,Rd *) ;
-  void  (* faceelement)(MatriceElementairePleine &,const FElement &,const FElement &,const FElement &,const FElement &, double*,int ie,int iee, int label,void *,Rd *) ;
-    void call(int k,int ie,int label,void *,void *B);
-  
-  MatriceElementairePleine & operator()(int k,int ie,int label,void * stack=0,Rd *Q=0)
-  {call(k,ie,label,stack,Q);return *this;}
-  MatriceElementairePleine(const FESpace & VVh,
-                           const QFElement & fit=*QFElement::Default,
-                           const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    :MatriceElementaireFES<R,FES>(VVh,
-			Square(VVh.MaximalNbOfDF()),
-			new int[VVh.MaximalNbOfDF()],this->Full,fit,fie,optim),
-    element(0),faceelement(0) {}
- 
-   //  matrice for VF or Galerkin Discontinus
-   MatriceElementairePleine(const FESpace & VVh,bool VF,
-                           const QFElement & fit=*QFElement::Default,
-                           const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-     :MatriceElementaireFES<R,FES>(VVh,
-			Square(VVh.MaximalNbOfDF()*2),
-			new int[VVh.MaximalNbOfDF()*2],
-			VF?VVh.MaximalNbOfDF()*2:0,
-                                   this->Full,fit,fie,optim),
-    element(0),faceelement(0) {}
-
-  MatriceElementairePleine(const FESpace & UUh,const FESpace & VVh,
-                               const QFElement & fit=*QFElement::Default,
-                               const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    :MatriceElementaireFES<R,FES>(UUh,VVh,
-				  UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF(),
-				  new int[UUh.MaximalNbOfDF()],
-				  new int[VVh.MaximalNbOfDF()],this->Full,fit,fie,optim),
-     element(0),faceelement(0) {}
-
-    MatriceElementairePleine(const FESpace & UUh,const FESpace & VVh,bool VF,
-                             const QFElement & fit=*QFElement::Default,
-                             const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    :MatriceElementaireFES<R,FES>(UUh,VVh,
-                                  UUh.MaximalNbOfDF()*VVh.MaximalNbOfDF()*4,
-                                  new int[UUh.MaximalNbOfDF()*2],VF?UUh.MaximalNbOfDF()*2:0,
-                                  new int[VVh.MaximalNbOfDF()*2],VF?VVh.MaximalNbOfDF()*2:0,this->Full,fit,fie,optim),
-    element(0),faceelement(0) {}
-
-}; 
-
-template <class R,class FES=FESpace> 
-class MatriceElementaireSymetrique:public MatriceElementaireFES<R,FES> {
-
-
-
-  // --- stockage --
-  //   0
-  //   1 2
-  //   3 4 5
-  //   6 7 8 9
-  //  10 . . . .
-  //
-
-public:
-  typedef FES FESpace;
-  typedef typename  FESpace::Mesh Mesh;
-  typedef typename  FESpace::QFElement QFElement;
-  typedef typename  FESpace::QFBorderElement QFBorderElement;
-  typedef typename  FESpace::FElement FElement; 
-  typedef typename  FESpace::Mesh::Rd Rd;
-  R & operator()(int i,int j) 
-  {return j < i ? this->a[(i*(i+1))/2 + j] : this->a[(j*(j+1))/2 + i] ;}
-  void (* element)(MatriceElementaireSymetrique &,const FElement &, double*,int ie,int label,void *,Rd *) ;
-  void (* mortar)(MatriceElementaireSymetrique &,const FMortar &,void *) ;
-  void call(int k,int ie,int label,void * stack,void *B);
-  MatriceElementaireSymetrique(const FESpace & VVh,
-                               const QFElement & fit=*QFElement::Default,
-                               const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
-    :MatriceElementaireFES<R,FES>(
-           VVh,
-	   int(VVh.MaximalNbOfDF()*(VVh.MaximalNbOfDF()+1)/2),
-	   new int[VVh.MaximalNbOfDF()],this->Symmetric,
-       fit,fie,optim),
-       element(0),mortar(0) {}
-  MatriceElementaireSymetrique & operator()(int k,int ie,int label,void * stack=0,Rd *B=0)
-  {this->call(k,ie,label,stack,B);return *this;};
 };
 
 
+template <typename Z,typename R> class  VirtualMatrix;
+template <typename Z,typename R>  class HashMatrix;
+#include "SparseLinearSolver.hpp"
+
+#ifdef REMOVE_CODE_OBSO
 template <class R>  class MatriceProfile;
-
-//  classe modele pour matrice creuse
-//  ---------------------------------
 template <class R> 
-class MatriceCreuse : public RefCounter,public VirtualMatrice<R> {
-public:
-  MatriceCreuse(int NbOfDF,int mm,int ddummy)
-         : VirtualMatrice<R>(NbOfDF,mm),n(NbOfDF),m(mm),dummy(ddummy){}
-  MatriceCreuse(int NbOfDF)
-         : VirtualMatrice<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
-  int n,m,dummy;
-  virtual int size() const =0;
-
-  virtual MatriceCreuse & operator +=(MatriceElementaire<R> & )=0;
-  virtual void operator=(const R & v) =0; // Mise a zero 
-  KN_<R> & MatMul(KN_<R> &ax,const KN_<R> &x) const { 
-    ax= R();
-    addMatMul(x,ax);
-    return ax;}
-  virtual ostream& dump (ostream&)  const =0;
-  virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
-  virtual void SolveT(KN_<R> & x,const KN_<R> & b) const {  ERREUR(SolveT, "No Solver of A^t in this matrix type ???"); }
-  virtual ~MatriceCreuse(){}
-  virtual R & diag(int i)=0;
-  virtual void SetBC(int i,double tgv)=0;
-  virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<n; ++i)  if(wbc[i]) SetBC(i,tgv);}
-  virtual R & operator()(int i,int j)=0;
-  virtual R * pij(int i,int j) const =0; // Add FH 
-  virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
-  virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
-  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
-  // Add FH april 2005
-  virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
-  virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
-  virtual void setdiag(const KN_<R> & x)=0 ;
-  virtual void getdiag( KN_<R> & x) const =0 ;
-  // end add
-  virtual int NbCoef() const {return 0;};
-  virtual void setcoef(const KN_<R> & x)=0 ;
-  virtual void getcoef( KN_<R> & x) const =0 ;
-  // Add FH oct 2005
-   bool ChecknbLine(int nn) const { return n==nn;}  
-   bool ChecknbColumn(int mm) const { return m==mm;}
-   virtual R trace() const {ffassert(n==m);  R t=R(), *p;  for(int i=0; i<n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
-  // end ADD
-  virtual bool sym() const {return false;}
-
-};
-
-template <class R> 
-inline ostream& operator <<(ostream& f,const MatriceCreuse<R> & m) 
+inline ostream& operator <<(ostream& f,const MatriceCreuseOld<R> & m)
     {return m.dump(f);}
 
 template <class R> 
 KN_<R> & operator/=(KN_<R> & x ,const MatriceProfile<R> & a) ;
 
-
+/*
 enum FactorizationType {
     FactorizationNO=0,
     FactorizationCholeski=1,
     FactorizationCrout=2,
     FactorizationLU=3};
-
+*/
 template <class R> 
-class MatriceProfile:public MatriceCreuse<R> {
+class MatriceProfile:public MatriceCreuseOld<R> {
 public:
   mutable R *L;  // lower 
   mutable R *U;  // upper
@@ -448,7 +184,7 @@ public:
 		 R* u, int * pu,
 		 R* l, int * pl,
 		 FactorizationType tf=FactorizationNO) 
-    : MatriceCreuse<R>(NbOfDF),L(l),U(u),D(d),pL(pl),pU(pu),
+    : MatriceCreuseOld<R>(NbOfDF),L(l),U(u),D(d),pL(pl),pU(pu),
       typefac(tf),typesolver(FactorizationNO){}
 
   const MatriceProfile t() const   
@@ -509,7 +245,7 @@ public:
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
   void addMatTransMul(const KN_<R> &x,KN_<R> &ax) const ;
   //  { this->t().addMatMul(x,ax);}
-  MatriceCreuse<R> & operator +=(MatriceElementaire<R> &);
+  MatriceCreuseOld<R> & operator +=(MatriceElementaire<R> &);
   void operator=(const R & v); // Mise a zero 
   void cholesky(double = EPSILON/8.) const ; //
   void crout(double = EPSILON/8.) const ; //
@@ -522,7 +258,7 @@ public:
     
   R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
   R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
-  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
+  MatriceMorseOld<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
   
   template<class F> void map(const  F & f)
   {
@@ -537,7 +273,7 @@ public:
   }
   
   template<class RR> MatriceProfile(const MatriceProfile<RR> & A)
-    : MatriceCreuse<R>(A.n,A.m,0)
+    : MatriceCreuseOld<R>(A.n,A.m,0)
   {
     
     typefac=A.typefac;
@@ -582,9 +318,9 @@ public:
 };
 
 
-                                          
+
 template <class R> 
-class MatriceMorse:public MatriceCreuse<R> {
+class MatriceMorseOld:public MatriceCreuseOld<R> {
 //  numebering  is no-symmetric
 //  the all line  i :  
 //     k=   lg[i] .. lg[i+1]+1
@@ -606,36 +342,36 @@ public:
 
     
  class VirtualSolver :public RefCounter { 
-   friend class MatriceMorse;
-   virtual void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
-     virtual void SolverT(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {ExecError("No Solver of Transpose matrix");};
+   friend class MatriceMorseOld;
+   virtual void Solver(const MatriceMorseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  =0;
+     virtual void SolverT(const MatriceMorseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {ExecError("No Solver of Transpose matrix");};
 };
 
-  MatriceMorse():MatriceCreuse<R>(0),nbcoef(0),symetrique(true),a(0),lg(0),cl(0),solver(0) {};
-  MatriceMorse(KNM_<R> & A, double tol) ;
-  MatriceMorse(const int  n,const R *a);
-//    :MatriceCreuse<R>(n),solver(0) {}
-  MatriceMorse(istream & f);
+  MatriceMorseOld():MatriceCreuseOld<R>(0),nbcoef(0),symetrique(true),a(0),lg(0),cl(0),solver(0) {};
+  MatriceMorseOld(KNM_<R> & A, double tol) ;
+  MatriceMorseOld(const int  n,const R *a);
+//    :MatriceCreuseOld<R>(n),solver(0) {}
+  MatriceMorseOld(istream & f);
 
   template<class FESpace>   explicit 
-  MatriceMorse(const FESpace & Uh,bool sym,bool VF=false)
-    :MatriceCreuse<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
+  MatriceMorseOld(const FESpace & Uh,bool sym,bool VF=false)
+    :MatriceCreuseOld<R>(Uh.NbOfDF),solver(0) {Build(Uh,Uh,sym,VF);}
 
   template<class FESpace>   explicit 
-  MatriceMorse(const FESpace & Uh,const FESpace & Vh,bool VF=false)
-    :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
+  MatriceMorseOld(const FESpace & Uh,const FESpace & Vh,bool VF=false)
+    :MatriceCreuseOld<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0)
   {Build(Uh,Vh,false,VF);}
 
   template<class FESpace>   explicit 
-  MatriceMorse(const FESpace & Uh,const FESpace & Vh,
-               void (*build)(MatriceMorse *,const FESpace & Uh,const FESpace & Vh,void *data),void *data=0
+  MatriceMorseOld(const FESpace & Uh,const FESpace & Vh,
+               void (*build)(MatriceMorseOld *,const FESpace & Uh,const FESpace & Vh,void *data),void *data=0
 	       )
-    :MatriceCreuse<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0) 
+    :MatriceCreuseOld<R>(Uh.NbOfDF,Vh.NbOfDF,0),solver(0)
   {build(this,Uh,Vh,data);           
   }
  
-MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=false, const VirtualSolver * s=0,bool transpose=false )
-    :MatriceCreuse<R>(nn,mm,dd && !transpose),
+MatriceMorseOld(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=false, const VirtualSolver * s=0,bool transpose=false )
+    :MatriceCreuseOld<R>(nn,mm,dd && !transpose),
      nbcoef(nbc),
      symetrique(sym), // transpose = true => dummy false (new matrix)
      a(docpyornot(this->dummy,aa,nbc)),
@@ -648,15 +384,15 @@ MatriceMorse(int nn,int mm,int nbc,bool sym,R *aa=0,int *ll=0,int *cc=0,bool dd=
   int size() const ;
   void addMatMul(const KN_<R> &x,KN_<R> &ax) const;
   void addMatTransMul(const KN_<R> &x,KN_<R> &ax) const;
-  MatriceMorse & operator +=(MatriceElementaire<R> &);
+  MatriceMorseOld & operator +=(MatriceElementaire<R> &);
   void operator=(const R & v) 
     { for (int i=0;i< nbcoef;i++) a[i]=v;}
-  virtual ~MatriceMorse(){ if (!this->dummy) { delete [] a; delete [] cl;delete [] lg;}}
+  virtual ~MatriceMorseOld(){ if (!this->dummy) { delete [] a; delete [] cl;delete [] lg;}}
   ostream&  dump(ostream & f) const ;
   R * pij(int i,int j) const ;
-  R  operator()(int i,int j) const {R * p= pij(i,j) ;throwassert(p); return *p;}
-  R & operator()(int i,int j)  {R * p= pij(i,j) ;throwassert(p); return *p;}
-  R & diag(int i)  {R * p= pij(i,i) ;throwassert(p); return *p;}
+  R  operator()(int ii,int jj) const {R * p= pij(ii,jj) ;throwassert(p); return *p;}
+  R & operator()(int ii,int jj)  {R * p= pij(ii,jj) ;throwassert(p); return *p;}
+  R & diag(int ii)  {R * p= pij(ii,ii) ;throwassert(p); return *p;}
     R trace() const {ffassert(this->n==this->m);  R t=R(),*p;  for(int i=0; i<this->n; ++i) {p=pij(i,i) ;if(p) t+= *p; } return t; }
   void SetBC (int i,double tgv) {
 	R * p= pij(i,i) ;
@@ -716,33 +452,33 @@ void SetBC (char * wbc,double tgv)
   // end add
 void  resize(int n,int m) ; // add march 2009 ...
 template<class K>
-  MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym);
+  MatriceMorseOld(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym);
   
  template<class RB,class RAB>
- void  prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB);
+ void  prod(const MatriceMorseOld<RB> & B, MatriceMorseOld<RAB> & AB);
  
- MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
-     return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
+ MatriceMorseOld<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
+     return new MatriceMorseOld(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
   bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false);
   
   template<typename RR,typename K> static  RR CastTo(K  b){return b;}
                                                   
   template<class K>
-    MatriceMorse(const MatriceMorse<K> & , R (*f)(K) );
+    MatriceMorseOld(const MatriceMorseOld<K> & , R (*f)(K) );
   template<class K>
-    MatriceMorse(const MatriceMorse<K> & );
+    MatriceMorseOld(const MatriceMorseOld<K> & );
 
   private:
   void dotransposition ()  ;  // do the transposition 
   CountPointer<const VirtualSolver> solver;
   
-  void operator=(const MatriceMorse & );
+  void operator=(const MatriceMorseOld & );
 
   template<class FESpace>
   void  Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF=false);
   
 };
-
+#endif
 
 template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){cout << " Stop !!!!!\n"; return false;} };
 template<class R,class M,class P,class S >// S=StopGC<Real>
@@ -928,6 +664,8 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 };
 
+#ifdef REMOVE_CODE
+#define VDATASPARSESOLVER  1
 struct TypeSolveMat {
     enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6, SparseSolverSym=7 };
     TSolveMat t;
@@ -946,8 +684,10 @@ template<class K,class V> class MyMap;
 class String; 
 typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi
 //  to build 
-#define VDATASPARSESOLVER  1
+
 int Data_Sparse_Solver_version() ; //{ return VDATASPARSESOLVER;}
+
+
 struct Data_Sparse_Solver {
   bool initmat;
   TypeSolveMat* typemat;
@@ -1036,31 +776,24 @@ struct Data_Sparse_Solver {
 private:
     Data_Sparse_Solver(const Data_Sparse_Solver& ); // pas de copie 
 };
+#endif
 
 // add Sep 2007 for generic Space solver
-#define DCL_ARG_SPARSE_SOLVER(T,A)  Stack stack,const MatriceMorse<T> *A, Data_Sparse_Solver & ds
+#define DCL_ARG_SPARSE_SOLVER(T,A)  Stack stack, MatriceMorse<T> *A, Data_Sparse_Solver & ds
 #define ARG_SPARSE_SOLVER(A) stack,A, ds					
 
-typedef MatriceMorse<double>::VirtualSolver *
-(*SparseRMatSolve)(DCL_ARG_SPARSE_SOLVER(double,A) );
-
-
-typedef MatriceMorse<Complex>::VirtualSolver *
-(*SparseCMatSolve)(DCL_ARG_SPARSE_SOLVER(Complex,A) );
+template<class K>  using VirtualSolverN=typename VirtualMatrix<int,K>::VSolver;
+typedef VirtualSolverN<double>  * (*SparseRMatSolve)(DCL_ARG_SPARSE_SOLVER(double,A) );
+typedef VirtualSolverN<Complex> * (*SparseCMatSolve)(DCL_ARG_SPARSE_SOLVER(Complex,A) );
 
 
 template<class R> struct DefSparseSolver {
-  typedef typename MatriceMorse<R>::VirtualSolver * 
+  typedef VirtualSolverN<R>  *
   (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
-
   static SparseMatSolver solver;
-    
-  static  typename MatriceMorse<R>::VirtualSolver * 
-
-  Build( DCL_ARG_SPARSE_SOLVER(R,A) )
-    
+  static   VirtualSolverN<R> * Build( DCL_ARG_SPARSE_SOLVER(R,A) )
   {
-    typename MatriceMorse<R>::VirtualSolver *ret=0;
+     VirtualSolverN<R> *ret=0;
     if(solver)
       ret =(solver)(ARG_SPARSE_SOLVER(A));
     return ret;	
@@ -1069,17 +802,17 @@ template<class R> struct DefSparseSolver {
 
 // add Dec 2012 F.H. for optimisation .. 
 template<class R> struct DefSparseSolverSym {
-    typedef typename MatriceMorse<R>::VirtualSolver *
+    typedef VirtualSolverN<R>  *
     (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
     
     static SparseMatSolver solver;
     
-    static  typename MatriceMorse<R>::VirtualSolver *
+    static  VirtualSolverN<R>  *
     
     Build( DCL_ARG_SPARSE_SOLVER(R,A) )
     
     {
-        typename MatriceMorse<R>::VirtualSolver *ret=0;
+        VirtualSolverN<R>  *ret=0;
         if(solver)
             ret =(solver)(ARG_SPARSE_SOLVER(A));
         return ret;	

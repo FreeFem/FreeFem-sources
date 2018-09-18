@@ -80,7 +80,8 @@ public:
     typedef size_t iterator;
     typedef size_t Hash;
     typedef pair<size_t,size_t> Pair;
-    size_t nnz,nnzmax,nhash,nbcollision,nbfind;
+    size_t nnz,nnzmax,nhash;
+    mutable size_t nbcollision,nbfind;
     I * i,*j;
     I *p;
     R * aij;
@@ -104,9 +105,9 @@ public:
     I * lg;
     I * cl;
 
-    int NbCoef() const {return  nnz;}
+    I NbCoef() const {return  nnz;}
     void setcoef(const KN_<R> & x){ffassert(x.N()==nnz);KN_<R>(this->aij,nnz) = x;}
-    void getcoef( KN_<R> & x){ffassert(x.N()==nnz);x =KN_<R>(this->aij,nnz);}
+    void getcoef( KN_<R> & x) const {ffassert(x.N()==nnz);x =KN_<R>(this->aij,nnz);}
     
     void setdiag(const KN_<R> & d)
     {
@@ -273,7 +274,7 @@ public:
         }
     }
     
-    Hash hash(size_t ii,size_t jj)
+    Hash hash(size_t ii,size_t jj) const
     {
        // if(trans) swap(ii,jj);
         return ( (ii-fortran)+ (jj-fortran)*this->n )%nhash;
@@ -301,12 +302,12 @@ public:
         return ;
     }
     
-    size_t find(size_t ii,size_t jj)
+    size_t find(size_t ii,size_t jj) const
     {
         return find(ii,jj, hash(ii,jj));
     }
     
-    size_t  find(I ii,I jj,Hash h)
+    size_t  find(I ii,I jj,Hash h) const
     {
        // if(trans) swap(ii,jj);
         nbfind++;
@@ -529,7 +530,7 @@ public:
             aij[k] *= v;
         
     }
-    void operator=(R v)
+    void operator=(const R & v)
     {
         re_do_numerics=1;
         for(int k=0; k < nnz; ++k)
@@ -843,28 +844,26 @@ public:
                     }
             }
             else  if( wbc[ii] ) { // tgv >= 0
-                operator()(i,i)=tgv;
+                operator()(ii,ii)=tgv;
             }
 
     }
-
-    bool  addMatTo(R coef,map<I,R> & A,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)
+ bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)
     {
         
         ffassert(0); // to do ..
     }
     
     VirtualMatrix<I,R>  & operator +=(MatriceElementaire<R> & ){ ffassert(0); };
-     void operator=(const R & v) =0; // Mise a zero
+  // virtual   void operator=(const R & v) =0; // Mise a zero
      ostream& dump (ostream&f)  const { return f<<*this;}
-    void SetBC(int i,double tgv) { diag(i)=tgv;};
+    void SetBC(I ii,double tgv) { diag(ii)=tgv;};
      HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not
-     bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
+//    virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
     
     
 };
-
 
 // END OF CLASS HashMatrix
 template<class I,class R>

@@ -30,7 +30,7 @@
 extern Block *currentblock;
 
 template<class K> class Matrice_Creuse;
-template<class K> class MatriceCreuse;
+//template<class K> class MatriceCreuse;
 namespace  Fem2D {
   template<class K> class SolveGCPrecon;
   template<class K> class SolveGMRESPrecon;
@@ -896,13 +896,15 @@ public:
 
 
 
-template<class K> class Matrice_Creuse  {
-  //  CountPointer<FESpace> Uh,Vh;
-  //pfes  *pUh,*pVh; // pointeur sur la variable stockant FESpace;  
+template<class K> class Matrice_Creuse
+{
 public:
-  UniqueffId Uh,Vh; // pour la reconstruction 
-  //  const void * pUh,pVh; //  pointeur pour la reconstruction 
-  CountPointer<MatriceCreuse<K> > A;  
+  UniqueffId Uh,Vh; // pour la reconstruction
+    // MatriceCreuse<K> == VirtualMatrix<int,K>
+ typedef  VirtualMatrix<int,K> VMat;
+
+ CountPointer<MatriceCreuse<K> > A;
+ 
   TypeSolveMat typemat;
     size_t count;
   void init() {
@@ -1125,6 +1127,18 @@ struct FF_L_args {
             AssembleBC<K,FESpace>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,0,l->largs,tgv);
     }
 };
+template<class R=double>
+struct CGMatVirtPreco : CGMatVirt<int,R>
+{
+    int n;
+    MatriceMorse<R> *A;
+    CGMatVirtPreco(Stack stack,const OneOperator* pprecon,MatriceMorse<R> *HA);
+     R * addmatmul(R *x,R *Ax)
+    {
+        
+    }
+};
+
 template<class R>
 void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds) 
 	       /*Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,
@@ -1136,15 +1150,19 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
 { 
   using namespace Fem2D;
   const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
+   typename  VirtualMatrix<int,R>::VSolver * solver=0;
+    MatriceMorse<R> & AH(dynamic_cast<MatriceMorse<R> &>(A));
+    ffassert(&AH);
+
   if (ds.typemat->profile)
     {
-      MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-      ffassert(&AA);
+     // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
+
       switch (ds.typemat->t) {
         
-      case TypeSolveMat::LU       : AA.typesolver=FactorizationLU; break;
-      case TypeSolveMat::CROUT    : AA.typesolver=FactorizationCrout; break;
-      case TypeSolveMat::CHOLESKY :  AA.typesolver=FactorizationCholeski; break;
+      case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds);  break;
+      case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds); ; break;
+      case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds); ; break;
       default:
         cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
         CompileError("type resolution unknown"); break;       
@@ -1152,6 +1170,26 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
     }
   else 
     {
+        switch (ds.typemat->t) {
+            case    TypeSolveMat::GC:
+                solver=NewVSolver<int,R>(AH,"CG",ds);
+                break;
+            case TypeSolveMat::GMRES :
+                //        InternalError("GMRES solveur to do");
+                solver=NewVSolver<int,R>(AH,"GMRES",ds);
+                
+            case TypeSolveMat::SparseSolver :
+                solver=NewVSolver<int,R>(AH,"UMFPACK",ds);
+                //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
+                break;
+            default:
+                if (verbosity >5)
+                    cout << "  SetSolver:: no  default solver " << ds.typemat << endl;
+                 CompileError("type resolution unknown"); break;
+        }
+    
+    }
+      /*
       typedef typename MatriceMorse<R>::VirtualSolver VirtualSolver;
       if(verbosity>5) cout << " Morse matrix GC Precond diag" << endl;
       MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
@@ -1190,8 +1228,12 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
         // cerr << " type resolution " << ds.typemat->t << endl;
         //  CompileError("type resolution inconnue"); break;       
       }
-      
-    }
+       */
+      if(solver)
+        A.SetSolver(solver,true);
+    else
+        CompileError("SetSolver: type resolution unknown");
+
 }
 
 template<class R,class v_fes>
@@ -1219,70 +1261,19 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
  // bool factorize=false;
   Data_Sparse_Solver ds;
   ds.factorize=false;
-  /*
-    long NbSpace = 50; 
-  long itmax=0; 
-  double epsilon=1e-6;
-  double tgv = ff_tgv;
-  int strategy=0;
-  double tol_pivot=-1;
-  double tol_pivot_sym=-1;
 
-  KN<int> param_int;
-  KN<double> param_double; 
-  string *param_char = NULL;
-  KN<int> perm_r; 
-  KN<int> perm_c;
-  string *file_param_int;  // Add J. Morice 02/09 
-  string *file_param_double; 
-  string* file_param_char;
-  string* file_param_perm_r;
-  string* file_param_perm_c;  
-*/
   TypeSolveMat tmat=  (  PUh == PVh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
   ds.typemat=&tmat;
   ds.initmat=true;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
-  /*  
-  if (b->nargs[0]) initmat= ! GetAny<bool>((*b->nargs[0])(stack));
-  if (b->nargs[1]) typemat= *GetAny<TypeSolveMat *>((*b->nargs[1])(stack));
-  if (b->nargs[2]) ds.epsilon= GetAny<double>((*b->nargs[2])(stack));
-  if (b->nargs[4]) ds.NbSpace= GetAny<long>((*b->nargs[4])(stack));
-  if (b->nargs[6]) ds.tgv= GetAny<double>((*b->nargs[6])(stack));
-  if (b->nargs[7]) factorize= GetAny<bool>((*b->nargs[7])(stack));
-  if (b->nargs[8]) ds.strategy= GetAny<long>((*b->nargs[8])(stack));
-  if (b->nargs[9]) ds.tol_pivot= GetAny<double>((*b->nargs[9])(stack));
-  if (b->nargs[10]) ds.tol_pivot_sym= GetAny<double>((*b->nargs[10])(stack));
-  if (b->nargs[11]) ds.itmax= GetAny<long>((*b->nargs[11])(stack));
 
-  if (b->nargs[12]) ds.param_int= GetAny< KN<int> >((*b->nargs[12])(stack));  // Add J. Morice 02/09 
-  if (b->nargs[13]) ds.param_double= GetAny< KN<double> >((*b->nargs[13])(stack));
-  if (b->nargs[14]) ds.param_char= GetAny< string * >((*b->nargs[14])(stack));  //
-  if (b->nargs[15]) ds.perm_r = GetAny< KN< int > >((*b->nargs[15])(stack));
-  if (b->nargs[16]) ds.perm_c = GetAny< KN< int > >((*b->nargs[16])(stack));  //
-  if (b->nargs[17]) ds.file_param_int= GetAny< string* >((*b->nargs[17])(stack));  // Add J. Morice 02/09 
-  if (b->nargs[18]) ds.file_param_double= GetAny< string* >((*b->nargs[18])(stack));
-  if (b->nargs[19]) ds.file_param_char= GetAny< string* >((*b->nargs[19])(stack));  //
-  if (b->nargs[20]) ds.file_param_perm_r = GetAny< string* >((*b->nargs[20])(stack));
-  if (b->nargs[21]) ds.file_param_perm_c = GetAny< string* >((*b->nargs[21])(stack));  //
- */
   if (! A_is_square && *ds.typemat != TypeSolveMat::NONESQUARE) 
    {
      cout << " -- Error the solver << "<< ds.typemat <<"  is set  on rectangular matrix  " << endl;
      ExecError("A solver is set on a none square matrix!");
     ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
    }
-    /*
-  const OneOperator *precon = static_cast<const OneOperator *> (ds.precon); //  a changer 
-  if ( ds.precon)
-    {
-     // const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(precon);
-      //ffassert(op);
-      precon =  ds.precon op->Find("(",ArrayOfaType(atype<KN<double>* >(),false));
-    }
-     */ // change mars 2011
-  //  for the gestion of the PTR. 
-  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
+   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
   
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
   if(init) A.init(); //
@@ -1290,11 +1281,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
     const FESpace & Uh =  *PUh ;
     const FESpace & Vh =  *PVh ;
 
-  /*  if  ( (pUh != A.pUh ) || (pVh != A.pVh  || A.typemat->t != typemat->t) )
-    { 
-      A.Uh.destroy();
-      A.Vh.destroy();
-      }*/
+
   const Mesh & Th = Uh.Th;
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);     
   if ( same)
@@ -1305,9 +1292,10 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 	 A.A=0; // to delete  old  matrix ADD FH 16112005 
 	 A.Uh=Uh;
 	 A.Vh=Vh;
-	 if (ds.typemat->profile)
-	   { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
-	 else if (ds.typemat->sym )
+	// if (ds.typemat->profile)
+	  // { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
+	 //else
+         if (ds.typemat->sym )
 	   {  A.A.master( new  MatriceMorse<R>(Vh,ds.typemat->sym,VF) ); 
 	     ffassert( &Uh == & Vh);}
 	 else 
@@ -1332,7 +1320,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
            AssembleBC<R>( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,0,b->largs,ds.tgv);
     
    }
-  if( A_is_square && ds.factorize ) {
+ /* if( A_is_square && ds.factorize ) {
     MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A.A);
     assert(pf);
     switch (ds.typemat->t) {
@@ -1342,12 +1330,9 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
     default: ExecError("Sorry no factorize for this type for matrix"); 
     }
     
-  }    
+  }    */
   if (A_is_square) 
     SetSolver(stack,VF,*A.A,ds);
-	      /*stack,*A.A,&typemat,VF,eps,NbSpace,itmax,precon,umfpackstrategy,tgv,tol_pivot,tol_pivot_sym, 
-	      param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, file_param_char, 
-	      file_param_perm_r, file_param_perm_c );*/
   
   return SetAny<Matrice_Creuse<R>  *>(&A);
   
@@ -1360,15 +1345,7 @@ bool SetCG();
 #ifdef HAVE_LIBUMFPACK
 bool SetUMFPACK();
 #endif
-/*
-template<class R>
-AnyType ProdMat(Stack,Expression ,Expression);
-template<class R> AnyType DiagMat(Stack,Expression ,Expression);
-template<class R> AnyType CopyTrans(Stack stack,Expression emat,Expression eA);
-template<class R> AnyType CopyMat(Stack stack,Expression emat,Expression eA);
-template<class R> AnyType CombMat(Stack stack,Expression emat,Expression combMat);
-template<class R> AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA);
-*/
+
 namespace FreeFempp {
 
 template<class R>

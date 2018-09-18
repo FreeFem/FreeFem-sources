@@ -64,18 +64,9 @@ struct Data_Sparse_Solver {
     KNM<double> * kernelt;
     long *kerneldim;
     long  verb;
-    /*
-     int *param_int;
-     double *param_double;
-     string *param_char;
-     int *perm_r;
-     int *perm_c;
-     string *file_param_int;
-     string *file_param_double;
-     string *file_param_char;
-     string *file_param_perm_r;
-     string *file_param_perm_c;
-     */
+    bool x0; //  init by 0 the inital data the solution
+    double * veps; //    to get and set value of eps
+
     
     Data_Sparse_Solver()
     :
@@ -90,31 +81,12 @@ struct Data_Sparse_Solver {
     tol_pivot_sym(-1),
     NbSpace(50),
     itmax(0),
-    //   lparams(0,0),
-    //   dparams(0,0),
-    smap(0) ,
-    //    perm_r(0,0),
-    //    perm_c(0,0),
-    //    scale_r(0,0),
-    //   scale_c(0,0)
-    
-    /*
-     param_int(0),
-     param_double(0),
-     param_char(0),
-     perm_r(0),
-     perm_c(0),
-     file_param_int(0),
-     file_param_double(0),
-     file_param_perm_r(0),
-     file_param_perm_c(0),
-     */
-    //sparams,
+     smap(0) ,
     commworld(0),
     master(0),
     rinfo(0),
     info(0),
-    kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) 
+    kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) ,x0(true),veps(0)
     {}
     
 
@@ -184,7 +156,7 @@ private:
 
 
 template<class I, class R>
-class VirtualSolver {
+class VirtualSolver : public VirtualMatrix<I,R>::VSolver  {
 public:
     int state;
     VirtualSolver() : state(0),codeini(0),codesym(0),codenum(0) {}
@@ -203,13 +175,13 @@ public:
         else if(cn &&  cn != codenum) { codenum=cn; state=2;}// a fixe
     };
     
-    R* solve(R *x,R *b,int N=1)
+    R* solve(R *x,R *b,int N=1,int trans=0)
     {
         SetState();
         if( state==0) {fac_init(); state=1;}
         if( state==1) {fac_symbolic(); state=2;}
         if( state==2) {fac_numeric();state=3;}
-        dosolver(x,b,N);
+        dosolver(x,b,N,trans);
         return x;
     }
     

@@ -1,4 +1,5 @@
 //  file to add UMFPACK solver with dynamic load.
+#ifdef REMOVE_CODE
 #include  <iostream>
 using namespace std;
 
@@ -425,5 +426,5 @@ template <>
 DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverGMRES;
 template <>
 DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverGMRES;
-
+#endif
 #endif

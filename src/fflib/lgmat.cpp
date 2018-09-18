@@ -25,6 +25,8 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifdef REMOVE_CODE
+  to do  F. HECHT
 #ifdef __MWERKS__
 #pragma optimization_level 0
 //#pragma inline_depth(0) 
@@ -3498,3 +3500,5 @@ void  init_lgmat()
 }
 
 int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}
+
+#endif

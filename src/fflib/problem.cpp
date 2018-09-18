@@ -62,6 +62,7 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
 };
 
 
+
 basicAC_F0::name_and_type  Problem::name_param[]= {
 {  "save",&typeid(string* )},
 {  "cadna",&typeid(KN<double>*)},
@@ -5602,6 +5603,53 @@ template<class R>
 void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
 {
     const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
+    typename  VirtualMatrix<int,R>::VSolver * solver=0;
+    MatriceMorse<R> & AH(dynamic_cast<MatriceMorse<R> &>(A));
+    ffassert(&AH);
+    
+    if (ds.typemat->profile)
+    {
+        // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
+        
+        switch (ds.typemat->t) {
+                
+            case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds);  break;
+            case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds); ; break;
+            case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds); ; break;
+            default:
+                cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
+                CompileError("type resolution unknown"); break;
+        }
+    }
+    else
+    {
+        switch (ds.typemat->t) {
+            case    TypeSolveMat::GC:
+                solver=NewVSolver<int,R>(AH,"CG",ds);
+                break;
+            case TypeSolveMat::GMRES :
+                //        InternalError("GMRES solveur to do");
+                solver=NewVSolver<int,R>(AH,"GMRES",ds);
+                
+            case TypeSolveMat::SparseSolver :
+                solver=NewVSolver<int,R>(AH,"UMFPACK",ds);
+                //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
+                break;
+            default:
+                if (verbosity >5)
+                    cout << "  SetSolver:: no  default solver " << ds.typemat << endl;
+                CompileError("type resolution unknown"); break;
+        }
+        
+    }
+
+    if(solver)
+        A.SetSolver(solver,true);
+    else
+        CompileError("SetSolver: type resolution unknown");
+
+    /*
+    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
     if (ds.typemat->profile)
       {
         if(verbosity>5) cout << " Matrix skyline type:" << ds.typemat->t <<endl;
@@ -5652,8 +5700,8 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
           CompileError("type resolution inconnue"); break;       
         }
         
-      }
-  }  
+      }*/
+  }
 
 bool SetGMRES()
 {
@@ -5727,6 +5775,7 @@ template<class R>
 )
 {
    typedef typename CadnaType<R>::Scalaire R_st;
+    /*
  //  MatriceCreuse<R_st> *CadnaMat;
     if (ds.typemat->profile)
       {
@@ -5747,9 +5796,9 @@ template<class R>
         }
         return &AA;
       }
-    else 
+    else */
       {
-         ExecError("matrix morse & CADNA are incompatible today, sorry!");
+         ExecError("matrix HMAT & CADNA are incompatible today, sorry!");
          return 0;
       }
    return 0;   
@@ -6008,11 +6057,13 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   
   if (ds.initmat) 
    {
-    if (ds.typemat->profile) 
-      {
-      dataA.master(new MatriceProfile<R>(Vh,VF));      
-      }
-    else 
+       
+    //if (ds.typemat->profile)
+    //  {
+          
+      //dataA.master(new MatriceProfile<R>(Vh,VF));
+     // }
+   // else 
       {
         if ( &Uh == & Vh )
           dataA.master(new MatriceMorse<R>(Vh,sym,VF));
@@ -6041,9 +6092,9 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   
   if (ds.initmat)
     {
-      if(cadna)
-	ACadna = DefSolverCadna( stack,A, ds);
-      else
+     // if(cadna)
+	//ACadna = DefSolverCadna( stack,A, ds);
+      //else
 	DefSolver(stack,  A, ds);
     }
 

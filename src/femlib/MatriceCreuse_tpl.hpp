@@ -291,7 +291,7 @@ void MatriceElementaireSymetrique<R,FES>::call(int k,int ie,int label,void * sta
       }
   }
 }
-  
+#ifdef REMOVE_CODE_OBSO
 template<class R>
 MatriceProfile<R>::~MatriceProfile() {
   if(!this->dummy) 
@@ -317,7 +317,7 @@ int MatriceProfile<R>::size() const {
 /*
 template<class R>
 int MatriceProfile<R>::MatriceProfile(const MatriceProfile<RR> & A )
-  : MatriceCreuse<R>(A.n,A.m,0)
+  : MatriceCreuseOld<R>(A.n,A.m,0)
   {
     
     typefac=A.typefac;
@@ -334,7 +334,7 @@ int MatriceProfile<R>::MatriceProfile(const MatriceProfile<RR> & A )
   
   }*/
 template<class R>
-  MatriceMorse<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool copy) const 
+  MatriceMorseOld<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool copy) const
   {
   // A FAIRE;
     ffassert(0); // TODO
@@ -385,7 +385,7 @@ bool MatriceProfile<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool tr
 }
 template<class R>
 MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
-  :MatriceCreuse<R>(nn,nn,0),typefac(FactorizationNO)
+  :MatriceCreuseOld<R>(nn,nn,0),typefac(FactorizationNO)
 {
   int *pf = new int [this->n+1];
   int i,j,k;
@@ -412,7 +412,7 @@ MatriceProfile<R>::MatriceProfile(const int nn,const R *a)
 template<class R>
 template<class FESpace>
 MatriceProfile<R>::MatriceProfile(const FESpace & Vh,bool VF) 
-  :MatriceCreuse<R>(Vh.NbOfDF,Vh.NbOfDF,0),typefac(FactorizationNO)
+  :MatriceCreuseOld<R>(Vh.NbOfDF,Vh.NbOfDF,0),typefac(FactorizationNO)
 {
    // for galerkine discontinue ....
    // VF : true=> Finite Volume matrices (change the stencil) 
@@ -548,7 +548,7 @@ void MatriceProfile<R>::operator=(const R & v) {
   U=L=D=0;
 }
 template<class R>
-MatriceCreuse<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
+MatriceCreuseOld<R>  & MatriceProfile<R>::operator +=(MatriceElementaire<R> & me) {
   int il,jl,i,j,k;
   int * mi=me.ni, *mj=me.nj;
   if (!D)  // matrice vide 
@@ -659,7 +659,7 @@ void MatriceProfile<R>::cholesky(double eps) const {
   int i,j,k;
   if (L != U) ERREUR(factorise,"Skyline matrix non symmetric");
   U = 0; // 
-  typefac = FactorizationCholeski;
+  typefac = FactorizationCholesky;
   if ( RNM::norm2(D[0]) <= 1.0e-60)
       ERREUR(cholesky,"pivot (" << 0 << ")= " << D[0] )
   
@@ -842,7 +842,7 @@ KN_<R> & operator/=(KN_<R> & x ,const MatriceProfile<R> & a)
 	  v[i]=v[i]/a.D[i];
       }
     break;
-  case FactorizationCholeski:  
+  case FactorizationCholesky:  
     //     cout << " FactorizationChosleski" << endl;
     x /= a.ld();
     x /= a.ldt();   
@@ -866,8 +866,8 @@ KN_<R> & operator/=(KN_<R> & x ,const MatriceProfile<R> & a)
 }
 
 template <class R> 
- MatriceMorse<R>::MatriceMorse(KNM_<R> & A,double tol)
-    :MatriceCreuse<R>(A.N(),A.M(),false),solver(0) 
+ MatriceMorseOld<R>::MatriceMorseOld(KNM_<R> & A,double tol)
+    :MatriceCreuseOld<R>(A.N(),A.M(),false),solver(0)
       {
   double tol2=tol*tol;    
   symetrique = false;
@@ -901,8 +901,8 @@ template <class R>
   
 }
 template <class R> 
- MatriceMorse<R>::MatriceMorse(const int  nn,const R *aa)
-    :MatriceCreuse<R>(nn),solver(0) 
+ MatriceMorseOld<R>::MatriceMorseOld(const int  nn,const R *aa)
+    :MatriceCreuseOld<R>(nn),solver(0)
       {
   symetrique = true;
   this->dummy=false;
@@ -922,8 +922,8 @@ lg[this->n]=this->n;
 
 template<class R>
 template<class K>
- MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A,R (*f)(K ))
-   : MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
+ MatriceMorseOld<R>::MatriceMorseOld(const MatriceMorseOld<K> & A,R (*f)(K ))
+   : MatriceCreuseOld<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),
      symetrique(A.symetrique),       
      a(new R[nbcoef]),
      lg(new int [this->n+1]),
@@ -943,8 +943,8 @@ template<class K>
 
 template<class R>
 template<class K>
-MatriceMorse<R>::MatriceMorse(const MatriceMorse<K> & A)
-: MatriceCreuse<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),      
+MatriceMorseOld<R>::MatriceMorseOld(const MatriceMorseOld<K> & A)
+: MatriceCreuseOld<R>(A.n,A.m,A.dummy),nbcoef(A.nbcoef),
 symetrique(A.symetrique),       
 a(new R[nbcoef]),
 lg(new int [this->n+1]),
@@ -965,35 +965,15 @@ solver(0)
 
 
 template <class R> 
-int MatriceMorse<R>::size() const 
+int MatriceMorseOld<R>::size() const
 {
   return nbcoef*(sizeof(int)+sizeof(R))+ sizeof(int)*(this->n+1);
 }
 
-inline int WhichMatrix(istream & f)
-{
-    string line;
-    while ( isspace(f.peek()))
-	f.get(); 
-    if  ( f.peek() =='#' )
-    {
-	line="";
-	while ( f.good()  )
-	{
-	    char c=f.get();
-	    if(c=='\n' || c=='\r') { break;}
-	    line += c;
-	}
-	if( line.find("(Morse)")) 
-	    return 2; // morse 
-	else 
-	    return 0; 
-    }
-  return 0;   
-}
+
 template <class R>
-  MatriceMorse<R>::MatriceMorse(istream & f)
-:  MatriceCreuse<R>(0,0,0),nbcoef(0),
+  MatriceMorseOld<R>::MatriceMorseOld(istream & f)
+:  MatriceCreuseOld<R>(0,0,0),nbcoef(0),
 a(0),
 lg(0),
 cl(0),
@@ -1059,7 +1039,7 @@ solver(0)
 }
 
 template <class R> 
-ostream& MatriceMorse<R>::dump(ostream & f) const 
+ostream& MatriceMorseOld<R>::dump(ostream & f) const
 {
   f << "# Sparse Matrix (Morse)  " << endl;
   f << "# first line: n m (is symmetic) nbcoef \n";
@@ -1083,7 +1063,7 @@ ostream& MatriceMorse<R>::dump(ostream & f) const
   return f;
 }
 template <class R> 
-inline R*  MatriceMorse<R>::pij(int i,int j) const 
+inline R*  MatriceMorseOld<R>::pij(int i,int j) const
  {
    if (! (i<this->n && j< this->m)) 
    throwassert(i<this->n && j< this->m);
@@ -1100,7 +1080,7 @@ inline R*  MatriceMorse<R>::pij(int i,int j) const
  }
 template <class R>
 template <class FESpace> 
-void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF)
+void MatriceMorseOld<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool VF)
 {
   typedef typename FESpace::Mesh Mesh;
   
@@ -1144,7 +1124,7 @@ void MatriceMorse<R>::Build(const FESpace & Uh,const FESpace & Vh,bool sym,bool 
       kkk=kk;
     } 
   if(verbosity>4) 
-    cout <<"  -- MatriceMorse<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement() 
+    cout <<"  -- MatriceMorseOld<R>::Build " << kk << " " << nbn_u << " " << Uh.SizeToStoreAllNodeofElement()
 	 << " " <<  nbn_u+1+Uh.SizeToStoreAllNodeofElement() << endl;
   ffassert(kk== nbn_u+1+Uh.SizeToStoreAllNodeofElement());
   for (int k=0;k<nbe;k++)
@@ -1254,7 +1234,7 @@ template<> inline void ConjArray<double>(double *v, int n) {}
 template<> inline void ConjArray<float>(float *v, int n) {}
 
 template<class R>
- void  MatriceMorse<R>::dotransposition()
+ void  MatriceMorseOld<R>::dotransposition()
  {
    if(symetrique) return; 
    
@@ -1292,10 +1272,10 @@ template<class R>
  }
 
 template<class R>
- triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+ triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuseOld<R> *,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
   {
     // modif FH feb 2010  cnj =>  transpose ->  conj &  trans 
-    typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
+    typedef typename list<triplet<R,MatriceCreuseOld<R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
@@ -1309,7 +1289,7 @@ template<class R>
     {
         if(i->second) // M == 0 => zero matrix 
         {
-            MatriceCreuse<R> & M=*i->second;
+            MatriceCreuseOld<R> & M=*i->second;
             if(!M.sym())
                 sym = false;
         }
@@ -1319,7 +1299,7 @@ template<class R>
      {
 	if(i->second) // M == 0 => zero matrix 
 	{
-	    MatriceCreuse<R> & M=*i->second;
+	    MatriceCreuseOld<R> & M=*i->second;
 	    bool transpose = i->third !=  trans;
 	    ffassert( &M);
 	    R coef=i->first;
@@ -1333,22 +1313,22 @@ template<class R>
      } 
     int nbcoef=mij.size();
 
-  // return new   MatriceMorse<R>(n,m,mij,sym);   
+  // return new   MatriceMorseOld<R>(n,m,mij,sym);
     return make_triplet(n,m,sym);
   }
   
 template<class R>
-  MatriceMorse<R> * BuildCombMat(const list<triplet<R,MatriceCreuse<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
+  MatriceMorseOld<R> * BuildCombMat(const list<triplet<R,MatriceCreuseOld<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
   {
    
     std::map< pair<int,int>, R> mij;
     triplet<int,int,bool> nmsym=BuildCombMat(mij,lM,trans,ii00,jj00);
 
-   return new   MatriceMorse<R>(nmsym.first,nmsym.second,mij,nmsym.third);   
+   return new   MatriceMorseOld<R>(nmsym.first,nmsym.second,mij,nmsym.third);
      
   }
 template<class R>
-bool MatriceMorse<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold, const bool keepSym)
+bool MatriceMorseOld<R>::addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans,int ii00,int jj00,bool cnj,double threshold, const bool keepSym)
 {
   double eps0=max(numeric_limits<double>::min(),threshold);
   int i,j,k;
@@ -1386,8 +1366,8 @@ return keepSym;
  
 template<class R> 
 template<class K>
-MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym):
-  MatriceCreuse<R>(nn,mm,0),
+MatriceMorseOld<R>::MatriceMorseOld(int nn,int mm, std::map< pair<int,int>, K> & m, bool sym):
+  MatriceCreuseOld<R>(nn,mm,0),
   nbcoef(m.size()),symetrique(sym),
   a(new R[nbcoef]),
   lg(new int[nn+1]),
@@ -1420,7 +1400,7 @@ MatriceMorse<R>::MatriceMorse(int nn,int mm, std::map< pair<int,int>, K> & m, bo
   }
 // FH  mars 2009 ... 
 template<class R>
- void  MatriceMorse<R>::resize(int nn,int mm) 
+ void  MatriceMorseOld<R>::resize(int nn,int mm)
 {
     int nc=0;   
     int *nlg=new int[nn+1],*ncl=0;
@@ -1428,7 +1408,7 @@ template<class R>
     nc =0;
     nlg[0]=nc; 
     if (symetrique)
-      {   if( nn != mm) AFAIRE("MatriceMorse<R>::resize symetric  n!=m");
+      {   if( nn != mm) AFAIRE("MatriceMorseOld<R>::resize symetric  n!=m");
 	  for (int i=0;i<nm;i++)
 	    {
 	      for (int k=lg[i];k<lg[i+1];k++)
@@ -1460,7 +1440,7 @@ template<class R>
     nc=0;
 
     if (symetrique)
-      {   if( nn != mm) AFAIRE("MatriceMorse<R>::resize symetric  n!=m");
+      {   if( nn != mm) AFAIRE("MatriceMorseOld<R>::resize symetric  n!=m");
 	  for (int i=0;i<nm;i++)
 	      for (int k=lg[i];k<lg[i+1];k++)
 		{   int j=cl[k];
@@ -1498,7 +1478,7 @@ template<class R>
 }
 template<class RA>
  template<class RB,class RAB>
- void  MatriceMorse<RA>::prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB)
+ void  MatriceMorseOld<RA>::prod(const MatriceMorseOld<RB> & B, MatriceMorseOld<RAB> & AB)
  {
    //  compute the s
   bool sym=this == & B &&symetrique;
@@ -1649,11 +1629,11 @@ template<class RA>
  }
 
 template<class R>
-  void  MatriceMorse<R>::addMatMul(const KN_<R> &  x, KN_<R> & ax) const   
+  void  MatriceMorseOld<R>::addMatMul(const KN_<R> &  x, KN_<R> & ax) const
 {
   int i,j,k;
   if( ! (this->n==ax.N() && this->m==x.N()))
-    {cerr << " Err MatriceMorse<R>:  ax += A x" <<endl;
+    {cerr << " Err MatriceMorseOld<R>:  ax += A x" <<endl;
       cerr << " A.n " << this->n<< " !=  "<< ax.N() << " ax.n \n";
       cerr << " A.m " << this->m<< " != " <<x.N() << " x.n \n" ;
       ffassert(0); 
@@ -1683,7 +1663,7 @@ template<class R>
 }
 
 template<class R>
-  void  MatriceMorse<R>::addMatTransMul(const KN_<R> &  x, KN_<R> & ax) const   
+  void  MatriceMorseOld<R>::addMatTransMul(const KN_<R> &  x, KN_<R> & ax) const
 {
   int i,j,k;
   ffassert(this->m==ax.N());
@@ -1713,7 +1693,7 @@ template<class R>
 
 
 template<class R>
-MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
+MatriceMorseOld<R>  & MatriceMorseOld<R>::operator +=(MatriceElementaire<R> & me) {
   //  R zero=R();
   int il,jl,i,j;
   int * mi=me.ni, *mj=me.nj;
@@ -1768,7 +1748,7 @@ MatriceMorse<R>  & MatriceMorse<R>::operator +=(MatriceElementaire<R> & me) {
 } 
 
 template<class R>
-  void MatriceMorse<R>::Solve(KN_<R> &x,const KN_<R> &b) const{
+  void MatriceMorseOld<R>::Solve(KN_<R> &x,const KN_<R> &b) const{
     if (solver)    
       solver->Solver(*this,x,b);
     else
@@ -1776,7 +1756,7 @@ template<class R>
     throw(ErrorExec("exit",1));}
   }
 template<class R>
-void MatriceMorse<R>::SolveT(KN_<R> &x,const KN_<R> &b) const{
+void MatriceMorseOld<R>::SolveT(KN_<R> &x,const KN_<R> &b) const{
     if (solver)
         solver->SolverT(*this,x,b);
     else
@@ -1786,7 +1766,7 @@ void MatriceMorse<R>::SolveT(KN_<R> &x,const KN_<R> &b) const{
 
 
 template<class R>
-double MatriceMorse<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) 
+double MatriceMorseOld<R>::psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega)
 {
   double err=0;
   int n=this->n;
@@ -1850,7 +1830,7 @@ void MatriceProfile<R>::getdiag(KN_<R> & x) const
   x=d;  
 }
 template<class R>
-void MatriceMorse<R>::setdiag(const KN_<R> & x) 
+void MatriceMorseOld<R>::setdiag(const KN_<R> & x)
 {
  ffassert( this->n == this->m&& this->n == x.N());
  for (int i=0;i<this->n;++i)
@@ -1860,7 +1840,7 @@ void MatriceMorse<R>::setdiag(const KN_<R> & x)
       else ffassert( RNM::norm2(x[i]) < 1e-30);}
 }
 template<class R>
-void MatriceMorse<R>::getdiag(KN_<R> & x) const 
+void MatriceMorseOld<R>::getdiag(KN_<R> & x) const
 {
  ffassert( this->n == this->m && this->n == x.N());
  for (int i=0;i<this->n;++i)
@@ -1871,7 +1851,7 @@ void MatriceMorse<R>::getdiag(KN_<R> & x) const
   
 }
 template<class R>
-R MatriceMorse<R>::pscal(const KN_<R> & x,const KN_<R> & y)
+R MatriceMorseOld<R>::pscal(const KN_<R> & x,const KN_<R> & y)
 { // (x, Ay)
   R sum=R();
   int i,j,k;
@@ -1934,19 +1914,19 @@ R MatriceProfile<R>::pscal(const KN_<R> & x,const KN_<R> & y)
 }
 
 template<class R>
-void MatriceMorse<R>::getcoef(KN_<R> & x) const 
+void MatriceMorseOld<R>::getcoef(KN_<R> & x) const
 {
  ffassert(x.N()==this->nbcoef);
  x = KN_<R>(this->a,nbcoef);  
 }
 template<class R>
-void MatriceMorse<R>::setcoef(const KN_<R> & x)  
+void MatriceMorseOld<R>::setcoef(const KN_<R> & x)
 {
  ffassert(x.N()==nbcoef);
   KN_<R>(this->a,nbcoef) = x;
 }
 template<class R>
-int MatriceMorse<R>::NbCoef() const  
+int MatriceMorseOld<R>::NbCoef() const
 {
   return this->nbcoef;
 }
@@ -1998,5 +1978,30 @@ int MatriceProfile<R>::NbCoef() const
   if (U && (U != L)) s += pU[this->n];
   return s;
 }
+#endif
+// REMOVE_CODE_OBSO
+
+inline int WhichMatrix(istream & f)
+{
+    string line;
+    while ( isspace(f.peek()))
+        f.get();
+    if  ( f.peek() =='#' )
+    {
+        line="";
+        while ( f.good()  )
+        {
+            char c=f.get();
+            if(c=='\n' || c=='\r') { break;}
+            line += c;
+        }
+        if( line.find("(Morse)"))
+            return 2; // morse
+        else
+            return 0;
+    }
+    return 0;
+}
+
 #endif
 
