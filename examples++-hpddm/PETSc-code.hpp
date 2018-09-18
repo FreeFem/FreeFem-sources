@@ -116,7 +116,11 @@ void initPETScStructure(HpddmType* ptA, PetscInt& bs, PetscBool symmetric, KN<ty
     VecCreate(PETSC_COMM_SELF, &isVec);
     VecSetType(isVec, VECMPI);
     VecSetSizes(isVec, PETSC_DECIDE, nr);
+#if PETSC_VERSION_RELEASE
     VecScatterCreate(rglobal, from, isVec, to, &(ptA->_scatter));
+#else
+    VecScatterCreateWithData(rglobal, from, isVec, to, &(ptA->_scatter));
+#endif
     VecDestroy(&isVec);
     VecDestroy(&rglobal);
     ISDestroy(&from);
