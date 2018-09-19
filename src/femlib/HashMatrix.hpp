@@ -94,13 +94,13 @@ public:
     I sizep;
     int lock;
     int fortran; // index start a one ..
-    int re_do_numerics,re_do_symbolic;
+    mutable int re_do_numerics,re_do_symbolic;
     static const  I empty= (I) -1;
     /*
-     FOR compatibilite with MatriceMorse
+     FOR compatibilite with MatriceMorse +> call CSR  befaore ...
      */
-    I  nbcoef;
-    bool  symetrique;
+   // I  nbcoef;
+   // bool  symetrique;
     R * a;
     I * lg;
     I * cl;
@@ -157,8 +157,8 @@ public:
     bool ismorse;
     void SetMorse(){
         CSR();
-        nbcoef=nnz;
-        symetrique= half;
+      //  nbcoef=nnz;
+      //  symetrique= half;
         lg =p;
         aij= a;
         cl = j;
@@ -182,15 +182,78 @@ public:
         }
     }
     
-    HashMatrix(I nn,I mm=-1,size_t nnnz=0)
+    HashMatrix(I nn,I mm=-1,size_t nnnz=0,bool halff=false)
     :  VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
     // trans(false),
-    half(false), state(unsorted),type_state(type_HM),
+    half(halff), state(unsorted),type_state(type_HM),
     nbsort(0),sizep(0),lock(0), fortran(0) ,
     re_do_numerics(0),re_do_symbolic(0)
     {
         Increaze(nnnz);
+    }
+    HashMatrix(istream & f):
+    VirtualMatrix<I,R>(0,0),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+    head(0), next(0),
+    // trans(false),
+    half(0), state(unsorted),type_state(type_HM),
+    nbsort(0),sizep(0),lock(0), fortran(0) ,
+    re_do_numerics(0),re_do_symbolic(0)
+     {
+     string line;
+     int k=0;
+     while ( isspace(f.peek()))
+     f.get();
+     while ( f.peek() =='#' )
+     {
+     line="";
+     while ( f.good()  )
+     {
+     char c=f.get();
+     if(c=='\n' || c=='\r') { break;}
+     line += c;
+     }
+     if( f.peek()=='\n' || f.peek()=='\r') f.get();
+     if(verbosity>9)
+     cout << "   --  Matrx: "<< k << " :"   << line << endl;
+     k++;
+     }
+         long rn,rm,rnbcoef,rsymetrique;
+         
+     f >> rn >> rm >> rsymetrique >>rnbcoef;
+     if(verbosity>3)
+         cout << "     -- Read Mat: " <<  this->n << " x " <<  this->m << " sym : " << rsymetrique << " nnz=" << rnbcoef <<endl;
+     resize(rn,rm);
+     half =rsymetrique;
+      Increaze(rnbcoef);
+      int ii,jj;
+    
+     R aaij;
+    
+     for (int kk =0;kk<rnbcoef; ++kk)
+     {
+     f >> ii >> jj >> aaij;
+     ffassert(f.good() );
+     i--;j--;
+      //cout << i << " " << j << " " << aij << endl;
+      operator()(ii,jj) = aaij;
+     }
+     
+        
+         
+     
+     }
+
+    
+    HashMatrix(bool Half,I nn)
+    :  VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+    head(0), next(0),
+    // trans(false),
+    half(Half), state(unsorted),type_state(type_HM),
+    nbsort(0),sizep(0),lock(0), fortran(0) ,
+    re_do_numerics(0),re_do_symbolic(0)
+    {
+        Increaze(nn*4);
     }
     
     HashMatrix(const HashMatrix& A)
@@ -361,9 +424,9 @@ public:
     
     void ReHash()
     {
-        for(int h=0;h<nhash;++h)
+        for(size_t h=0;h<nhash;++h)
             head[h]= empty;
-        for(int k=0;k<nnz;++k)
+        for(size_t k=0;k<nnz;++k)
         {
             Hash h= hash(i[k],j[k]);
             next[k]=head[h];
@@ -391,9 +454,19 @@ public:
     }
     R   *pij(I ii,I jj)  const
     {
+        re_do_numerics=1;
         Hash h = hash(ii,jj);
         size_t k = find(ii,jj,h);
         return k==empty ? 0 : aij+k;
+    }
+    R   *npij(I ii,I jj)   // with add if no term ii,jj
+    {
+        re_do_numerics=1;
+        Hash h = hash(ii,jj);
+        size_t k = find(ii,jj,h);
+        if(k==empty)
+            aij[k =simpleinsert(ii,jj,h)]=0;
+        return aij+k;
     }
     R & diag(I ii)  { return operator()(ii,ii);}
     R   diag(I ii) const  { return operator()(ii,ii);}
@@ -407,15 +480,7 @@ public:
     
     R  & operator()(I ii,I jj)
     {
-        re_do_numerics=1;
-        Hash h = hash(ii,jj);
-        size_t k = find(ii,jj,h);
-        if(k==empty) 
-		{   
-			k =simpleinsert(ii,jj,h);
-			return aij[k]=R();
-		}
-        else return aij[k];
+        return *npij(ii,jj);
     }
     
     R    operator()(pair<I,I> ij)  const {return operator()(ij.first,ij.second);}
@@ -848,17 +913,102 @@ public:
             }
 
     }
+  static   inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
+        // warning trans sub  matrix and not the block.
+        return trans ? make_pair<int,int>(j+ii00,i+jj00)
+        :  make_pair<int,int>(i+ii00,j+jj00) ; }
+    
+ void addMap(R coef,std::map< pair<I,I>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.)
+    {
+        for (auto pm=mij.begin();  pm != mij.end(); ++pm)
+        {
+            I ii = pm->first.first+ii00, jj= pm->first.second+jj00;
+            R cmij = coef* pm->second;
+            
+            if(trans) swap(ii,jj);
+
+            if(cnj) cmij = conj(cmij);
+            operator()(ii,jj) += cmij;
+        }
+    }
  bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)
     {
+
+        double eps0=max(numeric_limits<double>::min(),threshold);
+        int i,j,k;
+        if (half)
+        {
+            for ( i=0;i<this->n;i++)
+                for ( k=lg[i];k<lg[i+1];k++)
+                {
+                    j=cl[k];
+                    R cij =  coef* ( cnj ? RNM::conj(a[k]) : a[k]);
+                    if(RNM::norm2(cij)>eps0)
+                    {
+                        mij[ij_mat(trans,ii00,jj00,i,j)] += cij ;
+                        if (i!=j&&!keepSym)
+                            mij[ij_mat(trans,ii00,jj00,j,i)] += cij;
+                    }
+                }
+        }
+        else
+        {
+            for ( i=0;i<this->n;i++)
+                for ( k=lg[i];k<lg[i+1];k++)
+                {
+                    j=cl[k];
+                    R cij =  coef* ( cnj ? RNM::conj(a[k]) : a[k]);
+                    
+                    if(RNM::norm2(cij)>eps0)
+                        mij[ij_mat(trans,ii00,jj00,i,j)] += cij;
+                }
+        }
         
-        ffassert(0); // to do ..
+        return keepSym;
     }
     
-    VirtualMatrix<I,R>  & operator +=(MatriceElementaire<R> & ){ ffassert(0); };
+    VirtualMatrix<I,R>  & operator +=(MatriceElementaire<R> & me) {
+        //  R zero=R();
+        int il,jl,i,j;
+        int * mi=me.ni, *mj=me.nj;
+        if ((this->n==0) && (this->m==0))
+        {
+            
+         
+            cout << "  -- Bug: HashMat  is empty let's build it" << endl;
+            ffassert(0);
+  
+        }
+        R * al = me.a;
+        R * aij;
+        switch (me.mtype) {
+            case MatriceElementaire<R>::Full : ffassert(!half);
+                for (il=0; il<me.n; ++il)  { i=mi[il];
+                    for ( jl=0; jl< me.m ; ++jl,++al)  {j=mj[jl];
+                        aij = npij(i,j);
+                        {
+                            throwassert(aij);
+                            *aij += *al;}}}
+                break;
+                
+            case MatriceElementaire<R>::Symmetric : ffassert(half);
+                for (il=0; il<me.n; ++il) {  i=mi[il] ;
+                    for (jl=0;jl< il+1 ; ++jl) { j=mj[jl];
+                        aij =    (j<i) ? npij(i,j) : npij(j,i);
+                        throwassert(aij);
+                        *aij += *al++;}}
+                break;
+            default:
+                cerr << "Big bug type MatriceElementaire unknown" << (int) me.mtype << endl;
+                ErrorExec("Bi-ug in  Hashmat += MatriceElementaire",1);
+                break;
+        }
+        return *this;
+    }
   // virtual   void operator=(const R & v) =0; // Mise a zero
      ostream& dump (ostream&f)  const { return f<<*this;}
     void SetBC(I ii,double tgv) { diag(ii)=tgv;};
-     HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not
+    HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;} // not
 //    virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
     

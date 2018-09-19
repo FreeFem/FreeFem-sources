@@ -781,12 +781,12 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   int n=Uh.NbOfDF;
   int mm=Vh.NbOfDF;
   if(transpose) Exchange(n,mm);
-  m->symetrique = false;
+  m->half = false;
   m->dummy=false;
   m->a=0;
   m->lg=0;
   m->cl=0;
-  m->nbcoef=0;
+  m->nnz=0;
   m->n=n;
   m->m=mm;
   int n1=n+1;
@@ -797,7 +797,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
   //  int nbn_u = Uh.NbOfNodes;
   //int nbn_v = Vh.NbOfNodes;
   
-  int nbcoef =0;
+  int nnz =0;
   
   KN<int> color(ThV.nt);
   KN<int> mark(n);
@@ -942,9 +942,9 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	    }
 	    if (step==0)
 	     {
-	         nbcoef = sij.size();
-	         cl = new int[nbcoef];
-	         a = new double[nbcoef];
+	         nnz = sij.size();
+	         cl = new int[nnz];
+	         a = new double[nnz];
 	         int k=0;
 	         for(int i=0;i<n1;i++)
 	           lg[i]=0;
@@ -958,7 +958,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	            a[k]= kk->second;	            
 	            lg[i+1]=++k;
 	          }
-	         assert(k==nbcoef);
+	         assert(k==nnz);
 	         //  on bouche les ligne vide   lg[i]=0; 
 	         //  lg est un tableau croissant  =>
 	         for(int i=1;i<n1;i++)
@@ -966,7 +966,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	         m->lg=lg;
              m->cl=cl;
              m->a=a;
-             m->nbcoef=nbcoef;
+             m->nnz=nnz;
              fait=false;
 	     }
     }
@@ -1005,12 +1005,12 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     int n=Uh.NbOfDF;
     int mm=Vh.NbOfDF;
     if(transpose) Exchange(n,mm);
-    m->symetrique = false;
+    m->half = false;
     m->dummy=false;
     m->a=0;
     m->lg=0;
     m->cl=0;
-    m->nbcoef=0;
+    m->nnz=0;
     m->n=n;
     m->m=mm;
     int n1=n+1;
@@ -1021,7 +1021,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     //  int nbn_u = Uh.NbOfNodes;
     //int nbn_v = Vh.NbOfNodes;
     
-    int nbcoef =0;
+    int nnz =0;
     
     KN<int> color(ThV.nt);
     KN<int> mark(n);
@@ -1164,9 +1164,9 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	  }
 	if (step==0)
 	  {
-	    nbcoef = sij.size();
-	    cl = new int[nbcoef];
-	    a = new double[nbcoef];
+	    nnz = sij.size();
+	    cl = new int[nnz];
+	    a = new double[nnz];
 	    int k=0;
 	    for(int i=0;i<n1;i++)
 		lg[i]=0;
@@ -1180,7 +1180,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 		  a[k]= kk->second;	            
 		  lg[i+1]=++k;
 	      }
-	    assert(k==nbcoef);
+	    assert(k==nnz);
 	    //  on bouche les ligne vide   lg[i]=0; 
 	    //  lg est un tableau croissant  =>
 	    for(int i=1;i<n1;i++)
@@ -1188,7 +1188,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	    m->lg=lg;
 	    m->cl=cl;
 	    m->a=a;
-	    m->nbcoef=nbcoef;
+	    m->nnz=nnz;
 	    fait=false;
 	  }
       }
@@ -2573,7 +2573,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
     //cout <<  " nxm  =" <<n<< "x" << m <<endl; 
     amorse=  new MatriceMorse<R>(n,m,Aij,sym); 
     if(verbosity)
-	cout << "  -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
+	cout << "  -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
     
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
     if( !init) sparse_mat->init();
@@ -2718,7 +2718,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   amorse=  new MatriceMorse<R>(n,m,Aij,false); 
   }
   if(verbosity)
-     cout << "  -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nbcoef << endl;
+     cout << "  -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
  
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));
   if(!init) sparse_mat->init();
@@ -3202,8 +3202,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     double EPS=nargs[3] ? GetAny<double>((*nargs[3])(stack)) :defEPS ;
     KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
     
-    unsigned int n = condensation ? condensation->n : mR->nbcoef;
-    unsigned int m = condensation ? condensation->n : mC->nbcoef;
+    unsigned int n = condensation ? condensation->n : mR->nnz;
+    unsigned int m = condensation ? condensation->n : mC->nnz;
     int* lg = new int[n + 1];
     int* cl;
     T* val;
@@ -3215,9 +3215,9 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         tmpVec.resize(mA->m);
         for(unsigned int i = 0; i < m; ++i)
             tmpVec[mC->cl[i]] = i + 1;
-        if(!mA->symetrique) {
+        if(!mA->half) {
             std::vector<std::pair<int, T> > tmp;
-            tmp.reserve(mA->nbcoef);
+            tmp.reserve(mA->nnz);
             
             lg[0] = 0;
             for(unsigned int i = 0; i < n; ++i) {
@@ -3238,11 +3238,11 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                     *(*pOut + i) = *(*pX + mC->cl[i]);
                 lg[i + 1] = tmp.size();
             }
-            mA->nbcoef = tmp.size();
+            mA->nnz = tmp.size();
             if(symmetrize)
-                mA->symetrique = true;
+                mA->half = true;
             else
-                mA->symetrique = false;
+                mA->half = false;
             
             cl = new int[tmp.size()];
             val = new T[tmp.size()];
@@ -3272,7 +3272,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 if(rhs)
                     *(*pOut + i) = *(*pX + mC->cl[i]);
             }
-            mA->nbcoef = nnz;
+            mA->nnz = nnz;
             cl = new int[nnz];
             val = new T[nnz];
             nnz = 0;
@@ -3314,13 +3314,13 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         }
         
         
-        //        if(!mA->symetrique) {
+        //        if(!mA->half) {
         std::vector<std::pair<int, T> > tmpInterior;
         std::vector<std::pair<int, T> > tmpBoundary;
         std::vector<std::pair<int, T> > tmpInteraction;
-        tmpInterior.reserve(mA->nbcoef);
-        tmpBoundary.reserve(mA->nbcoef);
-        tmpInteraction.reserve(mA->nbcoef);
+        tmpInterior.reserve(mA->nnz);
+        tmpBoundary.reserve(mA->nnz);
+        tmpInteraction.reserve(mA->nnz);
         
         lg[0] = 0;
         for(unsigned int i = 0; i < mA->n; ++i) {
@@ -3354,7 +3354,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             val[i] = tmpBoundary[i].second;
         }
         //        }
-        MatriceMorse<T>* m = new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->symetrique, val, lg, cl, true);
+        MatriceMorse<T>* m = new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->half, val, lg, cl, true);
         pR->typemat = TypeSolveMat(TypeSolveMat::GMRES);
         pR->A.master(m);
         m->dummy = false;
@@ -3364,7 +3364,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
      {
          MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
         
-         unsigned int n = mR->nbcoef;
+         unsigned int n = mR->nnz;
          
          if(pOut->n != n) pOut->resize(n);
          
@@ -3500,5 +3500,9 @@ void  init_lgmat()
 }
 
 int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}
+#else
+#include <iostream>
 
+void  init_lgmat()
+{  std::cout << "\n warning  init_lgmat EMPTY\n"<< std::endl;}
 #endif

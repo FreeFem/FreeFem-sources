@@ -1963,7 +1963,7 @@ void Check(const Opera &Op,int N,int  M)
   void AssembleBilinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                            map<pair<int,int>, R >  & A, const  FormBilinear * b  )
     
-  {
+  { // XXXXXX A FAIRE
       /*FH:  case ..in 3D
        in varf ...
        all mesh can can be different ....
@@ -6066,9 +6066,9 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
    // else 
       {
         if ( &Uh == & Vh )
-          dataA.master(new MatriceMorse<R>(Vh,sym,VF));
+          dataA.master(new MatriceMorse<R>( sym,Vh.NbOfDF));
         else 
-          dataA.master(new MatriceMorse<R>(Vh,Uh,VF));
+          dataA.master(new MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF));
       }
       MatriceCreuse<R>  & AA(dataA);
      if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<ds.typemat->profile << endl;
@@ -6107,7 +6107,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
       string saveb=save+".b";
     {
      ofstream outmtx( savem.c_str());
-     outmtx << A << endl;
+     A.dump(outmtx)  << endl;
     }  
     {
      ofstream outb(saveb.c_str());

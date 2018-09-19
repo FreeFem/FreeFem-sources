@@ -1,5 +1,5 @@
 //  file to add UMFPACK solver with dynamic load.
-#ifdef REMOVE_CODE
+
 #include  <iostream>
 using namespace std;
 
@@ -9,7 +9,7 @@ using namespace std;
 #include "MatriceCreuse_tpl.hpp"
 #include "lgsolver.hpp"
 
- 
+#ifdef REMOVE_CODE
 #ifdef HAVE_LIBUMFPACK
 extern "C" {
 #ifdef HAVE_UMFPACK_H
@@ -422,9 +422,11 @@ void init_UMFPack_solver() {
   Global.New("HaveUMFPACK",CConstant<bool>(false)); 
 }
 
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverGMRES;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverGMRES;
 #endif
 #endif
+
+template <>
+DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =EF23::BuildSolverGMRES;
+template <>
+DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =EF23::BuildSolverGMRES;
+

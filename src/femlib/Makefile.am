@@ -35,4 +35,18 @@ HeapSort.hpp \
 libmesh5.c \
 libmesh5.h  \
 ufunction.hpp  \
-splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp
+splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp \
+HashMatrix.hpp \
+VirtualMatrix.hpp \
+SparseLinearSolver.hpp \
+VirtualSolverCG.hpp \
+VirtualSolver.hpp \
+MatriceCreuse_tpl.hpp \
+MatriceElementaire.hpp \
+CG.hpp \
+CG.cpp \
+SkyLineSolver.hpp \
+SparseLinearSolver.cpp \
+SolverSkyLine.hpp \
+VirtualSolverSparseSuite.hpp \
+VirtualSolverSkyLine.hpp \

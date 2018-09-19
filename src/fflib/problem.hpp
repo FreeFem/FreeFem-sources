@@ -943,7 +943,7 @@ template<class K> class Matrice_Creuse_Transpose;
  
 template<class K>  ostream & operator << (ostream & f,const Matrice_Creuse<K> & A) 
 { if ( !A.A) f << " unset sparse matrix " << endl;
- else f << *A.A ;
+  else A.A->dump(f);  ;
  return f;  }
 
 template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A) 
@@ -1296,11 +1296,11 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 	  // { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
 	 //else
          if (ds.typemat->sym )
-	   {  A.A.master( new  MatriceMorse<R>(Vh,ds.typemat->sym,VF) ); 
+	   {  A.A.master( new  MatriceMorse<R>(ds.typemat->sym,Vh.NbOfDF) );
 	     ffassert( &Uh == & Vh);}
 	 else 
 	   {
-	     A.A.master( new  MatriceMorse<R>(Vh,Uh,VF) ); // lines corresponding to test functions 
+	     A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,Vh.NbOfDF*2,0) ); // lines corresponding to test functions
 	   }
        }
      *A.A=R(); // reset value of the matrix
@@ -1311,11 +1311,16 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   else
    { // add FH 17 06 2005  int on different meshes. 
      map<pair<int,int>, R >   AAA;
+     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.typemat->sym);
      bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,ds.typemat->sym,&AAA,0,b->largs);
-     if (ds.typemat->profile)
+     pMA->addMap(1.,AAA);
+      A.A.master(pMA ) ;
+       
+ /*    if (ds.typemat->profile)
         { ExecError(" Sorry, construction of Skyline matrix with different meshes is not implemented! ");}
       else 
-        { A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA,ds.typemat->sym) ); }
+        { }// XXXXXX
+  */
       if (bc)
            AssembleBC<R>( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,0,b->largs,ds.tgv);
     

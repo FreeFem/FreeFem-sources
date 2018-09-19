@@ -154,12 +154,8 @@
 		3DBBFE9E1A654E4900E3CF4E /* write_xdmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */; };
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
 		3DC023132148071A008C76D0 /* HashMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023122148071A008C76D0 /* HashMatrix.hpp */; };
-		3DC023182148072B008C76D0 /* SparseLinearSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023142148072B008C76D0 /* SparseLinearSolver.cpp */; };
 		3DC023192148072B008C76D0 /* SolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023152148072B008C76D0 /* SolverSkyLine.hpp */; };
-		3DC0231A2148072B008C76D0 /* SparseLinearSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023162148072B008C76D0 /* SparseLinearSolver.hpp */; };
 		3DC0231B2148072B008C76D0 /* SkyLineSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023172148072B008C76D0 /* SkyLineSolver.hpp */; };
-		3DC0231E21480746008C76D0 /* CG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC0231C21480745008C76D0 /* CG.cpp */; };
-		3DC0231F21480746008C76D0 /* CG.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0231D21480746008C76D0 /* CG.hpp */; };
 		3DC023212148075C008C76D0 /* gmres.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023202148075C008C76D0 /* gmres.hpp */; };
 		3DC023342148078C008C76D0 /* SparseLinearSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */; };
 		3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023272148078A008C76D0 /* SolverSkyLine.hpp */; };
@@ -309,12 +305,8 @@
 		3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = write_xdmf.cpp; path = ../src/bamglib/write_xdmf.cpp; sourceTree = "<group>"; };
 		3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = write_hdf5.cpp; path = ../src/bamglib/write_hdf5.cpp; sourceTree = "<group>"; };
 		3DC023122148071A008C76D0 /* HashMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HashMatrix.hpp; path = ../src/femlib/HashMatrix.hpp; sourceTree = "<group>"; };
-		3DC023142148072B008C76D0 /* SparseLinearSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparseLinearSolver.cpp; path = ../src/femlib/SparseLinearSolver.cpp; sourceTree = "<group>"; };
 		3DC023152148072B008C76D0 /* SolverSkyLine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolverSkyLine.hpp; path = ../src/femlib/SolverSkyLine.hpp; sourceTree = "<group>"; };
-		3DC023162148072B008C76D0 /* SparseLinearSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SparseLinearSolver.hpp; path = ../src/femlib/SparseLinearSolver.hpp; sourceTree = "<group>"; };
 		3DC023172148072B008C76D0 /* SkyLineSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SkyLineSolver.hpp; path = ../src/femlib/SkyLineSolver.hpp; sourceTree = "<group>"; };
-		3DC0231C21480745008C76D0 /* CG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CG.cpp; path = ../src/femlib/CG.cpp; sourceTree = "<group>"; };
-		3DC0231D21480746008C76D0 /* CG.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CG.hpp; path = ../src/femlib/CG.hpp; sourceTree = "<group>"; };
 		3DC023202148075C008C76D0 /* gmres.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = gmres.hpp; path = ../src/femlib/gmres.hpp; sourceTree = "<group>"; };
 		3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparseLinearSolver.cpp; path = ../src/femlib/SparseLinearSolver.cpp; sourceTree = "<group>"; };
 		3DC023272148078A008C76D0 /* SolverSkyLine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolverSkyLine.hpp; path = ../src/femlib/SolverSkyLine.hpp; sourceTree = "<group>"; };
@@ -602,8 +594,6 @@
 				3D84ADFB1654DE9800301697 /* MeshPoint.hpp */,
 				3D84ADFC1654DE9800301697 /* GenericMesh.hpp */,
 				3D84ADFD1654DE9800301697 /* Mesh3dn.hpp */,
-				3DC0231C21480745008C76D0 /* CG.cpp */,
-				3DC0231D21480746008C76D0 /* CG.hpp */,
 				3DC023282148078A008C76D0 /* CG.cpp */,
 				3DC023332148078C008C76D0 /* CG.hpp */,
 				3DC0232C2148078B008C76D0 /* HashMatrix.hpp */,
@@ -620,8 +610,6 @@
 				3DC023202148075C008C76D0 /* gmres.hpp */,
 				3DC023172148072B008C76D0 /* SkyLineSolver.hpp */,
 				3DC023152148072B008C76D0 /* SolverSkyLine.hpp */,
-				3DC023142148072B008C76D0 /* SparseLinearSolver.cpp */,
-				3DC023162148072B008C76D0 /* SparseLinearSolver.hpp */,
 				3DC023122148071A008C76D0 /* HashMatrix.hpp */,
 				3D84AE001654DE9800301697 /* DOperator.hpp */,
 				3D84AE011654DE9800301697 /* CGNL.hpp */,
@@ -749,7 +737,6 @@
 				3D84ADFA1654DAE200301697 /* versionnumber.hpp in Headers */,
 				3D84AE201654DE9800301697 /* MeshPoint.hpp in Headers */,
 				3D84AE211654DE9800301697 /* GenericMesh.hpp in Headers */,
-				3DC0231F21480746008C76D0 /* CG.hpp in Headers */,
 				3D84AE221654DE9800301697 /* Mesh3dn.hpp in Headers */,
 				3D84AE251654DE9800301697 /* DOperator.hpp in Headers */,
 				3D84AE261654DE9800301697 /* CGNL.hpp in Headers */,
@@ -781,7 +768,6 @@
 				3D84AE401654DE9800301697 /* RefCounter.hpp in Headers */,
 				3DC023132148071A008C76D0 /* HashMatrix.hpp in Headers */,
 				3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */,
-				3DC0231A2148072B008C76D0 /* SparseLinearSolver.hpp in Headers */,
 				3D84AE431654DEB600301697 /* ufunction.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -859,7 +845,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D15D46E0BD3A67700CEB4C6 /* lg.tab.cpp in Sources */,
-				3DC0231E21480746008C76D0 /* CG.cpp in Sources */,
 				3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */,
 				3D15D4910BD3A6E000CEB4C6 /* AFunction.cpp in Sources */,
 				3D15D4930BD3A6E000CEB4C6 /* AFunction2.cpp in Sources */,
@@ -893,7 +878,6 @@
 				3D15D48E0BD3A6D500CEB4C6 /* SetOfE4.cpp in Sources */,
 				3D15D47D0BD3A6BF00CEB4C6 /* eigenvalue.cpp in Sources */,
 				3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */,
-				3DC023182148072B008C76D0 /* SparseLinearSolver.cpp in Sources */,
 				3D15D4710BD3A6AE00CEB4C6 /* BamgFreeFem.cpp in Sources */,
 				3D15D4720BD3A6AE00CEB4C6 /* CheckPtr.cpp in Sources */,
 				3D15D4730BD3A6AE00CEB4C6 /* Element_P2h.cpp in Sources */,

@@ -48,7 +48,21 @@ endian.hpp \
 ff++.hpp \
 ../Eigen/arpackff.hpp \
 ../femlib/splitsimplex.cpp AFunction_ext.hpp \
-ffapi.hpp P1IsoValue.cpp	P1IsoValue.hpp
+ffapi.hpp P1IsoValue.cpp	P1IsoValue.hpp \
+../femlib/HashMatrix.hpp \
+../femlib/VirtualMatrix.hpp \
+../femlib/SparseLinearSolver.hpp \
+../femlib/VirtualSolverCG.hpp \
+../femlib/VirtualSolver.hpp \
+../femlib/MatriceCreuse_tpl.hpp \
+../femlib/MatriceElementaire.hpp \
+../femlib/CG.hpp \
+../femlib/CG.cpp \
+../femlib/SkyLineSolver.hpp \
+../femlib/SparseLinearSolver.cpp \
+../femlib/SolverSkyLine.hpp \
+../femlib/VirtualSolverSparseSuite.hpp \
+../femlib/VirtualSolverSkyLine.hpp 
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
 
