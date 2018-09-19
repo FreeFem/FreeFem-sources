@@ -12,6 +12,7 @@ class VirtualMatrix: public RefCounter {
 public:
      typedef TypeIndex I;
     typedef TypeScalar R;
+    typedef VirtualMatrix<I,R> VMat ;
     typedef void (*ERRORFunc)(int i,const char *cmm);
     ERRORFunc ERRORHandle;
     class VSolver {public:
@@ -85,7 +86,7 @@ public:
     virtual R * pij(I i,I j) const =0; // Add FH
 
     virtual HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not
-    virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
+    virtual bool addMatTo(R coef,HashMatrix<I,R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
     virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire
     virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
     virtual void setdiag(const KN_<R> & x)=0 ;
@@ -98,7 +99,7 @@ public:
     virtual  void  resize(I n,I m)  {AFAIRE("~VirtualMatrix::resize");}
    virtual R trace() const {ffassert(n==m);  R t=R(), *p;  for(int i=0; i<n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
    virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<n; ++i)  if(wbc[i]) SetBC(i,tgv);}
-
+  //  void init(int nn=0,int mm=0) { VMat *p=new VMat(nn,mm);  }
 };
 
 

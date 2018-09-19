@@ -25,8 +25,8 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef REMOVE_CODE
-  to do  F. HECHT
+#ifndef REMOVE_CODE
+ // to do  F. HECHT
 #ifdef __MWERKS__
 #pragma optimization_level 0
 //#pragma inline_depth(0) 
@@ -617,89 +617,14 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     if( !A->A) A->A.master(new MatriceMorse<R>());//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
     bool VF=false;
-   // bool factorize=false;
     ds.factorize=false;
-    /*
-  long NbSpace = 50; 
-  long itmax=0; 
-  double epsilon=1e-6;
-//  bool VF=false;
-//  VF=isVF(op->largs);
- // assert(!VF); 
-  double tgv = ff_tgv;
-  double tol_pivot=-1;
-  double tol_pivot_sym=-1;
-  
-  KN<int>  param_int;
-  KN<double> param_double; 
-  string *param_char=NULL;
-  KN<int> perm_r; 
-  KN<int> perm_c;
-  string *file_param_int;  // Add J. Morice 02/09 
-  string *file_param_double; 
-  string* file_param_char;
-  string* file_param_perm_r;
-  string* file_param_perm_c;  
-*/
-// type de matrice par default 
+
   TypeSolveMat tmat= TypeSolveMat::defaultvalue; 
   if(   tmat !=  TypeSolveMat::SparseSolver  )    
     tmat=TypeSolveMat::GMRES;
- ds.typemat=&tmat; 
- SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);  
-/*     
-  TypeSolveMat    *typemat=&tmat;
-  bool initmat=true;
-  int strategy=0; 
-   
-  if (nargs[0]) ds.initmat= ! GetAny<bool>((*nargs[0])(stack));
-  if (nargs[1]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
-  if (nargs[2]) ds.epsilon= GetAny<double>((*nargs[2])(stack));
-  // 3 precon 
-  if (nargs[4]) ds.NbSpace= GetAny<long>((*nargs[4])(stack));
-  if (nargs[6]) ds.tgv= GetAny<double>((*nargs[6])(stack));
-  if (nargs[7]) ds.factorize= GetAny<bool>((*nargs[7])(stack));
-  
-  if (nargs[8]) ds.strategy = GetAny<long>((*nargs[8])(stack)); 
-  if (nargs[9]) ds.tol_pivot = GetAny<double>((*nargs[9])(stack)); 
-  if (nargs[10]) ds.tol_pivot_sym = GetAny<double>((*nargs[10])(stack)); 
-  if (nargs[11]) ds.itmax = GetAny<long>((*nargs[11])(stack)); //  frev 2007 OK
-   
-
-  if (nargs[12]) ds.param_int= GetAny< KN<int> >((*nargs[12])(stack));  // Add J. Morice 02/09 
-  if (nargs[13]) ds.param_double= GetAny< KN<double> >((*nargs[13])(stack));
-  if (nargs[14]) ds.param_char= GetAny< string * >((*nargs[14])(stack));  //
-  if (nargs[15]) ds.perm_r = GetAny< KN<int > >((*nargs[15])(stack));
-  if (nargs[16]) ds.perm_c = GetAny< KN<int> >((*nargs[16])(stack));  //
-  if (nargs[17]) ds.file_param_int= GetAny< string* >((*nargs[17])(stack));  // Add J. Morice 02/09 
-  if (nargs[18]) ds.file_param_double= GetAny< string* >((*nargs[18])(stack));
-  if (nargs[19]) ds.file_param_char= GetAny< string* >((*nargs[19])(stack));  //
-  if (nargs[20]) ds.file_param_perm_r = GetAny< string* >((*nargs[20])(stack));
-  if (nargs[21]) ds.file_param_perm_c = GetAny< string* >((*nargs[21])(stack));  //
-*/
-
-
-   if(A->typemat.profile != ds.typemat->profile) 
-   {
-     cerr << " type of matrix " << A->typemat<<endl;
-     cerr << " type of matrix for solver " <<*ds.typemat<<endl;
-     
-     ExecError(" Set incompatibility between solver and type of matrix");
-   }
-  if( ds.factorize ) {
-    MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A->A);
-    assert(pf);
-    switch (ds.typemat->t) {
-    case TypeSolveMat::LU: pf->LU(Abs(ds.epsilon));break;
-    case TypeSolveMat::CROUT: pf->crout(Abs(ds.epsilon));break;
-    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(ds.epsilon));break;
-    default: ExecError("Sorry no factorization for this type for matrix"); 
-    }
-    
-  }    
-  SetSolver<R>(stack,VF,*A->A,ds) ;/*stack,*A->A,typemat,VF,epsilon,NbSpace,itmax,precon,strategy,tgv,tol_pivot,tol_pivot_sym, 
-	       param_int, param_double, param_char, perm_r, perm_c, file_param_int, file_param_double, 
-	       file_param_char, file_param_perm_r, file_param_perm_c);*/
+  ds.typemat=&tmat;
+  SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+    SetSolver<R>(stack,VF,*A->A,ds);
 
   return Nothing; 
 }
@@ -738,7 +663,7 @@ AnyType SetMatrixInterpolation3(Stack,Expression ,Expression);
 //------
 
 template<class R>
-void BuildCombMat(map< pair<int,int>, R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
+void BuildCombMat(MatriceMorse<R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
 {
   double eps0=numeric_limits<double>::min();
   int i,j;
@@ -755,9 +680,9 @@ void BuildCombMat(map< pair<int,int>, R> & mij,const KNM_<R> & A, int ii00=0,int
 
 }
 
-void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpace & Vh,void *data)
+MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh,void *data)
 {  //  Uh = Vh 
-
+    MatriceMorse<R> * m=0;
   int op=op_id; //  value of the function
   bool transpose=false;
   bool inside=false;
@@ -778,17 +703,10 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
            << "                            just  inside = " << inside << endl;
     }
   using namespace Fem2D;
-  int n=Uh.NbOfDF;
-  int mm=Vh.NbOfDF;
-  if(transpose) Exchange(n,mm);
-  m->half = false;
-  m->dummy=false;
-  m->a=0;
-  m->lg=0;
-  m->cl=0;
-  m->nnz=0;
-  m->n=n;
-  m->m=mm;
+    int n=Uh.NbOfDF;
+    int mm=Vh.NbOfDF;
+ if(transpose) Exchange(n,mm);
+  m = new MatriceMorse<R>(n,mm);
   int n1=n+1;
   const  Mesh & ThU =Uh.Th; // line 
   const  Mesh & ThV =Vh.Th; // colunm
@@ -848,9 +766,9 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
    whatd[op]=true; // the value of function
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
-  map< pair<int,int> , double > sij; 
+  //map< pair<int,int> , double > sij;
   
-  for (int step=0;step<2;step++) 
+ // for (int step=0;step<2;step++)
    {
       
 	  for (int it=0;it<ThU.nt;it++)
@@ -919,14 +837,8 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 				      R c= fbj[idfv]*aipj;
 				      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 				      if(Abs(c)>eps)
-					  //
-					  sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
-				      /*   
-				       if(step==0)
-				       sij.insert(make_pair(i,j));
-				       else	                  
-				       (*m)(i,j)=c;
-				       */
+                                          (*m)(ii,jj) += c;
+					//  sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
 				  }
 			}
 	                      
@@ -940,7 +852,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	       
 	       
 	    }
-	    if (step==0)
+/*	    if (step==0)
 	     {
 	         nnz = sij.size();
 	         cl = new int[nnz];
@@ -969,13 +881,16 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
              m->nnz=nnz;
              fait=false;
 	     }
+ */
     }
-    sij.clear();
+   // sij.clear();
   //assert(0); // a faire to do
+    return m;
 }
 
-void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESpace3 & Vh,void *data)
-{  //  Uh = Vh 
+MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & Vh,void *data)
+{  //  Uh = Vh
+    MatriceMorse<R> * m=0;
     typedef FESpace3::Mesh Mesh;
     typedef FESpace3::FElement  FElement;
     typedef Mesh::Element  Element;
@@ -1005,14 +920,9 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     int n=Uh.NbOfDF;
     int mm=Vh.NbOfDF;
     if(transpose) Exchange(n,mm);
-    m->half = false;
-    m->dummy=false;
-    m->a=0;
-    m->lg=0;
-    m->cl=0;
-    m->nnz=0;
-    m->n=n;
-    m->m=mm;
+    m = new MatriceMorse<R>(n,mm);
+
+
     int n1=n+1;
     const  Mesh & ThU =Uh.Th; // line 
     const  Mesh & ThV =Vh.Th; // colunm
@@ -1035,24 +945,14 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     FElement Uh0 = Uh[0];
     FElement Vh0 = Vh[0];
     
-   // FElement::aIPJ ipjU(Uh0.Pi_h_ipj()); 
-   // FElement::aR2  PtHatU(Uh0.Pi_h_R2()); 
-    
-    //  FElement::aIPJ ipjV(Vh0.Pi_h_ipj()); 
-    // FElement::aR2  PtHatV(Vh0.Pi_h_R2()); 
     
     int nbdfVK= Vh0.NbDoF();
-    //  int nbdfUK= Uh0.NbDoF();
     int NVh= Vh0.N;
-   // int NUh= Uh0.N;
-    
-    //ffassert(NVh==NUh); 
     
     InterpolationMatrix<RdHat> ipmat(Uh);    
   
     int nbp=ipmat.np; // 
-    //  int nbc= ipjU.N(); // 
-    KN<RdHat> PV(nbp);   //  the PtHat in ThV mesh
+     KN<RdHat> PV(nbp);   //  the PtHat in ThV mesh
     KN<int> itV(nbp); // the Triangle number
     KN<bool> intV(nbp); // ouside or not 
    // KN<R>   AipjU(ipjU.N());
@@ -1065,13 +965,12 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     KN<R> kv(sfb1*nbp);
     R * v = kv;
     KN<int> ik(nbp); // the Triangle number
-    //   KNMK_<R> fb(v+ik[i],VhV0.NbDoF,VhV0.N,1); //  the value for basic fonction
-    op= op==3 ? op_dz : op; //   renumber op ????  dec 2010 FH. 
+    op= op==3 ? op_dz : op; //   renumber op ????  dec 2010 FH.
     What_d whatd= 1<< op;
     KN<bool> fait(Uh.NbOfDF);
     fait=false;
-    map< pair<int,int> , double > sij; 
-    for (int step=0;step<2;step++) 
+   // map< pair<int,int> , double > sij;
+  //  for (int step=0;step<2;step++)
       {
 	
 	for (int it=0;it<ThU.nt;it++)
@@ -1141,8 +1040,9 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 			      R c= fbj[idfv]*aipj;
 			      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 			      if(Abs(c)>eps)
+                                  (*m)(ii,jj) += c;
 				  //
-				  sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
+				 // sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
 			      /*   
 			       if(step==0)
 			       sij.insert(make_pair(i,j));
@@ -1162,7 +1062,7 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	    
 	    
 	  }
-	if (step==0)
+/*	if (step==0)
 	  {
 	    nnz = sij.size();
 	    cl = new int[nnz];
@@ -1190,10 +1090,11 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	    m->a=a;
 	    m->nnz=nnz;
 	    fait=false;
-	  }
+	  }*/
       }
-    sij.clear();
+   // sij.clear();
     //assert(0); // a faire to do
+    return m;
 }
 
 
@@ -1249,10 +1150,10 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
    whatd[op]=true; // the value of function
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
-   map< pair<int,int> , double > sij; 
+   //map< pair<int,int> , double > sij;
    R2 Phat;
    bool outside;
-   
+    MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
    for(int ii=0;ii<nbxx;ii++)
    {
      const Triangle *ts=ThU.Find(R2(xx[ii],yy[ii]),Phat,outside); 
@@ -1269,12 +1170,13 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
         if(transpose) Exchange(i,j);
         R c = Fwi(idfu);
 	if(Abs(c)>eps)
-	  sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
+            (*m)(i,j) += c;
+	 // sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
       }
       }
   
-   MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,sij,false);
-    sij.clear();
+  
+  //  sij.clear();
    return m;
   //assert(0); // a faire to do
 }
@@ -1333,7 +1235,8 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
     What_d whatd= 1 <<op;
     KN<bool> fait(Uh.NbOfDF);
     fait=false;
-    map< pair<int,int> , double > sij; 
+   // map< pair<int,int> , double > sij;
+     MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
     Rd Phat;
     bool outside;
     
@@ -1353,12 +1256,13 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 	    if(transpose) Exchange(i,j);
 	    R c = Fwi(idfu);
 	    if(Abs(c)>eps)
-		sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
+                (*m)(i,j) += c;
+		//sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
 	  }
       }
     
-    MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,sij,false);
-    sij.clear();
+   // MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,sij,false);
+   // sij.clear();
     return m;
     //assert(0); // a faire to do
 }
@@ -1410,8 +1314,7 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   //sparse_mat->pVh=pVh;
   if(!init) sparse_mat->init();
   sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
-  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+  sparse_mat->A.master(buildInterpolationMatrix(*Uh,*Vh,data));
   }
   else 
   {  // new cas mars 2006
@@ -1473,11 +1376,8 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
 	  ffassert(Vh);
 	  ffassert(Uh);
 	  if(!init) sparse_mat->init();
-	  //  sparse_mat->pUh=pUh;
-	  //sparse_mat->pVh=pVh;
 	  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-	  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
-	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+	  sparse_mat->A.master(buildInterpolationMatrix(*Uh,*Vh,data));	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
       }
     else 
       {  // new cas mars 2006
@@ -1522,8 +1422,8 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
     cerr << "  --MatProd " << mA->n<< " "<< mA->m << " x " << mB->n<< " "<< mB->m <<  endl;
     ExecError(" Wrong mat dim in MatProd");
   }
-  MatriceMorse<RAB> *mAB=new MatriceMorse<RA>();
-  mA->prod(*mB,*mAB);
+   MatriceMorse<RAB> *mAB=new MatriceMorse<RAB>(mA->n,mB->m);
+  AddMul(*mA,*mB,*mAB);
   if(!init) sparse_mat->init();
   sparse_mat->typemat=(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(mAB);

@@ -4,12 +4,17 @@
 #include <cstddef>
 #include <algorithm>
 #include <map>
+#include <list>
+
+#include <tuple>
+using std::tuple;
 #include <iostream>
 #include <cassert>
 #include <complex>
 #include <cstdint>
 #include "RNM.hpp"
 #include "RefCounter.hpp"
+
 using std::max;
 using std::min;
 using std::cout;
@@ -17,13 +22,17 @@ using std::endl;
 using std::pair;
 using std::swap;
 using std::complex;
-
+using std::list;
 extern  long  verbosity  ;
 
 template<class Z>
 inline uint64_t  roll64(Z y,int r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
 
 #include "VirtualMatrix.hpp"
+static   inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
+    // warning trans sub  matrix and not the block.
+    return trans ? make_pair<int,int>(j+ii00,i+jj00)
+    :  make_pair<int,int>(i+ii00,j+jj00) ; }
 
 template<class TypeIndex,class TypeScalaire>
 class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire>
@@ -181,6 +190,10 @@ public:
            code^=roll64(j[k],++kk);
         }
     }
+    void init(I nn,I mm=-1,size_t nnnz=0,bool halff=false)
+    {
+        new (this) HashMatrix(nn,mm,nnnz,halff); // OK .. 
+    }
     
     HashMatrix(I nn,I mm=-1,size_t nnnz=0,bool halff=false)
     :  VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
@@ -268,6 +281,26 @@ public:
         operator=(A);
     }
     
+    template<class K>
+    HashMatrix(const HashMatrix<I,K> &A , R (*ff)(K)=0 )
+    :  VirtualMatrix<I,R> (A), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
+    i(0),j(0),aij(0)  ,
+    head(0), next(0),
+    //trans(false),
+    half(false),  state(unsorted),type_state(type_HM),nbsort(0),
+    sizep(0),lock(0), fortran(0),re_do_numerics(0),re_do_symbolic(0)
+    {
+        Increaze(A.nnz);
+        if( ff ==0)
+          operator=(A);
+        else
+        {
+          pair<R,const HashMatrix<I,K>*> fp(ff,&A);
+          operator+=(fp);
+    }
+    }
+  
+    
     void CheckUnLock(const char * cmm)
     {
         if( lock)
@@ -296,8 +329,11 @@ public:
                 p[ii]=empty;
         sizep=sp;
     }
-    void resize(int nn,int mm=0)
+    void resize(I nn, I mm=0)  {resize(nn,mm);}
+        
+    void resize(I nn, I mm,I nnnz )
     {
+
         mm= mm ? mm : nn;
         if( mm>this->m ) this->m=mm;
         if (nn>this->n ) this->n = nn;
@@ -311,9 +347,11 @@ public:
                 aij[kk] = aij[k];
                 ++kk;
             }
-        bool resize = kk*1.4 < nnz;
-        nnz=kk;
-        if(resize) Increaze();
+        
+        nnnz = max(nnnz,kk);
+        bool rresize = (nnnz < 0.8*nnz) || ((nnnz > 1.2*nnz)) ;
+        
+        if(rresize) Increaze(nnnz);
         else ReHash();
         state= unsorted;
         type_state=type_COO;
@@ -485,6 +523,8 @@ public:
     
     R    operator()(pair<I,I> ij)  const {return operator()(ij.first,ij.second);}
     R &  operator()(pair<I,I> ij)  {return operator()(ij.first,ij.second);}
+    R    operator[](pair<I,I> ij)  const {return operator()(ij.first,ij.second);}
+    R &  operator[](pair<I,I> ij)  {return operator()(ij.first,ij.second);}
     ~HashMatrix()
     {
         if(nbfind && verbosity>4)
@@ -521,13 +561,14 @@ public:
             nbsort++;
         }
     }
-    
-    void operator=(const HashMatrix&A)
+    template<class K>
+    void operator=(const HashMatrix<I,K> &A)
     {
         if( this == & A) return;
         clear();
         this->n=A.n;
         this->m=A.m;
+        nnz =0; // empty matrice
         //nnz=0;
         nhash=A.nhash;// ????????
         //  nbcollision=0;
@@ -541,14 +582,15 @@ public:
         lock=0;
         re_do_numerics=1;
         re_do_symbolic=1;
-        
         operator+=(A);
+  
     }
-    void operator+=(const HashMatrix&A)
+    template<class K>
+    void operator+=(const HashMatrix<I,K> &A)
     {
-        this->n = max(this->n,A.n);
-        this->m = max(this->m,A.m);
-        
+        I nn = max(this->n,A.n);
+        I mm = max(this->m,A.m);
+        resize(nn,mm);
         if( this == & A)
             for(int k=0; k < nnz; ++k)
                 aij[k] += aij[k];
@@ -564,11 +606,36 @@ public:
                 operator()(A.i[k],A.j[k]) += A.aij[k];
         }
     }
+    template<class K>
+    void operator+=( pair<R (*)(K) ,const HashMatrix<I,K>*> pp)
+    {
+        R (*ff)(K) = pp.first;
+        const HashMatrix<I,K> &A= *pp.second;
+        I nn = max(this->n,A.n);
+        I mm = max(this->m,A.m);
+        resize(nn,mm,0);
+
+        if( this == & A)
+            for(int k=0; k < nnz; ++k)
+                aij[k] += ff(aij[k]);
+        else
+        {   if ( this->half!= A->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+            size_t nnzm= min(nnz,A.size()) ;
+            for(size_t k=0;k<nnzm;++k)
+                if( (i[k]==A.i[k]) && (j[k]==A.j[k]))
+                    aij[k] += f(A.aij[k]); // Optim...
+                else
+                    operator()(A.i[k],A.j[k]) += A.aij[k];
+            for(size_t  k=nnzm+1;k<A.size();++k)
+                operator()(A.i[k],A.j[k]) += ff( A.aij[k]);
+        }
+    }
     
-    void operator+=( pair<R,const HashMatrix*> pp)
+    template<class K>
+    void operator+=( pair<R,const HashMatrix<I,K>*> pp)
     {
         const R  aa = pp.first;
-        const HashMatrix &A= *pp.second;
+        const HashMatrix<I,K> &A= *pp.second;
         this->n = max(this->n,A.n);
         this->m = max(this->m,A.m);
         
@@ -576,15 +643,15 @@ public:
             for(int k=0; k < nnz; ++k)
                 aij[k] += aa*aij[k];
         else
-        {   if ( this->half!= this->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+        {   if ( this->half!= A->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
             size_t nnzm= min(nnz,A.size()) ;
             for(size_t k=0;k<nnzm;++k)
                 if( (i[k]==A.i[k]) && (j[k]==A.j[k]))
-                    aij[k] += aa*A.aij[k]; // Optim...
+                    aij[k] += aa*(R)A.aij[k]; // Optim...
                 else
                     operator()(A.i[k],A.j[k]) += A.aij[k];
             for(size_t  k=nnzm+1;k<A.size();++k)
-                operator()(A.i[k],A.j[k]) += aa*A.aij[k];
+                operator()(A.i[k],A.j[k]) += aa*(R) A.aij[k];
         }
     }
     
@@ -913,10 +980,7 @@ public:
             }
 
     }
-  static   inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
-        // warning trans sub  matrix and not the block.
-        return trans ? make_pair<int,int>(j+ii00,i+jj00)
-        :  make_pair<int,int>(i+ii00,j+jj00) ; }
+ 
     
  void addMap(R coef,std::map< pair<I,I>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.)
     {
@@ -931,7 +995,7 @@ public:
             operator()(ii,jj) += cmij;
         }
     }
- bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)
+ bool addMatTo(R coef,HashMatrix<I,R> & mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)
     {
 
         double eps0=max(numeric_limits<double>::min(),threshold);
@@ -1016,8 +1080,8 @@ public:
 };
 
 // END OF CLASS HashMatrix
-template<class I,class R>
-void AddMul(HashMatrix<I,R> &A, HashMatrix<I,R> &B, HashMatrix<I,R> &AB,R c=R(1))
+template<class I,class RA,class RB=RA,class RAB=RA>
+void AddMul(HashMatrix<I,RA> &A, HashMatrix<I,RB> &B, HashMatrix<I,RAB> &AB,R c=R(1))
 {
     AB.checksize(A.n,B.m);
     assert(A.m == B.n);
@@ -1053,4 +1117,103 @@ std::ostream & operator<<(std::ostream & coutt,  const HashMatrix<I,R> &A)
             coutt << k << " "<< A.p[k] << endl;
     return coutt;
 }
+
+template<class R>
+tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+{
+
+    typedef typename list<tuple<R,HashMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
+    
+    lconst_iterator begin=lM.begin();
+    lconst_iterator end=lM.end();
+    lconst_iterator i;
+ 
+    
+    int n=0,m=0;
+    bool sym=true;
+    for(i=begin;i!=end&&sym;i++++)
+    {
+        if(i->second) // M == 0 => zero matrix
+        {
+            HashMatrix<int,R>& M=*i->second;
+            if(!M.sym())
+                sym = false;
+        }
+    }
+    
+    for(i=begin;i!=end;i++++)
+    {
+        if(i->second) // M == 0 => zero matrix
+        {
+            HashMatrix<int,R> & M=*i->second;
+            bool transpose = i->third !=  trans;
+            ffassert( &M);
+            R coef=i->first;
+            if(verbosity>3)
+                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
+           { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
+           
+            M.addMatTo(coef,mij,transpose,ii00,jj00,transpose&&cnj,0.0,sym);
+        }
+    }
+    int nbcoef=mij.size();
+    
+    // return new   MatriceMorseOld<R>(n,m,mij,sym);
+    return make_tuple(n,m,sym);
+}
+
+template<class R>
+tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+{
+    
+    typedef typename list<tuple<R,HashMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
+    
+    lconst_iterator begin=lM.begin();
+    lconst_iterator end=lM.end();
+    lconst_iterator i;
+    
+    
+    int n=0,m=0;
+    bool sym=true;
+    for(i=begin;i!=end&&sym;i++++)
+    {
+        if(i->second) // M == 0 => zero matrix
+        {
+            HashMatrix<int,R>& M=*i->second;
+            if(!M.sym())
+                sym = false;
+        }
+    }
+    
+    for(i=begin;i!=end;i++++)
+    {
+        if(i->second) // M == 0 => zero matrix
+        {
+            HashMatrix<int,R> & M=*i->second;
+            bool transpose = i->third !=  trans;
+            ffassert( &M);
+            R coef=i->first;
+            if(verbosity>3)
+                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
+            { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
+            
+        }
+    }
+    
+    return make_tuple(n,m,sym);
+}
+
+template<class R>
+HashMatrix<int,R>* BuildCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00)
+{
+    
+ 
+    auto nmsym=nmCombMat(lM,trans,ii00,jj00);
+    HashMatrix<int,R> *  mij= new HashMatrix<int,R>(std::get<0>(nmsym),std::get<1>(nmsym),0,mij,std::get<2>(nmsym));
+    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00);
+    
+    return mij;
+    
+}
+
 #endif
