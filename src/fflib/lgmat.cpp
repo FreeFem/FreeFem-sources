@@ -79,24 +79,24 @@ extern const basicForEachType *aatypeknlongp; //// for  compilation error with g
 //  MatriceCreuse    real class for matrix sparse
 //  Matrice_Creuse   class for matrix sparse +  poiteur on FE space def 
 //         to recompute matrice in case of mesh change
-//  list<triplet<R,MatriceCreuse<R> *,bool> > * is liste of 
+//  list<tuple<R,MatriceCreuse<R> *,bool> > * is liste of
 //  \sum_i a_i*A_i  where a_i is a scalare and A_i is a sparse matrix
 //
  
 
 
 template<class R> 
-list<triplet<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse<R> * M)
+list<tuple<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse<R> * M)
 {
-  list<triplet<R,MatriceCreuse<R> *,bool> >  * l=new list<triplet<R,MatriceCreuse<R> *,bool> >;
-   l ->push_back(make_triplet<R,MatriceCreuse<R> *,bool>(1,M->A,false));
+  list<tuple<R,MatriceCreuse<R> *,bool> >  * l=new list<tuple<R,MatriceCreuse<R> *,bool> >;
+   l ->push_back(make_tuple<R,MatriceCreuse<R> *,bool>(1,M->A,false));
   return  l;
 }
 template<class R> 
-list<triplet<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse_Transpose<R>  M)
+list<tuple<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse_Transpose<R>  M)
 {
-  list<triplet<R,MatriceCreuse<R> *,bool> >  * l=new list<triplet<R,MatriceCreuse<R> *,bool> >;
-   l ->push_back(make_triplet<R,MatriceCreuse<R> *,bool>(1,M.A->A,true));
+  list<tuple<R,MatriceCreuse<R> *,bool> >  * l=new list<tuple<R,MatriceCreuse<R> *,bool> >;
+   l ->push_back(make_tuple<R,MatriceCreuse<R> *,bool>(1,M.A->A,true));
   return  l;
 }
 
@@ -115,9 +115,9 @@ AnyType tM2L3 (Stack , const AnyType & pp)
 
 
 template<class R> 
-struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
+struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,MatriceCreuse<R> *,bool> > *>
  { 
-   typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+   typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
    typedef R  AA;
@@ -126,14 +126,15 @@ struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<triplet<R,M
  static  RR f(const   AA & a,const   BB & b)  
   {
     RR r=  new list<P> ;
-    r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b->A,false));
+    P p(a,b->pMC(),false);
+    r ->push_back(p);
     return r;}
 };
 
 template<class R> 
-struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
+struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
  { 
-   typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+   typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
    typedef R  AA;
@@ -142,15 +143,16 @@ struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<triplet<R,M
  static  RR f(const   BB & b,const   AA & a)  
   {
     RR r=  new list<P> ;
-    r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b->A,false));
+    P p(a,b->pMC(),false);
+    r ->push_back(p);
     return r;}
 };
 //  ADD FH 16/02/2007
 
 template<class R> 
-struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
+struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<tuple<R,MatriceCreuse<R> *,bool> > *>
 { 
-    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
     typedef R  AA;
@@ -159,14 +161,15 @@ struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<t
     static  RR f(const   AA & a,const   BB & b)  
     {
 	RR r=  new list<P> ;
-	r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b.A->A,true));
+        P p(a,b.A->pMC(),true);
+	r ->push_back(p);
 	return r;}
 };
 
 template<class R> 
-struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<triplet<R,MatriceCreuse<R> *,bool> > *> 
+struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
 { 
-    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
     typedef R  AA;
@@ -175,7 +178,8 @@ struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<t
     static  RR f(const   BB & b,const   AA & a)  
     {
 	RR r=  new list<P> ;
-	r ->push_back(make_triplet<R,MatriceCreuse<R> *>(a,b.A->A,true));
+        P p(a,b.A->pMC(),true);
+	r ->push_back(p);
 	return r;}
 };
 // FIN ADD 16/02/2007
@@ -183,29 +187,29 @@ struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<t
 
 
 template<class R> 
-struct Op1_LCMd: public unary_function<list<triplet<R,MatriceCreuse<R> *,bool> > *,
-list<triplet<R,MatriceCreuse<R> *,bool> > *  >
+struct Op1_LCMd: public unary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
+list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 {  //  - ...
-    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
     
     static   RR f(const RR & l)  
     { 
-	typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::iterator lci;
+	typedef typename list<tuple<R,MatriceCreuse<R> *,bool> >::iterator lci;
 	for (lci i= l->begin();i !=l->end();++i)
-	    i->first *= R(-1);
+             get<0>(*i) *= R(-1);
 	return l;
     }    
     
 };
 
 template<class R> 
-struct Op2_ListCMCMadd: public binary_function<list<triplet<R,MatriceCreuse<R> *,bool> > *,
-                                               list<triplet<R,MatriceCreuse<R> *,bool> > *,
-                                               list<triplet<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
+                                               list<tuple<R,MatriceCreuse<R> *,bool> > *,
+                                               list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 {  //  ... + ...
-   typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+   typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
 
@@ -219,11 +223,11 @@ struct Op2_ListCMCMadd: public binary_function<list<triplet<R,MatriceCreuse<R> *
     
 };
 template<class R>
-struct Op2_ListCMCMsub: public binary_function<list<triplet<R,MatriceCreuse<R> *,bool> > *,
-list<triplet<R,MatriceCreuse<R> *,bool> > *,
-list<triplet<R,MatriceCreuse<R> *,bool> > *  >
+struct Op2_ListCMCMsub: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
+list<tuple<R,MatriceCreuse<R> *,bool> > *,
+list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 {  //  ... + ...
-    typedef triplet<R,MatriceCreuse<R> *,bool>  P;
+    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
     
@@ -240,10 +244,10 @@ list<triplet<R,MatriceCreuse<R> *,bool> > *  >
 
 template<class R,int cc=1>
 struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
-                                              list<triplet<R,MatriceCreuse<R> *,bool> > *,                                               
-                                               list<triplet<R,MatriceCreuse<R> *,bool> > *  >
+                                              list<tuple<R,MatriceCreuse<R> *,bool> > *,
+                                               list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 {  //  M + ....
-   typedef triplet<R,MatriceCreuse<R> *,bool> P;
+   typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
    typedef Matrice_Creuse<R> * MM;
@@ -251,7 +255,7 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
   static   RR f(const MM & a,const RR & b)  
   { 
     
-    b->push_front(make_triplet<R,MatriceCreuse<R> *>(R(cc),a->A,false));
+    b->push_front(make_tuple<R,MatriceCreuse<R> *>(R(cc),a->A,false));
     return b;
   }
     
@@ -259,11 +263,11 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
 };
 
 template<class R,int cc=1>
-struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *,bool> > *,                                                                                              
+struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,bool> > *,
                                                Matrice_Creuse<R> * ,
-                                               list<triplet<R,MatriceCreuse<R> *,bool> > *>
+                                               list<tuple<R,MatriceCreuse<R> *,bool> > *>
 {  //   .... + M
-   typedef triplet<R,MatriceCreuse<R> *,bool> P;
+   typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
    typedef Matrice_Creuse<R> * MM;
@@ -271,7 +275,7 @@ struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *
   static   RR f(const RR & a,const MM & b)  
   { 
     
-    a->push_back(make_triplet<R,MatriceCreuse<R> *,bool>(R(cc),b->A,false));
+    a->push_back(make_tuple<R,MatriceCreuse<R> *,bool>(R(cc),b->A,false));
     return a;
   }
     
@@ -281,9 +285,9 @@ struct Op2_ListCMMadd: public binary_function< list<triplet<R,MatriceCreuse<R> *
 template<class R,int cc=1>
 struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
                                               Matrice_Creuse<R> * ,
-                                              list<triplet<R,MatriceCreuse<R> *,bool> > *>
+                                              list<tuple<R,MatriceCreuse<R> *,bool> > *>
 {  //  M + M
-   typedef triplet<R,MatriceCreuse<R> *,bool> P;
+   typedef tuple<R,MatriceCreuse<R> *,bool> P;
    typedef list<P> L;
    typedef L * RR;
    typedef Matrice_Creuse<R> * MM;
@@ -291,7 +295,7 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
   static   RR f(const MM & a,const MM & b)  
   { 
     L * l=to(a);
-    l->push_back(make_triplet<R,MatriceCreuse<R> *>(R(cc),b->A,false));
+    l->push_back(make_tuple<R,MatriceCreuse<R> *>(R(cc),b->A,false));
     return l;
   }
     
@@ -614,7 +618,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
    
     ffassert(A);
-    if( !A->A) A->A.master(new MatriceMorse<R>());//  set to empty matrix .. mars 2014 FH ..
+    if( !A->A) A->A.master(new MatriceMorse<R>(0,0));//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
     bool VF=false;
     ds.factorize=false;
@@ -1438,10 +1442,10 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
   using namespace Fem2D;
   
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  list<triplet<R,MatriceCreuse<R> *,bool> > *  lcB = GetAny<list<triplet<R,MatriceCreuse<R> *,bool> >*>((*combMat)(stack));
+  list<tuple<R,HashMatrix<int,R> *,bool> > *  lcB = GetAny<list<tuple<R,HashMatrix<int,R> *,bool> >*>((*combMat)(stack));
   //  sparse_mat->pUh=0;
   // sparse_mat->pVh=0;
-   MatriceCreuse<R> * AA=BuildCombMat<R>(*lcB,false,0,0);
+  HashMatrix<int,R> * AA=BuildCombMat<R>(*lcB,false,0,0);
    if(!init) sparse_mat->init();
   sparse_mat->A.master(AA);
   sparse_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
@@ -1449,7 +1453,7 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
   return sparse_mat;
 }
 
-
+/*
 template<class R>
 AnyType MatriceCreuse2map(Stack , const AnyType & mat)
 {
@@ -1468,7 +1472,7 @@ AnyType MatriceCreuse2map(Stack , const AnyType & mat)
     }
   return M;
 }
-
+*/
 
 template<class R,int init>
 AnyType DiagMat(Stack stack,Expression emat,Expression edia)
@@ -1554,7 +1558,7 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
   
  return sparse_mat;
 }
-
+/*
 template<class R,int init>
 AnyType MatMap2Sparse(Stack stack,Expression emat,Expression eA)
 {
@@ -1580,7 +1584,7 @@ AnyType MatMap2Sparse(Stack stack,Expression emat,Expression eA)
   delete A; 
  return sparse_mat;
 }
-
+*/
 template<class RR,class AA=RR,class BB=AA> 
 struct Op2_pair: public binary_function<AA,BB,RR> { 
   static RR f(const AA & a,const BB & b)  
@@ -1601,9 +1605,9 @@ long get_mat_nbcoef(Matrice_Creuse<R> * p)
  { ffassert(p ) ;  return p->A ?p->A->NbCoef(): 0  ;}
 
 template<class R>
-pair<long,long> get_NM(const list<triplet<R,MatriceCreuse<R> *,bool> > & lM)
+pair<long,long> get_NM(const list<tuple<R,MatriceCreuse<R> *,bool> > & lM)
 {
-      typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
+      typedef typename list<tuple<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
@@ -1612,10 +1616,10 @@ pair<long,long> get_NM(const list<triplet<R,MatriceCreuse<R> *,bool> > & lM)
     long n=0,m=0;
     for(i=begin;i!=end;i++++)
      {
-       ffassert(i->second);
-       MatriceCreuse<R> & M=*i->second;
-       bool t=i->third;
-       int nn= M.n,mm=M.m;
+       ffassert(get<1>(*i));
+       MatriceCreuse<R> * M=get<1>(*i);
+       bool t=get<2>(*i);
+       int nn= M->n,mm=M->m;
        if (t) swap(nn,mm);
        if ( n==0) n =  nn;
        if ( m==0) m = mm;
@@ -2369,6 +2373,8 @@ public:
 	    
 	    AnyType operator()(Stack stack)  const 
 	    {
+                ffassert(0);
+                //V4
 		A  a=GetAny<A>((*Mat)(stack));
 		KN<long> *lg,*cl;
 		KN<RR> *cc;
@@ -2379,7 +2385,7 @@ public:
 		map<pair<int,int>,RR> *M=new map<pair<int,int>,RR>;
 		if (n >0 && m>0 && a->A) 
 		{
-		    a->A->addMatTo(RR(1.),*M);
+		   //V4  a->A->addMatTo(RR(1.),*M);
 		    // hack 
 		    (*M)[make_pair(n-1,m-1)]+=RR();
 		}
@@ -2426,7 +2432,8 @@ AnyType CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
     Matrice_Creuse<C> *Mat=CRMat; 
     int cas = CRMat.cas; 
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-    MatriceMorse<C> * mr=Mat->A->toMatriceMorse(false,false);
+    MatriceMorse<C> * mr=dynamic_cast<MatriceMorse<C> *> ((MatriceCreuse<C>*) Mat->A);
+    ffassert(mr); 
     MatriceMorse<R> * mrr = 0;
    // cout << " CopyMatC2R:  " << init << " " <<  sparse_mat <<endl;
     if(cas==0) 
@@ -2451,7 +2458,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
     int k= cc.N();
     int n= k;
     int m=n;
-    map< pair<int,int>, R> Aij;
+   // map< pair<int,int>, R> Aij;
     bool sym=false;
     if( lig && col)
     {
@@ -2460,25 +2467,22 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 	n = lg.max()+1;
 	m = cl.max()+1;
 	ffassert( lg.N()==k && cl.N()==k && lg.min()>=0 && lg.max()>=0);
+        amorse = new MatriceMorse<R>(n,m,k);
 	sym=false;
 	for(int i=0;i<k;++i)
-	    Aij[make_pair<int,int>(lg[i],cl[i])]+=cc[i];	
+	    (*amorse)[make_pair<int,int>(lg[i],cl[i])]+=cc[i];
     }
     else
     {
-	sym=true;
-	for(int i=0;i<n;++i)
-	    Aij[make_pair(i,i)]=cc[i];
+        amorse = new MatriceMorse<R>(n,cc);
     }
-    //cout <<  " nxm  =" <<n<< "x" << m <<endl; 
-    amorse=  new MatriceMorse<R>(n,m,Aij,sym); 
+
     if(verbosity)
 	cout << "  -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
     
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
     if( !init) sparse_mat->init();
-    // sparse_mat->pUh=0;
-    // sparse_mat->pVh=0; 
+
     sparse_mat->A.master(amorse);
     sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     
@@ -2488,7 +2492,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 }
 template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
-  typedef list<triplet<R,MatriceCreuse<R> *,bool> > * L;
+  typedef list<tuple<R,MatriceCreuse<R> *,bool> > * L;
    KNM<L> Bij(N,M);
    KNM<KNM_<R> * > Fij(N,M); 
    KNM<bool> cnjij(N,M); 
@@ -2598,24 +2602,26 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   }
   MatriceMorse<R> * amorse =0; 
 {
-   map< pair<int,int>, R> Aij;
+   //map< pair<int,int>, R> Aij;
+    HashMatrix<int,R>  *Aij = new  HashMatrix<int,R>( n, m,0);
     for (int i=0;i<N;++i)
      for (int j=0;j<M;++j) 
        if (Bij(i,j)) 
          {
            if(verbosity>3)
              cout << "  Add  Block S " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << " conj = " << cnjij(i,j) << endl;
-           BuildCombMat(Aij,*Bij(i,j),false,Oi(i),Oj(j),cnjij(i,j));
+             //V4  BuildCombMat(*Aij,*Bij(i,j),false,Oi(i),Oj(j),cnjij(i,j));
+             ffassert(0);
          }
        else if (Fij(i,j))
         {
            if(verbosity>3)
              cout << "  Add  Block F " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << endl;
-           BuildCombMat(Aij,*Fij(i,j),Oi(i),Oj(j),R(1.),cnjij(i,j));// BuildCombMat
+           BuildCombMat(*Aij,*Fij(i,j),Oi(i),Oj(j),R(1.),cnjij(i,j));// BuildCombMat
         }
         
            
-  amorse=  new MatriceMorse<R>(n,m,Aij,false); 
+    amorse=  Aij;
   }
   if(verbosity)
      cout << "  -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
@@ -2641,13 +2647,13 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 
 template<class R>
 class minusMat { public:
-    list<triplet<R,MatriceCreuse<R> *,bool> >  *l;
-    minusMat(list<triplet<R,MatriceCreuse<R> *,bool> > *ll):
-	l(new list<triplet<R,MatriceCreuse<R> *,bool> >(*ll) )
+    list<tuple<R,MatriceCreuse<R> *,bool> >  *l;
+    minusMat(list<tuple<R,MatriceCreuse<R> *,bool> > *ll):
+	l(new list<tuple<R,MatriceCreuse<R> *,bool> >(*ll) )
       {
-	    typedef typename list<triplet<R,MatriceCreuse<R> *,bool> >::iterator lci;
+	    typedef typename list<tuple<R,MatriceCreuse<R> *,bool> >::iterator lci;
 	    for (lci i= l->begin();i !=l->end();++i)
-		i->first*= R(-1);
+		get<0>(*i) *= R(-1);
       }
 };
 
@@ -2669,7 +2675,7 @@ AnyType mmM2L3 (Stack , const AnyType & pp)
 template<class R>
 AnyType mmM2L3c (Stack , const AnyType & pp)
 {
-    list<triplet<R,MatriceCreuse<R> *,bool> >  *  p(GetAny<minusMat<R> >(pp))
+    list<tuple<R,MatriceCreuse<R> *,bool> >  *  p(GetAny<minusMat<R> >(pp))
     minusMat<R> mpp(p.l);
     delete  p.l;
     return mpp.l;
@@ -2721,10 +2727,10 @@ class E_ForAllLoopMatrix
 };
 
 //  Mat real -> mat complex .... ??? FH.   april  2016 ....
-struct  VirtualMatCR :public VirtualMatrice<Complex> { public:
-    VirtualMatrice<double> & VM;
+struct  VirtualMatCR :public RNM_VirtualMatrix<Complex>{ public:
+   RNM_VirtualMatrix<double>& VM;
     typedef Complex R;
-    VirtualMatCR(VirtualMatrice<double> & MM): VirtualMatrice<Complex>(MM.N,MM.M),  VM(MM) {}
+    VirtualMatCR( RNM_VirtualMatrix<double> & MM): RNM_VirtualMatrix<Complex>(MM.N,MM.M),  VM(MM) {}
     void addMatMul(const KN_<R> &  cx, KN_<R> & cy) const {
         double *px = static_cast<double*>(static_cast<void*>(cx));
         double *py = static_cast<double*>(static_cast<void*>(cy));
@@ -2748,7 +2754,7 @@ struct  VirtualMatCR :public VirtualMatrice<Complex> { public:
     }
         bool WithSolver() const {return VM.WithSolver();} // by default no solver
     virtual void Solve( KN_<R> & cx ,const KN_<R> & cy) const
-    { if( !VM.WithSolver()) InternalError("VirtualMatrice::solve not implemented ");
+    { if( !VM.WithSolver()) InternalError("RNM_VirtualMatrix::solve not implemented ");
         double *px = static_cast<double*>(static_cast<void*>(cx));
         double *py = static_cast<double*>(static_cast<void*>(cy));
         KN_<double> rx(px+0,cx.N(),cx.step*2);
@@ -2775,7 +2781,8 @@ public:
         CODE( Expression aa0,Expression aa1) : a0(aa0), a1(aa1) {}  // extend (2th arg.)
         AnyType operator()(Stack s)  const
         {
-            VirtualMatrice<Complex>  *pv = new  VirtualMatCR ((*GetAny<A>((*a0)(s))).A);
+            RNM_VirtualMatrix<Complex> *pv = 0; //V4 new  VirtualMatCR ((*GetAny<A>((*a0)(s))).A);
+            ffassert(0);
             Add2StackOfPtr2Free(s,pv);
             return SetAny<R>(R(pv,GetAny<B>((*a1)(s))));
         }
@@ -2812,23 +2819,23 @@ void AddSparseMat()
  t_MC->SetTypeLoop(atype<  R* >(),atype<  long* >(),atype<  long* >());
     
 // basicForEachType * t_MCt=atype<  Matrice_Creuse_Transpose<R> >();
-// basicForEachType * t_lM=atype< list<triplet<R,MatriceCreuse<R> *,bool> > * >();
+// basicForEachType * t_lM=atype< list<tuple<R,MatriceCreuse<R> *,bool> > * >();
 // basicForEachType * t_nM=atype<  minusMat<R> >();
  
  basicForEachType * t_MM=atype<map< pair<int,int>, R> * >();
  
 TheOperators->Add("*", 
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >,
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >,
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > > ,
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAtxeqb,Matrice_Creuse_inv_trans<R>,KN_<R> > >
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >,
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >,
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > > ,
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::solveAtxeqb,Matrice_Creuse_inv_trans<R>,KN_<R> > >
         );
 
 /*if(0)
 TheOperators->Add("*", 
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >( 0  ,tkrp),
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >( 0 ,tkrp),
-        new OneBinaryOperator<Op2_mulvirtAv<typename VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > >( 0 ,tkrp)     
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >( 0  ,tkrp),
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >( 0 ,tkrp),
+        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > >( 0 ,tkrp)
         );
 */        
 TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
@@ -2842,8 +2849,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,1>), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,1>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R,1>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,1>) ,
+   //    new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R,1>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,1>) ,
        new OneOperatorCode<BlockMatrix1<R> >()
        
        );
@@ -2856,8 +2863,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>), 
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,0>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,0>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R,0>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<triplet<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>)
+     //V4  new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R,0>) ,
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>)
       
        
        );
@@ -2951,19 +2958,19 @@ TheOperators->Add("+",
    //   ; 
  map_type[typeid(map< pair<int,int>, R> *).name()]->AddCast(
      new E_F1_funcT<map< pair<int,int>, R> *,KNM<R>* >(Matrixfull2map<R>),
-     new E_F1_funcT<map< pair<int,int>, R> *,outProduct_KN_<R>* >(Matrixoutp2map<R>),
-     new E_F1_funcT<map< pair<int,int>, R> *,Matrice_Creuse<R>* >(MatriceCreuse2map<R>)
+     new E_F1_funcT<map< pair<int,int>, R> *,outProduct_KN_<R>* >(Matrixoutp2map<R>)
+     //, new E_F1_funcT<map< pair<int,int>, R> *,Matrice_Creuse<R>* >(MatriceCreuse2map<R>)
 
        ); 
 
- map_type[typeid(list<triplet<R,MatriceCreuse<R> *,bool> > *).name()]->AddCast(
-     new E_F1_funcT<list<triplet<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse<R>* >(M2L3<R>),
-     new E_F1_funcT<list<triplet<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse_Transpose<R> >(tM2L3<R>),						    
-     new E_F1_funcT<list<triplet<R,MatriceCreuse<R> *,bool> > *,minusMat<R> >(mM2L3<R> )
+ map_type[typeid(list<tuple<R,MatriceCreuse<R> *,bool> > *).name()]->AddCast(
+     new E_F1_funcT<list<tuple<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse<R>* >(M2L3<R>),
+     new E_F1_funcT<list<tuple<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse_Transpose<R> >(tM2L3<R>),
+     new E_F1_funcT<list<tuple<R,MatriceCreuse<R> *,bool> > *,minusMat<R> >(mM2L3<R> )
      );
  /*
  map_type[typeid(minusMat<R>).name()]->AddCast( 
-	new E_F1_funcT<minusMat<R>,list<triplet<R,MatriceCreuse<R> *,bool> > * >(mmM2L3<R> )
+	new E_F1_funcT<minusMat<R>,list<tuple<R,MatriceCreuse<R> *,bool> > * >(mmM2L3<R> )
 	//new E_F1_funcT<minusMat<R>,Matrice_Creuse<R>*  > * >(mmM2L3c<R> ),
 	//new E_F1_funcT<minusMat<R>,Matrice_Creuse_Transpose<R> > * >(mmM2L3ct<R> )
 						
@@ -3076,7 +3083,8 @@ template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pai
 template<class T>
 AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
       static const double defEPS=1e-12;
-    
+     ffassert(0);
+   // code wri-ng no ...
     Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
     Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
     KN<T>* pX = x ? GetAny<KN<T>* >((*x)(stack)) : 0;
@@ -3193,8 +3201,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         delete [] mA->a;
         mA->n = n;
         mA->m = m;
-        mA->N = n;
-        mA->M = m;
+    //V4    mA->N = n;
+    //V4    mA->M = m;
         mA->lg = lg;
         mA->cl = cl;
         mA->a = val;
@@ -3254,10 +3262,11 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             val[i] = tmpBoundary[i].second;
         }
         //        }
-        MatriceMorse<T>* m = new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->half, val, lg, cl, true);
+        ffassert(0);
+        MatriceMorse<T>* m = 0; //V4 new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->half, val, lg, cl, true);
         pR->typemat = TypeSolveMat(TypeSolveMat::GMRES);
         pR->A.master(m);
-        m->dummy = false;
+       //V4  m->dummy = false;
     }
     }
     else if(rhs)
@@ -3391,10 +3400,10 @@ void  init_lgmat()
 
     
     TheOperators->Add("*",
-                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::plusAx,Matrice_Creuse<double>*,KN_<Complex> > ,
-                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::plusAtx,Matrice_Creuse_Transpose<double>,KN_<Complex> > ,
-                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >,
-                     new Op2_mulvirtAvCR< VirtualMatrice<Complex>::solveAtxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
+                     new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::plusAx,Matrice_Creuse<double>*,KN_<Complex> > ,
+                     new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::plusAtx,Matrice_Creuse_Transpose<double>,KN_<Complex> > ,
+                     new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >,
+                     new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::solveAtxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
                      );
     
 }

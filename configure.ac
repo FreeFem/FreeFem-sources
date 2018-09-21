@@ -677,7 +677,10 @@ dnl ff_cxx11="no"
 dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
 if test "$ff_cxx11" = yes ; then
     CXX11FLAGS="-std=c++11";
+	CXXFLAGS="$CXXFLAGS std=c++11"
     AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+else 
+  AC_MSG_ERROR([ Fatal error c++11  ],1);
 fi
 CXXFLAGS="$ff_cxx_save"
 AC_SUBST(WITH_CXX11,$ff_cxx11)

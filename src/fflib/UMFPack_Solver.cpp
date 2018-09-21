@@ -422,8 +422,15 @@ void init_UMFPack_solver() {
   Global.New("HaveUMFPACK",CConstant<bool>(false)); 
 }
 
-#endif
-#endif
+#endif  // HAVE_LIBUMFPACK
+#endif // REMOVE_CODE
+
+void init_UMFPack_solver() {
+ //   if(verbosity&& (mpirank==0))
+ //       cout << " no UMFPACK -> replace by LU or GMRES  ";
+ //   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
+    Global.New("HaveUMFPACK",CConstant<bool>(false));
+}
 
 template <>
 DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =EF23::BuildSolverGMRES;

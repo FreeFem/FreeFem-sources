@@ -60,7 +60,7 @@ void Show(int ido,KN_<K> w,const char *cmm)
 
 
 template<class R>
-class FuncMat: public VirtualMatrice<R> { public:
+class FuncMat: public RNM_VirtualMatrix<R> { public:
     //    typedef double K;
     typedef KN<R> Kn;
     typedef KN_<R> Kn_;
@@ -71,9 +71,9 @@ class FuncMat: public VirtualMatrice<R> { public:
     C_F0 c_x;
     Kn *b;
     Expression  mat1,mat;
-    typedef  typename VirtualMatrice<R>::plusAx plusAx;
+    typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
     FuncMat(int n,Stack stk,const OneOperator * op,const OneOperator * op1,Kn *bb=0)
-    : VirtualMatrice<R>(n),
+    : RNM_VirtualMatrix<R>(n),
     stack(stk),
     x(n),c_x(CPValue(x)),b(bb),
     mat1(op1? CastTo<Kn_>(C_F0(op1->code(basicAC_F0_wa(c_x)),(aType)*op1)):0),
@@ -557,12 +557,12 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     
     if(evalue) nbev=Max( (long)evalue->N(),nbev);
     
-    const VirtualMatrice<K> * ptOP1=0, *ptB=0,*ptOP=0, *ptB1=0;
+    const RNM_VirtualMatrix<K> * ptOP1=0, *ptB=0,*ptOP=0, *ptB1=0;
     
     if(pOP1)
-        ptOP1= & (const VirtualMatrice<K>&)(pOP1->A);
+        ptOP1= & (const RNM_VirtualMatrix<K>&)(pOP1->A);
     if(pB)
-        ptB = &  (const VirtualMatrice<K>&)(pB->A);
+        ptB = &  (const RNM_VirtualMatrix<K>&)(pB->A);
     FuncMat<K> *pcOP=0,  *pcB=0;
     if(codeOP1 || codeOP)
         ptOP1=pcOP= new FuncMat<K>(n,stack,codeOP,codeOP1);
@@ -573,7 +573,7 @@ AnyType EigenValue::E_EV::operator()(Stack stack)  const
     MatriceIdentite<K>  Id(n);
     
     if(!ptB) ptB = &Id;
-    const VirtualMatrice<K> &OP1= *ptOP1, &B=*ptB;
+    const RNM_VirtualMatrix<K> &OP1= *ptOP1, &B=*ptB;
     if(sym)
     {
         nbev=min(n-1,nbev);
@@ -981,11 +981,11 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     
     if(evalue) nbev=Max( (long)evalue->N(),nbev);
     
-    const VirtualMatrice<K> * ptOP1, *ptB;
+    const RNM_VirtualMatrix<K> * ptOP1, *ptB;
     if(pOP1)
-        ptOP1= & (const VirtualMatrice<K>&)(pOP1->A);
+        ptOP1= & (const RNM_VirtualMatrix<K>&)(pOP1->A);
     if(pB)
-        ptB = &  (const VirtualMatrice<K>&)(pB->A);
+        ptB = &  (const RNM_VirtualMatrix<K>&)(pB->A);
     FuncMat<K> *pcOP1=0,  *pcB=0;
     if(codeOP1 || codeOP)
         ptOP1=pcOP1= new FuncMat<K>(n,stack,codeOP,codeOP1);
@@ -994,7 +994,7 @@ AnyType EigenValueC::E_EV::operator()(Stack stack)  const
     MatriceIdentite<K>  Id(n);
     
     if(!ptB) ptB = &Id;
-    const VirtualMatrice<K> &OP1= *ptOP1, &B=*ptB;
+    const RNM_VirtualMatrix<K> &OP1= *ptOP1, &B=*ptB;
     
     
     

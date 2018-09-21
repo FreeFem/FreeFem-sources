@@ -927,6 +927,7 @@ public:
   long M() const { return A ? A->m : 0;}
   void resize(int n,int m) { if(A) A->resize(n,m);}
   void increment(){ count++;}
+    MatriceCreuse<K> *pMC()  {return A ? ( MatriceCreuse<K> *)A:0; }
 };
 
 template<class K> class Matrice_Creuse_Transpose;
@@ -1375,8 +1376,8 @@ TypeVarForm() :
   tFL( atype<const  FormLinear *>() ),                       
   //tFL3( atype<const  FormLinear<v_fes3> *>() ),                       
   tTab( atype<KN<R> *>() ),                       
-  tMatX( atype<typename VirtualMatrice<R>::plusAx >() ),  
-  tMatTX( atype<typename VirtualMatrice<R>::plusAtx >() ),  
+  tMatX( atype<typename RNM_VirtualMatrix<R>::plusAx >() ),
+  tMatTX( atype<typename RNM_VirtualMatrix<R>::plusAtx >() ),
   tDotStar(atype< DotStar_KN_<R> >() ),
   tBC( atype<const  BC_set  *>())                     
   {  }

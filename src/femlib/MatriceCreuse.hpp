@@ -99,12 +99,12 @@ template <class T> T* docpyornot(bool nocpy,T* p,int n)
 
 
 template <class R>
-class MatriceCreuseOld : public RefCounter,public VirtualMatrice<R> {
+class MatriceCreuseOld : public RefCounter,public RNM_VirtualMatrix<R> {
 public:
     MatriceCreuseOld(int NbOfDF,int mm,int ddummy)
-    : VirtualMatrice<R>(NbOfDF,mm),n(NbOfDF),m(mm),dummy(ddummy){}
+    : RNM_VirtualMatrix<R>(NbOfDF,mm),n(NbOfDF),m(mm),dummy(ddummy){}
     MatriceCreuseOld(int NbOfDF)
-    : VirtualMatrice<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
+    : RNM_VirtualMatrix<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
     int n,m,dummy;
     virtual int size() const =0;
     
@@ -614,9 +614,9 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 }
 
 template <class R> 
-class MatriceIdentite:public  VirtualMatrice<R> { public:
- typedef typename VirtualMatrice<R>::plusAx plusAx;
-    MatriceIdentite(int n) :VirtualMatrice<R>(n) {}; 
+class MatriceIdentite:public  RNM_VirtualMatrix<R> { public:
+ typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
+    MatriceIdentite(int n) :RNM_VirtualMatrix<R>(n) {};
  void addMatMul(const  KN_<R>  & x, KN_<R> & Ax) const { 
      ffassert(x.N()==Ax.N());
    Ax+=x; }
@@ -625,23 +625,23 @@ class MatriceIdentite:public  VirtualMatrice<R> { public:
     Ax+=x; }
      void Solve( KN_<R> & y ,const KN_<R> & x) const { y=x; }
       bool WithSolver() const {return true;}
- plusAx operator*(const KN<R> &  x) const {return plusAx(this,x);} 
+   typename  RNM_VirtualMatrix<R>::plusAx operator*(const KN<R> &  x) const {return typename RNM_VirtualMatrix<R>::plusAx(this,x);}
   bool ChecknbLine(int n) const { return true;}  
   bool ChecknbColumn(int m) const { return true;} 
 
 };  
 
 template<class R>
-class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatrice<R>{
+class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
   int n;
   int nbitermax;
   double eps;
   mutable double  epsr;
   KN<R> D1;
   public:
-  typedef typename VirtualMatrice<R>::plusAx plusAx;
+  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
   SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6) : 
-    VirtualMatrice<R>(A.n),
+    RNM_VirtualMatrix<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n)
   { //throwassert(A.sym());
     for (int i=0;i<n;i++)

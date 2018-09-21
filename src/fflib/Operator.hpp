@@ -367,6 +367,14 @@ struct init_eqarray: public binary_function<A*,B,A*> {
     {  a->init(); *a = b;
 	return a;}
 };
+/*
+template<class A,class B>
+struct init_eqarray_call: public binary_function<A*,B,A*> {
+    static A* f(A* const  & a, B const & b)
+    {  a->init();
+       b.call(*a);
+        return a;}
+};*/
 //  ---------------------------------------------
 template<class A,class B>
 struct init_eqarraypd: public binary_function<A*,B,A*> {
@@ -409,6 +417,15 @@ struct set_eq_array: public binary_function<A,B,A> {
   {  A aa=a;aa = b;
      return a;}
 };
+/*
+template<class A,class B>
+struct set_eq_array_call: public binary_function<A,B,A> {
+    static A f(const A & a, B const & b)
+    {  A aa=a;
+        b.call(aa);//A aa=a;aa = b;
+        return a;}
+};
+ */
 template<class A,class B>
 struct set_eq_array_add: public binary_function<A,B,A> {
   static A f(A const  & a, B const & b)  {assert(SameShape(a,b));  A aa(a);  aa += b; return a;}

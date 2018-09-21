@@ -827,9 +827,26 @@ struct FFset3 {
     static bool Check(MC l) {return true;}
     static void f(KN<K>   *x,MC a,A pp,Stack stack) {
         CC at= GetAny<C>((*a)(stack));
-        *x = at;}
+        *x = at;
+    }
 };
-
+template<typename KK,typename vv_fes,typename CC>
+struct FFset3call {
+    typedef KK K;
+    typedef vv_fes v_fes;
+    typedef vv_fes *pfes;
+    typedef FEbase<K,vv_fes> ** R;
+    typedef R  A;
+    typedef pfes* B;
+    typedef CC C;
+    typedef Expression MC;
+    static Expression Clone(Expression e){return e;}
+    static bool Check(MC l) {return true;}
+    static void f(KN<K>   *x,MC a,A pp,Stack stack) {
+        CC at= GetAny<C>((*a)(stack));
+        at.call(*x);
+    }
+};
 
 
 template<typename FF >

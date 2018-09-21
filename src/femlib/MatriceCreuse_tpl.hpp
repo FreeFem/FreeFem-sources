@@ -1272,10 +1272,10 @@ template<class R>
  }
 
 template<class R>
- triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<triplet<R,MatriceCreuseOld<R> *,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+ triplet<int,int,bool> BuildCombMat(std::map< pair<int,int>, R> & mij,const list<tuplr<R,MatriceCreuseOld<R> *,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
   {
     // modif FH feb 2010  cnj =>  transpose ->  conj &  trans 
-    typedef typename list<triplet<R,MatriceCreuseOld<R> *,bool> >::const_iterator lconst_iterator;
+    typedef typename list<tuple<R,MatriceCreuseOld<R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
@@ -1318,7 +1318,7 @@ template<class R>
   }
   
 template<class R>
-  MatriceMorseOld<R> * BuildCombMat(const list<triplet<R,MatriceCreuseOld<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
+  MatriceMorseOld<R> * BuildCombMat(const list<tuple<R,MatriceCreuseOld<R> *,bool> >  &lM,bool trans,int ii00,int jj00)
   {
    
     std::map< pair<int,int>, R> mij;

@@ -92,10 +92,10 @@ inline KN_<complex<double> > R2C(KN_<double>  & vr)
 }
 
     template<class R>
-    struct  VirtualMatriceTrans:public VirtualMatrice<R> { public:
-        const VirtualMatrice<R> * A;
+    struct  RNM_VirtualMatrixTrans:public RNM_VirtualMatrix<R> { public:
+        const RNM_VirtualMatrix<R> * A;
         int N,M;
-        VirtualMatriceTrans(const VirtualMatrice<R> & AA): VirtualMatrice<R>(AA.M,AA.N),A(&AA)
+        RNM_VirtualMatrixTrans(const RNM_VirtualMatrix<R> & AA): RNM_VirtualMatrix<R>(AA.M,AA.N),A(&AA)
         { N=AA.M; M=AA.N;
           //  cout <<"Assertion fail " <<  N << " " << M << " "<< AA.N << " " << AA.M << endl;
         }
@@ -104,26 +104,26 @@ inline KN_<complex<double> > R2C(KN_<double>  & vr)
         
         virtual bool ChecknbLine  (int n) const {return N==n;}
         virtual bool ChecknbColumn  (int m) const {return M==m;}
-  /*      struct  plusAx { const VirtualMatrice * A; const KN_<R>   x;
-            plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y)
+  /*      struct  plusAx { const RNM_VirtualMatrix * A; const KN_<R>   x;
+            plusAx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y)
             { if(B) { ffassert(B->ChecknbColumn(y.N())); } }
         };
         
         plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
         
-        struct  plusAtx { const VirtualMatrice * A; const KN_<R>   x;
-            plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y)
+        struct  plusAtx { const RNM_VirtualMatrix * A; const KN_<R>   x;
+            plusAtx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y)
             { if(B) { ffassert(B->ChecknbLine(y.N())); } } };
         
-        struct  solveAxeqb { const VirtualMatrice * A; const KN_<R>   b;
-            solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y)
+        struct  solveAxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
+            solveAxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)
             { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
         
-        struct  solveAtxeqb { const VirtualMatrice * A; const KN_<R>   b;
-            solveAtxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y)
+        struct  solveAtxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
+            solveAtxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)
             { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
         */
-         VirtualMatriceTrans(){}
+         RNM_VirtualMatrixTrans(){}
     };
     
 
@@ -148,16 +148,16 @@ inline const KN_<complex<double> > R2C(const KN_<double>  & vr)
 // -----------------------------------------------------------------
 
 template <class MM>
-class MatC2R : public VirtualMatrice<double> { public:
+class MatC2R : public VirtualMatrix<double> { public:
 
-  typedef typename VirtualMatrice<double>::plusAx plusAx;
+  typedef typename VirtualMatrix<double>::plusAx plusAx;
 
-  //  typedef  VirtualMatrice<complex<double> > M;
+  //  typedef  RNM_VirtualMatrix<complex<double> > M;
 
   const MM &m;
 
   MatC2R(const MM &mm):
-      VirtualMatrice<double>(mm.N*2,mm.M*2),m(mm) {}
+      VirtualMatrix<double>(mm.N*2,mm.M*2),m(mm) {}
 
   void addMatMul(const  KN_<double>  & x, KN_<double> & Ax) const {
 
@@ -166,16 +166,16 @@ class MatC2R : public VirtualMatrice<double> { public:
   }
 
   plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
-  virtual bool ChecknbLine(int n) const { return !N ||n==N;}  
-  virtual bool ChecknbColumn(int m) const { return !M ||m==M;}
+  virtual bool ChecknbLine(int nn) const { return !n ||n==nn;}
+  virtual bool ChecknbColumn(int mm) const { return !n ||m==mm;}
 
 
 };
 
-#if 0
+#ifdef REOMVE_CODE_V4
 
 template<class R>
-class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public VirtualMatrice<R>{
+class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
   int n;
   int nbitermax;
   double eps;
@@ -185,11 +185,11 @@ class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public Virtu
   mutable KN<R> xx; 
   Expression xx_del, code_del; 
   Stack stack;
-  typedef typename VirtualMatrice<R>::plusAx plusAx;
+  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
  
   public:
   SolveGCPrecon(const MatriceCreuseOld<R> &A,const OneOperator * C,Stack stk,int itmax, double epsilon=1e-6) :
-    VirtualMatrice<R>(A.n),
+    RNM_VirtualMatrix<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
     D1(n),xx(n),stack(stk)
 {
@@ -249,7 +249,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };     
 
 template<class R>
-class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public VirtualMatrice<R>{
+class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
   int n;
   int nbitermax;
   double eps;
@@ -260,10 +260,10 @@ class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public Vi
   Expression xx_del, code_del;    
   Stack stack;
   int dKrylov; 
-  typedef typename VirtualMatrice<R>::plusAx plusAx;
+  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceCreuseOld<R> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) :
-    VirtualMatrice<R>(A.n),
+    RNM_VirtualMatrix<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
     D1(n),xx(n),
     stack(stk),dKrylov(dk)
@@ -298,7 +298,7 @@ class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public Vi
 
    }
     void SolverT(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-        VirtualMatriceTrans<R> at(a);
+        RNM_VirtualMatrixTrans<R> at(a);
         epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
         KNM<R> H(dKrylov+1,dKrylov+1);
         int k=dKrylov,nn=nbitermax;
@@ -336,7 +336,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };     
 
 template<class R>
-class SolveGMRESDiag :   public MatriceCreuseOld<R>::VirtualSolver , public VirtualMatrice<R>{
+class SolveGMRESDiag :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
   int n;
   int nbitermax;
   double eps;
@@ -344,9 +344,9 @@ class SolveGMRESDiag :   public MatriceCreuseOld<R>::VirtualSolver , public Virt
   int dKrilov;
   KN<R> D1;
   public:
-  typedef typename VirtualMatrice<R>::plusAx plusAx;
+  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
   SolveGMRESDiag(const MatriceCreuseOld<R> &A,int nbk=50,int itmax=0,double epsilon=1e-6) :
-     VirtualMatrice<R>(A.n),
+     RNM_VirtualMatrix<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),
     dKrilov(nbk) ,D1(n)
   { 
@@ -363,7 +363,7 @@ class SolveGMRESDiag :   public MatriceCreuseOld<R>::VirtualSolver , public Virt
 
  }
     void SolverT(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-        VirtualMatriceTrans<R> at(a);
+        RNM_VirtualMatrixTrans<R> at(a);
         epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
         KNM<R> H(dKrilov+1,dKrilov+1);
         int k=dKrilov,nn=nbitermax;
@@ -385,7 +385,7 @@ plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };   
 
 template<>
-class SolveGMRESDiag<Complex> :   public MatriceMorseOld<Complex>::VirtualSolver , public VirtualMatrice<Complex>
+class SolveGMRESDiag<Complex> :   public MatriceMorseOld<Complex>::VirtualSolver , public RNM_VirtualMatrix<Complex>
 {
    int n;
   int nbitermax;
@@ -394,9 +394,9 @@ class SolveGMRESDiag<Complex> :   public MatriceMorseOld<Complex>::VirtualSolver
   mutable double  epsr;
   int dKrilov;
   public:
-  typedef  VirtualMatrice<Complex>::plusAx plusAx;
+  typedef  RNM_VirtualMatrix<Complex>::plusAx plusAx;
   SolveGMRESDiag(const MatriceMorseOld<Complex> &A,int nbk=50,int itmax=0,double epsilon=1e-6) :
-    VirtualMatrice<Complex>(A.n),
+    RNM_VirtualMatrix<Complex>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
     dKrilov(nbk) 
   { 
@@ -432,7 +432,7 @@ plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
         typedef MatC2R<SolveGMRESDiag<Complex> > VC;
         VA AR(a);
         VC CR(*this);
-       VirtualMatriceTrans<double> ARt(AR);
+       RNM_VirtualMatrixTrans<double> ARt(AR);
          GMRES(ARt,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
     }
 
@@ -449,7 +449,7 @@ plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 
 
 template<>
-class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualSolver , public VirtualMatrice<Complex>
+class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualSolver , public RNM_VirtualMatrix<Complex>
 {
   public:
     typedef Complex R ;
@@ -463,10 +463,10 @@ class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualS
   int dKrylov; 
   KN<Complex> D1;  
   mutable KN<Complex> xx;  
-  typedef  VirtualMatrice<Complex>::plusAx plusAx;
+  typedef  RNM_VirtualMatrix<Complex>::plusAx plusAx;
   public:
   SolveGMRESPrecon(const MatriceCreuseOld<Complex> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) :
-    VirtualMatrice<Complex>(A.n),   
+    RNM_VirtualMatrix<Complex>(A.n),   
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),
     xx_del(0),code_del(0),
     precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
@@ -513,7 +513,7 @@ class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualS
         typedef MatC2R<SolveGMRESPrecon<Complex> > VC;
         VA AR(a);
         VC CR(*this);
-        VirtualMatriceTrans<double> ARt(AR);
+        RNM_VirtualMatrixTrans<double> ARt(AR);
        GMRES(ARt,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
 
     }

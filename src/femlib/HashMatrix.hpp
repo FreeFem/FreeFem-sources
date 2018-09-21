@@ -35,7 +35,7 @@ static   inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
     :  make_pair<int,int>(i+ii00,j+jj00) ; }
 
 template<class TypeIndex,class TypeScalaire>
-class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire>
+class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire> 
 {
     
     static double conj(double x){return x;}
@@ -281,9 +281,21 @@ public:
         operator=(A);
     }
     
+    HashMatrix(I nn,const R *diag)
+    :  VirtualMatrix<I,R> (nn,nn), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
+    i(0),j(0),aij(0)  ,
+    head(0), next(0),
+    half(false),  state(unsorted),type_state(type_HM),nbsort(0),
+    sizep(0),lock(0), fortran(0),re_do_numerics(0),re_do_symbolic(0)
+    {
+      Increaze(nn);
+      for(int k=0;k<nn;++k)
+            operator()(k,k) = diag[k];
+      
+    }
     template<class K>
     HashMatrix(const HashMatrix<I,K> &A , R (*ff)(K)=0 )
-    :  VirtualMatrix<I,R> (A), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
+    :  VirtualMatrix<I,R> (A.n,A.m), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
     i(0),j(0),aij(0)  ,
     head(0), next(0),
     //trans(false),
@@ -295,9 +307,8 @@ public:
           operator=(A);
         else
         {
-          pair<R,const HashMatrix<I,K>*> fp(ff,&A);
-          operator+=(fp);
-    }
+          Add(A,ff);
+        }
     }
   
     
@@ -564,7 +575,7 @@ public:
     template<class K>
     void operator=(const HashMatrix<I,K> &A)
     {
-        if( this == & A) return;
+        if( (const void*)  this == (const void*) & A) return;
         clear();
         this->n=A.n;
         this->m=A.m;
@@ -582,78 +593,76 @@ public:
         lock=0;
         re_do_numerics=1;
         re_do_symbolic=1;
-        operator+=(A);
+//        R xx=(R)    K(1.) ;
+        
+        Add(A);
   
     }
-    template<class K>
-    void operator+=(const HashMatrix<I,K> &A)
+    
+    
+    void Add(const HashMatrix<I,R> &A,R coef=R(1),bool trans=false, I ii00=0,I jj00=0)
     {
-        I nn = max(this->n,A.n);
-        I mm = max(this->m,A.m);
+        I nn=A.n,mm=A.m;
+        I *ii=A.i;
+        I *jj=A.j;
+        size_t Annz= A.nnz;  ;
+        if( trans ) swap(nn,mm),swap(ii,jj);
+         nn = max(this->n,nn);
+         mm = max(this->m,mm);
         resize(nn,mm);
-        if( this == & A)
+        if( (const void*) this == (const void*) & A && ii00==0 && jj00==0 && !trans )
             for(int k=0; k < nnz; ++k)
-                aij[k] += aij[k];
+                aij[k] += coef*aij[k];
         else
-        {   if ( this->half!= this->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
-            size_t nnzm= min(nnz,A.size()) ;
-            for(size_t k=0;k<nnzm;++k)
-                if( (i[k]==A.i[k]) && (j[k]==A.j[k]))
-                    aij[k] += A.aij[k]; // Optim...
-                else
-                    operator()(A.i[k],A.j[k]) += A.aij[k];
-            for(size_t  k=nnzm+1;k<A.size();++k)
-                operator()(A.i[k],A.j[k]) += A.aij[k];
-        }
-    }
-    template<class K>
-    void operator+=( pair<R (*)(K) ,const HashMatrix<I,K>*> pp)
-    {
-        R (*ff)(K) = pp.first;
-        const HashMatrix<I,K> &A= *pp.second;
-        I nn = max(this->n,A.n);
-        I mm = max(this->m,A.m);
-        resize(nn,mm,0);
-
-        if( this == & A)
-            for(int k=0; k < nnz; ++k)
-                aij[k] += ff(aij[k]);
-        else
-        {   if ( this->half!= A->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
-            size_t nnzm= min(nnz,A.size()) ;
-            for(size_t k=0;k<nnzm;++k)
-                if( (i[k]==A.i[k]) && (j[k]==A.j[k]))
-                    aij[k] += f(A.aij[k]); // Optim...
-                else
-                    operator()(A.i[k],A.j[k]) += A.aij[k];
-            for(size_t  k=nnzm+1;k<A.size();++k)
-                operator()(A.i[k],A.j[k]) += ff( A.aij[k]);
+        {   ffassert((const void*) this != (const void*) & A); // not the same matrix
+            if ( this->half!= this->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+            
+            for(size_t k=0;k<Annz;++k)
+                    operator()(ii[k]+ii00,jj[k]+jj00) += coef*A.aij[k];
         }
     }
     
     template<class K>
-    void operator+=( pair<R,const HashMatrix<I,K>*> pp)
+    void Add(const HashMatrix<I,K> &A,R (*f)(K) ,bool trans=false, I ii00=0,I jj00=0)
     {
-        const R  aa = pp.first;
-        const HashMatrix<I,K> &A= *pp.second;
-        this->n = max(this->n,A.n);
-        this->m = max(this->m,A.m);
-        
-        if( this == & A)
+        I nn=A.n,mm=A.m;
+        I *ii=A.i;
+        I *jj=A.j;
+        size_t Annz= A.nnz;  ;
+        if( trans ) swap(nn,mm),swap(ii,jj);
+        nn = max(this->n,nn);
+        mm = max(this->m,mm);
+        resize(nn,mm);
+/*        if( f==0)
+        {
+            if( (const void*) this == (const void*) & A && ii00==0 && jj00==0 && !trans )
+                for(int k=0; k < nnz; ++k)
+                    aij[k] += (R) (A.aij[k]);
+            else
+            {   ffassert((const void*) this != (const void*) & A); // not the same matrix
+                if ( this->half!= this->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+                
+                for(size_t k=0;k<Annz;++k)
+                    operator()(ii[k]+ii00,jj[k]+jj00) += (R) (A.aij[k]);
+            }
+
+        }
+        else*/
+        {
+        if( (const void*) this == (const void*) & A && ii00==0 && jj00==0 && !trans )
             for(int k=0; k < nnz; ++k)
-                aij[k] += aa*aij[k];
+                aij[k] += f(A.aij[k]);
         else
-        {   if ( this->half!= A->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
-            size_t nnzm= min(nnz,A.size()) ;
-            for(size_t k=0;k<nnzm;++k)
-                if( (i[k]==A.i[k]) && (j[k]==A.j[k]))
-                    aij[k] += aa*(R)A.aij[k]; // Optim...
-                else
-                    operator()(A.i[k],A.j[k]) += A.aij[k];
-            for(size_t  k=nnzm+1;k<A.size();++k)
-                operator()(A.i[k],A.j[k]) += aa*(R) A.aij[k];
+        {   ffassert((const void*) this != (const void*) & A); // not the same matrix
+            if ( this->half!= this->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+            
+            for(size_t k=0;k<Annz;++k)
+                operator()(ii[k]+ii00,jj[k]+jj00) += f(A.aij[k]);
+        }
         }
     }
+    
+    
     
     void operator*=(R v)
     {
@@ -897,7 +906,7 @@ public:
     void checksize(size_t nn,size_t mm=0) const
     { mm= mm ? mm : nn; assert( (nn ==this->n) && (mm==this->m));}
     
-    R* addMatMul(R *x,R*Ax,bool Transpose) const {
+    R* addMatMul(R *x,R*Ax,bool Transpose,I sx=1,I sAx=1) const {
         I *ii=ii,*jj=j;
         R *aa=aij;
      //   if(Transpose != trans) {std::swap(ii,jj);}
@@ -906,12 +915,12 @@ public:
         if( half)
           for(int k=0; k<nnz;++k)
             {
-                Ax[ii[k]] += aa[k]*x[jj[k]];
-                if( ii[k] != jj[k]) Ax[jj[k]] += conj(aa[k])*x[ii[k]];
+                Ax[ii[k]*sAx] += aa[k]*x[jj[k]*sx];
+                if( ii[k] != jj[k]) Ax[jj[k]*sAx] += conj(aa[k])*x[ii[k]*sx];
             }
         else
             for(int k=0; k<nnz;++k)
-                Ax[ii[k]] += aa[k]*x[jj[k]];
+                Ax[ii[k]*sAx] += aa[k]*x[jj[k]*sx];
         
          return Ax;}
     
@@ -1157,8 +1166,8 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Hash
         }
     }
     int nbcoef=mij.size();
-    
-    // return new   MatriceMorseOld<R>(n,m,mij,sym);
+    ffassert(0); 
+    //V4 return new   MatriceMorseOld<R>(n,m,mij,sym);
     return make_tuple(n,m,sym);
 }
 
@@ -1177,9 +1186,9 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM
     bool sym=true;
     for(i=begin;i!=end&&sym;i++++)
     {
-        if(i->second) // M == 0 => zero matrix
+        if(std::get<1>(*i)) // M == 0 => zero matrix
         {
-            HashMatrix<int,R>& M=*i->second;
+            HashMatrix<int,R>& M=*std::get<1>(*i);
             if(!M.sym())
                 sym = false;
         }
@@ -1187,14 +1196,14 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM
     
     for(i=begin;i!=end;i++++)
     {
-        if(i->second) // M == 0 => zero matrix
+        if(std::get<1>(*i)) // M == 0 => zero matrix
         {
-            HashMatrix<int,R> & M=*i->second;
-            bool transpose = i->third !=  trans;
+            HashMatrix<int,R> & M=*std::get<1>(*i);
+            bool transpose = std::get<2>(*i) !=  trans;
             ffassert( &M);
-            R coef=i->first;
+            R coef=std::get<0>(*i);
             if(verbosity>3)
-                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
+                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " << std::get<2>(*i) << endl;
             { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
             
         }
@@ -1204,15 +1213,16 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM
 }
 
 template<class R>
-HashMatrix<int,R>* BuildCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00)
+HashMatrix<int,R>* BuildCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans=false,int ii00=0,int jj00=0)
 {
     
- 
-    auto nmsym=nmCombMat(lM,trans,ii00,jj00);
-    HashMatrix<int,R> *  mij= new HashMatrix<int,R>(std::get<0>(nmsym),std::get<1>(nmsym),0,mij,std::get<2>(nmsym));
-    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00);
+    ffassert(0);
     
-    return mij;
+   //V4 auto nmsym=nmCombMat(lM,trans,ii00,jj00);
+    //V4 HashMatrix<int,R> *  mij= new HashMatrix<int,R>(std::get<0>(nmsym),std::get<1>(nmsym),0,mij,std::get<2>(nmsym));
+   //V4 nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00);
+    
+    return 0; // V4 mij;
     
 }
 

@@ -633,15 +633,15 @@ class LinearCG : public OneOperator
   typedef KN_<R> Kn_;
   const int cas;
 
- class MatF_O: VirtualMatrice<R> { public:
+ class MatF_O: RNM_VirtualMatrix<R> { public:
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
   
    Expression  mat1,mat;
-   typedef  typename VirtualMatrice<R>::plusAx plusAx;
+   typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op) 
-     : VirtualMatrice<R>(n),stack(stk),
+     : RNM_VirtualMatrix<R>(n),stack(stk),
        x(n),c_x(CPValue(x)),
        mat1(op->code(basicAC_F0_wa(c_x))),
        mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))) {
@@ -801,15 +801,15 @@ class LinearGMRES : public OneOperator
   typedef KN_<R> Kn_;
   const int cas;
 
- class MatF_O: VirtualMatrice<R> { public:
+ class MatF_O: RNM_VirtualMatrix<R> { public:
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
    Kn *b;
    Expression  mat1,mat;
-   typedef  typename VirtualMatrice<R>::plusAx plusAx;
+   typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
    MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb) 
-     : VirtualMatrice<R>(n),
+     : RNM_VirtualMatrix<R>(n),
        stack(stk),
        x(n),c_x(CPValue(x)),b(bb),
        mat1(op->code(basicAC_F0_wa(c_x))), 
@@ -817,10 +817,11 @@ class LinearGMRES : public OneOperator
       // ffassert(atype<Kn_ >() ==(aType) *op);
        }
      ~MatF_O() { if(mat1!=mat) delete mat; delete mat1; delete c_x.LeftValue();}
-   void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
-      ffassert(xx.N()==Ax.N());
-      x =xx;
-      Ax  += GetAny<Kn_>((*mat)(stack));
+   void addMatMul(const  Kn_  & xx, Kn_ & Ax) const {
+   
+     ffassert(xx.N()==Ax.N());
+       x =xx;
+      Ax    += GetAny<Kn_>((*mat)(stack));
       if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
       WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008
    } 
@@ -5144,17 +5145,18 @@ AnyType ClearReturn(Stack stack, const AnyType & a)
 template <class R>
 void DclTypeMatrix()
 {
- 
+   Dcl_Type<RNM_VirtualMatrix<R>*>( ); // ???????  ZZZZZZ
+
   Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >, ClearReturn<Matrice_Creuse<R> >);
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
   Dcl_Type<Matrice_Creuse_inv_trans<R> >();      // matrice^-1   A'^{-1}
-  Dcl_Type<typename VirtualMatrice<R>::plusAx >();       // A*x (A'*x)
-  Dcl_Type<typename VirtualMatrice<R>::plusAtx >();       // A^t*x (A'*x)
-  Dcl_Type<typename VirtualMatrice<R>::solveAxeqb >();       // A^-1*x (
-    Dcl_Type<typename VirtualMatrice<R>::solveAtxeqb >();       // A^t^-1*x 
+  Dcl_Type<typename RNM_VirtualMatrix<R>::plusAx >();       // A*x (A'*x)
+  Dcl_Type<typename RNM_VirtualMatrix<R>::plusAtx >();       // A^t*x (A'*x)
+  Dcl_Type<typename RNM_VirtualMatrix<R>::solveAxeqb >();       // A^-1*x (
+    Dcl_Type<typename RNM_VirtualMatrix<R>::solveAtxeqb >();       // A^t^-1*x
   Dcl_Type<Matrix_Prod<R,R> >();
-  Dcl_Type<list<triplet<R,MatriceCreuse<R> *,bool> >*>();
+  Dcl_Type<list<tuple<R,MatriceCreuse<R> *,bool> >*>();
   
    // resize mars 2006 v2.4-1
  
@@ -5452,14 +5454,7 @@ void  init_lgfem()
  
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);
  atype<Matrice_Creuse<Complex> * >()->AddCast(new OneOperatorCode<pb2mat<Complex> >);
-/*
-TheOperators->Add("*", 
-        new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::plusAx,Matrice_Creuse<R>*,KN<R>* > >,
-        new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN<R>* > >,
-        new OneBinaryOperator<Op2_mulvirtAv<VirtualMatrice<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN<R>* > >     
-        );
-TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
-*/
+
 //   Add all Finite Element "P0","P1","P2","RT0", ... 
   for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
     {
@@ -5672,8 +5667,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
       new OneOperatorCode<C_args>(t_C_args,atype<KN<R>*>())  ,
       new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<R> >())  ,           
       new OneOperatorCode<C_args>(t_C_args,atype<Matrice_Creuse<R>*>()) ,
-      new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<R>::plusAx >()),
-      new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<R>::plusAtx >())   
+      new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<R>::plusAx >()),
+      new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<R>::plusAtx >())
        
     );         
 
@@ -5682,8 +5677,8 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
       new OneOperatorCode<C_args>(t_C_args,atype<KN<Complex>*>())  ,
       new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<Complex> >())  ,           
       new OneOperatorCode<C_args>(t_C_args,atype<Matrice_Creuse<Complex>*>()) ,
-      new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<Complex>::plusAx >()),
-      new OneOperatorCode<C_args>(t_C_args,atype<VirtualMatrice<Complex>::plusAtx >())   
+      new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<Complex>::plusAx >()),
+      new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<Complex>::plusAtx >())
        
     );         
     
@@ -5731,16 +5726,12 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
   
  TheOperators->Add("=",
 		   new OneOperator2<pmesh*,pmesh*,pmesh >(&set_eqdestroy_incr),
-		//-   new OneBinaryOperator<set_eqarray<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
-		//-   new OneBinaryOperator<set_eqarray<KN<double> ,VirtualMatrice<R>::plusAtx > >  ,      
-		//-   new OneBinaryOperator<set_eqarray<KN<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
 		   
-		   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAx > > ,       
-		   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::plusAtx > >  ,      
-		   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAxeqb > >  ,      
-                   new OneBinaryOperator<set_eq_array<KN_<double> ,VirtualMatrice<R>::solveAtxeqb > >  ,
+		   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::plusAx > > ,
+		   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::plusAtx > >  , //ZZ set_eq_array
+		   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::solveAxeqb > >  ,
+                   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::solveAtxeqb > >  ,
 
-		//-   new OpArraytoLinearForm<double,v_fes>(atype< KN<double>* >(),true,false)  ,
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false)  ,
 		   new OpMatrixtoBilinearForm<double,v_fes >);
  
@@ -5761,14 +5752,10 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
 
  TheOperators->Add("=",
-		  // new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
-		  // new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,
-		  // new OneBinaryOperator<set_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,
-		   
-		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
-		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,
-		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >  ,      
-                   new OneBinaryOperator<set_eq_array<KN_<Complex> ,VirtualMatrice<Complex>::solveAtxeqb > >  ,
+		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
+		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > >  ,
+		    new OneBinaryOperator<set_eq_array<KN_<Complex> ,RNM_VirtualMatrix<Complex>::solveAxeqb > >  ,
+                   new OneBinaryOperator<set_eq_array<KN_<Complex> ,RNM_VirtualMatrix<Complex>::solveAtxeqb > >  ,
 
 		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,false)  ,
 		   //- new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false)   ,
@@ -5781,49 +5768,49 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 
  // add august 2007 
  TheOperators->Add("<-",
-		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAx > > ,       
-		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::plusAtx > >  ,      
-		   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAxeqb > >  ,  
-                   new OneBinaryOperator<init_eqarray<KN<double> ,VirtualMatrice<double>::solveAtxeqb > >  ,
+		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAx > > ,
+		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAtx > >  ,
+		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAxeqb > >  ,
+                   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAtxeqb > >  ,
 
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > >  ,      
-		   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAxeqb > >,
-                   new OneBinaryOperator<init_eqarray<KN<Complex> ,VirtualMatrice<Complex>::solveAtxeqb > >
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > >  ,
+		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::solveAxeqb > >,
+                   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::solveAtxeqb > >
 
 		);
     // Jan 2018  FH  Vh uh=yu[]; //  A FAIRE FH POUR F NATAF FFFFFFFF
     TheOperators->Add("<-"
-                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::plusAx> >(10)
-                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::solveAxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::solveAtxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<R,v_fes,VirtualMatrice<R>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,RNM_VirtualMatrix<R>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,RNM_VirtualMatrix<R>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,RNM_VirtualMatrix<R>::solveAtxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes,RNM_VirtualMatrix<R>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes,KN_<R> > >(10)
                       , new init_FE_eqarray<FF_L_args<R,v_fes,Call_FormLinear<v_fes> > >(10)
                       
                       );
     TheOperators->Add("<-"
-                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::plusAx> >(10)
-                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::solveAxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::solveAtxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<Complex,v_fes,VirtualMatrice<Complex>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,RNM_VirtualMatrix<Complex>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,RNM_VirtualMatrix<Complex>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,RNM_VirtualMatrix<Complex>::solveAtxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes,RNM_VirtualMatrix<Complex>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes,KN_<Complex> > >(10)
                       , new init_FE_eqarray<FF_L_args<Complex,v_fes,Call_FormLinear<v_fes> > >(10)
                       );
     TheOperators->Add("<-"
-                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::plusAx> >(10)
-                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::solveAxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::solveAtxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<R,v_fes3,VirtualMatrice<R>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,RNM_VirtualMatrix<R>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,RNM_VirtualMatrix<R>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,RNM_VirtualMatrix<R>::solveAtxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<R,v_fes3,RNM_VirtualMatrix<R>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes3,KN_<R> > >(10)
                       , new init_FE_eqarray<FF_L_args<R,v_fes3,Call_FormLinear<v_fes3> > >(10)
                       
                       );
     TheOperators->Add("<-"
-                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::plusAx> >(10)
-                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::solveAxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::solveAtxeqb> >(10)
-                      , new init_FE_eqarray<FFset3<Complex,v_fes3,VirtualMatrice<Complex>::plusAtx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,RNM_VirtualMatrix<Complex>::plusAx> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,RNM_VirtualMatrix<Complex>::solveAxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,RNM_VirtualMatrix<Complex>::solveAtxeqb> >(10)
+                      , new init_FE_eqarray<FFset3<Complex,v_fes3,RNM_VirtualMatrix<Complex>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,KN_<Complex> > >(10)
                       , new init_FE_eqarray<FF_L_args<Complex,v_fes3,Call_FormLinear<v_fes3> > >(10)
                       );
@@ -5833,11 +5820,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
     
     // Fin
  TheOperators->Add("+=",
-		 //-   new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAx > > ,       
-		  //-  new OneBinaryOperator<set_eqarray_add<KN<double> ,VirtualMatrice<R>::plusAtx > > ,
+		 //-   new OneBinaryOperator<set_eqarray_add<KN<double> ,RNM_VirtualMatrix<R>::plusAx > > ,
+		  //-  new OneBinaryOperator<set_eqarray_add<KN<double> ,RNM_VirtualMatrix<R>::plusAtx > > ,
 		   
-		   new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAx > > ,       
-		   new OneBinaryOperator<set_eq_array_add<KN_<double> ,VirtualMatrice<double>::plusAtx > >,        
+		   new OneBinaryOperator<set_eq_array_add<KN_<double> ,RNM_VirtualMatrix<double>::plusAx > > ,
+		   new OneBinaryOperator<set_eq_array_add<KN_<double> ,RNM_VirtualMatrix<double>::plusAtx > >,
 		   
 		 //-   new OpArraytoLinearForm<double,v_fes>(atype< KN<double>* >(),true,false,false)  ,
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false,false)  , 
@@ -5847,11 +5834,11 @@ TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
        );
 
  TheOperators->Add("+=",
-		  //-  new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
-		  //-  new OneBinaryOperator<set_eqarray_add<KN<Complex> ,VirtualMatrice<Complex>::plusAtx > > ,       
+		  //-  new OneBinaryOperator<set_eqarray_add<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
+		  //-  new OneBinaryOperator<set_eqarray_add<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > > ,
 		   
-		   new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAx > > ,       
-		   new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,VirtualMatrice<Complex>::plusAtx > >,
+		   new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
+		   new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > >,
 		   
 		  //-  new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,false,false)  ,
 		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false,false)  , 

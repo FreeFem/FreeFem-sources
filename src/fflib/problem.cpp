@@ -4470,14 +4470,14 @@ void Check(const Opera &Op,int N,int  M)
           {
             if ( B) 
               { 
-                *B += GetAny<typename VirtualMatrice<R>::plusAx >( (*e)(stack) )  ;
+                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
               }
           }
         else if (r==tvf->tMatTX)
           {
             if ( B) 
               { 
-                *B += GetAny<typename VirtualMatrice<R>::plusAtx >( (*e)(stack) )  ;
+                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
               }
           }
         else if (r== tvf->tBC) 
@@ -6489,10 +6489,10 @@ bool C_args::IsLinearOperator() const {
       aType r=c.left();
       if (     ( r != atype<const  FormLinear *>() )
 	       &&  ( r != atype<const  BC_set *>() )
-	       &&  ( r != atype<VirtualMatrice<R>::plusAx >() )
-	       &&  ( r != atype<VirtualMatrice<R>::plusAtx >() )
-	       &&  ( r != atype<VirtualMatrice<Complex>::plusAx >() )
-	       &&  ( r != atype<VirtualMatrice<Complex>::plusAtx >() )
+	       &&  ( r != atype<RNM_VirtualMatrix<R>::plusAx >() )
+	       &&  ( r != atype<RNM_VirtualMatrix<R>::plusAtx >() )
+	       &&  ( r != atype<RNM_VirtualMatrix<Complex>::plusAx >() )
+	       &&  ( r != atype<RNM_VirtualMatrix<Complex>::plusAtx >() )
 	       &&  ( r != tRn) 
 	       &&  ( r != tCn) 
 	       ) return false;
