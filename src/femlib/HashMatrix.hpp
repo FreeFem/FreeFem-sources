@@ -907,7 +907,7 @@ public:
     { mm= mm ? mm : nn; assert( (nn ==this->n) && (mm==this->m));}
     
     R* addMatMul(R *x,R*Ax,bool Transpose,I sx=1,I sAx=1) const {
-        I *ii=ii,*jj=j;
+        I *ii=i,*jj=j;
         R *aa=aij;
      //   if(Transpose != trans) {std::swap(ii,jj);}
         if(Transpose ) {std::swap(ii,jj);}

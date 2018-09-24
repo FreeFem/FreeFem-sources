@@ -32,6 +32,7 @@ public:
         std::cout << " SolverCG  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
                   << " v " << verb << "itsmx " << itermax <<endl;
         assert(A->n == A->m);
+        pC = new HMatVirtPreconDiag(A);
     }
         SolverCG() {delete pC;}
     void SetState(){}

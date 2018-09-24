@@ -2931,35 +2931,36 @@ TheOperators->Add("+",
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(1,get_elementp2mc<R>));
     
  atype<Matrice_Creuse<R> * >()->Add("[","",new OneOperator3_<R,Matrice_Creuse<R> *,long,long >(10,get_element2mc<R>));
-    
- atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
- atype<KNM<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
  
- atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,outProduct_KN_<R>*,Inv_KN_long,Inv_KN_long >(Matrixoutp2mapIJ_inv<R>));
- atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
+    typedef map< pair<int,int>, R> MAPMAT;
+ atype<KNM<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
+ atype<KNM<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
+ 
+ atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,outProduct_KN_<R>*,Inv_KN_long,Inv_KN_long >(Matrixoutp2mapIJ_inv<R>));
+ atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
 
 
  TheOperators->Add("=", new SetRawMatformMat<R>);
 
 
 
- t_MM->Add("(","",  new OneOperator3_<map< pair<int,int>, R> *,map< pair<int,int>, R> *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>));
- t_MM->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,map< pair<int,int>, R> *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>));
+ t_MM->Add("(","",  new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>));
+ t_MM->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>));
 
- t_MC->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,map< pair<int,int>, R> *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>,t_MC));
- t_MC->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,map< pair<int,int>, R> *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>,t_MC));
+ t_MC->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>,t_MC));
+ t_MC->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>,t_MC));
 
- //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,map< pair<int,int>, R> *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>),t_lM);
- //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<map< pair<int,int>, R> *,map< pair<int,int>, R> *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>),t_lM);
+ //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>),t_lM);
+ //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>),t_lM);
 
  
 //map< pair<int,int>, R> * ttt=   (0);
 
    //   ; 
- map_type[typeid(map< pair<int,int>, R> *).name()]->AddCast(
-     new E_F1_funcT<map< pair<int,int>, R> *,KNM<R>* >(Matrixfull2map<R>),
-     new E_F1_funcT<map< pair<int,int>, R> *,outProduct_KN_<R>* >(Matrixoutp2map<R>)
-     //, new E_F1_funcT<map< pair<int,int>, R> *,Matrice_Creuse<R>* >(MatriceCreuse2map<R>)
+ map_type[typeid(MAPMAT *).name()]->AddCast(
+     new E_F1_funcT<MAPMAT *,KNM<R>* >(Matrixfull2map<R>),
+     new E_F1_funcT<MAPMAT *,outProduct_KN_<R>* >(Matrixoutp2map<R>)
+     //, new E_F1_funcT<MAPMAT *,Matrice_Creuse<R>* >(MatriceCreuse2map<R>)
 
        ); 
 

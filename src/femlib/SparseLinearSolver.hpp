@@ -21,7 +21,7 @@ typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A,const char 
         thesolver = new VirtualSolverUMFPACK<Z,K> (A,ds.strategy,ds.tol_pivot,ds.tol_pivot_sym);
     else if(strncmp("CHOLMOD",solver,7)==0)
         thesolver = new VirtualSolverCHOLMOD<Z,K> (A);
-    else if(strncmp("GC",solver,2)==0)
+    else if(strncmp("CG",solver,2)==0)
         thesolver = new SolverCG<Z,K> (A,ds);
     else if(strncmp("GMRES",solver,5)==0)
         thesolver = new SolverGMRES<Z,K> (A,ds);
@@ -71,7 +71,7 @@ public:
         else if(strncmp("CHOLMOD",solver,7)==0)
          thesolver = new VirtualSolverCHOLMOD<Z,K> (A);
 
-        else if(strncmp("GC",solver,2)==0)
+        else if(strncmp("CG",solver,2)==0)
           thesolver = new SolverCG<Z,K> (A,ds);
         else if(strncmp("GMRES",solver,5)==0)
             thesolver = new SolverGMRES<Z,K> (A,ds);
