@@ -106,6 +106,7 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
     ffassert( A.symetrique && L.symetrique);
     ffassert( A.n == L.n);
     int n =A.n,i,j,k,kk;
+    double tgv1= sqrt(tgv);
     double tgve =tgv*0.99999999;
     if(tgve < 1) tgve=1e200;
     double nan=sqrt(-1.);
@@ -124,7 +125,7 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
         { // B.C
             for (kk=li0;kk<li1;kk++)
                 L.a[kk]=0; //  remove row and col
-            L.a[li1]=1.;
+            L.a[li1]=1;
             BC++;
         }
         else
@@ -207,6 +208,7 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
        cout << "    - ILU  tgv " << tgv << endl;
     ffassert( A.n == L.n);
     ffassert( A.n == Ut.n);
+    int sym = A.symetrique;
     int n =A.n,i,j,k,kk;
     double tgve =tgv*0.999;
     if(tgve < 1) tgve=1e200;
@@ -254,7 +256,7 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
              for(int u=ui0;u<ui1;++u) // coef of  Ut  non zero
             {
                 int j   = Ut.cl[u];// Ut(j,i) == U(j,i)
-                R *pAji = A.pij(j,i), Aji = pAji ? *pAji : 0.;
+                R *pAji = sym ? A.pij(i,j) : A.pij(j,i), Aji = pAji ? *pAji : 0.;
                 if( wbc[j] )  Aji=0; // remove row term  if BC. on j  ...
                 ffassert(j<i);// transpose
                 Ut.a[u] = (Aji - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,j));

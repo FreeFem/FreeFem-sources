@@ -691,6 +691,138 @@ long ff_flann_search (KNM_<double> const &P, KNM_<double> const &Q, double const
 }
 
 #endif
+using bamg::BinaryRand;
+int  WalkInTriangle(const Mesh & Th,int it, double *lambda,R2 PF)
+{
+    const Triangle & T(Th[it]);
+    const R2 Q[3]={(const R2) T[0],(const R2) T[1],(const R2) T[2]};
+    int i0=Th.number(T[0]);
+    int i1=Th.number(T[1]);
+    int i2=Th.number(T[2]);
+    
+     R2 P  = lambda[0]*Q[0]  + lambda[1]*Q[1]  + lambda[2]*Q[2];
+    
+    //  cout << " " << u << " " << v ;
+
+    
+    //  couleur(15);MoveTo( P); LineTo( PF);
+    R l[3];
+    l[0] = Area2(PF  ,Q[1],Q[2]);
+    l[1] = Area2(Q[0],PF  ,Q[2]);
+    l[2] = Area2(Q[0],Q[1],PF  );
+    R Det = l[0]+l[1]+l[2];
+    l[0] /= Det;
+    l[1] /= Det;
+    l[2] /= Det;
+    const R eps = 1e-5;
+    int neg[3],k=0;
+    int kk=-1;
+    if (l[0]>-eps && l[1]>-eps && l[2]>-eps)
+    {
+    
+        lambda[0] = l[0];
+        lambda[1] = l[1];
+        lambda[2] = l[2];
+    }
+    else
+    {
+        
+        if (l[0]<eps && lambda[0] != l[0]) neg[k++]=0;
+        if (l[1]<eps && lambda[1] != l[1]) neg[k++]=1;
+        if (l[2]<eps && lambda[2] != l[2]) neg[k++]=2;
+        R eps1 = T.area     * 1.e-5;
+        
+        if (k==2) // 2
+        {
+            // let j be the vertex beetween the 2 edges
+            int j = 3-neg[0]-neg[1];
+            //
+            R S = Area2(P,PF,Q[j]);
+            
+            if (S>eps1)
+                kk = (j+1)%3;
+            else if (S<-eps1)
+                kk = (j+2)%3;
+            else if (BinaryRand())
+                kk = (j+1)%3;
+            else
+                kk = (j+2)%3;
+            
+        }
+        else if (k==1)
+            kk = neg[0];
+        if(kk>=0)
+        {
+            R d=lambda[kk]-l[kk];
+            
+            throwassert(d);
+            R coef =  lambda[kk]/d;
+            R coef1 = 1-coef;
+            lambda[0] = lambda[0]*coef1 + coef *l[0];
+            lambda[1] = lambda[1]*coef1 + coef *l[1];
+            lambda[2] = lambda[2]*coef1 + coef *l[2];
+            lambda[kk] =0;
+        }
+    }
+    int jj=0;
+    R lmx=lambda[0];
+    if (lmx<lambda[1])  jj=1, lmx=lambda[1];
+    if (lmx<lambda[2])  jj=2, lmx=lambda[2];
+    if(lambda[0]<0) lambda[jj] += lambda[0],lambda[0]=0;
+    if(lambda[1]<0) lambda[jj] += lambda[1],lambda[1]=0;
+    if(lambda[2]<0) lambda[jj] += lambda[2],lambda[2]=0;
+    return kk;
+}
+BoundaryEdge *  Cut(const Mesh & Th,R2 P,R2 & PF)
+{
+    R2 PHat;
+    bool outside;
+    R l[3];
+    const Triangle *K= Th.Find(P,PHat,outside)   ;
+    ffassert(!outside);
+    int it = Th(K);
+    PHat.toBary(l);
+    int k=0;
+    int j;
+    while ( (j=WalkInTriangle(Th,it,l,PF))>=0)
+    {
+        int jj  = j;
+        throwassert( l[j] == 0);
+        R a= l[(j+1)%3], b= l[(j+2)%3];
+        int itt =  Th.ElementAdj(it,j);
+        if(itt==it || itt <0) {
+            PF=Th[it](R2(l+1)); // point de sortie
+           // cout << " P " << P <<endl;
+            int i1=Th(it,(jj+1)%3) ,i2=Th(it,(jj+2)%3) ;
+            return Th.TheBoundaryEdge(i1,i2);}
+        it = itt;
+        l[j]=0;
+        l[(j+1)%3] = b;
+        l[(j+2)%3] = a;
+        ffassert(k++<1000);
+    }
+    return 0;
+}
+long BorderIntersect(pmesh const & pTh, KN_<double> const &IX, KN_<double> const &IY, KN_<double> const &OX, KN_<double> const &OY, KN_<long> const& cL)
+{
+    const Mesh &Th = *pTh;
+    KN_<double>  ox=OX, oy =OY;
+    KN_<long>  L=cL;
+    int np = IX.N();
+    ffassert(OX.N()==np  &&OY.N()==np &&IY.N()==np &&cL.N()==np  ); //  verif taille
+    long ni=0;
+    for(int i=0; i<np;++i)
+    {
+        R2 P(IX[i],IY[i]);
+        R2 Q(OX[i],OY[i]);
+        BoundaryEdge * e=Cut(Th,P,Q);
+        
+        if(e ) { L[i]=e->lab;OX[i]=Q.x, OY[i]=Q.y;}
+        else L[i]= notaregion;
+    }
+    return ni;
+}
+
 static void init () {
 #ifdef WITH_flann
 	Global.Add("radiusSearch", "(", new OneOperator4_<long, KNM_<double>, KNM_<double>, double, KN<KN<long> > *>(ff_flann_search));
@@ -717,7 +849,9 @@ static void init () {
 	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<true>));
 	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<true>));
 	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<true>));
-	Global.Add("ClosePoints1", "(", new OneOperator3s_<KN<long> *, double, pmesh, KNM<double> *>(CloseTo<true> ));
+    Global.Add("ClosePoints1", "(", new OneOperator3s_<KN<long> *, double, pmesh, KNM<double> *>(CloseTo<true> ));
+    Global.Add("BorderIntersect", "(", new OneOperator6_<long,pmesh, KN_<double>,KN_<double>,KN_<double>,KN_<double>,KN_<long> >(BorderIntersect))  ;
+    
 }
 
 LOADFUNC(init);

@@ -395,7 +395,7 @@ public:
   virtual R & operator()(int i,int j)=0;
   virtual R * pij(int i,int j) const =0; // Add FH 
   virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
-  virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {return 0;} // not 
+  virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool nocopy=false) const {return 0;} // not 
   virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
   // Add FH april 2005
   virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
@@ -522,7 +522,7 @@ public:
     
   R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
   R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
-  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
+  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool nocopy=false) const ;
   
   template<class F> void map(const  F & f)
   {
@@ -721,8 +721,8 @@ template<class K>
  template<class RB,class RAB>
  void  prod(const MatriceMorse<RB> & B, MatriceMorse<RAB> & AB);
  
- MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
-     return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
+ MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool nocopy=false) const {
+     return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,nocopy, solver,transpose);}
   bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false);
   
   template<typename RR,typename K> static  RR CastTo(K  b){return b;}
