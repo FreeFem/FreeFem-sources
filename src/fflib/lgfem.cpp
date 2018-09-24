@@ -5148,6 +5148,10 @@ void DclTypeMatrix()
    Dcl_Type<RNM_VirtualMatrix<R>*>( ); // ???????  ZZZZZZ
 
   Dcl_Type<Matrice_Creuse<R>* >(InitP<Matrice_Creuse<R> >,Destroy<Matrice_Creuse<R> >, ClearReturn<Matrice_Creuse<R> >);
+    // newpMatrice_Creuse
+    Dcl_Type<newpMatrice_Creuse<R> >();      // to def new Matrice_Creuse
+    Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')
+
   Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
   Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
   Dcl_Type<Matrice_Creuse_inv_trans<R> >();      // matrice^-1   A'^{-1}
@@ -5168,7 +5172,8 @@ void DclTypeMatrix()
   
   // init array
     TheOperators->Add("<-", 
-       new OneOperator2_<AMat *,AMat *,long>(&set_initmat));
+       new OneOperator2_<AMat *,AMat *,long>(&set_initmat)
+                      );
   //  A[i] 
   atype<AMat* >()->Add("[","",new OneOperator2_<PMat,AMat*,long >(get_elementp_<Mat,AMat*,long>));
   

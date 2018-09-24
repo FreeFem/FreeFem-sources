@@ -1910,51 +1910,46 @@ class BlockMatrix1 :  public BlockMatrix<R> { public:
 };
 
 template<typename R>  
-map< pair<int,int>, R> *Matrixfull2mapIJ_inv (KNM<R>   * const & pa,const Inv_KN_long & iii,const Inv_KN_long & jjj)
+//map< pair<int,int>, R> *
+newpMatrice_Creuse<R> Matrixfull2mapIJ_inv (Stack s,KNM<R>   * const & pa,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
+   // ZZZZ
+    
    const  KN_<long> &ii(iii), &jj(jjj);
    const KNM<R> & a(*pa);
    int N=a.N(),M=a.M();
    long n = ii(SubArray(N)).max()+1;
    long m= jj(SubArray(M)).max()+1;
    
-/*
-  long minn = ii(SubArray(N)).min()+1;
-  long minm= jj(SubArray(M)).min()+1;
-  if ( !(0 <= minn && 0 <=  minm) ) 
-  {
-  cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;
-  ExecError("Out of Bound Error");
-  }
-*/
+
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
+    VirtualMatrix<int,R> & A =*pA;
    
-  // cout << "  ### n m " << n << " " << m << endl; 
-   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   map< pair<int,int>, R> & A(*pA);
-   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
-  
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
      { R aij=a(i,j);
        //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
        if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40) 
-         A[make_pair(ii[i],jj[j])] += aij;
+         A(ii[i],jj[j]) += aij;
      }
-      
-  return pA;
+
+  return newpMatrice_Creuse<R>(s,pA);
 }
 
 template<typename R>  
-map< pair<int,int>, R> *Matrixfull2mapIJ (KNM<R>   * const & pa,const KN_<long> & ii,const  KN_<long> & jj)
+//map< pair<int,int>, R> *
+newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN_<long> & ii,const  KN_<long> & jj)
 {
    const KNM<R> & a(*pa);
    int N=a.N(),M=a.M();
    long n = ii.N();
    long m= jj.N();
   // cout << "  ### n m " << n << " " << m << endl; 
-   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   map< pair<int,int>, R> & A(*pA);
-   A[make_pair(n-1,m-1)] += R(); // Hack to be sure that the last term existe 
+//   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+//   map< pair<int,int>, R> & A(*pA);
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
+    VirtualMatrix<int,R> & A =*pA;
+    //A[make_pair(n-1,m-1)] += R(); // Hack to be sure that the last term existe
   
    for (long il=0;il<N;++il)
     for (long jl=0;jl<M;++jl)
@@ -1971,37 +1966,41 @@ map< pair<int,int>, R> *Matrixfull2mapIJ (KNM<R>   * const & pa,const KN_<long> 
           R aij=a(i,j);
        //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
 	  if (Fem2D::norm(aij)>1e-40) 
-           A[make_pair(il,jl)] += aij;
+           A(il,jl) += aij;
        }
      }
       
-  return pA;
+    return newpMatrice_Creuse<R> (s,pA);//;pA;
 }
 
 template<class R>
-AnyType Matrixfull2map (Stack , const AnyType & pp)
+AnyType Matrixfull2map (Stack s , const AnyType & pp)
 {
    const KNM<R> & a(*GetAny<KNM<R> *>(pp));
    int N=a.N(),M=a.M();
    int n = N;
    int m= M;
-   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   map< pair<int,int>, R> & A(*pA);
-   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
+    VirtualMatrix<int,R> & A =*pA;
+
+  // map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+  // map< pair<int,int>, R> & A(*pA);
+   A(n-1,m-1) = R(); // Hack to be sure that the last term existe
   
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { R aij=a(i,j);
        if (Fem2D::norm(aij)>1e-40) 
-      A[make_pair(i,j)] += aij;
+      A(i,j) += aij;
      }
       
-  return pA;
+  return SetAny<newpMatrice_Creuse<R> >(newpMatrice_Creuse<R> (s,pA));//
 }
 
 
 template<class R>
-map< pair<int,int>, R> *Matrixoutp2mapIJ_inv (outProduct_KN_<R>   * const & pop,const Inv_KN_long & iii,const Inv_KN_long & jjj)
+//map< pair<int,int>, R> *
+newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const & pop,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
    const KN_<long> &ii(iii), &jj(jjj);
    const outProduct_KN_<R> & op(*pop);
@@ -2017,33 +2016,41 @@ map< pair<int,int>, R> *Matrixoutp2mapIJ_inv (outProduct_KN_<R>   * const & pop,
             ExecError("Out of Bound Error");
         }
  */
-   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   map< pair<int,int>, R> & A(*pA);
-   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
-  
+    //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+   //map< pair<int,int>, R> & A(*pA);
+   //A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
+    VirtualMatrix<int,R> & A =*pA;
+
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { 
        R aij=op.a[i]*RNM::conj(op.b[j]);
        if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40) 
 //       if (norm(aij)>1e-40 &) 
-          A[make_pair(ii[i],jj[j])] += aij;
+          A(ii[i],jj[j]) += aij;
      }   
   delete pop;
     
-  return pA;
+//  return pA;
+ return newpMatrice_Creuse<R> (s,pA);//
 }
 
 
 template<class R>
-map< pair<int,int>, R> *Matrixmapp2mapIJ1 (map< pair<int,int>, R> *const &  B,const Inv_KN_long & iii,const Inv_KN_long  & jjj)
+//map< pair<int,int>, R> *
+newpMatrice_Creuse<R>
+Matrixmapp2mapIJ1 (Stack s,Matrice_Creuse<R> *const &  mcB,const Inv_KN_long & iii,const Inv_KN_long  & jjj)
 {
     const KN_<long> &ii(iii), &jj(jjj);  
     typedef typename map< pair<int,int>, R>::const_iterator It;
     
-    map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-    map< pair<int,int>, R> & A(*pA);
-    int n=0,m=0;
+  //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+  //  map< pair<int,int>, R> & A(*pA);
+      int n=0,m=0;
+     HashMatrix<int,R> *B = dynamic_cast<HashMatrix<int,R> *>(mcB->pMC());
+     ffassert(B);
+  
     // hack:  the last element must exist in the map  to set matrix size 
 /*    
     It lastb= --B->end(); // le last element
@@ -2054,12 +2061,15 @@ map< pair<int,int>, R> *Matrixmapp2mapIJ1 (map< pair<int,int>, R> *const &  B,co
 	mb=last->first.second+1;
     } */
     int N=ii.N(),M=jj.N();
+    int nn = ii.max(), mm= jj.max();
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(nn,mm);
+    VirtualMatrix<int,R> & A =*pA;
    // A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
     
-    for (It k=B->begin();k!=B->end();++k)
+    for (int k=0;k<B->nnz;++k)
     {
-	int il =  k->first.first;
-	int jl =  k->first.second;
+        int il =  B->i[k];
+	int jl =  B->j[k];
 	if ( !( 0 <= il && il < N && 0 <= jl && jl < M )  )
 	{
 	    cerr << " Out of Bound  in (Map)(I,J) : " << il << " " << jl << " not in " << "[0,"<<N<<"[x[0," << M << "[ \n";
@@ -2069,25 +2079,29 @@ map< pair<int,int>, R> *Matrixmapp2mapIJ1 (map< pair<int,int>, R> *const &  B,co
 	int j=jj(jl);
 	n=max(i,n);
 	m=max(j,m);
-	R aij =k->second;
+	R aij = B->aij[k];
 	if(i >=0 && j>=0) 
-	  A[make_pair(i,j)] += aij;
+	  A(i,j) += aij;
     }
-     A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe 
-     delete B;
-    
-    return pA;
+    // A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe
+    // delete B;
+    //  FH question resize or not pA  to (n,m);
+ return  newpMatrice_Creuse<R> (s,pA);//
+  //  return pA;
 }
 
 template<class R>
-map< pair<int,int>, R> *Matrixmapp2mapIJ (map< pair<int,int>, R> *const &  B,const KN_<long> & ii,const KN_<long>  & jj)
+// map< pair<int,int>, R> *
+newpMatrice_Creuse<R> Matrixmapp2mapIJ (Stack s,Matrice_Creuse<R> *const &  mcB,const KN_<long> & ii,const KN_<long>  & jj)
 {
     
-    typedef typename map< pair<int,int>, R>::const_iterator It;
-    typedef typename multimap< int,int>::iterator  MI;
-    
-    map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-    map< pair<int,int>, R> & A(*pA);
+
+ typedef typename map< pair<int,int>, R>::const_iterator It;
+typedef typename multimap< int,int>::iterator  MI;
+    HashMatrix<int,R> *B = dynamic_cast<HashMatrix<int,R> *>(mcB->pMC());
+    ffassert(B);
+ //   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+  //  map< pair<int,int>, R> & A(*pA);
     multimap< int,int > I,J;
     int N=ii.N(),M=jj.N();
     for (int i=0;i<N;++i)
@@ -2097,12 +2111,14 @@ map< pair<int,int>, R> *Matrixmapp2mapIJ (map< pair<int,int>, R> *const &  B,con
 	if(jj[j]>=0)
 	    J.insert(make_pair(jj[j],j));
     int n=N-1,m=M-1;// change FH  sep 2009 to have the correct size..
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(N,M);
+    VirtualMatrix<int,R> & A =*pA;
 
-    for (It k=B->begin();k!=B->end();++k)
+    for (int k=0;k!=B->nnz;++k)
     {
-	int il =  k->first.first;
-	int jl =  k->first.second;
-	R aij =k->second;
+        int il =  B->i[k];
+	int jl =   B->j[k];
+	R aij = B->aij[k];
 	pair<MI,MI> PPi=I.equal_range(il);
 	pair<MI,MI> PPj=J.equal_range(jl);
 	for(MI pi=PPi.first ; pi !=  PPi.second; ++pi)
@@ -2114,26 +2130,32 @@ map< pair<int,int>, R> *Matrixmapp2mapIJ (map< pair<int,int>, R> *const &  B,con
 		n=max(i,n);
 	        m=max(j,m);	
 	       if(i >=0 && j>=0) 
-	         A[make_pair(i,j)] += aij;
+	         A(i,j) += aij;
 	    }
 	}   
     }
-    A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe 
-    delete B;
+    // resier A to n,m ?????
+   // A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe
+   // delete B;
     
-    return pA;
+   // return pA;
+    return  newpMatrice_Creuse<R> (s,pA);//
 }
 
 template<class R>
-map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,const KN_<long> & ii,const KN_<long>  & jj)
+newpMatrice_Creuse<R>
+//map< pair<int,int>, R> *
+Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii,const KN_<long>  & jj)
 {
    const outProduct_KN_<R> & op(*pop);
    long N=op.a.N(),M=op.b.N();
    long n=ii.N(),m=jj.N();
-   
-   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   map< pair<int,int>, R> & A(*pA);
-   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
+    VirtualMatrix<int,R> & A =*pA;
+
+ //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+ //  map< pair<int,int>, R> & A(*pA);
+//   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
    
    for (long il=0;il<n;++il)
     for (long jl=0;jl<m;++jl)
@@ -2149,35 +2171,38 @@ map< pair<int,int>, R> *Matrixoutp2mapIJ (outProduct_KN_<R>   * const & pop,cons
                 }
                R aij=op.a[i]*RNM::conj(op.b[j]);
                if (Fem2D::norm(aij)>1e-40) 
-                  A[make_pair(il,jl)] += aij;
+                  A(il,jl) += aij;
                }
      }   
   delete pop;
-    
-  return pA;
+  return  newpMatrice_Creuse<R> (s,pA);//
+  //return pA;
 }
 
 
 template<class R>
-AnyType Matrixoutp2map (Stack , const AnyType & pp)
+AnyType Matrixoutp2map (Stack s, const AnyType & pp)
 {
    const outProduct_KN_<R> & op(*GetAny<outProduct_KN_<R> *>(pp));
    long N=op.a.N(),M=op.b.N();
    long n = N;
    long m= M;
-   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   map< pair<int,int>, R> & A(*pA);
-   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
-  
+//   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
+//   map< pair<int,int>, R> & A(*pA);
+//   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
+    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
+    VirtualMatrix<int,R> & A =*pA;
+
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
      { 
       R aij=op.a[i]*RNM::conj(op.b[j]);
       if (Fem2D::norm(aij)>1e-40) 
-        A[make_pair(i,j)] += aij;
+        A(i,j) += aij;
      } 
   delete &op;        
-  return pA;
+ // return pA;
+ return  SetAny<newpMatrice_Creuse<R>>(newpMatrice_Creuse<R> (s,pA));//
 }
 
 
@@ -2376,12 +2401,15 @@ public:
                 ffassert(0);
                 //V4
 		A  a=GetAny<A>((*Mat)(stack));
+                ffassert(0); // TO DO
+                
 		KN<long> *lg,*cl;
 		KN<RR> *cc;
 		lg = GetAny<KN<long>*>((*lig)(stack));
 		cl = GetAny<KN<long>*>((*col)(stack));
 		cc = GetAny<KN<RR>*>((*coef)(stack));
 		int n=a->N(),m=a->M();
+                
 		map<pair<int,int>,RR> *M=new map<pair<int,int>,RR>;
 		if (n >0 && m>0 && a->A) 
 		{
@@ -2769,7 +2797,6 @@ struct  VirtualMatCR :public RNM_VirtualMatrix<Complex>{ public:
     bool ChecknbColumn  (int m) const  { return VM.ChecknbColumn(m); }
 };
 
-
 template<class R,class A,class B>    // extend (4th arg.)
 class  Op2_mulvirtAvCR : public OneOperator {     //
     aType r; //  return type
@@ -2803,7 +2830,11 @@ public:
     
 };
 
-
+template<class R,int Init>
+Matrice_Creuse<R> * SetMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R>  np)
+{
+    return np.set(p,Init);
+}
 template <class R>
 void AddSparseMat()
 {
@@ -2843,6 +2874,7 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
 
 // matrix new code   FH (Houston 2004)        
  TheOperators->Add("=",
+        new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (SetMatrice_Creuse<R,0> ),
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R,1>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R,1>),
@@ -2857,6 +2889,7 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        
  TheOperators->Add("<-",
        new OneOperatorCode<BlockMatrix<R> >(),
+       new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (SetMatrice_Creuse<R,1> ),
 //       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R,0>)  ,
@@ -2932,23 +2965,25 @@ TheOperators->Add("+",
     
  atype<Matrice_Creuse<R> * >()->Add("[","",new OneOperator3_<R,Matrice_Creuse<R> *,long,long >(10,get_element2mc<R>));
  
-    typedef map< pair<int,int>, R> MAPMAT;
- atype<KNM<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
- atype<KNM<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
+//    typedef map< pair<int,int>, R> MAPMAT;
+ typedef Matrice_Creuse<R> * MAPMATC;
+ typedef   newpMatrice_Creuse<R> MAPMATN;
+ atype<KNM<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
+ atype<KNM<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
  
- atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,outProduct_KN_<R>*,Inv_KN_long,Inv_KN_long >(Matrixoutp2mapIJ_inv<R>));
- atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
+ atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,outProduct_KN_<R>*,Inv_KN_long,Inv_KN_long >(Matrixoutp2mapIJ_inv<R>));
+ atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
 
 
  TheOperators->Add("=", new SetRawMatformMat<R>);
 
 
 
- t_MM->Add("(","",  new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>));
- t_MM->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>));
+ t_MM->Add("(","",new OneOperator3s_<MAPMATN ,MAPMATC ,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>));
+ t_MM->Add("(","",new OneOperator3s_<MAPMATN ,MAPMATC ,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>));
 
- t_MC->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>,t_MC));
- t_MC->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>,t_MC));
+ t_MC->Add("(","",new OneOperator3s_<MAPMATN ,MAPMATC ,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>,t_MC));
+ t_MC->Add("(","",new OneOperator3s_<MAPMATN ,MAPMATC ,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>,t_MC));
 
  //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>),t_lM);
  //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>),t_lM);
@@ -2957,9 +2992,9 @@ TheOperators->Add("+",
 //map< pair<int,int>, R> * ttt=   (0);
 
    //   ; 
- map_type[typeid(MAPMAT *).name()]->AddCast(
-     new E_F1_funcT<MAPMAT *,KNM<R>* >(Matrixfull2map<R>),
-     new E_F1_funcT<MAPMAT *,outProduct_KN_<R>* >(Matrixoutp2map<R>)
+ map_type[typeid(MAPMATN ).name()]->AddCast(
+     new E_F1_funcT<MAPMATN ,KNM<R>* >(Matrixfull2map<R>),
+     new E_F1_funcT<MAPMATN ,outProduct_KN_<R>* >(Matrixoutp2map<R>)
      //, new E_F1_funcT<MAPMAT *,Matrice_Creuse<R>* >(MatriceCreuse2map<R>)
 
        ); 

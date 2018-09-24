@@ -930,6 +930,22 @@ public:
     MatriceCreuse<K> *pMC()  {return A ? ( MatriceCreuse<K> *)A:0; }
 };
 
+template<class K> class newpMatrice_Creuse
+{
+public:
+    Matrice_Creuse<K> *pmc;
+    newpMatrice_Creuse(Stack s,VirtualMatrix<int,K> *pvm) :pmc(new Matrice_Creuse<K>(pvm)  )
+    {
+        pmc->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse) FH bofbof
+        Add2StackOfPtr2FreeRC(s,pmc);
+    }
+    Matrice_Creuse<K> * set(Matrice_Creuse<K> *pmcc,int init) const  {
+        if(!init) pmc->init() ;
+        pmcc->A=pmc->A;
+        return  pmcc;
+    }
+};
+
 template<class K> class Matrice_Creuse_Transpose;
 
  template<class KA,class KB>   class Matrix_Prod { public:  
