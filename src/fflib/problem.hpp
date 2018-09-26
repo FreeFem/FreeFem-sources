@@ -902,6 +902,7 @@ public:
   UniqueffId Uh,Vh; // pour la reconstruction
     // MatriceCreuse<K> == VirtualMatrix<int,K>
  typedef  VirtualMatrix<int,K> VMat;
+  typedef  HashMatrix<int,K> HMat;
 
  CountPointer<MatriceCreuse<K> > A;
  
@@ -927,7 +928,8 @@ public:
   long M() const { return A ? A->m : 0;}
   void resize(int n,int m) { if(A) A->resize(n,m);}
   void increment(){ count++;}
-    MatriceCreuse<K> *pMC()  {return A ? ( MatriceCreuse<K> *)A:0; }
+    VMat *pMC()  {return A ? ( MatriceCreuse<K> *)A:0; }
+    HMat *pHM()  {return dynamic_cast<HashMatrix<int,K> *>(pMC());}
 };
 
 template<class K> class newpMatrice_Creuse

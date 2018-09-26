@@ -193,8 +193,9 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
     K minus1=-1.;
     double gCgp, gCg, eps2=eps*eps;
     assert( A.m==n && C.m==n && C.n==n);
-    niveauimpression=std::max(niveauimpression,10);
-    int nprint =std::max((int)((nbitermax+1)*(10.-niveauimpression)/10.),1);
+    niveauimpression=std::min(niveauimpression,10);
+    int nprint =std::max((int)(max(nbitermax+1,1000)*(10.-niveauimpression)/10.),1);
+    
     mysaxpy(n,minus1,b,A.matmul(x,G));// G = Ax -b
     gCg = real(mysdot(n,G,C.matmul(G,CG))) ;
     myscal(n,minus1,myscopy(n,CG,H)); // H =- CG;
@@ -226,7 +227,7 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
                 break;
             }
             else
-                if ( (iter % nprint) == 0 )
+                if ( ((iter+1) % nprint) == 0 )
                     std::cout <<"  GC:iteration "<< iter << " rho "<< rho << " gamma "
                     <<gamma<< " ||g||_C^2:" << gCg << " / " << eps2 <<std::endl;
         }

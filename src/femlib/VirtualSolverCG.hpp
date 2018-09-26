@@ -29,8 +29,9 @@ public:
     SolverCG(HMat  &AA,const Data_Sparse_Solver & ds)
     :A(&AA),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),erronerr(1),eps(ds.epsilon)
     {
+        if(verb>1)
         std::cout << " SolverCG  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
-                  << " v " << verb << "itsmx " << itermax <<endl;
+                  << " v " << verb << " itmax " << itermax <<endl;
         assert(A->n == A->m);
         pC = new HMatVirtPreconDiag(A);
     }
@@ -50,7 +51,8 @@ public:
     };
     void dosolver(K *x,K*b,int N,int trans)
     {
-        std::cout <<" SolverCG::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
+        if(verb>2)
+        std::cout <<"   SolverCG::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
         HMatVirt AA(A,trans);
         //HMatVirtPreconDiag CC(A);
         int err=0;

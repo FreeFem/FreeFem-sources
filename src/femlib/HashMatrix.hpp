@@ -201,7 +201,7 @@ public:
     // trans(false),
     half(halff), state(unsorted),type_state(type_HM),
     nbsort(0),sizep(0),lock(0), fortran(0) ,
-    re_do_numerics(0),re_do_symbolic(0)
+    re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
     {
         Increaze(nnnz);
     }
@@ -259,34 +259,33 @@ public:
 
     
     HashMatrix(bool Half,I nn)
-    :  VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+    : VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
-    // trans(false),
     half(Half), state(unsorted),type_state(type_HM),
     nbsort(0),sizep(0),lock(0), fortran(0) ,
-    re_do_numerics(0),re_do_symbolic(0)
+    re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
+
     {
         Increaze(nn*4);
     }
     
     HashMatrix(const HashMatrix& A)
-    :  VirtualMatrix<I,R> (A), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
-    i(0),j(0),aij(0)  ,
+    :  VirtualMatrix<I,R> (A),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
-    //trans(false),
-    half(false),  state(unsorted),type_state(type_HM),nbsort(0),
-    sizep(0),lock(0), fortran(0),re_do_numerics(0),re_do_symbolic(0)
+    half(A.half), state(unsorted),type_state(type_HM),
+    nbsort(0),sizep(0),lock(0), fortran(0) ,
+    re_do_numerics(0),re_do_symbolic(0)
     {
         Increaze(A.nnz);
         operator=(A);
     }
     
     HashMatrix(I nn,const R *diag)
-    :  VirtualMatrix<I,R> (nn,nn), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
-    i(0),j(0),aij(0)  ,
+    :  VirtualMatrix<I,R> (nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
-    half(false),  state(unsorted),type_state(type_HM),nbsort(0),
-    sizep(0),lock(0), fortran(0),re_do_numerics(0),re_do_symbolic(0)
+    half(0), state(unsorted),type_state(type_HM),
+    nbsort(0),sizep(0),lock(0), fortran(0) ,
+    re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
     {
       Increaze(nn);
       for(int k=0;k<nn;++k)
@@ -295,12 +294,11 @@ public:
     }
     template<class K>
     HashMatrix(const HashMatrix<I,K> &A , R (*ff)(K)=0 )
-    :  VirtualMatrix<I,R> (A.n,A.m), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),
-    i(0),j(0),aij(0)  ,
+    :  VirtualMatrix<I,R> (A.n,A.m), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
-    //trans(false),
-    half(false),  state(unsorted),type_state(type_HM),nbsort(0),
-    sizep(0),lock(0), fortran(0),re_do_numerics(0),re_do_symbolic(0)
+    half(A.half), state(unsorted),type_state(type_HM),
+    nbsort(0),sizep(0),lock(0), fortran(0) ,
+    re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
     {
         Increaze(A.nnz);
         if( ff ==0)
@@ -340,7 +338,7 @@ public:
                 p[ii]=empty;
         sizep=sp;
     }
-    void resize(I nn, I mm=0)  {resize(nn,mm);}
+    void resize(I nn, I mm=0)  {resize(nn,mm); }
         
     void resize(I nn, I mm,I nnnz )
     {
@@ -370,6 +368,7 @@ public:
     
     void clear()
     {
+        nbsort=0;
         re_do_numerics=1;
         re_do_symbolic=1;
         half=false;
@@ -377,6 +376,7 @@ public:
         fortran = 0;
         state=unsorted;
         type_state = type_HM;
+        setp(0); // unset
         if(nnz)
         {
             nnz=0;
@@ -384,6 +384,7 @@ public:
             for (size_t h=0;h<nhash;++h)
                 head[h]=empty;
         }
+        
     }
     
     Hash hash(size_t ii,size_t jj) const
@@ -454,7 +455,19 @@ public:
         if(t) delete [] t;
         t=tt;
     }
-    
+    template<typename T>
+    static void copy( T *dst,const T *from, size_t nn)
+    {
+        for(size_t i=0; i< nn; ++i)
+            dst[i]= from[i];
+    }
+    void dotranspose()
+    {
+        swap(i,j);
+        swap(this->n,this->m);
+        ReHash();
+        state=unsorted;
+    }
     void Increaze(size_t nnznew=0)
     {
         if(!nnznew) nnznew = max(this->n,this->m)*10;
@@ -573,33 +586,43 @@ public:
         }
     }
     template<class K>
-    void operator=(const HashMatrix<I,K> &A)
+     HashMatrix & operator=(const HashMatrix<I,K> &A)
     {
-        if( (const void*)  this == (const void*) & A) return;
+        if( (const void*)  this == (const void*) & A) return *this ;
         clear();
         this->n=A.n;
         this->m=A.m;
-        nnz =0; // empty matrice
-        //nnz=0;
         nhash=A.nhash;// ????????
-        //  nbcollision=0;
-        nbfind=0;
-        //trans=A.trans;
+         nbfind=0;
         fortran=A.fortran;
-        //state=unsorted;
-        //type_state=type_HM;
         nbsort=0;
-        sizep=0;
         lock=0;
         re_do_numerics=1;
         re_do_symbolic=1;
-//        R xx=(R)    K(1.) ;
-        
         Add(A);
-  
+        return *this;
     }
-    
-    
+    void set(I nn,I mm,bool hhalf,I nnnz, I *ii, I*jj, R *aa,int f77=0)
+    {
+        clear();
+        this->n=nn;
+        this->m=mm;
+        fortran=f77;
+        half=hhalf;
+        Increaze(nnnz);
+        nnz=nnnz;
+       
+        copy(i,ii,nnnz);
+        copy(j,jj,nnnz);
+        copy(aij,aa,nnnz);
+        ReHash();
+    }
+     HashMatrix &operator=(const HashMatrix &A)
+    {
+        if( (const void*)  this == (const void*) & A) return *this;
+        set(A.n,A.m,A.half,A.nnz,A.i,A.j,A.aij);
+        return *this;
+    }
     void Add(const HashMatrix<I,R> &A,R coef=R(1),bool trans=false, I ii00=0,I jj00=0)
     {
         I nn=A.n,mm=A.m;
@@ -1090,41 +1113,74 @@ public:
 
 // END OF CLASS HashMatrix
 template<class I,class RA,class RB=RA,class RAB=RA>
-void AddMul(HashMatrix<I,RA> &A, HashMatrix<I,RB> &B, HashMatrix<I,RAB> &AB,R c=R(1))
+void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool ta=false,bool tb=false,R c=R(1))
 {
-    AB.checksize(A.n,B.m);
-    assert(A.m == B.n);
+    int An= A.n, Am =A.m;
+     int Bn= B.n, Bm =B.m;
+    if(ta) swap(An,Am);
+    if(tb) swap(Bn,Bm);
+
+    AB.checksize(An,Bm);
+    ffassert(Am == Bn);
     //  need A col sort  , b row sort
-    B.CSR(); // sort by row... and build p.
-    
-    cout << " B = " <<  B << " \n; \n\n;";
+    if( tb)
+      B.CSC(); // sort by COL nd build p.
+    else
+      B.CSR(); // sort by row... and build p.
+    int * Bj = tb ? B.i : B.j;
+    int * Bi = tb ? B.j : B.i;
+ //   cout << " B = " <<  B << " \n; \n\n;";
     for(size_t l=0; l< A.nnz;++l)
     {
         I i=A.i[l],j=A.j[l];
+        if(ta) swap(i,j);
         //typename HashMatrix<I,R>::Pair rj(B.Row(j));
         //      for(size_t ll=rj.first; ll< rj.second ;++ll)
         
         for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
         {
-            cout << j << " : " << ll << " " << B.i[ll] <<" " << B.j[ll] <<endl;
-            assert(j == B.i[ll]);
-            I k = B.j[ll];
+            if(verbosity>1000000000) cout << j << " : " << ll << " " << B.i[ll] <<" " << B.j[ll] <<endl;
+            //assert(j == B.i[ll]);
+            I k = Bj[ll];
+            assert(j == Bi[ll]);
             AB(i,k) += c* A.aij[l]*B.aij[ll];
         }
     }
 }
 
 template<class I,class R>
-std::ostream & operator<<(std::ostream & coutt,  const HashMatrix<I,R> &A)
+std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
 {
+     int pold= f.precision();
+    if(A.type_state==HashMatrix<I,R>::type_CSR)
+    {
     using namespace std;
-    coutt << A.n << " x " << A.m << " " <<  " nnz =" << A.nnz << " states: "<<  A.state<< " " << A.type_state<< " " << endl;
-    for(int k=0; k < A.nnz; ++k)
-        coutt << k<< " : "<<  A.i[k] << " " << A.j[k] << " "<< A.aij[k] << endl;
-    if(A.p)
-        for(int k=0; k < A.sizep; ++k)
-            coutt << k << " "<< A.p[k] << endl;
-    return coutt;
+    f << "# Sparse Matrix (Morse)  " << endl;
+    f << "# first line: n m (is symmetic) nnz \n";
+    f << "# after for each nonzero coefficient:   i j a_ij where (i,j) \\in  {1,...,n}x{1,...,m} \n";
+    
+    f << A.n << " " << A.m << " " << A.half << "  " << A.nnz <<endl;
+    int k=A.p[0];
+    
+    for (int i=0;i<A.n;i++)
+    {
+        int ke=A.p[i+1];
+        for (;k<ke;k++)
+            f << setw(9) << i+1 << ' ' << setw(9) << A.j[k]+1 << ' ' << setprecision( 20) << A.aij[k]<< '\n' ;
+
+    }
+    }
+    else
+    {
+        f << "#  HashMatrix Matrix (COO) "<< endl;
+        f << "#    n       m        nnz     half     fortran   state    f.precision(pold);
+        f << A.n << " " << A.m << " " << A.nnz << " "<< A.half << " " A.fortran << " " <<  A.state<< " " << A.type_state<< " " << endl;
+        for(int k=0; k < A.nnz; ++k)
+            f << k<< " : "<<  A.i[k] << " " << A.j[k] << " "<<  setprecision( 20)  << A.aij[k] << endl;
+        f << endl;
+    }
+       f.precision(pold);
+    return f;
 }
 
 template<class R>

@@ -143,7 +143,10 @@ typefac(FactorizationNO)
     //    i,j,aij   =>> p1(i),p1(j), ajj
     std::vector<Z> p1(n);
     for(Z i=0; i<n; ++i)
+    {
+         p[i]=i;//ZZZZZ
         p1[p[i]]=i;// perm inver
+    }
     pU=pL= new Z[n+1];
     std::fill(pL,pL+n,0);
     if(!sym) {
@@ -179,12 +182,17 @@ typefac(FactorizationNO)
     {
         L = new R[pL[n]];
         D = new R[n];
+        fill(L,L+pL[n],R());
+        fill(D,D+n,R());
+
         U = L;
         for(int k=0; k<A->nnz;++k)
         {
             Z i=p[A->i[k]],j=p[A->j[k]];
-            if( i ==j) D[i]= A->aij[k];
-            else if( i > j ) L[pL[j+1]-i+j]=A->aij[k];
+            if( i ==j)
+                D[i]= A->aij[k];
+            else if( i > j )
+                L[pL[i+1]+j-i]=A->aij[k];
         }
     }
     else
@@ -192,6 +200,9 @@ typefac(FactorizationNO)
         L = new R[pL[n]];
         D = new R[n];
         U = new R[pU[n]];
+        fill(L,L+pL[n],R());
+        fill(D,D+n,R());
+        fill(U,U+pU[n],R());
 
         for(int k=0; k<A->nnz;++k)
         {

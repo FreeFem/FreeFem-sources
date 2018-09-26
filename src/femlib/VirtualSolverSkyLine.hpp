@@ -25,13 +25,14 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         { // start point
             Z nri=nr;
             Z s=id;
-            
+            Z si=s;
             for(int step=0; step < 5; ++step)
             {
-                if(step) s = r[nr-1]; // last point ..
+                
                  for (int i= nri; i< nr;++i)
                     mark[r[i]]=-1; // clean
                 nr=nri; //
+                s=si;  // last point ..
                 mark[s]=nr;
                 r[nr++] = s;
                 Z sc = Ap[s+1]-Ap[s];
@@ -92,6 +93,7 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
                 {
                     for(int i= nri; i<nr; ++i)
                       p[r[i]]=mark[r[i]];
+                     if(debug)
                     cout << step<< "            pfs  " << pfs << " " << pfso << endl;
                     pfss=pfs;
                 }
@@ -112,6 +114,7 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
     }
     if(verbosity>9)
     {
+        cout << " " << n << endl; 
         for(int i=0; i< n; ++i)
         {  if(i%10==0) cout << endl;
             cout << p[i] << " ";

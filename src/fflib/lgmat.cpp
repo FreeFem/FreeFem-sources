@@ -1413,28 +1413,37 @@ template<class RA,class RB,class RAB,int init>
 AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
 {
   using namespace Fem2D;
-  
+
   Matrice_Creuse<RAB> * sparse_mat =GetAny<Matrice_Creuse<RA>* >((*emat)(stack));
   const Matrix_Prod<RA,RB>  AB = GetAny<Matrix_Prod<RA,RB> >((*prodmat)(stack));
-  //  sparse_mat->pUh=AB.A->pUh;
-  //sparse_mat->pVh=AB.B->pVh;
-  MatriceMorse<RA> *mA= AB.A->A->toMatriceMorse(AB.ta);
-  MatriceMorse<RB> *mB= AB.B->A->toMatriceMorse(AB.tb);
-  if( !mA && ! mB) ExecError(" Sorry error: in MatProd,  pb trans in MorseMat");
-  if( mA->m != mB->n) {
+    
+  MatriceMorse<RA> *mA= AB.A->pHM();
+  MatriceMorse<RB> *mB= AB.B->pHM();
+    bool ta = AB.ta, tb = AB.tb;
+  if( !mA || !mB)
+  {
+      ExecError(" numll matrix in pod mat ");
+  }
+      int An= mA->n, Am =mA->m;
+      int Bn= mB->n, Bm =mB->m;
+      if(ta) swap(An,Am);
+      if(tb) swap(Bn,Bm);
+
+  if(  Am!= Bn) {
     cerr << "  -- Error dim ProdMat A*B : tA =" << AB.ta << " = tB " << AB.tb << endl;
     cerr << "  --MatProd " << mA->n<< " "<< mA->m << " x " << mB->n<< " "<< mB->m <<  endl;
     ExecError(" Wrong mat dim in MatProd");
   }
-   MatriceMorse<RAB> *mAB=new MatriceMorse<RAB>(mA->n,mB->m);
-  AddMul(*mA,*mB,*mAB);
+   MatriceMorse<RAB> *mAB=new MatriceMorse<RAB>(An,Bm);
+   AddMul(*mAB,*mA,*mB,ta,tb);
+  
   if(!init) sparse_mat->init();
   sparse_mat->typemat=(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(mAB);
-  delete mA;
-  delete mB;
   return sparse_mat;
+    
 }
+    
 
 template<class R,int init>
 AnyType CombMat(Stack stack,Expression emat,Expression combMat)
@@ -1519,15 +1528,16 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
     Mat=tMat; 
    }
   else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
-  MatriceMorse<R> * mr=Mat->A->toMatriceMorse(transp,false);
-  MatriceMorse<RR> * mrr = ChangeMatriceMorse<R,RR>::f(mr);
+    MatriceMorse<R> * mr=Mat->pHM();
+   
+    MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
+    *mrr = *mr;
+    if(transp) mrr->dotranspose();
+    
   
   Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-  //  sparse_mat->pUh=Mat->pUh;
-  // sparse_mat->pVh=Mat->pUh;;
-  //  cout << " CopyMat_tt " << init << " "<<transp << " " << sparse_mat << endl;
   if(!init) sparse_mat->init() ;
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
+  sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
   sparse_mat->A.master(mrr);
   //delete mr;
   return sparse_mat;
@@ -1922,8 +1932,8 @@ newpMatrice_Creuse<R> Matrixfull2mapIJ_inv (Stack s,KNM<R>   * const & pa,const 
    long m= jj(SubArray(M)).max()+1;
    
 
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int) n,(int) m);
+    HashMatrix<int,R> & A =*pA;
    
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
@@ -1947,8 +1957,8 @@ newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN
   // cout << "  ### n m " << n << " " << m << endl; 
 //   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
 //   map< pair<int,int>, R> & A(*pA);
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> & A =*pA;
     //A[make_pair(n-1,m-1)] += R(); // Hack to be sure that the last term existe
   
    for (long il=0;il<N;++il)
@@ -1980,8 +1990,8 @@ AnyType Matrixfull2map (Stack s , const AnyType & pp)
    int N=a.N(),M=a.M();
    int n = N;
    int m= M;
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(n,m);
+    HashMatrix<int,R> & A =*pA;
 
   // map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
   // map< pair<int,int>, R> & A(*pA);
@@ -2019,8 +2029,8 @@ newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const
     //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
    //map< pair<int,int>, R> & A(*pA);
    //A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> & A =*pA;
 
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
@@ -2062,8 +2072,8 @@ Matrixmapp2mapIJ1 (Stack s,Matrice_Creuse<R> *const &  mcB,const Inv_KN_long & i
     } */
     int N=ii.N(),M=jj.N();
     int nn = ii.max(), mm= jj.max();
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(nn,mm);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(nn,mm);
+    HashMatrix<int,R> & A =*pA;
    // A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
     
     for (int k=0;k<B->nnz;++k)
@@ -2111,8 +2121,8 @@ typedef typename multimap< int,int>::iterator  MI;
 	if(jj[j]>=0)
 	    J.insert(make_pair(jj[j],j));
     int n=N-1,m=M-1;// change FH  sep 2009 to have the correct size..
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(N,M);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(N,M);
+    HashMatrix<int,R> & A =*pA;
 
     for (int k=0;k!=B->nnz;++k)
     {
@@ -2150,8 +2160,8 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
    const outProduct_KN_<R> & op(*pop);
    long N=op.a.N(),M=op.b.N();
    long n=ii.N(),m=jj.N();
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> & A =*pA;
 
  //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
  //  map< pair<int,int>, R> & A(*pA);
@@ -2190,8 +2200,8 @@ AnyType Matrixoutp2map (Stack s, const AnyType & pp)
 //   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
 //   map< pair<int,int>, R> & A(*pA);
 //   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
-    VirtualMatrix<int,R> *pA= new  VirtualMatrix<int,R>(n,m);
-    VirtualMatrix<int,R> & A =*pA;
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> & A =*pA;
 
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
