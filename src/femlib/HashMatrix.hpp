@@ -33,6 +33,30 @@ static   inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
     // warning trans sub  matrix and not the block.
     return trans ? make_pair<int,int>(j+ii00,i+jj00)
     :  make_pair<int,int>(i+ii00,j+jj00) ; }
+inline int WhichMatrix(istream & f)
+{
+    string line;
+    while ( isspace(f.peek()))
+        f.get();
+    if  ( f.peek() =='#' )
+    {
+        line="";
+        while ( f.good()  )
+        {
+            char c=f.get();
+            if(c=='\n' || c=='\r') { break;}
+            line += c;
+        }
+        if( line.find("(Morse)") != std::string::npos)
+            return 2; // morse
+        
+        else  if( line.find("(COO)") != std::string::npos)
+            return 3; // morse
+        
+        return 0;
+    }
+    return 0;
+}
 
 template<class TypeIndex,class TypeScalaire>
 class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire> 
@@ -195,7 +219,7 @@ public:
         new (this) HashMatrix(nn,mm,nnnz,halff); // OK .. 
     }
     
-    HashMatrix(I nn,I mm=-1,size_t nnnz=0,bool halff=false)
+    HashMatrix(I nn,I mm=-1,I nnnz=0,bool halff=false)
     :  VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
     // trans(false),
@@ -205,59 +229,101 @@ public:
     {
         Increaze(nnnz);
     }
-    HashMatrix(istream & f):
+    HashMatrix(istream & f,int cas=-1):
     VirtualMatrix<I,R>(0,0),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
     // trans(false),
     half(0), state(unsorted),type_state(type_HM),
     nbsort(0),sizep(0),lock(0), fortran(0) ,
     re_do_numerics(0),re_do_symbolic(0)
-     {
-     string line;
-     int k=0;
-     while ( isspace(f.peek()))
-     f.get();
-     while ( f.peek() =='#' )
-     {
-     line="";
-     while ( f.good()  )
-     {
-     char c=f.get();
-     if(c=='\n' || c=='\r') { break;}
-     line += c;
-     }
-     if( f.peek()=='\n' || f.peek()=='\r') f.get();
-     if(verbosity>9)
-     cout << "   --  Matrx: "<< k << " :"   << line << endl;
-     k++;
-     }
-         long rn,rm,rnbcoef,rsymetrique;
-         
-     f >> rn >> rm >> rsymetrique >>rnbcoef;
-     if(verbosity>3)
-         cout << "     -- Read Mat: " <<  this->n << " x " <<  this->m << " sym : " << rsymetrique << " nnz=" << rnbcoef <<endl;
-     resize(rn,rm);
-     half =rsymetrique;
-      Increaze(rnbcoef);
-      int ii,jj;
-    
-     R aaij;
-    
-     for (int kk =0;kk<rnbcoef; ++kk)
-     {
-     f >> ii >> jj >> aaij;
-     ffassert(f.good() );
-     i--;j--;
-      //cout << i << " " << j << " " << aij << endl;
-      operator()(ii,jj) = aaij;
-     }
-     
-        
-         
-     
-     }
+    {
+         if(cas ==-1) cas=  WhichMatrix(f)  ;
+        // eat lines with #
+        string line;
+        int k=0;
+        while ( isspace(f.peek()))
+            f.get();
+        while ( f.peek() =='#' )
+        {
+            line="";
+            while ( f.good()  )
+            {
+                char c=f.get();
+                if(c=='\n' || c=='\r') { break;}
+                line += c;
+            }
+            if( f.peek()=='\n' || f.peek()=='\r') f.get();
+            if(verbosity>9)
+                cout << "   --  Matrx: "<< k << " :"   << line << " cas " << cas << endl;
+            k++;
+        }
+        if(cas== 2)
+        {
+            long rn,rm,rnbcoef,rsymetrique;
+              ffassert(f.good() );
+            f >> rn >> rm >> rsymetrique >>rnbcoef;
 
+            if(verbosity>3)
+                cout << "     -- Read Mat: " <<  this->n << " x " <<  this->m << " sym : " << rsymetrique << " nnz=" << rnbcoef <<endl;
+            ffassert(f.good() && rn>0 && rm>0 && rnbcoef>0 );
+            resize(rn,rm,rnbcoef);
+            half =rsymetrique;
+            int ii,jj;
+            
+            R aaij;
+            
+            for (int kk =0;kk<rnbcoef; ++kk)
+            {
+                f >> ii >> jj >> aaij;
+                ffassert(f.good() );
+                i--;j--;
+                //cout << i << " " << j << " " << aij << endl;
+                operator()(ii,jj) = aaij;
+            }
+        }
+       else if(cas== 3)
+       {
+           I nn,mm,nnnz,hhalf,f77, state, tstate;
+           f >> nn >> mm >> nnnz >> hhalf >> f77 >> state >> tstate ;
+           ffassert(f.good() && nn>0 && mm>0 && nnnz>0  );
+           resize(nn,mm,nnnz);
+           half =hhalf;
+           for(int k=0; k < nnnz; ++k)
+           {
+               I ii,jj;
+               R aaij;
+               f >>  ii >> jj >> aaij ;
+               ffassert(f.good() );
+               operator()(ii-f77,jj-f77) = aaij;
+           }
+
+       }
+       else {
+           cerr << " Unkown matrice Tyoe" << endl << endl;
+           ffassert(0); 
+       }
+        
+        
+    }
+
+    HashMatrix(KNM_<R> F,double  threshold=1e-30)
+    : VirtualMatrix<I,R>(F.N(),F.M()),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+    head(0), next(0),
+    half(false), state(unsorted),type_state(type_HM),
+    nbsort(0),sizep(0),lock(0), fortran(0) ,
+    re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
     
+    {
+        Increaze();
+        for(int ii=0; ii <F.N(); ++ii)
+             for(int jj=0; jj <F.N(); ++jj)
+             {
+                 R Fiijj = F(ii,jj);
+                 if(abs(Fiijj) > threshold)
+                     operator()(ii,jj)=Fiijj;
+             }
+    }
+
     HashMatrix(bool Half,I nn)
     : VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
@@ -338,15 +404,16 @@ public:
                 p[ii]=empty;
         sizep=sp;
     }
-    void resize(I nn, I mm=0)  {resize(nn,mm); }
+    void resize(I nn, I mm=0)  {resize(nn,mm,nnz); }
         
     void resize(I nn, I mm,I nnnz )
     {
 
         mm= mm ? mm : nn;
+        if( nn == this->n && mm == this->m && nnz == nnnz) return ;
         if( mm>this->m ) this->m=mm;
         if (nn>this->n ) this->n = nn;
-        if( nn == this->n && mm == this->m) return ;
+
         int kk=0;
         for(size_t k=0; k <nnz ;++k)
             if( i[k] < this->n && j[k] < this->m)
@@ -1031,32 +1098,29 @@ public:
     {
 
         double eps0=max(numeric_limits<double>::min(),threshold);
-        int i,j,k;
+        
         if (half)
         {
-            for ( i=0;i<this->n;i++)
-                for ( k=lg[i];k<lg[i+1];k++)
-                {
-                    j=cl[k];
-                    R cij =  coef* ( cnj ? RNM::conj(a[k]) : a[k]);
+            for( int kk= 0; kk<nnz ;++kk)
+            {
+                int ii=i[kk], jj=j[kk];
+                    R cij =  coef* ( cnj ? RNM::conj(aij[kk]) : aij[kk]);
                     if(RNM::norm2(cij)>eps0)
                     {
-                        mij[ij_mat(trans,ii00,jj00,i,j)] += cij ;
-                        if (i!=j&&!keepSym)
-                            mij[ij_mat(trans,ii00,jj00,j,i)] += cij;
+                        mij[ij_mat(trans,ii00,jj00,ii,jj)] += cij ;
+                        if (ii!=jj&&!keepSym)
+                            mij[ij_mat(trans,ii00,jj00,jj,ii)] += cij;
                     }
                 }
         }
         else
         {
-            for ( i=0;i<this->n;i++)
-                for ( k=lg[i];k<lg[i+1];k++)
-                {
-                    j=cl[k];
-                    R cij =  coef* ( cnj ? RNM::conj(a[k]) : a[k]);
-                    
-                    if(RNM::norm2(cij)>eps0)
-                        mij[ij_mat(trans,ii00,jj00,i,j)] += cij;
+            for(int  kk= 0; kk<nnz ;++kk)
+            {
+                int ii=i[kk], jj=j[kk];
+                R cij =  coef* ( cnj ? RNM::conj(aij[kk]) : aij[kk]);
+                if(RNM::norm2(cij)>eps0)
+                        mij[ij_mat(trans,ii00,jj00,ii,jj)] += cij;
                 }
         }
         
@@ -1173,21 +1237,21 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
     else
     {
         f << "#  HashMatrix Matrix (COO) "<< endl;
-        f << "#    n       m        nnz     half     fortran   state    f.precision(pold);
-        f << A.n << " " << A.m << " " << A.nnz << " "<< A.half << " " A.fortran << " " <<  A.state<< " " << A.type_state<< " " << endl;
+        f << "#    n       m        nnz     half     fortran   state  \n";
+        f << A.n << " " << A.m << " " << A.nnz << " "<< A.half << " " << A.fortran
+          << " " <<  A.state<< " " << A.type_state<< " " << endl;
         for(int k=0; k < A.nnz; ++k)
-            f << k<< " : "<<  A.i[k] << " " << A.j[k] << " "<<  setprecision( 20)  << A.aij[k] << endl;
-        f << endl;
+            f <<  setw(10) <<  A.i[k] << setw(10)  << A.j[k] << ' '<<  setprecision( 20)  << A.aij[k] << endl;
     }
        f.precision(pold);
     return f;
 }
 
 template<class R>
-tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
 {
 
-    typedef typename list<tuple<R,HashMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
+    typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
@@ -1198,9 +1262,9 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Hash
     bool sym=true;
     for(i=begin;i!=end&&sym;i++++)
     {
-        if(i->second) // M == 0 => zero matrix
+        if(get<1>(*i))// M == 0 => zero matrix
         {
-            HashMatrix<int,R>& M=*i->second;
+            VirtualMatrix<int,R>& M=*get<1>(*i);
             if(!M.sym())
                 sym = false;
         }
@@ -1208,30 +1272,30 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Hash
     
     for(i=begin;i!=end;i++++)
     {
-        if(i->second) // M == 0 => zero matrix
+        if(get<1>(*i)) // M == 0 => zero matrix
         {
-            HashMatrix<int,R> & M=*i->second;
-            bool transpose = i->third !=  trans;
+            VirtualMatrix<int,R> & M=*get<1>(*i);
+            bool transpose = get<2>(*i) !=  trans;
             ffassert( &M);
-            R coef=i->first;
+            R coef= get<0>(*i);
             if(verbosity>3)
-                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  i->third << endl;
+                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  get<2>(*i) << endl;
            { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
            
             M.addMatTo(coef,mij,transpose,ii00,jj00,transpose&&cnj,0.0,sym);
         }
     }
     int nbcoef=mij.size();
-    ffassert(0); 
+ 
     //V4 return new   MatriceMorseOld<R>(n,m,mij,sym);
     return make_tuple(n,m,sym);
 }
 
 template<class R>
-tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
 {
     
-    typedef typename list<tuple<R,HashMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
+    typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
@@ -1244,7 +1308,7 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM
     {
         if(std::get<1>(*i)) // M == 0 => zero matrix
         {
-            HashMatrix<int,R>& M=*std::get<1>(*i);
+            VirtualMatrix<int,R>& M=*std::get<1>(*i);
             if(!M.sym())
                 sym = false;
         }
@@ -1254,7 +1318,7 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM
     {
         if(std::get<1>(*i)) // M == 0 => zero matrix
         {
-            HashMatrix<int,R> & M=*std::get<1>(*i);
+            VirtualMatrix<int,R>& M=*std::get<1>(*i);
             bool transpose = std::get<2>(*i) !=  trans;
             ffassert( &M);
             R coef=std::get<0>(*i);
@@ -1269,17 +1333,37 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM
 }
 
 template<class R>
-HashMatrix<int,R>* BuildCombMat(const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans=false,int ii00=0,int jj00=0)
+HashMatrix<int,R>* BuildCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans=false,int ii00=0,int jj00=0)
 {
     
-    ffassert(0);
+    //ffassert(0);
     
-   //V4 auto nmsym=nmCombMat(lM,trans,ii00,jj00);
-    //V4 HashMatrix<int,R> *  mij= new HashMatrix<int,R>(std::get<0>(nmsym),std::get<1>(nmsym),0,mij,std::get<2>(nmsym));
-   //V4 nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00);
+    auto nmsym=nmCombMat(lM,trans,ii00,jj00);
+    int n = std::get<0>(nmsym), m =std::get<1>(nmsym);
+    bool half= std::get<2>(nmsym);
+    HashMatrix<int,R> *  mij= new HashMatrix<int,R>(n,m,0,half);
+    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00);
     
-    return 0; // V4 mij;
+    return mij; // V4 mij;
     
 }
-
+/*
+template<class R>
+void BuildCombMat(HashMatrix<int,R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
+{
+    double eps0=numeric_limits<double>::min();
+    int i,j;
+    int n = A.N(),m=A.M();
+    for ( i=0;i<n;i++)
+        for ( j=0;j<m;j++)
+        {
+            R cij=coef*A(i,j);
+            if (cnj)  cij = RNM::conj(cij);
+            if(Fem2D::norm(cij) >eps0)
+                mij[ij_mat(false,ii00,jj00,i,j)] += cij;
+            
+        }
+    
+}
+ */ 
 #endif

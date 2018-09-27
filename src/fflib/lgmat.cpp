@@ -1451,10 +1451,11 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
   using namespace Fem2D;
   
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  list<tuple<R,HashMatrix<int,R> *,bool> > *  lcB = GetAny<list<tuple<R,HashMatrix<int,R> *,bool> >*>((*combMat)(stack));
+  list<tuple<R,VirtualMatrix<int,R> *,bool> > *  lcB = GetAny<list<tuple<R,VirtualMatrix<int,R> *,bool> >*>((*combMat)(stack));
   //  sparse_mat->pUh=0;
   // sparse_mat->pVh=0;
   HashMatrix<int,R> * AA=BuildCombMat<R>(*lcB,false,0,0);
+    
    if(!init) sparse_mat->init();
   sparse_mat->A.master(AA);
   sparse_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
@@ -2408,10 +2409,9 @@ public:
 	    
 	    AnyType operator()(Stack stack)  const 
 	    {
-                ffassert(0);
+                
                 //V4
 		A  a=GetAny<A>((*Mat)(stack));
-                ffassert(0); // TO DO
                 
 		KN<long> *lg,*cl;
 		KN<RR> *cc;
@@ -2419,29 +2419,31 @@ public:
 		cl = GetAny<KN<long>*>((*col)(stack));
 		cc = GetAny<KN<RR>*>((*coef)(stack));
 		int n=a->N(),m=a->M();
+                HashMatrix<int,RR> *mh = a->pHM();
+                mh->COO();
                 
-		map<pair<int,int>,RR> *M=new map<pair<int,int>,RR>;
-		if (n >0 && m>0 && a->A) 
-		{
-		   //V4  a->A->addMatTo(RR(1.),*M);
-		    // hack 
-		    (*M)[make_pair(n-1,m-1)]+=RR();
-		}
-		int kk = M->size();
-		lg->resize(kk);
-		cc->resize(kk);
-		cl->resize(kk);
+                int kk = mh->nnz,k1=0;
+                if( mh->pij(n-1,m-1)==0 ) k1=1;
+		lg->resize(kk+k1);
+		cc->resize(kk+k1);
+		cl->resize(kk+k1);
 		int k=0;
-		typename map<pair<int,int>,RR>::const_iterator i;
+
 		//if (!a->sym)
-		 for (i=M->begin(); i != M->end();++i,++k)
+                for ( k=0 ; k < kk;++k)
 		  {  
-		    (*lg)[k]= i->first.first;
-		    (*cl)[k]= i->first.second;
-		    (*cc)[k]= i->second;
+                      (*lg)[k]= mh->i[k];
+		      (*cl)[k]= mh->j[k];
+                      (*cc)[k]= mh->aij[k];
 		  }
-		    
-		delete M;
+                
+                if(k1)
+                {
+                 (*lg)[kk]= n;
+                 (*cl)[kk]= m;
+                 (*cc)[kk]= 0;
+                }
+
 		return SetAny<R>(a);
 	    } 
 	    bool MeshIndependent() const     {return  mi;} // 
@@ -2648,8 +2650,17 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
          {
            if(verbosity>3)
              cout << "  Add  Block S " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << " conj = " << cnjij(i,j) << endl;
-             //V4  BuildCombMat(*Aij,*Bij(i,j),false,Oi(i),Oj(j),cnjij(i,j));
-             ffassert(0);
+             HashMatrix<int,R> & mmij=*Aij;
+             const list<tuple<R,MatriceCreuse<R>*,bool> >  &lM=*Bij(i,j);
+             bool ttrans=false;
+             int ii00=Oi(i);
+             int jj00=Oj(j);
+             bool cnj=cnjij(i,j);
+            BuildCombMat(mmij,lM,ttrans,ii00,jj00,cnj);
+            
+           //  tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+
+            
          }
        else if (Fij(i,j))
         {

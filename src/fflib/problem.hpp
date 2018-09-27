@@ -966,17 +966,16 @@ template<class K>  ostream & operator << (ostream & f,const Matrice_Creuse<K> & 
  return f;  }
 
 template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A) 
-{ 
-    if ( WhichMatrix(f)== 2   )
+{
+    int wm=WhichMatrix(f);
+    if ( wm>0 )
     {
-      //	A.pUh=0;
-      //A.pVh=0; 
-	A.A.master(new MatriceMorse<K>(f));
+  	A.A.master(new MatriceMorse<K>(f,wm));
 	A.typemat=(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	
     }
     else {  
-	cerr << " unkwon type of matrix " << endl;
+	cerr << " unkwon type of matrix " << wm <<endl;
 	ExecError("Erreur read matrix ");	
 	A.A =0; }
     return f;  }

@@ -1981,27 +1981,6 @@ int MatriceProfile<R>::NbCoef() const
 #endif
 // REMOVE_CODE_OBSO
 
-inline int WhichMatrix(istream & f)
-{
-    string line;
-    while ( isspace(f.peek()))
-        f.get();
-    if  ( f.peek() =='#' )
-    {
-        line="";
-        while ( f.good()  )
-        {
-            char c=f.get();
-            if(c=='\n' || c=='\r') { break;}
-            line += c;
-        }
-        if( line.find("(Morse)"))
-            return 2; // morse
-        else
-            return 0;
-    }
-    return 0;
-}
 
 #endif
 
