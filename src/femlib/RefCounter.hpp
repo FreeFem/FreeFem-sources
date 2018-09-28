@@ -75,7 +75,7 @@ class RefCounter {
 };
 
 inline void baseCountPointer::add(const RefCounter * c)  const 
-   { if (c) c->count++;}    
+   { if (c) c->count++; SHOWVERB( cout << "baseCountPointer add  of " << this << " "<< c->count <<  endl);}
 inline void baseCountPointer::destroyPtr(const RefCounter *   c)  const 
    { if (c) c->destroy();}    
  

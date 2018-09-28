@@ -725,9 +725,9 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
   KN<int> mark(n);
   mark=0;
   
-  int *lg = new int [n1];
-  int * cl = 0;
-  double *a=0;
+ // int *lg = new int [n1];
+ // int * cl = 0;
+//  double *a=0;
   
   color=thecolor++;
   FElement Uh0 = Uh[0];

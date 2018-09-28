@@ -564,7 +564,7 @@ BuildSolverGMRES(DCL_ARG_SPARSE_SOLVER(R,A))
 	ret=new SolveGMRESDiag<R>(*A,ds.NbSpace,ds.itmax,ds.epsilon);
     
     return ret;	*/
-     return NewVSolver<int,R>(AH,"CMRES",ds);
+     return NewVSolver<int,R>(AH,"CMRES",ds,stack);
     
 }
 
@@ -579,7 +579,7 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
 	ret=new SolveGCDiag<R>(*A,ds.itmax,ds.epsilon);    
     return ret;*/
     MatriceMorse<R> & AH(*dynamic_cast<MatriceMorse<R> *>(A));
-     return NewVSolver<int,R>(AH,"CG",ds);
+     return NewVSolver<int,R>(AH,"CG",ds,stack);
 }
 
 

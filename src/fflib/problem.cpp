@@ -5600,7 +5600,7 @@ void InitProblem( int Nb, const FESpace & Uh,
 } 
 
 template<class R>
-void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
+void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
 {
     const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
     typename  VirtualMatrix<int,R>::VSolver * solver=0;
@@ -5613,9 +5613,9 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
         
         switch (ds.typemat->t) {
                 
-            case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds);  break;
-            case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds); ; break;
-            case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds); ; break;
+            case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
+            case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
+            case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
             default:
                 cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
                 CompileError("type resolution unknown"); break;
@@ -5625,14 +5625,14 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
     {
         switch (ds.typemat->t) {
             case    TypeSolveMat::GC:
-                solver=NewVSolver<int,R>(AH,"CG",ds);
+                solver=NewVSolver<int,R>(AH,"CG",ds,stack);
                 break;
             case TypeSolveMat::GMRES :
                 //        InternalError("GMRES solveur to do");
-                solver=NewVSolver<int,R>(AH,"GMRES",ds);
+                solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
                 
             case TypeSolveMat::SparseSolver :
-                solver=NewVSolver<int,R>(AH,"UMFPACK",ds);
+                solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
                 //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
                 break;
             default:
@@ -5648,59 +5648,7 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
     else
         CompileError("SetSolver: type resolution unknown");
 
-    /*
-    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
-    if (ds.typemat->profile)
-      {
-        if(verbosity>5) cout << " Matrix skyline type:" << ds.typemat->t <<endl;
-        MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-        throwassert(&AA);
-        double tol_pivot1= (ds.tol_pivot>0.) ? ds.tol_pivot : EPSILON/8.;
-       // cout << " tol_pivot1 " <<tol_pivot1 <<  endl; auto_ptr
-        switch (ds.typemat->t) {
-        case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
-        case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
-        case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
-        default:
-          cerr << " type resolution " << ds.typemat->t << endl;
-          CompileError("type resolution profile inconnue"); break;       
-        }
-      }
-    else 
-      {
-        if(verbosity>5) cout << " Matrix morse type:" << ds.typemat->t <<endl;
-	MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
-        throwassert(&A);
-        switch (ds.typemat->t) {
-        case    TypeSolveMat::GC:   
-          if (ds.precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon));
-          else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon));
-          break; 
-        case TypeSolveMat::GMRES :
-          if (ds.precon)
-            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
-          else 
-            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
-         break;
-	 //#ifdef HAVE_LIBUMFPACK         
-        case TypeSolveMat::SparseSolver :
-	  AA.SetSolverMaster(DefSparseSolver<R>::Build(stack,&AA,ds));
-//           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
-         break;
-        case TypeSolveMat::SparseSolverSym :
-                AA.SetSolverMaster(DefSparseSolverSym<R>::Build(stack,&AA,ds));
-                //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
-                break;
-          
-//#endif         
-        default:
-          cerr << " type resolution " << ds.typemat->t << endl;
-          CompileError("type resolution inconnue"); break;       
-        }
-        
-      }*/
+
   }
 
 bool SetGMRES()

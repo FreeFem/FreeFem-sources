@@ -915,7 +915,11 @@ public:
   Matrice_Creuse() { init();}
   void destroy() {// Correct Oct 2015 FH (avant test a 'envert) !!!!
     if(count--==0)
-      A.destroy();
+    {
+       A.destroy();
+        cerr << " DEL MC " << this << endl;
+     // delete this;
+    }
 //else count--;
     //    Uh.destroy();
     //Vh.destroy();
@@ -936,16 +940,20 @@ template<class K> class newpMatrice_Creuse
 {
 public:
     Matrice_Creuse<K> *pmc;
-    newpMatrice_Creuse(Stack s,VirtualMatrix<int,K> *pvm) :pmc(new Matrice_Creuse<K>(pvm)  )
+    newpMatrice_Creuse(Stack s,HashMatrix<int,K> *pvm) :pmc(new Matrice_Creuse<K>)
     {
+        pmc->A.master(pvm);
         pmc->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse) FH bofbof
         Add2StackOfPtr2FreeRC(s,pmc);
     }
     Matrice_Creuse<K> * set(Matrice_Creuse<K> *pmcc,int init) const  {
-        if(!init) pmc->init() ;
-        pmcc->A=pmc->A;
+        if(!init) pmcc->init() ;
+        pmcc->A.master(pmc->pMC());
+        pmc->A.master(0);
+        delete pmc;
         return  pmcc;
     }
+  //  ~newpMatrice_Creuse() { if(pmc) delete pmc;pmc=0; }
 };
 
 template<class K> class Matrice_Creuse_Transpose;
@@ -1178,9 +1186,9 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
 
       switch (ds.typemat->t) {
         
-      case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds);  break;
-      case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds); ; break;
-      case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds); ; break;
+      case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
+      case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
+      case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
       default:
         cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
         CompileError("type resolution unknown"); break;       
@@ -1190,14 +1198,14 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
     {
         switch (ds.typemat->t) {
             case    TypeSolveMat::GC:
-                solver=NewVSolver<int,R>(AH,"CG",ds);
+                solver=NewVSolver<int,R>(AH,"CG",ds,stack);
                 break;
             case TypeSolveMat::GMRES :
                 //        InternalError("GMRES solveur to do");
-                solver=NewVSolver<int,R>(AH,"GMRES",ds);
-                
+                solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
+                 break;
             case TypeSolveMat::SparseSolver :
-                solver=NewVSolver<int,R>(AH,"UMFPACK",ds);
+                solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
                 //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
                 break;
             default:

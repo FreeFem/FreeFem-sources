@@ -6,7 +6,9 @@
 #include "VirtualSolverSkyLine.hpp"
 #include <map>
 #include <vector>
-#include <cstring> 
+#include <cstring>
+
+#include "ffstack.hpp"
 
 template<class K,class V> class MyMap;
 class String;
@@ -14,17 +16,17 @@ typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi
 //  to build
 
 template<class Z, class K>
-typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A,const char *solver, Data_Sparse_Solver & ds )
+typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A,const char *solver, Data_Sparse_Solver & ds,Stack stack )
 {
-    VirtualSolver<Z,K> *thesolver;
+    VirtualSolver<Z,K> *thesolver=0;
     if(strncmp("UMFPACK",solver,6)==0)
         thesolver = new VirtualSolverUMFPACK<Z,K> (A,ds.strategy,ds.tol_pivot,ds.tol_pivot_sym);
     else if(strncmp("CHOLMOD",solver,7)==0)
         thesolver = new VirtualSolverCHOLMOD<Z,K> (A);
     else if(strncmp("CG",solver,2)==0)
-        thesolver = new SolverCG<Z,K> (A,ds);
+        thesolver = new SolverCG<Z,K> (A,ds,stack);
     else if(strncmp("GMRES",solver,5)==0)
-        thesolver = new SolverGMRES<Z,K> (A,ds);
+        thesolver = new SolverGMRES<Z,K> (A,ds,stack);
     else if(strncmp("LU",solver,2)==0)
         thesolver=new VirtualSolverSkyLine<Z,K> (&A,3,ds.tol_pivot);
     else if(strncmp("CROUT",solver,5)==0)
@@ -72,9 +74,9 @@ public:
          thesolver = new VirtualSolverCHOLMOD<Z,K> (A);
 
         else if(strncmp("CG",solver,2)==0)
-          thesolver = new SolverCG<Z,K> (A,ds);
+          thesolver = new SolverCG<Z,K> (A,ds,0);
         else if(strncmp("GMRES",solver,5)==0)
-            thesolver = new SolverGMRES<Z,K> (A,ds);
+            thesolver = new SolverGMRES<Z,K> (A,ds,0);
         else if(strncmp("LU",solver,2)==0)
             thesolver=new VirtualSolverSkyLine<Z,K> (&A,3,ds.tol_pivot);
         else if(strncmp("CROUT",solver,5)==0)
