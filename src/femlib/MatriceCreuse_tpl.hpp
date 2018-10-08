@@ -1749,8 +1749,12 @@ MatriceMorseOld<R>  & MatriceMorseOld<R>::operator +=(MatriceElementaire<R> & me
 
 template<class R>
   void MatriceMorseOld<R>::Solve(KN_<R> &x,const KN_<R> &b) const{
-    if (solver)    
+     
+    if (solver)
+    {
+        cout << " **** type solver "<< typeid(solver->Solver).name() <<endl; 
       solver->Solver(*this,x,b);
+    }
     else
   {  cerr << "No Solver defined  for this Morse matrix " << endl;
     throw(ErrorExec("exit",1));}

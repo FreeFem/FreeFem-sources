@@ -914,10 +914,11 @@ public:
     typemat=TypeSolveMat(TypeSolveMat::NONESQUARE);}
   Matrice_Creuse() { init();}
   void destroy() {// Correct Oct 2015 FH (avant test a 'envert) !!!!
+    if(verbosity>99999)  cerr << " DEL MC " << this <<" " << count <<" " << A <<  endl;
     if(count--==0)
     {
        A.destroy();
-        cerr << " DEL MC " << this << endl;
+       
      // delete this;
     }
 //else count--;
@@ -939,18 +940,24 @@ public:
 template<class K> class newpMatrice_Creuse
 {
 public:
-    Matrice_Creuse<K> *pmc;
-    newpMatrice_Creuse(Stack s,HashMatrix<int,K> *pvm) :pmc(new Matrice_Creuse<K>)
+    MatriceCreuse<K> *pmc;
+    newpMatrice_Creuse(Stack s,HashMatrix<int,K> *pvm) :pmc(pvm)
     {
-        pmc->A.master(pvm);
-        pmc->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse) FH bofbof
+       
+        if(verbosity>99999)  cerr << " newpMatrice_Creuse Add2StackOfPtr2FreeRC "<< pmc  << endl;
         Add2StackOfPtr2FreeRC(s,pmc);
+       // Add2StackOfPtr2Free(s,pmc);
     }
-    Matrice_Creuse<K> * set(Matrice_Creuse<K> *pmcc,int init) const  {
-        if(!init) pmcc->init() ;
-        pmcc->A.master(pmc->pMC());
-        pmc->A.master(0);
-        delete pmc;
+    Matrice_Creuse<K> * set(Matrice_Creuse<K> *pmcc,int init)   {
+        if(init) pmcc->init() ;
+        pmc->increment() ;
+        pmcc->A.master(pmc);
+      //  pmcc->A.cswap(pmc);
+       
+       if(verbosity>99999)  cerr << "newpMatrice_Creuse  set " << pmcc << " " << pmcc->count <<" " << pmcc->A
+        << " to " << pmc  << " init: "<< init << endl; ;;
+       // pmc->dump(cerr) << endl;
+         pmc=0;
         return  pmcc;
     }
   //  ~newpMatrice_Creuse() { if(pmc) delete pmc;pmc=0; }
@@ -1180,81 +1187,30 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
     MatriceMorse<R> & AH(dynamic_cast<MatriceMorse<R> &>(A));
     ffassert(&AH);
 
-  if (ds.typemat->profile)
-    {
+    
      // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
 
-      switch (ds.typemat->t) {
-        
+      switch (ds.typemat->t)
+     {
       case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
       case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
       case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
-      default:
+      case TypeSolveMat::GC:
+              solver=NewVSolver<int,R>(AH,"CG",ds,stack);
+              break;
+      case TypeSolveMat::GMRES :
+              //        InternalError("GMRES solveur to do");
+              solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
+              break;
+      case TypeSolveMat::SparseSolver :
+              solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
+              //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
+              break;
+       default:
         cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
         CompileError("type resolution unknown"); break;       
       }
-    }
-  else 
-    {
-        switch (ds.typemat->t) {
-            case    TypeSolveMat::GC:
-                solver=NewVSolver<int,R>(AH,"CG",ds,stack);
-                break;
-            case TypeSolveMat::GMRES :
-                //        InternalError("GMRES solveur to do");
-                solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
-                 break;
-            case TypeSolveMat::SparseSolver :
-                solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
-                //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
-                break;
-            default:
-                if (verbosity >5)
-                    cout << "  SetSolver:: no  default solver " << ds.typemat << endl;
-                 CompileError("type resolution unknown"); break;
-        }
     
-    }
-      /*
-      typedef typename MatriceMorse<R>::VirtualSolver VirtualSolver;
-      if(verbosity>5) cout << " Morse matrix GC Precond diag" << endl;
-      MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
-      ffassert(&AA);
-      //     ffassert(typemat->t==TypeSolveMat::GC);
-     // using Fem2D;
-      switch (ds.typemat->t) {
-      case    TypeSolveMat::GC:   
-        if (pprecon)
-          AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new Fem2D::SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon)));
-        else 
-          AA.SetSolverMaster(static_cast<const VirtualSolver *>(
-                                                                new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon)));
-        break; 
-      case TypeSolveMat::GMRES :
-        //        InternalError("GMRES solveur to do");
-        if (pprecon)
-          AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
-        else 
-          AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
-        break;
-//#ifdef HAVE_LIBUMFPACK         
-        case TypeSolveMat::SparseSolver :
-	  AA.SetSolverMaster(DefSparseSolver<R>::Build( stack,&AA,ds) ); 
-         //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
-        break;
-           
-//#endif         
-        
-      
-      default:
-      
-        if (verbosity >5)
-          cout << "  SetSolver:: no  default solver " << endl;
-        // cerr << " type resolution " << ds.typemat->t << endl;
-        //  CompileError("type resolution inconnue"); break;       
-      }
-       */
       if(solver)
         A.SetSolver(solver,true);
     else

@@ -47,7 +47,9 @@ public:
   R* MatTransMul(R *x,R*Atx) const { return addMatMul(x, Set2Const(m,Atx));}
    bool WithSolver() const {return vsolver;} // by default no solver
 
-  void SetSolver(VSolver *f=0, bool del = true)  {if(vsolver && delvsolver) delete vsolver; vsolver=f; delvsolver=del; }
+  void SetSolver(VSolver *f=0, bool del = true)  {if(vsolver && delvsolver) delete vsolver; vsolver=f; delvsolver=del;
+      // cout << "\n *** type SetSolver = " << typeid(f).name() << endl; 
+  }
 
     KN_<R> & MatMul(KN_<R> &ax,const KN_<R> &x) const {
         MatMul((R*)x,(R*)ax);
@@ -60,7 +62,9 @@ public:
     bool ChecknbLine(int nn) const { return n==nn;}
     bool ChecknbColumn(int mm) const { return m==mm;}
    bool Checknm(int nn,int mm) const { return nn==n && mm==m;}
-    virtual ~VirtualMatrix(){ if(vsolver && delvsolver) delete vsolver; } // clean solver
+    virtual ~VirtualMatrix(){
+        if(verbosity>99999) cout << " **  ~VirtualMatrix " << this << endl;
+        if(vsolver && delvsolver) delete vsolver; } // clean solver
     
     virtual size_t size() const {return 0; };
     virtual VirtualMatrix  & operator +=(MatriceElementaire<R> & ){AFAIRE("VirtualMatrix::+=");}

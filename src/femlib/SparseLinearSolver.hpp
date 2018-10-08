@@ -37,7 +37,7 @@ typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A,const char 
         thesolver=0;
     else if(strncmp("SUPERLU",solver,6)==0)
         thesolver=0;
-    if(thesolver ==0) { std::cerr << " Solver linear inconnue " << solver << " => UMFPACK " << std::endl;
+    if(thesolver ==0) { std::cerr << "\n ******* Solver linear inconnue " << solver << " => UMFPACK " << std::endl;
         {
             thesolver = new VirtualSolverUMFPACK<Z,K> (A);
         }

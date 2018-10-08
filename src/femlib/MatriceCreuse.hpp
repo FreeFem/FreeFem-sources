@@ -787,10 +787,11 @@ typedef VirtualSolverN<double>  * (*SparseRMatSolve)(DCL_ARG_SPARSE_SOLVER(doubl
 typedef VirtualSolverN<Complex> * (*SparseCMatSolve)(DCL_ARG_SPARSE_SOLVER(Complex,A) );
 
 
-template<class R> struct DefSparseSolver {
+template<class R,int sympos> struct DefSparseSolverNew {
   typedef VirtualSolverN<R>  *
   (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
   static SparseMatSolver solver;
+  static SparseMatSolver solverdef;
   static   VirtualSolverN<R> * Build( DCL_ARG_SPARSE_SOLVER(R,A) )
   {
      VirtualSolverN<R> *ret=0;
@@ -800,24 +801,9 @@ template<class R> struct DefSparseSolver {
   }
 };
 
-// add Dec 2012 F.H. for optimisation .. 
-template<class R> struct DefSparseSolverSym {
-    typedef VirtualSolverN<R>  *
-    (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
-    
-    static SparseMatSolver solver;
-    
-    static  VirtualSolverN<R>  *
-    
-    Build( DCL_ARG_SPARSE_SOLVER(R,A) )
-    
-    {
-        VirtualSolverN<R>  *ret=0;
-        if(solver)
-            ret =(solver)(ARG_SPARSE_SOLVER(A));
-        return ret;	
-    }
-};
+// alloc solver and solevr def 
+template<class R,int sympos>   typename DefSparseSolverNew<R,sympos>::SparseMatSolver DefSparseSolverNew<R,sympos>::solver=0;
+template<class R,int sympos>   typename DefSparseSolverNew<R,sympos>::SparseMatSolver DefSparseSolverNew<R,sympos>::solverdef=0;
 
 // End Sep 2007 for generic Space solver
 

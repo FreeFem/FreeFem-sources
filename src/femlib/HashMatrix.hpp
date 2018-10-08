@@ -358,8 +358,9 @@ public:
             operator()(k,k) = diag[k];
       
     }
+       template<class R,class K> static R conv(K x) { return (R) x;}
     template<class K>
-    HashMatrix(const HashMatrix<I,K> &A , R (*ff)(K)=0 )
+    HashMatrix(const HashMatrix<I,K> &A , R (*ff)(K)=conv )
     :  VirtualMatrix<I,R> (A.n,A.m), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
     head(0), next(0),
     half(A.half), state(unsorted),type_state(type_HM),
@@ -367,12 +368,8 @@ public:
     re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
     {
         Increaze(A.nnz);
-        if( ff ==0)
-          operator=(A);
-        else
-        {
-          Add(A,ff);
-        }
+        Add(&A,ff);
+        
     }
   
     
@@ -652,6 +649,9 @@ public:
             nbsort++;
         }
     }
+/*
+    template<class R,class K> static R conv(K x) { return (R) x;}
+    
     template<class K>
      HashMatrix & operator=(const HashMatrix<I,K> &A)
     {
@@ -666,9 +666,10 @@ public:
         lock=0;
         re_do_numerics=1;
         re_do_symbolic=1;
-        Add(A);
+        Add(&A,&conv);
         return *this;
     }
+ */ 
     void set(I nn,I mm,bool hhalf,I nnnz, I *ii, I*jj, R *aa,int f77=0)
     {
         clear();
@@ -690,8 +691,9 @@ public:
         set(A.n,A.m,A.half,A.nnz,A.i,A.j,A.aij);
         return *this;
     }
-    void Add(const HashMatrix<I,R> &A,R coef=R(1),bool trans=false, I ii00=0,I jj00=0)
+    void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0)
     {
+        const HashMatrix<I,R> &A=*PA;
         I nn=A.n,mm=A.m;
         I *ii=A.i;
         I *jj=A.j;
@@ -713,8 +715,9 @@ public:
     }
     
     template<class K>
-    void Add(const HashMatrix<I,K> &A,R (*f)(K) ,bool trans=false, I ii00=0,I jj00=0)
+    void Add(const HashMatrix<I,K> *PA,R (*f)(K) ,bool trans=false, I ii00=0,I jj00=0)
     {
+        const HashMatrix<I,K> &A=*PA;
         I nn=A.n,mm=A.m;
         I *ii=A.i;
         I *jj=A.j;
@@ -1054,29 +1057,38 @@ public:
     
     void SetBC(char *wbc,double tgv)
     {
+        if(tgv<0)
+         CSR();
         if ( this->n != this->m) MATERROR(1,"SetBC on none square matrix  ?????");
         for(I ii=0; ii< this->n; ++ii)
             if(tgv<0)
             {
-                
+               
                 if( wbc[ii] )
                 {
-                    for (I k=lg[ii];k<lg[ii+1]; ++k)
-                        if( cl[k]==ii)
-                            a[k] = 1.;
+                    for (I k=p[ii];k<p[ii+1]; ++k)
+                        if( j[k]==ii)
+                            aij[k] = 1.;
                         else
-                            a[k]=0;// put the line to Zero.
+                            aij[k]=0;// put the line to Zero.
                 }
-                else if(tgv < -1.999)
-                    for (I k=lg[ii];k<lg[ii+1]; ++k)
-                    {
-                        I jj = cl[k];
-                        if( wbc[jj] ) a[k]=0;//
-                    }
+            
             }
             else  if( wbc[ii] ) { // tgv >= 0
                 operator()(ii,ii)=tgv;
             }
+        if(tgv < -1.999) //  remove also columm ???
+        {
+           CSC();
+            for(I jj=0; jj< this->n; ++jj)
+                if( wbc[jj] )
+                    for (I k=p[jj];k<p[jj+1]; ++k)
+                        if( i[k]==jj)
+                            aij[k] = 1.;
+                        else
+                            aij[k]=0;// pu
+        }
+            
 
     }
  
@@ -1171,7 +1183,37 @@ public:
     HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;} // not
 //    virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
-    
+    double gettgv(I * pntgv=0,double ratio=1e6) const 
+    {
+        if( this->n != this->m) return 0; // no tgv
+        double tgv =0, max1=0;
+        I ntgv=0;
+        for (I ii=0; ii<this->n;++ii)
+        {
+            R * p=pij(ii,ii);
+            if (p)
+            {
+                
+                double a=real(*p);
+                if( a> tgv )
+                  {
+                      max1=tgv;
+                      tgv=a;
+                      ntgv =1;
+                   }
+                else if (a== tgv)
+                    ++ntgv;
+                else if( a >max1)
+                    max1 = a;
+            }
+            
+        }
+        if( max1*ratio> tgv) // tgv to small => no tgv ....
+        tgv=0,ntgv=0; // no tgv
+        if(pntgv) *pntgv = ntgv;
+        return tgv;
+
+    }
     
 };
 
@@ -1278,7 +1320,7 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
             bool transpose = get<2>(*i) !=  trans;
             ffassert( &M);
             R coef= get<0>(*i);
-            if(verbosity>3)
+            if(verbosity>99)
                 cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  get<2>(*i) << endl;
            { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
            
@@ -1322,7 +1364,7 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  
             bool transpose = std::get<2>(*i) !=  trans;
             ffassert( &M);
             R coef=std::get<0>(*i);
-            if(verbosity>3)
+            if(verbosity>99)
                 cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " << std::get<2>(*i) << endl;
             { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
             

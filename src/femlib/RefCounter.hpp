@@ -70,7 +70,7 @@ class RefCounter {
 // private:
   RefCounter(const RefCounter &) : count(0) {} 
   void operator=(const RefCounter &) { count=0;}
- 
+    ostream &dump(ostream & f) const { return f <<count;}
 
 };
 
@@ -102,7 +102,7 @@ class CountPointer: private baseCountPointer {
                 c=n.c;
                 add(c);               
               }}
-                           
+ void cswap(CountPointer & n) {if(*this != n) swap(c,n.c)    ;}
  void operator=( T * t) {
   if( c != t) { if(c) destroyPtr(c); 
                 c=t;

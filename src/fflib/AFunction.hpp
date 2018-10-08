@@ -862,7 +862,7 @@ template<class A> inline AnyType  DestroyPtr(Stack,const AnyType &x) {
 };
 template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
   const A *  a=PGetAny<A>(x);
- if(verbosity>99)cout << "DeletePtr " << typeid(A).name() << *a  << endl;
+ SHOWVERB( cout << "DeletePtr " << typeid(A).name() << *a  << endl);
   // (*a)->destroy(); 
     delete *a; 
 

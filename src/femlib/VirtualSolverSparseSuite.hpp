@@ -249,7 +249,7 @@ public:
         set_cholmod_dense(*X,x,N);
         set_cholmod_dense(B,b,N);
         
-        cout << " dosolver CHOLMoD double "<< endl;
+        cout << " dosolver CHOLMOD double "<< endl;
        cholmod_solve2 (CHOLMOD_A, L, &B, NULL, &X, NULL,
                         &Ywork, &Ework, &c) ;
         if( X !=  &XX) cholmod_free_dense (&X, &c) ;

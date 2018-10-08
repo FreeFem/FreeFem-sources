@@ -43,6 +43,14 @@ K * mysaxpy(I n,K a,const K *x,K *y)
     return  y;
 }
 template<class I,class K>
+K * mysax2y(I n,K a,const K *x,K *y)
+{
+    for(I i=0; i< n; ++i)
+        y[i] = a* x[i];
+    return  y;
+}
+
+template<class I,class K>
 K * myscal(I n,K a,K *x)
 {
     for(I i=0; i<n;++i)
@@ -111,6 +119,14 @@ double * mysaxpy(int n,double a,const double *x,double *y)
     daxpy_(&n,&a,x,&un,y,&un);
     return  y;
 }
+template<int,double>
+double * mysax2y(int n,double a,const double *x,double *y)
+{
+    int un=1;
+    std::fill(y,y+1,0.);
+    daxpy_(&n,&a,x,&un,y,&un);
+    return  y;
+}
 
 template<int,double>
 double * myscal(int n,double a,double *x)
@@ -147,6 +163,14 @@ Complex * mysaxpy(int n,Complex a,const Complex *x,Complex *y)
     zaxpy_(&n,&a,x,&un,y,&un);
     return  y;
 }
+template<int,Complex>
+Complex * mysax2y(int n,Complex a,const Complex *x,Complex *y)
+{
+    int un=1;
+    std::fill(x,x+n,Complex(0.));
+    zaxpy_(&n,&a,x,&un,y,&un);
+    return  y;
+}
 
 template<int,Complex>
 Complex * myscal(int n,Complex a,Complex *x)
@@ -162,7 +186,7 @@ Complex * myscal(int n,Complex a,Complex *x)
 
 
 template<class I,class K>
-K * SetArray(I *x,long n,K c)
+K * SetArrayGC(I *x,long n,K c)
 {
     std::fill(x,x+n,c);
     return x;
@@ -185,10 +209,10 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
     // niveauimpression: 0: pas impression .. 10 a chaque iteration
     Z n = A.n, nret=0;
     K NaN = nan("");
-    K * G = SetArray(new K[n] ,n,NaN);
-    K * CG= SetArray(new K[n],n,NaN);
+    K * G = SetArrayGC(new K[n] ,n,NaN);
+    K * CG= SetArrayGC(new K[n],n,NaN);
     K *AH=CG;// meme tableau que CG Attention ??????
-    K *H=SetArray(new K[n],n,NaN);
+    K *H=SetArrayGC(new K[n],n,NaN);
     K rho, gamma;
     K minus1=-1.;
     double gCgp, gCg, eps2=eps*eps;
@@ -221,8 +245,8 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
             if(gCg < eps2) // We have converged ...
             {
                 if(niveauimpression)
-                    std::cout << " GC: on a converge en iteration " <<iter
-                    << " g=" << gCg << " rho=" << rho << " gamma=" <<gamma<<std::endl;;
+                    std::cout << " GC:  converge in  " <<iter
+                    << " g=" << gCg << " rho= " << rho << " gamma= " <<gamma<<std::endl;;
                 nret= 1;
                 break;
             }
@@ -310,334 +334,224 @@ void DoPermute(int n,int *p,K *x,K *tmp)
 }
 
 
-/*------------- classical Gram - Schmidt -------------------*/
-// real ..
-template<typename K>
-void GramSchmidt(int nloc, int i1,int ptih, K *vv,K *hh)
-{
-    int  pti1 = i1*nloc;
-    K alpha;
-    for(int j=0; j<i1; j++)
-    {
-        hh[ptih+j] = mysdot(nloc, &vv[j*nloc], &vv[pti1]);
-        alpha = -hh[ptih+j];
-        mysaxpy(nloc, alpha, &vv[j*nloc], &vv[pti1]);
-    }
-}
 
-/* Givens Rotation */
 
-double sgn(double x, double y){
-    /* Sign transfer function */
-    if (y >= 0.0) return fabs(x);
-    else return -fabs(x);
-}
-double abssq(Complex  x){
-    return (pow(real(x), 2) + pow(imag(x),2));
-    //  return cpow(cabs(x),2);
-}
+#include "RNM.hpp"
 
-void zclartg(Complex  f, Complex g, double *cs, Complex  *sn, Complex *rot)
-{
-    const double  epsmac = 1.0e-16;
-    double one=1.0, zero=0.0;
-    Complex czero(0.0,0.0);
-    double D, F2, G2, FG2;
-    if (abs(g) <= epsmac)   {
-        *cs = sgn(one, real(f));
-        *sn = czero;
-        *rot = f*(*cs);
-    }
-    else if (std::abs(f) <= epsmac){
-        *cs = zero;
-        *sn = std::conj(g)/std::abs(g);
-        *rot = std::abs( g );
-    }
-    else{
-        F2 = abssq(f);
-        G2 = abssq( g );
-        FG2 = F2 + G2;
-        if(fabs(FG2) <= epsmac) FG2 = epsmac;
-        D = 1/sqrt(F2*FG2);
-        *cs = F2 * D;
-        FG2 = FG2*D;
-        *rot = f*FG2;
-        *sn = f*D;
-        *sn = conj(g)*(*sn);
-    }
-}
-
-double PlaneRot(int nloc,int i,int ptih,Complex *hh,double *c,Complex *s,Complex *rs)
-{
-    Complex t1;
-    int  i1=i+1;
-    double ro=0;
-    Complex rot;
-    if (i != 0) {
-        for(int k = 1; k <= i; k++) {
-            int k1 = k-1;
-            t1 = hh[ptih+k1];
-            
-            hh[ptih+k1] = c[k1]*t1 + s[k1]*hh[ptih+k];
-            hh[ptih+k] = -conj(s[k1])*t1 + c[k1]*hh[ptih+k];
-        }
-    }
-    /*-----------get next plane rotation------------ */
-    zclartg(hh[ptih+i], hh[ptih+i1], &c[i], &s[i], &rot);
-    rs[i1] = -conj(s[i])*rs[i];
-    rs[i] = c[i]*rs[i];
-    hh[ptih+i] = rot;
-    ro = abs(rs[i1]);
-    return ro;
-}
-
-double PlaneRot(int nloc,int i,int ptih,double *hh,double *c,double *s,double *rs)
-{
-    
-    double gam,ro;
-    double t1;
-    int i1 = i + 1;
-    if (i != 0) {
-        for(int k=1; k<=i; k++){
-            int k1 = k-1;
-            t1 = hh[ptih+k1];
-            hh[ptih+k1] = c[k1]*t1 + s[k1]*hh[ptih+k];
-            hh[ptih+k] = -s[k1]*t1 + c[k1]*hh[ptih+k];
-        }
-    }
-    /*-----------get next plane rotation------------ */
-    gam = sqrt(hh[ptih+i]*hh[ptih+i] + hh[ptih+i1]*hh[ptih+i1]);
-    /*
-     if gamma is zero then any small value will do ...
-     will affect only residual estimate
-     */
-    if (fabs(gam) <= TINY) gam = TINY;
-    
-    /* determine-next-plane-rotation */
-    c[i] = hh[ptih+i]/gam;
-    s[i] = hh[ptih+i1]/gam;
-    
-    rs[i1] = -s[i]*rs[i];
-    rs[i] = c[i]*rs[i];
-    /* determine res. norm and test for convergence */
-    hh[ptih+i] = c[i]*hh[ptih+i] + s[i]*hh[ptih+i1];
-    ro = fabs(rs[i1]);
-    return ro;
-}
+    double ffconj(double x) {return x;}
+    Complex ffconj(Complex x) {return std::conj(x);}
 
 template<typename K,typename Z=int>
 bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
-            CGMatVirt<Z,K> &C,
-            K *y,
-            K *x,
-            double tol,
-            int maxits,
-            int restart,
+            CGMatVirt<Z,K> &CC,int leftC,
+            K *prhs,
+            K *px,
+            double eps,
+            int nbitermx,
+            int nbkrylov,
             int verbo,
-            int *perm)
+            int *wbc)
 {
-   // typedef K FLOAT ;
-    typedef double R ;
+    //  This code is base of  fgmres of F. Nataf, P. Jolivet and P-H Tournier.
+    // witten in freefem++
     
-    bool outflag, intflag;
-    Z i, i1, pti, pti1, ptih, j, its;
-    Z ii, jj, k, k1, size;
-    K oneK = 1.;
-    K  *vv=0, *z=0, *hh=0, *s=0, *rs=0, t1=0.;
-    R  eps1,  ro=1e100, t, *c;
-    int n = A.n;
-    int nloc= n;
-    verbo=std::max(verbo,10);
-    int nprint =std::max((int)((maxits+1)*(10.-verbo)/10.),1);
+    verbo=std::min(verbo,10);
+    int nprint =std::max((int)(max(nbkrylov+1,100)*(10.-verbo)/10.),1);
+    leftC=1;
+    typedef double R;
+    R relerr=1e100 , relres=1e100,normb=0.;
+    Z n = A.n;
+    K NaN = nan("");
+    K * rot0 = SetArrayGC(new K[nbkrylov+2] ,nbkrylov+2,NaN);
+    K * rot1 = SetArrayGC(new K[nbkrylov+2] ,nbkrylov+2,NaN);
+    K * g = SetArrayGC(new K[nbkrylov+1] ,nbkrylov+1,NaN);
+    K * g1 = SetArrayGC(new K[nbkrylov+1] ,nbkrylov+1,NaN);
+    leftC = 0;
+    CGMatVirtId<Z,K> MatId(n);
+    CGMatVirt<Z,K> & C=CC;
+    CGMatVirt<Z,K> *pCl = leftC ? &C  :  &MatId;
+    CGMatVirt<Z,K> *pCr = !leftC ? &C :  &MatId;
+    Z nrestart=0;
     
- #if defined(WITH_MPI)
-    int rank;
-    MPI_Comm comm;
     
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
-    eps1 = tol;
+    KN<K> rwi(n),uni(n),x0(n),ri(n);
+    KNM<K> Hn(nbkrylov+2,nbkrylov+1);
+    KN_<K> x(px,n),rhs(prhs,n);
+    KN< KN<K> > Vi(nbkrylov+1),Vpi(nbkrylov+1);
+    KN<K> zi(n),vi(n),wi(n);
+    Hn = K();
+    wi = rhs; // remove tgv ????
+//    ffassert(wbc) ;
+    int kk=0;
+    if( wbc)
+     for(int i=0; i< n; ++i)
+      if( wbc[i]) // remove TGV in RHS ...
+        kk++,wi[i]=K();
+    cout << " nbcl " << kk<< endl;
+    pCl->matmul(wi,vi);
+    // remove BC part
     
-    /*----- allocate memory for working local arrays -------*/
-    
-    /* ---------allocate size for nx(m+1) matrix vv */
-    size = nloc*(restart+1);
-    vv=new K[size];
-    /*-------- allocate size for nxm matrix z -----*/
-    size = nloc*restart;
-    z=new K[size];
-    
-    /*----- allocate memory for Hessenberg matrix (nonzeros only)
-     *----- and rotation vectors s and rs -------------------*/
-    size = (((restart+1)*(restart+2)/2) - 1) + 2*(restart+1);
-    hh=new K[size];
-    
-    s = hh + ((restart+1)*(restart+2)/2) - 1;
-    rs = s + restart + 1;
-    /*--------- allocate memory for rotation matrix c -------
-     * This is done separately since for complex valued systems
-     * c is still a real-valued vector, and hence cannot be
-     * allocated as sizeof(complex double) as is the case for
-     * s and rs and hh above --------------------------------*/
-    c=new R[ restart+1];
-    
-    DoPermute(n,perm,x,vv);
-    DoPermute(n,perm,y,vv);
-    
-    /* outer loop starts here */
-    its = 0;
-    
-    outflag = true;
-    while(outflag) {
-        /* compute vv[0] = A * x */
-        A.matmul(x,vv);
-        mysaxpy(n,-oneK,y,vv);// vv = A x - y
-        /* compute the norm of the residual */
-        ro=mysnrm2(n,vv);
-      //  std::cout << " ro 0 = " << ro << std::endl;
-        if(fabs(ro) <= DBL_EPSILON)  {
-            outflag = false;
-            break;
-        }
-        t1 = 1.0 / ro;
-        myscal(n,t1,vv);
-        if(its == 0)
-            eps1 = tol*ro;
-        
-        /* ----------initialize 1-st term of rhs of hessenberg system ------------*/
-        
-        rs[0] = ro;
-        
-        i = -1;
-        pti = 0;
-        pti1 = 0;
-        ptih = 0;  //  
-        intflag = true;
-        while (intflag) {
-            i++;
-            its++;
-            // std::cout << i << " " << ptih << std::endl;
-             i1 = i + 1;
-            pti = i*nloc;
-            pti1 = i1*nloc;
+    normb = mysnrm2(n,(K*) vi);
+    cout << " normb " << normb << " "<< endl; 
+    uni = x;
+    K minus1 = K(-1.);
+    bool noconv = true;
+    int iter =0;//
+    while (noconv)
+    {
+        x0=uni;
+        // ri[] = matA(uni);  ri[] -= rhs;  ri[] *= -1.0;
+        myscal(n,minus1,mysaxpy(n,minus1,prhs,A.matmul(uni,ri)));
+        pCl->matmul(ri,zi);
+        // g[0] = sqrt(real(pr#scalprod(zi[],zi[])));
+        g[0]=mysnrm2(n,(K*)zi);
+        cout << iter << " residus 0 " << abs(g[0]) << " Cl: " << normb << endl ;
+        if (normb < 1.e-20 || eps < 0) normb = 1.;
+        Vi[0]=(1./g[0])*zi;
+        int it; // need for reconstruction
+        for( it=0; it<nbkrylov; it++,iter ++)
+        {
+            pCr->matmul(Vi[it],vi);
             
-            /*------------- preconditioning operation z = K^{-1}vv ---------------*/
-            C.matmul(&vv[pti], &z[pti]);
-            /*------------- compute A*z -----------------*/
-            A.matmul(&z[pti], &vv[pti1]);
-            
-            /*------------- classical Gram - Schmidt -------------------*/
-            GramSchmidt( nloc,  i1, ptih, vv, hh);
- 
-            t=mysnrm2(n,&vv[pti1]);
-            
-            hh[ptih+i1] = t;
-            
-            if (fabs(t) > TINY) {
-                t1 = 1.0 / t;
-                myscal(n,t1,&vv[pti1]);
+            if (!leftC) {
+                C.matmul(Vi[it],vi);// preCON(Vi[it][]);
+                Vpi[it]=vi;
+                //  vi[]=Vpi[it][];
+                A.matmul(vi,wi);// wi[]=matA(vi[]);
+                
             }
+            else {
+                A.matmul(Vi[it],vi);// vi[]=matA(Vi[it][]);
+                C.matmul(vi,wi);// wi[] = preCON(vi[]);
+            }
+            // mofif Gram Schmidt
+            for(int i=0; i<it+1; i++)
+            {
+                Hn(i,it) = mysdot(n, (K*)wi,(K*)Vi[i]);
+                mysaxpy(n,-ffconj(Hn(i,it)),(K*)Vi[i],(K*)wi);//wi = ffconj(Hn(i,it))* Vi[i];
+            }
+            K aux = Hn(it+1,it) = mysnrm2(n,(K*)(K*)wi);
             
-            /* done with classical Gram-Schmidt and Arnoldi step. now update
-             * factorization of hh */
-            ro=  PlaneRot( nloc, i, ptih,  hh, c, s,rs);
+            Vi[it+1] = (1./aux)*wi;
+            /* QR decomposition of Hn*/
+            for(int i=0; i<it; i++)
+            {      /* QR decomposition of Hn*/
+                K aa = ffconj(rot0[i])*Hn(i,it )+ffconj(rot1[i])*Hn(i+1,it);
+                K bb = -rot1[i]*Hn(i,it)+rot0[i]*Hn(i+1,it);
+                Hn(i,it) = aa;
+                Hn(i+1,it) = bb;
+               // cout << i << " " << aa << " " << bb << endl;
+            }
+            K sq = sqrt( ffconj(Hn(it,it))*Hn(it,it) + Hn(it+1,it)*Hn(it+1,it) );
+            rot0[it] = Hn(it,it)/sq;
+            rot1[it] = Hn(it+1,it)/sq;
+           // cout << " sq " << sq << " " << rot0[it] << " " << rot1[it] <<  endl;
             
-            /*------------ Check for convergence ---------*/
-            if ((i+1 >= restart) || (ro <= eps1) || its >= maxits)
-                intflag = false;
+            Hn(it,it) = ffconj(rot0[it])*Hn(it,it)+ffconj(rot1[it])*Hn(it+1,it);
+            Hn(it+1,it) =  0.;
+            g[it+1] = -rot1[it]*g[it];
+            g[it] = ffconj(rot0[it])*g[it];
+            
+            
+        
+            relres = abs(g[it+1]);//  residu gmres ||Ax -b ||_2
+            if ((iter+1) % nprint ==0)
+                cout << "   fgmres "<< iter << " Res:  = " << relres << " Rel res = " << relres/normb <<   endl;
+            
+            if(relres/normb < abs(eps)) {
+                noconv= false;
+                if (verbo ) {
+                    cout << " fgmres has converged in " << (iter) << " iterations "
+                    << "The relative residual is " <<  relres/normb << endl;
+                }
+                break;
+            }
+           if( it > nbitermx) break; // no converge
+        }
+        it = min(it,nbkrylov-1);
+        /* Reconstruct the solution */
+        // use g0, g1 , Hn , Vp, Vpi (fgmres)
+        
+        KN<K> y(it+1);
+        for(int i=it; i>=0; i--)
+        {
+            g1[i] = g[i];
+            for(int j=i+1; j<it+1; j++)
+            g1[i] = g1[i]-Hn(i,j)*y[j];
+            y[i]=g1[i]/Hn(i,i);
+        }
+        
+        wi = K();
+        for(int i=0;i<it+1;i++){
+            if (!leftC)
+            wi +=  ffconj(y[i])*Vpi[i];// ICI Fgmres ... pas de tableau Vpi ...
             else
-            /*------------ update hh pointer ptih ---------*/
-                ptih += i+2;
-            if ( (its % nprint) == 0 )
-            std::cout <<"  fgmres:iteration "<< its <<"/"<<maxits << " ro "<< ro << " / " << eps1 << " flags: " << intflag<< "/"<< outflag <<std::endl;
+            wi +=  ffconj(y[i])*Vi[i];
+        }
+        uni = wi; //
+       // pCr->matmul(wi,uni);// uni[]= Precon(uni[]) if (!leffC) pas flexi 
+        uni += x0;//
+        x = uni;
+        // Fin reconstruction de la solution
 
-        }
-        
-        /* now compute solution first solve upper triangular system */
-        rs[i] = rs[i]/hh[ptih+i];
-        for (ii = 1; ii <= i; ii++) {
-            k = i-ii;
-            k1 = k+1;
-            t1 = rs[k];
-            for (j = k1; j <= i; j++) {
-                jj = ((j+1)*(j+2)/2) - 1;
-                t1 = t1 - hh[jj+k]*rs[j];
-            }
-            jj = ((k+1)*(k+2)/2)-1;
-            rs[k] = t1/hh[jj+k];
-        }
-        /* done with back substitution. now form linear combination to
-         * get solution */
-        for (j = 0; j <= i; j++) {
-            t1 = rs[j];
-            //parms_VecAXPY(x, &z[j*nloc], t1, is);
-            mysaxpy(nloc,t1,&z[j*nloc],x);
-        }
-        /* test for return */
-        if ((ro <= eps1) || (its >= maxits)) {
-            outflag = false;
-            if(verbo)
-                std::cout << "fgmres  stop  " << ro << " " << eps1 << " its "<< its << " " << maxits << std::endl;
-        }
-        
-        
+        if(!noconv) break; 
+        if( iter > nbitermx) break; // no converge
+        if( nrestart++< verbo)
+            cout << " restart fgmres " <<endl;
+    }
+    if(noconv)
+    {
+        cout << " !!!!!!!! fgmres has not  converged in " << iter << " iterations "
+        << "The relative residual is " <<  relres/normb << endl;
     }
     
-    
-    
-    /* reset isvecperm and do inverse permutation*/
-    /* permutes x and y */
-    UnDoPermute(n,perm,x,vv);
-    UnDoPermute(n,perm,y,vv);
-    
-    delete [] vv;
-    delete [] z;
-    delete [] hh;
-    delete [] c;
-    
-    return (ro <= eps1);
+    delete [] g1;
+    delete [] g;
+    delete [] rot1;
+    delete [] rot0;
+    return !noconv;
 }
 
 template
 bool fgmres(CGMatVirt<int,double> &A, // fonction et pointeur data pour A
-            CGMatVirt<int,double> &C,
+            CGMatVirt<int,double> &C,int leftC,
             double *y,
             double *x,
             double tol,
             int maxits,
             int restart,
             int verb,
-            int *perm );
+            int *wbc);
 template
 bool fgmres(CGMatVirt<int,std::complex<double> > &A, // fonction et pointeur data pour A
-            CGMatVirt<int,std::complex<double> > &C,
+            CGMatVirt<int,std::complex<double> > &C,int leftC,
             std::complex<double>  *y,
             std::complex<double>  *x,
             double tol,
             int maxits,
             int restart,
             int verb,
-            int *perm );
+            int *wbc);
 template
 bool fgmres(CGMatVirt<long,double> &A, // fonction et pointeur data pour A
-            CGMatVirt<long,double> &C,
+            CGMatVirt<long,double> &C,int leftC,
             double *y,
             double *x,
             double tol,
             int maxits,
             int restart,
             int verb,
-            int *perm );
+            int *wbc );
 template
 bool fgmres(CGMatVirt<long,std::complex<double> > &A, // fonction et pointeur data pour A
-            CGMatVirt<long,std::complex<double> > &C,
+            CGMatVirt<long,std::complex<double> > &C,int leftC,
             std::complex<double>  *y,
             std::complex<double>  *x,
             double tol,
             int maxits,
             int restart,
             int verb,
-            int *perm );
+            int *wbc );
 
 
 template double * myscopy<int,double>(int n,const double *x,double *y);

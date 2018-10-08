@@ -531,7 +531,10 @@ CC_F0  Block::close(Block *& c,C_F0  ins)
  
    Block * Block::open(Block *& cb)
    {
-     return  cb = new Block(cb); 
+    Block *  ncb = new Block(cb);
+    if(verbosity>99) cout << " Block::open  " << ncb <<  " " << cb << endl;
+       
+    return cb = ncb;
    }
   
     
@@ -863,14 +866,15 @@ AnyType ListOfInst::operator()(Stack s) const {
 	for (i=0;i<n;i++)
 	{
 	    TheCurrentLine=linenumber[i]  ;
-  	    r=(*list[i])(s);
+            r=(*list[i])(s);
 	    sptr->clean(); // modif FH mars 2006  clean Ptr
 	    s1=CPUtime();
 	    if (showCPU)  
              cout << " CPU: "<< i <<" " << linenumber[i] <<  ": " << s1-s0 << "s" << " " << s1-ss0 << "s" << " / " << " " <<lsldel[i] <<endl;
 	    s0=CPUtime();
 	}
-        if(atclose) { if(verbosity>99999) cout << " ListOfInst::operator()  " << n << " " << atclose->n << " // " << lsldel[n-1] << endl;
+        if(atclose && atclose->n) {
+            if(verbosity>99999 ) cout << " ListOfInst::atclose()  " << n << " " << atclose->n << " // " << lsldel[n-1] << endl;
             atclose->eval(s,atclose->n);}// Add for sep 2016  FH
     }
     catch( E_exception & e) 	

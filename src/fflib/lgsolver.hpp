@@ -551,20 +551,15 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 };     
 #endif
 
-template<class R>
+template<class R,int cas>
 typename VirtualMatrix<int,R>::VSolver *
-BuildSolverGMRES(DCL_ARG_SPARSE_SOLVER(R,A))
+BuildSolver(DCL_ARG_SPARSE_SOLVER(R,A))
 {
+    ffassert( cas <=0  && cas <4);
+    static const char * name[] = {"GMRES","GC","UMFPACK","CHOLMOD","LU","CHOLESKY"};
     MatriceMorse<R> & AH(*dynamic_cast<MatriceMorse<R> *>(A));
    
- /*   typename MatriceCreuseOld<R>::VirtualSolver * ret=0;
-    if (ds.precon)
-	ret=new SolveGMRESPrecon<R>(*A,(const OneOperator *)ds.precon,stack,ds.NbSpace,ds.itmax,ds.epsilon);
-    else 
-	ret=new SolveGMRESDiag<R>(*A,ds.NbSpace,ds.itmax,ds.epsilon);
-    
-    return ret;	*/
-     return NewVSolver<int,R>(AH,"CMRES",ds,stack);
+    return NewVSolver<int,R>(AH,name[cas],ds,stack);
     
 }
 

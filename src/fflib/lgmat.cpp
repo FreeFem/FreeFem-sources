@@ -638,22 +638,22 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 bool SetDefaultSolver()
 {
 
-#ifdef HAVE_LIBUMFPACKXXXXXX
+#ifdef HAVE_LIBUMFPACK
     if(verbosity>1)
 	cout << " SetDefault sparse solver to UMFPACK" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverUMFPack;
-    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
-    DefSparseSolverSym<double>::solver  =BuildSolverGMRES<double>;
-    DefSparseSolverSym<Complex>::solver =BuildSolverGMRES<Complex>;
-    
+    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,2>;
+    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,2>;
+    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,3>;
+    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,3>;
+
 #else
     if(verbosity>1)
-	cout << " SetDefault sparse solver to GMRES (no UMFPACK)" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverGMRES<double>;
-    DefSparseSolver<Complex>::solver =BuildSolverGMRES<Complex>;
-    DefSparseSolverSym<double>::solver  =BuildSolverGMRES<double>;
-    DefSparseSolverSym<Complex>::solver =BuildSolverGMRES<Complex>;
-    
+	cout << " SetDefault sparse solver to LU (no UMFPACK)" << endl;
+    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,4>;
+    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,4>;
+    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,5>;
+    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,5>;
+
 #endif
     return true;
 
@@ -1650,7 +1650,7 @@ long set_diag(Matrice_Creuse<R> * p, KN<R> * x)
  
 template<class R>  
 R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){ 
-   MatriceCreuse<R> * a= ac ? ac->A:0 ;
+    MatriceMorse<R> * a= ac ? ac->pHM() : 0 ;
   if(  !a || a->n <= b || c<0 || a->m <= c  ) 
    { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
            << " Matrix type = " << typeid(ac).name() << endl;
@@ -1696,11 +1696,32 @@ class Matrice_Creuse_C2R  { public:
     operator Matrice_Creuse<K> * () const {return A;}
 };
 
+// ZZZZZ
+R realC(Complex c) {return c.real();}
+R imagC(Complex c) {return c.imag();}
+
+
 template<int cas> 
-Matrice_Creuse_C2R Build_Matrice_Creuse_C2R(Matrice_Creuse<Complex> * pAA)
+newpMatrice_Creuse<double>  Build_Matrice_Creuse_C2R(Stack stack,Matrice_Creuse<Complex> * const & Mat)
 {
     
-  return Matrice_Creuse_C2R(pAA,cas);
+    typedef Complex C;
+    typedef double R;
+    using namespace Fem2D;
+    MatriceMorse<C> * mr= Mat->pHM();
+    ffassert(mr);
+    MatriceMorse<R> * mrr = 0;// ZZZZZ
+    // cout << " CopyMatC2R:  " << init << " " <<  sparse_mat <<endl;
+    if(cas==0)
+        mrr = new MatriceMorse<R>(*mr,realC);
+    else if(cas==1)
+        mrr = new MatriceMorse<R>(*mr,imagC);
+    else {
+        cout << " cas = " << cas <<endl;
+        ffassert(0);
+    }
+     return newpMatrice_Creuse<double>(stack,mrr);
+    
 }
  
 template<class K>
@@ -2220,7 +2241,7 @@ AnyType Matrixoutp2map (Stack s, const AnyType & pp)
 template<typename R>  BlockMatrix<R>::~BlockMatrix() 
 {  
     if (e_Mij)
-    {  cout << " del Block matrix "<< this << " " << e_Mij <<" N = " << N << " M = " << M << endl;
+    {   if(verbosity>9999) cout << " del Block matrix "<< this << " " << e_Mij <<" N = " << N << " M = " << M << endl;
 	for (int i=0;i<N;i++)
 	{ delete [] e_Mij[i];
 	    delete [] t_Mij[i];
@@ -2460,10 +2481,10 @@ public: // warning hack  A and B
 };
 
 
-R realC(Complex c) {return c.real();}
-R imagC(Complex c) {return c.imag();}
-template<int init>
-AnyType CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
+
+
+/*
+newpMatrice_Creuse<R> CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
 {
     typedef Complex C; 
     typedef double R; 
@@ -2472,9 +2493,9 @@ AnyType CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
     Matrice_Creuse<C> *Mat=CRMat; 
     int cas = CRMat.cas; 
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-    MatriceMorse<C> * mr=dynamic_cast<MatriceMorse<C> *> ((MatriceCreuse<C>*) Mat->A);
+    MatriceMorse<C> * mr= Mat->pHM();
     ffassert(mr); 
-    MatriceMorse<R> * mrr = 0;
+    MatriceMorse<R> * mrr = 0;// ZZZZZ
    // cout << " CopyMatC2R:  " << init << " " <<  sparse_mat <<endl;
     if(cas==0) 
         mrr = new MatriceMorse<R>(*mr,realC);
@@ -2488,9 +2509,11 @@ AnyType CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
     if(!init) sparse_mat->init() ; // ???? 
     sparse_mat->A.master(mrr);
     //ffassert(0);// a faire 
-    return sparse_mat;
+   // return sparse_mat;
+  // ZZZZ
+    return newpMatrice_Creuse<R>(stack,mrr);
 }
-
+*/
 template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 {
     MatriceMorse<R> * amorse =0; 
@@ -2540,7 +2563,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   
    cnjij = false; 
    KN<long> Oi(N+1), Oj(M+1);
-   if(verbosity>3) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
+   if(verbosity>9) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
    Bij = (L) 0;
    Oi = (long) 0;
    Oj = (long)0;
@@ -2609,14 +2632,14 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
     //  gestion of zero block ????
     
     for (int j=0;j<M;++j)
-    {  if(verbosity>9) cout << j << " colum size" << Oj(j+1) << endl;
+    {  if(verbosity>99) cout << j << " colum size" << Oj(j+1) << endl;
         if   ( Oj(j+1) ==0) {
             Oj(j+1)=1;
             if( Oj(j+1) !=1)  err++;}
     }
     for (int i=0;i<N;++i)
     {
-        if(verbosity>9) cout << i << " row size" << Oi(i+1) << endl;
+        if(verbosity>99) cout << i << " row size" << Oi(i+1) << endl;
         if   ( Oi(i+1) ==0) {
                Oi(i+1)=1;
                if( Oi(i+1) !=1)  err++;}
@@ -2635,7 +2658,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
     for (int j=0;j<M;++j) // correct 10/01/2007 FH 
       Oj(j+1) += Oj(j);// correct 07/03/2010 FH
   long n=Oi(N),m=Oj(M);
-  if(verbosity>3)
+  if(verbosity>99)
    {
      cout << "     Oi = " <<  Oi << endl;
      cout << "     Oj = " <<  Oj << endl;
@@ -2648,7 +2671,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
      for (int j=0;j<M;++j) 
        if (Bij(i,j)) 
          {
-           if(verbosity>3)
+           if(verbosity>99)
              cout << "  Add  Block S " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << " conj = " << cnjij(i,j) << endl;
              HashMatrix<int,R> & mmij=*Aij;
              const list<tuple<R,MatriceCreuse<R>*,bool> >  &lM=*Bij(i,j);
@@ -2664,7 +2687,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
          }
        else if (Fij(i,j))
         {
-           if(verbosity>3)
+           if(verbosity>99)
              cout << "  Add  Block F " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << endl;
            BuildCombMat(*Aij,*Fij(i,j),Oi(i),Oj(j),R(1.),cnjij(i,j));// BuildCombMat
         }
@@ -2672,7 +2695,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
            
     amorse=  Aij;
   }
-  if(verbosity)
+  if(verbosity>9)
      cout << "  -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
  
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));
@@ -2688,7 +2711,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
    for (int j=0;j<M;++j)
     if(Bij(i,j)) delete Bij(i,j);
     else if(Fij(i,j))  delete Fij(i,j);  
-   if(verbosity>3) { cout << "  End Build Blok Matrix : " << endl;}
+   if(verbosity>9) { cout << "  End Build Blok Matrix : " << endl;}
    
  return sparse_mat;  
 
@@ -2829,8 +2852,8 @@ public:
         CODE( Expression aa0,Expression aa1) : a0(aa0), a1(aa1) {}  // extend (2th arg.)
         AnyType operator()(Stack s)  const
         {
-            RNM_VirtualMatrix<Complex> *pv = 0; //V4 new  VirtualMatCR ((*GetAny<A>((*a0)(s))).A);
-            ffassert(0);
+            
+            RNM_VirtualMatrix<Complex> *pv = new  VirtualMatCR ((*GetAny<A>((*a0)(s))).A);
             Add2StackOfPtr2Free(s,pv);
             return SetAny<R>(R(pv,GetAny<B>((*a1)(s))));
         }
@@ -3066,22 +3089,17 @@ class PrintErrorCompileIM :  public E_F0info { public:
 
 };
 
-//  the 2 default sparse solver double and complex
-DefSparseSolver<double>::SparseMatSolver SparseMatSolver_R ; ;
-DefSparseSolver<Complex>::SparseMatSolver SparseMatSolver_C;
-DefSparseSolverSym<double>::SparseMatSolver SparseMatSolverSym_R ; ;
-DefSparseSolverSym<Complex>::SparseMatSolver SparseMatSolverSym_C;
-// the default probleme solver 
+// the default probleme solver
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
 bool SetDefault()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolver<double>::solver =SparseMatSolver_R;
-    DefSparseSolver<Complex>::solver =SparseMatSolver_C;
-    DefSparseSolverSym<double>::solver =SparseMatSolverSym_R;
-    DefSparseSolverSym<Complex>::solver =SparseMatSolverSym_C;
+    DefSparseSolverNew<double,0>::solver =DefSparseSolverNew<double,0>::solverdef;
+    DefSparseSolverNew<double,1>::solver =DefSparseSolverNew<double,1>::solverdef;
+    DefSparseSolverNew<Complex,0>::solver =DefSparseSolverNew<Complex,0>::solverdef;
+    DefSparseSolverNew<Complex,1>::solver =DefSparseSolverNew<Complex,1>::solverdef;
     TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
     return  true;
 }
@@ -3356,10 +3374,12 @@ bool Have_UMFPACK() { return Have_UMFPACK_;}
 void  init_lgmat() 
 
 {
-  SparseMatSolver_R= DefSparseSolver<double>::solver;
-  SparseMatSolver_C= DefSparseSolver<Complex>::solver;
-  SparseMatSolverSym_R= DefSparseSolverSym<double>::solver;
-  SparseMatSolverSym_C= DefSparseSolverSym<Complex>::solver;
+    SetDefaultSolver(); 
+    DefSparseSolverNew<double,0>::solverdef =DefSparseSolverNew<double,0>::solver;
+    DefSparseSolverNew<double,1>::solverdef =DefSparseSolverNew<double,1>::solver;
+    DefSparseSolverNew<Complex,0>::solverdef =DefSparseSolverNew<Complex,0>::solver;
+    DefSparseSolverNew<Complex,1>::solverdef =DefSparseSolverNew<Complex,1>::solver;
+
 
   
   Dcl_Type<const  MatrixInterpolation<pfes>::Op *>(); 
@@ -3439,12 +3459,12 @@ void  init_lgmat()
  // Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
  //   Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
     Dcl_Type<Matrice_Creuse_C2R>(); 
-    Add<Matrice_Creuse<Complex>*>("re",".",new OneOperator1<Matrice_Creuse_C2R ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<0> ));
-    Add<Matrice_Creuse<Complex>*>("im",".",new OneOperator1<Matrice_Creuse_C2R ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<1> ));
+    Add<Matrice_Creuse<Complex>*>("re",".",new OneOperator1s_<newpMatrice_Creuse<double> ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<0> ));
+    Add<Matrice_Creuse<Complex>*>("im",".",new OneOperator1s_<newpMatrice_Creuse<double>  ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<1> ));
     // construction of complex matrix form a double matrix
-    TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<1>));
+ //   TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<1>));
 
-    TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<0>));
+ //   TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<0>));
 
  extern  void init_UMFPack_solver();
  init_UMFPack_solver();
@@ -3455,7 +3475,7 @@ void  init_lgmat()
     Global.Add("renumbering", "(", new removeDOF<double>(1, 1));
     Global.Add("renumbering", "(", new removeDOF<Complex>(1, 1));
 
-    
+    // ZZZZZZ  ne marche pas FH....
     TheOperators->Add("*",
                      new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::plusAx,Matrice_Creuse<double>*,KN_<Complex> > ,
                      new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::plusAtx,Matrice_Creuse_Transpose<double>,KN_<Complex> > ,

@@ -424,16 +424,31 @@ void init_UMFPack_solver() {
 
 #endif  // HAVE_LIBUMFPACK
 #endif // REMOVE_CODE
+bool SetGMRES();
+#ifdef HAVE_LIBUMFPACK
+bool SetUMFPACK();
+void init_UMFPack_solver() {
+    //   if(verbosity&& (mpirank==0))
+    //       cout << " no UMFPACK -> replace by LU or GMRES  ";
+    Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetUMFPACK));
+    Global.New("HaveUMFPACK",CConstant<bool>(false));
+}
+template <>
+DefSparseSolverNew<double,0>::SparseMatSolver  DefSparseSolverNew<double,0>::solver =EF23::BuildSolver<double,2>;;
+template <>
+DefSparseSolverNew<Complex,0>::SparseMatSolver  DefSparseSolverNew<Complex,0>::solver =EF23::BuildSolver<Complex,2>;;
 
+#else
 void init_UMFPack_solver() {
  //   if(verbosity&& (mpirank==0))
  //       cout << " no UMFPACK -> replace by LU or GMRES  ";
- //   Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
+    Global.Add("defaultoUMFPACK","(",new OneOperator0<bool>(SetGMRES));
     Global.New("HaveUMFPACK",CConstant<bool>(false));
 }
+template <>
+DefSparseSolverNew<double,0>::SparseMatSolver  DefSparseSolverNew<double,0>::solver =EF23::BuildSolver<double,0>;;
+template <>
+DefSparseSolverNew<Complex,0>::SparseMatSolver  DefSparseSolverNew<Complex,0>::solver =EF23::BuildSolver<Complex,0>;;
 
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =EF23::BuildSolverGMRES;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =EF23::BuildSolverGMRES;
+#endif
 

@@ -5607,8 +5607,7 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
     MatriceMorse<R> & AH(dynamic_cast<MatriceMorse<R> &>(A));
     ffassert(&AH);
     
-    if (ds.typemat->profile)
-    {
+  
         // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
         
         switch (ds.typemat->t) {
@@ -5616,21 +5615,13 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
             case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
             case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
             case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
-            default:
-                cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
-                CompileError("type resolution unknown"); break;
-        }
-    }
-    else
-    {
-        switch (ds.typemat->t) {
             case    TypeSolveMat::GC:
                 solver=NewVSolver<int,R>(AH,"CG",ds,stack);
                 break;
             case TypeSolveMat::GMRES :
                 //        InternalError("GMRES solveur to do");
                 solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
-                
+                  break;
             case TypeSolveMat::SparseSolver :
                 solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
                 //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
@@ -5641,7 +5632,6 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
                 CompileError("type resolution unknown"); break;
         }
         
-    }
 
     if(solver)
         A.SetSolver(solver,true);
@@ -5655,8 +5645,8 @@ bool SetGMRES()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse (morse) solver to GMRES" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverGMRES;
-    DefSparseSolver<Complex>::solver =BuildSolverGMRES; 
+    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,0>;
+    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,0>;
     return true;
 }
 
@@ -5664,46 +5654,44 @@ bool SetCG()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse (morse) solver to CG" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverCG;
-    DefSparseSolver<Complex>::solver =BuildSolverCG; 
+    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,1>;;
+    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,1>;;
+    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,1>;;
+    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,1>;;
     return true;
 }
 
-#ifdef XXXXXXXXXXX
+
 #ifdef HAVE_LIBUMFPACK
 bool SetUMFPACK()
 {
     if(verbosity>1)
 	cout << " SetDefault sparse solver to UMFPack" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverUMFPack;
-    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;  
+    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,2>;;;
+    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,2>;;;
+    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,3>;;;
+    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,3>;;;
     return true;
 }
 
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverUMFPack;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
 
 #else
-template <>
-DefSparseSolver<double>::SparseMatSolver  DefSparseSolver<double>::solver =BuildSolverGMRES;
-template <>
-DefSparseSolver<Complex>::SparseMatSolver  DefSparseSolver<Complex>::solver =BuildSolverGMRES;
-
 bool SetUMFPACK()
 {
+    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,5>;;;
+    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,6>;;;
+    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,5>;;;
+    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,6>;;;
+
     if(verbosity>1)
-	cout << " Sorry no UMFPack" << endl;
+        cout << " Sorry no UMFPack" << endl;
     return false;
 }
 
 #endif
-#endif
-template <>
-DefSparseSolverSym<double>::SparseMatSolver  DefSparseSolverSym<double>::solver =BuildSolverGMRES;
-template <>
-DefSparseSolverSym<Complex>::SparseMatSolver  DefSparseSolverSym<Complex>::solver =BuildSolverGMRES;
+
+
+
 
  
 template<class R>
