@@ -1464,6 +1464,18 @@ void init_mesh3_array()
     
     
 }
+template<class K,class v_fes>
+bool pfer_refresh3(pair<FEbase<K,v_fes> *,int> p)
+{
+    typedef typename v_fes::FESpace FESpace;
+    int n = 0;
+    if( p.first->x() ) n = p.first->x()->N();
+    const FESpace * Vho = p.first->Vh;
+    p.first->Vh= p.first->newVh();
+    if ( n && n !=  p.first->Vh->NbOfDF)
+        * p.first  = new KN<K>(p.first->Vh->NbOfDF,K());
+    return Vho != (const FESpace * ) p.first->Vh;// FE change !!!
+}
 
 
 void init_lgmesh3() {
@@ -1650,7 +1662,12 @@ void init_lgmesh3() {
  Global.Add("intallfaces","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
 
 
- /*decommente par J. Morice 14/01/09*/ 
+ /*decommente par J. Morice 14/01/09*/
+
+   Add<pf3r>("refresh",".",new OneOperator1<bool,pf3r>(pfer_refresh3<R,v_fes3>));
+   Add<pf3c>("refresh",".",new OneOperator1<bool,pf3c>(pfer_refresh3<Complex,v_fes3>));
+
+    
  Add<pf3r>("n",".",new OneOperator1<long,pf3r>(pf3r_nbdf<R>));
  Add<pf3c>("n",".",new OneOperator1<long,pf3c>(pf3r_nbdf<Complex>));
     

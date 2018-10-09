@@ -1637,7 +1637,18 @@ pmesh pfer_Th(pair<FEbase<K,v_fes> *,int> p)
     throwassert( !!p.first->Vh);
     return &p.first->Vh->Th;
 }
-
+//  add to refesh Th in fespace oct 2018
+template<class K,class v_fes>
+bool pfer_refresh(pair<FEbase<K,v_fes> *,int> p)
+{
+    int n = 0;
+    if( p.first->x() ) n = p.first->x()->N();
+    const FESpace * Vho = p.first->Vh;
+    p.first->Vh= p.first->newVh();
+    if ( n && n !=  p.first->Vh->NbOfDF)
+        * p.first  = new KN<K>(p.first->Vh->NbOfDF,K());
+    return Vho != (const FESpace * ) p.first->Vh;// FE change !!!
+}
 template<class K>        
 long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
  {  
@@ -5427,7 +5438,9 @@ void  init_lgfem()
  Add<MeshPoint *>("nuTriangle",".",new OneOperator1<long,MeshPoint *>(mp_nuTriangle));
  Add<MeshPoint *>("region",".",new OneOperator1<long,MeshPoint *>(mp_region));
  
- 
+    Add<pfer>("refresh",".",new OneOperator1<bool,pfer>(pfer_refresh<R,v_fes>));
+    Add<pfec>("refresh",".",new OneOperator1<bool,pfec>(pfer_refresh<Complex,v_fes>));
+
  Add<pfer>("n",".",new OneOperator1<long,pfer>(pfer_nbdf<R>));
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
  Add<pfer>("Th",".",new OneOperator1<pmesh ,pfer>(pfer_Th<R>));
