@@ -111,7 +111,7 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
 <A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++days/2015/Schedule.html"> Schedule, All Presentation, examples </A> and
 <A HREF="https://www.ljll.math.upmc.fr/hecht/ftp/ff++days/2015/.">  directory this all data  </A>.
  </font></li> 
- <li><font > <bf>  <font color=red > 
+ <li><font > <bf>  <font color=black > 
          The 8th   tutorial and Workshop on FreeFem++ 
    <A HREF="https://www.ljll.math.upmc.fr/freefem++/">  (inscription here)</A>, 
    held december 8th and 9th, 2016, in Paris at Universit&eacute Pierre
@@ -119,7 +119,20 @@ et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris</bf>
   <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2016/Schedule.html"> Schedule, All Presentation, examples </A> and
   <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2016/.">  directory this all data  </A>.
    </font></li> 
-
+	           <li>  <font>
+	        <b>  The 9th   tutorial and Workshop on FreeFem++ </b>
+	  , 
+	   held december 14th and 15th, 2017, in Paris at Universit&eacute Pierre
+	  et Marie Curie, Barre 16-15, 3ieme,  4 place Jussieu, Paris
+	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/Schedule.html" target="_top"> Schedule, All Presentation, examples </A> and
+	  <A HREF="https://www.ljll.math.upmc.fr/~hecht/ftp/ff++days/2017/." target="_self">  directory this all data  </A>.
+	   </font> </li> 
+      <li><b>25-26/03/2019</b><font > 
+ <A HREF="https://exed.polytechnique.edu/fr/formations/53843/-outils-avances-pour-le-prototypage-en-simulation-numerique-multiphysique target="_top" > Outils avancés pour le prototypage en simulation numérique multiphysique </a> Formaton continue de l''cole polytechnique 
+	 </font> </li> 
+      <li><b>13-15/05/2019</b><font > 
+ <A HREF="http://www.eurosae.com/formation/?formation=774" target="_top" > EUROSAE : DES OUTILS LIBRES ET PUISSANTS DE PROTOTYPAGE</a> POUR LA SIMULATION MULTIPHYSIQUE AVEC FREEFEM++
+	 </font> </li> 
   </ul>
   
 </div> 

@@ -904,6 +904,124 @@ bool mylex::IFMacro(int &ret)
     }
     return rt;
 }
+const mylex::MacroData *mylex::IsMacro()
+{
+    const MacroData * r=0;
+    for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
+    {
+        MapMacroDef::const_iterator j= i->find(buf);
+        
+        if (j != i->end())
+        {
+            // int inmacroold=withmacropara;
+            r = & j->second;
+            break;
+        }
+    }
+    return r;
+}
+string mylex::ExpandMacro(const string &macroname, const MacroData *pmacro)
+
+{
+    int ret=ID;
+    
+    const MacroData  & macroparm= *pmacro;
+    int nbparam= macroparm.d.size()-1;
+    if(debugmacro) cout <<"call macro : " << buf << endl;
+        string * macronn= newstring(" macro: ");
+        *macronn+= buf;
+        *macronn+=" in ";
+        *macronn+= macroparm.f;
+        if(echo) cout << buf  ;
+        MapMacroParam  lp;
+        if (nbparam > 0 )
+    {
+        match('(');
+        
+        for (int k=0; k<nbparam; k++)
+        {
+            string p;
+            int kend= ( k+1 == nbparam) ? ')' : ',';
+            int lvl=0;
+            int lvll=0;
+            while (1)
+            {
+                int sep =  EatCommentAndSpace();
+                int rr = basescanprint();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
+                if ( (rr=='}') && (--lvll==0) )
+                    continue; // remove first {
+                else if ( (rr=='{') && (++lvll==1) )
+                    continue; // remove last }
+                else if(lvll==0) //  count the open close () []
+                {
+                    if(lvl && rr==')') lvl--; //   if ( then  we eat next )
+                    else if(lvl && rr==']') lvl--; //   if ( then  we eat next )
+                    else if (rr=='(') lvl++ ;  //  eat next
+                    else if (rr=='[') lvl++ ;  //  eat next
+                    else if (lvl<=0)
+                    {
+                        if (rr==kend ) break;
+                        else if  (rr==')' || rr==',')   // Correction FH 2/06/2004
+                        {
+                            cerr << "Error in macro expansion "<< macroname
+                            << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
+                            cerr << " number of macro parameter in definition is " << nbparam << endl;
+                            ErrorScan(" Wrong number of parameter in  macro call");
+                        }
+                    }
+                }
+                
+                if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
+                if(sep==' ') p+=' ';
+                p += token(); // Correction FH 2/06/2004 of string parameter
+                
+            }
+            if(debugmacro)
+                cout << "macro arg "<< k << " :" << macroparm.d[k] << " -> " <<  p << endl;
+            lp.insert(pair<string,string>(macroparm.d[k],p));
+            //lp[macroparm[k]] = p;
+        }
+    }
+        if(debugmacro)
+        cout <<   " input in : -> " << macroparm.d[nbparam]  << " <-> " << nbparam << endl;
+        input(macroparm.d[nbparam],0,macroparm.l);//  no file no error here FH.
+        // ici il faut faire la substitution  de parameter
+        // -----------------------------------------------
+        string expandtxt,subexp;
+        bool echosave=echo;
+        int ifconcat =0;
+        while(1)
+    {
+        int c= EatCommentAndSpace(&expandtxt); // eat comment to save it;
+        if (c == EOF) break;
+        
+        ret =basescan();
+        if(debugmacro)  cout << " ret = " << ret << token() << endl;
+        if(ret== ENDOFFILE) break;
+        if (ret=='#') {
+            ifconcat=1;
+        }
+        else if ( ret == ID)
+        {
+            ifconcat=0;
+            MapMacroParam::const_iterator j=lp.find(buf);
+            if ( j !=  lp.end())
+                subexp=j->second;
+            else
+                subexp=token();
+            
+            expandtxt+=subexp; // ZZZZZZ 
+        }
+        else
+        {
+            expandtxt+=token();
+            ifconcat=0;} //
+    }
+        echo=echosave;
+        if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
+
+        return expandtxt;
+}
 
 bool mylex::CallMacro(int &ret)
 {
@@ -911,6 +1029,7 @@ bool mylex::CallMacro(int &ret)
     // FH  jan 2005
     // -----------------------------------------
 //  add Stringification,FILE, LINE  march 2014 FH..
+    const MacroData *pmacro=0;
     if(strncmp(buf,"Stringification",16)==0)
     {
         if(debugmacro) cout <<"call Stringification : " << buf << endl;
@@ -969,103 +1088,20 @@ bool mylex::CallMacro(int &ret)
         ret=LNUM;
         return false;
     }
-    else
-        for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
-        {
-            MapMacroDef::const_iterator j= i->find(buf);
-
-            if (j != i->end())
-            {
-                // int inmacroold=withmacropara;
-                const MacroData  & macroparm= j->second;
-                int nbparam= macroparm.d.size()-1;
-                if(debugmacro) cout <<"call macro : " << buf << endl;
-                string * macronn= newstring(" macro: ");
-                *macronn+= buf;
-                *macronn+=" in ";
-                *macronn+= macroparm.f;
-                if(echo) cout << buf  ;
-                MapMacroParam  lp;
-                if (nbparam > 0 )
-                {
-                    match('(');
-
-                    for (int k=0; k<nbparam; k++)
-                    {
-                        string p;
-                        int kend= ( k+1 == nbparam) ? ')' : ',';
-                        int lvl=0;
-                        int lvll=0;
-                        while (1)
-                        {
-                            int sep =  EatCommentAndSpace();
-                            int rr = basescanprint();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
-                            if ( (rr=='}') && (--lvll==0) )
-                                continue; // remove first {
-                            else if ( (rr=='{') && (++lvll==1) )
-                                continue; // remove last }
-                            else if(lvll==0) //  count the open close () []
-                            {
-                                if(lvl && rr==')') lvl--; //   if ( then  we eat next )
-                                else if(lvl && rr==']') lvl--; //   if ( then  we eat next )
-                                else if (rr=='(') lvl++ ;  //  eat next
-                                else if (rr=='[') lvl++ ;  //  eat next
-                                else if (lvl<=0)
-                                {
-                                    if (rr==kend ) break;
-                                    else if  (rr==')' || rr==',')   // Correction FH 2/06/2004
-                                    {
-                                        cerr << "Error in macro expansion "<< j->first
-                                             << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
-                                        cerr << " number of macro parameter in definition is " << nbparam << endl;
-                                        ErrorScan(" Wrong number of parameter in  macro call");
-                                    }
-                                }
-                            }
-
-                            if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
-                            if(sep==' ') p+=' ';
-                            p += token(); // Correction FH 2/06/2004 of string parameter
-
-                        }
-                        if(debugmacro)
-                            cout << "macro arg "<< k << " :" << macroparm.d[k] << " -> " <<  p << endl;
-                        lp.insert(pair<string,string>(macroparm.d[k],p));
-                        //lp[macroparm[k]] = p;
-                    }
-                }
-                if(debugmacro)
-                    cout <<   " input in : -> " << macroparm.d[nbparam]  << " <-> " << nbparam << endl;
-                input(macroparm.d[nbparam],0,macroparm.l);//  no file no error here FH.
-                // ici il faut faire la substitution  de parameter
-                // -----------------------------------------------
-                string expandtxt;
-                bool echosave=echo;
-                while(1)
-                {
-                    int c= EatCommentAndSpace(&expandtxt); // eat comment to save it;
-                    if (c == EOF) break;
-                    ret = basescan();
-                    if(debugmacro)  cout << " ret = " << ret << token() << endl;
-                    if(ret== ENDOFFILE) break;
-                    if (nbparam && ret == ID)
-                    {
-                        MapMacroParam::const_iterator j=lp.find(buf);
-                        if ( j !=  lp.end())
-                            expandtxt+=j->second;
-                        else
-                            expandtxt+=token();
-                    }
-                    else if (ret!='#')  //  macro concatenation operator
-                        expandtxt+=token();
-                }
-                echo=echosave;
-                if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
-                input(expandtxt,macronn,macroparm.l);
-                ret =  scan1(); // Correction FH 6/06/2004 of string parameter
-                return true;
-            }
-        }
+    else if( (pmacro = IsMacro()))
+           {
+               string * macronn= newstring(" macro: ");
+               *macronn+= buf;
+               *macronn+=" in ";
+               *macronn+= pmacro->f;
+               string expandtxt=ExpandMacro(buf,pmacro);
+            
+               if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
+               input(expandtxt,macronn,pmacro->l);
+               ret =  scan1(); // Correction FH 6/06/2004 of string parameter
+               return true;
+           }
+ 
     return false;
 }
 

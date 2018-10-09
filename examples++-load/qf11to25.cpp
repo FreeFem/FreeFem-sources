@@ -23,6 +23,9 @@
 // *INDENT-OFF* //
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
+//  the 3D quadratrure comme from MoFEM (Mesh Oriented Finite Element Method)
+// see https://likask.bitbucket.io/index.html
+// or https://likask.bitbucket.io/quad_8c.html
 // *INDENT-ON* //
 
 #include <stdlib.h>
