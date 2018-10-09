@@ -159,6 +159,7 @@ inline int  BuildMEK_KK(const int l,int *p,int *pk,int *pkk,const FElement * pKE
 
 template<class R,class FES>
 void MatriceElementairePleine<R,FES>::call(int k,int ie,int label,void * stack,void *B) {
+ //   cout << " BUG ?? " << k << " " << *((long*) (void *)  (this->data)-1) <<endl;
   for (int i=0;i<this->lga;i++) 
      this->a[i]=0;
   if(this->onFace)

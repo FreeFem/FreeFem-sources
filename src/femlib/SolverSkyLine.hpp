@@ -52,9 +52,10 @@ public:
     }
     
     void SetState(){
-        if( A->re_do_numerics ) cn++;
-        if( A->re_do_symbolic) cs++;
+        if( A->GetReDoNumerics() ) cn++;
+        if( A->GetReDoSymbolic()) cs++;
         CheckState(A->n,cs,cn);
+        
     }
                            
     void fac_symbolic(){
@@ -103,9 +104,10 @@ public:
     }
     
     void SetState(){
-        if( A->re_do_numerics ) cn++;
-        if( A->re_do_symbolic) cs++;
+        if( A->GetReDoNumerics() ) cn++;
+        if( A->GetReDoSymbolic()) cs++;
         CheckState(A->n,cs,cn);
+        
     }
     
     void fac_symbolic(){
@@ -220,9 +222,10 @@ public:
     }
     
     void SetState(){
-        if( HA->re_do_numerics ) cn++;
-        if( HA->re_do_symbolic) cs++;
+        if( HA->GetReDoNumerics() ) cn++;
+        if( HA->GetReDoSymbolic()) cs++;
         CheckState(HA->n,cs,cn);
+        
     }
     
     void fac_symbolic()
@@ -323,9 +326,10 @@ public:
     }
     
     void SetState(){
-        if( HA->re_do_numerics ) cn++;
-        if( HA->re_do_symbolic) cs++;
+        if( HA->GetReDoNumerics() ) cn++;
+        if( HA->GetReDoSymbolic()) cs++;
         CheckState(HA->n,cs,cn);
+        
     }
     
     void fac_symbolic()

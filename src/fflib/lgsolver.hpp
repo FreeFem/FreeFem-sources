@@ -608,12 +608,15 @@ BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
     { "kerneldim", &typeid(long*)}, \
     { "verb", &typeid(long)}, \
     { "x0", &typeid(bool)}, \
-    { "veps", &typeid(double*)  }
+    { "veps", &typeid(double*)  }, \
+    { "rightprecon", &typeid(bool)  }, \
+    { "sym", &typeid(bool)  }, \
+    { "positive", &typeid(bool)  }
 
 
 
 
-const int NB_NAME_PARM_MAT =  24 +6  ;
+const int NB_NAME_PARM_MAT =  24 +6+3  ;
     
     
 template<class R>
@@ -664,6 +667,9 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.x0 = GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.veps= GetAny<double*>((*nargs[kk])(stack));
         if( unset_eps && ds.veps) ds.epsilon = *ds.veps;//  if veps  and no def value  => veps def value of epsilon.
+        if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.sym= GetAny<bool>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
 
         ffassert(++kk == n_name_param);
     }

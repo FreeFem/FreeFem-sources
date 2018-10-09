@@ -20,7 +20,7 @@ typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A,const char 
 {
     VirtualSolver<Z,K> *thesolver=0;
     if(strncmp("UMFPACK",solver,6)==0)
-        thesolver = new VirtualSolverUMFPACK<Z,K> (A,ds.strategy,ds.tol_pivot,ds.tol_pivot_sym);
+        thesolver = new VirtualSolverUMFPACK<Z,K> (A,ds.strategy,ds.tol_pivot,ds.tol_pivot_sym,ds.verb);
     else if(strncmp("CHOLMOD",solver,7)==0)
         thesolver = new VirtualSolverCHOLMOD<Z,K> (A);
     else if(strncmp("CG",solver,2)==0)
@@ -28,11 +28,11 @@ typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A,const char 
     else if(strncmp("GMRES",solver,5)==0)
         thesolver = new SolverGMRES<Z,K> (A,ds,stack);
     else if(strncmp("LU",solver,2)==0)
-        thesolver=new VirtualSolverSkyLine<Z,K> (&A,3,ds.tol_pivot);
+        thesolver=new VirtualSolverSkyLine<Z,K> (&A,3,ds.tol_pivot,ds.verb);
     else if(strncmp("CROUT",solver,5)==0)
-        thesolver=new VirtualSolverSkyLine<Z,K> (&A,2,ds.tol_pivot);
+        thesolver=new VirtualSolverSkyLine<Z,K> (&A,2,ds.tol_pivot,ds.verb);
     else if(strncmp("CHOLESKY",solver,8)==0)
-        thesolver=new VirtualSolverSkyLine<Z,K> (&A,1,ds.tol_pivot);
+        thesolver=new VirtualSolverSkyLine<Z,K> (&A,1,ds.tol_pivot,ds.verb);
     else if(strncmp("MUMPS",solver,5)==0)
         thesolver=0;
     else if(strncmp("SUPERLU",solver,6)==0)

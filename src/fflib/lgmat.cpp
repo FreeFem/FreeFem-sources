@@ -2781,16 +2781,15 @@ class E_ForAllLoopMatrix
         ffassert(i && v);
         MatriceCreuse<R> *m=t->A;
         MatriceMorse<R> *mm = dynamic_cast<MatriceMorse<R>*>(m);
-        if(!mm) ExecError(" Matrix sparce of bad type ( not morse ) , sorry.. ");
+        if(!mm) ExecError(" Matrix sparce of bad type ( not HMatrix ) , sorry.. ");
         if(mm)
-            for (long  ii=0;ii < mm->n;++ii)
-            for (long  k=mm->lg[ii];k < mm->lg[ii+1];++k)
+        for (long  kk=0;kk< mm->nnz; ++kk)
             {
-                *i=ii;
-                *j= mm->cl[k];
-                *v =  mm->a[k];
+                *i=mm->i[kk];
+                *j= mm->j[kk];
+                *v =  mm->aij[kk];
                 data->code(s);
-                mm->a[k] = *v;
+                mm->aij[kk] = *v;
             }
       //  data->end(s);
         return Nothing  ;

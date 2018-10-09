@@ -137,7 +137,10 @@ public:
     R * a;
     I * lg;
     I * cl;
-
+    // for  Dirichlet BC
+    double tgv;
+    I ntgv;
+    
     I NbCoef() const {return  nnz;}
     void setcoef(const KN_<R> & x){ffassert(x.N()==nnz);KN_<R>(this->aij,nnz) = x;}
     void getcoef( KN_<R> & x) const {ffassert(x.N()==nnz);x =KN_<R>(this->aij,nnz);}
@@ -591,7 +594,10 @@ public:
         Hash h = hash(ii,jj);
         size_t k = find(ii,jj,h);
         if(k==empty)
-            aij[k =simpleinsert(ii,jj,h)]=0;
+        {
+            k =simpleinsert(ii,jj,h);
+            aij[k]=0;
+        }
         return aij+k;
     }
     R & diag(I ii)  { return operator()(ii,ii);}
@@ -1055,41 +1061,47 @@ public:
     bool sym() const {return half;}
  
     
-    void SetBC(char *wbc,double tgv)
+    void SetBC(char *wbc,double ttgv)
     {
-        if(tgv<0)
-         CSR();
+        tgv = ttgv;
+        ntgv =0;
+        if(ttgv<0)
+        CSR();
         if ( this->n != this->m) MATERROR(1,"SetBC on none square matrix  ?????");
         for(I ii=0; ii< this->n; ++ii)
-            if(tgv<0)
+        if( wbc[ii] )
+        {
+            ntgv++;
+            if(ttgv<0)
             {
-               
+                
                 if( wbc[ii] )
                 {
                     for (I k=p[ii];k<p[ii+1]; ++k)
-                        if( j[k]==ii)
-                            aij[k] = 1.;
-                        else
-                            aij[k]=0;// put the line to Zero.
+                    if( j[k]==ii)
+                    aij[k] = 1.;
+                    else
+                    aij[k]=0;// put the line to Zero.
                 }
-            
+                
             }
-            else  if( wbc[ii] ) { // tgv >= 0
-                operator()(ii,ii)=tgv;
-            }
-        if(tgv < -1.999) //  remove also columm ???
-        {
-           CSC();
-            for(I jj=0; jj< this->n; ++jj)
-                if( wbc[jj] )
-                    for (I k=p[jj];k<p[jj+1]; ++k)
-                        if( i[k]==jj)
-                            aij[k] = 1.;
-                        else
-                            aij[k]=0;// pu
+            else
+            operator()(ii,ii)=ttgv;
         }
-            
-
+        if(ttgv < -1.999) //  remove also columm tgv == -2 .....
+        {
+            CSC();
+            for(I jj=0; jj< this->n; ++jj)
+            if( wbc[jj] ) {
+            for (I k=p[jj];k<p[jj+1]; ++k)
+            if( i[k]==jj)
+            aij[k] = 1.;
+            else
+            aij[k]=0;//
+            }
+        }
+        
+        
     }
  
     
@@ -1179,14 +1191,14 @@ public:
     }
   // virtual   void operator=(const R & v) =0; // Mise a zero
      ostream& dump (ostream&f)  const { return f<<*this;}
-    void SetBC(I ii,double tgv) { diag(ii)=tgv;};
+    void SetBC(I ii,double ttgv) { diag(ii)=ttgv;};
     HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;} // not
 //    virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
     double gettgv(I * pntgv=0,double ratio=1e6) const 
     {
-        if( this->n != this->m) return 0; // no tgv
-        double tgv =0, max1=0;
+        if( this->n != this->m) return 0; // no ttgv
+        double ttgv =0, max1=0;
         I ntgv=0;
         for (I ii=0; ii<this->n;++ii)
         {
@@ -1195,25 +1207,27 @@ public:
             {
                 
                 double a=real(*p);
-                if( a> tgv )
+                if( a> ttgv )
                   {
-                      max1=tgv;
-                      tgv=a;
+                      max1=ttgv;
+                      ttgv=a;
                       ntgv =1;
                    }
-                else if (a== tgv)
+                else if (a== ttgv)
                     ++ntgv;
                 else if( a >max1)
                     max1 = a;
             }
             
         }
-        if( max1*ratio> tgv) // tgv to small => no tgv ....
-        tgv=0,ntgv=0; // no tgv
+        if( max1*ratio> ttgv) // ttgv to small => no ttgv ....
+        ttgv=0,ntgv=0; // no ttgv
         if(pntgv) *pntgv = ntgv;
-        return tgv;
+        return ttgv;
 
     }
+    bool GetReDoNumerics() const { bool b=re_do_numerics; re_do_numerics=0;return b;}
+    bool GetReDoSymbolic() const { bool b=re_do_symbolic; re_do_symbolic=0;return  b;}
     
 };
 

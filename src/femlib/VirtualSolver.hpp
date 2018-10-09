@@ -66,7 +66,9 @@ struct Data_Sparse_Solver {
     long  verb;
     bool x0; //  init by 0 the inital data the solution
     double * veps; //    to get and set value of eps
-
+    bool rightprecon;
+    bool sym;
+    bool positive;
     
     Data_Sparse_Solver()
     :
@@ -86,7 +88,10 @@ struct Data_Sparse_Solver {
     master(0),
     rinfo(0),
     info(0),
-    kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) ,x0(true),veps(0)
+    kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) ,x0(true),veps(0),
+    rightprecon(true),
+    sym(false),
+    positive(false)
     {}
     
 
@@ -177,7 +182,9 @@ public:
     
     R* solve(R *x,R *b,int N=1,int trans=0)
     {
+     
         SetState();
+        if(verbosity>99) cout << " VirtualSolver :: solve state:" << state << endl;
         if( state==0) {fac_init(); state=1;}
         if( state==1) {fac_symbolic(); state=2;}
         if( state==2) {fac_numeric();state=3;}

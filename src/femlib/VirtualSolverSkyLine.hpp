@@ -136,21 +136,24 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         Z *p; // permuation old -> new
         K *v;
         double tol_pivot;
-        
+        int verb;
         mutable int status;
         
-        VirtualSolverSkyLine(HMat  *AA,int ttypesolver,double tol_pivott=1e-15)
+        VirtualSolverSkyLine(HMat  *AA,int ttypesolver,double tol_pivott=1e-15,int vverb=2)
         :typesolver(ttypesolver),A(AA),SL(0),cs(0),cn(0),p(0),v(0),
-        tol_pivot(tol_pivott<0 ?  1e-15 :tol_pivott)  {}
+        tol_pivot(tol_pivott<0 ?  1e-15 :tol_pivott) , verb(vverb)  {}
         
         
         void SetState(){
-            if( A->re_do_numerics ) cn++;
-            if( A->re_do_symbolic) cs++;
+            if( A->GetReDoNumerics() ) cn++;
+            if( A->GetReDoSymbolic() ) cs++;
             this->CheckState(A->n,cs,cn);
         }
         void dosolver(K *x,K*b,int N,int trans) {
-            
+            if(verb>2|| verbosity>9)
+                std::cout <<"   dosolver::SkyLine" << N<< " "<< trans  << " WF " << SL->whichfac << " size " << SL->size()
+                          << std::endl;
+
             for(int k=0,oo=0; k<N;++k, oo+= A->n)
             {
                 K * xx = x+oo,  *bb =  b+oo;
@@ -178,8 +181,11 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
             
             A->CSC(Ap,Ai,Ax);
             
-            order_CutHill_McKee(A->n,Ap,Ai,p);
+            Z pfl =order_CutHill_McKee(A->n,Ap,Ai,p);
             //  rebuild perumation
+            if(verb>2|| verbosity>9)
+                std::cout <<"   Skyline: ::fac_symbolic :  skyline size "   << pfl <<  std::endl;
+
             
         }
         void fac_numeric(){

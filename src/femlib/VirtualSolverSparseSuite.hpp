@@ -16,6 +16,7 @@ public:
     void *Symbolic, *Numeric ;
     Z *Ai,*Ap;
     K *Ax;
+    long verb;
     mutable int status;
 
     VirtualSolverUMFPACK(HMat  *AA):A(AA) {}
@@ -38,13 +39,15 @@ public:
     Z *Ai,*Ap;
     K *Ax;
     int  cs,cn;
+    long verb;
     mutable int status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
     VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0)
+                         double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0), verb(vverb)
     {
+         if(verb>2 || verbosity> 9) cout << " build solver UMFPACK double/int " << endl;
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
@@ -57,9 +60,12 @@ public:
 
     }
     void dosolver(double *x,double*b,int N,int trans) {
+        if(verb>2 || verbosity> 9) cout << "dosolver UMFPACK double/int  "<< N << " " << trans << endl;
+        int TS=trans ? UMFPACK_At: UMFPACK_A;
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
-        status= umfpack_di_solve (UMFPACK_A, Ap, Ai, Ax, x+oo, b+oo, Numeric,Control,Info) ;
+    
+        status= umfpack_di_solve (TS, Ap, Ai, Ax, x+oo, b+oo, Numeric,Control,Info) ;
         if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
         if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
         }
@@ -67,12 +73,15 @@ public:
     }
     
     void SetState(){
-        if( A->re_do_numerics ) cn++;
-        if( A->re_do_symbolic) cs++;
+         if(verb>2 || verbosity> 9) std::cout << " SetState "<< A-> re_do_numerics << " " << A-> re_do_symbolic <<std::endl;
+        if( A->GetReDoNumerics() ) cn++;
+        if( A->GetReDoSymbolic()) cs++;
         CheckState(A->n,cs,cn);
     }
                            
     void fac_symbolic(){
+         if(verb>2 || verbosity> 9) cout << "fac_symbolic UMFPACK R: nnz U " << " nnz= "  << A->nnz << endl;
+
         A->CSC(Ap,Ai,Ax);
         if(Symbolic)  umfpack_di_free_symbolic (&Symbolic) ;
         status = umfpack_di_symbolic (A->n, A->m, Ap, Ai, Ax, &Symbolic,Control,Info) ;
@@ -80,7 +89,8 @@ public:
       }
     void fac_numeric(){
         if(Numeric)   umfpack_di_free_numeric (&Numeric) ;
-       
+         if(verb>2 || verbosity> 9) cout << "fac_numeric UMFPACK R: nnz U " << " nnz= "  << A->nnz << endl;
+
         status = umfpack_di_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control,Info) ;
         if(status) cout << " Error umpfack umfpack_di_numeric  status  " << status << endl;
 
@@ -105,13 +115,14 @@ public:
     K *Ac;
     double *Ax,*Az;
     int  cs,cn;
+    long verb;
     mutable int status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
     
     VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0)
+                         double tol_pivot=-1.,double tol_pivot_sym=-1., long vverb=verbosity)
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(vverb)
     {
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
@@ -127,6 +138,7 @@ public:
     void dosolver(K *x,K*b,int N,int trans) {
         int ts = UMFPACK_A ;
         if(trans) ts =UMFPACK_At;
+         if(verb>2 || verbosity> 9) cout << "dosolver UMFPACK complex/int "<< N << " " << trans << endl;
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
             double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=0;;
@@ -137,23 +149,24 @@ public:
     }
     
     void SetState(){
-        if( A->re_do_numerics ) cn++;
-        if( A->re_do_symbolic) cs++;
+        if( A->GetReDoNumerics() ) cn++;
+        if( A->GetReDoSymbolic()) cs++;
         CheckState(A->n,cs,cn);
+        
     }
     
     void fac_symbolic(){
         A->CSC(Ap,Ai,Ac);
         Ax= (double *) (void *) Ac;
         Az=0;
-        
+         if(verb>2 || verbosity> 9) cout << "fac_symbolic UMFPACK C:  nnz= "  << A->nnz << endl;
         if(Symbolic)  umfpack_zi_free_symbolic (&Symbolic) ;
         status = umfpack_zi_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, 0, 0) ;
         if(status) cout << " Error umpfack umfpack_zi_symbolic  status  " << status << endl;
     }
     void fac_numeric(){
         if(Numeric)   umfpack_zi_free_numeric (&Numeric) ;
-        
+         if(verb>2 || verbosity> 9) cout << "fac_numeric UMFPACK C:  nnz= "  << A->nnz << endl;
         status = umfpack_zi_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, 0, 0) ;
         if(status) cout << " Error umpfack umfpack_zi_numeric  status  " << status << endl;
         
@@ -203,7 +216,7 @@ public:
     K *Ax;
     cholmod_dense *Ywork, *Ework  ;
     int  cs,cn;
-    
+    long verb;
  
    void set_cholmod_dense(cholmod_dense & X,K *p,int m)
     {
@@ -218,8 +231,8 @@ public:
     }
     
     mutable int status;
-    VirtualSolverCHOLMOD(HMat  &HAA)
-      :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0)
+    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
+      :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
     {
        
         cholmod_start (&c) ;
@@ -249,7 +262,7 @@ public:
         set_cholmod_dense(*X,x,N);
         set_cholmod_dense(B,b,N);
         
-        cout << " dosolver CHOLMOD double "<< endl;
+        cout << " dosolver CHOLMOD double "<< N << " " << trans <<  endl;
        cholmod_solve2 (CHOLMOD_A, L, &B, NULL, &X, NULL,
                         &Ywork, &Ework, &c) ;
         if( X !=  &XX) cholmod_free_dense (&X, &c) ;
@@ -257,15 +270,16 @@ public:
     }
     
     void SetState(){
-        if( HA->re_do_numerics ) cn++;
-        if( HA->re_do_symbolic) cs++;
+        if( HA->GetReDoNumerics() ) cn++;
+        if( HA->GetReDoSymbolic()) cs++;
         CheckState(HA->n,cs,cn);
+        
     }
     
     void fac_symbolic()
     {
         AA.nzmax=HA->CSC_U(Ap,Ai,Ax);
-        cout << "fac_symbolic cholmod R: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
+         if(verb>2 || verbosity> 9) cout << "fac_symbolic cholmod R: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
 
         AA.p=Ap;
         AA.i=Ai;
@@ -274,7 +288,7 @@ public:
         L = cholmod_analyze (A, &c) ;
      }
     void fac_numeric(){
-        cout << " fac_numeric CHOLMoD double "<< endl;
+         if(verb>2 || verbosity> 9) cout << " fac_numeric CHOLMoD double "<< endl;
 
         cholmod_factorize (A, L, &c) ;
       
@@ -307,7 +321,7 @@ public:
     K *Ax;
     cholmod_dense *Ywork, *Ework  ;
     int  cs,cn;
-    
+    long verb;
     
     void set_cholmod_dense(cholmod_dense & X,K *p,int m)
     {
@@ -321,8 +335,8 @@ public:
         X.dtype=dtype;
     }
     
-    VirtualSolverCHOLMOD(HMat  &HAA)
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0)
+    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
+    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
     {
         
         cholmod_start (&c) ;
@@ -348,11 +362,11 @@ public:
     
     void dosolver(K *x,K*b,int N,int trans)
     {
-        cout << " dosolver CHOLMoD Complex "<< endl;
+         if(verb>2 || verbosity> 9) cout << " dosolver CHOLMoD Complex "<< endl;
         cholmod_dense XX,*X=&XX,B;
         set_cholmod_dense(*X,x,N);
         set_cholmod_dense(B,b,N);
-        
+        //assert(trans==0):
         cholmod_solve2 (CHOLMOD_A, L, &B, NULL, &X, NULL,
                         &Ywork, &Ework, &c) ;
         if( X !=  &XX) cholmod_free_dense (&X, &c) ;
@@ -360,15 +374,16 @@ public:
     }
     
     void SetState(){
-        if( HA->re_do_numerics ) cn++;
-        if( HA->re_do_symbolic) cs++;
+        if( HA->GetReDoNumerics() ) cn++;
+        if( HA->GetReDoSymbolic()) cs++;
         CheckState(HA->n,cs,cn);
+        
     }
     
     void fac_symbolic()
     {
         AA.nzmax=HA->CSC_U(Ap,Ai,Ax);
-        cout << "fac_symbolic cholmod C: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
+         if(verb>2 || verbosity> 9) cout << "fac_symbolic cholmod C: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
  //       HA->CSC(Ap,Ai,Ax);
         AA.p=Ap;
         AA.i=Ai;
@@ -377,7 +392,7 @@ public:
         L = cholmod_analyze (A, &c) ;
     }
     void fac_numeric(){
-        cout << " fac_numeric CHOLMoD complex "<< endl;
+         if(verb>2 || verbosity> 9) cout << " fac_numeric CHOLMoD complex "<< endl;
         cholmod_factorize (A, L, &c) ;
         
     }
@@ -402,12 +417,13 @@ public:
     Z *Ai,*Ap;
     K *Ax;
     int  cs,cn;
+    long verb;
     mutable long status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
     VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0)
+                         double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(vverb)
     {
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
@@ -423,6 +439,7 @@ public:
     void dosolver(double *x,double*b,int N,int trans) {
         int ts = UMFPACK_A ;
         if(trans) ts =UMFPACK_At;
+        if(verb>2 || verbosity> 9) cout << " dosolver UMFPACK double/long " << N << " " << trans <<endl;
 
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
@@ -434,20 +451,24 @@ public:
     }
     
     void SetState(){
-        if( A->re_do_numerics ) cn++;
-        if( A->re_do_symbolic) cs++;
+        if( A->GetReDoNumerics() ) cn++;
+        if( A->GetReDoSymbolic()) cs++;
         CheckState(A->n,cs,cn);
+        
     }
     
     void fac_symbolic(){
         A->CSC(Ap,Ai,Ax);
+        if(verb>2 || verbosity> 9) cout << " fac_symbolic UMFPACK double/long " << endl;
+
         if(Symbolic)  umfpack_di_free_symbolic (&Symbolic) ;
         status = umfpack_dl_symbolic (A->n, A->m, Ap, Ai, Ax, &Symbolic,Control,Info) ;
         if(status) cout << " Error umpfack umfpack_di_symbolic  status  " << status << endl;
     }
     void fac_numeric(){
         if(Numeric)   umfpack_dl_free_numeric (&Numeric) ;
-        
+        if(verb>2 || verbosity> 9) cout << " fac_numeric UMFPACK double/long " << endl;
+
         status = umfpack_dl_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control,Info) ;
         if(status) cout << " Error umpfack umfpack_di_numeric  status  " << status << endl;
         
@@ -472,13 +493,14 @@ public:
     K *Ac;
     double *Ax,*Az;
     int  cs,cn;
+    long verb;
     mutable Z status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
     
     VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0)
+                         double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(vverb)
     {
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
@@ -494,6 +516,7 @@ public:
     void dosolver(K *x,K*b,int N,int trans) {
         int ts = UMFPACK_A ;
         if(trans) ts =UMFPACK_At;
+        if(verb>2 || verbosity> 9) cout << " dosolver UMFPACK C/long " << endl;
 
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
@@ -505,23 +528,26 @@ public:
     }
     
     void SetState(){
-        if( A->re_do_numerics ) cn++;
-        if( A->re_do_symbolic) cs++;
+        if( A->GetReDoNumerics() ) cn++;
+        if( A->GetReDoSymbolic()) cs++;
         CheckState(A->n,cs,cn);
+        
     }
     
     void fac_symbolic(){
         A->CSC(Ap,Ai,Ac);
         Ax= (double *) (void *) Ac;
         Az=0;
-        
+        if(verb>2 || verbosity> 9) cout << " fac_symbolic UMFPACK C/long " << endl;
+
         if(Symbolic)  umfpack_zl_free_symbolic (&Symbolic) ;
         status = umfpack_zl_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, 0, 0) ;
         if(status) cout << " Error umpfack umfpack_zl_symbolic  status  " << status << endl;
     }
     void fac_numeric(){
         if(Numeric)   umfpack_zl_free_numeric (&Numeric) ;
-        
+        if(verb>2 || verbosity> 9) cout << " fac_numeric UMFPACK C/long " << endl;
+
         status = umfpack_zl_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, 0, 0) ;
         if(status) cout << " Error umpfack umfpack_zl_numeric  status  " << status << endl;
         
@@ -552,6 +578,7 @@ public:
     K *Ax;
     cholmod_dense *Ywork, *Ework  ;
     int  cs,cn;
+    long verb;
     
     
     void set_cholmod_dense(cholmod_dense & X,K *p,int m)
@@ -567,8 +594,8 @@ public:
     }
     
     mutable int status;
-    VirtualSolverCHOLMOD(HMat  &HAA)
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0)
+    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
+    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
     {
         
         cholmod_start (&c) ;
@@ -598,7 +625,7 @@ public:
         set_cholmod_dense(*X,x,N);
         set_cholmod_dense(B,b,N);
         
-        cout << " dosolver CHOLMoD double "<< endl;
+         if(verb>2 || verbosity> 9)  cout << " dosolver CHOLMoD double "<< endl;
         cholmod_l_solve2 (CHOLMOD_A, L, &B, NULL, &X, NULL,
                         &Ywork, &Ework, &c) ;
         if( X !=  &XX) cholmod_free_dense (&X, &c) ;
@@ -606,15 +633,16 @@ public:
     }
     
     void SetState(){
-        if( HA->re_do_numerics ) cn++;
-        if( HA->re_do_symbolic) cs++;
+        if( HA->GetReDoNumerics() ) cn++;
+        if( HA->GetReDoSymbolic()) cs++;
         CheckState(HA->n,cs,cn);
+        
     }
     
     void fac_symbolic()
     {
         AA.nzmax=HA->CSC_U(Ap,Ai,Ax);
-        cout << "fac_symbolic cholmod R: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
+         if(verb>2 || verbosity> 9)  cout << "fac_symbolic cholmod R: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
         
         AA.p=Ap;
         AA.i=Ai;
@@ -623,7 +651,7 @@ public:
         L = cholmod_l_analyze (A, &c) ;
     }
     void fac_numeric(){
-        cout << " fac_numeric CHOLMoD double "<< endl;
+         if(verb>2 || verbosity> 9)  cout << " fac_numeric CHOLMoD double "<< endl;
         
         cholmod_l_factorize (A, L, &c) ;
         
@@ -656,6 +684,7 @@ public:
     K *Ax;
     cholmod_dense *Ywork, *Ework  ;
     int  cs,cn;
+    long verb;
     
     
     void set_cholmod_dense(cholmod_dense & X,K *p,int m)
@@ -670,8 +699,8 @@ public:
         X.dtype=dtype;
     }
     
-    VirtualSolverCHOLMOD(HMat  &HAA)
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0)
+    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
+    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
     {
         
         cholmod_start (&c) ;
@@ -697,7 +726,7 @@ public:
     
     void dosolver(K *x,K*b,int N,int trans)
     {
-        cout << " dosolver CHOLMoD Complex "<< endl;
+         if(verb>2 || verbosity> 9)  cout << " dosolver CHOLMoD Complex "<< endl;
         cholmod_dense XX,*X=&XX,B;
         set_cholmod_dense(*X,x,N);
         set_cholmod_dense(B,b,N);
@@ -709,15 +738,16 @@ public:
     }
     
     void SetState(){
-        if( HA->re_do_numerics ) cn++;
-        if( HA->re_do_symbolic) cs++;
+        if( HA->GetReDoNumerics() ) cn++;
+        if( HA->GetReDoSymbolic()) cs++;
         CheckState(HA->n,cs,cn);
+         
     }
     
     void fac_symbolic()
     {
         AA.nzmax=HA->CSC_U(Ap,Ai,Ax);
-        cout << "fac_symbolic cholmod C: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
+         if(verb>2 || verbosity> 9)  cout << "fac_symbolic cholmod C: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
         //       HA->CSC(Ap,Ai,Ax);
         AA.p=Ap;
         AA.i=Ai;
@@ -726,7 +756,7 @@ public:
         L = cholmod_l_analyze (A, &c) ;
     }
     void fac_numeric(){
-        cout << " fac_numeric CHOLMoD complex "<< endl;
+         if(verb>2 || verbosity> 9)  cout << " fac_numeric CHOLMoD complex "<< endl;
         cholmod_l_factorize (A, L, &c) ;
         
     }
