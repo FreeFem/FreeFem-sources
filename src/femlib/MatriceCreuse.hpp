@@ -152,57 +152,7 @@ template <typename Z,typename R>  class HashMatrix;
 #ifdef REMOVE_CODE_OBSO
 template <class R>  class MatriceProfile;
 template <class R> 
-<<<<<<< ours
 inline ostream& operator <<(ostream& f,const MatriceCreuseOld<R> & m)
-=======
-class MatriceCreuse : public RefCounter,public VirtualMatrice<R> {
-public:
-  MatriceCreuse(int NbOfDF,int mm,int ddummy)
-         : VirtualMatrice<R>(NbOfDF,mm),n(NbOfDF),m(mm),dummy(ddummy){}
-  MatriceCreuse(int NbOfDF)
-         : VirtualMatrice<R>(NbOfDF),n(NbOfDF),m(NbOfDF),dummy(1){}
-  int n,m,dummy;
-  virtual int size() const =0;
-
-  virtual MatriceCreuse & operator +=(MatriceElementaire<R> & )=0;
-  virtual void operator=(const R & v) =0; // Mise a zero 
-  KN_<R> & MatMul(KN_<R> &ax,const KN_<R> &x) const { 
-    ax= R();
-    addMatMul(x,ax);
-    return ax;}
-  virtual ostream& dump (ostream&)  const =0;
-  virtual void Solve(KN_<R> & x,const KN_<R> & b) const =0;
-  virtual void SolveT(KN_<R> & x,const KN_<R> & b) const {  ERREUR(SolveT, "No Solver of A^t in this matrix type ???"); }
-  virtual ~MatriceCreuse(){}
-  virtual R & diag(int i)=0;
-  virtual void SetBC(int i,double tgv)=0;
-  virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<n; ++i)  if(wbc[i]) SetBC(i,tgv);}
-  virtual R & operator()(int i,int j)=0;
-  virtual R * pij(int i,int j) const =0; // Add FH 
-  virtual  void  resize(int n,int m)  {AFAIRE("MatriceCreuse::resize");}  // a faire dans les classe derive ... // add march 2009  FH 
-  virtual MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool nocopy=false) const {return 0;} // not 
-  virtual bool addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false)=0;
-  // Add FH april 2005
-  virtual R pscal(const KN_<R> & x,const KN_<R> & y) =0 ; // produit scalaire  
-  virtual double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) =0;
-  virtual void setdiag(const KN_<R> & x)=0 ;
-  virtual void getdiag( KN_<R> & x) const =0 ;
-  // end add
-  virtual int NbCoef() const {return 0;};
-  virtual void setcoef(const KN_<R> & x)=0 ;
-  virtual void getcoef( KN_<R> & x) const =0 ;
-  // Add FH oct 2005
-   bool ChecknbLine(int nn) const { return n==nn;}  
-   bool ChecknbColumn(int mm) const { return m==mm;}
-   virtual R trace() const {ffassert(n==m);  R t=R(), *p;  for(int i=0; i<n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
-  // end ADD
-  virtual bool sym() const {return false;}
-
-};
-
-template <class R> 
-inline ostream& operator <<(ostream& f,const MatriceCreuse<R> & m) 
->>>>>>> theirs
     {return m.dump(f);}
 
 template <class R> 
@@ -308,11 +258,7 @@ public:
     
   R & operator()(int i,int j) { if(i!=j) ffassert(0); return D[i];} // a faire 
   R * pij(int i,int j) const { if(i!=j) ffassert(0); return &D[i];} // a faire  Modif FH 31102005
-<<<<<<< ours
   MatriceMorseOld<R> *toMatriceMorse(bool transpose=false,bool copy=false) const ;
-=======
-  MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool nocopy=false) const ;
->>>>>>> theirs
   
   template<class F> void map(const  F & f)
   {
@@ -511,13 +457,8 @@ template<class K>
  template<class RB,class RAB>
  void  prod(const MatriceMorseOld<RB> & B, MatriceMorseOld<RAB> & AB);
  
-<<<<<<< ours
  MatriceMorseOld<R> *toMatriceMorse(bool transpose=false,bool copy=false) const {
      return new MatriceMorseOld(this->n,this->m,nbcoef,symetrique,a,lg,cl,copy, solver,transpose);}
-=======
- MatriceMorse<R> *toMatriceMorse(bool transpose=false,bool nocopy=false) const {
-     return new MatriceMorse(this->n,this->m,nbcoef,symetrique,a,lg,cl,nocopy, solver,transpose);}
->>>>>>> theirs
   bool  addMatTo(R coef,std::map< pair<int,int>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false);
   
   template<typename RR,typename K> static  RR CastTo(K  b){return b;}
@@ -590,13 +531,13 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
              eps =  epsold*epsold*g2; 
              if (verbosity>3 || (kprint<3))
              cout << "CG converge to fast (pb of BC)  restart: " << iter <<  "  ro = " 
-                  << ro << " ||g||^2 = " << g2 << " <= " << reps2  <<endl;
+                  << ro << " ||g||^2 = " << g2 << " <= " << reps2 << "  new eps2 =" <<  eps <<endl; 
               reps2=eps;
            } 
          else 
           { 
            if (verbosity>1 || (kprint<100000) )
-            cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << " eps2 " << reps2  <<endl;
+            cout << "CG converge: " << iter <<  "  ro = " << ro << " ||g||^2 = " << g2 << endl; 
            return 1;// ok 
           }
           }
@@ -697,33 +638,18 @@ class SolveGCDiag :   public MatriceMorse<R>::VirtualSolver , public RNM_Virtual
   double eps;
   mutable double  epsr;
   KN<R> D1;
-    bool x0;
-    double *veps;
   public:
-<<<<<<< ours
   typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
   SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6) : 
     RNM_VirtualMatrix<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n)
-=======
-  typedef typename VirtualMatrice<R>::plusAx plusAx;
-  SolveGCDiag(const MatriceMorse<R> &A,int itmax,double epsilon=1e-6,bool x00=true,double *vveps=0) :
-    VirtualMatrice<R>(A.n),
-    n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),D1(n),x0(x00),veps(vveps)
->>>>>>> theirs
   { //throwassert(A.sym());
     for (int i=0;i<n;i++)
       D1[i] = 1./A(i,i);}
    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-       epsr = veps ? *veps : eps;
-   //    cout << " GC0 " << epsr<< " " << *veps << endl;
-   //  epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
-       if(x0) x=R();
-       double xl2 = x.l2() ;
      ConjuguedGradient<R,MatriceMorse<R>,SolveGCDiag<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr  );
-    //  if(veps)  cout <<"  CG:" << epsr << " " << *veps << " " << xl2 <<endl;
-       if(veps) *veps=epsr; 
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
@@ -794,8 +720,6 @@ struct Data_Sparse_Solver {
     KNM<double>* kerneln;
     KNM<double> * kernelt;
     long *kerneldim;
-    bool x0; //  init by 0 the inital data the solution
-    double * veps; //    to get and set value of eps
  /*   
   int *param_int;
   double *param_double;
@@ -846,7 +770,7 @@ struct Data_Sparse_Solver {
     master(0),
     rinfo(0),
     info(0),
-    kerneln(0), kernelt(0), kerneldim(0),x0(true),veps(0) 
+    kerneln(0), kernelt(0), kerneldim(0)
     {}
     
 private:

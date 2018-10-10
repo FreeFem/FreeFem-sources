@@ -5611,35 +5611,12 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
         // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
         
         switch (ds.typemat->t) {
-<<<<<<< ours
                 
             case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
             case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
             case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
             case    TypeSolveMat::GC:
                 solver=NewVSolver<int,R>(AH,"CG",ds,stack);
-=======
-        case    TypeSolveMat::GC:   
-          if (ds.precon)
-            AA.SetSolverMaster(new SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon,ds.x0,ds.veps));
-          else 
-            AA.SetSolverMaster(new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon,ds.x0,ds.veps));
-          break; 
-        case TypeSolveMat::GMRES :
-          if (ds.precon)
-            AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0,ds.veps));
-          else 
-            AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0,ds.veps));
-         break;
-	 //#ifdef HAVE_LIBUMFPACK         
-        case TypeSolveMat::SparseSolver :
-	  AA.SetSolverMaster(DefSparseSolver<R>::Build(stack,&AA,ds));
-//           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
-         break;
-        case TypeSolveMat::SparseSolverSym :
-                AA.SetSolverMaster(DefSparseSolverSym<R>::Build(stack,&AA,ds));
-                //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
->>>>>>> theirs
                 break;
             case TypeSolveMat::GMRES :
                 //        InternalError("GMRES solveur to do");
