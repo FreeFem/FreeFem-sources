@@ -153,6 +153,9 @@ private:
   int scan1();
   bool SetMacro(int &ret);
   bool CallMacro(int &ret);
+  const MacroData *IsMacro();
+  string ExpandMacro(const string &macroname,const MacroData *pmacro);
+    
   bool IFMacro(int &ret);
     
   bool AddMacro(string m,string def) ;

@@ -100,9 +100,9 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
   
   if ( abs(normb) < 1.e-30)
     normb = 1;
-  
+  if( tol<0)  tol = -tol/ normb; // tol < 0 => tol abs..
   if ((resid = beta / normb) <= tol) {
-    tol = resid;
+    tol = resid*normb;
     max_iter = 0;
     return 0;
   }
@@ -155,7 +155,7 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
       cout << "GMRES: restart" << j << " " << beta << " " <<  normb << " " 
            <<  beta / normb << " < " << tol << endl;
     if ((resid = beta / normb) < tol) {
-      tol = resid;
+      tol = resid*normb;
       max_iter = j;
       delete [] v;
       return 0;
@@ -165,7 +165,7 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
  if(verbosity)
     cout << "WARNING: GMRES do not converges: " << j <<"/" << max_iter << ",  resid = " << resid 
          << ", tol=  " << tol << ", normb "<< normb << endl;
-  tol = resid;
+  tol = resid*normb;//  erreor absolue 
   delete [] v;
     
   return 1;

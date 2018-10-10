@@ -111,7 +111,7 @@ public:
   }
   void Solver(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
     ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    // = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
@@ -141,7 +141,7 @@ public:
   }
     void SolverT(const MatriceMorse<R> &A,KN_<R> &x,const KN_<R> &b) const  {
         ffassert ( &x[0] != &b[0]);
-        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        //epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
         // cout << " epsr = " << epsr << endl;
         double Control[UMFPACK_CONTROL];
         double Info[UMFPACK_INFO];
@@ -188,7 +188,7 @@ public:
 template<>
 class SolveUMFPACK<Complex> :   public MatriceMorse<Complex>::VirtualSolver  {
   double eps;
-  mutable double  epsr;
+ // mutable double  epsr;
   int umfpackstrategy;
   double tgv;
   void *Symbolic, *Numeric ;
@@ -201,7 +201,7 @@ public:
   SolveUMFPACK(const MatriceMorse<Complex> &A,int strategy,double ttgv, double epsilon=1e-6,
      double pivot=-1.,double pivot_sym=-1.
 ) : 
-    eps(epsilon),epsr(0),umfpackstrategy(strategy),tgv(ttgv),
+    eps(epsilon),umfpackstrategy(strategy),tgv(ttgv),
     Symbolic(0),Numeric(0),
     ar(0),ai(0),
     tol_pivot_sym(pivot_sym), 
@@ -265,7 +265,7 @@ public:
   }
   void Solver(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
         ffassert ( &x[0] != &b[0]);
-    epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+  //  epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
     // cout << " epsr = " << epsr << endl;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
@@ -298,7 +298,9 @@ public:
   }
     void SolverT(const MatriceMorse<Complex> &A,KN_<Complex> &x,const KN_<Complex> &b) const  {
         ffassert ( &x[0] != &b[0]);
-        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        //epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+       
+
         // cout << " epsr = " << epsr << endl;
         double Control[UMFPACK_CONTROL];
         double Info[UMFPACK_INFO];

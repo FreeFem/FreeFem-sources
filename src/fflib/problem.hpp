@@ -1210,12 +1210,58 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
         cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
         CompileError("type resolution unknown"); break;       
       }
+<<<<<<< ours
     
       if(solver)
         A.SetSolver(solver,true);
     else
         CompileError("SetSolver: type resolution unknown");
 
+=======
+    }
+  else 
+    {
+      typedef typename MatriceMorse<R>::VirtualSolver VirtualSolver;
+      if(verbosity>5) cout << " Morse matrix GC Precond diag" << endl;
+      MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
+      ffassert(&AA);
+      //     ffassert(typemat->t==TypeSolveMat::GC);
+     // using Fem2D;
+      switch (ds.typemat->t) {
+      case    TypeSolveMat::GC:   
+        if (pprecon)
+          AA.SetSolverMaster(static_cast<const VirtualSolver *>(
+                                                                new Fem2D::SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon,ds.x0)));
+        else 
+          AA.SetSolverMaster(static_cast<const VirtualSolver *>(
+                                                                new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon,ds.x0)));
+        break; 
+      case TypeSolveMat::GMRES :
+        //        InternalError("GMRES solveur to do");
+        if (pprecon)
+          AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0));
+        else 
+          AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0));
+        break;
+//#ifdef HAVE_LIBUMFPACK         
+        case TypeSolveMat::SparseSolver :
+	  AA.SetSolverMaster(DefSparseSolver<R>::Build( stack,&AA,ds) ); 
+         //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
+        break;
+           
+//#endif         
+        
+      
+      default:
+      
+        if (verbosity >5)
+          cout << "  SetSolver:: no  default solver " << endl;
+        // cerr << " type resolution " << ds.typemat->t << endl;
+        //  CompileError("type resolution inconnue"); break;       
+      }
+      
+    }
+>>>>>>> theirs
 }
 
 template<class R,class v_fes>

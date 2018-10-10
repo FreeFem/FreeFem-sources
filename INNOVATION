@@ -4,7 +4,7 @@ NOW the INNOVATION information are in CHANGELOG.md file (31 aug. 2018)
   correct bug in trunc (2d) in case of very fine mesh (eps too small ) 
 version 3.61 june 20 2018
   correct launchff.exe under windows 64  to choose a filescrip if no parameter
-  add name parameetre  kerneln=, kernelt=, kerneldim  for disection solve 
+  add name parametre  kerneln=, kernelt=, kerneldim  for disection solver 
   add option in method  toClose function in fquatree to get the nearst point (for intersect meshes)
   add missing file curvature.edp 
   correct the label definition in case of intalledges in 2d

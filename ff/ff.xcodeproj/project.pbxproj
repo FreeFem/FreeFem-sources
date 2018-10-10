@@ -126,7 +126,6 @@
 		3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1F1654DE9800301697 /* splitsimplex.hpp */; };
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
 		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
-		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
 		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
 		3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
 		3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; };
@@ -287,7 +286,6 @@
 		3D90DD23097015B4002A1826 /* mt19937ar.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mt19937ar.cpp; sourceTree = "<group>"; };
 		3D90DD26097015B4002A1826 /* problem.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = problem.cpp; sourceTree = "<group>"; };
 		3D90DD31097015B4002A1826 /* strversionnumber.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = strversionnumber.cpp; sourceTree = "<group>"; };
-		3D9B0EB40C8495C0008A8F03 /* RNM.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM.hpp; path = ../src/femlib/RNM.hpp; sourceTree = SOURCE_ROOT; };
 		3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.2.4.1.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libamd.2.4.1.a"; sourceTree = "<group>"; };
 		3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuitesparseconfig.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libsuitesparseconfig.a"; sourceTree = "<group>"; };
 		3DA740461BBEEA2100C4EB0A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libumfpack.a"; sourceTree = "<group>"; };
@@ -592,7 +590,10 @@
 			children = (
 				3DDEA1970DFFF77D00F54E1C /* libmesh5.c */,
 				3DC629C40972430700D487F6 /* BamgFreeFem.cpp */,
+<<<<<<< HEAD
 				3DC023282148078A008C76D0 /* CG.cpp */,
+=======
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
 				3DC629C50972430700D487F6 /* CheckPtr.cpp */,
 				3DC629C70972430700D487F6 /* Drawing.cpp */,
 				3DC629C80972430700D487F6 /* Element_P2h.cpp */,
@@ -603,7 +604,10 @@
 				3DC629CF0972430700D487F6 /* FQuadTree.cpp */,
 				3DC629D00972430700D487F6 /* gibbs.cpp */,
 				3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */,
+<<<<<<< HEAD
 				3DD0DF47216CC819006FD176 /* HashMatrix.cpp */,
+=======
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
 				3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */,
 				3DDEA1940DFFF76100F54E1C /* Mesh2dn.cpp */,
 				3DDEA1920DFFF74200F54E1C /* Mesh3dn.cpp */,
@@ -612,10 +616,15 @@
 				3DDEA18D0DFFF72000F54E1C /* P012_2d.cpp */,
 				3DDEA18B0DFFF71700F54E1C /* P012_3d.cpp */,
 				3DC629D60972430700D487F6 /* QuadratureFormular.cpp */,
+<<<<<<< HEAD
 				3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */,
 				3D84AE0D1654DE9800301697 /* assertion.hpp */,
 				3D84AE0E1654DE9800301697 /* BamgFreeFem.hpp */,
 				3DC023332148078C008C76D0 /* CG.hpp */,
+=======
+				3D84AE0D1654DE9800301697 /* assertion.hpp */,
+				3D84AE0E1654DE9800301697 /* BamgFreeFem.hpp */,
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
 				3D84AE011654DE9800301697 /* CGNL.hpp */,
 				3D84AE001654DE9800301697 /* DOperator.hpp */,
 				3D84AE101654DE9800301697 /* Element_P3.hpp */,
@@ -625,6 +634,7 @@
 				3D84AE021654DE9800301697 /* FESpacen.hpp */,
 				3D84AE131654DE9800301697 /* FQuadTree.hpp */,
 				3D84ADFC1654DE9800301697 /* GenericMesh.hpp */,
+<<<<<<< HEAD
 				3DC023202148075C008C76D0 /* gmres.hpp */,
 				3DC0232C2148078B008C76D0 /* HashMatrix.hpp */,
 				3D84AE151654DE9800301697 /* HashTable.hpp */,
@@ -633,6 +643,15 @@
 				3DC0234421480D75008C76D0 /* MatriceCreuse_tpl.hpp */,
 				3DC0234221480D6A008C76D0 /* MatriceCreuse.hpp */,
 				3DC0234621480EA8008C76D0 /* MatriceElementaire.hpp */,
+=======
+				3D84AE071654DE9800301697 /* gmres.hpp */,
+				3D84AE141654DE9800301697 /* GQuadTree.hpp */,
+				3D84AE151654DE9800301697 /* HashTable.hpp */,
+				3D84AE161654DE9800301697 /* HeapSort.hpp */,
+				3D84AE171654DE9800301697 /* Label.hpp */,
+				3D84ADFE1654DE9800301697 /* MatriceCreuse_tpl.hpp */,
+				3D84ADFF1654DE9800301697 /* MatriceCreuse.hpp */,
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
 				3D84AE181654DE9800301697 /* Mesh1dn.hpp */,
 				3D84AE081654DE9800301697 /* Mesh2dn.hpp */,
 				3D84ADFD1654DE9800301697 /* Mesh3dn.hpp */,
@@ -647,6 +666,7 @@
 				3D84AE091654DE9800301697 /* RNM_op.hpp */,
 				3D84AE0A1654DE9800301697 /* RNM_opc.hpp */,
 				3D84AE041654DE9800301697 /* RNM_tpl.hpp */,
+<<<<<<< HEAD
 				3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */,
 				3D84AE1F1654DE9800301697 /* splitsimplex.hpp */,
 				3D84AE421654DEB600301697 /* ufunction.hpp */,
@@ -658,6 +678,11 @@
 				3D84AE071654DE9800301697 /* gmres.hpp */,
 				3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */,
 				3D9B0EB40C8495C0008A8F03 /* RNM.hpp */,
+=======
+				3D84AE1F1654DE9800301697 /* splitsimplex.hpp */,
+				3D84AE421654DEB600301697 /* ufunction.hpp */,
+				3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */,
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
 			);
 			name = femlib;
 			sourceTree = "<group>";
@@ -698,8 +723,11 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+<<<<<<< HEAD
 				3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */,
 				3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */,
+=======
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
 				3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */,
 				3DC0233D2148078C008C76D0 /* VirtualSolverCG.hpp in Headers */,
 				3DC0234721480EA8008C76D0 /* MatriceElementaire.hpp in Headers */,

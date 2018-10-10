@@ -335,7 +335,11 @@ int MatriceProfile<R>::MatriceProfile(const MatriceProfile<RR> & A )
   
   }*/
 template<class R>
+<<<<<<< HEAD
   MatriceMorseOld<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool copy) const
+=======
+  MatriceMorse<R> *MatriceProfile<R>::toMatriceMorse(bool transpose,bool nocopy) const 
+>>>>>>> cf488bd0b71937113f99741ee2b8d5a6744260f7
   {
   // A FAIRE;
     ffassert(0); // TODO
