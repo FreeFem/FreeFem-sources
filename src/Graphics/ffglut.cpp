@@ -48,7 +48,7 @@ double gwait=0;//  no wait in second
 #include "ffglut.hpp"
 
 #include "ffthreads.hpp"
-
+bool hasDrawn= false;
 int version =0;
 
 //Mutex MutexNextPlot;
@@ -2541,7 +2541,11 @@ static void Reshape( int width, int height )
 
 
 void Display(void)
-{ 
+{
+    if (!hasDrawn) {
+        glutPostRedisplay();
+        hasDrawn = true;
+    }
     OneWindow * win=CurrentWin();
     if(win) 
       {
