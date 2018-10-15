@@ -2,8 +2,10 @@
 # ----------------------------------
 # $Id$
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 SUBDIRS=libMesh  bamglib femlib  Graphics Algo lglib fflib 	\
-nw mpi  bamg medit bin-win32 
+nw mpi  bamg medit bin-win32
 
 EXTRA_DIST= Carbon.r  \
 solver/MUMPS_FreeFem.cpp \
@@ -22,6 +24,4 @@ solver/real_pastix_FreeFem.cpp \
 solver/wrapper_dotblas.c \
 solver/wrapper_dotblas.f \
 solver/wrapper_dotblas1.c \
-solver/wrapper_dotblas1.f 
-
-
+solver/wrapper_dotblas1.f

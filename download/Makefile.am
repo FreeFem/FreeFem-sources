@@ -3,7 +3,9 @@
 
 # $Id: Makefile.am,v 1.16 2010/05/06 21:20:38 hecht Exp $
 
-SUBDIRS=blas arpack umfpack  
+AUTOMAKE_OPTIONS=subdir-objects
+
+SUBDIRS=blas arpack umfpack
 EXTRA_DIST= \
 ./nlopt/Make.inc ./nlopt/Makefile \
 ./blacs/BLACS.patch \
@@ -87,7 +89,7 @@ ff-petsc/Makefile \
 ff-petsc/Makefile-PETSc.inc \
 ff-petsc/Makefile.complex \
 ff-petsc/patch-slepc-3.7.4 \
-getall 
+getall
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
@@ -101,13 +103,13 @@ LIST_SOFT=@TOOL_COMPILE_tetgen@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_superlu4@ 
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@  @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
-	@TOOL_COMPILE_ipopt@ 
+	@TOOL_COMPILE_ipopt@
 
 all-recursive: bin lib include pkg
 
-lib: 
+lib:
 	mkdir lib
-bin: 
+bin:
 	mkdir bin
 include:
 	mkdir  include
@@ -135,13 +137,13 @@ tag-install-other:
 
 WHERE-OTHER: lib/WHERE.hpddm
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
-	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
+	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY
 	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm: ./getall
 	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:./getall
 	-rm lib/WHERE.hpddm
-	-rm ./pkg/hpddm.zip 
+	-rm ./pkg/hpddm.zip
 	-rm -rf include/hpddm
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
 include/hpddm/done.tag:./pkg/hpddm.zip
@@ -158,13 +160,13 @@ lib/WHERE.hpddm: ./getall
 	else true; 	fi
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
-compile-dir: 
+compile-dir:
 	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
 	@if [ 0 -eq `egrep ':$(COMPILEDIR) *LD' WHERE-LD | wc -l` ] ;then \
 	  cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET) ; \
 	else \
 	 echo $(COMPILEDIR) is in WHERE- files ;\
-	fi 
+	fi
 compile-pkg: tag-compile-pkg WHERE-LD
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
@@ -178,11 +180,11 @@ tag-compile-pkg: bin lib include pkg FORCE
 	touch tag-compile-pkg
 FORCE:
 
-re-install: 
+re-install:
 	$(MAKE) compile-pkg DIRTARGET=install
 WHERE:
-	$(MAKE) compile-pkg DIRTARGET=WHERE 
-install-exec-local:	
+	$(MAKE) compile-pkg DIRTARGET=WHERE
+install-exec-local:
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/bin
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
@@ -191,9 +193,9 @@ install-exec-local:
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
 
 clean-local:
-	-rm -rf	 tag-* include lib bin 
-	-mkdir   include lib bin 	
-	-rm */FAIT */FAIRE 
+	-rm -rf	 tag-* include lib bin
+	-mkdir   include lib bin
+	-rm */FAIT */FAIRE
 # 	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # 	compilation dependencies control there (see
 # 	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])

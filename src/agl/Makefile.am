@@ -2,9 +2,11 @@
 # ----------------------------------
 # $Id$
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 bin_PROGRAMS=$(AGLPROG)
 EXTRA_PROGRAMS=FreeFem++-agl
-EXTRA_DIST=FreeFem++.app.tgz Info-plist.am 
+EXTRA_DIST=FreeFem++.app.tgz Info-plist.am
 FreeFem___agl_SOURCES=../Graphics/glrgraph.hpp ../Graphics/macglrgraf.cpp  ../mpi/parallelempi-empty.cpp
 FreeFem___agl_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
@@ -28,4 +30,3 @@ INSTALL_APP_FreeFem++-agl::
 	cp $(top_srcdir)/src/FreeFem++-CoCoa $(bindir);
 	echo "End of Installation";
 INSTALL_APP_::
-

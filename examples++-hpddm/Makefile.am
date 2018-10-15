@@ -4,22 +4,24 @@
 # http://www.ljll.math.upmc.fr/lehyaric
 # ======================================================================
 # This file is part of Freefem++
-# 
+#
 # Freefem++ is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
-# 
+#
 # Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
+
+AUTOMAKE_OPTIONS=subdir-objects
 
 TESTS=   diffusion-2d-PETSc.edp	diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.edp	elasticity-2d-PETSc.edp	elasticity-3d-PETSc.edp	heat-2d-PETSc.edp	heat-3d.edp \
 diffusion-2d.edp	diffusion-3d.edp	elasticity-2d.edp	elasticity-3d.edp	heat-2d.edp		helmholtz-2d.edp	maxwell-3d.edp \
@@ -36,14 +38,14 @@ TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_T
 
 LIST_IDP=  macro_ddm.idp macro_ddm_substructuring.idp
 
-EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp PETSc-complex.cpp PETSc-code.hpp common.hpp hpddm.cpp hpddm_substructuring.cpp 	SLEPc.cpp SLEPc-complex.cpp SLEPc-code.hpp  PETSc.hpp 
+EXTRA_DIST= $(TESTS) $(LIST_IDP) PETSc.cpp PETSc-complex.cpp PETSc-code.hpp common.hpp hpddm.cpp hpddm_substructuring.cpp 	SLEPc.cpp SLEPc-complex.cpp SLEPc-code.hpp  PETSc.hpp
 
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
 # deactivated).
 
-LIST_COMPILE=@TOOL_DYLIB_hpddm@ 
+LIST_COMPILE=@TOOL_DYLIB_hpddm@
 
 if FFCS_MPIOK
 
@@ -63,10 +65,10 @@ endif
 #	FFCS on Windows inserts all MPI options (include, lib, ...) in the $MPICXX compiler script, instead of "$CXX $MPI_xxx",
 #	but it needs '-mpi' to do that
 #
-###	-../examples++-load/ff-c++ -auto  $< 
+###	-../examples++-load/ff-c++ -auto  $<
 	../examples++-load/ff-c++ -auto -mpi $<
 
-install-exec-local:: 
+install-exec-local::
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc

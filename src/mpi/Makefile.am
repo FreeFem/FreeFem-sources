@@ -1,9 +1,11 @@
 # Makefile using Automake + Autoconf
 # ----------------------------------
 # $Id$
-# change FH mars 2010 for sgi mpiu .... 
+# change FH mars 2010 for sgi mpiu ....
 
 # FFCS - we need to call MPICXX directly because Windows options are too different to be detailed to the FF configuration script.
+
+AUTOMAKE_OPTIONS=subdir-objects
 
 CXX=@MPICXX@
 
@@ -28,4 +30,3 @@ AM_CPPFLAGS=-I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @
 ff-mpirun:ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x  ff-mpirun
-

@@ -2,6 +2,8 @@
 # ----------------------------------
 # $Id$
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 # To create statically linked executables (see configure.ac)
 CXXLD=$(STATICTOOL) $(CXX)
 bin_PROGRAMS=FreeFem++ FreeFem++-nw @FFGLUTPROG@
@@ -22,4 +24,4 @@ FreeFem___nw_DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 FreeFem___DEPENDENCIES=../fflib/libff.a ../lglib/liblg.a
 
 LDADD=../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
-AM_CPPFLAGS=-I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib 
+AM_CPPFLAGS=-I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib

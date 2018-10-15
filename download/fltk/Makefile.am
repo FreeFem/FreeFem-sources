@@ -8,6 +8,8 @@ all-local: $(DOWNLOAD_FLTK)
 # Downloading and compiling FLTK
 # ------------------------------
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 # FLTK information
 SRCDIR=fltk-$(FLTK_VERSION)
 PACKAGE=fltk-$(FLTK_VERSION)-source.tar.bz2

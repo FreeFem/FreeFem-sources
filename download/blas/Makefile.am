@@ -4,22 +4,24 @@
 # Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
 # ======================================================================
 # This file is part of Freefem++
-# 
+#
 # Freefem++ is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
-# 
+#
 # Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh brief="Downloading and compiling extra BLAS libraries" default=0 freefem make multipleauthors start=04/06/04 upmc
+
+AUTOMAKE_OPTIONS=subdir-objects
 
 DIRPKG=../pkg
 BLAS_TGZ=$(DIRPKG)/blas-3.7.1.tgz
@@ -30,7 +32,7 @@ PKGCOMMON_PACKAGES=$(BLAS_TGZ) $(CBLAS_TGZ) ../pkg/OpenBLAS.tar.gz
 include ../common.mak
 
 EXTRA_DIST= \
-openblas.patches 
+openblas.patches
 
 # Downloading and compiling the Generic Blas
 # ------------------------------------------
@@ -159,12 +161,12 @@ links.done:openblas.done
 	touch $@
 install.done:links.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARED=1 DDYNAMIC_ARCH=1 PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARED=1 DDYNAMIC_ARCH=1 PREFIX=../.. install
 	touch $@
 else
 install.done:openblas.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARED=1 PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARED=1 PREFIX=../.. install
 	touch $@
 endif
 
@@ -176,8 +178,8 @@ openblas.done:openpatches.done
 # DYNAMIC_ARCH=1 allows the Openblas to run fast on all the processor architectures that the FFCS users may have
 #
 
-	test  -d ../lib ||  mkdir  ../lib 
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=1  "FLIBS=$(FLIBS)" libs netlib 
+	test  -d ../lib ||  mkdir  ../lib
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=1  "FLIBS=$(FLIBS)" libs netlib
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date

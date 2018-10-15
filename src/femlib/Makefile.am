@@ -5,6 +5,8 @@
 # This is not compiled as a separate library because its
 # interconnections with other libraries have not been solved.
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 EXTRA_DIST=BamgFreeFem.cpp BamgFreeFem.hpp CGNL.hpp CheckPtr.cpp	\
 ConjuguedGradrientNL.cpp DOperator.hpp Drawing.cpp Element_P2h.cpp	\
 Element_RT.cpp fem3.hpp fem.cpp fem.hpp FESpace.cpp	\

@@ -5,6 +5,8 @@
 # To create statically linked executables (see configure.ac)
 CXXLD=$(STATICTOOL) $(CXX)
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 bin_PROGRAMS=$(GLXPROG)
 EXTRA_PROGRAMS=FreeFem++-glx
 

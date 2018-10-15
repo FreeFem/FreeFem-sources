@@ -6,6 +6,8 @@ all-local: $(DOWNLOAD_FFTW)
 # Downloading and compiling FFTW
 # ------------------------------
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 # FFTW information
 FFTW_VERSION=3.3.2
 SRCDIR=fftw-$(FFTW_VERSION)
@@ -38,6 +40,6 @@ WHERE:$(SRCDIR)/FAIT
 
 
 clean-local:
-	-rm -rf fftw-* 
+	-rm -rf fftw-*
 	-rm ../include/fftw3.f ../include/fftw3.f03 ../include/fftw3.h ../include/fftw3l.f03 ../include/fftw3q.f03	\
 		../lib/libfftw3.a ../lib/libfftw3.la

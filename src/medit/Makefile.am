@@ -1,10 +1,12 @@
 # Makefile using Automake + Autoconf
 # ----------------------------------
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 CXXLD=$(STATICTOOL) $(CXX)
 
 bin_PROGRAMS=$(MEDITPROG)
-EXTRA_DIST=picking.c 
+EXTRA_DIST=picking.c
 EXTRA_PROGRAMS=ffmedit
 ffmedit_SOURCES=animat.c cube.c image.c listnum.c mouse.c persp.c stream.c zaldy2.c bbfile.c dlists.c inmsh2.c \
 	material.c normal.c tiles.c camera.c ellipse.c inout.c medit.c param.c psfile.c transform.c cenrad.c geometry.c \
@@ -25,7 +27,7 @@ compil.date: $(ffmedit_SOURCES)
 
 ffmedit_DEPENDENCIES=picking.$(OBJEXT)
 picking.$(OBJEXT):picking.c
-	${CC} -c $< $(CNOFLAGS) -o $@ 
+	${CC} -c $< $(CNOFLAGS) -o $@
 
 #pinking.no-optffmedit$(EXEEXT):picking.c
 #	rm picking.$(OBJEXT)
@@ -35,4 +37,3 @@ picking.$(OBJEXT):picking.c
 #	touch pinking.no-opt
 #clean-local:
 #	-rm pinking.no-opt pinking.no-optffmedit$(EXEEXT)
-

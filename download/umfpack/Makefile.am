@@ -4,26 +4,28 @@
 # Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
 # ======================================================================
 # This file is part of Freefem++
-# 
+#
 # Freefem++ is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
-# 
+#
 # Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh brief="Downloading and compiling extra libraries for Umfpack" default=0 freefem make multipleauthors start=04/06/04 upmc
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 # see [[file:../../configure.ac::DOWNLOAD_UMFPACK]]
 all-local: $(DOWNLOAD_UMFPACK)
-EXTRA_DIST= SuiteSparse_config.mk.in 
+EXTRA_DIST= SuiteSparse_config.mk.in
 
 # Downloading and compiling UMFPACK
 # ---------------------------------
@@ -31,7 +33,7 @@ EXTRA_DIST= SuiteSparse_config.mk.in
 DIRPKG=../pkg
 SUITESPARSE_TGZ=$(DIRPKG)/SuiteSparse-4.4.4.tar.gz
 
-UMFPACKLIB=../lib/libumfpack.a 
+UMFPACKLIB=../lib/libumfpack.a
 AMDLIB=../lib/libamd.a
 CAMDLIB=../lib/libcamd.a
 CHOLMODLIB=../lib/libcholmod.a
@@ -52,20 +54,20 @@ umfpack:
 	$(MAKE) MAKEFLAGS= $(COLAMDLIB)
 	$(MAKE) MAKEFLAGS= $(AMDLIB)
 	$(MAKE) MAKEFLAGS= $(CHOLMODLIB)
-	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB) 
+	$(MAKE) MAKEFLAGS= $(SUITESPARSECONFIGLIB)
 
 # FFCS: SuiteSparse/*/Source are not able to compile in parallel from scratch ("pipe from processes is a
 # directory"?). But specifying "make -j 1" is not enough (another error pops up). Use "$(MAKE) MAKEFLAGS=" instead
 # (using "make MAKEFLAGS=" still produces an error on Cygwin).
 
-$(SUITESPARSECONFIGLIB): SuiteSparse/FF 
+$(SUITESPARSECONFIGLIB): SuiteSparse/FF
 	cd SuiteSparse/SuiteSparse_config && $(MAKE) MAKEFLAGS=
 	mkdir -p ../include ../lib
 	cp -f SuiteSparse/SuiteSparse_config/SuiteSparse_config.h  ../include
 	cp  SuiteSparse/SuiteSparse_config/libsuitesparseconfig.a ../lib/libsuitesparseconfig.a
 	$(RANLIB) ../lib/libsuitesparseconfig.a
 
-$(UMFPACKLIB): SuiteSparse/FF 
+$(UMFPACKLIB): SuiteSparse/FF
 	cd SuiteSparse/UMFPACK/Lib && $(MAKE) MAKEFLAGS=
 	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/UMFPACK/Include/*.h ../include
@@ -73,28 +75,28 @@ $(UMFPACKLIB): SuiteSparse/FF
 	cp  SuiteSparse/UMFPACK/Lib/libumfpack.a ../lib/libumfpack.a
 	$(RANLIB) ../lib/libumfpack.a
 
-$(AMDLIB): SuiteSparse/FF 
+$(AMDLIB): SuiteSparse/FF
 	cd SuiteSparse/AMD/Lib && $(MAKE) MAKEFLAGS=
 	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/AMD/Include/*.h ../include
 	cp  SuiteSparse/AMD/Lib/libamd.a ../lib/libamd.a
 	$(RANLIB) ../lib/libamd.a
 
-$(CAMDLIB): SuiteSparse/FF 
+$(CAMDLIB): SuiteSparse/FF
 	cd SuiteSparse/CAMD/Lib && $(MAKE) MAKEFLAGS=
 	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/CAMD/Include/*.h ../include
 	cp  SuiteSparse/CAMD/Lib/libcamd.a ../lib/libcamd.a
 	$(RANLIB) ../lib/libcamd.a
 
-$(CHOLMODLIB): SuiteSparse/FF 
+$(CHOLMODLIB): SuiteSparse/FF
 	cd SuiteSparse/CHOLMOD/Lib && $(MAKE) MAKEFLAGS=
 	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/CHOLMOD/Include/*.h ../include
 	cp  SuiteSparse/CHOLMOD/Lib/libcholmod.a ../lib/libcholmod.a
 	$(RANLIB) ../lib/libcholmod.a
 
-$(COLAMDLIB): SuiteSparse/FF 
+$(COLAMDLIB): SuiteSparse/FF
 	cd SuiteSparse/COLAMD/Lib && $(MAKE) MAKEFLAGS=
 	mkdir -p ../include ../lib
 	cp -f  SuiteSparse/COLAMD/Include/*.h ../include
@@ -107,7 +109,7 @@ UMFPACKv4.4:
 # The 'lib' goal is replaced with 'libb' to avoid problems with the existing 'Lib' subdirectory on case-insensitive file
 # systems the lib depend of the Makefile to force the reconstruction if the parameter change
 
-UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4  
+UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4
 	sed 's/lib:/libb:/' < UMFPACKv4.4/UMFPACK/`basename $@ 2`  >$@
 
 SuiteSparse/DATE:$(SUITESPARSE_TGZ)
@@ -132,7 +134,7 @@ SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk:SuiteSparse/DATE Makefile S
 	   (cd SuiteSparse/CAMD && make clean); \
 	   (cd SuiteSparse/AMD && make clean); \
 	   find . -name '*.exe'|xargs rm;  \
-	fi; 
+	fi;
 	touch SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk
 
 UMFPACK_Make.m4: Makefile UMFPACKv4.4
@@ -148,7 +150,7 @@ UMFPACK_Make.m4: Makefile UMFPACKv4.4
 	   cp Make.include  UMFPACKv4.4/UMFPACK/Make/Make.include; \
 	   cd UMFPACKv4.4/UMFPACK && make clean; \
 	   find . -name '*.exe'|xargs rm; \
-	fi; 
+	fi;
 UMFPACKv4.4.tar.gz:
 	@WGET@ -N http://www.cise.ufl.edu/research/sparse/umfpack/v4.4/UMFPACKv4.4.tar.gz
 $(SUITESPARSE_TGZ):
@@ -156,14 +158,14 @@ $(SUITESPARSE_TGZ):
 
 clean-local:
 	-rm $(AMDLIB) $(CAMDLIB) $(CHOLMODLIB) $(COLAMDLIB) $(SUITESPARSECONFIGLIB)
-	-rm ../include/amd*.h 
-	-rm ../include/umfpack*.h 
-	-rm ../include/colmod*.h 
-	-rm ../include/camd*.h 
 	-rm ../include/amd*.h
-	-rm ../include/SuiteSparse_config.h 
+	-rm ../include/umfpack*.h
+	-rm ../include/colmod*.h
+	-rm ../include/camd*.h
+	-rm ../include/amd*.h
+	-rm ../include/SuiteSparse_config.h
 	-rm -rf UMFPACKv4.?.tar.gz UMFPACKv4.?
-	-rm SuiteSparse*gz 
+	-rm SuiteSparse*gz
 	-rm -rf SuiteSparse
 #	-rm ../pkg/SuiteSparse-*
 	-rm SuiteSparse_config.mk

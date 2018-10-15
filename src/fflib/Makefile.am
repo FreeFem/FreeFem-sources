@@ -8,6 +8,8 @@ noinst_LIBRARIES=libff.a
 # needs to be compiled with different options depending on the
 # executable it is included in (eg with/without MPI)
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 libff_a_SOURCES2=  UMFPack_Solver.cpp \
 AFunction.cpp AFunction2.cpp  \
  array_long.cpp          array_real.cpp        array_complex.cpp \
@@ -50,12 +52,12 @@ ff++.hpp \
 ../femlib/splitsimplex.cpp AFunction_ext.hpp \
 ffapi.hpp P1IsoValue.cpp	P1IsoValue.hpp
 
-libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp 
+libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp
 
 # eigenvalue.cpp is optional (see [[file:../../configure.ac::EIGENOBJ]])
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
-libff_a_LIBADD=@EIGENOBJ@
-libff_a_DEPENDENCIES=@EIGENOBJ@
+libff_a_LIBADD=../Eigen/@EIGENOBJ@
+libff_a_DEPENDENCIES=../Eigen/@EIGENOBJ@
 
 AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
 # -I$(top_srcdir)/arpack/arpack++/include

@@ -1,8 +1,10 @@
 # $Id$
 
+AUTOMAKE_OPTIONS=subdir-objects
+
 all-local: all.edp regtests.edp freefem++.pref
 TESTS=BlackScholes2D.edp NSNewton.edp NSprojection.edp condensor.edp convects.edp heatex.edp lame.edp membrane.edp membranerror.edp muwave.edp optimcontrol.edp potential.edp schwarz.edp sound.edp stokes.edp test1.edp testbed.edp thermal.edp thermic.edp
-# if .. no arpack ... 
+# if .. no arpack ...
 XFAIL_TESTS=sound.edp
 
 EXTRA_DIST=*.edp  all.edp regtests.edp regtests.m4 ref.edp

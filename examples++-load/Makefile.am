@@ -1,7 +1,9 @@
 all-local: @LOAD_COMPILE@
 TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NS_P2BR_P0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp  ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE_P2BR.edp testFEMorley.edp tetgencube.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp bfstream.edp bilapP3-hct-like.edp ClosePoints.edp cube.edp bilapHCT.edp	testFEHCT.edp Stokes-surface-tension-axi.edp Element_QF.edp distance.edp	distance2.edp	distance3.edp testdist.edp testp1dcnc.edp testFE-P2Bulle3.edp LaplaceRT2.edp LaplaceP2pnc.edp testFE-P2pnc.edp LaplaceP3-3d.edp LaplaceRT13d.edp SaveHB_sample.edp SaveHB_sample_z.edp IncompleteCholesky.edp
-# all test can fail must but clean ????  FH... 
+# all test can fail must but clean ????  FH...
 XFAIL_TESTS=$(TESTS)
+
+AUTOMAKE_OPTIONS=subdir-objects
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
@@ -85,7 +87,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
 	Element_HCT.$(DYLIB_SUFFIX) Curvature.$(DYLIB_SUFFIX) Element_P1bl.$(DYLIB_SUFFIX) \
 	Element_QF.$(DYLIB_SUFFIX) distance.$(DYLIB_SUFFIX) Element_P1ncdc.$(DYLIB_SUFFIX) \
 	Element_P2bulle3.$(DYLIB_SUFFIX)  \
-	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX) 
+	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
@@ -105,12 +107,12 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 # max_load
 	-@rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null || true
 	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE) $(LIST_COMPILE_PKG)
-	@if test -f Missing-plugins-$(DYLIB_SUFFIX).log ; then cat Missing-plugins-$(DYLIB_SUFFIX).log; fi; exit 0 
+	@if test -f Missing-plugins-$(DYLIB_SUFFIX).log ; then cat Missing-plugins-$(DYLIB_SUFFIX).log; fi; exit 0
 	@echo Warning missing plugin: `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
 	echo " finish build list $(DYLIB_SUFFIX)"
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
-	 ./ff-c++ -auto $< 
+	 ./ff-c++ -auto $<
 
 # FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with
 # empty files without any access right). So just replace the whole thing with a plain copy.
@@ -153,7 +155,7 @@ else
 include.done: $(allheaders)
 	-rm -rf include
 	mkdir -p  include
-	for i in $(allheaders); do  ln -s ../$$i include/. ; done 
+	for i in $(allheaders); do  ln -s ../$$i include/. ; done
 	touch $@
 endif
 
@@ -252,7 +254,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	        done ; \
 	fi
 
-ffmaster: libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h
+ffmaster$(EXEXT): libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h
 	$(CC) $(CFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster $(LIBSPTHREAD)
 libff-mmap-semaphore.o ff-mmap-semaphore.$(DYLIB_SUFFIX):include.done ff-mmap-semaphore.cpp libff-mmap-semaphore.c libff-mmap-semaphore.h ff-c++
 	./ff-c++ -auto ff-mmap-semaphore.cpp
@@ -261,7 +263,7 @@ clean-local::
 	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh ListOfAllocPtr-8.bin ffglut*.ppm Th.o.meshb	Th3.d.meshb	dep.sol.meshbgh \
 ipopt.out	mmg.out xxxx ThFF.txt		TriQA.txt		cavidadTT.txt		mass.txt		xy.txt \
 ThFF_Metric.txt		TriQA_Metric.txt	datanc.txt		u100m8.txt \
-TTh.sol		Th.o.sol	Th3.sol		dep.o.sol	dep.sol		gradient.sol	hessien.sol pippo.data pippo.dx testsavemedit.solb med.gp bidule.vtk	disque.vtk g-iso 
+TTh.sol		Th.o.sol	Th3.sol		dep.o.sol	dep.sol		gradient.sol	hessien.sol pippo.data pippo.dx testsavemedit.solb med.gp bidule.vtk	disque.vtk g-iso
 
 
 # FFCS: add tags for files that are not specified to automake by a SOURCE directive (this tags file is automatically

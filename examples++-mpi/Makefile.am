@@ -4,22 +4,24 @@
 # http://www.ljll.math.upmc.fr/lehyaric
 # ======================================================================
 # This file is part of Freefem++
-# 
+#
 # Freefem++ is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
-# 
+#
 # Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
+
+AUTOMAKE_OPTIONS=subdir-objects
 
 TESTS=  DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp	\
 	DDM-Schwarz-Stokes-2d.edp LaplaceRT-3d-matrix-mumps.edp MPICGLap.edp MPIGMRES2D.edp MPIGMRES3D.edp MUMPS.edp	\
@@ -35,7 +37,7 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP= 	DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \
-	DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp func-max.idp 
+	DDM-funcs-v2.idp	MPIplot.idp		mortar-msh.idp Heat3d.idp func-max.idp
 
 EXTRA_DIST=*.edp *.idp  regtests.sh  \
 MPICG.cpp \
@@ -81,10 +83,10 @@ endif
 #	FFCS on Windows inserts all MPI options (include, lib, ...) in the $MPICXX compiler script, instead of "$CXX $MPI_xxx",
 #	but it needs '-mpi' to do that
 #
-###	-../examples++-load/ff-c++ -auto  $< 
+###	-../examples++-load/ff-c++ -auto  $<
 	../examples++-load/ff-c++ -auto -mpi $<
 
-install-exec-local:: 
+install-exec-local::
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
@@ -99,7 +101,7 @@ freefem++.pref:Makefile
 	echo 'includepath = "../examples++-3d/"' >>freefem++.pref
 	echo 'includepath += "../examples++-tutorial/"' >>freefem++.pref
 #	echo loadpath += \"./\" >>freefem++.pref
-# force the build for freefem++.pref  FH.. 
+# force the build for freefem++.pref  FH..
 DDM-Schwarz-Lame-2d.edp:freefem++.pref
 # FFCS - cleaning is useful sometimes
 clean-local::
