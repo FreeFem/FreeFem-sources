@@ -307,9 +307,11 @@ public:
   R  rapz,rapz0;
   R3 Bmin3,Bmax3,Pvue3;
   R3 cam;
+
   bool withlight;
   bool changearrow,changeiso;// to rebuild de graphic list if neccessary
   bool keepPV,init;
+  long countdisplay; //  for Mojabe bUG ??? FH..
   //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
   OneWindow(int h,int w,ThePlot *p);
   void DefaultView(int state) ;
