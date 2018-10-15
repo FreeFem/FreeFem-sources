@@ -177,7 +177,7 @@ HDF5 support is being disabled (equivalent to --with-hdf5=no).
         HDF5_SHOW=$(eval $H5CC -show)
 
         dnl Get the actual compiler used
-        HDF5_CC=$(eval $H5CC -show | $AWK '{print $[]1}')
+        HDF5_CC=$(eval $H5CC -show | $AWK '{print $[]1; exit}')
         if test "$HDF5_CC" = "ccache"; then
             HDF5_CC=$(eval $H5CC -show | $AWK '{print $[]2}')
         fi
