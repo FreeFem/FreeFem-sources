@@ -127,7 +127,7 @@ head(0), next(0),
 // trans(false),
 half(halff), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
+re_do_numerics(0),re_do_symbolic(0)
 {
     Increaze(nnnz);
 }
@@ -163,7 +163,8 @@ re_do_numerics(0),re_do_symbolic(0)
     }
     if(cas== 2)
     {
-        long rn,rm,rnbcoef,rsymetrique;
+        long rn,rm,rsymetrique;
+        size_t rnbcoef;
         ffassert(f.good() );
         f >> rn >> rm >> rsymetrique >>rnbcoef;
         
@@ -187,7 +188,8 @@ re_do_numerics(0),re_do_symbolic(0)
     }
     else if(cas== 3)
     {
-        I nn,mm,nnnz,hhalf,f77, state, tstate;
+        I nn,mm,hhalf,f77, state, tstate;
+        size_t nnnz;
         f >> nn >> mm >> nnnz >> hhalf >> f77 >> state >> tstate ;
         ffassert(f.good() && nn>0 && mm>0 && nnnz>0  );
         resize(nn,mm,nnnz);
@@ -216,12 +218,12 @@ HashMatrix<I,R>::HashMatrix(KNM_<R> F,double  threshold)
 head(0), next(0),
 half(false), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
+re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
 
 {
     Increaze();
     for(int ii=0; ii <F.N(); ++ii)
-        for(int jj=0; jj <F.N(); ++jj)
+        for(int jj=0; jj <F.M(); ++jj)
         {
             R Fiijj = F(ii,jj);
             if(abs(Fiijj) > threshold)
@@ -235,7 +237,7 @@ HashMatrix<I,R>::HashMatrix(bool Half,I nn)
 head(0), next(0),
 half(Half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
+re_do_numerics(0),re_do_symbolic(0)
 
 {
     Increaze(nn*4);
@@ -259,7 +261,7 @@ HashMatrix<I,R>::HashMatrix(I nn,const R *diag)
 head(0), next(0),
 half(0), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
-re_do_numerics(0),re_do_symbolic(0),a(0), lg(0), cl(0)
+re_do_numerics(0),re_do_symbolic(0)
 {
     Increaze(nn);
     for(int k=0;k<nn;++k)
@@ -290,15 +292,17 @@ void HashMatrix<I,R>::setp(I sp)
 }
 
 template<class I,class R>
-void  HashMatrix<I,R>::resize(I nn, I mm,I nnnz, double tol , bool sym )
+void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
 {
     
     mm= mm ? mm : nn;
     if( nn == this->n && mm == this->m && nnz == nnnz) return ;
-    if( mm>this->m ) this->m=mm;
-    if (nn>this->n ) this->n = nn;
-    
-    I kk=0;
+    this->m=mm;
+    this->n = nn;
+    this->N=mm;
+    this->M = nn;
+
+    size_t kk=0;
     for(size_t k=0; k <nnz ;++k)
         if( i[k] < this->n && j[k] < this->m && abs(aij[k])> tol && (sym && i[k] <= j[k] ) )
         {
@@ -391,13 +395,104 @@ void HashMatrix<I,R>::dotranspose()
     ReHash();
     state=unsorted;
 }
+template<class I,class R>
+void HashMatrix<I,R>::Renumbering(I nn,I mm,KN_<I> ii,KN_<I> jj)
+{
+    //Do  B_ii(i),jj(j) : A_i,j
+    size_t kk=0;
+    for(size_t k=0; k<nnz; ++k)
+    {
+        I i1=ii[i[k]],j1=jj[i[k]];
+        if( i1 >=0 && j1 >=0 && i1 <nn && j1 < mm) // coef existe
+        {
+            i[kk] =i1;
+            j[kk] =j1;
+            aij[kk++]=aij[k];
+        }
+    }
+    nnz = kk;
+    this->n=nn;
+    this->m=mm;
+    state=unsorted;
+    
+    RemoveDoubleij(kk); // remove double term 
+  
+
+    
+}
+template<class I,class R>
+void HashMatrix<I,R>::RemoveDoubleij(int kkk)
+{
+    nnz=kkk;
+    COO();
+    I ip=-1,jp=-1;
+    long kk=-1;
+    for(size_t k=0; k<nnz; ++k)
+    {
+        if( ip != i[k] && jp != j[k] )
+        {  // new term
+            ++kk;
+            i[kk] =ip=i[k];
+            j[kk] =jp=j[k];
+            aij[kk]=aij[k];
+        }
+        else
+            aij[kk]=+aij[k];
+    }
+    if(verbosity>4)
+        cout << " HashMatrix::RemoveDoubleij  remove "<< nnz - kk << " coef "<< endl;
+    Increaze(kk,kk);
+}
+template<class I,class R>
+void HashMatrix<I,R>::RenumberingInv(KN_<I> II,KN_<I> JJ)
+{
+       //Do  B_(i),(j) : A_ii(i),jj(j)
+    I n = this->n, m = this->m;
+    I nn= II.N(), mm= JJ.N();
+    const I minus1 =-1;
+    KN<I> ii(n,minus1), jj(m,minus1);
+    // build inversion
+    int notinjection=0;
+    // build invertion ..
+    for( I l=0; l<nn; ++l)
+    {
+        I IIl = II[l];
+        if( IIl >= 0 && IIl < n)
+        {
+            if(ii[IIl]>=0 ) notinjection =1;
+          ii[IIl]=l;
+        }
+    }
+    for( int l=0; l<mm; ++l)
+    {
+        I IIl = JJ[l];
+        if( IIl >= 0 && IIl < m)
+        {
+            if(jj[IIl]>=0 ) notinjection |=2 ;
+            jj[IIl]=l;
+        }
+    }
+    if( !notinjection)
+    {
+        cerr << " HashMatrix<I,R>::Renumbering not injection " <<notinjection <<endl;
+        ffassert(0); // to do 
+    }
+    Renumbering(nn,mm,ii,jj);
+}
 
 template<class I,class R>
-void HashMatrix<I,R>::Increaze(size_t nnznew)
+void HashMatrix<I,R>::Increaze(size_t nnzxnew,size_t newnnz)
 {
-    if(!nnznew) nnznew = max(this->n,this->m)*10;
-    size_t nzzx = max(size_t(nnzmax*1.2),nnznew);
-    size_t nh = max(size_t(nhash*1.1),(size_t)max(this->n,this->m));
+    size_t mnx =(size_t)max(this->n,this->m);
+    if(newnnz==0) newnnz = nnz;
+    else nnz=newnnz; 
+    if( nnzxnew==0) {
+        nnzxnew = max(max(mnx*2,newnnz),(size_t) (nnzmax*1.2) );
+    }
+    
+    size_t nzzx =  nnzxnew;
+    double nnzl = min(max(1.,double(nzzx)/mnx),10.);
+    size_t nh = mnx*nnzl;
     HMresize(i,nnz,nzzx);
     HMresize(j,nnz,nzzx);
     HMresize(aij,nnz,nzzx);
@@ -559,6 +654,15 @@ void HashMatrix<I,R>::operator=(const R & v)
     
 }
 
+template<class I,class R>
+void HashMatrix<I,R>::HM()
+{
+    re_do_numerics=1;
+    re_do_symbolic=1;
+    setp(0);
+    type_state=type_HM;
+    
+}
 
 template<class I,class R>
 void HashMatrix<I,R>::COO()
@@ -1038,7 +1142,26 @@ double HashMatrix<I,R>::gettgv(I * pntgv,double ratio) const
 }
 
 
-
+template<class I,class R>
+void HashMatrix<I,R>::UnHalf()
+{
+    
+    if( !half) return;
+    HM();
+    size_t nnz0=nnz,err=0;
+    for(int k=0; k<nnz0; ++k)
+      if( i[k] < j[k] )
+       {
+        size_t ki=insert(j[k],i[k],aij[k]);
+        err += ki < nnz0;
+        }
+    else if ( i[k] > j[k] )
+        err++;
+    if( err )
+        cerr << " Try of unsymmetrize no half matrix (Bug) ... ????" <<endl;
+    ffassert(err==0);
+    
+}
 
 typedef double R;
 typedef complex<R> C;

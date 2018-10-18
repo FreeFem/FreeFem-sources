@@ -165,7 +165,9 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	ffassert(pTh);
 	const Mesh &Th(*pTh);
 	{
-		map<pair<int, int>, R> Aij;
+		//map<pair<int, int>, R> Aij;
+		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ; 
+		
 		KN<double> cc(Th.nv);
 		double infini = DBL_MAX;
 		cc = infini;
@@ -204,7 +206,7 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 			}
 		}
 
-		amorse = new MatriceMorse<R>(Th.nv, Th.nv, Aij, false);
+		amorse = pAij;//new MatriceMorse<R>(Th.nv, Th.nv, Aij, false);
 	}
 	sparce_mat->Uh = UniqueffId();
 	sparce_mat->Vh = UniqueffId();
@@ -230,7 +232,9 @@ AnyType MatrixUpWind3::operator () (Stack stack) const {
 	ffassert(pTh);
 	const Mesh3 &Th(*pTh);
 	{
-		map<pair<int, int>, R> Aij;
+		//map<pair<int, int>, R> Aij;
+		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ; 
+		
 		KN<double> cc(Th.nv);
 		double infini = DBL_MAX;
 		cc = infini;
@@ -269,7 +273,7 @@ AnyType MatrixUpWind3::operator () (Stack stack) const {
 			}
 		}
 
-		amorse = new MatriceMorse<R>(Th.nv, Th.nv, Aij, false);
+		amorse = pAij;//new MatriceMorse<R>(Th.nv, Th.nv, Aij, false);
 	}
 	sparce_mat->Uh = UniqueffId();
 	sparce_mat->Vh = UniqueffId();

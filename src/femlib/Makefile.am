@@ -37,6 +37,7 @@ libmesh5.h  \
 ufunction.hpp  \
 splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp \
 HashMatrix.hpp \
+HashMatrix.cpp \
 VirtualMatrix.hpp \
 SparseLinearSolver.hpp \
 VirtualSolverCG.hpp \
@@ -45,8 +46,8 @@ MatriceCreuse_tpl.hpp \
 MatriceElementaire.hpp \
 CG.hpp \
 CG.cpp \
-SkyLineSolver.hpp \
 SparseLinearSolver.cpp \
 SolverSkyLine.hpp \
 VirtualSolverSparseSuite.hpp \
-VirtualSolverSkyLine.hpp \
+VirtualSolverSkyLine.hpp 
+

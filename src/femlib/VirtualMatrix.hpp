@@ -1,4 +1,5 @@
-
+#ifndef VIRTUALMATRIX_HPP__
+#define VIRTUALMATRIX_HPP__
 #include "MatriceElementaire.hpp"
 
 inline void MATERROR(int i,const char *cmm)
@@ -12,6 +13,9 @@ class VirtualMatrix: public RefCounter, public RNM_VirtualMatrix<TypeScalar,Type
 public:
      typedef TypeIndex I;
     typedef TypeScalar R;
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int  TS_unsym=1, TS_sym=2, TS_def_positif=4,  TS_not_def_positif=8, TS_sequental = 16, TS_mpi = 32;// for verification
+    static const int TS_SYM=1,TS_DEF_POS=2,TS_PARA=4;
     typedef VirtualMatrix<I,R> VMat ;
     typedef void (*ERRORFunc)(int i,const char *cmm);
     ERRORFunc ERRORHandle;
@@ -26,12 +30,15 @@ public:
         else MATERROR(i,cmm);
     }
     I n,m; // size of matrix
+    bool symetric,positive_definite;   // for cholesly or CG
+    
     VSolver *vsolver;
     bool delvsolver;
    // long state,codeini,codesym,codenum;
-    VirtualMatrix(I NN,I MM=-1) : RNM_VirtualMatrix<R,I> (NN,MM),n(NN),m(this->M),vsolver(0),delvsolver(false)
- 
+    VirtualMatrix(I NN,I MM=-1,bool sym=false,bool dp=false) : RNM_VirtualMatrix<R,I> (NN,MM),
+    n(NN),m(this->M),symetric(sym),positive_definite(dp),vsolver(0),delvsolver(false)
     {}
+   virtual void setsdp(bool sym,bool dp) { symetric=sym; positive_definite=dp;}
    static R *Set2Const(I n,R *x,R c=R()) { std::fill(x,x+n,c); return x;}
     
    R* solve(R *x,R*b,int N=1,int transpo=0) const
@@ -126,4 +133,4 @@ template<class TypeIndex=int,class TypeScalar=double>
 inline double * ProduitMatVec(const VirtualMatrix<TypeIndex,TypeScalar> &A,TypeScalar *x, TypeScalar *Ax) { return A.MatMul(x,Ax);}
 
 
-
+#endif

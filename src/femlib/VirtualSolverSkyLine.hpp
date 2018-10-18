@@ -127,6 +127,10 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
     template<class Z=int,class K=double>
     class VirtualSolverSkyLine: public VirtualSolver<Z,K> {
     public:
+        //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+        static const int orTypeSol = 1&2&4&8&16;
+
+        
         typedef HashMatrix<Z,K>  HMat;
         typedef SkyLineMatrix<Z,K>  SLMat;
         int typesolver;
@@ -138,10 +142,10 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         double tol_pivot;
         int verb;
         mutable int status;
-        
-        VirtualSolverSkyLine(HMat  *AA,int ttypesolver,double tol_pivott=1e-15,int vverb=2)
-        :typesolver(ttypesolver),A(AA),SL(0),cs(0),cn(0),p(0),v(0),
-        tol_pivot(tol_pivott<0 ?  1e-15 :tol_pivott) , verb(vverb)  {}
+        static int ttypesolver(const string &name) { if(name.length()  <=2) return 2; else if( name[0] =='C')  return 1 + ( (name[1]) != 'H'); else return 2; }
+        VirtualSolverSkyLine(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
+        :typesolver(ttypesolver(ds.solver)),A(&AA),SL(0),cs(0),cn(0),p(0),v(0),
+        tol_pivot(ds.tol_pivot<0 ?  1e-15 :ds.tol_pivot) , verb(ds.verb)  {}
         
         
         void SetState(){

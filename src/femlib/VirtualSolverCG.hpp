@@ -23,12 +23,11 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
     KN<int> *wcl;
     double tgv;
     int ntgv;
-    HMatVirtPrecon(HMat *AA,const Data_Sparse_Solver * ds,Stack stk=0) :CGMatVirt<I,K>(AA->n),A(AA),diag(ds==0),
+    HMatVirtPrecon(HMat *AA,const Data_Sparse_Solver * ds,Stack stk=0) :CGMatVirt<I,K>(AA->n),A(AA),diag(!ds || !ds->precon|| !stk),
     xx_del(0),code_del(0),precon(0),stack(stk),wcl(0),xx(0),tgv(1e30),ntgv(0)
     {
         I n = A->n;
-        if(ds)
-        {
+        if(ds) {
             tgv = ds->tgv;
             int ntgv1;
             double tgvm = A->gettgv(&ntgv1);
@@ -43,7 +42,7 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
             }
             cout << " ntgv = " << ntgv << endl; 
         }
-        if(stack && ds && ds->precon)
+        if(stack &&  ds->precon)
         {  cout << " with Preco " << endl;
             const OneOperator * C = static_cast<const OneOperator *>(ds->precon);
            
@@ -64,22 +63,23 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
     }
     K * addmatmul(K *x,K *Ax) const
     {
+        int n = A->n;
         if(diag)
-        for(int i=0; i<A->n; ++i)
+        for(int i=0; i<n; ++i)
         Ax[i] += std::norm((*A)(i,i))>1e-60 ? x[i]/(*A)(i,i): x[i];
         else {// Call Precon ff++
-            *xx=x;
+            KN<K> &ffx=*xx;
+            KN_<K> ax(Ax,n);
+            ffx=x;
             // cout << x[0] << "  ";
-            *xx=GetAny<KN_<K> >((*precon)(stack));
+            ffx=GetAny<KN_<K> >((*precon)(stack));
             WhereStackOfPtr2Free(stack)->clean();
             //    cout << (xx)[0] << "  " << endl;
             K dii;
             if(wcl)
             for (int i=0;i<A->n;i++)
-            Ax[i] += ((*wcl[i])? x[i]/tgv : (*xx)[i] );
-            else
-            for (int i=0;i<A->n;i++)
-            Ax[i] += (*xx)[i] ;
+                if((*wcl)[i]) ffx[i] = x[i]/tgv ;
+            ax += ffx ;
             
         }
         return Ax;}
@@ -103,7 +103,9 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
 template<class I=int,class K=double>
 class SolverCG: public VirtualSolver<I,K> {
 public:
-    
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&2&4&16;
+
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
     CGMatVirt<I,K> *pC;
@@ -163,7 +165,9 @@ public:
 template<class I=int,class K=double>
 class SolverGMRES: public VirtualSolver<I,K> {
 public:
-    
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&2&4&8&16;
+
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
     CGMatVirt<I,K> *pC;

@@ -92,6 +92,7 @@ template<class R>
  TypeVarForm<R> * TypeVarForm<R>::Global;
 }
 
+/*
 const int nTypeSolveMat=10;
 int kTypeSolveMat;
 TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
@@ -107,35 +108,11 @@ TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
 	if( t==dTypeSolveMat[l]) return l;
     return long (kTypeSolveMat-1); // sparse solver case 
 }
-
+*/
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
      LIST_NAME_PARM_MAT
-/*
-  {   "init", &typeid(bool)},
-  {   "solver", &typeid(TypeSolveMat*)},
-  {   "eps", &typeid(double) } ,
-  {   "precon",&typeid(Polymorphic*)}, 
-  {   "dimKrylov",&typeid(long)},
-  {   "bmat",&typeid(Matrice_Creuse<R>* )},
-  {   "tgv",&typeid(double )},
-  {   "factorize",&typeid(bool)},
-  {   "strategy",&typeid(long )},
-  {   "tolpivot", &typeid(double)},
-  {   "tolpivotsym", &typeid(double) },
-  {   "nbiter", &typeid(long)}, // 12   
-  {   "paramint",&typeid(KN_<long>)}, // Add J. Morice 02/09 
-  {   "paramdouble",&typeid(KN_<double>)},
-  {   "paramstring",&typeid(string*)},
-  {   "permrow",&typeid(KN_<long>)},
-  {   "permcol",&typeid(KN_<long>)},
-  {   "fileparamint",&typeid(string*)}, // Add J. Morice 02/09 
-  {   "fileparamdouble",&typeid(string*)},
-  {   "fileparamstring",&typeid(string* )},
-  {   "filepermrow",&typeid(string*)},
-  {   "filepermcol",&typeid(string*)} //22
- */
 };
 
 
@@ -144,79 +121,7 @@ basicAC_F0::name_and_type  OpCall_FormLinear_np::name_param[]= {
 };
 
 
-/*
-template<class R,class TA0,class TA1,class TA2>
- class E_F_F0F0F0 :public  E_F0 { public:
-   template <class T> struct remove_reference     {typedef T type;};
-   template <class T> struct remove_reference<T&> {typedef T type;};
-   typedef typename remove_reference<TA0>::type A0;
-   typedef typename remove_reference<TA1>::type A1;
-   typedef typename remove_reference<TA2>::type A2;
-   typedef  R (*func)( A0 , A1, A2 ) ;
-    
-  func f;
-  Expression a0,a1,a2;
-  E_F_F0F0F0(func ff,Expression aa0,Expression aa1,Expression aa2) 
-    : f(ff),a0(aa0),a1(aa1),a2(aa2) {}
-  AnyType operator()(Stack s)  const 
-    {return SetAny<R>( f( GetAny<A0>((*a0)(s)) , GetAny<A1>((*a1)(s)),  GetAny<A2>((*a2)(s)) ) );}  
-   bool EvaluableWithOutStack() const 
-      {return a0->EvaluableWithOutStack() && a1->EvaluableWithOutStack() && a2->EvaluableWithOutStack() ;} // 
-   bool MeshIndependent() const 
-      {return a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent();} // 
-  int compare (const E_F0 *t) const { 
-     int rr;
-    // cout << "cmp " << typeid(*this).name() << " and " << typeid(t).name() << endl;
-     const  E_F_F0F0F0* tt=dynamic_cast<const E_F_F0F0F0 *>(t);
-     if (tt && f == tt->f) rr= clexico(a0->compare(tt->a0),a1->compare(tt->a1),a2->compare(tt->a2));
-     else rr = E_F0::compare(t);
-     return rr;
-     } // to give a order in instuction 
 
-      
-   int Optimize(deque<pair<Expression,int> > &l,MapOfE_F0 & m, size_t & n) const
-    {
-
-       int rr = find(m);
-       if (rr) return rr;
-
-       return insert(new Opt(*this,a0->Optimize(l,m,n),a1->Optimize(l,m,n),a2->Optimize(l,m,n)),l,m,n);
-    }
-     // build optimisation
-
-     class Opt: public E_F_F0F0F0  { public :
-       size_t ia,ib,ic;  
-       Opt(const  E_F_F0F0F0 &t,size_t iaa,size_t ibb,size_t icc) 
-         : E_F_F0F0F0(t) ,
-         ia(iaa),ib(ibb),ic(icc) {}
-      AnyType operator()(Stack s)  const 
-       {
-         //A0 aa =*static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia));
-         //A1 bb=*static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ;
-         //cout << ia << " " << ib <<  "f( " << aa << "," << bb  << " )   = "<< f(aa,bb) << endl;
-         return SetAny<R>( f( *static_cast<A0 *>(static_cast<void*>(static_cast<char *>(s)+ia)) , 
-                             *static_cast<A1 *>(static_cast<void*>(static_cast<char *>(s)+ib)) ,
-                             *static_cast<A2 *>(static_cast<void*>(static_cast<char *>(s)+ic)) 
-                             ) );}  
-         
-      };     
-       
-    
-};
-template<class R,class A=R,class B=A,class C=A,class CODE=E_F_F0F0F0<R,A,B,C> >
-class  OneOperator3 : public OneOperator {
-    aType r; //  return type 
-    typedef typename CODE::func func;
-    //typedef  R (*func)(A,B) ;
-    func f;
-    public: 
-    E_F0 * code(const basicAC_F0 & args) const 
-     { return  new CODE(f,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[3]));} 
-    OneOperator3(func  ff): 
-      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()],map_type[typeid(C).name()]),
-      f(ff){}
-};
-*/
 const E_Array * Array(const C_F0 & a) { 
   if (a.left() == atype<E_Array>() )
     return dynamic_cast<const E_Array *>(a.LeftValue());
@@ -274,21 +179,6 @@ void dump_table()
 	 cout << "--------------------- " << endl;
 
 }
-/*
- class LocalArrayVariable:public E_F0
- { 
-  size_t offset;
-  aType t; //  type of the variable just for check  
-  Expression  n; // expression of the size 
-  public:
-  AnyType operator()(Stack s) const { 
-    SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
-   return PtrtoAny(static_cast<void *>(static_cast<char *>(s)+offset),t);}
-  LocalArrayVariable(size_t o,aType tt,Expression nn):offset(o),t(tt),n(nn) {ffassert(tt);
-    SHOWVERB(cout << "\n--------new var " << offset << " " <<  t->name() << endl);
-    }
-};
-*/
 
 
 
@@ -318,26 +208,6 @@ LinkToInterpreter * l2interpreter;
 
   using namespace Fem2D;
   using namespace EF23;
-/*
-inline pmesh  ReadMesh( string * const & s) {
-  Mesh * m=new Mesh(*s);
-  R2 Pn,Px;
-  m->BoundingBox(Pn,Px);
-  m->quadtree=new FQuadTree(m,Pn,Px,m->nv);
- //  delete s; modif FH 2006 (stack ptr)
-  return m;
- }
-
-inline pmesh3  ReadMesh3( string * const & s) {
-  Mesh3 * m=new Mesh3(s->c_str());
-  R3 Pn,Px;
-  // m->BoundingBox(Pn,Px);
-  m->gtree=new Mesh3::GTree(m->vertices,m->Pmin,m->Pmax,m->nv);
- //  delete s; modif FH 2006 (stack ptr)
-  return m;
- }
-*/
- 
 
 template<class Result,class A>
 class E_F_A_Ptr_o_R :public  E_F0 { public:
@@ -5285,7 +5155,7 @@ void  init_lgfem()
     map_type[typeid(TypeOfFE3*).name()]->AddCast(
 						 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);				 
 
- Dcl_Type<TypeSolveMat*>();
+// Dcl_Type<TypeSolveMat*>();
  DclTypeMatrix<R>();
  DclTypeMatrix<Complex>();
  
@@ -5482,20 +5352,37 @@ void  init_lgfem()
      }
 // Global.New("P1",CConstant<TypeOfFE*>(&P1Lagrange))
 // Global.New("P2",CConstant<TypeOfFE*>(&P2Lagrange));
- kTypeSolveMat=0; 
- Global.New("LU",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU))); 
- Global.New("CG",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GC)));
- Global.New("Crout",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CROUT)));
- Global.New("Cholesky",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CHOLESKY)));
- Global.New("GMRES",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GMRES)));
- Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
- Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
+// kTypeSolveMat=0;
+    static  string LU="LU";
+    static  string CG="CG";
+    static  string GMRES="GMRES";
+    static  string Crout="CROUT";
+    static  string Cholesky="Cholesky";
+    static  string UMFPACK="UMFPACK";
+    static  string sparsesolver="sparsesolver";
+    static  string sparsesolverSym="sparsesolverSym";
+    Global.New("LU",CConstant<string*>(&LU));
+    Global.New(CG.c_str(),CConstant<string*>(&CG));
+    Global.New(GMRES.c_str(),CConstant<string*>(&GMRES));
+    Global.New(Crout.c_str(),CConstant<string*>(&Crout));
+    Global.New(Cholesky.c_str(),CConstant<string*>(&Cholesky));
+    Global.New(UMFPACK.c_str(),CConstant<string*>(&UMFPACK));
+    Global.New(sparsesolver.c_str(),CConstant<string*>(&sparsesolver));
+    Global.New(sparsesolverSym.c_str(),CConstant<string*>(&sparsesolverSym));
 
- Global.New("sparsesolverSym",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolverSym)));
+    //dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU)));
+// Global.New("CG",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GC)));
+ //Global.New("Crout",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CROUT)));
+ //Global.New("Cholesky",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CHOLESKY)));
+ //Global.New("GMRES",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GMRES)));
+// Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
+// Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
 
- ffassert(kTypeSolveMat<nTypeSolveMat);
- map_type[typeid(TypeSolveMat*).name()]->AddCast(new E_F1_funcT<TypeSolveMat*,long>(Long2TypeSolveMat) );    
- map_type[typeid(long).name()]->AddCast(  new E_F1_funcT<long,TypeSolveMat*>(TypeSolveMat2Long) );                                     
+// Global.New("sparsesolverSym",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolverSym)));
+
+// ffassert(kTypeSolveMat<nTypeSolveMat);
+// map_type[typeid(TypeSolveMat*).name()]->AddCast(new E_F1_funcT<TypeSolveMat*,long>(Long2TypeSolveMat) );
+// map_type[typeid(long).name()]->AddCast(  new E_F1_funcT<long,TypeSolveMat*>(TypeSolveMat2Long) );
     
 //  init pmesh  
 /*
@@ -6111,8 +5998,8 @@ TypeOfFE* setFE(TypeOfFE* a,TypeOfFE* b)
 */
 void clean_lgfem()
 {
-  for (int i=0;i<kTypeSolveMat;++i)
-    delete dTypeSolveMat[i];
+//  for (int i=0;i<kTypeSolveMat;++i)
+//    delete dTypeSolveMat[i];
    
   delete l2interpreter;
   delete  FreeFempp::TypeVarForm<double>::Global;

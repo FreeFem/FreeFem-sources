@@ -200,3 +200,5 @@ void InitMeshPoint(void * p)
     EF23::MeshPoint*mps=static_cast<EF23::MeshPoint*>(p);
     mps->unset();
 }
+
+string *def_solver=0,*def_solver_sym=0, *def_solver_sym_dp=0; 

@@ -1,12 +1,13 @@
 #include <config.h>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <cfloat>
 #include <cmath>
 #include <cstring>
 #include <complex>
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
@@ -455,7 +456,7 @@ struct MPIrank {
 	{
 	  if(a.A)
 	    {
-	      mA= a.A->toMatriceMorse();
+	      mA= a.pHM();
 	      ldata[0]=mA->n;
 	      ldata[1]=mA->m;
 	      ldata[2]=mA->nnz;
@@ -471,13 +472,18 @@ struct MPIrank {
 	mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]); 
       if(ldata[0]) 
 	  {
+        
 	    // cout << mpirank << " " << who << " lg  " << mA->lg << " " << n1 << endl;
-	    WBcast(  mA->lg,n1, who,comm);     
+	    WBcast(  mA->i,mA->nnz, who,comm);
 	    //cout << mpirank << " " << who << " cl  " << mA->cl << " " <<  mA->nnz << endl;
-	    WBcast(  mA->cl,mA->nnz, who,comm);
+	    WBcast(  mA->j,mA->nnz, who,comm);
 	    //cout << mpirank << " " << who << " a  " << mA->a << " " <<  mA->nnz << endl;
-	    WBcast( mA->a,mA->nnz , who,comm);
+	    WBcast( mA->aij,mA->nnz , who,comm);
+            mA->nnz = ldata[2];
+              
+            mA->Increaze(ldata[2]);
 	  }
+               
       if(  who != mpirank) 
 	a.A.master(mA);
       else 
@@ -604,27 +610,30 @@ public:
     int tag=MPI_TAG<Mat *>::TAG;
     if(verbosity>100)
       cout << mpirank << "  ---R: ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " " << state << endl;
-    
+ 
     int ll=0;
     switch (state)
       {
       case 1:
 	mA =  new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]); 
-	ll=WRecv(  mA->lg,mA->n+1,   who, tag+1,comm,rq);
+	ll=WRecv(  mA->i,ldata[2],   who, tag+1,comm,rq);
 	break;
       case 2:
-	ll=WRecv(  mA->cl,mA->nnz,  who, tag+2,comm,rq);
+	ll=WRecv(  mA->j,ldata[2],  who, tag+2,comm,rq);
 	break;
       case 3:
-	ll=WRecv(  mA->a,mA->nnz,  who, tag+3,comm,rq);
+	ll=WRecv(  mA->aij,ldata[2],  who, tag+3,comm,rq);
 	break;
       default:
+        mA->Increaze(ldata[2]);
 	pmat->A.master(mA);
 	mA=0;
 	return false;
 	break;
       }
+    
     ffassert(ll == MPI_SUCCESS);
+      
     return true; // OK 
   }
   ~RevcWMatd() {
@@ -646,7 +655,7 @@ public:
     : DoOnWaitMPI_Request(*mpirank),
       pmat(pm),mA(0),state(0)
   {
-    mA=pmat->A->toMatriceMorse();
+    mA=pmat->pHM();
     ldata[0]=mA->n;
     ldata[1]=mA->m;
     ldata[2]=mA->nnz;
@@ -661,26 +670,27 @@ public:
     int tag=MPI_TAG<Mat *>::TAG;
     if(verbosity>100)
       cout << mpirank << "  ---S  ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
+     
     
     int ll=0;
     switch (state)
       {
       case 1:
-	ll=WSend(  mA->lg,mA->n+1,  who, tag+1,comm,rq);     
+	ll=WSend(  mA->i,ldata[2],  who, tag+1,comm,rq);
 	break;
       case 2:
-	ll=WSend( mA->cl,mA->nnz,  who, tag+2,comm,rq);
+	ll=WSend( mA->j,ldata[2],  who, tag+2,comm,rq);
 	break;
       case 3:
-	ll=WSend(  mA->a,mA->nnz,   who, tag+3,comm,rq);
+	ll=WSend(  mA->aij,ldata[2],   who, tag+3,comm,rq);
 	break;
       default:
-	delete mA;
-	mA=0;
+	
 	return false;
 	break;
       }
-    ffassert(ll == MPI_SUCCESS);
+       
+    
     return true; // OK 
   }
   ~SendWMatd() {
@@ -796,7 +806,7 @@ public:
 
 template<class R>
   long MPIrank::Send(Matrice_Creuse<R> * const &  a) const 
-  {
+  { ffassert(0);
     if(0)
       {
 	if(verbosity>100) 
@@ -813,6 +823,7 @@ template<class R>
 	if(verbosity>100)
 	  cout << " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
 	int ll=0;
+          /*
 	ll=WSend( ldata,4, who, tag,comm,rq);
 	if(ll == MPI_SUCCESS) 
 	  ll=WSend(  mA->lg,mA->n+1,  who, tag+1,comm,rq);     
@@ -821,6 +832,7 @@ template<class R>
 	if(ll == MPI_SUCCESS) 
 	  ll=WSend(  mA->a,mA->nnz,   who, tag+3,comm,rq);
 	delete mA;
+           */
 	return ll;
       }
     else
@@ -834,26 +846,6 @@ template<class R>
   template<class R>
   long MPIrank::Recv(Matrice_Creuse<R>  &  a) const 
   {
-    if(0)
-      {
-	if(verbosity>100) 
-	  cout << " MPI << (Matrice_Creuse ) " << a << endl;
-	ffassert(rq==0 || rq == Syncro_block) ; // 
-	int tag =  MPI_TAG<Matrice_Creuse<R>* >::TAG;		       
-	int ldata[4];	
-	int ll=0;
-	ll=WRecv( ldata,4, who, tag,comm,rq);
-	MatriceMorse<R> *mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]); 
-	if(ll == MPI_SUCCESS) 
-	  ll=WRecv(  mA->lg,mA->n+1,   who, tag+1,comm,rq);     
-	if(ll == MPI_SUCCESS) 
-	  ll=WRecv(  mA->cl,mA->nnz,  who, tag+2,comm,rq);
-	if(ll == MPI_SUCCESS) 
-	  ll=WRecv(  mA->a,mA->nnz,  who, tag+3,comm,rq);
-	a.A.master(mA);
-	return ll;
-      }
-    else
       {
 	RevcWMatd<R> *rwm= new RevcWMatd<R>(this,&a);
         if( rwm->DoSR() ) delete rwm;
@@ -1345,23 +1337,9 @@ long Op_Scatterv3( KN_<R>  const  & s, KN_<R>  const  &r,  MPIrank const & root,
 }
 
 // fin J. Morice
-template<class Z>
-inline uint64_t  roll_64(Z y,int r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
-template<class R>
-uint64_t CodeIJ(const MatriceMorse<R> * pa)
-{
-    
-    ffassert( pa );
-    uint64_t code=pa->n;
-    code ^=roll_64(pa->n-pa->m,24);
-    long nnz = pa->nnz,n =pa->n,kk=0 ;
-    code ^=roll_64(nnz,48);
-    for(long k=0; k<= n;++k)
-        code^=roll_64(pa->lg[k],++kk);
-    for(long k=0; k< nnz;++k)
-        code^=roll_64(pa->cl[k],++kk);
-    return code;
-}
+//template<class Z>
+//inline uint64_t  roll_64(Z y,int r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
+template<class R> uint64_t CodeIJ(const MatriceMorse<R> * pa) { return pa->CodeIJ();}
 
 template<class R>
 struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,MPIrank,fMPI_Op,long> {
@@ -1371,23 +1349,42 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
 	MatriceCreuse<R> * sA=s->A;
 	MatriceCreuse<R> * rA=r->A;
 	ffassert( sA && rA); 
-	MatriceMorse<R> & sM = *dynamic_cast<MatriceMorse<R>* > (sA);
-	MatriceMorse<R> & rM = *dynamic_cast<MatriceMorse<R>* > (rA);
+	MatriceMorse<R> * sM = s->pHM();
         if( ! rA ) { // build a zero matric copy of sM
             ffassert(0);
-            MatriceMorse<R> *rm=0; //new MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
+            MatriceMorse<R> *rm=new MatriceMorse<R>(*sM); //new MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
             *rm=R(); // set the matrix to Zero ..
             r->A.master(rm);
             rA=r->A;
             
         }
+        MatriceMorse<R> * rM = r->pHM();
 
-	ffassert( &sM && &rM);
-	int chunk = sM.nnz;
-	ffassert(chunk==rM.nnz);
-        uint64_t rcode = CodeIJ(&rM);
-        uint64_t scode = ( &sM != &rM) ? CodeIJ(&sM) : rcode;
-	return MPI_Reduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);
+	ffassert( sM && rM);
+	int chunk = (int) sM->nnz;
+	ffassert(chunk==rM->nnz);
+        uint64_t rcode = CodeIJ(rM);
+        uint64_t scode = ( sM != rM) ? CodeIJ(sM) : rcode;
+       //  verif the code of matrix
+        int mpirankw,mpisizew;
+        MPI_Comm_rank(root.comm, &mpirankw);
+        MPI_Comm_size(root.comm, &mpisizew);
+        KN<uint64_t>  allcode(mpisizew);
+        if(mpisizew>1)
+        {
+            int chunk = 1;
+            // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
+            KN<uint64_t> code(mpisizew);
+            MPI_Gather( (void *) & scode  , chunk,  MPI_UNSIGNED_LONG_LONG,
+                       (void *)  &code[0] , chunk,  MPI_UNSIGNED_LONG_LONG, 0 ,root.comm);
+            int ok=1;
+            if(mpirankw==0)
+                for(int i=1; i<mpisizew;++i)
+                    ok |= (scode== code[i]);
+            ffassert(ok);
+        }
+
+	return MPI_Reduce( (void *)  sM->aij,(void *)  rM->aij, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);
     }
 };
 
@@ -1395,30 +1392,27 @@ template<class R>
 struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<R> *,fMPI_Comm,fMPI_Op,long> {
     static long  f(Stack, Matrice_Creuse<R>*  const  & s,Matrice_Creuse<R>*  const  &r,  fMPI_Comm const & comm, fMPI_Op const &op)  
     { 
-	ffassert( r && s);
-	MatriceCreuse<R> * sA=s->A;
-	MatriceCreuse<R> * rA=r->A;
-	ffassert( &sA );
+        ffassert( r && s);
+        MatriceCreuse<R> * sA=s->A;
+        MatriceCreuse<R> * rA=r->A;
+        ffassert( sA && rA);
+        MatriceMorse<R> * sM = s->pHM();
+        if( ! rA ) { // build a zero matric copy of sM
+            ffassert(0);
+            MatriceMorse<R> *rm=new MatriceMorse<R>(*sM); //new MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
+            *rm=R(); // set the matrix to Zero ..
+            r->A.master(rm);
+            rA=r->A;
+            
+        }
+        MatriceMorse<R> * rM = r->pHM();
 
-	MatriceMorse<R> & sM = *dynamic_cast<MatriceMorse<R>* > (sA);
-        ffassert( &sM );
-	if( ! rA ) { // build a zero matric copy of sM
-              ffassert(0);
-            MatriceMorse<R> *rm=0;//ew MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
-	    *rm=R(); // set the matrix to Zero ..
-	    r->A.master(rm);
-	    rA=r->A;
-	    
-	}
-	ffassert( sA && rA); 
-	
-	MatriceMorse<R> & rM = *dynamic_cast<MatriceMorse<R>* > (rA);
-	
-	ffassert( &sM && &rM);
-	int chunk = sM.nnz;
-	ffassert(chunk==rM.nnz);
-        uint64_t rcode = CodeIJ(&rM);
-        uint64_t scode = ( &sM != &rM) ? CodeIJ(&sM) : rcode;
+	ffassert( sM && rM);
+	int chunk = (int) sM->nnz;
+	ffassert(chunk==rM->nnz);
+        uint64_t rcode = CodeIJ(rM);
+        uint64_t scode = ( sM != rM) ? CodeIJ(sM) : rcode;
+        //ffassert(rcode == scode);
         // verif same code ????
         //  size machine
         int mpirankw,mpisizew;
@@ -1439,7 +1433,7 @@ struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creu
             ffassert(ok);
         }
 
-	return MPI_Allreduce( (void *)  sM.a,(void *)  rM.a, chunk , MPI_TYPE<R>::TYPE(),op,comm);	
+	return MPI_Allreduce( (void *)  sM->aij,(void *)  rM->aij, chunk , MPI_TYPE<R>::TYPE(),op,comm);
     }
 };
 

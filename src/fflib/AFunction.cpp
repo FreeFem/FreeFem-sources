@@ -1219,8 +1219,9 @@ void Init_map_type()
        );
        
      map_type[typeid(long).name()]->AddCast(new OneOperator_border_label);
-      
+  
      Global.New("verbosity",CPValue<long>(verbosity));
+ 
      Global.New("searchMethod",CPValue<long>(searchMethod)); //pichon
      Global.New("tgv",CPValue<double>(ff_tgv));
     

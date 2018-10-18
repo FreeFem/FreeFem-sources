@@ -95,7 +95,7 @@ Expression IsFebaseArray(Expression f);
 
 void SetArgsFormLinear(const ListOfId *lid,int ordre);
 
-
+/*
 inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
 {
   switch(tm.t) {
@@ -111,7 +111,7 @@ inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
   return f;
 }
 
-
+*/
 class C_args: public E_F0mps  {public:
   typedef const C_args *  Result;
   list<C_F0> largs;
@@ -905,13 +905,14 @@ public:
   typedef  HashMatrix<int,K> HMat;
 
  CountPointer<MatriceCreuse<K> > A;
- 
-  TypeSolveMat typemat;
+    int typemat; //
+     static const int TS_SYM=1,TS_DEF_POS=2,TS_PARA=4;
+  //TypeSolveMat typemat;
     size_t count;
   void init() {
       count=0;
     A.init();Uh.init();Vh.init();
-    typemat=TypeSolveMat(TypeSolveMat::NONESQUARE);}
+      typemat=0 ; }//
   Matrice_Creuse() { init();}
   void destroy() {// Correct Oct 2015 FH (avant test a 'envert) !!!!
     if(verbosity>99999)  cerr << " DEL MC " << this <<" " << count <<" " << A <<  endl;
@@ -985,9 +986,9 @@ template<class K>  istream & operator >> (istream & f,Matrice_Creuse<K> & A)
     int wm=WhichMatrix(f);
     if ( wm>0 )
     {
-  	A.A.master(new MatriceMorse<K>(f,wm));
-	A.typemat=(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-	
+        MatriceMorse<K> *HA =0;
+  	A.A.master(HA=new MatriceMorse<K>(f,wm));
+        A.typemat=HA->sym() ;//(A.A->n == A.A->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     }
     else {  
 	cerr << " unkwon type of matrix " << wm <<endl;
@@ -1184,12 +1185,12 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
   using namespace Fem2D;
   const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
    typename  VirtualMatrix<int,R>::VSolver * solver=0;
-    MatriceMorse<R> & AH(dynamic_cast<MatriceMorse<R> &>(A));
-    ffassert(&AH);
+    MatriceMorse<R> * AH(dynamic_cast<MatriceMorse<R> *>(&A));
+    ffassert(AH);
 
     
      // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-
+/*
       switch (ds.typemat->t)
      {
       case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
@@ -1210,7 +1211,8 @@ void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds
         cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
         CompileError("type resolution unknown"); break;       
       }
-    
+    */
+      solver = NewVSolver<int,R>(*AH,ds,stack);
       if(solver)
         A.SetSolver(solver,true);
     else
@@ -1244,16 +1246,16 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   Data_Sparse_Solver ds;
   ds.factorize=false;
 
-  TypeSolveMat tmat=  (  PUh == PVh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
-  ds.typemat=&tmat;
+ // TypeSolveMat tmat=  (  PUh == PVh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
+ // ds.typemat=&tmat;
   ds.initmat=true;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
 
-  if (! A_is_square && *ds.typemat != TypeSolveMat::NONESQUARE) 
+  if (! A_is_square ) //&& *ds.typemat != TypeSolveMat::NONESQUARE)
    {
-     cout << " -- Error the solver << "<< ds.typemat <<"  is set  on rectangular matrix  " << endl;
+     cout << " -- Error the solver << "<< ds.solver <<"  is un set  on rectangular matrix  " << endl;
      ExecError("A solver is set on a none square matrix!");
-    ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
+    //ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
    }
    WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
   
@@ -1268,7 +1270,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);     
   if ( same)
    {
-     A.typemat = *ds.typemat;
+     //A.typemat = *ds.typemat;
      if ( A.Uh != Uh  || A.Vh != Vh ) 
        { // reconstruct all the matrix
 	 A.A=0; // to delete  old  matrix ADD FH 16112005 
@@ -1277,8 +1279,8 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 	// if (ds.typemat->profile)
 	  // { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
 	 //else
-         if (ds.typemat->sym )
-	   {  A.A.master( new  MatriceMorse<R>(ds.typemat->sym,Vh.NbOfDF) );
+         if (ds.sym )
+	   {  A.A.master( new  MatriceMorse<R>(ds.sym,Vh.NbOfDF) );
 	     ffassert( &Uh == & Vh);}
 	 else 
 	   {
@@ -1287,14 +1289,14 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
        }
      *A.A=R(); // reset value of the matrix
      
-     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,b->largs) )
-       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,0,b->largs,ds.tgv);
+     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,ds.sym,A.A,0,b->largs) )
+       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);
    }
   else
    { // add FH 17 06 2005  int on different meshes. 
      map<pair<int,int>, R >   AAA;
-     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.typemat->sym);
-     bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,ds.typemat->sym,&AAA,0,b->largs);
+     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym);
+     bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
      pMA->addMap(1.,AAA);
       A.A.master(pMA ) ;
        
@@ -1304,7 +1306,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
         { }// XXXXXX
   */
       if (bc)
-           AssembleBC<R>( stack,Th,Uh,Vh,ds.typemat->sym,A.A,0,0,b->largs,ds.tgv);
+           AssembleBC<R>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);
     
    }
  /* if( A_is_square && ds.factorize ) {
@@ -1327,10 +1329,10 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 
 
 
-bool SetGMRES();
-bool SetCG();
+//bool SetGMRES();
+//bool SetCG();
 #ifdef HAVE_LIBUMFPACK
-bool SetUMFPACK();
+//bool SetUMFPACK();
 #endif
 
 namespace FreeFempp {

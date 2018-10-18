@@ -5524,7 +5524,7 @@ template<class R,class FESpace,class v_fes>
 void InitProblem( int Nb, const FESpace & Uh,
                                const FESpace & Vh,
 		  KN<R> *&B,KN<R> *&X,vector<  pair< FEbase<R,v_fes> * ,int> > &u_hh,
-                 TypeSolveMat    *typemat ,
+                  Data_Sparse_Solver    *ds ,// TypeSolveMat
 		  vector<  FEbase<R,v_fes> *  > & u_h,const FESpace ** LL, bool initx )
 {
     typedef typename  FESpace::Mesh Mesh;
@@ -5604,10 +5604,10 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
 {
     const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
     typename  VirtualMatrix<int,R>::VSolver * solver=0;
-    MatriceMorse<R> & AH(dynamic_cast<MatriceMorse<R> &>(A));
-    ffassert(&AH);
+    MatriceMorse<R> * AH(dynamic_cast<MatriceMorse<R> *>(&A));
+    ffassert(AH);
     
-  
+  /*
         // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
         
         switch (ds.typemat->t) {
@@ -5631,7 +5631,8 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
                     cout << "  SetSolver:: no  default solver " << ds.typemat << endl;
                 CompileError("type resolution unknown"); break;
         }
-        
+   */
+    solver = NewVSolver<int,R>(*AH,ds,stack);
 
     if(solver)
         A.SetSolver(solver,true);
@@ -5640,7 +5641,7 @@ void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
 
 
   }
-
+/*
 bool SetGMRES()
 {
     if(verbosity>1)
@@ -5660,9 +5661,10 @@ bool SetCG()
     DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,1>;;
     return true;
 }
-
+*/
 
 #ifdef HAVE_LIBUMFPACK
+/*
 bool SetUMFPACK()
 {
     if(verbosity>1)
@@ -5674,8 +5676,9 @@ bool SetUMFPACK()
     return true;
 }
 
-
+*/
 #else
+/*
 bool SetUMFPACK()
 {
     DefSparseSolverNew<double,0>::solver  =BuildSolver<double,5>;;;
@@ -5687,7 +5690,7 @@ bool SetUMFPACK()
         cout << " Sorry no UMFPack" << endl;
     return false;
 }
-
+*/
 #endif
 
 
@@ -5786,13 +5789,13 @@ void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbas
      delete B; 
   }
   }
-
+/*
 #ifdef HAVE_LIBUMFPACK   
 TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
 #else
 TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 #endif
-
+*/
 
 template<class R,class FESpace,class v_fes>
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
@@ -5819,9 +5822,9 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
  // assert(!VF); 
 //  double tgv = 1e30;
 // type de matrice par default
-    TypeSolveMat tmat(TypeSolveMat::defaultvalue); 
+  //  TypeSolveMat tmat(TypeSolveMat::defaultvalue);
      
-   ds.typemat=&tmat;
+ //  ds.typemat=&tmat;
  // bool initmat=true;
 /*
     int strategy=0;
@@ -5882,7 +5885,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   //  for the gestion of the PTR. 
   WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
 
-  bool sym = ds.typemat->sym;
+  bool sym = ds.sym;
   
   list<C_F0>::const_iterator ii,ib=op->largs.begin(),
     ie=op->largs.end();
@@ -5985,7 +5988,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
   // more safe for the future ( 4 days lose with is optimization FH )
 
-  InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,ds.typemat , u_h,  LL,  initx);
+  InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,&ds , u_h,  LL,  initx);
 
   if(verbosity>2) cout << "   Problem(): initmat " << ds.initmat << " VF (discontinuous Galerkin) = " << VF << endl;
   
@@ -6007,7 +6010,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
           dataA.master(new MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF));
       }
       MatriceCreuse<R>  & AA(dataA);
-     if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<ds.typemat->profile << endl;
+     if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" <</* " skyline =" <<ds.typemat->profile <<*/ endl;
     }
   MatriceCreuse<R>  & A(dataA);
   if  (AssembleVarForm( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, op->largs)) 

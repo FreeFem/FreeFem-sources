@@ -60,7 +60,8 @@ using namespace std;
 #include "problem.hpp"
 */
 #include "ff++.hpp" 
-#include "array_resize.hpp" 
+#include "array_resize.hpp"
+
 #include "AFunction_ext.hpp"
 #include "CGNL.hpp"
 
@@ -622,11 +623,12 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     Data_Sparse_Solver ds;
     bool VF=false;
     ds.factorize=false;
-
+/*
   TypeSolveMat tmat= TypeSolveMat::defaultvalue; 
   if(   tmat !=  TypeSolveMat::SparseSolver  )    
     tmat=TypeSolveMat::GMRES;
   ds.typemat=&tmat;
+ */
   SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
     SetSolver<R>(stack,VF,*A->A,ds);
 
@@ -634,7 +636,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 }
 
 
-
+/*
 bool SetDefaultSolver()
 {
 
@@ -658,6 +660,7 @@ bool SetDefaultSolver()
     return true;
 
 }
+ */
 
 template<int init>
 AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
@@ -1317,7 +1320,7 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   //  sparse_mat->pUh=pUh;
   //sparse_mat->pVh=pVh;
   if(!init) sparse_mat->init();
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+      sparse_mat->typemat=0; //TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(buildInterpolationMatrix(*Uh,*Vh,data));
   }
   else 
@@ -1330,7 +1333,7 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   //  sparse_mat->pUh=0;
   //  sparse_mat->pVh=0;
   if(!init) sparse_mat->init();
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+      sparse_mat->typemat=0;//TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
   }
   delete [] data;
@@ -1380,7 +1383,7 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
 	  ffassert(Vh);
 	  ffassert(Uh);
 	  if(!init) sparse_mat->init();
-	  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+	  sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	  sparse_mat->A.master(buildInterpolationMatrix(*Uh,*Vh,data));	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
       }
     else 
@@ -1394,7 +1397,7 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
 	  if(!init) sparse_mat->init();
 	  //  sparse_mat->pUh=0;
 	  //  sparse_mat->pVh=0;
-	  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+	  sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	  sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,zz,data));
       }
     delete [] data;
@@ -1438,7 +1441,7 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
    AddMul(*mAB,*mA,*mB,ta,tb);
   
   if(!init) sparse_mat->init();
-  sparse_mat->typemat=(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    sparse_mat->typemat=0;//(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(mAB);
   return sparse_mat;
     
@@ -1458,7 +1461,7 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
     
    if(!init) sparse_mat->init();
   sparse_mat->A.master(AA);
-  sparse_mat->typemat=(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    sparse_mat->typemat=0; //(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   delete lcB;
   return sparse_mat;
 }
@@ -1493,7 +1496,7 @@ AnyType DiagMat(Stack stack,Expression emat,Expression edia)
   //  sparse_mat->pUh=0;
   // sparse_mat->pVh=0;
   if(!init) sparse_mat->init();
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
+  sparse_mat->typemat=VirtualMatrix<int,R>::TS_SYM;//TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>((int) diag->N(),(const R*) *diag));
   return sparse_mat;
 }
@@ -1564,7 +1567,7 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
   //  sparse_mat->pUh=0;
   // sparse_mat->pVh=0;
   if(!init) sparse_mat->init() ;
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)
+  sparse_mat->typemat=0;//(TypeSolveMat::GMRES); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>((KNM_<R> &)*A,0.0));
   
  return sparse_mat;
@@ -1590,7 +1593,7 @@ AnyType MatMap2Sparse(Stack stack,Expression emat,Expression eA)
      if(!init) sparse_mat->init() ;
   //  sparse_mat->pUh=0;
   // sparse_mat->pVh=0;
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GMRES); //  none square matrice (morse)  
+  sparse_mat->typemat=0;//(TypeSolveMat::GMRES); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>(n,m,*A,false));
   delete A; 
  return sparse_mat;
@@ -2547,7 +2550,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
     if( !init) sparse_mat->init();
 
     sparse_mat->A.master(amorse);
-    sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    sparse_mat->typemat=0; //(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     
     if(verbosity>3) { cout << "  End Raw Matrix : " << endl;}
     
@@ -2703,7 +2706,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   //sparse_mat->pUh=0;
   // sparse_mat->pVh=0; 
   sparse_mat->A.master(amorse);
-  sparse_mat->typemat=(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    sparse_mat->typemat=0;//(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
                 
      
   // cleanning    
@@ -3089,8 +3092,8 @@ class PrintErrorCompileIM :  public E_F0info { public:
 };
 
 // the default probleme solver
-TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
-
+//TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
+/*
 bool SetDefault()
 {
     if(verbosity>1)
@@ -3103,7 +3106,7 @@ bool SetDefault()
     return  true;
 }
 
-
+*/
 template<class T>
 class removeDOF_Op : public E_F0mps {
 public:
@@ -3156,9 +3159,9 @@ public:
 template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
 template<class T>
 AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
-      static const double defEPS=1e-12;
-     ffassert(0);
-   // code wri-ng no ...
+    static const double defEPS=1e-12;
+
+    // code wri-ng no ...
     Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
     Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
     KN<T>* pX = x ? GetAny<KN<T>* >((*x)(stack)) : 0;
@@ -3172,191 +3175,179 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     bool rhs = (pX && pOut) && (pOut->n > 0 || pX->n > 0);
     if(pA)
     {
-    if(!pC)
-        pC = pR;
-    pA->Uh = pR->Uh;
-    pA->Vh = pC->Vh;
-    MatriceMorse<T> *mA = static_cast<MatriceMorse<T>*>(&(*pA->A));
-    MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
-    if(!mC)
-        mC = mR;
-    bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
-    double EPS=nargs[3] ? GetAny<double>((*nargs[3])(stack)) :defEPS ;
-    KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
-    
-    unsigned int n = condensation ? condensation->n : mR->nnz;
-    unsigned int m = condensation ? condensation->n : mC->nnz;
-    int* lg = new int[n + 1];
-    int* cl;
-    T* val;
-    T* b;
-     if(rhs && pOut->n != n) pOut->resize(n);
-    
-    std::vector<signed int> tmpVec;
-    if(!condensation) {
-        tmpVec.resize(mA->m);
-        for(unsigned int i = 0; i < m; ++i)
-            tmpVec[mC->cl[i]] = i + 1;
-        if(!mA->half) {
-            std::vector<std::pair<int, T> > tmp;
-            tmp.reserve(mA->nnz);
-            
-            lg[0] = 0;
-            for(unsigned int i = 0; i < n; ++i) {
-                for(unsigned int j = mA->lg[mR->cl[i]]; j < mA->lg[mR->cl[i] + 1]; ++j) {
-                    unsigned int col = tmpVec[mA->cl[j]];
-                    if(col != 0 && abs(mA->a[j]) > EPS) {
-                        if(symmetrize) {
-                            if(col - 1 <= i)
-                                tmp.push_back(std::make_pair(col - 1, mA->a[j]));
+        if(!pC)
+            pC = pR;
+        pA->Uh = pR->Uh;
+        pA->Vh = pC->Vh;
+        MatriceMorse<T> *mA = pA->pHM();
+        MatriceMorse<T> *mR = pR->pHM();
+        if(!mC)
+            mC = mR;
+        bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
+        double EPS=nargs[3] ? GetAny<double>((*nargs[3])(stack)) :defEPS ;
+        KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
+        
+        unsigned int n = condensation ? condensation->n : mR->nnz;
+        unsigned int m = condensation ? condensation->n : mC->nnz;
+        KN<int> lg(n+1,0);
+ 
+        if(rhs && pOut->n != n) pOut->resize(n);
+        mC->CSR();
+        mA->CSR();
+        std::vector<signed int> tmpVec;
+        if(!condensation)
+        {
+            tmpVec.resize(mA->m);
+            for(long i = 0; i < m; ++i)
+                tmpVec[mC->j[i]] = i + 1;
+            if(!mA->half) {
+                std::vector<std::pair<int, T> > tmp;
+                tmp.reserve(mA->nnz);
+                
+                lg[0] = 0;
+                for(long i = 0; i < n; ++i) {
+                    for(long j = mA->p[mR->j[i]]; j < mA->p[mR->j[i] + 1]; ++j) {
+                        long col = tmpVec[mA->j[j]];
+                        if(col != 0 && abs(mA->aij[j]) > EPS) {
+                            if(symmetrize) {
+                                if(col - 1 <= i)
+                                    tmp.push_back(std::make_pair(col - 1, mA->aij[j]));
+                            }
+                            else
+                                tmp.push_back(std::make_pair(col - 1, mA->aij[j]));
                         }
-                        else
-                            tmp.push_back(std::make_pair(col - 1, mA->a[j]));
+                    }
+                    std::sort(tmp.begin() + lg[i], tmp.end(),cmp<T> );
+                    // c++11 , [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
+                    if(rhs)
+                        *(*pOut + i) = *(*pX + mC->j[i]);
+                    lg[i + 1] = tmp.size();
+                }
+                mA->clear();
+                mA->resize(n,m);
+                MatriceMorse<T> &A = *mA;
+                A.half = symmetrize;
+                for(int i=0; i<n; ++i)
+                {
+                    for(int k= lg[i]; k < lg[i+1]; ++k)
+                    {
+                        int j= tmp[k].first;
+                        T aij  = tmp[k].second;
+                        A(i,j) =aij;
                     }
                 }
-                std::sort(tmp.begin() + lg[i], tmp.end(),cmp<T> );
-                // c++11 , [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
-                if(rhs)
-                    *(*pOut + i) = *(*pX + mC->cl[i]);
-                lg[i + 1] = tmp.size();
-            }
-            mA->nnz = tmp.size();
-            if(symmetrize)
-                mA->half = true;
-            else
-                mA->half = false;
-            
-            cl = new int[tmp.size()];
-            val = new T[tmp.size()];
-            
-            for(unsigned int i = 0; i < tmp.size(); ++i) {
-                cl[i]  = tmp[i].first;
-                val[i] = tmp[i].second;
-            }
-        }
-        else {
-            std::vector<std::vector<std::pair<unsigned int, T> > > tmp(n);
-            for(unsigned int i = 0; i < n; ++i)
-                tmp[i].reserve(mA->lg[mR->cl[i] + 1] - mA->lg[mR->cl[i]]);
-            
-            unsigned int nnz = 0;
-            for(unsigned int i = 0; i < n; ++i) {
-                for(unsigned int j = mA->lg[mR->cl[i]]; j < mA->lg[mR->cl[i] + 1]; ++j) {
-                    unsigned int col = tmpVec[mA->cl[j]];
-                    if(col != 0 && abs(mA->a[j]) > EPS) {
-                        if(i < col - 1)
-                            tmp[col - 1].push_back(make_pair(i, mA->a[j]));
-                        else
-                            tmp[i].push_back(make_pair(col - 1, mA->a[j]));
-                        ++nnz;
-                    }
-                }
-                if(rhs)
-                    *(*pOut + i) = *(*pX + mC->cl[i]);
-            }
-            mA->nnz = nnz;
-            cl = new int[nnz];
-            val = new T[nnz];
-            nnz = 0;
-            lg[0] = 0;
-            for(unsigned int i = 0; i < n; ++i) {
-                std::sort(tmp[i].begin(), tmp[i].end(),cmp<T>);
-                // c++11, [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
-                for(typename std::vector<std::pair<unsigned int, T> >::const_iterator it = tmp[i].begin(); it != tmp[i].end(); ++it) {
-                    cl[nnz] = it->first;
-                    val[nnz++] = it->second;
-                }
-                lg[i + 1] = nnz;
-            }
-            
-        }
-        delete [] mA->cl;
-        delete [] mA->lg;
-        delete [] mA->a;
-        mA->n = n;
-        mA->m = m;
-    //V4    mA->N = n;
-    //V4    mA->M = m;
-        mA->lg = lg;
-        mA->cl = cl;
-        mA->a = val;
-    }
-    else {
-        tmpVec.reserve(mA->n);
-        unsigned int i = 0, j = 1;
-        for(unsigned int k = 0; k < mA->n; ++k) {
-            if(k == *(*condensation + i)) {
-                ++i;
-                tmpVec.push_back(i);
-            }
+              
+                
+            }// !mA->Half
             else {
-                tmpVec.push_back(-j);
-                ++j;
-            }
-        }
-        
-        
-        //        if(!mA->half) {
-        std::vector<std::pair<int, T> > tmpInterior;
-        std::vector<std::pair<int, T> > tmpBoundary;
-        std::vector<std::pair<int, T> > tmpInteraction;
-        tmpInterior.reserve(mA->nnz);
-        tmpBoundary.reserve(mA->nnz);
-        tmpInteraction.reserve(mA->nnz);
-        
-        lg[0] = 0;
-        for(unsigned int i = 0; i < mA->n; ++i) {
-            int row = tmpVec[i];
-            if(row < 0) {
-                for(unsigned int j = mA->lg[i]; j < mA->lg[i + 1]; ++j) {
-                    int col = tmpVec[mA->cl[j]];
-                    if(col < 0)
-                        tmpInterior.push_back(make_pair(-col - 1, mA->a[j]));
-                    else
-                        tmpInteraction.push_back(make_pair(col - 1, mA->a[j]));
+                std::vector<std::vector<std::pair<unsigned int, T> > > tmp(n);
+                for(unsigned int i = 0; i < n; ++i)
+                    tmp[i].reserve(mA->p[mR->p[i] + 1] - mA->p[mR->j[i]]);
+                
+                unsigned int nnz = 0;
+                for(unsigned int i = 0; i < n; ++i) {
+                    for(unsigned int j = mA->p[mR->j[i]]; j < mA->p[mR->j[i] + 1]; ++j) {
+                        unsigned int col = tmpVec[mA->j[j]];
+                        if(col != 0 && abs(mA->aij[j]) > EPS) {
+                            if(i < col - 1)
+                                tmp[col - 1].push_back(make_pair(i, mA->aij[j]));
+                            else
+                                tmp[i].push_back(make_pair(col - 1, mA->aij[j]));
+                            ++nnz;
+                        }
+                    }
+                    if(rhs)
+                        *(*pOut + i) = *(*pX + mC->j[i]);
+                }
+                mA->clear();
+                mA->resize(n,m,nnz);
+                MatriceMorse<T> &A = *mA;
+                
+                for(unsigned int i = 0; i < n; ++i) {
+                    std::sort(tmp[i].begin(), tmp[i].end(),cmp<T>);
+                    // c++11, [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
+                    for(typename std::vector<std::pair<unsigned int, T> >::const_iterator it = tmp[i].begin(); it != tmp[i].end(); ++it)
+                          A(i,it->first) =it->second;
+                    
                 }
                 
             }
-            else {
-                for(unsigned int j = mA->lg[i]; j < mA->lg[i + 1]; ++j) {
-                    int col = tmpVec[mA->cl[j]];
-                    if(col > 0)
-                        tmpBoundary.push_back(make_pair(col - 1, mA->a[j]));
+        }
+        else
+        {
+            tmpVec.reserve(mA->n);
+            unsigned int i = 0, j = 1;
+            for(unsigned int k = 0; k < mA->n; ++k) {
+                if(k == *(*condensation + i)) {
+                    ++i;
+                    tmpVec.push_back(i);
                 }
-                // std::sort(tmp.begin() + lg[i], tmp.end());
-                if(rhs)
-                    *(*pOut + i) = *(*pX + *(*condensation + i));
-                lg[i + 1] = tmpBoundary.size();
+                else {
+                    tmpVec.push_back(-j);
+                    ++j;
+                }
             }
+        
+            
+            //        if(!mA->half) {
+            std::vector<std::pair<int, T> > tmpInterior;
+            std::vector<std::pair<int, T> > tmpBoundary;
+            std::vector<std::pair<int, T> > tmpInteraction;
+            tmpInterior.reserve(mA->nnz);
+            tmpBoundary.reserve(mA->nnz);
+            tmpInteraction.reserve(mA->nnz);
+            
+            lg[0] = 0;
+            for(long i = 0; i < mA->n; ++i) {
+                int row = tmpVec[i];
+                if(row < 0) {
+                    for(unsigned int j = mA->p[i]; j < mA->p[i + 1]; ++j) {
+                        int col = tmpVec[mA->j[j]];
+                        if(col < 0)
+                            tmpInterior.push_back(make_pair(-col - 1, mA->aij[j]));
+                        else
+                            tmpInteraction.push_back(make_pair(col - 1, mA->aij[j]));
+                    }
+                    
+                }
+                else {
+                    for(unsigned int j = mA->p[i]; j < mA->p[i + 1]; ++j) {
+                        int col = tmpVec[mA->j[j]];
+                        if(col > 0)
+                            tmpBoundary.push_back(make_pair(col - 1, mA->aij[j]));
+                    }
+                    // std::sort(tmp.begin() + lg[i], tmp.end());
+                    if(rhs)
+                        *(*pOut + i) = *(*pX + *(*condensation + i));
+                    lg[i + 1] = tmpBoundary.size();
+                }
+            }
+  
+            mA->clear();
+            mA->resize(n,n);
+            MatriceMorse<T> &mR = *new MatriceMorse<T>(n,m,tmpBoundary.size());
+            for(unsigned int i = 0; i < tmpBoundary.size(); ++i) {
+                mR(i, tmpBoundary[i].first)= tmpBoundary[i].second;
+            }
+            pR->typemat = 0; //TypeSolveMat(TypeSolveMat::GMRES);
+            pR->A.master(&mR);
+            //V4  m->dummy = false;
         }
-        cl = new int[tmpBoundary.size()];
-        val = new T[tmpBoundary.size()];
-        for(unsigned int i = 0; i < tmpBoundary.size(); ++i) {
-            cl[i]  = tmpBoundary[i].first;
-            val[i] = tmpBoundary[i].second;
-        }
-        //        }
-        ffassert(0);
-        MatriceMorse<T>* m = 0; //V4 new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->half, val, lg, cl, true);
-        pR->typemat = TypeSolveMat(TypeSolveMat::GMRES);
-        pR->A.master(m);
-       //V4  m->dummy = false;
-    }
     }
     else if(rhs)
-     {
-         MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+    {
+        MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
         
-         unsigned int n = mR->nnz;
-         
-         if(pOut->n != n) pOut->resize(n);
-         
-         
-     
-                 for(unsigned int i = 0; i < n; ++i) {
-                     *(*pOut + i) = *(*pX + mR->cl[i]);
-                 }
-         
+        unsigned int n = mR->nnz;
+        
+        if(pOut->n != n) pOut->resize(n);
+        
+        
+        
+        for(unsigned int i = 0; i < n; ++i) {
+            *(*pOut + i) = *(*pX + mR->j[i]);
+        }
+        
     }
     return 0L;
 }
@@ -3364,7 +3355,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
 
 bool SparseDefault()
 {
-    return TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
+    return 1;//TypeSolveMat::SparseSolver== TypeSolveMat::defaultvalue;
 }
 
 bool Have_UMFPACK_=false;
@@ -3373,11 +3364,12 @@ bool Have_UMFPACK() { return Have_UMFPACK_;}
 void  init_lgmat() 
 
 {
-    SetDefaultSolver(); 
-    DefSparseSolverNew<double,0>::solverdef =DefSparseSolverNew<double,0>::solver;
-    DefSparseSolverNew<double,1>::solverdef =DefSparseSolverNew<double,1>::solver;
-    DefSparseSolverNew<Complex,0>::solverdef =DefSparseSolverNew<Complex,0>::solver;
-    DefSparseSolverNew<Complex,1>::solverdef =DefSparseSolverNew<Complex,1>::solver;
+   // SetDefaultSolver();
+
+//    DefSparseSolverNew<double,0>::solverdef =DefSparseSolverNew<double,0>::solver;
+//    DefSparseSolverNew<double,1>::solverdef =DefSparseSolverNew<double,1>::solver;
+//    DefSparseSolverNew<Complex,0>::solverdef =DefSparseSolverNew<Complex,0>::solver;
+//    DefSparseSolverNew<Complex,1>::solverdef =DefSparseSolverNew<Complex,1>::solver;
 
 
   
@@ -3420,10 +3412,10 @@ void  init_lgmat()
   zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());
   zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
   
-  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
-  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
-  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
-  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
+//  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
+//  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
+//  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
+//  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
   
   Dcl_Type< Resize<Matrice_Creuse<double> > > ();
   
@@ -3481,7 +3473,13 @@ void  init_lgmat()
                      new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >,
                      new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::solveAtxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
                      );
+     init_SparseLinearSolver();
     
+    
+    Global.New("DefaultSolver",CPValue<string*>(def_solver));
+    Global.New("DefaultSolverSym",CPValue<string*>(def_solver_sym));
+    Global.New("DefaultSolverSDP",CPValue<string*>(def_solver_sym_dp));
+
 }
 
 int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}
@@ -3489,5 +3487,7 @@ int Data_Sparse_Solver_version() { return VDATASPARSESOLVER;}
 #include <iostream>
 
 void  init_lgmat()
-{  std::cout << "\n warning  init_lgmat EMPTY\n"<< std::endl;}
+{  std::cout << "\n warning  init_lgmat EMPTY\n"<< std::endl;
+
+}
 #endif

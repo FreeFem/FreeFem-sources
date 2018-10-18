@@ -54,7 +54,7 @@ class OptimBMO: public OneOperator
 		typedef R REAL;
 		typedef KN<REAL> VECT;
 		typedef KNM<REAL> MAT;
-		typedef VirtualMatrice<REAL> VMAT;
+		//typedef VirtualMatrice<REAL> VMAT;
 
 		const int cas;
 

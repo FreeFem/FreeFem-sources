@@ -5,7 +5,8 @@
 #include <string>
 extern double ff_tgv;
 #define VDATASPARSESOLVER  1
-struct TypeSolveMat {
+
+/*struct TypeSolveMat {
     enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6, SparseSolverSym=7 };
     TSolveMat t;
     bool sym;
@@ -17,7 +18,7 @@ struct TypeSolveMat {
     bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
     static TSolveMat defaultvalue;
 };
-
+*/
 // add FH , JM  avril 2009
 template<class K,class V> class MyMap;
 class String;
@@ -33,7 +34,7 @@ struct Data_Sparse_Solver {
 
     
     bool initmat;
-    TypeSolveMat* typemat;
+    string  solver;
     double epsilon;
     const void * precon;
     int NbSpace;
@@ -67,13 +68,13 @@ struct Data_Sparse_Solver {
     bool x0; //  init by 0 the inital data the solution
     double * veps; //    to get and set value of eps
     bool rightprecon;
-    bool sym;
+    bool sym;// know is set or not
     bool positive;
     
     Data_Sparse_Solver()
     :
     initmat(1),
-    typemat(0),
+    solver(""),
     strategy(0),
     tgv(ff_tgv),
     factorize(0),
@@ -94,6 +95,8 @@ struct Data_Sparse_Solver {
     positive(false)
     {}
     
+    template<class R> 
+    void Init_sym_positive_var();
 
     
     static   std::map<std::string,int> * Set_mds()
@@ -163,8 +166,11 @@ private:
 template<class I, class R>
 class VirtualSolver : public VirtualMatrix<I,R>::VSolver  {
 public:
-    int state;
-    VirtualSolver() : state(0),codeini(0),codesym(0),codenum(0) {}
+    typedef I INDEX;
+    typedef R SCALAR;
+    
+    int state,defMatType,MatType;
+    VirtualSolver(int dmt=0) : state(0),codeini(0),codesym(0),codenum(0),defMatType(dmt),MatType(dmt) {}
     long codeini,codesym,codenum;
     virtual void dosolver(R *x,R*b,int N=0,int trans=0) =0;
     
@@ -172,7 +178,16 @@ public:
     virtual void fac_symbolic(){} //  i,j fixe
     virtual void fac_numeric(){}   // a fixe
     virtual void SetState(){}
+
+    //  MatType :  & 2  symetric or not
+    //             & 4  positive of not
+    //             & 8  mpi or not
+    //             & 16  operator or not ????
     
+    
+    virtual int GetDefautMatType() { return defMatType;}// 0 LU, 1 sym , 4 positive  8 MPI
+    virtual void SetDefautMatType(int MMatType ) { ffassert(MMatType==defMatType);  MatType=MMatType;}
+
     void CheckState(long ci=0,long cs=0, long cn=0)
     {
         if(ci &&  ci != codeini) { codeini=ci; state=0;}// n, nzz fixe

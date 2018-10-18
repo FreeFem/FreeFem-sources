@@ -67,7 +67,7 @@ protected:
     : message(),code(c)
   {
     using namespace std;
-    ostringstream mess;
+      ostringstream mess;
     if(t1)  mess << t1;
     if(t2)  mess << t2;
     if(t3)  mess << t3 << n ;

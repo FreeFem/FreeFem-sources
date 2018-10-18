@@ -248,7 +248,7 @@ template<class P,class Q>
 
 template<class R,class Z=int>
 struct  RNM_VirtualMatrix { public:
-    int N,M;
+    Z N,M;
     RNM_VirtualMatrix(Z nn,Z mm=1): N(nn),M(mm<0 ? nn : mm) {}
    
   //  y += A x
@@ -262,11 +262,11 @@ struct  RNM_VirtualMatrix { public:
     { InternalError("RNM_VirtualMatrix::solve trans/herm not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); }
 
 #ifdef VersionFreeFempp
-  virtual bool ChecknbLine  (int n) const= 0; 
-  virtual bool ChecknbColumn  (int m) const =0; 
+  virtual bool ChecknbLine  (Z n) const= 0;
+  virtual bool ChecknbColumn  (Z m) const =0;
 #else
-  virtual bool ChecknbLine  (int n) const {return true;} 
-  virtual bool ChecknbColumn  (int m) const {return true;}
+  virtual bool ChecknbLine  (Z n) const {return true;}
+  virtual bool ChecknbColumn  (Z m) const {return true;}
 #endif
   struct  plusAx { const RNM_VirtualMatrix * A; const KN_<R>   x;
    plusAx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y) 

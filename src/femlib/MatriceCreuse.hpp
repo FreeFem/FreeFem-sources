@@ -666,6 +666,9 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 
 #ifdef REMOVE_CODE
 #define VDATASPARSESOLVER  1
+
+//  now a string * TypeSolveMat
+/*
 struct TypeSolveMat {
     enum TSolveMat { NONESQUARE=0, LU=1, CROUT=2, CHOLESKY=3, GC = 4 , GMRES = 5, SparseSolver=6, SparseSolverSym=7 };
     TSolveMat t;
@@ -678,7 +681,7 @@ struct TypeSolveMat {
     bool operator!=(const TypeSolveMat & a) const { return t != a.t;}
     static TSolveMat defaultvalue;
 };
-
+*/
 // add FH , JM  avril 2009 
 template<class K,class V> class MyMap;
 class String; 
@@ -690,7 +693,7 @@ int Data_Sparse_Solver_version() ; //{ return VDATASPARSESOLVER;}
 
 struct Data_Sparse_Solver {
   bool initmat;
-  TypeSolveMat* typemat;
+  string solver;
   double epsilon;
   const void * precon;
   int NbSpace;
@@ -720,19 +723,7 @@ struct Data_Sparse_Solver {
     KNM<double>* kerneln;
     KNM<double> * kernelt;
     long *kerneldim;
- /*   
-  int *param_int;
-  double *param_double;
-  string *param_char;
-  int *perm_r;
-  int *perm_c;
-  string *file_param_int;
-  string *file_param_double;
-  string *file_param_char;
-  string *file_param_perm_r;
-  string *file_param_perm_c;
-  */
-    
+ 
     Data_Sparse_Solver()
 	:
     initmat(1),

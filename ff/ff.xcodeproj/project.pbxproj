@@ -153,13 +153,10 @@
 		3DBBD5E60C3573DA007E5F45 /* mymain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5E50C3573DA007E5F45 /* mymain.cpp */; };
 		3DBBFE9E1A654E4900E3CF4E /* write_xdmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9D1A654E4900E3CF4E /* write_xdmf.cpp */; };
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
-		3DC023132148071A008C76D0 /* HashMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023122148071A008C76D0 /* HashMatrix.hpp */; };
 		3DC0231B2148072B008C76D0 /* SkyLineSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023172148072B008C76D0 /* SkyLineSolver.hpp */; };
-		3DC023212148075C008C76D0 /* gmres.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023202148075C008C76D0 /* gmres.hpp */; };
 		3DC023342148078C008C76D0 /* SparseLinearSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */; };
 		3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023272148078A008C76D0 /* SolverSkyLine.hpp */; };
 		3DC023362148078C008C76D0 /* CG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023282148078A008C76D0 /* CG.cpp */; };
-		3DC023372148078C008C76D0 /* SkyLineSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023292148078A008C76D0 /* SkyLineSolver.hpp */; };
 		3DC023382148078C008C76D0 /* SparseLinearSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */; };
 		3DC023392148078C008C76D0 /* VirtualSolverSparseSuite.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */; };
 		3DC0233A2148078C008C76D0 /* HashMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232C2148078B008C76D0 /* HashMatrix.hpp */; };
@@ -719,7 +716,6 @@
 				3D84ADE81654DAE200301697 /* array_tlp.hpp in Headers */,
 				3D84ADE91654DAE200301697 /* lgfem.hpp in Headers */,
 				3D84ADEA1654DAE200301697 /* PlotStream.hpp in Headers */,
-				3DC023372148078C008C76D0 /* SkyLineSolver.hpp in Headers */,
 				3D84ADEB1654DAE200301697 /* AFunction_ext.hpp in Headers */,
 				3DC0234321480D6A008C76D0 /* MatriceCreuse.hpp in Headers */,
 				3D84ADEC1654DAE200301697 /* ff++.hpp in Headers */,
@@ -764,13 +760,11 @@
 				3D84AE3A1654DE9800301697 /* Mesh1dn.hpp in Headers */,
 				3D84AE3B1654DE9800301697 /* P3_Lagrange.hpp in Headers */,
 				3D84AE3C1654DE9800301697 /* QuadratureFormular.hpp in Headers */,
-				3DC023212148075C008C76D0 /* gmres.hpp in Headers */,
 				3D84AE3D1654DE9800301697 /* R1.hpp in Headers */,
 				3D84AE3E1654DE9800301697 /* R2.hpp in Headers */,
 				3DC0234521480D75008C76D0 /* MatriceCreuse_tpl.hpp in Headers */,
 				3D84AE3F1654DE9800301697 /* R3.hpp in Headers */,
 				3D84AE401654DE9800301697 /* RefCounter.hpp in Headers */,
-				3DC023132148071A008C76D0 /* HashMatrix.hpp in Headers */,
 				3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */,
 				3D84AE431654DEB600301697 /* ufunction.hpp in Headers */,
 			);
@@ -820,7 +814,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1000;
 			};
 			buildConfigurationList = 3D90DC80097012B3002A1826 /* Build configuration list for PBXProject "ff" */;
 			compatibilityVersion = "Xcode 3.2";

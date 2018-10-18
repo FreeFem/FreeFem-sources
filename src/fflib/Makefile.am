@@ -50,6 +50,7 @@ ff++.hpp \
 ../femlib/splitsimplex.cpp AFunction_ext.hpp \
 ffapi.hpp P1IsoValue.cpp	P1IsoValue.hpp \
 ../femlib/HashMatrix.hpp \
+../femlib/HashMatrix.cpp \
 ../femlib/VirtualMatrix.hpp \
 ../femlib/SparseLinearSolver.hpp \
 ../femlib/VirtualSolverCG.hpp \

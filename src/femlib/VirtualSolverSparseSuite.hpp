@@ -11,6 +11,8 @@
 template<class Z=int,class K=double>
 class VirtualSolverUMFPACK: public VirtualSolver<Z,K> {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&8&16;
     typedef HashMatrix<Z,K>  HMat;
     HMat *A;
     void *Symbolic, *Numeric ;
@@ -31,6 +33,9 @@ public:
 template<>
 class  VirtualSolverUMFPACK<int,double> : public VirtualSolver<int,double> {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&8&16;
+
     typedef double K;
     typedef int Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -43,9 +48,10 @@ public:
     mutable int status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
-    VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0), verb(vverb)
+    VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
+                        // int strategy=-1,
+                        // double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0), verb(ds.verb)
     {
          if(verb>2 || verbosity> 9) cout << " build solver UMFPACK double/int " << endl;
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
@@ -53,10 +59,10 @@ public:
         
         umfpack_di_defaults (Control) ;
 
-        if(verbosity>4) Control[UMFPACK_PRL]=2;
-        if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=tol_pivot_sym;
-        if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=tol_pivot;
-        if(strategy>=0)   Control[UMFPACK_STRATEGY]=strategy;
+        if(ds.verb>4) Control[UMFPACK_PRL]=2;
+        if(ds.tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=ds.tol_pivot_sym;
+        if(ds.tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=ds.tol_pivot;
+        if(ds.strategy>=0)   Control[UMFPACK_STRATEGY]=ds.strategy;
 
     }
     void dosolver(double *x,double*b,int N,int trans) {
@@ -100,12 +106,16 @@ public:
      if(Symbolic)  umfpack_di_free_symbolic (&Symbolic) ;
      if(Numeric)   umfpack_di_free_numeric (&Numeric) ;
     }
+    
 };
 
 // specilisation
 template<>
 class  VirtualSolverUMFPACK<int,std::complex<double> > : public VirtualSolver<int,std::complex<double> > {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&8&16;
+
     typedef std::complex<double> K;
     typedef int Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -120,19 +130,19 @@ public:
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
     
-    VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1., long vverb=verbosity)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack stack )//int strategy=-1,
+                       //  double tol_pivot=-1.,double tol_pivot_sym=-1., long vverb=verbosity)
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
     {
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
         umfpack_zi_defaults (Control) ;
         
-        if(verbosity>4) Control[UMFPACK_PRL]=2;
-        if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=tol_pivot_sym;
-        if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=tol_pivot;
-        if(strategy>=0)   Control[UMFPACK_STRATEGY]=strategy;
+        if(ds.verb>4) Control[UMFPACK_PRL]=2;
+        if(ds.tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=ds.tol_pivot_sym;
+        if(ds.tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=ds.tol_pivot;
+        if(ds.strategy>=0)   Control[UMFPACK_STRATEGY]=ds.strategy;
 
     }
     void dosolver(K *x,K*b,int N,int trans) {
@@ -182,6 +192,9 @@ public:
 template<class Z=int,class K=double>
 class VirtualSolverCHOLMOD: public VirtualSolver<Z,K> {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 2&4&8&16;
+    
     typedef HashMatrix<Z,K>  HMat;
     HMat *HA;
     cholmod_common Common, *cm ;
@@ -191,7 +204,7 @@ public:
 
     mutable int status;
     
-    VirtualSolverCHOLMOD(HMat  *AA):A(AA) {}
+    VirtualSolverCHOLMOD(HMat  *AA, const Data_Sparse_Solver & ds,Stack stack ):A(AA) {}
     void dosolver(K *x,K*b,int N,int trans) {assert(0);}
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
@@ -203,6 +216,9 @@ public:
 template<>
 class  VirtualSolverCHOLMOD<int,double> : public VirtualSolver<int,double> {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&8&16;
+
     typedef double K;
     typedef int Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -231,8 +247,8 @@ public:
     }
     
     mutable int status;
-    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
-      :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverCHOLMOD(HMat  &HAA,  const Data_Sparse_Solver & ds,Stack stack )
+      :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
     {
        
         cholmod_start (&c) ;
@@ -307,6 +323,8 @@ template<>
 class  VirtualSolverCHOLMOD<int,std::complex<double> > : public VirtualSolver<int,std::complex<double> >
 {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 2&4&8&16;
     typedef std::complex<double>  K;
     typedef int Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -335,8 +353,8 @@ public:
         X.dtype=dtype;
     }
     
-    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverCHOLMOD(HMat  &HAA, const Data_Sparse_Solver & ds,Stack stack )
+    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
     {
         
         cholmod_start (&c) ;
@@ -409,6 +427,8 @@ public:
 template<>
 class  VirtualSolverUMFPACK<long,double> : public VirtualSolver<long,double> {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&8&16;
     typedef double K;
     typedef long Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -421,20 +441,19 @@ public:
     mutable long status;
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
-    VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
     {
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
         umfpack_di_defaults (Control) ;
         
-        if(verbosity>4) Control[UMFPACK_PRL]=2;
-        if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=tol_pivot_sym;
-        if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=tol_pivot;
-        if(strategy>=0)   Control[UMFPACK_STRATEGY]=strategy;
-        
+        if(ds.verb>4) Control[UMFPACK_PRL]=2;
+        if(ds.tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=ds.tol_pivot_sym;
+        if(ds.tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=ds.tol_pivot;
+        if(ds.strategy>=0)   Control[UMFPACK_STRATEGY]=ds.strategy;
+
     }
     void dosolver(double *x,double*b,int N,int trans) {
         int ts = UMFPACK_A ;
@@ -484,6 +503,9 @@ public:
 template<>
 class  VirtualSolverUMFPACK<long,std::complex<double> > : public VirtualSolver<long,std::complex<double> > {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 1&8&16;
+
     typedef std::complex<double> K;
     typedef long Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -498,20 +520,19 @@ public:
     double Control[UMFPACK_CONTROL];
     double Info[UMFPACK_INFO];
     
-    VirtualSolverUMFPACK(HMat  &AA,int strategy=-1,
-                         double tol_pivot=-1.,double tol_pivot_sym=-1.,long vverb=verbosity)
-    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack stack )
+    :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
     {
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
         umfpack_zl_defaults (Control) ;
         
-        if(verbosity>4) Control[UMFPACK_PRL]=2;
-        if(tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=tol_pivot_sym;
-        if(tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=tol_pivot;
-        if(strategy>=0)   Control[UMFPACK_STRATEGY]=strategy;
-        
+        if(ds.verb>4) Control[UMFPACK_PRL]=2;
+        if(ds.tol_pivot_sym>0) Control[UMFPACK_SYM_PIVOT_TOLERANCE]=ds.tol_pivot_sym;
+        if(ds.tol_pivot>0) Control[UMFPACK_PIVOT_TOLERANCE]=ds.tol_pivot;
+        if(ds.strategy>=0)   Control[UMFPACK_STRATEGY]=ds.strategy;
+
     }
     void dosolver(K *x,K*b,int N,int trans) {
         int ts = UMFPACK_A ;
@@ -565,6 +586,8 @@ public:
 template<>
 class  VirtualSolverCHOLMOD<long,double> : public VirtualSolver<long,double> {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 2&4&8&16;
     typedef double K;
     typedef long Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -594,8 +617,8 @@ public:
     }
     
     mutable int status;
-    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverCHOLMOD(HMat  &HAA,  const Data_Sparse_Solver & ds,Stack stack )
+    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
     {
         
         cholmod_start (&c) ;
@@ -670,6 +693,8 @@ template<>
 class  VirtualSolverCHOLMOD<long,std::complex<double> > : public VirtualSolver<int,std::complex<double> >
 {
 public:
+    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+    static const int orTypeSol = 2&4&8&16;
     typedef std::complex<double>  K;
     typedef long Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -699,8 +724,8 @@ public:
         X.dtype=dtype;
     }
     
-    VirtualSolverCHOLMOD(HMat  &HAA,long vverb=verbosity)
-    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(vverb)
+    VirtualSolverCHOLMOD(HMat  &HAA, const Data_Sparse_Solver & ds,Stack stack )
+    :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
     {
         
         cholmod_start (&c) ;

@@ -39,131 +39,92 @@ MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,int half)
     int nnz =0;
     int n = A.n;
     
-    if( A.symetrique )
-        return new MatriceMorse<R>(n,n,A.nbcoef,sym,A.a,A.lg,A.cl,true);//  copy
-    KN<int> ll(n+1);
-    ll=0;
-    for(int i=0; i< n; ++i)
-    {
-        
-        for(int k=A.lg[i]; k< A.lg[i+1]; ++k)
-        {
-            int j =A.cl[k] ;
-            ffassert(j>=0 && j < n);
-            if      ( half>0 && j  >= i) ll[j+1]++,nnz++;
-            else if ( half<=0 && j <= i) ll[i+1]++,nnz++;
-        }
-    }
+    if( A.half )
+        return &A;//  copy
     // do alloc
-    MatriceMorse<R> *r=new MatriceMorse<R>(n,n,nnz,sym);
+    MatriceMorse<R> *r=new MatriceMorse<R>(A);
+     r->RemoveHalf(0.);
     if(verbosity )
-        cout << "  removeHalf: nnz = "<< nnz << " half part =" << half  << " sym = "<< sym << endl;
-    int *cl =r->cl, *lg = r->lg;
-    double *a =r->a;
-    for(int i=0; i< n; ++i)
-        ll[i+1] += ll[i];
-     for(int i=0; i<= n; ++i)
-         lg[i]=ll[i];
-    ffassert(ll[n]== nnz);
-    for(int i=0; i< n; ++i)
-    {
-        //cout << i << " " << lg[i] << " :: " ;
-        for(int k=A.lg[i]; k< A.lg[i+1]; ++k)
-        {
-            int j =A.cl[k] ;
-            double aij = A.a[k];
-            int kk=-1,ij=-1;
-            if(half>0 && j >=i ) kk = ll[j]++,ij=i;
-            else if (half<=0 && j <=i) kk = ll[i]++,ij=j;
-            if(kk>=0)
-                cl[kk]=ij, a[kk]=aij;
-            //if(kk>=0) cout << kk  << " " << j  << " / " << ij << " , "  ;
-        }
-        //cout << endl;
-    }
+        cout << "  removeHalf: nnz = "<< r->nnz << endl;
     
-    lg[n]=nnz;
-    ffassert(ll[n]== nnz);
     return r;
 }
 
-Matrice_Creuse<R> *removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half)
+newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half)
 {
     MatriceCreuse<R> * pa=pA->A;
     MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
     ffassert(pma);
-    Matrice_Creuse<R> *Mat= new Matrice_Creuse<R> ;
-    Mat->A.master(removeHalf(*pma,half));
-    //delete pma;
-    Add2StackOfPtr2Free(stack,Mat);
-    return Mat;
+    return newpMatrice_Creuse<R>(stack,removeHalf(*pma,half));
 }
 
 long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 {
     // cf https://en.wikipedia.org/wiki/Incomplete_Cholesky_factorization
     cout << " tgv " << tgv << endl;
-    ffassert( A.symetrique && L.symetrique);
+    ffassert( A.half && L.half);
     ffassert( A.n == L.n);
     int n =A.n,i,j,k,kk;
     double tgv1= sqrt(tgv);
     double tgve =tgv*0.99999999;
     if(tgve < 1) tgve=1e200;
     double nan=sqrt(-1.);
-    for(int k=0; k<L.nbcoef;++k)
-        L.a[k]=nan;
+    for(int k=0; k<L.nnz;++k)
+        L.aij[k]=nan;
     int BC = 0;
     long err=0;
+    A.CSR();
+    L.CSR();
     for(int i=0; i< n; ++i)
     {
-        int ai1=A.lg[i+1]-1;
-        int ai0=A.lg[i];
-        int li1=L.lg[i+1]-1;
-        int li0=L.lg[i];
-        double  Aii=A.a[ai1];
+        int ai1=A.p[i+1]-1;
+        int ai0=A.p[i];
+        int li1=L.p[i+1]-1;
+        int li0=L.p[i];
+        double  Aii=A.aij[ai1];
         if (Aii > tgve)
         { // B.C
             for (kk=li0;kk<li1;kk++)
-                L.a[kk]=0; //  remove row and col
-            L.a[li1]=1;
+                L.aij[kk]=0; //  remove row and col
+            L.aij[li1]=1;
             BC++;
         }
         else
         {
             for (kk=li0;kk<li1;kk++) //  Build Lij is existe j<i
             {
-                int j = L.cl[kk]; // j < i
+                int j = L.j[kk]; // j < i
                 ffassert(j<i);
-                int lj1=L.lg[j+1]-1;
-                int lj0=L.lg[j];
+                int lj1=L.p[j+1]-1;
+                int lj0=L.p[j];
                 
                 double *pAij = A.pij(i,j) ;
                 double Lij = pAij ? *pAij: 0.,Aij=Lij;
                 for(int kkk= lj0; kkk<lj1; ++kkk)// loop  row j
                 {  //cout << " ?? " << kkk << " "<< lj0 << " " <<lj1 <<endl;
-                    int k = L.cl[kkk];
+                    int k = L.j[kkk];
                     //cout << " @@@" << i << " " << j << " ( " << lj0 << " " << lj1 << ")  " << k << " // " << kkk <<  " " << endl;
                     ffassert(k >=0 && k < j);
-                    double Ljk = L.a[kkk], *pLik=L.pij(i,k), Lik = pLik ? *pLik : 0.;
+                    double Ljk = L.aij[kkk], *pLik=L.pij(i,k), Lik = pLik ? *pLik : 0.;
                     //cout << " *** " << k << " " <<Lik *Ljk <<endl;
                     Lij -= Lik *Ljk;
                 }
                 Lij /=  L(j,j);
-                L.a[kk] =Lij;
+                L.aij[kk] =Lij;
                 //cout <<kk << " " << j << " " << Lij << " "<< Aij << " , ";
                 
             }
             // cout << " **" << endl;
             for(int k= li0; k<li1; ++k)
-                Aii -= L.a[k]*L.a[k];
+                Aii -= L.aij[k]*L.aij[k];
             if( Aii <=1e-30) {
                 if(err<10 && verbosity )
-                    cout << "   ichol neg pivot:"<< i << " " << Aii << " " << A.a[ai1] << endl;
+                    cout << "   ichol neg pivot:"<< i << " " << Aii << " " << A.aij[ai1] << endl;
                 Aii=1;// Bof Bof !!!
                 err++;
             }
             double Lii = sqrt(Aii);
-             L.a[li1] =Lii;
+             L.aij[li1] =Lii;
             
         }
     }
@@ -173,7 +134,7 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 
 inline R pscal(R*L,int *cl,int kl,int kl1,int i, MatriceMorse<R> &  Ut,int j )
 {
-    int ku = Ut.lg[j],ku1=Ut.lg[j]-1;
+    int ku = Ut.p[j],ku1=Ut.p[j]-1;
     int k= min(i,j); //  common  part
     R r =0;
     //cout << " pscal: "<<  i << " " << j << "  min: " << k << endl;
@@ -204,64 +165,67 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
  }
 
  */
+      A.CSR();
+        L.CSR();
+        Ut.CSR();
     if( verbosity > 2)
        cout << "    - ILU  tgv " << tgv << endl;
     ffassert( A.n == L.n);
     ffassert( A.n == Ut.n);
-    int sym = A.symetrique;
+    int sym = A.half    ;
     int n =A.n,i,j,k,kk;
     double tgve =tgv*0.999;
     if(tgve < 1) tgve=1e200;
     double NaN=sqrt(-1.);
-    fill(L.a,L.a+L.nbcoef,NaN);
-    fill(Ut.a,Ut.a+Ut.nbcoef,NaN);
+    fill(L.aij,L.aij+L.nnz,NaN);
+    fill(Ut.aij,Ut.aij+Ut.nnz,NaN);
     int BC = 0;
     KN<int> wbc(n);
     long err=0;
     double mUii=1e200;
     for(int i=0; i< n; ++i)
     {
-        int ai1=A.lg[i+1]-1;
-        int ai0=A.lg[i];
-        int li1=L.lg[i+1]-1;
-        int li0=L.lg[i];
-        int ui1=Ut.lg[i+1]-1;
-        int ui0=Ut.lg[i];
-        err += Ut.cl[ui1] != i;
-        err += L.cl[li1] != i;
-        ffassert( L.cl[li1]==i && Ut.cl[ui1]==i);
+        int ai1=A.p[i+1]-1;
+        int ai0=A.p[i];
+        int li1=L.p[i+1]-1;
+        int li0=L.p[i];
+        int ui1=Ut.p[i+1]-1;
+        int ui0=Ut.p[i];
+        err += Ut.j[ui1] != i;
+        err += L.j[li1] != i;
+        ffassert( L.j[li1]==i && Ut.j[ui1]==i);
         double  Aii=A(i,i),Uii;
         
         int BCi ;
          wbc[i]  = BCi= (Aii > tgve);
         if (BCi)
         { // B.C
-            fill(L.a+li0,L.a+li1,0.);
-            fill(Ut.a+ui0,Ut.a+ui1,0.);
-            L.a[li1]=1.;
-            Ut.a[ui1]=Aii;
+            fill(L.aij+li0,L.aij+li1,0.);
+            fill(Ut.aij+ui0,Ut.aij+ui1,0.);
+            L.aij[li1]=1.;
+            Ut.aij[ui1]=Aii;
             BC++;
         }
        else
         {
             for(int l=li0;l<li1;++l) // coef of  L non zero
             {
-                int j   = L.cl[l];
+                int j   = L.j[l];
                 R *pAij = A.pij(i,j), Aij = pAij ? *pAij : 0.;
                 
                 R Ujj=Ut(j,j);
                 ffassert(j<i);
-                L.a[l] = (Aij - pscal(L.a,L.cl,li0,li1,i, Ut,j)) / Ujj;
+                L.aij[l] = (Aij - pscal(L.aij,L.j,li0,li1,i, Ut,j)) / Ujj;
             }
              for(int u=ui0;u<ui1;++u) // coef of  Ut  non zero
             {
-                int j   = Ut.cl[u];// Ut(j,i) == U(j,i)
+                int j   = Ut.j[u];// Ut(j,i) == U(j,i)
                 R *pAji = sym ? A.pij(i,j) : A.pij(j,i), Aji = pAji ? *pAji : 0.;
                 if( wbc[j] )  Aji=0; // remove row term  if BC. on j  ...
                 ffassert(j<i);// transpose
-                Ut.a[u] = (Aji - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,j));
+                Ut.aij[u] = (Aji - pscal(Ut.aij,Ut.j,ui0,ui1,i, L,j));
             }
-            Uii= Aii - pscal(Ut.a,Ut.cl,ui0,ui1,i, L,i);
+            Uii= Aii - pscal(Ut.aij,Ut.j,ui0,ui1,i, L,i);
             L(i,i) =1.;
 
             mUii = min(mUii,abs(Uii));
@@ -317,23 +281,23 @@ long ff_ichol (Matrice_Creuse<R> *  pcA,Matrice_Creuse<R> *  pcL)
 void ichol_solve(MatriceMorse<R> &L,KN<double> & b,bool trans)
 {
     int n =L.n,i,j,k,k1,k0;
-    //ffassert(L.symetrique);
+    L.CSR();
     ffassert( L.n == b.N());
     if(trans)
     {
         for(int i=n-1; i>=0; --i)
         {
-            k0 = L.lg[i];
-            k1 = L.lg[i+1]-1;
-            b[i] /= L.a[k1];
+            k0 = L.p[i];
+            k1 = L.p[i+1]-1;
+            b[i] /= L.aij[k1];
             
             for (k=k0;k<k1;k++)
             {
-                int j = L.cl[k];
-                b[j] -= b[i]*L.a[k];
+                int j = L.j[k];
+                b[j] -= b[i]*L.aij[k];
             }
             
-            assert(L.cl[k] == i);
+            assert(L.j[k] == i);
         }
     }
     else
@@ -341,13 +305,13 @@ void ichol_solve(MatriceMorse<R> &L,KN<double> & b,bool trans)
         for(int i=0; i< n; ++i)
         {
             R bi= b[i];
-            for (k=L.lg[i];k<L.lg[i+1]-1;k++)
+            for (k=L.p[i];k<L.p[i+1]-1;k++)
             {
-                int j = L.cl[k];
-                bi -= b[j]*L.a[k];
+                int j = L.j[k];
+                bi -= b[j]*L.aij[k];
             }
-            b[i] = bi/ L.a[k];
-            assert(L.cl[k] == i);
+            b[i] = bi/ L.aij[k];
+            assert(L.j[k] == i);
         }
         
     }
@@ -386,14 +350,14 @@ bool ff_ilu_solve(Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> *const &  pc
 
 
 static void Load_Init () {
-    cout << " lood: init Incomplete Cholesky " << endl;
+    cout << " load: init Incomplete Cholesky " << endl;
     Global.Add("ichol", "(", new OneOperator2<long,Matrice_Creuse<R> * ,Matrice_Creuse<R> * >(ff_ichol));
     Global.Add("ichol", "(", new OneOperator3_<long,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,double >(ff_ichol));
     Global.Add("iLU", "(", new OneOperator4_<long,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,Matrice_Creuse<R> *,double >(ff_ilu));
     Global.Add("iLU", "(", new OneOperator3_<long,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,Matrice_Creuse<R> * >(ff_ilu));
     Global.Add("iluSolve", "(", new OneOperator3_<bool ,Matrice_Creuse<R> * ,Matrice_Creuse<R> * , KN<R> *>(ff_ilu_solve));
     Global.Add("icholSolve", "(", new OneOperator2<bool ,Matrice_Creuse<R> * , KN<R> *>(ff_ichol_solve));
-    Global.Add("removeHalf", "(", new OneOperator2s_<Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,long>(removeHalf));
+    Global.Add("removeHalf", "(", new OneOperator2s_<newpMatrice_Creuse<R> ,Matrice_Creuse<R> * ,long>(removeHalf));
 
 
 }

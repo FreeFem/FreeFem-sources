@@ -551,36 +551,10 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 };     
 #endif
 
-template<class R,int cas>
-typename VirtualMatrix<int,R>::VSolver *
-BuildSolver(DCL_ARG_SPARSE_SOLVER(R,A))
-{
-    ffassert( cas <=0  && cas <4);
-    static const char * name[] = {"GMRES","GC","UMFPACK","CHOLMOD","LU","CHOLESKY"};
-    MatriceMorse<R> & AH(*dynamic_cast<MatriceMorse<R> *>(A));
-   
-    return NewVSolver<int,R>(AH,name[cas],ds,stack);
-    
-}
-
-template<class R>
-typename VirtualMatrix<int,R>::VSolver *
-BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
-{/*
-    typename MatriceCreuseOld<R>::VirtualSolver * ret=0;
-    if (ds.precon)
-	ret=new SolveGCPrecon<R>(*A,(const OneOperator *)ds.precon,stack,ds.itmax,ds.epsilon);
-    else 
-	ret=new SolveGCDiag<R>(*A,ds.itmax,ds.epsilon);    
-    return ret;*/
-    MatriceMorse<R> & AH(*dynamic_cast<MatriceMorse<R> *>(A));
-     return NewVSolver<int,R>(AH,"CG",ds,stack);
-}
-
 
 #define LIST_NAME_PARM_MAT \
     {  "init", &typeid(bool)}, \
-    {  "solver", &typeid(TypeSolveMat*)}, \
+    {  "solver", &typeid(string*)}, \
     {  "eps", &typeid(double)  }, \
     {  "precon",&typeid(Polymorphic*)}, \
     {  "dimKrylov",&typeid(long)}, \
@@ -625,7 +599,8 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
          bool unset_eps=true;
 	int kk = n_name_param-NB_NAME_PARM_MAT-1;
 	if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));	
-	if (nargs[++kk]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[kk])(stack));
+	if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
+        ds.Init_sym_positive_var<R>();//  set def value of sym and posi
 	if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack)),unset_eps=false;
 	if (nargs[++kk])
 	{// modif FH fev 2010 ...
@@ -670,6 +645,14 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.sym= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
+        if(ds.solver == "")
+        { // SET DEFAULT SOLVER TO HRE ... 
+            if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;
+            else if( ds.sym ) ds.solver=*def_solver_sym;
+            else  ds.solver=*def_solver;
+            if(verbosity>9) cout << "  set default solver to " << ds.solver << endl;
+
+        }
 
         ffassert(++kk == n_name_param);
     }
