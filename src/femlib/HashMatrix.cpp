@@ -314,7 +314,7 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
     half = half || sym;
     nnnz = max(nnnz,kk);
     bool rresize = (nnnz < 0.8*nnz) || ((nnnz > 1.2*nnz)) ;
-    
+    nnz = kk; // forget after value ... 
     if(rresize) Increaze(nnnz);
     else ReHash();
     state= unsorted;
@@ -386,7 +386,43 @@ void HashMatrix<I,R>::HMcopy( T *dst,const T *from, size_t nn)
     for(size_t i=0; i< nn; ++i)
         dst[i]= from[i];
 }
-
+template<class I,class R>   bool  HashMatrix<I,R>::do2Triangular(bool lower)
+{
+    ffassert(half); //
+    size_t nc=0;
+    if( lower )
+       for(size_t k=0; k< nnz; ++k)
+       {
+           if(  (i[k] < j[k]) ) // Upper
+               ++nc,swap(i[k],j[k]);
+       }
+    else
+        for(size_t k=0; k< nnz; ++k)
+        {
+            if(  (i[k] > j[k]) ) // Lower
+                ++nc,swap(i[k],j[k]);
+        }
+    if( nc)
+    {
+    ReHash();
+    state=unsorted;
+    }
+    return  nc;
+}
+template<class I,class R>   int HashMatrix<I,R>::IsTrianglulare() const
+{
+    size_t nU, nL=0,nD=0;
+    for(size_t k=0; k< nnz; ++k)
+    {
+        if( i[k] < j[k] ) ++nU;// 0,10
+        else if( i[k] == j[k] ) ++nD;// 10,10
+        else ++nL;// 10,0 
+    }
+    // 3 => no sym
+    // 1 nU==0 =>   Trian Lower (no upper term)
+    // 2 nL==0 =>   Trian Upper (no upper term)
+    return 2*!nL +  !nU ;
+}
 template<class I,class R>
 void HashMatrix<I,R>::dotranspose()
 {

@@ -38,7 +38,7 @@ struct TheFFSolver {
         OneFFSlver(int pp,int tt):p(pp),orTypeSol(tt) {}
         virtual VirtualSolver<Z,K> * create(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )=0;
         virtual ~OneFFSlver() {}
-        
+        virtual OneFFSlver *clone()=0;
     };
     
     template<class VS>
@@ -46,46 +46,71 @@ struct TheFFSolver {
         OneFFSlverVS(int pp) :OneFFSlver(pp,VS::orTypeSol) {}
         virtual VirtualSolver<Z,K> * create(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )
         { return new VS(A,ds,stack);}
+        OneFFSlver *clone(){ return new OneFFSlverVS(*this); }
     };
     
     typedef pair<string,OneFFSlver *>  MValue;
     typedef  map<string,OneFFSlver *> MAPSF;
     static MAPSF ffsolver;
 
+    static void  ChangeSolver( string name, string  from)
+    {
+        std::transform(name.begin(), name.end(), name.begin(), static_cast<int(*)(int)>(std::toupper));
+        std::transform(from.begin(), from.end(), from.begin(), static_cast<int(*)(int)>(std::toupper));
+
+        auto f =ffsolver.find(from);
+        if( f  == ffsolver.end()) cerr << "Bug ChangeSolver the solver "<< from << " must exist " << endl;
+        ffassert( f  != ffsolver.end());// must exist to copie  FH.  !!!!
+        auto n =ffsolver.find(name);
+        if( n !=ffsolver.end()) // if existe clean
+            delete n->second;
+        ffsolver[name] = f->second->clone();
+    }
+    
     template<class VS>
-    static void addsolver (const char* name,int pp,int ts,const  VS* pvs)
+    static void addsolver (const char* name,int pp,int ts,const  VS* pvs,int sp=0)
     {
         string sn(name);
+        OneFFSlverVS<VS> pv=0;
         std::transform(sn.begin(), sn.end(), sn.begin(), static_cast<int(*)(int)>(std::toupper));
         ffassert( ffsolver.find(sn) == ffsolver.end());
         MValue vm(sn,new OneFFSlverVS<VS>(pp));
         auto ii=ffsolver.insert(vm);
         ffassert( ii.second == true);
+        if(sp&1)
+           ChangeSolver("SPARSESOLVER",name);
+       if(sp&2)
+           ChangeSolver("SPARSESOLVERSYM",name);
     }
+    
+ 
 
     static typename VirtualMatrix<Z,K>::VSolver * Find(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack );
 };
 
 
 
-template<class TS> void addsolver(const char *nm,int p)
+template<class TS> void addsolver(const char *nm,int p,int setsp=0)
 {
     typedef typename  TS::INDEX ZZ;
     typedef typename  TS::SCALAR KK;
     int ots=TS::orTypeSol;
-    TheFFSolver<ZZ,KK>::addsolver(nm,p,ots, (TS*) 0); // trick (TS*) 0 to call the corre ct case ..
+    TheFFSolver<ZZ,KK>::addsolver(nm,p,ots, (TS*) 0,setsp); // trick (TS*) 0 to call the corre ct case ..
 }
+
+template<class Z,class K> void changesolver(const string & n,const string & f)
+{ TheFFSolver<Z,K>::changesolver(n,f); }
 
 template<class Z, class K> void InitSolver()
 {
-   addsolver<VirtualSolverUMFPACK<Z,K>>("UMFPACK",100);
-   addsolver<VirtualSolverCHOLMOD<Z,K>>("CHOLMOD",99);
+ 
    addsolver<SolverCG<Z,K>>("CG",10);
-   addsolver<SolverGMRES<Z,K>>("GMRES",10);
+   addsolver<SolverGMRES<Z,K>>("GMRES",10,  3);// add set SparseSolver and SparseSolverSym
    addsolver<VirtualSolverSkyLine<Z,K>>("LU",10);
    addsolver<VirtualSolverSkyLine<Z,K>>("CROUT",9);
    addsolver<VirtualSolverSkyLine<Z,K>>("CHOLESKY",9);
-
+   addsolver<VirtualSolverUMFPACK<Z,K>>("UMFPACK",100, 1);// add set SparseSolver
+   addsolver<VirtualSolverCHOLMOD<Z,K>>("CHOLMOD",99,  2);// add set SparseSolverSym
 }
 template<class Z, class K>
 typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )

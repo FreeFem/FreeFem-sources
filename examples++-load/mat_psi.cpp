@@ -211,7 +211,7 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	sparce_mat->Uh = UniqueffId();
 	sparce_mat->Vh = UniqueffId();
 	sparce_mat->A.master(amorse);
-	sparce_mat->typemat = (amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
+    sparce_mat->typemat = 0;//(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
 	*mp = mps;
 
 	if (verbosity > 3) {cout << "  End Build MatrixUpWind : " << endl;}
@@ -278,7 +278,7 @@ AnyType MatrixUpWind3::operator () (Stack stack) const {
 	sparce_mat->Uh = UniqueffId();
 	sparce_mat->Vh = UniqueffId();
 	sparce_mat->A.master(amorse);
-	sparce_mat->typemat = (amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
+    sparce_mat->typemat = 0;//(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
 	*mp = mps;
 
 	if (verbosity > 3) {cout << "  End Build MatrixUpWind : " << endl;}

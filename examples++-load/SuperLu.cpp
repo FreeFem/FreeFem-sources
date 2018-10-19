@@ -39,6 +39,7 @@ template<> struct SuperLUDriver<double>
 {
 	/* Driver routines */
 	static Dtype_t R_SLU_T () {return SLU_D;}
+        static trans_t trans() {return TRANS;}
 
 	static void
 	gssv (superlu_options_t *p1, SuperMatrix *p2, int *p3, int *p4, SuperMatrix *p5,
@@ -91,6 +92,7 @@ template<> struct SuperLUDriver<Complex>
 {
 	/* Driver routines */
 	static Dtype_t R_SLU_T () {return SLU_Z;}
+        static trans_t trans() {return CONJ;}
 
 	static doublecomplex*dc (Complex *p) {return (doublecomplex *)(void *)p;}
 
@@ -347,7 +349,7 @@ public:
     long verb ;
      int  cs,cn;
     SuperLUStat_t stat;
-    VirtualSolverSuperLU(HMat  &AA,const char *solver, const Data_Sparse_Solver & ds,Stack stack )
+    VirtualSolverSuperLU(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
     :AH(&AA),
     etree(0), string_option(ds.sparams), perm_r(ds.perm_r), perm_c(ds.perm_c),
     RR(0), CC(0),
@@ -359,13 +361,14 @@ public:
         U.Store = 0;
         
        set_default_options(&options);
- 
+       options.SymmetricMode = AH->half ? YES : NO ;
        StatInit(&stat);
     }
     void dosolver(R *x,R*b,int N,int trans)
     {
         if(verb>2 || verbosity> 9) cout << "dosolver SuperLU double/int  "<< N << " " << trans << endl;
         ffassert(trans == 0);
+        options.Trans = trans ? SuperLUDriver<R>::trans() : NOTRANS;
         int info = 0, lwork = 0;
         void *work = 0;
         double ferr[1], berr[1];
@@ -423,7 +426,8 @@ public:
             if (etree.size() != n) {etree.resize(n);}
             if (perm_r.size() != n) {perm_r.resize(n);}
             if (perm_c.size() != n) {perm_c.resize(n);}
-            
+            options.Fact = DOFACT;
+            options.SymmetricMode = AH->half ? YES : NO ;
 
             RR = 1.;
             CC=1.;
@@ -446,20 +450,21 @@ public:
         if (A.Store) Destroy_SuperMatrix_Store(&A);
         if (L.Store) Destroy_SuperNode_Matrix(&L);
         if (U.Store) Destroy_CompCol_Matrix(&U);
-        AH->CSC(asub,xa,a);
+        AH->CSC(xa,asub,a);
         this->Create_CompCol_Matrix(&A, m, n, nnz, a, asub, xa, SLU_NC, R_SLU, SLU_GE);
         /* Indicate not to solve the system  ncol = 0 */
         // no X and B ..
-        B.ncol=0;
-        B.Store=0;
-        X.ncol=0;
-        X.Store=0;
-       
+        this->Create_Dense_Matrix(&B, m, 0, 0, m, SLU_DN, R_SLU, SLU_GE);
+        this->Create_Dense_Matrix(&X, m, 0, 0, m, SLU_DN, R_SLU, SLU_GE);
+        B.ncol = 0;
+        options.Fact = DOFACT;
         SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
                                 &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr, &Glu,
                                 &mem_usage, &stat, &info);
+        options.Fact = FACTORED;
+        if( B.Store) Destroy_SuperMatrix_Store(&B);
+        if( X.Store) Destroy_SuperMatrix_Store(&X);
 
- 
     }
     ~VirtualSolverSuperLU()
     {
@@ -477,7 +482,7 @@ public:
 
 static bool Load_Init()
 {
-addsolver<VirtualSolverSuperLU<double>>("SuperLU",50);
-    addsolver<VirtualSolverSuperLU<Complex>>("SuperLU",50);
+addsolver<VirtualSolverSuperLU<double>>("SuperLU",50,1);
+    addsolver<VirtualSolverSuperLU<Complex>>("SuperLU",50,1);
 }
 LOADFUNC(Load_Init)

@@ -110,7 +110,7 @@ public:
         Increaze(A.nnz);
         Addto<I,R,K>(this,&A,ff);
     }
-  
+    int IsTrianglulare() const ; 
     
     void CheckUnLock(const char * cmm)
     {
@@ -160,6 +160,7 @@ public:
     
     template<typename T> static void HMresize(T *&t,size_t no,size_t nn);
     template<typename T>     static void HMcopy( T *dst,const T *from, size_t nn);
+    bool do2Triangular(bool lower) ; //  put half tp lower or upper
     void dotranspose();
     void Increaze(size_t nnznew=0,size_t newnnz=0);// newnnz<0 => newnnz is set to nnz (change value of nnz)
     void ReHash();

@@ -46,8 +46,8 @@ template<class Z,class K>
     if( i == ffsolver.end()) // choose the best ???
         for ( auto j  = ffsolver.begin() ; j != ffsolver.end() ; ++j)
         {
-            int ts=i->second->orTypeSol;
-            int p=i->second->p;
+            int ts=j->second->orTypeSol;
+            int p=j->second->p;
             if( (ts  & typesolve) == typesolve ) // compiatile
             {
                 

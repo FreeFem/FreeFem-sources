@@ -39,7 +39,7 @@ long symmetrizeCSR (Matrice_Creuse<T> *const &sparse_mat)
 		int n = phm->n, m = phm->m;
 		int nnzo = phm->nnz; 
 		phm->resize(n,m,0,-1,true);
-		  if (verbosity) {cout << "  symmetrizeCSR remove " << phm->nnz-nnzo   << " them in the matrix " << sparse_mat << endl;}
+		  if (verbosity) {cout << "  symmetrizeCSR remove " << (long) nnzo-(long) phm->nnz   << " them in the matrix " << sparse_mat << endl;}
 		} else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
 	}
 
