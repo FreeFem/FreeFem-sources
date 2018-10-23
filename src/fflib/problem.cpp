@@ -33,7 +33,9 @@ using namespace std;
 #include "AFunction.hpp"
 
 //#include "lex.hpp"
-#include "MatriceCreuse_tpl.hpp"
+#include "HashMatrix.hpp"
+
+#include "SparseLinearSolver.hpp"
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
@@ -5599,48 +5601,7 @@ void InitProblem( int Nb, const FESpace & Uh,
 
 } 
 
-template<class R>
-void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds)
-{
-    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
-    typename  VirtualMatrix<int,R>::VSolver * solver=0;
-    MatriceMorse<R> * AH(dynamic_cast<MatriceMorse<R> *>(&A));
-    ffassert(AH);
-    
-  /*
-        // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-        
-        switch (ds.typemat->t) {
-                
-            case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
-            case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
-            case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
-            case    TypeSolveMat::GC:
-                solver=NewVSolver<int,R>(AH,"CG",ds,stack);
-                break;
-            case TypeSolveMat::GMRES :
-                //        InternalError("GMRES solveur to do");
-                solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
-                  break;
-            case TypeSolveMat::SparseSolver :
-                solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
-                //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
-                break;
-            default:
-                if (verbosity >5)
-                    cout << "  SetSolver:: no  default solver " << ds.typemat << endl;
-                CompileError("type resolution unknown"); break;
-        }
-   */
-    solver = NewVSolver<int,R>(*AH,ds,stack);
 
-    if(solver)
-        A.SetSolver(solver,true);
-    else
-        CompileError("SetSolver: type resolution unknown");
-
-
-  }
 /*
 bool SetGMRES()
 {
@@ -5811,37 +5772,10 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   using namespace Fem2D;
   typedef typename CadnaType<R>::Scalaire R_st;
   MeshPoint *mps= MeshPointStack(stack),mp=*mps;
-    Data_Sparse_Solver ds;
- /* long NbSpace = 50; 
-  long itmax=0; 
-  double epsilon=1e-6;*/
+  Data_Sparse_Solver ds;
   string save;
     
-//  bool VF=false;
-//  VF=isVF(op->largs);
- // assert(!VF); 
-//  double tgv = 1e30;
-// type de matrice par default
-  //  TypeSolveMat tmat(TypeSolveMat::defaultvalue);
-     
- //  ds.typemat=&tmat;
- // bool initmat=true;
-/*
-    int strategy=0;
-  double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005 
-  double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005 
-  
-  KN<int> param_int;
-  KN<double> param_double; 
-  string *param_char = NULL;
-  KN<int> perm_r; 
-  KN<int> perm_c;
-  string *file_param_int;  // Add J. Morice 02/09 
-  string *file_param_double; 
-  string* file_param_char;
-  string* file_param_perm_r;
-  string* file_param_perm_c;  
-*/
+
   KN<double>* cadna=0; 
 /*
  {  "save",&typeid(string* )}, 0
@@ -5851,35 +5785,8 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
  */
  if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
  if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));   
-  // bmat not used .... bizarre  
-/*    
-  if (nargs[0]) ds.initmat= ! GetAny<bool>((*nargs[0])(stack));
-  if (nargs[1]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
-  if (nargs[2]) ds.epsilon= GetAny<double>((*nargs[2])(stack));
-  // 3 precon 
-  if (nargs[4]) ds.NbSpace= GetAny<long>((*nargs[4])(stack));
-  if (nargs[6]) ds.tgv= GetAny<double>((*nargs[6])(stack));
-  if (nargs[7]) ds.strategy = GetAny<long>((*nargs[7])(stack));
-  if (nargs[8]) save = *GetAny<string*>((*nargs[8])(stack));
-  if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
-*/
-/*
-  if (nargs[10]) ds.tol_pivot= GetAny<double>((*nargs[10])(stack));
-  if (nargs[11]) ds.tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
-  if (nargs[12]) ds.itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
 
-  if (nargs[13]) ds.param_int= GetAny< KN<int> >((*nargs[13])(stack));  // Add J. Morice 02/09 
-  if (nargs[14]) ds.param_double= GetAny< KN<double> >((*nargs[14])(stack));
-  if (nargs[15]) ds.param_char= GetAny< string * >((*nargs[15])(stack));  //
-  if (nargs[16]) ds.perm_r = GetAny< KN<int > >((*nargs[16])(stack));
-  if (nargs[17]) ds.perm_c = GetAny< KN<int> >((*nargs[17])(stack));  //
-  if (nargs[18]) ds.file_param_int= GetAny< string* >((*nargs[18])(stack));  // Add J. Morice 02/09 
-  if (nargs[19]) ds.file_param_double= GetAny< string* > ((*nargs[19])(stack));
-  if (nargs[20]) ds.file_param_char= GetAny< string* >((*nargs[20])(stack));  //
-  if (nargs[21]) ds.file_param_perm_r = GetAny< string* >((*nargs[21])(stack));
-  if (nargs[22]) ds.file_param_perm_c = GetAny< string* >((*nargs[22])(stack));  //
- */
-    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+  SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
 
 
   //  for the gestion of the PTR. 
@@ -5996,14 +5903,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   
   if (ds.initmat) 
    {
-       
-    //if (ds.typemat->profile)
-    //  {
-          
-      //dataA.master(new MatriceProfile<R>(Vh,VF));
-     // }
-   // else 
-      {
+     {
         if ( &Uh == & Vh )
           dataA.master(new MatriceMorse<R>( sym,Vh.NbOfDF));
         else 
@@ -6030,12 +5930,8 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
   try {  
   
   if (ds.initmat)
-    {
-     // if(cadna)
-	//ACadna = DefSolverCadna( stack,A, ds);
-      //else
-	DefSolver(stack,  A, ds);
-    }
+	DefSolver<R>(stack, A, ds);
+    
 
 
       

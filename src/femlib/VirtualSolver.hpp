@@ -163,6 +163,26 @@ private:
 };
 
 
+//template<class K>  using VirtualSolverN=typename VirtualMatrix<int,K>::VSolver;
+//typedef VirtualSolverN<double>  * (*SparseRMatSolve)(DCL_ARG_SPARSE_SOLVER(double,A) );
+//typedef VirtualSolverN<Complex> * (*SparseCMatSolve)(DCL_ARG_SPARSE_SOLVER(Complex,A) );
+
+/*
+template<class R,int sympos> struct DefSparseSolverNew {
+    typedef VirtualSolverN<R>  *
+    (*SparseMatSolver)(DCL_ARG_SPARSE_SOLVER(R,A) );
+    static SparseMatSolver solver;
+    static SparseMatSolver solverdef;
+    static   VirtualSolverN<R> * Build( DCL_ARG_SPARSE_SOLVER(R,A) )
+    {
+        VirtualSolverN<R> *ret=0;
+        if(solver)
+            ret =(solver)(ARG_SPARSE_SOLVER(A));
+        return ret;
+    }
+};
+*/
+
 template<class I, class R>
 class VirtualSolver : public VirtualMatrix<I,R>::VSolver  {
 public:

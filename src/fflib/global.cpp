@@ -115,9 +115,8 @@ using namespace std;
 #include "fem.hpp"
 #include "Mesh3dn.hpp"
 
-
-#include "MatriceCreuse_tpl.hpp"
-
+#include "HashMatrix.hpp"
+#include "SparseLinearSolver.hpp"
 #include "MeshPoint.hpp"
 
  bool  NoGraphicWindow=false;

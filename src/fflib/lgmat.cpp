@@ -623,44 +623,14 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     Data_Sparse_Solver ds;
     bool VF=false;
     ds.factorize=false;
-/*
-  TypeSolveMat tmat= TypeSolveMat::defaultvalue; 
-  if(   tmat !=  TypeSolveMat::SparseSolver  )    
-    tmat=TypeSolveMat::GMRES;
-  ds.typemat=&tmat;
- */
+
   SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
-    SetSolver<R>(stack,VF,*A->A,ds);
+    SetSolver<R>(stack,VF,*A->pMC(),ds);
 
   return Nothing; 
 }
 
 
-/*
-bool SetDefaultSolver()
-{
-
-#ifdef HAVE_LIBUMFPACK
-    if(verbosity>1)
-	cout << " SetDefault sparse solver to UMFPACK" << endl;
-    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,2>;
-    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,2>;
-    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,3>;
-    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,3>;
-
-#else
-    if(verbosity>1)
-	cout << " SetDefault sparse solver to LU (no UMFPACK)" << endl;
-    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,4>;
-    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,4>;
-    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,5>;
-    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,5>;
-
-#endif
-    return true;
-
-}
- */
 
 template<int init>
 AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
@@ -3457,8 +3427,10 @@ void  init_lgmat()
 
  //   TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<0>));
 
- extern  void init_UMFPack_solver();
+// extern  void init_UMFPack_solver();
  init_UMFPack_solver();
+ init_HashMatrix ();
+    
  Global.Add("renumbering", "(", new removeDOF<double>);
  Global.Add("renumbering", "(", new removeDOF<Complex>);
     Global.Add("renumbering", "(", new removeDOF<double>(1));

@@ -221,7 +221,7 @@ public:
                            const QFElement & fit=*QFElement::Default,
                            const QFBorderElement & fie =*QFBorderElement::Default,int optim=1)
      :MatriceElementaireFES<R,FES>(VVh,
-			Square(VVh.MaximalNbOfDF()*2),
+                                   RNM::Square(VVh.MaximalNbOfDF()*2),
 			new int[VVh.MaximalNbOfDF()*2],
 			VF?VVh.MaximalNbOfDF()*2:0,
                                    this->Full,fit,fie,optim),

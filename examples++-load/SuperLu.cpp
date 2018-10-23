@@ -361,6 +361,12 @@ public:
         U.Store = 0;
         
        set_default_options(&options);
+        if( AH->half)
+        {
+            cerr << " Sorry SUPERLU need a no symmetric matrix "<< endl;
+            cerr << " bug in choose Solver "<< endl; 
+            ExecError("SuperLU solver");
+        }
        options.SymmetricMode = AH->half ? YES : NO ;
        StatInit(&stat);
     }
@@ -427,7 +433,7 @@ public:
             if (perm_r.size() != n) {perm_r.resize(n);}
             if (perm_c.size() != n) {perm_c.resize(n);}
             options.Fact = DOFACT;
-            options.SymmetricMode = AH->half ? YES : NO ;
+           // options.SymmetricMode = AH->half ? YES : NO ;
 
             RR = 1.;
             CC=1.;
@@ -483,6 +489,7 @@ public:
 static bool Load_Init()
 {
 addsolver<VirtualSolverSuperLU<double>>("SuperLU",50,1);
-    addsolver<VirtualSolverSuperLU<Complex>>("SuperLU",50,1);
+addsolver<VirtualSolverSuperLU<Complex>>("SuperLU",50,1);
+setptrstring(def_solver,"SuperLU");
 }
 LOADFUNC(Load_Init)

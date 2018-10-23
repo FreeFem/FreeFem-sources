@@ -28,17 +28,7 @@
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "MatriceCreuse_tpl.hpp"
-#include "Mesh3dn.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
+#include "ff++.hpp"
 #include "NRJ.hpp"
 #include "RosenBrock.hpp"
 #include "LineSearch.hpp"

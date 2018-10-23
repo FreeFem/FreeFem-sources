@@ -1,6 +1,10 @@
 #ifndef __SparseLinearSolver_HPP__
 #define __SparseLinearSolver_HPP__
 #include <cstdarg>
+#include "rgraph.hpp"
+#include "AFunction.hpp"
+#include "MatriceCreuse.hpp"
+#include "MatriceCreuse_tpl.hpp"
 #include "VirtualSolverCG.hpp"
 #include "VirtualSolverSparseSuite.hpp"
 #include "VirtualSolverSkyLine.hpp"
@@ -57,7 +61,7 @@ struct TheFFSolver {
     {
         std::transform(name.begin(), name.end(), name.begin(), static_cast<int(*)(int)>(std::toupper));
         std::transform(from.begin(), from.end(), from.begin(), static_cast<int(*)(int)>(std::toupper));
-
+        cout << " ** ChangeSolver "<< name << " <- " << from << " " << endl ;
         auto f =ffsolver.find(from);
         if( f  == ffsolver.end()) cerr << "Bug ChangeSolver the solver "<< from << " must exist " << endl;
         ffassert( f  != ffsolver.end());// must exist to copie  FH.  !!!!
@@ -118,33 +122,6 @@ typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A, const Data
     typename VirtualMatrix<Z,K>::VSolver *thesolver= TheFFSolver<Z,K>::Find(A,ds,stack);
     ffassert(thesolver);
     return thesolver;
-    /*
-     VirtualSolver<Z,K> *thesolver=0;
-     if(strncmp("UMFPACK",solver,6)==0)
-     thesolver = new VirtualSolverUMFPACK<Z,K> (A,solver,ds,stack); //.strategy,ds.tol_pivot,ds.tol_pivot_sym,ds.verb);
-     else if(strncmp("CHOLMOD",solver,7)==0)
-     thesolver = new VirtualSolverCHOLMOD<Z,K> (A,solver,ds,stack);
-     else if(strncmp("CG",solver,2)==0)
-        thesolver = new SolverCG<Z,K> (A,solver,ds,stack);
-    else if(strncmp("GMRES",solver,5)==0)
-        thesolver = new SolverGMRES<Z,K> (A,solver,ds,stack);
-    else if(strncmp("LU",solver,2)==0)
-        thesolver=new VirtualSolverSkyLine<Z,K> (&A,solver,ds,stack);
-    else if(strncmp("CROUT",solver,5)==0)
-        thesolver=new VirtualSolverSkyLine<Z,K> (&A,solver,ds,stack);
-    else if(strncmp("CHOLESKY",solver,8)==0)
-        thesolver=new VirtualSolverSkyLine<Z,K> (&A,solver,ds,stack);
-    else if(strncmp("MUMPS",solver,5)==0)
-        thesolver=0;
-    else if(strncmp("SUPERLU",solver,6)==0)
-        thesolver=0;
-    if(thesolver ==0) { std::cerr << "\n ******* Solver linear inconnue " << solver << " => UMFPACK " << std::endl;
-        {
-            thesolver =new VirtualSolverUMFPACK<Z,K> (A,solver,ds,stack);
-        }
-    }
-    */
-    return thesolver;
 }
 
 template<class Z, class K>
@@ -201,11 +178,11 @@ public:
     ~SparseLinearSolver(){ delete thesolver;}
 };
 
+template<class R>
+void DefSolver(Stack stack,VirtualMatrix<int,R>   & A,  const Data_Sparse_Solver & ds);
+template<class R>
+void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R>  & A,const  Data_Sparse_Solver & ds);
+
 void init_SparseLinearSolver();
-/*
-template<class TypeIndex=int,class TypeScalar=double>
-inline double * ProduitMatVec(const SparseLinearSolver<TypeIndex,TypeScalar> *A,TypeScalar *x, TypeScalar *Ax) { return VR->A->matmul(x,Ax);}
-template<class TypeIndex=int,class TypeScalar=double>
-inline double * ProduitMatVec(const SparseLinearSolver<TypeIndex,TypeScalar> &A,TypeScalar *x, TypeScalar *Ax) { return VR->A.matmul(x,Ax);}
-*/
+
 #endif

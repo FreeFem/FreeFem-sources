@@ -1,3 +1,6 @@
+#ifndef VIRTUALSOLVERSPARSESUITE_HPP_
+#define VIRTUALSOLVERSPARSESUITE_HPP_
+
 #include <iostream>
 #include <cmath>
 #include "HashMatrix.hpp"
@@ -7,6 +10,7 @@
 #include "VirtualSolver.hpp"
 //#include "cholmod_function.h"
 #include <complex>
+void init_UMFPack_solver();
 
 template<class Z=int,class K=double>
 class VirtualSolverUMFPACK: public VirtualSolver<Z,K> {
@@ -134,6 +138,8 @@ public:
                        //  double tol_pivot=-1.,double tol_pivot_sym=-1., long vverb=verbosity)
     :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
     {
+        if(verb>2 || verbosity> 9) cout << " build solver UMFPACK complex/int " << endl;
+
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
@@ -217,7 +223,7 @@ template<>
 class  VirtualSolverCHOLMOD<int,double> : public VirtualSolver<int,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
+    static const int orTypeSol = 2&4&8&16;
 
     typedef double K;
     typedef int Z;
@@ -294,8 +300,13 @@ public:
     
     void fac_symbolic()
     {
-        AA.nzmax=HA->CSC_U(Ap,Ai,Ax);
-         if(verb>2 || verbosity> 9) cout << "fac_symbolic cholmod R: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << endl;
+        AA.nzmax=HA->nnz;
+        if( HA->half)
+         HA->CSR(Ap,Ai,Ax);
+        else
+         AA.nzmax=HA->CSC_U(Ap,Ai,Ax);
+        
+        if(verb>2 || verbosity> 9) cout << "fac_symbolic cholmod R: nnz U=" << AA.nzmax << " nnz= "  << HA->nnz << " " <<  HA->half << endl;
 
         AA.p=Ap;
         AA.i=Ai;
@@ -444,7 +455,8 @@ public:
     VirtualSolverUMFPACK(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
     :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
     {
-        for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
+        if(verb>2 || verbosity> 9) cout << " build solver UMFPACK double/long " << endl;
+       for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
         umfpack_di_defaults (Control) ;
@@ -523,6 +535,7 @@ public:
     VirtualSolverUMFPACK(HMat  &AA,  const Data_Sparse_Solver & ds,Stack stack )
     :A(&AA),Symbolic(0),Numeric(0),Ai(0),Ap(0),Ax(0),cs(0),cn(0),verb(ds.verb)
     {
+        if(verb>2 || verbosity> 9) cout << " build solver UMFPACK complex/long " << endl;
         for(int i=0;i<UMFPACK_CONTROL;i++) Control[i]=0;
         for(int i=0;i<UMFPACK_INFO;i++) Info[i]=0;
         
@@ -794,4 +807,4 @@ public:
     }
 };
 
-
+#endif

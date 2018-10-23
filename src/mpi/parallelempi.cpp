@@ -29,8 +29,9 @@ using namespace std;
 
 #include "FESpacen.hpp" 
 #include "FESpace.hpp" 
+#include "HashMatrix.hpp"
+#include "SparseLinearSolver.hpp"
 
-#include "MatriceCreuse_tpl.hpp"
 #include "MeshPoint.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"

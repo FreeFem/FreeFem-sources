@@ -1,8 +1,8 @@
 load "Element_P3"
 load "UMFPACK64"
 
-defaulttoUMFPACK64();
-verbosity=3;
+//defaulttoUMFPACK64();
+verbosity=10;
  mesh Th=square(10,10);
  fespace Vh(Th,P3);     // P1 FE space
  Vh uh,vh;              // unkown and test function. 

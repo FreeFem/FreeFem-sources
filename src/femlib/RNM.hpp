@@ -152,6 +152,8 @@ inline void Check_Kn(const char * str,const char * file,int line)
 // ----------------
 
 namespace RNM {
+template<class T> T Square(const T & r){return r*r;}
+
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
 inline long  conj(const long &x){return x;}

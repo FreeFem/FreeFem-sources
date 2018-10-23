@@ -14,6 +14,7 @@ using std::tuple;
 #include <cstdint>
 #include "RNM.hpp"
 #include "RefCounter.hpp"
+#include "VirtualMatrix.hpp"
 
 using std::max;
 using std::min;
@@ -25,16 +26,19 @@ using std::complex;
 using std::list;
 extern  long  verbosity  ;
 
+void init_HashMatrix (); 
 template<class Z,class ZZ>
 inline uint64_t  roll64(Z y,ZZ r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
 
-#include "VirtualMatrix.hpp"
+
 
 int WhichMatrix(istream & f);
 template<class TypeIndex,class TypeScalaire> class HashMatrix;
 
 template<class I,class R,class K>
 void Addto(HashMatrix<I,R> *P0,const HashMatrix<I,K> *PA,R (*f)(K) ,bool trans=false, I ii00=0,I jj00=0);
+
+
 
 template<class TypeIndex,class TypeScalaire>
 class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire> 
@@ -78,13 +82,13 @@ public:
      //bool ismorse;
     
     I NbCoef() const {return  (I) nnz;}
-    void setcoef(const KN_<R> & x){ffassert(x.N()==nnz);KN_<R>(this->aij,nnz) = x;}
-    void getcoef( KN_<R> & x) const {ffassert(x.N()==nnz);x =KN_<R>(this->aij,nnz);}
+    void setcoef(const KN_<R> & x){ffassert(x.N()==(I) nnz);KN_<R>(this->aij,nnz) = x;}
+    void getcoef( KN_<R> & x) const {ffassert(x.N()==(I) nnz);x =KN_<R>(this->aij,nnz);}
     
     void setdiag(const KN_<R> & d);
     void getdiag( KN_<R> & d) const;
     R pscal(R *x,R *y,I sx=1,I sy=1);
-    R pscal(const KN_<R> & x,const KN_<R> & y) { return pscal(x,y,x.step,y.step);}
+    R pscal(const KN_<R> & x,const KN_<R> & y) { return pscal(x,y,(I) x.step,(I) y.step);}
     void SetMorse();
     void UnSetMorse();
     uniquecodeInt CodeIJ() const ;
@@ -98,18 +102,22 @@ public:
     void RenumberingInv(KN_<I> II,KN_<I> JJ);
     void Renumbering(I nn,I mm,KN_<I> II,KN_<I> JJ);
     void RemoveDoubleij(int kk);// remove 
-    template<class R,class K> static R conv(K x) { return (R) x;}
+    template<class R,class K> static R cast_funct(K x) { return (R) x;}
     
-    template<class K> HashMatrix(const HashMatrix<I,K> &A , R (*ff)(K)=conv )
-    :  VirtualMatrix<I,R> (A.n,A.m), nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
-    head(0), next(0),
-    half(A.half), state(unsorted),type_state(type_HM),
-    nbsort(0),sizep(0),lock(0), fortran(0) ,
-    re_do_numerics(0),re_do_symbolic(0)
+    template<class J,class K> HashMatrix(const HashMatrix<J,K> &A , R (*ff)(K) );
+    template<class J> HashMatrix(const HashMatrix<J,R> &A );
+
+    template<class II,class RR> HashMatrix & operator=(const HashMatrix<II,RR>& A )
     {
-        Increaze(A.nnz);
-        Addto<I,R,K>(this,&A,ff);
+        if( (const void*)  this == (const void*) & A) return *this;
+        
+        set(A.n,A.m,A.half,A.nnz,A.i,A.j,A.aij,A.fortran,cast_funct<R,RR>);
+        return *this;
     }
+ 
+    template<class II,class RR> HashMatrix & operator+=(const HashMatrix<II,RR>& A );
+
+    
     int IsTrianglulare() const ; 
     
     void CheckUnLock(const char * cmm)
@@ -158,8 +166,10 @@ public:
         return k;
     }
     
-    template<typename T> static void HMresize(T *&t,size_t no,size_t nn);
-    template<typename T>     static void HMcopy( T *dst,const T *from, size_t nn);
+    template<typename T>                 static void HMresize(T *&t,size_t no,size_t nn);
+    template<typename T,typename TT>     static void HMcopy( T *dst,const TT *from, size_t nn);
+    template<typename T,typename TT>     static void HMcopy( T *dst,const TT *from, size_t nn, T (*ff)(TT) );
+    
     bool do2Triangular(bool lower) ; //  put half tp lower or upper
     void dotranspose();
     void Increaze(size_t nnznew=0,size_t newnnz=0);// newnnz<0 => newnnz is set to nnz (change value of nnz)
@@ -193,13 +203,18 @@ public:
     
     void Sortij();
     void Sortji();
-    void set(I nn,I mm,bool hhalf,I nnnz, I *ii, I*jj, R *aa,int f77=0);
     
-    HashMatrix &operator=(const HashMatrix &A);
- 
-    void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0);
+                                void set(I  nn,I  mm,bool hhalf,size_t nnnz, I  *ii, I *jj, R  *aa,int f77);
+    template<class II>          void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R  *aa,int f77);
+    template<class II,class RR> void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R (*ff)(RR));
 
-   
+    void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0);
+    
+    HashMatrix &operator=(const HashMatrix &A) ;
+    HashMatrix &operator+=(const HashMatrix &A) ;// {Add(&A); return *this;};
+    HashMatrix &operator-=(const HashMatrix &A) ; //{Add(&A,R(-1.)); return *this;}
+
+    
     
     void operator*=(R v);
     void operator=(const R & v);
@@ -235,8 +250,8 @@ public:
     void SetBC(char *wbc,double ttgv);
  
     
-    void addMap(R coef,std::map< pair<I,I>, R> &mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.);
-    bool addMatTo(R coef,HashMatrix<I,R> & mij,bool trans=false,int ii00=0,int jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false) ;
+    void addMap(R coef,std::map< pair<I,I>, R> &mij,bool trans=false,I ii00=0,I jj00=0,bool cnj=false,double threshold=0.);
+    bool addMatTo(R coef,HashMatrix<I,R> & mij,bool trans=false,I ii00=0,I jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false) ;
   
     
     VirtualMatrix<I,R>  & operator +=(MatriceElementaire<R> & me) ;
@@ -250,14 +265,13 @@ public:
     
     HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;}	
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
+    
     void UnHalf();
-    void setsdp(bool sym,bool dp) { this->symetric=sym; this->positive_definite=dp;
-        if( half != sym)
-            if( sym)
-                resize(this->n,this->m,nnz,-1,sym);
-            else
-                UnHalf();
-    }
+    void setsdp(bool sym,bool dp); // set of unset to sym / defpos or not 
+    
+    virtual bool ChecknbLine  (I n) const {return this->n==n;}
+    virtual bool ChecknbColumn  (I m) const {return this->m==m;}
+
 };
 
 // END OF CLASS HashMatrix
@@ -479,10 +493,64 @@ HashMatrix<int,R>* BuildCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >
     
 }
 
-static   inline pair<int,int> ij_mat(bool trans,int ii00,int jj00,int i,int j) {
+template<class I>
+static   inline pair<I,I> ij_mat(bool trans,I ii00,I jj00,I i,I j) {
     // warning trans sub  matrix and not the block.
     return trans ? make_pair<int,int>(j+ii00,i+jj00)
     :  make_pair<int,int>(i+ii00,j+jj00) ; }
 
+
+
+template<class I,class R>    template<typename T,typename TT>
+void HashMatrix<I,R>::HMcopy( T *dst,const TT *from, size_t nn, T(*ff)(TT))
+{
+    for(size_t i=0; i< nn; ++i)
+        dst[i]= ff(from[i]);
+}
+template<class I,class R>    template<typename T,typename TT>
+void HashMatrix<I,R>::HMcopy( T *dst,const TT *from, size_t nn)
+{
+    for(size_t i=0; i< nn; ++i)
+        dst[i]= (T) from[i];
+}
+template<class I,class R> template<class II,class RR> HashMatrix<I,R> &
+HashMatrix<I,R>::operator+=(const HashMatrix<II,RR>& A )
+{
+    Addto(this,&A,cast_funct);
+}
+
+
+template<class I,class R> template<class II,class RR>
+void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R(*ff)(RR))
+{
+    clear();
+    this->n=nn;
+    this->m=mm;
+    fortran=f77;
+    half=hhalf;
+    Increaze(nnnz);
+    nnz=nnnz;
+    
+    HMcopy(i,ii,nnnz);
+    HMcopy(j,jj,nnnz);
+    HMcopy(aij,aa,nnnz,ff);
+    ReHash();
+}
+template<class I,class R> template<class II>
+void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R *aa,int f77)
+{
+    clear();
+    this->n=nn;
+    this->m=mm;
+    fortran=f77;
+    half=hhalf;
+    Increaze(nnnz);
+    nnz=nnnz;
+    
+    HMcopy(i,ii,nnnz);
+    HMcopy(j,jj,nnnz);
+    HMcopy(aij,aa,nnnz);
+    ReHash();
+}
 // #include "HashMatrix-tmpl.hpp"
 #endif

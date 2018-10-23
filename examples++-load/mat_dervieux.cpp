@@ -29,13 +29,18 @@
 
 #include  <iostream>
 using namespace std;
+
 #include "cfloat"
+#include "ff++.hpp"
+/*
 #include "rgraph.hpp"
 #include "error.hpp"
 #include "AFunction.hpp"
 
 // #include "lex.hpp"
-#include "MatriceCreuse_tpl.hpp"
+#include "HashMatrix.hpp"
+#include "SparseLinearSolver.hpp"
+
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"

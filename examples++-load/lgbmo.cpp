@@ -28,6 +28,7 @@
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
+/*
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "rgraph.hpp"
@@ -39,6 +40,8 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
+ */
+#include "ff++.hpp"
 #include "bmo.hpp"
 
 // template<class R>

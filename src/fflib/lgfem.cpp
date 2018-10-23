@@ -43,8 +43,11 @@ using namespace std;
 #include "fem.hpp"
 #include "Mesh3dn.hpp"
 
+#include "HashMatrix.hpp"
 
-#include "MatriceCreuse_tpl.hpp"
+#include "SparseLinearSolver.hpp"
+
+//#include "MatriceCreuse_tpl.hpp"
 
 
 #include "MeshPoint.hpp"

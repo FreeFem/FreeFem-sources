@@ -13,7 +13,7 @@ fespace Vh(Th,P1);     // P1 FE space
  func g=0;                 //  boundary condition function
  
  verbosity= 3;
-problem laplace(uh,vh,solver="SUPERLU",tgv=1e5) =                    //  definion of  the problem 
+problem laplace(uh,vh,solver="SUPERLU",tgv=1e5,sym=0) =                    //  definion of  the problem 
     int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
   - int2d(Th)( f*vh )                        	     //  linear form
   + on(1,2,3,4,uh=g) ;                      //  bou  ndary condition form

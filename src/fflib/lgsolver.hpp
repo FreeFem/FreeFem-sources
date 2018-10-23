@@ -28,6 +28,7 @@
 #ifndef lgsolver_hpp_
 #define lgsolver_hpp_
 #include "gmres.hpp"
+
 typedef void *    pcommworld;
 
 namespace  Fem2D {
@@ -650,8 +651,7 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
             if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;
             else if( ds.sym ) ds.solver=*def_solver_sym;
             else  ds.solver=*def_solver;
-            if(verbosity>9) cout << "  set default solver to " << ds.solver << endl;
-
+            if(verbosity>4) cout << "  **Warning: set default solver to " << ds.solver << endl;
         }
 
         ffassert(++kk == n_name_param);

@@ -1,3 +1,6 @@
+#ifndef VIRTUALSOLVERSKYLINE_HPP_
+#define VIRTUALSOLVERSKYLINE_HPP_
+
 #include <iostream>
 #include <cmath>
 #include "HashMatrix.hpp"
@@ -214,4 +217,4 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
     
     
     
-    
+#endif

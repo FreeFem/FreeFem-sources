@@ -39,11 +39,7 @@ extern "C" {
     extern void omp_set_num_threads (int);
 }
 #endif
-#include "rgraph.hpp"
-#include "AFunction.hpp"
-
-#include "MatriceCreuse.hpp"
-#include "dmatrix.hpp"
+#include "ff++.hpp"
 
 template<typename RR> struct  PARDISO_STRUC_TRAIT {typedef void R; static const int unSYM = 0; static const int SYM = 0;};
 template<> struct PARDISO_STRUC_TRAIT<double>  {typedef double R; static const int unSYM = 11; static const int SYM = 2;};
@@ -59,30 +55,59 @@ template<class R>
 class SolverPardiso: public  VirtualSolver<int,R> {
 private:
     typedef HashMatrix<int,R> HMat;
-    mutable void *_pt[64];
-    mutable MKL_INT mtype;
-    mutable MKL_INT _iparm[64];
+    mutable void * pt[64];
+    MKL_INT iparm[64];
+    MKL_INT maxfct, mnum, phase, error, msglvl;
+    /* Auxiliary variables. */
+    double ddum;          /* Double dummy */
+    MKL_INT idum;         /* Integer dummy. */
+    
     mutable HMat *ptA;
-    MKL_INT *_I;
-    MKL_INT *_J;
-    R *_C; // Coef
+    MKL_INT n;
+    MKL_INT *ia;
+    MKL_INT *ja;
+    R *a; // Coef
     long verb;
     long cn,cs;
-    MKL_INT pmtype;
-        MKL_INT phase, error, msglvl, maxfct, mnum;
+    MKL_INT pmtype,mtype, nrhs;
 public:
      static const int orTypeSol = 1&2&8&16;// Do all
     static const MKL_INT pmtype_unset= -1000000000;
     typedef typename PARDISO_STRUC_TRAIT<R>::R MR;
     
     SolverPardiso (HMat  &AH, const Data_Sparse_Solver & ds,Stack stack )
-    : ptA(&AH),_I(0),_J(0),_C(0),verb(ds.verb),cn(0),cs(0),pmtype(pmtype_unset)
+    : ptA(&AH),ia(0),ja(0),a(0),verb(ds.verb),cn(0),cs(0),pmtype(pmtype_unset)
     {
         if( ds.lparams.N()>1) pmtype=ds.lparams[0]; // bof bof ...
-        msglvl=0;
-        error=0;
-        phase =0;
-    //(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double) {
+        fill(iparm,iparm+64,0);
+        fill(pt,pt+64,(void*) 0);
+        iparm[0] = 1;         /* No solver default */
+        iparm[1] = 2;         /* Fill-in reordering from METIS */
+        iparm[3] = 0;         /* No iterative-direct algorithm */
+        iparm[4] = 0;         /* No user fill-in reducing permutation */
+        iparm[5] = 0;         /* Write solution into x */
+        iparm[6] = 0;         /* Not in use */
+        iparm[7] = 2;         /* Max numbers of iterative refinement steps */
+        iparm[8] = 0;         /* Not in use */
+        iparm[9] = 13;        /* Perturb the pivot elements with 1E-13 */
+        iparm[10] = 1;        /* Use nonsymmetric permutation and scaling MPS */
+        iparm[11] = 0;        /* Not in use */
+        iparm[12] = 0;        /* Maximum weighted matching algorithm is switched-off (default for symmetric). Try iparm[12] = 1 in case of inappropriate accuracy */
+        iparm[13] = 0;        /* Output: Number of perturbed pivots */
+        iparm[14] = 0;        /* Not in use */
+        iparm[15] = 0;        /* Not in use */
+        iparm[16] = 0;        /* Not in use */
+        iparm[17] = -1;       /* Output: Number of nonzeros in the factor LU */
+        iparm[18] = -1;       /* Output: Mflops for LU factorization */
+        iparm[19] = 0;        /* Output: Numbers of CG Iterations */
+        maxfct = 1;           /* Maximum number of numerical factorizations. */
+        mnum = 1;         /* Which factorization to use. */
+        msglvl = 1;           /* Print statistical information in file */
+        error = 0;       //(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double) {
+        if( ptA->half)
+           mtype = -2;       /* Real symmetric matrix */
+        else mtype = 11;     // CRS
+        nrhs=0; 
     }
 
 void SetState()
@@ -94,164 +119,87 @@ void SetState()
 }
 void fac_init()
 {
-    MR ddum;
-    maxfct = 1; /* Maximum number of numerical factorizations. */
-    mnum = 1; /* Which factorization to use. */
-    if (ptA->half) {
-        mtype = PARDISO_STRUC_TRAIT<R>::SYM;
-    } else {
-        if (pmtype != pmtype_unset )
-            mtype = pmtype;// Debil .... FH
-        else
-            mtype = PARDISO_STRUC_TRAIT<R>::unSYM;
+    ptA->setfortran(true);
+    n = ptA->N;
+    if(ptA->half)
+    {
+        ptA->CSR(ia,ja,a);
+   if( verb>99999)
+     for(int i=0; i< n; ++i)
+        for(int k= ia[i]-1; k<ia[i+1]; ++ k)
+            cout << i <<" " <<  ja[k] << " " << a[k] << endl;
+    }
+    else {
+        ptA->CSR(ia,ja,a);
     }
     
-    for (unsigned short i = 0; i < 64; ++i) {
-        _iparm[i] = 0;
-        _pt[i] = NULL;
-    }
-    
-    _iparm[0] = 1;    /* No solver default */
-    _iparm[1] = 3;    /* Fill-in reordering from METIS */
-    _iparm[2] = 1;
-    _iparm[3] = 0;    /* No iterative-direct algorithm */
-    _iparm[4] = 0;    /* No user fill-in reducing permutation */
-    _iparm[5] = 0;    /* Write solution into rhs */
-    _iparm[6] = 0;    /* Not in use */
-    _iparm[7] = 0;    /* Max numbers of iterative refinement steps */
-    _iparm[8] = 0;    /* Not in use */
-    _iparm[9] = 13;    /* Perturb the pivot elements with 1E-13 */
-    _iparm[10] = 1;    /* Use nonsymmetric permutation and scaling MPS */
-    _iparm[11] = 0;    /* Not in use */
-    _iparm[12] = 0;    /* Maximum weighted matching algorithm is switched-off (default for symmetric). Try _iparm[12] = 1 in case of inappropriate accuracy */
-    _iparm[13] = 0;    /* Output: Number of perturbed pivots */
-    _iparm[14] = 0;    /* Not in use */
-    _iparm[15] = 0;    /* Not in use */
-    _iparm[16] = 0;    /* Not in use */
-    _iparm[17] = -1;/* Output: Number of nonzeros in the factor LU */
-    _iparm[18] = -1;/* Output: Mflops for LU factorization */
-    _iparm[19] = 0;    /* Output: Numbers of CG Iterations */
-    _iparm[34] = 1;
-    msglvl = 0;    /* Print statistical information in file */
-    if (verbosity > 1) {
-        msglvl = 1;
-    }
     
 }
 void fac_symbolic()
 {// phase 11
 
-    
-
-    error = 0;    /* Initialize error flag */
-    MKL_INT one = 1, nrhs=0;
-    MKL_INT n = ptA->n;
-    
-    if (mtype != 2) {
-        cout << " Pardiso :CSR  "<< endl;
-        ptA->CSR();
-        _I = ptA->p;
-        _J = ptA->i;
-        _C = ptA->aij;
-    } else {
-        // WARNING PARDISO USE just UPPER TRAINGular PART in CSR format
-        
-        if (ptA->half) {
-             cout << " Pardiso :do2Triangular "<< endl;
-            ptA->do2Triangular(false);// triangular Upper ...
-            ptA->CSR();
-            _I = ptA->p;
-            _J = ptA->i;
-            _C = ptA->aij;
-
-        } else {
-            cout << " Pardiso : Copie mat ????? "<< endl;
-            ptA->CSR();
-            _I = new MKL_INT[n + 1];
-            _J = new MKL_INT[n + (ptA->nnz - n) / 2];
-            _C = new R[n + (ptA->nnz - n) / 2];
-            trimCSR<true, 'C', R>(n, _I, ptA->p, _J, ptA->j, _C, ptA->aij);
-        }
-    }
-    if(verb>2 || verbosity> 9) cout << "fac_symbolic PARDISO  nnz U " << " nnz= "  << n<< " " << ptA->nnz << " "
-        <<   endl;
-    MR ddum;
-    MR * _CC =  reinterpret_cast<MR *>((R *)_C);
     phase = 11;
-    PARDISO(_pt,  &maxfct, &mnum, &mtype, &phase,
-            &n, _CC, _I, _J, &one, &nrhs, _iparm, &msglvl, &ddum, &ddum, &error);
-    printf("\nReordering completed ... ");
-    printf("\nNumber of nonzeros in factors = %d", _iparm[17]);
-    printf("\nNumber of factorization MFLOPS = %d", _iparm[18]);
+    PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
+             &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
+    if ( error != 0 )
+    {
+        printf ("\nERROR during symbolic factorization: %d\n", error);
+        exit (1);
+    }
+    if(verb>3)
+    {
+        printf ("\n Pardiso: Reordering completed ... ");
+        printf ("\n      Number of nonzeros in factors = %d", iparm[17]);
+        printf ("\n      Number of factorization MFLOPS = %d", iparm[18]);
+    }
 
-
-    cout << " PARDISO" << error << endl;
 }
 void fac_numeric()
 {
-    MKL_INT nrhs = 0;
-    MKL_INT idum;
-    error = 0;
     phase = 22;
-    MR ddum;
-    MKL_INT n = ptA->n;
-    if(verb>2 || verbosity> 9) cout << "fac_NUMERIC PARDISO  R: nnz U " << " nnz= "  << ptA->nnz << endl;
-    MR * _CC =  reinterpret_cast<MR *>((R *)_C);
-    PARDISO(_pt, &maxfct, &mnum, &mtype, &phase,
-            &n, _CC , _I, _J,  &idum, &nrhs, _iparm, &msglvl, &ddum, &ddum, &error);
-    /*
-     phase = 22;
-     PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
-     &n, a, ia, ja, &idum, &nrhs,
-     iparm, &msglvl, &ddum, &ddum, &error);
+    PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
+             &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
+    if ( error != 0 )
+    {
+        printf ("\nERROR during numerical factorization: %d", error);
+        exit (2);
+    }
+    if(verb>3)
+    printf ("\n    Pardiso: Factorization completed ... ");
 
-     */
-  
 
 }
 void dosolver(R *x,R*b,int N,int trans)
 {
-    MKL_INT nrhs = N;
-     msglvl = 0;
-    MKL_INT one = 1;
-    MKL_INT idum;
-    
-    if (verbosity > 1) {
-        msglvl = 1;
+    phase = 33;
+    iparm[7] = 2;         /* Max numbers of iterative refinement steps. */
+    nrhs=N;
+    iparm[11] = 2; //
+    /* Set right hand side to one. */
+   
+    PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
+             &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, b, x, &error);
+    if ( error != 0 )
+    {
+        printf ("\nERROR during solution: %d", error);
+        exit (3);
     }
-    
-     error = 0;
-     phase = 33;
-    MR ddum;
-    MKL_INT n = ptA->n;
-       if(verb>2 || verbosity> 9) cout << "dosolver PARDISO  R: nnz U " << " nnz= "  << ptA->nnz << " "<< N << endl;
-    MR * _CC =  reinterpret_cast<MR *>((R *)_C);
-    PARDISO(_pt, &maxfct, &mnum, &mtype, &phase, &n,_CC, _I, _J, &idum, &nrhs, _iparm, &msglvl, reinterpret_cast<MR *>((R *)b), reinterpret_cast<MR *>((R *)x), &error);
+    printf ("\nSolve completed ... ");
+   
+
 }
 
 ~SolverPardiso () {
-    MKL_INT phase = -1;
-    MKL_INT one = 1;
-    MKL_INT msglvl = 0;
-    MKL_INT error;
-    MR ddum;
-    MKL_INT idum;
-    MKL_INT n = ptA->n;
+    ptA->setfortran(false);
+    ptA->HM();
+    nrhs=0;
+    phase = -1;           /* Release internal memory. */
     
-    PARDISO(_pt,&maxfct, &mnum, &mtype, &phase, &n, &ddum, &idum, &idum, &one, &one, _iparm, &msglvl, &ddum, &ddum, &error);
-    if (mtype == 2) {
-        if (_I)
-            delete [] _I;
-        
-        
-        if (_J)
-            delete [] _J;
-        
-        if (_C != ptA->aij)
-            delete [] _C;
-
-    }
+    PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
+             &n, &ddum, ia, ja, &idum, &nrhs,
+             iparm, &msglvl, &ddum, &ddum, &error);
 }
+    
 };
 
 

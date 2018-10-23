@@ -1173,52 +1173,6 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
     }
 };
 
-template<class R>
-void SetSolver(Stack stack,bool VF,MatriceCreuse<R> & A, Data_Sparse_Solver & ds) 
-	       /*Stack stack,MatriceCreuse<R> & A,const TypeSolveMat *typemat,bool VF,double eps,int NbSpace,int itmax,
-	       const OneOperator * const precon,int umfpackstrategy, double tgv,
-	       double tol_pivot,double tol_pivot_sym, 
-	       int *param_int, double *param_double, string *param_char, int *perm_r, 
-	       int *perm_c, string *file_param_int, string *file_param_double, string *file_param_char, 
-	       string *file_param_perm_r, string *file_param_perm_c)*/
-{ 
-  using namespace Fem2D;
-  const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
-   typename  VirtualMatrix<int,R>::VSolver * solver=0;
-    MatriceMorse<R> * AH(dynamic_cast<MatriceMorse<R> *>(&A));
-    ffassert(AH);
-
-    
-     // MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-/*
-      switch (ds.typemat->t)
-     {
-      case TypeSolveMat::LU       : solver=NewVSolver<int,R>(AH,"LU",ds,stack);  break;
-      case TypeSolveMat::CROUT    : solver=NewVSolver<int,R>(AH,"CROUT",ds,stack); ; break;
-      case TypeSolveMat::CHOLESKY :  solver=NewVSolver<int,R>(AH,"CHOLESKY",ds,stack); ; break;
-      case TypeSolveMat::GC:
-              solver=NewVSolver<int,R>(AH,"CG",ds,stack);
-              break;
-      case TypeSolveMat::GMRES :
-              //        InternalError("GMRES solveur to do");
-              solver=NewVSolver<int,R>(AH,"GMRES",ds,stack);
-              break;
-      case TypeSolveMat::SparseSolver :
-              solver=NewVSolver<int,R>(AH,"UMFPACK",ds,stack);
-              //   AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,epsilon,tol_pivot,tol_pivot_sym));
-              break;
-       default:
-        cerr << " type resolution " << ds.typemat->t <<" sym=" <<  ds.typemat->profile <<  endl;
-        CompileError("type resolution unknown"); break;       
-      }
-    */
-      solver = NewVSolver<int,R>(*AH,ds,stack);
-      if(solver)
-        A.SetSolver(solver,true);
-    else
-        CompileError("SetSolver: type resolution unknown");
-
-}
 
 template<class R,class v_fes>
 AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const 

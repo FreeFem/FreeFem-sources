@@ -34,12 +34,19 @@
 
 
 using namespace std;
+//#include "ff++.hpp"
+
+
 #include "error.hpp"
 #include "arpackff.hpp"
 #include "AFunction.hpp"
 #include "rgraph.hpp"
 #include "RNM.hpp"
-#include "MatriceCreuse_tpl.hpp"
+
+#include "HashMatrix.hpp"
+
+#include "SparseLinearSolver.hpp"
+
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
@@ -47,6 +54,7 @@ using namespace std;
 #include "lgsolver.hpp"
 #include "problem.hpp"
 //#include "ffstack.hpp"
+ 
 extern Block *currentblock;
 
 typedef double R;

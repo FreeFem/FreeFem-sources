@@ -6,7 +6,10 @@ using namespace std;
 #include "rgraph.hpp"
 #include "error.hpp"
 #include "AFunction.hpp"
-#include "MatriceCreuse_tpl.hpp"
+#include "HashMatrix.hpp"
+
+#include "SparseLinearSolver.hpp"
+
 #include "lgsolver.hpp"
 
 #ifdef HAVE_LIBUMFPACK

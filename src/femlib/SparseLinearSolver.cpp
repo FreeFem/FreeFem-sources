@@ -8,12 +8,24 @@ void Data_Sparse_Solver::Init_sym_positive_var()
 {
     //  put the solver name in UPPER CASE
    std::transform(solver.begin(), solver.end(), solver.begin(), static_cast<int(*)(int)>(std::toupper));
-    if( solver == "CHOLESKY") {sym = true; positive = true;}
-    if( solver == "CROUT") {sym = true;}
-    if( solver == "CG") {sym = true;positive=true;}
-    if( solver == "SPARSESOLVERSYM") {sym=true;}
-    if( solver == "CHOLMOD") {sym=true;}
-    
+    auto i=  TheFFSolver<int,R>::ffsolver.find(solver);
+    if ( i != TheFFSolver<int,R>::ffsolver.end())
+    {
+        //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+        int ts = i->second->orTypeSol ;
+        if ( (ts & 2) && (( ts & 1 ) ==0)) sym=0; //
+        if ( (ts & 4) && (( ts & 8 ) ==0)) positive=0; //
+        if(verbosity>4)
+            cout <<  "  The solver "<< solver << " need sym "<< sym << " and  positif def "<< positive << " matrix \n";
+    }
+    else
+    {
+        if( solver == "CHOLESKY") {sym = true; positive = true;}
+        if( solver == "CROUT") {sym = true;}
+        if( solver == "CG") {sym = true;positive=true;}
+        if( solver == "SPARSESOLVERSYM") {sym=true;}
+        if( solver == "CHOLMOD") {sym=true;}
+    }
 }
 
 template<class Z,class K>
@@ -35,6 +47,7 @@ template<class Z,class K>
 {
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     //    static const int  TS_unsym=1, TS_sym=2, TS_def_positif=4,  TS_not_def_positif=8, TS_sequental = 16, TS_mpi = 32;
+    if(verbosity>2) cout << " ** Find solver "<< ds.solver << endl;
     typedef  VirtualMatrix<Z,K> VM;
     int sym=ds.sym, pos = ds.positive;
     string sn = ds.solver;
@@ -55,13 +68,13 @@ template<class Z,class K>
                 {
                     i=j; // the last   ???
                     pp=p;
-                    if(verbosity>999)
+                    if(verbosity>9)
                         cout << " find solver " << i->first << " "<< p << " / " << typesolve << " in "<< ts <<  endl;
                 }
                 
             }
             else
-                if(verbosity>999)
+                if(verbosity>9)
                     cout << " not find solver " << i->first << " "<< p << " / " << typesolve << " in "<< ts <<  endl;
             
             
@@ -85,28 +98,67 @@ template<class Z,class K>
 }
 
 
+template<class R>
+void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A,const  Data_Sparse_Solver & ds)
+{
+    using namespace Fem2D;
+    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
+    typename  VirtualMatrix<int,R>::VSolver * solver=0;
+    HashMatrix<int,R> * AH(dynamic_cast<HashMatrix<int,R> *>(&A));
+    ffassert(AH);
+    solver = NewVSolver<int,R>(*AH,ds,stack);
+    if(solver)
+        A.SetSolver(solver,true);
+    else
+        CompileError("SetSolver: type resolution unknown");
+    
+}
 
 
+template<class R>
+void DefSolver(Stack stack, VirtualMatrix<int,R>  & A,const Data_Sparse_Solver & ds)
+{
+    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
+    typename  VirtualMatrix<int,R>::VSolver * solver=0;
+    HashMatrix<int,R>* AH(dynamic_cast<HashMatrix<int,R> *>(&A));
+    ffassert(AH);
+    
+    solver = NewVSolver<int,R>(*AH,ds,stack);
+    
+    if(solver)
+        A.SetSolver(solver,true);
+    else
+        CompileError("SetSolver: type resolution unknown");
+    
+    
+}
 
-
+typedef double R;
+typedef complex<double> C;
 
 // explicit instentition of solver ...
 std::map<std::string,int> * Data_Sparse_Solver::mds = Data_Sparse_Solver::Set_mds();
 
 void init_SparseLinearSolver()
 {
-    InitSolver<int,double>();
-    InitSolver<int,std::complex<double> >();
+    InitSolver<int,R>();
+    InitSolver<int,C>();
 }
 
-template class SparseLinearSolver<int,double>;
-template class SparseLinearSolver<int,std::complex<double> >;
+template class SparseLinearSolver<int,R>;
+template class SparseLinearSolver<int,C>;
 
-template class TheFFSolver<int,double>;
-template class TheFFSolver<int,std::complex<double> >;
+template class TheFFSolver<int,R>;
+template class TheFFSolver<int,C>;
 
-template int TypeOfMat<int,double>( Data_Sparse_Solver & ds);
-template  int TypeOfMat<int,std::complex<double> >( Data_Sparse_Solver & ds);
+template int TypeOfMat<int,R>( Data_Sparse_Solver & ds);
+template  int TypeOfMat<int,C>( Data_Sparse_Solver & ds);
 
-template void Data_Sparse_Solver::Init_sym_positive_var<double>();
-template void Data_Sparse_Solver::Init_sym_positive_var<complex<double> >();
+template void Data_Sparse_Solver::Init_sym_positive_var<R>();
+template void Data_Sparse_Solver::Init_sym_positive_var<C>();
+
+template void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A, const Data_Sparse_Solver & ds);
+template void SetSolver(Stack stack,bool VF,VirtualMatrix<int,C> & A, const     Data_Sparse_Solver & ds);
+
+template void DefSolver(Stack stack, VirtualMatrix<int,R>  & A,const Data_Sparse_Solver & ds);
+template void DefSolver(Stack stack, VirtualMatrix<int,C> & A,const  Data_Sparse_Solver & ds);
