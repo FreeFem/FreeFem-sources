@@ -31,6 +31,7 @@ public:
     void fac_numeric(){assert(0);}
     ~VirtualSolverUMFPACK(){}
     void SetState(){}
+   // VirtualSolver<Z,K> *clone() { return new VirtualSolverUMFPACK(*this);}
 };
 
 // specilisation
@@ -110,7 +111,7 @@ public:
      if(Symbolic)  umfpack_di_free_symbolic (&Symbolic) ;
      if(Numeric)   umfpack_di_free_numeric (&Numeric) ;
     }
-    
+  //  VirtualSolver<Z,K> *clone() { return new VirtualSolverUMFPACK(*this);}
 };
 
 // specilisation

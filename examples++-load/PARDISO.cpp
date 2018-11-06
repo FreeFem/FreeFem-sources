@@ -78,10 +78,12 @@ public:
     SolverPardiso (HMat  &AH, const Data_Sparse_Solver & ds,Stack stack )
     : ptA(&AH),ia(0),ja(0),a(0),verb(ds.verb),cn(0),cs(0),pmtype(pmtype_unset)
     {
+        if(verb>2)  cout << "   SolverPardiso "<< this << " mat: " << ptA << "sym "<< ds.sym << " half " <<ptA->half  <<  " spd " << ds.positive << endl;
+        
         if( ds.lparams.N()>1) pmtype=ds.lparams[0]; // bof bof ...
         fill(iparm,iparm+64,0);
         fill(pt,pt+64,(void*) 0);
-        iparm[0] = 1;         /* No solver default */
+        iparm[0] =   1;         /* No solver default */
         iparm[1] = 2;         /* Fill-in reordering from METIS */
         iparm[3] = 0;         /* No iterative-direct algorithm */
         iparm[4] = 0;         /* No user fill-in reducing permutation */
@@ -100,9 +102,9 @@ public:
         iparm[17] = -1;       /* Output: Number of nonzeros in the factor LU */
         iparm[18] = -1;       /* Output: Mflops for LU factorization */
         iparm[19] = 0;        /* Output: Numbers of CG Iterations */
-        maxfct = 1;           /* Maximum number of numerical factorizations. */
+        maxfct =        1;           /* Maximum number of numerical factorizations. */
         mnum = 1;         /* Which factorization to use. */
-        msglvl = 1;           /* Print statistical information in file */
+        msglvl = verb > 4;           /* Print statistical information in file */
         error = 0;       //(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double) {
         if( ptA->half)
            mtype = -2;       /* Real symmetric matrix */
@@ -124,15 +126,15 @@ void fac_init()
     if(ptA->half)
     {
         ptA->CSR(ia,ja,a);
-   if( verb>99999)
-     for(int i=0; i< n; ++i)
-        for(int k= ia[i]-1; k<ia[i+1]; ++ k)
-            cout << i <<" " <<  ja[k] << " " << a[k] << endl;
     }
     else {
         ptA->CSR(ia,ja,a);
     }
-    
+    if( verb>99)
+        for(int i=0; i< n; ++i)
+            for(int k= ia[i]-1; k<ia[i+1]; ++ k)
+                cout << i+1 <<" " <<  ja[k] << " " << a[k] << endl;
+
     
 }
 void fac_symbolic()
@@ -174,7 +176,7 @@ void dosolver(R *x,R*b,int N,int trans)
     phase = 33;
     iparm[7] = 2;         /* Max numbers of iterative refinement steps. */
     nrhs=N;
-    iparm[11] = 2; //
+    iparm[11] = trans; //
     /* Set right hand side to one. */
    
     PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
@@ -190,11 +192,16 @@ void dosolver(R *x,R*b,int N,int trans)
 }
 
 ~SolverPardiso () {
+    //   Warning the solver is del afer the Matrix ptA;
+    if(verb>99) cout << " ~SolverPardiso"<< this << " " << ptA << " " << ptA->type_state<<  endl;
+    if( ptA->type_state != HMat::type_isdeleted)
+    {
     ptA->setfortran(false);
     ptA->HM();
-    nrhs=0;
+    }
+     nrhs=0;
     phase = -1;           /* Release internal memory. */
-    
+
     PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
              &n, &ddum, ia, ja, &idum, &nrhs,
              iparm, &msglvl, &ddum, &ddum, &error);

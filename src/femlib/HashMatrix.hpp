@@ -55,7 +55,7 @@ public:
     typedef TypeIndex I;
     typedef TypeScalaire R;
     typedef uint64_t uniquecodeInt;
-    static const int type_HM=0,type_COO=1, type_CSR=2,type_CSC=3;
+    static const int type_isdeleted=-1,type_HM=0,type_COO=1, type_CSR=2,type_CSC=3;
     static const int  unsorted=0, sorted_ij=type_CSR,sorted_ji=type_CSC;
     typedef size_t iterator;
     typedef size_t Hash;
@@ -133,7 +133,6 @@ public:
     void resize(I nn, I mm=0)  {resize(nn,mm,nnz); }
         
     void resize(I nn, I mm,size_t nnnz, double tol = -1., bool sym=false );
-    void RemoveHalf(double tol=-1)  { resize(this->n,this->m,tol,true); }
     void clear();
     Hash hash(size_t ii,size_t jj) const{ return ( (ii-fortran)+ (jj-fortran)*this->n )%nhash; }
     
@@ -267,6 +266,9 @@ public:
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
     
     void UnHalf();
+    void Half() {resize(this->n,this->m,nnz,-1,true);}
+    void RemoveHalf(int cas,double tol=-1) ;
+
     void setsdp(bool sym,bool dp); // set of unset to sym / defpos or not 
     
     virtual bool ChecknbLine  (I n) const {return this->n==n;}

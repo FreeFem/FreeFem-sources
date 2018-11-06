@@ -32,7 +32,7 @@ struct Data_Sparse_Solver {
     static std::map<std::string,int> *  mds;
     typedef std::map<std::string,int>::const_iterator IMDS;
 
-    
+    Expression einitmat;
     bool initmat;
     string  solver;
     double epsilon;
@@ -73,7 +73,7 @@ struct Data_Sparse_Solver {
     
     Data_Sparse_Solver()
     :
-    initmat(1),
+    einitmat(0),
     solver(""),
     strategy(0),
     tgv(ff_tgv),
@@ -94,7 +94,11 @@ struct Data_Sparse_Solver {
     sym(false),
     positive(false)
     {}
-    
+    void Update(Stack s)
+    {
+        if(einitmat)
+            initmat= GetAny<bool>((*einitmat)(s));
+    }
     template<class R> 
     void Init_sym_positive_var();
 

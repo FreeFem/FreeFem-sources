@@ -596,21 +596,6 @@ template <class R>
 basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
  LIST_NAME_PARM_MAT
 
-
-
-/*
-   {   "paramint",&typeid(KN<int>)}, // Add J. Morice 02/09 
-   {   "paramdouble",&typeid(KN<double>)},
-
-   {   "paramstring",&typeid(string*)},
-   {   "permrow",&typeid(KN_<long>)},
-   {   "permcol",&typeid(KN_<long>)},
-   {   "fileparamint",&typeid(string*)}, // Add J. Morice 02/09 
-   {   "fileparamdouble",&typeid(string*)},
-   {   "fileparamstring",&typeid(string* )},
-   {   "filepermrow",&typeid(string*)},
-   {   "filepermcol",&typeid(string*)} //22
- */
 };
 
 template<class R>
@@ -624,7 +609,10 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     bool VF=false;
     ds.factorize=false;
 
-  SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+    VirtualMatrix<int,R> *pvm =A->pMC();
+    ffassert(pvm);
+    pvm->setsdp(ds.sym,ds.positive); // put the matrix in rigth format
     SetSolver<R>(stack,VF,*A->pMC(),ds);
 
   return Nothing; 
@@ -1493,28 +1481,30 @@ template<class R>
 template<class R,class RR,int init>
 AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
 {
-  using namespace Fem2D;
-  Matrice_Creuse<R> * Mat;
- 
-  if(transp)
-   {
-    Matrice_Creuse_Transpose<R>  tMat=GetAny<Matrice_Creuse_Transpose<R> >((*eA)(stack));
-    Mat=tMat; 
-   }
-  else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
+    using namespace Fem2D;
+    Matrice_Creuse<R> * Mat;
+    
+    if(transp)
+    {
+        Matrice_Creuse_Transpose<R>  tMat=GetAny<Matrice_Creuse_Transpose<R> >((*eA)(stack));
+        Mat=tMat;
+    }
+    else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
     MatriceMorse<R> * mr=Mat->pHM();
-   
+    
     MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
     *mrr = *mr;
     if(transp) mrr->dotranspose();
     
-  
-  Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-  if(!init) sparse_mat->init() ;
-  sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
-  sparse_mat->A.master(mrr);
-  //delete mr;
-  return sparse_mat;
+    
+    Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
+    if(!init) sparse_mat->init() ;
+    sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
+    sparse_mat->A.master(mrr);
+    VirtualMatrix<int,RR> *pvm = sparse_mat->pMC();
+    pvm->SetSolver(); // copy solver ???
+    //delete mr;
+    return sparse_mat;
 }
 
 template<class R,class RR,int init>
@@ -3330,6 +3320,50 @@ bool SparseDefault()
 
 bool Have_UMFPACK_=false;
 bool Have_UMFPACK() { return Have_UMFPACK_;}
+
+MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
+{
+    
+    // half < 0 => L
+    // half > 0 => U
+    // half = 0 => L and the result will be sym
+    int sym = half ==0;
+    int nnz =0;
+    int n = A.n;
+    
+    if( A.half )
+        return &A;//  copy
+    // do alloc
+    // MatriceMorse<R> *r=&A;
+    MatriceMorse<R> *r=new MatriceMorse<R>(A);
+    r->RemoveHalf(half,tol);
+    if(verbosity )
+        cout << "  removeHalf: new nnz = "<< r->nnz << " "<< r->half << endl;
+    
+    return r;
+}
+
+newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half,const double & tol)
+{
+    MatriceCreuse<R> * pa=pA->A;
+    MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+    ffassert(pma);
+    return newpMatrice_Creuse<R>(stack,removeHalf(*pma,half,tol));
+}
+
+bool removeHalf(Stack stack,Matrice_Creuse<R> *const & pR,Matrice_Creuse<R> *const & pA,long const & half,const double & tol)
+{
+    MatriceCreuse<R> * pa=pA->A;
+    MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+    MatriceCreuse<R> * pr= removeHalf(*pma,half,tol);
+    
+    pR->A.master(pr);
+    return true;
+}
+newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half)
+{
+    return removeHalf(stack,pA,half,-1.);
+}
 //OneOperator0<bool> *TheSetDefaultSolver=0; // to change the SetDefaultSolver
 void  init_lgmat() 
 
@@ -3451,6 +3485,10 @@ void  init_lgmat()
     Global.New("DefaultSolver",CPValue<string*>(def_solver));
     Global.New("DefaultSolverSym",CPValue<string*>(def_solver_sym));
     Global.New("DefaultSolverSDP",CPValue<string*>(def_solver_sym_dp));
+
+    Global.Add("removeHalf", "(", new OneOperator2s_<newpMatrice_Creuse<R> ,Matrice_Creuse<R> * ,long>(removeHalf));
+    Global.Add("removeHalf", "(", new OneOperator3s_<newpMatrice_Creuse<R> ,Matrice_Creuse<R> * ,long,double>(removeHalf));
+    Global.Add("removeHalf", "(", new OneOperator4s_<bool,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,long,double>(removeHalf));
 
 }
 

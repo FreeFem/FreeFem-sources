@@ -30,33 +30,6 @@
 #include "AFunction_ext.hpp"
 #include <vector>
 
-MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,int half)
-{
-    // half < 0 => L
-    // half > 0 => U
-    // half = 0 => L and the result will be sym
-    int sym = half ==0;
-    int nnz =0;
-    int n = A.n;
-    
-    if( A.half )
-        return &A;//  copy
-    // do alloc
-    MatriceMorse<R> *r=new MatriceMorse<R>(A);
-     r->RemoveHalf(0.);
-    if(verbosity )
-        cout << "  removeHalf: nnz = "<< r->nnz << endl;
-    
-    return r;
-}
-
-newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long const & half)
-{
-    MatriceCreuse<R> * pa=pA->A;
-    MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
-    ffassert(pma);
-    return newpMatrice_Creuse<R>(stack,removeHalf(*pma,half));
-}
 
 long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 {
@@ -166,10 +139,11 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
 
  */
       A.CSR();
-        L.CSR();
-        Ut.CSR();
-    if( verbosity > 2)
-       cout << "    - ILU  tgv " << tgv << endl;
+      L.CSR();
+      Ut.dotranspose();
+      Ut.CSR();
+    if( verbosity > 4)
+        cout << "   - ILU fact:   tgv " << tgv << endl;
     ffassert( A.n == L.n);
     ffassert( A.n == Ut.n);
     int sym = A.half    ;
@@ -241,6 +215,9 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
         }
     }
     if(verbosity>2 || err ) cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
+    Ut.dotranspose();
+    Ut.CSC();
+    L.CSR();
     return  err;
 }
 
@@ -278,40 +255,47 @@ long ff_ichol (Matrice_Creuse<R> *  pcA,Matrice_Creuse<R> *  pcL)
 {
     return ff_ichol(pcA,pcL,ff_tgv);
 }
-void ichol_solve(MatriceMorse<R> &L,KN<double> & b,bool trans)
+void LU_solve(MatriceMorse<R> &T,int cas,KN<double> & b,bool trans)
 {
-    int n =L.n,i,j,k,k1,k0;
-    L.CSR();
-    ffassert( L.n == b.N());
-    if(trans)
-    {
+    int n =T.n,i,j,k,k1,k0;
+    if(cas<0) T.CSR();
+    else if  (cas>0) T.CSC();
+    int  *ij= cas<0? T.j : T.i;
+    ffassert(cas!=0);
+    ffassert( n == b.N());
+    if( trans == (cas <0) ) // (cas <0 et trans) or (not et  cas >0)
+    { // U = L'
+        if(verbosity>9)
+            cout  << " LU_solve:: Remonte:  " << cas << " " << trans << endl;
         for(int i=n-1; i>=0; --i)
         {
-            k0 = L.p[i];
-            k1 = L.p[i+1]-1;
-            b[i] /= L.aij[k1];
+            k0 = T.p[i];
+            k1 = T.p[i+1]-1;
+            b[i] /= T.aij[k1];
             
             for (k=k0;k<k1;k++)
             {
-                int j = L.j[k];
-                b[j] -= b[i]*L.aij[k];
+                int j = ij[k];
+                b[j] -= b[i]*T.aij[k];
             }
             
-            assert(L.j[k] == i);
+            assert(ij[k] == i);
         }
     }
-    else
+    else // cas >0 et not trans
     {
+        if(verbosity>9)
+        cout  << " LU_solve:: Descente:  " << cas << " " << trans << endl;
         for(int i=0; i< n; ++i)
         {
             R bi= b[i];
-            for (k=L.p[i];k<L.p[i+1]-1;k++)
+            for (k=T.p[i];k<T.p[i+1]-1;k++)
             {
-                int j = L.j[k];
-                bi -= b[j]*L.aij[k];
+                int j = ij[k];
+                bi -= b[j]*T.aij[k];
             }
-            b[i] = bi/ L.aij[k];
-            assert(L.j[k] == i);
+            b[i] = bi/ T.aij[k];
+            assert(ij[k] == i);
         }
         
     }
@@ -326,8 +310,8 @@ bool ff_ichol_solve(Matrice_Creuse<R> * pcL,KN<double> * b)
     ffassert(pl );
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
     ffassert(pL );
-    ichol_solve(*pL,*b,0);
-    ichol_solve(*pL,*b,1);
+    LU_solve(*pL,-1,*b,0);
+    LU_solve(*pL,-1,*b,1);
     
     return true;
 }
@@ -342,8 +326,8 @@ bool ff_ilu_solve(Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> *const &  pc
     ffassert(pu );
     MatriceMorse<R> *pU = dynamic_cast<MatriceMorse<R>* > (pu);
     ffassert(pl );
-    ichol_solve(*pL,*b,0);
-    ichol_solve(*pU,*b,1);
+    LU_solve(*pL,-1,*b,0);
+    LU_solve(*pU, 1,*b,0);
     
     return true;
 }
@@ -357,7 +341,6 @@ static void Load_Init () {
     Global.Add("iLU", "(", new OneOperator3_<long,Matrice_Creuse<R> * ,Matrice_Creuse<R> * ,Matrice_Creuse<R> * >(ff_ilu));
     Global.Add("iluSolve", "(", new OneOperator3_<bool ,Matrice_Creuse<R> * ,Matrice_Creuse<R> * , KN<R> *>(ff_ilu_solve));
     Global.Add("icholSolve", "(", new OneOperator2<bool ,Matrice_Creuse<R> * , KN<R> *>(ff_ichol_solve));
-    Global.Add("removeHalf", "(", new OneOperator2s_<newpMatrice_Creuse<R> ,Matrice_Creuse<R> * ,long>(removeHalf));
 
 
 }

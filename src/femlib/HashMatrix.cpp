@@ -313,13 +313,51 @@ void HashMatrix<I,R>::setp(I sp)
             p[ii]=-1;
     sizep=sp;
 }
+template<class I,class R>
+void  HashMatrix<I,R>::RemoveHalf(int cas,double tol)
+{
+    
+    size_t kk=0;
+    if( cas <=0) // L cas
+    {
+    for(size_t k=0; k <nnz ;++k)
+        if(  abs(aij[k])> tol && ( i[k] >= j[k] ) )
+        {
+            i[kk] = i[k];
+            j[kk] = j[k];
+            aij[kk] = aij[k];
+            ++kk;
+        }
+    }
+    else
+    {
+     for(size_t k=0; k <nnz ;++k)
+        if(  abs(aij[k])> tol && ( i[k] <= j[k] ) )
+        {
+            i[kk] = i[k];
+            j[kk] = j[k];
+            aij[kk] = aij[k];
+            ++kk;
+        }
+    }
+    half= cas==0;
+    size_t nrt = nnz - kk;
+    if (verbosity>2)
+        cout << " RemoveHalf " << cas << " tol "  << tol << " , remove term : " << nrt << " half =" << half << endl;
+    nnz = kk;
+    if(nrt)  Increaze(kk);
+    else ReHash();
+    state= unsorted;
+    type_state=type_COO;
+
+}
 
 template<class I,class R>
 void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
 {
     
     mm= mm ? mm : nn;
-    if( nn == this->n && mm == this->m && nnz == nnnz) return ;
+    if( nn == this->n && mm == this->m && nnz == nnnz && sym == half) return ;
     this->m=mm;
     this->n = nn;
     this->N=mm;
@@ -369,7 +407,7 @@ void HashMatrix<I,R>::clear()
 template<class I,class R>
 void HashMatrix<I,R>::setfortran(int yes)
 {
-    
+// trop casse geule
     int shift =  yes-fortran;
     if( shift == 0) return ;
     CheckUnLock("setfortran");
@@ -583,7 +621,8 @@ HashMatrix<I,R>::~HashMatrix()
     delete [] next;
     delete [] head;
     if(p) delete [] p;
-    p=0;
+    type_state=type_isdeleted;// Mark Matrix is type_isdeleted
+    // because the solver is some time deleted after ...
 }
 template<class I,class R>
 void HashMatrix<I,R>::Sortij()
@@ -898,22 +937,17 @@ void HashMatrix<I,R>::Buildp(I nn,I * IA,int type_m,size_t nnzz)
         assert( state==type_m);
         
         setp(nn+1);
-        I k=I(nnzz);
-        assert( (nnzz-k) ==0);
-        //int shift =  fortran;
-        do
+         //int shift =  fortran;
+        p[nn] = fortran+ (I) nnzz;
+        for( I k=I(nnzz)-1; k>=0 ; --k )
         {
-            --k;
             p[IA[k]-fortran] = k+fortran;
             ffassert( (IA[k]-fortran>=0 ) && (IA[k]-fortran<=nn));
         }
-        while( k!=0);
-        
         p[0]=fortran;
-        p[nn] = fortran+ (I) nnzz;
-        // empty line
+        // remove empty row
         for(I ii=0;ii<nn;++ii)
-            if(p[ii+1]<0)
+            if(p[ii+1]<0)//  empty row
                 p[ii+1]=p[ii];
         
      
@@ -1220,13 +1254,14 @@ double HashMatrix<I,R>::gettgv(I * pntgv,double ratio) const
 }
 
 template<class I,class R>
-void HashMatrix<I,R>::setsdp(bool sym,bool dp) {
+void HashMatrix<I,R>::setsdp(bool sym,bool dp) // sym dpos para 
+{
     this->symetric=sym;
     this->positive_definite=dp;
     if( half != sym)
     {
         if( sym)
-            resize(this->n,this->m,nnz,-1,sym);//  remove half
+            Half();//  remove half part
         else
             UnHalf();
     }

@@ -31,7 +31,18 @@
  ref:ANR-07-CIS7-002-01 
  */
 
+#ifndef OLDFFVERSION
+#include  "ff++.hpp"
+static void Load_Init()
+{ 
+	cout << " load(\"MUMPS_FreeFem\")   is obsoled now use oad(\"MUMPS\") pluging "<< endl; 
+	ExecError("Plugins MUMPS_FreeFem is reomve"); 
+		exit(0);
+}
 
+LOADFUNC(Load_Init);
+#else 
+ 
 #include <mpi.h>
 #include  <iostream>
 using namespace std;
@@ -2605,3 +2616,4 @@ void ffinit()
 addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem");
 
 LOADFUNC(Load_Init);
+#endif

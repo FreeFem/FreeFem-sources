@@ -387,12 +387,12 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
      for(int i=0; i< n; ++i)
       if( wbc[i]) // remove TGV in RHS ...
         kk++,wi[i]=K();
-    cout << " nbcl " << kk<< endl;
+   // cout << " nbcl " << kk<< endl;
     pCl->matmul(wi,vi);
     // remove BC part
     
     normb = mysnrm2(n,(K*) vi);
-    cout << " normb " << normb << " "<< endl; 
+    //cout << " normb " << normb << " "<< endl; 
     uni = x;
     K minus1 = K(-1.);
     bool noconv = true;
@@ -405,7 +405,8 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
         pCl->matmul(ri,zi);
         // g[0] = sqrt(real(pr#scalprod(zi[],zi[])));
         g[0]=mysnrm2(n,(K*)zi);
-        cout << iter << " residus 0 " << abs(g[0]) << " Cl: " << normb << endl ;
+        if(verbo>2)
+            cout << "  ** fgmres: " << iter << " residus 0 " << abs(g[0]) << " Cl: " << normb << endl ;
         if (normb < 1.e-20 || eps < 0) normb = 1.;
         Vi[0]=(1./g[0])*zi;
         int it; // need for reconstruction
@@ -456,12 +457,12 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
         
             relres = abs(g[it+1]);//  residu gmres ||Ax -b ||_2
             if ((iter+1) % nprint ==0)
-                cout << "   fgmres "<< iter << " Res:  = " << relres << " Rel res = " << relres/normb <<   endl;
+                cout << "     fgmres "<< iter << " Res:  = " << relres << " Rel res = " << relres/normb <<   endl;
             
             if(relres/normb < abs(eps)) {
                 noconv= false;
                 if (verbo ) {
-                    cout << " fgmres has converged in " << (iter) << " iterations "
+                    cout << "     fgmres has converged in " << (iter) << " iterations "
                     << "The relative residual is " <<  relres/normb << endl;
                 }
                 break;
@@ -496,10 +497,10 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
 
         if(!noconv) break; 
         if( iter > nbitermx) break; // no converge
-        if( nrestart++< verbo)
-            cout << " restart fgmres " <<endl;
+        if( (nrestart++< verbo) && (verbo> 2) )
+            cout << "  ** restart fgmres iter " <<iter << " res:  " << relres/normb << endl;
     }
-    if(noconv)
+    if(noconv && verbo  )
     {
         cout << " !!!!!!!! fgmres has not  converged in " << iter << " iterations "
         << "The relative residual is " <<  relres/normb << endl;

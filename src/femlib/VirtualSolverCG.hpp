@@ -40,7 +40,7 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
                 for (int i=0;i<n;i++)
                 ntgv += (*wcl)[i] = real((*A)(i,i))==tgve;
             }
-            cout << " ntgv = " << ntgv << endl; 
+            //cout << " HMatVirtPrecon: ntgv = " << ntgv << endl;
         }
         if(stack &&  ds->precon)
         {  cout << " with Preco " << endl;
@@ -55,10 +55,10 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
             code_del= C->code(basicAC_F0_wa(e_xx));
             precon =  to<KN_<K> >(C_F0(code_del,*C));// 2 undelete pointer
             throwassert(precon);
-            if (verbosity>5) cout << " Precon  GC/GMRES : nb tgv in mat = "<< ntgv << " " << tgv << endl;
+            if (verbosity>4 ) cout << " ## Precon  GC/GMRES : nb tgv in mat = "<< ntgv << " " << tgv << " " << this << endl;
         }
         else {stack=0;diag=true;
-            if (verbosity>5) cout << " Precon Diag GC/GMRES : nb tgv in mat = "<< ntgv << " " << tgv << endl;
+            if (verbosity>4) cout << " ## Precon Diag GC/GMRES : nb tgv in mat = "<< ntgv << " " << tgv << this << endl;
         } // no freefem++ precon
     }
     K * addmatmul(K *x,K *Ax) const
@@ -93,6 +93,7 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
     int * pwcl() const {return wcl ?  (int*) *wcl  : 0; ;}
     ~HMatVirtPrecon()
     {
+        if(verbosity>99) cout << " ## ~HMatVirtPrecon "<< this << endl;
         if(xx) delete xx;
         if(wcl) delete wcl;
         if(stack) WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005
@@ -114,7 +115,8 @@ public:
     SolverCG(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int itx=0)
     :A(&AA),pC(0),verb(v),itermax(itx>0?itx:A->n/2),erronerr(eoe),eps(eeps)
     {
-        cout << " SolverCG  " << A->n << " "<<  A->m <<" eps " << eps << " eoe " << eoe << " v " << verb << " " << itermax <<endl;
+        if(verb>4)
+            cout << " ## SolverCG  " << A->n << " "<<  A->m <<" eps " << eps << " eoe " << eoe << " v " << verb << " " << itermax <<endl;
         pC = new HMatVirtPreconDiag(A);
         assert(A->n == A->m);
     }
@@ -122,8 +124,8 @@ public:
     SolverCG(HMat  &AA,const Data_Sparse_Solver & ds,Stack stack)
     :A(&AA),pC(0),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),erronerr(1),eps(ds.epsilon)
     {
-        if(verb>1)
-        std::cout << " SolverCG  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
+        if(verb>4)
+            std::cout << " ## SolverCG  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
         << " v " << verb << " itmax " << itermax <<endl;
         assert(A->n == A->m);
         
@@ -158,7 +160,7 @@ public:
         }
         if(err && erronerr) {  std::cerr << "Error: ConjugueGradient do not converge nb end ="<< err << std::endl; assert(0); }
     }
-   ~SolverCG() {delete pC;}
+    ~SolverCG() {delete pC;}
 };
 
 
@@ -183,13 +185,14 @@ public:
     SolverGMRES(HMat  &AA,const Data_Sparse_Solver & ds,Stack stack)
     :A(&AA),pC(0),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),restart(ds.NbSpace),erronerr(1),eps(ds.epsilon)
     {
-        std::cout << " SolverGMRES  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
+        if(verb>4)
+            std::cout << " ## SolverGMRES  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
         << " v " << verb << "  itsmx " << itermax <<endl;
         assert(A->n == A->m);
         pC = new HMatVirtPrecon<I,K>(A,&ds,stack);
     }
     
-    ~SolverGMRES() {delete pC;}
+    ~SolverGMRES() {delete pC;pC=0;}
     void SetState(){}
     
     struct HMatVirt: CGMatVirt<I,K> {
@@ -202,7 +205,7 @@ public:
     void dosolver(K *x,K*b,int N=0,int trans=1)
     {
         if(verbosity>9 || verb> 2)
-        std::cout <<" SolverGMRES::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
+            std::cout <<" ##  SolverGMRES::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
         HMatVirt AA(A,trans);
         //HMatVirtPreconDiag CC(A);
         int err=0;

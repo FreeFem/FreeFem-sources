@@ -5,6 +5,7 @@
 inline void MATERROR(int i,const char *cmm)
 {
     std::cerr << " MATERROR " << i << " : " << cmm << std::endl;
+    ErrorExec("MATERROR",1);
     std::abort();
 }
 template<class Z,class R> class HashMatrix ;
@@ -22,6 +23,11 @@ public:
     class VSolver {public:
         virtual R* solve(R *x,R*b,int N=0,int trans=0) =0;
         virtual ~VSolver(){}
+        int count;
+        VSolver(): count(0) {}
+        VSolver * copyptr(){ count++; return this;}
+        void destroy() { if(count==0) delete this; else count --;}
+       // virtual VSolver * clone() =0;  to hard
     };
 
     void ERROR(int i,const char *cmm) const
@@ -30,10 +36,11 @@ public:
         else MATERROR(i,cmm);
     }
     I n,m; // size of matrix
-    bool symetric,positive_definite;   // for cholesly or CG
+    bool symetric,positive_definite;   // for cholesky or CG
     
     VSolver *vsolver;
     bool delvsolver;
+    
    // long state,codeini,codesym,codenum;
     VirtualMatrix(I NN,I MM=-1,bool sym=false,bool dp=false) : RNM_VirtualMatrix<R,I> (NN,MM),
     n(NN),m(this->M),symetric(sym),positive_definite(dp),vsolver(0),delvsolver(false)
@@ -53,8 +60,19 @@ public:
   R* MatMul(R *x,R*Ax) const { return addMatMul(x, Set2Const(n,Ax)); }
   R* MatTransMul(R *x,R*Atx) const { return addMatMul(x, Set2Const(m,Atx));}
    bool WithSolver() const {return vsolver;} // by default no solver
-
-  void SetSolver(VSolver *f=0, bool del = true)  {if(vsolver && delvsolver) delete vsolver; vsolver=f; delvsolver=del;
+  //  void CloneSolver() { return vsolver ? vsolver->clone(): 0;}// for copy matrix  to hard ...
+    void SetSolver(const VirtualMatrix<I,R> & A)
+    {
+        
+        if(A.vsolver) SetSolver(vsolver->copyptr(),A.delvsolver);
+        else SetSolver(0);
+    }
+  void SetSolver(VSolver *f=0, bool del = true)  {
+      if(verbosity>4)  cout<< " ## SetSolver "<< this << " " << vsolver <<" "<<  f << endl;
+      if(vsolver && delvsolver)
+           vsolver->destroy();
+      vsolver=f;
+      delvsolver=del;
       // cout << "\n *** type SetSolver = " << typeid(f).name() << endl; 
   }
 
@@ -71,7 +89,8 @@ public:
    bool Checknm(int nn,int mm) const { return nn==n && mm==m;}
     virtual ~VirtualMatrix(){
         if(verbosity>99999) cout << " **  ~VirtualMatrix " << this << endl;
-        if(vsolver && delvsolver) delete vsolver; } // clean solver
+        if(vsolver && delvsolver)  vsolver->destroy();//   Warning the solver is del afer the Matrix
+    } // clean solver
     
     virtual size_t size() const {return 0; };
     virtual VirtualMatrix  & operator +=(MatriceElementaire<R> & ){AFAIRE("VirtualMatrix::+=");}
@@ -123,6 +142,18 @@ public:
         { if(B) { ffassert(B->ChecknbColumn(y.N())); } }
             void call(KN_<R> &ax) const {ffassert(ax.contiguous() &&b.contiguous());   A->SolveT(ax,b); }
     };
+
+    VirtualMatrix(const VirtualMatrix<I,R> &A)
+     : RNM_VirtualMatrix<TypeScalar,TypeIndex>(A)  { operator=(A); }
+    void operator=(const VirtualMatrix<I,R> &A)
+    {
+        n=A.n;
+        m=A.m; // size of matrix
+        symetric=A.symetric;
+        positive_definite=A.positive_definite;   // for cholesky or CG
+        delvsolver = A.delvsolver;
+        vsolver = A.vsolver && delvsolver ? A.vsolver->copyptr() : 0;
+    }
 
 };
 

@@ -5783,9 +5783,10 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
  {  "bmat",&typeid(Matrice_Creuse<R>* )}, 2
  
  */
+ 
  if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
  if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));   
-
+  
   SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
 
 

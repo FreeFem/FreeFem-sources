@@ -915,17 +915,30 @@ public:
       typemat=0 ; }//
   Matrice_Creuse() { init();}
   void destroy() {// Correct Oct 2015 FH (avant test a 'envert) !!!!
-    if(verbosity>99999)  cerr << " DEL MC " << this <<" " << count <<" " << A <<  endl;
+    if(verbosity>99999)
+        cerr << " ## DEL MC " << this <<" " << count <<" " << A <<  endl;
     if(count--==0)
     {
+        VMat *pvm=pMC();
+        if(pvm) pvm->SetSolver();
+        pvm=0; // del solver before the del of the real matrix...
        A.destroy();
-       
-     // delete this;
     }
 //else count--;
     //    Uh.destroy();
     //Vh.destroy();
-  }   
+  }
+  void copysolver(Matrice_Creuse *a)
+    {
+        VMat *pvm=pMC(), *pvam=a->pMC();
+        if( pvm)
+        {
+            //typename VMat::VSolver s= pvam ?   pvam->CloneSolver() : 0;
+            //  to hard  to CloneSolver
+            pvm->SetSolver();//So  Solver ..
+            pvm=0; 
+        }
+    }
   Matrice_Creuse( MatriceCreuse<K> * aa)//,const pfes  *ppUh,const pfes  *ppVh)
     :A(aa){}//,pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
   Matrice_Creuse( MatriceCreuse<K> * aa,const UniqueffId *pUh,const UniqueffId *pVh)//,const pfes  *ppUh,const pfes  *ppVh)
@@ -955,7 +968,7 @@ public:
         pmcc->A.master(pmc);
       //  pmcc->A.cswap(pmc);
        
-       if(verbosity>99999)  cerr << "newpMatrice_Creuse  set " << pmcc << " " << pmcc->count <<" " << pmcc->A
+        if(verbosity>99999)   cerr << "newpMatrice_Creuse  set " << pmcc << " " << pmcc->count <<" " << pmcc->A
         << " to " << pmc  << " init: "<< init << endl; ;;
        // pmc->dump(cerr) << endl;
          pmc=0;
@@ -1193,23 +1206,15 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   const FESpace * PVh =  (FESpace*) **pVh ;
   bool A_is_square= PUh == PVh || PUh->NbOfDF == PVh->NbOfDF ;
 
-  // MatriceProfile<R> *pmatpf=0;
   bool VF=isVF(b->largs);
-//  assert(!VF);
- // bool factorize=false;
   Data_Sparse_Solver ds;
   ds.factorize=false;
-
- // TypeSolveMat tmat=  (  PUh == PVh  ? TypeSolveMat::GMRES : TypeSolveMat::NONESQUARE);
- // ds.typemat=&tmat;
   ds.initmat=true;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
 
-  if (! A_is_square ) //&& *ds.typemat != TypeSolveMat::NONESQUARE)
+  if (! A_is_square )
    {
-     cout << " -- Error the solver << "<< ds.solver <<"  is un set  on rectangular matrix  " << endl;
-     ExecError("A solver is set on a none square matrix!");
-    //ds.typemat= &(tmat =TypeSolveMat::NONESQUARE);
+     if(verbosity>3) cout << " -- the solver  is un set  on rectangular matrix  " << endl;
    }
    WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
   
@@ -1224,22 +1229,17 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);     
   if ( same)
    {
-     //A.typemat = *ds.typemat;
      if ( A.Uh != Uh  || A.Vh != Vh ) 
        { // reconstruct all the matrix
 	 A.A=0; // to delete  old  matrix ADD FH 16112005 
 	 A.Uh=Uh;
 	 A.Vh=Vh;
-	// if (ds.typemat->profile)
-	  // { A.A.master( new MatriceProfile<R>(Vh,VF) ); ffassert( &Uh == & Vh);}
-	 //else
          if (ds.sym )
 	   {  A.A.master( new  MatriceMorse<R>(ds.sym,Vh.NbOfDF) );
 	     ffassert( &Uh == & Vh);}
-	 else 
-	   {
+	 else
 	     A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,Vh.NbOfDF*2,0) ); // lines corresponding to test functions
-	   }
+           // reset the solver ...
        }
      *A.A=R(); // reset value of the matrix
      
@@ -1253,30 +1253,14 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
      bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
      pMA->addMap(1.,AAA);
       A.A.master(pMA ) ;
-       
- /*    if (ds.typemat->profile)
-        { ExecError(" Sorry, construction of Skyline matrix with different meshes is not implemented! ");}
-      else 
-        { }// XXXXXX
-  */
-      if (bc)
+
+       if (bc)
            AssembleBC<R>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);
     
    }
- /* if( A_is_square && ds.factorize ) {
-    MatriceProfile<R> * pf = dynamic_cast<MatriceProfile<R> *>((MatriceCreuse<R> *) A.A);
-    assert(pf);
-    switch (ds.typemat->t) {
-    case TypeSolveMat::LU: pf->LU(Abs(ds.epsilon));break;
-    case TypeSolveMat::CROUT: pf->crout(Abs(ds.epsilon));break;
-    case TypeSolveMat::CHOLESKY: pf->cholesky(Abs(ds.epsilon));break;
-    default: ExecError("Sorry no factorize for this type for matrix"); 
-    }
-    
-  }    */
-  if (A_is_square) 
-    SetSolver(stack,VF,*A.A,ds);
-  
+   if (A_is_square)
+        SetSolver(stack,VF,*A.A,ds);
+
   return SetAny<Matrice_Creuse<R>  *>(&A);
   
 }
