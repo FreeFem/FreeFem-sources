@@ -36,29 +36,53 @@ class DistributedCSR {
         unsigned int                       _clast;
         DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); }
         ~DistributedCSR() {
-            MatDestroy(&_petsc);
-            for(int i = 0; i < _S.size(); ++i)
-                MatDestroy(&_S[i]);
-            KSPDestroy(&_ksp);
-            if(_exchange) {
-                _exchange[0]->clearBuffer();
-                delete _exchange[0];
-                if(_exchange[1]) {
-                    _exchange[1]->clearBuffer();
-                    delete _exchange[1];
+            MatType type;
+            PetscBool isType;
+            if(_petsc) {
+                MatGetType(_petsc, &type);
+                PetscStrcmp(type, MATNEST, &isType);
+                if(isType) {
+                    Mat** mat;
+                    PetscInt M, N;
+                    MatNestGetSubMats(_petsc, &M, &N, &mat);
+                    for(PetscInt i = 0; i < M; ++i) {
+                        for(PetscInt j = 0; j < N; ++j) {
+                            if(mat[i][j]) {
+                                MatGetType(mat[i][j], &type);
+                                PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
+                                if(isType) {
+                                    Mat B = mat[i][j];
+                                    MatDestroy(&B);
+                                }
+                            }
+                        }
+                    }
                 }
-                delete [] _exchange;
+                MatDestroy(&_petsc);
+                for(int i = 0; i < _S.size(); ++i)
+                    MatDestroy(&_S[i]);
+                KSPDestroy(&_ksp);
+                if(_exchange) {
+                    _exchange[0]->clearBuffer();
+                    delete _exchange[0];
+                    if(_exchange[1]) {
+                        _exchange[1]->clearBuffer();
+                        delete _exchange[1];
+                    }
+                    delete [] _exchange;
+                    _exchange = nullptr;
+                }
+                if(_A) {
+                    if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
+                        VecScatterDestroy(&_scatter);
+                    else
+                        _A->clearBuffer();
+                    delete _A;
+                    _A = nullptr;
+                }
+                delete [] _num;
+                _num = nullptr;
             }
-            if(_A) {
-                if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
-                    VecScatterDestroy(&_scatter);
-                else
-                    _A->clearBuffer();
-                delete _A;
-                _A = nullptr;
-            }
-            delete [] _num;
-            _num = nullptr;
         }
 };
 
@@ -75,16 +99,27 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         PC pc;
         KSPGetPC(ksp, &pc);
         PCSetType(pc, PCFIELDSPLIT);
-        unsigned short* local = new unsigned short[fields->n + ptA->_last - ptA->_first]();
+        PetscInt first = ptA->_first;
+        PetscInt last = ptA->_last;
+        if(!ptA->_num) {
+            Mat A;
+            KSPGetOperators(ksp, &A, NULL);
+            MatGetOwnershipRange(A, &first, &last);
+        }
+        unsigned short* local = new unsigned short[fields->n + last - first]();
         for(int i = 0; i < fields->n; ++i)
             local[i] = std::round(fields->operator[](i));
         unsigned short nb = fields->n > 0 ? *std::max_element(local, local + fields->n) : 0;
         MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_UNSIGNED_SHORT, MPI_MAX, PETSC_COMM_WORLD);
         local += fields->n;
-        if(fields->n)
-            HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, local - fields->n, local, fields->n);
+        if(fields->n) {
+            if(ptA->_num)
+                HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, first, last, local - fields->n, local, fields->n);
+            else
+                std::copy_n(local - fields->n, fields->n, local);
+        }
         unsigned long* counts = new unsigned long[nb]();
-        for(unsigned int i = 0; i < ptA->_last - ptA->_first; ++i)
+        for(unsigned int i = 0; i < last - first; ++i)
             if(local[i])
                 ++counts[local[i] - 1];
         PetscInt* idx = new PetscInt[*std::max_element(counts, counts + nb)];
@@ -93,7 +128,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             unsigned short* pt = local;
             for(unsigned int i = 0; i < counts[j]; ++pt) {
                 if(*pt == j + 1)
-                    idx[i++] = ptA->_first + std::distance(local, pt);
+                    idx[i++] = first + std::distance(local, pt);
             }
             ISCreateGeneral(PETSC_COMM_WORLD, counts[j], idx, PETSC_COPY_VALUES, &is);
             PCFieldSplitSetIS(pc, names && j < names->size() ? (*(names->operator[](j))).c_str() : NULL, is);
