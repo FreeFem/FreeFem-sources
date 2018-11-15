@@ -113,8 +113,30 @@ m4_define([TOOL_PARAMETERS],
 
 m4_define([TOOL_DISABLE],
     [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+	
     if test "$enable_$1" = "no"
     then
+        AC_SUBST([TOOL_COMPILE_$1],"")
+        AC_SUBST([TOOL_DYLIB_$1],"")
+    elif  test   "$ff_$1_ok" = "yes" ; then
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+        enable_$1_download=no
+    else  
+        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+	    enable_$1_download=yes
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+    TOOL_PARAMETERS($1,$2,$3)
+])
+m4_define([TOOL_DISABLE_NO],
+    [
+	AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+    if test "$enable_$1" = "no" -o "$enable_$1" = ""
+    then
+	    enable_$1=no
         AC_SUBST([TOOL_COMPILE_$1],"")
         AC_SUBST([TOOL_DYLIB_$1],"")
     elif  test   "$ff_$1_ok" = "yes" ; then
@@ -1975,23 +1997,24 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try 
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
+TOOL_DISABLE_NO(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(parmetis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
-TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX)
+TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
 TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 dnl TOOL_DISABLE(parmetis)
-TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
-dnl TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(parms,parms_FreeFem.$DYLIB_SUFFIX)
+
+TOOL_DISABLE_NO(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu4,SuperLu.$DYLIB_SUFFIX,superlu)
-TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)

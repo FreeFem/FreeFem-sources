@@ -248,6 +248,7 @@ long  WRecv<Complex> (Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Reques
 template<class R> 
 void  WBcast(R * v,int  n,int who,MPI_Comm comm)  
 {
+  //cout << " WBcast v " << v << " "<< n << endl;
   assert(v && n>0);
   MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_TYPE<R>::TYPE(), who,comm);
 }
@@ -255,6 +256,7 @@ void  WBcast(R * v,int  n,int who,MPI_Comm comm)
 template<> 
 void  WBcast<Complex>(Complex * v,int  n,int who,MPI_Comm comm)  
 {
+  //  cout << " WBcast C v " << v << " "<< n << endl;
   assert(v && n>0);
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
     MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX /*MPI_TYPE<R>::TYPE()*/, who,comm);
@@ -462,33 +464,34 @@ struct MPIrank {
 	      ldata[1]=mA->m;
 	      ldata[2]=mA->nnz;
 	      ldata[3]=mA->half;
-	      // cout << mpirank << " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
+	      // cout <<" Bcast matrix "  << mpirank << " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
 	    }
 	}
       int n4=4;
       WBcast( ldata,n4, who,comm); 
-      //cout << mpirank << " after 4 " " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
       int n1= ldata[0]+1;
+       // cout << mpirank << " after 4 " " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " ok= " << (  who != mpirank && ldata[0] ) << endl;
       if(  who != mpirank && ldata[0] )
-	mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]); 
+	mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]);
+      //cout << mpirank <<  "**mA :: " << mA->i << " " << mA->j << " " << mA->aij << " " << mA->nnzmax <<endl;
       if(ldata[0]) 
 	  {
-        
-	    // cout << mpirank << " " << who << " lg  " << mA->lg << " " << n1 << endl;
-	    WBcast(  mA->i,mA->nnz, who,comm);
-	    //cout << mpirank << " " << who << " cl  " << mA->cl << " " <<  mA->nnz << endl;
-	    WBcast(  mA->j,mA->nnz, who,comm);
-	    //cout << mpirank << " " << who << " a  " << mA->a << " " <<  mA->nnz << endl;
-	    WBcast( mA->aij,mA->nnz , who,comm);
-            mA->nnz = ldata[2];
+            // cout << mpirank << " #/ " << who << " i  " << mA->i << " " << mA->nnz << endl;
+	    WBcast(  mA->i,ldata[2], who,comm);
+            //  cout << mpirank << " ##/ " << who << " j  " << mA->j << " " <<  mA->nnz << endl;
+	    WBcast(  mA->j,ldata[2], who,comm);
+            //  cout << mpirank << " ###/ " << who << " aij  " << mA->aij << " " <<  mA->nnz << endl;
+	    WBcast( mA->aij,ldata[2] , who,comm);
+           
               
-            mA->Increaze(ldata[2]);
+            mA->Increaze(ldata[2],ldata[2]);
+           // cout << mpirank << "***mA :: " <<&a << " " << mA  <<" " <<  mA->i << " " << mA->j << " " << mA->aij << " " << mA->nnzmax <<endl;
 	  }
                
       if(  who != mpirank) 
 	a.A.master(mA);
-      else 
-	delete mA;      
+     // else
+//	delete mA;
       return *this;
     }
   
@@ -613,6 +616,8 @@ public:
       cout << mpirank << "  ---R: ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " " << state << endl;
  
     int ll=0;
+   //cout <<mpirank <<  " HashMatrice   Recv "<<state << " " <<  mA <<" " << ldata[2] <<endl;
+
     switch (state)
       {
       case 1:
@@ -623,10 +628,13 @@ public:
 	ll=WRecv(  mA->j,ldata[2],  who, tag+2,comm,rq);
 	break;
       case 3:
+            
 	ll=WRecv(  mA->aij,ldata[2],  who, tag+3,comm,rq);
 	break;
       default:
-        mA->Increaze(ldata[2]);
+         //     cout <<mpirank <<  " HashMatrice Recv "<< mA <<endl;
+        mA->Increaze(ldata[2],ldata[2]);
+         //     cout << " WRecv " << *mA<< endl;
 	pmat->A.master(mA);
 	mA=0;
 	return false;
@@ -670,7 +678,7 @@ public:
     state++;
     int tag=MPI_TAG<Mat *>::TAG;
     if(verbosity>100)
-      cout << mpirank << "  ---S  ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
+      cout << mpirank << "  ---S  ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " "<< state << endl;
      
     
     int ll=0;
@@ -686,7 +694,6 @@ public:
 	ll=WSend(  mA->aij,ldata[2],   who, tag+3,comm,rq);
 	break;
       default:
-	
 	return false;
 	break;
       }
@@ -695,7 +702,7 @@ public:
     return true; // OK 
   }
   ~SendWMatd() {
-    if(mA) delete mA; 
+   // if(mA) delete mA;
   }	
   
 };
@@ -807,10 +814,10 @@ public:
 
 template<class R>
   long MPIrank::Send(Matrice_Creuse<R> * const &  a) const 
-  { ffassert(0);
+  { //ffassert(0);
     if(0)
       {
-	if(verbosity>100) 
+	//if(verbosity>100)
 	  cout << " MPI << (Matrice_Creuse *) " << a << endl;
 	ffassert(rq==0 || rq == Syncro_block) ; // 
 	int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;		       
@@ -1376,8 +1383,8 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
             int chunk = 1;
             // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
             KN<uint64_t> code(mpisizew);
-            MPI_Gather( (void *) & scode  , chunk,  MPI_UNSIGNED_LONG_LONG,
-                       (void *)  &code[0] , chunk,  MPI_UNSIGNED_LONG_LONG, 0 ,root.comm);
+            MPI_Gather( (void *) & scode  , 1,  MPI_UNSIGNED_LONG_LONG,
+                       (void *)  &code[0] , 1,  MPI_UNSIGNED_LONG_LONG, 0 ,root.comm);
             int ok=1;
             if(mpirankw==0)
                 for(int i=1; i<mpisizew;++i)
@@ -1396,10 +1403,10 @@ struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creu
         ffassert( r && s);
         MatriceCreuse<R> * sA=s->A;
         MatriceCreuse<R> * rA=r->A;
-        ffassert( sA && rA);
+        ffassert( sA );
         MatriceMorse<R> * sM = s->pHM();
         if( ! rA ) { // build a zero matric copy of sM
-            ffassert(0);
+         //   ffassert(0);
             MatriceMorse<R> *rm=new MatriceMorse<R>(*sM); //new MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
             *rm=R(); // set the matrix to Zero ..
             r->A.master(rm);
@@ -1420,17 +1427,18 @@ struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creu
         MPI_Comm_rank(comm, &mpirankw);
         MPI_Comm_size(comm, &mpisizew);
         KN<uint64_t>  allcode(mpisizew);
-        if(mpisizew>1)
+        if((mpisizew>1)  )
         {
             int chunk = 1;
             // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
             KN<uint64_t> code(mpisizew);
-            MPI_Gather( (void *) & scode  , chunk,  MPI_UNSIGNED_LONG_LONG,
-                         (void *)  &code[0] , chunk,  MPI_UNSIGNED_LONG_LONG, 0 ,comm);
+            MPI_Gather( (void *) & scode  , 1,  MPI_UNSIGNED_LONG_LONG,
+                         (void *)  &code[0] , 1,  MPI_UNSIGNED_LONG_LONG, 0 ,comm);
             int ok=1;
             if(mpirankw==0)
                 for(int i=1; i<mpisizew;++i)
                     ok |= (scode== code[i]);
+            cout << " MPI_Allreduce mat: revif " <<  mpirankw  << " " << ok << " " << sM->aij << endl;
             ffassert(ok);
         }
 

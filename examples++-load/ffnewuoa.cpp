@@ -25,6 +25,8 @@
 //ff-c++-cpp-dep: newuoa.f
 // *INDENT-ON* //
 
+#include "ff++.hpp"
+/*
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
@@ -39,7 +41,7 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
-
+*/
 typedef int integer;
 typedef int logical;
 typedef void (*typecalfunc)(integer *, double *, double *f, void *);

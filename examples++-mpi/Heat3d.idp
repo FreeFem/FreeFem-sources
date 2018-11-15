@@ -45,10 +45,11 @@ matrix AA = vlaplace(Vh,Vh,tgv=ttgv) ;
 time1=clock()-time1;
 // reduce the matrice to get the full matrice 
 // warning the tgv number is now mpisize*tgv for B.C.
-matrix A; 
+matrix A=AA; 
 time6=clock();
 if(op) mpiAllReduce(AA,A,mpiCommWorld,mpiSUM);
 else A=AA;
+
 time6 = clock()-time6;
 time2=clock();
 set(A,solver=sparsesolver,tgv=ttgv,sparams=ssparams) ; // factorize

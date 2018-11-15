@@ -366,7 +366,7 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
     if(A.type_state==HashMatrix<I,R>::type_CSR)
     {
     using namespace std;
-    f << "# Sparse Matrix (Morse)  " << endl;
+    f << "# Sparse Matrix (Morse)  " << &A << endl;
     f << "# first line: n m (is symmetic) nnz \n";
     f << "# after for each nonzero coefficient:   i j a_ij where (i,j) \\in  {1,...,n}x{1,...,m} \n";
     
@@ -383,7 +383,7 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
     }
     else
     {
-        f << "#  HashMatrix Matrix (COO) "<< endl;
+        f << "#  HashMatrix Matrix (COO) "<< &A  << endl;
         f << "#    n       m        nnz     half     fortran   state  \n";
         f << A.n << " " << A.m << " " << A.nnz << " "<< A.half << " " << A.fortran
           << " " <<  A.state<< " " << A.type_state<< " " << endl;

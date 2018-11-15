@@ -513,7 +513,7 @@ struct PrintP: public binary_function<ostream*,A,ostream*> {
 template<class A>
 struct PrintPnd: public binary_function<ostream*,A,ostream*> {
   static ostream* f(ostream* const  & a,const A & b)  
-  {  *a << *b; return a;}
+    { if(verbosity>9999) cout << "PrintPnd:  " << b << endl;  *a << *b; return a;}
 };
 
 

@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep:mumps ptscotch scotch metis parmetis  scalapack blas  mpifc  fc mpi  pthread 
+//xxff-c++-LIBRARY-dep:mumps ptscotch scotch metis parmetis  scalapack blas  mpifc  fc mpi  pthread
 //ff-c++-cpp-dep: 
 
 /* 
@@ -36,7 +36,7 @@
 static void Load_Init()
 { 
 	cout << " load(\"MUMPS_FreeFem\")   is obsoled now use oad(\"MUMPS\") pluging "<< endl; 
-	ExecError("Plugins MUMPS_FreeFem is reomve"); 
+	ExecError("Plugins MUMPS_FreeFem is remove"); 
 		exit(0);
 }
 

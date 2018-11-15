@@ -21,7 +21,7 @@
 // E-MAIL  : frederic.hecht@sorbonne-unviersite.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: mumps_seq blas libseq fc pthread
+//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch scotch  scalapack blas  mpifc  fc mpi  pthread
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
@@ -39,10 +39,10 @@ using namespace std;
 
 #include "ff++.hpp"
 
-#include "mpi.h"
+#include <mpi.h>
 #include "dmatrix.hpp"
-#include "dmumps_c.h"
-#include "zmumps_c.h"
+#include <dmumps_c.h>
+#include <zmumps_c.h>
 
 const int JOB_INIT = -1;
 const int JOB_END = -2;
@@ -83,19 +83,19 @@ public:
     // typedef double R;
     long verb;
     double eps;
-    mutable double epsr;
     double tgv;
     int cn,cs;
     typedef typename MUMPS_STRUC_TRAIT<R>::R MR;
     mutable typename MUMPS_STRUC_TRAIT<R>::MUMPS id;
     KN<double> *rinfog;
     KN<long> *infog;
-    mutable unsigned char   _strategy;
+    mutable unsigned char   strategy;
     bool distributed;
     MPI_Comm comm;
     int mpirank;
     int matrank;
-    int distributed;
+    // int distributed;
+    
     int&    ICNTL (int i) const {return id.icntl[i - 1];}
     double& CNTL  (int i) const {return id.cntl[i - 1];}
     int&    INFO  (int i) const {return id.info[i - 1];}
@@ -104,9 +104,9 @@ public:
     double& RINFOG (int i) const {return id.rinfog[i - 1];}
     
     void SetVerb () const {
-          ICNTL(1) = 6;//   output stream for error messages.
-          ICNTL(2) = 6;//  stream for diagnostic printing, statistics, and warning messages.
-          ICNTL(3) = 6;//  output stream global information, collected on the host.
+        ICNTL(1) = 6;//   output stream for error messages.
+        ICNTL(2) = 6;//  stream for diagnostic printing, statistics, and warning messages.
+        ICNTL(3) = 6;//  output stream global information, collected on the host.
         ICNTL(4) = min(max(verb-2,1L),4L); // the level of printing for error, warning, and diag
         if(verb ==0 )ICNTL(4) =0;
         ICNTL(11)=0; // noerroranalysisisperformed(nostatistics).
@@ -116,7 +116,7 @@ public:
             else ICNTL(11)=2;// compute main statistics
         }
         
-  
+        
     }
     void Clean ()
     {
@@ -130,59 +130,91 @@ public:
     void to_mumps_mat()
     {
         Clean ();
- 
+        
         id.nrhs = 0;//
         int n = A.n;
         int nz = A.nnz;
         ffassert(A.n == A.m);
         if( distributed || (mpirank == matrank) )
         {
-        int *irn = new int[nz];
-        int *jcn = new int[nz];
-        R *a = new R[nz];
-        A.COO();
-        
-        for (int k = 0; k < nz; ++k) {
-           {
-               irn[k] = A.i[k]+1;
-                jcn[k] = A.j[k] + 1;
-                a[k] = A.aij[k];
+            int *irn = new int[nz];
+            int *jcn = new int[nz];
+            R *a = new R[nz];
+            A.COO();
+            
+            for (int k = 0; k < nz; ++k) {
+                {
+                    irn[k] = A.i[k]+1;
+                    jcn[k] = A.j[k] + 1;
+                    a[k] = A.aij[k];
+                }
             }
-        }
-        
-        id.n = n;
-        
-        if(!distributed)
-        {
-        id.nz = nz;
-        id.irn = irn;
-        id.jcn = jcn;
-        id.a = (MR *)(void *)a;
-        }
+            
+            id.n = n;
+            
+            if(!distributed)
+            {
+                if(mpirank == matrank)
+                {
+                  id.nz = nz;
+                  id.irn = irn;
+                  id.jcn = jcn;
+                  id.a = (MR *)(void *)a;
+                }
+                else
+                { //  no matrix
+                    id.nz=0;
+                    id.a =0;
+                    id.irn = 0;;
+                    id.jcn = 0;
+                    
+                }
+                
+            }
             else
             {
                 id.nz_loc = nz;
                 id.irn_loc = irn;
                 id.jcn_loc = jcn;
                 id.a_loc = (MR *)(void *)a;
-
+                
             }
-        else
-        { //  no matrix 
-            id->nz=0;
-            id->a =0;
-            id->irn = 0;;
-            id->jcn = 0;
-
+            id.rhs = 0;
+            ffassert( A.half == (id.sym != 0) );//
+            ICNTL(5) = 0;    // input matrix type
+            ICNTL(7) = 7;    // NUMBERING ...
+            
+            ICNTL(9) = 1;    // 1: A x = b, !1 : tA x = b  during slove phase
+            ICNTL(18) = 0;
+            if(strategy > 0 && strategy < 9 && strategy != 2)
+            {
+                ICNTL(28) = 1;             // 1: sequential analysis
+                ICNTL(7)  = strategy - 1; //     0: AMD
+            }
+            //     1:
+            //     2: AMF
+            //     3: SCOTCH
+            //     4: PORD
+            //     5: METIS
+            //     6: QAMD
+            //     7: automatic
+            else
+            {
+                ICNTL(28) = 1;
+                ICNTL(7)  = 7;
+            }
+            if(strategy > 8 && strategy < 12)
+            {
+                ICNTL(28) = 2;              // 2: parallel analysis
+                ICNTL(29) = strategy - 9;  //     0: automatic
+            }                                   //     1: PT-STOCH
+            //     2: ParMetis
+            ICNTL(9)  = 1;
+            ICNTL(11) = 0;                 // verbose level
+            ICNTL(18) = distributed ? 3: 0;        // centralized matrix input if !distributed
+            ICNTL(20) = 0;                 // dense RHS
+            ICNTL(14) = 30;
         }
-        id.rhs = 0;
-        ffassert( A.half == (id.sym != 0) );//
-        ICNTL(5) = 0;    // input matrix type
-        ICNTL(7) = 7;    // NUMBERING ...
-        
-        ICNTL(9) = 1;    // 1: A x = b, !1 : tA x = b  during slove phase
-        ICNTL(18) = 0;
-        
     }
     void Check (const char *msg = "mumps_mpi")
     {
@@ -217,17 +249,19 @@ public:
     }
     SolveMUMPS_mpi (HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
     : A(AA), verb(ds.verb),
-    eps(ds.epsilon), epsr(0),
+    eps(ds.epsilon),
     tgv(ds.tgv),cn(0),cs(0),
-    rinfog(ds.rinfo), infog(ds.info), comm(MPI_COMM_WORLD),matrank(ds.master),distributed(matrank<0)
+    rinfog(ds.rinfo), infog(ds.info), comm(MPI_COMM_WORLD),
+    matrank(ds.master),distributed(ds.master<0),
+    strategy(ds.strategy)
     {
-       
+        
         if(ds.commworld)
-            MPI_Comm_dup(comm,ds.commworld);
+            MPI_Comm_dup(comm,(MPI_Comm*) ds.commworld);
         
         MPI_Comm_rank(comm, &mpirank);
         int master = mpirank==matrank;
-       int myid = 0;
+        int myid = 0;
         MPI_Comm_rank(MPI_COMM_WORLD, &myid);
         
         id.irn=0;
@@ -243,43 +277,51 @@ public:
         
         
         Check("MUMPS_mpi build/init");
-        if (verbosity > 3) {
+        if (verbosity > 3 && master) {
             cout << "  -- MUMPS   n=  " << id.n << ", peak Mem: " << INFOG(22) << " Mb" << " sym: " << id.sym << endl;
         }
         
-   
+        
     }
     
- 
-
+    
+    
     ~SolveMUMPS_mpi () {
         Clean ();
         id.job = JOB_END;
         SetVerb () ;
         mumps_c(&id);	/* Terminate instance */
         /*int ierr = */
-    
+        
     }
     
     
     void dosolver(K *x,K*b,int N,int trans)
     {
-        if (verbosity > 1) {
+        long nN=id.n*N;
+        if (verbosity > 1 && mpirank==0) {
             cout << " -- MUMPS solve,  peak Mem : " << INFOG(22) << " Mb,   n = "
             << id.n << " sym =" << id.sym <<" trans = " << trans  << endl;
         }
         ICNTL(9) = trans == 0;    // 1: A x = b, !1 : tA x = b  during slove phase
         id.nrhs = N;
-       // x = b;
-        myscopy(id.n,b,x);
+        // x = b;
+        if(distributed)
+        {
+            MPI_Reduce( (void *) b,(void *)  x  , nN , MPI_TYPE<R>::TYPE(),MPI_SUM,0,comm);
+        }
+        else if(mpirank==0)  myscopy(nN,b,x);
         id.rhs = (MR *)(void *)(R *)x;
         id.job = JOB_SOLVE;    // performs the analysis. and performs the factorization.
         SetVerb();
         mumps_c(&id);
         Check("MUMPS_mpi dosolver");
+        if(distributed) // send the solution ...
+            MPI_Bcast(reinterpret_cast<void*> (x),nN, MPI_TYPE<R>::TYPE(), 0,comm);
         
-        if (verb  > 9) {
-           
+        
+        if (verb  > 9 && mpirank==0) {
+            
             for(int j=0; j<N; ++j)
             {
                 KN_<R> B(b+j*id.n,id.n);
@@ -288,7 +330,7 @@ public:
         }
         
         if (verb > 2) {
-
+            
             for(int j=0; j<N; ++j)
             {   KN_<R> B(x+j*id.n,id.n);
                 cout << "   x  " << j <<"  linfty " << B.linfty() << endl;

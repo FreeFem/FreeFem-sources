@@ -3,11 +3,11 @@
 
 // other
 //load "medit"
-load "MUMPS_FreeFem"
+load "MUMPS"
 include "cube.idp"
 
 real ttgv=1e10;
-string ssparams="nprow=1, npcol="+mpisize;
+//string ssparams="nprow=1, npcol="+mpisize;
 
 int[int]  Nxyz=[40,8,8];
 real [int,int]  Bxyz=[[0.,5.],[0.,1.],[0.,1.]];
@@ -42,7 +42,7 @@ matrix MLame=vLame(Vh,Vh,tgv=ttgv);
 tMatrix = clock()-tMatrix;
 
 real tFact = clock();
-set(MLame,solver=sparsesolver,tgv=ttgv,sparams=ssparams);
+set(MLame,solver="MUMPSMPI",tgv=ttgv);
 tFact = clock()-tFact;
 
 real tsdc = clock();

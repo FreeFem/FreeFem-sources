@@ -433,11 +433,14 @@ void HashMatrix<I,R>::setfortran(int yes)
 template<class I,class R>  template<typename T>
 void HashMatrix<I,R>::HMresize(T *&t,size_t no,size_t nn)
 {
+    if( no != nn)
+    {
     T * tt= new T[nn];
     for(size_t i=0; i< no; ++i)
         tt[i]= t[i];
     if(t) delete [] t;
     t=tt;
+    }
 }
 
 
@@ -584,6 +587,7 @@ void HashMatrix<I,R>::Increaze(size_t nnzxnew,size_t newnnz)
     size_t nzzx =  nnzxnew;
     double nnzl = min(max(1.,double(nzzx)/mnx),50.);// bof bof !!!! FH
     size_t nh = mnx*nnzl;
+    if(verbosity>999) cout << "HMresize "<< nzzx << " " <<nnzxnew << " mpirank" << mpirank << " " << this << endl; 
     HMresize(i,nnz,nzzx);
     HMresize(j,nnz,nzzx);
     HMresize(aij,nnz,nzzx);
@@ -614,7 +618,7 @@ template<class I,class R>
 HashMatrix<I,R>::~HashMatrix()
 {
     if(nbfind && verbosity>4)
-        cout << "    ~HashMatrix:   Mean collision in hash: " << (double) nbcollision/ nbfind << endl;
+        cout << "    ~HashMatrix:   Mean collision in hash: " << (double) nbcollision/ nbfind << " " << this << " rank: "<< mpirank << endl;
     delete [] i;
     delete [] j;
     delete [] aij;
