@@ -53,7 +53,7 @@ namespace  Fem2D {
 				}
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
 
 			virtual R operator () (const FElement &K, const R2 &PHat, const KN_<R> &u, int componante, int op) const;
 	};
@@ -84,11 +84,11 @@ namespace  Fem2D {
 		return r;
 	}
 
-	void TypeOfFE_P1ttdcnc1_::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
+	void TypeOfFE_P1ttdcnc1_::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
 		// const Triangle & K(FE.T);
 		R2 A(K[0]), B(K[1]), C(K[2]);
 		// l1(  cshrink1*(cshrink*((1,0)-G)+G)-G)+G  = 1
-		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
+		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
 
 		if (val.N() < 3) {
 			throwassert(val.N() >= 3);

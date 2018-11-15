@@ -1512,7 +1512,7 @@ void GenericMesh<T,B,V>::BuildBound()
 	 }
     }
   if(verbosity>3)
-      cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
+    cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe << "mes " << mes << " " << mesb
 	 << " , bb: (" << Pmin << ") , (" << Pmax << ")\n"; 
 }
 

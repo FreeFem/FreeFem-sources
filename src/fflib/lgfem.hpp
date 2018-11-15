@@ -2,7 +2,7 @@
 //
 // SUMMARY  :      
 // USAGE    :        
-// ORG      : 
+// ORG      : pfes3_tefk
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
@@ -38,9 +38,11 @@ extern Block *currentblock;
 void init_lgmat(); // initialisation for sparse mat functionnallity
 
 class v_fes; 
-class v_fes3; 
+class v_fes3;
+class v_fesS;
 typedef v_fes *pfes;
 typedef v_fes3 *pfes3;
+typedef v_fesS *pfesS;
 
 namespace  Fem2D {
   class Mesh3;
@@ -48,9 +50,10 @@ namespace  Fem2D {
 }
 using Fem2D::Mesh;
 using Fem2D::Mesh3;
-
+using Fem2D::MeshS;
 typedef const Mesh  *  pmesh;
 typedef const Mesh3  * pmesh3;
+typedef const MeshS  * pmeshS;
 
 using  Fem2D::FESpace;
 using  Fem2D::TypeOfFE;
@@ -155,12 +158,14 @@ bool BuildPeriodic(
   int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe);
 
 // <<v_fes>> uses [[file:~/ff/src/femlib/RefCounter.hpp::RefCounter]]
-class v_fes : public RefCounter { 
+
+//2d
+class v_fes : public RefCounter {
 public:
   typedef ::pfes pfes;
   typedef ::FESpace FESpace;
   
-  static const int d=2;
+  static const int dHat=2;
   const int N;
   const pmesh* ppTh; // adr du maillage
   CountPointer<FESpace>  pVh;
@@ -171,7 +176,7 @@ public:
   
   
   operator FESpace * ()  { 
-    throwassert( d==2);
+    throwassert( dHat==2);
     if  ( !pVh || *ppTh !=  &pVh->Th )
       pVh=CountPointer<FESpace>(update(),true);
     return  pVh   ;} 
@@ -192,16 +197,16 @@ public:
   
 };  
 
-  
+//3D volume
 class v_fes3 : public RefCounter { public:
     typedef pfes3 pfes;
   typedef FESpace3 FESpace;
 
-  static const int d=3;
+  static const int dHat=3;
   const int N;
   const pmesh3* ppTh; // adr du maillage
   CountPointer<FESpace3> pVh;
-  
+    
   Stack stack; // the stack is use whith periodique expression
   
   int nbcperiodic;
@@ -209,7 +214,7 @@ class v_fes3 : public RefCounter { public:
   
   
   operator FESpace3 * ()  { 
-    throwassert( d==3);
+    throwassert( dHat==3);
     if  ( !pVh || *ppTh !=  &pVh->Th )
       pVh=CountPointer<FESpace3>(update(),true);
     return  pVh   ;} 
@@ -229,7 +234,47 @@ class v_fes3 : public RefCounter { public:
   
 };  
   
+//3D surface
+class v_fesS : public RefCounter { public:
+    typedef pfesS pfes;
+    typedef FESpaceS FESpace;
+    
+    static const int dHat=2;
+    const int N;
+    const pmeshS* ppTh; // adr du maillage
 
+    CountPointer<FESpaceS> pVh;
+    
+    Stack stack; // the stack is use whith periodique expression
+    
+    int nbcperiodic;
+    Expression *periodic;
+
+    
+    operator FESpaceS * ()  {
+        throwassert( dHat==2);
+        if  ( !pVh || *ppTh !=  &pVh->Th )
+            pVh=CountPointer<FESpaceS>(update(),true);
+            return  pVh   ;}
+    FESpaceS * update() ;
+
+    v_fesS(int NN,const pmesh3* t,Stack s, int n,Expression *p)
+    : N(NN), ppTh(&(**t).meshS), pVh(0),stack(s), nbcperiodic(n),periodic(p) {}  //take a pmesh3 and use the pmeshS
+    v_fesS(int NN,const v_fesS *f,Stack s,int n,Expression *p)
+    :  N(NN),ppTh(f->ppTh),pVh(0),stack(s), nbcperiodic(n),periodic(p)
+    {}
+    
+    
+    
+    // void destroy(){ ppTh=0;pVh=0; delete this;}
+    virtual ~v_fesS() {}
+    bool buildperiodic(Stack stack, KN<int> & ndfe)  ;
+    virtual  FESpaceS * buildupdate( KN<int> & ndfe) {  return 0;}
+    virtual  FESpaceS * buildupdate() {return 0;};
+    
+};
+
+//2d
 class pfes_tef : public v_fes { public:
     
     const TypeOfFE * tef ;  
@@ -262,6 +307,7 @@ class pfes_tefk : public v_fes { public:
   
 }; 
 
+//3D volume
 class pfes3_tef : public v_fes3 { public:
     
     const TypeOfFE3 * tef ;  
@@ -272,8 +318,7 @@ class pfes3_tef : public v_fes3 { public:
   
 };
 
-
-class pfes3_tefk : public v_fes3 { 
+class pfes3_tefk : public v_fes3 {
 public:
   
   const TypeOfFE3 ** tef ;
@@ -309,7 +354,57 @@ public:
   }
     
 }; 
+
+
+//3D surface
+class pfesS_tef : public v_fesS { public:
+    
+    const TypeOfFES * tef ;
+    pfesS_tef(const pmesh3* t,const TypeOfFES * tt,Stack s=NullStack, int n=0,Expression *p=0 )
+    : v_fesS(tt->N,t,s,n,p),tef(tt) { operator FESpaceS * ();}
+    FESpaceS * buildupdate( KN<int> & ndfe)   { return  *ppTh ? new FESpaceS(**ppTh,*tef,ndfe.size()/2,ndfe):0;   }
+    FESpaceS * buildupdate()   {  return  *ppTh? new FESpaceS(**ppTh,*tef):0;}
+    
+};
+
+class pfesS_tefk : public v_fesS {
+public:
+    const TypeOfFES ** tef ;
+    const int k;
+    KN< GTypeOfFE<MeshS> const *> atef;
+    GTypeOfFESum<MeshS> tefs;
+    
+    static int sum(const Fem2D::TypeOfFES ** l,int const Fem2D::TypeOfFES::*p,int n)
+    {
+        int r=0;
+        for (int i=0;i<n;i++)
+            r += l[i]->*p;
+        return r;
+    }
  
+    pfesS_tefk(const pmesh3* t,const Fem2D::TypeOfFES ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 )
+    : v_fesS(sum((const Fem2D::TypeOfFES **)tt,&Fem2D::TypeOfFES::N,kk),t,s,n,p),
+    tef(tt),k(kk),
+    atef(kk,tt),tefs(atef)
+    
+    {
+        // cout << "pfes_tefk const" << tef << " " << this << endl;
+        operator FESpaceS * ();
+    }
+    FESpaceS * buildupdate() {
+        // cout << "pfes_tefk upd:" << tef << " " << this <<  endl;
+        //assert(tef);
+        return  *ppTh? new FESpaceS(**ppTh,tefs):0;}
+    virtual ~pfesS_tefk() { delete [] tef;}
+    FESpaceS * buildupdate(KN<int> & ndfe)
+    {
+        return *ppTh? new FESpaceS(**ppTh,tefs,ndfe.size()/2,ndfe):0;
+    }
+
+};
+
+
+
 class pfes_fes : public v_fes {
 public:
   
@@ -348,7 +443,7 @@ class FEbase {
 public:
   typedef typename v_fes::pfes pfes;
   typedef typename v_fes::FESpace FESpace;
-  
+    
   v_fes *const*pVh; // pointeur sur la variable stockant FESpace;
   KN<K> * xx; // value
   CountPointer<FESpace> Vh; // espace courant 
@@ -539,7 +634,7 @@ typedef pair<pferbasearray,int> pferarray ;
 };
 
 inline FESpace * v_fes::update() {     
-    assert(d==2);
+    assert(dHat==2);
     if(!*ppTh) return 0; 
     if (nbcperiodic ) {
        assert(periodic);
@@ -556,7 +651,7 @@ inline FESpace * v_fes::update() {
 
 
 inline FESpace3 * v_fes3::update() {     
-  assert(d==3);
+  assert(dHat==3);
   if(!*ppTh) return 0;
   if (nbcperiodic ) {
     assert(periodic);
@@ -570,6 +665,23 @@ inline FESpace3 * v_fes3::update() {
      else 
        return  buildupdate();
 }
+
+inline FESpaceS * v_fesS::update() {
+    assert(dHat==2);
+    if(!*ppTh) return 0;
+    if (nbcperiodic ) {
+        assert(periodic);
+        //const MeshS &Th(**ppTh);
+        //    KN<int> ndfv(Th.nv);
+        KN<int> ndfe;
+        //  int nbdfv,nbdfe;
+        bool ret = buildperiodic(stack,ndfe);
+        return   ret ? buildupdate(ndfe) : buildupdate();
+    }
+    else
+        return  buildupdate();
+}
+
 
 template<class A,class B>  A Build(B b) {  return A(b);}
 
@@ -700,6 +812,7 @@ class Op4_K2R : public quad_function<K,R,R,R,K> { public:
     };
 };
 
+// 3D volume
 template<class K,class  v_fes>
 class E_set_fev3: public E_F0mps {
 public:
@@ -727,6 +840,36 @@ public:
              
 };
 
+
+// 3D surface
+template<class K,class  v_fes>
+class E_set_fevS: public E_F0mps {
+public:
+    typedef typename  v_fes::pfes pfes;
+    typedef typename  v_fes::FESpace FESpace;
+    typedef typename  FESpace::Mesh Mesh;
+    typedef typename  FESpace::FElement FElement;
+    typedef typename  Mesh::Element Element;
+    typedef typename  Mesh::Vertex Vertex;
+    typedef typename  Mesh::RdHat RdHat;
+    typedef typename  Mesh::Rd Rd;
+    
+    
+    E_Array  aa;
+    Expression   ppfe;
+    bool optimize, optimizecheck;
+    
+    vector<size_t>  where_in_stack_opt;
+    Expression optiexp0,optiexpK;
+    
+    E_set_fevS(const E_Array * a,Expression pp) ;
+    
+    AnyType operator()(Stack)  const ;
+    operator aType () const { return atype<void>();}
+    
+};
+
+// 2d
 template<class K>
 class E_set_fev: public E_F0mps {public:
     const int dim;
@@ -739,9 +882,10 @@ class E_set_fev: public E_F0mps {public:
   E_set_fev(const E_Array * a,Expression pp,int ddim=2) ;
   
   AnyType operator()(Stack)  const ;
-   AnyType Op2d(Stack)  const ;
+  AnyType Op2d(Stack)  const ;
   AnyType Op3d(Stack)  const ;
-  
+  AnyType OpS(Stack)  const ;
+    
   operator aType () const { return atype<void>();} 
   
 };

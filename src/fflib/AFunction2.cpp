@@ -67,6 +67,7 @@ class vectorOfInst : public  E_F0mps { public:
        if(j>=0) j = n-j;
        else j =0;
        if(verbosity>999) cout << " eval vectorOfInst " << j << " " << n << endl;
+       cout << " eval vectorOfInst " << j << " " << n << endl;
         for (int i=j;i<n;++i)
         {
             ffassert(v[i]);
@@ -612,10 +613,10 @@ bool ArrayOfaType::WithOutCast( const ArrayOfaType & a) const
 bool ArrayOfaType::WithCast( const ArrayOfaType & a,int nbcast) const 
  {  
    if (  ( !ellipse && (a.n != n))  || (ellipse && n > a.n) ) return false;
-   for (int i=0;i<n;i++)
+     for (int i=0;i<n;i++)
      if ( a.t[i]->SametypeRight(t[i])) ;
      else if (! t[i]->CastingFrom(a.t[i])) return false; 
-     else if ( --nbcast <0) return false;
+         else if ( --nbcast <0) return false;
    return true;
  }    
  

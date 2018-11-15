@@ -53,7 +53,8 @@ template<class T> T  norm(const complex<T> &x){return std::norm(x);}
 inline void MoveTo(R2 P) { rmoveto((float) P.x,(float)P.y);}
 inline void LineTo(R2 P) { rlineto((float)P.x,(float)P.y);}
 
-inline R Area2(const R2 A,const R2 B,const R2 C){return (B-A)^(C-A);} 
+inline R Area2(const R2 A,const R2 B,const R2 C){return (B-A)^(C-A);}
+inline R3 Area3(const R3 A,const R3 B,const R3 C){return (B-A)^(C-A);}
 inline R Theta(R2 P){ return atan2(P.y,P.x);}
   /*
 inline R2 Minc(const R2 & A,const R2& B) { return R2(Min(A.x,B.x),Min(A.y,B.y));}
@@ -456,6 +457,7 @@ public:
   R2  * bnormalv; //  boundary vertex normal 
   //Triangle * adj;
   Triangle & operator[](int i) const {throwassert(i>=0 && i<nt);return triangles[i];}
+  // TriangleS & operator[](int i) const {throwassert(i>=0 && i<nt);return trianglesS[i];}
  // const Triangle & operator[](int i) const {return triangles[i];}
   Vertex & operator()(int i) const {throwassert(i>=0 && i<nv);return vertices[i];}
   Mesh(const char * filename) {read(filename);} // read on a file
@@ -528,9 +530,9 @@ public:
   int BoundaryElement(int bbe,int & edgeInT) const {
      int i= BoundaryEdgeHeadLink[bbe]; edgeInT = i%3; 
      return i/3;}
-
-     
+    
   Triangle * Find(const R2 & P) const ;
+    
   const Triangle * Find(R2 P, R2 & Phat,bool & outside,const Triangle * tstart=0) const  ;
   
   BoundaryEdge * TheBoundaryEdge(int i,int j)  const

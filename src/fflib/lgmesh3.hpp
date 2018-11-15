@@ -12,6 +12,21 @@ typedef FEbaseArray<Complex,v_fes3> * pf3cbasearray ;	// <<pf3cbasearray>>
 typedef pair<pf3cbase,int> pf3c ;			// <<pf3c>>
 typedef pair<pf3cbasearray,int> pf3carray ;		// <<pf3carray>>
 // fin
+
+// Surf real (2d equivalent at [[file:problem.hpp::pferbase]])
+typedef FEbase<double,v_fesS> * pfSrbase ;        // <<pf3rbase>>
+typedef FEbaseArray<double,v_fesS> * pfSrbasearray ;    // <<pf3rbasearray>>
+typedef pair<pfSrbase,int> pfSr ;            // <<pf3r>>
+typedef pair<pfSrbasearray,int> pfSrarray ;        // <<pf3rarray>>
+
+// Surf complex (2d equivalent at [[file:problem.hpp::pfecbase]])
+typedef FEbase<Complex,v_fesS> * pfScbase ;        // <<pf3cbase>
+typedef FEbaseArray<Complex,v_fesS> * pfScbasearray ;    // <<pf3cbasearray>>
+typedef pair<pfScbase,int> pfSc ;            // <<pf3c>>
+typedef pair<pfScbasearray,int> pfScarray ;        // <<pf3carray>>
+// fin
+
+
 bool isSameMesh(const list<C_F0> & largs,const void * Thu,const void * Thv,Stack stack) ; // true => VF type of Matrix   
   //bool isSameMesh(const list<C_F0> & largs,const Mesh * Thu,const Mesh * Thv,Stack stack)  ;
 

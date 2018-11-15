@@ -449,10 +449,9 @@ int mylex::scan(int lvl)
     if (! InMotClef(plglval->type,ret))  {
       int ft = FindType(buf);
 
-      // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
-      int feid3[4]  ={ ID,FESPACE1,FESPACE,FESPACE3};
-
-      assert ( ft >= 0 && ft <= 3)  ;
+        // FESPACE, FESPACE1, FESPACE3 , FESPACES are defined at [[file:../lglib/lg.ypp::FESPACE]]
+      int feid3[5]  ={ ID,FESPACE1,FESPACE,FESPACE3,FESPACES};
+      assert ( ft >= 0 && ft <= 4)  ;
       ret =  feid3[ft];      
       plglval->str = newcopy(buf);
     }}

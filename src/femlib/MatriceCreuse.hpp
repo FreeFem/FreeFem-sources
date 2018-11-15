@@ -326,6 +326,7 @@ public:
 
 }; 
 
+
 template <class R,class FES=FESpace> 
 class MatriceElementaireSymetrique:public MatriceElementaireFES<R,FES> {
 
