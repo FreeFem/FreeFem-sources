@@ -64,7 +64,6 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
 };
 
 
-
 basicAC_F0::name_and_type  Problem::name_param[]= {
     {  "save",&typeid(string* )},
     {  "cadna",&typeid(KN<double>*)},
@@ -1292,260 +1291,7 @@ namespace Fem2D {
         if(verbosity>9) cout << "  -- CPU assemble mat " <<  CPUtime()-CPU0 << " s\n";
     }
 
-<<<<<<< HEAD
-			
- template<class R>
-  void AssembleBilinearForm(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
-                           map<pair<int,int>, R >  & A, const  FormBilinear * b  )
-    
-  { // XXXXXX A FAIRE
-      /*FH:  case ..in 3D
-       in varf ...
-       all mesh can can be different ....
-       */
-      
-      
-      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
-      bool sptrclean=true;
-      //     sptr->clean(); // modif FH mars 2006  clean Ptr
-      Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
-      
-      const CDomainOfIntegration & di= *b->di;
-      const Mesh3 * pThdi = GetAny<pmesh3>( (* di.Th)(stack));
-      SHOWVERB(cout << " FormBilinear () " << endl);
-      //MatriceElementaireSymetrique<R> *mates =0;
-      // MatriceElementairePleine<R> *matep =0;
-      const int useopt=di.UseOpt(stack);
-      //double binside=di.binside(stack);
-      const bool intmortar=di.intmortar(stack);
-      if ( verbosity >1)
-      {
-          cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
-          cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
-          cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
-          cout << "        suppose in mortar " << intmortar << endl;
-      }
-      assert(pThdi == & Th);
-      //const vector<Expression>  & what(di.what);             
-      CDomainOfIntegration::typeofkind  kind = di.kind;
-      
-      set<int> setoflab;
-      bool all=true;
-      // const QuadratureFormular1d & FIEo = di.FIE(stack);
-      const QuadratureFormular & FITo = di.FIT(stack);
-      const GQuadratureFormular<R3> & FIVo = di.FIV(stack);
-      //  to change the quadrature on element ... may 2014 FH ..
-      // QuadratureFormular1d  FIE(FIEo,3);
-      QuadratureFormular FIT(FITo,3);
-      GQuadratureFormular<R3>  FIV(FIVo,3);
-      
-      
-      
-  //    const QuadratureFormular & FIT = di.FIT(stack);
-  //    const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
-      bool VF=b->VF();  // finite Volume or discontinous Galerkin
-      if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
-      if (verbosity>3)
-      {
-          if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
-          else  if (CDomainOfIntegration::intallfaces==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
-          //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
-          else cout << "  --  int 3d   (nQP: "<< FIV.n << " ) in "  ;
-      }
-      if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (2)");
-      if(di.islevelset() && (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) ) InternalError("Sorry no levelset integration type on no int2d case");
-   
-      Expandsetoflab(stack,di, setoflab,all);
-      /*
-       for (size_t i=0;i<what.size();i++)
-       {long  lab  = GetAny<long>( (*what[i])(stack));
-       setoflab.insert(lab);
-       if ( verbosity>3) cout << lab << " ";
-       all=false;
-       }*/
-      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
-      const E_F0 *poptiexp0=b->b->optiexp0;
-      // const E_F0 & optiexpK=*b->b->optiexpK;
-      int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
-      R** where_in_stack =0;
-      if (n_where_in_stack_opt && useopt)
-          where_in_stack = new R * [n_where_in_stack_opt];
-      if (where_in_stack)
-      {
-          assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
-          for (int i=0;i<n_where_in_stack_opt;i++)
-          {
-              int offset=b->b->where_in_stack_opt[i];
-              assert(offset>10);
-              where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
-              *(where_in_stack[i])=0;
-          }
-          
-          
-          if(poptiexp0)
-              (*poptiexp0)(stack);
-          KN<bool> ok(b->b->v.size());
-          {  //   remove the zero coef in the liste 
-              // R zero=R();  
-              int il=0;
-              for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                  ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
-          }
-          BilinearOperator b_nozer(*b->b,ok); 
-          if (verbosity % 10 > 3 ) 
-              cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size() 
-              << "  total " << n_where_in_stack_opt << endl;
-          
-          if ( (verbosity/100) % 10 >= 2)   
-          { 
-              int il=0;
-              
-              for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                  cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) 
-                  << " offset=" << b->b->where_in_stack_opt[il] 
-                  << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
-          }
-      }
-      Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
-      
-      KN<double>  p(Vh.esize()+ Uh.esize() );
-      
-      
-      if (verbosity >3) 
-	{
-	  if (all) cout << " all " << endl ;
-          else cout << endl;
-	}
-      
-      if (di.kind == CDomainOfIntegration::int2d )
-      { 
-          for( int e=0;e<Th.nbe;e++)
-          {
-              if (all || setoflab.find(Th.be(e).lab) != setoflab.end())   
-              {                  
-                  int ie,i =Th.BoundaryElement(e,ie);
-                  AddMatElem(A,Th,*b->b,sym,i,ie,Th.be(e).lab,Uh,Vh,FIV,FIT,p,stack,intmortar);  
-                  if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-              }
-          }
-      }
-      else if (di.kind == CDomainOfIntegration::intallfaces)
-      {
-          ffassert(0); // a faire 
-          
-          for (int i=0;i< Th.nt; i++) 
-          {
-              if ( all || setoflab.find(Th[i].lab) != setoflab.end())
-                  for (int ie=0;ie<3;ie++)   
-                      AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIV,FIT,p,stack,intmortar);  
-           
-              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr   
-              
-              
-          } 
-          
-      }      
-     /* else if (di.kind == CDomainOfIntegration::intallVFedges)
-      {
-          
-          cerr << " a faire intallVFedges " << endl;
-          ffassert(0);
-          
-      }  */    
-      else if (di.kind == CDomainOfIntegration::int3d )
-      {
-          if(di.islevelset())  //  may 2014 FH ...
-          {   // int3d levelset < 0
-              double llevelset = 0;
-              const double uset = std::numeric_limits<double>::max();
-              // cout << " uset ="<<uset << endl;
-              R3 Q[3][4];
-              double vol6[3];
-              KN<double> phi(Th.nv);
-              phi=uset;
-              double f[4];
-              
-              for (int t=0;t< Th.nt; t++)
-              {
-                  
-                  const Mesh3::Element & K(Th[t]);
-                  if (all || setoflab.find(Th[t].lab) != setoflab.end())
-                      
-                  {
-                      double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
-                      for(int i=0;i<4;++i)
-                      {
-                          int j= Th(t,i);
-                          if( phi[j]==uset)
-                          {
-                              MeshPointStack(stack)->setP(&Th,t,i);
-                              phi[j]= di.levelset(stack);//zzzz
-                          }
-                          f[i]=phi[j];
-                      }
-                      int ntets= UnderIso(f,Q, vol6,1e-14);
-                      setQF<R3>(FIV,FIVo,QuadratureFormular_Tet_1, Q,vol6,ntets);
-                      if(FIV.n)
-                      {
-                          AddMatElem(A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIV,FIT,p,stack);
-                          if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-                          
-                      }
-                      
-                  }
-              }
-              FIV = FIVo;
-              
-          }
-          else
-
-      {
-          // cerr << " a faire CDomainOfIntegration::int3d  " << endl;
-          for (int i=0;i< Th.nt; i++) 
-          {
-              if ( all || setoflab.find(Th[i].lab) != setoflab.end())  
-                  AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIV,FIT,p,stack); 
-              if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr    
-          }
-          
-      } }
-      else 
-          InternalError(" kind of CDomainOfIntegration unkown");
-      
-      if (where_in_stack) delete [] where_in_stack;
-      mp=mps;// restore x,y,z
-   
-  }
-// --------- FH 170605
- 
- 
-  template<class R> 
-  void  Element_Op(MatriceElementairePleine<R,FESpace3> & mat,const FElement3 & Ku,const FElement3 & Kv,double * p,int ie,int label,void *vstack,R3 *B)
-  {
-  //  ffassert(B==0);
-   Stack stack=pvoid2Stack(vstack);    
-    //    ffassert(0);
-    typedef  FElement3::Element Element;
-    MeshPoint mp= *MeshPointStack(stack);
-    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
-    
-    bool same = &Ku == & Kv;
-    const Element & T  = Ku.T;
-    throwassert(&T == &Kv.T);  
-    const GQuadratureFormular<R3> & FI = mat.FIT;
-    const GQuadratureFormular<R2> & FIb = mat.FIE;
-    long npi;
-    R *a=mat.a;
-    R *pa=a;
-    long i,j;
-    long n= mat.n,m=mat.m,nx=n*m;
-    long N= Kv.N;
-    long M= Ku.N;
-    
-  
-=======
     // end 3d
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     
     
     
@@ -6282,14 +6028,14 @@ namespace Fem2D {
             {
                 if ( B)
                 {
-                    *B += GetAny<typename VirtualMatrice<R>::plusAx >( (*e)(stack) )  ;
+                    *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
                 }
             }
             else if (r==tvf->tMatTX)
             {
                 if ( B)
                 {
-                    *B += GetAny<typename VirtualMatrice<R>::plusAtx >( (*e)(stack) )  ;
+                    *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
                 }
             }
             else if (r== tvf->tBC)
@@ -7766,104 +7512,6 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         
     }
     
-<<<<<<< HEAD
-  } 
-  
-
-  template<class R,typename MC,class FESpace >
-  bool AssembleVarForm(Stack stack,const typename FESpace::Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                       MC  * A,KN_<R> * B,const list<C_F0> &largs)
-  { // return true if BC 
-    typedef typename FESpace::Mesh Mesh ;
-    typedef Mesh * pmesh;
-    bool ret=false; 
-    typedef DotStar_KN_<R> DotStar;
-    typedef DotSlash_KN_<R> DotSlash;
-    list<C_F0>::const_iterator ii,ib=largs.begin(),
-      ie=largs.end();
-     using namespace FreeFempp;  
-     TypeVarForm<R> *tvf=TypeVarForm<R>::Global;
-     assert( tvf);
-    for (ii=ib;ii != ie;ii++)
-      {
-        Expression e=ii->LeftValue();
-        aType r = ii->left();
-      //  if(A)        cout << "AssembleVarForm " <<  * r << " " <<  (*A)(0,3) << endl;
-        if (r==  tvf->tFB) 
-          { if (A)
-           { 
-            const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
-            pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));
-            if(Thbf)AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
-           }
-          }
-        else if (r==tvf->tMat)
-          {
-            if (A)
-              InternalError(" Add sparse matrice; to do, sorry");
-          }
-        else if (r==tvf->tFL)
-          {
-            if (B) {
-              const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
-              pmesh  Thbf = GetAny<pmesh>((*bf->di->Th)(stack));            
-              if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf) ;
-	    }
-          }
-        else if (r==tvf->tTab)
-          {
-            if ( B) 
-              *B += *GetAny<KN<R> *>( (*e)(stack) );
-          }
-        else if (r==tvf->tDotStar)
-          {
-            if ( B) 
-              {
-                DotStar ab=GetAny<DotStar>( (*e)(stack) );
-                *B += ab;
-              }
-          }
-        else if (r==tvf->tMatX)
-          {
-            if ( B) 
-              { 
-                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
-              }
-          }
-        else if (r==tvf->tMatTX)
-          {
-            if ( B) 
-              { 
-                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
-              }
-          }
-        else if (r== tvf->tBC) 
-          ret=true;
-        else 
-          { 
-            cerr << "AssembleVarForm  invalid type : " << * r <<  endl;
-            throw(ErrorExec("AssembleVarForm invalid type in varf",1));
-          }
-      }
-    return ret;
-  }                            
-  
-  template<class R,class FESpace>
-  void AssembleBC(Stack stack,const typename FESpace::Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
-                  MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const list<C_F0> &largs , double tgv  )
-  {
-    list<C_F0>::const_iterator ii,ib=largs.begin(),
-      ie=largs.end();
-    aType tBC( atype<const  BC_set  *>()) ;                    
-    for (ii=ib;ii != ie;ii++)
-      {
-        Expression e=ii->LeftValue();
-        aType r = ii->left();
-        if (r==tBC)
-          AssembleBC(stack,Th,Uh,Vh,sym,A,B,X, dynamic_cast<const  BC_set *>(e),tgv);
-      }
-=======
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     
     
     
@@ -8249,17 +7897,10 @@ bool isSameMesh(const list<C_F0> & largs,const void * Thu,const void * Thv,Stack
 
 template<class R,class FESpace,class v_fes>
 void InitProblem( int Nb, const FESpace & Uh,
-<<<<<<< HEAD
-                               const FESpace & Vh,
-		  KN<R> *&B,KN<R> *&X,vector<  pair< FEbase<R,v_fes> * ,int> > &u_hh,
-                  Data_Sparse_Solver    *ds ,// TypeSolveMat
-		  vector<  FEbase<R,v_fes> *  > & u_h,const FESpace ** LL, bool initx )
-=======
                  const FESpace & Vh,
                  KN<R> *&B,KN<R> *&X,vector<  pair< FEbase<R,v_fes> * ,int> > &u_hh,
-                 TypeSolveMat    *typemat ,
+                 Data_Sparse_Solver    *ds ,//    *typemat ,
                  vector<  FEbase<R,v_fes> *  > & u_h,const FESpace ** LL, bool initx )
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
 {
     typedef typename  FESpace::Mesh Mesh;
     typedef typename  FESpace::FElement FElement;
@@ -8278,17 +7919,10 @@ void InitProblem( int Nb, const FESpace & Uh,
     {
         if (!X || (X =B) )
         X=new KN<R>(B->N());
-<<<<<<< HEAD
-      const FEbase<R,v_fes> & u_h0 = *(u_h[0]);
-      const FESpace  * u_Vh = u_h0.Vh ;
-      
-      if ( u_Vh==0  || ! u_h[0]->x() || &((u_h[0])->Vh->Th) != &Th )
-=======
         const FEbase<R,v_fes> & u_h0 = *(u_h[0]);
         const FESpace  * u_Vh = u_h0.Vh ;
         
         if ( u_Vh==0  || &((u_h[0])->Vh->Th) != &Th )
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
         {
             *X=R();
             if(verbosity>1)
@@ -8340,187 +7974,45 @@ void InitProblem( int Nb, const FESpace & Uh,
     
 }
 
-<<<<<<< HEAD
-=======
-template<class R>
-void DefSolver(Stack stack, MatriceCreuse<R>  & A, Data_Sparse_Solver & ds )
-{
-    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
-    if (ds.typemat->profile)
-    {
-        if(verbosity>5) cout << " Matrix skyline type:" << ds.typemat->t <<endl;
-        MatriceProfile<R> & AA(dynamic_cast<MatriceProfile<R> &>(A));
-        throwassert(&AA);
-        double tol_pivot1= (ds.tol_pivot>0.) ? ds.tol_pivot : EPSILON/8.;
-        // cout << " tol_pivot1 " <<tol_pivot1 <<  endl; auto_ptr
-        switch (ds.typemat->t) {
-                case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
-                case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
-                case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
-            default:
-                cerr << " type resolution " << ds.typemat->t << endl;
-                CompileError("type resolution profile inconnue"); break;
-        }
-    }
-    else
-    {
-        if(verbosity>5) cout << " Matrix morse type:" << ds.typemat->t <<endl;
-        MatriceMorse<R> & AA(dynamic_cast<MatriceMorse<R> &>(A));
-        throwassert(&A);
-        switch (ds.typemat->t) {
-                case    TypeSolveMat::GC:
-                if (ds.precon)
-                AA.SetSolverMaster(new SolveGCPrecon<R>(AA,pprecon,stack,ds.itmax,ds.epsilon));
-                else
-                AA.SetSolverMaster(new SolveGCDiag<R>(AA,ds.itmax,ds.epsilon));
-                break;
-                case TypeSolveMat::GMRES :
-                if (ds.precon)
-                AA.SetSolverMaster(new SolveGMRESPrecon<R>(AA,pprecon,stack,ds.NbSpace,ds.itmax,ds.epsilon));
-                else
-                AA.SetSolverMaster(new SolveGMRESDiag<R>(AA,ds.NbSpace,ds.itmax,ds.epsilon));
-                break;
-                //#ifdef HAVE_LIBUMFPACK
-                case TypeSolveMat::SparseSolver :
-                AA.SetSolverMaster(DefSparseSolver<R>::Build(stack,&AA,ds));
-                //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
-                break;
-                case TypeSolveMat::SparseSolverSym :
-                AA.SetSolverMaster(DefSparseSolverSym<R>::Build(stack,&AA,ds));
-                //           AA.SetSolverMaster(new SolveUMFPack<R>(AA,umfpackstrategy,tgv,eps,tol_pivot,tol_pivot_sym));
-                break;
-                
-                //#endif
-            default:
-                cerr << " type resolution " << ds.typemat->t << endl;
-                CompileError("type resolution inconnue"); break;
-        }
-        
-    }
-}
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-
-/*
-bool SetGMRES()
-{
-    if(verbosity>1)
-<<<<<<< HEAD
-	cout << " SetDefault sparse (morse) solver to GMRES" << endl;
-    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,0>;
-    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,0>;
-=======
-    cout << " SetDefault sparse (morse) solver to GMRES" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverGMRES;
-    DefSparseSolver<Complex>::solver =BuildSolverGMRES;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-    return true;
-}
-
-bool SetCG()
-{
-    if(verbosity>1)
-<<<<<<< HEAD
-	cout << " SetDefault sparse (morse) solver to CG" << endl;
-    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,1>;;
-    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,1>;;
-    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,1>;;
-    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,1>;;
-=======
-    cout << " SetDefault sparse (morse) solver to CG" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverCG;
-    DefSparseSolver<Complex>::solver =BuildSolverCG;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-    return true;
-}
-*/
-
-#ifdef HAVE_LIBUMFPACK
-/*
-bool SetUMFPACK()
-{
-    if(verbosity>1)
-<<<<<<< HEAD
-	cout << " SetDefault sparse solver to UMFPack" << endl;
-    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,2>;;;
-    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,2>;;;
-    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,3>;;;
-    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,3>;;;
-=======
-    cout << " SetDefault sparse solver to UMFPack" << endl;
-    DefSparseSolver<double>::solver  =BuildSolverUMFPack;
-    DefSparseSolver<Complex>::solver =BuildSolverUMFPack;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-    return true;
-}
-
-*/
-#else
-/*
-bool SetUMFPACK()
-{
-    DefSparseSolverNew<double,0>::solver  =BuildSolver<double,5>;;;
-    DefSparseSolverNew<Complex,0>::solver =BuildSolver<Complex,6>;;;
-    DefSparseSolverNew<double,1>::solver  =BuildSolver<double,5>;;;
-    DefSparseSolverNew<Complex,1>::solver =BuildSolver<Complex,6>;;;
-
-    if(verbosity>1)
-<<<<<<< HEAD
-        cout << " Sorry no UMFPack" << endl;
-=======
-    cout << " Sorry no UMFPack" << endl;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-    return false;
-}
-*/
-#endif
-
-
-
 
 
 template<class R>
-MatriceCreuse<typename CadnaType<R>::Scalaire> * DefSolverCadna(
-                                                                Stack stack,
-                                                                MatriceCreuse<R>  & A,
-                                                                Data_Sparse_Solver & ds
-/*  long NbSpace ,
- long itmax,
- double & eps,
- bool initmat,
- int strategy,
- const OneOperator *precon,
- double tgv,
- double tol_pivot, double tol_pivot_sym
- */
+ MatriceCreuse<typename CadnaType<R>::Scalaire> * DefSolverCadna(
+  Stack stack,
+  MatriceCreuse<R>  & A,
+  Data_Sparse_Solver & ds
+/*  long NbSpace , 
+  long itmax, 
+  double & eps,
+  bool initmat,
+  int strategy,
+  const OneOperator *precon,
+  double tgv,
+  double tol_pivot, double tol_pivot_sym
+*/
 )
 {
-<<<<<<< HEAD
    typedef typename CadnaType<R>::Scalaire R_st;
     /*
  //  MatriceCreuse<R_st> *CadnaMat;
-=======
-    typedef typename CadnaType<R>::Scalaire R_st;
-    //  MatriceCreuse<R_st> *CadnaMat;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     if (ds.typemat->profile)
-    {
+      {
         if(verbosity>5) cout << " Matrix skyline type:" << ds.typemat->t <<endl;
         MatriceProfile<R> & AAA(dynamic_cast<MatriceProfile<R> &>(A));
-        MatriceProfile<R_st> &AA(*new MatriceProfile<R_st>(AAA)); //
+        MatriceProfile<R_st> &AA(*new MatriceProfile<R_st>(AAA)); // 
         
         throwassert(&AA);
         double tol_pivot1= (ds.tol_pivot>0) ? ds.tol_pivot : EPSILON/8.;
-        // cout << " tol_pivot1 " <<tol_pivot1 <<  endl;
+       // cout << " tol_pivot1 " <<tol_pivot1 <<  endl;
         switch (ds.typemat->t) {
-                case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
-                case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
-                case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
-            default:
-                cerr << " type resolution " << ds.typemat->t << endl;
-                CompileError("type resolution profile inconnue"); break;
+        case TypeSolveMat::LU       : AA.LU(tol_pivot1); break;
+        case TypeSolveMat::CROUT    : AA.crout(tol_pivot1); break;
+        case TypeSolveMat::CHOLESKY : AA.cholesky(tol_pivot1); break;
+        default:
+          cerr << " type resolution " << ds.typemat->t << endl;
+          CompileError("type resolution profile inconnue"); break;       
         }
         return &AA;
-<<<<<<< HEAD
       }
     else */
       {
@@ -8530,38 +8022,6 @@ MatriceCreuse<typename CadnaType<R>::Scalaire> * DefSolverCadna(
    return 0;   
   }      
   
-template<class R,class FESpace,class v_fes>   
-void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbase<R,v_fes> * > & u_h,KN<R> * X,KN<R> * B,const FESpace **  LL,const FESpace &  Uh)
-  {
-      typedef typename  FESpace::Mesh Mesh;
-      typedef typename  FESpace::FElement FElement;
-      typedef typename  Mesh::Element Element;
-      typedef typename  Mesh::Vertex Vertex;  
-      typedef typename  Mesh::RdHat RdHat;  
-      typedef typename  Mesh::Rd Rd;  
-      
-   // dispatch the solution 
-  if (Nb==1)  {
-    *(u_h[0])=X;
-    if (X != B ) delete B;  }
-  else {
-    const FElement ** sK= new const FElement * [Nb];
-    
-    KN<R> ** sol= new KN<R> * [Nb];
-    for (int i=0;i<Nb;i++) {
-      sol[i]= new KN<R>( LL[i]->NbOfDF) ;
-      *(u_h[i]) = sol[i];
-=======
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-    }
-    else
-    {
-        ExecError("matrix morse & CADNA are incompatible today, sorry!");
-        return 0;
-    }
-    return 0;
-}
-
 template<class R,class FESpace,class v_fes>
 void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbase<R,v_fes> * > & u_h,KN<R> * X,KN<R> * B,const FESpace **  LL,const FESpace &  Uh)
 {
@@ -8579,18 +8039,6 @@ void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbas
     else {
         const FElement ** sK= new const FElement * [Nb];
         
-<<<<<<< HEAD
-      }
-    
-     delete [] sK;
-     delete [] sol;
-     if (X != B && X ) delete X; 
-     delete B; 
-  }
-  }
-/*
-#ifdef HAVE_LIBUMFPACK   
-=======
         KN<R> ** sol= new KN<R> * [Nb];
         for (int i=0;i<Nb;i++) {
             sol[i]= new KN<R>( LL[i]->NbOfDF) ;
@@ -8620,9 +8068,8 @@ void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbas
         delete B;
     }
 }
-
+/*
 #ifdef HAVE_LIBUMFPACK
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
 TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
 #else
 TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
@@ -8631,13 +8078,8 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 
 template<class R,class FESpace,class v_fes>
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
-<<<<<<< HEAD
-      MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
-{  
-=======
                       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
 {
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     typedef typename  FESpace::Mesh Mesh;
     typedef typename  FESpace::FElement FElement;
     typedef typename  Mesh::Element Element;
@@ -8645,35 +8087,6 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     typedef typename  Mesh::RdHat RdHat;
     typedef typename  Mesh::Rd Rd;
     
-<<<<<<< HEAD
-  using namespace Fem2D;
-  typedef typename CadnaType<R>::Scalaire R_st;
-  MeshPoint *mps= MeshPointStack(stack),mp=*mps;
-  Data_Sparse_Solver ds;
-  string save;
-    
-
-  KN<double>* cadna=0; 
-/*
- {  "save",&typeid(string* )}, 0
- {  "cadna",&typeid(KN<double>*)}, 1
- {  "bmat",&typeid(Matrice_Creuse<R>* )}, 2
- 
- */
- 
- if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
- if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));   
-  
-  SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
-
-
-  //  for the gestion of the PTR. 
-  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007 
-
-  bool sym = ds.sym;
-  
-  list<C_F0>::const_iterator ii,ib=op->largs.begin(),
-=======
     using namespace Fem2D;
     typedef typename CadnaType<R>::Scalaire R_st;
     MeshPoint *mps= MeshPointStack(stack),mp=*mps;
@@ -8683,77 +8096,20 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
      double epsilon=1e-6;*/
     string save;
     
-    //  bool VF=false;
-    //  VF=isVF(op->largs);
-    // assert(!VF);
-    //  double tgv = 1e30;
-    // type de matrice par default
-    TypeSolveMat tmat(TypeSolveMat::defaultvalue);
-    
-    ds.typemat=&tmat;
-    // bool initmat=true;
-    /*
-     int strategy=0;
-     double tol_pivot=-1.; // defaut UMFPACK value  Add FH 31 oct 2005
-     double tol_pivot_sym=-1.; // defaut Add FH 31 oct 2005
-     
-     KN<int> param_int;
-     KN<double> param_double;
-     string *param_char = NULL;
-     KN<int> perm_r;
-     KN<int> perm_c;
-     string *file_param_int;  // Add J. Morice 02/09
-     string *file_param_double;
-     string* file_param_char;
-     string* file_param_perm_r;
-     string* file_param_perm_c;
-     */
-    KN<double>* cadna=0;
-    /*
-     {  "save",&typeid(string* )}, 0
-     {  "cadna",&typeid(KN<double>*)}, 1
-     {  "bmat",&typeid(Matrice_Creuse<R>* )}, 2
-     
-     */
+     KN<double>* cadna=0;
+ 
     if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
     if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));
-    // bmat not used .... bizarre
-    /*
-     if (nargs[0]) ds.initmat= ! GetAny<bool>((*nargs[0])(stack));
-     if (nargs[1]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[1])(stack));
-     if (nargs[2]) ds.epsilon= GetAny<double>((*nargs[2])(stack));
-     // 3 precon
-     if (nargs[4]) ds.NbSpace= GetAny<long>((*nargs[4])(stack));
-     if (nargs[6]) ds.tgv= GetAny<double>((*nargs[6])(stack));
-     if (nargs[7]) ds.strategy = GetAny<long>((*nargs[7])(stack));
-     if (nargs[8]) save = *GetAny<string*>((*nargs[8])(stack));
-     if (nargs[9]) cadna= GetAny<KN<double>* >((*nargs[9])(stack));
-     */
-    /*
-     if (nargs[10]) ds.tol_pivot= GetAny<double>((*nargs[10])(stack));
-     if (nargs[11]) ds.tol_pivot_sym= GetAny<double>((*nargs[11])(stack));
-     if (nargs[12]) ds.itmax = GetAny<long>((*nargs[12])(stack)); //  fevr 2007
-     if (nargs[13]) ds.param_int= GetAny< KN<int> >((*nargs[13])(stack));  // Add J. Morice 02/09
-     if (nargs[14]) ds.param_double= GetAny< KN<double> >((*nargs[14])(stack));
-     if (nargs[15]) ds.param_char= GetAny< string * >((*nargs[15])(stack));  //
-     if (nargs[16]) ds.perm_r = GetAny< KN<int > >((*nargs[16])(stack));
-     if (nargs[17]) ds.perm_c = GetAny< KN<int> >((*nargs[17])(stack));  //
-     if (nargs[18]) ds.file_param_int= GetAny< string* >((*nargs[18])(stack));  // Add J. Morice 02/09
-     if (nargs[19]) ds.file_param_double= GetAny< string* > ((*nargs[19])(stack));
-     if (nargs[20]) ds.file_param_char= GetAny< string* >((*nargs[20])(stack));  //
-     if (nargs[21]) ds.file_param_perm_r = GetAny< string* >((*nargs[21])(stack));
-     if (nargs[22]) ds.file_param_perm_c = GetAny< string* >((*nargs[22])(stack));  //
-     */
+ 
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
     
     
     //  for the gestion of the PTR.
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
     
-    bool sym = ds.typemat->sym;
+    bool sym = ds.sym;
     
     list<C_F0>::const_iterator ii,ib=op->largs.begin(),
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     ie=op->largs.end();
     int Nbcomp2=var.size(),Nbcomp=Nbcomp2/2; // nb de composante
     throwassert(Nbcomp2==2*Nbcomp);
@@ -8854,99 +8210,23 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case
     // more safe for the future ( 4 days lose with is optimization FH )
     
-    InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,ds.typemat , u_h,  LL,  initx);
+    InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,&ds , u_h,  LL,  initx);
     
     if(verbosity>2) cout << "   Problem(): initmat " << ds.initmat << " VF (discontinuous Galerkin) = " << VF << endl;
     
     
     
-    if (ds.initmat)
-    {
-<<<<<<< HEAD
-       ds.initmat = true;
-       data->pTh=pTh;
-       if (Nb==1) 
-         { //  cas scalaire
-           data->Uh=LL[0];
-           data->Vh=LL[1]; }
-       else 
-         { //  cas vectoriel 
-           bool same=true;
-           for (int i=0;i<Nb;i++)
-             if ( LL[i] != LL[Nb+i] )
-               {
-                 same = false;
-                 break;
-               }
-           if(!same)
-             InternalError("Methode de Galerkine (a faire)");
-           else
-             {
-               
-               bool unique=true;
-               for (int i=1;i<Nb;i++)
-                 if ( LL[0] != LL[i]) 
-                   {
-                     unique = false;
-                     break;
-                   }
-                 else if(LL[i]->FirstDfOfNodeData)// Correct jan 2015 not FE product this case
-                 {
-                     unique = false;
-                     break;
-                 }
-                 
-               if (unique) 
-                 data->Uh.master( new FESpace(*LL[0],Nb));
-               else 
-                 data->Uh.master(new FESpace(LL,Nb));
-               data->Vh=data->Uh;
-             }
-           
-         }
-    }          
-               
-  const FESpace & Uh(*data->Uh);    
-  const FESpace & Vh(*data->Vh);
-  throwassert(Nbcomp==Uh.N && Nbcomp==Vh.N); 
-  KN<R> *B=new KN<R>(Vh.NbOfDF);
-  KN<R> *X=B; //
-  const  Mesh & Th(Uh.Th);
-  bool initx = true; //typemat->t==TypeSolveMat::GC ; //  make x and b different in all case 
-  // more safe for the future ( 4 days lose with is optimization FH )
-
-  InitProblem<R,FESpace,v_fes>(  Nb,  Uh, Vh, B, X,u_hh,&ds , u_h,  LL,  initx);
-
-  if(verbosity>2) cout << "   Problem(): initmat " << ds.initmat << " VF (discontinuous Galerkin) = " << VF << endl;
-  
-
-  
-  if (ds.initmat) 
-   {
+    if (ds.initmat) 
      {
-        if ( &Uh == & Vh )
-          dataA.master(new MatriceMorse<R>( sym,Vh.NbOfDF));
-        else 
-          dataA.master(new MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF));
-      }
-      MatriceCreuse<R>  & AA(dataA);
-     if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" <</* " skyline =" <<ds.typemat->profile <<*/ endl;
-=======
-        if (ds.typemat->profile)
-        {
-            dataA.master(new MatriceProfile<R>(Vh,VF));
-        }
-        else
-        {
-            if ( &Uh == & Vh )
-            dataA.master(new MatriceMorse<R>(Vh,sym,VF));
-            else
-            dataA.master(new MatriceMorse<R>(Vh,Uh,VF));
+       {
+          if ( &Uh == & Vh )
+            dataA.master(new MatriceMorse<R>( sym,Vh.NbOfDF));
+          else 
+            dataA.master(new MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF));
         }
         MatriceCreuse<R>  & AA(dataA);
-        if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << " skyline =" <<ds.typemat->profile << endl;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
-    }
+       if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" <</* " skyline =" <<ds.typemat->profile <<*/ endl;
+      }
     MatriceCreuse<R>  & A(dataA);
     if  (AssembleVarForm( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, op->largs))
     {
@@ -8959,50 +8239,16 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     }
     else
     *B = - *B;
-<<<<<<< HEAD
-  MatriceCreuse<R_st>  * ACadna = 0;
-  
-  
-  try {  
-  
-  if (ds.initmat)
-	DefSolver<R>(stack, A, ds);
-    
-
-
-      
- // if(verbosity>3) cout << "   B  min " << B->min() << " ,  max = " << B->max() << endl;
-  if( save.length() )
-  {
-      string savem=save+".matrix";
-      string saveb=save+".b";
-    {
-     ofstream outmtx( savem.c_str());
-     A.dump(outmtx)  << endl;
-    }  
-    {
-     ofstream outb(saveb.c_str());
-     outb<< *B << endl;
-    }  
-     
-  }
-  if (verbosity>99)
-   {
-    cout << " X= " << *X << endl;
-    cout << " B= " << *B << endl;
-    }
-=======
     MatriceCreuse<R_st>  * ACadna = 0;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     
     
     try {
         
         if (ds.initmat)
         {
-            if(cadna)
-            ACadna = DefSolverCadna( stack,A, ds);
-            else
+         //   if(cadna)
+         //   ACadna = DefSolverCadna( stack,A, ds);
+         //   else
             DefSolver(stack,  A, ds);
         }
         
@@ -9015,7 +8261,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
             string saveb=save+".b";
             {
                 ofstream outmtx( savem.c_str());
-                outmtx << A << endl;
+                A.dump(outmtx)  << endl;
             }
             {
                 ofstream outb(saveb.c_str());
@@ -9081,12 +8327,6 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     *mps=mp;
     return SetAny<const Problem *>(this);
 }
-
-//   force particular instace
-template AnyType Problem::eval<double,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse<  CadnaType<double>::Scalaire >  * & dataCadna) const;
-template AnyType Problem::eval<Complex,FESpace,v_fes>(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse<  CadnaType<Complex>::Scalaire >  * & dataCadna) const;
-template AnyType Problem::eval<double,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<double> > & dataA,MatriceCreuse<  CadnaType<double>::Scalaire >  * & dataCadna) const;
-template AnyType Problem::eval<Complex,FESpace3,v_fes3>(Stack stack,Data<FESpace3> * data,CountPointer<MatriceCreuse<Complex> > & dataA,MatriceCreuse<  CadnaType<Complex>::Scalaire >  * & dataCadna) const;
 
 
 // dimProblem read the number of arguments of problem ex: problem a(u,v) or a([u1,u2], [v1,v2])
@@ -9398,25 +8638,6 @@ ppfes(ft)//IsFebaseArray(ft))
     largs=LLL->largs;
 }
 bool C_args::IsLinearOperator() const {
-<<<<<<< HEAD
-  //  int n=largs.size();
-  aType tRn =atype<KN<R>* >();
-  aType tCn =atype<KN<Complex>* >();
-  for (const_iterator i=largs.begin(); i != largs.end();i++) 
-    { 
-      C_F0  c= *i; 
-      // Expression e=c; 
-      aType r=c.left();
-      if (     ( r != atype<const  FormLinear *>() )
-	       &&  ( r != atype<const  BC_set *>() )
-	       &&  ( r != atype<RNM_VirtualMatrix<R>::plusAx >() )
-	       &&  ( r != atype<RNM_VirtualMatrix<R>::plusAtx >() )
-	       &&  ( r != atype<RNM_VirtualMatrix<Complex>::plusAx >() )
-	       &&  ( r != atype<RNM_VirtualMatrix<Complex>::plusAtx >() )
-	       &&  ( r != tRn) 
-	       &&  ( r != tCn) 
-	       ) return false;
-=======
     //  int n=largs.size();
     aType tRn =atype<KN<R>* >();
     aType tCn =atype<KN<Complex>* >();
@@ -9426,15 +8647,14 @@ bool C_args::IsLinearOperator() const {
         // Expression e=c;
         aType r=c.left();
         if (     ( r != atype<const  FormLinear *>() )
-            &&  ( r != atype<const  BC_set *>() )
-            &&  ( r != atype<VirtualMatrice<R>::plusAx >() )
-            &&  ( r != atype<VirtualMatrice<R>::plusAtx >() )
-            &&  ( r != atype<VirtualMatrice<Complex>::plusAx >() )
-            &&  ( r != atype<VirtualMatrice<Complex>::plusAtx >() )
-            &&  ( r != tRn)
-            &&  ( r != tCn)
+ 	       &&  ( r != atype<const  BC_set *>() )
+ 	       &&  ( r != atype<RNM_VirtualMatrix<R>::plusAx >() )
+ 	       &&  ( r != atype<RNM_VirtualMatrix<R>::plusAtx >() )
+ 	       &&  ( r != atype<RNM_VirtualMatrix<Complex>::plusAx >() )
+ 	       &&  ( r != atype<RNM_VirtualMatrix<Complex>::plusAtx >() )
+ 	       &&  ( r != tRn) 
+ 	       &&  ( r != tCn) 
             ) return false;
->>>>>>> d497e274441b4abdd5f17fb344b777e58def6206
     }
     return true;}
 
