@@ -134,8 +134,8 @@ namespace  Fem2D {
 				return w(i * m + j);
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const {
-				int k = ijP(P);
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
+				int k = ijP(PHat);
 
 				val = 0;
 				if (whatd[op_id]) {
@@ -164,7 +164,7 @@ namespace  Fem2D {
 			typedef GQuadratureFormular<R2> QFf;// quadrature formule on a face
 			typedef GQuadratureFormular<R3> QFk;// quadrature formule on a element
 			TypeOfFE_QF3d (const TypeOfFE_QF3d::QFk &qf);	// constructor
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
 			// void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
 			static int*pdfon (int n);
 			~TypeOfFE_QF3d () {delete [] dfon;}
@@ -249,10 +249,10 @@ namespace  Fem2D {
 		if (verbosity > 9) {cout << "  search TypeOfFE_QF3d   NbDoF=" << NbDoF << " m = " << m << endl;}
 	}
 
-	void TypeOfFE_QF3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
+	void TypeOfFE_QF3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
 		assert(val.N() >= 4);
 		assert(val.M() == 1);
-		int kqf = ijP(P);
+		int kqf = ijP(PHat);
 		// wi = signe * (x - qi)/ (volume*d)
 		val = 0;
 		if (whatd & Fop_D0) {

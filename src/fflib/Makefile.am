@@ -37,6 +37,7 @@ environment.cpp environment.hpp string_def.cpp \
 ../femlib/P012_1d.cpp \
 ../femlib/P012_2d.cpp \
 ../femlib/P012_3d.cpp \
+../femlib/P012_3dSurf.cpp \
 ../femlib/Mesh1dn.cpp \
 ../femlib/Mesh2dn.cpp \
 ../femlib/Mesh3dn.cpp \

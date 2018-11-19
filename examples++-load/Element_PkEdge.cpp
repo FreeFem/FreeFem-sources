@@ -122,14 +122,14 @@ namespace  Fem2D {
 				// cout << " v :" << v << endl;
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
 	};
 
 	// ENDOFCLASS TypeOfFE_PkEdge
 
-	void TypeOfFE_PkEdge::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
+	void TypeOfFE_PkEdge::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
 		R2 A(K[0]), B(K[1]), C(K[2]);
-		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
+		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
 		R L[3] = {l0, l1, l2};
 
 		assert(val.N() >= ndf);
@@ -291,14 +291,14 @@ namespace  Fem2D {
 				// cout << " v :" << v << endl;
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
 	};
 
 	// ENDOFCLASS TypeOfFE_PkEdge
 
-	void TypeOfFE_PkEdgedc::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
+	void TypeOfFE_PkEdgedc::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
 		R2 A(K[0]), B(K[1]), C(K[2]);
-		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
+		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
 		R L[3] = {l0, l1, l2};
 
 		assert(val.N() >= ndf);

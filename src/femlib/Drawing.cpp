@@ -592,7 +592,7 @@ void TBoundaryEdge<R2>::Draw() const
 template<class R>    
 KN<R>  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) const 
     {
-	nsb = TFE[0]->nbsubdivision;
+        nsb = TFE[0]->nbsubdivision; 
 	int nsbv = NbOfSubInternalVertices(nsb);
 	lg = nsbv*Th.nt;
 	if(verbosity>99)
@@ -606,6 +606,8 @@ KN<R>  FESpace::newSaveDraw(const KN_<R> & U,int composante,int & lg,int & nsb) 
 	  }
 	return KN<R>(true,v);// to remove the copy.
     }
+    
+    
 template<class R>      
 KN<R>  FESpace::newSaveDraw(const KN_<R> & U,const KN_<R> & V,int iU,int iV,int & lg,int & nsb) const 
     {
@@ -706,7 +708,7 @@ void  FESpace::Draw(const KN_<R>& U,const KN_<R>& V,const RN_ & Viso, R coef,int
    NewSetColorTable(Viso.N()+5,colors,nbcolors,hsv);
 
 }
-
+   
 
 template<class R2>
 void TTriangle<R2>::Draw(double skrink) const
@@ -759,7 +761,7 @@ void DrawMark(R2 P,R k)
    rlineto((float)P.x+h,(float)P.y-h);
  }
  
- Triangle * Mesh::Find(const R2 & P) const 
+ Triangle * Mesh::Find(const R2 & P) const
  {
     // brute force
     
@@ -778,6 +780,8 @@ void DrawMark(R2 P,R k)
      }
    return 0; // outside 
  }
+    
+  
 
 template<class R2>
  void TMortar<R2>::Draw() const {
