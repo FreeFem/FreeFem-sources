@@ -1434,6 +1434,7 @@ void OnePlotBorder::Draw(OneWindow *win)
 }
 
 OneWindow::OneWindow(int h,int w,ThePlot *p)
+<<<<<<< HEAD
 :
 icurrentPlot(lplots.begin()),
 lplotssize(0),
@@ -1441,6 +1442,15 @@ height(h),width(w),theplot(0),hpixel(1),
 Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
 windowdump(false),help(false), rapz0(-1.),rapz(1),withlight(false),
 changearrow(true),changeiso(true), keepPV(false),init(false)
+=======
+  :
+  icurrentPlot(lplots.begin()), 
+  lplotssize(0),
+  height(h),width(w),theplot(0),hpixel(1),
+  Bmin(0,0),Bmax(1,1),oBmin(Bmin),oBmax(Bmax),zmin(0),zmax(1),
+  windowdump(false),help(false), rapz0(-1.),rapz(1),withlight(false),
+  changearrow(true),changeiso(true), keepPV(false),init(false),countdisplay(0)
+>>>>>>> 98d60afac9745605febd9217f515c08a02604586
 {
     
     add(p);
@@ -3021,6 +3031,7 @@ static void Reshape( int width, int height )
 
 void Display(void)
 {
+<<<<<<< HEAD
     OneWindow * win=CurrentWin();
     if(win)
     {
@@ -3058,6 +3069,39 @@ void Display(void)
         }
         
     }
+=======
+
+    OneWindow * win=CurrentWin();
+    if(win) 
+      {
+          if (win->countdisplay++<1) { // HAsh for MAC OS Mojave ???? FH oct 2018 ...
+               cout << "\n\n **** Hack Mojove :: glutReshapeWindow \n\n" << endl;
+              win->width--;
+              win->height--;
+              glutReshapeWindow(win->width,win->height);
+              win->resize(win->width,win->height);
+              glutPostRedisplay();
+              return;
+          }
+          if(debug>9)
+          {
+              cout << "\n\n     Display "<< win->theplot  << "  true wait: " << (!win->theplot || !win->theplot->wait || gwait) << " " << win->countdisplay <<endl;
+          }
+	{
+
+
+	    Clean();
+	    win->Display();
+	    glFlush();
+	    glutSwapBuffers();
+	    if ( win->windowdump)
+		WindowDump(win->width,win->height);
+	    win->windowdump=false;
+
+	}
+	  
+      }
+>>>>>>> 98d60afac9745605febd9217f515c08a02604586
     if(debug>9)
     {
         cout << "  Send  SendForNextPlot : win->theplot " << win->theplot << "   " << (!win->theplot || !win->theplot->wait || gwait);;
@@ -3406,7 +3450,7 @@ static  bool TryNewPlot( void )
             int Height = 512;
             int Width = 512*3/2;
             
-            glutInitWindowSize(Width , Height);
+            glutInitWindowSize(Width+1 , Height+1);
             glutInitWindowPosition(100+iwnp*50, 100+iwnp*50);
             int iw0=glutCreateWindow(titre.str().c_str());
             if(debug>1)  cout << " ** glutCreateWindow  " << iw0 << endl;
@@ -3419,7 +3463,7 @@ static  bool TryNewPlot( void )
             glutDisplayFunc( Display ); // l'affichage
             glutPushWindow();
             glutShowWindow();
-            AllWindows[iw0]= new OneWindow(Width , Height,nextPlot);
+            AllWindows[iw0]= new OneWindow(Width+1 , Height+1,nextPlot);
             Num2Windows[iwnp]=iw0;
         }
         else
@@ -3568,7 +3612,7 @@ int main(int argc,  char** argv)
     
     
     
-    glutInitWindowSize(Width , Height);
+    glutInitWindowSize(Width+1, Height+1);
     glutInitWindowPosition(iii0,jjj0);
     
     int iw0=glutCreateWindow(titre.c_str());
@@ -3584,7 +3628,7 @@ int main(int argc,  char** argv)
     glutMotionFunc(MotionMouse); // les mouvements  de la sourie
     glutDisplayFunc( Display ); // l'affichage
     glutSetWindow(iw0);
-    AllWindows[iw0]=new OneWindow(Width , Height,currentPlot);
+    AllWindows[iw0]=new OneWindow(Width+1, Height+1,currentPlot);
     TryNewPlot();
     
     

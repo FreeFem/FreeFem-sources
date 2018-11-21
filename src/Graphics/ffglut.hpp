@@ -339,47 +339,49 @@ public:
 
 class OneWindow {
 public:
-    ThePlot *theplot;
-    list<ThePlot*> lplots;//  to store some plot
-    list<ThePlot*>::iterator icurrentPlot;//=lplots.begin();
-    int lplotssize;
-    
-    int height,width;
-    R2 Bmin,Bmax;
-    R2 oBmin,oBmax;// orign box
-    R zmin,zmax;
-    R hpixel;// taille pixel en coordonne x,y,z
-    int xold,yold;
-    bool windowdump,help;
-    
-    GLdouble modelMatrix[16];
-    GLdouble projMatrix[16];
-    GLint viewport[4];
-    
-    int  plotdim;
-    R theta, phi, coef_dist, focal, dtheta;
-    R  rapz,rapz0;
-    R3 Bmin3,Bmax3,Pvue3;
-    R3 cam;
-    bool withlight;
-    bool changearrow,changeiso;// to rebuild de graphic list if neccessary
-    bool keepPV,init;
-    //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
-    OneWindow(int h,int w,ThePlot *p);
-    void DefaultView(int state) ;
-    bool  NextCase() ;
-    void  SetView() ;
-    void MoveXView(R dx,R dy) ;
-    void set(ThePlot *p);
-    void add(ThePlot *p);
-    void cadre(R2 A,R2 B);
-    void cadreortho(R2 A,R2 B);
-    void getcadre(double &xmin,double &xmax,double &ymin,double &ymax);
-    void Display();
-    void resize(int w,int h);
-    void zoom(int w,int h,R coef);
-    void zoom(R coef);
-    float GetHeigthFont(){return 10;}
+  ThePlot *theplot;
+  list<ThePlot*> lplots;//  to store some plot 
+  list<ThePlot*>::iterator icurrentPlot;//=lplots.begin();
+  int lplotssize;
+
+  int height,width;
+  R2 Bmin,Bmax;
+  R2 oBmin,oBmax;// orign box 
+  R zmin,zmax;
+  R hpixel;// taille pixel en coordonne x,y,z 
+  int xold,yold;
+  bool windowdump,help;
+
+  GLdouble modelMatrix[16];
+  GLdouble projMatrix[16];
+  GLint viewport[4];  
+  
+  int  plotdim;
+  R theta, phi, coef_dist, focal, dtheta;
+  R  rapz,rapz0;
+  R3 Bmin3,Bmax3,Pvue3;
+  R3 cam;
+
+  bool withlight;
+  bool changearrow,changeiso;// to rebuild de graphic list if neccessary
+  bool keepPV,init;
+  long countdisplay; //  for Mojabe bUG ??? FH..
+  //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
+  OneWindow(int h,int w,ThePlot *p);
+  void DefaultView(int state) ;
+  bool  NextCase() ;
+  void  SetView() ;
+  void MoveXView(R dx,R dy) ;
+  void set(ThePlot *p);
+  void add(ThePlot *p);
+  void cadre(R2 A,R2 B);
+  void cadreortho(R2 A,R2 B);
+  void getcadre(double &xmin,double &xmax,double &ymin,double &ymax);
+  void Display();
+  void resize(int w,int h);
+  void zoom(int w,int h,R coef);
+  void zoom(R coef);
+  float GetHeigthFont(){return 10;}
     void color(int i,R alpha=1) {theplot->color(i,alpha);}
     void FillRect(R x0,R y0,R x1,R y1);
     void PlotValue(const KN_<double> & Viso,int  k0,const char * cmm);
