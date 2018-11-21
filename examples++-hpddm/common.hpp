@@ -309,32 +309,43 @@ bool statistics(Type* const& Op) {
 }
 
 template<class K>
-class distributedDot_Op : public E_F0mps {
-    public:
-        Expression A;
-        Expression in;
-        Expression out;
-        static const int n_name_param = 1;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        distributedDot_Op<K>(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), in(param2), out(param3) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
-
-        AnyType operator()(Stack stack) const;
-};
-template<class K>
-basicAC_F0::name_and_type distributedDot_Op<K>::name_param[] = {
-    {"communicator", &typeid(pcommworld)}
-};
-template<class K>
 class distributedDot : public OneOperator {
     public:
-        distributedDot() : OneOperator(atype<K>(), atype<KN<double>*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
+        const int c;
+        class E_distributedDot : public E_F0mps {
+            public:
+                std::vector<std::tuple<Expression, Expression, Expression>> E;
+                const int c;
+                static const int n_name_param = 1;
+                static basicAC_F0::name_and_type name_param[];
+                Expression nargs[n_name_param];
+                E_distributedDot(const basicAC_F0& args, int d) : E(), c(d) {
+                    args.SetNameParam(n_name_param, name_param, nargs);
+                    if(c == 1) {
+                        const E_Array* EA = dynamic_cast<const E_Array*>(args[0].LeftValue());
+                        const E_Array* Ex = dynamic_cast<const E_Array*>(args[1].LeftValue());
+                        const E_Array* Ey = dynamic_cast<const E_Array*>(args[2].LeftValue());
+                        ffassert(EA->size() == Ex->size() && Ex->size() == Ey->size());
+                        E.reserve(EA->size());
+                        for(int i = 0; i < EA->size(); ++i)
+                            E.emplace_back(to<KN<double>*>((*EA)[i]), to<KN<K>*>((*Ex)[i]), to<KN<K>*>((*Ey)[i]));
+                    }
+                    else {
+                        E.reserve(1);
+                        E.emplace_back(to<KN<double>*>(args[0]), to<KN<K>*>(args[1]), to<KN<K>*>(args[2]));
+                    }
+                }
 
-        E_F0* code(const basicAC_F0& args) const {
-            return new distributedDot_Op<K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
-        }
+                AnyType operator()(Stack stack) const;
+                operator aType() const { return atype<long>(); }
+        };
+        E_F0* code(const basicAC_F0 & args) const { return new E_distributedDot(args, c); }
+        distributedDot() : OneOperator(atype<K>(), atype<KN<double>*>(), atype<KN<K>*>(), atype<KN<K>*>()), c(0) { }
+        distributedDot(int) : OneOperator(atype<KN_<K>>(), atype<E_Array>(), atype<E_Array>(), atype<E_Array>()), c(1) { }
+};
+template<class K>
+basicAC_F0::name_and_type distributedDot<K>::E_distributedDot::name_param[] = {
+    {"communicator", &typeid(pcommworld)}
 };
 template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
 inline K prod(K u, double d, K v) {
@@ -345,16 +356,32 @@ inline K prod(K u, double d, K v) {
     return u * d * v;
 }
 template<class K>
-AnyType distributedDot_Op<K>::operator()(Stack stack) const {
-    KN<double>* pA = GetAny<KN<double>*>((*A)(stack));
-    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
-    KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
+AnyType distributedDot<K>::E_distributedDot::operator()(Stack stack) const {
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    K dot = K();
-    for(int i = 0; i < pin->n; ++i)
-        dot += prod(pin->operator[](i), pA->operator[](i), pout->operator[](i));
-    MPI_Allreduce(MPI_IN_PLACE, &dot, 1, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
-    return SetAny<K>(dot);
+    std::vector<K> dot(E.size(), K());
+    for(int j = 0; j < E.size(); ++j) {
+        KN<double>* pA = GetAny<KN<double>*>((*(std::get<0>(E[j])))(stack));
+        KN<K>* pin = GetAny<KN<K>*>((*(std::get<1>(E[j])))(stack));
+        KN<K>* pout = GetAny<KN<K>*>((*(std::get<2>(E[j])))(stack));
+        for(int i = 0; i < pin->n; ++i)
+            dot[j] += prod(pin->operator[](i), pA->operator[](i), pout->operator[](i));
+    }
+    MPI_Allreduce(MPI_IN_PLACE, dot.data(), dot.size(), HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
+    for(int j = 0; j < E.size(); ++j) {
+        if(std::abs(dot[j]) < std::numeric_limits<double>::epsilon())
+            dot[j] = K(std::numeric_limits<double>::epsilon());
+    }
+    if(c == 0) {
+        return SetAny<K>(dot[0]);
+    }
+    else {
+        KN<K>* ptab = new KN<K>(dot.size());
+        KN<K>& tab = *ptab;
+        for(int i = 0; i < dot.size(); ++i)
+            tab[i] = dot[i];
+        Add2StackOfPtr2Free(stack, ptab);
+        return SetAny<KN<K>>(tab);
+    }
 }
 
 static void Init_Common() {
@@ -375,6 +402,7 @@ static void Init_Common() {
 #endif
         Global.Add("dscalprod", "(", new distributedDot<double>);
         Global.Add("dscalprod", "(", new distributedDot<std::complex<double>>);
+        Global.Add("dscalprod", "(", new distributedDot<double>(1));
     }
 }
 #endif // _COMMON_

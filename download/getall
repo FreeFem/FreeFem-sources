@@ -259,7 +259,7 @@ sub downloadone{
 	system $cmd;
 	if($?){
 		print "Download failed from $url\n";
-		my $url="http://www.freefem.org/ff++/$pkg";
+		my $url="http://pkgs.freefem.org/$pkg";
 		my $cmd="../build/download $url $pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;

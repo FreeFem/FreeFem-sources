@@ -127,19 +127,24 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             EPSCreate(PETSC_COMM_WORLD, &eps);
             Mat S;
             User<Type, K> user = nullptr;
+            MatType type;
+            PetscBool isType;
+            MatGetType(ptA->_petsc, &type);
+            PetscStrcmp(type, MATNEST, &isType);
+            PetscInt bs;
+            PetscInt m;
             if(!codeA) {
                 Type* ptB = GetAny<Type*>((*B)(stack));
                 EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
             }
             else {
-                PetscInt bs;
                 MatGetBlockSize(ptA->_petsc, &bs);
-                PetscInt m, M;
                 MatGetLocalSize(ptA->_petsc, &m, NULL);
+                PetscInt M;
                 MatGetSize(ptA->_petsc, &M, NULL);
                 PetscNew(&user);
                 user->mat = new eigensolver<Type, K>::MatF_O(m * bs, stack, codeA);
-                MatCreateShell(PETSC_COMM_WORLD, ptA->_last - ptA->_first, ptA->_last - ptA->_first, M, M, user, &S);
+                MatCreateShell(PETSC_COMM_WORLD, m, m, M, M, user, &S);
                 MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K>);
                 EPSSetOperators(eps, S, NULL);
             }
@@ -173,6 +178,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             Vec* basis = nullptr;
             PetscInt n = 0;
             if(eigenvectors) {
+                ffassert(!isType);
                 if(eigenvectors->N > 0 && eigenvectors->get(0) && eigenvectors->get(0)->n > 0) {
                     n = eigenvectors->N;
                     basis = new Vec[n];
@@ -200,10 +206,10 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 KNM<K>* array = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
                 if(eigenvalues)
                     eigenvalues->resize(nconv);
-                if(eigenvectors)
+                if(eigenvectors && !isType)
                     eigenvectors->resize(nconv);
                 if(array)
-                    array->resize(ptA->_A->getDof(), nconv);
+                    array->resize(!codeA && !isType ? ptA->_A->getDof() : m * bs, nconv);
                 Vec xr, xi;
                 PetscInt n;
                 if(eigenvectors || array) {
@@ -226,14 +232,20 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                         }
                         else
                             pt = reinterpret_cast<K*>(tmpr);
-                        KN<K> cpy(ptA->_A->getDof());
-                        cpy = K(0.0);
-                        HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pt, cpy.n, 1);
-                        ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
-                        if(eigenvectors)
-                            eigenvectors->set(i, cpy);
-                        if(array)
+                        if(!isType) {
+                            KN<K> cpy(ptA->_A->getDof());
+                            cpy = K(0.0);
+                            HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pt, cpy.n, 1);
+                            ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
+                            if(eigenvectors)
+                                eigenvectors->set(i, cpy);
+                            if(array && !codeA)
+                                (*array)(':', i) = cpy;
+                        }
+                        if((codeA || isType) && array) {
+                            KN<K> cpy(m * bs, pt);
                             (*array)(':', i) = cpy;
+                        }
                         if(std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
                             delete [] pt;
                         else

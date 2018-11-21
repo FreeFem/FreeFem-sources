@@ -410,8 +410,9 @@ macro buildEdgePeriodic(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, ar
                         partPeriodic[] = 1.0;
                     partGlobal = partPeriodic;
                 }
-                else
+                else {
                     partitionerSeq(partGlobal[], ThGlobal, mpiSize(comm));
+                }
             }
             if(labPeriodic.n > 0 && Stringification(partitioner) != "metis" && Stringification(partitioner) != "scotch") {
                 fespace PhPeriodic(ThGlobalPeriodic, P0);
