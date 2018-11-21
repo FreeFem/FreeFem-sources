@@ -28,7 +28,7 @@ extern  long  verbosity  ;
 
 void init_HashMatrix (); 
 template<class Z,class ZZ>
-inline uint64_t  roll64(Z y,ZZ r){uint64_t x=y; r %= 64; return (x<<r) || (x << (64-r)) ;}
+inline uint64_t  roll64(Z y,ZZ r){uint64_t x=y; r %= 64; return (x<<r) | (x << (64-r)) ;}
 
 
 

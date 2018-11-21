@@ -110,7 +110,8 @@ R HashMatrix<I,R>::pscal(R *x,R *y,I sx,I sy)
 template<class I,class R>
 typename   HashMatrix<I,R>::uniquecodeInt HashMatrix<I,R>::CodeIJ() const  {
     uniquecodeInt code=this->n;
-    code ^=roll64(this->n-this->m, 24);
+    code ^=roll64(this->n,0);
+    code ^=roll64(this->m,24);
     code ^=roll64(nnz, 48);
     for(size_t k=0,kk=0; k< nnz;++k)
     {

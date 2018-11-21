@@ -67,7 +67,6 @@ class vectorOfInst : public  E_F0mps { public:
        if(j>=0) j = n-j;
        else j =0;
        if(verbosity>999) cout << " eval vectorOfInst " << j << " " << n << endl;
-       cout << " eval vectorOfInst " << j << " " << n << endl;
         for (int i=j;i<n;++i)
         {
             ffassert(v[i]);

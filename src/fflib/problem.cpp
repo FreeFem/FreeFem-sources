@@ -1549,7 +1549,6 @@ namespace Fem2D {
                      const QuadratureFormular1d & FIb,
                      double *p,   void *vstack, bool intmortar=false,R2 *Q=0)
     {
-        cout << "test 3dV AddMatElem " << endl;
         //cout << "AddMatElem" << Q << " "  << ie << endl;
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp= *MeshPointStack(stack);
@@ -1797,7 +1796,7 @@ namespace Fem2D {
                      const  QuadratureFormular & FIb,
                      double *p,   void *vstack, bool intmortar=false)
     {
-        cout << "test 3dV AddMatElem " << endl;
+
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp= *MeshPointStack(stack);
         static int count =0; // non test FH .........................
@@ -2275,7 +2274,6 @@ namespace Fem2D {
                               map<pair<int,int>, R >  & A, const  FormBilinear * b  )
     
     {
-        cout << "test 2d AssembleBilinearForm " << endl;
         /*FH:  case ..in 2D
          in varf ...
          all mesh can can be different ....
@@ -2572,7 +2570,6 @@ namespace Fem2D {
          in varf ...
          all mesh can can be different ....
          */
-        cout << "test 3dV AssembleBilinearForm " << endl;
         
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
         bool sptrclean=true;
@@ -7790,7 +7787,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                         
                     }
                     if( umx <=0 )
-                    {Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT,useopt); cout << "test RHS" << endl;}
+                    {Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIT,useopt);}
                     else if( umn <0 )
                     { // coupe ..
                         int i0 = 0, i1 = 1, i2 =2;
@@ -7818,11 +7815,11 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 { cout << "tototototot" << endl;
                     if ( sameMesh )
-                    {Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT,useopt); cout << "test A "<<endl;}
+                    {Element_rhs<R>(Vh[i],*l->l,buf,stack,*B,FIT,useopt); }
                     else if(!mapt)
-                    { Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT,useopt); cout << "test B "<<endl;}
+                    { Element_rhs<R>(ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT,useopt); }
                     else
-                    {  Element_rhs<R>(mapt,ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT,useopt); cout << "test C "<<endl;  }
+                    {  Element_rhs<R>(mapt,ThI,ThI[i],Vh,*l->l,buf,stack,*B,FIT,useopt);  }
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
                 }
     }

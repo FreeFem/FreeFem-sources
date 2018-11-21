@@ -6687,7 +6687,7 @@ C_F0 NewFEvariableT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0
 
 
 C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim)
-{   cout << "test 75" << endl;
+{   //cout << "test 75" << endl;
   if(dim==2)
     return NewFEvariableT<v_fes,2>(pids,currentblock,fespacetype,init,cplx,dim);
   else if  (dim==3)
@@ -6772,16 +6772,16 @@ aType  typeFESpace(const basicAC_F0 &args)
  
  
     if (tfe == t_tfe && tMesh== t_m2)
-    {   cout << "test 45" << endl;
+    {   //cout << "test 45" << endl;
         ret = atype<pfes *>();
         
     }
     else   if ( (tfe == t_tfe3||tfe == t_tfe )&& tMesh== t_m3)
-    {   cout << "test 55" << endl;
+    {   //cout << "test 55" << endl;
         ret = atype<pfes3 *>();
     }
     else   if (tfe == t_tfeS && tMesh== t_m3)
-    {   cout << "test 65" << endl;
+    {   //cout << "test 65" << endl;
         ret = atype<pfesS *>();
     }
 

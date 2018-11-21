@@ -1677,7 +1677,7 @@ void  OneWindow::SetView()
         
         if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " "
             << Bmax  << " dz  " << dz0 << " " << dz1
-            << " theta " << theta << "  phi = "<<  phi << endl;
+            << " theta " << theta << "  phi = "<<  phi << " // "<< Bmax - Bmin << " w " <<width << " h " <<  height<< endl;
         ShowGlerror("0 Set MV");
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();

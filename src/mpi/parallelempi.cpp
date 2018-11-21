@@ -1356,43 +1356,80 @@ struct Op_ReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creuse<
 	ffassert( r && s);
 	MatriceCreuse<R> * sA=s->A;
 	MatriceCreuse<R> * rA=r->A;
-	ffassert( sA && rA); 
+        int mpirankw,mpisizew;
+        MPI_Comm_rank(root.comm, &mpirankw);
+        MPI_Comm_size(root.comm, &mpisizew);
+        int who = root.who;
+	ffassert( sA );
 	MatriceMorse<R> * sM = s->pHM();
-        if( ! rA ) { // build a zero matric copy of sM
-            ffassert(0);
+        MatriceMorse<R> * rM=0;
+        if(  !rA && (mpirankw==who) ) { // build a zero matric copy of sM on proc root
             MatriceMorse<R> *rm=new MatriceMorse<R>(*sM); //new MatriceMorse<R>(sM.n,sM.m,sM.nnz,sM.half,0,sM.lg,sM.cl);
             *rm=R(); // set the matrix to Zero ..
             r->A.master(rm);
             rA=r->A;
             
         }
-        MatriceMorse<R> * rM = r->pHM();
+        if(r)
+          rM = r->pHM();
 
-	ffassert( sM && rM);
-	int chunk = (int) sM->nnz;
-	ffassert(chunk==rM->nnz);
-        uint64_t rcode = CodeIJ(rM);
-        uint64_t scode = ( sM != rM) ? CodeIJ(sM) : rcode;
+        ffassert( sM);
+        cout << " Op_ReduceMat " << rM << " " << who << " " <<mpirankw << " " << sA << " " << rA << endl;
+        ffassert( rM ||  (mpirankw!=who) );
+	
+	
+        
+        uint64_t scode =  CodeIJ(sM) ;
+        uint64_t rcode = rM ? CodeIJ(rM): scode;
+        int chunk = rM ? (int) rM->nnz : (int) sM->nnz;
+        //  moralement pattern de rM commun
        //  verif the code of matrix
-        int mpirankw,mpisizew;
-        MPI_Comm_rank(root.comm, &mpirankw);
-        MPI_Comm_size(root.comm, &mpisizew);
+        sM->COO(); // sort
+        if(rM) rM->COO(); // sort
+        R * saij=sM->aij;
+        if(rcode != scode)
+        { //  build array to send ..
+            if( verbosity> 9) cout <<mpirank <<  " MPI_Reduce sparse  matrix not same pattern in send/recv build data to send  "<< endl;
+            int err =0;
+            *rM=R();
+            for (int k=0; k< sM->nnz;++k )
+            {
+                
+                R * prij = rM->pij(sM->i[k],sM->j[k]);
+                if( prij) *prij = sM->aij[k];
+                else err++;
+            }
+            if (err)  {
+                cerr << mpirank << " **** MPI_Reduce sparse  matrix: warning missing term in pattern "<< err << endl;
+            }
+            saij = new R [sM->nnz];
+            copy(rM->aij,rM->aij+rM->nnz,saij);
+            *rM=R();
+        }
         KN<uint64_t>  allcode(mpisizew);
         if(mpisizew>1)
         {
-            int chunk = 1;
-            // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
             KN<uint64_t> code(mpisizew);
-            MPI_Gather( (void *) & scode  , 1,  MPI_UNSIGNED_LONG_LONG,
-                       (void *)  &code[0] , 1,  MPI_UNSIGNED_LONG_LONG, 0 ,root.comm);
+            MPI_Gather( (void *) & rcode  , 1,  MPI_UNSIGNED_LONG_LONG,
+                       (void *)  &code[0] , 1,  MPI_UNSIGNED_LONG_LONG, root.who ,root.comm);
             int ok=1;
-            if(mpirankw==0)
-                for(int i=1; i<mpisizew;++i)
-                    ok |= (scode== code[i]);
-            ffassert(ok);
+            if(mpirankw==root.who) //  verif same patern ...
+                for(int i=0; i<mpisizew;++i)
+                    ok = ok &&  (rcode== code[i]);
+            if( !ok)
+            {
+                cerr << " Fatal error  MPI_reduce mat: the pattern of the all recv matrix are not the same "<< endl;
+                cerr << " set the recv matrix with same patten" <<endl;
+                 for(int i=0; i<mpisizew;++i)
+                     cout << " proc "<< i << " pattern code: "<< code[i] << " != " << rcode << endl;;
+                ffassert(0);
+            }
+
         }
 
-	return MPI_Reduce( (void *)  sM->aij,(void *)  rM->aij, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);
+	long ret= MPI_Reduce( (void *)  saij,(void *)  rM->aij, chunk , MPI_TYPE<R>::TYPE(),op,root.who,root.comm);
+        if( saij != sM->aij) delete [] saij;
+        return ret;
     }
 };
 
@@ -1404,6 +1441,7 @@ struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creu
         MatriceCreuse<R> * sA=s->A;
         MatriceCreuse<R> * rA=r->A;
         ffassert( sA );
+      
         MatriceMorse<R> * sM = s->pHM();
         if( ! rA ) { // build a zero matric copy of sM
          //   ffassert(0);
@@ -1413,36 +1451,70 @@ struct Op_AllReduceMat  : public   quad_function<Matrice_Creuse<R>*,Matrice_Creu
             rA=r->A;
             
         }
+ 
         MatriceMorse<R> * rM = r->pHM();
-
+       
 	ffassert( sM && rM);
-	int chunk = (int) sM->nnz;
-	ffassert(chunk==rM->nnz);
+        sM->COO(); // sort
+        rM->COO(); // sort
+	int nnz = (int) sM->nnz;
         uint64_t rcode = CodeIJ(rM);
         uint64_t scode = ( sM != rM) ? CodeIJ(sM) : rcode;
+        R * saij=sM->aij;
+        if(rcode != scode)
+        { //  build array to send ..
+             int err =0;
+            *rM=R();
+            for (int k=0; k< sM->nnz;++k )
+            {
+                
+                R * prij = rM->pij(sM->i[k],sM->j[k]);
+                if( prij) *prij = sM->aij[k];
+                else err++;
+            }
+            nnz = (int) rM->nnz;
+            saij = new R [nnz];
+            nnz = (int) rM->nnz;
+            if( verbosity> 9)
+                cout <<mpirank <<  " ** Warning: MPI_AllReduce sparse  matrix not same pattern in send/recv build data to send, build send:  R nnz "<< nnz << " S nnz " << sM->nnz<<   endl;
+
+            copy(rM->aij,rM->aij+rM->nnz,saij);
+            *rM=R();
+
+        }
         //ffassert(rcode == scode);
         // verif same code ????
         //  size machine
         int mpirankw,mpisizew;
         MPI_Comm_rank(comm, &mpirankw);
         MPI_Comm_size(comm, &mpisizew);
+        //cout << mpirankw << " rcode " << rcode << endl;
+
         KN<uint64_t>  allcode(mpisizew);
         if((mpisizew>1)  )
         {
             int chunk = 1;
             // ffassert( (myrank != root.who) || (r.N()>=mpisizew*chunk) );
             KN<uint64_t> code(mpisizew);
-            MPI_Gather( (void *) & scode  , 1,  MPI_UNSIGNED_LONG_LONG,
+            MPI_Gather( (void *) & rcode  , 1,  MPI_UNSIGNED_LONG_LONG,
                          (void *)  &code[0] , 1,  MPI_UNSIGNED_LONG_LONG, 0 ,comm);
             int ok=1;
             if(mpirankw==0)
                 for(int i=1; i<mpisizew;++i)
-                    ok |= (scode== code[i]);
-            cout << " MPI_Allreduce mat: revif " <<  mpirankw  << " " << ok << " " << sM->aij << endl;
+                    ok |= (rcode== code[i]);
+            if(verbosity>99) cout << " MPI_Allreduce mat: revif " <<  mpirankw  << " " << ok << " / " << sM->aij << " -> " << rM->aij << " " << comm <<" " <<  chunk << endl;
+            if( !ok)
+            {
+                cerr << " Fatal error  MPI_Allreduce matrix the pattern of the all recv matrix are not the same "<< endl;
+                cerr << " set the recv matrix with same patten" <<endl;
+                
+            }
             ffassert(ok);
         }
-
-	return MPI_Allreduce( (void *)  sM->aij,(void *)  rM->aij, chunk , MPI_TYPE<R>::TYPE(),op,comm);
+    //    cout << "MPI_Allreduce "<< sM->aij << " " << rM->aij << " " << chunk << " " <<op <<" " << comm << endl;
+	long ret= MPI_Allreduce( (void *)  saij,(void *)  rM->aij, nnz , MPI_TYPE<R>::TYPE(),op,comm);
+        if( saij != sM->aij) delete [] saij;
+        return ret;
     }
 };
 

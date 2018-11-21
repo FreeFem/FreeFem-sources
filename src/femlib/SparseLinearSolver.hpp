@@ -61,7 +61,7 @@ struct TheFFSolver {
     {
         std::transform(name.begin(), name.end(), name.begin(), static_cast<int(*)(int)>(std::toupper));
         std::transform(from.begin(), from.end(), from.begin(), static_cast<int(*)(int)>(std::toupper));
-        cout << " ** ChangeSolver "<< name << " <- " << from << " " << endl ;
+        if(verbosity>99) cout << " ** ChangeSolver "<< name << " <- " << from << " " << endl ;
         auto f =ffsolver.find(from);
         if( f  == ffsolver.end()) cerr << "Bug ChangeSolver the solver "<< from << " must exist " << endl;
         ffassert( f  != ffsolver.end());// must exist to copie  FH.  !!!!
