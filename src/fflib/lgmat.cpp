@@ -3124,8 +3124,8 @@ bool SetDefault()
 template<class T>
 class removeDOF_Op : public E_F0mps {
 public:
-    Expression A;
-    Expression R;
+    Expression A;// mat<T>
+    Expression R;// mat<IR>
     Expression x;
     Expression out;
     int nbarg;
@@ -3174,15 +3174,15 @@ template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pai
 template<class T>
 AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
       static const double defEPS=1e-12;
-    
+    typedef double IR;
     Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
-    Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
+    Matrice_Creuse<IR>* pR = GetAny<Matrice_Creuse<IR>* >((*R)(stack));
     KN<T>* pX = x ? GetAny<KN<T>* >((*x)(stack)) : 0;
     KN<T>* pOut = out ? GetAny<KN<T>* >((*out)(stack)) : 0;
-    Matrice_Creuse<T>* pC = nargs[2] ? GetAny<Matrice_Creuse<T>*>((*nargs[2])(stack)) : 0;
-    MatriceMorse<T> *mC = 0;
+    Matrice_Creuse<IR>* pC = nargs[2] ? GetAny<Matrice_Creuse<IR>*>((*nargs[2])(stack)) : 0;
+    MatriceMorse<IR> *mC = 0;
     if(pC && pC->A) {
-        mC = static_cast<MatriceMorse<T>*>(&(*pC->A));
+        mC = static_cast<MatriceMorse<IR>*>(&(*pC->A));
     }
     ffassert(pR);
     bool rhs = (pX && pOut) && (pOut->n > 0 || pX->n > 0);
@@ -3193,7 +3193,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     pA->Uh = pR->Uh;
     pA->Vh = pC->Vh;
     MatriceMorse<T> *mA = static_cast<MatriceMorse<T>*>(&(*pA->A));
-    MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+    MatriceMorse<IR> *mR = static_cast<MatriceMorse<IR>*>(&(*pR->A));
     if(!mC)
         mC = mR;
     bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
@@ -3297,7 +3297,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         mA->cl = cl;
         mA->a = val;
     }
-    else {
+    else
+    {
         tmpVec.reserve(mA->n);
         unsigned int i = 0, j = 1;
         for(unsigned int k = 0; k < mA->n; ++k) {
@@ -3353,14 +3354,15 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         }
         //        }
         MatriceMorse<T>* m = new MatriceMorse<T>(n, n, tmpBoundary.size(), mA->symetrique, val, lg, cl, true);
-        pR->typemat = TypeSolveMat(TypeSolveMat::GMRES);
-        pR->A.master(m);
+        pA->typemat = TypeSolveMat(TypeSolveMat::GMRES);
+        pA->A.master(m);
         m->dummy = false;
+        ffassert(0);
     }
     }
     else if(rhs)
      {
-         MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+         MatriceMorse<IR> *mR = static_cast<MatriceMorse<IR>*>(&(*pR->A));
         
          unsigned int n = mR->nbcoef;
          
