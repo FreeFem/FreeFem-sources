@@ -51,14 +51,22 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
         out->resize(n);
     for(unsigned short i = 0; i < n; ++i) {
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](i).A));
+#ifdef VERSION_MATRICE_CREUSE
+        pt->CSR();
+#endif
         send[i] = new unsigned char[pt->n];
         recv[i] = new unsigned char[pt->n];
         unsigned int dest = arrayNeighbor->operator[](i);
         if(dest < mpirank) {
             unsigned int col = 0;
             for(unsigned int j = 0; j < pt->n; ++j) {
+#ifndef VERSION_MATRICE_CREUSE
                 if(pt->lg[j + 1] != pt->lg[j]) {
                     if(std::abs(in->operator[](pt->cl[col++]) - 1.0) < 0.1)
+#else
+                if(pt->p[j + 1] != pt->p[j]) {
+                    if(std::abs(in->operator[](pt->j[col++]) - 1.0) < 0.1)
+#endif
                         send[i][j] = '1';
                     else
                         send[i][j] = '0';
@@ -83,15 +91,32 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
         unsigned short dest = neighborAfter + index;
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](dest).A));
         KN<long>& resOut = out->operator[](dest);
-        resOut.resize(pt->nbcoef);
+       
+
+#ifdef VERSION_MATRICE_CREUSE
+        pt->CSR();
+         resOut.resize(pt->nnz);
+#else
+         resOut.resize(pt->nbcoef);
+#endif
+
         unsigned int nnz = 0;
         unsigned int col = 0;
         for(unsigned int j = 0; j < pt->n; ++j) {
+#ifndef VERSION_MATRICE_CREUSE
             if(pt->lg[j + 1] != pt->lg[j]) {
                 if(std::abs(in->operator[](pt->cl[col]) - 1.0) < 0.1 && recv[dest][j] == '1') {
                     send[dest][j] = '1';
                     resOut[(int)nnz++] = pt->cl[col++];
                 }
+#else
+            if(pt->p[j + 1] != pt->p[j]) {
+                 if(std::abs(in->operator[](pt->j[col]) - 1.0) < 0.1 && recv[dest][j] == '1') {
+                     send[dest][j] = '1';
+                     resOut[(int)nnz++] = pt->i[col++];
+                 }
+#endif
+ 
                 else {
                     ++col;
                     send[dest][j] = '0';
@@ -109,16 +134,28 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
         MPI_Waitany(neighborAfter, rq + n, &index, MPI_STATUS_IGNORE);
         KN<long>& resOut = out->operator[](index);
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](index).A));
+#ifndef VERSION_MATRICE_CREUSE
         resOut.resize(pt->nbcoef);
+#else
+        resOut.resize(pt->nnz);
+#endif
         unsigned int nnz = 0;
         unsigned int col = 0;
         for(unsigned int j = 0; j < pt->n; ++j) {
             if(recv[index][j] == '1') {
+#ifndef VERSION_MATRICE_CREUSE
                 if(pt->lg[j + 1] != pt->lg[j])
                     resOut[(int)nnz++] = pt->cl[col++];
             }
-            else if(pt->lg[j + 1] != pt->lg[j])
+           else if(pt->lg[j + 1] != pt->lg[j])
                 ++col;
+#else
+               if(pt->p[j + 1] != pt->p[j])
+                resOut[(int)nnz++] = pt->j[col++];
+           }
+             else if(pt->p[j + 1] != pt->p[j])
+               ++col;
+#endif
         }
         resOut.resize(nnz);
     }
@@ -235,7 +272,7 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     if(ptO)
-        ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
     FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
     if(deflation && deflation->N > 0 && !ptA->getVectors()) {
         K** ev = new K*[deflation->N];
@@ -502,7 +539,15 @@ AnyType renumber_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
     if(mA) {
         const HPDDM::MatrixCSR<K>* dA = ptA->getMatrix();
+#ifndef VERSION_MATRICE_CREUSE
         mA->lg = dA->_ia;
+#else
+        mA->HM();   
+        for(int i=0;i<mA->n;++i)
+            for(int k=dA->_ia[i];k<dA->_ia[i+1];++k)
+             mA->i[k]=i;
+        mA->CSR();
+#endif
     }
 
     HPDDM::Option& opt = *HPDDM::Option::get();

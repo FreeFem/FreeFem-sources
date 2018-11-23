@@ -60,7 +60,7 @@ Matrice_Creuse<R>*thresholding2 (const Thresholding<R> &t, const double &thresho
 		//	sparse_mat->A.master(new MatriceMorse<R>(n, m, M, sym));
 		//	nrt -= sparse_mat->A->NbCoef();
 	    //}
-		  if (verbosity) {cout << "  thresholding= remove " << phm->nnz-nnzo   << " them in the matrix " << sparse_mat << " " << threshold << endl;}
+		  if (verbosity) {cout << "  thresholding : remove " << nnzo-phm->nnz  << " them in the matrix " << sparse_mat << " " << threshold << endl;}
 		} else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
 	}
 

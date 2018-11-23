@@ -84,9 +84,9 @@ public:
     void Solve(KN_<R> & x,const KN_<R> & b) const  {solve(x,b);}
     void SolveT(KN_<R> & x,const KN_<R> & b) const  {solve(x,b,1,1);}
                                                     
-    bool ChecknbLine(int nn) const { return n==nn;}
-    bool ChecknbColumn(int mm) const { return m==mm;}
-   bool Checknm(int nn,int mm) const { return nn==n && mm==m;}
+    bool ChecknbLine(int nn) const { return this->n==nn;}
+    bool ChecknbColumn(int mm) const { return this->m==mm;}
+   bool Checknm(int nn,int mm) const { return nn==this->n && mm==this->m;}
     virtual ~VirtualMatrix(){
         if(verbosity>99999) cout << " **  ~VirtualMatrix " << this << endl;
         if(vsolver && delvsolver)  vsolver->destroy();//   Warning the solver is del afer the Matrix
@@ -114,8 +114,8 @@ public:
     virtual bool sym() const {return false;}
  
     virtual  void  resize(I n,I m)  {AFAIRE("VirtualMatrix::resize");}
-   virtual R trace() const {ffassert(n==m);  R t=R(), *p;  for(int i=0; i<n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
-   virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<n; ++i)  if(wbc[i]) SetBC(i,tgv);}
+   virtual R trace() const {ffassert(this->n==this->m);  R t=R(), *p;  for(int i=0; i<this->n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
+   virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<this->n; ++i)  if(wbc[i]) SetBC(i,tgv);}
   //  void init(int nn=0,int mm=0) { VMat *p=new VMat(nn,mm);  }
   
     struct  plusAx { const VirtualMatrix * A; const KN_<R>   x;

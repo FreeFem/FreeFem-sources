@@ -1,6 +1,7 @@
 #ifndef MatriceCreuse_h_
 #define MatriceCreuse_h_
 
+#define VERSION_MATRICE_CREUSE 4
 
 // add Sep 2007 for generic Space solver
 #define DCL_ARG_SPARSE_SOLVER(T,A)  Stack stack, HashMatrix<int,T> *A, Data_Sparse_Solver & ds

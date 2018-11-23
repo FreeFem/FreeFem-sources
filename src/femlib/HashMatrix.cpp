@@ -358,21 +358,25 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
 {
     
     mm= mm ? mm : nn;
-    if( nn == this->n && mm == this->m && nnz == nnnz && sym == half) return ;
+    if( nn == this->n && mm == this->m && nnz == nnnz && sym == half && tol <0) return ;
     this->m=mm;
     this->n = nn;
     this->N=mm;
     this->M = nn;
-
+    R mxt =0;
     size_t kk=0;
     for(size_t k=0; k <nnz ;++k)
-        if( i[k] < this->n && j[k] < this->m && abs(aij[k])> tol && (sym && i[k] <= j[k] ) )
+    {
+        double t =abs(aij[k]);
+        if( i[k] < this->n && j[k] < this->m && t > tol && (!sym || i[k] <= j[k] ) )
         {
             i[kk] = i[k];
             j[kk] = j[k];
             aij[kk] = aij[k];
             ++kk;
         }
+    }
+    if(verbosity>9 ) cout << "HashMatrix<I,R>::resize: new nnz  = " << kk << " " << nnz << " " << " sym " << sym << " "<< tol << " " << nn << " " << mm << endl;
     half = half || sym;
     nnnz = max(nnnz,kk);
     bool rresize = (nnnz < 0.8*nnz) || ((nnnz > 1.2*nnz)) ;
@@ -657,7 +661,7 @@ void HashMatrix<I,R>::Sortji()
 }
 
 template<class I,class R>
-void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,int f77)
+void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,int f77,int tcsr)
 {
     clear();
     this->n=nn;
@@ -666,9 +670,19 @@ void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,i
     half=hhalf;
     Increaze(nnnz);
     nnz=nnnz;
-    
-    HMcopy(i,ii,nnnz);
-    HMcopy(j,jj,nnnz);
+    if(tcsr >=0)
+      HMcopy(i,ii,nnnz);
+    if(tcsr <=0)
+      HMcopy(j,jj,nnnz);
+    if( tcsr>0)//  input CSR
+        for(I ip=0; ip< nn; ++ip)
+            for(I k=ii[ip]; k<ii[ip+1]; ++k)
+                i[k-f77]=ip+f77;
+    else if( tcsr<0) //  input CSC
+        for(I jp=0; jp< mm; ++jp)
+            for(I k=jj[jp]; k<jj[jp+1]; ++k)
+                j[k-f77]=jp+f77;
+
     HMcopy(aij,aa,nnnz);
     ReHash();
 }
@@ -772,8 +786,8 @@ void HashMatrix<I,R>::operator=(const R & v)
 template<class I,class R>
 void HashMatrix<I,R>::HM()
 {
-    re_do_numerics=1;
-    re_do_symbolic=1;
+    re_do_numerics++;
+    re_do_symbolic++;
     setp(0);
     type_state=type_HM;
     

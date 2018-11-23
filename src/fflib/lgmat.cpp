@@ -3070,21 +3070,24 @@ bool SetDefault()
 template<class T>
 class removeDOF_Op : public E_F0mps {
 public:
-    Expression A;
-    Expression R;
-    Expression x;
-    Expression out;
+    Expression eA;
+    Expression eR;
+    Expression ex;
+    Expression eout;
     int nbarg;
     static const int n_name_param = 4;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
-    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), R(param2), x(param3), out(param4),nbarg(4) {
+    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4)
+    : eA(param1), eR(param2), ex(param3), eout(param4),nbarg(4) {
         args.SetNameParam(n_name_param, name_param, nargs);
     }
-    removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4) : A(0), R(param2), x(param3), out(param4) ,nbarg(3){
+    removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4)
+    : eA(0), eR(param2), ex(param3), eout(param4) ,nbarg(3){
         args.SetNameParam(n_name_param, name_param, nargs);
     }
-    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2) : A(param1), R(param2), x(0), out(0) ,nbarg(2){
+    removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2)
+    : eA(param1), eR(param2), ex(0), eout(0) ,nbarg(2){
         args.SetNameParam(n_name_param, name_param, nargs);
     }
     
@@ -3120,33 +3123,37 @@ template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pai
 template<class T>
 AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     static const double defEPS=1e-12;
-
+    typedef double R;
     // code wri-ng no ...
-    Matrice_Creuse<T>* pA = A ? GetAny<Matrice_Creuse<T>* >((*A)(stack)):0;
-    Matrice_Creuse<T>* pR = GetAny<Matrice_Creuse<T>* >((*R)(stack));
-    KN<T>* pX = x ? GetAny<KN<T>* >((*x)(stack)) : 0;
-    KN<T>* pOut = out ? GetAny<KN<T>* >((*out)(stack)) : 0;
-    Matrice_Creuse<T>* pC = nargs[2] ? GetAny<Matrice_Creuse<T>*>((*nargs[2])(stack)) : 0;
-    MatriceMorse<T> *mC = 0;
+    Matrice_Creuse<T>* pA = eA ? GetAny<Matrice_Creuse<T>* >((*eA)(stack)):0;
+    Matrice_Creuse<R>* pR = GetAny<Matrice_Creuse<R>* >((*eR)(stack));
+    KN<T>* pX = ex ? GetAny<KN<T>* >((*ex)(stack)) : 0;
+    KN<T>* pOut = eout ? GetAny<KN<T>* >((*eout)(stack)) : 0;
+    Matrice_Creuse<R>* pC = nargs[2] ? GetAny<Matrice_Creuse<R>*>((*nargs[2])(stack)) : 0;
+    MatriceMorse<R> *mC = 0;
     if(pC && pC->A) {
-        mC = static_cast<MatriceMorse<T>*>(&(*pC->A));
+        mC = static_cast<MatriceMorse<R>*>(&(*pC->A));
     }
     ffassert(pR);
     bool rhs = (pX && pOut) && (pOut->n > 0 || pX->n > 0);
     if(pA)
     {
+        cout << "removeDOF_Op pA " << pA << " " << pA->pHM() <<endl;
+        cout << "   pR " << pA << " " << pR->pHM() <<endl;
         if(!pC)
             pC = pR;
-        pA->Uh = pR->Uh;
-        pA->Vh = pC->Vh;
         MatriceMorse<T> *mA = pA->pHM();
-        MatriceMorse<T> *mR = pR->pHM();
+        MatriceMorse<R> *mR = pR->pHM();
+        cout << " removeDOF_Op "  << " " << mR << " " << mC << " "  << mA <<  endl;
         if(!mC)
             mC = mR;
+        pA->Uh = pR->Uh;
+        pA->Vh = pC->Vh;
+
         bool symmetrize = nargs[0] ? GetAny<bool>((*nargs[0])(stack)) : false;
         double EPS=nargs[3] ? GetAny<double>((*nargs[3])(stack)) :defEPS ;
         KN<long>* condensation = nargs[1] ? GetAny<KN<long>* >((*nargs[1])(stack)) : (KN<long>*) 0;
-        
+        ffassert(condensation ||( mR && mC) );
         unsigned int n = condensation ? condensation->n : mR->nnz;
         unsigned int m = condensation ? condensation->n : mC->nnz;
         KN<int> lg(n+1,0);
@@ -3289,14 +3296,17 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             for(unsigned int i = 0; i < tmpBoundary.size(); ++i) {
                 mR(i, tmpBoundary[i].first)= tmpBoundary[i].second;
             }
+            ffassert(0);
             pR->typemat = 0; //TypeSolveMat(TypeSolveMat::GMRES);
-            pR->A.master(&mR);
+            // bug ici ::: FH..            pR->A.master(&mR);
             //V4  m->dummy = false;
         }
     }
     else if(rhs)
     {
-        MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+         ffassert(0);//
+        /*
+       MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
         
         unsigned int n = mR->nnz;
         
@@ -3307,7 +3317,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         for(unsigned int i = 0; i < n; ++i) {
             *(*pOut + i) = *(*pX + mR->j[i]);
         }
-        
+        */
     }
     return 0L;
 }

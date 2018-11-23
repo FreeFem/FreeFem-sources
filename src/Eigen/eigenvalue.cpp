@@ -422,50 +422,6 @@ class EigenValueC : public OneOperator
 
 
 
-/*
- class EigenValueC : public OneOperator
- { public:
- typedef Complex K;
- typedef double R;
- typedef KN<K> Kn;
- typedef KN_<K> Kn_;
- const int cas;
- class E_EV: public E_F0mps { public:
- const int cas;
- 
- static basicAC_F0::name_and_type name_param[] ;
- static const int n_name_param =10;
- Expression nargs[n_name_param];
- Expression expOP1,expB;
- template<class T>
- T arg(int i,Stack stack,const T & a) const{ return nargs[i] ? GetAny<T>( (*nargs[i])(stack) ): a;}
- E_EV(const basicAC_F0 & args,int cc) :
- cas(cc)
- {
- // OP1 = (A-sigma*B)
- //                int nbj= args.size()-1;
- args.SetNameParam(n_name_param,name_param,nargs);
- expOP1=to< Matrice_Creuse<K> *>(args[0]);
- expB=to< Matrice_Creuse<K> *>(args[1]);
- 
- }
- 
- AnyType operator()(Stack stack)  const;
- operator aType () const { return atype<long>();}
- 
- };
- 
- E_F0 * code(const basicAC_F0 & args) const {
- return new E_EV(args,cas);}
- 
- EigenValueC(int c) :
- OneOperator(atype<long>(),
- atype<Matrice_Creuse<K> *>(),
- atype<Matrice_Creuse<K> *>()),
- cas(c){}
- 
- };
- */
 basicAC_F0::name_and_type  EigenValue::E_EV::name_param[]= {
     {   "tol", &typeid(double)  },
     {   "nev",&typeid(long) },

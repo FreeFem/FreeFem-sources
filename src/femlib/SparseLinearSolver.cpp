@@ -108,7 +108,13 @@ void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A,const  Data_Sparse_S
     ffassert(AH);
     solver = NewVSolver<int,R>(*AH,ds,stack);
     if(solver)
+    {
         A.SetSolver(solver,true);
+        if(ds.factorize)
+        {
+            
+        }
+    }
     else
         CompileError("SetSolver: type resolution unknown");
     

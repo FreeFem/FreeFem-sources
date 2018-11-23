@@ -50,6 +50,8 @@
 		3D15D4AD0BD3A6E000CEB4C6 /* mt19937ar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD23097015B4002A1826 /* mt19937ar.cpp */; };
 		3D15D4AF0BD3A6E000CEB4C6 /* problem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD26097015B4002A1826 /* problem.cpp */; };
 		3D15D4B40BD3A6E000CEB4C6 /* strversionnumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD31097015B4002A1826 /* strversionnumber.cpp */; };
+		3D1E311121A6DC61005200CF /* VirtualMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */; };
+		3D1E311321A6DC76005200CF /* VirtualSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D1E311221A6DC75005200CF /* VirtualSolver.hpp */; };
 		3D23E89E20BE9F7D00B6683D /* libifport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89D20BE9F7D00B6683D /* libifport.a */; };
 		3D23E8A020BEA02300B6683D /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89F20BEA02300B6683D /* libarpack.a */; };
 		3D23E8A120BEA02300B6683D /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89F20BEA02300B6683D /* libarpack.a */; };
@@ -193,6 +195,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualMatrix.hpp; path = ../src/femlib/VirtualMatrix.hpp; sourceTree = "<group>"; };
+		3D1E311221A6DC75005200CF /* VirtualSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolver.hpp; path = ../src/femlib/VirtualSolver.hpp; sourceTree = "<group>"; };
 		3D23E89D20BE9F7D00B6683D /* libifport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifport.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.a; sourceTree = "<group>"; };
 		3D23E89F20BEA02300B6683D /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../download/lib/libarpack.a; sourceTree = "<group>"; };
 		3D23E8A620BEAB5A00B6683D /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
@@ -647,6 +651,8 @@
 				3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */,
 				3D84AE1F1654DE9800301697 /* splitsimplex.hpp */,
 				3D84AE421654DEB600301697 /* ufunction.hpp */,
+				3D1E311221A6DC75005200CF /* VirtualSolver.hpp */,
+				3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */,
 				3DC0232F2148078B008C76D0 /* VirtualSolverCG.hpp */,
 				3DC023322148078C008C76D0 /* VirtualSolverSkyLine.hpp */,
 				3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */,
@@ -705,6 +711,7 @@
 				3D84ADE01654DAE200301697 /* lgsolver.hpp in Headers */,
 				3D84ADE11654DAE200301697 /* problem.hpp in Headers */,
 				3DC0231B2148072B008C76D0 /* SkyLineSolver.hpp in Headers */,
+				3D1E311121A6DC61005200CF /* VirtualMatrix.hpp in Headers */,
 				3DC023402148078C008C76D0 /* VirtualSolverSkyLine.hpp in Headers */,
 				3D84ADE21654DAE200301697 /* lex.hpp in Headers */,
 				3D84ADE31654DAE200301697 /* AFunction.hpp in Headers */,
@@ -721,6 +728,7 @@
 				3D84ADEC1654DAE200301697 /* ff++.hpp in Headers */,
 				3D84ADED1654DAE200301697 /* Serialize.hpp in Headers */,
 				3D84ADEF1654DAE200301697 /* array_init.hpp in Headers */,
+				3D1E311321A6DC76005200CF /* VirtualSolver.hpp in Headers */,
 				3D84ADF01654DAE200301697 /* array_resize.hpp in Headers */,
 				3D84ADF11654DAE200301697 /* CodeAlloc.hpp in Headers */,
 				3D84ADF21654DAE200301697 /* endian.hpp in Headers */,

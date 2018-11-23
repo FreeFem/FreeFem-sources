@@ -203,7 +203,8 @@ public:
     void Sortij();
     void Sortji();
     
-                                void set(I  nn,I  mm,bool hhalf,size_t nnnz, I  *ii, I *jj, R  *aa,int f77);
+    void set(I  nn,I  mm,bool hhalf,size_t nnnz, I  *ii, I *jj, R  *aa,int f77=0,int tcsr=0);
+    // tcsr = 0=> COO, 1=> CSR , -1 : CSC
     template<class II>          void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R  *aa,int f77);
     template<class II,class RR> void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R (*ff)(RR));
 

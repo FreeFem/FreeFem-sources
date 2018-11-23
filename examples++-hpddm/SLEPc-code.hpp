@@ -44,15 +44,15 @@ class eigensolver : public OneOperator {
     public:
         typedef KN<PetscScalar> Kn;
         typedef KN_<PetscScalar> Kn_;
-        class MatF_O : public VirtualMatrice<PetscScalar> {
+        class MatF_O : public RNM_VirtualMatrix<PetscScalar> {
             public:
                 Stack stack;
                 mutable Kn x;
                 C_F0 c_x;
                 Expression mat1, mat;
-                typedef typename VirtualMatrice<PetscScalar>::plusAx plusAx;
+                typedef typename RNM_VirtualMatrix<PetscScalar>::plusAx plusAx;
                 MatF_O(int n, Stack stk, const OneOperator* op) :
-                    VirtualMatrice<PetscScalar>(n), stack(stk), x(n), c_x(CPValue(x)),
+                    RNM_VirtualMatrix<PetscScalar>(n), stack(stk), x(n), c_x(CPValue(x)),
                     mat1(op ? op->code(basicAC_F0_wa(c_x)) : 0),
                     mat(op ? CastTo<Kn_>(C_F0(mat1, (aType)*op)) : 0) { }
                 ~MatF_O() {

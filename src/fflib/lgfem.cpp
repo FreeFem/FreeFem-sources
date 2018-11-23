@@ -1547,7 +1547,7 @@ KN<K> * pfer2vect( pair<FEbase<K,v_fes> *,int> p)
  {  
     KN<K> * x=p.first->x();
     if ( !x) {  // defined 
-      FESpace * Vh= p.first->newVh();  cout << "test 1" << endl;
+      FESpace * Vh= p.first->newVh(); // cout << "test 1" << endl;
       throwassert( Vh);
       *p.first = x = new KN<K>(Vh->NbOfDF);
       *x=K(); 
@@ -5805,8 +5805,8 @@ void  init_lgfem()
     Global.New("LU",CConstant<string*>(&LU));
     Global.New(CG.c_str(),CConstant<string*>(&CG));
     Global.New(GMRES.c_str(),CConstant<string*>(&GMRES));
-    Global.New(Crout.c_str(),CConstant<string*>(&Crout));
-    Global.New(Cholesky.c_str(),CConstant<string*>(&Cholesky));
+    Global.New("Crout",CConstant<string*>(&Crout));
+    Global.New("Cholesky",CConstant<string*>(&Cholesky));
     Global.New(UMFPACK.c_str(),CConstant<string*>(&UMFPACK));
     Global.New(sparsesolver.c_str(),CConstant<string*>(&sparsesolver));
     Global.New(sparsesolverSym.c_str(),CConstant<string*>(&sparsesolverSym));

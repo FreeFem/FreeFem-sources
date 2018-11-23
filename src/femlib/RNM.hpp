@@ -251,8 +251,8 @@ template<class P,class Q>
 template<class R,class Z=int>
 struct  RNM_VirtualMatrix { public:
     Z N,M;
-    RNM_VirtualMatrix(Z nn,Z mm=1): N(nn),M(mm<0 ? nn : mm) {}
-   
+    RNM_VirtualMatrix(Z nn): N(nn),M(nn) {}
+    RNM_VirtualMatrix(Z nn,Z mm): N(nn),M(mm   ) {}
   //  y += A x
   virtual void addMatMul(const KN_<R> &  x, KN_<R> & y) const =0; 
   virtual void addMatTransMul(const KN_<R> &  , KN_<R> & ) const 
