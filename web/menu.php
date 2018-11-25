@@ -29,14 +29,14 @@ include 'phpfiles.php';
 	
 		<p>
 	<div class="menuTitle">Documentation</div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++doc.pdf" target="_top"> freefem++doc.pdf  <? sizefile("freefem++doc.pdf") ?></a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/freefem++doc.pdf" target="_top"> freefem++doc.pdf  <? sizefile("freefem++doc.pdf") ?></a></div>
 	<div class="menuItem"><a href="https://doc.freefem.org" target="_top">New web documentation</a></div>	
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/CHANGELOG.html" target="_top">  News after aug. 2018 (CHANGELOG) </a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/INNOVATION" target="_top">  News before aug. 2018 (INNOVATION) </a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/HISTORY" target="_top">HISTORY (crazy) </a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/BUGS" target="_top">knows BUGS  </a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++Spanish.pdf" target="_top">Una documentation en español</a></div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/ftp/freefem++doc-chinese.pdf" target="_top"> Chinese documentation  </a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/CHANGELOG.html" target="_top">  News after aug. 2018 (CHANGELOG) </a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/INNOVATION" target="_top">  News before aug. 2018 (INNOVATION) </a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/HISTORY" target="_top">HISTORY (crazy) </a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/BUGS" target="_top">knows BUGS  </a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/freefem++Spanish.pdf" target="_top">Una documentation en español</a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/ftp/freefem++doc-chinese.pdf" target="_top"> Chinese documentation  </a></div>
 
 	<div class="menuItem"><a href="http://comfos.org/jp/ffempp/index.html" target="_top">Japanese (Kohji Ohtsuka)</a></div>
 	 <div class="menuItem"><a href="http://homepage.ntu.edu.tw/~twhsheu/twsiamff++/freefem.html"  target="_top"> TWSIAM Activity Group </a></div>	
@@ -61,12 +61,12 @@ include 'phpfiles.php';
 download all the examples</a> (in tar.gz format) from the book
 "Simulation numérique en C++" by Ionut Danaila, Frédéric
 Hecht, Olivier Pironneau, DUNOD 2003  </div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/freefem/fraold.htm" target="_top"> freefem </a> The first freefem version </div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/freefem/fraold.htm" target="_top"> freefem </a> The first freefem version </div>
 
-	<div class="menuItem"><a href="http://www.freefem.org/ff++/freefem/index.html" target="_top"> freefem+ </a> The freefem+ version </div>
-	<div class="menuItem"><a href="http://www.freefem.org/ff3d/index.html" target="_top">freeFEM3D</a>: the 3D version based on ficticious domain.</div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff++/freefem/index.html" target="_top"> freefem+ </a> The freefem+ version </div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff3d/index.html" target="_top">freeFEM3D</a>: the 3D version based on ficticious domain.</div>
 
-	<div class="menuItem"><a href="http://www.freefem.org/ff2a3" target="_top">ANR FF2A3</a></div>
+	<div class="menuItem"><a href="http://www3.freefem.org/ff2a3" target="_top">ANR FF2A3</a></div>
 		<div class="menuItem"><a href="https://www.ljll.math.upmc.fr/hecht/ftp/emc2" target="main">emc2 (CAD 2d) </a></div>
 
 	
