@@ -48,7 +48,8 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     if(ptO)
-        ptA->HPDDM::template Subdomain<K>::initialize(mA ? new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) : 0, STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA)
+                                            , STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
     FEbaseArrayKn<K>* deflation = nargs[2] ? GetAny<FEbaseArrayKn<K>*>((*nargs[2])(stack)) : 0;
     if(deflation && deflation->N > 0 && !ptA->getVectors()) {
         K** ev = new K*[deflation->N];
@@ -115,7 +116,8 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
         long nbSolver = 0;
         std::vector<const HPDDM::MatrixCSR<K>*> vecAIJ;
         if(mA) {
-            HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+            
+            ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
             MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
             MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
             if(dA._n == dA._m) {
@@ -123,17 +125,20 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
                     timing->resize(timing->n + 1);
                     (*timing)[timing->n - 1] = MPI_Wtime();
                 }
-                const HPDDM::MatrixCSR<K>* const dP = mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
+                const HPDDM::MatrixCSR<K>* const dP = new_HPDDM_MatrixCSR<K>(mP);
+                //mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
                 if(mB) {
-                    HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
+   //                 HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
+                    ff_HPDDM_MatrixCSR<K> dB(mB);
                     ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
                 }
                 else
                     ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
-                mA->nbcoef = dA._nnz;
+                set_ff_matrix(mA,dA);
+              /*  mA->nbcoef = dA._nnz;
                 mA->a = dA._a;
                 mA->lg = dA._ia;
-                mA->cl = dA._ja;
+                mA->cl = dA._ja;*/
                 delete dP;
                 if(timing) { // toc
                     (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
@@ -355,7 +360,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         (*timing)[timing->n - 1] = MPI_Wtime();
     }
     if(mpisize > 1 && (mA && opt.any_of(prefix + "schwarz_method", { 1, 2, 4 }))) {
-        HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
         ptA->callNumfact(&dA);
     }
     else {
@@ -441,7 +446,7 @@ class changeOperator : public OneOperator {
 template<class Type, class K>
 AnyType changeOperator_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mN = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*mat)(stack))->A));
-    HPDDM::MatrixCSR<K>* dN = new HPDDM::MatrixCSR<K>(mN->n, mN->m, mN->nbcoef, mN->a, mN->lg, mN->cl, mN->symetrique);
+    HPDDM::MatrixCSR<K>* dN = new_HPDDM_MatrixCSR<K>(mN);//mN->n, mN->m, mN->nbcoef, mN->a, mN->lg, mN->cl, mN->symetrique);
     Type* ptA = GetAny<Type*>((*A)(stack));
     ptA->setMatrix(dN);
     return 0L;
@@ -514,7 +519,7 @@ AnyType distributedMV_Op<Type, K>::operator()(Stack stack) const {
     pout->resize(pin->n);
     unsigned short mu = pin->n / pA->getDof();
     MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
-    HPDDM::MatrixCSR<K> dA(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+    ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
     bool allocate = pA->setBuffer();
     pA->GMV((K*)*pin, (K*)*pout, mu, &dA);
     pA->clearBuffer(allocate);
@@ -582,15 +587,15 @@ class IterativeMethod : public OneOperator {
     public:
         typedef KN<R> Kn;
         typedef KN_<R> Kn_;
-        class MatF_O : VirtualMatrice<R> {
+        class MatF_O : RNM_VirtualMatrix<R> {
             public:
                 Stack stack;
                 mutable Kn x;
                 C_F0 c_x;
                 Expression mat1, mat;
-                typedef typename VirtualMatrice<R>::plusAx plusAx;
+                typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
                 MatF_O(int n, Stack stk, const OneOperator* op) :
-                    VirtualMatrice<R>(n), stack(stk), x(n), c_x(CPValue(x)),
+                    RNM_VirtualMatrix<R>(n), stack(stk), x(n), c_x(CPValue(x)),
                     mat1(op ? op->code(basicAC_F0_wa(c_x)) : 0),
                     mat(op ? CastTo<Kn_>(C_F0(mat1, (aType)*op)) : 0) { }
                 ~MatF_O() {
@@ -610,7 +615,8 @@ class IterativeMethod : public OneOperator {
                     KN_<R> xx((R*)in, n);
                     KN_<R> yy(out, n);
                     yy = R();
-                    yy = plusAx(this, xx);
+                    addMatMul(xx,yy);
+                   // yy = plusAx(this, xx);
                 }
                 bool ChecknbLine(int) const { return true; }
                 bool ChecknbColumn(int) const { return true; }

@@ -161,6 +161,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             for(int k = 0; k < mT->n; ++k) {
                 MatriceMorse<PetscScalar>* mS = static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A));
                 std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(mS->n);
+#ifndef VERSION_MATRICE_CREUSE
                 for(int i = 0; i < mS->n; ++i) {
                     unsigned int row = re[i];
                     tmp[row].reserve(mS->lg[i + 1] - mS->lg[i]);
@@ -168,9 +169,23 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                         tmp[row].emplace_back(re[mS->cl[j]], mS->a[j]);
                     std::sort(tmp[row].begin(), tmp[row].end(), [](const std::pair<int, PetscScalar>& lhs, const std::pair<int, PetscScalar>& rhs) { return lhs.first < rhs.first; });
                 }
+
+                int mSnbcoef =mS->nbcoef;
+#else
+                mS->CSR();
+                 int mSnbcoef =mS->nnz;
+                for(int i = 0; i < mS->n; ++i) {
+                    unsigned int row = re[i];
+                    tmp[row].reserve(mS->p[i + 1] - mS->p[i]);
+                    for(int j = mS->p[i]; j < mS->p[i + 1]; ++j)
+                        tmp[row].emplace_back(re[mS->j[j]], mS->aij[j]);
+                    std::sort(tmp[row].begin(), tmp[row].end(), [](const std::pair<int, PetscScalar>& lhs, const std::pair<int, PetscScalar>& rhs) { return lhs.first < rhs.first; });
+                }
+
+#endif
                 is = new int[mS->n + 1];
-                js = new int[mS->nbcoef];
-                s = new PetscScalar[mS->nbcoef];
+                js = new int[mSnbcoef];
+                s = new PetscScalar[mSnbcoef];
                 is[0] = 0;
                 for(int i = 0; i < mS->n; ++i) {
                     for(int j = 0; j < tmp[i].size(); ++j) {
@@ -179,13 +194,13 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                     }
                     is[i + 1] = is[i] + tmp[i].size();
                 }
-                js -= mS->nbcoef;
-                s -= mS->nbcoef;
+                js -= mSnbcoef;
+                s -= mSnbcoef;
                 int* ia, *ja;
                 PetscScalar* c;
                 ia = ja = nullptr;
                 c = nullptr;
-                HPDDM::MatrixCSR<PetscScalar>* dN = new HPDDM::MatrixCSR<PetscScalar>(mS->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
+                HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS,true,s,is,js);//->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
                 bool free = ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN);
                 MatCreate(PETSC_COMM_WORLD, &ptA->_S[k]);
                 MatSetSizes(ptA->_S[k], end - start, end - start, global, global);

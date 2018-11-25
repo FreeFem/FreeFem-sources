@@ -34,6 +34,102 @@
 #undef CBLAS_H
 
 #include <HPDDM.hpp>
+#ifndef VERSION_MATRICE_CREUSE
+//  OLD CODE
+#define RNM_VirtualMatrix VirtualMatrice
+template<class K>
+struct ff_HPDDM_MatrixCSR : public:HPDDM::MatrixCSR<K>
+{
+    ff_HPDDM_MatrixCSR(MatriceMorse<K>* pA) :
+    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) {}
+};
+template<class K>
+HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K>* mA,bool  mfree=false,K *s=0,int *is=0,int *js=0)
+{
+ 
+    if(mA)
+    {
+        if(!s) s=mA->a;
+        if(!is) is=mA->lg;
+        if(!js) js=mA->cl;
+    return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, s, is, js , mA->symetrique,mfree);
+    }
+    else return nullptr;
+    
+}
+template<class K>
+HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K>* mA,bool  mfree=false,int *is=0,int *js=0)
+{
+    
+    if(mA)
+    {
+        if(!is) is=mA->lg;
+        if(!js) js=mA->cl;
+        return new HPDDM::MatrixCSR<void>(mA->n, mA->m, mA->nbcoef, is, js , mA->symetrique,mfree);
+    }
+    else return nullptr;
+    
+}
+
+template<class K>
+void set_ff_matrix(MatriceMorse<K>* mA,HPDDM::MatrixCSR<K> &dA)
+{
+    // bof Bof
+    mA->nbcoef = dA._nnz;
+    mA->a = dA._a;
+    mA->lg = dA._ia;
+    mA->cl = dA._ja;
+}
+#else
+
+template<class K>  using MatriceMorse=HashMatrix<int,K>;
+
+template<class K>
+struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
+{
+    ff_HPDDM_MatrixCSR(MatriceMorse<K>* mA) :
+    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, mA->aij, mA->p, mA->j, mA->half) {
+        mA->CSR();
+        this->_ia=mA->p;
+        // PB delete FH?????
+    }
+};
+
+template<class K>
+HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K   >* mA,bool mfree=false,K *s=0,int *is=0,int *js=0)
+{ if(mA)
+    {
+        mA->CSR();
+        if(!s) s=mA->aij;
+        if(!is) is=mA->p;
+        if(!js) js=mA->j;
+
+        return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, s, is, js , mA->half,mfree);
+    }
+    else
+        return 0;
+}
+template<class K>
+HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K   >* mA,bool mfree=false,int *is=0,int *js=0)
+{ if(mA)
+{
+    mA->CSR();
+    if(!js) js=mA->j;
+    if(!is) is=mA->p;
+    return new HPDDM::MatrixCSR<void>(mA->n, mA->m, mA->nnz, is, js , mA->half,mfree);
+}
+else
+    return 0;
+}
+
+template<class K>
+void set_ff_matrix(MatriceMorse<K>* mA,HPDDM::MatrixCSR<K> &dA)
+{
+    //void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
+    cout << " set_ff_matrix " <<endl; 
+    mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,dA._a,0,1);
+}
+#endif
 
 template<class T>
 class STL {
@@ -199,12 +295,21 @@ void exchange_restriction(Type* const& pA, KN<K>* pin, KN<K>* pout, MatriceMorse
         PETSc::changeNumbering_func(pA, pin, pout, true);
         pout->resize(pA->_exchange[0]->getDof());
         *pout = K();
+
         if(mR) {
+  //          mR->addMatTransMul(*pin,*pout);;
+  //  out += A^t in
+#ifndef VERSION_MATRICE_CREUSE
             for(int i = 0; i < mR->n; ++i) {
                 for(int j = mR->lg[i]; j < mR->lg[i + 1]; ++j)
                     pout->operator[](mR->cl[j]) += mR->a[j] * pin->operator[](i);
             }
+#else
+            for(int k = 0; k < mR->nnz; ++k)
+                    pout->operator[](mR->j[k]) += mR->aij[k] * pin->operator[](mR->i[k]);
+#endif
         }
+    
         exchange_dispatched(pA->_exchange[0], pout, false);
     }
 }
