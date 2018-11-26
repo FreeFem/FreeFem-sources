@@ -207,7 +207,7 @@ class MeshPointBase { public:
          t=(*Th)(T);
 	v=f=e=-1;
 	VF=0;
-	d=2;  
+        d=3;// Bug correct v4 
 	
     }
     
