@@ -3122,6 +3122,7 @@ public:
 template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
 template<class T>
 AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
+
     static const double defEPS=1e-12;
     typedef double R;
     // code wri-ng no ...
@@ -3182,6 +3183,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                             }
                             else
                                 tmp.push_back(std::make_pair(col - 1, mA->aij[j]));
+
                         }
                     }
                     std::sort(tmp.begin() + lg[i], tmp.end(),cmp<T> );
@@ -3240,6 +3242,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 
             }
         }
+
         else
         {
             tmpVec.reserve(mA->n);
@@ -3253,6 +3256,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                     tmpVec.push_back(-j);
                     ++j;
                 }
+
             }
         
             
@@ -3301,6 +3305,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             // bug ici ::: FH..            pR->A.master(&mR);
             //V4  m->dummy = false;
         }
+
     }
     else if(rhs)
     {

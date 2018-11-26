@@ -338,7 +338,9 @@ class E_P_Stack_hTriangle   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
-    double l= mp->T->h();
+    double l=1e100;
+    if( mp->d==2) l=mp->T->h();
+      else if ( mp->d==3) l=mp->T3->lenEdgesmax();
     return SetAny<double>(l);} 
     operator aType () const  { return atype<double>();}         
     
