@@ -379,10 +379,17 @@ public:
   bool   EdgeOrientation(int i) const 
     { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
     
-  R lenEdge(int i) const {ASSERTION(i>=0 && i <3);
+  R lenEdge(int i) const {ASSERTION(i>=0 && i <ne);
     Rd E=Edge(i);return sqrt((E,E));}
-
-  R lenEdge2(int i) const {ASSERTION(i>=0 && i <3);
+  R lenEdgesmax() const
+    {
+        R lx2 = 0;
+        for (int i=0; i< ne; ++i)
+            lx2 = max(lx2,lenEdge2(i));
+        return sqrt(lx2);
+        
+    }
+  R lenEdge2(int i) const {ASSERTION(i>=0 && i <ne);
         Rd E=Edge(i);return ((E,E));}
   
   R  mesure() const {return mes;}
@@ -1512,7 +1519,7 @@ void GenericMesh<T,B,V>::BuildBound()
 	 }
     }
   if(verbosity>3)
-      cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
+    cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe << "mes " << mes << " " << mesb
 	 << " , bb: (" << Pmin << ") , (" << Pmax << ")\n"; 
 }
 

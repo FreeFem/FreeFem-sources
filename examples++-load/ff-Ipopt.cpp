@@ -332,7 +332,7 @@ class SparseMatStructure
 
 		SparseMatStructure (bool _sym = 0): structure(), sym(_sym), n(0), m(0), raws(0), cols(0) {}
 
-		SparseMatStructure (Matrice_Creuse<R> const *const M, bool _sym = 0): structure(), sym(_sym), n(M->N()), m(M->M()), raws(0), cols(0) {this->AddMatrix(M);}
+		SparseMatStructure (Matrice_Creuse<R>  * M, bool _sym = 0): structure(), sym(_sym), n(M->N()), m(M->M()), raws(0), cols(0) {this->AddMatrix(M);}
 
 		template<class INT> SparseMatStructure (const KN<INT> &I, const KN<INT> &J, bool _sym = 0): structure(), sym(_sym), n(I.max()), m(J.max()), raws(0), cols(0) {this->AddArrays(I, J);}
 
@@ -380,7 +380,7 @@ class SparseMatStructure
 
 		int size () const {return structure.size() ? structure.size() : (raws ? raws->N() : 0);}
 
-		SparseMatStructure&AddMatrix (Matrice_Creuse<R> const *const);
+		SparseMatStructure&AddMatrix (Matrice_Creuse<R>  *);
 		template<class INT> SparseMatStructure&AddArrays (const KN<INT> &, const KN<INT> &);
 		SparseMatStructure&ToKn (bool emptystruct = false);
 
@@ -420,27 +420,27 @@ SparseMatStructure &SparseMatStructure::ToKn (bool emptystruct) {
 	return *this;
 }
 
-SparseMatStructure &SparseMatStructure::AddMatrix (Matrice_Creuse<R> const *const _M) {
+SparseMatStructure &SparseMatStructure::AddMatrix (Matrice_Creuse<R>  *const _M) {
 	n = n > _M->N() ? n : _M->N();
 	m = m > _M->M() ? m : _M->M();
-	MatriceMorse<R> const *const M = dynamic_cast<MatriceMorse<R> const *const>(&(*_M->A));
+	MatriceMorse<R>  * M = _M->pHM();
 	if (!M) {
 		cerr << " Err= " << " Matrix is not morse or CSR " << &(*_M->A) << endl;
 		ffassert(M);
 	}
-
+       M->CSR();
 	{
-		if (!sym || (sym && M->symetrique)) {
+		if (!sym || (sym && M->half)) {
 			for (int i = 0; i < M->N; ++i) {
-				for (int k = M->lg[i]; k < M->lg[i + 1]; ++k) {
-					structure.insert(Z2(i, M->cl[k]));
+				for (int k = M->p[i]; k < M->p[i + 1]; ++k) {
+					structure.insert(Z2(i, M->j[k]));
 				}
 			}
 		} else {// sym && !M->symetrique
 			for (int i = 0; i < M->N; ++i) {
-				for (int k = M->lg[i]; k < M->lg[i + 1]; ++k) {
-					if (i >= M->cl[k]) {
-						structure.insert(Z2(i, M->cl[k]));
+				for (int k = M->p[i]; k < M->p[i + 1]; ++k) {
+					if (i >= M->j[k]) {
+						structure.insert(Z2(i, M->j[k]));
 					}
 				}
 			}
@@ -743,13 +743,13 @@ bool ffNLP::eval_jac_g (Index n, const Number *x, bool new_x, Index m, Index nel
 	} else if (dconstraints) {
 		Matrice_Creuse<R> *M = dconstraints->J(X);
 		MatriceMorse<R> *MM = dynamic_cast<MatriceMorse<R> *>(&(*M->A));// ugly!
-
+                MM->CSR();
 		for (int i = 0; i < MM->N; ++i) {
-			for (int k = MM->lg[i]; k < MM->lg[i + 1]; ++k) {
+			for (int k = MM->p[i]; k <  MM->p[i + 1]; ++k) {
 				if (checkstruct) {
-					int kipopt = FindIndex(JacStruct.Raws(), JacStruct.Cols(), i, MM->cl[k], 0, nele_jac - 1);
-					if (kipopt >= 0) {values[kipopt] = MM->a[k];}
-				} else {values[k] = MM->a[k];}
+					int kipopt = FindIndex(JacStruct.Raws(), JacStruct.Cols(), i, MM->j[k], 0, nele_jac - 1);
+					if (kipopt >= 0) {values[kipopt] = MM->aij[k];}
+				} else {values[k] = MM->aij[k];}
 			}
 		}
 	}
@@ -779,29 +779,30 @@ bool ffNLP::eval_h (Index n, const Number *x, bool new_x, Number obj_factor, Ind
 		if (NLCHPE) {M = hessian->J(X, obj_factor, L);} else {M = hessian->J(X);}
 
 		MatriceMorse<R> *MM = dynamic_cast<MatriceMorse<R> *>(&(*M->A));// ugly!
+                MM->CSR();
 		if (MM) {
 			if (checkstruct) {
 				for (int i = 0; i < MM->N; ++i) {
-					for (int k = MM->lg[i]; k < MM->lg[i + 1]; ++k) {
-						int kipopt = FindIndex(HesStruct.Raws(), HesStruct.Cols(), i, MM->cl[k], 0, nele_hess - 1);
-						if (kipopt >= 0) {values[kipopt] = _obj_factor * (MM->a[k]);}
+					for (int k = MM->p[i]; k < MM->p[i + 1]; ++k) {
+						int kipopt = FindIndex(HesStruct.Raws(), HesStruct.Cols(), i, MM->j[k], 0, nele_hess - 1);
+						if (kipopt >= 0) {values[kipopt] = _obj_factor * (MM->aij[k]);}
 
 						// else values[k] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
 					}
 				}
-			} else if (!MM->symetrique) {
+			} else if (!MM->half) {
 				for (int i = 0, kipopt = 0; i < MM->N; ++i) {
-					for (int k = MM->lg[i]; k < MM->lg[i + 1]; ++k) {
-						if (i >= MM->cl[k]) {
-							values[kipopt] = _obj_factor * (MM->a[k]);
+					for (int k = MM->p[i]; k < MM->p[i + 1]; ++k) {
+						if (i >= MM->j[k]) {
+							values[kipopt] = _obj_factor * (MM->aij[k]);
 							++kipopt;
 						}
 					}
 				}
 			} else {
 				for (int i = 0; i < MM->N; ++i) {
-					for (int k = MM->lg[i]; k < MM->lg[i + 1]; ++k) {
-						values[k] = _obj_factor * (MM->a[k]);
+					for (int k = MM->p[i]; k < MM->p[i + 1]; ++k) {
+						values[k] = _obj_factor * (MM->aij[k]);
 					}
 				}
 			}

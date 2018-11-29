@@ -118,7 +118,7 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/AFunction.hpp ../src/fflib/AnyType.hpp	\
 	../src/fflib/array_init.hpp ../src/fflib/array_resize.hpp ../src/fflib/array_tlp.hpp				\
 	../src/femlib/assertion.hpp ../src/femlib/BamgFreeFem.hpp ../src/Algo/BFGS.hpp ../src/Algo/BrentLS.hpp		\
-	../src/Algo/CG.hpp ../src/femlib/CGNL.hpp ../src/fflib/CodeAlloc.hpp ../config.h ../config-wrapper.h		\
+	../src/femlib/CGNL.hpp ../src/fflib/CodeAlloc.hpp ../config.h ../config-wrapper.h		\
 	../src/Algo/CubicLS.hpp ../src/Algo/defs.hpp ../src/femlib/DOperator.hpp ../src/libMesh/eigenv.h		\
 	../src/fflib/endian.hpp ../src/fflib/environment.hpp ../src/fflib/error.hpp ../src/femlib/fem3.hpp		\
 	../src/femlib/fem.hpp ../src/femlib/FESpace.hpp ../src/femlib/FESpacen.hpp ../src/fflib/ff++.hpp		\
@@ -139,7 +139,18 @@ allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/A
 	../src/fflib/showverb.hpp ../src/femlib/splitsimplex.hpp ../src/fflib/String.hpp				\
 	../src/fflib/strversionnumber.hpp ../src/fflib/throwassert.hpp ../src/femlib/ufunction.hpp			\
 	../src/fflib/versionnumber.hpp ../src/bamglib/write_hdf5.hpp	../src/bamglib/write_xdmf.hpp                   \
-	../src/fflib/P1IsoValue.hpp
+	../src/fflib/P1IsoValue.hpp \
+	../src/femlib/SkyLineSolver.hpp \
+	../src/femlib/SolverSkyLine.hpp \
+	../src/femlib/SparseLinearSolver.hpp \
+	../src/femlib/VirtualMatrix.hpp \
+	../src/femlib/VirtualSolver.hpp \
+	../src/femlib/CG.hpp \
+	../src/femlib/VirtualSolverCG.hpp \
+	../src/femlib/VirtualSolverSkyLine.hpp \
+	../src/femlib/VirtualSolverSparseSuite.hpp \
+	../src/femlib/HashMatrix.hpp \
+	../src/femlib/MatriceElementaire.hpp
 
 if ENABLE_FFCS
 

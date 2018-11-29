@@ -499,37 +499,29 @@ int mylex::scan1()
 // <<mylex_scan>>
 int mylex::scan(int lvl)
 {
+ 
+  int ret= scan1(); 
+  
+  // ID defined at [[file:../lglib/lg.ypp::ID]] and detected at [[found_an_identifier]]
+  if ( ret == ID) {
+    if (! InMotClef(plglval->type,ret))  {
+      int ft = FindType(buf);
 
-    int ret= scan1();
-
-    // ID defined at [[file:../lglib/lg.ypp::ID]] and detected at [[found_an_identifier]]
-    if ( ret == ID)
-    {
-        if (! InMotClef(plglval->type,ret))
-        {
-            int ft = FindType(buf);
-
-            // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
-            int feid3[4]  = { ID,FESPACE1,FESPACE,FESPACE3};
-
-            assert ( ft >= 0 && ft <= 3)  ;
-            ret =  feid3[ft];
-            plglval->str = newcopy(buf);
-        }
-    }
-
-    if ( ret =='{')   //cout << " listMacroDef->push_back"<< endl;
-    {
-        listMacroDef->push_back( MapMacroDef() );
-    }
-    else if (ret == '}')  //cout << " listMacroDef->pop_back"<< endl;
-    {
-        listMacroDef->pop_back( );
-    }
-
-    if (! lexdebug && echo && lvl==0 ) print(cout);
-
-    return ret;
+        // FESPACE, FESPACE1, FESPACE3 , FESPACES are defined at [[file:../lglib/lg.ypp::FESPACE]]
+      int feid3[5]  ={ ID,FESPACE1,FESPACE,FESPACE3,FESPACES};
+      assert ( ft >= 0 && ft <= 4)  ;
+      ret =  feid3[ft];      
+      plglval->str = newcopy(buf);
+    }}
+  
+  if ( ret =='{') { //cout << " listMacroDef->push_back"<< endl; 
+    listMacroDef->push_back( MapMacroDef() );}
+  else if (ret == '}') {//cout << " listMacroDef->pop_back"<< endl;
+    listMacroDef->pop_back( );}
+  
+  if (! lexdebug && echo && lvl==0 ) print(cout);
+  
+  return ret;
 }
 
 string mylex::token() const

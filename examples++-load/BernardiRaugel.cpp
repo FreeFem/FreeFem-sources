@@ -91,7 +91,7 @@ namespace Fem2D
 				assert(pij_alpha.N() == kk);
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
 			void Pi_h_alpha (const baseFElement &K, KN_<double> &v) const;
 	};
 
@@ -129,9 +129,9 @@ namespace Fem2D
 	}
 
 	// Shape function
-	void TypeOfFE_P2BRLagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
+	void TypeOfFE_P2BRLagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
 		R2 A(K[0]), B(K[1]), C(K[2]);
-		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
+		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
 		R l4_0 = (4 * l0 - 1), l4_1 = (4 * l1 - 1), l4_2 = (4 * l2 - 1);
 		// int_e_1 l0*l0 = |e_1|/3 and int_e_1 l0*l1 = |e_1|/6
 		// to get the flux = 1

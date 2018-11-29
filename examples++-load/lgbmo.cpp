@@ -28,6 +28,7 @@
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
+/*
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "rgraph.hpp"
@@ -39,6 +40,8 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
+ */
+#include "ff++.hpp"
 #include "bmo.hpp"
 
 // template<class R>
@@ -54,7 +57,7 @@ class OptimBMO: public OneOperator
 		typedef R REAL;
 		typedef KN<REAL> VECT;
 		typedef KNM<REAL> MAT;
-		typedef VirtualMatrice<REAL> VMAT;
+		//typedef VirtualMatrice<REAL> VMAT;
 
 		const int cas;
 

@@ -77,7 +77,7 @@ namespace  Fem2D {
 				ffassert(p == this->P_Pi_h.N());
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
 			// R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
 			void Pi_h_alpha (const baseFElement &K, KN_<double> &v) const;
 	};
@@ -131,10 +131,10 @@ namespace  Fem2D {
 		ffassert(k == this->pij_alpha.N());
 	}
 
-	void TypeOfFE_P2pnc::FB (const bool *whatd, const Mesh &TH, const Triangle &K, const R2 &P, RNMK_ &val) const {
+	void TypeOfFE_P2pnc::FB (const bool *whatd, const Mesh &TH, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
 		// const Triangle & K(FE.T);
 		R2 A(K[0]), B(K[1]), C(K[2]);
-		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
+		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
 		R oe[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
 		R l7 [] = {l0, l1, l2, l1 *l2, l0 *l2, l0 *l1, (l0 - l1) * (l1 - l2) * (l2 - l0)};	// 7 monome
 		double C1 [][7] = {

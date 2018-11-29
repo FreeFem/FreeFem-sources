@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep: double_pastix   blas parmetis metis scotch  mpi fc
+//xxff-c++-LIBRARY-dep: double_pastix   blas parmetis metis scotch  mpi fc
 //ff-c++-cpp-dep: 
 
 /* 
@@ -34,6 +34,17 @@
 /*
   Interface entre freefem++ et pastix
 */
+#ifndef OLDFFVERSION
+#include  "ff++.hpp"
+static void Load_Init()
+{
+    cout << " load(\"real_pastix_FreeFem\")   is obsoled now  pluging "<< endl;
+    ExecError("Plugins real_pastix_FreeFem is remove");
+    exit(0);
+}
+
+LOADFUNC(Load_Init);
+#else
 #include <mpi.h>
 #include  <iostream>
 using namespace std;
@@ -717,3 +728,4 @@ static void Load_Init()
   Global.Add("realdefaulttopastix","(",new OneOperator0<bool>(Setpastixmpi));
 }
  LOADFUNC(Load_Init)
+#endif

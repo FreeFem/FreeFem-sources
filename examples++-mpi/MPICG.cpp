@@ -263,16 +263,16 @@ public:
     typedef KN_<R> Kn_;
     const int cas,CG;
     
-    class MatF_O: VirtualMatrice<R> { public:
+    class MatF_O: RNM_VirtualMatrix<R> { public:
 	Stack stack;
 	mutable  Kn x;       
 	C_F0 c_x;
 	Kn *b;
 	
 	Expression  mat1,mat;
-	typedef  typename VirtualMatrice<R>::plusAx plusAx;
+	typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
 	MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb=0) 
-	: VirtualMatrice<R>(n),stack(stk),
+	: RNM_VirtualMatrix<R>(n),stack(stk),
 	x(n),c_x(CPValue(x)),b(bb),
 	mat1(op->code(basicAC_F0_wa(c_x))),
 	mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))) {
@@ -292,7 +292,9 @@ public:
 	    // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
 	    
 	}
-	void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
+        void addMatMul(const KN_<R> &  xx, KN_<R> & Ax) const
+	//void addMatMul(const  Kn_  & xx, Kn_ & Ax) const
+        {
 	    ffassert(xx.N()==Ax.N());
 	    x =xx;
 	    Ax  += GetAny<Kn_>((*mat)(stack));
@@ -300,8 +302,8 @@ public:
 	    WhereStackOfPtr2Free(stack)->clean();
 	} 
 	plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
-	virtual bool ChecknbLine(int n) const { return true;}  
-	virtual bool ChecknbColumn(int m) const { return true;} 
+        bool ChecknbLine(int n) const { return true;}
+        bool ChecknbColumn(int m) const { return true;}
 	
     };  
     

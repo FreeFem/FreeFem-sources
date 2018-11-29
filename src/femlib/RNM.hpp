@@ -104,7 +104,7 @@ inline void Check_Kn(const char * str,const char * file,int line)
 //    Donc la fonction  IsVector1() nous dit si un tableau 
 //    a un 2 ou 3 indices est ou non consecutif en memoire
 //    
-//  --  ajoute d'une classe VirtualMatrice
+//  --  ajoute d'une classe RNM_VirtualMatrix
 // pour modeliser le produit matrice vecteur 
 //  x = A*v; via des fonctions virtuelle 
 //  ---------------------------------- 
@@ -152,6 +152,8 @@ inline void Check_Kn(const char * str,const char * file,int line)
 // ----------------
 
 namespace RNM {
+template<class T> T Square(const T & r){return r*r;}
+
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
 inline long  conj(const long &x){return x;}
@@ -246,48 +248,48 @@ template<class P,class Q>
     PplusQ(const P & pp,const Q & qq) : p(pp),q(qq){}
     };
 
-template<class R> 
-struct  VirtualMatrice { public:
-    int N,M;
-    VirtualMatrice(int nn,int mm): N(nn),M(mm) {}
-    VirtualMatrice(int nn): N(nn),M(nn) {}
+template<class R,class Z=int>
+struct  RNM_VirtualMatrix { public:
+    Z N,M;
+    RNM_VirtualMatrix(Z nn): N(nn),M(nn) {}
+    RNM_VirtualMatrix(Z nn,Z mm): N(nn),M(mm   ) {}
   //  y += A x
   virtual void addMatMul(const KN_<R> &  x, KN_<R> & y) const =0; 
   virtual void addMatTransMul(const KN_<R> &  , KN_<R> & ) const 
-    { InternalError("VirtualMatrice::addMatTransMul not implemented "); }
+    { InternalError("RNM_VirtualMatrix::addMatTransMul not implemented "); }
   virtual bool WithSolver() const {return false;} // by default no solver          
   virtual void Solve( KN_<R> &  ,const KN_<R> & ) const 
-    { InternalError("VirtualMatrice::solve not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); } 
+    { InternalError("RNM_VirtualMatrix::solve not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); } 
   virtual void SolveT( KN_<R> &  ,const KN_<R> & ) const
-    { InternalError("VirtualMatrice::solve trans/herm not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); }
+    { InternalError("RNM_VirtualMatrix::solve trans/herm not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); }
 
 #ifdef VersionFreeFempp
-  virtual bool ChecknbLine  (int n) const= 0; 
-  virtual bool ChecknbColumn  (int m) const =0; 
+  virtual bool ChecknbLine  (Z n) const= 0;
+  virtual bool ChecknbColumn  (Z m) const =0;
 #else
-  virtual bool ChecknbLine  (int n) const {return true;} 
-  virtual bool ChecknbColumn  (int m) const {return true;}
+  virtual bool ChecknbLine  (Z n) const {return true;}
+  virtual bool ChecknbColumn  (Z m) const {return true;}
 #endif
-  struct  plusAx { const VirtualMatrice * A; const KN_<R>   x;
-   plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
+  struct  plusAx { const RNM_VirtualMatrix * A; const KN_<R>   x;
+   plusAx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y) 
       { if(B) { ffassert(B->ChecknbColumn(y.N())); } }
     };
     
    plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
    
-  struct  plusAtx { const VirtualMatrice * A; const KN_<R>   x;
-   plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y) 
+  struct  plusAtx { const RNM_VirtualMatrix * A; const KN_<R>   x;
+   plusAtx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y) 
     { if(B) { ffassert(B->ChecknbLine(y.N())); } } };
     
-  struct  solveAxeqb { const VirtualMatrice * A; const KN_<R>   b;
-   solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y) 
+  struct  solveAxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
+   solveAxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y) 
     { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
   
-    struct  solveAtxeqb { const VirtualMatrice * A; const KN_<R>   b;
-        solveAtxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y)
+    struct  solveAtxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
+        solveAtxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)
         { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
 
-  virtual ~VirtualMatrice(){} 
+  virtual ~RNM_VirtualMatrix(){} 
 };
 
     
@@ -340,6 +342,7 @@ class ShapeOfArray{ protected:
   long end()  const      { return n*step;}
   long last()      const      { return (n-1)*step;}
   long constant()  const { return step==0;}
+  bool contiguous() const {return step==1;}
   long index(long k) const { K_throwassert( (k>=0) && ( (k <n) || !step) );
            return step*k;}
   ShapeOfArray operator*(long stepp) const {return  ShapeOfArray(n,step*stepp,next);}  
@@ -549,18 +552,20 @@ public:
 
  //  KN_& operator =(const MatriceCreuseMulKN_<R> & ) ;
  //  KN_& operator +=(const MatriceCreuseMulKN_<R> & ) ;
-   KN_& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
+   KN_& operator =(const typename RNM_VirtualMatrix<R>::plusAx & Ax)  
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatMul(Ax.x,*this); } return *this;}
-   KN_& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
+   KN_& operator =(const typename RNM_VirtualMatrix<R>::plusAtx & Ax)  
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatTransMul(Ax.x,*this); } return *this;}
-   KN_& operator +=(const typename VirtualMatrice<R>::plusAx & Ax)  
+   KN_& operator +=(const typename RNM_VirtualMatrix<R>::plusAx & Ax)  
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0)); Ax.A->addMatMul(Ax.x,*this); } return *this;}
-   KN_& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
+   KN_& operator +=(const typename RNM_VirtualMatrix<R>::plusAtx & Ax)  
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0)); Ax.A->addMatTransMul(Ax.x,*this); } return *this;}
-   KN_& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
+
+   KN_& operator =(const typename RNM_VirtualMatrix<R>::solveAxeqb & Ab)  
     { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));/* *this=R();*/ Ab.A->Solve(*this,Ab.b); } return *this;}
-    KN_& operator =(const typename VirtualMatrice<R>::solveAtxeqb & Ab)
+    KN_& operator =(const typename RNM_VirtualMatrix<R>::solveAtxeqb & Ab)
     { if(Ab.A) { ffassert(&Ab.b[0] != &this->operator[](0));/* *this=R();*/ Ab.A->SolveT(*this,Ab.b); } return *this;}
+
 
   template<class  A,class B,class C,class D> KN_&  operator =  (const F_KN_<A,B,C,D>  & u) ;
   template<class  A,class B,class C,class D> KN_&  operator +=  (const F_KN_<A,B,C,D>  & u) ;
@@ -1037,22 +1042,22 @@ class KN :public KN_<R> { public:
 //       {if(this->unset()) set(new R[Ax.v.N()],Ax.v.N()); KN_<R>::operator+=(Ax);return *this;}
 //   KN& operator =(const MatriceCreuseDivKN_<R> & A1x)  
 //       { if(this->unset()) set(new R[A1x.v.N()],A1x.v.N());KN_<R>::operator=(A1x);return *this;}
-  // correcton aout 2007 FH  add N,M flied in VirtualMatrice
-   KN& operator =(const typename VirtualMatrice<R>::plusAx & Ax)  
+  // correcton aout 2007 FH  add N,M flied in RNM_VirtualMatrix
+   KN& operator =(const typename RNM_VirtualMatrix<R>::plusAx & Ax)  
         { if(this->unset() && Ax.A && Ax.A->N ) this->set(new R[Ax.A->N],Ax.A->N); if(Ax.A) KN_<R>::operator=(Ax);return *this;}
-   KN& operator =(const typename VirtualMatrice<R>::solveAxeqb & Ab)  
+   KN& operator =(const typename RNM_VirtualMatrix<R>::solveAxeqb & Ab)  
         { if(this->unset()) this->set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
-    KN& operator =(const typename VirtualMatrice<R>::solveAtxeqb & Ab)
+    KN& operator =(const typename RNM_VirtualMatrix<R>::solveAtxeqb & Ab)
     { if(this->unset()) this->set(new R[Ab.b.N()],Ab.b.N());KN_<R>::operator=(Ab);return *this;}
-  KN& operator +=(const typename  VirtualMatrice<R>::plusAx & Ax)
+  KN& operator +=(const typename  RNM_VirtualMatrix<R>::plusAx & Ax)
   { if(this->unset()  && Ax.A->N) {
         this->set(new R[Ax.A->N],Ax.A->N);
         KN_<R>::operator=(R());}
     KN_<R>::operator+=(Ax);
     return *this;}
-   KN& operator =(const typename VirtualMatrice<R>::plusAtx & Ax)  
+   KN& operator =(const typename RNM_VirtualMatrix<R>::plusAtx & Ax)  
         { if(this->unset()&&Ax.A->M) this->set(new R[Ax.A->M],Ax.A->M);KN_<R>::operator=(Ax);return *this;}
-   KN& operator +=(const typename VirtualMatrice<R>::plusAtx & Ax)  
+   KN& operator +=(const typename RNM_VirtualMatrix<R>::plusAtx & Ax)  
   { if(this->unset()&&Ax.A->M) {
        this->set(new R[Ax.A->M],Ax.A->M);
       KN_<R>::operator=(R());}
@@ -1534,13 +1539,13 @@ template<class R> inline bool  SameShape(const ShapeOfArray & a,const DotSlash_K
            { return SameShape(a,b.a) ;} 
 template<class R> inline bool  SameShape(const ShapeOfArray & a,const Mul_KNM_KN_<R> & b) 
            { return a.n==b.A.N() ;} 
- inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<double>::plusAx & ) 
+ inline bool  SameShape(const ShapeOfArray & ,const RNM_VirtualMatrix<double>::plusAx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
- inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<double>::plusAtx & ) 
+ inline bool  SameShape(const ShapeOfArray & ,const RNM_VirtualMatrix<double>::plusAtx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
- inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<complex<double> >::plusAx & ) 
+ inline bool  SameShape(const ShapeOfArray & ,const RNM_VirtualMatrix<complex<double> >::plusAx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
- inline bool  SameShape(const ShapeOfArray & ,const VirtualMatrice<complex<double> >::plusAtx & ) 
+ inline bool  SameShape(const ShapeOfArray & ,const RNM_VirtualMatrix<complex<double> >::plusAtx & ) 
            { return true ;} //  pas de test car la matrice peut etre rectangulaire
 
  inline bool  SameShape(const ShapeOfArray & ,const double) 
@@ -1563,20 +1568,20 @@ template<class R> inline long SameAdress(const KN_<R> &a, const KN_<R> &b) { ret
 
 //  operateur y=Ax-b ou y=Ax + b pour le GC
 template<class R> 
-   PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >  operator-(const typename VirtualMatrice<R>::plusAx & A,const KN_<R> & B)  
-    { return PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >(A,Mulc_KN_<R>(B,R(-1.)));}
+   PplusQ< typename RNM_VirtualMatrix<R>::plusAx, Mulc_KN_<R> >  operator-(const typename RNM_VirtualMatrix<R>::plusAx & A,const KN_<R> & B)  
+    { return PplusQ< typename RNM_VirtualMatrix<R>::plusAx, Mulc_KN_<R> >(A,Mulc_KN_<R>(B,R(-1.)));}
 
 template<class R> 
-   PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >  operator+(const typename VirtualMatrice<R>::plusAx & A,const KN_<R> & B)  
-    { return PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >(A,B);}
+   PplusQ< typename RNM_VirtualMatrix<R>::plusAx, KN_<R> >  operator+(const typename RNM_VirtualMatrix<R>::plusAx & A,const KN_<R> & B)  
+    { return PplusQ< typename RNM_VirtualMatrix<R>::plusAx, KN_<R> >(A,B);}
 
 template<class R> 
-   PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >  operator-(const typename VirtualMatrice<R>::plusAx & A,const KN<R> & B)  
-    { return PplusQ< typename VirtualMatrice<R>::plusAx, Mulc_KN_<R> >(A,Mulc_KN_<R>(B,R(-1.)));}
+   PplusQ< typename RNM_VirtualMatrix<R>::plusAx, Mulc_KN_<R> >  operator-(const typename RNM_VirtualMatrix<R>::plusAx & A,const KN<R> & B)  
+    { return PplusQ< typename RNM_VirtualMatrix<R>::plusAx, Mulc_KN_<R> >(A,Mulc_KN_<R>(B,R(-1.)));}
 
 template<class R> 
-   PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >  operator+(const typename VirtualMatrice<R>::plusAx & A,const KN<R> & B)  
-    { return PplusQ< typename VirtualMatrice<R>::plusAx, KN_<R> >(A,B);}
+   PplusQ< typename RNM_VirtualMatrix<R>::plusAx, KN_<R> >  operator+(const typename RNM_VirtualMatrix<R>::plusAx & A,const KN<R> & B)  
+    { return PplusQ< typename RNM_VirtualMatrix<R>::plusAx, KN_<R> >(A,B);}
     
 
 template<class R>

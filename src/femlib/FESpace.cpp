@@ -201,7 +201,7 @@ class TypeOfFESum: public FESumConstruct, public  TypeOfFE { public:
      FESumConstruct(kk,Make(t,kk)),TypeOfFE(teb,kk,data,data1) {}
 
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
 //   void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
 //  void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void * arg ) const; 
    virtual void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
@@ -232,7 +232,7 @@ class TypeOfFEProduit: protected FEProduitConstruct, public  TypeOfFE { public:
     FEProduitConstruct(kk,t),TypeOfFE(t,kk,data,data1)  {}
   
   
-  void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+  void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
   virtual void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
   { int nbof=teb.NbDoF;
   for (int i=0,k0=0;i<k;i++,k0+=nbof)
@@ -451,7 +451,7 @@ class TypeOfFE_P1Lagrange : public  TypeOfFE { public:
        P_Pi_h[i]=Pt[i]; }
      }
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
    
 //   void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
   // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
@@ -472,8 +472,8 @@ class TypeOfFE_P0VF : public  TypeOfFE { public:
        pij_alpha[i]= IPJ(i,i,0);
        P_Pi_h[i]=Pt[i]; }
      }
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
+   virtual R operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const ;
    
 } ;
 int TypeOfFE_P0VF::Data[]={0,1,2,       0,0,0,       0,1,2,       0,0,0,        0,1,2,       0, 0,3};
@@ -501,13 +501,13 @@ double TypeOfFE_P0VF::Pi_h_coef[]={1.,1.,1.}; //  bofbof a verifier ...
 }
 
 
-void TypeOfFE_P0VF::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+void TypeOfFE_P0VF::FB(const bool *whatd,const Mesh & ,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
 {
 //  const Triangle & K(FE.T);
   if (whatd[op_id]) 
    {
   R2 A(K[0]), B(K[1]),C(K[2]);
-  R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
+  R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y;
   l1 = l1 * 3. < 1;
   l2 = l2 * 3. < 1;
   l0 = 1 - l0 -l2;
@@ -541,7 +541,7 @@ class TypeOfFE_P1Bubble : public  TypeOfFE { public:
        P_Pi_h[i]=Pt[i]; }
      }
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
    
 //   void D2_FB(const Me¶SeriaÄÄÄÄÄsh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
  //  void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
@@ -563,7 +563,7 @@ class TypeOfFE_P2Lagrange : public  TypeOfFE { public:
      }
    
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
  //  void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
   // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
 } ;
@@ -581,7 +581,7 @@ class TypeOfFE_P2bLagrange : public  TypeOfFE { public:
      }
    
   // void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
+   void FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const;
  //  void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
   // void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
 } ;
@@ -1202,19 +1202,19 @@ void ConstructDataFElement::renum(const long *r,int l)
      val(SubArray(n,i,k),SubArray(m,m*i),t)=v; 
  }
  */
- void TypeOfFEProduit::FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 & P,RNMK_ & val) const
+ void TypeOfFEProduit::FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
  {
    int n=teb.NbDoF;
    int m=teb.N;   
    val=0.0;
    SubArray t(val.K());
    RNMK_ v(val(SubArray(n,0,k),SubArray(m),t));
-   teb.FB(whatd,Th,K,P,v);
+   teb.FB(whatd,Th,K,PHat,v);
    for (int i=1;i<k;i++)
      val(SubArray(n,i,k),SubArray(m,m*i),t)=v; 
  }
  
-  void TypeOfFESum::FB(const bool * whatd,const Mesh & Th,const Triangle & K,const R2 & P,RNMK_ & val) const
+  void TypeOfFESum::FB(const bool * whatd,const Mesh & Th,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
  {
    val=0.0;
    SubArray t(val.K());
@@ -1229,7 +1229,7 @@ void ConstructDataFElement::renum(const long *r,int l)
      throwassert(ni<nii && di < dii);
      RNMK_ v(val(SubArray(dii-di,di),SubArray(nii-ni,ni),t));     
      if (j<=i)
-       teb[i]->FB(whatd,Th,K,P,v);       
+       teb[i]->FB(whatd,Th,K,PHat,v);
      else
        v=val(SubArray(DF[j+1]-DF[j],DF[j]),SubArray(NN[j+1]-NN[j],NN[j]),t);     
     }
@@ -1257,11 +1257,11 @@ void ConstructDataFElement::renum(const long *r,int l)
 }
 
 
-void TypeOfFE_P1Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+void TypeOfFE_P1Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
 {
 //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
-  R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
+  R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y;
   
   if (val.N() <3) 
    throwassert(val.N() >=3);
@@ -1302,11 +1302,11 @@ void TypeOfFE_P1Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,
 ///////////////////////////////////////////////////////////////////////////////
 
 
-void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
 {
 //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
-  R l0=1-P.x-P.y, l1=P.x, l2=P.y, lb=l0*l1*l2*9.; 
+  R l0=1-PHat.x-PHat.y, l1=PHat.x, l2=PHat.y, lb=l0*l1*l2*9.;
   
   if (val.N() <4) 
    throwassert(val.N() >=4);
@@ -1453,11 +1453,11 @@ void TypeOfFE_P1Bubble::FB(const bool *whatd,const Mesh & ,const Triangle & K,co
   
 }
 */
-void TypeOfFE_P2Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+void TypeOfFE_P2Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
 {
 //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
-  R l0=1-P.x-P.y,l1=P.x,l2=P.y; 
+  R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y;
   R l4_0=(4*l0-1),l4_1=(4*l1-1),l4_2=(4*l2-1); 
   
 //  throwassert(FE.N == 1);  
@@ -1542,11 +1542,11 @@ void TypeOfFE_P2Lagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,
 }
 
 
-void TypeOfFE_P2bLagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const R2 & P,RNMK_ & val) const
+void TypeOfFE_P2bLagrange::FB(const bool *whatd,const Mesh & ,const Triangle & K,const RdHat & PHat,RNMK_ & val) const
 {
 //  const Triangle & K(FE.T);
   R2 A(K[0]), B(K[1]),C(K[2]);
-  R l0=1-P.x-P.y,l1=P.x,l2=P.y,lb=l0*l1*l2*3.;  
+  R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y,lb=l0*l1*l2*3.;
   R l4_0=(4*l0-1),l4_1=(4*l1-1),l4_2=(4*l2-1); 
   
 //  throwassert(FE.N == 1);  

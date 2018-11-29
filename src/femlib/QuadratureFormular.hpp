@@ -104,7 +104,7 @@ public:
   ~GQuadratureFormular() {if(clean) delete [] p;}
     
     GQuadratureFormular(const GQuadratureFormular & QF, int mul=1)
-    :exact(QF.exact),n(QF.n),size(QF.size*mul),p(new QP[size]),clean(true){ operator=(QF);}
+    :exact(QF.exact),n(QF.n),size(QF.size*mul),p(new QP[size*mul]),clean(true){ operator=(QF);}
   void operator=(const GQuadratureFormular &QF)
     {
       assert(size>=QF.n);
@@ -125,7 +125,7 @@ public:
   void AddQFK(const GQuadratureFormular<RD> &QF ,Rd *K,double mes,int n0=0)
     {
         
-        assert( size >=  n0  + QF.n );
+        ffassert( size >=  n0  + QF.n );
         n0 += n;
         n = n0 + QF.n;
         for(int i=0;i<QF.n;++i)

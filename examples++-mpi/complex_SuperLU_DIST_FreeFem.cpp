@@ -1,6 +1,6 @@
 //   for automatic  compilation with ff-c++
 // FFCS - 23/5/12 - remove metis dependency because it interfers with identically-named libmetis.a from parmetis
-//ff-c++-LIBRARY-dep: superlu_dist   ptscotchparmetis  ptscotch  scotchmetis scotch  mpi blas fc
+//xxff-c++-LIBRARY-dep: superlu_dist   ptscotchparmetis  ptscotch  scotchmetis scotch  mpi blas fc
 //ff-c++-cpp-dep: 
 // ORIG-DATE: 02/2009
 // -*- Mode : c++ -*-
@@ -41,6 +41,18 @@
 */
 
 // FFCS - required to define __int64 for MSMPI
+#ifndef OLDFFVERSION
+#include  "ff++.hpp"
+static void Load_Init()
+{
+    cout << " load(\"complex_SuperLU_DIST_FreeFem\")   is obsoled now  pluging "<< endl;
+    ExecError("Plugins complex_SuperLU_DIST_FreeFem is remove");
+    exit(0);
+}
+
+LOADFUNC(Load_Init);
+#else
+
 #include <stdint.h>
 
 #include <mpi.h>
@@ -841,3 +853,4 @@ static void Load_Init()
 
 
  LOADFUNC(Load_Init)
+#endif
