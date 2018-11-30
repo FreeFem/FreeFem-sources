@@ -6759,52 +6759,41 @@ aType  typeFESpace(const basicAC_F0 &args)
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
+  aType atfe[]={t_tfe,t_tfe3,t_tfeS};
+  aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>()};
   aType t_a= atype<E_Array>();
-  aType ret =0;
+  aType ret =0,tl=0;
   aType tMesh=0;
-  aType tfe=0;
-    // 20 avril 2009 add brak 
-  for (int i=0;i<args.size();i++)
-    if (args[i].left() == t_m2 || args[i].left() == t_m3 )
-    {
-        if( tMesh) ffassert(args[i].left()== tMesh);
-        tMesh=args[i].left();
-    }
-    else if (args[i].left() == t_tfe3 ||args[i].left() == t_tfe || args[i].left() == t_tfeS)
-    {
-        if( tfe) ffassert(args[i].left()== tfe);
-        tfe =args[i].left();
-    }
-    else if (args[i].left() == t_a)
-    {
-        const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
-        ffassert(&ea);
-        for (int i=0;i<ea.size();i++)
-            if (ea[i].left() == t_m2 || ea[i].left() == t_m3)
-                tMesh=ea[i].left();
-            else if (ea[i].left() == t_tfe3 ||ea[i].left() == t_tfe || ea[i].left() == t_tfeS)
-                tfe =ea[i].left();
-            else ffassert(0); // bug
-     }
- 
- 
-    if (tfe == t_tfe && tMesh== t_m2)
-    {   //cout << "test 45" << endl;
-        ret = atype<pfes *>();
-        
-    }
-    else   if ( (tfe == t_tfe3||tfe == t_tfe )&& tMesh== t_m3)
-    {   //cout << "test 55" << endl;
-        ret = atype<pfes3 *>();
-    }
-    else   if (tfe == t_tfeS && tMesh== t_m3)
-    {   //cout << "test 65" << endl;
-        ret = atype<pfesS *>();
-    }
+  int dm =-1,id=-2;
 
-  if(!ret)
+  for (int i=0;i<args.size();i++)
+  {
+    tl=args[i].left();
+      if ( tl == t_m2) {ffassert(dm==2 || dm<0); dm=2;}
+    else if( tl  == t_m3 ) {ffassert(dm==3 || dm<0); dm=3;}
+    else if(tl==t_a) // array
+      {
+          const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
+          ffassert(&ea);
+          for (int i=0;i<ea.size();i++)
+          {
+              tl=ea[i].left();
+              for( int it=0; it<3; ++it)
+                  if (atfe[it]->CastingFrom(tl)) // Warning  P1 can be cast in 2d or 3d FE ...
+                  { id = it;} // 
+          }
+      }
+    else
+          for( int it=0; it<3; ++it)
+              if (atfe[it]->CastingFrom(tl))
+              { id = it;}
+  }
+    if (dm==2) ret =atfs[0];
+    else if (dm==3 && id == 2) ret =atfs[2];
+    else if (dm==3) ret = atfs[1];
+    else
     {
-        cerr << " bug dim: "  << " != 2 or 3 or 4 (3D surface) \n";
+        cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :"  << dm << " type FE "<< id +2 <<endl;
       ffassert(0);
     }
     return ret;
