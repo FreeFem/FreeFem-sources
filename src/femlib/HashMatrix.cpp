@@ -296,7 +296,7 @@ re_do_numerics(0),re_do_symbolic(0)
 template<class I,class R>
 void HashMatrix<I,R>::setp(I sp)
 {
-   // cout << "  setp "<< this << " " << sp << " "<< p << " / " << (sp != sizep) << endl;
+ 
     if(sp == 0)
     {
         delete [] p;
@@ -305,14 +305,17 @@ void HashMatrix<I,R>::setp(I sp)
     
     else if( sp != sizep)
     {
-        delete [] p;
+        if(p) delete [] p;
         p = new I[sp];
         
     }
     if(p )
         for(I ii=0; ii<sp; ++ii)
             p[ii]=-1;
+    cout << "  HashMatrix:: setp "<< this << " sp= " << sp << " p  "<< p << " / " << (sp != sizep) << endl;
+    ffassert( (sp==0) ==  (p==0)  );
     sizep=sp;
+    
 }
 template<class I,class R>
 void  HashMatrix<I,R>::RemoveHalf(int cas,double tol)
@@ -438,11 +441,12 @@ void HashMatrix<I,R>::setfortran(int yes)
 template<class I,class R>  template<typename T>
 void HashMatrix<I,R>::HMresize(T *&t,size_t no,size_t nn)
 {
-    if( no != nn)
+    if( no != nn || t==0)
     {
     T * tt= new T[nn];
-    for(size_t i=0; i< no; ++i)
-        tt[i]= t[i];
+    if(t)
+        for(size_t i=0; i< no; ++i)
+           tt[i]= t[i];
     if(t) delete [] t;
     t=tt;
     }
@@ -796,6 +800,7 @@ void HashMatrix<I,R>::HM()
 template<class I,class R>
 void HashMatrix<I,R>::COO()
 {
+    cout << " HashMatrix:: COO "<< this->n << " x " << this->m << " "<< p << " / "<< sizep << endl;
     Sortij();
     setp(0);
     type_state=type_COO;
@@ -828,6 +833,7 @@ void HashMatrix<I,R>::CSR(I *& IA, I *& JA, R *& A)
 template<class I,class R>
 void HashMatrix<I,R>::CSR()
 {
+    cout << " HashMatrix:: csr()  " << state << " " << sorted_ij<< endl;
     Sortij();
     Buildp(this->n,i,type_CSR);
     type_state=type_CSR;
@@ -950,9 +956,11 @@ size_t HashMatrix<I,R>::CSR_L(I *& IA, I *& JA, R *& A)
 template<class I,class R>
 void HashMatrix<I,R>::Buildp(I nn,I * IA,int type_m,size_t nnzz)
 {
+    cout << " HashMatrix:: Buildp"<< this->n<< " x " << this->m << " " << nn << " " << IA<< " " << type_m << " " << nnzz << " / " << nnz << " / p=" << p <<endl;
     if(nnzz==0) nnzz=nnz;
     if(type_m != type_state)
     {
+        
         assert( state==type_m);
         
         setp(nn+1);

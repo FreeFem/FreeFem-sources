@@ -357,6 +357,20 @@ class E_P_Stack_nTonEdge   :public  E_F0mps { public:
     
 };
 
+class E_P_Stack_nElementonB   :public  E_F0mps { public:
+    AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+        MeshPoint * mp=MeshPointStack(s);
+        long l=0;
+        if((mp->T) && (mp->e > -1) && (mp->d==2 ))
+         l=mp->Th->nTonEdge(mp->t,mp->e);
+        else if (mp->d==3 && mp->T3 && ( mp->f>=0) )
+           l= mp->Th3->nElementonB(mp->t,mp->f);
+        // cout << " nTonEdge " << l << endl;
+        return SetAny<long>( l) ;}
+    operator aType () const  { return atype<long>();}
+    
+};
+
 template<int NBT>
 class E_P_Stack_TypeEdge   :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
@@ -3085,7 +3099,8 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("volume",volume);   
   Global.New("hTriangle",hTriangle);
   Global.New("inside",inside);   
-  Global.New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));   
+  Global.New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));
+  Global.New("nElementonB",make_Type_Expr(atype<long>(),new E_P_Stack_nElementonB));
   Global.New("edgeOrientation",make_Type_Expr(atype<R>(),new E_P_Stack_EdgeOrient)); // Add FH jan 2018
   Global.New("BoundaryEdge",make_Type_Expr(atype<long>(),new E_P_Stack_TypeEdge<1>));// Add FH jan 2018
   Global.New("InternalEdge",make_Type_Expr(atype<long>(),new E_P_Stack_TypeEdge<2>));// Add FH jan 2018
