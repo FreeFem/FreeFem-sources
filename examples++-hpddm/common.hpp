@@ -83,8 +83,9 @@ void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
 
 #else
 //  version 4
-template<class K> K* newCopy(K *p,int n)
-{ K *q= new K[n];
+template<class K> K* newCopy(bool mfree,K *p,int n)
+{  if( mfree) return p;
+	K *q= new K[n];
     copy(p,p+n,q);
     return q;
 }
@@ -107,9 +108,9 @@ HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K   >* mA,bool mfree=fals
     {
         int nnz = mA->nnz, n = mA->n;
         mA->CSR();
-        if(!s) s=newCopy(mA->aij,nnz);
-        if(!is) is=newCopy(mA->p,n+1);
-        if(!js) js=newCopy(mA->j,nnz);
+        if(!s) s=newCopy(mfree,mA->aij,nnz);
+        if(!is) is=newCopy(mfree,mA->p,n+1);
+        if(!js) js=newCopy(mfree,mA->j,nnz);
 
         return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, s, is, js , mA->half,mfree);
     }
