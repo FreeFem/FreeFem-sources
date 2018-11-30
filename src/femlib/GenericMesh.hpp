@@ -551,7 +551,9 @@ public:
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
-  
+  int nElementonB(int k,int j) const // add v4 F.H 12/2018 (not sure for internal boundary !!!)
+    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk%nea  != k) ? 2 : 1;}
+    
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
     if(p>=0) j=p%nea;

@@ -539,14 +539,11 @@ class renumber : public OneOperator {
         MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
         if(mA) {
             const HPDDM::MatrixCSR<K>* dA = ptA->getMatrix();
+            
     #ifndef VERSION_MATRICE_CREUSE
             mA->lg = dA->_ia;
     #else
-            mA->HM();
-            for(int i=0;i<mA->n;++i)
-                for(int k=dA->_ia[i];k<dA->_ia[i+1];++k)
-                 mA->i[k]=i;
-            mA->CSR();
+            set_ff_matrix<K>(mA,*dA);
     #endif
         }
 

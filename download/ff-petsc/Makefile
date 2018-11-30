@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
-PYTHON=/usr/bin/pyton2.7
+PYTHON2=python2.7
 include Makefile.inc
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
 W_SUDO1=$(SHELL ls	)
