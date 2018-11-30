@@ -3309,9 +3309,9 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     }
     else if(rhs)
     {
-         ffassert(0);//
-        /*
-       MatriceMorse<T> *mR = static_cast<MatriceMorse<T>*>(&(*pR->A));
+    
+        
+       MatriceMorse<R> *mR = pR->pHM();
         
         unsigned int n = mR->nnz;
         
@@ -3322,7 +3322,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         for(unsigned int i = 0; i < n; ++i) {
             *(*pOut + i) = *(*pX + mR->j[i]);
         }
-        */
+        
     }
     return 0L;
 }
