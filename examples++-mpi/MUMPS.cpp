@@ -298,7 +298,7 @@ public:
     
     void dosolver(K *x,K*b,int N,int trans)
     {
-        long nN=id.n*N;
+        size_t  nN=id.n*N;
         if (verbosity > 1 && mpirank==0) {
             cout << " -- MUMPS solve,  peak Mem : " << INFOG(22) << " Mb,   n = "
             << id.n << " sym =" << id.sym <<" trans = " << trans  << endl;
