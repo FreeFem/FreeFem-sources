@@ -2402,8 +2402,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
             p=new OnePlotCurve(fin,4,this);// add zz and color ..
         else if(what==4)
             p=new OnePlotBorder(fin);
-        else if(what==51 || what==52)
-        {;
+        else if (what==51 || what==52 || what == 5)
+        {
             fin >> imsh;
             p=new OnePlotMesh3(Ths3[imsh-1]);if((debug > 9)) cout << " plot : mesh3 (volume) " << imsh << endl;
         }
