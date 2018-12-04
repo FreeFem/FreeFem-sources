@@ -257,7 +257,7 @@ public:
     {
         
         if(ds.commworld)
-            MPI_Comm_dup(comm,(MPI_Comm*) ds.commworld);
+            MPI_Comm_dup(*((MPI_Comm*)ds.commworld), &comm);
         
         MPI_Comm_rank(comm, &mpirank);
         int master = mpirank==matrank;
@@ -271,7 +271,7 @@ public:
         id.job = JOB_INIT;
         id.par = 1;
         id.sym = A.half;
-        id.comm_fortran = USE_COMM_WORLD;
+        id.comm_fortran = MPI_Comm_c2f(comm);
         SetVerb();
         mumps_c(&id);
         
