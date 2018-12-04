@@ -1,0 +1,148 @@
+//ff-mpirun -np 8 diffusion-2d-thirdlevelgeneo.edp -glut ffglut -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 50 -ffddm_partitioner 0 -nsuper 4 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
+
+macro dimension 2// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+macro def(i)i// EOM     // vector field definition
+macro init(i)i// EOM        // vector field initialization
+macro grad(u) [dx(u),dy(u),dz(u)] // EOM
+func Pk = P1;             // finite element space
+
+int global = getARGV("-global", 8);
+
+mesh ThGlobal = square(global,global);
+
+macro Varf(varfName, meshName, PhName)
+
+varf varfName(def(u), def(v)) = intN(meshName)(grad(u)' * grad(v))
++ intN(meshName)(v)
++ on(1, u = 0.0);
+// EOM
+
+vsym = 1;
+vtgv = 1e+30;
+vtgvelim = vtgv;
+
+int nsuper = getARGV("-nsuper",2);
+
+ffddmbuildNested(Lap,ThGlobal,nsuper,real,def,init,Pk)
+
+real[int] rhs(1);
+real[int] x0(LapVhi.ndof);
+x0 = 0;
+LapVhi def(u), def(err);
+macro Lapdefplot(u)u//
+
+LapbinexactgeneoCS = 0;
+
+ffddmsetupsuperinit(Lap,Lap)
+
+ffddmsetup(Lap,Lap,Varf,null)
+
+ffddmbuildrhs(Lap,Varf,rhs)
+
+if (mpirank == 0) cout << "RAS :" << endl; 
+
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Lapwritesummary
+  
+if (mpirank == 0) cout << endl << "RAS + GENEO EXACT :" << endl;   
+  
+ffddmgeneosetup(Lap,Varf)
+
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Lapwritesummary
+
+if (mpirank == 0) cout << endl << "RAS + GENEO INEXACT(RAS) :" << endl;
+
+LapbinexactgeneoCS = 1;
+
+ffddmgeneosetup(Lap,Varf)
+
+ffddmsetupsuper(Lap)
+
+ffddmset(Lapsuper,verbosity,1)
+
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Lapwritesummary
+
+if (mpirank == 0) cout << endl << "RAS + GENEO INEXACT(GENEO) :" << endl; 
+
+ffddmnu = getARGV("-ffddm_geneo_super_nu",5);
+
+ffddmgeneosetupsuper(Lap)
+
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Lapwritesummary
+
+err[] = LapA(u[]);
+err[] -= rhs;
+
+ffddmplot(Lap,u, "Global solution");
+ffddmplot(Lap,err, "Global residual");
+
+// SAVE TO FILES FOR HUSSAM
+/*
+{
+LapVhi def(isshared);
+
+isshared[] = 0;
+for (int i=0;i<LaparrayIntersection.n;i++){
+      real[int] tvec(LaprestrictionIntersection[i].n);
+      tvec = 1;
+      real[int] tres = LaprestrictionIntersection[i]'*tvec;
+      isshared[] += tres;
+}
+
+{ofstream f("isshared_"+mpirank+".dat");
+ f << isshared[];
+}
+
+matrix R = interpolate(LapVhi,LapVhglob);
+
+int[int] I(1), J(1);
+real[int] K(1);
+[I,J,K] = R;
+
+if (K[K.n-1] == 0) {
+  I.resize(K.n-1);
+  J.resize(K.n-1);
+  K.resize(K.n-1);
+}
+
+ofstream parU("ParU_"+mpirank+".dat");
+parU << LapDk[mpirank];
+
+ofstream ff("renum_"+mpirank+".dat");
+ff << J;
+
+ofstream f("neumann_"+mpirank+".mat");
+f << LapmatN;
+
+ffddmnpart = 1;
+ffddmbuildDmesh(Lap0,ThGlobal,Lapcommself)
+
+if (mpirank == 0) {
+
+  ffddmbuildDfespace(Lap0,Lap0,real,def,init,P1)
+  ffddmsetupOperator(Lap0,Lap0,Varf)
+  
+  real[int] rhs(1);
+
+  ffddmbuildrhs(Lap0,Varf,rhs)
+
+  ofstream rhsj("rhs.dat");
+  rhsj << rhs;
+  cout << rhs.l2 << endl;
+
+  ofstream fj("AGlobal.mat");
+  fj << Lap0aRd[0];
+}
+
+}
+*/

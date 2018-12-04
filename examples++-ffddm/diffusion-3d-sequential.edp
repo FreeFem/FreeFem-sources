@@ -1,0 +1,46 @@
+//FreeFem++ diffusion-3d-sequential.edp -global 20 
+
+include "getARGV.idp"// to process command line options
+
+load "msh3"
+load "mumps"
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+func Pk = P1;                               // finite element space
+
+int[int] LL = [2,2, 1,2, 2,2];
+mesh3 ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10),
+    [x, y, z], label = LL);
+savemesh(ThGlobal,"ThGlobal.mesh");
+	
+
+varf Lap(u,v) = int3d(ThGlobal)(grad(u)' * grad(v)) + int3d(ThGlobal)(v) + on(1, u = 1.0); 
+		
+fespace Vh(ThGlobal,Pk);
+
+//matrix of the problem
+matrix A = Lap(Vh,Vh);
+Vh u = 1.;
+real[int] Au = A*u[];
+
+// Direct and GMRES solves
+real[int] rhs = Lap(0,Vh);
+Vh  udirectsolver , v ;
+
+//Direct solve 
+cout << endl << "Lap: Direct solver (MUMPS) :" << endl;//direct solver 
+set(A,solver=sparsesolver);
+udirectsolver[] = A^-1*rhs;
+plot(udirectsolver,cmm = "Lap Global solution with direct solver", wait=1,fill=1);
+
+//GMRES solve
+cout << endl << "Lap: GMRES :" << endl;
+set(A,solver=GMRES);
+u[] = A^-1*rhs;
+plot(u,cmm = "Lap Global solution with GMRES solver", wait=1,fill=1);
+
+// Visualization and computation of relative error w.r.t. direct solver 
+Vh error = u-udirectsolver;
+real solnorm2 = u[]'*u[] ,  errnorm2 = error[]'*error[]  ;
+cout << endl << "Relative error w.r.t. to direct solver : " <<  sqrt(errnorm2/solnorm2) << "\n" << endl;
+

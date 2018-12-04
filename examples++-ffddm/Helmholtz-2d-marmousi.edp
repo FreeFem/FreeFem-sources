@@ -1,0 +1,150 @@
+//ff-c++ -auto marmousi.cpp
+//ff-mpirun -np 4 Helmholtz-2d-marmousi.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+macro dimension 2// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+load "marmousi"
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+func Pk = P2;  
+
+Marmousi marm("marmousi.bin");
+
+func vel = marm(x,y);  // km/s
+
+real freq = 5; // Hz
+func k = 2.*pi*freq/vel;
+
+func f = exp(-2000*((x-6)^2+y^2));  // source at the top surface
+
+real lambda = 1.5/freq;
+
+real epsilonprob = 0;
+real be = getARGV("-betaEprec",1.);
+real epsilonEprec = 0;//k^be;
+
+int Dirichlet = 1;
+int Robin = 2;
+
+int[int] chlab=[1, Robin, 2, Robin, 3, Dirichlet, 4, Robin];
+
+int mysplit = 3;
+
+real npplo = 10./mysplit;
+
+int nloc = npplo*9.2/lambda;
+
+mesh Thc = square(nloc,nloc*3./9.2,[x*9.2,y*3-3]);
+
+Thc=change(Thc,refe=chlab);
+
+mesh Th = trunc(Thc,1,split=mysplit);
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2-1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
+				+ intbN(meshName,Robin)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+macro VarfEprec(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ intbN(meshName,Robin)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+// for the preconditioner
+macro VarfOpt(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ intbN(meshName,Robin,10)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName(u,v) =
+                -intN(meshName)(f*v)
+                + on(Dirichlet,u=0); // EOM
+
+macro Hdefplot(u)real(u)//
+
+vsym = 1;
+vtgv = 1.e+30;
+vtgvelim = 1.e+30;
+
+ffddmbuild(H,Th,complex,def,init,Pk,mpiCommWorld)
+
+//macro Hwithhpddmkrylov()1//
+
+ffddmsetup(H,H,Varf,VarfOpt)
+
+complex[int] rhs(1);
+
+ffddmbuildrhs(H,Varfrhs,rhs)
+
+complex[int] x0(rhs.n);
+x0 = 0;
+
+HVhi<complex> def(u);
+
+
+
+if (mpirank == 0) cout << "ORAS :" << endl;
+
+u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Hwritesummary
+
+if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL :" << endl;
+
+ffddmEuansetup(H,Thc,VarfEprec,VarfEprec)
+
+u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Hwritesummary
+
+ffddmplot(H,real(u), "Global solution");
+
+/*
+complex[int] err(u[].n);
+err = HA(u[]);
+err -= rhs;
+
+ffddmplot(H,u[], "Global solution");
+ffddmplot(H,err, "Global residual");
+*/
+
+savemesh(HThi,"visu/marm_" + mpirank + "_" + mpisize + ".mesh");
+{
+	ofstream f("visu/marm_" + mpirank + "_" + mpisize + ".dat");
+	f << u[];
+}
+
+int[int] fforder=[1];
+load "iovtk"
+savevtk("visu/test_" + mpirank + "_" + mpisize + ".vtk", HThi, real(u), dataname = "sol", order = fforder);
+exec("/Applications/paraview.app/Contents/bin/pvpython vtk2vtu.py visu/test_" + mpirank + "_" + mpisize);
+
+if(mpirank == 0) {
+    ofstream pvd("visu/test.pvd");
+    pvd << "<?xml version=\"1.0\"?>\n";
+    pvd << "<VTKFile type=\"Collection\" version=\"0.1\"\n";
+    pvd << "         byte_order=\"LittleEndian\"\n";
+    pvd << "         compressor=\"vtkZLibDataCompressor\">\n";
+    pvd << "  <Collection>\n";
+    for(int i = 0; i < mpisize; ++i) {
+        pvd << "    <DataSet timestep=\"0\" group=\"\" part=\"" << i << "\"\n";
+        pvd << "             file=\""; pvd << "test_" << i << "_" << mpisize << ".vtu\"/>\n";
+    }   
+    pvd << "  </Collection>\n";
+    pvd << "</VTKFile>\n";
+}
+// EOM
+
+

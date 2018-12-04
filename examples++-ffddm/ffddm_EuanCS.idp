@@ -1,0 +1,129 @@
+macro ffddmEuansetupinit(pr,Thc)
+IFMACRO(!pr#Euansetupinit)
+
+pr#bEuan = 1;
+
+meshN pr#ThCoarse = minimalMesh;
+fespace pr#VhCoarse(pr#ThCoarse,pr#prfe#fPk); /* fespace on the coarse mesh */
+
+/*
+if (pCS == 0) {
+if (mpirank == 0)
+cout << "ffddm Euan setup WARNING: pCS = 0; setting pCS to 1 for solving the coarse problem" << endl;
+pCS = 1;
+if (bpara) {  
+int p = 1;
+splitComm(mpiCommWorld, p, commCS, topology = getARGV("-hpddm_master_topology", 0), exclude = 0);
+}
+}
+*/
+
+if (pr#prfe#prmesh#isincomm) {
+  if (!pr#prfe#prmesh#binexactCS) {
+    pr#ThCoarse = Thc;
+    pr#ncoarsespace = pr#VhCoarse.ndof;
+    
+    if (!bpara) {
+      matrix Zc = interpolate(pr#prfe#Vhglob,pr#VhCoarse); /* Zeuan=R0^T */
+      Zc.thresholding(1.e-10);
+      pr#Zeuan = Zc; /* (from real to 'complex' matrix for FreeFem) */    
+    }
+    else if (!pr#prfe#prmesh#excluded){
+      matrix Zci = interpolate(pr#prfe#Vhi,pr#VhCoarse);
+      Zci.thresholding(1.e-10);
+      pr#Zeuani = Zci;
+    }
+    NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
+    IFMACRO(localmacroaug,1)
+    if (bseq) {
+      pr#CSinterp = interpolate(pr#VhCoarse,pr#prfe#Vhglob);
+    }
+    else if (!pr#prfe#prmesh#excluded) {
+      pr#CSinterp = interpolate(pr#VhCoarse,pr#prfe#Vhi);
+    }
+    ENDIFMACRO
+  }
+  else if (!pr#prfe#prmesh#excluded){
+    NewMacro localmacroinexact pr#prfe#prmesh#minexactCS EndMacro
+    IFMACRO (localmacroinexact,1)
+    matrix Zci = interpolate(pr#prfe#Vhi,pr#prfe#CoarseVhi);
+    Zci.thresholding(1.e-10);
+    pr#Zeuani = Zci;
+    pr#ncoarsespace = pr#prfe#CoarseNdofglobal;
+    ENDIFMACRO
+    ;
+  }
+  
+  if (!pr#prfe#prmesh#excluded && pr#verbosity && (mpiRank(pr#prfe#prmesh#commddm) == 0))
+  cout << "["+Stringification(pr)+"] Coarse space dimension: " << pr#ncoarsespace << endl;
+}
+
+NewMacro pr#Euansetupinit()1 EndMacro
+ENDIFMACRO
+// EOM
+
+macro ffddmEuansetup(pr,Thc,VarfEprec,VarfA)
+ffddmEuansetupinit(pr,Thc)
+if (pr#prfe#prmesh#isincomm)
+{
+pr#corr = ffddmcorrection;
+  
+pr#prfe#prmesh#tic(pr#tloc)
+
+if(bseq) {
+  IFMACRO(!VarfA)
+  pr#AglobEprec = pr#Aglobal;
+  ENDIFMACRO
+  IFMACRO(VarfA)
+  VarfA(vaglobalEprec,pr#prfe#prmesh#Thglob,pr#prfe#Vhglob)
+  pr#AglobEprec = vaglobalEprec(pr#prfe#Vhglob,pr#prfe#Vhglob,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+  ENDIFMACRO
+}
+else if (!pr#prfe#prmesh#excluded) {
+  int i = mpiRank(pr#prfe#prmesh#commddm);
+  
+  IFMACRO(!VarfA)
+  pr#aRdEprec[i] = pr#aRd[i];
+  ENDIFMACRO
+  
+  IFMACRO(VarfA)
+  pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
+  
+  NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
+  IFMACRO(localmacroaug,1)
+  pr#AugThi = pr#AugaTh[i];
+  ENDIFMACRO
+  IFMACRO(localmacroaug,0)
+  meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+  fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
+  matrix pr#prfe#Auginterp = interpolate(pr#prfe#Vhi, pr#prfe#AugVhi); /* restriction de WhAugmented à Wh; this rectangular sparse matrix contains only 0s and 1s.*/
+  pr#prfe#Auginterp.thresholding(1.e-10); /* eliminate too small values*/
+  ENDIFMACRO   
+
+  VarfA(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+  pr#aRdEprec[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+  
+  pr#prfe#K[int] rhsFull(pr#prfe#AugVhi.ndof);
+  pr#prfe#K[int] rhs(pr#prfe#Vhi.ndof);
+  
+  renumbering(pr#aRdEprec[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
+  ENDIFMACRO
+}
+
+if (!pr#prfe#prmesh#binexactCS) {
+  {
+    VarfEprec(cvaglobalEprec,pr#ThCoarse,pr#VhCoarse)
+    if (mpirank < pr#prfe#prmesh#pCS || !bpara) {
+      pr#Eeuan = cvaglobalEprec(pr#VhCoarse,pr#VhCoarse,solver=(vsym ? CG : GMRES),tgv=vtgv);  /* this is A_{eps,0} of Euan paper */
+      /*pr#Eeuan.thresholding(1.e-10);*/
+    }
+  }
+
+  if (bseq || mpirank < pr#prfe#prmesh#pCS) {
+  	set(pr#Eeuan,solver=GMRES);
+    set(pr#Eeuan,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=-1);
+  }
+}
+	
+pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
+} // EOM

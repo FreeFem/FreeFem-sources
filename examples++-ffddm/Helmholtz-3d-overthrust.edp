@@ -1,0 +1,109 @@
+//ff-c++ overthrust.cpp
+//ff-mpirun -np 8 Helmholtz-3d-overthrust.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+macro dimension 3// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+load "overthrust"
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+func Pk = P2;  
+
+Overthrust Ovt("/Users/pn/3DOverthrustdata.bin");
+
+func vel = Ovt(x,y,z);  // km/s
+
+real freq = getARGV("-frequency",1.); // Hz
+real refvel = 2.1791;
+func k = 2.*pi*freq/vel;
+real k0 = 2.*pi*freq/refvel;
+real lambda = (1./freq)*refvel;
+
+real epsilonprob = 0;
+real be = getARGV("-betaEprec",1.);
+real epsilonEprec = 0;//k^be;
+
+int Dirichlet = 1;
+int Robin = 2;
+
+real nppwl = 5./ffddmsplit;
+
+real length = 20;
+real depth = 4.65;
+
+int nloc = nppwl*length/lambda;
+
+int[int] N=[nloc,nloc,nloc*depth/length];
+real[int,int] B=[[0,length],[0,length],[-depth,0]];
+int[int] L=[Robin,Robin,Robin,Robin,Robin,Dirichlet];
+mesh3 Th = cube(nloc,nloc,nloc*depth/length, [x*length, y*length, z*depth-depth], label = L);      // global mesh
+
+real xs = length/8.;
+real ys = length/8.;
+real zs = -depth/8.;
+
+// 2000
+func source = 1000*exp(-200*((x-xs)^2+(y-ys)^2+(z-zs)^2));  // source at the top surface
+
+macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2-1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
+				+ intbN(meshName,Robin)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+macro VarfEprec(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ intbN(meshName,Robin)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+// for the preconditioner
+macro VarfOpt(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ intbN(meshName,Robin,10)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName(u,v) =
+                intN(meshName)(source*v)
+                + on(Dirichlet,u=0); // EOM
+
+macro defplot(u)real(u)//
+
+macro Hdefplot(u)real(u)//
+
+macro Hwithhpddm()1//
+
+vsym = 1;
+vtgv = 1.e+30;
+vtgvelim = 1.e+30;
+
+ffddmbuild(H,Th,complex,def,init,Pk,mpiCommWorld)
+
+ffddmsetup(H,H,Varf,VarfOpt)
+
+complex[int] rhs(1);
+
+ffddmbuildrhs(H,Varfrhs,rhs)
+
+complex[int] x0(rhs.n);
+x0 = 0;
+
+HVhi<complex> def(u);
+
+if (mpirank == 0) cout << "ORAS :" << endl;
+
+u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Hwritesummary
+
+ffddmplot(H,real(u), "Global solution");
+

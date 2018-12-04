@@ -1,0 +1,148 @@
+//ff-mpirun -np 4 Helmholtz-3d-semiopencavity.edp -glut ffglut -raspart -ffddm_schwarz_method oras  -ffddm_medit
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+macro dimension 3// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+include "semiopen-cylindrical-cavity-mesh.idp"
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+func Pk = P2;  
+
+real freq  = getARGV("-frequency",1);        // Hz
+real k = 2.*pi*freq;
+
+real lambda = 2*pi/k;
+
+real epsilonprob = 0;
+real be = getARGV("-betaEprec",1.);
+real epsilonEprec =k^be;
+
+int mysplit = 3;
+
+// Configuration: Model
+// spherical coordinates (radius r, inclination θ, azimuth ?~F)
+// planewave
+real[int] incwaveangle = [150. * (2.*pi/360.), 0.];            // 150 and 0 degree
+real[int] incwavedir = [sin(incwaveangle[0])*cos(incwaveangle[1]),
+                        sin(incwaveangle[0])*sin(incwaveangle[1]),
+                        cos(incwaveangle[0])];
+func uin = exp(1i*k*(x*incwavedir[0]+y*incwavedir[1]+z*incwavedir[2]));
+func uinx = 1i*k*incwavedir[0]*uin;
+func uiny = 1i*k*incwavedir[1]*uin;
+func uinz = 1i*k*incwavedir[2]*uin;
+
+// Configuration: Boundary
+int labextxm = 11;
+int labextxM = 12;
+int labextym = 13;
+int labextyM = 14;
+int labextzm = 15;
+int labextzM = 16;
+int labint = 55;
+
+int Dirichlet = labint;
+int[int] Robin = [labextxm,labextxM,labextym,labextyM,labextzm,labextzM];
+
+// Configuration: mesh
+int  nppw  = getARGV("-nppw",30);               // number of points per wave length
+nppw /= mysplit;
+
+meshN Thc;
+
+real lambda0 = 1.;
+real width  =  6*lambda0;
+real depth  =  3*lambda0;
+real height =  3*lambda0;
+
+real localrefinementratio = 15./20.;
+real obstaclethickness = .2*lambda0;
+real obstaclewidth  =  4*lambda0;
+real obstacleheight =  2*lambda0;
+real entranceradius = .3*obstacleheight;
+int nloc = round(nppw*(lambda0/lambda)^1.5);
+Thc = buildMeshWithCavity(nloc,width, depth, height,
+    obstaclewidth, obstacleheight, obstaclethickness,
+    entranceradius, localrefinementratio);
+
+macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2+1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
+				- intbN(meshName,Robin)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+macro VarfEprec(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2+1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				- intbN(meshName,Robin)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+// for the preconditioner
+macro VarfOpt(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  intN(meshName)(-(k^2+1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				- intbN(meshName,Robin,10)(1i*k*u*v)
+				+ on(Dirichlet,u=0); // EOM
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName(u,v) =
+    intbN(meshName,labextxm)(v*(1i*k*uin+uinx))
+   +intbN(meshName,labextxM)(v*(1i*k*uin-uinx))
+   +intbN(meshName,labextym)(v*(1i*k*uin+uiny))
+   +intbN(meshName,labextyM)(v*(1i*k*uin-uiny))
+   +intbN(meshName,labextzm)(v*(1i*k*uin+uinz))
+   +intbN(meshName,labextzM)(v*(1i*k*uin-uinz))
+   + on(Dirichlet,u=0); // EOM
+
+macro defplot(u)real(u)//
+
+macro Hdefplot(u)real(u)//
+
+vsym = 1;
+vtgv = 1.e+30;
+vtgvelim = -2;
+
+ffddmbuildTwolevel(H,Thc,mysplit,complex,def,init,Pk,mpiCommWorld)
+
+ffddmsetup(HCoarse,HCoarse,VarfEprec,VarfOpt)
+
+ffddmset(HCoarse,verbosity,1)
+
+ffddmsetup(H,H,Varf,VarfOpt)
+
+complex[int] rhs(1);
+
+ffddmbuildrhs(H,Varfrhs,rhs)
+
+complex[int] x0(rhs.n);
+x0 = 0;
+
+HVhi<complex> def(u);
+
+if (mpirank == 0) cout << "ORAS :" << endl;
+
+u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Hwritesummary
+
+if (mpirank == 0) cout <<  endl << "ORAS TWO-LEVEL :" << endl;
+
+ffddmEuansetup(H,Thc,VarfEprec,VarfEprec)
+
+u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Hwritesummary
+
+ffddmplot(H,real(u), "Global solution");
+
+savemesh(HThi,"visu/marm_" + mpirank + "_" + mpisize + ".mesh");
+{
+	ofstream f("visu/marm_" + mpirank + "_" + mpisize + ".dat");
+	f << u[];
+}

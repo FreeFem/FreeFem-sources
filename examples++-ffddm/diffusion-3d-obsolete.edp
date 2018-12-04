@@ -1,0 +1,73 @@
+//ff-mpirun  -np  4 diffusion-3d-obsolete.edp -glut ffglut -raspart -ffddm_schwarz_method asm -ffddm_geneo_nu 10 -global 20 -ffddm_plot
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+include "getARGV.idp"// to process command line options
+
+macro dimension 3// EOM            // 2D or 3D
+
+include "ffddm_parameters.idp"
+
+include "ffddm.idp"
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+func Pk = P1;                               // finite element space
+
+int[int] LL = [2,2, 1,2, 2,2];
+meshN ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);      // global mesh
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) = intN(meshName)(grad(u)' * grad(v)) + intN(meshName)(v) + on(1, u = 1.0); // EOM
+
+vtgv = 1e+30; // en suspens
+vtgvelim = 1e+30;// en suspens 
+vsym = 1; // the problem is symmetric 
+
+ffddmbuild(Lap,ThGlobal,real,def,init,Pk,mpiCommWorld)
+
+savemesh(LapThi,"localTh"+mpirank+".mesh");
+
+macro Lapwithhpddm()1//
+
+ffddmsetup(Lap,Lap,Varf,Varf)  // ne pas factoriser les mat locales a ce moment la ? 
+// couper le setup en 2 : 1)ffddmsetupOperator(Lap,Lap,Varf)
+//                        2)ffddmsetupPrecond(Lap,Lap,Varf)
+// mettre les fonctions pr qui dependent que de prfe dans prfe
+
+real[int] rhs(1);
+
+ffddmbuildrhs(Lap,Varf,rhs)
+
+real[int] x0(rhs.n);
+x0 = 0;
+
+LapVhi def(u);
+
+//set(LaphpddmOP,sparams="-hpddm_reuse_preconditioner 1");
+
+if (mpirank == 0) cout << "ASM :" << endl; 
+
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Lapwritesummary//process 0 prints convergence history
+
+if (mpirank == 0) cout << endl << "ASM + GENEO :" << endl; //second level method with a GenEO coarse space
+
+ffddmgeneosetup(Lap,Varf)
+
+ffddmset(Lap,corr,"BNN");
+
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Lapwritesummary//process 0 prints convergence history
+
+real[int] err(u[].n);
+err = LapA(u[]);
+err -= rhs;
+
+ffddmplot(Lap,u, "Global solution");
+//ffddmplot(Lap,err, "Global residual");
+
+

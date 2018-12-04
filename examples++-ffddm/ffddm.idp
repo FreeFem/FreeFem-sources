@@ -1,0 +1,454 @@
+load "medit"
+//load "MUMPS"
+
+include "getARGV.idp"// to process command line options
+
+include "ffddm_parameters.idp"
+
+IFMACRO(dimension,2)
+macro meshN()mesh// EOM             // two-dimensional problem
+macro intN()int2d// EOM             // two-dimensional integral
+macro intbN()int1d// EOM            // one-dimensional integral
+macro minimalMesh()square(1,1)// EOM
+ENDIFMACRO
+
+IFMACRO(dimension,3)
+load "msh3"
+macro meshN()mesh3// EOM            // three-dimensional problem
+macro intN()int3d// EOM             // three-dimensional integral
+macro intbN()int2d// EOM            // two-dimensional integral
+macro minimalMesh()cube(1,1,1)// EOM
+ENDIFMACRO
+
+IFMACRO(WITHHPDDM)
+load "hpddm"
+ENDIFMACRO
+
+load "thresholdings"
+
+include "ffddm_partitioning.idp"
+
+include "ffddm_EuanCS.idp"
+
+include "ffddm_geneoCS.idp"
+
+include "ffddm_functions.idp"
+
+include "ffddm_geneoCS_3rdlvl.idp"
+
+func string removespaces(string& str) {
+	string res = "";
+	for (int i = 0; i < str.size; i++)
+	if (str(i:i) != " " && str(i:i) != "\t" && str(i:i) != "\n")
+		res = res + str(i:i);
+	return res;
+}
+
+macro ffddmsetupOperatorinit(pr,preffe)
+IFMACRO(!pr#setupoperatorinit)
+
+NewMacro pr#prfe preffe EndMacro
+
+NewMacro pr#fromVhi(ui,VhName,res)
+if (preffe#prmesh#isincomm)
+{
+	string str = Stringification(VhName);
+	string svhglob = Stringification(preffe#Vhglob);
+	string svhi = Stringification(preffe#Vhi);
+	string svhaug = Stringification(preffe#AugVhi);
+	string svhcoarse = Stringification(pr#VhCoarse);
+	str = removespaces(str);
+	svhglob = removespaces(svhglob);
+	svhi = removespaces(svhi);
+	svhaug = removespaces(svhaug);
+	svhcoarse = removespaces(svhcoarse);
+		
+	if (bseq) {
+		assert(ui.n == preffe#Vhglob.ndof);
+		if (str == svhglob) {
+			res = ui;
+		}
+		else if (str == svhi) {
+			cout << "***** ALERTE (c'est normal) *****" << endl;
+			res = ui;	
+		}
+		else if (str == svhaug) {
+			assert(0);
+			IFMACRO(pr#localmacroaug,0)
+			cout << "you need to use ffddmbuildaug" << endl;
+			assert(0);
+			ENDIFMACRO
+			IFMACRO(pr#localmacroaug,1)
+			res = preffe#Auginterp*ui;
+			ENDIFMACRO
+		}
+		else if (str == svhcoarse) {
+			IFMACRO(pr#localmacroaug,0)
+			cout << "you need to use ffddmbuildaug" << endl;
+			assert(0);
+			ENDIFMACRO
+			IFMACRO(pr#localmacroaug,1)
+			res = pr#CSinterp*ui;
+			ENDIFMACRO
+		}		
+		else {
+			cout << "***** ALERTE ALERTE ALERTE ALERTE ALERTE *****" << endl;
+		}
+	}
+	else {
+		assert(ui.n == preffe#Vhi.ndof);
+		if (str == svhi) {
+			res = ui;
+		}
+		else if (str == svhaug) {
+			IFMACRO(pr#localmacroaug,0)
+			cout << "you need to use ffddmbuildaug" << endl;
+			assert(0);
+			ENDIFMACRO
+			IFMACRO(pr#localmacroaug,1)
+			res = preffe#Auginterp'*ui;
+			/* A PARTIR DE LA IL FAUT REPRENDRE CETTE MACRO */
+			preffe#Augupdate(res,true);
+			ENDIFMACRO
+		}
+		else if (str == svhcoarse) {
+			IFMACRO(pr#localmacroaug,0)
+			cout << "you need to use ffddmbuildaug" << endl;
+			assert(0);
+			ENDIFMACRO
+			IFMACRO(pr#localmacroaug,1)
+			preffe#K[int] tmp(res.n);
+ 			if (!preffe#prmesh#excluded) {
+				preffe#K[int] ls = ui .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+			    tmp = pr#CSinterp*ls;
+			}
+			else
+				tmp = 0;
+			res = 0;
+			mpiReduce(tmp,res,processor(0,preffe#prmesh#mpicomm),mpiSUM);
+			if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS)
+		  	broadcast(processor(0,preffe#prmesh#commCS),res);
+		  	ENDIFMACRO
+		}
+		else {
+			preffe#K[int] inttmp(VhName.ndof);
+			inttmp = 0;
+			if (!preffe#prmesh#excluded) {
+				IFMACRO(preffe#K,complex)
+				matrix Mintr = interpolate(preffe#Vhi,VhName);
+				matrix<complex> Mint = Mintr;
+				ENDIFMACRO
+				IFMACRO(preffe#K,real)
+				matrix Mint = interpolate(preffe#Vhi,VhName);
+				ENDIFMACRO
+				preffe#K[int] inttmp2 = ui .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+				inttmp = Mint'*inttmp2;
+			}
+			mpiAllReduce(inttmp,res,preffe#prmesh#mpicomm,mpiSUM);
+			if (mpiRank(preffe#prmesh#mpicomm) == 0)
+			  cout << "***** ALERTE (c'est normal) *****" << endl;
+		}
+	}
+}
+EndMacro
+
+real pr#tdirect = 0, pr#teigenv = 0, pr#tbuildE = 0, pr#ttotal = 0;
+real pr#tgmresi, pr#tpreci, pr#tmvi, pr#tfactoi, pr#ttotali;
+real pr#tgmres = 0, pr#tprec = 0, pr#tmv = 0, pr#tfacto =0;
+real pr#tscalprod = 0;
+real pr#tloc = 0, pr#tglob = 0;
+real pr#tcsi, pr#tcs = 0;
+real pr#ttotalelapsed = mpiWtime();
+
+NewMacro pr#writesummary
+if (preffe#prmesh#isincomm)
+{
+  real[int] timings = [preffe#prmesh#tdecomp,pr#tfacto,pr#tbuildE,pr#tgmres,pr#tmv,pr#tprec,pr#tcs,pr#teigenv];
+  real[int] timingsg(timings.n);
+  timingsg = 0;
+  mpiAllReduce(timings,timingsg,preffe#prmesh#mpicomm,mpiMAX);
+  if (mpiRank(preffe#prmesh#mpicomm) == 0) {
+    cout << "timings - decomp and partition : " << timingsg[0] << endl;
+    cout << "timings - assembly and factorization local matrices : " << timingsg[1] << endl;
+    cout << "timings - assembly and factorization coarse problem : " << timingsg[2] << endl;
+    cout << "timings - GMRES : " << timingsg[3] << endl;
+    cout << "timings - MV : " << timingsg[4] << endl;
+    cout << "timings - PREC : " << timingsg[5] << endl;
+    cout << "timings - COARSE SOLVE : " << timingsg[6] << endl;
+    /*cout << "timings - scalprod : " << timingsg[7] << endl;*/
+    cout << "timings - total_sum : " << timingsg[3]+timingsg[0]+timingsg[1]+timingsg[2]+timingsg[7] << endl;
+    cout << "timings - total elapsed wall time : " << mpiWtime()-pr#ttotalelapsed << endl;
+  }
+  pr#tgmres = 0; pr#tmv = 0; pr#tprec = 0; pr#tcs = 0; pr#tscalprod = 0;
+}
+EndMacro
+
+int pr#verbosity = ffddmverbosity;
+
+int pr#bdirect = ffddmbdirect;
+
+matrix<preffe#K> pr#Aglobal;
+matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
+
+IFMACRO(pr#withhpddm)
+if (!bpara){
+	if (mpiRank(preffe#prmesh#mpicomm) == 0)
+		cout << "["+Stringification(pr)+"] Error: HPDDM is to be used only in parallel mode" << endl;
+	assert(bpara);
+}
+
+int[int][int] pr#restrictionIntersectionhpddm(preffe#prmesh#numberIntersection);
+{
+preffe#K[int] CC;
+  int[int] II;
+  for (int j=0; j<preffe#prmesh#numberIntersection;j++) {
+    [II, pr#restrictionIntersectionhpddm[j], CC] = preffe#restrictionIntersection[j];
+    if (CC[CC.n-1] == 0)
+      pr#restrictionIntersectionhpddm[j].resize(CC.n-1);
+  }
+}
+IFMACRO(preffe#K,real)
+dschwarz pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, scaling = preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
+ENDIFMACRO
+IFMACRO(preffe#K,complex)
+real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
+zschwarz pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, scaling = pr#hpddmDk, communicator = preffe#prmesh#commddm);
+ENDIFMACRO
+if (preffe#prmesh#inexactCSsplit == 1)
+  set(pr#hpddmOP,sparams="-hpddm_reuse_preconditioner 1");
+ENDIFMACRO
+
+ffddmgenerateOperatorfunctions(pr,preffe)
+
+NewMacro pr#setupoperatorinit()1 EndMacro
+ENDIFMACRO
+// EOM
+
+macro ffddmsetupPrecondinit(pr)
+IFMACRO(!pr#setupprecondinit)
+
+NewMacro pr#localmacroaug pr#prfe#prmesh#buildAug EndMacro
+IFMACRO(pr#localmacroaug,1)
+matrix<pr#prfe#K> pr#CSinterp;
+ENDIFMACRO
+
+matrix<pr#prfe#K> pr#AglobEprec;
+matrix<pr#prfe#K>[int] pr#aR(pr#prfe#prmesh#npart);       /* local (ras or Robin) matrices (for the preconditioner) */
+matrix<pr#prfe#K>[int] pr#aRdEprec(pr#prfe#prmesh#npart);  /* local Dirichlet matrices for DtN CS */
+
+matrix<pr#prfe#K> pr#matN;
+
+string pr#prec = ffddmprecond;
+
+int pr#bEuan = 0;
+
+string pr#corr = "none";
+
+matrix<pr#prfe#K> pr#E;
+matrix<pr#prfe#K> pr#Zeuan,pr#Zeuani,pr#Eeuan;
+
+int pr#si;
+
+int[int] pr#sizelg(pr#prfe#prmesh#npart), pr#offseti(pr#prfe#prmesh#npart);
+
+int[int] pr#sizelgworld(mpiSize(pr#prfe#prmesh#mpicomm)), pr#offsetiworld(mpiSize(pr#prfe#prmesh#mpicomm));
+
+int pr#ncoarsespace = 0;
+
+pr#prfe#K[int][int] pr#Z(0);
+
+ffddmgeneratePrecondfunctions(pr,pr#prfe)
+
+NewMacro pr#setupprecondinit()1 EndMacro
+ENDIFMACRO
+// EOM
+
+macro ffddmsetupinit(pr,preffe)
+ffddmsetupOperatorinit(pr,preffe)
+ffddmsetupPrecondinit(pr)
+// EOM
+
+macro ffddmsetupOperator(pr,preffe,Varf)
+
+ffddmsetupOperatorinit(pr,preffe)
+
+if (preffe#prmesh#isincomm)
+{	
+	preffe#prmesh#tic(pr#tfactoi)
+ 
+  if (pr#bdirect || bseq) {
+    Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
+    pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,solver = (vsym ? CG : GMRES),tgv=vtgvelim);
+  }
+  
+  preffe#K[int] rhsFull(1), rhs(1);
+ 
+  for(int i = 0;i<preffe#prmesh#npart;++i)
+  if ((!preffe#prmesh#excluded) && ((!bpara) || (i == mpiRank(preffe#prmesh#commddm)))) {
+  	     
+    preffe#prmesh#Thi = preffe#prmesh#aTh[i];
+  
+	  NewMacro localmacroaug preffe#prmesh#buildAug EndMacro
+  	IFMACRO(localmacroaug,1)
+  	preffe#prmesh#AugThi = preffe#prmesh#AugaTh[i];
+  	ENDIFMACRO
+  	IFMACRO(localmacroaug,0)
+    meshN preffe#prmesh#AugThi = preffe#prmesh#Thi + preffe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+    fespace preffe#AugVhi(preffe#prmesh#AugThi, preffe#fPk);
+    matrix preffe#Auginterp = interpolate(preffe#Vhi, preffe#AugVhi); /* restriction de WhAugmented à Wh; this rectangular sparse matrix contains only 0s and 1s.*/
+    preffe#Auginterp.thresholding(1.e-10); /* eliminate too small values*/
+    ENDIFMACRO
+    
+    rhsFull.resize(preffe#AugVhi.ndof);
+    rhs.resize(preffe#Vhi.ndof);    
+
+    if (bpara)      
+    {
+      Varf(vPb, preffe#prmesh#AugThi, preffe#AugVhi)
+      
+      if (preffe#prmesh#inexactCSsplit > 1)
+        pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+      else
+      
+      pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+
+      renumbering(pr#aRd[i], preffe#Auginterp, rhsFull, rhs, eps=-1);
+      
+      IFMACRO(pr#withhpddm)
+      changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
+      ENDIFMACRO
+    }
+    
+  }
+  if (bseq)
+    preffe#prmesh#Thi = preffe#prmesh#Thglob;
+		
+  preffe#prmesh#toc(pr#tfactoi,"",pr#tfacto)
+}
+//EOM
+
+macro ffddmsetupPrecond(pr,VarfPrec)
+
+ffddmsetupPrecondinit(pr)
+
+if (pr#prfe#prmesh#isincomm)
+{	
+	pr#prfe#prmesh#tic(pr#tfactoi)
+  
+  pr#prfe#K[int] rhsFull(1), rhs(1);
+ 
+  for(int i = 0;i<pr#prfe#prmesh#npart;++i)
+  if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
+  	     
+    if (pr#verbosity > 1 && !bpara) cout << "["+Stringification(pr)+"] Domain :" << i << "/" << pr#prfe#prmesh#npart << endl;
+    
+		IFMACRO(!VarfPrec)
+		pr#aR[i] = pr#aRd[i];
+		ENDIFMACRO
+		IFMACRO(VarfPrec)
+		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
+  
+	  NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
+  	IFMACRO(localmacroaug,1)
+  	pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
+  	ENDIFMACRO
+  	IFMACRO(localmacroaug,0)
+    meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+    fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
+    matrix pr#prfe#Auginterp = interpolate(pr#prfe#Vhi, pr#prfe#AugVhi); /* restriction de WhAugmented à Wh; this rectangular sparse matrix contains only 0s and 1s.*/
+    pr#prfe#Auginterp.thresholding(1.e-10); /* eliminate too small values*/
+    ENDIFMACRO
+    
+    rhsFull.resize(pr#prfe#AugVhi.ndof);
+    rhs.resize(pr#prfe#Vhi.ndof);
+
+    if (pr#prec == "oras" || pr#prec == "soras"){
+    	VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+    	    	
+    	if (pr#prfe#prmesh#inexactCSsplit > 1)
+    	  pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+    	else
+    	
+    	pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+    }
+    else if (pr#prec == "ras" || pr#prec == "asm") {
+      VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+			if (pr#prfe#prmesh#inexactCSsplit > 1)
+        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+			else
+				pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+      renumbering(pr#aR[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
+    }
+    else if (pr#prec != "none")
+      assert(0);
+		ENDIFMACRO
+		IFMACRO(!pr#withhpddm)
+		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself);
+		ENDIFMACRO
+  }
+  if (bseq)
+    pr#prfe#prmesh#Thi = pr#prfe#prmesh#Thglob;
+		
+  pr#prfe#prmesh#toc(pr#tfactoi,"",pr#tfacto)
+}
+//EOM
+
+macro ffddmsetup(pr,preffe,Varf,VarfPrec)
+ffddmsetupOperator(pr,preffe,Varf)
+ffddmsetupPrecond(pr,VarfPrec)
+// EOM
+
+/*
+IFMACRO (pr#K,complex)
+zschwarz pr#Addmc(pr#matc, pr#arrayIntersectionc, pr#restrictionIntersectionc, scaling = pr#Dc, communicator = mpiCommWorld);
+ENDIFMACRO
+IFMACRO (pr#K,real)
+dschwarz pr#Addmc(pr#matc, pr#arrayIntersectionc, pr#restrictionIntersectionc, scaling = pr#Dc, communicator = mpiCommWorld);
+ENDIFMACRO
+
+IFMACRO (pr#minexactCS,1)
+
+ffddmsetup(pr#Coarse,VarfEprec,VarfOpt)
+ffddmEuansetup(pr#Coarse,Thcc,VarfEprec)
+ffddmset(pr#Coarse,corr,"ADEF1")
+pr#ncoarsespace = pr#CoarseNdofglobal;
+
+ENDIFMACRO
+
+set(pr#Addmc,sparams="-hpddm_verbosity "+getARGV("-inexactCS_verbosity", 0)+" -hpddm_schwarz_method "+getARGV("-inexactCS_schwarz_method", "oras")+" -hpddm_tol "+getARGV("-inexactCS_tol", 1.e-1)+" -hpddm_gmres_restart "+getARGV("-inexactCS_restart", 200)+" -hpddm_max_it "+getARGV("-inexactCS_max_it", 200));
+*/
+
+macro ffddmbuildrhs(pr,Varfrhs,rhs)
+if (pr#prfe#prmesh#isincomm)
+{
+	if (pr#bdirect || bseq)
+	{
+		{
+			Varfrhs(vaglobalrhs,pr#prfe#prmesh#Thglob,pr#prfe#Vhglob)
+			rhs.resize(pr#prfe#Vhglob.ndof);
+			rhs = vaglobalrhs(0,pr#prfe#Vhglob,tgv=vtgvelim);
+		}
+	}
+	
+	if (bpara && !pr#prfe#prmesh#excluded)
+	{ 
+		
+		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[mpiRank(pr#prfe#prmesh#commddm)];
+		
+		rhs.resize(pr#prfe#Vhi.ndof); 
+		
+		Varfrhs(vPbrhs, pr#prfe#prmesh#Thi, pr#prfe#Vhi)
+		rhs = vPbrhs(0,pr#prfe#Vhi,tgv=vtgvelim);
+		
+		pr#prfe#update(rhs,true);   
+	}
+}
+// EOM
+
+macro ffddmset(pr,param,value)
+pr#param = value;
+// EOM
+
+macro ffddmplot(pr,sol,msg)
+pr#plot(sol,msg)
+// EOM

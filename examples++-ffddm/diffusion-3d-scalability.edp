@@ -1,0 +1,95 @@
+//ff-mpirun  -np  4 diffusion-3d-scalability.edp -glut ffglut -raspart -ffddm_schwarz_method asm -ffddm_geneo_nu 10 -global 20
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+macro dimension 3// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+func Pk = P1;                               // finite element space
+
+int[int] LL = [2,2, 1,2, 2,2];
+meshN ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10),
+// [x*cos(pi/2.*z)-y*sin(pi/2.*z), y*cos(pi/2.*z)+x*sin(pi/2.*z), z], label = LL);      // global mesh
+    [x, y, z], label = LL);      // global mesh
+
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) = intN(meshName)(grad(u)' * grad(v)) + intN(meshName)(v) + on(1, u = 1.0); // EOM
+    
+    
+real[int] timingsmumps(mpisize);
+real[int] timingsddm(mpisize);
+
+for (int nbproc=1; nbproc < mpisize+1; nbproc++) {
+  
+  int[int] tabprocs(nbproc);
+  for (int i=0;i<nbproc;i++)
+  tabprocs[i] = i;
+  mpiGroup grpprocs(tabprocs);
+  mpiComm comm(mpiCommWorld,grpprocs);
+  
+  ffddmnpart = nbproc;
+  
+// Domain decomposition
+ffddmbuildDmesh(Lapmesh,ThGlobal,comm)
+savemesh(LapmeshThi,"localTh"+mpirank+".mesh");
+ffddmbuildDfespace(LapFE,Lapmesh,real,def,init,P1)
+ffddmsetupOperator(Lap,LapFE,Varf)
+	//distributed matrix vector product
+LapFEVhi uux=1.;
+LapA(uux[]);
+
+// Direct and Schwarz solves
+
+real[int] rhs(LapFEVhi.ndof);//rhs(1) works as well 
+LapFEVhi def(u) , def(udirectsolver);
+ffddmbuildrhs(Lap,Varf,rhs)
+
+//Direct solve
+if (mpirank == 0) cout << endl << "Lap: Direct solver (MUMPS) :" << endl;//direct parallel solver 
+udirectsolver[] = Lapdirectsolve(rhs);
+Lapwritesummary//process 0 prints convergence history
+timingsmumps[nbproc-1] = Laptfacto+Laptdirect;
+Laptfacto = 0;
+ffddmplot(Lap,udirectsolver, "Lap Global solution with direct solver");
+
+// Two-level Schwarz solve
+ffddmsetupPrecond(Lap,null)
+  
+if (mpirank == 0) cout << endl << "Lap: ASM + GENEO :" << endl; //second level method with a GenEO coarse space
+ffddmgeneosetup(Lap,Varf)
+
+real[int] x0(LapFEVhi.ndof);
+x0 = 0;
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+Lapwritesummary//process 0 prints convergence history
+timingsddm[nbproc-1] = Laptfacto+LaptbuildE+Laptgmres+Lapteigenv;
+ffddmplot(Lap,u, "Lap Global solution with fGMRES");
+
+// Visualization and computation of error indicators  
+real[int] residual(u[].n);
+residual = LapA(u[]);
+residual -= rhs;
+LapFEVhi def(residualh);
+residualh[] = residual;
+ffddmplot(Lap,abs(residualh), "Global residual for the fGMRES solve: ");
+real resnorm2 = LapFEscalprod(residual,residual) ;
+real rhsnorm2 = LapFEscalprod(rhs,rhs); 
+if(mpirank == 0) cout << endl << "Relative residual for the fGMRES solve: " <<  sqrt(resnorm2/rhsnorm2) << endl;
+
+
+	// relative error w.r.t. direct solver 
+residual = u[]-udirectsolver[];
+real solnorm2 = LapFEscalprod(u[],u[]) ,  errnorm2 = LapFEscalprod(residual,residual)  ;
+if(mpirank == 0) cout << endl << "Relative error w.r.t. to direct solver : " <<  sqrt(errnorm2/solnorm2) << endl;
+
+}
+if (mpirank == 0){
+  cout << timingsmumps << endl;
+  cout << timingsddm << endl;
+}
+  

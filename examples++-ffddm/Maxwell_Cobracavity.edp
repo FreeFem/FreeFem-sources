@@ -1,0 +1,217 @@
+//ff-c++ mymsh3.cpp
+//ff-mpirun -np 8 Maxwell_Cobracavity.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit -frequency 2e+9
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+load "metis"
+load "medit"
+load "mymsh3"
+load "Element_Mixte3d"
+
+macro dimension 3// EOM
+
+include "ffddm.idp"
+
+include "cobrameshcavity.idp"
+
+/* COBRA cavity paper JCP: EM wave scattering problem from the COBRA cavity
+We place a first order absorbing boundary condition a few lambdas away from the cavity boundary. 
+The volume of the computational domain is much bigger than the interior cavity region itself.  */
+
+// The long dimension is along x (not the same axes)
+
+real sec1 = 0.01;
+real angle = 2*pi*35/360;
+real radius = 0.186;
+real sec2 = 0.08;
+real sec3 = 0.1;
+real height = 0.084;
+real width = 0.11;
+
+int npangler = 4;
+int npangleR = radius/(radius-height)*npangler;
+
+real c0= 299792458;
+real f = getARGV("-frequency",5.e+9);//17.5e+9;
+real k = 2*pi*f/c0;
+real lambda = c0/f;
+
+// pour regler les dimensions de la boite de calcul autour de la cavite
+real distx = 0.2*lambda;
+real disty = distx;
+real distz = distx;
+
+int labtomerge = 7;
+
+int labmetal = 1;
+int labi = 2; // label in : entrance (n=(-1,0,0))
+int labo = labmetal; // label out
+// Cavity: labo is also a metallic border
+
+int labextxm = 11;
+int labextxM = 12;
+int labextym = 13;
+int labextyM = 14;
+int labextzm = 15;
+int labextzM = 16;
+
+int[int] labsext = [labextxm,labextxM,labextym,labextyM,labextzm,labextzM];
+
+int regint = 4;
+int regext = 5;
+
+real epsilonprob = 0;//0 k k^2;                  // epsilon of the problem
+real be = getARGV("-betaEprec",1.); // beta from Euan paper, used in epsilonEprec  
+real epsilonEprec = k^be; 
+
+int mysplit = 2;
+
+int nloc = 20./mysplit*sec3/lambda;
+
+mesh3 Thc;
+
+buildcobramesh(Thc);
+
+macro def(u)[u,u#y,u#z]//
+macro init(u)[u,u,u]//
+macro defpart(u)u//
+macro initpart(u)u//
+
+func Pk = Edge03d;
+func PkP0 = Edge03ds0;
+
+macro mplot(u)sqrt(real(u)^2+real(u#y)^2+real(u#z)^2)//
+
+//  Macros: Curl and cross product by the normal
+macro Curl(ux,uy,uz) [dy(uz)-dz(uy),dz(ux)-dx(uz),dx(uy)-dy(ux)] // EOM
+macro CrossN(ux,uy,uz) [uy*N.z-uz*N.y,uz*N.x-ux*N.z,ux*N.y-uy*N.x] // EOM
+
+// Incident plane wave
+
+// Convention exp(+i w t)
+// exp(-ikx)
+// -> propagation along +x
+
+real theta = 2.*pi*180./360.; // 180 or 150
+
+// eta is - the direction of propagation
+real[int] eta(3), etaort(3);
+eta = [cos(theta),0,sin(theta)];  // oblique
+//eta = [-1,0,0];  // normal
+//etaort = [0,1,0]; // not used
+    
+// plane wave
+// y polarization
+func fx = 0;
+func fy = exp(1.i*k*(eta(0)*x+eta(1)*y+eta(2)*z));
+func fz = 0;
+
+// calculated for the impedance condition with n=(-1,0,0) (= 2*1i*k f in the normal case)
+func Gxm1 = 0;
+func Gxm2 = (-1i*k*cos(theta) + 1i*k)*fy;
+func Gxm3 = 0;
+
+// calculated for the impedance condition with n=(1,0,0) (= 0 in the normal case)
+func GxM1 = 0;
+func GxM2 = (1i*k*cos(theta) + 1i*k)*fy;
+func GxM3 = 0;
+
+// n=(0,-1,0)
+func Gym1 = 1i*k*cos(theta)*fy;
+func Gym2 = 0;
+func Gym3 = 1i*k*sin(theta)*fy;
+
+// n=(0,1,0)
+func GyM1 = -1i*k*cos(theta)*fy;
+func GyM2 = 0;
+func GyM3 = -1i*k*sin(theta)*fy;
+
+// n=(0,0,-1)
+func Gzm1 = 0;
+func Gzm2 = (-1i*k*sin(theta) + 1i*k)*fy;
+func Gzm3 = 0;
+
+// n=(0,0,1)
+func GzM1 = 0;
+func GzM2 = (1i*k*sin(theta) + 1i*k)*fy;
+func GzM3 = 0;
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
+  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + intN(meshName)(-(k^2-1i*epsilonprob)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + intbN(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM
+
+// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+macro VarfEprec(varfName, meshName, PhName)
+    varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
+  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + intN(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + intbN(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM
+                
+// for the preconditioner
+macro VarfOpt(varfName, meshName, PhName)
+
+    varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
+  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + intN(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + intbN(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + intbN(meshName,10)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))                              
+                + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM                
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
+        intbN(meshName,labextxm)([vx,vy,vz]'*[Gxm1,Gxm2,Gxm3])
+       +intbN(meshName,labextxM)([vx,vy,vz]'*[GxM1,GxM2,GxM3])        
+       +intbN(meshName,labextym)([vx,vy,vz]'*[Gym1,Gym2,Gym3])
+       +intbN(meshName,labextyM)([vx,vy,vz]'*[GyM1,GyM2,GyM3])
+       +intbN(meshName,labextzm)([vx,vy,vz]'*[Gzm1,Gzm2,Gzm3])
+       +intbN(meshName,labextzM)([vx,vy,vz]'*[GzM1,GzM2,GzM3])
+       + on(labmetal,labo,Ex=0,Ey=0,Ez=0);  // EOM
+
+//macro Mdefplot(u)sqrt(real(u)^2+real(u#y)^2+real(u#z)^2)//
+
+vsym = 1;
+vtgv = 1.e+30;
+vtgvelim = -2;
+
+ffddmbuildEdgeTwolevel(M,Thc,mysplit,complex,def,init,Pk,defpart,initpart,PkP0,mpiCommWorld)
+
+//macro Mwithhpddmkrylov()1//
+macro MCoarsewithhpddm()1//
+
+ffddmsetup(MCoarse,MCoarse,VarfEprec,VarfOpt)
+
+ffddmset(MCoarse,verbosity,1)
+
+ffddmsetup(M,M,Varf,VarfOpt)
+
+complex[int] rhs(1);
+
+ffddmbuildrhs(M,Varfrhs,rhs)
+
+complex[int] x0(rhs.n);
+x0 = 0;
+
+MVhi<complex> def(u);
+
+if (mpirank == 0) cout << "ORAS :" << endl;
+
+u[] = MfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+Mwritesummary
+
+if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL + INEXACT COARSE SOLVE :" << endl;
+
+ffddmEuansetup(M,Thc,VarfEprec,VarfEprec)
+
+u[] = MfGMRES(x0, rhs, 1.e-6, 200, "right");
+
+if (mpirank == 0) cout << "fine problem :" << endl;
+Mwritesummary
+if (mpirank == 0)cout << endl << "coarse problem :" << endl;
+MCoarsewritesummary
+
+ffddmplot(M,sqrt(real(u)^2+real(uy)^2+real(uz)^2), "Global solution");
