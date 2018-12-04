@@ -470,7 +470,8 @@ macro ffddmgeneosetupsuper(pr)
       
       pr#prfe#K[int,int] Szi(pr#matN.n,pr#si);
       for (int ii=0; ii < pr#si; ii++) {
-        pr#prfe#K[int] tmp = SumNeumann*pr#Z[ii];
+        pr#prfe#K[int] tmp(SumNeumann.n);
+        tmp = SumNeumann*pr#Z[ii];
         Szi(:,ii) = tmp;
       }
       

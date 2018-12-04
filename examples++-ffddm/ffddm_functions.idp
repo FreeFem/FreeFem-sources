@@ -259,7 +259,8 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
               }
               else {
                 preffe#K[int] tmp = vaux .* preffe#superDk[mpiRank(preffe#prmesh#commsuper)];
-                preffe#K[int] tmp2 = pr#RsuperCS'*tmp;
+                preffe#K[int] tmp2(pr#RsuperCS.m);
+                tmp2 = pr#RsuperCS'*tmp;
                 vaux.resize(pr#ncoarsespace);
                 vaux = pr#E^-1*tmp2;
                 /*
