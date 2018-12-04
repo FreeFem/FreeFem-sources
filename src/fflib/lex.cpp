@@ -38,6 +38,8 @@
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
+#include <regex>
+
 
 extern YYSTYPE *plglval;
 
@@ -499,29 +501,37 @@ int mylex::scan1()
 // <<mylex_scan>>
 int mylex::scan(int lvl)
 {
- 
-  int ret= scan1(); 
-  
-  // ID defined at [[file:../lglib/lg.ypp::ID]] and detected at [[found_an_identifier]]
-  if ( ret == ID) {
-    if (! InMotClef(plglval->type,ret))  {
-      int ft = FindType(buf);
 
-        // FESPACE, FESPACE1, FESPACE3 , FESPACES are defined at [[file:../lglib/lg.ypp::FESPACE]]
-      int feid3[5]  ={ ID,FESPACE1,FESPACE,FESPACE3,FESPACES};
-      assert ( ft >= 0 && ft <= 4)  ;
-      ret =  feid3[ft];      
-      plglval->str = newcopy(buf);
-    }}
-  
-  if ( ret =='{') { //cout << " listMacroDef->push_back"<< endl; 
-    listMacroDef->push_back( MapMacroDef() );}
-  else if (ret == '}') {//cout << " listMacroDef->pop_back"<< endl;
-    listMacroDef->pop_back( );}
-  
-  if (! lexdebug && echo && lvl==0 ) print(cout);
-  
-  return ret;
+    int ret= scan1();
+
+    // ID defined at [[file:../lglib/lg.ypp::ID]] and detected at [[found_an_identifier]]
+    if ( ret == ID)
+    {
+        if (! InMotClef(plglval->type,ret))
+        {
+            int ft = FindType(buf);
+
+            // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
+            int feid3[4]  = { ID,FESPACE1,FESPACE,FESPACE3};
+
+            assert ( ft >= 0 && ft <= 3)  ;
+            ret =  feid3[ft];
+            plglval->str = newcopy(buf);
+        }
+    }
+
+    if ( ret =='{')   //cout << " listMacroDef->push_back"<< endl;
+    {
+        listMacroDef->push_back( MapMacroDef() );
+    }
+    else if (ret == '}')  //cout << " listMacroDef->pop_back"<< endl;
+    {
+        listMacroDef->pop_back( );
+    }
+
+    if (! lexdebug && echo && lvl==0 ) print(cout);
+
+    return ret;
 }
 
 string mylex::token() const
@@ -896,124 +906,6 @@ bool mylex::IFMacro(int &ret)
     }
     return rt;
 }
-const mylex::MacroData *mylex::IsMacro()
-{
-    const MacroData * r=0;
-    for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
-    {
-        MapMacroDef::const_iterator j= i->find(buf);
-        
-        if (j != i->end())
-        {
-            // int inmacroold=withmacropara;
-            r = & j->second;
-            break;
-        }
-    }
-    return r;
-}
-string mylex::ExpandMacro(const string &macroname, const MacroData *pmacro)
-
-{
-    int ret=ID;
-    
-    const MacroData  & macroparm= *pmacro;
-    int nbparam= macroparm.d.size()-1;
-    if(debugmacro) cout <<"call macro : " << buf << endl;
-        string * macronn= newstring(" macro: ");
-        *macronn+= buf;
-        *macronn+=" in ";
-        *macronn+= macroparm.f;
-        if(echo) cout << buf  ;
-        MapMacroParam  lp;
-        if (nbparam > 0 )
-    {
-        match('(');
-        
-        for (int k=0; k<nbparam; k++)
-        {
-            string p;
-            int kend= ( k+1 == nbparam) ? ')' : ',';
-            int lvl=0;
-            int lvll=0;
-            while (1)
-            {
-                int sep =  EatCommentAndSpace();
-                int rr = basescanprint();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
-                if ( (rr=='}') && (--lvll==0) )
-                    continue; // remove first {
-                else if ( (rr=='{') && (++lvll==1) )
-                    continue; // remove last }
-                else if(lvll==0) //  count the open close () []
-                {
-                    if(lvl && rr==')') lvl--; //   if ( then  we eat next )
-                    else if(lvl && rr==']') lvl--; //   if ( then  we eat next )
-                    else if (rr=='(') lvl++ ;  //  eat next
-                    else if (rr=='[') lvl++ ;  //  eat next
-                    else if (lvl<=0)
-                    {
-                        if (rr==kend ) break;
-                        else if  (rr==')' || rr==',')   // Correction FH 2/06/2004
-                        {
-                            cerr << "Error in macro expansion "<< macroname
-                            << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
-                            cerr << " number of macro parameter in definition is " << nbparam << endl;
-                            ErrorScan(" Wrong number of parameter in  macro call");
-                        }
-                    }
-                }
-                
-                if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
-                if(sep==' ') p+=' ';
-                p += token(); // Correction FH 2/06/2004 of string parameter
-                
-            }
-            if(debugmacro)
-                cout << "macro arg "<< k << " :" << macroparm.d[k] << " -> " <<  p << endl;
-            lp.insert(pair<string,string>(macroparm.d[k],p));
-            //lp[macroparm[k]] = p;
-        }
-    }
-        if(debugmacro)
-        cout <<   " input in : -> " << macroparm.d[nbparam]  << " <-> " << nbparam << endl;
-        input(macroparm.d[nbparam],0,macroparm.l);//  no file no error here FH.
-        // ici il faut faire la substitution  de parameter
-        // -----------------------------------------------
-        string expandtxt,subexp;
-        bool echosave=echo;
-        int ifconcat =0;
-        while(1)
-    {
-        int c= EatCommentAndSpace(&expandtxt); // eat comment to save it;
-        if (c == EOF) break;
-        
-        ret =basescan();
-        if(debugmacro)  cout << " ret = " << ret << token() << endl;
-        if(ret== ENDOFFILE) break;
-        if (ret=='#') {
-            ifconcat=1;
-        }
-        else if ( ret == ID)
-        {
-            ifconcat=0;
-            MapMacroParam::const_iterator j=lp.find(buf);
-            if ( j !=  lp.end())
-                subexp=j->second;
-            else
-                subexp=token();
-            
-            expandtxt+=subexp; // ZZZZZZ 
-        }
-        else
-        {
-            expandtxt+=token();
-            ifconcat=0;} //
-    }
-        echo=echosave;
-        if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
-
-        return expandtxt;
-}
 
 bool mylex::CallMacro(int &ret)
 {
@@ -1021,7 +913,6 @@ bool mylex::CallMacro(int &ret)
     // FH  jan 2005
     // -----------------------------------------
 //  add Stringification,FILE, LINE  march 2014 FH..
-    const MacroData *pmacro=0;
     if(strncmp(buf,"Stringification",16)==0)
     {
         if(debugmacro) cout <<"call Stringification : " << buf << endl;
@@ -1080,20 +971,191 @@ bool mylex::CallMacro(int &ret)
         ret=LNUM;
         return false;
     }
-    else if( (pmacro = IsMacro()))
-           {
-               string * macronn= newstring(" macro: ");
-               *macronn+= buf;
-               *macronn+=" in ";
-               *macronn+= pmacro->f;
-               string expandtxt=ExpandMacro(buf,pmacro);
-            
-               if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
-               input(expandtxt,macronn,pmacro->l);
-               ret =  scan1(); // Correction FH 6/06/2004 of string parameter
-               return true;
-           }
- 
+    else
+        for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
+        {
+            MapMacroDef::const_iterator j= i->find(buf);
+
+            if (j != i->end())
+            {
+                // int inmacroold=withmacropara;
+                const MacroData  & macroparm= j->second;
+                int nbparam= macroparm.d.size()-1;
+                if(debugmacro) cout <<"call macro : " << buf << endl;
+                string * macronn= newstring(" macro: ");
+                *macronn+= buf;
+                *macronn+=" in ";
+                *macronn+= macroparm.f;
+                if(echo) cout << buf  ;
+                MapMacroParam  lp;
+                if (nbparam > 0 )
+                {
+                    match('(');
+
+                    for (int k=0; k<nbparam; k++)
+                    {
+                        string p;
+                        int kend= ( k+1 == nbparam) ? ')' : ',';
+                        int lvl=0;
+                        int lvll=0;
+                        while (1)
+                        {
+                            int sep =  EatCommentAndSpace();
+                            int rr = basescanprint();// basescan -> scan1 change 2/2/2007  ( not change to pass macro name as a parameter)
+                            if ( (rr=='}') && (--lvll==0) )
+                                continue; // remove first {
+                            else if ( (rr=='{') && (++lvll==1) )
+                                continue; // remove last }
+                            else if(lvll==0) //  count the open close () []
+                            {
+                                if(lvl && rr==')') lvl--; //   if ( then  we eat next )
+                                else if(lvl && rr==']') lvl--; //   if ( then  we eat next )
+                                else if (rr=='(') lvl++ ;  //  eat next
+                                else if (rr=='[') lvl++ ;  //  eat next
+                                else if (lvl<=0)
+                                {
+                                    if (rr==kend ) break;
+                                    else if  (rr==')' || rr==',')   // Correction FH 2/06/2004
+                                    {
+                                        cerr << "Error in macro expansion "<< j->first
+                                             << ", we wait for "<< char(kend) << " and we get  " << char(rr)<< endl;
+                                        cerr << " number of macro parameter in definition is " << nbparam << endl;
+                                        ErrorScan(" Wrong number of parameter in  macro call");
+                                    }
+                                }
+                            }
+
+                            if (rr==ENDOFFILE) ErrorScan(" ENDOFFILE in macro usage");
+                            if(sep==' ') p+=' ';
+                            p += token(); // Correction FH 2/06/2004 of string parameter
+
+                        }
+                        if(debugmacro)
+                            cout << "macro arg "<< k << " :" << macroparm.d[k] << " -> " <<  p << endl;
+                        lp.insert(pair<string,string>(macroparm.d[k],p));
+                        //lp[macroparm[k]] = p;
+                    }
+                }
+                if(debugmacro)
+                    cout <<   " input in : -> " << macroparm.d[nbparam]  << " <-> " << nbparam << endl;
+                input(macroparm.d[nbparam],0,macroparm.l);//  no file no error here FH.
+                // ici il faut faire la substitution  de parameter
+                // -----------------------------------------------
+                string expandtxt;
+                string currentexpand;
+                string leftexpand;
+                string rightexpand;
+                string ReadCommentAndSpace;
+                bool echosave=echo;
+                char buf2[256];
+				const char *ifm="IFMACRO";
+    			const char *ifs="Stringification";
+                bool inifmacro = 0;
+                bool isconc = 0;
+                while(1)
+                {
+                	ReadCommentAndSpace = "";
+                    int c= EatCommentAndSpace(&ReadCommentAndSpace); // eat comment to save it;
+                    if (c == EOF) {
+                    	expandtxt+=currentexpand+ReadCommentAndSpace;
+                    	break;
+                    }
+					ret = basescan();
+                    if(debugmacro)  cout << " ret = " << ret << token() << endl;
+                    if(ret== ENDOFFILE) {
+                    	expandtxt+=currentexpand+ReadCommentAndSpace;
+                    	break;
+                    }
+                    if (nbparam && (ret==ID||ret==CNUM||ret==DNUM||ret==LNUM))
+                    {
+                    	if (strncmp(buf,ifm,8)==0 || strncmp(buf,ifs,15)==0)
+	                    	inifmacro = 1;
+                    	
+                    	if (!isconc) {
+                        	MapMacroParam::const_iterator j=lp.find(buf);
+                        	if ( j !=  lp.end()) {
+                            	expandtxt+=currentexpand+ReadCommentAndSpace;
+                            	currentexpand=j->second;
+                        	}
+                        	else {
+                            	expandtxt+=currentexpand+ReadCommentAndSpace;
+                            	currentexpand=token();
+                        	}
+                    	}
+                        //strcpy(buf2,buf);
+                        if (isconc) {
+							MapMacroParam::const_iterator j=lp.find(buf);
+                        	if ( j !=  lp.end())
+                            	rightexpand=j->second;
+                        	else
+                            	rightexpand=token();
+                            	
+                        	currentexpand = leftexpand+rightexpand;
+							//currentexpand.erase(currentexpand.begin(), std::find_if(currentexpand.begin(), currentexpand.end(), std::bind1st(std::not_equal_to<char>(), ' ')));
+                        	//cout << "isconc"<<currentexpand<<"close"<<endl;
+                        	//strcpy(buf,currentexpand.c_str());
+                        	if (!inifmacro)
+                        	for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++) {
+                        	
+                        		            					
+								while (currentexpand[0] == ' ')
+									currentexpand.erase(0, 1);
+								
+            					MapMacroDef::const_iterator j= i->find(currentexpand.c_str());
+								if (j != i->end()) {
+									const MacroData  & macroparm= j->second;
+									//strcpy(buf,macroparm.d[0].c_str());
+									//cout << "bbbbbb" << buf << endl;
+									//expandtxt+=macroparm.d[0];
+									//cout << "trouve" << j->first << endl;
+									if (macroparm.d.size() == 1) {
+										currentexpand = macroparm.d[0];
+									if (currentexpand[currentexpand.size()-1] == ' ')
+										currentexpand.resize(currentexpand.size()-1);
+									}
+								}
+                        	}
+                        	isconc = 0;	
+                        }
+                    }
+                    else if (ret!='#') {  //  macro concatenation operator
+                    	if (ret == ')' && inifmacro)
+                    		inifmacro = 0;
+                    	if (!isconc) {
+                        	expandtxt+=currentexpand+ReadCommentAndSpace;
+                        	currentexpand=token();
+                        //strcpy(buf2,buf);
+                    	}
+
+                    }
+                    else {
+                    	//cout << "haha" << currentexpand << "hehe" << endl;
+                    	leftexpand = currentexpand;
+                    	//leftexpand.erase(leftexpand.begin(), std::find_if(leftexpand.begin(), leftexpand.end(), std::bind1st(std::not_equal_to<char>(), ' ')));
+                        	//cout << "isconc"<<currentexpand<<"close"<<endl;
+                    	//while (leftexpand[leftexpand.size()-1] == '\0')
+						//	leftexpand.resize(leftexpand.size()-1);
+						//while (leftexpand[leftexpand.size()-1] == '\n')
+						//	leftexpand.resize(leftexpand.size()-1);
+ 						//while (leftexpand[leftexpand.size()-1] == ' ')
+						//	leftexpand.resize(leftexpand.size()-1);
+                    	isconc = 1;
+                    	//ret = scan1();
+                    	//strcat(buf,buf2);
+                    	//cout << "haha " << buf  << endl;
+                    	;//CallMacro(ret);
+                    	//expandtxt+=buf;
+                    }
+                }
+                echo=echosave;
+                if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
+                //if (expandtxt[expandtxt.size()-1] == ' ')	expandtxt[expandtxt.size()-1] = '\0';
+                //cout << "haha " << expandtxt <<"hehe" << endl;
+                input(expandtxt,macronn,macroparm.l);
+                ret =  scan1(); // Correction FH 6/06/2004 of string parameter
+                return true;
+            }
+        }
     return false;
 }
 

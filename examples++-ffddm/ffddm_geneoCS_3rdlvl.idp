@@ -479,12 +479,13 @@ macro ffddmgeneosetupsuper(pr)
       for (int jj=0; jj < pr#si; jj++) {
         Sii[is](ii,jj) = pr#Z[ii]'*Szi(:,jj);
       }
-      
+
       for(int j=0;j<indicesofneighbors[is].n;++j) {
         msnd[cptmpi].resize(pr#prfe#restrictionIntersection[indicesofneighbors[is][j]].n,pr#si);
         mrcv[cptmpi].resize(pr#prfe#restrictionIntersection[indicesofneighbors[is][j]].n, pr#sizelg[pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][j]]]);
         for (int ii=0; ii<pr#si; ii++) {
-          pr#prfe#K[int] tmp = pr#prfe#restrictionIntersection[indicesofneighbors[is][j]]*Szi(:,ii);
+          pr#prfe#K[int] tmp(pr#prfe#restrictionIntersection[indicesofneighbors[is][j]].n);
+          tmp = pr#prfe#restrictionIntersection[indicesofneighbors[is][j]]*Szi(:,ii);
           msnd[cptmpi](:,ii) = tmp;
         }
         Isend(processor(pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][j]],pr#prfe#prmesh#commddm,rqszi[2*cptmpi]),msnd[cptmpi]);

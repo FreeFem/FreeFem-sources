@@ -3139,13 +3139,13 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     bool rhs = (pX && pOut) && (pOut->n > 0 || pX->n > 0);
     if(pA)
     {
-        cout << "removeDOF_Op pA " << pA << " " << pA->pHM() <<endl;
-        cout << "   pR " << pA << " " << pR->pHM() <<endl;
+        //cout << "removeDOF_Op pA " << pA << " " << pA->pHM() <<endl;
+        //cout << "   pR " << pA << " " << pR->pHM() <<endl;
         if(!pC)
             pC = pR;
         MatriceMorse<T> *mA = pA->pHM();
         MatriceMorse<R> *mR = pR->pHM();
-        cout << " removeDOF_Op "  << " " << mR << " " << mC << " "  << mA <<  endl;
+        //cout << " removeDOF_Op "  << " " << mR << " " << mC << " "  << mA <<  endl;
         if(!mC)
             mC = mR;
         pA->Uh = pR->Uh;
