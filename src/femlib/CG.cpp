@@ -560,3 +560,7 @@ template double * myscal<int,double>(int n,double  a,double *x);
 template double * myscopy<unsigned long,double>(unsigned long n,const double *x,double *y);
 template double * myscal<unsigned long,double>(unsigned long n,double  a,double *x);
 
+template Complex * myscopy<int,Complex>(int n,const Complex *x,Complex *y);
+template Complex * myscal<int,Complex>(int n,Complex  a,Complex *x);
+template Complex * myscopy<unsigned long,Complex>(unsigned long n,const Complex *x,Complex *y);
+template Complex * myscal<unsigned long,Complex>(unsigned long n,Complex  a,Complex *x);
