@@ -364,8 +364,8 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
     if( nn == this->n && mm == this->m && nnz == nnnz && sym == half && tol <0) return ;
     this->m=mm;
     this->n = nn;
-    this->N=mm;
-    this->M = nn;
+    this->N=nn;
+    this->M=mm;
     R mxt =0;
     size_t kk=0;
     for(size_t k=0; k <nnz ;++k)
@@ -965,17 +965,18 @@ void HashMatrix<I,R>::Buildp(I nn,I * IA,int type_m,size_t nnzz)
         
         setp(nn+1);
          //int shift =  fortran;
+        std::fill(p,p+this->n+1,-1);
         p[nn] = fortran+ (I) nnzz;
         for( I k=I(nnzz)-1; k>=0 ; --k )
         {
             p[IA[k]-fortran] = k+fortran;
             ffassert( (IA[k]-fortran>=0 ) && (IA[k]-fortran<=nn));
         }
-        p[0]=fortran;
+        p[nn]=nnzz+fortran;
         // remove empty row
-        for(I ii=0;ii<nn;++ii)
-            if(p[ii+1]<0)//  empty row
-                p[ii+1]=p[ii];
+        for(I ii=nn-1;ii>=0;--ii)
+            if(p[ii]<0)//  empty row
+                p[ii]=p[ii+1];
         
      
         

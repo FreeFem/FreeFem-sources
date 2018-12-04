@@ -351,9 +351,11 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
         
         for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
         {
-            if(verbosity>1000000000) cout << j << " : " << ll << " " << B.i[ll] <<" " << B.j[ll] <<endl;
-            //assert(j == B.i[ll]);
+             //assert(j == B.i[ll]);
             I k = Bj[ll];
+            if(verbosity>1000000000) cout << " *** " << i<< " " << " " << k << " : " << j << " : "
+                  << ll << " " << B.i[ll] <<" " << B.j[ll]<< " ::  " << A.aij[l]*B.aij[ll] <<endl;
+
             assert(j == Bi[ll]);
             AB(i,k) += c* A.aij[l]*B.aij[ll];
         }

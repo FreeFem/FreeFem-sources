@@ -22,6 +22,15 @@
 
 # Changelog
 All notable changes to this project will be documented in this file.
+## [Version 4] 2018-12-01
+
+- change all the sparse amtrice structure 
+
+### Added 
+- surface finite elemet (in progress)	
+
+- nElementonB (version 2d and 3d of nTonEge)
+- area  ( same the lenEdge) in 3d 
 
 ## [Unreleased] 2018-08-31
 
