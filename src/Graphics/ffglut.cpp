@@ -1435,6 +1435,7 @@ void OnePlotBorder::Draw(OneWindow *win)
 
 OneWindow::OneWindow(int h,int w,ThePlot *p)
 :
+countdisplay(0),
 icurrentPlot(lplots.begin()),
 lplotssize(0),
 height(h),width(w),theplot(0),hpixel(1),
@@ -3024,6 +3025,16 @@ void Display(void)
     OneWindow * win=CurrentWin();
     if(win)
     {
+        if (win->countdisplay++<1) { // HAsh for MAC OS Mojave ???? FH oct 2018 ...
+            if(debug>4) cout << "\n **** Hack Mojove :: glutReshapeWindow \n" << endl;
+            win->width--;
+            win->height--;
+            glutReshapeWindow(win->width,win->height);
+            win->resize(win->width,win->height);
+            glutPostRedisplay();
+            return;
+        }
+
         if(debug>9)
         {
             cout << "\n\n     Display "<< win->theplot  << "  true wiat: " << (!win->theplot || !win->theplot->wait || gwait) << endl;
@@ -3419,7 +3430,7 @@ static  bool TryNewPlot( void )
             glutDisplayFunc( Display ); // l'affichage
             glutPushWindow();
             glutShowWindow();
-            AllWindows[iw0]= new OneWindow(Width , Height,nextPlot);
+            AllWindows[iw0]= new OneWindow(Width+1 , Height+1,nextPlot);
             Num2Windows[iwnp]=iw0;
         }
         else
@@ -3568,7 +3579,7 @@ int main(int argc,  char** argv)
     
     
     
-    glutInitWindowSize(Width , Height);
+    glutInitWindowSize(Width+1 , Height+1);
     glutInitWindowPosition(iii0,jjj0);
     
     int iw0=glutCreateWindow(titre.c_str());
@@ -3584,7 +3595,7 @@ int main(int argc,  char** argv)
     glutMotionFunc(MotionMouse); // les mouvements  de la sourie
     glutDisplayFunc( Display ); // l'affichage
     glutSetWindow(iw0);
-    AllWindows[iw0]=new OneWindow(Width , Height,currentPlot);
+    AllWindows[iw0]=new OneWindow(Width+1 , Height+1 ,currentPlot);
     TryNewPlot();
     
     

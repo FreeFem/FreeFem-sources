@@ -339,6 +339,7 @@ public:
 
 class OneWindow {
 public:
+    int countdisplay;// for bug mojave 
     ThePlot *theplot;
     list<ThePlot*> lplots;//  to store some plot
     list<ThePlot*>::iterator icurrentPlot;//=lplots.begin();

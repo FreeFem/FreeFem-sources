@@ -965,7 +965,7 @@ void HashMatrix<I,R>::Buildp(I nn,I * IA,int type_m,size_t nnzz)
         
         setp(nn+1);
          //int shift =  fortran;
-        std::fill(p,p+this->n+1,-1);
+        std::fill(p,p+nn+1,-1);
         p[nn] = fortran+ (I) nnzz;
         for( I k=I(nnzz)-1; k>=0 ; --k )
         {

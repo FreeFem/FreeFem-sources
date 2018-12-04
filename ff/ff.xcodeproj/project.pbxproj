@@ -168,6 +168,7 @@
 		3DC0234321480D6A008C76D0 /* MatriceCreuse.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0234221480D6A008C76D0 /* MatriceCreuse.hpp */; };
 		3DC0234521480D75008C76D0 /* MatriceCreuse_tpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0234421480D75008C76D0 /* MatriceCreuse_tpl.hpp */; };
 		3DC0234721480EA8008C76D0 /* MatriceElementaire.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0234621480EA8008C76D0 /* MatriceElementaire.hpp */; };
+		3DCE376D21B728AF004BC875 /* P012_3dSurf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DCE376C21B728AE004BC875 /* P012_3dSurf.cpp */; };
 		3DD0DF48216CC819006FD176 /* HashMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD0DF47216CC819006FD176 /* HashMatrix.cpp */; };
 		3DD0DF49216CC819006FD176 /* HashMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD0DF47216CC819006FD176 /* HashMatrix.cpp */; };
 		3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
@@ -352,6 +353,7 @@
 		3DC62AF2097299D800D487F6 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
 		3DC62AF6097299F400D487F6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		3DCC78380EC0B11C00ED5A17 /* ffglut.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ffglut.hpp; path = ../src/Graphics/ffglut.hpp; sourceTree = SOURCE_ROOT; };
+		3DCE376C21B728AE004BC875 /* P012_3dSurf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = P012_3dSurf.cpp; path = ../src/femlib/P012_3dSurf.cpp; sourceTree = "<group>"; };
 		3DD0DF47216CC819006FD176 /* HashMatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HashMatrix.cpp; path = ../src/femlib/HashMatrix.cpp; sourceTree = "<group>"; };
 		3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = GQuadTree.cpp; path = ../src/femlib/GQuadTree.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lgmesh3.cpp; sourceTree = "<group>"; };
@@ -600,6 +602,7 @@
 				3DC629CA0972430700D487F6 /* Element_RT.cpp */,
 				3DC629CB0972430700D487F6 /* fem.cpp */,
 				3DC629CD0972430700D487F6 /* FESpace.cpp */,
+				3DCE376C21B728AE004BC875 /* P012_3dSurf.cpp */,
 				3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */,
 				3DC629CF0972430700D487F6 /* FQuadTree.cpp */,
 				3DC629D00972430700D487F6 /* gibbs.cpp */,
@@ -877,6 +880,7 @@
 				3D15D4810BD3A6D500CEB4C6 /* MeshGeom.cpp in Sources */,
 				3D15D4820BD3A6D500CEB4C6 /* Meshio.cpp in Sources */,
 				3D15D4840BD3A6D500CEB4C6 /* MeshQuad.cpp in Sources */,
+				3DCE376D21B728AF004BC875 /* P012_3dSurf.cpp in Sources */,
 				3D15D4850BD3A6D500CEB4C6 /* MeshRead.cpp in Sources */,
 				3D15D4870BD3A6D500CEB4C6 /* MeshWrite.cpp in Sources */,
 				3D15D4880BD3A6D500CEB4C6 /* Metric.cpp in Sources */,
