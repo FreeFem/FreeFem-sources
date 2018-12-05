@@ -212,14 +212,14 @@ public:
   MeshS(FILE *f,int offset=0);
   //MeshS(const string);         
   MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
+  int *liste_v_num_surf=NULL; // mapping for volume/surface vertices
   //const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
   int Save(const string & filename);
   //MeshS(FILE *f);
-   void GSave(FILE * f,int offset=0) const ; //void GSave(FILE * f) const { return GSave2<MeshS>(f,*this);}
+  void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
   ~MeshS() {SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
   private:
-  //int load(const string filename);
   MeshS(const MeshS &); // pas de construction par copie
   void operator=(const MeshS &);// pas affectation par copy
 };
@@ -259,7 +259,7 @@ public:
  inline MeshS * getMeshS() const{
    return meshS;
  }
-    ~Mesh3() {/*cout << "type Mesh3 "<< typeMesh3 << endl; if(typeMesh3!=1) delete meshS;*/SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
+    ~Mesh3() { SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

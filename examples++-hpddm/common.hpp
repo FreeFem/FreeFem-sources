@@ -84,7 +84,7 @@ void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
 #else
 //  version 4
 template<class K> K* newCopy(bool mfree,K *p,int n)
-{  if( mfree) return p;
+{  if( !mfree) return p;
 	K *q= new K[n];
     copy(p,p+n,q);
     return q;
