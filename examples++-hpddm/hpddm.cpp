@@ -113,133 +113,32 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
     std::pair<MPI_Request, const K*>* ret = nullptr;
     if(mA) {
-        long nbSolver = 0;
-        std::vector<const HPDDM::MatrixCSR<K>*> vecAIJ;
-        if(mA) {
-            
-            ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-            MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
-            MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
-            if(dA._n == dA._m) {
-                if(timing) { // tic
-                    timing->resize(timing->n + 1);
-                    (*timing)[timing->n - 1] = MPI_Wtime();
-                }
-                const HPDDM::MatrixCSR<K>* const dP = new_HPDDM_MatrixCSR<K>(mP);
-                //mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
-                if(mB) {
+        ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
+        MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
+        if(dA._n == dA._m) {
+            if(timing) { // tic
+                timing->resize(timing->n + 1);
+                (*timing)[timing->n - 1] = MPI_Wtime();
+            }
+            const HPDDM::MatrixCSR<K>* const dP = new_HPDDM_MatrixCSR<K>(mP);
+            //mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
+            if(mB) {
    //                 HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
-                    ff_HPDDM_MatrixCSR<K> dB(mB);
-                    ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
-                }
-                else
-                    ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
-                set_ff_matrix(mA,dA);
-              /*  mA->nbcoef = dA._nnz;
-                mA->a = dA._a;
-                mA->lg = dA._ia;
-                mA->cl = dA._ja;*/
-                delete dP;
-                if(timing) { // toc
-                    (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
-                }
-            }
-            else {
-                vecAIJ.emplace_back(&dA);
-                nbSolver = 101;
-            }
-        }
-        else {
-            ptA->template interaction<false, true>(vecAIJ);
-            std::sort(vecAIJ.begin(), vecAIJ.end(), [](const HPDDM::MatrixCSR<K>* lhs, const HPDDM::MatrixCSR<K>* rhs) { return lhs->_m > rhs->_m; });
-            nbSolver = 100;
-        }
-        if(nbSolver != 0) {
-            ptA->callNumfact();
-            if(!vecAIJ.empty()) {
-                int dof = ptA->getDof();
-                HPDDM::Eigensolver<K> solver(dof);
-                const HPDDM::MatrixCSR<K>& first = *vecAIJ.front();
-                unsigned short nu = std::min(opt.template val<unsigned short>("geneo_nu", 20), static_cast<unsigned short>(first._m));
-                K** ev = new K*[nu];
-                *ev = new K[nu * dof];
-                for(int i = 0; i < nu; ++i)
-                    ev[i] = *ev + i * dof;
-                ptA->setVectors(ev);
-                ptA->Type::super::initialize(nu);
-                int info;
-                int lwork = -1;
-                {
-                    K wkopt;
-                    HPDDM::Lapack<K>::gesdd("S", &dof, &first._m, nullptr, &dof, nullptr, nullptr, &dof, nullptr, &first._m, &wkopt, &lwork, nullptr, nullptr, &info);
-                }
-                K* a;
-                HPDDM::underlying_type<K>* values;
-                if(!std::is_same<K, HPDDM::underlying_type<K>>::value) {
-                    a = new K[first._m * (2 * dof + first._m) + lwork];
-                    values = new HPDDM::underlying_type<K>[nu + first._m + std::max(1, first._m * std::max(5 * first._m + 7, 2 * dof + 2 * first._m + 1))];
-                }
-                else {
-                    a = new K[first._m * (2 * dof + first._m + 1) + lwork + nu];
-                    values = reinterpret_cast<HPDDM::underlying_type<K>*>(a + first._m * (2 * dof + first._m) + lwork);
-                }
-                int* pos = new int[nu + 8 * first._m];
-                std::fill(pos, pos + nu, 0);
-                std::fill(values, values + nu, 0.0);
-                for(const HPDDM::MatrixCSR<K>* A : vecAIJ) {
-                    K* u = a + dof * A->_m;
-                    K* vt = u + dof * A->_m;
-                    K* work = vt + A->_m * A->_m;
-                    HPDDM::underlying_type<K>* s = values + nu;
-                    HPDDM::underlying_type<K>* rwork = s + A->_m;
-                    std::fill(a, a + A->_m * dof, K(0.0));
-                    for(int i = 0; i < dof; ++i)
-                        for(int j = A->_ia[i]; j < A->_ia[i + 1]; ++j)
-                            a[i + A->_ja[j] * dof] = A->_a[j];
-                    ptA->Type::super::callSolve(a, A->_m);
-                    HPDDM::Lapack<K>::gesdd("S", &dof, &(A->_m), a, &dof, s, u, &dof, vt, &(A->_m), work, &lwork, rwork, pos + nu, &info);
-                    for(unsigned int i = 0, j = 0, k = 0; k < nu; ++k) {
-                        if(s[i] > values[j])
-                            pos[k] = ++i;
-                        else
-                            pos[k] = -(++j);
-                    }
-                    for(unsigned int i = nu - 1; i > 0; ) {
-                        if(pos[i] < 0) {
-                            unsigned int j = i;
-                            while(j > 0 && pos[j - 1] < 0)
-                                --j;
-                            std::copy_backward(values - pos[j] - 1, values - pos[i], values + i + 1);
-                            std::copy_backward(ev[-pos[j] - 1], ev[-pos[i] - 1] + dof, ev[i] + dof);
-                            i = std::max(j, 1u) - 1;
-                        }
-                        else
-                            --i;
-                    }
-                    for(unsigned int i = 0; i < nu; ) {
-                        if(pos[i] > 0) {
-                            unsigned int j = i;
-                            while(j < nu - 1 && pos[j + 1] > 0)
-                                ++j;
-                            std::copy(s + pos[i] - 1, s + pos[j], values + i);
-                            std::copy(u + (pos[i] - 1) * dof, u + pos[j] * dof, ev[i]);
-                            i = j + 1;
-                        }
-                        else
-                            ++i;
-                    }
-                }
-                delete [] pos;
-                if(!std::is_same<K, HPDDM::underlying_type<K>>::value)
-                    delete [] values;
-                delete [] a;
-                ptA->Type::super::initialize(nu);
-                if(nbSolver == 100)
-                    std::for_each(vecAIJ.begin(), vecAIJ.end(), std::default_delete<const HPDDM::MatrixCSR<K>>());
-                opt["geneo_nu"] = nu;
+                ff_HPDDM_MatrixCSR<K> dB(mB);
+                ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
             }
             else
-                ptA->Type::super::initialize(0);
+                ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
+            set_ff_matrix(mA,dA);
+          /*  mA->nbcoef = dA._nnz;
+            mA->a = dA._a;
+            mA->lg = dA._ia;
+            mA->cl = dA._ja;*/
+            delete dP;
+            if(timing) { // toc
+                (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
+            }
         }
         MPI_Barrier(comm);
         if(timing) { // tic
@@ -694,6 +593,17 @@ basicAC_F0::name_and_type IterativeMethod<R>::E_LCG::name_param[] = {
     {"comm", &typeid(pcommworld)}
 };
 
+template<class Type>
+long globalNumbering(Type* const& A, KN<long>* const& numbering) {
+    if(A) {
+        numbering->resize(2 + A->getMatrix()->_n);
+        unsigned int g;
+        unsigned int* num = reinterpret_cast<unsigned int*>(&((*numbering)[0]));
+        A->distributedNumbering(num + 2, num[0], num[1], g);
+    }
+    return 0L;
+}
+
 template<template<class, char> class Type, class K, char S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
@@ -711,6 +621,7 @@ void add() {
     Global.Add("exchange", "(", new exchangeIn<Type<K, S>, K>);
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
     Global.Add("IterativeMethod","(",new IterativeMethod<K>());
+    Global.Add("globalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
 }
 }
 

@@ -1433,11 +1433,44 @@ long MatConvert(Type* const& A, Type* const& B) {
     }
     return 0L;
 }
-template<class Type>
-long KSPSolve(Type* const& A, KN<PetscScalar>* const& in, KN<PetscScalar>* const& out) {
+template<class Type, char N = 'N'>
+class Solve : public OneOperator {
+    public:
+        typedef KN<PetscScalar> Kn;
+        typedef KN_<PetscScalar> Kn_;
+        class E_Solve : public E_F0mps {
+            public:
+                Expression A;
+                Expression x;
+                Expression y;
+                static const int n_name_param = 1;
+                static basicAC_F0::name_and_type name_param[];
+                Expression nargs[n_name_param];
+                E_Solve(const basicAC_F0& args) : A(0), x(0), y(0) {
+                    args.SetNameParam(n_name_param, name_param, nargs);
+                    A = to<Type*>(args[0]);
+                    x = to<KN<PetscScalar>*>(args[1]);
+                    y = to<KN<PetscScalar>*>(args[2]);
+                }
+
+                AnyType operator()(Stack stack) const;
+                operator aType() const { return atype<long>(); }
+        };
+        E_F0* code(const basicAC_F0 & args) const { return new E_Solve(args); }
+        Solve() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()) { }
+};
+template<class Type, char N>
+basicAC_F0::name_and_type Solve<Type, N>::E_Solve::name_param[] = {
+    {"sparams", &typeid(std::string*)}
+};
+template<class Type, char N>
+AnyType Solve<Type, N>::E_Solve::operator()(Stack stack) const {
+    KN<PetscScalar>* in = GetAny<KN<PetscScalar>*>((*x)(stack));
+    KN<PetscScalar>* out = GetAny<KN<PetscScalar>*>((*y)(stack));
     if(A) {
+        Type* ptA = GetAny<Type*>((*A)(stack));
         Vec x, y;
-        MatCreateVecs(A->_petsc, &x, &y);
+        MatCreateVecs(ptA->_petsc, &x, &y);
         PetscInt size;
         VecGetLocalSize(y, &size);
         ffassert(in->n == size);
@@ -1447,7 +1480,13 @@ long KSPSolve(Type* const& A, KN<PetscScalar>* const& in, KN<PetscScalar>* const
         }
         VecPlaceArray(x, *in);
         VecPlaceArray(y, *out);
-        KSPSolve(A->_ksp, x, y);
+        if(N == 'N')
+            KSPSolve(ptA->_ksp, x, y);
+        else if(N == 'H') {
+            VecConjugate(x);
+            KSPSolveTranspose(ptA->_ksp, x, y);
+            VecConjugate(y);
+        }
         VecResetArray(y);
         VecResetArray(x);
         VecDestroy(&y);
@@ -1758,7 +1797,9 @@ static void Init_PETSc() {
     if(!std::is_same<PetscScalar, PetscReal>::value)
         Global.Add("MatMultHermitianTranspose", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::MatMult<'H'>));
     Global.Add("MatConvert", "(", new OneOperator2_<long, Dmat*, Dmat*>(PETSc::MatConvert));
-    Global.Add("KSPSolve", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::KSPSolve));
+    Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>());
+    if(!std::is_same<PetscScalar, PetscReal>::value)
+        Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::Solve<Dmat, 'H'>());
     Global.Add("augmentation", "(", new PETSc::augmentation<Dmat>);
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dmat*, KN<long>*>(PETSc::globalNumbering<Dmat>));
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dbddc*, KN<long>*>(PETSc::globalNumbering<Dbddc>));

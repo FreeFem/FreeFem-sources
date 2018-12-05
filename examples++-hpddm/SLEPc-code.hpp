@@ -136,6 +136,10 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             if(!codeA) {
                 Type* ptB = GetAny<Type*>((*B)(stack));
                 EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
+                if(!ptA->_A) {
+                    MatGetBlockSize(ptA->_petsc, &bs);
+                    MatGetLocalSize(ptA->_petsc, &m, NULL);
+                }
             }
             else {
                 MatGetBlockSize(ptA->_petsc, &bs);
@@ -209,7 +213,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 if(eigenvectors && !isType)
                     eigenvectors->resize(nconv);
                 if(array)
-                    array->resize(!codeA && !isType ? ptA->_A->getDof() : m * bs, nconv);
+                    array->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m * bs, nconv);
                 Vec xr, xi;
                 PetscInt n;
                 if(eigenvectors || array) {
@@ -232,7 +236,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                         }
                         else
                             pt = reinterpret_cast<K*>(tmpr);
-                        if(!isType) {
+                        if(!isType && ptA->_A) {
                             KN<K> cpy(ptA->_A->getDof());
                             cpy = K(0.0);
                             HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pt, cpy.n, 1);
@@ -242,7 +246,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                             if(array && !codeA)
                                 (*array)(':', i) = cpy;
                         }
-                        if((codeA || isType) && array) {
+                        if((codeA || isType || !ptA->_A) && array) {
                             KN<K> cpy(m * bs, pt);
                             (*array)(':', i) = cpy;
                         }
