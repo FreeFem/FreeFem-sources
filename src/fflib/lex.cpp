@@ -38,7 +38,7 @@
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
-#include <regex>
+//#include <regex>
 
 
 extern YYSTYPE *plglval;
