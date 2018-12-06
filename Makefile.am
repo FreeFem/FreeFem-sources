@@ -286,7 +286,8 @@ configure			examples++-chapt3/Makefile.in	src/Graphics/Makefile.in	src/libMesh/M
 download/Makefile.in		examples++-eigen/Makefile.in	src/Makefile.in			src/medit/Makefile.in \
 download/arpack/Makefile.in	examples++-load/Makefile.in	src/bamg/Makefile.in		src/mpi/Makefile.in \
 download/blas/Makefile.in	examples++-mpi/Makefile.in	src/bamglib/Makefile.in		src/nw/Makefile.in \
-download/fftw/Makefile.in	examples++-other/Makefile.in	src/bin-win32/Makefile.in     	examples++-hpddm/Makefile.in 
+download/fftw/Makefile.in	examples++-other/Makefile.in	src/bin-win32/Makefile.in     	examples++-hpddm/Makefile.in \
+examples++-ffddm/Makefile.in 
 
 LIST_GENERATE_FILE_AM= \
 download/umfpack/Makefile.am	examples++-tutorial/Makefile.am	src/femlib/Makefile.am \
