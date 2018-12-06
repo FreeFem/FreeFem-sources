@@ -770,6 +770,7 @@ namespace Fem2D
     //define the type of meshes present in the data file .mesh
     if(nTet==0 && nTri>0 /*&& nSeg>0*/) { cout << "data file contains only a surface Mesh" <<endl; typeMesh3=0; if (nSeg==0) cout << "Caution, no boundary element to apply BC " << endl;}
     if (nTet>0 && nTri>0 && nSeg==0) { cout << "data file contains only a volume Mesh"<<endl; typeMesh3=1; }
+    if (nTet==0 && nTri>0 && nSeg==0) { cout << "data file contains only an old surface mesh3 surface"<<endl; typeMesh3=1; }
     if(nTet>0 && nTri>0 && nSeg>0){ cout << "data file contains a volume and surface Meshes"<<endl; typeMesh3=2; }
     // By default, there is a mesh3 volume mesh. If pure surface mesh, mesh3 is empty except to the pointer on meshS
     // Initialize num of vertice, tetra, triang in the volume mesh
@@ -1140,7 +1141,7 @@ namespace Fem2D
         GmfSetLin(outm,GmfVertices,fx=P.x,fy=P.y,fz=P.z,P.lab);
       }
       // write tetrahedrons (mesh3)
-      if(nt != 0) {
+        if(nt != 0) { 
         GmfSetKwd(outm,GmfTetrahedra,nt);
         for (int k=0; k<nt; k++) {
           const Element & K(this->elements[k]);
@@ -1155,7 +1156,7 @@ namespace Fem2D
       // write triangles (boundary elements mesh3 = element meshS (mesh3)
       GmfSetKwd(outm,GmfTriangles,nbe);
       for (int k=0; k<nbe; k++) {
-        const BorderElement & K(this->borderelements[k]);
+          const BorderElement & K(this->borderelements[k]);
         int i0=this->operator()(K[0])+1;
         int i1=this->operator()(K[1])+1;
         int i2=this->operator()(K[2])+1;
@@ -1164,15 +1165,17 @@ namespace Fem2D
       }
     } // end typeMesh3 !=0
     // write edges, in cas of volume + surface mesh (meshS)
-    if (typeMesh3==2) {
-        int nbeS = meshS->nbe; 
+      if (typeMesh3==2) {
+        int nbeS = meshS->nbe;
+        if(nbeS != 0) {
       GmfSetKwd(outm,GmfEdges,nbeS);
       for (int k=0; k<nbeS; k++) {
           const MeshS::BorderElement & K(meshS->borderelements[k]);
-        int i0= meshS->liste_v_num_surf[meshS->operator()(K[0])]+1;
+          int i0= meshS->liste_v_num_surf[meshS->operator()(K[0])]+1;
         int i1= meshS->liste_v_num_surf[meshS->operator()(K[1])]+1;
         int lab=K.lab;
         GmfSetLin(outm,GmfEdges,i0,i1,lab);
+        }
         }
     } //end typeMesh=2
     if (typeMesh3==0) {
@@ -2033,6 +2036,7 @@ namespace Fem2D
        
         
   MeshS::MeshS(FILE *f,int offset)
+    :liste_v_num_surf(0)
   {
             
     GRead(f,offset);// remove 1
@@ -2127,6 +2131,7 @@ namespace Fem2D
   */
         
   MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
+    :liste_v_num_surf(0)
   {
     nv = nnv;
     nt = nnt;

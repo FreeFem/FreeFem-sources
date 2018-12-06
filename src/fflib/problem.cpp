@@ -396,7 +396,7 @@ namespace Fem2D {
         set<int> setoflab;
         bool all=true;
         
-        const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+        const Mesh & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
         
         //    const QuadratureFormular1d & FIE = di.FIE(stack);
@@ -1019,7 +1019,7 @@ namespace Fem2D {
         set<int> setoflab;
         bool all=true;
         
-        const MeshS & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+        const MeshS & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
         
         //    const QuadratureFormular1d & FIE = di.FIE(stack);
@@ -6541,7 +6541,7 @@ namespace Fem2D {
         
         //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
         const CDomainOfIntegration & di= *l->di;
-        const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+        const Mesh & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th;
         const bool intmortar=di.intmortar(stack);
         
@@ -6860,7 +6860,7 @@ namespace Fem2D {
         ffassert(di.d==3);
         // const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
         
-        const Mesh & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+        const Mesh & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th;
         
         SHOWVERB(cout << " FormLinear " << endl);
@@ -7213,7 +7213,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         const CDomainOfIntegration & di= *l->di;
         ffassert(di.d==3);
         
-        const MeshS & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+        const MeshS & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
         bool sameMesh = &ThI == &Vh.Th;
         
         const bool intmortar=di.intmortar(stack);
@@ -7531,7 +7531,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
     
     //            const  FormLinear * l=dynamic_cast<const  FormLinear *>(e);
     const CDomainOfIntegration & di= *l->di;
-    const MeshS & ThI = Th;//* GetAny<pmesh>( (* di.Th)(stack));
+    const MeshS & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
     bool sameMesh = &ThI == &Vh.Th;
     const bool intmortar=di.intmortar(stack);
     

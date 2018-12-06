@@ -8,7 +8,7 @@ SUBDIRS=download src  examples++-load  examples++-mpi \
 	 examples++-tutorial examples++	\
 	examples++-eigen	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d  examples++-hpddm  
+	examples++-3d  examples++-hpddm  examples++-ffddm 
 
 EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \

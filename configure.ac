@@ -2181,6 +2181,7 @@ AC_OUTPUT(Makefile
     examples++/Makefile
     examples++-mpi/Makefile
     examples++-hpddm/Makefile
+    examples++-ffddm/Makefile
     examples++-eigen/Makefile
     examples++-chapt3/Makefile
     examples++-bug/Makefile
