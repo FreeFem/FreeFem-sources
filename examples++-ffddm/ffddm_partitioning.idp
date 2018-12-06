@@ -261,17 +261,7 @@ int pr#numberIntersection = 0;
 
 int[int] pr#arrayIntersection(0);
 
-meshN pr#Thglob = minimalMesh;  
-
-if (!bnoGlob)
-if  (pr#inexactCSsplit <= 1) {
-  if (ffddmsplit == 1)
-    pr#Thglob = Th;
-  else
-    pr#Thglob = trunc(Th,1,split=ffddmsplit);
-}
-else 
-  pr#Thglob = trunc(Th,1,split=pr#inexactCSsplit*ffddmsplit);
+meshN pr#Thglob = minimalMesh;
 
 matrix[int] pr#RihP1(pr#npart);
 pr#VhiP1[int] pr#DP1(pr#npart);
@@ -518,6 +508,7 @@ if (prmsh#isincomm && !prmsh#excluded)
         matrix R = interpolate(WhIntersection, pr#Vhi);
         R.thresholding(1.e-10);
         pr#restrictionIntersection[i] = R;
+        pr#restrictionIntersection[i].resize(WhIntersection.ndof, pr#Vhi.ndof);
         pr#rcv[i].resize(pr#restrictionIntersection[i].n);
         pr#snd[i].resize(pr#restrictionIntersection[i].n);
       }
@@ -646,6 +637,16 @@ int pr#pCS = ffddmpCS;
 int pr#exclude = ffddmexclude;
 ffddminitDmeshf(pr,Th,comm)
 
+if (!bnoGlob)
+if  (pr#inexactCSsplit <= 1) {
+  if (ffddmsplit == 1)
+    pr#Thglob = Th;
+  else
+    pr#Thglob = trunc(Th,1,split=ffddmsplit);
+}
+else 
+  pr#Thglob = trunc(Th,1,split=pr#inexactCSsplit*ffddmsplit);
+
 IFMACRO(!pr#buildAug)
 NewMacro pr#buildAug()0 EndMacro
 ENDIFMACRO
@@ -691,6 +692,17 @@ int pr#CoarsepCS = ffddmpCS;
 int pr#Coarseexclude = ffddmexclude;
 
 ffddminitDmeshf(pr,Thc,comm)
+
+if (!bnoGlob)
+if  (pr#inexactCSsplit <= 1) {
+  if (ffddmsplit == 1)
+    pr#Thglob = Th;
+  else
+    pr#Thglob = trunc(Th,1,split=ffddmsplit);
+}
+else 
+  pr#Thglob = trunc(Th,1,split=pr#inexactCSsplit*ffddmsplit);
+
 ffddminitDmeshf(pr#Coarse,Thc,comm)
 
 IFMACRO(!pr#buildAug)
