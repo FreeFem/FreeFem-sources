@@ -30,7 +30,7 @@ public:
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
     ~VirtualSolverUMFPACK(){}
-    void SetState(){}
+    void UpdateState(){}
    // VirtualSolver<Z,K> *clone() { return new VirtualSolverUMFPACK(*this);}
 };
 
@@ -83,11 +83,11 @@ public:
 
     }
     
-    void SetState(){
-         if(verb>2 || verbosity> 9) std::cout << " SetState "<< A-> re_do_numerics << " " << A-> re_do_symbolic <<std::endl;
+    void UpdateState(){
+         if(verb>2 || verbosity> 9) std::cout << " UpdateState "<< A-> re_do_numerics << " " << A-> re_do_symbolic <<std::endl;
         if( A->GetReDoNumerics() ) cn++;
         if( A->GetReDoSymbolic()) cs++;
-        CheckState(A->n,cs,cn);
+        ChangeCodeState(A->n,cs,cn);
     }
                            
     void fac_symbolic(){
@@ -165,10 +165,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( A->GetReDoNumerics() ) cn++;
         if( A->GetReDoSymbolic()) cs++;
-        CheckState(A->n,cs,cn);
+        ChangeCodeState(A->n,cs,cn);
         
     }
     
@@ -216,7 +216,7 @@ public:
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
     ~VirtualSolverCHOLMOD(){}
-    void SetState(){}
+    void UpdateState(){}
 };
 
 // specilisation
@@ -292,10 +292,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( HA->GetReDoNumerics() ) cn++;
         if( HA->GetReDoSymbolic()) cs++;
-        CheckState(HA->n,cs,cn);
+        ChangeCodeState(HA->n,cs,cn);
         
     }
     
@@ -403,10 +403,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( HA->GetReDoNumerics() ) cn++;
         if( HA->GetReDoSymbolic()) cs++;
-        CheckState(HA->n,cs,cn);
+        ChangeCodeState(HA->n,cs,cn);
         
     }
     
@@ -482,10 +482,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( A->GetReDoNumerics() ) cn++;
         if( A->GetReDoSymbolic()) cs++;
-        CheckState(A->n,cs,cn);
+        ChangeCodeState(A->n,cs,cn);
         
     }
     
@@ -562,10 +562,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( A->GetReDoNumerics() ) cn++;
         if( A->GetReDoSymbolic()) cs++;
-        CheckState(A->n,cs,cn);
+        ChangeCodeState(A->n,cs,cn);
         
     }
     
@@ -669,10 +669,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( HA->GetReDoNumerics() ) cn++;
         if( HA->GetReDoSymbolic()) cs++;
-        CheckState(HA->n,cs,cn);
+        ChangeCodeState(HA->n,cs,cn);
         
     }
     
@@ -776,10 +776,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( HA->GetReDoNumerics() ) cn++;
         if( HA->GetReDoSymbolic()) cs++;
-        CheckState(HA->n,cs,cn);
+        ChangeCodeState(HA->n,cs,cn);
          
     }
     

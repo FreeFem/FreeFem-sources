@@ -112,12 +112,12 @@ public:
         nrhs=0; 
     }
 
-void SetState()
+void UpdateState()
 {
-    if(verb>2 || verbosity> 9) std::cout << " SetState "<< ptA-> re_do_numerics << " " << ptA-> re_do_symbolic <<std::endl;
+    if(verb>2 || verbosity> 9) std::cout << " UpdateState "<< ptA-> re_do_numerics << " " << ptA-> re_do_symbolic <<std::endl;
     if( ptA->GetReDoNumerics() ) cn++;
     if( ptA->GetReDoSymbolic()) cs++;
-    this->CheckState(ptA->n,cs,cn);
+    this->ChangeCodeState(ptA->n,cs,cn);
 }
 void fac_init()
 {

@@ -23,7 +23,7 @@ public:
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
     ~VirtualSolverSkyLine(){}
-    void SetState(){}
+    void UpdateState(){}
 };
 
 // specilisation
@@ -51,10 +51,10 @@ public:
 
     }
     
-    void SetState(){
+    void UpdateState(){
         if( A->GetReDoNumerics() ) cn++;
         if( A->GetReDoSymbolic()) cs++;
-        CheckState(A->n,cs,cn);
+        ChangeCodeState(A->n,cs,cn);
         
     }
                            
@@ -103,10 +103,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( A->GetReDoNumerics() ) cn++;
         if( A->GetReDoSymbolic()) cs++;
-        CheckState(A->n,cs,cn);
+        ChangeCodeState(A->n,cs,cn);
         
     }
     
@@ -148,7 +148,7 @@ public:
     void fac_symbolic(){assert(0);}
     void fac_numeric(){assert(0);}
     ~VirtualSolverCHOLMOD(){}
-    void SetState(){}
+    void UpdateState(){}
 };
 
 // specilisation
@@ -221,10 +221,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( HA->GetReDoNumerics() ) cn++;
         if( HA->GetReDoSymbolic()) cs++;
-        CheckState(HA->n,cs,cn);
+        ChangeCodeState(HA->n,cs,cn);
         
     }
     
@@ -325,10 +325,10 @@ public:
         
     }
     
-    void SetState(){
+    void UpdateState(){
         if( HA->GetReDoNumerics() ) cn++;
         if( HA->GetReDoSymbolic()) cs++;
-        CheckState(HA->n,cs,cn);
+        ChangeCodeState(HA->n,cs,cn);
         
     }
     

@@ -62,7 +62,7 @@ public:
      void fac_init(){v64.fac_init();}  // n, nzz fixe
      void fac_symbolic(){v64.fac_symbolic();}
      void fac_numeric(){v64.fac_numeric();}
-     void SetState(){v64.SetState();}
+     void UpdateState(){v64.UpdateState();}
 
    ~VirtualSolverUMFPACK64()
     { delete pA64;}

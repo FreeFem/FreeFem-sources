@@ -415,12 +415,12 @@ public:
 
     }
     
-    void SetState()
+    void UpdateState()
     {
-        if(verb>2 || verbosity> 9) std::cout << " SetState "<< AH-> re_do_numerics << " " << AH-> re_do_symbolic <<std::endl;
+        if(verb>2 || verbosity> 9) std::cout << " UpdateState "<< AH-> re_do_numerics << " " << AH-> re_do_symbolic <<std::endl;
         if( AH->GetReDoNumerics() ) cn++;
         if( AH->GetReDoSymbolic()) cs++;
-        this->CheckState(AH->n,cs,cn);
+        this->ChangeCodeState(AH->n,cs,cn);
     }
     void fac_init()
         {

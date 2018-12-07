@@ -194,14 +194,16 @@ public:
     typedef R SCALAR;
     
     int state,defMatType,MatType;
-    VirtualSolver(int dmt=0) : state(0),codeini(0),codesym(0),codenum(0),defMatType(dmt),MatType(dmt) {}
     long codeini,codesym,codenum;
+    long codeininew,codesymnew,codenumnew;// previous code
+    VirtualSolver(int dmt=0) : state(0),codeini(0),codesym(0),codenum(0),defMatType(dmt),MatType(dmt) {}
+ 
     virtual void dosolver(R *x,R*b,int N=0,int trans=0) =0;
     
     virtual void fac_init(){}  // n, nzz fixe
     virtual void fac_symbolic(){} //  i,j fixe
     virtual void fac_numeric(){}   // a fixe
-    virtual void SetState(){}
+    virtual void UpdateState(){}// to see the code change to redo fac ????
 
     //  MatType :  & 2  symetric or not
     //             & 4  positive of not
@@ -212,21 +214,27 @@ public:
     virtual int GetDefautMatType() { return defMatType;}// 0 LU, 1 sym , 4 positive  8 MPI
     virtual void SetDefautMatType(int MMatType ) { ffassert(MMatType==defMatType);  MatType=MMatType;}
 
-    void CheckState(long ci=0,long cs=0, long cn=0)
+    void ChangeCodeState(long ci=0,long cs=0, long cn=0)
     {
-        if(ci &&  ci != codeini) { codeini=ci; state=0;}// n, nzz fixe
-        else if(cs &&  cs != codesym) { codesym=cs; state=1;}//  i,j fixe
-        else if(cn &&  cn != codenum) { codenum=cn; state=2;}// a fixe
+        if(ci) codeininew=ci;
+        if(cs) codesymnew=ci;
+        if(cn) codenumnew=ci;
+        if(codeininew != codeini) state=0; // redo init
+        else if(codesymnew != codesym) state=1; // redo init
+        else if(codenumnew != codenumnew) state=2; // redo init
     };
-    
+    void factorize(int st)
+    {
+        UpdateState();
+        if(verbosity>9) cout << " VirtualSolver :: factorize state:" << state << " st= "<< st << endl;
+
+        if( (state==0) && (state <st)) {codeini=codeininew;fac_init(); state=1;}
+        if( (state==1) && (state <st)) {codesym=codesymnew;fac_symbolic(); state=2;}
+        if( (state==2) && (state <st)) {codenum=codenumnew;fac_numeric();state=3;}
+    }
     R* solve(R *x,R *b,int N=1,int trans=0)
     {
-     
-        SetState();
-        if(verbosity>99) cout << " VirtualSolver :: solve state:" << state << endl;
-        if( state==0) {fac_init(); state=1;}
-        if( state==1) {fac_symbolic(); state=2;}
-        if( state==2) {fac_numeric();state=3;}
+        factorize(3);
         dosolver(x,b,N,trans);
         return x;
     }

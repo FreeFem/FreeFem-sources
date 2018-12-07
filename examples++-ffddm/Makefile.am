@@ -2,7 +2,7 @@
 
 all-local:   freefem++.pref
 
-TESTS=	Maxwell-3d-simple.edp			diffusion-3d-intermediate.edp		diffusion-3d-simple.edp \
+TESTS=	Maxwell-3d-simple.edp			diffusion-3d-simple.edp \
 diffusion-3d-minimal-ddm.edp	 \
 Helmholtz-2d-simple.edp			diffusion-3d-minimal-direct.edp		elasticity-3d-simple.edp \
 elasticity-3d-thirdlevelgeneo.edp \

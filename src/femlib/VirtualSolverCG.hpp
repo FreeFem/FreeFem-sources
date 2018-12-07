@@ -132,7 +132,7 @@ public:
         pC = new HMatVirtPrecon<I,K>(A,&ds,stack);
     }
     SolverCG() {delete pC;}
-    void SetState(){}
+    void UpdateState(){}
     
     struct HMatVirt: CGMatVirt<I,K> {
         HMat *A;
@@ -193,7 +193,7 @@ public:
     }
     
     ~SolverGMRES() {delete pC;pC=0;}
-    void SetState(){}
+    void UpdateState(){}
     
     struct HMatVirt: CGMatVirt<I,K> {
         HMat *A;

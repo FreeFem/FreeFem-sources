@@ -357,10 +357,10 @@ public:
         Check("MUMPS_mpi Factorize");
         CopyInfo();
     }
-    void SetState(){
+    void UpdateState(){
         if( A.GetReDoNumerics() ) cn++;
         if( A.GetReDoSymbolic() ) cs++;
-        this->CheckState(A.n,cs,cn);
+        this->ChangeCodeState(A.n,cs,cn);
     }
     
 };

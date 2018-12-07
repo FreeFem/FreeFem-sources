@@ -151,10 +151,10 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         tol_pivot(ds.tol_pivot<0 ?  1e-15 :ds.tol_pivot) , verb(ds.verb)  {}
         
         
-        void SetState(){
+        void UpdateState(){
             if( A->GetReDoNumerics() ) cn++;
             if( A->GetReDoSymbolic() ) cs++;
-            this->CheckState(A->n,cs,cn);
+            this->ChangeCodeState(A->n,cs,cn);
         }
         void dosolver(K *x,K*b,int N,int trans) {
             if(verb>2|| verbosity>9)
