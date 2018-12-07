@@ -13,7 +13,7 @@ LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP= cobrameshcavity.idp			ffddm_EuanCS.idp			ffddm_geneoCS_3rdlvl.idp		ffddm_partitioning.idp \
-cobrameshcavity2d.idp			ffddm_functions.idp			ffddm_globals.idp			semiopen-cylindrical-cavity-mesh.idp \
+ffddm_functions.idp \
 ffddm.idp				ffddm_geneoCS.idp			ffddm_parameters.idp
 
 EXTRA_DIST=*.edp  
