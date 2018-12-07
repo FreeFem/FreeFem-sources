@@ -327,15 +327,19 @@ macro ffddmgeneosetupsuper(pr)
   pr#prfe#prmesh#tic(pr#tloc)
   
   matrix[int] restNeumann(pr#prfe#prmesh#arrayIntersection.n);
+  matrix[int] restNeumannSend(pr#prfe#prmesh#arrayIntersection.n);
+  
   mpiRequest[int] rqn(pr#prfe#prmesh#arrayIntersection.n*2);
   for (int i=0; i<pr#prfe#prmesh#arrayIntersection.n; i++) {
     /*
     matrix rest = pr#prfe#restrictionIntersection[i]*pr#matN;
     rest = rest*pr#prfe#restrictionIntersection[i]';
     */
-    matrix rest = pr#matN;
-    renumbering(rest,pr#prfe#restrictionIntersection[i],eps=-1);
-    Isend(processor(pr#prfe#prmesh#arrayIntersection[i],pr#prfe#prmesh#commddm,rqn[i]),rest);
+    restNeumannSend[i] = pr#matN;
+    
+    renumbering(restNeumannSend[i],pr#prfe#restrictionIntersection[i],eps=-1);
+ 
+ Isend(processor(pr#prfe#prmesh#arrayIntersection[i],pr#prfe#prmesh#commddm,rqn[i]),restNeumannSend[i]);
   }
   for (int i=0; i<pr#prfe#prmesh#arrayIntersection.n; i++)
     Irecv(processor(pr#prfe#prmesh#arrayIntersection[i],pr#prfe#prmesh#commddm,rqn[pr#prfe#prmesh#arrayIntersection.n+i]),restNeumann[i]);
@@ -522,7 +526,8 @@ macro ffddmgeneosetupsuper(pr)
     for(int j=0;j<indicesofneighbors[is].n;++j) {
       Sij[cptmpi].resize(pr#si,pr#sizelg[pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][j]]]);
       for (int jj=0; jj < pr#sizelg[pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][j]]]; jj++) {
-        pr#prfe#K[int] tmp = pr#prfe#restrictionIntersection[indicesofneighbors[is][j]]'*mrcv[cptmpi](:,jj);
+        pr#prfe#K[int] tmp(pr#prfe#restrictionIntersection[indicesofneighbors[is][j]].m);
+        tmp = pr#prfe#restrictionIntersection[indicesofneighbors[is][j]]'*mrcv[cptmpi](:,jj);
         for (int ii=0; ii < pr#si; ii++){
           Sij[cptmpi](ii,jj) = pr#Z[ii]'*tmp;
         }

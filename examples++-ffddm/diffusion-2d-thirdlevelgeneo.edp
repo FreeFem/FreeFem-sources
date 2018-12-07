@@ -1,3 +1,6 @@
+// NBPROC 8
+// PARAM -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 50 -ffddm_partitioner 0 -nsuper 4 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
+
 //ff-mpirun -np 8 diffusion-2d-thirdlevelgeneo.edp -glut ffglut -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 50 -ffddm_partitioner 0 -nsuper 4 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
 
 macro dimension 2// EOM            // 2D or 3D

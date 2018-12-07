@@ -104,7 +104,7 @@ if (!bpara) {
   /* the 2 fors loop over the columns of Z subdomainwise */
   for (int jj=0; jj<pr#prfe#prmesh#npart; jj++)
   for (int ii=0; ii < pr#sizelg[jj]; ii++) {
-  	pr#prfe#K[int] /*tmp(pr#prfe#Rih[jj].m);
+  	pr#prfe#K[int] tmp(pr#prfe#Rih[jj].m); /*tmp(pr#prfe#Rih[jj].m);
     */ tmp = pr#prfe#Rih[jj]'*pr#Z[cpt];
     Zm(:,cpt) = tmp;
     cpt++; /* keeps track of the global numbering of the columns of Z */
