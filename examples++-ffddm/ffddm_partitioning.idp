@@ -38,13 +38,13 @@ if (pr#isincomm)
       int numberIntersectioni = 0;
       
       meshN overlapName=Th;
-      fespace VhGlobal(overlapName, P1);
-      fespace PhGlobal(overlapName, P0);
-      PhGlobal part;
+      fespace VhGlobalff(overlapName, P1);
+      fespace PhGlobalff(overlapName, P0);
+      PhGlobalff part;
       part[]=partdof;
       
-      PhGlobal supp = abs(part - ii) < 0.1;
-      VhGlobal suppSmooth;
+      PhGlobalff supp = abs(part - ii) < 0.1;
+      VhGlobalff suppSmooth;
       AddLayers(overlapName, supp[], sizeoverlaps * 2, suppSmooth[]);
       {   
         meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
@@ -78,16 +78,16 @@ if (pr#isincomm)
       khi = khi > 0.001 ? 1.0 : 0.0;
       
       else if (usedARGV("-raspart") != -1) {
-        VhGlobal phir;
-        PhGlobal suppP0 = abs(ii - part) < 0.1;
+        VhGlobalff phir;
+        PhGlobalff suppP0 = abs(ii - part) < 0.1;
         varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
-        phir[] = vSuppi(0,VhGlobal);
+        phir[] = vSuppi(0,VhGlobalff);
         phir = phir > 0.;
         khi = phir;
       }            
       
       pr#VhiP1 sum = khi;
-      VhGlobal phi = 0, phibase = 0;
+      VhGlobalff phi = 0, phibase = 0;
       
       /*real eps=int2d(overlapName)(1.);*/
       real eps = intN(overlapName)(1.0);
@@ -102,9 +102,9 @@ if (pr#isincomm)
         int k = mpiWaitAny(rqn);
       }    
       for(int i = 0; i < arrayIntersectioni.n; ++i) {
-        PhGlobal suppPartition = abs(arrayIntersectioni[i] - part) < 0.1;
+        PhGlobalff suppPartition = abs(arrayIntersectioni[i] - part) < 0.1;
         
-        PhGlobal suppP0;
+        PhGlobalff suppP0;
         suppP0[] = suppPartition[];
         
         AddLayers(overlapName, suppPartition[], sizeoverlaps, phi[]);
@@ -115,9 +115,9 @@ if (pr#isincomm)
         phi = phi > 0.001 ? 1.0 : 0.0;
         
         else if (usedARGV("-raspart") != -1) {
-          VhGlobal phir;
+          VhGlobalff phir;
           varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
-          phir[] = vSuppi(0,VhGlobal);
+          phir[] = vSuppi(0,VhGlobalff);
           phir = phir > 0.;
           phi = phir;
         } 
