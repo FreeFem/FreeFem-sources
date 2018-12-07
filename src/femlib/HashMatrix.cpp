@@ -635,8 +635,17 @@ HashMatrix<I,R>::~HashMatrix()
     delete [] head;
     if(p) delete [] p;
     type_state=type_isdeleted;// Mark Matrix is type_isdeleted
+    i =0;
+    j=0;
+    aij=0;
+    next=0;
+    head =0;
+    this->n=-1234567890;//  stupide number
+    this->m=-1234567801;//  stupide number
+    this->nnz=-1234567802;
     // because the solver is some time deleted after ...
 }
+
 template<class I,class R>
 void HashMatrix<I,R>::Sortij()
 {

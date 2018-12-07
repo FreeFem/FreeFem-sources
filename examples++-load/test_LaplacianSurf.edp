@@ -79,8 +79,8 @@ cout << "---> norm error l2 for variationnal form " << errVar.l2 << endl;
 real[int] errPb = uPb[] - uSPb[];  
 cout << "---> norm error l2 with problem " << errPb.l2;
 
+plot(uSPb,cmm=" USPd  ",wait=1);
 
-
-
+//plot(ThS,cmm=" ThS",wait=1);
 
 

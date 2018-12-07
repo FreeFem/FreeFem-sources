@@ -474,6 +474,8 @@ struct MPIrank {
       if(  who != mpirank && ldata[0] )
 	mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]);
       //cout << mpirank <<  "**mA :: " << mA->i << " " << mA->j << " " << mA->aij << " " << mA->nnzmax <<endl;
+      else
+          CheckPtrHashMatrix(mA,"Bcast 2");
       if(ldata[0]) 
 	  {
             // cout << mpirank << " #/ " << who << " i  " << mA->i << " " << mA->nnz << endl;
@@ -487,7 +489,7 @@ struct MPIrank {
             mA->Increaze(ldata[2],ldata[2]);
            // cout << mpirank << "***mA :: " <<&a << " " << mA  <<" " <<  mA->i << " " << mA->j << " " << mA->aij << " " << mA->nnzmax <<endl;
 	  }
-               
+      CheckPtrHashMatrix(mA,"Bcast 2");
       if(  who != mpirank) 
 	a.A.master(mA);
      // else
@@ -614,7 +616,7 @@ public:
     int tag=MPI_TAG<Mat *>::TAG;
     if(verbosity>100)
       cout << mpirank << "  ---R: ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " " << state << endl;
- 
+   
     int ll=0;
    //cout <<mpirank <<  " HashMatrice   Recv "<<state << " " <<  mA <<" " << ldata[2] <<endl;
 
@@ -635,6 +637,7 @@ public:
          //     cout <<mpirank <<  " HashMatrice Recv "<< mA <<endl;
         mA->Increaze(ldata[2],ldata[2]);
          //     cout << " WRecv " << *mA<< endl;
+        CheckPtrHashMatrix(mA," WRecv ");
 	pmat->A.master(mA);
 	mA=0;
 	return false;
@@ -665,6 +668,7 @@ public:
       pmat(pm),mA(0),state(0)
   {
     mA=pmat->pHM();
+    CheckPtrHashMatrix(mA," SendWMatd ");
     ldata[0]=mA->n;
     ldata[1]=mA->m;
     ldata[2]=mA->nnz;
@@ -680,7 +684,7 @@ public:
     if(verbosity>100)
       cout << mpirank << "  ---S  ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " "<< state << endl;
      
-    
+    CheckPtrHashMatrix(mA," SendWMatd 2");
     int ll=0;
     switch (state)
       {

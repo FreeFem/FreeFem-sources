@@ -276,6 +276,28 @@ public:
     virtual bool ChecknbColumn  (I m) const {return this->m==m;}
 
 };
+// 0 good , -1 delete, ...
+template<class I,class R> int GoodPtrHashMatrix(const HashMatrix<I,R> *p ) {
+    if( p==0) return 1;
+    if( p->N != p->n) return -2;
+    if( p->M != p->m) return -3;
+    if (p->nnz ==-1234567802) return  -4;
+    if( p->i && p->j && p->aij ) return 0;
+    return -5;
+}
+template<class I,class R> void CheckPtrHashMatrix(const HashMatrix<I,R> *p,const char * where )
+{
+    int gm=GoodPtrHashMatrix(p);
+    if( gm !=0)
+    {
+        if(gm <0)
+            cout << " n = " << p->n << " == " << p->N
+                  << " , m= " << p->m << " "<< p->M
+            << " nzz "<< p->nnz << endl; 
+        cerr << " Fatal Error " << where << "  invalide HashMatrix Ptr "<< gm << " "<< p << endl;
+        ffassert(0);
+    }
+}
 
 // END OF CLASS HashMatrix
 

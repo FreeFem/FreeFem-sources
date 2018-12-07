@@ -186,10 +186,10 @@ int getprog(char* fn,int argc, char **argv)
             {
                 progffglut=argv[++i];
                 if(flagnw)
-                    progffglut=0;// if -nw => no graphic in anycase
+                    noffglut=true,NoGraphicWindow=true;// if -nw => no graphic in anycase
                 else
                 {
-                noffglut=true;
+                noffglut=false;
                 NoGraphicWindow=false;
                 }
             }
@@ -197,10 +197,10 @@ int getprog(char* fn,int argc, char **argv)
             {
                 progffglut=Shell_Space(argv[++i]);
                 if(flagnw)// if -nw => no graphic in anycase
-                    progffglut=0;// if -nw => no graphic in anycase
+                    noffglut=true,NoGraphicWindow=true;// if -nw => no graphic in anycase
                 else
                 {
-                noffglut=true;
+                noffglut=false;
                 NoGraphicWindow=false;
                 }
             }
