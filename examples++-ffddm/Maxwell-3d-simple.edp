@@ -1,3 +1,5 @@
+// NBPROC 6
+// PARAM -raspart -ffddm_schwarz_method oras -global 15
 //ff-mpirun -np 8 Maxwell-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 load "Element_Mixte3d"

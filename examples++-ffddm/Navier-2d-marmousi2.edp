@@ -1,3 +1,6 @@
+// NBPROC 8
+// PARAM -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
+
 //ff-c++ -auto marmousi2.cpp
 //ff-mpirun -np 8 Navier-2d-marmousi2.edp -glut ffglut -ns -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
 

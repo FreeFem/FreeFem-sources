@@ -1,3 +1,6 @@
+// NBPROC 4
+// PARAM -raspart -ffddm_disable_plots
+
 //ff-mpirun  -np 4 Richards-2d.edp -glut ffglut -raspart -ns -ffddm_disable_plots
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer

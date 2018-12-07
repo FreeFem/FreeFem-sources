@@ -1,3 +1,6 @@
+// NBPROC 8
+// PARAM -raspart -ffddm_schwarz_method oras -global 9 -CSsplit 3
+
 //ff-mpirun -np 8 natural_convection_3D_obstacle.edp -raspart -ffddm_schwarz_method oras -glut ffglut -ffddm_medit -global 9 -CSsplit 3
 
 //large scale case : ff-mpirun  -np 224 natural_convection_3D_obstacle.edp -raspart -ffddm_schwarz_method oras -ns -nw -global 36 -noGlob -CSsplit 6 -ffddm_master_p 2 -ffddm_master_exclude 1

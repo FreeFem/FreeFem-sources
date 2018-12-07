@@ -1,3 +1,6 @@
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras
+
 //ff-mpirun -np 4 Helmholtz-3d-semiopencavity.edp -glut ffglut -raspart -ffddm_schwarz_method oras  -ffddm_medit
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer

@@ -1,3 +1,5 @@
+// NBPROC 8
+// PARAM --raspart -ffddm_schwarz_method oras  -frequency 2e+9
 //ff-c++ mymsh3.cpp
 //ff-mpirun --oversubscribe -np 8 Helmholtz-2d-Cobracavity.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit -frequency 2e+9
 

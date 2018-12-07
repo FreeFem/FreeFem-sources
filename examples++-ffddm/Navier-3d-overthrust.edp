@@ -1,5 +1,8 @@
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras
+
 //ff-c++ -auto overthrust.cpp
-//ff-mpirun -np 4 Navier-3d-overthrust.edp -glut ffglut -raspart -ffddm_schwarz_method ras
+//ff-mpirun -np 4 Navier-3d-overthrust.edp -glut ffglut -raspart -ffddm_schwarz_method oras
 
 include "cube.idp"
 

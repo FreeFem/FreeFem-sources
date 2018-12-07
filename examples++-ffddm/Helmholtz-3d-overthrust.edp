@@ -1,3 +1,6 @@
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras 
+
 //ff-c++ overthrust.cpp
 //ff-mpirun -np 8 Helmholtz-3d-overthrust.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
 

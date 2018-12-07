@@ -1,3 +1,6 @@
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras 
+
 //ff-c++ -auto marmousi.cpp
 //ff-mpirun -np 4 Helmholtz-2d-marmousi.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
 
