@@ -118,6 +118,7 @@ int getprog(char* fn,int argc, char **argv)
             waitatend=false;
         }
     }
+    bool flagnw=0;
     echo_edp=true;
     ffapi::ff_justcompile=false;
     if(argc)
@@ -139,6 +140,7 @@ int getprog(char* fn,int argc, char **argv)
             }
             else if  ((strcmp(argv[i],"-nw")==0 ) || (strcmp(argv[i],"-ng")==0 ))// add -ng april 2017
             {
+                flagnw=true;
                 consoleatend=false;
                 noffglut=true;
                 NoGraphicWindow=true;
@@ -180,17 +182,27 @@ int getprog(char* fn,int argc, char **argv)
                 fileglut=argv[++i];
                 noffglut=true;
             }
-            else if(strcmp(argv[i],"-glut")==0 && i+1 < argc)
+            else if( strcmp(argv[i],"-glut")==0 && i+1 < argc)
             {
                 progffglut=argv[++i];
+                if(flagnw)
+                    progffglut=0;// if -nw => no graphic in anycase
+                else
+                {
                 noffglut=true;
                 NoGraphicWindow=false;
+                }
             }
             else if(strcmp(argv[i],"-gff")==0 && i+1 < argc)
             {
                 progffglut=Shell_Space(argv[++i]);
+                if(flagnw)// if -nw => no graphic in anycase
+                    progffglut=0;// if -nw => no graphic in anycase
+                else
+                {
                 noffglut=true;
                 NoGraphicWindow=false;
+                }
             }
             else if(strcmp(argv[i],"-?")==0 )
                 ret=2;
