@@ -696,12 +696,12 @@ ffddminitDmeshf(pr,Thc,comm)
 if (!bnoGlob)
 if  (pr#inexactCSsplit <= 1) {
   if (ffddmsplit == 1)
-    pr#Thglob = Th;
+    pr#Thglob = Thc;
   else
-    pr#Thglob = trunc(Th,1,split=ffddmsplit);
+    pr#Thglob = trunc(Thc,1,split=ffddmsplit);
 }
 else 
-  pr#Thglob = trunc(Th,1,split=pr#inexactCSsplit*ffddmsplit);
+  pr#Thglob = trunc(Thc,1,split=pr#inexactCSsplit*ffddmsplit);
 
 ffddminitDmeshf(pr#Coarse,Thc,comm)
 

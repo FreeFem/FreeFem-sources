@@ -7,7 +7,8 @@ diffusion-3d-minimal-ddm.edp	 \
 Helmholtz-2d-simple.edp			diffusion-3d-minimal-direct.edp		elasticity-3d-simple.edp \
 elasticity-3d-thirdlevelgeneo.edp \
 Richards-2d.edp					natural_convection.edp \
-Helmholtz-3d-simple.edp			diffusion-2d-thirdlevelgeneo.edp	natural_convection_3D_obstacle.edp
+Helmholtz-3d-simple.edp			diffusion-2d-thirdlevelgeneo.edp	natural_convection_3D_obstacle.edp \
+Helmholtz-2d-HPDDM-BGMRES.edp
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
