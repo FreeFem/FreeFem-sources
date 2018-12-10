@@ -1837,7 +1837,7 @@ Mesh3*GluMesh3 (listMesh3 const &lst) {
 		}
 
 		// nbv0 =+Th3.nv;
-    } cout  << "eeeeeeeeeeee"<< endl;
+    }
 
 	delete gtree;
 	delete gtree_be;
