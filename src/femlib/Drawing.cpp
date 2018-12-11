@@ -237,7 +237,14 @@ void  SetDefaultIsoValue(const RN_& u,const RN_& v,RN_ & Viso)
    couleur(1);
 //   rattente(0);
  }
-
+    // to remove link of blas with graphic tools dec. 2018 FH
+    double dot(const RN_& U,const RN_& V)
+    {
+        double s=0;
+        for(int i=0; U.N(); ++i)
+            s += U[i]*V[i];
+        return s;
+    }
 void FElement::Draw(const RN_& U,const RN_ & Viso,int composante) const
 {   
   int nsb = nbsubdivision();
@@ -260,7 +267,7 @@ void FElement::Draw(const RN_& U,const RN_ & Viso,int composante) const
      //   cout << nbdf << endl;
         Pt=SubTriangle(nsb,k,j); //  current point 
         BF(whatd,Pt,fb);
-        ff[j] = (fb('.',composante,0),fk);
+        ff[j] = dot(fb('.',composante,0),fk);
         P[j] = A*(1-Pt.x-Pt.y)+B*Pt.x + C*Pt.y;
        }
      DrawIsoT(P,ff,Viso);  
@@ -289,7 +296,7 @@ void FElement::Drawfill(const RN_& U,const RN_ & Viso,int composante, double rap
      //   cout << nbdf << endl;
         Pt=SubTriangle(nsb,k,j); //  current point 
         BF(whatd,Pt,fb);
-        ff[j] = (fb('.',composante,0),fk);
+        ff[j] = dot(fb('.',composante,0),fk);
         P[j] = A*(1-Pt.x-Pt.y)+B*Pt.x + C*Pt.y;
        }
      DrawIsoTfill(P,ff,Viso,rapz);  
@@ -322,8 +329,8 @@ R2 FElement::MinMax(const RN_& U,const RN_& V,int i0,int i1) const
      //   cout << nbdf << endl;
         R2 Pt=SubTriangle(nsb,k,j); //  current point 
         BF(whatd,Pt,fb);
-        f0[j] = (fb('.',i0,0),fk);
-        f1[j] = (fb('.',i1,0),gk);
+        f0[j] = dot(fb('.',i0,0),fk);
+        f1[j] = dot(fb('.',i1,0),gk);
         R2 uv(f0[j],f1[j]);
         R uv2 = (uv,uv);
         minmax.x=Min(minmax.x,uv2);
@@ -358,7 +365,7 @@ R2 FElement::MinMax(const RN_& U,int i0) const
      //   cout << nbdf << endl;
         R2 Pt=SubTriangle(nsb,k,j); //  current point 
         BF(whatd,Pt,fb);
-        f0[j] = (fb('.',i0,0),fk);
+        f0[j] = dot(fb('.',i0,0),fk);
         minmax.x=Min(minmax.x,f0[j]);
         minmax.y=Max(minmax.y,f0[j]);        
        }
@@ -398,8 +405,8 @@ void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int
      //   cout << nbdf << endl;
         Pt=SubTriangle(nsb,k,j); //  current point 
         BF(whatd,Pt,fb);
-        f0[j] = (fb('.',i0,0),fk);
-        f1[j] = (fb('.',i1,0),gk);
+        f0[j] = dot(fb('.',i0,0),fk);
+        f1[j] = dot(fb('.',i1,0),gk);
      //   if(number<2) 
      //   cout << number << " " << fk << " " << fb('.',0,0) << " :  " << f0[j] << " " <<  f1[j] << endl;
         P[j] = A*(1-Pt.x-Pt.y)+B*Pt.x + C*Pt.y;
