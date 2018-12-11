@@ -1,22 +1,10 @@
-macro ffddmEuansetupinit(pr,Thc)
-IFMACRO(!pr#Euansetupinit)
+macro ffddmcoarsemeshsetupinit(pr,Thc)
+IFMACRO(!pr#coarsemeshsetupinit)
 
-pr#bEuan = 1;
+pr#bCM = 1;
 
 meshN pr#ThCoarse = minimalMesh;
 fespace pr#VhCoarse(pr#ThCoarse,pr#prfe#fPk); /* fespace on the coarse mesh */
-
-/*
-if (pCS == 0) {
-if (mpirank == 0)
-cout << "ffddm Euan setup WARNING: pCS = 0; setting pCS to 1 for solving the coarse problem" << endl;
-pCS = 1;
-if (bpara) {  
-int p = 1;
-splitComm(mpiCommWorld, p, commCS, topology = getARGV("-hpddm_master_topology", 0), exclude = 0);
-}
-}
-*/
 
 if (pr#prfe#prmesh#isincomm) {
   if (!pr#prfe#prmesh#binexactCS) {
@@ -24,14 +12,14 @@ if (pr#prfe#prmesh#isincomm) {
     pr#ncoarsespace = pr#VhCoarse.ndof;
     
     if (!bpara) {
-      matrix Zc = interpolate(pr#prfe#Vhglob,pr#VhCoarse); /* Zeuan=R0^T */
+      matrix Zc = interpolate(pr#prfe#Vhglob,pr#VhCoarse); /* ZCM=R0^T */
       Zc.thresholding(1.e-10);
-      pr#Zeuan = Zc; /* (from real to 'complex' matrix for FreeFem) */    
+      pr#ZCM = Zc; /* (from real to 'complex' matrix for FreeFem) */    
     }
     else if (!pr#prfe#prmesh#excluded){
       matrix Zci = interpolate(pr#prfe#Vhi,pr#VhCoarse);
       Zci.thresholding(1.e-10);
-      pr#Zeuani = Zci;
+      pr#ZCMi = Zci;
     }
     NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
     IFMACRO(localmacroaug,1)
@@ -48,7 +36,7 @@ if (pr#prfe#prmesh#isincomm) {
     IFMACRO (localmacroinexact,1)
     matrix Zci = interpolate(pr#prfe#Vhi,pr#prfe#CoarseVhi);
     Zci.thresholding(1.e-10);
-    pr#Zeuani = Zci;
+    pr#ZCMi = Zci;
     pr#ncoarsespace = pr#prfe#CoarseNdofglobal;
     ENDIFMACRO
     ;
@@ -58,12 +46,12 @@ if (pr#prfe#prmesh#isincomm) {
   cout << "["+Stringification(pr)+"] Coarse space dimension: " << pr#ncoarsespace << endl;
 }
 
-NewMacro pr#Euansetupinit()1 EndMacro
+NewMacro pr#coarsemeshsetupinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
-macro ffddmEuansetup(pr,Thc,VarfEprec,VarfA)
-ffddmEuansetupinit(pr,Thc)
+macro ffddmcoarsemeshsetup(pr,Thc,VarfEprec,VarfA)
+ffddmcoarsemeshsetupinit(pr,Thc)
 if (pr#prfe#prmesh#isincomm)
 {
 pr#corr = ffddmcorrection;
@@ -114,14 +102,14 @@ if (!pr#prfe#prmesh#binexactCS) {
   {
     VarfEprec(cvaglobalEprec,pr#ThCoarse,pr#VhCoarse)
     if (mpirank < pr#prfe#prmesh#pCS || !bpara) {
-      pr#Eeuan = cvaglobalEprec(pr#VhCoarse,pr#VhCoarse,solver=(vsym ? CG : GMRES),tgv=vtgv);  /* this is A_{eps,0} of Euan paper */
-      /*pr#Eeuan.thresholding(1.e-10);*/
+      pr#ECM = cvaglobalEprec(pr#VhCoarse,pr#VhCoarse,solver=(vsym ? CG : GMRES),tgv=vtgv);  /* this is A_{eps,0} of Euan paper */
+      /*pr#ECM.thresholding(1.e-10);*/
     }
   }
 
   if (bseq || mpirank < pr#prfe#prmesh#pCS) {
-  	set(pr#Eeuan,solver=GMRES);
-    set(pr#Eeuan,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=-1);
+  	set(pr#ECM,solver=GMRES);
+    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=-1);
   }
 }
 	

@@ -1,9 +1,10 @@
-// NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras -waven 30
-
 //ff-mpirun -np 4 Helmholtz-2d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras -waven 30
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras -waven 30
 
 macro dimension 2// EOM            // 2D or 3D
 
@@ -65,9 +66,10 @@ macro Varfrhs(varfName, meshName, PhName)
                 -intN(meshName)(f*v)
                 + on(Dirichlet,u=0); // EOM
 
-macro Hdefplot(u)real(u)//
-
 ffddmbuildDmesh(Hmesh,Th,mpiCommWorld)
+
+macro HFEdefplot(u)real(u)//
+
 ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
 
 vsym = 1;
@@ -95,7 +97,7 @@ Hwritesummary
 
 if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL :" << endl;
 
-ffddmEuansetup(H,Thc,VarfEprec,VarfEprec)
+ffddmcoarsemeshsetup(H,Thc,VarfEprec,VarfEprec)
 
 u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
 
@@ -104,5 +106,5 @@ Hwritesummary
 err[] = HA(u[]);
 err[] -= rhs;
 
-ffddmplot(H,real(u), "Global solution");
-ffddmplot(H,abs(err), "Global residual");
+ffddmplot(HFE,real(u), "Global solution");
+ffddmplot(HFE,abs(err), "Global residual");

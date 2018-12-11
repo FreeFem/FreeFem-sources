@@ -1,9 +1,10 @@
-// NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras 
-
-//ff-mpirun -np 4 Helmholtz-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras  -ffddm_medit
+ //ff-mpirun -np 4 Helmholtz-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras  -ffddm_medit
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras
 
 macro dimension 3// EOM            // 2D or 3D
 
@@ -63,8 +64,6 @@ macro Varfrhs(varfName, meshName, PhName)
                 -intN(meshName)(f*v)
                 + on(Dirichlet,u=0); // EOM
 
-macro defplot(u)real(u)//
-
 macro Hdefplot(u)real(u)//
 
 vsym = 1;
@@ -92,7 +91,7 @@ Hwritesummary
 
 if (mpirank == 0) cout <<  endl << "ORAS TWO-LEVEL :" << endl;
 
-ffddmEuansetup(H,Thc,VarfEprec,VarfEprec)
+ffddmcoarsemeshsetup(H,Thc,VarfEprec,VarfEprec)
 
 u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
 

@@ -142,7 +142,7 @@ Nwritesummary
 
 if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL :" << endl;
 
-ffddmEuansetup(N,Thc,VarfEprec,VarfEprec)
+ffddmcoarsemeshsetup(N,Thc,VarfEprec,VarfEprec)
 
 u[] = NfGMRES(x0, rhs, 1.e-6, 300, "right");
 

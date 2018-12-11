@@ -1,12 +1,12 @@
-// NBPROC 8
-// PARAM -raspart -ffddm_schwarz_method oras -global 9 -CSsplit 3
-
 //ff-mpirun -np 8 natural_convection_3D_obstacle.edp -raspart -ffddm_schwarz_method oras -glut ffglut -ffddm_medit -global 9 -CSsplit 3
 
 //large scale case : ff-mpirun  -np 224 natural_convection_3D_obstacle.edp -raspart -ffddm_schwarz_method oras -ns -nw -global 36 -noGlob -CSsplit 6 -ffddm_master_p 2 -ffddm_master_exclude 1
 
-
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 8
+// PARAM -raspart -ffddm_schwarz_method oras -global 9 -CSsplit 3
 
 macro dimension()3// EOM            // 2D or 3D
 
@@ -77,8 +77,8 @@ if (NCpCS > 1) {
 	}
 }
 
-// on initialise les structures pour le 2e niveau (grossier) du precond (tout sauf ce qui depend de l'edp -- on apellera plus tard ffddmEuansetup(NC,Thc,VarfCS,null) a chaque iteration pour assembler la matrice du probleme grossier)
-ffddmEuansetupinit(NC,Thc)
+// on initialise les structures pour le 2e niveau (grossier) du precond (tout sauf ce qui depend de l'edp -- on apellera plus tard ffddmcoarsemeshsetup(NC,Thc,VarfCS,null) a chaque iteration pour assembler la matrice du probleme grossier)
+ffddmcoarsemeshsetupinit(NC,Thc)
 
 // [uG,uGB,uGC,pG,TG] est destinee a etre l'interpolation de la solution sur le maillage grossier et interviendra dans l'assemblage du probleme grossier (mais en fait on ne va pas l'utiliser car ca marche beaucoup mieux sans !)
 NCVhCoarse [uG,uGB,uGC,pG,TG];
@@ -111,7 +111,7 @@ macro Varf(varfName, meshName, VhName)
     +on(20,Tw=Tin);
 // EOM
 
-// la formulation variationnelle pour le probleme grossier. On enleve les termes qui dependent de la solution precedente, est ca marche quand meme tres bien.
+// la formulation variationnelle pour le probleme grossier. On enleve les termes qui dependent de la solution precedente, et ca marche quand meme tres bien.
 macro VarfCS(varfName, meshName, VhName)
     varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
      intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
@@ -181,9 +181,9 @@ for(int step=1; step <= nstep; ++step)
 	 ffddmsetup(NC,NC,Varf,VarfOpt)
 	 
 	 // on assemble le probleme grossier. On repasse pour l'occasion en mode penalisation exacte avec des 1e+30 sur la diagonale pour les conditions de Dirichlet, ca marche en general mieux et c'est plus simple lorsque la matrice est distribuee (sur les NCpCS coeurs du probleme grossier).
-	 // remarque : si -ffddm_master_exclude 1, les calls ffddmsetup et ffddmEuansetup sont faits en parallele : les coeurs qui ne s'occupent que du 1er niveau assemblent les matrices locales dans ffddmsetup, et les coeurs qui ne s'occupent que du probleme grossier l'assemblent dans ffddmEuansetup
+	 // remarque : si -ffddm_master_exclude 1, les calls ffddmsetup et ffddmcoarsemeshsetup sont faits en parallele : les coeurs qui ne s'occupent que du 1er niveau assemblent les matrices locales dans ffddmsetup, et les coeurs qui ne s'occupent que du probleme grossier l'assemblent dans ffddmcoarsemeshsetup
 	 vtgv = 1.e+30/NCpCS; 
-	 ffddmEuansetup(NC,Thc,VarfCS,null)	 
+	 ffddmcoarsemeshsetup(NC,Thc,VarfCS,null)	 
 	 vtgv = -1;
 	 
 	 // assemblage du second membre

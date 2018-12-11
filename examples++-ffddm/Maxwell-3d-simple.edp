@@ -1,6 +1,8 @@
+//ff-mpirun -np 8 Maxwell-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
+
+// for the make check:
 // NBPROC 6
 // PARAM -raspart -ffddm_schwarz_method oras -global 15
-//ff-mpirun -np 8 Maxwell-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 load "Element_Mixte3d"
 
@@ -95,7 +97,7 @@ Mwritesummary
 
 if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL :" << endl;
 
-ffddmEuansetup(M,Thc,VarfEprec,VarfEprec)
+ffddmcoarsemeshsetup(M,Thc,VarfEprec,VarfEprec)
 
 u[] = MfGMRES(x0, rhs, 1.e-6, 200, "right");
 

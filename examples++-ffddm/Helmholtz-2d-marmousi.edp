@@ -1,10 +1,11 @@
-// NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras 
-
 //ff-c++ -auto marmousi.cpp
 //ff-mpirun -np 4 Helmholtz-2d-marmousi.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras 
 
 macro dimension 2// EOM            // 2D or 3D
 
@@ -106,7 +107,7 @@ Hwritesummary
 
 if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL :" << endl;
 
-ffddmEuansetup(H,Thc,VarfEprec,VarfEprec)
+ffddmcoarsemeshsetup(H,Thc,VarfEprec,VarfEprec)
 
 u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
 
