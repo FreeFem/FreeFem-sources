@@ -61,7 +61,7 @@ history:
 		fi
 
 documentation:
-	rm freefem++doc.pdf
+	rm -f freefem++doc.pdf
 	$(WGET) https://github.com/FreeFem/FreeFem-doc-pdf/raw/master/freefem%2B%2Bdoc.pdf
 #	cd DOC && $(MAKE) $(AM_MAKEFLAGS) documentation
 
