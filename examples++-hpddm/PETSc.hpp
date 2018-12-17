@@ -108,7 +108,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         }
         unsigned short* local = new unsigned short[fields->n + last - first]();
         for(int i = 0; i < fields->n; ++i)
-            local[i] = std::round(fields->operator[](i));
+            local[i] = std::lround(fields->operator[](i));
         unsigned short nb = fields->n > 0 ? *std::max_element(local, local + fields->n) : 0;
         MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_UNSIGNED_SHORT, MPI_MAX, PETSC_COMM_WORLD);
         local += fields->n;
@@ -140,7 +140,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             unsigned int* re = new unsigned int[pL->n];
             unsigned int nbSchur = 1;
             for(int i = 0; i < pL->n; ++i)
-                re[i] = ((*pL)[i]) ? nbSchur++ : 0;
+                re[i] = std::abs((*pL)[i]) > 1.0e-12 ? nbSchur++ : 0;
             nbSchur--;
             unsigned int* num;
             unsigned int start, end, global;
@@ -150,9 +150,9 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             re = new unsigned int[2 * nbSchur];
             unsigned int* numSchur = re + nbSchur;
             for(int i = 0, j = 0; i < pL->n; ++i) {
-                if((*pL)[i]) {
+                if(std::abs((*pL)[i]) > 1.0e-12) {
                     *numSchur++ = num[i];
-                    re[static_cast<int>((*pL)[i]) - 1] = j++;
+                    re[std::lround((*pL)[i]) - 1] = j++;
                 }
             }
             numSchur -= nbSchur;
