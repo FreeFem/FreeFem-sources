@@ -65,7 +65,7 @@ double myjn(long n, double x){ return jn((int) n,x);}
 #include <queue>
 
 #include "array_init.hpp"
-
+#include "AFunction_ext.hpp"
 // Add FH to get memroy used in test .. march 2014
 #if __APPLE__
 #include <malloc/malloc.h>
@@ -125,6 +125,9 @@ template<class T> inline T Min (const T &a,const T & b){return a < b ? a : b;}
 template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
 template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(Max(a,b),c);}
 template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
+template<class T> inline T Min (const T &a,const T & b,const T & c,const T & d){return Min(Min(a,b),Min(c,d));}
+template<class T> inline T Max (const T &a,const T & b,const T & c,const T & d){return Max(Max(a,b),Max(c,d));}
+
 template<class T> inline T Square (const T &a){return a*a;}
 
 struct SubArray2: public binary_function<long,long,SubArray> { 
@@ -439,6 +442,7 @@ long exec(string *s)
   ostream * f;
    operator long () const {return f->precision();}
  };
+
 
 class OP_setw { public:
     long w;
@@ -1637,6 +1641,7 @@ void Init_map_type()
      Global.Add("tanh","(",new OneOperator1<double>(tanh));
 
     Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
+    Global.Add("atol","(",new OneOperator1<long,string*>(atoi));// add march 2010
     Global.Add("atof","(",new OneOperator1<double,string*>(atof));// add march 2010
 
     Global.Add("strtol","(",new OneOperator1<long,string*>(ffstrtol));// add march 2017
@@ -1691,6 +1696,10 @@ void Init_map_type()
     Global.Add("min","(",new OneOperator3_<double,double>(Min<double> ));
     Global.Add("max","(",new OneOperator3_<long,long>(Max));
     Global.Add("min","(",new OneOperator3_<long,long>(Min));
+    Global.Add("max","(",new OneOperator4_<long,long>(Max));
+    Global.Add("min","(",new OneOperator4_<long,long>(Min));
+    Global.Add("max","(",new OneOperator4_<double,double>(Max));
+    Global.Add("min","(",new OneOperator4_<double,double>(Min));
 
     Global.Add("atan2","(",new OneOperator2<double>(atan2));
     Global.Add("fmod","(",new OneOperator2<double>(fmod));// add sep 2017

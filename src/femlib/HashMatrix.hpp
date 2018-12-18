@@ -133,6 +133,7 @@ public:
     void resize(I nn, I mm=0)  {resize(nn,mm,nnz); }
         
     void resize(I nn, I mm,size_t nnnz, double tol = -1., bool sym=false );
+    void SymmetrizePattern(); // To do for Suzuki , Paradiso 
     void clear();
     Hash hash(size_t ii,size_t jj) const{ return ( (ii-fortran)+ (jj-fortran)*this->n )%nhash; }
     

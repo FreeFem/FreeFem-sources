@@ -241,7 +241,7 @@ void  SetDefaultIsoValue(const RN_& u,const RN_& v,RN_ & Viso)
     double dot(const RN_& U,const RN_& V)
     {
         double s=0;
-        for(int i=0; U.N(); ++i)
+        for(int i=0; i<U.N(); ++i)
             s += U[i]*V[i];
         return s;
     }

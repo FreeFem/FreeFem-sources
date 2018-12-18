@@ -361,7 +361,10 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
   if (typsols)
     {
       for (Int4 i=0;i<nbsol;i++)
+          if(typsols[i]<4)
 	     ntmp += sizeoftype[typsols[i]];
+          else
+             ntmp+=typsols[i]+1;
     }
   else
     ntmp = nbsol;
@@ -463,7 +466,9 @@ void Triangles::IntersectConsMetric(const double * s,const Int4 nbsol,const int 
       Real8 h1=1.e30,h2=1e-30,rx=0;
       Real8 coef = 1./(anisomax*anisomax);
       Real8 hn1=1.e30,hn2=1e-30,rnx =1.e-30;  
-      int nbfield = typsols? sizeoftype[typsols[nusol]] : 1; 
+        int nbfield = typsols
+           ? (typsols[nusol] <4 ? sizeoftype[typsols[nusol]] : typsols[nusol]+1 )
+           : 1;
       if (nbfield == 1) 
        for ( iv=0,k=0; iv<nbv; iv++,k+=n )
 				{

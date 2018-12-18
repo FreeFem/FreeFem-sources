@@ -389,6 +389,14 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
     state= unsorted;
     type_state=type_COO;
 }
+template<class I,class R>
+void HashMatrix<I,R>::SymmetrizePattern()
+{
+    ffassert( this->n==this->m);
+    for(size_t k=0; k <nnz ;++k)
+        npij( j[k], i[k]);
+    
+}
 
 template<class I,class R>
 void HashMatrix<I,R>::clear()

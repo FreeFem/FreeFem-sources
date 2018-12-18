@@ -1707,6 +1707,7 @@ if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
     AC_SUBST(DOWNLOAD_UMFPACK,"umfpack")
+	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
     ff_umfpack_download=yes
 
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
