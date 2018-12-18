@@ -70,7 +70,7 @@ int vsym = 0;//
 
 /*
 if (binexactCS) {
-  assert(bCS && bEuan && bpara);
+  assert(bCS && bCM && bpara);
 }
 */
 

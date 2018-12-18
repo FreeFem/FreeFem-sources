@@ -1,6 +1,10 @@
-//ff-mpirun  -np  4 diffusion-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 10 -global 20 -ffddm_plot
+//ff-mpirun  -np  4 diffusion-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 10 -global 20
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 10 -global 20
 
 macro dimension 3// EOM            // 2D or 3D
 

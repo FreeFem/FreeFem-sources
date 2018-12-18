@@ -1,8 +1,12 @@
-//ff-mpirun  -np  4 diffusion-3d-minimal-direct.edp -glut ffglut -raspart -ffddm_schwarz_method ras -ffddm_geneo_nu 10 -global 20 -ffddm_plot
+//ff-mpirun  -np 4 diffusion-3d-minimal-direct.edp -glut ffglut -raspart -global 20
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
 // Abstract "Lap: Direct solver (MUMPS) :" << endl;//direct parallel solver 
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -global 20
 
 macro dimension 3// EOM            // 2D or 3D
 

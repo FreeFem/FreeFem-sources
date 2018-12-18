@@ -1,31 +1,4 @@
-macro ffddmgenerateOperatorfunctions(pr,preffe) 
-NewMacro pr#plot(u,s)
-  if (preffe#prmesh#isincomm) {
-    if (ffddmbplot) {	
-      fespace VhP1(preffe#prmesh#Thglob,P1);
-      VhP1 solplot;
-      if (!bpara) {
-        if (mpiRank(preffe#prmesh#mpicomm) == 0)
-        solplot = u;
-      }
-      else if (!preffe#prmesh#excluded){   
-        preffe#prmesh#VhiP1 v = u;
-        v[] = preffe#prmesh#DP1[mpiRank(preffe#prmesh#commddm)][].*v[];
-        VhP1 tmp;
-        tmp[] = preffe#prmesh#RihP1[mpiRank(preffe#prmesh#commddm)]'*v[];
-        solplot[] = 0;
-        mpiReduce(tmp[],solplot[],processor(0,preffe#prmesh#commddm),mpiSUM);
-      }
-      if (mpiRank(preffe#prmesh#commddm) == 0) {
-        if (ffddmbmedit)
-        medit(s,preffe#prmesh#Thglob,solplot);
-        if (ffddmbffplot)
-        plot(solplot,dim=3,wait=0,cmm=s, value =1,fill=1,nbiso=ffddmnbiso);     
-      }
-    }
-  }
-EndMacro
-
+macro ffddmgenerateOperatorfunctions(pr,preffe)
 func preffe#K[int] pr#A(preffe#K[int] &x)
 {
   /* Matrix vector product with the global matrix */
@@ -94,18 +67,18 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
     preffe#K[int] res(l.n);
     res=0.;
     if (preffe#prmesh#isincomm) {
-      if(pr#bEuan){
+      if(pr#bCM){
         preffe#K[int] vaux(pr#ncoarsespace), tmp(pr#ncoarsespace), zaux(pr#ncoarsespace);
         
         /* Z^T l */
         if (!bpara) {
           
-          vaux = pr#Zeuan'*l;
+          vaux = pr#ZCM'*l;
         }
         else if (!preffe#prmesh#binexactCS){
           if (!preffe#prmesh#excluded) {
             preffe#K[int] ls = l .* preffe#Dk[mpiRank(preffe#prmesh#commddm)]; /* Z = sum_i D_i Z_i */
-            tmp = pr#Zeuani'*ls;
+            tmp = pr#ZCMi'*ls;
           }
           else
           tmp = 0;
@@ -117,7 +90,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           IFMACRO (localmacroinexact,1)
           if (!preffe#prmesh#excluded) {
             tmp.resize(preffe#CoarseVhi.ndof);
-            tmp = pr#Zeuani'*l;
+            tmp = pr#ZCMi'*l;
           }
           /*exchange(pr#Addmc,tmp,scaled=true);*/
           pr#prfe#Coarseupdate(tmp,true);
@@ -129,10 +102,10 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           if (!bpara || mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
             preffe#prmesh#tic(pr#tcsi)
             if (mpiRank(preffe#prmesh#mpicomm) == 0)
-            zaux = pr#Eeuan^-1*vaux;
+            zaux = pr#ECM^-1*vaux;
             else {
-              preffe#K[int] dumx(pr#Eeuan.n), dumb(pr#Eeuan.n);
-              dumx = pr#Eeuan^-1*dumb;	
+              preffe#K[int] dumx(pr#ECM.n), dumb(pr#ECM.n);
+              dumx = pr#ECM^-1*dumb;	
             }
             preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
           }
@@ -141,10 +114,10 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           broadcast(processor(0,preffe#prmesh#mpicomm),zaux);    
           
           if (!bpara) {
-            res = pr#Zeuan*zaux;
+            res = pr#ZCM*zaux;
           }
           else if (!preffe#prmesh#excluded) {
-            res = pr#Zeuani*zaux;
+            res = pr#ZCMi*zaux;
           }
         }
         else {
@@ -163,7 +136,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           solc = pr#CoarsefGMRES(solc, tmp, ffddminexactCStol, ffddmmaxit, ffddmvariant);
           preffe#prmesh#toc(pr#tcsi,"",pr#tcs)
           if (!preffe#prmesh#excluded)
-          res = pr#Zeuani*solc;
+          res = pr#ZCMi*solc;
           ENDIFMACRO
           ;	  
         }	
@@ -370,7 +343,7 @@ func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
     /* P */
     if (pr#corr == "ADEF1" || pr#corr == "BNN" || pr#corr == "RBNN1") {
       aux.resize(l.n);
-      if (pr#bEuan)
+      if (pr#bCM)
       aux = pr#AEprec(Ql);
       else
       aux = pr#A(Ql);
@@ -413,7 +386,7 @@ func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
     
     /* P^T */
     if (pr#corr == "ADEF2" || pr#corr == "BNN" || pr#corr == "RBNN1" || pr#corr == "RBNN2") {
-      if (pr#bEuan)
+      if (pr#bCM)
       ltemp = pr#AEprec(s);
       else
       ltemp = pr#A(s);
@@ -461,11 +434,11 @@ func preffe#K[int] pr#PRECTEST(preffe#K[int] &l)
 {
    preffe#K[int] res(l.n);
    preffe#K[int] ls = l .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
-   preffe#K[int] tmp = pr#Zeuani'*ls;
+   preffe#K[int] tmp = pr#ZCMi'*ls;
    
    IFMACRO (preffe#prmesh#minexactCS,1)
    preffe#K[int] rr = pr#CoarsePREC1(tmp);
-   res = pr#Zeuani*rr;
+   res = pr#ZCMi*rr;
    ENDIFMACRO
 
    return res;
@@ -672,10 +645,10 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       }
       
       if (pr#verbosity >= 10){
-        IFMACRO(pr#defplot)
+        IFMACRO(preffe#defplot)
         preffe#Vhi<preffe#K> def(unih);
         unih[] = uni;
-        pr#plot(pr#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + it)
+        preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + it)
         ENDIFMACRO
         ;
       }

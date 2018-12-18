@@ -1,9 +1,10 @@
-// NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras -waven 30
-
 //ff-mpirun -np 4 Helmholtz-2d-HPDDM-BGMRES.edp -glut ffglut -raspart -ffddm_schwarz_method oras -waven 30
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras -waven 30
 
 macro dimension 2// EOM            // 2D or 3D
 
@@ -102,4 +103,4 @@ Hwritesummary
 HFEVhi<complex> def(u);
 u[] = bu(0:HFEVhi.ndof-1); 
 
-ffddmplot(H,real(u), "u[0]");
+ffddmplot(HFE,real(u), "u[0]");

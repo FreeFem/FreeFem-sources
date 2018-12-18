@@ -1,8 +1,9 @@
-// NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras 
-
 //ff-c++ overthrust.cpp
 //ff-mpirun -np 8 Helmholtz-3d-overthrust.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras 
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
@@ -78,8 +79,6 @@ macro Varfrhs(varfName, meshName, PhName)
     varf varfName(u,v) =
                 intN(meshName)(source*v)
                 + on(Dirichlet,u=0); // EOM
-
-macro defplot(u)real(u)//
 
 macro Hdefplot(u)real(u)//
 

@@ -28,7 +28,7 @@ load "thresholdings"
 
 include "ffddm_partitioning.idp"
 
-include "ffddm_EuanCS.idp"
+include "ffddm_coarsemeshCS.idp"
 
 include "ffddm_geneoCS.idp"
 
@@ -240,12 +240,12 @@ matrix<pr#prfe#K> pr#matN;
 
 string pr#prec = ffddmprecond;
 
-int pr#bEuan = 0;
+int pr#bCM = 0;
 
 string pr#corr = "none";
 
 matrix<pr#prfe#K> pr#E;
-matrix<pr#prfe#K> pr#Zeuan,pr#Zeuani,pr#Eeuan;
+matrix<pr#prfe#K> pr#ZCM,pr#ZCMi,pr#ECM;
 
 int pr#si;
 
@@ -409,7 +409,7 @@ ENDIFMACRO
 IFMACRO (pr#minexactCS,1)
 
 ffddmsetup(pr#Coarse,VarfEprec,VarfOpt)
-ffddmEuansetup(pr#Coarse,Thcc,VarfEprec)
+ffddmcoarsemeshsetup(pr#Coarse,Thcc,VarfEprec)
 ffddmset(pr#Coarse,corr,"ADEF1")
 pr#ncoarsespace = pr#CoarseNdofglobal;
 

@@ -75,7 +75,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   
   for(int j=0;j<nev;++j) {
     if (ffddmtau == 0 || real(ev[j]) < ffddmtau) {
-      cout << i << " " << pr#si << " " << ev[j] << endl;
+      /*cout << i << " " << pr#si << " " << ev[j] << endl;*/
       
       pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
 			pr#Z[pr#si] = pr#prfe#Dk[i].*eV(:,j);

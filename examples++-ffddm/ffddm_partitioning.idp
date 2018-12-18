@@ -465,6 +465,33 @@ func scalar pr#scalprod(scalar[int] a, scalar[int] b)
   return res;
 }
 
+NewMacro pr#plot(u,s)
+  if (prmsh#isincomm) {
+    if (ffddmbplot) {	
+      fespace VhP1(prmsh#Thglob,P1);
+      VhP1 solplot;
+      if (!bpara) {
+        if (mpiRank(prmsh#mpicomm) == 0)
+        solplot = u;
+      }
+      else if (!prmsh#excluded){   
+        prmsh#VhiP1 v = u;
+        v[] = prmsh#DP1[mpiRank(prmsh#commddm)][].*v[];
+        VhP1 tmp;
+        tmp[] = prmsh#RihP1[mpiRank(prmsh#commddm)]'*v[];
+        solplot[] = 0;
+        mpiReduce(tmp[],solplot[],processor(0,prmsh#commddm),mpiSUM);
+      }
+      if (mpiRank(prmsh#commddm) == 0) {
+        if (ffddmbmedit)
+        medit(s,prmsh#Thglob,solplot);
+        if (ffddmbffplot)
+        plot(solplot,dim=3,wait=0,cmm=s, value =1,fill=1,nbiso=ffddmnbiso);     
+      }
+    }
+  }
+EndMacro
+
 NewMacro pr#feinit()1 EndMacro
 ENDIFMACRO
 // EOM

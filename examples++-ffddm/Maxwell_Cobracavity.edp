@@ -1,9 +1,10 @@
-// NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras -frequency 2e+9
-
 //ff-mpirun -np 8 Maxwell_Cobracavity.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit -frequency 2e+9
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras -frequency 2e+9
 
 load "metis"
 load "medit"
@@ -81,8 +82,6 @@ macro initpart(u)u//
 
 func Pk = Edge03d;
 func PkP0 = Edge03ds0;
-
-macro mplot(u)sqrt(real(u)^2+real(u#y)^2+real(u#z)^2)//
 
 //  Macros: Curl and cross product by the normal
 macro Curl(ux,uy,uz) [dy(uz)-dz(uy),dz(ux)-dx(uz),dx(uy)-dy(ux)] // EOM
@@ -207,7 +206,7 @@ Mwritesummary
 
 if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL + INEXACT COARSE SOLVE :" << endl;
 
-ffddmEuansetup(M,Thc,VarfEprec,VarfEprec)
+ffddmcoarsemeshsetup(M,Thc,VarfEprec,VarfEprec)
 
 u[] = MfGMRES(x0, rhs, 1.e-6, 200, "right");
 
