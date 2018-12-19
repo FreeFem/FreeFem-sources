@@ -76,10 +76,12 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
   Int4 kk =0;
 
   Int4 nbeold = nbe;
+     
+  int *orientedgeold = new int[nbe];// save orientation ... Dec 2018 FH.
   for (i=0;i<nbe;i++)
     {
       //      cout << i << " " << Number(edges[i][0]) << " " << Number(edges[i][1]) << endl;
-      edge4->addtrie(Number(edges[i][0]),Number(edges[i][1]));
+        edge4->addtrie(Number(edges[i][0]),Number(edges[i][1]),orientedgeold+i);
     }
   if (nbe !=  edge4->nb())
       { 
@@ -173,7 +175,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
       // construction of the edges 
       if(verbosity>4)
 	cout << "    Construction of the edges  " << nbe << endl;
-
+      int kos =0;
       for (i=0;i<nbedges;i++)
 	{ 
 	  Int4  add= -1;
@@ -185,6 +187,13 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	      Triangle & tt = * triangles[it].TriangleAdj(j);
 	      if (triangles[it].color !=  tt.color || i < nbeold) // Modif FH 06122055
 		  add=k++;
+              if( i<nbeold  && orientedgeold[i] <0 )// Warning keep orientation
+              {
+                  // get over side of
+                  j = triangles[it].NuEdgeTriangleAdj(j);
+                  it = Number(tt);
+                  kos++;
+              }
 	    }
 	  else if (st[i] >=0) // edge alone 
 	    {
@@ -199,7 +208,7 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	      edges[add].v[0] = &triangles[it][VerticesOfTriangularEdge[j][0]];
 	      edges[add].v[1] = &triangles[it][VerticesOfTriangularEdge[j][1]];
 	      edges[add].on=0; 
-	      if (i<nbeold) // in file edge // Modif FH 06122055 
+	      if (i<nbeold) // in file edge // Modif FH 06122055
 		{
 		  edges[add].ref = edgessave[i].ref; 		      
 		  edges[add].on = edgessave[i].on; //  HACK pour recuperer les aretes requise midf FH avril 2006 ???? 
@@ -210,8 +219,11 @@ void Triangles::ConsGeometry(Real8 cutoffradian,int *equiedges) // construct a g
 	}
       assert(k==nbe);
       if (edgessave) delete [] edgessave;
+        if(verbosity>2) cout << " ConsGeometry: reverse edge ??? " << kos <<  endl;
     }
-    
+     if(orientedgeold )delete [] orientedgeold;
+     orientedgeold=0;
+     
     // construction of edges[].adj 
     for (i=0;i<nbv;i++) 
       vertices[i].color =0;
