@@ -10,6 +10,10 @@ typedef PETSc::DistributedCSR<HpSchur<PetscReal>> DbddcR;
 typedef PETSc::DistributedCSR<HpSchur<PetscComplex>> DbddcC;
 
 namespace PETSc {
+template<class Type>
+struct _n_User;
+template<class Type>
+using User = _n_User<Type>*;
 template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, Dmat>::value>::type* = nullptr>
 void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
     double timing = MPI_Wtime();
@@ -1051,7 +1055,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 7;
+        static const int n_name_param = 8;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1068,7 +1072,12 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"names", &typeid(KN<String>*)},
     {"prefix", &typeid(std::string*)},
     {"schurPreconditioner", &typeid(KN<Matrice_Creuse<PetscScalar>>*)},
-    {"schurList", &typeid(KN<double>*)}
+    {"schurList", &typeid(KN<double>*)},
+    {"subksp", &typeid(Type*)}
+};
+template<class Type>
+struct _n_User {
+    typename Type::MatF_O*             op;
 };
 template<class Type>
 class setOptions : public OneOperator {
@@ -1082,6 +1091,34 @@ class setOptions : public OneOperator {
 template<class Type>
 AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
+    Type* ptSub = nargs[7] ? GetAny<Type*>((*nargs[7])(stack)) : 0;
+    if(ptSub && ptA) {
+        PC pc;
+        KSPGetPC(ptA->_ksp, &pc);
+        PCType type;
+        PCGetType(pc, &type);
+        PetscBool isFieldSplit;
+        PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
+        if(!isFieldSplit)
+            return 0L;
+        else {
+            PetscInt nsplits;
+            KSP* subksp;
+            PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+            for(int i = 0; i < nsplits; ++i) {
+                Mat A;
+                KSPGetOperators(subksp[i], &A, NULL);
+                if(A == ptSub->_petsc) {
+                    KSPDestroy(&(ptSub->_ksp));
+                    ptSub->_ksp = subksp[i];
+                    PetscObjectReference((PetscObject)subksp[i]);
+                    ptA = ptSub;
+                    break;
+                }
+            }
+            PetscFree(subksp);
+        }
+    }
     std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
     bool fieldsplit = PETSc::insertOptions(options);
     if(std::is_same<Type, Dmat>::value && fieldsplit) {
@@ -1438,17 +1475,60 @@ class Solve : public OneOperator {
     public:
         typedef KN<PetscScalar> Kn;
         typedef KN_<PetscScalar> Kn_;
+        class MatF_O : public VirtualMatrice<PetscScalar> {
+            public:
+                Stack stack;
+                mutable Kn x;
+                C_F0 c_x;
+                Expression mat1, mat;
+                typedef typename VirtualMatrice<PetscScalar>::plusAx plusAx;
+                MatF_O(int n, Stack stk, const OneOperator* op) :
+                    VirtualMatrice<PetscScalar>(n), stack(stk), x(n), c_x(CPValue(x)),
+                    mat1(op ? op->code(basicAC_F0_wa(c_x)) : 0),
+                    mat(op ? CastTo<Kn_>(C_F0(mat1, (aType)*op)) : 0) { }
+                ~MatF_O() {
+                    if(mat1 != mat)
+                        delete mat;
+                    delete mat1;
+                    Expression zzz = c_x;
+                    delete zzz;
+                }
+                void addMatMul(const Kn_& xx, Kn_& Ax) const {
+                    ffassert(xx.N() == Ax.N());
+                    x = xx;
+                    Ax += GetAny<Kn_>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                plusAx operator*(const Kn& x) const { return plusAx(this, x); }
+                bool ChecknbLine(int) const { return true; }
+                bool ChecknbColumn(int) const { return true; }
+        };
+        const int c;
         class E_Solve : public E_F0mps {
             public:
                 Expression A;
                 Expression x;
                 Expression y;
-                static const int n_name_param = 1;
+                const OneOperator *codeA, *codeC;
+                const int c;
+                static const int n_name_param = 2;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
-                E_Solve(const basicAC_F0& args) : A(0), x(0), y(0) {
+                E_Solve(const basicAC_F0& args, int d) : A(0), x(0), y(0), codeA(0), codeC(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
-                    A = to<Type*>(args[0]);
+                    if(c == 1) {
+                        const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
+                        ffassert(op);
+                        codeA = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
+                        if(nargs[0]) {
+                            op = dynamic_cast<const Polymorphic*>(nargs[0]);
+                            ffassert(op);
+                            codeC = op->Find("(", ArrayOfaType(atype<Kn*>(), false));
+                        }
+                    }
+                    else {
+                        A = to<Type*>(args[0]);
+                    }
                     x = to<KN<PetscScalar>*>(args[1]);
                     y = to<KN<PetscScalar>*>(args[2]);
                 }
@@ -1456,13 +1536,17 @@ class Solve : public OneOperator {
                 AnyType operator()(Stack stack) const;
                 operator aType() const { return atype<long>(); }
         };
-        E_F0* code(const basicAC_F0 & args) const { return new E_Solve(args); }
-        Solve() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()) { }
+        E_F0* code(const basicAC_F0 & args) const { return new E_Solve(args, c); }
+        Solve() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()), c(0) { }
+        Solve(int) : OneOperator(atype<long>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()), c(1) { }
 };
 template<class Type, char N>
 basicAC_F0::name_and_type Solve<Type, N>::E_Solve::name_param[] = {
+    {"precon", &typeid(Polymorphic*)},
     {"sparams", &typeid(std::string*)}
 };
+template<class Type, class Container>
+static PetscErrorCode Op_User(Container A, Vec x, Vec y);
 template<class Type, char N>
 AnyType Solve<Type, N>::E_Solve::operator()(Stack stack) const {
     KN<PetscScalar>* in = GetAny<KN<PetscScalar>*>((*x)(stack));
@@ -1492,7 +1576,79 @@ AnyType Solve<Type, N>::E_Solve::operator()(Stack stack) const {
         VecDestroy(&y);
         VecDestroy(&x);
     }
+    else {
+        User<Solve<Type, N>> user = nullptr;
+        PetscNew(&user);
+        user->op = new Solve<Type, N>::MatF_O(in->n, stack, codeA);
+        Mat S;
+        MatCreateShell(PETSC_COMM_WORLD, in->n, in->n, PETSC_DECIDE, PETSC_DECIDE, user, &S);
+        MatShellSetOperation(S, MATOP_MULT, (void (*)(void))Op_User<Solve<Type, N>, Mat>);
+        Vec x, y;
+        MatCreateVecs(S, &x, &y);
+        if(out->n != in->n) {
+            out->resize(in->n);
+            *out = PetscScalar();
+        }
+        VecPlaceArray(x, *in);
+        VecPlaceArray(y, *out);
+        KSP ksp;
+        KSPCreate(PETSC_COMM_WORLD, &ksp);
+        KSPSetOperators(ksp, S, S);
+        std::string* options = nargs[1] ? GetAny<std::string*>((*nargs[1])(stack)) : NULL;
+        insertOptions(options);
+        PC pc;
+        KSPGetPC(ksp, &pc);
+        User<Solve<Type, N>> userPC = nullptr;
+        if(codeC) {
+            PCSetType(pc, PCSHELL);
+            PetscNew(&userPC);
+            userPC->op = new Solve<Type, N>::MatF_O(in->n, stack, codeC);
+            PCShellSetContext(pc, userPC);
+            PCShellSetApply(pc, Op_User<Solve<Type, N>, PC>);
+        }
+        KSPSetFromOptions(ksp);
+        KSPSolve(ksp, x, y);
+        VecResetArray(y);
+        VecResetArray(x);
+        VecDestroy(&y);
+        VecDestroy(&x);
+        MatDestroy(&S);
+        KSPDestroy(&ksp);
+        if(codeC) {
+            delete userPC->op;
+            PetscFree(userPC);
+        }
+        delete user->op;
+        PetscFree(user);
+    }
     return 0L;
+}
+template<class Type, class Container, typename std::enable_if<std::is_same<Container, Mat>::value>::type* = nullptr>
+static PetscErrorCode ContainerGetContext(Container A, Type& user) {
+    return MatShellGetContext(A, &user);
+}
+template<class Type, class Container, typename std::enable_if<std::is_same<Container, PC>::value>::type* = nullptr>
+static PetscErrorCode ContainerGetContext(Container A, Type& user) {
+    return PCShellGetContext(A, (void**)&user);
+}
+template<class Type, class Container>
+static PetscErrorCode Op_User(Container A, Vec x, Vec y) {
+    User<Type>             user;
+    const PetscScalar*       in;
+    PetscScalar*            out;
+    PetscErrorCode         ierr;
+
+    PetscFunctionBegin;
+    ierr = ContainerGetContext(A, user); CHKERRQ(ierr);
+    typename Solve<Type>::MatF_O* mat = reinterpret_cast<typename Solve<Type>::MatF_O*>(user->op);
+    VecGetArrayRead(x, &in);
+    VecGetArray(y, &out);
+    KN_<PetscScalar> xx(const_cast<PetscScalar*>(in), mat->N);
+    KN_<PetscScalar> yy(out, mat->N);
+    yy = *mat * xx;
+    VecRestoreArray(y, &out);
+    VecRestoreArrayRead(x, &in);
+    PetscFunctionReturn(0);
 }
 
 template<class Type>
@@ -1798,6 +1954,7 @@ static void Init_PETSc() {
         Global.Add("MatMultHermitianTranspose", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::MatMult<'H'>));
     Global.Add("MatConvert", "(", new OneOperator2_<long, Dmat*, Dmat*>(PETSc::MatConvert));
     Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>());
+    Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>(1));
     if(!std::is_same<PetscScalar, PetscReal>::value)
         Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::Solve<Dmat, 'H'>());
     Global.Add("augmentation", "(", new PETSc::augmentation<Dmat>);
