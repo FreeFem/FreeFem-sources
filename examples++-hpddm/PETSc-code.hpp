@@ -1247,6 +1247,49 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
 }
 
 template<class Type>
+class view_Op : public E_F0mps {
+    public:
+        Expression A;
+        static const int n_name_param = 1;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        view_Op(const basicAC_F0& args, Expression param1) : A(param1) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+
+        AnyType operator()(Stack stack) const;
+};
+template<class Type>
+basicAC_F0::name_and_type view_Op<Type>::name_param[] = {
+    {"object", &typeid(std::string*)}
+};
+template<class Type>
+class view : public OneOperator {
+    public:
+        view() : OneOperator(atype<long>(), atype<Type*>()) { }
+
+        E_F0* code(const basicAC_F0& args) const {
+            return new view_Op<Type>(args, t[0]->CastTo(args[0]));
+        }
+};
+template<class Type>
+AnyType view_Op<Type>::operator()(Stack stack) const {
+    Type* ptA = GetAny<Type*>((*A)(stack));
+    std::string* object = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
+    if(!object || object->compare("mat") == 0) {
+        MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_WORLD);
+    }
+    else if(object->compare("ksp") == 0)
+        KSPView(ptA->_ksp, PETSC_VIEWER_STDOUT_WORLD);
+    else if(object->compare("pc") == 0) {
+        PC pc;
+        KSPGetPC(ptA->_ksp, &pc);
+        PCView(pc, PETSC_VIEWER_STDOUT_WORLD);
+    }
+    return 0L;
+}
+
+template<class Type>
 class changeNumbering : public OneOperator {
     public:
         const int c;
@@ -1962,6 +2005,7 @@ static void Init_PETSc() {
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dbddc*, KN<long>*>(PETSc::globalNumbering<Dbddc>));
     Global.Add("changeOperator", "(", new PETSc::changeOperator<Dmat>);
     Global.Add("IterativeMethod", "(", new PETSc::IterativeMethod<Dmat>);
+    Global.Add("view", "(", new PETSc::view<Dmat>);
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Dbddc*, KN<PetscScalar>*, KN<long>*>(PETSc::originalNumbering));
     Global.Add("renumber", "(", new OneOperator3_<long, KN<PetscScalar>*, KN<long>*, KN<PetscScalar>*>(PETSc::renumber));
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
