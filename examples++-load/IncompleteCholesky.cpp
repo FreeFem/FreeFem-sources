@@ -30,6 +30,28 @@
 #include "AFunction_ext.hpp"
 #include <vector>
 
+#ifdef __LP64__
+typedef int intblas;
+typedef int integer;
+#else
+typedef long intblas;
+typedef long integer;
+#endif
+
+typedef integer logical;
+typedef float LAPACK_real;
+typedef double doublereal;
+typedef logical (*L_fp)();
+typedef integer ftnlen;
+typedef complex<float> LAPACK_complex;
+typedef complex<double> doublecomplex;
+typedef void VOID;
+#define complex LAPACK_complex
+#define real LAPACK_real
+
+#include "clapack.h"
+#undef real
+#undef complex
 
 long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 {
@@ -220,7 +242,197 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
     L.CSR();
     return  err;
 }
+double * inv(int n,double *a,double *a1)
+{
+    int info;
+    int n2=n*n,n1=n+1.
+    fill(a1,a1+n*n,0.);
+    for (int i = 0; i < n2; i+= n1)
+        a1[i]=1;
+    
+    KN<integer> p(n);
+    dgesv_(&n, &n, a1, &n, p, a, &n, &info);
 
+}
+
+double * MatVect(int n,double *a,double *x, double *y)
+{
+    //  y = A *x, Row major
+    fill(y,y+n,0.);
+    for (int k=0,j=0;j<n;++j)
+        for(int i=0; i<n;++i,++k)
+            y[i] += a[k]*x[j];
+}
+#ifdef CODE_IN_PROGRESS
+//  F. Hecht try to make block ILU preconditinneur
+//  the matrix U must have the full diagonal bloc
+//  Store Diag bloc of inv Diag block ????
+long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double tgv)
+{
+    
+    /*  Algo LU block :
+     L = L + I, U = U+D
+     for(int i=0;i<n; ++i)
+     {
+     for(int j=0;j<i;++j) L(i,j) = (A(i,j) - (L(i,':'),U(':',j)))/ D(j,j);
+     for(int j=0;j<i;++j) U(j,i) = (A(j,i) - (L(j,':'),U(':',i))) ;
+     D(i,i) = A(i,i) - (L(i,':'),U(':',i));
+     }
+     
+     */
+    //  calcul indic de bloc
+
+    A.CSR();
+    L.CSR();
+    Ut.dotranspose();
+    Ut.CSR();
+    if( verbosity > 4)
+        cout << "   - ILU fact:   tgv " << tgv << endl;
+    ffassert( A.n == L.n);
+    ffassert( A.n == Ut.n);
+    int sym = A.half    ;
+    int n =A.n,i,j,k,kk;
+    ffassert( b[nb]== n);
+    
+    double tgve =tgv*0.999;
+    if(tgve < 1) tgve=1e200;
+    double NaN=sqrt(-1.);
+    fill(L.aij,L.aij+L.nnz,NaN);
+    fill(Ut.aij,Ut.aij+Ut.nnz,NaN);
+    int BC = 0;
+    KN<int> wbc(n);
+    long err=0;
+    double mUii=1e200;
+    const int nbix = 0;
+    KN<int> bn(n);
+
+    long lD1 =0;
+    KN<int> pD1(nb+1);
+    for(int ib=0; ib< nb; ++ib)
+    {
+        int i0=b[i0], i1=b[ib+1], nbi = i1-n0,;
+        for(int i=i0;i<i1;++i)
+            bn[i]=ib; // bloc number
+        ffassert( nbi>0);
+        pD1[ib] = lD1;
+        nbix = max(nbix,nbi);
+        lD1 += nbi*nbi;
+    }
+    pD1[nb] = lD1;
+    KN<double> DD1(ld1),DD(ld1),LB(nbi),UB(nbi);// to store the inverse of Diag block
+    KN<double> Aii(nbix*nbix); //  to store the bigest block
+    KN<int> ai1(nbix),ai0(nbix),li1(nbix),ui1(nbix),ui0(nbix):
+    for(int ib=0; ib< nb; ++ib)
+    {
+        int i0=b[i0], i1=b[ib+1], nbi = i1-n0,;
+       
+        for (int i= i0; i<i1; ++i)
+        {
+        int il=i-i0;
+        ai1[il] =A.p[i0+1]-1;
+        ai0[il]=A.p[i0];
+        li1[il]=L.p[i+1]-1;
+        li0[il]=L.p[i];
+        ui1[il]=Ut.p[i+1]-1;
+        ui0[il]=Ut.p[i];
+        }
+        //double  Aii=A(i,i),Uii;
+        
+        int BCi ;//  bofboc
+        for (int i= i0; i<i1; ++i,++k)
+        {
+        int il=i-i0;
+        wbc[i]  = BCi= (Aii[(nbi+1)*il] > tgve);
+        if (BCi)
+        { // B.C
+            fill(L.aij+li0[il],L.aij+li1[il],0.);
+            fill(Ut.aij+ui0[il],Ut.aij+ui1[il],0.);
+            L.aij[li1[il]]=1.;
+            Ut.aij[ui1[il]]=Aii[(nbi+1)*il];// bof bog (cas scalaire)
+            BC++;
+        }
+        else
+        {  // loop sur le bloc ib
+            int jbo=-1;
+            for(int l=li0[il];l<li1[il];++l) // coef of  L non zero  (pas bloc )
+            {
+                int j   = L.j[l];// j < i0
+                int jnext = L.j[l+1];// no PB the diag coef exist (jnext <= i)
+                int jb = bn[j];
+                if( jbo != jb)
+                    Lb=0.;
+                if (jb<ib) {
+                    int jl = j-ib[ij]; // offset dans le bloc
+                    R *pAij = A.pij(i,j), Aij = pAij ? *pAij : 0.;
+                    Lb[jl] = (Aij - pscal(L.aij,L.j,li0[il],li1[il],i, Ut,j));  // * D1(;
+                    if( jb == bn[jnext] ) // last term of the bloc because next is not same
+                    {
+                        int fb=ib[jb+1]-ib[jb]-1
+                        MatVect(fd,&D1[pD1[jb]],&Lj[0],y)
+                        for(int jl=0;jl<fb;++jl)
+                        { int j= ib[jb]+ jl;
+                          R * p= L.pij(i,j);
+                          if(p) *p = y[jl]; 
+                        }
+                    }
+                }
+                //
+            }
+            for(int u=ui0[il];u<ui1[il];++u) // coef of  Ut  non zero
+            {
+                int j   = Ut.j[u];// Ut(j,i) == U(j,i)
+                int jb = bn[j];
+                if (jb<ib) {
+                  R *pAji = sym ? A.pij(i,j) : A.pij(j,i), Aji = pAji ? *pAji : 0.;
+                  if( wbc[j] )  Aji=0; // remove row term  if BC. on j  ...
+                  ffassert(j<i);// transpose
+                  Ut.aij[u] = (Aji - pscal(Ut.aij,Ut.j,ui0[il],ui1[il],i, L,j));
+                }
+            }
+        }
+        }
+        
+       //  bloc diagonale
+         for (int k=0,j= i0; j<i1; ++j)
+            for (int i= i0; i<i1; ++i,++k)
+            { // block diagonal !!!
+                int kk= k+ pD1[ib] ;
+                int il = i-i0;
+                double  Aij=A(i,j);
+                Aii[k]=Aij;
+                DD[kk]= Aij -pscal(Ut.aij,Ut.j,ui0[il],ui1[il],i, L,j);
+                
+            }
+        //  inverse DD
+        inv(nbi,DD+pD1[ib],DD1+pD1[ib]);
+        for (int kK=pD1[ib],j= i0; j<i1; ++j)
+            for (int i= i0; i<i1; ++i,++kk)
+            {
+                 R *pU = sym ? A.pij(i,j) : A.pij(j,i)
+            }
+
+        // Uii= Aii - pscal(Ut.aij,Ut.j,ui0,ui1,i, L,i);
+        //  L(i,i) =1.;
+            
+            mUii = min(mUii,abs(Uii));
+            
+            if (abs(Uii)< 1e-30)
+            {
+                if(verbosity && err<10)
+                    cerr << "    error: ILU nul pivot "<< i << " " << Uii << endl;
+                Uii =1;
+                err++;
+            }
+            Ut(i,i) = Uii;
+        }
+    
+    if(verbosity>2 || err ) cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
+    Ut.dotranspose();
+    Ut.CSC();
+    L.CSR();
+    return  err;
+}
+#endif
 
 long ff_ilu (Matrice_Creuse<R> * const & pcA,Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> * const & pcU,double const & tgv)
 {
