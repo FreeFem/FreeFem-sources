@@ -1610,6 +1610,7 @@ AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
 # Looking for UMFPACK
 # -------------------
+UMFPACK_CPPFLAGS="";
 ff_umfpack_incs=""
 ff_amd_ok=no
 ff_umfpack_ok=no
@@ -1624,7 +1625,8 @@ if test "$ff_where_lib_conf_suitesparse" = "1"  ; then
    ff_umfpack_incs="$ff_where_inc_suitesparse"
    AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
    AC_DEFINE(HAVE_LIBCHOLMOD,1,Cholmod  is used for sparse matrices computations)
-   AC_SUBST([UMFPACK_CPPFLAGS],[$ff_where_inc_suitesparse])
+   UMFPACK_CPPFLAGS="$ff_where_inc_suitesparse"
+dnl   AC_SUBST([UMFPACK_CPPFLAGS],[$ff_where_inc_suitesparse])
    AC_DEFINE(HAVE_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir)
 fi
 
@@ -1633,7 +1635,6 @@ AC_ARG_ENABLE(system_umfpack,AC_HELP_STRING([--disable-system-umfpack],[Disable 
 if test "$ff_umfpack_ok"  = no -a "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
 then
     # User-specified location
-
     AC_ARG_WITH(amd,
 	AC_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
         ff_amd_ok=yes
@@ -1691,6 +1692,10 @@ then
     fi
 
     if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
+	if test -n "$ff_umfpack_incs" ; then 
+	  UMFPACK_CPPFLAGS="$ff_umfpack_incs"
+	fi
+dnl    AC_SUBST([UMFPACK_CPPFLAGS],[$ff_umfpack_incs])	
 	AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
     fi
 fi
@@ -1701,13 +1706,13 @@ LIBS="$ff_save_libs"
 #  attention no /usr/include in WHERE 
 if test "$ff_umfpack_ok" = yes -a -n "$ff_umfpack_dir" -a -z "$ff_umfpack_incs"
 then
-	ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"	
+	ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
+	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
 fi
 if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
     AC_SUBST(DOWNLOAD_UMFPACK,"umfpack")
-	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
     ff_umfpack_download=yes
 
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
@@ -1715,12 +1720,14 @@ then
     
     ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
     ff_umfpack_incs="-I${curdir}/download/include"
+	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
     AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
     if test "$ff_win32" = yes; then
   	AC_SUBST(FF_UMFPACK_CONFIG,-DCBLAS)
     fi
     ff_umfpack_ok=yes
 fi
+AC_SUBST([UMFPACK_CPPFLAGS],[$UMFPACK_CPPFLAGS])
 
 # ALH - 17/9/13 - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version because
 # [[file:download/umfpack/Makefile.am]] does not set the WHERE mechanism. Also removed -I/usr/include/$ff_umfpack_dir

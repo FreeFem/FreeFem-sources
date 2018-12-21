@@ -4,8 +4,39 @@
 #include <iostream>
 #include <cmath>
 #include "HashMatrix.hpp"
+#ifdef HAVE_LIBUMFPACK
+extern "C" {
+#ifdef HAVE_UMFPACK_H
+#include <umfpack.h>
+#include <cholmod.h>
+#else
+#ifdef HAVE_UMFPACK_UMFPACK_H
+#include <umfpack/umfpack.h>
+#else
+#ifdef HAVE_BIG_UMFPACK_UMFPACK_H
+#include <UMFPACK/umfpack.h>
+#else
+#ifdef HAVE_UFSPARSE_UMFPACK_H
+#include <ufsparse/umfpack.h>
+#else
+#ifdef HAVE_SUITESPARSE_UMFPACK_H
+#include <suitesparse/umfpack.h>
+#include <suitesparse/cholmod.h<
+#else
+    
+    // Defaults to a local version of the UMFPACK headers
 #include "umfpack.h"
 #include "cholmod.h"
+
+#endif // HAVE_SUITESPARSE_UMFPACK_H
+#endif // HAVE_UFSPARSE_UMFPACK_H
+#endif // HAVE_BIG_UMFPACK_UMFPACK_H
+#endif // HAVE_UMFPACK_UMFPACK_H
+#endif // HAVE_UMFPACK_H
+}
+#endif
+
+
 #include <vector>
 #include "VirtualSolver.hpp"
 //#include "cholmod_function.h"
@@ -762,7 +793,9 @@ public:
         //c.error_handler = my_handler ;
         
     }
-    
+    void void fac_init(){
+        
+    }
     void dosolver(K *x,K*b,int N,int trans)
     {
          if(verb>2 || verbosity> 9)  cout << " dosolver CHOLMoD Complex "<< endl;
@@ -803,7 +836,7 @@ public:
     {
         if(L) cholmod_l_free_factor (&L, &c) ;            /* free matrices */
         //w       if(A) cholmod_free_sparse (&A, &c) ;
-        cholmod_l_finish (&c) ;
+             (&c) ;
         
     }
 };
