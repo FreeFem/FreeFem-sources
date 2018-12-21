@@ -1,0 +1,166 @@
+// NBPROC 8
+// PARAM -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
+
+//ff-c++ -auto marmousi2.cpp
+//ff-mpirun -np 8 Navier-2d-marmousi2.edp -glut ffglut -ns -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+macro dimension 2// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+load "marmousi2"
+
+macro def(i)[i,i#B]// EOM                         // scalar field definition
+macro init(i)[i,i]// EOM                        // scalar field initialization
+func Pk = [P1,P1];
+
+Marmousi2 marm2vp("/var/tmp/data/marmousi2/model/vp.rsf@");
+Marmousi2 marm2vs("/var/tmp/data/marmousi2/model/vs.rsf@");
+Marmousi2 marm2density("/var/tmp/data/marmousi2/model/density.rsf@");
+
+real freq = getARGV("-frequency",1.); // Hz
+real k = 2.*pi*freq;
+real k0 = 2.*pi*freq;
+real lambda0 = 0.32319/freq;
+real omega = 2*pi*freq;
+
+real Q = 0;
+
+func Cp = marm2vp(x,y);  // km/s
+func Cs = marm2vs(x,y);  // km/s
+func rho = marm2density(x,y);
+func lambda = -2*Cs^2*rho+Cp^2*rho;
+func mu = Cs^2*rho;
+func Kp = omega/Cp;
+func Ks = Kp*Cp/Cs;                                         // wavenumber of P & S-waves
+
+func source = exp(-200*((x-10)^2+(y+0.5)^2));  // source at the top surface
+
+int labextxm = 4;
+int labextxM = 2;
+int labextym = 1;
+int labextyM = 3;
+int[int] labsext = [labextxm,labextxM,labextym,labextyM];
+
+int mysplit = 3;
+
+real npplo = 20./mysplit;
+
+int nloc = npplo*17./lambda0;
+
+int nn = ffddmnpart/2;
+int mm = ffddmnpart/nn;
+
+int nlocx = nloc/nn*nn;
+int nlocy = int(nloc*3./17)/mm*mm;
+
+mesh Thc = square(nlocx,nlocy,[x*17,y*3-3.5]);
+
+mesh Th = trunc(Thc,1,split=mysplit);
+
+real sqrt2 = sqrt(2.);
+macro Grad(u) [dx(u),dy(u)]              // EOM
+macro epsilon(u,v) [dx(u),dy(v),(dy(u)+dx(v))/sqrt2] // EOM
+macro div(u,v) ( dx(u)+dy(v) )                              // EOM
+// Sigma macro
+macro sxx() rho*omega*(Cp*N.x^2+Cs*N.y^2) //EOM
+macro sxy() rho*omega*(Cp-Cs)*N.x*N.y     //EOM
+macro syy() rho*omega*(Cp*N.y^2+Cs*N.x^2) //EOM
+
+macro Navier(u,v,uu,vv) rho*(omega^2)*(u*uu+v*vv) -        
+            lambda*(div(u,v)*div(uu,vv))-2.*mu*( epsilon(u,v)'*epsilon(uu,vv) ) // EOM
+
+macro NavierEprec(u,v,uu,vv) rho*(omega^2+1.i*omega)*(u*uu+v*vv) -        
+            lambda*(div(u,v)*div(uu,vv))-2.*mu*( epsilon(u,v)'*epsilon(uu,vv) ) // EOM
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName([u,v],[uu,vv]) = int2d(meshName)(Navier(u,v,uu,vv)) 
+              + int1d(meshName,labsext)(1i *(sxx*u*uu + sxy*(v*uu+u*vv) +syy*v*vv));
+// EOM
+
+// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+macro VarfEprec(varfName, meshName, PhName)
+    varf varfName([u,v],[uu,vv]) = int2d(meshName)(NavierEprec(u,v,uu,vv)) 
+              + int1d(meshName,labsext)(1i *(sxx*u*uu + sxy*(v*uu+u*vv) +syy*v*vv));
+// EOM
+
+// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;) (oras)
+macro VarfOpt(varfName, meshName, PhName)
+    varf varfName([u,v],[uu,vv]) = int2d(meshName)(NavierEprec(u,v,uu,vv)) 
+              + int1d(meshName,labsext,10)(1i *(sxx*u*uu + sxy*(v*uu+u*vv) +syy*v*vv));
+// EOM
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName([u,v],[uu,vv]) =
+                         -intN(meshName)(source*vv);
+// EOM
+
+/*
+macro Nsimple(PhGlobal, part, comm)
+{
+
+ fespace PhGlobal(Thc,P0);
+ real allongx = 17;
+ real allongy = 3;
+ if (mpirank==0 && (nn*mm != ffddmnpart))
+   cout << "PB SIMPLE PARTITIONING : nn*mm != npart" << endl;
+ assert (nn*mm == ffddmnpart);
+
+ PhGlobal xx=x,yy=y;
+ part= int(xx/allongx*nn)*mm + int((-0.5-yy)/allongy*mm);
+}
+// EOM
+*/
+
+ffddmbuildTwolevel(N,Thc,mysplit,complex,def,init,Pk,mpiCommWorld)
+
+//macro NCoarsewithhpddmkrylov()1//
+//macro Nwithhpddmkrylov()1//
+
+ffddmsetup(NCoarse,NCoarse,VarfEprec,VarfOpt)
+
+ffddmset(NCoarse,verbosity,1)
+
+ffddmsetup(N,N,Varf,VarfOpt)
+
+complex[int] rhs(1);
+
+ffddmbuildrhs(N,Varfrhs,rhs)
+
+complex[int] x0(rhs.n);
+x0 = 0;
+
+NVhi<complex> def(u), def(err);
+
+if (mpirank == 0) cout << "ORAS :" << endl;
+
+u[] = NfGMRES(x0, rhs, 1.e-6, 2000, "right");
+
+Nwritesummary
+
+if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL :" << endl;
+
+ffddmcoarsemeshsetup(N,Thc,VarfEprec,VarfEprec)
+
+u[] = NfGMRES(x0, rhs, 1.e-6, 300, "right");
+
+Nwritesummary
+
+if (mpirank == 0) cout << "Coarse problem :" << endl;
+
+NCoarsewritesummary
+
+err[] = NA(u[]);
+err[] -= rhs;
+
+ffddmplot(N,sqrt(real(u)^2+real(uB)^2), "Global solution");
+ffddmplot(N,abs(err), "Global residual");
+
+fespace Vhg(Th,Pk);
+Vhg<complex> def(ug);
+NfromVhi(u[],Vhg,ug[])
+
+if (mpirank == 0)
+medit("ug",Th,sqrt(real(ug)^2+real(ugB)^2));

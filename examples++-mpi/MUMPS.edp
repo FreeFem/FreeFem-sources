@@ -2,7 +2,7 @@
 // NBPROC 4
 
 load "MUMPS"
-load "symmetrizeCSR"
+// load "symmetrizeCSR"
 int[int] l = [1, 1, 2, 2];
 mesh Th = square(150, 150, label = l);
 int master = 0; //  no choose see MUMPS doc sect 4.3 
@@ -18,7 +18,11 @@ matrix A,B;
 //if( mpirank==master) // => trap pb of size  in  A^-1 * b;
 { // def only on master .. 
 	A = lap(Vh, Vh); B = A;
-	symmetrizeCSR(B);
+	//symmetrizeCSR(B);
+	set(B,sym=1);
+	
+	cout<< " A nnz "<< A.nnz << endl;
+	cout<< " B nnz "<< B.nnz << endl;
 } 
 verbosity = 2;
 // If you want, you can pass an array of integer (int[int] t)
@@ -41,11 +45,6 @@ verbosity = 2;
 // set(A, solver = sparsesolver, lparams = t);
 set(A, solver = sparsesolver,master=master);
 set(B, solver = sparsesolver,master=master,rinfo=rinfo,info=info);
-if(mpirank==master)
-for(int i=0; i<40;++i)
-   {
-    cout << "mumps: info B" << i+1 << " = " << info[i] << " , / r " << rinfo[i] <<endl;
-   }
 verbosity = 0;
 Vh u;
 u[] = A^-1 * b;
@@ -54,6 +53,12 @@ if(mpirank==0-master)
 plot(Th, u, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver unsymmetric", value = 1);
 u[] = B^-1 * b;
 if(mpirank==master) cout << " B :  u " << u[].l1 << " " << u[].linfty << endl; 
+if(mpirank==master)
+for(int i=0; i<40;++i)
+   {
+    cout << "mumps: info B" << i+1 << " = " << info[i] << " , / r " << rinfo[i] <<endl;
+   }
+
 if(mpirank==master)
 plot(Th, u, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver symmetric", value = 1);
 
@@ -68,3 +73,4 @@ set(A, solver = sparsesolver,master=-1);// distruteb
 b = lapd(0, Vh);
 u[] = A^-1 * b;
 cout << " D u " << u[].l1 << " " << u[].linfty << " " << mpirank << endl; 
+cout << " On Fini" << endl; 

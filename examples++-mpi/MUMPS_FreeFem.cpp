@@ -7,7 +7,7 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-//ff-c++-LIBRARY-dep:mumps ptscotch scotch metis parmetis  scalapack blas  mpifc  fc mpi  pthread 
+//xxff-c++-LIBRARY-dep:mumps ptscotch scotch metis parmetis  scalapack blas  mpifc  fc mpi  pthread
 //ff-c++-cpp-dep: 
 
 /* 
@@ -31,7 +31,18 @@
  ref:ANR-07-CIS7-002-01 
  */
 
+#ifndef OLDFFVERSION
+#include  "ff++.hpp"
+static void Load_Init()
+{ 
+	cout << " load(\"MUMPS_FreeFem\")   is obsoled now use oad(\"MUMPS\") pluging "<< endl; 
+	ExecError("Plugins MUMPS_FreeFem is remove"); 
+		exit(0);
+}
 
+LOADFUNC(Load_Init);
+#else 
+ 
 #include <mpi.h>
 #include  <iostream>
 using namespace std;
@@ -2605,3 +2616,4 @@ void ffinit()
 addingInitFunct FFinit(100,ffinit,"MUMPS_FreeFem");
 
 LOADFUNC(Load_Init);
+#endif

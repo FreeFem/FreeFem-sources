@@ -1,6 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
-
+//{int iii; cin >> iii;} // for debug 
 
 load "hpddm_substructuring"         // HPDDM plugin
 macro partitioner()metis// EOM      // metis, scotch, or parmetis

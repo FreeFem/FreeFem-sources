@@ -50,7 +50,7 @@ namespace Fem2D {
 			static const GQuadratureFormular<R1> QFe;	// quadrature formula on an edge
 			static const GQuadratureFormular<R2> QFf;	// quadrature formula on a face
 			TypeOfFE_P2_bulle3_3d ();	// constructor
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
 			void set (const Mesh &Th, const Element &K, InterpolationMatrix<RdHat> &M, int ocoef, int odf, int *nump) const;
 	};
 
@@ -127,7 +127,7 @@ namespace Fem2D {
 		}
 	}
 
-	void TypeOfFE_P2_bulle3_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
+	void TypeOfFE_P2_bulle3_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
 		assert(val.N() >= 10 + 3 * 4 + 1);	// 23 degrees of freedom
 		assert(val.M() == 1);	// 3 components
 		// -------------
@@ -178,13 +178,14 @@ namespace Fem2D {
 		R beta5 = -0.4698211451190111;
 		R beta6 = -0.0341147839626256;
 		R beta7 = -0.0997720100233590;
-		R w = 1. - P.sum();
+		R w = 1. - PHat.sum();
 		// ===================================================================================================================================================
 		//
 		// basis function
 		//
 		// ===================================================================================================================================================
-		R l [] = {
+        RdHat P(PHat);
+        R l [] = {
 			w *(2 * w - 1),
 			P.x * (2 * P.x - 1),
 			P.y * (2 * P.y - 1),

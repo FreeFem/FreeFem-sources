@@ -24,12 +24,19 @@ using namespace std;
 #include <map>
 
 #include "fem.hpp"
-
-
 #include "FESpacen.hpp" 
 #include "FESpace.hpp" 
-
+#include "HashMatrix.hpp"
+#include "SparseLinearSolver.hpp"       
 #include "MatriceCreuse_tpl.hpp"
+#include "MatriceCreuse.hpp"
+#include "MatriceCreuse_tpl.hpp"
+#include "VirtualSolverCG.hpp"
+//#include "VirtualSolverSparseSuite.hpp"
+//#include "VirtualSolverSkyLine.hpp"
+//#include "SparseLinearSolver.hpp"
+#include "lgsolver.hpp"
+
 #include "MeshPoint.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
@@ -38,7 +45,7 @@ using namespace std;
 #include "libmesh5.h"
 #include "lgfem.hpp"
 #include "lgmesh3.hpp"
-#include "lgsolver.hpp"
+
 #include "problem.hpp"
 
 #include "Mesh2.h"

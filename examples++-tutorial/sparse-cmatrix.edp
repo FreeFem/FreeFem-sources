@@ -46,8 +46,8 @@ for(int step=0; step <2; ++step)
     // WARNING if UMFPACK is not install
     // the UMFPACK solver is replace by LU 
     //  but LU need skyline matrix 
-    int typesolver=UMFPACK;
-    if(HaveUMFPACK) typesolver=GMRES; 
+    string typesolver="UMFPACK";
+    if(HaveUMFPACK) typesolver="GMRES"; 
     set(A,solver=typesolver); // set a solver 
 
     VH<complex> uH=0;

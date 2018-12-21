@@ -28,11 +28,25 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-//ff-c++-LIBRARY-dep: complex_pastix   blas parmetis metis scotch mpi fc
+//xxff-c++-LIBRARY-dep: complex_pastix   blas parmetis metis scotch mpi fc
 //ff-c++-cpp-dep: 
 /*
   Interface entre freefem++ et pastix
 */
+
+#ifndef OLDFFVERSION
+#include  "ff++.hpp"
+static void Load_Init()
+{
+    cout << " load(\"complex_pastix_FreeFem\")   is obsoled now  pluging "<< endl;
+    ExecError("Plugins complex_pastix_FreeFem is remove");
+    exit(0);
+}
+
+LOADFUNC(Load_Init);
+#else
+
+
 #include <mpi.h>
 
 #include  <iostream>
@@ -684,3 +698,4 @@ static void Load_Init()
 }
 
  LOADFUNC(Load_Init)
+#endif

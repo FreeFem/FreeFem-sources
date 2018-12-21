@@ -1108,7 +1108,7 @@ static void RecDblWrd(GmfMshSct *msh, unsigned char *wrd)
 /* Fortran 77 API                                            */
 /*----------------------------------------------------------*/
 
-int call(gmfopenmeshf77)(char *FilNam, int *mod, int *ver, int *dim, int StrSiz)
+int CALL_F77(gmfopenmeshf77)(char *FilNam, int *mod, int *ver, int *dim, int StrSiz)
 {
     int  i;
     char TmpNam[ GmfStrSiz ];
@@ -1124,12 +1124,12 @@ int call(gmfopenmeshf77)(char *FilNam, int *mod, int *ver, int *dim, int StrSiz)
         return(GmfOpenMesh(TmpNam, *mod, *ver, *dim));
 }
 
-int call(gmfclosemeshf77)(int *idx)
+int CALL_F77(gmfclosemeshf77)(int *idx)
 {
     return(GmfCloseMesh(*idx));
 }
 
-int call(gmfstatkwdf77)(int *MshIdx, int *KwdIdx, int *NmbTyp, int *SolSiz, int *TypTab)
+int CALL_F77(gmfstatkwdf77)(int *MshIdx, int *KwdIdx, int *NmbTyp, int *SolSiz, int *TypTab)
 {
     if(!strcmp(KwdFmt[ *KwdIdx ][2], "sr"))
         return(GmfStatKwd(*MshIdx, *KwdIdx, NmbTyp, SolSiz, TypTab));
@@ -1137,12 +1137,12 @@ int call(gmfstatkwdf77)(int *MshIdx, int *KwdIdx, int *NmbTyp, int *SolSiz, int 
         return(GmfStatKwd(*MshIdx, *KwdIdx));
 }
 
-int call(gmfgotokwdf77)(int *MshIdx, int *KwdIdx)
+int CALL_F77(gmfgotokwdf77)(int *MshIdx, int *KwdIdx)
 {
     return(GmfGotoKwd(*MshIdx, *KwdIdx));
 }
 
-int call(gmfsetkwdf77)(int *MshIdx, int *KwdIdx, int *NmbLin, int *NmbTyp, int *TypTab)
+int CALL_F77(gmfsetkwdf77)(int *MshIdx, int *KwdIdx, int *NmbLin, int *NmbTyp, int *TypTab)
 {
     if(!strcmp(KwdFmt[ *KwdIdx ][2], "sr"))
         return(GmfSetKwd(*MshIdx, *KwdIdx, *NmbLin, *NmbTyp, TypTab));
@@ -1152,72 +1152,72 @@ int call(gmfsetkwdf77)(int *MshIdx, int *KwdIdx, int *NmbLin, int *NmbTyp, int *
         return(GmfSetKwd(*MshIdx, *KwdIdx));
 }
 
-int call(gmfgetvertex2df77)(int *MshIdx, float *x, float *y, int *ref)
+int CALL_F77(gmfgetvertex2df77)(int *MshIdx, float *x, float *y, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfVertices, x, y, ref));
 }
 
-int call(gmfgetvertex3df77)(int *MshIdx, float *x, float *y, float *z, int *ref)
+int CALL_F77(gmfgetvertex3df77)(int *MshIdx, float *x, float *y, float *z, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfVertices, x, y, z, ref));
 }
 
-int call(gmfsetvertex2df77)(int *MshIdx, float *x, float *y, int *ref)
+int CALL_F77(gmfsetvertex2df77)(int *MshIdx, float *x, float *y, int *ref)
 {
     return(GmfSetLin(*MshIdx, GmfVertices, *x, *y, *ref));
 }
 
-int call(gmfsetvertex3df77)(int *MshIdx, float *x, float *y, float *z, int *ref)
+int CALL_F77(gmfsetvertex3df77)(int *MshIdx, float *x, float *y, float *z, int *ref)
 {
     return(GmfSetLin(*MshIdx, GmfVertices, *x, *y, *z, *ref));
 }
 
-int call(gmfgettrianglef77)(int *MshIdx, int *p1, int *p2, int *p3, int *ref)
+int CALL_F77(gmfgettrianglef77)(int *MshIdx, int *p1, int *p2, int *p3, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfTriangles, p1, p2, p3, ref));
 }
 
-int call(gmfsettrianglef77)(int *MshIdx, int *p1, int *p2, int *p3, int *ref)
+int CALL_F77(gmfsettrianglef77)(int *MshIdx, int *p1, int *p2, int *p3, int *ref)
 {
     return(GmfSetLin(*MshIdx, GmfTriangles, *p1, *p2, *p3, *ref));
 }
 
-int call(gmfgettetrahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
+int CALL_F77(gmfgettetrahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfTetrahedra, p1, p2, p3, p4, ref));
 }
 
-int call(gmfsettetrahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
+int CALL_F77(gmfsettetrahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
 {
     return(GmfSetLin(*MshIdx, GmfTetrahedra, *p1, *p2, *p3, *p4, *ref));
 }
 
-int call(gmfgetedgef77)(int *MshIdx, int *p1, int *p2, int *ref)
+int CALL_F77(gmfgetedgef77)(int *MshIdx, int *p1, int *p2, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfEdges, p1, p2, ref));
 }
 
-int call(gmfsetedgef77)(int *MshIdx, int *p1, int *p2, int *ref)
+int CALL_F77(gmfsetedgef77)(int *MshIdx, int *p1, int *p2, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfEdges, *p1, *p2, *ref));
 }
 
-int call(gmfgetquadrilateralf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
+int CALL_F77(gmfgetquadrilateralf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfQuadrilaterals, p1, p2, p3, p4, ref));
 }
 
-int call(gmfsetquadrilateralf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
+int CALL_F77(gmfsetquadrilateralf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfQuadrilaterals, *p1, *p2, *p3, *p4, *ref));
 }
 
-int call(gmfgethexahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *p5, int *p6, int *p7, int *p8, int *ref)
+int CALL_F77(gmfgethexahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *p5, int *p6, int *p7, int *p8, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfHexahedra, p1, p2, p3, p4, p5, p6, p7, p8, ref));
 }
 
-int call(gmfsethexahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *p5, int *p6, int *p7, int *p8, int *ref)
+int CALL_F77(gmfsethexahedronf77)(int *MshIdx, int *p1, int *p2, int *p3, int *p4, int *p5, int *p6, int *p7, int *p8, int *ref)
 {
     return(GmfGetLin(*MshIdx, GmfHexahedra, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *ref));
 }

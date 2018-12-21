@@ -42,7 +42,7 @@
 class TypeOfFE_P0Lagrange3d : public  TypeOfFE_Lagrange<Mesh3> { 
 public:  
   TypeOfFE_P0Lagrange3d(): TypeOfFE_Lagrange<Mesh3>(0) {  }
-  void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, RNMK_ & val) const;
+  void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, RNMK_ & val) const;
   virtual R operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const ;
   
 } ;
@@ -50,7 +50,7 @@ public:
      
 
 
-R TypeOfFE_P0Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN_<R> & u,int componante,int op) const 
+R TypeOfFE_P0Lagrange3d::operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const
 { 
   R u0(u(K(0)));
   R r=0;
@@ -60,7 +60,7 @@ R TypeOfFE_P0Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN
   return r;
 }
 
-void TypeOfFE_P0Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
+void TypeOfFE_P0Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const RdHat & PHat,RNMK_ & val) const
 {
   assert(val.N() >=1);
   assert(val.M()==1 );
@@ -79,14 +79,14 @@ void TypeOfFE_P0Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 class TypeOfFE_P1Lagrange3d : public  TypeOfFE_Lagrange<Mesh3> { 
 public:  
   TypeOfFE_P1Lagrange3d(): TypeOfFE_Lagrange<Mesh3>(1) {  }
-  void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, RNMK_ & val) const;
+  void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, RNMK_ & val) const;
   virtual R operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const ;
   
 } ;
 
 
 
-R TypeOfFE_P1Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN_<R> & u,int componante,int op) const 
+R TypeOfFE_P1Lagrange3d::operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const
 { 
   R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))),u3(u(K(3)));
   R r=0;
@@ -111,11 +111,11 @@ R TypeOfFE_P1Lagrange3d::operator()(const FElement & K,const  R3 & PHat,const KN
   return r;
 }
 
-void TypeOfFE_P1Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
+void TypeOfFE_P1Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const RdHat & PHat,RNMK_ & val) const
 {
   //  const Triangle & K(FE.T);
   
-  R l[]={1.-P.sum(),P.x,P.y,P.z}; 
+  R l[]={1.-PHat.sum(),PHat.x,PHat.y,PHat.z};
   
   assert(val.N() >=Element::nv);
   assert(val.M()==1 );
@@ -173,7 +173,7 @@ public:
   typedef Mesh3 Mesh;
   typedef GFElement<Mesh3> FElement;
   TypeOfFE_P2Lagrange3d(): TypeOfFE_Lagrange<Mesh3>(2) {  }
-  void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+  void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const;
 } ;
 
 class TypeOfFE_P1bLagrange3d : public TypeOfFE_Lagrange<Mesh3>  { 
@@ -181,17 +181,17 @@ class TypeOfFE_P1bLagrange3d : public TypeOfFE_Lagrange<Mesh3>  {
 	 typedef Mesh3 Mesh;
 	 typedef GFElement<Mesh3> FElement;
 	 TypeOfFE_P1bLagrange3d(): TypeOfFE_Lagrange<Mesh3>(-1) {  }
-	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const;
 } ;
      
 
      
 
-void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
+void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const RdHat & PHat,RNMK_ & val) const
 {
   //  const Triangle & K(FE.T);
   
-  R l[]={1.-P.sum(),P.x,P.y,P.z}; 
+  R l[]={1.-PHat.sum(),PHat.x,PHat.y,PHat.z};
   
   assert(val.N() >=E::nv+E::ne);
   assert(val.M()==1 );
@@ -491,13 +491,13 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 return r;
      }
  */    
-     void TypeOfFE_P1bLagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const R3 & P,RNMK_ & val) const
+     void TypeOfFE_P1bLagrange3d::FB(const What_d whatd,const Mesh & ,const Element & K,const RdHat & PHat,RNMK_ & val) const
      {
 	 //  const Triangle & K(FE.T);
-	 const R d1=d+1.;
+	 const R d1=dHat+1.;
 	 const R d13=d1*d1*d1;
 	 const R d14=d13*d1;
-	 R ll[]={1.-P.sum(),P.x,P.y,P.z}; 
+	 R ll[]={1.-PHat.sum(),PHat.x,PHat.y,PHat.z};
 	 R lb4= (ll[0]*ll[1]*ll[2]*ll[3])*d13; // d1^-4 d1^3 = 1/d1 in G
 	 R lb=lb4*d1; // 1  in G     
 	 R l[5];
@@ -579,7 +579,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 static const int d=Mesh::Rd::d;
 	 TypeOfFE_RT0_3d();
 	 int edgeface[4][3] ;
-	void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+	void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const;
 	void  set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump  ) const;
      } ;
      int TypeOfFE_RT0_3d::dfon[]={0,0,1,0}; 
@@ -654,7 +654,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 //ffassert(i==M.ncoef && M.np == 6 );
  	 
      }
-     void  TypeOfFE_RT0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
+     void  TypeOfFE_RT0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const
      {
 	 assert(val.N() >=4);
 	 assert(val.M()==3 );
@@ -666,7 +666,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 
 	 if (whatd & Fop_D0) 
 	   {
-	       R3 X=K(P);
+	       R3 X=K(PHat);
 	       int k=0;
 	       for(int i=0;i<4;++i)
 		 { R3 wi=(X-K[i])*ci[i];
@@ -703,7 +703,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 static const GQuadratureFormular<R1> QFe;
 	 int edgeface[4][3] ;
 	 TypeOfFE_Edge0_3d();
-	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const;
+	 void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const;
 	 void  set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump  ) const;
      } ;
      int TypeOfFE_Edge0_3d::dfon[]={0,1,0,0}; 
@@ -762,11 +762,11 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	// ffassert(i==M.ncoef && M.np == p );
  	 
      }
-     void  TypeOfFE_Edge0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const Rd &P, RNMK_ & val) const
+     void  TypeOfFE_Edge0_3d::FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const
      {
 	 assert(val.N() >=6);
 	 assert(val.M()==3 );
-         R l[]={1.-P.sum(),P.x,P.y,P.z}; 
+         R l[]={1.-PHat.sum(),PHat.x,PHat.y,PHat.z}; 
 	 R3 D[4];
 	 K.Gradlambda(D);
 	 
@@ -781,7 +781,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 
 	 if (whatd & Fop_D0) 
 	   {
-	       R3 X=K(P);
+	       R3 X=K(PHat);
 	       int k=0;
 	       for(int i=0;i<6;++i)
 		 { 
@@ -844,15 +844,14 @@ GTypeOfFE<Mesh3> & RT03d(RT0_3d);
 
 static TypeOfFE_Edge0_3d  Edge0_3d;
 GTypeOfFE<Mesh3> & Edge03d(Edge0_3d);
-
      
-
-
-
-template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P0=P0_3d; 
+template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P0=P0_3d;
 template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P1=P1_3d; 
 template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P2=P2_3d; 
 
+ 
+     
+     
 
  }
 

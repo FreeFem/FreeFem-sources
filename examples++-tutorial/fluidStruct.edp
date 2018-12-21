@@ -29,8 +29,8 @@ varf Mass(p,q)=int2d(sh)(p*q);
 Xh bc1; 
 Xh brhs;
                    
-matrix A= Lap(Xh,Xh,solver=CG); 
-matrix M= Mass(Mh,Mh,solver=CG); 
+matrix A= Lap(Xh,Xh,solver=UMFPACK); 
+matrix M= Mass(Mh,Mh,solver=UMFPACK); 
 matrix Bx= bx(Xh,Mh);
 matrix By= by(Xh,Mh);
 
@@ -87,7 +87,7 @@ solve  bbst([uu,vv],[w,s],init=i)  =
   + int1d(th,bottombeam)( coef*(sigma11*N.x*w + sigma22*N.y*s + sigma12*(N.y*w+N.x*s) )  )
   + on(1,uu=0,vv=0) 
   ;
-cout << " max deplacement " << uu[].linfty << endl;
+cout << " max deplacement " << uu[].linfty << " " << uu[].min << " " << uu[].max <<endl;
  plot([uu,vv],wait=1);
  real  err = sqrt(int2d(th)( (uu-uu1)^2 + (vv-vv1)^2 )); 
  cout << " ----- Iteration = " << i <<  " Erreur L2 = " << err << "----------\n";
@@ -96,11 +96,12 @@ cout << " max deplacement " << uu[].linfty << endl;
  sh = buildmesh(h(-20)+f(10)+e(10)+g(10));
  plot(sh);
  p=p;q=q;u1=u1;u2=u2;brhs=brhs;ppp=ppp;
- A= Lap(Xh,Xh,solver=CG); 
- M= Mass(Mh,Mh,solver=CG); 
+ A= Lap(Xh,Xh,solver=UMFPACK); 
+ M= Mass(Mh,Mh,solver=UMFPACK); 
  Bx= bx(Xh,Mh);
  By= by(Xh,Mh);
  bc1=0;  // for resize
  bc1[] = Lap(0,Xh);
 }
 cout << " max deplacement " << uu[].linfty << endl;
+assert(  abs(0.172522 -uu[].linfty ) < 1e-2); 

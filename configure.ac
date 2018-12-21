@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,3.61-2,frederic.hecht@sorbonne-universite.fr,freefem++)
+AC_INIT(FreeFem++,4.0,frederic.hecht@sorbonne-universite.fr,freefem++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -113,8 +113,30 @@ m4_define([TOOL_PARAMETERS],
 
 m4_define([TOOL_DISABLE],
     [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+	
     if test "$enable_$1" = "no"
     then
+        AC_SUBST([TOOL_COMPILE_$1],"")
+        AC_SUBST([TOOL_DYLIB_$1],"")
+    elif  test   "$ff_$1_ok" = "yes" ; then
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+        enable_$1_download=no
+    else  
+        AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
+        AC_SUBST([TOOL_DYLIB_$1],$2)
+	    enable_$1_download=yes
+    fi
+
+    # Also allow to disable the download of one tool if it is already locally installed
+
+    TOOL_PARAMETERS($1,$2,$3)
+])
+m4_define([TOOL_DISABLE_NO],
+    [
+	AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+    if test "$enable_$1" = "no" -o "$enable_$1" = ""
+    then
+	    enable_$1=no
         AC_SUBST([TOOL_COMPILE_$1],"")
         AC_SUBST([TOOL_DYLIB_$1],"")
     elif  test   "$ff_$1_ok" = "yes" ; then
@@ -666,20 +688,25 @@ m4_include(ax_lib_hdf5.m4)
 # [[file:ax_lib_gsl.m4]]
 m4_include(ax_lib_gsl.m4)
 
-# Checking c++11 for schwarz/hpddm  interface of P. Jolivet ...
+# Checking c++11 for HashMatix (Madatory now)
 # F.Hecht:
 # do not compile all with c++11 version to much 
 # probleme to day (frev 2015) with g++ 4.8.1
 ff_cxx_save=$CXXFLAGS
 CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
 dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
-dnl ff_cxx11="no"
+dnlff_cxx11="no"
 dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
 if test "$ff_cxx11" = yes ; then
     CXX11FLAGS="-std=c++11";
+##	CXXFLAGS="$CXXFLAGS -std=c++11"
     AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+else 
+  AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
+  AC_MSG_ERROR([ Sorry no c++ compiler !])
+  AC_MSG_ERROR([ Fatal error c++11  ],1);
 fi
-CXXFLAGS="$ff_cxx_save"
+##CXXFLAGS="$ff_cxx_save"
 AC_SUBST(WITH_CXX11,$ff_cxx11)
 AC_SUBST(CXX11FLAGS,$CXX11FLAGS)
 #end Checking  c++11
@@ -1680,6 +1707,7 @@ if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
     AC_SUBST(DOWNLOAD_UMFPACK,"umfpack")
+	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
     ff_umfpack_download=yes
 
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
@@ -1972,23 +2000,24 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try 
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE(hips,hips_FreeFem.$DYLIB_SUFFIX)
+TOOL_DISABLE_NO(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(parmetis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
-TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX)
-TOOL_DISABLE(mumps,"MUMPS_FreeFem.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX")
+TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
+TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 dnl TOOL_DISABLE(parmetis)
-TOOL_DISABLE(parms,parms_FreeFem.$DYLIB_SUFFIX)
-TOOL_DISABLE(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(parms,parms_FreeFem.$DYLIB_SUFFIX)
+
+TOOL_DISABLE_NO(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu4,SuperLu.$DYLIB_SUFFIX,superlu)
-TOOL_DISABLE(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
@@ -2153,6 +2182,7 @@ AC_OUTPUT(Makefile
     examples++/Makefile
     examples++-mpi/Makefile
     examples++-hpddm/Makefile
+    examples++-ffddm/Makefile
     examples++-eigen/Makefile
     examples++-chapt3/Makefile
     examples++-bug/Makefile

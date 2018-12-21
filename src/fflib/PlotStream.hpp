@@ -32,7 +32,7 @@ public:
   operator bool() const { return TheStream;}
   // datatype mush be < 0 to have no collistion with arg number. 
   // FFCS: <<PlotStream::datatype>>
-    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_plots3=-11,dt_endarg=99999,dt_newplot=-5  };
+    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_plots3=-11,dt_endarg=99999,dt_newplot=-5, dt_meshesS=-12,dt_plotsS=-13  };
   
   //FFCS:need to send control data to FFCS at least once per plot
   void SendNewPlot() {  ffapi::newplot();write((long )dt_newplot); set_binary_mode(); }
@@ -42,6 +42,7 @@ public:
   void SendPlots() { write((long )dt_plots); }
   void SendMeshes() { write((long )dt_meshes);}
   void SendMeshes3() { write((long )dt_meshes3);}
+  void SendMeshesS() { write((long )dt_meshesS);}  // must be controled
   //FFCS: divert stream to FFCS
   void write(const void *data,size_t l) {ffapi::ff_fwrite(data,1,l,TheStream);}
 
@@ -107,7 +108,7 @@ public:
 
   PlotStream & operator << (const Fem2D::Mesh2& Th) { Th.GSave(TheStream); return *this;}
   PlotStream & operator << (const Fem2D::Mesh3& Th) { Th.GSave(TheStream); return *this;}
-
+  PlotStream & operator << (const Fem2D::MeshS& Th) { Th.GSave(TheStream); return *this;}
     
     
   void read( void *data,size_t l) {
@@ -124,13 +125,34 @@ public:
   void GetEndPlot() {get(dt_endplot); set_text_mode();}
   void GetPlots() { get(dt_plots); }
   void GetMeshes() { get(dt_meshes);}
-  bool GetMeshes3() { long tt; read(tt);
+ //void GetMeshesS() { get(dt_meshesS);}
+ /* bool GetMeshes3() { long tt; read(tt);
       if(tt== dt_meshes3) return true;
       else if (tt== dt_plots) return false;
       cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_plots << endl;
       ffassert(0);
-     }
+     }*/
     
+   inline int GetMeshes3() { long tt; read(tt);
+      
+       if(tt== dt_meshes3) return 0;
+        else if (tt== dt_meshesS) return 1;
+        else if (tt== dt_plots) return 2;
+     
+        cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_meshesS << " or "<< dt_plots << endl;
+        ffassert(0);
+    }
+    
+    
+    
+    
+ /* bool GetMeshesS() { long tt; read(tt);
+      if(tt== dt_meshesS) return true;
+      else if (tt== dt_plots) return false;
+      cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshesS << " or "<< dt_plots << endl;
+      ffassert(0);
+    }
+   */
   void get(datatype t) { long tt; read(tt);
     if( tt !=(long) t) 
       cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 
@@ -204,7 +226,7 @@ public:
   //  PlotStream & operator >> ( Mesh3 *& Th);
     PlotStream &  operator >> ( Fem2D::Mesh3 *& Th) {	Th= new Fem2D::Mesh3(TheStream); return *this;}
     PlotStream &  operator >> ( Fem2D::Mesh2 *& Th) {	Th= new Fem2D::Mesh2(TheStream); return *this;}
-    
+    PlotStream &  operator >> ( Fem2D::MeshS *& Th) {    Th= new Fem2D::MeshS(TheStream); return *this;}
     
     // ---   I also write the type .. to skip data if we  need  to skip data 
     // just change   >> and <<  by :  <= and >= 

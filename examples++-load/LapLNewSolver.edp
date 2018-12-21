@@ -1,7 +1,7 @@
 load "Element_P3"
 load "NewSolver"
 
-defaulttoUMFPACK();
+//defaulttoUMFPACK();
 verbosity=3;
  mesh Th=square(10,10);
  fespace Vh(Th,P3);     // P1 FE space

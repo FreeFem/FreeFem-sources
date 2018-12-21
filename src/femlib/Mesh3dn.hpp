@@ -51,6 +51,29 @@ namespace Fem2D {
   
 typedef GenericVertex<R3> Vertex3;
 
+
+struct DataSeg3  {
+  static const int NbOfVertices =2;
+  static const int NbOfEdges =1;
+  static const int NbOfFaces =0;
+  static const int NT =0;
+  static const int NbOfAdjElem =NbOfVertices;
+  static const int NbOfVertexOnHyperFace =NbOfVertices-1;
+  typedef Vertex3 V;
+  typedef  V::Rd Rd;
+  static R mesure(  V *  pv[NbOfVertices]) {
+    return R3(*pv[0],*pv[1]).norme();
+  }
+  typedef R1 RdHat;
+  typedef R0 RdHatBord;
+  static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
+        
+  //static const int (* const nvface)[3];// = nvfaceSeg ;
+  //static const int (* const nvedge)[2];//  = nvedgeSeg;
+        
+  };
+
+  
 struct DataTriangle3  {
   static const int NbOfVertices =3;
   static const int NbOfEdges =3;
@@ -97,6 +120,55 @@ struct DataTet  {
 
 };
 
+
+    class BoundaryEdgeS: public GenericElement<DataSeg3>  
+  {
+  public: 
+      BoundaryEdgeS() {}; // constructor empty for array
+      
+      
+  };
+
+
+class Triangle3: public GenericElement<DataTriangle3>  {
+public: 
+  Triangle3() {}; // constructor empty for array
+
+  Rd Edge(int i) const {ASSERTION(i>=0 && i <3);
+    return Rd(this->at((i+1)%3),this->at((i+2)%3));}// opposite edge vertex i
+  /*
+  Rd H(int i) const { ASSERTION(i>=0 && i <3);
+    Rd E=Edge(i);return E.perp()/(2.*this->mesure());} // heigth 
+  
+  void Gradlambda(Rd * GradL) const
+  {
+    GradL[1]= H(1);
+    GradL[2]= H(2);
+    GradL[0]=-GradL[1]-GradL[2];
+  }
+  */ 
+
+};
+
+  
+  class TriangleS: public Triangle3  {
+public: 
+  TriangleS() {}; // constructor empty for array
+
+  void Gradlambda(Rd * GradL) const
+  {
+    R3 Normal = Edge(2)^Edge(1); 
+    R N = Normal.norme2();
+    for(int i=0 ; i<3 ; i++)
+      GradL[i]= (Normal^Edge(i)) / N;
+    }
+      
+    R3 NormalS(int i) const {ASSERTION(i>=0 && i <3);
+      return R3( Edge(2)^Edge(1) );}
+   
+  };
+ 
+
 class Tet: public GenericElement<DataTet>  {
 public: 
   Tet() {}; // constructor empty for array
@@ -131,24 +203,25 @@ public:
 
 };
 
-class Triangle3: public GenericElement<DataTriangle3>  {
-public: 
-  Triangle3() {}; // constructor empty for array
+template<typename Mesh> void GSave2(FILE * ff,const Mesh & Th) ;
 
-  Rd Edge(int i) const {ASSERTION(i>=0 && i <3);
-    return Rd(this->at((i+1)%3),this->at((i+2)%3));}// opposite edge vertex i
-  /*
-  Rd H(int i) const { ASSERTION(i>=0 && i <3);
-    Rd E=Edge(i);return E.perp()/(2.*this->mesure());} // heigth 
   
-  void Gradlambda(Rd * GradL) const
-  {
-    GradL[1]= H(1);
-    GradL[2]= H(2);
-    GradL[0]=-GradL[1]-GradL[2];
-  }
-  */ 
-
+class MeshS : public GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> { 
+public:
+  MeshS(){};
+  MeshS(FILE *f,int offset=0);
+  //MeshS(const string);         
+  MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
+  int *liste_v_num_surf=NULL; // mapping for volume/surface vertices
+  //const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
+  int Save(const string & filename);
+  //MeshS(FILE *f);
+  void GSave(FILE * f,int offset=0) const ;
+  void GRead(FILE * f,int offset);
+  ~MeshS() {SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
+  private:
+  MeshS(const MeshS &); // pas de construction par copie
+  void operator=(const MeshS &);// pas affectation par copy
 };
 
 
@@ -161,26 +234,44 @@ public:
   Mesh3(const  Serialize &);     
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
   Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
-  
   double hmin() const; // Add J. Morice 11/10
-
+  //surface mesh possible
+  MeshS *meshS; 
+  int typeMesh3 = 1;   // by default volume mesh only
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
-    
   int Save(const string & filename) const ;  
-    
   int SaveSurface(const string & filename) const ;  
   int SaveSurface(const string & filename1, const string & filename2) const ;  
   void flipSurfaceMesh3(int surface_orientation);
   void read(istream &);
   void readmsh(ifstream & f,int offset);
   void TrueVertex();
-    ~Mesh3() {SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
+  inline int & getTypeMesh3() {
+    return typeMesh3;
+   }
+ inline const int & getTypeMesh3() const{
+   return typeMesh3;
+ }
+ inline MeshS * getMeshS() {
+   return meshS;
+ }
+ inline MeshS * getMeshS() const{
+   return meshS;
+ }
+    ~Mesh3() { SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie
-  void operator=(const Mesh3 &);// pas affectation par copy 
+  void operator=(const Mesh3 &);// pas affectation par copy
 };
+
+
+
+    
+
+
+  
 // for the caracteristic method.
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt);
   int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt,R3 &offset);

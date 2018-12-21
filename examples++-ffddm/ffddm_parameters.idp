@@ -1,0 +1,99 @@
+macro WITHHPDDM()1//
+
+verbosity = 0;
+int ffddmverbosity = getARGV("-ffddm_verbosity", 3);
+/*
+if (mpirank != 0)
+  mverbosity = 0;
+*/
+
+string ffddmprecond = getARGV("-ffddm_schwarz_method", "ras");
+string ffddmvariant = getARGV("-ffddm_variant", "right"); // right(default) or left preconditioning
+int ffddmmaxit = getARGV("-ffddm_max_it", 200);
+real ffddmtol = getARGV("-ffddm_tol", 1.e-6);
+real ffddminexactCStol = getARGV("-ffddm_inexactCS_tol", 1.e-1);
+int ffddmnu = getARGV("-ffddm_geneo_nu", 20); // number of local eigenvectors to compute for DtN CS (choice criterion 4.3 of Lea's paper is applied to these computed eigenvectors unless -noLea is activated)
+real ffddmtau = getARGV("-ffddm_geneo_threshold",0.5);
+if ( usedARGV("-ffddm_geneo_nu") > -1 && usedARGV("-ffddm_geneo_threshold") <= -1)
+  ffddmtau = 0;
+
+string ffddmcorrection = getARGV("-ffddm_schwarz_coarse_correction", "ADEF1"); // for 2 level preconditioner
+
+int ffddmexclude = getARGV("-ffddm_master_exclude", 0);
+int ffddmpCS = getARGV("-ffddm_master_p", 1);
+
+int ffddminterfacelabel = 10;
+
+/*
+int binexactCS = usedARGV("-inexactCS") > -1 ? 1 : 0;
+int inexactCSsplit = getARGV("-inexactCS_split", 1);
+if (binexactCS) {
+  exclude = 0;
+  pCS = mpisize; 
+}
+*/
+
+/*
+if (!bCS) {
+  exclude = 0;
+  pCS = 0;
+}
+*/
+
+int ffddmoverlap = getARGV("-ffddm_overlap", 1);
+int ffddmsplit = getARGV("-ffddm_split", 1);
+int ffddmpartitioner = getARGV("-ffddm_partitioner", 1); // 0: simple, 1: metis, 2: scotch
+int ffddmbmedit = usedARGV("-ffddm_medit") > -1 ? 1 : 0;
+int ffddmbffplot = usedARGV("-ffddm_disable_plots") > -1 ? 0 : 1;
+int ffddmbplot = ffddmbmedit || ffddmbffplot;
+int ffddmnbiso = getARGV("-ffddm_nbiso", 20);
+int ffddmbdirect = usedARGV("-direct") > -1 ? 1 : 0;
+int ffddmnpart = getARGV("-seqddm", -1);
+int bpara = 0;
+int bseq = 1;
+if (ffddmnpart <= 0) {
+  bseq = 0;
+  bpara = 1;
+  ffddmnpart = mpisize-ffddmexclude*ffddmpCS;
+}
+
+int bnoGlob = usedARGV("-noGlob") > -1 ? 1 : 0;
+
+//if (abs(ffddmsplit)>1) bnoGlob = 1;
+if (bseq || ffddmbplot || ffddmbdirect)
+  assert(!bnoGlob);
+  
+real vtgv = -1;//1.e+30;
+real vtgvelim = -1;//-2;
+int vsym = 0;//
+//macro msym GMRES//CG//EOM
+
+/*
+if (binexactCS) {
+  assert(bCS && bCM && bpara);
+}
+*/
+
+/*
+macro simple(PhGlobal, part, comm)
+{
+	part = 1;
+}
+// EOM
+*/
+
+/*
+real diam;
+macro bbN(boundingMesh, overshoot, ThGlobal)
+            real[int] bb(4);
+            boundingbox(bb, boundingMesh);
+            diam = sqrt((bb(1) - bb(0))^2 + (bb(3) - bb(2))^2);
+            bb(0) -= overshoot;
+            bb(1) += overshoot;
+            bb(2) -= overshoot;
+            bb(3) += overshoot;
+
+            ThGlobal = mtrunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
+*/
+         
+

@@ -1,0 +1,679 @@
+macro ffddmgenerateOperatorfunctions(pr,preffe)
+func preffe#K[int] pr#A(preffe#K[int] &x)
+{
+  /* Matrix vector product with the global matrix */
+  preffe#K[int] res(x.n);
+  if (preffe#prmesh#isincomm) {
+    preffe#prmesh#tic(pr#tmvi)
+    if (!bpara)
+    res = pr#Aglobal*x;
+    else if (!preffe#prmesh#excluded){
+      res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*x;
+      pr#prfe#update(res,true);
+    }
+    preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
+  }
+  return res;
+}
+
+func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
+{
+  preffe#K[int] res(rhs.n);
+
+  preffe#prmesh#tic(pr#tloc)
+
+  if (preffe#prmesh#isincomm) {
+    if (!bpara) {
+      set(pr#Aglobal,solver = sparsesolver,commworld=preffe#prmesh#commself);
+      res = pr#Aglobal^-1*rhs;
+    }
+    else if (!preffe#prmesh#excluded) {
+      matrix<preffe#K> matloc = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*pr#aRd[mpiRank(preffe#prmesh#commddm)];
+      matloc = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*matloc;
+      matloc = matloc*preffe#Rih[mpiRank(preffe#prmesh#commddm)];
+      set(matloc,solver = sparsesolver,commworld=preffe#prmesh#commddm,master=-1);
+      preffe#K[int] scaledrhs = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*rhs;
+      preffe#K[int] scaledrhsg(preffe#Vhglob.ndof);
+      scaledrhsg = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*scaledrhs;
+      preffe#K[int] resg = matloc^-1*scaledrhsg;
+      res = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg;
+    }
+  }
+  
+  preffe#prmesh#toc(pr#tloc,"direct solver",pr#tdirect)
+  
+  return res;
+}
+// EOM
+
+macro ffddmgeneratePrecondfunctions(pr,preffe)  
+
+  func preffe#K[int] pr#AEprec(preffe#K[int] &x)
+  {
+    preffe#K[int] res(x.n);
+    if (preffe#prmesh#isincomm) {
+      if (!bpara)
+      res = pr#AglobEprec*x;
+      else if (!preffe#prmesh#excluded){	
+        res = pr#aRdEprec[mpiRank(preffe#prmesh#commddm)]*x;
+        pr#prfe#update(res,true);
+      }
+    }
+    return res;
+  }   
+
+  func preffe#K[int] pr#Q(preffe#K[int] &l)      /* Q = Z*E^-1*Z^T */
+  {
+    preffe#K[int] res(l.n);
+    res=0.;
+    if (preffe#prmesh#isincomm) {
+      if(pr#bCM){
+        preffe#K[int] vaux(pr#ncoarsespace), tmp(pr#ncoarsespace), zaux(pr#ncoarsespace);
+        
+        /* Z^T l */
+        if (!bpara) {
+          
+          vaux = pr#ZCM'*l;
+        }
+        else if (!preffe#prmesh#binexactCS){
+          if (!preffe#prmesh#excluded) {
+            preffe#K[int] ls = l .* preffe#Dk[mpiRank(preffe#prmesh#commddm)]; /* Z = sum_i D_i Z_i */
+            tmp = pr#ZCMi'*ls;
+          }
+          else
+          tmp = 0;
+          vaux = 0;
+          mpiReduce(tmp,vaux,processor(0,preffe#prmesh#mpicomm),mpiSUM);
+        }
+        else {
+          NewMacro localmacroinexact preffe#prmesh#minexactCS EndMacro
+          IFMACRO (localmacroinexact,1)
+          if (!preffe#prmesh#excluded) {
+            tmp.resize(preffe#CoarseVhi.ndof);
+            tmp = pr#ZCMi'*l;
+          }
+          /*exchange(pr#Addmc,tmp,scaled=true);*/
+          pr#prfe#Coarseupdate(tmp,true);
+          ENDIFMACRO
+          ;
+        }
+        
+        if (!preffe#prmesh#binexactCS) {
+          if (!bpara || mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
+            preffe#prmesh#tic(pr#tcsi)
+            if (mpiRank(preffe#prmesh#mpicomm) == 0)
+            zaux = pr#ECM^-1*vaux;
+            else {
+              preffe#K[int] dumx(pr#ECM.n), dumb(pr#ECM.n);
+              dumx = pr#ECM^-1*dumb;	
+            }
+            preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
+          }
+          
+          if (bpara)   
+          broadcast(processor(0,preffe#prmesh#mpicomm),zaux);    
+          
+          if (!bpara) {
+            res = pr#ZCM*zaux;
+          }
+          else if (!preffe#prmesh#excluded) {
+            res = pr#ZCMi*zaux;
+          }
+        }
+        else {
+          NewMacro localmacroinexact preffe#prmesh#minexactCS EndMacro
+          IFMACRO (localmacroinexact,1)
+          preffe#K[int] solc(preffe#CoarseVhi.ndof);
+          solc = 0;
+          preffe#prmesh#tic(pr#tcsi)
+          /*
+          destroyRecycling(Addmc);
+          DDM(Addmc, solc, tmp, O=Optc);
+          solc = 0;
+          */
+          
+          /*DDM(pr#Addmc, solc, tmp, O=pr#Optc);*/
+          solc = pr#CoarsefGMRES(solc, tmp, ffddminexactCStol, ffddmmaxit, ffddmvariant);
+          preffe#prmesh#toc(pr#tcsi,"",pr#tcs)
+          if (!preffe#prmesh#excluded)
+          res = pr#ZCMi*solc;
+          ENDIFMACRO
+          ;	  
+        }	
+      }
+      else{
+        
+        preffe#K[int] vaux(pr#ncoarsespace), zaux(pr#ncoarsespace);
+        
+        /* Z^T l */
+        if (!bpara) {
+          int cpt = 0;
+          for (int jj=0; jj<preffe#prmesh#npart; jj++) {
+            preffe#K[int] tmp(preffe#Rih[jj].n);
+            tmp = preffe#Rih[jj]*l;
+            for (int ii=0; ii < pr#sizelg[jj]; ii++) {
+              vaux[cpt]=pr#Z[cpt]'*tmp;
+              cpt++;
+            }
+          }
+          /* Z E^-1 vaux */	
+          zaux=pr#E^-1*vaux;
+          cpt = 0;
+          /* the 2 fors loop over the columns of Z subdomainwise */
+          for (int jj=0; jj<preffe#prmesh#npart; jj++)
+          for (int ii=0; ii < pr#sizelg[jj]; ii++) {
+            preffe#K[int] tmp(preffe#Rih[jj].m);
+            tmp = preffe#Rih[jj]'*pr#Z[cpt];
+            res += zaux[cpt]*tmp;
+            cpt++; /* keeps track of the global numbering of the columns of Z */
+            /* we multiply 'column by element' */
+          }
+        }
+        else {
+          preffe#K[int] tmp(pr#si);
+          for (int i=0;i<pr#si;i++)
+          tmp[i]=pr#Z[i]'*l; /* local vector Z'_i l_i */
+          if(!preffe#prmesh#binexactCS) {
+            mpiGatherv(tmp,vaux,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
+            /* mpiGatherv puts together inside vaux the local vectors (whose sizes are in sizelg) */
+            if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
+              preffe#prmesh#tic(pr#tcsi)
+              if (mpiRank(preffe#prmesh#mpicomm) == 0)
+              zaux = pr#E^-1*vaux;
+              else {
+                preffe#K[int] dumx(pr#E.n), dumb(pr#E.n);
+                dumx = pr#E^-1*dumb;
+              }
+              preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
+            }
+            mpiScatterv(zaux,tmp,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
+            /* inverse of mpiGatherv, cut the global zaux into the local tmp[i] */
+            for (int i=0;i<pr#si;i++) {
+              res += tmp[i]*pr#Z[i];
+            }
+            /* sum_j R_i Z_j zaux_j */
+          }
+          else {
+            NewMacro localmacroinexact preffe#prmesh#minexactgeneoCS EndMacro
+            IFMACRO (localmacroinexact,1)
+            
+            mpiRequest[int] rq(pr#prfe#prmesh#listofsupers.n-pr#issuper+pr#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
+            int cpt = 0;
+            pr#prfe#K[int][int] tres(pr#prfe#prmesh#insuperwithoverlap.n);
+            for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++)
+            if (!pr#prfe#prmesh#issuper || pr#prfe#prmesh#mysuperrank != pr#prfe#prmesh#listofsupers[is])
+              Isend(processor(pr#prfe#prmesh#rankofsuper(pr#prfe#prmesh#listofsupers[is]),pr#prfe#prmesh#mpicomm,rq[cpt++]),tmp);
+            if (pr#prfe#prmesh#issuper) {
+              vaux.resize(pr#prfe#superDk[mpiRank(pr#prfe#prmesh#commsuper)].n);
+              if (!pr#prfe#prmesh#excluded)
+                vaux(pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]:pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]+pr#sizelg[mpiRank(pr#prfe#prmesh#commddm)]-1) = tmp;
+              for (int i=!pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#insuperwithoverlap.n; i++) {
+                tres[i].resize(pr#sizelg[pr#prfe#prmesh#insuperwithoverlap[i]]);              
+                Irecv(processor(pr#prfe#prmesh#insuperwithoverlap[i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rq[cpt++]),tres[i]);
+              }
+            }
+            for (int i=0;i < cpt;i++)
+              int k = mpiWaitAny(rq);
+            
+            if (pr#prfe#prmesh#issuper)
+            for (int i=!pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#insuperwithoverlap.n; i++)
+              vaux(pr#superlocalnuminv[pr#offseti[pr#prfe#prmesh#insuperwithoverlap[i]]]:pr#superlocalnuminv[pr#offseti[pr#prfe#prmesh#insuperwithoverlap[i]]]+pr#sizelg[pr#prfe#prmesh#insuperwithoverlap[i]]-1) = tres[i];         
+            
+            if (preffe#prmesh#issuper) {
+              preffe#prmesh#tic(pr#tcsi)
+              
+              if (preffe#prmesh#binexactgeneoCS) {
+                preffe#K[int] solc(vaux.n);
+                solc = 0;
+                solc = pr#superfGMRES(solc, vaux, ffddminexactCStol, ffddmmaxit, ffddmvariant);
+                solc = solc .* preffe#superDk[mpiRank(preffe#prmesh#commsuper)];
+                vaux.resize(pr#ncoarsespace);
+                vaux = pr#RsuperCS'*solc;
+              }
+              else {
+                preffe#K[int] tmp = vaux .* preffe#superDk[mpiRank(preffe#prmesh#commsuper)];
+                preffe#K[int] tmp2(pr#RsuperCS.m);
+                tmp2 = pr#RsuperCS'*tmp;
+                vaux.resize(pr#ncoarsespace);
+                vaux = pr#E^-1*tmp2;
+                /*
+                tmp = pr#RsuperCS*vaux;
+                tmp = tmp .* preffe#superDk[mpiRank(preffe#prmesh#commsuper)];
+                vaux = pr#RsuperCS'*tmp;
+                */
+              }
+              
+              preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commsuper)
+            }
+            
+            if (pr#prfe#prmesh#issuper) {
+              if (!pr#prfe#prmesh#excluded)
+                tmp = vaux(pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]:pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]+pr#sizelg[mpiRank(pr#prfe#prmesh#commddm)]-1);
+              mpiRequest[int] rq(pr#insuperinterior.n-!pr#prfe#prmesh#excluded);
+              for (int i=!pr#prfe#prmesh#excluded; i < pr#insuperinterior.n; i++) {
+                Isend(processor(pr#insuperinterior[i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rq[i-!pr#prfe#prmesh#excluded]),vaux(pr#offseti[pr#insuperinterior[i]]:pr#offseti[pr#insuperinterior[i]]+pr#sizelg[pr#insuperinterior[i]]-1));
+              }
+              for (int i=0;i < pr#insuperinterior.n-!pr#prfe#prmesh#excluded;i++)
+                int k = mpiWaitAny(rq);
+            }
+            else {
+              mpiRequest rq;
+              Irecv(processor(pr#prfe#prmesh#mysuper,pr#prfe#prmesh#mpicomm,rq),tmp);
+              mpiWait(rq);
+            }
+
+            for (int i=0;i<pr#si;i++) {
+              res += tmp[i]*pr#Z[i];
+            }
+            /* sum_j R_i Z_j zaux_j */
+            ENDIFMACRO
+            ;
+          }
+          pr#prfe#update(res,false); /* recover the Z_j zaux_j (in the overlap) computed by neighbouring subdomains */
+        }
+      }
+    }
+    return res;
+}
+
+func preffe#K[int] pr#PREC1(preffe#K[int] &l)
+{
+  /* Application of the 1 level preconditioner
+  M^{-1}*y = \sum Ri^T*Di*Ai^{-1}*Ri*y
+  Ri restriction operators, Ai local matrices */
+  
+  preffe#K[int] s(l.n);
+  s = 0;
+  
+  if (preffe#prmesh#isincomm) {
+    preffe#prmesh#tic(pr#tpreci)
+    
+    if (pr#prec == "none") {
+      s = l;
+    }
+    else {
+      if (!bpara) {
+        for(int i=0; i<preffe#prmesh#npart; ++i)  {
+          preffe#K[int] bi(preffe#Rih[i].n);
+          bi = preffe#Rih[i]*l;           /* restricts rhs */
+          if(pr#prec == "soras")
+          bi = bi .* preffe#Dk[i];
+          preffe#K[int] ui = pr#aR[i] ^-1 * bi;  /* local solves */
+          if(pr#prec != "asm")
+          ui = ui .* preffe#Dk[i];                      /* partition of unity */
+          s += preffe#Rih[i]'*ui;                  /* prolongation */
+        }
+      }
+      else if (!preffe#prmesh#excluded){
+        preffe#K[int] aux = l;
+        if(pr#prec == "soras")
+        aux = aux .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+        /* s = aR[mpirank]^-1 * l; */
+        s = pr#aR[mpiRank(preffe#prmesh#commddm)]^-1 * aux;
+        if(pr#prec != "asm"){
+          pr#prfe#update(s,true);
+        }
+        else{
+          pr#prfe#update(s,false);	
+        }       
+      }
+    }
+    preffe#prmesh#toc(pr#tpreci,"",pr#tprec)
+  }
+  return s;
+}
+
+func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
+{
+  preffe#K[int] ltemp(l.n);
+  ltemp = 0;
+  if (preffe#prmesh#isincomm) {
+    
+    preffe#prmesh#tic(pr#tpreci)
+    
+    preffe#K[int] Ql;
+    preffe#K[int] aux;
+    
+    /* Q */
+    if (pr#corr == "AD" || pr#corr == "ADEF1" || pr#corr == "ADEF2" || pr#corr == "BNN" || pr#corr == "RBNN1")   {
+      Ql.resize(l.n);
+      Ql = pr#Q(l);
+    }
+    
+    /* P */
+    if (pr#corr == "ADEF1" || pr#corr == "BNN" || pr#corr == "RBNN1") {
+      aux.resize(l.n);
+      if (pr#bCM)
+      aux = pr#AEprec(Ql);
+      else
+      aux = pr#A(Ql);
+      ltemp = l-aux; 
+    }
+    else
+    ltemp = l; 
+    
+    preffe#K[int] s(l.n);
+    
+    /* M^-1 */
+    if (pr#prec == "none") {
+      s = ltemp;
+    }
+    else if (!bpara) {
+      for(int i=0; i<preffe#prmesh#npart; ++i)  {
+        preffe#K[int] bi(preffe#Rih[i].n);
+        bi = preffe#Rih[i]*ltemp;           /* restricts rhs */
+        if(pr#prec == "soras")
+        bi = bi .* preffe#Dk[i];
+        preffe#K[int] ui = pr#aR[i] ^-1 * bi;  /* local solves */
+        if(pr#prec != "asm")
+        ui = ui .* preffe#Dk[i];                      /* partition of unity */
+        s += preffe#Rih[i]'*ui;                  /* prolongation */
+      }
+    }
+    else if (!preffe#prmesh#excluded){
+      preffe#K[int] aux = ltemp;
+      if(pr#prec == "soras")
+      aux = aux .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+      s = pr#aR[mpiRank(preffe#prmesh#commddm)]^-1 * aux;
+      /* s = aR[mpirank]^-1 * ltemp; */
+      if(pr#prec != "asm"){
+        pr#prfe#update(s,true);
+      }
+      else{
+        pr#prfe#update(s,false);	
+      }       
+    }
+    
+    /* P^T */
+    if (pr#corr == "ADEF2" || pr#corr == "BNN" || pr#corr == "RBNN1" || pr#corr == "RBNN2") {
+      if (pr#bCM)
+      ltemp = pr#AEprec(s);
+      else
+      ltemp = pr#A(s);
+      aux.resize(l.n);
+      aux = pr#Q(ltemp);
+      ltemp = s-aux;
+    }
+    else
+    ltemp = s;    
+    
+    /* + Q */
+    if (pr#corr == "AD" || pr#corr == "ADEF1" || pr#corr == "ADEF2" || pr#corr == "BNN") 
+    ltemp += Ql;
+    
+    preffe#prmesh#toc(pr#tpreci,"",pr#tprec)
+  }
+  return ltemp;
+}
+
+/*
+func preffe#K[int] pr#PRECTEST(preffe#K[int] &l)
+{
+   preffe#K[int] res(l.n),x0(l.n);
+   IFMACRO (pr#minexactCS,1)
+   x0 = 0;
+   res = pr#CoarsefGMRES(x0, l, 1.e-6, 5, "right");
+   ENDIFMACRO
+   return res;
+}
+*/
+
+func preffe#K[int] pr#PRECTEST(preffe#K[int] &l)
+{
+  /*
+   preffe#K[int] dd = pr#aRd[0].diag;
+   dd = 1./dd;
+   dd = l.*dd;
+   return dd;
+   */
+   return l;
+}
+
+/*
+func preffe#K[int] pr#PRECTEST(preffe#K[int] &l)
+{
+   preffe#K[int] res(l.n);
+   preffe#K[int] ls = l .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+   preffe#K[int] tmp = pr#ZCMi'*ls;
+   
+   IFMACRO (preffe#prmesh#minexactCS,1)
+   preffe#K[int] rr = pr#CoarsePREC1(tmp);
+   res = pr#ZCMi*rr;
+   ENDIFMACRO
+
+   return res;
+}
+*/
+
+/* CMCG */
+/*
+func pr#K[int] pr#PRECTEST(pr#K[int] &l)
+{
+  if (cpt%2 >3) {
+  Vhi<pr#K> pr#mdef(u0),pr#mdef(ucmcg);
+  u0[] = 0;
+  ffcmcgrhs(Vhi,Thi,ThAugmented,l,u0,ucmcg)
+  cpt++;
+  return ucmcg[];
+  }
+  else{
+    cpt++;
+    return pr#PREC1(l);
+  }
+}
+*/
+
+func preffe#K[int] pr#PREC(preffe#K[int] &l)
+{
+	if (pr#corr == "test")
+	  return pr#PRECTEST(l);
+    else if (pr#corr == "none")
+      return pr#PREC1(l);
+    else
+      return pr#PREC2level(l);
+}
+
+func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, int nbiter, string sprec)
+{	
+  if (preffe#prmesh#isincomm) {
+    preffe#prmesh#tic(pr#tgmresi)
+    
+    preffe#K[int] uni(x0.n);
+    
+    IFMACRO(pr#withhpddmkrylov)
+    if (!preffe#prmesh#excluded) {
+      uni = x0;
+      IterativeMethod(pr#A, uni,rhs, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
+    }
+    else
+    IterativeMethod(pr#A, uni,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
+    ENDIFMACRO
+    
+    IFMACRO(pr#withhpddm)
+    uni = x0;
+    real[int] timings(0);
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+sprec+" -hpddm_max_it "+nbiter+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
+    if (pr#corr == "AD")
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction additive");
+    else if (pr#corr == "BNN")
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction balanced");
+    else if (pr#corr == "ADEF1")
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction deflated");
+    
+    if (pr#prec == "oras" || pr#prec == "soras")
+    DDM(pr#hpddmOP,uni,rhs,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
+    else
+    DDM(pr#hpddmOP,uni,rhs,timing=timings);
+    
+    /*
+    real[int] timingsg(timings.n);
+    mpiAllReduce(timings,timingsg,mpiCommWorld,mpiMAX);
+    */
+    pr#tgmres -= timings[0];
+    pr#tfacto += timings[0];
+    ENDIFMACRO
+    
+    IFMACRO(!pr#withhpddm)
+    IFMACRO(!pr#withhpddmkrylov)
+    preffe#K[int,int] Hn(nbiter+2,nbiter+1);     /* Hessenberg matrix */
+    Hn = 0.;
+    preffe#K[int,int] rot(2,nbiter+2);
+    rot = 0.;
+    preffe#K[int] g(nbiter+1),g1(nbiter+1);
+    g = 0.;  g1 = 0.;
+    
+    preffe#K[int] ri(x0.n),zi(x0.n),vi(x0.n),wi(x0.n),veri(x0.n);
+    preffe#K[int][int] Vi(nbiter+1), Vpi(nbiter+1);
+    for (int i=0;i<nbiter+1;i++){
+      Vi[i].resize(x0.n);
+      Vpi[i].resize(x0.n);
+    }
+    
+    if (pr#corr=="ADEF2" || pr#corr=="RBNN1" || pr#corr=="RBNN2")
+    x0 = pr#Q(rhs);
+    
+    ri = pr#A(x0);
+  
+    if (!preffe#prmesh#excluded)
+    ri -= rhs;
+    ri *= -1.0;
+    
+    if (sprec == "right")
+    zi = ri;
+    else
+    zi = pr#PREC(ri);
+    
+    g[0] = sqrt(real(pr#prfe#scalprod(zi,zi)));
+    real normb = 0;
+    
+    if (!preffe#prmesh#excluded) {
+      wi = rhs;
+      for [i,bi: wi] bi = (bi > 1.e+20 ? 0 : bi);
+    }
+    
+    if (sprec == "right")
+    normb = sqrt(real(pr#prfe#scalprod(wi,wi)));
+    else{
+      vi = pr#PREC(wi);
+      normb = sqrt(real(pr#prfe#scalprod(vi,vi)));
+    }
+    if (normb < 1.e-20 || eps < 0) normb = 1.;
+    
+    Vi[0]=1/g[0]*zi;           /* first basis vector */
+    
+    real relres = 0;
+    
+    for(int it=0; it<nbiter; it++) {
+      if (sprec == "right") {
+        Vpi[it] = pr#PREC(Vi[it]);
+        vi=Vpi[it];
+        wi=pr#A(vi);
+        
+      }
+      else {
+        vi=pr#A(Vi[it]);
+        wi = pr#PREC(vi);
+      }
+      
+      for(int i=0; i<it+1; i++) {
+        Hn(i,it) = pr#prfe#scalprod(wi,Vi[i]);
+        wi -=  conj(Hn(i,it))*Vi[i];
+      }
+      Hn(it+1,it) = sqrt(real(pr#prfe#scalprod(wi,wi)));
+      preffe#K aux = Hn(it+1,it);
+      Vi[it+1]=1/aux*wi;
+      
+      for(int i=0; i<it; i++){ 	 /* QR decomposition of Hn */
+        preffe#K aa = conj(rot(0,i))*Hn(i,it)+conj(rot(1,i))*Hn(i+1,it);
+        preffe#K bb = -rot(1,i)*Hn(i,it)+rot(0,i)*Hn(i+1,it);
+        Hn(i,it) = aa;
+        Hn(i+1,it) = bb;
+      }
+      
+      preffe#K sq = sqrt( conj(Hn(it,it))*Hn(it,it) + Hn(it+1,it)*Hn(it+1,it) );
+      
+      rot(0,it) = Hn(it,it)/sq;
+      rot(1,it) = Hn(it+1,it)/sq;
+            
+      Hn(it,it) = conj(rot(0,it))*Hn(it,it)+conj(rot(1,it))*Hn(it+1,it);
+      Hn(it+1,it) =  0.; 
+      g[it+1] = -rot(1,it)*g[it]; 
+      g[it] = conj(rot(0,it))*g[it];
+      
+      preffe#K[int] y(it+1);     	/* Reconstruct the solution */
+      for(int i=it; i>=0; i--) {
+        g1[i] = g[i];
+        for(int j=i+1; j<it+1; j++){
+          g1[i] = g1[i]-Hn(i,j)*y[j];
+        }
+        y[i]=g1[i]/Hn(i,i);
+      }
+      
+      uni = x0;
+      for(int i=0;i<it+1;i++){
+        if (sprec == "right")
+        uni= uni+ conj(y[i])*Vpi[i];
+        else
+        uni= uni+ conj(y[i])*Vi[i];
+      }
+      
+      real relerr = 0;
+      relres = abs(g[it+1]);
+      
+      /*
+      if (pr#bdirect){
+        if (!bpara) {
+          pr#ver[] = uni[] - pr#uglob[];
+          relerr = pr#ver[].l2/pr#uglob[].l2;
+        }
+        else {
+          if (!preffe#prmesh#excluded) {
+            vi[] = preffe#Rih[mpiRank(preffe#prmesh#commddm)] * pr#uglob[];
+            vi[] -= uni[];
+          }
+          relerr = sqrt(real(pr#prfe#scalprod(vi[],vi[])));
+          relerr /= pr#uglob[].l2;			
+        }
+      }
+      */
+      
+      if (pr#verbosity >= 3 && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+        if (pr#bdirect)
+        cout << "["+Stringification(pr)+"] It: "<< it+1 << " Residual = " << relres << " Rel res = " << relres/normb <<  " Relative L2 Error =  "<< relerr <<  endl;
+        else
+        cout << "["+Stringification(pr)+"] It: "<< it+1 << " Residual = " << relres << " Rel res = " << relres/normb << endl; 
+      }
+      
+      if (pr#verbosity >= 10){
+        IFMACRO(preffe#defplot)
+        preffe#Vhi<preffe#K> def(unih);
+        unih[] = uni;
+        preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + it)
+        ENDIFMACRO
+        ;
+      }
+      
+      int j = it+2;
+      if(relres/normb < abs(eps)) {
+        if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+          cout << "["+Stringification(pr)+"] GMRES has converged in " + (it+1) + " iterations " << endl;
+          cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+        }
+        break;
+      }
+    }
+    if(relres/normb >= abs(eps))
+    if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+      cout << "["+Stringification(pr)+"] GMRES did not converge in " + nbiter + " iterations " << endl;
+      cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+    }
+    ENDIFMACRO
+    ENDIFMACRO
+    preffe#prmesh#toc(pr#tgmresi,"",pr#tgmres)
+    return uni;
+  }
+}
+/*# finGMRESsolve #*/
+
+// EOM
+

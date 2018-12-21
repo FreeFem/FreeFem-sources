@@ -1751,6 +1751,7 @@ class PopenMeditMesh3_Op: public E_F0mps
 					} else if (offset != offset1) {
 						CompileError("the number of solution by mesh is different");
 					}
+					lastTh=jj;
 				}
 			}
 

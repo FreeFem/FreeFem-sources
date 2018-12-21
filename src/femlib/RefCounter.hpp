@@ -70,12 +70,12 @@ class RefCounter {
 // private:
   RefCounter(const RefCounter &) : count(0) {} 
   void operator=(const RefCounter &) { count=0;}
- 
+    ostream &dump(ostream & f) const { return f <<count;}
 
 };
 
 inline void baseCountPointer::add(const RefCounter * c)  const 
-   { if (c) c->count++;}    
+   { if (c) c->count++; SHOWVERB( cout << "baseCountPointer add  of " << this << " "<< c->count <<  endl);}
 inline void baseCountPointer::destroyPtr(const RefCounter *   c)  const 
    { if (c) c->destroy();}    
  
@@ -102,7 +102,7 @@ class CountPointer: private baseCountPointer {
                 c=n.c;
                 add(c);               
               }}
-                           
+ void cswap(CountPointer & n) {if(*this != n) swap(c,n.c)    ;}
  void operator=( T * t) {
   if( c != t) { if(c) destroyPtr(c); 
                 c=t;
