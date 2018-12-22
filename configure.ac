@@ -1689,14 +1689,16 @@ then
     if test "$ff_umfpack_header" != yes -o "$ff_umfpack_ok" != yes; then
         ff_umfpack_ok=no
 	AC_MSG_WARN([Sorry, we could not find the UMFPACK lib or the UMFPACK headers])
+	ff_umfpack_incs=""
+	UMFPACK_CPPFLAGS=";
     fi
 
     if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
-	if test -n "$ff_umfpack_incs" ; then 
+	 if test -n "$ff_umfpack_incs" ; then 
 	  UMFPACK_CPPFLAGS="$ff_umfpack_incs"
-	fi
+	 fi
 dnl    AC_SUBST([UMFPACK_CPPFLAGS],[$ff_umfpack_incs])	
-	AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
+	  AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
     fi
 fi
 

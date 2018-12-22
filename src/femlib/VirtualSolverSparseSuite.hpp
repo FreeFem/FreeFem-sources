@@ -34,14 +34,14 @@ extern "C" {
 #endif // HAVE_UMFPACK_UMFPACK_H
 #endif // HAVE_UMFPACK_H
 }
-#endif
+
 
 
 #include <vector>
 #include "VirtualSolver.hpp"
 //#include "cholmod_function.h"
 #include <complex>
-void init_UMFPack_solver();
+
 
 template<class Z=int,class K=double>
 class VirtualSolverUMFPACK: public VirtualSolver<Z,K> {
@@ -840,5 +840,7 @@ public:
         
     }
 };
+#endif
 
+void init_UMFPack_solver();
 #endif
