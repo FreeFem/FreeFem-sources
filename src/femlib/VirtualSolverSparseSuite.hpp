@@ -793,7 +793,7 @@ public:
         //c.error_handler = my_handler ;
         
     }
-    void void fac_init(){
+    void fac_init(){
         
     }
     void dosolver(K *x,K*b,int N,int trans)
