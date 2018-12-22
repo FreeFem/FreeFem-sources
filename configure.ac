@@ -15,11 +15,11 @@ dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
 dnl : ${FFLAGS=""}
 
-# progg test  exec for windows 
+# progg test  exec for windows
 ff_TEST_FFPP="../src/nw/FreeFem++"
 ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
 
-AC_PREREQ(2.69) dnl for AC_LANG_CASE and check stuff 
+AC_PREREQ(2.69) dnl for AC_LANG_CASE and check stuff
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
@@ -45,7 +45,7 @@ inc_usr_include=""
 ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
 dnl search of associad software
 m4_define([AC_FF_ADDWHERELIB],
-  [	
+  [
     if test -z "$ff_where_lib_conf_$1"  ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    test -n "$3" && echo "$1 INCLUDE $3 "  >>$ff_where_lib_conf
@@ -66,7 +66,7 @@ m4_define([AC_FF_WHERELIB],
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
-	    case "$ff_WHERE_INC" in 
+	    case "$ff_WHERE_INC" in
 		/*) echo "$1 INCLUDE -I$ff_WHERE_INC"  >>$ff_where_lib_conf ;;
 	    esac
             ff_where_lib_conf_$1=1
@@ -81,11 +81,11 @@ m4_define([AC_FF_PETSC_WHERELIB],
 	  [
 	    ff_$2=`AC_FF_PETSC_AWK($2,$4)`
 	    ff_$3=`AC_FF_PETSC_AWK($3,$4)`
-	   if test -n "[$]ff_$2"; then 
+	   if test -n "[$]ff_$2"; then
 			    ff_$1_ok=yes;
 			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
 			    AC_SUBST([TOOL_COMPILE_$1],"")
-	  fi	    
+	  fi
 	  ]
 )dnl end m4_defineAC_FF_PETSC_WHERELIB
 
@@ -99,7 +99,7 @@ m4_define([TOOL_PARAMETERS],
 	AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
     AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
 	AC_ARG_ENABLE(download-$1,AC_HELP_STRING([--enable-download_$1],[force the download of $1]))
- 
+
     if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
     then
 
@@ -113,7 +113,7 @@ m4_define([TOOL_PARAMETERS],
 
 m4_define([TOOL_DISABLE],
     [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
-	
+
     if test "$enable_$1" = "no"
     then
         AC_SUBST([TOOL_COMPILE_$1],"")
@@ -121,7 +121,7 @@ m4_define([TOOL_DISABLE],
     elif  test   "$ff_$1_ok" = "yes" ; then
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
-    else  
+    else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
 	    enable_$1_download=yes
@@ -142,7 +142,7 @@ m4_define([TOOL_DISABLE_NO],
     elif  test   "$ff_$1_ok" = "yes" ; then
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
-    else  
+    else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
 	    enable_$1_download=yes
@@ -172,11 +172,11 @@ if test `uname` != Darwin; then
  ff_ldbg="-Wl,--start-group"
 fi
 
-#  suffix of  dynamic lib .. 
+#  suffix of  dynamic lib ..
 # ---------------------------
 ff_uname=`uname`
 #  flag to build window 32   version   ff_mingw = yes
-# bof bof F. Hecht 
+# bof bof F. Hecht
 case $ff_uname in
     CYGWIN*|MINGW*|MSYS_NT*)
 	ff_suffix_dylib="dll"
@@ -184,10 +184,10 @@ case $ff_uname in
      Darwin)
 	ff_suffix_dylib="dylib"
 	ff_suffix_dylib_a="dylib";;
-    *) 
+    *)
        ff_suffix_dylib="so";
        ff_suffix_dylib_a="so";
-esac 
+esac
 # end suffix ...
 
 
@@ -457,7 +457,7 @@ eval for i in $ac_configure_args\; do echo \$i\; done | sed -e "s/$/'/" -e "s/^/
 #      it is .dll   under windows
 #      it is .dylib under macos X
 
-# suffix of dynamic lib 
+# suffix of dynamic lib
 # Checking wether we can produce a MacIntosh-specific version
 # -----------------------------------------------------------
 AC_MSG_CHECKING(wether we are on a MacIntosh)
@@ -488,7 +488,7 @@ AC_ARG_WITH(glut,[  --with-glut  glutlib and include  ])
 if test "$with_glut" != no -a  -n "$with_glut" ; then
     ff_libs_save="$LIBS"
     LIBS="$LIBS"
-dnl not works .... so no check .... FH 
+dnl not works .... so no check .... FH
       ff_glut="$with_glut";ff_glut_ok=yes
 dnl     AC_SEARCH_LIBS(abort,[$with_glut],[ff_glut="$with_glut";ff_glut_ok=yes],[ff_glut="";ff_glut_ok="no"])
     LIBS="$ff_libs_save"
@@ -578,7 +578,7 @@ CYGWIN*|MINGW*)
 		    fi
 		fi
 
-		if test -z "$ff_glut" -a  "$ff_glut_ok" != "no" ; then 
+		if test -z "$ff_glut" -a  "$ff_glut_ok" != "no" ; then
                     ff_glutname="glut32"
 		#  check abort a existing function just to find in glut32.dll exist in the path
 		#  because glutInit is not the real symbol on win32 dur dur FH !!!!!!!!!
@@ -690,7 +690,7 @@ m4_include(ax_lib_gsl.m4)
 
 # Checking c++11 for HashMatix (Madatory now)
 # F.Hecht:
-# do not compile all with c++11 version to much 
+# do not compile all with c++11 version to much
 # probleme to day (frev 2015) with g++ 4.8.1
 ff_cxx_save=$CXXFLAGS
 CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
@@ -701,7 +701,7 @@ if test "$ff_cxx11" = yes ; then
     CXX11FLAGS="-std=c++11";
 ##	CXXFLAGS="$CXXFLAGS -std=c++11"
     AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
-else 
+else
   AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
   AC_MSG_ERROR([ Sorry no c++ compiler !])
   AC_MSG_ERROR([ Fatal error c++11  ],1);
@@ -946,21 +946,21 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
 AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --without-petsc  ])
-# /usr/local/petsc/conf/petscvariables 
+# /usr/local/petsc/conf/petscvariables
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
     for d in "$with_petsc" "${prefix}/ff-petsc/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
-	    ffconfpetsc="$d$dd"		
+	    ffconfpetsc="$d$dd"
 		echo " petsc ... $ffconfpetsc"
-	    if test -f "$ffconfpetsc" ; then 
+	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]); 
-			
+			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
+
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetsc)
@@ -973,9 +973,9 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
-			
+
 		    else
-			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);			
+			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
 		fi
 	    else
@@ -994,24 +994,24 @@ else
     AC_MSG_NOTICE([ without petsc ***** ])
 fi
 
-## PETSc complex 
+## PETSc complex
 AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvariables   --without-petsc_complex  ])
 ff_petsccomplex_ok=no
 if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
     for d in "$with_petsc_complex" "${prefix}/ff-petsc/complex/lib" /usr/local/ff++/petsc-complex/lib ;do
 	for dd in ""  "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
-	    ffconfpetscc="$d$dd"		
+	    ffconfpetscc="$d$dd"
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
-		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`	
+		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`
 		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetsc]);
-					
+
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 	        AC_FF_PETSC_WHERELIB(petsccomplex,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetscc)
-			
+
 			else
-			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);			
+			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);
 		    fi
 		fi
 	done
@@ -1024,14 +1024,14 @@ if test "$ff_petsccomplex_ok" != no ;   then
 else
     AC_MSG_NOTICE([ without petsc complex ***** ])
 fi
-##  slepc 
+##  slepc
 
-### end petsc .... 
+### end petsc ....
 
 if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
-  ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'` 
+  ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'`
   AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
-  AC_MSG_NOTICE([ fftw3 from  petsc ***** ]) 
+  AC_MSG_NOTICE([ fftw3 from  petsc ***** ])
 fi
 
 
@@ -1178,9 +1178,9 @@ if test "$ff_where_lib_conf_blaslapack" = 1  ; then
 	    ff_blas_inc="$ff_where_inc_blaslapack"
        AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	   AC_FF_ADDWHERELIB(blas,$ff_blas_libs,$ff_blas_inc)
-	   AC_MSG_NOTICE([ BLAS and LAPACK  from  petsc ***** ]) 
+	   AC_MSG_NOTICE([ BLAS and LAPACK  from  petsc ***** ])
 	   if  echo  "$ff_where_lib_blaslapack"| grep -q  " -lmkl"  ; then
-	     	AC_MSG_NOTICE([ MKL  from  petsc ***** ]) 
+	     	AC_MSG_NOTICE([ MKL  from  petsc ***** ])
 	        AC_FF_ADDWHERELIB(mkl,$ff_blas_libs,$ff_blas_inc)
             AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
             AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
@@ -1207,7 +1207,7 @@ then
     AC_MSG_CHECKING(for MKL)
     ff_mkl_root=""
     if test "$ff_mkl_libpath" != "not" -a -z "$ff_mkl_flags" ; then
-	
+
 	if test "$ff_mkl_libpath"  = "yes"  ; then
 	    ff_IFS="$IFS"
 	    IFS=":"
@@ -1242,7 +1242,7 @@ then
 	    if test ! -d "$ff_mkl_libpath" ; then
 		ff_mkl_libpath="$ff_mkl_root/lib/$ff_mkl_arch"
 	    fi
-	    
+
 	    if test  -f "$ff_mkl_libpath/libmkl_rt.$ff_suffix_dylib" ; then
 		mkl_blas=rt
 		mkl_lapack=rt
@@ -1258,7 +1258,7 @@ then
 		ff_mkl_blas="$ff_ldbg -Wl,-rpath,$ff_mkl_libpath  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
 		ff_mkl_lapack="$ff_mkl_blas"
 	    fi
-	    if test -f "-L$ff_mkl_libpathmkl_scalapack${ff_mkl_lp}" ; then 
+	    if test -f "-L$ff_mkl_libpathmkl_scalapack${ff_mkl_lp}" ; then
             ff_mkl_scalapack="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
             ff_mkl_blacs="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	    fi
@@ -1290,7 +1290,7 @@ then
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
             AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
             AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
-			
+
 	else
 	    ff_mkl_libpath=no
 
@@ -1318,7 +1318,7 @@ then
 	"-framework Accelerate" "$ff_mkl_blas" "-lblas"  "-L/usr/lib/atlas -lblas" \
 	$ff_freebsd_blas
     do
-	if test "$ff_blas_ok" = no -a "$iblas" != "no" 
+	if test "$ff_blas_ok" = no -a "$iblas" != "no"
 	then
             AC_MSG_CHECKING(for daxpy_ in $iblas)
             ff_save_libs="$LIBS"
@@ -1616,47 +1616,48 @@ ff_amd_ok=no
 ff_umfpack_ok=no
 # echo @@@@@@@@@ ff_where_lib_conf_suitesparse == $ff_where_lib_conf_suitesparse  @@@@
 if test "$ff_where_lib_conf_suitesparse" = "1"  ; then
-  echo "amd/umfpack/suitesparse  of petsc"
-  echo "    lib: $ff_where_lib_suitesparse inc: $ff_where_inc_suitesparse"
-  ff_amd_ok=yes
-   ff_umfpack_ok=yes
-   enable_system_umfpack=no
-   ff_umfpack_libs="$ff_where_lib_suitesparse"
-   ff_umfpack_incs="$ff_where_inc_suitesparse"
-   AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
-   AC_DEFINE(HAVE_LIBCHOLMOD,1,Cholmod  is used for sparse matrices computations)
-   UMFPACK_CPPFLAGS="$ff_where_inc_suitesparse"
-dnl   AC_SUBST([UMFPACK_CPPFLAGS],[$ff_where_inc_suitesparse])
-   AC_DEFINE(HAVE_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir)
+    echo "amd/umfpack/suitesparse  of petsc"
+    echo "    lib: $ff_where_lib_suitesparse inc: $ff_where_inc_suitesparse"
+    ff_amd_ok=yes
+    ff_umfpack_ok=yes
+    enable_system_umfpack=no
+    ff_umfpack_libs="$ff_where_lib_suitesparse"
+    ff_umfpack_incs="$ff_where_inc_suitesparse"
+    AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
+    AC_DEFINE(HAVE_LIBCHOLMOD,1,Cholmod  is used for sparse matrices computations)
+    UMFPACK_CPPFLAGS="$ff_where_inc_suitesparse"
+    dnl   AC_SUBST([UMFPACK_CPPFLAGS],[$ff_where_inc_suitesparse])
+    AC_DEFINE(HAVE_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir)
 fi
-
+#echo "@@@@@@@"
 ff_save_libs="$LIBS"
 AC_ARG_ENABLE(system_umfpack,AC_HELP_STRING([--disable-system-umfpack],[Disable the automatic detection of umfpack, colmod, amd, ....]))
 if test "$ff_umfpack_ok"  = no -a "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
 then
+#    echo "@@@@@@@qqqq"
     # User-specified location
     AC_ARG_WITH(amd,
 	AC_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
         ff_amd_ok=yes
 	ff_umfpack_libs="${withval}")
-
+    
     AC_ARG_WITH(umfpack,
         AC_HELP_STRING([--with-umfpack=library],[Use a specific version of Umfpack]),
         ff_umfpack_ok=yes
         ff_umfpack_libs="${withval} $ff_umfpack_libs")
-
-    if test "${with_umfpack_include+set}" = set; then 
+    
+    if test "${with_umfpack_include+set}" = set; then
       	CPPFLAGS="$CPPFLAGS $with_umfpack_include"
     fi
-
+    
     AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
 	[ff_umfpack_header=yes
-	ff_umfpack_dir=`dirname $ac_header`
-	break])
-
+	    ff_umfpack_dir=`dirname $ac_header`
+	    break])
+    
     # Somes systems like FreeBSD hide umfpack.h in a directory called UMFPACK (all capitals). This breaks the
     # standard #define produced by autoconf in config.h.in.
-
+    
     LIBS="$ff_blas_libs $LIBS"
     if test "$ff_umfpack_header" != yes;
     then
@@ -1665,47 +1666,47 @@ then
 	    ff_umfpack_dir=UMFPACK
 	    AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir))
     fi
-
+    
     if test "$ff_amd_ok" = no;
     then
 	AC_CHECK_LIB(amd,amd_info,
 	    ff_umfpack_libs="$ff_umfpack_libs -lamd"
 	    ff_amd_ok=yes)
     fi
-
+    
     if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
     then
-
+	
         # ALH - 30/9/13 - other libraries required by Umfpack
-
+	
 	AC_CHECK_LIB(cholmod,cholmod_add,ff_umfpack_libs="$ff_umfpack_libs -lcholmod")
 	AC_CHECK_LIB(colamd,colamd_set_defaults,ff_umfpack_libs="$ff_umfpack_libs -lcolamd")
-
+	
 	AC_CHECK_LIB(umfpack,umf_i_malloc,
 	    ff_umfpack_libs="-lumfpack $ff_umfpack_libs"
 	    ff_umfpack_ok=yes,,$ff_umfpack_libs)
     fi
-
+    
     if test "$ff_umfpack_header" != yes -o "$ff_umfpack_ok" != yes; then
         ff_umfpack_ok=no
 	AC_MSG_WARN([Sorry, we could not find the UMFPACK lib or the UMFPACK headers])
 	ff_umfpack_incs=""
-	UMFPACK_CPPFLAGS=";
+	UMFPACK_CPPFLAGS=""
     fi
 
     if test "$ff_umfpack_ok" = yes -a "$ff_amd_ok" = yes; then
-	 if test -n "$ff_umfpack_incs" ; then 
+	 if test -n "$ff_umfpack_incs" ; then
 	  UMFPACK_CPPFLAGS="$ff_umfpack_incs"
 	 fi
-dnl    AC_SUBST([UMFPACK_CPPFLAGS],[$ff_umfpack_incs])	
+dnl    AC_SUBST([UMFPACK_CPPFLAGS],[$ff_umfpack_incs])
 	  AC_DEFINE(HAVE_LIBUMFPACK,1,Umfpack is used for sparse matrices computations)
     fi
 fi
 
 LIBS="$ff_save_libs"
-
+#echo "@@@@22@@@"
 # If all else fails, download!
-#  attention no /usr/include in WHERE 
+#  attention no /usr/include in WHERE
 if test "$ff_umfpack_ok" = yes -a -n "$ff_umfpack_dir" -a -z "$ff_umfpack_incs"
 then
 	ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
@@ -1719,7 +1720,7 @@ then
 
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
     # the following tests fail.
-    
+
     ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
     ff_umfpack_incs="-I${curdir}/download/include"
 	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
@@ -1734,7 +1735,7 @@ AC_SUBST([UMFPACK_CPPFLAGS],[$UMFPACK_CPPFLAGS])
 # ALH - 17/9/13 - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version because
 # [[file:download/umfpack/Makefile.am]] does not set the WHERE mechanism. Also removed -I/usr/include/$ff_umfpack_dir
 # from include options for FFCS because it breaks the MingW64 compilation process.
-
+echo " totot *****"
 if test "$ff_umfpack_ok" = yes
 then
     if test $enable_ffcs = no
@@ -1745,7 +1746,9 @@ then
 	AC_FF_ADDWHERELIB(amd,$ff_umfpack_libs,)
 	AC_FF_ADDWHERELIB(umfpack,$ff_umfpack_libs,)
     fi
+
 else
+#echo "@@@@33@@@@"
     AC_MSG_NOTICE([ -- NO UMFPACK (ff_wget = $ff_wget)])
 fi
 
@@ -1776,7 +1779,7 @@ AC_CHECK_HEADERS(sys/mman.h,ff_mmap=1,ff_mmap=0)
 if test "$ff_sem" -eq  1 -a  "$ff_mmap" -eq  1 ; then
 BIN_ffmaster=ffmaster
 else
-enable_MMAP=no  
+enable_MMAP=no
 BIN_ffmaster=
 fi
 
@@ -1885,7 +1888,7 @@ dnl		CHECK_COMPILE_FLAG(C,-rdynamic,CFLAGS)
 	CHECK_COMPILE_FLAG(C++,-fPIC,CXXFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CFLAGS)
 	CHECK_COMPILE_FLAG(C,-fPIC,CNOFLAGS)
-	fi 
+	fi
 	if test "$enable_fortran" != no ;  then
 	if test "$ff_fpic" != "no" ; then
 	 CHECK_COMPILE_FLAG(Fortran,-fPIC,FFLAGS)
@@ -1902,7 +1905,7 @@ AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 #  the doc is now in https://github.com/FreeFem/FreeFem-doc-pdf/blob/master/freefem%2B%2Bdoc.pdf
 # Checking wether we can generate some documentation
 # --------------------------------------------------
-dnl 
+dnl
 dnl AC_CHECK_PROG(ff_latex,latex,yes,no)
 dnl AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
 dnl AC_CHECK_PROG(ff_dvips,dvips,yes,no)
@@ -1913,7 +1916,7 @@ dnl AC_CHECK_PROG(ff_convert,convert,yes,no)
 dnl if test "$ff_latex" = yes -a "$ff_makeindex" = yes -a "$ff_dvips" = yes -a $ff_pdf2ps = yes -a $ff_convert = yes;
 dnl then
 dnl 	AC_SUBST(DOCPS,"freefem++doc.ps")
-dnl 
+dnl
 dnl 	AC_CHECK_PROG(ff_gzip,gzip,yes,no)
 dnl 	if test "$ff_gzip" = yes;
 dnl 	then
@@ -1968,10 +1971,10 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 # ----------------------------------------------
 
 
-##  try to see pakage is hon computer  if the FH ZZZZ 
-## FH to find gsl ... 
+##  try to see pakage is hon computer  if the FH ZZZZ
+## FH to find gsl ...
 AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
-if test "$ff_with_gsl" = "yes"; then  
+if test "$ff_with_gsl" = "yes"; then
   AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
 fi
 
@@ -1979,7 +1982,7 @@ fi
 
 
 m4_map([AC_FF_WHERELIB],[
-	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],	
+	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
 	[[mumps_seq],[-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq],[dmumps_c.h],[]],
 	[[libseq],[-lmpiseq_seq],[${inc_usr_include}mumps_seq/mpi.h]],
 	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
@@ -2006,7 +2009,7 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[nlopt],[ -lnlopt],[nlopt.hpp],[]]
     ]
     )
-## before try 
+## before try
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
 TOOL_DISABLE_NO(hips,hips_FreeFem.$DYLIB_SUFFIX)
@@ -2058,7 +2061,7 @@ then
 fi
 
 # ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
-if test "$with_scotch_include" = "" 
+if test "$with_scotch_include" = ""
 then
     with_scotch_include=$ac_pwd/download/include/scotch
 fi
@@ -2116,9 +2119,9 @@ test -n "$ff_mkl_root" && ff_winc="$ff_mkl_root/include/mkl_blas.h"
 
 ##  search of HDF5 ....
 AX_LIB_HDF5()
-if test "$with_hdf5" = "yes"; then  
+if test "$with_hdf5" = "yes"; then
   ff_save_cppflags="$CPPFLAGS";
-  CPPFLAGS="$CPPFLAGS $HDF5_CPPFLAGS" 
+  CPPFLAGS="$CPPFLAGS $HDF5_CPPFLAGS"
   AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf=no])
   CPPFLAGS="$ff_save_cppflags"
   if test "$with_hdf5" = "yes"; then
@@ -2126,7 +2129,7 @@ if test "$with_hdf5" = "yes"; then
    LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
   fi
 else
-  enable_iohdf5=no  
+  enable_iohdf5=no
 fi
 TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX)
 
@@ -2134,7 +2137,7 @@ TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX)
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
 
 #  remove gsl if not find ... FH
-# correction FH .. 18/12/2013. 
+# correction FH .. 18/12/2013.
 # ALH - 7/1/14 - not able to compile gsl or pardiso with FFCS on Windows
 if test "$enable_ffcs" != yes
 then
@@ -2146,7 +2149,7 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
-test "$enable_hpddm" != no && enable_hpddm=yes  
+test "$enable_hpddm" != no && enable_hpddm=yes
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
@@ -2162,7 +2165,7 @@ if test "$ff_slepc_ok" != no ;   then
 FF_PETSC_DYLIB="$FF_PETSC_DYLIB SLEPc.$DYLIB_SUFFIX"
 fi
 
-##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB" 
+##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 
 
@@ -2217,19 +2220,19 @@ if test "$ff_arpack_download" = yes -a  -n "$TOOL_COMPILE_arpack"  ; then
 fi
 
 if test "$enable_download" = yes  ;then
-    if test  -n "$TOOL_COMPILE_fftw3"   ; then 
+    if test  -n "$TOOL_COMPILE_fftw3"   ; then
     AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
-    fi 
-    if test  -n "$TOOL_COMPILE_tetgen"   ; then 
+    fi
+    if test  -n "$TOOL_COMPILE_tetgen"   ; then
     AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.5.1-beta/LICENSE ])
     fi
-    if test  -n "$TOOL_COMPILE_yams"   ; then 
+    if test  -n "$TOOL_COMPILE_yams"   ; then
     AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
     fi
-    if test  -n "$TOOL_COMPILE_mmg3d"   ; then     
+    if test  -n "$TOOL_COMPILE_mmg3d"   ; then
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  ])
     fi
-    if test  -n "$TOOL_COMPILE_parmets"   ; then     
+    if test  -n "$TOOL_COMPILE_parmets"   ; then
     AC_MSG_NOTICE([      use of download parmetis])
      fi
     # ALH - some tools may be activated but not downloaded if a local version is specified (see

@@ -842,5 +842,5 @@ public:
 };
 #endif
 
-void init_UMFPack_solver();
+void init_UMFPack_solver(); 
 #endif
