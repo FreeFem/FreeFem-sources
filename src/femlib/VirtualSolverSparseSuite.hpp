@@ -21,7 +21,7 @@ extern "C" {
 #else
 #ifdef HAVE_SUITESPARSE_UMFPACK_H
 #include <suitesparse/umfpack.h>
-#include <suitesparse/cholmod.h<
+#include <suitesparse/cholmod.h>
 #else
     
     // Defaults to a local version of the UMFPACK headers
