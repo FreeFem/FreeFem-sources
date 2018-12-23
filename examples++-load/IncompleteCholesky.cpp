@@ -245,7 +245,7 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
 double * inv(int n,double *a,double *a1)
 {
     int info;
-    int n2=n*n,n1=n+1.
+    int n2=n*n,n1=n+1.;
     fill(a1,a1+n*n,0.);
     for (int i = 0; i < n2; i+= n1)
         a1[i]=1;

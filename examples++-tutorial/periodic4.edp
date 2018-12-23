@@ -29,6 +29,6 @@ func abs=sqrt(x^2+y^2);
 real moyf =  intf/mTh;
 cout << moyf << endl; 
  problem laplace(uh,vh) =                     
-    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) + int2d(Th)( (moyf-f)*vh ) ;                
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) + 1e-8*uh*vh ) + int2d(Th)( (moyf-f)*vh ) ;                
 laplace; 
   plot(uh,wait=1,ps="perio4.eps");

@@ -279,7 +279,11 @@ void SkyLineMatrix<Z,R>::crout(double eps) const  {
             xii -= *ij * *ij * *dkk;
         }
         if (norm2(xii) <= max(eps2*norm2(D[i]),1.0e-60))
+        {
+            cout << " Crout: zero pivot (" << i << " )= " << abs(xii)<< " <= " << eps*abs(D[i])
+            << " eps = " << eps <<endl;
             MATERROR(3,"Crout SkyLine pivot ");
+        }
             D[i] = xii;
     }
 }

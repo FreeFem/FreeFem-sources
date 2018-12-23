@@ -175,6 +175,7 @@ public:
 #ifdef HAVE_LIBUMFPACK
                 thesolver = new  VirtualSolverUMFPACK<Z,K> (A,ds,0);
 #else
+                ds.solver="LU"‡;
                 thesolver=new VirtualSolverSkyLine<Z,K> (A,ds,0);
 #endif
             }

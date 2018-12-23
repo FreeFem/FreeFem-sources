@@ -145,10 +145,15 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         double tol_pivot;
         int verb;
         mutable int status;
-        static int ttypesolver(const string &name) { if(name.length()  <=2) return 2; else if( name[0] =='C')  return 1 + ( (name[1]) != 'H'); else return 2; }
+        static int ttypesolver(const string &name) {
+            if(name.length()  <=2) return 3;
+            else if( name[0] =='C')  return 1 + ( (name[1]) != 'H');
+            else return 3; }
         VirtualSolverSkyLine(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
         :typesolver(ttypesolver(ds.solver)),A(&AA),SL(0),cs(0),cn(0),p(0),v(0),
-        tol_pivot(ds.tol_pivot<0 ?  1e-15 :ds.tol_pivot) , verb(ds.verb)  {}
+        tol_pivot(ds.tol_pivot<0 ?  1e-15 :ds.tol_pivot) , verb(ds.verb)  {
+            if( verb>3) cout << "   -- SkyLineMatrix: "<<typesolver << " " <<ds.solver<<    endl;
+        }
         
         
         void UpdateState(){
@@ -158,7 +163,8 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         }
         void dosolver(K *x,K*b,int N,int trans) {
             if(verb>2|| verbosity>9)
-                std::cout <<"   dosolver::SkyLine" << N<< " "<< trans  << " WF " << SL->whichfac << " size " << SL->size()
+                std::cout <<"   dosolver::SkyLine" << N<< " "<< trans  << " WF " << SL->whichfac
+                          << " size " << SL->size() << " typesolver: " <<typesolver
                           << std::endl;
 
             for(int k=0,oo=0; k<N;++k, oo+= A->n)
@@ -191,14 +197,14 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
             Z pfl =order_CutHill_McKee(A->n,Ap,Ai,p);
             //  rebuild perumation
             if(verb>2|| verbosity>9)
-                std::cout <<"   Skyline: ::fac_symbolic :  skyline size "   << pfl <<  std::endl;
+                std::cout <<"   Skyline::fac_symbolic :  skyline size "   << pfl <<  std::endl;
 
             
         }
         void fac_numeric(){
             if(SL) delete SL;
             SL = new SLMat(A,p,typesolver);
-            if(verbosity>1) std::cout << " size of Skyline mat ="<< SL->size() << " nz :" <<SL->pL[A->n] << " nzz " << A->nnz << endl;
+            if(verbosity>1) std::cout << " size of Skyline mat ="<< SL->size() << " nz :" <<SL->pL[A->n] << " nzz " << A->nnz << " typesolver " << typesolver <<endl;
             if(verbosity>99)
             {
                  cout << *SL << endl;
