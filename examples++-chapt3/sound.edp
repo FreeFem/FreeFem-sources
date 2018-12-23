@@ -28,7 +28,7 @@ varf  op(u1,u2)= int2d(Th)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) - sigma* u1*u2 )
 
 varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ; // no  Boundary condition
 
-matrix OP= op(Vh,Vh,solver=Crout,factorize=1);  // crout solver because the matrix in not positive
+matrix OP= op(Vh,Vh,solver=Crout);  // crout solver because the matrix in not positive
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20);
 
 

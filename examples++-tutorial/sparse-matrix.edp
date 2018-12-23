@@ -45,11 +45,11 @@ ml[]/=2.;
     //cout << "BML="<<BML << endl;
     //cout << "MLtB=" << MLtB << endl;
 
-    // WARNING if UMFPACK is not install
-    // the UMFPACK solver is replace by LU 
+    // WARNING if sparsesolver is not install
+    // the sparsesolver solver is replace by LU 
     //  but LU need skyline matrix 
     if(HaveUMFPACK)
-      set(A,solver=UMFPACK); // set a solver 
+      set(A,solver=sparsesolver); // set a solver 
     else 
       set(A,solver=GMRES); // set a solver 
     VH uH=0;
@@ -59,7 +59,7 @@ ml[]/=2.;
     matrix BtA = BB'*A;//';
     matrix BtAB = BtA*BB;
     if(HaveUMFPACK)  
-      set(BtAB,solver=UMFPACK);  
+      set(BtAB,solver=sparsesolver);  
     else 
       set(BtAB,solver=GMRES);  
     Vh ff=1;

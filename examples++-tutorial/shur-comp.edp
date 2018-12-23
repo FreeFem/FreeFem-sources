@@ -105,7 +105,7 @@ Mhe  gamma;
 gamma[] = vgamma(0,Mhe,tgv=1);
 plot(gamma,wait=1,cmm="gamma",value=1);
 varf vM(u,v) =  int1d(The)( u*v) ;
-matrix M = vM(Mhe,Mhe,solver=UMFPACK) ;
+matrix M = vM(Mhe,Mhe,solver=sparsesolver) ;
  
 // debut macro par ssd 
 macro Pb(A,B,a,P,Th,u1,v1,Xh)

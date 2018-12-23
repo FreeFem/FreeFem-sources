@@ -41,10 +41,11 @@ macro div(u1,u2) (dx(u1)+dy(u2)) //
  varf vu1([p],[v1]) = int2d(Th)(p*dx(v1)) ;
  varf vu2([p],[v1]) = int2d(Th)(p*dy(v1)) ;
    
-
- matrix pAM=vM(Mh,Mh,solver=UMFPACK); 
- matrix pAA=vA(Mh,Mh,solver=UMFPACK); 
- matrix AU=vu(Xh,Xh,solver=UMFPACK); 
+ string solver="UMFPACK";
+ if(!HaveUMFPACK) solver="CHOLESKY";
+ matrix pAM=vM(Mh,Mh,solver=solver); 
+ matrix pAA=vA(Mh,Mh,solver=solver); 
+ matrix AU=vu(Xh,Xh,solver=solver); 
  matrix B1=vu1(Mh,Xh);
  matrix B2=vu2(Mh,Xh);
  Xh u1,u2;

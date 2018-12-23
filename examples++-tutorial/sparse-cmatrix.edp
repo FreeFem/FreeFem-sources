@@ -43,11 +43,11 @@ for(int step=0; step <2; ++step)
     cout << "BML="<<BML << endl;
     cout << "MLtB=" << MLtB << endl;
 
-    // WARNING if UMFPACK is not install
-    // the UMFPACK solver is replace by LU 
+    // WARNING if sparsesolver is not install
+    // the sparsesolver solver is replace by LU 
     //  but LU need skyline matrix 
-    string typesolver="UMFPACK";
-    if(HaveUMFPACK) typesolver="GMRES"; 
+    string typesolver="sparsesolver";
+    if(!HaveUMFPACK) typesolver="GMRES"; 
     set(A,solver=typesolver); // set a solver 
 
     VH<complex> uH=0;
@@ -58,7 +58,7 @@ for(int step=0; step <2; ++step)
     matrix<complex> BtA = BB'*A;//';
     matrix<complex> BtAB = BtA*BB;
     if(HaveUMFPACK)  
-      set(BtAB,solver=UMFPACK);  
+      set(BtAB,solver=sparsesolver);  
     else 
       set(BtAB,solver=GMRES);  
     Vh<complex> ff=1+1i;
@@ -108,7 +108,7 @@ for(int step=0; step <2; ++step)
       sparseA=A;
       verbosity=4;
       if(HaveUMFPACK)		
-	set(sparseA,solver=UMFPACK,tolpivot=1e-10,tolpivotsym=1e-9);  
+	set(sparseA,solver=sparsesolver,tolpivot=1e-10,tolpivotsym=1e-9);  
       else 
 	set(sparseA,solver=GMRES);  
       bb=sparseA^-1*a;

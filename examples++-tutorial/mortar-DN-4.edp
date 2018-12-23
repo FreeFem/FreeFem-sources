@@ -97,8 +97,8 @@ for(int sd=0;sd<nbsd;++sd)
    epssd[sd] = -real(epssd[sd] <-0.00001) + real(epssd[sd] >0.00001);
    
    Csd[sd]  = cci(Lh,Vhi);
-   Asd[sd]  = vLapMi(Vhi,Vhi,solver=UMFPACK);
-   PAsd[sd] = vPLapMi(Vhi,Vhi,solver=UMFPACK);
+   Asd[sd]  = vLapMi(Vhi,Vhi,solver=sparsesolver);
+   PAsd[sd] = vPLapMi(Vhi,Vhi,solver=sparsesolver);
    matrix IVL=interpolate(Vhi,Lh,inside=1);
    //   v = IVL*l 
    varf vonext(u,v)=on(labext,u=1);
@@ -145,7 +145,7 @@ matrix M=[
 real[int] xx(M.n);
 
 real[int] bb =[rhssd[0][], rhssd[1][],rhssd[2][],rhssd[3][],rhsl[] ];
-set(M,solver=UMFPACK);
+set(M,solver=sparsesolver);
 
 xx = M^-1 * bb;
 

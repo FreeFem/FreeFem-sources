@@ -76,7 +76,7 @@ Vh<complex> u;
    //  ABem(IdfB2Vh(ib),IdfB2Vh(jb)) = ABemFull(ib,jb) 
   A = A + ABem;
   }// for cleanning all local varaible at end of block. ABem ABemFull
-  set(A,solver=UMFPACK);
+  set(A,solver=sparsesolver);
   u[]=A^-1*b;
   Vh ur=real(u),ui=imag(u);
   Vh  err=ur-uref;

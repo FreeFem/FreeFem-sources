@@ -35,7 +35,7 @@ cout << "b  mat " << endl;
 
 matrix A=vStokes(VVh,VVh);
 cout << "e  mat " << endl;
-set(A,solver=UMFPACK);
+set(A,solver=sparsesolver,dimKrylov=1000);
 cout << "e fac  mat " << endl;
 real[int] b= vStokes(0,VVh);
 
@@ -70,7 +70,8 @@ macro XX3() (z-u3*dt)//
 cout << " build  A" << endl;
 A = vNS(VVh,VVh);
 cout << " fac A" << endl;
-set(A,solver=UMFPACK);
+
+set(A,solver=sparsesolver,dimKrylov=1000);
 real t=0;
 for(int i=0;i<10;++i)
   {

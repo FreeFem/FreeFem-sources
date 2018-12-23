@@ -7,10 +7,10 @@ varf vat(u,v) = int2d(Th) ( u*v+grad(u)'*grad(v)-10*(v)*dy(u))+ int2d(Th)(v*x)+o
 
 
 
-matrix A=va(Vh,Vh,solver=UMFPACK);
-matrix At=vat(Vh,Vh,solver=UMFPACK);
+matrix A=va(Vh,Vh,solver=sparsesolver);
+matrix At=vat(Vh,Vh,solver=sparsesolver);
 real[int] b = va(0,Vh);
-set(A,solver=UMFPACK);
+set(A,solver=sparsesolver);
 
 Vh u,ut;
 

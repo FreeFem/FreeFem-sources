@@ -28,9 +28,11 @@ varf Mass(p,q)=int2d(sh)(p*q);
 
 Xh bc1; 
 Xh brhs;
+string solver="UMFPACK";
+if(!HaveUMFPACK) solver="CHOLESKY";
                    
-matrix A= Lap(Xh,Xh,solver=UMFPACK); 
-matrix M= Mass(Mh,Mh,solver=UMFPACK); 
+matrix A= Lap(Xh,Xh,solver=solver); 
+matrix M= Mass(Mh,Mh,solver=solver); 
 matrix Bx= bx(Xh,Mh);
 matrix By= by(Xh,Mh);
 
@@ -96,8 +98,8 @@ cout << " max deplacement " << uu[].linfty << " " << uu[].min << " " << uu[].max
  sh = buildmesh(h(-20)+f(10)+e(10)+g(10));
  plot(sh);
  p=p;q=q;u1=u1;u2=u2;brhs=brhs;ppp=ppp;
- A= Lap(Xh,Xh,solver=UMFPACK); 
- M= Mass(Mh,Mh,solver=UMFPACK); 
+ A= Lap(Xh,Xh,solver=sparsesolver); 
+ M= Mass(Mh,Mh,solver=sparsesolver); 
  Bx= bx(Xh,Mh);
  By= by(Xh,Mh);
  bc1=0;  // for resize
