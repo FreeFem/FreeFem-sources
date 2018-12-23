@@ -377,7 +377,7 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             
             if ( this->U && !this->L )
             { // matrice triangulaire superieure
-               cout << " remonter " << (this->D ? "DU" : "U") << endl;
+               if( verbosity> 5) cout << " remonter " << (this->D ? "DU" : "U") << endl;
                 ki = this->U + this->pU[n];
                 i = n;
                 while ( i-- )
@@ -390,7 +390,7 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             }
             else if  ( !this->U && this->L )
             { // matrice triangulaire inferieure
-                 cout << " descente "  <<( this->D ? "LD" : "L" ) <<endl;
+                if( verbosity> 5) cout << " descente "  <<( this->D ? "LD" : "L" ) <<endl;
                 ii = this->L;
                 for (i=0; i<n; i++)
                 { ij = ik = (this->L + this->pL[i+1]) ;  // ii =debut,ij=fin+1 de la ligne
@@ -405,24 +405,24 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             }
             else if (this->D)
             { // matrice diagonale
-                 cout << " diagonal D" <<endl;
+                if( verbosity> 5) cout << " diagonal D" <<endl;
                 for (i=0;i<n;i++)
                     v[i]=v[i]/this->D[i];
             }
             break;
         case FactorizationCholesky:
-                 cout << " FactorizationChoslesky" << endl;
+                if(verbosity>4) cout << " FactorizationChoslesky" << endl;
            ld().solve(x);
            ldt().solve(x);
             break;
         case FactorizationCrout:
-               cout << " FactorizationCrout" << endl;
+               if(verbosity>4) cout << " FactorizationCrout" << endl;
            this->l().solve(x);
            this->d().solve(x);
            this->lt().solve(x);
            break;
         case FactorizationLU:
-          cout << " FactorizationLU" << endl;
+           if(verbosity>4) cout << " FactorizationLU" << endl;
           if(trans)
           {
               this->dut().solve(x);
