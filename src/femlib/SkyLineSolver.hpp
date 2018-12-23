@@ -168,7 +168,7 @@ typefac(FactorizationNO)
         for(int i=0; i<n;++i)
             diff += abs(pL[i]-pU[i]);
         if(verb > 2 || verbosity >9)
-            cout << "Skyline : diff pL/pU: "<< n<< " " << diff<< endl;
+            cout << "  - SkyLineMatrix : diff pL/pU: "<< n<< " " << diff<< endl;
         if(2*diff <= n)
         {
             // Skyline symetric near symetric
@@ -215,7 +215,7 @@ typefac(FactorizationNO)
         }
     }
     if(verbosity>4 || verb)
-    cout << "  Skyline : size pL/pU: "<< n<< " " << pL[n] << " " << pU[n] << " moy=" << pU[n]/(double) n << endl;
+        cout << "  SkyLineMatrix: size pL/pU: "<< n<< " " << pL[n] << " " << pU[n] << " moy=" << pU[n]/(double) n << endl;
 }
 
 template <class Z,class R>
@@ -226,8 +226,8 @@ void SkyLineMatrix<Z,R>::cholesky(double eps) const {
     if (L != U) MATERROR(1,"cholesky Skyline matrix non symmetric");
     U = 0; //
     typefac = FactorizationCholesky;
-    if(verb > 1 || verbosity >9)
-        cout << " Do Factorize Cholesky Skyline "<< endl;
+    if(verbosity>3 || verb >1 )
+        cout << "  -- SkyLineMatrix Factorize/Cholesky   " << endl;
     if ( norm2(D[0]) <= 1.0e-60)
         MATERROR(2,"cholesky SkyLine pivot ");
         
@@ -263,8 +263,8 @@ void SkyLineMatrix<Z,R>::crout(double eps) const  {
     Z i,j,k;
     double eps2=eps*eps;
     if (L != U) MATERROR(1,"Skyline matrix  non symmetric");
-    if(verb > 1 || verbosity >9)
-        cout << " Do Factorize Crout Skyline "<< endl;
+    if(verbosity>3 || verb >1 )
+        cout << "  -- SkyLineMatrix Factorize/Crout   " << endl;
     U = 0; //
     typefac = FactorizationCrout;
     
@@ -301,7 +301,7 @@ void SkyLineMatrix<Z,R>::LU(double eps) const  {
     Z i,j;
     if (L == U && ( pL[this->n]  || pU[this->n] ) ) MATERROR(3,"matrix LU  symmetric");
     if(verbosity>3 || verb >1 )
-        cout << "  -- Factorize  LU SkyLine  " << endl;
+        cout << "  -- SkyLineMatrix Factorize/LU SkyLine  " << endl;
     typefac=FactorizationLU;
     
     for (i=1;i<this->n;i++) // boucle sur les sous matrice de rang i
@@ -384,7 +384,7 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             
             if ( this->U && !this->L )
             { // matrice triangulaire superieure
-               if( verbosity> 5 || verb>2) cout << "  backward substitution  " << (this->D ? "DU" : "U") << endl;
+               if( verbosity> 5 || verb>2) cout << "  -- backward substitution  " << (this->D ? "DU" : "U") << endl;
                 ki = this->U + this->pU[n];
                 i = n;
                 while ( i-- )
@@ -397,7 +397,7 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             }
             else if  ( !this->U && this->L )
             { // matrice triangulaire inferieure
-                if( verbosity> 5 || verb>2) cout << " forward substitution "  <<( this->D ? "LD" : "L" ) <<endl;
+                if( verbosity> 5 || verb>2) cout << "  -- forward substitution "  <<( this->D ? "LD" : "L" ) <<endl;
                 ii = this->L;
                 for (i=0; i<n; i++)
                 { ij = ik = (this->L + this->pL[i+1]) ;  // ii =debut,ij=fin+1 de la ligne
@@ -412,24 +412,24 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             }
             else if (this->D)
             { // matrice diagonale
-                if( verbosity> 5 || verb>2) cout << " diagonal D" <<endl;
+                if( verbosity> 5 || verb>2) cout << "  -- diagonal substitution D" <<endl;
                 for (i=0;i<n;i++)
                     v[i]=v[i]/this->D[i];
             }
             break;
         case FactorizationCholesky:
-                if(verbosity>4|| verb>1 ) cout << " Factorization Choslesky" << endl;
+            //if(verbosity>9|| verb>5 ) cout << " Factorization Choslesky" << endl;
            ld().solve(x);
            ldt().solve(x);
             break;
         case FactorizationCrout:
-               if(verbosity>4 || verb>1) cout << " Factorization Crout" << endl;
+          //     if(verbosity>4 || verb>1) cout << " Factorization Crout" << endl;
            this->l().solve(x);
            this->d().solve(x);
            this->lt().solve(x);
            break;
         case FactorizationLU:
-           if(verbosity>4|| verb>1) cout << " Factorization LU" << endl;
+         //  if(verbosity>4|| verb>1) cout << "  LU" << endl;
           if(trans)
           {
               this->dut().solve(x);
