@@ -45,7 +45,7 @@ namespace  Fem2D {
 			}
 
 			// void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
 			// void D2_FB(const Me∂Seriaƒƒƒƒƒsh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
 			// void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
 			// virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
@@ -53,10 +53,10 @@ namespace  Fem2D {
 
 	int TypeOfFE_P1Bubble2::Data [] = {0, 1, 2, 6, 0, 0, 0, 0, 0, 1, 2, 3, 0, 0, 0, 0, 0, 1, 2, 3, 0, 0, 4};
 	double TypeOfFE_P1Bubble2::Pi_h_coef [] = {1., 1., 1., 1.};
-	void TypeOfFE_P1Bubble2::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_P1Bubble2::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
 		// const Triangle & K(FE.T);
 		R2 A(K[0]), B(K[1]), C(K[2]);
-		R l [] = {1 - PHat.x - PHat.y, PHat.x, PHat.y};	// lb=l0*l1*l2*9.;
+		R l [] = {1 - P.x - P.y, P.x, P.y};	// lb=l0*l1*l2*9.;
 		int i0 = 0;
 
 		if (l[1] < l[i0]) {i0 = 1;}
@@ -108,12 +108,12 @@ namespace  Fem2D {
 			typedef GFElement<Mesh3> FElement;
 			TypeOfFE_P1blLagrange3d (): TypeOfFE_Lagrange<Mesh3>(-1) {}
 
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
 	};
 
-	void TypeOfFE_P1blLagrange3d::FB (const What_d whatd, const Mesh &, const Element &K, const RdHat &PHat, RNMK_ &val) const {
-		R l [] = {1. - PHat.sum(), PHat.x, PHat.y, PHat.z};
-		const R d1 = dHat + 1.;
+	void TypeOfFE_P1blLagrange3d::FB (const What_d whatd, const Mesh &, const Element &K, const R3 &P, RNMK_ &val) const {
+		R l [] = {1. - P.sum(), P.x, P.y, P.z};
+		const R d1 = d + 1.;
 		const R d13 = d1 * d1 * d1;
 		const R d14 = d13 * d1;
 		int i0 = 0;

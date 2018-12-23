@@ -79,7 +79,7 @@ namespace  Fem2D {
 				assert(pij_alpha.N() == kk);
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
 			void Pi_h_alpha (const baseFElement &K, KN_<double> &v) const {
 				for (int i = 0; i < 16; ++i) {
 					v[i] = 1;
@@ -113,9 +113,9 @@ namespace  Fem2D {
 		0, 10
 	};
 	double TypeOfFE_P3Lagrange::Pi_h_coef [] = {1., 1., 1., 1., 1., 1., 1., 1., 1., 1.};
-	void TypeOfFE_P3Lagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_P3Lagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P, RNMK_ &val) const {
 		R2 A(K[0]), B(K[1]), C(K[2]);
-		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
+		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
 		R L[3] = {l0 *k, l1 *k, l2 *k};
 
 		throwassert(val.N() >= 10);
@@ -241,7 +241,7 @@ namespace  Fem2D {
 			static const int d = Mesh::Rd::d;
 
 			TypeOfFE_P3_3d ();	// constructor
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
 			void set (const Mesh &Th, const Element &K, InterpolationMatrix<RdHat> &M, int ocoef, int odf, int *nump) const;
 	};
 
@@ -365,7 +365,7 @@ namespace  Fem2D {
 		}
 	}
 
-	void TypeOfFE_P3_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_P3_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
 		assert(val.N() >= 20);	// 23 degrees of freedom
 		assert(val.M() == 1);	// 3 components
 		// int n = this->NbDoF;
@@ -375,7 +375,7 @@ namespace  Fem2D {
 		// perm[3] is the local number of the vertex with the biggest global number.)
 		// -------------
 		R ld[4];
-		PHat.toBary(ld);
+		P.toBary(ld);
 		ld[0] *= 3.;
 		ld[1] *= 3.;
 		ld[2] *= 3.;

@@ -97,16 +97,7 @@ trap "st=141; $do_exit" 13
 trap "st=143; $do_exit" 15
 
 # Test script is run here.
-
-FFnp=`awk  '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}' "$@"`
-FLAGS_FFPP_A=`awk  '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}' "$@"`
-if [  "0$FFnp" -gt 0 ]  ; then 
-	FLAGS_FFPP_B="-np $FFnp -nw"
-else
-	FLAGS_FFPP_B="${FLAGS_FFPP}"
-fi	
-## echo "  test ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}" 
-${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
+${TEST_FFPP} ${FLAGS_FFPP}  "$@" >$log_file 2>&1
 
 estatus=$?
 fi

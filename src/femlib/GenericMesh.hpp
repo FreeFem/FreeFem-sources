@@ -379,17 +379,10 @@ public:
   bool   EdgeOrientation(int i) const 
     { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
     
-  R lenEdge(int i) const {ASSERTION(i>=0 && i <ne);
+  R lenEdge(int i) const {ASSERTION(i>=0 && i <3);
     Rd E=Edge(i);return sqrt((E,E));}
-  R lenEdgesmax() const
-    {
-        R lx2 = 0;
-        for (int i=0; i< ne; ++i)
-            lx2 = max(lx2,lenEdge2(i));
-        return sqrt(lx2);
-        
-    }
-  R lenEdge2(int i) const {ASSERTION(i>=0 && i <ne);
+
+  R lenEdge2(int i) const {ASSERTION(i>=0 && i <3);
         Rd E=Edge(i);return ((E,E));}
   
   R  mesure() const {return mes;}
@@ -551,9 +544,7 @@ public:
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
-  int nElementonB(int k,int j) const // add v4 F.H 12/2018 (not sure for internal boundary !!!)
-    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk%nea  != k) ? 2 : 1;}
-    
+  
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
     if(p>=0) j=p%nea;
@@ -1521,7 +1512,7 @@ void GenericMesh<T,B,V>::BuildBound()
 	 }
     }
   if(verbosity>3)
-    cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe << "mes " << mes << " " << mesb
+      cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
 	 << " , bb: (" << Pmin << ") , (" << Pmax << ")\n"; 
 }
 

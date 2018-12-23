@@ -46,7 +46,7 @@
 #include <cmath>
 #include <complex>
 using namespace std;
-/*
+
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
@@ -72,8 +72,6 @@ using namespace std;
 #include "msh3.hpp"
 // #include "GQuadTree.hpp"
 // #include "lex.hpp"
- */
-#include "ff++.hpp"
 #include <set>
 #include <vector>
 #include <list>

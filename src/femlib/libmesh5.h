@@ -138,30 +138,30 @@ extern int GmfSetLin(int, int, ...);
 /*----------------------------------------------------------*/
 
 #if defined(F77_NO_UNDER_SCORE)
-#define CALL_F77(x) x
+#define call(x) x
 #else
-#define CALL_F77(x) x ## _
+#define call(x) x ## _
 #endif
 
-int CALL_F77(gmfopenmeshf77)(char *, int *, int *, int *, int);
-int CALL_F77(gmfclosemeshf77)(int *);
-int CALL_F77(gmfstatkwdf77)(int *, int *, int *, int *, int *);
-int CALL_F77(gmfgotokwdf77)(int *, int *);
-int CALL_F77(gmfsetkwdf77)(int *, int *, int *, int *, int *);
-int CALL_F77(gmfgetvertex2df77)(int *, float *, float *, int *);
-int CALL_F77(gmfgetvertex3df77)(int *, float *, float *, float *, int *);
-int CALL_F77(gmfsetvertex2df77)(int *, float *, float *, int *);
-int CALL_F77(gmfsetvertex3df77)(int *, float *, float *, float *, int *);
-int CALL_F77(gmfgettrianglef77)(int *, int *, int *, int *, int *);
-int CALL_F77(gmfsettrianglef77)(int *, int *, int *, int *, int *);
-int CALL_F77(gmfgettetrahedronf77)(int *, int *, int *, int *, int *, int *);
-int CALL_F77(gmfsettetrahedronf77)(int *, int *, int *, int *, int *, int *);
-int CALL_F77(gmfgetedgef77)(int *, int *, int *, int *);
-int CALL_F77(gmfsetedgef77)(int *, int *, int *, int *);
-int CALL_F77(gmfgetquadrilateralf77)(int *, int *, int *, int *, int *, int *);
-int CALL_F77(gmfsetquadrilateralf77)(int *, int *, int *, int *, int *, int *);
-int CALL_F77(gmfgethexahedronf77)(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
-int CALL_F77(gmfsethexahedronf77)(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
+int call(gmfopenmeshf77)(char *, int *, int *, int *, int);
+int call(gmfclosemeshf77)(int *);
+int call(gmfstatkwdf77)(int *, int *, int *, int *, int *);
+int call(gmfgotokwdf77)(int *, int *);
+int call(gmfsetkwdf77)(int *, int *, int *, int *, int *);
+int call(gmfgetvertex2df77)(int *, float *, float *, int *);
+int call(gmfgetvertex3df77)(int *, float *, float *, float *, int *);
+int call(gmfsetvertex2df77)(int *, float *, float *, int *);
+int call(gmfsetvertex3df77)(int *, float *, float *, float *, int *);
+int call(gmfgettrianglef77)(int *, int *, int *, int *, int *);
+int call(gmfsettrianglef77)(int *, int *, int *, int *, int *);
+int call(gmfgettetrahedronf77)(int *, int *, int *, int *, int *, int *);
+int call(gmfsettetrahedronf77)(int *, int *, int *, int *, int *, int *);
+int call(gmfgetedgef77)(int *, int *, int *, int *);
+int call(gmfsetedgef77)(int *, int *, int *, int *);
+int call(gmfgetquadrilateralf77)(int *, int *, int *, int *, int *, int *);
+int call(gmfsetquadrilateralf77)(int *, int *, int *, int *, int *, int *);
+int call(gmfgethexahedronf77)(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
+int call(gmfsethexahedronf77)(int *, int *, int *, int *, int *, int *, int *, int *, int *, int *);
 
 #ifdef __cplusplus
 }

@@ -18,7 +18,6 @@ FESpacen.hpp \
 P012_1d.cpp \
 P012_2d.cpp \
 P012_3d.cpp \
-P012_3dSurf.cpp \
 PkLagrange.hpp \
 Mesh1dn.cpp \
 Mesh1dn.hpp \
@@ -36,19 +35,4 @@ HeapSort.hpp \
 libmesh5.c \
 libmesh5.h  \
 ufunction.hpp  \
-splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp \
-HashMatrix.hpp \
-HashMatrix.cpp \
-VirtualMatrix.hpp \
-SparseLinearSolver.hpp \
-VirtualSolverCG.hpp \
-VirtualSolver.hpp \
-MatriceCreuse_tpl.hpp \
-MatriceElementaire.hpp \
-CG.hpp \
-CG.cpp \
-SparseLinearSolver.cpp \
-SolverSkyLine.hpp \
-VirtualSolverSparseSuite.hpp \
-VirtualSolverSkyLine.hpp 
-
+splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp

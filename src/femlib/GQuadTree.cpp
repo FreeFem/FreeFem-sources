@@ -370,11 +370,11 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
     //cout << "  RdtoZd(Pmin)" << RdtoZd(Pmin) << " RdtoZd(Pmax)" << RdtoZd(Pmax) << endl;
     }
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
-  root=NewQuadTreeBox(); 
+  root=NewQuadTreeBox();
   //  throwassert( MaxISize > MaxICoor);
   if (v)
     for (long i=0;i<nbv;i++) 
-     Add(v[i]);
+      Add(v[i]);
 }
   
   template<class Vertex>
@@ -459,7 +459,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	QuadTreeBox * b0= b->b[k];
 	if ( ( b0 == 0) || (b0->n == 0) ) 
 	  break; // null box or empty   => break 	    
-	NbQuadTreeBoxSearch++;	
+	NbQuadTreeBoxSearch++;
+	b=b0;	
 	p0.Add(k,hb2);	
 	hb = hb2; 
       }
@@ -877,22 +878,9 @@ RESTART:
 template class GTree<Vertex2>;
 template class GTree<Vertex3>;
 template class GTree<Vertex1>;
-    
-///typedef MeshS::GMesh GMeshS;
 typedef Mesh3::GMesh GMesh3;
 typedef Mesh2::GMesh GMesh2;
 typedef Mesh1::GMesh GMesh1;
- 
-    
-/*template
-const   GMeshS::Element * Find<GMeshS>(const GMeshS & Th,
-                       GTree< GMeshS::Vertex> *quadtree,
-                       GMeshS::Rd P,
-                       GMeshS::RdHat & Phat,
-                       bool & outside,
-                       const   GMeshS::Element * tstart);
-  */
- 
 template
 const   GMesh3::Element * Find<GMesh3>(const GMesh3 & Th,
 				       GTree< GMesh3::Vertex> *quadtree,

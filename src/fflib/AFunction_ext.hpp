@@ -88,8 +88,7 @@ class E_F_F0F0F0s_ :public  E { public:                               // extend
 
 template<class R,class A=R,class B=A,class C=B, class CODE=E_F_F0F0F0s_<R,A,B,C,E_F0> >    // extend (3th arg.)
 class  OneOperator3s_ : public OneOperator {     // 
-  aType r; //  return type
-   aType tA,tB,tC; // type of template modif FH mars 2007
+  aType r; //  return type 
   typedef typename  CODE::func  func;
   func f;
 public: 
@@ -102,20 +101,11 @@ public:
 		     t[0]->CastTo(args[0]),
 		     t[1]->CastTo(args[1]),
 		     t[2]->CastTo(args[2]));}     // extend
-/*  OneOperator3s_(func  ff):                        // 2->
+  OneOperator3s_(func  ff):                        // 2->
     OneOperator(map_type[typeid(R).name()],
 		map_type[typeid(A).name()],
 		map_type[typeid(B).name()],
 		map_type[typeid(C).name()]),      // extend
-    f(ff){}*/
-    OneOperator3s_(func  ff,
-                  aType tt0=map_type[typeid(A).name()],
-                  aType tt1=map_type[typeid(B).name()],
-                  aType tt2=map_type[typeid(C).name()])
-    : OneOperator(map_type[typeid(R).name()],tt0,tt1,tt2),
-    tA(map_type[typeid(A).name()]),
-    tB(map_type[typeid(B).name()]),
-    tC(map_type[typeid(C).name()]),
     f(ff){}
 };
 // ***********************************************

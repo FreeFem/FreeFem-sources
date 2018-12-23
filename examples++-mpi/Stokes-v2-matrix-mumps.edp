@@ -4,11 +4,11 @@
 // other
 load "msh3"
 load "medit"
-load "MUMPS"
+load "MUMPS_FreeFem"
 
 
 real ttgv=1e10;
-//string ssparams="nprow=1, npcol="+mpisize;
+string ssparams="nprow=1, npcol="+mpisize;
 
 int nn=15;
 mesh Th2=square(nn,nn);
@@ -57,7 +57,7 @@ matrix A = [ [ L, BT ],     //'
 time1=clock()-time1;
 
 real timeF=clock();
-set(A,solver=sparsesolver);
+set(A,solver=sparsesolver,sparams=ssparams);
 timeF=clock()-timeF;
 
 real time2=clock();

@@ -1,4 +1,4 @@
-//xxff-c++-LIBRARY-dep: metis  superlu_dist parmetis blas mpi fc
+//ff-c++-LIBRARY-dep: metis  superlu_dist parmetis blas mpi fc
 //ff-c++-cpp-dep: 
 /*
   Interface freefem++ et SuperLU_DIST_2.3 
@@ -6,19 +6,6 @@
   /bin/sh ff-mpic++ dSuperLU_DIST.cpp -I/Users/morice/librairie/SuperLU_DIST_2.3/SRC/ -L/Users/morice/librairie/openmpi/lib/ -lmpi -lopal -lorte -L/Users/morice/librairie/PATCHVECLIB/ -lwrapperdotblas -framework veclib -L/Users/morice/librairie/ParMetis-3.1/ -lparmetis -lmetis -L/Users/morice/librairie/SuperLU_DIST_2.3/lib/ -lsuperlu_dist_2.3
 
 */
-#ifndef OLDFFVERSION
-#include  "ff++.hpp"
-static void Load_Init()
-{
-    cout << " load(\"dSuperLU_DIST\")   is obsoled now  pluging "<< endl;
-    ExecError("Plugins dSuperLU_DIST is remove");
-    exit(0);
-}
-
-LOADFUNC(Load_Init);
-#else
-
-
 #include <mpi.h>
 #include  <iostream>
 using namespace std;
@@ -751,4 +738,3 @@ static void Load_Init()
 
 
  LOADFUNC(Load_Init)
-#endif

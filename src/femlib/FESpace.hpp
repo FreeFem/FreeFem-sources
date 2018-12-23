@@ -178,7 +178,7 @@ class TypeOfFE { public:
   const  int NbNode;
   //  remark 
  // virtual void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const =0;
-  virtual void FB(const bool *,const Mesh & Th,const Triangle & K,const RdHat &PHat, RNMK_ & val) const =0;
+  virtual void FB(const bool *,const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const =0;
 //  virtual void D2_FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const=0;
  // virtual void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int , void *) const=0;
   
@@ -473,6 +473,7 @@ class FElement : public baseFElement { public:
   typedef  TypeOfFE::IPJ   IPJ;
   typedef const KN<R2> &  aR2;
   
+  
   friend class Fem2D::FESpace;
   const int *p;
   const int nb;
@@ -494,8 +495,8 @@ class FElement : public baseFElement { public:
   void Draw(const RN_& U,const RN_& V, const  KN_<R> & Viso,R coef,int i0,int i1,double ArrowSize=-1) const;
   R2   MinMax(const RN_& U,const RN_& V,int i0,int i1) const  ;
   R2   MinMax(const RN_& U,int i0) const  ;
-  void BF(const R2 & PHat,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
-  void BF(const bool * whatd, const R2 & PHat,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
+  void BF(const R2 & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
+  void BF(const bool * whatd, const R2 & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
  // void D2_BF(const R2 & P,RNMK_ & val) const ; //{ tfe->D2_FB(Vh.Th,T,P,val);}
   void Pi_h(RN_ val,InterpolFunction f,R *v,  void * arg) const;//  {tfe->Pi_h(Vh.Th,T,val,f,v);}
   aIPJ Pi_h_ipj() const { return tfe->Ph_ijalpha();}
@@ -831,11 +832,12 @@ inline ostream & operator << (ostream & f,const FESpace & Vh)
      
    }
    
-inline void FElement::BF(const R2 & PHat,RNMK_ & val) const {
+inline void FElement::BF(const R2 & P,RNMK_ & val) const {
  static bool whatdold[last_operatortype]={true,true,true,false,false,false,false,false,false,false};
- tfe->FB(whatdold,Vh.Th,T,PHat,val);}
-inline void FElement::BF(const bool * whatd,const R2 & PHat,RNMK_ & val) const { tfe->FB(whatd,Vh.Th,T,PHat,val);}
+ tfe->FB(whatdold,Vh.Th,T,P,val);}
+inline void FElement::BF(const bool * whatd,const R2 & P,RNMK_ & val) const { tfe->FB(whatd,Vh.Th,T,P,val);}
 //inline  void FElement::D2_BF(const R2 & P,RNMK_ & val) const { tfe->D2_FB(Vh.Th,T,P,val);}
+
 
 //  -------
  extern const TypeOfMortar & TheMortarCas1P2; 

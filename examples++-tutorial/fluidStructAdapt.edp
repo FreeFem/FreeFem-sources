@@ -31,8 +31,8 @@ varf Mass(p,q)=int2d(sh)(p*q);
 Xh bc1; 
 Xh brhs;
                    
-matrix A= Lap(Xh,Xh,solver=UMFPACK); 
-matrix M= Mass(Mh,Mh,solver=UMFPACK); 
+matrix A= Lap(Xh,Xh,solver=CG); 
+matrix M= Mass(Mh,Mh,solver=CG); 
 matrix Bx= bx(Xh,Mh);
 matrix By= by(Xh,Mh);
 func cly =(-y)*(10.+y)/25.;
@@ -131,7 +131,7 @@ solve  bbst([uu,vv],[w,s],init=i)  =
  else 
   {
     fespace VVh(sh,P1);VVh  uh,vh;
-    solve lapllll(uh,vh,solver=UMFPACK,tgv=1e5) =                    //  definion of  the problem 
+    solve lapllll(uh,vh,solver=CG,tgv=1e5) =                    //  definion of  the problem 
     //  compute a deformation field for moving the fluid mesh
     
     //  x -> vv(x,0) is the new deformation y 
@@ -150,8 +150,8 @@ solve  bbst([uu,vv],[w,s],init=i)  =
     p=p;
     u1=u1; 
     u2=u2;
-    A= Lap(Xh,Xh,solver=UMFPACK); 
-    M= Mass(Mh,Mh,solver=UMFPACK); 
+    A= Lap(Xh,Xh,solver=CG); 
+    M= Mass(Mh,Mh,solver=CG); 
     Bx= bx(Xh,Mh);
     By= by(Xh,Mh);
     bcx=0;
@@ -160,8 +160,8 @@ solve  bbst([uu,vv],[w,s],init=i)  =
 
 
  p=p;q=q;u1=u1;u2=u2;brhs=brhs;ppp=ppp;
- A= Lap(Xh,Xh,solver=UMFPACK); 
- M= Mass(Mh,Mh,solver=UMFPACK); 
+ A= Lap(Xh,Xh,solver=CG); 
+ M= Mass(Mh,Mh,solver=CG); 
  Bx= bx(Xh,Mh);
  By= by(Xh,Mh);
  bc1=0;  // for resize

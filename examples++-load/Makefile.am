@@ -1,5 +1,5 @@
 all-local: @LOAD_COMPILE@
-TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NS_P2BR_P0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp  ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE_P2BR.edp testFEMorley.edp tetgencube.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp bfstream.edp bilapP3-hct-like.edp ClosePoints.edp cube.edp bilapHCT.edp	testFEHCT.edp Stokes-surface-tension-axi.edp Element_QF.edp distance.edp	distance2.edp	distance3.edp testdist.edp testp1dcnc.edp testFE-P2Bulle3.edp LaplaceRT2.edp LaplaceP2pnc.edp testFE-P2pnc.edp LaplaceP3-3d.edp LaplaceRT13d.edp SaveHB_sample.edp SaveHB_sample_z.edp IncompleteCholesky.edp test_LaplacianSurf.edp 
+TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NS_P2BR_P0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp  ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE_P2BR.edp testFEMorley.edp tetgencube.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp bfstream.edp bilapP3-hct-like.edp ClosePoints.edp cube.edp bilapHCT.edp	testFEHCT.edp Stokes-surface-tension-axi.edp Element_QF.edp distance.edp	distance2.edp	distance3.edp testdist.edp testp1dcnc.edp testFE-P2Bulle3.edp LaplaceRT2.edp LaplaceP2pnc.edp testFE-P2pnc.edp LaplaceP3-3d.edp LaplaceRT13d.edp SaveHB_sample.edp SaveHB_sample_z.edp IncompleteCholesky.edp
 # all test can fail must but clean ????  FH... 
 XFAIL_TESTS=$(TESTS)
 
@@ -118,7 +118,7 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/AFunction.hpp ../src/fflib/AnyType.hpp	\
 	../src/fflib/array_init.hpp ../src/fflib/array_resize.hpp ../src/fflib/array_tlp.hpp				\
 	../src/femlib/assertion.hpp ../src/femlib/BamgFreeFem.hpp ../src/Algo/BFGS.hpp ../src/Algo/BrentLS.hpp		\
-	../src/femlib/CGNL.hpp ../src/fflib/CodeAlloc.hpp ../config.h ../config-wrapper.h		\
+	../src/Algo/CG.hpp ../src/femlib/CGNL.hpp ../src/fflib/CodeAlloc.hpp ../config.h ../config-wrapper.h		\
 	../src/Algo/CubicLS.hpp ../src/Algo/defs.hpp ../src/femlib/DOperator.hpp ../src/libMesh/eigenv.h		\
 	../src/fflib/endian.hpp ../src/fflib/environment.hpp ../src/fflib/error.hpp ../src/femlib/fem3.hpp		\
 	../src/femlib/fem.hpp ../src/femlib/FESpace.hpp ../src/femlib/FESpacen.hpp ../src/fflib/ff++.hpp		\
@@ -139,18 +139,7 @@ allheaders=../src/fflib/AddNewFE.h ../src/fflib/AFunction_ext.hpp ../src/fflib/A
 	../src/fflib/showverb.hpp ../src/femlib/splitsimplex.hpp ../src/fflib/String.hpp				\
 	../src/fflib/strversionnumber.hpp ../src/fflib/throwassert.hpp ../src/femlib/ufunction.hpp			\
 	../src/fflib/versionnumber.hpp ../src/bamglib/write_hdf5.hpp	../src/bamglib/write_xdmf.hpp                   \
-	../src/fflib/P1IsoValue.hpp \
-	../src/femlib/SkyLineSolver.hpp \
-	../src/femlib/SolverSkyLine.hpp \
-	../src/femlib/SparseLinearSolver.hpp \
-	../src/femlib/VirtualMatrix.hpp \
-	../src/femlib/VirtualSolver.hpp \
-	../src/femlib/CG.hpp \
-	../src/femlib/VirtualSolverCG.hpp \
-	../src/femlib/VirtualSolverSkyLine.hpp \
-	../src/femlib/VirtualSolverSparseSuite.hpp \
-	../src/femlib/HashMatrix.hpp \
-	../src/femlib/MatriceElementaire.hpp
+	../src/fflib/P1IsoValue.hpp
 
 if ENABLE_FFCS
 
@@ -239,7 +228,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi || true
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
-	$(INSTALL_DATA)  renumb.hpp  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
+	$(INSTALL_DATA)  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   $(DESTDIR)$(ff_prefix_dir)/include
 	$(INSTALL)  -m 555 $(LIST_COMPILE) $(DESTDIR)$(ff_prefix_dir)/lib
 	$(INSTALL)  -m 555 ff-get-dep.awk  WHERE_LIBRARY-config WHERE_LIBRARY  $(DESTDIR)$(ff_prefix_dir)/lib
 	for i in  WHERE_LIBRARY-config WHERE_LIBRARY WHERE_LIBRARY-download; do \

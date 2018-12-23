@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
-PYTHON2=python2.7
+
 include Makefile.inc
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
 W_SUDO1=$(SHELL ls	)
@@ -105,7 +105,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
+	cd $(SRCDIR) &&  python2 ./configure \
 	--prefix=$(DIR_INSTALL_REAL) \
 	--with-ssl=0 ---with-x=0 \
     '--with-scalar-type=real' \
@@ -123,7 +123,7 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/
 ifdef 	MUMPS_LIB
 #  version COMPLEX  .....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
+	cd $(SRCDIR) &&  python2 ./configure \
 	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
     '--with-scalar-type=complex' \
 	--with-ssl=0 ---with-x=0 \
@@ -188,7 +188,7 @@ WHERE-all:Makefile WHERE-complex WHERE
 $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_COMPLEX) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_COMPLEX)
+	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_COMPLEX)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
@@ -225,7 +225,7 @@ $(PACKAGE_SLEPC):
 $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_REAL)
+	cd $(SRCDIR_SLEPC) &&   python2 ./configure  --prefix=$(DIR_INSTALL_REAL)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real

@@ -57,7 +57,7 @@ namespace Fem2D {
 			static const GQuadratureFormular<R1> QFe;	// quadrature formula on an edge
 			static const GQuadratureFormular<R2> QFf;	// quadrature formula on a face
 			TypeOfFE_Edge1_3d ();	// constructor
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
 			void set (const Mesh &Th, const Element &K, InterpolationMatrix<RdHat> &M, int ocoef, int odf, int *nump) const;
 	};
 
@@ -255,7 +255,7 @@ namespace Fem2D {
 	 */
 
 	// val contains the values of the basis functions and of their derivatives at the point of K corresponding to the point P of the reference tetrahedron, by components
-	void TypeOfFE_Edge1_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_Edge1_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
 		assert(val.N() >= 20);	// 20 degrees of freedom
 		assert(val.M() == 3);	// 3 components
 		// -------------
@@ -288,7 +288,7 @@ namespace Fem2D {
 		// -------------
 		// the 4 barycentric coordinates for the reference tetrahedron evaluated at the point P
 		// (they have the same value at the real tetrahedron's point corresponding to the reference tetrahedron's point P)
-		R l [] = {1. - PHat.sum(), PHat.x, PHat.y, PHat.z};
+		R l [] = {1. - P.sum(), P.x, P.y, P.z};
 		R3 D[4];
 		K.Gradlambda(D);// (riempie un array di 4 R3)
 		val = 0;
@@ -316,7 +316,7 @@ namespace Fem2D {
 		// -----
 
 		if (whatd & Fop_D0) {	// Fop_D0 defined in FESpacen.hpp
-			R3 X = K(PHat);
+			R3 X = K(P);
 			// First, the functions omega (they don't constitute a dual basis! only a basis)
 			R3 omega[20];
 
@@ -810,7 +810,7 @@ namespace Fem2D {
 			static const GQuadratureFormular<R2> QFf;	// quadrature formula on a face
 			static const GQuadratureFormular<R3> QFv;	// quadrature formula on a tetrahedron
 			TypeOfFE_Edge2_3d ();	// constructor
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
 			void set (const Mesh &Th, const Element &K, InterpolationMatrix<RdHat> &M, int ocoef, int odf, int *nump) const;
 	};
 
@@ -1095,7 +1095,7 @@ namespace Fem2D {
 	 */
 
 	// val contains the values of the basis functions and of their derivatives at the point of K corresponding to the point P of the reference tetrahedron, by components
-	void TypeOfFE_Edge2_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_Edge2_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
 		assert(val.N() >= 45);	// 45 degrees of freedom
 		assert(val.M() == 3);	// 3 components
 		// -------------
@@ -1128,7 +1128,7 @@ namespace Fem2D {
 		// -------------
 		// the 4 barycentric coordinates for the reference tetrahedron evaluated at the point P
 		// (they have the same value at the real tetrahedron's point corresponding to the reference tetrahedron's point P)
-		R l [] = {1. - PHat.sum(), PHat.x, PHat.y, PHat.z};
+		R l [] = {1. - P.sum(), P.x, P.y, P.z};
 		R3 D[4];
 		K.Gradlambda(D);
 		val = 0;
@@ -2027,7 +2027,7 @@ namespace Fem2D {
 
 			TypeOfFE_P0Edge3ds0 ();
 
-			void FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Element &K, const Rd &P, RNMK_ &val) const;
 
 			~TypeOfFE_P0Edge3ds0 () {}	// cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
 
@@ -2053,7 +2053,7 @@ namespace Fem2D {
 		}
 	}
 
-	void TypeOfFE_P0Edge3ds0::FB (const What_d whatd, const Mesh &, const Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_P0Edge3ds0::FB (const What_d whatd, const Mesh &, const Element &K, const R3 &P, RNMK_ &val) const {
 		assert(0);
 	}
 
@@ -2082,7 +2082,7 @@ namespace Fem2D {
 
 			TypeOfFE_P1Edge3ds0 ();
 
-			void FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Element &K, const Rd &P, RNMK_ &val) const;
 
 			~TypeOfFE_P1Edge3ds0 () {}	// cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
 
@@ -2131,7 +2131,7 @@ namespace Fem2D {
 		}
 	}
 
-	void TypeOfFE_P1Edge3ds0::FB (const What_d whatd, const Mesh &, const Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_P1Edge3ds0::FB (const What_d whatd, const Mesh &, const Element &K, const R3 &P, RNMK_ &val) const {
 		assert(0);
 	}
 
@@ -2162,7 +2162,7 @@ namespace Fem2D {
 
 			TypeOfFE_P2Edge3ds0 ();	// constructor
 
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
 
 			~TypeOfFE_P2Edge3ds0 () {}	// cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
 
@@ -2244,7 +2244,7 @@ namespace Fem2D {
 		}
 	}
 
-	void TypeOfFE_P2Edge3ds0::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_P2Edge3ds0::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
 		assert(0);
 	}
 
@@ -2261,7 +2261,7 @@ namespace Fem2D {
 			static const GQuadratureFormular<R3> QFtetra;
 			TypeOfFE_RT1_3d ();
 			int edgeface[4][3];
-			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const;
 			void set (const Mesh &Th, const Element &K, InterpolationMatrix<RdHat> &M, int ocoef, int odf, int *nump) const;
 	};
 
@@ -2408,7 +2408,7 @@ namespace Fem2D {
 	}	// end set function
 
 	// here the basis functions and theirs derivates
-	void TypeOfFE_RT1_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_RT1_3d::FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const Rd &P, RNMK_ &val) const {
 		assert(val.N() >= 15);
 		assert(val.M() == 3);
 
@@ -2417,8 +2417,8 @@ namespace Fem2D {
 		// basis functions to RT03d / multiply by sign to have a exterior normal and divide by the mesure of K
 		// phi = signe * (x - qi)/ (volume*d)
 		R cc = d * K.mesure();
-		R lambda [] = {1. - PHat.sum(), PHat.x, PHat.y, PHat.z};
-		R3 X = K(PHat);
+		R lambda [] = {1. - P.sum(), P.x, P.y, P.z};
+		R3 X = K(P);
 		R3 phi[4] = {X - K[0], X - K[1], X - K[2], X - K[3]};	// phi * area *6
 
 		// fo contain just the sign about permutation ----- 1perm=-1 / 2perm=1 / 3perm=-1

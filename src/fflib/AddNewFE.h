@@ -53,7 +53,8 @@ struct AddNewFE {
   }
 };
 
-// 3d volume case
+// 3d case 
+
 
 class EConstantTypeOfFE3 :public E_F0
 { public:
@@ -70,30 +71,8 @@ public:
     operator aType () const { return atype<T>();} 
 };
 
+
 Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v);
-
-
-// 3d surface case
-
-class EConstantTypeOfFES :public E_F0
-{ public:
-    //  using namespace   Fem2D;
-    typedef Fem2D::TypeOfFES * T;
-    T  v;
-public:
-    AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
-    EConstantTypeOfFES( T o):v(o) { /*cout << "New constant " << o << endl;*/}
-    size_t nbitem() const { assert(v);
-        if(verbosity > 2)
-            cout << " nb item = " << v->N << endl;
-        return v->N ;}
-    operator aType () const { return atype<T>();}
-};
-
-
-Type_Expr CConstantTFES(const EConstantTypeOfFES::T & v);
-
-
 
 /*
 class EConstantTypeOfFE3 :public E_F0

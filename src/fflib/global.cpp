@@ -115,8 +115,9 @@ using namespace std;
 #include "fem.hpp"
 #include "Mesh3dn.hpp"
 
-#include "HashMatrix.hpp"
-#include "SparseLinearSolver.hpp"
+
+#include "MatriceCreuse_tpl.hpp"
+
 #include "MeshPoint.hpp"
 
  bool  NoGraphicWindow=false;
@@ -199,5 +200,3 @@ void InitMeshPoint(void * p)
     EF23::MeshPoint*mps=static_cast<EF23::MeshPoint*>(p);
     mps->unset();
 }
-
-string *def_solver=0,*def_solver_sym=0, *def_solver_sym_dp=0; 

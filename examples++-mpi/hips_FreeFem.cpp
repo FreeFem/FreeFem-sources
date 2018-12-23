@@ -8,7 +8,7 @@
 //         Modif by F. Hecht 2011
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
-//xxxff-c++-LIBRARY-dep:  hips scotchmetis scotch   blas  mpi
+//ff-c++-LIBRARY-dep:  hips scotchmetis scotch   blas  mpi
 //ff-c++-cpp-dep: 
 
 /* 
@@ -31,19 +31,6 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-#ifndef OLDFFVERSION
-#include  "ff++.hpp"
-static void Load_Init()
-{
-    cout << " load(\"hips_FreeFem\")   is obsoled now  pluging "<< endl;
-    ExecError("Plugins hips_FreeFem is remove");
-    exit(0);
-}
-
-LOADFUNC(Load_Init);
-#else
-
-
 #include <mpi.h>
 #include  <iostream>
 using namespace std;
@@ -783,4 +770,3 @@ static void Load_Init()
 		      
 		      
  LOADFUNC(Load_Init)
-#endif

@@ -28,7 +28,6 @@
 #ifndef lgsolver_hpp_
 #define lgsolver_hpp_
 #include "gmres.hpp"
-
 typedef void *    pcommworld;
 
 namespace  Fem2D {
@@ -93,10 +92,10 @@ inline KN_<complex<double> > R2C(KN_<double>  & vr)
 }
 
     template<class R>
-    struct  RNM_VirtualMatrixTrans:public RNM_VirtualMatrix<R> { public:
-        const RNM_VirtualMatrix<R> * A;
+    struct  VirtualMatriceTrans:public VirtualMatrice<R> { public:
+        const VirtualMatrice<R> * A;
         int N,M;
-        RNM_VirtualMatrixTrans(const RNM_VirtualMatrix<R> & AA): RNM_VirtualMatrix<R>(AA.M,AA.N),A(&AA)
+        VirtualMatriceTrans(const VirtualMatrice<R> & AA): VirtualMatrice<R>(AA.M,AA.N),A(&AA)
         { N=AA.M; M=AA.N;
           //  cout <<"Assertion fail " <<  N << " " << M << " "<< AA.N << " " << AA.M << endl;
         }
@@ -105,26 +104,26 @@ inline KN_<complex<double> > R2C(KN_<double>  & vr)
         
         virtual bool ChecknbLine  (int n) const {return N==n;}
         virtual bool ChecknbColumn  (int m) const {return M==m;}
-  /*      struct  plusAx { const RNM_VirtualMatrix * A; const KN_<R>   x;
-            plusAx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y)
+  /*      struct  plusAx { const VirtualMatrice * A; const KN_<R>   x;
+            plusAx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y)
             { if(B) { ffassert(B->ChecknbColumn(y.N())); } }
         };
         
         plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
         
-        struct  plusAtx { const RNM_VirtualMatrix * A; const KN_<R>   x;
-            plusAtx( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),x(y)
+        struct  plusAtx { const VirtualMatrice * A; const KN_<R>   x;
+            plusAtx( const VirtualMatrice * B,const KN_<R> &  y) :A(B),x(y)
             { if(B) { ffassert(B->ChecknbLine(y.N())); } } };
         
-        struct  solveAxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
-            solveAxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)
+        struct  solveAxeqb { const VirtualMatrice * A; const KN_<R>   b;
+            solveAxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y)
             { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
         
-        struct  solveAtxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
-            solveAtxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)
+        struct  solveAtxeqb { const VirtualMatrice * A; const KN_<R>   b;
+            solveAtxeqb( const VirtualMatrice * B,const KN_<R> &  y) :A(B),b(y)
             { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
         */
-         RNM_VirtualMatrixTrans(){}
+         VirtualMatriceTrans(){}
     };
     
 
@@ -149,16 +148,16 @@ inline const KN_<complex<double> > R2C(const KN_<double>  & vr)
 // -----------------------------------------------------------------
 
 template <class MM>
-class MatC2R : public VirtualMatrix<double> { public:
+class MatC2R : public VirtualMatrice<double> { public:
 
-  typedef typename VirtualMatrix<double>::plusAx plusAx;
+  typedef typename VirtualMatrice<double>::plusAx plusAx;
 
-  //  typedef  RNM_VirtualMatrix<complex<double> > M;
+  //  typedef  VirtualMatrice<complex<double> > M;
 
   const MM &m;
 
   MatC2R(const MM &mm):
-      VirtualMatrix<double>(mm.N*2,mm.M*2),m(mm) {}
+      VirtualMatrice<double>(mm.N*2,mm.M*2),m(mm) {}
 
   void addMatMul(const  KN_<double>  & x, KN_<double> & Ax) const {
 
@@ -167,16 +166,16 @@ class MatC2R : public VirtualMatrix<double> { public:
   }
 
   plusAx operator*(const KN<double> &  x) const {return plusAx(this,x);}
-  virtual bool ChecknbLine(int nn) const { return !n ||n==nn;}
-  virtual bool ChecknbColumn(int mm) const { return !n ||m==mm;}
+  virtual bool ChecknbLine(int n) const { return !N ||n==N;}  
+  virtual bool ChecknbColumn(int m) const { return !M ||m==M;}
 
 
 };
 
-#ifdef REOMVE_CODE_V4
+
 
 template<class R>
-class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
+class SolveGCPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMatrice<R>{
   int n;
   int nbitermax;
   double eps;
@@ -186,13 +185,15 @@ class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_V
   mutable KN<R> xx; 
   Expression xx_del, code_del; 
   Stack stack;
-  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
+    bool x0;
+      double *veps;
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
  
   public:
-  SolveGCPrecon(const MatriceCreuseOld<R> &A,const OneOperator * C,Stack stk,int itmax, double epsilon=1e-6) :
-    RNM_VirtualMatrix<R>(A.n),
+  SolveGCPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,int itmax, double epsilon=1e-6,bool x00=true,double *vveps=0) :
+    VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
-    D1(n),xx(n),stack(stk)
+    D1(n),xx(n),stack(stk),x0(x00),veps(vveps)
 {
       assert(C); 
 
@@ -214,10 +215,14 @@ class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_V
        D1[i] = Fem2D::norm(D1[i]) < tgv  ? R(1.) : tgv1;
       
 }
-   void Solver(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+   void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
+//     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+       epsr = veps ? *veps : eps;
+
     // cout << " epsr = " << epsr << endl;
-     ConjuguedGradient<R,MatriceCreuseOld<R>,SolveGCPrecon<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr);
+       if(x0) x=R();
+     ConjuguedGradient<R,MatriceMorse<R>,SolveGCPrecon<R>,StopGC<R> >(a,*this,b,x,nbitermax,epsr);
+    if(veps) *veps=epsr;
    }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
@@ -250,7 +255,7 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };     
 
 template<class R>
-class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
+class SolveGMRESPrecon :   public MatriceMorse<R>::VirtualSolver , public VirtualMatrice<R>{
   int n;
   int nbitermax;
   double eps;
@@ -260,14 +265,16 @@ class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RN
   mutable KN<R> xx; 
   Expression xx_del, code_del;    
   Stack stack;
-  int dKrylov; 
-  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
+  int dKrylov;
+    bool x0;
+      double *veps;
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
   public:
-  SolveGMRESPrecon(const MatriceCreuseOld<R> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) :
-    RNM_VirtualMatrix<R>(A.n),
+  SolveGMRESPrecon(const MatriceMorse<R> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6,bool x00=true,double *vveps=0) :
+    VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),precon(0),
     D1(n),xx(n),
-    stack(stk),dKrylov(dk)
+    stack(stk),dKrylov(dk),x0(x00),veps(vveps)
 
 {
       assert(C); 
@@ -291,19 +298,26 @@ class SolveGMRESPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RN
         D1[i] = (std::abs(D1[i]) <  tgv ) ? R(1.)  : R() ; // remove the tgv ...
       
 }
-    void Solver(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
+    // epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        epsr = veps ? *veps : eps;
+
       KNM<R> H(dKrylov+1,dKrylov+1);
       int k=dKrylov,nn=nbitermax;
+        if(x0) x=R();
       GMRES(a,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
+        if(veps) *veps=epsr;
 
    }
-    void SolverT(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-        RNM_VirtualMatrixTrans<R> at(a);
-        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    void SolverT(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
+        VirtualMatriceTrans<R> at(a);
+      //  epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        epsr = veps ? *veps : eps;
         KNM<R> H(dKrylov+1,dKrylov+1);
         int k=dKrylov,nn=nbitermax;
+          if(x0) x=R();
         GMRES(at ,(KN<R> &)x, (const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
+         if(veps) *veps=epsr;
     }
 plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
 
@@ -337,38 +351,46 @@ plusAx operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };     
 
 template<class R>
-class SolveGMRESDiag :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_VirtualMatrix<R>{
+class SolveGMRESDiag :   public MatriceMorse<R>::VirtualSolver , public VirtualMatrice<R>{
   int n;
   int nbitermax;
   double eps;
   mutable double  epsr;
   int dKrilov;
   KN<R> D1;
+    bool x0;
+      double *veps;
   public:
-  typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
-  SolveGMRESDiag(const MatriceCreuseOld<R> &A,int nbk=50,int itmax=0,double epsilon=1e-6) :
-     RNM_VirtualMatrix<R>(A.n),
+  typedef typename VirtualMatrice<R>::plusAx plusAx;
+  SolveGMRESDiag(const MatriceMorse<R> &A,int nbk=50,int itmax=0,double epsilon=1e-6,bool x00=true,double *vveps=0) :
+     VirtualMatrice<R>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),eps(epsilon),epsr(0),
-    dKrilov(nbk) ,D1(n)
+    dKrilov(nbk) ,D1(n),x0(x00),veps(vveps)
   { 
     R aii=0;
     A.getdiag(D1);
     for (int i=0;i<n;i++)
       D1[i] = (norm(aii=D1[i]) < 1e-20 ? R(1.) : R(1.)/aii);}
 
-   void Solver(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+   void Solver(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
+    //  epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+       epsr = veps ? *veps : eps;
+
       KNM<R> H(dKrilov+1,dKrilov+1);
       int k=dKrilov,nn=nbitermax;
+       if(x0) x=R();
       GMRES(a,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
 
  }
-    void SolverT(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-        RNM_VirtualMatrixTrans<R> at(a);
-        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    void SolverT(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
+        VirtualMatriceTrans<R> at(a);
+     //   epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        epsr = veps ? *veps : eps;
         KNM<R> H(dKrilov+1,dKrilov+1);
         int k=dKrilov,nn=nbitermax;
+         if(x0) x=R();
         GMRES(at,(KN<R> &)x,(const KN<R> &)b,*this,H,k,nn,epsr,verbosity);
+        if(veps) *veps=epsr;
     }
 
 plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);} 
@@ -386,55 +408,61 @@ plusAx  operator*(const KN_<R> &  x) const {return plusAx(this,x);}
 };   
 
 template<>
-class SolveGMRESDiag<Complex> :   public MatriceMorseOld<Complex>::VirtualSolver , public RNM_VirtualMatrix<Complex>
-{
+class SolveGMRESDiag<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
    int n;
   int nbitermax;
   KN<Complex> D1;
   double eps;
   mutable double  epsr;
   int dKrilov;
+  bool x0;
+  double *veps;
   public:
-  typedef  RNM_VirtualMatrix<Complex>::plusAx plusAx;
-  SolveGMRESDiag(const MatriceMorseOld<Complex> &A,int nbk=50,int itmax=0,double epsilon=1e-6) :
-    RNM_VirtualMatrix<Complex>(A.n),
+  typedef  VirtualMatrice<Complex>::plusAx plusAx;
+  SolveGMRESDiag(const MatriceMorse<Complex> &A,int nbk=50,int itmax=0,double epsilon=1e-6,bool x00=true,double *vveps=0) :
+    VirtualMatrice<Complex>(A.n),
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),D1(n),eps(epsilon),epsr(0),
-    dKrilov(nbk) 
+    dKrilov(nbk) ,x0(x00),veps(vveps)
   { 
     Complex aii=0;
     A.getdiag(D1);
     for (int i=0;i<n;i++)
       D1[i] = (Fem2D::norm(aii=D1[i]) < 1e-20 ? Complex(1.) : Complex(1.)/aii);}
 
-   void Solver(const MatriceMorseOld<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
-      epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+   void Solver(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
+    //  epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+       epsr = veps ? *veps : eps;
+
           KNM<double> H(dKrilov+1,dKrilov+1);
       int k=dKrilov,nn=nbitermax;
       KN_<double> rx=C2R(x);
       const  KN_<double> rb=C2R(b);
-      typedef MatC2R<MatriceMorseOld<Complex> > VA;
+      typedef MatC2R<MatriceMorse<Complex> > VA;
       typedef MatC2R<SolveGMRESDiag<Complex> > VC;
       VA AR(a);
       VC CR(*this);
       //int res=
+        if(x0) x=Complex();
       GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
-
+       if(veps) *veps=epsr;
  }
 
 plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);} 
 
-    void SolverT(const MatriceCreuseOld<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
+    void SolverT(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
         epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
         KNM<double> H(dKrilov+1,dKrilov+1);
         int k=dKrilov,nn=nbitermax;
         KN_<double> rx=C2R(x);
         const  KN_<double> rb=C2R(b);
-        typedef MatC2R<MatriceCreuseOld<Complex> > VA;
+        typedef MatC2R<MatriceMorse<Complex> > VA;
         typedef MatC2R<SolveGMRESDiag<Complex> > VC;
         VA AR(a);
         VC CR(*this);
-       RNM_VirtualMatrixTrans<double> ARt(AR);
+       VirtualMatriceTrans<double> ARt(AR);
+         if(x0) x=Complex();
          GMRES(ARt,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
+         if(veps) *veps=epsr;
     }
 
  void addMatMul(const KN_<Complex> & x, KN_<Complex> & Ax) const 
@@ -446,12 +474,10 @@ plusAx  operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
   virtual bool ChecknbLine(int n) const { return true;}  
   virtual bool ChecknbColumn(int m) const { return true;} 
 
-};
-
+};   
 
 template<>
-class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualSolver , public RNM_VirtualMatrix<Complex>
-{
+class SolveGMRESPrecon<Complex> :   public MatriceMorse<Complex>::VirtualSolver , public VirtualMatrice<Complex>{
   public:
     typedef Complex R ;
   int n;
@@ -463,15 +489,17 @@ class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualS
   mutable double  epsr;
   int dKrylov; 
   KN<Complex> D1;  
-  mutable KN<Complex> xx;  
-  typedef  RNM_VirtualMatrix<Complex>::plusAx plusAx;
+  mutable KN<Complex> xx;
+  bool x0;
+  double *veps;
+  typedef  VirtualMatrice<Complex>::plusAx plusAx;
   public:
-  SolveGMRESPrecon(const MatriceCreuseOld<Complex> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6) :
-    RNM_VirtualMatrix<Complex>(A.n),   
+    SolveGMRESPrecon(const MatriceMorse<Complex> &A,const OneOperator * C,Stack stk,int dk=50,int itmax=0,double epsilon=1e-6,bool x00=true,double *vveps=0) :
+    VirtualMatrice<Complex>(A.n),   
     n(A.n),nbitermax(itmax?itmax: Max(100,n)),
     xx_del(0),code_del(0),
     precon(0),stack(stk),eps(epsilon),epsr(0),dKrylov(dk),
-    D1(n),xx(n)
+    D1(n),xx(n),x0(x00),veps(vveps)
 {
       assert(C); 
       WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
@@ -490,33 +518,39 @@ class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualS
 	D1[i] = Fem2D::norm(aii=D1[i])<1e-20 ? Complex(1.0) : Complex(1.)/aii;
       
 }
-   void Solver(const MatriceCreuseOld<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
-     epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+   void Solver(const MatriceMorse<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
+     //epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+       epsr = veps ? *veps : eps;
+
        KNM<double> H(dKrylov+1,dKrylov+1);
       int k=dKrylov,nn=nbitermax;
       KN_<double> rx=C2R(x);
       const  KN_<double> rb=C2R(b);
-      typedef MatC2R<MatriceCreuseOld<Complex> > VA;
+      typedef MatC2R<MatriceMorse<Complex> > VA;
       typedef MatC2R<SolveGMRESPrecon<Complex> > VC;
       VA AR(a);
       VC CR(*this);
+        if(x0) x=Complex();
 	GMRES(AR,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
-      
+       if(veps) *veps=epsr;
    }
     
-    void SolverT(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
-        epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+    void SolverT(const MatriceMorse<R> &a,KN_<R> &x,const KN_<R> &b) const  {
+       // epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
+        epsr = veps ? *veps : eps;
+
         KNM<double> H(dKrylov+1,dKrylov+1);
         int k=dKrylov,nn=nbitermax;
         KN_<double> rx=C2R(x);
         const  KN_<double> rb=C2R(b);
-        typedef MatC2R<MatriceCreuseOld<Complex> > VA;
+        typedef MatC2R<MatriceMorse<Complex> > VA;
         typedef MatC2R<SolveGMRESPrecon<Complex> > VC;
         VA AR(a);
         VC CR(*this);
-        RNM_VirtualMatrixTrans<double> ARt(AR);
+        VirtualMatriceTrans<double> ARt(AR);
+         if(x0) x=Complex();
        GMRES(ARt,(KN<double> &)rx,(const KN<double> &)rb,CR,H,k,nn,epsr,verbosity);
-
+      if(veps) *veps=epsr;
     }
 
 plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);} 
@@ -550,12 +584,37 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
 
  
 };     
-#endif
+
+
+template<class R>
+typename MatriceMorse<R>::VirtualSolver *
+BuildSolverGMRES(DCL_ARG_SPARSE_SOLVER(R,A))
+{
+    typename MatriceMorse<R>::VirtualSolver * ret=0;
+    if (ds.precon)
+	ret=new SolveGMRESPrecon<R>(*A,(const OneOperator *)ds.precon,stack,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0);
+    else 
+	ret=new SolveGMRESDiag<R>(*A,ds.NbSpace,ds.itmax,ds.epsilon,ds.x0);
+    
+    return ret;	
+}
+
+template<class R>
+typename MatriceMorse<R>::VirtualSolver *
+BuildSolverCG(DCL_ARG_SPARSE_SOLVER(R,A)  )
+{
+    typename MatriceMorse<R>::VirtualSolver * ret=0;
+    if (ds.precon)
+	ret=new SolveGCPrecon<R>(*A,(const OneOperator *)ds.precon,stack,ds.itmax,ds.epsilon,ds.x0);
+    else 
+	ret=new SolveGCDiag<R>(*A,ds.itmax,ds.epsilon,ds.x0);
+    return ret;
+}
 
 
 #define LIST_NAME_PARM_MAT \
     {  "init", &typeid(bool)}, \
-    {  "solver", &typeid(string*)}, \
+    {  "solver", &typeid(TypeSolveMat*)}, \
     {  "eps", &typeid(double)  }, \
     {  "precon",&typeid(Polymorphic*)}, \
     {  "dimKrylov",&typeid(long)}, \
@@ -581,27 +640,21 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
     { "kerneln", &typeid(  KNM<double> *)}, \
     { "kernelt", &typeid(  KNM<double> *)}, \
     { "kerneldim", &typeid(long*)}, \
-    { "verb", &typeid(long)}, \
     { "x0", &typeid(bool)}, \
-    { "veps", &typeid(double*)  }, \
-    { "rightprecon", &typeid(bool)  }, \
-    { "sym", &typeid(bool)  }, \
-    { "positive", &typeid(bool)  }
+    {  "veps", &typeid(double*)  } \
 
 
 
-
-const int NB_NAME_PARM_MAT =  24 +6+3  ;
+const int NB_NAME_PARM_MAT =  24+3+2  ;
     
     
 template<class R>
 inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param)
     {
-         bool unset_eps=true;
+        bool unset_eps=true;
 	int kk = n_name_param-NB_NAME_PARM_MAT-1;
 	if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));	
-	if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
-        ds.Init_sym_positive_var<R>();//  set def value of sym and posi
+	if (nargs[++kk]) ds.typemat= GetAny<TypeSolveMat *>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack)),unset_eps=false;
 	if (nargs[++kk])
 	{// modif FH fev 2010 ...
@@ -639,22 +692,10 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.kerneln = GetAny< KNM<double>* >((*nargs[kk])(stack));
         if (nargs[++kk]) ds.kernelt = GetAny< KNM<double>* >((*nargs[kk])(stack));
         if (nargs[++kk]) ds.kerneldim = GetAny<long * >((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.verb = GetAny<long  >((*nargs[kk])(stack));
         if (nargs[++kk]) ds.x0 = GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.veps= GetAny<double*>((*nargs[kk])(stack));
         if( unset_eps && ds.veps) ds.epsilon = *ds.veps;//  if veps  and no def value  => veps def value of epsilon.
-        if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.sym= GetAny<bool>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
-        if(ds.solver == "")
-        { // SET DEFAULT SOLVER TO HRE ... 
-            if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;
-            else if( ds.sym ) ds.solver=*def_solver_sym;
-            else  ds.solver=*def_solver;
-            if(verbosity>4) cout << "  **Warning: set default solver to " << ds.solver << endl;
-        }
-
-        ffassert(++kk == n_name_param);
+       ffassert(++kk == n_name_param);
     }
 } // end of namespace Fem2D
 #endif

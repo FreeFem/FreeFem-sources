@@ -36,7 +36,6 @@ extern bool NoWait;
 
 typedef Mesh const * pmesh;
 typedef Mesh3 const * pmesh3;
-typedef MeshS const * pmeshS;
 
 map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,int> & k)
 {
@@ -62,14 +61,14 @@ map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,in
     S[2]=3-S[0]-S[1];
     assert(I[2]==J[3-S[0]-S[1]]);
 }
-template<class Mesh>
+
 bool BuildPeriodic( 
 		   int nbcperiodic ,
 		   Expression *periodic,
-		   const Mesh &Th,Stack stack,
+		   const Mesh3 &Th,Stack stack,
 		   KN<int> & ndfe) 
 { 
-    typedef typename Mesh::BorderElement BE;
+    
     /*
      build numbering of vertex form 0 to nbdfv-1
      and build numbering  of  edge form 0 to nbdfe-1
@@ -79,7 +78,7 @@ bool BuildPeriodic(
      ndfv[i]  given the numero of the df of the vertex 
      -- we suppose 1 df
      */ 
-    //////////////////////////typedef Mesh3::BorderElement BE;
+    typedef Mesh3::BorderElement BE;
     //typedef Smallvect<int,2> int2;    
     if (nbcperiodic ) {
 	
@@ -389,11 +388,6 @@ bool  v_fes3::buildperiodic(Stack stack, KN<int> & ndfe) {
     
 }
 
-bool  v_fesS::buildperiodic(Stack stack, KN<int> & ndfe) {
-    return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,ndfe);
-    
-}
-
 template<class Mesh> 
 class GlgVertex {
 public:
@@ -520,7 +514,6 @@ double pmesh_mesb(pmesh3 * p) { ffassert(p && *p) ;  return (**p).mesb;}
 long pmesh_nt(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nt ;}
 long pmesh_nv(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nv ;}
 long pmesh_nbe(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nbe ;}
-
 double pmesh_hmax(pmesh3 * p)
 { ffassert(p && *p) ;
     double hmax2 =0;
@@ -538,6 +531,7 @@ double pmesh_hmin(pmesh3 * p)
         for(int e=0; e<6; ++e)
             hmin2=min(hmin2,Th[k].Edge(e).norme2());
     return sqrt(hmin2);}
+
 
 
 pf3rbase* get_element(pf3rbasearray *const & a, long const & n)
@@ -623,9 +617,7 @@ AnyType ReadMesh3::operator()(Stack stack) const
   if(verbosity > 2)
       cout << "ReadMesh3 " << *fn << endl;
   Mesh3 *Thh = new Mesh3(*fn);
-
-  if (Thh->getTypeMesh3()!=0) Thh->BuildGTree();
-    if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree();
+  Thh->BuildGTree();
   Add2StackOfPtr2FreeRC(stack,Thh);
   return SetAny<pmesh3>(Thh);;
   
@@ -673,11 +665,9 @@ AnyType SaveMesh3::operator()(Stack stack) const
   
    pmesh3 Thh = GetAny<pmesh3>((*getmesh)(stack));
    string * fn =  GetAny<string*>((*filename)(stack));
-   
    if (verbosity > 2)
        cout << "SaveMesh3 " << *fn << " " << Thh << endl;
    int ret=Thh->Save(*fn);
-    
     if( ret!=0) {ExecError("PB Write error !");}
    return SetAny<pmesh3>(Thh);
 
@@ -787,7 +777,7 @@ inline pmesh3 *  initMesh(pmesh3 * const & p, string * const & s) {
   Mesh3 * m;
   if(verbosity > 2)
       cout << " initMesh " << *s << endl;
-    *p= m =new Mesh3(*s);
+  *p= m =new Mesh3(*s); 
   m->BuildGTree();
  //  delete s;  modif mars 2006 auto del ptr 
   return p;
@@ -869,7 +859,7 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 }
 */
 
-template<class R> //, class v_tfes>
+template<class R>
 AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 { 
   typedef v_fes3 v_fes;
@@ -959,21 +949,6 @@ AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 template<class K,class v_fes>
 E_set_fev3<K,v_fes>::E_set_fev3(const E_Array * a,Expression pp) 
   :aa(*a),ppfe(pp),optimize(true),
@@ -1038,6 +1013,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   FEbase<K,v_fes> & fe(**pp);
   const  FESpace & Vh(*fe.newVh());
  // KN<K> gg(Vh.MaximalNbOfDF()); 
+  
   
   const  Mesh & Th(Vh.Th);
   const int dim=Vh.N;
@@ -1138,7 +1114,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   return Nothing;
 }
 
-// 3D volume
+
 template<class K>
 inline FEbase<K,v_fes> * MakePtrFE3_(pfes3 * const &  a){ 
   FEbase<K,v_fes3> * p=new FEbase<K,v_fes3>(a);
@@ -1153,25 +1129,6 @@ template<class K>
 inline FEbaseArray<K,v_fes3> ** MakePtrFE3_3(FEbaseArray<K,v_fes3> * * const &  p,pfes3 * const &  a,const long & N){ 
   *p=new FEbaseArray<K,v_fes3>(a,N);
   return p ;}
-
-
-// 3D surface
-template<class K>
-inline FEbase<K,v_fes> * MakePtrFE3_(pfesS * const &  a){
-    FEbase<K,v_fesS> * p=new FEbase<K,v_fesS>(a);
-    return p ;}
-
-template<class K>
-inline FEbase<K,v_fesS> ** MakePtrFE3_2(FEbase<K,v_fesS> * * const &  p,pfesS * const &  a){
-    *p=new FEbase<K,v_fesS>(a);
-    return p ;}
-
-template<class K>
-inline FEbaseArray<K,v_fesS> ** MakePtrFE3_3(FEbaseArray<K,v_fesS> * * const &  p,pfesS * const &  a,const long & N){
-    *p=new FEbaseArray<K,v_fesS>(a,N);
-    return p ;}
-
-
 
 template<class K,class v_fes>
 class  OneOperatorMakePtrFE3 : public OneOperator 
@@ -1234,23 +1191,6 @@ public:
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 template<class K,class v_fes>    
 KN<K> * pf3r2vect( pair<FEbase<K,v_fes> *,int> p)
@@ -1279,7 +1219,6 @@ pmesh3 pf3r_Th(pair<FEbase<K,v_fes3> *,int> p)
     return & p.first->Vh->Th;
 }
 
-//3D volume
 long pVh3_ndof(pfes3 * p)
  { throwassert(p && *p);
    FESpace3 *fes=**p; ;  return fes->NbOfDF ;}
@@ -1292,22 +1231,6 @@ long pVh3_ndofK(pfes3 * p)
 pmesh3 pVh3_Th(pfes3 * p)
 { throwassert(p && *p);
     FESpace3 *fes=**p; ;  return &fes->Th ;}
-
-//3D surface
-long pVhS_ndof(pfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return fes->NbOfDF ;}
-long pVhS_nt(pfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return fes->NbOfElements ;}
-long pVhS_ndofK(pfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p;   return (*fes)[0].NbDoF() ;}
-pmeshS pVhS_Th(pfesS * p)
-{ throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return &fes->Th ;}
-
-
 
 template<class R,int dd,class v_fes>
 AnyType pf3r2R(Stack s,const AnyType &a)
@@ -1451,7 +1374,6 @@ KN<K> * pf3r2vect( pair<FEbase<K,v_fes> *,int> p)
 
 // add 19 jan 2009 FH
 
-//3D volume
 class pVh3_ndf : public ternary_function<pfes3 *,long,long,long> { public:
     
     
@@ -1472,30 +1394,6 @@ class pVh3_ndf : public ternary_function<pfes3 *,long,long,long> { public:
 	    return  ret;
 	}
 	
-    };
-};
-
-//3D surface
-class pVhS_ndf : public ternary_function<pfesS *,long,long,long> { public:
-    
-    
-    class Op : public E_F0mps { public:
-        Expression a,b,c;
-        Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}
-        AnyType operator()(Stack s)  const
-        {
-            pfesS * p(GetAny<pfesS *>((*a)(s)));
-            long  k(GetAny<long>((*b)(s)));
-            long  i(GetAny<long>((*c)(s)));
-            throwassert(p && *p);
-            FESpaceS *fes=**p;
-            throwassert(fes && k >=0 && k < fes->NbOfElements );
-            FESpaceS::FElement K=(*fes)[k];
-            throwassert(i>=0 && i <K.NbDoF() );
-            long ret(K(i));
-            return  ret;
-        }
-        
     };
 };
 
@@ -1552,7 +1450,6 @@ template<class R>  R * set_initinit( R* const & a,const long & n){
 	(*a)[i]=0;
     return a;}
 
-//3d
 void init_mesh3_array()
 {
     Dcl_Type<KN<pmesh3> *>(0,::DestroyKN<pmesh3> );
@@ -1567,18 +1464,6 @@ void init_mesh3_array()
     
     
 }
-template<class K,class v_fes>
-bool pfer_refresh3(pair<FEbase<K,v_fes> *,int> p)
-{
-    typedef typename v_fes::FESpace FESpace;
-    int n = 0;
-    if( p.first->x() ) n = p.first->x()->N();
-    const FESpace * Vho = p.first->Vh;
-    p.first->Vh= p.first->newVh();
-    if ( n && n !=  p.first->Vh->NbOfDF)
-        * p.first  = new KN<K>(p.first->Vh->NbOfDF,K());
-    return Vho != (const FESpace * ) p.first->Vh;// FE change !!!
-}
 
 
 void init_lgmesh3() {
@@ -1589,14 +1474,12 @@ void init_lgmesh3() {
 
  atype<pmesh3>()->AddCast( new E_F1_funcT<pmesh3,pmesh3*>(UnRef<pmesh3 >)); 
  atype<pfes3 >()->AddCast(  new E_F1_funcT<pfes3,pfes3*>(UnRef<pfes3>));
-    
+ 
  atype<pf3rbase>()->AddCast(  new E_F1_funcT<pf3rbase,pf3rbase>(UnRef<pf3rbase>));
  atype<pf3cbase>()->AddCast(  new E_F1_funcT<pf3cbase,pf3cbase>(UnRef<pf3cbase>));
  
- Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
+  Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
  Add<pf3c>("[]",".",new OneOperator1<KN<Complex> *,pf3c>(pf3r2vect<Complex,v_fes3>));
- Add<pfSr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesS>));
- Add<pfSc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesS>));
  Add<pf3r>("(","",new OneQuadOperator<Op4_pf32K<R,v_fes3>,Op4_pf32K<R,v_fes3>::Op> );
  Add<pf3c>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fes3>,Op4_pf32K<Complex,v_fes3>::Op> );
  Add<double>("(","",new OneQuadOperator<Op4_K2R<R>,Op4_K2R<R>::Op> );
@@ -1615,8 +1498,7 @@ void init_lgmesh3() {
   TheOperators->Add("=",
 		    new OneOperator2<pmesh3*,pmesh3*,pmesh3 >(&set_eqdestroy_incr)
 		    );
-    
-    
+  
  
   Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);
   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
@@ -1665,67 +1547,49 @@ void init_lgmesh3() {
    Add<GlgElement<Mesh3> >("label",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
    Add<GlgElement<Mesh3> >("region",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
    Add<GlgElement<Mesh3> >("mesure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
-   Add<GlgElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
+    Add<GlgElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
    Add<pmesh3*>("mesure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
-   Add<pmesh3*>("measure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
+    Add<pmesh3*>("measure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
    Add<pmesh3*>("bordermesure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
-   Add<pmesh3*>("bordermeasure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
+    Add<pmesh3*>("bordermeasure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
    Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
    Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
    Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
-   Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
-   Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
- 
- // 3D volume
+    Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
+    Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
+
+    
  TheOperators->Add("<-",
        new OneOperator2_<pf3rbase*,pf3rbase*,pfes3* >(MakePtrFE3_2),
        new OneOperator3_<pf3rbasearray*,pf3rbasearray*,pfes3*,long >(MakePtrFE3_3),  
+
+
        new OneOperator2_<pf3cbase*,pf3cbase*,pfes3* >(MakePtrFE3_2),
        new OneOperator3_<pf3cbasearray*,pf3cbasearray*,pfes3*,long >(MakePtrFE3_3) //,
-       //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
+     //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
+       
+       
        );
  TheOperators->Add("<-",
-	   new OneOperatorMakePtrFE3<double,v_fes3>(atype<double>()),  //  scalar case
-	   new OneOperatorMakePtrFE3<double,v_fes3>(atype<E_Array>()),  //  vect case
-	   new OneOperatorMakePtrFE3<Complex,v_fes3>(atype<Complex>()),  //  scalar complex  case
-	   new OneOperatorMakePtrFE3<Complex,v_fes3>(atype<E_Array>())  //  vect complex case
+		   new OneOperatorMakePtrFE3<double,v_fes3>(atype<double>()),  //  scalar case
+		   new OneOperatorMakePtrFE3<double,v_fes3>(atype<E_Array>()),  //  vect case
+		   new OneOperatorMakePtrFE3<Complex,v_fes3>(atype<Complex>()),  //  scalar complex  case
+		   new OneOperatorMakePtrFE3<Complex,v_fes3>(atype<E_Array>())  //  vect complex case
        );
  TheOperators->Add("<-",
        new OneOperator2_<pfes3*,pfes3*,pfes3>(&set_copy_incr));
+
  TheOperators->Add("=",
-	   new OneOperator2<pfes3*,pfes3*,pfes3>(&set_eqdestroy_incr)
-	   );
+		   new OneOperator2<pfes3*,pfes3*,pfes3>(&set_eqdestroy_incr)
+		   ); 
+
+
  TheOperators->Add("=",
-       new OneOperator2_<pf3r,pf3r,double,E_F_StackF0F0opt2<double> >(set_fe3<double>), //,pfes3>) ,      // modif template
-       new OneOperator2_<pf3c,pf3c,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex>) //,pfes3>)     // modif template
+       new OneOperator2_<pf3r,pf3r,double,E_F_StackF0F0opt2<double> >(set_fe3<double>) ,
+       new OneOperator2_<pf3c,pf3c,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex>)        
        ) ;     
 
-// 3D surface
-TheOperators->Add("<-",
-      new OneOperator2_<pfSrbase*,pfSrbase*,pfesS* >(MakePtrFE3_2),
-      new OneOperator3_<pfSrbasearray*,pfSrbasearray*,pfesS*,long >(MakePtrFE3_3),
-      new OneOperator2_<pfScbase*,pfScbase*,pfesS* >(MakePtrFE3_2),
-      new OneOperator3_<pfScbasearray*,pfScbasearray*,pfesS*,long >(MakePtrFE3_3) //,
-      //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
-      );
-TheOperators->Add("<-",
-      new OneOperatorMakePtrFE3<double,v_fesS>(atype<double>()),  //  scalar case
-      new OneOperatorMakePtrFE3<double,v_fesS>(atype<E_Array>()),  //  vect case
-      new OneOperatorMakePtrFE3<Complex,v_fesS>(atype<Complex>()),  //  scalar complex  case
-      new OneOperatorMakePtrFE3<Complex,v_fesS>(atype<E_Array>())  //  vect complex case
-      );
-TheOperators->Add("<-",
-      new OneOperator2_<pfesS*,pfesS*,pfesS>(&set_copy_incr));
-TheOperators->Add("=",
-      new OneOperator2<pfesS*,pfesS*,pfesS>(&set_eqdestroy_incr)
-      );
-//TheOperators->Add("=",
-    //  new OneOperator2_<pfSr,pfSr,double,E_F_StackF0F0opt2<double> >(set_fe3<double,pfesS>) ,   // modif/ use template
-     // new OneOperator2_<pfSc,pfSc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,pfesS>) // modif/ use template
- //    ) ;
 
- 
-    
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pf3r>(pf3r2R<R,0,v_fes3>)
    );
@@ -1786,12 +1650,7 @@ TheOperators->Add("=",
  Global.Add("intallfaces","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
 
 
- /*decommente par J. Morice 14/01/09*/
-
-   Add<pf3r>("refresh",".",new OneOperator1<bool,pf3r>(pfer_refresh3<R,v_fes3>));
-   Add<pf3c>("refresh",".",new OneOperator1<bool,pf3c>(pfer_refresh3<Complex,v_fes3>));
-
-    
+ /*decommente par J. Morice 14/01/09*/ 
  Add<pf3r>("n",".",new OneOperator1<long,pf3r>(pf3r_nbdf<R>));
  Add<pf3c>("n",".",new OneOperator1<long,pf3c>(pf3r_nbdf<Complex>));
     
@@ -1818,7 +1677,6 @@ TheOperators->Add("=",
 init_mesh3_array();   
  
 }
-
 //#include "InitFunct.hpp"
 //static addingInitFunct TheaddingInitFunct(-10,init_lgmesh3);
 template E_set_fev3<double,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;

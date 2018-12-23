@@ -63,7 +63,7 @@ namespace  Fem2D {
 				// cout <<" cshrink: " << cshrink << " cshrink1 : "<< cshrink1 <<endl;
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
 			virtual R operator () (const FElement &K, const R2 &PHat, const KN_<R> &u, int componante, int op) const;
 	};
 
@@ -92,7 +92,7 @@ namespace  Fem2D {
 				}
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
 	};
 
 	// on what   nu df on node  node of df
@@ -125,8 +125,8 @@ namespace  Fem2D {
 		return r;
 	}
 
-	void TypeOfFE_P1ttdc1_::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
-		R2 P = Shrink1(PHat);
+	void TypeOfFE_P1ttdc1_::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P1, RNMK_ &val) const {
+		R2 P = Shrink1(P1);
 
 		// const Triangle & K(FE.T);
 		R2 A(K[0]), B(K[1]), C(K[2]);
@@ -167,8 +167,8 @@ namespace  Fem2D {
 		}
 	}
 
-	void TypeOfFE_P2ttdc1_::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
-		R2 P = Shrink1(PHat);
+	void TypeOfFE_P2ttdc1_::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P1, RNMK_ &val) const {
+		R2 P = Shrink1(P1);
 
 		// const Triangle & K(FE.T);
 		R2 A(K[0]), B(K[1]), C(K[2]);
@@ -347,7 +347,7 @@ namespace  Fem2D {
 
 			~TypeOfFE_LagrangeDC3d () {}// cout << "TypeOfFE_LagrangeDC3d"<< this->NbDoF<<endl;}
 
-			void FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const What_d whatd, const Mesh &Th, const Element &K, const Rd &P, RNMK_ &val) const;
 			virtual R operator () (const FElement &K, const RdHat &PHat, const KN_<R> &u, int componante, int op) const;
 
 		private:
@@ -355,9 +355,9 @@ namespace  Fem2D {
 			void operator = (const TypeOfFE_LagrangeDC3d &);
 	};
 
-	void TypeOfFE_LagrangeDC3d::FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const {
+	void TypeOfFE_LagrangeDC3d::FB (const What_d whatd, const Mesh &Th, const Element &K, const Rd &P1, RNMK_ &val) const {
 		// const Triangle & K(FE.T);
-		R3 P = this->Shrink1(PHat);
+		R3 P = this->Shrink1(P1);
 		R l [] = {1. - P.sum(), P.x, P.y, P.z};
 
 		assert(val.N() >= Element::nv);

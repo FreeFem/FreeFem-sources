@@ -12,17 +12,15 @@ fespace Vh(Th,P1);     // P1 FE space
  func f=1;                 //  right hand side function 
  func g=0;                 //  boundary condition function
  
- verbosity= 3;
-problem laplace(uh,vh,solver="SUPERLU",tgv=1e5,sym=0) =                    //  definion of  the problem 
+
+problem laplace(uh,vh,solver=sparsesolver,tgv=1e5) =                    //  definion of  the problem 
     int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
   - int2d(Th)( f*vh )                        	     //  linear form
   + on(1,2,3,4,uh=g) ;                      //  bou  ndary condition form
 
   laplace; // solve the problem plot(uh); // to see the result
  
-  plot(uh,value=true); 
-   verbosity= 1;
-   assert(abs(uh[].max - 0.0730987)< 0.01);
+  plot(uh,ps="Laplace.eps",value=true); 
 }
 
 // FFCS: need to declare it globally to print out its value for regression tests
@@ -43,7 +41,7 @@ for(int i=0;i<3;++i)
     b=A*xx;
     cout << "b="  << b  << endl;
     cout << "xx=" << xx << endl;
-    set(A,solver="SUPERLU",sparams="DiagPivotThresh=0.05,ColPerm=MMD_AT_PLUS_A,Equil=NO"); 
+    set(A,solver=sparsesolver,sparams="DiagPivotThresh=0.05,ColPerm=MMD_AT_PLUS_A,Equil=NO"); 
     x = A^-1*b;	
     cout << "x=" << endl; cout << x << endl;	
   }
@@ -63,8 +61,8 @@ for(int i=0;i<3;++i)
     cout << "x=" << endl; cout << x << endl;
     lastx=x;
   }
-  if(i==0) DefaultSolver="GMRES";
-  if(i==1) DefaultSolver="UMFPACK";
+  if(i==0)defaulttoGMRES();
+  if(i==1)defaultsolver();
 }
 cout << " fin.. \n";
 

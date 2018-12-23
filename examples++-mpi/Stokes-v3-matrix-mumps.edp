@@ -5,10 +5,10 @@
 // other
 load "msh3"
 load "medit"
-load "MUMPS"
+load "MUMPS_FreeFem"
 
 real ttgv=-1;
-//string ssparams="nprow=1, npcol="+mpisize;
+string ssparams="nprow=1, npcol="+mpisize;
 
 
 int nn=5;
@@ -92,7 +92,7 @@ real[int] xx(VVh.ndof);
 time2=clock()-time2;
 
 real timeF=clock();
-set(A,solver=sparsesolver,tgv=ttgv);
+set(A,solver=sparsesolver,tgv=ttgv,sparams=ssparams);
 timeF=clock()-timeF;
 
 real time3=clock();

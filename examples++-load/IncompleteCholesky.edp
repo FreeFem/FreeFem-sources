@@ -6,14 +6,13 @@
 */
 load "IncompleteCholesky"
 
-int nn=50	;
+int nn=100	;
 mesh Th=square(nn,nn);
 fespace Vh(Th,P1); 
 macro grad(u) [dx(u),dy(u)]//
 real kconv =0;
 func f = sin(2*pi*x)*sin(2*pi*y);
 varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
-if(1)
 {
 	matrix L ;// to store in incomplet factorizatin. 
 	func real[int] PreconIcho(real[int] & b) {// the precondtionner
@@ -21,13 +20,13 @@ if(1)
 		return b;}
 	
 	matrix AI = va(Vh,Vh,solver=CG,precon=PreconIcho);
-	matrix A = va(Vh,Vh,solver=CG,sym=1);
-	L=A; // sym ok 
+	matrix A = va(Vh,Vh,solver=CG);
+	L=removeHalf(A,0);// 
 	ichol(A,L);
 
 	real[int] b = va(0,Vh);
 	Vh u,ui;
-	verbosity = 4;
+	verbosity = 3;
 	real t0=clock();
 	u[]= A^-1*b;
 	real t1=clock();
@@ -41,10 +40,10 @@ if(1)
     kconv =50;
 	int n = Vh.ndof;
 	verbosity=3;
-	matrix L,U;// to store in incomplet factorizatin. 
+	matrix L,Ut;// to store in incomplet factorizatin. 
 	
 	func real[int] PreconILU(real[int] & b) {
-		 iluSolve(L,U,b); 
+		 iluSolve(L,Ut,b); 
 		 return b;}
 		 
 	matrix AI = va(Vh,Vh,solver=GMRES,precon=PreconILU);
@@ -55,14 +54,12 @@ if(1)
 	L=removeHalf(AI,-1);  // build the structure of L
 		if(nn<10)
     	  cout << " L " <<  L << endl; 
-	U=removeHalf(AI,1); // build the structure of Ut ( transpose of )
+	Ut=removeHalf(AI,1); // build the structure of Ut ( transpose of )
 	    if(nn<10)	
-		  cout << " U " <<  U << endl; 
+		  cout << " Ut " <<  Ut << endl; 
 		
-	iLU(AI,L,U);// do the incomplet LU  
+	iLU(AI,L,Ut);// do the incomplet LU  
 	
-    if(nn<10)	
-	  cout << "\n\n **L=" << L <<"\n\n  **U " <<  U << endl; 
 	Vh u,ui;
 	verbosity = 3;
 	real t0=clock();
@@ -71,5 +68,5 @@ if(1)
 	ui[]= AI^-1*b;
 	real t2=clock();
 	cout << " ** GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
-	//plot(u,wait=1);
+	plot(u,wait=1);
 }

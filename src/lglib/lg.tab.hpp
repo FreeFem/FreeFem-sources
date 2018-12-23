@@ -79,17 +79,16 @@
      FESPACE = 295,
      FESPACE1 = 296,
      FESPACE3 = 297,
-     FESPACES = 298,
-     PLUSEQ = 299,
-     MOINSEQ = 300,
-     MULEQ = 301,
-     DIVEQ = 302,
-     DOTMULEQ = 303,
-     DOTDIVEQ = 304,
-     ARROW = 305,
-     BORDER = 306,
-     CURVE = 307,
-     SOLVE = 308
+     PLUSEQ = 298,
+     MOINSEQ = 299,
+     MULEQ = 300,
+     DIVEQ = 301,
+     DOTMULEQ = 302,
+     DOTDIVEQ = 303,
+     ARROW = 304,
+     BORDER = 305,
+     CURVE = 306,
+     SOLVE = 307
    };
 #endif
 /* Tokens.  */
@@ -133,17 +132,16 @@
 #define FESPACE 295
 #define FESPACE1 296
 #define FESPACE3 297
-#define FESPACES 298
-#define PLUSEQ 299
-#define MOINSEQ 300
-#define MULEQ 301
-#define DIVEQ 302
-#define DOTMULEQ 303
-#define DOTDIVEQ 304
-#define ARROW 305
-#define BORDER 306
-#define CURVE 307
-#define SOLVE 308
+#define PLUSEQ 298
+#define MOINSEQ 299
+#define MULEQ 300
+#define DIVEQ 301
+#define DOTMULEQ 302
+#define DOTDIVEQ 303
+#define ARROW 304
+#define BORDER 305
+#define CURVE 306
+#define SOLVE 307
 
 
 
@@ -185,7 +183,7 @@ typedef union YYSTYPE
  vectorOfInst * endb;
 }
 /* Line 1529 of yacc.c.  */
-#line 189 "lg.tab.hpp"
+#line 187 "lg.tab.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

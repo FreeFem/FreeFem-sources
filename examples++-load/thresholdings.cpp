@@ -41,26 +41,19 @@ template<class T> struct  Thresholding {
 
 template<class R>
 Matrice_Creuse<R>*thresholding2 (const Thresholding<R> &t, const double &threshold) {
-	typedef HashMatrix<int,R> HMat;
 	Matrice_Creuse<R> *sparse_mat = t.v;
 	if (sparse_mat) {
-		HMat *phm=sparse_mat->pHM() ;
-		if( phm)
-		{
-		int n = phm->n, m = phm->m;
-		int nnzo = phm->nnz; 
-		phm->resize(n,m,0,threshold);
-		//map<pair<int, int>, R> M;
-		//if (n > 0 && m > 0 && sparse_mat->A) {
-		//	int nrt = sparse_mat->A->NbCoef();
-		//	sparse_mat->A->addMatTo(R(1.), M, false, 0, 0, false, threshold);
+		int n = sparse_mat->N(), m = sparse_mat->M();
+		map<pair<int, int>, R> M;
+		if (n > 0 && m > 0 && sparse_mat->A) {
+			int nrt = sparse_mat->A->NbCoef();
+			sparse_mat->A->addMatTo(R(1.), M, false, 0, 0, false, threshold);
 			// (M)[make_pair(n-1,m-1)]+=R();
-		//	bool sym = false;	// bof bof
-		//	sparse_mat->typemat = TypeSolveMat(TypeSolveMat::GMRES);// none square matrice (morse)
-		//	sparse_mat->A.master(new MatriceMorse<R>(n, m, M, sym));
-		//	nrt -= sparse_mat->A->NbCoef();
-	    //}
-		  if (verbosity) {cout << "  thresholding : remove " << nnzo-phm->nnz  << " them in the matrix " << sparse_mat << " " << threshold << endl;}
+			bool sym = false;	// bof bof
+			sparse_mat->typemat = TypeSolveMat(TypeSolveMat::GMRES);// none square matrice (morse)
+			sparse_mat->A.master(new MatriceMorse<R>(n, m, M, sym));
+			nrt -= sparse_mat->A->NbCoef();
+			if (verbosity) {cout << "  thresholding= remove " << nrt << " them in the matrix " << sparse_mat << " " << threshold << endl;}
 		} else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
 	}
 

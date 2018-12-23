@@ -514,38 +514,41 @@ class renumber : public OneOperator {
             return new renumber_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
         }
 };
-    template<class Type, class K>
-    AnyType renumber_Op<Type, K>::operator()(Stack stack) const {
-        Type* ptA = GetAny<Type*>((*A)(stack));
-        KN<long>* ptInterface = GetAny<KN<long>*>((*interface)(stack));
-        FEbaseArrayKn<K>* deflation = nargs[0] ? GetAny<FEbaseArrayKn<K>*>((*nargs[0])(stack)) : 0;
-        KN<K>* ptEffort = nargs[1] ? GetAny<KN<K>*>((*nargs[1])(stack)) : 0;
-        KN<K>* rho = nargs[2] ? GetAny<KN<K>*>((*nargs[2])(stack)) : 0;
-        KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
-        double t = MPI_Wtime();
-        K** ev;
-        if(deflation && deflation->N > 0) {
-            ev = new K*[deflation->N];
-            *ev = new K[deflation->N * deflation->get(0)->n];
-            for(int i = 0; i < deflation->N; ++i) {
-                ev[i] = *ev + i * deflation->get(0)->n;
-                std::copy(static_cast<K*>(*(deflation->get(i))), static_cast<K*>(*(deflation->get(i))) + deflation->get(i)->n, ev[i]);
-            }
-            ptA->setVectors(ev);
-            ptA->Type::super::super::initialize(deflation->N);
+template<class Type, class K>
+AnyType renumber_Op<Type, K>::operator()(Stack stack) const {
+    Type* ptA = GetAny<Type*>((*A)(stack));
+    KN<long>* ptInterface = GetAny<KN<long>*>((*interface)(stack));
+    FEbaseArrayKn<K>* deflation = nargs[0] ? GetAny<FEbaseArrayKn<K>*>((*nargs[0])(stack)) : 0;
+    KN<K>* ptEffort = nargs[1] ? GetAny<KN<K>*>((*nargs[1])(stack)) : 0;
+    KN<K>* rho = nargs[2] ? GetAny<KN<K>*>((*nargs[2])(stack)) : 0;
+    KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
+    double t = MPI_Wtime();
+    K** ev;
+    if(deflation && deflation->N > 0) {
+        ev = new K*[deflation->N];
+        *ev = new K[deflation->N * deflation->get(0)->n];
+        for(int i = 0; i < deflation->N; ++i) {
+            ev[i] = *ev + i * deflation->get(0)->n;
+            std::copy(static_cast<K*>(*(deflation->get(i))), static_cast<K*>(*(deflation->get(i))) + deflation->get(i)->n, ev[i]);
         }
+        ptA->setVectors(ev);
+        ptA->Type::super::super::initialize(deflation->N);
+    }
 
-        ptA->renumber(STL<long>(*ptInterface), ptEffort ? static_cast<K*>(*ptEffort) : nullptr);
-        MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
-        if(mA) {
-            const HPDDM::MatrixCSR<K>* dA = ptA->getMatrix();
-            
-    #ifndef VERSION_MATRICE_CREUSE
-            mA->lg = dA->_ia;
-    #else
-            set_ff_matrix<K>(mA,*dA);
-    #endif
-        }
+    ptA->renumber(STL<long>(*ptInterface), ptEffort ? static_cast<K*>(*ptEffort) : nullptr);
+    MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
+    if(mA) {
+        const HPDDM::MatrixCSR<K>* dA = ptA->getMatrix();
+#ifndef VERSION_MATRICE_CREUSE
+        mA->lg = dA->_ia;
+#else
+        mA->HM();   
+        for(int i=0;i<mA->n;++i)
+            for(int k=dA->_ia[i];k<dA->_ia[i+1];++k)
+             mA->i[k]=i;
+        mA->CSR();
+#endif
+    }
 
     HPDDM::Option& opt = *HPDDM::Option::get();
     char scaling = opt.val<char>("substructuring_scaling", 0);

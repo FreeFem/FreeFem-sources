@@ -2,12 +2,12 @@
 // NBPROC 4
 
 load "msh3"
-load "MUMPS"
+load "MUMPS_FreeFem"
 ////////////////////
 //  parameters
 
 real ttgv=1e30;
-//string ssparams="nprow=1, npcol="+mpisize;
+string ssparams="nprow=1, npcol="+mpisize;
 ////////////////////
 real nu=0.01,dt=0.3;
 real alpha=1./dt,alpha2=sqrt(alpha);
@@ -44,11 +44,11 @@ varf vStokes([u1,u2,u3,p],[v1,v2,v3,q]) =
  + on(2,u1=1.,u2=0,u3=0)
  + on(1,u1=0,u2=0,u3=0)
  ;
-matrix A=vStokes( VVh, VVh, tgv=ttgv );
+matrix A=vStokes( VVh, VVh, tgv=ttgv, sparams=ssparams );
 t1=clock()-t1;
 
 t4=clock();
-set(A,solver=sparsesolver );
+set(A,solver=sparsesolver, sparams=ssparams );
 t4=clock()-t4;
 
 t2=clock();
@@ -86,11 +86,11 @@ macro XX3() (z-u3*dt)//
 real time1,time2=0.,time3=0.,time4,time5;
 
 time1=clock();
-A = vNS( VVh, VVh, tgv=ttgv);
+A = vNS( VVh, VVh, tgv=ttgv, sparams=ssparams);
 time1=clock()-time1;
 
 time5=clock();
-set(A,solver=sparsesolver,verb=1);
+set(A,solver=sparsesolver,sparams=ssparams);
 time5=clock()-time5;
 
 time4=clock();

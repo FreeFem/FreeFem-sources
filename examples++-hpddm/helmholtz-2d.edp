@@ -1,8 +1,7 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
-load "hpddm"
-//load "pipe"   sleep(10);                     // HPDDM plugin
 
+load "hpddm"                        // HPDDM plugin
 macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
@@ -58,7 +57,6 @@ matrix<complex> Mat;                        // local operator
     Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
     complex[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
     matrix R = interpolate(Wh, WhAugmented);
-	cout << "renumbering " << Mat.n << " "<< R.n<< endl; 
     renumbering(Mat, R, rhsFull, rhs);
 }
 ThBorder = square(1, 1);

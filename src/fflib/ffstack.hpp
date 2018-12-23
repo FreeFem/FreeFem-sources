@@ -29,8 +29,6 @@
  */
 //-----------------------------------  
 //  to manage the freefem stack 
-#ifndef FFSTACK_HPP__
-#define FFSTACK_HPP__
 
 #include "throwassert.hpp"
 
@@ -418,4 +416,3 @@ inline void deleteStack(Stack s)
  s.clean();
  }  
 #endif  
-#endif
