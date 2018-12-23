@@ -93,10 +93,9 @@ getall
 
 # <<no_more_blacs>> blacs is included in scalapack 2.0.2
 
-MPI_SOFT= scalapack @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@	
-#
-#	@TOOL_COMPILE_pastix@ @TOOL_COMPILE_hips@			\
-#	@TOOL_COMPILE_parms@
+MPI_SOFT= scalapack @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@	\
+	@TOOL_COMPILE_pastix@ @TOOL_COMPILE_hips@			\
+	@TOOL_COMPILE_parms@
 
 LIST_SOFT=@TOOL_COMPILE_tetgen@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_superlu4@ fftw 	\
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
@@ -137,7 +136,7 @@ tag-install-other:
 WHERE-OTHER: lib/WHERE.hpddm
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
-	-grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
+	grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
 install-hpddm: ./getall
 	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:./getall

@@ -32,7 +32,6 @@ reinstall::install
 
 # Downloading and compiling ARPACK
 # --------------------------------
-.NOTPARALLEL:
 
 # set in configure 
 #ARPACKLIB=ARPACK/libarpack_ff++.a

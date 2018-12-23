@@ -165,57 +165,11 @@ void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
 	}
 }
 
-/*
-// d = 3 Surfacic
-void SplitSimplex(int N,R3 *P,int *K,int op=0,R3 *ABC=0)
-{
-    assert(N>0);
-    int nv = (N+1)*(N+2)/2;
-    double h=1./N;
-    //   loop sur les diag   i+j = k
-    //   num  ( i+j,j) lexico croissant
-    for(int l=0;l<nv;l++)
-    {
-        int i,j,k;
-        invNumSimplex3(l,i,j,k);
-        if(ABC)
-            P[l+op]= R3(i*h,j*h,k*h).Bary(ABC);
-        else
-            P[l+op]= R3(i*h,j*h,k*h);
-        assert(l<nv);
-    }
-    //    generation des trianges
-    // --------
-    int l=0;
-    for (int i=0;i<N;++i)
-        for (int j=0;j<N;++j)
-            if(i+j<N)
-            {
-                K[l++]= op+NumSimplex2(i,j);
-                K[l++]= op+NumSimplex2(i+1,j);
-                K[l++]= op+NumSimplex2(i,j+1);
-            }
-            else
-            {
-                K[l++]= op+NumSimplex2(N-i,N-j);
-                K[l++]= op+NumSimplex2(N-i,N-j-1);
-                K[l++]= op+NumSimplex2(N-i-1,N-j);
-            }
-} */
-
-
-
-
-
-
-
-
-
 
 
 void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 {
-    const int n=N;
+  const int n=N;
   const int n2=n*n;
   const int n3=n2*n;
   const int ntc=6;
@@ -263,7 +217,7 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 	  }
       
     }
- /* if(verbosity>199)
+  if(verbosity>199)
     {
       
       cout <<   "  SplitSimplex   " << endl;
@@ -271,7 +225,7 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
        for(int m=0;m<4;++m)
          cout << tet[l++] << (m==3 ? '\n' : ' ' );
        cout << ptet << "   " << tet << endl;
-    }*/
+    }
   assert(ntt==n3);
 }
 

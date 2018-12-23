@@ -1,5 +1,5 @@
 //   for automatic  compilation with ff-c++
-//xxff-c++-LIBRARY-dep: superlu_dist   ptscotchparmetis  ptscotch scotchmetis  scotch  mpi blas fc
+//ff-c++-LIBRARY-dep: superlu_dist   ptscotchparmetis  ptscotch scotchmetis  scotch  mpi blas fc
 //ff-c++-cpp-dep: 
 //
 // ORIG-DATE: 02/2009
@@ -32,20 +32,6 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-
-#ifndef OLDFFVERSION
-#include  "ff++.hpp"
-static void Load_Init()
-{
-    cout << " load(\"real_SuperLU_DIST_FreeFem\")   is obsoled now  pluging "<< endl;
-    ExecError("Plugins real_SuperLU_DIST_FreeFem is remove");
-    exit(0);
-}
-
-LOADFUNC(Load_Init);
-#else
-
-
 #include <mpi.h>
 
 #include  <iostream>
@@ -825,4 +811,3 @@ static void Load_Init()
 }
 
 LOADFUNC(Load_Init)
-#endif

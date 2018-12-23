@@ -31,17 +31,6 @@
  Thank to the ARN ()  FF2A3 grant
  ref:ANR-07-CIS7-002-01 
  */
-#ifndef OLDFFVERSION
-#include  "ff++.hpp"
-static void Load_Init()
-{
-    cout << " load(\"parms_FreeFem\")   is obsoled now  pluging "<< endl;
-    ExecError("Plugins parms_FreeFem is remove");
-    exit(0);
-}
-
-LOADFUNC(Load_Init);
-#else
 
 #include <mpi.h>
 #include  <iostream>
@@ -1081,4 +1070,3 @@ static void Load_Init()
 
 
  LOADFUNC(Load_Init)
-#endif

@@ -86,7 +86,7 @@ long SaveHB(std::string *const &hb_filename,
 	    KN_<R> const &b,
 	    std::string *const &hb_title)
 {
-    MatriceMorse<R> *A = sparse_mat->pHM();
+    MatriceMorse<R> *A = sparse_mat->A->toMatriceMorse();
 
     const bool isDouble = sizeof(R) == sizeof(double);// std::is_floating_point<R>::value;
 
@@ -105,20 +105,51 @@ long SaveHB(std::string *const &hb_filename,
 
     const int N = A->N;
     const int M = A->M;
-    if( N != M ) return 1; 
+    ffassert( N == M );
 
     std::cout << "SaveHB : # of unknowns = " << N << std::endl;
 
-    const int nnzero = A->nnz;
-    
+    const int nnzero = A->lg[N];
+    ffassert( nnzero == A->nbcoef );
 
     std::cout << "SaveHB : # of non-zero entries in A = " << nnzero << std::endl;
-	// (I *& JA, I *& IA, R *& A)
-	int * col_ptr, *row_ind;
-	R * ccs_val;
-	A->setfortran(true);
-    A->CSC(col_ptr,row_ind,ccs_val);
-   
+
+    //--------------------------------------------------
+    // Transpose from CRS to CCS
+    //--------------------------------------------------
+    int *col_ptr = new int [N+1];
+    for(int i = 0; i <= N; i++)    	// initialize
+	col_ptr[i] = 0;
+    for(int i = 0; i < nnzero; i++)    	// count
+	col_ptr[ A->cl[i]+1 ] += 1;
+    for(int i = 1; i <= N; i++)		// accumulate
+	col_ptr[i] += col_ptr[i-1];
+
+    int *row_ind = new int [ col_ptr[N] ];
+    R *ccs_val = new R [ col_ptr[N] ];
+
+    int *count = new int [N];
+    for(int i = 0; i < N; i++)
+	count[i] = 0;
+
+    for(int i = 0; i < N; i++)
+	for(int ij = A->lg[i]; ij < A->lg[i+1]; ij++){
+
+	    int c = A->cl[ij];
+
+	    row_ind[ col_ptr[c] + count[c] ] = i;
+	    ccs_val[ col_ptr[c] + count[c] ] = A->a[ij];
+	    count[c] += 1;
+	}
+
+    delete [] count;
+
+    // from C index manner to FORTRAN index manner
+    for(int i = 0; i <= N; i++)
+	col_ptr[i]++;
+    for(int i = 0; i < nnzero; i++)
+	row_ind[i]++;
+
     //--------------------------------------------------
     // File
     //--------------------------------------------------
@@ -213,9 +244,9 @@ long SaveHB(std::string *const &hb_filename,
     output_matrix_entries( fout, N, ccs_val, nnzero, b );
 
     fout.close();
-   // delete [] col_ptr;  delete [] row_ind; delete [] ccs_val;
+    delete [] col_ptr;  delete [] row_ind; delete [] ccs_val;
 
-    A->setfortran(false);
+    delete A;
     return 0;
 }
     

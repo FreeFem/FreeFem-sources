@@ -84,7 +84,7 @@ namespace  Fem2D {
 				// 3,4,5, 6,7,8, 9,10,11,
 			}
 
-			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
+			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
 			/*  void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
 			 * {
 			 *  for (int i=0;i<15+6;++i)
@@ -122,8 +122,8 @@ namespace  Fem2D {
 
 		0, 15};
 	double TypeOfFE_P4dcLagrange::Pi_h_coef [] = {1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.};
-	void TypeOfFE_P4dcLagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
-		R2 P = Shrink1(PHat);
+	void TypeOfFE_P4dcLagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const R2 &P1, RNMK_ &val) const {
+		R2 P = Shrink1(P1);
 		R2 A(K[0]), B(K[1]), C(K[2]);
 		R l0 = 1. - P.x - P.y, l1 = P.x, l2 = P.y;
 		R L[3] = {l0 *k, l1 *k, l2 *k};

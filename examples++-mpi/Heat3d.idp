@@ -45,15 +45,13 @@ matrix AA = vlaplace(Vh,Vh,tgv=ttgv) ;
 time1=clock()-time1;
 // reduce the matrice to get the full matrice 
 // warning the tgv number is now mpisize*tgv for B.C.
-varf vffullpattern(u,v) = int2d(Th,qforder=1)(u*v);
-matrix A=vffullpattern(Vh,Vh); 
+matrix A; 
 time6=clock();
 if(op) mpiAllReduce(AA,A,mpiCommWorld,mpiSUM);
 else A=AA;
-
 time6 = clock()-time6;
 time2=clock();
-set(A,solver=sparsesolver,tgv=ttgv) ; // factorize
+set(A,solver=sparsesolver,tgv=ttgv,sparams=ssparams) ; // factorize
 time2=clock()-time2;
 
 real time3=clock();

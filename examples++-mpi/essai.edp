@@ -76,9 +76,9 @@ cout << " l == " << l << "  mpirank ="<< mpirank << endl;
 
 {
 matrix<complex> A;
-matrix<complex>[int]  B(10);
+
 if( mpirank==0)
-   A=[[1+1i,1i],[0,2-1i],[0,2-1i]];
+   A=[[1+1i,1i],[0,2-1i]];
 broadcast(processor(0),A);
 
 
@@ -87,19 +87,12 @@ if (mpirank==1)
     processor(0) << A;
   }
  else if (mpirank==0)
-   processor(1) >>  B[3];
+   processor(1) >>  A;
 
 cout << " mpirank = " << mpirank << " A =  " << endl;
-if (mpirank==0)
-cout <<  " **** " <<  B[3] << endl;
+cout <<   A << endl;
 
 cout << " " <<  norm(A(1,1) - 2-1i) << endl;
-mpiRequest rr;
-if (mpirank==1) Isend(processor(0,mpiCommWorld,rr),A);
-else if (mpirank==0) Irecv(processor(1,mpiCommWorld,rr),B[3]);
-mpiWait(rr);
-if (mpirank==0)  cout << " B3= " << B[3] << endl;
-if (mpirank==1)  cout << " A= " << A << endl;
 }
 
 // asyncronous  send/recv  messages....

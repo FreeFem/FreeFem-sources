@@ -38,27 +38,27 @@ namespace Fem2D {
 template<class Rd,class E>
 static void SetPtPk(Rd *Pt,const int *dfon,int nn)
 {  // P0 P1 et P2 , P1b 
-    const int dHat= E::RdHat::d;
+    const int d= E::Rd::d;
     int k=0;
     
     if(dfon[0])
       {
-	for(int i=0;i<=dHat;++i)
+	for(int i=0;i<=d;++i)
 	  Pt[k++]=Rd();
 	
-	for(int i=0;i<dHat;++i)
+	for(int i=0;i<d;++i)
 	  Pt[i+1][i]=1.;
       }
 
-    if(dfon[1]&& dHat !=1)
+    if(dfon[1]&& d !=1)
 	for(int i=0;i<E::ne;++i)
 	    Pt[k++] = (Pt[E::nvedge[i][0]]+Pt[E::nvedge[i][1]])*0.5;
     
-    if(dfon[dHat]==1)
-	Pt[k++]=Rd::diag(1./(dHat+1));
+    if(dfon[d]==1) 
+	Pt[k++]=Rd::diag(1./(d+1));
     if(nn != k)
       { 
-	cout << nn << " == " << k << " dHat = "<< dHat << " " << dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<" "<< E::ne << endl;
+	cout << nn << " == " << k << " d = "<< d << " " << dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<" "<< E::ne << endl;
 	assert(nn==k); 
       }  
     if(verbosity>9)
@@ -74,8 +74,9 @@ class TypeOfFE_Lagrange: public  GTypeOfFE<MMesh>
 public:
   typedef   MMesh Mesh;
   typedef typename  Mesh::Element Element;
-    typedef typename  Element::RdHat RdHat;
-    static const int dHat=RdHat::d;
+  typedef typename  Element::Rd Rd;
+  typedef typename  Element::RdHat RdHat;
+  static const int d=Rd::d;
   struct A4 {
     int dfon[4];
     
@@ -83,20 +84,20 @@ public:
       if(k==0) 
 	{// P0
 	  dfon[0]=dfon[1]=dfon[2]=dfon[3]=0;
-	  dfon[dHat]=1;
+	  dfon[d]=1;
 	}
       else if(k==-1) //  P1b. add  FH   March 2009 
 	  {
 	      dfon[0]=1;
 	      dfon[1]=dfon[2]=dfon[3]=0;
-	      dfon[dHat]=1;
+	      dfon[d]=1;
 	  }	
       else
 	{
 	  dfon[0]=1;
 	  dfon[1]=max(k-1,0);
-	  dfon[2]=dHat>1?max(k-2,0):0;
-	  dfon[3]=dHat>2?max(k-3,0):0;}
+	  dfon[2]=d>1?max(k-2,0):0;
+	  dfon[3]=d>2?max(k-3,0):0;}
     if(verbosity>9)      
       cout << "A4 "<<   k<< " "   <<dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<endl;
     }

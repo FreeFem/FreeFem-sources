@@ -28,7 +28,7 @@ real lambda = E*sigma/((1 + sigma)*(1 - 2*sigma));
 cout << "Lambda = " << lambda << endl;
 cout << "Mu = " << mu << endl;
 cout << "Gravity = " << gravity << endl;
-solve Elasticity ([uu, vv], [w, s], solver=UMFPACK)
+solve Elasticity ([uu, vv], [w, s], solver=CG)
 	= int2d(th)(
 		  lambda*div(w, s)*div(uu, vv)
 		+ 2.*mu*(epsilon(w, s)' * epsilon(uu, vv))

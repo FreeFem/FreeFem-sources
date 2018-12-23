@@ -29,18 +29,13 @@
 
 #include  <iostream>
 using namespace std;
-
 #include "cfloat"
-#include "ff++.hpp"
-/*
 #include "rgraph.hpp"
 #include "error.hpp"
 #include "AFunction.hpp"
 
 // #include "lex.hpp"
-#include "HashMatrix.hpp"
-#include "SparseLinearSolver.hpp"
-
+#include "MatriceCreuse_tpl.hpp"
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "lgfem.hpp"
@@ -129,8 +124,7 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	ffassert(pTh);
 	const Mesh &Th(*pTh);
 	{
-		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ; 
-		
+		map<pair<int, int>, R> Aij;
 		KN<double> cc(Th.nv);
 		double infini = DBL_MAX;
 		cc = infini;
@@ -169,12 +163,12 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 			}
 		}
 
-		amorse = pAij;//new MatriceMorse<R>(Th.nv, Th.nv, Aij, false);
+		amorse = new MatriceMorse<R>(Th.nv, Th.nv, Aij, false);
 	}
 	sparce_mat->Uh = UniqueffId();
 	sparce_mat->Vh = UniqueffId();
 	sparce_mat->A.master(amorse);
-        sparce_mat->typemat = 0;//(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
+	sparce_mat->typemat = (amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
 	*mp = mps;
 
 	if (verbosity > 3) {cout << "  End Build MatrixUpWind : " << endl;}

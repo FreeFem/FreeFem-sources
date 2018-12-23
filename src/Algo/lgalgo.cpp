@@ -28,7 +28,17 @@
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
-#include "ff++.hpp"
+#include "error.hpp"
+#include "AFunction.hpp"
+#include "rgraph.hpp"
+#include "RNM.hpp"
+#include "MatriceCreuse_tpl.hpp"
+#include "Mesh3dn.hpp"
+#include "MeshPoint.hpp"
+#include "lgfem.hpp"
+#include "lgmesh3.hpp"
+#include "lgsolver.hpp"
+#include "problem.hpp"
 #include "NRJ.hpp"
 #include "RosenBrock.hpp"
 #include "LineSearch.hpp"
@@ -62,7 +72,7 @@ class OptimAlgo : public OneOperator
   typedef Param<REAL> PARAM;
   typedef KN<REAL> VECT;
   typedef KNM<REAL> MAT;
-  typedef Matrice_Creuse<R>::VMat  VMAT;
+  typedef VirtualMatrice<REAL> VMAT;
   
    const int cas;
   
@@ -125,7 +135,7 @@ class OptimAlgo : public OneOperator
 	Matrice_Creuse<R> * M=  GetAny<Matrice_Creuse<R> *>( (*hJ)(stack));
 	WhereStackOfPtr2Free(stack)->clean(); 
 	assert(M && M->A );
-	return (VMAT*) M->A;}
+	return (VirtualMatrice<R>*) M->A;}
       
     };
     

@@ -85,7 +85,7 @@ load "MPICG"
 	   catch(...) {;};
 	int[int] I(0:Vh.ndof-1);
 	Ihi = Ihi(I,Ii);
-	//assert(Ihi(Vh.ndof-1,nn-1) == Ihioo);
+	assert(Ihi(Vh.ndof-1,nn-1) == Ihioo);
 	// cout << rank << " Ihi = "<< Ihi << " ---- " << endl;
 	dhi=1;
 	vi=1;

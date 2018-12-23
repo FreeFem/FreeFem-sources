@@ -862,7 +862,7 @@ template<class A> inline AnyType  DestroyPtr(Stack,const AnyType &x) {
 };
 template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
   const A *  a=PGetAny<A>(x);
- SHOWVERB( cout << "DeletePtr " << typeid(A).name() << *a  << endl);
+ if(verbosity>99)cout << "DeletePtr " << typeid(A).name() << *a  << endl;
   // (*a)->destroy(); 
     delete *a; 
 
@@ -1310,7 +1310,7 @@ template<class R> class EConstant:public E_F0
   aType t; //  type of the variable just for check  
   public:
   AnyType operator()(Stack s) const { 
-   // SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
+    SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
 //   return PtrtoAny(static_cast<void *>(static_cast<char *>(s)+offset),t);}
    return PtrtoAny(Stack_offset<void>(s,offset),t);}
 

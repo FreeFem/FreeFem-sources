@@ -22,23 +22,14 @@
 
 # Changelog
 All notable changes to this project will be documented in this file.
-## [Version 4] 2018-12-01
-
-- change all the sparse matrix structure
-
-### Added
-- surface finite elemet (in progress)
-
-- nElementonB (version 2d and 3d of nTonEge)
-- area  ( same the lenEdge) in 3d
 
 ## [Unreleased] 2018-08-31
 
 ### Added
 
-- add  x0=true/false, add veps=eps in solver parameters to initialazed of not the the CG , GMRES algo
-  with 0 or previous value and veps is to get the absolue tolerance
-
+- add  x0=true/false, add veps=eps in solver parameters to initiaze of not the the CG , GMRES algo 
+  with 0 or previous value and veps is to get the absolue tolerance 
+  
 - A tool of solve adjoint matrix A with only one single LU decomposition with LU, UMFPACK, GMRES  
     `u[]=A'^-1*b;`  
 - Add plugin to save matrix in Harwell-Boeing format (see Harwell-Boeing format)

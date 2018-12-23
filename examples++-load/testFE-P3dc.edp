@@ -43,7 +43,7 @@ for (int i=0;i<Vh.ndofK;++i)
   cout << " a = " << a1[] <<endl;
   cout << " b = " << b1[] <<endl;
 
-  assert(c1[].linfty < 1e-5 );
+  assert(c1[].max < 1e-5 && c1[].min > -1e-9);
 
   cout << " dx(a1)(x1,y1) = " << dx(a1)(x1,y1) << " == " << DD(a1,h,0) << endl; 
   cout << " dy(a1)(x1,y1) = " << dy(a1)(x1,y1) << " == " << DD(a1,0,h)  << endl; 
