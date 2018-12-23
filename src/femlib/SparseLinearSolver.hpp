@@ -113,8 +113,10 @@ template<class Z, class K> void InitSolver()
    addsolver<VirtualSolverSkyLine<Z,K>>("LU",10);
    addsolver<VirtualSolverSkyLine<Z,K>>("CROUT",9);
    addsolver<VirtualSolverSkyLine<Z,K>>("CHOLESKY",9);
+ #ifdef HAVE_LIBUMFPACK
    addsolver<VirtualSolverUMFPACK<Z,K>>("UMFPACK",100, 1);// add set SparseSolver
    addsolver<VirtualSolverCHOLMOD<Z,K>>("CHOLMOD",99,  2);// add set SparseSolverSym
+#endif
 }
 template<class Z, class K>
 typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )
@@ -147,12 +149,8 @@ public:
         va_end(val);
         ds.solver=solver;
         // int strategy=-1,double tol_pivot=-1.,double tol_pivot_sym=-1.
-        if(strncmp("UMFPACK",solver,6)==0)
-         thesolver = new VirtualSolverUMFPACK<Z,K> (A,ds,0);
-        else if(strncmp("CHOLMOD",solver,7)==0)
-         thesolver = new VirtualSolverCHOLMOD<Z,K> (A,ds,0);
-
-        else if(strncmp("CG",solver,2)==0)
+        
+        if(strncmp("CG",solver,2)==0)
           thesolver = new SolverCG<Z,K> (A,ds,0);
         else if(strncmp("GMRES",solver,5)==0)
             thesolver = new SolverGMRES<Z,K> (A,ds,0);
@@ -162,13 +160,23 @@ public:
             thesolver=new VirtualSolverSkyLine<Z,K> (A,ds,0);
         else if(strncmp("CHOLESKY",solver,8)==0)
             thesolver=new VirtualSolverSkyLine<Z,K> (A,ds,0);
+#ifdef HAVE_LIBUMFPACK
+        else if(strncmp("UMFPACK",solver,6)==0)
+            thesolver = new VirtualSolverUMFPACK<Z,K> (A,ds,0);
+        else if(strncmp("CHOLMOD",solver,7)==0)
+            thesolver = new VirtualSolverCHOLMOD<Z,K> (A,ds,0);
+#endif
         else if(strncmp("MUMPS",solver,5)==0)
             thesolver=0;
         else if(strncmp("SUPERLU",solver,6)==0)
             thesolver=0;
         if(thesolver ==0) { std::cerr << " Solver linear inconnue " << solver << " => UMFPACK " << std::endl;
             {
+#ifdef HAVE_LIBUMFPACK
                 thesolver = new  VirtualSolverUMFPACK<Z,K> (A,ds,0);
+#else
+                thesolver=new VirtualSolverSkyLine<Z,K> (A,ds,0);
+#endif
             }
             
         }

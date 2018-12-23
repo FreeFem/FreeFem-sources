@@ -38,10 +38,10 @@
 //  OLD CODE
 #define RNM_VirtualMatrix VirtualMatrice
 template<class K>
-struct ff_HPDDM_MatrixCSR : public:HPDDM::MatrixCSR<K>
+struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
 {
     ff_HPDDM_MatrixCSR(MatriceMorse<K>* pA) :
-    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique) {}
+    HPDDM::MatrixCSR<K>(pA->n, pA->m, pA->nbcoef, pA->a, pA->lg, pA->cl, pA->symetrique) {}
 };
 template<class K>
 HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K>* mA,bool  mfree=false,K *s=0,int *is=0,int *js=0)

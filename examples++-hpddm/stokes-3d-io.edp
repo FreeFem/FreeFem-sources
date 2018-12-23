@@ -97,7 +97,9 @@ else
     fespace WhExport(ThExport, Pk);
     WhExport def(uExport);
     def(uExport) = def(u);
-    int[int] order = [1];
-    export("stokes", ThExport, [uExport, uExportB, uExportC], order, comm);
+    int[int] order = [1, 1];
+    macro sol()[uExport, uExportB, uExportC], uExportD//
+    macro orderAndName()order, dataname = "velocity pressure"//
+    export("stokes", ThExport, sol, orderAndName, comm);
 }
 
