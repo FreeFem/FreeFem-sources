@@ -31,9 +31,10 @@ public:
     Z *pL,*opL; // profile L
     Z *pU,*opU; // profile U
     mutable  FactorizationType typefac;
+    int verb;
     FactorizationType typesolver;
     std::ostream& dump (std::ostream&) const ;
-    SkyLineMatrix(HMat *A,Z *p,int tf);
+    SkyLineMatrix(HMat *A,Z *p,int tf,int verbb);
     
     SkyLineMatrix(const SkyLineMatrix& A,bool copy=false)
     : n(A.n),m(n),whichfac(A.whichfac),
@@ -130,8 +131,8 @@ private:
 
 
 template <class Z,class R>
- SkyLineMatrix<Z,R>::SkyLineMatrix(HashMatrix<Z,R> *A,Z *p,int typfact)
-: n(A->n),m(n),whichfac((FactorizationType)typfact),
+ SkyLineMatrix<Z,R>::SkyLineMatrix(HashMatrix<Z,R> *A,Z *p,int typfact,int verbb)
+: n(A->n),m(n),whichfac((FactorizationType)typfact),verb(verbb),
 L(0),oL(0),U(0),oU(0),D(0),oD(0),
 pL(0),opL(0),pU(0),opU(0),
 typefac(FactorizationNO)
@@ -166,7 +167,8 @@ typefac(FactorizationNO)
          Z diff=0;
         for(int i=0; i<n;++i)
             diff += abs(pL[i]-pU[i]);
-        cout << "Skyline : diff pL/pU: "<< n<< " " << diff<< endl;
+        if(verb > 2 || verbosity >9)
+            cout << "Skyline : diff pL/pU: "<< n<< " " << diff<< endl;
         if(2*diff <= n)
         {
             // Skyline symetric near symetric
@@ -212,7 +214,8 @@ typefac(FactorizationNO)
             else U[pU[j+1]-j+i]=A->aij[k];
         }
     }
-    cout << "Skyline : size pL/pU: "<< n<< " " << pL[n] << " " << pU[n] << " moy=" << pU[n]/(double) n << endl;
+    if(verbosity>4 || verb)
+    cout << "  Skyline : size pL/pU: "<< n<< " " << pL[n] << " " << pU[n] << " moy=" << pU[n]/(double) n << endl;
 }
 
 template <class Z,class R>
@@ -223,6 +226,8 @@ void SkyLineMatrix<Z,R>::cholesky(double eps) const {
     if (L != U) MATERROR(1,"cholesky Skyline matrix non symmetric");
     U = 0; //
     typefac = FactorizationCholesky;
+    if(verb > 1 || verbosity >9)
+        cout << " Do Factorize Cholesky Skyline "<< endl;
     if ( norm2(D[0]) <= 1.0e-60)
         MATERROR(2,"cholesky SkyLine pivot ");
         
@@ -258,6 +263,8 @@ void SkyLineMatrix<Z,R>::crout(double eps) const  {
     Z i,j,k;
     double eps2=eps*eps;
     if (L != U) MATERROR(1,"Skyline matrix  non symmetric");
+    if(verb > 1 || verbosity >9)
+        cout << " Do Factorize Crout Skyline "<< endl;
     U = 0; //
     typefac = FactorizationCrout;
     
@@ -293,8 +300,8 @@ void SkyLineMatrix<Z,R>::LU(double eps) const  {
     double eps2=eps*eps;
     Z i,j;
     if (L == U && ( pL[this->n]  || pU[this->n] ) ) MATERROR(3,"matrix LU  symmetric");
-    if(verbosity>3)
-        cout << "  -- LU " << endl;
+    if(verbosity>3 || verb >1 )
+        cout << "  -- Factorize  LU SkyLine  " << endl;
     typefac=FactorizationLU;
     
     for (i=1;i<this->n;i++) // boucle sur les sous matrice de rang i
@@ -373,11 +380,11 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
     switch (this->typefac) {
         case FactorizationNO:
             if (this->U && this->L) {std::cerr << "APROGRAMMER (KN_<R><R>::operator/SkyLineMatrix)";
-                MATERROR(10,"SkyLineMatrix solve no factozi");}
+                MATERROR(10,"SkyLineMatrix solve no factorized ");}
             
             if ( this->U && !this->L )
             { // matrice triangulaire superieure
-               if( verbosity> 5) cout << " remonter " << (this->D ? "DU" : "U") << endl;
+               if( verbosity> 5 || verb>2) cout << "  backward substitution  " << (this->D ? "DU" : "U") << endl;
                 ki = this->U + this->pU[n];
                 i = n;
                 while ( i-- )
@@ -390,7 +397,7 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             }
             else if  ( !this->U && this->L )
             { // matrice triangulaire inferieure
-                if( verbosity> 5) cout << " descente "  <<( this->D ? "LD" : "L" ) <<endl;
+                if( verbosity> 5 || verb>2) cout << " forward substitution "  <<( this->D ? "LD" : "L" ) <<endl;
                 ii = this->L;
                 for (i=0; i<n; i++)
                 { ij = ik = (this->L + this->pL[i+1]) ;  // ii =debut,ij=fin+1 de la ligne
@@ -405,24 +412,24 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
             }
             else if (this->D)
             { // matrice diagonale
-                if( verbosity> 5) cout << " diagonal D" <<endl;
+                if( verbosity> 5 || verb>2) cout << " diagonal D" <<endl;
                 for (i=0;i<n;i++)
                     v[i]=v[i]/this->D[i];
             }
             break;
         case FactorizationCholesky:
-                if(verbosity>4) cout << " FactorizationChoslesky" << endl;
+                if(verbosity>4|| verb>1 ) cout << " Factorization Choslesky" << endl;
            ld().solve(x);
            ldt().solve(x);
             break;
         case FactorizationCrout:
-               if(verbosity>4) cout << " FactorizationCrout" << endl;
+               if(verbosity>4 || verb>1) cout << " Factorization Crout" << endl;
            this->l().solve(x);
            this->d().solve(x);
            this->lt().solve(x);
            break;
         case FactorizationLU:
-           if(verbosity>4) cout << " FactorizationLU" << endl;
+           if(verbosity>4|| verb>1) cout << " Factorization LU" << endl;
           if(trans)
           {
               this->dut().solve(x);

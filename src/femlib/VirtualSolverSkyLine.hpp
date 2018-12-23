@@ -203,7 +203,7 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
         }
         void fac_numeric(){
             if(SL) delete SL;
-            SL = new SLMat(A,p,typesolver);
+            SL = new SLMat(A,p,typesolver,verb);
             if(verbosity>1) std::cout << " size of Skyline mat ="<< SL->size() << " nz :" <<SL->pL[A->n] << " nzz " << A->nnz << " typesolver " << typesolver <<endl;
             if(verbosity>99)
             {
