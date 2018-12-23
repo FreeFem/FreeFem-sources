@@ -82,7 +82,7 @@ struct Data_Sparse_Solver {
     precon(0),
     tol_pivot(-1),
     tol_pivot_sym(-1),
-    NbSpace(50),
+    NbSpace(1000),
     itmax(0),
      smap(0) ,
     commworld(0),
