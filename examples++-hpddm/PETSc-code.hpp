@@ -410,15 +410,16 @@ AnyType initRectangularCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) con
         ptA->_last = ptB->_last;
         ptA->_cfirst = ptC->_first;
         ptA->_clast = ptC->_last;
-        PetscInt bs;
-        MatGetBlockSize(ptB->_petsc, &bs);
+        PetscInt bsB, bsC;
+        MatGetBlockSize(ptB->_petsc, &bsB);
+        MatGetBlockSize(ptC->_petsc, &bsC);
         int* ia = nullptr;
         int* ja = nullptr;
         PetscScalar* c = nullptr;
         bool free = true;
         MatCreate(PETSC_COMM_WORLD, &(ptA->_petsc));
-        if(bs > 1)
-            MatSetBlockSize(ptA->_petsc, bs);
+        if(bsB == bsC && bsB > 1)
+            MatSetBlockSize(ptA->_petsc, bsB);
         MatSetSizes(ptA->_petsc, ptB->_last - ptB->_first, ptC->_last - ptC->_first, PETSC_DECIDE, PETSC_DECIDE);
         MatSetType(ptA->_petsc, MATMPIAIJ);
         if(ptK->A) {
@@ -1513,6 +1514,28 @@ long MatConvert(Type* const& A, Type* const& B) {
     }
     return 0L;
 }
+template<class Type>
+long MatZeroRows(Type* const& A, KN<double>* const& ptRows) {
+    if(A->_petsc) {
+        PetscInt bs;
+        MatGetBlockSize(A->_petsc, &bs);
+        PetscInt m;
+        MatGetLocalSize(A->_petsc, &m, NULL);
+        ffassert(ptRows->n == bs * m);
+        std::vector<PetscInt> rows;
+        rows.reserve(bs * m);
+        PetscInt start;
+        MatGetOwnershipRange(A->_petsc, &start, NULL);
+        for(int i = 0; i < bs * m; ++i) {
+            if(std::abs(ptRows->operator[](i)) > 1.0e-12)
+                rows.emplace_back(start + i);
+        }
+        MatSetOption(A->_petsc, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+        MatSetOption(A->_petsc, MAT_NO_OFF_PROC_ZERO_ROWS, PETSC_TRUE);
+        MatZeroRows(A->_petsc, rows.size(), rows.data(), 0.0, NULL, NULL);
+    }
+    return 0L;
+}
 template<class Type, char N = 'N'>
 class Solve : public OneOperator {
     public:
@@ -1996,6 +2019,7 @@ static void Init_PETSc() {
     if(!std::is_same<PetscScalar, PetscReal>::value)
         Global.Add("MatMultHermitianTranspose", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::MatMult<'H'>));
     Global.Add("MatConvert", "(", new OneOperator2_<long, Dmat*, Dmat*>(PETSc::MatConvert));
+    Global.Add("MatZeroRows", "(", new OneOperator2_<long, Dmat*, KN<double>*>(PETSc::MatZeroRows));
     Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>());
     Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>(1));
     if(!std::is_same<PetscScalar, PetscReal>::value)
