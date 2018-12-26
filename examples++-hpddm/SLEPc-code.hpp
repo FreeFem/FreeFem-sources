@@ -135,7 +135,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             PetscInt m;
             if(!codeA) {
                 Type* ptB = GetAny<Type*>((*B)(stack));
-                EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
+                EPSSetOperators(eps, ptA->_petsc, ptB->_petsc);
                 if(!ptA->_A) {
                     MatGetBlockSize(ptA->_petsc, &bs);
                     MatGetLocalSize(ptA->_petsc, &m, NULL);
@@ -157,21 +157,22 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             if(nargs[1])
                 EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             EPSSetFromOptions(eps);
-            if(fieldsplit) {
+            ST st;
+            KSP ksp;
+            EPSGetST(eps, &st);
+            if(ptA->_ksp)
+                STSetKSP(st, ptA->_ksp);
+            else if(fieldsplit) {
                 KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
                 KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
                 KN<Matrice_Creuse<PetscScalar>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[7])(stack)) : 0;
                 KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
                 if(fields && names) {
-                    ST st;
-                    KSP ksp;
-                    PC pc;
-                    EPSGetST(eps, &st);
-                    STGetKSP(st, &ksp);
                     KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                     setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
                     EPSSetUp(eps);
                     if(!ptA->_S.empty()) {
+                        PC pc;
                         KSPGetPC(ksp, &pc);
                         PCSetUp(pc);
                         setCompositePC(ptA, pc);
