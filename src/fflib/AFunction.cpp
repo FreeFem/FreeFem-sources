@@ -27,7 +27,10 @@
  */
 //#pragma dont_inline on
 //#pragma inline_depth(1)
-
+//  for bessel function
+// c++11   => __STRICT_ANSI__ => error FH..
+#undef __STRICT_ANSI__
+// 
 #include "config-wrapper.h"
 
 #include <cmath>
