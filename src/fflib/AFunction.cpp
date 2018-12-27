@@ -29,7 +29,9 @@
 //#pragma inline_depth(1)
 //  for bessel function
 // c++11   => __STRICT_ANSI__ => error FH..
+#ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
+#endif
 // 
 #include "config-wrapper.h"
 

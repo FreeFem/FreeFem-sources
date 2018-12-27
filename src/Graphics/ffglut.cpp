@@ -3,6 +3,10 @@
 #else
 #include <GL/glut.h>
 #endif
+//  FOR M_PI 
+#ifdef __STRICT_ANSI__
+#undef __STRICT_ANSI__
+#endif
 //#include <pthread.h>
 #include <limits>
 #include <cfloat>
