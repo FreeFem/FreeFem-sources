@@ -468,12 +468,12 @@ public:
 
 // specilisation
 template<>
-class  VirtualSolverUMFPACK<long,double> : public VirtualSolver<long,double> {
+class  VirtualSolverUMFPACK< SuiteSparse_long,double> : public VirtualSolver< SuiteSparse_long,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     static const int orTypeSol = 1&8&16;
     typedef double K;
-    typedef long Z;
+    typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;
     HMat *A;
     void *Symbolic, *Numeric ;
@@ -545,13 +545,13 @@ public:
 
 // specilisation
 template<>
-class  VirtualSolverUMFPACK<long,std::complex<double> > : public VirtualSolver<long,std::complex<double> > {
+class  VirtualSolverUMFPACK<SuiteSparse_long,std::complex<double> > : public VirtualSolver< SuiteSparse_long,std::complex<double> > {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     static const int orTypeSol = 1&8&16;
 
     typedef std::complex<double> K;
-    typedef long Z;
+    typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;
     HMat *A;
     void *Symbolic, *Numeric ;
@@ -629,12 +629,12 @@ public:
 
 // specilisation
 template<>
-class  VirtualSolverCHOLMOD<long,double> : public VirtualSolver<long,double> {
+class  VirtualSolverCHOLMOD< SuiteSparse_long,double> : public VirtualSolver< SuiteSparse_long,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     static const int orTypeSol = 2&4&8&16;
     typedef double K;
-    typedef long Z;
+    typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;
     HMat *HA;
     Z n;
@@ -735,13 +735,13 @@ public:
 
 // specialisation
 template<>
-class  VirtualSolverCHOLMOD<long,std::complex<double> > : public VirtualSolver<int,std::complex<double> >
+class  VirtualSolverCHOLMOD< SuiteSparse_long,std::complex<double> > : public VirtualSolver<int,std::complex<double> >
 {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     static const int orTypeSol = 2&4&8&16;
     typedef std::complex<double>  K;
-    typedef long Z;
+    typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;
     HMat *HA;
     Z n;

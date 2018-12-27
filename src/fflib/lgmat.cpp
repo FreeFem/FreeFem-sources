@@ -1571,6 +1571,28 @@ long get_mat_n(Matrice_Creuse<R> * p)
  { ffassert(p ) ;  return p->A ?p->A->n: 0  ;}
 
 template<class R>
+bool set_mat_COO(Matrice_Creuse<R> * p)
+{ ffassert(p ) ;
+    HashMatrix<int,R> *phm=p->pHM();
+    if(phm) phm->COO();
+    return phm;
+}
+template<class R>
+bool set_mat_CSR(Matrice_Creuse<R> * p)
+{ ffassert(p ) ;
+    HashMatrix<int,R> *phm=p->pHM();
+    if(phm) phm->CSR();
+    return phm;
+}
+template<class R>
+bool set_mat_CSC(Matrice_Creuse<R> * p)
+{ ffassert(p ) ;
+    HashMatrix<int,R> *phm=p->pHM();
+    if(phm) phm->CSC();
+    return phm;
+}
+
+template<class R>
 long get_mat_m(Matrice_Creuse<R> * p)
  { ffassert(p ) ;  return p->A ?p->A->m: 0  ;}
 
@@ -1619,7 +1641,7 @@ R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & 
            << " Matrix type = " << typeid(ac).name() << endl;
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
-   R *  p =a->pij(b,c);
+   R *  p =a->npij(b,c);
    if( !p) { if(verbosity) cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparse matrix "
            << " Matrix  type = " << typeid(ac).name() << endl;
        ExecError("Use of unexisting coef in sparse matrix operator a(i,j) ");}
@@ -2939,7 +2961,10 @@ TheOperators->Add("+",
  TheOperators->Add("-",  
 	 new OneUnaryOperator<Op1_LCMd<R> >
      );
- Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
+    Add<Matrice_Creuse<R> *>("COO",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_COO<R>) );
+    Add<Matrice_Creuse<R> *>("CSR",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_CSR<R>) );
+    Add<Matrice_Creuse<R> *>("CSC",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_CSC<R>) );
+    Add<Matrice_Creuse<R> *>("n",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_n<R>) );
  Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
  Add<Matrice_Creuse<R> *>("nbcoef",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("nnz",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
