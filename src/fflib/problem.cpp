@@ -8371,6 +8371,37 @@ int dimProblem(const ListOfId &l)
     return dim;
     
 }
+
+AnyType Problem::operator()(Stack stack) const
+{
+    if(dim==2)
+    {
+        Data<FESpace> *data= dataptr(stack);
+        if (complextype)
+            return eval<Complex,FESpace,v_fes>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpace,v_fes>(stack,data,data->AR,data->AcadnaR);
+    }
+    
+    else if(dim==3)
+    {
+        Data<FESpace3> *data= dataptr3(stack);
+        if (complextype)
+            return eval<Complex,FESpace3,v_fes3>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpace3,v_fes3>(stack,data,data->AR,data->AcadnaR);
+    }
+    else if(dim==4)
+    {
+        Data<FESpaceS> *data= dataptrS(stack);
+        if (complextype)
+            return eval<Complex,FESpaceS,v_fesS>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpaceS,v_fesS>(stack,data,data->AR,data->AcadnaR);
+    }
+    
+    else ffassert(0);
+}
 template<class pfer,class pfec>
 bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,int n_name_param,
                       Expression *nargs,int & N,int & M,  vector<Expression> & var )
