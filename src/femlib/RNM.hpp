@@ -408,6 +408,8 @@ public:
 
   KN_ operator()(const SubArray & sa) const { return KN_(*this,sa);} // sub array 
   
+  R & operator[](long long i) const {return v[index(i)];}
+  R & operator()(long long i) const {return v[index(i)];}
   R & operator[](long i) const {return v[index(i)];}
   R & operator()(long i) const {return v[index(i)];}
   R & operator[](int i) const {return v[index(i)];}
