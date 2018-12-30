@@ -513,7 +513,7 @@ void HashMatrix<I,R>::Renumbering(I nn,I mm,KN_<I> ii,KN_<I> jj)
     size_t kk=0;
     for(size_t k=0; k<nnz; ++k)
     {
-        I i1=ii[i[k]],j1=jj[i[k]];
+        I i1=ii[(long) i[k]],j1=jj[ (long) i[k]];
         if( i1 >=0 && j1 >=0 && i1 <nn && j1 < mm) // coef existe
         {
             i[kk] =i1;
