@@ -28,6 +28,7 @@
 // F. Hecht  december 2011
 // ----------------------------
 // file to add MUMPS sequentiel interface for sparce linear solver with dynamic load.
+#include <mpi.h>
 #ifdef _WIN32
 __declspec(dllexport) int toto;
 MPI_Fint* _imp__MPI_F_STATUS_IGNORE;
@@ -39,7 +40,7 @@ using namespace std;
 
 #include "ff++.hpp"
 
-#include <mpi.h>
+
 #include "dmatrix.hpp"
 #include <dmumps_c.h>
 #include <zmumps_c.h>
@@ -310,7 +311,7 @@ public:
         {
             MPI_Reduce( (void *) b,(void *)  x  , nN , MPI_TYPE<R>::TYPE(),MPI_SUM,0,comm);
         }
-        else if(mpirank==0)  myscopy(nN,b,x);
+        else if(mpirank==0)  std::copy(b,b+nN,x);
         id.rhs = (MR *)(void *)(R *)x;
         id.job = JOB_SOLVE;    // performs the analysis. and performs the factorization.
         SetVerb();
