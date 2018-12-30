@@ -486,7 +486,7 @@ public:
 };
 
 
-static bool Load_Init()
+static void Load_Init()
 {
 addsolver<VirtualSolverSuperLU<double>>("SuperLU",50,1);
 addsolver<VirtualSolverSuperLU<Complex>>("SuperLU",50,1);

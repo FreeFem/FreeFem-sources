@@ -77,3 +77,4 @@ clean:
 #	-rm $(PACKAGE1)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
+.NOTPARALLEL:

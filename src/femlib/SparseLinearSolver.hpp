@@ -15,11 +15,8 @@
 #include "ffstack.hpp"
 
 extern string *def_solver, *def_solver_sym, *def_solver_sym_dp;
-inline void setptrstring( string * & ds, const string & s)
-{
-    if(ds) delete ds;
-    ds = new string(s);
-}
+
+void setptrstring( string * & ds, const string & s);
 template<class K,class V> class MyMap;
 class String;
 typedef void *    pcommworld; // to get the pointeur to the comm word ... in mpi

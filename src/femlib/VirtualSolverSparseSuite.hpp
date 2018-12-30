@@ -836,7 +836,7 @@ public:
     {
         if(L) cholmod_l_free_factor (&L, &c) ;            /* free matrices */
         //w       if(A) cholmod_free_sparse (&A, &c) ;
-             (&c) ;
+        cholmod_l_finish(&c) ;
         
     }
 };
