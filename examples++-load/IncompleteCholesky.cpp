@@ -22,8 +22,7 @@
 
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep:
-//ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: lapack blas
 // *INDENT-ON* //
 
 #include "ff++.hpp"
@@ -244,15 +243,15 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
 }
 double * inv(int n,double *a,double *a1)
 {
-    int info;
-    int n2=n*n,n1=n+1.;
+    integer info;
+    integer n0=n,n2=n*n,n1=n+1.;
     fill(a1,a1+n*n,0.);
     for (int i = 0; i < n2; i+= n1)
         a1[i]=1;
     
     KN<integer> p(n);
-    dgesv_(&n, &n, a1, &n, p, a, &n, &info);
-
+    dgesv_(&n0, &n0, a1, &n0, p, a, &n0, &info);
+    return a1;
 }
 
 double * MatVect(int n,double *a,double *x, double *y)
@@ -262,6 +261,7 @@ double * MatVect(int n,double *a,double *x, double *y)
     for (int k=0,j=0;j<n;++j)
         for(int i=0; i<n;++i,++k)
             y[i] += a[k]*x[j];
+	return y; 
 }
 #ifdef CODE_IN_PROGRESS
 //  F. Hecht try to make block ILU preconditinneur

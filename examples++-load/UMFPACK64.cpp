@@ -46,14 +46,14 @@ public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     static const int orTypeSol = 1&8&16;
     typedef HashMatrix<int,K>  HMat;
-    typedef HashMatrix<long,K>  HMat64;
+    typedef HashMatrix<SuiteSparse_long,K>  HMat64;
     HMat *pA;
     HMat64 *pA64;
-    VirtualSolverUMFPACK<long,K> v64;
+    VirtualSolverUMFPACK<SuiteSparse_long,K> v64;
     
      VirtualSolverUMFPACK64(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
     : pA(&AA),
-      pA64(new HashMatrix<long,K>(AA)),
+      pA64(new HashMatrix<SuiteSparse_long,K>(AA)),
       v64(*pA64,ds,stack) {}
     void dosolver(K *x,K*b,int N,int trans){
         return v64.dosolver(x,b,N,trans);
