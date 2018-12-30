@@ -35,7 +35,7 @@
  */
 
 // ./ff-c++ yams.cpp -I../src/libMesh/ -I../download/include/yams/ -L../download/lib/yams/ -lyams2 -L/Users/morice/work/postdoc/freefem++prod/src/libMesh/ -lMesh
-
+#define _USE_MATH_DEFINES
 #include "ff++.hpp"
 #include "msh3.hpp"
 // #define ADAPTLIBRARY

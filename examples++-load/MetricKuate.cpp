@@ -28,7 +28,7 @@
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
-
+#define _USE_MATH_DEFINES
 #include  <iostream>
 #include  <cfloat>
 #include  <cmath>

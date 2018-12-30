@@ -55,7 +55,7 @@
  * real a11 = 3, a12 = 2, a22 = 1;
  * cout << vp1(a11, a12, a22); // first vp of [[a11, a12][a12, a22]]
  */
-
+#define _USE_MATH_DEFINES
 #ifndef WITH_NO_INIT
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"

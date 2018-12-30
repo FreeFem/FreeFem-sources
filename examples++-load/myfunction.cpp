@@ -26,7 +26,7 @@
 // *INDENT-ON* //
 
 // Example C++ function "myfunction", dynamically loaded into "load.edp"
-
+#define _USE_MATH_DEFINES
 #include <ff++.hpp>
 using namespace Fem2D;
 double myfunction (Stack stack) {
