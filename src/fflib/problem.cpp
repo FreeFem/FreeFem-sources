@@ -5444,15 +5444,16 @@ namespace Fem2D {
         
         RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
         
+        R2 E(PA,PB);
+        double le = sqrt((E,E));
+
+        //cout << " Element_rhs 2d " << PA << " " << PB << " " << le << " " << Kv.number <<  endl;
         for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
             QuadratureFormular1dPoint pi( FI[npi]);
-            R2 E(PA,PB);
-            double le = sqrt((E,E));
             double coef = le*pi.a;
             double sa=pi.x,sb=1-sa;
-            
-            R2 Pt(PA*sa+PB*sb ); //
+            R2 Pt(PPA*sa+PPB*sb ); //
             Kv.BF(Dop,Pt,fu);
             MeshPointStack(stack)->set(T(Pt),Pt,Kv,0,R2(E.y,-E.x)/le,0);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
@@ -5480,7 +5481,7 @@ namespace Fem2D {
                     
                     
                     //= GetAny<double>(ll.second.eval(stack));
-                    
+                  //  cout << "         " << coef<< " " << c << " " << w_i << " " << Kv(i) << " | " << Pt <<  endl;
                     B[Kv(i)] += coef * c * w_i;
                 }
             }
@@ -7231,7 +7232,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         bool all=true;
         bool VF=l->VF();  // finite Volume or discontinous Galerkin
         
-        if (verbosity>2) cout << "  -- AssembleLinearForm 2, discontinous Galerkin  =" << VF << " binside = "<< binside
+        if (verbosity>2) cout << "  -- AssembleLinearForm S, discontinous Galerkin  =" << VF << " binside = "<< binside
             << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
         //  if( di.withmap()) { ExecError(" no map  in the case (6)??");}
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
