@@ -241,9 +241,10 @@ ml[]/=2.;
     }
 
     // version 3.1-1
-    cout << MM << endl;
+	MM.CSR; 
+    cout << " MM (format CSR or Morse)   "<< MM << endl;
     MM.resize(10,100);
-    cout << MM << endl;
+    cout << " MM format COO " << MM << endl;
 
     {  //  test renumbering of sub mesh ..
       func Pk=P2;
@@ -251,7 +252,7 @@ ml[]/=2.;
       mesh ThC = trunc(Th,x < 0.5,new2old=n2ok);
       fespace VFh(Th,Pk);
       fespace VCh(ThC,Pk);
-      verbosity= 100; 
+      verbosity= 1; 
       int[int] n2o=restrict(VCh,VFh,n2ok);
       cout << " n2o " << n2o << endl;
   
