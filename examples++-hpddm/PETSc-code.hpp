@@ -1056,7 +1056,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 8;
+        static const int n_name_param = 9;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1074,7 +1074,8 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"prefix", &typeid(std::string*)},
     {"schurPreconditioner", &typeid(KN<Matrice_Creuse<PetscScalar>>*)},
     {"schurList", &typeid(KN<double>*)},
-    {"subksp", &typeid(Type*)}
+    {"subksp", &typeid(Type*)},
+    {"MatNullSpace", &typeid(KNM<PetscScalar>*)}
 };
 template<class Type>
 struct _n_User {
@@ -1131,20 +1132,34 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     }
     if(std::is_same<Type, Dmat>::value) {
         FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
+        KNM<PetscScalar>* ptPETScNS = nargs[8] ? GetAny<KNM<PetscScalar>*>((*nargs[8])(stack)) : 0;
         int dim = ptNS ? ptNS->N : 0;
-        if(dim) {
+        int dimPETSc = ptPETScNS ? ptPETScNS->M() : 0;
+        if(dim || dimPETSc) {
             Vec x;
             MatCreateVecs(ptA->_petsc, &x, NULL);
             Vec* ns;
-            VecDuplicateVecs(x, dim, &ns);
-            for(unsigned short i = 0; i < dim; ++i) {
-                PetscScalar* x;
-                VecGetArray(ns[i], &x);
-                HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*(ptNS->get(i))), x, ptNS->get(i)->n);
-                VecRestoreArray(ns[i], &x);
+            VecDuplicateVecs(x, std::max(dim, dimPETSc), &ns);
+            if(std::max(dim, dimPETSc) == dimPETSc) {
+                PetscInt m;
+                VecGetLocalSize(ns[0], &m);
+                for(unsigned short i = 0; i < dimPETSc; ++i) {
+                    PetscScalar* x;
+                    VecGetArray(ns[i], &x);
+                    for(int j = 0; j < m; ++j)
+                        x[j] = (*ptPETScNS)(j, i);
+                    VecRestoreArray(ns[i], &x);
+                }
             }
-            PetscScalar* dots = new PetscScalar[dim];
-            for(unsigned short i = 0; i < dim; ++i) {
+            else
+                for(unsigned short i = 0; i < dim; ++i) {
+                    PetscScalar* x;
+                    VecGetArray(ns[i], &x);
+                    HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*(ptNS->get(i))), x, ptNS->get(i)->n);
+                    VecRestoreArray(ns[i], &x);
+                }
+            PetscScalar* dots = new PetscScalar[std::max(dim, dimPETSc)];
+            for(unsigned short i = 0; i < std::max(dim, dimPETSc); ++i) {
                 if(i > 0) {
                     VecMDot(ns[i], i, ns, dots);
                     for(int j = 0; j < i; ++j)
@@ -1155,7 +1170,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             }
             delete [] dots;
             MatNullSpace sp;
-            MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, dim, ns, &sp);
+            MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
             MatSetNearNullSpace(ptA->_petsc, sp);
             MatNullSpaceDestroy(&sp);
             if(ns)
