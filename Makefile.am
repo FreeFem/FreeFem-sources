@@ -18,21 +18,24 @@ logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
 mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4 ax_lib_hdf5.m4  \
 freefem++.spec \
 Install-MacOS.command.in \
-examples-bamg/NACA012/naca.awk  examples-bamg/quadloop/dotest.pl \
-examples-bamg/square/*_g.* examples-bamg/square/do* examples-bamg/NACA012/[adp]* \
-examples-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
+examples++-bamg/NACA012/naca.awk  examples++-bamg/quadloop/dotest.pl \
+examples++-bamg/square/*_g.* examples++-bamg/square/do* examples++-bamg/NACA012/[adp]* \
+examples++-bamg/test/dotest*.pl 0ldUserReadMe.txt CheckAllEdp CheckAll  \
 WHERE_LIBRARY-mkl FreeFem++-CoCoa.in  \
 uninstall-ff++ \
 ./build/cleancrlf		./build/download		./build/links2files \
 ./build/orgindex ./build/ff-md5  script/PostInstall.m4 \
 web/download.php	web/index.php		web/macosx.php		web/menu.php		web/phpfiles.php \
 web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php \
-FreeFem++.app.in.tgz 
+FreeFem++.app.in.tgz \
+ examples++-ffddm/README.md 
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 
-FF_EXAMPLES_FILES = COPYRIGHT HISTORY HISTORY_BEFORE_2005 README_COMPILATION.md README_WINDOWS.md README_MAC.md BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
+FF_EXAMPLES_FILES = CHANGELOG.md		README4.md		README_COMPILATION.md	README_MAC.md		README_XCODE.md \
+README.md		README_ARPACK.md	README_GIT.md		README_WINDOWS.md \
+COPYRIGHT HISTORY HISTORY_BEFORE_2005  BUGS TODO INSTALL INSTALL-MacOSX INNOVATION \
 mode-mi-edp.zip \
 examples++-tutorial/aile.msh examples++-tutorial/xyf \
 examples++-3d/dodecaedre01.mesh  \

@@ -14,10 +14,10 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : Mesh visualization tool
-/* LICENSE : LGPLv3
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-/* AUTHORS : Pascal Frey
+/* SUMMARY : ...  visualization tool */
+/* LICENSE : LGPLv3 */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
+/* AUTHORS : Pascal Frey */
 /* E-MAIL  : pascal.frey@sorbonne-universite.fr
  */
 

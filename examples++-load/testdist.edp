@@ -15,4 +15,4 @@ distance(Th,u,v[]);
 e = v-y;
 cout << "err = "<< e[].linfty << endl; 
 plot(e, wait=1);
-assert( e[].linfty < 1e-10);
+assert( e[].linfty < 1e-6);// not really exact F. Hecht but small 
