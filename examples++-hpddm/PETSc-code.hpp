@@ -1533,7 +1533,14 @@ template<class Type>
 long MatZeroRows(Type* const& A, KN<double>* const& ptRows) {
     if(A->_petsc) {
         PetscInt bs;
-        MatGetBlockSize(A->_petsc, &bs);
+        MatType type;
+        MatGetType(A->_petsc, &type);
+        PetscBool isNotBlock;
+        PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+        if(isNotBlock)
+            bs = 1;
+        else
+            MatGetBlockSize(A->_petsc, &bs);
         PetscInt m;
         MatGetLocalSize(A->_petsc, &m, NULL);
         ffassert(ptRows->n == bs * m);
