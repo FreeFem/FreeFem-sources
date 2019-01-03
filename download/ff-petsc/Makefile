@@ -201,16 +201,17 @@ WHERE-all:Makefile WHERE-complex WHERE
 $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(DIR_INSTALL_COMPLEX) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
+	export PETSC_ARCH=ff-complex ; \
 	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_COMPLEX)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
-	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX)
+	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) PETSC_ARCH=ff-complex 
 	touch $@
 
 
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX)
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) PETSC_ARCH=ff-complex 
 	touch $@
 
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
@@ -219,6 +220,10 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
 	echo done ../lib/WHERE.SLEPc-complex
 else
+WHERE-complex:
+	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex WHERE-complex ;\
+	else echo " -- No  Petc , no MPI"; fi
+
 WHERE-all:Makefile  Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@
 endif
