@@ -59,7 +59,6 @@ DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 petsc-slepc: Makefile.inc dir-install WHERE-all
-	
 recompile: recompile-real recompile-complex
 recompile-real:
 	-rm */tag-make-real
@@ -233,8 +232,8 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 $(SRCDIR_SLEPC)/tag-tar:$(PACKAGE_SLEPC)
 	rm -rf $(SRCDIR_SLEPC)
 	tar xvzf $(PACKAGE_SLEPC)
-	#mv `tar tfz $(PACKAGE_SLEPC) | head -1` $(SRCDIR_SLEPC)
-	#cd $(SRCDIR_SLEPC);patch -p1 <../patch-slepc-3.8.3
+#	mv `tar tfz $(PACKAGE_SLEPC) | head -1` $(SRCDIR_SLEPC)
+#	cd $(SRCDIR_SLEPC);patch -p1 <../patch-slepc-3.8.3
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
@@ -268,12 +267,11 @@ clean-local:
 	-rm -rf ../include/*PETSc*
 	-rm -rf ../lib/lib*PETSc*
 	-rm -rf $(SRCDIR)
+	-rm -rf $(SRCDIR_SLEPC)
 	-rm -rf $(prefix)/ff-petsc
-#	-rm $(PACKAGE1)
 	-rm WHERE-all config.log *.done
 	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo rm -rf $(prefix)/ff-petsc ; fi
 	-rm do-sudo
-
 echo:
 	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 	@echo SUDO: $(SUDO)
