@@ -60,11 +60,7 @@ PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 	
-recompile:
-	-rm */tag-make*
-	-rm */tag-install*
-	make WHERE
-	make WHERE-complex
+recompile: recompile-real recompile-complex
 recompile-real:
 	-rm */tag-make-real
 	-rm */tag-install-real
@@ -72,7 +68,8 @@ recompile-real:
 recompile-complex:
 	-rm */tag-make-complex
 	-rm */tag-install-complex
-	make WHERE-complex
+	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex WHERE-complex ;\
+	else echo " -- No  Petc , no MPI"; fi
 
 dir-install: Makefile.inc
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
@@ -173,7 +170,7 @@ WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
-    echo done $@
+	echo done $@
 
 ##  need include include Make-petsc-download.mk
 WHERE-all:Makefile WHERE-complex WHERE
