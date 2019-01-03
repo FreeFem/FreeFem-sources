@@ -30,9 +30,10 @@ all-local:
 	@echo " # warning you have no write acces in $(DESTDIR)$(prefix)/ff-petsc"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
 	@echo " # run under root "
-	@echo " # or create / add acces to $(DESTDIR)$(prefix)/ff-petsc "
+	@echo " # or create / add access to $(DESTDIR)$(prefix)/ff-petsc "
 	@echo " # do for examples:"
-	@echo "	sudo chmod a+rxw $(DESTDIR)$(prefix)/ff-petsc"
+	@echo "	sudo mkdir  $(DESTDIR)$(prefix)/ff-petsc"
+	@echo "	sudo chown -R $(LOGNAME)  $(DESTDIR)$(prefix)/ff-petsc"
 	@echo "	make petsc-slepc "
 # Downloading and compiling mumps
 # -------------------------------
@@ -58,6 +59,20 @@ DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)
 SLEPC_DIR:=$(PWD)/$(SRCDIR_SLEPC)
 petsc-slepc: Makefile.inc dir-install WHERE-all
+	
+recompile:
+	-rm */tag-make*
+	-rm */tag-install*
+	make WHERE
+	make WHERE-complex
+recompile-real:
+	-rm */tag-make-real
+	-rm */tag-install-real
+	make WHERE
+recompile-complex:
+	-rm */tag-make-complex
+	-rm */tag-install-complex
+	make WHERE-complex
 
 dir-install: Makefile.inc
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
@@ -153,11 +168,12 @@ WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 	-mkdir ../lib
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lpetsc' > $@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
+	echo done $@
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
-
+    echo done $@
 
 ##  need include include Make-petsc-download.mk
 WHERE-all:Makefile WHERE-complex WHERE
@@ -204,6 +220,7 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
+	echo done ../lib/WHERE.SLEPc-complex
 else
 WHERE-all:Makefile  Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@
