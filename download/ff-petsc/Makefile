@@ -110,6 +110,7 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
 	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install
+	test -e $(DIR_INSTALL_REAL)/include/petsc.h		
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -157,22 +158,25 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex
 	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
+	test -e $(DIR_INSTALL_COMPLEX)/include/petsc.h	
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
+	test -e $(DIR_INSTALL_COMPLEX)/include/petsc.h	
 	-mkdir ../lib
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lpetsc' > $@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
 	echo done $@
 ../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
+	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h	
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
 	echo done $@
 
 ##  need include include Make-petsc-download.mk
-WHERE-all:Makefile WHERE-complex WHERE
+WHERE-all:Makefile WHERE WHERE-complex 
 	echo scalapack LD $(SCALAPACK_LIB) >$@
 	echo scalapack INCLUDE -I$(CALAPACK_INCLUDE) >>$@
 	echo metis LD $(METIS_LIB) >>$@
@@ -198,27 +202,30 @@ WHERE-all:Makefile WHERE-complex WHERE
 
 
 $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
-	export PETSC_DIR=$(DIR_INSTALL_COMPLEX) ; \
+	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-complex ; \
 	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_COMPLEX)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
-	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) PETSC_ARCH=ff-complex 
+	export PETSC_DIR=$(PETSC_DIR) ; \
+	export SLEPC_DIR=$(SLEPC_DIR) ; \
+	export PETSC_ARCH=ff-complex ; \
+	cd $(SRCDIR_SLEPC) &&   make  
 	touch $@
 
 
 $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) PETSC_ARCH=ff-complex 
+	export PETSC_DIR=$(PETSC_DIR) ; \
+	export SLEPC_DIR=$(SLEPC_DIR) ; \
+	export PETSC_ARCH=ff-complex ; \
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install 
+	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h
 	touch $@
-
-../lib/WHERE.SLEPc-complex:$(SRCDIR_SLEPC)/tag-install-complex
-	-mkdir ../lib
-	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib"   -lslepc' > $@
-	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
-	echo done ../lib/WHERE.SLEPc-complex
+#
 else
+#
 WHERE-complex:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) -f Makefile.complex WHERE-complex ;\
 	else echo " -- No  Petc , no MPI"; fi
@@ -241,21 +248,30 @@ $(PACKAGE_SLEPC):
 	../getall -o SLEPc -a
 
 $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
-	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
+	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_REAL)
+	export PETSC_ARCH=ff-real; \
+	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure --prefix=$(DIR_INSTALL_REAL)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
-	cd $(SRCDIR_SLEPC) &&   make SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL)
+	export PETSC_DIR=$(PETSC_DIR) ; \
+	export SLEPC_DIR=$(SLEPC_DIR) ; \
+	export PETSC_ARCH=ff-real; \
+	cd $(SRCDIR_SLEPC) &&   make 
 	touch $@
 
 
 $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL)
+	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
+	export SLEPC_DIR=$(SLEPC_DIR) ; \
+	export PETSC_ARCH=ff-real; \
+	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install 
+	test -e $(DIR_INSTALL_REAL)/include/slepc.h	
 	touch $@
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
+	test -e $(DIR_INSTALL_REAL)/include/slepc.h	
 	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib"   -lslepc' > $@
 	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
 
