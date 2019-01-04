@@ -1005,6 +1005,8 @@ class initCSRfromBlockMatrix : public E_F0 {
         static E_F0* f(const basicAC_F0& args) { return new initCSRfromBlockMatrix(args, 0); }
         AnyType operator()(Stack s) const {
             Mat* a = new Mat[N * M]();
+            std::vector<int> zeros;
+            zeros.reserve(std::min(N, M));
             for(int i = 0; i < N; ++i) {
                 for(int j = 0; j < M; ++j) {
                     Expression e = e_M[i][j];
@@ -1013,7 +1015,7 @@ class initCSRfromBlockMatrix : public E_F0 {
                         AnyType e_ij = (*e)(s);
                         if(t == 1) {
                             DistributedCSR<HpddmType>* pt = GetAny<DistributedCSR<HpddmType>*>(e_ij);
-                            a[i * N + j] = pt->_petsc;
+                            a[i * M + j] = pt->_petsc;
                         }
                         else if(t == 2) {
                             DistributedCSR<HpddmType>* pt = GetAny<DistributedCSR<HpddmType>*>(e_ij);
@@ -1022,18 +1024,50 @@ class initCSRfromBlockMatrix : public E_F0 {
                                 MatCreateTranspose(pt->_petsc, &B);
                             else
                                 MatCreateHermitianTranspose(pt->_petsc, &B);
-                            a[i * N + j] = B;
+                            a[i * M + j] = B;
                         }
                         else if(t == 7) {
                             PetscScalar r = GetAny<PetscScalar>(e_ij);
                             if(std::abs(r) > 1.0e-16)
                                 ExecError("Nonzero scalar in submatrix");
+                            if(i == j)
+                                zeros.emplace_back(i);
                         }
                         else {
                             ExecError("Unknown type in submatrix");
                         }
                     }
+                    else if(i == j)
+                        zeros.emplace_back(i);
                 }
+            }
+            for(int i = 0; i < zeros.size(); ++i) {
+                int posX = -1, posY = -1;
+                for(int j = 0; j < M && posX == -1; ++j) {
+                    if(j != zeros[i] && a[zeros[i] * M + j])
+                        posX = j;
+                }
+                for(int j = 0; j < N && posY == -1; ++j) {
+                    if(j != zeros[i] && a[zeros[i] + j * M])
+                        posY = j;
+                }
+                if(posX == -1 && posY == -1)
+                    ExecError("Zero row and zero column");
+                int x, X, y, Y;
+                if(posX != -1) {
+                    MatGetSize(a[zeros[i] * M + posX], &X, &Y);
+                    MatGetLocalSize(a[zeros[i] * M + posX], &x, &y);
+                }
+                if(posY != -1) {
+                    MatGetSize(a[zeros[i] + posY * M], posX == -1 ? &X : NULL, &Y);
+                    MatGetLocalSize(a[zeros[i] + posY * M], posX == -1 ? &x : NULL, &y);
+                }
+                MatCreate(PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
+                MatSetSizes(a[zeros[i] * M + zeros[i]],x, y, X, Y);
+                MatSetType(a[zeros[i] * M + zeros[i]], MATMPIAIJ);
+                MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
+                MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
+                MatAssemblyEnd(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
             }
             Result sparse_mat = GetAny<Result>((*emat)(s));
             if(sparse_mat->_petsc)
