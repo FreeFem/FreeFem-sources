@@ -48,6 +48,7 @@ SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
 W_MPICC:=$(strip $(shell which mpicc))
+SUDO_WITH_ENV:=$(SUDO) -E 
 
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
@@ -220,7 +221,7 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-complex ; \
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install 
+	cd $(SRCDIR_SLEPC) &&   $(SUDO_WITH_ENV) make install 
 	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h
 	touch $@
 #
@@ -266,7 +267,7 @@ $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real
 	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-real; \
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install 
+	cd $(SRCDIR_SLEPC) &&   $(SUDO_WITH_ENV) make install 
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h	
 	touch $@
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
