@@ -48,7 +48,7 @@ SRCDIR=petsc-$(VERSION)
 SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
 W_MPICC:=$(strip $(shell which mpicc))
-SUDO_WITH_ENV:=$(SUDO) -E 
+SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
 
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
@@ -292,6 +292,7 @@ clean-local:
 echo:
 	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 	@echo SUDO: $(SUDO)
+	@echo "sudo using user env: $(SUDO_WITH_ENV)"
 	@echo MPI_DIR: $(MPI_DIR)
 	@echo " dir install real :" $(DIR_INSTALL_REAL)
 	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX)
