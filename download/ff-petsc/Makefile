@@ -39,8 +39,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.9.2
-VERSION_SLEPC=3.9.1
+VERSION=3.10.3
+VERSION_SLEPC=3.10.1
 # http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
@@ -80,7 +80,7 @@ dir-install: Makefile.inc
 	 echo " or add write access to  2 directory "; \
 	 echo sudo >do-sudo; \
 	fi
-
+	test -e "$(DESTDIR)$(DIR_INSTALL_REAL)" -a -e "$(DESTDIR)$(DIR_INSTALL_COMPLEX)"
 PETSc-real:
 	@if [  -n "$(MPI_INCLUDE)" ]; then $(MAKE) WHERE ;\
 	else echo " -- No  Petc , no MPI"; fi
