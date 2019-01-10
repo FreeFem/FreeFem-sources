@@ -111,6 +111,7 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
 	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install
+	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real check
 	test -e $(DIR_INSTALL_REAL)/include/petsc.h		
 	touch $@
 
@@ -222,7 +223,8 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-complex ; \
 	cd $(SRCDIR_SLEPC) &&   $(SUDO_WITH_ENV) make install 
-	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h
+	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h	
+	cd $(SRCDIR_SLEPC) &&   make 'PETSC_DIR=$(PETSC_DIR)' 'SLEPC_DIR=$(SLEPC_DIR)' PETSC_ARCH=ff-complex check 
 	touch $@
 #
 else
@@ -269,7 +271,10 @@ $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real
 	export PETSC_ARCH=ff-real; \
 	cd $(SRCDIR_SLEPC) &&   $(SUDO_WITH_ENV) make install 
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h	
+	cd $(SRCDIR_SLEPC) &&   make 'PETSC_DIR=$(PETSC_DIR)' 'SLEPC_DIR=$(SLEPC_DIR)' PETSC_ARCH=ff-real check 
+
 	touch $@
+	
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h	

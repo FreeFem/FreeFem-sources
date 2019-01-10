@@ -120,6 +120,7 @@ struct _n_User {
 };
 template<class Type, class K>
 AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
+     ffassert(MAT_CLASSID);
     if(A && (B || codeA)) {
         Type* ptA = GetAny<Type*>((*A)(stack));
         if(ptA->_petsc) {
@@ -130,11 +131,13 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             MatType type;
             PetscBool isType;
             MatGetType(ptA->_petsc, &type);
+            cout << " ptA->_petsc classid type "<<type <<" " << MATNEST <<endl;
             PetscStrcmp(type, MATNEST, &isType);
             PetscInt bs;
             PetscInt m;
             if(!codeA) {
                 Type* ptB = GetAny<Type*>((*B)(stack));
+                cout << "\n" << mpirank << " ****// !!!codeA " << ptA->_petsc << endl;
                 EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
                 if(!ptA->_A) {
                     MatGetBlockSize(ptA->_petsc, &bs);
@@ -150,6 +153,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 user->mat = new eigensolver<Type, K>::MatF_O(m * bs, stack, codeA);
                 MatCreateShell(PETSC_COMM_WORLD, m, m, M, M, user, &S);
                 MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K>);
+                cout << "\n" << mpirank << " ****// codeA S " << S << endl;
                 EPSSetOperators(eps, S, NULL);
             }
             std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
@@ -335,14 +339,17 @@ static void Init() {
             argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
         PetscBool isInitialized;
         PetscInitialized(&isInitialized);
+        ffassert(MAT_CLASSID);
         if(!isInitialized && mpirank == 0)
             std::cout << "PetscInitialize has not been called, do not forget to load PETSc before loading SLEPc" << std::endl;
         SlepcInitialize(&argc, &argv, 0, "");
         delete [] argv;
         ff_atend(SLEPc::finalizeSLEPc);
         SLEPc::addSLEPc<PetscScalar>();
+#ifdef WITH_slepccomplex
         Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
         Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>(1));
+#endif
         if(verbosity>1)cout << "*** End:: load PETSc & SELPc "<< typeid(PetscScalar).name() <<"\n\n"<<endl;
         zzzfff->Add(mmmm, atype<Dmat*>());
     }

@@ -7064,7 +7064,7 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 			for (int ii = 0; ii < labelface.N(); ii++) {
 				if (K.lab == labelface[ii]) {
 					nbeLab++;
-					cout << "takeface" << endl;
+					//cout << "takeface" << endl;
 					takebe[ibe] = 1;
 
 					for (int jj = 0; jj < 3; jj++) {

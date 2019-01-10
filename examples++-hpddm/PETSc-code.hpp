@@ -1936,6 +1936,10 @@ static void Init_PETSc() {
     for(int i = 0; i < argc; ++i)
         argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
     PetscInitialize(&argc, &argv, 0, "");
+    PetscSysInitializePackage();
+    MatInitializePackage();
+    cout << " MAT_CLASSID " << MAT_CLASSID << " " << &MAT_CLASSID << endl; 
+    //PetscDLLibraryRegister() ;
     if(argc > 1) {
         HPDDM::Option& opt = *HPDDM::Option::get();
         opt.parse(argc - 1, argv + 1, mpirank == 0);
