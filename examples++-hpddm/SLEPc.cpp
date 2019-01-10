@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 hpddm petsc slepc [mkl|blas] mpi
+//ff-c++-LIBRARY-dep: cxx11 hpddm slepc [mkl|blas] mpi
 //ff-c++-cpp-dep:
 
 #define WITH_slepc

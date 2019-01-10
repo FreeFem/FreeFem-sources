@@ -319,6 +319,8 @@ template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type
 void addSLEPc() { }
 }
 
+
+
 static void Init() {
     //  to load only once
     aType t;

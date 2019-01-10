@@ -99,7 +99,7 @@ bool load(string ss)
 	    string s= *i+ss+suffix[j];
 	    
 #ifdef LOAD  
-	    handle = dlopen (s.c_str(), RTLD_LAZY ); 
+	    handle = dlopen (s.c_str(), RTLD_NOW ); // RTLD_GLOBAL RTLD_LAZY
 	    if (verbosity>9) cout << " test dlopen(" << s << ")= " << handle <<  endl;
 	    
 	    // FFCS - 20/9/11 - print explanation for load errors

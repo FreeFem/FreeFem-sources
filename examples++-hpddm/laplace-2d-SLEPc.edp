@@ -12,7 +12,7 @@
 /*     Load PETSc & SLEPc macros      */
 /**************************************/
 load "PETSc"                             // PETSc plugin
-load "SLEPc"                             // SLEPc plugin
+//load "SLEPc"                             // SLEPc plugin
 macro partitioner()metis// End Of Macro  // metis, scotch, or parmetis
 macro dimension(      )2// End Of Macro  // 2D or 3D
 include "macro_ddm.idp"                  // Additional DDM functions

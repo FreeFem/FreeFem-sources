@@ -1914,6 +1914,7 @@ class ProdPETSc {
 };
 }
 
+ 
 template<typename Type>
 bool CheckPetscMatrix(Type* ptA) {
     ffassert(ptA);
@@ -2018,6 +2019,18 @@ static void Init_PETSc() {
 
     Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
+  
+    template<>  void PETSc::changeNumbering_func<PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >, PetscScalar>(PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >*, KN<PetscScalar>*, KN<PetscScalar>*, bool){ffassert(0);}
+ 
+    extern "C"{
+        void  cblas_daxpby(const int N, const double alpha, const double *X,
+                      const int incX, const double beta, double *Y, const int incY);
+    void catlas_daxpby(const int N, const double alpha, const double *X,
+                            const int incX, const double beta, double *Y, const int incY)
+    {
+        cblas_daxpby(N,alpha,X,incX,beta,Y,incY);
+    }
+    }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)
 #endif
