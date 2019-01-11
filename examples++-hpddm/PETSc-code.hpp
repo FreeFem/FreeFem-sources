@@ -2019,8 +2019,9 @@ static void Init_PETSc() {
 
     Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
-  
-    template<>  void PETSc::changeNumbering_func<PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >, PetscScalar>(PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >*, KN<PetscScalar>*, KN<PetscScalar>*, bool){ffassert(0);}
+namespace PETSc {
+    template<>  void changeNumbering_func<PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >, PetscScalar>(PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >*, KN<PetscScalar>*, KN<PetscScalar>*, bool){ffassert(0);}
+}
 #ifdef WITH_mkl
     extern "C"{
         void  cblas_daxpby(const int N, const double alpha, const double *X,
