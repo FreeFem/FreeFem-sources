@@ -2021,7 +2021,7 @@ static void Init_PETSc() {
 }
   
     template<>  void PETSc::changeNumbering_func<PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >, PetscScalar>(PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >*, KN<PetscScalar>*, KN<PetscScalar>*, bool){ffassert(0);}
- 
+#ifdef WITH_mkl
     extern "C"{
         void  cblas_daxpby(const int N, const double alpha, const double *X,
                       const int incX, const double beta, double *Y, const int incY);
@@ -2031,6 +2031,7 @@ static void Init_PETSc() {
         cblas_daxpby(N,alpha,X,incX,beta,Y,incY);
     }
     }
+#endif
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)
 #endif
