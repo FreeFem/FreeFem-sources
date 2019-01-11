@@ -1,0 +1,67 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+macro partitioner()metis// EOM      // metis, scotch, or parmetis
+macro dimension()2// EOM            // 2D or 3D
+macro trueRestrict()true// EOM
+macro removeZeros()true// EOM
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)i// EOM                 // scalar field definition
+macro init(i)i// EOM                // scalar field initialization
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P1;                       // finite element space
+
+int s = getARGV("-split", 1);                                   // refinement factor
+func f = 1 + x - y;
+
+meshN Th = square(1, 1);
+fespace Wh(Th, Pk);                         // local finite element space
+int[int] arrayIntersection;                 // ranks of neighboring subdomains
+int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
+real[int] D;                                // partition of unity
+{
+    meshN ThBorder, ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
+    build(Th, ThBorder, ThGlobal, 10, s, 1, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false)
+}
+
+varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
+varf vL(u, v)  = intN(Th)(f * v);
+varf vb(u, v)  = intN(Th)(1.0 * v);
+matrix<real> Mat = vPb(Wh, Wh);
+real[int] F = vL(0, Wh);
+real[int] B = vb(0, Wh);
+real[int] pB, pF, pSol;
+dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+changeNumbering(A, B, pB);
+changeNumbering(A, F, pF);
+
+dmatrix AA = [[ A, pB ],
+              [ pB', 0 ]];
+if(mpirank == 0)
+    pF = [pF, 0];
+{
+    dmatrix C;
+    MatConvert(AA, C);
+    set(C, sparams = "-pc_type lu");
+    KSPSolve(C, pF, pSol);
+    if(mpirank == 0)
+        pSol.resize(pSol.n - 1);
+    Wh sol;
+    changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
+    plotMPI(Th, sol[], "Global solution #1", Pk, def, real, 3, 1)
+}
+{
+    real[int] split(pF.n);
+    split = 1;
+    if(mpirank == 0)
+        split(pF.n - 1) = 2;
+    set(AA, sparams = "-ksp_view_pre -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_mat_mumps_cntl_3 1e-12 -fieldsplit_0_mat_mumps_icntl_24 1 -pc_fieldsplit_detect_saddle_point", fields = split);
+    KSPSolve(AA, pF, pSol);
+    if(mpirank == 0)
+        pSol.resize(pSol.n - 1);
+    Wh sol;
+    changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
+    plotMPI(Th, sol[], "Global solution #2", Pk, def, real, 3, 1)
+}

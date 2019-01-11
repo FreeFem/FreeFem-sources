@@ -978,6 +978,14 @@ class initCSRfromBlockMatrix : public E_F0 {
                         e_M[i][j] = e;
                         t_M[i][j] = 2;
                     }
+                    else if( atype<KN_<PetscScalar>>()->CastingFrom(r) ) {
+                        e_M[i][j] = to<KN_<PetscScalar>>(c_M);
+                        t_M[i][j] = 3;
+                    }
+                    else if(atype<Transpose<KN_<PetscScalar>>>()->CastingFrom(r)) {
+                        e_M[i][j] = to<Transpose<KN_<PetscScalar>>>(c_M);
+                        t_M[i][j] = 4;
+                    }
                     else if(atype<PetscScalar>()->CastingFrom(r)) {
                         e_M[i][j] = to<PetscScalar>(c_M);
                         t_M[i][j] = 7;
@@ -1033,6 +1041,29 @@ class initCSRfromBlockMatrix : public E_F0 {
                             if(i == j)
                                 zeros.emplace_back(i);
                         }
+                        else if(t == 3 || t == 4) {
+                            KN<PetscScalar> x;
+                            Mat B;
+                            MatCreate(PETSC_COMM_WORLD, &B);
+                            if(t == 4) {
+                                x = GetAny<KN_<PetscScalar>>(e_ij);
+                                MatSetSizes(B, PETSC_DECIDE, x.n, 1, PETSC_DECIDE);
+                            }
+                            else {
+                                x = GetAny<Transpose<KN_<PetscScalar>>>(e_ij);
+                                MatSetSizes(B, x.n, PETSC_DECIDE, PETSC_DECIDE, 1);
+                            }
+                            MatSetType(B, MATMPIDENSE);
+                            MatMPIDenseSetPreallocation(B, PETSC_NULL);
+                            PetscScalar* array;
+                            MatDenseGetArray(B, &array);
+                            if(array)
+                                std::copy_n(static_cast<PetscScalar*>(x), x.n, array);
+                            MatDenseRestoreArray(B, &array);
+                            MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
+                            MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
+                            a[i * M + j] = B;
+                        }
                         else {
                             ExecError("Unknown type in submatrix");
                         }
@@ -1071,7 +1102,7 @@ class initCSRfromBlockMatrix : public E_F0 {
                     Y = X;
                 }
                 MatCreate(PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
-                MatSetSizes(a[zeros[i] * M + zeros[i]],x, y, X, Y);
+                MatSetSizes(a[zeros[i] * M + zeros[i]], x, y, X, Y);
                 MatSetType(a[zeros[i] * M + zeros[i]], MATMPIAIJ);
                 MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
                 MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);

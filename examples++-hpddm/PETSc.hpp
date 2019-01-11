@@ -54,6 +54,13 @@ class DistributedCSR {
                                     Mat B = mat[i][j];
                                     MatDestroy(&B);
                                 }
+                                else {
+                                    PetscStrcmp(type, MATMPIDENSE, &isType);
+                                    if(isType) {
+                                        Mat B = mat[i][j];
+                                        MatDestroy(&B);
+                                    }
+                                }
                             }
                         }
                     }
