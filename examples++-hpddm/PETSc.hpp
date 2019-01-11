@@ -60,6 +60,14 @@ class DistributedCSR {
                                         Mat B = mat[i][j];
                                         MatDestroy(&B);
                                     }
+                                    else if(i == j) {
+                                        MatInfo info;
+                                        MatGetInfo(mat[i][j], MAT_GLOBAL_SUM, &info);
+                                        if(std::abs(info.nz_used) < 1.0e-12) {
+                                            Mat B = mat[i][j];
+                                            MatDestroy(&B);
+                                        }
+                                    }
                                 }
                             }
                         }

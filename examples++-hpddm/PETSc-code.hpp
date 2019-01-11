@@ -1084,29 +1084,31 @@ class initCSRfromBlockMatrix : public E_F0 {
                 }
                 if(posX == -1 && posY == -1)
                     ExecError("Zero row and zero column");
-                int x, X, y, Y;
-                if(posX != -1) {
-                    MatGetSize(a[zeros[i] * M + posX], &X, &Y);
-                    MatGetLocalSize(a[zeros[i] * M + posX], &x, &y);
-                }
-                if(posY != -1) {
-                    MatGetSize(a[zeros[i] + posY * M], posX == -1 ? &X : NULL, &Y);
-                    MatGetLocalSize(a[zeros[i] + posY * M], posX == -1 ? &x : NULL, &y);
-                    if(posX == -1) {
-                        x = y;
-                        X = Y;
+                else if(posX == -1 || posY == -1) {
+                    int x, X, y, Y;
+                    if(posX != -1) {
+                        MatGetSize(a[zeros[i] * M + posX], &X, &Y);
+                        MatGetLocalSize(a[zeros[i] * M + posX], &x, &y);
                     }
+                    if(posY != -1) {
+                        MatGetSize(a[zeros[i] + posY * M], posX == -1 ? &X : NULL, &Y);
+                        MatGetLocalSize(a[zeros[i] + posY * M], posX == -1 ? &x : NULL, &y);
+                        if(posX == -1) {
+                            x = y;
+                            X = Y;
+                        }
+                    }
+                    else {
+                        y = x;
+                        Y = X;
+                    }
+                    MatCreate(PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
+                    MatSetSizes(a[zeros[i] * M + zeros[i]], x, y, X, Y);
+                    MatSetType(a[zeros[i] * M + zeros[i]], MATMPIAIJ);
+                    MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
+                    MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
+                    MatAssemblyEnd(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
                 }
-                else {
-                    y = x;
-                    Y = X;
-                }
-                MatCreate(PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
-                MatSetSizes(a[zeros[i] * M + zeros[i]], x, y, X, Y);
-                MatSetType(a[zeros[i] * M + zeros[i]], MATMPIAIJ);
-                MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
-                MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
-                MatAssemblyEnd(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
             }
             Result sparse_mat = GetAny<Result>((*emat)(s));
             if(sparse_mat->_petsc)
