@@ -188,7 +188,7 @@ int[int] lregionint = [regint2d,regint,regext2d,regext];
 
 meshtab[1] = buildlayers( Th2, mmz, zbound = [ 0, width ], labelup=lupint,labeldown=ldownint,labelmid=lmidint,region=lregionint);
 
-meshname = gluemesh3(meshtab,labtodel=labtomerge);
+meshname = gluemesh(meshtab,labtodel=labtomerge);
 } // EOM
 
 

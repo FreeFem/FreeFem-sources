@@ -8,7 +8,6 @@
 
 load "metis"
 load "medit"
-load "mymsh3"
 load "Element_Mixte3d"
 
 macro dimension 3// EOM
