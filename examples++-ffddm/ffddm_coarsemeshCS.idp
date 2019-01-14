@@ -71,7 +71,7 @@ else if (!pr#prfe#prmesh#excluded) {
   int i = mpiRank(pr#prfe#prmesh#commddm);
   
   IFMACRO(!VarfA)
-  pr#aRdEprec[i] = pr#aRd[i];
+  pr#aRdEprec = pr#aRd[i];
   ENDIFMACRO
   
   IFMACRO(VarfA)
@@ -89,19 +89,20 @@ else if (!pr#prfe#prmesh#excluded) {
   ENDIFMACRO   
 
   VarfA(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
-  pr#aRdEprec[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+  pr#aRdEprec = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
   
   pr#prfe#K[int] rhsFull(pr#prfe#AugVhi.ndof);
   pr#prfe#K[int] rhs(pr#prfe#Vhi.ndof);
   
-  renumbering(pr#aRdEprec[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
+  renumbering(pr#aRdEprec, pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
   ENDIFMACRO
 }
 
 if (!pr#prfe#prmesh#binexactCS) {
   {
     VarfEprec(cvaglobalEprec,pr#ThCoarse,pr#VhCoarse)
-    if (mpirank < pr#prfe#prmesh#pCS || !bpara) {
+    /*if (mpirank < pr#prfe#prmesh#pCS || !bpara)*/
+    if (mpirank == 0 || !bpara) {
       pr#ECM = cvaglobalEprec(pr#VhCoarse,pr#VhCoarse,solver=(vsym ? CG : GMRES),tgv=vtgv);  /* this is A_{eps,0} of Euan paper */
       /*pr#ECM.thresholding(1.e-10);*/
     }
@@ -109,7 +110,7 @@ if (!pr#prfe#prmesh#binexactCS) {
 
   if (bseq || mpirank < pr#prfe#prmesh#pCS) {
   	set(pr#ECM,solver=GMRES);
-    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=-1);
+    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0); /* -1 */
   }
 }
 	

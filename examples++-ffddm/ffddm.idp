@@ -234,7 +234,7 @@ ENDIFMACRO
 
 matrix<pr#prfe#K> pr#AglobEprec;
 matrix<pr#prfe#K>[int] pr#aR(pr#prfe#prmesh#npart);       /* local (ras or Robin) matrices (for the preconditioner) */
-matrix<pr#prfe#K>[int] pr#aRdEprec(pr#prfe#prmesh#npart);  /* local Dirichlet matrices for DtN CS */
+matrix<pr#prfe#K> pr#aRdEprec; 
 
 matrix<pr#prfe#K> pr#matN;
 
@@ -313,7 +313,7 @@ if (preffe#prmesh#isincomm)
       pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
 
       renumbering(pr#aRd[i], preffe#Auginterp, rhsFull, rhs, eps=-1);
-      
+ 
       IFMACRO(pr#withhpddm)
       changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
       ENDIFMACRO

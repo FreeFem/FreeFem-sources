@@ -55,7 +55,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
       if (!bpara)
       res = pr#AglobEprec*x;
       else if (!preffe#prmesh#excluded){	
-        res = pr#aRdEprec[mpiRank(preffe#prmesh#commddm)]*x;
+        res = pr#aRdEprec*x;
         pr#prfe#update(res,true);
       }
     }
@@ -548,7 +548,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     
     if (!preffe#prmesh#excluded) {
       wi = rhs;
-      for [i,bi: wi] bi = (bi > 1.e+20 ? 0 : bi);
+      for [i,bi: wi] bi = (abs(bi) > 1.e+20 ? 0 : bi);
     }
     
     if (sprec == "right")
