@@ -6796,7 +6796,7 @@ aType  typeFESpace(const basicAC_F0 &args)
         cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :"  << dm << " type FE "<< id +2 <<endl;
       ffassert(0);
     }
-    cout << " typeFESpace " << id << " " << ret->name() << endl;
+    if(verbosity>99) cout << " typeFESpace " << id << " " << ret->name() << endl;
     return ret;
 }
 

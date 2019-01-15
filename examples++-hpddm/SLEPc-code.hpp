@@ -131,13 +131,11 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             MatType type;
             PetscBool isType;
             MatGetType(ptA->_petsc, &type);
-            cout << " ptA->_petsc classid type "<<type <<" " << MATNEST <<endl;
             PetscStrcmp(type, MATNEST, &isType);
             PetscInt bs;
             PetscInt m;
             if(!codeA) {
                 Type* ptB = GetAny<Type*>((*B)(stack));
-                cout << "\n" << mpirank << " ****// !!!codeA " << ptA->_petsc << endl;
                 EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
                 if(!ptA->_A) {
                     MatGetBlockSize(ptA->_petsc, &bs);
@@ -153,8 +151,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 user->mat = new eigensolver<Type, K>::MatF_O(m * bs, stack, codeA);
                 MatCreateShell(PETSC_COMM_WORLD, m, m, M, M, user, &S);
                 MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K>);
-                cout << "\n" << mpirank << " ****// codeA S " << S << endl;
-                EPSSetOperators(eps, S, NULL);
+                 EPSSetOperators(eps, S, NULL);
             }
             std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
             bool fieldsplit = PETSc::insertOptions(options);

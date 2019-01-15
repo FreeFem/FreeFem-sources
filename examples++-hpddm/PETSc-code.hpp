@@ -1939,7 +1939,6 @@ static void Init_PETSc() {
     PetscInitialize(&argc, &argv, 0, "");
     PetscSysInitializePackage();
     MatInitializePackage();
-    cout << " MAT_CLASSID " << MAT_CLASSID << " " << &MAT_CLASSID << endl; 
     //PetscDLLibraryRegister() ;
     if(argc > 1) {
         HPDDM::Option& opt = *HPDDM::Option::get();
