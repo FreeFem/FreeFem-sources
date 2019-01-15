@@ -1546,6 +1546,78 @@ long MatMult(Type* const& A, KN<PetscScalar>* const& in, KN<PetscScalar>* const&
     }
     return 0L;
 }
+template<char P, class Type>
+long MatMatMult(Type* const& A, KNM<PetscScalar>* const& in, KNM<PetscScalar>* const& out) {
+    if(A) {
+        Mat C;
+        if(mpisize == 1)
+            MatMPIAIJGetLocalMat(A->_petsc, MAT_INITIAL_MATRIX, &C);
+        else
+            C = A->_petsc;
+        Mat x, y;
+        PetscInt n, m, bs, N, M;
+        MatGetLocalSize(A->_petsc, &n, &m);
+        MatGetSize(A->_petsc, &N, &M);
+        MatType type;
+        MatGetType(A->_petsc, &type);
+        PetscBool isNotBlock;
+        PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+        if(isNotBlock)
+            bs = 1;
+        else {
+            MatGetBlockSize(A->_petsc, &bs);
+            N *= bs;
+            M *= bs;
+        }
+        MatCreate(PETSC_COMM_WORLD, &x);
+        MatSetSizes(x, P == 'T' || P == 'H' ? bs * n : bs * m, PETSC_DECIDE, P == 'T' || P == 'H' ? N : M, in->M());
+        MatSetType(x, MATDENSE);
+        if(mpisize == 1)
+            MatSeqDenseSetPreallocation(x, &(in->operator()(0, 0)));
+        else
+            MatMPIDenseSetPreallocation(x, &(in->operator()(0, 0)));
+        MatAssemblyBegin(x, MAT_FINAL_ASSEMBLY);
+        MatAssemblyEnd(x, MAT_FINAL_ASSEMBLY);
+        if(P == 'T' || P == 'H') {
+            ffassert(in->N() == bs * n);
+            out->resize(bs * m, in->M());
+            if(P == 'T')
+                MatTransposeMatMult(C, x, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
+            else {
+                Mat w;
+                MatDuplicate(x, MAT_COPY_VALUES, &w);
+                MatConjugate(w);
+                MatTransposeMatMult(C, w, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
+                MatDestroy(&w);
+                MatConjugate(y);
+            }
+            PetscScalar* array;
+            MatDenseGetArray(y, &array);
+            if(array)
+                std::copy_n(array, bs * m * in->M(), &(out->operator()(0, 0)));
+            MatDenseRestoreArray(y, &array);
+        }
+        else {
+            ffassert(in->N() == bs * m);
+            out->resize(bs * n, in->M());
+            MatCreate(PETSC_COMM_WORLD, &y);
+            MatSetSizes(y, P == 'T' || P == 'H' ? bs * m : bs * n, PETSC_DECIDE, P == 'T' || P == 'H' ? M : N, in->M());
+            MatSetType(y, MATDENSE);
+            if(mpisize == 1)
+                MatSeqDenseSetPreallocation(y, &(out->operator()(0, 0)));
+            else
+                MatMPIDenseSetPreallocation(y, &(out->operator()(0, 0)));
+            MatAssemblyBegin(y, MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(y, MAT_FINAL_ASSEMBLY);
+            MatMatMult(C, x, MAT_REUSE_MATRIX, PETSC_DEFAULT, &y);
+        }
+        MatDestroy(&y);
+        MatDestroy(&x);
+        if(C != A->_petsc)
+            MatDestroy(&C);
+    }
+    return 0L;
+}
 template<class Type>
 long MatConvert(Type* const& A, Type* const& B) {
     if(A->_petsc) {
@@ -1679,21 +1751,28 @@ class Solve : public OneOperator {
                 Expression nargs[n_name_param];
                 E_Solve(const basicAC_F0& args, int d) : A(0), x(0), y(0), codeA(0), codeC(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
-                    if(c == 1) {
-                        const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
-                        ffassert(op);
-                        codeA = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
-                        if(nargs[0]) {
-                            op = dynamic_cast<const Polymorphic*>(nargs[0]);
+                    if(c != 2) {
+                        if(c == 1) {
+                            const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
                             ffassert(op);
-                            codeC = op->Find("(", ArrayOfaType(atype<Kn*>(), false));
+                            codeA = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
+                            if(nargs[0]) {
+                                op = dynamic_cast<const Polymorphic*>(nargs[0]);
+                                ffassert(op);
+                                codeC = op->Find("(", ArrayOfaType(atype<Kn*>(), false));
+                            }
                         }
+                        else {
+                            A = to<Type*>(args[0]);
+                        }
+                        x = to<KN<PetscScalar>*>(args[1]);
+                        y = to<KN<PetscScalar>*>(args[2]);
                     }
                     else {
                         A = to<Type*>(args[0]);
+                        x = to<KNM<PetscScalar>*>(args[1]);
+                        y = to<KNM<PetscScalar>*>(args[2]);
                     }
-                    x = to<KN<PetscScalar>*>(args[1]);
-                    y = to<KN<PetscScalar>*>(args[2]);
                 }
 
                 AnyType operator()(Stack stack) const;
@@ -1702,6 +1781,7 @@ class Solve : public OneOperator {
         E_F0* code(const basicAC_F0 & args) const { return new E_Solve(args, c); }
         Solve() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()), c(0) { }
         Solve(int) : OneOperator(atype<long>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()), c(1) { }
+        Solve(int, int) : OneOperator(atype<long>(), atype<Type*>(), atype<KNM<PetscScalar>*>(), atype<KNM<PetscScalar>*>()), c(2) { }
 };
 template<class Type, char N>
 basicAC_F0::name_and_type Solve<Type, N>::E_Solve::name_param[] = {
@@ -1712,77 +1792,100 @@ template<class Type, class Container>
 static PetscErrorCode Op_User(Container A, Vec x, Vec y);
 template<class Type, char N>
 AnyType Solve<Type, N>::E_Solve::operator()(Stack stack) const {
-    KN<PetscScalar>* in = GetAny<KN<PetscScalar>*>((*x)(stack));
-    KN<PetscScalar>* out = GetAny<KN<PetscScalar>*>((*y)(stack));
-    if(A) {
-        Type* ptA = GetAny<Type*>((*A)(stack));
-        Vec x, y;
-        MatCreateVecs(ptA->_petsc, &x, &y);
-        PetscInt size;
-        VecGetLocalSize(y, &size);
-        ffassert(in->n == size);
-        if(out->n != size) {
-            out->resize(size);
-            *out = PetscScalar();
+    if(c != 2) {
+        KN<PetscScalar>* in = GetAny<KN<PetscScalar>*>((*x)(stack));
+        KN<PetscScalar>* out = GetAny<KN<PetscScalar>*>((*y)(stack));
+        if(A) {
+            Type* ptA = GetAny<Type*>((*A)(stack));
+            Vec x, y;
+            MatCreateVecs(ptA->_petsc, &x, &y);
+            PetscInt size;
+            VecGetLocalSize(y, &size);
+            ffassert(in->n == size);
+            if(out->n != size) {
+                out->resize(size);
+                *out = PetscScalar();
+            }
+            VecPlaceArray(x, *in);
+            VecPlaceArray(y, *out);
+            if(N == 'N')
+                KSPSolve(ptA->_ksp, x, y);
+            else if(N == 'H') {
+                VecConjugate(x);
+                KSPSolveTranspose(ptA->_ksp, x, y);
+                VecConjugate(y);
+            }
+            VecResetArray(y);
+            VecResetArray(x);
+            VecDestroy(&y);
+            VecDestroy(&x);
         }
-        VecPlaceArray(x, *in);
-        VecPlaceArray(y, *out);
-        if(N == 'N')
-            KSPSolve(ptA->_ksp, x, y);
-        else if(N == 'H') {
-            VecConjugate(x);
-            KSPSolveTranspose(ptA->_ksp, x, y);
-            VecConjugate(y);
+        else {
+            User<Solve<Type, N>> user = nullptr;
+            PetscNew(&user);
+            user->op = new Solve<Type, N>::MatF_O(in->n, stack, codeA);
+            Mat S;
+            MatCreateShell(PETSC_COMM_WORLD, in->n, in->n, PETSC_DECIDE, PETSC_DECIDE, user, &S);
+            MatShellSetOperation(S, MATOP_MULT, (void (*)(void))Op_User<Solve<Type, N>, Mat>);
+            Vec x, y;
+            MatCreateVecs(S, &x, &y);
+            if(out->n != in->n) {
+                out->resize(in->n);
+                *out = PetscScalar();
+            }
+            VecPlaceArray(x, *in);
+            VecPlaceArray(y, *out);
+            KSP ksp;
+            KSPCreate(PETSC_COMM_WORLD, &ksp);
+            KSPSetOperators(ksp, S, S);
+            std::string* options = nargs[1] ? GetAny<std::string*>((*nargs[1])(stack)) : NULL;
+            insertOptions(options);
+            PC pc;
+            KSPGetPC(ksp, &pc);
+            User<Solve<Type, N>> userPC = nullptr;
+            if(codeC) {
+                PCSetType(pc, PCSHELL);
+                PetscNew(&userPC);
+                userPC->op = new Solve<Type, N>::MatF_O(in->n, stack, codeC);
+                PCShellSetContext(pc, userPC);
+                PCShellSetApply(pc, Op_User<Solve<Type, N>, PC>);
+            }
+            KSPSetFromOptions(ksp);
+            KSPSolve(ksp, x, y);
+            VecResetArray(y);
+            VecResetArray(x);
+            VecDestroy(&y);
+            VecDestroy(&x);
+            MatDestroy(&S);
+            KSPDestroy(&ksp);
+            if(codeC) {
+                delete userPC->op;
+                PetscFree(userPC);
+            }
+            delete user->op;
+            PetscFree(user);
         }
-        VecResetArray(y);
-        VecResetArray(x);
-        VecDestroy(&y);
-        VecDestroy(&x);
     }
     else {
-        User<Solve<Type, N>> user = nullptr;
-        PetscNew(&user);
-        user->op = new Solve<Type, N>::MatF_O(in->n, stack, codeA);
-        Mat S;
-        MatCreateShell(PETSC_COMM_WORLD, in->n, in->n, PETSC_DECIDE, PETSC_DECIDE, user, &S);
-        MatShellSetOperation(S, MATOP_MULT, (void (*)(void))Op_User<Solve<Type, N>, Mat>);
-        Vec x, y;
-        MatCreateVecs(S, &x, &y);
-        if(out->n != in->n) {
-            out->resize(in->n);
-            *out = PetscScalar();
+        KNM<PetscScalar>* in = GetAny<KNM<PetscScalar>*>((*x)(stack));
+        KNM<PetscScalar>* out = GetAny<KNM<PetscScalar>*>((*y)(stack));
+        if(A) {
+            Type* ptA = GetAny<Type*>((*A)(stack));
+            PetscInt m, bs;
+            MatGetLocalSize(ptA->_petsc, &m, NULL);
+            MatType type;
+            MatGetType(ptA->_petsc, &type);
+            PetscBool isNotBlock;
+            PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
+            if(isNotBlock)
+                bs = 1;
+            else
+                MatGetBlockSize(ptA->_petsc, &bs);
+            ffassert(in->N() == bs * m);
+            out->resize(bs * m, in->M());
+            HPDDM::PETScOperator op(ptA->_ksp, m, bs);
+            op.apply(&in->operator()(0, 0), &out->operator()(0, 0), in->M());
         }
-        VecPlaceArray(x, *in);
-        VecPlaceArray(y, *out);
-        KSP ksp;
-        KSPCreate(PETSC_COMM_WORLD, &ksp);
-        KSPSetOperators(ksp, S, S);
-        std::string* options = nargs[1] ? GetAny<std::string*>((*nargs[1])(stack)) : NULL;
-        insertOptions(options);
-        PC pc;
-        KSPGetPC(ksp, &pc);
-        User<Solve<Type, N>> userPC = nullptr;
-        if(codeC) {
-            PCSetType(pc, PCSHELL);
-            PetscNew(&userPC);
-            userPC->op = new Solve<Type, N>::MatF_O(in->n, stack, codeC);
-            PCShellSetContext(pc, userPC);
-            PCShellSetApply(pc, Op_User<Solve<Type, N>, PC>);
-        }
-        KSPSetFromOptions(ksp);
-        KSPSolve(ksp, x, y);
-        VecResetArray(y);
-        VecResetArray(x);
-        VecDestroy(&y);
-        VecDestroy(&x);
-        MatDestroy(&S);
-        KSPDestroy(&ksp);
-        if(codeC) {
-            delete userPC->op;
-            PetscFree(userPC);
-        }
-        delete user->op;
-        PetscFree(user);
     }
     return 0L;
 }
@@ -2112,13 +2215,18 @@ static void Init_PETSc() {
     Global.Add("changeNumbering", "(", new PETSc::changeNumbering<Dmat>(1));
     Global.Add("changeNumbering", "(", new PETSc::changeNumbering<Dmat>(1, 2));
     Global.Add("MatMult", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::MatMult<'N'>));
+    Global.Add("MatMatMult", "(", new OneOperator3_<long, Dmat*, KNM<PetscScalar>*, KNM<PetscScalar>*>(PETSc::MatMatMult<'N'>));
     Global.Add("MatMultTranspose", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::MatMult<'T'>));
-    if(!std::is_same<PetscScalar, PetscReal>::value)
+    Global.Add("MatTransposeMatMult", "(", new OneOperator3_<long, Dmat*, KNM<PetscScalar>*, KNM<PetscScalar>*>(PETSc::MatMatMult<'T'>));
+    if(!std::is_same<PetscScalar, PetscReal>::value) {
         Global.Add("MatMultHermitianTranspose", "(", new OneOperator3_<long, Dmat*, KN<PetscScalar>*, KN<PetscScalar>*>(PETSc::MatMult<'H'>));
+        Global.Add("MatHermitianTransposeMatMult", "(", new OneOperator3_<long, Dmat*, KNM<PetscScalar>*, KNM<PetscScalar>*>(PETSc::MatMatMult<'H'>));
+    }
     Global.Add("MatConvert", "(", new OneOperator2_<long, Dmat*, Dmat*>(PETSc::MatConvert));
     Global.Add("MatZeroRows", "(", new OneOperator2_<long, Dmat*, KN<double>*>(PETSc::MatZeroRows));
     Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>());
     Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>(1));
+    Global.Add("KSPSolve", "(", new PETSc::Solve<Dmat>(1, 1));
     if(!std::is_same<PetscScalar, PetscReal>::value)
         Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::Solve<Dmat, 'H'>());
     Global.Add("augmentation", "(", new PETSc::augmentation<Dmat>);
