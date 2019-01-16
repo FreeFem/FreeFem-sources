@@ -30,6 +30,9 @@
 extern Block *currentblock;
 
 template<class K> class Matrice_Creuse;
+//template<class K>  using MatriceMap=map<pair<int,int>,K>;
+template<class K>  using MatriceMap=HashMatrix<int,K>;
+
 //template<class K> class MatriceCreuse;
 namespace  Fem2D {
   template<class K> class SolveGCPrecon;
@@ -1226,12 +1229,19 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
        AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);
    }
   else
-   { // add FH 17 06 2005  int on different meshes. 
-     map<pair<int,int>, R >   AAA;
+   { // add FH 17 06 2005  int on different meshes.
+#ifdef V3__CODE
+     MatriceMap<R>   AAA;
      MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym);
-     bool bc=AssembleVarForm<R,map<pair<int,int>, R >,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
+     bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
      pMA->addMap(1.,AAA);
-      A.A.master(pMA ) ;
+#else
+       MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,ds.sym);
+       MatriceMap<R>  &  AAA = *pMA;
+       bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
+
+#endif
+       A.A.master(pMA ) ;
 
        if (bc)
            AssembleBC<R>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);

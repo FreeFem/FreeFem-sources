@@ -1580,6 +1580,38 @@ bool pfer_refresh3(pair<FEbase<K,v_fes> *,int> p)
     return Vho != (const FESpace * ) p.first->Vh;// FE change !!!
 }
 
+template<class Mesh>
+KN_<long> listoflabel(Stack s, Mesh const * const & pTh)
+{
+    set<long> sl;
+    for(int e=0; e< pTh->nbBrdElmts();++e)
+        sl.insert(pTh->be(e).lab);
+    
+    long n = sl.size(),ii=0;
+    long * p = Add2StackOfPtr2FreeA<long>(s,new long[n]); //   mark to be delete ..
+    KN_<long> A(p,n);
+    for(auto  i=sl.begin();i!=sl.end();++i)
+        A[ii++]= *i;
+    ffassert(ii== n);
+  if(verbosity>99)   cout << " -- listoflabels "<< A << endl;
+    return A;
+};
+template<class Mesh>
+KN_<long> listofregion(Stack s, Mesh  const * const  & pTh)
+{
+    const Mesh & Th=*pTh;
+    set<long> sl;
+    for(int t=0; t< Th.nt;++t)
+        sl.insert(Th[t].lab);
+    
+    long n = sl.size(),ii=0;
+    long * p = Add2StackOfPtr2FreeA<long>(s,new long[n]); //   mark to be delete ..
+    KN_<long> A(p,n);
+    for(auto  i=sl.begin();i!=sl.end();++i)
+        A[ii++]= *i;
+     if(verbosity>99)   cout << " -- listofregions "<< A << endl;
+    return A;
+};
 
 void init_lgmesh3() {
   if(verbosity&&(mpirank==0))  cout <<"lg_mesh3 ";
@@ -1815,8 +1847,12 @@ TheOperators->Add("=",
     
  
  Add<pfes3*>("(","", new OneTernaryOperator<pVh3_ndf,pVh3_ndf::Op>  );
-init_mesh3_array();   
- 
+init_mesh3_array();
+    // Add jan 2019 F.H ..to get a sorted the array of label and region of a mesh.
+    Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh3>(listoflabel));
+    Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh>(listoflabel));
+    Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
+    Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
 }
 
 //#include "InitFunct.hpp"

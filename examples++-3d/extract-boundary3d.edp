@@ -1,7 +1,15 @@
 load "msh3"
 load "medit"
-mesh3 Th=cube(10,10,10);
-int[int] ll=labels(Th);
-cout << ll << endl;
+int n= 10;
+int nvb = (n+1)^3 - (n-1)^3;// Nb boundary vertices
+int ntb = n*n*12; // Nb of Boundary triangle 
+mesh3 Th=cube(n,n,n);
+int[int] ll=labels(Th);//  get all labels of the mesh .. 
+cout << " the labels "<< ll << endl;
+cout << Th.nbe << endl; 
 Th=extract(Th,label=ll);// extract boundary of 3d Mesh with given label
-medit("Th",Th);
+assert(Th.nt==0); 
+cout <<"  mesh nbe, nv " <<  Th.nbe << " " << Th. nv << endl; 
+cout <<"  computed by hand: " << ntb  << " " << nvb  << endl; 
+assert( Th.nbe == ntb) ;
+assert( Th.nv == nvb);

@@ -1103,7 +1103,7 @@ class  OneOperator_2KN_ : public OneOperator {public:
 	}
 	AnyType operator()(Stack s)  const { 
 	    K * p = Add2StackOfPtr2FreeA<K>(s,new K[N]); //   mark to be delete .. 
-	    KN<K> A(N, p);
+            KN_<K> A(p,N); // FH:  Correct jan 2019  bug is: stupide A what delete if KN  type 
 	    for(int i=0;i<N;++i)
 		A[i]= GetAny<K>( (*tab[i])(s));
 	    return SetAny<KN_<K> >(A);}
