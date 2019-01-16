@@ -1,0 +1,7 @@
+load "msh3"
+load "medit"
+mesh3 Th=cube(10,10,10);
+int[int] ll=labels(Th);
+cout << ll << endl;
+Th=extract(Th,label=ll);// extract boundary of 3d Mesh with given label
+medit("Th",Th);
