@@ -298,7 +298,7 @@ template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Typ
 void exchange_restriction(Type* const&, KN<K>*, KN<K>*, MatriceMorse<double>*) { }
 namespace PETSc {
 template<class Type, class K>
-void changeNumbering_func(Type*, KN<K>*, KN<K>*, bool);
+    void changeNumbering_func(Type*, KN<K>*, KN<K>*, bool){ ffassert(0);} // Modif FH. Missing function Do Day
 }
 template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
 void exchange_restriction(Type* const& pA, KN<K>* pin, KN<K>* pout, MatriceMorse<double>* mR) {

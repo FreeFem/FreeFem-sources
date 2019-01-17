@@ -1347,7 +1347,7 @@ template<class T, typename std::enable_if<!std::is_same<T, KN<PetscScalar>>::val
 void resize(T* v, int size) { }
 template<class T, class U>
 void changeNumbering_func(unsigned int* const num, unsigned int first, unsigned int last, PetscInt m, PetscInt n, PetscInt bs, T* ptIn, U* ptOut, bool inverse) {
-    PetscScalar* out;
+/*    PetscScalar* out;
     if(!inverse) {
         resize(ptOut, m ? m * bs : n);
         out = static_cast<PetscScalar*>(*ptOut);
@@ -1365,6 +1365,7 @@ void changeNumbering_func(unsigned int* const num, unsigned int first, unsigned 
         else
             std::copy_n(out, ptIn->n, static_cast<PetscScalar*>(*ptIn));
     }
+	*/
 }
 template<class Type>
 AnyType changeNumbering<Type>::changeNumbering_Op::operator()(Stack stack) const {
@@ -2018,20 +2019,8 @@ static void Init_PETSc() {
 
     Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
-namespace PETSc {
-    template<>  void changeNumbering_func<PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >, PetscScalar>(PETSc::DistributedCSR<HPDDM::Schwarz<(char)83, PetscScalar> >*, KN<PetscScalar>*, KN<PetscScalar>*, bool){ffassert(0);}
-}
-#ifdef WITH_mkl
-    extern "C"{
-        void  cblas_daxpby(const int N, const double alpha, const double *X,
-                      const int incX, const double beta, double *Y, const int incY);
-    void catlas_daxpby(const int N, const double alpha, const double *X,
-                            const int incX, const double beta, double *Y, const int incY)
-    {
-        cblas_daxpby(N,alpha,X,incX,beta,Y,incY);
-    }
-    }
-#endif
+
+
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)
 #endif
