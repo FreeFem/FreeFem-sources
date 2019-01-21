@@ -136,7 +136,10 @@ plot(rh,ps="lshape.eps");
     {
       u[][i]=1;
       plot(u,wait=1);
-      mesh Shi=trunc(Th,abs(u)>1e-10,split=2,label=2,new2old=n2o);
+      mesh Shi=trunc(Th,abs(u)>1e-10,split=2,label=2,new2old=n2o,fregion=i+0);
+      int [int] lr = regions(Shi);
+	  cout<< "regions " <<  i << " :: " << lr.n << " " << lr[0] << endl; 
+	  assert( lr.n ==1 && lr[0] == i);
       plot(Th,Shi,wait=1,ps="trunc"+i+".eps");                    
       cout << " n2o " << n2o << endl; // where the element come
       u[][i]=0;
