@@ -216,8 +216,6 @@ AnyType changeOperator_Op<Type>::operator()(Stack stack) const {
             int* ia = nullptr;
             int* ja = nullptr;
             PetscScalar* c = nullptr;
-            if(ptA->_ksp)
-                KSPSetOperators(ptA->_ksp, NULL, NULL);
             bool free = true;
             if(!ptA->_ksp)
                 free = HPDDM::template Subdomain<PetscScalar>::distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, ptA->_num + dN->_n);
