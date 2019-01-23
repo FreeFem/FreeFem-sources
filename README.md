@@ -17,10 +17,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/710d25bb3c6040c19c3ff7c0f3201835)](https://www.codacy.com/app/sgarnotel/FreeFem-sources?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FreeFem/FreeFem-sources&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/FreeFem/FreeFem-sources.svg?branch=master)](https://travis-ci.org/FreeFem/FreeFem-sources)
-<a href="https://scan.coverity.com/projects/freefem-freefem-sources">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/15433/badge.svg"/>
-</a>
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/FreeFem/FreeFem-sources.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FreeFem/FreeFem-sources/context:cpp)
 
 | Branch | Ubuntu All<sup>1</sup> | Ubuntu No<sup>1</sup> | MacOSX All<sup>2</sup> | MacOSX No<sup>3</sup> | Windows 7 64bits<sup>4</sup> | Windows7 32bits<sup>4<sup> |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
