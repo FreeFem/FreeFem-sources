@@ -28,7 +28,7 @@ See [CI/CD Tools](#ci-cd-tools)
 
 # FreeFem++ sources
 
-FreeFem++ is a partial differential equation solver for non-linear multi-physics systems in 2D and 3D
+[FreeFem++](https://freefem.org) is a partial differential equation solver for non-linear multi-physics systems in 2D and 3D using the finite element method.
 
 Problems involving partial differential equations from several branches of physics such as fluid-structure interactions require interpolations of data on several meshes and their manipulation within one program.
 
@@ -58,15 +58,15 @@ Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathemat
 **BibTeX :**
 ```
 @article{MR3043640,
-AUTHOR = {Hecht, F.},
-TITLE = {New development in FreeFem++},
-JOURNAL = {J. Numer. Math.},
-FJOURNAL = {Journal of Numerical Mathematics},
-VOLUME = {20}, YEAR = {2012},
-NUMBER = {3-4}, PAGES = {251--265},
-ISSN = {1570-2820},
-MRCLASS = {65Y15},
-MRNUMBER = {3043640}
+  AUTHOR = {Hecht, F.},
+  TITLE = {New development in FreeFem++},
+  JOURNAL = {J. Numer. Math.},
+  FJOURNAL = {Journal of Numerical Mathematics},
+  VOLUME = {20}, YEAR = {2012},
+  NUMBER = {3-4}, PAGES = {251--265},
+  ISSN = {1570-2820},
+  MRCLASS = {65Y15},
+  MRNUMBER = {3043640}
 }
 ```
 
