@@ -136,7 +136,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             PetscInt m;
             if(!codeA) {
                 Type* ptB = GetAny<Type*>((*B)(stack));
-                EPSSetOperators(eps, ptA->_petsc, ptB->_A ? ptB->_petsc : NULL);
+                EPSSetOperators(eps, ptA->_petsc, ptB->_petsc);
                 if(!ptA->_A) {
                     MatGetBlockSize(ptA->_petsc, &bs);
                     MatGetLocalSize(ptA->_petsc, &m, NULL);
@@ -151,28 +151,29 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 user->mat = new eigensolver<Type, K>::MatF_O(m * bs, stack, codeA);
                 MatCreateShell(PETSC_COMM_WORLD, m, m, M, M, user, &S);
                 MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K>);
-                 EPSSetOperators(eps, S, NULL);
+                EPSSetOperators(eps, S, NULL);
             }
             std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
             bool fieldsplit = PETSc::insertOptions(options);
             if(nargs[1])
                 EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             EPSSetFromOptions(eps);
-            if(fieldsplit) {
+            ST st;
+            KSP ksp;
+            EPSGetST(eps, &st);
+            if(ptA->_ksp)
+                STSetKSP(st, ptA->_ksp);
+            else if(fieldsplit) {
                 KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
                 KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
                 KN<Matrice_Creuse<PetscScalar>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[7])(stack)) : 0;
                 KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
                 if(fields && names) {
-                    ST st;
-                    KSP ksp;
-                    PC pc;
-                    EPSGetST(eps, &st);
-                    STGetKSP(st, &ksp);
                     KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                     setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
                     EPSSetUp(eps);
                     if(!ptA->_S.empty()) {
+                        PC pc;
                         KSPGetPC(ksp, &pc);
                         PCSetUp(pc);
                         setCompositePC(ptA, pc);
@@ -345,10 +346,8 @@ static void Init() {
         delete [] argv;
         ff_atend(SLEPc::finalizeSLEPc);
         SLEPc::addSLEPc<PetscScalar>();
-#ifdef WITH_slepccomplex
         Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
         Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>(1));
-#endif
         if(verbosity>1)cout << "*** End:: load PETSc & SELPc "<< typeid(PetscScalar).name() <<"\n\n"<<endl;
         zzzfff->Add(mmmm, atype<Dmat*>());
     }

@@ -1197,8 +1197,7 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 		if (!squiet && !ddebug) {
 			fprintf(stdout, ": %d (%d, %.2f) / %d lines",
 			        nbar, nbp, (float)nbp / nbar, k / 3);
-			ct = difftime(clock(), ct);
-			fprintf(stdout, " %6.2f sec.\n", ct);
+			fprintf(stdout, " %6.2f sec.\n", difftime(clock(), ct));
 		}
 
 		if (sc->par.maxtime < FLT_MAX) {
@@ -1277,8 +1276,7 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 		if (nbar)
 			fprintf(stdout, ": %d (%d, %.2f) / %d lines", nbar, nbp, (float)nbp / nbar, k / 3);
 
-		ct = difftime(clock(), ct);
-		fprintf(stdout, " %6.2f sec.\n", ct);
+		fprintf(stdout, " %6.2f sec.\n", difftime(clock(), ct));
 	}
 
 	return (1);
@@ -1675,8 +1673,7 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 		glLineWidth(1.0);
 		glEndList();
 		fprintf(stdout, ": %d (%d, %.2f) / %d lines", nbar, nbp, (float)nbp / nbar, k / 3);
-		ct = difftime(clock(), ct);
-		fprintf(stdout, " %6.2f sec.\n", ct);
+		fprintf(stdout, " %6.2Lf sec.\n", difftime(clock(), ct));
 		if (sc->par.maxtime < FLT_MAX) {
 			fprintf(out, "%8.2f  %f %f\n",
 			        sc->par.cumtim, p[0] + mesh->xtra, p[1] + mesh->ytra);
@@ -1750,8 +1747,7 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 	if (nbar)
 		fprintf(stdout, ": %d (%d, %.2f) / %d lines", nbar, nbp, (float)nbp / nbar, k / 3);
 
-	ct = difftime(clock(), ct);
-	fprintf(stdout, " %6.2f sec.\n", ct);
+	fprintf(stdout, " %6.2f sec.\n", difftime(clock(), ct));
 
 	return (1);
 }
