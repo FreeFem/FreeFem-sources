@@ -170,6 +170,8 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	SetEpsilon(epsilon);
 	SetEta(eta);
 	
+	if (init)
+		delete *Hmat;
 	*Hmat = new HMatrix<LR,K>(A,p1,p2);
 	
 	//*Hmat = generateBIO<LR,K,EquationEnum::YU,BIOpKernelEnum::HS_OP,BIOpKernelEnum::SL_OP,2,P1_2D>();
@@ -233,6 +235,7 @@ struct PrintPinfos: public binary_function<ostream*,A,ostream*> {
 template<template<class> class LR, class K>
 void add() {
     Dcl_Type<HMatrix<LR ,K>**>(Initialize<HMatrix<LR,K>*>, Delete<HMatrix<LR,K>*>);
+		Dcl_TypeandPtr<HMatrix<LR ,K>*>(0,0,::InitializePtr<HMatrix<LR ,K>*>,::DeletePtr<HMatrix<LR ,K>*>);
     //TheOperators->Add("<-", new init<LR,K>);
     zzzfff->Add("HMatrix", atype<HMatrix<LR,K>**>());
 		Dcl_Type<const typename assembleHMatrix<LR, K>::Op *>(); 
