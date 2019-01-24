@@ -96,8 +96,8 @@ CBLAS/src/cblas_scopy.c CBLAS/src/cblas_zgeru.c CBLAS/src/snrm2sub.f CBLAS/src/c
 CBLAS/src/cblas_zhbmv.c CBLAS/src/xerbla.c CBLAS/src/cblas_dger.c CBLAS/src/cblas_sdsdot.c CBLAS/src/cblas_zhemm.c	\
 CBLAS/src/zdotcsub.f CBLAS/src/cblas_dnrm2.c CBLAS/src/cblas_sgbmv.c CBLAS/src/cblas_zhemv.c CBLAS/src/zdotusub.f
 
-nodist_libf77blas_a_SOURCES=$(F77BLAS_SOURCES)
-nodist_libcblas_a_SOURCES=$(CBLAS_SOURCES)
+nodist_libf77blas_a_SOURCES= #$(F77BLAS_SOURCES)
+nodist_libcblas_a_SOURCES= #$(CBLAS_SOURCES)
 BUILT_SOURCES=@DOWNLOADED_BLAS_BUILT_SOURCES@
 
 # -ICBLAS/include to find cblas.h

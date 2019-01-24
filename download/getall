@@ -207,10 +207,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/68f7a27c36eb
 		'317358b525baa9da97f60db972c2bf42');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/605b297e1a87441c10b171386dd2b27ec2815e81.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/a3721b95909d61a6995ce7e2bc4aa401f21e07e7.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'0144dc53fa9b45417fbd95fe959a9eb9');
+	'7d5422a54fd3ec42827ba0fc62eee803');
 
 # run all downloads concurrently
 
