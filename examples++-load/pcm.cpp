@@ -52,7 +52,7 @@ using namespace std;
 PCM::PCM (int w, int h) {
 	width = w;
 	height = h;
-	pixels = w * h;
+	pixels = (long) w * h;
 	max = 0.0;
 	image = new pcm_complex[pixels];
 }

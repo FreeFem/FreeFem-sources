@@ -246,7 +246,7 @@ int LineBorder (R2 *P, double *f, long close, R2 *Q, int *i1, int *i2, double ep
 			Q[np] = P[1];
 			i1[np] = i2[np] = 1, np++;
 		}
-	} else {}
+	}
 
 	return np;
 }

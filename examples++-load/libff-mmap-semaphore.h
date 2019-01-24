@@ -20,6 +20,9 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+#ifndef _LIBFF_MMAP_SEMAPHORE_
+#define _LIBFF_MMAP_SEMAPHORE_
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -84,3 +87,4 @@ void ffmmap_write_ (long *p, void *pt, int *ln, int *off, long *ret);
 }
 #endif
 
+#endif

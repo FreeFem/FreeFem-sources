@@ -20,6 +20,9 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+#ifndef _BMO_HPP_
+#define _BMO_HPP_
+
 typedef int integer;
 class BijanMO
 {
@@ -121,3 +124,4 @@ class BijanMO
 		virtual void result (Vect &xoptg, Vect &vinit) {}
 };
 
+#endif

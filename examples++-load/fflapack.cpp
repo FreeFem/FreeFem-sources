@@ -398,7 +398,7 @@ long lapack_zggev (KNM<Complex> *const &A, KNM<Complex> *const &B, KN<Complex> *
 	if (info) {
 		cout << " info =  " << info << endl;
 		nvp = 0;
-	} else {}
+	}
 
 	return nvp;
 }

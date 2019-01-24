@@ -20,6 +20,9 @@
 // AUTHORS : Nikolaus Hansen
 // E-MAIL  : ...
 
+#ifndef _CMAES_INTERFACE_H_
+#define _CMAES_INTERFACE_H_
+
 #include "cmaes.h"
 
 /* --------------------------------------------------------- */
@@ -61,3 +64,4 @@ double*cmaes_NewDouble (int n);
 void cmaes_FATAL (char const *s1, char const *s2, char const *s3,
                   char const *s4);
 
+#endif

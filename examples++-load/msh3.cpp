@@ -288,7 +288,7 @@ int TestElementMesh3 (const Mesh3 &Th3) {
 	for (int k = 0; k < Th3.nbe; k++) {
 		for (int e = 0; e < 3; e++) {
 			if (Th3.be(k).lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
-				for (int eh = 0; eh < 3; e++) {
+				for (int eh = 0; eh < 3; eh++) {
 					cout << "triangles: " << k << " edge : " << eh << " lenght " << Th3.be(k).lenEdge(e) << endl;
 				}
 
@@ -1995,10 +1995,10 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
 	ffassert(pTh);
-    
+
 	Mesh3 &Th = *pTh;
     MeshS &ThS = *(pTh->getMeshS());
-    
+
 	//Mesh3 *m = pTh;	// question a quoi sert *m ??
     // for volume 3D mesh
 	int nbv = Th.nv;// nombre de sommet
@@ -2008,12 +2008,12 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     KN<int> takemesh(Th.nv);
     MeshPoint *mp3(MeshPointStack(stack));
     takemesh = 0;
-   
+
     // for surface 3D mesh
     int nbvS = 0;
     int nbtS = 0;
     int nbeS = 0;
-   
+
     if(typeMesh3!=1) {
         //takemeshS(ThS.nv);
         nbvS = ThS.nv;// nombre de sommet
@@ -2024,10 +2024,10 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     KN<int> takemeshS(nbvS);
     takemeshS = 0;
     KN<double> txxS(nbvS), tyyS(nbvS), tzzS(nbvS);
-    
+
 	if (typeMesh3!=0 && verbosity > 5) {cout << "before movemesh volume: Vertex " << nbv << " Tetrahedra " << nbt << " triangles " << nbe << endl;}
     if (typeMesh3!=1 && verbosity > 5) {cout << "before movemesh surface: Vertex " << nbvS << " Triangles " << nbtS << " Edges " << nbeS << endl;}
-  
+
 	// lecture des references
 
 	KN<long> zzempty;
@@ -2061,10 +2061,10 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
 	assert((xx) && (yy) && (zz));
 
 	KN<double> txx(Th.nv), tyy(Th.nv), tzz(Th.nv);
-   
+
 	Mesh3 &rTh3 = Th;
     MeshS &rThS = ThS;
-   
+
     // mesh3 contains volume mesh
     if (typeMesh3!=0) {
     // loop over tetrahedron
@@ -2119,48 +2119,48 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             iv[0] = ThS.operator () (K[0]);
             iv[1] = ThS.operator () (K[1]);
             iv[2] = ThS.operator () (K[2]);
-            
+
             R coordx, coordy, coordz;
             for (int jj = 0; jj < 3; jj++) {
                 int i = iv[jj];
                 if (takemeshS[i] == 0) {
                     mpS->set(ThS.vertices[i].x, ThS.vertices[i].y, ThS.vertices[i].z);
                     if (xx) {txxS[i] = GetAny<double>((*xx)(stack));}
-                    
+
                     if (yy) {tyyS[i] = GetAny<double>((*yy)(stack));}
-                    
+
                     if (zz) {tzzS[i] = GetAny<double>((*zz)(stack));}
-                    
+
                     takemeshS[i] = takemeshS[i] + 1;
                 }
             }
         }
-        
+
     // loop on edge
         for (int it = 0; it < ThS.nbe; ++it) {
             const BoundaryEdgeS &K(ThS.be(it));
             int iv[2];
             iv[0] = ThS.operator () (K[0]);
             iv[1] = ThS.operator () (K[1]);
-            
+
             R coordx, coordy, coordz;
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 int i = iv[jj];
                 if (takemeshS[i] == 0) {
                     mpS->set(ThS.vertices[i].x, ThS.vertices[i].y, ThS.vertices[i].z);
                     if (xx) {txxS[i] = GetAny<double>((*xx)(stack));}
-                    
+
                     if (yy) {tyyS[i] = GetAny<double>((*yy)(stack));}
-                    
+
                     if (zz) {tzzS[i] = GetAny<double>((*zz)(stack));}
-                    
+
                     takemeshS[i] = takemeshS[i] + 1;
                 }
             }
         }
     }
-   
+
 	// option (Transfo_Mesh3) ::
 
 	// border_only = 0, recollement_border=1, point_confondus_ok=0;   == > 1900 triangles
@@ -2189,9 +2189,9 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
 		recollement_border = 1;
 		point_confondus_ok = 1;
 	}
-    
+
     Mesh3 *T_Th3 = &rTh3;
-    
+
     if (typeMesh3!=0) {
         T_Th3 = Transfo_Mesh3(precis_mesh, rTh3, txx, tyy, tzz, border_only,
                                  recollement_elem, recollement_border, point_confondus_ok, orientationelement);
@@ -2218,7 +2218,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             }
         }
     }
-    
+
     if (typeMesh3 !=1) {
         T_Th3->meshS = Transfo_MeshS(precis_mesh, rThS, txxS, tyyS, tzzS, border_only,
                                     recollement_elem, recollement_border, point_confondus_ok, orientationelement);
@@ -2235,9 +2235,9 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
                // T_ThS->elements[i].lab = ChangeLab3D(maptet, lab);
         //    }
        // }
-        
+
         // les arete frontieres qui n'ont pas change
-        
+
        /* if (nrf.N() > 0) {
             for (int i = 0; i < nbeS; i++) {
                 const BoundaryEdgeS &K(T_ThS->be(i));
@@ -2246,21 +2246,21 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             }
         }*/
     }
-    
+
     if (typeMesh3 !=0) {
         if (flagsurfaceall == 1)
             T_Th3->BuildBoundaryElementAdj();
         T_Th3->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th3);
     }
-    
+
     if (typeMesh3 !=1) {
         if (flagsurfaceall == 1)
             T_Th3->meshS->BuildBoundaryElementAdj();
         T_Th3->meshS->BuildGTree();
         //Add2StackOfPtr2FreeRC(stack, T_ThS);
         }
-    
+
 	*mp = mps;
 	return T_Th3;
 }
@@ -2672,30 +2672,30 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 		// Rajouter fonction flip a l interieure
 		int nbflip = 0;
 
-        
+
         // loop on triangles mesh3
         for (int ii = 0; ii < Th3->nbe; ii++) {
             const Triangle3 &K(Th3->be(ii));
             int iv[3];
             int lab;
             double mes_triangle3;
-            
+
             iv[0] = Th3->operator () (K[0]);
             iv[1] = Th3->operator () (K[1]);
             iv[2] = Th3->operator () (K[2]);
-            
+
             map<int, int>::const_iterator imap;
             imap = mapface.find(K.lab);
-            
+
             if (imap != mapface.end()) {
                 lab = imap->second;
             } else {
                 lab = K.lab;
             }
-            
+
             Th3->be(ii).set(Th3->vertices, iv, lab);
             mes_triangle3 = Th3->be(ii).mesure();
-            
+
             if (surface_orientation * mes_triangle3 < 0) {
                 int iv_temp = iv[1];
                 iv[1] = iv[2];
@@ -2704,30 +2704,30 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
                 nbflip++;
             }
         }
-     
+
         // loop on triangles meshS
         for (int ii = 0; ii < ThS->nt; ii++) {
             const TriangleS &K(ThS->elements[ii]);
             int iv[3];
             int lab;
             double mes_triangleS;
-            
+
             iv[0] = ThS->operator () (K[0]);
             iv[1] = ThS->operator () (K[1]);
             iv[2] = ThS->operator () (K[2]);
-            
+
             map<int, int>::const_iterator imap;
             imap = mapface.find(K.lab);
-            
+
             if (imap != mapface.end()) {
                 lab = imap->second;
             } else {
                 lab = K.lab;
             }
-            
+
             ThS->elements[ii].set(ThS->vertices, iv, lab);
             mes_triangleS = ThS->elements[ii].mesure();
-            
+
             if (surface_orientation * mes_triangleS < 0) {
                 int iv_temp = iv[1];
                 iv[1] = iv[2];
@@ -2755,7 +2755,7 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 
 			ThS->be(ii).set(ThS->vertices, iv, lab);
 		}
-        
+
 
 		assert(nbflip == 0 || nbflip == Th3->nbe);
 		if (flagsurfaceall == 1) {Th3->BuildBoundaryElementAdj();}
@@ -2764,8 +2764,8 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 
 		return Th3;
 	}
-    
-    
+
+
    /* else if (vertex_out == 0) {
 		// Tet       *t = new Tet[1];
 		Vertex3 *v = new Vertex3[nbv];
@@ -2846,7 +2846,7 @@ class Movemesh2D_3D_surf: public OneOperator {
 /* ancien fichier de TransfoMesh */
 Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
-    
+
 	// cas besoin memoire important
 
 	// Mesh3 *T_Th3=new Mesh3;
@@ -2994,7 +2994,7 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
     // cas besoin memoire important
-    
+
     // Mesh3 *T_Th3=new Mesh3;
     int nv_t, nt_t, nbe_t;
     int *Numero_Som;
@@ -3005,24 +3005,24 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     int *label_nbe_t;
     int i_som, i_elem, i_border;
     Numero_Som = new int[ThS.nv];
-    
+
     ind_nv_t = new int[ThS.nv];
     ind_nt_t = new int[ThS.nt];
     ind_nbe_t = new int[ThS.nbe];
-    
+
     label_nt_t = new int[ThS.nt];
     label_nbe_t = new int[ThS.nbe];
- 
+
     for (int ii = 0; ii < ThS.nv; ii++) {
         Numero_Som[ii] = ii;
     }
-    
+
     if (verbosity > 1) {cout << " debut: SamePointElement " << endl;}
     SamePointElement_MeshS(precis_mesh, tab_XX, tab_YY, tab_ZZ, ThS, recollement_element, recollement_border, point_confondus_ok,
                      Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
-  
+
     if (verbosity > 1) {cout << " fin: SamePointElement " << endl;}
-    
+
     // set size of Mesh T_Th3
     // T_Th3->set(nv_t,nt_t,nbe_t);
     Vertex3 *v = new Vertex3[nv_t];
@@ -3038,50 +3038,50 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
 
     // determination of vertex
     i_som = 0;
-    
+
     for (int i = 0; i < nv_t; i++) {
         int &ii = ind_nv_t[i];
         assert(Numero_Som[ii] == i_som);
-        
+
         const Vertex3 &K(ThS.vertices[ii]);
        // cout << "test " <<tab_XX[ii]<<" " <<tab_YY[ii]<< " "<< tab_ZZ[ii]<< endl;
         v[i_som].x = tab_XX[ii];
         v[i_som].y = tab_YY[ii];
         v[i_som].z = tab_ZZ[ii];
         v[i_som].lab = K.lab;
-        
+
         i_som = i_som + 1;
     }
-    
+
     assert(i_som == nv_t);
-    
+
     // cout << " Transfo volume elements " << endl;
     // determination of triangle elements
     i_elem = 0;
-    
+
     for (int i = 0; i < nt_t; i++) {
         int &ii = ind_nt_t[i];
-        
+
         // creation of elements
         const TriangleS &K(ThS.elements[ii]);
         int iv[3];
         int lab;
         lab = label_nt_t[i];
-        
+
         for (int jj = 0; jj < 3; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
-        
+
         if (orientation < 0) {swap(iv[1], iv[2]);}
-        
+
         (tt)->set(v, iv, lab);
         mes += tt++->mesure();
         i_elem++;
     }
-    
+
     assert(i_elem == nt_t);
-    
+
     // cout << " Transfo border elements " << endl;
     // determination of border elements
     i_border = 0;
@@ -3093,14 +3093,14 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
         int iv[2];
         int lab;
         lab = label_nbe_t[i];
-        
+
         for (int jj = 0; jj < 2; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
-        
+
         if (orientation < 0) {swap(iv[1], iv[2]);}
-        
+
         bb->set(v, iv, lab);
         mesb += bb++->mesure();
         i_border = i_border + 1;
@@ -3113,7 +3113,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
         cerr << " surface border mesh = " << mesb << endl;
         ErrorExec(" movemesh 3d ", 1);
     }
-    
+
     delete [] Numero_Som;
     delete [] ind_nv_t;
     delete [] ind_nt_t;
@@ -3612,7 +3612,7 @@ void Transfo_Mesh2_map_face (const Mesh &Th2, map<int, int> &maptri) {
 
 Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                       int &border_only, int &recollement_border, int &point_confondus_ok) {
-	
+
 	int nv_t, nt_t, nbe_t;
 	int *Numero_Som;
 	int *ind_nv_t;
@@ -3626,7 +3626,7 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     label_nt_t = new int[Th2.nt];
 	ind_nbe_t = new int[Th2.neb];
 	label_nbe_t = new int[Th2.neb];
-    
+
 	if (verbosity > 5) {
 		cout << "before movemesh::Vertex  triangle2  border " << Th2.nv << " " << Th2.nt << " " << Th2.neb << endl;
 	}
@@ -3636,7 +3636,7 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     // gestion of recollement ????
     SamePointElement_Mesh2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border /*recollement_element*/, recollement_border, point_confondus_ok,
                            Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
-    
+
     if (verbosity > 1) cout << " fin: SamePointElement " << endl;
 	cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl;
 
@@ -3683,11 +3683,11 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     Mesh3 *T_Th3 = new Mesh3(nv_t, nt_t, v, t3);
     T_Th3->typeMesh3=2;    ///// we consider the 2 structures of surface mesh - mesh3 with 0 tet nt border triangles And meshS with nt element triangles nbe edges
     T_Th3->meshS = new MeshS(nv_t, nt_t, nbe_t, v, t, b);
- 
+
     T_Th3->meshS->liste_v_num_surf=new int(nv_t);
     T_Th3->meshS->liste_v_num_surf=ind_nv_t;
-    
-    
+
+
     delete [] Numero_Som;
 	delete [] ind_nv_t;
     delete [] ind_nt_t;
@@ -3704,18 +3704,18 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
     // int recollement_border=0;
     R3 bmin, bmax;
     double hmin, hmin_border;
-    
+
     if (verbosity > 1) {cout << "calculus of bound and minimal distance" << endl;}
-    
+
     BuildBoundMinDist_th2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, bmin, bmax, hmin);
     // assertion pour la taille de l octree
     assert(hmin > Norme2(bmin - bmax) / 1e9);
-    
+
     double bmin3[3], bmax3[3];
     bmin3[0] = bmin.x;
     bmin3[1] = bmin.y;
     bmin3[2] = bmin.z;
-    
+
     bmax3[0] = bmax.x;
     bmax3[1] = bmax.y;
     bmax3[2] = bmax.z;
@@ -3725,101 +3725,101 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
      * cout << "fin order vertex: nv_t=" << nv_t << endl;
      */
     if (verbosity > 1) {cout << "debut: OrderVertexTransfo_hcode_gtree " << endl;}
-    
+
     OrderVertexTransfo_hcode_nv_gtree(Th2.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
     if (verbosity > 1) {cout << "fin: OrderVertexTransfo_hcode_gtree " << endl;}
-    
+
     /* determination de nt_t et de nbe_t*/
     nt_t = 0;
     int i_border;
-    
+
     // determination of border elements
     i_border = 0;
-    
+
     for (int
          ii = 0; ii < Th2.nt; ii++) {
         Border_ok = 1;
         const Mesh::Triangle &K(Th2.t(ii));    // const Triangle2 & K(Th2.elements[ii]); // avant Mesh2
         int iv[3];
-        
+
         for (int jj = 0; jj < 3; jj++) {
             iv[jj] = Numero_Som[Th2.operator () (K[jj])];
         }
-        
+
         for (int jj = 0; jj < 3; jj++) {
             for (int kk = jj + 1; kk < 3; kk++) {
                 if (iv[jj] == iv[kk]) {Border_ok = 0;}
             }
         }
-        
+
         if (Border_ok == 1) {
             ind_nbe_t[i_border] = ii;
             label_nbe_t[i_border] = K.lab;
             i_border = i_border + 1;
         }
     }
-    
+
     nbe_t = i_border;
-    
+
     if (recollement_border == 1) {
         // int point_confondus_ok=1;
         if (verbosity > 1) {cout << "debut recollement : nbe_t= " << nbe_t << endl;}
-        
+
         int np, dim = 3;
         int *ind_np = new int [nbe_t];
         int *label_be = new int [nbe_t];
         double **Cdg_be = new double *[nbe_t];
-        
+
         for (int i = 0; i < nbe_t; i++) {
             Cdg_be[i] = new double[dim];
         }
-        
+
         for (int i_border = 0; i_border < nbe_t; i_border++) {
             int &ii = ind_nbe_t[i_border];
             const Mesh::Triangle &K(Th2.t(ii));    // const Triangle2 & K(Th2.elements[ii]);  // avant Mesh2
             int iv[3];
-            
+
             for (int jj = 0; jj < 3; jj++) {
                 iv[jj] = Th2.operator () (K[jj]);
             }
-            
+
             Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]]) / 3.;
             Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]]) / 3.;
             Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]]) / 3.;
-            
+
             label_be[i_border] = K.lab;
         }
-        
+
         hmin_border = hmin / 3.;
         if (verbosity > 1) {cout << "points commun " << endl;}
-        
+
         // PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np); // ancien
         PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be, bmin, bmax, hmin_border,
                                 ind_np, label_nbe_t, np);    // new
         if (verbosity > 1) {cout << "points commun finis " << endl;}
-        
+
         assert(np <= nbe_t);
-        
+
         // int *ind_nbe_t_tmp= new int [np];
         int ind_nbe_t_tmp[np];
-        
+
         for (int i_border = 0; i_border < np; i_border++) {
             ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
         }
-        
+
         for (int i_border = 0; i_border < np; i_border++) {
             ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
         }
-        
+
         delete [] ind_np;    //= new int [nbe_t];
         delete [] label_be;    // = new int [nbe_t ];
-        
+
         for (int i = 0; i < nbe_t; i++) {
             delete [] Cdg_be[i];
         }
-        
+
         delete [] Cdg_be;    //= new double *[nbe_t];
-        
+
         nbe_t = np;
         if (verbosity > 1) {cout << "fin recollement : nbe_t= " << nbe_t << endl;}
     }
@@ -3857,7 +3857,7 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
 
 	// determination de nt_t
 	int i_elem = 0;
-    
+
     for (int ii = 0; ii < Th2.nt; ii++) {
       const Mesh::Triangle &K(Th2.t(ii));
       int iv[3];
@@ -3882,26 +3882,26 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
       double **Cdg_t = new double *[nt_t];
       for (int i = 0; i < nt_t; i++)
         Cdg_t[i] = new double[dim];
-        
+
       for (int i_elem = 0; i_elem < nt_t; i_elem++) {
         int &ii = ind_nt_t[i_elem];
         const Mesh::Triangle &K(Th2.t(ii));
         int iv[3];
-            
+
         for (int jj = 0; jj < 3; jj++)
           iv[jj] = Th2.operator () (K[jj]);
-          
+
           Cdg_t[i_elem][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] ) / 3.;
           Cdg_t[i_elem][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] ) / 3.;
           Cdg_t[i_elem][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] ) / 3.;
           label_t[i_elem] = K.lab;
         }
-        
+
         hmin_elem = hmin / 3;
         PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
                                 ind_np, label_nt_t, np);// nv
        assert(np <= nt_t);
-        
+
         int *ind_nt_t_tmp = new int [np];
         for (int i_elem = 0; i_elem < np; i_elem++) {
           assert(ind_np[i_elem] >= 0 && ind_np[i_elem] <= nt_t);
@@ -3909,92 +3909,92 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
         }
         for (int i_elem = 0; i_elem < np; i_elem++)
           ind_nt_t[i_elem] = ind_nt_t_tmp[i_elem];
-        
+
         delete [] ind_np;
         delete [] label_t;
-        
+
         for (int i = 0; i < nt_t; i++)
           delete [] Cdg_t[i];
-        
+
         delete [] Cdg_t;
         delete [] ind_nt_t_tmp;
-        
+
         nt_t = np;
         if (verbosity > 1) cout << "fin recollement : nt_t= " << nt_t << endl;
     }
-   
+
     // determination de nbe_t
     int i_border = 0;
     for (int ii = 0; ii < Th2.neb; ii++) {
       Border_ok = 1;
       const Mesh::BorderElement &K(Th2.be(ii));
       int iv[2];
-      
+
       for (int jj = 0; jj < 2; jj++)
         iv[jj] = Numero_Som[Th2.operator () (K[jj])];
-        
+
       for (int jj = 0; jj < 2; jj++)
         for (int kk = jj + 1; kk < 2; kk++)
           if (iv[jj] == iv[kk]) Border_ok = 0;
-     
+
       if (Border_ok == 1) {
         ind_nbe_t[i_border] = ii;
         label_nbe_t[i_border] = K.lab;
         i_border = i_border + 1;
       }
     }
-  
+
     nbe_t = i_border;
-    
+
     if (recollement_border == 1) {
       // int point_confondus_ok=1;
       if (verbosity > 1) cout << "debut recollement : nbe_t= " << nbe_t << endl;
-        
+
       int np, dim = 3;
       int *ind_np = new int [nbe_t];
       int *label_be = new int [nbe_t];
       double **Cdg_be = new double *[nbe_t];
-        
+
       for (int i = 0; i < nbe_t; i++)
         Cdg_be[i] = new double[dim];
-        
+
       for (int i_border = 0; i_border < nbe_t; i_border++) {
         int &ii = ind_nbe_t[i_border];
         const Mesh::BorderElement &K(Th2.be(ii));    // const Triangle2 & K(Th2.elements[ii]);  // avant Mesh2
         int iv[2];
-            
+
         for (int jj = 0; jj < 2; jj++) iv[jj] = Th2.operator () (K[jj]);
-     
+
         Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]]) / 3.;
         Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]]) / 3.;
         Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]]) / 3.;
-            
+
         label_be[i_border] = K.lab;
       }
-        
+
       hmin_border = hmin / 3.;
       if (verbosity > 1) cout << "points commun " << endl;
-     
+
       PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be, bmin, bmax, hmin_border,
                               ind_np, label_nbe_t, np);
         if (verbosity > 1) cout << "points commun finis " << endl;
-        
+
         assert(np <= nbe_t);
         int ind_nbe_t_tmp[np];
-        
+
         for (int i_border = 0; i_border < np; i_border++)
           ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
-        
+
         for (int i_border = 0; i_border < np; i_border++)
           ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
-       
+
         delete [] ind_np;
         delete [] label_be;
-        
+
         for (int i = 0; i < nbe_t; i++)
           delete [] Cdg_be[i];
         delete [] Cdg_be;
-        
+
         nbe_t = np;
         if (verbosity > 1) cout << "fin recollement : nbe_t= " << nbe_t << endl;
 	}
@@ -4232,44 +4232,44 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
     int Elem_ok, Border_ok;
     double hmin, hmin_elem, hmin_border;
     R3 bmin, bmax;
-    
+
     // int recollement_element=1,recollement_border=1;
-    
+
     if (verbosity > 2) {cout << "    BuilBound " << endl;}
-    
+
     BuildBoundMinDist_thS(precis_mesh, tab_XX, tab_YY, tab_ZZ, ThS, bmin, bmax, hmin);     //////////
     if (verbosity > 2) {cout << "   =============================== " << endl;}
-    
+
     double bmin3[3], bmax3[3];
     bmin3[0] = bmin.x;
     bmin3[1] = bmin.y;
     bmin3[2] = bmin.z;
-    
+
     bmax3[0] = bmax.x;
     bmax3[1] = bmax.y;
     bmax3[2] = bmax.z;
-    
+
     if (verbosity > 2) {cout << "    OrderVertexTransfo_hcode gtree " << endl;}
     OrderVertexTransfo_hcode_nv_gtree(ThS.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
     if (verbosity > 2) {cout << "    fin order vertex gtree: nv_t=" << nv_t << endl;}
-    
+
     if (verbosity > 2) {cout << "   =============================== " << endl;}
-    
+
     /* determination de nt_t et de nbe_t*/
     int i_elem, i_border;
-    
+
     i_elem = 0;
-    
+
     for (int ii = 0; ii < ThS.nt; ii++) {
         const TriangleS &K(ThS.elements[ii]);
         int iv[3];
-        
+
         Elem_ok = 1;
-        
+
         for (int jj = 0; jj < 3; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
         }
-        
+
         for (int jj = 0; jj < 3; jj++) {
             for (int kk = jj + 1; kk < 3; kk++) {
                 if (iv[jj] == iv[kk]) {
@@ -4277,171 +4277,171 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
                 }
             }
         }
-        
+
         if (Elem_ok == 1) {
             ind_nt_t[i_elem] = ii;
             label_nt_t[i_elem] = K.lab;
             i_elem = i_elem + 1;
         }
     }
-    
+
     nt_t = i_elem;
-    
+
     if (recollement_element == 1) {
         // int point_confondus_ok_e = 0;
         if (verbosity > 1) {cout << "debut recollement : nt_t= " << nt_t << endl;}
-        
+
         int np, dim = 3;
         int *ind_np = new int [nt_t];
         int *label_t = new int [nt_t];
         double **Cdg_t = new double *[nt_t];
-        
+
         for (int i = 0; i < nt_t; i++) {
             Cdg_t[i] = new double[dim];
         }
-        
+
         for (int i_elem = 0; i_elem < nt_t; i_elem++) {
             int &ii = ind_nt_t[i_elem];
             const TriangleS &K(ThS.elements[ii]);
             int iv[3];
-            
+
             for (int jj = 0; jj < 3; jj++) {
                 iv[jj] = ThS.operator () (K[jj]);
             }
-            
+
             Cdg_t[i_elem][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] ) / 3.;
             Cdg_t[i_elem][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] ) / 3.;
             Cdg_t[i_elem][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] ) / 3.;
             label_t[i_elem] = K.lab;
         }
-        
+
         hmin_elem = hmin / 3;
         // PointCommun_hcode( dim, nt_t, 0, Cdg_t, bmin3, bmax3, hmin_elem, ind_np, np); //ancien
         PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
                                 ind_np, label_nt_t, np);// nv
-        
+
         assert(np <= nt_t);
-        
+
         int *ind_nt_t_tmp = new int [np];
-        
+
         for (int i_elem = 0; i_elem < np; i_elem++) {
             assert(ind_np[i_elem] >= 0 && ind_np[i_elem] <= nt_t);
             ind_nt_t_tmp[i_elem] = ind_nt_t[ind_np[i_elem]];
         }
-        
+
         for (int i_elem = 0; i_elem < np; i_elem++) {
             ind_nt_t[i_elem] = ind_nt_t_tmp[i_elem];
         }
-        
+
         delete [] ind_np;
         delete [] label_t;
-        
+
         for (int i = 0; i < nt_t; i++) {
             delete [] Cdg_t[i];
         }
-        
+
         delete [] Cdg_t;
-        
+
         delete [] ind_nt_t_tmp;
-        
+
         nt_t = np;
         if (verbosity > 1) {cout << "fin recollement : nt_t= " << nt_t << endl;}
     }
-    
+
     // determination of border elements
     i_border = 0;
-    
+
     for (int ii = 0; ii < ThS.nbe; ii++) {
         Border_ok = 1;
-        
+
         const BoundaryEdgeS &K(ThS.be(ii));
         int iv[2];
-        
+
         for (int jj = 0; jj < 2; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
-        
+
         for (int jj = 0; jj < 2; jj++) {
             for (int kk = jj + 1; kk < 2; kk++) {
                 if (iv[jj] == iv[kk]) {Border_ok = 0;}
             }
         }
-        
+
         if (Border_ok == 1) {
             ind_nbe_t[i_border] = ii;
             label_nbe_t[i_border] = K.lab;
             i_border = i_border + 1;
         }
     }
-    
+
     nbe_t = i_border;
-    
+
     if (recollement_border == 1) {
         // int point_confondus_ok = 1;
         if (verbosity > 1) {cout << "debut recollement : nbe_t= " << nbe_t << endl;}
-        
+
         int np, dim = 3;
         int *ind_np = new int [nbe_t];
         double **Cdg_be = new double *[nbe_t];
         int *label_be = new int [nbe_t];
-        
+
         for (int i = 0; i < nbe_t; i++) {
             Cdg_be[i] = new double[dim];
         }
-        
+
         for (int i_border = 0; i_border < nbe_t; i_border++) {
             int &ii = ind_nbe_t[i_border];
             const BoundaryEdgeS &K(ThS.be(ii));
             int iv[2];
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 iv[jj] = ThS.operator () (K[jj]);
             }
-            
+
             Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] ) / 2.;
             Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] ) / 2.;
-            Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] ) / 2.;   
-            
+            Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] ) / 2.;
+
             label_be[i_border] = K.lab;
         }
-        
+
         hmin_border = hmin / 2.;
         if (verbosity > 1) {cout << "hmin_border=" << hmin_border << endl;}
-        
+
         if (verbosity > 1) {cout << "appele de PointCommun_hcode := " << point_confondus_ok << endl;}
-        
+
         // PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np);
         PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be,
                                 bmin, bmax, hmin_border, ind_np, label_nbe_t, np);
         if (verbosity > 1) {cout << "fin appele de PointCommun_hcode" << endl;}
-        
+
         assert(np <= nbe_t);
-        
+
         int *ind_nbe_t_tmp = new int [np];
-        
+
         for (int i_border = 0; i_border < np; i_border++) {
             ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
         }
-        
+
         for (int i_border = 0; i_border < np; i_border++) {
             ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
         }
-        
+
         delete [] ind_np;
         delete [] label_be;
-        
+
         for (int i = 0; i < nbe_t; i++) {
             delete [] Cdg_be[i];
         }
-        
+
         delete [] Cdg_be;
-        
+
         delete [] ind_nbe_t_tmp;
-        
+
         nbe_t = np;
         if (verbosity > 1) {cout << "fin recollement : nbe_t= " << nbe_t << endl;}
-        
+
         // Affectation de la nouvelle valeur du label
     }
 }
@@ -4449,62 +4449,62 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
     // determination de la boite englobante
     // R3 bmin,bmax;
     double precispt;
-    
+
     bmin.x = tab_XX[0];
     bmin.y = tab_YY[0];
     bmin.z = tab_ZZ[0];
-    
+
     bmax.x = bmin.x;
     bmax.y = bmin.y;
     bmax.z = bmin.z;
-    
+
     // R3 bmax = new R3(bmin);
-    
+
     if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
-    
+
     for (int ii = 1; ii < ThS.nv; ii++) {
         bmin.x = min(bmin.x, tab_XX[ii]);
         bmin.y = min(bmin.y, tab_YY[ii]);
         bmin.z = min(bmin.z, tab_ZZ[ii]);
-        
+
         bmax.x = max(bmax.x, tab_XX[ii]);
         bmax.y = max(bmax.y, tab_YY[ii]);
         bmax.z = max(bmax.z, tab_ZZ[ii]);
     }
-    
+
     double longmini_box;
-    
+
     // longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
     // longmini_box = min(longmini_box, bmax.z-bmin.z);
-    
+
     longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
     longmini_box = sqrt(longmini_box);
-    
+
     if (verbosity > 1) {cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;}
-    
+
     if (verbosity > 1) {cout << " bmax := " << bmax.x << " " << bmax.y << " " << bmax.z << endl;}
-    
+
     if (verbosity > 1) {cout << " box volume :=" << longmini_box << endl;}
-    
+
     if (precis_mesh < 0) {
         precispt = longmini_box * 1e-7;
     } else {
         precispt = precis_mesh;
     }
-    
+
     // determination de hmin
-    
+
     hmin = 1e10;
-    
+
     for (int ii = 0; ii < ThS.nt; ii++) {
         const TriangleS &K(ThS.elements[ii]);
         double longedge;
         int iv[3];
-        
+
         for (int jj = 0; jj < 3; jj++) {
             iv[jj] = ThS.operator () (K[jj]);
         }
-        
+
         for (int jj = 0; jj < 3; jj++) {
             for (int kk = jj + 1; kk < 3; kk++) {
                 int &i1 = iv[jj];
@@ -4517,19 +4517,19 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
             }
         }
     }
-    
+
     if (ThS.nt == 0) {
         for (int ii = 0; ii < ThS.nbe; ii++) {
             if (verbosity > 10) {cout << "border " << ii << " hmin =" << hmin << endl;}
-            
+
             const BoundaryEdgeS &K(ThS.be(ii));
             double longedge;
             int iv[2];
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 iv[jj] = ThS.operator () (K[jj]);
             }
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = jj + 1; kk < 2; kk++) {
                     int &i1 = iv[jj];
@@ -4543,14 +4543,14 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
             }
         }
     }
-    
+
     if (verbosity > 5) {cout << "    longmini_box" << longmini_box << endl;}
-    
+
     if (verbosity > 5) {cout << "    hmin =" << hmin << endl;}
-    
+
     assert(hmin < longmini_box);
     if (verbosity > 5) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
-    
+
     // assertion pour la taille de l octree
     assert(hmin > Norme2(bmin - bmax) / 1e9);
 }

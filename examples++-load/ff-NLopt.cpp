@@ -629,7 +629,12 @@ template<nlopt::algorithm ALGO, bool SA = Info<ALGO>::SA> class OptimNLopt: publ
 
 					if (verbosity > 1) {cout << Info<ALGO>::name << " starting..." << endl;}
 
-					try {cost = optim();} catch (nlopt::roundoff_limited) {cout << " nlopt roundoff limited" << endl;} catch (nlopt::forced_stop) {cout << " nlopt forced stop" << endl;} catch (std::runtime_error) {cout << "runtime error" << endl;} catch (std::invalid_argument) {cout << "invalid argument" << endl;} catch (std::bad_alloc) {cout << "bad alloc" << endl;}
+					try {cost = optim();}
+					catch (const nlopt::roundoff_limited&) {cout << " nlopt roundoff limited" << endl;}
+					catch (const nlopt::forced_stop&) {cout << " nlopt forced stop" << endl;}
+					catch (const std::runtime_error&) {cout << "runtime error" << endl;}
+					catch (const std::invalid_argument&) {cout << "invalid argument" << endl;}
+					catch (const std::bad_alloc&) {cout << "bad alloc" << endl;}
 
 					// x = KN_<double>(optim.xbestever(),optim.dimension());
 					// cout << "Number of fitness evalution(s) : " << optim.eval() << endl;
@@ -830,7 +835,12 @@ template<nlopt::algorithm ALGO> class OptimNLopt<ALGO, true>: public OneOperator
 
 						if (verbosity > 1) {cout << Info<ALGO>::name << " starting..." << endl;}
 
-						try {cost = optim();} catch (nlopt::roundoff_limited) {cout << " nlopt roundoff limited" << endl;} catch (nlopt::forced_stop) {cout << " nlopt forced stop" << endl;} catch (std::runtime_error) {cout << "runtime error" << endl;} catch (std::invalid_argument) {cout << "invalid argument" << endl;} catch (std::bad_alloc) {cout << "bad alloc" << endl;}
+						try {cost = optim();}
+						catch (const nlopt::roundoff_limited&) {cout << " nlopt roundoff limited" << endl;}
+						catch (const nlopt::forced_stop&) {cout << " nlopt forced stop" << endl;}
+						catch (const std::runtime_error&) {cout << "runtime error" << endl;}
+						catch (const std::invalid_argument&) {cout << "invalid argument" << endl;}
+						catch (const std::bad_alloc&) {cout << "bad alloc" << endl;}
 					}
 
 					// x = KN_<double>(optim.xbestever(),optim.dimension());

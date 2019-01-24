@@ -97,7 +97,7 @@ long read_pcm (string *const &filename, KNM<double> *const &u, KNM<double> *cons
 	}
 
 	cout << " max uv : " << x1 << " " << x2 << endl;
-	return pcm.width * pcm.height;
+	return (long) pcm.width * pcm.height;
 }
 
 /*  class Init { public:

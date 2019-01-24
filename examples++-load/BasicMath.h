@@ -47,7 +47,7 @@ inline int smallmod (int a, int N) {const int NHalf = N / 2; return -NHalf + mod
  * \brief try_debug helps to locate errors in combination with external libraries
  */
 #if DEBUG
-#define assert_msg(condition, message) if (!(condition)) {std::cerr << message << " : "; assert(condition); assert(false);} else {}
+#define assert_msg(condition, message) if (!(condition)) {std::cerr << message << " : "; assert(condition); assert(false);}
 #define try_debug_msg(instructions, message) try {instructions;} catch (...) {assert_msg(false, message);}
 #define try_debug(instructions) try {instructions;} catch (...) {assert(false);}
 #else
