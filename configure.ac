@@ -2150,7 +2150,9 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
 
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_hpddm" != no && enable_hpddm=yes
+test "$enable_htool" != no && enable_htool=yes
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes   &&  enable_htool=no
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
 FF_PETSC_DYLIB="PETSc.$DYLIB_SUFFIX"
@@ -2167,6 +2169,7 @@ fi
 
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
+TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 
 
 # All makefiles

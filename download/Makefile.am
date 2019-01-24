@@ -132,12 +132,14 @@ install-other: tag-install-other
 
 tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
+	if test -n "$(TOOL_COMPILE_htool)" ; then  $(MAKE) install-htool; else true; fi
 	touch tag-install-other
 
-WHERE-OTHER: lib/WHERE.hpddm
+WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../examples++-load/WHERE_LIBRARY-config ../examples++-load/WHERE_LIBRARY		
 	-grep LD ../examples++-load/WHERE_LIBRARY ../examples++-load/WHERE_LIBRARY-config >WHERE-LD
+# BEGIN HPDDM
 install-hpddm: ./getall
 	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi
 reinstall-hpddm:./getall
@@ -157,6 +159,26 @@ lib/WHERE.hpddm: ./getall
 	echo hpddm LD -L@DIR@/lib > $@ ;\
 	echo hpddm  INCLUDE -I@DIR@/include/hpddm/src >> $@ ;\
 	else true; 	fi
+#end HPDDM 
+# begin HTOOL 
+install-htool: ./getall
+	 if test -n "$(TOOL_COMPILE_htool)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
+reinstall-htool:./getall
+	-rm lib/WHERE.htool
+	-rm ./pkg/htool.zip 
+	-rm -rf include/htool
+	-test -n "$(TOOL_COMPILE_htool)" && $(MAKE) install-htool || true
+include/htool/done.tag:./pkg/htool.zip
+	-if test -f ./pkg/htool.zip ; then \
+          cd include;rm -rf htool htool-*;  unzip ../pkg/htool.zip ; mv  htool-* htool ; touch htool/done.tag; \
+         else true;  fi
+lib/WHERE.htool: ./getall
+	if test -d include/htool/include ; then \
+	echo htool LD -L@DIR@/lib > $@ ;\
+	echo htool  INCLUDE -I@DIR@/include/htool/include >> $@ ;\
+	else true; 	fi
+# end HTOOLL
+
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir: 
@@ -175,7 +197,7 @@ tag-compile-pkg: bin lib include pkg FORCE
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d || exit 1; done;\
 	fi;fi
-	$(MAKE) install-hpddm
+	$(MAKE) install-hpddm install-htool
 	touch tag-compile-pkg
 FORCE:
 

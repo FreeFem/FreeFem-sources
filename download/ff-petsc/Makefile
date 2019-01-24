@@ -20,7 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
-PYTHON2=python2.7
+PETSC_ADDCONF?=
+SPELC_ADDCONF?=
+
+PYTHON2?=python2.7
 include Makefile.inc
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
 W_SUDO1=$(SHELL ls	)
@@ -49,7 +52,7 @@ SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
 W_MPICC:=$(strip $(shell which mpicc))
 SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
-
+BLAS_LAPACK_LIBS:=$(if ifeq '$(LAPACKLIBS)' '$(BLASLIBS)',$(LAPACKLIBS),$(LAPACKLIBS) $(BLASLIBS))
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
 else
@@ -123,8 +126,8 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	--prefix=$(DIR_INSTALL_REAL) \
 	--with-ssl=0 ---with-x=0 \
     '--with-scalar-type=real' \
-    $(WITH_MPI_DIR) \
-	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
+    $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
+	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 	--download-scalapack --download-metis --download-ptscotch \
 	--download-mumps --download-ml --download-hypre --download-parmetis \
 	--download-superlu --download-suitesparse --download-fftw \
@@ -141,8 +144,8 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
     '--with-scalar-type=complex' \
 	--with-ssl=0 ---with-x=0 \
-    $(WITH_MPI_DIR)  \
-	--with-blas-lapack-lib='$(LAPACKLIBS) $(BLASLIBS)' \
+    $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
+	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 	--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
 	--with-metis-include='$(METIS_INCLUDE)'  --with-metis-lib='$(METIS_LIB)' \
 	--with-ptscotch-include='$(PTSCOTCH_INCLUDE)'  --with-ptscotch-lib='$(PTSCOTCH_LIB)' \
@@ -207,7 +210,7 @@ $(SRCDIR_SLEPC)/tag-conf-complex:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-complex ; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_COMPLEX)
+	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure  --prefix=$(DIR_INSTALL_COMPLEX) $(SPELC_ADDCONF)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-complex:$(SRCDIR_SLEPC)/tag-conf-complex
@@ -254,7 +257,7 @@ $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-real; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure --prefix=$(DIR_INSTALL_REAL)
+	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure --prefix=$(DIR_INSTALL_REAL) $(SPELC_ADDCONF)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
@@ -301,7 +304,10 @@ echo:
 	@echo MPI_DIR: $(MPI_DIR)
 	@echo " dir install real :" $(DIR_INSTALL_REAL)
 	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX)
-	@echo " do-sudo auto ???" $(SHELL  cat o-sudo)
+	@echo " do-sudo auto ???:" $(SHELL  cat do-sudo)
+	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
+	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
+	
 install-destdir:
 	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)
 	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR)
