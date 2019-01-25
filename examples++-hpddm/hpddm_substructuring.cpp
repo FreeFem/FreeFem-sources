@@ -113,7 +113,7 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
             if(pt->p[j + 1] != pt->p[j]) {
                  if(std::abs(in->operator[](pt->j[col]) - 1.0) < 0.1 && recv[dest][j] == '1') {
                      send[dest][j] = '1';
-                     resOut[(int)nnz++] = pt->i[col++];
+                     resOut[(int)nnz++] = pt->j[col++];
                  }
 #endif
  
