@@ -27,7 +27,7 @@ all.edp:  Makefile
 Ref: makeref.edp freefem++.pref
 	export  FF_LOADPATH=../examples++-load/.;../src/nw/FreeFem++-nw makeref.edp
 
-makeref.edp: regtests.m4 ../regtests.m4
+makeref.edp: regtests.m4 ../m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 
 freefem++.pref:
@@ -41,6 +41,6 @@ install-exec-local::
 
 
 # To check the scripts against their reference values
-regtests.edp: regtests.m4 ../regtests.m4
+regtests.edp: regtests.m4 ../m4/regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 FORCE:

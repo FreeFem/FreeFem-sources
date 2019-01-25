@@ -29,13 +29,13 @@ install-exec-local::
 	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
 
 
-makeref.edp: regtests.m4 ../regtests.m4
+makeref.edp: regtests.m4 ../m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 freefem++.pref:
 	echo loadpath = \"../examples++-load/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 
 # To check the scripts against their reference values
-regtests.edp: regtests.m4 ../regtests.m4
+regtests.edp: regtests.m4 ../m4/regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 FORCE:

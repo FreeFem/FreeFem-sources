@@ -15,6 +15,8 @@ dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
 dnl : ${FFLAGS=""}
 
+AC_CONFIG_MACRO_DIR([m4])
+
 # progg test  exec for windows
 ff_TEST_FFPP="../src/nw/FreeFem++"
 ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
@@ -679,14 +681,14 @@ EOF
 # ------------------------------------------
 
 # Generic or hardware-dependant optimization
-m4_include(acmacros.m4)
-m4_include(acoptim.m4)
+m4_include(m4/acmacros.m4)
+m4_include(m4/acoptim.m4)
 
 # [[file:ax_lib_hdf5.m4]]
-m4_include(ax_lib_hdf5.m4)
+m4_include(m4/ax_lib_hdf5.m4)
 
 # [[file:ax_lib_gsl.m4]]
-m4_include(ax_lib_gsl.m4)
+m4_include(m4/ax_lib_gsl.m4)
 
 # Checking c++11 for HashMatix (Madatory now)
 # F.Hecht:
@@ -863,7 +865,7 @@ fi
 if test $enable_ffcs = no
 then
     # FF case
-    m4_include(acmpi.m4)
+    m4_include(m4/acmpi.m4)
 else
     # FFCS - use the same MPI configuration choices as FFCS
     if test -z "$MPICXX"

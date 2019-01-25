@@ -175,7 +175,7 @@ clean-local::
 Ref: makeref.edp
 	../src/nw/FreeFem++-nw makeref.edp
 
-makeref.edp: regtests.m4 ../regtests.m4
+makeref.edp: regtests.m4 ../m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 
 all-local: all.edp regtests.edp load_compile
@@ -198,7 +198,7 @@ all.edp:
 	@awk '/error compile/ {print "Error freefem++ file ," $$6}' $@
 
 # To check the scripts against their reference values
-regtests.edp: regtests.m4 ../regtests.m4
+regtests.edp: regtests.m4 ../m4/regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
 # FFCS - 27/2/13 - remove dependency on Makefile to avoid recompiling everything everytime something is changed in the

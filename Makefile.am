@@ -11,11 +11,11 @@ SUBDIRS=download src  examples++-load  examples++-mpi \
 	examples++-3d  examples++-hpddm  examples++-ffddm 
 
 EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
-FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO regtests.m4 \
+FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO m4/regtests.m4 \
 INSTALL INSTALL-MacOSX INNOVATION \
-WindowsPackage.m4 README_COMPILATION.md README_ARPACK.md README_WINDOWS.md README_MAC.md \
+m4/WindowsPackage.m4 README_COMPILATION.md README_ARPACK.md README_WINDOWS.md README_MAC.md \
 logo.ico copysharedlibs.sh COPYRIGHT edp.nedit  reconfigure \
-mode-mi-edp.zip aclocal.m4  acmacros.m4   acoptim.m4 ax_lib_hdf5.m4  \
+mode-mi-edp.zip m4/aclocal.m4  m4/acmacros.m4   m4/acoptim.m4 m4/ax_lib_hdf5.m4  \
 freefem++.spec \
 Install-MacOS.command.in \
 examples++-bamg/NACA012/naca.awk  examples++-bamg/quadloop/dotest.pl \
@@ -137,10 +137,10 @@ win32:WindowsPackage.iss
 	test ! -d examples++-load/include-tmp  || rm -r examples++-load/include-tmp 
 	cd examples++-load;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr *.h include/* include-tmp
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe  "`cygpath.exe WindowsPackage.iss`"
-WindowsPackage.iss: WindowsPackage.m4 configure.ac Makefile.am
+WindowsPackage.iss: m4/WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
-	-DHOSTOS='$(host_os)'  WindowsPackage.m4 > WindowsPackage.iss
+	-DHOSTOS='$(host_os)'  m4/WindowsPackage.m4 > WindowsPackage.iss
 	echo loadpath += '"!\."'  >freefem++.pref
 	echo includepath += '"!\idp"'  >>freefem++.pref
 
