@@ -3185,7 +3185,8 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         KN<int> lg(n+1,0);
  
         if(rhs && pOut->n != n) pOut->resize(n);
-        mC->CSR();
+        mC->COO();
+        mR->COO();
         mA->CSR();
         std::vector<signed int> tmpVec;
         if(!condensation)
@@ -3337,7 +3338,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     
         
        MatriceMorse<R> *mR = pR->pHM();
-        
+        mR->COO();
         unsigned int n = mR->nnz;
         
         if(pOut->n != n) pOut->resize(n);
