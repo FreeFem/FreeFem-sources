@@ -52,7 +52,11 @@ SRCDIR_SLEPC=slepc-$(VERSION_SLEPC)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
 W_MPICC:=$(strip $(shell which mpicc))
 SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
-BLAS_LAPACK_LIBS:=$(ifeq '$(LAPACKLIBS)' '$(BLASLIBS)',$(LAPACKLIBS),$(LAPACKLIBS) $(BLASLIBS))
+ifeq ($(LAPACKLIBS), $(BLASLIBS))
+  BLAS_LAPACK_LIBS=$(LAPACKLIBS)
+else
+  BLAS_LAPACK_LIBS=$(LAPACKLIBS) $(BLASLIBS)
+endif
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
 else
