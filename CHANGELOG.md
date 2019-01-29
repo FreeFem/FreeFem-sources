@@ -22,9 +22,12 @@
 
 # Changelog
 All notable changes to this project will be documented in this file.
-## [Version 4] 2018-12-01
+
+## [Version 4 ]
+- uniformize 2d/3d in element, methode   EdgeOrientation(e)  now return +1/-1 
+## [Version 4 beta] 2018-12-01
 - change all the sparse matrix structure
-- remove all map matrix jan 2019 
+- remove all map matrix jan 2019
 
 ### Added
 - surface finite element (in progress)
@@ -32,8 +35,8 @@ All notable changes to this project will be documented in this file.
 - nElementonB (version 2d and 3d of nTonEge)
 - area  ( same the lenEdge) in 3d
 
-- add function labels to get the array of label of a  mesh 
-- add function regions to get the array of label of a  mesh 
+- add function labels to get the array of label of a  mesh
+- add function regions to get the array of label of a  mesh
 - correct big bug in 	toRarray,toZarray, toCarray  transform [ ... ] array to int[int], real[int], complex[int]  
 
 ## [Unreleased] 2018-08-31

@@ -746,8 +746,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 int i=ocoef,p=0;
 	 for (int e=0;e<Element::ne;++e) 
 	   {
-	       R3 E=K.Edge(e);//  exterior and  ||N|| = 2* area f
-	       if(! K.EdgeOrientation(e)) E=-E;
+	       R3 E=K.EdgeOrientation(e)*K.Edge(e);//  exterior and  ||N|| = 2* area f
 	       for(int q=0;q<QFe.n;++q,++p)  
 		    for (int c=0;c<3;c++,i++) 
 			     
@@ -776,7 +775,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	 // int_i^j  grad lj . t_ij = 1
 	 
 	 
-	 bool  se[]={ K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2), 
+	 int  se[]={ K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2),
 	 K.EdgeOrientation(3), K.EdgeOrientation(4), K.EdgeOrientation(5)};
 	 
 	 if (whatd & Fop_D0) 
@@ -786,7 +785,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	       for(int i=0;i<6;++i)
 		 { 
 		     int i0=Element::nvedge[i][0],i1=Element::nvedge[i][1];
-		     if( !se[i]) Exchange(i0,i1);
+		     if( se[i]<0) Exchange(i0,i1);
 		     R3 wi = l[i0]*D[i1]-l[i1]*D[i0];
 		     val(i,0,op_id) = wi.x ;
 		     val(i,1,op_id) = wi.y ;
@@ -800,7 +799,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	     for(int i=0;i<6;++i)
 	       { 
 		   int i0=Element::nvedge[i][0],i1=Element::nvedge[i][1];
-		   if( !se[i]) Exchange(i0,i1);
+		   if( se[i]<0) Exchange(i0,i1);
 		   if (whatd & Fop_dx) 
 		     {
 			 R3 wi = D[i0].x*D[i1]-D[i1].x*D[i0];		    

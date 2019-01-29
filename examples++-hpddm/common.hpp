@@ -134,7 +134,7 @@ template<class K>
 void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
 {
     //void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
-    cout << " set_ff_matrix " <<endl;
+    if(verbosity>99) cout << " set_ff_matrix " <<endl;
     // Warning this pointeur a change or not in hpddm => not del in HashMatrix
     mA->j=0;
     mA->p=0;

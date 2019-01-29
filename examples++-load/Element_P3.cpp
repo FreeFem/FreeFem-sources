@@ -358,8 +358,8 @@ namespace  Fem2D {
 		int dof = 4;
 
 		for (int e = 0; e < 6; ++e) {
-			bool oe = K.EdgeOrientation(e);
-			if (!oe) {swap(p[dof], p[dof + 1]);}
+			int oe = K.EdgeOrientation(e);
+			if (oe<0) {swap(p[dof], p[dof + 1]);}
 
 			dof += 2;
 		}
@@ -387,8 +387,8 @@ namespace  Fem2D {
 			int dof = 4;
 
 			for (int e = 0; e < 6; ++e) {
-				bool oe = K.EdgeOrientation(e);
-				if (!oe) {swap(p[dof], p[dof + 1]);}
+				int oe = K.EdgeOrientation(e);
+				if (oe<0) {swap(p[dof], p[dof + 1]);}
 
 				dof += 2;
 			}

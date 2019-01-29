@@ -84,7 +84,7 @@ namespace Fem2D {
 	// Rd Edge(int i) const {ASSERTION(i>=0 && i <ne);
 	// return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}
 	// In GenericMesh.hpp:
-	// bool   EdgeOrientation(int i) const
+	// int   EdgeOrientation(int i) const  +/- 1
 	// { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
 
 	// Constructor
@@ -165,10 +165,10 @@ namespace Fem2D {
 
 		for (e = 0; e < (Element::ne)*2; e++) {
 			int ee = e / 2;
-			R3 E = K.Edge(ee);	// the edge local number is given by the integer division between e and 2
-			int eo = K.EdgeOrientation(ee);
+                        int  eo = K.EdgeOrientation(ee)>0;//  change FH; jan 2019
+			R3 E = K.Edge(ee);	// the edge local number is given by the integer division betweeand
 			if (!eo) {E = -E;}
-
+                    
 			if (e % 2 == 1) {p = p - QFe.n;}// if I consider an 'even' dof, the quad pts are the ones of the previous dof (they correspond to the same edge)
 
 			for (int q = 0; q < QFe.n; ++q, ++p) {
@@ -982,16 +982,16 @@ namespace Fem2D {
 
 		// 18 edge dofs
 		for (int ee = 0; ee < Element::ne; ee++) {	// loop on the edges
-			R3 E = K.Edge(ee);
+			R3 E = K.EdgeOrientation(ee)*K.Edge(ee);
 			int eo = K.EdgeOrientation(ee);
-			if (!eo) {E = -E;}
+			if (eo<0) {E = -E;}
 
 			for (int edof = 0; edof < 3; ++edof) {	// 3 dofs for each edge
 				if (edof != 0) {p = p - QFe.n;}
 
 				for (int q = 0; q < QFe.n; ++q, ++p) {	// loop on the edge quadrature pts
 					double ll = 1 - QFe[q].x;	// lambda of the first vertex of the edge
-					if (!eo) {ll = 1 - ll;}
+					if (eo<0) {ll = 1 - ll;}
 
 					double prodll;	// the product of two lambdas:
 					if (edof == 0) {prodll = ll * ll;} else if (edof == 1) {prodll = ll * (1 - ll);} else {

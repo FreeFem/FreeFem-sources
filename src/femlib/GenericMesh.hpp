@@ -376,8 +376,8 @@ public:
     return fo;
   }
 
-  bool   EdgeOrientation(int i) const 
-    { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
+  int   EdgeOrientation(int i) const
+    {  return 2*(&at(nvedge[i][0]) < &at(nvedge[i][1]))-1;}// return -1 or 1 FH: Change jan 2018 
     
   R lenEdge(int i) const {ASSERTION(i>=0 && i <ne);
     Rd E=Edge(i);return sqrt((E,E));}
