@@ -144,7 +144,7 @@ real ref;
 assert(err==0);
 
 NewMacro V(u) [u#1,u#2] EndMacro
-NewMacro CheckRT(RT,RTname,xx,yy,dxxx,V)
+NewMacro CheckRT(RT,RTname,xx,yy,pxy,dxxx,V,doassert)
 cout << " Check  ***********" << RTname <<  "\n"; 
 
 {
@@ -152,6 +152,7 @@ fespace Wh1 (Th,RT);
 fespace Ph1 (Th,P1);
 fespace Ph2 (Th,P2dc);
 fespace Kh (Th,P2);
+fespace P4h (Th,P4);
 fespace Eh0 (Th,P1nc);
 Wh1 V(u), V(w);
 
@@ -192,16 +193,22 @@ Th=square(5,5,[10*(x+y/3),10*(y-x/3)]);
 V(u)=[0,0];
 V(w)=[0,0];
 
-  func p1=2+x+y*2;
-  func uu1 =  1+xx*p1;
-  func uu2 =  2+yy*p1;
+  P4h p1=pxy;
+  P4h uu1 =  1-x+xx*p1;
+  P4h uu2 =  2-2*y+yy*p1;
 
 
  [u1,u2] = [uu1 ,uu2];
- cout << int2d(Th)( square(uu1-u1) )/ Th.area << endl;
- cout << int2d(Th)( square(uu2-u2) )/Th.area << endl;
- plot([u1,u2],wait=1);
-
+ real eerr1=int2d(Th)( square(uu1-u1) )/ Th.area ,err2=int2d(Th)( square(uu2-u2) )/Th.area;
+ real errx1= int2d(Th)( square(dx(uu1)-dx(u1)) )/ Th.area ,errx2=int2d(Th)( square(dx(uu2)-dx(u2)) )/Th.area;
+ real erry1= int2d(Th)( square(dy(uu1)-dy(u1)) )/ Th.area ,erry2=int2d(Th)( square(dy(uu2)-dy(u2)) )/Th.area;
+ 
+ cout << "err "+RTname+" "<< eerr1 << " "  << err2  << endl;
+ cout << "  dx " <<  errx1 <<" " << errx2 << endl; 
+ cout << "  dy " <<  erry1 <<" " << erry2 << endl; 
+ plot([u1,u2],wait=1,cmm=RTname);
+ real err=eerr1+err2+errx1+errx2+erry1+erry2; 
+ if( doassert) assert( err< 1e-6);
 for( int i=0;i<Wh1.ndof;++i)
 {
 
@@ -218,13 +225,15 @@ for( int i=0;i<Wh1.ndof;++i)
 cout << " End  Check  ***********" << RTname <<  " Ok .... \n"; 
 }
 EndMacro
+func pxy0=2;
+func pxy1=2+x-y*3;
+func pxy2 = 2+x+y*2+x*x+2*x*y+-x*x;
+CheckRT(RT1,"RT1",x,y,pxy1,ccn,V,1)
+CheckRT(RT1Ortho,"RT1Ortho",-y,x,pxy1,cctau,V,1)
 
-CheckRT(RT1,"RT1",x,y,ccn,V)
-CheckRT(RT1Ortho,"RT1Ortho",-y,x,cctau,V)
-CheckRT(BDM1,"BDM1",x,y,ccn,V)
-CheckRT(BDM1Ortho,"BDM1Ortho",-y,x,cctau,V)
-
-CheckRT(RT1,"RT2",x,y,ccn,V)
-CheckRT(RT1Ortho,"RT2Ortho",-y,x,cctau,V)
-
+CheckRT(RT2,"RT2",x,y,pxy2,ccn,V,1)
+CheckRT(RT2Ortho,"RT2Ortho",-y,x,pxy2,cctau,V,1)
+CheckRT(BDM1,"BDM1",x,y,pxy0,ccn,V,1)
+CheckRT(BDM1Ortho,"BDM1Ortho",-y,x,pxy0,cctau,V,1)
+	
 }

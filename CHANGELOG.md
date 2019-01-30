@@ -24,7 +24,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Version 4 ]
-- uniformize 2d/3d in element, methode   EdgeOrientation(e)  now return +1/-1 
+- correct bug in RT1Ortho and RT2Ortho  2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)  
+- uniformize 2d/3d in element, methode   EdgeOrientation(e)  now return +1/-1
 ## [Version 4 beta] 2018-12-01
 - change all the sparse matrix structure
 - remove all map matrix jan 2019
