@@ -96,6 +96,7 @@ freefem++.pref:Makefile
 # FFCS - cleaning is useful sometimes
 clean-local::
 	-rm $(LIST_COMPILE)  hpddm.dylib hpddm_substructuring.dylib PETSc.dylib PETSc-complex.dylib SLEPc-complex.dylib SLEPc.dylib
+	-cd ../examples++-mpi/.; rm $(LIST_COMPILE)  hpddm.dylib hpddm_substructuring.dylib PETSc.dylib PETSc-complex.dylib SLEPc-complex.dylib SLEPc.dylib
 	-rm *.$(OBJEXT)
 
 # Local Variables:
