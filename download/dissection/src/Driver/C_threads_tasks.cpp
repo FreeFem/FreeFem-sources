@@ -48,12 +48,12 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "Compiler/OptionLibrary.hpp"
 #include <iostream>
 #include <float.h>
 #include <cmath> // for isnan()
 
 #include "Compiler/blas.hpp"
-#include "Compiler/OptionLibrary.h"
 #include "Driver/C_threads_tasks.hpp"
 #include "Driver/C_KernDetect.hpp"
 #include "Algebra/VectorArray.hpp"
@@ -916,6 +916,7 @@ int dimKernDense(vector<int> &singIdx, const int n,
   bool flagShrinkSchur = false;
   int nn0 = sing_max;
   int *permute1 = new int[aug_max];
+#if 0
   {
     double pivot = 1.0;
     double fop;
@@ -945,6 +946,7 @@ int dimKernDense(vector<int> &singIdx, const int n,
       diss_printf(verbose, fp, "\n");
     }
   }
+#endif
   int aug_max1 = aug_max;
   if (flagShrinkSchur) {
     aug_max1 = aug_dim + nn0;
@@ -1017,16 +1019,19 @@ int dimKernDense(vector<int> &singIdx, const int n,
   delete [] permute1;
 
   int n2;
-  bool flag, flag_2x2;
+  bool flag, flag_unsym_pivot;
 
-  flag = ComputeDimKernel<T, U>(&n2, &flag_2x2, s.addrCoefs(), aug_max1, isSym,
+  flag = ComputeDimKernel<T, U>(&n2, &flag_unsym_pivot, s.addrCoefs(), aug_max1, isSym,
 				aug_dim, eps_machine, eps_piv, verbose, fp);
-  diss_printf(verbose, fp, "%s %d : detected dim. of the kernel = %d\n",
-	      __FILE__, __LINE__, n2);
+  diss_printf(verbose, fp, "%s %d : detected dim. of the kernel = %d %s\n",
+	      __FILE__, __LINE__, n2, flag_unsym_pivot ? "full" : "symmetric");
   // 
   // restore stored diagonal entries nullified for augmented dimenison
   for (int i = 0; i < aug_max; i++) {
     D.diag(aug_ind0[i]) = a_diag[i];
+  }
+  if (flag_unsym_pivot) {
+    return 0;     // force kernel detection failure : 15 May 2018
   }
   if ((n2 != sing_max)) {
     if (refactorize) {
@@ -1257,9 +1262,9 @@ void calc_relative_norm<complex<float> >(double *norm_l2, double *norm_infty,
 					 const int dim);
 
 //
-template<typename T, typename U>
+template<typename T, typename Z>
 void calc_relative_normscaled(double *norm_l2,  double *norm_infty, 
-			       const T *v, const T *u, const U *w,
+			       const T *v, const T *u, const Z *w,
 			       const int dim)
 {
   fprintf(stderr, "%s %d : specialized template is not yet defined.\n",
@@ -1611,7 +1616,6 @@ int count_diag_negative<complex<float> >(SquareBlockMatrix<complex<float> >& Dia
 {
   return count_diag_negative_complex<float>(Diag);
 }
-
 //
 template<typename T>
 int count_diag_negative(SubSquareMatrix<T>& Diag)

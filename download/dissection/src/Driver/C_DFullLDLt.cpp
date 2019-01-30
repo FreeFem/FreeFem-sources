@@ -258,7 +258,9 @@ void C_dfull_gauss_b(void *arg_)
       D.copyBlockToArray(arg->i1_block, arg->i1_block, a.addrCoefs(), n);
       //      D.copyToArrayFull(a, n);
     } // if (id_level == 0)
-    singIdx0.resize(n, -1);
+    singIdx0.clear();
+    singIdx0.reserve(n);
+    //    singIdx0.resize(n, -1);
     D.set_dim_kern(0);    // counting total number of null pivots among blocks
     // initialize permute[]
     for (int i = 0; i < n; i++) {
@@ -346,7 +348,8 @@ void C_dfull_gauss_b(void *arg_)
   {
     int itmp = i1 + nrow - nn0;
     for (int i = 0; i < nn0; i++, itmp++, sing_max++) {
-      singIdx0[sing_max] = itmp;
+      //      singIdx0[sing_max] = itmp;
+      singIdx0.push_back(itmp);
     }
     D.set_dim_kern(sing_max);  // total number of null pivots
     D.set_dim_kern_block(id_block, nn0); // #null pivots candidate in the block
@@ -648,6 +651,7 @@ void C_dinvDL_timesU<complex<float> >(void *arg_);
 template<typename T, typename U>
 void C_gauss_whole_pivot(void *arg_)
 {
+  const T zero(0.0);
   const T one(1.0);
   C_dfull_gauss_arg<T, U> *arg = (C_dfull_gauss_arg<T, U> *)arg_;
 
@@ -786,13 +790,13 @@ void C_gauss_whole_pivot(void *arg_)
   // nullify lower part corresponding to the suspicious pivots
       for (int j = 0; j < n; j++) {
 	for (int i = n1; i < n; i++){
-	  a[i + j * n] = 0.0;
+	  a[i + j * n] = zero;
 	}
       }
       if (!arg->isSym) {
 	for (int j = 0; j < n; j++) {
 	  for (int i = n1; i < n; i++){
-	    a[j + i * n] = 0.0;
+	    a[j + i * n] = zero;
 	  }
 	}
       }

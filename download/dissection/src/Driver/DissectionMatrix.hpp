@@ -307,10 +307,12 @@ template<typename T>
 class SchurMatrix
 {
 public:
-  SchurMatrix() { }
+  SchurMatrix() { _full_pivoting = false;}
   ~SchurMatrix() { }
   void free() {
     _sldu.free();
+    _sldu_list.clear(); // 
+    _sldu_list_left.clear();
     delete _arow;
     delete _acol;
     _scol.free();
@@ -318,24 +320,34 @@ public:
   }
   SubSquareMatrix<T>& getSldu() { return _sldu; }
   vector<int>& getSlduList() { return _sldu_list; }
+  vector<int>& getSlduListLeft() {
+    return _full_pivoting ? _sldu_list_left : _sldu_list;
+  }
   SparseMatrix<T>*& getArow() { return _arow; }
   SparseMatrix<T>*& getAcol() { return _acol; }
   ColumnMatrix<T>& getScol() { return _scol; }
   ColumnMatrix<T>& getSchur() { return _schur; } // for debugging
+  bool isFullPivoting() { return _full_pivoting; }
+  void setFullPivoting(const bool full_pivoting) {
+    _full_pivoting = full_pivoting;
+  }
 private:
   SubSquareMatrix<T>  _sldu;
-  vector<int>         _sldu_list;
+  vector<int>         _sldu_list; // _sldu_list_right;
+  vector<int>         _sldu_list_left;
   SparseMatrix<T>*    _arow;
   SparseMatrix<T>*    _acol;
   ColumnMatrix<T>     _scol;
   ColumnMatrix<T>     _schur;
+  bool                _full_pivoting;
 };
   
 template<typename T>
 class KernelMatrix
 {
 public:
-  KernelMatrix(int dimension = 0) : _dimension(dimension) { }
+  KernelMatrix(int dimension = 0) : _dimension(dimension),
+				    _full_pivoting(false) { }
   ~KernelMatrix() { }
   void free()
   {
@@ -350,22 +362,31 @@ public:
   int dimension() const { return _dimension; }
   void set_dimension(int dimension){ _dimension = dimension; }
   vector<int>& getSingIdx() { return _singIdx; }
-  vector<int>& getKernListEq() { return _kern_list_eq; }
+  vector<int>& getKernListEq() {
+    return _kern_list_eq;   
+  }
+  vector<int>& getKernListEqLeft() {
+    return _full_pivoting ? _kern_list_eq_left : _kern_list_eq;
+  }  
   ColumnMatrix<T>& getKernBasis() {return _kern_basis; }
   ColumnMatrix<T>& getTKernBasis() { return _tkern_basis; }
   SquareMatrix<T>& getKernProj() { return _kern_proj; }
   SquareMatrix<T>& getTKernProj()  { return _tkern_proj; }
   SquareMatrix<T>& getNTKernProj() { return _ntkern_proj; }
-
+  void setFullPivoting(const bool full_pivoting) {
+    _full_pivoting = full_pivoting;
+  }
 private:
   int _dimension;
   vector<int>      _singIdx;
   vector<int>      _kern_list_eq;
+  vector<int>      _kern_list_eq_left;
   ColumnMatrix<T>  _kern_basis;
   ColumnMatrix<T>  _tkern_basis;
   SquareMatrix<T>  _kern_proj;
   SquareMatrix<T>  _tkern_proj; 
   SquareMatrix<T>  _ntkern_proj;
+  bool _full_pivoting;
 };
 
 #endif

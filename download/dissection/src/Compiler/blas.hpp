@@ -56,8 +56,6 @@
 # include "Compiler/OptionCompiler.hpp"
 # include "Compiler/arithmetic.hpp"
 
-#include <complex>
-
 #ifdef BLAS_MKL
 #define MKL_Complex16 std::complex<double>
 #include <mkl_cblas.h>
@@ -67,6 +65,8 @@ typedef void BLAS_VOID;
 #endif
 #ifdef VECLIB
 #include <cblas.h>
+typedef int BLAS_INT;
+typedef void BLAS_VOID;
 #endif
 #ifdef SX_ACE_BLAS
 #include <cblas.h>
@@ -143,7 +143,7 @@ inline quadruple
 blas_abs<complex<quadruple>, quadruple>(const complex<quadruple> &x) {
   quadruple xx = x.real();
   quadruple yy = x.imag();
-  return sqrt(xx * xx + yy * yy);
+  return sqrt<quadruple>(xx * xx + yy * yy);
 }
 
 #ifndef NO_OCTRUPLE
@@ -158,7 +158,7 @@ inline octruple
 blas_abs<complex<octruple>, octruple>(const complex<octruple> &x) {
   octruple xx = x.real();
   octruple yy = x.imag();
-  return sqrt(xx * xx + yy * yy);
+  return sqrt<octruple>(xx * xx + yy * yy);
 }
 #endif
 
@@ -173,7 +173,7 @@ inline double
 blas_abs<complex<quadruple>, double>(const complex<quadruple> &x) {
   quadruple xx = x.real();
   quadruple yy = x.imag();
-  return quad2double(sqrt(xx * xx + yy * yy));
+  return quad2double(sqrt<quadruple>(xx * xx + yy * yy));
 }
 
 #ifndef NO_OCTRUPLE
@@ -188,7 +188,7 @@ inline double
 blas_abs<complex<octruple>, double>(const complex<octruple> &x) {
   octruple xx = x.real();
   octruple yy = x.imag();
-  return oct2double(sqrt(xx * xx + yy * yy));
+  return oct2double(sqrt<octruple>(xx * xx + yy * yy));
 }
 #endif
 
@@ -717,37 +717,8 @@ blas_trsm<complex<float> >(const CBLAS_SIDE Side,
 			    const complex<float> &alpha,
 			    const complex<float> *A, const int lda,
 			    complex<float> *B, const int ldb);
-#endif
-#ifdef BLAS_MKL
-// ====================== MKL transposition routines =======================
-inline void 
-mkl_omatcopy(char ordering, char trans,
-	     size_t rows, size_t cols,
-	     const double alpha,
-	     const double *A, size_t lda,
-	     double *B, size_t ldb)
-{
-  mkl_domatcopy(ordering, trans,
-		rows, cols,
-		alpha, A, lda,
-		B, ldb);
-}
-
-inline void 
-mkl_omatcopy(char ordering, char trans,
-	     size_t rows, size_t cols,
-	     const double alpha_,
-	     const complex<double> *A, size_t lda,
-	     complex<double> *B, size_t ldb)
-{
-  const complex<double> alpha = complex<double>(alpha_, 0.0);
-  mkl_zomatcopy(ordering, trans,
-		rows, cols,
-		(MKL_Complex16)alpha, (MKL_Complex16 *)A, lda,
-		(MKL_Complex16 *)B, ldb);
-}
-#endif
-
+#endif 
+//#ifdef BLAS_MKL
 
 // ======== for computation of norm and norm^2
 

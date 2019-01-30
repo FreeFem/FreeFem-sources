@@ -10,7 +10,7 @@ using namespace std;
 #include "rgraph.hpp"
 #include "error.hpp"
 #include "AFunction.hpp"
-
+#include "ff++.hpp"
 
 #include "MatriceCreuse_tpl.hpp"
 
@@ -143,7 +143,7 @@ class SolveDissection:   public MatriceMorse<R>::VirtualSolver  {
   double *_xtmp;
   uint64_t *_dslv;
 public:
-
+  
   SolveDissection(const MatriceMorse<R> &A,
 		  int strategy_, double ttgv, 
 		  double pivot) :
@@ -159,7 +159,7 @@ public:
 	    num_threads);
    }
     _dslv = new uint64_t;
-    diss_init(*_dslv, 0, 1, 0, num_threads, ((verbosity > 0) ? 1 : 0)); 
+    diss_init(*_dslv, 0, 1, num_threads, ((verbosity > 3) ? 1 : 0)); 
     // real matrix, with double precision factorization, # of threads
     const int decomposer = (strategy_ % 100) / 10;
     const int scaling = strategy_ == 0 ? 2 : strategy_ % 10;
@@ -221,7 +221,7 @@ public:
     int nnz1;
     nnz1 = copy_CSR<double>(_ptrows0, indcol_tmp, coef_tmp, _dim0, indcols_tmp, 
 			    coefs_tmp, 0, _dim0);
-    if (verbosity > 0) {
+    if (verbosity > 10) {
       cout << "nnz1 " << nnz1 << endl;
     }
     _indcols0 = new int[nnz1];
@@ -303,6 +303,11 @@ public:
     Ax += (const MatriceMorse<R> &) (*this) * x; 
   }
 
+  uint64_t *dslv() {
+    return _dslv;
+  }
+  int dim0() const { return _dim0; }
+  int * new2old() const { return _new2old; }
 }; 
 
 
@@ -339,7 +344,7 @@ public:
     }
 
     _dslv = new uint64_t;
-    diss_init(*_dslv, 0, 2, 0, num_threads, ((verbosity > 0) ? 1 : 0)); // 
+    diss_init(*_dslv, 0, 2, num_threads, ((verbosity > 3) ? 1 : 0)); // 
     // complex matrix, with double precision factorization, # of threads
     const int decomposer = (strategy_ % 100) / 10;
     const int scaling = strategy_ == 0 ? 2 : strategy_ % 10;
@@ -474,6 +479,12 @@ public:
     Ax += (const MatriceMorse<Complex> &) (*this) * x; 
   }
 
+  uint64_t *dslv() {
+    return _dslv;
+  }
+  int dim0() const { return _dim0; }
+  int * new2old() const { return _new2old; }
+
 }; 
 
 inline MatriceMorse<double>::VirtualSolver *
@@ -504,6 +515,100 @@ DefSparseSolverSym<Complex>::SparseMatSolver SparseMatSolverSym_C;
 // the default probleme solver 
 TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
 
+
+template<class K>
+class dissectionkernel_Op : public E_F0mps {
+    public:
+        Expression mat;
+        static const int n_name_param = 3;
+        static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
+        dissectionkernel_Op(const basicAC_F0& args, Expression param1) : mat(param1) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+        AnyType operator()(Stack stack) const;
+};
+
+template<class K>
+basicAC_F0::name_and_type dissectionkernel_Op<K>::name_param[] = {
+  {"kerneldim", &typeid(long *)},
+  {"kerneln", &typeid(KNM<K>*)},
+  {"kernelt", &typeid(KNM<K>*)}
+};
+
+template<class K>
+class dissectionkernel : public OneOperator {
+    public:
+  dissectionkernel() : OneOperator(atype<long>(), atype<Matrice_Creuse<K>*>()) {}
+  
+  E_F0* code(const basicAC_F0& args) const {
+    return new dissectionkernel_Op<K>(args, t[0]->CastTo(args[0]));
+  }
+};
+
+#if 0
+template<class K>
+AnyType dissectionkernel_Op<K>::operator()(Stack stack) const {
+    MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*mat)(stack))->A));
+//    SolveDissection<K>* mdissection = dynamic_cast<SolveDissection<K> *>(mA);
+    const SolveDissection<K>* mdissection;
+    mA->GetSolver(mdissection);
+    if (mdissection) {
+      uint64_t *dslv = ((SolveDissection<K>*)mdissection)->dslv();
+      int n0;      
+      long *kerndim = nargs[0] ?  GetAny<long*>((*nargs[0])(stack)) : 0;
+      if (kerndim) {
+	diss_get_kern_dim(*dslv, &n0);
+	*kerndim = n0;
+      }
+      KNM<K>* ptKerN = nargs[1] ? GetAny<KNM<K>*>((*nargs[1])(stack)) : 0;
+      if(ptKerN) {
+	diss_get_kern_dim(*dslv, &n0);
+	if (n0 > 0) {
+	  const int dim = mA->n;
+	  const int dim0 = mdissection->dim0();
+	  const int *new2old = mdissection->new2old();
+	  ptKerN->resize(mA->n, n0);
+	  double *kernv = new double[n0 * dim];
+	  diss_get_kern_vecs(*dslv, kernv);
+	  for (int k = 0; k < n0; k++) {
+	    for (int i = 0; i < dim0; i++) {
+	      (*ptKerN)(new2old[i], k) = kernv[i + k * dim0];
+	    } 
+	    for (int i = dim0; i < dim; i++) {
+	      (*ptKerN)(new2old[i], k) = 0.0;
+	    }
+	  }
+	  delete [] kernv;
+	} // if (n0 > 0)
+      }
+      KNM<K>* ptKerT = nargs[2] ? GetAny<KNM<K>*>((*nargs[2])(stack)) : 0;
+      if(ptKerT) {
+	const int dim = mA->n;
+	const int dim0 = mdissection->dim0();
+	const int *new2old = mdissection->new2old();
+	ptKerT->resize(mA->n, n0);
+	double *kernv = new double[n0 * dim];
+	diss_get_kernt_vecs(*dslv, kernv);
+	for (int k = 0; k < n0; k++) {
+	  for (int i = 0; i < dim0; i++) {
+	    (*ptKerT)(new2old[i], k) = kernv[i + k * dim0];
+	  } 
+	  for (int i = dim0; i < dim; i++) {
+	    (*ptKerT)(new2old[i], k) = 0.0;
+	  }
+	}
+	delete [] kernv;
+      }
+      return static_cast<long>(n0);
+    } // 
+    else {
+      // error mddisection is not casted!
+      return 0L;
+    }
+}
+#endif
+// --
 bool SetDissection()
 {
     if(verbosity>1)
@@ -531,8 +636,11 @@ void init22()
   DefSparseSolver<Complex>::solver =BuildSolverIDissection;
 
   if(! Global.Find("defaulttoDissection").NotNull() )
-    Global.Add("defaulttoDissection","(",new OneOperator0<bool>(SetDissection));  
+    Global.Add("defaulttoDissection","(",new OneOperator0<bool>(SetDissection));
+#if 0
+  Global.Add("dissectionkernel", "(", new dissectionkernel<double>);
+  Global.Add("dissectionkernel", "(", new dissectionkernel<Complex>);
+#endif
 }
-
 
 LOADFUNC(init22);

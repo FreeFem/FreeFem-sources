@@ -181,6 +181,7 @@ public:
 		   const bool kernel_detection_all = false,
 		   const int dim_augkern = DIM_AUG_KERN,
 		   const double machine_eps_ = -1.0,
+		   const bool assume_invertible = false,
 		   const bool higher_precision = false);
 
   bool getFactorized(void) { return _status_factorized; };
@@ -195,17 +196,24 @@ public:
   void GetMatrixScaling(Z *weight);
 
   void ProjectionImageSingle(T *x, string name = string(""));
-  void ProjectionKernelOrthSingle(T *x, bool isTrans);
+
+  void ProjectionKernelOrthSingle(T *x, string name = string(""),
+				  bool isTrans = false);
   void ProjectionImageMulti(T *x, int nrhs);
 
   void SpMV(const T *x, T *y, bool scaling_flag = true);
   void SpMtV(const T *x, T *y, bool scaling_flag = true);
 
   void SolveScaled(T *x, int nrhs, bool isTrans);
+  void SolveScaledRefinement(T *x, int nrhs, vector<int> &singIdx,
+			     bool isTrans);
+  
   void QueueFwBw(T **x, int *nrhs);
 
   void SolveSingle(T *x, bool projection, bool isTrans, bool isScaling,
 		   const int nexcls = 0);
+  void SolveSingle2(T *x, bool isScaling, bool pseudo = false);
+
   void SolveMulti(T *x, int nrhs, bool projection, bool isTrans,
 		  bool isScaling, const int nexcls = 0);
 
@@ -214,8 +222,9 @@ public:
   void BuildSingCoefs(T *DSsingCoefs, 
 		      SparseMatrix<T> *DCsCoefs,
 		      T *DBsCoefs,
-		      vector<int> &singIdx);
-  
+		      vector<int> &singIdx,
+		      const bool isTrans = false);
+
   void BuildKernels(vector<int> &singIdx_, 
 		    int n2,
 		    SchurMatrix<T> &Schur,
@@ -228,11 +237,13 @@ public:
 			     const double eps,
 			     const int dim_augkern,
 			     SchurMatrix<T> &Schur,
-			     KernelMatrix<T> &kernel);
+			     KernelMatrix<T> &kernel,
+			     const bool enableDetection = true);
   Dissection::Tree** btree() { return _btree; }
   SparseMatrix<T>* ptDA() { return _ptDA; }
   int dimension(void) { return _dim; }
-  int kern_dimension(void); 
+  int kern_dimension(void);
+  int postponed_pivots(void);
   int ComputeTransposedKernels(void);
   int get_num_threads(void) { return _num_threads; }
   int scaling(void) const { return _scaling; }
@@ -286,9 +297,11 @@ private:
   int _scaling;
   bool _verbose;
   int _num_threads;
+  bool _assume_invertible;
   bool _status_factorized;
   int _dim;
   int _graph_colors;
+  int _dim_augkern;
   int _nsing;
   int _called;
   FILE *_fp;

@@ -47,6 +47,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
+#include "DissectionVersion.hpp"
 
 void
 DissectionVersion (
@@ -54,7 +55,7 @@ int * const                 vern,
 int * const                 rels,
 int * const                 ptch)
 {
-  *versptr = SCOTCH_VERSION;
-  *relaptr = SCOTCH_RELEASE;
-  *patcptr = SCOTCH_PATCHLEVEL;
+  *vern = DISSECTION_VERSION;
+  *rels = DISSECTION_RELEASE;
+  *ptch = DISSECTION_PATCHLEVEL;
 }

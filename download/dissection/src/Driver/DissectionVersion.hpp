@@ -5,6 +5,8 @@
     \date   Sep. 29th 2015
     \date   Nov. 30th 2016
     \date   Oct. 15th 2017
+    \date   Apr. 24th 2018
+    \date   Jun. 15th 2018
 */
 
 // This file is part of Dissection
@@ -55,7 +57,7 @@
 #include <string>
 
 #define DISSECTION_VERSION    1
-#define DISSECTION_RELEASE    0
-#define DISSECTION_PATCHLEVEL 3
+#define DISSECTION_RELEASE    2
+#define DISSECTION_PATCHLEVEL 2 
 
 #endif

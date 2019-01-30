@@ -49,7 +49,6 @@
 //
 
 #include "Compiler/blas.hpp"
-#include "Compiler/OptionLibrary.h"
 #include "Driver/C_threads_tasks.hpp"
 
 template<typename T>

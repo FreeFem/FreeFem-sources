@@ -96,14 +96,23 @@ FFLAGS     = $(DEBUGFLAG)
 LDOPT      = $(DEBUGFLAG)
 #
 DISSECTLIB= $(DISSECT_LIB_PATH) \
-	    -L$(DISSECT_LIB_DIR) -lDissection \
-            -L$(LIB_DIR_SCOTCH) -lscotch -lscotcherr
+	    -L$(DISSECT_LIB_DIR) -lDissection 
 
 all: MM-Dissection
 
 .cpp.o:
 	@echo Compiling $<
 	$(CXX) $(CCFLAGS) -I../ -c $< -o $@
+
+# MM-Dissection-Cinterface: MM-Dissection-Cinterface.o
+# 	@echo Create executable $(DIRECTORY)
+# 	@echo -n "**** setting of variables : "
+# 	@echo -n "COMPILER=$(COMPILER) "
+# 	@echo -n "BLAS=$(BLAS) "
+# 	@echo -n "PARALLEL=$(PARALLEL) "
+# 	@echo    "****"
+# 	$(LD) -o $@ $(LDOPT) MM-Dissection-Cinterface
+#.o $(DISSECTLIB) $(BLASLIB) $(LIBFORTRAN) $(LIB_SYSTEM) $(SHARED_COMPILER)
 
 MM-Dissection: MM-Dissection.o
 	@echo Create executable $(DIRECTORY)

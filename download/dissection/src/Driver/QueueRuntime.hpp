@@ -50,14 +50,8 @@
 
 #ifndef _QUEUE_RUNTIME_
 # define _QUEUE_RUNTIME_
-#ifdef _MSC_VER
-#include <iterator>
-#endif
-#ifdef SX_ACE
-#include <iterator>
-#endif
+#include "Compiler/OptionLibrary.hpp"
 #include "Driver/C_threads_tasks.hpp"
-#include "Compiler/OptionLibrary.h"
 #include "Compiler/elapsed_time.hpp"
 #include <time.h>
 #include <cstdlib>

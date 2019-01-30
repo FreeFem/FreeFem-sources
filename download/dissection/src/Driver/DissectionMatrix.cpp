@@ -48,12 +48,12 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "Compiler/OptionLibrary.hpp"
 #include <string>
 #include "Driver/DissectionMatrix.hpp"
 #include "Algebra/SparseRenumbering.hpp"
 
 // to_stirng is available in C++11 but NEC SXC++ does not support it
-#include "Compiler/OptionLibrary.h"
 #include "Compiler/DissectionIO.hpp"
 
 template<typename T, typename U>

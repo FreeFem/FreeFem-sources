@@ -399,8 +399,8 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	evnchld_id = _btree->childIndex(d); // "selfIndex(j) + 1 == j" is used
 	isChldrnAlgnd = dM[evnchld_id]->isAlignedFather();
       }
-      vector<C_task *> &task_p = (isChldrnAlgnd ? _tasks_DSymmGEMM[evnchld_id] :
-				  _tasks_Dsub[level + 1][j]);
+      //      vector<C_task *> &task_p = (isChldrnAlgnd ? _tasks_DSymmGEMM[evnchld_id] :
+      //				  _tasks_Dsub[level + 1][j]);
       
       itmp = dM[j]->C_DFullLDLt_queue(_tasks_DFullLDLt[j],
 				      task_indcol,
@@ -412,8 +412,10 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 				      &_eps_machine,
 				      &_pivots[j],
 				      &_pivots[_children[j][0]],
-				      &_pivots[_children[j][1]],
-				      task_p,
+				      &_pivots[_children[j][1]],		      
+				      //    task_p,
+				      (isChldrnAlgnd ? _tasks_DSymmGEMM[evnchld_id] :
+				       _tasks_Dsub[level + 1][j]),
 				      isChldrnAlgnd,
 				      _verbose,
 				      &_fp);
@@ -428,7 +430,7 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 	   << " / " << itmp << endl;
 #endif
       if (level > 0) {
-	vector<C_task *> &task_pp = _tasks_Dsub[level + 1][j];
+	//	vector<C_task *> &task_pp = _tasks_Dsub[level + 1][j];
 	
 	itmp = dM[j]->C_DTRSMScale_queue(_tasks_DTRSMScale[j],
 				  tasks_DTRSMScale_parents_index[j],
@@ -439,7 +441,8 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 				  _tasks_DFullLDLt[j],
 				  task_indcol,
 				  task_ptr,
-				  task_pp,
+					 _tasks_Dsub[level + 1][j],
+					 //				  task_pp,
 				  _verbose,
 				  &_fp);
 	if (itmp > 1) {
@@ -476,32 +479,36 @@ generate_queue(vector<DissectionMatrix<T, U>* >& dM,
 		(RectBlockMatrix<T> *) NULL);
       lower1 = (isEven ? dM[j - 1]->addrlowerBlock() :
 		(RectBlockMatrix<T> *) NULL);
-      vector<C_task *> &tasks_q = (isEven ? _tasks_DTRSMScale[j - 1] :
-				   null_task);
+      //      vector<C_task *> &tasks_q = (isEven ? _tasks_DTRSMScale[j - 1] :
+      //				   null_task);
       vector<int> null_idx;
-      vector<int> &tasks_q_index = (isEven ? tasks_DTRSMScale_index[j - 1] :
-				   null_idx);
+      //      vector<int> &tasks_q_index = (isEven ? tasks_DTRSMScale_index[j - 1] :
+      //				   null_idx);
       
-      vector<int> &tasks_q_indcol = (isEven ? tasks_DTRSMScale_indcol[j - 1] :
-				     null_idx);
-      vector<int> &tasks_q_ptr = (isEven ? tasks_DTRSMScale_ptr[j - 1] :
-				     null_idx);
+      //      vector<int> &tasks_q_indcol = (isEven ? tasks_DTRSMScale_indcol[j - 1] :
+      //				     null_idx);
+      //      vector<int> &tasks_q_ptr = (isEven ? tasks_DTRSMScale_ptr[j - 1] :
+      //				     null_idx);
 
       itmp = dM[j]->C_DGEMM_local_queue(_tasks_DSymmGEMM[j],
-				 tasks_DSymmGEMM_indcol[j],
-				 upper1,
-				 lower1,
-				 (!isEven),
-				 isDirect,
-				 f_diag,
-				 _tasks_DTRSMScale[j],
-				 tasks_DTRSMScale_index[j],
-				 tasks_DTRSMScale_indcol[j],
-				 tasks_DTRSMScale_ptr[j],
-				 tasks_q,
-				 tasks_q_index,
-				 tasks_q_indcol,
-				 tasks_q_ptr,
+					tasks_DSymmGEMM_indcol[j],
+					upper1,
+					lower1,
+					(!isEven),
+					isDirect,
+					f_diag,
+					_tasks_DTRSMScale[j],
+					tasks_DTRSMScale_index[j],
+					tasks_DTRSMScale_indcol[j],
+					tasks_DTRSMScale_ptr[j],
+					(isEven ? _tasks_DTRSMScale[j - 1] : null_task),
+					(isEven ? tasks_DTRSMScale_index[j - 1] : null_idx),
+					(isEven ? tasks_DTRSMScale_indcol[j - 1] : null_idx),
+					(isEven ? tasks_DTRSMScale_ptr[j - 1] : null_idx),
+					//				 tasks_q,
+					//				 tasks_q_index,
+					//				 tasks_q_indcol,
+					//				 tasks_q_ptr,
 				 (jf >= 0) ? &_tasks_Dsub[level + 1][jf] : 
 				 (vector<C_task *>*)NULL,
 				 _verbose,
@@ -2108,9 +2115,10 @@ void DissectionQueue<T, U>::erase_queue(void)
 #ifdef DEBUG_ERASE
   cerr << "symbolic ";
 #endif
- vector<C_task *> &queue = *(_queue_symb->queue);
+  // vector<C_task *> &queue = *(_queue_symb->queue);
   for (int j = _queue_symb->begin; j < _queue_symb->end; j++) {
-    C_task *task = queue[j];
+    //    C_task *task = queue[j];
+    C_task *task = (*(_queue_symb->queue))[j];
 #ifdef DEBUG_ERASE
     cerr << task->task_name << " ";
 #endif

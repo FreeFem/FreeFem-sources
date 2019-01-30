@@ -47,7 +47,8 @@
 #
 
 DIRECTORY  = Driver
-SOURCESCPP = C_threads_tasks.cpp \
+SOURCESCPP = DissectionVersion.cpp \
+             C_threads_tasks.cpp \
              C_Dsub.cpp \
              C_DFullLDLt.cpp \
              DissectionMatrix.cpp \

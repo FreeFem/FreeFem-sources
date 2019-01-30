@@ -48,250 +48,19 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "Compiler/OptionLibrary.hpp"
 #include "Driver/C_KernDetect.hpp"
 #include "Algebra/ColumnMatrix.hpp"
 #include "Algebra/VectorArray.hpp"
-#include "Compiler/OptionLibrary.h"
 #include "Compiler/DissectionIO.hpp"
-
-template<typename T, typename U>
-void copy_matrix_permute_(const int lda, int n,
-			  U *b, T *a, int *permute)
-{
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      const int ij0 = permute[i] + permute[j] * lda;
-      const int ij1 = i + j * n;
-      b[ij1] = U(a[ij0]);
-    }
-  }
-}
-
-template
-void copy_matrix_permute_<double, quadruple>(const int lda, int n,
-					     quadruple *b, double *a,
-					     int *permute);
-
-template
-void copy_matrix_permute_<float, double>(const int lda, int n,
-					double *b, float *a,
-					int *permute);
-
-#ifndef NO_OCTRUPLE
-template
-void copy_matrix_permute_<quadruple, octruple>(const int lda, int n,
-					       octruple *b, quadruple *a,
-					       int *permute);
-#endif
-//
-
-template<typename T, typename U>
-void copy_matrix_permute_complex_(const int lda, int n,
-				  complex<U> *b, complex<T> *a, int *permute)
-{
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      const int ij0 = permute[i] + permute[j] * lda;
-      const int ij1 = i + j * n;
-      b[ij1] = complex<U>(U(a[ij0].real()),    // complex value is defined
-			  U(a[ij0].imag()));   // by std::complex, then no
-    }                                              // direct cast
-  }
-}
-
-template
-void copy_matrix_permute_complex_<double, quadruple>(const int lda, int n,
-						     complex<quadruple> *b,
-						     complex<double> *a,
-						     int *permute);
-
-template
-void copy_matrix_permute_complex_<float, double>(const int lda, int n,
-						 complex<double> *b,
-						 complex<float> *a,
-						 int *permute);
-
-#ifndef NO_OCTRUPLE
-template
-void copy_matrix_permute_complex_<quadruple, octruple>(const int lda, int n,
-						       complex<octruple> *b,
-						       complex<quadruple> *a,
-						       int *permute);
-#endif
-//
-
-inline
-void copy_matrix_permute(const int lda, int n,
-			 quadruple *b, double *a, int *permute)
-{
-  copy_matrix_permute_<double, quadruple>(lda, n, b, a, permute);
-}
-
-inline
-void copy_matrix_permute(const int lda, int n,
-			 complex<quadruple> *b, complex<double> *a,
-			 int *permute)
-{
-  copy_matrix_permute_complex_<double, quadruple>(lda, n, b, a, permute);
-}
-
-inline
-void copy_matrix_permute(const int lda, int n,
-			 double *b, float *a, int *permute)
-{
-  copy_matrix_permute_<float, double>(lda, n, b, a, permute);
-}
-
-inline
-void copy_matrix_permute(const int lda, int n,
-			 complex<double> *b, complex<float> *a,
-			 int *permute)
-{
-  copy_matrix_permute_complex_<float, double>(lda, n, b, a, permute);
-}
-
-#ifndef NO_OCTRUPLE
-inline
-void copy_matrix_permute(const int lda, int n,
-			 octruple *b, quadruple *a, int *permute)
-{
-  copy_matrix_permute_<quadruple, octruple>(lda, n, b, a, permute);
-}
-
-inline
-void copy_matrix_permute(const int lda, int n,
-			 complex<octruple> *b, complex<quadruple> *a,
-			 int *permute)
-{
-  copy_matrix_permute_complex_<quadruple, octruple>(lda, n, b, a, permute);
-}
-#endif
-
-template<typename T, typename U>
-bool check_kern(const int n0, const int lda, const int n, T *a_ini,
-		int *permute,
-		const int dim_augkern, const U &eps,
-		const U &eps_param, const bool flag_sym, U *errors)
-{
-  fprintf(stderr, "%s %d : specialized template not implemented\n",
-	  __FILE__, __LINE__);
-  return false;
-}
-
-template<>
-bool check_kern<double, double>(const int n0, const int lda, const int n,
-				double *a_ini, int *permute,
-				const int dim_augkern, const double &eps,
-				const double &eps_param, const bool flag_sym,
-				double *errors)
-{
-  return check_kern_<double,
-		     double,
-		     quadruple,
-		     quadruple>(n0, lda, n, a_ini, permute,
-				dim_augkern, eps, eps_param,
-				flag_sym, errors);
-}
-
-template<>
-bool check_kern<complex<double>, double >(const int n0,
-					  const int lda, const int n,
-					  complex<double> *a_ini,
-					  int *permute,
-					  const int dim_augkern,
-					  const double &eps,
-					  const double &eps_param,
-					  const bool flag_sym,
-					  double *errors)
-{
-  return check_kern_<complex<double>,
-		     double,
-		     complex<quadruple>,
-		     quadruple>(n0, lda, n, a_ini, permute,
-				dim_augkern, eps, eps_param,
-				flag_sym, errors);
-}
-
-template<>
-bool check_kern<float, float>(const int n0, const int lda, const int n,
-			      float *a_ini, int *permute,
-			      const int dim_augkern, const float &eps,
-			      const float &eps_param, const bool flag_sym,
-			      float *errors)
-{
-  return check_kern_<float,
-		     float,
-		     double,
-		     double>(n0, lda, n, a_ini, permute,
-			     dim_augkern, eps, eps_param,
-			     flag_sym, errors);
-}
-
-template<>
-bool check_kern<complex<float>, float >(const int n0,
-					  const int lda, const int n,
-					  complex<float> *a_ini,
-					  int *permute,
-					  const int dim_augkern,
-					  const float &eps,
-					  const float &eps_param,
-					  const bool flag_sym,
-					  float *errors)
-{
-  return check_kern_<complex<float>,
-		     float,
-		     complex<double>,
-		     double>(n0, lda, n, a_ini, permute,
-				dim_augkern, eps, eps_param,
-				flag_sym, errors);
-}
-
-
-#ifndef NO_OCTRUPLE
-template<>
-bool check_kern<quadruple, quadruple>(const int n0, const int lda, const int n,
-				      quadruple *a_ini, int *permute,
-				      const int dim_augkern,
-				      const quadruple &eps,
-				      const quadruple &eps_param,
-				      const bool flag_sym,
-				      quadruple *errors)
-{
-  return check_kern_<quadruple,
-		     quadruple,
-		     octruple,
-		     octruple>(n0, lda, n, a_ini, permute,
-			       dim_augkern, eps,
-			       eps_param, flag_sym,
-			       errors);
-}
-
-template<>
-bool check_kern<complex<quadruple>, quadruple>(const int n0,
-					       const int lda, const int n,
-					       complex<quadruple> *a_ini,
-					       int *permute,
-					       const int dim_augkern,
-					       const quadruple &eps,
-					       const quadruple &eps_param,
-					       const bool flag_sym,
-					       quadruple *errors)
-{
-  return check_kern_<complex<quadruple>,
-		     quadruple,
-		     complex<octruple>,
-		     octruple>(n0, lda, n, a_ini, permute,
-			       dim_augkern, eps, eps_param,
-			       flag_sym, errors);
-}
-#endif
 
 // T may be std::complex of U and W is in higher precision than T
 template<typename T, typename U, typename W, typename Y>
-bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
+bool check_kern(const int n0, const int lda, const int n, W *a_ini,
 		 int *permute,
 		 const int dim_augkern, const U &eps,
-		 const U &eps_param, const bool flag_sym, U *errors)
+		 const U &eps_param, const bool flag_sym, U *errors,
+		 const bool verbose, FILE *fp)
 {
   bool flag;
   //  W *a_q, *a_fq, *proj, *nsp, *nsp2;
@@ -299,6 +68,7 @@ bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
   const W zero(0.0);
   const W one(1.0);
   const W none(-1.0);
+  const U Uzero(0.0);
   
   ColumnMatrix<W> a_q(n, n); 
   ColumnMatrix<W> a_fq(n, n); 
@@ -308,7 +78,12 @@ bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
   VectorArray<W> v(n); 
   VectorArray<W> alpha(n);
 
-  copy_matrix_permute(lda, n, a_fq.addrCoefs(), a_ini, permute);
+  for (int j = 0; j < n; j++) {
+    for (int i = 0; i < n; i++) {
+      const int ij = permute[i] + permute[j] * lda;
+      a_fq(i, j) = a_ini[ij];
+    }                                             
+  }
   // duplicate of a_fq
   a_q.copy(a_fq);
   if (flag_sym) {
@@ -330,7 +105,8 @@ bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
   }
   full_fwbw_perturb_multi<W, U>(n1, n0, a_q.addrCoefs(), n,
 				a_fq.addrCoefs(), nsp.addrCoefs(), dim_augkern,
-				eps, flag_sym);
+			        eps,
+				flag_sym);
   // compute projection matrix
   for (int i = 0; i < n0; i++) {
     for (int j = 0; j <= i; j++) {
@@ -351,8 +127,9 @@ bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
       }
     }
     full_fwbw_perturb_multi<W, U>(k, n, a_q.addrCoefs(), n,
-				a_fq.addrCoefs(), nsp2.addrCoefs(),
-				dim_augkern, eps,
+				  a_fq.addrCoefs(), nsp2.addrCoefs(),
+				  dim_augkern,
+				  eps,
 				  flag_sym);
     for (int j = 0; j < n; j++) {
       for (int i = k; i < n; i++) {
@@ -395,185 +172,64 @@ bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
 }
 
 template
-bool check_kern_<double, double,
-		 quadruple, quadruple>(const int n0, const int lda, const int n,
-				       double *a_ini, int *permute,
-				       const int dim_augkern, const double &eps,
-				       const double &eps_param,
-				       const bool flag_sym,
-				       double *errors);
+bool check_kern<double, double,
+		quadruple, quadruple>(const int n0, const int lda, const int n,
+				      quadruple *a_ini, int *permute,
+				      const int dim_augkern, const double &eps,
+				      const double &eps_param,
+				      const bool flag_sym,
+				      double *errors,
+				      const bool verbose, FILE *fp);
 template
-bool check_kern_<complex<double>,
-		 double,
-		 complex<quadruple>,
-		 quadruple>(const int n0,
-			    const int lda,
-			    const int n,
-			    complex<double> *a_ini,
-			    int *permute,
-			    const int dim_augkern,
-			    const double &eps,
-			    const double &eps_param,
-			    const bool flag_sym,
-			    double *errors);
-
-template
-bool check_kern_<float, float,
-		 double, double>(const int n0, const int lda, const int n,
-				 float *a_ini, int *permute,
-				 const int dim_augkern, const float &eps,
-				 const float &eps_param,
-				 const bool flag_sym,
-				 float *errors);
-template
-bool check_kern_<complex<float>,
-		 float,
-		 complex<double>,
-		 double>(const int n0,
-			 const int lda,
-			 const int n,
-			 complex<float> *a_ini,
-			 int *permute,
-			 const int dim_augkern,
-			 const float &eps,
-			 const float &eps_param,
-			 const bool flag_sym,
-			 float *errors);
+bool check_kern<complex<double>,
+		double,
+		complex<quadruple>,
+		quadruple>(const int n0,
+			   const int lda,
+			   const int n,
+			   complex<quadruple> *a_ini,
+			   int *permute,
+			   const int dim_augkern,
+			   const double &eps,
+			   const double &eps_param,
+			   const bool flag_sym,
+			   double *errors,
+			   const bool verbose, FILE *fp);
 
 #ifndef NO_OCTRUPLE
 template
-bool check_kern_<quadruple, quadruple,
-		 octruple, octruple>(const int n0, const int lda,
-				     const int n,
-				     quadruple *a_ini, int *permute,
-				     const int dim_augkern,
-				     const quadruple &eps,
-				     const quadruple &eps_param,
-				     const bool flag_sym,
-				     quadruple *errors);
+bool check_kern<quadruple, quadruple,
+		octruple, octruple>(const int n0, const int lda,
+				    const int n,
+				    octruple *a_ini, int *permute,
+				    const int dim_augkern,
+				    const quadruple &eps,
+				    const quadruple &eps_param,
+				    const bool flag_sym,
+				    quadruple *errors,
+				    const bool verbose, FILE *fp);
 template
 bool
-check_kern_<complex<quadruple>,
-	    quadruple,
-	    complex<octruple>,
-	    octruple>(const int n0,
-		      const int lda,
-		      const int n,
-		      complex<quadruple> *a_ini,
-		      int *permute,
-		      const int dim_augkern,
-		      const quadruple &eps,
-		      const quadruple &eps_param,
-		      const bool flag_sym,
-		      quadruple *errors);
-#endif
-
-template<typename T, typename U>
-U check_matrixerr(const int lda, const int n,
-		  T *a,
-		  const int dim_augkern, const int k,
-		  int *permute,
-		  const U &eps,
-		  const bool flag_sym)
-{
-  fprintf(stderr, "%s %d : specialized template not implemented\n",
-	  __FILE__, __LINE__);
-  return U(0.0);
-};
-
-template<>
-double check_matrixerr<double, double>(const int lda, const int n,
-				       double *a, const int dim_augkern,
-				       const int k, int *permute,
-				       const double &eps,
-				       const bool flag_sym)
-{
-  return check_matrixerr_<double, double, quadruple>(lda, n, a, dim_augkern, k,
-						     permute, eps, flag_sym);
-}
-
-template<>
-double check_matrixerr<complex<double>, double>(const int lda,
-						const int n,
-						complex<double> *a,
-						const int dim_augkern,
-						const int k,
-						int *permute,
-						const double &eps,
-						const bool flag_sym)
-{
-  return check_matrixerr_<complex<double>,
-			  double,
-			  complex<quadruple> >(lda, n, a, dim_augkern, k,
-					       permute,
-					       eps, flag_sym);
-}
-
-template<>
-float check_matrixerr<float, float>(const int lda, const int n,
-				       float *a, const int dim_augkern,
-				       const int k, int *permute,
-				       const float &eps,
-				       const bool flag_sym)
-{
-  return check_matrixerr_<float, float, double>(lda, n, a, dim_augkern, k,
-						     permute, eps, flag_sym);
-}
-
-template<>
-float check_matrixerr<complex<float>, float>(const int lda,
-						const int n,
-						complex<float> *a,
-						const int dim_augkern,
-						const int k,
-						int *permute,
-						const float &eps,
-						const bool flag_sym)
-{
-  return check_matrixerr_<complex<float>,
-			  float,
-			  complex<double> >(lda, n, a, dim_augkern, k,
-					    permute,
-					    eps, flag_sym);
-}
-
-#ifndef NO_OCTRUPLE
-template<>
-quadruple check_matrixerr<quadruple, quadruple>(const int lda, const int n,
-						quadruple *a,
-						const int dim_augkern,
-						const int k, int *permute,
-						const quadruple &eps,
-						const bool flag_sym)
-{
-  return check_matrixerr_<quadruple,
-			  quadruple,
-			  octruple>(lda, n, a, dim_augkern,
-				    k, permute, eps, flag_sym);
-}
-
-template<>
-quadruple check_matrixerr<complex<quadruple>,
-			  quadruple>(const int lda,
-				     const int n,
-				     complex<quadruple> *a,
-				     const int dim_augkern,
-				     const int k,
-				     int *permute,
-				     const quadruple &eps,
-				     const bool flag_sym)
-{
-  return check_matrixerr_<complex<quadruple>,
-			  quadruple, 
-			  complex<octruple> >(lda, n, a, dim_augkern,
-					      k, permute, eps, flag_sym);
-}
+check_kern<complex<quadruple>,
+	   quadruple,
+	   complex<octruple>,
+	   octruple>(const int n0,
+		     const int lda,
+		     const int n,
+		     complex<octruple> *a_ini,
+		     int *permute,
+		     const int dim_augkern,
+		     const quadruple &eps,
+		     const quadruple &eps_param,
+		     const bool flag_sym,
+		     quadruple *errors,
+		     const bool verbose, FILE *fp);
 #endif
 //
 // T may be std::complex of U and W is in higher precision than T
-template<typename T, typename U, typename W>
-U check_matrixerr_(const int lda, const int n,
-		   T *a,
+template<typename T, typename U, typename W, typename Y>
+U check_matrixerr(const int lda, const int n,
+		   W *a,
 		   const int dim_augkern, const int k,
 		   int *permute,
 		   const U &eps,
@@ -581,6 +237,7 @@ U check_matrixerr_(const int lda, const int n,
   
 {
   U error;
+  const U Uzero(0.0);
   const W one(1.0);
   ColumnMatrix<W> nsp2(n, n);
   ColumnMatrix<W> nsp3(n, n);
@@ -619,104 +276,71 @@ U check_matrixerr_(const int lda, const int n,
 }
 
 template
-double check_matrixerr_<double, double, quadruple>(const int lda, const int n,
-						   double *a,
-						   const int dim_augkern,
-						   const int k, int *permute,
-						   const double &eps,
-						   const bool flag_sym);
-
-template
-double check_matrixerr_<complex<double>,
-			double,
-			complex<quadruple> >(const int lda,
-					     const int n,
-					     complex<double> *a,
+double check_matrixerr<double, double,
+		       quadruple, quadruple>(const int lda, const int n,
+					     quadruple *a,
 					     const int dim_augkern,
-					     const int k,
-					     int *permute,
+					     const int k, int *permute,
 					     const double &eps,
 					     const bool flag_sym);
 
 template
-float check_matrixerr_<float, float, double>(const int lda, const int n,
-					      float *a,
-					      const int dim_augkern,
-					      const int k, int *permute,
-					      const float &eps,
-					      const bool flag_sym);
-
-template
-float check_matrixerr_<complex<float>,
-			float,
-			complex<double> >(const int lda,
-					  const int n,
-					  complex<float> *a,
-					  const int dim_augkern,
-					  const int k,
-					  int *permute,
-					  const float &eps,
-					  const bool flag_sym);
-
+double check_matrixerr<complex<double>,
+		       double,
+		       complex<quadruple>,
+		       quadruple>(const int lda,
+				  const int n,
+				  complex<quadruple> *a,
+				  const int dim_augkern,
+				  const int k,
+				  int *permute,
+				  const double &eps,
+				  const bool flag_sym);
 #ifndef NO_OCTRUPLE
 template
-quadruple check_matrixerr_<quadruple,
-			   quadruple,
-			   octruple>(const int lda, const int n,
-				     quadruple *a,
-				     const int dim_augkern,
-				     const int k, int *permute,
-				     const quadruple &eps,
-				     const bool flag_sym);
+quadruple check_matrixerr<quadruple,
+			  quadruple,
+			  octruple,
+			  octruple>(const int lda, const int n,
+				    octruple *a,
+				    const int dim_augkern,
+				    const int k, int *permute,
+				    const quadruple &eps,
+				    const bool flag_sym);
 
 template
 quadruple
-check_matrixerr_<complex<quadruple>,
-		 quadruple,
-		 complex<octruple> >(const int lda,
-				     const int n,
-				     complex<quadruple> *a,
-				     const int dim_augkern,
-				     const int k,
-				     int *permute,
-				     const quadruple &eps,
-				     const bool flag_sym);
+check_matrixerr<complex<quadruple>,
+		quadruple,
+		complex<octruple>,
+		octruple>(const int lda,
+			  const int n,
+			  complex<octruple> *a,
+			  const int dim_augkern,
+			  const int k,
+			  int *permute,
+			  const quadruple &eps,
+			  const bool flag_sym);
 #endif
 //
-
+ 
 template<typename T, typename U>
 void verify_kernels(const int n0, const int n, const T *a_ini,
-		    const bool isSym, const double eps, U *errors)
+		    const T *a_fact, const int lda,
+		    const double eps, U *errors,
+		    const bool verbose, FILE *fp)
 {
   const T one(1.0);
   const T zero(0.0);
   const T none(-1.0);
 
-  ColumnMatrix<T> a_fact(n, n);
   ColumnMatrix<T> a_p(n, n);
-  int *permute = new int[n];
-  double fop;
   const int n1 = n - n0;
-  blas_copy<T>((n * n), a_ini, 1, a_fact.addrCoefs(), 1);
-  double pivot_ref = 0.0;
-  for (int i = 0; i < n ; i++) {
-    double tmp = blas_abs<T, double>(a_ini[i + i * n]); 
-    pivot_ref = pivot_ref > tmp ? pivot_ref : tmp;
-  }
-  int nn0;
-  if (isSym) {
-    full_ldlt_permute<T, U>(&nn0, n0, n, a_fact.addrCoefs(), n,
-			    &pivot_ref, permute, eps,
-			    &fop);
-  }
-  else {
-    full_ldu_permute<T, U>(&nn0, n0, n, a_fact.addrCoefs(), n,
-			   &pivot_ref, permute, eps,
-			   &fop);
-  }
+  
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n ; j++) {
-      const int ij0 = permute[i] + permute[j] * n;
+      // const int ij0 = permute[i] + permute[j] * n;
+      const int ij0 = i + j * lda;
       a_p(i, j) = a_ini[ij0];         //      const int ij1 = i + j * n;
     }
   }
@@ -726,10 +350,11 @@ void verify_kernels(const int n0, const int n, const T *a_ini,
   VectorArray<T> w(n);
   for (int j = n1; j < n; j++) {
     for (int i = 0; i < n1; i++) {
-      const int ij0 = permute[i] + permute[j] * n;
+      //      const int ij0 = permute[i] + permute[j] * n;
+      const int ij0 = i + j * lda;
       v[i] = a_ini[ij0];
     }
-    full_fwbw_part<T>(n1, a_fact.addrCoefs(), n, v.addrCoefs());
+    full_fwbw_part<T>(n1, (T *)a_fact, lda, v.addrCoefs()); //cast : 22 May 2018
     for (int i = n1; i < n; i++) {
       v[i] = zero;
     }
@@ -737,51 +362,54 @@ void verify_kernels(const int n0, const int n, const T *a_ini,
     blas_gemv<T>(CblasNoTrans, n, n, one, a_p.addrCoefs(), n,
 		 v.addrCoefs(), 1, zero,
 		 w.addrCoefs(), 1);
+#if 0
+    diss_printf(verbose, fp, "%s %d verify_kernels %d\n",
+		__FILE__, __LINE__, n);
+    for (int i = 0; i < n; i++) {
+      diss_printf(verbose, fp, "%d %s %s\n", i, tostring<T>(v[i]).c_str(),
+		  tostring<T>(w[i]).c_str());
+    }
+#endif
     errors[j - n1] = blas_l2norm<T, U>(n, w.addrCoefs(), 1);
   }
-
-  delete [] permute;
 }
 
 template
 void verify_kernels<double, double>(const int n0, const int n,
 				    const double *a_ini,
-				    const bool isSym, const double eps,
-				    double *errors);
+				    const double *a_fact,
+				    const int lda,
+				    const double eps,
+				    double *errors,
+				    const bool verbose, FILE *fp);
 
 template
 void verify_kernels<complex<double>, double>(const int n0, const int n,
 					     const complex<double> *a_ini,
-					     const bool isSym, const double eps,
-					     double *errors);
-
-template
-void verify_kernels<float, float>(const int n0, const int n,
-				  const float *a_ini,
-				  const bool isSym, const double eps,
-				  float *errors);
-
-template
-void verify_kernels<complex<float>, float>(const int n0, const int n,
-					   const complex<float> *a_ini,
-					   const bool isSym, const double eps,
-					   float *errors);
-
+					     const complex<double> *a_fact,
+					     const int lda,
+					     const double eps,
+					     double *errors,
+					     const bool verbose, FILE *fp);
 template
 void verify_kernels<quadruple, quadruple>(const int n0, const int n,
 					  const quadruple *a_ini,
-					  const bool isSym, const double eps,
-					  quadruple *errors);
+					  const quadruple *a_fact,
+					  const int lda,
+					  const double eps,
+					  quadruple *errors,
+					  const bool verbose, FILE *fp);
 
 template
 void verify_kernels<complex<quadruple>,
 		    quadruple>(const int n0, const int n,
 			       const complex<quadruple> *a_ini,
-			       const bool isSym,
+			       const complex<quadruple> *a_fact,
+			       const int lda,
 			       const double eps,
-			       quadruple *errors);
+			       quadruple *errors,
+			       const bool verbose, FILE *fp);
 //
-
 
 template<typename T, typename U>
 void HouseholderVector_complex(int n, T *x, T *v, T *gamma)
@@ -895,6 +523,15 @@ void HouseholderVector<complex<quadruple> >(int n,
 					    complex<quadruple> *gamma)
 {
   HouseholderVector_complex<complex<quadruple>, quadruple>(n, x, v, gamma);
+}
+
+template<>
+void HouseholderVector<complex<octruple> >(int n,
+					    complex<octruple> *x,
+					    complex<octruple> *v,
+					    complex<octruple> *gamma)
+{
+  HouseholderVector_complex<complex<octruple>, octruple>(n, x, v, gamma);
 }
 
 template<>
@@ -1074,8 +711,9 @@ int hqr_pivot<complex<float>, float>(const int n, complex<float> *a,
 //
 
 
-template<typename T, typename U>
-bool ComputeDimKernel(int *n0, bool *flag_2x2, const T *a_, const int n, 
+template<typename T, typename U, typename W, typename Y>
+bool ComputeDimKernel_(int *n0, bool *flag_unsym_permute,
+		       const T *a_, const int n, 
 		      const bool sym_flag,
 		      const int dim_augkern,
 		      const U eps_machine, // for perturbation
@@ -1083,131 +721,208 @@ bool ComputeDimKernel(int *n0, bool *flag_2x2, const T *a_, const int n,
 		      const bool verbose,
 		      FILE *fp)
 {
-  const T zero(0.0);
+  const W zero(0.0);
+  const Y Yzero(0.0);
+  const Y Yone(1.0);
   const U Uzero(0.0);
+  Y Yeps_machine;
+  Yeps_machine = conv_prec<Y, U>(eps_machine);
   // dimension of the image of the matrix a is at least one
   int nn0, n1, n2;
-  bool flag;
   int n_dim = n + 1;
   int *permute = new int[n_dim];
 
-  ColumnMatrix<T> a0(n_dim, n_dim);
-                            // sizeof(long double) = sizeof(double) in Windows
-  ColumnMatrix<T> a1(n_dim, n_dim);
-  VectorArray<T> aa_diag(n_dim);
-  VectorArray<U> rr(n_dim - 1);
+  ColumnMatrix<W> aq0(n_dim, n_dim);
+  ColumnMatrix<T> ad0(n, n);
+  ColumnMatrix<W> a1(n_dim, n_dim);
+  ColumnMatrix<W> aq_fact(n_dim, n_dim);
+  ColumnMatrix<T> ad_fact(n, n);
+  VectorArray<W> aa_diag(n_dim);
+  //  VectorArray<Y> diag_scale(n_dim);
+  VectorArray<double> rr(n_dim - 1);
 
   int *permute_d = new int[n_dim];
   int *permute_q = new int[n_dim];
-  
-  a1(n, n) = zero;
-  //  a1.ZeroClear();
-  // emulate numerical error from floating point operations
+
+  int *permute_right = new int[n_dim];
+  int *permute_left = new int[n_dim];
+  bool flag_tmp;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      a1(i, j) = conv_prec<W, T>(a_[i + j * n]);
+    }
+  }
   if (sym_flag) {
+    flag_tmp = false;
     for (int i = 0; i < n; i++) {
-      T tmp = zero;
-      for (int j = 0; j < n; j++) {
-	a1(i, j) = a_[i + j * n];
-	tmp += a_[i + j * n] + T(random_bool() ? eps_machine : Uzero);
-      }
-      a1(i, n) = tmp;
-      a1(n, i) = tmp; // keep symmetry of the matrix
-      a1(n, n) += tmp + T(random_bool() ? eps_machine : Uzero);
+      permute_left[i] = permute_right[i] = i;
     }
   }
   else {
+    double pivot = 1.0;
+    double fop;
+    double epspiv = todouble<U>(eps_machine);
+    ldu_full_permute<W, Y>(&nn0, 0, n, a1.addrCoefs(), n_dim, &pivot,
+			   permute_right, permute_left,
+			   epspiv, &fop);
+    flag_tmp = false;
     for (int i = 0; i < n; i++) {
-      T tmp = zero;
-      for (int j = 0; j < n; j++) {
-	a1(i, j) = a_[i + j * n];
-	tmp += a_[i + j * n] + T(random_bool() ? eps_machine : Uzero);
+      if (permute_left[i] != permute_right[i]) {
+	flag_tmp = true;
+	break;
       }
-      a1(i, n) = tmp;
-      a1(n, n) += tmp + T(random_bool() ? eps_machine : Uzero);
     }
+  }
+  diss_printf(verbose, fp, "%s %d : %s pivots\n",
+	      __FILE__, __LINE__,
+	      flag_tmp ? "full" : "symmetric ");
+  for (int i = 0; i < n; i++) {
+    diss_printf(verbose, fp, "%d : %d %d %s\n",
+		i, permute_left[i], permute_right[i],
+		tostring<W>(a1(i, i)).c_str());
+    //	      tostring<T>(tolower<W, T>(diag_scale[i])).c_str());
+  }
+  for (int j = 0; j < n; j++) {
+    for (int i = 0; i < n; i++) {
+      a1(i, j) = conv_prec<W, T>(a_[permute_left[i] + permute_right[j] * n]);
+    }
+  }
+  diss_printf(verbose, fp, "%s %d : permuted Schur complement %d\n", 
+	      __FILE__, __LINE__, n);
+  for (int i = 0; i < n; i++) {
+    diss_printf(verbose, fp, "%d ", i);
     for (int j = 0; j < n; j++) {
-      T tmp = zero;
-      for (int i = 0; i < n; i++) {
-	tmp += a_[i + j * n] + T(random_bool() ? eps_machine : Uzero);
-      }
-      a1(n, j) = tmp;
-    }
-  }
-  diss_printf(verbose, fp, "%s %d : machine eps = %s\n", __FILE__, __LINE__,
-	      tostring<U>(eps_machine).c_str());
-  a0.copy(a1);
-  //
-  n1 = hqr_pivot<T, U>(n_dim, a0.addrCoefs(), permute);
-  diss_printf(verbose, fp,
-	      "%s %d dimension of the image deteced by d_hqr_pivot() is %d\n",
-	    __FILE__, __LINE__, n1);
-  for (int i = 0; i < n1; i++) {
-    aa_diag[i] = a0(i, i);
-  }
-#ifdef DEBUG_QR
-  diss_printf(verbose, fp, "matrix\n");
-  for (int i = 0; i < n_dim; i++) {
-    diss_printf(verbose, fp, "%d : ", i); 
-    for (int j = 0; j < n_dim; j++) {
-      diss_printf(verbose, fp, "%s ", tostring<T>(aa_diag[i]).c_str());
+      diss_printf(verbose, fp, "%s ",
+		  tostring<T>(conv_prec<T, W>(a1(i, j))).c_str());
     }
     diss_printf(verbose, fp, "\n");
   }
-#else
-  diss_printf(verbose, fp, "%s %d : diagonal entries of QR factorization\n",
-	      __FILE__, __LINE__);
-  for (int i = 0; i < n_dim; i++) {
-    diss_printf(verbose, fp, "%d : %d %s\n", i, permute[i],
-		tostring<T>(aa_diag[i]).c_str());
+  for (int i = 0; i < n; i++) {
+    W tmp = zero;
+    for (int j = 0; j < n; j++) {
+      tmp += a1(i, j) + (random_bool() ? Yeps_machine : Yzero);
+    }
+    a1(i, n) = tmp;
+    a1(n, n) += tmp + (random_bool() ? Yeps_machine : Yzero);
   }
-#endif
+  for (int j = 0; j < n; j++) {
+    W tmp = zero;
+    for (int i = 0; i < n; i++) {
+      tmp += a1(i, j) + (random_bool() ? Yeps_machine : Yzero);
+    }
+    a1(n, j) = tmp;
+  }
+  // column and row of inflated matrix are scaled
+  Y diag_scalen = sqrt(Yone / blas_abs<W, Y>(a1(n, n)));
+  for (int i = 0; i < n; i++) {
+    a1(i, n) *= diag_scalen;
+    a1(n, i) *= diag_scalen;
+  }
+  a1(n, n) *= (diag_scalen *  diag_scalen);
+	
+  diss_printf(verbose, fp, "%s %d : the original Schur complement %d\n", 
+	      __FILE__, __LINE__, n);
+  for (int i = 0; i < n; i++) {
+    diss_printf(verbose, fp, "%d ", i);
+    for (int j = 0; j < n; j++) {
+      diss_printf(verbose, fp, "%s ",
+		  tostring<T>(conv_prec<T, W>(a_[i + j * n])).c_str());
+    }
+    diss_printf(verbose, fp, "\n");
+  }
+
+  diss_printf(verbose, fp, "%s %d : the scaled last Schur complement %d\n", 
+	      __FILE__, __LINE__, n_dim);
+  for (int i = 0; i < n_dim; i++) {
+    diss_printf(verbose, fp, "%d ", i);
+    for (int j = 0; j < n_dim; j++) {
+      diss_printf(verbose, fp, "%s ",
+		  tostring<T>(conv_prec<T, W>(a1(i,j))).c_str());
+    }
+    diss_printf(verbose, fp, "\n");
+  }
+  aq0.copy(a1);
+  aq_fact.copy(a1);
+  n1 = hqr_pivot<W, Y>(n_dim, aq0.addrCoefs(), permute);
+  diss_printf(verbose, fp,
+	      "%s %d dimension of the image deteced by d_hqr_pivot() is %d\n",
+	      __FILE__, __LINE__, n1);
+  diss_printf(verbose, fp, "%s %d QR\n", __FILE__, __LINE__);
+  for (int i = 0; i < n_dim; i++) {
+    diss_printf(verbose, fp, "%d : %d ", i, permute[i]); 
+    for (int j = 0; j < n_dim; j++) {
+      diss_printf(verbose, fp, "%s ",
+		  tostring<T>(conv_prec<T, W>(aq0(i, j))).c_str());
+    }
+    diss_printf(verbose, fp, "\n");
+  }
+  for (int i = 0; i < n1; i++) {
+    aa_diag[i] = aq0(i, i);
+  }
+    
   list<int> pos_gap;
   vector<int> kernel_dim;
   pos_gap.push_back(dim_augkern);
 
-  flag = false;
-  n2 = n1;
   for (int i = 0; i < (n1 - 1); i++) {
-    if (blas_abs<T, U>(aa_diag[i]) > (eps_machine /
-				      conv_prec<double, U>(sqrt<double>(eps_piv)))) {
-      rr[i] = blas_abs<T, U>(aa_diag[i + 1] / aa_diag[i]);
-    }
-    else {
-      n2 = i + 1;
-      flag = true;
-      break;
-    }
+    rr[i] = todouble<Y>(blas_abs<W, Y>(aa_diag[i + 1] / aa_diag[i]));
   }
-
   // find largest gap inside of invertible part
-  U aug_diff = U(1.0);
+  double aug_diff = 1.0;
   for (int i = 0; i < (dim_augkern - 1); i++) {
     if (aug_diff > rr[i]) {
       aug_diff = rr[i];
     }
   }
-
+  
   diss_printf(verbose, fp, "%s %d : aug_diff = %s esp = %.12e\n",
-	      __FILE__, __LINE__, tostring<U>(aug_diff).c_str(), eps_piv);
-  for (int i = (dim_augkern - 1); i < (n2 - 1); i++) {
-    if (rr[i] < (aug_diff * U(eps_piv))) {
-      diss_printf(verbose, fp, "rr[%d] : %s\n", i, tostring<U>(rr[i]).c_str());
+	      __FILE__, __LINE__,
+	      tostring<double>(aug_diff).c_str(), eps_piv);
+  for (int i = (dim_augkern - 1); i < (n1 - 1); i++) {
+    if (rr[i] < (aug_diff * eps_piv)) {
+      diss_printf(verbose, fp, "rr[%d] : %s\n",
+		  i, tostring<double>(rr[i]).c_str());
+      pos_gap.push_back(i + 1);
     }
   }
+  const bool flag_perturb =
+    ((rr[dim_augkern - 1] < aug_diff)
+     && (blas_abs<W, Y>(aa_diag[n1 - 1]) > Yeps_machine * Y(eps_piv)));
+    
+  const U eps_perturb =  flag_perturb ? eps_machine : Uzero;
+  diss_printf(verbose, fp, "%s %d : rr[%d] = %s => perturb = %s %s\n",
+	      __FILE__, __LINE__,
+	      (dim_augkern - 1),
+	      tostring<double>(rr[dim_augkern - 1]).c_str(),
+	      tostring<U>(eps_perturb).c_str(),
+	      tostring<Y>(blas_abs<W, Y>(aa_diag[n1 - 1])).c_str()
+	      );
 
+  int n_dim1;
+  if (flag_perturb) {  // condition number of the invertible part is moderate
+    n2 = n1;           // and the diagonal entry becomes etreamly small
+    // n1 may be less than n_dim when a diagnal of QR == 0
+    for (int i = 0; i < (n1 - 1); i++) {
+      if (rr[i] < (todouble<U>(eps_machine) / sqrt(eps_piv))) {
+	n2 = i + 1;
+	break;
+      }
+    }
+    n_dim1 = n2 > dim_augkern ? n2 : n_dim;
+    pos_gap.push_back(n2 - 1); // matrix being inflated 
+  }
+  else {
+    n_dim1 = n_dim;
+    pos_gap.push_back(n); // matrix being inflated : n = n_dim - 1
+  }
+  rr.free();
   pos_gap.sort();
   pos_gap.unique();
-  if (pos_gap.size() == 1 && (!flag)) {
-    pos_gap.push_back(n1 - 1);
-  }
-  
-  int n_dim1 = flag ? n2 : n_dim;
 
   for (list<int>::const_iterator it = pos_gap.begin(); it != pos_gap.end();
        ++it) {
     kernel_dim.push_back(n_dim1 - (*it));
   }
-
   diss_printf(verbose, fp, "%s %d : kernel_dim = %d : ",
 	      __FILE__, __LINE__, (int)kernel_dim.size());
   for (vector<int>::const_iterator it = kernel_dim.begin();
@@ -1216,67 +931,246 @@ bool ComputeDimKernel(int *n0, bool *flag_2x2, const T *a_, const int n,
     diss_printf(verbose, fp, "%d ", *it);
   }
   diss_printf(verbose, fp, "\n");
-  ColumnMatrix<T> a_fact(n_dim1, n_dim1);
-  for (int i = 0; i < n_dim1; i++) {
-    for (int j = 0; j < n_dim1; j++) {
-      //      a_fact[i + j * n_dim1] = a1[permute[i] + permute[j] * n_dim];
-      a_fact(i, j) = a1(permute[i], permute[j]);
-    }
-  }
-  
-  //  if (kernel_dim.size() > 1) {
-  flag = VerifyDimKernel(&nn0, n_dim1, a_fact.addrCoefs(), kernel_dim,
-			 sym_flag, dim_augkern, eps_machine, verbose, fp);
 
-  nn0 += (n_dim - n2) - 1;
+  int flag;
+  flag = VerifyDimKernel<T, U, W, Y>(&nn0, permute_q,
+				     n_dim1, aq_fact.addrCoefs(), kernel_dim,
+				     sym_flag, dim_augkern, eps_perturb,
+				     verbose, fp);
+  if (flag == false) {
+    nn0 = 1;           // iflated matrix is generated as singular
+  }
+  //  nn0 += (n_dim - n2) - 1;
   //  nn0--;   // detection of kernel is done for dim_augkern > 0 and at least 
-  if (nn0 > 0) {
-    U *errors_k = new U[nn0 + 1];
-    vector<int> nnn;
+  //  if (nn0 > 0) {
+  {
+    const double eps_machine_double = todouble<U>(eps_machine);
+    U *errors_d = new U[nn0 + 1];
+    list<int> nnn;
     if (nn0 > 2) {
-      nnn.push_back(nn0 - 1);
+      nnn.push_back(nn0 - 2);
     }
+    nnn.push_back(nn0 - 1); //
     nnn.push_back(nn0);
-    nnn.push_back(nn0 + 1);
-    for (vector<int>::const_iterator it = nnn.begin(); it != nnn.end();
+
+    for (int j = 0; j < n; j++) {
+      for (int i = 0; i < n; i++) {
+	ad_fact(i, j) = a_[i + j * n];
+      }
+    }
+    {
+      double pivot_ref = 0.0;
+      for (int i = 0; i < n ; i++) {
+	double tmp = blas_abs<T, double>(a_[i + i * n]); 
+	pivot_ref = pivot_ref > tmp ? pivot_ref : tmp;
+      }
+      int nnn0;
+      double fop;
+      if (sym_flag) {
+	full_ldlt_permute<T, U>(&nnn0, 0, n, ad_fact.addrCoefs(), n,
+				&pivot_ref, permute_d, eps_machine_double,
+				&fop);
+      }
+      else {
+	full_ldu_permute<T, U>(&nnn0, 0, n, ad_fact.addrCoefs(), n,
+			       &pivot_ref, permute_d, eps_machine_double,
+			       &fop);
+      }
+    }
+    for (int j = 0; j < n; j++) {
+      for (int i = 0; i < n; i++) {
+	ad0(i, j) = a_[permute_d[i] + permute_d[j] * n];
+      }
+    }
+    diss_printf(verbose, fp, "%s %d : verify errors : size = %d : ",
+		__FILE__, __LINE__, nnn.size());
+    for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
+	 ++it) {
+      diss_printf(verbose, fp, "%d ", (*it));
+    }
+    diss_printf(verbose, fp, "\n");
+    for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
 	 ++it) {
       const int nn = (*it);
-      const double eps_machine_double = todouble<U>(eps_machine);
-      verify_kernels(nn, n, a_, sym_flag, eps_machine_double, errors_k);
+      if (nn > 0) {
+	verify_kernels<T, U>(nn, n, ad0.addrCoefs(), ad_fact.addrCoefs(),
+			     n,
+			     eps_machine_double, errors_d,
+			     verbose, fp);
+	diss_printf(verbose, fp, "errors of %d kernels\n", nn);
+	for (int i = 0; i < nn; i++) {
+	  diss_printf(verbose, fp,
+		      "%d : %s\n", i, tostring<U>(errors_d[i]).c_str());
+	}
+      }
+    }
+    if (flag_tmp) {
+      for (int j = 0; j < n; j++) {
+	for (int i = 0; i < n; i++) {
+	  ad_fact(i, j) = a_[permute_left[i] + permute_right[j] * n];
+	}
+      }
+      {
+	double pivot_ref = 0.0;
+	for (int i = 0; i < n ; i++) {
+	  double tmp = blas_abs<T, double>(a_[i + i * n]); 
+	  pivot_ref = pivot_ref > tmp ? pivot_ref : tmp;
+	}
+	int nnn0;
+	double fop;
+	if (sym_flag) {
+	  full_ldlt_permute<T, U>(&nnn0, 0, n, ad_fact.addrCoefs(), n,
+				  &pivot_ref, permute_d, eps_machine_double,
+				  &fop);
+	}
+	else {
+	  full_ldu_permute<T, U>(&nnn0, 0, n, ad_fact.addrCoefs(), n,
+				 &pivot_ref, permute_d, eps_machine_double,
+				 &fop);
+	}
+      } 
+      for (int j = 0; j < n; j++) {
+	for (int i = 0; i < n; i++) {
+	  ad0(i, j) = a_[permute_d[permute_left[i]] + permute_d[permute_right[j]] * n];
+	}
+      }
+      diss_printf(verbose, fp, "%s %d : verify errors : size = %d : ",
+		__FILE__, __LINE__, nnn.size());
+      for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
+	   ++it) {
+	diss_printf(verbose, fp, "%d ", (*it));
+      }
+      diss_printf(verbose, fp, "\n");
+      for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
+	   ++it) {
+	const int nn = (*it);
+	if (nn > 0) {
+	  verify_kernels<T, U>(nn, n, ad0.addrCoefs(), ad_fact.addrCoefs(), n,
+			       eps_machine_double, errors_d,
+			     verbose, fp);
+	  diss_printf(verbose, fp, "errors of %d kernels\n", nn);
+	  for (int i = 0; i < nn; i++) {
+	    diss_printf(verbose, fp,
+			"%d : %s\n", i, tostring<U>(errors_d[i]).c_str());
+	  }
+	}
+      }
+    } // if (flag_tmp) 
+    //    nnn.clear();
+    Y *errors_q = new Y[nn0 + 1];
+
+    for (int j = 0; j < n_dim; j++) {
+      for (int i = 0; i < n_dim; i++) {
+	aq0(i, j) = a1(permute_q[i], permute_q[j]);
+      }
+    }
+
+    for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
+	 ++it) {
+      const int nn = (*it) + 1;
+      verify_kernels<W, Y>(nn, n_dim,
+			   aq0.addrCoefs(), aq_fact.addrCoefs(), n_dim,
+			   eps_machine_double, errors_q,
+			   verbose, fp);
       diss_printf(verbose, fp, "errors of %d kernels\n", nn);
       for (int i = 0; i < nn; i++) {
 	diss_printf(verbose, fp,
-		    "%d : %s\n", i, tostring<U>(errors_k[i]).c_str());
+		    "%d :  %s\n", i,
+		    tostring<Y>(errors_q[i]).c_str());
       }
     }
-    delete [] errors_k;
+
+    
+    for (int j = 0; j < n; j++) {
+      for (int i = 0; i < n; i++) {
+	aq_fact(i, j) = conv_prec<W, T>(a_[i + j * n]);
+      }
+    }
+    {
+      double pivot_ref = 0.0;
+      for (int i = 0; i < n ; i++) {
+	double tmp = blas_abs<T, double>(a_[i + i * n]); 
+	pivot_ref = pivot_ref > tmp ? pivot_ref : tmp;
+      }
+      int nnn0;
+      double fop;
+      if (sym_flag) {
+	full_ldlt_permute<W, Y>(&nnn0, 0, n, aq_fact.addrCoefs(), n_dim,
+				&pivot_ref, permute_q, eps_machine_double,
+				&fop);
+      }
+      else {
+	full_ldu_permute<W, Y>(&nnn0, 0, n, aq_fact.addrCoefs(), n_dim,
+			       &pivot_ref, permute_q, eps_machine_double,
+			       &fop);
+      }
+    }
+    for (int j = 0; j < n; j++) {
+      for (int i = 0; i < n; i++) {
+	aq0(i, j) = conv_prec<W, T>(a_[permute_q[i] + permute_q[j] * n]);
+      }
+    }
+    diss_printf(verbose, fp, "%s %d : verify errors : size = %d : ",
+		__FILE__, __LINE__, nnn.size());
+    for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
+	 ++it) {
+      diss_printf(verbose, fp, "%d ", (*it));
+    }
+    diss_printf(verbose, fp, "\n");
+    for (list<int>::const_iterator it = nnn.begin(); it != nnn.end();
+	 ++it) {
+      const int nn = (*it);
+      if (nn > 0) {
+	verify_kernels<W, Y>(nn, n,
+			     aq0.addrCoefs(), aq_fact.addrCoefs(), n_dim,
+			     eps_machine_double, errors_q,
+			     verbose, fp);
+	diss_printf(verbose, fp, "errors of %d kernels\n", nn);
+	for (int i = 0; i < nn; i++) {
+	  diss_printf(verbose, fp,
+		      "%d : %s\n", i, tostring<Y>(errors_q[i]).c_str());
+	}
+      }
+    }
+
+    nnn.clear();
+    delete [] errors_q;
+    delete [] errors_d;
   } // if (nn0 > 0)
   delete [] permute;
   delete [] permute_d;
   delete [] permute_q;
+  delete [] permute_left;
+  delete [] permute_right;
+  *n0 = nn0 + (n_dim - n_dim1) - 1;
   diss_printf(verbose, fp,
 	      "%s %d : dimension of the kernel is %d\n",
-	      __FILE__, __LINE__, nn0);
-  *n0 = nn0;
-  *flag_2x2 = false;
+	      __FILE__, __LINE__, *n0);
+
+
+  
+  *flag_unsym_permute = flag_tmp;
 
   return flag;
 }
 
 template
-bool ComputeDimKernel<double, double>(int *n0, bool *flag_2x2,
-				      const double *a_,
-				      const int n, 
-				      const bool sym_flag,
-				      const int dim_augkern,
-				      const double eps_machine,
-				      const double eps_piv,
-				      const bool verbose,
-				      FILE *fp);
+bool ComputeDimKernel_<double, double,
+		       quadruple, quadruple>(int *n0, bool *flag_unsym_permute,
+					     const double *a_,
+					     const int n, 
+					     const bool sym_flag,
+					     const int dim_augkern,
+					     const double eps_machine,
+					     const double eps_piv,
+					     const bool verbose,
+					     FILE *fp);
 
 template
-bool ComputeDimKernel<complex<double>, 
-		      double>(int *n0, bool *flag_2x2,
+bool ComputeDimKernel_<complex<double>, 
+		       double,
+		       complex<quadruple>,
+		       quadruple>(int *n0, bool *flag_unsym_permute,
 			      const complex<double> *a_,
 			      const int n, 
 			      const bool sym_flag,
@@ -1287,8 +1181,10 @@ bool ComputeDimKernel<complex<double>,
 			      FILE *fp);
 
 template
-bool ComputeDimKernel<quadruple, 
-		      quadruple>(int *n0, bool *flag_2x2,
+bool ComputeDimKernel_<quadruple, 
+		       quadruple,
+		       octruple,
+		       octruple>(int *n0, bool *flag_unsym_permute,
 				 const quadruple *a_,
 				 const int n, 
 				 const bool sym_flag,
@@ -1299,8 +1195,10 @@ bool ComputeDimKernel<quadruple,
 				 FILE *fp);
 
 template
-bool ComputeDimKernel<complex<quadruple>,
-		      quadruple>(int *n0, bool *flag_2x2,
+bool ComputeDimKernel_<complex<quadruple>,
+		       quadruple,
+		       complex<octruple>,
+		       octruple>(int *n0, bool *flag_unsym_permute,
 				 const complex<quadruple> *a_,
 				 const int n, 
 				 const bool sym_flag,
@@ -1310,20 +1208,128 @@ bool ComputeDimKernel<complex<quadruple>,
 				 const bool verbose,
 				 FILE *fp);
 
-template
-bool ComputeDimKernel<float, float>(int *n0, bool *flag_2x2,
-				    const float *a_,
-				    const int n, 
-				    const bool sym_flag,
-				    const int dim_augkern,
-				    const float eps_machine,
-				    const double eps_piv,
-				    const bool verbose,
-				    FILE *fp);
 
-template
+template<typename T, typename U>
+bool ComputeDimKernel(int *n0, bool *flag_unsym_permute,
+		      const T *a_, const int n, 
+		      const bool sym_flag,
+		      const int dim_augkern,
+		      const U eps_machine, // for perturbation
+		      const double eps_piv,
+		      const bool verbose,
+		      FILE *fp)
+{
+  fprintf(stderr, "%s %d : specialized template not implemented\n",
+	  __FILE__, __LINE__);
+}
+
+template<>
+bool ComputeDimKernel<double, double>(int *n0, bool *flag_unsym_permute,
+				      const double *a_,
+				      const int n, 
+				      const bool sym_flag,
+				      const int dim_augkern,
+				      const double eps_machine,
+				      const double eps_piv,
+				      const bool verbose,
+				      FILE *fp)
+{
+  return ComputeDimKernel_<double,
+			   double,
+			   quadruple,
+			   quadruple>(n0, flag_unsym_permute, a_, n,
+				      sym_flag, dim_augkern,
+				      eps_machine, eps_piv,
+				      verbose, fp);
+}
+
+template<>
+bool ComputeDimKernel<complex<double>, 
+		      double>(int *n0, bool *flag_unsym_permute,
+			      const complex<double> *a_,
+			      const int n, 
+			      const bool sym_flag,
+			      const int dim_augkern,
+			      const double eps_machine,
+			      const double eps_piv,
+			      const bool verbose,
+			      FILE *fp)
+{
+  return ComputeDimKernel_<complex<double>,
+			   double,
+			   complex<quadruple>,
+			   quadruple>(n0, flag_unsym_permute, a_, n,
+				      sym_flag, dim_augkern,
+				      eps_machine, eps_piv,
+				      verbose, fp);
+  
+}
+
+template<>
+bool ComputeDimKernel<quadruple, 
+		      quadruple>(int *n0, bool *flag_unsym_permute,
+				 const quadruple *a_,
+				 const int n, 
+				 const bool sym_flag,
+				 const int dim_augkern,
+				 const quadruple eps_machine,
+				 const double eps_piv,
+				 const bool verbose,
+				 FILE *fp)
+{
+  return ComputeDimKernel_<quadruple,
+			   quadruple,
+			   octruple,
+			   octruple>(n0, flag_unsym_permute, a_, n,
+				     sym_flag, dim_augkern,
+				     eps_machine, eps_piv,
+				     verbose, fp);
+}
+
+template<>
+bool ComputeDimKernel<complex<quadruple>,
+		      quadruple>(int *n0, bool *flag_unsym_permute,
+				 const complex<quadruple> *a_,
+				 const int n, 
+				 const bool sym_flag,
+				 const int dim_augkern,
+				 const quadruple eps_machine,
+				 const double eps_piv,
+				 const bool verbose,
+				 FILE *fp)
+{
+  return ComputeDimKernel_<complex<quadruple>,
+			   quadruple,
+			   complex<octruple>,
+			   octruple>(n0, flag_unsym_permute, a_, n,
+				     sym_flag, dim_augkern,
+				     eps_machine, eps_piv,
+				     verbose, fp);
+}
+
+template<>
+bool ComputeDimKernel<float, float>(int *n0, bool *flag_unsym_permute,
+				      const float *a_,
+				      const int n, 
+				      const bool sym_flag,
+				      const int dim_augkern,
+				      const float eps_machine,
+				      const double eps_piv,
+				      const bool verbose,
+				      FILE *fp)
+{
+  return ComputeDimKernel_<float,
+			   float,
+			   double,
+			   double>(n0, flag_unsym_permute, a_, n,
+				      sym_flag, dim_augkern,
+				      eps_machine, eps_piv,
+				      verbose, fp);
+}
+
+template<>
 bool ComputeDimKernel<complex<float>, 
-		      float>(int *n0, bool *flag_2x2,
+		      float>(int *n0, bool *flag_unsym_permute,
 			      const complex<float> *a_,
 			      const int n, 
 			      const bool sym_flag,
@@ -1331,14 +1337,25 @@ bool ComputeDimKernel<complex<float>,
 			      const float eps_machine,
 			      const double eps_piv,
 			      const bool verbose,
-			      FILE *fp);
+			      FILE *fp)
+{
+  return ComputeDimKernel_<complex<float>,
+			   float,
+			   complex<double>,
+			   double>(n0, flag_unsym_permute, a_, n,
+				      sym_flag, dim_augkern,
+				      eps_machine, eps_piv,
+				      verbose, fp);
+  
+}
 
 
 //
 
-template<typename T, typename U>
+template<typename T, typename U, typename W, typename Y>
 bool VerifyDimKernel(int *nn0_,
-		     int n_dim, T* a_fact,
+		     int *permute_q,
+		     int n_dim, W* a_fact,
 		     vector<int> &kernel_dim,
 		     const bool sym_flag,
 		     const int dim_augkern,
@@ -1346,21 +1363,23 @@ bool VerifyDimKernel(int *nn0_,
 		     const bool verbose,
 		     FILE *fp)
 {
+  U Uzero(0.0);
+  U Uone(1.0);
   int nn, nn0;
   int k;
   double pivot_ref, pivot_ref_q;
-  int *permute_q = new int[n_dim];
-  ColumnMatrix<T> a2(n_dim, n_dim);
+  //  int *permute_q = new int[n_dim];
+  ColumnMatrix<W> a2(n_dim, n_dim);
   U *errors = new U[6];
 
-  blas_copy<T>((n_dim * n_dim), a_fact, 1, a2.addrCoefs(), 1);
+  blas_copy<W>((n_dim * n_dim), a_fact, 1, a2.addrCoefs(), 1);
   //  for (int i = 0; i < (n_dim * n_dim); i++) {
   //    a2[i] = a_fact[i];
   //  }
   pivot_ref = 0.0;
   k = 0;
   for (int i = 0; i < n_dim; i++) {
-    double dtmp = blas_abs<T, double>(a_fact[k]); // accuracy? : 14 Jul.2015 Atsushi
+    double dtmp = blas_abs<W, double>(a_fact[k]); // accuracy? : 14 Jul.2015 Atsushi
     k += (n_dim + 1);
     pivot_ref = (pivot_ref < dtmp ? dtmp : pivot_ref);
   } 
@@ -1373,13 +1392,13 @@ bool VerifyDimKernel(int *nn0_,
   if (sym_flag) {
     double fop;
     const double eps0 = todouble<U>(eps_machine);
-    full_ldlt_permute<T, U>(&nn, nn1, n_dim, a_fact, n_dim, &pivot_ref_q,
+    full_ldlt_permute<W, Y>(&nn, nn1, n_dim, a_fact, n_dim, &pivot_ref_q,
 			    permute_q, eps0, &fop);
   }
   else {
     double fop;
     const double eps0 = todouble<U>(eps_machine);
-    full_ldu_permute<T, U>(&nn, nn1, n_dim, a_fact, n_dim, &pivot_ref_q,
+    full_ldu_permute<W, Y>(&nn, nn1, n_dim, a_fact, n_dim, &pivot_ref_q,
 			   permute_q, eps0, &fop);
   }
   // question: eps_machine is ok?  : 06 Jan.2013 
@@ -1395,18 +1414,23 @@ bool VerifyDimKernel(int *nn0_,
     dims[i] = i + 1;
   }
   vector<U> errors_image(dims.size());
+  U error_max, error_min, Ueps;
+  error_min = Uone / eps_machine;
+  error_max = Uzero;
+  Ueps = machine_epsilon<U, U>();
   for (int i = 0; i < dims.size(); i++) {
-    errors_image[i] = check_matrixerr<T, U>(n_dim, n_dim,
-					    a2.addrCoefs(), dim_augkern,
-					    dims[i],
-					    permute_q,
-					    eps_machine,
-					    sym_flag);
+    errors_image[i] = check_matrixerr<T, U, W, Y>(n_dim, n_dim,
+						  a2.addrCoefs(), dim_augkern,
+						  dims[i],
+						  permute_q,
+						  eps_machine,
+						  sym_flag);
   }
   for (int i = 0; i < dims.size(); i++) {
     diss_printf(verbose, fp,
 		"%d : %s\n", dims[i], tostring<U>(errors_image[i]).c_str());
   }
+
   U err_image = errors_image[0];
   for (int i = 1; i < dims.size(); i++) {
     if (dims[i] > dim_augkern) {
@@ -1427,10 +1451,11 @@ bool VerifyDimKernel(int *nn0_,
        it != kernel_dim.end(); ++it) {
     nn0 = *it;
 
-    flag0 = check_kern<T, U>(nn0, n_dim, n_dim, a2.addrCoefs(),
-			     permute_q,
-			     dim_augkern, eps_machine,
-			     eps_param0, sym_flag, errors);
+    flag0 = check_kern<T, U, W, Y>(nn0, n_dim, n_dim, a2.addrCoefs(),
+				   permute_q,
+				   dim_augkern, eps_machine,
+				   eps_param0, sym_flag, errors,
+				   verbose, fp);
       diss_printf(verbose, fp, "%d : %s / %s / %s\n",
 	      nn0,
 	      tostring<U>(errors[0]).c_str(), tostring<U>(errors[1]).c_str(),
@@ -1441,11 +1466,11 @@ bool VerifyDimKernel(int *nn0_,
 		  "first trial by error from image %d %s -> %s fails\n",
 		  n_dim, tostring<U>(errors_image.back()).c_str(),
 		  tostring<U>(eps_param0).c_str());
-      flag0 = check_kern<T, U>((nn0 - 1), n_dim, n_dim, a2.addrCoefs(),
-			       permute_q,
-			       dim_augkern, eps_machine,
-			       eps_param0, sym_flag,
-			       &errors[3]);
+      flag0 = check_kern<T, U, W, Y>((nn0 - 1), n_dim, n_dim, a2.addrCoefs(),
+				     permute_q,
+				     dim_augkern, eps_machine,
+				     eps_param0, sym_flag,
+				     &errors[3], verbose, fp);
       diss_printf(verbose, fp, "%d : %s / %s / %s\n",
 		  (nn0 - 1), tostring<U>(errors[3]).c_str(),
 		  tostring<U>(errors[4]).c_str(),
@@ -1470,13 +1495,14 @@ bool VerifyDimKernel(int *nn0_,
 		    tostring<U>(errors[3]).c_str());
 	int itmp = n_dim - nn0;
 	U err_image_tmp;
-
-	err_image_tmp = check_matrixerr<T, U>(n_dim, n_dim,
-					      a2.addrCoefs(), dim_augkern,
-					      itmp,
-					      permute_q,
-					      eps_machine,
-					      sym_flag);
+	
+	err_image_tmp = check_matrixerr<T, U, W, Y>(n_dim, n_dim,
+						    a2.addrCoefs(),
+						    dim_augkern,
+						    itmp,
+						    permute_q,
+						    eps_machine,
+						    sym_flag);
 	diss_printf(verbose, fp,
 		    "part of %d (%d - %d) is regular, err_image=%s/%s\n",
 		    itmp, n_dim, nn0,
@@ -1547,69 +1573,60 @@ bool VerifyDimKernel(int *nn0_,
   }
   //  delete [] a2;
   delete [] errors;
-  delete [] permute_q;
+  //  delete [] permute_q;
   *nn0_ = nn0; 
   return flag;
 }
 
 template
-bool VerifyDimKernel<double, double>(int *nn0_, int n_dim, double* a_fact,
-				     vector<int>& kernel_dim,
-				     const bool sym_flag,
-				     const int dim_augkern,
-				     const double eps_machine,
-				     const bool verbose,
-				     FILE *fp);
-template
-bool VerifyDimKernel<complex<double>, double>(int *nn0_,
-					      int n_dim, 
-					      complex<double>* a_fact,
-					      vector<int>& kernel_dim,
-					      const bool sym_flag,
-					      const int dim_augkern,
-					      const double eps_machine,
-					      const bool verbose,
-					      FILE *fp);
-
-template
-bool VerifyDimKernel<float, float>(int *nn0_, int n_dim, float* a_fact,
-				     vector<int>& kernel_dim,
-				     const bool sym_flag,
-				     const int dim_augkern,
-				     const float eps_machine,
-				     const bool verbose,
-				     FILE *fp);
-template
-bool VerifyDimKernel<complex<float>, float>(int *nn0_,
-					      int n_dim, 
-					      complex<float>* a_fact,
-					      vector<int>& kernel_dim,
-					      const bool sym_flag,
-					      const int dim_augkern,
-					      const float eps_machine,
-					      const bool verbose,
-					      FILE *fp);
-
-#ifndef NO_OCTRUPLE
-template
-bool VerifyDimKernel<quadruple, quadruple>(int *nn0_, int n_dim,
+bool VerifyDimKernel<double, double,
+		     quadruple, quadruple>(int *nn0_,
+					   int *permute_q,
+					   int n_dim,
 					   quadruple* a_fact,
 					   vector<int>& kernel_dim,
 					   const bool sym_flag,
 					   const int dim_augkern,
-					   const quadruple eps_machine,
+					   const double eps_machine,
 					   const bool verbose,
 					   FILE *fp);
 template
-bool VerifyDimKernel<complex<quadruple>, quadruple>(int *nn0_,
+bool VerifyDimKernel<complex<double>, double,
+		     complex<quadruple>, quadruple>(int *nn0_,
+						    int *permute_q,
 						    int n_dim, 
 						    complex<quadruple>* a_fact,
 						    vector<int>& kernel_dim,
 						    const bool sym_flag,
 						    const int dim_augkern,
-						    const quadruple eps_machine,
+						    const double eps_machine,
 						    const bool verbose,
 						    FILE *fp);
+#ifndef NO_OCTRUPLE
+template
+bool VerifyDimKernel<quadruple, quadruple,
+		     octruple, octruple>(int *nn0_,
+					 int *permute_q,
+					 int n_dim,
+					 octruple* a_fact,
+					 vector<int>& kernel_dim,
+					 const bool sym_flag,
+					 const int dim_augkern,
+					 const quadruple eps_machine,
+					 const bool verbose,
+					 FILE *fp);
+template
+bool VerifyDimKernel<complex<quadruple>, quadruple,
+		     complex<octruple>, octruple>(int *nn0_,
+						  int *permute_q,
+						  int n_dim, 
+						  complex<octruple>* a_fact,
+						  vector<int>& kernel_dim,
+						  const bool sym_flag,
+						  const int dim_augkern,
+						  const quadruple eps_machine,
+						  const bool verbose,
+						  FILE *fp);
 
 #endif
 

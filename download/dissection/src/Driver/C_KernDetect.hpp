@@ -68,14 +68,16 @@ template<typename T, typename U>
 bool check_kern(const int n0, const int lda, const int n, T *a_ini,
 		int *permute,
 		const int dim_augkern, const U &eps,
-		const U &eps_param, const bool flag_sym, U *errors);
+		const U &eps_param, const bool flag_sym, U *errors,
+		 const bool verbose, FILE *fp);
 
 //template<typename T, typename U, typename W, typename Y = W>
 template<typename T, typename U, typename W, typename Y>
 bool check_kern_(const int n0, const int lda, const int n, T *a_ini,
-		int *permute,
-		const int dim_augkern, const U &eps,
-		const U &eps_param, const bool flag_sym, U *errors);
+		 int *permute,
+		 const int dim_augkern, const U &eps,
+		 const U &eps_param, const bool flag_sym, U *errors,
+		 const bool verbose, FILE *fp);
 
 template<typename T, typename U>
 U check_matrixerr(const int lda, const int n,
@@ -94,7 +96,7 @@ U check_matrixerr_(const int lda, const int n,
 		   const bool flag_sym);
 
 template<typename T, typename U>
-void verify_kernels(const int n0, const int n, const T *a_ini,
+void verify_kernels(const int n0, const int n, const T *a_ini, const int lda,
 		    const bool isSym, const double eps, U *errors);
 
 template<typename T, typename U>
@@ -110,7 +112,8 @@ template<typename T>
 void HouseholderReflection(int n, T *a, int lda, T *v, T *w, const T &gamma);
 
 template<typename T, typename U>
-bool ComputeDimKernel(int *n0, bool *flag_2x2, const T *a_, const int n, 
+bool ComputeDimKernel(int *n0, bool *flag_unsym_permute,
+		      const T *a_, const int n, 
 		      const bool sym_flag,
 		      const int dim_augkern,
 		      const U eps_machine,
@@ -118,14 +121,24 @@ bool ComputeDimKernel(int *n0, bool *flag_2x2, const T *a_, const int n,
 		      const bool verbose,
 		      FILE *fp);
 
-template<typename T, typename U>
+template<typename T, typename U, typename W, typename Y>
+bool ComputeDimKernel_(int *n0, bool *flag_unsym_permute,
+		       const T *a_, const int n, 
+		       const bool sym_flag,
+		       const int dim_augkern,
+		       const U eps_machine,
+		       const double eps_piv,
+		       const bool verbose,
+		       FILE *fp);
+
+template<typename T, typename U, typename W, typename Y>
 bool VerifyDimKernel(int *nn0_,
-		     int n_dim, T* a_fact,
-		     vector<int>& kernel_dim,
+		     int *permute_q,
+		     int n_dim, W* a_fact,
+		     vector<int> &kernel_dim,
 		     const bool sym_flag,
 		     const int dim_augkern,
 		     const U eps_machine,
 		     const bool verbose,
 		     FILE *fp);
-
 #endif

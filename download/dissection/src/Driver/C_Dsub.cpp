@@ -48,9 +48,9 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "Compiler/OptionLibrary.hpp"
 #include <string>
 #include "Compiler/blas.hpp"
-#include "Compiler/OptionLibrary.h"
 #include "Driver/C_threads_tasks.hpp"
 #include "Driver/C_Dsub.hpp"
 #include "Compiler/DissectionIO.hpp"

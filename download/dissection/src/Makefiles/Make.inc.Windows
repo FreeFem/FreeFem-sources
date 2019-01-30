@@ -1,5 +1,5 @@
-#! \file   Makefile
-#  \brief  top of Makefile
+#! \file   Make.inc
+#  \brief  fundamental setting of Makefile
 #  \author Atsushi Suzuki, Laboratoire Jacques-Louis Lions
 #  \date   Jul. 12th 2015
 #  \date   Nov. 30th 2016
@@ -46,38 +46,22 @@
 # along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include ./Defs.inc
-# @(cd Utilities;       $(MAKE) )
-all:
-	@(cd Compiler;        $(MAKE) )
-	@(cd Splitters;       $(MAKE) )
-	@(cd Algebra;         $(MAKE) )
-	@(cd Driver;          $(MAKE) )
-	@(cd Interfaces; $(MAKE) )
-	$(LD) $(LDOPT) -o libDissection.$(EXT_SHAREDLIB) \
-	Driver/*.o \
-	Algebra/*.o \
-	Splitters/*.o \
-	Compiler/*.o \
-	Interfaces/*.o \
-	$(LIB_METIS) \
-	$(LIB_SCOTCH) \
-	$(LIB_QD) \
-        $(SHARED_BLAS) $(SHARED_COMPILER)
-	mv libDissection.$(EXT_SHAREDLIB) $(PROJ_LIBDIR)
+OBJS       = $(SOURCESCPP:%.cpp=%.obj)
+
+all: $(OBJS) 
+
+.SUFFIXES: .cpp .obj
+
+.cpp.obj:
+	$(CXX) $(CCFLAGS) -c $< -o $@
+
+#%.d: %.cpp
+#	$(CXX) $(MAKE_DEP_OPT) $(CCFLAGS) $< > $@.$$$$; \
+#       sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+#        rm -f $@.$$$$
+
+# include $(SOURCESCPP:%.cpp=%.d)
 
 clean:
-	@(cd Compiler;        make clean)
-	@(cd Splitters;       make clean)
-	@(cd Algebra;         make clean)
-	@(cd Driver;          make clean)
-	@(cd Interfaces;      make clean)
-	@rm -fr *~ *.o *.so core *.d *.mod *.a *.i90
-
-distclean:
-	-make clean
-	@rm -rf */*.d 
-	@(cd C-test; make clean)
-
-tar:
-	@(cd ..; tar -zcvf src.tar.gz lib src/Defs.inc.Intel src/Defs.inc src/Make.inc src/Makefile.Intel src/Makefile src/*/*.cpp src/*/*.hpp src/*/*.h src/*/Makefile src/*/Make.inc src/freefem++-interface/ LICENSE COPYRIGHT README qd-2.3.17-for-LLVM.patch)
+	echo "Cleaning the trash..."
+	@rm -fr *~ *.obj *.so core *.d *.a
