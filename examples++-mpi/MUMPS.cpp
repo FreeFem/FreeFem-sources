@@ -252,14 +252,16 @@ public:
     : A(AA), verb(ds.verb),
     eps(ds.epsilon),
     tgv(ds.tgv),cn(0),cs(0),
-    rinfog(ds.rinfo), infog(ds.info), comm(MPI_COMM_WORLD),
+    rinfog(ds.rinfo), infog(ds.info),
     matrank(ds.master),distributed(ds.master<0),
     strategy(ds.strategy)
     {
         
         if(ds.commworld)
             MPI_Comm_dup(*((MPI_Comm*)ds.commworld), &comm);
-        
+	else
+	    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
         MPI_Comm_rank(comm, &mpirank);
         int master = mpirank==matrank;
         int myid = 0;
@@ -293,7 +295,7 @@ public:
         SetVerb () ;
         mumps_c(&id);	/* Terminate instance */
         /*int ierr = */
-        
+        MPI_Comm_free(&comm);
     }
     
     
