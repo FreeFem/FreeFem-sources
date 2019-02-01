@@ -127,15 +127,19 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
-	--prefix=$(DIR_INSTALL_REAL) \
-	--with-ssl=0 ---with-x=0 \
-    '--with-scalar-type=real' \
-    $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-	--download-scalapack --download-metis --download-ptscotch \
-	--download-mumps --download-ml --download-hypre --download-parmetis \
-	--download-superlu --download-suitesparse --download-fftw \
-	PETSC_ARCH=ff-real
+		--prefix=$(DIR_INSTALL_REAL) \
+		--with-debugging=no \
+		COPTFLAGS='-O3 -march=native -mtune=native' \
+		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
+		FOPTFLAGS='-O3 -march=native -mtune=native' \
+		--with-ssl=0 ---with-x=0 \
+	  '--with-scalar-type=real' \
+	  $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
+		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+		--download-scalapack --download-metis --download-ptscotch \
+		--download-mumps --download-ml --download-hypre --download-parmetis \
+		--download-superlu --download-suitesparse --download-fftw \
+		PETSC_ARCH=ff-real
 	test -f $(SRCDIR)/ff-real/lib/petsc/conf/petscvariables
 	touch $@
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
@@ -145,19 +149,23 @@ ifdef 	MUMPS_LIB
 #  version COMPLEX  .....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
-	--prefix=''$(DIR_INSTALL_COMPLEX)'' \
-    '--with-scalar-type=complex' \
-	--with-ssl=0 ---with-x=0 \
-    $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
-	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-	--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
-	--with-metis-include='$(METIS_INCLUDE)'  --with-metis-lib='$(METIS_LIB)' \
-	--with-ptscotch-include='$(PTSCOTCH_INCLUDE)'  --with-ptscotch-lib='$(PTSCOTCH_LIB)' \
-	--with-suitesparse-include='$(SUITESPARSE_INCLUDE)'  --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-	--with-mumps-include='$(MUMPS_INCLUDE)'  --with-mumps-lib='$(MUMPS_LIB)' \
-	--with-parmetis-include='$(PARMETIS_INCLUDE)'  --with-parmetis-lib='$(PARMETIS_LIB)' \
-	--with-fftw-include='$(FFTW_INCLUDE)'  --with-fftw-lib='$(FFTW_LIB)' \
-	PETSC_ARCH=ff-complex
+		--prefix=''$(DIR_INSTALL_COMPLEX)'' \
+		--with-debugging=no \
+		COPTFLAGS='-O3 -march=native -mtune=native' \
+		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
+		FOPTFLAGS='-O3 -march=native -mtune=native' \
+	  '--with-scalar-type=complex' \
+		--with-ssl=0 ---with-x=0 \
+	  $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
+		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+		--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
+		--with-metis-include='$(METIS_INCLUDE)'  --with-metis-lib='$(METIS_LIB)' \
+		--with-ptscotch-include='$(PTSCOTCH_INCLUDE)'  --with-ptscotch-lib='$(PTSCOTCH_LIB)' \
+		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)'  --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
+		--with-mumps-include='$(MUMPS_INCLUDE)'  --with-mumps-lib='$(MUMPS_LIB)' \
+		--with-parmetis-include='$(PARMETIS_INCLUDE)'  --with-parmetis-lib='$(PARMETIS_LIB)' \
+		--with-fftw-include='$(FFTW_INCLUDE)'  --with-fftw-lib='$(FFTW_LIB)' \
+		PETSC_ARCH=ff-complex
 	test -f $(SRCDIR)/ff-complex/lib/petsc/conf/petscvariables
 	touch $@
 
