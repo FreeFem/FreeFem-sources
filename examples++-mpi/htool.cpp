@@ -265,11 +265,13 @@ public:
 
 		AnyType operator()(Stack stack) const{
 
-			if (mpirank == 0) {
-				HMatrix<LR,K>** H =GetAny<HMatrix<LR,K>** >((*a)(stack));
-				bool wait = arg(0,stack,false);
+			bool wait = arg(0,stack,false);
 
-				PlotStream theplot(ThePlotStream);
+			HMatrix<LR,K>** H =GetAny<HMatrix<LR,K>** >((*a)(stack));
+
+			PlotStream theplot(ThePlotStream);
+
+			if (mpirank == 0) {
 				theplot.SendNewPlot();
 				theplot << 3L;
 				theplot <= wait;
@@ -279,37 +281,115 @@ public:
 				theplot.SendPlots();
 				theplot << 1L;
 				theplot << 31L;
+			}
 
+			if (!H || !(*H)) {
+				if (mpirank == 0) {
+					theplot << 0;
+					theplot << 0;
+					theplot << 0L;
+					theplot << 0L;
+				}
+			}
+			else {
 				const std::vector<LR<K>*>& lrmats = (*H)->get_MyFarFieldMats();
 				const std::vector<SubMatrix<K>*>& dmats = (*H)->get_MyNearFieldMats();
 
-				int si = (*H)->nb_rows();
-				int sj = (*H)->nb_cols();
+				int nbdense = dmats.size();
+				int nblr = lrmats.size();
 
-				theplot << si;
-				theplot << sj;
-				theplot << (long)dmats.size();
-				theplot << (long)lrmats.size();
+				int sizeworld = (*H)->get_sizeworld();
+				int rankworld = (*H)->get_rankworld();
+
+				int nbdenseworld[sizeworld];
+				int nblrworld[sizeworld];
+				MPI_Allgather(&nbdense, 1, MPI_INT, nbdenseworld, 1, MPI_INT, (*H)->get_comm());
+				MPI_Allgather(&nblr, 1, MPI_INT, nblrworld, 1, MPI_INT, (*H)->get_comm());
+				int nbdenseg = 0;
+				int nblrg = 0;
+				for (int i=0; i<sizeworld; i++) {
+					nbdenseg += nbdenseworld[i];
+					nblrg += nblrworld[i];
+				}
+
+				int* buf = new int[4*(mpirank==0?nbdenseg:nbdense) + 5*(mpirank==0?nblrg:nblr)];
 
 				for (int i=0;i<dmats.size();i++) {
 					const SubMatrix<K>& l = *(dmats[i]);
-					theplot << l.get_offset_i();
-					theplot << l.get_offset_j();
-					theplot << l.nb_rows();
-					theplot << l.nb_cols();
+					buf[4*i] = l.get_offset_i();
+					buf[4*i+1] = l.get_offset_j();
+					buf[4*i+2] = l.nb_rows();
+					buf[4*i+3] = l.nb_cols();
 				}
+
+				int displs[sizeworld];
+				int recvcounts[sizeworld];
+				displs[0] = 0;
+
+				for (int i=0; i<sizeworld; i++) {
+					recvcounts[i] = 4*nbdenseworld[i];
+					if (i > 0)	displs[i] = displs[i-1] + recvcounts[i-1];
+				}
+				MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buf, recvcounts[rankworld], MPI_INT, buf, recvcounts, displs, MPI_INT, 0, (*H)->get_comm());
+
+				int* buflr = buf + 4*(mpirank==0?nbdenseg:nbdense);
+				double* bufcomp = new double[mpirank==0?nblrg:nblr];
 
 				for (int i=0;i<lrmats.size();i++) {
 					const LR<K>& l = *(lrmats[i]);
-					theplot << l.get_offset_i();
-					theplot << l.get_offset_j();
-					theplot << l.nb_rows();
-					theplot << l.nb_cols();
-					theplot << l.rank_of();
-					theplot << l.compression();
+					buflr[5*i] = l.get_offset_i();
+					buflr[5*i+1] = l.get_offset_j();
+					buflr[5*i+2] = l.nb_rows();
+					buflr[5*i+3] = l.nb_cols();
+					buflr[5*i+4] = l.rank_of();
+					bufcomp[i] = l.compression();
 				}
 
-				theplot.SendEndPlot();
+				for (int i=0; i<sizeworld; i++) {
+					recvcounts[i] = 5*nblrworld[i];
+					if (i > 0)	displs[i] = displs[i-1] + recvcounts[i-1];
+				}
+
+				MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buflr, recvcounts[rankworld], MPI_INT, buflr, recvcounts, displs, MPI_INT, 0, (*H)->get_comm());
+
+				for (int i=0; i<sizeworld; i++) {
+					recvcounts[i] = nblrworld[i];
+					if (i > 0)	displs[i] = displs[i-1] + recvcounts[i-1];
+				}
+
+				MPI_Gatherv(rankworld==0?MPI_IN_PLACE:bufcomp, recvcounts[rankworld], MPI_DOUBLE, bufcomp, recvcounts, displs, MPI_DOUBLE, 0, (*H)->get_comm());
+
+				if (mpirank == 0) {
+
+					int si = (*H)->nb_rows();
+					int sj = (*H)->nb_cols();
+
+					theplot << si;
+					theplot << sj;
+					theplot << (long)nbdenseg;
+					theplot << (long)nblrg;
+
+					for (int i=0;i<nbdenseg;i++) {
+						theplot << buf[4*i];
+						theplot << buf[4*i+1];
+						theplot << buf[4*i+2];
+						theplot << buf[4*i+3];
+					}
+
+					for (int i=0;i<nblrg;i++) {
+						theplot << buflr[5*i];
+						theplot << buflr[5*i+1];
+						theplot << buflr[5*i+2];
+						theplot << buflr[5*i+3];
+						theplot << buflr[5*i+4];
+						theplot << bufcomp[i];
+					}
+
+					theplot.SendEndPlot();
+
+				}
+				delete [] buf;
+				delete [] bufcomp;
 
 			}
 
