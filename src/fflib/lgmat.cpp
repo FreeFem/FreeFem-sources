@@ -2857,6 +2857,26 @@ public:
                 map_type[typeid(B).name()]) {pref=preff;}
     
 };
+// Norme Hashmatrix 
+template<class K>
+double get_norme_linfty(Matrice_Creuse<K> * p){
+    if(p==0) return 0.;
+    HashMatrix<int,K>* ph=p->pHM();
+    ffassert(ph);
+    return ph->norminfty();}
+template<class K>
+double get_norme_l2(Matrice_Creuse<K> * p){
+    if(p==0) return 0.;
+    HashMatrix<int,K>* ph=p->pHM();
+    ffassert(ph);
+    return ph->FrobeniusNorm();}
+
+template<class K>
+double get_norme_l1(Matrice_Creuse<K> * p){
+    if(p==0) return 0.;
+    HashMatrix<int,K>* ph=p->pHM();
+    ffassert(ph);
+    return ph->norm1();}
 
 template<class R,int Init>
 Matrice_Creuse<R> * SetMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R>  np)
@@ -2990,6 +3010,9 @@ TheOperators->Add("+",
 // TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
  
  Global.Add("set","(",new SetMatrix<R>);
+ Add<Matrice_Creuse<R> *>("linfty",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_linfty));
+ Add<Matrice_Creuse<R> *>("l2",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_l2));
+ Add<Matrice_Creuse<R> *>("l1",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_l1));
  //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );
  //   a(i,i)
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(1,get_elementp2mc<R>));
