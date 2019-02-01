@@ -71,6 +71,9 @@ namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso); 
 extern const basicForEachType *aatypeknlongp; //// for  compilation error with g++ 3.2.2
 #include "BamgFreeFem.hpp"
 
+#include "PlotStream.hpp"
+
+extern FILE *ThePlotStream;
 
 
 // Debut FH Houston -------- avril 2004 ---------
@@ -3429,6 +3432,79 @@ newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long 
     return removeHalf(stack,pA,half,-1.);
 }
 //OneOperator0<bool> *TheSetDefaultSolver=0; // to change the SetDefaultSolver
+
+template<class K>
+class plotMatrix : public OneOperator {
+public:
+
+	class Op : public E_F0info {
+	public:
+		Expression a;
+
+		static const int n_name_param = 1;
+		static basicAC_F0::name_and_type name_param[] ;
+		Expression nargs[n_name_param];
+		bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
+		long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+
+	public:
+		Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
+			args.SetNameParam(n_name_param,name_param,nargs);
+		}
+
+		AnyType operator()(Stack stack) const{
+
+			if (mpirank == 0) {
+				Matrice_Creuse<K>* A =GetAny<Matrice_Creuse<K>* >((*a)(stack));
+				bool wait = arg(0,stack,false);
+
+				PlotStream theplot(ThePlotStream);
+				theplot.SendNewPlot();
+				theplot << 3L;
+				theplot <= wait;
+				theplot.SendEndArgPlot();
+				theplot.SendMeshes();
+				theplot << 0L;
+				theplot.SendPlots();
+				theplot << 1L;
+				theplot << 31L;
+
+				HashMatrix<int,K>* ph=A->pHM();
+
+				theplot << (int)ph->n;
+				theplot << (int)ph->m;
+				theplot << (long)ph->nnz;
+				theplot << 0L;
+
+
+				for (int i=0;i<ph->nnz;i++) {
+					theplot << ph->i[i];
+					theplot << ph->j[i];
+					theplot << 1;
+					theplot << 1;
+				}
+
+				theplot.SendEndPlot();
+
+			}
+
+			return 0L;
+		}
+	};
+
+	plotMatrix() : OneOperator(atype<long>(),atype<Matrice_Creuse<K>*>()) {}
+
+	E_F0 * code(const basicAC_F0 & args) const
+	{
+		return  new Op(args,t[0]->CastTo(args[0]));
+	}
+};
+
+template<class K>
+basicAC_F0::name_and_type  plotMatrix<K>::Op::name_param[]= {
+	{  "wait", &typeid(bool)}
+};
+
 void  init_lgmat() 
 
 {
@@ -3535,6 +3611,9 @@ void  init_lgmat()
     Global.Add("renumbering", "(", new removeDOF<Complex>(1));
     Global.Add("renumbering", "(", new removeDOF<double>(1, 1));
     Global.Add("renumbering", "(", new removeDOF<Complex>(1, 1));
+
+  Global.Add("display", "(", new plotMatrix<double>);
+  Global.Add("display", "(", new plotMatrix<Complex>);
 
     // ZZZZZZ  ne marche pas FH....
     TheOperators->Add("*",

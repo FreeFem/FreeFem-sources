@@ -1451,25 +1451,42 @@ void OnePlotHMatrix::Draw(OneWindow *win)
   for (int i=0;i < nbdense; i++) {
     std::pair<int,int>& offset = offsetsdense[i];
     std::pair<int,int>& size = sizesdense[i];
-    glColor3f(1,0,0);
-    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-    glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    if (size.first > 1 || size.second > 1) {
+      glColor3f(1,0,0);
+      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+      glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    }
   }
 
   for (int i=0;i < nblr; i++) {
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
-    glColor3f((20+compression[i]*80)/255,(80+compression[i]*170)/255,(20+compression[i]*80)/255);
-    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-    glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    if (size.first > 1 || size.second > 1) {
+      glColor3f((20+compression[i]*80)/255,(80+compression[i]*170)/255,(20+compression[i]*80)/255);
+      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+      glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    }
+  }
+  glEnd();
+
+  // For sparse matrices
+  glPointSize(1);
+  glBegin(GL_POINTS);
+  for (int i=0;i < nbdense; i++) {
+    std::pair<int,int>& offset = offsetsdense[i];
+    std::pair<int,int>& size = sizesdense[i];
+    if (size.first == 1 && size.second == 1) {
+      glColor3f(1,0,0);
+      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+    }
   }
   glEnd();
 
@@ -1480,27 +1497,31 @@ void OnePlotHMatrix::Draw(OneWindow *win)
   for (int i=0;i < nbdense; i++) {
     std::pair<int,int>& offset = offsetsdense[i];
     std::pair<int,int>& size = sizesdense[i];
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    if (size.first > 1 || size.second > 1) {
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    }
   }
 
   for (int i=0;i < nblr; i++) {
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    if (size.first > 1 || size.second > 1) {
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    }
   }
 
   glEnd();
