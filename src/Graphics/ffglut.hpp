@@ -219,6 +219,67 @@ struct OnePlotBorder: public OnePlot {
     void Draw(OneWindow *win);
 };
 
+struct OnePlotHMatrix: public OnePlot
+{
+    int si;
+    int sj;
+    long nbdense;
+    long nblr;
+    std::vector<std::pair<int,int>> offsetsdense;
+    std::vector<std::pair<int,int>> sizesdense;
+    std::vector<std::pair<int,int>> offsetslr;
+    std::vector<std::pair<int,int>> sizeslr;
+    std::vector<int> rankslr;
+    std::vector<double> compression;
+
+    OnePlotHMatrix(long w, PlotStream & f)
+    :OnePlot(w)
+    {
+        dim = 2;
+        Pmin = R3(0,0,0);
+        Pmax = R3(1,1,0);
+
+        int offseti, offsetj;
+        int sizei, sizej;
+        int rank;
+
+        f >> si;
+        f >> sj;
+        f >> nbdense;
+        f >> nblr;
+
+        offsetsdense.resize(nbdense);
+        sizesdense.resize(nbdense);
+        offsetslr.resize(nblr);
+        sizeslr.resize(nblr);
+        rankslr.resize(nblr);
+        compression.resize(nblr);
+
+        for (int i=0;i<nbdense;i++) {
+          f >> offseti;
+          f >> offsetj;
+          f >> sizei;
+          f >> sizej;
+          offsetsdense[i] = std::pair<int,int>(offseti,offsetj);
+          sizesdense[i] = std::pair<int,int>(sizei,sizej);
+        }
+
+        for (int i=0;i<nblr;i++) {
+          f >> offseti;
+          f >> offsetj;
+          f >> sizei;
+          f >> sizej;
+          f >> rankslr[i];
+          f >> compression[i];
+          offsetslr[i] = std::pair<int,int>(offseti,offsetj);
+          sizeslr[i] = std::pair<int,int>(sizei,sizej);
+        }
+
+        ffassert(f.good());
+    }
+    void Draw(OneWindow *win);
+};
+
 // add 11/12/2008 for gestion of error FH  (what -1)
 struct OnePlotError: public OnePlot {
     long item;

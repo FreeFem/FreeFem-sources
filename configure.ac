@@ -972,6 +972,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
+                AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)

@@ -92,7 +92,7 @@
 #    endif
 #  else 
 #    define DISSECTION_API
-#  endif 
+#  endif
 #else
 #  define DISSECTION_API
 #endif

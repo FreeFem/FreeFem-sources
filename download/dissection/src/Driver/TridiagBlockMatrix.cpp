@@ -48,13 +48,14 @@
 // along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "Compiler/OptionCompiler.hpp"
+#include "Compiler/OptionLibrary.hpp"
 #include <cstdlib>
 #include <algorithm>
 #include "Driver/TridiagBlockMatrix.hpp"
 #include "Driver/C_BlasRoutines.hpp"
 #include "Driver/C_KernDetect.hpp"
 #include "Driver/DissectionDefault.hpp"
-#include "Compiler/OptionCompiler.hpp"
 #include "Compiler/arithmetic.hpp"
 #include "Compiler/elapsed_time.hpp"
 #include "Algebra/SparseRenumbering.hpp"

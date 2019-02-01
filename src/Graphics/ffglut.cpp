@@ -1437,6 +1437,92 @@ void OnePlotBorder::Draw(OneWindow *win)
     
 }
 
+
+void OnePlotHMatrix::Draw(OneWindow *win)
+{
+  ThePlot & plt=*win->theplot;
+
+  glDisable(GL_DEPTH_TEST);
+
+  glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+  R z1= 0;
+
+  glBegin(GL_TRIANGLES);
+  for (int i=0;i < nbdense; i++) {
+    std::pair<int,int>& offset = offsetsdense[i];
+    std::pair<int,int>& size = sizesdense[i];
+    glColor3f(1,0,0);
+    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+    glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+  }
+
+  for (int i=0;i < nblr; i++) {
+    std::pair<int,int>& offset = offsetslr[i];
+    std::pair<int,int>& size = sizeslr[i];
+    glColor3f((20+compression[i]*80)/255,(80+compression[i]*170)/255,(20+compression[i]*80)/255);
+    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+    glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+  }
+  glEnd();
+
+  glLineWidth(1);
+  glColor3f(0,0,0);
+  glBegin(GL_LINES);
+
+  for (int i=0;i < nbdense; i++) {
+    std::pair<int,int>& offset = offsetsdense[i];
+    std::pair<int,int>& size = sizesdense[i];
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+  }
+
+  for (int i=0;i < nblr; i++) {
+    std::pair<int,int>& offset = offsetslr[i];
+    std::pair<int,int>& size = sizeslr[i];
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+    glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+  }
+
+  glEnd();
+
+  for (int i=0;i < nblr; i++) {
+    std::pair<int,int>& offset = offsetslr[i];
+    std::pair<int,int>& size = sizeslr[i];
+    string s = std::to_string(rankslr[i]);
+    //plot((float)(offset.first+size.first*0.5)/si,1.-float(offset.second+size.second*0.5)/sj,rankslr[i],1);
+    glPushMatrix();
+    float scale = 0.005*std::min((float)size.first/si,(float)size.second/sj)/**std::min(mSize.x(),mSize.y())*/;
+    glTranslatef(-36*scale*s.length()+(float)(offset.second+size.second*0.5)/si,-48*scale+1.-float(offset.first+size.first*0.5)/sj, 0);
+    glScalef(scale,scale,scale);
+    glColor3d(100,100,100);
+    for(char& c : s)
+      glutStrokeCharacter(GLUT_STROKE_ROMAN,c);
+    glPopMatrix();
+  }
+
+}
+
+
 OneWindow::OneWindow(int h,int w,ThePlot *p)
 :
 countdisplay(0),
@@ -1860,21 +1946,21 @@ void OneWindow::setLighting()
         }
         
         float cca=0.3,ccd=1., ccs=0.8;
-        GLfloat ambient[] = {cca,cca,cca,1.0f};//diffŽrents paramtres
+        GLfloat ambient[] = {cca,cca,cca,1.0f};//differents parametres
         GLfloat diffuse[] = {ccd,ccd,ccd,1.0f};
         GLfloat specular_reflexion[] = {ccs,ccs,ccs,1.0f};
         GLubyte shiny_obj = 128;
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,1);
-        glEnable(GL_LIGHTING);//positionnement de la lumire avec
-        glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);//les diffŽrents paramtres
+        glEnable(GL_LIGHTING);//positionnement de la lumiere avec
+        glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);//les differents parametres
         glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuse);
         
-        glEnable(GL_COLOR_MATERIAL);//spŽcification de la rŽflexion sur les matŽriaux
+        glEnable(GL_COLOR_MATERIAL);//specification de la reflexion sur les materiaux
         glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,ambient);
         glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,diffuse);
         // glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular_reflexion);// on peut le faire avant chaque objet
-        //glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,shiny_obj);//si on veut qu'ils aient des caractŽristiques #
+        //glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,shiny_obj);//si on veut qu'ils aient des caracteristiques #
         glShadeModel(GL_FLAT);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
@@ -2440,6 +2526,10 @@ case 20+index: {type dummy; fin >= dummy;} break;
             ffassert(imsh>0 && imsh <=nbmeshesS);
             
             p=new OnePlotFES(ThsS[imsh-1],what,fin);
+        }
+        else if (what == 31)
+        {
+            p=new OnePlotHMatrix(what,fin);
         }
         else
         {

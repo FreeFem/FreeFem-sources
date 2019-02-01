@@ -67,8 +67,9 @@ ifeq ($(UNAME), Linux)
   EXT_SHAREDLIB = so
   BLAS       = MKL
 # BLAS = GENERIC
-  COMPILER   = INTEL16
-  QUAD = FLOAT128
+  COMPILER   = INTEL17
+#  QUAD = FLOAT128
+  QUAD = DD_REAL
 endif
 PARALLEL   = NONE
 MAKE       = make -j 8
@@ -76,6 +77,7 @@ MAKE       = make -j 8
 DEBUGFLAG  = -g -O3
 DISSECTION =
 #DISSECTION = NO_METIS
+#DISSECTION = NO_SCOTCH
 #
 COMPILERBASE = $(COMPILER)
 VER        = $(subst INTEL,,$(COMPILER))
@@ -114,7 +116,7 @@ ifeq ($(COMPILERBASE), LLVM)
       LDOPT      = $(DEBUGFLAG) -shared
      SHARED_COMPILER = 
    endif
-   VER = 15
+   VER = 17
 else
    $(error COMPILER should be specified as one of INTEL14, GNU, LLVM)
 endif
@@ -128,6 +130,7 @@ ifeq ($(UNAME), Linux)
 endif
    MAKE_DEP_OPT = -MM
 #
+# metis and scotch are assumed to be compiled as shared library
 METIS_INC =  $(WORK_DIR)/metis-5.1.0/include
 SCOTCH_INC = $(WORK_DIR)/scotch_6.0.4/include 
 QD_INC =     $(WORK_DIR)/include
@@ -141,13 +144,25 @@ LIB_DIR_SCOTCH = $(WORK_DIR)/scotch_6.0.4/lib
 LIB_DIR_QD =     $(WORK_DIR)/lib
 #
 ifeq ($(BLAS), MKL)
-  BLAS_DEF = -DBLAS_MKL -DMKL_ILP64  # 64bit (long long) int for CSR data
-# BLAS_DEF = -DBLAS_MKL              # 32bit int
+# BLAS_DEF = -DBLAS_MKL -DMKL_ILP64  # 64bit (long long) int for CSR data
+  BLAS_DEF = -DBLAS_MKL              # 32bit int
+  ifeq ($(VER), 18)
+    ifeq ($(UNAME), Linux)
+      BLAS_INC = /opt/intel/compilers_and_libraries_2018/linux/mkl/include/
+      LIB_DIR_MKL = /opt/intel/compilers_and_libraries_2018/linux/mkl/lib/intel64
+      LIB_DIR_INTEL = /opt/intel/compilers_and_libraries_2018/linux/compiler/lib/intel64
+    endif
+  else
   ifeq ($(VER), 17)
     ifeq ($(UNAME), Linux)
-      BLAS_INC = /opt/intel//compilers_and_libraries_2017/linux/mkl/include/
+      BLAS_INC = /opt/intel/compilers_and_libraries_2017/linux/mkl/include/
       LIB_DIR_MKL = /opt/intel/compilers_and_libraries_2017/linux/mkl/lib/intel64
       LIB_DIR_INTEL = /opt/intel/compilers_and_libraries_2017/linux/compiler/lib/intel64
+    endif
+    ifeq ($(UNAME), Darwin)
+      BLAS_INC = /opt/intel/compilers_and_libraries_2017/mac/mkl/include/
+      LIB_DIR_MKL = /opt/intel/compilers_and_libraries_2017/mac/mkl/lib 
+      LIB_DIR_INTEL = /opt/intel/compilers_and_libraries_2017/mac/lib
     endif
   else
   ifeq ($(VER), 16)
@@ -181,20 +196,21 @@ ifeq ($(BLAS), MKL)
     endif
     endif
   else
-   $(error MKLverion should be 14, 15, 16 or 17)
+   $(error MKLverion should be 14, 15, 16, 17 or 18)
+  endif
   endif
   endif
   endif
   endif
 #
-  SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core
-# SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_lp64 -lmkl_sequential -lmkl_core 
   ifeq ($(UNAME), Linux)
      SHARED_COMPILER = -L$(LIB_DIR_INTEL) -lpthread -lrt
-     SHARED_OPT   = -Xlinker -rpath=$(LIB_DIR_MKL) 
+     SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
+#    SHARED_BLAS = -L$(LIB_DIR_MKL) -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core   ## for 64bit integer
   else
   ifeq ($(UNAME), Darwin)
-     SHARED_COMPILER =  -L$(LIB_DIR_INTEL) -lintlc -lsvml -lc++ -lm
+     SHARED_COMPILER =  -L$(LIB_DIR_INTEL) -lc++ -lm #-lintlc -lsvml -lc++ -lm
+     SHARED_BLAS = -Wl,-rpath,$(LIB_DIR_MKL) -L$(LIB_DIR_MKL) -lmkl_intel_lp64 -lmkl_sequential -lmkl_core 
   endif
   endif
   #
@@ -255,7 +271,11 @@ else
 #
 ifeq ($(QUAD), DD_REAL)
   CCFLAGS += -D$(QUAD) -I$(QD_INC)
-  LIB_QD = -L$(LIB_DIR_QD) -lqd
+  ifeq ($(UNAME), Linux)
+     LIB_QD = -Xlinker -rpath=$(LIB_DIR_QD) -L$(LIB_DIR_QD) -lqd
+  else
+     LIB_QD = -L$(LIB_DIR_QD) -lqd
+  endif
 endif
 ifeq ($(QUAD), LONG_DOUBLE)
   CCFLAGS += -D$(QUAD) -DNO_OCTRUPLE
@@ -268,8 +288,9 @@ endif
 #
 ifeq ($(UNAME), Darwin)
    CCFLAGS      += #-DGETRUSAGE
+   LIB_SCOTCH = -L$(LIB_DIR_SCOTCH) -lscotch -lscotcherr
 endif
 ifeq ($(UNAME), Linux)
    CCFLAGS      += -DCLOCK_GETTIME
+   LIB_SCOTCH = -Xlinker -rpath=$(LIB_DIR_SCOTCH) -L$(LIB_DIR_SCOTCH) -lscotch -lscotcherr
 endif
-LIB_SCOTCH = -L$(LIB_DIR_SCOTCH) -lscotch -lscotcherr

@@ -351,7 +351,7 @@ public:
   vector<int> &getSingIdx() {
     return _singIdx;
   }
- vector<int> &getSingIdx0() {
+  vector<int> &getSingIdx0() {
     return _singIdx0;
   }
   //  void set_lastpiv(int lastpiv) { _lastpiv = lastpiv; }
@@ -403,6 +403,7 @@ public:
   SubSquareMatrix() : SquareMatrix<T>(), _loc2glob()
   { 
     _offdiag_2x2_status = false;
+    _full_pivoting = false;
   }
 
   SubSquareMatrix(const vector<int>& l2g) : SquareMatrix<T>()
@@ -413,6 +414,7 @@ public:
   void init(const vector<int>& l2g)
   { 
     int n = l2g.size();
+    _full_pivoting = false;
     _loc2glob = l2g; // copy constructor
     SquareMatrix<T>::setDimension(n); 
     PlainMatrix<T>::init(n * n); 
@@ -422,6 +424,23 @@ public:
     _offdiag_2x2 = new T[n];
     _offdiag_2x2_status = true;
   }
+
+  void init(const bool full_pivoting, const vector<int>& l2g,
+	    const vector<int>& l2g_left)
+  { 
+    int n = l2g.size();
+    _full_pivoting = true;
+    _loc2glob = l2g; // copy constructor
+    _loc2glob_left = l2g_left;
+    SquareMatrix<T>::setDimension(n); 
+    PlainMatrix<T>::init(n * n); 
+    SquareMatrix<T>::getPermute().resize(n);
+    _pivot_width.resize(n);
+    _pivot_2x2.resize(0);
+    _offdiag_2x2 = new T[n];
+    _offdiag_2x2_status = true;
+  }
+
   vector<int>& loc2glob()
   {
     return _loc2glob;
@@ -429,6 +448,15 @@ public:
   const vector<int>& loc2glob() const
   { 
     return _loc2glob; 
+  }
+
+  vector<int>& loc2glob_left()
+  {
+    return _full_pivoting ? _loc2glob_left : _loc2glob;
+  }
+  const vector<int>& loc2glob_left() const
+  {
+    return _full_pivoting ? _loc2glob_left : _loc2glob;
   }
 
   virtual ~SubSquareMatrix() {}
@@ -474,9 +502,11 @@ public:
   }
 private:
   vector<int> _loc2glob;
+  vector<int> _loc2glob_left;
   vector<int> _pivot_width;
   vector<int> _pivot_2x2;
   T*          _offdiag_2x2;
   bool        _offdiag_2x2_status;
+  bool        _full_pivoting;
 };
 #endif

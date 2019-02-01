@@ -295,6 +295,22 @@ bool full_ldlt_permute<complex<quadruple>, quadruple>(int *nn0, const int n0,
 						      int *permute, 
 						      const double eps,
 						      double *fop);
+template
+bool full_ldlt_permute<octruple, octruple>(int *nn0, const int n0,
+					     const int n, 
+					     octruple *a, const int lda, 
+					     double *pivot, int *permute, 
+					     const double eps, double *fop);
+
+template
+bool full_ldlt_permute<complex<octruple>, octruple>(int *nn0, const int n0,
+						      const int n, 
+						      complex<octruple> *a,
+						      const int lda, 
+						      double *pivot,
+						      int *permute, 
+						      const double eps,
+						      double *fop);
 //
 
 template<typename T, typename U>
@@ -395,8 +411,160 @@ bool full_ldu_permute<complex<quadruple>, quadruple>(int *nn0, const int n0,
 						     int *permute, 
 						     const double eps,
 						     double *fop);
+template
+bool full_ldu_permute<octruple, octruple>(int *nn0, const int n0,
+					    const int n, 
+					    octruple *a, const int lda, 
+					    double *pivot, int *permute, 
+					    const double eps, double *fop);
+template
+bool full_ldu_permute<complex<octruple>, octruple>(int *nn0, const int n0,
+						     const int n, 
+						     complex<octruple> *a,
+						     const int lda, 
+						     double *pivot,
+						     int *permute, 
+						     const double eps,
+						     double *fop);
 //
+template<typename T, typename U>
+bool ldu_full_permute(int *nn0, const int n0,
+		      const int n, T *a, const int lda, 
+		      double *pivot, int *permute_right, int *permute_left,
+		      const double eps, double *fop)
+{
+  const int lda1 = lda + 1;
+  //  T *col_k, *col_km;
+  const T one(1.0);
+  const T none(-1.0);
+  bool flag = true;
+  VectorArray<T> coli(n);
+  VectorArray<T> colj(n);
+  for (int i = 0; i < n; i++) {
+    permute_right[i] = i;
+    permute_left[i] = i;
+  }
+  const int n1 = n - n0;
+  int k = 0;
+  while (k < n1) {
+    int ki, kj, itmp;
+    double vmax = 0.0;
+    for (int i = k; i < n; i++) {
+      for (int j = k; j < n; j++) {
+	double tmp = blas_abs<T, double>(a[i + j * lda]);
+	if (tmp > vmax) {
+	  vmax = tmp;
+	  ki = i;
+	  kj = j;
+	}
+      }
+    }
+    if (vmax < (*pivot * eps)) {
+      flag = false;
+      break;
+    }
+    *pivot = vmax;
+    if (kj > k) {
+      itmp = permute_right[kj];
+      permute_right[kj] = permute_right[k];
+      permute_right[k] = itmp;
+    }
+    if (ki > k) {
+      itmp = permute_left[ki];
+      permute_left[ki] = permute_left[k];
+      permute_left[k] = itmp;
+    }
+      // swap row/column
+    swap_full(n, a, lda, k, ki, kj, coli.addrCoefs(), colj.addrCoefs());
+    const T d = one / a[k * lda1];
+    a[k * lda1] = d;
+    if (k == (n1 - 1)) {
+      k++;
+      break;
+    }
+    //    alpha = none;
+    blas_scal<T>((n - k - 1), d, &a[k * lda1 + lda], lda);
+    blas_ger<T>((n - k - 1), (n - k - 1), none,
+	     &a[k * lda1 + 1], 1, &a[k * lda1 + lda], lda,
+	     &a[(k + 1) * lda1], lda);
+    *fop += 3.0 * (double)(n - k - 1) * (double)(n - k) / 2.0;
+    blas_scal<T>((n - k - 1), d, &a[k * lda1 + 1], 1);
+    *fop += 2.0 * double(n - k - 1);
+    k++;
+  } // while (k < n1)
 
+  *nn0 = n - k;
+  return flag;
+}
+
+template
+bool ldu_full_permute<double, double>(int *nn0, const int n0,
+				      const int n, 
+				      double *a, const int lda, 
+				      double *pivot,
+				      int *permute_right, int *permute_left,
+				      const double eps, double *fop);
+template
+bool ldu_full_permute<complex<double>, double>(int *nn0, const int n0,
+					       const int n, 
+					       complex<double> *a,
+					       const int lda,
+					       double *pivot,
+					       int *permute_right,
+					       int *permute_left,
+					       const double eps, double *fop);
+template
+bool ldu_full_permute<quadruple, quadruple>(int *nn0, const int n0,
+					    const int n, 
+					    quadruple *a, const int lda,
+					    double *pivot, int *permute_right,
+					    int *permute_left,
+					    const double eps, double *fop);
+template
+bool ldu_full_permute<complex<quadruple>, quadruple>(int *nn0, const int n0,
+						     const int n, 
+						     complex<quadruple> *a,
+						     const int lda,
+						     double *pivot,
+						     int *permute_right,
+						     int *permute_left,
+						     const double eps,
+						     double *fop);
+template
+bool ldu_full_permute<octruple, octruple>(int *nn0, const int n0,
+					    const int n, 
+					    octruple *a, const int lda,
+					    double *pivot, int *permute_right,
+					    int *permute_left,
+					    const double eps, double *fop);
+template
+bool ldu_full_permute<complex<octruple>, octruple>(int *nn0, const int n0,
+						   const int n, 
+						   complex<octruple> *a,
+						   const int lda,
+						   double *pivot,
+						   int *permute_right,
+						   int *permute_left,
+						   const double eps,
+						   double *fop);
+template
+bool ldu_full_permute<float, float>(int *nn0, const int n0,
+				      const int n, 
+				      float *a, const int lda, 
+				      double *pivot,
+				      int *permute_right, int *permute_left,
+				      const double eps, double *fop);
+template
+bool ldu_full_permute<complex<float>, float>(int *nn0, const int n0,
+					       const int n, 
+					       complex<float> *a,
+					       const int lda,
+					       double *pivot,
+					       int *permute_right,
+					       int *permute_left,
+					       const double eps, double *fop);
+
+//
 template<typename T>
 void swap_sym_lower(const int n, T *a, const int lda, 
 		    const int k, const int km, T *col_k, T *col_km)
@@ -596,6 +764,63 @@ void swap_unsym<complex<quadruple> >(const int n, complex<quadruple> *a,
 				     complex<quadruple> *col_km);
 //
 
+template<typename T>
+void swap_full(const int n, T *a, const int lda, 
+	       const int k, const int ki, const int kj, T *coli, T *colj)
+{ 
+  for (int i = 0; i < n; i++) {
+    coli[i] = a[i + k * lda];     // save lower column k
+    colj[i] = a[i + kj * lda];   // save lower column km
+  }
+  for (int i = 0; i < n; i++) {
+    a[i + kj * lda] = coli[i];   // save lower column km
+    a[i + k * lda] = colj[i];
+  }
+  for (int i = 0; i < n; i++) {
+    coli[i] = a[k + i * lda];     // save lower column k
+    colj[i] = a[ki + i * lda];   // save lower column km
+  }
+  for (int i = 0; i < n; i++) {
+    a[ki + i * lda] = coli[i];   // save lower column km
+    a[k + i * lda] = colj[i];
+  }
+}
+
+template
+void swap_full<double>(const int n, double *a, const int lda, 
+		       const int k, const int ki, const int kj, 
+		       double *coli, double *colj);
+
+template
+void swap_full<complex<double> >(const int n, complex<double> *a, 
+				  const int lda, 
+				  const int k, const int ki, const int kj, 
+				  complex<double> *coli, 
+				  complex<double> *colj);
+template
+void swap_full<quadruple>(const int n, quadruple *a, const int lda, 
+			   const int k, const int ki, const int kj, 
+			   quadruple *coli, quadruple *colj);
+
+template
+void swap_full<complex<quadruple> >(const int n, complex<quadruple> *a, 
+				  const int lda, 
+				  const int k, const int ki, const int kj, 
+				  complex<quadruple> *coli, 
+				  complex<quadruple> *colj);
+
+template
+void swap_full<float>(const int n, float *a, const int lda, 
+		       const int k, const int ki, const int kj, 
+		       float *coli, float *colj);
+
+template
+void swap_full<complex<float> >(const int n, complex<float> *a, 
+				  const int lda, 
+				  const int k, const int ki, const int kj, 
+				  complex<float> *coli, 
+				  complex<float> *colj);
+//
 template<typename T>
 void full_ldlt(const int n, T *a, const int lda)
 {

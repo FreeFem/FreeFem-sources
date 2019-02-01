@@ -480,6 +480,18 @@ void
 blas_copy<complex<quadruple> > (const int n,
 				const complex<quadruple>* x, const int incx,
 				complex<quadruple> *y, const int incy);
+
+template
+void
+blas_copy<octruple>(const int n, const octruple* x, const int incx,
+		  octruple *y, const int incy);
+
+template
+void
+blas_copy<complex<octruple> > (const int n,
+			     const complex<octruple>* x, const int incx,
+			     complex<octruple> *y, const int incy);
+
 // dz axpy
 #ifndef BLAS_GENERIC
 template<>
@@ -1077,6 +1089,12 @@ int blas_iamax<quadruple, quadruple>(const int n, const quadruple *x, const int 
 template
 int blas_iamax<complex<quadruple>, quadruple>(const int n,
 					      const complex<quadruple> *x,
+					      const int incx);
+template
+int blas_iamax<octruple, octruple>(const int n, const octruple *x, const int incx);
+template
+int blas_iamax<complex<octruple>, octruple>(const int n,
+					      const complex<octruple> *x,
 					      const int incx);
 //
 // BLAS 2
@@ -2732,6 +2750,21 @@ blas_gerc<complex<quadruple> >(const int M, const int N,
 			       const complex<quadruple> *Y, const int incY,
 			       complex<quadruple> *A, const int lda);
 
+template
+void
+blas_gerc<octruple>(const int M, const int N, const octruple &alpha,
+		     const octruple *X, const int incX,
+		     const octruple *Y, const int incY,
+		     octruple *A, const int lda);
+
+template
+void
+blas_gerc<complex<octruple> >(const int M, const int N,
+			       const complex<octruple> &alpha,
+			       const complex<octruple> *X, const int incX,
+			       const complex<octruple> *Y, const int incY,
+			       complex<octruple> *A, const int lda);
+
 // BLAS 3
 
 // dz trsm
@@ -3796,7 +3829,7 @@ U blas_l2norm(const int n, T *x, const int incX)
 {
   U tmp;
   tmp = blas_dot<T>(n, x, incX, x, incX);
-  return sqrt<T>(tmp); // works for T = double, quadruple, etc. not for complex<U>
+  return sqrt<U>(tmp); // works for T = double, quadruple, etc. not for complex<U>
 }
 
 template<>
@@ -3874,14 +3907,14 @@ double blas_l2norm_lower_prec(const int n, quadruple *x, const int incX)
   tmp = blas_dot(n, x, incX, x, incX);
   return sqrt<double>(quad2double(tmp)); //
 }
-#ifndef NO_OCTRUPLE
+
 quadruple blas_l2norm_lower_prec(const int n, octruple *x, const int incX)
 {
   octruple tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt<double>(oct2quad(tmp)); //
+  return sqrt<quadruple>(oct2quad(tmp)); //
 }
-#endif
+
 double blas_l2norm_lower_prec(const int n, complex<quadruple> *x,
 			      const int incX)
 {
@@ -3889,15 +3922,14 @@ double blas_l2norm_lower_prec(const int n, complex<quadruple> *x,
   tmp = blas_dot(n, x, incX, x, incX);
   return sqrt<double>(quad2double(tmp.real())); //
 }
-#ifndef NO_OCTRUPLE
+
 quadruple blas_l2norm_lower_prec(const int n, complex<octruple> *x,
 				 const int incX)
 {
   complex<octruple> tmp;
   tmp = blas_dot(n, x, incX, x, incX);
-  return sqrt<double>(oct2quad(tmp.real())); //
+  return sqrt<quadruple>(oct2quad(tmp.real())); //
 }
-#endif
 
 template <typename T, typename U>
 U blas_l2norm2(const int n, T *x, const int incX)
@@ -3935,6 +3967,16 @@ quadruple blas_l2norm2<complex<quadruple>, quadruple>(const int n,
   return tmp.real(); //
 }
 
+template<>
+octruple blas_l2norm2<complex<octruple>, octruple>(const int n,
+						   complex<octruple> *x,
+						   const int incX)
+{
+  complex<octruple> tmp;
+  tmp = blas_dot<complex<octruple> >(n, x, incX, x, incX);
+  return tmp.real(); //
+}
+
 template
 double blas_l2norm2<double, double>(const int n, double *x, const int incX);
 
@@ -3955,4 +3997,15 @@ template
 quadruple blas_l2norm2<complex<quadruple>, quadruple>(const int n,
 						      complex<quadruple> *x,
 						      const int incX);
+
+template
+octruple blas_l2norm2<octruple, octruple>(const int n,
+					octruple *x,
+					const int incX);
+
+template
+octruple blas_l2norm2<complex<octruple>, octruple>(const int n,
+						   complex<octruple> *x,
+						   const int incX);
+
 #endif

@@ -9,7 +9,7 @@
 //defaulttoUMFPACK64();
 load "Dissection"
 defaulttoDissection();
-
+verbosity=5;
 real  reymax = 6400; // ok < 125000 
 mesh Th=square(60,60);
 fespace Xh(Th,P2);
@@ -22,12 +22,11 @@ macro div(u1,u2) (dx(u1)+dy(u2))//
 macro grad(u1,u2) [dx(u1),dy(u2)]//
 macro ugrad(u1,u2,v) (u1*dx(v)+u2*dy(v)) //
 macro Ugrad(u1,u2,v1,v2) [ugrad(u1,u2,v1),ugrad(u1,u2,v2)]//
-verbosity=1;
 solve Stokes ([u1,u2,p],[v1,v2,q],solver=sparsesolver,strategy=102,tolpivot=1.0e-2) =
     int2d(Th)( ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
             - p*div(v1,v2)-q*div(u1,u2)
-            //    - p*q*(0.000001) 
+//            - p*q*(0.000001) 
            )
   + on(3,u1=4*x*(1-x),u2=0) 
   + on(1,2,4,u1=0,u2=0);
@@ -37,13 +36,12 @@ solve Stokes ([u1,u2,p],[v1,v2,q],solver=sparsesolver,strategy=102,tolpivot=1.0e
 
 Xh psi,phi;
 
-solve streamlines(psi,phi,solver=sparsesolver,strategy=101) = 
+solve streamlines(psi,phi,solver=sparsesolver,strategy=101,tolpivot=1.0e-16) = 
       int2d(Th)( dx(psi)*dx(phi) + dy(psi)*dy(phi))
    +  int2d(Th)( -phi*(dy(u1)-dx(u2)))
    +  on(1,2,3,4,psi=0);
 // default tolpivot=1.0e-16 without kernel detection
 // strategy=101 <=> symmetric = 100 + diagonal scaling = 1
-//plot(psi,wait=1);
 int i=0;
 real  nu=1./100.;
 real dt=0.1;
@@ -69,13 +67,13 @@ varf   vDNS ([u1,u2,p],[v1,v2,q]) =
     int2d(Th)(
             + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
- //           + p*q*(0.000001) 
+	    //           - p*q*(0.000001) 
             + p*dx(v1)+ p*dy(v2)
             - dx(u1)*q- dy(u2)*q
             + Ugrad(u1,u2,up1,up2)'*[v1,v2]
             + Ugrad(up1,up2,u1,u2)'*[v1,v2]
            )
-  + on(1,2,3,4,u1=0,u2=0) 
+  + on(1,2,3,4,u1=1,u2=1)   // u1 = 0, u2 = 0
 ;
 
 varf   vNS ([u1,u2,p],[v1,v2,q]) =
@@ -83,12 +81,12 @@ varf   vNS ([u1,u2,p],[v1,v2,q]) =
           
             + nu * ( dx(up1)*dx(v1) + dy(up1)*dy(v1)
             +  dx(up2)*dx(v2) + dy(up2)*dy(v2) )
-  //          + pp*q*(0.000001) 
+	    //           - pp*q*(0.000001) 
             + pp*dx(v1)+ pp*dy(v2)
             - dx(up1)*q- dy(up2)*q
             + Ugrad(up1,up2,up1,up2)'*[v1,v2]//'
 	      )
-  + on(1,2,3,4,u1=0,u2=0) 
+  + on(1,2,3,4,u1=0,u2=0)   //homogeneous Dirichlet bc. for linear not affine 
   ;
 
 for(real re=100;re<=reymax;re *=2)
@@ -116,9 +114,30 @@ for(real re=100;re<=reymax;re *=2)
 	    real clocktime1=clock();      		 
 	    real[int] b = vNS(0,XXMh,tgv=1e+30);
 	    real walltime2=time();
-	    real clocktime2=clock();      		 
-	    set(Ans,solver=sparsesolver,tolpivot=1.0e-2);
-            // default scaling startegy = KKT_SCALE
+	    real clocktime2=clock();
+	    real[int,int] kernn(1,1);
+	    real[int,int] kernt(1,1);
+	    int kerndim;
+	    set(Ans,solver=sparsesolver,strategy=2, tolpivot=1.0e-2);
+		// default scaling startegy = KKT_SCALE
+            dissectionkernel(Ans,kerneldim=kerndim,kerneln=kernn,kernelt=kernt);
+	    cout << "kern dim = " << kerndim << endl;
+	    real[int] kern(XXMh.ndof);
+	    kern = kernn(:,0);
+            real[int] bBC = vDNS(0, XXMh, tgv=1.0); //Ans.diag;
+	    real[int] vv(XXMh.ndof);
+	    vv = Ans * kern;
+            vv = bBC ? 0.0 : vv;
+	    cout << "orthogonality of kernel vector of A " << vv.max << endl;
+            kern = kernt(:,0);
+            vv = Ans' * kern;
+            vv = bBC ? 0.0 : vv;
+            cout << "orthogonality of kernel vector of A^T " << vv.max << endl;
+            XXMh [w1, w2, r]; 
+            w1[] = kern;
+            plot([w1, w2], cmm="kernel vector",value=true,wait=1);
+            plot(r, cmm="kernel pressure",value=true,wait=1);
+  
 	    real walltime3=time();
 	    real clocktime3=clock();      		 
 	    real[int] w = Ans^-1*b;

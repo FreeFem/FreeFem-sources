@@ -50,8 +50,8 @@
 
 #ifndef _DISSECTION_QUEUE_
 #define _DISSECTION_QUEUE_
+#include "Compiler/OptionLibrary.hpp"
 #include <cassert>
-#include "Compiler/OptionLibrary.h"
 #include "Splitters/BisectionTree.hpp"
 #include "Driver/DissectionMatrix.hpp"
 #include "Driver/QueueRuntime.hpp"

@@ -69,23 +69,20 @@ static unsigned compBegOfDomains(unsigned invLevel,
 			         const int* sizeOfDomains,
 			         int* ptOnDomains)
 {
-  unsigned left,right;
-  if (invLevel==1) {
-    ptOnDomains[indDom-1] = begDom;
-    return sizeOfDomains[indDom-1];
-  }
-  else {
-    left = compBegOfDomains(invLevel-1, begDom,
-			    2*indDom, sizeOfDomains,
-			    ptOnDomains);
-    begDom += left;   // to prevent aggressive optimization
-    right = compBegOfDomains(invLevel-1, begDom,
-			     2*indDom+1, sizeOfDomains,
-			     ptOnDomains);
-    begDom += right;  // to prevent aggressive optimization
-    ptOnDomains[indDom-1] = begDom;
-    return sizeOfDomains[indDom-1];
-  }
+    if (invLevel==1) {
+      ptOnDomains[indDom-1] = begDom;
+      return sizeOfDomains[indDom-1];
+    }
+    else {
+	begDom += compBegOfDomains(invLevel-1, begDom,
+				   2*indDom, sizeOfDomains,
+				   ptOnDomains);
+	begDom += compBegOfDomains(invLevel-1, begDom,
+				   2*indDom+1, sizeOfDomains,
+				   ptOnDomains);
+	ptOnDomains[indDom-1] = begDom;
+	return sizeOfDomains[indDom-1];
+    }
 }
 			     
 

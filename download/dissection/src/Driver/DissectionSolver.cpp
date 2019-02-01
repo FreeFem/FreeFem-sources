@@ -411,7 +411,7 @@ CopyQueueFwBw(DissectionSolver<W, Z, T, U> &qdslv)
   TridiagQueue<W, Z>** tQ = qdslv.getTridiagQueue();
   _precDiag = new U[_dim];
   for (int i = 0; i < _dim; i++) {
-    _precDiag[i] = conv_prec<Z, U>(qdslv.addrPrecDiag()[i]);
+    _precDiag[i] = conv_prec<U, Z>(qdslv.addrPrecDiag()[i]);
   }
   
   _ptDA = new SparseMatrix<T>(isSym, isUpper, isWhole);
@@ -817,7 +817,12 @@ SymbolicFact_(const int dim_,
     break;
   case (-1):
       nbLevels = (int)log2((double)dim_ / (double)minNodes);
-      decomposer = decomposer_;
+      if (nbLevels < 2) {
+        decomposer = TRIDIAG_DECOMPOSER;
+      }
+      else {
+        decomposer = decomposer_;
+      }
       break;
   default:
     nbLevels = nbLevels_;
@@ -1196,12 +1201,15 @@ NumericFact(const int called,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
 	    const double machine_eps_,
+	    const bool assume_invertible,
 	    const bool higher_precision)
 {
   clock_t t0_cpu, t1_cpu, t2_cpu, t3_cpu;
   elapsed_t t0_elapsed, t1_elapsed, t2_elapsed, t3_elapsed;
   const U eps_machine = machine_eps_ < 0.0 ? machine_epsilon<U, Z>() : U(machine_eps_);
   t0_cpu = clock();
+  _assume_invertible = assume_invertible;
+  _dim_augkern = dim_augkern;
   get_realtime(&t0_elapsed);
 
   diss_printf(_verbose, _fp, "%s %d : eps_machine = %s scaling = %d\n",
@@ -1362,14 +1370,16 @@ NumericFact(const int called,
 	_kernel[m].getKernProj().init(0);
 	//	_ptDA_kern_proj[m].init(0); // = new SquareMatrix<double>();
 	_kernel[m].getKernBasis().init(0, 0); //  = new ColumnMatrix<double>();
+	_kernel[m].getKernListEq().clear();
+	_kernel[m].getKernListEqLeft().clear();
       }
       _singIdx[m].resize(0);
       _Schur[m].getAcol() = new SparseMatrix<T>(); // dummy allocation
       _Schur[m].getArow() = new SparseMatrix<T>(); // dummy allocation
-      if (_status_factorized) {  // for safty of second call
+      //   if (_status_factorized) {  // for safty of second call
 	_Schur[m].getSlduList().clear(); //
+	_Schur[m].getSlduListLeft().clear(); //
 	_Schur[m].getSldu().free();
-      }
     } //  if (_tridiagQueue[m]->tridiagSolver())
     else {
       int sz = 0, sz1 = 0;
@@ -1408,8 +1418,7 @@ NumericFact(const int called,
       } // loop : j	
       sz_total += sz;
       if (sz > 0) {
-	if (kernel_detected) {
-	  //if (false) { // 29 Oct.2014 debug
+	if (kernel_detected && (!_assume_invertible)) {
 	  _singIdx[m].resize(sz); 
 	  int k = 0;
 	  for (int j = 0; j < _dissectionMatrix[m].size(); j++ ) {
@@ -1421,6 +1430,7 @@ NumericFact(const int called,
 	      _singIdx[m][k] = loc2glob[*it];
 	    } // loop : d
 	  }
+#if 0
 	  if (_verbose)  {
 	    std::sort(_singIdx[m].begin(), _singIdx[m].end());
 	    char fname[256];
@@ -1441,9 +1451,23 @@ NumericFact(const int called,
 	      exit(-1);
 	    }
 	  } // if (_verbose)
+
 	  BuildKernels(_singIdx[m], 
 		       sz,
 		       _Schur[m], _kernel[m]);
+#else
+	  vector<SquareBlockMatrix<T>* > diags; // dummy
+	  vector<vector<int> >augkern_indexes;  // dummy
+
+	  BuildKernelsDetection(sz, 
+				_singIdx[m],
+				augkern_indexes,
+				diags,
+				eps_pivot,
+				dim_augkern,
+				_Schur[m],
+				_kernel[m], false);
+#endif
 	  // need to copy kern basis projection matrix from global to m-th array
 	} // if (kernel_detected)
 	else {
@@ -1524,7 +1548,6 @@ NumericFact(const int called,
 	  }
 	  diss_printf(_verbose, _fp, "to the last level.\n");
 	  diss_printf(_verbose, _fp,
-		      
 		      "%s %d : singIdx = %d : ",
 		      __FILE__, __LINE__, (int)_singIdx[m].size());
 	  for (int i = 0; i < _singIdx[m].size(); i++) {
@@ -1547,7 +1570,8 @@ NumericFact(const int called,
 				eps_pivot,
 				dim_augkern,
 				_Schur[m],
-				_kernel[m]);
+				_kernel[m],
+				true);
 	  if (kern_dim == (-1)) {
 	    int pid = get_process_id();
 	    SaveCSRMatrix(_called, coefs);
@@ -1566,10 +1590,12 @@ NumericFact(const int called,
 	_kernel[m].set_dimension(0);
 	_kernel[m].getKernProj().init(0);   //  _ptDA_kern_proj[m].init(0); //
 	_kernel[m].getKernBasis().init(0, 0); //
-	if (_status_factorized) {          // for safty of second call
-	  _Schur[m].getSlduList().clear(); // _ptDA_sldu_list[m].clear(); 
+	_kernel[m].getKernListEq().clear();
+	_kernel[m].getKernListEqLeft().clear();
+	//	if (_status_factorized) {          // for safty of second call
+	  _Schur[m].getSlduList().clear(); // _ptDA_sldu_list[m].clear();
+	  _Schur[m].getSlduListLeft().clear(); // _ptDA_sldu_list[m].clear(); 
 	  _Schur[m].getSldu().free();      // 	  _ptDA_sldu[m].free();
-	}
       }
     } //  if (_tridiagQueue[m]->tridiagSolver()) 
   }   // loop : _graph_colors
@@ -1671,23 +1697,23 @@ NumericFact(const int called,
     } // loop : m
     if (count > 0) {
       diss_printf(_verbose, _fp,
-		  "%s %d :negative diagnol entries = %d / %d\n", 
+		  "%s %d :negative diagonal entries = %d / %d\n", 
 		  __FILE__, __LINE__, count, _dim);
     }
   } // if (_verbose)
     //
-  bool nokernel_flag = true;
+  bool kernel_flag = false;
   for (int m = 0; m < _graph_colors; m++) {
-    //    if (_ptDA_kern_proj[m].dimension() != 0) {
     if (_kernel[m].dimension() != 0) {
-      nokernel_flag = false;
-	break;
+      kernel_flag = true;
+      break;
     }
   }
-  //  if (nokernel_flag) {
-  if ((!nokernel_flag) && !_ptDA->isSymmetric()) {
+#if 0
+  if (kernel_flag && (!_ptDA->isSymmetric())) {
     ComputeTransposedKernels();
   }
+#endif
   if(_verbose) {
     int n1 = 0;
     for (int m = 0; m < _graph_colors; m++) {
@@ -1702,19 +1728,23 @@ NumericFact(const int called,
     }
     VectorArray<T> bb(_dim);
     bb.ZeroClear();
+    diss_printf(_verbose, _fp, "%s %d : compute error in (Ker A)^\\perp\n",
+		__FILE__, __LINE__);
     SpMV(ww.addrCoefs(), xx.addrCoefs(), true); //  isScaling = true
-    if (!nokernel_flag) {
-      ProjectionImageSingle(xx.addrCoefs(), "creating solution");
-      //      ProjectionKernelOrthSingle(xx.addrCoefs(), "creating solution");
+    if (kernel_flag) {
+      ProjectionKernelOrthSingle(xx.addrCoefs(), "creating solution", false);
     }
     SpMV(xx.addrCoefs(), bb.addrCoefs(), true);  //  isScaling = true
+    if (kernel_flag) {
+      ProjectionKernelOrthSingle(bb.addrCoefs(), "RHS", true);
+      //      ProjectionImageSingle(bb.addrCoefs(), "RHS", false);
+    }
     blas_copy<T>(_dim, bb.addrCoefs(), 1, yy.addrCoefs(), 1);
     SolveSingle(yy.addrCoefs(), false, false, true); // isScaling = true
-    //    blas_copy<T>(_dim, yy.addrCoefs(), 1, bb.addrCoefs(), 1);
-    if (!nokernel_flag) {
-      ProjectionImageSingle(yy.addrCoefs(), "computed solution");
-      //      ProjectionKernelOrthSingle(yy.addrCoefs(), "computed solution");
+    if (kernel_flag) {
+      ProjectionKernelOrthSingle(yy.addrCoefs(), "computed solution", false);
     }
+    SpMV(yy.addrCoefs(), ww.addrCoefs(), true);
     U norm0, norm1;
     norm0 = blas_l2norm<T, U>(_dim, xx.addrCoefs(), 1); 
     blas_axpy<T>(_dim, _none, xx.addrCoefs(), 1, yy.addrCoefs(), 1);
@@ -1731,9 +1761,17 @@ NumericFact(const int called,
 		  tostring<U>(norm1).c_str(), tostring<U>(norm0).c_str(),
 		  tostring<U>(norm1 / norm0).c_str());
       //      SaveMMMatrix(_called, coefs);
-      _status_factorized = false;
-      return;
+      //      _status_factorized = false;
+      //      return;
     }
+    norm0 = blas_l2norm<T, U>(_dim, bb.addrCoefs(), 1); 
+    blas_axpy<T>(_dim, _none, bb.addrCoefs(), 1, ww.addrCoefs(), 1);
+    norm1 = blas_l2norm<T, U>(_dim, ww.addrCoefs(), 1);
+    diss_printf(_verbose, _fp, "%s %d : residual = %s / %s = %s\n",
+	    __FILE__, __LINE__,
+	    tostring<U>(norm1).c_str(), tostring<U>(norm0).c_str(),
+	    tostring<U>(norm1 / norm0).c_str());
+
   } //  if (_verbose)
   _status_factorized = true;
 }
@@ -1746,6 +1784,7 @@ void DissectionSolver<double>::NumericFact(const int called,
 					   const bool kernel_detection_all,
 					   const int dim_augkern,
 					   const double machine_eps_,
+					   const bool assume_invertible,
 					   const bool higher_precision);
 
 template
@@ -1757,6 +1796,7 @@ NumericFact(const int called,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
 	    const double machine_eps_,
+	    const bool assume_invertible,
 	    const bool higher_precision);
 
 template
@@ -1767,6 +1807,7 @@ void DissectionSolver<quadruple>::NumericFact(const int called,
 					      const bool kernel_detection_all,
 					      const int dim_augkern,
 					      const double machine_eps_,
+					      const bool assume_invertible,
 					      const bool higher_precision);
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
@@ -1777,17 +1818,20 @@ NumericFact(const int called,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
 	    const double machine_eps_,
+	    const bool assume_invertible,
 	    const bool higher_precision);
 
 template
-void DissectionSolver<double, double, quadruple, quadruple>::NumericFact(const int called,
-					   double *coefs,
-					   const int scaling,
-					   const double eps_pivot,
-					   const bool kernel_detection_all,
-					   const int dim_augkern,
-					   const double machine_eps_,
-					   const bool higher_precision);
+void DissectionSolver<double, double, quadruple, quadruple>::
+NumericFact(const int called,
+	    double *coefs,
+	    const int scaling,
+	    const double eps_pivot,
+	    const bool kernel_detection_all,
+	    const int dim_augkern,
+	    const double machine_eps_,
+	    const bool assume_invertible,
+	    const bool higher_precision);
 
 template
 void DissectionSolver<complex<double>, double, complex<quadruple>, quadruple>::
@@ -1798,17 +1842,20 @@ NumericFact(const int called,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
 	    const double machine_eps_,
+	    const bool assume_invertible,
 	    const bool higher_precision);
 
 template
-void DissectionSolver<quadruple, quadruple, double, double>::NumericFact(const int called,
-					      quadruple *coefs,
-					      const int scaling,
-					      const double eps_pivot,
-					      const bool kernel_detection_all,
-					      const int dim_augkern,
-					      const double machine_eps_,
-					      const bool higher_precision);
+void DissectionSolver<quadruple, quadruple, double, double>::
+NumericFact(const int called,
+	    quadruple *coefs,
+	    const int scaling,
+	    const double eps_pivot,
+	    const bool kernel_detection_all,
+	    const int dim_augkern,
+	    const double machine_eps_,
+	    const bool assume_invertible,
+	    const bool higher_precision);
 template
 void DissectionSolver<complex<quadruple>, quadruple, complex<double>, double>::
 NumericFact(const int called,
@@ -1818,17 +1865,19 @@ NumericFact(const int called,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
 	    const double machine_eps_,
+	    const bool assume_invertible,
 	    const bool higher_precision);
 
 template
 void DissectionSolver<float>::NumericFact(const int called,
-					   float *coefs,
-					   const int scaling,
-					   const double eps_pivot,
-					   const bool kernel_detection_all,
-					   const int dim_augkern,
-					   const double machine_eps_,
-					   const bool higher_precision);
+					  float *coefs,
+					  const int scaling,
+					  const double eps_pivot,
+					  const bool kernel_detection_all,
+					  const int dim_augkern,
+					  const double machine_eps_,
+					  const bool assume_invertible,
+					  const bool higher_precision);
 template
 void DissectionSolver<complex<float>, float>::
 NumericFact(const int called,
@@ -1838,6 +1887,7 @@ NumericFact(const int called,
 	    const bool kernel_detection_all,
 	    const int dim_augkern,
 	    const double machine_eps_,
+	    const bool assume_invertible,
 	    const bool higher_precision);
 
 //
@@ -2111,7 +2161,7 @@ ProjectionImageSingle(T *x, string name)
 			  x, 1);
     }
     diss_printf(_verbose, _fp,
-		"%s %d : %s : check orthogonality of the given vector : ",
+		"%s %d : %s : check orthogonality of the given vector \n",
 		__FILE__, __LINE__,
 		name.c_str());
     for (int j = 0; j < n0; j++) {
@@ -2151,7 +2201,7 @@ ProjectionImageSingle(T *x, string name)
 			  x, 1);
     }
     diss_printf(_verbose, _fp,
-		"%s %d : %s : after projection, component of each kernel : ",
+		"%s %d : %s : after projection, component of each kernel \n",
 		__FILE__, __LINE__, name.c_str());
     for (int j = 0; j < n0; j++) {
       diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
@@ -2182,18 +2232,25 @@ template
 void DissectionSolver<complex<float>, float>::
 ProjectionImageSingle(complex<float> *x, string name);
 
+template
+void DissectionSolver<double, double, quadruple, quadruple>::ProjectionImageSingle(double *x, string name);
+
+template
+void DissectionSolver<quadruple, quadruple, double, double>::ProjectionImageSingle(quadruple *x, string name);
+
 //
 template<typename T, typename U, typename W, typename Z>
 void DissectionSolver<T, U, W, Z>::
-ProjectionKernelOrthSingle(T *x, bool isTrans)
+ProjectionKernelOrthSingle(T *x, string name, bool isTrans)
 {
   for (int m = 0; m < _graph_colors; m++) {
-    T *kern_basis = isTrans ? _kernel[m].getTKernBasis().addrCoefs() :
+    const bool flag_trans = isTrans && (!_ptDA->isSymmetric());
+    
+    T *kern_basis = flag_trans ? _kernel[m].getTKernBasis().addrCoefs() :
                                    _kernel[m].getKernBasis().addrCoefs();
-    T *kern_proj = isTrans ? _kernel[m].getTKernProj().addrCoefs() : 
+    T *kern_proj = flag_trans ? _kernel[m].getTKernProj().addrCoefs() : 
                                   _kernel[m].getKernProj().addrCoefs();
     const int n0 = _kernel[m].dimension();
-    //isTrans ? _ptDAt_kern_proj[m].dimension() : _ptDA_kern_proj[m].dimension();
   
     VectorArray<T> xx(n0);
     for (int j = 0; j < n0; j++) {
@@ -2203,8 +2260,8 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
 			  x, 1);
     }
     diss_printf(_verbose, _fp,
-		"%s %d : check orthogonality of the given vector\n",
-		__FILE__, __LINE__);
+		"%s %d : %s : check orthogonality of the given vector\n",
+		__FILE__, __LINE__, name.c_str());
     for (int j = 0; j < n0; j++) {
       diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
     } 
@@ -2224,8 +2281,8 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
 		 n0, kern_proj,
 		 n0, xx.addrCoefs(), 1);
     diss_printf(_verbose, _fp,
-		"%s %d : solution of kernel adjustment\n",
-		__FILE__, __LINE__);
+		"%s %d : %s : solution of kernel adjustment\n",
+		__FILE__, __LINE__, name.c_str());
     for (int j = 0; j < n0; j++) {
       diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
     } 
@@ -2243,8 +2300,8 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
 			  x, 1);
     }
     diss_printf(_verbose, _fp,
-		"%s %d : after projection, component of each kernel\n",
-		__FILE__, __LINE__);
+		"%s %d : %s : after projection, component of each kernel\n",
+		__FILE__, __LINE__, name.c_str());
     for (int j = 0; j < n0; j++) {
       diss_printf(_verbose, _fp, "%.6e ", blas_abs<T, double>(xx[j]));
     } 
@@ -2255,26 +2312,29 @@ ProjectionKernelOrthSingle(T *x, bool isTrans)
 
 template
 void DissectionSolver<double>::ProjectionKernelOrthSingle(double *x,
+							  string name,
 							  bool isTrans);
 template
 void DissectionSolver<quadruple>::ProjectionKernelOrthSingle(quadruple *x,
+							     string name,
 							     bool isTrans);
 
 template
 void DissectionSolver<complex<double>, double>::
-ProjectionKernelOrthSingle(complex<double> *x, bool isTrans);
+ProjectionKernelOrthSingle(complex<double> *x, string name, bool isTrans);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
-ProjectionKernelOrthSingle(complex<quadruple> *x, bool isTrans);
+ProjectionKernelOrthSingle(complex<quadruple> *x,  string name, bool isTrans);
 
 template
 void DissectionSolver<float>::ProjectionKernelOrthSingle(float *x,
-							  bool isTrans);
+							 string name,
+							 bool isTrans);
 
 template
 void DissectionSolver<complex<float>, float>::
-ProjectionKernelOrthSingle(complex<float> *x, bool isTrans);
+ProjectionKernelOrthSingle(complex<float> *x, string name, bool isTrans);
 
 //
 //
@@ -2409,28 +2469,25 @@ SolveSingle(T *x, bool projection,
     diss_printf(_verbose, _fp, 
 		"%s %d : projection of the scaled RHS onto the image\n", 
 		__FILE__, __LINE__);
-    ProjectionImageSingle(x, "scaled RHS");
+    ProjectionKernelOrthSingle(x, "scaled RHS", true); // orthogonal to ker A^T
   }
   if (isScaling) {
     for (int i = 0; i < _dim; i++) {
-      //      x[i] *= fromreal(_precDiag[i]);
-            x[i] *= _precDiag[i];
+      x[i] *= _precDiag[i];
     }
   }
-  if (n1 > 0) {
-    int i0 = 0;
-    for (int m = 0; m < _graph_colors; m++) {
-      int nn1 = _Schur[m].getSlduList().size();
-      for (int i = 0; i < nn1; i++, i0++) {
-	const int ii = _Schur[m].getSldu().loc2glob()[i];
-	yy[i0] = x[ii];
-	x[ii] = _zero;  // the matrix is factorized only regular node, 
-	               // elements for suspicious pivots are set to be 0
-      } // loop : i
-    } // loop : m
-  } // if (n1 > 0)
   if (isTrans) {
     if (n1 > 0) {
+      int i0 = 0;
+      for (int m = 0; m < _graph_colors; m++) {
+	int nn1 = _Schur[m].getSlduList().size();
+	for (int i = 0; i < nn1; i++, i0++) {
+	  const int ii = _Schur[m].getSldu().loc2glob()[i];
+	  yy[i0] = x[ii];
+	  x[ii] = _zero;  // the matrix is factorized only regular node, 
+	  // elements for suspicious pivots are set to be 0
+	} // loop : i
+      } // loop : m
       diss_printf(_verbose, _fp, 
 		  "%s %d : _ptDA_sldu[] are solved with n1=%d\n", 
 		  __FILE__, __LINE__, n1);
@@ -2487,6 +2544,22 @@ SolveSingle(T *x, bool projection,
     }    // if (n1 > 0)
   }      // if (isTrans)
   else {
+    if (n1 > 0) {
+      int i0 = 0;
+      for (int m = 0; m < _graph_colors; m++) {
+	int nn1 = _Schur[m].getSlduList().size();
+	for (int i = 0; i < nn1; i++, i0++) {
+	  const int ii = _Schur[m].getSldu().loc2glob_left()[i];
+	  yy[i0] = x[ii];
+	  x[ii] = _zero;  // the matrix is factorized only regular node, 
+	  // elements for suspicious pivots are set to be 0
+	} // loop : i
+	for (int i = 0; i < _kernel[m].getKernListEqLeft().size(); i++) {
+	  const int ii = _kernel[m].getKernListEqLeft()[i];
+	  x[ii] = _zero;
+	}
+      } // loop : m
+    }
     for (int m = 0; m < _graph_colors; m++) {
       const int nnn1 = _Schur[m].getSlduList().size();
       diss_printf(_verbose, _fp, "%s %d : color = %d %d\n",
@@ -2540,7 +2613,7 @@ SolveSingle(T *x, bool projection,
 		      nn1);
 	  for (int i = 0; i < nn1; i++) {
 	    T stmp(0.0);
-	    const int ii = _Schur[m].getSlduList()[i];
+	    const int ii = _Schur[m].getSlduListLeft()[i];
 	    const SparseMatrix<T> * const arow = _Schur[m].getArow();
 	    for (int k = arow->ptRow(ii); k < arow->ptRow(ii + 1); k++) {
 	      const int j = arow->indCol(k);
@@ -2573,7 +2646,11 @@ SolveSingle(T *x, bool projection,
 			 _Schur[m].getScol().addrCoefs(), _dim,
 			 yy.addrCoefs() + mm0, 1, _one, x, 1);
 	    mm0 += nnn1; // move to the next block
-	  } 
+	  }
+	  for (int i = 0; i < _kernel[m].getKernListEq().size(); i++) {
+	    const int ii = _kernel[m].getKernListEq()[i];
+	    x[ii] = _zero;
+	  }
 	} // loop : _graph_colors : m
       } // scope of mm0
     }   // if (n1 > 0)
@@ -2605,7 +2682,6 @@ SolveSingle(T *x, bool projection,
   // adjust the kernel  : x = x - N (N{^T} N)^-1 N^{T} x
   if (isScaling) {
     for (int i = 0; i < _dim; i++) {
-      //      x[i] *= fromreal(_precDiag[i]);
       x[i] *= _precDiag[i];
     }
   }
@@ -2625,9 +2701,9 @@ SolveSingle(T *x, bool projection,
   }   //  if (_index_isolated.size() > 0)
   if (n0 > 0 && projection) {
     diss_printf(_verbose, _fp, 
-		"%s %d : projection of the scaled solution onto the image\n", 
+		"%s %d : projection orthogonal to the kernel\n", 
 		__FILE__, __LINE__);
-    ProjectionImageSingle(x, "scaled solution");
+    ProjectionKernelOrthSingle(x, "scaled RHS", false); // orthogonal to ker A
   }
   get_realtime(&t1_elapsed);
 }
@@ -2737,8 +2813,8 @@ SolveMulti(T *x, int nrhs, bool projection,
 {
   const int nsing = _nsing; //_singIdx.size();
   VectorArray<T> vtmp(nrhs);
-  vector<int> nn1;
-  nn1.resize(_graph_colors);
+  vector<int> nn1(_graph_colors);
+    //  nn1.resize(_graph_colors);
   int i0, mm0, n0, n1;
 
   int itmp;
@@ -2775,32 +2851,32 @@ SolveMulti(T *x, int nrhs, bool projection,
 		"%s %d : projection of the scaled RHS onto the image\n",
 		__FILE__, __LINE__);
     for (int n = 0; n < nrhs; n++) {
-      ProjectionImageSingle(xx.addrCoefs() + (n * _dim), "scaled RHS");
+      ProjectionKernelOrthSingle(xx.addrCoefs() + (n * _dim),
+				 "scaled RHS", true); // orthogonal to ker A^T
     }
   }
   if (n1 > 0) {
     yy.init(n1, nrhs);
-    i0 = 0;
-    for (int m = 0; m < _graph_colors; m++) {
-      for (int i = 0; i < nn1[m]; i++, i0++) {
-	for (int n = 0; n < nrhs; n++) {
-	  const int ii = _Schur[m].getSldu().loc2glob()[i];
-
-	  yy(i0, n) = xx(ii, n);     //	  yy[n][i0] = xx[n][ii];
-	  xx(ii, n) = _zero; 	  //xx[n][ii] = _zero; //the matrix is factorized only regular node,
-	  //                      elements for suspicious pivots are set to be 0
-	}     // loop : n
-      }       // loop : i
-    }         // loop : m
   }           // if (n1 > 0)
   if (isTrans) {
-    if (nsing > 0) {
+    if (n1 > 0) {    //    if (nsing > 0) {
+      i0 = 0;
+      for (int m = 0; m < _graph_colors; m++) {
+	for (int i = 0; i < nn1[m]; i++, i0++) {
+	  for (int n = 0; n < nrhs; n++) {
+	    const int ii = _Schur[m].getSldu().loc2glob()[i];
+	    yy(i0, n) = xx(ii, n);     //	  yy[n][i0] = xx[n][ii];
+	    xx(ii, n) = _zero; 	 
+	  }     // loop : n
+	}       // loop : i
+      }         // loop : m
       mm0 = 0;
-      for (int m = 0; m < _graph_colors; m++, mm0 += nn1[m]) {
+      for (int m = 0; m < _graph_colors; m++) {
 	if (nn1[m] > 0) {
 	  blas_gemm<T>(CblasTrans, CblasNoTrans, nn1[m], nrhs, _dim, _none,
 		       _Schur[m].getScol().addrCoefs(), _dim,
 		       xx.addrCoefs(), _dim, _one, yy.addrCoefs() + mm0, n1);
+	  mm0 += nn1[m];
 	}
       }
       mm0 = 0;
@@ -2855,6 +2931,18 @@ SolveMulti(T *x, int nrhs, bool projection,
     }     // if (nsing > 0)
   }
   else {
+    if (n1 > 0) {    //    if (nsing > 0) {
+      i0 = 0;
+      for (int m = 0; m < _graph_colors; m++) {
+	for (int i = 0; i < nn1[m]; i++, i0++) {
+	  for (int n = 0; n < nrhs; n++) {
+	    const int ii = _Schur[m].getSldu().loc2glob_left()[i];
+	    yy(i0, n) = xx(ii, n);     //	  yy[n][i0] = xx[n][ii];
+	    xx(ii, n) = _zero; 	 
+	  }     // loop : n
+	}       // loop : i
+      }
+    }
     for (int m = 0; m < _graph_colors; m++) {
       const int nnn1 = _Schur[m].getSlduList().size();
       diss_printf(_verbose, _fp, "%s %d : color = %d %d\n",
@@ -2900,7 +2988,7 @@ SolveMulti(T *x, int nrhs, bool projection,
       for (int m = 0; m < _graph_colors; m++) {
 	for (int i = 0; i < nn1[m]; i++, i0++) {
 	  vtmp.ZeroClear();
-	  const int ii = _Schur[m].getSlduList()[i];
+	  const int ii = _Schur[m].getSlduListLeft()[i];
 	  const SparseMatrix<T> * const arow = _Schur[m].getArow();
 	  for (int k = arow->ptRow(ii); k < arow->ptRow(ii + 1); k++) {
 	    const int j = arow->indCol(k);
@@ -2947,11 +3035,12 @@ SolveMulti(T *x, int nrhs, bool projection,
 	}
       } // loop : m
       mm0 = 0;
-      for (int m = 0; m < _graph_colors; m++, mm0 += nn1[m]) {
+      for (int m = 0; m < _graph_colors; m++) {
 	if (nn1[m] > 0) {
 	  blas_gemm<T>(CblasNoTrans, CblasNoTrans, _dim, nrhs, nn1[m], _none,
 		       _Schur[m].getScol().addrCoefs(), _dim,
 		       yy.addrCoefs() + mm0, n1, _one, xx.addrCoefs(), _dim);
+	  mm0 += nn1[m];
 	}
       }
     }
@@ -2984,7 +3073,9 @@ SolveMulti(T *x, int nrhs, bool projection,
 		"%s %d : projection of the scaled solution onto the image\n",
 	      __FILE__, __LINE__);
     for (int n = 0; n < nrhs; n++) {
-      ProjectionImageSingle(xx.addrCoefs() + (n * _dim), "scaled solution");
+      ProjectionKernelOrthSingle(xx.addrCoefs() + (n * _dim),
+				 "scaled solution",
+				 false); // orthogonal to ker A
     }
   }
   //  if (n1 > 0) {
@@ -3026,6 +3117,22 @@ SolveMulti(complex<quadruple> *x, int nrhs, bool projection,
 	   const int nexcls);
 
 template
+void DissectionSolver<double, double, quadruple, quadruple>::
+SolveMulti(double *x, int nrhs,
+	   bool projection, 
+	   bool isTrans, bool isScaling,
+	   const int nexcls);
+
+template
+void DissectionSolver<complex<double>, double,
+		      complex<quadruple>, quadruple>::
+SolveMulti(complex<double> *x, int nrhs,
+	   bool projection, 
+	   bool isTrans,
+	   bool isScaling,
+	   const int nexcls);
+
+template
 void DissectionSolver<float>::SolveMulti(float *x, int nrhs,
 					  bool projection, 
 					  bool isTrans, bool isScaling,
@@ -3042,11 +3149,28 @@ void DissectionSolver<T, U, W, Z>::
 BuildSingCoefs(T *DSsingCoefs, 
 	       SparseMatrix<T> *DCsCoefs,
 	       T *DBsCoefs,
-	       vector<int>& singIdx)
+	       vector<int>& singIdx,
+	       const bool isTrans)
 {
+  const bool flag_trans = isTrans && (!_ptDA->isSymmetric());
+  T *DSsingCoefs0;
   const int nsing = singIdx.size();
 
-  _ptDA->extractSquareMatrix(DSsingCoefs, singIdx);
+  if (flag_trans) {
+    DSsingCoefs0 = new T [nsing * nsing];
+  }
+  else {
+    DSsingCoefs0 = DSsingCoefs;
+  }
+  _ptDA->extractSquareMatrix(DSsingCoefs0, singIdx);
+  if (flag_trans) {
+    for (int i = 0; i < nsing; i++) {
+      for (int j = 0; j < nsing;j++) {
+	DSsingCoefs[i + j * nsing] = DSsingCoefs0[j + i * nsing];
+      }
+    }
+  }
+  
   if ( _ptDA->isSymmetric() ) {
     // singIdx[] is sorted in increasing order
     // col_ind[] of symmetric matrix with CSR also in increasing order
@@ -3086,6 +3210,9 @@ BuildSingCoefs(T *DSsingCoefs,
 	      "%s %d : Schur complement on the singular dofs set %d x %d\n",
 	    __FILE__, __LINE__,
 	    nsing, nsing);
+  if (flag_trans) {
+    delete [] DSsingCoefs0;
+  }
 }
 
 template
@@ -3093,39 +3220,45 @@ void DissectionSolver<double>::
 BuildSingCoefs(double *DSsingCoefs, 
 	       SparseMatrix<double> *DCsCoefs,
 	       double *DBsCoefs,
-	       vector<int>& singIdx);
+	       vector<int>& singIdx,
+	       const bool isTrans);
 template
 void DissectionSolver<complex<double>, double>::
 BuildSingCoefs(complex<double> *DSsingCoefs, 
 	       SparseMatrix<complex<double> > *DCsCoefs,
 	       complex<double> *DBsCoefs,
-	       vector<int>& singIdx);
+	       vector<int>& singIdx,
+	       const bool isTrans);
 
 template
 void DissectionSolver<quadruple>::
 BuildSingCoefs(quadruple *DSsingCoefs, 
 	       SparseMatrix<quadruple> *DCsCoefs,
 	       quadruple *DBsCoefs,
-	       vector<int>& singIdx);
+	       vector<int>& singIdx,
+	       const bool isTrans);
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
 BuildSingCoefs(complex<quadruple> *DSsingCoefs, 
 	       SparseMatrix<complex<quadruple> > *DCsCoefs,
 	       complex<quadruple> *DBsCoefs,
-	       vector<int>& singIdx);
+	       vector<int>& singIdx,
+	       const bool isTrans);
 
 template
 void DissectionSolver<float>::
 BuildSingCoefs(float *DSsingCoefs, 
 	       SparseMatrix<float> *DCsCoefs,
 	       float *DBsCoefs,
-	       vector<int>& singIdx);
+	       vector<int>& singIdx,
+	       const bool isTrans);
 template
 void DissectionSolver<complex<float>, float>::
 BuildSingCoefs(complex<float> *DSsingCoefs, 
 	       SparseMatrix<complex<float> > *DCsCoefs,
 	       complex<float> *DBsCoefs,
-	       vector<int>& singIdx);
+	       vector<int>& singIdx,
+	       const bool isTrans);
 //
 
 template<typename T, typename U, typename W, typename Z>
@@ -3142,8 +3275,8 @@ BuildKernels(vector<int> &singIdx_,
   const int nsing = n2; // singIdx.size();
   ColumnMatrix<T> DBsCoefs(_dim, nsing);
   diss_printf(_verbose, _fp,
-	      "%s %d : BuildKernels n0 = %d n2 = %d\n",
-	      __FILE__, __LINE__, n0, n2);
+	      "%s %d : BuildKernels n0 = %d n1 = %d n2 = %d\n",
+	      __FILE__, __LINE__, n0, n1, n2);
   if (n1 > 0) {
     //IndiceArray regularVal(n1);
     vector<int> regularVal;
@@ -3198,6 +3331,7 @@ BuildKernels(vector<int> &singIdx_,
     int *pivot_width = &(Schur.getSldu().getPivotWidth()[0]); //&ptDA_sldu.getPivotWidth()[0];
     T *d1 = Schur.getSldu().addr2x2();
     int *permute = &Schur.getSldu().getPermute()[0];
+#if 0
     full_sym_2x2BK<T>(n1, Schur.getSldu().addrCoefs(), d1, pivot_width,
 		      permute);
     //    fprintf(_fp, "Bunch-Kaufman permutation : ");
@@ -3231,10 +3365,42 @@ BuildKernels(vector<int> &singIdx_,
     }
     // 1x1 + 2x2
     //    delete ptDA_acol;
+#else
+  {
+    int nn0, n0 = 0;
+    double fop, pivot_ref = 1.0; // should be automatically defined in ldlt/ldu
+    double eps_piv = machine_epsilon<double, double>();
+    if (_ptDA->isSymmetric()) {
+      full_ldlt_permute<T, U>(&nn0, n0, n1,
+			      Schur.getSldu().addrCoefs(), n1,
+			      &pivot_ref,
+			      permute, eps_piv, &fop);
+    }
+    else {
+      full_ldu_permute<T, U>(&nn0, n0, n1,
+			     Schur.getSldu().addrCoefs(), n1,
+			     &pivot_ref,
+			     permute, eps_piv, &fop);
+    }
+    diss_printf(_verbose, _fp, 
+		"%s %d : factorization with eps_piv = %g : dim kern = %d\n",
+		__FILE__, __LINE__, eps_piv, nn0);
+    diss_printf(_verbose, _fp, "permute[] = ");
+    for (int i = 0; i < n1; i++) {
+      diss_printf(_verbose, _fp, "%d ", permute[i]);
+    }
+    diss_printf(_verbose, _fp, "\n");
+  }
+  Schur.getSlduList().resize(n1);
+  for (int i = 0; i < n1; i++) {
+    Schur.getSlduList()[i] = permute[i]; 
+  }
+#endif
   }  // if (n1 > 0)
   else { // if (n1 == 0)
     Schur.getAcol() = new SparseMatrix<T>(); // dummy allocation
     Schur.getArow() = new SparseMatrix<T>(); // dummy allocation
+    Schur.getSlduList().clear();
   } // if (n1 > 0)
   
   if (n2 == 0) {
@@ -3418,6 +3584,7 @@ BuildKernels(vector<int> &singIdx_,
 		    "original : l2_norm = %.6e, infty_norm = %.6e\n",
 		    norm_l2, norm_infty);
       } // if (_scaling)
+      diss_printf(_verbose, _fp, "\n");
     }
 #ifdef DEBUG_DATA
     fout.close();
@@ -3514,7 +3681,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<T> &Schur,
-		      KernelMatrix<T> &kernel)
+		      KernelMatrix<T> &kernel,
+		      const bool enableDetection)
 {
   elapsed_t t0_elapsed, t1_elapsed, t2_elapsed, t3_elapsed;
   //  struct timespec ts0, ts1, ts2, ts3;
@@ -3522,10 +3690,14 @@ BuildKernelsDetection(int &n0,
   //  vector<int>& singIdx = singIdx; // singIdx is inherited from older version
   const int nsing = singIdx.size();
   ColumnMatrix<T> DBsCoefs(_dim, nsing);
+  ColumnMatrix<T> DCsCoefs(_dim, nsing);
   ColumnMatrix<T> DSsingCoefs(nsing, nsing);
   ColumnMatrix<T> DSsingCoefs0(nsing, nsing);
   ColumnMatrix<T> DSsingCoefs1;
+  ColumnMatrix<T> DSsingCoefs2(nsing, nsing);
+  ColumnMatrix<T> DSsingCoefs3(nsing, nsing);
   ColumnMatrix<T> DS0(nsing, nsing);
+  ColumnMatrix<T> DS2(nsing, nsing);
   double pivot_ref;
   int *permute0 = new int[nsing];
   VectorArray<T> u(_dim);
@@ -3562,11 +3734,19 @@ BuildKernelsDetection(int &n0,
   // elimination of CSR entries is best for performance, but now replacing by 0
   {   // scope of acol
     SparseMatrix<T> *acol = Schur.getAcol();
+    SparseMatrix<T> *arow = Schur.getArow();
     for (int i = 0; i < nsing; i++) {
       for (int k = acol->ptRow(i); k < acol->ptRow(i + 1); k++) {
 	for (int n = 0; n < nsing; n++) {
 	  if (acol->indCol(k) == singIdx[n]) {
 	    acol->Coef(k) = _zero;
+	  }
+	}
+      }
+      for (int k = arow->ptRow(i); k < arow->ptRow(i + 1); k++) {
+	for (int n = 0; n < nsing; n++) {
+	  if (arow->indCol(k) == singIdx[n]) {
+	    arow->Coef(k) = _zero;
 	  }
 	}
       }
@@ -3583,6 +3763,13 @@ BuildKernelsDetection(int &n0,
 	DBsCoefs(icol, j) = acol->Coef(k);
       }
     }
+    DCsCoefs.ZeroClear();
+    for (int j = 0; j < nsing; j++) {
+      for (int k = arow->ptRow(j); k < arow->ptRow(j + 1); k++) {
+	const int icol = arow->indCol(k);
+	DCsCoefs(icol, j) = arow->Coef(k);
+      }
+    }
   }  // scope of acol
   diss_printf(_verbose, _fp,
 	      "%s %d : Bs matrix: from global sparse matrix %d x %d\n",
@@ -3593,6 +3780,9 @@ BuildKernelsDetection(int &n0,
   get_realtime(&t0_elapsed);
   //  clock_gettime(CLOCK_REALdoubleIME, &ts0);
   SolveScaled(DBsCoefs.addrCoefs(), nsing, false);
+  if (!_ptDA->isSymmetric()) {
+    SolveScaled(DCsCoefs.addrCoefs(), nsing, true);
+  }
   get_realtime(&t1_elapsed);
   //  clock_gettime(CLOCK_REALTIME, &ts1);
   diss_printf(_verbose, _fp,
@@ -3602,12 +3792,18 @@ BuildKernelsDetection(int &n0,
 
   BuildSingCoefs(DSsingCoefs.addrCoefs(),
 		 Schur.getArow(), DBsCoefs.addrCoefs(), singIdx);
+  if (!_ptDA->isSymmetric()) {
+    BuildSingCoefs(DSsingCoefs2.addrCoefs(),
+		   Schur.getAcol(), DCsCoefs.addrCoefs(), singIdx, true);
+  }
   // copy DSsingCoefs
   DS0.copy(DSsingCoefs);
+  DS2.copy(DSsingCoefs2);
   // set candidate of kernel vectors before applying Schur complement on 
   // regular part of suspicious pivots
   for (int i = 0; i < nsing; i++) {
     DBsCoefs(singIdx[i], i) = _none;
+    DCsCoefs(singIdx[i], i) = _none;
   }
   get_realtime(&t2_elapsed);
   DSsingCoefs0.copy(DSsingCoefs);
@@ -3622,7 +3818,30 @@ BuildKernelsDetection(int &n0,
     }
     diss_printf(_verbose, _fp, "\n");
   }
-
+  if (!_ptDA->isSymmetric()) {
+    diss_printf(_verbose, _fp,
+		"%s %d : transposed DSsingCoefs2[]\n",
+		__FILE__, __LINE__);
+    for (int i = 0; i < nsing; i++) {
+      for (int j = 0; j < nsing; j++) {
+	diss_printf(_verbose, _fp, "%s ",
+		    tostring<T>(DSsingCoefs2(j, i)).c_str());
+      }
+      diss_printf(_verbose, _fp, "\n");
+    }
+    diss_printf(_verbose, _fp,
+		"%s %d : unsymmetry\n",
+		__FILE__, __LINE__);
+    for (int i = 0; i < nsing; i++) {
+      for (int j = 0; j < nsing; j++) {
+	diss_printf(_verbose, _fp, "%s ",
+		    tostring<T>(DSsingCoefs0(i, j) - DSsingCoefs2(j, i)).c_str());
+      }
+      diss_printf(_verbose, _fp, "\n");
+    }
+  }
+  bool flag_unsym_permute = false;
+  if (enableDetection) {
   pivot_ref = 0.0;
   for (int i = 0; i < nsing; i++) { // find maximum of abs value of diagonal
     const double stmp = blas_abs<T, double>(DSsingCoefs0(i, i));
@@ -3660,6 +3879,7 @@ BuildKernelsDetection(int &n0,
     diss_printf(_verbose, _fp, "%d ", permute0[i]);
   }
   diss_printf(_verbose, _fp, "\n");
+#if 0
   diss_printf(_verbose, _fp,
 	      "%s %d : DSsingCoefs0[]\n",
 	      __FILE__, __LINE__);
@@ -3670,17 +3890,19 @@ BuildKernelsDetection(int &n0,
     }
     diss_printf(_verbose, _fp, "\n");
   }
+#endif
   if (nn == 0) {
     n0 = 0;
   }
   else {
     const int nsing1 = nn + dim_augkern;
-    const int nsing0 = nsing - nsing1; 
-    if (nsing0 <= 0) {
-      DSsingCoefs1.init(nsing, nsing, DSsingCoefs0.addrCoefs(), false);
+    const int nsing0 = nsing - nsing1;
+    DSsingCoefs1.init(nsing1, nsing1); 
+    if (nsing0 == 0) {
+      DSsingCoefs1.copy(DSsingCoefs);
     }
     else{ // recompute smaller Schur complement with size nsing1
-      DSsingCoefs1.init(nsing1, nsing1); 
+
       // nullify rows and columns
       for (int j = nsing0; j < nsing; j++) {
 	for (int i = 0; i < nsing; i++) {
@@ -3773,9 +3995,11 @@ BuildKernelsDetection(int &n0,
 	diss_printf(_verbose, _fp, "\n");
       }
     }  //   if (nsing0 <= 0)
-    bool flag, flag_2x2;
+    bool flag;
     const U eps_machine = machine_epsilon<U, Z>();
-    flag = ComputeDimKernel<T, U>(&n0, &flag_2x2,
+    DSsingCoefs3.copy(DSsingCoefs2);
+    int n0n, n0t;
+    flag = ComputeDimKernel<T, U>(&n0n, &flag_unsym_permute,
 				  DSsingCoefs1.addrCoefs(), nsing1,
 				  _ptDA->isSymmetric(),
 				  dim_augkern,
@@ -3783,12 +4007,26 @@ BuildKernelsDetection(int &n0,
 				  eps_piv,
 				  _verbose,
 				  _fp);
+
+    flag = ComputeDimKernel<T, U>(&n0t, &flag_unsym_permute,
+				  DSsingCoefs3.addrCoefs(), nsing1,
+				  _ptDA->isSymmetric(),
+				  dim_augkern,
+				  eps_machine,
+				  eps_piv,
+				  _verbose,
+				  _fp);
     
+    n0 = n0t > n0n ? n0t : n0n;
+    // n0 = n0n;
     if (flag == false) {
       fprintf(stderr,
 	      "%s %d : ERROR: kernel detection failed!\n",
 	      __FILE__, __LINE__);
-      exit(-1);
+      //exit(-1);
+    }
+    if (_assume_invertible) {
+      n0 = 0;
     }
   } // if (nn > 0)
 
@@ -3799,31 +4037,55 @@ BuildKernelsDetection(int &n0,
 	      "%s %d : detection of the _dim. of the kernel (sec.) = %.6f\n",
 	      __FILE__, __LINE__,
 	      convert_time(t3_elapsed, t2_elapsed));
-    // 11 Jun.2012 : Atsushi
-  // if (n0 == (nsing - dim_augkern)) { 
-  // recomputation A_II^-1 A_IB by DissectionSolve() might be more accurate }
+  } // if (enableDetection)
 
   // LDLt factorization of DS0(i,j)
-  vector<int> permute;
+  vector<int> permute, permute_left, permute_tright, permute_tleft;
   permute.resize(nsing);
 
-  double last_pivot = 1.0;
-  const int n1 = nsing - n0;
 
-  {
+  const double machine_eps_double = machine_epsilon<double, double>();
+  const int n1 = nsing - n0;
+  
+  //  flag_unsym_permute = false;
+  Schur.setFullPivoting(flag_unsym_permute);
+
+  if (flag_unsym_permute) {
     int nn0;
     double fop;
+    double last_pivot = 1.0;
+    permute_left.resize(nsing);
+    ldu_full_permute<T, U>(&nn0, n0, nsing, 
+			   DSsingCoefs.addrCoefs(), nsing, &last_pivot,
+			   &permute[0], &permute_left[0],
+			   machine_eps_double, &fop);
+#if 0
+    last_pivot = 1.0;
+    permute_tright.resize(nsing);
+    permute_tleft.resize(nsing);
+    ldu_full_permute<T, U>(&nn0, n0, nsing, 
+			   DSsingCoefs2.addrCoefs(), nsing, &last_pivot,
+			   &permute_tright[0], &permute_tleft[0],
+			   machine_eps_double, &fop);
+#endif
+    n0 = nn0;
+  }
+  else {
+    int nn0;
+    double fop;
+    double last_pivot = 1.0;
     if (_ptDA->isSymmetric()) {
       full_ldlt_permute<T, U>(&nn0, n0, nsing,
 			      DSsingCoefs.addrCoefs(), nsing, &last_pivot,
-			      &permute[0], machine_epsilon<double, double>(), &fop);
+			       &permute[0], machine_eps_double, &fop);
     }
     else {
       full_ldu_permute<T, U>(&nn0, n0, nsing,
 			     DSsingCoefs.addrCoefs(), nsing, &last_pivot,
-			     &permute[0], machine_epsilon<double, double>(), &fop);
+			     &permute[0], machine_eps_double, &fop);
     }
     n0 = nn0;
+    permute_left = permute;
   }
   
   if (n0 != (nsing - n1)) {
@@ -3833,39 +4095,46 @@ BuildKernelsDetection(int &n0,
   }
   else {
     diss_printf(_verbose, _fp,
-		"%s %d : after n0 = %d\n",
-		__FILE__, __LINE__, n0);
+		"%s %d : pivot = %s after n0 = %d\n",
+		__FILE__, __LINE__,
+		flag_unsym_permute ? "full" : "symmetric", n0);
   } 
 // keep offdiagonal part corresponding to the last Schur complement
   Schur.getScol().init(_dim, n1);
-  //  T *scol = Schur.getScol().addrCoefs();
   for (int j = 0; j < n1; j++) {
     blas_copy<T>(_dim, DBsCoefs.addrCoefs() + (permute[j] * _dim), 1,
 		 Schur.getScol().addrCoefs() + (j * _dim), 1);
   }
   if (n0 > 0) {
-    Schur.getSchur().init(n1, n1); // for deguunig copy with permutation
+    Schur.getSchur().init(n1, n1); // copy with permutation for debugging 
     for (int j = 0; j < n1; j++) {
       for (int i = 0; i < n1; i++) {
-	Schur.getSchur()(i, j) = DS0(permute[i], permute[j]);
+	Schur.getSchur()(i, j) = DS0(permute_left[i], permute[j]);
       }
     }
   // d23 = (S_22)^{-1} (-S_23)
-    ColumnMatrix<T> d23(n1, n0);
+    ColumnMatrix<T> d23(nsing, n0);
+    ColumnMatrix<T> d32(nsing, n0);
+
+    d23.ZeroClear();   
     for (int j = 0; j < n0; j++) {
       for (int i = 0; i < n1; i++) {
-	d23(i, j) = DS0(permute[i], (permute[j + n1]));
+	d23(i, j) = DS0(permute_left[i], permute[j + n1]);
+      }
+    }
+    d32.ZeroClear();
+    for (int j = 0; j < n0; j++) {
+      for (int i = 0; i < n1; i++) {
+	d32(i, j) = DS0(permute_left[j + n1], permute[i]);
+      //d32(i, j) = DS2(permute_tleft[i], permute_tright[j + n1]);
       }
     }
     //    alpha = 1.0;
     blas_trsm<T>(CblasLeft, CblasLower, CblasNoTrans, CblasUnit,
 		 n1, n0, _one, DSsingCoefs.addrCoefs(), nsing,
-		 d23.addrCoefs(), n1);
+		 d23.addrCoefs(), nsing);
     {
-      //      int ii = 0;
-      //      for (int i = 0; i < n1; i++, ii += (nsing + 1)) {
       for (int i = 0; i < n1; i++) {
-	//	const T stmp = DSsingCoefs[i + i * nsing];
 	const T stmp = DSsingCoefs(i, i);
 	for (int j = 0; j < n0; j++) {
 	  d23(i, j) *= stmp;
@@ -3874,29 +4143,191 @@ BuildKernelsDetection(int &n0,
     }
     blas_trsm<T>(CblasLeft, CblasUpper, CblasNoTrans, CblasUnit,
 		 n1, n0, _one, DSsingCoefs.addrCoefs(), nsing,
-		 d23.addrCoefs(), n1);
+		 d23.addrCoefs(), nsing);
+    for (int i = 0; i < n0; i++) {
+      const int ii = i + n1;
+      d23(ii, i) = _none;
+    }
+    blas_trsm<T>(CblasLeft, CblasUpper, CblasTrans, CblasUnit,
+    		 n1, n0, _one, DSsingCoefs.addrCoefs(), nsing,
+		 //blas_trsm<T>(CblasLeft, CblasLower, CblasNoTrans, CblasUnit,
+		 //n1, n0, _one, DSsingCoefs2.addrCoefs(), nsing,
+		 d32.addrCoefs(), nsing);
+    {
+      for (int i = 0; i < n1; i++) {
+	const T stmp = DSsingCoefs(i, i);
+	//const T stmp = DSsingCoefs2(i, i);
+	for (int j = 0; j < n0; j++) {
+	  d32(i, j) *= stmp;
+	}
+      }
+    }
+    blas_trsm<T>(CblasLeft, CblasLower, CblasTrans, CblasUnit,
+    		 n1, n0, _one, DSsingCoefs.addrCoefs(), nsing,
+		 // blas_trsm<T>(CblasLeft, CblasUpper, CblasNoTrans, CblasUnit,
+		 // n1, n0, _one, DSsingCoefs2.addrCoefss(), nsing,
+		 d32.addrCoefs(), nsing);
+    
+    for (int i = 0; i < n0; i++) {
+      const int ii = i + n1;
+      d32(ii, i) = _none;
+    }
   // generating the kernel vectors
   // keep the vectors from suspicious pivots
     kernel.getKernBasis().free(); // the 2nd allocation _dim * nsing -> _dim * n
     kernel.getKernBasis().init(_dim, n0);
+    kernel.getTKernBasis().free(); //
+    kernel.getTKernBasis().init(_dim, n0);
     T *kern_basis = kernel.getKernBasis().addrCoefs();
-    for (int j = 0; j < n0; j++) {
-      for (int i = 0; i < _dim; i++) {
-	kern_basis[i + j * _dim] = DBsCoefs(i, permute[j + n1]);
+    T *kernt_basis = kernel.getTKernBasis().addrCoefs();
+    ColumnMatrix<T> d23_permuted(nsing, n0);
+#if 1
+      ColumnMatrix<T> dtest(nsing, n0);
+      // for debugging
+      d23_permuted.ZeroClear();
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < nsing; i++) {
+	  d23_permuted(permute[i], j) = d23(i, j);
+	}
       }
-    }
-    // update the kernel using singular part of the Schur complement, d23
-    // kern_basis = - kern_basis - scol * d23
-    //              - [ A11^-1 A_13] + [A_11^-1 A_12] [S22^-1 S_23]
-    //                [      0     ]   [     -I     ]
-    //                [     -I     ]   [      0     ]
-    blas_gemm<T>(CblasNoTrans, CblasNoTrans,
-		 _dim, n0, n1, _one, // alpha
-		 Schur.getScol().addrCoefs(), _dim, // none
-		 d23.addrCoefs(), n1, _none, // beta
-		 kern_basis, _dim);
-    d23.free();
+      blas_gemm<T>(CblasNoTrans, CblasNoTrans,
+		   nsing, n0, nsing, _one,
+		   DS0.addrCoefs(), nsing,
+		   d23_permuted.addrCoefs(), nsing, _zero,
+		   dtest.addrCoefs(), nsing);
+      diss_printf(_verbose, _fp, "%s %d verify kernel : %d\n",
+		  __FILE__, __LINE__, n0);
+      for (int j = 0; j < n0; j++) {
+	U stmp = blas_l2norm<T, U>(nsing, dtest.addrCoefs() + j * nsing, 1);
+	for (int i = 0; i < nsing; i++) {
+	  diss_printf(_verbose, _fp, "%d : %d %s %s\n",
+		      i, permute[i],
+		      tostring<T>(d23_permuted(i, j)).c_str(),
+		      tostring<T>(dtest[i + j * nsing]).c_str());
+	}
+	diss_printf(_verbose, _fp, "%d %s\n", j, tostring<U>(stmp).c_str());
+      }
+      if (!_ptDA->isSymmetric()) {  
+	d23_permuted.ZeroClear();
+	for (int j = 0; j < n0; j++) {
+	  for (int i = 0; i < nsing; i++) {
+	    d23_permuted(permute_left[i], j) = d32(i, j);
+	    //d23_permuted(permute_tright[i], j) = d32(i, j);
+	  }
+	}
+	blas_gemm<T>(CblasTrans, CblasNoTrans,
+		     nsing, n0, nsing, _one,
+		     DS0.addrCoefs(), nsing,
+		     //DS2.addrCoefs(), nsing, 
+		     d23_permuted.addrCoefs(), nsing, _zero,
+		     dtest.addrCoefs(), nsing);
+	diss_printf(_verbose, _fp, "%s %d verify transposed kernel : %d\n",
+		    __FILE__, __LINE__, n0);
+	for (int j = 0; j < n0; j++) {
+	  U stmp = blas_l2norm<T, U>(nsing, dtest.addrCoefs() + j * nsing, 1);
+	  for (int i = 0; i < nsing; i++) {
+	    diss_printf(_verbose, _fp, "%d : %d %s %s\n",
+			i, permute_left[i],
+			//i, permute_tright[i],
+			tostring<T>(d23_permuted(i, j)).c_str(),
+			tostring<T>(dtest[i + j * nsing]).c_str());
+	  }
+	  diss_printf(_verbose, _fp, "%d %s\n", j, tostring<U>(stmp).c_str());
+	}
+      }
+#endif
+      //
+   d23_permuted.ZeroClear();
+   if (flag_unsym_permute) {
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < nsing; i++) {
+	  d23_permuted(permute[i], j) = d23(i, j);
+	}
+      }
+      //  A11^-1 [ A_13 A_12] permute_right [S22^-1 S_23] - p_r [S22^-1 S_23]
+      //                                    [     -I    ]       [     -I    ]
+      kernel.getKernBasis().ZeroClear();
+      for (int i = 0; i < nsing; i++) {
+	DBsCoefs(singIdx[i], i) = _zero;
+      }
 
+      blas_gemm<T>(CblasNoTrans, CblasNoTrans,
+		   _dim, n0, nsing, _one, // alpha
+		   DBsCoefs.addrCoefs(), _dim, //
+		   d23_permuted.addrCoefs(), nsing, _zero, // beta
+		   kern_basis, _dim);
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < nsing; i++) {
+	  kernel.getKernBasis()(singIdx[i], j) = -d23_permuted(i, j);
+	}
+      }
+      // compute transposed kernel
+      d23_permuted.ZeroClear();
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < nsing; i++) {
+	  d23_permuted(permute_left[i], j) = d32(i, j);
+	  //d23_permuted(permute_tright[i], j) = d32(i, j);
+	}
+      }
+      // A11^-T [ A_31^T A_12^T] permute_l [S22^-T S_32^T] - p_l [S22^-T S_23^T]
+      //                                   [     -I      ]       [     -I      ]
+      kernel.getTKernBasis().ZeroClear();
+      for (int i = 0; i < nsing; i++) {
+	DCsCoefs(singIdx[i], i) = _zero;
+      }
+      blas_gemm<T>(CblasNoTrans, CblasNoTrans,
+		   _dim, n0, nsing, _one, // alpha
+		   DCsCoefs.addrCoefs(), _dim, //
+		   d23_permuted.addrCoefs(), nsing, _zero, // beta
+		   kernt_basis, _dim);
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < nsing; i++) {
+	  kernel.getTKernBasis()(singIdx[i], j) = -d23_permuted(i, j);
+	}
+      }
+      //      d23_permuted.free();
+   }
+   else { //  if (flag_unsym_permute) 
+     for (int i = 0; i < nsing; i++) {
+       DBsCoefs(singIdx[i], i) = _none;
+      }
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < _dim; i++) {
+	  kernel.getKernBasis()(i, j) = DBsCoefs(i, permute[j + n1]);
+	}
+      }
+      // update the kernel using singular part of the Schur complement, d23
+      // kern_basis = - kern_basis - scol * d23
+      //              - [ A11^-1 A_13] + [A_11^-1 A_12] [S22^-1 S_23]
+      //                [      0     ]   [     -I     ]
+      //                [     -I     ]   [      0     ]
+      blas_gemm<T>(CblasNoTrans, CblasNoTrans,
+		   _dim, n0, n1, _one, // alpha
+		   Schur.getScol().addrCoefs(), _dim, // none
+		   d23.addrCoefs(), nsing, _none, // beta
+		   kern_basis, _dim);
+
+      // kernel of the transposed matrix
+      ColumnMatrix<T> DCsCoefs12(_dim, n1);
+      for (int i = 0; i < nsing; i++) {
+	DCsCoefs(singIdx[i], i) = _none;
+      }
+      for (int j = 0; j < n1; j++) {
+	blas_copy<T>(_dim, DCsCoefs.addrCoefs() + (permute[j] * _dim), 1,
+		     DCsCoefs12.addrCoefs() + (j * _dim), 1);
+      }
+      for (int j = 0; j < n0; j++) {
+	for (int i = 0; i < _dim; i++) {
+	  kernel.getTKernBasis()(i, j) = DCsCoefs(i, permute[j + n1]);
+	}
+      }
+      blas_gemm<T>(CblasNoTrans, CblasNoTrans,
+		   _dim, n0, n1, _one, // alpha
+		   DCsCoefs12.addrCoefs(), _dim, // none
+		   d32.addrCoefs(), nsing, _none, // beta
+		   kernt_basis, _dim);
+      DCsCoefs12.free();
+   } // if (flag_unsym_permute)
     // normalize each kernel_basis
     for (int j = 0; j < n0; j++) {
       U stmp(0.0);
@@ -3914,16 +4345,65 @@ BuildKernelsDetection(int &n0,
       calc_relative_norm<T>(&norm_l2, &norm_infty,
 			    v.addrCoefs(), (kern_basis + (j * _dim)), _dim);
       diss_printf(_verbose, _fp,
-		  "%d -th kernel scaled : infty = %.6e, norm_infty = %.6e / ",
+		  "%d -th kernel scaled : norm_l2 = %.6e, norm_infty = %.6e / ",
 		  j, norm_l2, norm_infty);
       if(_scaling) {
 	calc_relative_normscaled<T, U>(&norm_l2, &norm_infty,
 				       v.addrCoefs(), kern_basis + (j * _dim),
 				       &_precDiag[0], _dim);
-	diss_printf(_verbose, _fp, "original : infty = %.6e, norm_infty = %.6e\n",
+	diss_printf(_verbose, _fp,
+		    "original : norm_l2 = %.6e, norm_infty = %.6e\n",
 		    norm_l2, norm_infty);
-      } // if (_scaling)
+      }
+      else {
+	diss_printf(_verbose, _fp, "\n");
+      }// if (_scaling)
+      for (int i = 0; i < nsing; i++) {
+	diss_printf(_verbose, _fp, "%d %d %s\n",
+		    i, singIdx[i],
+		    tostring<T>(v(singIdx[i], j)).c_str());
+      }
     }
+    if (!_ptDA->isSymmetric()) {  
+      for (int j = 0; j < n0; j++) {
+	U stmp(0.0);
+	const U one(1.0);
+	stmp = one / blas_l2norm<T, U>(_dim, (kernt_basis + (j * _dim)), 1);
+	blas_scal2<T, U>(_dim, stmp, (kernt_basis + (j * _dim)), 1);
+      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : == ptDA^T * transposed kernel\n",
+		  __FILE__, __LINE__);
+	
+      for (int j = 0; j < n0; j++) {
+	_ptDA->prodt((kernt_basis + (j * _dim)), v.addrCoefs());
+
+	double norm_l2, norm_infty;
+	calc_relative_norm<T>(&norm_l2, &norm_infty,
+			      v.addrCoefs(), (kernt_basis + (j * _dim)), _dim);
+	diss_printf(_verbose, _fp,
+		    "%d -th  scaled : norm_l2 = %.6e, norm_infty = %.6e / ",
+		    j, norm_l2, norm_infty);
+	if(_scaling) {
+	  calc_relative_normscaled<T, U>(&norm_l2, &norm_infty,
+					 v.addrCoefs(),
+					 kernt_basis + (j * _dim),
+					 &_precDiag[0], _dim);
+	  diss_printf(_verbose, _fp,
+		      "original : norm_l2 = %.6e, norm_infty = %.6e\n",
+		      norm_l2, norm_infty);
+	}
+	else {
+	  diss_printf(_verbose, _fp, "\n");
+	}
+	diss_printf(_verbose, _fp, "%s %d\n", __FILE__, __LINE__);
+  	for (int i = 0; i < nsing; i++) {
+	  diss_printf(_verbose, _fp, "%d %d %s\n",
+		      i, singIdx[i],
+		      tostring<T>(v(singIdx[i], j)).c_str());
+	}
+      }
+    } //  if (!_ptDA->isSymmetric()) 
     if(_scaling) {
       for (int j = 0; j < n0; j++) {
 	const int jtmp = j * _dim;
@@ -3931,8 +4411,13 @@ BuildKernelsDetection(int &n0,
 	  kern_basis[i + jtmp] *= _precDiag[i];
 	}
       }
+      for (int j = 0; j < n0; j++) {
+	const int jtmp = j * _dim;
+	for (int i = 0; i < _dim; i++) {
+	  kernt_basis[i + jtmp] *= _precDiag[i];
+	}
+      }
     }
-    
 #ifdef NORMALIZE_KERNEL_BASIS
   // normalize each kernel_basis
     for (int j = 0; j < n0; j++) {
@@ -3940,12 +4425,19 @@ BuildKernelsDetection(int &n0,
       const U one(1.0);
       stmp = one / blas_l2norm<T, U>(_dim, (kern_basis + (j * _dim)), 1);
       blas_scal2<T, U>(_dim, stmp, (kern_basis + (j * _dim)), 1);
+      stmp = one / blas_l2norm<T, U>(_dim, (kernt_basis + (j * _dim)), 1);
+      blas_scal2<T, U>(_dim, stmp, (kernt_basis + (j * _dim)), 1);
+    
     }
 #endif
     kernel.getKernProj().free();     // second alloctation : nsing -> n0
     kernel.set_dimension(n0);
     kernel.getKernProj().init(n0);
-    
+    kernel.getTKernProj().free();     // second alloctation : nsing -> n0
+    if (!_ptDA->isSymmetric()) {  
+      kernel.getTKernProj().init(n0);
+      kernel.getNTKernProj().init(n0);
+    }
     for (int i = 0; i < n0; i++) {
       for(int j = i; j < n0; j++) {
 	kernel.getKernProj()(i, j) = blas_dot<T>(_dim,
@@ -3959,23 +4451,73 @@ BuildKernelsDetection(int &n0,
     }
     full_ldlh<T>(n0, kernel.getKernProj().addrCoefs(), n0);
     // inverse of diagonal part is also storead in the factorized matrix
+    if (!_ptDA->isSymmetric()) {      
+      for (int i = 0; i < n0; i++) {
+	for(int j = i; j < n0; j++) {
+	  kernel.getTKernProj()(i, j) = 
+	    blas_dot<T>(_dim, 
+			(kernt_basis + (i * _dim)), 1,
+			(kernt_basis + (j * _dim)), 1);
+	}
+	// symmetrize
+	for (int j = (i + 1); j < n0; j++) {
+	  kernel.getTKernProj()(j, i) = kernel.getTKernProj()(i, j);
+	}
+      }
+      full_ldlh<T>(n0, kernel.getTKernProj().addrCoefs(), n0);
+      // for oblique projection
+      for (int i = 0; i < n0; i++) {
+	for(int j = 0; j < n0; j++) {
+	  kernel.getNTKernProj()(i, j) = 
+	    blas_dot<T>(_dim, 
+			(kernt_basis + (i * _dim)), 1,
+			(kern_basis + (j * _dim)), 1);
+	}
+      }
+      diss_printf(_verbose, _fp,
+		  "%s %d : orthogonality matrix kernels of A and A^T\n",
+		  __FILE__, __LINE__);
+      for (int i = 0; i < n0; i++) {
+	diss_printf(_verbose, _fp, "%d : ", i);
+	for(int j = 0; j < n0; j++) {
+	  diss_printf(_verbose, _fp, "%.16e ",
+		      blas_abs<T, double>(kernel.getNTKernProj()(i, j)));
+	}
+	diss_printf(_verbose, _fp, "\n");
+      }
+      full_ldu<T>(n0, kernel.getNTKernProj().addrCoefs(), n0);
+    }
   } // if (n0 > 0)
+  else {
+    kernel.set_dimension(0);
+  }
   //
   diss_printf(_verbose, _fp,
 	    "%s %d : nsing = %d dim_augkern = %d n1 = %d n0 = %d\n",
 	    __FILE__, __LINE__, nsing, dim_augkern, n1, n0);
 
   // for some applications which need index of singular entries
-  kernel.getKernListEq().resize(n0); // = IndiceArray(n0);
+  kernel.setFullPivoting(flag_unsym_permute);
+  kernel.getKernListEq().resize(n0);
+  kernel.getKernListEqLeft().resize(n0);
   for (int i = 0; i < n0; i++) {
     kernel.getKernListEq()[i]= singIdx[permute[i + n1]];
+    kernel.getKernListEqLeft()[i]= singIdx[permute_left[i + n1]];
   }
   diss_printf(_verbose, _fp, "%s %d : kern_list_eq[] = ", __FILE__, __LINE__);
   for (int i = 0; i < kernel.getKernListEq().size(); i++) {
     diss_printf(_verbose,_fp, "%d ", kernel.getKernListEq()[i]);
   }
   diss_printf(_verbose, _fp, "\n");
-  if (n1 == dim_augkern) {
+  if (flag_unsym_permute) {
+    diss_printf(_verbose, _fp, "%s %d : kern_list_eq_left[] = ",
+		__FILE__, __LINE__);
+    for (int i = 0; i < kernel.getKernListEqLeft().size(); i++) {
+      diss_printf(_verbose,_fp, "%d ", kernel.getKernListEqLeft()[i]);
+    }
+    diss_printf(_verbose, _fp, "\n");
+  }
+  if (n1 == dim_augkern && (!flag_unsym_permute)) {
     diss_printf(_verbose, _fp,
 		"%s %d dimension of detected kernel == suspicous one = %d\n",
 		__FILE__, __LINE__, n0);
@@ -3997,21 +4539,33 @@ BuildKernelsDetection(int &n0,
   }
   else {  //  if (n1 == dim_augkern) {
     Schur.getSlduList().resize(n1);
+    Schur.getSlduListLeft().resize(n1);
     for (int i = 0; i < n1; i++) {
       Schur.getSlduList()[i] = permute[i];
+      Schur.getSlduListLeft()[i] = permute_left[i];
     }
-    vector<int> s_list_eq;
+    vector<int> s_list_eq, s_list_eq_left;
     s_list_eq.resize(n1);
+    s_list_eq_left.resize(n1);
     // local2global index for the last Schur complement
     for (int i = 0; i < n1; i++) {
       s_list_eq[i] = singIdx[permute[i]];
+      s_list_eq_left[i] = singIdx[permute_left[i]];
     }
     diss_printf(_verbose, _fp, "%s %d : s_list_eq[] = ",  __FILE__, __LINE__);
     for (int i = 0; i < s_list_eq.size(); i++) {
       diss_printf(_verbose, _fp, "%d ", s_list_eq[i]);
     }
     diss_printf(_verbose, _fp, "\n");
-    Schur.getSldu().init(s_list_eq);
+    if (flag_unsym_permute) {
+      diss_printf(_verbose, _fp, "%s %d : s_list_eq_left[] = ",
+		  __FILE__, __LINE__);
+      for (int i = 0; i < s_list_eq_left.size(); i++) {
+	diss_printf(_verbose, _fp, "%d ", s_list_eq_left[i]);
+      }
+      diss_printf(_verbose, _fp, "\n");
+    }
+    Schur.getSldu().init(flag_unsym_permute, s_list_eq, s_list_eq_left);
     
   // copy regular part n1*n1 from nsing*nsing matrix DSsingCoefs[]
     for (int j = 0; j < n1; j++) {
@@ -4023,7 +4577,7 @@ BuildKernelsDetection(int &n0,
     // [  -I          ]    [   0           ] : singIdx[permute[i]] 
     // [   0          ]    [   0           ] :  0<= i < nsing
     for (int i = 0; i < n1; i++) {
-      Schur.getScol()(singIdx[permute[i]], i) = _zero;
+	Schur.getScol()(s_list_eq[i], i) = _zero; 
     }
   } //  if (n1 == dim_augkern) {
 
@@ -4046,7 +4600,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<double> &Schur,
-		      KernelMatrix<double> &kernel);
+		      KernelMatrix<double> &kernel,
+		      const bool enableDetection);
 
 template
 void DissectionSolver<complex<double>, double>::
@@ -4057,7 +4612,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<complex<double> > &Schur,
-		      KernelMatrix<complex<double> > &kernel);
+		      KernelMatrix<complex<double> > &kernel,
+		      const bool enableDetection);
 
 template
 void DissectionSolver<quadruple>::
@@ -4068,7 +4624,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<quadruple> &Schur,
-		      KernelMatrix<quadruple> &kernel);
+		      KernelMatrix<quadruple> &kernel,
+		      const bool enableDetection);
 
 template
 void DissectionSolver<complex<quadruple>, quadruple>::
@@ -4079,7 +4636,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<complex<quadruple> > &Schur,
-		      KernelMatrix<complex<quadruple> > &kernel);
+		      KernelMatrix<complex<quadruple> > &kernel,
+		      const bool enableDetection);
 template
 void DissectionSolver<float>::
 BuildKernelsDetection(int &n0,
@@ -4089,7 +4647,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<float> &Schur,
-		      KernelMatrix<float> &kernel);
+		      KernelMatrix<float> &kernel,
+		      const bool enableDetection);
 
 template
 void DissectionSolver<complex<float>, float>::
@@ -4100,7 +4659,8 @@ BuildKernelsDetection(int &n0,
 		      const double eps_piv,
 		      const int dim_augkern,
 		      SchurMatrix<complex<float> > &Schur,
-		      KernelMatrix<complex<float> > &kernel);
+		      KernelMatrix<complex<float> > &kernel,
+		      const bool enableDetection);
 
 //
 
@@ -4142,11 +4702,50 @@ int DissectionSolver<complex<float>, float>::kern_dimension(void);
 
 //
 
+//
+template<typename T, typename U, typename W, typename Z>
+int DissectionSolver<T, U, W, Z>::
+postponed_pivots(void) 
+{ 
+  int itmp = 0;
+  for (int m = 0; m < _graph_colors; m++) {
+    itmp += _singIdx[m].size();
+  }
+  return itmp; 
+}
+
+//
+template
+int DissectionSolver<double>::postponed_pivots(void);
+
+template
+int DissectionSolver<quadruple>::postponed_pivots(void);
+
+template
+int DissectionSolver<complex<double>, double>::postponed_pivots(void);
+
+template
+int DissectionSolver<complex<quadruple>, quadruple>::postponed_pivots(void);
+
+template
+int DissectionSolver<double, double, quadruple, quadruple>::postponed_pivots(void);
+
+template
+int DissectionSolver<quadruple, quadruple, double, double>::postponed_pivots(void);
+
+template
+int DissectionSolver<float>::postponed_pivots(void);
+
+template
+int DissectionSolver<complex<float>, float>::postponed_pivots(void);
+
+//
+
 template<typename T, typename U, typename W, typename Z>
 int DissectionSolver<T, U, W, Z>::
 ComputeTransposedKernels(void)
 {
-  int n0_max = 0;
+  //  int n0_max = 0;
   if (_ptDA->isSymmetric()) {
     diss_printf(_verbose, _fp,
 	    "%s %d : ComputeTransposedKernels : matrix is symmetric\n",
@@ -4156,19 +4755,19 @@ ComputeTransposedKernels(void)
 
   for (int m = 0; m < _graph_colors; m++) {
     int n0 = _kernel[m].dimension();
+#if 0  
     if (!_tridiagQueue[m]->tridiagSolver()) {
       _kernel[m].getTKernBasis().init(_dim, n0);
     }
+#endif
     _kernel[m].getTKernProj().init(n0);
     _kernel[m].getNTKernProj().init(n0);
-    if (n0_max < n0) {
-      n0_max = n0;
-    }
   }
   for (int m = 0; m < _graph_colors; m++) {
     int n0 = _kernel[m].dimension();
     T *kernt_basis = _kernel[m].getTKernBasis().addrCoefs();
     T *kernn_basis = _kernel[m].getKernBasis().addrCoefs();
+#if 0
     if (!_tridiagQueue[m]->tridiagSolver()) {
       _kernel[m].getTKernBasis().ZeroClear();
       for (int i = 0; i < n0; i++) {
@@ -4192,12 +4791,12 @@ ComputeTransposedKernels(void)
       // nullify singular block 
       for (int j = 0; j < n0; j++) {
 	for (int i = 0; i < n0; i++) {
-	  _kernel[m].getTKernBasis()(_kernel[m].getKernListEq()[i], j) = _zero;
+	  _kernel[m].getTKernBasis()(_kernel[m].getKernListEqLeft()[i], j) = _zero;
 	}
       }
       // set -I on the diagonal entries of singular block
       for (int i = 0; i < n0; i++) {
-	_kernel[m].getTKernBasis()(_kernel[m].getKernListEq()[i], i) = _none;
+	_kernel[m].getTKernBasis()(_kernel[m].getKernListEqLeft()[i], i) = _none;
       }
       if(_scaling) {
 	for (int j = 0; j < n0; j++) {
@@ -4213,6 +4812,7 @@ ComputeTransposedKernels(void)
 		  "%s %d : transposed kernel from tridiag_kernelt_basis()\n",
 		  __FILE__, __LINE__);
     }
+#endif
     VectorArray<T> vn(_dim);
     VectorArray<T> vt(_dim);
     diss_printf(_verbose, _fp,
@@ -4240,7 +4840,7 @@ ComputeTransposedKernels(void)
     }  // loop : j
     vn.free();
     vt.free();
-#ifdef NORMALIZE_KERNEL_BASIS
+#ifdef NORMALIZE_KERNEL_BASIS2
       // normalize each kernel_basis
     for (int j = 0; j < n0; j++) {
       U stmp(0.0);
@@ -4252,17 +4852,18 @@ ComputeTransposedKernels(void)
 #endif
     for (int i = 0; i < n0; i++) {
       for(int j = i; j < n0; j++) {
-	_kernel[m].getKernProj()(i, j) = 
+	_kernel[m].getTKernProj()(i, j) = 
 	  blas_dot<T>(_dim, 
 		      (kernt_basis + (i * _dim)), 1,
 		      (kernt_basis + (j * _dim)), 1);
       }
       // symmetrize
       for (int j = (i + 1); j < n0; j++) {
-	_kernel[m].getKernProj()(j, i) = _kernel[m].getKernProj()(i, j);
+	_kernel[m].getTKernProj()(j, i) = _kernel[m].getTKernProj()(i, j);
       }
     }
-    full_ldlh<T>(n0, _kernel[m].getKernProj().addrCoefs(), n0);
+    full_ldlh<T>(n0, _kernel[m].getTKernProj().addrCoefs(), n0);
+// for oblique projection
     for (int i = 0; i < n0; i++) {
       for(int j = 0; j < n0; j++) {
 	_kernel[m].getNTKernProj()(i, j) = 

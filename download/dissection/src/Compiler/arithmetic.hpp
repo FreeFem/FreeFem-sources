@@ -53,6 +53,39 @@
 #include <float.h>
 #include <string>
 #include <cstdio>
+
+// scalbn modification for LLVM is taken from
+// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0415r0.html
+template <class T>
+T scalbn(T e, int exp) {
+#ifndef __clang__
+    return scalbn(e, exp);
+#else
+    if (!exp) return e;
+    T mult(1.0);
+    if (exp > 0) {
+        mult = FLT_RADIX;
+        -- exp;
+    } else {
+        ++ exp;
+        exp = -exp;
+        mult /= FLT_RADIX;
+    }
+
+    while (exp > 0) {
+        if (!(exp & 1)) {
+            mult *= mult;
+            exp >>= 1;
+        } else {
+            e *= mult;
+            -- exp;
+        }
+    }
+
+    return e;
+#endif
+}
+
 #include <complex>
 using std::complex;
 

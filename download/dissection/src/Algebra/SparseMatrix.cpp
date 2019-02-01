@@ -119,7 +119,7 @@ normalize(const int type, const T* coefs0, SparseMatrix<T> *ptDA, U* u)
     v[i] = Uzero;
   }
   for (int i = 0; i < n; i++) {
-    for (unsigned k = (ptDA->getRows()[i] + 1); k < ptDA->getRows()[i + 1]; k++) {
+    for (unsigned k = ptDA->getRows()[i]; k < ptDA->getRows()[i + 1]; k++) {
       int j = ptDA->getIndCols()[k];
       if (i == j) {
 	d[i] = blas_abs<T, U>(coefs0[k]);

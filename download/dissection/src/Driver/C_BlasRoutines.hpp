@@ -124,6 +124,12 @@ bool full_ldu_permute(int *n0, const int nn0, const int n,
 		      double *pivot, int *permute, 
 		      const double eps, double *fop);
 
+template<typename T, typename U>
+bool ldu_full_permute(int *nn0, const int n0,
+		      const int n, T *a, const int lda, 
+		      double *pivot, int *permute_right, int *permute_left,
+		      const double eps, double *fop);
+
 template<typename T>
 void full_fw_multiprofile(bool isTransposed, const int nrow, const int n0,
 			  const int ncol,
@@ -200,6 +206,10 @@ template<typename T>
 void swap_unsym(const int n, T *a, const int lda, 
 		const int k, const int km, T *col_k, T *col_km);
 
+template<typename T>
+void swap_full(const int n, T *a, const int lda, 
+	       const int k, const int ki, const int kj, T *coli, T *colj);
+  
 // routines for C_KernDetect.cpp
 template<typename T, typename Z>
 void full_fwbw_perturb_single(const int n,

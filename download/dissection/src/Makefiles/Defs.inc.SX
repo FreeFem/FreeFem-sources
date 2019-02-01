@@ -1,0 +1,89 @@
+#! \file DissectionSolver.hpp
+#  \brief task mangemanet of dissection algorithm
+#  \author Atsushi Suzuki, Laboratoire Jacques-Louis Lions
+#  \date   Mar. 30th 2012
+#  \date   Jul. 12th 2015
+
+# This file is part of Dissection
+# 
+# Dissection is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Linking Dissection statically or dynamically with other modules is making
+# a combined work based on Disssection. Thus, the terms and conditions of 
+# the GNU General Public License cover the whole combination.
+#
+# As a special exception, the copyright holders of Dissection give you 
+# permission to combine Dissection program with free software programs or 
+# libraries that are released under the GNU LGPL and with independent modules 
+# that communicate with Dissection solely through the Dissection-fortran 
+# interface. You may copy and distribute such a system following the terms of 
+# the GNU GPL for Dissection and the licenses of the other code concerned, 
+# provided that you include the source code of that other code when and as
+# the GNU GPL requires distribution of source code and provided that you do 
+# not modify the Dissection-fortran interface.
+#
+# Note that people who make modified versions of Dissection are not obligated 
+# to grant this special exception for their modified versions; it is their
+# choice whether to do so. The GNU General Public License gives permission to 
+# release a modified version without this exception; this exception also makes
+# it possible to release a modified version which carries forward this
+# exception. If you modify the Dissection-fortran interface, this exception 
+# does not apply to your modified version of Dissection, and you must remove 
+# this exception when you distribute your modified version.
+#
+# This exception is an additional permission under section 7 of the GNU 
+# General Public License, version 3 ("GPLv3")
+#
+# Dissection is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Dissection.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+PROJ_DIR = $(HOME)/work/sx-ace/dissection
+PROJ_SRC = $(PROJ_DIR)/src
+PROJ_LIBDIR = $(PROJ_DIR)/lib
+UNAME := $(shell uname -s)
+# define BLAS MKL or ATLAS : be careful with no space after the name of variable
+# QUAD specifies 128bit floating point arithmetic : DD_REAL by qd library
+MAKE       = make -j 8
+#
+DEBUGFLAG  = #-C sopt
+#
+CXX = sxc++ -D_REENTRANT -Cvopt -Tnoauto,used -Kstd=c++98 -Kexceptions  #-gv -dir,debug
+MPICXX = sxmpic++ -D_REENTRANT -Cvopt -Tnoauto,used -Kstd=c++98 -Kexceptions  #-gv -dir,d
+ebug
+CPP = sxc++ -Pmulti
+LD  = $(CXX) -Pmulti
+MPILD  = $(MPICXX) -Pmulti
+QUAD = DD_REAL 
+QUAD_FLAG = -D$(QUAD) -DBLAS_QUADRUPLE -DBLAS_QUADRUPLE2 #-DBLAS_GENERIC
+
+LDOPT      = 
+MODULES    = -I../Modules
+MAKE_DEP_OPT = -M
+#
+METIS_INC =  $(PROJ_DIR)/metis-5.1.0/include
+SCOTCH_INC = $(PROJ_DIR)/scotch_6.0.4/include
+QD_INC =     $(PROJ_SRC)
+LIB_DIR_METIS =  $(PROJ_DIR)/metis-5.1.0
+LIB_DIR_SCOTCH = $(PROJ_DIR)/scotch_6.0.4/lib
+LINK_QD = #-L$(LIB_DIR_QD) -lqd
+LDOPT      = $(DEBUGFLAG)
+#
+BLAS_DEF = -DSX_ACE_BLAS #-DBLAS_FORTRAN
+
+SHARED_COMPILER = -lpthread -lm -f90lib 
+
+#
+CCFLAGS    = $(DEBUGFLAG) -I$(METIS_INC) -I$(SCOTCH_INC) $(BLAS_DEF) \
+-I.. -I$(PROJ_SRC)/Compiler $(CCFLAGS_OMP) $(QUAD_FLAG) -I$(QD_INC) \
+-DNO_TO_STRING -DPOSIX_THREADS -DSX_ACE
+FFLAGS     = $(DEBUGFLAG) -I.. $(FFFLAGS_OMP) 
+#

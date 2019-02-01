@@ -63,7 +63,6 @@
 struct dissection_solver_ptr
 {
   int real_or_complex;
-  bool quad_fact;
   DissectionSolver<double> *rptr;
   DissectionSolver<complex<double>, double> *cptr;
   DissectionSolver<quadruple, quadruple, double, double> *rqtr;
@@ -101,7 +100,6 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
   dslv_ = (uint64_t)new dissection_solver_ptr;
   dslv = (dissection_solver_ptr *)dslv_;
   dslv->real_or_complex = real_or_complex;
-  dslv->quad_fact = false;
   dslv->called = called;
   dslv->symbolic = 0;
   dslv->numeric = 0;
@@ -115,10 +113,9 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
       dslv->verbose = false;
     }
 #if 1 
-    if (dslv->verbose > 0) {
+    if (dslv->verbose) {
       fprintf(stderr, "pid = %d\n", pid);
       sprintf(fname, "dissection.%04d.%04d.log", pid, called);
-      //      sprintf(fname, "dissection.%04d.log", pid);
       dslv->fp = fopen(fname, "a");
     }
     else {
@@ -128,7 +125,7 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
     dslv->fp = stderr;
 #endif
   }
-  if (dslv->verbose > 0) {
+  if (dslv->verbose) {
     fprintf(dslv->fp, "%s %d : diss_init : called = %d\n", 
 	    __FILE__, __LINE__,  dslv->called);
   }
@@ -146,7 +143,7 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
   else {
     dslv->mkl_num_threads = mkl_get_max_threads();
   }
-  if (dslv->verbose > 0) {
+  if (dslv->verbose) {
     fprintf(dslv->fp,
 	    "MKL_NUM_THREADS = %d\n", dslv->mkl_num_threads);
   }
@@ -170,12 +167,13 @@ DISSECTION_API void DISS_INIT(uint64_t &dslv_,
 						dslv->called, dslv->fp);
       break;
     case DISSECTION_COMPLEX_MATRIX:
-      dslv->cptr = new DissectionSolver<complex<double>, double>(num_threads, 
-								 (verbose != 0 ? true : false), 
-								 dslv->called, dslv->fp);
+      dslv->cptr = new DissectionSolver<complex<double>,
+					double>(num_threads, 
+						(verbose != 0 ? true : false), 
+						dslv->called, dslv->fp);
       break;
     default:
-      if (dslv->verbose > 0) {
+      if (dslv->verbose) {
 	fprintf(dslv->fp, "%s %d : unknown matrix data type : %d\n", 
 		__FILE__, __LINE__, dslv->real_or_complex);
       }
@@ -187,38 +185,20 @@ DISSECTION_API void DISS_FREE(uint64_t &dslv_)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
 
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      delete dslv->rqtr;
-      //      delete dslv->rqtr_fwbw; 
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      delete dslv->cqtr;
-      //      delete dslv->cqtr_fwbw; 
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d : unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    delete dslv->rptr;
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    delete dslv->cptr;
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d : unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      delete dslv->rptr;
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      delete dslv->cptr;
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d : unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
+  
   delete dslv;
   dslv_ = (uint64_t)NULL;
   //  _called--;
@@ -235,34 +215,17 @@ DISSECTION_API void DISS_FREE(uint64_t &dslv_)
 DISSECTION_API void DISS_NUMERIC_FREE(uint64_t &dslv_)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr->NumericFree();
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr->NumericFree();
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->NumericFree();
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cptr->NumericFree();
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->NumericFree();
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    dslv->cptr->NumericFree();
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
@@ -283,55 +246,28 @@ DISSECTION_API void DISS_S_FACT(uint64_t &dslv_,
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
   //  int num_levels;
   
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr->SymbolicFact(dim, (int *)ptRows, (int *)indCols,
-			       (bool)(sym % 2 == 1), (bool)((sym / 2) == 0),
-			       (bool)((sym / 4) == 1),
-			       decomposer); // using default parameter
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr->SymbolicFact(dim, (int *)ptRows, (int *)indCols,
-			       (bool)(sym % 2 == 1), (bool)((sym / 2) == 0),
-			       (bool)((sym / 4) == 1),
-			       decomposer); // using default parameter
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-    if (dslv->verbose > 0) {
-      fprintf(dslv->fp, "%s:%d Dissection::SymbolicFact done\n",
-	      __FILE__, __LINE__);
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->SymbolicFact(dim, (int *)ptRows, (int *)indCols,
+			     (bool)(sym % 2 == 1), (bool)((sym / 2) == 0),
+			     (bool)((sym / 4) == 1),
+			     decomposer); // using default parameter
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    dslv->cptr->SymbolicFact(dim, (int *)ptRows, (int *)indCols,
+			     (bool)(sym % 2 == 1), (bool)((sym / 2) == 0),
+			     (bool)((sym / 4) == 1),
+			     decomposer); // using default parameter
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->SymbolicFact(dim, (int *)ptRows, (int *)indCols,
-			       (bool)(sym % 2 == 1), (bool)((sym / 2) == 0),
-			       (bool)((sym / 4) == 1),
-			       decomposer); // using default parameter
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cptr->SymbolicFact(dim, (int *)ptRows, (int *)indCols,
-			       (bool)(sym % 2 == 1), (bool)((sym / 2) == 0),
-			       (bool)((sym / 4) == 1),
-			       decomposer); // using default parameter
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-    if (dslv->verbose > 0) {
-      fprintf(dslv->fp, "%s:%d Dissection::SymbolicFact done\n",
-	      __FILE__, __LINE__);
-    }
+  if (dslv->verbose) {
+    fprintf(dslv->fp, "%s:%d Dissection::SymbolicFact done\n",
+	    __FILE__, __LINE__);
   }
   dslv->symbolic++;
 }
@@ -363,31 +299,27 @@ DISSECTION_API void DISS_N_FACT(uint64_t &dslv_,
     setenv("VECLIB_MAXIMUM_THREADS", "1", true);
 #endif
   //  dslv->NumericFree(); // for debugging : 20 Nov.2013
-    if (dslv->quad_fact) {
-    }
-    else {
-      switch(dslv->real_or_complex) {
-	case DISSECTION_REAL_MATRIX:
-	  dslv->rptr->NumericFact(dslv->numeric,
-				  (double *)coefs, scaling, 
-				  eps_pivot, 
-				  kernel_detection_all);
-	  if (dslv->rptr->getFactorized() == false) {
-	    dslv->rptr->SaveMMMatrix(dslv->called, coefs);
-	  }
-	  break;
-      case DISSECTION_COMPLEX_MATRIX:
-	dslv->cptr->NumericFact(dslv->numeric,
-				(complex<double> *)coefs, scaling, 
-				eps_pivot, 
-				kernel_detection_all);
-	break;
+    switch(dslv->real_or_complex) {
+    case DISSECTION_REAL_MATRIX:
+      dslv->rptr->NumericFact(dslv->numeric,
+			      (double *)coefs, scaling, 
+			      eps_pivot, 
+			      kernel_detection_all);
+      if (dslv->rptr->getFactorized() == false) {
+	dslv->rptr->SaveMMMatrix(dslv->called, coefs);
       }
+      break;
+    case DISSECTION_COMPLEX_MATRIX:
+      dslv->cptr->NumericFact(dslv->numeric,
+			      (complex<double> *)coefs, scaling, 
+			      eps_pivot, 
+				kernel_detection_all);
+      break;
     }
 #ifdef BLAS_MKL
   mkl_set_num_threads(dslv->mkl_num_threads);
 #endif
-  if (dslv->verbose > 0) {
+  if (dslv->verbose) {
     fprintf(dslv->fp,
 	    "%s %d : Dissection::NumericFact done : %d\n",
 	    __FILE__, __LINE__, dslv->numeric);
@@ -399,34 +331,17 @@ DISSECTION_API void DISS_GET_COLORS(uint64_t &dslv_,
 				    int *n)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      *n = dslv->rqtr->GetMaxColors();
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      *n =  dslv->cqtr->GetMaxColors();
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    *n = dslv->rptr->GetMaxColors();
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    *n =  dslv->cptr->GetMaxColors();
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
 		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      *n = dslv->rptr->GetMaxColors();
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      *n =  dslv->cptr->GetMaxColors();
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
     }
   }
 }
@@ -436,44 +351,22 @@ DISSECTION_API void DISS_GET_KERN_DIM(uint64_t &dslv_,
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
 
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      *n0 = dslv->rqtr->kern_dimension();
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_get_kern_dim() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    *n0 = dslv->rptr->kern_dimension();
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, 
+	      "%s %d diss_get_kern_dim() for complex is not yet implemented\n",
+	      __FILE__, __LINE__);
       }
-      *n0 = 0;
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      *n0 = dslv->rptr->kern_dimension();
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_get_kern_dim() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
-      }
-      *n0 = 0;
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+    *n0 = 0;
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
@@ -482,34 +375,17 @@ DISSECTION_API void DISS_GET_NULLPIVOTS(uint64_t &dslv_,
 					int *pivots)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr->GetNullPivotIndices(pivots);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr->GetNullPivotIndices(pivots);
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->GetNullPivotIndices(pivots);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cptr->GetNullPivotIndices(pivots);
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->GetNullPivotIndices(pivots);
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    dslv->cptr->GetNullPivotIndices(pivots);
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
@@ -519,34 +395,17 @@ DISSECTION_API void DISS_GET_SMALLPIVOTS(uint64_t &dslv_,
 					 int *pivots)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr->GetSmallestPivotIndices(n, pivots);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr->GetSmallestPivotIndices(n, pivots);
-      break;
-    default:
-      if (dslv->verbose > 0) {
-      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-	      __FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->GetSmallestPivotIndices(n, pivots);
-      break;
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->GetSmallestPivotIndices(n, pivots);
+    break;
     case DISSECTION_COMPLEX_MATRIX:
       dslv->cptr->GetSmallestPivotIndices(n, pivots);
       break;
-    default:
-      if (dslv->verbose > 0) {
+  default:
+    if (dslv->verbose) {
       fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
 	      __FILE__, __LINE__, dslv->real_or_complex);
-      }
     }
   }
 }
@@ -555,42 +414,21 @@ DISSECTION_API void DISS_GET_KERN_VECS(uint64_t &dslv_,
 				       double *vec)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr_fwbw->GetKernelVectors(vec);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_get_kern_vecs() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
-      }
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->GetKernelVectors(vec);
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, 
+	      "%s %d diss_get_kern_vecs() for complex is not yet implemented\n",
+	      __FILE__, __LINE__);
     }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->GetKernelVectors(vec);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_get_kern_vecs() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
-      }
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
@@ -599,42 +437,21 @@ DISSECTION_API void DISS_GET_KERNT_VECS(uint64_t &dslv_,
 				       double *vec)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr_fwbw->GetTransKernelVectors(vec);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_get_kern_vecs() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
-      }
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->GetTransKernelVectors(vec);
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, 
+	      "%s %d diss_get_kern_vecs() for complex is not yet implemented\n",
+	      __FILE__, __LINE__);
     }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->GetTransKernelVectors(vec);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_get_kern_vecs() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
-      }
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
@@ -644,48 +461,24 @@ DISSECTION_API void DISS_PROJECT(uint64_t &dslv_,
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
   int n0;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      n0 = dslv->rqtr_fwbw->kern_dimension();
-      if (n0 > 0) {
-	dslv->rqtr_fwbw->ProjectionImageSingle(x);
-      }
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, 
-		"%s %d diss_project() for complex is not yet implemented\n",
-		__FILE__, __LINE__);
-      }
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    n0 = dslv->rptr->kern_dimension();
+    if (n0 > 0) {
+      dslv->rptr->ProjectionImageSingle(x);
     }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      n0 = dslv->rptr->kern_dimension();
-      if (n0 > 0) {
-	dslv->rptr->ProjectionImageSingle(x);
-      }
-      break;
+    break;
     case DISSECTION_COMPLEX_MATRIX:
-      if (dslv->verbose > 0) {
+      if (dslv->verbose) {
 	fprintf(dslv->fp, 
 		"%s %d diss_project() for complex is not yet implemented\n",
 		__FILE__, __LINE__);
       }
       break;
-    default:
-      if (dslv->verbose > 0) {
+  default:
+    if (dslv->verbose) {
 	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
 		__FILE__, __LINE__, dslv->real_or_complex);
-      }
     }
   }
 }
@@ -699,43 +492,20 @@ DISSECTION_API void DISS_SOLVE_1(uint64_t &dslv_,
   const bool isTrans = (bool)(trans == 1);
   
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr_fwbw->SolveSingle(x, isProj, isTrans, true); 
-      // isTrans
-      break;
-    case DISSECTION_COMPLEX_MATRIX:    
-      fprintf(dslv->cptr->get_filedescriptor(), 
-	      "Dissection::SolveSingle : %p\n", dslv->cptr);
-      dslv->cqtr_fwbw->SolveSingle((complex<double> *)x,
-				   isProj, isTrans, true); 
-      // isTrans
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-
-  }
-  else {
-    switch(dslv->real_or_complex) {
+  switch(dslv->real_or_complex) {
     case DISSECTION_REAL_MATRIX:
       dslv->rptr->SolveSingle(x, isProj, isTrans, true);
       break;
-    case DISSECTION_COMPLEX_MATRIX:    
-      fprintf(dslv->cptr->get_filedescriptor(), 
-	      "Dissection::SolveSingle : %p\n", dslv->cptr);
-      dslv->cptr->SolveSingle((complex<double> *)x, isProj, isTrans, true);
-      // isTrans
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+  case DISSECTION_COMPLEX_MATRIX:    
+    fprintf(dslv->cptr->get_filedescriptor(), 
+	    "Dissection::SolveSingle : %p\n", dslv->cptr);
+    dslv->cptr->SolveSingle((complex<double> *)x, isProj, isTrans, true);
+    // isTrans
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
 		__FILE__, __LINE__, dslv->real_or_complex);
-      }
     }
   }
 }
@@ -749,35 +519,17 @@ DISSECTION_API void DISS_SOLVE_N(uint64_t &dslv_,
   const bool isTrans = (bool)(trans == 1);
   
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr_fwbw->SolveMulti(x, nrhs, isProj, isTrans, true);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr_fwbw->SolveMulti((complex<double> *)x, nrhs,
-				  isProj, isTrans, true);
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->SolveMulti(x, nrhs, isProj, isTrans, true);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cptr->SolveMulti((complex<double> *)x, nrhs, isProj, isTrans, true);
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->SolveMulti(x, nrhs, isProj, isTrans, true);
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    dslv->cptr->SolveMulti((complex<double> *)x, nrhs, isProj, isTrans, true);
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
@@ -786,34 +538,17 @@ DISSECTION_API void DISS_MATRIX_PRODUCT(uint64_t &dslv_,
 					const double* x, double* y)
 {
   dissection_solver_ptr *dslv = (dissection_solver_ptr *)dslv_;
-  if (dslv->quad_fact) {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rqtr_fwbw->SpMV(x, y);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cqtr_fwbw->SpMV((complex<double> *)x, (complex<double> *)y);    
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
-    }
-  }
-  else {
-    switch(dslv->real_or_complex) {
-    case DISSECTION_REAL_MATRIX:
-      dslv->rptr->SpMV(x, y);
-      break;
-    case DISSECTION_COMPLEX_MATRIX:
-      dslv->cptr->SpMV((complex<double> *)x, (complex<double> *)y);    
-      break;
-    default:
-      if (dslv->verbose > 0) {
-	fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
-		__FILE__, __LINE__, dslv->real_or_complex);
-      }
+  switch(dslv->real_or_complex) {
+  case DISSECTION_REAL_MATRIX:
+    dslv->rptr->SpMV(x, y);
+    break;
+  case DISSECTION_COMPLEX_MATRIX:
+    dslv->cptr->SpMV((complex<double> *)x, (complex<double> *)y);    
+    break;
+  default:
+    if (dslv->verbose) {
+      fprintf(dslv->fp, "%s %d unknown matrix data type : %d\n", 
+	      __FILE__, __LINE__, dslv->real_or_complex);
     }
   }
 }
