@@ -1529,19 +1529,21 @@ void OnePlotHMatrix::Draw(OneWindow *win)
 
   glEnd();
 
+  glColor3f(0,0,0);
   for (int i=0;i < nblr; i++) {
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
     string s = std::to_string(rankslr[i]);
     //plot((float)(offset.first+size.first*0.5)/si,1.-float(offset.second+size.second*0.5)/sj,rankslr[i],1);
-    glPushMatrix();
     float scale = 0.005*std::min((float)size.first/si,(float)size.second/sj)/**std::min(mSize.x(),mSize.y())*/;
-    glTranslatef(-36*scale*s.length()+(float)(offset.second+size.second*0.5)/si,-48*scale+1.-float(offset.first+size.first*0.5)/sj, 0);
-    glScalef(scale,scale,scale);
-    glColor3d(100,100,100);
-    for(char& c : s)
-      glutStrokeCharacter(GLUT_STROKE_ROMAN,c);
-    glPopMatrix();
+    if (scale > 0.04/std::min(win->height,win->width)) {
+      glPushMatrix();
+      glTranslatef(-36*scale*s.length()+(float)(offset.second+size.second*0.5)/sj,-48*scale+1.-float(offset.first+size.first*0.5)/si, 0);
+      glScalef(scale,scale,scale);
+      for(char& c : s)
+        glutStrokeCharacter(GLUT_STROKE_ROMAN,c);
+      glPopMatrix();
+    }
   }
 
 }
