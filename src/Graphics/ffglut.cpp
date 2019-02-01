@@ -1441,6 +1441,9 @@ void OnePlotBorder::Draw(OneWindow *win)
 void OnePlotHMatrix::Draw(OneWindow *win)
 {
   ThePlot & plt=*win->theplot;
+  
+  if (si <= 0 || sj <= 0)
+    return;
 
   glDisable(GL_DEPTH_TEST);
 

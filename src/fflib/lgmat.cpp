@@ -3471,18 +3471,25 @@ public:
 
 				HashMatrix<int,K>* ph=A->pHM();
 
-				theplot << (int)ph->n;
-				theplot << (int)ph->m;
-				theplot << (long)ph->nnz;
-				theplot << 0L;
+        if (!ph) {
+          theplot << 0;
+          theplot << 0;
+          theplot << 0L;
+          theplot << 0L;
+        }
+        else {
+          theplot << (int)ph->n;
+          theplot << (int)ph->m;
+          theplot << (long)ph->nnz;
+          theplot << 0L;
 
-
-				for (int i=0;i<ph->nnz;i++) {
-					theplot << ph->i[i];
-					theplot << ph->j[i];
-					theplot << 1;
-					theplot << 1;
-				}
+          for (int i=0;i<ph->nnz;i++) {
+            theplot << ph->i[i];
+            theplot << ph->j[i];
+            theplot << 1;
+            theplot << 1;
+          }
+        }
 
 				theplot.SendEndPlot();
 
