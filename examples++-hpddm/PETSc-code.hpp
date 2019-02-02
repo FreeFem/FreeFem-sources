@@ -745,7 +745,7 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
 #else
                 if(k == 0) { 
                     mA->CSR();
-                    cl = mA->i;
+                    cl = mA->j;
                     lg = mA->p;
                     a = mA->aij;
                 }

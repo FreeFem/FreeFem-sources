@@ -452,7 +452,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     KN<double>* timing = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
     bool excluded = nargs[3] && GetAny<bool>((*nargs[3])(stack));
     if(excluded)
-        opt["master_exclude"];
+        opt["level_2_exclude"];
     double timer = MPI_Wtime();
     if(mpisize == 1) {
         ptA->computeSchurComplement();

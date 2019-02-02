@@ -131,10 +131,6 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             else
                 ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
             set_ff_matrix(mA,dA);
-          /*  mA->nbcoef = dA._nnz;
-            mA->a = dA._a;
-            mA->lg = dA._ia;
-            mA->cl = dA._ja;*/
             delete dP;
             if(timing) { // toc
                 (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
@@ -279,7 +275,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     }
     bool excluded = nargs[4] && GetAny<bool>((*nargs[4])(stack));
     if(excluded)
-        opt[prefix + "master_exclude"];
+        opt[prefix + "level_2_exclude"];
     if(pair)
         if(pair->p) {
             MPI_Wait(&(pair->p->first), MPI_STATUS_IGNORE);
