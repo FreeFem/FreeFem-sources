@@ -16,8 +16,8 @@ int labNeumann = getARGV("-labNeumann", 2);                     // interface bet
 int s = getARGV("-split", 1);                                   // refinement factor
 
 mpiComm comm;
-int p = getARGV("-hpddm_master_p", 1);
-bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_master_topology", 0), exclude = (usedARGV("-hpddm_master_exclude") != -1));
+int p = getARGV("-hpddm_level_2_p", 1);
+bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_level_2_topology", 0), exclude = (usedARGV("-hpddm_level_2_exclude") != -1));
 
 if(verbosity > 0 && mpirank == 0) {
     cout << " --- " << mpirank << "/" << mpisize;

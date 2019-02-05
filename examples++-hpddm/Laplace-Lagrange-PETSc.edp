@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 macro trueRestrict()true// EOM
 macro removeZeros()true// EOM
@@ -28,17 +27,19 @@ real[int] D;                                // partition of unity
 
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
 varf vL(u, v)  = intN(Th)(f * v);
-varf vb(u, v)  = intN(Th)(1.0 * v);
+varf vb(u, v)  = intN(Th)(v);
 matrix<real> Mat = vPb(Wh, Wh);
 real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;
+real[int] zero(mpirank == 0 ? 1 : 0);
+zero = 0;
 dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
 changeNumbering(A, B, pB);
 changeNumbering(A, F, pF);
 
 dmatrix AA = [[ A, pB ],
-              [ pB', 0 ]];
+              [ pB', zero ]];
 if(mpirank == 0)
     pF = [pF, 0];
 {

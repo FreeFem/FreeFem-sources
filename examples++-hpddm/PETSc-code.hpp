@@ -743,9 +743,9 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
                 }
 
 #else
-                if(k == 0) {
+                if(k == 0) { 
                     mA->CSR();
-                    cl = mA->i;
+                    cl = mA->j;
                     lg = mA->p;
                     a = mA->aij;
                 }
@@ -976,7 +976,7 @@ class initCSRfromBlockMatrix : public E_F0 {
                         e_M[i][j] = e;
                         t_M[i][j] = 2;
                     }
-                    else if( atype<KN_<PetscScalar>>()->CastingFrom(r) ) {
+                    else if(atype<KN_<PetscScalar>>()->CastingFrom(r)) {
                         e_M[i][j] = to<KN_<PetscScalar>>(c_M);
                         t_M[i][j] = 3;
                     }
