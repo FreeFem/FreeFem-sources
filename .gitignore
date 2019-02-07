@@ -743,11 +743,13 @@ download/superlu/SuperLU_5.2.1/
 download/superludist/SuperLU_DIST_3.0/
 download/tag-install-other
 download/tetgen/tetgen1.5.1-beta1/
-##  file create by autoreconf -i 
+##  file create by autoreconf -i
+INSTALL
 compile
 config.guess
 config.sub
-depcomp install-sh
+depcomp
+install-sh
 missing
 mkinstalldirs
 test-driver
