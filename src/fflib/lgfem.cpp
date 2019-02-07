@@ -4649,6 +4649,10 @@ if(nargs[VTK_START+index])                    \
                     for (int i= 1;i<k;i++)
                         rlineto(x[i],y[i]);
                 }
+                else {
+                    if(verbosity) cout << "  Plot::  Sorry no ps version for this type of plot "
+                         << l[i].what <<endl;
+                }
             /*
              else if(l[i].what==23)
              {

@@ -273,7 +273,7 @@ int getprog(char* fn,int argc, char **argv)
         if(!ThePlotStream) { cerr << "  Error popen  "<< progffglut << endl;exit(1);}
         
     }
-    else if (fileglut)
+    else if (fileglut  && mpirank==0)
     {// correction progffglut -> fileglut v3.0-2 FH.
         ThePlotStream = fopen(fileglut, MODE_WRITE_BINARY );
         if(verbosity)

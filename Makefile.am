@@ -8,7 +8,7 @@ SUBDIRS=download src  examples++-load  examples++-mpi \
 	 examples++-tutorial examples++	\
 	examples++-eigen	\
 	examples++-bug examples++-chapt3 examples++-other \
-	examples++-3d  examples++-hpddm  examples++-ffddm 
+	examples++-3d  examples++-hpddm  examples++-ffddm
 
 EXTRA_DIST=test-driver-ff regtests.sh config-wrapper.h  \
 FreeFem++.mcp HISTORY HISTORY_BEFORE_2005  BUGS TODO m4/regtests.m4 \
@@ -28,7 +28,7 @@ uninstall-ff++ \
 web/download.php	web/index.php		web/macosx.php		web/menu.php		web/phpfiles.php \
 web/ffstyle.css		web/linux.php		web/main.php		web/news.php		web/windows.php \
 FreeFem++.app.in.tgz \
- examples++-ffddm/README.md 
+ examples++-ffddm/README.md
 
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
@@ -72,8 +72,8 @@ documentation:
 #	cd $(@D) && $(MAKE) $(AM_MAKEFLAGS) $(@F)
 
 clean-local::
-	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm 
-	-rm examples*/*.eps 
+	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm
+	-rm examples*/*.eps
 
 # "dist" targets
 clean-local::
@@ -103,9 +103,9 @@ bamg:
 
 ide:
 	cd src/libMesh && $(MAKE) $(AM_MAKEFLAGS)
-	cd download && $(MAKE) $(AM_MAKEFLAGS) 
-	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS) 
-	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS) 
+	cd download && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
+	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/ide && $(MAKE) $(AM_MAKEFLAGS) FreeFem++-cs$(EXEEXT)
 
 # Cleaning generated files which are stored in the CVS repository, to
@@ -134,7 +134,7 @@ speedtest: all
 # information from the Debian Changelog to get the package release
 # number as well.
 win32:WindowsPackage.iss
-	test ! -d examples++-load/include-tmp  || rm -r examples++-load/include-tmp 
+	test ! -d examples++-load/include-tmp  || rm -r examples++-load/include-tmp
 	cd examples++-load;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr *.h include/* include-tmp
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe  "`cygpath.exe WindowsPackage.iss`"
 WindowsPackage.iss: m4/WindowsPackage.m4 configure.ac Makefile.am
@@ -155,9 +155,9 @@ deb:
 # ------------------
 
 
-nativeX: $(FF_MAC_PREFIX)_MacOsX.tgz 
+nativeX: $(FF_MAC_PREFIX)_MacOsX.tgz
 	echo "done"
-MacOsX: FreeFem++.app.tgz 
+MacOsX: FreeFem++.app.tgz
 	-rm -rf  OsXxx
 	mkdir -p  OsXxx/Applications/
 	make install DESTDIR="`pwd`/OsXxx"
@@ -171,7 +171,7 @@ clean-local::
 # Native MacOS packaging
 # ----------------------
 install-exec-local::
-	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa  script/PostInstall.sh 
+	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa  script/PostInstall.sh
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/etc/paths.d/
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/usr/local/bin
@@ -189,7 +189,7 @@ script/PostInstall.sh:./Makefile script/PostInstall.m4
 
 
 
-ListFiles-natives: .FORCE 
+ListFiles-natives: .FORCE
 	test `uname` != Darwin || $(MAKE)  FreeFem++-CoCoa
 	echo $(FF_EXAMPLES_FILES) >$@
 	echo ./download/fftw/Makefile ./download/fftw/Makefile.am  >>$@
@@ -206,32 +206,32 @@ CheckMPIMacLib.sh: src/mpi/FreeFem++-mpi
 .FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
-	-mkdir $@ 
-	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )  
-	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++ 
+	-mkdir $@
+	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )
+	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++
 	cp   freefem++-doc.pdf $@
 
 $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
-	-mkdir $@ 
+	-mkdir $@
 	cp   freefem++doc.pdf $@
-	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )  
+	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )
 	cd  $@ ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
            -e "s/@VVERSION@/$(VERSION)$(ADD_PACKAGE_NAME)/g" \
-           -e "s/@DATE@/`date`/g"  
+           -e "s/@DATE@/`date`/g"
 	cp src/nw/FreeFem++ $@/FreeFem++.app/Contents/bin
 	cp src/nw/ffglut $@/FreeFem++.app/Contents/bin
 	cp src/medit/ffmedit $@/FreeFem++.app/Contents/bin
 	cp examples++-load/ff-get-dep  $@/FreeFem++.app/Contents/bin
 	cp examples++-load/ff-pkg-download  $@/FreeFem++.app/Contents/bin
-	sed <examples++-load/ff-c++ > $@/FreeFem++.app/Contents/bin/ff-c++ 	-e 's;FFAPPLI_INC;$@/FreeFem++.app/Contents/include;' 
+	sed <examples++-load/ff-c++ > $@/FreeFem++.app/Contents/bin/ff-c++ 	-e 's;FFAPPLI_INC;$@/FreeFem++.app/Contents/include;'
 	chmod a+x $@/FreeFem++.app/Contents/bin/ff-c++
-	-mkdir $@/FreeFem++.app/Contents/include 
-	-mkdir $@/FreeFem++.app/Contents/idp 
+	-mkdir $@/FreeFem++.app/Contents/include
+	-mkdir $@/FreeFem++.app/Contents/idp
 	cp examples++-load/include/* $@/FreeFem++.app/Contents/include
 	cp examples++-load/*.dylib  $@/FreeFem++.app/Contents/lib
-	cp examples++-*/*.idp  $@/FreeFem++.app/Contents/idp       
-	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi; 
+	cp examples++-*/*.idp  $@/FreeFem++.app/Contents/idp
+	-if [ -s List-agl-dylib ]; then tar zchvf $@/OtherMacOsLib.tgz `cat List-agl-dylib`; fi;
 	./config.status  --file=$@/Install-MacOS.command:Install-MacOS.command.in
 	chmod a+rx $@/Install-MacOS.command
 	-mkdir $@/FreeFem++.app/Contents/etc
@@ -256,8 +256,8 @@ linux-package: $(PACKAGE_NAME).tgz
 # procedure on its own.
 
 $(PACKAGE_NAME):  ListFiles-natives
-	cat ListFiles-natives|xargs tar cfh - | (cd $@ ; tar xf - )  
-	-mkdir $@ 
+	cat ListFiles-natives|xargs tar cfh - | (cd $@ ; tar xf - )
+	-mkdir $@
 	cp src/std/FreeFem++ $@
 	./copysharedlibs.sh src/std/FreeFem++ $@
 	cp src/nw/FreeFem++-nw $@
@@ -280,7 +280,8 @@ $(PACKAGE_NAME).tgz: $(PACKAGE_NAME)
 clean-local::
 	-rm -r $(PACKAGE_NAME) $(PACKAGE_NAME).tgz
 autofiles:AutoGeneratedFile.tar.gz
-
+LIST_REQUIRE_AM= compile config.guess config.sub depcomp install-sh  missing mkinstalldirs test-driver INSTALL
+LIST_AM_UNUSED=ar-lib  mdate-sh ylwrap py-compile texinfo.tex
 LIST_GENERATE_FILE= \
 download/umfpack/Makefile.in	examples++-tutorial/Makefile.in	src/femlib/Makefile.in \
 Makefile.in			examples++-3d/Makefile.in	examples++/Makefile.in		src/fflib/Makefile.in \
@@ -290,7 +291,7 @@ download/Makefile.in		examples++-eigen/Makefile.in	src/Makefile.in			src/medit/M
 download/arpack/Makefile.in	examples++-load/Makefile.in	src/bamg/Makefile.in		src/mpi/Makefile.in \
 download/blas/Makefile.in	examples++-mpi/Makefile.in	src/bamglib/Makefile.in		src/nw/Makefile.in \
 download/fftw/Makefile.in	examples++-other/Makefile.in	src/bin-win32/Makefile.in     	examples++-hpddm/Makefile.in \
-examples++-ffddm/Makefile.in 
+examples++-ffddm/Makefile.in
 
 LIST_GENERATE_FILE_AM= \
 download/umfpack/Makefile.am	examples++-tutorial/Makefile.am	src/femlib/Makefile.am \
@@ -316,8 +317,8 @@ conf-without-autoconf:
 	./config.status --recheck
 conf-touch:
 	touch $(LIST_GENERATE_FILE)
-AutoGeneratedFile.tar.gz:$(LIST_GENERATE_FILE)  configure.ac
-	tar cvfz $@  $(LIST_GENERATE_FILE)
+AutoGeneratedFile.tar.gz:$(LIST_GENERATE_FILE)  configure.ac $(LIST_REQUIRE_AM)
+	tar cvfz $@  $(LIST_GENERATE_FILE) $(LIST_REQUIRE_AM)
 
 FreeFem++-CoCoa:FreeFem++-CoCoa.in ./config.status
 		./config.status  --file="FreeFem++-CoCoa:FreeFem++-CoCoa.in"
@@ -336,7 +337,7 @@ findtags:
 clean-local::
 	-rm TAGS
 
-##  trick to check if the configure configure.ac Makefile.in .. are correct in time 
+##  trick to check if the configure configure.ac Makefile.in .. are correct in time
 Makefile: @MAINTAINER_MODE_FALSE@ configure  $(LIST_GENERATE_FILE_AM)
 	echo "configure Makefile:$(LIST_GENERATE_FILE_AM)"  >Makefile-for-Checkam
 	echo '@false'| tr '@' '\t'  >> Makefile-for-Checkam
@@ -350,5 +351,3 @@ Makefile: @MAINTAINER_MODE_FALSE@ configure  $(LIST_GENERATE_FILE_AM)
 	ok=0; \
 	fi ;  \
 	test $$ok -eq 1
-
-
