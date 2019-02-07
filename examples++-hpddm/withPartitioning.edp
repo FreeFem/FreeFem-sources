@@ -1,7 +1,6 @@
 //  run with MPI:  ff-mpirun -np 2 script.edp
 // NBPROC 2
 
-macro partitioner()scotch// EOM     // metis, scotch, or parmetis
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 

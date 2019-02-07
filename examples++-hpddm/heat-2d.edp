@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "hpddm"                        // HPDDM plugin
-macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
@@ -58,7 +57,7 @@ matrix<real> M;                             // local mass matrix
 }
 ThBorder = square(1, 1);
 
-dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+dschwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 dpair ret;

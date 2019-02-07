@@ -15,10 +15,11 @@ class initDDM_Op : public E_F0mps {
         Expression Mat;
         Expression o;
         Expression R;
+        Expression D;
         static const int n_name_param = 4;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
-        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), Mat(param2), o(param3), R(param4) {
+        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4, Expression param5) : A(param1), Mat(param2), o(param3), R(param4), D(param5) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
 
@@ -27,17 +28,17 @@ class initDDM_Op : public E_F0mps {
 template<class Type, class K>
 basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
-    {"scaling", &typeid(KN<HPDDM::underlying_type<K>>*)},
+    {"scaled", &typeid(bool)},
     {"deflation", &typeid(FEbaseArrayKn<K>*)},
     {"prefix", &typeid(string*)}
 };
 template<class Type, class K>
 class initDDM : public OneOperator {
     public:
-        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>()) { }
+        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
-            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
+            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]), t[4]->CastTo(args[4]));
         }
 };
 template<class Type, class K>
@@ -47,6 +48,7 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
     KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
+    KN<HPDDM::underlying_type<K>>* ptD = GetAny<KN<HPDDM::underlying_type<K>>*>((*D)(stack));
     if(ptO)
         ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA)
                                             , STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
@@ -61,10 +63,12 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
         ptA->setVectors(ev);
         ptA->Type::super::initialize(deflation->N);
     }
-    if(nargs[1])
-        ptA->initialize(*GetAny<KN<HPDDM::underlying_type<K>>*>((*nargs[1])(stack)));
+    if(ptD)
+        ptA->initialize(*ptD);
     else
-        std::cerr << "Something is really wrong here !" << std::endl;
+        std::cerr << "Something is really wrong here!" << std::endl;
+    if(!nargs[1] || GetAny<bool>((*nargs[1])(stack)))
+        ptA->exchange();
     if(nargs[3])
         ptA->setPrefix(*(GetAny<string*>((*nargs[3])(stack))));
     return ptA;
@@ -297,8 +301,13 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         timing->resize(timing->n + 1);
         (*timing)[timing->n - 1] = timer;
     }
-    if(!excluded)
+    if(!excluded) {
+        const auto& map = ptA->getMap();
+        bool allocate = map.size() > 0 && ptA->getBuffer()[0] == nullptr ? ptA->setBuffer() : false;
+        ptA->exchange(static_cast<K*>(*ptRHS), mu);
+        ptA->clearBuffer(allocate);
         HPDDM::IterativeMethod::solve(*ptA, (K*)*ptRHS, (K*)*ptX, mu, comm);
+    }
     else
         HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, comm);
     timer = MPI_Wtime() - timer;
@@ -319,16 +328,19 @@ class changeOperator_Op : public E_F0mps {
     public:
         Expression A;
         Expression mat;
-        static const int n_name_param = 0;
+        static const int n_name_param = 1;
         static basicAC_F0::name_and_type name_param[];
+        Expression nargs[n_name_param];
         changeOperator_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), mat(param2) {
-            args.SetNameParam(n_name_param, name_param, nullptr);
+            args.SetNameParam(n_name_param, name_param, nargs);
         }
 
         AnyType operator()(Stack stack) const;
 };
 template<class Type, class K>
-basicAC_F0::name_and_type changeOperator_Op<Type, K>::name_param[] = { };
+basicAC_F0::name_and_type changeOperator_Op<Type, K>::name_param[] = {
+    {"scaled", &typeid(bool)}
+};
 template<class Type, class K>
 class changeOperator : public OneOperator {
     public:
@@ -344,6 +356,8 @@ AnyType changeOperator_Op<Type, K>::operator()(Stack stack) const {
     HPDDM::MatrixCSR<K>* dN = new_HPDDM_MatrixCSR<K>(mN);//mN->n, mN->m, mN->nbcoef, mN->a, mN->lg, mN->cl, mN->symetrique);
     Type* ptA = GetAny<Type*>((*A)(stack));
     ptA->setMatrix(dN);
+    if(!nargs[0] || GetAny<bool>((*nargs[0])(stack)))
+        ptA->exchange();
     return 0L;
 }
 
@@ -469,6 +483,10 @@ class InvSchwarz {
             }
             if(mpirank != 0)
                 HPDDM::Option::get()->remove((*t).prefix("verbosity"));
+            const auto& map = (*t).getMap();
+            bool allocate = map.size() > 0 && (*t).getBuffer()[0] == nullptr ? (*t).setBuffer() : false;
+            (*t).exchange(static_cast<K*>(*u), mu);
+            (*t).clearBuffer(allocate);
             HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, mu, MPI_COMM_WORLD);
         }
         static U init(U Ax, InvSchwarz<T, U, K, trans> A) {

@@ -79,7 +79,7 @@ complex[int] rhs(Wh.ndof);
         rhs = vPbRhs(0, WhAugmented);
 }
 
-zschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D, communicator = mpiCommWorld);
+zschwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false, communicator = mpiCommWorld);
 set(A, sparams = "-hpddm_schwarz_method oras");
 
 complex[int] nEx(Wh.ndof);
