@@ -1613,17 +1613,22 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
     Mat=tMat; 
    }
   else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
-  MatriceMorse<R> * mr=Mat->A->toMatriceMorse(transp,false);
-  MatriceMorse<RR> * mrr = ChangeMatriceMorse<R,RR>::f(mr);
-  
   Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-  //  sparse_mat->pUh=Mat->pUh;
-  // sparse_mat->pVh=Mat->pUh;;
-  //  cout << " CopyMat_tt " << init << " "<<transp << " " << sparse_mat << endl;
-  if(!init) sparse_mat->init() ;
-  sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
-  sparse_mat->A.master(mrr);
-  //delete mr;
+  if(Mat->A) {
+      MatriceMorse<R> * mr=Mat->A->toMatriceMorse(transp,false);
+      MatriceMorse<RR> * mrr = ChangeMatriceMorse<R,RR>::f(mr);
+
+      //  sparse_mat->pUh=Mat->pUh;
+      // sparse_mat->pVh=Mat->pUh;;
+      //  cout << " CopyMat_tt " << init << " "<<transp << " " << sparse_mat << endl;
+      if(!init) sparse_mat->init() ;
+      sparse_mat->typemat=TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
+      sparse_mat->A.master(mrr);
+      //delete mr;
+  }
+  else if(sparse_mat->A) {
+        sparse_mat->A.master(0);
+  }
   return sparse_mat;
 }
 
