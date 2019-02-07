@@ -1,9 +1,7 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
-load "hpddm"
-//load "pipe"   sleep(10);                     // HPDDM plugin
 
-macro partitioner()metis// EOM      // metis, scotch, or parmetis
+load "hpddm"
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
@@ -63,7 +61,7 @@ matrix<complex> Mat;                        // local operator
 }
 ThBorder = square(1, 1);
 
-zschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+zschwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
 
 matrix<complex> Opt;                        // local operator with optimized boundary conditions
 zpair ret;

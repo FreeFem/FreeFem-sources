@@ -29,7 +29,6 @@ int[int] labPeriodic = [Labels[0],Labels[2]];
 /**************************************/
 load "PETSc"                             // PETSc plugin
 load "SLEPc"                             // SLEPc plugin
-macro partitioner()metis// End Of Macro  // metis, scotch, or parmetis
 macro dimension(      )2// End Of Macro  // 2D or 3D
 include "macro_ddm.idp"                  // Additional DDM functions
 macro def(i)i// EOM

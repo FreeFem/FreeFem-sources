@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc-complex"                        // PETSc plugin
-macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 

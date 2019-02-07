@@ -3,7 +3,6 @@
 //{int iii; cin >> iii;} // for debug 
 
 load "hpddm_substructuring"         // HPDDM plugin
-macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm_substructuring.idp" // additional DDM functions
 

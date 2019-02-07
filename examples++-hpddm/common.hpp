@@ -264,14 +264,14 @@ void addProd() {
 extern KN<String>* pkarg;
 
 template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 1>::type* = nullptr>
-void scaledExchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) {
+void exchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) {
     if(allocate)
-        pA->template scaledExchange<true>(pin, mu);
+        pA->template exchange<true>(pin, mu);
     else
-        pA->template scaledExchange<false>(pin, mu);
+        pA->template exchange<false>(pin, mu);
 }
 template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 1>::type* = nullptr>
-void scaledExchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) { }
+void exchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) { }
 template<class Type, class K>
 void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
     if(pA) {
@@ -279,7 +279,7 @@ void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
         const auto& map = pA->getMap();
         bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
         if(scaled)
-            scaledExchange(pA, static_cast<K*>(*pin), mu, false);
+            exchange(pA, static_cast<K*>(*pin), mu, false);
         else
             pA->HPDDM::template Subdomain<K>::exchange(static_cast<K*>(*pin), mu);
         pA->clearBuffer(allocate);

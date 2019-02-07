@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "hpddm"                        // HPDDM plugin
-macro partitioner()metis// EOM      // metis, scotch, or parmetis
 macro dimension()2// EOM            // 2D or 3D
 macro vectorialfe()P2// EOM
 include "macro_ddm.idp"             // additional DDM functions
@@ -28,14 +27,14 @@ if(verbosity > 0 && mpirank == 0) {
     cout << " - elasticity-2d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << endl;
 }
 
-meshN ThBorder, Th = square(1, 1);
+meshN Th = square(1, 1);
 fespace Wh(Th, Pk);                         // local finite element space
 int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
     int[int] l = [2, 1, 2, 2];
-    meshN ThGlobal = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
+    meshN ThBorder, ThGlobal = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
     build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, Pk, comm, excluded, 2)
 }
 
@@ -46,20 +45,12 @@ real poisson = 0.45;
 real tmp = 1.0 + poisson;
 real mu = Young  / (2.0 * tmp);
 real lambda = Young * poisson / (tmp * (1.0 - 2.0 * poisson));
-real[int] rhs;                              // local right-hand side
 matrix<real> Mat;                           // local operator
-{                                           // local weak form
-    meshN ThAugmented = Th + ThBorder;
-    varf vPb(def(u), def(v)) = intN(ThAugmented)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN(ThAugmented)(f * vB) + on(1, u = 0.0, uB = 0.0);
-    fespace WhAugmented(ThAugmented, Pk);
-    Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
-    real[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
-    matrix R = interpolate(Wh, WhAugmented);
-    renumbering(Mat, R, rhsFull, rhs);
-}
-ThBorder = square(1, 1);
+varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN(Th)(f * vB) + on(1, u = 0.0, uB = 0.0);
+Mat = vPb(Wh, Wh, solver = CG);
+real[int] rhs = vPb(0, Wh);
 
-dschwarz A(Mat, arrayIntersection, restrictionIntersection, scaling = D);
+dschwarz A(Mat, arrayIntersection, restrictionIntersection, D);
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 dpair ret;

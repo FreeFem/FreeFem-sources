@@ -1549,7 +1549,11 @@ template<char P, class Type>
 long MatMatMult(Type* const& A, KNM<PetscScalar>* const& in, KNM<PetscScalar>* const& out) {
     if(A) {
         Mat C;
-        if(mpisize == 1)
+        MatType type;
+        MatGetType(A->_petsc, &type);
+        PetscBool isType;
+        PetscStrcmp(type, MATMPIAIJ, &isType);
+        if(isType)
             MatMPIAIJGetLocalMat(A->_petsc, MAT_INITIAL_MATRIX, &C);
         else
             C = A->_petsc;
@@ -1557,11 +1561,7 @@ long MatMatMult(Type* const& A, KNM<PetscScalar>* const& in, KNM<PetscScalar>* c
         PetscInt n, m, bs, N, M;
         MatGetLocalSize(A->_petsc, &n, &m);
         MatGetSize(A->_petsc, &N, &M);
-        MatType type;
-        MatGetType(A->_petsc, &type);
-        PetscBool isNotBlock;
-        PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
-        if(isNotBlock)
+        if(isType)
             bs = 1;
         else {
             MatGetBlockSize(A->_petsc, &bs);
