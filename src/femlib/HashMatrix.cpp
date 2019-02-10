@@ -123,7 +123,7 @@ typename   HashMatrix<I,R>::uniquecodeInt HashMatrix<I,R>::CodeIJ() const  {
 
 template<class I,class R>
 HashMatrix<I,R>::HashMatrix(I nn,I mm,I nnnz,bool halff)
-:  VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+:  VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 // trans(false),
 half(halff), state(unsorted),type_state(type_HM),
@@ -135,7 +135,7 @@ re_do_numerics(0),re_do_symbolic(0)
 
 template<class I,class R>
 HashMatrix<I,R>::HashMatrix(istream & f,int cas):
-VirtualMatrix<I,R>(0,0),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+VirtualMatrix<I,R>(0,0),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 // trans(false),
 half(0), state(unsorted),type_state(type_HM),
@@ -215,7 +215,7 @@ re_do_numerics(0),re_do_symbolic(0)
 
 template<class I,class R>
 HashMatrix<I,R>::HashMatrix(KNM_<R> F,double  threshold)
-: VirtualMatrix<I,R>(F.N(),F.M()),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+: VirtualMatrix<I,R>(F.N(),F.M()),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(false), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
@@ -234,7 +234,7 @@ re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
 
 template<class I,class R>
 HashMatrix<I,R>::HashMatrix(bool Half,I nn)
-: VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+: VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(Half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
@@ -246,7 +246,7 @@ re_do_numerics(0),re_do_symbolic(0)
 
 template<class I,class R>
 HashMatrix<I,R>::HashMatrix(const HashMatrix& A)
-:  VirtualMatrix<I,R> (A),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+:  VirtualMatrix<I,R> (A),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(A.half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
@@ -258,7 +258,7 @@ re_do_numerics(0),re_do_symbolic(0)
 
 template<class I,class R> template<class II>
 HashMatrix<I,R>::HashMatrix(const HashMatrix<II,R>& A)
-:  VirtualMatrix<I,R> (A.n,A.m),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+:  VirtualMatrix<I,R> (A.n,A.m),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(A.half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
@@ -269,7 +269,7 @@ re_do_numerics(0),re_do_symbolic(0)
 
 template<class I,class R> template<class II,class RR>
 HashMatrix<I,R>::HashMatrix(const HashMatrix<II,RR>& A, R (*ff)(RR) )
-:  VirtualMatrix<I,R> (A.n,A.m),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+:  VirtualMatrix<I,R> (A.n,A.m),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(A.half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
@@ -280,7 +280,7 @@ re_do_numerics(0),re_do_symbolic(0)
 
 template<class I,class R>
 HashMatrix<I,R>::HashMatrix(I nn,const R *diag)
-:  VirtualMatrix<I,R> (nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),i(0),j(0),p(0),aij(0),
+:  VirtualMatrix<I,R> (nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(0), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
@@ -635,7 +635,9 @@ template<class I,class R>
 HashMatrix<I,R>::~HashMatrix()
 {
     if(nbfind && verbosity>4)
-        cout << "    ~HashMatrix:   Mean collision in hash: " << (double) nbcollision/ nbfind << " " << this << " rank: "<< mpirank << endl;
+        cout << "    ~HashMatrix:   Mean collision in hash: " << (double) nbcollision/ nbfind << " "
+        << this << " rank: "<< mpirank << " matmul " << matmulcpu << "s" << endl;
+    
     delete [] i;
     delete [] j;
     delete [] aij;
@@ -1068,9 +1070,23 @@ template<class I,class R>
 R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
     I *ii=i,*jj=j;
     R *aa=aij;
+    double t0= CPUsecond();
     //   if(Transpose != trans) {std::swap(ii,jj);}
     if(Transpose ) {std::swap(ii,jj);}
     if(fortran) {aa++;}
+    if(sx==1 && sAx==1)
+    {
+        if( half)
+            for(int k=0; k<nnz;++k)
+            {
+                Ax[ii[k]] += aa[k]*x[jj[k]];
+                if( ii[k] != jj[k]) Ax[jj[k]] += conj(aa[k])*x[ii[k]];
+            }
+        else
+            for(int k=0; k<nnz;++k)
+                Ax[ii[k]] += aa[k]*x[jj[k]];
+    }
+    else
     if( half)
         for(int k=0; k<nnz;++k)
         {
@@ -1080,7 +1096,7 @@ R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
     else
         for(int k=0; k<nnz;++k)
             Ax[ii[k]*sAx] += aa[k]*x[jj[k]*sx];
-    
+    matmulcpu+=  CPUsecond()-t0;
     return Ax;}
 
 

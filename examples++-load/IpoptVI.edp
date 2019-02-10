@@ -26,6 +26,6 @@ ub[] = onGamma ? 0. : ub[];
 lb[] = onGamma ? 0. : lb[];
 
 IPOPT([A,b],u[],lb=lb[],ub=ub[]);
-
-plot(u,wait=1);
+Vh ubb =g;
+plot(u,ubb,wait=1);
 

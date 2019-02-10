@@ -53,7 +53,8 @@
 extern bool showCPU;
 #include "RNM.hpp" 
 
-#ifdef TIME_WITH_SYS_TIME 
+# include <ctime>
+/* #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h> 
 # include <time.h> 
 #else
@@ -63,18 +64,20 @@ extern bool showCPU;
 # include <time.h>
 # endif 
 #endif
-
+*/
 // #include <time.h> 
 #include "CodeAlloc.hpp"
 
 inline double CPUtime(){
+    /*
 #ifdef SYSTIMES
   struct tms buf;
   if (times(&buf)!=-1)
     return ((double)buf.tms_utime+(double)buf.tms_stime)/(long) sysconf(_SC_CLK_TCK);
   else
 #endif
-    return ((double) clock())/CLOCKS_PER_SEC;
+     */
+      return ((double) std::clock())/CLOCKS_PER_SEC;
 }
 
 extern long verbosity;  // level off printing

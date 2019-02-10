@@ -942,6 +942,7 @@ class ForEachType<void *>:  public basicForEachType{public:// correction july 20
 };
 
 inline double walltime(){
+    /*
 #ifdef HAVE_GETTIMEOFDAY
 
     
@@ -958,21 +959,21 @@ inline double walltime(){
 
     
 #else
-
+*/
     // add for Pichon mars 2010 
     time_t currentWallTime;
     time(&currentWallTime);
     return (double)currentWallTime;
-#endif
+//#endif
 }
 
 inline long fftime()
 {
-#ifdef HAVE_GETTIMEOFDAY
+//#ifdef HAVE_GETTIMEOFDAY
     time_t tloc;
     return time(&tloc);
-#endif
-    return -1;
+//#endif
+//    return -1;
 }
 long ffstrtol(string* p)
 {

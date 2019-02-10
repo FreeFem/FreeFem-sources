@@ -62,6 +62,7 @@ public:
     typedef pair<size_t,size_t> Pair;
     size_t nnz,nnzmax,nhash;
     mutable size_t nbcollision,nbfind;
+    mutable double matmulcpu;
     I * i,*j;
     I *p;
     R * aij;
@@ -275,7 +276,9 @@ public:
     
     virtual bool ChecknbLine  (I n) const {return this->n==n;}
     virtual bool ChecknbColumn  (I m) const {return this->m==m;}
-
+    static double CPUsecond() {
+        return (double)clock()/CLOCKS_PER_SEC;
+    }
 };
 // 0 good , -1 delete, ...
 template<class I,class R> int GoodPtrHashMatrix(const HashMatrix<I,R> *p ) {

@@ -1,23 +1,32 @@
 #include <algorithm>
 
-
+extern long verbosity;
 template<class TypeIndex=int,class TypeScalar=double>
 struct CGMatVirt {
 public:
     typedef TypeIndex I;
     typedef TypeScalar R;
-    
+   
     I n,m;
+    mutable int it;
+    mutable double cpu;
     virtual  R * addmatmul(R *x,R *Ax) const =0;
-    virtual ~CGMatVirt() {}
+    virtual ~CGMatVirt() {
+        if(verbosity>5)
+            std::cout << " cpu CGMatVirt "<< cpu << " s / " << it << " nb mul " <<  std::endl;
+    }
 
     virtual R * matmul(R *x,R *Ax) const
     {
+        it++;
         std::fill(Ax,Ax+n, 0.);
-        return addmatmul(x,Ax);
+       double t0=((double) clock())/CLOCKS_PER_SEC;
+        R*p= addmatmul(x,Ax);
+        cpu+=((double) clock())/CLOCKS_PER_SEC-t0;
+        return p;
     }
     virtual void  SetInitWithBC(R*rhs,R *x) const {}// do nothing by default ..
-    CGMatVirt(int nn,int mm=-1) : n(nn),m(mm<0 ?nn:mm) {}
+    CGMatVirt(int nn,int mm=-1) : n(nn),m(mm<0 ?nn:mm),cpu(0.),it(0) {}
     virtual int * pwcl() const {return  0;} // array know if  node with BC (TGV) 
 };
 

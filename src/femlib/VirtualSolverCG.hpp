@@ -14,17 +14,18 @@ template<class I=int,class K=double>
 struct HMatVirtPrecon: CGMatVirt<I,K> {
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
-    bool diag;
+    //bool diag;
     //  Preco FF++
     Expression xx_del, code_del;
     const E_F0 * precon;
     Stack stack;
     KN<K> *xx;
+    K *diag1;
     KN<int> *wcl;
     double tgv;
     int ntgv;
-    HMatVirtPrecon(HMat *AA,const Data_Sparse_Solver * ds,Stack stk=0) :CGMatVirt<I,K>(AA->n),A(AA),diag(!ds || !ds->precon|| !stk),
-    xx_del(0),code_del(0),precon(0),stack(stk),wcl(0),xx(0),tgv(1e30),ntgv(0)
+    HMatVirtPrecon(HMat *AA,const Data_Sparse_Solver * ds,Stack stk=0) :CGMatVirt<I,K>(AA->n),A(AA),//diag(!ds || !ds->precon|| !stk),
+    xx_del(0),code_del(0),precon(0),stack(stk),wcl(0),xx(0),diag1(0),tgv(1e30),ntgv(0)
     {
         I n = A->n;
         if(ds) {
@@ -57,16 +58,22 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
             throwassert(precon);
             if (verbosity>4 ) cout << " ## Precon  GC/GMRES : nb tgv in mat = "<< ntgv << " " << tgv << " " << this << endl;
         }
-        else {stack=0;diag=true;
+        else {stack=0;
+            diag1 = new K[n];
+            for(int i=0; i<n;++i)
+                diag1[i]=(*A)(i,i);
+              for(int i=0; i<n;++i)
+                  if( std::norm(diag1[i]) < 1e-60) diag1[i]=1;
+                  else diag1[i]=1./diag1[i];
             if (verbosity>4) cout << " ## Precon Diag GC/GMRES : nb tgv in mat = "<< ntgv << " " << tgv << this << endl;
         } // no freefem++ precon
     }
     K * addmatmul(K *x,K *Ax) const
     {
         int n = A->n;
-        if(diag)
-        for(int i=0; i<n; ++i)
-        Ax[i] += std::norm((*A)(i,i))>1e-60 ? x[i]/(*A)(i,i): x[i];
+        if(diag1)
+         for(int i=0; i<n; ++i)
+            Ax[i] += diag1[i]*x[i]; //std::norm((*A)(i,i))>1e-60 ? x[i]/(*A)(i,i): x[i];
         else {// Call Precon ff++
             KN<K> &ffx=*xx;
             KN_<K> ax(Ax,n);
@@ -95,6 +102,7 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
     {
         if(verbosity>99) cout << " ## ~HMatVirtPrecon "<< this << endl;
         if(xx) delete xx;
+        if( diag1) delete [] diag1;
         if(wcl) delete wcl;
         if(stack) WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005
         if(xx_del) delete  xx_del;
@@ -142,8 +150,18 @@ public:
     };
     struct HMatVirtPreconDiag: CGMatVirt<I,K> {
         HMat *A;
-        HMatVirtPreconDiag(HMat *AA) :CGMatVirt<I,K>(AA->n),A(AA){}
-        K * addmatmul(K *x,K *Ax) const { for(int i=0; i<A->n; ++i) Ax[i] += std::abs((*A)(i,i)) ? x[i]/(*A)(i,i): x[i]; return Ax;}
+        K *d;
+        HMatVirtPreconDiag(HMat *AA) :CGMatVirt<I,K>(AA->n),A(AA),d(A->n){
+            for(int i=0; i<A->n; ++i) d[i] += std::abs((*A)(i,i)) ? 1./(*A)(i,i): 1.;
+        }
+        K * addmatmul(K *x,K *Ax) const {
+            for(int i=0; i<A->n; ++i)
+                Ax[i] += d[i]* x[i];
+            return Ax;}
+        ~HMatVirtPreconDiag() { delete d;}
+    private:// not copy ..
+        HMatVirtPreconDiag(const HMatVirtPreconDiag &AA);
+        void operator=(const HMatVirtPreconDiag &AA);
     };
     void dosolver(K *x,K*b,int N,int trans)
     {
