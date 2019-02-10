@@ -9,6 +9,7 @@ if (mpirank != 0)
 
 string ffddmprecond = getARGV("-ffddm_schwarz_method", "ras");
 string ffddmvariant = getARGV("-ffddm_variant", "right"); // right(default) or left preconditioning
+int ffddmrestart = getARGV("-ffddm_gmres_restart",200);
 int ffddmmaxit = getARGV("-ffddm_max_it", 200);
 real ffddmtol = getARGV("-ffddm_tol", 1.e-6);
 real ffddminexactCStol = getARGV("-ffddm_inexactCS_tol", 1.e-1);

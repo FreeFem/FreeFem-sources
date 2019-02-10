@@ -11,6 +11,7 @@ func preffe#K[int] pr#A(preffe#K[int] &x)
       res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*x;
       pr#prfe#update(res,true);
     }
+    /*res = B*x;*/
     preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
   }
   return res;
@@ -315,6 +316,7 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l)
         }
         else{
           pr#prfe#update(s,false);	
+          pr#prfe#update(s,true);
         }       
       }
     }
@@ -380,7 +382,8 @@ func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
         pr#prfe#update(s,true);
       }
       else{
-        pr#prfe#update(s,false);	
+        pr#prfe#update(s,false);
+        pr#prfe#update(s,true);
       }       
     }
     
@@ -480,30 +483,32 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     
     preffe#K[int] uni(x0.n);
     
+    int dim = min(nbiter,ffddmrestart);
+
     IFMACRO(pr#withhpddmkrylov)
     if (!preffe#prmesh#excluded) {
       uni = x0;
-      IterativeMethod(pr#A, uni,rhs, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
+      IterativeMethod(pr#A, uni,rhs, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
     }
     else
-    IterativeMethod(pr#A, uni,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
+    IterativeMethod(pr#A, uni,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
     ENDIFMACRO
     
     IFMACRO(pr#withhpddm)
     uni = x0;
     real[int] timings(0);
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+sprec+" -hpddm_max_it "+nbiter+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+sprec+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
     if (pr#corr == "AD")
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction additive");
+      set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction additive");
     else if (pr#corr == "BNN")
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction balanced");
+      set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction balanced");
     else if (pr#corr == "ADEF1")
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction deflated");
+      set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction deflated");
     
     if (pr#prec == "oras" || pr#prec == "soras")
-    DDM(pr#hpddmOP,uni,rhs,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
+      DDM(pr#hpddmOP,uni,rhs,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
     else
-    DDM(pr#hpddmOP,uni,rhs,timing=timings);
+      DDM(pr#hpddmOP,uni,rhs,timing=timings);
     
     /*
     real[int] timingsg(timings.n);
@@ -515,35 +520,20 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     
     IFMACRO(!pr#withhpddm)
     IFMACRO(!pr#withhpddmkrylov)
-    preffe#K[int,int] Hn(nbiter+2,nbiter+1);     /* Hessenberg matrix */
+    preffe#K[int,int] Hn(dim+2,dim+1);     /* Hessenberg matrix */
     Hn = 0.;
-    preffe#K[int,int] rot(2,nbiter+2);
+    preffe#K[int,int] rot(2,dim+2);
     rot = 0.;
-    preffe#K[int] g(nbiter+1),g1(nbiter+1);
+    preffe#K[int] g(dim+1),g1(dim+1);
     g = 0.;  g1 = 0.;
     
-    preffe#K[int] ri(x0.n),zi(x0.n),vi(x0.n),wi(x0.n),veri(x0.n);
-    preffe#K[int][int] Vi(nbiter+1), Vpi(nbiter+1);
-    for (int i=0;i<nbiter+1;i++){
+    preffe#K[int] ri(x0.n),zi(x0.n),vi(x0.n),wi(x0.n),x0i(x0.n);
+    preffe#K[int][int] Vi(dim+1), Vpi(dim+1);
+    for (int i=0;i<dim+1;i++){
       Vi[i].resize(x0.n);
       Vpi[i].resize(x0.n);
     }
     
-    if (pr#corr=="ADEF2" || pr#corr=="RBNN1" || pr#corr=="RBNN2")
-    x0 = pr#Q(rhs);
-    
-    ri = pr#A(x0);
-  
-    if (!preffe#prmesh#excluded)
-    ri -= rhs;
-    ri *= -1.0;
-    
-    if (sprec == "right")
-    zi = ri;
-    else
-    zi = pr#PREC(ri);
-    
-    g[0] = sqrt(real(pr#prfe#scalprod(zi,zi)));
     real normb = 0;
     
     if (!preffe#prmesh#excluded) {
@@ -552,115 +542,146 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     }
     
     if (sprec == "right")
-    normb = sqrt(real(pr#prfe#scalprod(wi,wi)));
+      normb = sqrt(real(pr#prfe#scalprod(wi,wi)));
     else{
       vi = pr#PREC(wi);
       normb = sqrt(real(pr#prfe#scalprod(vi,vi)));
     }
     if (normb < 1.e-20 || eps < 0) normb = 1.;
-    
-    Vi[0]=1/g[0]*zi;           /* first basis vector */
-    
+
     real relres = 0;
     
-    for(int it=0; it<nbiter; it++) {
-      if (sprec == "right") {
-        Vpi[it] = pr#PREC(Vi[it]);
-        vi=Vpi[it];
-        wi=pr#A(vi);
-        
-      }
-      else {
-        vi=pr#A(Vi[it]);
-        wi = pr#PREC(vi);
-      }
+    int itg = 0;
+    
+    x0i = x0;
+    
+    while (itg < nbiter) {
       
-      for(int i=0; i<it+1; i++) {
-        Hn(i,it) = pr#prfe#scalprod(wi,Vi[i]);
-        wi -=  conj(Hn(i,it))*Vi[i];
-      }
-      Hn(it+1,it) = sqrt(real(pr#prfe#scalprod(wi,wi)));
-      preffe#K aux = Hn(it+1,it);
-      Vi[it+1]=1/aux*wi;
+      if (pr#corr=="ADEF2" || pr#corr=="RBNN1" || pr#corr=="RBNN2")
+        /* TODO handle restart */
+        x0i = pr#Q(rhs);
       
-      for(int i=0; i<it; i++){ 	 /* QR decomposition of Hn */
-        preffe#K aa = conj(rot(0,i))*Hn(i,it)+conj(rot(1,i))*Hn(i+1,it);
-        preffe#K bb = -rot(1,i)*Hn(i,it)+rot(0,i)*Hn(i+1,it);
-        Hn(i,it) = aa;
-        Hn(i+1,it) = bb;
-      }
+      ri = pr#A(x0i);
+
+      if (!preffe#prmesh#excluded)
+        ri -= rhs;
+      ri *= -1.0;
       
-      preffe#K sq = sqrt( conj(Hn(it,it))*Hn(it,it) + Hn(it+1,it)*Hn(it+1,it) );
+      if (sprec == "right")
+        zi = ri;
+      else
+        zi = pr#PREC(ri);
       
-      rot(0,it) = Hn(it,it)/sq;
-      rot(1,it) = Hn(it+1,it)/sq;
-            
-      Hn(it,it) = conj(rot(0,it))*Hn(it,it)+conj(rot(1,it))*Hn(it+1,it);
-      Hn(it+1,it) =  0.; 
-      g[it+1] = -rot(1,it)*g[it]; 
-      g[it] = conj(rot(0,it))*g[it];
+      g[0] = sqrt(real(pr#prfe#scalprod(zi,zi)));
       
-      preffe#K[int] y(it+1);     	/* Reconstruct the solution */
-      for(int i=it; i>=0; i--) {
-        g1[i] = g[i];
-        for(int j=i+1; j<it+1; j++){
-          g1[i] = g1[i]-Hn(i,j)*y[j];
-        }
-        y[i]=g1[i]/Hn(i,i);
-      }
+      Vi[0]=1/g[0]*zi;           /* first basis vector */
       
-      uni = x0;
-      for(int i=0;i<it+1;i++){
-        if (sprec == "right")
-        uni= uni+ conj(y[i])*Vpi[i];
-        else
-        uni= uni+ conj(y[i])*Vi[i];
-      }
-      
-      real relerr = 0;
-      relres = abs(g[it+1]);
-      
-      /*
-      if (pr#bdirect){
-        if (!bpara) {
-          pr#ver[] = uni[] - pr#uglob[];
-          relerr = pr#ver[].l2/pr#uglob[].l2;
+      for(int it=0; it<dim; it++) {
+        if (sprec == "right") {
+          Vpi[it] = pr#PREC(Vi[it]);
+          vi=Vpi[it];
+          wi=pr#A(vi);
         }
         else {
-          if (!preffe#prmesh#excluded) {
-            vi[] = preffe#Rih[mpiRank(preffe#prmesh#commddm)] * pr#uglob[];
-            vi[] -= uni[];
+          vi=pr#A(Vi[it]);
+          wi = pr#PREC(vi);
+        }
+
+        for(int i=0; i<it+1; i++) {
+          Hn(i,it) = pr#prfe#scalprod(wi,Vi[i]);
+          wi -=  conj(Hn(i,it))*Vi[i];
+        }
+        Hn(it+1,it) = sqrt(real(pr#prfe#scalprod(wi,wi)));
+        preffe#K aux = Hn(it+1,it);
+        Vi[it+1]=1/aux*wi;
+
+        for(int i=0; i<it; i++){ 	 /* QR decomposition of Hn */
+          preffe#K aa = conj(rot(0,i))*Hn(i,it)+conj(rot(1,i))*Hn(i+1,it);
+          preffe#K bb = -rot(1,i)*Hn(i,it)+rot(0,i)*Hn(i+1,it);
+          Hn(i,it) = aa;
+          Hn(i+1,it) = bb;
+        }
+
+        preffe#K sq = sqrt( conj(Hn(it,it))*Hn(it,it) + Hn(it+1,it)*Hn(it+1,it) );
+
+        rot(0,it) = Hn(it,it)/sq;
+        rot(1,it) = Hn(it+1,it)/sq;
+
+        Hn(it,it) = conj(rot(0,it))*Hn(it,it)+conj(rot(1,it))*Hn(it+1,it);
+        Hn(it+1,it) =  0.;
+        g[it+1] = -rot(1,it)*g[it];
+        g[it] = conj(rot(0,it))*g[it];
+
+        preffe#K[int] y(it+1);     	/* Reconstruct the solution */
+        for(int i=it; i>=0; i--) {
+          g1[i] = g[i];
+          for(int j=i+1; j<it+1; j++){
+            g1[i] = g1[i]-Hn(i,j)*y[j];
           }
-          relerr = sqrt(real(pr#prfe#scalprod(vi[],vi[])));
-          relerr /= pr#uglob[].l2;			
+          y[i]=g1[i]/Hn(i,i);
         }
-      }
-      */
-      
-      if (pr#verbosity >= 3 && (mpiRank(preffe#prmesh#mpicomm)==0)) {
-        if (pr#bdirect)
-        cout << "["+Stringification(pr)+"] It: "<< it+1 << " Residual = " << relres << " Rel res = " << relres/normb <<  " Relative L2 Error =  "<< relerr <<  endl;
-        else
-        cout << "["+Stringification(pr)+"] It: "<< it+1 << " Residual = " << relres << " Rel res = " << relres/normb << endl; 
-      }
-      
-      if (pr#verbosity >= 10){
-        IFMACRO(preffe#defplot)
-        preffe#Vhi<preffe#K> def(unih);
-        unih[] = uni;
-        preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + it)
-        ENDIFMACRO
-        ;
-      }
-      
-      int j = it+2;
-      if(relres/normb < abs(eps)) {
-        if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
-          cout << "["+Stringification(pr)+"] GMRES has converged in " + (it+1) + " iterations " << endl;
-          cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+
+        uni = x0i;
+        for(int i=0;i<it+1;i++){
+          if (sprec == "right")
+            uni= uni+ conj(y[i])*Vpi[i];
+          else
+            uni= uni+ conj(y[i])*Vi[i];
         }
+
+        real relerr = 0;
+        relres = abs(g[it+1]);
+
+        /*
+        if (pr#bdirect){
+          if (!bpara) {
+            pr#ver[] = uni[] - pr#uglob[];
+            relerr = pr#ver[].l2/pr#uglob[].l2;
+          }
+          else {
+            if (!preffe#prmesh#excluded) {
+              vi[] = preffe#Rih[mpiRank(preffe#prmesh#commddm)] * pr#uglob[];
+              vi[] -= uni[];
+            }
+            relerr = sqrt(real(pr#prfe#scalprod(vi[],vi[])));
+            relerr /= pr#uglob[].l2;
+          }
+        }
+        */
+
+        if (pr#verbosity >= 3 && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+          if (pr#bdirect)
+            cout << "["+Stringification(pr)+"] It: "<< itg+1 << " Residual = " << relres << " Rel res = " << relres/normb <<  " Relative L2 Error =  "<< relerr <<  endl;
+          else
+            cout << "["+Stringification(pr)+"] It: "<< itg+1 << " Residual = " << relres << " Rel res = " << relres/normb << endl;
+        }
+
+        if (pr#verbosity >= 10){
+          IFMACRO(preffe#defplot)
+          preffe#Vhi<preffe#K> def(unih);
+          unih[] = uni;
+          preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + itg)
+          ENDIFMACRO
+          ;
+        }
+
+        if(relres/normb < abs(eps)) {
+          if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+            cout << "["+Stringification(pr)+"] GMRES has converged in " + (itg+1) + " iterations " << endl;
+            cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
+          }
+          break;
+        }
+        itg++;
+        if (itg == nbiter)
+          break;
+      }
+      if(relres/normb < abs(eps) || itg == nbiter)
         break;
-      }
+
+      x0i = uni;
+      if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0))
+        cout << "["+Stringification(pr)+"] GMRES restart(" + dim +")" << endl;
     }
     if(relres/normb >= abs(eps))
     if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
