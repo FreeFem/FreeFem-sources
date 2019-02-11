@@ -222,7 +222,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
         supp = supp;
         suppSmooth = suppSmooth;
         meshName = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
-        if(!removeZeros && (fakeInterface != -111111 || overlap != -1)) {
+        if(!removeZeros && (fakeInterface != -111111 || overlap != 1)) {
             if(suppSmooth[].min < 0.501)
                 borderName = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
         }
@@ -343,7 +343,7 @@ ENDIFMACRO
                 }
                 numberIntersection -= skip.n;
                 arrayIntersection.resize(numberIntersection);
-                if(fakeInterface != -111111 || overlap != -1) {
+                if(fakeInterface != -111111 || overlap != 1) {
                     PhGlobal suppPartition = khi > 0.1;
                     AddLayers(globalName, suppPartition[], 1, phi[]);
                     borderName = trunc(globalName, phi > 0.001 && phi < 0.501, label = (abs(fakeInterface) + 1) * 100);

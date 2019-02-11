@@ -199,10 +199,10 @@ download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.9.1.tar.gz',
 	'https://bitbucket.org/slepc/slepc/get/',
 	'slepc-3.9.1.tar.gz',
 	'7eae35e7bcfe5c5144677731089d3ee9');
-download('hpddm','https://github.com/hpddm/hpddm/archive/fa03130fbfed8c3260516548ebf80ac05d90127d.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/00a9073c416c7513c0ea1b85740cab68578bd47a.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'03a537a8f18d024a7fbaec881b8f07fe');
+	'f71d08d54fd0e024bef09187a7933871');
 
 # run all downloads concurrently
 
