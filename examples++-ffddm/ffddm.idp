@@ -208,11 +208,11 @@ preffe#K[int] CC;
   }
 }
 IFMACRO(preffe#K,real)
-dschwarz pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, scaling = preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
+dschwarz pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 IFMACRO(preffe#K,complex)
 real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
-zschwarz pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, scaling = pr#hpddmDk, communicator = preffe#prmesh#commddm);
+zschwarz pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_reuse_preconditioner 1");
