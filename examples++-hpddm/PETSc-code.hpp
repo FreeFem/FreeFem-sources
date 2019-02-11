@@ -1436,7 +1436,7 @@ template<class T, typename std::enable_if<!std::is_same<T, KN<PetscScalar>>::val
 void resize(T* v, int size) { }
 template<class T, class U>
 void changeNumbering_func(unsigned int* const num, unsigned int first, unsigned int last, PetscInt m, PetscInt n, PetscInt bs, T* ptIn, U* ptOut, bool inverse) {
-/*    PetscScalar* out;
+   PetscScalar* out;
     if(!inverse) {
         resize(ptOut, m ? m * bs : n);
         out = static_cast<PetscScalar*>(*ptOut);
@@ -1454,7 +1454,7 @@ void changeNumbering_func(unsigned int* const num, unsigned int first, unsigned 
         else
             std::copy_n(out, ptIn->n, static_cast<PetscScalar*>(*ptIn));
     }
-	*/
+	
 }
 template<class Type>
 AnyType changeNumbering<Type>::changeNumbering_Op::operator()(Stack stack) const {

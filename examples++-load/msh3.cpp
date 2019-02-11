@@ -7210,7 +7210,7 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 		const Mesh3 &Th3(*tab->operator [] (i));
 		th0 = &Th3;
 		if (verbosity > 1) {cout << " determination of hmin : GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
-        cout << "*********Th3.getTypeMesh3() " << Th3.getTypeMesh3();
+                //cout << "*********Th3.getTypeMesh3() " << Th3.getTypeMesh3();
 		nbt += Th3.nt;
 		nbvx += Th3.nv;
 		nbex += Th3.nbe;
