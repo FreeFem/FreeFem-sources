@@ -618,9 +618,12 @@ long globalNumbering(Type* const& A, KN<long>* const& numbering) {
     return 0L;
 }
 
-template<template<class, char> class Type, class K, char S>
+template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
+    if(std::is_same<K, HPDDM::underlying_type<K>>::value)
+        zzzfff->Add("schwarz", atype<HpSchwarz<K, S>*>());
+    map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
@@ -636,39 +639,32 @@ void add() {
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
     Global.Add("IterativeMethod","(",new IterativeMethod<K>());
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
+
+    if(!exist_type<Pair<K>*>()) {
+        Dcl_Type<Pair<K>*>(InitP<Pair<K>>, Destroy<Pair<K>>);
+        map_type_of_map[make_pair(atype<Pair<HPDDM::underlying_type<K>>*>(), atype<K*>())] = atype<Pair<K>*>();
+    }
+    aType t;
+    int r;
+    if(!zzzfff->InMotClef("pair", t, r) && std::is_same<K, HPDDM::underlying_type<K>>::value)
+        zzzfff->Add("pair", atype<Pair<K>*>());
 }
 }
 
 static void Init_Schwarz() {
     Init_Common();
 #if defined(DSUITESPARSE) || defined(DHYPRE)
-    const char ds = 'G';
+    constexpr char ds = 'G';
 #else
-    const char ds = 'S';
+    constexpr char ds = 'S';
 #endif
-    const char zs = 'G';
+    constexpr char zs = 'G';
     Schwarz::add<HpSchwarz, double, ds>();
-    zzzfff->Add("dschwarz", atype<HpSchwarz<double, ds>*>());
 #ifndef DHYPRE
+    Schwarz::add<HpSchwarz, std::complex<double>, zs, ds>();
     // Schwarz::add<HpSchwarz, float, ds>();
-    // zzzfff->Add("sschwarz", atype<HpSchwarz<float, ds>*>());
-    Schwarz::add<HpSchwarz, std::complex<double>, zs>();
-    zzzfff->Add("zschwarz", atype<HpSchwarz<std::complex<double>, zs>*>());
     // Schwarz::add<HpSchwarz, std::complex<float>, zs>();
-    // zzzfff->Add("cschwarz", atype<HpSchwarz<std::complex<float>, zs>*>());
 #endif
-    aType t;
-    int r;
-    if(!zzzfff->InMotClef("dpair", t, r)) {
-        // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
-        // zzzfff->Add("spair", atype<Pair<double>*>());
-        Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
-        zzzfff->Add("dpair", atype<Pair<double>*>());
-        // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
-        // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
-        Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
-        zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
-    }
 }
 
 LOADFUNC(Init_Schwarz)

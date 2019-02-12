@@ -61,10 +61,10 @@ matrix<complex> Mat;                        // local operator
 }
 ThBorder = square(1, 1);
 
-zschwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
+schwarz<complex> A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
 
 matrix<complex> Opt;                        // local operator with optimized boundary conditions
-zpair ret;
+pair<complex> ret;
 {
     int solver = getOption("schwarz_method");
     fespace Ph(Th, P0);

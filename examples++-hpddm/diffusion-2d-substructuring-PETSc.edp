@@ -30,10 +30,10 @@ int[int] interfaceNb;                       //
 
 func f = 10;
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(1, u = 1.0);
-matrix<real> Mat = vPb(Wh, Wh, solver = CG); // local operator
+matrix<real> Loc = vPb(Wh, Wh, solver = CG); // local operator
 real[int] rhs = vPb(0, Wh);                  // local right-hand side
 
-dbddc A(Mat, arrayIntersection, restrictionIntersection, interfaceNb, communicator = mpiCommWorld);
+MatIS A(Loc, arrayIntersection, restrictionIntersection, interfaceNb, communicator = mpiCommWorld);
 Wh<real> def(u) = 0.0;    // local solution
 
 int[int] numbering;

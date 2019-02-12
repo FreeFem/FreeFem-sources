@@ -39,11 +39,11 @@ varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 1.0);
 Mat = vPb(Wh, Wh, tgv = -1);
 real[int] rhs = vPb(0, Wh, tgv = -1);
 
-dschwarz A(Mat, arrayIntersection, restrictionIntersection, D);
+schwarz A(Mat, arrayIntersection, restrictionIntersection, D);
 set(A, sparams = "-hpddm_schwarz_method ras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 10");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
-dpair ret;
+pair ret;
 {
     int solver = getOption("schwarz_method");
     if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods

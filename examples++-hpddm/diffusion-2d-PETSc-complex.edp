@@ -28,10 +28,10 @@ real[int] D;                                // partition of unity
 }
 
 varf vPb(u, v) = intN(Th)(1i*grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);
-matrix<complex> Mat = vPb(Wh, Wh);
+matrix<complex> Loc = vPb(Wh, Wh);
 complex[int] rhs = vPb(0, Wh);
 
-zmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+Mat<complex> A(Loc, arrayIntersection, restrictionIntersection, D);
 set(A, sparams = "-ksp_view");
 Wh<complex> def(u);    // local solution
 

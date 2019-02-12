@@ -37,8 +37,8 @@ varf vPb([u, uB, p], [v, vB, q]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * gra
 matrix<real> K = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-dmatrix Mat(K, arrayIntersection, restrictionIntersection, D, bs = 1);
-set(Mat, sparams = "-pc_type lu -pc_factor_mat_solver_package mumps");
+Mat A(K, arrayIntersection, restrictionIntersection, D, bs = 1);
+set(A, sparams = "-pc_type lu -pc_factor_mat_solver_package mumps");
 Wh<real> def(b);
-b[] = Mat^-1 * rhs;
+b[] = A^-1 * rhs;
 plotMPI(Th, b[], "Global solution PETSc", Pk, def, real, 3, 1);

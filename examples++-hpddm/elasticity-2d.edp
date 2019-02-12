@@ -50,10 +50,10 @@ varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsil
 Mat = vPb(Wh, Wh, solver = CG);
 real[int] rhs = vPb(0, Wh);
 
-dschwarz A(Mat, arrayIntersection, restrictionIntersection, D);
+schwarz A(Mat, arrayIntersection, restrictionIntersection, D);
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
-dpair ret;
+pair ret;
 {
     int solver = getOption("schwarz_method");
     if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
