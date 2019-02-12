@@ -131,6 +131,12 @@ void set_ff_matrix(MatriceMorse<K>* mA,HPDDM::MatrixCSR<K> &dA)
 }
 #endif
 
+template<typename T>
+inline bool exist_type() {
+    map<const string,basicForEachType*>::iterator ir = map_type.find(typeid(T).name());
+    return ir != map_type.end();
+}
+
 template<class T>
 class STL {
     T* const _it;
@@ -491,23 +497,23 @@ AnyType distributedDot<K>::E_distributedDot::operator()(Stack stack) const {
 
 static void Init_Common() {
     if(!Global.Find("dscalprod").NotNull()) {
-#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
-        aType t;
-        int r;
-        if(!zzzfff->InMotClef("dpair", t, r)) {
-            Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
-            Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
-            int argc = pkarg->n;
-            const char** argv = new const char*[argc];
-            for(int i = 0; i < argc; ++i)
-                argv[i] = (*((*pkarg)[i].getap()))->data();
-            HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
-            delete [] argv;
-        }
-#endif
         Global.Add("dscalprod", "(", new distributedDot<double>);
         Global.Add("dscalprod", "(", new distributedDot<std::complex<double>>);
         Global.Add("dscalprod", "(", new distributedDot<double>(1));
     }
+#if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
+    aType t;
+    int r;
+    if(!zzzfff->InMotClef("pair", t, r)) {
+        Global.Add("getOption", "(", new OneOperator1_<double, string*>(getOpt));
+        Global.Add("isSetOption", "(", new OneOperator1_<bool, string*>(isSetOpt));
+        int argc = pkarg->n;
+        const char** argv = new const char*[argc];
+        for(int i = 0; i < argc; ++i)
+            argv[i] = (*((*pkarg)[i].getap()))->data();
+        HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
+        delete [] argv;
+    }
+#endif
 }
 #endif // _COMMON_

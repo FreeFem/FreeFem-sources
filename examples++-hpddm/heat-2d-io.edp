@@ -57,10 +57,10 @@ matrix<real> M;                             // local mass matrix
 }
 ThBorder = square(1, 1);
 
-dschwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
+schwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
-dpair ret;
+pair ret;
 {
     int solver = getOption("schwarz_method");
     if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods

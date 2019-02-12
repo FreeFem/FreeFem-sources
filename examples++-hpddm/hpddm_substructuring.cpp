@@ -606,9 +606,19 @@ class InvSubstructuring {
         }
 };
 
-template<template<class, char> class Type, class K, char S>
+template<class K, char S>
+using HpFetiPrec = HpFeti<HPDDM::FetiPrcndtnr::DIRICHLET, K, S>;
+template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
+    if(std::is_same<K, HPDDM::underlying_type<K>>::value) {
+        static_assert(std::is_same<Type<K, S>, HpBdd<K, S>>::value || std::is_same<Type<K, S>, HpFetiPrec<K, S>>::value, "What are you trying to do?");
+        if(std::is_same<Type<K, S>, HpBdd<K, S>>::value)
+            zzzfff->Add("bdd", atype<Type<K, S>*>());
+        else
+            zzzfff->Add("feti", atype<Type<K, S>*>());
+    }
+    map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
@@ -620,52 +630,39 @@ void add() {
     addInv<Type<K, S>, InvSubstructuring, KN<K>, K>();
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
+
+    if(!exist_type<Pair<K>*>()) {
+        Dcl_Type<Pair<K>*>(InitP<Pair<K>>, Destroy<Pair<K>>);
+        map_type_of_map[make_pair(atype<Pair<HPDDM::underlying_type<K>>*>(), atype<K*>())] = atype<Pair<K>*>();
+    }
+    aType t;
+    int r;
+    if(!zzzfff->InMotClef("pair", t, r) && std::is_same<K, HPDDM::underlying_type<K>>::value)
+        zzzfff->Add("pair", atype<Pair<K>*>());
 }
 }
 
-template<class K, char S>
-using HpFetiPrec = HpFeti<HPDDM::FetiPrcndtnr::DIRICHLET, K, S>;
 static void Init_Substructuring() {
     Init_Common();
     Global.Add("buildSkeleton", "(", new Substructuring::Skeleton);
 #if defined(DSUITESPARSE) || defined(DHYPRE)
-    const char ds = 'G';
+    constexpr char ds = 'G';
 #else
-    const char ds = 'S';
+    constexpr char ds = 'S';
 #endif
-    const char zs = 'G';
+    constexpr char zs = 'G';
     Substructuring::add<HpBdd, double, ds>();
-    zzzfff->Add("dbdd", atype<HpBdd<double, ds>*>());
 #ifndef DHYPRE
+    Substructuring::add<HpBdd, std::complex<double>, zs, ds>();
     // Substructuring::add<HpBdd, float, ds>();
-    // zzzfff->Add("sbdd", atype<HpBdd<float, ds>*>());
-    Substructuring::add<HpBdd, std::complex<double>, zs>();
-    zzzfff->Add("zbdd", atype<HpBdd<std::complex<double>, zs>*>());
     // Substructuring::add<HpBdd, std::complex<float>, zs>();
-    // zzzfff->Add("cbdd", atype<HpBdd<std::complex<float>, zs>*>());
 #endif
-    Substructuring::add<HpFetiPrec, double, ds>();
-    zzzfff->Add("dfeti", atype<HpFetiPrec<double, ds>*>());
+    Substructuring::add<Substructuring::HpFetiPrec, double, ds>();
 #ifndef DHYPRE
+    Substructuring::add<Substructuring::HpFetiPrec, std::complex<double>, zs, ds>();
     // Substructuring::add<HpFetiPrec, float, ds>();
-    // zzzfff->Add("sfeti", atype<HpFetiPrec<float, ds>*>());
-    Substructuring::add<HpFetiPrec, std::complex<double>, zs>();
-    zzzfff->Add("zfeti", atype<HpFetiPrec<std::complex<double>, zs>*>());
     // Substructuring::add<HpFetiPrec, std::complex<float>, zs>();
-    // zzzfff->Add("cfeti", atype<HpFetiPrec<std::complex<float>, zs>*>());
 #endif
-    aType t;
-    int r;
-    if(!zzzfff->InMotClef("dpair", t, r)) {
-        // Dcl_Type<Pair<float>*>(InitP<Pair<float>>, Destroy<Pair<float>>);
-        // zzzfff->Add("spair", atype<Pair<double>*>());
-        Dcl_Type<Pair<double>*>(InitP<Pair<double>>, Destroy<Pair<double>>);
-        zzzfff->Add("dpair", atype<Pair<double>*>());
-        // Dcl_Type<Pair<std::complex<float>>*>(InitP<Pair<std::complex<float>>>, Destroy<Pair<std::complex<float>>>);
-        // zzzfff->Add("cpair", atype<Pair<std::complex<float>>*>());
-        Dcl_Type<Pair<std::complex<double>>*>(InitP<Pair<std::complex<double>>>, Destroy<Pair<std::complex<double>>>);
-        zzzfff->Add("zpair", atype<Pair<std::complex<double>>*>());
-    }
 }
 
 LOADFUNC(Init_Substructuring)

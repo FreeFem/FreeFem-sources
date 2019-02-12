@@ -47,11 +47,11 @@ varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsil
 matrix<real> Mat = vPb(Wh, Wh, solver = CG); // local operator
 real[int] rhs = vPb(0, Wh);                  // local right-hand side
 
-dbdd A(Mat, arrayIntersection, restrictionIntersection, communicator = comm);
-// this can be replaced by dfeti
+bdd A(Mat, arrayIntersection, restrictionIntersection, communicator = comm);
+// this can be replaced by feti
 bool adaptive = isSetOption("geneo_nu") || isSetOption("geneo_threshold");
 
-dpair ret;
+pair ret;
 if(mpisize == 1)
     renumber(A, Mat, interfaceNb, effort = rhs);
 else {

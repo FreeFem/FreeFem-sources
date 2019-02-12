@@ -50,7 +50,7 @@ else if(mpirank == 3) {
     C(0) = 7.0;
     Ai[0] = [I, J, C];
 }
-dmatrix A(Ai, columns = Ji);
+Mat A(Ai, columns = Ji);
 real[int] x(1), b(1);
 b = (mpirank + 1) * 10;
 x = A^-1 * b;

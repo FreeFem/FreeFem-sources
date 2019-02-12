@@ -120,8 +120,8 @@ matrix<complex> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
-dmatrix<complex> DistA(A, arrayIntersection, restrictionIntersection, D, clean = true);
-dmatrix<complex>   DistB(DistA, B, clean = true);
+Mat<complex> DistA(A, arrayIntersection, restrictionIntersection, D, clean = true);
+Mat<complex>   DistB(DistA, B, clean = true);
 /***************************************/
 /*          Problem resolution         */
 /***************************************/

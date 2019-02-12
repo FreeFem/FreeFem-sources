@@ -28,22 +28,22 @@ real[int] D;                                // partition of unity
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
 varf vL(u, v)  = intN(Th)(f * v);
 varf vb(u, v)  = intN(Th)(v);
-matrix<real> Mat = vPb(Wh, Wh);
+matrix<real> Loc = vPb(Wh, Wh);
 real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;
 real[int] zero(mpirank == 0 ? 1 : 0);
 zero = 0;
-dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, arrayIntersection, restrictionIntersection, D);
 changeNumbering(A, B, pB);
 changeNumbering(A, F, pF);
 
-dmatrix AA = [[ A, pB ],
-              [ pB', zero ]];
+Mat AA = [[ A, pB ],
+          [ pB', zero ]];
 if(mpirank == 0)
     pF = [pF, 0];
 {
-    dmatrix C;
+    Mat C;
     MatConvert(AA, C);
     set(C, sparams = "-pc_type lu");
     KSPSolve(C, pF, pSol);

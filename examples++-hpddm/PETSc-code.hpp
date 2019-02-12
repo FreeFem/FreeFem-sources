@@ -2142,12 +2142,6 @@ bool CheckPetscMatrix(Type* ptA) {
     return true;
 }
 
-template<typename T>
-inline bool exist_type() {
-    map<const string,basicForEachType*>::iterator ir = map_type.find(typeid(T).name());
-    return ir != map_type.end();
-}
-
 static void Init_PETSc() {
     if(verbosity > 1 && mpirank == 0) {
         cout << " PETSc ( " << typeid(PetscScalar).name() << " )" << endl;
@@ -2168,24 +2162,20 @@ static void Init_PETSc() {
     ff_atend(PETSc::finalizePETSc);
     if(!exist_type<DmatR*>()) {
         Dcl_Type<DmatR*>(Initialize<DmatR>, Delete<DmatR>);
-        zzzfff->Add("dmatrix", atype<DmatR*>());
+        zzzfff->Add("Mat", atype<DmatR*>());
     }
-    if(!exist_type<DmatC*>()) {
+    if(!exist_type<DmatC*>())
         Dcl_Type<DmatC*>(Initialize<DmatC>, Delete<DmatC>);
-        zzzfff->Add("zmatrix", atype<DmatC*>());
-    }
     if(!exist_type<DbddcR*>()) {
         Dcl_Type<DbddcR*>(Initialize<DbddcR>, Delete<DbddcR>);
-        zzzfff->Add("dbddc", atype<DbddcR*>());
+        zzzfff->Add("MatIS", atype<DbddcR*>());
     }
-    if(!exist_type<DbddcC*>()) {
+    if(!exist_type<DbddcC*>())
         Dcl_Type<DbddcC*>(Initialize<DbddcC>, Delete<DbddcC>);
-        zzzfff->Add("zbddc", atype<DbddcC*>());
-    }
-    map_type_of_map[make_pair(atype<DmatR*>(),atype<Complex*>())] = atype<DmatC*>();
-    map_type_of_map[make_pair(atype<DmatR*>(),atype<double*>())] = atype<DmatR*>();
-    map_type_of_map[make_pair(atype<DbddcR*>(),atype<Complex*>())] = atype<DbddcC*>();
-    map_type_of_map[make_pair(atype<DbddcR*>(),atype<double*>())] = atype<DbddcR*>();
+    map_type_of_map[make_pair(atype<DmatR*>(), atype<Complex*>())] = atype<DmatC*>();
+    map_type_of_map[make_pair(atype<DmatR*>(), atype<double*>())] = atype<DmatR*>();
+    map_type_of_map[make_pair(atype<DbddcR*>(), atype<Complex*>())] = atype<DbddcC*>();
+    map_type_of_map[make_pair(atype<DbddcR*>(), atype<double*>())] = atype<DbddcR*>();
 
     TheOperators->Add("<-", new OneOperator1_<long, Dmat*>(PETSc::initEmptyCSR<Dmat>));
     if(std::is_same<PetscInt, int>::value) {

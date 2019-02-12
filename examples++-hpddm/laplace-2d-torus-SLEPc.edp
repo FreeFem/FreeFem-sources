@@ -159,8 +159,8 @@ matrix<real> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
-dmatrix DistA(A, arrayIntersection, restrictionIntersection, D);
-dmatrix DistB(DistA, B);
+Mat DistA(A, arrayIntersection, restrictionIntersection, D);
+Mat DistB(DistA, B);
 /***************************************/
 /*          Problem resolution         */
 /***************************************/

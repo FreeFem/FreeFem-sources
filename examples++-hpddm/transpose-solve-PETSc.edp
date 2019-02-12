@@ -26,13 +26,13 @@ real[int] D;                                // partition of unity
 
 varf vPb(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(v) * u) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
 varf vPbT(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(u) * v) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
-matrix<real> Mat  = vPb(Wh, Wh);
-matrix<real> MatT = vPbT(Wh, Wh);
+matrix<real> Loc  = vPb(Wh, Wh);
+matrix<real> LocT = vPbT(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, arrayIntersection, restrictionIntersection, D);
 set(A, sparams = "");
-dmatrix AT(MatT, arrayIntersection, restrictionIntersection, D);
+Mat AT(LocT, arrayIntersection, restrictionIntersection, D);
 set(AT, sparams = "");
 Wh<real> def(u);  // local solution
 Wh<real> def(v);  // local solution

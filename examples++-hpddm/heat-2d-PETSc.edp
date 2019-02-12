@@ -32,19 +32,19 @@ real[int] D;                                // partition of unity
 }
 
 real[int] rhs(Wh.ndof);                     // local right-hand side
-matrix<real> Mat;                           // local operator
+matrix<real> Loc;                           // local operator
 matrix<real> M;                             // local mass matrix
 {                                           // local weak form
     fespace Ph(Th, P0);
     Ph f = x < 0.25 ? 1.0e+3 : 1.0e-3;
     varf vPb(u, v) = intN(Th)(u * v + dt * (grad(u)' * grad(v))) + intN(Th)(dt * f *  v) + on(1, u = 0.0);
-    Mat = vPb(Wh, Wh, tgv = -1);
+    Loc = vPb(Wh, Wh, tgv = -1);
     rhs = vPb(0, Wh, tgv = -1);
     varf vPbM(u, v) = intN(Th)(u * v);
     M = vPbM(Wh, Wh);
 }
 
-dmatrix A(Mat, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, arrayIntersection, restrictionIntersection, D);
 set(A, sparams = "-ksp_view");
 
 Wh<real> def(u) = init(0.0);    // local solution
