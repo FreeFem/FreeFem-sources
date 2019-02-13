@@ -735,7 +735,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
   //map< pair<int,int> , double > sij;
-  
+    R2 Gh(1./3,1./3);
  // for (int step=0;step<2;step++)
    {
       
@@ -755,11 +755,16 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
 	        }
 	      else 
 	       {  
-	          const Triangle *ts=0;
+	          const Triangle *ts=0,*ts0=0;
+                   // Search  barycenter
+                   bool outside;
+                   R2 G;// Add frev 2019  more cleaver F. Hecht
+                   ts0=ThV.Find(TU(Gh),G,outside,ts0);// find barycenter good if imbricated mesh ....
+                   if(outside) ts0=0; // not find
 	          for (int i=0;i<nbp;i++)
 	            {
-	              bool outside;
-	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts); 
+	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts0);
+                        if(!outside && ts0==0) ts0=ts;
 		      if(outside && verbosity>9 ) 
 		        cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
@@ -889,8 +894,8 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
     int mm=Vh.NbOfDF;
     if(transpose) Exchange(n,mm);
     m = new MatriceMorse<R>(n,mm);
-
-
+    RdHat Gh= RdHat::diag(RdHat::d+1);
+    Rd G;
     int n1=n+1;
     const  Mesh & ThU =Uh.Th; // line 
     const  Mesh & ThV =Vh.Th; // colunm
@@ -958,11 +963,15 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
 	      }
 	    else 
 	      {  
-	          const Element *ts=0;
+	          const Element *ts=0,*ts0=0;
+                  bool outside;
+                  ts=ThV.Find(Gh,G,outside,ts0);
+                  if(outside) ts0=0; // bad starting tet
 	          for (int i=0;i<nbp;i++)
 	            {
-	              bool outside;
-	              ts=ThV.Find(TU(ipmat.P[i]),PV[i],outside,ts); 
+	           
+	              ts=ThV.Find(TU(ipmat.P[i]),PV[i],outside,ts0);
+                      if( ts0 ==0 && !outside) ts0=ts;
 		      if(outside && verbosity>9 ) 
 			  cout << it << " " << i << " :: " << TU(ipmat.P[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
