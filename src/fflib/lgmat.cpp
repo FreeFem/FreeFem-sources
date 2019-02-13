@@ -894,7 +894,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
     int mm=Vh.NbOfDF;
     if(transpose) Exchange(n,mm);
     m = new MatriceMorse<R>(n,mm);
-    RdHat Gh= RdHat::diag(RdHat::d+1);
+    RdHat Gh= RdHat::diag(1./(RdHat::d+1));
     Rd G;
     int n1=n+1;
     const  Mesh & ThU =Uh.Th; // line 
@@ -965,7 +965,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
 	      {  
 	          const Element *ts=0,*ts0=0;
                   bool outside;
-                  ts=ThV.Find(Gh,G,outside,ts0);
+                  ts0=ThV.Find(TU(Gh),G,outside,ts0);
                   if(outside) ts0=0; // bad starting tet
 	          for (int i=0;i<nbp;i++)
 	            {
@@ -1039,35 +1039,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
 	    
 	    
 	  }
-/*	if (step==0)
-	  {
-	    nnz = sij.size();
-	    cl = new int[nnz];
-	    a = new double[nnz];
-	    int k=0;
-	    for(int i=0;i<n1;i++)
-		lg[i]=0;
-	    
-	    for (map<pair<int,int>, double >::iterator kk=sij.begin();kk!=sij.end();++kk)
-	      { 
-		  int i= kk->first.first;
-		  int j= kk->first.second;
-		  // cout << " Mat inter " << i << " , "<< j  << endl;
-		  cl[k]=j;
-		  a[k]= kk->second;	            
-		  lg[i+1]=++k;
-	      }
-	    assert(k==nnz);
-	    //  on bouche les ligne vide   lg[i]=0; 
-	    //  lg est un tableau croissant  =>
-	    for(int i=1;i<n1;i++)
-		lg[i]=max(lg[i-1],lg[i]) ;
-	    m->lg=lg;
-	    m->cl=cl;
-	    m->a=a;
-	    m->nnz=nnz;
-	    fait=false;
-	  }*/
+
       }
    // sij.clear();
     //assert(0); // a faire to do

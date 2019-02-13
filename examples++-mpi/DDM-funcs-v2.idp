@@ -158,7 +158,8 @@ func bool  prefix#CheckUpdate()
   Whi defPk#Pknbcomp(u,) =Times#Pknbcomp(1),defPk#Pknbcomp(v,);
   prefix#Update(u[],v[]);
   u[]-=v[];
-  if(mpirank==0) cout << "CheckUpdate  " << u[].linfty << endl;
+  if(mpirank==0 || (u[].linfty>1e-6)) 
+     cout << "CheckUpdate  " << u[].linfty << " rank: " << mpirank <<endl;
   if(u[].linfty>1e-6) plot(u,cmm="bug ????");
   assert( u[].linfty<1e-6); 
   
