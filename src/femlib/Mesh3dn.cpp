@@ -768,10 +768,10 @@ namespace Fem2D
     nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
      
     //define the type of meshes present in the data file .mesh
-    if(nTet==0 && nTri>0 /*&& nSeg>0*/) { cout << "data file contains only a surface Mesh" <<endl; typeMesh3=0; if (nSeg==0) cout << "Caution, no boundary element to apply BC " << endl;}
-    if (nTet>0 && nTri>0 && nSeg==0) { cout << "data file contains only a volume Mesh"<<endl; typeMesh3=1; }
-    if (nTet==0 && nTri>0 && nSeg==0) { cout << "data file contains only an old surface mesh3 surface"<<endl; typeMesh3=1; }
-    if(nTet>0 && nTri>0 && nSeg>0){ cout << "data file contains a volume and surface Meshes"<<endl; typeMesh3=2; }
+      if(nTet==0 && nTri>0 /*&& nSeg>0*/) { if(verbosity) {cout << "data file "<< pfile <<  " contains only a surface Mesh" <<endl; typeMesh3=0; if (nSeg==0) cout << "Caution, no boundary element to apply BC " << endl;}}
+    if (nTet>0 && nTri>0 && nSeg==0) { if(verbosity) cout << "data file "<< pfile <<  " contains only a volume Mesh"<<endl; typeMesh3=1; }
+    if (nTet==0 && nTri>0 && nSeg==0) { if(verbosity) cout << "data file "<< pfile << " contains only an old surface mesh3 surface"<<endl; typeMesh3=1; }
+    if(nTet>0 && nTri>0 && nSeg>0){ if(verbosity) cout << "data file "<< pfile << " contains a volume and surface Meshes"<<endl; typeMesh3=2; }
     // By default, there is a mesh3 volume mesh. If pure surface mesh, mesh3 is empty except to the pointer on meshS
     // Initialize num of vertice, tetra, triang in the volume mesh
     this->set(nv,nTet,nTri);
