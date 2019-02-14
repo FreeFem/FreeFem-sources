@@ -271,7 +271,7 @@ public:
 
 			PlotStream theplot(ThePlotStream);
 
-			if (mpirank == 0) {
+			if (mpirank == 0 && ThePlotStream) {
 				theplot.SendNewPlot();
 				theplot << 3L;
 				theplot <= wait;
@@ -284,7 +284,7 @@ public:
 			}
 
 			if (!H || !(*H)) {
-				if (mpirank == 0) {
+				if (mpirank == 0&& ThePlotStream) {
 					theplot << 0;
 					theplot << 0;
 					theplot << 0L;
@@ -359,7 +359,7 @@ public:
 
 				MPI_Gatherv(rankworld==0?MPI_IN_PLACE:bufcomp, recvcounts[rankworld], MPI_DOUBLE, bufcomp, recvcounts, displs, MPI_DOUBLE, 0, (*H)->get_comm());
 
-				if (mpirank == 0) {
+				if (mpirank == 0 && ThePlotStream ) {
 
 					int si = (*H)->nb_rows();
 					int sj = (*H)->nb_cols();
