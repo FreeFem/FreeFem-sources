@@ -846,9 +846,9 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
    whatd[op]=true; // the value of function
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
-  map< pair<int,int> , double > sij; 
-  
-  for (int step=0;step<2;step++) 
+  map< pair<int,int> , double > sij;
+    R2 Gh(1./3,1./3);
+ // for (int step=0;step<2;step++)
    {
       
 	  for (int it=0;it<ThU.nt;it++)
@@ -867,11 +867,16 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	        }
 	      else 
 	       {  
-	          const Triangle *ts=0;
+	          const Triangle *ts=0,*ts0=0;
+                   // Search  barycenter
+                   bool outside;
+                   R2 G;// Add frev 2019  more cleaver F. Hecht
+                   ts0=ThV.Find(TU(Gh),G,outside,ts0);// find barycenter good if imbricated mesh ....
+                   if(outside) ts0=0; // not find
 	          for (int i=0;i<nbp;i++)
 	            {
-	              bool outside;
-	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts); 
+	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts0);
+                        if(!outside && ts0==0) ts0=ts;
 		      if(outside && verbosity>9 ) 
 		        cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
@@ -938,8 +943,6 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
 	       
 	       
 	    }
-	    if (step==0)
-	     {
 	         nbcoef = sij.size();
 	         cl = new int[nbcoef];
 	         a = new double[nbcoef];
@@ -966,7 +969,6 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace & Uh,const FESpa
              m->a=a;
              m->nbcoef=nbcoef;
              fait=false;
-	     }
     }
     sij.clear();
   //assert(0); // a faire to do
@@ -1003,6 +1005,8 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     int n=Uh.NbOfDF;
     int mm=Vh.NbOfDF;
     if(transpose) Exchange(n,mm);
+    RdHat Gh= RdHat::diag(1./(RdHat::d+1));
+    Rd G;
     m->symetrique = false;
     m->dummy=false;
     m->a=0;
@@ -1033,24 +1037,14 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     FElement Uh0 = Uh[0];
     FElement Vh0 = Vh[0];
     
-   // FElement::aIPJ ipjU(Uh0.Pi_h_ipj()); 
-   // FElement::aR2  PtHatU(Uh0.Pi_h_R2()); 
-    
-    //  FElement::aIPJ ipjV(Vh0.Pi_h_ipj()); 
-    // FElement::aR2  PtHatV(Vh0.Pi_h_R2()); 
     
     int nbdfVK= Vh0.NbDoF();
-    //  int nbdfUK= Uh0.NbDoF();
     int NVh= Vh0.N;
-   // int NUh= Uh0.N;
-    
-    //ffassert(NVh==NUh); 
     
     InterpolationMatrix<RdHat> ipmat(Uh);    
   
     int nbp=ipmat.np; // 
-    //  int nbc= ipjU.N(); // 
-    KN<RdHat> PV(nbp);   //  the PtHat in ThV mesh
+     KN<RdHat> PV(nbp);   //  the PtHat in ThV mesh
     KN<int> itV(nbp); // the Triangle number
     KN<bool> intV(nbp); // ouside or not 
    // KN<R>   AipjU(ipjU.N());
@@ -1063,14 +1057,11 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
     KN<R> kv(sfb1*nbp);
     R * v = kv;
     KN<int> ik(nbp); // the Triangle number
-    //   KNMK_<R> fb(v+ik[i],VhV0.NbDoF,VhV0.N,1); //  the value for basic fonction
-    op= op==3 ? op_dz : op; //   renumber op ????  dec 2010 FH. 
+    op= op==3 ? op_dz : op; //   renumber op ????  dec 2010 FH.
     What_d whatd= 1<< op;
     KN<bool> fait(Uh.NbOfDF);
     fait=false;
     map< pair<int,int> , double > sij; 
-    for (int step=0;step<2;step++) 
-      {
 	
 	for (int it=0;it<ThU.nt;it++)
 	  {
@@ -1089,11 +1080,15 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	      }
 	    else 
 	      {  
-	          const Element *ts=0;
+	          const Element *ts=0,*ts0=0;
+                  bool outside;
+                  ts0=ThV.Find(TU(Gh),G,outside,ts0);
+                  if(outside) ts0=0; // bad starting tet
 	          for (int i=0;i<nbp;i++)
 	            {
-	              bool outside;
-	              ts=ThV.Find(TU(ipmat.P[i]),PV[i],outside,ts); 
+	           
+	              ts=ThV.Find(TU(ipmat.P[i]),PV[i],outside,ts0);
+                      if( ts0 ==0 && !outside) ts0=ts;
 		      if(outside && verbosity>9 ) 
 			  cout << it << " " << i << " :: " << TU(ipmat.P[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
@@ -1160,8 +1155,6 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	    
 	    
 	  }
-	if (step==0)
-	  {
 	    nbcoef = sij.size();
 	    cl = new int[nbcoef];
 	    a = new double[nbcoef];
@@ -1188,8 +1181,6 @@ void buildInterpolationMatrix(MatriceMorse<R> * m,const FESpace3 & Uh,const FESp
 	    m->a=a;
 	    m->nbcoef=nbcoef;
 	    fait=false;
-	  }
-      }
     sij.clear();
     //assert(0); // a faire to do
 }
