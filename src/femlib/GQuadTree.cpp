@@ -616,7 +616,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   const int d=Rd::d;
   R dP=DBL_MAX, nddd=0;
   Rd PPhat,Delta;
-  int k=0;    
+  int k=0;
+    const int nReStartMax = 1 << Rd::d; //  Nb vertex of the d-cube/
     int nReStart = 0;
     int itstart[100],itout[100],kstart=0;
     Rd Pout[100];
@@ -780,14 +781,8 @@ RESTART:
           // Mod.  23/02/2016 F. H
        itout[kstart-1]= it;
        Pout[kstart-1]=Phat;
-       while(nReStart++ < 8)
-        {
- /*            if(nReStart==1)
-            {
-                Delta =(P-Th[it](Phat));
-                nddd=Norme2(Delta);
-            }
-            else*/
+       while(nReStart++ < nReStartMax)
+        {// Loop on the vertex of a d-hyper-cude
             {
                 int k= nReStart-1;
                 int i = (nReStart-2)/2;
@@ -804,16 +799,14 @@ RESTART:
             Rd PP= P + Delta;
             Vertex* v=quadtree->NearestVertex(PP);
             if( nddd ==0)  nddd= Norme2(P-*v);
-           // if(!v) v=quadtree->NearestVertex(PP);
             it=Th.Contening(v);
             bool same=false;
 
             for(int j=0;j<kstart ; ++j)
                 if( it == itstart[j]) {same=true; break;}
             if( verbosity>199)
-                cout << "   loop Search "<<nReStart << " Delta" <<  Delta << " it " << it << endl;
+                cout << "   loop Search "<<nReStart << P << " Delta" <<  Delta << " it " << it << " same "<< same << endl;
             if(same) continue;
-            if( verbosity>199) cout << " Restart tet: " << it << " " << P << endl;
             if(Rd::d==2)  npichon2d1++;
             if(Rd::d==3)  npichon3d1++;
             
