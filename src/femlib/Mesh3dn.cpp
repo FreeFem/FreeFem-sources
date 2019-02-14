@@ -735,7 +735,7 @@ namespace Fem2D
     char *data = new char[filename.size()+1];
     size_t ssize = filename.size()+1;
     char *ptr;
-    char *pfile;
+    char *pfile=data;
     strncpy( data, filename.c_str(),ssize);
     ptr = strstr(data,".mesh");
     if( !ptr ){
