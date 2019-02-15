@@ -64,7 +64,7 @@ class assembleHMatrix : public OneOperator { public:
 	public:
 		Expression a,b;
 
-		static const int n_name_param = 4;
+		static const int n_name_param = 6;
 		static basicAC_F0::name_and_type name_param[] ;
 		Expression nargs[n_name_param];
 		bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
@@ -93,7 +93,9 @@ class assembleHMatrix : public OneOperator { public:
 		{  "epsilon", &typeid(double)},
 		{  "eta", &typeid(double)},
 		{  "minclustersize", &typeid(long)},
-		{  "maxblocksize", &typeid(long)}
+		{  "maxblocksize", &typeid(long)},
+		{  "mintargetdepth", &typeid(long)},
+		{  "minsourcedepth", &typeid(long)}
 	};
 
 	/*
@@ -143,6 +145,8 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	double eta=mi->arg(1,stack,htool::Parametres::eta);
 	int minclustersize=mi->argl(2,stack,htool::Parametres::minclustersize);
 	int maxblocksize=mi->argl(3,stack,htool::Parametres::eta);
+	int mintargetdepth=mi->argl(4,stack,htool::Parametres::mintargetdepth);
+	int minsourcedepth=mi->argl(5,stack,htool::Parametres::minsourcedepth);
 
 	ffassert(einter);
 	pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
@@ -180,6 +184,8 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	SetMinClusterSize(minclustersize);
 	SetEpsilon(epsilon);
 	SetEta(eta);
+	SetMinTargetDepth(mintargetdepth);
+	SetMinSourceDepth(minsourcedepth);
 
 	if (init)
 	delete *Hmat;
@@ -411,11 +417,10 @@ basicAC_F0::name_and_type  plotHMatrix<LR, K>::Op::name_param[]= {
 };
 
 template<template<class> class LR, class K>
-void add() {
+void add(const char* namec) {
 	Dcl_Type<HMatrix<LR ,K>**>(Initialize<HMatrix<LR,K>*>, Delete<HMatrix<LR,K>*>);
 	Dcl_TypeandPtr<HMatrix<LR ,K>*>(0,0,::InitializePtr<HMatrix<LR ,K>*>,::DeletePtr<HMatrix<LR ,K>*>);
 	//TheOperators->Add("<-", new init<LR,K>);
-	zzzfff->Add("HMatrix", atype<HMatrix<LR,K>**>());
 	Dcl_Type<const typename assembleHMatrix<LR, K>::Op *>();
 	Add<const typename assembleHMatrix<LR, K>::Op *>("<-","(", new assembleHMatrix<LR, K>);
 
@@ -423,11 +428,10 @@ void add() {
 	new OneOperator2_<HMatrix<LR ,K>**,HMatrix<LR ,K>**,const typename assembleHMatrix<LR, K>::Op*,E_F_StackF0F0>(SetHMatrix<LR, K, 1>));
 	TheOperators->Add("<-",
 	new OneOperator2_<HMatrix<LR ,K>**,HMatrix<LR ,K>**,const typename assembleHMatrix<LR, K>::Op*,E_F_StackF0F0>(SetHMatrix<LR, K, 0>));
-	Global.Add("assemble","(",new assembleHMatrix<LR, K>);
+	Global.Add(namec,"(",new assembleHMatrix<LR, K>);
 
 	//atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
 	Add<HMatrix<LR ,K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrix<LR ,K>**>(get_infos));
-	Add<std::map<std::string, std::string>*>("[","",new OneOperator2_<string*, std::map<std::string, std::string>*, string*>(get_info));
 
 	Dcl_Type<Prod<KN<K>*, LR, K>>();
 	TheOperators->Add("*", new OneOperator2<Prod<KN<K>*, LR, K>, HMatrix<LR ,K>**, KN<K>*>(Build));
@@ -440,7 +444,14 @@ void add() {
 static void Init_Schwarz() {
 	Dcl_Type<std::map<std::string, std::string>*>( );
 	TheOperators->Add("<<",new OneBinaryOperator<PrintPinfos<std::map<std::string, std::string>*>>);
-	add<partialACA,double>();
+	Add<std::map<std::string, std::string>*>("[","",new OneOperator2_<string*, std::map<std::string, std::string>*, string*>(get_info));
+
+	add<partialACA,double>("assemble");
+	add<partialACA,std::complex<double>>("assemblecomplex");
+
+	zzzfff->Add("HMatrix", atype<HMatrix<partialACA ,double>**>());
+	map_type_of_map[make_pair(atype<HMatrix<partialACA ,double>**>(), atype<double*>())] = atype<HMatrix<partialACA ,double>**>();
+	map_type_of_map[make_pair(atype<HMatrix<partialACA ,double>**>(), atype<Complex*>())] = atype<HMatrix<partialACA ,std::complex<double>>**>();
 }
 
 LOADFUNC(Init_Schwarz)
