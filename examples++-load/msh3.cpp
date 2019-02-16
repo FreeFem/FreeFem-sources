@@ -288,7 +288,7 @@ int TestElementMesh3 (const Mesh3 &Th3) {
 	for (int k = 0; k < Th3.nbe; k++) {
 		for (int e = 0; e < 3; e++) {
 			if (Th3.be(k).lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
-				for (int eh = 0; eh < 3; e++) {
+				for (int eh = 0; eh < 3; eh++) {
 					cout << "triangles: " << k << " edge : " << eh << " lenght " << Th3.be(k).lenEdge(e) << endl;
 				}
 
@@ -5266,7 +5266,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
 			tagTonB[itt] |= tagb[ifff];
 		}
 	}
-
+    int nerr=0;
 	for (int i = 0; i < Th.nt; i++) {
 		if (split[i]) {
 			++ntsplit;
@@ -5292,12 +5292,17 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
 			}
 
 			for (int e = 0; e < 6; e++) {
-				hmin = min(hmin, Th[i].lenEdge(e));	// calcul de .lenEdge pour un Mesh3
+                            double he =Th[i].lenEdge(e);
+                            if( he ==0 &&  nerr ++ < 10)
+                            {
+                                    cerr  << "  Trunc 3d:  egde "<< e << " of " << i << " tet is degenerated\n";
+                            }
+				hmin = min(hmin,he );	// calcul de .lenEdge pour un Mesh3
 			}
 		}
 	}
 
-	ffassert(nbfi % 2 == 0);
+	ffassert(nbfi % 2 == 0 && nerr==0 );
 	nface = nbeee + nbfi / 2;
 	double hseuil = (hmin / kksplit) / 1000.;
 	if (verbosity > 5) {
@@ -5440,7 +5445,11 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
 					} else {
 						newindex[iv] = pvi - v;
 					}
-
+                                    if(np>nv) {
+                                        cout << " bug in tet "<< i << " vertices ="
+                                        << Th(i,0)<< " " << Th(i,1)<< " " << Th(i,2)<< " " << Th(i,3) << endl
+                                        << " np = " << np << " " << nv << " " << hseuil << endl;
+                                    }
 					ffassert(np <= nv);
 				}
 
