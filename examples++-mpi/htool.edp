@@ -1,12 +1,12 @@
 load "htool"
 
-mesh Th = square(40,40);
+mesh Th = square(80,80);
 
 fespace Uh(Th,P1);
 
 Uh<real> u,v,d;
 
-HMatrix A;
+HMatrix<real> A;
 HMatrix H;
 
 v = 1;
@@ -15,8 +15,8 @@ for (int i=0; i<5; i++) {
   mesh Th2 = movemesh(Th,[x+0.4*i,y]);
   fespace Uh2(Th2,P1);
 
-  A = assemble(Uh,Uh2,eta=-1);
-  H = assemble(Uh,Uh2,eta=1e+0,epsilon=1e-3,minclustersize=10);
+  A = assemble(Uh,Uh2,eta=-1,minclustersize=20,maxblocksize=1000000);
+  H = assemble(Uh,Uh2,eta=1e+0,epsilon=1e-3,minclustersize=20,maxblocksize=1000000);
 
   u[] = A*v[];
   d[] = H*v[];
