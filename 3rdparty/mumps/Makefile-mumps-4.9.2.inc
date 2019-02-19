@@ -1,6 +1,6 @@
 abs_top_builddir=/Volumes/Ike/cazeaux/ff++/
 include $(abs_top_builddir)/3rdparty/headers-sparsesolver.inc
-DOWNLOADFF= $(abs_top_builddir)/download
+DOWNLOADFF= $(abs_top_builddir)/3rdparty
 ###############################################################################
 #
 #  This file is part of MUMPS 4.9.2, built on Thu Nov  5 07:05:08 UTC 2009

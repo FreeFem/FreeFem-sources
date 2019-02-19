@@ -1,6 +1,6 @@
 
 abs_top_builddir=@abs_top_builddir@
-DOWNLOADFF= $(abs_top_builddir)/download
+DOWNLOADFF= $(abs_top_builddir)/3rdparty
 
 #
 #  This file is part of MUMPS 4.10.0, built on Tue May 10 12:56:32 UTC 2011
@@ -12,7 +12,7 @@ DOWNLOADFF= $(abs_top_builddir)/download
 #   This defines some parameters dependent on your platform; you should
 #   look for the approriate file in the directory ./Make.inc/ and copy it
 #   into a file called Makefile.inc. For example, from the MUMPS root
-#   directory, use 
+#   directory, use
 #   "cp Make.inc/Makefile.inc.generic ./Makefile.inc"
 #   (see the main README file for details)
 #
@@ -48,7 +48,7 @@ ISCOTCH    = #-I$(SCOTCHDIR)/include/scotch
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dscotch in the ORDERINGSF
-# variable below); for both parallel and sequential analysis choose the second 
+# variable below); for both parallel and sequential analysis choose the second
 # line (remember to add -Dptscotch in the ORDERINGSF variable below)
 
 #LSCOTCH    = -L$(SCOTCHDIR)/lib/scotch/ -lesmumps -lscotch -lscotcherr
@@ -65,7 +65,7 @@ LMETISDIR = $(DOWNLOADFF)
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dmetis in the ORDERINGSF
-# variable below); for both parallel and sequential analysis choose the second 
+# variable below); for both parallel and sequential analysis choose the second
 # line (remember to add -Dparmetis in the ORDERINGSF variable below)
 
 LMETIS    = # -L$(LMETISDIR)/lib -lparmetis -lmetis
@@ -89,19 +89,19 @@ PLAT    = FREEFEM-SEQ
 # Library extension, + C and Fortran "-o" option
 # may be different under Windows
 LIBEXT  = .a
-OUTC    = -o 
-OUTF    = -o 
+OUTC    = -o
+OUTF    = -o
 # RM : remove files
 RM      = /bin/rm -f
 # CC : C compiler
 CC      = @CC@
 # FC : Fortran 90 compiler
-FC      = @FC@ 
+FC      = @FC@
 # FL : Fortran linker
-FL      = @FC@ 
+FL      = @FC@
 # AR : Archive object in a library
 #      keep a space at the end if options have to be separated from lib name
-AR      =   @AR@ @ARFLAGS@ 
+AR      =   @AR@ @ARFLAGS@
 # RANLIB : generate index of an archive file
 #   (optionnal use "RANLIB = echo" in case of problem)
 RANLIB  = @RANLIB@
@@ -128,7 +128,7 @@ LIBSEQ  = -L$(DOWNLOADFF)//mumps-seq/MUMPS_4.10.0/libseq  -lmpiseq$(PLAT)
 LIBBLAS =  @BLASLIBS@
 
 # DEFINE YOUR PTHREAD LIBRARY
-LIBOTHERS = @LIBSPTHREAD@ @FLIBS@ $(FFLIBOTHERSMUMPS) 
+LIBOTHERS = @LIBSPTHREAD@ @FLIBS@ $(FFLIBOTHERSMUMPS)
 LIBSPTHREAD = @LIBSPTHREAD@
 
 # FORTRAN/C COMPATIBILITY:
@@ -146,9 +146,9 @@ LIBSPTHREAD = @LIBSPTHREAD@
 CDEFS = @CFLAGSF77@
 
 #COMPILER OPTIONS
-OPTF    = -O @FFLAGS@ 
-OPTC    = -O -I. @CFLAGS@  
-OPTL    = -O @FFLAGS@ 
+OPTF    = -O @FFLAGS@
+OPTC    = -O -I. @CFLAGS@
+OPTL    = -O @FFLAGS@
 
 
 # CHOOSE BETWEEN USING THE SEQUENTIAL OR THE PARALLEL VERSION.

@@ -1,4 +1,4 @@
-FFDOWNLOAD=@abs_builddir@/download
+FFDOWNLOAD=@abs_builddir@/3rdparty
 CC=@CC@
 CXX=@CXX@
 WGET=@WGET@
