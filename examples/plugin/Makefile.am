@@ -164,7 +164,7 @@ else
 include.done: $(allheaders)
 	-rm -rf include
 	mkdir -p  include
-	for i in $(allheaders); do  ln -s ../../$$i include/. ; done
+	for i in $(allheaders); do  ln -s ../$$i include/. ; done
 	touch $@
 endif
 
