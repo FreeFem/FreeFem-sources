@@ -888,7 +888,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         }
         if(uncorrect==0) break;
     }
-    if( nbchangeorient && verbosity) cout << " Warning change oriantation of " << nbchangeorient << " faces \n";
+    if( nbchangeorient && verbosity) cout << " Warning change orientation of " << nbchangeorient << " faces \n";
     if( kerr || kerrf ) {
         cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
         cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";

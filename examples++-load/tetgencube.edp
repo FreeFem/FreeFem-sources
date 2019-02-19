@@ -54,13 +54,13 @@ mesh3 Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],label=ref33b,orientation
 ////////////////////////////////
 mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
 //medit("glumesh",Th33);
-savemesh(Th33,"Th33.mesh");
+savemesh(Th33,"o/Th33.mesh");
 
 // build a mesh of a axis parallel box with TetGen
 //real[int] domaine = [1.5,pi,0.75,145,0.001];
 //mesh3 Thfinal = tetg(Th33,switch="pqaAAYYQ",nbofregions=1,regionlist=domaine);    // Tetrahelize the interior of the cube with tetgen
 //medit("tetg",Thfinal);
-//savemesh(Thfinal,"Thfinal.mesh");
+//savemesh(Thfinal,"o/Thfinal.mesh");
 
 
 // build a mesh of a half cylindrical shell of interior radius 1. and exterior radius 2 and heigh 1.5
@@ -68,14 +68,14 @@ func mv2x = x*cos(y);
 func mv2y = x*sin(y);
 func mv2z = z;
 //mesh3 Thmv2 = movemesh3(Thfinal, transfo=[mv2x,mv2y,mv2z]);
-//savemesh(Thmv2,"halfcylindricalshell.mesh");
+//savemesh(Thmv2,"o/halfcylindricalshell.mesh");
 verbosity=2;
 mesh3 Thmv2surf = movemesh(Th33, [mv2x,mv2y,mv2z], facemerge=0);
 cout << "\b\b Thmv2surf.measure=" << Thmv2surf.measure << endl;
 cout << " Thmv2surf.bordermeasure=" << Thmv2surf.bordermeasure << endl;
 
 medit("maiAllagesurf",Thmv2surf,wait=1);
-//savemesh(Thmv2surf,"maillagesurfacecylindre.mesh");
+//savemesh(Thmv2surf,"o/maillagesurfacecylindre.mesh");
 //medit("maillageplein",Thmv2);
 
 

@@ -38,7 +38,7 @@ verbosity=1;
   + on(1,2,3,4,uh=g) ;                      //  boundary condition form
 
   laplace; // solve the problem plot(uh); // to see the result
-  plot(uh,ps="LaplaceP4.eps",value=true);
+  plot(uh,ps="o/LaplaceP4.eps",value=true);
 
   real[int,int] qq1=[ [0.5,0],
                       [0.5,1]];

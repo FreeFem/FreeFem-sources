@@ -40,4 +40,4 @@ for(int i=0; i<nIter; i++){
 	massRef=ratio*massRef;
 }
 
-plot(Th, wait=1, ps="triangulationEpsDelta.ps");
+plot(Th, wait=1, ps="o/triangulationEpsDelta.ps");

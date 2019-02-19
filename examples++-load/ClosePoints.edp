@@ -47,7 +47,7 @@ real regtest;
   int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively . 
   plot(bb(nn),cc(NC),wait=1);
   mesh th= buildmesh(bb(nn)+cc(NC), points=P,nbvx=100000) ; 
-  plot(th,wait=1,ps="multy-border+internal.eps"); 
+  plot(th,wait=1,ps="o/multy-border+internal.eps"); 
   regtest = th.area; 
   real eps= 0.01;
   //dumptable(cout);

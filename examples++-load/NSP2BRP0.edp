@@ -33,7 +33,7 @@ varf NS ([u1,u2,p],[v1,v2,q],init=i) =
   matrix A= NS(Wh,Wh,solver=UMFPACK); 
   real[int] b=  NS(0,Wh); 
   u1[] = A^-1*b;
-plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="StokesP2P1.eps",value=1,wait=1);
+plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="o/StokesP2P1.eps",value=1,wait=1);
 {
   real[int] xx(21),yy(21),pp(21);
   for (int i=0;i<21;i++)
@@ -66,7 +66,7 @@ for (iter=1;iter<=nbiter;iter++)
 	 u1[] = A^-1*b; 
      //NS;
      if ( !(i % 10)) 
-     plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="plotNS_"+iter+"_"+i+".eps");  
+     plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="o/plotNS_"+iter+"_"+i+".eps");  
      cout << "CPU " << clock()-s0 << "s " << endl;     
    } 
  
@@ -74,7 +74,7 @@ for (iter=1;iter<=nbiter;iter++)
  
   Th=adaptmesh(Th,[u1,u2],iso=0,
               abserror=0,cutoff=cut,err=tol, inquire=0,ratio=1.5,hmin=1./1000);
-  plot(Th,ps="ThNS.eps");
+  plot(Th,ps="o/ThNS.eps");
   dt = dt*coefdt;
   tol = tol *coeftol;
   cut = cut *coefcut;

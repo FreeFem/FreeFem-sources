@@ -8,7 +8,7 @@ Vh u =1,v, e=y;
 u[] = ong ? 0 : u[]; 
 //plot(u,wait=1);
 //verbosity = 10000; 
-//savemesh(Th,"Th.msh"); 
+//savemesh(Th,"o/Th.msh"); 
 distance(Th,u,v[]);
 //for (int i=0;i<v[].n; ++i)
 // cout << i << " " << v[][i] << " "<< e[][i] <<  endl;  

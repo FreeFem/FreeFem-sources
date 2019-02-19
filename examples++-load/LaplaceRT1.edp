@@ -38,5 +38,5 @@ problem laplaceMixte([u1,u2,p],[v1,v2,q],solver=UMFPACK,eps=1.0e-10,tgv=1e30,dim
  + on(4,u1=g1n,u2=g2n);
 
  laplaceMixte;
- plot([u1,u2],coef=0.1,wait=1,ps="lapRTuv.eps",value=true); 
- plot(p,fill=1,wait=1,ps="laRTp.eps",value=true);  
+ plot([u1,u2],coef=0.1,wait=1,ps="o/lapRTuv.eps",value=true); 
+ plot(p,fill=1,wait=1,ps="o/laRTp.eps",value=true);  

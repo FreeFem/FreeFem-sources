@@ -36,12 +36,12 @@ for(int i=1;i<4;i++)
     real cc=10;
     Th=adaptmesh(Th,cc*m11,cc*m12,cc*m22,IsMetric=1,inquire=1,hmin=0.00001,nbvx=1000000);
     cout << m11[].max << " " << m12[].max << " " << m22[].max << endl;
-    plot(Th,wait=1,ps="Th.eps");
+    plot(Th,wait=1,ps="o/Th.eps");
     plot(f2,wait=1);
     Ph eh = (abs(f2-f));
     Ph leh= log10(eh);
     real[int] viso=[-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1];
-    plot(leh,fill=1,wait=1,viso=viso,value=1,ps="leh.eps");
+    plot(leh,fill=1,wait=1,viso=viso,value=1,ps="o/leh.eps");
     cout << i << " .... " << eh[].min << " "<< eh[].max << " "<< eh[].sum/eh[].n << " " 
          << int2d(Th)(eh)/Th.area << " " << Th.nt << " " << Th.nv << endl;
   }
@@ -60,12 +60,12 @@ real regtest;
     real cc=10;
     Th=adaptmesh(Th,f,err=cerr,inquire=1,hmin=0.00001,nbvx=1000000);
     cout << m11[].max << " " << m12[].max << " " << m22[].max << endl;
-    plot(Th,wait=1,ps="Th2.eps");
+    plot(Th,wait=1,ps="o/Th2.eps");
     plot(f2,wait=1);
     Ph eh = (abs(f2-f));
     Ph leh= log10(eh);
     real[int] viso=[-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1];
-    plot(leh,fill=1,wait=1,viso=viso,value=1,ps="leh2.eps");
+    plot(leh,fill=1,wait=1,viso=viso,value=1,ps="o/leh2.eps");
     cout << i << " .... " << eh[].min << " "<< eh[].max << " "<< eh[].sum/eh[].n << " " 
          << int2d(Th)(eh)/Th.area << " " << Th.nt << " " << Th.nv << endl;
     regtest=eh[]'*eh[];//'

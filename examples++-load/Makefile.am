@@ -100,7 +100,7 @@ bin_PROGRAMS= @BIN_ffmaster@
 
 # FFCS parallel make: some targets need to be built first, sequentially
 
-load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
+load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref o
 #
 # max_load
 	-@rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null || true
@@ -169,6 +169,7 @@ include.done: $(allheaders)
 endif
 
 clean-local::
+	-rm -r o
 	-rm -r include
 	-rm include.done
 
@@ -230,6 +231,10 @@ WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
 WHERE_LIBRARY:
 	touch $@
 FORCE: ;
+o:
+	-mkdir o
+	test -d o
+
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
 	echo includepath += \"../examples++-3d/\" >freefem++.pref

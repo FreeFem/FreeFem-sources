@@ -3433,59 +3433,59 @@ public:
 			args.SetNameParam(n_name_param,name_param,nargs);
 		}
 
-		AnyType operator()(Stack stack) const{
-
-			if (mpirank == 0) {
-				Matrice_Creuse<K>* A =GetAny<Matrice_Creuse<K>* >((*a)(stack));
-				bool wait = arg(0,stack,false);
-
-				PlotStream theplot(ThePlotStream);
-				theplot.SendNewPlot();
-				theplot << 3L;
-				theplot <= wait;
-				theplot.SendEndArgPlot();
-				theplot.SendMeshes();
-				theplot << 0L;
-				theplot.SendPlots();
-				theplot << 1L;
-				theplot << 31L;
-
-				HashMatrix<int,K>* ph=A->pHM();
-
-        if (!ph) {
-          theplot << 0;
-          theplot << 0;
-          theplot << 0L;
-          theplot << 0L;
-        }
-        else {
-          theplot << (int)ph->n;
-          theplot << (int)ph->m;
-          theplot << (long)ph->nnz;
-          theplot << 0L;
-
-          for (int i=0;i<ph->nnz;i++) {
-            theplot << ph->i[i];
-            theplot << ph->j[i];
-            theplot << 1;
-            theplot << 1;
-          }
-        }
-
-				theplot.SendEndPlot();
-
-			}
-
-			return 0L;
-		}
-	};
-
-	plotMatrix() : OneOperator(atype<long>(),atype<Matrice_Creuse<K>*>()) {}
-
-	E_F0 * code(const basicAC_F0 & args) const
-	{
-		return  new Op(args,t[0]->CastTo(args[0]));
-	}
+            AnyType operator()(Stack stack) const{
+                
+                if (mpirank == 0 && ThePlotStream) {
+                    Matrice_Creuse<K>* A =GetAny<Matrice_Creuse<K>* >((*a)(stack));
+                    bool wait = arg(0,stack,false);
+                    
+                    PlotStream theplot(ThePlotStream);
+                    theplot.SendNewPlot();
+                    theplot << 3L;
+                    theplot <= wait;
+                    theplot.SendEndArgPlot();
+                    theplot.SendMeshes();
+                    theplot << 0L;
+                    theplot.SendPlots();
+                    theplot << 1L;
+                    theplot << 31L;
+                    
+                    HashMatrix<int,K>* ph=A->pHM();
+                    
+                    if (!ph) {
+                        theplot << 0;
+                        theplot << 0;
+                        theplot << 0L;
+                        theplot << 0L;
+                    }
+                    else {
+                        theplot << (int)ph->n;
+                        theplot << (int)ph->m;
+                        theplot << (long)ph->nnz;
+                        theplot << 0L;
+                        
+                        for (int i=0;i<ph->nnz;i++) {
+                            theplot << ph->i[i];
+                            theplot << ph->j[i];
+                            theplot << 1;
+                            theplot << 1;
+                        }
+                    }
+                    
+                    theplot.SendEndPlot();
+                    
+                }
+                
+                return 0L;
+            }
+        };
+    
+    plotMatrix() : OneOperator(atype<long>(),atype<Matrice_Creuse<K>*>()) {}
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        return  new Op(args,t[0]->CastTo(args[0]));
+    }
 };
 
 template<class K>

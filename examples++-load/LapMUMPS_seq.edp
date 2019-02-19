@@ -26,7 +26,7 @@ for(int i=0; i<40;++i)
 //verbosity=1;
   uh[]=A^-1*b; // solve the problem plot(uh); // to see the result
   cout << "uh[] " << uh[].linfty << endl;
-  plot(uh,ps="LaplaceP3.eps",value=true);
+  plot(uh,ps="o/LaplaceP3.eps",value=true);
   if(verbosity>9)
  for(int i=0; i<40;++i)
    {

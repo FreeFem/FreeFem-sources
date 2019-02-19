@@ -24,12 +24,12 @@ solve laplacep(uh,vh,solver=CG,tgv=1e5) =      //  definion of  the problem
 
 cout << "vtk information" << endl;
 int[int] fforder=[0,0,1,0,1];
-savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
+savevtk("o/disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
 
 
 mesh3 Th3;
 try {
-Th3=readmesh3("spherewithahole.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
+Th3=readmesh3("o/spherewithahole.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
 }
 catch (...) {
   // FFCS - path to example scripts are changed, so this needs to be in the local directory to be common to FF and FFCS
@@ -46,6 +46,6 @@ fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;
 int[int] fforder2=[0,0,1,1];
 verbosity=6;
-savevtk("bidule.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45"); // The fourth solution Have no name. This name is vector4 (4 ==> fourth solution and vector ==> vector solution).
+savevtk("o/bidule.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45"); // The fourth solution Have no name. This name is vector4 (4 ==> fourth solution and vector ==> vector solution).
 
 savegmsh(Th3,"Th3");

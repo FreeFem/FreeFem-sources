@@ -3099,7 +3099,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
 
-        if (orientation < 0) {swap(iv[1], iv[2]);}
+        if (orientation < 0) {swap(iv[0], iv[1]);}
 
         bb->set(v, iv, lab);
         mesb += bb++->mesure();
@@ -3108,7 +3108,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
 
     assert(i_border == nbe_t);
     if (mes < 0) {
-        cerr << " E rror of mesh orientation , current orientation = " << orientation << endl;
+        cerr << " Error of mesh orientation , current orientation = " << orientation << endl;
         cerr << " volume mesh = " << mes << endl;
         cerr << " surface border mesh = " << mesb << endl;
         ErrorExec(" movemesh 3d ", 1);
@@ -3634,10 +3634,10 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
 
 	if (verbosity > 1) cout << " debut: SamePointElement " << endl;
     // gestion of recollement ????
-    SamePointElement_Mesh2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border /*recollement_element*/, recollement_border, point_confondus_ok,
+    SamePointElement_Mesh2New(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border /*recollement_element*/, recollement_border, point_confondus_ok,
                            Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
 
-    if (verbosity > 1) cout << " fin: SamePointElement " << endl;
+    if (verbosity > 1) cout << " fin: SamePointElement (New) " << endl;
 	cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl;
 
 	Vertex3 *v = new Vertex3[nv_t];
@@ -3826,7 +3826,7 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
 }
 
 // FIN OLD V3
-void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh &Th2,
+void SamePointElement_Mesh2New(const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh &Th2,
                             int &recollement_element, int &recollement_border, int &point_confondus_ok,
                             int *Numero_Som, int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t,
                             int *label_nt_t, int *label_nbe_t, int &nv_t, int &nt_t, int &nbe_t) {
@@ -3835,7 +3835,7 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
 	R3 bmin, bmax;
 	double hmin, hmin_elem, hmin_border;
 
-	if (verbosity > 1) {cout << "calculus of bound and minimal distance" << endl;}
+	if (verbosity > 1) {cout << "   calculus of bound and minimal distance (new)" << endl;}
 
 	BuildBoundMinDist_th2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, bmin, bmax, hmin);
 	// assertion pour la taille de l octree
@@ -3965,9 +3965,9 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
 
         for (int jj = 0; jj < 2; jj++) iv[jj] = Th2.operator () (K[jj]);
 
-        Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]]) / 3.;
-        Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]]) / 3.;
-        Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]]) / 3.;
+          Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]])/2. ;// BUG /// + tab_XX[iv[2]]) / 3.;
+          Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]])/2; //+ tab_YY[iv[2]]) / 3.;
+          Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]])/2.; // + tab_ZZ[iv[2]]) / 3.;
 
         label_be[i_border] = K.lab;
       }
@@ -3977,7 +3977,7 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
 
       PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be, bmin, bmax, hmin_border,
                               ind_np, label_nbe_t, np);
-        if (verbosity > 1) cout << "points commun finis " << endl;
+        if (verbosity > 1) cout << " border points commun finis " << endl;
 
         assert(np <= nbe_t);
         int ind_nbe_t_tmp[np];

@@ -38,5 +38,5 @@ mesh3 Thm=movemesh3(Th,transfo=[x+u1*coef,y+u2*coef,z+u3*coef],label=ref2);
 Thm=change(Thm,label=ref2);
 plot(Th,Thm, wait=1,cmm="coef  amplification = "+coef );
 
-savemesh(Thm,"beam-3d-def.mesh.h5");
-savehdf5sol("beam-3d-def.sol.h5",Thm,u1,"ux",[u1,u2,u3],"U",(epsilon(u1,u2,u3)),"eps");
+savemesh(Thm,"o/beam-3d-def.mesh.h5");
+savehdf5sol("o/beam-3d-def.sol.h5",Thm,u1,"ux",[u1,u2,u3],"U",(epsilon(u1,u2,u3)),"eps");

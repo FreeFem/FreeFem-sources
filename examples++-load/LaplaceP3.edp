@@ -12,4 +12,4 @@ load "Element_P3"
   + on(1,2,3,4,uh=g) ;                      //  boundary condition form
 
   laplace; // solve the problem plot(uh); // to see the result
-  plot(uh,ps="LaplaceP3.eps",value=true);
+  plot(uh,ps="o/LaplaceP3.eps",value=true);

@@ -17,5 +17,5 @@ load "Element_P3dc"
   real[int] b= vLap(0,Vh);
   //cout << A << endl; 
   uh[]=A^-1*b ;// solve the problem plot(uh); // to see the result
-  plot(uh,ps="LaplaceP2pnc.eps",value=true);
+  plot(uh,ps="o/LaplaceP2pnc.eps",value=true);
  
