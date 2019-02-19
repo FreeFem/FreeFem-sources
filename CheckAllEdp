@@ -15,30 +15,49 @@ NC=0
 NF=0
 
 cmm=$1;shift;
+mpicm==$1;shift;
+
 if [ $# -eq 0 ]; then
 list=*.edp
 elif  [ $# -gt  0 ]; then
 list="$@"
 fi
-for i in $list
+for j in $list
 do
-    case $i in
+    case $j in
 	all.edp|regtests.edp) 
-	    echo  pass   $i;; 
+	    echo  pass   $j;; 
 	*)
+		ffarg="-ns"
+		dir=`dirname "$j"`
+		i=`basename "$j"`
+		log="o/$i.log"
+		skeep=`head "$1"|awk '$1=="//" && $2=="UN-CHECK-BOGGUS" { if( vv == ""){ print 1;}; vv=1}'`
+		if (( skeep > 0)) ; then
+			MSG="${std} UnCheck(.edp) ${std}"
+		else
+        np=`head "$1"|awk '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}'`
+        npa=`head "$1"|awk '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}'`
+		wmpi=`egrep 'mpirank|mpisize' $i|wc -l`
+		cmmff="cmm";
+		 (( ( np == 0  &&  wmpi > 0)  )) && np=4
+	    (( np > 0 )) && cmmff=$mpicm -np $np 
+		    
+			ffarg="-nw -ns"
+		fi 
 	    ((NN++))
-	    ( $cmm "$i" )2>&1 1>$i-out;
+	    (cd $dir; $cmm "$i" $ffarg $npa  ) 2>&1 1>"$log";
 	    RES=$?
 	    ((SIG=$RES%128));
 
-	    ## error Compile error : Error load   # 1
+	    ## error Compile error : Error load   $log
 	    ## error Compile error :
-            ## Exec error : exec assert
+        ## Exec error : exec assert
 	    ## Exec error :
-	    errl=`grep 'error Compile error : Error load' $i-out`
-	    errC=`grep 'error Compile error :' $i-out`
-	    errX=`grep 'Exec error :' $i-out`
-	    errA=`grep 'Exec error : exec assert' $i-out`
+	    errl=`grep 'error Compile error : Error load' "$log"`
+	    errC=`grep 'error Compile error :' "$log"`
+	    errX=`grep 'Exec error :' $log`
+	    errA=`grep 'Exec error : exec assert' o/$i.log`
 	  #  echo "$RES,$SIG,$errC,$errA."
 	    if [ -n "$errl" ] ; then
 		((NL++))
@@ -59,9 +78,10 @@ do
 		MSG="${red} FAIL(signal)=$SIG ${std}"
 		((NF++))
 	    fi
-	    echo $MSG  $cmm $i  >>$i-out
-	    echo  $MSG  $cmm $i "( see $i-out )";
-#	    echo  $MSG  $cmm $i "(see $i-out )" >>/tmp/list-ff-$$
+	fi
+	    echo $MSG  $cmm $i  >>"$log"
+	    echo  $MSG  $cmm $i "( see "$log" )";
+#	    echo  $MSG  $cmm $i "(see "$log " )" >>/tmp/list-ff-$$
 	    ;;
     esac
 done

@@ -60,7 +60,7 @@ cout << "=====================" << endl;
 cout << "=====================" << endl;
 cout << "addition" << endl;
 mesh3 Th3=Th3sph+Th3sph2;
-savemesh(Th3sph,"ellipsoide.mesh");
+savemesh(Th3sph,"o/ellipsoide.mesh");
 
 real[int] domain2 = [1.5*Ra,0.,0.,145,0.001,0.,0.,0.,18,0.001];
 cout << "==============================" << endl;
@@ -70,7 +70,7 @@ mesh3 Th3fin=tetg(Th3,switch="paAAYYCCV",nbofregions=2,regionlist=domain2);
 cout << "=============================" << endl;
 cout << "finish: tetgen call without hole" << endl;
 cout << "=============================" << endl;
-savemesh(Th3fin,"spherewithtworegion.mesh"); 
+savemesh(Th3fin,"o/spherewithtworegion.mesh"); 
 medit("maillagetwo",Th3fin);
 
 real[int] hole = [0.,0.,0.];
@@ -82,7 +82,7 @@ mesh3 Th3finhole=tetg(Th3,switch="paAAYCCV",nbofholes=1,holelist=hole,nbofregion
 cout << "=============================" << endl;
 cout << "finish: tetgen call with hole   " << endl;
 cout << "=============================" << endl;
-savemesh(Th3finhole,"spherewithahole.mesh"); 
+savemesh(Th3finhole,"o/spherewithahole.mesh"); 
 
 
 

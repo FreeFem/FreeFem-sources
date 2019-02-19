@@ -261,9 +261,9 @@ class basicForEachType : public CodeAlloc {
 
    // virtual  void print(ostream &f,const void *p) const =0;
                             
-    friend ostream & operator<<(ostream & f,const basicForEachType & e) 
-      { f << '<' << e.name() << '>' ;return f;}
-     void Show(ostream & f) const ;
+    friend ostream & operator<<(ostream & f,const basicForEachType & e)
+    { f << '<' << e.name() << '>' ;return f;}
+    void Show(ostream & f) const ;
      const char * name() const  { return this!=tnull  ?  ktype->name() :"NULL" ;}
      virtual bool CastingFrom(const basicForEachType * t) const ;
      //  modif FH -----  A TESTER  // 
@@ -306,7 +306,7 @@ public:
     
     Function1 InitExp;       //  to init the ptr value 
     Function1  destroy;//  the destroy function 
-    TableOfIdentifier ti; //  all polymorphisme of the Identifier   
+    TableOfIdentifier ti; //  all polymorphisme of the Identifier
    public:
   // basicForEachType * FunctionType() const;// { return funct_type ? funct_type : (funct_type= new FuncForEachType(this));}
    C_F0  Find(const char * k) const; // {return ti->Find(k);}
@@ -2922,14 +2922,14 @@ inline basicForEachType::basicForEachType(const type_info  & k, const type_info 
         
         
 */
-
+/*  remove frev 2019 FH. 
 inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
 {
    C_F0 r = C_F0(TheOperators,"+",a,b);
    a=r;
    return a;
 }
-
+*/
 
 template<typename T,typename PT>
 void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)

@@ -68,8 +68,8 @@ problem Lap3dS(uSPb,vSPb , solver = CG )  = int2d(ThS)(Grad3(uSPb)'*Grad3(vSPb))
   + on(1,uSPb=g);
 Lap3dS;
 
-savemesh (Th, "Th2D.mesh");
-savemesh (ThS, "ThS.mesh");
+savemesh (Th, "o/Th2D.mesh");
+savemesh (ThS, "o/ThS.mesh");
 
 // check solution for variational forms  
 real[int] errVar = solVar - solSVar;  

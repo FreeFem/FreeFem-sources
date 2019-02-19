@@ -25,7 +25,7 @@ cout << "   gluing mesh  " << endl;
 mesh Th2D=Th1+Th2;
 cout << "Vertex, Triangle, Border " << Th2D.nv << " "<< Th2D.nt << " " <<  endl; 
 //plot( Th2D, wait=1 );
-savemesh( Th2D, "glu2D.mesh");
+savemesh( Th2D, "o/glu2D.mesh");
 
 
 func zmin=0.;
@@ -33,13 +33,13 @@ func zmax=1.;
 int MaxLayer=10;
 
 mesh3 Th31=buildlayers(Th1,MaxLayer,zbound=[zmin,zmax]); 
-savemesh( Th31, "bl31.mesh");
+savemesh( Th31, "o/bl31.mesh");
 
 mesh3 Th32=buildlayers(Th2,MaxLayer,zbound=[zmin,zmax]); 
-savemesh( Th32, "bl32.mesh");
+savemesh( Th32, "o/bl32.mesh");
 
 mesh3 Tht=Th31+Th32;
-savemesh( Tht, "glu3D.mesh");
+savemesh( Tht, "o/glu3D.mesh");
 
 cout << "Vertex, Tet, Triangle " << Tht.nv << " "<< Tht.nt << " " << Tht.nbe << endl; 
 cout << "area  border = " << int2d(Tht)(1.) << endl; 
@@ -51,4 +51,4 @@ func mv1x = 1+x;
 func mv1y = y;
 func mv1z = z;
 mesh3 Thmvs1 = movemesh3(Tht, transfo=[mv1x,mv1y,mv1z]);
-savemesh(Thmvs1,"movemeshglumesh.mesh");
+savemesh(Thmvs1,"o/movemeshglumesh.mesh");
