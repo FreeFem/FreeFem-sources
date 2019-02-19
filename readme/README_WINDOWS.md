@@ -35,7 +35,7 @@ Then, execute and follow the instructions.
 
 ## To test the MPI usage: in windows terminal (cmd, shell, PowerShell)
 
-Go to the directory `C:\Program Files (86)\FreeFem++\examples++-mpi`
+Go to the directory `C:\Program Files (86)\FreeFem++\examples\mpi`
 
 To lauch an example:
 ```bash

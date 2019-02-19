@@ -1,0 +1,577 @@
+macro ffddmgeneosetup(pr,Varf)
+
+if (pr#prfe#prmesh#isincomm)
+{
+pr#corr = ffddmcorrection;
+  
+int nev = ffddmnu;
+
+IFMACRO(pr#withhpddm)
+set(pr#hpddmOP,sparams="-hpddm_geneo_nu "+nev);
+
+pr#prfe#prmesh#tic(pr#tloc)
+
+IFMACRO(!pr#algebraic)
+{	
+  Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=CG,tgv=vtgv);
+}
+ENDIFMACRO
+attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN);
+
+pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
+
+ENDIFMACRO
+
+IFMACRO(!pr#withhpddm)
+
+if (!bpara)
+  pr#Z.resize(nev*pr#prfe#prmesh#npart);
+else if (!pr#prfe#prmesh#excluded)
+  pr#Z.resize(nev);
+
+pr#si=0;
+pr#prfe#prmesh#tic(pr#tloc)
+
+int[int] sizel(pr#prfe#prmesh#npart);
+
+for(int i=0;i<pr#prfe#prmesh#npart;++i)
+if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
+	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i];
+	
+  pr#prfe#K[int,int] eV(pr#prfe#Dk[i].n,nev);
+	pr#prfe#K[int] ev(nev);
+		
+	matrix<pr#prfe#K> weightedTmp;
+	weightedTmp=pr#aR[i]*pr#prfe#Dih[i];	
+	
+  matrix<pr#prfe#K> weighted;
+  
+  weighted=pr#prfe#Dih[i]*weightedTmp;
+  
+  /*
+  pr#prfe#K[int] dofsinoverlap(pr#prfe#Dk[i].n);
+  dofsinoverlap = 1;
+  pr#prfe#update(dofsinoverlap,false);
+  for [j,bj: dofsinoverlap] bj = abs(bj) > 1;
+  
+  matrix<pr#prfe#K> Movl = dofsinoverlap;
+  
+  weighted = weighted*Movl;
+  weighted = Movl*weighted;
+  */
+  
+  IFMACRO(!pr#algebraic)
+  {	
+    Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+    pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+  }
+  ENDIFMACRO
+  set(pr#matN,solver = sparsesolver,commworld=pr#prfe#prmesh#commself);
+  
+  int kk = EigenValue(pr#matN,weighted,value=ev,rawvector=eV,ncv=max(20,3*nev));
+  
+  int nok = 0;
+  
+  for(int j=0;j<nev;++j) {
+    if (ffddmtau == 0 || real(ev[j]) < ffddmtau) {
+      /*cout << i << " " << pr#si << " " << ev[j] << endl;*/
+      
+      pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
+			pr#Z[pr#si] = pr#prfe#Dk[i].*eV(:,j);
+			pr#si+=1;
+			nok+=1;
+		}
+	}
+  
+  sizel[i] = nok;	/* number of ev for subdomain i */
+}
+if (bseq)
+  pr#prfe#prmesh#Thi = pr#prfe#prmesh#Thglob;
+
+pr#prfe#prmesh#toc(pr#tloc,"local eigenvalue problems",pr#teigenv)
+  
+pr#prfe#prmesh#tic(pr#tloc)
+
+if (!bpara) {
+  pr#ncoarsespace=pr#si;
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
+    cout << "["+Stringification(pr)+"] CS size = " << pr#ncoarsespace << endl;
+  pr#sizelg = sizel;	/* sizelg: vector stocking the number of ev for every subdomain */
+
+  pr#prfe#K[int,int] Zm(pr#prfe#Ndofglobal,pr#ncoarsespace);
+  int cpt = 0;
+  /* the 2 fors loop over the columns of Z subdomainwise */
+  for (int jj=0; jj<pr#prfe#prmesh#npart; jj++)
+  for (int ii=0; ii < pr#sizelg[jj]; ii++) {
+  	pr#prfe#K[int] tmp(pr#prfe#Rih[jj].m); /*tmp(pr#prfe#Rih[jj].m);
+    */ tmp = pr#prfe#Rih[jj]'*pr#Z[cpt];
+    Zm(:,cpt) = tmp;
+    cpt++; /* keeps track of the global numbering of the columns of Z */
+  }
+  matrix<pr#prfe#K> Zms = Zm;
+  matrix<pr#prfe#K> tmp = pr#Aglobal*Zms;
+  pr#E = Zms'*tmp;
+  set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commself);
+}
+else {
+  pr#ncoarsespace = 0; /* coarse space dimension */
+  mpiAllReduce(pr#si,pr#ncoarsespace,pr#prfe#prmesh#mpicomm,mpiSUM); 
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
+    cout << "["+Stringification(pr)+"] CS size = " << pr#ncoarsespace << endl;
+    
+  /* Assemble E on proc 0
+     see PhD thesis of P.Jolivet pag 46 and following */
+  	
+  pr#sizelg = 0;
+  mpiAllReduce(sizel,pr#sizelg,pr#prfe#prmesh#mpicomm,mpiSUM); /* sizelg: vector stocking the number of ev for every subdomain */
+    
+  pr#offseti = 0; /* offseti[i]: index of the first ev of the subdomain i in the global numbering of the columns of Z */
+  for (int ii=0; ii < pr#prfe#prmesh#npart; ii++)
+    pr#offseti[ii] = (ii == 0 ? 0 : pr#offseti[ii-1] + pr#sizelg[ii-1]);
+    
+  if (!pr#prfe#prmesh#exclude) {
+    pr#sizelgworld = pr#sizelg;
+    pr#offsetiworld = pr#offseti;
+  }
+  else {
+    for (int i = 0; i < mpiSize(pr#prfe#prmesh#mpicomm); i++) {
+      if (i < pr#prfe#prmesh#pCS) {
+        pr#sizelgworld[i] = 0;
+        pr#offsetiworld[i] = 0;
+      }
+      else {
+        pr#sizelgworld[i] = pr#sizelg[i-pr#prfe#prmesh#pCS];
+        pr#offsetiworld[i] = pr#offseti[i-pr#prfe#prmesh#pCS];	
+      }	
+    }	
+  }
+  
+  pr#prfe#K[int,int] AiZmi(0,pr#si); /* A_i Z_i */
+  
+  if (!pr#prfe#prmesh#excluded)
+    AiZmi.resize(pr#prfe#Dk[mpiRank(pr#prfe#prmesh#commddm)].n,pr#si);
+  
+  for (int ii=0; ii < pr#si; ii++) {
+  	pr#prfe#K[int] tmp = pr#aR[mpiRank(pr#prfe#prmesh#commddm)]*pr#Z[ii];
+    AiZmi(:,ii) = tmp;
+  }
+  
+  /* step 3 of P.Jolivet thesis (pag 47) */
+  pr#prfe#K[int,int][int] mrcv(pr#prfe#prmesh#numberIntersection);
+  pr#prfe#K[int,int][int] msnd(pr#prfe#prmesh#numberIntersection);
+  
+  pr#prfe#K[int,int] Eii(pr#si,pr#si);
+  pr#prfe#K[int,int][int] Eij(pr#prfe#prmesh#numberIntersection);
+  
+  if (!pr#prfe#prmesh#excluded) {  
+	  mpiRequest[int] rq(pr#prfe#prmesh#numberIntersection*2);
+	  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j) {
+	  	msnd[j].resize(pr#prfe#restrictionIntersection[j].n,pr#si);
+	  	mrcv[j].resize(pr#prfe#restrictionIntersection[j].n,pr#sizelg[pr#prfe#prmesh#arrayIntersection[j]]);
+	  	for (int ii=0; ii<pr#si; ii++) {
+	      pr#prfe#K[int] tmp = pr#prfe#restrictionIntersection[j]*AiZmi(:,ii);
+        NewMacro localmacroK pr#prfe#K EndMacro
+	      IFMACRO(localmacroK,complex)
+	        msnd[j](:,ii) = conj(tmp);
+	      ENDIFMACRO
+	      IFMACRO(localmacroK,real)
+	        msnd[j](:,ii) = tmp;
+	      ENDIFMACRO	      
+	  	}
+	  }
+	  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+	    Isend(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq[j*2]),msnd[j]);
+	  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+	    Irecv(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq[j*2+1]),mrcv[j]);
+	  for(int j=0;j<pr#prfe#prmesh#numberIntersection*2;++j)
+	    int k = mpiWaitAny(rq);
+	  
+	  /* step 4 of P.Jolivet thesis (pag 47) */
+	  for (int ii=0; ii < pr#si; ii++)
+	  for (int jj=0; jj < pr#si; jj++) {
+	    Eii(ii,jj) = pr#Z[ii]'*AiZmi(:,jj);
+	  }
+	  
+	  /* step 5 of P.Jolivet thesis (pag 47) */
+	  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j) {
+	  	Eij[j].resize(pr#si,pr#sizelg[pr#prfe#prmesh#arrayIntersection[j]]);
+	  	for (int jj=0; jj < pr#sizelg[pr#prfe#prmesh#arrayIntersection[j]]; jj++) {
+        pr#prfe#K[int] tmp(pr#prfe#restrictionIntersection[j].m);
+	  	  tmp = pr#prfe#restrictionIntersection[j]'*mrcv[j](:,jj);
+	      IFMACRO(pr#prfe#K,complex)
+	  	    tmp = conj(tmp);
+	      ENDIFMACRO
+	  	  for (int ii=0; ii < pr#si; ii++){
+	        Eij[j](ii,jj) = pr#Z[ii]'*tmp;
+	  	  }
+	  	}
+	  }  
+  }
+
+  if(!pr#prfe#prmesh#binexactCS) {
+  
+  /* send Eij to processor 0 which assembles them inside E */
+
+  int[int] tabnumberIntersection(pr#prfe#prmesh#npart); /* i: number of neighbours of processor i */
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0) {
+    mpiRequest[int] rqt(pr#prfe#prmesh#npart-(!pr#prfe#prmesh#excluded));
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      Irecv(processor(i+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqt[i-!pr#prfe#prmesh#excluded]),tabnumberIntersection[i]);
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      int k = mpiWaitAny(rqt);
+  }
+  else if (!pr#prfe#prmesh#excluded) {
+    mpiRequest rqt;
+    Isend(processor(0,pr#prfe#prmesh#mpicomm,rqt),pr#prfe#prmesh#numberIntersection);
+    mpiWait(rqt);
+  }
+  
+  int[int][int] tabarrayIntersection(pr#prfe#prmesh#npart); /* i: global numbering of neighbouring subdomains of proc i */
+  
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0) {
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      tabarrayIntersection[i].resize(tabnumberIntersection[i]);
+    mpiRequest[int] rqt(pr#prfe#prmesh#npart-(!pr#prfe#prmesh#excluded));
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      Irecv(processor(i+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqt[i-!pr#prfe#prmesh#excluded]),tabarrayIntersection[i]);
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      int k = mpiWaitAny(rqt);
+  }
+  else if (!pr#prfe#prmesh#excluded) {
+    mpiRequest rqt;
+    Isend(processor(0,pr#prfe#prmesh#mpicomm,rqt),pr#prfe#prmesh#arrayIntersection);
+    mpiWait(rqt);
+  }
+  
+  int nbij = 0;
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      nbij += tabnumberIntersection[i];
+  
+  pr#prfe#K[int,int][int] tabEij(nbij); /* big vector of full matrices for the blocks Eij */
+  pr#prfe#K[int,int][int] tabEii(pr#prfe#prmesh#npart); /* big vector of full matrices for the blocks Eii */
+  
+  /* on proc 0 resize tabEii and receive Eii blocks */
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0) {
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      tabEii[i].resize(pr#sizelg[i],pr#sizelg[i]);
+    mpiRequest[int] rqt(pr#prfe#prmesh#npart-(!pr#prfe#prmesh#excluded));
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      Irecv(processor(i+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqt[i-!pr#prfe#prmesh#excluded]),tabEii[i]);
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+      int k = mpiWaitAny(rqt);
+  }
+  else if (!pr#prfe#prmesh#excluded) {
+    mpiRequest rqt;
+    Isend(processor(0,pr#prfe#prmesh#mpicomm,rqt),Eii);
+    mpiWait(rqt);
+  }  
+  /* on proc 0 resize tabEij and receive Eij blocks */
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0) {
+  	int cpt = 0;
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+    for (int j=0; j < tabnumberIntersection[i]; j++) {
+      tabEij[cpt].resize(pr#sizelg[i],pr#sizelg[tabarrayIntersection[i][j]]);
+      cpt++;   
+    }
+	mpiRequest[int] rqt(nbij);
+	cpt = 0;
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++)
+    for (int j=0; j < tabnumberIntersection[i]; j++) {
+      Irecv(processor(i+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqt[cpt]),tabEij[cpt]);
+      cpt++;
+    }
+    for (int i=0; i < nbij; i++)
+      int k = mpiWaitAny(rqt);
+  }
+  else if (!pr#prfe#prmesh#excluded) {
+    mpiRequest[int] rqt(pr#prfe#prmesh#numberIntersection);
+    for (int i=0; i < pr#prfe#prmesh#numberIntersection; i++)
+      Isend(processor(0,pr#prfe#prmesh#mpicomm,rqt[i]),Eij[i]);
+    for (int i=0; i < pr#prfe#prmesh#numberIntersection; i++)
+      int k = mpiWaitAny(rqt);
+  }
+  
+  /*
+  K[int,int] E0(ncoarsespace,ncoarsespace);
+  E0 = 0;
+  for (int ii=0; ii< si; ii++)
+  for (int jj=0; jj< si; jj++)
+    E0(offseti[mpirank]+ii,offseti[mpirank]+jj) = Eii(ii,jj);
+      
+  for(int j=0;j<numberIntersection;++j)
+  for (int ii=0; ii< si; ii++)
+  for (int jj=0; jj< sizelg[arrayIntersection[j]]; jj++)
+    E0(offseti[mpirank]+ii,offseti[arrayIntersection[j]]+jj) = Eij[j](ii,jj);
+  
+  K[int,int] Eg(ncoarsespace,ncoarsespace);
+  Eg = 0;
+  mpiReduce(E0,Eg,processor(0,mpiCommWorld),mpiSUM);
+  */
+
+  if (mpiRank(pr#prfe#prmesh#mpicomm) == 0) { /* fill E0 with Eii and Eij */
+    pr#prfe#K[int,int] E0(pr#ncoarsespace,pr#ncoarsespace);
+    E0 = 0;
+    
+    if (!pr#prfe#prmesh#excluded) {
+	    /* block E00 */
+	    for (int jj=0; jj< pr#sizelg[0]; jj++)
+	      E0(0:pr#sizelg[0]-1,jj) = Eii(:,jj);
+	    /* blocks E0j */
+	    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+	    for (int jj=0; jj< pr#sizelg[pr#prfe#prmesh#arrayIntersection[j]]; jj++)
+	      E0(0:pr#sizelg[0]-1,pr#offseti[pr#prfe#prmesh#arrayIntersection[j]]+jj) = Eij[j](:,jj);
+    }
+    
+    int cpt = 0;
+    for (int i = !pr#prfe#prmesh#excluded; i < pr#prfe#prmesh#npart; i++) {
+    	/* blocks Eii */
+      for (int jj=0; jj< pr#sizelg[i]; jj++)
+        E0(pr#offseti[i]:pr#offseti[i]+pr#sizelg[i]-1,pr#offseti[i]+jj) = tabEii[i](:,jj);
+      /* blocks Eij */
+      for(int j=0;j<tabnumberIntersection[i];++j) {
+        for (int jj=0; jj< pr#sizelg[tabarrayIntersection[i][j]]; jj++)
+          E0(pr#offseti[i]:pr#offseti[i]+pr#sizelg[i]-1,pr#offseti[tabarrayIntersection[i][j]]+jj) = tabEij[cpt](:,jj);
+        cpt++;
+      }	
+    }
+    
+    pr#E = E0;
+  }
+  
+  if (!pr#prfe#prmesh#binexactCS)
+  if (mpiRank(pr#prfe#prmesh#mpicomm) < pr#prfe#prmesh#pCS)
+    set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0);
+
+    /*
+    ET = E';
+    set(ET,solver=sparsesolver,commworld=commself);
+
+    Emc = Efmc;
+    set(Emc,solver=sparsesolver,commworld=commself);
+    */
+    
+  }
+  else {
+      
+  NewMacro localmacroinexact pr#prfe#prmesh#minexactgeneoCS EndMacro
+  IFMACRO (localmacroinexact,1)
+  
+  ffddmsetupsuper(pr)
+
+  int[int][int] inisuperwithoverlap(pr#prfe#prmesh#listofsupers.n);
+  int[int]inisuperwithoverlapsize(pr#prfe#prmesh#listofsupers.n);
+  inisuperwithoverlapsize = 0;
+  for (int i=0; i<inisuperwithoverlap.n; i++)
+    inisuperwithoverlap[i].resize(1000);
+  
+  mpiRequest[int] rq(2*(pr#prfe#prmesh#listofsupers.n-pr#issuper)+2*pr#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
+  int cpt = 0;
+  if (pr#prfe#prmesh#issuper) {  
+    for (int i=!pr#prfe#prmesh#excluded;i<pr#prfe#prmesh#insuperwithoverlap.n;i++) {
+      Isend(processor(pr#prfe#prmesh#insuperwithoverlap[i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rq[cpt++]),pr#prfe#prmesh#insuperwithoverlap.n);
+      Isend(processor(pr#prfe#prmesh#insuperwithoverlap[i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rq[cpt++]),pr#prfe#prmesh#insuperwithoverlap);
+    }
+  }
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    int isuper = pr#prfe#prmesh#listofsupers[is];
+    if (!pr#prfe#prmesh#issuper || pr#prfe#prmesh#mysuperrank != isuper) {
+      Irecv(processor(pr#prfe#prmesh#rankofsuper(isuper),pr#prfe#prmesh#mpicomm,rq[cpt++]),inisuperwithoverlapsize[is]);
+      Irecv(processor(pr#prfe#prmesh#rankofsuper(isuper),pr#prfe#prmesh#mpicomm,rq[cpt++]),inisuperwithoverlap[is]);
+    }
+  }
+  for (int i=0;i < cpt;i++)
+    int k = mpiWaitAny(rq);
+
+  for (int is=0;is < pr#prfe#prmesh#listofsupers.n; is++) {
+    int isuper = pr#prfe#prmesh#listofsupers[is];
+    if (pr#prfe#prmesh#issuper && pr#prfe#prmesh#mysuperrank == isuper) {
+      inisuperwithoverlap[is] = pr#prfe#prmesh#insuperwithoverlap;
+      inisuperwithoverlap[is].resize(pr#prfe#prmesh#insuperwithoverlap.n);
+    }
+    else
+      inisuperwithoverlap[is].resize(inisuperwithoverlapsize[is]);
+  }
+
+  int[int][int] indicesofneighbors(pr#prfe#prmesh#listofsupers.n);
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    int isuper = pr#prfe#prmesh#listofsupers[is];
+    indicesofneighbors[is].resize(pr#prfe#prmesh#arrayIntersection.n);
+    cpt = 0;
+    for (int i=0; i<pr#prfe#prmesh#arrayIntersection.n; i++)
+    for (int j=0; j<inisuperwithoverlap[is].n;j++)
+    if (pr#prfe#prmesh#arrayIntersection[i] == inisuperwithoverlap[is][j])
+      indicesofneighbors[is][cpt++] = i;
+    indicesofneighbors[is].resize(cpt);
+  }
+
+  int[int][int] neighbors(pr#prfe#prmesh#listofsupers.n);
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    neighbors[is].resize(indicesofneighbors[is].n);
+    for (int i=0;i<indicesofneighbors[is].n;i++)
+      neighbors[is][i] = pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][i]];
+  }
+  
+  int[int] tabnumberIntersection(pr#prfe#prmesh#insuperwithoverlap.n); /* i: number of neighbours of processor i */
+  int[int][int] tabarrayIntersection(pr#prfe#prmesh#insuperwithoverlap.n);
+  if (pr#issuper)
+  for (int i=!pr#prfe#prmesh#excluded; i<pr#prfe#prmesh#insuperwithoverlap.n; i++)
+    tabarrayIntersection[i].resize(1000);
+  
+  mpiRequest[int] rqt(2*(pr#prfe#prmesh#listofsupers.n-pr#issuper)+2*pr#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
+  
+  cpt = 0;
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    int isuper = pr#prfe#prmesh#listofsupers[is];
+    if (!pr#prfe#prmesh#issuper || pr#prfe#prmesh#mysuperrank != isuper) {
+      Isend(processor(pr#prfe#prmesh#rankofsuper(isuper),pr#prfe#prmesh#mpicomm,rqt[cpt++]),neighbors[is].n);
+      Isend(processor(pr#prfe#prmesh#rankofsuper(isuper),pr#prfe#prmesh#mpicomm,rqt[cpt++]),neighbors[is]);
+    }
+    else {
+      for (int i = !pr#prfe#prmesh#excluded; i < inisuperwithoverlap[is].n; i++) {
+        Irecv(processor(inisuperwithoverlap[is][i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqt[cpt++]),tabnumberIntersection[i]);
+        Irecv(processor(inisuperwithoverlap[is][i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqt[cpt++]),tabarrayIntersection[i]);
+      }
+    }
+  }
+  
+  for (int i=0;i < cpt;i++)
+    int k = mpiWaitAny(rqt);
+  
+  if (pr#issuper)
+  for (int i=!pr#prfe#prmesh#excluded; i<pr#prfe#prmesh#insuperwithoverlap.n; i++)
+    tabarrayIntersection[i].resize(tabnumberIntersection[i]);
+    
+  int nbrqmpiexcl = 0;
+  
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    if (!pr#prfe#prmesh#issuper || pr#prfe#prmesh#mysuperrank != pr#prfe#prmesh#listofsupers[is])
+      nbrqmpiexcl += indicesofneighbors[is].n;
+  } 
+  
+  int is = 0;
+  int nbij = 0;
+  
+  if (pr#prfe#prmesh#issuper) {  
+    for (int i=0; i< pr#prfe#prmesh#listofsupers.n; i++)
+    if (pr#prfe#prmesh#listofsupers[i] == pr#prfe#prmesh#mysuperrank)
+      is = i;
+    
+    for (int i = !pr#prfe#prmesh#excluded; i < inisuperwithoverlap[is].n; i++)
+      nbij += tabnumberIntersection[i];
+  }
+  
+  mpiRequest[int] rqs(pr#prfe#prmesh#listofsupers.n-pr#issuper+nbrqmpiexcl+pr#issuper*(inisuperwithoverlap[is].n+nbij));
+  cpt = 0;
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    int isuper = pr#prfe#prmesh#listofsupers[is];
+    if (!pr#prfe#prmesh#issuper || pr#prfe#prmesh#mysuperrank != isuper)
+    Isend(processor(pr#prfe#prmesh#rankofsuper(isuper),pr#prfe#prmesh#mpicomm,rqs[cpt++]),Eii);
+  }
+    
+  int cptmpi = 0;
+  for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
+    int isuper = pr#prfe#prmesh#listofsupers[is];
+    for(int j=0;j<indicesofneighbors[is].n;++j) {
+      if (!pr#prfe#prmesh#issuper || pr#prfe#prmesh#mysuperrank != isuper) {
+        Isend(processor(pr#prfe#prmesh#rankofsuper(isuper),pr#prfe#prmesh#mpicomm,rqs[pr#prfe#prmesh#listofsupers.n-pr#issuper+cptmpi++]),Eij[indicesofneighbors[is][j]]);
+      }
+    }
+  }
+
+  pr#prfe#K[int,int][int] tabEij(nbij); /* big vector of full matrices for the blocks Sij */
+  pr#prfe#K[int,int][int] tabEii(inisuperwithoverlap[is].n); /* big vector of full matrices for the blocks Sii */
+  
+  if (pr#prfe#prmesh#issuper) {
+      
+    int isuper = pr#prfe#prmesh#mysuperrank;
+    
+    /* on proc 0 resize tabSii and receive Sii blocks */
+    for (int i = !pr#prfe#prmesh#excluded; i < inisuperwithoverlap[is].n; i++) {
+      tabEii[i].resize(pr#sizelg[inisuperwithoverlap[is][i]],pr#sizelg[inisuperwithoverlap[is][i]]);
+      Irecv(processor(inisuperwithoverlap[is][i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqs[pr#prfe#prmesh#listofsupers.n-pr#issuper+nbrqmpiexcl+i-!pr#prfe#prmesh#excluded]),tabEii[i]);
+    }
+    
+    /* on proc 0 resize tabSij and receive Sij blocks */
+    int cpt = 0;
+    for (int i = !pr#prfe#prmesh#excluded; i < inisuperwithoverlap[is].n; i++)
+    for (int j=0; j < tabnumberIntersection[i]; j++) {
+      tabEij[cpt].resize(pr#sizelg[inisuperwithoverlap[is][i]],pr#sizelg[tabarrayIntersection[i][j]]);
+      Irecv(processor(inisuperwithoverlap[is][i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqs[pr#prfe#prmesh#listofsupers.n-pr#issuper+nbrqmpiexcl+inisuperwithoverlap[is].n+cpt]),tabEij[cpt]);
+      cpt++;
+    }
+  }
+
+  for (int i=0; i<pr#prfe#prmesh#listofsupers.n-pr#issuper+nbrqmpiexcl+pr#issuper*(inisuperwithoverlap[is].n+nbij); i++)
+    int k = mpiWaitAny(rqs);
+  
+  if (pr#prfe#prmesh#issuper) {
+    
+    int isuper = pr#prfe#prmesh#mysuperrank;
+    
+    /* fill E0 with Eii and Eij */
+    pr#prfe#K[int,int] E0(pr#prfe#superDk[mpiRank(pr#prfe#prmesh#commsuper)].n,pr#prfe#superDk[mpiRank(pr#prfe#prmesh#commsuper)].n);
+    E0 = 0;
+    
+    if (!pr#prfe#prmesh#excluded) {
+      /* block E00 */
+      for (int jj=0; jj< pr#sizelg[mpiRank(pr#prfe#prmesh#commddm)]; jj++)
+        E0(pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]:pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]+pr#sizelg[mpiRank(pr#prfe#prmesh#commddm)]-1,
+        pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]+jj) = Eii(:,jj);
+      /* blocks E0j */          
+      for(int j=0;j<indicesofneighbors[is].n;++j)
+      for (int jj=0; jj< pr#sizelg[pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][j]]]; jj++)
+        E0(pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]:pr#superlocalnuminv[pr#offseti[mpiRank(pr#prfe#prmesh#commddm)]]+pr#sizelg[mpiRank(pr#prfe#prmesh#commddm)]-1,
+        pr#superlocalnuminv[pr#offseti[pr#prfe#prmesh#arrayIntersection[indicesofneighbors[is][j]]]]+jj) = Eij[j](:,jj);    
+    }
+    
+    cpt = 0;
+    for (int i = !pr#prfe#prmesh#excluded; i < inisuperwithoverlap[is].n; i++) {
+      /* blocks Eii */
+      for (int jj=0; jj< pr#sizelg[inisuperwithoverlap[is][i]]; jj++)
+        E0(pr#superlocalnuminv[pr#offseti[inisuperwithoverlap[is][i]]]:pr#superlocalnuminv[pr#offseti[inisuperwithoverlap[is][i]]]+pr#sizelg[inisuperwithoverlap[is][i]]-1,
+        pr#superlocalnuminv[pr#offseti[inisuperwithoverlap[is][i]]]+jj) = tabEii[i](:,jj);
+      /* blocks Eij */
+      for(int j=0;j<tabnumberIntersection[i];++j) {
+        for (int jj=0; jj< pr#sizelg[tabarrayIntersection[i][j]]; jj++) {
+          E0(pr#superlocalnuminv[pr#offseti[inisuperwithoverlap[is][i]]]:pr#superlocalnuminv[pr#offseti[inisuperwithoverlap[is][i]]]+pr#sizelg[inisuperwithoverlap[is][i]]-1,
+          pr#superlocalnuminv[pr#offseti[tabarrayIntersection[i][j]]]+jj) = tabEij[cpt](:,jj);
+        }
+        cpt++;
+      }	
+    }
+    
+    if (pr#prfe#prmesh#binexactgeneoCS == 1) {
+      
+      pr#superaRd[mpiRank(pr#prfe#prmesh#commsuper)] = E0;
+    
+    /*
+    matrix E0s = E0;
+    pr#superaRd[mpiRank(pr#prfe#prmesh#commsuper)] = pr#RsuperCS*E0s;
+    pr#superaRd[mpiRank(pr#prfe#prmesh#commsuper)] = pr#superaRd[mpiRank(pr#prfe#prmesh#commsuper)]*pr#RsuperCS';
+    */
+    
+      pr#superaR[mpiRank(pr#prfe#prmesh#commsuper)] = pr#superaRd[mpiRank(pr#prfe#prmesh#commsuper)];
+    
+      set(pr#superaR[mpiRank(pr#prfe#prmesh#commsuper)],solver=sparsesolver,commworld=pr#prfe#prmesh#supercommself);
+    }
+    else {
+      pr#E = E0;
+      pr#E = pr#superDih[mpiRank(pr#prfe#prmesh#commsuper)]*pr#E;
+      pr#E = pr#RsuperCS'*pr#E;
+      pr#E = pr#E*pr#RsuperCS;
+      set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commsuper,master=-1);      
+    }
+  }
+
+  ENDIFMACRO
+  ;
+  }
+    
+}
+pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
+ENDIFMACRO
+}
+// EOM
+/*# finCoarseSpace #*/

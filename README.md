@@ -109,13 +109,13 @@ Configuration:
 Download:
 
 ```bash
-./download/getall -a
+./3rdparty/getall -a
 ```
 
 PETSc:
 
 ```bash
-cd download/ff-petsc
+cd 3rdparty/ff-petsc
 sed -i 's/--download-pastix //g' Makefile
 make petsc-slepc
 cd -

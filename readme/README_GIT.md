@@ -122,7 +122,7 @@ Build the Makefile:
 
 Optionnaly, compile PETSc/SLEPc if needed (more than 30 min):
 
-```cd download/ff-petsc
+```cd 3rdparty/ff-petsc
 make petsc-slepc [SUDO=sudo]
 ./reconfigure```
 

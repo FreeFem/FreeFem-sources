@@ -15,7 +15,7 @@ dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
 dnl : ${FFLAGS=""}
 
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIR([etc/config/m4])
 
 # progg test  exec for windows
 ff_TEST_FFPP="../src/nw/FreeFem++"
@@ -44,7 +44,7 @@ AC_PROG_MAKE_SET
 dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
 inc_usr_include=""
-ff_where_lib_conf=examples++-load/WHERE_LIBRARY-config
+ff_where_lib_conf=examples/plugin/WHERE_LIBRARY-config
 dnl search of associad software
 m4_define([AC_FF_ADDWHERELIB],
   [
@@ -340,8 +340,8 @@ then
     fi
 # add FH oct 2007 for download f2c
     if test -z "$F77"  ; then
-	ff_f77=`pwd`/download/bin/fort77
-	ff_flibs=`pwd`/download/lib/libf2c.a
+	ff_f77=`pwd`/3rdparty/bin/fort77
+	ff_flibs=`pwd`/3rdparty/lib/libf2c.a
 	if test -x $ff_f77  -a -f $ff_flibs ; then
 	    AC_MSG_WARN([ no fortran, but find download f2c/fort]);
 	    F77=$ff_f77
@@ -349,7 +349,7 @@ then
 	else
 	    AC_MSG_NOTICE( [ fatal error : no fortran ] );
 	    AC_MSG_NOTICE( [add --disable-fortran  ] );
-	    AC_MSG_NOTICE( [or try to compile f2c in directory download/f2c  ] );
+	    AC_MSG_NOTICE( [or try to compile f2c in directory 3rdparty/f2c  ] );
 	    AC_MSG_NOTICE( [  just do:  make install ] );
 	    AC_MSG_ERROR([ Fatal error No Fortran compiler . ],1);
 	fi
@@ -681,14 +681,14 @@ EOF
 # ------------------------------------------
 
 # Generic or hardware-dependant optimization
-m4_include(m4/acmacros.m4)
-m4_include(m4/acoptim.m4)
+m4_include(etc/config/m4/acmacros.m4)
+m4_include(etc/config/m4/acoptim.m4)
 
 # [[file:ax_lib_hdf5.m4]]
-m4_include(m4/ax_lib_hdf5.m4)
+m4_include(etc/config/m4/ax_lib_hdf5.m4)
 
 # [[file:ax_lib_gsl.m4]]
-m4_include(m4/ax_lib_gsl.m4)
+m4_include(etc/config/m4/ax_lib_gsl.m4)
 
 # Checking c++11 for HashMatix (Madatory now)
 # F.Hecht:
@@ -865,7 +865,7 @@ fi
 if test $enable_ffcs = no
 then
     # FF case
-    m4_include(m4/acmpi.m4)
+    m4_include(etc/config/m4/acmpi.m4)
 else
     # FFCS - use the same MPI configuration choices as FFCS
     if test -z "$MPICXX"
@@ -898,13 +898,13 @@ else
 	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
         # these values should not be empty otherwise
-        # examples++-load/ff-get-dep will think that they are not
+        # examples/plugin/ff-get-dep will think that they are not
         # defined
 	AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
 
         # mpifc and mpif77 libraries should always be specified
         # because FF never calls the Fortran MPI compiler. It always
-        # uses mpicxx in [[file:examples++-load/ff-c++]]. The
+        # uses mpicxx in [[file:examples/plugin/ff-c++]]. The
         # resulting Fortran libraries (eg Mumps) would compile even
         # without the proper Fortran libs, but they would not load
         # properly.
@@ -1099,7 +1099,7 @@ if test "$with_cadna" != no
     then
     ff_libs_old="$LIBS"
     ff_ldflags_old="$LDFLAGS"
-    ff_cadna_dir="${curdir}/download/cadna"
+    ff_cadna_dir="${curdir}/3rdparty/cadna"
     LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
     AC_CHECK_LIB(cadnafree,arit_zero,
 	ff_cadna_ok=yes)
@@ -1147,7 +1147,7 @@ else
     fi
 fi
 
-# used in [[file:download/fftw/Makefile.am::DOWNLOAD_FFTW]]
+# used in [[file:3rdparty/fftw/Makefile.am::DOWNLOAD_FFTW]]
 
 AC_SUBST(DOWNLOAD_FFTW,$ff_DOWNLOAD_FFTW)
 
@@ -1364,14 +1364,14 @@ then
     else
 	ff_download_blas=openblas
 
-	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples+++-load/ff-c++ will place -lgfortran in
+	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples/plugin/ff-c++ will place -lgfortran in
 	# LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which will fail. But libopenblas.a is placed in
-	# the standard directory download/lib so the -L option is not required anymore.
+	# the standard directory 3rdparty/lib so the -L option is not required anymore.
 
-	ff_blas_libs="-L${curdir}/download/lib -lopenblas $LIBS $ff_pthread"
-	ff_blas_inc="-I${curdir}/download/include"
+	ff_blas_libs="-L${curdir}/3rdparty/lib -lopenblas $LIBS $ff_pthread"
+	ff_blas_inc="-I${curdir}/3rdparty/include"
 
-        # skip generic blas compilation and activate OpenBLAS (see [[file:download/blas/Makefile.am::OpenBLAS]])
+        # skip generic blas compilation and activate OpenBLAS (see [[file:3rdparty/blas/Makefile.am::OpenBLAS]])
 	AC_SUBST(DOWNLOADED_BLAS,"")
 	AC_SUBST(COMPILE_OPENBLAS,openblas)
 
@@ -1397,8 +1397,8 @@ then
     # When compiling a generic version, we do not need an optimized version of the BLAS.
 
     ff_download_blas=generic
-    ff_blas_libs="-L${curdir}/download/blas -lcblas -lf77blas"
-    ff_blas_inc="-I${curdir}/download/blas/CBLAS/src"
+    ff_blas_libs="-L${curdir}/3rdparty/blas -lcblas -lf77blas"
+    ff_blas_inc="-I${curdir}/3rdparty/blas/CBLAS/src"
 
     AC_SUBST(DOWNLOADED_BLAS,"libf77blas.a libcblas.a")
     AC_SUBST(DOWNLOADED_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
@@ -1427,7 +1427,7 @@ then
 	ff_cblas_h=no)
 fi
 
-# ALH - 18/9/13 - [[file:download/blas/Makefile.am]] does not update the WHERE mechanism so it always needs to be set up
+# ALH - 18/9/13 - [[file:3rdparty/blas/Makefile.am]] does not update the WHERE mechanism so it always needs to be set up
 # here even in the case of a downloaded blas library.
 
 AC_FF_ADDWHERELIB(blas,$ff_blas_libs,)
@@ -1512,7 +1512,7 @@ then
     # no compilation of lapack in arpack
     ff_lapackdir=
 else
-    ff_lapack_lib="-L${curdir}/download/lib -llapack"
+    ff_lapack_lib="-L${curdir}/3rdparty/lib -llapack"
 fi
 
 # Arpack itself
@@ -1564,22 +1564,22 @@ then
 		AC_MSG_NOTICE(using downloaded Arpack)
 
 		# ALH - 6/11/13 - this install goal is the standard goal for all downloaded packages in
-		# [[file:download/common.mak::install]]
+		# [[file:3rdparty/common.mak::install]]
 
 		AC_SUBST(DOWNLOAD_ARPACK,install)
 
 		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
-		AC_SUBST(ARPACKLIB,${curdir}/download/lib/libarpack.a)
-		AC_SUBST(LAPACK_arpack_LIB,${curdir}/download/lib/liblapack.a)
+		AC_SUBST(ARPACKLIB,${curdir}/3rdparty/lib/libarpack.a)
+		AC_SUBST(LAPACK_arpack_LIB,${curdir}/3rdparty/lib/liblapack.a)
 
 		# Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this
 		# could make the following tests fail.
 
-		# ALH - 30/9/13 - do not use the "-L ${curdir}/download/lib" directive because it would allow other
+		# ALH - 30/9/13 - do not use the "-L ${curdir}/3rdparty/lib" directive because it would allow other
 		# following -l directives (eg -lumfpack) to pick an old locally compiled library instead of the system
 		# ones.
 
-                ff_arpack_libs="${curdir}/download/lib/libarpack.a $ff_lapack_lib"
+                ff_arpack_libs="${curdir}/3rdparty/lib/libarpack.a $ff_lapack_lib"
 		ff_arpack_ok=yes
 	fi
 fi
@@ -1607,7 +1607,7 @@ fi
 AC_SUBST([EIGENOBJ])
 
 # ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
-# examples++-load require it (eg [[file:examples++-load/Element_Mixte.cpp::lapack]]). Request from Fred.
+# examples/plugin require it (eg [[file:examples/plugin/Element_Mixte.cpp::lapack]]). Request from Fred.
 
 AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
@@ -1643,24 +1643,24 @@ then
 	AC_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
         ff_amd_ok=yes
 	ff_umfpack_libs="${withval}")
-    
+
     AC_ARG_WITH(umfpack,
         AC_HELP_STRING([--with-umfpack=library],[Use a specific version of Umfpack]),
         ff_umfpack_ok=yes
         ff_umfpack_libs="${withval} $ff_umfpack_libs")
-    
+
     if test "${with_umfpack_include+set}" = set; then
       	CPPFLAGS="$CPPFLAGS $with_umfpack_include"
     fi
-    
+
     AC_CHECK_HEADERS(umfpack.h umfpack/umfpack.h ufsparse/umfpack.h suitesparse/umfpack.h,
 	[ff_umfpack_header=yes
 	    ff_umfpack_dir=`dirname $ac_header`
 	    break])
-    
+
     # Somes systems like FreeBSD hide umfpack.h in a directory called UMFPACK (all capitals). This breaks the
     # standard #define produced by autoconf in config.h.in.
-    
+
     LIBS="$ff_blas_libs $LIBS"
     if test "$ff_umfpack_header" != yes;
     then
@@ -1669,27 +1669,27 @@ then
 	    ff_umfpack_dir=UMFPACK
 	    AC_DEFINE(HAVE_BIG_UMFPACK_UMFPACK_H,1,If umfpack.h is located in UMFPACK subdir))
     fi
-    
+
     if test "$ff_amd_ok" = no;
     then
 	AC_CHECK_LIB(amd,amd_info,
 	    ff_umfpack_libs="$ff_umfpack_libs -lamd"
 	    ff_amd_ok=yes)
     fi
-    
+
     if test "$ff_umfpack_ok" = no -a "$ff_amd_ok" = yes;
     then
-	
+
         # ALH - 30/9/13 - other libraries required by Umfpack
-	
+
 	AC_CHECK_LIB(cholmod,cholmod_add,ff_umfpack_libs="$ff_umfpack_libs -lcholmod")
 	AC_CHECK_LIB(colamd,colamd_set_defaults,ff_umfpack_libs="$ff_umfpack_libs -lcolamd")
-	
+
 	AC_CHECK_LIB(umfpack,umf_i_malloc,
 	    ff_umfpack_libs="-lumfpack $ff_umfpack_libs"
 	    ff_umfpack_ok=yes,,$ff_umfpack_libs)
     fi
-    
+
     if test "$ff_umfpack_header" != yes -o "$ff_umfpack_ok" != yes; then
         ff_umfpack_ok=no
 	AC_MSG_WARN([Sorry, we could not find the UMFPACK lib or the UMFPACK headers])
@@ -1724,8 +1724,8 @@ then
     # Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this could make
     # the following tests fail.
 
-    ff_umfpack_libs="-L${curdir}/download/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
-    ff_umfpack_incs="-I${curdir}/download/include"
+    ff_umfpack_libs="-L${curdir}/3rdparty/lib -lumfpack -lcholmod -lcolamd -lamd -lsuitesparseconfig"
+    ff_umfpack_incs="-I${curdir}/3rdparty/include"
 	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
     AC_DEFINE(HAVE_LIBUMFPACK,1,UMFPACK)
     if test "$ff_win32" = yes; then
@@ -1736,7 +1736,7 @@ fi
 AC_SUBST([UMFPACK_CPPFLAGS],[$UMFPACK_CPPFLAGS])
 
 # ALH - 17/9/13 - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version because
-# [[file:download/umfpack/Makefile.am]] does not set the WHERE mechanism. Also removed -I/usr/include/$ff_umfpack_dir
+# [[file:3rdparty/umfpack/Makefile.am]] does not set the WHERE mechanism. Also removed -I/usr/include/$ff_umfpack_dir
 # from include options for FFCS because it breaks the MingW64 compilation process.
 echo " totot *****"
 if test "$ff_umfpack_ok" = yes
@@ -1875,7 +1875,7 @@ fi
 if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
-	# Activate dynamic loading tests (see examples++-load/Makefile.am)
+	# Activate dynamic loading tests (see examples/plugin/Makefile.am)
 	AC_SUBST(LOAD_TESTS,../regtests.sh)
 	AC_SUBST(LOAD_COMPILE,load_compile)
 
@@ -2056,7 +2056,7 @@ fi
 #
 # [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
 #
-# Such constants are rejected without [[file:download/parms/makefile-parms.in::NO_RANGE_CHECK]]
+# Such constants are rejected without [[file:3rdparty/parms/makefile-parms.in::NO_RANGE_CHECK]]
 
 if test "$OS" = Windows_NT
 then
@@ -2066,7 +2066,7 @@ fi
 # ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
 if test "$with_scotch_include" = ""
 then
-    with_scotch_include=$ac_pwd/download/include/scotch
+    with_scotch_include=$ac_pwd/3rdparty/include/scotch
 fi
 AC_SUBST(SCOTCH_INCLUDE,$with_scotch_include)
 
@@ -2177,11 +2177,11 @@ TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 
 # All makefiles
 AC_OUTPUT(Makefile
-    download/Makefile
-    download/blas/Makefile
-    download/arpack/Makefile
-    download/umfpack/Makefile
-    download/fftw/Makefile
+    3rdparty/Makefile
+    3rdparty/blas/Makefile
+    3rdparty/arpack/Makefile
+    3rdparty/umfpack/Makefile
+    3rdparty/fftw/Makefile
     src/Makefile
     src/bamglib/Makefile
     src/Graphics/Makefile
@@ -2195,17 +2195,17 @@ AC_OUTPUT(Makefile
     src/libMesh/Makefile
     src/medit/Makefile
     src/bin-win32/Makefile
-    examples++-load/Makefile
-    examples++-tutorial/Makefile
-    examples++/Makefile
-    examples++-mpi/Makefile
-    examples++-hpddm/Makefile
-    examples++-ffddm/Makefile
-    examples++-eigen/Makefile
-    examples++-chapt3/Makefile
-    examples++-bug/Makefile
-    examples++-other/Makefile
-    examples++-3d/Makefile)
+    examples/plugin/Makefile
+    examples/tutorial/Makefile
+    examples/misc/Makefile
+    examples/mpi/Makefile
+    examples/hpddm/Makefile
+    examples/ffddm/Makefile
+    examples/eigen/Makefile
+    examples/examples/Makefile
+    examples/bug/Makefile
+    examples/other/Makefile
+    examples/3d/Makefile)
 
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
 AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
@@ -2219,24 +2219,24 @@ AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
 if test  "$ff_umfpack_download" = yes -a  -n "$TOOL_COMPILE_umfpack" ;then
-    AC_MSG_NOTICE([      use of download UMFPACK see  download/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
+    AC_MSG_NOTICE([      use of download UMFPACK see  3rdparty/umfpack/SuiteSparse/UMFPACK/README.txt for the License])
 fi
 if test "$ff_arpack_download" = yes -a  -n "$TOOL_COMPILE_arpack"  ; then
-    AC_MSG_NOTICE([      use of download ARPACK see  download/arpack/ARPACK/README  no License ])
+    AC_MSG_NOTICE([      use of download ARPACK see  3rdparty/arpack/ARPACK/README  no License ])
 fi
 
 if test "$enable_download" = yes  ;then
     if test  -n "$TOOL_COMPILE_fftw3"   ; then
-    AC_MSG_NOTICE([      use of download fftw   see  download/fftw/fftw-3.2/COPYRIGHT ])
+    AC_MSG_NOTICE([      use of download fftw   see  3rdparty/fftw/fftw-3.2/COPYRIGHT ])
     fi
     if test  -n "$TOOL_COMPILE_tetgen"   ; then
-    AC_MSG_NOTICE([      use of download tetgen  see download/tetgen/tetgen1.5.1-beta/LICENSE ])
+    AC_MSG_NOTICE([      use of download tetgen  see 3rdparty/tetgen/tetgen1.5.1-beta/LICENSE ])
     fi
     if test  -n "$TOOL_COMPILE_yams"   ; then
-    AC_MSG_NOTICE([      use of download freeyams  see download/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
+    AC_MSG_NOTICE([      use of download freeyams  see 3rdparty/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
     fi
     if test  -n "$TOOL_COMPILE_mmg3d"   ; then
-    AC_MSG_NOTICE([      use of download mmg3d (v4)   see download/mmg3d/mmg3d4/LICENCE.txt  ])
+    AC_MSG_NOTICE([      use of download mmg3d (v4)   see 3rdparty/mmg3d/mmg3d4/LICENCE.txt  ])
     fi
     if test  -n "$TOOL_COMPILE_parmets"   ; then
     AC_MSG_NOTICE([      use of download parmetis])
@@ -2257,13 +2257,13 @@ if test "$enable_download" = yes  ;then
         AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
         AC_MSG_NOTICE([      you can try to use the  Kazushige Goto s BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
         AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
-        AC_MSG_NOTICE([      or try to download/compile the altas blas .])
+        AC_MSG_NOTICE([      or try to 3rdparty/compile the altas blas .])
     fi
 
-    # ALH - 30/10/13 - (request from FH) all downloads are now part of a separate script ([[file:download/getall]])
+    # ALH - 30/10/13 - (request from FH) all downloads are now part of a separate script ([[file:3rdparty/getall]])
     # which needs to be run before make for the user to specify whether he is ok with each of the package licences.
 
-    AC_MSG_NOTICE([      Please run "download/getall" to download all necessary packages before running make])
+    AC_MSG_NOTICE([      Please run "3rdparty/getall" to download all necessary packages before running make])
 fi
 
 # FFCS does not use glut, so remove this message because it could make the user think that something is broken

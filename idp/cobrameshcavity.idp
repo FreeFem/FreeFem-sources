@@ -1,0 +1,195 @@
+load "msh3"
+
+macro buildcobramesh(meshname)
+{
+
+int m11 = max(1., sec1/sec3 * nloc);
+int m12 = max(1., 2*(radius-height)*sin(angle/npangler/2)/sec3 * nloc);
+int m13 = max(1., sec2/sec3 * nloc);
+int m14 = max(1., 2*radius*sin(angle/npangleR/2)/sec3 * nloc);
+int m15 = max(1., 1.*nloc);
+int m2 = max(1., height/sec3 * nloc);
+int mmextz = max(1., distz/sec3 * nloc);
+int mmz = max(1., width/sec3 * nloc);
+int mmextx = max(1.,(height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))/sec3 * nloc);
+int mmexty = max(1.,(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3 + distx+distx)/sec3 * nloc);
+
+border b11 (t=0, sec1){x=t;y=0;label=labmetal;}
+border b12 (t=0, 2*(radius-height)*sin(angle/npangler/2); i){
+	real l = 2*(radius-height)*sin(angle/npangler/2);
+	real xpos = sec1;
+	real ypos = 0;
+	for (int j=0; j<i; j++) {
+      xpos+=cos(angle/npangler/2+(j*angle/npangler))*l;
+	  ypos-=sin(angle/npangler/2+(j*angle/npangler))*l;
+	}
+	x = xpos + cos(angle/npangler/2+(i*angle/npangler))*t;
+	y = ypos - sin(angle/npangler/2+(i*angle/npangler))*t;
+
+	label=labmetal;
+}
+border b13 (t=0, sec2){	
+	real xpos = sec1+(radius-height)*sin(angle);
+	real ypos = (radius-height)*cos(angle)-(radius-height);
+	
+	x=xpos+t*cos(angle);
+	y=ypos-t*sin(angle);
+	
+	label=labmetal;
+}
+
+border b14 (t=0, 2*radius*sin(angle/npangleR/2); i){
+	real xpos = sec1+(radius-height)*sin(angle)+sec2*cos(angle);
+	real ypos = (radius-height)*cos(angle)-(radius-height)-sec2*sin(angle);
+	
+	real l2 = 2*radius*sin(angle/npangleR/2);
+	for (int j=0; j<i; j++) {
+      xpos+=cos(angle-(angle/npangleR/2+(j*angle/npangleR)))*l2;
+	  ypos-=sin(angle-(angle/npangleR/2+(j*angle/npangleR)))*l2;
+	}
+	x = xpos + cos(angle-(angle/npangleR/2+(i*angle/npangleR)))*t;
+	y = ypos - sin(angle-(angle/npangleR/2+(i*angle/npangleR)))*t;
+	
+	label=labmetal;
+}
+
+border b15 (t=0, sec3){
+	x=sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+t;
+	y=(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle);
+	label=labmetal;
+}
+
+border b2 (t=0, height){
+	x=sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3;
+	y=(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)+t;
+	label=labo;
+}
+
+border b21 (t=sec1, 0){
+	x=t;
+	y=height;
+	label=labmetal;
+}
+
+border b22 (t=2*radius*sin(angle/npangleR/2), 0; i){
+	real xpos = sec1;
+	real ypos = height;
+	
+	real l2 = 2*radius*sin(angle/npangleR/2);
+	for (int j=0; j<i; j++) {
+      xpos+=cos(angle/npangleR/2+(j*angle/npangleR))*l2;
+	  ypos-=sin(angle/npangleR/2+(j*angle/npangleR))*l2;
+	}
+	x = xpos + cos(angle/npangleR/2+(i*angle/npangleR))*t;
+	y = ypos - sin(angle/npangleR/2+(i*angle/npangleR))*t;
+	
+	label=labmetal;
+}
+
+border b23 (t=sec2, 0){
+	x=sec1+radius*sin(angle)+t*cos(angle);
+	y=height+radius*cos(angle)-radius-t*sin(angle);
+	label=labmetal;
+}
+
+border b24 (t=2*(radius-height)*sin(angle/npangler/2), 0; i){
+	real l = 2*(radius-height)*sin(angle/npangler/2);
+	real xpos = sec1+radius*sin(angle)+sec2*cos(angle);
+	real ypos = height+radius*cos(angle)-radius-sec2*sin(angle);
+	for (int j=0; j<i; j++) {
+      xpos+=cos(angle-(angle/npangler/2+(j*angle/npangler)))*l;
+	  ypos-=sin(angle-(angle/npangler/2+(j*angle/npangler)))*l;
+	}
+	x = xpos + cos(angle-(angle/npangler/2+(i*angle/npangler)))*t;
+	y = ypos - sin(angle-(angle/npangler/2+(i*angle/npangler)))*t;
+
+	label=labmetal;
+}
+
+border b25 (t=sec3, 0){
+	x=sec1+radius*sin(angle)+sec2*cos(angle)+(radius-height)*sin(angle)+t;
+	y=height+radius*cos(angle)-radius-sec2*sin(angle)-(radius-height)+(radius-height)*cos(angle);
+	label=labmetal;
+}
+
+border b3 (t=height, 0){
+	x=0; 
+	y=t;
+	label=labi;
+}
+
+border ext1 (t=height+disty,(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty) {
+	x=-distx;
+	y=t;
+	label = labextxm;
+}
+
+border ext2 (t=-distx, sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3 + distx) {
+	x=t;
+	y= (radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty;
+	label = labextym;
+}
+
+border ext3 (t=(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,height+disty) {
+	x=sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3 + distx;
+	y=t;
+	label = labextxM;
+}
+
+border ext4 (t=sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3 + distx, -distx) {
+	x=t;
+	y=height+disty;
+	label = labextyM;
+}
+
+
+int[int] tm12(npangler);
+tm12 = m12;
+
+int[int] tm14(npangleR);
+tm14 = m14;
+
+/*
+plot((b11(m11)+b12(tm12)+b13(m13)+b14(tm14)+b15(m15)+b2(m2)+b25(m15)+b24(tm12)+b23(m13)+b22(tm14)+b21(m11)+b3(m2)+ext1(mmextx)+ext2(mmexty)+ext3(mmextx)+ext4(mmexty)));
+*/
+
+mesh Th2 = buildmesh(b11(m11)+b12(tm12)+b13(m13)+b14(tm14)+b15(m15)+b2(m2)+b25(m15)+b24(tm12)+b23(m13)+b22(tm14)+b21(m11)+b3(m2)+ext1(mmextx)+ext2(mmexty)+ext3(mmextx)+ext4(mmexty),fixedborder=1);
+
+fespace Uh2(Th2,P0);
+
+Uh2 reg = region;
+
+int regint2d = reg(0.1*height,0.1*height);
+int regext2d = reg(-0.1*height,-0.1*height);
+
+/*cout << regint2d << " " << regext2d << endl;*/
+
+/*
+plot(Th2);
+*/
+
+mesh3[int] meshtab(3);
+
+int[int] lup = [regint2d,labextzm,regext2d,labextzm];
+int[int] ldown = [regint2d,labtomerge,regext2d,labtomerge];
+int[int] lmid = [labi,labtomerge,labo,labtomerge,labmetal,labtomerge,labextxm,labextxm,labextxM,labextxM,labextym,labextym,labextyM,labextyM];
+int[int] lregion = [regint2d,regext,regext2d,regext];
+
+meshtab[0] = buildlayers( Th2, mmextz, zbound = [ -distz, 0 ], labelup=ldown,labeldown=lup,labelmid=lmid,region=lregion);
+
+lup = [regint2d,labextzM,regext2d,labextzM];
+
+meshtab[2] = buildlayers( Th2, mmextz, zbound = [ width, width+distz ], labelup=lup,labeldown=ldown,labelmid=lmid,region=lregion);
+
+int[int] lupint = [regint2d,labmetal,regext2d,labtomerge];
+int[int] ldownint = [regint2d,labmetal,regext2d,labtomerge];
+int[int] lmidint = [labi,labi,labo,labo,labmetal,labmetal,labextxm,labextxm,labextxM,labextxM,labextym,labextym,labextyM,labextyM];
+int[int] lregionint = [regint2d,regint,regext2d,regext];
+
+meshtab[1] = buildlayers( Th2, mmz, zbound = [ 0, width ], labelup=lupint,labeldown=ldownint,labelmid=lmidint,region=lregionint);
+
+meshname = gluemesh(meshtab,labtodel=labtomerge);
+} // EOM
+
+
+

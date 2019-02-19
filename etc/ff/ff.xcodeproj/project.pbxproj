@@ -199,7 +199,7 @@
 		3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualMatrix.hpp; path = ../src/femlib/VirtualMatrix.hpp; sourceTree = "<group>"; };
 		3D1E311221A6DC75005200CF /* VirtualSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolver.hpp; path = ../src/femlib/VirtualSolver.hpp; sourceTree = "<group>"; };
 		3D23E89D20BE9F7D00B6683D /* libifport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifport.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.a; sourceTree = "<group>"; };
-		3D23E89F20BEA02300B6683D /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../download/lib/libarpack.a; sourceTree = "<group>"; };
+		3D23E89F20BEA02300B6683D /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../3rdparty/lib/libarpack.a; sourceTree = "<group>"; };
 		3D23E8A620BEAB5A00B6683D /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
 		3D23E8A820BEAC3E00B6683D /* libifcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifcore.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifcore.a; sourceTree = "<group>"; };
 		3D23E8AA20BEACB300B6683D /* libirc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libirc.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libirc.dylib; sourceTree = "<group>"; };
@@ -992,7 +992,7 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" \"$(inherited) /usr/local/ff++/mpich/include/\" \"/usr/local/include/\"";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../3rdparty/include\" \"$(SRCROOT)/..\" \"$(inherited) /usr/local/ff++/mpich/include/\" \"/usr/local/include/\"";
 				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../dowload/include\"  \"$(SRCROOT)/..\" $(inherited)";
 				VALID_ARCHS = x86_64;
 			};
@@ -1041,8 +1041,8 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited)";
-				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../3rdparty/include\" \"$(SRCROOT)/..\" $(inherited)";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../3rdparty/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
@@ -1072,8 +1072,8 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"\"$(SRCROOT)/../download/lib\"",
-					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
+					"\"$(SRCROOT)/../3rdparty/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/3rdparty/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
@@ -1085,15 +1085,15 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"\"$(SRCROOT)/../download/lib\"",
-					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
+					"\"$(SRCROOT)/../3rdparty/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/3rdparty/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../3rdparty/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../3rdparty/lib\"";
 				PRODUCT_NAME = fflib;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited) \"/usr/local/include\"";
@@ -1125,17 +1125,17 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"\"$(SRCROOT)/../download/lib\"",
-					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
+					"\"$(SRCROOT)/../3rdparty/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/3rdparty/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../3rdparty/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../3rdparty/lib\"";
 				PRODUCT_NAME = fflib;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited) \"/usr/local/include\"";
@@ -1179,7 +1179,7 @@
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../download/lib\"",
+					"\"$(SRCROOT)/../3rdparty/lib\"",
 					/usr/local/lib,
 					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
@@ -1205,7 +1205,7 @@
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../download/lib\"",
+					"\"$(SRCROOT)/../3rdparty/lib\"",
 					/usr/local/lib,
 					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
