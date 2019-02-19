@@ -1,0 +1,43 @@
+load "Element_P3-3d"
+load "msh3"
+load "medit"
+//mesh3 Th=cube(1, 1, 1);
+mesh3 Th = readmesh3("./T1.mesh");
+mesh3 Thf = trunc(Th,1,split=2);
+func bool fv(real[int] & v, ofstream of)
+{
+	of<< " ( ";
+	for(int i=0; i< v.n; ++i)
+	if(abs(v[i])>1e-10) of << i << " " << v[i] << ", " ;
+	of << " ) \n";
+	return 1; 
+}
+func f = x; //x+2*y+3*z*x*z;                                            //sin(x) + sin(2*y)+sin(3*z);
+fespace Vh(Th,P33d);
+
+
+Vh u =f,v,w;
+cout << u[] << endl; 
+//verbosity=10;
+int err=0;
+for(int i=0; i< u[].n; ++i)
+{
+	//cout << "\n\t******  i = " << i << endl;
+	u=0; u[][i]=1; 
+	v =u;
+	w[]=u[]-v[];
+	//plot(u2,cmm=" i =" + i ,wait=1,nbiso = 10);
+	if( w[].linfty> 1e-5)
+	{
+		err++;
+	  cout << i << " "<< v[][i] <<" ==" << v[].imax  ; fv(v[],cout); 
+     }
+	
+}
+assert(err==0);
+u=f; 
+real err1 = int3d(Thf)(sqr(f-u)) ;
+cout << " err1=" << err1 << endl; 
+//cout << u[] << endl;
+
+

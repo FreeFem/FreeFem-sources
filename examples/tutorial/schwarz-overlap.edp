@@ -1,0 +1,35 @@
+real pi=4*atan(1);
+int inside = 2;
+int outside = 1;
+border a(t=1,2){x=t;y=0;label=outside;};
+border b(t=0,1){x=2;y=t;label=outside;};
+border c(t=2,0){x=t ;y=1;label=outside;};
+border d(t=1,0){x = 1-t; y = t;label=inside;};
+border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
+border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;}; 
+int n=4;
+mesh th = buildmesh( a(5*n) + b(5*n) + c(10*n) + d(5*n));
+mesh TH = buildmesh ( e(5*n) + e1(25*n) );
+plot(th,TH,ps="schwarz-th.eps");
+fespace vh(th,P1);
+fespace VH(TH,P1);
+vh u=0,v; VH U,V;
+int i=0;
+
+problem PB(U,V,init=i,solver=Cholesky) = 
+    int2d(TH)( dx(U)*dx(V)+dy(U)*dy(V) )
+  + int2d(TH)( -V) + on(inside,U = u)  +    on(outside,U= 0 ) ;
+problem pb(u,v,init=i,solver=Cholesky) = 
+    int2d(th)( dx(u)*dx(v)+dy(u)*dy(v) )
+  + int2d(th)( -v) + on(inside ,u = U) +    on(outside,u = 0 ) ;
+
+
+for ( i=0 ;i< 10; i++) 
+{   
+   PB; 
+   pb;
+   //if (i==0) 
+        plot(U,u,wait=true,ps="schwarz-u"+i+".eps");
+};
+
+plot(U,u,ps="schwarz-u.eps");

@@ -1,0 +1,86 @@
+// Parameters
+real nu = 1./100.;
+real dt = 0.1;
+
+// Mesh
+mesh Th = square(8, 8);
+
+// Fespace
+fespace Xh(Th, P2);
+Xh u1, v1;
+Xh u2, v2;
+Xh up1, up2;
+Xh psi, phi;
+fespace Mh(Th, P1);
+Mh p, q;
+
+// Problem Stokes (with solve)
+real epsr = 1e-8;
+solve Stokes ([u1, u2, p], [v1, v2, q])
+	= int2d(Th)(
+		( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+		+ dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+		- p*q*epsr
+		+ p*dx(v1) + p*dy(v2)
+		+ dx(u1)*q + dy(u2)*q
+	)
+	+ on(3, u1=1, u2=0)
+	+ on(1, 2, 4, u1=0, u2=0)
+	;
+
+// Plot
+plot(coef=0.2, cmm="[u1, u2] and p", p, [u1, u2], ArrowSize=0.5, wait=1);
+
+// Problem stream-lines (with solve)
+solve streamlines (psi, phi)
+	= int2d(Th)(
+		  dx(psi)*dx(phi)
+		+ dy(psi)*dy(phi)
+	)
+	+ int2d(Th)(
+		- phi*(dy(u1) - dx(u2))
+	)
+	+ on(1, 2, 3, 4, psi=0);
+
+// Plot
+plot(psi, wait=1);
+
+// Problem Navier-Stokes
+int i = 0;
+real alpha = 1/dt;
+problem NS ([u1, u2, p], [v1, v2, q], init=i)
+	= int2d(Th)(
+		  alpha*(u1*v1 + u2*v2)
+		+ nu * (
+			  dx(u1)*dx(v1) + dy(u1)*dy(v1)
+			+ dx(u2)*dx(v2) + dy(u2)*dy(v2)
+		)
+		- p * q * epsr
+		+ p*dx(v1) + p*dy(v2)
+		+ dx(u1)*q + dy(u2)*q
+	)
+	+ int2d(Th)(
+		- alpha*convect([up1, up2], -dt, up1)*v1
+		- alpha*convect([up1, up2], -dt, up2)*v2
+	)
+	+ on(3, u1=1, u2=0)
+	+ on(1, 2, 4, u1=0, u2=0)
+	;
+
+for (i = 0; i <= 20; i++) {
+	// Update
+	up1 = u1;
+	up2 = u2;
+
+	// Solve
+	NS;
+
+	// Plot
+	if (!(i % 10))
+		plot(coef=0.2, cmm="[u1, u2] and p", p, [u1, u2]);
+}
+plot(coef=0.2, cmm="[u1, u2] and p", p, [u1, u2]);
+
+// Re-calculate stream-lines
+streamlines;
+plot(psi, wait=1);

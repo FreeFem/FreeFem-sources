@@ -1,0 +1,37 @@
+// Regression tests
+// ----------------
+
+// $Id$
+
+// Regression tests
+// ----------------
+
+// The tests are checked against reference values by "make check" in
+// each examples subdirectory
+
+// "ref.edp" contains all reference values and may be rebuilt with
+// "make Ref"
+
+// $Id$
+
+// The values tested here may not have a physical or mathematical
+// meaning. Their main property is to gather numerical values from the
+// whole domain, to be checked for consistency with previous runs.
+
+NoUseOfWait=true;
+int verbosityy=verbosity;
+
+
+
+
+include "ref.edp";
+
+
+
+
+
+// The values tested here may not have a physical or mathematical
+// meaning. Their main property is to gather numerical values from the
+// whole domain, to be checked for consistency with previous runs.
+
+

@@ -1,0 +1,222 @@
+//ff-mpirun -np 8 natural_convection_3D_obstacle.edp -raspart -ffddm_schwarz_method oras -glut ffglut -ffddm_medit -global 9 -CSsplit 3
+
+//large scale case : ff-mpirun  -np 224 natural_convection_3D_obstacle.edp -raspart -ffddm_schwarz_method oras -ns -nw -global 36 -noGlob -CSsplit 6 -ffddm_master_p 2 -ffddm_master_exclude 1
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 8
+// PARAM -raspart -ffddm_schwarz_method oras -global 9 -CSsplit 3
+
+macro dimension()3// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+searchMethod = 1;
+
+macro def(i)[i, i#B, i#C, i#D, i#E]// EOM     // vector field definition
+macro init(i)[i, i, i, i, i]// EOM        // vector field initialization
+macro grad(u)[dx(u), dy(u),dz(u)]// EOM   // two-dimensional gradient
+macro Grad(u1,u2,u3)[dx(u1),dy(u1),dz(u1),dx(u2),dy(u2),dz(u2),dx(u3),dy(u3),dz(u3)]//
+macro div(u)(dx(u) + dy(u#B) + dz(u#C))// EOM
+macro UgradU(uw,u)[[uw,uw#B,uw#C]'*grad(u),[uw,uw#B,uw#C]'*grad(u#B),[uw,uw#B,uw#C]'*grad(u#C)]//
+func Pk = [P2, P2, P2, P1, P1];             // finite element space
+
+real Ra=1.e5;
+real Pr=0.71;
+real Rey=sqrt(Ra/Pr);
+real IRe=1./Rey, IRa=Ra/(Rey*Rey*Pr), IPr=1./(Rey*Pr);
+
+real Thot=0.5, Tcold=-0.5, Tin=0.8;
+
+real eps = 1e-7; // penalisation dans Navier-Stokes
+
+int newtonMax = 20; 
+real tolNewton = 1.e-3;
+
+real coef;
+
+int np = getARGV("-global", 9);
+
+int mysplit = getARGV("-CSsplit", 3);
+
+// maillage grossier pour le precond 2 niveaux
+meshN Thc = cube(np/mysplit,np/mysplit,np/mysplit, [x, y, z]);
+Thc = trunc(Thc,(((x>0.66|x<0.33) |(y>0.66|y<0.33)| (z>0.66|z<0.33))),label=20);
+
+// maillage fin defini en splittant le maillage grossier : on split les aretes du maillage grossier en 3 (parametre mysplit) -> les 2 maillages sont emboites
+meshN ThGlobal = trunc(Thc,1,split=mysplit);
+
+//macro NCdefplot(u)u#E//
+
+// on construit la decomposition avec recouvrement (le "aug" signifie qu'on fait egalement le necessaire pour pouvoir recuperer la solution syncronisee sur les ThAugmented, ce qui va nous servir pour avoir la matrice restreinte au sous-domaine (qui depend de la solution precedente) correcte).
+// "NC" est un prefixe, un nom qu'on choisit en input, qui va correspondre a une simulation (on peut combiner et resoudre de maniere differente plusieurs problemes dans le meme script)
+// Toutes les structures de donnees creees par la suite auront un nom prefixe par "NC"
+ffddmbuildAug(NC,ThGlobal,real,def,init,Pk,mpiCommWorld)
+
+// tgv = -1 -> pseudo elimination pour les conditions de Dirichlet (on met 1 sur la diagonale et 0 ailleurs sur la ligne).
+vtgv = -1;
+vtgvelim = -1;
+vsym = 0;
+
+// la definition de la macro ci-dessous signifie qu'on veut utiliser le GMRES d'hpddm, mais avec notre preconditionneur (par defaut si on ne la definit pas on utilise un GMRES parallele "maison" en freefem, defini dans ffddm_functions.idp)
+macro NCwithhpddmkrylov()1//
+
+// on initialise les structures pour le 1er niveau du precond (tout sauf ce qui depend de l'edp -- on apellera plus tard ffddmsetup(NC,Varf,VarfOpt) a chaque iteration pour assembler les matrices locales a partir des formulations variationnelles, qui changent a chaque iteration)
+ffddmsetupinit(NC,NC)
+
+// NCpCS est le nombre de coeurs qui s'occupent du probleme grossier, donne par -ffddm_master_p (1 par defaut). Si NCpCS > 1, alors on "distribue" les elements du maillage grossier en utilisant les regions, pour distribuer plus tard l'assemblage du probleme grossier sur les NCpCS coeurs.
+if (NCpCS > 1) {
+	int[int] nupart(Thc.nt);
+	nupart=0;
+	if (mpirank == 0)
+		scotch(nupart, Thc, NCpCS);
+	if (mpirank < NCpCS) {
+		broadcast(processor(0,NCcommCS),nupart);
+		Thc=change(Thc,fregion=nupart[nuTriangle]);
+	}
+}
+
+// on initialise les structures pour le 2e niveau (grossier) du precond (tout sauf ce qui depend de l'edp -- on apellera plus tard ffddmcoarsemeshsetup(NC,Thc,VarfCS,null) a chaque iteration pour assembler la matrice du probleme grossier)
+ffddmcoarsemeshsetupinit(NC,Thc)
+
+// [uG,uGB,uGC,pG,TG] est destinee a etre l'interpolation de la solution sur le maillage grossier et interviendra dans l'assemblage du probleme grossier (mais en fait on ne va pas l'utiliser car ca marche beaucoup mieux sans !)
+NCVhCoarse [uG,uGB,uGC,pG,TG];
+uG[] = 0;
+
+ffddmset(NC,verbosity,10)
+
+// solutions locales
+NCVhi [ui,uiB,uiC,pi,Ti], [upi,upiB,upiC,ppi,Tpi];
+
+real[int] rhs;
+
+// la formulation variationnelle pour le probleme initial (pour le produit matrice-vecteur A). On va l'assembler sur les maillage locaux "augmentes" (anciennement les ThAugmented).
+macro Varf(varfName, meshName, VhName)
+	/* on syncronise la solution precedente (ui[] en local) sur les maillages locaux augmentes. le fespace courant qu'on utilise est "VhName" (qui correspondra au fespace sur maillages augmentes). Le resultat est uG (solution qui est donc syncronisee sur les maillages augmentes apres le call). */
+	VhName [uG,uGB,uGC,pG,TG];
+	NCfromVhi(ui[],VhName,uG[])
+	
+    varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
+     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+         + UgradU(uG,uw)'*[v,vB,vC]
+         + UgradU(uw,uG)'*[v,vB,vC]
+         + ( Grad(uw,uwB,uwC)'*Grad(v,vB,vC))*IRe
+         - coef*IRa*Tw*vB
+         -[uG,uGB,uGC]'*grad(W)*Tw
+         -[uw,uwB,uwC]'*grad(W)*TG
+         + grad(Tw)'*grad(W)*IPr)
+    + on(1,2,3,4,5,6,20, uw=0,uwB=0,uwC=0)
+    + on(2,Tw=Tcold) + on(4,Tw=Thot)
+    +on(20,Tw=Tin);
+// EOM
+
+// la formulation variationnelle pour le probleme grossier. On enleve les termes qui dependent de la solution precedente, et ca marche quand meme tres bien.
+macro VarfCS(varfName, meshName, VhName)
+    varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
+     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+         /*+ UgradU(uG,uw)'*[v,vB,vC]
+         + UgradU(uw,uG)'*[v,vB,vC]*/
+         + ( Grad(uw,uwB,uwC)'*Grad(v,vB,vC))*IRe
+         - coef*IRa*Tw*vB
+         /*-[uG,uGB,uGC]'*grad(W)*Tw
+         -[uw,uwB,uwC]'*grad(W)*TG*/
+         + grad(Tw)'*grad(W)*IPr)
+    + on(1,2,3,4,5,6,20, uw=0,uwB=0,uwC=0)
+    + on(2,Tw=Tcold) + on(4,Tw=Thot)
+    +on(20,Tw=Tin);
+// EOM
+
+// la formulation variationnelle pour le 1er niveau du preconditionneur (optimized schwarz). On integre sur les maillages locaux (NCThi), donc on peut utiliser directement la solution locale precedente ui. La condition optimisee sur les interfaces (bord 10) est un choix a faire, celle-ci semble bien marcher.
+macro VarfOpt(varfName, meshName, VhName)
+    varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
+     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+         + UgradU(ui,uw)'*[v,vB,vC]
+         + UgradU(uw,ui)'*[v,vB,vC]
+         + ( Grad(uw,uwB,uwC)'*Grad(v,vB,vC))*IRe
+         - coef*IRa*Tw*vB
+         -[ui,uiB,uiC]'*grad(W)*Tw
+         -[uw,uwB,uwC]'*grad(W)*Ti
+         + grad(Tw)'*grad(W)*IPr)
+    + intbN(meshName,10)(20./hTriangle*IRe*[uw,uwB,uwC]'*[v,vB,vC]+20*1./hTriangle*[pw, Tw]'*[q, W])
+    + on(1,2,3,4,5,6,20, uw=0,uwB=0,uwC=0)
+    + on(2,Tw=Tcold) + on(4,Tw=Thot)
+    +on(20,Tw=Tin);
+// EOM
+
+macro Varfrhs(varfName, meshName, VhName)
+	varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
+     intN(meshName)(
+         UgradU(ui,ui)'*[v,vB,vC]       
+         - [ui,uiB,uiC]'*grad(W)*Ti       
+     )
+    + on(1,2,3,4,5,6,20, uw=0,uwB=0,uwC=0)
+    + on(2,Tw=Tcold) + on(4,Tw=Thot)
+    +on(20,Tw=Tin);
+// EOM
+
+int nstep= max((int(log10(Ra)-4)^2), 3)*max(log10(Ra)-7.,1.);
+
+[ui,uiB,uiC,pi,Ti]=[0,0,0,0,Thot+x*(Tcold-Thot)];
+
+int iter=0;
+
+for(int step=1; step <= nstep; ++step)
+{
+   iter++;
+
+    real err=1e100;
+    real errp = err;
+    coef = (step/real(nstep))^3; // continuation sur le coef en temperature ...
+    if (mpirank == 0)
+      cout<< "---------------  continuation coef*Ra=" << coef*Ra << endl;
+
+   // Iteration de Newton ---------------------------
+   for(int niter=0 ; niter < newtonMax ; niter++){
+   	
+   	 //le call NCfromVhi permet d'interpoler la solution locale fine sur le maillage grossier, mais on a finalement enleve les termes qui dependent de la solution precedente dans le probleme grossier
+	 //NCfromVhi(ui[],NCVhCoarse,uG[])
+
+	 // on assemble les matrices locales (Varf pour le produit matrice-vecteur A, VarfOpt pour le 1er niveau du preconditionneur)
+	 ffddmsetup(NC,NC,Varf,VarfOpt)
+	 
+	 // on assemble le probleme grossier. On repasse pour l'occasion en mode penalisation exacte avec des 1e+30 sur la diagonale pour les conditions de Dirichlet, ca marche en general mieux et c'est plus simple lorsque la matrice est distribuee (sur les NCpCS coeurs du probleme grossier).
+	 // remarque : si -ffddm_master_exclude 1, les calls ffddmsetup et ffddmcoarsemeshsetup sont faits en parallele : les coeurs qui ne s'occupent que du 1er niveau assemblent les matrices locales dans ffddmsetup, et les coeurs qui ne s'occupent que du probleme grossier l'assemblent dans ffddmcoarsemeshsetup
+	 vtgv = 1.e+30/NCpCS; 
+	 ffddmcoarsemeshsetup(NC,Thc,VarfCS,null)	 
+	 vtgv = -1;
+	 
+	 // assemblage du second membre
+     ffddmbuildrhs(NC,Varfrhs,rhs)
+
+	 // resolution
+     ui[] = NCfGMRES(ui[], rhs, 1.e-8, 200, "right");
+     
+     upi[] -= ui[];
+     real reduce = upi[].linfty;
+     upi[]  = ui[];
+     mpiAllReduce(reduce, err, mpiCommWorld, mpiMAX);
+
+     if(mpirank == 0)
+	   cout << "niter = " << niter << " err =  " << err << endl;
+
+     if(err > errp*100) break;
+     if(err < tolNewton) break;
+   }
+   
+   ffddmplot(NC,Ti, "Global solution");
+
+}
+
+NCwritesummary
+
+// on peut aussi automatiquement mettre la solution locale ui sur n'importe quel maillage (global) avec NCfromVhi, qui interpole et fait les communications
+fespace Vhg(ThGlobal,Pk);
+Vhg [u1s,u2s,u3s,ps,Ts];
+NCfromVhi(ui[],Vhg,u1s[])
+
+int[int] fforder=[1,1,1,1];
+load "iovtk"
+if (mpirank == 0)
+	savevtk("sol.vtk",ThGlobal,u1s,u2s,u3s,Ts,dataname="VelocityX VelocityY VelocityZ Temperature",order=fforder);
+

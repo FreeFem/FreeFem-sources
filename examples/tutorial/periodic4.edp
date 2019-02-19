@@ -1,0 +1,34 @@
+real r=0.25;
+// a diamond with a hole
+border a(t=0,1){x=-t+1; y=t;label=1;}; 
+border b(t=0,1){ x=-t; y=1-t;label=2;};
+border c(t=0,1){ x=t-1; y=-t;label=3;};
+border d(t=0,1){ x=t; y=-1+t;label=4;};
+border e(t=0,2*pi){ x=r*cos(t); y=-r*sin(t);label=0;};
+int n = 10;
+mesh Th= buildmesh(a(n)+b(n)+c(n)+d(n)+e(n)); 
+plot(Th,wait=1);
+real r2=1.732;
+func abs=sqrt(x^2+y^2);
+//  warning for periodic condition:
+//  side a and c \hfilll
+//  on side a (label 1) $ x \in [0,1] $ or $ x-y\in [-1,1] $ \hfilll
+//  on side c (label 3) $ x \in [-1,0]$ or $ x-y\in[-1,1] $\hfilll
+// so the common abcissa can be repectively $x$ and $x+1$
+// or you can can try curviline abcissa $x-y$ and $x-y$ 
+//  1 first way
+// fespace Vh(Th,P2,periodic=[[2,1+x],[4,x],[1,x],[3,1+x]]);     
+// 2 second way
+ fespace Vh(Th,P2,periodic=[[2,x+y],[4,x+y],[1,x-y],[3,x-y]]);     
+
+ Vh uh,vh;             
+
+ func f=(y+x+1)*(y+x-1)*(y-x+1)*(y-x-1);                
+ real intf = int2d(Th)(f);
+ real mTh = int2d(Th)(1.);
+real moyf =  intf/mTh;
+cout << moyf << endl; 
+ problem laplace(uh,vh) =                     
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) + 1e-8*uh*vh ) + int2d(Th)( (moyf-f)*vh ) ;                
+laplace; 
+  plot(uh,wait=1,ps="perio4.eps");

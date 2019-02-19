@@ -1,0 +1,47 @@
+// Beam under it own weight
+
+// Parameters
+real E = 21.5;
+real sigma = 0.29;
+real gravity = -0.05;
+
+// Mesh
+int bottombeam = 2;
+border a(t=2, 0){x=0; y=t ;label=1;}	// left beam
+border b(t=0, 10){x=t; y=0 ;label=bottombeam;}	// bottom of beam
+border c(t=0, 2){x=10; y=t ;label=1;}	// rigth beam
+border d(t=0, 10){x=10-t; y=2; label=3;}	// top beam
+mesh th = buildmesh(b(20) + c(5) + d(20) + a(5));
+
+// Fespace
+fespace Vh(th, [P1, P1]);
+Vh [uu, vv], [w, s];
+
+// Macro
+real sqrt2 = sqrt(2.);
+macro epsilon(u1, u2) [dx(u1), dy(u2), (dy(u1) + dx(u2))/sqrt2] // EOM
+macro div(u, v) (dx(u) + dy(v)) // EOM
+
+// Problem (with solve)
+real mu = E/(2*(1 + sigma));
+real lambda = E*sigma/((1 + sigma)*(1 - 2*sigma));
+cout << "Lambda = " << lambda << endl;
+cout << "Mu = " << mu << endl;
+cout << "Gravity = " << gravity << endl;
+solve Elasticity ([uu, vv], [w, s], solver=sparsesolver)
+	= int2d(th)(
+		  lambda*div(w, s)*div(uu, vv)
+		+ 2.*mu*(epsilon(w, s)' * epsilon(uu, vv))
+	)
+	- int2d(th)(gravity*s)
+	+ on(1, uu=0, vv=0)
+	;
+cout << "Max displacement = " << uu[].linfty << endl;
+
+// Plot
+plot([uu, vv], wait=1);
+plot([uu, vv], wait=1, bb=[[-0.5, 2.5], [2.5, -0.5]]);
+
+// Move mesh
+mesh th1 = movemesh(th, [x+uu, y+vv]);
+plot(th1, wait=1);

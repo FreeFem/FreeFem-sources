@@ -1,0 +1,62 @@
+// Example of number manipulation
+
+real x = 3.14, y;
+int i, j;
+complex c;
+cout << "x = " << x << endl;
+
+x = 1; y = 2;
+x = y;
+
+i = 0; j = 1;
+
+cout << "--- Integer and real numbers ---" << endl;
+cout << 1 + 3 << " " << 1/3 << "\n";
+cout << 10 ^10 << "\n";
+cout << 10 ^-10 << "\n";
+cout << -10^-2 + 5 << " == 4.99\n";
+cout << 10^-2 + 5 << " == 5.01\n";
+
+cout << "--- Complex numbers ---" << endl;
+cout << 10 - 10i << endl;
+
+cout.scientific << "--- Scientific notation ---\n";
+int prec = cout.precision(12);
+cout << "-1^(1/3) = " << (-1+0i)^(1./3.) << " (precision=12)\n";
+cout.precision(prec);
+cout.fixed;
+cout.showpos << "--- Fixed and showpos ---\n";
+cout << "-1^(1/3) = " << (-1+0i)^(1./3.) << " (precision=" << prec << ")\n";
+cout.noshowpos << "--- noshowpos ---\n";
+cout << "8^(1/3)= " << (8)^(1./3.) << endl;
+cout << "sqrt(-1) = " << sqrt(-1+0i) << endl;
+complex a = 10 + 1i;
+cout.default << "--- Default ---\n";
+cout << a << endl;
+cout << "real(a) = " << real(a) << ", conj(a) = " << conj(a)
+	<< ", arg(a) = " << arg(a) << endl;
+
+cout << "++i =" << ++i ;
+cout << "i = " << i << endl;
+cout << "i++ = "<< i++ << endl;
+cout << "i = " << i << endl;
+cout << "--- String concatenation ---" << endl;
+string str, str1;
+str = "abc+";
+str1 = "+abcddddd+";
+str = str + str1;
+str = str + 2 ;
+cout << "str = " << str << " == abc++abcddddd+2;\n";
+
+{
+	real x=0;
+	for (int i = 0; i < 10; i++)
+		x += i*i;
+	cout << "x= " << x << endl;
+	// example of if arithmetic expression
+	real a = x == 0 ? x : -1;
+	real b = x != 0 ? x : -1;
+	cout << "a = " << a << ", b = " << b << endl;
+	string ss = "\z\a\b\f\\--\\";
+	cout << "\"" << ss << "\"" << endl;
+}

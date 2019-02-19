@@ -1,0 +1,46 @@
+// Mesh
+border a(t=0, 1.0){x=t;   y=0;   label=1;}
+border b(t=0, 0.5){x=1;   y=t;   label=2;}
+border c(t=0, 0.5){x=1-t; y=0.5; label=3;}
+border d(t=0.5, 1){x=0.5; y=t;   label=4;}
+border e(t=0.5, 1){x=1-t; y=1;   label=5;}
+border f(t=0.0, 1){x=0;   y=1-t; label=6;}
+mesh Th = buildmesh (a(6) + b(4) + c(4) +d(4) + e(4) + f(6));
+savemesh(Th, "th.msh");
+
+// Fespace
+fespace Vh(Th, P1);
+Vh u, v;
+
+// Problem
+problem Probem1(u, v, solver=CG, eps=1.0e-6)
+	= int2d(Th, qforder=2)(
+		  u * v * 1.0e-10
+		+ dx(u)*dx(v)
+		+ dy(u)*dy(v)
+	)
+	+ int2d(Th, qforder=2)((x-y)*v)
+	;
+
+// Adaptation loop
+int i;
+real error = 0.01;
+for (i = 0; i < 4; i++) {
+	// Solve
+	Probem1;
+	cout << u[].min << " " << u[].max << endl;
+
+	// Plot
+	plot(u,wait=1);
+
+	// Mesh adaptation
+	Th = adaptmesh(Th, u, err=error);
+	plot(Th, wait=1);
+
+	// Interpolation
+	// on the new mesh
+	u = u;
+
+	// Error update
+	error = error/2;
+}

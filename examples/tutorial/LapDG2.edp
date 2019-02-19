@@ -1,0 +1,53 @@
+//    Discontinous Galerlin Method
+//   based on paper from 
+// Riviere, Beatrice; Wheeler, Mary F.; Girault, Vivette
+// title: 
+// A priori error estimates for finite element 
+// methods based on discontinuous approximation spaces
+//  for elliptic problems.
+//  SIAM J. Numer. Anal. 39 (2001), no. 3, 902--931 (electronic).
+//  ---------------------------------
+//  Formulation given by Vivette Girault
+//  ------ 
+// Author: F. Hecht , december 2003
+// -------------------------------
+//   nonsymetric bilinear form
+//   ------------------------
+//  solve $ -\Delta u = f$ on $\Omega$ and $u= g$ on $\Gamma$
+macro dn(u) (N.x*dx(u)+N.y*dy(u) ) //  def the normal derivative 
+
+mesh Th = square(10,10); // unite square 
+fespace Vh(Th,P2dc);     // Discontinous P2 finite element
+fespace Xh(Th,P2);
+//  if param = 0 => Vh must be P2 otherwise we need some penalisation  
+real pena=0; // a paramater to add penalisation 
+varf Ans(u,v)= 
+   int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)  )
+ + intalledges(Th)(//  loop on all  edge of all triangle 
+       // the edge are see nTonEdge times so we / nTonEdge
+       // remark: nTonEdge =1 on border edge and =2 on internal 
+       // we are in a triange th normal is the exterior normal
+       // def: jump = external - internal value; on border exter value =0
+       //      mean = (external + internal value)/2, on border just internal value
+            ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
+          + pena*jump(u)*jump(v) ) / nTonEdge 
+)
+ + int1d(Th,3)(pena*0.*v)
+;
+func f=1;
+func g=0;
+Vh u,v;
+Xh uu,vv;
+problem A(u,v,solver=sparsesolver) = Ans 
+- int2d(Th)(f*v) 
+- int1d(Th)(g*dn(v)  + pena*g*v) 
+;
+problem A1(uu,vv,solver=CG) 
+= 
+ int2d(Th)(dx(uu)*dx(vv)+dy(uu)*dy(vv)) - int2d(Th)(f*vv) + on(1,2,3,4,uu=g);
+ 
+ A; // solve  DG
+ A1; // solve continuous
+
+plot(u,uu,cmm="Discontinue Galerkin",wait=1,value=1);
+plot(u,cmm="Discontinue Galerkin",wait=1,value=1,fill=1);

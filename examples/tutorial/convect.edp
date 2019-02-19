@@ -1,0 +1,31 @@
+// This is the rotating hill problem with one turn
+
+// Parameters
+real dt = 0.17, t = 0;	// time step
+
+// Mesh
+border a(t=0, 2*pi){x=cos(t); y=sin(t);}	// the unit circle
+mesh th = buildmesh(a(70));	// triangulates the disk
+
+// Fespace
+fespace Vh(th, P1);
+Vh v;
+Vh u1, u2;
+Vh vv, vo; // work Finite element function
+
+// Function
+func real hill (real r2){ return exp(-10*(r2)); }
+
+// Initialization
+v = hill( (x-0.3)^2 +(y-0.3)^2 );
+plot(v);
+
+u1 = y;
+u2 = -x;	// rotation velocity
+int i;
+for (i = 0; i < 20; i++) {
+	t += dt;
+	vo = v;
+	v = convect([u1, u2], -dt, vo);	// convect v by u1,u2, dt seconds, results in f
+	plot(v, cmm="convection: t=" + t + ", min=" + v[].min + ", max=" + v[].max, wait=0);
+}

@@ -1,0 +1,74 @@
+// Mesh
+border ba(t=0, 1.0){x=t;   y=0;  label=1;}
+border bb(t=0, 0.5){x=1;   y=t;  label=2;}
+border bc(t=0, 0.5){x=1-t; y=0.5;label=3;}
+border bd(t=0.5, 1){x=0.5; y=t;  label=4;}
+border be(t=0.5, 1){x=1-t; y=1;  label=5;}
+border bf(t=0.0, 1){x=0;   y=1-t;label=6;}
+mesh Th = buildmesh (ba(6) + bb(4) + bc(4) +bd(4) + be(4) + bf(6));
+savemesh(Th, "th.msh");
+
+// Fespace
+fespace Vh(Th, P2);
+fespace Nh(Th, P0);
+Vh u, v;
+Nh rho, logrho;
+
+// Variables
+real[int] viso(21);
+for (int i = 0; i < viso.n; i++)
+	viso[i]=10.^(+(i-16.)/2.);
+
+// Functions
+func f = (x-y);
+
+// Problem
+problem Probem1 (u, v, solver=CG, eps=1.0e-6)
+	= int2d(Th, qforder=5)(
+		  u * v * 1.0e-10
+		+ dx(u)*dx(v)
+		+ dy(u)*dy(v)
+	)
+	+ int2d(Th, qforder=10)(-f*v)
+	;
+
+varf indicator2 (uu, chiK)
+	= intalledges(Th)(
+		  chiK*lenEdge*square(jump(N.x*dx(u) + N.y*dy(u)))
+	  )
+	+ int2d(Th)(
+		  chiK*square(hTriangle*(f+dxx(u)+dyy(u)))
+	)
+	;
+
+// Adaptation loop
+real error = 0.01;
+for (int i = 0; i < 4; i++) {
+	// Solve
+	Probem1;
+	cout << u[].min << " " << u[].max << endl;
+
+	// Plot
+	plot(u, wait=1);
+
+	// Indicator
+	rho[] = indicator2(0, Nh);
+	rho = sqrt(rho);
+	logrho = log10(rho);
+	cout << "rho min = " << rho[].min << ", rho max = " << rho[].max << endl;
+
+	// Plot
+	plot(rho, fill=1, wait=1, cmm="indicator density ", value=1, viso=viso, nbiso=viso.n);
+	plot(logrho, fill=1, wait=1, cmm="log 10 indicator density ", value=1, nbiso=10);
+
+	// Mesh adaptation
+	Th = adaptmesh(Th, [dx(u), dy(u)], err=error, anisomax=1);
+	plot(Th, wait=1);
+
+	// Interpolation
+	u = u;
+	rho = rho;
+
+	// Update error
+	error = error/2;
+}

@@ -1,0 +1,4 @@
+ofstream table("theTables");
+dumptable(table);
+
+if (!exec("ls -al theTables")) cout << "execution ok " << endl;

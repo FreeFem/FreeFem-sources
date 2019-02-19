@@ -1,0 +1,50 @@
+real [int,int] a(10,10);
+real [int,int] aa(2,3);
+for [i,j,aij : aa] 
+{
+   aij= 1.+i+2*j;
+   cout << i << " "<< j << " " << aij << endl; 
+}
+	
+real [int] b(10);
+for [i,bi : b] {bi=i+1; cout << i << " " << bi << endl;}
+cout << " b="<< b<< endl;  
+for [i,j,aij : a] 
+{
+   aij= 1.+i+2*j;
+   if(abs(i-j)>2) aij=0;
+}
+cout << a(1,2) << " == " << 1.+1+2*2 << endl; 
+assert(abs(a(1,2)- (1.+1+2*2))<1e-9);
+cout << " a= "<< a << endl; 
+matrix A=a;
+string[string] ss;
+ss["1"]= 1;
+ss["2"]= 2;
+ss["3"]= 5;
+for [i,bi : ss] 
+    ss[i]=bi+i+6+"-dddd"; 
+cout <<" ss = "<< ss << endl;
+int[string] si;
+si[1]=2;
+si[50]=1;
+for [i,vi : si]
+   {
+   cout << " i " << setw(3) << i << " " << setw(10) <<vi << endl;
+    vi= atoi(i)*2;
+    }
+
+cout <<" si = "<< si << endl;
+for [i,j,aij : A]
+{
+    cout << i<< " " << j <<" " <<  aij << endl; 
+    aij= -aij;
+}
+cout << A << endl; 
+real[string] sd;
+sd["1"]= 1;
+sd["2"]= 2;
+sd["3"]= 5;
+for [i,bi : sd] 
+    bi=bi*bi;
+cout << "sd=\n"<< sd <<endl ;
