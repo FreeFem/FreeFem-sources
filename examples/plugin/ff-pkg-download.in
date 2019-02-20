@@ -44,7 +44,7 @@ esac
 DIRP=`dirname $DIR`
 #echo "WWWWW"  $DIRP
 if [ -d "$DESTDIR$DIRP/3rdparty/lib" -a -d "$DESTDIR$DIRP/3rdparty/include"  ] ; then
-    DIR="$DIRP/download"
+    DIR="$DIRP/3rdparty"
     DIRW="$DIRP/examples/plugin"
 elif [ -d "$DESTDIR$DIRP/lib" -a -d "$DESTDIR$DIRP/include"  ] ; then
     DIR="$DIRP"

@@ -8,37 +8,37 @@
 
 FREEFEM_DIR     = /Volumes/Ike/cazeaux/ff++/
 
-FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples++-load/include/ 
+FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples/plugin/include/
 
 # directory of the different package
 
-SOFT_DIR =  $(FREEFEM_DIR)download/
+SOFT_DIR =  $(FREEFEM_DIR)3rdparty/
 
 
 #==========
 #   BLAS
 #==========
-BLAS_INCLUDE = 
-BLAS_LIB     = -L$(SOFT_DIR)BLAS/blas_LINUX.a 
+BLAS_INCLUDE =
+BLAS_LIB     = -L$(SOFT_DIR)BLAS/blas_LINUX.a
 
 #============
-#  BLACS : this library is need by MUMPS 
+#  BLACS : this library is need by MUMPS
 #============
 BLACS_DIR     =  $(SOFT_DIR)/BLACS/
-BLACS_INCLUDE = 
+BLACS_INCLUDE =
 BLACS_LIB     =  -L$(BLACS_DIR)LIB/ -lblacsCinit_MPI-BROCHET-0 -lblacs_MPI-BROCHET-0 -lblacsF77init_MPI-BROCHET-0
 
 #=============
 #  SCALAPACK : this library is need by MUMPS
 #=============
 SCALAPACK_DIR     = $(SOFT_DIR)/scalapack-1.8.0/
-SCALAPACK_INCLUDE = -I$(SCALAPACK_DIR)SRC/ 
+SCALAPACK_INCLUDE = -I$(SCALAPACK_DIR)SRC/
 SCALAPACK_LIB     = -L$(SCALAPACK_DIR) -lscalapack
 
 #==============================================
-#   ordering : metis, parmetis, scotch 
+#   ordering : metis, parmetis, scotch
 #===============================================
-#  pord : this ordering is given in the mumps package 
+#  pord : this ordering is given in the mumps package
 #         and it is only need by MUMPS
 #PORD_DIR     =  $(SOFT_DIR)MUMPS_4.8.3/PORD/
 #PORD_INCLUDE = -I$(PORD_DIR)include
@@ -49,7 +49,7 @@ SCOTCH_DIR = $(SOFT_DIR)/scotch_5.1_esmumps/
 SCOTCH_INCLUDE = -I$(SCOTCH_DIR)include/
 SCOTCH_LIB     = -L$(SCOTCH_DIR)lib/  -lesmumps  -lscotch -lscotcherr -lscotcherrexit -lm
 
-# ptscotch 
+# ptscotch
 PTSCOTCH_INCLUDE = -I$(SCOTCH_DIR)include/
 PTSCOTCH_LIB     = -L$(SCOTCH_DIR)lib/ -lptscotch -lptscotcherrexit -lm
 

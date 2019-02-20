@@ -80,7 +80,7 @@ bamg:
 
 ide:
 	cd src/libMesh && $(MAKE) $(AM_MAKEFLAGS)
-	cd download && $(MAKE) $(AM_MAKEFLAGS)
+	cd 3rdparty && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/fflib && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/ide && $(MAKE) $(AM_MAKEFLAGS) FreeFem++-cs$(EXEEXT)
