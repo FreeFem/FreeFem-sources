@@ -232,7 +232,7 @@ WHERE_LIBRARY:
 FORCE: ;
 freefem++.pref:
 	echo loadpath = \"./\" >freefem++.pref
-	echo includepath += \"../3d/\" >freefem++.pref
+	echo includepath = \"../../idp/\" >freefem++.pref
 
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib

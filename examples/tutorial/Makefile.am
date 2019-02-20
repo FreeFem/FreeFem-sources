@@ -32,6 +32,7 @@ install-exec-local::
 makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 freefem++.pref:
+	echo includepath = \"../../idp/\" >freefem++.pref
 	echo loadpath = \"../plugin/\" >freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 

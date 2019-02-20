@@ -34,10 +34,7 @@ freefem++.pref:Makefile.am
 	echo loadpath = \"../mpi/\" >freefem++.pref
 	echo loadpath += \"../hpddm/\" >>freefem++.pref
 	echo loadpath += \"../plugin/\" >>freefem++.pref
-	echo includepath = \"../mpi/\" >>freefem++.pref
-	echo includepath += \"../hpddm/\" >>freefem++.pref
-	echo includepath += \"../3d/\" >>freefem++.pref
-	echo includepath += \"../tutorial/\" >>freefem++.pref
+	echo includepath = \"../../idp/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 
 $(TESTS)::freefem++.pref

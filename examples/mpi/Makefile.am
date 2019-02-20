@@ -97,8 +97,7 @@ install-exec-local::
 
 freefem++.pref:Makefile
 	echo 'loadpath = "./;../plugin/"' >freefem++.pref
-	echo 'includepath = "../3d/"' >>freefem++.pref
-	echo 'includepath += "../tutorial/"' >>freefem++.pref
+	echo 'includepath = "../../idp/"' >>freefem++.pref
 #	echo loadpath += \"./\" >>freefem++.pref
 # force the build for freefem++.pref  FH..
 DDM-Schwarz-Lame-2d.edp:freefem++.pref
