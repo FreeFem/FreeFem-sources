@@ -17,7 +17,7 @@ Richards-2d.edp					natural_convection.edp \
 Helmholtz-3d-simple.edp			diffusion-2d-thirdlevelgeneo.edp	natural_convection_3D_obstacle.edp \
 Helmholtz-2d-HPDDM-BGMRES.edp
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP= cobrameshcavity.idp		ffddm_coarsemeshCS.idp			ffddm_geneoCS_3rdlvl.idp		ffddm_partitioning.idp \

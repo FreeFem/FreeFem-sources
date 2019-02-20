@@ -31,7 +31,7 @@ TESTS=  DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp 
 
 XFAIL_TESTS=$(TESTS)
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP= 	DDM-Schwarz-macro.idp	MPIGMRESmacro.idp	getARGV.idp \

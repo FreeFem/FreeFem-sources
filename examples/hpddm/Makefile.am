@@ -41,7 +41,7 @@ TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.e
 
 XFAIL_TESTS=$(TESTS)
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/test-driver-ff
+LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 LIST_IDP=macro_ddm.idp macro_ddm_substructuring.idp
