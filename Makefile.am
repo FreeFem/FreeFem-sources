@@ -148,7 +148,7 @@ clean-local::
 # Native MacOS packaging
 # ----------------------
 install-exec-local::
-	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa  script/PostInstall.sh
+	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa  bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/etc/paths.d/
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/usr/local/bin
@@ -160,9 +160,9 @@ install-exec-local::
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
 	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
 
-script/PostInstall.sh:./Makefile script/PostInstall.m4
-	m4 script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" >script/PostInstall.sh
-	chmod a+x script/PostInstall.sh
+script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
+	m4 bin/script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" > bin/script/PostInstall.sh
+	chmod a+x bin/script/PostInstall.sh
 
 
 
