@@ -21,7 +21,7 @@ all.edp:
 clean-local:
 	-rm *.fg *.eps *~ *.ps  Th?.faces  Th?.points Th?.BB Th?.mesh.gmsh   ListOf?llocPtr*.bin ffglut*.ppm 	toto.txt
 Ref: makeref.edp
-	../src/nw/FreeFem++-nw makeref.edp
+	../../src/nw/FreeFem++-nw makeref.edp
 
 makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 regtests.m4 > makeref.edp

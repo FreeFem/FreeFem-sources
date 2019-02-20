@@ -25,7 +25,7 @@ all.edp:  Makefile
 
 # To create a new set of reference values in "ref.edp"
 Ref: makeref.edp freefem++.pref
-	export  FF_LOADPATH=../examples/plugin/.;../src/nw/FreeFem++-nw makeref.edp
+	export  FF_LOADPATH=../plugin/.;../../src/nw/FreeFem++-nw makeref.edp
 
 makeref.edp: regtests.m4 ../m4/regtests.m4
 	m4 regtests.m4 > makeref.edp

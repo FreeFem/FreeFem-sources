@@ -23,7 +23,7 @@ clean-local:
 	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh f.txt	u.txt A.matrix	mm.matrix mm.b sphere-a.faces	sphere-a.points	sphere.faces	sphere.points toto.Th		toto.am_fmt	toto.dbg.gmsh toto.Th.gmsh	toto.dbg	toto.msh plot.gp ListOfAllocPtr-8.bin ffglut*.ppm th.msh Th1.msh		Th12.msh	th.msh 	emptymesh-2.msh	 thermic.dat
 # To create a new set of reference values in "ref.edp"
 Ref: makeref.edp freefem++.pref
-	../src/nw/FreeFem++-nw makeref.edp
+	../../src/nw/FreeFem++-nw makeref.edp
 install-exec-local::
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
