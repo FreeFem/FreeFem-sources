@@ -18,8 +18,8 @@ dnl : ${FFLAGS=""}
 AC_CONFIG_MACRO_DIR([etc/config/m4])
 
 # progg test  exec for windows
-ff_TEST_FFPP="../src/nw/FreeFem++"
-ff_TEST_FFPP_MPI="../src/mpi/FreeFem++-mpi"
+ff_TEST_FFPP="../../src/nw/FreeFem++"
+ff_TEST_FFPP_MPI="../../src/mpi/FreeFem++-mpi"
 
 AC_PREREQ(2.69) dnl for AC_LANG_CASE and check stuff
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
@@ -600,8 +600,8 @@ CYGWIN*|MINGW*)
 	        AC_SUBST(WINDRESOBJ,windres.o)
 	        AC_SUBST(LIBSNOCONSOLE,$LIBSNOCONSOLE)
             AC_SUBST(WIN32DLLTARGET,win32-dll-target)
-		    ff_TEST_FFPP="../src/bin-win32/FreeFem++.exe"
-		    ff_TEST_FFPP_MPI="../src/bin-win32/FreeFem++-mpi.exe"
+		    ff_TEST_FFPP="../../src/bin-win32/FreeFem++.exe"
+		    ff_TEST_FFPP_MPI="../../src/bin-win32/FreeFem++-mpi.exe"
 
             AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
 		ff_dynload=yes
