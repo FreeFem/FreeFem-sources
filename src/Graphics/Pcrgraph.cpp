@@ -1,34 +1,34 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : D. Bernardi, Y. Darmaillac F. Hecht,     */
 /*           O. Pironneau, K.Ohtsuka        */
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #define PCRGRAPH_CPP
 #define FF_GRAPH_SET_PTR
-#include <config-wrapper.h>
+#include <config.h>
 
 #define TOSTRING1(i) #i
 #define TOSTRING(i) TOSTRING1(i)
@@ -61,7 +61,7 @@ using namespace std;
 #include <io.h>      //*OT  use for the console window
 ///#include <stat.h>
 
-const char *  edpfilenamearg=0; 
+const char *  edpfilenamearg=0;
 bool  waitatend=true;
 bool  consoleatend=true;
 
@@ -83,9 +83,9 @@ char Getijc(int & x,int & y);
 void postexit();
 
 static int  cube6[7][3] ={ {255,0,0},{255,255,0},{0,255,0},
-      {0,255,255},{0,0,255}, {255,0,255},{255,0,0} }; 
-static  int grey6[2][3] ={ {255,255,255},{0,0,0} }; 
-static bool grey=false;      
+      {0,255,255},{0,0,255}, {255,0,255},{255,0,0} };
+static  int grey6[2][3] ={ {255,255,255},{0,0,0} };
+static bool grey=false;
 static int ncolortable=0;
 static int LastColor=2; // LastColor=1 => Noir et Blanc >2 =>couleur
 
@@ -130,7 +130,7 @@ static HWND        hWnd;
 static WNDCLASS    rClass;
 static HDC hdc;
 static HANDLE hConOut=0;
-const float fMinPixel = -32000; // to avoid int overflot 
+const float fMinPixel = -32000; // to avoid int overflot
 const float fMaxPixel = 32000;
 
 /* Function definitions */
@@ -172,29 +172,29 @@ unsigned int winf_flg = 0;
 
 char FreeFemCache[256]="\0",
      shortName[256]="\0",
-     fullName[256]="\0";          
+     fullName[256]="\0";
 
 void fillpoly(int n, float *poly){
    POINT *pt;
-   
+
    pt = new POINT[n];
    for (int i=0; i < n; i++) {
       pt[i].x = scalx(poly[2*i]); pt[i].y = scaly(poly[2*i+1]);
      }
-   
+
    if (cstatic <0  || cstatic > ncolortable)  cstatic =1;
    SelectObject(hdc,hbr[cstatic]);
    int ret = Polygon(hdc,pt,n);
    delete []  pt;
    SelectObject(hdc,hpen[n]);
-    if (psfile) 
+    if (psfile)
     {
      fprintf(psfile,"bF ");
      for (int i=0;i<n;i++)
       fprintf(psfile,"%d %d ", scalx(poly[2*i]),height-scaly( poly[2*i+1]));
      fprintf(psfile,"eF\n");
     }
-} 
+}
 
 void out_of_memory ()
 {
@@ -205,22 +205,22 @@ void out_of_memory ()
 void erreur(char *s)
 {
    ErrorExec(s,0);
- 
+
 }
 void HandleWindowEvent()
 {  MSG msg;
-  
+
 //if ( PeekMessage(&msg,NULL,WM_PAINT,WM_PAINT,PM_NOREMOVE)) {
 if ( PeekMessage(&msg,NULL,0,0,PM_NOREMOVE)) {
     	TranslateMessage(&msg);
    		DispatchMessage(&msg);
   	}
-  	
+
 }
 void SetColorTable(int n);
 void raffpoly(int n, float *poly){}
 #include "getprog-unix.hpp"
-    
+
 
 void penthickness(int pepais){
   if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais);
@@ -229,7 +229,7 @@ void showgraphic(){ShowWindow(hWnd, SW_SHOW ); } // UpdateWindow(hWnd);}
 
 void thisexit(){ myexit(0);}
 
-    
+
 void plotstring(const char *s)
 {
     static  HFONT  hOldFont;
@@ -250,7 +250,7 @@ void rmoveto(float x, float y)
 {
 	currx = scalx(x);
 	curry = scaly(y);
-}         
+}
 
 void rlineto(float x, float y)
 {
@@ -259,7 +259,7 @@ void rlineto(float x, float y)
   MoveToEx(hdc,currx,curry,NULL);
   LineTo(hdc,newx,newy);
   if (psfile) {
-    fprintf(psfile,"%d %d M\n", currx,height-curry);  
+    fprintf(psfile,"%d %d M\n", currx,height-curry);
     fprintf(psfile,"%d %d L\n", newx,height-newy);
   }
   currx = newx; curry = newy;
@@ -272,7 +272,7 @@ void cadre(float xmin,float xmax,float ymin,float ymax)
 	rymin = ymin;
 	rymax = ymax;
 	echx=aspx/(xmax-xmin);
-	echy=aspy/(ymax-ymin); 
+	echy=aspy/(ymax-ymin);
 }
 
 void getcadre(float &xmin,float &xmax,float &ymin,float &ymax)
@@ -336,7 +336,7 @@ void pointe(float x, float y)
 }
 
 int InRecScreen(float x1, float y1,float x2, float y2)
-{  
+{
   float xi = Min(x1,x2),xa=Max(x1,x2);
   float yi = Min(y1,y2),ya=Max(y1,y2);
   return (xa >= rxmin) && (xi <= rxmax) && (ya >= rymin) && (yi <= rymax);
@@ -363,7 +363,7 @@ extern void DefColor(float & r, float & g, float & b,
  C.g= (BYTE) (255*g);
  C.b= (BYTE) (255*b);
  return C;
-}              
+}
 
 
 void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
@@ -374,7 +374,7 @@ void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
   if (ncolortable == nb && greyo == grey && colorso == colors ) return;// optim
    greyo = grey;
    colorso=colors;
-   { 
+   {
      if (hpen) for(int i=0; i<ncolortable;i++)
        DeleteObject(hpen[i]);
      delete [] hpen;
@@ -385,35 +385,35 @@ void SetColorTable1(int nb,bool hsv,int nbcolors,float *colors)
      hpen=0;
      hbr=0;
      hFont=0;
-     
-     if(colortable) 
+
+     if(colortable)
        delete [] colortable;
      colortable = new rgb[nb+1];
      ncolortable = nb;
      if(LastColor>1) LastColor=nb-1;
      for (int i0=0;i0<nb;i0++)
-       {  
-	 colortable[i0]=DefColorWin32(i0,nb,hsv,grey,nbcolors,colors);           
+       {
+	 colortable[i0]=DefColorWin32(i0,nb,hsv,grey,nbcolors,colors);
        }
-     
+
    }
-   
+
    {
-     
+
      hpen = new HPEN[ncolortable];
      hbr = new HBRUSH[ncolortable];
-     
+
      for(int i=0; i<ncolortable;i++)
        {
-	 hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
+	 hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r,
 						   colortable[i].g,
 						   colortable[i].b));
-	 hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
+	 hbr[i] = CreateSolidBrush(RGB(colortable[i].r,
 				       colortable[i].g,
 				       colortable[i].b));
 	 }
    }
-   
+
 }
 
 void SetColorTable(int nb)
@@ -422,13 +422,13 @@ void SetColorTable(int nb)
   GetClientRect(hWnd, &rc);
   aspx = (float)(rc.right - rc.left);
   aspy = (float)(rc.bottom - rc.top);
-  
+
   if (winf_flg & winf_NOCOLOR) return;
   nb=Max(nb,23);
   if(nb<2) nb = 2;
   if (ncolortable == nb) return;
   if(LastColor>1) LastColor=nb-1;
-  
+
   if (hpen) for(int i=0; i<ncolortable;i++)
     DeleteObject(hpen[i]);
   delete [] hpen;
@@ -439,8 +439,8 @@ void SetColorTable(int nb)
   hpen=0;
   hbr=0;
   hFont=0;
-  
-  if(colortable) 
+
+  if(colortable)
     delete [] colortable;
   colortable = new rgb[nb+1];
   ncolortable = nb;
@@ -451,25 +451,25 @@ void SetColorTable(int nb)
   colortable[k].r = 0;
   colortable[k].g = 0;
   colortable[k++].b = 0;
-  if (nb>2) 
-    { 
+  if (nb>2)
+    {
       nb -= 2;
       for (long i0=0;i0<nb;i0++,k++)
-        {  
+        {
 	  long  i6 = i0*6;
 	  long  j0 = i6/nb;// in 0..6
 	  long  j1 = j0+1;// in 1..6
 	  long  k0 = i0 - (nb*j0)/6L;
 	  long  k1 = (nb*j1)/6L-i0;
 	  long  kk = (k0+k1);
-	  
+
 	  if (! grey)
 	    {
 	      colortable[k].r  = ((cube6[j1][0]*k0+cube6[j0][0]*k1)/kk);
 	      colortable[k].g  = ((cube6[j1][1]*k0+cube6[j0][1]*k1)/kk);
 	      colortable[k].b  = ((cube6[j1][2]*k0+cube6[j0][2]*k1)/kk);
 	    }
-          else 
+          else
 	    {
 	      kk=nb-1;
 	      k1 =  i0;
@@ -478,41 +478,41 @@ void SetColorTable(int nb)
 	      colortable[k].g   = ((grey6[0][1]*k0+grey6[1][1]*k1)/kk);
 	      colortable[k].b   = ((grey6[0][2]*k0+grey6[1][2]*k1)/kk);
 	    }
-	  
+
 	  /*
 	    colortable[k].r = ((cube6[j1][0]*k0+cube6[j0][0]*k1)/kk)%256;
 	    colortable[k].g = ((cube6[j1][1]*k0+cube6[j0][1]*k1)/kk)%256;
 	    colortable[k].b = ((cube6[j1][2]*k0+cube6[j0][2]*k1)/kk)%256;
 	  */
-        }         
+        }
     }
-  else 
+  else
     {	ncolortable  =2;}
-  
+
   hpen = new HPEN[ncolortable];
   hbr = new HBRUSH[ncolortable];
-  
+
   for(int i=0; i<ncolortable;i++)
     {
-      hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r, 
+      hpen[i] = CreatePen(PS_INSIDEFRAME, 1,RGB(colortable[i].r,
 						colortable[i].g,
 						colortable[i].b));
-      hbr[i] = CreateSolidBrush(RGB(colortable[i].r, 
-				    colortable[i].g, 
+      hbr[i] = CreateSolidBrush(RGB(colortable[i].r,
+				    colortable[i].g,
 				    colortable[i].b));
     }
 }
 
 void couleur(int c)
-{ 
-  if(c!=cstatic) 
-  { 
+{
+  if(c!=cstatic)
+  {
     c= c > LastColor ? 1 : c; // c=Min(c,LastColor); pour noir et blanc
 
     if (!(winf_flg&winf_NOCOLOR)) {
     if (c>=0 && c < ncolortable)
     	cstatic = c;
-    else cstatic = 1;  
+    else cstatic = 1;
 	SetRGBpen(cstatic);
   	}
   // else  SetRGBpen(1);
@@ -530,7 +530,7 @@ void couleur(int c)
     }
     else if (c!=0)
       r=g=b=0;
-    
+
     fprintf(psfile,"%.3f %.3f %.3f C\n",r,g,b);
   }
 }
@@ -548,29 +548,29 @@ void rattente(int waitm)
 char Getijc(int & x,int & y)
 {
   char char1=' ';
-  if(!INITGRAPH) 
+  if(!INITGRAPH)
     {
       x = 0;
-      y = 0;   
+      y = 0;
       return char1;
     }
    int  cont=1;
    POINT xy;
     xy.x =0;
     xy.y =0;
-  MSG msg;      
+  MSG msg;
 	SetWindowText(hWnd,"Click mouse to continue");
   do
-   {   
+   {
       GetMessage(&msg,hWnd,0,0);// all message
       GetCursorPos(&xy);
       switch (msg.message)
        {
          case WM_LBUTTONDOWN:char1=char(251), cont=0;
-         		break; 
-         // with shift 248                 
+         		break;
+         // with shift 248
          case WM_RBUTTONDOWN:char1=char(253), cont=0;
-         break;  
+         break;
          // with shit 250
          // if the 2 buttom, 252, et shith 249;
          case WM_CLOSE:	myexit(2);
@@ -583,7 +583,7 @@ char Getijc(int & x,int & y)
        	break;
        }
     }
-    while (cont); 
+    while (cont);
 //    ScreenToClient(hWnd,&xy);
  	ShowWindow(hWnd, SW_SHOW );
  // SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
@@ -591,7 +591,7 @@ char Getijc(int & x,int & y)
  	RECT rc;
     ScreenToClient(hWnd,&xy);
  	GetClientRect(hWnd, &rc);
- 
+
  	x = xy.x-rc.left;
  	y = xy.y-rc.top;
  //	cout << " x = " << x << " y = " << y  << " char = " << ((unsigned char)char1 > 127 ? '*': char1) << ")" << endl;
@@ -599,7 +599,7 @@ char Getijc(int & x,int & y)
 }
 
 char Getxyc(float &x,float &y)
-{ 
+{
   char c=' ';
   int i=0,j=0;
   if(!(winf_flg&winf_NOWAIT)) c = Getijc( i,j);
@@ -611,7 +611,7 @@ char Getxyc(float &x,float &y)
 
 //* clear the screen with white
 void reffecran(void)
-{     
+{
  HBRUSH hbr;
  RECT rc;
 
@@ -623,10 +623,10 @@ void reffecran(void)
 
 BOOL ShowOpenDialogBox(char *fileName)
 {
-  OPENFILENAME ofn; 
-  char szDirName[256];   
-  char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0"; 
-  
+  OPENFILENAME ofn;
+  char szDirName[256];
+  char *strFilter="PCgFEM Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0";
+
   memset(&ofn, 0, sizeof(OPENFILENAME));
   getcwd(szDirName,sizeof(szDirName));
   ofn.lStructSize = sizeof(OPENFILENAME);
@@ -637,15 +637,15 @@ BOOL ShowOpenDialogBox(char *fileName)
   ofn.lpstrInitialDir=szDirName;
   ofn.lpstrTitle ="Choose you freefem '*.edp' File";
   ofn.Flags=OFN_SHOWHELP|OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
-  
+
   return GetOpenFileName(&ofn);
-} 
+}
 
 void coutmode(short r) { ;}// will be done later
-   
 
-void initgraphique(void)       
-{ 
+
+void initgraphique(void)
+{
   if (INITGRAPH) return;
   hdc=GetDC(hWnd);
   hpen=0;
@@ -682,13 +682,13 @@ void initgraphique(void)
 }
 
 void closegraphique(void)
-{ 
+{
 	if(INITGRAPH) {
-		if(hpen) 
+		if(hpen)
 		   DeleteObject(hpen), delete [] colortable;
-		if (hbr)   DeleteObject(hbr), 
-    INITGRAPH =0; // before DestroyWindow to avoid loop 
-    ReleaseDC(hWnd,hdc); 
+		if (hbr)   DeleteObject(hbr),
+    INITGRAPH =0; // before DestroyWindow to avoid loop
+    ReleaseDC(hWnd,hdc);
 //    DestroyWindow(hWnd);
 	}
 }
@@ -700,7 +700,7 @@ void GetScreenSize(int & ix,int &iy)
 }
 
 void openPS(const char *filename )
-{ 
+{
   RECT rc;
   GetClientRect(hWnd, &rc);
   width = rc.right - rc.left;
@@ -744,13 +744,13 @@ void closePS(void)
     fprintf(psfile_save,"showpage\n");//fprintf(psfile,"showpage\n");
     fclose(psfile_save);//fclose(psfile);
     }
-    
+
   psfile=0;
   psfile_save=0;
-  
+
 }
 
-  void Commentaire(const char * c)  
+  void Commentaire(const char * c)
   {
   if(psfile)   {
     fprintf(psfile,"%% %s\n",c);
@@ -761,10 +761,10 @@ void closePS(void)
     if(NB) LastColor=1;
     else LastColor=ncolortable?ncolortable:2;
   }
- 
+
   void MettreDansPostScript(int in)
    {
-     if(in)  psfile=psfile_save;     
+     if(in)  psfile=psfile_save;
      else   psfile=0;
    }
 
@@ -780,17 +780,17 @@ void myexit(int err)
   if (err==0) {  // normal end
 		cout << "end No Error " << endl << flush ;
 	}
-  else  
+  else
   	cout << "end by Error (no.=" << err << ')' << endl;
   rattente(1);
-	
+
   if (GetConsoleBuff()==FALSE)
  		FatalErr("Log file creation error !",0);
  	if (!(winf_flg&winf_NOEDIT)) EditLog();
 
   if (INITGRAPH)
    closegraphique();
- 
+
  	FreeConsole();
 	PostQuitMessage(0);
  	exit(err);
@@ -801,22 +801,22 @@ void SetcppIo()
 {
   FILE *fp=NULL,*fin=NULL;
   // Get the standard output
-   fin = GetConsoleHandle(STD_INPUT_HANDLE);   
+   fin = GetConsoleHandle(STD_INPUT_HANDLE);
    if(fin!=NULL)
      *stdin = *fin;
-   
+
    // get the standard output
    if((fp = GetConsoleHandle(STD_OUTPUT_HANDLE)) == NULL)
      *stdout = *fp;
    freopen("conin$", "r", stdin);
    freopen("conout$", "w", stdout);
    // freopen("conout$", "w", stderr);
-   
+
    using namespace __gnu_cxx;
    stdio_filebuf<char> * ccout = new stdio_filebuf<char>(stdout, std::ios_base::out);
    //static  stdio_filebuf<char> ccerr(stderr, std::ios_base::out);
    stdio_filebuf<char> *ccin= new stdio_filebuf<char>(stdin, std::ios_base::in);
-   
+
    cout.rdbuf(ccout);
    cin.rdbuf(ccin);
    cerr.rdbuf(ccout);
@@ -830,11 +830,11 @@ BOOL inittext(VOID)
   osVer.dwOSVersionInfoSize = sizeof(osVer);
   GetVersionEx(&osVer);
   if (osVer.dwPlatformId == VER_PLATFORM_WIN32s) {
-    MessageBox(NULL, 
+    MessageBox(NULL,
         "This FreeFEM++ cannot run on Windows 3.1.\n"
         "This application will now terminate.",
         "Error: Windows NT or Windows 95 Required to Run",  MB_OK );
-        return FALSE;       // Console API is not able in Windows 3.1 
+        return FALSE;       // Console API is not able in Windows 3.1
     }
 
   // FreeConsole();          // If the console is already used
@@ -854,7 +854,7 @@ BOOL inittext(VOID)
 //*------- Modules for MS-Windows
 //*OT  12/3/1999
 //* Get the buffer of the console
-//* The buffer is stored in the filename.log 
+//* The buffer is stored in the filename.log
 BOOL GetConsoleBuff()
 {
   CONSOLE_SCREEN_BUFFER_INFO csbi; //* to get buffer info
@@ -870,7 +870,7 @@ BOOL GetConsoleBuff()
 		perror(fname);
      return FALSE;
 	}
-	
+
   szLine = (CHAR *)malloc((csbi.dwSize.X+1) * sizeof(CHAR));
   for (int i=0; i<csbi.dwCursorPosition.Y; i++) {
   	if (ReadConsoleOutputCharacter(hConOut, szLine,
@@ -880,7 +880,7 @@ BOOL GetConsoleBuff()
     }
     int j=csbi.dwSize.X-1;
     while ((szLine[j] == ' ') && (j > 0)) szLine[j--] =0;
-    if (j < csbi.dwSize.X-1) szLine[j+1] = '\n'; 
+    if (j < csbi.dwSize.X-1) szLine[j+1] = '\n';
     fprintf(fp,"%s",szLine);
     coordLine.Y++;
   }
@@ -891,11 +891,11 @@ BOOL GetConsoleBuff()
 //*OT  12/3/1999
 //* Open the filename.log by the editor
 //* default editor is notepad.exe
-//* Using variable "ffemEd", we can change the editor 
+//* Using variable "ffemEd", we can change the editor
 BOOL EditLog()
 {
   char *editor, fname[256], cmdLine[255];
-  
+
   strcpy(fname,ChangePdeToExt(shortName,"log"));
   editor = getenv("ffed");
   if (editor == 0)
@@ -928,7 +928,7 @@ void Usage()
 }
 
 // freefem+  arg1  arg2 arg3
-// Hack the args and analysis 
+// Hack the args and analysis
 int StoreFname(char Line[], int len)
 {
   char msg[256]; char *ext;
@@ -954,14 +954,14 @@ int StoreFname(char Line[], int len)
     }
   }
   fullName[j] = '\0';
- 	
+
   ofstream check(fullName,ios::in);
   if (!check.is_open()) {
     sprintf(msg,"\"%s\" does not exist!",fullName);
     FatalErr(msg,-1);
   }
   else check.close();
- 	   
+
   ext = strrchr(fullName,'.'); ext++;
   /*
   if (toupper(*ext) != 'E'
@@ -970,20 +970,20 @@ int StoreFname(char Line[], int len)
     sprintf(msg,"\"%s\" is not a FreeFem++ script!",fullName);
     FatalErr(msg,-1);
   }
-*/	
+*/
   GetFileName(fullName,shortName);
   return i;
 }
 
 // freefem+  arg1  arg2 arg3
-// Hack the args and analysis 
+// Hack the args and analysis
 DWORD GetOption(char lpszCmdLine[])
 {
   int i = 0;
   int CmdLen = strlen(lpszCmdLine);
   DWORD dwStyle = WS_OVERLAPPEDWINDOW;
   cout << "getOp: " ;
-  while (i < CmdLen) { 
+  while (i < CmdLen) {
     cout << lpszCmdLine[i] ;
     while (lpszCmdLine[i] == ' ')
       i++;
@@ -1002,7 +1002,7 @@ DWORD GetOption(char lpszCmdLine[])
 	  char c;
 	  while  (i < CmdLen &&( (isspace(c=lpszCmdLine[i++])&& vv.length()>0 )||isdigit(c) ))
 	    if(isdigit(c)) vv+= c;
-	  verbosity=atoi(vv.c_str());	  
+	  verbosity=atoi(vv.c_str());
       }
       case 's':  // not wait at end of execution
 	winf_flg |= winf_NOWAIT; ++i;
@@ -1031,7 +1031,7 @@ DWORD GetOption(char lpszCmdLine[])
 }
 
 /*
- * Init     
+ * Init
  *     Initialization for the program is done here:
  *     1)  Register the window class (if this is the first instance)
  *     2)  Create the desktop window for the app.
@@ -1039,7 +1039,7 @@ DWORD GetOption(char lpszCmdLine[])
  *
  */
 BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
-    LPSTR  lpszCmdLine, int    nCmdShow) 
+    LPSTR  lpszCmdLine, int    nCmdShow)
 {
   DWORD dwStyle = WS_OVERLAPPEDWINDOW;
 
@@ -1069,21 +1069,21 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
 	   cout  << " screen size ??  " << dev_mode.dmPelsWidth << " x " << dev_mode.dmPelsHeight << endl;
 	   dd = Min(dev_mode.dmPelsWidth*0.7,dev_mode.dmPelsHeight*0.9);
 	   ddx0 = dev_mode.dmPelsWidth*0.28;
-	   ddy0=dev_mode.dmPelsHeight*0.05;	   
+	   ddy0=dev_mode.dmPelsHeight*0.05;
 	}
   else cout << " Error EnumDisplaySettings => no screen size " << endl;
-  
+
   */
   int sx = GetSystemMetrics(SM_CXSCREEN);
   int sy = GetSystemMetrics(SM_CYSCREEN);
   dd = static_cast<int>(Min(sx*0.7,sy*0.9));
   ddx0 = static_cast<int>(sx*0.28);
-  ddy0 = static_cast<int>(sy*0.05);	   
-  
+  ddy0 = static_cast<int>(sy*0.05);
+
   //cout << " Screen Size " << sx << " x " << sy << endl;
  // Rectangle  ss=Get_VirtualScreen();
  //  dd=(Abs(ss.get_Top-ss.get_Bottom())*90)/100;
- 
+
   GetOption(lpszCmdLine);
   hWnd = CreateWindow("FreeFEM++",
       PACKAGE_STRING " for Windows",
@@ -1097,15 +1097,15 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
       hInstance,
       NULL);
 
-  
+
   if (*fullName == '\0' && (winf_flg != winf_Usage)) { // in command line, there is no filename
     if (ShowOpenDialogBox(shortName)==FALSE) {
        exit(0);
     }
     strcpy(fullName,shortName);
   }
-  
-  if (inittext()==FALSE) 
+
+  if (inittext()==FALSE)
     myexit(1);
   else if (winf_flg & winf_VFFEM ) { // create only cache, option "-f" is given
    if (!getcwd(FreeFemCache,MAX_PATH)) {
@@ -1119,14 +1119,14 @@ BOOL Init(HINSTANCE hInstance,   HINSTANCE hPrevInstance,
 #else
      if (mkdir(FreeFemCache,0777)) {
 #endif
-       sprintf(errbuf,"Fail to create the directory %s",FreeFemCache); 
+       sprintf(errbuf,"Fail to create the directory %s",FreeFemCache);
        FatalErr(errbuf,-1);
      }
    }
    else (chdir("..\\"));  // already created
    return TRUE;
   };
-  
+
   return TRUE;
 }
 
@@ -1165,7 +1165,7 @@ BOOL CreateProjetFile(char *shortName);
 BOOL SaveLogFile(char *fileName);
 void GetOption(int argc, char *argv[]);
 FILE *projet=NULL;
-// end 
+// end
 
 
 int WINAPI WinMain(HINSTANCE  hInstance,
@@ -1174,7 +1174,7 @@ int WINAPI WinMain(HINSTANCE  hInstance,
         int    nCmdShow)
 {
   MSG msg;
-  
+
   LPTSTR cmd = GetCommandLine();
   if (Init(hInstance, hPrevInstance,lpszCmdLine,nCmdShow)) {
 		// main after checking options
@@ -1190,7 +1190,7 @@ int WINAPI WinMain(HINSTANCE  hInstance,
 	}
 	return -1;
 }
-// the real main 
+// the real main
 
 
 extern int mymain(int argc,char **argv);
@@ -1198,7 +1198,7 @@ extern int mymain(int argc,char **argv);
 // main() in FreeFEM+ for PCs
 BOOL mainFreeFEM()
 {
- char prjName[256]; 
+ char prjName[256];
 
  if (winf_flg & winf_VFFEM) {	// given by "-f filename"
   strcpy(prjName,ChangePdeToExt(shortName,"prj"));
@@ -1206,8 +1206,8 @@ BOOL mainFreeFEM()
   if (strcmp(FreeFemCache,"")!=0)
       if (CreateProjetFile(prjName)==FALSE)
         FatalErr(prjName,-1);
- }   
- 
+ }
+
  cout << "Welcome to freefem++ v " << StrVersionNumber() <<endl;
  cout << "Program file [" << fullName <<']'<< endl;
  time_t ltime;         // write the time stump in console
@@ -1229,17 +1229,17 @@ BOOL mainFreeFEM()
  	ret=mymain(argc,argv);
  	cout << fullName << endl;
  	rattente(1);
- 	
+
  	rattente(1);
  	} catch(Error &e){
 	  ret=e.errcode();
-	  cout<<" error "<<e.what(); myexit(1); };                   
- 
+	  cout<<" error "<<e.what(); myexit(1); };
+
  if (projet!=NULL)
   fclose(projet);
 
  SetWindowText(hWnd,"End of FreeFEM++");
- if (winf_flg & winf_NOWAIT) {	// option "-s" 
+ if (winf_flg & winf_NOWAIT) {	// option "-s"
    	myexit(ret);
  };
   return ret==0;
@@ -1271,7 +1271,7 @@ void SetConsole(HANDLE hConsole)
 	COORD  coordScreen;
 
 	srctWindowRect.Left = 10;
-	srctWindowRect.Top = 10;   
+	srctWindowRect.Top = 10;
 	srctWindowRect.Bottom = 500;
 	srctWindowRect.Right = 320;
 	SetConsoleWindowInfo(hConsole, TRUE, &srctWindowRect);
@@ -1280,7 +1280,7 @@ void SetConsole(HANDLE hConsole)
 	SetConsoleScreenBufferSize(hConsole,coordScreen);
 }
 
-// the console handle to stdout 
+// the console handle to stdout
 FILE *GetConsoleHandle(DWORD Device)
 {
   int Crt;
@@ -1350,15 +1350,15 @@ void ShowHelp(const char * s,int k)
     rmoveto(xmin+(xmax-xmin)/100,ymax-(k)*(ymax-ymin)/30);
     plotstring(s);
     MettreDansPostScript(1);
-       //  couleur(1);	
+       //  couleur(1);
   }
 }
 
 char *ChangePdeToExt(char *fileName,char *ext)
 {
  int len;
-  
- len=strlen(fileName);        
+
+ len=strlen(fileName);
  char *file = new char[len+1];
  for(int i=0; i<len; i++) *(file+i) = *(fileName+i);
  file[len-4]='.';
@@ -1367,7 +1367,7 @@ char *ChangePdeToExt(char *fileName,char *ext)
  file[len-1]=ext[2];
  file[len]='\0';
  return file;
-} 
+}
 
 BOOL CreateProjetFile(char *fileName)
 {
@@ -1377,7 +1377,7 @@ BOOL CreateProjetFile(char *fileName)
  strcat(chemin,ChangePdeToExt(shortName,"prj"));
  if (projet=fopen(chemin,"w"),!projet)
      return FALSE;
- fprintf(projet,"FFF@WinfFEM@FFF\n");                         
+ fprintf(projet,"FFF@WinfFEM@FFF\n");
  return TRUE;
 }
 
@@ -1393,7 +1393,7 @@ float GetHeigthFont()
 
 // Chack the mesh which will be stored in the cache
 // return TRUE  (if it is same)
-// else return FALSE  
+// else return FALSE
 /*
 BOOL CheckSameTrig(Grid& t)
 {
@@ -1414,9 +1414,9 @@ BOOL CheckSameTrig(Grid& t)
 
 SET:
  nv = t.nv;  nt = t.nt;
- p[0].x = t.v[0].x; p[0].y = t.v[0].y; p[0].w = t.v[0].where; 
- p[1].x = t.v[nv/2].x; p[1].y = t.v[nv/2].y; p[1].w = t.v[nv/2].where; 
- p[2].x = t.v[nv-1].x; p[2].y = t.v[nv-1].y; p[2].w = t.v[nv-1].where; 
+ p[0].x = t.v[0].x; p[0].y = t.v[0].y; p[0].w = t.v[0].where;
+ p[1].x = t.v[nv/2].x; p[1].y = t.v[nv/2].y; p[1].w = t.v[nv/2].where;
+ p[2].x = t.v[nv-1].x; p[2].y = t.v[nv-1].y; p[2].w = t.v[nv-1].where;
  return FALSE;
 }
 
@@ -1426,7 +1426,7 @@ SET:
 {
  char chemin[256],meshName[256];
  int i,j=0;
- 
+
  if (!(winf_flg&winf_VFFEM)) return;
  if (CheckSameTrig(t)==TRUE)
    return;
@@ -1434,7 +1434,7 @@ SET:
  strcpy(chemin,FreeFemCache);
  sprintf(meshName,"%d-%s",NbMeshTotal++,ChangePdeToExt(shortName,"msh"));
  strcat(chemin,meshName);
- 
+
  ofstream mesh(chemin,ios::out);
  if (mesh.is_open())  {
    mesh << "FFF@WinfFEM_MESH@FFF" << endl;
@@ -1445,7 +1445,7 @@ SET:
            << t.v[i].where << endl;
    }
 
-   for( i=0; i<t.nt; i++ ) {	
+   for( i=0; i<t.nt; i++ ) {
        mesh << t.no(t.t[i].v[0]) <<"	"<< t.no(t.t[i].v[1]) <<"	"<< t.no(t.t[i].v[2]) <<"	"<< j<<endl;
    }
  } else {
@@ -1454,13 +1454,13 @@ SET:
   }
   NbPlotTotal=1;
   mesh.close();
-} 
+}
 
 void SavePlot(int D,Grid& t, Real *f)
-{                                    
+{
  char chemin[256],plotName[256];
  int i;
- 
+
  if (!(winf_flg&winf_VFFEM)) return;
  if (f == NULL) return;
  strcpy(chemin,FreeFemCache);
@@ -1470,18 +1470,18 @@ void SavePlot(int D,Grid& t, Real *f)
  ofstream plot(chemin,ios::out);
  if (plot.is_open()) {
    fprintf(projet,"%s\n",plotName);
-   plot << "FFF@WinfFEM_PLOT@FFF" << endl;          
+   plot << "FFF@WinfFEM_PLOT@FFF" << endl;
    plot << NbMeshTotal-1 << "-" << ChangePdeToExt(shortName,"msh") << endl;
    plot << D << endl;
    plot << t.nv << endl;
-   for (i=0; i<t.nv; i++) 
+   for (i=0; i<t.nv; i++)
      plot << t.v[i].where << "  " << f[i] << endl;
  } else {
    cerr << "Unable to SAVE PLOT for WinfFEM !" << endl;
    return;
  }
  NbPlotTotal++;
-}                         
+}
 */
 void  viderbuff(){;}
 
@@ -1510,10 +1510,10 @@ int execute(const char* what)
 {
   char szBuffer[MAXPATH + 1];
   char *option;
-  int r=0; 
+  int r=0;
   char *vide="";
   option = getOp(what);
-  if(!option) 
+  if(!option)
     option = vide;
   cout << "excute :: " <<what << "  ## " << option << endl;
   if (*what) {
@@ -1524,7 +1524,7 @@ int execute(const char* what)
     si.cb=sizeof( STARTUPINFO );
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_SHOWNORMAL;
-    
+
     CreateProcess(what,option,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&si,&pi );
     if( pi.hProcess )	{
       WaitForInputIdle( GetCurrentProcess(), INFINITE );
@@ -1538,9 +1538,9 @@ int execute(const char* what)
     }
     else {
       sprintf(szBuffer,"%s: cannot execute",what);
-      if (option != NULL) sprintf(szBuffer,"%s  with option %s!",szBuffer, option); 
+      if (option != NULL) sprintf(szBuffer,"%s  with option %s!",szBuffer, option);
       MessageBox(NULL, szBuffer, "Error in FreeFem++", MB_OK | MB_ICONINFORMATION);
-      r=1; 
+      r=1;
     }
   }
   else r=2,MessageBox(NULL, "Error in system()", "Error in FreeFem++", MB_OK | MB_ICONINFORMATION);
@@ -1548,7 +1548,7 @@ int execute(const char* what)
 }
 #else
 int  execute (const char * str)
-{ 
+{
  if(verbosity)
      cout << "exec: " << str << endl;
  return  system(str);

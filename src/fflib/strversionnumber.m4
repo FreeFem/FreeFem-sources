@@ -1,4 +1,4 @@
-#include "config-wrapper.h"
+#include <config.h>
 #include "strversionnumber.hpp" // [[file:strversionnumber.hpp]]
 #include <cstdlib>
 using namespace std;

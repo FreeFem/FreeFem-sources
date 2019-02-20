@@ -1,6 +1,6 @@
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 /* -------------------                                */
@@ -8,39 +8,39 @@
 /* (e-mail)    hecht@ann.jussieu.fr                   */
 /******************************************************/
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-// E-MAIL :   Frederic.Hecht@Inria.fr   
+// E-MAIL :   Frederic.Hecht@Inria.fr
 //
 // ORIG-DATE:     Dec 97
 #ifndef RGRAPH_H_
 
 #define RGRAPH_H_
 
-// Modif F Hecht for dll on win32 
+// Modif F Hecht for dll on win32
 // pass all the graphic function via pointeur
 //  now the real graphic function of a pointeur xxxx is call  xxxx_
 //   We just need to add <<FF_GRAPH_SET_PTR>> in all graphic.cpp version
-//  the dcl of xxxx pointeur is  done via GRAPH_PTR_DCL macro (set one time ) 
-//  
-// ----- 
+//  the dcl of xxxx pointeur is  done via GRAPH_PTR_DCL macro (set one time )
+//
+// -----
 #ifdef FF_GRAPH_SET_PTR
-#define EXTERNFF(t,f,arg) t f##_ arg;  extern t (*f) arg 
+#define EXTERNFF(t,f,arg) t f##_ arg;  extern t (*f) arg
 #else
 #ifdef FF_GRAPH_PTR_DCL
 #define EXTERNFF(t,f,arg)  t (*f) arg
@@ -48,10 +48,10 @@
 #define EXTERNFF(t,f,arg) extern t (*f) arg
 #endif
 #endif
-//#define EXTERN 
+//#define EXTERN
 #ifdef __cplusplus
 
-#include "config-wrapper.h"
+#include <config.h>
 
 
 //extern "C" {
@@ -81,8 +81,8 @@ EXTERNFF(	void ,reffecran,()) ;
 EXTERNFF(	void ,fillpoly,(int n, float *poly)) ;
 EXTERNFF(	void ,SetColorTable,(int nb)) ;
 EXTERNFF(	void ,SetColorTable1,(int nb,bool hsv,int nbcolors,float *colors)) ;
-EXTERNFF(	float ,GetHeigthFont,()) ; 
-//  old function for freefem+  
+EXTERNFF(	float ,GetHeigthFont,()) ;
+//  old function for freefem+
 //EXTERNFF(	void ,compile,(char *fname)) ;
 //EXTERNFF(	void ,compileString,(char *texte)) ;/*tlr: add a string stream */
 
@@ -93,14 +93,14 @@ EXTERNFF(	void ,myexit,(int err)) ; // err=0 ??
 EXTERNFF(	void ,viderbuff,()) ;
 EXTERNFF(	void ,Commentaire,(const char *)) ;
 EXTERNFF(	void ,NoirEtBlanc,(int NB)) ;
-EXTERNFF(	void ,MettreDansPostScript,(int in)) ;//  oui=1 ou non=0 
+EXTERNFF(	void ,MettreDansPostScript,(int in)) ;//  oui=1 ou non=0
 EXTERNFF(    int ,getprog,(char* fn,int , char** argvptr)) ;
 EXTERNFF(    void ,setgrey,(bool )) ;
 EXTERNFF(    int ,getgrey,(    )) ;
 
 
 // wrapping of function  -----
-#ifdef  FF_GRAPH_SET_PTR 
+#ifdef  FF_GRAPH_SET_PTR
 static int init_ff_graph_ptr_func()
 { //  a small function to set all pointeur
 	getcadre=getcadre_;
@@ -144,7 +144,7 @@ static int init_ff_graph_ptr_func()
 	getgrey=getgrey_;
   return 1;
 }
-//  to call the init function before main 
+//  to call the init function before main
 static int init_ff_graph_ptr_func_call = init_ff_graph_ptr_func();
 
 #define getcadre getcadre_
@@ -187,7 +187,7 @@ static int init_ff_graph_ptr_func_call = init_ff_graph_ptr_func();
 #define setgrey setgrey_
 #define getgrey getgrey_
 #endif
-// end wrapping ----	    
+// end wrapping ----
 #ifdef __cplusplus
 
 //}
@@ -196,7 +196,7 @@ static int init_ff_graph_ptr_func_call = init_ff_graph_ptr_func();
 
 #ifdef TERM_USED
 
-/** Ouput on the terminal window */	   
+/** Ouput on the terminal window */
 
 class myostream {
 
@@ -247,4 +247,3 @@ extern myostream termerr; // could be cerr, or another thing
 
 
 #endif /* RGRAPH_H_ */
-

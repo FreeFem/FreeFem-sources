@@ -118,7 +118,7 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../src/fflib/AFunction.hpp ../../src/fflib/AnyType.hpp	\
 	../../src/fflib/array_init.hpp ../../src/fflib/array_resize.hpp ../../src/fflib/array_tlp.hpp				\
 	../../src/femlib/assertion.hpp ../../src/femlib/BamgFreeFem.hpp ../../src/Algo/BFGS.hpp ../../src/Algo/BrentLS.hpp		\
-	../../src/femlib/CGNL.hpp ../../src/fflib/CodeAlloc.hpp ../../config.h ../../config-wrapper.h		\
+	../../src/femlib/CGNL.hpp ../../src/fflib/CodeAlloc.hpp ../../config.h 	\
 	../../src/Algo/CubicLS.hpp ../../src/Algo/defs.hpp ../../src/femlib/DOperator.hpp ../../src/libMesh/eigenv.h		\
 	../../src/fflib/endian.hpp ../../src/fflib/environment.hpp ../../src/fflib/error.hpp ../../src/femlib/fem3.hpp		\
 	../../src/femlib/fem.hpp ../../src/femlib/FESpace.hpp ../../src/femlib/FESpacen.hpp ../../src/fflib/ff++.hpp		\

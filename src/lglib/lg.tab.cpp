@@ -185,36 +185,36 @@
 
 /* Copy the first part of user declarations.  */
 #line 3 "lg.ypp"
- 
+
     // -*- Mode : c++ -*-
     //
-    // SUMMARY  :      
-    // USAGE    :        
-    // ORG      : 
+    // SUMMARY  :
+    // USAGE    :
+    // ORG      :
     // AUTHOR   : Frederic Hecht
     // E-MAIL   : hecht@ann.jussieu.fr
     //
-    
+
     /*
-     
+
      This file is part of Freefem++
-     
+
      Freefem++ is free software; you can redistribute it and/or modify
      it under the terms of the GNU Lesser General Public License as published by
      the Free Software Foundation; either version 2.1 of the License, or
      (at your option) any later version.
-     
+
      Freefem++  is distributed in the hope that it will be useful,
      but WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      GNU Lesser General Public License for more details.
-     
+
      You should have received a copy of the GNU Lesser General Public License
      along with Freefem++; if not, write to the Free Software
      Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
      */
-    
-#include "config-wrapper.h"
+
+#include <config.h>
 #include <iostream>
 #include  <complex>
 #include <string>
@@ -242,11 +242,11 @@ class Iden;
 //  to reserve space to graphical pointer function
 #include "rgraph.hpp"
 #include "fem.hpp"
-#include "FESpacen.hpp" 
-#include "FESpace.hpp" 
+#include "FESpacen.hpp"
+#include "FESpace.hpp"
 #include "MeshPoint.hpp"
 
-#include "lgfem.hpp" 
+#include "lgfem.hpp"
 #include "lex.hpp"
 #include "environment.hpp"
 extern long storageused();
@@ -264,15 +264,15 @@ extern mylex *zzzfff;
 extern  void (*initparallele)(int &, char **&);
 extern  void (*init_lgparallele)();
 // extern  void (*end_parallele)();
-// 
+//
 #ifdef HAVE_LIBARPACK
   void init_eigenvalue();
 #endif
-   
+
   aType dcltype;
 const int nbembtype=10;
 aType rettype[nbembtype];
-Block * routineinblock[nbembtype]; // Add FH july 2005 pb clean on return 
+Block * routineinblock[nbembtype]; // Add FH july 2005 pb clean on return
 int kkembtype=-1;
 int inloopcount=0;
 
@@ -280,9 +280,9 @@ int inloopcount=0;
 
 Block *currentblock;
 
-// Add FH july 2005 
+// Add FH july 2005
 //  problem clean variable after break,continue and return.
-const int sizeStackOfLoop=100; 
+const int sizeStackOfLoop=100;
 Block * StackOfLoop[sizeStackOfLoop];
 // end ADD
 double CPUcompileInit =0;
@@ -303,7 +303,7 @@ extern bool withrgraphique;
 /// <<fingraphique>>
 
 inline void fingraphique()
- { if(withrgraphique) 
+ { if(withrgraphique)
    { withrgraphique=false;
     rattente(1);
     closegraphique();
@@ -312,7 +312,7 @@ inline void fingraphique()
 void lgerror (const char* s) ;
 
 
- // mpi ptr to function ... 
+ // mpi ptr to function ...
 void (*initparallele)(int &argc, char **& argv)=0 ;
 void (*init_lgparallele)()=0;
 //void (*end_parallele)()=0;
@@ -368,23 +368,23 @@ typedef union YYSTYPE
 
  /* <<YYSTYPE_cexp>> [[file:../fflib/AFunction.hpp::CC_F0]] */
  CC_F0 cexp;
- 
+
  Routine   *routine;
 
  /* <<YYSTYPE_args>> [[file:~/ff/src/fflib/AFunction.hpp::AC_F0]] */
  AC_F0 args;
- 
+
  /* <<YYSTYPE_type>> refers to [[file:~/ff/src/fflib/AnyType.hpp::aType]] */
  aType type;
 
  /* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
  CListOfInst cinst;
- 
+
  Block * block;
 
  /* <<YYSTYPE_clist_id>> [[file:~/ff/src/fflib/AFunction.hpp::ListOfId]] */
  ListOfId *clist_id;
- 
+
 /* ListCatch * clist_Catchs;*/
 
  vectorOfInst * endb;
@@ -1895,7 +1895,7 @@ yyparse ()
 #endif
 #endif
 {
-  
+
   int yystate;
   int yyn;
   int yyresult;
@@ -2144,9 +2144,9 @@ yyreduce:
     {
                         if(  ffapi::ff_justcompile) exit(0);
     // clean FH  mach 2014
-		        const char *  magicffglut="#!ffglutdata4.0\n";// for complex and vector 3d plot 
+		        const char *  magicffglut="#!ffglutdata4.0\n";// for complex and vector 3d plot
 			//FFCS: divert stream to FFCS
-                        if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);	            
+                        if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);
 
                         // <<sizestack_set>>
                         size_t sizestack = currentblock->size()+1024 ; //  before close
@@ -2167,7 +2167,7 @@ yyreduce:
                             // <<create_global_FF_stack>> calls [[file:../fflib/ffstack.hpp::newStack]]
 
                             Stack stack = newStack(sizestack);
-                            
+
                         double CPUcompile= CPUtime();
                         try {
 
@@ -2182,21 +2182,21 @@ yyreduce:
 			  cerr << " err code " << err.errcode() << " ,  mpirank " << mpirank << endl;
                           return err.errcode();
                         }
-                         catch( ...) { cerr << "Strange catch exception ???\n"; 
+                         catch( ...) { cerr << "Strange catch exception ???\n";
                           cerr << " at exec line  " << TheCurrentLine << " ,  mpirank " << mpirank << endl;
-                          return 1; 
+                          return 1;
                          }
 
-                        if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution " 
+                        if(verbosity)  cout << "times: compile "<< CPUcompile-CPUcompileInit <<"s, execution "
 			    <<  CPUtime()-CPUcompile  <<"s,  mpirank:" << mpirank << endl;
 
 
                         // <<delete_global_FF_stack>>
 
                         deleteStack(stack);
-                        
-                        //debugstack.clear() 
-                        } 
+
+                        //debugstack.clear()
+                        }
                         fingraphique();
 			//FFCS: divert stream to FFCS
 			if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
@@ -2204,8 +2204,8 @@ yyreduce:
                         if(debugstack) delete debugstack;
                         NbPtr = ShowAlloc("end execution -- ",lg1) - NbPtr;
                         long stu1 =storageused()-stu0    ;
-                        
-                        
+
+
 			    if (verbosity && (NbPtr || (stu1>100000) )) { cout << " ######## We forget of deleting   " << NbPtr
 			                      << " Nb pointer,   " <<  lg1-lg0 << "Bytes " << " ,  mpirank " << mpirank << ", memory leak ="<< stu1 <<  endl;}
   return 0;;}
@@ -2588,7 +2588,7 @@ yyreduce:
                       routineinblock[kkembtype] = currentblock;
                       (yyvsp[(5) - (6)].routine)=new Routine((yyvsp[(1) - (6)].type),(yyvsp[(2) - (6)].type)->right(),(yyvsp[(3) - (6)].str),(yyvsp[(5) - (6)].clist_id),currentblock);
 		      // routineinblock[kkembtype]->Add($3,"(",$<routine>5); //pas recursif pour l'instanat test  FH 27 dec 2008
-                     // cout << " \n after new routine \n " << endl;                      
+                     // cout << " \n after new routine \n " << endl;
                       ;}
     break;
 
@@ -2598,7 +2598,7 @@ yyreduce:
                        currentblock->Add((yyvsp[(3) - (10)].str),"(",(yyvsp[(5) - (10)].routine)); //pas recursif pour l'instant test  FH 27 dec 2008
                        kkembtype--;
                        (yyval.cexp)=0;
-                    
+
                         ;}
     break;
 
@@ -2764,14 +2764,14 @@ yyreduce:
   case 114:
 #line 592 "lg.ypp"
     {
-                    if(inloopcount) 
-                      (yyval.cexp)= C_F0(new E_throw(E_exception::e_break),atype<void>()); 
+                    if(inloopcount)
+                      (yyval.cexp)= C_F0(new E_throw(E_exception::e_break),atype<void>());
                     else lgerror("break not in loop");;}
     break;
 
   case 115:
 #line 596 "lg.ypp"
-    { 
+    {
                     if(inloopcount)
                         (yyval.cexp)= C_F0(new E_throw(E_exception::e_continue),atype<void>()) ;
                     else lgerror("continue not in loop");;}
@@ -2779,7 +2779,7 @@ yyreduce:
 
   case 116:
 #line 600 "lg.ypp"
-    { 
+    {
                     if (kkembtype>=0)
                       (yyval.cexp)= C_F0(new E_throw(E_exception::e_return,(rettype[kkembtype]->CastTo((yyvsp[(2) - (3)].cexp))).OnReturn()) ,atype<void>());
                      else lgerror(" return not in routine ");;}
@@ -3186,10 +3186,10 @@ yyreduce:
   case 206:
 #line 766 "lg.ypp"
     {
-             if ((yyvsp[(1) - (4)].type)->right()->CastingFrom((yyvsp[(3) - (4)].cexp).left()) ) 
+             if ((yyvsp[(1) - (4)].type)->right()->CastingFrom((yyvsp[(3) - (4)].cexp).left()) )
                 (yyval.cexp)=(yyvsp[(1) - (4)].type)->right()->CastTo((yyvsp[(3) - (4)].cexp))  ;
              else { (yyval.cexp)=(yyvsp[(1) - (4)].type)->right()->Find("<--",basicAC_F0_wa((yyvsp[(3) - (4)].cexp)));
-             if (!(yyval.cexp).left()) { cerr << " no wait to change " << (yyvsp[(3) - (4)].cexp).left()->right()->name() << " in " << 
+             if (!(yyval.cexp).left()) { cerr << " no wait to change " << (yyvsp[(3) - (4)].cexp).left()->right()->name() << " in " <<
                                         (yyvsp[(1) - (4)].type)->right()->name() << endl;
                                 CompileError(" Error in type(exp) "); }
              }
@@ -3423,7 +3423,7 @@ yyreturn:
 
 
 #line 781 "lg.ypp"
- 
+
 
 
 #include <fstream>
@@ -3447,7 +3447,7 @@ int Compile()
 {
 
   // see [[YYSTYPE]] [[yylval]] [[lglval]]
-  extern   YYSTYPE *plglval;  // modif FH 
+  extern   YYSTYPE *plglval;  // modif FH
 
   /// plglval is allocated at [[file:../fflib/global.cpp::plglval]]
   plglval = &lglval;
@@ -3455,21 +3455,21 @@ int Compile()
   int retvalue=0;
 
   // <<initialize_currentblock>>
-  
+
   currentblock=0;
-  Block::open(currentblock);  
+  Block::open(currentblock);
   try {
     UnShowAlloc =0;
 
     retvalue=yyparse(); // grammar analysis starting from [[start_symbol]]
-   
+
     if(retvalue==0){
-      if(currentblock) 
-        {retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }  
+      if(currentblock)
+        {retvalue=1; if(!mpirank) cerr <<  "Error:a block is not close" << endl; }
       else {
         if( verbosity  ) {
 	      UnShowAlloc =1;
-	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg 
+	      cerr << " CodeAlloc : nb ptr  "<< CodeAlloc::nb << ",  size :"  <<  CodeAlloc::lg
               << " mpirank: " <<mpirank <<  endl    ;
               extern   long npichon2d, npichon3d;
               extern   long npichon2d1, npichon3d1;
@@ -3481,30 +3481,30 @@ int Compile()
     }
   }
 
-  catch (Error & e) 
+  catch (Error & e)
     {
       retvalue=e.errcode();
       if(mpirank ==0)
-	cerr << "error " << e.what() 
+	cerr << "error " << e.what()
 	     << "\n code = "<<  retvalue << " mpirank: " <<mpirank  << endl;
     }
   catch(std::ios_base::failure & e)
     {
-      cerr << "std  catch io failure \n what : " << e.what() << endl;; 
-      cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank  << endl; 
+      cerr << "std  catch io failure \n what : " << e.what() << endl;;
+      cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank  << endl;
     }
   catch(std::exception & e)
     {
-      cerr << "std  catch exception \n what : " << e.what() << endl;; 
-      cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank  << endl; 
-      
+      cerr << "std  catch exception \n what : " << e.what() << endl;;
+      cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank  << endl;
+
     }
   catch(...)
     {
-      cerr << "Strange catch exception ???\n"; 
-      cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank << endl; 
+      cerr << "Strange catch exception ???\n";
+      cerr << " at exec line  " << TheCurrentLine << " mpirank: " <<mpirank << endl;
     }
-  return retvalue; 
+  return retvalue;
 }
 static void SetcppIo()
 {
@@ -3517,11 +3517,11 @@ static void SetcppIo()
   static  stdio_filebuf<char> ccout(stdout, std::ios_base::out);
   static  stdio_filebuf<char> ccin(stdin, std::ios_base::in);
    //stdio_filebuf<char> *ccin= new stdio_filebuf<char>(stdin, std::ios_base::in);
-   
+
    cout.rdbuf(&ccout);
    cin.rdbuf(&ccin);
    cerr.rdbuf(&ccout);
-   cout << " -- SetcppIo --" << endl; 
+   cout << " -- SetcppIo --" << endl;
 #endif
    ios::sync_with_stdio();
 }
@@ -3534,8 +3534,8 @@ extern  bool echo_edp;
 
 int mainff (int  argc, char **argv)
 {
-    
-  if(argc)  
+
+  if(argc)
     prognamearg=argv[0];
 
  //   int vvold=verbosity;
@@ -3548,7 +3548,7 @@ int mainff (int  argc, char **argv)
 
   GetEnvironment(); // [[file:~/ff/src/fflib/environment.cpp::GetEnvironment]]
 //    vvold=verbosity;
-  if(mpirank !=0) verbosity=0; 
+  if(mpirank !=0) verbosity=0;
   //  size_t lg000;
  // ShowAlloc("begin main ",lg000);
   int retvalue=0;
@@ -3569,14 +3569,14 @@ int mainff (int  argc, char **argv)
     {
       cout << "-- FreeFem++ v" << StrVersionNumber() << " (error parameter!)\n"  ;
       if(ThePlotStream) {ffapi::ff_pclose(ThePlotStream); ThePlotStream=0;}
-      return 1; 
+      return 1;
     }
-   
-  if(verbosity && (mpirank==0)) { 
+
+  if(verbosity && (mpirank==0)) {
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
       if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
   }
-    
+
     KN<String> karg(argc);
     for(int i=0;i< argc;++i)
 	karg[i]=argv[i];
@@ -3584,18 +3584,18 @@ int mainff (int  argc, char **argv)
 
     /// <<zzzfff>>
     zzzfff = Newlex(cout,echo_edp,pkarg);
-    
-  
-/*  
+
+
+/*
   ccin= new ifstream(cc);
-  if (argc >1 && (ccin!=0) )  
+  if (argc >1 && (ccin!=0) )
      ccin= new ifstream(argv[1]),throwassert(ccin);
-  if (ccin!=0) 
+  if (ccin!=0)
     zzzfff = new  mylex(*ccin,cout) ;
-  else 
+  else
     zzzfff = new  mylex(cin,cout) ;
-*/    
-//  les motsclefs    
+*/
+//  les motsclefs
    zzzfff->Add("include",INCLUDE);
    zzzfff->Add("load",LOAD);
    zzzfff->Add("while",WHILE);
@@ -3622,9 +3622,9 @@ int mainff (int  argc, char **argv)
 
 #ifdef HAVE_LIBARPACK
    init_eigenvalue();
-#endif   
+#endif
 
-   if(init_lgparallele)  init_lgparallele(); 
+   if(init_lgparallele)  init_lgparallele();
   //  callInitsFunct() ; //  init for dynamique libs ...
 
    if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;
@@ -3633,9 +3633,9 @@ int mainff (int  argc, char **argv)
 
   retvalue= Compile(); // [[Compile]]
    // cout << " xxxxx " <<  retvalue << " " << ThePlotStream << endl;
-  
+
   //if(end_parallele) end_parallele();
-  ff_finalize(); 
+  ff_finalize();
   //  currentblock->close(currentblock).eval(thestack);
  // fingraphique();
   // FFCS: divert stream to FFCS
@@ -3650,7 +3650,7 @@ int mainff (int  argc, char **argv)
 }
 
 /* FFCS: emacs configuration for this file */
- 
+
 /*!
  * Local Variables:
  * mode:antlr
@@ -3658,4 +3658,3 @@ int mainff (int  argc, char **argv)
  * coding:utf-8
  * End:
  */
-
