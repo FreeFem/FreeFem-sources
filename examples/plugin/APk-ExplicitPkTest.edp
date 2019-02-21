@@ -18,5 +18,4 @@ for(int i=0; i<nIter; i++){
 	Th = adaptmesh(Th,m11,m12,m22,IsMetric=true);
 	massRef=massRef*ratio;
 }
-plot(Th,wait=true,ps="lastMesh.ps");
-
+plot(Th,wait=true,ps="o/lastMesh.ps");

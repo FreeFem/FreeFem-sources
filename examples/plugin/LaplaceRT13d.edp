@@ -2,13 +2,13 @@ load "Element_Mixte3d"
 load "msh3"
 load "Element_P1dc1"
 /*
-   Solving the following Poisson problem 
+   Solving the following Poisson problem
    Find $p$, such that;
-   $ - \Delta p = f $   on $\Omega$, 
-   $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{123}$ 
-   $ p = gd  $ on $\Gamma_{1}$ 
-  with de Mixte finite element formulation 
-   Find $p\in L^2(\Omega)   and $u\in H(div) $ such than  
+   $ - \Delta p = f $   on $\Omega$,
+   $ dp / dn = (g1d,g2d). n  $ on $\Gamma_{123}$
+   $ p = gd  $ on $\Gamma_{1}$
+  with de Mixte finite element formulation
+   Find $p\in L^2(\Omega)   and $u\in H(div) $ such than
     u - Grad p = 0
     - div u =  f
    $  u. n = (g1d,g2d). n  $ on $\Gamma_{123}$
@@ -17,11 +17,11 @@ load "Element_P1dc1"
    the variationnel form is:
  $\forall v\in H(div)$;  $v.n = 0$ on $\Gamma_{4}\} $:    $ \int_\Omega  u v + p div v -\int_{\Gamma_{123}} gd* v.n  = 0 $
 
- $\forall q\in L^2$:   $  -\int_\Omega q div u = \int_Omega f q  $ 
-and $ u.n = (g1n,g2n).n$ on $\Gamma_4$ 
+ $\forall q\in L^2$:   $  -\int_\Omega q div u = \int_Omega f q  $
+and $ u.n = (g1n,g2n).n$ on $\Gamma_4$
 
 */
-int nn=8; 
+int nn=8;
 mesh3 Th=cube(nn,nn,nn);
 fespace Wh(Th,P1);
 fespace Vh(Th,RT13d);
@@ -29,24 +29,24 @@ fespace Ph(Th,P1dc3d);
 
 func gd = 0.;
 func g1n = 1.;
-func g2n = 1.; 
-func g3n = 1.; 
+func g2n = 1.;
+func g3n = 1.;
 func f = 1.;
 
 Vh [u1,u2,u3],[v1,v2,v3];
-Ph p,q; 
+Ph p,q;
 Wh pp,qq;
 problem laplaceMixte([u1,u2,u3,p],[v1,v2,v3,q],solver=UMFPACK,eps=1.0e-10,tgv=1e30,dimKrylov=150) =
-   int3d(Th)( p*q*0e-10+ u1*v1 + u2*v2 + u3*v3 
+   int3d(Th)( p*q*0e-10+ u1*v1 + u2*v2 + u3*v3
 	   + p*(dx(v1)+dy(v2)+dz(v3)) + (dx(u1)+dy(u2)+dz(u3))*q )
  + int3d(Th) ( f*q)
- - int2d(Th,1,2,3,4,5,6)( gd*(v1*N.x +v2*N.y+ v3*N.z))   //  int on gamma 
+ - int2d(Th,1,2,3,4,5,6)( gd*(v1*N.x +v2*N.y+ v3*N.z))   //  int on gamma
 // + on(4,u1=g1n,u2=g2n,u3=g3n)
  ;
- macro grad(u) [dx(u),dy(u),dz(u)]// 
+ macro grad(u) [dx(u),dy(u),dz(u)]//
  solve LapP1(pp,qq) = int3d(Th)(grad(pp)'*grad(qq)) - int3d(Th)(f*qq) +on(1,2,3,4,5,6,pp=gd);
  laplaceMixte;
  real err =  int3d(Th)(abs(pp-p));
  cout << "err =" <<  err << " max  "<< pp[].max << " " << p[].max << endl;
- plot(p,wait=1,ps="laRTp.eps",value=true);  
+ plot(p,wait=1,ps="o/laRTp.eps",value=true);  
  assert(err < 0.005);

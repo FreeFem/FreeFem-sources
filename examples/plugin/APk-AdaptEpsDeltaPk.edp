@@ -1,13 +1,13 @@
 load "MetricPk"
-load "Element_P3";	
+load "Element_P3";
 load "Element_P4";
 
 int nIter=4;
 mesh Th=square(20,20,[x,y]);
-//fespace Vh(Th,P1); int kDeg=1;  //degré des FE utilisés
-//fespace Vh(Th,P2); int kDeg=2;  //degré des FE utilisés
-fespace Vh(Th,P3); int kDeg=3;  //degré des FE utilisés
-int rdeg=1;	 //on approche le gradient ou des dérivées d'ordre supérieur
+//fespace Vh(Th,P1); int kDeg=1;  //degrï¿½ des FE utilisï¿½s
+//fespace Vh(Th,P2); int kDeg=2;  //degrï¿½ des FE utilisï¿½s
+fespace Vh(Th,P3); int kDeg=3;  //degrï¿½ des FE utilisï¿½s
+int rdeg=1;	 //on approche le gradient ou des dï¿½rivï¿½es d'ordre supï¿½rieur
 
 real ratio = 2.;//number of triangles is multiplied by ratio at each step
 real rmax = 1; 	//max triangle size desired.
@@ -16,16 +16,16 @@ Vh u,v;
 fespace Metric(Th,[P1,P1,P1]);
 Metric [m11,m12,m22];
 ////pour de l'adaptation isotrope
-//problem EpsDelta(u,v) = 
+//problem EpsDelta(u,v) =
 //		int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+
 //		on(1,u=1)+on(2,3,4, u=0);
-//avec une forte anisotropie, et des singularités aux coins.
+//avec une forte anisotropie, et des singularitï¿½s aux coins.
 real eps=0.01;
-problem EpsDelta(u,v) = 
+problem EpsDelta(u,v) =
 		int2d(Th)(eps*dx(u)*dx(v)+eps*dy(u)*dy(v)+(dx(u)+dy(u))*v)+
 		on(1,u=atan(10*x*(1-x)))+on(2,3,4, u=0);
 
-//real massRef = 1000*Th.nt;	
+//real massRef = 1000*Th.nt;
 real massRef = Th.nt/2;
 EpsDelta;
 plot(u, wait=1);
@@ -40,4 +40,4 @@ for(int i=0; i<nIter; i++){
 	massRef=ratio*massRef;
 }
 
-plot(Th, wait=1, ps="triangulationEpsDelta.ps");
+plot(Th, wait=1, ps="o/triangulationEpsDelta.ps");
