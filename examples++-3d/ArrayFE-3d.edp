@@ -1,5 +1,0 @@
-mesh3 Th("dodecaedre01.mesh");
-fespace Vh(Th,P23d);
-Vh[int] u(10);
-u[1]=x;
-cout << " u[1].l2 =" << u[1][].l2 << endl;

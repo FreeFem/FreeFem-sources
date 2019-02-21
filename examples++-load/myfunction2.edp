@@ -1,9 +1,0 @@
-// Example of dynamic function load
-// --------------------------------
-// $Id$
-
- load "myfunction2"
-  string toto="xxxx";
- Why(toto);
- Why("qqsdqs.wwc.dqqs");
- cout << f(3.) << endl; 

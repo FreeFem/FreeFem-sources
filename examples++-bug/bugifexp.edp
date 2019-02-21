@@ -1,4 +1,0 @@
-mesh Th=square(10,10);
-fespace Vh(Th,P1);
-// bug due  to optimisation process .. HARD ....  FH 
-Vh u = y ? 1./y : x;

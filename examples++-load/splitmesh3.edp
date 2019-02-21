@@ -1,4 +1,0 @@
-load "splitmesh3"
-mesh Th=square(5,5);
-mesh Th3=splitmesh3(Th);
-plot(Th3,wait=1);

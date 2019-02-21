@@ -1,6 +1,0 @@
-load "addNewType"
-
-myType ff("toto"); 
-cout << ff(1,2).x << endl; 
-
-cout << ff(1,2).N.x  << endl; 

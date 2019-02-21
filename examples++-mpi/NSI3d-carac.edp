@@ -1,4 +1,0 @@
-//  run with MPI:  ff-mpirun -np 4 script.edp
-// NBPROC 4
-
-cout << "\n\n empty file remove NSI3d-carac.edp\n\n" << endl;
