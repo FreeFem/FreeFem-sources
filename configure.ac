@@ -90,6 +90,20 @@ m4_define([AC_FF_PETSC_WHERELIB],
 	  fi
 	  ]
 )dnl end m4_defineAC_FF_PETSC_WHERELIB
+m4_define([AC_FF_PETSC_WHERELIB_BASIC],# PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES
+	  [
+	    ff_PETSC_EXTERNAL_LIB_BASIC=`AC_FF_PETSC_AWK(PETSC_EXTERNAL_LIB_BASIC,$2)`
+	    ff_PETSC_LIB_BASIC=`AC_FF_PETSC_AWK(PETSC_LIB_BASIC,$2)`
+	    ff_PETSC_PREFIXDIR=`awk -F' ' '"PREFIXDIR"==[$]1 {print [$]3}' $2`
+	    ff_PETSC_WITH_EXTERNAL_LIB="-Wl,-rpath,[$]ff_PETSC_PREFIXDIR/lib -L[$]ff_PETSC_PREFIXDIR/lib [$]ff_PETSC_LIB_BASIC [$]ff_PETSC_EXTERNAL_LIB_BASIC"
+	    ff_PETSC_CC_INCLUDES=`AC_FF_PETSC_AWK(PETSC_CC_INCLUDES,$2)`
+	   if test -n "[$]ff_PETSC_WITH_EXTERNAL_LIB"; then
+			    ff_$1_ok=yes;
+			    AC_FF_ADDWHERELIB($1,[$]ff_PETSC_WITH_EXTERNAL_LIB,[$]ff_PETSC_CC_INCLUDES)
+			    AC_SUBST([TOOL_COMPILE_$1],"")
+	  fi
+	  ]
+)dnl end m4_defineAC_FF_PETSC_WHERELIB_BASIC
 
 # ALH - this is required by FFCS that needs to deactivate some tools that do not work on all platforms. Some FF users
 # may also find interesting to specify a local version of a tool instead of downloading it.
@@ -965,7 +979,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
-		        AC_FF_PETSC_WHERELIB(petsc,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
@@ -1007,11 +1021,21 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
 		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`
-		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetsc]);
+		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
 
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
-	        AC_FF_PETSC_WHERELIB(petsccomplex,PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUDES,$ffconfpetscc)
+	        AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
 
 			else
 			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);
