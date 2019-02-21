@@ -30,7 +30,7 @@ TESTS=3d-Leman.edp ArrayFE-3d.edp \
 	cone.edp convect-3d.edp \
 	cube-period.edp cylinder-3d.edp \
 	EqPoisson.edp extract-boundary3d.edp \
-	fallingsphere.edp first.edp \
+	fallingspheres.edp first.edp \
 	intlevelset3d.edp Lac.edp \
 	Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp \
 	Laplace3d.edp LaplaceRT-3d.edp \
