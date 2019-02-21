@@ -8,10 +8,10 @@ compiler:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake libopenmpi-dev
+  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake mpich
 
 script:
-    - autoreconf -i && ./configure --enable-download --enable-optim && ./3rdparty/getall -a
+    - autoreconf -i && ./configure --enable-download && ./3rdparty/getall -a
     - make
     - make check
     - sudo make install
