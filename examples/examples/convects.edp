@@ -18,7 +18,7 @@
 /// Characteristics Galerkin
 // Parameters
 verbosity = 1;
-real dt = 0.17,;
+real dt = 0.17;
 real t = 0;
 
 // Mesh
