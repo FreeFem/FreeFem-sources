@@ -1,25 +1,24 @@
-# ======================================================================
-# Laboratoire Jacques-Louis Lions
-# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
-# http://www.ljll.math.upmc.fr/lehyaric
-# ======================================================================
-# This file is part of Freefem++
-#
-# Freefem++ is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation; either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# Freefem++ is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with Freefem++; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-# ======================================================================
-# headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
+############################################################################
+# This file is part of FreeFem++.                                          #
+#                                                                          #
+# FreeFem++ is free software: you can redistribute it and/or modify        #
+# it under the terms of the GNU Lesser General Public License as           #
+# published by the Free Software Foundation, either version 3 of           #
+# the License, or (at your option) any later version.                      #
+#                                                                          #
+# FreeFem++ is distributed in the hope that it will be useful,             #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+# GNU Lesser General Public License for more details.                      #
+#                                                                          #
+# You should have received a copy of the GNU Lesser General Public License #
+# along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        #
+############################################################################
+# SUMMARY : Makefile for FreeFem++
+# LICENSE : LGPLv3
+# ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+# AUTHORS : ...
+# E-MAIL  : ...
 
 TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.edp \
 	elasticity-2d-PETSc.edp	elasticity-3d-PETSc.edp \
@@ -44,8 +43,7 @@ XFAIL_TESTS=$(TESTS)
 LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
-LIST_IDP=macro_ddm.idp macro_ddm_substructuring.idp
-EXTRA_DIST=$(TESTS) $(LIST_IDP) PETSc.cpp PETSc-complex.cpp PETSc-code.hpp common.hpp hpddm.cpp hpddm_substructuring.cpp SLEPc.cpp SLEPc-complex.cpp SLEPc-code.hpp PETSc.hpp
+EXTRA_DIST=$(TESTS) PETSc.cpp PETSc-complex.cpp PETSc-code.hpp common.hpp hpddm.cpp hpddm_substructuring.cpp SLEPc.cpp SLEPc-complex.cpp SLEPc-code.hpp PETSc.hpp
 
 # FFCS - list modified to disable some downloaded tools depending on the platform (see
 # [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be
@@ -80,7 +78,6 @@ install-exec-local::
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
 	-for i in $(LIST_COMPILE); do \
 	 if [ -f $$i ] ; then 	$(INSTALL) -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib/mpi; fi; done
-	$(INSTALL) -m 555 $(LIST_IDP) $(DESTDIR)$(ff_prefix_dir)/idp
 
 
 freefem++.pref:Makefile

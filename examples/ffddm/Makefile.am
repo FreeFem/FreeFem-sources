@@ -1,34 +1,51 @@
-# $Id$
-
-all-local:   freefem++.pref
-
-TESTS=	Maxwell-3d-simple.edp		Maxwell_Cobracavity.edp			diffusion-3d-simple.edp \
-diffusion-3d-minimal-ddm.edp	 \
-Helmholtz-2d-simple.edp			diffusion-3d-minimal-direct.edp		elasticity-3d-simple.edp \
-elasticity-3d-thirdlevelgeneo.edp \
-Richards-2d.edp					natural_convection.edp \
-Helmholtz-3d-simple.edp			diffusion-2d-thirdlevelgeneo.edp	natural_convection_3D_obstacle.edp \
-Helmholtz-2d-HPDDM-BGMRES.edp
-XFAIL_TESTS=	Maxwell-3d-simple.edp		Maxwell_Cobracavity.edp			diffusion-3d-simple.edp \
-diffusion-3d-minimal-ddm.edp	 \
-Helmholtz-2d-simple.edp			diffusion-3d-minimal-direct.edp		elasticity-3d-simple.edp \
-elasticity-3d-thirdlevelgeneo.edp \
-Richards-2d.edp					natural_convection.edp \
-Helmholtz-3d-simple.edp			diffusion-2d-thirdlevelgeneo.edp	natural_convection_3D_obstacle.edp \
-Helmholtz-2d-HPDDM-BGMRES.edp
+############################################################################
+# This file is part of FreeFem++.                                          #
+#                                                                          #
+# FreeFem++ is free software: you can redistribute it and/or modify        #
+# it under the terms of the GNU Lesser General Public License as           #
+# published by the Free Software Foundation, either version 3 of           #
+# the License, or (at your option) any later version.                      #
+#                                                                          #
+# FreeFem++ is distributed in the hope that it will be useful,             #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+# GNU Lesser General Public License for more details.                      #
+#                                                                          #
+# You should have received a copy of the GNU Lesser General Public License #
+# along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        #
+############################################################################
+# SUMMARY : Makefile for FreeFem++
+# LICENSE : LGPLv3
+# ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+# AUTHORS : ...
+# E-MAIL  : ...
 
 LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
 TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
-LIST_IDP= cobrameshcavity.idp		ffddm_coarsemeshCS.idp			ffddm_geneoCS_3rdlvl.idp		ffddm_partitioning.idp \
-ffddm_functions.idp \
-ffddm.idp				ffddm_geneoCS.idp			ffddm_parameters.idp
+all-local: freefem++.pref
 
-EXTRA_DIST=*.edp *.idp
+TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
+	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
+	elasticity-3d-simple.edp elasticity-3d-thirdlevelgeneo.edp \
+	Helmholtz-2d-HPDDM-BGMRES.edp Helmholtz-2d-marmousi.edp \
+	Helmholtz-2d-simple.edp Helmholtz-3d-overthrsut.edp \
+	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
+	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
+	natural_convection.edp Navier-2d-marmousi2.edp \
+	Richards-2d.edp
 
+XFAIL_TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
+	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
+	elasticity-3d-simple.edp elasticity-3d-thirdlevelgeneo.edp \
+	Helmholtz-2d-HPDDM-BGMRES.edp Helmholtz-2d-marmousi.edp \
+	Helmholtz-2d-simple.edp Helmholtz-3d-overthrsut.edp \
+	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
+	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
+	natural_convection.edp Navier-2d-marmousi2.edp \
+	Richards-2d.edp
 
-
-
+EXTRA_DIST=*.edp
 
 freefem++.pref:Makefile.am
 	echo loadpath = \"../mpi/\" >freefem++.pref
@@ -38,8 +55,5 @@ freefem++.pref:Makefile.am
 	echo loadpath += \"./\" >>freefem++.pref
 
 $(TESTS)::freefem++.pref
-install-exec-local::
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
-	$(INSTALL)  -m 555  $(LIST_IDP)  $(DESTDIR)$(ff_prefix_dir)/idp
 
 FORCE:

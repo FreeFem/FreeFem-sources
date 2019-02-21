@@ -49,8 +49,8 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
 	examples/plugin/g.gmesh
 
 clean-local::
-	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) |xargs rm
-	-rm examples*/*.eps
+	-find . \( -name '*~' -or  -name ListOfUnAllocPtr.bin \) | xargs rm
+	-rm examples/*/*.eps
 
 # "dist" targets
 clean-local::
