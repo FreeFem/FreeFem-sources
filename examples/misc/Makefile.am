@@ -28,7 +28,7 @@ all-local: all.edp regtests.edp freefem++.pref
 TESTS=aaa-adp.edp aadaptation.edp \
 	aalapacien.edp aalaplace-nc.edp \
 	aamove.edp aaRT.edp arrayoFVh.edp \
-	bilap.edp ccc-adapt.edp \
+	bilap.edp ccc-adap.edp \
 	D2.edp demo.edp \
 	demo1.edp FE-medit.edp \
 	funct.edp include.edp \
