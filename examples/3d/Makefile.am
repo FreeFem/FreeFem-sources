@@ -40,17 +40,18 @@ TESTS=3d-Leman.edp ArrayFE-3d.edp \
 	Poisson-cube-ballon.edp Poisson.edp \
 	Poisson3d.edp pyramide.edp \
 	refinesphere.edp schwarz-nm-3d.edp \
-	Sphere-Isocaherdon.edp sphere2.edp \
+	Sphere-Isocahedron.edp sphere2.edp \
 	sphere6.edp sphereincube.edp \
 	Stokes.edp tetgencube.edp \
 	tetgenholeregion.edp \
-	TruncLap.edp
+	TruncLac.edp
 
 XFAIL_TESTS=cylinder.edp extract-boundary3d.edp \
 	fallingspheres.edp Laplace-Adapt-3d.edp \
 	Laplace-Adapt-aniso-3d.edp Period-Poisson-cube-ballon.edp \
 	Poisson3d.edp Poisson-cube-ballon.edp \
 	refinesphere.edp schwarz-nm-3d.edp \
+	Sphere-Isocahedron.edp \
 	tetgencube.edp tetgenholeregion.edp
 
 EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh lac-leman-v4.msh
