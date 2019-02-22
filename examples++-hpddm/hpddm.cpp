@@ -16,7 +16,7 @@ class initDDM_Op : public E_F0mps {
         Expression o;
         Expression R;
         Expression D;
-        static const int n_name_param = 4;
+        static const int n_name_param = 3;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4, Expression param5) : A(param1), Mat(param2), o(param3), R(param4), D(param5) {
@@ -29,7 +29,6 @@ template<class Type, class K>
 basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"scaled", &typeid(bool)},
-    {"deflation", &typeid(FEbaseArrayKn<K>*)},
     {"prefix", &typeid(string*)}
 };
 template<class Type, class K>
@@ -52,25 +51,14 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     if(ptO)
         ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA)
                                             , STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
-    FEbaseArrayKn<K>* deflation = nargs[2] ? GetAny<FEbaseArrayKn<K>*>((*nargs[2])(stack)) : 0;
-    if(deflation && deflation->N > 0 && !ptA->getVectors()) {
-        K** ev = new K*[deflation->N];
-        *ev = new K[deflation->N * deflation->get(0)->n];
-        for(int i = 0; i < deflation->N; ++i) {
-            ev[i] = *ev + i * deflation->get(0)->n;
-            std::copy(&(*deflation->get(i))[0], &(*deflation->get(i))[deflation->get(i)->n], ev[i]);
-        }
-        ptA->setVectors(ev);
-        ptA->Type::super::initialize(deflation->N);
-    }
     if(ptD)
         ptA->initialize(*ptD);
     else
         std::cerr << "Something is really wrong here!" << std::endl;
     if(!nargs[1] || GetAny<bool>((*nargs[1])(stack)))
         ptA->exchange();
-    if(nargs[3])
-        ptA->setPrefix(*(GetAny<string*>((*nargs[3])(stack))));
+    if(nargs[2])
+        ptA->setPrefix(*(GetAny<string*>((*nargs[2])(stack))));
     return ptA;
 }
 
@@ -79,7 +67,7 @@ class attachCoarseOperator_Op : public E_F0mps {
     public:
         Expression comm;
         Expression A;
-        static const int n_name_param = 6;
+        static const int n_name_param = 7;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         attachCoarseOperator_Op(const basicAC_F0& args, Expression param1, Expression param2) : comm(param1), A(param2) {
@@ -95,7 +83,8 @@ basicAC_F0::name_and_type attachCoarseOperator_Op<Type, K>::name_param[] = {
     {"pattern", &typeid(Matrice_Creuse<K>*)},
     {"threshold", &typeid(HPDDM::underlying_type<K>)},
     {"timing", &typeid(KN<double>*)},
-    {"ret", &typeid(Pair<K>*)}
+    {"ret", &typeid(Pair<K>*)},
+    {"deflation", &typeid(FEbaseArrayKn<K>*)}
 };
 template<class Type, class K>
 class attachCoarseOperator : public OneOperator {
@@ -113,6 +102,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
     Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
+    FEbaseArrayKn<K>* deflation = nargs[6] ? GetAny<FEbaseArrayKn<K>*>((*nargs[6])(stack)) : 0;
     HPDDM::Option& opt = *HPDDM::Option::get();
     KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
     std::pair<MPI_Request, const K*>* ret = nullptr;
@@ -120,7 +110,7 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
         ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
         MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
         MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
-        if(dA._n == dA._m) {
+        if(dA._n == dA._m && !deflation) {
             if(timing) { // tic
                 timing->resize(timing->n + 1);
                 (*timing)[timing->n - 1] = MPI_Wtime();
@@ -139,6 +129,16 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
             if(timing) { // toc
                 (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
             }
+        }
+        else if(deflation && deflation->N > 0 && !ptA->getVectors()) {
+            K** ev = new K*[deflation->N];
+            *ev = new K[deflation->N * deflation->get(0)->n];
+            for(int i = 0; i < deflation->N; ++i) {
+                ev[i] = *ev + i * deflation->get(0)->n;
+                std::copy(&(*deflation->get(i))[0], &(*deflation->get(i))[deflation->get(i)->n], ev[i]);
+            }
+            ptA->setVectors(ev);
+            ptA->Type::super::initialize(deflation->N);
         }
         MPI_Barrier(comm);
         if(timing) { // tic

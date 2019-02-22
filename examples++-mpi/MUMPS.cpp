@@ -209,7 +209,7 @@ class SolverMumps : public MatriceMorse<R>::VirtualSolver {
     ICNTL(1) = 0;
     ICNTL(2) = 0;
     ICNTL(3) = verbosity > 1 ? 6 : 0;
-    ICNTL(4) = 0; // verbose level
+    ICNTL(4) = verbosity > 1 ? 2 : 0; // verbose level
     ICNTL(5) = 0;                                                          // assembled format
     if(_strategy > 0 && _strategy < 9 && _strategy != 2) 
       {
