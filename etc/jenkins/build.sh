@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Input arguments
-# ./build.sh [PETSc (0/1)] [sudo (0/1)]
+# ./build.sh [PETSc (0/1), default 0] [sudo (0/1), default 0] [install (0), default 1]
 withPETSc=0
 withSudo=0
 if [ "$#" -eq 0 ]
@@ -19,6 +19,12 @@ else
 	then
 		echo "Sudo argument: $2"
 		withSudo=$2
+	fi
+
+	if [ "$3" -eq 0 ]
+	then
+		echo "Install argument: $3"
+		withInstall=$3
 	fi
 fi
 
@@ -41,14 +47,14 @@ then
 		&& ./reconfigure \
 		&& make -j4 \
 		&& make check \
-		&& $SUDO make install
+		&& if [ $withInstall ]; then $SUDO make install; else echo "Without install"; fi
 else
 	autoreconf -i \
 		&& ./configure --enable-download --enable-optim --prefix=/builds/freefem \
 		&& ./3rdparty/getall -a \
 		&& make -j4 \
 		&& make check \
-		&& $SUDO make install
+		&& if [ $withInstall ]; then $SUDO make install; else echo "Without install"; fi
 fi
 
 if [ $? -eq 0 ]
