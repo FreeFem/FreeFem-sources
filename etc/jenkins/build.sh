@@ -24,7 +24,7 @@ else
 	if [ "$3" -eq 0 ]
 	then
 		echo "Install argument: $3"
-		withInstall=$3
+		withoutInstall=$3
 	fi
 fi
 
@@ -47,14 +47,14 @@ then
 		&& ./reconfigure \
 		&& make -j4 \
 		&& make check \
-		&& if [ $withInstall ]; then $SUDO make install; else echo "Without install"; fi
+		&& if [ $withoutInstall ]; then echo "Without install"; else $SUDO make install; fi
 else
 	autoreconf -i \
 		&& ./configure --enable-download --enable-optim --prefix=/builds/freefem \
 		&& ./3rdparty/getall -a \
 		&& make -j4 \
 		&& make check \
-		&& if [ $withInstall ]; then $SUDO make install; else echo "Without install"; fi
+		&& if [ $withoutInstall ]; then echo "Without install"; else $SUDO make install; fi
 fi
 
 if [ $? -eq 0 ]
