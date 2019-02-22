@@ -26,7 +26,7 @@
 // *INDENT-ON* //
 
 // using namespace std;
-#include "../config.h"
+#include "../../config.h"
 #include "coin/IpTNLP.hpp"
 #include "coin/IpIpoptApplication.hpp"
 #include "ff++.hpp"
