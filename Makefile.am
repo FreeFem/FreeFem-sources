@@ -301,7 +301,7 @@ FreeFem++-CoCoa:bin/FreeFem++-CoCoa.in ./config.status
 		./config.status  --file="FreeFem++-CoCoa:bin/FreeFem++-CoCoa.in"
 FreeFem++.app.tgz:./config.status etc/config/FreeFem++.app.in.tgz
 	tar zxf etc/config/FreeFem++.app.in.tgz
-	./config.status --file=FreeFem++.scrpt-txt:FreeFem++.scrpt-txt.in
+	./config.status --file=FreeFem++.scrpt-txt:etc/config/FreeFem++.scrpt-txt.in
 	-rm FreeFem++.app/Contents/Resources/Scripts/main.scpt
 	 osacompile <FreeFem++.scrpt-txt -o FreeFem++.app/Contents/Resources/Scripts/main.scpt
 	tar zcf FreeFem++.app.tgz FreeFem++.app
