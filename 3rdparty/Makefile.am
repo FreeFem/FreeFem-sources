@@ -137,8 +137,8 @@ tag-install-other:
 
 WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
-	touch ../examples/plugin/WHERE_LIBRARY-config ../examples/plugin/WHERE_LIBRARY
-	-grep LD ../examples/plugin/WHERE_LIBRARY ../examples/plugin/WHERE_LIBRARY-config >WHERE-LD
+	touch ../plugin/seq/WHERE_LIBRARY-config ../plugin/seq/WHERE_LIBRARY
+	-grep LD ../plugin/seq/WHERE_LIBRARY ../plugin/seq/WHERE_LIBRARY-config >WHERE-LD
 # BEGIN HPDDM
 install-hpddm: ./getall
 	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi

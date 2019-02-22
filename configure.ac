@@ -44,7 +44,7 @@ AC_PROG_MAKE_SET
 dnl AM_COLOR_TESTS=always
 AC_PROG_RANLIB
 inc_usr_include=""
-ff_where_lib_conf=examples/plugin/WHERE_LIBRARY-config
+ff_where_lib_conf=plugin/seq/WHERE_LIBRARY-config
 dnl search of associad software
 m4_define([AC_FF_ADDWHERELIB],
   [
@@ -912,13 +912,13 @@ else
 	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
         # these values should not be empty otherwise
-        # examples/plugin/ff-get-dep will think that they are not
+        # plugin/seq/ff-get-dep will think that they are not
         # defined
 	AC_FF_ADDWHERELIB(mpi,-DDUMMY,-I$MPI_INC_DIR)
 
         # mpifc and mpif77 libraries should always be specified
         # because FF never calls the Fortran MPI compiler. It always
-        # uses mpicxx in [[file:examples/plugin/ff-c++]]. The
+        # uses mpicxx in [[file:plugin/seq/ff-c++]]. The
         # resulting Fortran libraries (eg Mumps) would compile even
         # without the proper Fortran libs, but they would not load
         # properly.
@@ -1388,7 +1388,7 @@ then
     else
 	ff_download_blas=openblas
 
-	# it is necessary to split the library path into -L and -l otherwise ff/upstream/examples/plugin/ff-c++ will place -lgfortran in
+	# it is necessary to split the library path into -L and -l otherwise ff/upstream/plugin/seq/ff-c++ will place -lgfortran in
 	# LIBS, .../libgoto___.lib in OTHER, and call the compiler with $LIBS before $OTHER, which will fail. But libopenblas.a is placed in
 	# the standard directory 3rdparty/lib so the -L option is not required anymore.
 
@@ -1631,7 +1631,7 @@ fi
 AC_SUBST([EIGENOBJ])
 
 # ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
-# examples/plugin require it (eg [[file:examples/plugin/Element_Mixte.cpp::lapack]]). Request from Fred.
+# plugin/seq require it (eg [[file:plugin/seq/Element_Mixte.cpp::lapack]]). Request from Fred.
 
 AC_FF_ADDWHERELIB(lapack,$ff_lapack_lib,)
 
@@ -1899,7 +1899,7 @@ fi
 if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
-	# Activate dynamic loading tests (see examples/plugin/Makefile.am)
+	# Activate dynamic loading tests (see plugin/seq/Makefile.am)
 	AC_SUBST(LOAD_TESTS,../regtests.sh)
 	AC_SUBST(LOAD_COMPILE,load_compile)
 
@@ -2219,6 +2219,10 @@ AC_OUTPUT(Makefile
     src/libMesh/Makefile
     src/medit/Makefile
     src/bin-win32/Makefile
+		plugin/seq/Makefile
+		plugin/mpi/Makefile
+		plugin/hpddm/Makefile
+		plugin/ffddm/Makefile
     examples/plugin/Makefile
     examples/tutorial/Makefile
     examples/misc/Makefile

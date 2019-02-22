@@ -20,40 +20,4 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
-
-all-local: freefem++.pref
-
-TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
-	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
-	elasticity-3d-simple.edp elasticity-3d-thirdlevelgeneo.edp \
-	Helmholtz-2d-HPDDM-BGMRES.edp Helmholtz-2d-marmousi.edp \
-	Helmholtz-2d-simple.edp Helmholtz-3d-overthrsut.edp \
-	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
-	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
-	natural_convection.edp Navier-2d-marmousi2.edp \
-	Richards-2d.edp
-
-XFAIL_TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
-	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
-	elasticity-3d-simple.edp elasticity-3d-thirdlevelgeneo.edp \
-	Helmholtz-2d-HPDDM-BGMRES.edp Helmholtz-2d-marmousi.edp \
-	Helmholtz-2d-simple.edp Helmholtz-3d-overthrsut.edp \
-	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
-	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
-	natural_convection.edp Navier-2d-marmousi2.edp \
-	Richards-2d.edp
-
-EXTRA_DIST=*.edp
-
-freefem++.pref:Makefile.am
-	echo loadpath = \"../mpi/\" >freefem++.pref
-	echo loadpath += \"../hpddm/\" >>freefem++.pref
-	echo loadpath += \"../plugin/\" >>freefem++.pref
-	echo includepath = \"../../idp/\" >>freefem++.pref
-	echo loadpath += \"./\" >>freefem++.pref
-
-$(TESTS)::freefem++.pref
-
-FORCE:
+all-local:

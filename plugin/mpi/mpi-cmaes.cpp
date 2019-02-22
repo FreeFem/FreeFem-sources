@@ -27,7 +27,7 @@
  */
 
 //ff-c++-LIBRARY-dep: mpi
-//ff-c++-cpp-dep: ../plugin/cmaes.cpp -I../plugin
+//ff-c++-cpp-dep: ../seq/cmaes.cpp -I../seq
 
 /*
 	This is a freefem interface of the Hansen's CMA-ES C optimizer.

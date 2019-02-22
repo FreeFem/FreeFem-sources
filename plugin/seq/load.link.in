@@ -27,15 +27,15 @@ if [ -z "$INCFF" ] ; then
 	INCFF="-I@INCFF@"
     elif [ -f "${dircommand}/include/ff++.hpp" ]; then
 	INCFF="-I${dircommand}/include"
-    elif [ -f ../plugin/include/ff++.hpp ]; then
-	INCFF="-I../plugin/include"
+    elif [ -f ../seq/include/ff++.hpp ]; then
+	INCFF="-I../seq/include"
     elif [ -f "FFAPPLI_INC/ff++.hpp" ] ; then
 	INCFF="-IFFAPPLI_INC"
     elif [ -f '@ff_prefix_dir@/include/ff++.hpp' ] ; then
 	INCFF='-I@ff_prefix_dir@/include'
     else
 	ff=`which freefem++.exe`;
-	ffinc=`dirname "$ff"`/plugin/include
+	ffinc=`dirname "$ff"`/seq/include
 	if [ -f "$ffinc/ff++.hpp" ]; then
 	  INCFF=-I"'$ffinc'";
         else

@@ -82,7 +82,7 @@ drawbdmesh.exe:../std/Pcrgraph.o  ../bamg/drawbdmesh.o $(LIBS_FF)
 launchff++.exe:launchff++.cpp
 	$(CXX) $(GCCNOCYGWIN) launchff++.cpp -o launchff++.exe -lcomdlg32
 
-ff-c++:../../examples/plugin/load.link.in
+ff-c++:../../plugin/seq/load.link.in
 	../../config.status  --file=ff-c++:$<
 	chmod a+x ff-c++
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)

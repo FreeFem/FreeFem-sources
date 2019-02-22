@@ -8,7 +8,7 @@
 
 FREEFEM_DIR     = /Volumes/Ike/cazeaux/ff++/
 
-FREEFEM_INCLUDE = -I$(FREEFEM_DIR)examples/plugin/include/
+FREEFEM_INCLUDE = -I$(FREEFEM_DIR)plugin/seq/include/
 
 # directory of the different package
 

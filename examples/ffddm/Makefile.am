@@ -48,9 +48,9 @@ XFAIL_TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
 EXTRA_DIST=*.edp
 
 freefem++.pref:Makefile.am
-	echo loadpath = \"../mpi/\" >freefem++.pref
-	echo loadpath += \"../hpddm/\" >>freefem++.pref
-	echo loadpath += \"../plugin/\" >>freefem++.pref
+	echo loadpath = \"../../plugin/mpi/\" >freefem++.pref
+	echo loadpath += \"../../plugin/hpddm/\" >>freefem++.pref
+	echo loadpath += \"../../plugin/seq/\" >>freefem++.pref
 	echo includepath = \"../../idp/\" >>freefem++.pref
 	echo loadpath += \"./\" >>freefem++.pref
 

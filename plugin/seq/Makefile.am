@@ -21,66 +21,6 @@
 # E-MAIL  : ...
 
 all-local: @LOAD_COMPILE@
-TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NS_P2BR_P0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp  ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp refinesphere.edp  schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE_P2BR.edp testFEMorley.edp tetgencube.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp bfstream.edp bilapP3-hct-like.edp ClosePoints.edp cube.edp bilapHCT.edp	testFEHCT.edp Stokes-surface-tension-axi.edp Element_QF.edp distance.edp	distance2.edp	distance3.edp testdist.edp testp1dcnc.edp testFE-P2Bulle3.edp LaplaceRT2.edp LaplaceP2pnc.edp testFE-P2pnc.edp LaplaceP3-3d.edp LaplaceRT13d.edp SaveHB_sample.edp SaveHB_sample_z.edp IncompleteCholesky.edp test_LaplacianSurf.edp
-# all test can fail must but clean ????  FH...
-XFAIL_TESTS=$(TESTS)
-
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
-
-EXTRA_DIST= $(TESTS) all.edp makeref.edp regtests.edp \
-ff-get-dep.in ff-get-dep.awk ff-pkg-download.in load.link.in  include.tar.gz \
- BernardiRaugel.cpp Morley.cpp dfft.cpp  \
- funcTemplate.cpp mat_dervieux.cpp mat_psi.cpp myfunction.cpp \
- mat_dervieux.cpp  funcTemplate.cpp \
- regtests.m4     addNewType.cpp \
-  qf11to25.cpp  Element_P3.cpp  Element_P3.hpp  Element_P4.cpp  Element_P4.hpp \
-  Element_P3dc.cpp  Element_P3dc.hpp Element_P4dc.cpp  Element_P4dc.hpp \
-  Element_PkEdge.cpp \
-  SuperLu.cpp  \
-  NewSolver.cpp \
-  splitmesh3.cpp    splitmesh6.cpp   \
-  splitmesh4.cpp    splitmesh12.cpp   \
-  README_SuperLU \
-  tetgen.cpp\
-  msh3.cpp msh3.hpp\
-  ffrandom.cpp   \
-  medit.cpp  \
-  bmo.cpp lgbmo.cpp bmo.hpp \
- fflapack.cpp	lapack.cpp	clapack.h  \
- fig.pgm lg.pgm ppm2rnm.cpp ppmimg.h   \
- DxWriter.cpp  metis.cpp pcm.cpp pcm.hpp pcm2rnm.cpp \
- UMFPACK64.cpp iovtk.cpp gmsh.cpp MetricKuate.cpp  \
- ffnewuoa.cpp		newuoa.f Element_P1dc1.cpp ilut.cpp  \
- freeyams.cpp mmg3d-v4.0.cpp  mshmet.cpp \
- BinaryIO.cpp	gsl.cpp   gsl.awk isolineP1.cpp isoline.cpp lg.pgm  \
- thresholdings.cpp	 \
- VTK_writer_3d.cpp VTK_writer.cpp splitedges.cpp  \
- Element_Mixte.cpp    \
- Element_Mixte3d.cpp    \
- myfunction2.cpp   \
- cmaes.cpp \
- cmaes.h cmaes_interface.h ff-cmaes.cpp \
- ff-NLopt.cpp \
- MetricPk.cpp GeometryQA.cpp  FreeFemQA.cpp BasicMath.h  TensorK.hpp  Geometry.hpp  \
- RZ.h SortedList.h ExampleMetrics.h  \
- cube.msh  \
- MUMPS_seq.cpp \
- MUMPS.cpp \
- ff-Ipopt.cpp \
- scotch.cpp    shell.cpp \
- pipe.cpp pstream.h  \
- symmetrizeCSR.cpp \
- dmatrix.hpp PARDISO.cpp             \
- ch.pts   BEC.cpp bfstream.cpp iohdf5.cpp \
- iohd5-beam-2d.edp	iohd5-beam-3d.edp ff-AiryBiry.cpp \
- exactpartition.cpp	exactpartition.edp \
- ClosePoints.cpp aniso.cpp Element_HCT.cpp Curvature.cpp waveguide.edp waveguide2.edp Element_P1bl.cpp \
- Element_QF.cpp distance.edp	distance2.edp	distance3.edp g.gmesh distance.cpp testdist.edp \
- Element_P1ncdc.cpp testp1dcnc.edp \
- renumb.hpp Element_P2bulle3.cpp Element_P2pnc.cpp \
- libff-mmap-semaphore.c ffmaster.c libff-mmap-semaphore.h ff-mmap-semaphore.cpp fortan_master.f90 \
- SaveHB.cpp SaveHB_sample.edp SaveHB_README SaveHB_sample_z.edp IncompleteCholesky.edp IncompleteCholesky.cpp
 
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
          Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
@@ -194,34 +134,6 @@ clean-local::
 	-rm -r include
 	-rm include.done
 
-Ref: makeref.edp
-	../../src/nw/FreeFem++-nw makeref.edp
-
-makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
-	m4 regtests.m4 > makeref.edp
-
-all-local: all.edp regtests.edp load_compile
-
-# FFCS - 27/2/13 - remove dependency on Makefile to avoid recompiling everything everytime something is changed in the
-# configuration step
-
-all.edp:
-	@test -f ../../src/bin-win32/FreeFem++.exe && ffpp=../../src/bin-win32/FreeFem++.exe || ffpp=../../src/nw/FreeFem++; \
-	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
-	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \
-	    if $$ffpp -ns -jc -v 0 $$i  1>/dev/null 2>/dev/null ; then \
-		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
-		echo "verbosity=verbosityy;" ; \
-		echo \{ include \"$$i\"\;\}\; ;\
-		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
-	    else  \
-	        echo ' cout << "--------- error compile  file : '$$i' ---------------------------------------------" << endl;'; \
-	      fi; done) > $@
-	@awk '/error compile/ {print "Error freefem++ file ," $$6}' $@
-
-# To check the scripts against their reference values
-regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
-	m4 -DASSERT regtests.m4 > regtests.edp
 
 # FFCS - 27/2/13 - remove dependency on Makefile to avoid recompiling everything everytime something is changed in the
 # configuration step
@@ -230,7 +142,7 @@ $(LIST_COMPILE):ff-c++ include.done
 
 clean-local::
 	-rm *.o *.$(DYLIB_SUFFIX) load.link WHERE_LIBRARY-download ff-get-dep ff-c++ ff-pkg-download \
-	  $(LIST_COMPILE) $(LIST_COMPILE_PKG)  regtests.edp makeref.edp
+	  $(LIST_COMPILE) $(LIST_COMPILE_PKG)
 	-rm -rf include include.done
 ff-c++:load.link.in load.link WHERE_LIBRARY-download ff-get-dep ../../config.status
 	../../config.status  --file=ff-c++:load.link.in

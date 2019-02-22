@@ -21,6 +21,8 @@
 # E-MAIL  :
 
 SUBDIRS=3rdparty src \
+	plugin/seq plugin/mpi \
+	plugin/hpddm plugin/ffddm \
 	examples/examples examples/misc \
 	examples/tutorial examples/other \
 	examples/plugin examples/mpi \
@@ -41,8 +43,6 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
 	examples/plugin/lg.pgm \
 	examples/mpi/regtests.sh \
 	examples/other/speedtest.sh \
-	3rdparty/fftw/Makefile \
-	3rdparty/fftw/Makefile.am \
 	examples/*/*.edp \
 	examples/CheckAllEdp \
 	examples/plugin/ch.pts \

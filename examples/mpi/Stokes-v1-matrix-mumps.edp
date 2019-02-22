@@ -4,7 +4,7 @@
 /*
 to change locatation of daynamic lib. set   freefem++.pref   file like :
 more freefem++.pref
-loadpath = "../examples/plugin/"
+loadpath = "../../plugin/seq/"
 loadpath += "./"
 */
 
