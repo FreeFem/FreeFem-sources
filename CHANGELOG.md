@@ -40,19 +40,15 @@ All notable changes to this project will be documented in this file.
 - add function regions to get the array of label of a  mesh
 - correct big bug in 	toRarray,toZarray, toCarray  transform [ ... ] array to int[int], real[int], complex[int]  
 
-## [3.62] 2018-08-31
-
+## [3.62] - 2018-08-31
 ### Added
-
 - add  x0=true/false, add veps=eps in solver parameters to initialazed of not the the CG , GMRES algo
   with 0 or previous value and veps is to get the absolue tolerance
-
 - A tool of solve adjoint matrix A with only one single LU decomposition with LU, UMFPACK, GMRES  
     `u[]=A'^-1*b;`  
 - Add plugin to save matrix in Harwell-Boeing format (see Harwell-Boeing format)
 
 ### Fixed
-
 - Fix bug in `trunc` (2d) in case of very fine mesh (eps too small)
 
 ## [3.61] - 2018-06-20
@@ -76,5 +72,6 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/3.61...master
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...master
+[3.62]: https://github.com/FreeFem/FreeFem-sources/compare/3.61...3.62
 [3.61]: https://github.com/FreeFem/FreeFem-sources/compare/v3.60...3.61
