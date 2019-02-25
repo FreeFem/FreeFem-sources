@@ -54,7 +54,7 @@ install-exec-local::
 
 
 # force the build for freefem++.pref  FH..
-DDM-Schwarz-Lame-2d.edp:freefem++.pref
+# DDM-Schwarz-Lame-2d.edp:freefem++.pref
 # FFCS - cleaning is useful sometimes
 clean-local::
 	-rm $(LIST_COMPILE)

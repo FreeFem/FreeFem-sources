@@ -2129,7 +2129,7 @@ ff_progs="FreeFem++-nw $ff_bamgprog  $ff_mpiprog $ff_meditprog $ff_ffglutprog"
 
 AC_SUBST(TEST_FFPP,$ff_TEST_FFPP)
 AC_SUBST(TEST_FFPP_MPI,$ff_TEST_FFPP_MPI)
-AC_SUBST(TEST_FFPPMPI,"../src/mpi/ff-mpirun")
+AC_SUBST(TEST_FFPPMPI,"../../src/mpi/ff-mpirun")
 
 ff_with_mpi=-openmpi;
 
