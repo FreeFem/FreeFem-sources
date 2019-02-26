@@ -29,7 +29,7 @@ dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 # ALH - 10/9/13 - FFCS needs to skip this automake version requirement when compiling on older platforms (eg cygwin or
 # last Ubuntu LTS). So we fix a low hardcoded requirement and test for higher versions when not in FFCS.
 
-AM_INIT_AUTOMAKE(1.11 dist-zip foreign)
+AM_INIT_AUTOMAKE(1.11 dist-zip foreign subdir-objects)
 
 if test "$enable_ffcs" != yes
 then
@@ -1628,6 +1628,8 @@ else
 # all eigen test fails
 	AC_SUBST([SKIP_TESTS_EIGEN],[yes])
 fi
+AM_CONDITIONAL([ENABLE_EIGEN], [test "$ff_arpack_ok" = "yes"])
+
 AC_SUBST([EIGENOBJ])
 
 # ALH - 25/9/13 - <<WHERE_lapack>> always run the WHERE LD statement for lapack because some libraries in
