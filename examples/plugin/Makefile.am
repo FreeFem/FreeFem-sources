@@ -43,6 +43,7 @@ makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 
 all.edp:
+	mkdir o
 	@test -f ../../src/bin-win32/FreeFem++.exe && ffpp=../../src/bin-win32/FreeFem++.exe || ffpp=../../src/nw/FreeFem++; \
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;"; \
 	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do  \

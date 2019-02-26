@@ -87,9 +87,11 @@ libff_a_SOURCES2=  UMFPack_Solver.cpp \
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp
 
 # eigenvalue.cpp is optional (see [[file:../../configure.ac::EIGENOBJ]])
+if ENABLE_EIGEN
 EXTRA_libff_a_SOURCES=../Eigen/eigenvalue.cpp
 libff_a_LIBADD=../Eigen/@EIGENOBJ@
 libff_a_DEPENDENCIES=../Eigen/@EIGENOBJ@
+endif
 
 AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
 if ENABLE_EIGEN
