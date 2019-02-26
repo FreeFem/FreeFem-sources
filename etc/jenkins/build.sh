@@ -64,15 +64,15 @@ else
 	exit 1
 fi
 
-# Clean process (not fail script if cleanup fails)
-make clean
-sudo rm -Rf /builds/freefem
-
-if [ $? -eq 0 ]
-then
-	echo "Cleanup process succed"
-else
-	echo "Cleanup process failed"
-fi
-
-echo "That's all folks!"
+# # Clean process (not fail script if cleanup fails)
+# make clean
+# sudo rm -Rf /builds/freefem
+#
+# if [ $? -eq 0 ]
+# then
+# 	echo "Cleanup process succed"
+# else
+# 	echo "Cleanup process failed"
+# fi
+#
+# echo "That's all folks!"
