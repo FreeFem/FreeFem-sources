@@ -1425,7 +1425,7 @@ then
     ff_blas_inc="-I${curdir}/3rdparty/blas/CBLAS/src"
 
     AC_SUBST(DOWNLOADED_BLAS,"libf77blas.a libcblas.a")
-    AC_SUBST(DOWNLOADED_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SOURCES) $(CBLAS_SOURCES)')
+    AC_SUBST(DOWNLOADED_BLAS_BUILT_SOURCES,'BLAS CBLAS $(F77BLAS_SRC) $(CBLAS_SRC)')
 
     AC_MSG_RESULT($ff_download_blas)
     ff_blas_ok=yes

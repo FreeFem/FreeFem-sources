@@ -678,9 +678,9 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = mainpage.dox \
+INPUT                  = etc/doxygen/mainpage.dox \
                          src \
-                         examples/tutorial \
+						 plugin \
                          src/lglib/lg.ypp
 
 # This tag can be used to specify the character encoding of the source files
@@ -713,7 +713,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = .hg \
+EXCLUDE                = .git \
                          src/bamg
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
@@ -1235,7 +1235,7 @@ MATHJAX_FORMAT         = HTML-CSS
 # However, it is strongly recommended to install a local
 # copy of MathJax from http://www.mathjax.org before deployment.
 
-MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
+MATHJAX_RELPATH        = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5
 
 # The MATHJAX_EXTENSIONS tag can be used to specify one or MathJax extension
 # names that should be enabled during MathJax rendering.

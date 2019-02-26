@@ -4,17 +4,17 @@
 # Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
 # ======================================================================
 # This file is part of Freefem++
-# 
+#
 # Freefem++ is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 2.1 of
 # the License, or (at your option) any later version.
-# 
+#
 # Freefem++ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with Freefem++; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -30,7 +30,7 @@ PKGCOMMON_PACKAGES=$(BLAS_TGZ) $(CBLAS_TGZ) ../pkg/OpenBLAS.tar.gz
 include ../common.mak
 
 EXTRA_DIST= \
-openblas.patches 
+openblas.patches
 
 # Downloading and compiling the Generic Blas
 # ------------------------------------------
@@ -42,7 +42,7 @@ pkgcompile::@DOWNLOADED_BLAS@
 
 # List of files to compile (do not list them in *_SOURCES to prevent them from being included in distributions).
 
-F77BLAS_SOURCES=BLAS/caxpy.f BLAS/crotg.f BLAS/dcopy.f BLAS/dsymv.f BLAS/lsame.f BLAS/sspmv.f BLAS/zaxpy.f BLAS/zhpr2.f	\
+F77BLAS_SRC=BLAS/caxpy.f BLAS/crotg.f BLAS/dcopy.f BLAS/dsymv.f BLAS/lsame.f BLAS/sspmv.f BLAS/zaxpy.f BLAS/zhpr2.f	\
 BLAS/ccopy.f BLAS/cscal.f BLAS/ddot.f BLAS/dsyr2.f BLAS/sasum.f BLAS/sspr2.f BLAS/zcopy.f BLAS/zhpr.f BLAS/cdotc.f	\
 BLAS/csrot.f BLAS/dgbmv.f BLAS/dsyr2k.f BLAS/saxpy.f BLAS/sspr.f BLAS/zdotc.f BLAS/zrotg.f BLAS/cdotu.f BLAS/csscal.f	\
 BLAS/dgemm.f BLAS/dsyr.f BLAS/scasum.f BLAS/sswap.f BLAS/zdotu.f BLAS/zscal.f BLAS/cgbmv.f BLAS/cswap.f BLAS/dgemv.f	\
@@ -60,7 +60,7 @@ BLAS/strmv.f BLAS/zher2k.f BLAS/ztrsv.f BLAS/chpmv.f BLAS/dasum.f BLAS/dspr.f BL
 BLAS/zher.f BLAS/chpr2.f BLAS/daxpy.f BLAS/dswap.f BLAS/isamax.f BLAS/ssbmv.f BLAS/strsv.f BLAS/zherk.f BLAS/chpr.f	\
 BLAS/dcabs1.f BLAS/dsymm.f BLAS/izamax.f BLAS/sscal.f blas_xerbla.f BLAS/zhpmv.f
 
-CBLAS_SOURCES=CBLAS/src/cblas_caxpy.c CBLAS/src/cblas_drot.c CBLAS/src/cblas_sgemm.c CBLAS/src/cblas_zher2.c		\
+CBLAS_SRC=CBLAS/src/cblas_caxpy.c CBLAS/src/cblas_drot.c CBLAS/src/cblas_sgemm.c CBLAS/src/cblas_zher2.c		\
 CBLAS/src/cblas_ccopy.c CBLAS/src/cblas_drotg.c CBLAS/src/cblas_sgemv.c CBLAS/src/cblas_zher2k.c			\
 CBLAS/src/cblas_cdotc_sub.c CBLAS/src/cblas_drotm.c CBLAS/src/cblas_sger.c CBLAS/src/cblas_zher.c			\
 CBLAS/src/cblas_cdotu_sub.c CBLAS/src/cblas_drotmg.c CBLAS/src/cblas_snrm2.c CBLAS/src/cblas_zherk.c			\
@@ -96,8 +96,8 @@ CBLAS/src/cblas_scopy.c CBLAS/src/cblas_zgeru.c CBLAS/src/snrm2sub.f CBLAS/src/c
 CBLAS/src/cblas_zhbmv.c CBLAS/src/xerbla.c CBLAS/src/cblas_dger.c CBLAS/src/cblas_sdsdot.c CBLAS/src/cblas_zhemm.c	\
 CBLAS/src/zdotcsub.f CBLAS/src/cblas_dnrm2.c CBLAS/src/cblas_sgbmv.c CBLAS/src/cblas_zhemv.c CBLAS/src/zdotusub.f
 
-nodist_libf77blas_a_SOURCES= #$(F77BLAS_SOURCES)
-nodist_libcblas_a_SOURCES= #$(CBLAS_SOURCES)
+nodist_libf77blas_a_SOURCES= #$(F77BLAS_SRC)
+nodist_libcblas_a_SOURCES= #$(CBLAS_SRC)
 BUILT_SOURCES=@DOWNLOADED_BLAS_BUILT_SOURCES@
 
 # -ICBLAS/include to find cblas.h
@@ -118,7 +118,7 @@ BLAS/fait:$(BLAS_TGZ)
 	esac
 	cp BLAS/xerbla.f blas_xerbla.f
 	touch BLAS/fait
-$(F77BLAS_SOURCES): BLAS
+$(F77BLAS_SRC): BLAS
 
 CBLAS:CBLAS/fait
 
@@ -126,7 +126,7 @@ CBLAS/fait: $(CBLAS_TGZ)
 	tar xvzf $(CBLAS_TGZ)
 	cp CBLAS/include/*.h  CBLAS/src
 	touch CBLAS/fait
-$(CBLAS_SOURCES): CBLAS/fait
+$(CBLAS_SRC): CBLAS/fait
 
 clean-local::
 	-rm -r BLAS CBLAS blas_xerbla.f
@@ -159,12 +159,12 @@ links.done:openblas.done
 	touch $@
 install.done:links.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARED=1 DDYNAMIC_ARCH=1 PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} NO_SHARED=1 DDYNAMIC_ARCH=1 PREFIX=../.. install
 	touch $@
 else
 install.done:openblas.done
 	cp OpenBLAS/libopenblas.a ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARED=1 PREFIX=../.. install	
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ CC=${CC} FC=${FC} DYNAMIC_ARCH=1 NO_SHARED=1 PREFIX=../.. install
 	touch $@
 endif
 
@@ -176,8 +176,8 @@ openblas.done:openpatches.done
 # DYNAMIC_ARCH=1 allows the Openblas to run fast on all the processor architectures that the FFCS users may have
 #
 
-	test  -d ../lib ||  mkdir  ../lib 
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=1  "FLIBS=$(FLIBS)" libs netlib 
+	test  -d ../lib ||  mkdir  ../lib
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=1  "FLIBS=$(FLIBS)" libs netlib
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
