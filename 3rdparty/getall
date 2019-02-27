@@ -117,8 +117,8 @@ download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz',
 	'http://www.fftw.org',
 	'fftw-3.3.2.tar.gz',
 	'6977ee770ed68c85698c7168ffa6e178');
-download('freeYams','http://www.ann.jussieu.fr/~frey/ftp/archives/freeyams.2012.02.05.tgz',
-	'http://www.ann.jussieu.fr/~frey/software.html',
+download('freeYams','https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
+	'https://www.ljll.math.upmc.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
 	'b7c82a256a3e59beeb2b578de93a4e0b');
 download('Gmm++','http://download.gna.org/getfem/stable/gmm-4.2.tar.gz',
@@ -145,8 +145,8 @@ download('MMG3D','http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/download/mm
 	'http://www.math.u-bordeaux1.fr/~dobrzyns/logiciels/mmg3d.php',
 	'mmg3d4.0.tgz',
 	'bfc2b0373bc208e0512415d1aa2e76a1');
-download('mshmet','http://www.ann.jussieu.fr/~frey/ftp/archives/mshmet.2012.04.25.tgz',
-	'http://www.ann.jussieu.fr/~frey/software.html',
+download('mshmet','https://www.ljll.math.upmc.fr/frey/ftp/archives/mshmet.2012.04.25.tgz',
+	'https://www.ljll.math.upmc.fr/frey/software.html',
 	'mshmet.2012.04.25.tgz',
 	'427f397e0602efc56aa897d38a8e9bfa');
 download('MUMPS','http://mumps.enseeiht.fr/MUMPS_5.0.2.tar.gz',
