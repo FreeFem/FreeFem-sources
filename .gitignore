@@ -52,6 +52,8 @@ examples/*/*.log
 examples/*/*.matrix
 examples/*/*.mesh
 examples/*/*.msh
+#  build with gmsh tool ..
+!examples/plugin/cube.msh
 examples/*/*.points
 examples/*/*.ps
 examples/*/*.trs

@@ -30,7 +30,7 @@ TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-Metri
 
 XFAIL_TESTS=$(TESTS)
 
-EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4
+EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 cube.msh 
 
 freefem++.pref:Makefile
 	echo loadpath = "../../plugin/seq/" > freefem++.pref

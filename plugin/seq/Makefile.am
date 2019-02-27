@@ -74,6 +74,9 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ./ff-c++ -auto $<
 
+#to force the recompile if change ... FH
+$(LIST_COMPILE): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
+
 # FFCS - 26/10/11 - Unpacking include.tar.gz is very often buggy under Cygwin (softlinks are randomly replaced with
 # empty files without any access right). So just replace the whole thing with a plain copy.
 
