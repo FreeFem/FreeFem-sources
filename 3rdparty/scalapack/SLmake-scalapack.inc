@@ -26,8 +26,8 @@ CDEFS         = @CFLAGSF77@ -DNO_IEEE $(USEMPI)
 #  The fortran and C compilers, loaders, and their flags
 #
 
-FC            = @MPIF77@ 
-CC            = @MPICC@ 
+FC            = @MPIF77@
+CC            = @MPICC@
 NOOPT         = -O0 @CNOFLAGS@
 
 # FFCS - some return statements without value cause trouble on MacOS
@@ -64,3 +64,5 @@ LAPACKLIB     = $(FFLAPACKLIB)
 LIBS          = $(LAPACKLIB) $(BLASLIB)
 
 WGET = @WGET@
+
+.NOTPARRALEL:
