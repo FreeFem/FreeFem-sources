@@ -63,6 +63,5 @@ regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 
 freefem++.pref:
 	echo loadpath = \"../../plugin/seq/\" > freefem++.pref
-	echo loadpath += \"./\" >> freefem++.pref
 
 FORCE:

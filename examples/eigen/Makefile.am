@@ -46,5 +46,4 @@ all.edp:
 	done) > $@
 
 freefem++.pref:
-	echo loadpath = \"../../plugin/seq/\" >freefem++.pref
-	echo loadpath += \"./\" >>freefem++.pref
+	echo loadpath = \"../../plugin/seq/\" > freefem++.pref

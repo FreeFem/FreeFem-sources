@@ -62,8 +62,7 @@ makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 
 freefem++.pref:
-	echo loadpath = \"../../plugin/seq/\" >freefem++.pref
-	echo loadpath += \"./\" >>freefem++.pref
+	echo loadpath = \"../../plugin/seq/\" > freefem++.pref
 
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
