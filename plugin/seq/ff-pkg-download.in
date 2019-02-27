@@ -42,6 +42,7 @@ case $DIR in
 *)  DIR="$pp/$DIR"
 esac
 DIRP=`dirname $DIR`
+DIRP=`dirname $DIRP`
 #echo "WWWWW"  $DIRP
 if [ -d "$DESTDIR$DIRP/3rdparty/lib" -a -d "$DESTDIR$DIRP/3rdparty/include"  ] ; then
     DIR="$DIRP/3rdparty"
