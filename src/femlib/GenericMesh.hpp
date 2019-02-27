@@ -880,7 +880,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         {
             if( p->second.first && p->second.second)
             {
-                if(verbosity && step==0)  cout << " error in orientation of internal face beetwen region "
+                if(verbosity>2 && step==0)  cout << " error in orientation of internal face beetwen region "
                     << p->first.first << " , " << p->first.second << " to no zero value "
                     << p->second.first << "  " << p->second.second << endl;
                 uncorrect++;
@@ -888,7 +888,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         }
         if(uncorrect==0) break;
     }
-    if( nbchangeorient && verbosity) cout << " Warning change orientation of " << nbchangeorient << " faces \n";
+    if( nbchangeorient && verbosity>2) cout << " Warning change orientation of " << nbchangeorient << " faces \n";
     if( kerr || kerrf ) {
         cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
         cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";

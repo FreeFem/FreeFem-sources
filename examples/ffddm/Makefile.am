@@ -28,21 +28,21 @@ all-local: freefem++.pref
 TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
 	elasticity-3d-simple.edp elasticity-3d-thirdlevelgeneo.edp \
-	Helmholtz-2d-HPDDM-BGMRES.edp Helmholtz-2d-marmousi.edp \
-	Helmholtz-2d-simple.edp Helmholtz-3d-overthrsut.edp \
+	Helmholtz-2d-HPDDM-BGMRES.edp \
+	Helmholtz-2d-simple.edp \
 	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
 	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
-	natural_convection.edp Navier-2d-marmousi2.edp \
+	natural_convection.edp \
 	Richards-2d.edp
 
 XFAIL_TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
 	elasticity-3d-simple.edp elasticity-3d-thirdlevelgeneo.edp \
-	Helmholtz-2d-HPDDM-BGMRES.edp Helmholtz-2d-marmousi.edp \
-	Helmholtz-2d-simple.edp Helmholtz-3d-overthrsut.edp \
+	Helmholtz-2d-HPDDM-BGMRES.edp \
+	Helmholtz-2d-simple.edp \
 	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
 	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
-	natural_convection.edp Navier-2d-marmousi2.edp \
+	natural_convection.edp \
 	Richards-2d.edp
 
 EXTRA_DIST=*.edp

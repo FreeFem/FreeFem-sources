@@ -293,9 +293,9 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
   int l=0;
   if(verbosity>200)
     cout << "face i=0" << endl;
-  for (int i=0;i<N;++i)
-    for (int j=0;j<N;++j){
-      if(i+j<N) 
+    for (int i=0;i<N;++i)
+        for (int j=0;j<N;++j){
+            if(i+j<N)
 	{
 	  tri[l++]= op+NumSimplex3(0,i,j);
 	  tri[l++]= op+NumSimplex3(0,i+1,j);

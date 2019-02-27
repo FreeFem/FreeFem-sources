@@ -391,7 +391,9 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
 template<class I,class R>
 std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
 {
-     int pold= f.precision();
+    int p20=20;
+    long pold= f.precision();
+    if( pold > 20) p20= (int) pold;
     if(A.type_state==HashMatrix<I,R>::type_CSR)
     {
     using namespace std;
@@ -400,13 +402,13 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
     f << "# after for each nonzero coefficient:   i j a_ij where (i,j) \\in  {1,...,n}x{1,...,m} \n";
     
     f << A.n << " " << A.m << " " << A.half << "  " << A.nnz <<endl;
-    int k=A.p[0];
+    I k=A.p[0];
     
-    for (int i=0;i<A.n;i++)
+    for (I i=0;i<A.n;i++)
     {
-        int ke=A.p[i+1];
+        I ke=A.p[i+1];
         for (;k<ke;k++)
-            f << setw(9) << i+1 << ' ' << setw(9) << A.j[k]+1 << ' ' << setprecision( 20) << A.aij[k]<< '\n' ;
+            f << setw(9) << i+1 << ' ' << setw(9) << A.j[k]+1 << ' ' << setprecision( p20) << A.aij[k]<< '\n' ;
 
     }
     }
@@ -416,10 +418,10 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
         f << "#    n       m        nnz     half     fortran   state  \n";
         f << A.n << " " << A.m << " " << A.nnz << " "<< A.half << " " << A.fortran
           << " " <<  A.state<< " " << A.type_state<< " " << endl;
-        for(int k=0; k < A.nnz; ++k)
-            f <<  setw(10) <<  A.i[k] << setw(10)  << A.j[k] << ' '<<  setprecision( 20)  << A.aij[k] << endl;
+        for(size_t k=0; k < A.nnz; ++k)
+            f <<  setw(10) <<  A.i[k] << setw(10)  << A.j[k] << ' '<<  setprecision( p20)  << A.aij[k] << endl;
     }
-       f.precision(pold);
+    f.precision(pold);
     return f;
 }
 

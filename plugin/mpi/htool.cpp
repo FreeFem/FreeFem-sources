@@ -25,7 +25,7 @@ class MyMatrix: public IMatrix<K>{
 public:
 	MyMatrix(const FESpace * Uh , const FESpace * Vh ):IMatrix<K>(Uh->Th.nv,Vh->Th.nv),ThU(Uh->Th), ThV(Vh->Th) {}
 
-	K get_coef(const int& i, const int& j)const {return 1./(0.01+4*M_PI*(ThU.vertices[i]-ThV.vertices[j]).norme2());}
+	K get_coef(const int& i, const int& j)const {return 1./(0.01+(ThU.vertices[i]-ThV.vertices[j]).norme2());}
 
 };
 
@@ -277,7 +277,7 @@ public:
 
 			PlotStream theplot(ThePlotStream);
 
-			if (mpirank == 0) {
+			if (mpirank == 0 && ThePlotStream) {
 				theplot.SendNewPlot();
 				theplot << 3L;
 				theplot <= wait;
@@ -290,7 +290,7 @@ public:
 			}
 
 			if (!H || !(*H)) {
-				if (mpirank == 0) {
+				if (mpirank == 0&& ThePlotStream) {
 					theplot << 0;
 					theplot << 0;
 					theplot << 0L;
@@ -365,7 +365,7 @@ public:
 
 				MPI_Gatherv(rankworld==0?MPI_IN_PLACE:bufcomp, recvcounts[rankworld], MPI_DOUBLE, bufcomp, recvcounts, displs, MPI_DOUBLE, 0, (*H)->get_comm());
 
-				if (mpirank == 0) {
+				if (mpirank == 0 && ThePlotStream ) {
 
 					int si = (*H)->nb_rows();
 					int sj = (*H)->nb_cols();
