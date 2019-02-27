@@ -18,8 +18,7 @@ EXTRA_SCRIPTS=ff-mpirun
 EXTRA_DIST=ff-mpirun.in
 
 # FFCS: visualization stream redirection
-FreeFem___mpi_SOURCES=../Graphics/sansrgraph.cpp ../lglib/mymain.cpp parallelempi.cpp ../lglib/lg.tab.cpp	\
-	../fflib/ffapi.cpp
+FreeFem___mpi_SOURCES=sansrgraph.cpp mymain.cpp parallelempi.cpp lg.tab.cpp	ffapi.cpp
 FreeFem___mpi_DEPENDENCIES=../fflib/libff.a
 LDADD=../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
 
@@ -29,3 +28,13 @@ ff-mpirun:ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x  ff-mpirun
 
+
+## copie file because no compile with same FLAGS (with -DPARALLELE)
+sansrgraph.cpp:../Graphics/sansrgraph.cpp
+	cp $^ .
+mymain.cpp:../lglib/mymain.cpp
+	cp $^ .
+lg.tab.cpp:../lglib/lg.tab.cpp
+	cp $^ .
+ffapi.cpp:../fflib/ffapi.cpp
+	cp $^ .
