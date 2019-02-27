@@ -25,7 +25,7 @@ class MyMatrix: public IMatrix<K>{
 public:
 	MyMatrix(const FESpace * Uh , const FESpace * Vh ):IMatrix<K>(Uh->Th.nv,Vh->Th.nv),ThU(Uh->Th), ThV(Vh->Th) {}
 
-	K get_coef(const int& i, const int& j)const {return 1./(0.01+mi(ThU.vertices[i]-ThV.vertices[j]).norme2());}
+	K get_coef(const int& i, const int& j)const {return 1./(0.01+(ThU.vertices[i]-ThV.vertices[j]).norme2());}
 
 };
 
