@@ -65,7 +65,7 @@ $(SRCDIR)/FAIT:Makefile.inc
 	cd $(SRCDIR) && $(MAKE) z
 	touch $@
 
-Makefile.inc: ../../config.status Makefile Makefile-mumps-$(VERSION).inc $(SRCDIR)/tag-tar
+Makefile.inc: ../../config.status Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
 
 $(SRCDIR)/tag-tar:$(PACKAGE1)

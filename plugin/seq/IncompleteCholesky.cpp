@@ -319,7 +319,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
         lD1 += nbi*nbi;
     }
     pD1[nb] = lD1;
-    KN<double> DD1(ld1),DD(ld1),LB(nbi),UB(nbi);// to store the inverse of Diag block
+    KN<double> DD1(ld1),DD(ld1),Lb(nbi),Ub(nbi);// to store the inverse of Diag block
     KN<double> Aii(nbix*nbix); //  to store the bigest block
     KN<int> ai1(nbix),ai0(nbix),li1(nbix),ui1(nbix),ui0(nbix):
     for(int ib=0; ib< nb; ++ib)
@@ -368,7 +368,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
                     if( jb == bn[jnext] ) // last term of the bloc because next is not same
                     {
                         int fb=ib[jb+1]-ib[jb]-1
-                        MatVect(fd,&D1[pD1[jb]],&Lj[0],y)
+                        MatVect(fd,&D1[pD1[jb]],&Lb[0],y)
                         for(int jl=0;jl<fb;++jl)
                         { int j= ib[jb]+ jl;
                           R * p= L.pij(i,j);
