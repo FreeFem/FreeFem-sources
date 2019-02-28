@@ -306,7 +306,7 @@ public:
     {return  *vertices[(i+1+j)%3];}  // vertex j of edge i 
 
     R EdgeOrientation(int i) const { // return +1 or -1 
-     R Orient[2]={-1.,1.};
+     R Orient[2]={-1.,1.};//cout << "test vertice " <<this->at((i+1)%3) <<" "<< this->at((i+2)%3) << endl;
     return  Orient[vertices[ (i+1)%3] < vertices[ (i+2)%3] ] ;}
     
   bool intersect(Rd P,Rd Q) const 
@@ -346,6 +346,7 @@ public:
     static const int NbE = 1; //
     
   Vertex *vertices[2];
+    
   TBoundaryEdge(Vertex * v0,int i0,int i1,int r): Label(r) 
   { vertices[0]=v0+i0; vertices[1]=v0+i1; }
   void set(Vertex * v0,int i0,int i1,int r)

@@ -288,7 +288,7 @@ public:
   Expression mapt[3],mapu[3];
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ??? 
-  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2) // 3d
+  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2,bool surface=false) // 3d
     :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
      
   {
@@ -297,8 +297,10 @@ public:
     args.SetNameParam(n_name_param,name_param,nargs);
     if(d==2) // 3d
       Th=CastTo<pmesh>(args[0]);
-    else if(d==3)
-      Th=CastTo<pmesh3>(args[0]);
+    else if(d==3 && !surface){
+        Th=CastTo<pmesh3>(args[0]);}
+    else if(d==3 && surface){
+        Th=CastTo<pmeshS>(args[0]);}
     else ffassert(0); // a faire 
     int n=args.size();
     
@@ -363,7 +365,8 @@ public:
   CDomainOfIntegrationVFEdges( const basicAC_F0 & args) :CDomainOfIntegration(args,intallVFedges) {}
   static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intallVFedges);}    
 };
-// add for the 3d case .. // 3d 
+
+// 3D Volume
 class CDomainOfIntegration3d: public CDomainOfIntegration { 
 public:
   CDomainOfIntegration3d( const basicAC_F0 & args) :CDomainOfIntegration(args,int3d,3) {}
@@ -385,9 +388,21 @@ public:
   static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh3>(), true);} // all type
 };
 
-// end add
+// 3D surface
 
+class CDomainOfIntegrationS: public CDomainOfIntegration {
+public:
+    CDomainOfIntegrationS( const basicAC_F0 & args) :CDomainOfIntegration(args,int2d,3,true) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int2d,3,true);}     //TODOCHECK
+    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
+};
 
+class CDomainOfIntegrationBorderS: public CDomainOfIntegration {
+public:
+    CDomainOfIntegrationBorderS( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,true) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,true);}
+    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
+};
 
 
 

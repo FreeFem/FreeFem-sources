@@ -32,8 +32,9 @@ public:
   operator bool() const { return TheStream;}
   // datatype mush be < 0 to have no collistion with arg number. 
   // FFCS: <<PlotStream::datatype>>
-    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_plots3=-11,dt_endarg=99999,dt_newplot=-5, dt_meshesS=-12,dt_plotsS=-13  };
+    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_endarg=99999,dt_newplot=-5, dt_meshesS=-12};    // modif order
   
+  //  dt_plots3=-11,dt_plotsS=-13,dt_plots3S=-14
   //FFCS:need to send control data to FFCS at least once per plot
   void SendNewPlot() {  ffapi::newplot();write((long )dt_newplot); set_binary_mode(); }
   void SendEndArgPlot() {write((long )dt_endarg); }
@@ -42,7 +43,7 @@ public:
   void SendPlots() { write((long )dt_plots); }
   void SendMeshes() { write((long )dt_meshes);}
   void SendMeshes3() { write((long )dt_meshes3);}
-  void SendMeshesS() { write((long )dt_meshesS);}  // must be controled
+  void SendMeshesS() { write((long )dt_meshesS);}
   //FFCS: divert stream to FFCS
   void write(const void *data,size_t l) {ffapi::ff_fwrite(data,1,l,TheStream);}
 
@@ -142,17 +143,7 @@ public:
         cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_meshesS << " or "<< dt_plots << endl;
         ffassert(0);
     }
-    
-    
-    
-    
- /* bool GetMeshesS() { long tt; read(tt);
-      if(tt== dt_meshesS) return true;
-      else if (tt== dt_plots) return false;
-      cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshesS << " or "<< dt_plots << endl;
-      ffassert(0);
-    }
-   */
+
   void get(datatype t) { long tt; read(tt);
     if( tt !=(long) t) 
       cout << " Error Check :  get " << tt << " == wait for  "<< t << endl; 

@@ -38,9 +38,9 @@ Lap2d;
 // laplacian Beltrami
 // build surface 3D  with Th 2D mesh and move with pi/2 rotation ThSurf
 real theta = pi/2;
-mesh3 ThS = movemesh23(Th, transfo=[x, cos(theta)*y-sin(theta)*z, sin(theta)*y+cos(theta)*z]);
+meshS ThS = movemesh2S(Th, transfo=[x, cos(theta)*y-sin(theta)*z, sin(theta)*y+cos(theta)*z]);
 
-fespace VhS(ThS,P1S);
+fespace VhS(ThS,P1);
 VhS uSVar,vSVar;
 VhS uSPb,vSPb;
 

@@ -124,3 +124,11 @@ struct AddNewFE3 {
 	  TEF2dto3d[FindFE2(FEname2)]=tfe;
     }
 };
+// no use for the moment
+/*struct AddNewFES {
+    AddNewFES (const char * FEname,Fem2D::TypeOfFES* tfe,const char * FEname2=0)
+    {
+        ffassert(tfe); // check
+        Global.New(FEname, Type_Expr(atype<Fem2D::TypeOfFES*>() ,new  EConstantTypeOfFES(tfe)));
+    }
+};*/

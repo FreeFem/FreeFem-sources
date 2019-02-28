@@ -123,9 +123,9 @@ struct DataTet  {
 
     class BoundaryEdgeS: public GenericElement<DataSeg3>  
   {
-  public: 
+  public:
       BoundaryEdgeS() {}; // constructor empty for array
-      
+      bool in(const Vertex3 * pv) const {return pv == &operator[](0) || pv == &operator[](1);}
       
   };
 
@@ -136,6 +136,7 @@ public:
 
   Rd Edge(int i) const {ASSERTION(i>=0 && i <3);
     return Rd(this->at((i+1)%3),this->at((i+2)%3));}// opposite edge vertex i
+    
   /*
   Rd H(int i) const { ASSERTION(i>=0 && i <3);
     Rd E=Edge(i);return E.perp()/(2.*this->mesure());} // heigth 
@@ -161,12 +162,19 @@ public:
     R N = Normal.norme2();
     for(int i=0 ; i<3 ; i++)
       GradL[i]= (Normal^Edge(i)) / N;
-    }
+   }
       
-    R3 NormalS(int i) const {ASSERTION(i>=0 && i <3);
-      return R3( Edge(2)^Edge(1) );}
-   
-  };
+   R3 NormalS(int i) const {
+     ASSERTION(i>=0 && i <3);
+     return R3( Edge(2)^Edge(1) );
+   }
+      
+   R EdgeOrientationS(int i) const {
+     R Orient[2]={-1.,1.};
+     return Orient[EdgeOrientation(i)];
+   }
+
+};
  
 
 class Tet: public GenericElement<DataTet>  {
@@ -213,11 +221,14 @@ public:
   //MeshS(const string);         
   MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
   int *liste_v_num_surf=NULL; // mapping for volume/surface vertices
-  //const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
+  const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
   int Save(const string & filename);
   //MeshS(FILE *f);
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
+  double hmin() const;
+  int Save(const string & filename) const;
+    
   ~MeshS() {SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
   private:
   MeshS(const MeshS &); // pas de construction par copie
@@ -228,7 +239,7 @@ public:
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
   Mesh3(){}
-  Mesh3(const string); 
+  Mesh3(const string);
   Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const  Serialize &);     
@@ -237,7 +248,7 @@ public:
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
   MeshS *meshS; 
-  int typeMesh3 = 1;   // by default volume mesh only
+  int typeMesh3=1;   // by default volume mesh only
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
   int Save(const string & filename) const ;  
@@ -259,7 +270,7 @@ public:
  inline MeshS * getMeshS() const{
    return meshS;
  }
-    ~Mesh3() { SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
+    ~Mesh3() {SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

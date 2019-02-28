@@ -76,7 +76,7 @@ namespace bamg { class Triangles; }
 namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
    extern GTypeOfFE<Mesh3> &P1bLagrange3d;
    extern GTypeOfFE<Mesh3> &RT03d;
-    extern GTypeOfFE<Mesh3> &Edge03d;
+   extern GTypeOfFE<Mesh3> &Edge03d;
 void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
 }
 
@@ -253,10 +253,10 @@ class E_F_A_Ptr_o_R :public  E_F0 { public:
 
  class E_P_Stack_N   :public  E_F0mps { public: 
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R3*>(&MeshPointStack(s)->N);} 
+    return SetAny<R3*>(&MeshPointStack(s)->N);}
         operator aType () const { return atype<R3*>();}         
 
-}; 
+};
  class E_P_Stack_Nx   :public  E_F0mps { public: 
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     return SetAny<R*>(&MeshPointStack(s)->N.x);} 
@@ -266,10 +266,10 @@ class E_F_A_Ptr_o_R :public  E_F0 { public:
  class E_P_Stack_Ny   :public  E_F0mps { public: 
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     return SetAny<R*>(&MeshPointStack(s)->N.y);} 
-    operator aType () const { return atype<R*>();}             
+    operator aType () const { return atype<R*>();}
 }; 
  class E_P_Stack_Nz   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     return SetAny<R*>(&MeshPointStack(s)->N.z);} 
     operator aType () const { return atype<R*>();}         
     
@@ -1203,6 +1203,8 @@ basicAC_F0::name_and_type  OpMake_pfes_np::name_param[]= {
   "periodic", &typeid(E_Array) 
 };
 
+// by default, in DSL a FE is 2D, in the building of fespace, if mesh3-S used them associate the corresponding FE
+// mapping between TypeOfFE2 and TypeOfFES
 map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
 AnyType TypeOfFE3to2(Stack,const AnyType &b) { 
     TypeOfFE3 *t3=0;
@@ -1218,6 +1220,25 @@ AnyType TypeOfFE3to2(Stack,const AnyType &b) {
       }
     return t3;
 }
+
+// mapping between TypeOfFE2 and TypeOfFES
+map<TypeOfFE *,TypeOfFES *> TEF2dtoS;
+AnyType TypeOfFESto2(Stack,const AnyType &b) {
+    TypeOfFES *tS=0;
+    TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
+    map<TypeOfFE *,TypeOfFES *>::const_iterator i=TEF2dtoS.find(t2);
+    if(i != TEF2dtoS.end())
+        tS=i->second;
+   
+    if(tS==0)
+    {
+        cerr << " sorry no cast to this surface finite element " <<endl;
+        ExecError( " sorry no cast to this surface finite element ");
+    }
+    return tS;
+}
+
+
 
 /*
  for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
@@ -1321,7 +1342,7 @@ inline pfes3* MakePtr3(pfes3 * const &p,pmesh3 * const &  a, TypeOfFE3 * const &
   //(**p).decrement();
   return p;}
 
-inline pfesS* MakePtrS(pfesS * const &p,pmesh3 * const &  a, TypeOfFES * const & tef)
+inline pfesS* MakePtrS(pfesS * const &p,pmeshS * const &  a, TypeOfFES * const & tef)       ///TODO
 { *p=new pfesS_tef(a,tef) ;
     //(**p).decrement();
     return p;}
@@ -1406,7 +1427,7 @@ class OP_MakePtrS { public:
         Expression nargs[n_name_param];
         typedef pfesS * R;
         typedef pfesS * A;
-        typedef pmesh3 * B;
+        typedef pmeshS * B;
         typedef TypeOfFES * C;
         Expression a,b,c;
         int nbcperiodic ;
@@ -2623,6 +2644,7 @@ public:
 	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
+    const MeshS & evalmS(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshS >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
          pttab  evalptt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<pttab>((*e[i])(s)) ;}
@@ -2808,7 +2830,10 @@ public:
                 l[i].composant=true;
                 l[i].what=5;// 3d mesh ...
                 l[i][0]=CastTo<pmesh3>(args[i]);}
-        
+            else if (BCastTo<pmeshS>(args[i])){
+                l[i].composant=true;
+                l[i].what=50;// 3d surface mesh ...
+                l[i][0]=CastTo<pmeshS>(args[i]);}
             else if (BCastTo<const E_BorderN *>(args[i])){
                 // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
                 l[i].what=4; // border 2d
@@ -3807,11 +3832,10 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
         //nsb = feS[0]->nbsubdivision;
         //int nsbv = NbOfSubInternalVertices(nsb);
         //lg = nsbv*Th.nt;
-        
         KN<R2> Psub;
         KN<int> Ksub;
         KN<K> V1=feS[0]->Vh->newSaveDraw(*feS[0]->x(),cmp[0],lg,Psub,Ksub,0);
-        
+
         if(verbosity>9)
             cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
             << " Max "  << V1.max() << " min " << V1.min() << endl;
@@ -3902,6 +3926,7 @@ AnyType Plot::operator()(Stack s) const{
             case 17 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 18 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 19 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 50 : l[i].EvalandPush<void *>(s,i,ll); break;
             case  100 : l[i].MEvalandPush< pmesh>(s,i,ll); break;
             case  101 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
             case  103 : l[i].AEvalandPush(s,i,ll,lat); break;
@@ -3940,6 +3965,7 @@ AnyType Plot::operator()(Stack s) const{
          what = 17 -> complex 3d vector field (tree FE function  3d) volume
          what = 18 -> complex FE function 3D surface
          what = 19 -> complex 3d vector field (tree FE function  3d) surface
+         what = 50 -> 3D surface mesh
          what = 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
          what = 111, 116 , 117 118 ->  remap with complex ... 2d, 3D volume, 3D surface
          what = -1 -> error, item empty
@@ -4031,61 +4057,54 @@ if(nargs[VTK_START+index])                    \
         map<const MeshS *,long> mapthS;
         long kth=0,kth3=0,kthS=0;
         //  send all the mesh:
-        for (size_t ii=0;ii<ll.size();ii++)
-        {
-            int i=ll[ii].i;
-            long what = ll[i].what;
-            const Mesh *th=0;
-            const Mesh3 *th3=0;
+        for (size_t ii=0;ii<ll.size();ii++) {
+          int i=ll[ii].i;
+          long what = ll[i].what;
+          const Mesh *th=0;
+          const Mesh3 *th3=0;
             const MeshS *thS=0;
-            // Prepare for the sending mesh 2d
-            if(what ==0)
-                th= ll[ii].th();
-            // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
-            if( what ==5 ) {
-                const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
-                // need to modifie the what for type mesh3 for identification in the ffglut reading
-                if (th3type==0) { ll[i].what=50; thS= (&(l[i].evalm3(0,s)))->getMeshS(); }  // 3d pure surface
-                else if (th3type==1) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-                else if (th3type==2) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= (&(l[i].evalm3(0,s)))->getMeshS(); } // 3d mixed volume and surface
-            }
-            // Prepare for the sending 2d iso values for ffglut
-            else if (what==1 || what==2|| what==11 || what==12)
-            {
-                ll[ii].eval(fe,cmp);
-                if (fe[0]->x()) th=&fe[0]->Vh->Th;
-                if(fe[1] && fe[1]->x()) {
+          // Prepare for the sending mesh 2d
+          if(what ==0)
+            th= ll[ii].th();
+          // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
+          if( what ==5 ) {
+            const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
+            // need to modifie the what for type mesh3 for identification in the ffglut reading
+            if (th3type==0) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
+            else if (th3type==1) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
+            else if (th3type==2) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
+          }
+          if( what ==50 )
+            thS= (&(l[i].evalmS(0,s)));// 3d pure surface
+          // Prepare for the sending 2d iso values for ffglut
+          else if (what==1 || what==2|| what==11 || what==12) {
+            ll[ii].eval(fe,cmp);
+            if (fe[0]->x()) th=&fe[0]->Vh->Th;
+              if(fe[1] && fe[1]->x())
                     ffassert(th == &fe[1]->Vh->Th);
-                    //    assert(th);
-                };
-            }
-            // Prepare for the sending 3D volume iso values for ffglut
-            else if (what==6 || what==7 || what==16 || what==17)
-            {
-                ll[ii].eval(fe3,cmp);
-                if (fe3[0]->x()) th3=&fe3[0]->Vh->Th;
-                if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
-                if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
+          }
+          // Prepare for the sending 3D volume iso values for ffglut
+          else if (what==6 || what==7 || what==16 || what==17) {
+            ll[ii].eval(fe3,cmp);
+            if (fe3[0]->x()) th3=&fe3[0]->Vh->Th;
+            if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
+            if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
                 
-            }
-            // Prepare for the sending 3D surface iso values for ffglut
-            else if (what==8 || what==9 || what==18 || what==19)
-            {
-                ll[ii].eval(feS,cmp);
-                if (feS[0]->x()) thS=&feS[0]->Vh->Th;
-                if (feS[1]) ffassert(thS == &feS[1]->Vh->Th);
-                if (feS[2]) ffassert(thS == &feS[2]->Vh->Th);
-                
-            }
-            // test on the type meshes --- 2D, 3D volume and 3D surface
-            if(th && mapth.find(th)==mapth.end())
-                mapth[th]=++kth;
-            
-            if(th3 && (mapth3.find(th3)==mapth3.end()))
-                mapth3[th3]=++kth3;
-            
-            if(thS && (mapthS.find(thS)==mapthS.end()))
-                mapthS[thS]=++kthS;
+          }
+          // Prepare for the sending 3D surface iso values for ffglut
+          else if (what==8 || what==9 || what==18 || what==19) {
+            ll[ii].eval(feS,cmp);
+            if (feS[0]->x()) thS=&feS[0]->Vh->Th;
+            if (feS[1] && feS[1]->x()) ffassert(thS == &feS[1]->Vh->Th);
+            if (feS[2] && feS[2]->x()) ffassert(thS == &feS[2]->Vh->Th);
+          }
+          // test on the type meshes --- 2D, 3D volume and 3D surface
+          if(th && mapth.find(th)==mapth.end())
+            mapth[th]=++kth;
+          if(th3 && (mapth3.find(th3)==mapth3.end()))
+            mapth3[th3]=++kth3;
+          if(thS && (mapthS.find(thS)==mapthS.end()))
+          mapthS[thS]=++kthS;
         }
         // send of meshes 2d
         theplot.SendMeshes();
@@ -4094,17 +4113,17 @@ if(nargs[VTK_START+index])                    \
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
             theplot << i->second << *  i->first ;
 
-       // send of meshes 3D volume
-        if(kth3)
+       // only send of volume meshes 3D
+        if(kth3 && kthS==0)
         {
             theplot.SendMeshes3();
             theplot << kth3 ;
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
                 theplot << i->second << *  i->first ;
            }
-     
-        // send of meshes 3D surface
-       if(kthS)
+    
+        // only send of surface meshes 3D
+       if(kthS && kth3==0)
         {
             theplot.SendMeshesS();
             theplot << kthS ;
@@ -4112,6 +4131,15 @@ if(nargs[VTK_START+index])                    \
                 theplot << i->second << *  i->first ;
        }
         
+        // send of volume and surface meshes 3D
+        // in this case, plot the surface
+        if(kthS && kth3) {
+          theplot.SendMeshesS();
+          theplot << kthS ;
+          for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i)
+            theplot << i->second << *  i->first ;
+        }
+      
         // end of what ploting for meshes
         theplot.SendPlots();
         
@@ -4241,8 +4269,8 @@ if(nargs[VTK_START+index])                    \
                 Bh->SavePlot(s,theplot);
             }
             // send 3d meshes for ffglut
-            else if(what ==51 || what ==52)
-            {
+            else if(what ==51)
+            { 
                 pTh3=&l[i].evalm3(0,s);
                 if(pTh3) {
                     err=0;
@@ -4250,14 +4278,25 @@ if(nargs[VTK_START+index])                    \
                     theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage 3D volume
                 }
             }
-            else if(what ==50 || what ==52) {
-                pThS=(&(l[i].evalm3(0,s)))->getMeshS();
+            else if(what ==50) {
+                pThS=&(l[i].evalmS(0,s));
                     if(pThS) {
                         err=0;
                         theplot << what ;
-                        theplot <<mapthS[ (&(l[i].evalm3(0,s)))->getMeshS()];// numero du maillage 3D surface
+                        theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
                  }
             }
+            
+            else if(what ==52)
+            {
+                pThS=&(l[i].evalmS(0,s));
+                if(pThS) {
+                    err=0;
+                    theplot << what ;
+                    theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
+                }
+            }
+            
             // send 3D volume iso values for ffglut
             else  if (what==6 ||what==7 )
                 err = Send3d<R,v_fes3>( theplot,ll[ii] ,mapth3);
@@ -5580,7 +5619,9 @@ void  init_lgfem()
 
  map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);   
   Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType); 
-  Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType); 
+  Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType);
+  Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);    ///TODOCHECK
+    
   Dcl_Type<lgVertex>(); 
   Dcl_Type<lgElement>( ); 
   Dcl_Type<lgElement::Adj>( ); 
@@ -5598,9 +5639,11 @@ void  init_lgfem()
  Dcl_Type<TypeOfFE3*>(); // 3D volume
  Dcl_Type<TypeOfFES*>(); // 3D surface
   //  cout << " test DCL TypeOfFES* "<<typeid(TypeOfFES*).name() <<endl;
-    map_type[typeid(TypeOfFE3*).name()]->AddCast(
-						 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);				 
-
+ map_type[typeid(TypeOfFE3*).name()]->AddCast(
+				 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);
+ map_type[typeid(TypeOfFES*).name()]->AddCast(
+                 new E_F1_funcT<TypeOfFES*,TypeOfFE*>(TypeOfFESto2)    );
+    
 // Dcl_Type<TypeSolveMat*>();
  DclTypeMatrix<R>();
  DclTypeMatrix<Complex>();
@@ -5792,7 +5835,7 @@ void  init_lgfem()
     
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
  Add<pfes*>("Th",".",new OneOperator1<pmesh,pfes*>(pVh_Th));
-    Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
+ Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
  Add<pfes*>("ndofK",".",new OneOperator1<long,pfes*>(pVh_ndofK));
  Add<pfes*>("(","", new OneTernaryOperator<pVh_ndf,pVh_ndf::Op>  );
 /* FH: ne peux pas marcher, il faut passer aussi le nouveau Vh
@@ -5876,7 +5919,7 @@ void  init_lgfem()
            new OneOperatorCode<OP_MakePtrS>,
 		   new OpMake_pfes<pfes,Mesh,TypeOfFE,pfes_tefk>,
 		   new OpMake_pfes<pfes3,Mesh3,TypeOfFE3,pfes3_tefk>,
-           new OpMake_pfes<pfesS,Mesh3,TypeOfFES,pfesS_tefk>      // add for 3D surface  FEspace
+           new OpMake_pfes<pfesS,MeshS,TypeOfFES,pfesS_tefk>      // add for 3D surface  FEspace
         );
     TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
  
@@ -5930,12 +5973,12 @@ void  init_lgfem()
 
  // <<mesh_keyword>> pmesh is a pointer to Mesh [[file:../femlib/fem.hpp::class Mesh]] defined at
  // [[file:lgfem.hpp::typedef Mesh pmesh]]
-
+ // pmesh is a pointer to Mesh
  zzzfff->Add("mesh",atype<pmesh*>());
-
  // pmesh3 is a pointer to Mesh3 defined at [[file:lgfem.hpp::typedef Mesh3 pmesh3]]
-
  zzzfff->Add("mesh3",atype<pmesh3*>());
+ // pmeshS is a pointer to MeshS defined at [[file:lgfem.hpp::typedef MeshS pmeshS]]
+ zzzfff->Add("meshS",atype<pmeshS*>());  /////
 
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());
@@ -6448,10 +6491,18 @@ void  init_lgfem()
  Global.New("Edge03d",CConstantTFE3(&Edge03d));   
  Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));
 
+ Global.New("RT0S",CConstantTFES(&DataFE<MeshS>::RT0));    ///TODOCHECK
  Global.New("P1S",CConstantTFES(&DataFE<MeshS>::P1));
  Global.New("P2S",CConstantTFES(&DataFE<MeshS>::P2));
  Global.New("P0S",CConstantTFES(&DataFE<MeshS>::P0));
 
+ TEF2dtoS[FindFE2("P0")]=&DataFE<MeshS>::P0;
+ TEF2dtoS[FindFE2("P1")]=&DataFE<MeshS>::P1;
+ TEF2dtoS[FindFE2("P2")]=&DataFE<MeshS>::P2;
+ TEF2dtoS[FindFE2("RT0")]=&DataFE<MeshS>::RT0;
+    
+    
+    
     /*
      for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
      {
@@ -6733,7 +6784,7 @@ size_t dimFESpaceImage(const basicAC_F0 &args)
   // aType t_m3= atype<pmesh3*>();
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
-    aType t_tfeS= atype<TypeOfFES*>();
+  aType t_tfeS= atype<TypeOfFES*>();
   aType t_a= atype<E_Array>();
   size_t dim23=0; 
   
@@ -6759,10 +6810,12 @@ aType  typeFESpace(const basicAC_F0 &args)
   
   aType t_m2= atype<pmesh*>();
   aType t_m3= atype<pmesh3*>();
+  aType t_mS= atype<pmeshS*>();
   
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
+    
   aType atfe[]={t_tfe,t_tfe3,t_tfeS};
   aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>()};
   aType t_a= atype<E_Array>();
@@ -6770,38 +6823,37 @@ aType  typeFESpace(const basicAC_F0 &args)
   aType tMesh=0;
   int dm =-1,id=-2;
 
-  for (int i=0;i<args.size();i++)
-  {
+  for (int i=0;i<args.size();i++) {
     tl=args[i].left();
-      if ( tl == t_m2) {ffassert(dm==2 || dm<0); dm=2;}
+    if ( tl == t_m2) {ffassert(dm==2 || dm<0); dm=2;}
     else if( tl  == t_m3 ) {ffassert(dm==3 || dm<0); dm=3;}
-    else if(tl==t_a) // array
-      {
-          const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
-          ffassert(&ea);
-          for (int i=0;i<ea.size();i++)
-          {
-              tl=ea[i].left();
-              for( int it=0; it<3; ++it)
-                  if (atfe[it]->CastingFrom(tl)) // Warning  P1 can be cast in 2d or 3d FE ...
-                  { id = it;} // 
-          }
+    else if( tl  == t_mS ) {ffassert(dm==4 || dm<0); dm=4;}
+    // array
+    else if(tl==t_a) {
+      const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
+      ffassert(&ea);
+      for (int i=0;i<ea.size();i++) {
+        tl=ea[i].left();
+        for( int it=0; it<3; ++it)
+          if (atfe[it]->CastingFrom(tl)) // Warning  P1 can be cast in 2d or 3d FE ...
+            id = it;
       }
-    else
-          for( int it=0; it<3; ++it)
-              if (atfe[it]->CastingFrom(tl))
-              { id = it;}
-  }
-    if (dm==2) ret =atfs[0];
-    else if (dm==3 && id == 2) ret =atfs[2];
-    else if (dm==3) ret = atfs[1];
-    else
-    {
-        cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :"  << dm << " type FE "<< id +2 <<endl;
-      ffassert(0);
     }
-    if(verbosity>99) cout << " typeFESpace " << id << " " << ret->name() << endl;
-    return ret;
+    else
+      for( int it=0; it<3; ++it)
+        if (atfe[it]->CastingFrom(tl))
+          id = it;
+  }
+
+  if (dm==2) ret =atfs[0]; // 2D fespace
+  else if (dm==3) ret = atfs[1]; // 3D fespace (Volume)
+  else if (dm==4) ret =atfs[2]; // 3D fespace (surface)
+  else {
+    cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :"  << dm << " type FE "<< id +2 <<endl;
+    ffassert(0);
+  }
+  if(verbosity>99) cout << " typeFESpace " << id << " " << ret->name() << endl;
+  return ret;
 }
 
 

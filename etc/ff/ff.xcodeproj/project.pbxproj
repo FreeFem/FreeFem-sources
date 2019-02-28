@@ -52,16 +52,9 @@
 		3D15D4B40BD3A6E000CEB4C6 /* strversionnumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D90DD31097015B4002A1826 /* strversionnumber.cpp */; };
 		3D1E311121A6DC61005200CF /* VirtualMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */; };
 		3D1E311321A6DC76005200CF /* VirtualSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D1E311221A6DC75005200CF /* VirtualSolver.hpp */; };
-		3D23E89E20BE9F7D00B6683D /* libifport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89D20BE9F7D00B6683D /* libifport.a */; };
-		3D23E8A020BEA02300B6683D /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89F20BEA02300B6683D /* libarpack.a */; };
-		3D23E8A120BEA02300B6683D /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E89F20BEA02300B6683D /* libarpack.a */; };
-		3D23E8A720BEAB5A00B6683D /* libifport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E8A620BEAB5A00B6683D /* libifport.dylib */; };
-		3D23E8A920BEAC3E00B6683D /* libifcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E8A820BEAC3E00B6683D /* libifcore.a */; };
-		3D23E8AD20BEAD6600B6683D /* libirc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D23E8AC20BEAD6600B6683D /* libirc.a */; };
 		3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */; };
 		3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */; };
-		3D5AF7D81C1863D30036669F /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
 		3D6406B8195B2DD200F33E4F /* getprog-unix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */; };
 		3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
 		3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */; };
@@ -127,28 +120,8 @@
 		3D84AE401654DE9800301697 /* RefCounter.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1E1654DE9800301697 /* RefCounter.hpp */; };
 		3D84AE411654DE9800301697 /* splitsimplex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE1F1654DE9800301697 /* splitsimplex.hpp */; };
 		3D84AE431654DEB600301697 /* ufunction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D84AE421654DEB600301697 /* ufunction.hpp */; };
-		3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */; };
 		3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3D9B0EB40C8495C0008A8F03 /* RNM.hpp */; };
-		3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
-		3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */; };
-		3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; };
-		3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */; };
-		3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; };
-		3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740461BBEEA2100C4EB0A /* libumfpack.a */; };
-		3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; };
-		3DA7404B1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740491BBEEA4700C4EB0A /* libgsl.dylib */; };
-		3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; };
-		3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */; };
-		3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; };
-		3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */; };
-		3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; };
-		3DA740541BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740521BBEEB8C00C4EB0A /* libcholmod.a */; };
 		3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; };
-		3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740551BBEEBB900C4EB0A /* Accelerate.framework */; };
-		3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; };
-		3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA740581BBEEBDC00C4EB0A /* libccolamd.a */; };
-		3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; };
-		3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */; };
 		3DBBD5AF0C356E99007E5F45 /* lgalgo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC6299409723FE000D487F6 /* lgalgo.cpp */; };
 		3DBBD5BC0C356EEE007E5F45 /* string_def.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */; };
 		3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */; };
@@ -157,7 +130,6 @@
 		3DBBFEA01A654E6C00E3CF4E /* write_hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DBBFE9F1A654E6C00E3CF4E /* write_hdf5.cpp */; };
 		3DC0231B2148072B008C76D0 /* SkyLineSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023172148072B008C76D0 /* SkyLineSolver.hpp */; };
 		3DC023342148078C008C76D0 /* SparseLinearSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */; };
-		3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC023272148078A008C76D0 /* SolverSkyLine.hpp */; };
 		3DC023362148078C008C76D0 /* CG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DC023282148078A008C76D0 /* CG.cpp */; };
 		3DC023382148078C008C76D0 /* SparseLinearSolver.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */; };
 		3DC023392148078C008C76D0 /* VirtualSolverSparseSuite.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */; };
@@ -171,7 +143,6 @@
 		3DCE376D21B728AF004BC875 /* P012_3dSurf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DCE376C21B728AE004BC875 /* P012_3dSurf.cpp */; };
 		3DD0DF48216CC819006FD176 /* HashMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD0DF47216CC819006FD176 /* HashMatrix.cpp */; };
 		3DD0DF49216CC819006FD176 /* HashMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DD0DF47216CC819006FD176 /* HashMatrix.cpp */; };
-		3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D5AF7D71C1863D30036669F /* libhdf5.dylib */; };
 		3DDEA1830DFFD92F00F54E1C /* GQuadTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */; };
 		3DDEA1870DFFD97F00F54E1C /* lgmesh3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */; };
 		3DDEA18A0DFFF6DA00F54E1C /* FESpacen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */; };
@@ -183,6 +154,21 @@
 		3DDEA1980DFFF77D00F54E1C /* libmesh5.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA1970DFFF77D00F54E1C /* libmesh5.c */; };
 		3DDEA19B0DFFF7D000F54E1C /* Mesh1dn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */; };
 		3DEB5BFD14C607C100BA47D8 /* ffapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */; };
+		77279C0721C796B1007B558C /* libcholmod.3.0.12.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77279C0621C796B1007B558C /* libcholmod.3.0.12.dylib */; };
+		77279C0921C796C7007B558C /* libcolamd.2.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77279C0821C796C7007B558C /* libcolamd.2.9.6.dylib */; };
+		77279C0B21C796E7007B558C /* libsuitesparseconfig.5.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77279C0A21C796E7007B558C /* libsuitesparseconfig.5.2.0.dylib */; };
+		77279C0D21C79715007B558C /* libccolamd.2.9.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77279C0C21C79715007B558C /* libccolamd.2.9.6.dylib */; };
+		77B0E32621BC3B7D00734B1E /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E32221BC3B7D00734B1E /* libarpack.a */; };
+		77B0E32E21BE843100734B1E /* parallelempi-empty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77B0E32D21BE843100734B1E /* parallelempi-empty.cpp */; };
+		77B0E32F21BE843100734B1E /* parallelempi-empty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77B0E32D21BE843100734B1E /* parallelempi-empty.cpp */; };
+		77C96BC421C4021300C082E2 /* libarpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E32221BC3B7D00734B1E /* libarpack.a */; };
+		77C96BC521C4022C00C082E2 /* libgfortran.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E33221BE84E200734B1E /* libgfortran.4.dylib */; };
+		77C96BC721C4023900C082E2 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77C96BC621C4023900C082E2 /* Accelerate.framework */; };
+		77C96BCE21C412D300C082E2 /* libumfpack.5.7.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E33021BE84C400734B1E /* libumfpack.5.7.6.dylib */; };
+		77C96BCF21C4132B00C082E2 /* libquadmath.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E33521BE852600734B1E /* libquadmath.0.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		77C96BD021C4135000C082E2 /* libquadmath.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E33521BE852600734B1E /* libquadmath.0.dylib */; };
+		77C96BD121C4137000C082E2 /* libumfpack.5.7.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E33021BE84C400734B1E /* libumfpack.5.7.6.dylib */; };
+		77C96BD221C4138C00C082E2 /* libgfortran.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 77B0E33221BE84E200734B1E /* libgfortran.4.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -198,15 +184,8 @@
 /* Begin PBXFileReference section */
 		3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualMatrix.hpp; path = ../src/femlib/VirtualMatrix.hpp; sourceTree = "<group>"; };
 		3D1E311221A6DC75005200CF /* VirtualSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolver.hpp; path = ../src/femlib/VirtualSolver.hpp; sourceTree = "<group>"; };
-		3D23E89D20BE9F7D00B6683D /* libifport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifport.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.a; sourceTree = "<group>"; };
-		3D23E89F20BEA02300B6683D /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = ../3rdparty/lib/libarpack.a; sourceTree = "<group>"; };
-		3D23E8A620BEAB5A00B6683D /* libifport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libifport.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifport.dylib; sourceTree = "<group>"; };
-		3D23E8A820BEAC3E00B6683D /* libifcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libifcore.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libifcore.a; sourceTree = "<group>"; };
-		3D23E8AA20BEACB300B6683D /* libirc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libirc.dylib; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libirc.dylib; sourceTree = "<group>"; };
-		3D23E8AC20BEAD6600B6683D /* libirc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libirc.a; path = ../../../../../opt/intel/composer_xe_2015.3.187/compiler/lib/libirc.a; sourceTree = "<group>"; };
 		3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = splitsimplex.cpp; path = ../src/femlib/splitsimplex.cpp; sourceTree = SOURCE_ROOT; };
 		3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = GQuadTree.hpp; path = ../src/femlib/GQuadTree.hpp; sourceTree = SOURCE_ROOT; };
-		3D5AF7D71C1863D30036669F /* libhdf5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libhdf5.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libhdf5.dylib"; sourceTree = "<group>"; };
 		3D6406B7195B2DD200F33E4F /* getprog-unix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = "getprog-unix.hpp"; path = "../src/Graphics/getprog-unix.hpp"; sourceTree = "<group>"; };
 		3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = UMFPack_Solver.cpp; sourceTree = "<group>"; };
 		3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = glumesh2D.cpp; sourceTree = "<group>"; };
@@ -269,7 +248,6 @@
 		3D84AE1E1654DE9800301697 /* RefCounter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RefCounter.hpp; path = ../src/femlib/RefCounter.hpp; sourceTree = "<group>"; };
 		3D84AE1F1654DE9800301697 /* splitsimplex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = splitsimplex.hpp; path = ../src/femlib/splitsimplex.hpp; sourceTree = "<group>"; };
 		3D84AE421654DEB600301697 /* ufunction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ufunction.hpp; path = ../src/femlib/ufunction.hpp; sourceTree = "<group>"; };
-		3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = parallelempi.cpp; path = ../src/mpi/parallelempi.cpp; sourceTree = SOURCE_ROOT; };
 		3D90DC9E0970155D002A1826 /* lg.tab.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = lg.tab.cpp; sourceTree = "<group>"; };
 		3D90DCA00970155D002A1826 /* lg.tab.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; path = lg.tab.hpp; sourceTree = "<group>"; };
 		3D90DCDD097015B4002A1826 /* AFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = AFunction.cpp; sourceTree = "<group>"; };
@@ -290,16 +268,7 @@
 		3D90DD26097015B4002A1826 /* problem.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = problem.cpp; sourceTree = "<group>"; };
 		3D90DD31097015B4002A1826 /* strversionnumber.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = strversionnumber.cpp; sourceTree = "<group>"; };
 		3D9B0EB40C8495C0008A8F03 /* RNM.hpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.h; name = RNM.hpp; path = ../src/femlib/RNM.hpp; sourceTree = SOURCE_ROOT; };
-		3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libamd.2.4.1.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libamd.2.4.1.a"; sourceTree = "<group>"; };
-		3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuitesparseconfig.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libsuitesparseconfig.a"; sourceTree = "<group>"; };
-		3DA740461BBEEA2100C4EB0A /* libumfpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libumfpack.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libumfpack.a"; sourceTree = "<group>"; };
-		3DA740491BBEEA4700C4EB0A /* libgsl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgsl.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libgsl.dylib"; sourceTree = "<group>"; };
-		3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libmpi.dylib"; sourceTree = "<group>"; };
-		3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpichcxx.dylib; path = "../../../../../usr/local/ff++/mpich/lib/libmpichcxx.dylib"; sourceTree = "<group>"; };
-		3DA740521BBEEB8C00C4EB0A /* libcholmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcholmod.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libcholmod.a"; sourceTree = "<group>"; };
 		3DA740551BBEEBB900C4EB0A /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = ../../../../../System/Library/Frameworks/Accelerate.framework; sourceTree = "<group>"; };
-		3DA740581BBEEBDC00C4EB0A /* libccolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libccolamd.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libccolamd.a"; sourceTree = "<group>"; };
-		3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcolamd.a; path = "../../../../../usr/local/ff++/mpich/petsc/lib/libcolamd.a"; sourceTree = "<group>"; };
 		3DAA7DBE0BBFF3930054E435 /* libfflib.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libfflib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = string_def.cpp; sourceTree = "<group>"; };
 		3DBBD5E50C3573DA007E5F45 /* mymain.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; path = mymain.cpp; sourceTree = "<group>"; };
@@ -309,9 +278,7 @@
 		3DC023172148072B008C76D0 /* SkyLineSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SkyLineSolver.hpp; path = ../src/femlib/SkyLineSolver.hpp; sourceTree = "<group>"; };
 		3DC023202148075C008C76D0 /* gmres.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = gmres.hpp; path = ../src/femlib/gmres.hpp; sourceTree = "<group>"; };
 		3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparseLinearSolver.cpp; path = ../src/femlib/SparseLinearSolver.cpp; sourceTree = "<group>"; };
-		3DC023272148078A008C76D0 /* SolverSkyLine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SolverSkyLine.hpp; path = ../src/femlib/SolverSkyLine.hpp; sourceTree = "<group>"; };
 		3DC023282148078A008C76D0 /* CG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CG.cpp; path = ../src/femlib/CG.cpp; sourceTree = "<group>"; };
-		3DC023292148078A008C76D0 /* SkyLineSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SkyLineSolver.hpp; path = ../src/femlib/SkyLineSolver.hpp; sourceTree = "<group>"; };
 		3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SparseLinearSolver.hpp; path = ../src/femlib/SparseLinearSolver.hpp; sourceTree = "<group>"; };
 		3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VirtualSolverSparseSuite.hpp; path = ../src/femlib/VirtualSolverSparseSuite.hpp; sourceTree = "<group>"; };
 		3DC0232C2148078B008C76D0 /* HashMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HashMatrix.hpp; path = ../src/femlib/HashMatrix.hpp; sourceTree = "<group>"; };
@@ -361,11 +328,24 @@
 		3DDEA18B0DFFF71700F54E1C /* P012_3d.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = P012_3d.cpp; path = ../src/femlib/P012_3d.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA18D0DFFF72000F54E1C /* P012_2d.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = P012_2d.cpp; path = ../src/femlib/P012_2d.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA18E0DFFF72000F54E1C /* P012_1d.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = P012_1d.cpp; path = ../src/femlib/P012_1d.cpp; sourceTree = SOURCE_ROOT; };
-		3DDEA1920DFFF74200F54E1C /* Mesh3dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh3dn.cpp; path = ../src/femlib/Mesh3dn.cpp; sourceTree = SOURCE_ROOT; };
+		3DDEA1920DFFF74200F54E1C /* Mesh3dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh3dn.cpp; path = ../src/femlib/Mesh3dn.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		3DDEA1940DFFF76100F54E1C /* Mesh2dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh2dn.cpp; path = ../src/femlib/Mesh2dn.cpp; sourceTree = SOURCE_ROOT; };
 		3DDEA1970DFFF77D00F54E1C /* libmesh5.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = libmesh5.c; path = ../src/femlib/libmesh5.c; sourceTree = SOURCE_ROOT; };
 		3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh1dn.cpp; path = ../src/femlib/Mesh1dn.cpp; sourceTree = SOURCE_ROOT; };
 		3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ffapi.cpp; sourceTree = "<group>"; };
+		77279C0621C796B1007B558C /* libcholmod.3.0.12.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcholmod.3.0.12.dylib; path = ../../../Shared/SuiteSparse/libcholmod.3.0.12.dylib; sourceTree = "<group>"; };
+		77279C0821C796C7007B558C /* libcolamd.2.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcolamd.2.9.6.dylib; path = ../../../Shared/SuiteSparse/libcolamd.2.9.6.dylib; sourceTree = "<group>"; };
+		77279C0A21C796E7007B558C /* libsuitesparseconfig.5.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsuitesparseconfig.5.2.0.dylib; path = ../../../Shared/SuiteSparse/libsuitesparseconfig.5.2.0.dylib; sourceTree = "<group>"; };
+		77279C0C21C79715007B558C /* libccolamd.2.9.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libccolamd.2.9.6.dylib; path = ../../../Shared/SuiteSparse/libccolamd.2.9.6.dylib; sourceTree = "<group>"; };
+		77B0E32221BC3B7D00734B1E /* libarpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libarpack.a; path = "../../FreeFem++_back/download/lib/libarpack.a"; sourceTree = "<group>"; };
+		77B0E32321BC3B7D00734B1E /* libquadmath.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libquadmath.dylib; path = ../../../../usr/local/lib/libquadmath.dylib; sourceTree = "<group>"; };
+		77B0E32421BC3B7D00734B1E /* libgfortran.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgfortran.dylib; path = ../../../../usr/local/lib/libgfortran.dylib; sourceTree = "<group>"; };
+		77B0E32521BC3B7D00734B1E /* libumfpack.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libumfpack.dylib; path = ../../../Shared/SuiteSparse/libumfpack.dylib; sourceTree = "<group>"; };
+		77B0E32D21BE843100734B1E /* parallelempi-empty.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "parallelempi-empty.cpp"; path = "../src/mpi/parallelempi-empty.cpp"; sourceTree = "<group>"; };
+		77B0E33021BE84C400734B1E /* libumfpack.5.7.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libumfpack.5.7.6.dylib; path = ../../../Shared/SuiteSparse/libumfpack.5.7.6.dylib; sourceTree = "<group>"; };
+		77B0E33221BE84E200734B1E /* libgfortran.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgfortran.4.dylib; path = ../../../../usr/local/lib/libgfortran.4.dylib; sourceTree = "<group>"; };
+		77B0E33521BE852600734B1E /* libquadmath.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libquadmath.0.dylib; path = ../../../../usr/local/lib/libquadmath.0.dylib; sourceTree = "<group>"; };
+		77C96BC621C4023900C082E2 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -373,21 +353,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3DA7405A1BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
-				3DA740451BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
-				3DA740571BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
-				3D23E8A120BEA02300B6683D /* libarpack.a in Frameworks */,
-				3D23E8A720BEAB5A00B6683D /* libifport.dylib in Frameworks */,
-				3D23E8A920BEAC3E00B6683D /* libifcore.a in Frameworks */,
-				3D23E8AD20BEAD6600B6683D /* libirc.a in Frameworks */,
-				3DA7404E1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
-				3DD7CCFD1D0195F7006E5519 /* libhdf5.dylib in Frameworks */,
-				3DA740511BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
-				3DA7405D1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
-				3DA740481BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
-				3DA740541BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */,
-				3DA740421BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */,
-				3DA7404B1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */,
+				77279C0D21C79715007B558C /* libccolamd.2.9.6.dylib in Frameworks */,
+				77279C0B21C796E7007B558C /* libsuitesparseconfig.5.2.0.dylib in Frameworks */,
+				77279C0921C796C7007B558C /* libcolamd.2.9.6.dylib in Frameworks */,
+				77279C0721C796B1007B558C /* libcholmod.3.0.12.dylib in Frameworks */,
+				77C96BCE21C412D300C082E2 /* libumfpack.5.7.6.dylib in Frameworks */,
+				77C96BC721C4023900C082E2 /* Accelerate.framework in Frameworks */,
+				77C96BC421C4021300C082E2 /* libarpack.a in Frameworks */,
+				77C96BC521C4022C00C082E2 /* libgfortran.4.dylib in Frameworks */,
+				77C96BCF21C4132B00C082E2 /* libquadmath.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,20 +369,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3DA740531BBEEB8C00C4EB0A /* libcholmod.a in Frameworks */,
-				3DA740591BBEEBDC00C4EB0A /* libccolamd.a in Frameworks */,
-				3DA740441BBEEA1900C4EB0A /* libsuitesparseconfig.a in Frameworks */,
-				3DA7404A1BBEEA4700C4EB0A /* libgsl.dylib in Frameworks */,
-				3DA740501BBEEA7E00C4EB0A /* libmpichcxx.dylib in Frameworks */,
-				3DA740471BBEEA2100C4EB0A /* libumfpack.a in Frameworks */,
-				3DA7404D1BBEEA4E00C4EB0A /* libmpi.dylib in Frameworks */,
+				77C96BD121C4137000C082E2 /* libumfpack.5.7.6.dylib in Frameworks */,
+				77C96BD021C4135000C082E2 /* libquadmath.0.dylib in Frameworks */,
+				77C96BD221C4138C00C082E2 /* libgfortran.4.dylib in Frameworks */,
+				77B0E32621BC3B7D00734B1E /* libarpack.a in Frameworks */,
 				3DA740561BBEEBB900C4EB0A /* Accelerate.framework in Frameworks */,
-				3DA7405C1BBEEC3A00C4EB0A /* libcolamd.a in Frameworks */,
-				3D23E8A020BEA02300B6683D /* libarpack.a in Frameworks */,
 				3DBBD5D20C3570A0007E5F45 /* libfflib.dylib in Frameworks */,
-				3D5AF7D81C1863D30036669F /* libhdf5.dylib in Frameworks */,
-				3DA740411BBEEA0000C4EB0A /* libamd.2.4.1.a in Frameworks */,
-				3D23E89E20BE9F7D00B6683D /* libifport.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,10 +384,14 @@
 		3D23E8A520BEAB5A00B6683D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3D23E8AC20BEAD6600B6683D /* libirc.a */,
-				3D23E8AA20BEACB300B6683D /* libirc.dylib */,
-				3D23E8A820BEAC3E00B6683D /* libifcore.a */,
-				3D23E8A620BEAB5A00B6683D /* libifport.dylib */,
+				77279C0C21C79715007B558C /* libccolamd.2.9.6.dylib */,
+				77279C0A21C796E7007B558C /* libsuitesparseconfig.5.2.0.dylib */,
+				77279C0821C796C7007B558C /* libcolamd.2.9.6.dylib */,
+				77279C0621C796B1007B558C /* libcholmod.3.0.12.dylib */,
+				77C96BC621C4023900C082E2 /* Accelerate.framework */,
+				77B0E33521BE852600734B1E /* libquadmath.0.dylib */,
+				77B0E33221BE84E200734B1E /* libgfortran.4.dylib */,
+				77B0E33021BE84C400734B1E /* libumfpack.5.7.6.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -433,7 +403,6 @@
 				3D90DC95097014FF002A1826 /* Sources */,
 				3D90DC8D097012DB002A1826 /* Products */,
 				3D23E8A520BEAB5A00B6683D /* Frameworks */,
-				3DD0DF46216C79DB006FD176 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -475,56 +444,56 @@
 		3D90DCAD097015B3002A1826 /* fflib */ = {
 			isa = PBXGroup;
 			children = (
+				3D84ADCF1654DAE200301697 /* AFunction_ext.hpp */,
 				3D90DCDD097015B4002A1826 /* AFunction.cpp */,
+				3D84ADC71654DAE200301697 /* AFunction.hpp */,
 				3D90DCE0097015B4002A1826 /* AFunction2.cpp */,
+				3D84ADCA1654DAE200301697 /* AnyType.hpp */,
 				3D90DCE5097015B4002A1826 /* array_complex.cpp */,
+				3D84ADD31654DAE200301697 /* array_init.hpp */,
 				3D90DCE8097015B4002A1826 /* array_long.cpp */,
 				3D90DCEA097015B4002A1826 /* array_real.cpp */,
-				3D90DCEF097015B4002A1826 /* CodeAlloc.cpp */,
-				3D90DCF7097015B4002A1826 /* environment.cpp */,
-				3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */,
-				3D90DD00097015B4002A1826 /* global.cpp */,
-				3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */,
-				3D90DD03097015B4002A1826 /* InitFunct.cpp */,
-				3D90DD06097015B4002A1826 /* lex.cpp */,
-				3D90DD0A097015B4002A1826 /* lgfem.cpp */,
-				3D90DD0D097015B4002A1826 /* lgmat.cpp */,
-				3D90DD0F097015B4002A1826 /* lgmesh.cpp */,
-				3D90DD26097015B4002A1826 /* problem.cpp */,
-				3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */,
-				3D90DD14097015B4002A1826 /* load.cpp */,
-				3D90DD23097015B4002A1826 /* mt19937ar.cpp */,
-				3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */,
-				3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */,
-				3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */,
-				3D90DD31097015B4002A1826 /* strversionnumber.cpp */,
-				3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */,
-				3D84ADCF1654DAE200301697 /* AFunction_ext.hpp */,
-				3D84ADC71654DAE200301697 /* AFunction.hpp */,
-				3D84ADCA1654DAE200301697 /* AnyType.hpp */,
-				3D84ADD31654DAE200301697 /* array_init.hpp */,
 				3D84ADD41654DAE200301697 /* array_resize.hpp */,
 				3D84ADCC1654DAE200301697 /* array_tlp.hpp */,
+				3D90DCEF097015B4002A1826 /* CodeAlloc.cpp */,
 				3D84ADD51654DAE200301697 /* CodeAlloc.hpp */,
 				3D84ADD61654DAE200301697 /* endian.hpp */,
+				3D90DCF7097015B4002A1826 /* environment.cpp */,
 				3D84ADD71654DAE200301697 /* environment.hpp */,
 				3D84ADD81654DAE200301697 /* error.hpp */,
 				3D84ADD01654DAE200301697 /* ff++.hpp */,
+				3DEB5BFC14C607C100BA47D8 /* ffapi.cpp */,
 				3D84ADC91654DAE200301697 /* ffapi.hpp */,
 				3D84ADC31654DAE200301697 /* ffstack.hpp */,
+				3D90DD00097015B4002A1826 /* global.cpp */,
+				3D71697D0F371F9E00031DA8 /* glumesh2D.cpp */,
+				3D90DD03097015B4002A1826 /* InitFunct.cpp */,
 				3D84ADC81654DAE200301697 /* InitFunct.hpp */,
+				3D90DD06097015B4002A1826 /* lex.cpp */,
 				3D84ADC61654DAE200301697 /* lex.hpp */,
+				3D90DD0A097015B4002A1826 /* lgfem.cpp */,
 				3D84ADCD1654DAE200301697 /* lgfem.hpp */,
+				3D90DD0D097015B4002A1826 /* lgmat.cpp */,
+				3D90DD0F097015B4002A1826 /* lgmesh.cpp */,
+				3DDEA1860DFFD97F00F54E1C /* lgmesh3.cpp */,
 				3D84ADD91654DAE200301697 /* lgmesh3.hpp */,
 				3D84ADC41654DAE200301697 /* lgsolver.hpp */,
+				3D90DD14097015B4002A1826 /* load.cpp */,
+				3D90DD23097015B4002A1826 /* mt19937ar.cpp */,
 				3D84ADCB1654DAE200301697 /* Operator.hpp */,
+				3D75A16F18CA62AE00AEDCE7 /* P1IsoValue.cpp */,
 				3D84ADCE1654DAE200301697 /* PlotStream.hpp */,
+				3D90DD26097015B4002A1826 /* problem.cpp */,
 				3D84ADC51654DAE200301697 /* problem.hpp */,
 				3D84ADD11654DAE200301697 /* Serialize.hpp */,
 				3D84ADDA1654DAE200301697 /* showverb.hpp */,
+				3D2D5C990F43095A00F41F4C /* splitsimplex.cpp */,
+				3DBBD5BB0C356EEE007E5F45 /* string_def.cpp */,
 				3D84ADDB1654DAE200301697 /* String.hpp */,
+				3D90DD31097015B4002A1826 /* strversionnumber.cpp */,
 				3D84ADDC1654DAE200301697 /* strversionnumber.hpp */,
 				3D84ADDD1654DAE200301697 /* throwassert.hpp */,
+				3D7169790F371F7F00031DA8 /* UMFPack_Solver.cpp */,
 				3D84ADDE1654DAE200301697 /* versionnumber.hpp */,
 			);
 			name = fflib;
@@ -534,19 +503,11 @@
 		3D90DDE309704FA0002A1826 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
+				77B0E32221BC3B7D00734B1E /* libarpack.a */,
+				77B0E32421BC3B7D00734B1E /* libgfortran.dylib */,
+				77B0E32321BC3B7D00734B1E /* libquadmath.dylib */,
+				77B0E32521BC3B7D00734B1E /* libumfpack.dylib */,
 				3DA740551BBEEBB900C4EB0A /* Accelerate.framework */,
-				3DA7404C1BBEEA4E00C4EB0A /* libmpi.dylib */,
-				3DA7404F1BBEEA7E00C4EB0A /* libmpichcxx.dylib */,
-				3DA740491BBEEA4700C4EB0A /* libgsl.dylib */,
-				3DA7405B1BBEEC3A00C4EB0A /* libcolamd.a */,
-				3DA740581BBEEBDC00C4EB0A /* libccolamd.a */,
-				3DA740431BBEEA1900C4EB0A /* libsuitesparseconfig.a */,
-				3DA740521BBEEB8C00C4EB0A /* libcholmod.a */,
-				3DA740461BBEEA2100C4EB0A /* libumfpack.a */,
-				3DA740401BBEEA0000C4EB0A /* libamd.2.4.1.a */,
-				3D23E89F20BEA02300B6683D /* libarpack.a */,
-				3D23E89D20BE9F7D00B6683D /* libifport.a */,
-				3D5AF7D71C1863D30036669F /* libhdf5.dylib */,
 				3DC62AF6097299F400D487F6 /* OpenGL.framework */,
 				3DC62AF2097299D800D487F6 /* GLUT.framework */,
 				3DC62AED0972999000D487F6 /* Cocoa.framework */,
@@ -593,56 +554,56 @@
 		3DC629C1097242A600D487F6 /* femlib */ = {
 			isa = PBXGroup;
 			children = (
-				3DDEA1970DFFF77D00F54E1C /* libmesh5.c */,
-				3DC629C40972430700D487F6 /* BamgFreeFem.cpp */,
-				3DC023282148078A008C76D0 /* CG.cpp */,
-				3DC629C50972430700D487F6 /* CheckPtr.cpp */,
-				3DC629C70972430700D487F6 /* Drawing.cpp */,
-				3DC629C80972430700D487F6 /* Element_P2h.cpp */,
-				3DC629CA0972430700D487F6 /* Element_RT.cpp */,
-				3DC629CB0972430700D487F6 /* fem.cpp */,
-				3DC629CD0972430700D487F6 /* FESpace.cpp */,
-				3DCE376C21B728AE004BC875 /* P012_3dSurf.cpp */,
-				3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */,
-				3DC629CF0972430700D487F6 /* FQuadTree.cpp */,
-				3DC629D00972430700D487F6 /* gibbs.cpp */,
-				3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */,
-				3DD0DF47216CC819006FD176 /* HashMatrix.cpp */,
-				3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */,
-				3DDEA1940DFFF76100F54E1C /* Mesh2dn.cpp */,
-				3DDEA1920DFFF74200F54E1C /* Mesh3dn.cpp */,
-				3DC629D40972430700D487F6 /* mshptg.cpp */,
-				3DDEA18E0DFFF72000F54E1C /* P012_1d.cpp */,
-				3DDEA18D0DFFF72000F54E1C /* P012_2d.cpp */,
-				3DDEA18B0DFFF71700F54E1C /* P012_3d.cpp */,
-				3DC629D60972430700D487F6 /* QuadratureFormular.cpp */,
-				3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */,
 				3D84AE0D1654DE9800301697 /* assertion.hpp */,
+				3DC629C40972430700D487F6 /* BamgFreeFem.cpp */,
 				3D84AE0E1654DE9800301697 /* BamgFreeFem.hpp */,
+				3DC023282148078A008C76D0 /* CG.cpp */,
 				3DC023332148078C008C76D0 /* CG.hpp */,
 				3D84AE011654DE9800301697 /* CGNL.hpp */,
+				3DC629C50972430700D487F6 /* CheckPtr.cpp */,
 				3D84AE001654DE9800301697 /* DOperator.hpp */,
+				3DC629C70972430700D487F6 /* Drawing.cpp */,
+				3DC629C80972430700D487F6 /* Element_P2h.cpp */,
 				3D84AE101654DE9800301697 /* Element_P3.hpp */,
+				3DC629CA0972430700D487F6 /* Element_RT.cpp */,
+				3DC629CB0972430700D487F6 /* fem.cpp */,
 				3D84AE061654DE9800301697 /* fem.hpp */,
 				3D84AE111654DE9800301697 /* fem3.hpp */,
+				3DC629CD0972430700D487F6 /* FESpace.cpp */,
 				3D84AE121654DE9800301697 /* FESpace.hpp */,
+				3DDEA1890DFFF6DA00F54E1C /* FESpacen.cpp */,
 				3D84AE021654DE9800301697 /* FESpacen.hpp */,
+				3DC629CF0972430700D487F6 /* FQuadTree.cpp */,
 				3D84AE131654DE9800301697 /* FQuadTree.hpp */,
 				3D84ADFC1654DE9800301697 /* GenericMesh.hpp */,
+				3DC629D00972430700D487F6 /* gibbs.cpp */,
 				3DC023202148075C008C76D0 /* gmres.hpp */,
+				3DDEA1810DFFD92F00F54E1C /* GQuadTree.cpp */,
+				3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */,
+				3DD0DF47216CC819006FD176 /* HashMatrix.cpp */,
 				3DC0232C2148078B008C76D0 /* HashMatrix.hpp */,
 				3D84AE151654DE9800301697 /* HashTable.hpp */,
 				3D84AE161654DE9800301697 /* HeapSort.hpp */,
 				3D84AE171654DE9800301697 /* Label.hpp */,
+				3DDEA1970DFFF77D00F54E1C /* libmesh5.c */,
 				3DC0234421480D75008C76D0 /* MatriceCreuse_tpl.hpp */,
 				3DC0234221480D6A008C76D0 /* MatriceCreuse.hpp */,
 				3DC0234621480EA8008C76D0 /* MatriceElementaire.hpp */,
+				3DDEA19A0DFFF7D000F54E1C /* Mesh1dn.cpp */,
 				3D84AE181654DE9800301697 /* Mesh1dn.hpp */,
+				3DDEA1940DFFF76100F54E1C /* Mesh2dn.cpp */,
 				3D84AE081654DE9800301697 /* Mesh2dn.hpp */,
+				3DDEA1920DFFF74200F54E1C /* Mesh3dn.cpp */,
 				3D84ADFD1654DE9800301697 /* Mesh3dn.hpp */,
 				3D84ADFB1654DE9800301697 /* MeshPoint.hpp */,
+				3DC629D40972430700D487F6 /* mshptg.cpp */,
 				3D84AE191654DE9800301697 /* P3_Lagrange.hpp */,
+				3DDEA18E0DFFF72000F54E1C /* P012_1d.cpp */,
+				3DDEA18D0DFFF72000F54E1C /* P012_2d.cpp */,
+				3DDEA18B0DFFF71700F54E1C /* P012_3d.cpp */,
+				3DCE376C21B728AE004BC875 /* P012_3dSurf.cpp */,
 				3D84AE0B1654DE9800301697 /* PkLagrange.hpp */,
+				3DC629D60972430700D487F6 /* QuadratureFormular.cpp */,
 				3D84AE1A1654DE9800301697 /* QuadratureFormular.hpp */,
 				3D84AE1B1654DE9800301697 /* R1.hpp */,
 				3D84AE1C1654DE9800301697 /* R2.hpp */,
@@ -651,19 +612,19 @@
 				3D84AE091654DE9800301697 /* RNM_op.hpp */,
 				3D84AE0A1654DE9800301697 /* RNM_opc.hpp */,
 				3D84AE041654DE9800301697 /* RNM_tpl.hpp */,
+				3D9B0EB40C8495C0008A8F03 /* RNM.hpp */,
+				3DC023172148072B008C76D0 /* SkyLineSolver.hpp */,
+				3DC023262148078A008C76D0 /* SparseLinearSolver.cpp */,
 				3DC0232A2148078B008C76D0 /* SparseLinearSolver.hpp */,
 				3D84AE1F1654DE9800301697 /* splitsimplex.hpp */,
 				3D84AE421654DEB600301697 /* ufunction.hpp */,
-				3D1E311221A6DC75005200CF /* VirtualSolver.hpp */,
 				3D1E311021A6DC61005200CF /* VirtualMatrix.hpp */,
+				3D1E311221A6DC75005200CF /* VirtualSolver.hpp */,
 				3DC0232F2148078B008C76D0 /* VirtualSolverCG.hpp */,
 				3DC023322148078C008C76D0 /* VirtualSolverSkyLine.hpp */,
 				3DC0232B2148078B008C76D0 /* VirtualSolverSparseSuite.hpp */,
-				3DC023172148072B008C76D0 /* SkyLineSolver.hpp */,
 				3DC023122148071A008C76D0 /* HashMatrix.hpp */,
 				3D84AE071654DE9800301697 /* gmres.hpp */,
-				3D338F970E069DF400E1E7E8 /* GQuadTree.hpp */,
-				3D9B0EB40C8495C0008A8F03 /* RNM.hpp */,
 			);
 			name = femlib;
 			sourceTree = "<group>";
@@ -680,19 +641,10 @@
 			name = Graphics;
 			sourceTree = "<group>";
 		};
-		3DD0DF46216C79DB006FD176 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				3DC023272148078A008C76D0 /* SolverSkyLine.hpp */,
-				3DC023292148078A008C76D0 /* SkyLineSolver.hpp */,
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
 		3DE786BB124C7ACB00A2C49C /* MPI */ = {
 			isa = PBXGroup;
 			children = (
-				3D8EF13D12510E9F00D38A94 /* parallelempi.cpp */,
+				77B0E32D21BE843100734B1E /* parallelempi-empty.cpp */,
 			);
 			name = MPI;
 			sourceTree = "<group>";
@@ -705,7 +657,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D9B0EC50C8495C0008A8F03 /* RNM.hpp in Headers */,
-				3DC023352148078C008C76D0 /* SolverSkyLine.hpp in Headers */,
 				3D338F980E069DF400E1E7E8 /* GQuadTree.hpp in Headers */,
 				3DC0233D2148078C008C76D0 /* VirtualSolverCG.hpp in Headers */,
 				3DC0234721480EA8008C76D0 /* MatriceElementaire.hpp in Headers */,
@@ -880,6 +831,7 @@
 				3D15D4810BD3A6D500CEB4C6 /* MeshGeom.cpp in Sources */,
 				3D15D4820BD3A6D500CEB4C6 /* Meshio.cpp in Sources */,
 				3D15D4840BD3A6D500CEB4C6 /* MeshQuad.cpp in Sources */,
+				77B0E32F21BE843100734B1E /* parallelempi-empty.cpp in Sources */,
 				3DCE376D21B728AF004BC875 /* P012_3dSurf.cpp in Sources */,
 				3D15D4850BD3A6D500CEB4C6 /* MeshRead.cpp in Sources */,
 				3D15D4870BD3A6D500CEB4C6 /* MeshWrite.cpp in Sources */,
@@ -915,7 +867,6 @@
 				3D71697B0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697F0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9B0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
-				3D8EF13E12510E9F00D38A94 /* parallelempi.cpp in Sources */,
 				3DC023362148078C008C76D0 /* CG.cpp in Sources */,
 				3D79E0601A5D280C0045F64D /* P1IsoValue.cpp in Sources */,
 				3DEB5BFD14C607C100BA47D8 /* ffapi.cpp in Sources */,
@@ -929,6 +880,7 @@
 				3D75A17118CA62AE00AEDCE7 /* P1IsoValue.cpp in Sources */,
 				3D15D46D0BD3A65E00CEB4C6 /* sansrgraph.cpp in Sources */,
 				3D15D46F0BD3A68500CEB4C6 /* DefColor.cpp in Sources */,
+				77B0E32E21BE843100734B1E /* parallelempi-empty.cpp in Sources */,
 				3D71697A0F371F7F00031DA8 /* UMFPack_Solver.cpp in Sources */,
 				3D71697E0F371F9E00031DA8 /* glumesh2D.cpp in Sources */,
 				3D2D5C9A0F43095A00F41F4C /* splitsimplex.cpp in Sources */,
@@ -992,7 +944,7 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../3rdparty/include\" \"$(SRCROOT)/..\" \"$(inherited) /usr/local/ff++/mpich/include/\" \"/usr/local/include/\"";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" \"$(inherited) /usr/local/ff++/mpich/include/\" \"/usr/local/include/\"";
 				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../dowload/include\"  \"$(SRCROOT)/..\" $(inherited)";
 				VALID_ARCHS = x86_64;
 			};
@@ -1041,8 +993,8 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "FreeFem++";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../3rdparty/include\" \"$(SRCROOT)/..\" $(inherited)";
-				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../3rdparty/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
+				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited)";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/../download/include\" \"$(SRCROOT)/..\" $(inherited) /usr/local/ff++/mpich/include/";
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
@@ -1062,7 +1014,6 @@
 					BAMG_LONG_LONG,
 					DRAWING,
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					PARALLELE,
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = "\"/usr/local/ff++/mpich/include\"";
@@ -1072,8 +1023,8 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"\"$(SRCROOT)/../3rdparty/lib\"",
-					"\"$(SRCROOT)/../../../ff/ff-MacIntel/3rdparty/lib\"",
+					"\"$(SRCROOT)/../download/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
@@ -1085,15 +1036,15 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"\"$(SRCROOT)/../3rdparty/lib\"",
-					"\"$(SRCROOT)/../../../ff/ff-MacIntel/3rdparty/lib\"",
+					"\"$(SRCROOT)/../download/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../3rdparty/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../3rdparty/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
 				PRODUCT_NAME = fflib;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited) \"/usr/local/include\"";
@@ -1113,7 +1064,6 @@
 					BAMG_LONG_LONG,
 					DRAWING,
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					PARALLELE,
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -1125,17 +1075,17 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_3)",
-					"\"$(SRCROOT)/../3rdparty/lib\"",
-					"\"$(SRCROOT)/../../../ff/ff-MacIntel/3rdparty/lib\"",
+					"\"$(SRCROOT)/../download/lib\"",
+					"\"$(SRCROOT)/../../../ff/ff-MacIntel/download/lib\"",
 					/opt/intel/composer_xe_2013_sp1.3.166/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../3rdparty/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../download/lib\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"/usr/local/lib\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../3rdparty/lib\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_3 = "\"$(SRCROOT)/../download/lib\"";
 				PRODUCT_NAME = fflib;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../src/bamglib\" \"$(SRCROOT)/../src/Graphics\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/Algo\" \"$(SRCROOT)/../src/fflib\" \"$(SRCROOT)/../src/femlib\" \"$(SRCROOT)/../src/Eigen\" \"$(SRCROOT)/../arpack/arpack++/include\" \"$(SRCROOT)/..\" $(inherited) \"/usr/local/include\"";
@@ -1179,13 +1129,14 @@
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../3rdparty/lib\"",
+					"\"$(SRCROOT)/../download/lib\"",
 					/usr/local/lib,
 					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "freefem++-nw";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";
@@ -1205,13 +1156,14 @@
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../3rdparty/lib\"",
+					"\"$(SRCROOT)/../download/lib\"",
 					/usr/local/lib,
 					/opt/intel/composer_xe_2015.3.187/compiler/lib,
 					"/usr/local/ff++/mpich/petsc/lib",
 					"/usr/local/ff++/mpich/lib",
 					/opt/intel/composer_xe_2015.2.132/compiler/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "freefem++-nw";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../arpack/arpack++/include $(SRCROOT)/.. $(USER_HEADER_SEARCH_PATHS)";

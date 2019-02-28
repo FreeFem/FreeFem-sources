@@ -73,10 +73,12 @@ void SplitSimplex(int N,R1 *P,int *K,int op=0,R1 *AB=0)
       P[i+op] = R1(i*h).Bary(AB);
     else
       P[i+op] = R1(i*h);
-  for(int i=0;i<N;++i)
-    {
-      K[i]=i+op;
-      K[i]=i+1+op;
+    int l=0;
+  for(int i=0;i<N;++i) {
+    K[l++]=i+op;
+    K[l++]=i+1+op;
+   if(verbosity>200)
+     cout << "l="<< l/2 <<  " "<< K[l-2] <<" "<<  K[l-1] <<" "<<  endl;
     }
 }
 /*
@@ -202,15 +204,6 @@ void SplitSimplex(int N,R3 *P,int *K,int op=0,R3 *ABC=0)
                 K[l++]= op+NumSimplex2(N-i-1,N-j);
             }
 } */
-
-
-
-
-
-
-
-
-
 
 
 void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
@@ -379,8 +372,63 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
     }
   if(verbosity>200)
     cout << "l= " << l << " ntri=" << ntri << endl;
-  assert( l == ntri); 
+  assert( l == ntri);
 }
+
+
+
+
+void SplitEdgeSimplex(int N,int &nedge2,int *&edge)
+{
+  const int n=N;
+  const int n2=n*n;
+    
+  int nedge=2*nedge2;
+  int op=0;
+    
+  edge = new int[nedge];
+  //    generation des edges
+  // --------
+  // (i,j,k) barycentric coordinates
+
+  int l=0;
+
+  for (int i=0;i<N;++i)
+    for (int j=0;j<N;++j) {
+      if(i+j<N) {
+        edge[l++]= op+NumSimplex2(i+1,j);
+        edge[l++]= op+NumSimplex2(i,j+1);
+      }
+      if(verbosity>200)
+        cout << "l="<< l/2 <<" "<< edge[l-2] <<" "<<  edge[l-1] <<" "<<  endl;
+    }
+ 
+    for (int i=0;i<N;++i)
+     for (int j=0;j<N;++j) {
+       if(i+j<N) {
+         edge[l++]= op+NumSimplex2(i,j);
+         edge[l++]= op+NumSimplex2(i,j+1);
+       }
+       if(verbosity>200)
+         cout << "l="<< l/2 <<" "<< edge[l-2] <<" "<<  edge[l-1] <<" "<<  endl;
+     }
+    
+    for (int i=0;i<N;++i)
+      for (int j=0;j<N;++j) {
+        if(i+j<N) {
+          edge[l++]= op+NumSimplex2(i,j);
+          edge[l++]= op+NumSimplex2(i+1,j);
+        }
+        if(verbosity>200)
+          cout << i+j << "l="<< l/2 <<" "<< edge[l-2] <<" "<<  edge[l-1] <<" "<<  endl;
+      }
+
+    if(verbosity>200)
+      cout << "l= " << l << " nedge=" << nedge << endl;
+    assert( l == nedge);
+}
+
+
 
 /*
 void  SplitSimplex(int N,int & nv, R1 *& P, int & nk , int *& K)

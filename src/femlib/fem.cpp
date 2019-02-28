@@ -647,7 +647,8 @@ public:
 		for (int it=0;it<nt;it++)
 		    for (int j=0;j<3;j++)
 			TriangleConteningVertex[(*this)(it,j)]=it;
-		
+        cout <<"************************************************"<<endl;
+        //for (int i=0 ; i<3*nt ; i++)     cout << i/3 << " " << i%3 << " val " <<TheAdjacencesLink[i]/3 << " " <<TheAdjacencesLink[i]%3 <<endl;; //cout << "val " <<TheAdjacencesLink[i]<<endl;;
 		Buildbnormalv();
 		if (verbosity>4) 
 		{ 
@@ -1511,7 +1512,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
     R2 Pmin,Pmax;
     Th.BoundingBox(Pmin,Pmax);
     nt=0;
-    int nebi=0; // nb arete interne 
+    int nebi=0; // nb arete interne
     int nbsdd =0;
     int splitmin=100,splitmax=0;
     for (int i=0;i<Th.nt;i++)
@@ -1577,7 +1578,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
     }
 		
 	int nebmax=neb;
-	int nebimax=nebi;   
+	int nebimax=nebi;
 	int nbsddmax=nbsdd;
 	for (int i=0;i<Th.nt;i++)
 	    if(split[i])
@@ -1708,8 +1709,8 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			R2 A(*pva),B(*pvb);
 			R la = 1,lb=0, delta=1.0/n;
 			
-			for (int j=1;j<n;j++) 
-			{ 
+			for (int j=1;j<n;j++)
+			{
 			    sens = 1; //  arete decoupe => le sens change avril 2007
 			    la-=delta;
 			    lb+=delta;
@@ -1746,7 +1747,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		nbsdd++; 
 	    }
 
-		//   cout << "          (debug)  nb vertices on egdes " << nv << endl;  
+		//   cout << "          (debug)  nb vertices on egdes " << nv << endl;
 		    //  cout << " " <<  nebmax << " " << neb << endl;
 	ffassert(neb==nebmax);
 	ffassert(nebi==nebimax);
@@ -1807,14 +1808,14 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    R2 C=vertices[vt[2]]; 
 		    R a = (( B-A)^(C-A))*0.5;
 		    
-		    if (a>0) 
+		    if (a>0)
 			triangles[kt].set(vertices,vt[0],vt[1],vt[2],T.lab);
 		    else 
 			triangles[kt].set(vertices,vt[0],vt[2],vt[1],T.lab);
 		}
 	    }   // end loop on all sub triangle
 	    
-	} //  end 
+	} //  end
 	if (verbosity>3 ) 
 	{ 
 	    cout << "  - regeneration = " << ! noregenereration <<endl; 

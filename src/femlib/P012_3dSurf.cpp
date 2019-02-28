@@ -254,8 +254,113 @@
          
    }
      
-     
-     
+// RT0 surface
+
+      
+      
+      
+      class TypeOfFE_RT0_surf : public GTypeOfFE<MeshS>  {
+      public:
+          typedef MeshS Mesh;
+          typedef MeshS::Element  Element;
+          
+          typedef GFElement<MeshS> FElement;
+          static int dfon[];
+          static const int d=Mesh::Rd::d;
+          //static const int d=Mesh::RdHat::d;
+          TypeOfFE_RT0_surf();
+          void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, RNMK_ & val) const;
+          void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
+      } ;
+      
+      
+      
+      int TypeOfFE_RT0_surf::dfon[]={0,1,0,0};   // dofs per vertice, edge, face, volume
+      
+      
+      TypeOfFE_RT0_surf::TypeOfFE_RT0_surf(): GTypeOfFE<MeshS>(dfon,d,1,3*3,3,false,true)
+      {
+          //  integration on middle of faces  (light ) on  each face ..
+          R2 Pt[]={ R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
+         
+          for (int i=0;i<3;++i)
+              this->PtInterpolation[i]=Pt[i];
+       
+          {
+              int i=0;
+              for (int e=0;e<3;e++) //loop on edge
+                      for (int c=0;c<3;c++,i++) {
+                        this->pInterpolation[i]=e;
+                        this->cInterpolation[i]=c;
+                        this->dofInterpolation[i]=e;
+                        this->coefInterpolation[i]=0.;
+                      }
+             }
+      }
+      
+      
+      
+      
+      void TypeOfFE_RT0_surf::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump) const
+      {
+         
+         cout << "RT0 surface ongoing" << endl;
+          ffassert(0);
+          //   compute de coef d'interpolation
+          int i=ocoef;
+          R3 Nk= K.Edge(0)^K.Edge(1);
+          for (int e=0;e<3;e++)
+          {
+              
+              R3 N= (K.EdgeOrientationS(e)*Nk)^(K.Edge(e)); //^(K.NormalS(e)); //   K.N(e);//  exterior and  ||N|| = 2* area f
+              N /=N.norme();
+              N *= K.EdgeOrientationS(e);//  exterior and  ||N|| = 2* area f
+             
+              for (int c=0;c<3;c++,i++)
+                M.coef[i]=N[c];
+              
+              }
+          
+      }
+  
+      
+      void  TypeOfFE_RT0_surf::FB(const What_d whatd,const MeshS & Th,const MeshS::Element & K,const RdHat &PHat, RNMK_ & val) const
+      {
+          assert(val.N()>=Element::ne); //cout << "RT0 surface ongoing" << endl;
+          ffassert(0);
+          assert(val.M()==3 );
+          // wi = signe * (x - qi)/ (volume*d)
+          val=0;
+          R3 P=K(PHat);
+          R3 A[3]={(K[0]), (K[1]), (K[2])};
+          R cc =1./(2.*K.mesure());
+          R ci[3]={cc*K.EdgeOrientationS(0),cc*K.EdgeOrientationS(1),cc*K.EdgeOrientationS(2)};     /// orientation????????
+          
+          if (whatd & Fop_D0)
+          {
+              
+              for(int i=0;i<3;++i)
+              {
+                  val(i,0,op_id) = (P.x-A[i].x)*ci[i] ; //cout << "test " << (P.x-A[i].x) << " " << (P.y-A[i].y) << " " << (P.z-A[i].z) << " " <<ci[i] << endl;
+                  val(i,1,op_id) = (P.y-A[i].y)*ci[i] ;
+                  val(i,2,op_id) = (P.z-A[i].z)*ci[i] ;
+                  //cout  << "RT 3d  "<<i << " "<< X << " " <<wi << " fo: " << K.faceOrient(i) <<endl;
+              }
+          }
+          
+          if (whatd & Fop_D1)
+          {
+              RN_ Ci(ci,3);
+              if (whatd & Fop_dx)
+                  val('.',0,op_dx) = Ci;  // cout << " deriv 1 " << Ci << endl;
+              if (whatd & Fop_dy)
+                  val('.',1,op_dy) = Ci;//cout << " deriv 2" << Ci << endl;
+              if (whatd & Fop_dz)
+                  val('.',2,op_dz) = Ci;//cout << " deriv 3" << Ci << endl;
+          }
+          
+      }
+ 
    static TypeOfFE_P0Lagrange_surf P0_surf;
    GTypeOfFE<MeshS> & P0Lagrange_surf(P0_surf);
      
@@ -265,12 +370,13 @@
    static TypeOfFE_P2Lagrange_surf P2_surf;
    GTypeOfFE<MeshS> & P2Lagrange_surf(P2_surf);
      
-     
+   static TypeOfFE_RT0_surf  RT0_surf;
+   GTypeOfFE<MeshS> & RT0surf(RT0_surf);
+      
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P0=P0_surf;
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P1=P1_surf;
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P2=P2_surf;
-     
-     
+   template<> GTypeOfFE<MeshS> & DataFE<MeshS>::RT0=RT0_surf;
      
      
      
