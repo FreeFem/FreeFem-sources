@@ -79,12 +79,11 @@ inline    KNM_<R> & KNM_<R>::operator oper (const KNM_<const_R> & u)
   K_throwassert( N() == u.N() && M() == u.M() );   
   if(IsVector1() && u.IsVector1() && shapei.step == u.shapei.step ) // modif 2011 (thank to Oka) 
         KN_<R>::operator oper(u); // modif FH jan 2004
-  else {  
-          KN_<R>  lj(operator()('.',0)); //  (.,O)
-          KN_<const_R>  uj(u('.',0));
-          long  j=M();
-          while ( j--)
-            { lj oper uj;++lj;++uj;} 
+  else {
+      long n=N(),m=M();
+      for(int j=0; j <m;++j)
+          for(int i=0; i <n;++i)
+            this->operator()(i,j) oper u(i,j);
         }      
   return *this;
 }
