@@ -258,8 +258,8 @@ class v_fesS : public RefCounter { public:
             return  pVh   ;}
     FESpaceS * update() ;
 
-    v_fesS(int NN,const pmesh3* t,Stack s, int n,Expression *p)
-    : N(NN), ppTh(&(**t).meshS), pVh(0),stack(s), nbcperiodic(n),periodic(p) {}  //take a pmesh3 and use the pmeshS
+    v_fesS(int NN,const pmeshS* t,Stack s, int n,Expression *p)    ///TODO
+    : N(NN), ppTh(t), pVh(0),stack(s), nbcperiodic(n),periodic(p) {}  //take a pmesh3 and use the pmeshS
     v_fesS(int NN,const v_fesS *f,Stack s,int n,Expression *p)
     :  N(NN),ppTh(f->ppTh),pVh(0),stack(s), nbcperiodic(n),periodic(p)
     {}
@@ -360,7 +360,7 @@ public:
 class pfesS_tef : public v_fesS { public:
     
     const TypeOfFES * tef ;
-    pfesS_tef(const pmesh3* t,const TypeOfFES * tt,Stack s=NullStack, int n=0,Expression *p=0 )
+    pfesS_tef(const pmeshS* t,const TypeOfFES * tt,Stack s=NullStack, int n=0,Expression *p=0 )
     : v_fesS(tt->N,t,s,n,p),tef(tt) { operator FESpaceS * ();}
     FESpaceS * buildupdate( KN<int> & ndfe)   { return  *ppTh ? new FESpaceS(**ppTh,*tef,ndfe.size()/2,ndfe):0;   }
     FESpaceS * buildupdate()   {  return  *ppTh? new FESpaceS(**ppTh,*tef):0;}
@@ -382,7 +382,7 @@ public:
         return r;
     }
  
-    pfesS_tefk(const pmesh3* t,const Fem2D::TypeOfFES ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 )
+    pfesS_tefk(const pmeshS* t,const Fem2D::TypeOfFES ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 )
     : v_fesS(sum((const Fem2D::TypeOfFES **)tt,&Fem2D::TypeOfFES::N,kk),t,s,n,p),
     tef(tt),k(kk),
     atef(kk,tt),tefs(atef)

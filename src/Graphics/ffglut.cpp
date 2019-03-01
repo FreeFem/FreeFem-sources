@@ -499,7 +499,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     R z2= plot.z0;
     
     double r=0,g=0,b=0;
-    
+    if((debug > 3)) cout<< " OnePlotMesh3::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
     bool cc[3]= { plotborder , plotborder && fill , plotmesh && fill };
     double saturation =plotmesh ? 1 :  0.25;
     int kk=0;
@@ -2393,11 +2393,11 @@ case 20+index: {type dummy; fin >= dummy;} break;
     }
     long nbmeshes3=0;
     long nbmeshesS=0;
-    int getMesh3Type = fin.GetMeshes3();   // 0 : dt_mesh3, 1 : dt_meshS, 2 : dt_plots
-    if (getMesh3Type!=2) //  read GetPlots if false ...
+    int getMesh3Type = fin.GetMeshes3(); // 0 : dt_mesh3, 1 : dt_meshS, 12 : dt_mesh3S, 2 : dt_plots
+    if (getMesh3Type!=3) //  read GetPlots if false ...
     {
      //  There are 3D volume solution
-     if(getMesh3Type==0)
+     if(getMesh3Type==0 /*|| getMesh3Type==2 */)
      {
         
          fin >> nbmeshes3;
@@ -2435,7 +2435,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         getMesh3Type==fin.GetMeshes3();
      }
      //  There are 3D surface solution
-     if(getMesh3Type==1)
+     if(getMesh3Type==1 /*|| getMesh3Type==2*/)
      {
          fin >> nbmeshesS;
          if((debug > 2)) cout << " read nb : meshS " << nbmeshesS << endl;
@@ -2471,7 +2471,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         getMesh3Type==fin.GetMeshes3();
      }
-     else if (getMesh3Type==2)
+     else if (getMesh3Type==3)
     
       fin.GetPlots();
     }
@@ -2519,19 +2519,21 @@ case 20+index: {type dummy; fin >= dummy;} break;
             p=new OnePlotCurve(fin,4,this);// add zz and color ..
         else if(what==4)
             p=new OnePlotBorder(fin);
-        else if (what==51 || what==52 || what == 5)
+        else if (what==51 || what == 5)
         {
             fin >> imsh;
             p=new OnePlotMesh3(Ths3[imsh-1]);if((debug > 9)) cout << " plot : mesh3 (volume) " << imsh << endl;
         }
-        else if(what==50 || what==52)
+        else if(what==50)
         {
             fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (surface) " << imsh << endl;
             p=new OnePlotMeshS(ThsS[imsh-1]);
         }
-        
-        
-        
+        else if (what==52)
+        {
+            fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (surface) " << imsh << endl;
+            p=new OnePlotMeshS(ThsS[imsh-1]);
+        }
         else if (what==6  || what==7|| what==16  || what==17)
         {
             iso3d++;
@@ -2544,10 +2546,10 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         else if (what==8  || what==9 || what==18  || what==19)
         {
-            iso3d++;
+            iso3d++;   
             fin >> imsh;
             if(what==8||what==18 ) withiso=true;
-            
+            else if (what%10==9) witharrow=true;
             if((debug > 10)) cout << " plot : mesh3 (surface) " << imsh << endl;
             ffassert(imsh>0 && imsh <=nbmeshesS);
             

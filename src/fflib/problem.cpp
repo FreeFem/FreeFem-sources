@@ -969,18 +969,18 @@ namespace Fem2D {
     
     
     // template struct to obtain the original type mesh - particular case for meshS FEM
-    template<class FE>    struct Trait_MESHO {
+  /*  template<class FE>    struct Trait_MESHO {
         // By default Mesh == MeshO
         typedef typename FE::Mesh MeshO;//   Mesh origin for Mesh S
         typedef typename FE::Mesh Mesh; //   Mesh Mesh S
         static Mesh * topmesh(MeshO *p) {return p;}
-    };
-    template<>    struct Trait_MESHO<FESpaceS> {
+    };*/
+   /* template<>    struct Trait_MESHO<FESpaceS> {
         // By default Mesh == MeshS and MeshO == Mesh3
         typedef  Mesh3 MeshO;
         typedef typename FESpaceS::Mesh Mesh;
         static Mesh * topmesh(MeshO *p) {return p->getMeshS();}
-    };
+    };*/
     
     
     
@@ -2795,10 +2795,9 @@ namespace Fem2D {
         //     sptr->clean(); // modif FH mars 2006  clean Ptr
         
         const CDomainOfIntegration & di= *b->di;
-        
-        typedef typename Trait_MESHO<FESpaceS>::MeshO * pmeshO;
-        pmeshO  ThbfO = GetAny<pmeshO>((*b->di->Th)(stack)); // case 3D surface ThbfO =
-        pmeshS  pThdi = Trait_MESHO<FESpaceS>::topmesh(ThbfO);  //
+        ///typedef typename Trait_MESHO<FESpaceS>::MeshO * pmeshO;
+       // pmeshO  ThbfO = GetAny<pmeshO>((*b->di->Th)(stack)); // case 3D surface ThbfO =
+        pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack)); //Trait_MESHO<FESpaceS>::topmesh(ThbfO);  //
       
         SHOWVERB(cout << " FormBilinear () " << endl);
         //MatriceElementaireSymetrique<R> *mates =0;
@@ -3008,7 +3007,7 @@ namespace Fem2D {
             
         }
         else if (di.kind == CDomainOfIntegration::int2d )
-        {
+        {cout << "bonjour*****11111111"<<endl;
             // cerr << " a faire CDomainOfIntegration::int2d  " << endl;
             if(di.islevelset())
             {
@@ -5406,7 +5405,77 @@ namespace Fem2D {
     void  Element_rhs(const FElementS & Kv,int ie,int label,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                       const QuadratureFormular1d & FI = QF_GaussLegendre2,bool alledges=false,int optim=1)
     {
-        ffassert(0);
+        Stack stack=pvoid2Stack(vstack);
+        MeshPoint mp=*MeshPointStack(stack) ;
+        R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+        const TriangleS & T  = Kv.T;
+        // const QuadratureFormular1d & FI = QF_GaussLegendre2;
+        long npi;
+        long i,n=Kv.NbDoF(),N=Kv.N;
+        
+        //  bool show = Kv.Vh.Th(T)==0;
+        // char * xxx[] ={" u"," v,"," p"," q"," r"};
+        // char * xxxx[] ={" u'"," v',"," p'"," q'"," r'"};
+        // char * yyy[] ={" ","_x ","_y "};
+        
+        bool classoptm = copt && Op.optiexpK;
+        // assert(  (copt !=0) ==  (Op.where_in_stack_opt.size() !=0) );
+        if (Kv.number<1 && verbosity/100 && verbosity % 10 == 2)
+            cout << "Element_rhs S: copt = " << copt << " " << classoptm << "opt " << optim << endl;
+        
+        int lastop=0;
+        What_d Dop = Op.DiffOp(lastop);
+        assert(Op.MaxOp() <last_operatortype);
+        
+        // assert(lastop<=3);
+        
+        RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
+        
+        for (npi=0;npi<FI.n;npi++) // loop on the integration point
+        {
+            QuadratureFormular1dPoint pi( FI[npi]);
+            R3 E=T.Edge(ie);
+            double le = sqrt((E,E));
+            double coef = le*pi.a;
+            double sa=pi.x,sb=1-sa;
+            R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
+            PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
+            R2 Pt(PA*sa+PB*sb ); //
+            Kv.BF(Dop,Pt,fu);
+            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,R2(E.y,-E.x)/le,ie);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+            
+            for ( i=0;  i<n;   i++ )
+                // if (alledges || onWhatIsEdge[ie][Kv.DFOnWhat(i)]) // bofbof faux si il y a des derives ..
+            {
+                RNM_ wi(fu(i,'.','.'));
+                int il=0;
+                for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                {
+                    LOperaD::K ll(*l);
+                    pair<int,int> ii(ll.first);
+                    double w_i =  wi(ii.first,ii.second);
+                    R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                    // FFCS - removing what is probably a small glitch
+                    if ( copt && ( optim==1) && Kv.number<1)
+                    {
+                        R cc  =  GetAny<R>(ll.second.eval(stack));
+                        if ( c != cc) {
+                            cerr << c << " =! " << cc << endl;
+                            cerr << "Sorry error in Optimization (v) add:  int2d(Th,optimize=0)(...)" << endl;
+                            ExecError("In Optimized version "); }
+                    }
+                    
+                    
+                    //= GetAny<double>(ll.second.eval(stack));
+                    
+                    B[Kv(i)] += coef * c * w_i;
+                }
+            }
+            
+            
+        }
+        *MeshPointStack(stack) = mp;
     }
     
     // end 3d
@@ -5971,7 +6040,7 @@ namespace Fem2D {
     { // return true if BC
         typedef typename FESpace::Mesh Mesh ;
         typedef Mesh * pmesh;
-        typedef typename Trait_MESHO<FESpace>::MeshO * pmeshO;
+        ///typedef typename Trait_MESHO<FESpace>::MeshO * pmeshO;
         bool ret=false;
         typedef DotStar_KN_<R> DotStar;
         typedef DotSlash_KN_<R> DotSlash;
@@ -5990,8 +6059,8 @@ namespace Fem2D {
                 {
                     const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
                     // integration mesh type
-                    pmeshO  ThbfO = GetAny<pmeshO>((*bf->di->Th)(stack)); // case 3D surface ThbfO =
-                    pmesh  Thbf= Trait_MESHO<FESpace>::topmesh(ThbfO);  //
+                    ///pmeshO  ThbfO = GetAny<pmeshO>((*bf->di->Th)(stack)); // case 3D surface ThbfO =
+                    pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));///Trait_MESHO<FESpace>::topmesh(ThbfO);  //
                     if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
                 }
             }
@@ -6004,8 +6073,8 @@ namespace Fem2D {
             {
                 if (B) {
                     const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
-                    pmeshO  ThbfO = GetAny<pmeshO>((*bf->di->Th)(stack)); // case 3D surface ThbfO =
-                    pmesh  Thbf= Trait_MESHO<FESpace>::topmesh(ThbfO);  //
+                    ///pmeshO  ThbfO = GetAny<pmeshO>((*bf->di->Th)(stack)); // case 3D surface ThbfO =
+                    pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack)); //Trait_MESHO<FESpace>::topmesh(ThbfO);  //
                     if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf);
                 }
             }
