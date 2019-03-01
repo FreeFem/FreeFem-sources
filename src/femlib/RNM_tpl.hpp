@@ -228,7 +228,8 @@ typedef struct {
 #define BLAS_ddot F77_FUNC_(ddot,DDOT)
 #define BLAS_zdotu F77_FUNC_(zdotu,ZDOTU)
 #define BLAS_zdotc F77_FUNC_(zdotc,ZDOTC)
-#define DCL_DOT(U,DOT) extern "C"  U DOT (const int*, const U*, const int*, const U*, const int*);
+
+#define DCL_DOT(U,DOT) extern "C"  U DOT ( int*,  U*,  int*,  U*,  int*);
 
 DCL_DOT(double,BLAS_ddot);
 // XXDCL_DOT(complex<double>,BLAS_zdotu);

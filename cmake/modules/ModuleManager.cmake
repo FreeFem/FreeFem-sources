@@ -24,7 +24,8 @@ IF(WITH_PETSC)
 ENDIF(WITH_PETSC)
 
 
-LIST(APPEND MODULE_LIST FFTW
+LIST(APPEND MODULE_LIST CHOLMOD
+                        FFTW
                         #GMM
                         IPOPT
                         METIS

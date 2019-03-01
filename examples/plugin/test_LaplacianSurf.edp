@@ -1,0 +1,86 @@
+// test to valid the adding of the surfacic finite elements in FreeFem++
+
+load "msh3"
+load "medit"
+
+
+/////variational form
+
+/////////////////////////////////
+// laplacian 2D
+mesh Th = square(10,10);
+
+fespace Vh(Th,P1);
+Vh uVar,vVar;
+Vh uPb, vPb;
+func f = -12.;
+func g = P.x*P.x+2.*P.y*P.y;
+
+macro Grad2(uVar) [dx(uVar),dy(uVar)]  // EOM
+
+//with variational form
+varf a(uVar,vVar) = int2d(Th)(Grad2(uVar)'*Grad2(vVar))
+ - int2d ( Th ) ( f * vVar )
+  + on(1,uVar=g);
+ 
+matrix AVar =a(Vh,Vh);  
+real[int] bVar = a(0,Vh);
+real[int] solVar = AVar^-1*bVar;
+
+// with problem
+
+problem Lap2d(uPb,vPb , solver = CG )  = int2d(Th)(Grad2(uPb)'*Grad2(vPb))
+ - int2d ( Th ) ( f * vPb )
+  + on(1,uPb=g);
+Lap2d;
+
+/////////////////////////////////////
+// laplacian Beltrami
+// build surface 3D  with Th 2D mesh and move with pi/2 rotation ThSurf
+real theta = pi/2;
+meshS ThS = movemesh2S(Th, transfo=[x, cos(theta)*y-sin(theta)*z, sin(theta)*y+cos(theta)*z]);
+
+fespace VhS(ThS,P1);
+VhS uSVar,vSVar;
+VhS uSPb,vSPb;
+
+/*(const R3 & P){
+    R theta = 3.14; //pi/2.;
+    R x=P.x;
+    R y=cos(theta)*P.y-sin(theta)*P.z;
+    R z=sin(theta)*P.y+cos(theta)*P.z;
+    return x*x+2*y*y;} // boundary condition
+*/
+
+macro Grad3(uSVar) [dx(uSVar),dy(uSVar),dz(uSVar)]  // EOM
+
+//with variational form
+varf aS(uSVar,vSVar) = int2d(ThS)(Grad3(uSVar)'*Grad3(vSVar))
+ - int2d ( ThS ) ( f * vSVar )
+  + on(1,uSVar=g);
+matrix ASVar =aS(VhS,VhS);  
+real[int] bSVar = aS(0,VhS);
+real[int] solSVar = ASVar^-1*bSVar;
+  
+// with problem
+problem Lap3dS(uSPb,vSPb , solver = CG )  = int2d(ThS)(Grad3(uSPb)'*Grad3(vSPb))
+ - int2d ( ThS ) ( f * vSPb )
+  + on(1,uSPb=g);
+Lap3dS;
+
+savemesh (Th, "Th2D.mesh");
+savemesh (ThS, "ThS.mesh");
+
+// check solution for variational forms  
+real[int] errVar = solVar - solSVar;  
+cout << "---> norm error l2 for variationnal form " << errVar.l2 << endl;
+
+// check solution with problem
+real[int] errPb = uPb[] - uSPb[];  
+cout << "---> norm error l2 with problem " << errPb.l2;
+
+plot(uSPb,cmm=" USPd  ",wait=1);
+
+//plot(ThS,cmm=" ThS",wait=1);
+
+

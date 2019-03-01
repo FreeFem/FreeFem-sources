@@ -376,13 +376,20 @@ public:
     return fo;
   }
 
-  bool   EdgeOrientation(int i) const 
-    { return &at(nvedge[i][0]) < &at(nvedge[i][1]);}
+  int   EdgeOrientation(int i) const
+    {  return 2*(&at(nvedge[i][0]) < &at(nvedge[i][1]))-1;}// return -1 or 1 FH: Change jan 2018 
     
-  R lenEdge(int i) const {ASSERTION(i>=0 && i <3);
+  R lenEdge(int i) const {ASSERTION(i>=0 && i <ne);
     Rd E=Edge(i);return sqrt((E,E));}
-
-  R lenEdge2(int i) const {ASSERTION(i>=0 && i <3);
+  R lenEdgesmax() const
+    {
+        R lx2 = 0;
+        for (int i=0; i< ne; ++i)
+            lx2 = max(lx2,lenEdge2(i));
+        return sqrt(lx2);
+        
+    }
+  R lenEdge2(int i) const {ASSERTION(i>=0 && i <ne);
         Rd E=Edge(i);return ((E,E));}
   
   R  mesure() const {return mes;}
@@ -544,7 +551,9 @@ public:
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
-  
+  int nElementonB(int k,int j) const // add v4 F.H 12/2018 (not sure for internal boundary !!!)
+    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk%nea  != k) ? 2 : 1;}
+    
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
     if(p>=0) j=p%nea;
@@ -871,7 +880,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         {
             if( p->second.first && p->second.second)
             {
-                if(verbosity && step==0)  cout << " error in orientation of internal face beetwen region "
+                if(verbosity>2 && step==0)  cout << " error in orientation of internal face beetwen region "
                     << p->first.first << " , " << p->first.second << " to no zero value "
                     << p->second.first << "  " << p->second.second << endl;
                 uncorrect++;
@@ -879,7 +888,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         }
         if(uncorrect==0) break;
     }
-    if( nbchangeorient && verbosity) cout << " Warning change oriantation of " << nbchangeorient << " faces \n";
+    if( nbchangeorient && verbosity>2) cout << " Warning change orientation of " << nbchangeorient << " faces \n";
     if( kerr || kerrf ) {
         cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
         cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";
@@ -1512,7 +1521,7 @@ void GenericMesh<T,B,V>::BuildBound()
 	 }
     }
   if(verbosity>3)
-      cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe 
+    cout << "  -- GMesh" << V::d << " , n V: " << nv << " , n Elm: " << nt << " , n B Elm: " << nbe << "mes " << mes << " " << mesb
 	 << " , bb: (" << Pmin << ") , (" << Pmax << ")\n"; 
 }
 

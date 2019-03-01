@@ -1,0 +1,55 @@
+SUFF64	WindowsPackage.m4	/^;; ifelse(SIZEOFPTR,64, define(`SUFF64',`-64' ),define(`SUFF64',`' ))$/;"	d
+SUFF64	WindowsPackage.m4	/^;; ifelse(SIZEOFPTR,64, define(`SUFF64',`-64' ),define(`SUFF64',`' ))$/;"	d
+IFMPI	WindowsPackage.m4	/^;; define(IFMPI,ifelse(len(MPIPROG),0,; ,))$/;"	d
+IFMGW32	WindowsPackage.m4	/^;; define(IFMGW32,ifelse(SIZEOFPTR,32,,;))$/;"	d
+IFMGW64	WindowsPackage.m4	/^;; define(IFMGW64,ifelse(SIZEOFPTR,64,,;))$/;"	d
+CHECK_COMPILE_FLAG	acmacros.m4	/^AC_DEFUN([CHECK_COMPILE_FLAG],$/;"	m
+mpipath	acmpi.m4	/^AC_ARG_WITH(mpipath,[  --with-mpipath= the path of mpich under windows (no command  mpic++, ... /;"	w
+mpilibs	acmpi.m4	/^AC_ARG_WITH(mpilibs,[  --with-mpilibs= the libs to add to c++,fc, ... (to link with c++ - ex:   /;"	w
+mpilibsc	acmpi.m4	/^AC_ARG_WITH(mpilibsc,[  --with-mpilibsc= the libs to add to c  ... (to link with cc (for pastix /;"	w
+mpiinc	acmpi.m4	/^AC_ARG_WITH(mpiinc,[  --with-mpiinc= the include directory directive and preprocess directive  (/;"	w
+mpi	acmpi.m4	/^AC_ARG_WITH(mpi,[  --with-mpi=[yes|no|mpic++|lam|mpich|openmpi|\/usr\/local\/bin\/mpic++|... ]	o/;"	w
+HAVE_MPI_DOUBLE_COMPLEX	acmpi.m4	/^AC_DEFINE(HAVE_MPI_DOUBLE_COMPLEX,1, mpi_double_complex)$/;"	d
+MPIPROG	acmpi.m4	/^   		  AC_SUBST(MPIPROG,"$ff_mpiprog")$/;"	s
+MPISCRIPT	acmpi.m4	/^   		  AC_SUBST(MPISCRIPT,"ff-mpirun")$/;"	s
+MPIRUN	acmpi.m4	/^   		  AC_SUBST(MPIRUN,$MPIRUN)$/;"	s
+MPICXX	acmpi.m4	/^                  AC_SUBST(MPICXX,$MPICXX)$/;"	s
+MPICXX	acmpi.m4	/^	        AC_SUBST(MPICXX,$ff_save_cxx)$/;"	s
+MPIF77	acmpi.m4	/^	      AC_SUBST(MPIF77)$/;"	s
+MPIFC	acmpi.m4	/^	      AC_SUBST(MPIFC)$/;"	s
+MPICXX	acmpi.m4	/^	AC_SUBST(MPICXX,$MPICXX)		$/;"	s
+MPICC	acmpi.m4	/^	AC_SUBST(MPICC,$MPICC)$/;"	s
+PASTIX_HOSTARCH	acmpi.m4	/^	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)$/;"	s
+MPI_INC_DIR	acmpi.m4	/^	AC_SUBST(MPI_INC_DIR,$ff_MPI_INCLUDE_DIR)      		$/;"	s
+MPI_INCLUDE	acmpi.m4	/^	AC_SUBST(MPI_INCLUDE,$ff_MPI_INCLUDE)$/;"	s
+MPI_LIB_DIRS	acmpi.m4	/^	AC_SUBST(MPI_LIB_DIRS,$ff_MPI_LIB_DIRS)$/;"	s
+MPI_LIB	acmpi.m4	/^	AC_SUBST(MPI_LIB,$ff_MPI_LIB)$/;"	s
+MPI_LIBC	acmpi.m4	/^	AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)$/;"	s
+MPI_LIBFC	acmpi.m4	/^	AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)$/;"	s
+SKIP_TESTS_MPI	acmpi.m4	/^        AC_SUBST(SKIP_TESTS_MPI,"no")$/;"	s
+MPIRUN	acmpi.m4	/^	  AC_SUBST(MPIRUN,"")      		$/;"	s
+MPICC	acmpi.m4	/^	  AC_SUBST(MPICC,"")      		$/;"	s
+MPICXX	acmpi.m4	/^	  AC_SUBST(MPICXX,"")      		$/;"	s
+MPIF77	acmpi.m4	/^	  AC_SUBST(MPIF77,"")      		$/;"	s
+MPIFC	acmpi.m4	/^	  AC_SUBST(MPIFC,"")      		$/;"	s
+MPI_INCLUDE	acmpi.m4	/^	  AC_SUBST(MPI_INCLUDE,"")$/;"	s
+MPI_LIB_DIRS	acmpi.m4	/^	  AC_SUBST(MPI_LIB_DIRS,"")$/;"	s
+MPI_LIB	acmpi.m4	/^	  AC_SUBST(MPI_LIB,"")$/;"	s
+MPI_LIBC	acmpi.m4	/^	  AC_SUBST(MPI_LIBC,"")$/;"	s
+MPI_LIBFC	acmpi.m4	/^	  AC_SUBST(MPI_LIBFC,"")$/;"	s
+SKIP_TESTS_MPI	acmpi.m4	/^          AC_SUBST(SKIP_TESTS_MPI,"yes")$/;"	s
+profiling	acoptim.m4	/^AC_ARG_ENABLE(profiling,[  --enable-profiling	Turn on profiling])$/;"	e
+m64	acoptim.m4	/^AC_ARG_ENABLE(m64,[  --enable-m64	Turn on 64 bits architecture])$/;"	e
+m32	acoptim.m4	/^AC_ARG_ENABLE(m32,[  --enable-m32	Turn on 32 bits architecture])$/;"	e
+debug	acoptim.m4	/^AC_ARG_ENABLE(debug,[  --enable-debug	Turn on debug versions of FreeFem++])$/;"	e
+optim	acoptim.m4	/^AC_ARG_ENABLE(optim,[  --enable-optim	Turn on compiler optimization])$/;"	e
+generic	acoptim.m4	/^AC_ARG_ENABLE(generic,$/;"	e
+OPTIM_TYPE	acoptim.m4	/^AC_SUBST(OPTIM_TYPE,$ff_optim_type)$/;"	s
+AX_PATH_GSL	ax_lib_gsl.m4	/^AC_DEFUN([AX_PATH_GSL],$/;"	m
+HDF5_VERSION	ax_lib_hdf5.m4	/^#     AC_SUBST(HDF5_VERSION)$/;"	s
+AX_LIB_HDF5	ax_lib_hdf5.m4	/^AC_DEFUN([AX_LIB_HDF5], [$/;"	m
+AX_OPENMP	ax_openmp.m4	/^AC_DEFUN([AX_OPENMP], [$/;"	m
+REFFILE	regtests.m4	/^define(REFFILE,"ref.edp")$/;"	d
+ONETEST	regtests.m4	/^define(ONETEST,$/;"	d
+[[TESTVAR]]	regtests.m4	/^	define([[TESTVAR]],TEST[[]]translit($1,-_,XX))$/;"	d
+[[REFVAR]]	regtests.m4	/^	define([[REFVAR]],REF[[]]translit($1,-_,XX))$/;"	d

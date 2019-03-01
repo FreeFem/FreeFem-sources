@@ -326,7 +326,7 @@ public:
   
   
   virtual R operator()(const GFElement<Mesh>  & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const  ;
-  virtual void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const =0;
+  virtual void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, KNMK_<R> & val) const =0;
   virtual void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const {}; // no change by deflaut
     // ocoef is the offset of the coef in M 
     // odf is the offset in the df 
@@ -388,7 +388,8 @@ private:
   {
     static GTypeOfFE<mesh> & P0; 
     static GTypeOfFE<mesh> & P1; 
-    static GTypeOfFE<mesh> & P2; 
+    static GTypeOfFE<mesh> & P2;
+    static GTypeOfFE<mesh> & RT0;  ///TODOCHECK
   };
   
 
@@ -444,8 +445,8 @@ public:
   //void Draw(const RN_& U,const RN_& V, const  KN_<R> & Viso,R coef,int i0,int i1) const;
   //Rd   MinMax(const RN_& U,const RN_& V,int i0,int i1) const  ;
   //Rd   MinMax(const RN_& U,int i0) const  ;
-  void BF(const Rd & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
-  void BF(const What_d whatd, const Rd & P,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
+  void BF(const RdHat & PHat,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
+  void BF(const What_d whatd, const RdHat & PHat,RNMK_ & val) const;// { tfe->FB(Vh.Th,T,P,val);}
   void set(InterpolationMatrix<RdHat> &M) const {this->tfe->set(this->Vh.Th,this->T,M,0,0,0);}
   // add april 08   begin end number for df of the componante ic 
   int dfcbegin(int ic) const { return this->tfe->begin_dfcomp[ic];}
@@ -484,7 +485,7 @@ public:
   int FromASubDF(int i) const { return this->tfe->fromASubDF[i];}
   int DFOfNode(int df) const { return this->tfe->DFOfNode[df];} // the df number on the node 
   
-  R operator()(const Rd & PHat,const KN_<R> & u,int i,int op)  const ;
+  R operator()(const RdHat & PHat,const KN_<R> & u,int i,int op)  const ;
   complex<R> operator()(const RdHat & PHat,const KN_<complex<R> > & u,int i,int op)  const ;
   
   // GFElementGlobalToLocal operator()(const KN_<R> & u ) const { return GFElementGlobalToLocal(*this,u);}
@@ -561,9 +562,9 @@ public:
     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
     maxNbcoefforInterpolation(TFE[0]->NbcoefforInterpolation)
     
-    {
+  { 
 	if(verbosity) cout << "  -- FESpace: Nb of Nodes " << NbOfNodes 
-	    << " Nb of DoF " << NbOfDF << endl;
+			   << " Nb of DoF " << NbOfDF <<endl;
     }
     
   GFESpace(const GFESpace & Vh,int kk,int nbequibe=0,int *equibe=0);
@@ -615,9 +616,10 @@ public:
     */
     bool isFEMesh() const { return ! NodesOfElement  && ( N==1) ;} // to make optim
   template <class R>  
-  KN<R>  newSaveDraw(const KN_<R> & U,int composante,int & lg,KN<Rd> &Psub,KN<int> &Ksub,int op_U=0) const  ; 
-
-
+  KN<R>  newSaveDraw(const KN_<R> & U,int composante,int & lg,KN<typename Mesh::RdHat> &Psub,KN<int> &Ksub,int op_U=0) const  ;
+  
+ 
+    
 private: // for gibbs  
   int gibbsv (long* ptvoi,long* vois,long* lvois,long* w,long* v);
 };
@@ -651,22 +653,22 @@ inline   int  GFElement<Mesh>::NbDoF(int i) const {
   return  this->Vh.LastDFOfNode(node)-this->Vh.FirstDFOfNode(node);}  
 
 template<class Mesh>
-inline void GFElement<Mesh>::BF(const Rd & P,RNMK_ & val) const {
-  this->tfe->FB(Fop_D0|Fop_D1,this->Vh.Th,this->T,P,val);}  
+inline void GFElement<Mesh>::BF(const RdHat & PHat,RNMK_ & val) const {
+  this->tfe->FB(Fop_D0|Fop_D1,this->Vh.Th,this->T,PHat,val);}  
 
  
 template<class Mesh>
-    inline void GFElement<Mesh>::BF(const What_d whatd,const Rd & P,RNMK_ & val) const { this->tfe->FB(whatd,this->Vh.Th,this->T,P,val);}
+    inline void GFElement<Mesh>::BF(const What_d whatd,const RdHat & PHat,RNMK_ & val) const { this->tfe->FB(whatd,this->Vh.Th,this->T,PHat,val);}
     
 //template<class Mesh>
  //   inline void GFElement<Mesh>::set(InterpolationMatrix<typename Mesh::Element::RdHat> &M) const { this->tfe->set(this->Vh.Th,this->T,&M);}
 
 template<class Mesh>
-inline   R GFElement<Mesh>::operator()(const Rd & PHat,
+inline   R GFElement<Mesh>::operator()(const RdHat & PHat,
                                 const KN_<R> & u,int i,int op)  const
 {
     return (*this->tfe)(*this,PHat,u,i,op);
-}
+}                       
 
 template<class Mesh>
 inline  complex<R> GFElement<Mesh>::operator()(const RdHat & PHat,const KN_<complex<R> > & u,int i,int op)  const 
@@ -722,13 +724,13 @@ public:
     
   void init(InterpolationMatrix<RdHat> & M,FElement * pK=0,int odf=0,int ocomp=0,int *pp=0) const;
   void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump ) const; // no change by deflaut 
-  void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const ;
+  void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, KNMK_<R> & val) const ;
   ~GTypeOfFESum(){}
 } ;
 
 
 template<class Mesh>
-void GTypeOfFESum<Mesh>::FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, KNMK_<R> & val) const  
+void GTypeOfFESum<Mesh>::FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, KNMK_<R> & val) const
 {
     val=0.0;
     SubArray t(val.K());
@@ -743,7 +745,7 @@ void GTypeOfFESum<Mesh>::FB(const What_d whatd,const Mesh & Th,const Element & K
 	  assert(ni<nii && di < dii);
 	  RNMK_ v(val(SubArray(dii-di,di),SubArray(nii-ni,ni),t));     
 	  if (j<=i)
-	      teb[i]->FB(whatd,Th,K,P,v);       
+	      teb[i]->FB(whatd,Th,K,PHat,v);
 	  else
 	      v=val(SubArray(DF[j+1]-DF[j],DF[j]),SubArray(NN[j+1]-NN[j],NN[j]),t);     
       }
@@ -794,14 +796,16 @@ void InterpolationMatrix<RdHat>::set(const GFElement<Mesh> & FK)
 }
 
 typedef  GTypeOfFE<Mesh3> TypeOfFE3;
-typedef  GTypeOfFE<Mesh3> TypeOfFE3;
+typedef  GTypeOfFE<MeshS> TypeOfFES;
 typedef  GFESpace<Mesh3> FESpace3;
+typedef  GFESpace<MeshS> FESpaceS;
 typedef  GFESpace<Mesh2> FESpace2;
 typedef  GFElement<Mesh3> FElement3;
+typedef  GFElement<MeshS> FElementS;
 typedef  GFElement<Mesh2> FElement2;
-typedef  GFElement<Mesh3> FElement3;
 typedef  GbaseFElement<Mesh2> baseFElement2;
 typedef  GbaseFElement<Mesh3> baseFElement3;
+typedef  GbaseFElement<MeshS> baseFElementS;
 
 }
 

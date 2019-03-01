@@ -1,0 +1,164 @@
+// Schwarz without overlapping (Shur complement Neumann -> Dirichet)  
+//  with matrix ---
+//  ------------
+verbosity=2;
+real cpu=clock();
+
+macro laplacien(u,v) (dx(u)*dx(v)+dy(u)*dy(u)) //
+
+// --- beging  meshes  building --------------
+int nbsd=4;
+int labext= nbsd+1;
+real[int] theta(nbsd+1),cost(nbsd),sint(nbsd);
+
+for (int i=0;i<nbsd;i++)
+ {
+  real t=i*2*pi/nbsd;
+  theta[i]= t;
+  theta[i+1]= (i+1)*2*pi/nbsd;
+  cost[i]=cos(t);
+  sint[i]=sin(t);
+ }
+
+
+border g1(t=0,1){x=cost[0]*t;y=sint[0]*t;label=1;};
+border g2(t=0,1){x=cost[1]*t;y=sint[1]*t;label=2;};
+border g3(t=0,1){x=cost[2]*t;y=sint[2]*t;label=3;};
+border g4(t=0,1){x=cost[3]*t;y=sint[3]*t;label=4;};
+
+border e12(t=theta[0],theta[1]){x=cos(t);y=sin(t);label=labext;};
+border e23(t=theta[1],theta[2]){x=cos(t);y=sin(t);label=labext;};
+border e34(t=theta[2],theta[3]){x=cos(t);y=sin(t);label=labext;};
+border e41(t=theta[3],theta[4]){x=cos(t);y=sin(t);label=labext;};
+
+ int Ng = 10;
+ int Ne = 10;
+
+plot(g1(Ng)+g2(Ng)+g3(Ng)+g4(Ng) + e12(Ne) + e23(Ne)+ e34(Ne) + e41(Ne) ,wait=1);
+
+mesh Thf = buildmesh( g1(Ng)+g2(Ng)+g3(Ng)+g4(Ng) + e12(Ne) + e23(Ne)+ e34(Ne) + e41(Ne) );
+fespace Phf(Thf,P0);
+fespace Vhf(Thf,P1);
+Phf reg=region;
+int rr1 = 0; 
+int rr2 = 1;
+int rr3 = 2; 
+int rr4 = 3;
+
+func rreg1 = reg==rr1;
+func rreg2 = reg==rr2;
+func rreg3 = reg==rr3;
+func rreg4 = reg==rr4;
+
+Vhf reg1=rreg1, reg2=rreg2, reg3=rreg3, reg4=rreg4;
+
+int[int] ssd(Thf.nt);
+for (int i=0;i<Thf.nt;i++)
+ ssd[i]=reg[][i];
+
+mesh The = emptymesh(Thf,ssd);
+plot(Thf,wait=1);
+plot(The,wait=1);
+
+fespace Phe(The,P0); //
+
+Phe rege=reg;
+plot(rege,fill=1,wait=1);
+fespace Whe(The,P1dc); // espace des multilicateur de Lagrange
+fespace Mhe(The,P1); // espace des multilicateur de Lagrange
+Whe trace;
+Mhe lambda; 
+Mhe intern; //  1 if the vertex in internal and 0 if on the real boundary 
+
+intern=  (square(x)+square(y))  < 0.999; 
+
+//   - end of  meshes building  . 
+mesh[int] aTh(nbsd);
+for (int i=0;i<nbsd;i++)
+  aTh[i]=trunc(Thf,region==i);
+
+int i=0;
+
+fespace Xh1(aTh[0],P1);
+Xh1 u1,v1,dnu1;
+
+fespace Xh2(aTh[1],P1);
+Xh2 u2,v2,dnu2;
+
+fespace Xh3(aTh[2],P1);
+Xh3 u3,v3,dnu3;
+
+fespace Xh4(aTh[3],P1);
+Xh4 u4,v4,dnu4;
+
+matrix I1=interpolate(Xh1,Mhe); // build interpolation matrix  Mhe -> Xh1
+matrix I2=interpolate(Xh2,Mhe); // build interpolation matrix  Mhe -> Xh2
+matrix I3=interpolate(Xh3,Mhe); // build interpolation matrix  Mhe -> Xh2
+matrix I4=interpolate(Xh4,Mhe); // build interpolation matrix  Mhe -> Xh3
+
+int nm = Mhe.ndof;
+real [int]  l1(nm),l2(nm),l3(nm),l4(nm);
+
+func f = (x+1)*(y-2);
+varf vgamma(u,v) = on(1,2,3,4,u=1);
+Mhe  gamma;
+gamma[] = vgamma(0,Mhe,tgv=1);
+plot(gamma,wait=1,cmm="gamma",value=1);
+varf vM(u,v) =  int1d(The)( u*v) ;
+matrix M = vM(Mhe,Mhe,solver=sparsesolver) ;
+ 
+// debut macro par ssd 
+macro Pb(A,B,a,P,Th,u1,v1,Xh)
+   cout << " -- PB -- " << endl;
+  varf a(u1,v1) =   int2d(Th)( dx(u1)*dx(v1)+dy(u1)*dy(v1) )
+  - int2d(Th)( f*v1) ;
+problem P(u1,v1,init=i,solver=Cholesky) = 
+  int2d(Th)( dx(u1)*dx(v1)+dy(u1)*dy(v1) )
+  - int2d(Th)( f*v1) 
+  + on(labext,u1= 0 ) 
+  + on(1,2,3,4,u1=lambda)
+  ;
+
+matrix A = a(Xh,Xh,solver=GMRES) ;
+real[int] B(Xh.ndof);
+B=a(0,Xh);
+
+// Fin macro ssd -------
+
+
+Pb(A1,b1,va1,Pb1,aTh[0],u1,v1,Xh1);
+Pb(A2,b2,va2,Pb2,aTh[1],u2,v2,Xh2);
+Pb(A3,b3,va3,Pb3,aTh[2],u3,v3,Xh3);
+Pb(A4,b4,va4,Pb4,aTh[3],u4,v4,Xh4);
+
+
+func real[int] BoundaryProblem(real[int] &l)
+{
+  int vv = verbosity;
+  verbosity=0; 
+  lambda[]=l;
+  Pb1;  dnu1[]= A1*u1[];dnu1[]+=b1;  l1= I1'*dnu1[];
+  Pb2;  dnu2[]= A2*u2[];dnu2[]+=b2;  l2= I2'*dnu2[];
+  Pb3;  dnu3[]= A3*u3[];dnu3[]+=b3;  l3= I3'*dnu3[];
+  Pb4;  dnu4[]= A4*u4[];dnu4[]+=b4;  l4= I4'*dnu4[];
+  l1 += l2;
+  l1 += l3;
+  l1 += l4;
+  l1 = l1.* intern[]; 
+  cout << " residu = " <<  l1.max << " " << l1.min << endl;
+  lambda[]=M*l1;
+  plot(lambda,wait=1,cmm="lamdba");
+  lambda[]=lambda[].* intern[];
+  i++;
+  verbosity=vv; 
+  return lambda[] ;
+};
+
+lambda=0;
+
+Mhe p=0;
+
+verbosity=100;
+LinearCG(BoundaryProblem,p[],eps=1.e-6,nbiter=100);
+BoundaryProblem(p[]);
+plot(u1,u2,u3,u4,wait=1,cmm="u1,u2,u3,u4");

@@ -49,7 +49,9 @@ public:
   ~SetOfEdges4() {// cout << " delete SetofArete " << endl ;
   delete [] tete; delete [] Edges;}
    Int4 add (Int4 ii,Int4 jj);
-  Int4 addtrie (Int4 ii,Int4 jj) {return ii <=jj ? add (ii,jj)  : add (jj,ii) ;}
+  Int4 addtrie (Int4 ii,Int4 jj,int *orient=0) {
+      if(orient) *orient = ii <=jj ? 1 : -1;
+      return ii <=jj ? add (ii,jj)  : add (jj,ii) ;}
   Int4  nb(){return NbOfEdges;}
   Int4 find (Int4 ii,Int4 jj);
   Int4 findtrie (Int4 ii,Int4 jj) {return ii <=jj ? find (ii,jj)  : find (jj,ii) ;}

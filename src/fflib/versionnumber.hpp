@@ -1,1 +1,1 @@
-#include "config-wrapper.h"
+#include <config.h>

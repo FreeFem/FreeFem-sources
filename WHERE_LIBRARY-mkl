@@ -1,9 +1,0 @@
-blas LD '-L@MKLDIR@/lib/@MKL_ARCH@ -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lm -lpthread '
-blas INCLUDE '-I@MKLDIR@/include'
-lapack LD '-L@MKLDIR@/lib/@MKL_ARCH@ -llibmkl_lapack'
-lapack INCLUDE '-I@MKLDIR@/include'
-scalapack LD '-L@MKLDIR@/lib/@MKL_ARCH@ -lmkl_scalapack_lp64'
-scalapack INCLUDE '-I@MKLDIR@/include'
-blacs LD '-L@MKLDIR@/lib/@MKL_ARCH@ -lmkl_blacs_lp64'
-blacs INCLUDE '-I@MKLDIR@/include'
-

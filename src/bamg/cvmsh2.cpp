@@ -1,37 +1,37 @@
 // ********** DO NOT REMOVE THIS BANNER **********
 //
 // SUMMARY: Bamg: Bidimensional Anisotrope Mesh Generator
-// RELEASE: 0 
-// AUTHOR:   F. Hecht,    
+// RELEASE: 0
+// AUTHOR:   F. Hecht,
 // ORG    :  UPMC
-// E-MAIL :   Frederic.Hecht@Inria.fr   
+// E-MAIL :   Frederic.Hecht@Inria.fr
 //
 /*
- 
+
  This file is part of Freefem++ or Bamg
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-// E-MAIL :   Frederic.Hecht@Inria.fr   
+// E-MAIL :   Frederic.Hecht@Inria.fr
 //
 // ORIG-DATE:     Dec 97
 // ORIG-DATE:     Dec 97
 
 // TODO: remove this block as soon as autoconf is removed from FreeFem++
 #ifndef CMAKE
-#include "config-wrapper.h"
+#include <config.h>
 #endif
 
 #include <cstdlib>
@@ -47,12 +47,12 @@
 using namespace std;
 using namespace bamg;
 //long verbosity=2;
-#ifdef DRAWING 
+#ifdef DRAWING
 bool withrgraphique=  initgraphique;
 #else
-bool withrgraphique=false; 
+bool withrgraphique=false;
 #endif
-#ifdef HAVE_UNISTD_H 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
 #ifdef __MWERKS__
@@ -89,7 +89,7 @@ void  MeshErrorIO(ios& )
 }
 
 int main(int argc, char **argv)
-{ 
+{
   Real8 cutoffradian = 30.0*Pi/180.0;
   char * fin=0,*fout=0,*fgeom=0;
   verbosity = 2;
@@ -100,9 +100,9 @@ int main(int argc, char **argv)
       fout=argv[2];
       ok= !access(fin,R_OK) && (access(fout,F_OK) || !access(fout,W_OK)) ;
     }
-  
+
   for (i=3;i<argc && ok ;i+=2)
-    if (!strcmp(argv[i],"-g")) 
+    if (!strcmp(argv[i],"-g"))
       {
 	fgeom=argv[i+1];
 	ok= ok &&  (access(fgeom,F_OK) || !access(fgeom,W_OK) );
@@ -113,9 +113,9 @@ int main(int argc, char **argv)
       verbosity = atoi(argv[i+1]);
     else
       ok=0;
-      
-  
-  
+
+
+
   if (!ok)
     {
       cout << "2D mesh convertisor of type   .am_fmt .amdba .am .nopo .msh .ftq + bd mesh\n";
@@ -137,8 +137,8 @@ int main(int argc, char **argv)
   set_new_handler( &NewHandler);
 #ifdef DRAWING
   if(initgraphique)
-    { 
-      initgraphique(); 
+    {
+      initgraphique();
       initgraph=1;
     }
 #endif

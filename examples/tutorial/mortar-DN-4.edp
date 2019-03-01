@@ -1,0 +1,231 @@
+assert(version>=2.23);
+//  Mortar  (4 sub domain) 
+//  with matrix -et Precon Conjugade Gradient --
+//    Neuman -> Dirichlet . 
+//  -------------------------------
+
+func f=1+x+y;
+real g=1; 
+int withprecon=1; 
+macro Grad(u) [ dx(u), dy(u) ] //
+int nbsd=4;
+
+macro Psd(U) U[0],U[1],U[2],U[3] //
+int labext= nbsd+1;
+real meshsize=0.025; 
+real meshsizem=meshsize*1.5; 
+bool noconforme=0;
+include "mortar-msh.idp"
+cout << "mortar : " << endl;
+mesh Thm=Tha;
+Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=100000);
+Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=1000000);
+
+Thm=emptymesh(Thm);
+mesh Thmm=Thm;
+if(noconforme)
+  {  //  need a find mesh to integrate on Thm. 
+    Thmm=trunc(Thm,split=4,1); // for fine integration
+    Thmm=emptymesh(Thmm);
+  }
+plot(Thm,wait=0);
+
+verbosity=1;
+
+
+mesh[int] Thsd(nbsd);
+
+for(int sd=0;sd<nbsd;++sd)
+ Thsd[sd]=trunc(Tha,region==regi[sd],split=1);// les sous domaines
+
+if(noconforme)
+{
+for(int sd=0;sd<nbsd;++sd)
+ Thsd[sd]=adaptmesh(Thsd[sd],meshsize*(1+sd*0.05),IsMetric=1,nbvx=100000,thetamax=60);// les sous domaines
+
+}
+plot(Thsd,Thm);
+// a faire : plot(Thsd,Thm,wait=1); 
+
+fespace Lh(Thm,P1);
+fespace RTh(Thm,[P0edge,P0edge]);
+ RTh [Nmx,Nmy]; // ne marche pas car la normal 
+//                             n'est definie que une un bord
+varf  vNN([ux,uy],[nx,ny]) = int1d(Thm,1)(( nx*N.x + ny*N.y)/lenEdge);
+Nmx[]= vNN(0,RTh);
+
+// les joint P0 sur le squelette 
+// -----   \int [q] l + \int[p] m 
+Lh  lh=0,rhsl=0;
+
+mesh Thi=Thsd[0];
+
+// remark: operator # is  the concatenation operator in macro 
+
+//   cout << " Domaine " << i<< " --------" << endl;
+// OK P1/P0 ;, PB P1/P1,  P1/P0Edge , FH..
+fespace Vhi(Thi,P1);
+fespace Ehi(Thi,P0);
+matrix[int] Asd(nbsd),Csd(nbsd),PAsd(nbsd),PIsd(nbsd),PJsd(nbsd);
+Vhi[int] usd(nbsd),vsd(nbsd),rhssd(nbsd), pusd(nbsd),bcsd(nbsd);
+Ehi[int] epssd(nbsd);
+   
+real tgv=1e30;
+for(int sd=0;sd<nbsd;++sd)
+{
+
+  varf cci([l],[u]) = int1d(Thmm,1,qforder=3)(l*u*epssd[sd]);
+  varf vepsi(u,v)= int1d(Thi,1,qforder=10)( (Nmx*N.x + Nmy*N.y)*v/lenEdge);
+  
+  varf vLapMi([ui],[vi],tgv=tgv) =
+         int2d(Thi)(  Grad(ui)'*Grad(vi)  )
+      // + int1d(Thi,1,qfe=qf1pElump)(alpha*ui*vi)
+    +  int2d(Thi) (f*vi)   +  on(labext,ui=g);  
+    
+  varf vPLapMi([ui],[vi],tgv=tgv) =
+        int2d(Thi)(  Grad(ui)'*Grad(vi)  )
+     // + int1d(Thi,1,qfe=qf1pElump)(alphap*ui*vi)
+      + on(labext,1,ui=0);
+   ;  
+
+   varf  vrhsMi(ui,vi) =   on(labext,ui=g);
+
+   Thi=Thsd[sd];
+   usd[sd]=0;
+   vsd[sd]=0;
+   epssd[sd][]= vepsi(0,Ehi);
+   epssd[sd] = -real(epssd[sd] <-0.00001) + real(epssd[sd] >0.00001);
+   
+   Csd[sd]  = cci(Lh,Vhi);
+   Asd[sd]  = vLapMi(Vhi,Vhi,solver=sparsesolver);
+   PAsd[sd] = vPLapMi(Vhi,Vhi,solver=sparsesolver);
+   matrix IVL=interpolate(Vhi,Lh,inside=1);
+   //   v = IVL*l 
+   varf vonext(u,v)=on(labext,u=1);
+   varf von1(u,v)=on(1,u=1);
+   real[int]  onext=vonext(0,Vhi);
+   real[int]  on1=von1(0,Vhi);
+   on1= on1 ? 1 : 0;
+   on1 = onext ? 0 : on1; //  remove df of ext
+   matrix I1(on1);//   matrix    tgv $i\in Gamma_1 \ Gamma_e $ , 0 otherwise
+   
+   PIsd[sd]=  I1*IVL;//  remove of line not on $Gamma_1 \ Gamma_e $
+ 
+    // so PIsd[sd]*l  =  tgv * Interpole l on $Gamma_1 \ Gamma_e $
+   I1.diag=on1;
+   matrix AA=I1*Asd[sd];//  remove line not on lab 1 
+   PJsd[sd]= IVL'*AA;
+   
+   
+   rhssd[sd][]=vLapMi(0,Vhi);
+
+}
+
+plot(epssd,cmm="eps 0,1,2,3",wait=0,value=1);
+
+
+lh[]=0;
+varf  vDD(u,v) = int2d(Thm)(u*v*1e-10);
+varf  vML(u,v) = int2d(Thm)(u*v*1e-10)+int1d(Thm,1)(u*v);
+matrix ML=vML(Lh,Lh);
+
+
+
+
+matrix DD=vDD(Lh,Lh);
+
+matrix M=[ 
+  [ Asd[0] ,0      ,0      ,0      ,Csd[0] ],
+  [ 0      ,Asd[1] ,0      ,0      ,Csd[1] ],
+  [ 0      ,0      ,Asd[2] ,0      ,Csd[2] ],
+  [ 0      ,0      ,0      ,Asd[3] ,Csd[3] ],
+  [ Csd[0]',Csd[1]',Csd[2]',Csd[3]',DD     ] 
+ ];
+
+real[int] xx(M.n);
+
+real[int] bb =[rhssd[0][], rhssd[1][],rhssd[2][],rhssd[3][],rhsl[] ];
+set(M,solver=sparsesolver);
+
+xx = M^-1 * bb;
+
+[usd[0][],usd[1][],usd[2][],usd[3][],lh[]] = xx; // dispatch the solution 
+
+plot(usd,cmm="u1,u2,u3,u4",wait=1); 
+
+
+int itera=0;
+
+varf  vbc(u,v) =   int1d(Thm,labext)(v);
+real[int] lbc(Lh.ndof),lbc0(Lh.ndof);
+lbc=vbc(0,Lh);
+lbc = lbc ? 0 : 1 ; 
+
+func real[int] SkPb(real[int] &l)
+{ 
+   int verb=verbosity;   verbosity=0;   itera++;
+   for(int sd=0;sd<nbsd;++sd)
+    {
+      Thi=Thsd[sd];  //  for initialisation of vsd with the correct size 
+      vsd[sd][]  = rhssd[sd][];
+      vsd[sd][] += Csd[sd]* l;
+      usd[sd][]  = Asd[sd]^-1*vsd[sd][];
+
+    }
+    l=0;
+   for(int sd=0;sd<nbsd;++sd)
+     	l  += Csd[sd]'*usd[sd][];  
+     	
+    l= lbc .* l; 
+    plot(usd,wait=0,cmm="CG iteration u");
+   verbosity=verb; 
+   return l ;
+};
+
+func real[int] PSkPb(real[int] &l)
+{ 
+  if(withprecon)
+  {  	
+   int verb=verbosity;   verbosity=0;   itera++;
+   real[int] ll= ML^-1*l;
+   ll= lbc .* ll; 
+   ll *= tgv;
+ 
+   for(int sd=0;sd<nbsd;++sd)
+    {
+      Thi=Thsd[sd];              
+      pusd[sd][] = PAsd[sd]^-1*(vsd[sd][]= PIsd[sd]* ll);
+    }
+    ll=0;
+   for(int sd=0;sd<nbsd;++sd)
+     ll  += PJsd[sd]*pusd[sd][];  
+    l = ML^-1*ll; 	
+    l= lbc .* l; 
+   verbosity=verb; 
+  }
+  return l ;
+};
+
+
+verbosity=100;
+lh[]=0;
+LinearCG(SkPb,lh[],eps=1.e-7,nbiter=100,precon=PSkPb);
+verbosity=1; 
+
+plot(usd,wait=1,cmm="CG");
+
+// FFCS: for regression tests
+real regtest;
+{  
+fespace Vha(Tha,P1);
+Vha vah,uah;
+solve vLapMM([uah],[vah]) =
+       int2d(Tha)(  Grad(uah)'*Grad(vah) )
+    -  int2d(Tha) (f*vah)
+    +  on(labext,uah=g)
+   ;
+verbosity =3;
+plot(uah,usd,cmm="uah",wait=1); 
+regtest=uah[]'*uah[];
+}
+

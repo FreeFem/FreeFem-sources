@@ -1,0 +1,171 @@
+/*
+  Incompressible Navier Stokes 
+    with Taylor-Hood Finite element
+    No linearity : Newton method 
+    continuation on Reynols Number
+    Mesh adaptation 
+    
+    Test case Laminar Flow over a Backward Facing Step  Gamm Workshop
+    
+     K.Morgan, J.Périaux and F.Thomasset, Analysis of laminar flow over a backward facing step, Vol9 of Notes on Num. Fluid Mech., Vieweg, 1984. 
+    
+*/
+
+// FFCS regression test value
+real regtest;
+
+real[int] Reynold=[50,150,300,400,500];
+real[int] HH=[1.5,1]; 
+real[int,int] reattachP=[ [ 2.8, 2 ], [ 5.16, 3.7 ]] ;  // reattachP[irey,cas]  
+int nerr=0; 
+bool adapt=1; // do adap or not 
+bool dplot=0; // debug plot 
+for(int cas=0;cas<2;++cas)
+{
+real h=HH[cas]-0.5,H=HH[cas],l=3,L=22;
+int[int] ll=[3,2,5,1];
+// label 1 in
+//       2  out 
+//       3  down wall
+//       4   step 
+//       5   up wall 
+func zoom=[[2.5,0],[10,H]];
+mesh Th=square(22,6,[x*22,y*H],label=ll);
+Th=trunc(Th, (x>l) | (y >0.5),label=4); 
+func meshsize= 2*max(0.05,max(max(x-l,0.0)/19./5.,max(l-x,0.0)/3./8. ));
+func uin=(H-y)*(y-0.5)/square((H-0.5)/2.);
+Th=adaptmesh(Th,meshsize,IsMetric=1);
+Th=adaptmesh(Th,meshsize,IsMetric=1);
+plot(Th,wait=0);
+fespace Xh(Th,P2);
+fespace Mh(Th,P1);
+fespace XXMh(Th,[P2,P2,P1]);
+XXMh [u1,u2,p];
+XXMh [v1,v2,q]; 
+
+macro div(u1,u2) (dx(u1)+dy(u2))//
+macro grad(u1,u2) [dx(u1),dy(u2)]//
+macro ugrad(u1,u2,v) (u1*dx(v)+u2*dy(v)) //
+macro Ugrad(u1,u2,v1,v2) [ugrad(u1,u2,v1),ugrad(u1,u2,v2)]//
+
+solve Stokes ([u1,u2,p],[v1,v2,q],solver=sparsesolver) =
+    int2d(Th)( ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            + p*q*(0.000001) 
+            - p*div(v1,v2)-q*div(u1,u2)
+           )
+  + on(1,u1=uin,u2=0) 
+  + on(3,4,5,u1=0,u2=0);
+
+ Xh uu1=u1,uu2=u2;  
+plot(coef=0.2,cmm="Stokes [u1,u2] et p  ",p,[uu1,uu2],wait=0);
+plot(coef=0.2,cmm="Stokes  p  ",p,wait=0);
+Mh psi,phi;
+
+
+solve streamlines(psi,phi) = 
+      int2d(Th)( dx(psi)*dx(phi) + dy(psi)*dy(phi))
+   +  int2d(Th)( -phi*(dy(u1)-dx(u2)))
+   +  on(3,4,psi=0)+ on(5,psi=-2./3.*(H-0.5))
+   ;
+real[int] psiviso(31);
+{int k=0;
+for(int i=-20;i<0;i++)
+ psiviso[k++] = i*2./3.*(H-0.5)/20;
+for(int i=0;i<=10;i++)
+ psiviso[k++] = i*2./3.*(H-0.5)/100/(H*H*H);
+}
+
+plot(psi,wait=0,viso=psiviso);
+int i=0;
+real  nu=1./100.;
+real dt=0.1;
+real alpha=1/dt;
+
+
+
+
+
+XXMh [up1,up2,pp];
+varf   vDNS ([u1,u2,p],[v1,v2,q]) =
+    int2d(Th)(
+            
+            + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
+            +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+            + p*q*(0.000001) 
+            + p*dx(v1)+ p*dy(v2)
+            + dx(u1)*q+ dy(u2)*q
+            + Ugrad(u1,u2,up1,up2)'*[v1,v2]
+            + Ugrad(up1,up2,u1,u2)'*[v1,v2]
+           )
+  + on(1,3,4,5,u1=0,u2=0) 
+;
+
+
+varf   vNS ([u1,u2,p],[v1,v2,q]) =
+    int2d(Th)(
+          
+            + nu * ( dx(up1)*dx(v1) + dy(up1)*dy(v1)
+            +  dx(up2)*dx(v2) + dy(up2)*dy(v2) )
+            + pp*q*(0.000001) 
+            + pp*dx(v1)+ pp*dy(v2)
+            + dx(up1)*q+ dy(up2)*q
+            + Ugrad(up1,up2,up1,up2)'*[v1,v2]//'
+	      )
+  + on(1,3,4,5,u1=0,u2=0) 
+  ;
+
+for(int krey=0;krey<Reynold.n;++krey)
+  { 
+    real re=Reynold[krey];
+    real lerr=0.01;
+    
+    for(int step=0;step<(adapt?2:1) ;step++)
+      {
+     if(adapt)
+     {
+	  Th=adaptmesh(Th,[u1,u2],p,abserror=1,cutoff=1e-5,err=lerr,nbvx=100000,hmin=0.01);
+	  if(dplot) plot(Th,wait=0,bb=zoom);
+     }
+	[u1,u2,p]=[u1,u2,p];
+	[up1,up2,pp]=[up1,up2,pp];
+	
+	for (i=0;i<=20;i++)
+	  {
+	    nu = (H-h)/re;
+	    up1[]=u1[];
+	    real[int] b = vNS(0,XXMh);
+	    matrix Ans=vDNS(XXMh,XXMh);
+	    set(Ans,solver=sparsesolver);
+	    real[int] w = Ans^-1*b;
+	    u1[] -= w;
+	    cout << " iter = "<< i << "  " << w.l2 <<  " rey = " << re << endl;
+	    if(w.l2<1e-6) break; 
+	    // uu1=u1;uu2=u2;
+	    if(dplot) plot(coef=0.2,cmm="H="+H+" re "+re+ " [u1,u2] et p  ",p,[uu1,uu2],bb=zoom);  
+	    
+	  } ;
+      }
+    uu1=u1;uu2=u2;
+    streamlines;
+    real rp1=1./(H-h)*int1d(Th,3)( real( (x>=l & x < (l+0.5)) | (x>(l+0.4)) & (x<10)& (dy(psi) >= 1e-5)) ) ;
+    real rp2=1./(H-h)*int1d(Th,3)( real( (x>=l & x < (l+0.5)) | (x>(l+0.4)) & (x<10)& (dy(psi) >= -1e-5)) ) ;
+    real rp3=1./(H-h)*int1d(Th,3)( real( (x>=l & x < (l+0.5)) | (x>(l+0.4)) & (x<10)& (dy(u1)<=0)       ) ) ;
+    cout << " Reattach point " << rp2 << " " << rp2 << " " << rp3 << endl;
+    real rp = (rp1+rp2)/2;
+    real rppaper =  krey < 2 ? reattachP(krey,cas) : rp; 
+    real err= abs(rppaper - rp)/rp;
+    if( err>0.5 ) nerr++;//  
+    cout << "\n\n\n";
+    cout << "H= " << H << " Re " << re << " Reattach point " << rp << " paper=" << rppaper << " err "<< err 
+         << "  psi max = " << psi[].max <<endl; 
+    cout << "\n\n\n";
+    plot(coef=0.2,cmm="H="+H+", rey="+re+" [u1,u2] et p  ",p,[uu1,uu2],wait=0,nbiso=20,bb=zoom);//,ps="Upstep-"+H+"-"+re
+    plot(coef=0.2,cmm="H="+H+", rey="+re+" [u1,u2] et p  ",p,[uu1,uu2],wait=0,nbiso=20,bb=zoom);//,ps="Upstep-"+H+"-"+re+".ps");  
+    plot(coef=0.2,cmm="H="+H+", rey="+re+" [u1,u2] et p  ",psi,bb=zoom,viso=psiviso);//,ps="psi-step-"+H+"-"+re+".ps");  
+
+    // FFCS regression test value
+    regtest=uu1[]'*uu1[];//'
+     }
+}
+assert(nerr==0); 

@@ -370,11 +370,11 @@ GTree<Vertex>::GTree(Vertex * v,Rd Pmin,Rd Pmax,int nbv) :
     //cout << "  RdtoZd(Pmin)" << RdtoZd(Pmin) << " RdtoZd(Pmax)" << RdtoZd(Pmax) << endl;
     }
   sb =new StorageQuadTreeBox(lenStorageQuadTreeBox);
-  root=NewQuadTreeBox();
+  root=NewQuadTreeBox(); 
   //  throwassert( MaxISize > MaxICoor);
   if (v)
     for (long i=0;i<nbv;i++) 
-      Add(v[i]);
+     Add(v[i]);
 }
   
   template<class Vertex>
@@ -459,8 +459,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	QuadTreeBox * b0= b->b[k];
 	if ( ( b0 == 0) || (b0->n == 0) ) 
 	  break; // null box or empty   => break 	    
-	NbQuadTreeBoxSearch++;
-	b=b0;	
+	NbQuadTreeBoxSearch++;	
 	p0.Add(k,hb2);	
 	hb = hb2; 
       }
@@ -617,13 +616,16 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   const int d=Rd::d;
   R dP=DBL_MAX, nddd=0;
   Rd PPhat,Delta;
-  int k=0;    
+  int k=0;
+    const int nReStartMax = 1 << Rd::d; //  Nb vertex of the d-cube/
     int nReStart = 0;
-    int itstart[100],kstart=0;
+    int itstart[100],itout[100],kstart=0;
+    Rd Pout[100];
   int it,j,it00;
   const int mxbord=1000;
   int kbord[mxbord+1];
   int nbord=0;
+
   if(searchMethod>1) goto PICHON;
   if ( tstart )
     it00=it =  Th(tstart);
@@ -645,7 +647,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     }
   else ffassert(0);
 RESTART:
-    ffassert(kstart<100);
+  ffassert(kstart<100);
   itstart[kstart++]=it;
   if(verbosity>199)
     cout << "    " << nReStart << " tstart= " << tstart << " , it=" << it << " P="<< P << endl;
@@ -776,15 +778,11 @@ RESTART:
           }
 	outside=true;
         // on retest with a other stating point??????
-          // Mod.  23/02/2016 F. H 
-       while(nReStart++ < 8)
-        {
- /*            if(nReStart==1)
-            {
-                Delta =(P-Th[it](Phat));
-                nddd=Norme2(Delta);
-            }
-            else*/
+          // Mod.  23/02/2016 F. H
+       itout[kstart-1]= it;
+       Pout[kstart-1]=Phat;
+       while(nReStart++ < nReStartMax)
+        {// Loop on the vertex of a d-hyper-cude
             {
                 int k= nReStart-1;
                 int i = (nReStart-2)/2;
@@ -800,22 +798,35 @@ RESTART:
             
             Rd PP= P + Delta;
             Vertex* v=quadtree->NearestVertex(PP);
-           // if(!v) v=quadtree->NearestVertex(PP);
+            if( nddd ==0)  nddd= Norme2(P-*v);
             it=Th.Contening(v);
             bool same=false;
 
             for(int j=0;j<kstart ; ++j)
                 if( it == itstart[j]) {same=true; break;}
             if( verbosity>199)
-                cout << "   loop Search "<<nReStart << " Delta" <<  Delta << " it " << it << endl;
+                cout << "   loop Search "<<nReStart << P << " Delta" <<  Delta << " it " << it << " same "<< same << endl;
             if(same) continue;
-            if( verbosity>199) cout << " Restart tet: " << it << " " << P << endl;
             if(Rd::d==2)  npichon2d1++;
             if(Rd::d==3)  npichon3d1++;
+            
             goto RESTART;
         }
+          
 	if(searchMethod) goto PICHON;
-	return &Th[it] ;
+          // Search best out ....
+        int ko=0,k=0;
+        double dmin=Norme2_2(P-Th[itout[k]](Pout[k]));
+        for(int k=1; k<kstart; ++k)
+          {
+              double dk=Norme2_2(P-Th[itout[k]](Pout[k]));
+              if( dk< dmin) { dmin=dk; ko=k;}
+          }
+        Phat=Pout[ko];
+        it=itout[ko];
+        if( verbosity>149)
+            cout << " -- Find(out) " << it << " Outside " << outside << " it "<< it << " err = "<< sqrt(dmin) << "/" << Phat << " " << nddd << endl;
+        return &Th[it] ;
       }		    
     }
   
@@ -878,9 +889,22 @@ RESTART:
 template class GTree<Vertex2>;
 template class GTree<Vertex3>;
 template class GTree<Vertex1>;
+    
+///typedef MeshS::GMesh GMeshS;
 typedef Mesh3::GMesh GMesh3;
 typedef Mesh2::GMesh GMesh2;
 typedef Mesh1::GMesh GMesh1;
+ 
+    
+/*template
+const   GMeshS::Element * Find<GMeshS>(const GMeshS & Th,
+                       GTree< GMeshS::Vertex> *quadtree,
+                       GMeshS::Rd P,
+                       GMeshS::RdHat & Phat,
+                       bool & outside,
+                       const   GMeshS::Element * tstart);
+  */
+ 
 template
 const   GMesh3::Element * Find<GMesh3>(const GMesh3 & Th,
 				       GTree< GMesh3::Vertex> *quadtree,

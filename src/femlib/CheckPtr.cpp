@@ -1,5 +1,5 @@
 //#define SHOWALLOC
-//#define NCHECKPTR // BUg with MPI ??? FH
+#define NCHECKPTR // BUg with MPI ??? FH
 /*
 #if __cplusplus >= 201103L
 #define PARAM_THROW(i) (i)
@@ -47,33 +47,33 @@ static long StorageUsed()
 #else
     return 0;
 #endif
-    
+
 }
 #ifndef NCHECKPTR
-#define DEBUGUNALLOC 1 
+#define DEBUGUNALLOC 1
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -95,11 +95,11 @@ void debugunalloc()
 void exitalloc(int i)
 { static long count=0;
  count++;
- exit(1); 
+ exit(1);
 }
 
 // Modif:         Juin 2001  for debuging  missing  delete point
-//  --  THE MACRO 
+//  --  THE MACRO
 // TO SHOW ALL ALLOCATION
 // #define SHOWALLOC
 //  TO DEBUG ALL UN DELETE POINETUR
@@ -107,20 +107,20 @@ void exitalloc(int i)
 
 int UnShowAlloc =1;
 
-int ShowAlloc(const char *s,size_t & lg); 
-        
+int ShowAlloc(const char *s,size_t & lg);
+
 //inline void *operator new(size_t, void *place) { return place; }
 
 static int kerr=0;
 void * mymalloc(size_t l)
 {
   char *p = (char*)malloc(l+16);
-  if (!p) return p;   
+  if (!p) return p;
   for( int i = 0; i < 8 ; i++)
-    p[i] = 'a'+i,p[i+l+8] = 'z'-i; // put a marque before 
+    p[i] = 'a'+i,p[i+l+8] = 'z'-i; // put a marque before
   return (void*) (p+8);
 }
-void myfree(char *p,size_t l=0,int nordre=0) 
+void myfree(char *p,size_t l=0,int nordre=0)
 {
   if(p) {
     p -= 8;
@@ -128,14 +128,14 @@ void myfree(char *p,size_t l=0,int nordre=0)
     for( int i = 0; i < 8 ; i++)
       {
 	if (p[i] != 'a' +i)     k++;
-	if(l && (p[i+l+8] != 'z' -i)) k++;       
+	if(l && (p[i+l+8] != 'z' -i)) k++;
       }
     for (size_t i=0;i<l;i++)
       p[i+8]=127;
     if(!k) free(p);
    else {
      debugalloc();
-     if (kerr++<20) 
+     if (kerr++<20)
        printf("@@@@@@@@@@@@@@@@@ Erreur myfree p= %p   l=%ul n=%d\n",p,(unsigned int) l,nordre);
 
    }
@@ -164,7 +164,7 @@ class OneAlloc {public:
   bool is_array ;
   bool operator<(const OneAlloc & a) const { return n<a.n;}
 };
-  
+
   void  HeapSort(OneAlloc **c,long n)
   {
     long l,j,r,i;
@@ -178,7 +178,7 @@ class OneAlloc {public:
 	crit = c[r];
 	c[r--] = c[1];
 	if ( r == 1 ) { c[1]=crit; return;}
-      } else  crit = c[--l]; 
+      } else  crit = c[--l];
       j=l;
       while (1) {// label 4
       i=j;
@@ -190,7 +190,7 @@ class OneAlloc {public:
       }
     }
   }
-  
+
   class AllocData {public:
     OneAlloc *a;
     AllocData * next;
@@ -202,19 +202,19 @@ class OneAlloc {public:
   };
 
 private:
-    
+
   static const long Maxundelptr = 2048;
     static size_t StorageUsage;
   static size_t AllocSize ;
   static size_t MaxUsedSize;
-  static AllocData * AllocHead ;  
+  static AllocData * AllocHead ;
   static long NbAlloc;
   static long NbAllocShow;
   static long NbPtr;
   static void * NextFree;
   static long NbuDelPtr;
   static long uDelPtr[Maxundelptr];
-  static bool after_end; 
+  static bool after_end;
   static char filename[128];
   AllocData * NewAllocData();
   OneAlloc *Alloc();
@@ -222,14 +222,14 @@ private:
     static OneAlloc *  LastAlloc[nblastalloc];
 public:
   static  bool CheckAlloc ;
-  
+
   void * MyNewOperator(size_t ll,bool is_array );
   void MyDeleteOperator(void * pp,bool is_array);
   AllocExtern();
   ~AllocExtern();
-  void init();  
-  int ShowAlloc( const char *s,size_t & lg); 
-  bool IsUnDelPtr(long nn) { // dichotomic find 
+  void init();
+  int ShowAlloc( const char *s,size_t & lg);
+  bool IsUnDelPtr(long nn) { // dichotomic find
     long i=0;
     long j=NbuDelPtr-1;
     while (i<=j) {
@@ -246,7 +246,7 @@ static AllocExtern AllocExternData;
 size_t AllocExtern::StorageUsage=0;
 size_t AllocExtern::AllocSize =0;
 size_t AllocExtern::MaxUsedSize =0;
-AllocExtern::AllocData * AllocExtern::AllocHead =0;  
+AllocExtern::AllocData * AllocExtern::AllocHead =0;
 long AllocExtern::NbAlloc =0;
 long AllocExtern::NbAllocShow=0;
 long AllocExtern::NbPtr =0;
@@ -259,16 +259,16 @@ char AllocExtern::filename[128] ="ListOfUnAllocPtr.bin";
 AllocExtern::OneAlloc * AllocExtern::LastAlloc[nblastalloc];
 AllocExtern::AllocData * AllocExtern::NewAllocData()
 {
-  
+
   AllocExtern::AllocData * ad = (AllocData *) mymalloc(sizeof(AllocData));
   ad->a = (OneAlloc*) mymalloc(sizeof(OneAlloc)*N100);
   for (int i=0;i<N100;i++)
     ad->a[i].l=0,ad->a[i].p=NextFree,NextFree = & ad->a[i];
   ad->next = AllocHead;
   AllocHead = ad;
-#ifdef SHOWALLOC    
+#ifdef SHOWALLOC
   printf("\t\tCheckPtr: OneAlloc[100] %lx\n",this);
-#endif    
+#endif
   return ad;
 }
 
@@ -277,7 +277,7 @@ AllocExtern::AllocData * AllocExtern::NewAllocData()
 AllocExtern::OneAlloc * AllocExtern::Alloc()
 {
   OneAlloc * f =  (OneAlloc *) NextFree;
-  if (!f) 
+  if (!f)
     AllocHead = NewAllocData();
   f =(OneAlloc *) NextFree;
   if (!f) exitalloc(1);
@@ -287,7 +287,7 @@ AllocExtern::OneAlloc * AllocExtern::Alloc()
 
 
 void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
-{ 
+{
   if(after_end || !CheckAlloc)  return malloc(ll);
   init();
   AllocExtern::OneAlloc * a = Alloc();
@@ -300,10 +300,10 @@ void * AllocExtern::MyNewOperator(size_t ll,bool is_array)
   NbPtr++;
   AllocSize += ll;
 #ifdef DEBUGUNALLOC
-  if ( (IsUnDelPtr(a->n) && (a->n >= DEBUGUNALLOC) )) 
+  if ( (IsUnDelPtr(a->n) && (a->n >= DEBUGUNALLOC) ))
     debugunalloc();
 #endif
-#ifdef SHOWALLOC    
+#ifdef SHOWALLOC
   printf( "\t%d\tCheckPtr: New Alloc %ld %lx when %ld\n ",a->n, ll, a->p, a->n);
 #endif
   MaxUsedSize = AllocSize < MaxUsedSize ? MaxUsedSize :  AllocSize;
@@ -323,11 +323,11 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 {
   if(after_end) { /*free(pp)*/; return;}
   if( !AllocExtern::CheckAlloc) {free(pp); return;}
- 
+
   init();
     for( int i=0; i< nblastalloc; ++i)
     {
-        if( (NbPtr-i) <0) break; 
+        if( (NbPtr-i) <0) break;
         int k =(NbPtr-i)%nblastalloc;
          if (LastAlloc[k]  && LastAlloc[k]->l>0 && LastAlloc[k]->p ==pp)
          {
@@ -336,12 +336,12 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
              size_t ll = pa->l-1;
              for (size_t kkk=0;kkk<ll;kkk++)
                  ((char *) pp)[kkk]=18;
-             
+
              myfree((char*)pp,ll,pa->n);
 #ifdef SHOWALLOC
              printf("\t%d\tCheckPtr: fast delete  Alloc %ld %lx when %ld \n",pa->n,pa->l-1,  pa->p, pa->n);
 #endif
-             
+
              AllocSize -= ll;
              NbPtr--;
              pa->l=0;
@@ -349,7 +349,7 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
              pa->n =0;
              if (pa->is_array != is_array)
                  printf("\t\tCheckPtr:  erreur delete [] \n");
-             //if( pa->n < NbAllocShow )		  debugalloc();      
+             //if( pa->n < NbAllocShow )		  debugalloc();
              NextFree = & pa->p;
              return;
          }
@@ -363,15 +363,15 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 	  for (int i=0;i<N100;i++)
 	    if((p->a[i].l > 0) && (p->a[i].p == pp))
 	      {
-#ifdef SHOWALLOC    	  
+#ifdef SHOWALLOC
 		printf("\t%d\tCheckPtr: delete  Alloc %ld %lx when %ld \n",p->a[i].n,p->a[i].l-1,  p->a[i].p, p->a[i].n);
 #endif
 		size_t ll = p->a[i].l-1;
-		for (size_t kkk=0;kkk<ll;kkk++) 
+		for (size_t kkk=0;kkk<ll;kkk++)
 		  ((char *) pp)[kkk]=18;
-		
+
 		myfree((char*)pp,ll,p->a[i].n);
-		
+
 		AllocSize -= ll;
 		NbPtr--;
 		p->a[i].l=0;
@@ -379,7 +379,7 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
 		p->a[i].n =0;
 		if (p->a[i].is_array != is_array)
 		  printf("\t\tCheckPtr:  erreur delete [] \n");
-		//if( p->a[i].n < NbAllocShow )		  debugalloc();      
+		//if( p->a[i].n < NbAllocShow )		  debugalloc();
 		NextFree = & p->a[i].p;
 		return;}
                 if(p == p->next ||  kloop++ > 10000)
@@ -387,70 +387,70 @@ void AllocExtern::MyDeleteOperator(void * pp,bool is_array)
                    printf("\n\n ****CheckPTR Big BUG ??????? loop %d\n",kloop);
                    break;
                   }
-            
+
 	  p = p->next;
 	}
-      if(pp) 
+      if(pp)
 	{
 	  printf( "\t\tCheckPtr: delete of bad pointer %p  -----------\n",pp);
-	  debugalloc(); 
+	  debugalloc();
 	}
-      
-    } else 
-      myfree((char*)pp); 
+
+    } else
+      myfree((char*)pp);
 }
 void AllocExtern::init()
 {
    static int count=0;
-   if(0== (count++)) 
+   if(0== (count++))
     {
       sprintf(filename,"ListOfAllocPtr-%d.bin",(int) sizeof(void*));
       StorageUsage=0;
       AllocSize =0;
       MaxUsedSize =0;
-      AllocHead =0;  
+      AllocHead =0;
       NbAlloc =0;
       NbPtr =0;
       NextFree =0;
       NbuDelPtr =0;
       NbuDelPtr = 0;
-        
+
       after_end = false;
       for(int i=0; i<nblastalloc; i++)
           LastAlloc[i]=0;
       FILE *file=fopen(filename,"rb");
-      
+
       if (file)
 	{
 	  fread(&NbuDelPtr,sizeof(long),1,file);
 	  fread(uDelPtr,sizeof(long),NbuDelPtr,file);
-	  if(NbuDelPtr> 100000000 && NbuDelPtr <0) 
+	  if(NbuDelPtr> 100000000 && NbuDelPtr <0)
 	    {
 	      printf("Fatal error in the file %s is wrong (please remove)",filename);
 	      exit(1);
 	    }
 	  fclose(file);
-	}  
+	}
       else
 	{ // printf("fopen ListOfUnAllocPtr errno = %d\n",errno);
-	}   
+	}
     }
 }
 AllocExtern::AllocExtern()
 {
   init();
-  
+
 }
 
 AllocExtern::~AllocExtern()
 {
     if(UnShowAlloc==0) return;
      OneAlloc *  list[Maxundelptr];
-     
+
      AllocData * p=AllocHead;
      int k=0,kk=0;
      int lln=0;
-     
+
      while (p) {int i=N100;
      while(i--)
        if (p->a[i].l >0  )
@@ -461,7 +461,7 @@ AllocExtern::~AllocExtern()
 	   else
 	     if (kk<Maxundelptr)
 	       list[kk++]=p->a+i;
-             
+
 	 }
       p = p->next;
      }
@@ -471,12 +471,12 @@ AllocExtern::~AllocExtern()
     if(verbosity > 2)
     for (int i= kk-10<0 ? 0 : kk-10 ;i<kk;i++)
       {
-        printf ("\t\tCheckPtr:Undelete pointer  %p size %ld  when %ld\n", list[i]->p,list[i]->l,list[i]->n);        
+        printf ("\t\tCheckPtr:Undelete pointer  %p size %ld  when %ld\n", list[i]->p,list[i]->l,list[i]->n);
       }
     if (kk)
       {
 	FILE *file=fopen(filename,"wb");
-	if (file) 
+	if (file)
 	  {
 	    NbuDelPtr=kk;
 	    for (int i=0;i<kk;i++)
@@ -486,25 +486,24 @@ AllocExtern::~AllocExtern()
 	    fclose(file);
 	  }
       }
-      else {}
     
       if(verbosity>2) {
     if(k)  printf ("\t\tCheckPtr:Nb of undelete pointer is %d last %d\n",k,lln);
     printf ("\t\tCheckPtr:Max Memory used %10.3f kbytes " ,  MaxUsedSize/1024. );
     printf (" Memory undelete %ld \n" , AllocSize);
       }
-    
-    //   clean store pointer      
-    p=AllocHead;    
+
+    //   clean store pointer
+    p=AllocHead;
     while (p)
       {
 	myfree((char*)p->a);
 	AllocData * pold = p;
 	p = p->next;
 	myfree((char*)pold);
-      }     
+      }
     AllocHead=0;
-    after_end=true; 
+    after_end=true;
 }
 // ------------------
 
@@ -536,7 +535,7 @@ void *operator new[] (std::size_t ll) throw(std::bad_alloc)
         throw exception; };
     return p;}
 
-  
+
 void operator delete(void * pp,const std::nothrow_t& nothrow_constant) throw()
 {  AllocExternData.MyDeleteOperator(pp,false);}
 void operator delete[] (void * pp,const std::nothrow_t& nothrow_constant) throw()
@@ -555,7 +554,7 @@ int AllocExtern::ShowAlloc(const char *s,size_t & lg) {
   lg = AllocSize;
   return NbPtr;
 }
-int ShowAlloc(const char *s,size_t & lg) 
+int ShowAlloc(const char *s,size_t & lg)
 {  return  AllocExternData.ShowAlloc(s,lg);}
 void WithoutCheckPtr(){AllocExtern::CheckAlloc=false;}
 void WithCheckPtr(){AllocExtern::CheckAlloc=true;}
@@ -579,7 +578,7 @@ void * operator new(std::size_t size,const std::nothrow_t& nothrow_constant) thr
     if(verbosity > 1000000 )
         std::cout << " CheckPtr: new nothrow" << CheckPtr___nbptr << " " << size
                   << " p =" << p <<std::endl;
-    
+
     return p;
 }
 
@@ -599,7 +598,7 @@ void *operator new(std::size_t size) throw(std::bad_alloc)
     if(verbosity > 1000000 )
         std::cout << " CheckPtr: new throw " << CheckPtr___nbptr << " " << size
         << " p =" << p <<std::endl;
-    
+
     return p;
 }
 
@@ -618,7 +617,7 @@ void operator delete(void * p,const std::nothrow_t& nothrow_constant) throw()
         std::cout << " CheckPtr: free nothrow " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
 
     free(p);
-    
+
     CheckPtr___nbptr--;
 
 }
@@ -635,11 +634,11 @@ void operator delete(void * p) throw()
 {
     if(verbosity > 1000000 )
         std::cout << " CheckPtr: free throw " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
-    
+
     free(p);
-    
+
     CheckPtr___nbptr--;
-    
+
 }
 
 void operator delete[](void * p) throw()
@@ -648,7 +647,7 @@ void operator delete[](void * p) throw()
         std::cout << " CheckPtr: free[] throw " << CheckPtr___nbptr-1 <<  " p =" << p <<std::endl;
     free(p);
     CheckPtr___nbptr--;
-    
+
 }
 
 int ShowAlloc(const char *s,size_t & lg)
@@ -661,7 +660,7 @@ int ShowAlloc(const char *s,size_t & lg)
     lg = 0; return CheckPtr___nbptr;}
 void WithoutCheckPtr(){}
 void WithCheckPtr(){}
-        
+
 int UnShowAlloc =0;
 #else
 #include <stdlib.h>
@@ -671,6 +670,6 @@ int ShowAlloc(const char *s,size_t & lg)
 int UnShowAlloc =0;
         void WithoutCheckPtr(){}
         void WithCheckPtr(){}
-    
+
 #endif
 #endif

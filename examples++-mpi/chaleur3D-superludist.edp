@@ -1,8 +1,0 @@
- // other
- // NBPROC 2
-// ff-mpirun -np 4 chaleur3D-superludist.edp -glut ffglut  -n 20 -op 1  -dt 0.01 -niter 10
-
-load "real_SuperLU_DIST_FreeFem"
-real ttgv=-1;
-string ssparams="nprow=1, npcol="+mpisize; 
-include "Heat3d.idp"

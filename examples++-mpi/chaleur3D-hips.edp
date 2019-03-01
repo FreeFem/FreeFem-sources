@@ -1,9 +1,0 @@
-// NBPROC 5
-//  bug with 4 proc very strange (Debug in progress)
-//ff-mpirun -np 4 chaleur3D-mumps.edp -glut ffglut -n 20 -op 1  -dt 0.01 -niter 10
-load "hips_FreeFem"
-real ttgv=1e10;
-string ssparams="";//"nprow=1, npcol="+mpisize; 
-verbosity=4; include "Heat3d.idp"
-
-

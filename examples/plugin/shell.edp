@@ -1,0 +1,40 @@
+load "shell"
+Directory  c=".";
+string ttoto="/tmp/toto";
+while(1)
+{
+	string n=readdir(c);
+	if( n != "") 
+	  cout << n << " " << isdir(n) << endl; 
+	else break; 
+}
+
+cout << " login " << getenv("LOGIN") << endl;
+setenv("FF_TOTO","toto");
+setenv("FF_TOTO","toto");
+cout << " FF_TOTO  " << getenv("FF_TOTO") << endl;
+string pwd=getenv("PWD");
+verbosity=3;
+cout << " FILE: " <<FILE << endl;
+cpfile(FILE,"/tmp");
+cout << "basename " << basename(pwd) << endl; 
+cout << "dirname " << dirname(pwd) << endl; 
+cout << isdir(ttoto) << endl; 
+if (isdir(ttoto)<0 )
+{
+	cout << "mkdir"  << " " << ttoto << endl; 
+if  (mkdir(ttoto)==0)
+{
+	cout << " ls : " ;
+	Directory dtoto = "/tmp/toto";
+	while(1)
+	{
+		string n=readdir(dtoto);
+		if( n == "") break;
+		cout <<  n << " "; 
+	}
+	cout << endl; 
+	cout << " rmdir /tmp/toto" << endl; 
+   rmdir("/tmp/toto");//  dir /tmp/toto must be  empty 
+}
+}

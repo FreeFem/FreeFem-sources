@@ -14,10 +14,10 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ...
-/* LICENSE : LGPLv3
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-/* AUTHORS : Pascal Frey
+/* SUMMARY : ... */
+/* LICENSE : LGPLv3 */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
+/* AUTHORS : Pascal Frey */
 /* E-MAIL  : pascal.frey@sorbonne-universite.fr
  */
 
@@ -544,6 +544,8 @@ static int getColorRange (Color *c, pMesh mesh) {
 
 	c->aMask = mask;
 	c->aBits = 8 - aBits;
+	
+	return (1);
 }
 
 static void displayPoint (pScene sc, pMesh mesh, Color *c) {
@@ -615,7 +617,7 @@ static void displayTria (pScene sc, pMesh mesh, Color *c) {
 	glEnd();
 }
 
-static int displayQuad (pScene sc, pMesh mesh, Color *c) {
+static void displayQuad (pScene sc, pMesh mesh, Color *c) {
 	pQuad pq;
 	pPoint p0, p1, p2, p3;
 	pMaterial pm;
@@ -661,7 +663,7 @@ static int displayQuad (pScene sc, pMesh mesh, Color *c) {
 	glEnd();
 }
 
-static int displayTets (pScene sc, pMesh mesh, Color *c) {
+static void displayTets (pScene sc, pMesh mesh, Color *c) {
 	pTetra ptt;
 	pPoint p0, p1, p2;
 	pMaterial pm;
@@ -711,7 +713,7 @@ static int displayTets (pScene sc, pMesh mesh, Color *c) {
 	glEnd();
 }
 
-static int displayHexa (pScene sc, pMesh mesh, Color *c) {
+static void displayHexa (pScene sc, pMesh mesh, Color *c) {
 	pHexa ph;
 	pPoint p0, p1, p2, p3;
 	pMaterial pm;

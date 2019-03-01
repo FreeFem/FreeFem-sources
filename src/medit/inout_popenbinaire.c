@@ -14,15 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ...
-/* LICENSE : LGPLv3
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-/* AUTHORS : Pascal Frey
+/* SUMMARY : ... */
+/* LICENSE : LGPLv3 */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
+/* AUTHORS : Pascal Frey */
 /* E-MAIL  : pascal.frey@sorbonne-universite.fr
  */
 
 #include "medit.h"
-#include "libmesh5.h"
+#include "libmeshb7.h"
 #include "extern.h"
 #include "string.h"
 #ifdef WIN32

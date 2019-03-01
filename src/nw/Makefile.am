@@ -14,7 +14,7 @@ ffglut_SOURCES=../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads
 ../femlib/Drawing.cpp ../femlib/mshptg.cpp ../fflib/ffapi.cpp
 
 ffglut_DEPENDENCIES= ../libMesh/libMesh.a
-ffglut_LDADD= ../libMesh/libMesh.a @LIBSGLUT@ @LIBSPTHREAD@ @BLASLIBS@
+ffglut_LDADD= ../libMesh/libMesh.a @LIBSGLUT@ @LIBSPTHREAD@ 
 FreeFem___nw_SOURCES=../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp
 FreeFem___SOURCES=../Graphics/sansrgraph.cpp  ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp
 

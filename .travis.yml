@@ -1,24 +1,16 @@
+git:
+    submodules: false
+
 language: cpp
 
-script: echo "done"
+compiler:
+    - gcc
 
-env:
-  global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - secure: "lyRq9e7GMdmUI2erEtyUOGSfJp2hNLV3JIIy51LhtMQSpsFG4GjLaSOZw2OoUvdRXqiWl6G07S48K+P2M0ctbOoToZhBAnVkN6IDnefJ52GvodOCKjZb7pbl6MrDpihvlBV9s9ISPHE5QSJyqfc/0IMayazJPm1aR3FmrhKyN+Q9phx3FBJ23FoP28guEpzj01KF400AIdVKqB4EcuDjqnyJRZmJzRkqSsu3UCEz7YfE//B7tJfvByMN8sb5XG33Io0cBKgtNpkaferD3CVgThN/ECtrcbouqAuPkvBnPCqc3GvS5tZEdH9MHvo0qw/GItlO3rAn+jpuAL9y1aJ/+cT3oWbgqeopbY0m5Y0FRQpUTtRUcQvH3Z+kfYsU0DD47Q5Y47PMUATol3hFJZvXIf6TCip1zzB5aVW6zJJyuF5Tg87XdyucpbdqQn4XEfTDDIrnOk+GYgbnWUEQ4Hc5YI+iqnXwP6fG3Xnu+jhH/jlDOJiC0ElF4Z7TD1Xv9Hss22JVM+tZtik43qtMkkziruk2i6Jr9uPjnmHbwg6MD5nlcR6vTdsAAvK+Qe7oKgxoJaXNlxMVTTu+ZZd1BTrYx3o0RPkZ+5rNevXg8gvNEGQCYQ+byHT+pAtrJG/OfKIUdizT9aLOOd+zgp2gDBgHNQaa0XTqNpKUyispUlRoneU="
-   
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake libopenmpi-dev
-  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+  - sudo apt-get install -y g++ gcc gfortran ghostscript m4 make patch pkg-config wget python unzip libopenblas-dev liblapack-dev libhdf5-dev libscotch-dev libfftw3-dev libarpack2-dev libsuitesparse-dev libmumps-seq-dev libnlopt-dev coinor-libipopt-dev libgmm++-dev libtet1.5-dev gnuplot-qt autoconf automake autotools-dev bison flex gdb valgrind git cmake mpich
 
-addons:
-  coverity_scan:
-    project:
-      name: FreeFem/FreeFem-sources
-      description: FreeFem
-    notification_email: simon.garnotel@gmail.com
-    build_command_prepend: autoreconf -i && ./configure --enable-download --enable-optim --disable-pastix --prefix=/builds/freefem-source-master && ./download/getall -a
-    build_command: make
-    branch_pattern: develop
+script:
+    - autoreconf -i && ./configure --enable-download && ./3rdparty/getall -a
+    - make
+    - make check

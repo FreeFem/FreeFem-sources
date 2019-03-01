@@ -1,0 +1,25 @@
+mesh Th=square(10,10);
+fespace Vh(Th,P1); 
+
+macro grad(u) [dx(u),dy(u)]//
+varf va(u,v) = int2d(Th) ( u*v+grad(u)'*grad(v)-10*dy(v)*(u))+ int2d(Th)(v*x)+on(1,2,3,4,u=0);
+varf vat(u,v) = int2d(Th) ( u*v+grad(u)'*grad(v)-10*(v)*dy(u))+ int2d(Th)(v*x)+on(1,2,3,4,u=0);
+
+
+
+matrix A=va(Vh,Vh,solver=sparsesolver);
+matrix At=vat(Vh,Vh,solver=sparsesolver);
+real[int] b = va(0,Vh);
+set(A,solver=sparsesolver);
+
+Vh u,ut;
+
+u[]=A'^-1*b;
+ut[]=At^-1*b;
+plot(u,ut,wait=1);
+
+ut[]-=u[];
+real err = ut[].linfty ;
+cout << " err = " << err << endl; 
+assert(err < 1e-6); 
+

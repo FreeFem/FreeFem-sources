@@ -17,10 +17,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/710d25bb3c6040c19c3ff7c0f3201835)](https://www.codacy.com/app/sgarnotel/FreeFem-sources?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FreeFem/FreeFem-sources&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/FreeFem/FreeFem-sources.svg?branch=master)](https://travis-ci.org/FreeFem/FreeFem-sources)
-<a href="https://scan.coverity.com/projects/freefem-freefem-sources">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/15433/badge.svg"/>
-</a>
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/FreeFem/FreeFem-sources.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FreeFem/FreeFem-sources/context:cpp)
 
 | Branch | Ubuntu All<sup>1</sup> | Ubuntu No<sup>1</sup> | MacOSX All<sup>2</sup> | MacOSX No<sup>3</sup> | Windows 7 64bits<sup>4</sup> | Windows7 32bits<sup>4<sup> |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -31,21 +28,52 @@ See [CI/CD Tools](#ci-cd-tools)
 
 # FreeFem++ sources
 
-FreeFem++ is a partial differential equation solver for non-linear multi-physics systems in 2D and 3D
+[FreeFem++](https://freefem.org) is a partial differential equation solver for non-linear multi-physics systems in 2D and 3D using the finite element method.
 
 Problems involving partial differential equations from several branches of physics such as fluid-structure interactions require interpolations of data on several meshes and their manipulation within one program.
 
-FreeFem++ includes a fast interpolation algorithm and a language for the manipulation of data on multiple meshes.
-
-FreeFem++ is written in C++ and the FreeFem++ language is a C++ idiom.
+FreeFem++ includes a fast interpolation algorithm and a language for the manipulation of data on multiple meshes. It is written in C++ and the FreeFem++ language is a C++ idiom.
 
 ## For users
 
-The user documentation is available [here](https://github.com/FreeFem/FreeFem-doc) in Web format, or [here](https://github.com/FreeFem/FreeFem-doc-pdf/raw/master/freefem%2B%2Bdoc.pdf) in PDF format.
+The user documentation is available [here](https://github.com/FreeFem/FreeFem-doc).
+
+If you use FreeFem++ for academic research, please use the following :
+
+**APA :**
+```
+Hecht, F. (2012). New development in FreeFem++. Journal of numerical mathematics, 20(3-4), 251-266.
+```
+
+**ISO 690 :**
+```
+HECHT, Frédéric. New development in FreeFem++. Journal of numerical mathematics, 2012, vol. 20, no 3-4, p. 251-266.
+```
+
+**MLA :**
+```
+Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathematics 20.3-4 (2012): 251-266.
+```
+
+**BibTeX :**
+```
+@article{MR3043640,
+  AUTHOR = {Hecht, F.},
+  TITLE = {New development in FreeFem++},
+  JOURNAL = {J. Numer. Math.},
+  FJOURNAL = {Journal of Numerical Mathematics},
+  VOLUME = {20}, YEAR = {2012},
+  NUMBER = {3-4}, PAGES = {251--265},
+  ISSN = {1570-2820},
+  MRCLASS = {65Y15},
+  MRNUMBER = {3043640}
+}
+```
+
 
 ## For developers
 
-All development take place in the develop branch (or in feature branches: cmake, geneo4PETSc, ... for specific projects)
+All development efforts take place in the _develop_ branch (or in feature branches: cmake, geneo4PETSc, ... for specific projects)
 
 **Do not commit on master branch !**
 
@@ -81,13 +109,13 @@ Configuration:
 Download:
 
 ```bash
-./download/getall -a
+./3rdparty/getall -a
 ```
 
 PETSc:
 
 ```bash
-cd download/ff-petsc
+cd 3rdparty/ff-petsc
 sed -i 's/--download-pastix //g' Makefile
 make petsc-slepc
 cd -

@@ -1,0 +1,172 @@
+assert(version>=1.24); //  for big bug is non symetric matrix see HISTORY, and sign in int1d 
+int method1=0;
+int iwait=0;
+include "beam.edp"
+// Stokes on square  b,e,f,g  driven cavite on left side g 
+border e(t=0,10) { x=t; y=-10; label= 1; };      //  bottom
+border f(t=0,10) { x=10; y=-10+t ; label= 1; };   //  right
+border g(t=0,10) { x=0; y=-t ;label= 2;};       //  left
+border h(t=0,10) { x=t; y=vv(t,0)*( t>=0.001 )*(t <= 9.999); label=3;};   //  top of cavity deforme 
+
+real err=10;
+mesh sh = buildmesh(h(-20)+f(10)+e(10)+g(10));
+plot(sh,wait=iwait);
+
+fespace Xh(sh,P2),Mh(sh,P1);
+fespace V1h(sh,P2);
+
+Xh u1,u2,v1,v2;
+Mh p,q,ppp;
+
+real veps=1e-4;
+varf bx(u1,q) = int2d(sh)( -(dx(u1)*q)); 
+
+varf by(u1,q) = int2d(sh)( -(dy(u1)*q));
+
+varf Lap(u1,u2)= int2d(sh)(  dx(u1)*dx(u2) + dy(u1)*dy(u2) )
+                   +  on(2,u1=1) +  on(1,3,u1=0)   ;
+
+varf Mass(p,q)=int2d(sh)(p*q);
+
+Xh bc1; 
+Xh brhs;
+string solver="UMFPACK";
+if(!HaveUMFPACK) solver="CHOLESKY";
+                   
+matrix A= Lap(Xh,Xh,solver=solver); 
+matrix M= Mass(Mh,Mh,solver=solver); 
+matrix Bx= bx(Xh,Mh);
+matrix By= by(Xh,Mh);
+func cly =(-y)*(10.+y)/25.;
+Xh bcx=0,bcy=cly;
+func real[int] divup(real[int] & pp)
+{ //  
+  int verb=verbosity;
+   verbosity=1;
+   brhs[]  = Bx'*pp; brhs[] += bc1[] .*bcx[];
+   u1[] = A^-1*brhs[];
+   brhs[]  = By'*pp; brhs[] += bc1[] .*bcy[];
+   u2[] = A^-1*brhs[];
+   ppp[] = M^-1*pp;
+   ppp[] = 1.e-6*ppp[];
+   ppp[] =   Bx*u1[];
+   ppp[] +=  By*u2[];
+   verbosity=verb;
+   return ppp[] ;
+};
+p=0;q=0;u1=0;v1=0;
+
+int i;
+ th1 = movemesh(th, [x+uu, y+vv]);
+for( i=0;i<6;i++)
+ {    
+ bc1=0; 
+ brhs=0;
+ bc1[] = Lap(0,Xh);
+ q=0;   
+ verbosity=50;
+ LinearCG(divup,p[],veps=veps,nbiter=100);
+ divup(p[]);
+ verbosity=1;
+ plot([u1,u2],p,wait=iwait,value=true,coef=0.1);
+
+ real coef=0.2;
+
+Vh [uu1,vv1];
+[uu1,vv1]=[uu,vv];
+
+if(method1==1)
+ {
+ V1h sigma11,sigma22,sigma12;
+
+  sigma11([x+uu,y+vv]) = (2*dx(u1)-p);
+  sigma22([x+uu,y+vv]) = (2*dy(u2)-p);
+  sigma12([x+uu,y+vv]) = (dx(u2)+dy(u1));
+
+solve  bbst([uu,vv],[w,s],init=i)  = 
+    int2d(th)(
+		  lambda*div(w,s)*div(uu,vv)	
+                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 
+              )
+  + int2d(th) (-gravity*s)
+  + int1d(th,bottombeam)( coef*(sigma11*N.x*w + sigma22*N.y*s + sigma12*(N.y*w+N.x*s) )  )
+  + on(1,uu=0,vv=0) 
+  ;
+  }
+ else
+ {
+ // this piece of code is crucial to mixe adaptation and fluid structure 
+ fespace  Vh11(th1,[P1,P1]);
+ varf vFS([yyyy],[w,s])= int1d(th1,bottombeam)( 
+     coef*((2*dx(u1)-p)*N.x*w + (2*dy(u2)-p)*N.y*s + (dx(u1)+dy(u2))*(N.y*w+N.x*s)) 
+   );
+ Vh11 [FS,FS1];[FS,FS1]=[0,0];
+ FS[]= vFS(0,Vh11);
+ cout << FS[].min << " " << FS[].max << endl;
+ 
+ plot([FS,FS1],wait=iwait,value=1);
+ solve  bbst2([uu,vv],[w,s],init=i)  = 
+    int2d(th)(
+		  lambda*div(w,s)*div(uu,vv)	
+                  +2.*mu*( epsilon(w,s)'*epsilon(uu,vv) ) 
+              )
+  + int2d(th) (-gravity*s)
+  + FS[] // + int1d(th,bottombeam)( coef*(sigma11*N.x*w + sigma22*N.y*s + sigma12*(N.y*w+N.x*s) )  )
+  + on(1,uu=0,vv=0) 
+  ;
+   
+ }
+ //plot([uu,vv],wait=1);
+  err = sqrt(int2d(th)( (uu-uu1)^2 + (vv-vv1)^2 )); 
+ cout << " ----- Iteration = " << i <<  " Erreur L2 = " << err << "----------\n";
+ cout << " max deplacement " << uu[].linfty << endl;
+ bool iadapt=err>0.05;
+ if(iadapt)
+ th = adaptmesh(th,[uu,vv],err=1.e-2);
+ [uu,vv]=[uu,vv];
+ [w,s]=[0,0];
+ 
+ th1 = movemesh(th, [x+uu, y+vv]);
+ //plot(th1,wait=1);
+ if(method1==1)
+   sh = buildmesh(h(-20)+f(10)+e(10)+g(10));
+ else 
+  {
+    fespace VVh(sh,P1);VVh  uh,vh;
+    solve lapllll(uh,vh,solver=sparsesolver,tgv=1e5) =                    //  definion of  the problem 
+    //  compute a deformation field for moving the fluid mesh
+    
+    //  x -> vv(x,0) is the new deformation y 
+    //  x -> y is the position of the mesh on border 3
+    int2d(sh)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
+    + on(1,2,uh=0)+ on(3,uh=(vv(x,0)-y)*( x>=0.001 )*(x <= 9.999))  ;    //  boundary condition form
+    
+    sh = movemesh(sh,[x,y+uh]);
+   if(iadapt)
+    {
+    sh = adaptmesh(sh,[u1,u2],p,err=2.e-2);
+    lapllll;  
+    sh = movemesh(sh,[x,y+uh]);    
+    }
+    plot(th1,sh,wait=iwait);
+    p=p;
+    u1=u1; 
+    u2=u2;
+    A= Lap(Xh,Xh,solver=sparsesolver); 
+    M= Mass(Mh,Mh,solver=sparsesolver); 
+    Bx= bx(Xh,Mh);
+    By= by(Xh,Mh);
+    bcx=0;
+    bcy=cly;
+  }
+
+
+ p=p;q=q;u1=u1;u2=u2;brhs=brhs;ppp=ppp;
+ A= Lap(Xh,Xh,solver=sparsesolver); 
+ M= Mass(Mh,Mh,solver=sparsesolver); 
+ Bx= bx(Xh,Mh);
+ By= by(Xh,Mh);
+ bc1=0;  // for resize
+ bc1[] = Lap(0,Xh);
+}
+cout << " max deplacement " << uu[].linfty << endl;

@@ -1,0 +1,90 @@
+#!/bin/bash
+  red='[0;31m' # Red.
+  grn='[0;32m' # Green.
+  lgn='[1;32m' # Light green.
+  blu='[1;34m' # Blue.
+  mgn='[0;35m' # Magenta.
+  std='[m'     # No color.
+
+NL=0
+NA=0
+NX=0
+NN=0
+NO=0
+NC=0
+NF=0
+
+if [ "$1" = "-n"] ; then dry=1; shift; fi
+ffcmm=$1;shift;
+mpicm==$1;shift;
+if [ $# -eq 0 ]; then
+list=*.edp
+elif  [ $# -gt  0 ]; then
+list="$@"
+fi
+for j in $list
+do
+    case $j in
+	all.edp|regtests.edp) 
+	    echo  pass   $j;; 
+	*)
+		ffarg="-ns"
+		dir=`dirname "$j"`
+		i=`basename "$j"`
+		log="o/$i.log"
+		skeep=`head "$1"|awk '$1=="//" && $2=="UNCHECK-BOGGUS" { if( vv == ""){ print 1;}; vv=1}'`
+		if (( skeep > 0)) ; then
+			MSG="${std} UnCheck(.edp) ${std}"
+		else
+        np=`head "$1"|awk '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}'`
+        npa=`head "$1"|awk '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}'`
+		wmpi=`egrep 'mpirank|mpisize' $i|wc -l`
+		cmmff="$cmm";
+		 (( ( np == 0  &&  wmpi > 0)  )) && np=4
+	    (( np > 0 )) && cmmff=$mpicm -np $np 
+		    
+			ffarg="-nw -ns"
+		fi 
+	    ((NN++))
+	    (( dry ==1 )) && echo "(cd $dir; $cmm "$i" $ffarg $npa  )" '2>&1 1>' $log;
+	    (( dry !=1 )) && (cd $dir; $cmm "$i" $ffarg $npa  ) 2>&1 1>"$log";
+	    RES=$?
+	    ((SIG=$RES%128));
+
+	    ## error Compile error : Error load   $log
+	    ## error Compile error :
+        ## Exec error : exec assert
+	    ## Exec error :
+	    errl=`grep 'error Compile error : Error load' "$log"`
+	    errC=`grep 'error Compile error :' "$log"`
+	    errX=`grep 'Exec error :' $log`
+	    errA=`grep 'Exec error : exec assert' o/$i.log`
+	  #  echo "$RES,$SIG,$errC,$errA."
+	    if [ -n "$errl" ] ; then
+		((NL++))
+		MSG="${mgn} FAIL(load)        ${std}"
+	    elif [ -n "$errC" ] ; then
+		((NC++))
+		MSG="${lgn} FAIL(Compile)     ${std}"
+	    elif [ -n "$errA" -a  $SIG -ne 0 ] ; then
+		((NA++))
+		MSG="${blu} FAIL(Assert)      ${std}"
+	    elif [ -n "$errX" -a  $SIG -ne 0 ] ; then
+		((NX++))
+		MSG="${mgn} FAIL(Exec)        ${std}"
+	    elif [ $SIG -eq 0 ] ; then
+		((NO++))
+		MSG="${grn} OK  (Exec)        ${std}"
+	    else
+		MSG="${red} FAIL(signal)=$SIG ${std}"
+		((NF++))
+	    fi
+	fi
+	    echo $MSG  $cmm $i  >>"$log"
+	    echo  $MSG  $cmm $i "( see "$log" )";
+#	    echo  $MSG  $cmm $i "(see "$log " )" >>/tmp/list-ff-$$
+	    ;;
+    esac
+done
+
+echo "Nb Case $NN / ${grn}OK $NO / ${red} FAIL $NF / ${blu} Assert Error $NA/ ${lgn} Compile Error $NC  / ${mgn} load Error $NL / Exec Error $NX${std}"

@@ -1,0 +1,87 @@
+//  compute the solution of a Laplace operator in a Semi infini domain.
+//  with coupling of Boundary element with periodicity BC in x . 
+// -------------------------------------------------------------
+include "ExtractDofsonBorder.idp"
+real eps0=1;
+int labup=3, labdown=1;
+int nharm= 10; // Number of  Harmonique
+
+func ug= max(0.,-(x-0.5)*(x-0.75)); // boundary condition.. 
+
+macro Grad(u) [dx(u),dy(u)] // eom
+
+
+real Xmax=1,Ymax=0.3;
+int NNx=100,NNy=NNx*Ymax;
+mesh Th=square(NNx,NNy,[x*Xmax,y*Ymax]); 
+fespace Vh(Th,P1,periodic=[[2,y],[4,y]]);
+
+Vh uref; // la solution de reference. 
+
+{ // calcule de la solution de reference in  Huge Domaine.
+mesh Th1=square(NNx,NNx*10,[x*Xmax,10*Xmax*y]); // pour la solution de reference 
+fespace Uh(Th1,P1,periodic=[[2,y],[4,y]]);
+Uh uu,vv;
+solve Pref(uu,vv)=int2d(Th1)(eps0*(Grad(uu)'*Grad(vv)))+on(labdown,uu=ug);
+ uref=uu; 
+ plot(uu,wait=1,cmm=" ref sol / large Th ");
+} // pour nettoyer la memoire
+
+plot(uref,wait=1,cmm=" ref sol / Th");
+
+
+varf vP(u,v)=int2d(Th)(eps0*(Grad(u)'*Grad(v)))+on(labdown,u=ug);
+varf vF(u,v)=on(labdown,u=ug);
+matrix<complex> A=vP(Vh,Vh);  // la matrice sans BEM. 
+
+complex[int] b=vF(0,Vh);
+Vh<complex> u;
+
+{// for cleanning all local varaible at end of block.
+ // computation of the matrice BEM
+  // nb of  DoF on border 
+ int[int] IdfB2Vh(1); // for numbering IdfB2Vh[i]==i 
+ ExtractDofsonBorder(labup,Vh,IdfB2Vh,-1)
+ int kdfBEM=IdfB2Vh.n;
+ // verif
+ if(0)  { Vh X=x;
+     real[int] xx(IdfB2Vh.n);
+     xx=X[](IdfB2Vh);
+     cout << IdfB2Vh << endl; 
+     cout << xx << endl; 
+   }
+//  end of the numbering computation
+ // so  IdfB2Vh[ibem] = iVh where ibem is a df of on bem , and iVh is a df in Vh space. 
+   real perio=Xmax;
+   complex  deuxpii=2*pi*1i;
+   int n=0;// 
+   // Use of higher order Quadarture formular ...
+   varf vWn(u,w)=int1d(Th,labup,qforder=10)(exp(-deuxpii*(n)*x)*w);
+      
+   //complex[int] wn=vWn(0,Vh);//  with Vh numbering.. 
+
+   complex[int,int] ABemFull(kdfBEM,kdfBEM);// the full bem matrix in Bem numbering.
+   ABemFull=0;//  set of 0 
+   for ( n=-nharm;n<=nharm;++n)
+    {
+    	complex[int] wwn(kdfBEM);
+    	complex[int] wn=vWn(0,Vh);
+    	wwn=wn(IdfB2Vh);//  wwn(i) = wn(IdfB2Vh(i))  i=0 a wwn.n -1 
+        complex Gs=+2.*pi*abs(n/perio/perio)*eps0;
+    	ABemFull += Gs*wwn*wwn';
+    }
+    
+ 
+  matrix<complex> ABem=ABemFull(IdfB2Vh^-1,IdfB2Vh^-1); // Build the sparse BEm matrix
+   //  ABem(IdfB2Vh(ib),IdfB2Vh(jb)) = ABemFull(ib,jb) 
+  A = A + ABem;
+  }// for cleanning all local varaible at end of block. ABem ABemFull
+  set(A,solver=sparsesolver);
+  u[]=A^-1*b;
+  Vh ur=real(u),ui=imag(u);
+  Vh  err=ur-uref;
+  cout << " err Linty=" << err[].linfty << " /  " <<  uref[].linfty << endl; 
+
+  plot(ur,uref,wait=1,cmm="ur + uref ");
+
+    

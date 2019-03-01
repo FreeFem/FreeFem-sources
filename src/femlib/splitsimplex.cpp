@@ -73,10 +73,12 @@ void SplitSimplex(int N,R1 *P,int *K,int op=0,R1 *AB=0)
       P[i+op] = R1(i*h).Bary(AB);
     else
       P[i+op] = R1(i*h);
-  for(int i=0;i<N;++i)
-    {
-      K[i]=i+op;
-      K[i]=i+1+op;
+    int l=0;
+  for(int i=0;i<N;++i) {
+    K[l++]=i+op;
+    K[l++]=i+1+op;
+   if(verbosity>200)
+     cout << "l="<< l/2 <<  " "<< K[l-2] <<" "<<  K[l-1] <<" "<<  endl;
     }
 }
 /*
@@ -165,11 +167,48 @@ void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
 	}
 }
 
+/*
+// d = 3 Surfacic
+void SplitSimplex(int N,R3 *P,int *K,int op=0,R3 *ABC=0)
+{
+    assert(N>0);
+    int nv = (N+1)*(N+2)/2;
+    double h=1./N;
+    //   loop sur les diag   i+j = k
+    //   num  ( i+j,j) lexico croissant
+    for(int l=0;l<nv;l++)
+    {
+        int i,j,k;
+        invNumSimplex3(l,i,j,k);
+        if(ABC)
+            P[l+op]= R3(i*h,j*h,k*h).Bary(ABC);
+        else
+            P[l+op]= R3(i*h,j*h,k*h);
+        assert(l<nv);
+    }
+    //    generation des trianges
+    // --------
+    int l=0;
+    for (int i=0;i<N;++i)
+        for (int j=0;j<N;++j)
+            if(i+j<N)
+            {
+                K[l++]= op+NumSimplex2(i,j);
+                K[l++]= op+NumSimplex2(i+1,j);
+                K[l++]= op+NumSimplex2(i,j+1);
+            }
+            else
+            {
+                K[l++]= op+NumSimplex2(N-i,N-j);
+                K[l++]= op+NumSimplex2(N-i,N-j-1);
+                K[l++]= op+NumSimplex2(N-i-1,N-j);
+            }
+} */
 
 
 void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 {
-  const int n=N;
+    const int n=N;
   const int n2=n*n;
   const int n3=n2*n;
   const int ntc=6;
@@ -217,7 +256,7 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
 	  }
       
     }
-  if(verbosity>199)
+ /* if(verbosity>199)
     {
       
       cout <<   "  SplitSimplex   " << endl;
@@ -225,7 +264,7 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
        for(int m=0;m<4;++m)
          cout << tet[l++] << (m==3 ? '\n' : ' ' );
        cout << ptet << "   " << tet << endl;
-    }
+    }*/
   assert(ntt==n3);
 }
 
@@ -247,9 +286,9 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
   int l=0;
   if(verbosity>200)
     cout << "face i=0" << endl;
-  for (int i=0;i<N;++i)
-    for (int j=0;j<N;++j){
-      if(i+j<N) 
+    for (int i=0;i<N;++i)
+        for (int j=0;j<N;++j){
+            if(i+j<N)
 	{
 	  tri[l++]= op+NumSimplex3(0,i,j);
 	  tri[l++]= op+NumSimplex3(0,i+1,j);
@@ -333,8 +372,63 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
     }
   if(verbosity>200)
     cout << "l= " << l << " ntri=" << ntri << endl;
-  assert( l == ntri); 
+  assert( l == ntri);
 }
+
+
+
+
+void SplitEdgeSimplex(int N,int &nedge2,int *&edge)
+{
+  const int n=N;
+  const int n2=n*n;
+    
+  int nedge=2*nedge2;
+  int op=0;
+    
+  edge = new int[nedge];
+  //    generation des edges
+  // --------
+  // (i,j,k) barycentric coordinates
+
+  int l=0;
+
+  for (int i=0;i<N;++i)
+    for (int j=0;j<N;++j) {
+      if(i+j<N) {
+        edge[l++]= op+NumSimplex2(i+1,j);
+        edge[l++]= op+NumSimplex2(i,j+1);
+      }
+      if(verbosity>200)
+        cout << "l="<< l/2 <<" "<< edge[l-2] <<" "<<  edge[l-1] <<" "<<  endl;
+    }
+ 
+    for (int i=0;i<N;++i)
+     for (int j=0;j<N;++j) {
+       if(i+j<N) {
+         edge[l++]= op+NumSimplex2(i,j);
+         edge[l++]= op+NumSimplex2(i,j+1);
+       }
+       if(verbosity>200)
+         cout << "l="<< l/2 <<" "<< edge[l-2] <<" "<<  edge[l-1] <<" "<<  endl;
+     }
+    
+    for (int i=0;i<N;++i)
+      for (int j=0;j<N;++j) {
+        if(i+j<N) {
+          edge[l++]= op+NumSimplex2(i,j);
+          edge[l++]= op+NumSimplex2(i+1,j);
+        }
+        if(verbosity>200)
+          cout << i+j << "l="<< l/2 <<" "<< edge[l-2] <<" "<<  edge[l-1] <<" "<<  endl;
+      }
+
+    if(verbosity>200)
+      cout << "l= " << l << " nedge=" << nedge << endl;
+    assert( l == nedge);
+}
+
+
 
 /*
 void  SplitSimplex(int N,int & nv, R1 *& P, int & nk , int *& K)

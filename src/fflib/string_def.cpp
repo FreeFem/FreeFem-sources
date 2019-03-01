@@ -3,7 +3,7 @@
 
 // TODO: remove this block as soon as autoconf is removed from FreeFem++
 #ifndef CMAKE
-#include "config-wrapper.h"
+#include <config.h>
 #endif
 
 #include <complex>
@@ -16,7 +16,7 @@
 #include "RNM.hpp"
 
 #include "Operator.hpp"
-// for exec routine 
+// for exec routine
 #include "rgraph.hpp"
 #include "InitFunct.hpp"
 #include <queue>
@@ -33,8 +33,8 @@ class SubString {  public:
 };
 
 
-extern Map_type_of_map map_type_of_map ; //  to store te type 
-extern Map_type_of_map map_pair_of_type ; //  to store te type 
+extern Map_type_of_map map_type_of_map ; //  to store te type
+extern Map_type_of_map map_pair_of_type ; //  to store te type
 
 extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and complex variable
 
@@ -47,21 +47,21 @@ long get_sizep(string ** p)  { ffassert(p && *p) ;  return (*p)->size() ;}
 
 
 
-string ** get_replace(string ** pp,long i,long j, string *rr) 
+string ** get_replace(string ** pp,long i,long j, string *rr)
     {
-     ffassert(pp && *pp ) ; 
-      string  s=**pp; // copy modif for windows pb free 
-      s.replace(i,j,*rr); 
+     ffassert(pp && *pp ) ;
+      string  s=**pp; // copy modif for windows pb free
+      s.replace(i,j,*rr);
       delete *pp;
       *pp = newstring(s);
       return pp;
-    } 
+    }
 // a( : ) = "sqsd";
 
 struct set_substring: public binary_function<SubString,string *,SubString> {
 
-  static SubString f(SubString const  & a, string  *const  & b)  
-  {  
+  static SubString f(SubString const  & a, string  *const  & b)
+  {
      string s=*a.s;
      s.replace(a.i,a.n,*b);
      * a.s = s; // bofbof pour windows
@@ -72,33 +72,33 @@ struct set_substring: public binary_function<SubString,string *,SubString> {
 
 SubString fSubString( string ** const & a,const SubArray & b)
  { return SubString(a,b);}
- 
+
 template<bool B>
  struct String_find {
    string *p;
    String_find(string *pp) :p(pp){ffassert(p);}
    String_find(string **pp) :p(*pp){ffassert(p);}
-   
-   long find(string *f) const 
-      { return p->find(*f);}
-   long find(string *f,long i) const 
-      { return p->find(*f,i);}
-   
- }; 
 
-// spacialisation find -> rfind  (bofbof ??) 
+   long find(string *f) const
+      { return p->find(*f);}
+   long find(string *f,long i) const
+      { return p->find(*f,i);}
+
+ };
+
+// spacialisation find -> rfind  (bofbof ??)
 template<>
  struct String_find<false> {
    string *p;
    String_find(string *pp) :p(pp){ffassert(p);}
    String_find(string **pp) :p(*pp){ffassert(p);}
-   
-   long find(string *f) const 
+
+   long find(string *f) const
       { return p->rfind(*f);}
-   long find(string *f,long i) const 
+   long find(string *f,long i) const
       { return p->rfind(*f,i);}
-   
- }; 
+
+ };
 
 template<bool B>
 String_find<B> to_String_find(string * p)
@@ -122,7 +122,7 @@ istream* getlinep( istream* f, string ** s)
  {
    getline(*f,**s);
    size_t l= (**s).length();
-   // clean begin end for win32 file 
+   // clean begin end for win32 file
    if( l) { if((**s)[0] == '\r') { (**s).erase(0,1); l--;}}
    if( l) { if((**s)[l-1] == '\r') { (**s).erase(l-1,1); l--;}}
    return f;
@@ -133,7 +133,7 @@ void     initStringOperator()
   Dcl_Type<SubString>();
   // aType  tstringp =atype<string*>();
   //aType  tstringpp =atype<string**>();
-  
+
    Dcl_Type< String_find<true> > ();
    Dcl_Type< String_find<false> > ();
     map_type[typeid(string*).name()]->AddCast(
@@ -141,17 +141,17 @@ void     initStringOperator()
 // ajoute pour les chaines
  Add<string **>("size",".",new OneOperator1<long,string **>(get_sizep) );
  Add<string **>("length",".",new OneOperator1<long,string **>(get_sizep) );
- 
+
  Add<string *>("size",".",new OneOperator1<long,string *>(get_size) );
  Add<string *>("length",".",new OneOperator1<long,string *>(get_size) );
- 
+
   Add<string *>("find",".",new OneOperator1<String_find<true>,string * >(to_String_find<true> ));
   Add<string *>("rfind",".",new OneOperator1<String_find<false>,string * >(to_String_find<false> ));
   Add<string **>("find",".",new OneOperator1<String_find<true>,string ** >(to_String_findp<true> ));
   Add<string **>("rfind",".",new OneOperator1<String_find<false>,string ** >(to_String_findp<false> ));
-  
-  
- 
+
+
+
   Add<String_find<true> >("(","",new OneOperator2<long,String_find<true>,string *>(string_find ) );
   Add<String_find<false> >("(","",new OneOperator2<long,String_find<false>,string *>(string_find ) );
 
@@ -162,14 +162,14 @@ void     initStringOperator()
  TheOperators->Add("=",
          new OneBinaryOperator<set_substring > );
 
- Add<string**>("(","",new OneOperator2_<SubString,string **,SubArray>(fSubString)); 
+ Add<string**>("(","",new OneOperator2_<SubString,string **,SubArray>(fSubString));
 
  TheOperators->Add("getline",new OneOperator2<istream*,istream*,string**>(getlinep));
-  
- 
- 
-// Add<string**>("[","",new OneOperator2_<SubString,string **,SubArray>(fSubString)); 
- 
+
+
+
+// Add<string**>("[","",new OneOperator2_<SubString,string **,SubArray>(fSubString));
+
  //Add<string **>("rfind",".",new OneOperator4_<long,string **,long,long,string *>(get_replace) );
- 
+
 }

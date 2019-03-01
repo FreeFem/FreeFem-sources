@@ -53,7 +53,8 @@
 extern bool showCPU;
 #include "RNM.hpp" 
 
-#ifdef TIME_WITH_SYS_TIME 
+# include <ctime>
+/* #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h> 
 # include <time.h> 
 #else
@@ -63,18 +64,20 @@ extern bool showCPU;
 # include <time.h>
 # endif 
 #endif
-
+*/
 // #include <time.h> 
 #include "CodeAlloc.hpp"
 
 inline double CPUtime(){
+    /*
 #ifdef SYSTIMES
   struct tms buf;
   if (times(&buf)!=-1)
     return ((double)buf.tms_utime+(double)buf.tms_stime)/(long) sysconf(_SC_CLK_TCK);
   else
 #endif
-    return ((double) clock())/CLOCKS_PER_SEC;
+     */
+      return ((double) std::clock())/CLOCKS_PER_SEC;
 }
 
 extern long verbosity;  // level off printing
@@ -258,9 +261,9 @@ class basicForEachType : public CodeAlloc {
 
    // virtual  void print(ostream &f,const void *p) const =0;
                             
-    friend ostream & operator<<(ostream & f,const basicForEachType & e) 
-      { f << '<' << e.name() << '>' ;return f;}
-     void Show(ostream & f) const ;
+    friend ostream & operator<<(ostream & f,const basicForEachType & e)
+    { f << '<' << e.name() << '>' ;return f;}
+    void Show(ostream & f) const ;
      const char * name() const  { return this!=tnull  ?  ktype->name() :"NULL" ;}
      virtual bool CastingFrom(const basicForEachType * t) const ;
      //  modif FH -----  A TESTER  // 
@@ -303,7 +306,7 @@ public:
     
     Function1 InitExp;       //  to init the ptr value 
     Function1  destroy;//  the destroy function 
-    TableOfIdentifier ti; //  all polymorphisme of the Identifier   
+    TableOfIdentifier ti; //  all polymorphisme of the Identifier
    public:
   // basicForEachType * FunctionType() const;// { return funct_type ? funct_type : (funct_type= new FuncForEachType(this));}
    C_F0  Find(const char * k) const; // {return ti->Find(k);}
@@ -862,7 +865,7 @@ template<class A> inline AnyType  DestroyPtr(Stack,const AnyType &x) {
 };
 template<class A> inline AnyType DeletePtr(Stack,const AnyType &x) {
   const A *  a=PGetAny<A>(x);
- if(verbosity>99)cout << "DeletePtr " << typeid(A).name() << *a  << endl;
+ SHOWVERB( cout << "DeletePtr " << typeid(A).name() << *a  << endl);
   // (*a)->destroy(); 
     delete *a; 
 
@@ -1310,7 +1313,7 @@ template<class R> class EConstant:public E_F0
   aType t; //  type of the variable just for check  
   public:
   AnyType operator()(Stack s) const { 
-    SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
+   // SHOWVERB( cout << "\n\tget var " << offset << " " <<  t->name() << endl);  
 //   return PtrtoAny(static_cast<void *>(static_cast<char *>(s)+offset),t);}
    return PtrtoAny(Stack_offset<void>(s,offset),t);}
 
@@ -2103,9 +2106,9 @@ public:
 template<class T>   
    C_F0 NewVar(Key k,aType t,const C_F0 &i) 
      {return table.NewVar<T>(k, t,top,i);}
-template<class T>   
+/*template<class T>
    C_F0 NewFESpace(Key k,aType t,const basicAC_F0 &args) 
-     {return table.NewFESpace<T>(k, t,top,args);}
+     {return table.NewFESpace<T>(k, t,top,args);}*/
 template<class T>   
    C_F0 NewVar(Key k,aType t, AC_F0 &args) 
      {C_F0 r= table.NewVar<T>(k, t,top,args);
@@ -2919,14 +2922,14 @@ inline basicForEachType::basicForEachType(const type_info  & k, const type_info 
         
         
 */
-
+/*  remove frev 2019 FH. 
 inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
 {
    C_F0 r = C_F0(TheOperators,"+",a,b);
    a=r;
    return a;
 }
-
+*/
 
 template<typename T,typename PT>
 void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)

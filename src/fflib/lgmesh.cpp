@@ -453,7 +453,7 @@ struct Op_trunc_mesh : public OneOperator {
 
     class Op: public E_F0mps   { public:
       static basicAC_F0::name_and_type name_param[] ;
-      static const int n_name_param =5;
+      static const int n_name_param =9;
       Expression nargs[n_name_param];
     
       Expression getmesh,bbb;
@@ -477,8 +477,12 @@ basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_nam
    {  "label",             &typeid(long)},
    { "new2old", &typeid(KN<long>*)},  //  ajout FH pour P. Jolivet jan 2014
    { "old2new", &typeid(KN<long>*)},   //  ajout FH pour P. JoLivet jan 2014
-     { "renum",&typeid(bool)}
- 
+     { "renum",&typeid(bool)},
+//  add jan 2019
+     {  "labels", &typeid(KN_<long> )},
+     {  "region", &typeid(KN_<long> )},
+     {  "flabel", &typeid(long)},
+     {  "fregion", &typeid(long)},
  };
 
 
@@ -506,6 +510,13 @@ AnyType BuildMeshFile::operator()(Stack stack)  const {
     return SetAny<pmesh>(pmsh);
     
 }
+static int  ChangeLab(const map<int,int> & m,int lab)
+{
+    map<int,int>::const_iterator i=m.find(lab);
+    if(i != m.end())
+        lab=i->second;
+    return lab;
+}
 
 AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     // Remark : F.Hecht feb 2016 ...
@@ -519,6 +530,17 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     KN<long> * po2n =  arg(3,stack);
     KN<int> split(Th.nt);
     bool renum=arg(4,stack,false);//  change to false too dangerous with ddm the trunc must commute in DDM
+    KN<long> kempty;
+    KN<long> nre = arg(5,stack,kempty);
+    KN<long> nrt = arg(6,stack,kempty);
+    Expression flab = nargs[7] ;
+    Expression freg = nargs[8] ;
+    /* ZZZZZ
+     {  "labels", &typeid(KN_<long> )},
+     {  "region", &typeid(KN_<long> )},
+     {  "flabel", &typeid(long)},
+     {  "fregion", &typeid(long)},
+     */
     split=kkksplit;
     long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
@@ -555,19 +577,58 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
                 }
             else o2n[k]=-1;
         }
-
+//    chnage ....
     
      *mp=mps;
      if (verbosity>1) 
      cout << "  -- Trunc mesh: Nb of Triangle = " << kk << " label=" <<label <<endl;
-  Mesh  * pmsh = new Mesh(Th,split,false,label);
-  if(renum) pmsh->renum();
-   /* deja fait  dans bamg2msh
-  Fem2D::R2 Pn,Px;
-  m->BoundingBox(Pn,Px);
-  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);*/
- // pmsh->decrement();  
-  Add2StackOfPtr2FreeRC(stack,pmsh);//  07/2008 FH 
+    Mesh  * pmsh = new Mesh(Th,split,false,label);
+    if(renum)
+        pmsh->renum();
+    {
+        Mesh &Th=*pmsh; 
+        map<int,int> mape,mapt;
+        for(int i=0;i<nre.N();i+=2)
+            mape[nre[i]]=nrt[i+1];
+        for(int i=0;i<nrt.N();i+=2)
+            mapt[nrt[i]]=nrt[i+1];
+        R2 PtHat(1./3,1./3.);
+        for (int i=0;i<Th.nt;i++)
+        {
+            int lab=ChangeLab(mapt,Th[i].lab);
+            if(freg)
+            {
+                mp->set(Th,Th[i](PtHat),PtHat,Th[i],lab);
+                Th[i].lab =GetAny<long>( (* freg)(stack)) ;
+                cout << " freg "<<Th[i].lab  << endl;
+            }
+        }
+        
+        
+        // les arete frontieres qui n'ont pas change
+        for (int i=0;i<Th.nbBrdElmts();i++)
+        {
+            int ke,k =Th.BoundaryElement(i,ke);
+            int kke,kk= Th.ElementAdj(k,kke=ke);
+            int intern = ! (( kk == k )|| ( kk < 0)) ;
+            const   Triangle &K(Th[k]);
+            int l0,l1=ChangeLab(mape,l0=Th.bedges[i].lab) ;
+            mp->set(Th,Th[k](PtHat),PtHat,Th[k],l1);
+            if(flab)
+            {
+                R2 E=K.Edge(ke);
+                double le = sqrt((E,E));
+                double sa=0.5,sb=1-sa;
+                R2 PA(TriangleHat[VerticesOfTriangularEdge[ke][0]]),
+                PB(TriangleHat[VerticesOfTriangularEdge[ke][1]]);
+                R2 Pt(PA*sa+PB*sb ); //
+                MeshPointStack(stack)->set(Th,K(Pt),Pt,K,l1,R2(E.y,-E.x)/le,ke);
+                Th.bedges[i].lab =GetAny<long>( (*flab)(stack)) ;
+            }
+        }
+        
+    }
+    Add2StackOfPtr2FreeRC(stack,pmsh);//  07/2008 FH
 
   return SetAny<pmesh>(pmsh); 
  };
