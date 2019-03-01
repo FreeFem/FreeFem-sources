@@ -15,7 +15,7 @@ mkdir -p build_cmake \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/build_cmake/examples++-3d \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/build_cmake/examples++-bamg \
+&& cd $FF_ROOT/build_cmake/examples-bamg \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/build_cmake/examples++-bug \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
