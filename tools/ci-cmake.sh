@@ -19,8 +19,6 @@ mkdir -p build_cmake \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/build_cmake/examples++-eigen \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
-&& cd $FF_ROOT/build_cmake/examples++-hpddm \
-&& make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/build_cmake/examples++-mpi \
 && make test CTEST_OUTPUT_ON_FAILURE=On \
 && cd $FF_ROOT/build_cmake/examples++-other \
