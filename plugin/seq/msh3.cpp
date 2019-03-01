@@ -288,7 +288,7 @@ int TestElementMesh3 (const Mesh3 &Th3) {
 	for (int k = 0; k < Th3.nbe; k++) {
 		for (int e = 0; e < 3; e++) {
 			if (Th3.be(k).lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
-				for (int eh = 0; eh < 3; e++) {
+				for (int eh = 0; eh < 3; eh++) {
 					cout << "triangles: " << k << " edge : " << eh << " lenght " << Th3.be(k).lenEdge(e) << endl;
 				}
 
@@ -2233,11 +2233,11 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
         T_Th3->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th3);
     }
-     Add2StackOfPtr2FreeRC(stack, T_Th3->meshS); cout << "test ********************************************" << endl;
+     Add2StackOfPtr2FreeRC(stack, T_Th3->meshS);
     if (typeMesh3 !=1) {
         if (flagsurfaceall == 1)
             T_Th3->meshS->BuildBoundaryElementAdj();
-        T_Th3->meshS->BuildGTree();    cout << "test " << endl;
+        T_Th3->meshS->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th3->meshS);
         }
     
