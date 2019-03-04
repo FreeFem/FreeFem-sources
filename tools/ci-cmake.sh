@@ -5,7 +5,7 @@
 export FF_ROOT=/builds/workspace/FreeFem-source-feature-cmake-UbuntuAll 
 export FF_LOADPATH=$FF_ROOT/build_cmake/examples++-load 
 export LD_LIBRARY_PATH=$FF_ROOT/build_cmake/examples++-load 
-export FF_INCLUDEPATH=$FF_ROOT/examples++ 
+export FF_INCLUDEPATH=$FF_ROOT/idp 
 
 mkdir -p build_cmake \
 && cd build_cmake \
