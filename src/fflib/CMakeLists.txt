@@ -21,6 +21,7 @@ IF(DLOPEN_FOUND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D HAVE_DLFCN_H")
 ENDIF(DLOPEN_FOUND)
 
+
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib 
                   ${CMAKE_SOURCE_DIR}/src/fflib/ 
                   ${CMAKE_SOURCE_DIR}/src/Graphics/ 
