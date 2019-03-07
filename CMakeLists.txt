@@ -50,15 +50,8 @@ ENDIF(NOT ENABLE_DOWNLOAD)
 
 ADD_SUBDIRECTORY(plugin)
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(examples/misc)
-ADD_SUBDIRECTORY(examples/3d)
-ADD_SUBDIRECTORY(examples/bug)
-ADD_SUBDIRECTORY(examples/examples)
-ADD_SUBDIRECTORY(examples/eigen)
-#ADD_SUBDIRECTORY(examples/plugin)
-ADD_SUBDIRECTORY(examples/mpi)
-ADD_SUBDIRECTORY(examples/other)
-ADD_SUBDIRECTORY(examples/tutorial)
+ADD_SUBDIRECTORY(examples)
+
 
 ######################
 # strversionnumber.cpp
