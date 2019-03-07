@@ -6,17 +6,14 @@ SET(FREEFEM_VERSION 4.0)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
-INCLUDE(ProcessorCount)
-ProcessorCount(N)
-IF(NOT N EQUAL 0)
-  SET(CMAKE_BUILD_FLAGS -j${N})
-ENDIF()
+include(ff_configure_cmake)
+include(ff_configure_compilers)
 
-######################
-# C++ COMPILER OPTIONS
-######################
 
-INCLUDE(CompilerManager)
+ff_configure_cmake()
+ff_configure_compilers()
+
+
 INCLUDE(ModuleManager)
 
 
