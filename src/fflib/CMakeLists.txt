@@ -2,6 +2,9 @@ INCLUDE(ff_create_strversionnumber)
 
 ff_create_strversionnumber()
 
+FILE(GLOB FEMLIB_SRC ${CMAKE_SOURCE_DIR}/src/femlib/*.cpp)
+FILE(GLOB_RECURSE FFLIB_SRC $ {CMAKE_SOURCE_DIR}/src/fflib/*.cpp)
+
 SET(LIBFF_SRC ${FEMLIB_SRC} ${FFLIB_SRC})
 
 LIST(REMOVE_ITEM LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp

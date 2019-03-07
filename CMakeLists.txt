@@ -19,8 +19,6 @@ ENDIF()
 INCLUDE(CompilerManager)
 INCLUDE(ModuleManager)
 
-FILE(GLOB FEMLIB_SRC src/femlib/*.cpp)
-FILE(GLOB_RECURSE FFLIB_SRC src/fflib/*.cpp)
 
 FIND_PACKAGE(MPI)
 
