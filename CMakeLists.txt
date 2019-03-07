@@ -16,27 +16,13 @@ ENDIF()
 # C++ COMPILER OPTIONS
 ######################
 
-SET(CMAKE_CXX_STANDARD 11)
 INCLUDE(CompilerManager)
 INCLUDE(ModuleManager)
 
 FILE(GLOB FEMLIB_SRC src/femlib/*.cpp)
 FILE(GLOB_RECURSE FFLIB_SRC src/fflib/*.cpp)
 
-######
-# TEST
-######
-
-ENABLE_TESTING()
-
-FILE(GLOB EXAMPLE_DIRECTORIES RELATIVE ${CMAKE_SOURCE_DIR} examples*)
-
 FIND_PACKAGE(MPI)
-IF(MPI_FOUND)
-  ADD_CUSTOM_TARGET(check LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/examples++-mpi:${CMAKE_BINARY_DIR}/examples++-load ${CMAKE_SOURCE_DIR}/CheckAll "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/src/FreeFem++-mpi ")
-ELSE(MPI_FOUND)
-  ADD_CUSTOM_TARGET(check LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/examples++-load ${CMAKE_SOURCE_DIR}/CheckAll ${CMAKE_BINARY_DIR}/src/FreeFem++)
-ENDIF(MPI_FOUND)
 
 ###########
 # DOWNLOAD
@@ -51,12 +37,3 @@ ENDIF(NOT ENABLE_DOWNLOAD)
 ADD_SUBDIRECTORY(plugin)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
-
-
-######################
-# strversionnumber.cpp
-######################
-
-INCLUDE(ff_create_strversionnumber)
-ff_create_strversionnumber()
-

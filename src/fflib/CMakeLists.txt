@@ -1,3 +1,7 @@
+INCLUDE(ff_create_strversionnumber)
+
+ff_create_strversionnumber()
+
 SET(LIBFF_SRC ${FEMLIB_SRC} ${FFLIB_SRC})
 
 LIST(REMOVE_ITEM LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/bamglib/Meshgibbs.cpp
