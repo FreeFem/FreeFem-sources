@@ -1,10 +1,10 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 
-PROJECT(FreeFem++ C CXX)
+project(FreeFem++ C CXX)
 
-SET(FREEFEM_VERSION 4.0)
+set(FREEFEM_VERSION 4.0)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 include(ff_configure_cmake)
 include(ff_configure_compilers)
@@ -14,24 +14,26 @@ ff_configure_cmake()
 ff_configure_compilers()
 
 
-INCLUDE(ModuleManager)
+include(ModuleManager)
 
 
-FIND_PACKAGE(MPI)
+find_package(MPI)
 
 ###########
 # DOWNLOAD
 ##########
 
-INCLUDE(FFInstallPackage)
+include(FFInstallPackage)
 
-IF(NOT ENABLE_DOWNLOAD)
-  SET(ENABLE_DOWNLOAD False)
-ENDIF(NOT ENABLE_DOWNLOAD)
+if(NOT ENABLE_DOWNLOAD)
+  set(ENABLE_DOWNLOAD False)
+endif(NOT ENABLE_DOWNLOAD)
 
-ADD_SUBDIRECTORY(plugin)
-ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(examples)
+add_subdirectory(plugin)
+add_subdirectory(src)
+add_subdirectory(examples)
 
-ENABLE_TESTING()
+# creation of "make test" command
+# Note: this call MUST be performed in the main CMake script
+enable_testing()
 
