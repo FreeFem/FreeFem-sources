@@ -1059,10 +1059,9 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
 }
 */
 
-template<class R> //, class v_tfes>
+template<class R, class v_fes>
 AnyType set_fe3 (Stack s,Expression ppfe, Expression e)
 { 
-  typedef v_fes3 v_fes;
   typedef typename  v_fes::pfes pfes;
   typedef typename  v_fes::FESpace FESpace;
   typedef typename  FESpace::Mesh Mesh;
@@ -1603,6 +1602,81 @@ AnyType pf3r2R(Stack s,const AnyType &a)
 }
 
 
+template<class R,int dd,class v_fes>
+AnyType pfSr2R(Stack s,const AnyType &a)
+{
+  typedef typename  v_fes::pfes pfes;
+  typedef typename  v_fes::FESpace FESpace;
+  typedef typename  FESpace::Mesh Mesh;
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  Mesh::Element Element;
+  typedef typename  Mesh::Vertex Vertex;
+  typedef typename  Mesh::RdHat RdHat;
+  typedef typename  Mesh::Rd Rd;
+
+  pair< FEbase<R,v_fes> *  ,int> ppfe=GetAny<pair< FEbase<R,v_fes> *,int> >(a);
+  FEbase<R,v_fes> & fe( *ppfe.first);
+  int componante=ppfe.second;
+  if ( !fe.x()) {
+    if ( !fe.x()){
+      return   SetAny<R>(0.0);
+    }
+  }
+
+  const FESpace & Vh(*fe.Vh);
+  const Mesh & Th(Vh.Th);
+  MeshPoint & mp = *MeshPointStack(s);
+  const Element *K;
+  R2 PHat;
+  bool outside=false;
+  bool qnu=true;
+  if ( 0 && mp.ThS && mp.ThS->elements == Th.elements && mp.T)
+   {
+     qnu=false;
+     K=mp.TS;
+     //PHat=mp.PHat;
+   }
+  else if ( 0 && mp.other.ThS
+            && (mp.other.ThS->elements ==  Th.elements)
+            && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
+    {
+      K=mp.other.TS;
+      //PHat=mp.other.PHat;
+      outside = mp.other.outside;
+    }
+  else {
+    if (mp.isUnset()) ExecError("Try to get unset x,y, ...");
+    K=Th.Find(mp.P,PHat,outside);
+    mp.other.set(Th,mp.P,PHat,*K,0,outside);
+  }
+  if(verbosity>1000)
+    {
+    if(outside)
+	cout << "  ---  " << qnu << "  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K= " << K << " " << PHat << endl;
+    else
+	cout << "  ---  " << qnu << " P=  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K(PHat) == P =  " <<  (*K)(PHat) << " PHat = " << PHat << endl;
+    }
+  const FElement KK(Vh[Th(K)]);
+  if (outside && KK.tfe->discontinue)
+  {   if(verbosity>=10000) cout << " outside f() = 0. " << KK.tfe->discontinue << "\n";
+    return   SetAny<R>(0.0);
+  }
+#ifndef NDEBUG
+  if (!outside)
+    {
+      if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
+        cout << "bug ??  " << Norme2_2( (*K)(PHat) - mp.P ) << " " << mp.P << " " << (*K)(PHat) << endl;
+    }
+#endif
+
+ const R rr = KK(PHat,*fe.x(),componante,dd);
+
+ if(verbosity>=10000)
+      cout << componante<< " "<< dd << " f()  Tet:  " << Th(K) << " " << mp.P << " " << PHat << " =  " << rr <<  endl;
+  return SetAny<R>(rr);
+}
+
+
 template<class K,class v_fes>
 class Op4_pf32K : public quad_function<pair<FEbase<K,v_fes> *,int>,R,R,R,K> { public:
     
@@ -2024,8 +2098,8 @@ void init_lgmesh3() {
 	   new OneOperator2<pfes3*,pfes3*,pfes3>(&set_eqdestroy_incr)
 	   );
  TheOperators->Add("=",
-       new OneOperator2_<pf3r,pf3r,double,E_F_StackF0F0opt2<double> >(set_fe3<double>), //,pfes3>) ,      // modif template
-       new OneOperator2_<pf3c,pf3c,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex>) //,pfes3>)     // modif template
+       new OneOperator2_<pf3r,pf3r,double,E_F_StackF0F0opt2<double> >(set_fe3<double,v_fes3>) ,      // modif template
+       new OneOperator2_<pf3c,pf3c,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,v_fes3>)     // modif template
        ) ;     
 
 // 3D surface
@@ -2047,10 +2121,10 @@ TheOperators->Add("<-",
 TheOperators->Add("=",
       new OneOperator2<pfesS*,pfesS*,pfesS>(&set_eqdestroy_incr)
       );
-//TheOperators->Add("=",
-    //  new OneOperator2_<pfSr,pfSr,double,E_F_StackF0F0opt2<double> >(set_fe3<double,pfesS>) ,   // modif/ use template
-     // new OneOperator2_<pfSc,pfSc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,pfesS>) // modif/ use template
- //    ) ;
+TheOperators->Add("=",
+      new OneOperator2_<pfSr,pfSr,double,E_F_StackF0F0opt2<double> >(set_fe3<double,v_fesS>) ,   // modif/ use template
+      new OneOperator2_<pfSc,pfSc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,v_fesS>) // modif/ use template
+     ) ;
 
  
     
@@ -2060,6 +2134,14 @@ TheOperators->Add("=",
    
  map_type[typeid(Complex).name()]->AddCast(
    new E_F1_funcT<Complex,pf3c>(pf3r2R<Complex,0,v_fes3>)
+ );
+
+ map_type[typeid(double).name()]->AddCast(
+   new E_F1_funcT<double,pfSr>(pfSr2R<R,0,v_fesS>)
+   );
+
+ map_type[typeid(Complex).name()]->AddCast(
+   new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,0,v_fesS>)
  );
 
  Global.Add("dz","(",new OneOperatorCode<CODE_Diff<Ftest,op_dz> >);
