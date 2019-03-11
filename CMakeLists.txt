@@ -16,7 +16,6 @@ ff_configure_thirdparty()
 
 
 
-find_package(MPI)
 
 ###########
 # DOWNLOAD
