@@ -1642,7 +1642,7 @@ namespace Fem2D
 		  << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
 		  <<endl ;
            
-    int neg[nve],k=0,nng[4],kn;
+    int neg[nve],k=0,nng[4],kn=0;// Bug missing init of kn Thank of Axel mars 2019.. 
     int kk=-1;
            
     if(kf>=0)   // sortie positive ..
