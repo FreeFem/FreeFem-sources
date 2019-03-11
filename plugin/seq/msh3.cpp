@@ -1906,6 +1906,158 @@ struct Op3_setmesh: public binary_function<AA, BB, RR> {
 	}
 };
 
+
+class listMeshS {
+public:
+	list<const MeshS *> *lth;
+	void init () {lth = new list<const MeshS *>;}
+
+	void destroy () {delete lth;}
+
+	listMeshS (Stack s, const MeshS *th): lth(Add2StackOfPtr2Free(s, new list<const MeshS *> )) {lth->push_back(th);}
+
+	listMeshS (Stack s, const MeshS *tha, const MeshS *thb): lth(Add2StackOfPtr2Free(s, new list<const MeshS *> )) {lth->push_back(tha); lth->push_back(thb);}
+
+	listMeshS (Stack s, const listMeshS &l, const MeshS *th): lth(Add2StackOfPtr2Free(s, new list<const MeshS *>(*l.lth))) {lth->push_back(th);}
+};
+
+MeshS*GluMeshS (listMeshS const &lst) {
+	int nbt=0;
+	int neb=0;
+	int nebx=0;
+	int nbv=0;
+	int nbvx=0;
+	double hmin=1e100;
+	R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
+	const list<MeshS const *> lth(*lst.lth);
+	const  MeshS * th0=0;
+	int kk=0;
+	for(list<MeshS const *>::const_iterator i=lth.begin();i != lth.end();++i)
+	{
+		if(! *i ) continue; //
+		++kk;
+		const MeshS &Th(**i);
+		th0=&Th;
+		if(verbosity>1)  cout << " GluMeshS + "<< Th.nv << " " << Th.nt << endl;
+		nbt+= Th.nt;
+		nbvx += Th.nv;
+		nebx += Th.nbe;
+		for (int k=0;k<Th.nt;k++)
+		for (int e=0;e<3;e++)
+		hmin=min(hmin,Th[k].lenEdge(e));
+
+		for (int i=0;i<Th.nv;i++)
+		{
+			R3 P(Th(i));
+			Pn=Minc(P,Pn);
+			Px=Maxc(P,Px);
+		}
+	}
+	if(kk==0) return 0; //  no mesh ...
+	if(verbosity>2)
+	cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
+
+	Vertex3 * v= new Vertex3[nbvx];
+	TriangleS *t= new TriangleS[nbt];
+	TriangleS *tt=t;
+	BoundaryEdgeS *b= new BoundaryEdgeS[nebx];
+	BoundaryEdgeS *bb= b;
+
+	ffassert(hmin>Norme2(Pn-Px)/1e9);
+	double hseuil =hmin/10.;
+
+	EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, Pn, Px, 0);
+	{
+		map<pair<int,int>,int> bbe;
+		for(list<MeshS const  *>::const_iterator i=lth.begin();i != lth.end();++i)
+		{
+			if(! *i ) continue; //
+			const MeshS &Th(**i);
+			if(!*i) continue;
+			if(verbosity>1)  cout << " GluMeshS + "<< Th.nv << " " << Th.nt << endl;
+			int nbv0 = nbv;
+
+			for (int ii=0;ii<Th.nv;ii++)
+			{
+				const Vertex3 &vi(Th(ii));
+				Vertex3 * pvi=gtree->ToClose(vi,hseuil);
+				if(!pvi) {
+					v[nbv].x = vi.x;
+					v[nbv].y = vi.y;
+					v[nbv].z = vi.z;
+					v[nbv].lab = vi.lab;
+					gtree->Add(v[nbv++]);
+				}
+			}
+
+			for (int k=0;k<Th.nt;k++)
+			{
+				const TriangleS  &K(Th[k]);
+				int ivt[3];
+				ivt[0]=gtree->ToClose(K[0],hseuil)-v; //NearestVertex(K[0])-v;
+				ivt[1]=gtree->ToClose(K[1],hseuil)-v; //NearestVertex(K[1])-v;
+				ivt[2]=gtree->ToClose(K[2],hseuil)-v; //NearestVertex(K[2])-v;
+				(*tt++).set(v,ivt,K.lab);
+			}
+
+			for (int k=0;k<Th.nbe;k++)
+			{
+				const BoundaryEdgeS & be(Th.be(k));
+				int i0=gtree->ToClose(be[0],hseuil)-v;
+				int i1=gtree->ToClose(be[1],hseuil)-v;
+				int ii0=i0,ii1=i1;
+				if(ii1<ii0) Exchange(ii0,ii1);
+				pair<int,int> i01(ii0,ii1);
+				if( bbe.find(i01) == bbe.end())
+				{
+					int ivt[] = {i0,i1};
+					(*bb++).set(v,ivt,be.lab);
+					bbe[i01]=	neb++;
+				}
+			}
+		}
+	}
+
+	delete gtree;
+
+	if(verbosity>1)
+	{
+		cout << "     Nb points : "<< nbv << " , nb edges : " << neb << endl;
+		cout << "     Nb of glu point " << nbvx -nbv;
+		cout << "     Nb of glu  Boundary edge " << nebx-neb;
+	}
+
+	{
+		MeshS * m = new MeshS(nbv,nbt,neb,v,t,b);
+		m->BuildGTree();
+		return m;
+	}
+}
+
+template<class RR, class AA = RR, class BB = AA>
+struct Op3_addmeshS: public binary_function<AA, BB, RR> {
+	static RR f (Stack s, const AA &a, const BB &b)
+	{return RR(s, a, b);}
+};
+
+template<bool INIT, class RR, class AA = RR, class BB = AA>
+struct Op3_setmeshS: public binary_function<AA, BB, RR> {
+	static RR f (Stack stack, const AA &a, const BB &b) {
+		ffassert(a);
+		const pmeshS p = GluMeshS(b);
+
+		if (!INIT && *a) {
+			// Add2StackOfPtr2FreeRC(stack,*a);
+			(**a).destroy();
+			cout << "destruction du pointeur" << endl;
+		}
+
+		// Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove.
+		*a = p;
+		return a;
+	}
+};
+
 // Movemesh3D
 
 class Movemesh3D_Op: public E_F0mps
@@ -6432,7 +6584,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
    
         }
     nvmax+=nvtrunc;
-   
+
     int nvsub = (kksplit + 1) * (kksplit + 2)/2;
     int ntrisub = kksplit2;
     int nedgesub = 3*(kksplit+1)*(kksplit+2)/2-3*(kksplit+1);
@@ -6454,8 +6606,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     TriangleS *triangles = t;
     BoundaryEdgeS *b = new BoundaryEdgeS[nbe];
     BoundaryEdgeS *bbedges = b;
-    R3 hh = (bmax - bmax) / 10.;
-    
+    R3 hh = (bmax - bmin) / 10.;
     
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(vertices, bmin - hh, bmax + hh, 0);
 
@@ -6475,12 +6626,10 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
             } else {ffassert(0);}
         }
     }
-    
+
     KN<R3> vertextrisub(nvsub);
     KN<int> newindex(nvsub);
-    
-    
-    
+
         for (int i = 0; i < Th.nt; i++) {
           if (split[i]) {
             const TriangleS &K(Th.elements[i]);
@@ -6489,6 +6638,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
               pP[ii] = &K[ii];
             for (int iv = 0; iv < nvsub; iv++)
               (R3 &)vertextrisub[iv] = vertexsub[iv].Bary(pP);
+
            // new points
             for (int iv = 0; iv < nvsub; iv++) {
               Vertex3 *pvi = gtree->ToClose(vertextrisub[iv], hseuil);
@@ -6534,13 +6684,15 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
               for (int j = 0; j < 3; j++) {
                   int jt = j, it = Th.ElementAdj(i, jt);
               
+              int nedgesplit = kksplit;
               if (((tagTonB[i] & tagb[j]) == 0) && !(it == i || it < 0) && !split[it]) {
                       // new border not on boundary
                       int ivb[2];
-                      for (int ii = 0; ii < nedgesub; ii++) {
+                      for (int ii = 0; ii < nedgesplit; ii++) {
                           for (int jjj = 0; jjj < 2; jjj++) {
-                              ivb[jjj] = newindex[edgesub[2*ii+ jjj]];
-                              assert(trisub[2*ii+ jjj] < nvsub);
+                              int iedge = 2 * j * nedgesplit + 2 * ii;
+                              ivb[jjj] = newindex[edgesub[iedge+jjj]];
+                              assert(edgesub[2*ii+ jjj] < nvsub);
                               assert(ivb[jjj] < np);
                           }
                           bbedges[ie].set(vertices, ivb, newbelabel);
@@ -6621,7 +6773,6 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
         delete [] vertexedgesub;
         delete [] newindex;
     }
-    
     delete [] vertex1Dsub;
     delete [] edge1Dsub;
 
@@ -7017,7 +7168,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     Tet *tt = t;
     Triangle3 *b = new Triangle3[nbe];
     Triangle3 *bb = b;
-    R3 hh = (bmax - bmax) / 10.;
+    R3 hh = (bmax - bmin) / 10.;
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, bmin - hh, bmax + hh, 0);
     const R3 *pP[4];
     int np = 0;    // nb of new points ..
@@ -8055,6 +8206,62 @@ bool AddLayers (Mesh3 const *const &pTh, KN<double> *const &psupp, long const &n
 	return true;
 }
 
+bool AddLayers (MeshS const *const &pTh, KN<double> *const &psupp, long const &nlayer, KN<double> *const &pphi) {
+	ffassert(pTh && psupp && pphi);
+	const int nve = MeshS::Element::nv;
+	const MeshS &Th = *pTh;
+	const int nt = Th.nt;
+	const int nv = Th.nv;
+
+	KN<double> &supp(*psupp);
+	KN<double> u(nv), s(nt);
+	KN<double> &phi(*pphi);
+	ffassert(supp.N() == nt);	// P0
+	ffassert(phi.N() == nv);// P1
+	s = supp;
+	phi = 0.;
+	// supp = 0.;
+	// cout << " s  " << s << endl;
+
+	for (int step = 0; step < nlayer; ++step) {
+		u = 0.;
+
+		for (int k = 0; k < nt; ++k) {
+			for (int i = 0; i < nve; ++i) {
+				u[Th(k, i)] += s[k];
+			}
+		}
+
+		for (int v = 0; v < nv; ++v) {
+			u[v] = u[v] > 0.;
+		}
+
+		// cout << " u  " << u << endl;
+
+		phi += u;
+
+		s = 0.;
+
+		for (int k = 0; k < nt; ++k) {
+			for (int i = 0; i < nve; ++i) {
+				s[k] += u[Th(k, i)];
+			}
+		}
+
+		for (int k = 0; k < nt; ++k) {
+			s[k] = s[k] > 0.;
+		}
+
+		supp += s;
+		// cout << " s  " << s << endl;
+	}
+
+	// cout << " phi  " << phi << endl;
+	phi *= (1. / nlayer);
+	// supp =s;
+	return true;
+}
+
 Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 	int flagsurfaceall = 0;
 	// variables for mesh3 (volume)
@@ -8962,8 +9169,10 @@ AnyType Cube_Op::operator () (Stack stack)  const {
 
 static void Load_Init () {
 	Dcl_Type<listMesh3>();
+	Dcl_Type<listMeshS>();
 	typedef const Mesh *pmesh;
 	typedef const Mesh3 *pmesh3;
+	typedef const MeshS *pmeshS;
 
 	if (verbosity > 1 && mpirank == 0) {
 		cout << " load: msh3  " << endl;
@@ -8971,11 +9180,19 @@ static void Load_Init () {
 
 	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, pmesh3, pmesh3> > );
 	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, listMesh3, pmesh3> > );
+
 	// TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
 	// TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
 
 	TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
 	TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
+
+
+	// 3D SURF :
+	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmeshS<listMeshS, pmeshS, pmeshS> > );
+	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmeshS<listMeshS, listMeshS, pmeshS> > );
+	TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmeshS<false, pmeshS *, pmeshS *, listMeshS> > );
+	TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmeshS<true, pmeshS *, pmeshS *, listMeshS> > );
 
 	Global.Add("change", "(", new SetMesh3D);
 	Global.Add("movemesh23", "(", new Movemesh2D_3D_surf);
@@ -9002,6 +9219,7 @@ static void Load_Init () {
 	Global.Add("showborder", "(", new OneOperator1<long, const Mesh3 *>(ShowBorder));
 	Global.Add("getborder", "(", new OneOperator2<long, const Mesh3 *, KN<long> *>(GetBorder));
 	Global.Add("AddLayers", "(", new OneOperator4_<bool, const Mesh3 *, KN<double> *, long, KN<double> *>(AddLayers));
+	Global.Add("AddLayers", "(", new OneOperator4_<bool, const MeshS *, KN<double> *, long, KN<double> *>(AddLayers));
 	typedef const Mesh3 *pmesh3;
     typedef const MeshS *pmeshS;
 	// Global.Add("trunc","(", new Op_trunc_mesh3);
