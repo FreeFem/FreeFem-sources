@@ -1901,7 +1901,7 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
   }
 AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
   { // inutile 
-    // même chose que  v(X1,X2);
+    // meme chose que  v(X1,X2);
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
     typedef const interpolate_f_X_1<R>::CODE * code;
     MeshPoint mp= *MeshPointStack(s); 
@@ -6437,11 +6437,26 @@ void  init_lgfem()
     Add<pf3rarray>("resize",".",new OneOperator1<Resize1<pf3rarray >,pf3rarray>(to_Resize1));  //  FH fev 2013
     Add<pf3cbasearray*>("resize",".",new OneOperator1<Resize1<pf3cbasearray* >,pf3cbasearray*>(to_Resize1));  //   FH oct. 2016
     Add<pf3carray>("resize",".",new OneOperator1<Resize1<pf3carray >,pf3carray>(to_Resize1));  //  FH Oct 2016
+
     //new OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize<pf3rbasearray*>);
     Add<Resize1<pf3rbasearray* > >("(","",new  OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize));
     Add<Resize1<pf3rarray > >("(","",new OneOperator2_<pf3rarray,Resize1<pf3rarray > , long  >(feresize));
     Add<Resize1<pf3cbasearray* > >("(","",new  OneOperator2_<pf3cbasearray*,Resize1<pf3cbasearray* > , long  >(fepresize));//  FH Oct 2016
     Add<Resize1<pf3carray > >("(","",new OneOperator2_<pf3carray,Resize1<pf3carray > , long  >(feresize));//  FH Oct 2016
+
+    Dcl_Type< Resize1<pfSrbasearray* > > ();
+    Dcl_Type< Resize1<pfSrarray > > ();
+    Dcl_Type< Resize1<pfScbasearray* > > ();
+    Dcl_Type< Resize1<pfScarray > > ();
+    Add<pfSrbasearray*>("resize",".",new OneOperator1<Resize1<pfSrbasearray* >,pfSrbasearray*>(to_Resize1));
+    Add<pfSrarray>("resize",".",new OneOperator1<Resize1<pfSrarray >,pfSrarray>(to_Resize1));
+    Add<pfScbasearray*>("resize",".",new OneOperator1<Resize1<pfScbasearray* >,pfScbasearray*>(to_Resize1));
+    Add<pfScarray>("resize",".",new OneOperator1<Resize1<pfScarray >,pfScarray>(to_Resize1));
+
+    Add<Resize1<pfSrbasearray* > >("(","",new  OneOperator2_<pfSrbasearray*,Resize1<pfSrbasearray* > , long  >(fepresize));
+    Add<Resize1<pfSrarray > >("(","",new OneOperator2_<pfSrarray,Resize1<pfSrarray > , long  >(feresize));
+    Add<Resize1<pfScbasearray* > >("(","",new  OneOperator2_<pfScbasearray*,Resize1<pfScbasearray* > , long  >(fepresize));
+    Add<Resize1<pfScarray > >("(","",new OneOperator2_<pfScarray,Resize1<pfScarray > , long  >(feresize));
 
 // end of resize ...
    
