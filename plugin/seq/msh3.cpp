@@ -2539,7 +2539,7 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     // realisation de la map par default
     assert((xx) && (yy) && (zz));
    
-    MeshS &rTh = Th;
+  
     
 
         // loop on triangle
@@ -2610,9 +2610,7 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
         point_confondus_ok = 1;
     }
     
-    MeshS *T_Th = &rTh;
- 
-        T_Th = Transfo_MeshS(precis_mesh, rTh, txx, tyy, tzz, border_only,
+    MeshS *T_Th = Transfo_MeshS(precis_mesh, Th, txx, tyy, tzz, border_only,
                                      recollement_elem, recollement_border, point_confondus_ok, orientationelement);
         
         if ((T_Th->mes) <= 0 && (T_Th->nt > 0)) {
@@ -3089,7 +3087,7 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 		                            border_only, recollement_border, point_confondus_ok);
         MeshS * ThS = Th3->meshS;
 		// Rajouter fonction flip a l interieure
-		int nbflip = 0;
+        int nbflip = 0, nbflipS = 0;
 
 
         // loop on triangles mesh3
@@ -3152,7 +3150,7 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
                 iv[1] = iv[2];
                 iv[2] = iv_temp;
                 ThS->elements[ii].set(ThS->vertices, iv, lab);
-                nbflip++;
+                nbflipS++;
             }
         }
        // loop on eges meshS
@@ -3176,8 +3174,9 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 		}
 
 
-		assert(nbflip == 0 || nbflip == Th3->nbe);
-		if (flagsurfaceall == 1) {Th3->BuildBoundaryElementAdj();}
+        ffassert(nbflip == 0 || nbflip == Th3->nbe);
+        ffassert(nbflipS == 0 || nbflipS == ThS->nt);
+        if (flagsurfaceall == 1) {Th3->BuildBoundaryElementAdj();}
 
 		Add2StackOfPtr2FreeRC(stack, Th3);
       // Add2StackOfPtr2FreeRC(stack,ThS);
@@ -3320,7 +3319,7 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
        ThS->be(ii).set(ThS->vertices, iv, lab);
      }
     
-     assert(nbflip == 0 || nbflip == ThS->nbe);
+     ffassert(nbflip == 0 || nbflip == ThS->nbe);
      if (flagsurfaceall == 1) {ThS->BuildBoundaryElementAdj();}
      
      Add2StackOfPtr2FreeRC(stack, Th3);

@@ -1029,7 +1029,7 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
     int nk=0;
     int err=0;
     int sens;
-
+      ffassert(0); // a verifier ???? F HECHT mars2019 firstVertex and secondVertex
     cout << "nea/nva" << B::nea << " "  << B::nva << endl;
     for (int k=0;k<nbe_surf;++k)
       for (int i=0;i<B::nea;++i)
@@ -1052,8 +1052,8 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
 	      if( sens*TheBoundaryElementAdjacencesLink[p->v] > 0 ){
 		
 		B & K(borderelements[CheckBE(surf_be[k])]);
-		int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
-		int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+		int firstVertex  =  operator()(K[B::nvadj[0][i]])+1;
+		int secondVertex =  operator()(K[B::nvadj[1][i]])+1;
 		cout << " The edges, defined by vertex is " << firstVertex << "-" << secondVertex <<  ", is oriented in the same direction in element " << surf_be[k]+1 << 
 		  " and in element "<<  1+surf_be[(p->v/B::nea)] << endl;
 	
@@ -1063,8 +1063,8 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
 	      if( abs(TheBoundaryElementAdjacencesLink[p->v]) != 1+p->v ){
 		
 		B & K(borderelements[CheckBE(k)]);
-		int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
-		int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+		int firstVertex  =  operator()(K[B::nvadj[0][i]])+1;
+		int secondVertex =  operator()(K[B::nvadj[1][i]])+1;
 		cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex << "belong to the three border elements ::" 
 		     << 1+surf_be[(p->v)/B::nea] <<", "<< surf_be[k]+1 <<" and  "<< 1+surf_be[(abs(TheBoundaryElementAdjacencesLink[p->v])-1)/B::nea] << endl;
 		cout << " The "<< isurf+1 << " Surface contains these edges is not a manifold" << endl;
