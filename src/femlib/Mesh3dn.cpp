@@ -453,9 +453,9 @@ namespace Fem2D
   // Add by J. Morice 11/10
   // compute the hmin in a 3d mesh
   // Remark: on peut le mettre dans generic mesh
-  //         (attention aux boucles sur les arrêtes)
+  //         (attention aux boucles sur les arretes)
   double Mesh3::hmin() const{
-    R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
+    R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremite de la boite englobante
     double hmin=1e10;
         
     for (int ii=0;ii< this->nv;ii++){
@@ -2066,7 +2066,7 @@ namespace Fem2D
     
   double MeshS::hmin() const
   {
-    R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremité de la boîte englobante
+    R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremite de la boite englobante
     double hmin=1e10;
         
     for (int ii=0;ii< this->nv;ii++) {
@@ -2158,8 +2158,10 @@ namespace Fem2D
   R c=(Area3(A,B,P),n);
   R s=a+b+c;
   R eps=s*1e-6;
-  if (a>-eps && b >-eps && c >-eps) return this->elements + i;
-         
+  if (a>-eps && b >-eps && c >-eps && abs((P-A,n)) < eps) {
+    Phat=R2(b/s,c/s);
+    return this->elements + i;
+  }
   }
   return 0; // outside
   }
