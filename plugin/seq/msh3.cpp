@@ -4191,19 +4191,20 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
         if (oldSurface) (tt3++)->set(v, iv, K.lab);
       }
 
-    Mesh3 *T_Th3;
+    Mesh3 *T_Th3=0;
     if (oldSurface) {
-      Mesh3 *T_Th3 = new Mesh3(nv_t, nt_t, v, t3);
+      T_Th3 = new Mesh3(nv_t, nt_t, v, t3);
       T_Th3->typeMesh3=1;//   transform the 2D in 3D old surface
     }
     else {
       T_Th3 = new Mesh3();
       T_Th3->typeMesh3=0;//   transform the 2D in 3D surface
-    }
+   }
     T_Th3->meshS = new MeshS(nv_t, nt_t, nbe_t, v, t, b);
     T_Th3->meshS->liste_v_num_surf=new int(nv_t);
     T_Th3->meshS->liste_v_num_surf=ind_nv_t;
-   
+    
+
     
     delete [] Numero_Som;
 	delete [] ind_nv_t;
