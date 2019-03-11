@@ -4,17 +4,16 @@ project(FreeFem++ C CXX)
 
 set(FREEFEM_VERSION 4.0)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 include(ff_configure_cmake)
 include(ff_configure_compilers)
-
+include(ff_configure_thirdparty)
 
 ff_configure_cmake()
 ff_configure_compilers()
+ff_configure_thirdparty()
 
-
-include(ModuleManager)
 
 
 find_package(MPI)
