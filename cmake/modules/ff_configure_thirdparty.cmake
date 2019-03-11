@@ -4,18 +4,18 @@ macro(ff_configure_thirdparty)
 
 
   find_package(FLEX REQUIRED)
-
-
+  
   find_package(ARPACK)
   find_package(CBLAS)
-  #find_package(GLUT)
+  find_package(DLOPEN)
+  find_package(GLUT)
   find_package(GSL)
   find_package(HDF5)
-  find_package(UMFPACK)
   find_package(LAPACK)
   find_package(MPI)
-  #find_package(OpenGL)
+  find_package(OpenGL)
   find_package(Threads)
+  find_package(UMFPACK)
 
   if(WITH_PETSC)
     include(FFInstallPackage)

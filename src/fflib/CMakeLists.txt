@@ -23,7 +23,6 @@ LIST(APPEND LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/Algo/lgalgo.cpp
                     ${CMAKE_SOURCE_DIR}/src/femlib/libmesh5.c
                     ${CMAKE_SOURCE_DIR}/src/Graphics/DefColor.cpp)
 
-FIND_PACKAGE(DLOPEN)
 IF(DLOPEN_FOUND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D HAVE_DLFCN_H")
 ENDIF(DLOPEN_FOUND)
