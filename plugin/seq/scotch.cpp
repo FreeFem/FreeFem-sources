@@ -79,7 +79,7 @@ AnyType SCOTCH_Op<T, V, K>::operator () (Stack stack)  const {
 	KN<K> *part = GetAny<KN<K> *>((*partition)(stack));
 	ffassert(part);
 
-	int nve = T::Rd::d + 1;
+	int nve = T::RdHat::d + 1;
 	long lpart = GetAny<long>((*lpartition)(stack));
 	ffassert(lpart > 1 && part->n == nt && lpart < nt);
 
@@ -151,8 +151,10 @@ AnyType SCOTCH_Op<T, V, K>::operator () (Stack stack)  const {
 static void Init_Scotch () {
 	Global.Add("scotch", "(", new SCOTCH<const Mesh, pmesh, long> );
 	Global.Add("scotch", "(", new SCOTCH<const Mesh3, pmesh3, long> );
+	Global.Add("scotch", "(", new SCOTCH<const MeshS, pmeshS, long> );
 	Global.Add("scotch", "(", new SCOTCH<const Mesh, pmesh, double> );
 	Global.Add("scotch", "(", new SCOTCH<const Mesh3, pmesh3, double> );
+	Global.Add("scotch", "(", new SCOTCH<const MeshS, pmeshS, double> );
 }
 
 LOADFUNC(Init_Scotch)

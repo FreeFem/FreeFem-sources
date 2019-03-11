@@ -47,7 +47,7 @@ KN<R>*partmetis (Stack s, KN<R> *const &part, Mesh *const &pTh, long const &lpar
 	ffassert(pTh);
 	const Mesh &Th(*pTh);
 	idx_t nt = Th.nt, nv = Th.nv;
-	idx_t nve = Mesh::Rd::d + 1;
+	idx_t nve = Mesh::RdHat::d + 1;
 
 	KN<idx_t> eptr(nt + 1), elmnts(nve * nt), epart(nt), npart(nv);
 
@@ -140,11 +140,17 @@ static void Load_Init () {
 	Global.Add("metisdual", "(", new OneOperator3_<KN<long> *, KN<long> *, const Mesh *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const Mesh *, long> >(&partmetis<const Mesh, 1> ));
 	Global.Add("metisnodal", "(", new OneOperator3_<KN<long> *, KN<long> *, const Mesh3 *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const Mesh3 *, long> >(&partmetis<const Mesh3, 0> ));
 	Global.Add("metisdual", "(", new OneOperator3_<KN<long> *, KN<long> *, const Mesh3 *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const Mesh3 *, long> >(&partmetis<const Mesh3, 1> ));
+	Global.Add("metisnodal", "(", new OneOperator3_<KN<long> *, KN<long> *, const MeshS *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const MeshS *, long> >(&partmetis<const MeshS, 0> ));
+	Global.Add("metisdual", "(", new OneOperator3_<KN<long> *, KN<long> *, const MeshS *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const MeshS *, long> >(&partmetis<const MeshS, 1> ));
+
 
 	Global.Add("metisnodal", "(", new OneOperator3_<KN<double> *, KN<double> *, const Mesh *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const Mesh *, long> >(&partmetis<const Mesh, 0> ));
 	Global.Add("metisdual", "(", new OneOperator3_<KN<double> *, KN<double> *, const Mesh *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const Mesh *, long> >(&partmetis<const Mesh, 1> ));
 	Global.Add("metisnodal", "(", new OneOperator3_<KN<double> *, KN<double> *, const Mesh3 *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const Mesh3 *, long> >(&partmetis<const Mesh3, 0> ));
 	Global.Add("metisdual", "(", new OneOperator3_<KN<double> *, KN<double> *, const Mesh3 *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const Mesh3 *, long> >(&partmetis<const Mesh3, 1> ));
+	Global.Add("metisnodal", "(", new OneOperator3_<KN<double> *, KN<double> *, const MeshS *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const MeshS *, long> >(&partmetis<const MeshS, 0> ));
+	Global.Add("metisdual", "(", new OneOperator3_<KN<double> *, KN<double> *, const MeshS *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const MeshS *, long> >(&partmetis<const MeshS, 1> ));
+
 }
 
 LOADFUNC(Load_Init)
