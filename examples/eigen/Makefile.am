@@ -45,5 +45,6 @@ all.edp:
 		echo ' cout << "------------------------------------------------------------------------------ " << endl;' ;\
 	done) > $@
 
-freefem++.pref:
-	echo loadpath = \"../../plugin/seq/\" > freefem++.pref
+freefem++.pref:Makefile
+	echo includepath = \"../../idp/\" > freefem++.pref
+	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref

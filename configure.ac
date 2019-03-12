@@ -20,7 +20,9 @@ AC_CONFIG_MACRO_DIR([etc/config/m4])
 # progg test  exec for windows
 ff_TEST_FFPP="../../src/nw/FreeFem++"
 ff_TEST_FFPP_MPI="../../src/mpi/FreeFem++-mpi"
-
+ff_uncompile_plugin=""
+ff_unlib_plugin=""
+ff_download_lib=""
 AC_PREREQ(2.69) dnl for AC_LANG_CASE and check stuff
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
@@ -134,12 +136,15 @@ m4_define([TOOL_DISABLE],
     then
         AC_SUBST([TOOL_COMPILE_$1],"")
         AC_SUBST([TOOL_DYLIB_$1],"")
+		ff_uncompile_plugin="$2 $ff_uncompile_plugin"
+		ff_unlib_plugin="$1 $ff_uncompile_plugin"
     elif  test   "$ff_$1_ok" = "yes" ; then
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
     else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
+		ff_download_lib="$1 $ff_download_lib"
 	    enable_$1_download=yes
     fi
 
@@ -2202,7 +2207,8 @@ TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 
 
 # All makefiles
-AC_OUTPUT(Makefile
+AC_OUTPUT(
+    Makefile
     3rdparty/Makefile
     3rdparty/blas/Makefile
     3rdparty/arpack/Makefile
@@ -2221,10 +2227,12 @@ AC_OUTPUT(Makefile
     src/libMesh/Makefile
     src/medit/Makefile
     src/bin-win32/Makefile
-		plugin/seq/Makefile
-		plugin/mpi/Makefile
-		plugin/hpddm/Makefile
-		plugin/ffddm/Makefile
+    plugin/Makefile
+	plugin/seq/Makefile
+	plugin/mpi/Makefile
+	plugin/hpddm/Makefile
+	plugin/ffddm/Makefile
+	examples/Makefile
     examples/plugin/Makefile
     examples/tutorial/Makefile
     examples/misc/Makefile
@@ -2235,16 +2243,19 @@ AC_OUTPUT(Makefile
     examples/examples/Makefile
     examples/bug/Makefile
     examples/other/Makefile
-    examples/3d/Makefile)
+    examples/3d/Makefile
+)
 
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
-AC_MSG_NOTICE([	 	 --  Dynamic load facility: $ff_dynload ])
-AC_MSG_NOTICE([		 --  ARPACK (eigen value): $ff_arpack_ok ])
-AC_MSG_NOTICE([		 --  UMFPACK (sparse solver) $ff_umfpack_ok ])
-AC_MSG_NOTICE([		 --  BLAS $ff_blas_ok ])
-AC_MSG_NOTICE([		 --  with MPI             $ff_mpi])
-AC_MSG_NOTICE([          --  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
-AC_MSG_NOTICE([          --  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
+AC_MSG_NOTICE([	--  Dynamic load facility: $ff_dynload ])
+AC_MSG_NOTICE([	--  ARPACK (eigen value): $ff_arpack_ok ])
+AC_MSG_NOTICE([	--  UMFPACK (sparse solver) $ff_umfpack_ok ])
+AC_MSG_NOTICE([	--  BLAS $ff_blas_ok ])
+AC_MSG_NOTICE([	--  with MPI             $ff_mpi])
+AC_MSG_NOTICE([		--  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
+AC_MSG_NOTICE([		--  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
+AC_MSG_NOTICE([	--  without libs  : $ff_unlib_plugin]);
+AC_MSG_NOTICE([	--  without plugin: $ff_uncompile_plugin]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
@@ -2268,7 +2279,7 @@ if test "$enable_download" = yes  ;then
     if test  -n "$TOOL_COMPILE_mmg3d"   ; then
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see 3rdparty/mmg3d/mmg3d4/LICENCE.txt  ])
     fi
-    if test  -n "$TOOL_COMPILE_parmets"   ; then
+    if test  -n "$TOOL_COMPILE_parmetis"   ; then
     AC_MSG_NOTICE([      use of download parmetis])
      fi
     # ALH - some tools may be activated but not downloaded if a local version is specified (see
@@ -2280,7 +2291,7 @@ if test "$enable_download" = yes  ;then
     fi
 
     if test -n "$MPICC" ; then
-   	AC_MSG_NOTICE([      try to download: blacs parmetis  scalapack scotch superludist pastix hypre hips library])
+   	AC_MSG_NOTICE([      try to download: $ff_download_lib])
     fi
 
     if test "$ff_download_blas" = "generic"  ; then

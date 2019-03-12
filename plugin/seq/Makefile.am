@@ -62,14 +62,14 @@ bin_PROGRAMS= @BIN_ffmaster@
 
 # FFCS parallel make: some targets need to be built first, sequentially
 
-load_compile: ff-c++ WHERE_LIBRARY-download include.done freefem++.pref
+load_compile: ff-c++ WHERE_LIBRARY-download include.done 
 #
 # max_load
 	-@rm "Missing-plugins-$(DYLIB_SUFFIX).log" 2>/dev/null || true
-	$(MAKE) $(AM_MAKEFLAGS) $(LIST_COMPILE) $(LIST_COMPILE_PKG)
+	@$(MAKE) -s $(AM_MAKEFLAGS) $(LIST_COMPILE) $(LIST_COMPILE_PKG)
 	@if test -f Missing-plugins-$(DYLIB_SUFFIX).log ; then cat Missing-plugins-$(DYLIB_SUFFIX).log; fi; exit 0
-	@echo Warning missing plugin: `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
-	echo " finish build list $(DYLIB_SUFFIX)"
+	@echo " Warning missing plugin:" `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
+	@echo " finish build list $(DYLIB_SUFFIX)"
 
 .cpp.$(DYLIB_SUFFIX): ff-c++
 	 ./ff-c++ -auto $<
@@ -167,9 +167,6 @@ WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
 WHERE_LIBRARY:
 	touch $@
 FORCE: ;
-freefem++.pref:
-	echo loadpath = \"./\" >freefem++.pref
-	echo includepath = \"../../idp/\" >freefem++.pref
 
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib

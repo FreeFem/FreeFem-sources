@@ -61,7 +61,8 @@ makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
 
-freefem++.pref:
-	echo loadpath = \"../../plugin/seq/\" > freefem++.pref
+freefem++.pref:Makefile
+	echo includepath = \"../../idp/\" > freefem++.pref
+	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
 
 FORCE:

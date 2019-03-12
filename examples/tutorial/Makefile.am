@@ -49,7 +49,7 @@ Ref: makeref.edp freefem++.pref
 makeref.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 regtests.m4 > makeref.edp
 
-freefem++.pref:
+freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
 
