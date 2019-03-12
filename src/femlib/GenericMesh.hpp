@@ -261,11 +261,13 @@ private: // pas de copie pour ne pas prendre l'adresse
   void operator=(const GenericVertex &); 
   
 };
-  inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {   return f[0]==0 ? R1(-1):R1(1);  }
-  inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {   return R2(*v[f[1]],*v[f[0]]).perp();  }
+  template<int d> inline  R1 ExtNormal( GenericVertex<R1> *const v[2],int const f[1])  {  static_assert ( d== 1 ,"dim =1"); return f[0]==0 ? R1(-1):R1(1);  }
+  template<int d> inline  R2 ExtNormal( GenericVertex<R2> *const v[3],int const f[2])  {    static_assert ( d== 2 ,"dim=2");  return R2(*v[f[1]],*v[f[0]]).perp();  }
     // correct signe N in 3d mai 2009 (FH)
-  inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {   return R3(*v[f[0]],*v[f[2]])^R3(*v[f[0]],*v[f[1]]) ;  }
-    
+  template<int d> inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {  static_assert ( d== 3 ,"dim=3"); return R3(*v[f[0]],*v[f[2]])^R3(*v[f[0]],*v[f[1]]) ;  }
+  template<> // pour axel exterior  Normal of surface ..
+    inline  R3 ExtNormal<2>( GenericVertex<R3> *const v[3],int const f[2])  {   return R3(*v[f[0]],*v[f[1]])^R3(*v[0],*v[1])^R3(*v[0],*v[2]) ;  }// module 2 aire*l
+
 
 template<typename Data>  
 class GenericElement: public Label {
@@ -346,8 +348,8 @@ public:
   Rd Edge(int i) const {ASSERTION(i>=0 && i <ne);
     return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}// opposite edge vertex i
 
-  Rd N(int i) const  { return ExtNormal(vertices,nvadj[i]);}
-  Rd PBord(int i,RdHatBord P) const   { return Data::PBord(nvadj[i],P);}  
+    Rd N(int i) const  { return ExtNormal<RdHat::d> (vertices,nvadj[i]);}
+  RdHat PBord(int i,RdHatBord P) const   { return Data::PBord(nvadj[i],P);} // Correction FH  mars 2019 For Axel 
 
   Rd operator()(const RdHat & Phat) const {
     Rd r= (1.-Phat.sum())*(*(Rd*) vertices[0]);    
