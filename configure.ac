@@ -144,8 +144,8 @@ m4_define([TOOL_DISABLE],
     else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
-		ff_download_lib="$1 $ff_download_lib"
-	    enable_$1_download=yes
+		ifelse($4,,[ff_download_lib="$1 $ff_download_lib"])
+	    ifelse($4,,[enable_$1_download=yes])
     fi
 
     # Also allow to disable the download of one tool if it is already locally installed
@@ -166,7 +166,8 @@ m4_define([TOOL_DISABLE_NO],
     else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
-	    enable_$1_download=yes
+		ifelse($4,,[ff_download_lib="$1 $ff_download_lib"])
+	    ifelse($4,,[enable_$1_download=yes])		
     fi
 
     # Also allow to disable the download of one tool if it is already locally installed
@@ -2060,15 +2061,14 @@ dnl TOOL_DISABLE(parmetis)
 TOOL_DISABLE_NO(parms,parms_FreeFem.$DYLIB_SUFFIX)
 
 TOOL_DISABLE_NO(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
-TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu4,SuperLu.$DYLIB_SUFFIX,superlu)
 TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
-TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX)
+TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX,,nodowload)
 AC_SUBST([BIN_ffmaster],"$BIN_ffmaster")
-TOOL_DISABLE(MMAP,ff-mmap-semaphore.$DYLIB_SUFFIX)
+TOOL_DISABLE(MMAP,ff-mmap-semaphore.$DYLIB_SUFFIX,,nodowload)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 
@@ -2165,7 +2165,7 @@ if test "$with_hdf5" = "yes"; then
 else
   enable_iohdf5=no
 fi
-TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX)
+TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX,,nodownload)
 
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
@@ -2178,9 +2178,9 @@ then
     if test  "$ff_where_lib_conf_gsl" = 1  -a  "$enable_gsl" != "no" ; then enable_gsl=yes; fi;
     if test  "$ff_where_lib_conf_mkl" = 1  -a  "$enable_mkl" != "no" ; then enable_pardiso=yes; fi;
 fi
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX")
-TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX")
-TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX")
+TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
+TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
+TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
 
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_download" = yes  -a "$enable_hpddm" != no && enable_hpddm=yes

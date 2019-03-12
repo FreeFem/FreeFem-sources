@@ -54,7 +54,7 @@ extern long mpirank;
 
 class Error : public exception
 { public:
-  enum CODE_ERROR { NONE, COMPILE_ERROR,EXEC_ERROR, MEM_ERROR,MESH_ERROR,ASSERT_ERROR,INTERNAL_ERROR, UNKNOWN };
+  enum CODE_ERROR { NONE, COMPILE_ERROR,LOAD_ERROR,EXEC_ERROR, MEM_ERROR,MESH_ERROR,ASSERT_ERROR,INTERNAL_ERROR, UNKNOWN };
   
   
 private: 
@@ -93,6 +93,12 @@ class ErrorCompile : public Error
  public:
   ErrorCompile(const char * Text,int l,const char * t2="") : 
     Error(COMPILE_ERROR,"Compile error : ",Text,"\n\tline number :",l,", ", t2) {}
+};
+class ErrorLoad : public Error
+{
+public:
+    ErrorLoad(const char * Text,int l,const char * t2="") :
+    Error(LOAD_ERROR,"Load error : ",Text,"\n\tline number :",l,", ", t2) {}
 };
 
 class ErrorExec : public Error

@@ -165,7 +165,7 @@ bool load(string ss)
 		cout << "  load: sorry no dlopen on this system " << s << " \n" ;
 		cout << "------------------------------------   \n" ;
 	      }
-	    CompileError("Error load");
+              CompileError("not load / dlopen on this system");
 	    return 0;
 #endif
 	  }
@@ -188,7 +188,8 @@ bool load(string ss)
 
 	  cerr << endl;
 	}
-      CompileError("Error load");
+       throw(ErrorLoad(ss.c_str(),zzzfff->lineno(),zzzfff->YYText() ));
+      //ErrorLoad("Error load");
     }
   return 0 ;
 }
