@@ -283,7 +283,8 @@ public:
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
   typeofkind  kind; //  0 
   int d; // 3d
-   typedef const CDomainOfIntegration* Result;
+  bool isMeshS;;
+  typedef const CDomainOfIntegration* Result;
   Expression Th;
   Expression mapt[3],mapu[3];
   vector<Expression> what;
@@ -292,6 +293,7 @@ public:
     :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
      
   {
+      isMeshS=surface;
     mapt[0]=mapt[1]=mapt[2]=0; // no map of intergration points for test function
     mapu[0]=mapu[1]=mapu[2]=0; // no map of intergration points for unknows function
     args.SetNameParam(n_name_param,name_param,nargs);
@@ -393,7 +395,7 @@ public:
 class CDomainOfIntegrationS: public CDomainOfIntegration {
 public:
     CDomainOfIntegrationS( const basicAC_F0 & args) :CDomainOfIntegration(args,int2d,3,true) {}
-    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int2d,3,true);}     //TODOCHECK
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int2d,3,true);} 
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
 };
 
