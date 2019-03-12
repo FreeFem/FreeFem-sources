@@ -266,9 +266,14 @@ private: // pas de copie pour ne pas prendre l'adresse
     // correct signe N in 3d mai 2009 (FH)
   template<int d> inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {  static_assert ( d== 3 ,"dim=3"); return R3(*v[f[0]],*v[f[2]])^R3(*v[f[0]],*v[f[1]]) ;  }
   template<> // pour axel exterior  Normal of surface ..
-    inline  R3 ExtNormal<2>( GenericVertex<R3> *const v[3],int const f[2])  {   return R3(*v[f[0]],*v[f[1]])^R3(*v[0],*v[1])^R3(*v[0],*v[2]) ;  }// module 2 aire*l
+    inline  R3 ExtNormal<2>( GenericVertex<R3> *const v[3],int const f[2])  {   return R3(*v[f[0]],*v[f[1]])   ^(R3(*v[0],*v[1])^R3(*v[0],*v[2])) ;
+       // R3(*v[0],*v[2])^R3(*v[0],*v[1])  ^ R3(*v[f[0]],*v[f[1]]) ;
+        
+    }// module 2 aire*l
 
-
+    
+    
+    
 template<typename Data>  
 class GenericElement: public Label {
 public:
@@ -348,7 +353,7 @@ public:
   Rd Edge(int i) const {ASSERTION(i>=0 && i <ne);
     return Rd(at(nvedge[i][0]),at(nvedge[i][1]));}// opposite edge vertex i
 
-    Rd N(int i) const  { return ExtNormal<RdHat::d> (vertices,nvadj[i]);}
+  Rd N(int i) const  { return ExtNormal<RdHat::d> (vertices,nvadj[i]);}
   RdHat PBord(int i,RdHatBord P) const   { return Data::PBord(nvadj[i],P);} // Correction FH  mars 2019 For Axel 
 
   Rd operator()(const RdHat & Phat) const {

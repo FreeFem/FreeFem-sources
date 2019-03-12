@@ -3709,7 +3709,6 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                         
                          if(mes2*mes <epsmes3) continue; //  too small
                          NN /= mes;
-                         mes *= 0.5; //   warning correct FH 050109
                              //  cout <<i << " / "  << NN << " / " << mes <<" / "<< i0<< i1<< i2 <<" " << llevelset <<endl;
                          llevelset += mes;
                       
@@ -3833,68 +3832,30 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      }
      else   if (kind==CDomainOfIntegration::intalledges)
      {
-         ffassert(0); //TODO AXEL
-         /*const QuadratureFormular1d & FI = FIE;
+         const QuadratureFormular1d & FI = FIE;
+         int lab;
          for (int i=0;i< Th.nt; i++)
              if (all || setoflab.find(Th[i].lab) != setoflab.end())
-             {
                  for( int ie=0;ie<3;ie++)
                  {
-                     const TriangleS & K(Th[i]);
-                     int e0=VerticesOfTriangularEdge[ie][0];
-                     int e1=VerticesOfTriangularEdge[ie][1];
-                     int i1 = Th(K[e0]),i2 = Th(K[e1]);
-                     BoundaryEdge * be = Th.TheBoundaryEdge(i1,i2);
-                     int lab = be ? be->lab :  notaregion;
-                     R3 E=K.Edge(ie);
-                     double le = sqrt((E,E));
-                     R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
-                     PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-                     
+    
+                     const MeshS::Element  & K(Th[i]);
+                     R3 NN=K.N(ie);
+                     double mes = NN.norme();
+                     NN /= mes; 
                      for (int npi=0;npi<FI.n;npi++) // loop on the integration point
-                     {
+                    {
                          QuadratureFormular1dPoint pi( FI[npi]);
-                         double sa=pi.x,sb=1-sa;
-                         R2 Pt(PA*sa+PB*sb ); //
-                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014
-                         r += le*pi.a*GetAny<R>( (*fonc)(stack));
+                         R2 Pt(K.PBord(ie,pi)); // cout
+                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
+                         r += mes*pi.a*GetAny<R>( (*fonc)(stack));
                      }
                  }
-                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
-             }*/
+         wsptr2free->clean(swsptr2free);// ADD FH 11/2017
      }
      else   if (kind==CDomainOfIntegration::intallVFedges)
      {
-         double untier(1./3.);
-         cerr << " a faire CDomainOfIntegration::intallVFedges " << endl; //%%%%%%%%%
-         ffassert(0);
-         const QuadratureFormular1d & FI = FIE;
-         for (int i=0;i< Th.nt; i++)
-             if (all || setoflab.find(Th[i].lab) != setoflab.end())
-             {
-                 const TriangleS & K(Th[i]);
-                 const R2 GH(untier,untier);
-                 const R3 G=K(GH);
-                 for( int ie=0;ie<3;ie++)
-                 {
-                     int ie0=VerticesOfTriangularEdge[ie][0] ;
-                     int ie1=VerticesOfTriangularEdge[ie][1] ;
-                     const R2 MH=(TriangleHat[ie0]+TriangleHat[ie1])*0.5;
-                     const R3 M(K(MH));
-                     R3 E(G,M);
-                     double le = sqrt((E,E));
-                     
-                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
-                     {
-                         QuadratureFormular1dPoint pi( FI[npi]);
-                         double sa=pi.x,sb=1-sa;
-                         R2 Pt(GH*sa+MH*sb ); //
-                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie,1);
-                         r += le*pi.a*GetAny<R>( (*fonc)(stack));
-                     }
-                 }
-                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
-             }
+         ffassert(0); //TODO AXEL
      }
      else
      {

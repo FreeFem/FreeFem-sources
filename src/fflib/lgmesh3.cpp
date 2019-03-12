@@ -2198,7 +2198,7 @@ TheOperators->Add("=",
  // 3d surface
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationS>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorderS>);
-
+ Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
 
  /*decommente par J. Morice 14/01/09*/
 
