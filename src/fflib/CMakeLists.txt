@@ -54,11 +54,19 @@ else()
                                    PRIVATE HAVE_SUITESPARSE_UMFPACK_H)
 endif()
 
-  TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
+  if(MINGW)
+    TARGET_LINK_LIBRARIES(libff bamglib strversionnumber FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
+  else()
+    TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
+  endif(MINGW)
 
 ELSE(FREEFEM_SUITESPARSE_INSTALLED AND FREEFEM_CHOLMOD_INSTALLED)
 
-  TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber)
+  if(MINGW)
+    TARGET_LINK_LIBRARIES(libff bamglib strversionnumber)
+  else()
+    TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber)
+  endif(MINGW)
 
 ENDIF(FREEFEM_SUITESPARSE_INSTALLED AND FREEFEM_CHOLMOD_INSTALLED) 
 
