@@ -15,6 +15,9 @@
 <!--- along with Foobar.  If not, see <http://www.gnu.org/licenses/>.             --->
 <!----------------------------------------------------------------------------------->
 
+<details>
+<summary> CI / CD tools </summary>
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/710d25bb3c6040c19c3ff7c0f3201835)](https://www.codacy.com/app/sgarnotel/FreeFem-sources?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FreeFem/FreeFem-sources&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/FreeFem/FreeFem-sources.svg?branch=master)](https://travis-ci.org/FreeFem/FreeFem-sources)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/FreeFem/FreeFem-sources.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FreeFem/FreeFem-sources/context:cpp)
@@ -25,6 +28,7 @@
 | Master | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-UbuntuNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-UbuntuNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXAll)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXAll/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-MacOSXNo)](https://ci.inria.fr/freefem/job/FreeFem-source-master-MacOSXNo/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-Windows7)](https://ci.inria.fr/freefem/job/FreeFem-source-master-Windows7) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFem-source-master-Windows7-32)](https://ci.inria.fr/freefem/job/FreeFem-source-master-Windows7-32) |
 
 See [CI/CD Tools](#ci-cd-tools)
+</details>
 
 # FreeFem++ sources
 
@@ -73,7 +77,7 @@ Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathemat
 
 ## For developers
 
-All development efforts take place in the _develop_ branch (or in feature branches: cmake, geneo4PETSc, ... for specific projects)
+All development efforts take place in the _develop_ branch (or in feature branches: feature-cmake, geneo4PETSc, ... for specific projects)
 
 **Do not commit on master branch !**
 
@@ -84,7 +88,7 @@ Have a look on the [Wiki](https://github.com/FreeFem/FreeFem-sources/wiki)!
 All: all dependency packages are installed (computer with root access).<br/>
 No : dependency packages are not installed (computer without root access).
 
-<sup>1</sup>: Ubuntu 16.04 x86
+<sup>1</sup>: Ubuntu 18.04 x86
 
 <sup>2</sup>: mac OS X 10.13
 
@@ -116,7 +120,6 @@ PETSc:
 
 ```bash
 cd 3rdparty/ff-petsc
-sed -i 's/--download-pastix //g' Makefile
 make petsc-slepc
 cd -
 ./reconfigure
