@@ -1411,6 +1411,8 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpaceS & Uh,const KN_<double> & xx,const KN_<double> & yy ,const KN_<double> & zz,int *data)
 {
   // TODO
+    ffassert(0);
+    return 0; 
 }
 
 AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,int init)
