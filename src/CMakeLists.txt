@@ -7,7 +7,7 @@
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/lglib ${CMAKE_SOURCE_DIR}/src/fflib ${CMAKE_SOURCE_DIR}/src/Graphics)
 
   if(MINGW)
-    TARGET_LINK_LIBRARIES(FreeFem++ lglib libff)
+    TARGET_LINK_LIBRARIES(FreeFem++ Comdlg32 lglib libff)
   else()
     TARGET_LINK_LIBRARIES(FreeFem++ dl lglib libff)
   endif(MINGW)
