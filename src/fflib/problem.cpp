@@ -2212,7 +2212,7 @@ namespace Fem2D {
                 if( !same)
                     Kv.BF(Dop,Ptv,fv);
                 
-                R3 NN= T.N(ie);
+                R3 NN= T.N(ie); //dHat=2
                 // int label=-999999; // a passer en argument
                 MeshPointStack(stack)->set(Th,P,Pt,T,label,NN,ie);
                 if (classoptm) (*Op.optiexpK)(stack); // call optim version
@@ -4321,7 +4321,7 @@ namespace Fem2D {
             
             pa =a;
             GQuadraturePoint<R2> pi( FIb[npi]);
-            R3 NN= T.N(ie);
+            R3 NN= T.N(ie); 
             double mes=NN.norme();
             NN/=mes;
             mes *=0.5;

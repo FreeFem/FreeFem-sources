@@ -406,6 +406,12 @@ public:
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
 };
 
+class CDomainOfIntegrationAllEdgesS: public CDomainOfIntegration {
+public:
+    CDomainOfIntegrationAllEdgesS( const basicAC_F0 & args) :CDomainOfIntegration(args,intalledges,3,true) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intalledges,3,true);}
+    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
+};
 
 
 // hack build template 
