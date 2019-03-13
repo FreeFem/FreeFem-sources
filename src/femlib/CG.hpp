@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <time.h>
 
 extern long verbosity;
 template<class TypeIndex=int,class TypeScalar=double>
