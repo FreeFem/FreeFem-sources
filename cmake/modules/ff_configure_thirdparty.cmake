@@ -43,9 +43,9 @@ macro(ff_configure_thirdparty)
     endif(NOT FREEFEM_${MODULE}_INSTALLED)
   endforeach(MODULE)
 
-  if(ENABLE_DOWNLOAD)
-    message(STATUS "The following modules will be downloaded: ${DOWNLOAD_LIST}")
-  endif(ENABLE_DOWNLOAD)
+#  if(ENABLE_DOWNLOAD)
+#    message(STATUS "The following modules will be downloaded: ${DOWNLOAD_LIST}")
+#  endif(ENABLE_DOWNLOAD)
 
 
 endmacro(ff_configure_thirdparty)
