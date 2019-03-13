@@ -33,7 +33,7 @@ endif(NOT ENABLE_DOWNLOAD)
 # Note: this call MUST be performed in the main CMake script
 enable_testing()
 
-add_subdirectory(plugin)
+#add_subdirectory(plugin)
 add_subdirectory(src)
 add_subdirectory(examples)
 
