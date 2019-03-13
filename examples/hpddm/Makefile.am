@@ -41,7 +41,9 @@ TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.e
 	iterative.edp withPartitioning.edp \
   elasticity-2d-substructuring.edp \
 	diffusion-2d-substructuring-withPartitioning.edp \
-	elasticity-3d.edp elasticity-3d-simple.edp laplace-lagrange-PETSc.edp
+	laplace-lagrange-PETSc.edp
+
+#elasticity-3d.edp elasticity-3d-simple.edp 
 
 XFAIL_TESTS=$(TESTS)
 
