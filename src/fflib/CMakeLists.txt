@@ -23,6 +23,11 @@ LIST(APPEND LIBFF_SRC ${CMAKE_SOURCE_DIR}/src/Algo/lgalgo.cpp
                     ${CMAKE_SOURCE_DIR}/src/femlib/libmesh5.c
                     ${CMAKE_SOURCE_DIR}/src/Graphics/DefColor.cpp)
 
+
+MESSAGE(STATUS "Le systeme est ${CMAKE_SYSTEM_NAME}")
+
+
+
 IF(DLOPEN_FOUND AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D HAVE_DLFCN_H")
 ENDIF(DLOPEN_FOUND AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
