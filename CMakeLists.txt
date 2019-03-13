@@ -9,12 +9,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
 include(ff_configure_cmake)
 include(ff_configure_compilers)
 include(ff_configure_thirdparty)
+include(ff_write_config_file)
+
 
 ff_configure_cmake()
 ff_configure_compilers()
 ff_configure_thirdparty()
 
-
+ff_write_config_file()
 
 
 ###########
