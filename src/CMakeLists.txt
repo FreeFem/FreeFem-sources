@@ -5,7 +5,12 @@
                          ${CMAKE_SOURCE_DIR}/src/mpi/parallelempi-empty.cpp 
                          ${CMAKE_SOURCE_DIR}/src/fflib/ffapi.cpp)
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/lglib ${CMAKE_SOURCE_DIR}/src/fflib ${CMAKE_SOURCE_DIR}/src/Graphics)
-  TARGET_LINK_LIBRARIES(FreeFem++ dl lglib libff)
+
+  if(MINGW)
+    TARGET_LINK_LIBRARIES(FreeFem++ lglib libff)
+  else()
+    TARGET_LINK_LIBRARIES(FreeFem++ dl lglib libff)
+  endif(MINGW)
 
   INSTALL(TARGETS FreeFem++
           RUNTIME DESTINATION bin)
