@@ -647,7 +647,6 @@ public:
 		for (int it=0;it<nt;it++)
 		    for (int j=0;j<3;j++)
 			TriangleConteningVertex[(*this)(it,j)]=it;
-        cout <<"************************************************"<<endl;
         //for (int i=0 ; i<3*nt ; i++)     cout << i/3 << " " << i%3 << " val " <<TheAdjacencesLink[i]/3 << " " <<TheAdjacencesLink[i]%3 <<endl;; //cout << "val " <<TheAdjacencesLink[i]<<endl;;
 		Buildbnormalv();
 		if (verbosity>4) 

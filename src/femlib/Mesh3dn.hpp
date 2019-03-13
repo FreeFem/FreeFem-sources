@@ -216,11 +216,14 @@ template<typename Mesh> void GSave2(FILE * ff,const Mesh & Th) ;
   
 class MeshS : public GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> { 
 public:
-  MeshS(){};
+  int *liste_v_num_surf;
+  int *v_num_surf;
+  MeshS():v_num_surf(0),liste_v_num_surf(0) {};
   MeshS(FILE *f,int offset=0);
   //MeshS(const string);         
   MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
-  int *liste_v_num_surf=NULL; // mapping for volume/surface vertices
+ // mapping for volume/surface vertices
+ // int *v_num_surf=NULL; // mapping for surface/volume vertices
   const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
   int Save(const string & filename);
   //MeshS(FILE *f);
@@ -238,7 +241,7 @@ public:
 
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
-    Mesh3():meshS(0){}
+  Mesh3():meshS(0){}
   Mesh3(const string);
   Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
@@ -270,7 +273,7 @@ public:
  inline MeshS * getMeshS() const{
    return meshS;
  }
-    ~Mesh3() {SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl) ; }
+    ~Mesh3() {SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

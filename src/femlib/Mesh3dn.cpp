@@ -770,8 +770,8 @@ namespace Fem2D
      
     //define the type of meshes present in the data file .mesh
 
-      if(nTet==0 && nTri>0 /*&& nSeg>0*/) { if(verbosity) {cout << "data file "<< pfile <<  " contains only a surface Mesh" <<endl; typeMesh3=0; 
-	  if (nSeg==0) cout << "Caution, no boundary element to apply BC " << endl;}}
+    if(nTet==0 && nTri>0 /*&& nSeg>0*/) { if(verbosity) {cout << "data file "<< pfile <<  " contains only a surface Mesh" <<endl; typeMesh3=0;
+    if (nSeg==0) cout << "Caution, no boundary element to apply BC " << endl;}}
     if (nTet>0 && nTri>0 && nSeg==0) { if(verbosity) cout << "data file "<< pfile <<  " contains only a volume Mesh"<<endl; typeMesh3=1; }
     if (nTet==0 && nTri>0 && nSeg==0) { if(verbosity) cout << "data file "<< pfile << " contains only an old surface mesh3 surface"<<endl; typeMesh3=1; }
     if(nTet>0 && nTri>0 && nSeg>0){ if(verbosity) cout << "data file "<< pfile << " contains a volume and surface Meshes"<<endl; typeMesh3=2; }
@@ -799,7 +799,7 @@ namespace Fem2D
     // volume and surface meshes -> in the .mesh, vertice are true for the volume and the surface vertice
     // must be searched - *liste_v_num_surf is the mapping bewteen surface and volume vertice in mesh
         
-    int mxlab=0, mnlab=0;
+      int mxlab=0, mnlab=0;
     // 1st case, the .mesh contains tetrahedrons -> volume mesh -> mesh3 is iniatiazed
     if (typeMesh3!=0) {
       // read vertices
@@ -813,13 +813,14 @@ namespace Fem2D
 	     }
 	     else
 	       GmfGetLin(inm,GmfVertices,&vertices[i].x,&vertices[i].y,&vertices[i].z,&lab);
-	     vertices[i].lab=lab;
-         mxlab= max(mxlab,lab);
-	     mnlab= min(mnlab,lab);
+	       vertices[i].lab=lab;
+           mxlab= max(mxlab,lab);
+	       mnlab= min(mnlab,lab);
 	  }
        
       // read tetrahedrons (element mesh3)
        GmfGotoKwd(inm,GmfTetrahedra);
+       mes=0;
        for(int i=0;i<nTet;++i) {
 	     GmfGetLin(inm,GmfTetrahedra,&iv[0],&iv[1],&iv[2],&iv[3],&lab);
 	     assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv && iv[3]>0 && iv[3]<=nv);
@@ -875,14 +876,14 @@ namespace Fem2D
            meshS->vertices[i].z=cr[2];}
          else
            GmfGetLin(inm,GmfVertices,&meshS->vertices[i].x,&meshS->vertices[i].y,&meshS->vertices[i].z,&lab);
-          meshS->vertices[i].lab=lab;
-          mxlabSurf= max(mxlabSurf,lab);
-          mnlabSurf= min(mnlabSurf,lab);
+           meshS->vertices[i].lab=lab;
+           mxlabSurf= max(mxlabSurf,lab);
+           mnlabSurf= min(mnlabSurf,lab);
         }
       // read triangles (element meshS)
       if(mnlab==0 && mxlab==0 ) {
 	    int kmv=0;
-	    mesb=0;
+	    meshS->mes=0;
 	    GmfGotoKwd(inm,GmfTriangles);
 	    for(int i=0;i<nTri;++i) {
 	      GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
@@ -894,19 +895,19 @@ namespace Fem2D
 		    }
 	        for (int j=0;j<3;++j) iv[j]--;
 	        meshS->elements[i].set(meshS->vertices,iv,lab);
-	        mesb += meshS->elements[i].mesure();
+	        meshS->mes += meshS->elements[i].mesure();
 	     }
 	     if(kmv&& verbosity>1) cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
       }
       else {
-	    mesb=0;
+	    meshS->mes=0;
 	    GmfGotoKwd(inm,GmfTriangles);
 	    for(int i=0;i<nTri;++i) {
 	      GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
 	      assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv);
 	      for (int j=0;j<3;++j) iv[j]--;
 	      meshS->elements[i].set(this->meshS->vertices,iv,lab);
-	      mesb += meshS->elements[i].mesure();
+	      meshS->mes += meshS->elements[i].mesure();
 	    }
 	  }
       // read edges (boundary elements meshS)
@@ -927,11 +928,11 @@ namespace Fem2D
       if (typeMesh3==2) {
       meshS = new MeshS();
       // Number of Vertex in the surface
-      int *v_num_surf=new int[nv];
+      meshS->v_num_surf=new int[nv];
       meshS->liste_v_num_surf=new int[nv]; // mapping to surface/volume vertices
       for (int k=0; k<nv; k++) {
-	    v_num_surf[k]=-1;
-          meshS->liste_v_num_surf[k]=0;
+	    meshS->v_num_surf[k]=-1;
+        meshS->liste_v_num_surf[k]=0;
       }
       // search Vertex on the surface
       int nbv_surf=0;
@@ -939,9 +940,9 @@ namespace Fem2D
 	    const BorderElement & K(this->borderelements[k]);
 	    for(int jj=0; jj<3; jj++) {
 	      int i0=this->operator()(K[jj]);
-	      if( v_num_surf[i0] == -1 ) {
+	      if( meshS->v_num_surf[i0] == -1 ) {
             // the mapping v_num_surf -> new numbering /  liste_v_num_surf[nbv_surf] -> the global num
-	        v_num_surf[i0] = nbv_surf; // this is the mapping
+            meshS->v_num_surf[i0] = nbv_surf;
 	        meshS->liste_v_num_surf[nbv_surf]= i0;
 	        nbv_surf++;
 	      }
@@ -950,8 +951,9 @@ namespace Fem2D
       this->meshS->set(nbv_surf,nTri,nSeg);
       // save the surface vertices
       for (int k=0; k<nbv_surf; k++) {
-          int k0 = meshS->liste_v_num_surf[k];
+        int k0 = meshS->liste_v_num_surf[k];
 	    const  Vertex & P = this->vertices[k0];
+        meshS->vertices[k].lab=P.lab;
 	    meshS->vertices[k].x=P.x;
 	    meshS->vertices[k].y=P.y;
 	    meshS->vertices[k].z=P.z;
@@ -962,7 +964,7 @@ namespace Fem2D
       GmfGotoKwd(inm,GmfTriangles);
       for(int i=0;i<nTri;++i) {
 	    GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
-	    for (int j=0;j<3;++j) iv[j]=v_num_surf[iv[j]-1];
+	    for (int j=0;j<3;++j) iv[j]=meshS->v_num_surf[iv[j]-1];
        // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf && iv[2]>0 &&iv[2]<=nbv_surf );
 	    for(int j=0;j<3;++j)
 	      if(!meshS->vertices[iv[j]].lab) {
@@ -978,12 +980,12 @@ namespace Fem2D
       GmfGotoKwd(inm,GmfEdges);
       for(int i=0;i<nSeg;++i) {
 	    GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
-	    for (int j=0;j<2;++j) iv[j]=v_num_surf[iv[j]-1];
+	    for (int j=0;j<2;++j) iv[j]=meshS->v_num_surf[iv[j]-1];
        // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf);
         meshS->borderelements[i].set(meshS->vertices,iv,lab);
 	    meshS->mesb += meshS->borderelements[i].mesure();
 	  }
-      delete [ ] v_num_surf;
+     // delete [ ] v_num_surf;
     } // end typeMesh3==2
 
     if(verbosity>1 && (typeMesh3!=1) )
@@ -1177,7 +1179,7 @@ namespace Fem2D
       GmfSetKwd(outm,GmfEdges,nbeS);
       for (int k=0; k<nbeS; k++) {
         const MeshS::BorderElement & K(meshS->borderelements[k]);
-        int i0= meshS->liste_v_num_surf[meshS->operator()(K[0])]+1;   //cout << "test here " <<meshS->liste_v_num_surf[meshS->operator()(K[0])]+1<< endl;;
+        int i0= meshS->liste_v_num_surf[meshS->operator()(K[0])]+1;
         int i1= meshS->liste_v_num_surf[meshS->operator()(K[1])]+1;
         int lab=K.lab;
         GmfSetLin(outm,GmfEdges,i0,i1,lab);
@@ -2040,7 +2042,7 @@ namespace Fem2D
        
         
   MeshS::MeshS(FILE *f,int offset)
-    :liste_v_num_surf(0)
+    :liste_v_num_surf(0),v_num_surf(0)
   {
       cout << "write here " << endl;
     GRead(f,offset);// remove 1
@@ -2169,8 +2171,8 @@ namespace Fem2D
   
         
   MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
-    :liste_v_num_surf(0)
-  {
+    :/*v_num_surf(0),*/liste_v_num_surf(0)
+ {
     nv = nnv;
     nt = nnt;
     nbe =nnbe;
@@ -2179,7 +2181,7 @@ namespace Fem2D
     borderelements = bb;
     mes=0.;
     mesb=0.;
-        
+     
     for (int i=0;i<nt;i++)
       mes += this->elements[i].mesure();
     for (int i=0;i<nbe;i++)
