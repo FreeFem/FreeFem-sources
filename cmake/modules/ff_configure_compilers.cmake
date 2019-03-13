@@ -9,6 +9,10 @@ macro(ff_configure_compilers)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_UNISTD_H")
   endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
+  if(MINGW)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPURE_WIN32")
+  endif(MINGW)
+
   if(CMAKE_BUILD_TYPE EQUAL "Debug")
     set(CMAKE_C_FLAGS "${FF_C_FLAGS} -DCHECK_KN -g" )
     set(CMAKE_CXX_FLAGS "${FF_CXX_FLAGS} -DCHECK_KN -g" )
