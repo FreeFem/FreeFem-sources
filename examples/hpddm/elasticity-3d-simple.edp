@@ -65,6 +65,8 @@ real[int] err(u[].n);
 err = A * u[];      // global matrix-vector product
 err -= rhs;
 
+mpiBarrier(mpiCommWorld);
+
 plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
 plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)
 real alpha = 20000.0;
