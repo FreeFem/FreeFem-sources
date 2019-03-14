@@ -3542,7 +3542,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     TriangleS *t = new TriangleS[nt_t];
     TriangleS *tt = t;
 
-    BoundaryEdgeS *b = new BoundaryEdgeS[nbe_t];
+    BoundaryEdgeS *b = new BoundaryEdgeS[nt_t];
     BoundaryEdgeS *bb = b;
     double mes = 0, mesb = 0;
     if (verbosity > 1)
@@ -7351,122 +7351,8 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     
     // delete gtree;
     
-   Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
+    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
     Tht->BuildGTree();    // Add JM. Oct 2010
-    
-    
-    
-    // if the surface mesh MeshS, trunc is obtain whit the slip on the triangle3, extract the points on the surface domain and split the edges border element of the real surface
-    
-    if (typeMesh3==2) {
-        cout << "enter in trunc S" << endl;
-        
-        Tht->meshS = new MeshS();
-        // Number of Vertex in the surface
-        Tht->meshS->v_num_surf=new int[nv];
-        Tht->meshS->liste_v_num_surf=new int[nv]; // mapping to surface/volume vertices
-        for (int k=0; k<nv; k++) {
-            Tht->meshS->v_num_surf[k]=-1;
-            Tht->meshS->liste_v_num_surf[k]=0;
-        }
-        // search Vertex on the surface
-        int nbv_surf=0;
-        for (int k=0; k<nbe; k++) {
-            const Triangle3 & K(Tht->borderelements[k]);
-            for(int jj=0; jj<3; jj++) {
-                int i0=Tht->operator()(K[jj]);
-                if( Tht->meshS->v_num_surf[i0] == -1 ) {
-                    Tht->meshS->v_num_surf[i0] = nbv_surf; // this is the mapping
-                    Tht->meshS->liste_v_num_surf[nbv_surf]= i0;
-                    nbv_surf++;
-                }
-            }
-        }
-        Tht->meshS->vertices=new Vertex3[nbv_surf];
-        Tht->meshS->elements= new TriangleS[nbe];
-        Tht->meshS->nt=nbe;
-        Tht->meshS->nv=nbv_surf;
-        
-        // save the surface vertices
-        for (int k=0; k<nbv_surf; k++) {
-            int k0 = Tht->meshS->liste_v_num_surf[k];
-            const  Vertex3 & P = Tht->vertices[k0];
-            Tht->meshS->vertices[k].x=P.x;
-            Tht->meshS->vertices[k].y=P.y;
-            Tht->meshS->vertices[k].z=P.z;
-        }
-        
-        // read triangles and change with the surface numbering
-        int iv[3], lab;
-        Tht->meshS->mes=0;
-        
-        for(int i=0;i<nbe;++i) {
-            const Triangle3 & K(Tht->borderelements[i]);
-            iv[0]=Tht->meshS->liste_v_num_surf[Tht->operator()(K[0])];
-            iv[1]=Tht->meshS->liste_v_num_surf[Tht->operator()(K[1])];
-            iv[2]=Tht->meshS->liste_v_num_surf[Tht->operator()(K[2])];
-            lab=K.lab;
-            
-            Tht->meshS->elements[i].set(Tht->meshS->vertices,iv,lab);
-            Tht->meshS->mes += Tht->meshS->elements[i].mesure();
-        }
-        
-        
-        int nbeS=0, nbeiS=0;
-        // loop on the triangleS = boundary tetra
-        for (int i = 0; i < Th.nbe; i++) {
-            // origin of the triangleS ->tetra itet
-            int iftet;
-            int itet = Th.BoundaryElement(i, iftet);
-            
-            
-            cout << "triangle i " << i << "origine tet" << itet <<"itrS "<<iftet<<endl;
-            if (split[itet]) {
-                cout << "test i "  << i << "nbe " << nbe << endl;
-                
-                // computation of number of border elements
-                for (int j = 0; j < 3; j++) {
-                    int jt = j, it = Th.ElementAdj(i, jt);
-                    // origin tet of the adj element triangleS
-                    int iadjftet;
-                    int iadjtet = Th.BoundaryElement(it, iadjftet);
-                    
-                    /*  if ((it == i || it < 0) || !split[iadjtet]) {
-                     nbeee++;// boundary face ...
-                     } else {
-                     nbfi++;    // internal face count 2 times ...
-                     }*/
-                    
-                    if (it == i || it < 0) {
-                        nbeS += kksplit;// on est sur la frontiere
-                    } else if (!split[iadjtet]) {
-                        nbeS += kksplit;// le voisin ne doit pas etre decoupe
-                    } else if ((tagTonB[i] & tagb[j]) != 0 && i < it) {
-                        nbeiS++, nbeS += kksplit;// internal boundary ..
-                    }
-                }
-            }
-        }
-        
-        cout << " test nbe :" << nbe << endl;
-        
-        
-        
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     delete gtree;
     
     return Tht;

@@ -14,6 +14,9 @@ const int notaregion=INT_MIN;
 const long lnotaregion=INT_MIN;
 const int notalabel=INT_MIN;
 const double doublenotset = -123e100;
+
+    
+    
 class MeshPointBase { public:
   
   R3 P;
@@ -372,10 +375,12 @@ class MeshPointBase { public:
    }
     
 // --------3D surface
-    void set(const R3 &P2,const R3 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge)
+    void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge)
     {
         P=P2;
-        PHat=P_Hat;
+        PHat.x=P_Hat.x;
+        PHat.y=P_Hat.y;
+        PHat.z=0;
         TS=&K.T;
         //const MeshS &ThIS  = *ThI.meshS;
         ThS=&K.Vh.Th;
@@ -391,10 +396,12 @@ class MeshPointBase { public:
         VF=0;
         d=3;
     }
-    void set(const MeshS & aTh,const R3 &P2,const R3 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0)
+    void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0)
     {
         P=P2;
-        PHat=P_Hat;
+        PHat.x=P_Hat.x;
+        PHat.y=P_Hat.y;
+        PHat.z=0;
         TS=&aK;
         ThS=&aTh;
         region = TS->lab;
@@ -410,10 +417,12 @@ class MeshPointBase { public:
         d=3;
     }
     
-    void set(const R3 &P2,const R3 & P_Hat,const baseFElementS & K,int ll)
+    void set(const R3 &P2, const R2 & P_Hat,const baseFElementS & K,int ll)
     {
         P=P2;
-        PHat=P_Hat;
+        PHat.x=P_Hat.x;
+        PHat.y=P_Hat.y;
+        PHat.z=0;
         TS=&K.T;
         ThS=&K.Vh.Th;
         region = TS->lab;
@@ -427,13 +436,13 @@ class MeshPointBase { public:
         d=3;
     }
     
-    void set(const R3 &P2,const R3 & P_Hat,const  baseFElementS & K)
+    void set(const R3 &P2, const R2 & P_Hat,const  baseFElementS & K)
     {
         P=P2;
         PHat=P_Hat;
         PHat.x=P_Hat.x;
         PHat.y=P_Hat.y;
-        PHat.z=P_Hat.z;
+        PHat.z=0;
         TS=&K.T;
         ThS=&K.Vh.Th;
         region = TS->lab;
@@ -445,13 +454,11 @@ class MeshPointBase { public:
         int ll[3],kk(0);
         if ( P_Hat.x<1.e-6) ll[kk++]=1;
         if ( P_Hat.y<1.e-6) ll[kk++]=2;
-        if ( P_Hat.z<1.e-6) ll[kk++]=3;
-        if ( P_Hat.z+P_Hat.y+P_Hat.x>0.999999) ll[kk++]=0;
+        if ( P_Hat.y+P_Hat.x>0.999999) ll[kk++]=0;
         if (kk==0) label=0;
-        else if (kk==3)
-        {
-            v = 6-ll[0]-ll[1]-ll[2];// 3 = 0+1+2 sommet oppose
-            label=(*T)[v].lab;
+        else if (kk==2) {
+          v = 3-ll[0]-ll[1];// 3 = 0+1+2 sommet oppose
+          label=(*T)[v].lab;
         }
         else  {
           //  e = ll[0];
@@ -552,24 +559,23 @@ class MeshPoint : public MeshPointBase { public:
     other.unset();
   }
 
-    // 3D surface
-    void set(const R3 &P2,const R3 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge) {
-        MeshPointBase::set(P2,P_Hat,K,ll,NN,iedge);
-        other.unset();}
-    void set(const MeshS & aTh,const R3 &P2,const R3 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,int iedge) {
-        MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
-        other.unset();}
-    void set(const MeshS & aTh,const R3 &P2,const R3 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,int iedge,int VFF) {
-        MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge,VFF);
-        other.unset();}
-    void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K) {
-        MeshPointBase::set(P2,P_Hat,K);
-        other.unset();
-    }
-    void set(const  MeshS &aTh, const R3 &P2,const R3 & P_Hat,const TriangleS &aK,
-             const int ll,bool coutside=false) {
-        MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
-        other.unset();
+  // 3D surface
+  void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge) {
+      MeshPointBase::set(P2,P_Hat,K,ll,NN,iedge);
+      other.unset();}
+  void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,int iedge) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
+      other.unset();}
+  void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,int iedge,int VFF) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge,VFF);
+      other.unset();}
+  void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K) {
+      MeshPointBase::set(P2,P_Hat,K);
+      other.unset();
+  }
+  void set(const MeshS &aTh, const R3 &P2,const R2 & P_Hat,const TriangleS &aK, const int ll,bool coutside=false) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
+      other.unset();
     }
 //fin 3d
     

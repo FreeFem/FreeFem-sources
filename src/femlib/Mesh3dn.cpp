@@ -1173,7 +1173,7 @@ namespace Fem2D
       }
     } // end typeMesh3 !=0
     // write edges, in cas of volume + surface mesh (meshS)
-      if (typeMesh3==2) {
+      if (typeMesh3==2) { 
         int nbeS = meshS->nbe;
         if(nbeS != 0) {
       GmfSetKwd(outm,GmfEdges,nbeS);
