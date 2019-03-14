@@ -12,7 +12,7 @@ export FF_INCLUDEPATH=$FF_ROOT/idp
 mkdir -p build_cmake \
 && cd build_cmake \
 && cmake -D CMAKE_CXX_COMPILER=g++ -D CMAKE_C_COMPILER=gcc -D CMAKE_INSTALL_PREFIX=/builds/freefem-source-feature-cmake .. \
-&& make -j 8 \
+&& make -j 8 VERBOSE=1 \
 && ls src \
 && ls src/fflib \
 && ldd src/FreeFem++ \
