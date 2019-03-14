@@ -36,22 +36,22 @@ public:
     std::ostream& dump (std::ostream&) const ;
     SkyLineMatrix(HMat *A,Z *p,int tf,int verbb);
     
-    SkyLineMatrix(const SkyLineMatrix& A,bool copy=false)
+    SkyLineMatrix(const SkyLineMatrix& A,bool copy=false,int vrb=verbosity)
     : n(A.n),m(n),whichfac(A.whichfac),
     L(A.L),oL(L),      U(A.U),oU(U),     D(A.D),oD(A.D),
     pL(A.pL),opL(pL),  pU(A.pU),opU(pU),
-    typefac(A.typefac)
+    typefac(A.typefac),verb(vrb)
     { if(copy) docopy(); }
     
     SkyLineMatrix(Z NbOfDF,R* d,
                    R* u, Z * pu,
                    R* l, Z * pl,
-                   bool copy,
+                   bool copy,int vrb=verbosity,
                    FactorizationType tf=FactorizationNO)
     : n(NbOfDF),m(n),
       L(l),oL(l),       U(u),oU(u),    D(d),oD(d),
       pL(pl),opL(pl),   pU(pu),opU(pu),
-      typefac(tf)
+      typefac(tf),verb(vrb)
     { if(copy) docopy(); }
     
  
@@ -64,16 +64,16 @@ public:
         if(pU &&  pU != opU && pU != pL  ) delete [] pU;
     }
     
-    const SkyLineMatrix t(bool cpy=false) const  {return SkyLineMatrix(this->n,D,L,pL,U,pU,cpy,typefac);}
-    const SkyLineMatrix lt(bool cpy=false) const {return SkyLineMatrix(this->n,0,L,pL,0,0,cpy);}
-    const SkyLineMatrix l(bool cpy=false) const  {return SkyLineMatrix(this->n,0,0,0,L,pL,cpy);}
-    const SkyLineMatrix d(bool cpy=false) const  {return SkyLineMatrix(this->n,D,0,0,0,0,cpy);}
-    const SkyLineMatrix ld(bool cpy=false) const {return SkyLineMatrix(this->n,D,0,0,L,pL,cpy);}
-    const SkyLineMatrix ldt(bool cpy=false) const {return SkyLineMatrix(this->n,D,L,pL,0,0,cpy);}
-    const SkyLineMatrix du(bool cpy=false) const {return SkyLineMatrix(this->n,D,U,pU,0,0,cpy);}
-    const SkyLineMatrix u(bool cpy=false) const  {return SkyLineMatrix(this->n,0,U,pU,0,0,cpy);}
-    const SkyLineMatrix ut(bool cpy=false) const {return SkyLineMatrix(this->n,0,0,0,U,pU,cpy);}
-    const SkyLineMatrix dut(bool cpy=false) const {return SkyLineMatrix(this->n,D,0,0,U,pU,cpy);}
+    const SkyLineMatrix t(bool cpy=false) const  {return SkyLineMatrix(this->n,D,L,pL,U,pU,cpy,verb,typefac);}
+    const SkyLineMatrix lt(bool cpy=false) const {return SkyLineMatrix(this->n,0,L,pL,0,0,cpy,verb);}
+    const SkyLineMatrix l(bool cpy=false) const  {return SkyLineMatrix(this->n,0,0,0,L,pL,cpy,verb);}
+    const SkyLineMatrix d(bool cpy=false) const  {return SkyLineMatrix(this->n,D,0,0,0,0,cpy,verb);}
+    const SkyLineMatrix ld(bool cpy=false) const {return SkyLineMatrix(this->n,D,0,0,L,pL,cpy,verb);}
+    const SkyLineMatrix ldt(bool cpy=false) const {return SkyLineMatrix(this->n,D,L,pL,0,0,cpy,verb);}
+    const SkyLineMatrix du(bool cpy=false) const {return SkyLineMatrix(this->n,D,U,pU,0,0,cpy,verb);}
+    const SkyLineMatrix u(bool cpy=false) const  {return SkyLineMatrix(this->n,0,U,pU,0,0,cpy,verb);}
+    const SkyLineMatrix ut(bool cpy=false) const {return SkyLineMatrix(this->n,0,0,0,U,pU,cpy,verb);}
+    const SkyLineMatrix dut(bool cpy=false) const {return SkyLineMatrix(this->n,D,0,0,U,pU,cpy,verb);}
 
     Z size() const ;
     

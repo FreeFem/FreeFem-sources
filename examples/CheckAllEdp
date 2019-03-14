@@ -14,7 +14,7 @@ NO=0
 NC=0
 NF=0
 
-if [ "$1" = "-n"] ; then dry=1; shift; fi
+if [ "$1" = "-n" ] ; then dry=1; shift; fi
 ffcmm=$1;shift;
 mpicm==$1;shift;
 if [ $# -eq 0 ]; then
@@ -79,7 +79,7 @@ do
 		MSG="${red} FAIL(signal)=$SIG ${std}"
 		((NF++))
 	    fi
-	fi
+		
 	    echo $MSG  $cmm $i  >>"$log"
 	    echo  $MSG  $cmm $i "( see "$log" )";
 #	    echo  $MSG  $cmm $i "(see "$log " )" >>/tmp/list-ff-$$

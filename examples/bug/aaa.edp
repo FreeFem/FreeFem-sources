@@ -1,4 +1,5 @@
 // remark: the sign of p is correct 
+// BUG ..... 
 bool classique=0;
 
 real s0=clock();
@@ -70,6 +71,7 @@ for (iter=1;iter<=nbiter;iter++)
 	solve NS1 ([uu1,uu2,pp],[vv1,vv2,qq],solver=UMFPACK,init=i,save="toto") =   vNS; 	
       }
       else {
+		  [f1,f2,fp]=[0,0,0];
 	f1[] = vNS(0,Wh);
 	{
 	  ofstream tt("tt.matrix");
