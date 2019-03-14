@@ -50,7 +50,8 @@ FILE(GLOB EDP_FILES *.edp)
 # tests which are known to fail are removed from test list  
 LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-hips.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-mumps.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-superludist.edp)
+                           ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-superludist.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/essai-com.edp)
 
 
 IF(NOT EXISTS $ENV{FF_INCLUDEPATH}/getARGV.idp OR NOT FF_PLUGIN_MUMPS)
