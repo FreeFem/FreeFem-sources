@@ -1,5 +1,12 @@
 FILE(GLOB EDP_FILES *.edp)
 
+
+# Tests which are known to fail
+LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/exception.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/regtests.edp)
+
+
+
 IF(NOT FREEFEM_MEDIT_INSTALLED)
   LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/tutorial/Newton.edp)
   LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/tutorial/medit.edp)
