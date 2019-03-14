@@ -37,7 +37,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/bamglib
 
 ADD_LIBRARY(libff ${LIBFF_SRC})
 
-ADD_LIBRARY(strversionnumber SHARED strversionnumber.cpp)
+ADD_LIBRARY(strversionnumber STATIC strversionnumber.cpp)
 TARGET_COMPILE_DEFINITIONS(strversionnumber PRIVATE VersionFreeFempp=${FREEFEM_VERSION})
 
 
