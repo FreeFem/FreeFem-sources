@@ -14,6 +14,7 @@ mkdir -p build_cmake \
 && cmake -D CMAKE_CXX_COMPILER=g++ -D CMAKE_C_COMPILER=gcc -D CMAKE_INSTALL_PREFIX=/builds/freefem-source-feature-cmake .. \
 && make -j 8 \
 && ls src/fflib \
+&& ldd src/FreeFem++ \
 && make install 
 
 cd $FF_ROOT/build_cmake/examples/bug 
