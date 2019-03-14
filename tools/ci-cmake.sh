@@ -13,16 +13,8 @@ mkdir -p build_cmake \
 && cd build_cmake \
 && cmake -D CMAKE_CXX_COMPILER=g++ -D CMAKE_C_COMPILER=gcc -D CMAKE_INSTALL_PREFIX=/builds/freefem-source-feature-cmake .. \
 && make -j 8 VERBOSE=1 \
-&& ls src \
-&& ls src/fflib \
-&& ldd src/FreeFem++ \
 && make install
 
-cygcheck src/FreeFem++ 
-cygcheck src/FreeFem++.exe
-
-cd $FF_ROOT/build_cmake/examples/bug 
-make test CTEST_OUTPUT_ON_FAILURE=On 
 cd $FF_ROOT/build_cmake/examples/3d 
 make test CTEST_OUTPUT_ON_FAILURE=On 
 cd $FF_ROOT/build_cmake/examples/eigen 
