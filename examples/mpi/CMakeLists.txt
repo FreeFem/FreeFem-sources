@@ -153,26 +153,6 @@ IF (NOT FF_PLUGIN_MSH3)
                              ${CMAKE_SOURCE_DIR}/examples/mpi/schwarz-3.edp)
 ENDIF(NOT FF_PLUGIN_MSH3)
 
-IF(NOT MPIEXEC_MAX_NUMPROCS EQUAL 2)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/schwarz-2d.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/schwarz-b.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/schwarz-c.edp)
-
-  ADD_TEST(NAME schwarz-2d COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2 
-  ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/src/FreeFem++-mpi ${MPIEXEC_POSTFLAGS} -nw schwarz-2d.edp
-                            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/mpi)
-
-  ADD_TEST(NAME schwarz-b COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2 
-  ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/src/FreeFem++-mpi ${MPIEXEC_POSTFLAGS} -nw schwarz-b.edp
-                            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/mpi)
-
-  #TODO understand why this test lasts so much time
-  #ADD_TEST(NAME schwarz-c COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2 
-  #${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/src/FreeFem++-mpi ${MPIEXEC_POSTFLAGS} -nw schwarz-c.edp
-  #                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/mpi)
-
-ENDIF(NOT MPIEXEC_MAX_NUMPROCS EQUAL 2)
-
 IF(NOT MPIEXEC_MAX_NUMPROCS EQUAL 4)
   LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/mortar-DN-4-mpi.edp)
 
