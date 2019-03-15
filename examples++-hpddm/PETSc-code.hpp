@@ -359,8 +359,6 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         MatGetBlockSize(ptB->_petsc, &bs);
         KN<PetscScalar>* rhs = nargs[0] ? GetAny<KN<PetscScalar>*>((*nargs[0])(stack)) : nullptr;
         initPETScStructure(ptA, bs, nargs[2] ? (GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, static_cast<KN<double>*>(nullptr), rhs);
-        KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
-        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
     }
     bool clean = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(clean)
@@ -422,7 +420,7 @@ AnyType initRectangularCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) con
         MatSetType(ptA->_petsc, MATMPIAIJ);
         if(ptK->A) {
             MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
-            HPDDM::MatrixCSR<PetscScalar> dA = ff_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+            ff_HPDDM_MatrixCSR<PetscScalar> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
             ptA->_num = new unsigned int[mA->n + mA->m];
             ptA->_cnum = ptA->_num + mA->n;
             std::copy_n(ptB->_num, mA->n, ptA->_num);
@@ -578,12 +576,10 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
     if(nargs[2])
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE);
-    KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
-#ifdef PETSC_HAVE_MKL_SPARSE_OPTIMIZE
-    if(0 && prune && bsr)
-        MatConvert(ptA->_petsc, MATMPIBAIJMKL, MAT_INPLACE_MATRIX, &(ptA->_petsc));
-#endif
-    KSPSetOperators(ptA->_ksp, ptA->_petsc, prune ? ptA->_S[0] : ptA->_petsc);
+    if(prune) {
+        KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
+        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_S[0]);
+    }
     return ptA;
 }
 template<class HpddmType>
@@ -773,8 +769,6 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
         if(verbosity > 0 && mpirank == 0)
             cout << " --- global CSR created (in " << MPI_Wtime() - timing << ")" << endl;
         timing = MPI_Wtime();
-        KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
-        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
     }
     return ptA;
 }
@@ -903,8 +897,6 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
             ffassert(0); // A faire ???? FH..
         }
 #endif
-        KSPCreate(PETSC_COMM_WORLD, &(ptA->_ksp));
-        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         bool clean = nargs[3] && GetAny<bool>((*nargs[3])(stack));
         if(clean) {
             ptO->resize(0);
@@ -1112,8 +1104,6 @@ class initCSRfromBlockMatrix : public E_F0 {
             if(sparse_mat->_petsc)
                 sparse_mat->~DistributedCSR();
             MatCreateNest(PETSC_COMM_WORLD, N, NULL, M, NULL, a, &sparse_mat->_petsc);
-            KSPCreate(PETSC_COMM_WORLD, &sparse_mat->_ksp);
-            KSPSetOperators(sparse_mat->_ksp, sparse_mat->_petsc, sparse_mat->_petsc);
             delete [] a;
             return sparse_mat;
         }
@@ -1167,7 +1157,7 @@ template<class Type>
 AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     Type* ptSub = nargs[7] ? GetAny<Type*>((*nargs[7])(stack)) : 0;
-    if(ptSub && ptA) {
+    if(ptSub && ptA && ptA->_ksp) {
         PC pc;
         KSPGetPC(ptA->_ksp, &pc);
         PCType type;
@@ -1196,69 +1186,75 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     }
     std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
     bool fieldsplit = PETSc::insertOptions(options);
-    if(std::is_same<Type, Dmat>::value && fieldsplit) {
-        KN<double>* fields = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
-        KN<String>* names = nargs[3] ? GetAny<KN<String>*>((*nargs[3])(stack)) : 0;
-        KN<Matrice_Creuse<PetscScalar>>* mS = nargs[5] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[5])(stack)) : 0;
-        KN<double>* pL = nargs[6] ? GetAny<KN<double>*>((*nargs[6])(stack)) : 0;
-        setFieldSplitPC(ptA, ptA->_ksp, fields, names, mS, pL);
-    }
-    if(std::is_same<Type, Dmat>::value) {
-        FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
-        KNM<PetscScalar>* ptPETScNS = nargs[8] ? GetAny<KNM<PetscScalar>*>((*nargs[8])(stack)) : 0;
-        int dim = ptNS ? ptNS->N : 0;
-        int dimPETSc = ptPETScNS ? ptPETScNS->M() : 0;
-        if(dim || dimPETSc) {
-            Vec x;
-            MatCreateVecs(ptA->_petsc, &x, NULL);
-            Vec* ns;
-            VecDuplicateVecs(x, std::max(dim, dimPETSc), &ns);
-            if(std::max(dim, dimPETSc) == dimPETSc) {
-                PetscInt m;
-                VecGetLocalSize(ns[0], &m);
-                for(unsigned short i = 0; i < dimPETSc; ++i) {
-                    PetscScalar* x;
-                    VecGetArray(ns[i], &x);
-                    for(int j = 0; j < m; ++j)
-                        x[j] = (*ptPETScNS)(j, i);
-                    VecRestoreArray(ns[i], &x);
-                }
-            }
-            else
-                for(unsigned short i = 0; i < dim; ++i) {
-                    PetscScalar* x;
-                    VecGetArray(ns[i], &x);
-                    HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*(ptNS->get(i))), x, ptNS->get(i)->n);
-                    VecRestoreArray(ns[i], &x);
-                }
-            PetscScalar* dots = new PetscScalar[std::max(dim, dimPETSc)];
-            for(unsigned short i = 0; i < std::max(dim, dimPETSc); ++i) {
-                if(i > 0) {
-                    VecMDot(ns[i], i, ns, dots);
-                    for(int j = 0; j < i; ++j)
-                        dots[j] *= -1.0;
-                    VecMAXPY(ns[i], i, dots, ns);
-                }
-                VecNormalize(ns[i], NULL);
-            }
-            delete [] dots;
-            MatNullSpace sp;
-            MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
-            MatSetNearNullSpace(ptA->_petsc, sp);
-            MatNullSpaceDestroy(&sp);
-            if(ns)
-                VecDestroyVecs(dim, &ns);
-            delete [] ns;
+    if(ptA && ptA->_petsc) {
+        if(!ptA->_ksp) {
+            KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+            KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
-    }
-    if(nargs[4])
-        KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
-    KSPSetFromOptions(ptA->_ksp);
-    KSPSetUp(ptA->_ksp);
-    if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
-        PC pc;
-        KSPGetPC(ptA->_ksp, &pc);
-        setCompositePC(ptA, pc);
+        if(std::is_same<Type, Dmat>::value && fieldsplit) {
+            KN<double>* fields = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
+            KN<String>* names = nargs[3] ? GetAny<KN<String>*>((*nargs[3])(stack)) : 0;
+            KN<Matrice_Creuse<PetscScalar>>* mS = nargs[5] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[5])(stack)) : 0;
+            KN<double>* pL = nargs[6] ? GetAny<KN<double>*>((*nargs[6])(stack)) : 0;
+            setFieldSplitPC(ptA, ptA->_ksp, fields, names, mS, pL);
+        }
+        if(std::is_same<Type, Dmat>::value) {
+            FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
+            KNM<PetscScalar>* ptPETScNS = nargs[8] ? GetAny<KNM<PetscScalar>*>((*nargs[8])(stack)) : 0;
+            int dim = ptNS ? ptNS->N : 0;
+            int dimPETSc = ptPETScNS ? ptPETScNS->M() : 0;
+            if(dim || dimPETSc) {
+                Vec x;
+                MatCreateVecs(ptA->_petsc, &x, NULL);
+                Vec* ns;
+                VecDuplicateVecs(x, std::max(dim, dimPETSc), &ns);
+                if(std::max(dim, dimPETSc) == dimPETSc) {
+                    PetscInt m;
+                    VecGetLocalSize(ns[0], &m);
+                    for(unsigned short i = 0; i < dimPETSc; ++i) {
+                        PetscScalar* x;
+                        VecGetArray(ns[i], &x);
+                        for(int j = 0; j < m; ++j)
+                            x[j] = (*ptPETScNS)(j, i);
+                        VecRestoreArray(ns[i], &x);
+                    }
+                }
+                else
+                    for(unsigned short i = 0; i < dim; ++i) {
+                        PetscScalar* x;
+                        VecGetArray(ns[i], &x);
+                        HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*(ptNS->get(i))), x, ptNS->get(i)->n);
+                        VecRestoreArray(ns[i], &x);
+                    }
+                PetscScalar* dots = new PetscScalar[std::max(dim, dimPETSc)];
+                for(unsigned short i = 0; i < std::max(dim, dimPETSc); ++i) {
+                    if(i > 0) {
+                        VecMDot(ns[i], i, ns, dots);
+                        for(int j = 0; j < i; ++j)
+                            dots[j] *= -1.0;
+                        VecMAXPY(ns[i], i, dots, ns);
+                    }
+                    VecNormalize(ns[i], NULL);
+                }
+                delete [] dots;
+                MatNullSpace sp;
+                MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
+                MatSetNearNullSpace(ptA->_petsc, sp);
+                MatNullSpaceDestroy(&sp);
+                if(ns)
+                    VecDestroyVecs(dim, &ns);
+                delete [] ns;
+            }
+        }
+        if(nargs[4])
+            KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
+        KSPSetFromOptions(ptA->_ksp);
+        KSPSetUp(ptA->_ksp);
+        if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
+            PC pc;
+            KSPGetPC(ptA->_ksp, &pc);
+            setCompositePC(ptA, pc);
+        }
     }
     return 0L;
 }
@@ -1308,6 +1304,10 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
         bs = 1;
     else
         MatGetBlockSize(ptA->_petsc, &bs);
+    if(!ptA->_ksp) {
+        KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+    }
     HPDDM::PETScOperator op(ptA->_ksp, ptA->_last - ptA->_first, bs);
     if(prefix)
         op.setPrefix(*prefix);
@@ -1365,15 +1365,18 @@ template<class Type>
 AnyType view_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     std::string* object = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
-    if(!object || object->compare("mat") == 0) {
+    if(!object || object->compare("mat") == 0)
         MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_WORLD);
-    }
-    else if(object->compare("ksp") == 0)
-        KSPView(ptA->_ksp, PETSC_VIEWER_STDOUT_WORLD);
-    else if(object->compare("pc") == 0) {
-        PC pc;
-        KSPGetPC(ptA->_ksp, &pc);
-        PCView(pc, PETSC_VIEWER_STDOUT_WORLD);
+    else {
+        if(ptA->_ksp) {
+            if(object->compare("ksp") == 0)
+                KSPView(ptA->_ksp, PETSC_VIEWER_STDOUT_WORLD);
+            else if(object->compare("pc") == 0) {
+                PC pc;
+                KSPGetPC(ptA->_ksp, &pc);
+                PCView(pc, PETSC_VIEWER_STDOUT_WORLD);
+            }
+        }
     }
     return 0L;
 }
@@ -1668,8 +1671,6 @@ long MatConvert(Type* const& A, Type* const& B) {
                     MatCreateHermitianTranspose(p.second, &B);
                 MatNestSetSubMat(A->_petsc, p.first.first, p.first.second, B);
             }
-            KSPCreate(PETSC_COMM_WORLD, &B->_ksp);
-            KSPSetOperators(B->_ksp, B->_petsc, B->_petsc);
         }
     }
     return 0L;
@@ -1806,6 +1807,10 @@ AnyType Solve<Type, N>::E_Solve::operator()(Stack stack) const {
             }
             VecPlaceArray(x, *in);
             VecPlaceArray(y, *out);
+            if(!ptA->_ksp) {
+                KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+                KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+            }
             if(N == 'N')
                 KSPSolve(ptA->_ksp, x, y);
             else if(N == 'H') {
@@ -1881,6 +1886,10 @@ AnyType Solve<Type, N>::E_Solve::operator()(Stack stack) const {
                 MatGetBlockSize(ptA->_petsc, &bs);
             ffassert(in->N() == bs * m);
             out->resize(bs * m, in->M());
+            if(!ptA->_ksp) {
+                KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+                KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+            }
             HPDDM::PETScOperator op(ptA->_ksp, m, bs);
             op.apply(&in->operator()(0, 0), &out->operator()(0, 0), in->M());
         }
@@ -2019,6 +2028,10 @@ class InvPETSc {
 #endif
                 }
                 timing = MPI_Wtime();
+                if(!(*t)._ksp) {
+                    KSPCreate(PETSC_COMM_WORLD, &(*t)._ksp);
+                    KSPSetOperators((*t)._ksp, (*t)._petsc, (*t)._petsc);
+                }
                 if(trans == 'N')
                     KSPSolve((*t)._ksp, x, y);
                 else {

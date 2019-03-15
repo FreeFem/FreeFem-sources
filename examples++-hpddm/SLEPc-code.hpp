@@ -157,17 +157,18 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
             if(nargs[1])
                 EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             EPSSetFromOptions(eps);
-            ST st;
-            KSP ksp;
-            EPSGetST(eps, &st);
-            if(ptA->_ksp)
+            if(ptA->_ksp) {
+                ST st;
+                EPSGetST(eps, &st);
                 STSetKSP(st, ptA->_ksp);
+            }
             else if(fieldsplit) {
                 KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
                 KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
                 KN<Matrice_Creuse<PetscScalar>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[7])(stack)) : 0;
                 KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
                 if(fields && names) {
+                    KSP ksp;
                     KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                     setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
                     EPSSetUp(eps);
