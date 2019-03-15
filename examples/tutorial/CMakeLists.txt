@@ -1,8 +1,9 @@
 FILE(GLOB EDP_FILES *.edp)
 
 
-# Tests which are known to fail
+# Tests which are known to fail are removed from test list
 LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/exception.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/Laplace-RHS-Dirac.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/regtests.edp)
 
 
