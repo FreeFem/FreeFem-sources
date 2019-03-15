@@ -48,12 +48,12 @@ IF(MPI_FOUND)
 FILE(GLOB EDP_FILES *.edp)
 
 # tests which are known to fail are removed from test list  
-LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-hips.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-mumps.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-superludist.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/essai-com.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/schwarz-2d.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/schwarz-b.edp)
+LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/mpi/chaleur3D-hips.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mpi/chaleur3D-mumps.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mpi/chaleur3D-superludist.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mpi/essai-com.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mpi/schwarz-2d.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/mpi/schwarz-b.edp)
 
 
 IF(NOT EXISTS $ENV{FF_INCLUDEPATH}/getARGV.idp OR NOT FF_PLUGIN_MUMPS)
