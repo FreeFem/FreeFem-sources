@@ -51,7 +51,9 @@ FILE(GLOB EDP_FILES *.edp)
 LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-hips.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-mumps.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-superludist.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/essai-com.edp)
+                           ${CMAKE_CURRENT_SOURCE_DIR}/essai-com.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/schwarz-2d.edp
+                           ${CMAKE_CURRENT_SOURCE_DIR}/schwarz-b.edp)
 
 
 IF(NOT EXISTS $ENV{FF_INCLUDEPATH}/getARGV.idp OR NOT FF_PLUGIN_MUMPS)
