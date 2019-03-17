@@ -210,6 +210,7 @@ AnyType changeOperator_Op<Type>::operator()(Stack stack) const {
                 dN = new HPDDM::MatrixCSR<PetscScalar>(dM, dL, perm);
                 delete [] perm;
                 delete dM;
+                dM = nullptr;
             }
             if(ptA->_A)
                 ptA->_A->setMatrix(dN);
@@ -217,7 +218,7 @@ AnyType changeOperator_Op<Type>::operator()(Stack stack) const {
             int* ja = nullptr;
             PetscScalar* c = nullptr;
             bool free = true;
-            if(!ptA->_ksp)
+            if(!dM)
                 free = HPDDM::template Subdomain<PetscScalar>::distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, ptA->_num + dN->_n);
             else
                 free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c);
@@ -1142,7 +1143,7 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
 };
 template<class Type>
 struct _n_User {
-    typename Type::MatF_O*             op;
+    typename Type::MatF_O* op;
 };
 template<class Type>
 class setOptions : public OneOperator {
@@ -1201,13 +1202,14 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(std::is_same<Type, Dmat>::value) {
             FEbaseArrayKn<PetscScalar>* ptNS = nargs[1] ? GetAny<FEbaseArrayKn<PetscScalar>*>((*nargs[1])(stack)) : 0;
             KNM<PetscScalar>* ptPETScNS = nargs[8] ? GetAny<KNM<PetscScalar>*>((*nargs[8])(stack)) : 0;
-            int dim = ptNS ? ptNS->N : 0;
+            PetscInt dim = ptNS ? ptNS->N : 0;
             int dimPETSc = ptPETScNS ? ptPETScNS->M() : 0;
             if(dim || dimPETSc) {
-                Vec x;
-                MatCreateVecs(ptA->_petsc, &x, NULL);
+                Vec v;
+                MatCreateVecs(ptA->_petsc, &v, NULL);
                 Vec* ns;
-                VecDuplicateVecs(x, std::max(dim, dimPETSc), &ns);
+                VecDuplicateVecs(v, std::max(dim, dimPETSc), &ns);
+                VecDestroy(&v);
                 if(std::max(dim, dimPETSc) == dimPETSc) {
                     PetscInt m;
                     VecGetLocalSize(ns[0], &m);
@@ -2010,8 +2012,7 @@ class InvPETSc {
                         std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
                 }
                 else {
-                    PetscScalar zero = 0.0;
-                    VecSet(x, zero);
+                    VecSet(x, PetscScalar());
 #if 0
                     Mat_IS* is = (Mat_IS*)(*t)._petsc->data;
                     VecGetArray(is->y, &ptr);
