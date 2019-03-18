@@ -76,7 +76,8 @@ class DistributedCSR {
                 MatDestroy(&_petsc);
                 for(int i = 0; i < _S.size(); ++i)
                     MatDestroy(&_S[i]);
-                KSPDestroy(&_ksp);
+                if(_ksp)
+                    KSPDestroy(&_ksp);
                 if(_exchange) {
                     _exchange[0]->clearBuffer();
                     delete _exchange[0];

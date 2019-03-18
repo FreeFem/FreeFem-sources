@@ -120,7 +120,7 @@ struct _n_User {
 };
 template<class Type, class K>
 AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
-     ffassert(MAT_CLASSID);
+    ffassert(MAT_CLASSID);
     if(A && (B || codeA)) {
         Type* ptA = GetAny<Type*>((*A)(stack));
         if(ptA->_petsc) {
@@ -159,7 +159,6 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             EPSSetFromOptions(eps);
             ST st;
-            KSP ksp;
             EPSGetST(eps, &st);
             if(ptA->_ksp)
                 STSetKSP(st, ptA->_ksp);
@@ -169,6 +168,8 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 KN<Matrice_Creuse<PetscScalar>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[7])(stack)) : 0;
                 KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
                 if(fields && names) {
+                    KSP ksp;
+                    STGetKSP(st, &ksp);
                     KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                     setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
                     EPSSetUp(eps);
@@ -316,8 +317,6 @@ void addSLEPc() {
 template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
 void addSLEPc() { }
 }
-
-
 
 static void Init() {
     //  to load only once

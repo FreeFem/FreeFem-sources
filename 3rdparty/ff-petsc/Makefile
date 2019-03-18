@@ -132,7 +132,7 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 		COPTFLAGS='-O3 -march=native -mtune=native' \
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \
-		--with-ssl=0 ---with-x=0 \
+		--with-ssl=0 ---with-x=0 --with-fortran-bindings=0 \
 	  '--with-scalar-type=real' \
 	  $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
@@ -155,7 +155,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \
 	  '--with-scalar-type=complex' \
-		--with-ssl=0 ---with-x=0 \
+		--with-ssl=0 ---with-x=0 --with-fortran-bindings=0 \
 	  $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 		--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
