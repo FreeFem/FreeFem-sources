@@ -15,4 +15,3 @@ before_install:
 script:
     - autoreconf -i && ./configure --enable-download && ./3rdparty/getall -a
     - make
-    - make check
