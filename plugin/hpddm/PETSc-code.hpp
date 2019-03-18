@@ -1557,7 +1557,7 @@ long MatMatMult(Type* const& A, KNM<PetscScalar>* const& in, KNM<PetscScalar>* c
         MatGetType(A->_petsc, &type);
         PetscBool isType;
         PetscStrcmp(type, MATMPIAIJ, &isType);
-        if(isType)
+        if(mpisize == 1 && isType)
             MatMPIAIJGetLocalMat(A->_petsc, MAT_INITIAL_MATRIX, &C);
         else
             C = A->_petsc;
