@@ -60,19 +60,19 @@ libff.dll: $(FFD_OBJ0) $(FFD_OBJ_AR) $(FFD_OBJ_AC) $(FFD_OBJ_AL) $(FFD_OBJ1) $(F
 parallelempi-empty.o:../mpi/parallelempi-empty.cpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
-FreeFem++-nw.exe: .../Graphics/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+FreeFem++-nw.exe: ../Graphics/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
 # ALH - 28/7/14 - the new automake default is to place the objects in
 # the same directory as the corresponding source file
 
-FreeFem++.exe: .../Graphics/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
+FreeFem++.exe: ../Graphics/sansrgraph.o parallelempi-empty.o ../lglib/mymain.o $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32
 
 ## FH.. Strange : pb with MPI finaly with ffapi-mpi.dll  ( J'ai compris)
 ## dur dur ...
 ##  on mais init ffpt dans mymain.cpp
-FreeFem++-mpi.exe:	.../Graphics/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FFmpi)
+FreeFem++-mpi.exe:	../Graphics/sansrgraph.o ../mpi/parallelempi.o   ../lglib/mymain.o $(LIBS_FFmpi)
 	$(MPICXX)   $(GCCNOCYGWIN) libff.dll $^ -o $@  -lcomdlg32 $(MPI_LIB)
 bamg.exe:  libff.dll $(LIBS_FF)
 	$(CXX)   $(GCCNOCYGWIN) ../bamg/bamg.o  -Wl,--enable-auto-import $^ -o $@
