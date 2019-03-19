@@ -206,4 +206,4 @@ var
 			Dir[0] := ExpandConstant('{app}');
 			Result := Dir;
 		end;
- #include "modpath.iss"
+#include "bin\modpath.iss"
