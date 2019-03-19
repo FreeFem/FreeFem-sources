@@ -3542,7 +3542,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     TriangleS *t = new TriangleS[nt_t];
     TriangleS *tt = t;
 
-    BoundaryEdgeS *b = new BoundaryEdgeS[nt_t];
+    BoundaryEdgeS *b = new BoundaryEdgeS[nbe_t];
     BoundaryEdgeS *bb = b;
     double mes = 0, mesb = 0;
     if (verbosity > 1)
@@ -6679,7 +6679,6 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
               assert(itt <= nt);
             }
               
-              // TO BE CHECK
               // here split internal edges
               for (int j = 0; j < 3; j++) {
                   int jt = j, it = Th.ElementAdj(i, jt);
@@ -7185,10 +7184,9 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
             } else {ffassert(0);}
         }
     }
-    
+    KN<int> newindex(nvsub);
     {
         KN<R3> vertextetsub(nvsub);
-        KN<int> newindex(nvsub);
         
         for (int i = 0; i < Th.nt; i++) {
             if (split[i]) {
@@ -7351,10 +7349,281 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     
     // delete gtree;
     
-    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
-    Tht->BuildGTree();    // Add JM. Oct 2010
-    delete gtree;
+   Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
+   Tht->BuildGTree();    // Add JM. Oct 2010
+   delete gtree;
     
+    
+    // if the surface mesh MeshS, trunc is obtain whit the slip on the triangle3, extract the points on the surface domain and split the edges border element of the real surface
+    
+    if (typeMesh3==2) {
+      double hminS = 1e100;
+      R3 bminS, bmaxS;
+      MeshS *ThS=Th.meshS;
+      int tagbS[3] = {1, 2, 4};
+        
+      // type 3D mesh
+      KN<int> tagTonBS(ThS->nt);
+      tagTonBS = 0;
+        
+      for (int ibe = 0; ibe < ThS->nbe; ibe++) {
+        int iff;
+        int it = ThS->BoundaryElement(ibe, iff);
+        tagTonBS[it] |= tagbS[iff];
+        int ifff = iff, itt = ThS->ElementAdj(it, ifff);
+        if (itt >= 0 && itt != it)
+          tagTonBS[itt] |= tagbS[ifff];
+      }
+        
+      /* determination de bminS, bmaxS et hminS */
+        
+      KN<int> takevertexS(ThS->nv, -1);
+      for (int i = 0; i < ThS->nt; i++) {
+        // origin of the triangleS ->tetra itet
+        int iftet;
+        // the original tetra to acces split
+        int itet = Th.BoundaryElement(i, iftet);
+        if (split[itet]) {
+          const TriangleS &K(ThS->elements[i]);
+          for (int ii = 0; ii < 3; ii++) {
+            int iv = ThS->operator () (K[ii]);
+            if (takevertexS[iv] == -1) {
+              bminS = Minc(ThS->vertices[iv], bminS);
+              bmaxS = Maxc(ThS->vertices[iv], bmaxS);
+              takevertexS[iv] = nvtrunc++;
+            }
+          }
+        }
+      }
+        
+      // determine the boundary number
+      int nbeS=0, nbeiS=0;
+      for (int i = 0; i < ThS->nt; i++) {
+        // origin of the triangleS ->tetra itet
+        int iftet;
+        // the original tetra to acces split
+        int itet = Th.BoundaryElement(i, iftet);
+        if (split[itet]) {
+          // computation of number of border elements -- edge element boundary o internal
+          for (int j = 0; j < 3; j++) {
+            int jt = j, it = ThS->ElementAdj(i, jt), iftet;
+            // the original adj tetra to acces split
+            int itetadj = Th.BoundaryElement(it, iftet);
+                   
+            if (it == i || it < 0)
+              nbeS += kksplit;// on est sur la frontiere
+            else if (!split[itetadj])
+              nbeS += kksplit;// le voisin ne doit pas etre decoupe
+            else if ((tagTonBS[i] & tagbS[j]) != 0 && i < it)  {
+              nbeiS++, nbeS+= kksplit; // internal boundary ..
+            }
+          }
+          for (int e = 0; e < 3; e++)
+            hminS = min(hminS, ThS->elements[i].lenEdge(e));
+        }
+      }
+
+      Tht->meshS = new MeshS();
+      // Number of Vertex in the surface
+      Tht->meshS->v_num_surf=new int[nv];
+      Tht->meshS->liste_v_num_surf=new int[nv]; // mapping to surface/volume vertices
+      for (int k=0; k<nv; k++) {
+        Tht->meshS->v_num_surf[k]=-1;
+        Tht->meshS->liste_v_num_surf[k]=0;
+      }
+      // search Vertex on the surface -- create the mappings
+      int nbv_surf=0;
+      for (int k=0; k<nbe; k++) {
+        const Triangle3 & K(Tht->borderelements[k]);
+        for(int jj=0; jj<3; jj++) {
+          int i0=Tht->operator()(K[jj]);
+          if( Tht->meshS->v_num_surf[i0] == -1 ) {
+            Tht->meshS->v_num_surf[i0] = nbv_surf; // this is the mapping
+            Tht->meshS->liste_v_num_surf[nbv_surf]= i0;
+            nbv_surf++;
+          }
+        }
+      }
+      Tht->meshS->set(nbv_surf, nbe, nbeS);
+      R3 hhS = (bmaxS - bminS) / 10.;
+      double hseuilS = (hminS / kksplit) / 1000.;
+      EF23::GTree<Vertex3> *gtreeS = new EF23::GTree<Vertex3>(Tht->meshS->vertices, bminS - hhS, bmaxS + hhS, 0);
+        
+        
+      // save the surface vertices
+      for (int k=0; k<nbv_surf; k++) {
+        int k0 = Tht->meshS->liste_v_num_surf[k];
+        const Vertex3 & P = Tht->vertices[k0];
+        Tht->meshS->vertices[k].x=P.x;
+        Tht->meshS->vertices[k].y=P.y;
+        Tht->meshS->vertices[k].z=P.z;
+        Tht->meshS->vertices[k].lab=P.lab;
+      }
+
+        np=0;
+      // first build old point to keep the numbering order for DDM ...
+     for (int i = 0, k = 0; i < Tht->meshS->nv; i++) {
+        if (takevertexS[i] >= 0) {
+          const R3 r3vi( Tht->meshS->vertices[i].x, Tht->meshS->vertices[i].y, Tht->meshS->vertices[i].z);
+          const Vertex3 &vi(r3vi);
+   
+           Vertex3 * pvi=gtreeS->ToClose(vi,hseuilS);
+           if (!pvi) {
+             (R3 &)v[np] = Tht->meshS->vertices[i];
+             v[np].lab = Tht->meshS->vertices[i].lab;
+             gtreeS->Add(v[np]);
+             np++;
+           }
+           else {ffassert(0);}
+        }
+        ffassert(np<=nbv_surf);
+      }
+  
+      // read triangles and change with the surface numbering
+      int iv[3], lab;
+      Tht->meshS->mes=0;
+  
+      for(int i=0;i<nbe;++i) {
+        const Triangle3 & K(Tht->borderelements[i]);
+        for (int j=0;j<3;++j) iv[j]=Tht->meshS->v_num_surf[Tht->operator()(K[j])];
+        lab=K.lab;
+        Tht->meshS->elements[i].set(Tht->meshS->vertices,iv,lab);
+        Tht->meshS->mes += Tht->elements[i].mesure();
+      }
+   
+      int nvsub = (kksplit + 1) * (kksplit + 2)/2;
+      int nedgesub = 3*(kksplit+1)*(kksplit+2)/2-3*(kksplit+1);
+      int *edgesub, ie=0;
+
+      // split the boundary of the triangle simplex
+      SplitEdgeSimplex(kksplit, nedgesub, edgesub);
+      
+      for (int i = 0; i < ThS->nt; i++) {
+        int iftet;
+        int itet = Th.BoundaryElement(i, iftet);
+          
+        if (split[itet]) {
+          const TriangleS &K(ThS->elements[i]);
+          // K comes from to the original tetra
+          int iftet;
+          int itet = Th.BoundaryElement(i, iftet);
+  
+          // here split internal edges
+          for (int j = 0; j < 3; j++) {
+            int jt = j, it = ThS->ElementAdj(i, jt), iftet;
+            // the original adj tetra to acces split
+            int itetadj = Th.BoundaryElement(it, iftet);
+            int nedgesplit = kksplit;
+            if (((tagTonBS[i] & tagbS[j]) == 0) && !(it == i || it < 0) && !split[itetadj]) {
+              // new border not on boundary
+              int ivb[2];
+              for (int ii = 0; ii < nedgesplit; ii++) {
+                for (int jjj = 0; jjj < 2; jjj++) {
+                  int iedge = 2 * j * nedgesplit + 2 * ii;
+                  ivb[jjj] = newindex[edgesub[iedge+jjj]];
+                  assert(edgesub[2*ii+ jjj] < nvsub);
+                  assert(ivb[jjj] < np);
+                }
+                Tht->meshS->borderelements[ie].set(Tht->meshS->vertices, ivb, newbelabel);
+                ie++;
+              }
+            }
+            assert(ie <= nbeS);
+          }
+        }
+      }
+      delete [] edgesub;
+        
+        
+      // split border elements Edges
+      int nv1Dsub = kksplit+1;
+      int nedge1Dsub = kksplit;
+      R1 *vertex1Dsub;
+      int *edge1Dsub;
+        
+      SplitSimplex<R1>(kksplit, nv1Dsub, vertex1Dsub, nedge1Dsub, edge1Dsub);
+  
+        
+      for (int ibe = 0; ibe < ThS->nbe; ibe++) {
+        int iff, it = ThS->BoundaryElement(ibe, iff);
+        int iftet, iftetadj;
+        // it triangleS come from to the tetra itet
+        int itet = Th.BoundaryElement(it, iftet);
+        int ifff = iff, itt = ThS->ElementAdj(it, ifff);
+        
+        // the original adj tetra to acces split
+        int itetadj = Th.BoundaryElement(itt, iftetadj);
+        if (itt < 0) {itt = it;}
+          
+        if (split[itet] == 0 && split[itetadj] == 0)
+          continue;    // boundary not on one element
+          
+        const BoundaryEdgeS &K(ThS->be(ibe));
+        int ivv[2];
+            
+        ivv[0] = ThS->operator () (K[0]);
+        ivv[1] = ThS->operator () (K[1]);
+ 
+          R3 *vertexedgesub = new R3[nv1Dsub];
+          int *newindex = new int[nv1Dsub];
+            
+        for (int iv = 0; iv < nv1Dsub; iv++) {
+          double alpha = vertex1Dsub[iv].x;
+          vertexedgesub[iv].x = alpha * ThS->vertices[ivv[0]].x + (1.-alpha) * ThS->vertices[ivv[1]].x;
+          vertexedgesub[iv].y = alpha * ThS->vertices[ivv[0]].y + (1.-alpha) * ThS->vertices[ivv[1]].y;
+          vertexedgesub[iv].z = alpha * ThS->vertices[ivv[0]].z + (1.-alpha) * ThS->vertices[ivv[1]].z;
+        }
+     
+        for (int iv = 0; iv < nv1Dsub; iv++) {
+          const Vertex3 &vi(vertexedgesub[iv]);
+          Vertex3 *pvi = gtreeS->ToClose(vi, hseuilS);
+          assert(pvi);
+          newindex[iv] = pvi - v;
+        }
+        for (int ii = 0; ii < nedge1Dsub; ii++) {
+          int ivb[2];
+                
+          for (int jjj = 0; jjj < 2; jjj++) {
+            ivb[jjj] = newindex[edge1Dsub[2 * ii + jjj]];
+            assert(edge1Dsub[2 * ii + jjj] < nvsub);
+            if (verbosity > 199) {cout << "        " << ivb[jjj] << " np:" << np << endl;}
+                    
+            assert(ivb[jjj] < nbv_surf);
+          }
+          Tht->meshS->borderelements[ie].set(Tht->meshS->vertices, ivb, K.lab);
+          ie++;
+          assert(ie <= nbeS);
+        }
+        delete [] vertexedgesub;
+        delete [] newindex;
+      }
+        
+        
+      // Tht->meshS->set(nbv_surf, nbe, nbeS);
+      // complete the building of the new meshS
+      int mes=0., mesb=0.;
+        
+      for (int i=0;i<nbe;i++)
+        mes += Tht->meshS->elements[i].mesure();
+      for (int i=0;i<nbeS;i++)
+        mesb += Tht->meshS->be(i).mesure();
+        
+      Tht->meshS->BuildBound();
+      if(nt > 0){
+        Tht->meshS->BuildAdj();
+        Tht->meshS->Buildbnormalv();
+        Tht->meshS->BuildjElementConteningVertex();
+      }
+      if(verbosity>1) cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
+        
+      assert(mes>=0.);
+      Tht->meshS->BuildGTree();
+      delete gtreeS;
+      delete [] vertex1Dsub;
+      delete [] edge1Dsub;
+   
+    }
+
     return Tht;
 }
 
@@ -7498,55 +7767,8 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
     
     Mesh3 *Tht = truncmesh(Th, kkksplit, split, false, label);
     Tht->getTypeMesh3()= Th.getTypeMesh3();
-    
-    // if surface mesh, call the trunc meshS function
-    
-    if (Th.getTypeMesh3()!=1) {
-        
-        KN<int> splitS(ThS.nt);
-        splitS = kkksplit;
-        MeshPoint *mpS = MeshPointStack(stack), mpsS = *mpS;
-        int kkS=0;
-        long ksS = kkksplit * kkksplit;
-        
-        for (int k = 0; k < ThS.nt; k++) {
-            const TriangleS &K(ThS.elements[k]);
-            R2 B(1. / 3., 1. / 3.);
-            mpS->set(ThS, K(B), B, K, 0);
-            if (GetAny<bool>((*bbb)(stack))) {kkS++;} else {splitS[k] = 0;}
-        }
-        if (verbosity > 1)
-            cout << "  -- Trunc mesh: Nb of Surface Trianles = " << kkS << " label=" << label << endl;
-        
-        if (pn2o) {
-            pn2o->resize(kkS * ksS);
-            KN<long> &n2o(*pn2o);
-            int l = 0;
-            
-            for (int k = 0; k < ThS.nt; ++k)
-                if (splitS[k])
-                    for (int i = 0; i < ksS; ++i)
-                        n2o[l++] = k;
-        }
-        
-        if (po2n) {
-            po2n->resize(ThS.nt);
-            KN<long> &o2n(*po2n);
-            int l = 0;
-            
-            for (int k = 0; k < Th.nt; ++k)
-                if (splitS[k]) {
-                    o2n[k] = l;
-                    l += ksS;
-                }
-                else o2n[k] = -1;
-        }
-        
-        *mpS = mpsS;
-        Tht->meshS = truncmesh(ThS, kkksplit, splitS, false, label);
-    }
-    
-    
+  
+
     if (pn2o) {
         pn2o->resize(kk * ks);
         KN<long> &n2o(*pn2o);
@@ -7578,7 +7800,7 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
     if (renum && Tht->getTypeMesh3()!=1) {Renumb(Tht->meshS);}
     
     Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
- 
+    
     *mp = mps;
     return Tht;
 };
