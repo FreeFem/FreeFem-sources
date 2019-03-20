@@ -185,7 +185,6 @@ public:
     {
        
         int myid = 0;
-        MPI_Comm_rank(MPI_COMM_WORLD, &myid);
         
         id.irn=0;
         id.jcn=0;
