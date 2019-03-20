@@ -1,6 +1,7 @@
 macro(ff_configure_thirdparty)
 
   include(ff_find_package)
+  include(ff_install_package)
 
 
   ff_find_package(ARPACK REQUIRED)

@@ -26,7 +26,6 @@ ff_write_config_file()
 # DOWNLOAD
 ##########
 
-include(FFInstallPackage)
 
 
 # creation of "make test" command
