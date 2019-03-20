@@ -40,7 +40,7 @@ ADD_LIBRARY(libff ${LIBFF_SRC})
 ADD_LIBRARY(strversionnumber STATIC strversionnumber.cpp)
 TARGET_COMPILE_DEFINITIONS(strversionnumber PRIVATE VersionFreeFempp=${FREEFEM_VERSION})
 
-target_link_options(libff PUBLIC ${OPENMP_C_FLAGS} ${OPENMP_CXX_FLAGS})
+#target_link_options(libff PUBLIC ${OPENMP_C_FLAGS} ${OPENMP_CXX_FLAGS})
 
 
 IF(FREEFEM_SUITESPARSE_INSTALLED AND FREEFEM_CHOLMOD_INSTALLED)
