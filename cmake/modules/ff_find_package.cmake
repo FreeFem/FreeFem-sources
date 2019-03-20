@@ -1,6 +1,6 @@
 function(ff_find_package PACKAGE)
 
-  find_package(${PACKAGE})
+  find_package(${PACKAGE} ${ARGN})
 
   if(${PACKAGE}_FOUND)
   
