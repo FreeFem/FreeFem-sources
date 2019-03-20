@@ -68,8 +68,10 @@ case "$uu" in
   WIN32="win32-"
   wff=`which FreeFem++.exe`
   dff=`dirname "$wff"`
-  if [ "$bin" = "." -a  -f ../src/bin-win32/libff.dll  ]; then
-    bin=../src/bin-win32
+  if [ "$bin" = "." -a  -f ../../src/bin-win32/libff.dll  ]; then
+    bin=../../src/bin-win32
+  elif [ "$bin" = "." -a  -f ../src/bin-win32/libff.dll  ]; then
+      bin=../src/bin-win32
   elif [  -f "$dff/libff.dll"  ]; then
 #  modif for install on cygwin
     bin="$dff"
@@ -77,6 +79,8 @@ case "$uu" in
     bin=..
   elif [ "$bin" = "." -a  -f ../../libff.dll  ]; then
     bin=../..
+  elif [ "$bin" = "." -a  -f ../../../libff.dll  ]; then
+    bin=../../..
   fi;;
 esac
 autodep=""
