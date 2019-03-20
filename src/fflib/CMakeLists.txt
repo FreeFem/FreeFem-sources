@@ -58,7 +58,7 @@ else()
 endif()
 
   if(MINGW)
-    TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber ${LAPACK_LIBRARIES} FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
+    TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber OpenMP::OpenMP_C ${LAPACK_LIBRARIES} FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
   else()
     TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
   endif(MINGW)

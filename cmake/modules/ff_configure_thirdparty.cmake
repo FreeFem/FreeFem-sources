@@ -16,6 +16,8 @@ macro(ff_configure_thirdparty)
   find_package(MPI)
   find_package(Threads)
   find_package(UMFPACK)
+  find_package(OpenMP)
+
 
   if(WITH_PETSC)
     include(FFInstallPackage)
