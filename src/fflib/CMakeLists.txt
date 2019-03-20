@@ -40,6 +40,7 @@ ADD_LIBRARY(libff ${LIBFF_SRC})
 ADD_LIBRARY(strversionnumber STATIC strversionnumber.cpp)
 TARGET_COMPILE_DEFINITIONS(strversionnumber PRIVATE VersionFreeFempp=${FREEFEM_VERSION})
 
+target_link_options(libff PUBLIC ${OPENMP_C_FLAGS} ${OPENMP_CXX_FLAGS})
 
 
 IF(FREEFEM_SUITESPARSE_INSTALLED AND FREEFEM_CHOLMOD_INSTALLED)
@@ -58,7 +59,7 @@ else()
 endif()
 
   if(MINGW)
-    TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber OpenMP::OpenMP_C ${LAPACK_LIBRARIES} FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
+    TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber OpenMP::OpenMP_CXX OpenMP::OpenMP_C ${LAPACK_LIBRARIES} FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
   else()
     TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::CHOLMOD FREEFEM::SUITESPARSE)
   endif(MINGW)
