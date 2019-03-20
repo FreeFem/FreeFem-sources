@@ -539,6 +539,7 @@ case $ff_uname in
 
 
 esac
+ff_PURE_WIN32=0
 case $ff_uname in
 CYGWIN*|MINGW*)
 	ff_fpic=no
@@ -624,6 +625,7 @@ CYGWIN*|MINGW*)
 		    ff_TEST_FFPP_MPI="../../src/bin-win32/FreeFem++-mpi.exe"
 
             AC_DEFINE(PURE_WIN32,1,A pure windows applications no cygwin dll)
+		ff_PURE_WIN32=1
 		ff_dynload=yes
 	fi
 
@@ -1869,6 +1871,7 @@ AC_SUBST(RANLIN,$ff_RANLIB)
 # -------------------------------------
 
 # Not if we don't want shared libraries (non FH  modif FH juin 2005)
+if test "$ff_PURE_WIN32" -ne 1 ; then 
 ff_dynload=no
 if test "$enable_static" != yes
 then
@@ -1904,11 +1907,14 @@ int main(int argc,char **argv){
 	ff_dynload=no)
 	AC_MSG_RESULT($ff_dynload)
 fi
-
-#  the -rdynamic don't exist on macos and sunOS
 if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
+fi
+fi  # endif ff_PURE_WIN32 != 1 
+#  the -rdynamic don't exist on macos and sunOS
+if test "$ff_dynload" = yes
+then
 	# Activate dynamic loading tests (see plugin/seq/Makefile.am)
 	AC_SUBST(LOAD_TESTS,../regtests.sh)
 	AC_SUBST(LOAD_COMPILE,load_compile)
