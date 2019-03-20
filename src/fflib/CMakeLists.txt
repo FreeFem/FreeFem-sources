@@ -67,12 +67,12 @@ endif()
     message(STATUS "OpenMP_CXX_LIB_NAMES = ${OpenMP_CXX_LIB_NAMES}")
 
     foreach(WRONG_FILENAME ${OpenMP_C_LIBRARIES})
-      string(REPLACE "C:/msys64" ""  RIGHT_FILENAME ${FILENAME})
+      string(REPLACE "C:/msys64" ""  RIGHT_FILENAME ${WRONG_FILENAME})
       list(APPEND FF_OpenMP_C_LIBRARIES ${RIGHT_FILENAME})
     endforeach(WRONG_FILENAME ${OpenMP_C_LIBRARIES})
 
     foreach(WRONG_FILENAME ${OpenMP_CXX_LIBRARIES})
-      string(REPLACE "C:/msys64" ""  RIGHT_FILENAME ${FILENAME})
+      string(REPLACE "C:/msys64" ""  RIGHT_FILENAME ${WRONG_FILENAME})
       list(APPEND FF_OpenMP_CXX_LIBRARIES ${RIGHT_FILENAME})
     endforeach(WRONG_FILENAME ${OpenMP_CXX_LIBRARIES})
 
