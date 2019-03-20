@@ -3,27 +3,62 @@ macro(ff_configure_thirdparty)
   include(ff_find_package)
   include(ff_install_package)
 
+  # Required packages
 
-  ff_find_package(ARPACK REQUIRED)
-  find_package(DLOPEN REQUIRED)
-  find_package(FLEX REQUIRED)
-  find_package(OpenGL)
-  find_package(GLUT)
-  find_package(GSL REQUIRED)
-  find_package(HDF5 REQUIRED)
+  set(FF_THIRDPARTY_REQUIRED ARPACK
+                             DLOPEN
+                             FLEX
+                             OpenGL
+                             GLUT
+                             GSL
+                             HDF5)
+
+  foreach(PACKAGE ${FF_THIRDPARTY_REQUIRED})
+    ff_find_package(${PACKAGE} REQUIRED)
+    if(NOT FF_${PACKAGE}_FOUND)
+      message(SEND_ERROR "Required package ${PACKAGE} is missing")
+    endif(NOT FF_${PACKAGE}_FOUND)
+  endforeach(PACKAGE ${FF_THIRDPARTY_REQUIRED})
   
-  find_package(CBLAS)
-  find_package(LAPACK)
-  find_package(MPI)
-  find_package(Threads)
-  find_package(UMFPACK)
-  find_package(OpenMP)
+
+  # Optional packages
+
+  set(FF_THIRDPARTY_OPTIONAL CBLAS
+                             CHOLMOD
+                             FFTW
+                             IPOPT
+                             LAPACK
+                             METIS
+                             MPI
+                             MUMPS
+                             NLOPT
+                             OpenMP
+                             SCOTCH
+                             SUPERLU
+                             TETGEN
+                             UMFPACK
+                             Threads)
+
+  foreach(PACKAGE ${FF_THIRDPARTY_OPTIONAL})
+    ff_find_package(${PACKAGE} REQUIRED)
+  endforeach(PACKAGE ${FF_THIRDPARTY_OPTIONAL})
+
+  
 
 
   if(WITH_PETSC)
     include(FFInstallPackage)
     FF_INSTALL_PACKAGE(PETSC)
   endif(WITH_PETSC)
+
+  foreach(PACKAGE ${FF_THIRDPARTY})
+    ff_find_package(${PACKAGE})
+    if(NOT FF_${PACKAGE}_FOUND)
+      list(APPEND FF_THIRDPARTY_MISSING ${PACKAGE})
+    endif(NOT FF_${PACKAGE}_FOUND)
+  endforeach(PACKAGE ${FF_THIRDPARTY})
+
+  message(STATUS "The following packages are missing: ${FF_THIRDPARTY_MISSING}")
 
 
   list(APPEND MODULE_LIST CHOLMOD
@@ -46,7 +81,7 @@ macro(ff_configure_thirdparty)
 
 
   foreach(MODULE ${MODULE_LIST})
-    ff_find_package(${MODULE})
+#    ff_find_package(${MODULE})
     if(NOT FREEFEM_${MODULE}_INSTALLED)
       list(APPEND DOWNLOAD_LIST ${MODULE})
     endif(NOT FREEFEM_${MODULE}_INSTALLED)
