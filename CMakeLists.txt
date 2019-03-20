@@ -11,6 +11,9 @@ include(ff_configure_compilers)
 include(ff_configure_thirdparty)
 include(ff_write_config_file)
 
+if(NOT ENABLE_DOWNLOAD)
+  set(ENABLE_DOWNLOAD False)
+endif(NOT ENABLE_DOWNLOAD)
 
 ff_configure_cmake()
 ff_configure_compilers()
@@ -25,9 +28,6 @@ ff_write_config_file()
 
 include(FFInstallPackage)
 
-if(NOT ENABLE_DOWNLOAD)
-  set(ENABLE_DOWNLOAD False)
-endif(NOT ENABLE_DOWNLOAD)
 
 # creation of "make test" command
 # Note: this call MUST be performed in the main CMake script

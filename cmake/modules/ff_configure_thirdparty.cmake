@@ -33,9 +33,15 @@ macro(ff_configure_thirdparty)
                           MUMPS
                           NLOPT
                           SCOTCH
-                          SUITESPARSE
                           SUPERLU
                           TETGEN)
+
+  # SuiteSparse is systematically downloaded on Windows
+  # because the associated pacman package
+  # is not compiled in the expected way
+  if(NOT MINGW)
+    list(APPEND MODULE_LIST SUITESPARSE)
+  endif(NOT MINGW)
 
 
   foreach(MODULE ${MODULE_LIST})
@@ -45,9 +51,9 @@ macro(ff_configure_thirdparty)
     endif(NOT FREEFEM_${MODULE}_INSTALLED)
   endforeach(MODULE)
 
-#  if(ENABLE_DOWNLOAD)
-#    message(STATUS "The following modules will be downloaded: ${DOWNLOAD_LIST}")
-#  endif(ENABLE_DOWNLOAD)
+  if(ENABLE_DOWNLOAD)
+    message(STATUS "The following modules will be downloaded: ${DOWNLOAD_LIST}")
+  endif(ENABLE_DOWNLOAD)
 
 
 endmacro(ff_configure_thirdparty)
