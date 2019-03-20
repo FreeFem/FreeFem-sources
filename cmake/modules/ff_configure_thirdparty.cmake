@@ -7,7 +7,7 @@ macro(ff_configure_thirdparty)
   find_package(DLOPEN REQUIRED)
   find_package(FLEX REQUIRED)
   find_package(OpenGL)
-  find_package(GLUT REQUIRED)
+  find_package(GLUT REQUIRED PATHS /mingw64/lib)
   find_package(GSL REQUIRED)
   find_package(HDF5 REQUIRED)
   
