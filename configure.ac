@@ -136,8 +136,8 @@ m4_define([TOOL_DISABLE],
     then
         AC_SUBST([TOOL_COMPILE_$1],"")
         AC_SUBST([TOOL_DYLIB_$1],"")
-		ff_uncompile_plugin="$2 $ff_uncompile_plugin"
-		ff_unlib_plugin="$1 $ff_uncompile_plugin"
+		ff_uncompile_plugin+=" "$2
+		ff_unlib_plugin+=" $1"
     elif  test   "$ff_$1_ok" = "yes" ; then
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
@@ -2185,6 +2185,9 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
 
  echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+test "$enable_download" != "yes" -a "$enable_hpddm" != yes && enable_hpddm=no
+test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
+
 test "$enable_download" = yes  -a "$enable_hpddm" != no && enable_hpddm=yes
 test "$enable_download" = yes -a "$enable_htool" != no && enable_htool=yes
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
@@ -2256,6 +2259,7 @@ AC_MSG_NOTICE([	--  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([	--  with MPI             $ff_mpi])
 AC_MSG_NOTICE([		--  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
 AC_MSG_NOTICE([		--  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
+AC_MSG_NOTICE([		--  with htool  $enable_htool (need MPI & c++11 :  $ff_cxx11 ) ]);
 AC_MSG_NOTICE([	--  without libs  : $ff_unlib_plugin]);
 AC_MSG_NOTICE([	--  without plugin: $ff_uncompile_plugin]);
 
