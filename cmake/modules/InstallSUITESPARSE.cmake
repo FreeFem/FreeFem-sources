@@ -1,5 +1,6 @@
 SET(LIBNAME SUITESPARSE)
-SET(URL http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.4.4.tar.gz)
-SET(URL_MD5 e0af74476935c9ff6d971df8bb6b82fc)
+SET(URL http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-5.4.0.tar.gz)
+SET(URL_MD5 4a6d4e74fc44c503f52996ae95cad03a)
 
 SET(PATCH_COMMAND cp ${CMAKE_SOURCE_DIR}/cmake/modules/suitesparse/CMakeLists.txt <SOURCE_DIR>)
+SET(INSTALL_COMMAND cd .)
