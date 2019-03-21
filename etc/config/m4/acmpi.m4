@@ -121,6 +121,8 @@ esac
 	ff_MPI_LIBC="'$ff_msmpi_lib/msmpi.lib'"
 	ff_MPI_LIB="'$ff_msmpi_lib/msmpi.lib'"
 	ff_MPI_LIBFC="'$ff_msmpi_lib/msmpifec.lib' '$ff_msmpi_lib/msmpi.lib'"
+	ff_mpiexec_win="C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
+	test -z "$ff_mpiexec_win" && MPIRUN="$ff_mpiexec_win"
 	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
 	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
 	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"

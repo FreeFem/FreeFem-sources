@@ -163,23 +163,23 @@ typedef union YYSTYPE
 
  /* <<YYSTYPE_cexp>> [[file:../fflib/AFunction.hpp::CC_F0]] */
  CC_F0 cexp;
- 
+
  Routine   *routine;
 
  /* <<YYSTYPE_args>> [[file:~/ff/src/fflib/AFunction.hpp::AC_F0]] */
  AC_F0 args;
- 
+
  /* <<YYSTYPE_type>> refers to [[file:~/ff/src/fflib/AnyType.hpp::aType]] */
  aType type;
 
  /* <<YYSTYPE_cinst>> refers to [[file:~/ff/src/fflib/AFunction.hpp::CListOfInst]] */
  CListOfInst cinst;
- 
+
  Block * block;
 
  /* <<YYSTYPE_clist_id>> [[file:~/ff/src/fflib/AFunction.hpp::ListOfId]] */
  ListOfId *clist_id;
- 
+
 /* ListCatch * clist_Catchs;*/
 
  vectorOfInst * endb;
