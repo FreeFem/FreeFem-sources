@@ -2766,7 +2766,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
         amorse = new MatriceMorse<R>(n,m,k);
 	sym=false;
 	for(int i=0;i<k;++i)
-	    (*amorse)[make_pair<int,int>(lg[i],cl[i])]+=cc[i];
+	    (*amorse)[make_pair<int,int>((int)lg[i],(int)cl[i])]+=cc[i];
     }
     else
     {

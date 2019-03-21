@@ -529,8 +529,8 @@ HashMatrix<int,R>* BuildCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >
 template<class I>
 static   inline pair<I,I> ij_mat(bool trans,I ii00,I jj00,I i,I j) {
     // warning trans sub  matrix and not the block.
-    return trans ? make_pair<int,int>(j+ii00,i+jj00)
-    :  make_pair<int,int>(i+ii00,j+jj00) ; }
+    return trans ? make_pair<I,I>(j+ii00,i+jj00)
+    :  make_pair<I,I>(i+ii00,j+jj00) ; }
 
 
 
