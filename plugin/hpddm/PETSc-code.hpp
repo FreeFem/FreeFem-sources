@@ -218,7 +218,7 @@ AnyType changeOperator_Op<Type>::operator()(Stack stack) const {
             int* ja = nullptr;
             PetscScalar* c = nullptr;
             bool free = true;
-            if(!dM)
+            if(ptA->_cnum)
                 free = HPDDM::template Subdomain<PetscScalar>::distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, ptA->_num + dN->_n);
             else
                 free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c);
@@ -1076,7 +1076,7 @@ class initCSRfromBlockMatrix : public E_F0 {
                 if(posX == -1 && posY == -1)
                     ExecError("Zero row and zero column");
                 else if(posX == -1 || posY == -1) {
-                    int x, X, y, Y;
+                    PetscInt x, X, y, Y;
                     if(posX != -1) {
                         MatGetSize(a[zeros[i] * M + posX], &X, &Y);
                         MatGetLocalSize(a[zeros[i] * M + posX], &x, &y);
