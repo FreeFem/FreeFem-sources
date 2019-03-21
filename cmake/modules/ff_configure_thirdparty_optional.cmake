@@ -11,7 +11,6 @@ macro(ff_configure_thirdparty_optional)
                              MPI
                              MUMPS
                              NLOPT
-                             OpenMP
                              SCOTCH
                              SUPERLU
                              TETGEN
