@@ -14,11 +14,6 @@ func Pk = P1;                       // finite element space
 
 int s = getARGV("-split", 1);                                   // refinement factor
 
-if(verbosity > 0 && mpirank == 0) {
-    cout << " --- " << mpirank << "/" << mpisize;
-    cout << " - diffusion-2d-PETSc.edp - input parameters: refinement factor = " << s << endl;
-}
-
 meshN Th = square(1, 1);
 fespace Wh(Th, Pk);                         // local finite element space
 int[int] arrayIntersection;                 // ranks of neighboring subdomains
@@ -35,7 +30,7 @@ matrix Loc = vPb(Wh, Wh, tgv = -2);
 Mat A(Loc, arrayIntersection, restrictionIntersection, D);
 Wh<real> def(u);    // local solution
 
-set(A, sparams = "-pc_type lu -ksp_type gmres -ksp_reuse_preconditioner");
+set(A, sparams = "-pc_type lu -ksp_type gmres");
 real[int] rhs = vPb(0, Wh, tgv = -2);
 real[int] rhsPETSc;
 changeNumbering(A, rhs, rhsPETSc);
