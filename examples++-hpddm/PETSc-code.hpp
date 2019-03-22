@@ -1934,17 +1934,20 @@ class NonlinearSolve : public OneOperator {
                     return ret;
                 }
         };
+        const int c;
         class E_NonlinearSolve : public E_F0mps {
             public:
                 Expression A;
                 Expression J;
                 Expression r;
+                Expression b;
                 Expression x;
                 const OneOperator *codeJ, *codeR;
-                static const int n_name_param = 1;
+                const int c;
+                static const int n_name_param = 3;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
-                E_NonlinearSolve(const basicAC_F0& args) : A(0), J(0), r(0), x(0), codeJ(0), codeR(0) {
+                E_NonlinearSolve(const basicAC_F0& args, int d) : A(0), J(0), r(0), x(0), codeJ(0), codeR(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     A = to<Type*>(args[0]);
                     const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[1].LeftValue());
@@ -1953,18 +1956,26 @@ class NonlinearSolve : public OneOperator {
                     op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
                     ffassert(op);
                     codeR = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
-                    x = to<KN<PetscScalar>*>(args[3]);
+                    if(c == 0)
+                        x = to<KN<PetscScalar>*>(args[3]);
+                    else {
+                        b = to<KN<PetscScalar>*>(args[3]);
+                        x = to<KN<PetscScalar>*>(args[4]);
+                    }
                 }
 
                 AnyType operator()(Stack stack) const;
                 operator aType() const { return atype<long>(); }
         };
-        E_F0* code(const basicAC_F0 & args) const { return new E_NonlinearSolve(args); }
-        NonlinearSolve() : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>()) { }
+        E_F0* code(const basicAC_F0 & args) const { return new E_NonlinearSolve(args, c); }
+        NonlinearSolve() : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>()), c(0) { }
+        NonlinearSolve(int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()), c(1) { }
 };
 template<class Type>
 basicAC_F0::name_and_type NonlinearSolve<Type>::E_NonlinearSolve::name_param[] = {
-    {"sparams", &typeid(std::string*)}
+    {"sparams", &typeid(std::string*)},
+    {"xl", &typeid(KN<PetscScalar>*)},
+    {"xu", &typeid(KN<PetscScalar>*)}
 };
 template<class Type>
 PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
@@ -2016,10 +2027,34 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
 
         SNES snes;
         SNESCreate(PETSC_COMM_WORLD, &snes);
-        Vec r, x;
+        Vec r, x, f;
         MatCreateVecs(ptA->_petsc, &r, NULL);
         SNESSetFunction(snes, r, FormFunction<NonlinearSolve<Type>>, &user);
         SNESSetJacobian(snes, ptA->_petsc, ptA->_petsc, FormJacobian<NonlinearSolve<Type>>, &user);
+        KN<PetscScalar>* fl = nargs[1] ? GetAny<KN<PetscScalar>*>((*nargs[1])(stack)) : nullptr;
+        bool setXl = (fl && fl->n == in->n);
+        KN<PetscScalar>* fu = nargs[2] ? GetAny<KN<PetscScalar>*>((*nargs[2])(stack)) : nullptr;
+        bool setXu = (fu && fu->n == in->n);
+        if(setXl || setXu) {
+            Vec xu, xl;
+            MatCreateVecs(ptA->_petsc, &xu, &xl);
+            PetscScalar* ptr;
+            if(setXl) {
+                VecGetArray(xl, &ptr);
+                std::copy_n(static_cast<PetscScalar*>(*fl), in->n, ptr);
+                VecRestoreArray(xl, &ptr);
+            }
+            else
+                VecSet(xl, PETSC_NINFINITY);
+            if(setXu) {
+                VecGetArray(xu, &ptr);
+                std::copy_n(static_cast<PetscScalar*>(*fu), in->n, ptr);
+                VecRestoreArray(xu, &ptr);
+            }
+            else
+                VecSet(xu, PETSC_INFINITY);
+            SNESVISetVariableBounds(snes, xl, xu);
+        }
         std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
         insertOptions(options);
         SNESSetFromOptions(snes);
@@ -2029,9 +2064,16 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
             PetscInt n;
             VecGetSize(r, &n);
             VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, in->n, n, static_cast<PetscScalar*>(*in), &x);
+            if(c == 1) {
+                KN<PetscScalar>* fb = GetAny<KN<PetscScalar>*>((*b)(stack));
+                ffassert(fb->n == ptA->_last - ptA->_first);
+                VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, fb->n, n, static_cast<PetscScalar*>(*fb), &f);
+            }
         }
-        SNESSolve(snes, NULL, x);
+        SNESSolve(snes, c == 1 ? f : NULL, x);
         VecDestroy(&x);
+        if(c == 1)
+            VecDestroy(&f);
         VecDestroy(&r);
         SNESDestroy(&snes);
 
@@ -2378,6 +2420,7 @@ static void Init_PETSc() {
     if(!std::is_same<PetscScalar, PetscReal>::value)
         Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolve<Dmat, 'H'>());
     Global.Add("SNESSolve", "(", new PETSc::NonlinearSolve<Dmat>());
+    Global.Add("SNESSolve", "(", new PETSc::NonlinearSolve<Dmat>(1));
     Global.Add("augmentation", "(", new PETSc::augmentation<Dmat>);
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dmat*, KN<long>*>(PETSc::globalNumbering<Dmat>));
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dbddc*, KN<long>*>(PETSc::globalNumbering<Dbddc>));
