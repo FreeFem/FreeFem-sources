@@ -176,7 +176,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                         PC pc;
                         KSPGetPC(ksp, &pc);
                         PCSetUp(pc);
-                        setCompositePC(ptA, pc);
+                        PETSc::setCompositePC(pc, ptA->_S);
                     }
                 }
             }

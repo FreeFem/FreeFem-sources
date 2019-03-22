@@ -239,23 +239,22 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         delete [] local;
     }
 }
-template<class Type>
-void setCompositePC(Type* A, PC pc) {
+void setCompositePC(PC pc, const std::vector<Mat>& S) {
     PetscInt nsplits;
     KSP* subksp;
     PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
-    if(A->_S.size() == 1)
-        KSPSetOperators(subksp[nsplits - 1], A->_S[0], A->_S[0]);
+    if(S.size() == 1)
+        KSPSetOperators(subksp[nsplits - 1], S[0], S[0]);
     else {
         PC pcS;
         KSPGetPC(subksp[nsplits - 1], &pcS);
-        for(int i = 0; i < A->_S.size(); ++i)
+        for(int i = 0; i < S.size(); ++i)
             PCCompositeAddPC(pcS, PCNONE);
         PCSetUp(pcS);
-        for(int i = 0; i < A->_S.size(); ++i) {
+        for(int i = 0; i < S.size(); ++i) {
             PC subpc;
             PCCompositeGetPC(pcS, i, &subpc);
-            PCSetOperators(subpc, A->_S[i], A->_S[i]);
+            PCSetOperators(subpc, S[i], S[i]);
             PCSetFromOptions(subpc);
         }
     }

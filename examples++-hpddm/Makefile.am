@@ -27,7 +27,7 @@ diffusion-3d-simple.edp	elasticity-3d-simple.edp \
 stokes-2d-PETSc.edp 	stokes-3d-PETSc.edp	stokes-3d.edp	stokes-2d.edp	diffusion-2d-substructuring.edp	elasticity-2d-substructuring.edp laplace-lagrange-PETSc.edp \
 laplace-2d-SLEPc.edp				laplace-complex-2d-SLEPc.edp	diffusion-2d-substructuring-withPartitioning.edp	iterative.edp \
 laplace-2d-spherical-harmonics-SLEPc.edp	schrodinger-1d-harmonic-oscillator-SLEPc.edp	schrodinger-2d-harmonic-oscillator-SLEPc.edp \
-laplace-2d-torus-SLEPc.edp			schrodinger-1d-square-well-SLEPc.edp  withPartitioning.edp transpose-solve-PETSc.edp
+laplace-2d-torus-SLEPc.edp			schrodinger-1d-square-well-SLEPc.edp  withPartitioning.edp transpose-solve-PETSc.edp elasticity-3d-SNES-PETSc.edp
 
 XFAIL_TESTS=$(TESTS)
 
