@@ -13,6 +13,7 @@ macro grad(u) [dx(u),dy(u)]//
 real kconv =0;
 func f = sin(2*pi*x)*sin(2*pi*y);
 varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
+real teps =1e-8;
 if(1)
 {
 	matrix L ;// to store in incomplet factorizatin. 
@@ -33,7 +34,7 @@ if(1)
 	real t1=clock();
 	ui[]= AI^-1*b;
 	real t2=clock();
-	cout << " ** GC/  ichol "<< t2-t1 << " GC/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
+	cout << " ** GC/  ichol "<< t2-t1 << " GC/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1+teps) << endl;
 	plot(u,wait=1);
 
 }
@@ -70,6 +71,6 @@ if(1)
 	real t1=clock();
 	ui[]= AI^-1*b;
 	real t2=clock();
-	cout << " ** GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1) << endl;
+	cout << " ** GMRES/  iLU "<< t2-t1 << " GMRES/diag  " << t1-t0 << " s "<< " ratio = "<<  (t1-t0 )/(t2-t1+teps) << endl;
 	//plot(u,wait=1);
 }
