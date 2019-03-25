@@ -129,6 +129,7 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
 		--prefix=$(DIR_INSTALL_REAL) \
 		--with-debugging=no \
+		--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
 		COPTFLAGS='-O3 -march=native -mtune=native' \
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \
@@ -151,6 +152,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
 		--prefix=''$(DIR_INSTALL_COMPLEX)'' \
 		--with-debugging=no \
+		--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \		
 		COPTFLAGS='-O3 -march=native -mtune=native' \
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \

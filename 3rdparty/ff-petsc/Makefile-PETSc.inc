@@ -1,5 +1,6 @@
 abs_top_builddir=@abs_top_builddir@
 CC=@CC@
+CXX=@CXX@
 # FC : Fortran 90 compiler
 FC=@FC@
 BLASLIBS = @BLASLIBS@
