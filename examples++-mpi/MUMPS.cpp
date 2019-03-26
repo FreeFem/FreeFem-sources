@@ -4,7 +4,7 @@
 // AUTHOR   : P. Jolivet 
 // E-MAIL   : Pierre Jolivet <pierre.jolivet@ljll.math.upmc.fr>
 //
-//ff-c++-LIBRARY-dep:  mumps parmetis ptscotch scotch  scalapack blas  mpifc  fc mpi  pthread 
+//ff-c++-LIBRARY-dep:  mumps parmetis [ptscotch scotch]  scalapack blas  mpifc  fc mpi  pthread 
 //ff-c++-cpp-dep: 
 
 /* 

@@ -56,7 +56,7 @@ install.done: $(SRCDIR)/FAIT
 	cp $(SRCDIR)/libseq/libmpiseqFREEFEM-SEQ.a ../lib/
 	touch $@
 
-$(SRCDIR)/FAIT:Makefile.inc
+$(SRCDIR)/FAIT:Makefile.inc $(SRCDIR)/tag-tar
 	cp Makefile.inc $(SRCDIR)
 #
 #	FFCS - 22/5/12 - Mumps has difficulties compiling d & z in parallel
@@ -65,7 +65,7 @@ $(SRCDIR)/FAIT:Makefile.inc
 	cd $(SRCDIR) && $(MAKE) z
 	touch $@
 
-Makefile.inc: ../../config.status Makefile Makefile-mumps-$(VERSION).inc $(SRCDIR)/tag-tar
+Makefile.inc: ../../config.status Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status  --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
 
 $(SRCDIR)/tag-tar:$(PACKAGE1)

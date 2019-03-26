@@ -36,9 +36,9 @@ class DistributedCSR {
         unsigned int                       _clast;
         DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); }
         ~DistributedCSR() {
-            MatType type;
-            PetscBool isType;
             if(_petsc) {
+                MatType type;
+                PetscBool isType;
                 MatGetType(_petsc, &type);
                 PetscStrcmp(type, MATNEST, &isType);
                 if(isType) {
@@ -61,11 +61,15 @@ class DistributedCSR {
                                         MatDestroy(&B);
                                     }
                                     else if(i == j) {
-                                        MatInfo info;
-                                        MatGetInfo(mat[i][j], MAT_GLOBAL_SUM, &info);
-                                        if(std::abs(info.nz_used) < 1.0e-12) {
-                                            Mat B = mat[i][j];
-                                            MatDestroy(&B);
+                                        PetscBool assembled;
+                                        MatAssembled(mat[i][j], &assembled);
+                                        if(assembled) {
+                                            MatInfo info;
+                                            MatGetInfo(mat[i][j], MAT_GLOBAL_SUM, &info);
+                                            if(std::abs(info.nz_used) < 1.0e-12) {
+                                                Mat B = mat[i][j];
+                                                MatDestroy(&B);
+                                            }
                                         }
                                     }
                                 }

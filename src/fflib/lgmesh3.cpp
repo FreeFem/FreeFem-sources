@@ -1475,7 +1475,7 @@ KN_<long> listoflabel(Stack s, Mesh const * const & pTh)
     long n = sl.size(),ii=0;
     long * p = Add2StackOfPtr2FreeA<long>(s,new long[n]); //   mark to be delete ..
     KN_<long> A(p,n);
-    for(auto  i=sl.begin();i!=sl.end();++i)
+    for(set<long>::const_iterator  i=sl.begin();i!=sl.end();++i)
         A[ii++]= *i;
     ffassert(ii== n);
   if(verbosity>99)   cout << " -- listoflabels "<< A << endl;
@@ -1492,7 +1492,7 @@ KN_<long> listofregion(Stack s, Mesh  const * const  & pTh)
     long n = sl.size(),ii=0;
     long * p = Add2StackOfPtr2FreeA<long>(s,new long[n]); //   mark to be delete ..
     KN_<long> A(p,n);
-    for(auto  i=sl.begin();i!=sl.end();++i)
+    for(set<long>::const_iterator  i=sl.begin();i!=sl.end();++i)
         A[ii++]= *i;
      if(verbosity>99)   cout << " -- listofregions "<< A << endl;
     return A;

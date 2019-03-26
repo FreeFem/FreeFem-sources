@@ -309,7 +309,7 @@ bool In(long *viso,int n,long v)
 
 
 class  LinkToInterpreter { public:
- Type_Expr   P,N,x,y,z,label,region,nu_triangle,nu_edge,lenEdge,hTriangle,area,inside,volume;
+ Type_Expr   P,N,x,y,z,label,region,nu_triangle,nu_face,nu_edge,lenEdge,hTriangle,area,inside,volume;
   LinkToInterpreter() ; 
 };
 
@@ -2907,6 +2907,7 @@ LinkToInterpreter::LinkToInterpreter()
    label=make_Type_Expr(new E_P_Stack_Label,atype<long*>());
    nu_triangle= make_Type_Expr(atype<long>(),new E_P_Stack_Nu_Triangle);
    nu_edge= make_Type_Expr(atype<long>(),new E_P_Stack_Nu_Edge);
+   nu_face= make_Type_Expr(atype<long>(),new E_P_Stack_Nu_Face);
    lenEdge    = make_Type_Expr(atype<R>(),new E_P_Stack_lenEdge);
    hTriangle  = make_Type_Expr(atype<R>(),new E_P_Stack_hTriangle);
    area       = make_Type_Expr(atype<R>(),new E_P_Stack_areaTriangle);
@@ -2921,6 +2922,7 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("nuTriangle",nu_triangle);   
   Global.New("nuTet",nu_triangle);
   Global.New("nuEdge",nu_edge);
+  Global.New("nuFace",nu_face);
   Global.New("P",P);   
   Global.New("N",N);   
   
