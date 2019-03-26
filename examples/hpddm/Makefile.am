@@ -39,10 +39,10 @@ TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.e
 	heat-2d.edp	heat-3d.edp \
 	helmholtz-2d.edp maxwell-3d.edp \
 	iterative.edp withPartitioning.edp \
-  elasticity-2d-substructuring.edp \
+	elasticity-2d-substructuring.edp \
 	diffusion-2d-substructuring-withPartitioning.edp \
-	elasticity-3d.edp elasticity-3d-simple.edp laplace-lagrange-PETSc.edp
-
+	elasticity-3d.edp elasticity-3d-simple.edp laplace-lagrange-PETSc.edp \
+	elasticity-3d-SNES-PETSc.edp vi-2d-PETSc.edp Newton-2d-PETSc.edp
 
 XFAIL_TESTS=$(TESTS)
 
