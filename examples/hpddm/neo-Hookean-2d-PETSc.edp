@@ -2,6 +2,8 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
+macro trueRestrict()true// EOM
+macro removeZeros()true// EOM
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 macro def(i)[i, i#B]// EOM          // vector field definition

@@ -1,0 +1,62 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+macro trueRestrict()true// EOM
+macro removeZeros()true// EOM
+macro dimension()2// EOM
+include "macro_ddm.idp"
+macro def(i)i// EOM
+macro init(i)i// EOM
+
+real c = 6.25;
+int N  = 80;
+
+// domain: unit square
+border aa(t=0,1) { x=t;   y=0;   };
+border bb(t=0,1) { x=1;   y=t;   };
+border cc(t=0,1) { x=1-t; y=1;   };
+border dd(t=0,1) { x=0;   y=1-t; };
+
+mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
+
+load "Element_P3"
+func Pk = P3;
+fespace Vh(M, Pk);
+int[int] arrayIntersection;
+int[int][int] restrictionIntersection(0);
+real[int] D;
+{
+    meshN ThGlobal = M;
+    int s = getARGV("-split", 1);
+    buildPETSc(M, ThGlobal, s, D, arrayIntersection, restrictionIntersection, Vh, Pk, mpiCommWorld)
+}
+Vh u;
+func BC = cos(pi*x)*cos(pi*y);
+varf vInit(w, v) = on(aa, bb, cc, dd, w = BC);
+varf vJ(w, v) = int2d(M)(dx(w)*dx(v) + dy(w)*dy(v) - c*exp(u)*w*v) + on(aa, bb, cc, dd, w = 0);
+varf vRes(w, v) = int2d(M)(dx(u)*dx(v) + dy(u)*dy(v) - c*exp(u)*v) + on(aa, bb, cc, dd, w = u);
+Mat A(Vh.ndof, arrayIntersection, restrictionIntersection, D);
+set(A, sparams = "-pc_type asm -sub_pc_type lu -ksp_converged_reason");
+matrix J;
+func real[int] funcRes(real[int]& inPETSc) {
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    real[int] out(Vh.ndof);
+    out = vRes(0, Vh, tgv = -2);
+    real[int] outPETSc;
+    changeNumbering(A, out, outPETSc);
+    return outPETSc;
+}
+func int funcJ(real[int]& inPETSc) {
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    J = vJ(Vh, Vh, tgv = -2);
+    changeOperator(A, J);
+    return 0;
+}
+real[int] bPETSc;
+u[] = vInit(0, Vh, tgv = -2);
+changeNumbering(A, u[], bPETSc);
+real[int] xPETSc = bPETSc;
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtontr -snes_converged_reason -snes_view");
+changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+plotMPI(M, u[], "Global solution", Pk, def, real, 3, 1)
