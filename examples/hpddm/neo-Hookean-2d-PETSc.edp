@@ -1,0 +1,347 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+macro def(i)[i, i#B]// EOM          // vector field definition
+macro init(i)[i, i]// EOM           // vector field initialization
+func Pk = [P1, P1];                 // finite element space
+
+//  Macros for the gradient of a vector field (u1, u2)
+macro grad11(u1, u2) (dx(u1)) //
+macro grad21(u1, u2) (dy(u1)) //
+macro grad12(u1, u2) (dx(u2)) //
+macro grad22(u1, u2) (dy(u2)) //
+
+//  Macros for the deformation gradient
+macro F11(u1, u2) (1.0 + grad11(u1,u2)) //
+macro F12(u1, u2) (0.0 + grad12(u1,u2)) //
+macro F21(u1, u2) (0.0 + grad21(u1,u2)) //
+macro F22(u1, u2) (1.0 + grad22(u1,u2)) //
+
+//  Macros for the incremental deformation gradient
+macro dF11(varu1, varu2) (grad11(varu1, varu2)) //
+macro dF12(varu1, varu2) (grad12(varu1, varu2)) //
+macro dF21(varu1, varu2) (grad21(varu1, varu2)) //
+macro dF22(varu1, varu2) (grad22(varu1, varu2)) //
+
+//  Macro for the determinant of the deformation gradient
+macro J(u1, u2) (
+F11(u1, u2)*F22(u1, u2) - F12(u1, u2)*F21(u1, u2)
+) //
+
+//  Macros for the inverse of the deformation gradient
+macro Finv11 (u1, u2) (
+F22(u1, u2) / J(u1, u2)
+) //
+macro Finv22 (u1, u2) (
+F11(u1, u2) / J(u1, u2)
+) //
+macro Finv12 (u1, u2) (
+-F12(u1, u2) / J(u1, u2)
+) //
+macro Finv21 (u1, u2) (
+-F21(u1, u2) / J(u1, u2)
+) //
+
+//  Macros for the square of the inverse of the deformation gradient
+macro FFinv11 (u1, u2) (
+Finv11(u1, u2)^2 + Finv12(u1, u2)*Finv21(u1, u2)
+) //
+
+macro FFinv12 (u1, u2) (
+Finv12(u1, u2)*(Finv11(u1, u2) + Finv22(u1, u2))
+) //
+
+macro FFinv21 (u1, u2) (
+Finv21(u1, u2)*(Finv11(u1, u2) + Finv22(u1, u2))
+) //
+
+macro FFinv22 (u1, u2) (
+Finv12(u1, u2)*Finv21(u1, u2) + Finv22(u1, u2)^2
+) //
+
+//  Macros for the inverse of the transpose of the deformation gradient
+macro FinvT11(u1, u2) (Finv11(u1, u2)) //
+macro FinvT12(u1, u2) (Finv21(u1, u2)) //
+macro FinvT21(u1, u2) (Finv12(u1, u2)) //
+macro FinvT22(u1, u2) (Finv22(u1, u2)) //
+
+macro B11(u1, u2)
+(
+F11(u1, u2)^2 + F12(u1, u2)^2
+)//
+
+macro B12(u1, u2)
+(
+F11(u1, u2)*F21(u1, u2) + F12(u1, u2)*F22(u1, u2)
+)//
+
+macro B21(u1, u2)
+(
+F11(u1, u2)*F21(u1, u2) + F12(u1, u2)*F22(u1, u2)
+)//
+
+macro B22(u1, u2)
+(
+F21(u1, u2)^2 + F22(u1, u2)^2
+)//
+
+macro d0Aux11 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * F11(u1, u2) + dF12(varu1, varu2) * F12(u1, u2)
+)//
+
+macro d0Aux12 (u1, u2, varu1, varu2) 
+(
+dF21(varu1, varu2) * F11(u1, u2) + dF22(varu1, varu2) * F12(u1, u2)
+)//
+
+macro d0Aux21 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * F21(u1, u2) + dF12(varu1, varu2) * F22(u1, u2)
+)//
+
+macro d0Aux22 (u1, u2, varu1, varu2) 
+(
+dF21(varu1, varu2) * F21(u1, u2) + dF22(varu1, varu2) * F22(u1, u2)
+)//
+
+////  The tensor quantity D1 = D0 + D0^T
+macro d1Aux11 (u1, u2, varu1, varu2) 
+(
+2.0 * d0Aux11 (u1, u2, varu1, varu2) 
+)//
+
+macro d1Aux12 (u1, u2, varu1, varu2) 
+(
+d0Aux12 (u1, u2, varu1, varu2) + d0Aux21 (u1, u2, varu1, varu2) 
+)//
+
+macro d1Aux21 (u1, u2, varu1, varu2) 
+(
+d1Aux12 (u1, u2, varu1, varu2) 
+)//
+
+macro d1Aux22 (u1, u2, varu1, varu2) 
+(
+2.0 * d0Aux22 (u1, u2, varu1, varu2) 
+)//
+
+////  The tensor quantity D2 = F^{-T}_{n} dF_{n+1}
+macro d2Aux11 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * FinvT11(u1, u2) + dF21(varu1, varu2) * FinvT12(u1, u2)
+)//
+
+macro d2Aux12 (u1, u2, varu1, varu2) 
+(
+dF12(varu1, varu2) * FinvT11(u1, u2) + dF22(varu1, varu2) * FinvT12(u1, u2)
+)//
+
+macro d2Aux21 (u1, u2, varu1, varu2) 
+(
+dF11(varu1, varu2) * FinvT21(u1, u2) + dF21(varu1, varu2) * FinvT22(u1, u2)
+)//
+
+macro d2Aux22 (u1, u2, varu1, varu2) 
+(
+dF12(varu1, varu2) * FinvT21(u1, u2) + dF22(varu1, varu2) * FinvT22(u1, u2)
+)//
+
+////  The tensor quantity D3 = F^{-2}_{n} dF_{n+1}
+macro d3Aux11 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF11(varu1, varu2) *FFinv11(u1, u2) *grad11(w1, w2) + dF21(varu1, varu2) *FFinv12(u1, u2)
+*grad11(w1, w2) 
++ dF11(varu1, varu2) *FFinv21(u1, u2) *grad12(w1, w2) + dF21(varu1, varu2) *FFinv22(u1, u2) *grad12(w1, w2)
+)//
+
+macro d3Aux12 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF12(varu1, varu2) *FFinv11(u1, u2) *grad11(w1, w2) + dF22(varu1, varu2) *FFinv12(u1, u2)
+*grad11(w1, w2) 
++ dF12(varu1, varu2) *FFinv21(u1, u2) *grad12(w1, w2) + dF22(varu1, varu2) *FFinv22(u1, u2) *grad12(w1, w2)
+)//
+
+macro d3Aux21 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF11(varu1, varu2) *FFinv11(u1, u2) *grad21(w1, w2) + dF21(varu1, varu2) *FFinv12(u1, u2)
+*grad21(w1, w2) 
++ dF11(varu1, varu2) *FFinv21(u1, u2) *grad22(w1, w2) + dF21(varu1, varu2) *FFinv22(u1, u2) *grad22(w1, w2)
+)//
+
+macro d3Aux22 (u1, u2, varu1, varu2, w1, w2) 
+(
+dF12(varu1, varu2) *FFinv11(u1, u2) *grad21(w1, w2) + dF22(varu1, varu2) *FFinv12(u1, u2)
+*grad21(w1, w2) 
++ dF12(varu1, varu2) *FFinv21(u1, u2) *grad22(w1, w2) + dF22(varu1, varu2) *FFinv22(u1, u2) *grad22(w1, w2)
+)//
+
+////  The tensor quantity D4 = (grad w) * Finv
+macro d4Aux11 (w1, w2, u1, u2) 
+(
+Finv11(u1, u2)*grad11(w1, w2) + Finv21(u1, u2)*grad12(w1, w2)
+)//
+
+macro d4Aux12 (w1, w2, u1, u2) 
+(
+Finv12(u1, u2)*grad11(w1, w2) + Finv22(u1, u2)*grad12(w1, w2)
+)//
+
+macro d4Aux21 (w1, w2, u1, u2) 
+(
+Finv11(u1, u2)*grad21(w1, w2) + Finv21(u1, u2)*grad22(w1, w2)
+)//
+
+macro d4Aux22 (w1, w2, u1, u2) 
+(
+Finv12(u1, u2)*grad21(w1, w2) + Finv22(u1, u2)*grad22(w1, w2)
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK11(u1, u2)
+(
+mu * (B11(u1, u2) - 1.0)
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK12(u1, u2)
+(
+mu * B12(u1, u2) 
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK21(u1, u2)
+(
+mu * B21(u1, u2) 
+)//
+
+//  The Kirchhoff stress tensor
+macro StressK22(u1, u2)
+(
+mu * (B22(u1, u2) - 1.0)
+)//
+
+//  The tangent Kirchhoff stress tensor
+macro TanK11(u1, u2, varu1, varu2)
+(
+mu * d1Aux11(u1, u2, varu1, varu2) 
+)//
+
+macro TanK12(u1, u2, varu1, varu2)
+(
+mu * d1Aux12(u1, u2, varu1, varu2) 
+)//
+
+macro TanK21(u1, u2, varu1, varu2)
+(
+mu * d1Aux21(u1, u2, varu1, varu2) 
+)//
+
+macro TanK22(u1, u2, varu1, varu2)
+(
+mu * d1Aux22(u1, u2, varu1, varu2) 
+)//
+
+//  Elastic coefficients
+real mu = 5.e2; //  kg/cm^2
+
+//  Stress loads
+real Pa = -3.e2;
+
+//  The wound radius
+real InnerRadius = 1.e0;
+
+//  The outer (truncated) radius
+real OuterRadius = 4.e0;
+
+//  Extension of the inner ellipse ((major axis) - (minor axis))
+real InnerEllipseExtension = 1.e0;
+
+int m = 40, n = 20;
+
+border InnerEdge(t = 0, 2.0*pi) {x = (1.0 + InnerEllipseExtension) * InnerRadius * cos(t); y = InnerRadius * sin(t); label = 1;}
+
+border OuterEdge(t = 0, 2.0*pi) {x = (1.0 + 0.0 * InnerEllipseExtension) * OuterRadius * cos(t); y = OuterRadius * sin(t); label = 2;}
+
+mesh Th = buildmesh(InnerEdge(-m) + OuterEdge(n));
+
+plot(Th);
+fespace Vh(Th, Pk);
+Vh [u1n,u2n];
+
+varf neoHookeanInc ([varu1, varu2], [w1, w2]) =
+int2d(Th, qforder=1)
+( // BILINEAR part
+-(
+  StressK11 (u1n, u2n) * d3Aux11(u1n, u2n, varu1, varu2, w1, w2) 
++ StressK12 (u1n, u2n) * d3Aux12(u1n, u2n, varu1, varu2, w1, w2) 
++ StressK21 (u1n, u2n) * d3Aux21(u1n, u2n, varu1, varu2, w1, w2) 
++ StressK22 (u1n, u2n) * d3Aux22(u1n, u2n, varu1, varu2, w1, w2) 
+)
++ TanK11 (u1n, u2n, varu1, varu2) * d4Aux11(w1, w2, u1n, u2n) 
++ TanK12 (u1n, u2n, varu1, varu2) * d4Aux12(w1, w2, u1n, u2n)
++ TanK21 (u1n, u2n, varu1, varu2) * d4Aux21(w1, w2, u1n, u2n) 
++ TanK22 (u1n, u2n, varu1, varu2) * d4Aux22(w1, w2, u1n, u2n) 
+)
++
+ int2d(Th, qforder=1)
+( // LINEAR part
+  StressK11 (u1n, u2n) * d4Aux11(w1, w2, u1n, u2n) 
++ StressK12 (u1n, u2n) * d4Aux12(w1, w2, u1n, u2n) 
++ StressK21 (u1n, u2n) * d4Aux21(w1, w2, u1n, u2n) 
++ StressK22 (u1n, u2n) * d4Aux22(w1, w2, u1n, u2n) 
+)
+
+//  Choose one of the following two boundary conditions involving Pa:
+
+// Load vectors normal to the boundary:
+ - int1d(Th,1)( Pa * (w1*N.x + w2*N.y) ) 
+
+//  Load vectors tangential to the boundary:
+// - int1d(Th,1)( Pa * (w1*N.y - w2*N.x) ) 
+
+   + on(2, varu1 = 0, varu2 = 0);
+
+int[int] arrayIntersection;                 // ranks of neighboring subdomains
+int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
+real[int] D;                                // partition of unity
+{
+    meshN ThGlobal = Th;
+    int s = getARGV("-split", 1);
+    buildPETSc(Th, ThGlobal, s, D, arrayIntersection, restrictionIntersection, Vh, Pk, mpiCommWorld)
+}
+
+Mat A(Vh.ndof, arrayIntersection, restrictionIntersection, D, bs = 2);
+Vh<real> def(Rb)[3];
+[Rb[0], RbB[0]] = [1, 0];
+[Rb[1], RbB[1]] = [0, 1];
+[Rb[2], RbB[2]] = [y, -x];
+set(A, sparams = "-ksp_converged_reason -pc_type gamg", nearnullspace = Rb);
+matrix Loc;
+func real[int] funcRes(real[int]& inPETSc) {
+    changeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
+    real[int] out(Vh.ndof);
+    out = neoHookeanInc(0, Vh, tgv = -2);
+    real[int] outPETSc;
+    changeNumbering(A, out, outPETSc);
+    return outPETSc;
+}
+func int funcJ(real[int]& inPETSc) {
+    changeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
+    Loc = neoHookeanInc(Vh, Vh, tgv = -2);
+    changeOperator(A, Loc);
+    return 0;
+}
+real[int] xPETSc;
+[u1n, u2n] = [0.0, 0.0];
+changeNumbering(A, u1n[], xPETSc);
+SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtonls -snes_converged_reason -snes_view -snes_rtol 1e-4");
+changeNumbering(A, u1n[], xPETSc, inverse = true, exchange = true);
+plotMPI(Th, u1n[], "Global solution", Pk, def, real, 2, 1)
+real alpha = 1.0;
+meshN ThMoved = movemesh(Th, [x + alpha * u1n, y + alpha * u2n]);
+u1n[] = mpirank;
+plotMPI(ThMoved, u1n[], "Global moved solution", Pk, def, real, 2, 1)
