@@ -178,7 +178,7 @@ string ssparams =            // Parameters for the distributed EigenValue solver
   " -eps_gen_hermitian"      // The problem is symmetric
   ;
 
-int k = deigensolver
+int k = EPSSolve
 (DistA,              // matrix OP = A − sigma*B
  DistB,              //
  vectors = EigenVEC, // Array to store the FEM-EigenFunctions

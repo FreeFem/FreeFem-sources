@@ -311,8 +311,8 @@ void finalizeSLEPc() {
 }
 template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
 void addSLEPc() {
-    Global.Add("deigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, double>());
-    Global.Add("deigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, double>(1));
+    Global.Add("EPSSolveComplex", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
+    Global.Add("EPSSolveComplex", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>(1));
 }
 template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
 void addSLEPc() { }
@@ -345,8 +345,8 @@ static void Init() {
         delete [] argv;
         ff_atend(SLEPc::finalizeSLEPc);
         SLEPc::addSLEPc<PetscScalar>();
-        Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>());
-        Global.Add("zeigensolver", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, std::complex<double>>(1));
+        Global.Add("EPSSolve", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar>());
+        Global.Add("EPSSolve", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar>(1));
         if(verbosity>1)cout << "*** End:: load PETSc & SELPc "<< typeid(PetscScalar).name() <<"\n\n"<<endl;
         zzzfff->Add(mmmm, atype<Dmat*>());
     }
