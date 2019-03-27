@@ -31,8 +31,7 @@ int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
-    meshN ThGlobal = Th;    // global mesh
-    buildPeriodic(Th, ThBorder, ThGlobal, 10, s, 1, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false, labPeriodic)
+    buildPeriodic(Th, ThBorder, 10, s, 1, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, false, labPeriodic)
 }
 
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);

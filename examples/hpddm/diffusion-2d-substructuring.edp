@@ -32,8 +32,8 @@ int[int] interfaceNb;                       //
 int[int] labDirichlet = [1, 3];
 {
     int[int] l = [2, 1, 3, 2];
-    meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    buildSubstructuring(Th, interfaceNb, ThGlobal, 10, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, Pk, BC, comm, excluded)
+    Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
+    buildSubstructuring(Th, interfaceNb, 10, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Pk, BC, comm, excluded)
 }
 
 func f = 10;

@@ -24,8 +24,9 @@ int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
-    meshN ThBorder, ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);    // global mesh
-    build(Th, ThBorder, ThGlobal, 10, s, 1, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false)
+    meshN ThBorder;
+    Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);    // global mesh
+    build(Th, ThBorder, 10, s, 1, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, false)
 }
 
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);

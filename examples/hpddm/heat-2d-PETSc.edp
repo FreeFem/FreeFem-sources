@@ -27,8 +27,9 @@ int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
-    meshN ThBorder, ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    build(Th, ThBorder, ThGlobal, 10, s, 1, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false)
+    meshN ThBorder;
+    Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
+    build(Th, ThBorder, 10, s, 1, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, false)
 }
 
 real[int] rhs(Wh.ndof);                     // local right-hand side
