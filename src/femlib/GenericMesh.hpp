@@ -1036,8 +1036,8 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
     int nk=0;
     int err=0;
     int sens;
-      ffassert(0); // a verifier ???? F HECHT mars2019 firstVertex and secondVertex
-    cout << "nea/nva" << B::nea << " "  << B::nva << endl;
+    //  ffassert(0); // a verifier ???? F HECHT mars2019 firstVertex and secondVertex
+      if(verbosity>4) cout << "BuildBoundaryElementAdj: nea/nva " << B::nea << " "  << B::nva << endl;
     for (int k=0;k<nbe_surf;++k)
       for (int i=0;i<B::nea;++i)
 	{
