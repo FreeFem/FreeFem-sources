@@ -29,14 +29,18 @@ function(ff_find_package PACKAGE)
 
     # Return unified names
 
+    message(STATUS "LIBRARIES of ${PACKAGE}$ = ${LIBRARIES}")
+
     set(FF_${PACKAGE}_FOUND TRUE PARENT_SCOPE)
     set(FF_${PACKAGE}_INCLUDE_PATHS ${INCLUDE_PATHS} PARENT_SCOPE)
     set(FF_${PACKAGE}_LIBRARIES ${LIBRARIES} PARENT_SCOPE)
 
-
-    #add_library(FREEFEM::${PACKAGE} UNKNOWN IMPORTED)
-    #set_target_properties(FREEFEM::${PACKAGE} PROPERTIES IMPORTED_LOCATION ${LIBRARIES})
-    #set_target_properties(FREEFEM::${PACKAGE} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${INCLUDE_PATHS}")
+    message(STATUS "ok pour ${PACKAGE}")
+    add_library(FREEFEM::${PACKAGE} UNKNOWN IMPORTED)
+    foreach(LIB ${LIBRARIES})
+      set_target_properties(FREEFEM::${PACKAGE} PROPERTIES IMPORTED_LOCATION ${LIB})
+    endforeach()
+    set_target_properties(FREEFEM::${PACKAGE} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${INCLUDE_PATHS}")
 
 
 

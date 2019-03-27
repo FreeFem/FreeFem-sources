@@ -4,6 +4,7 @@ project(FreeFem++ C CXX)
 
 set(FREEFEM_VERSION 4.0)
 
+#cmake_policy(SET CMP0060 NEW) 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 include(ff_configure_cmake)
