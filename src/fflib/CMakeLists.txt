@@ -57,6 +57,10 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
   endif()
 
   if(MINGW)
+    message(STATUS "BLAS_LIBRARIES = ${BLAS_LIBRARIES}")
+    message(STATUS "FF_BLAS_LIBRARIES = ${FF_BLAS_LIBRARIES}")
+    message(STATUS "LAPACK_LIBRARIES = ${LAPACK_LIBRARIES}")
+    message(STATUS "FF_LAPACK_LIBRARIES = ${FF_LAPACK_LIBRARIES}")
     TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::CHOLMOD 
                                                                   FREEFEM::SUITESPARSE 
                                                                   FREEFEM::AMD 
@@ -65,7 +69,7 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
                                                                   FREEFEM::COLAMD 
                                                                   FREEFEM::METIS
                                                                   FREEFEM::SUITESPARSECONFIG 
-                                                                  FREEFEM::OPENBLAS)
+                                                                  ${BLAS_LIBRARIES})
   else()
     TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::SUITESPARSE FREEFEM::CHOLMOD)
   endif(MINGW)

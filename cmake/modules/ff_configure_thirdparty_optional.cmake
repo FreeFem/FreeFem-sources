@@ -10,6 +10,7 @@ macro(ff_configure_thirdparty_optional)
                              MPI
                              MUMPS
                              NLOPT
+                             OPENBLAS
                              SCOTCH
                              SUPERLU
                              TETGEN
