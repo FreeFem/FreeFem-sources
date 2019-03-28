@@ -57,7 +57,15 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
   endif()
 
   if(MINGW)
-    TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::CHOLMOD FREEFEM::SUITESPARSE FREEFEM::AMD FREEFEM::COLAMD FREEFEM::SUITESPARSECONFIG ${LAPACK_LIBRARIES})
+    TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::CHOLMOD 
+                                                                  FREEFEM::SUITESPARSE 
+                                                                  FREEFEM::AMD 
+                                                                  FREEFEM::CAMD
+                                                                  FREEFEM::CCOLAMD
+                                                                  FREEFEM::COLAMD 
+                                                                  FREEFEM::METIS
+                                                                  FREEFEM::SUITESPARSECONFIG 
+                                                                  ${LAPACK_LIBRARIES})
   else()
     TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::SUITESPARSE FREEFEM::CHOLMOD)
   endif(MINGW)

@@ -4,6 +4,8 @@
 
   set(FF_THIRDPARTY_REQUIRED AMD
                              ARPACK
+                             CAMD
+                             CCOLAMD
                              CHOLMOD
                              COLAMD
                              DLOPEN
