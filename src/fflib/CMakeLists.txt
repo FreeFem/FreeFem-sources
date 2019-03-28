@@ -65,7 +65,7 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
                                                                   FREEFEM::COLAMD 
                                                                   FREEFEM::METIS
                                                                   FREEFEM::SUITESPARSECONFIG 
-                                                                  ${LAPACK_LIBRARIES})
+                                                                  FREEFEM::OPENBLAS)
   else()
     TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::SUITESPARSE FREEFEM::CHOLMOD)
   endif(MINGW)
