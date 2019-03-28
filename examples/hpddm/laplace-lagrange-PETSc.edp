@@ -40,8 +40,10 @@ changeNumbering(A, F, pF);
 
 Mat AA = [[ A, pB ],
           [ pB', zero ]];
-if(mpirank == 0)
-    pF = [pF, 0];
+if(mpirank == 0) {
+    pF.resize(pF.n + 1);
+    pF = [pF(0:pF.n - 2), 0];
+}
 {
     Mat C;
     MatConvert(AA, C);
