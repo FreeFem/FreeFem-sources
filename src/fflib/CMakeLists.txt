@@ -57,10 +57,8 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
   endif()
 
   if(MINGW)
-
     find_package(OpenMP)
     string(REPLACE "C:/msys64" "" OpenMP_C_LIBRARIES "${OpenMP_C_LIBRARIES}")
-    message(STATUS "OpenMP_C_LIBRARIES = ${OpenMP_C_LIBRARIES}")
     TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::SUITESPARSE
                                                                   FREEFEM::CHOLMOD 
                                                                   FREEFEM::AMD 
