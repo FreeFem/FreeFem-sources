@@ -5,13 +5,15 @@
   set(FF_THIRDPARTY_REQUIRED AMD
                              ARPACK
                              CHOLMOD
+                             COLAMD
                              DLOPEN
                              FLEX
                              #OpenGL
                              #GLUT
                              GSL
                              HDF5
-                             SUITESPARSE)
+                             SUITESPARSE
+                             SUITESPARSECONFIG)
 
   foreach(PACKAGE ${FF_THIRDPARTY_REQUIRED})
     ff_find_package(${PACKAGE} REQUIRED)
