@@ -60,7 +60,8 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
 
     find_package(OpenMP)
     message(STATUS "OpenMP_C_LIBRARIES = ${OpenMP_C_LIBRARIES}")
-    
+    message(STATUS "OpenMP_C_FLAGS = ${OpenMP_C_FLAGS}")
+    target_compile_options(fflib PUBLIC ${OpenMP_C_FLAGS})    
     TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::SUITESPARSE
                                                                   FREEFEM::CHOLMOD 
                                                                   FREEFEM::AMD 
