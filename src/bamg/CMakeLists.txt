@@ -8,7 +8,7 @@ ADD_EXECUTABLE(bamg ${CMAKE_SOURCE_DIR}/src/bamg/bamg.cpp
 
 if(MINGW)
   TARGET_LINK_LIBRARIES(bamg libff bamglib ${OpenMP_C_LIBRARIES})
-  target_compile_options(bamg ${OpenMP_C_FLAGS})
+  target_compile_options(bamg PUBLIC ${OpenMP_C_FLAGS})
 else()
   TARGET_LINK_LIBRARIES(bamg libff bamglib)
 endif()
@@ -22,7 +22,7 @@ ADD_EXECUTABLE(cvmsh2 ${CMAKE_SOURCE_DIR}/src/bamg/cvmsh2.cpp
 
 if(MINGW)
   TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff ${OpenMP_C_LIBRARIES})
-  target_compile_options(cvmsh2 ${OpenMP_C_FLAGS})
+  target_compile_options(cvmsh2 PUBLIC ${OpenMP_C_FLAGS})
 else()
   TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff)
 endif()
