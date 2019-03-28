@@ -686,6 +686,10 @@ void HashMatrix<I,R>::Sortji()
 template<class I,class R>
 void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,int f77,int tcsr)
 {
+//    tcsr >0 => CSR ii pointer size nn+1, jj col size nnnz
+//    tcrs <0 = CSC  jj pointer size mm+1, ii row size nnnz
+//    tcsr == 0 => COO
+
     clear();
     this->n=nn;
     this->m=mm;
@@ -693,10 +697,10 @@ void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,i
     half=hhalf;
     Increaze(nnnz);
     nnz=nnnz;
-    if(tcsr >=0)
-      HMcopy(i,ii,nnnz);
-    if(tcsr <=0)
-      HMcopy(j,jj,nnnz);
+    if(tcsr >=0) //  input CSR
+      HMcopy(j,jj,nnnz);// copy of col
+    if(tcsr <=0) //  input CSC
+      HMcopy(i,ii,nnnz);// copy of  row
     if( tcsr>0)//  input CSR
         for(I ip=0; ip< nn; ++ip)
             for(I k=ii[ip]; k<ii[ip+1]; ++k)
