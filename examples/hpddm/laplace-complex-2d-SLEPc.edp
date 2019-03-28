@@ -75,22 +75,16 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
     int Xpts= int(0.5*Npts*Lx/(Lx+Ly)); // pts on the x-axis sides
     int Ypts= int(0.5*Npts*Ly/(Lx+Ly)); // pts on the y-axis sides
 
-    meshN ThBorder, ThGlobal ;
-    ThGlobal = square(Xpts,Ypts,[Lx*(x-0.5),Ly*(y-0.5)],label=Labels);
+    meshN ThBorder;
+    Th = square(Xpts,Ypts,[Lx*(x-0.5),Ly*(y-0.5)],label=Labels);
     // .....
     build(Th,       // The local mesh
-            ThBorder, // The interface mesh
-            ThGlobal, // The global mesh
-            10,       // Fake interface
             s,        // Refinement factor
-            1,        // overlap
             D,        // partition of unity
             arrayIntersection,       // ranks of neighboring subdomains
             restrictionIntersection, // local-to-neighbors renumbering
-            Vh,           // The local Finite Element space
             Pk,           // FE-space
-            mpiCommWorld, // Communicator
-            false         // excluded
+            mpiCommWorld // Communicator
          );
 }
 /***************************************/

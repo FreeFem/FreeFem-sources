@@ -295,8 +295,13 @@ if (preffe#prmesh#isincomm)
   	IFMACRO(localmacroaug,0)
     meshN preffe#prmesh#AugThi = preffe#prmesh#Thi + preffe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
     fespace preffe#AugVhi(preffe#prmesh#AugThi, preffe#fPk);
-    matrix preffe#Auginterp = interpolate(preffe#Vhi, preffe#AugVhi); /* restriction de WhAugmented à Wh; this rectangular sparse matrix contains only 0s and 1s.*/
-    preffe#Auginterp.thresholding(1.e-10); /* eliminate too small values*/
+    int[int] n2o = (0:preffe#prmesh#Thi.nt-1);
+    int[int] renum = restrict(preffe#Vhi, preffe#AugVhi,n2o);
+    int[int] Ic = (0:preffe#Vhi.ndof-1);
+    real[int] Kc(preffe#Vhi.ndof);
+    Kc = 1;
+    matrix preffe#Auginterp = [Ic,renum,Kc];
+    preffe#Auginterp.resize(preffe#Vhi.ndof, preffe#AugVhi.ndof);
     ENDIFMACRO
     
     rhsFull.resize(preffe#AugVhi.ndof);
@@ -355,8 +360,13 @@ if (pr#prfe#prmesh#isincomm)
   	IFMACRO(localmacroaug,0)
     meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
     fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
-    matrix pr#prfe#Auginterp = interpolate(pr#prfe#Vhi, pr#prfe#AugVhi); /* restriction de WhAugmented à Wh; this rectangular sparse matrix contains only 0s and 1s.*/
-    pr#prfe#Auginterp.thresholding(1.e-10); /* eliminate too small values*/
+    int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
+    int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
+    int[int] Ic = (0:pr#prfe#Vhi.ndof-1);
+    real[int] Kc(pr#prfe#Vhi.ndof);
+    Kc = 1;
+    matrix pr#prfe#Auginterp = [Ic,renum,Kc];
+    pr#prfe#Auginterp.resize(pr#prfe#Vhi.ndof, pr#prfe#AugVhi.ndof);
     ENDIFMACRO
     
     rhsFull.resize(pr#prfe#AugVhi.ndof);

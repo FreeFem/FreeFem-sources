@@ -21,13 +21,14 @@ real[int] DP;                                // partition of unity
 real[int] DZ;                                // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
-    meshN ThBorder, ThGlobal = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5));    // global mesh
-    fespace Ph(ThGlobal, P0);
+    meshN ThBorder;
+    Th = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5));    // global mesh
+    fespace Ph(Th, P0);
     real[int] part(Ph.ndof);
     if(mpirank == 0)
-        partitionerSeq(part, ThGlobal, mpisize);
-    buildWithPartitioning(Th, ThBorder, ThGlobal, part, 11111, 1, 1, DP, arrayIntersection, restrictionIntersectionZ, Wh, Pk, mpiCommWorld, false);
-    ThGlobal = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5)); // need to reload the global mesh because it is destroyed in ''build*''
-    buildEdgeWithPartitioning(Th, ThBorder, ThGlobal, part, 22222, 1, 1, DZ, arrayIntersection, restrictionIntersectionP, Qh, Zk, mpiCommWorld, false, Zk, def2, init2);
+        partitionerSeq(part, Th, mpisize);
+    buildOverlapWithPartitioning(Th, ThBorder, part, 11111, 1, 1, DP, arrayIntersection, restrictionIntersectionZ, Pk, mpiCommWorld, false);
+    Th = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5)); // need to reload the global mesh because it is destroyed in ''build*''
+    buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 22222, 1, 1, DZ, arrayIntersection, restrictionIntersectionP, Zk, mpiCommWorld, false, Zk, def2, init2);
     ThBorder = cube(1, 1, 1);
 }

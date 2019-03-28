@@ -32,8 +32,8 @@ int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 int[int] interfaceNb;                       //
 {
     int[int] l = [2, 1, 2, 2];
-    meshN ThGlobal = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
-    buildSubstructuring(Th, interfaceNb, ThGlobal, 10, 1, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, Pk, BC, comm, excluded)
+    Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
+    buildSubstructuring(Th, interfaceNb, 10, 1, labNeumann, s, arrayIntersection, restrictionIntersection, Pk, BC, comm, excluded)
 }
 
 real f = -90000.0;

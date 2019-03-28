@@ -37,8 +37,8 @@ real[int] D;                                // partition of unity
     ThGlobal2d = trunc(ThGlobal2d, (y >= 0.25) || (x >= 0.25), label = 5);
     mesh Th2d = movemesh(ThGlobal2d, [-x, y]);
     ThGlobal2d = ThGlobal2d + Th2d;
-    meshN ThGlobal = buildlayers(ThGlobal2d, getARGV("-global", 12) / 2, zbound = [0, 0.4]);
-    build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, Pk, comm, excluded)
+    Th = buildlayers(ThGlobal2d, getARGV("-global", 12) / 2, zbound = [0, 0.4]);
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side

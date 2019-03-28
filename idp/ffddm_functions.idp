@@ -1,17 +1,17 @@
 macro ffddmgenerateOperatorfunctions(pr,preffe)
-func preffe#K[int] pr#A(preffe#K[int] &x)
+func preffe#K[int] pr#A(preffe#K[int] &u)
 {
   /* Matrix vector product with the global matrix */
-  preffe#K[int] res(x.n);
+  preffe#K[int] res(u.n);
   if (preffe#prmesh#isincomm) {
     preffe#prmesh#tic(pr#tmvi)
     if (!bpara)
-    res = pr#Aglobal*x;
+    res = pr#Aglobal*u;
     else if (!preffe#prmesh#excluded){
-      res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*x;
+      res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*u;
       pr#prfe#update(res,true);
     }
-    /*res = B*x;*/
+    /*res = B*u;*/
     preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
   }
   return res;
@@ -357,35 +357,7 @@ func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
     preffe#K[int] s(l.n);
     
     /* M^-1 */
-    if (pr#prec == "none") {
-      s = ltemp;
-    }
-    else if (!bpara) {
-      for(int i=0; i<preffe#prmesh#npart; ++i)  {
-        preffe#K[int] bi(preffe#Rih[i].n);
-        bi = preffe#Rih[i]*ltemp;           /* restricts rhs */
-        if(pr#prec == "soras")
-        bi = bi .* preffe#Dk[i];
-        preffe#K[int] ui = pr#aR[i] ^-1 * bi;  /* local solves */
-        if(pr#prec != "asm")
-        ui = ui .* preffe#Dk[i];                      /* partition of unity */
-        s += preffe#Rih[i]'*ui;                  /* prolongation */
-      }
-    }
-    else if (!preffe#prmesh#excluded){
-      preffe#K[int] aux = ltemp;
-      if(pr#prec == "soras")
-      aux = aux .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
-      s = pr#aR[mpiRank(preffe#prmesh#commddm)]^-1 * aux;
-      /* s = aR[mpirank]^-1 * ltemp; */
-      if(pr#prec != "asm"){
-        pr#prfe#update(s,true);
-      }
-      else{
-        pr#prfe#update(s,false);
-        pr#prfe#update(s,true);
-      }       
-    }
+    s = pr#PREC1(ltemp);
     
     /* P^T */
     if (pr#corr == "ADEF2" || pr#corr == "BNN" || pr#corr == "RBNN1" || pr#corr == "RBNN2") {

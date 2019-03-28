@@ -89,22 +89,16 @@ fespace Vh(Th, Pk);      // local finite element space
     int Thetapts = int(Npts/6.0); // pts on the x-axis sides
     int Phipts   = int(Npts/3.0); // pts on the y-axis sides
 
-    meshN ThBorder, ThGlobal ;
-    ThGlobal = square(Thetapts,Phipts,[x*pi,2.0*pi*y],label=Labels);
+    meshN ThBorder;
+    Th = square(Thetapts,Phipts,[x*pi,2.0*pi*y],label=Labels);
     // .....
     buildPeriodic(Th,       // The local mesh
-            ThBorder, // The interface mesh
-            ThGlobal, // The global mesh
-            10,       // Fake interface
             s,        // Refinement factor
-            1,        // overlap
             D,        // partition of unity
             arrayIntersection,       // ranks of neighboring subdomains
             restrictionIntersection, // local-to-neighbors renumbering
-            Vh,           // The local Finite Element space
             Pk,           // FE-space
             mpiCommWorld, // Communicator
-            false,        // excluded
             labPeriodic   // Array of labels for periodic boundaries
          );
 }

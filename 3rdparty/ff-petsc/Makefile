@@ -153,9 +153,9 @@ ifdef 	MUMPS_LIB
 #  version COMPLEX  .....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
-		--prefix=''$(DIR_INSTALL_COMPLEX)'' \
+		--prefix=$(DIR_INSTALL_COMPLEX) \
 		--with-debugging=no \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \		
+		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
 		COPTFLAGS='-O3 -march=native -mtune=native' \
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \

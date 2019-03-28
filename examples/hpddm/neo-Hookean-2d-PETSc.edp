@@ -311,9 +311,8 @@ int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
-    meshN ThGlobal = Th;
     int s = getARGV("-split", 1);
-    buildPETSc(Th, ThGlobal, s, D, arrayIntersection, restrictionIntersection, Vh, Pk, mpiCommWorld)
+    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
 }
 
 Mat A(Vh.ndof, arrayIntersection, restrictionIntersection, D, bs = 2);

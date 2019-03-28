@@ -63,10 +63,12 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         }
         buildSkeleton(interface[], arrayIntersection, R, ndofSkeleton, interface = interfaceNb, redundancy = getARGV("-redundancy", 1), communicator = comm);// EOM
 
-macro buildSubstructuringWithPartitioning(Th, interfaceNb, ThGlobal, userPartitioning, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, P, BC, comm, excluded)
+macro buildSubstructuringWithPartitioning(Th, interfaceNb, userPartitioning, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, P, BC, comm, excluded)
 {
     real timing = mpiWtime();
+    fespace WhLocal(Th, Pk);
     if(mpisize > 1 && !excluded) {
+        meshN ThGlobal = Th;
         fespace PhGlobal(ThGlobal, P0);
         PhGlobal partGlobal;
         if(userPartitioning.n != PhGlobal.ndof) {
@@ -88,7 +90,8 @@ macro buildSubstructuringWithPartitioning(Th, interfaceNb, ThGlobal, userPartiti
         partitionSubstructuring(Th, interfaceNb, ThGlobal, PhGlobal, partGlobal, s, restrictionIntersection, BC, comm, fakeInterface, labDirichlet)
     }
     else if(mpisize == 1) {
-        Th = ThGlobal;
+        if(s > 1)
+            Th = trunc(Th, 1, split = s);
         Wh def(interface);
         varf vPbInterface(def(u), def(v)) = on(labNeumann, BC(u, 1.0)) + on(labDirichlet, BC(u, 0.0));
         interface[] = vPbInterface(0, Wh, tgv = 1);
@@ -104,8 +107,8 @@ macro buildSubstructuringWithPartitioning(Th, interfaceNb, ThGlobal, userPartiti
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
 }// EOM
 
-macro buildSubstructuring(Th, interfaceNb, ThGlobal, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, P, BC, comm, excluded)
+macro buildSubstructuring(Th, interfaceNb, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, P, BC, comm, excluded)
 {
     real[int] emptyArray(0);
-    buildSubstructuringWithPartitioning(Th, interfaceNb, ThGlobal, emptyArray, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, P, BC, comm, excluded)
+    buildSubstructuringWithPartitioning(Th, interfaceNb, emptyArray, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, P, BC, comm, excluded)
 }// EOM

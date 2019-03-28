@@ -27,9 +27,8 @@ int[int] arrayIntersection;
 int[int][int] restrictionIntersection(0);
 real[int] D;
 {
-    meshN ThGlobal = M;
     int s = getARGV("-split", 1);
-    buildPETSc(M, ThGlobal, s, D, arrayIntersection, restrictionIntersection, Vh, Pk, mpiCommWorld)
+    build(M, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
 }
 Vh u;
 func BC = cos(pi*x)*cos(pi*y);

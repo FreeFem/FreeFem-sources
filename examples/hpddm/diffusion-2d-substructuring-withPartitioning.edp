@@ -32,11 +32,11 @@ int[int] interfaceNb;                       //
 int[int] labDirichlet = [1, 3];
 {
     int[int] l = [2, 1, 3, 2];
-    meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    fespace Ph(ThGlobal, P0);
+    Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
+    fespace Ph(Th, P0);
     Ph part;
     part = (x > 0.5 && y > 0.5 ? 3 : (x > 0.5 ? 2 : (y < 0.5 ? 1 : 0)));
-    buildSubstructuringWithPartitioning(Th, interfaceNb, ThGlobal, part[], 10, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Wh, Pk, BC, comm, excluded)
+    buildSubstructuringWithPartitioning(Th, interfaceNb, part[], 10, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Pk, BC, comm, excluded)
 }
 
 func f = 10;

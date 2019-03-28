@@ -25,14 +25,13 @@ border c(t=0,1)    { x = t-1; y = -t;             label = 3; };
 border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
 border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
 
-meshN ThBorder, Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
+meshN Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
 fespace Wh(Th, Pk);                         // local finite element space
 int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
-    meshN ThGlobal = Th;    // global mesh
-    buildPeriodic(Th, ThBorder, ThGlobal, 10, s, 1, D, arrayIntersection, restrictionIntersection, Wh, Pk, mpiCommWorld, false, labPeriodic)
+    buildPeriodic(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, labPeriodic)
 }
 
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);

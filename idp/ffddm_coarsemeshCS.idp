@@ -79,13 +79,18 @@ else if (!pr#prfe#prmesh#excluded) {
   
   NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
   IFMACRO(localmacroaug,1)
-  pr#AugThi = pr#AugaTh[i];
+  pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
   ENDIFMACRO
   IFMACRO(localmacroaug,0)
   meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
   fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
-  matrix pr#prfe#Auginterp = interpolate(pr#prfe#Vhi, pr#prfe#AugVhi); /* restriction de WhAugmented à Wh; this rectangular sparse matrix contains only 0s and 1s.*/
-  pr#prfe#Auginterp.thresholding(1.e-10); /* eliminate too small values*/
+  int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
+  int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
+  int[int] Ic = (0:pr#prfe#Vhi.ndof-1);
+  real[int] Kc(pr#prfe#Vhi.ndof);
+  Kc = 1;
+  matrix pr#prfe#Auginterp = [Ic,renum,Kc];
+  pr#prfe#Auginterp.resize(pr#prfe#Vhi.ndof, pr#prfe#AugVhi.ndof);
   ENDIFMACRO   
 
   VarfA(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)

@@ -34,8 +34,8 @@ int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
-    meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    build(Th, ThBorder, ThGlobal, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Wh, Pk, comm, excluded)
+    Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side

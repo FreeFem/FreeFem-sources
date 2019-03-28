@@ -446,18 +446,18 @@ func int pr#update(scalar[int] vv, bool scale)
   return 0;
 }
 
-func scalar pr#scalprod(scalar[int] a, scalar[int] b)
+func scalar pr#scalprod(scalar[int] va, scalar[int] vb)
 {
   scalar res = 0;
   if(prmsh#isincomm) {
     /*prmsh#tic(pr#tloc)*/
     scalar resi = 0;
     if (!bpara) {
-      resi = a '* b;
+      resi = va '* vb;
     }
     else if (!prmsh#excluded){
-      scalar[int] sa = a .* pr#Dk[mpiRank(prmsh#commddm)];	
-      resi = sa '* b;      
+      scalar[int] sa = va .* pr#Dk[mpiRank(prmsh#commddm)];
+      resi = sa '* vb;
     }
     mpiAllReduce(resi,res,prmsh#mpicomm,mpiSUM);
     /*prmsh#toc(pr#tloc,"",pr#tscalprod)*/
