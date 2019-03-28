@@ -5,7 +5,7 @@
   set(FF_THIRDPARTY_REQUIRED ARPACK
                              DLOPEN
                              FLEX
-                             OpenGL
+                             #OpenGL
                              GLUT
                              GSL
                              HDF5)
