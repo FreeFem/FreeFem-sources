@@ -60,7 +60,6 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
 
     find_package(OpenMP)
     string(REPLACE "C:/msys64" "" OpenMP_C_LIBRARIES ${OpenMP_C_LIBRARIES})
-    #target_compile_options(libff PUBLIC ${OpenMP_C_FLAGS})    
     TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::SUITESPARSE
                                                                   FREEFEM::CHOLMOD 
                                                                   FREEFEM::AMD 

@@ -1,6 +1,16 @@
+if(MINGW)
+  find_package(OpenMP)
+  string(REPLACE "C:/msys64" "" OpenMP_C_LIBRARIES ${OpenMP_C_LIBRARIES})
+endif()
+
 ADD_EXECUTABLE(bamg ${CMAKE_SOURCE_DIR}/src/bamg/bamg.cpp 
                     ${CMAKE_SOURCE_DIR}/src/bamg/global.cpp) 
-TARGET_LINK_LIBRARIES(bamg libff bamglib)
+
+if(MINGW)
+  TARGET_LINK_LIBRARIES(bamg libff bamglib ${OpenMP_C_LIBRARIES})
+else()
+  TARGET_LINK_LIBRARIES(bamg libff bamglib)
+endif()
 
 INSTALL(TARGETS bamg
         RUNTIME DESTINATION bin)  
@@ -8,7 +18,12 @@ INSTALL(TARGETS bamg
 
 ADD_EXECUTABLE(cvmsh2 ${CMAKE_SOURCE_DIR}/src/bamg/cvmsh2.cpp 
                       ${CMAKE_SOURCE_DIR}/src/bamg/global.cpp)
-TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff)
+
+if(MINGW)
+  TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff ${OpenMP_C_LIBRARIES})
+else()
+  TARGET_LINK_LIBRARIES(cvmsh2 bamglib libff)
+endif()
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} 
                     ${CMAKE_SOURCE_DIR}/src/bamg 
