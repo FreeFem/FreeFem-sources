@@ -3,7 +3,6 @@ macro(ff_configure_thirdparty_optional)
   include(ff_find_package)
 
   set(FF_THIRDPARTY_OPTIONAL CBLAS
-                             CHOLMOD
                              FFTW
                              IPOPT
                              LAPACK

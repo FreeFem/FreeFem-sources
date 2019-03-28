@@ -2,7 +2,9 @@
 
   include(ff_find_package)
 
-  set(FF_THIRDPARTY_REQUIRED ARPACK
+  set(FF_THIRDPARTY_REQUIRED AMD
+                             ARPACK
+                             CHOLMOD
                              DLOPEN
                              FLEX
                              #OpenGL
