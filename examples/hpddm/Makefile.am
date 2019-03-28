@@ -54,4 +54,5 @@ freefem++.pref:Makefile
 	echo loadpath += \"../../plugin/seq/\" >> freefem++.pref
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
-clean-local::
+clean-local:
+	rm -rf sol_heat_2d_io* sol_stokes_3d_io*

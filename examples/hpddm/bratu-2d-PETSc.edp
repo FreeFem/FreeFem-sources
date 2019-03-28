@@ -28,7 +28,7 @@ int[int][int] restrictionIntersection(0);
 real[int] D;
 {
     int s = getARGV("-split", 1);
-    buildPETSc(M, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(M, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
 }
 Vh u;
 func BC = cos(pi*x)*cos(pi*y);

@@ -45,7 +45,7 @@ int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;
 {
-    buildEdge(Th, ThBorder, 10, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
+    buildOverlapEdge(Th, ThBorder, 10, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
 }
 
 matrix<complex> Mat;

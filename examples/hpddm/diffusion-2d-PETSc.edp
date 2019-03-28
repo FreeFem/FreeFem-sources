@@ -25,7 +25,7 @@ real[int] D;                                // partition of unity
 {
     Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
     meshN ThBorder;
-    build(Th, ThBorder, 10, s, 1, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, false)
+    buildOverlap(Th, ThBorder, 10, s, 1, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, false)
 }
 
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);

@@ -23,7 +23,7 @@ int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
     Th = cube(6 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [6 * x, y, z], label = LL);
-    build(Th, ThBorder, 10, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld , false)
+    buildOverlap(Th, ThBorder, 10, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld , false)
 }
 
 real f = -9000.0;

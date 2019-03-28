@@ -24,7 +24,7 @@ int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
     Th = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
-    buildPETSc(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
 }
 
 real f = -9000.0;

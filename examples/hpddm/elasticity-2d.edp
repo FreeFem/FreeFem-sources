@@ -36,7 +36,7 @@ real[int] D;                                // partition of unity
     int[int] l = [2, 1, 2, 2];
     meshN ThBorder;
     Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
-    build(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded, 2)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded, 2)
 }
 
 real f = -90000.0;
