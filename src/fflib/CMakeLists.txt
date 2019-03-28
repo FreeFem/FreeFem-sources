@@ -65,6 +65,8 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
     endforeach()
     message(STATUS "OpenMP_C_LIBRARIES = ${OpenMP_C_LIBRARIES}")
     message(STATUS "OpenMP_C_FLAGS = ${OpenMP_C_FLAGS}")
+    string(REPLACE "C:/msys64" "" ${OpenMP_C_LIBRARIES} ${OpenMP_C_LIBRARIES})
+    message(STATUS "OpenMP_C_LIBRARIES = ${OpenMP_C_LIBRARIES}")
     target_compile_options(libff PUBLIC ${OpenMP_C_FLAGS})    
     TARGET_LINK_LIBRARIES(libff bamglib Comdlg32 strversionnumber FREEFEM::SUITESPARSE
                                                                   FREEFEM::CHOLMOD 
@@ -75,7 +77,7 @@ IF(FF_SUITESPARSE_FOUND AND FF_CHOLMOD_FOUND)
                                                                   FREEFEM::METIS
                                                                   FREEFEM::SUITESPARSECONFIG 
                                                                   ${FF_LAPACK_LIBRARIES}
-                                                                  OpenMP::OpenMP_C)
+                                                                  ${OpenMP_C_LIBRARIES})
   else()
     TARGET_LINK_LIBRARIES(libff bamglib dl strversionnumber FREEFEM::SUITESPARSE FREEFEM::CHOLMOD)
   endif(MINGW)
