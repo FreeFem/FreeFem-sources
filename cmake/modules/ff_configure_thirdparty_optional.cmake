@@ -18,7 +18,7 @@ macro(ff_configure_thirdparty_optional)
                              Threads)
 
   foreach(PACKAGE ${FF_THIRDPARTY_OPTIONAL})
-    ff_find_package(${PACKAGE} REQUIRED)
+    ff_find_package(${PACKAGE})
   endforeach(PACKAGE ${FF_THIRDPARTY_OPTIONAL})
 
 endmacro(ff_configure_thirdparty_optional)
