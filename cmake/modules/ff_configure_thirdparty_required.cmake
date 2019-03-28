@@ -6,7 +6,7 @@
                              DLOPEN
                              FLEX
                              #OpenGL
-                             GLUT
+                             #GLUT
                              GSL
                              HDF5)
 
