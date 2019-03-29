@@ -663,7 +663,7 @@ void WithCheckPtr(){}
 
 int UnShowAlloc =0;
 #else
-#include <stdlib.h>
+#include <cstdlib>
 
 int ShowAlloc(const char *s,size_t & lg)
 {lg=0; return 0;}

@@ -55,7 +55,7 @@ int iter=0;
     cout << i <<  " residu^2 = " <<  res  << endl;
     matrix H;
     if( res< 1e-12) break;
-    H= vhJ(Vh,Vh,factorize=1,solver=LU);
+    H= vhJ(Vh,Vh,factorize=3,solver=LU);
     w[]=H^-1*v[];
     u[] -= w[];
     plot (u,wait=0,cmm="solution with Newton Raphson");

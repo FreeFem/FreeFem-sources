@@ -51,9 +51,9 @@ using namespace std;
  }
  #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "mpi.h"
 
@@ -103,7 +103,7 @@ double dwalltime() {
 #ifndef NO_TIMER
 #include <sys/types.h>
 #include <sys/times.h>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
 #endif
 

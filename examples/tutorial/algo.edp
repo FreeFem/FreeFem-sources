@@ -147,7 +147,7 @@ varf amass(uh,vh)=  int2d(Th)( uh*vh)  + on(1,2,3,4,uh=0);
 
 matrix Amass = amass(Vh,Vh,solver=CG);
 
-matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=1);   
+matrix Alap=  alap(Vh,Vh,solver=Cholesky,factorize=3);   
 
 func real[int] C(real[int] & u)
 {
@@ -163,7 +163,7 @@ func real[int] C(real[int] & u)
 
      if (conv) break; 
      alpha=df( dx(u)*dx(u) + dy(u)*dy(u) ); // optimization 
-     Alap = alap(Vh,Vh,solver=Cholesky,factorize=1);   
+     Alap = alap(Vh,Vh,solver=Cholesky,factorize=3);   
      cout << " restart with new preconditionner " << conv << " eps =" << eps << endl;
    }
    plot (u,wait=1,cmm="solution with NLCG");

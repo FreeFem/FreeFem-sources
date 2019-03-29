@@ -560,7 +560,7 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
     {  "precon",&typeid(Polymorphic*)}, \
     {  "dimKrylov",&typeid(long)}, \
     {  "tgv",&typeid(double )}, \
-    {  "factorize",&typeid(bool)}, \
+    {  "factorize",&typeid(long)}, \
     {  "strategy",&typeid(long )}, \
     {  "tolpivot",&typeid(double )}, \
     {  "tolpivotsym",&typeid(double )}, \
@@ -612,7 +612,7 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
       
 	if (nargs[++kk]) ds.NbSpace= GetAny<long>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.tgv= GetAny<double>((*nargs[kk])(stack));
-	if (nargs[++kk]) ds.factorize= GetAny<bool>((*nargs[kk])(stack));	
+	if (nargs[++kk]) ds.factorize= GetAny<long>((*nargs[kk])(stack));	
 	if (nargs[++kk]) ds.strategy = GetAny<long>((*nargs[kk])(stack)); 
 	if (nargs[++kk]) ds.tol_pivot = GetAny<double>((*nargs[kk])(stack)); 
 	if (nargs[++kk]) ds.tol_pivot_sym = GetAny<double>((*nargs[kk])(stack)); 

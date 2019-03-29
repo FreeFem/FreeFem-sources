@@ -71,13 +71,13 @@ bool  waitatend=true;
 #include "error.hpp"
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 using namespace std;
 
 #include <errno.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
 #define fill thequikdrawfill
 #include "rgraph.hpp"
 #include <Windows.h>
@@ -86,9 +86,9 @@ using namespace std;
 #include <Quickdraw.h>
 //#include <StandardFile.h>
 #include <Navigation.h>
-#include <time.h>
+#include <ctime>
 #include <setjmp.h>
-#include <time.h>
+#include <ctime>
 #include <unix.h>
 #include <SIOUX.h> 
 #undef fill

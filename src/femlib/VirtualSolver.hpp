@@ -40,7 +40,7 @@ struct Data_Sparse_Solver {
     int NbSpace;
     int strategy;
     double tgv;
-    bool factorize;
+    int factorize;
     double tol_pivot;
     double tol_pivot_sym;
     int itmax ;

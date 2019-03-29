@@ -22,6 +22,7 @@ public:
     ERRORFunc ERRORHandle;
     class VSolver {public:
         virtual R* solve(R *x,R*b,int N=0,int trans=0) =0;
+        virtual void factorize(int st){ if(verbosity>4)  cout << " ** warning no factorisation" << st << endl;};
         virtual ~VSolver(){}
         int count;
         VSolver(): count(0) {}

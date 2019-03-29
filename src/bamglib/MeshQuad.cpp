@@ -38,10 +38,10 @@
 //  to make quad 
 // -------------------
 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <ctime>
 
 #include "Meshio.h"
 #include "Mesh2.h"

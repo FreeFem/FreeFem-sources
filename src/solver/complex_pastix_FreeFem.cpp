@@ -42,34 +42,34 @@ using namespace std;
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 #include <pthread.h>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
 
 
 #include <mpi.h>
 
-// #include <ctype.h>
-// #include <stdio.h>
-// #include <stdlib.h>
+// #include <cctype>
+// #include <cstdio>
+// #include <cstdlib>
 // #include <unistd.h>
 // //#include <pthread.h>
-// #include <string.h>
-// #include <time.h>
+// #include <cstring>
+// #include <ctime>
 // #include <sys/time.h>
 // #include "mpi.h"
    
-// #include <assert.h>
+// #include <cassert>
 // #include "pastix.h"
 // #include "cscd_utils.h"
 // #include "read_matrix.h"
 
-#include <assert.h>
+#include <cassert>
 #ifdef __cplusplus
 extern "C" {
 #endif

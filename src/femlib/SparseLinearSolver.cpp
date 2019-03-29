@@ -117,7 +117,7 @@ void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A,const  Data_Sparse_S
         A.SetSolver(solver,true);
         if(ds.factorize)
         {
-            
+            solver->factorize(ds.factorize);// full factorization  mars 2019 FH/PHT 
         }
     }
     else

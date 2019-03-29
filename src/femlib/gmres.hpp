@@ -24,7 +24,7 @@
 //  dot(u,v) => (u,v)
 //  norm(u) => sqrt( (u,u) ) 
 
-#include <math.h> 
+#include <cmath> 
 
 
 

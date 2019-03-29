@@ -32,10 +32,10 @@ bool  waitatend=true;
 bool  consoleatend=true;
 
 #define FF_GRAPH_SET_PTR
-#include <math.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
+#include <cstdio>
 #include <iostream>
 #include <cassert>
 #include "strversionnumber.hpp"

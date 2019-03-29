@@ -79,12 +79,12 @@ pair<complex> ret;
             attachCoarseOperator(mpiCommWorld, A/*, A = noPen, B = overlapRestriction, threshold = 2. * h[].max / diam*/);
         else {
             varf vPbNoPen(u, v) = intN(Th)(-k^2 * u * v + (grad(u)' * grad(v))) + intN1(Th, 2)(1i * k * u * v) + intN(Th)(f * v) + on(1, u = 0.0);
-            matrix<complex> noPen = vPbNoPen(Wh, Wh, solver = CG);
+            matrix<complex> noPen = vPbNoPen(Wh, Wh, sym = 1);
             if(deflation == "geneo") // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
                 attachCoarseOperator(mpiCommWorld, A, A = noPen/*, threshold = 2. * h[].max / diam,*/, ret = ret);
             else if(deflation == "dtn") {
                 varf vMass(def(u), def(v)) = intN1(Th, fakeInterface)(u * v);
-                matrix<complex> massMatrix = vMass(Wh, Wh, solver = CG);
+                matrix<complex> massMatrix = vMass(Wh, Wh, sym = 1);
                 attachCoarseOperator(mpiCommWorld, A, A = noPen, B = massMatrix, pattern = Opt/*, threshold = k,*/, ret = ret);
             }
             else if(deflation == "geneo-2") // GenEO-2 for optimized Schwarz methods, need for RHS (LHS is still Neumann matrix)

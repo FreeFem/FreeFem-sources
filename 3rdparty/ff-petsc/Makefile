@@ -57,11 +57,14 @@ ifeq ($(LAPACKLIBS), $(BLASLIBS))
 else
   BLAS_LAPACK_LIBS=$(LAPACKLIBS) $(BLASLIBS)
 endif
+WITH_MPI_DIR=
+
 ifeq ($(MPICC),$(W_MPICC))
   WITH_MPI_DIR=
 else
-  WITH_MPI_DIR=--with-mpi-dir='$(MPI_DIR)'
+ # WITH_MPI_DIR=--with-mpi-dir='$(MPI_DIR)'
 endif
+
 DIR_INSTALL_REAL:=$(prefix)/ff-petsc/real
 DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
 PETSC_DIR:=$(PWD)/$(SRCDIR)

@@ -1213,7 +1213,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 
   bool VF=isVF(b->largs);
   Data_Sparse_Solver ds;
-  ds.factorize=false;
+  ds.factorize=0;
   ds.initmat=true;
   SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
 

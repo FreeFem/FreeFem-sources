@@ -1,5 +1,5 @@
 #include <direct.h>
-#include <string.h>
+#include <cstring>
 #include <cstdlib>
 #include <string>
 #include <cstring>

@@ -38,7 +38,7 @@
 #include <stddef.h>
 //#include <cassert>
 #include <cmath>
-#include <string.h>
+#include <cstring>
 #include <list>
 using namespace std;
 

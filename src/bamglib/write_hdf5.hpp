@@ -1,8 +1,8 @@
 #ifndef write_hdf5_h_
 #define write_hdf5_h_
  
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <vector>

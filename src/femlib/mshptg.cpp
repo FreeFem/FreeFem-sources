@@ -50,9 +50,9 @@ using namespace std;
 #define MAXCOOR ((double) 32767. )
 #endif
 #define DET8(a11,a12,a21,a22) ( (LONG8) (a11) * (LONG8) (a22) - (LONG8) (a21)* (LONG8) (a12))
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 namespace Fem2D {
 #define i_nint(x) ((long) x >= 0 ? x + 0.5 : x - 0.5)
 #define amin(a, b) ((a) < (b) ? (a) : (b))

@@ -14,9 +14,9 @@
 #define TOSTRING1(i) #i
 #define TOSTRING(i) TOSTRING1(i)
 
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
+#include <cstdlib>
+#include <cmath>
+#include <cstring>
 #include <setjmp.h>
 
 #include <new.h>
@@ -32,9 +32,9 @@
 #include <windows.h>
 #include <commdlg.h>
 #include <direct.h>
-#include <time.h>
+#include <ctime>
 
-#include <stdio.h>
+#include <cstdio>
 #include <fcntl.h>
 #include <io.h>      //*OT  use for the console window
 #include <stat.h>

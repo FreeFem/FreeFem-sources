@@ -9,7 +9,7 @@
 #include <cmath>
 #include <cstring>
 #include <complex>
-#include<stdlib.h>
+#include<cstdlib>
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"

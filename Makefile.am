@@ -111,13 +111,13 @@ speedtest: all
 # information from the Debian Changelog to get the package release
 # number as well.
 win32:WindowsPackage.iss
-	test ! -d examples/plugin/include-tmp  || rm -r examples/plugin/include-tmp
-	cd examples/plugin;tar zxvf include.tar.gz;mkdir include-tmp;cp -Lr *.h include/* include-tmp
+	test ! -d plugin/include-tmp  || rm -r plugin/include-tmp
+	cd plugin;mkdir include-tmp;cp -Lr seq/include/*  */*.h  include-tmp
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe  "`cygpath.exe WindowsPackage.iss`"
 WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
-	-DHOSTOS='$(host_os)'  m4/WindowsPackage.m4 > WindowsPackage.iss
+	-DHOSTOS='$(host_os)'  etc/config/m4/WindowsPackage.m4  > WindowsPackage.iss
 	echo loadpath += '"!\."'  >freefem++.pref
 	echo includepath += '"!\idp"'  >>freefem++.pref
 
