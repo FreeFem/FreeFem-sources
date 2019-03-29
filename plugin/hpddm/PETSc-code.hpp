@@ -38,12 +38,12 @@ void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typ
         MatSetBlockSize(ptA->_petsc, bs);
     MatSetSizes(ptA->_petsc, ptA->_last - ptA->_first, ptA->_last - ptA->_first, global, global);
     MatSetType(ptA->_petsc, MATMPIAIJ);
-    MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-    MatSetOption(ptA->_petsc, MAT_SYMMETRIC, symmetric);
     if(ia)
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
     else
         MatSetUp(ptA->_petsc);
+    MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+    MatSetOption(ptA->_petsc, MAT_SYMMETRIC, symmetric);
     if(free) {
         delete [] ia;
         delete [] ja;
@@ -440,7 +440,6 @@ AnyType initRectangularCSRfromDMatrix<HpddmType>::initRectangularCSRfromDMatrix_
             MatSetBlockSize(ptA->_petsc, bsB);
         MatSetSizes(ptA->_petsc, ptB->_last - ptB->_first, ptC->_last - ptC->_first, PETSC_DECIDE, PETSC_DECIDE);
         MatSetType(ptA->_petsc, MATMPIAIJ);
-        MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         if(c != 1) {
             int* ia = nullptr;
             int* ja = nullptr;
@@ -471,6 +470,7 @@ AnyType initRectangularCSRfromDMatrix<HpddmType>::initRectangularCSRfromDMatrix_
             std::copy_n(ptB->_num, ptB->_A->getMatrix()->_n, ptA->_num);
             std::copy_n(ptC->_num, ptC->_A->getMatrix()->_m, ptA->_cnum);
         }
+        MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         ptA->_exchange = new HPDDM::template Subdomain<PetscScalar>*[2];
         ptA->_exchange[0] = new HPDDM::template Subdomain<PetscScalar>(*ptB->_A);
         ptA->_exchange[0]->setBuffer();
@@ -559,8 +559,6 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     if(clean)
         ptSize->resize(0);
     MatSetType(ptA->_petsc, bsr ? MATMPIBAIJ : MATMPIAIJ);
-    MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-    MatSetOption(ptA->_petsc, MAT_SYMMETRIC, nargs[2] ? (GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE);
 #ifndef VERSION_MATRICE_CREUSE
     if(bsr)
         MatMPIBAIJSetPreallocationCSR(ptA->_petsc, bs, reinterpret_cast<PetscInt*>(mK->lg), reinterpret_cast<PetscInt*>(mK->cl), mK->a);
@@ -608,6 +606,8 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         delete [] pJ;
         delete [] pI;
     }
+    MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+    MatSetOption(ptA->_petsc, MAT_SYMMETRIC, nargs[2] ? (GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE);
     if(clean)
         ptK->destroy();
     if(prune) {
@@ -793,9 +793,9 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
             ptK->resize(0);
         }
         MatSetType(ptA->_petsc, MATMPIAIJ);
+        MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, nargs[3] ? (GetAny<bool>((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE);
-        MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         delete [] ia;
         delete [] ja;
         delete [] c;
