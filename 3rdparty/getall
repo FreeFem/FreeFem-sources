@@ -201,10 +201,10 @@ download('SLEPc','http://slepc.upv.es/download/distrib/slepc-3.10.1.tar.gz',
 	'slepc-3.10.1.tar.gz',
 	'91a90637414b5c305a7c23df6ea6d262');
 	
-download('htool','https://github.com/PierreMarchand20/htool/archive/c68eb0d6e63c9b708fef65feda73327bfa306e71.zip',
+download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9ac7c81aba8191cb5da31da5f767a.zip',
 		'https://github.com/PierreMarchand20/',
 		'htool.zip',
-		'689ceccaa133d9ea44e26254148e5acf');
+		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
 
 	
 download('hpddm','https://github.com/hpddm/hpddm/archive/6b09af3a1aff64fe37fa5f9d0d4eea8de04884af.zip',
