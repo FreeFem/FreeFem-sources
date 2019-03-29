@@ -41,7 +41,7 @@ int[int] labDirichlet = [1, 3];
 
 func f = 10;
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(labDirichlet, u = 1.0);
-matrix<real> Mat = vPb(Wh, Wh, solver = CG); // local operator
+matrix<real> Mat = vPb(Wh, Wh, sym = 1); // local operator
 real[int] rhs = vPb(0, Wh);                  // local right-hand side
 
 bdd A(Mat, arrayIntersection, restrictionIntersection, communicator = comm);

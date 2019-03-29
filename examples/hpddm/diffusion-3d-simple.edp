@@ -43,7 +43,7 @@ set(A, sparams = "-hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 10")
 int solver = getOption("schwarz_method");
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
     varf vPbNoPen(u, v) = intN(Th)(grad(u)' * grad(v)) + on(1, u = 0.0);
-    matrix<real> noPen = vPbNoPen(Wh, Wh, solver = CG);
+    matrix<real> noPen = vPbNoPen(Wh, Wh, sym = 1);
     attachCoarseOperator(mpiCommWorld, A, A = noPen);
 }
 
