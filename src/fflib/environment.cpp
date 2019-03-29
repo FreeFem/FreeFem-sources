@@ -43,7 +43,7 @@ extern  void (*initparallele)(int &, char **&); // to know if mpiversion ...
 
 
 #ifdef HAVE_GETENV
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 using namespace std;
 bool load(string s);

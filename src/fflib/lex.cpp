@@ -29,8 +29,8 @@
 #include  <string>
 #include  <iostream>
 #include  "error.hpp"
-#include  <ctype.h>
-#include  <stdlib.h>
+#include  <cctype>
+#include  <cstdlib>
 #include  <map>
 #include "AFunction.hpp"
 //class pfes;

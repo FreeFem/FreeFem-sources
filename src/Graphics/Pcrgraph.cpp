@@ -56,7 +56,7 @@ using namespace std;
 ///#include <direct.h>
 #include <time.h>
 
-#include <stdio.h>
+#include <cstdio>
 #include <fcntl.h>
 #include <io.h>      //*OT  use for the console window
 ///#include <stat.h>

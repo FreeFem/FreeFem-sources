@@ -43,9 +43,9 @@ using namespace std;
 //#include "lex.hpp"
 #include "MatriceCreuse_tpl.hpp"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include "mpi.h"
 #include "dmumps_c.h"
 #include "zmumps_c.h"

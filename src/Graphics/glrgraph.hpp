@@ -63,13 +63,13 @@ bool  consoleatend=true;
 #include "error.hpp"
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 using namespace std;
 
 #include <errno.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
 #include "rgraph.hpp"
 #include <time.h>
 #include <setjmp.h>

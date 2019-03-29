@@ -31,9 +31,9 @@
 //
 // ORIG-DATE:     Dec 97
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <setjmp.h>
 #include <new>
 #include <cassert>

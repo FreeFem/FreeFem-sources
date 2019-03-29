@@ -118,7 +118,7 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
 }
 
 
-#include <math.h> 
+#include <cmath> 
 
 
 template<class Real> 

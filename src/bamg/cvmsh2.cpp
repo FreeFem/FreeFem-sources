@@ -31,7 +31,7 @@
 #include <config.h>
 #include <cstdlib>
 #include <cstdio>
-#include <string.h>
+#include <cstring>
 #include <setjmp.h>
 #include <new>
 #include <cassert>

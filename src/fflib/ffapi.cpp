@@ -46,7 +46,7 @@
 #endif
 #ifdef FFLANG
 #include "options.hpp"
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 #ifndef FFLANG
 #ifdef _WIN32
@@ -192,7 +192,7 @@ static  size_t ffapi_ff_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *
     // where the problematic pipe value came from).
 
     // need #include "options.hpp"
-    if(options->AbortFFGraphicsDataAt==buffer.getpoint())abort(); // need #include <stdlib.h>
+    if(options->AbortFFGraphicsDataAt==buffer.getpoint())abort(); // need #include <cstdlib>
 
 #else
     fwrite(ptr,size,nmemb,stream);

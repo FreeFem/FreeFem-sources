@@ -30,7 +30,7 @@
 extern long verbosity ;
 //#define strcasecmp strcmp
 #include <cstdio>
-#include <string.h>
+#include <cstring>
 #include <cmath>
 #include <time.h>
 #include <iostream>

@@ -41,7 +41,7 @@
 // Ceci dit, le premiers tests semblent OK...
 
 #include "defs.hpp"
-#include <stdio.h>
+#include <cstdio>
 
 
 #ifndef BRENT_LINE_SEARCH_HH

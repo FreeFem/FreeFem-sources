@@ -28,7 +28,7 @@ FFD_OBJ2 = ../femlib/BamgFreeFem.o ../femlib/Drawing.o ../femlib/Element_P2h.o .
 FFD_OBJIDE = $(patsubst %.o,../ide/%.o,$(FF_OBJIDE))
 FFD_OBJLMSH = $(patsubst %.o,../ide/%.o,$(FF_OBJLMSH))
 
-LIBS_FF = ../nw/ffapi.o  libff.dll
+LIBS_FF = ../fflib/ffapi.o  libff.dll
 LIBS_FFmpi = ../mpi/ffapi.o libff.dll
 
 
