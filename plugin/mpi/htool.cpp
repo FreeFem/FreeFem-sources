@@ -25,7 +25,7 @@ class MyMatrix: public IMatrix<K>{
 public:
 	MyMatrix(const FESpace * Uh , const FESpace * Vh ):IMatrix<K>(Uh->Th.nv,Vh->Th.nv),ThU(Uh->Th), ThV(Vh->Th) {}
 
-	K get_coef(const int& i, const int& j)const {return 1./(0.01+(ThU.vertices[i]-ThV.vertices[j]).norme2());}
+	K get_coef(const int& i, const int& j)const {return 100*(i==j)+(sqrt((ThU.vertices[i]-ThV.vertices[j]).norme2()) < 0.2)*exp(-(ThU.vertices[i]-ThV.vertices[j]).norme2());}
 
 };
 
@@ -64,14 +64,14 @@ class assembleHMatrix : public OneOperator { public:
 	public:
 		Expression a,b;
 
-		static const int n_name_param = 6;
+		static const int n_name_param = 7;
 		static basicAC_F0::name_and_type name_param[] ;
 		Expression nargs[n_name_param];
 		bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
 		long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 		double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
-		KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-
+		KN_<long> arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
+		pcommworld arg(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
 	public:
 		Op(const basicAC_F0 &  args,Expression aa,Expression bb) : a(aa),b(bb) {
 			args.SetNameParam(n_name_param,name_param,nargs); }
@@ -95,7 +95,8 @@ class assembleHMatrix : public OneOperator { public:
 		{  "minclustersize", &typeid(long)},
 		{  "maxblocksize", &typeid(long)},
 		{  "mintargetdepth", &typeid(long)},
-		{  "minsourcedepth", &typeid(long)}
+		{  "minsourcedepth", &typeid(long)},
+		{		"comm", &typeid(pcommworld)}
 	};
 
 	/*
@@ -147,6 +148,9 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	int maxblocksize=mi->argl(3,stack,htool::Parametres::eta);
 	int mintargetdepth=mi->argl(4,stack,htool::Parametres::mintargetdepth);
 	int minsourcedepth=mi->argl(5,stack,htool::Parametres::minsourcedepth);
+	pcommworld pcomm=mi->arg(6,stack,nullptr);
+
+	MPI_Comm comm = pcomm ? *(MPI_Comm*)pcomm : MPI_COMM_WORLD;
 
 	ffassert(einter);
 	pfes * pUh = GetAny< pfes * >((* mi->a)(stack));
@@ -189,7 +193,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 
 	if (init)
 	delete *Hmat;
-	*Hmat = new HMatrix<LR,K>(A,p1,p2);
+	*Hmat = new HMatrix<LR,K>(A,p1,p2,-1,comm);
 
 	//*Hmat = generateBIO<LR,K,EquationEnum::YU,BIOpKernelEnum::HS_OP,BIOpKernelEnum::SL_OP,2,P1_2D>();
 
@@ -203,6 +207,29 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter)
 template<class R, class A, class B> R Build(A a, B b) {
 	return R(a, b);
 }
+
+template<template<class> class LR, class K>
+AnyType ToDense(Stack stack,Expression emat,Expression einter,int init)
+{
+	ffassert(einter);
+	HMatrix<LR,K>** Hmat =GetAny<HMatrix<LR,K>** >((*einter)(stack));
+	ffassert(Hmat && *Hmat);
+	HMatrix<LR,K>& H = **Hmat;
+	Matrix<K> mdense = H.to_dense_perm();
+	const std::vector<K>& vdense = mdense.get_mat();
+
+	KNM<K>* M =GetAny<KNM<K>*>((*emat)(stack));
+
+	for (int i=0; i< mdense.nb_rows(); i++)
+		for (int j=0; j< mdense.nb_cols(); j++)
+			(*M)(i,j) = mdense(i,j);
+
+	return M;
+}
+
+template<template<class> class LR, class K, int init>
+AnyType ToDense(Stack stack,Expression emat,Expression einter)
+{ return ToDense<LR,K>(stack,emat,einter,init);}
 
 template<class V, template<class> class LR, class K>
 class Prod {
@@ -439,6 +466,12 @@ void add(const char* namec) {
 	TheOperators->Add("<-", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, LR, K>>(Prod<KN<K>*, LR, K>::init));
 
 	Global.Add("display","(",new plotHMatrix<LR, K>);
+
+	// to dense:
+	TheOperators->Add("=",
+	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrix<LR ,K>**,E_F_StackF0F0>(ToDense<LR, K, 1>));
+	TheOperators->Add("<-",
+	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrix<LR ,K>**,E_F_StackF0F0>(ToDense<LR, K, 0>));
 }
 
 static void Init_Schwarz() {
