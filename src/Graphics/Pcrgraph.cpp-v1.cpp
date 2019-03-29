@@ -32,7 +32,7 @@
 #include <windows.h>
 #include <commdlg.h>
 #include <direct.h>
-#include <time.h>
+#include <ctime>
 
 #include <cstdio>
 #include <fcntl.h>

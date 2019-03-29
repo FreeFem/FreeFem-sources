@@ -619,7 +619,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     if( !A->A) A->A.master(new MatriceMorse<R>(0,0));//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
     bool VF=false;
-    ds.factorize=false;
+    ds.factorize=0;
 
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
     VirtualMatrix<int,R> *pvm =A->pMC();

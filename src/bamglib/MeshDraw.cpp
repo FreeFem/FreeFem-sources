@@ -30,7 +30,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cmath>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 using namespace std;
 

@@ -103,7 +103,7 @@ double dwalltime() {
 #ifndef NO_TIMER
 #include <sys/types.h>
 #include <sys/times.h>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
 #endif
 

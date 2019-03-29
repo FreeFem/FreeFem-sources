@@ -33,7 +33,7 @@ bool  consoleatend=true;
 
 #define FF_GRAPH_SET_PTR
 #include <cmath>
-#include <time.h>
+#include <ctime>
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>

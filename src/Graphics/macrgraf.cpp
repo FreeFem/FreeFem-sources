@@ -86,9 +86,9 @@ using namespace std;
 #include <Quickdraw.h>
 //#include <StandardFile.h>
 #include <Navigation.h>
-#include <time.h>
+#include <ctime>
 #include <setjmp.h>
-#include <time.h>
+#include <ctime>
 #include <unix.h>
 #include <SIOUX.h> 
 #undef fill

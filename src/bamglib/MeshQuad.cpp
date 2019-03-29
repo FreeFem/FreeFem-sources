@@ -41,7 +41,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cmath>
-#include <time.h>
+#include <ctime>
 
 #include "Meshio.h"
 #include "Mesh2.h"

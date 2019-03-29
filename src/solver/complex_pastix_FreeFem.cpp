@@ -48,7 +48,7 @@ using namespace std;
 #include <cstring>
 #include <unistd.h>
 #include <pthread.h>
-#include <time.h>
+#include <ctime>
 #include <sys/time.h>
 
 
@@ -60,7 +60,7 @@ using namespace std;
 // #include <unistd.h>
 // //#include <pthread.h>
 // #include <cstring>
-// #include <time.h>
+// #include <ctime>
 // #include <sys/time.h>
 // #include "mpi.h"
    

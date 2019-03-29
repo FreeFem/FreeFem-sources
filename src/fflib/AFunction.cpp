@@ -78,7 +78,7 @@ double myjn(long n, double x){ return jn((int) n,x);}
 #include <malloc.h>
 #endif
 #ifdef HAVE_TIMES
-#include <time.h>
+#include <ctime>
 #endif
 long storageused()
 {
