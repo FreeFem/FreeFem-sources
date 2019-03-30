@@ -222,8 +222,6 @@ AnyType changeOperator_Op<Type>::operator()(Stack stack) const {
                 free = HPDDM::template Subdomain<PetscScalar>::distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, ptA->_num + dN->_n);
             else
                 free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c);
-            PetscBool assembled;
-            MatAssembled(ptA->_petsc, &assembled);
             if(assembled) {
                 MatZeroEntries(ptA->_petsc);
                 for(PetscInt i = 0; i < ptA->_last - ptA->_first; ++i) {

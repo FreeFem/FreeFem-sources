@@ -42,7 +42,7 @@ TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.e
 	elasticity-2d-substructuring.edp elasticity-block.edp \
 	diffusion-2d-substructuring-withPartitioning.edp \
 	elasticity-3d.edp elasticity-3d-simple.edp laplace-lagrange-PETSc.edp \
-	elasticity-3d-SNES-PETSc.edp vi-2d-PETSc.edp Newton-2d-PETSc.edp neo-Hookean-2d-PETSc.edp bratu-2d-PETSc.edp
+	elasticity-3d-SNES-PETSc.edp vi-2d-PETSc.edp Newton-vi-2d-PETSc.edp Newton-2d-PETSc.edp neo-Hookean-2d-PETSc.edp bratu-2d-PETSc.edp
 
 XFAIL_TESTS=$(TESTS)
 
