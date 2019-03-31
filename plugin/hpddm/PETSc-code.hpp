@@ -1366,6 +1366,7 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     std::fill_n(ptr_y, op._n, 0.0);
     HPDDM::IterativeMethod::solve(op, ptr_x, ptr_y, 1, PETSC_COMM_WORLD);
     VecRestoreArray(x, &ptr_x);
+    VecDestroy(&x);
     HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptX), ptr_y, ptX->n / bs, bs);
     VecRestoreArray(y, &ptr_y);
     VecDestroy(&y);
@@ -2325,6 +2326,7 @@ class ProdPETSc {
                         MatMultTranspose(t->_petsc, x, y);
                     else
                         MatMult(t->_petsc, x, y);
+                    VecDestroy(&x);
                     VecGetArray(y, &ptr);
                     if(!t->_A)
                         std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
