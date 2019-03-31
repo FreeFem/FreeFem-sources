@@ -33,7 +33,7 @@ TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.e
 	laplace-2d-spherical-harmonics-SLEPc.edp	schrodinger-1d-harmonic-oscillator-SLEPc.edp	schrodinger-2d-harmonic-oscillator-SLEPc.edp \
 	laplace-2d-torus-SLEPc.edp schrodinger-1d-square-well-SLEPc.edp transpose-solve-PETSc.edp stokes-3d-PETSc-fieldsplit.edp \
 	PETSc-block.edp diffusion-2d.edp diffusion-3d.edp	diffusion-3d-simple.edp schrodinger-2d-axial-well-SLEPc.edp \
-	diffusion-2d-substructuring.edp	\
+	diffusion-2d-substructuring.edp	diffusion-2d-substructuring-PETSc.edp \
 	elasticity-2d.edp	\
 	stokes-3d.edp	stokes-2d.edp	\
 	heat-2d.edp	heat-3d.edp \
