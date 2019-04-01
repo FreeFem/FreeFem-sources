@@ -42,9 +42,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.10.3
-VERSION_SLEPC=3.10.1
-# http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
+VERSION=3.11.0
+VERSION_SLEPC=3.11.0
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
 SRCDIR=petsc-$(VERSION)
@@ -159,7 +158,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		COPTFLAGS='-O3 -march=native -mtune=native' \
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \
-	  '--with-scalar-type=complex' \
+		--with-scalar-type=complex \
 		--with-ssl=0 ---with-x=0 --with-fortran-bindings=0 \
 	  $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
