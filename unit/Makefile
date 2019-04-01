@@ -1,4 +1,4 @@
-FF=FreeFem++ -ne
+FF=../src/nw/FreeFem++ -ne -nw
 SRC=$(wildcard *.edp)
 
 all:
