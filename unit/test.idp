@@ -1,0 +1,8 @@
+func int test(bool condition)
+{
+	assert(condition);
+	return 0;
+}
+
+string IND = "\t";
+real HWERROR = 1e-15;

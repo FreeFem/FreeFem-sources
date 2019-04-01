@@ -1,0 +1,42 @@
+include "test.idp"
+
+cout << "asin" << endl;
+real t;
+real eps = 1e-6;
+
+cout << IND << "real" << endl;
+
+t = clock();
+real moins1 = -1.0;
+real theta = asin(moins1);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(theta == -pi/2.);
+
+t = clock();
+real zero = 0.;
+real theta2 = asin(zero);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(theta2 == 0);
+
+t = clock();
+real un = 1.;
+real theta3 = asin(un);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(theta3 == pi/2);
+
+t = clock();
+real moins1moinseps = -1. - eps;
+real theta4 = asin(moins1moinseps);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNaN(theta4));
+
+t = clock();
+real p1pluseps = 1.0 + eps;
+real theta5 = asin(p1pluseps);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNaN(theta5));

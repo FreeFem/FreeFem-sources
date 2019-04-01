@@ -1,0 +1,37 @@
+include "test.idp"
+
+cout << "acos" << endl;
+real t;
+real eps = 1e-6;
+
+cout << IND << "real" << endl;
+
+t = clock();
+real am1 = acos(-1.);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(am1 == pi);
+
+t = clock();
+real a0 = acos(0.);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(a0 == pi / 2);
+
+t = clock();
+real ap1 = acos(1.);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ap1 == 0);
+
+t = clock();
+real ap1eps = acos(1. + eps);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNaN(ap1eps));
+
+t = clock();
+real am1eps = acos(-1. - eps);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNaN(am1eps));
