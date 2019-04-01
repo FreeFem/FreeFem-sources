@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <ctime>
-
 extern long verbosity;
 template<class TypeIndex=int,class TypeScalar=double>
 struct CGMatVirt {
