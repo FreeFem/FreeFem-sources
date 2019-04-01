@@ -7462,21 +7462,19 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
 
         np=0;
       // first build old point to keep the numbering order for DDM ...
-     for (int i = 0, k = 0; i < Tht->meshS->nv; i++) {
-        if (takevertexS[i] >= 0) {
-          const R3 r3vi( Tht->meshS->vertices[i].x, Tht->meshS->vertices[i].y, Tht->meshS->vertices[i].z);
-          const Vertex3 &vi(r3vi);
+     for (int i = 0 ; i < Tht->meshS->nv; i++) {
+       const R3 r3vi( Tht->meshS->vertices[i].x, Tht->meshS->vertices[i].y, Tht->meshS->vertices[i].z);
+       const Vertex3 &vi(r3vi);
    
-           Vertex3 * pvi=gtreeS->ToClose(vi,hseuilS);
-           if (!pvi) {
-             (R3 &)v[np] = Tht->meshS->vertices[i];
-             v[np].lab = Tht->meshS->vertices[i].lab;
-             gtreeS->Add(v[np]);
-             np++;
-           }
-           else {ffassert(0);}
-        }
-        ffassert(np<=nbv_surf);
+       Vertex3 * pvi=gtreeS->ToClose(vi,hseuilS);
+       if (!pvi) {
+         (R3 &)v[np] = Tht->meshS->vertices[i];
+         v[np].lab = Tht->meshS->vertices[i].lab;
+         gtreeS->Add(v[np]);
+         np++;
+       }
+       else ffassert(0);
+       ffassert(np<=nbv_surf);
       }
   
       // read triangles and change with the surface numbering

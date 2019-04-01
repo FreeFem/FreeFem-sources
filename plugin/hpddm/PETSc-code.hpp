@@ -379,8 +379,7 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
         KN<PetscScalar>* rhs = nargs[0] ? GetAny<KN<PetscScalar>*>((*nargs[0])(stack)) : nullptr;
         initPETScStructure(ptA, bs, nargs[2] ? (GetAny<bool>((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, static_cast<KN<double>*>(nullptr), rhs);
     }
-    bool clean = nargs[1] && GetAny<bool>((*nargs[1])(stack));
-    if(clean)
+    if(nargs[1] && GetAny<bool>((*nargs[1])(stack)))
         ptK->destroy();
     return ptA;
 }
@@ -475,11 +474,8 @@ AnyType initRectangularCSRfromDMatrix<HpddmType>::initRectangularCSRfromDMatrix_
         ptA->_exchange[1] = new HPDDM::template Subdomain<PetscScalar>(*ptC->_A);
         ptA->_exchange[1]->setBuffer();
     }
-    if(c != 1) {
-        bool clean = nargs[0] && GetAny<bool>((*nargs[0])(stack));
-        if(clean)
-            ptK->destroy();
-    }
+    if(c != 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack)))
+        ptK->destroy();
     return ptA;
 }
 
@@ -748,8 +744,7 @@ AnyType initCSRfromArray_Op<HpddmType>::operator()(Stack stack) const {
             MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M(), PETSC_DECIDE, PETSC_DECIDE);
         ptA->_first = 0;
         ptA->_last = n;
-        bool clean = nargs[4] && GetAny<bool>((*nargs[4])(stack));
-        if(clean) {
+        if(nargs[4] && GetAny<bool>((*nargs[4])(stack))) {
             int* cl = nullptr;
             int* lg = nullptr;
             PetscScalar* a = nullptr;
@@ -919,19 +914,18 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
         delete dL;
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
         initPETScStructure(ptA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs);
-        if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
+        if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value) {
 #ifndef VERSION_MATRICE_CREUSE
             mA->lg = ptA->_A->getMatrix()->_ia;
 #else
-        {
-            ffassert(0); // A faire ???? FH..
-        }
+            mA->p = ptA->_A->getMatrix()->_ia;
 #endif
-        bool clean = nargs[3] && GetAny<bool>((*nargs[3])(stack));
-        if(clean) {
+        }
+        if(nargs[3] && GetAny<bool>((*nargs[3])(stack))) {
             ptO->resize(0);
             ptR->resize(0);
-            GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->destroy();
+            if(c == 0)
+                GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->destroy();
         }
     }
     return ptA;
@@ -1372,6 +1366,7 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     std::fill_n(ptr_y, op._n, 0.0);
     HPDDM::IterativeMethod::solve(op, ptr_x, ptr_y, 1, PETSC_COMM_WORLD);
     VecRestoreArray(x, &ptr_x);
+    VecDestroy(&x);
     HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptX), ptr_y, ptX->n / bs, bs);
     VecRestoreArray(y, &ptr_y);
     VecDestroy(&y);
@@ -2331,6 +2326,7 @@ class ProdPETSc {
                         MatMultTranspose(t->_petsc, x, y);
                     else
                         MatMult(t->_petsc, x, y);
+                    VecDestroy(&x);
                     VecGetArray(y, &ptr);
                     if(!t->_A)
                         std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);

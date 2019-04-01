@@ -29,9 +29,9 @@ int[int] interfaceNb;                       //
 }
 
 func f = 10;
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(1, u = 1.0);
-matrix<real> Loc = vPb(Wh, Wh, sym = 1); // local operator
-real[int] rhs = vPb(0, Wh);                  // local right-hand side
+varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(1, u = 0.0);
+matrix<real> Loc = vPb(Wh, Wh, sym = 1, tgv = -2); // local operator
+real[int] rhs = vPb(0, Wh, tgv = -2);              // local right-hand side
 
 MatIS A(Loc, arrayIntersection, restrictionIntersection, interfaceNb, communicator = mpiCommWorld);
 Wh<real> def(u) = 0.0;    // local solution
@@ -43,6 +43,7 @@ for(int i = 0; i < u[].n; ++i)
 originalNumbering(A, u[], interfaceNb);
 plotMPI(Th, u[], "Global numbering", Pk, def, real, 3, 1)
 
+set(A, sparams = "-pc_type bddc -ksp_monitor");
 u[] = A^-1 * rhs;
 
 originalNumbering(A, u[], interfaceNb);
